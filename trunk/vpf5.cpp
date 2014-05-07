@@ -1603,7 +1603,33 @@ bool Calculator::fDifferential(Calculator& theCommands, const Expression& input,
   return true;
 }
 
-bool LargeIntUnsigned::Factor(List<unsigned int>& outputPrimeFactors, List<int>& outputMultiplicites)
+void LargeIntUnsigned::AccountPrimeFactor(const LargeInt& theP, List<LargeInt>& outputPrimeFactors, List<LargeIntUnsigned>& outputMults)
+{ if (outputPrimeFactors.size==0)
+  { outputPrimeFactors.AddOnTop(theP);
+    outputMults.AddOnTop(1);
+    return;
+  }
+  if ((*outputPrimeFactors.LastObject()).operator==(theP))
+    (*outputMults.LastObject())++;
+  else
+  { outputPrimeFactors.AddOnTop(theP);
+    outputMults.AddOnTop(1);
+  }
+}
+
+bool LargeIntUnsigned::Factor(List<LargeInt>& outputPrimeFactors, List<int>& outputMultiplicites)
+{ MacroRegisterFunctionWithName("LargeIntUnsigned::Factor");
+  List<LargeIntUnsigned> buffer;
+  if (!this->Factor(outputPrimeFactors, buffer))
+    return false;
+  outputMultiplicites.SetSize(buffer.size);
+  for (int i=0; i<buffer.size; i++)
+    if (!buffer[i].IsSmallEnoughToFitInInt(&outputMultiplicites[i]))
+      return false;
+  return true;
+}
+
+bool LargeIntUnsigned::Factor(List<LargeInt>& outputPrimeFactors, List<LargeIntUnsigned>& outputMultiplicites)
 { MacroRegisterFunctionWithName("LargeIntUnsigned::Factor");
   if (this->theDigits.size>1)
     return false;
@@ -1717,7 +1743,7 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
     return false;
   int degreeLeft=degree/2;
   Vector<Rational> AllPointsOfEvaluation;
-  List<List<unsigned int> > thePrimeFactorsAtPoints;
+  List<List<LargeInt> > thePrimeFactorsAtPoints;
   List<List<int> > thePrimeFactorsMults;
   Vector<Rational> theValuesAtPoints, theValuesAtPointsLeft;
   AllPointsOfEvaluation.SetSize(degree+1);

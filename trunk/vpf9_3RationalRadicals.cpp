@@ -859,7 +859,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, Alge
   }
   LargeInt squareFreeInput=absoluteInput.GetNumerator();
   squareFreeInput*=absoluteInput.GetDenominator();
-  List<unsigned int> primeFactors;
+  List<LargeInt> primeFactors;
   List<int> theMults;
   if (!squareFreeInput.value.Factor(primeFactors, theMults))
     return false;
@@ -869,9 +869,8 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, Alge
   for (int i=0; i<primeFactors.size; i++)
   { if (theMults[i]%2==1)
       squareFreeInput*=primeFactors[i];
-    Rational tempLI=primeFactors[i];
-    tempLI.RaiseToPower(theMults[i]/2);
-    squareRootRationalPart*=tempLI;
+    primeFactors[i].RaiseToPower(theMults[i]/2);
+    squareRootRationalPart*=primeFactors[i];
   }
 //  squareRootRationalPart/=input.GetDenominator();
 

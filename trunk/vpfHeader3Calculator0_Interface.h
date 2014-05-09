@@ -456,13 +456,14 @@ class Function
   Expression theArgumentTypes;
   std::string theDescription;
   std::string theExample;
+  std::string additionalIdentifier;
   bool flagIsInner;
   bool flagMayActOnBoundVars;
   bool flagIamVisible;
   bool flagIsExperimental;
   Expression::FunctionAddress theFunction;
 
-  std::string GetString(Calculator& theBoss);
+  std::string ToString(Calculator& theBoss);
   void operator =(const Function& other)
   { this->theArgumentTypes=other.theArgumentTypes;
     this->theDescription=other.theDescription;
@@ -472,6 +473,7 @@ class Function
     this->flagMayActOnBoundVars=other.flagMayActOnBoundVars;
     this->flagIamVisible=other.flagIamVisible;
     this->flagIsExperimental=other.flagIsExperimental;
+    this->additionalIdentifier=other.additionalIdentifier;
   }
   bool operator==(const Function& other)const
   { return this->theArgumentTypes==other.theArgumentTypes &&
@@ -1416,7 +1418,7 @@ public:
   static bool innerDistributeExponent(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAssociateExponentExponent(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerAssociateTimesDivision(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerCollectMultiplicands(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyAtoXtimesAtoYequalsAtoXplusY(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerExtractBaseMultiplication(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerMeltBrackets(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyByOne(Calculator& theCommands, const Expression& input, Expression& output);
@@ -1593,11 +1595,11 @@ public:
    const std::string& opExample, bool visible=true, bool experimental=false);
   void AddOperationHandler
   (const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing, const std::string& opDescription,
-   const std::string& opExample, bool isInner, bool visible=true, bool experimental=false);
+   const std::string& opExample, bool isInner, bool visible=true, bool experimental=false, const std::string& inputAdditionalIdentifier="");
   void AddOperationInnerHandler
   (const std::string& theOpName, Expression::FunctionAddress innerHandler, const std::string& opArgumentListIgnoredForTheTimeBeing,
-   const std::string& opDescription, const std::string& opExample, bool visible=true, bool experimental=false)
-  { this->AddOperationHandler(theOpName, innerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription, opExample, true, visible, experimental);
+   const std::string& opDescription, const std::string& opExample, bool visible=true, bool experimental=false, const std::string& inputAdditionalIdentifier="")
+  { this->AddOperationHandler(theOpName, innerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription, opExample, true, visible, experimental, inputAdditionalIdentifier);
   }
   void AddOperationOuterHandler
   (const std::string& theOpName, Expression::FunctionAddress outerHandler, const std::string& opArgumentListIgnoredForTheTimeBeing,

@@ -47,7 +47,7 @@ std::string Calculator::ToStringFunctionHandlers()
           out << openTag2 << this->theAtoms[i] << closeTag2;
           if (totalDirectHandlers>1)
             out << " (" << j+1 << " out of " << totalDirectHandlers << ")";
-          out << "\n" << this->FunctionHandlers[i][j].GetString(*this);
+          out << "\n" << this->FunctionHandlers[i][j].ToString(*this);
         }
     if (indexCompositeHander!=-1)
       for (int j=0; j<this->operationsCompositeHandlers[indexCompositeHander].size; j++)
@@ -57,7 +57,7 @@ std::string Calculator::ToStringFunctionHandlers()
           found=true;
           out << openTag2 << this->theAtoms[i] << closeTag2;
           out << " (" << j+1 << " out of " << this->operationsCompositeHandlers[indexCompositeHander].size << " composite handlers)";
-          out << "\n" << this->operationsCompositeHandlers[indexCompositeHander][j].GetString(*this);
+          out << "\n" << this->operationsCompositeHandlers[indexCompositeHander][j].ToString(*this);
         }
   }
   return out.str();
@@ -92,8 +92,11 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
         if(output!=input)
         { output.CheckConsistency();
           if (theCommands.flagLogEvaluatioN)
-            theCommands.Comments << "<hr>Substitution, outer rule " << theCommands.GetOperations()[functionNameNode.theData]
-            << ", handler " << i+1 << " out of " << theCommands.FunctionHandlers[functionNameNode.theData].size << "<br>";
+          { theCommands << "<hr>Substitution, outer rule " << theCommands.GetOperations()[functionNameNode.theData];
+            if (theCommands.FunctionHandlers[functionNameNode.theData][i].additionalIdentifier!="")
+              theCommands << ", handler identifier: " << theCommands.FunctionHandlers[functionNameNode.theData][i].additionalIdentifier;
+            theCommands << ", (handler " <<  i+1 << " out of " << theCommands.FunctionHandlers[functionNameNode.theData].size << ")<br>";
+          }
           return true;
         }
     } else

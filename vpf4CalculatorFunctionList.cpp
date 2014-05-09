@@ -1695,9 +1695,9 @@ void Calculator::initPredefinedStandardOperations()
    "Tensor and decompose two virtual Weyl group representations. ",
    "W:= WeylGroupNaturalRep{}(B_3); V:=MakeVirtualWeylGroupRepresentation{}W; W\\otimes W; V*V", true);
   this->AddOperationInnerHandler
-  ("*", this->innerCollectMultiplicands, "",
+  ("*", this->innerMultiplyAtoXtimesAtoYequalsAtoXplusY, "",
    "Collects multiplicand exponents. ",
-   "x*(x*y)*x*(x*x^3*x); ", true);
+   "x*(x*y)*x*(x*x^3*x); ", true, false, "innerMultiplyAtoXtimesAtoYequalsAtoXplusY");
   this->AddOperationInnerHandler
   ("*", this->innerMultiplyByOne, "",
    "Rule 1*{{anything}}=anything.",

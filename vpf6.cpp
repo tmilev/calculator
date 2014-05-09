@@ -1324,11 +1324,11 @@ bool Calculator::outerTensor(Calculator& theCommands, const Expression& input, E
   return false;
 }
 
-bool Calculator::innerCollectMultiplicands(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::innerCollectMultiplicands");
+bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY");
   if (!input.StartsWith(theCommands.opTimes(), 3))
     return false;
-//  stOutput << "<hr>Collecting multiplicands. input: " << input.ToString();
+  stOutput << "<hr>Collecting multiplicands. input: " << input.ToString();
   Expression constPower, thePower;
   const Expression* left= &input[1];
   const Expression* right=&input[2];
@@ -1339,18 +1339,24 @@ bool Calculator::innerCollectMultiplicands(Calculator& theCommands, const Expres
     return true;
   }
   for (int i=0; i<2; i++, MathRoutines::swap(left, right))
-    if (left->StartsWith(theCommands.opThePower(), 3))
-    { if ((*left)[1]==(*right))
-      { constPower.AssignValue(1, theCommands);
-        thePower.MakeXOX(theCommands, theCommands.opPlus(), (*left)[2], constPower);
-        return output.MakeXOX(theCommands, theCommands.opThePower(), *right, thePower);
+    if (right->StartsWith(theCommands.opThePower(), 3))
+    { if ((*right)[1]==(*left))
+      { bool isGood=true;
+        stOutput << "<br>Right is: " << right->ToString();
+        if ((*right)[2].IsOfType<Rational>())
+          if (!(*right)[2].GetValue<Rational>().IsInteger())
+            isGood=false;
+        if(isGood)
+        { constPower.AssignValue(1, theCommands);
+          thePower.MakeXOX(theCommands, theCommands.opPlus(), (*right)[2], constPower);
+          return output.MakeXOX(theCommands, theCommands.opThePower(), *left, thePower);
+        }
       }
-      if (right->StartsWith(theCommands.opThePower(), 3))
+      if (left->StartsWith(theCommands.opThePower(), 3))
         if ((*left)[1]==(*right)[1])
         { thePower.MakeXOX(theCommands, theCommands.opPlus(), (*left)[2], (*right)[2]);
-          output.MakeXOX(theCommands, theCommands.opThePower(), (*left)[1], thePower);
+          return output.MakeXOX(theCommands, theCommands.opThePower(), (*left)[1], thePower);
           //stOutput << "<br>output be at second place: " << output.ToString();
-          return true;
         }
     }
   return false;
@@ -1932,7 +1938,7 @@ void Calculator::AddOperationBinaryInnerHandlerWithTypes
 
 void Calculator::AddOperationHandler
 (const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing,
- const std::string& opDescription, const std::string& opExample, bool isInner, bool visible, bool isExperimental)
+ const std::string& opDescription, const std::string& opExample, bool isInner, bool visible, bool isExperimental, const std::string& inputAdditionalIdentifier)
 { int indexOp=this->theAtoms.GetIndex(theOpName);
   if (indexOp==-1)
   { this->theAtoms.AddOnTop(theOpName);
@@ -1943,6 +1949,7 @@ void Calculator::AddOperationHandler
   if (opArgumentListIgnoredForTheTimeBeing!="")
     crash << "This section of code is not implemented yet. Crashing to let you know. " << crash;
   Function theFun(handler, 0, opDescription, opExample, isInner, visible, isExperimental);
+  theFun.additionalIdentifier=inputAdditionalIdentifier;
   if (theOpName=="*" || theOpName=="+" || theOpName=="/" || theOpName=="\\otimes" || theOpName=="^")
     this->FunctionHandlers[indexOp].ReservE(100);
   else
@@ -2011,7 +2018,7 @@ bool Function::inputFitsMyInnerType(const Expression& input)
   return argument1good && argument2good;
 }
 
-std::string Function::GetString(Calculator& theBoss)
+std::string Function::ToString(Calculator& theBoss)
 { if (!this->flagIamVisible)
     return "";
   std::stringstream out2;
@@ -2021,6 +2028,8 @@ std::string Function::GetString(Calculator& theBoss)
 //    out << " \nFunction memory address: " << std::hex << (int) this->theFunction << ". ";
     // use of unsigned long is correct on i386 and amd64
     // uintptr_t is only available in c++0x
+    if (this->additionalIdentifier!="")
+      out << " Function identifier: " << this->additionalIdentifier;
     out << " Function memory address: " << std::hex << (unsigned long) this->theFunction << ". ";
     if (!this->flagIsInner)
       out << "This is a <b>``law''</b> - substitution takes place only if output expression is different from input. ";

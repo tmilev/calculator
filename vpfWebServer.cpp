@@ -584,6 +584,7 @@ int WebWorker::ProcessRequestTypeUnknown()
 int WebWorker::StandardOutput()
 { MacroRegisterFunctionWithName("WebServer::StandardOutput");
   WebWorker::StandardOutputPart1BeforeComputation();
+//  theParser.inputString="%LogEvaluation 3 *3^{1/2}";
   if (theParser.inputString!="")
   { theParser.Evaluate(theParser.inputString);
     onePredefinedCopyOfGlobalVariables.flagComputationComplete=true;

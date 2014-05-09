@@ -169,6 +169,7 @@ class Expression
   bool AssignMatrixExpressions(const Matrix<Expression>& input, Calculator& owner);
   template<class coefficient>
   bool AssignMatrix(const Matrix<coefficient>& input, Calculator& owner);
+  bool DivisionByMeShouldBeWrittenInExponentForm()const;
   bool AssignMeMyChild(int childIndex)
   { Expression tempExp=(*this)[childIndex];
     this->operator=(tempExp);

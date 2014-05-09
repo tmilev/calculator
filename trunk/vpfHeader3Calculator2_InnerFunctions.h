@@ -59,7 +59,7 @@ public:
 
   static bool outerMergeConstantRadicals(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerCommuteConstants(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool outerAdivBpowerItimesBpowerJ(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool outerDivideReplaceAdivBpowerItimesBpowerJ(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerAtimesBpowerJplusEtcDivBpowerI(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool outerCombineFractionsCommutative(Calculator& theCommands, const Expression& input, Expression& output);

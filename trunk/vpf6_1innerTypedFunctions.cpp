@@ -825,10 +825,11 @@ bool CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors(Calculat
   if (!input.StartsWith(theCommands.opThePower(), 3))
     return false;
   Rational base, exponent;
-  if (!input[0].IsOfType<Rational>(&base))
+  if (!input[1].IsOfType<Rational>(&base))
     return false;
-  if (!input[1].IsOfType<Rational>(&exponent))
+  if (!input[2].IsOfType<Rational>(&exponent))
     return false;
+  stOutput << "<br>reducing " << input.ToString();
   if (exponent<0)
   { exponent*=-1;
     base.Invert();

@@ -1395,6 +1395,23 @@ bool Expression::IsSmallInteger(int* whichInteger)const
   return theRat.IsSmallInteger(whichInteger);
 }
 
+bool Expression::DivisionByMeShouldBeWrittenInExponentForm()const
+{ if (this->theBoss==0)
+    return false;
+  RecursionDepthCounter theCounter(&this->theBoss->RecursionDeptH);
+  if (this->theBoss->RecursionDepthExceededHandleRoughly())
+    return false;
+  if (this->StartsWith(this->theBoss->opTimes()))
+    for (int i=1; i<this->children.size; i++)
+      if (!(*this)[i].DivisionByMeShouldBeWrittenInExponentForm())
+        return false;
+  if (this->StartsWith(this->theBoss->opThePower(),3))
+    return (*this)[1].DivisionByMeShouldBeWrittenInExponentForm();
+  if (this->StartsWith(this->theBoss->opPlus()))
+    return false;
+  return true;
+}
+
 bool Expression::IsConstantNumber()const
 { //stOutput << "<br>Testing whether " << this->ToString() << " is constant.";
   if (this->theBoss==0)

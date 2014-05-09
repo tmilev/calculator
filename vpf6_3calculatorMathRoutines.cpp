@@ -1655,8 +1655,8 @@ bool CalculatorFunctionsGeneral::outerCommuteConstants(Calculator& theCommands, 
   return output.MakeProducT(theCommands, input[2], input[1]);
 }
 
-bool CalculatorFunctionsGeneral::outerAdivBpowerItimesBpowerJ(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::outerAdivBpowerItimesBpowerJ");
+bool CalculatorFunctionsGeneral::outerDivideReplaceAdivBpowerItimesBpowerJ(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::outerDivideReplaceAdivBpowerItimesBpowerJ");
   if (!input.StartsWith(theCommands.opTimes(), 3))
     return false;
   if (!input[1].StartsWith(theCommands.opDivide(),3))
@@ -1700,8 +1700,8 @@ bool CalculatorFunctionsGeneral::outerAtimesBpowerJplusEtcDivBpowerI(Calculator&
   input[2].GetBaseExponentForm(denominatorBase, denominatorExponent);
   //if (!denominatorBase.IsAtom())
   //  return false;
-  //if (denominatorBase.IsBuiltInAtom())
-  //  return false;
+  if (!denominatorBase.DivisionByMeShouldBeWrittenInExponentForm())
+    return false;
   MonomialCollection<Expression, Rational> numerators, numeratorsNew;
   theCommands.CollectSummands(theCommands, input[1], numerators);
   numeratorsNew.SetExpectedSize(numerators.size());

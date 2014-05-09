@@ -1742,7 +1742,7 @@ void Calculator::initPredefinedStandardOperations()
    "Distributive law (left and right).",
    "(a+b)*c; \n a*(b+c)", true);
   this->AddOperationOuterHandler
-  ("*", CalculatorFunctionsGeneral::outerAdivBpowerItimesBpowerJ, "",
+  ("*", CalculatorFunctionsGeneral::outerDivideReplaceAdivBpowerItimesBpowerJ, "",
    "Rule: (a/x^t)x^s:=a x^{s-t}.",
    " (a/x) x^{-1} ;(a/x^2) x^{3};(a/x) x^{3}; (a/x^2) x", true);
   this->AddOperationBinaryInnerHandlerWithTypes

@@ -2935,13 +2935,13 @@ public:
   Controller theLocalPauseController;
 
   std::string PhysicalPathServerBase;
-  std::string PhysicalPathExecutable;
   std::string PhysicalPathOutputFolder;
   std::string PhysicalNameIndicatorWithPath;
   std::string PhysicalNameDefaultOutputNoPatH;
   std::string PhysicalNameDefaultOutputWithPath;
   std::string PhysicalNameFolderBelowExecutable;
   std::string PhysicalNameExecutableNoPath;
+  std::string PhysicalNameExecutableWithPath;
 
   std::string DisplayPathServerBase;
   std::string DisplayPathExecutable;

@@ -7,6 +7,7 @@
 #include <netdb.h> //<-addrinfo and related data structures defined here
 #include <arpa/inet.h> // <- inet_ntop declared here (ntop= network to presentation)
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <fcntl.h> //<- setting of flags for pipes and the like (example: making a pipe non-blocking).
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
 
@@ -88,6 +89,7 @@ public:
   bool flagTryToKillOlderProcesses;
   List<WebWorker> theWorkers;
   int activeWorker;
+  int timeLastExecutableModification;
   List<char> lastPipeReadResult;
   List<char> pipeBuffer;
   WebServer();
@@ -107,6 +109,9 @@ public:
   static void SendStringThroughActiveWorker(const std::string& input);
   static void Signal_SIGINT_handler(int s);
   static void Signal_SIGCHLD_handler(int s);
+  void Restart();
+  void CheckExecutableVersionAndRestartIfNeeded();
+  void initDates();
   std::string ToStringLastErrorDescription();
   std::string ToStringStatusActive();
   std::string ToStringStatusAll();

@@ -109,6 +109,7 @@ void GlobalVariables::initDefaultFolderAndFileNames
       this->PhysicalNameExecutableNoPath="";
     }
   }
+  this->PhysicalNameExecutableWithPath=this->PhysicalNameFolderBelowExecutable+this->PhysicalNameExecutableNoPath;
   if (this->PhysicalPathServerBase=="")
   { this->PhysicalPathServerBase="./../";
     this->DisplayPathServerBase="trunk/";

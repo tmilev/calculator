@@ -865,12 +865,43 @@ std::string WebServer::ToStringStatusAll()
   return out.str();
 }
 
+void WebServer::CheckExecutableVersionAndRestartIfNeeded()
+{ struct stat theFileStat;
+  std::cout << "Name executable: "
+  << onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableWithPath
+  << std::endl;
+  if (stat(onePredefinedCopyOfGlobalVariables.PhysicalNameFolderBelowExecutable.c_str(), &theFileStat)!=0)
+    return;
+
+  std::cout << "current process spawned from file with time stamp: "
+  << this->timeLastExecutableModification
+  << "; latest executable time stamp: " << theFileStat.st_ctime << std::endl;
+  if (this->timeLastExecutableModification!=theFileStat.st_ctime)
+  { std::cout << consoleRed("Time stamps are different, RESTARTING.") << std::endl;
+    this->Restart();
+  }
+}
+
+void WebServer::Restart()
+{ std::cout << "Killing all copies of the calculator and restarting..." << std::endl;
+  this->Release(this->listeningSocketID);
+  system("killall calculator \r\n./calculator server nokill"); //kill any other running copies of the calculator.
+}
+
+void WebServer::initDates()
+{ this->timeLastExecutableModification=-1;
+  struct stat theFileStat;
+  if (stat(onePredefinedCopyOfGlobalVariables.PhysicalNameFolderBelowExecutable.c_str(), &theFileStat)!=0)
+    return;
+  this->timeLastExecutableModification=theFileStat.st_ctime;
+}
+
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
   if (this->flagTryToKillOlderProcesses)
-  { std::cout << "Killing all copies of the calculator and restarting..." << std::endl;
-    system("killall calculator \r\n./calculator server nokill"); //kill any other running copies of the calculator.
-  }
+    this->Restart();
+  usleep(10000);
+  this->initDates();
   addrinfo hints, *servinfo, *p;
   sockaddr_storage their_addr; // connector's address information
   socklen_t sin_size;
@@ -919,6 +950,7 @@ int WebServer::Run()
   unsigned int connectionsSoFar=0;
   while(true)
   { // main accept() loop
+    this->CheckExecutableVersionAndRestartIfNeeded();
     sin_size = sizeof their_addr;
     int newConnectedSocket = accept(this->listeningSocketID, (struct sockaddr *)&their_addr, &sin_size);
     if (newConnectedSocket <0)

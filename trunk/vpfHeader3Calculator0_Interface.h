@@ -453,17 +453,24 @@ bool EvaluatesToDoubleUnderSubstitutions
 class Function
 {
   public:
+  Calculator* owner;
   Expression theArgumentTypes;
   std::string theDescription;
   std::string theExample;
   std::string additionalIdentifier;
+  int indexOperation;
+  int indexAmongOperationHandlers;
+
+  bool flagIsCompositeHandler;
   bool flagIsInner;
   bool flagMayActOnBoundVars;
   bool flagIamVisible;
   bool flagIsExperimental;
   Expression::FunctionAddress theFunction;
 
-  std::string ToString(Calculator& theBoss);
+  std::string ToStringShort();
+  std::string ToStringSummary();
+  std::string ToStringFull();
   void operator =(const Function& other)
   { this->theArgumentTypes=other.theArgumentTypes;
     this->theDescription=other.theDescription;
@@ -474,6 +481,10 @@ class Function
     this->flagIamVisible=other.flagIamVisible;
     this->flagIsExperimental=other.flagIsExperimental;
     this->additionalIdentifier=other.additionalIdentifier;
+    this->indexOperation=other.indexOperation;
+    this->indexAmongOperationHandlers=other.indexAmongOperationHandlers;
+    this->owner=other.owner;
+    this->flagIsCompositeHandler=other.flagIsCompositeHandler;
   }
   bool operator==(const Function& other)const
   { return this->theArgumentTypes==other.theArgumentTypes &&
@@ -487,11 +498,18 @@ class Function
   bool inputFitsMyInnerType(const Expression& input);
   Function()
   { this->theFunction=0;
+    this->indexAmongOperationHandlers=-1;
+    this->indexOperation=-1;
+    this->owner=0;
+    this->flagIsCompositeHandler=false;
   }
   Function
-  (const Expression::FunctionAddress& functionPointer, Expression* inputArgTypes, const std::string& description, const std::string& inputExample,
+  (Calculator& inputOwner, int inputIndexOperation, int inputIndexAmongOperationHandlers, const Expression::FunctionAddress& functionPointer, Expression* inputArgTypes, const std::string& description, const std::string& inputExample,
    bool inputflagIsInner, bool inputIsVisible=true, bool inputIsExperimental=false, bool inputflagMayActOnBoundVars=false)
-  { this->theFunction=functionPointer;
+  { this->owner=&inputOwner;
+    this->indexOperation=inputIndexOperation;
+    this->indexAmongOperationHandlers=inputIndexAmongOperationHandlers;
+    this->theFunction=functionPointer;
     this->theDescription=description;
     this->theExample=inputExample;
     if (inputArgTypes!=0)
@@ -500,6 +518,7 @@ class Function
     this->flagIamVisible=inputIsVisible;
     this->flagMayActOnBoundVars=inputflagMayActOnBoundVars;
     this->flagIsExperimental=inputIsExperimental;
+    this->flagIsCompositeHandler=false;
   }
   inline static unsigned int HashFunction(const Function& input)
   { return input.HashFunction();
@@ -755,6 +774,7 @@ public:
 
   bool flagLogSyntaxRules;
   bool flagLogEvaluatioN;
+  bool flagLogRules;
   bool flagLogPatternMatching;
   bool flagLogFullTreeCrunching;
   bool flagProduceLatexLink;
@@ -1592,7 +1612,7 @@ public:
    const std::string& opExample, bool isInner, bool visible=true, bool experimental=false);
   void AddOperationBinaryInnerHandlerWithTypes
   (const std::string& theOpName, Expression::FunctionAddress innerHandler, int leftType, int rightType, const std::string& opDescription,
-   const std::string& opExample, bool visible=true, bool experimental=false);
+   const std::string& opExample, bool visible=true, bool experimental=false, const std::string& inputAdditionalIdentifier="");
   void AddOperationHandler
   (const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing, const std::string& opDescription,
    const std::string& opExample, bool isInner, bool visible=true, bool experimental=false, const std::string& inputAdditionalIdentifier="");

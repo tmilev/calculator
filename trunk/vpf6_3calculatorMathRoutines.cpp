@@ -112,6 +112,52 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
   return output.AssignValue(out.str(), theCommands);
 }
 
+class LaTeXcrawler
+{
+  public:
+  int recursionDepth;
+  std::string theFileToCrawl;
+  void Crawl();
+  void CrawlRecursive(const std::string& currentFileName);
+  std::stringstream crawlingResult;
+  std::stringstream errorStream;
+  std::string ToString();
+};
+
+void LaTeXcrawler::Crawl()
+{ this->recursionDepth=0;
+  this->CrawlRecursive(this->theFileToCrawl);
+}
+
+void LaTeXcrawler::CrawlRecursive(const std::string& currentFileName)
+{ MacroRegisterFunctionWithName("LaTeXcrawler::CrawlRecursive");
+  RecursionDepthCounter theCounter(&this->recursionDepth);
+  if (this->recursionDepth>1000)
+  { this->errorStream << "While crawling theFileToCrawl, reached max recursion depth of 1000";
+    return;
+  }
+  if (this->errorStream.str()!="")
+    return;
+  std::fstream theFile;
+  if (!FileOperations::OpenFile(theFile, currentFileName, false, false, false))
+  { this->errorStream << "Failed to open file " << currentFileName << ", aborting.";
+    return;
+  }
+
+}
+
+bool CalculatorFunctionsGeneral::innerCrawlTexFile(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrawlTexFile");
+//  if (!input.IsOfType<std::string>())
+  { theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
+    return false;
+  }
+  LaTeXcrawler theCrawler;
+//  theCrawler.theFileToCrawl=input.GetValue<std::string>();
+  theCrawler.Crawl();
+  return output.AssignValue(theCrawler.crawlingResult, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerCharToBase64(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCharToBase64");
   if (!input.IsOfType<std::string>())

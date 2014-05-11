@@ -39,6 +39,7 @@ void Calculator::reset()
   this->DepthRecursionReached=0;
   this->flagLogSyntaxRules=false;
   this->flagLogEvaluatioN=false;
+  this->flagLogRules=false;
   this->flagLogPatternMatching=false;
   this->flagLogFullTreeCrunching=false;
   this->flagNewContextNeeded=true;
@@ -227,6 +228,7 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("ShowContext");
   this->controlSequences.AddOnTop("LogParsing");
   this->controlSequences.AddOnTop("LogEvaluation");
+  this->controlSequences.AddOnTop("LogRules");
   this->controlSequences.AddOnTop("LogFull");
   this->controlSequences.AddOnTop("LatexLink");
   this->controlSequences.AddOnTop("FullTree");
@@ -1024,6 +1026,11 @@ bool Calculator::ApplyOneRule()
   }
   if (secondToLastS=="%" && lastS=="LogEvaluation")
   { this->flagLogEvaluatioN=true;
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
+  if (secondToLastS=="%" && lastS=="LogRules")
+  { this->flagLogRules=true;
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }

@@ -29,25 +29,18 @@ std::string Calculator::ToStringFunctionHandlers()
       if (this->FunctionHandlers[i][j].flagIsInner)
         numInnerHandlers++;
   }
-  out << "\n <b> " << numOpsHandled << "  built-in atoms are handled by a total of " << numHandlers << " handler functions ("
+  out << "\n <b> " << numOpsHandled << " built-in atoms are handled by a total of " << numHandlers << " handler functions ("
   << numInnerHandlers << " inner and " << numHandlers-numInnerHandlers << " outer).</b><br>\n";
   bool found=false;
-  std::string openTag2="<span style=\"color:#FF0000\">";
-  std::string closeTag2="</span>";
   for (int i=0; i<this->theAtoms.size; i++)
   { int indexCompositeHander=this->operationsComposite.GetIndex(this->theAtoms[i]);
-    int totalDirectHandlers=this->FunctionHandlers[i].size;
-
     if (this->FunctionHandlers[i].size>0)
       for (int j=0; j<this->FunctionHandlers[i].size; j++)
         if (this->FunctionHandlers[i][j].flagIamVisible)
         { if (found)
             out << "<br>\n";
           found=true;
-          out << openTag2 << this->theAtoms[i] << closeTag2;
-          if (totalDirectHandlers>1)
-            out << " (" << j+1 << " out of " << totalDirectHandlers << ")";
-          out << "\n" << this->FunctionHandlers[i][j].ToString(*this);
+          out << this->FunctionHandlers[i][j].ToStringFull();
         }
     if (indexCompositeHander!=-1)
       for (int j=0; j<this->operationsCompositeHandlers[indexCompositeHander].size; j++)
@@ -55,9 +48,7 @@ std::string Calculator::ToStringFunctionHandlers()
         { if (found)
             out << "<br>\n";
           found=true;
-          out << openTag2 << this->theAtoms[i] << closeTag2;
-          out << " (" << j+1 << " out of " << this->operationsCompositeHandlers[indexCompositeHander].size << " composite handlers)";
-          out << "\n" << this->operationsCompositeHandlers[indexCompositeHander][j].ToString(*this);
+          out << this->operationsCompositeHandlers[indexCompositeHander][j].ToStringFull();
         }
   }
   return out.str();
@@ -76,8 +67,7 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
       for (int i=0; i<theHandlers->size; i++)
         if ((*theHandlers)[i].theFunction(theCommands, input, output))
         { if (theCommands.flagLogEvaluatioN)
-            theCommands.Comments << "<hr>Substitution, composite rule " << theCommands.GetOperations()[functionNameNode[0].theData]
-            << ", " << i+1 << " out of " << theHandlers->size << "<br>";
+            theCommands << "Substitution: " << (*theHandlers)[i].ToStringSummary();
           return true;
         }
   }
@@ -92,11 +82,7 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
         if(output!=input)
         { output.CheckConsistency();
           if (theCommands.flagLogEvaluatioN)
-          { theCommands << "<hr>Substitution, outer rule " << theCommands.GetOperations()[functionNameNode.theData];
-            if (theCommands.FunctionHandlers[functionNameNode.theData][i].additionalIdentifier!="")
-              theCommands << ", handler identifier: " << theCommands.FunctionHandlers[functionNameNode.theData][i].additionalIdentifier;
-            theCommands << ", (handler " <<  i+1 << " out of " << theCommands.FunctionHandlers[functionNameNode.theData].size << ")<br>";
-          }
+            theCommands << "Substitution: " << outerFun.ToStringSummary();
           return true;
         }
     } else
@@ -111,8 +97,7 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
           if (innerFun.theFunction(theCommands, input, output))
           { output.CheckConsistency();
             if (theCommands.flagLogEvaluatioN)
-              theCommands.Comments << "<hr>Substitution, inner rule " << theCommands.GetOperations()[functionNameNode.theData]
-              << ", handler " << i+1 << " out of " << theCommands.FunctionHandlers[functionNameNode.theData].size << "<br>";
+              theCommands << "Substitution: " << innerFun.ToStringSummary();
             return true;
           }
       } else
@@ -120,8 +105,7 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
           if (innerFun.theFunction(theCommands, input[1], output))
           { output.CheckConsistency();
             if (theCommands.flagLogEvaluatioN)
-              theCommands.Comments << "<hr>Substitution, inner rule " << theCommands.GetOperations()[functionNameNode.theData]
-              << ", handler " << i+1 << " out of " << theCommands.FunctionHandlers[functionNameNode.theData].size << "<br>";
+              theCommands.Comments << "Substitution: " << innerFun.ToStringSummary();
             return true;
           }
     }
@@ -188,9 +172,9 @@ bool Calculator::EvaluateExpression(const Expression& input, Expression& output,
   if (this->flagLogFullTreeCrunching && this->RecursionDeptH<3)
   { this->Comments << "<br>";
     for (int i=0; i<this->RecursionDeptH; i++)
-      this->Comments << "&nbsp&nbsp&nbsp&nbsp";
+      *this << "&nbsp&nbsp&nbsp&nbsp";
       //stOutput << "&nbsp&nbsp&nbsp&nbsp";
-    this->Comments << "Evaluating " << input.Lispify() << " with rule stack of size " << this->RuleStack.size; // << this->RuleStack.ToString();
+    *this << "Evaluating " << input.Lispify() << " with rule stack of size " << this->RuleStack.size; // << this->RuleStack.ToString();
 //    stOutput << "Evaluating " << input.Lispify() << " with rule stack of size " << this->RuleStack.size; // << this->RuleStack.ToString();
   }
   if (this->RecursionDeptH>=this->MaxRecursionDeptH)
@@ -321,8 +305,15 @@ bool Calculator::EvaluateExpression(const Expression& input, Expression& output,
     if (this->outerStandardFunction(*this, output, tempE))
     { ReductionOcurred=true;
       if (this->flagLogEvaluatioN)
-        this->Comments << CGI::GetMathMouseHover(output.ToString()) << "  ->  " << CGI::GetMathMouseHover(tempE.ToString())
-        << "<br>" << output.ToStringSemiFull() << "  ->  " << tempE.ToStringSemiFull();
+      { *this << "<br>";
+        if (this->flagLogRules)
+        { *this << "<br>Rule stack size: " << this->RuleStack.size << ", RuleContextIdentifier: "
+          << this->RuleContextIdentifier
+          << "<br>Rules: " << this->RuleStack.ToString();
+        }
+        *this << CGI::GetMathMouseHover(output.ToString()) << "  ->  " << CGI::GetMathMouseHover(tempE.ToString()) << "<hr>";
+      }
+//        << "<br>" << output.ToStringSemiFull() << "  ->  " << tempE.ToStringSemiFull();
       output=tempE;
       continue;
     }
@@ -346,8 +337,15 @@ bool Calculator::EvaluateExpression(const Expression& input, Expression& output,
       if(this->ProcessOneExpressionOnePatternOneSub(currentPattern, output, bufferPairs, &this->Comments, this->flagLogPatternMatching))
       { ReductionOcurred=true;
         if (this->flagLogEvaluatioN)
-          this->Comments << CGI::GetMathSpanPure(beforePatternMatch.ToString()) << "  ->  "
-          << CGI::GetMathSpanPure(output.ToString()) << "<br>" << beforePatternMatch.ToStringSemiFull() << "  ->  " << output.ToStringSemiFull();
+        { if (this->flagLogRules)
+          { *this << "<br>Rule stack size: " << this->RuleStack.size << ", RuleContextIdentifier: "
+            << this->RuleContextIdentifier
+            << "<br>Rules: " << this->RuleStack.ToString();
+          }
+          *this << CGI::GetMathSpanPure(beforePatternMatch.ToString()) << "  ->  "
+          << CGI::GetMathSpanPure(output.ToString()) << "<hr>";
+        }
+        //<< "<br>" << beforePatternMatch.ToStringSemiFull() << "  ->  " << output.ToStringSemiFull();
         break;
       }
     }

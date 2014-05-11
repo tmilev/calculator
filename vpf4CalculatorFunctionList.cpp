@@ -450,6 +450,14 @@ void Calculator::initPredefinedInnerFunctions()
    ", true, false)
    ;
   this->AddOperationInnerHandler
+  ("Crawl", CalculatorFunctionsGeneral::innerCrawlTexFile, "",
+   "Crawls a latex file collecting all local style files and all \\input commands to produce a single latex file. \
+   The function was originally designed for the purposes of the freecalc project as not been tested on any other projects,\
+   please use only for freecalc.",
+   "Crawl(\"~/math/freecalc/trunk/homework/UMB-M141-2014-spring/ReviewFinal_2014_Spring_Calculus_I_Math_140.tex\")", true, false)
+   ;
+
+  this->AddOperationInnerHandler
   ("\\log", CalculatorFunctionsGeneral::innerLog, "",
    "Logarithm function. Gives a decimal approximation of the natural logarithm provided the input is a double number. ",
    "\\log{}(e); \\log 10", true, false)
@@ -1350,9 +1358,9 @@ void Calculator::initPredefinedStandardOperations()
    "%LogEvaluation\n({{a}}*{{b}})*{{c}}:=a*(b*c);  ", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", CalculatorFunctionsBinaryOps:: innerAddRatToRat, this->opRational(), this->opRational(),
+  ("+", CalculatorFunctionsBinaryOps::innerAddRatToRat, this->opRational(), this->opRational(),
    "Adds two rational numbers. ",
-   "2+3", true);
+   "2+3", true, false, "CalculatorFunctionsBinaryOps::innerAddRatToRat");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat, this->opRational(), this->opEltZmodP(),
    "Adds elements of Z_p. ",

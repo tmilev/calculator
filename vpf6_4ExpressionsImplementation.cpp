@@ -2130,15 +2130,13 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   else if (this->IsListStartingWithAtom(this->theBoss->opUnionNoRepetition()))
     out << (*this)[1].ToString(theFormat) << "\\sqcup " << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->theBoss->opEndStatement()))
-  { if (startingExpression==0)
-      out << "<table>";
+  { bool createTable=(startingExpression!=0);
+    if (!createTable)
+      out << "(";
     for (int i=1; i<this->children.size; i++)
-    { out << "<tr><td valign=\"top\">";
-      bool createTable=(startingExpression!=0);
       if (createTable)
-        createTable=(startingExpression->IsListStartingWithAtom(this->theBoss->opEndStatement()));
-      if (createTable)
-      { out << "<hr> ";
+      { out << "<tr><td valign=\"top\">";
+        out << "<hr> ";
         if (!this->theBoss->flagHideLHS)
         { if (i<(*startingExpression).children.size)
             out << CGI::GetMathMouseHoverBeginArrayL((*startingExpression)[i].ToString(theFormat));
@@ -2158,17 +2156,14 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
           out << CGI::GetMathSpanBeginArrayL((*this)[i].ToString(theFormat));
         if (i!=this->children.size-1)
           out << ";";
-      }
-      else
+        out << "</td></tr>";
+      } else
       { out << (*this)[i].ToString(theFormat);
         if (i!=this->children.size-1)
           out << ";";
       }
-//      out << "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Context index: " << this->IndexBoundVars;
-      out << "</td></tr>";
-    }
-    if (startingExpression==0)
-      out << "</table>";
+    if (!createTable)
+      out << ")";
   } else if (this->StartsWith(this->theBoss->opError(), 2))
   { this->theBoss->NumErrors++;
     out << "(Error~ " << this->theBoss->NumErrors << ":~ see~ comments)";

@@ -584,6 +584,8 @@ int WebWorker::ProcessRequestTypeUnknown()
 int WebWorker::StandardOutput()
 { MacroRegisterFunctionWithName("WebServer::StandardOutput");
   WebWorker::StandardOutputPart1BeforeComputation();
+  theWebServer.CheckExecutableVersionAndRestartIfNeeded();
+
 //  theParser.inputString="%LogEvaluation 3 *3^{1/2}";
   if (theParser.inputString!="")
   { theParser.Evaluate(theParser.inputString);
@@ -723,6 +725,7 @@ WebServer::WebServer()
 { this->flagUsingBuiltInServer=false;
   this->flagTryToKillOlderProcesses=true;
   this->activeWorker=-1;
+  this->timeLastExecutableModification=-1;
 }
 
 WebWorker& WebServer::GetActiveWorker()
@@ -867,19 +870,21 @@ std::string WebServer::ToStringStatusAll()
 
 void WebServer::CheckExecutableVersionAndRestartIfNeeded()
 { struct stat theFileStat;
-  std::cout << "Name executable: "
-  << onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableWithPath
-  << std::endl;
   if (stat(onePredefinedCopyOfGlobalVariables.PhysicalNameFolderBelowExecutable.c_str(), &theFileStat)!=0)
     return;
-
   std::cout << "current process spawned from file with time stamp: "
   << this->timeLastExecutableModification
   << "; latest executable time stamp: " << theFileStat.st_ctime << std::endl;
-  if (this->timeLastExecutableModification!=theFileStat.st_ctime)
-  { std::cout << consoleRed("Time stamps are different, RESTARTING.") << std::endl;
-    this->Restart();
-  }
+  if (this->timeLastExecutableModification!=-1)
+    if (this->timeLastExecutableModification!=theFileStat.st_ctime)
+    { stOutput << "<b>The server executable was updated, but the server has not been restarted yet. Restarting...";
+      if (this->activeWorker!=-1)
+      { this->GetActiveWorker().SendAllBytes();
+        this->ReleaseActiveWorker();
+      }
+      std::cout << consoleRed("Time stamps are different, RESTARTING.") << std::endl;
+      this->Restart();
+    }
 }
 
 void WebServer::Restart()
@@ -950,7 +955,6 @@ int WebServer::Run()
   unsigned int connectionsSoFar=0;
   while(true)
   { // main accept() loop
-    this->CheckExecutableVersionAndRestartIfNeeded();
     sin_size = sizeof their_addr;
     int newConnectedSocket = accept(this->listeningSocketID, (struct sockaddr *)&their_addr, &sin_size);
     if (newConnectedSocket <0)

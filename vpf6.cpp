@@ -1328,7 +1328,7 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(Calculator& theComman
 { MacroRegisterFunctionWithName("Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY");
   if (!input.StartsWith(theCommands.opTimes(), 3))
     return false;
-  stOutput << "<hr>Collecting multiplicands. input: " << input.ToString();
+//  stOutput << "<hr>Collecting multiplicands. input: " << input.ToString();
   Expression constPower, thePower;
   const Expression* left= &input[1];
   const Expression* right=&input[2];
@@ -1920,7 +1920,7 @@ void Calculator::AddOperationNoRepetitionAllowed(const std::string& theOpName)
 
 void Calculator::AddOperationBinaryInnerHandlerWithTypes
 (const std::string& theOpName, Expression::FunctionAddress innerHandler, int leftType, int rightType, const std::string& opDescription,
- const std::string& opExample, bool visible, bool experimental)
+ const std::string& opExample, bool visible, bool experimental, const std::string& inputAdditionalIdentifier)
 { int indexOp=this->theAtoms.GetIndex(theOpName);
   if (indexOp==-1)
   { this->theAtoms.AddOnTop(theOpName);
@@ -1928,10 +1928,11 @@ void Calculator::AddOperationBinaryInnerHandlerWithTypes
     this->FunctionHandlers.SetSize(this->theAtoms.size);
     this->FunctionHandlers.LastObject()->SetSize(0);
   }
-  Function innerFunction(innerHandler, 0, opDescription, opExample, true, visible, experimental, true);
+  Function innerFunction(*this, indexOp, this->FunctionHandlers[indexOp].size, innerHandler, 0, opDescription, opExample, true, visible, experimental, true);
   innerFunction.theArgumentTypes.reset(*this, 2);
   innerFunction.theArgumentTypes.AddChildAtomOnTop(leftType);
   innerFunction.theArgumentTypes.AddChildAtomOnTop(rightType);
+  innerFunction.additionalIdentifier=inputAdditionalIdentifier;
   this->FunctionHandlers[indexOp].ReservE(10);
   this->FunctionHandlers[indexOp].AddOnTop(innerFunction);
 }
@@ -1948,7 +1949,7 @@ void Calculator::AddOperationHandler
   }
   if (opArgumentListIgnoredForTheTimeBeing!="")
     crash << "This section of code is not implemented yet. Crashing to let you know. " << crash;
-  Function theFun(handler, 0, opDescription, opExample, isInner, visible, isExperimental);
+  Function theFun(*this, indexOp, this->FunctionHandlers[indexOp].size, handler, 0, opDescription, opExample, isInner, visible, isExperimental);
   theFun.additionalIdentifier=inputAdditionalIdentifier;
   if (theOpName=="*" || theOpName=="+" || theOpName=="/" || theOpName=="\\otimes" || theOpName=="^")
     this->FunctionHandlers[indexOp].ReservE(100);
@@ -1970,7 +1971,8 @@ void Calculator::AddOperationComposite
     this->operationsCompositeHandlers.SetSize(this->operationsCompositeHandlers.size+1);
     this->operationsCompositeHandlers.LastObject()->SetSize(0);
   }
-  Function theFun(handler, 0, opDescription, opExample, isInner, visible, isExperimental);
+  Function theFun(*this, theIndex, this->operationsComposite[theIndex].size(), handler, 0, opDescription, opExample, isInner, visible, isExperimental);
+  theFun.flagIsCompositeHandler=true;
   this->operationsCompositeHandlers[theIndex].AddOnTop(theFun);
 }
 
@@ -2018,26 +2020,53 @@ bool Function::inputFitsMyInnerType(const Expression& input)
   return argument1good && argument2good;
 }
 
-std::string Function::ToString(Calculator& theBoss)
+std::string Function::ToStringShort()
+{ if (this->owner==0)
+    return "(non-initialized)";
+  std::stringstream out;
+  if (this->flagIsCompositeHandler)
+    out << "<span style=\"color:#FF0000\">" << this->owner->operationsComposite[this->indexOperation]
+    << "</span> (" << this->indexAmongOperationHandlers+1 << " out of "
+    << this->owner->operationsCompositeHandlers[this->indexOperation].size << ") ";
+  else
+    out << "<span style=\"color:#FF0000\">" << this->owner->theAtoms[this->indexOperation]
+    << "</span> (" << this->indexAmongOperationHandlers+1 << " out of "
+    << this->owner->FunctionHandlers[this->indexOperation].size << "). ";
+  return out.str();
+}
+
+std::string Function::ToStringSummary()
+{ if (this->owner==0)
+    return "(non-initialized)";
+  std::stringstream out;
+  out << this->ToStringShort();
+  if (this->additionalIdentifier!="")
+    out << "Handler: " << this->additionalIdentifier << ". ";
+  return out.str();
+}
+
+std::string Function::ToStringFull()
 { if (!this->flagIamVisible)
     return "";
+  if (this->owner==0)
+    return "(non-intialized)";
   std::stringstream out2;
+  out2 << this->ToStringSummary();
   if (!this->flagIsExperimental)
   { std::stringstream out;
     out << this->theDescription;
 //    out << " \nFunction memory address: " << std::hex << (int) this->theFunction << ". ";
     // use of unsigned long is correct on i386 and amd64
     // uintptr_t is only available in c++0x
-    if (this->additionalIdentifier!="")
-      out << " Function identifier: " << this->additionalIdentifier;
-    out << " Function memory address: " << std::hex << (unsigned long) this->theFunction << ". ";
+    out << "Function memory address: " << std::hex << (unsigned long) this->theFunction << ". ";
     if (!this->flagIsInner)
       out << "This is a <b>``law''</b> - substitution takes place only if output expression is different from input. ";
     if (this->theExample!="")
       out << " <br> " << this->theExample << "&nbsp&nbsp&nbsp";
     out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());
     if (this->theExample!="")
-      out2 << "<a href=\"" << theBoss.theGlobalVariableS->DisplayNameExecutableWithPath  << "? textType=Calculator&textDim=1&textInput="
+      out2 << "<a href=\"" << this->owner->theGlobalVariableS->DisplayNameExecutableWithPath
+      << "? textType=Calculator&textDim=1&textInput="
       << CGI::UnCivilizeStringCGI(this->theExample) << "\"> " << " Example" << "</a>" ;
   } else
     out2 << "<b>Experimental, please don't use.</b>";

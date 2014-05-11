@@ -3,8 +3,8 @@ all: directories calculator
 directories: Debug
 Debug:
 	mkdir ./Debug
-calculator: vpf4CalculatorFunctionList.o vpf5.o vpf5_1CalculatorCode.o vpf5_2javascript_graphics.o vpf6.o vpf6_05evaluationroutines.o vpf6_0parsingRoutines.o vpf6_1innerTypedFunctions.o vpf6_2serialization_code.o vpf6_3calculatorMathRoutines.o vpf6_4ExpressionsImplementation.o vpf7.o vpf8.o vpf9.o vpf99_HardcodedData.o vpf9_1.o vpf9_2.o vpf9_3RationalRadicals.o vpf9_4SemisimpleLieAlgebras.o vpf9_5SemisimpleLieAlgebras_RootSubalgebras.o vpf9_6SemisimpleLieSubAlgebras.o vpf9_7floating_point_routines.o vpf9_8GlobalObjects.o vpf9_91html_routines_calculator.o vpf9_9SystemFunctions.o vpfCalculatorMain.o vpfCharacters.o vpfCharacters_CalculatorInterface.o vpfGraph.o vpfJson.o vpfWebServer.o 
-	g++ -std=c++11 -pthread vpf4CalculatorFunctionList.o vpf5.o vpf5_1CalculatorCode.o vpf5_2javascript_graphics.o vpf6.o vpf6_05evaluationroutines.o vpf6_0parsingRoutines.o vpf6_1innerTypedFunctions.o vpf6_2serialization_code.o vpf6_3calculatorMathRoutines.o vpf6_4ExpressionsImplementation.o vpf7.o vpf8.o vpf9.o vpf99_HardcodedData.o vpf9_1.o vpf9_2.o vpf9_3RationalRadicals.o vpf9_4SemisimpleLieAlgebras.o vpf9_5SemisimpleLieAlgebras_RootSubalgebras.o vpf9_6SemisimpleLieSubAlgebras.o vpf9_7floating_point_routines.o vpf9_8GlobalObjects.o vpf9_91html_routines_calculator.o vpf9_9SystemFunctions.o vpfCalculatorMain.o vpfCharacters.o vpfCharacters_CalculatorInterface.o vpfGraph.o vpfJson.o vpfWebServer.o -o ./Debug/calculator
+calculator: vpf4CalculatorFunctionList.o vpf5.o vpf5_1CalculatorCode.o vpf5_2javascript_graphics.o vpf6.o vpf6_05evaluationroutines.o vpf6_0parsingRoutines.o vpf6_1innerTypedFunctions.o vpf6_2serialization_code.o vpf6_3calculatorMathRoutines.o vpf6_4ExpressionsImplementation.o vpf7.o vpf8.o vpf9.o vpf99_HardcodedData.o vpf9_1.o vpf9_2.o vpf9_3RationalRadicals.o vpf9_4SemisimpleLieAlgebras.o vpf9_5SemisimpleLieAlgebras_RootSubalgebras.o vpf9_6SemisimpleLieSubAlgebras.o vpf9_7floating_point_routines.o vpf9_8GlobalObjects.o vpf9_91html_routines_calculator.o vpf9_9SystemFunctions.o vpfCalculatorMain.o vpfCharacters.o vpfCharacters_CalculatorInterface.o vpfCrypo.o vpfGraph.o vpfJson.o vpfWebServer.o 
+	g++ -std=c++11 -pthread vpf4CalculatorFunctionList.o vpf5.o vpf5_1CalculatorCode.o vpf5_2javascript_graphics.o vpf6.o vpf6_05evaluationroutines.o vpf6_0parsingRoutines.o vpf6_1innerTypedFunctions.o vpf6_2serialization_code.o vpf6_3calculatorMathRoutines.o vpf6_4ExpressionsImplementation.o vpf7.o vpf8.o vpf9.o vpf99_HardcodedData.o vpf9_1.o vpf9_2.o vpf9_3RationalRadicals.o vpf9_4SemisimpleLieAlgebras.o vpf9_5SemisimpleLieAlgebras_RootSubalgebras.o vpf9_6SemisimpleLieSubAlgebras.o vpf9_7floating_point_routines.o vpf9_8GlobalObjects.o vpf9_91html_routines_calculator.o vpf9_9SystemFunctions.o vpfCalculatorMain.o vpfCharacters.o vpfCharacters_CalculatorInterface.o vpfCrypo.o vpfGraph.o vpfJson.o vpfWebServer.o -o ./Debug/calculator
 
 vpf4CalculatorFunctionList.o: vpf4CalculatorFunctionList.cpp
 	g++ -std=c++0x -pthread -c vpf4CalculatorFunctionList.cpp
@@ -89,6 +89,9 @@ vpfCharacters.o: vpfCharacters.cpp
 
 vpfCharacters_CalculatorInterface.o: vpfCharacters_CalculatorInterface.cpp
 	g++ -std=c++0x -pthread -c vpfCharacters_CalculatorInterface.cpp
+
+vpfCrypo.o: vpfCrypo.cpp
+	g++ -std=c++0x -pthread -c vpfCrypo.cpp
 
 vpfGraph.o: vpfGraph.cpp
 	g++ -std=c++0x -pthread -c vpfGraph.cpp

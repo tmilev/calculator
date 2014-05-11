@@ -132,7 +132,7 @@ void WebWorker::StandardOutputPart1BeforeComputation()
 
   stOutput << tempStreamXX.str();
   stOutput << "<table>\n <tr valign=\"top\">\n <td>";
-  stOutput << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\""
+  stOutput << "\n<FORM method=\"POST\" id=\"formCalculator\" name=\"formCalculator\" action=\""
   << theParser.theGlobalVariableS->DisplayNameCalculatorWithPath << "\">\n" ;
   std::string civilizedInputSafish;
   if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, civilizedInputSafish))
@@ -877,7 +877,10 @@ void WebServer::CheckExecutableVersionAndRestartIfNeeded()
   << "; latest executable time stamp: " << theFileStat.st_ctime << std::endl;
   if (this->timeLastExecutableModification!=-1)
     if (this->timeLastExecutableModification!=theFileStat.st_ctime)
-    { stOutput << "<b>The server executable was updated, but the server has not been restarted yet. Restarting...";
+    { stOutput << "<b>The server executable was updated, but the server has not been restarted yet. "
+      << "Restarting in 0.5 seconds...";
+      stOutput << "<script language=\"javascript\">setTimeout(resubmit, 500); "
+      << " function resubmit() { document.getElementById('formCalculator').submit();}</script>";
       if (this->activeWorker!=-1)
       { this->GetActiveWorker().SendAllBytes();
         this->ReleaseActiveWorker();

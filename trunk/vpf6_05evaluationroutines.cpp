@@ -3,18 +3,6 @@
 #include "vpf.h"
 ProjectInformationInstance ProjectInfoVpf6_05cpp(__FILE__, "Calculator core evaluation engine. ");
 
-StackMaintainerRules::StackMaintainerRules(Calculator* inputBoss)
-{ this->theBoss=inputBoss;
-  if (this->theBoss!=0)
-    this->startingRuleStackSize=inputBoss->RuleStack.size;
-}
-
-StackMaintainerRules::~StackMaintainerRules()
-{ if (this->theBoss!=0)
-    this->theBoss->RuleStack.SetSize(this->startingRuleStackSize);
-  this->theBoss=0;
-}
-
 std::string Calculator::ToStringFunctionHandlers()
 { MacroRegisterFunctionWithName("Calculator::ToStringFunctionHandlers");
   std::stringstream out;
@@ -67,7 +55,7 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
       for (int i=0; i<theHandlers->size; i++)
         if ((*theHandlers)[i].theFunction(theCommands, input, output))
         { if (theCommands.flagLogEvaluatioN)
-            theCommands << "Substitution: " << (*theHandlers)[i].ToStringSummary();
+            theCommands << "<hr>Built-in substitution: " << (*theHandlers)[i].ToStringSummary();
           return true;
         }
   }
@@ -82,7 +70,7 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
         if(output!=input)
         { output.CheckConsistency();
           if (theCommands.flagLogEvaluatioN)
-            theCommands << "Substitution: " << outerFun.ToStringSummary();
+            theCommands << "<hr>Built-in substitution: " << outerFun.ToStringSummary();
           return true;
         }
     } else
@@ -97,7 +85,7 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
           if (innerFun.theFunction(theCommands, input, output))
           { output.CheckConsistency();
             if (theCommands.flagLogEvaluatioN)
-              theCommands << "Substitution: " << innerFun.ToStringSummary();
+              theCommands << "<hr>Built-in substitution: " << innerFun.ToStringSummary();
             return true;
           }
       } else
@@ -105,7 +93,7 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
           if (innerFun.theFunction(theCommands, input[1], output))
           { output.CheckConsistency();
             if (theCommands.flagLogEvaluatioN)
-              theCommands.Comments << "Substitution: " << innerFun.ToStringSummary();
+              theCommands.Comments << "<hr>Built-in substitution: " << innerFun.ToStringSummary();
             return true;
           }
     }
@@ -166,6 +154,41 @@ bool Calculator::ExpressionMatchesPattern(const Expression& thePattern, const Ex
   return true;
 }
 
+struct StackMaintainerRules
+{
+public:
+  Calculator* theBoss;
+  int startingRuleStackSize;
+  StackMaintainerRules(Calculator* inputBoss);
+  void AddRule(const Expression& theRule);
+  ~StackMaintainerRules();
+};
+
+void StackMaintainerRules::AddRule(const Expression& theRule)
+{ if (this->theBoss==0)
+    crash << crash;
+  this->theBoss->RuleStack.AddOnTop(theRule);
+  this->theBoss->RuleContextIdentifier++;
+}
+
+StackMaintainerRules::StackMaintainerRules(Calculator* inputBoss)
+{ this->theBoss=inputBoss;
+  if (this->theBoss!=0)
+    this->startingRuleStackSize=inputBoss->RuleStack.size;
+}
+
+StackMaintainerRules::~StackMaintainerRules()
+{ if (this->theBoss==0)
+    return;
+  for (int i=this->theBoss->RuleStack.size-1; i>=this->startingRuleStackSize; i--)
+    if (this->theBoss->flagLogRules)
+      *this->theBoss << "<hr>Popping rule " << this->theBoss->RuleStack[i].ToString() << ". ";
+  if (this->theBoss!=0)
+    this->theBoss->RuleStack.SetSize(this->startingRuleStackSize);
+  this->theBoss->RuleContextIdentifier++;
+  this->theBoss=0;
+}
+
 bool Calculator::EvaluateExpression(const Expression& input, Expression& output, BoundVariablesSubstitution& bufferPairs, bool& outputIsFree)
 { RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
@@ -177,15 +200,9 @@ bool Calculator::EvaluateExpression(const Expression& input, Expression& output,
     *this << "Evaluating " << input.Lispify() << " with rule stack of size " << this->RuleStack.size; // << this->RuleStack.ToString();
 //    stOutput << "Evaluating " << input.Lispify() << " with rule stack of size " << this->RuleStack.size; // << this->RuleStack.ToString();
   }
-  if (this->RecursionDeptH>=this->MaxRecursionDeptH)
-  { std::stringstream out;
-    out << "Recursion depth limit of " << this->MaxRecursionDeptH << " exceeded while evaluating expressions.";
-    output.SetError(out.str(), *this);
-    if (this->flagMaxRecursionErrorEncountered)
-      this->evaluationErrors.AddOnTop(out.str());
-    this->flagMaxRecursionErrorEncountered=true;
-    this->flagAbortComputationASAP=true;
-    return true;
+  if (this->RecursionDepthExceededHandleRoughly())
+  { *this << " Evaluating expression: " << input.ToString() << " aborted. ";
+    return false;
   }
   output=input;
   if (output.IsError())
@@ -213,8 +230,12 @@ bool Calculator::EvaluateExpression(const Expression& input, Expression& output,
   theExpressionWithContext.AddChildOnTop(input);
   int indexInCache=this->cachedExpressions.GetIndex(theExpressionWithContext);
   if (indexInCache!=-1)
+  { if (this->flagLogCache)
+    { *this << "<hr>Cache hit with state identifier " << this->RuleContextIdentifier << ": "
+      << output.ToString() << " -> " << this->imagesCachedExpressions[indexInCache].ToString();
+    }
     output= this->imagesCachedExpressions[indexInCache];
-  else if (this->cachedExpressions.size<this->MaxNumCachedExpressionPerContext)
+  } else if (this->cachedExpressions.size<this->MaxNumCachedExpressionPerContext)
   { this->cachedExpressions.AddOnTop(theExpressionWithContext);
     indexInCache=this->cachedExpressions.size-1;
     this->imagesCachedExpressions.SetSize(indexInCache+1);
@@ -228,25 +249,13 @@ bool Calculator::EvaluateExpression(const Expression& input, Expression& output,
   Expression tempE;
   tempE.reset(*this);
   Expression beforePatternMatch;
-  //stOutput << "<br>";
-  //for (int i=0; i<this->RecursionDeptH; i++)
-    //stOutput << "&nbsp;";
-  //stOutput << "Evaluating " << input.ToString();
-  //stOutput.flush();
   while (ReductionOcurred && !this->flagAbortComputationASAP)
   { StackMaintainerRules theRuleStackMaintainer(this);
     ReductionOcurred=false;
     counterNumTransformations++;
-//    stOutput << "<hr>transforming " << output.ToString() << " at recursion depth " << this->RecursionDeptH;
-//    stOutput.flush();
-
-    //if (this->flagLogEvaluation && counterNumTransformations>1 )
-    //{ this->Comments << "<br>input: " << input.ToString() << "->"
-    //  << output.ToString();
-    //}
     if (indexInCache!=-1)
       this->imagesCachedExpressions[indexInCache]=output;
-//////------Handling naughty expressions------
+    //////------Handling naughty expressions------
     if (this->theGlobalVariableS->GetElapsedSeconds()!=0)
       if (this->theGlobalVariableS->GetElapsedSeconds()>this->theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2)
       { if (!this->flagTimeLimitErrorDetected)
@@ -267,15 +276,12 @@ bool Calculator::EvaluateExpression(const Expression& input, Expression& output,
       }
       break;
     }
-//////------End of handling naughty expressions------
-/////-------Evaluating children if the expression is not of built-in type-------
+    //////------End of handling naughty expressions------
+    /////-------Evaluating children if the expression is not of built-in type-------
     //bool foundError=false;
     if (!output.IsFrozen())
       for (int i=0; i<output.children.size && !this->flagAbortComputationASAP; i++)
       { bool tempBool=true;
-  //      bool debugBool=false;
-  //      if (output[i].ToString()=="c");
-  //        debugBool=true;
         if (this->EvaluateExpression(output[i], tempE, bufferPairs, tempBool))
           output.SetChilD(i, tempE);
         if (!tempBool)
@@ -284,68 +290,50 @@ bool Calculator::EvaluateExpression(const Expression& input, Expression& output,
         { this->flagAbortComputationASAP=true;
           break;
         }
-  /*      if (this->RecursionDeptH==1)
-        { stOutput << "<hr>Considering whether "
-          << output[i].Lispify() << " is rule-stack-worthy.";
-          if (output.ToString()=="a:=b")
-            stOutput << "<hr>a:=b is here<hr>";
-        }*/
         if (output.StartsWith(this->opEndStatement()))
           if (output[i].StartsWith(this->opDefine()) || output[i].StartsWith(this->opDefineConditional()))
-          { this->RuleStack.AddOnTop(output[i]);
-            this->RuleContextIdentifier++;
-           // stOutput << ".. added !!!!";
+          { if (this->flagLogRules)
+              *this << "<hr>Added rule " << output[i].ToString() << " while reducing " << output.ToString();
+            theRuleStackMaintainer.AddRule(output[i]);
           }
       }
     if (this->flagAbortComputationASAP)
       break;
-    //->/////-------Default operation handling-------
-      //stOutput << "<br>got to standard functions";
-    //stOutput.flush();
+    /////-------Default operation handling-------
     if (this->outerStandardFunction(*this, output, tempE))
     { ReductionOcurred=true;
       if (this->flagLogEvaluatioN)
-      { *this << "<br>";
+      { /* *this << "<br>";
         if (this->flagLogRules)
-        { *this << "<br>Rule stack size: " << this->RuleStack.size << ", RuleContextIdentifier: "
-          << this->RuleContextIdentifier
-          << "<br>Rules: " << this->RuleStack.ToString();
-        }
-        *this << CGI::GetMathMouseHover(output.ToString()) << "  ->  " << CGI::GetMathMouseHover(tempE.ToString()) << "<hr>";
+        { *this << "<br>Rule stack size: " << this->RuleStack.size << ", context identifier: "
+          << this->RuleContextIdentifier << "<br>Rules: " << this->RuleStack.ToString() << "<br>";
+        }*/
+        *this << "<br>" << CGI::GetMathMouseHover(output.ToString()) << " -> " << CGI::GetMathMouseHover(tempE.ToString());
       }
-//        << "<br>" << output.ToStringSemiFull() << "  ->  " << tempE.ToStringSemiFull();
       output=tempE;
       continue;
     }
-    //->/////-------Default operation handling end-------
-    //if (foundError || !resultExpressionIsFree)
-      //break;
-/////-------Evaluating children end-------
-/////-------User-defined pattern matching------
-      //stOutput << "<br>got to custom rules";
-    //stOutput.flush();
+    /////-------Default operation handling end-------
+    /////-------Evaluating children end-------
+    /////-------User-defined pattern matching------
     for (int i=0; i<this->RuleStack.size && !this->flagAbortComputationASAP; i++)
     { Expression& currentPattern=this->RuleStack[i];
       this->TotalNumPatternMatchedPerformed++;
       bufferPairs.reset();
-      //stOutput << "<br>Checking whether "
-      //<< output.ToString() << " matches " << currentPattern.ToString();
-    //stOutput.flush();
-
       if (this->flagLogEvaluatioN)
         beforePatternMatch=output;
       if(this->ProcessOneExpressionOnePatternOneSub(currentPattern, output, bufferPairs, &this->Comments, this->flagLogPatternMatching))
       { ReductionOcurred=true;
         if (this->flagLogEvaluatioN)
-        { if (this->flagLogRules)
-          { *this << "<br>Rule stack size: " << this->RuleStack.size << ", RuleContextIdentifier: "
-            << this->RuleContextIdentifier
-            << "<br>Rules: " << this->RuleStack.ToString();
+        { /*
+          if (this->flagLogRules)
+          { *this << "<br>Rule stack size: " << this->RuleStack.size << ", context identifier: "
+            << this->RuleContextIdentifier << "<br>Rules: " << this->RuleStack.ToString() << "<br>";
           }
-          *this << CGI::GetMathSpanPure(beforePatternMatch.ToString()) << "  ->  "
-          << CGI::GetMathSpanPure(output.ToString()) << "<hr>";
+          */
+          *this << "<hr>" << CGI::GetMathSpanPure(beforePatternMatch.ToString()) << " -> "
+          << CGI::GetMathSpanPure(output.ToString());
         }
-        //<< "<br>" << beforePatternMatch.ToStringSemiFull() << "  ->  " << output.ToStringSemiFull();
         break;
       }
     }
@@ -357,8 +345,8 @@ bool Calculator::EvaluateExpression(const Expression& input, Expression& output,
   if (this->flagLogFullTreeCrunching && this->RecursionDeptH<3)
   { this->Comments << "<br>";
     for (int i=0; i<this->RecursionDeptH; i++)
-      this->Comments << "&nbsp&nbsp&nbsp&nbsp";
-    this->Comments << "to get: " << output.Lispify();
+      *this << "&nbsp&nbsp&nbsp&nbsp";
+    *this << "to get: " << output.Lispify();
   }
 
   return true;

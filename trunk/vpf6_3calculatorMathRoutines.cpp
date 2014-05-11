@@ -1470,9 +1470,7 @@ bool Calculator::GetFunctionFromDiffOneForm(const Expression& input, Expression&
   { *this << "<hr>Failed to extract one variable one-form from " << input.ToString();
     return false;
   }
-  BoundVariablesSubstitution thebuff;
-  bool thebool;
-  if (!this->EvaluateExpression(theFormE[1], outputFunction, thebuff, thebool))
+  if (!this->EvaluateExpression(*this, theFormE[1], outputFunction))
   { *this << "Failed to evaluate expression: " << theFormE[1].ToString();
     return false;
   }
@@ -1507,9 +1505,7 @@ bool CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst
   if (integrandE==theFunctionE)
     return false;
   newIntegralE.MakeIntegral(theCommands, integrandE, theVariableE);
-  BoundVariablesSubstitution theSub;
-  bool tempB;
-  if (!theCommands.EvaluateExpression(newIntegralE, output, theSub, tempB))
+  if (!theCommands.EvaluateExpression(theCommands, newIntegralE, output))
     return false;
   if (output.ContainsAsSubExpression(theCommands.opIntegral()))
     return false;
@@ -1544,12 +1540,10 @@ bool CalculatorFunctionsGeneral::innerIntegrateSum(Calculator& theCommands, cons
   List<Expression> integralsOfSummands;
   integralsOfSummands.SetSize(theFunctionE.children.size-1);
   Expression newIntegralE, newDx, newDiffFormE, newFunctionE, result, newSummand;
-  BoundVariablesSubstitution theSub;
-  bool tempB;
   for (int i=1; i<theFunctionE.children.size; i++)
   { newIntegralE.MakeIntegral(theCommands, theFunctionE[i], theVariableE);
-    std::cout << "New integral: " << newIntegralE.ToString();
-    if (!theCommands.EvaluateExpression(newIntegralE, newSummand, theSub, tempB))
+    stOutput << "New integral: " << newIntegralE.ToString();
+    if (!theCommands.EvaluateExpression(theCommands, newIntegralE, newSummand))
       return false;
     if (newSummand.ContainsAsSubExpression(theCommands.opIntegral()))
       return false;
@@ -2378,9 +2372,7 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
       theFunValueEnonEvaluated=(j==0) ? lowerFunctionE : upperFunctionE;
       theFunValueEnonEvaluated.Substitute(xExpression, xValueE);
   //    stOutput << "<br>substitution result:" << tempE2.ToString();
-      BoundVariablesSubstitution tempSub;
-      bool tempB;
-      if (!theCommands.EvaluateExpression(theFunValueEnonEvaluated, theFunValueFinal, tempSub, tempB))
+      if (!theCommands.EvaluateExpression(theCommands, theFunValueEnonEvaluated, theFunValueFinal))
         return false;
   //    stOutput << "and after evaluation: " << theFunValueFinal.ToString();
       double finalResultDouble;

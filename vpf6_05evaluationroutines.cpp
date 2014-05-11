@@ -185,94 +185,98 @@ StackMaintainerRules::~StackMaintainerRules()
       *this->theBoss << "<hr>Popping rule " << this->theBoss->RuleStack[i].ToString() << ". ";
   if (this->theBoss!=0)
     this->theBoss->RuleStack.SetSize(this->startingRuleStackSize);
-  this->theBoss->RuleContextIdentifier++;
+  this->theBoss->RuleContextIdentifier=this->startingRuleStackSize-1;
   this->theBoss=0;
 }
 
-bool Calculator::EvaluateExpression(const Expression& input, Expression& output, BoundVariablesSubstitution& bufferPairs, bool& outputIsFree)
-{ RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
+bool Calculator::EvaluateExpression
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
-  if (this->flagLogFullTreeCrunching && this->RecursionDeptH<3)
-  { this->Comments << "<br>";
-    for (int i=0; i<this->RecursionDeptH; i++)
-      *this << "&nbsp&nbsp&nbsp&nbsp";
+  if (theCommands.flagLogFullTreeCrunching && theCommands.RecursionDeptH<3)
+  { theCommands << "<br>";
+    for (int i=0; i<theCommands.RecursionDeptH; i++)
+      theCommands << "&nbsp&nbsp&nbsp&nbsp";
       //stOutput << "&nbsp&nbsp&nbsp&nbsp";
-    *this << "Evaluating " << input.Lispify() << " with rule stack of size " << this->RuleStack.size; // << this->RuleStack.ToString();
+    theCommands << "Evaluating " << input.Lispify() << " with rule stack of size " << theCommands.RuleStack.size; // << this->RuleStack.ToString();
 //    stOutput << "Evaluating " << input.Lispify() << " with rule stack of size " << this->RuleStack.size; // << this->RuleStack.ToString();
   }
-  if (this->RecursionDepthExceededHandleRoughly())
-  { *this << " Evaluating expression: " << input.ToString() << " aborted. ";
+  if (theCommands.RecursionDepthExceededHandleRoughly())
+  { theCommands << " Evaluating expression: " << input.ToString() << " aborted. ";
     return false;
   }
   output=input;
   if (output.IsError())
-  { this->flagAbortComputationASAP=true;
+  { theCommands.flagAbortComputationASAP=true;
     return true;
   }
   //////////////////////////////
   //  stOutput << "temporary check comment me out";
-  //  this->ExpressionStack.GrandMasterConsistencyCheck();
+  //  theCommands.ExpressionStack.GrandMasterConsistencyCheck();
   //  input.CheckConsistency();
   //  input.HashFunction();
   //////////////////////////////
-  if (this->ExpressionStack.Contains(input))
+  if (theCommands.ExpressionStack.Contains(input))
   { std::stringstream errorStream;
     errorStream << "I think I have detected an infinite cycle: I am asked to reduce " << input.ToString()
     << " but I have already seen that expression in the expression stack. ";
-    this->flagAbortComputationASAP=true;
-    return output.SetError(errorStream.str(), *this);
+    theCommands.flagAbortComputationASAP=true;
+    return output.SetError(errorStream.str(), theCommands);
   }
-  this->ExpressionStack.AddOnTop(input);
+  theCommands.ExpressionStack.AddOnTop(input);
   Expression theExpressionWithContext;
-  theExpressionWithContext.reset(*this, 3);
-  theExpressionWithContext.AddChildAtomOnTop(this->opSequence());
-  theExpressionWithContext.AddChildValueOnTop(this->RuleContextIdentifier);
+  theExpressionWithContext.reset(theCommands, 3);
+  theExpressionWithContext.AddChildAtomOnTop(theCommands.opSequence());
+  theExpressionWithContext.AddChildValueOnTop(theCommands.RuleContextIdentifier);
   theExpressionWithContext.AddChildOnTop(input);
-  int indexInCache=this->cachedExpressions.GetIndex(theExpressionWithContext);
+  int indexInCache=theCommands.cachedExpressions.GetIndex(theExpressionWithContext);
   if (indexInCache!=-1)
-  { if (this->flagLogCache)
-    { *this << "<hr>Cache hit with state identifier " << this->RuleContextIdentifier << ": "
-      << output.ToString() << " -> " << this->imagesCachedExpressions[indexInCache].ToString();
+  { if (theCommands.flagLogCache)
+    { theCommands << "<hr>Cache hit with state identifier " << theCommands.RuleContextIdentifier << ": "
+      << output.ToString() << " -> " << theCommands.imagesCachedExpressions[indexInCache].ToString();
     }
-    output= this->imagesCachedExpressions[indexInCache];
-  } else if (this->cachedExpressions.size<this->MaxNumCachedExpressionPerContext)
-  { this->cachedExpressions.AddOnTop(theExpressionWithContext);
-    indexInCache=this->cachedExpressions.size-1;
-    this->imagesCachedExpressions.SetSize(indexInCache+1);
-    this->imagesCachedExpressions.LastObject()->reset(*this);
-    this->imagesCachedExpressions.LastObject()->SetError("Error: not computed yet.", *this);
+    output= theCommands.imagesCachedExpressions[indexInCache];
+  } else
+  { bool shouldCache=
+    theCommands.cachedExpressions.size<theCommands.MaxNumCachedExpressionPerContext &&
+    !output.IsBuiltInType();
+    if (shouldCache)
+    { theCommands.cachedExpressions.AddOnTop(theExpressionWithContext);
+      indexInCache=theCommands.cachedExpressions.size-1;
+      theCommands.imagesCachedExpressions.SetSize(indexInCache+1);
+      theCommands.imagesCachedExpressions.LastObject()->reset(theCommands);
+      theCommands.imagesCachedExpressions.LastObject()->SetError("Error: not computed yet.", theCommands);
+    }
   }
   //reduction phase:
-  outputIsFree=true;
   bool ReductionOcurred=true;
   int counterNumTransformations=0;
-  Expression tempE;
-  tempE.reset(*this);
+  Expression transformationE(theCommands);
   Expression beforePatternMatch;
-  while (ReductionOcurred && !this->flagAbortComputationASAP)
-  { StackMaintainerRules theRuleStackMaintainer(this);
+  while (ReductionOcurred && !theCommands.flagAbortComputationASAP)
+  { StackMaintainerRules theRuleStackMaintainer(&theCommands);
     ReductionOcurred=false;
     counterNumTransformations++;
     if (indexInCache!=-1)
-      this->imagesCachedExpressions[indexInCache]=output;
+      theCommands.imagesCachedExpressions[indexInCache]=output;
     //////------Handling naughty expressions------
-    if (this->theGlobalVariableS->GetElapsedSeconds()!=0)
-      if (this->theGlobalVariableS->GetElapsedSeconds()>this->theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2)
-      { if (!this->flagTimeLimitErrorDetected)
-          stOutput << "<br><b>Max allowed computational time is " << this->theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2 << ";  so far, "
-          << this->theGlobalVariableS->GetElapsedSeconds()-this->StartTimeEvaluationInSecondS << " have elapsed -> aborting computation ungracefully.</b>";
-        this->flagTimeLimitErrorDetected=true;
-        this->flagAbortComputationASAP=true;
+    if (theCommands.theGlobalVariableS->GetElapsedSeconds()!=0)
+      if (theCommands.theGlobalVariableS->GetElapsedSeconds()>theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2)
+      { if (!theCommands.flagTimeLimitErrorDetected)
+          stOutput << "<br><b>Max allowed computational time is " << theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2 << ";  so far, "
+          << theCommands.theGlobalVariableS->GetElapsedSeconds()-theCommands.StartTimeEvaluationInSecondS << " have elapsed -> aborting computation ungracefully.</b>";
+        theCommands.flagTimeLimitErrorDetected=true;
+        theCommands.flagAbortComputationASAP=true;
         break;
       }
-    if (counterNumTransformations>this->MaxAlgTransformationsPerExpression)
-    { if (!this->flagMaxTransformationsErrorEncountered)
+    if (counterNumTransformations>theCommands.MaxAlgTransformationsPerExpression)
+    { if (!theCommands.flagMaxTransformationsErrorEncountered)
       { std::stringstream out;
-        out << " While simplifying " << output.ToString(&this->formatVisibleStrings) << "<br>Maximum number of algebraic transformations of "
-        << this->MaxAlgTransformationsPerExpression << " exceeded.";
-        output.SetError(out.str(), *this);
-        this->flagAbortComputationASAP=true;
-        this->flagMaxTransformationsErrorEncountered=true;
+        out << " While simplifying " << output.ToString(&theCommands.formatVisibleStrings) << "<br>Maximum number of algebraic transformations of "
+        << theCommands.MaxAlgTransformationsPerExpression << " exceeded.";
+        output.SetError(out.str(), theCommands);
+        theCommands.flagAbortComputationASAP=true;
+        theCommands.flagMaxTransformationsErrorEncountered=true;
       }
       break;
     }
@@ -280,58 +284,55 @@ bool Calculator::EvaluateExpression(const Expression& input, Expression& output,
     /////-------Evaluating children if the expression is not of built-in type-------
     //bool foundError=false;
     if (!output.IsFrozen())
-      for (int i=0; i<output.children.size && !this->flagAbortComputationASAP; i++)
-      { bool tempBool=true;
-        if (this->EvaluateExpression(output[i], tempE, bufferPairs, tempBool))
-          output.SetChilD(i, tempE);
-        if (!tempBool)
-          outputIsFree=false;
+      for (int i=0; i<output.children.size && !theCommands.flagAbortComputationASAP; i++)
+      { if (theCommands.EvaluateExpression(theCommands, output[i], transformationE))
+          output.SetChilD(i, transformationE);
         if (output[i].IsError())
-        { this->flagAbortComputationASAP=true;
+        { theCommands.flagAbortComputationASAP=true;
           break;
         }
-        if (output.StartsWith(this->opEndStatement()))
-          if (output[i].StartsWith(this->opDefine()) || output[i].StartsWith(this->opDefineConditional()))
-          { if (this->flagLogRules)
-              *this << "<hr>Added rule " << output[i].ToString() << " while reducing " << output.ToString();
+        if (output.StartsWith(theCommands.opEndStatement()))
+          if (output[i].StartsWith(theCommands.opDefine()) || output[i].StartsWith(theCommands.opDefineConditional()))
+          { if (theCommands.flagLogRules)
+              theCommands << "<hr>Added rule " << output[i].ToString() << " while reducing " << output.ToString();
             theRuleStackMaintainer.AddRule(output[i]);
           }
       }
-    if (this->flagAbortComputationASAP)
+    if (theCommands.flagAbortComputationASAP)
       break;
     /////-------Default operation handling-------
-    if (this->outerStandardFunction(*this, output, tempE))
+    if (theCommands.outerStandardFunction(theCommands, output, transformationE))
     { ReductionOcurred=true;
-      if (this->flagLogEvaluatioN)
+      if (theCommands.flagLogEvaluatioN)
       { /* *this << "<br>";
-        if (this->flagLogRules)
-        { *this << "<br>Rule stack size: " << this->RuleStack.size << ", context identifier: "
-          << this->RuleContextIdentifier << "<br>Rules: " << this->RuleStack.ToString() << "<br>";
+        if (theCommands.flagLogRules)
+        { *this << "<br>Rule stack size: " << theCommands.RuleStack.size << ", context identifier: "
+          << theCommands.RuleContextIdentifier << "<br>Rules: " << theCommands.RuleStack.ToString() << "<br>";
         }*/
-        *this << "<br>" << CGI::GetMathMouseHover(output.ToString()) << " -> " << CGI::GetMathMouseHover(tempE.ToString());
+        theCommands << "<br>" << CGI::GetMathMouseHover(output.ToString()) << " -> " << CGI::GetMathMouseHover(transformationE.ToString());
       }
-      output=tempE;
+      output=transformationE;
       continue;
     }
     /////-------Default operation handling end-------
     /////-------Evaluating children end-------
     /////-------User-defined pattern matching------
-    for (int i=0; i<this->RuleStack.size && !this->flagAbortComputationASAP; i++)
-    { Expression& currentPattern=this->RuleStack[i];
-      this->TotalNumPatternMatchedPerformed++;
-      bufferPairs.reset();
-      if (this->flagLogEvaluatioN)
+    for (int i=0; i<theCommands.RuleStack.size && !theCommands.flagAbortComputationASAP; i++)
+    { Expression& currentPattern=theCommands.RuleStack[i];
+      theCommands.TotalNumPatternMatchedPerformed++;
+      if (theCommands.flagLogEvaluatioN)
         beforePatternMatch=output;
-      if(this->ProcessOneExpressionOnePatternOneSub(currentPattern, output, bufferPairs, &this->Comments, this->flagLogPatternMatching))
+      BoundVariablesSubstitution bufferPairs;
+      if(theCommands.ProcessOneExpressionOnePatternOneSub(currentPattern, output, bufferPairs, &theCommands.Comments, theCommands.flagLogPatternMatching))
       { ReductionOcurred=true;
-        if (this->flagLogEvaluatioN)
+        if (theCommands.flagLogEvaluatioN)
         { /*
-          if (this->flagLogRules)
-          { *this << "<br>Rule stack size: " << this->RuleStack.size << ", context identifier: "
-            << this->RuleContextIdentifier << "<br>Rules: " << this->RuleStack.ToString() << "<br>";
+          if (theCommands.flagLogRules)
+          { *this << "<br>Rule stack size: " << theCommands.RuleStack.size << ", context identifier: "
+            << theCommands.RuleContextIdentifier << "<br>Rules: " << theCommands.RuleStack.ToString() << "<br>";
           }
           */
-          *this << "<hr>" << CGI::GetMathSpanPure(beforePatternMatch.ToString()) << " -> "
+          theCommands << "<hr>" << CGI::GetMathSpanPure(beforePatternMatch.ToString()) << " -> "
           << CGI::GetMathSpanPure(output.ToString());
         }
         break;
@@ -339,14 +340,12 @@ bool Calculator::EvaluateExpression(const Expression& input, Expression& output,
     }
 /////-------User-defined pattern matching end------
   }
-  this->ExpressionStack.RemoveIndexSwapWithLast(this->ExpressionStack.size-1);
-  if (output.IsListStartingWithAtom(this->opBind()))
-    outputIsFree=false;
-  if (this->flagLogFullTreeCrunching && this->RecursionDeptH<3)
-  { this->Comments << "<br>";
-    for (int i=0; i<this->RecursionDeptH; i++)
-      *this << "&nbsp&nbsp&nbsp&nbsp";
-    *this << "to get: " << output.Lispify();
+  theCommands.ExpressionStack.RemoveIndexSwapWithLast(theCommands.ExpressionStack.size-1);
+  if (theCommands.flagLogFullTreeCrunching && theCommands.RecursionDeptH<3)
+  { theCommands << "<br>";
+    for (int i=0; i<theCommands.RecursionDeptH; i++)
+      theCommands << "&nbsp&nbsp&nbsp&nbsp";
+    theCommands << "to get: " << output.Lispify();
   }
 
   return true;
@@ -382,9 +381,8 @@ Expression* Calculator::PatternMatch
   if (theLog!=0 && logAttempts)
     (*theLog) << "<hr>Specialized condition: " << tempExp.ToString() << "; evaluating...";
   BoundVariablesSubstitution tempPairs;
-  bool isFree;
   Expression conditionResult;
-  this->EvaluateExpression(tempExp, conditionResult, tempPairs, isFree);
+  this->EvaluateExpression(*this, tempExp, conditionResult);
   if (theLog!=0 && logAttempts)
     (*theLog) << "<hr>The evaluated specialized condition: " << conditionResult.ToString() << "; evaluating...";
   if (conditionResult.IsEqualToOne())
@@ -470,7 +468,6 @@ void Calculator::Evaluate(const std::string& theInput)
 void Calculator::EvaluateCommands()
 { MacroRegisterFunctionWithName("Calculator::EvaluateCommands");
   std::stringstream out;
-  BoundVariablesSubstitution thePairs;
 
 //  this->theLogs.resize(this->theCommands.size());
 //this->ToString();
@@ -487,9 +484,8 @@ void Calculator::EvaluateCommands()
 //  stOutput << "comment me out when done with debugging";
 //  StartingExpression.HashFunction();
   this->flagAbortComputationASAP=false;
-  bool tempBool;
   this->Comments.clear();
-  this->EvaluateExpression(this->theProgramExpression, this->theProgramExpression, thePairs, tempBool);
+  this->EvaluateExpression(*this, this->theProgramExpression, this->theProgramExpression);
   if (this->RecursionDeptH!=0)
     crash << "This is a programming error: the starting recursion depth before evaluation was 0, but after evaluation it is "
     << this->RecursionDeptH << "." << crash;

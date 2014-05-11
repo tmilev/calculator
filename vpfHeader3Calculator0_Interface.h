@@ -1633,7 +1633,9 @@ public:
   void initPredefinedOperationsComposite();
   bool ExtractExpressions(Expression& outputExpression, std::string* outputErrors);
   void EvaluateCommands();
-  bool EvaluateExpression(const Expression& input, Expression& output, BoundVariablesSubstitution& bufferPairs, bool& outputIsFree);
+  static bool EvaluateExpression
+  (Calculator& theCommands, const Expression& input, Expression& output)
+  ;
   void Evaluate(const std::string& theInput);
   bool ParseAndExtractExpressions
   (const std::string& theInputString, Expression& outputExp, List<SyntacticElement>& outputSynSoup, List<SyntacticElement>& outputSynStack, std::string* outputSynErrors);

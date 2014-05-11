@@ -1524,19 +1524,16 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(Calculator& theCommands,
     theSet.AddOnTop(input[i]);
   int numGenerators=theSet.size;
   Expression theProduct, evaluatedProduct;
-  BoundVariablesSubstitution tempSub;
-  bool tempBool;
   //stOutput << "<br>" << theSet[0].ToString() << "->" << theSet[0].ToStringFull() << " is with hash " << theSet[0].HashFunction();
   ProgressReport theReport(theCommands.theGlobalVariableS);
   for (int i=0; i<theSet.size; i++)
     for (int j=0; j<numGenerators; j++)
-    { tempSub.reset();
-      theProduct.MakeProducT(theCommands, theSet[j], theSet[i]);
+    { theProduct.MakeProducT(theCommands, theSet[j], theSet[i]);
       std::stringstream reportStream;
       reportStream << "found " << theSet.size << "elements so far, exploring element " << i+1;
       reportStream << "<br>Evaluating: " << theProduct.ToString();
       theReport.Report(reportStream.str());
-      theCommands.EvaluateExpression(theProduct, evaluatedProduct, tempSub, tempBool);
+      theCommands.EvaluateExpression(theCommands, theProduct, evaluatedProduct);
       //stOutput << " to get " << evaluatedProduct.ToString() << "->" << evaluatedProduct.ToStringFull();
       //stOutput << " with hash " << evaluatedProduct.HashFunction();
       //if (evaluatedProduct==theSet[0])

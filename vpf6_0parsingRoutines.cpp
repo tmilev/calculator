@@ -52,7 +52,7 @@ void Calculator::reset()
   this->flagNoApproximations=false;
   this->MaxLatexChars=2000;
   this->numEmptyTokensStart=9;
-  this->MaxNumCachedExpressionPerContext=277777;
+  this->MaxNumCachedExpressionPerContext=100000;
   this->theObjectContainer.reset();
   this->controlSequences.Clear();
 

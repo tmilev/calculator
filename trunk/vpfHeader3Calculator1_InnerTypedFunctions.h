@@ -158,29 +158,30 @@ bool CalculatorSerialization::innerPolynomial(Calculator& theCommands, const Exp
       return CalculatorFunctionsBinaryOps::innerAddRatOrPolyToRatOrPoly(theCommands, theComputed, output);
     crash << "Error, this line of code should never be reached. " << crash;
   }
+  int thePower=-1;
   if (input.StartsWith(theCommands.opThePower(), 3))
-  { if(!CalculatorSerialization::innerPolynomial<coefficient>(theCommands, input[1], theConverted))
-    { theCommands.Comments << "<hr>Failed to extract polynomial from " << input[1].ToString() << ".";
-      return false;
-    }
-    int thePower=-1;
-    if (!input[2].IsSmallInteger(&thePower))
-    { theCommands.Comments << "<hr>Failed to extract polynomial from " << input.ToString() << " because the exponent was not a small integer.";
-      return false;
-    }
-    Polynomial<coefficient> resultP=theConverted.GetValue<Polynomial<coefficient> >();
-    if (thePower<0)
-      if (!resultP.IsAConstant())
-      { theCommands.Comments << "<hr>Failed to extract polynomial from  " << input.ToString() << " because the exponent was negative. ";
+    if (input[2].IsSmallInteger(&thePower))
+    { if(!CalculatorSerialization::innerPolynomial<coefficient>(theCommands, input[1], theConverted))
+      { theCommands.Comments << "<hr>Failed to extract polynomial from " << input[1].ToString() << ".";
         return false;
       }
-    if (thePower==0)
-      if (resultP.IsEqualToZero())
-        return output.SetError("Error: 0^0 is undefined. ", theCommands);
-    resultP.RaiseToPower(thePower);
-    return output.AssignValueWithContext(resultP, theConverted.GetContext(), theCommands);
-  }
-
+      Polynomial<coefficient> resultP=theConverted.GetValue<Polynomial<coefficient> >();
+      if (thePower<0)
+      { coefficient theConst;
+        if (!resultP.IsAConstant(&theConst))
+        { theCommands.Comments << "<hr>Failed to extract polynomial from  " << input.ToString() << " because the exponent was negative. ";
+          return false;
+        }
+        theConst.Invert();
+        thePower*=-1;
+        resultP=theConst;
+      }
+      if (thePower==0)
+        if (resultP.IsEqualToZero())
+          return output.SetError("Error: 0^0 is undefined. ", theCommands);
+      resultP.RaiseToPower(thePower);
+      return output.AssignValueWithContext(resultP, theConverted.GetContext(), theCommands);
+    }
   Polynomial<coefficient> JustAmonomial;
   JustAmonomial.MakeMonomiaL(0,1,1);
   Expression theContext;

@@ -648,15 +648,6 @@ public:
   std::string ToString();
 };
 
-struct StackMaintainerRules
-{
-public:
-  Calculator* theBoss;
-  int startingRuleStackSize;
-  StackMaintainerRules(Calculator* inputBoss);
-  ~StackMaintainerRules();
-};
-
 struct ExpressionTripleCrunchers
 {
   int theOp;
@@ -775,6 +766,7 @@ public:
   bool flagLogSyntaxRules;
   bool flagLogEvaluatioN;
   bool flagLogRules;
+  bool flagLogCache;
   bool flagLogPatternMatching;
   bool flagLogFullTreeCrunching;
   bool flagProduceLatexLink;

@@ -972,8 +972,9 @@ bool Calculator::innerHWVCommon
 bool Calculator::RecursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo)
 { if (this->RecursionDeptH<=this->MaxRecursionDeptH)
     return false;
-  *this << additionalErrorInfo << "<span style=\"color:#FF0000\"><b> Maximum recursion depth of " << this->MaxRecursionDeptH
-  << " exceeded. </b></span>" << "Aborting computation ASAP. ";
+  if (!this->flagMaxRecursionErrorEncountered)
+    *this << additionalErrorInfo << "<span style=\"color:#FF0000\"><b> Maximum recursion depth of " << this->MaxRecursionDeptH
+    << " exceeded. </b></span>" << "Aborting computation ASAP. ";
   this->flagAbortComputationASAP=true;
   this->flagMaxRecursionErrorEncountered=true;
   return true;
@@ -1971,7 +1972,7 @@ void Calculator::AddOperationComposite
     this->operationsCompositeHandlers.SetSize(this->operationsCompositeHandlers.size+1);
     this->operationsCompositeHandlers.LastObject()->SetSize(0);
   }
-  Function theFun(*this, theIndex, this->operationsComposite[theIndex].size(), handler, 0, opDescription, opExample, isInner, visible, isExperimental);
+  Function theFun(*this, theIndex, this->operationsCompositeHandlers[theIndex].size, handler, 0, opDescription, opExample, isInner, visible, isExperimental);
   theFun.flagIsCompositeHandler=true;
   this->operationsCompositeHandlers[theIndex].AddOnTop(theFun);
 }
@@ -2026,7 +2027,7 @@ std::string Function::ToStringShort()
   std::stringstream out;
   if (this->flagIsCompositeHandler)
     out << "<span style=\"color:#FF0000\">" << this->owner->operationsComposite[this->indexOperation]
-    << "</span> (" << this->indexAmongOperationHandlers+1 << " out of "
+    << " </span><span style=\"color:#00FF00\">(composite)</span> (" << this->indexAmongOperationHandlers+1 << " out of "
     << this->owner->operationsCompositeHandlers[this->indexOperation].size << ") ";
   else
     out << "<span style=\"color:#FF0000\">" << this->owner->theAtoms[this->indexOperation]
@@ -2051,13 +2052,15 @@ std::string Function::ToStringFull()
   if (this->owner==0)
     return "(non-intialized)";
   std::stringstream out2;
-  out2 << this->ToStringSummary();
+  out2 << this->ToStringShort();
   if (!this->flagIsExperimental)
   { std::stringstream out;
     out << this->theDescription;
 //    out << " \nFunction memory address: " << std::hex << (int) this->theFunction << ". ";
     // use of unsigned long is correct on i386 and amd64
     // uintptr_t is only available in c++0x
+    if (this->additionalIdentifier!="")
+      out << "Handler: " << this->additionalIdentifier << ". ";
     out << "Function memory address: " << std::hex << (unsigned long) this->theFunction << ". ";
     if (!this->flagIsInner)
       out << "This is a <b>``law''</b> - substitution takes place only if output expression is different from input. ";

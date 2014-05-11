@@ -40,6 +40,7 @@ void Calculator::reset()
   this->flagLogSyntaxRules=false;
   this->flagLogEvaluatioN=false;
   this->flagLogRules=false;
+  this->flagLogCache=false;
   this->flagLogPatternMatching=false;
   this->flagLogFullTreeCrunching=false;
   this->flagNewContextNeeded=true;
@@ -229,6 +230,7 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("LogParsing");
   this->controlSequences.AddOnTop("LogEvaluation");
   this->controlSequences.AddOnTop("LogRules");
+  this->controlSequences.AddOnTop("LogCache");
   this->controlSequences.AddOnTop("LogFull");
   this->controlSequences.AddOnTop("LatexLink");
   this->controlSequences.AddOnTop("FullTree");
@@ -1029,6 +1031,11 @@ bool Calculator::ApplyOneRule()
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
+  if (secondToLastS=="%" && lastS=="LogCache")
+  { this->flagLogCache=true;
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
   if (secondToLastS=="%" && lastS=="LogRules")
   { this->flagLogRules=true;
     this->PopTopSyntacticStack();
@@ -1217,7 +1224,10 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   if (fifthToLastS=="Expression" && fourthToLastS== "{}" && thirdToLastS=="{" && secondToLastS=="Sequence" && lastS=="}")
     return this->ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
-  if (secondToLastS=="Sequence" && lastS!=",")
+  if (secondToLastS=="Sequence" &&
+      ((thirdToLastS=="(" && lastS==")")||
+       (thirdToLastS=="{" && lastS=="}")
+      ))
     return this->ReplaceOXbyEX();
   if (fifthToLastS=="\\begin" && fourthToLastS=="{" && thirdToLastS=="array" && secondToLastS=="}" && lastS=="Expression")
   { this->registerNumNonClosedBeginArray++;

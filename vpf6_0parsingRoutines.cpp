@@ -33,6 +33,8 @@ std::string SyntacticElement::ToString(Calculator& theBoss)const
 
 void Calculator::reset()
 { this->MaxAlgTransformationsPerExpression=100;
+  this->MaxRuleStacksCached=500;
+  this->MaxCachedExpressionPerRuleStack=100000;
   this->MaxRecursionDeptH=10000;
   this->RecursionDeptH=0;
   this->NumErrors=0;
@@ -52,7 +54,6 @@ void Calculator::reset()
   this->flagNoApproximations=false;
   this->MaxLatexChars=2000;
   this->numEmptyTokensStart=9;
-  this->MaxNumCachedExpressionPerContext=100000;
   this->theObjectContainer.reset();
   this->controlSequences.Clear();
 
@@ -79,7 +80,7 @@ void Calculator::reset()
   this->flagMaxRecursionErrorEncountered=false;
   this->flagAbortComputationASAP=false;
   this->flagDisplayContext=false;
-  this->ExpressionStack.Clear();
+  this->EvaluatedExpressionsStack.Clear();
   this->theCruncherIds.Clear();
   this->theCruncherS.SetSize(0);
   this->syntaxErrors="";
@@ -89,6 +90,9 @@ void Calculator::reset()
   this->cachedExpressions.Clear();
   this->imagesCachedExpressions.SetSize(0);
   this->theProgramExpression.reset(*this);
+  this->RuleStackCacheIndex=-1;
+  this->RuleStack.reset(*this,this->MaxRuleStacksCached);
+  this->cachedRuleStacks.Clear();
   //The expression container must be cleared last!
   this->theExpressionContainer.Clear();
 }
@@ -252,8 +256,11 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->initArithmeticOperations();
 
   Expression theSSLieAlgrule;
-  this->RuleStack.SetSize(0);
-  this->RuleContextIdentifier=0;
+  this->RuleStack.reset(*this, 100);
+  this->RuleStack.AddChildAtomOnTop(this->opEndStatement());
+  this->cachedRuleStacks.Clear();
+  this->RuleStackCacheIndex=0;
+  this->cachedRuleStacks.AddOnTop(this->RuleStack);
   this->NumPredefinedAtoms=this->theAtoms.size; //<-operations added up to this point are called ``operations''
 
 /*  this->Evaluate
@@ -934,7 +941,7 @@ bool Calculator::LookAheadAllowsDivide(const std::string& lookAhead)
 }
 
 bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* outputErrors)
-{ MacroRegisterFunctionWithName("ommandList::ExtractExpressions");
+{ MacroRegisterFunctionWithName("Calculator::ExtractExpressions");
   //std::string lookAheadToken;
   std::stringstream errorLog;
   (*this->CurrentSyntacticStacK).ReservE((*this->CurrrentSyntacticSouP).size+this->numEmptyTokensStart);

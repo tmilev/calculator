@@ -1289,7 +1289,6 @@ private:
   void RemoveFirstOccurenceSwapWithLast(Object& o);
   Object PopIndexShiftDown(int index);
   void AssignLight(const ListLight<Object>& from);
-  void SetSize(int theSize);
   void ReverseOrderElements();
   void ShiftUpExpandOnTop(int StartingIndex);
 
@@ -1499,6 +1498,18 @@ public:
     }
     return result;
   }
+  void SetSize(int inputSize)
+  { if (inputSize<0)
+      inputSize=0;
+    if (inputSize>this->size)
+      crash << "SetSize is allowed for hashed lists only when resizing the hashed list to smaller. "
+      << "This is because if I was to resize to larger, I would have to allocate non-initialized "
+      << " objects, and those will have to be rehashed which does not make sense. "
+      << crash;
+    for (int i=this->size-1; i>=inputSize; i--)
+      this->PopLastObject();
+  }
+
   inline bool IsSparseRelativeToExpectedSize(int expectedSize)const
   { return expectedSize*3<this->TheHashedArrays.size;
   }

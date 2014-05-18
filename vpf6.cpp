@@ -988,12 +988,12 @@ bool Calculator::innerCrash(Calculator& theCommands, const Expression& input, Ex
 
 bool Calculator::CheckConsistencyAfterInitializationExpressionStackEmpty()
 { this->theExpressionContainer.GrandMasterConsistencyCheck();
-  this->ExpressionStack.GrandMasterConsistencyCheck();
+  this->EvaluatedExpressionsStack.GrandMasterConsistencyCheck();
   this->cachedExpressions.GrandMasterConsistencyCheck();
-  if (this->cachedExpressions.size!=0 || this->imagesCachedExpressions.size!=0 || this->ExpressionStack.size!=0 || this->theExpressionContainer.size!=0)
+  if (this->cachedExpressions.size!=0 || this->imagesCachedExpressions.size!=0 || this->EvaluatedExpressionsStack.size!=0 || this->theExpressionContainer.size!=0)
     crash << "This is a programming error: cached expressions, images cached expressions, expression stack and expression container are supposed to be empty, but "
     << " instead they contain respectively " << this->cachedExpressions.size << ", " << this->imagesCachedExpressions.size << ", "
-    << this->ExpressionStack.size << " and " << this->theExpressionContainer.size << " elements. " << crash;
+    << this->EvaluatedExpressionsStack.size << " and " << this->theExpressionContainer.size << " elements. " << crash;
   return true;
 }
 
@@ -2135,11 +2135,11 @@ std::string Calculator::ToString()
   if (Rational::TotalLargeGCDcalls>0)
     out2 << "<br>Number large number gcd calls: " << Rational::TotalLargeGCDcalls << " (# calls LargeIntUnsigned::gcd)";
   #endif
-  if (this->RuleStack.size>0)
+  if (this->RuleStack.children.size>0)
   { out2 << "<hr><b>Predefined rules.</b><br>";
-    for (int i=0; i<this->RuleStack.size; i++)
+    for (int i=1; i<this->RuleStack.children.size; i++)
     { out2 << this->RuleStack[i].ToString();
-      if (i!=this->RuleStack.size-1)
+      if (i!=this->RuleStack.children.size-1)
         out2 << "<br>";
     }
   }

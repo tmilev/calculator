@@ -691,6 +691,7 @@ public:
   HashedList<std::string, MathRoutines::hashString> operationsComposite;
   List<List<Function> > FunctionHandlers;
   List<List<Function> > operationsCompositeHandlers;
+  HashedList<Expression> cachedRuleStacks;
 
 //Calculator functions have as arguments two expressions passed by reference,
 //const Expression& input and Expression& output. Calculator functions
@@ -753,8 +754,10 @@ public:
   int DepthRecursionReached;
   int MaxAlgTransformationsPerExpression;
   int MaxLatexChars;
-  int MaxNumCachedExpressionPerContext;
+  int MaxCachedExpressionPerRuleStack;
+  int MaxRuleStacksCached;
   int NumErrors;
+  int RuleStackCacheIndex;
   ///////////////////////////////////////////////////////////////////////////
   bool flagAbortComputationASAP;
   bool flagTimeLimitErrorDetected;
@@ -797,12 +800,11 @@ public:
   HashedList<Expression> cachedExpressions;
   List<Expression> imagesCachedExpressions;
   ////
-  HashedList<Expression> ExpressionStack;
+  HashedList<Expression> EvaluatedExpressionsStack;
   List<HashedList<int, MathRoutines::IntUnsignIdentity> > NonBoundVariablesStack;
   List<HashedList<int, MathRoutines::IntUnsignIdentity> > BoundVariablesStack;
 
-  int RuleContextIdentifier;
-  List<Expression> RuleStack;
+  Expression RuleStack;
 
   HashedListReferences<Expression> theExpressionContainer;
 
@@ -1335,7 +1337,7 @@ public:
   (const Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs, const Expression* condition=0,
    std::stringstream* theLog=0, bool logAttempts=false);
   bool ProcessOneExpressionOnePatternOneSub
-  (Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs, std::stringstream* theLog=0, bool logAttempts=false);
+  (const Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs, std::stringstream* theLog=0, bool logAttempts=false);
   static void CheckInputNotSameAsOutput(const Expression& input, const Expression& output)
   { if (&input==&output)
       crash << "This is a programming error: the input expression, equal to " << input.ToString() << " has the same address as the output expression. "

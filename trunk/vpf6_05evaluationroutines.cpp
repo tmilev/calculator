@@ -55,7 +55,8 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
       for (int i=0; i<theHandlers->size; i++)
         if ((*theHandlers)[i].theFunction(theCommands, input, output))
         { if (theCommands.flagLogEvaluatioN)
-            theCommands << "<hr>Built-in substitution: " << (*theHandlers)[i].ToStringSummary();
+            theCommands << "<hr>Built-in substitution: " << (*theHandlers)[i].ToStringSummary() << "<br>Rule stack id: "
+            << theCommands.RuleStackCacheIndex;
           return true;
         }
   }
@@ -70,7 +71,8 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
         if(output!=input)
         { output.CheckConsistency();
           if (theCommands.flagLogEvaluatioN)
-            theCommands << "<hr>Built-in substitution: " << outerFun.ToStringSummary();
+            theCommands << "<hr>Built-in substitution: " << outerFun.ToStringSummary() << "<br>Rule stack id: "
+            << theCommands.RuleStackCacheIndex;
           return true;
         }
     } else
@@ -85,7 +87,8 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
           if (innerFun.theFunction(theCommands, input, output))
           { output.CheckConsistency();
             if (theCommands.flagLogEvaluatioN)
-              theCommands << "<hr>Built-in substitution: " << innerFun.ToStringSummary();
+              theCommands << "<hr>Built-in substitution: " << innerFun.ToStringSummary() << "<br>Rule stack id: "
+              << theCommands.RuleStackCacheIndex;
             return true;
           }
       } else
@@ -93,7 +96,8 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
           if (innerFun.theFunction(theCommands, input[1], output))
           { output.CheckConsistency();
             if (theCommands.flagLogEvaluatioN)
-              theCommands.Comments << "<hr>Built-in substitution: " << innerFun.ToStringSummary();
+              theCommands.Comments << "<hr>Built-in substitution: " << innerFun.ToStringSummary()
+              << "<br>Rule stack id: " << theCommands.RuleStackCacheIndex;
             return true;
           }
     }
@@ -158,6 +162,7 @@ struct StackMaintainerRules
 {
 public:
   Calculator* theBoss;
+  int startingRuleStackIndex;
   int startingRuleStackSize;
   StackMaintainerRules(Calculator* inputBoss);
   void AddRule(const Expression& theRule);
@@ -167,25 +172,31 @@ public:
 void StackMaintainerRules::AddRule(const Expression& theRule)
 { if (this->theBoss==0)
     crash << crash;
-  this->theBoss->RuleStack.AddOnTop(theRule);
-  this->theBoss->RuleContextIdentifier++;
+  this->theBoss->RuleStack.AddChildOnTop(theRule);
+  this->theBoss->RuleStackCacheIndex=this->theBoss->cachedRuleStacks.GetIndex(this->theBoss->RuleStack);
+  if (this->theBoss->RuleStackCacheIndex==-1)
+    if (this->theBoss->cachedRuleStacks.size<this->theBoss->MaxCachedExpressionPerRuleStack)
+    { this->theBoss->RuleStackCacheIndex=this->theBoss->cachedRuleStacks.size;
+      this->theBoss->cachedRuleStacks.AddOnTop(this->theBoss->RuleStack);
+    }
+  if (this->theBoss->flagLogRules)
+    *this->theBoss << "<hr>Added rule " << theRule.ToString() << " with state identifier "
+    << this->theBoss->RuleStackCacheIndex;
 }
 
 StackMaintainerRules::StackMaintainerRules(Calculator* inputBoss)
 { this->theBoss=inputBoss;
-  if (this->theBoss!=0)
-    this->startingRuleStackSize=inputBoss->RuleStack.size;
+  if (this->theBoss==0)
+    return;
+  this->startingRuleStackIndex=inputBoss->RuleStackCacheIndex;
+  this->startingRuleStackSize=inputBoss->RuleStack.children.size;
 }
 
 StackMaintainerRules::~StackMaintainerRules()
 { if (this->theBoss==0)
     return;
-  for (int i=this->theBoss->RuleStack.size-1; i>=this->startingRuleStackSize; i--)
-    if (this->theBoss->flagLogRules)
-      *this->theBoss << "<hr>Popping rule " << this->theBoss->RuleStack[i].ToString() << ". ";
-  if (this->theBoss!=0)
-    this->theBoss->RuleStack.SetSize(this->startingRuleStackSize);
-  this->theBoss->RuleContextIdentifier=this->startingRuleStackSize-1;
+  this->theBoss->RuleStackCacheIndex=this->startingRuleStackIndex;
+  this->theBoss->RuleStack.children.SetSize(this->startingRuleStackSize);
   this->theBoss=0;
 }
 
@@ -198,7 +209,7 @@ bool Calculator::EvaluateExpression
     for (int i=0; i<theCommands.RecursionDeptH; i++)
       theCommands << "&nbsp&nbsp&nbsp&nbsp";
       //stOutput << "&nbsp&nbsp&nbsp&nbsp";
-    theCommands << "Evaluating " << input.Lispify() << " with rule stack of size " << theCommands.RuleStack.size; // << this->RuleStack.ToString();
+    theCommands << "Evaluating " << input.Lispify() << " with rule stack cache index " << theCommands.RuleStackCacheIndex; // << this->RuleStack.ToString();
 //    stOutput << "Evaluating " << input.Lispify() << " with rule stack of size " << this->RuleStack.size; // << this->RuleStack.ToString();
   }
   if (theCommands.RecursionDepthExceededHandleRoughly())
@@ -216,30 +227,30 @@ bool Calculator::EvaluateExpression
   //  input.CheckConsistency();
   //  input.HashFunction();
   //////////////////////////////
-  if (theCommands.ExpressionStack.Contains(input))
+  if (theCommands.EvaluatedExpressionsStack.Contains(input))
   { std::stringstream errorStream;
     errorStream << "I think I have detected an infinite cycle: I am asked to reduce " << input.ToString()
     << " but I have already seen that expression in the expression stack. ";
     theCommands.flagAbortComputationASAP=true;
     return output.SetError(errorStream.str(), theCommands);
   }
-  theCommands.ExpressionStack.AddOnTop(input);
+  theCommands.EvaluatedExpressionsStack.AddOnTop(input);
   Expression theExpressionWithContext;
   theExpressionWithContext.reset(theCommands, 3);
   theExpressionWithContext.AddChildAtomOnTop(theCommands.opSequence());
-  theExpressionWithContext.AddChildValueOnTop(theCommands.RuleContextIdentifier);
+  theExpressionWithContext.AddChildValueOnTop(theCommands.RuleStackCacheIndex);
   theExpressionWithContext.AddChildOnTop(input);
   int indexInCache=theCommands.cachedExpressions.GetIndex(theExpressionWithContext);
   if (indexInCache!=-1)
   { if (theCommands.flagLogCache)
-    { theCommands << "<hr>Cache hit with state identifier " << theCommands.RuleContextIdentifier << ": "
+    { theCommands << "<hr>Cache hit with state identifier " << theCommands.RuleStackCacheIndex << ": "
       << output.ToString() << " -> " << theCommands.imagesCachedExpressions[indexInCache].ToString();
     }
     output= theCommands.imagesCachedExpressions[indexInCache];
   } else
   { bool shouldCache=
-    theCommands.cachedExpressions.size<theCommands.MaxNumCachedExpressionPerContext &&
-    !output.IsBuiltInType();
+    theCommands.cachedExpressions.size<theCommands.MaxCachedExpressionPerRuleStack &&
+    !output.IsBuiltInType() && !output.IsBuiltInAtom();
     if (shouldCache)
     { theCommands.cachedExpressions.AddOnTop(theExpressionWithContext);
       indexInCache=theCommands.cachedExpressions.size-1;
@@ -293,10 +304,7 @@ bool Calculator::EvaluateExpression
         }
         if (output.StartsWith(theCommands.opEndStatement()))
           if (output[i].StartsWith(theCommands.opDefine()) || output[i].StartsWith(theCommands.opDefineConditional()))
-          { if (theCommands.flagLogRules)
-              theCommands << "<hr>Added rule " << output[i].ToString() << " while reducing " << output.ToString();
             theRuleStackMaintainer.AddRule(output[i]);
-          }
       }
     if (theCommands.flagAbortComputationASAP)
       break;
@@ -309,7 +317,9 @@ bool Calculator::EvaluateExpression
         { *this << "<br>Rule stack size: " << theCommands.RuleStack.size << ", context identifier: "
           << theCommands.RuleContextIdentifier << "<br>Rules: " << theCommands.RuleStack.ToString() << "<br>";
         }*/
-        theCommands << "<br>" << CGI::GetMathMouseHover(output.ToString()) << " -> " << CGI::GetMathMouseHover(transformationE.ToString());
+        theCommands << "<br>Rule context identifier: " << theCommands.RuleStackCacheIndex
+        << "<br>" << CGI::GetMathMouseHover(output.ToString()) << " -> "
+        << CGI::GetMathMouseHover(transformationE.ToString());
       }
       output=transformationE;
       continue;
@@ -317,8 +327,8 @@ bool Calculator::EvaluateExpression
     /////-------Default operation handling end-------
     /////-------Evaluating children end-------
     /////-------User-defined pattern matching------
-    for (int i=0; i<theCommands.RuleStack.size && !theCommands.flagAbortComputationASAP; i++)
-    { Expression& currentPattern=theCommands.RuleStack[i];
+    for (int i=0; i<theCommands.RuleStack.children.size && !theCommands.flagAbortComputationASAP; i++)
+    { const Expression& currentPattern=theCommands.RuleStack[i];
       theCommands.TotalNumPatternMatchedPerformed++;
       if (theCommands.flagLogEvaluatioN)
         beforePatternMatch=output;
@@ -332,7 +342,8 @@ bool Calculator::EvaluateExpression
             << theCommands.RuleContextIdentifier << "<br>Rules: " << theCommands.RuleStack.ToString() << "<br>";
           }
           */
-          theCommands << "<hr>" << CGI::GetMathSpanPure(beforePatternMatch.ToString()) << " -> "
+          theCommands << "<hr>Rule cache index: " << theCommands.RuleStackCacheIndex << "<br>Rule: " << currentPattern.ToString()
+          << "<br>" << CGI::GetMathSpanPure(beforePatternMatch.ToString()) << " -> "
           << CGI::GetMathSpanPure(output.ToString());
         }
         break;
@@ -340,7 +351,7 @@ bool Calculator::EvaluateExpression
     }
 /////-------User-defined pattern matching end------
   }
-  theCommands.ExpressionStack.RemoveIndexSwapWithLast(theCommands.ExpressionStack.size-1);
+  theCommands.EvaluatedExpressionsStack.RemoveLastObject();
   if (theCommands.flagLogFullTreeCrunching && theCommands.RecursionDeptH<3)
   { theCommands << "<br>";
     for (int i=0; i<theCommands.RecursionDeptH; i++)
@@ -411,7 +422,7 @@ void Calculator::SpecializeBoundVars(Expression& toBeSubbedIn, BoundVariablesSub
 }
 
 bool Calculator::ProcessOneExpressionOnePatternOneSub
-(Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs, std::stringstream* theLog, bool logAttempts)
+(const Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs, std::stringstream* theLog, bool logAttempts)
 { MacroRegisterFunctionWithName("Calculator::ProcessOneExpressionOnePatternOneSub");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (!thePattern.StartsWith(this->opDefine(), 3) && !thePattern.StartsWith(this->opDefineConditional(), 4))

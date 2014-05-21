@@ -1041,7 +1041,7 @@ Expression Expression::ContextGetContextVariable(int variableIndex)const
   { Expression errorE;
     std::stringstream out;
     out << "Context ~does ~not ~have ~variable ~index ~" << variableIndex+1 << ". ";
-    errorE.SetError(out.str(), *this->theBoss);
+    errorE.MakeError(out.str(), *this->theBoss);
     return errorE;
   }
   return thePolVars[variableIndex+1];
@@ -1382,7 +1382,7 @@ bool Expression::IsEqualToZero()const
   return false;
 }
 
-bool Expression::SetError(const std::string& theError, Calculator& owner)
+bool Expression::MakeError(const std::string& theError, Calculator& owner)
 { this->reset(owner, 2);
   this->AddChildAtomOnTop(owner.opError());
   return this->AddChildValueOnTop(theError);
@@ -2040,8 +2040,11 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         out << "+";
     out << tempS;
   } else if (this->StartsWith(this->theBoss->opMinus(), 2))
-    out << "-" << (*this)[1].ToString(theFormat);
-  else if (this->StartsWith(this->theBoss->opSqrt(), 2))
+  { if ((*this)[1].StartsWith(this->theBoss->opPlus()) ||(*this)[1].StartsWith(this->theBoss->opMinus()) )
+      out << "-\\left(" << (*this)[1].ToString(theFormat) << "\\right)";
+    else
+      out << "-" << (*this)[1].ToString(theFormat);
+  } else if (this->StartsWith(this->theBoss->opSqrt(), 2))
     out << "\\sqrt{" << (*this)[1].ToString(theFormat) << "}";
   else if (this->StartsWith(this->theBoss->opMinus(), 3))
   { if (!(this->children.size==3))

@@ -397,7 +397,7 @@ class Expression
   const Expression& GetLastChild()const
   { return (*this)[this->children.size-1];
   }
-  bool SetError (const std::string& theError, Calculator& owner);
+  bool MakeError (const std::string& theError, Calculator& owner);
   Expression(const Expression& other):flagDeallocated(false)
   { this->operator=(other);
   }
@@ -1940,17 +1940,17 @@ bool Calculator::GetTypeHighestWeightParabolic
 (Calculator& theCommands, const Expression& input, Expression& output, Vector<coefficient>& outputWeightHWFundcoords,
  Selection& outputInducingSel, Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra, Expression::FunctionAddress ConversionFun)
 { if (!input.IsListNElements(4) && !input.IsListNElements(3))
-    return output.SetError
+    return output.MakeError
     ("Function TypeHighestWeightParabolic is expected to have two or three arguments: SS algebra type, highest weight, [optional] parabolic selection. ", theCommands);
   const Expression& leftE=input[1];
   const Expression& middleE=input[2];
   if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, leftE, ambientSSalgebra))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
   if (!theCommands.GetVectoR<coefficient>(middleE, outputWeightHWFundcoords, &outputHWContext, ambientSSalgebra->GetRank(), ConversionFun))
   { std::stringstream tempStream;
     tempStream << "Failed to convert the second argument of HWV to a list of " << ambientSSalgebra->GetRank()
     << " polynomials. The second argument you gave is " << middleE.ToString() << ".";
-    return output.SetError(tempStream.str(), theCommands);
+    return output.MakeError(tempStream.str(), theCommands);
   }
   if (input.IsListNElements(4))
   { Vector<Rational> parabolicSel;
@@ -1959,7 +1959,7 @@ bool Calculator::GetTypeHighestWeightParabolic
     { std::stringstream tempStream;
       tempStream << "Failed to convert the third argument of HWV to a list of " << ambientSSalgebra->GetRank()
       << " rationals. The third argument you gave is " << rightE.ToString() << ".";
-      return output.SetError(tempStream.str(), theCommands);
+      return output.MakeError(tempStream.str(), theCommands);
     }
     outputInducingSel=parabolicSel;
   } else

@@ -676,7 +676,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
   { ModuleSSalgebra<RationalFunctionOld>& theMod=theMods[i];
     tempV=theHws[i];
     if (!theMod.MakeFromHW(theSSalgebra, tempV, selInducing, *theCommands.theGlobalVariableS, 1, 0, 0, true))
-      return output.SetError("Failed to create module.", theCommands);
+      return output.MakeError("Failed to create module.", theCommands);
     if (i==0)
     { theMod.GetElementsNilradical(elementsNegativeNilrad, true);
       Polynomial<Rational> Pone, Pzero;
@@ -705,7 +705,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
         tempstream3 << theFinalXletter << "_" << k-numStartingVars+1;
         tempStream4 << theFinalPartialLetter << "_{" << k-numStartingVars+1 << "}";
         if (theWeylFormat.polyAlphabeT.Contains(tempstream2.str()) || theWeylFormat.polyAlphabeT.Contains(tempstream3.str()))
-          return output.SetError
+          return output.MakeError
           ("Error: the variable "+ tempstream2.str()+" is reserved for me: you are not allowed to use it as a coordinate of the highest weight. ", theCommands);
         theWeylFormat.polyAlphabeT[k]=tempstream2.str();
         theWeylFormat.weylAlgebraLetters[k]=tempStream4.str();
@@ -959,7 +959,7 @@ bool Calculator::innerHWVCommon
     if (Verbose)
       theCommands.Comments << theMod.ToString();
     if (!isGood)
-      return output.SetError("Error while generating highest weight module. See comments for details. ", theCommands);
+      return output.MakeError("Error while generating highest weight module. See comments for details. ", theCommands);
   }
   if (&theMod.GetOwner()!=owner)
     crash << "This is a programming error: module has owner that is not what it should be. " << crash;
@@ -1044,12 +1044,12 @@ bool Calculator::innerGetChevGen(Calculator& theCommands, const Expression& inpu
     return false;
   SemisimpleLieAlgebra* theSSalg;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[1], theSSalg))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
   int theIndex;
   if (!input[2].IsSmallInteger(&theIndex))
     return false;
   if (theIndex>theSSalg->GetNumPosRoots() || theIndex==0 || theIndex<-theSSalg->GetNumPosRoots())
-    return output.SetError("Bad Chevalley-Weyl generator index.", theCommands);
+    return output.MakeError("Bad Chevalley-Weyl generator index.", theCommands);
   ElementSemisimpleLieAlgebra<Rational> theElt;
   if (theIndex>0)
     theIndex+=theSSalg->GetRank()-1;
@@ -1075,7 +1075,7 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
 //  stOutput << "<br>before calling inner ss: " << input.ToString();
 //  stOutput.flush();
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[1], theSSalg))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
   if (theSSalg==0)
     crash << "This is a programming error: called conversion function successfully, but the output is a zero pointer to a semisimple Lie algebra. "
     << crash;
@@ -1085,7 +1085,7 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
   if (!input[2].IsSmallInteger(&theIndex))
     return false;
   if (theIndex<1 || theIndex>theSSalg->GetRank() )
-    return output.SetError("Bad Cartan subalgebra genrator index.", theCommands);
+    return output.MakeError("Bad Cartan subalgebra genrator index.", theCommands);
   ElementSemisimpleLieAlgebra<Rational> theElt;
   Vector<Rational> theH;
   theIndex--;
@@ -1107,7 +1107,7 @@ bool Calculator::fKLcoeffs(Calculator& theCommands, const Expression& input, Exp
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   SemisimpleLieAlgebra* theSSalgebra=0;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input, theSSalgebra))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
   std::stringstream out;
   WeylGroup& theWeyl=theSSalgebra->theWeyl;
   if (theWeyl.GetGroupSizeByFormula()>192)
@@ -1132,7 +1132,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   SemisimpleLieAlgebra *tempSSpointer=0;
   input.CheckInitialization();
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input, tempSSpointer))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& theSSalgebra=*tempSSpointer;
   WeylGroup& theWeyl=theSSalgebra.theWeyl;
   std::stringstream out;
@@ -1391,7 +1391,7 @@ bool Calculator::outerCheckRule(Calculator& theCommands, const Expression& input
     return false;
   std::stringstream out;
   out << "Bad rule: you are asking me to substitute " << input[1] << " by itself (" << input[2] << ")" << " which is an infinite substitution cycle. ";
-  return output.SetError(out.str(), theCommands);
+  return output.MakeError(out.str(), theCommands);
 }
 
 bool Calculator::innerSubZeroDivAnythingWithZero(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1679,7 +1679,7 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
 
 bool Calculator::EvaluateIf(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.StartsWith(theCommands.opDefineConditional(), 4))
-    return output.SetError("Error: operation :if := takes three arguments.", theCommands);
+    return output.MakeError("Error: operation :if := takes three arguments.", theCommands);
   Rational conditionRat;
   if (!input[1].IsOfType<Rational>(&conditionRat))
     return false;
@@ -1788,7 +1788,7 @@ bool Calculator::outerDivide(Calculator& theCommands, const Expression& input, E
   if (!input[2].IsOfType<Rational>(&tempRat))
     return false;
   if (tempRat.IsEqualToZero())
-    return output.SetError("Division by zero. ", theCommands);
+    return output.MakeError("Division by zero. ", theCommands);
   output=input;
   tempRat.Invert();
   output.SetChildAtomValue(0, theCommands.opTimes());
@@ -2472,7 +2472,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(Calculator& theCommands, c
   }
   if (!theCommands.GetTypeHighestWeightParabolic<Polynomial<Rational> >
       (theCommands, truncatedInput, output, theHWs[0], theParSel, theContext, theSSalgebra, CalculatorSerialization::innerPolynomial<Rational>))
-    return output.SetError("Failed to extract type, highest weight, parabolic selection", theCommands);
+    return output.MakeError("Failed to extract type, highest weight, parabolic selection", theCommands);
   if (output.IsError())
     return true;
   std::string letterString="x";
@@ -2500,17 +2500,17 @@ bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression&
   SemisimpleLieAlgebra* theSSalg;
   Expression context;
   if (!theCommands.GetTypeHighestWeightParabolic<Rational>(theCommands, input, output, hwFundamental, tempSel, context, theSSalg, 0))
-    return output.SetError("Failed to extract highest weight and algebra", theCommands);
+    return output.MakeError("Failed to extract highest weight and algebra", theCommands);
   if (output.IsError())
     return true;
   if (tempSel.CardinalitySelection>0)
-    return output.SetError("Failed to extract highest weight. ", theCommands);
+    return output.MakeError("Failed to extract highest weight. ", theCommands);
   charSSAlgMod<Rational> startingChar, resultChar ;
   hwSimple=theSSalg->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
   startingChar.MakeFromWeight(hwSimple, theSSalg);
   std::string reportString;
   if (!startingChar.FreudenthalEvalMeFullCharacter(resultChar, 10000, &reportString, theCommands.theGlobalVariableS))
-    return output.SetError(reportString, theCommands);
+    return output.MakeError(reportString, theCommands);
   std::stringstream out;
   out << resultChar.ToString();
   return output.AssignValue(out.str(), theCommands);
@@ -2522,17 +2522,17 @@ bool Calculator::innerFreudenthalEval(Calculator& theCommands, const Expression&
   SemisimpleLieAlgebra* theSSalg=0;
   Expression context;
   if (!theCommands.GetTypeHighestWeightParabolic<Rational>(theCommands, input, output, hwFundamental, tempSel, context, theSSalg, 0))
-    return output.SetError("Failed to extract highest weight and algebra", theCommands);
+    return output.MakeError("Failed to extract highest weight and algebra", theCommands);
   if (output.IsError())
     return true;
   if (tempSel.CardinalitySelection>0)
-    return output.SetError("Failed to extract highest weight. ", theCommands);
+    return output.MakeError("Failed to extract highest weight. ", theCommands);
   charSSAlgMod<Rational> startingChar, resultChar ;
   hwSimple=theSSalg->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
   startingChar.MakeFromWeight(hwSimple, theSSalg);
   std::string reportString;
   if (!startingChar.FreudenthalEvalMeDominantWeightsOnly(resultChar, 10000, &reportString, theCommands.theGlobalVariableS))
-    return output.SetError(reportString, theCommands);
+    return output.MakeError(reportString, theCommands);
   return output.AssignValue(resultChar, theCommands);
 }
 

@@ -156,7 +156,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNum
     rightAN.AssignRational(tempRat, theCommands.theObjectContainer.theAlgebraicClosure);
   }
   if (rightAN.IsEqualToZero())
-    return output.SetError("Division by zero. ", theCommands);
+    return output.MakeError("Division by zero. ", theCommands);
   leftAN/=rightAN;
   return output.AssignValue(leftAN, theCommands);
 }
@@ -245,7 +245,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideRatByRat(Calculator& theCommands, 
   if (!input[1].IsOfType(&leftR) || !input[2].IsOfType(&rightR))
     return false;
   if (rightR.IsEqualToZero())
-    return output.SetError("Division by zero.", theCommands);
+    return output.MakeError("Division by zero.", theCommands);
   return output.AssignValue(leftR/rightR, theCommands);
 }
 
@@ -268,7 +268,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble(Calculator& theComm
       rightD=rightR.GetDoubleValue();
   }
   if (rightD==0)
-    return output.SetError("Division by zero.", theCommands);
+    return output.MakeError("Division by zero.", theCommands);
   return output.AssignValue(leftD/rightD, theCommands);
 }
 
@@ -484,7 +484,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLRO(Calculator& theCommands
   result*=rightMon;
   for (int i=0; i<result.generatorsIndices.size; i++)
     if (result.Powers[i]>100000 || result.Powers[i]<0)
-      return output.SetError
+      return output.MakeError
       ("The result of this operation is " + result.ToString() + " which is outside of the allowed range. ", theCommands);
   return output.AssignValue(result, theCommands);
 }
@@ -510,7 +510,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLSPath(Calculator& theComma
     { std::stringstream out;
       out << " The Littelmann root operator must have an index whose absolute value is between 1 and the rank of the ambient Lie algebra, instead I get index  "
       << theLRO.generatorsIndices[i];
-      return output.SetError(out.str(), theCommands);
+      return output.MakeError(out.str(), theCommands);
     } else
       for (int j=0; j<theLRO.Powers[i]; j++)
         result.ActByEFDisplayIndex(theLRO.generatorsIndices[i]);
@@ -558,7 +558,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger(Calculator& theC
   if(!input[1].IsOfType(&base)|| !input[2].IsSmallInteger(&thePower))
     return false;
   if (base.IsEqualToZero() && thePower<=0)
-    return output.SetError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+    return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
   if (thePower<0)
   { if (base.size()==1)
     { Polynomial<Rational> outputPoly;
@@ -590,10 +590,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatRatBySmallInteger(Calculator& th
   if(!input[1].IsOfType(&base)|| !input[2].IsSmallInteger(&thePower))
     return false;
   if (!base.IsSquare() || base.NumCols==0)
-    return output.SetError("Exponentiating non-square matrices or matrices with zero rows is not allowed.", theCommands);
+    return output.MakeError("Exponentiating non-square matrices or matrices with zero rows is not allowed.", theCommands);
   if (thePower<=0)
     if (base.GetDeterminant()==0 )
-      return output.SetError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+      return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
   if (thePower<0)
   { base.Invert();
     thePower*=-1;
@@ -618,7 +618,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger(Calculator
   if (thePower<0)
     return false;
   if (base.IsEqualToZero() && thePower<=0)
-    return output.SetError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+    return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
   base.RaiseToPower(thePower);
   return output.AssignValueWithContext(base, input[1].GetContext(), theCommands);
 }
@@ -635,7 +635,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(Calcu
   if (thePower<0)
     return false;
   if (base.IsEqualToZero() && thePower<=0)
-    return output.SetError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+    return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
   MathRoutines::RaiseToPower(base, thePower, (AlgebraicNumber) 1);
   return output.AssignValueWithContext(base, input[1].GetContext(), theCommands);
 }
@@ -681,7 +681,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(Calculator& theCo
     return output.AssignValueWithContext(finalOutput, input[1].GetContext(), theCommands);
   }
   if (base.IsEqualToZero() && thePower<=0)
-    return output.SetError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+    return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
   base.RaiseToPower(thePower);
   return output.AssignValueWithContext(base, input[1].GetContext(), theCommands);
 }
@@ -703,7 +703,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRatByRat(Calculator& theCommands, c
   if (!exp.IsSmallInteger(&thePower))
     return false;
   if (base==0 && thePower<=0)
-    return output.SetError("Division by zero: trying to raise 0 to negative or zero power. ", theCommands);
+    return output.MakeError("Division by zero: trying to raise 0 to negative or zero power. ", theCommands);
   base.RaiseToPower(thePower);
   return output.AssignValue(base, theCommands);
 }
@@ -806,7 +806,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat(Calculator& the
   if (!theCommands.GetMatrixExpressions(input[1], theMat))
     return false;
   if (!theMat.IsSquare())
-    return output.SetError("Attempting to raise non-square matrix to power", theCommands);
+    return output.MakeError("Attempting to raise non-square matrix to power", theCommands);
   if (theMat.NumRows>10)
   { theCommands.Comments << "I've been instructed not to exponentiate non-ratinoal matrices of dimension >10. ";
     return false;
@@ -829,7 +829,12 @@ bool CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors(Calculat
     return false;
   if (!input[2].IsOfType<Rational>(&exponent))
     return false;
-  stOutput << "<br>reducing " << input.ToString();
+//  stOutput << "<br>reducing " << input.ToString();
+  if (base==0)
+  { if (exponent<0)
+      return output.MakeError("Division by zero while evaluating " + input.ToString(), theCommands);
+    return output.AssignValue(0, theCommands);
+  }
   if (exponent<0)
   { exponent*=-1;
     base.Invert();

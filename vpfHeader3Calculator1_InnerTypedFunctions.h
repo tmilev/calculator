@@ -116,7 +116,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& theCommands
   if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged))
     return false;
   if (inputContextsMerged[2].GetValue<theType>().IsEqualToZero())
-    return output.SetError("Division by zero. ", theCommands);
+    return output.MakeError("Division by zero. ", theCommands);
   theType result=inputContextsMerged[1].GetValue<theType>();
   result/=inputContextsMerged[2].GetValue<theType>();
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
@@ -178,7 +178,7 @@ bool CalculatorSerialization::innerPolynomial(Calculator& theCommands, const Exp
       }
       if (thePower==0)
         if (resultP.IsEqualToZero())
-          return output.SetError("Error: 0^0 is undefined. ", theCommands);
+          return output.MakeError("Error: 0^0 is undefined. ", theCommands);
       resultP.RaiseToPower(thePower);
       return output.AssignValueWithContext(resultP, theConverted.GetContext(), theCommands);
     }

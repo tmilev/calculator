@@ -226,7 +226,7 @@ bool Calculator::innerGCDOrLCM(Calculator& theCommands, const Expression& input,
 //  stOutput << "<br>Time elapsed before calling innerGCDOrLCM: " << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
 //  stOutput << "<br>Input lispified: " << input.Lispify();
   if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 2, CalculatorSerialization::innerPolynomial<Rational>))
-    return output.SetError("Failed to extract a list of 2 polynomials. ", theCommands);
+    return output.MakeError("Failed to extract a list of 2 polynomials. ", theCommands);
 //  stOutput << "<br>Time elapsed after extracting two polynomials in innerGCDOrLCM: " << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
   Polynomial<Rational> outputP;
 //  stOutput << "<br>context: " << theContext.ToString();
@@ -275,12 +275,12 @@ bool Calculator::innerPolynomialDivisionRemainder(Calculator& theCommands, const
   Expression theContext;
   Vector<Polynomial<Rational> > thePolys;
   if (!theCommands.GetListPolysVariableLabelsInLex(input, thePolys, theContext))
-    return output.SetError("Failed to extract list of polynomials. ", theCommands);
+    return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   GroebnerBasisComputation<Rational> theGB;
   theGB.theBasiS.SetSize(thePolys.size-1);
   for (int i=1; i<thePolys.size; i++)
   { if (thePolys[i].IsEqualToZero())
-      return output.SetError("Division by zero.", theCommands);
+      return output.MakeError("Division by zero.", theCommands);
     theGB.theBasiS[i-1]=thePolys[i];
   }
 //  stOutput << "<hr>The polys: " << thePolys.ToString() << "<br>The gb basis: "
@@ -312,13 +312,13 @@ bool Calculator::innerPolynomialDivisionVerbose(Calculator& theCommands, const E
   Expression theContext;
   Vector<Polynomial<Rational> > thePolys;
   if (!theCommands.GetListPolysVariableLabelsInLex(input, thePolys, theContext))
-    return output.SetError("Failed to extract list of polynomials. ", theCommands);
+    return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   GroebnerBasisComputation<Rational> theGB;
   theGB.flagDoLogDivision=true;
   theGB.theBasiS.SetSize(thePolys.size-1);
   for (int i=1; i<thePolys.size; i++)
   { if (thePolys[i].IsEqualToZero())
-      return output.SetError("Division by zero.", theCommands);
+      return output.MakeError("Division by zero.", theCommands);
     theGB.theBasiS[i-1]=thePolys[i];
   }
 //  Polynomial<Rational> outputRemainder;
@@ -463,7 +463,7 @@ bool Calculator::innerPrintSSsubalgebras
   bool isAlreadySubalgebrasObject=input.IsOfType<SemisimpleSubalgebras>();
   if (!isAlreadySubalgebrasObject)
   { if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input, ownerSSPointer))
-      return output.SetError("Error extracting Lie algebra.", theCommands);
+      return output.MakeError("Error extracting Lie algebra.", theCommands);
     if (ownerSSPointer->GetRank()>7)
     { out << "<b>This code is completely experimental and has been set to run up to rank 6. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
       return output.AssignValue(out.str(), theCommands);
@@ -553,13 +553,13 @@ bool MathRoutines::IsPrime(int theInt)
 bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerAttemptExtendingEtoHEFwithHinCartan");
   if (input.children.size!=3)
-    return output.SetError("Function takes 2 arguments - type and an element of the Lie algebra.", theCommands);
+    return output.MakeError("Function takes 2 arguments - type and an element of the Lie algebra.", theCommands);
   SemisimpleLieAlgebra* ownerSS=0;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[1], ownerSS))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
   ElementSemisimpleLieAlgebra<Rational> theErational;
   if (!CalculatorSerialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[2], theErational, *ownerSS))
-    return output.SetError("Failed to extract element of semisimple Lie algebra. ", theCommands);
+    return output.MakeError("Failed to extract element of semisimple Lie algebra. ", theCommands);
   ElementSemisimpleLieAlgebra<AlgebraicNumber> theF, theH, theE;
   theE=theErational;
   std::stringstream out, logStream;
@@ -577,16 +577,16 @@ bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommand
 bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerAdCommonEigenSpaces");
   if (input.children.size<3)
-    return output.SetError("Function ad common eigenspaces needs at least 2 arguments - type and at least one element of the algebra.", theCommands);
+    return output.MakeError("Function ad common eigenspaces needs at least 2 arguments - type and at least one element of the algebra.", theCommands);
   SemisimpleLieAlgebra* ownerSS;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[1], ownerSS))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
   List<ElementSemisimpleLieAlgebra<Rational> > theOperators, outputElts;
   theOperators.ReservE(input.children.size-2);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   for (int i=2; i<input.children.size; i++)
   { if (!CalculatorSerialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[i], tempElt, *ownerSS))
-      return output.SetError("Failed to extract element of semisimple Lie algebra. ", theCommands);
+      return output.MakeError("Failed to extract element of semisimple Lie algebra. ", theCommands);
     theOperators.AddOnTop(tempElt);
   }
   ownerSS->GetCommonCentralizer(theOperators, outputElts);
@@ -608,13 +608,13 @@ bool Calculator::innerGroebner(Calculator& theCommands, const Expression& input,
   Vector<Polynomial<ElementZmodP> > inputVectorZmodP;
   Expression theContext;
   if (input.children.size<3)
-    return output.SetError("Function takes at least two arguments. ", theCommands);
+    return output.MakeError("Function takes at least two arguments. ", theCommands);
   const Expression& numComputationsE=input[1];
   Rational upperBound=0;
   if (!numComputationsE.IsOfType(&upperBound))
-    return output.SetError("Failed to convert the first argument of the expression to rational number.", theCommands);
+    return output.MakeError("Failed to convert the first argument of the expression to rational number.", theCommands);
   if (upperBound>1000000)
-    return output.SetError
+    return output.MakeError
     ("Error: your upper limit of polynomial operations exceeds 1000000, which is too large.\
      You may use negative or zero number give no computation bound, but please don't. ", theCommands);
   int upperBoundComputations=(int) upperBound.GetDoubleValue();
@@ -624,12 +624,12 @@ bool Calculator::innerGroebner(Calculator& theCommands, const Expression& input,
   int theMod;
   if (useModZp)
   { if (!output[1].IsSmallInteger(&theMod))
-      return output.SetError("Error: failed to extract modulo from the second argument. ", theCommands);
+      return output.MakeError("Error: failed to extract modulo from the second argument. ", theCommands);
     if (!MathRoutines::IsPrime(theMod))
-      return output.SetError("Error: modulo not prime. ", theCommands);
+      return output.MakeError("Error: modulo not prime. ", theCommands);
   }
   if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >(output, inputVector, &theContext, -1, CalculatorSerialization::innerPolynomial<Rational>))
-    return output.SetError("Failed to extract polynomial expressions", theCommands);
+    return output.MakeError("Failed to extract polynomial expressions", theCommands);
   //theCommands.GetVector<Polynomial<Rational> >
   //(output, inputVector, &theContext, -1, CalculatorSerialization::innerPolynomial);
   for (int i=0; i<inputVector.size; i++)
@@ -727,7 +727,7 @@ bool Calculator::innerDeterminantPolynomial(Calculator& theCommands, const Expre
     return false;
   }
   if (matPol.NumRows!=matPol.NumCols)
-    return output.SetError("<hr>Failed to compute determinant: matrix is non-square. ", theCommands);
+    return output.MakeError("<hr>Failed to compute determinant: matrix is non-square. ", theCommands);
   if (matPol.NumRows>8)
   { theCommands.Comments << "<hr>Failed to compute determinant: matrix is larger than 8 x 8, and your matrix had "
     << matPol.NumRows << " rows. Note that you can compute determinant using the \\det function which does Gaussian elimination "
@@ -918,7 +918,7 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
       return output.AssignValue<std::string>("ACOS ", theCommands);
     if (currentString=="\\sqrt")
       return output.AssignValue<std::string>("sqrt ", theCommands);
-    return output.SetError("Cannot convert "+currentString+ " to suffix notation.", theCommands);
+    return output.MakeError("Cannot convert "+currentString+ " to suffix notation.", theCommands);
   }
   std::stringstream out;
   out.precision(7);
@@ -945,23 +945,23 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
   if (useUsualOrder)
     for (int i=input.children.size-1; i>=1; i--)
     { if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[i], currentE))
-        return output.SetError("Failed to convert "+input[i].ToString(), theCommands);
+        return output.MakeError("Failed to convert "+input[i].ToString(), theCommands);
       if (!currentE.IsOfType(&currentString))
-        return output.SetError("Failed to convert "+input[i].ToString(), theCommands);
+        return output.MakeError("Failed to convert "+input[i].ToString(), theCommands);
       out << currentString << " ";
     }
   else
     for (int i=1; i<input.children.size; i++)
     { if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[i], currentE))
-        return output.SetError("Failed to convert "+input[i].ToString(), theCommands);
+        return output.MakeError("Failed to convert "+input[i].ToString(), theCommands);
       if (!currentE.IsOfType(&currentString))
-        return output.SetError("Failed to convert "+input[i].ToString(), theCommands);
+        return output.MakeError("Failed to convert "+input[i].ToString(), theCommands);
       out << currentString << " ";
     }
   if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[0], currentE))
-    return output.SetError("Failed to convert "+input[0].ToString(), theCommands);
+    return output.MakeError("Failed to convert "+input[0].ToString(), theCommands);
   if (!currentE.IsOfType(&currentString))
-    return output.SetError("Failed to convert "+input[0].ToString(), theCommands);
+    return output.MakeError("Failed to convert "+input[0].ToString(), theCommands);
   out << currentString << " ";
   return output.AssignValue(out.str(), theCommands);
 }
@@ -977,7 +977,7 @@ bool Calculator::innerCharacterSSLieAlgFD(Calculator& theCommands, const Express
   if (output.IsError())
     return true;
   if (!parSel.CardinalitySelection==0)
-    return output.SetError("I know only to compute with finite dimensional characters, for the time being.", theCommands);
+    return output.MakeError("I know only to compute with finite dimensional characters, for the time being.", theCommands);
   charSSAlgMod<Rational> theElt;
   theElt.MakeFromWeight(ownerSSLiealg->theWeyl.GetSimpleCoordinatesFromFundamental(theHW), ownerSSLiealg);
   return output.AssignValue(theElt, theCommands);
@@ -1005,7 +1005,7 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
   if (coneNonStrictMatForm.NumCols!=coneStrictMatForm.NumCols)
   { out << "I got as input vectors of different dimensions, first groups had vectors of dimension " << coneNonStrictMatForm.NumCols
     << " and second of dimension " << coneStrictMatForm.NumCols << " which is not allowed. ";
-    return output.SetError(out.str(), theCommands);
+    return output.MakeError(out.str(), theCommands);
   }
   coneNonStrictMatForm.GetVectorsFromRows(coneNonStrictGens);
   coneStrictMatForm.GetVectorsFromRows(coneStrictGens);
@@ -1076,10 +1076,10 @@ bool Calculator::innerSolveSerreLikeSystem(Calculator& theCommands, const Expres
   Expression theContext(theCommands);
   if (input.StartsWith(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystem")))
   { if (!theCommands.GetVectorFromFunctionArguments(input, thePolysRational, &theContext, 0, CalculatorSerialization::innerPolynomial<Rational>))
-      return output.SetError("Failed to extract list of polynomials. ", theCommands);
+      return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   } else
     if (!theCommands.GetVectoR(input, thePolysRational, &theContext, 0, CalculatorSerialization::innerPolynomial<Rational>))
-      return output.SetError("Failed to extract list of polynomials. ", theCommands);
+      return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   Vector<Polynomial<AlgebraicNumber> > thePolysAlgebraic;
   thePolysAlgebraic=thePolysRational;
   //int numVars=theContext.GetNumContextVariables();
@@ -1182,7 +1182,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
     return false;
   SemisimpleLieAlgebra* theSSlieAlg=0;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[1], theSSlieAlg))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
   int theRank=theSSlieAlg->GetRank();
   Vector<Rational> currentRoot;
   Vectors<Rational> outputRoots;
@@ -1195,7 +1195,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
   { if (!theCommands.GetVectoR(input[i], currentRoot, 0, theRank, 0))
       return false;
     if (!theWeyl.RootSystem.Contains(currentRoot))
-      return output.SetError("Input vector " + currentRoot.ToString() + " is not a root. ", theCommands);
+      return output.MakeError("Input vector " + currentRoot.ToString() + " is not a root. ", theCommands);
     outputRoots.AddOnTop(currentRoot);
   }
   std::stringstream out;
@@ -1213,22 +1213,22 @@ bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expr
   if (input.children.size!=4)
   { out << "Perturbing splitting normal takes 3 arguments: normal, positive vectors, and vectors relative to which to perturb. "
     << "Instead I got " << input.children.size-1 << ". ";
-    return output.SetError(out.str(), theCommands);
+    return output.MakeError(out.str(), theCommands);
   }
   Vector<Rational> splittingNormal;
   if (!theCommands.GetVectoR(input[1], splittingNormal, 0))
-    return output.SetError("Failed to extract normal from first argument. ", theCommands);
+    return output.MakeError("Failed to extract normal from first argument. ", theCommands);
   Matrix<Rational> theMat;
   Vectors<Rational> NonStrictCone, VectorsToPerturbRelativeTo;
   if (!theCommands.GetMatrix(input[2], theMat, 0, splittingNormal.size, 0))
-    return output.SetError("Failed to extract matrix from second argument. ", theCommands);
+    return output.MakeError("Failed to extract matrix from second argument. ", theCommands);
   NonStrictCone.AssignMatrixRows(theMat);
   if (!theCommands.GetMatrix(input[3], theMat, 0, splittingNormal.size, 0))
-    return output.SetError("Failed to extract matrix from third argument. ", theCommands);
+    return output.MakeError("Failed to extract matrix from third argument. ", theCommands);
   VectorsToPerturbRelativeTo.AssignMatrixRows(theMat);
   for (int i =0; i<NonStrictCone.size; i++)
     if (splittingNormal.ScalarEuclidean(NonStrictCone[i])<0)
-      return output.SetError("The normal vector " + splittingNormal.ToString() + " is has negative scalar product with " + NonStrictCone[i].ToString(), theCommands);
+      return output.MakeError("The normal vector " + splittingNormal.ToString() + " is has negative scalar product with " + NonStrictCone[i].ToString(), theCommands);
   out << "Perturbing " << splittingNormal.ToString() << " relative to cone " << NonStrictCone.ToString() << " and vectors " << VectorsToPerturbRelativeTo.ToString();
   splittingNormal.PerturbNormalRelativeToVectorsInGeneralPosition(NonStrictCone, VectorsToPerturbRelativeTo);
   out << "<br>End result: " << splittingNormal.ToString();

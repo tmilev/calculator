@@ -339,7 +339,7 @@ bool CalculatorSerialization::innerLoadSSLieAlgebra(Calculator& theCommands, con
   if(!CalculatorSerialization::innerLoadDynkinType(theCommands, input, theDynkinType))
   { //  stOutput << "got to error";
   //stOutput.flush();
-    return output.SetError("Failed to extract Dynkin type.", theCommands);
+    return output.MakeError("Failed to extract Dynkin type.", theCommands);
   }
 //  stOutput << "got to making the type, " << theDynkinType.ToString();
 //  stOutput.flush();
@@ -348,7 +348,7 @@ bool CalculatorSerialization::innerLoadSSLieAlgebra(Calculator& theCommands, con
     out << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. If you would like to relax this limitation edit file " << __FILE__
     << " line " << __LINE__ << ". Note that the Chevalley constant computation reserves a dim(g)*dim(g) table of RAM memory, which means the RAM memory rises with the 4^th power of rank(g). "
     << " You have been warned. Alternatively, you may want to implement a sparse structure constant table (write me an email if you want to do that, I will help you). ";
-    return output.SetError(out.str(), theCommands);
+    return output.MakeError(out.str(), theCommands);
   }
   SemisimpleLieAlgebra tempSSalgebra;
   tempSSalgebra.theWeyl.MakeFromDynkinType(theDynkinType);
@@ -378,7 +378,7 @@ bool CalculatorSerialization::innerLoadSSLieAlgebra(Calculator& theCommands, con
 
 bool CalculatorSerialization::innerStoreSemisimpleLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsOfType<SemisimpleLieAlgebra>())
-    return output.SetError("Asking serialization of non-semisimple Lie algebra to semisimple Lie algebra not allowed. ", theCommands);
+    return output.MakeError("Asking serialization of non-semisimple Lie algebra to semisimple Lie algebra not allowed. ", theCommands);
   SemisimpleLieAlgebra& owner=input.GetValueNonConst<SemisimpleLieAlgebra>();
   return CalculatorSerialization::innerStoreObject(theCommands, owner, output);
 }
@@ -668,7 +668,7 @@ bool CalculatorSerialization::innerLoadCandidateSA(Calculator& theCommands, cons
     }
 
   //CalculatorSerialization::innerLoadFromObject(theCommands,
-  return output.SetError("Candidate subalgebra is not a stand-alone object and its Expression output should not be used. ", theCommands);
+  return output.MakeError("Candidate subalgebra is not a stand-alone object and its Expression output should not be used. ", theCommands);
 }
 
 bool CalculatorSerialization::innerLoadSemisimpleSubalgebras(Calculator& theCommands, const Expression& inpuT, Expression& output)
@@ -766,13 +766,13 @@ bool CalculatorSerialization::innerStore(Calculator& theCommands, const Expressi
     return CalculatorSerialization::innerStoreSemisimpleSubalgebrasFromExpression(theCommands, input, output);
   if (theType==theCommands.opElementUEoverRF())
     return CalculatorSerialization::innerStoreUE(theCommands, input, output);
-  return output.SetError("Serialization not implemented for this data type.", theCommands);
+  return output.MakeError("Serialization not implemented for this data type.", theCommands);
 }
 
 bool CalculatorSerialization::innerStoreUE(Calculator& theCommands, const Expression& input, Expression& output)
 { ElementUniversalEnveloping<RationalFunctionOld> theUE;
   if (!input.IsOfType(&theUE))
-    return output.SetError("To ask to store a non-elementUE as an elementUE is not allowed", theCommands);
+    return output.MakeError("To ask to store a non-elementUE as an elementUE is not allowed", theCommands);
   output.MakeSerialization("UE", theCommands, 1);
   Expression tempE;
   Expression theContext=input.GetContext();
@@ -967,7 +967,7 @@ bool CalculatorSerialization::innerStorePoly(Calculator& theCommands, const Expr
 { MacroRegisterFunctionWithName("CalculatorSerialization::innerStorePoly");
   Polynomial<Rational> thePoly;
   if (!input.IsOfType(&thePoly))
-    return output.SetError("To ask to store a non-polynomial to a polynomial is not allowed. ", theCommands);
+    return output.MakeError("To ask to store a non-polynomial to a polynomial is not allowed. ", theCommands);
   Expression theContext=input.GetContext();
   Expression resultE;
   if (!CalculatorSerialization::innerStoreMonCollection(theCommands, thePoly, resultE, &theContext))
@@ -983,7 +983,7 @@ bool CalculatorSerialization::innerStorePoly(Calculator& theCommands, const Expr
 bool CalculatorSerialization::innerStoreRationalFunction(Calculator& theCommands, const Expression& input, Expression& output)
 { RationalFunctionOld theRF;
   if (!input.IsOfType(&theRF))
-    return output.SetError("To ask to store a non-rational function as a rational function is not allowed.", theCommands);
+    return output.MakeError("To ask to store a non-rational function as a rational function is not allowed.", theCommands);
   Expression contextE=input.GetContext();
   return CalculatorSerialization::innerStoreObject(theCommands, theRF, output, &contextE);
 }

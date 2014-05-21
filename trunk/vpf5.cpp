@@ -154,14 +154,14 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebr
 bool Calculator::fAnimateLittelmannPaths(Calculator& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(3))
-    return output.SetError("This function takes 2 arguments", theCommands);
+    return output.MakeError("This function takes 2 arguments", theCommands);
   SemisimpleLieAlgebra* theSSowner=0;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[1], theSSowner))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
   Vector<Rational> theWeight;
   Expression tempContext(theCommands);
   if (!theCommands.GetVectoR<Rational>(input[2], theWeight, &tempContext, theSSowner->GetRank(), 0))
-    return output.SetError("Failed to convert the argument of the function to a highest weight vector", theCommands);
+    return output.MakeError("Failed to convert the argument of the function to a highest weight vector", theCommands);
   Vector<Rational> theWeightInSimpleCoords;
   theWeightInSimpleCoords = theSSowner->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
   //stOutput << "The fundamental coords: " << theWeight.ToString();
@@ -192,7 +192,7 @@ bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, 
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   SemisimpleLieAlgebra* theSSalg=0;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input, theSSalg))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& theSSowner=*theSSalg;
   if (theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit<50)
     theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=50;
@@ -209,16 +209,16 @@ bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, 
 bool Calculator::innerDrawWeightSupportWithMults(Calculator& theCommands, const Expression& input, Expression& output)
 { //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
   if (!input.IsListNElements(3))
-    return output.SetError("Error: the function for drawing weight support takes two  arguments (type and highest weight)", theCommands);
+    return output.MakeError("Error: the function for drawing weight support takes two  arguments (type and highest weight)", theCommands);
   const Expression& typeNode=input[1];
   const Expression& hwNode=input[2];
   SemisimpleLieAlgebra* theSSalgpointer=0;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, typeNode, theSSalgpointer))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
   Vector<Rational> highestWeightFundCoords;
   Expression theContext;
   if (!theCommands.GetVectoR<Rational>  (hwNode, highestWeightFundCoords, &theContext, theSSalgpointer->GetRank(), 0))
-    return output.SetError("Failed to extract highest weight vector", theCommands);
+    return output.MakeError("Failed to extract highest weight vector", theCommands);
   Vector<Rational> highestWeightSimpleCoords;
   WeylGroup& theWeyl=theSSalgpointer->theWeyl;
   highestWeightSimpleCoords= theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
@@ -239,7 +239,7 @@ bool Calculator::innerDrawRootSystem(Calculator& theCommands, const Expression& 
   const Expression& typeNode= hasPreferredProjectionPlane ? input[1] : input;
   SemisimpleLieAlgebra* theAlgPointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, typeNode, theAlgPointer))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& theAlg=*theAlgPointer;
   WeylGroup& theWeyl=theAlg.theWeyl;
   Vectors<Rational> preferredProjectionPlane;
@@ -248,7 +248,7 @@ bool Calculator::innerDrawRootSystem(Calculator& theCommands, const Expression& 
     bool isGood=
     theCommands.GetVectoR(input[2], preferredProjectionPlane[0], 0, theWeyl.GetDim(), 0) && theCommands.GetVectoR(input[3], preferredProjectionPlane[1], 0, theWeyl.GetDim(), 0);
     if (!isGood)
-      return output.SetError("Failed to convert second or third argument to vector of desired dimension", theCommands);
+      return output.MakeError("Failed to convert second or third argument to vector of desired dimension", theCommands);
   }
   std::stringstream out;
   DrawingVariables theDV;
@@ -264,12 +264,12 @@ bool Calculator::innerDrawRootSystem(Calculator& theCommands, const Expression& 
 bool Calculator::innerDrawWeightSupport(Calculator& theCommands, const Expression& input, Expression& output)
 { //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
   if (!input.IsListNElements(3))
-    return output.SetError("Wrong number of arguments, must be 2. ", theCommands);
+    return output.MakeError("Wrong number of arguments, must be 2. ", theCommands);
   const Expression& typeNode=input[1];
   const Expression& hwNode=input[2];
   SemisimpleLieAlgebra* theAlgPointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, typeNode, theAlgPointer))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& theAlg=*theAlgPointer;
   Vector<Rational> highestWeightFundCoords;
   Expression tempContext;
@@ -292,17 +292,17 @@ bool Calculator::innerDrawWeightSupport(Calculator& theCommands, const Expressio
 bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& input, Expression& output)
 { output=input;
   if (!output.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
-    return output.SetError("Failed to convert argument to element of the Universal enveloping algebra. ", theCommands);
+    return output.MakeError("Failed to convert argument to element of the Universal enveloping algebra. ", theCommands);
   SemisimpleLieAlgebra& ownerSS=*output.GetAmbientSSAlgebraNonConstUseWithCaution();
   if (!ownerSS.IsOfSimpleType('G', 2))
-    return output.SetError("Error: embedding of G_2 in B_3 takes elements of U(G_2) as arguments.", theCommands);
+    return output.MakeError("Error: embedding of G_2 in B_3 takes elements of U(G_2) as arguments.", theCommands);
   HomomorphismSemisimpleLieAlgebra theHmm;
   theCommands.MakeHmmG2InB3(theHmm);
 
   ElementUniversalEnveloping<RationalFunctionOld> argument=output.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
   ElementUniversalEnveloping<RationalFunctionOld> outputUE;
   if(!theHmm.ApplyHomomorphism(argument, outputUE, *theCommands.theGlobalVariableS))
-    return output.SetError("Failed to apply homomorphism for unspecified reason", theCommands);
+    return output.MakeError("Failed to apply homomorphism for unspecified reason", theCommands);
 //  stOutput << theHmm.ToString(*theCommands.theGlobalVariableS);
   outputUE.Simplify(theCommands.theGlobalVariableS);
   Expression contextE;
@@ -1244,11 +1244,11 @@ bool Calculator::fPrintAllPartitions(Calculator& theCommands, const Expression& 
 { MacroRegisterFunctionWithName("Calculator::fPrintAllPartitions");
   RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(3))
-    return output.SetError("Function fPrintAllPartitions expects 2 arguments.", theCommands);
+    return output.MakeError("Function fPrintAllPartitions expects 2 arguments.", theCommands);
 
   SemisimpleLieAlgebra* theSSowner;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[1], theSSowner))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
 
   SemisimpleLieAlgebra& theSSalgebra=*theSSowner;
   Expression theContext;
@@ -1256,12 +1256,12 @@ bool Calculator::fPrintAllPartitions(Calculator& theCommands, const Expression& 
 //  stOutput << theExpression.ToString() << " rank "
 //  << theSSalgebra.GetRank() << " child one : " << input[2].ToString();
   if (!theCommands.GetVectoR<Rational>(input[2], theHW, &theContext, theSSalgebra.GetRank()))
-    return output.SetError("Failed to extract weight you want partitioned from "+ input[2].ToString(), theCommands);
+    return output.MakeError("Failed to extract weight you want partitioned from "+ input[2].ToString(), theCommands);
   Vector<int> theHWint;
   theHWint.SetSize(theHW.size);
   for (int i=0; i<theHW.size; i++)
     if (!theHW[i].IsSmallInteger(&theHWint[i]) || theHW[i]<0)
-      return output.SetError("The input weight you gave is bad: it must consist of non-negative small integers", theCommands);
+      return output.MakeError("The input weight you gave is bad: it must consist of non-negative small integers", theCommands);
   std::stringstream out;
   out << "<br>the weight you want partitioned: " << theHWint;
   Vector<int> thePartition;
@@ -1330,15 +1330,15 @@ bool Calculator::fTestMonomialBaseConjecture(Calculator& theCommands, const Expr
 { MacroRegisterFunctionWithName("Calculator::fTestMonomialBaseConjecture");
   RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(3))
-    return output.SetError("fTestMonomialBaseConjecture takes two arguments as input", theCommands);
+    return output.MakeError("fTestMonomialBaseConjecture takes two arguments as input", theCommands);
   const Expression& rankE=input[1];
   const Expression& dimE=input[2];
   int rankBound=0;
   int dimBound=0;
   if (!rankE.IsSmallInteger(&rankBound) || !dimE.IsSmallInteger(&dimBound))
-    return output.SetError("The rank and  dim bounds must be small integers", theCommands);
+    return output.MakeError("The rank and  dim bounds must be small integers", theCommands);
   if (rankBound<2 || rankBound > 100 || dimBound <1 || dimBound > 10000)
-    return output.SetError("The rank bound must be an integer between 2 and 100, and the dim bound must be an integer between 1 and 10000", theCommands);
+    return output.MakeError("The rank bound must be an integer between 2 and 100, and the dim bound must be an integer between 1 and 10000", theCommands);
   std::stringstream out;
   List<int> theRanks;
   List<char> theWeylLetters;
@@ -1486,9 +1486,9 @@ bool Calculator::fLittelmannOperator(Calculator& theCommands, const Expression& 
     return false;
   int theIndex=0;
   if (!input.IsSmallInteger(&theIndex))
-    return output.SetError("The argument of the Littelmann root operator is expected to be a small integer, instead you gave me"+input.ToString(), theCommands);
+    return output.MakeError("The argument of the Littelmann root operator is expected to be a small integer, instead you gave me"+input.ToString(), theCommands);
   if (theIndex==0)
-    return output.SetError("The index of the Littelmann root operator is expected to be non-zero", theCommands);
+    return output.MakeError("The index of the Littelmann root operator is expected to be non-zero", theCommands);
   return output.AssignValue(theIndex, theCommands);
 }
 
@@ -1496,17 +1496,17 @@ bool Calculator::fLSPath(Calculator& theCommands, const Expression& input, Expre
 { RecursionDepthCounter theRecutionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::fLSPath");
   if (input.children.size<3)
-    return output.SetError("LSPath needs at least two arguments.", theCommands);
+    return output.MakeError("LSPath needs at least two arguments.", theCommands);
   SemisimpleLieAlgebra* theSSowner;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[1], theSSowner))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
 
   SemisimpleLieAlgebra& ownerSSalgebra=*theSSowner;
   Vectors<Rational> waypoints;
   waypoints.SetSize(input.children.size-2);
   for (int i=2; i<input.children.size; i++)
     if (!theCommands.GetVectoR<Rational>(input[i], waypoints[i-2], 0, ownerSSalgebra.GetRank(), 0))
-      return output.SetError("Failed to extract waypoints", theCommands);
+      return output.MakeError("Failed to extract waypoints", theCommands);
   waypoints=ownerSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(waypoints);
   LittelmannPath theLSpath;
   theLSpath.MakeFromWaypoints(waypoints, ownerSSalgebra.theWeyl);
@@ -1517,9 +1517,9 @@ bool Calculator::innerInvertMatrixVerbose(Calculator& theCommands, const Express
 { MacroRegisterFunctionWithName("Calculator::innerInvertMatrixVerbose");
   Matrix<Rational> mat, outputMat, tempMat;
   if (!theCommands.GetMatriXFromArguments<Rational>(input, mat, 0, -1, 0))
-    return output.SetError("Failed to extract matrix with rational coefficients", theCommands);
+    return output.MakeError("Failed to extract matrix with rational coefficients", theCommands);
   if (mat.NumRows!=mat.NumCols || mat.NumCols<1)
-    return output.SetError("The matrix is not square", theCommands);
+    return output.MakeError("The matrix is not square", theCommands);
   outputMat.MakeIdMatrix(mat.NumRows);
   int tempI;
   int NumFoundPivots = 0;
@@ -1593,11 +1593,11 @@ bool Calculator::fDifferential(Calculator& theCommands, const Expression& input,
   /* if (!theExpression.EvaluatesToAtom())
     if (!theCommands.CallCalculatorFunction
         (theCommands., inputIndexBoundVars, theExpression, comments))
-      return output.SetError("Failed to convert argument of differential to differential form. ");
+      return output.MakeError("Failed to convert argument of differential to differential form. ");
   Data theData;
   theData=theExpression.GetAtomicValue();
   if (!theData.ConvertToTypE<DifferentialForm<Rational> >())
-    return output.SetError("Failed to convert argument of differential to differential form.");
+    return output.MakeError("Failed to convert argument of differential to differential form.");
 
   theCommands.innerPolynomial(the)*/
   return true;
@@ -1883,7 +1883,7 @@ bool Calculator::innerFactorPoly(Calculator& theCommands, const Expression& inpu
   Expression theContext=output.GetContext();
   Polynomial<Rational> thePoly=output.GetValue<Polynomial<Rational> >();
   if (thePoly.GetMinNumVars()>1)
-    return output.SetError("I have been taught to factor one variable polys only. ", theCommands);
+    return output.MakeError("I have been taught to factor one variable polys only. ", theCommands);
   List<Polynomial<Rational> > theFactors;
   if(!thePoly.FactorMe(theFactors, &theCommands.Comments))
     return false;

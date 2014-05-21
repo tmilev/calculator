@@ -232,7 +232,7 @@ bool Calculator::EvaluateExpression
     errorStream << "I think I have detected an infinite cycle: I am asked to reduce " << input.ToString()
     << " but I have already seen that expression in the expression stack. ";
     theCommands.flagAbortComputationASAP=true;
-    return output.SetError(errorStream.str(), theCommands);
+    return output.MakeError(errorStream.str(), theCommands);
   }
   theCommands.EvaluatedExpressionsStack.AddOnTop(input);
   Expression theExpressionWithContext;
@@ -256,7 +256,7 @@ bool Calculator::EvaluateExpression
       indexInCache=theCommands.cachedExpressions.size-1;
       theCommands.imagesCachedExpressions.SetSize(indexInCache+1);
       theCommands.imagesCachedExpressions.LastObject()->reset(theCommands);
-      theCommands.imagesCachedExpressions.LastObject()->SetError("Error: not computed yet.", theCommands);
+      theCommands.imagesCachedExpressions.LastObject()->MakeError("Error: not computed yet.", theCommands);
     }
   }
   //reduction phase:
@@ -285,7 +285,7 @@ bool Calculator::EvaluateExpression
       { std::stringstream out;
         out << " While simplifying " << output.ToString(&theCommands.formatVisibleStrings) << "<br>Maximum number of algebraic transformations of "
         << theCommands.MaxAlgTransformationsPerExpression << " exceeded.";
-        output.SetError(out.str(), theCommands);
+        output.MakeError(out.str(), theCommands);
         theCommands.flagAbortComputationASAP=true;
         theCommands.flagMaxTransformationsErrorEncountered=true;
       }
@@ -369,7 +369,7 @@ Expression* Calculator::PatternMatch
   if (this->RecursionDeptH>=this->MaxRecursionDeptH)
   { std::stringstream out;
     out << "Error: while trying to evaluate expression, the maximum recursion depth of " << this->MaxRecursionDeptH << " was exceeded";
-    theExpression.SetError(out.str(), *this);
+    theExpression.MakeError(out.str(), *this);
     return 0;
   }
 //  if (theExpression.ToString()=="f{}((a)):=a+5")

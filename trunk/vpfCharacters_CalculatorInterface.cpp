@@ -473,16 +473,16 @@ void WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion(GlobalVariables* 
 
 bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(Calculator& theCommands, const Expression& input, Expression& output, bool useOuter)
 { if (input.children.size<2)
-    return output.SetError("Raising to maximally dominant takes at least 2 arguments, type and vector", theCommands);
+    return output.MakeError("Raising to maximally dominant takes at least 2 arguments, type and vector", theCommands);
   const Expression& theSSalgebraNode=input[1];
   SemisimpleLieAlgebra* theSSalgebra;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, theSSalgebraNode, theSSalgebra))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
   Vectors<Rational> theHWs;
   theHWs.SetSize(input.children.size-2);
   for (int i=2; i<input.children.size; i++)
     if (!theCommands.GetVectoR<Rational>(input[i], theHWs[i-2], 0, theSSalgebra->GetRank()))
-      return output.SetError("Failed to extract rational vectors from arguments", theCommands);
+      return output.MakeError("Failed to extract rational vectors from arguments", theCommands);
   std::stringstream out;
   out << "Input: " << theHWs.ToString() << ", simultaneously raising to maximally dominant ";
   theSSalgebra->theWeyl.RaiseToMaximallyDominant(theHWs, useOuter);
@@ -492,7 +492,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(Calculator&
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElements(3))
-    return output.SetError("innerWeylOrbit takes two arguments", theCommands);
+    return output.MakeError("innerWeylOrbit takes two arguments", theCommands);
   const Expression& theSSalgebraNode=input[1];
   const Expression& vectorNode=input[2];
   DynkinType theType;
@@ -504,7 +504,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(Calculator& th
   Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords, currentWeight;
   Expression theContext;
   if (!theCommands.GetVectoR(vectorNode, theHWfundCoords, &theContext, theType.GetRank(), CalculatorSerialization::innerPolynomial<Rational>))
-    return output.SetError("Failed to extract highest weight", theCommands);
+    return output.MakeError("Failed to extract highest weight", theCommands);
   WeylGroup theWeyl;
   theWeyl.MakeFromDynkinType(theType);
   theHWsimpleCoords=theHWfundCoords;
@@ -615,7 +615,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize
 bool CalculatorFunctionsWeylGroup::innerWeylOrbit(Calculator& theCommands, const Expression& input, Expression& output, bool useFundCoords, bool useRho)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylOrbit");
   if (!input.IsListNElements(3))
-    return output.SetError("innerWeylOrbit takes two arguments", theCommands);
+    return output.MakeError("innerWeylOrbit takes two arguments", theCommands);
   SemisimpleLieAlgebra* theSSalgebra=0;
   Vector<Polynomial<Rational> > theWeight;
   Expression theContextE;
@@ -852,7 +852,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint(Calcul
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint");
   DynkinType theType;
   if (!CalculatorSerialization::innerLoadDynkinType(theCommands, input, theType))
-    return output.SetError("Failed to extract Dynkin type from argument. ", theCommands);
+    return output.MakeError("Failed to extract Dynkin type from argument. ", theCommands);
   std::stringstream out, outCommand;
   FinitelyGeneratedMatrixMonoid<Rational> groupGeneratedByMatrices;
   theType.GetOuterAutosGeneratorsActOnVectorColumn(groupGeneratedByMatrices.theGenerators);
@@ -922,7 +922,7 @@ bool CalculatorFunctionsWeylGroup::innerTensorWeylReps(Calculator& theCommands, 
   //stOutput << "<br>left rep is: " << leftRep.ToString(&theFormat);
   //stOutput << "<br>right rep is: " << rightRep.ToString(&theFormat);
   if (leftRep.ownerGroup!=rightRep.ownerGroup)
-    return output.SetError("Error: attempting to tensor irreps with different owner groups. ", theCommands);
+    return output.MakeError("Error: attempting to tensor irreps with different owner groups. ", theCommands);
   leftRep*=rightRep;
   return output.AssignValue(leftRep, theCommands);
 }
@@ -1388,7 +1388,7 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
   //input[1] and input[2];
   SemisimpleLieAlgebra* thePointer=0;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input, thePointer))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
   rootSubalgebras theRootSAs;
   theRootSAs.owneR=thePointer;
   theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphismOLD(*theCommands.theGlobalVariableS, true, false);
@@ -1434,7 +1434,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(Calculator& theCommands
     { std::stringstream errorStream;
       errorStream << "The second argument of the MakeWeight function needs to be index of a weight between 1 and the Lie algebra rank. "
       << "However, the index is " << theWeightIndex << ".";
-      return output.SetError(errorStream.str(), theCommands);
+      return output.MakeError(errorStream.str(), theCommands);
     }
     Vector<Polynomial<Rational> > EiVector;
     EiVector.MakeEi(theSSowner->GetRank(), theWeightIndex-1);
@@ -1450,7 +1450,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(Calculator& theCommands
     { std::stringstream errorStream;
       errorStream << "The second argument of the MakeWeight function needs to be index of a weight between 1 and " << tempV.size
       << ". However, the index is " << theWeightIndex << ".";
-      return output.SetError(errorStream.str(), theCommands);
+      return output.MakeError(errorStream.str(), theCommands);
     }
     EiVector.MakeEi(tempV.size, theWeightIndex-1);
     stOutput << "Getting fundamental coords from eps coords: " << EiVector.ToString();
@@ -1480,14 +1480,14 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight(Calculator& theComma
 bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupElement");
   //if (!input.IsSequenceNElementS(2))
-  //return output.SetError("Function Coxeter element takes two arguments.", theCommands);
+  //return output.MakeError("Function Coxeter element takes two arguments.", theCommands);
   if(input.children.size<2)
-    return output.SetError("Function WeylElement needs to know what group the element belongs to", theCommands);
+    return output.MakeError("Function WeylElement needs to know what group the element belongs to", theCommands);
   //note that if input is list of 2 elements then input[0] is sequence atom, and your two elements are in fact
   //input[1] and input[2];
   SemisimpleLieAlgebra* thePointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[1], thePointer))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
   ElementWeylGroup<WeylGroup> theElt;
   theElt.generatorsLastAppliedFirst.ReservE(input.children.size-2);
   for(int i=2; i<input.children.size; i++)
@@ -1501,7 +1501,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(Calculator& theCommands
 //  stOutput << "<b>Not implemented!!!!!</b> You requested reflection indexed by " << theReflection;
   for(int i=0; i<theElt.generatorsLastAppliedFirst.size; i++)
     if (theElt.generatorsLastAppliedFirst[i] >= thePointer->GetRank() || theElt.generatorsLastAppliedFirst[i] < 0)
-      return output.SetError("Bad reflection index", theCommands);
+      return output.MakeError("Bad reflection index", theCommands);
 //  stOutput << "\n" << theGroup.rho << " " << theElt.owner->rho << "\n";
   theElt.MakeCanonical();
   return output.AssignValue(theElt, theCommands);
@@ -1510,10 +1510,10 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(Calculator& theCommands
 bool Calculator::innerGenerateMultiplicativelyClosedSet(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerGenerateMultiplicativelyClosedSet");
   if (input.children.size<=2)
-    return output.SetError("I need at least two arguments - upper bound and at least one element to multiply.", theCommands);
+    return output.MakeError("I need at least two arguments - upper bound and at least one element to multiply.", theCommands);
   int upperLimit;
   if (!input[1].IsSmallInteger(&upperLimit))
-    return output.SetError("First argument must be a small integer, serving as upper bound for the set.", theCommands);
+    return output.MakeError("First argument must be a small integer, serving as upper bound for the set.", theCommands);
   if (upperLimit <=0)
   { upperLimit=10000;
     theCommands.Comments << "The upper computation limit I got was 0 or less; I replaced it with the default value " << upperLimit << ".";
@@ -1543,7 +1543,7 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(Calculator& theCommands,
       if (theSet.size>upperLimit)
       { std::stringstream out;
         out << "<hr>While generating multiplicatively closed set, I went above the upper limit of " << upperLimit << " elements.";
-        evaluatedProduct.SetError(out.str(), theCommands);
+        evaluatedProduct.MakeError(out.str(), theCommands);
         theSet.AddOnTop(evaluatedProduct);
         i=theSet.size; break;
       }

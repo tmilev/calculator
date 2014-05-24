@@ -2915,9 +2915,9 @@ private:
   double (*getElapsedTimePrivate)();
   void (*callSystem)(const std::string& theSystemCommand);
 public:
-  void (*StandardStringOutputFunction)(const std::string& input);
-  void (*ReturnIndicator)();
+  void (*IndicatorStringOutputFunction)(const std::string& input);
   void (*sleepFunction)(int nanoseconds);
+  void (*WebServerReturnDisplayIndicatorCloseConnection)();
 
   void FallAsleep(int nanoseconds)
   { if (this->sleepFunction!=0)
@@ -3008,18 +3008,11 @@ public:
  const std::string& scrambledIP);
 
   void operator=(const GlobalVariables& other)
-  { this->StandardStringOutputFunction=other.StandardStringOutputFunction;
+  { this->IndicatorStringOutputFunction=other.IndicatorStringOutputFunction;
     this->theDrawingVariables=other.theDrawingVariables;
   }
   inline void DrawBufferNoIniT()
   { this->theDrawingVariables.drawBufferNoIniT();
-  }
-  inline void SetStandardStringOutput(void (*inputFunction)(const std::string& ))
-  { this->StandardStringOutputFunction=inputFunction;
-  }
-  inline void StandardStringOutput(const std::string& input)
-  { if (this->StandardStringOutputFunction!=0)
-      this->StandardStringOutputFunction(input);
   }
   void SetCallSystem(void (*theSystemCall)(const std::string&))
   { this->callSystem=theSystemCall;
@@ -3029,13 +3022,17 @@ public:
       this->callSystem(systemCommand);
   }
   std::string ToStringFolderInfo()const;
+  inline void MakeReport(const std::string& input)
+  { if (this->IndicatorStringOutputFunction!=0)
+      this->IndicatorStringOutputFunction(input);
+  }
   void MakeReport()
-  { if (this->StandardStringOutputFunction==0)
+  { if (this->IndicatorStringOutputFunction==0)
       return;
     std::stringstream reportStream;
     for (int i=this->ProgressReportStringS.size-1; i>=0; i--)
       reportStream << "\n" << this->ProgressReportStringS[i] << "\n<br>\n";
-    this->StandardStringOutput(reportStream.str());
+    this->IndicatorStringOutputFunction(reportStream.str());
   }
   /// @endcond
 };

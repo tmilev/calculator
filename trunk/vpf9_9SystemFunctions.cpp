@@ -44,8 +44,8 @@ void CreateTimerThread()
 #endif
 }
 
-void SleepFunction(int nanoseconds)
-{ usleep(100);
+void SleepFunction(int microseconds)
+{ usleep(microseconds);
 }
 
 #ifndef WIN32

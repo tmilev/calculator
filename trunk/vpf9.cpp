@@ -70,10 +70,10 @@ unsigned long long int Rational::TotalSmallGCDcalls=0;
 unsigned long long int Rational::TotalSmallMultiplications=0;
 
 GlobalVariables::GlobalVariables()
-{ this->StandardStringOutputFunction=0;
+{ this->IndicatorStringOutputFunction=0;
+  this->WebServerReturnDisplayIndicatorCloseConnection=0;
   this->MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000000;
   this->callSystem=0;
-  this->ReturnIndicator=0;
   this->sleepFunction=0;
   this->flagGaussianEliminationProgressReport=false;
   this->getElapsedTimePrivate=0;
@@ -3108,7 +3108,7 @@ int PartFraction::ControlLineSizeStringPolys(std::string& output, FormatExpressi
 #pragma warning(default:4018)//grrrrr
 #endif
 void PartFractions::MakeProgressReportSplittingMainPart(GlobalVariables& theGlobalVariables)
-{ if (theGlobalVariables.StandardStringOutputFunction==0)
+{ if (theGlobalVariables.IndicatorStringOutputFunction==0)
     return;
   std::stringstream out1, out2, out3;
   out1 << this->NumberRelevantReducedFractions << " relevant reduced + " << this->NumberIrrelevantFractions << " disjoint = " << this->NumTotalReduced;
@@ -3133,11 +3133,11 @@ void PartFractions::MakeProgressReportSplittingMainPart(GlobalVariables& theGlob
 
 void PartFractions::MakeProgressVPFcomputation(GlobalVariables& theGlobalVariables)
 { this->NumProcessedForVPFfractions++;
-  if (theGlobalVariables.StandardStringOutputFunction==0)
+  if (theGlobalVariables.IndicatorStringOutputFunction==0)
     return;
   std::stringstream out2, out3;
   ProgressReport theReport(&theGlobalVariables);
-  out2  << "Processed " << this->NumProcessedForVPFfractions << " out of "
+  out2 << "Processed " << this->NumProcessedForVPFfractions << " out of "
   << this->NumberRelevantReducedFractions << " relevant fractions";
 //  out3  << "Processed " <<" out of " <<this->NumMonomialsInNumeratorsRelevantFractions
 //        << " relevant fractions";

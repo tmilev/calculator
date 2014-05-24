@@ -1617,8 +1617,8 @@ public:
   }
   void AddOperationOuterHandler
   (const std::string& theOpName, Expression::FunctionAddress outerHandler, const std::string& opArgumentListIgnoredForTheTimeBeing,
-   const std::string& opDescription, const std::string& opExample, bool visible=true, bool experimental=false)
-  { this->AddOperationHandler(theOpName, outerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription, opExample, false, visible, experimental);
+   const std::string& opDescription, const std::string& opExample, bool visible=true, bool experimental=false, const std::string& inputAdditionalIdentifier="")
+  { this->AddOperationHandler(theOpName, outerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription, opExample, false, visible, experimental, inputAdditionalIdentifier);
   }
   void init(GlobalVariables& inputGlobalVariables);
   void reset();

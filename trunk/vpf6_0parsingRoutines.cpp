@@ -48,7 +48,7 @@ void Calculator::reset()
   this->flagNewContextNeeded=true;
   this->flagProduceLatexLink=false;
   this->flagDisplayFullExpressionTree=false;
-  this->flagUseFracInRationalLaTeX=false;
+  this->flagUseFracInRationalLaTeX=true;
   this->flagDontDistribute=false;
   this->flagForkingProcessAllowed=true;
   this->flagNoApproximations=false;
@@ -228,7 +228,7 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("\\");
   this->controlSequences.AddOnTop("&");
   this->controlSequences.AddOnTop("%");
-  this->controlSequences.AddOnTop("UseFrac");
+  this->controlSequences.AddOnTop("NoFrac");
   this->controlSequences.AddOnTop("NoApproximations");
   this->controlSequences.AddOnTop("ShowContext");
   this->controlSequences.AddOnTop("LogParsing");
@@ -1073,8 +1073,8 @@ bool Calculator::ApplyOneRule()
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
-  if (secondToLastS=="%" && lastS=="UseFrac")
-  { this->flagUseFracInRationalLaTeX=true;
+  if (secondToLastS=="%" && lastS=="NoFrac")
+  { this->flagUseFracInRationalLaTeX=false;
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }

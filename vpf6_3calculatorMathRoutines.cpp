@@ -558,6 +558,11 @@ bool CalculatorFunctionsGeneral::outerCombineFractionsCommutative(Calculator& th
   if (!leftE.StartsWith(theCommands.opDivide(), 3) ||
       !rightE.StartsWith(theCommands.opDivide(), 3))
     return false;
+  stOutput << "<br><b>To do: make this function work really well</b>";
+  if (leftE[2]==rightE[2])
+  { output=(leftE[1]+rightE[1])/leftE[2];
+    return true;
+  }
   output=(leftE[1]*rightE[2]+rightE[1]*leftE[2])/(leftE[2]*rightE[2]);
   return true;
 }
@@ -1301,6 +1306,18 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAdivideBCommutative(Calculato
   //Quotient rule (commutative): (a/b^n)':=(a'b-n a b')/b^{n+1}
   if (!theArgument.StartsWith(theCommands.opDivide(), 3))
     return false;
+  const Expression& numeratorE=theArgument[1];
+  const Expression& denominatorE=theArgument[2];
+  if (numeratorE.StartsWith(theCommands.opPlus()))
+  { Expression leftE(theCommands), rightE(theCommands);
+    leftE.AddChildAtomOnTop(theCommands.opDifferentiate());
+    leftE.AddChildOnTop(theDOvar);
+    rightE=leftE;
+    leftE.AddChildOnTop(numeratorE[1]/denominatorE);
+    rightE.AddChildOnTop(numeratorE[2]/denominatorE);
+    output=leftE+rightE;
+    return true;
+  }
   theCommands.CheckInputNotSameAsOutput(input, output);
   output.reset(theCommands);
   Expression theDenominatorBase, eOne, theDenominatorExponentPlusOne, theDenominatorExponent, changedMultiplicand,
@@ -3808,11 +3825,19 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
 
 bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestIndicator");
-  if (theCommands.theGlobalVariableS->ReturnIndicator!=0)
-    theCommands.theGlobalVariableS->ReturnIndicator();
+//  stOutput << "Report html return!";
+  if (theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection!=0)
+    theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection();
+//  else
+//    std::cout << "WebServerReturnDisplayIndicatorCloseConnection IS ZERO!!!!" << std::endl;
   ProgressReport theReport(theCommands.theGlobalVariableS);
-  for (int i=0; i<100000; i++)
-  { theCommands.theGlobalVariableS->FallAsleep(1000000);
+  for (int i=0; i<
+  100000
+//  1
+  ; i++)
+  { if (theCommands.theGlobalVariableS->sleepFunction==0)
+      crash << "fall asleep function is zero!" << crash;
+    theCommands.theGlobalVariableS->FallAsleep(1000000);
     std::stringstream reportStream;
     reportStream << " Running indicator test, " << i+1 << " out of 10000.";
     theReport.Report(reportStream.str());

@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 int main_command_input(int argc, char **argv)
 { MacroRegisterFunctionWithName("main_command_input");
   std::stringstream theInputStream;
-  theParser.theGlobalVariableS->SetStandardStringOutput(&CGI::MakeStdCoutReport);
+  theParser.theGlobalVariableS->IndicatorStringOutputFunction=CGI::MakeStdCoutReport;
   for (int i=1; i<argc; i++)
   { theInputStream << argv[i];
     if (i<argc-1)
@@ -65,6 +65,7 @@ int main_command_input(int argc, char **argv)
 int main_apache_client()
 { MacroRegisterFunctionWithName("main_apache_client");
   stOutput << "Content-Type: text/html\n\n";
+  theParser.theGlobalVariableS->IndicatorStringOutputFunction=CGI::MakeReportIndicatorFile;
   std::cin >> theParser.inputStringRawestOfTheRaw;
 	if (theParser.inputStringRawestOfTheRaw=="")
 	{ theParser.inputStringRawestOfTheRaw=getenv("QUERY_STRING");

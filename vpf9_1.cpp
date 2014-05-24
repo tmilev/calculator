@@ -35,6 +35,12 @@ Crasher& Crasher::operator<<(int x)
 
 Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
 { this->FirstRun();
+  static bool ThisCodeHasntRunYet=true;
+  if (!ThisCodeHasntRunYet)
+  //this would mean one of the crash-processing functions below has requested a crash, which is an
+  //unbounded recursion leading to crash.
+    assert(false);
+  ThisCodeHasntRunYet=false;
   this->theCrashReport << "<hr>This is a program crash";
   if (this->theGlobalVariables!=0)
     this->theCrashReport << " " << this->theGlobalVariables->GetElapsedSeconds() << " second(s) from the start. ";
@@ -1089,7 +1095,7 @@ bool SemisimpleLieAlgebra::GetConstantOrHElement
 }
 
 void SemisimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total, GlobalVariables& theGlobalVariables)
-{ if (theGlobalVariables.StandardStringOutputFunction==0)
+{ if (theGlobalVariables.IndicatorStringOutputFunction==0)
     return;
   std::stringstream out2, out3;
   int x=(i*Total*Total+j*Total+k+1);

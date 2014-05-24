@@ -35,22 +35,25 @@ public:
   int connectionID;
   List<char> remainingBytesToSend;
   List<char> bufferFileIO;
-  List<int> pipeServerToWorker;
-  List<int> pipeWorkerToServer;
+  List<int> pipeServerToWorkerControls;
+  List<int> pipeWorkerToServerControls;
+  List<int> pipeServerToWorkerIndicator;
+  List<int> pipeWorkerToServerIndicator;
 
   std::string error;
-  void DisplayIndicator(const std::string& input);
 
-  int ProcessGetRequestIndicator();
+  int ProcessGetRequestServerStatus();
+  int ProcessGetRequestComputationIndicator();
   int ProcessGetRequestNonCalculator();
-  int ProcessGetStatus();
   int ProcessGetRequestFolder();
   int ProcessRequestTypeUnknown();
   int ServeClient();
   void QueueStringForSending(const std::string& stringToSend, bool MustSendAll=false);
-  static int StandardOutput();
   void StandardOutputReturnIndicatorWaitForComputation();
   bool CheckConsistency();
+  void PipeProgressReportToParentProcess(const std::string& input);
+
+  static int StandardOutput();
   static void StandardOutputPart1BeforeComputation();
   static void StandardOutputPart2AfterComputation();
 
@@ -58,6 +61,7 @@ public:
   (const List<char>& bytesToSend, bool MustSendAll=false)
   ;
   void SignalIamDoneReleaseEverything();
+  void ReleaseServerSideResources();
   void ReleaseResourcesMarkNotInUse();
   void ReleaseResourcesKeepUseStatus();
   void SendAllBytes();
@@ -69,7 +73,7 @@ public:
   bool ReceiveOnce();
   bool ReceiveAll();
   enum{requestTypeUnknown, requestTypeGetCalculator, requestTypePostCalculator, requestTypeGetNotCalculator, requestTypeGetServerStatus,
-  requestTypeGetIndicator};
+  requestTypeGetComputationIndicator};
   std::string ToStringStatus()const;
   std::string ToStringMessage()const;
   std::string ToStringMessageShort(FormatExpressions* theFormat=0)const;
@@ -78,7 +82,7 @@ public:
   void ExtractArgumentFromAddress();
   void ExtractPhysicalAddressFromMainAddress();
   void reset();
-  void resetMessageComponenetsExceptRawMessage();
+  void resetMessageComponentsExceptRawMessage();
 };
 
 class WebServer
@@ -95,8 +99,10 @@ public:
   WebServer();
   ~WebServer();
   void ReadFromPipe(List<int>& inputPipe, bool doNotBlock);
-  void SendThroughPipe(const std::string& toBeSent, List<int>& outputPipe, bool doNotBlock);
+  void WriteToPipe(const std::string& toBeSent, List<int>& outputPipe, bool doNotBlock);
+  void ReleaseWorkerSideResources();
   void ReleaseActiveWorker();
+  void ReleaseSocketsNonActiveWorkers();
   void ReleaseNonActiveWorkers();
   void CreateNewActiveWorker();
   int Run();
@@ -104,9 +110,9 @@ public:
   static void Release(int& theDescriptor);
   static void SignalActiveWorkerDoneReleaseEverything();
   static void FlushActiveWorker();
-  static void DisplayActiveIndicator(const std::string& input);
   static void ReturnActiveIndicatorAlthoughComputationIsNotDone();
   static void SendStringThroughActiveWorker(const std::string& input);
+  static void PipeProgressReportToParentProcess(const std::string& input);
   static void Signal_SIGINT_handler(int s);
   static void Signal_SIGCHLD_handler(int s);
   void Restart();

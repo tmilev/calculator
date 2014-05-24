@@ -13,7 +13,7 @@ FormatExpressions consoleFormat;
 void InitializeGlobalObjects()
 { //stOutput << "Content-Type: text/html\n\n";
   InitializeTimer();
-  onePredefinedCopyOfGlobalVariables.SetStandardStringOutput(&CGI::MakeReportIndicatorFile);
+  onePredefinedCopyOfGlobalVariables.IndicatorStringOutputFunction=&CGI::MakeReportIndicatorFile;
   onePredefinedCopyOfGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
   onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=-1;
   onePredefinedCopyOfGlobalVariables.sleepFunction=SleepFunction;

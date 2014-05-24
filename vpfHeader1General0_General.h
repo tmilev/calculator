@@ -1018,23 +1018,23 @@ public:
   // return the last index n of which we can say o <= l[n], or l.size
   // i.e. not the first index at which o <= l[n], as if we were implementing l.GetIndex(o)
   // the reason we want the last index is to support insertion sorting
-  int BSExpectedIndex(const Object& o) const{
-    if(this->size == 0)
+  int BSExpectedIndex(const Object& o) const
+  { if(this->size == 0)
       return 0;
     int i = 0, j = this->size-1;
-    while(true){
-        int s=(j-i)/2;
-        int n = j-s;
-        if(s == 0)
-        { if(this->TheObjects[n]<o)
-            return n+1;
-          return n;
-        }
-        if(o<this->TheObjects[n])
-        { j = n-1;
-          continue;
-        }
-        i = n;
+    while(true)
+    { int s=(j-i)/2;
+      int n = j-s;
+      if(s == 0)
+      { if(this->TheObjects[n]<o)
+          return n+1;
+        return n;
+      }
+      if(o<this->TheObjects[n])
+      { j = n-1;
+        continue;
+      }
+      i = n;
     }
   }
   // indexing is O(n log n) and insertion is O(n), whereas hash table insertion and indexing
@@ -1107,6 +1107,15 @@ public:
   }
   inline bool operator!=(const List<Object>& other)const
   { return !this->IsEqualTo(other);
+  }
+  template <unsigned int a>
+  bool operator==(const Object (&other)[a])
+  { if (this->size!=a)
+      return false;
+    for (int i=0; i<this->size; i++)
+      if (!(this->TheObjects[i]==other[i]))
+        return false;
+    return true;
   }
   inline bool operator==(const List<Object>& other)const
   { return this->IsEqualTo(other);

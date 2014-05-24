@@ -2979,7 +2979,7 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(Se
     //    if(tempI!=theRootSA.GetIndexKmoduleContainingRoot(tempRoot))crash << crash;
     //  }
     }
-    if (theGlobalVariables.StandardStringOutputFunction!=0)
+    if (theGlobalVariables.IndicatorStringOutputFunction!=0)
     { std::stringstream out;
       out << "Computing action of element " << i+1 << " out of " << theSubgroup.size;
       theReport.Report(out.str());

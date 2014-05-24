@@ -9,6 +9,11 @@ ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator func
 
 void Calculator::initPredefinedInnerFunctions()
 { this->AddOperationInnerHandler
+  ("TestCalculatorIndicator", CalculatorFunctionsGeneral::innerTestIndicator, "",
+   "(This is not a mathematical function). Tests the calculator indicator mechanism.",
+   "TestCalculatorIndicator(0)", true, false)
+   ;
+  this->AddOperationInnerHandler
   ("crash", Calculator::innerCrash, "",
    "Crashes the calculator: tests the crashing mechanism (are crash logs properly created, etc.).",
    "crash(0)");
@@ -1303,11 +1308,6 @@ void Calculator::initPredefinedInnerFunctions()
    "TestMouseHover(x^2)", true, false)
    ;
    this->AddOperationInnerHandler
-  ("TestCalculatorIndicator", CalculatorFunctionsGeneral::innerTestIndicator, "",
-   "(This is not a mathematical function). Tests the calculator indicator mechanism.",
-   "TestCalculatorIndicator(0)", true, false)
-   ;
-   this->AddOperationInnerHandler
   ("CoefficientOf", CalculatorFunctionsGeneral::innerCoefficientOf, "",
    "Gets the coefficient of the first argument in the second. ",
    "CoefficientOf(y, x*x*y+x*z*y*z+x*y*x)", true)
@@ -1400,7 +1400,7 @@ void Calculator::initPredefinedStandardOperations()
    "Combines fractions on condition that all participants commute. \
    Equivalent to {{a}}/{{b}}+{{c}}/{{d}}:=(a *d+c*b)/(d*b); \
    Please note that this transformation is not correct if b and d do not commute. ",
-   "a/b+c/d", true);
+   "a/b+c/d", true, false, "CalculatorFunctionsGeneral::outerCombineFractionsCommutative");
 
   this->AddOperationOuterHandler
   ("+", this->outerCombineFractions, "",
@@ -1927,7 +1927,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors, this->opRational(), this->opRational(),
    "If a rational number is small enough to factor, reduces the rational exponents of the rational number. ",
-   "%UseFrac\n(4/9)^{17/3}; (12/7)^{7/2} ", true);
+   "\n(4/9)^{17/3}; (12/7)^{7/2} ", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat, this->opRational(), this->opDouble(),
    "Calls the built-in cpp functions to approximately raise a double to a power,\

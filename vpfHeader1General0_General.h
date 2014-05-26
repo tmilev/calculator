@@ -1108,9 +1108,9 @@ public:
   inline bool operator!=(const List<Object>& other)const
   { return !this->IsEqualTo(other);
   }
-  template <unsigned int a>
-  bool operator==(const Object (&other)[a])
-  { if (this->size!=a)
+  bool operator==(const std::string& other)
+  { //std::cout << "CALLING COMPARISON OPERATOR, this->size= " << this->size << " a= " << a << std::endl;
+    if (((unsigned) this->size)!=other.size())
       return false;
     for (int i=0; i<this->size; i++)
       if (!(this->TheObjects[i]==other[i]))
@@ -1131,15 +1131,6 @@ public:
     this->SetSize((signed) input.size());
     for (int i=0; i<this->size; i++)
       this->TheObjects[i]=input[i];
-  }
-  template <unsigned int a>
-  List(const Object (&other)[a])
-  { this->initConstructorCallOnly();
-    this->SetSize(a);
-//    std::cout << std::endl << "list constructor input is: " << other << "(total " << this->size
-//    << " elements)" << std::endl;
-    for (int i=0; i<this->size; i++)
-      this->TheObjects[i]=other[i];
   }
   List();//<-newly constructed lists start with size=0; This default is used in critical places in HashedList and other classes, do not change!
   ~List();

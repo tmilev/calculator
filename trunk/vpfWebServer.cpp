@@ -371,7 +371,7 @@ bool WebWorker::ReceiveAll()
     std::cout << this->error << std::endl;
     return false;
   }
-  this->remainingBytesToSend="HTTP/1.1 100 Continue\r\n";
+  this->remainingBytesToSend=(std::string)"HTTP/1.1 100 Continue\r\n";
   this->SendAllBytes();
   this->remainingBytesToSend.SetSize(0);
   this->mainArgumentRAW="";
@@ -469,8 +469,7 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
 int WebWorker::ProcessGetRequestFolder()
 { MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestFolder");
   std::stringstream out;
-  out << "HTTP/1.1 200 OK\r\n"
-  << "Content-Type: text/html\r\n\r\n"
+  out << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
   << "<html><body>";
   //out << this->ToString();
   List<std::string> theFileNames, theFileTypes;

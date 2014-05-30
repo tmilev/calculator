@@ -1644,7 +1644,6 @@ public:
   bool isLeftSeparator(char c);
   bool isRightSeparator(char c);
   void ParseFillDictionary(const std::string& input);
-  void InitJavaScriptDisplayIndicator();
 };
 
 class CalculatorSerialization

@@ -3837,7 +3837,7 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, con
   ; i++)
   { if (theCommands.theGlobalVariableS->sleepFunction==0)
       crash << "fall asleep function is zero!" << crash;
-    theCommands.theGlobalVariableS->FallAsleep(1000000);
+    theCommands.theGlobalVariableS->FallAsleep(10000000);
     std::stringstream reportStream;
     reportStream << " Running indicator test, " << i+1 << " out of 10000.";
     theReport.Report(reportStream.str());

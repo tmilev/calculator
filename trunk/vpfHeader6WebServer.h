@@ -14,6 +14,30 @@
 static ProjectInformationInstance projectInfoInstanceWebServerHeader(__FILE__, "Web server classes declarations.");
 
 class WebServer;
+
+class Pipe
+{
+private:
+  void ReadFileDescriptor(int readEnd, bool doNotBlock);
+public:
+  List<int> thePipe; //thePipe[0] is the read end; thePipe[1] is the write end.
+  List<int> pipeIndicesOnCreation;
+  List<char> lastRead;
+  List<char> pipeBuffer;
+  void Read(bool doNotBlock);
+  void Write(const std::string& toBeSent, bool doNotBlock);
+  void WriteAfterClearingPipe(const std::string& toBeSent, bool doNotBlock);
+
+  std::string ToString()const;
+  void reset();
+  void Release();
+  void CreateMe();
+  Pipe()
+  { this->thePipe.initFillInObject(2,-1);
+    this->pipeIndicesOnCreation.initFillInObject(2,-1);
+  }
+};
+
 class WebWorker
 {
 public:
@@ -35,10 +59,10 @@ public:
   int connectionID;
   List<char> remainingBytesToSend;
   List<char> bufferFileIO;
-  List<int> pipeServerToWorkerControls;
-  List<int> pipeWorkerToServerControls;
-  List<int> pipeServerToWorkerIndicator;
-  List<int> pipeWorkerToServerIndicator;
+  Pipe pipeServerToWorkerControls;
+  Pipe pipeWorkerToServerControls;
+  Pipe pipeServerToWorkerIndicator;
+  Pipe pipeWorkerToServerIndicator;
 
   std::string error;
 
@@ -66,6 +90,8 @@ public:
   void ReleaseResourcesKeepUseStatus();
   void SendAllBytes();
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
+  static std::string GetJavaScriptIndicatorFromHD();
+  std::string GetJavaScriptIndicatorBuiltInServer(bool withButton);
   bool IsFileExtensionOfBinaryFile(const std::string& fileExtension);
   WebWorker();
   ~WebWorker();
@@ -94,12 +120,8 @@ public:
   List<WebWorker> theWorkers;
   int activeWorker;
   int timeLastExecutableModification;
-  List<char> lastPipeReadResult;
-  List<char> pipeBuffer;
   WebServer();
   ~WebServer();
-  void ReadFromPipe(List<int>& inputPipe, bool doNotBlock);
-  void WriteToPipe(const std::string& toBeSent, List<int>& outputPipe, bool doNotBlock);
   void ReleaseWorkerSideResources();
   void ReleaseActiveWorker();
   void ReleaseSocketsNonActiveWorkers();

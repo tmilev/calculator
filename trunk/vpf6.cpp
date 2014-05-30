@@ -2417,45 +2417,6 @@ bool Calculator::IsNonBoundVarInContext(int inputOp)
   return false;
 }
 
-void Calculator::InitJavaScriptDisplayIndicator()
-{ std::stringstream output;
-  output << " <!>\n";
-  output << " <script type=\"text/javascript\"> \n";
-  output << " var timeOutCounter=0;\n";
-//  output << " var newReportString=\"\";\n";
-  output << " var showProgress=false;";
-  output << " function progressReport()\n";
-  output << "{ var el = document.getElementById(\"idProgressReport\");	\n";
-  output << "  if (!showProgress) \n";
-  output << "  { el.style.display = 'none';\n";
-  output << "    return;";
-  output << "  }\n";
-  output << "  el.style.display = '';\n";
-//  output << "  el.contentWindow.location.reload();";
-  output << "  timeOutCounter++;\n";
-  output << "  var oRequest = new XMLHttpRequest();\n";
-  output << "  var sURL  = \"" << this->theGlobalVariableS->DisplayNameIndicatorWithPath << "\";\n";
-  output << "  oRequest.open(\"GET\",sURL,false);\n";
-//  output << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
-  output << "  oRequest.send(null)\n";
-  output << "  if (oRequest.status==200)\n";
-  output << "  { newReportString= oRequest.responseText;\n";
-  output << "    el.innerHTML= \"<hr>Refreshing each second. Client time: ~\"+ timeOutCounter+\" second(s)<br>\" +newReportString+\"<hr>\";\n";
-  output << "  }\n";
-  output << "   window.setTimeout(\"progressReport()\",1000);\n";
-  output << " }\n";
-  output << " </script>\n";
-  output << CGI::GetHtmlButton
-  ("progressReportButton", "showProgress=!showProgress; progressReport()", "expand/collapse progress report");
-  output << "<br><div "
-  //<< "src=\"" << this->indicatorFileNameDisplaY << "\" "
-  << "id=\"idProgressReport\" style=\"display:none\">\n";
-  output << " </div>\n";
-  output << " \n";
-  output << " \n";
-  this->javaScriptDisplayingIndicator=output.str();
-}
-
 bool Calculator::innerWriteGenVermaModAsDiffOperators(Calculator& theCommands, const Expression& input, Expression& output, bool AllGenerators)
 { MacroRegisterFunctionWithName("Calculator::innerWriteGenVermaModAsDiffOperators");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);

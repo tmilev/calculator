@@ -110,7 +110,6 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->formatVisibleStrings.flagExpressionIsFinal=true;
   this->theGlobalVariableS=&inputGlobalVariables;
   this->theObjectContainer.theAlgebraicClosure.theGlobalVariables=&inputGlobalVariables;
-  this->InitJavaScriptDisplayIndicator();
 
   //operation List is the very first operation. It signifies a non-atomic expression.
   //operation List is signified by the empty string

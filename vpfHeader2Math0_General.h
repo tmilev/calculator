@@ -3026,14 +3026,7 @@ public:
   { if (this->IndicatorStringOutputFunction!=0)
       this->IndicatorStringOutputFunction(input);
   }
-  void MakeReport()
-  { if (this->IndicatorStringOutputFunction==0)
-      return;
-    std::stringstream reportStream;
-    for (int i=this->ProgressReportStringS.size-1; i>=0; i--)
-      reportStream << "\n" << this->ProgressReportStringS[i] << "\n<br>\n";
-    this->IndicatorStringOutputFunction(reportStream.str());
-  }
+  void MakeReport();
   /// @endcond
 };
 

@@ -99,6 +99,16 @@ std::string GlobalVariables::ToStringFolderInfo()const
   return out.str();
 }
 
+void GlobalVariables::MakeReport()
+{ MacroRegisterFunctionWithName("GlobalVariables::MakeReport");
+  if (this->IndicatorStringOutputFunction==0)
+    return;
+  std::stringstream reportStream;
+  for (int i=0; i<this->ProgressReportStringS.size; i++)
+    reportStream << "\n<div id=\"divProgressReport" << i << "\">" << this->ProgressReportStringS[i] << "\n</div>";
+  this->IndicatorStringOutputFunction(reportStream.str());
+}
+
 void GlobalVariables::initDefaultFolderAndFileNames
 (const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow,
  const std::string& scrambledIP)
@@ -136,7 +146,6 @@ void GlobalVariables::initDefaultFolderAndFileNames
   this->DisplayPathServerBase +"cgi-bin/calculator";
 
 }
-
 
 template<>
 typename List<Weight<RationalFunctionOld> >::OrderLeftGreaterThanRight

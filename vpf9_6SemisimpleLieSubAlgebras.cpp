@@ -621,7 +621,9 @@ void SemisimpleSubalgebras::GetHCandidates
 (Vectors<Rational>& outputHCandidatesScaledToActByTwo, CandidateSSSubalgebra& newCandidate,
  DynkinType& currentType, List<int>& currentRootInjection)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::GetHCandidates");
-  ProgressReport theReport2(this->theGlobalVariables), theReport3(this->theGlobalVariables);
+  ProgressReport theReport1(this->theGlobalVariables);
+  ProgressReport theReport2(this->theGlobalVariables);
+  ProgressReport theReport3(this->theGlobalVariables);
   int baseRank=currentType.GetRank()-1;
 
   DynkinSimpleType theSmallType;
@@ -630,7 +632,7 @@ void SemisimpleSubalgebras::GetHCandidates
   if (this->theGlobalVariables!=0)
   { std::stringstream reportStream;
     reportStream << "the latest root of the candidate simple component " << theSmallType.ToString();
-    theReport2.Report(reportStream.str());
+    theReport1.Report(reportStream.str());
   }
   int indexNewRooT=*currentRootInjection.LastObject();
   int indexNewRootInSmallType=indexNewRooT-currentType.GetRank()+theSmallType.theRank;
@@ -649,7 +651,7 @@ void SemisimpleSubalgebras::GetHCandidates
         //stOutput << " The h element " << this->theSl2s[j].theH.GetCartanPart().ToString() << " generating orbit number "
         //<< j+1 << " out of " << this->theSl2s.size << " has the required length. ";
       //stOutput << "<br>" << reportStreamX.str();
-      theReport3.Report(reportStreamX.str());
+      theReport2.Report(reportStreamX.str());
     }
     if (this->theSl2s[j].LengthHsquared!=desiredHLengthSquared)
       continue;
@@ -667,16 +669,21 @@ void SemisimpleSubalgebras::GetHCandidates
     { if (newCandidate.IsGoodHnewActingByTwo(currentOrbit[k], currentRootInjection))
       { if (theGlobalVariables!=0)
         { std::stringstream out2;
-          out2 << "sl(2) orbit " << j+1 << ", h orbit candidate " << k+1 << " out of " << currentOrbit.size << " has desired scalar products, adding to list of good candidates. ";
-          theReport2.Report(out2.str());
+          std::stringstream out3;
+          out3 << "So far, found" << outputHCandidatesScaledToActByTwo.size+1 << " good candidates. ";
+          theReport2.Report(out3.str());
+          out2 << "sl(2) orbit " << j+1 << ", h orbit candidate " << k+1 << " out of " << currentOrbit.size
+          << " has desired scalar products.";
+          theReport3.Report(out2.str());
           //stOutput << "<hr>" << out2.str();
         }
         outputHCandidatesScaledToActByTwo.AddOnTop(currentOrbit[k]);
       } else
         if (theGlobalVariables!=0)
         { std::stringstream out2;
-          out2 << "sl(2) orbit " << j+1 << ", h orbit candidate " << k+1 << " out of " << currentOrbit.size << " is not a valid candidate (doesn't have desired scalar products). ";
-          theReport2.Report(out2.str());
+          out2 << "sl(2) orbit " << j+1 << ", h orbit candidate " << k+1 << " out of " << currentOrbit.size
+          << " is not a valid candidate (doesn't have desired scalar products). ";
+          theReport3.Report(out2.str());
           //stOutput << "<hr>" << out2.str();
         }
     }
@@ -684,7 +691,7 @@ void SemisimpleSubalgebras::GetHCandidates
     { std::stringstream out2;
       out2 << "Sl(2) orbit " << j+1 << ": extension to " << currentType.ToString()
       << " not possible because there were no h candidates.";
-      theReport2.Report(out2.str());
+      theReport1.Report(out2.str());
       //stOutput << "<hr>" << out2.str();
     }
   }

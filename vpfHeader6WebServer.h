@@ -21,20 +21,25 @@ private:
   void ReadFileDescriptor(int readEnd, bool doNotBlock);
 public:
   List<int> thePipe; //thePipe[0] is the read end; thePipe[1] is the write end.
+  List<int> pipeEmptyingBlocksRead;
+  List<int> pipeEmptyingBlocksWrite;
   List<int> pipeIndicesOnCreation;
   List<char> lastRead;
   List<char> pipeBuffer;
+
   void Read(bool doNotBlock);
   void Write(const std::string& toBeSent, bool doNotBlock);
   void WriteAfterClearingPipe(const std::string& toBeSent, bool doNotBlock);
 
   std::string ToString()const;
-  void reset();
   void Release();
   void CreateMe();
+  ~Pipe();
   Pipe()
   { this->thePipe.initFillInObject(2,-1);
     this->pipeIndicesOnCreation.initFillInObject(2,-1);
+    this->pipeEmptyingBlocksRead.initFillInObject(2,-1);
+    this->pipeEmptyingBlocksWrite.initFillInObject(2,-1);
   }
 };
 
@@ -43,6 +48,8 @@ class WebWorker
 public:
   WebServer* parent;
   bool flagInUse;
+  bool flagOutputTimedOut;
+  bool flagTimedOutComputationIsDone;
   int indexInParent;
   int ProcessPID;
   std::string userAddress;
@@ -79,15 +86,16 @@ public:
 
   static int StandardOutput();
   static void StandardOutputPart1BeforeComputation();
-  static void StandardOutputPart2AfterComputation();
+  static void StandardOutputPart2StandardExit();
+  static void StandardOutputPart2ComputationTimeout();
 
   void QueueBytesForSending
   (const List<char>& bytesToSend, bool MustSendAll=false)
   ;
   void SignalIamDoneReleaseEverything();
   void ReleaseServerSideResources();
-  void ReleaseResourcesMarkNotInUse();
-  void ReleaseResourcesKeepUseStatus();
+  void Release();
+  void ReleaseKeepInUseFlag();
   void SendAllBytes();
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
   static std::string GetJavaScriptIndicatorFromHD();

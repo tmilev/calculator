@@ -3831,15 +3831,13 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, con
 //  else
 //    std::cout << "WebServerReturnDisplayIndicatorCloseConnection IS ZERO!!!!" << std::endl;
   ProgressReport theReport(theCommands.theGlobalVariableS);
-  for (int i=0; i<
-  100000
-//  1
-  ; i++)
+  int numRuns = 5;
+  for (int i=0; i<numRuns; i++)
   { if (theCommands.theGlobalVariableS->sleepFunction==0)
       crash << "fall asleep function is zero!" << crash;
-    theCommands.theGlobalVariableS->FallAsleep(10000000);
+    theCommands.theGlobalVariableS->FallAsleep(400000);
     std::stringstream reportStream;
-    reportStream << " Running indicator test, " << i+1 << " out of 10000.";
+    reportStream << " Running indicator test, " << i+1 << " out of " << numRuns << ".";
     theReport.Report(reportStream.str());
   }
   return output.AssignValue((std::string)"Indicator test executed. ", theCommands);

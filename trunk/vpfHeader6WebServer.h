@@ -146,6 +146,7 @@ public:
   static void PipeProgressReportToParentProcess(const std::string& input);
   static void Signal_SIGINT_handler(int s);
   static void Signal_SIGCHLD_handler(int s);
+  static std::string ToStringActiveWorker();
   void Restart();
   void CheckExecutableVersionAndRestartIfNeeded();
   void initDates();

@@ -551,7 +551,7 @@ void WebWorker::SignalIamDoneReleaseEverything()
   { std::cout << consoleRed("Signal done called on non-active worker") << std::endl;
     return;
   }
-  std::cout << consoleBlue("Worker: ") << this->indexInParent+1 << consoleBlue(" is done with the work. ") << std::endl;
+  std::cout << consoleBlue("worker ") << this->indexInParent+1 << consoleBlue(" is done with the work. ") << std::endl;
   this->pipeWorkerToServerControls.WriteAfterClearingPipe("close", false);
   std::cout << consoleBlue("Notification dispatched.") << std::endl;
   this->SendAllBytes();
@@ -713,7 +713,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(bool withButton)
   out << "\n<br>\n<div id=\"idProgressReportTimer\"></div>\n";
   out << "\n<br>\n<div id=\"idProgressReport\"></div>\n";
   out << "\n<script type=\"text/javascript\"> \n";
-  out << " var timeIncrementInTenthsOfSecond=40;//measured in tenths of a second\n";
+  out << " var timeIncrementInTenthsOfSecond=4;//measured in tenths of a second\n";
   out << " var timeOutCounter=0;//measured in tenths of a second\n";
   out << " var showProgress=false;";
 
@@ -785,11 +785,13 @@ int WebWorker::ServeClient()
 }
 
 void WebWorker::ReleaseServerSideResources()
-{ this->parent->Release(pipeServerToWorkerControls.thePipe[1]); //no access to write end
-  this->parent->Release(pipeWorkerToServerControls.thePipe[0]); //no access to read end
-  this->parent->Release(pipeServerToWorkerRequestIndicator.thePipe[1]); //no access to write end
-  this->parent->Release(pipeServerToWorkerComputationReportReceived.thePipe[1]); //no access to write end
-  this->parent->Release(pipeWorkerToServerIndicatorData.thePipe[0]); //no access to read end
+{ //The following ends are needed to wipe out data in those
+  this->parent->Release(pipeServerToWorkerRequestIndicator.thePipe[1]);            //no access to write end
+  this->parent->Release(pipeServerToWorkerComputationReportReceived.thePipe[1]);  //no access to write end
+  this->parent->Release(pipeServerToWorkerControls.thePipe[1]);                   //no access to write end
+  //The following ends are needed to clear the pipes before using.
+  //pipeWorkerToServerIndicatorData.thePipe[0]                                    //no access to read end
+  //pipeWorkerToServerControls.thePipe[0]                                         //no access to read end
   this->parent->Release(this->parent->listeningSocketID);//worker has no access to socket listener
 }
 
@@ -837,7 +839,7 @@ void WebWorker::StandardOutputReturnIndicatorWaitForComputation()
 
 std::string WebWorker::ToStringStatus()const
 { std::stringstream out;
-  out << "Worker " << this->indexInParent+1;
+  out << "worker " << this->indexInParent+1;
   if (this->flagInUse)
     out << ", <b>in use</b>";
   else
@@ -980,9 +982,9 @@ void Pipe::Write(const std::string& toBeSent, bool doNotBlock)
   char buffer[2];
   read(this->pipeEmptyingBlocksWrite[0], buffer, 2);
   if (theWebServer.activeWorker!=-1)
-    std::cout << consoleGreen("Worker ") << theWebServer.activeWorker;
+    std::cout << consoleGreen("worker ") << theWebServer.activeWorker;
   else
-    std::cout << consoleGreen("Server ");
+    std::cout << consoleGreen("server ");
   std::cout << consoleGreen(" is sending ") << toBeSent.size()
   << consoleGreen(" bytes through pipe "+this->ToString()) << std::endl;
 /*  if (doNotBlock)
@@ -1069,12 +1071,15 @@ void Pipe::ReadFileDescriptor(int readEnd, bool doNotBlock)
   { this->pipeBuffer.SetSize(4096); // <-once the buffer is resized, this operation does no memory allocation and is fast.
     int numReadBytes =read(readEnd, this->pipeBuffer.TheObjects, 4096);
     if (numReadBytes<=0)
+    { if (numReadBytes<0)
+        std::cout << consoleRed(theWebServer.ToStringLastErrorDescription()) << std::endl;
       break;
+    }
     counter++;
     if (counter>10000)
       std::cout << "This is not supposed to happen: more than 10000 iterations of read from pipe."
       << std::endl;
-    std::cout << consoleBlue("Worker ") << theWebServer.activeWorker
+    std::cout << consoleBlue(theWebServer.ToStringActiveWorker())
     << consoleBlue(" pipe, " + this->ToString()) << " " << numReadBytes << " bytes read. ";
     this->pipeBuffer.SetSize(numReadBytes);
     this->lastRead.AddListOnTop(this->pipeBuffer);
@@ -1090,31 +1095,31 @@ void Pipe::Read(bool doNotBlock)
   char buffer[2];
   if (!doNotBlock)
     read(this->pipeEmptyingBlocksRead[0], buffer, 2);
-  if (theWebServer.activeWorker!=-1)
-    std::cout << consoleBlue("Worker ") << theWebServer.activeWorker
-    << consoleBlue(" is reading pipe: " + this->ToString()) << std::endl;
-  else
-    std::cout << consoleBlue("Server is reading pipe: "+ this->ToString()) << std::endl;
+  std::cout << consoleBlue(theWebServer.ToStringActiveWorker()+" reading pipe "+this->ToString()) << std::endl;
   this->ReadFileDescriptor(this->thePipe[0], doNotBlock);
-  if (theWebServer.activeWorker!=-1)
-    std::cout << consoleBlue("Worker ") << theWebServer.activeWorker << consoleBlue(" read ")
-    << this->lastRead.size << consoleBlue(" bytes. ") << std::endl;
-  else
-    std::cout << consoleBlue("Server read ") << this->lastRead.size << consoleBlue(" bytes. ") << std::endl;
+  std::cout << consoleBlue(theWebServer.ToStringActiveWorker()+ " read ") << this->lastRead.size << consoleBlue(" bytes.") << std::endl;
   if (!doNotBlock)
     write(this->pipeEmptyingBlocksRead[1], "!", 1);
 }
 
 std::string WebServer::ToStringLastErrorDescription()
 { std::stringstream out;
-  out << this->ToStringStatusActive() << consoleRed(strerror(errno)) << ". ";
+  out << this->ToStringActiveWorker() << ": " << consoleRed(strerror(errno)) << ". ";
+  return out.str();
+}
+
+std::string WebServer::ToStringActiveWorker()
+{ if (theWebServer.activeWorker==-1)
+    return "server";
+  std::stringstream out;
+  out << "worker " << theWebServer.activeWorker;
   return out.str();
 }
 
 std::string WebServer::ToStringStatusActive()
 { MacroRegisterFunctionWithName("WebServer::ToStringStatusActive");
   if (this->activeWorker==-1)
-    return "Server.";
+    return "server.";
   std::stringstream out;
   if (this->activeWorker!=this->GetActiveWorker().indexInParent)
     crash << "Bad index in parent!" << crash;
@@ -1178,11 +1183,12 @@ void WebServer::initDates()
 
 void WebServer::ReleaseWorkerSideResources()
 { MacroRegisterFunctionWithName("WebServer::ReleaseWorkerSideResources");
-  this->Release(this->GetActiveWorker().pipeServerToWorkerComputationReportReceived.thePipe[0]);//release read end
-  this->Release(this->GetActiveWorker().pipeServerToWorkerControls.thePipe[0]);//release read end
-  this->Release(this->GetActiveWorker().pipeServerToWorkerRequestIndicator.thePipe[0]);//release read end
-  this->Release(this->GetActiveWorker().pipeWorkerToServerControls.thePipe[1]);//release write end
-  this->Release(this->GetActiveWorker().pipeWorkerToServerIndicatorData.thePipe[1]);//release write end
+  //The following ends are needed to clear the pipe before using:
+  //this->GetActiveWorker().pipeServerToWorkerComputationReportReceived.thePipe[0]   //read end
+  //this->GetActiveWorker().pipeServerToWorkerControls.thePipe[0]                    //read end
+  //this->GetActiveWorker().pipeServerToWorkerRequestIndicator.thePipe[0]            //read end
+  this->Release(this->GetActiveWorker().pipeWorkerToServerControls.thePipe[1]);      //release write end
+  this->Release(this->GetActiveWorker().pipeWorkerToServerIndicatorData.thePipe[1]); //release write end
   this->Release(this->GetActiveWorker().connectedSocketID);
   //<-release socket- communication is handled by the worker.
   this->activeWorker=-1; //<-The active worker is needed only in the child process.
@@ -1240,7 +1246,7 @@ int WebServer::Run()
   if (sigaction(SIGINT, &sa, NULL) == -1)
     std::cout << "sigaction returned -1" << std::endl;
 */
-  std::cout << "Server: waiting for connections...\r\n" << std::endl;
+  std::cout << "server: waiting for connections...\r\n" << std::endl;
   std::cout << std::endl << std::endl << std::endl <<std::endl;
   unsigned int connectionsSoFar=0;
   while(true)
@@ -1262,9 +1268,9 @@ int WebServer::Run()
         currentPipe.Read(true);
         if (currentPipe.lastRead.size>0)
         { this->theWorkers[i].flagInUse=false;
-          std::cout << consoleGreen("Worker: ") << i+1 << consoleGreen(" done, marking for reuse.") << std::endl;
+          std::cout << consoleGreen("worker ") << i+1 << consoleGreen(" done, marking for reuse.") << std::endl;
         } else
-          std::cout << consoleRed("Worker: ") << i+1 << consoleRed(" not done yet.") << std::endl;
+          std::cout << consoleRed("worker ") << i+1 << consoleRed(" not done yet.") << std::endl;
       }
     std::cout << std::endl << std::endl;
     this->CreateNewActiveWorker();

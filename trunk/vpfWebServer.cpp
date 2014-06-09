@@ -77,10 +77,12 @@ std::string WebWorker::ToStringMessageShort(FormatExpressions* theFormat)const
     out << "GET (computation indicator)";
   else
     out << "Request type undefined.";
-  out << lineBreak << "<hr>Main address raw: " << this->mainAddresSRAW;
-  out << lineBreak << "<br>Main address: " << this->mainAddress;
+  out << "<hr>Main address raw: " << this->mainAddresSRAW;
+  out << lineBreak << "Main address: " << this->mainAddress;
   out << lineBreak << "Main argument: " << this->mainArgumentRAW;
   out << lineBreak << "Physical file address referred to by main address: " << this->PhysicalFileName;
+  out << lineBreak << "Display path server base: "
+  << onePredefinedCopyOfGlobalVariables.DisplayPathServerBase;
   return out.str();
 }
 
@@ -173,8 +175,8 @@ void WebWorker::StandardOutputPart2ComputationTimeout()
   std::cout << consoleRed("GOT THERE!");
   out << "<table><tr><td>" << theParser.outputString << "</td><td><b>Comments</b>"
   << theParser.outputCommentsString << "</td></tr></table>";
-  theWebServer.GetActiveWorker().pipeWorkerToServerIndicator.WriteAfterClearingPipe(out.str(), false);
-  theWebServer.GetActiveWorker().pipeServerToWorkerIndicator.Read(false);
+  theWebServer.GetActiveWorker().pipeWorkerToServerIndicatorData.WriteAfterClearingPipe(out.str(), false);
+  theWebServer.GetActiveWorker().pipeServerToWorkerComputationReportReceived.Read(false);
 }
 
 void WebWorker::StandardOutputPart2StandardExit()
@@ -414,10 +416,12 @@ bool WebWorker::ReceiveAll()
 
 void WebWorker::ExtractPhysicalAddressFromMainAddress()
 { MacroRegisterFunctionWithName("WebWorker::ExtractPhysicalAddressFromMainAddress");
-  if (this->mainAddress.size()<onePredefinedCopyOfGlobalVariables.DisplayPathServerBase.size())
-    return;
+  int numBytesToChop=onePredefinedCopyOfGlobalVariables.DisplayPathServerBase.size();
+  std::string displayAddressStart= this->mainAddress.substr(0, numBytesToChop);
+  if (displayAddressStart!=onePredefinedCopyOfGlobalVariables.DisplayPathServerBase)
+    numBytesToChop=0;
   this->PhysicalFileName=onePredefinedCopyOfGlobalVariables.PhysicalPathServerBase+
-  this->mainAddress.substr(onePredefinedCopyOfGlobalVariables.DisplayPathServerBase.size(), std::string::npos);
+  this->mainAddress.substr(numBytesToChop, std::string::npos);
 }
 
 int WebWorker::ProcessGetRequestServerStatus()
@@ -451,15 +455,17 @@ int WebWorker::ProcessGetRequestComputationIndicator()
   WebWorker& otherWorker=this->parent->theWorkers[inputWebWorkerIndex];
 //  std::cout << "Worker " << this->parent->activeWorker
 //  << consoleYellow(" piping 'indicator'" ) << std::endl;
-  otherWorker.pipeServerToWorkerIndicator.WriteAfterClearingPipe("indicator", true);
+  otherWorker.pipeServerToWorkerRequestIndicator.WriteAfterClearingPipe("!", true);
 //  std::cout << "'indicator' piped, waiting for return." << std::endl;
-  otherWorker.pipeWorkerToServerIndicator.Read(true);
+  otherWorker.pipeWorkerToServerIndicatorData.Read(true);
 //  std::cout << "indicator returned." << std::endl;
-
-  std::string outputString;
-  outputString.assign(otherWorker.pipeWorkerToServerIndicator.lastRead.TheObjects, otherWorker.pipeWorkerToServerIndicator.lastRead.size);
+  if (otherWorker.pipeWorkerToServerIndicatorData.lastRead.size>0)
+  { std::string outputString;
+    outputString.assign(otherWorker.pipeWorkerToServerIndicatorData.lastRead.TheObjects, otherWorker.pipeWorkerToServerIndicatorData.lastRead.size);
 //  std::cout << "string " << outputString << " read." << std::endl;
-  stOutput << outputString;
+    stOutput << outputString;
+    otherWorker.pipeServerToWorkerComputationReportReceived.WriteAfterClearingPipe("!", true);
+  }
 //  stOutput << "<b>Not implemented: request for indicator for worker " << inputWebWorkerNumber
 //  << " out of " << this->parent->theWorkers.size << ".</b>";
   return 0;
@@ -467,18 +473,12 @@ int WebWorker::ProcessGetRequestComputationIndicator()
 
 void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
 { MacroRegisterFunctionWithName("WebWorker::PipeProgressReportToParentProcess");
-  this->pipeServerToWorkerIndicator.Read(true);
-  List<char> endLastPipeRead=this->pipeServerToWorkerIndicator.lastRead;
-  endLastPipeRead.Slice(endLastPipeRead.size-9, 9);
-  std::string tempS;
-  tempS.assign(endLastPipeRead.TheObjects, endLastPipeRead.size);
-//  std::cout << "While making progress report " << input << " got that endLastPipeRead=" << tempS << std::endl;
-  if (!(endLastPipeRead=="indicator"))
+  this->pipeServerToWorkerRequestIndicator.Read(true);
+  if (this->pipeServerToWorkerRequestIndicator.lastRead.size==0)
     return;
-//  std::cout << consoleGreen("GOT to writing to pipe!!") << std::endl;
   if (this->flagTimedOutComputationIsDone)
     return;
-  this->pipeWorkerToServerIndicator.Write(input, true);
+  this->pipeWorkerToServerIndicatorData.Write(input, true);
 }
 
 int WebWorker::ProcessGetRequestFolder()
@@ -522,8 +522,9 @@ void WebWorker::reset()
   this->requestType=this->requestTypeUnknown;
   this->pipeServerToWorkerControls.Release();
   this->pipeWorkerToServerControls.Release();
-  this->pipeServerToWorkerIndicator.Release();
-  this->pipeWorkerToServerIndicator.Release();
+  this->pipeServerToWorkerRequestIndicator.Release();
+  this->pipeServerToWorkerComputationReportReceived.Release();
+  this->pipeWorkerToServerIndicatorData.Release();
 }
 
 WebWorker::WebWorker()
@@ -571,6 +572,8 @@ std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExten
     return "Content-Type: image/png\r\n";
   if (fileExtension==".js")
     return "Content-Type: text/javascript\r\n";
+  if (fileExtension==".ico")
+    return "Content-Type: image/x-icon\r\n";
   return "Content-Type: application/octet-stream\r\n";
 }
 
@@ -582,8 +585,7 @@ int WebWorker::ProcessGetRequestNonCalculator()
     return this->ProcessGetRequestFolder();
   if (!FileOperations::FileExists(this->PhysicalFileName))
   { stOutput << "HTTP/1.1 404 Object not found\r\n";
-    stOutput << "Content-Type: text/html\r\n";
-    stOutput << "\r\n";
+    stOutput << "Content-Type: text/html\r\n\r\n";
     stOutput << "<html><body>";
     stOutput << "<b>File does not exist.</b><br><b> File display name:</b> " << this->mainAddress
     << "<br><b>File physical name:</b> " << this->PhysicalFileName;
@@ -634,8 +636,7 @@ int WebWorker::ProcessGetRequestNonCalculator()
 int WebWorker::ProcessRequestTypeUnknown()
 { MacroRegisterFunctionWithName("WebWorker::ProcessRequestTypeUnknown");
   stOutput << "HTTP/1.1 501 Method Not Implemented\r\n";
-  stOutput << "Content-Type: text/html\r\n";
-  stOutput << "\r\n"
+  stOutput << "Content-Type: text/html\r\n\r\n"
   << "<b>Requested method is not implemented. </b> <hr>The original message received from the server follows."
   << "<hr>\n" << this->ToStringMessage();
   return 0;
@@ -783,19 +784,21 @@ int WebWorker::ServeClient()
 }
 
 void WebWorker::ReleaseServerSideResources()
-{ this->parent->Release(this->pipeWorkerToServerControls.thePipe[0]); //no access to read end
-  this->parent->Release(this->pipeServerToWorkerControls.thePipe[1]); //no access to write end
-  this->parent->Release(this->pipeWorkerToServerIndicator.thePipe[0]); //no access to read end
-  this->parent->Release(this->pipeServerToWorkerIndicator.thePipe[1]); //no access to write end
+{ this->parent->Release(pipeServerToWorkerControls.thePipe[1]); //no access to write end
+  this->parent->Release(pipeWorkerToServerControls.thePipe[0]); //no access to read end
+  this->parent->Release(pipeServerToWorkerRequestIndicator.thePipe[1]); //no access to write end
+  this->parent->Release(pipeServerToWorkerComputationReportReceived.thePipe[1]); //no access to write end
+  this->parent->Release(pipeWorkerToServerIndicatorData.thePipe[0]); //no access to read end
   this->parent->Release(this->parent->listeningSocketID);//worker has no access to socket listener
 }
 
 void WebWorker::ReleaseKeepInUseFlag()
 { MacroRegisterFunctionWithName("WebServer::ReleaseMyPipe");
   this->pipeServerToWorkerControls.Release();
-  this->pipeServerToWorkerIndicator.Release();
   this->pipeWorkerToServerControls.Release();
-  this->pipeWorkerToServerIndicator.Release();
+  this->pipeServerToWorkerRequestIndicator.Release();
+  this->pipeServerToWorkerComputationReportReceived.Release();
+  this->pipeWorkerToServerIndicatorData.Release();
   WebServer::Release(this->connectedSocketID);
 }
 
@@ -850,8 +853,9 @@ std::string WebWorker::ToStringStatus()const
     out << this->connectedSocketID;
   out << ", pipe indices: worker to server controls: " << this->pipeWorkerToServerControls.ToString()
   << ", server to worker controls:  " << this->pipeServerToWorkerControls.ToString()
-  << ", worker ot server indicator: " << this->pipeWorkerToServerIndicator.ToString()
-  << ", server to worker indicator: " << this->pipeServerToWorkerIndicator.ToString();
+  << ", server to worker request indicator: " << this->pipeServerToWorkerRequestIndicator.ToString()
+  << ", server to worker computation report received: " << this->pipeServerToWorkerComputationReportReceived.ToString()
+  << ", worker to server indicator data: " << this->pipeWorkerToServerIndicatorData.ToString()
   ;
 
   out << ", user address: " << this->userAddress << ".";
@@ -952,10 +956,11 @@ void WebServer::CreateNewActiveWorker()
   this->GetActiveWorker().Release();
   this->theWorkers[this->activeWorker].flagInUse=true;
 
+  this->GetActiveWorker().pipeServerToWorkerComputationReportReceived.CreateMe();
   this->GetActiveWorker().pipeServerToWorkerControls.CreateMe();
+  this->GetActiveWorker().pipeServerToWorkerRequestIndicator.CreateMe();
   this->GetActiveWorker().pipeWorkerToServerControls.CreateMe();
-  this->GetActiveWorker().pipeServerToWorkerIndicator.CreateMe();
-  this->GetActiveWorker().pipeWorkerToServerIndicator.CreateMe();
+  this->GetActiveWorker().pipeWorkerToServerIndicatorData.CreateMe();
   this->GetActiveWorker().indexInParent=this->activeWorker;
   this->GetActiveWorker().parent=this;
 }
@@ -1164,10 +1169,11 @@ void WebServer::initDates()
 
 void WebServer::ReleaseWorkerSideResources()
 { MacroRegisterFunctionWithName("WebServer::ReleaseWorkerSideResources");
-  this->Release(this->GetActiveWorker().pipeWorkerToServerIndicator.thePipe[1]);//release write end
-  this->Release(this->GetActiveWorker().pipeServerToWorkerIndicator.thePipe[0]);//release read end
-  this->Release(this->GetActiveWorker().pipeWorkerToServerControls.thePipe[1]);//release write end
+  this->Release(this->GetActiveWorker().pipeServerToWorkerComputationReportReceived.thePipe[0]);//release read end
   this->Release(this->GetActiveWorker().pipeServerToWorkerControls.thePipe[0]);//release read end
+  this->Release(this->GetActiveWorker().pipeServerToWorkerRequestIndicator.thePipe[0]);//release read end
+  this->Release(this->GetActiveWorker().pipeWorkerToServerControls.thePipe[1]);//release write end
+  this->Release(this->GetActiveWorker().pipeWorkerToServerIndicatorData.thePipe[1]);//release write end
   this->Release(this->GetActiveWorker().connectedSocketID);
   //<-release socket- communication is handled by the worker.
   this->activeWorker=-1; //<-The active worker is needed only in the child process.

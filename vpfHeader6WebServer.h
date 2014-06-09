@@ -66,10 +66,11 @@ public:
   int connectionID;
   List<char> remainingBytesToSend;
   List<char> bufferFileIO;
+  Pipe pipeServerToWorkerComputationReportReceived;
   Pipe pipeServerToWorkerControls;
+  Pipe pipeServerToWorkerRequestIndicator;
   Pipe pipeWorkerToServerControls;
-  Pipe pipeServerToWorkerIndicator;
-  Pipe pipeWorkerToServerIndicator;
+  Pipe pipeWorkerToServerIndicatorData;
 
   std::string error;
 

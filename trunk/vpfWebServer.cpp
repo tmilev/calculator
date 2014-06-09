@@ -172,11 +172,12 @@ void WebWorker::StandardOutputPart2ComputationTimeout()
 { MacroRegisterFunctionWithName("WebWorker::StandardOutputPart2ComputationTimeout");
   theWebServer.GetActiveWorker().flagTimedOutComputationIsDone=true;
   std::stringstream out;
-  std::cout << consoleRed("GOT THERE!");
   out << "<table><tr><td>" << theParser.outputString << "</td><td><b>Comments</b>"
   << theParser.outputCommentsString << "</td></tr></table>";
   theWebServer.GetActiveWorker().pipeWorkerToServerIndicatorData.WriteAfterClearingPipe(out.str(), false);
+  std::cout << consoleRed("GOT THERE PART 1!!!") << std::endl;
   theWebServer.GetActiveWorker().pipeServerToWorkerComputationReportReceived.Read(false);
+  std::cout << consoleRed("GOT THERE PART 2!!!") << std::endl;
 }
 
 void WebWorker::StandardOutputPart2StandardExit()
@@ -712,7 +713,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(bool withButton)
   out << "\n<br>\n<div id=\"idProgressReportTimer\"></div>\n";
   out << "\n<br>\n<div id=\"idProgressReport\"></div>\n";
   out << "\n<script type=\"text/javascript\"> \n";
-  out << " var timeIncrementInTenthsOfSecond=4;//measured in tenths of a second\n";
+  out << " var timeIncrementInTenthsOfSecond=40;//measured in tenths of a second\n";
   out << " var timeOutCounter=0;//measured in tenths of a second\n";
   out << " var showProgress=false;";
 
@@ -838,7 +839,7 @@ std::string WebWorker::ToStringStatus()const
 { std::stringstream out;
   out << "Worker " << this->indexInParent+1;
   if (this->flagInUse)
-    out << ", in use";
+    out << ", <b>in use</b>";
   else
     out << ", not in use";
   out << ", connection " << this->connectionID << ", process ID: ";
@@ -978,7 +979,11 @@ void Pipe::Write(const std::string& toBeSent, bool doNotBlock)
     return;
   char buffer[2];
   read(this->pipeEmptyingBlocksWrite[0], buffer, 2);
-  std::cout << consoleGreen("Sending ") << toBeSent.size()
+  if (theWebServer.activeWorker!=-1)
+    std::cout << consoleGreen("Worker ") << theWebServer.activeWorker;
+  else
+    std::cout << consoleGreen("Server ");
+  std::cout << consoleGreen(" is sending ") << toBeSent.size()
   << consoleGreen(" bytes through pipe "+this->ToString()) << std::endl;
 /*  if (doNotBlock)
     std::cout << ", NON-blocking." << std::endl;
@@ -1126,7 +1131,11 @@ std::string WebServer::ToStringStatusAll()
   { out << "The process is functioning as a worker. The active worker is number " << this->activeWorker+1 << ".";
     out << "<br>" << this->ToStringStatusActive();
   }
-  out << "<hr>Total workers: " << this->theWorkers.size;
+  int numInUse=0;
+  for (int i=0; i<this->theWorkers.size; i++)
+    if (this->theWorkers[i].flagInUse)
+      numInUse++;
+  out << "<hr>" << numInUse << " workers in use out of total " << this->theWorkers.size << " workers.";
   for (int i=0; i<this->theWorkers.size; i++)
     out << "<br>" << this->theWorkers[i].ToStringStatus();
   return out.str();

@@ -67,7 +67,7 @@ public:
   List<char> remainingBytesToSend;
   List<char> bufferFileIO;
   Pipe pipeServerToWorkerComputationReportReceived;
-  Pipe pipeServerToWorkerControls;
+  Pipe pipeServerToWorkerEmptyingPausesWorker;
   Pipe pipeServerToWorkerRequestIndicator;
   Pipe pipeWorkerToServerControls;
   Pipe pipeWorkerToServerIndicatorData;
@@ -76,6 +76,7 @@ public:
 
   int ProcessGetRequestServerStatus();
   int ProcessGetRequestComputationIndicator();
+  int ProcessPauseWorker();
   int ProcessGetRequestNonCalculator();
   int ProcessGetRequestFolder();
   int ProcessRequestTypeUnknown();
@@ -100,14 +101,14 @@ public:
   void SendAllBytes();
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
   static std::string GetJavaScriptIndicatorFromHD();
-  std::string GetJavaScriptIndicatorBuiltInServer(bool withButton);
+  std::string GetJavaScriptIndicatorBuiltInServer();
   bool IsFileExtensionOfBinaryFile(const std::string& fileExtension);
   WebWorker();
   ~WebWorker();
   bool IamActive();
   bool ReceiveOnce();
   bool ReceiveAll();
-  enum{requestTypeUnknown, requestTypeGetCalculator, requestTypePostCalculator, requestTypeGetNotCalculator, requestTypeGetServerStatus,
+  enum requestTypes {requestTypeUnknown, requestTypeGetCalculator, requestTypeTogglePauseCalculator, requestTypePostCalculator, requestTypeGetNotCalculator, requestTypeGetServerStatus,
   requestTypeGetComputationIndicator};
   std::string ToStringStatus()const;
   std::string ToStringMessage()const;

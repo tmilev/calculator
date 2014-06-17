@@ -2916,12 +2916,16 @@ private:
   void (*callSystem)(const std::string& theSystemCommand);
 public:
   void (*IndicatorStringOutputFunction)(const std::string& input);
-  void (*sleepFunction)(int nanoseconds);
+  void (*sleepFunction)(int microseconds);
   void (*WebServerReturnDisplayIndicatorCloseConnection)();
-
-  void FallAsleep(int nanoseconds)
+  void (*PauseUponUserRequest)();
+  void Pause()
+  { if (this->PauseUponUserRequest!=0)
+      this->PauseUponUserRequest();
+  }
+  void FallAsleep(int microseconds)
   { if (this->sleepFunction!=0)
-      this->sleepFunction(nanoseconds);
+      this->sleepFunction(microseconds);
   }
   double MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   FormatExpressions theDefaultFormat;

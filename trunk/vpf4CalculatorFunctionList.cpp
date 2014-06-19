@@ -1414,7 +1414,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddPlotToPlot, this->opCalculusPlot(), this->opCalculusPlot(),
    "Superimposes two plots. ",
-   "plot2D{}(sin{}(x), -5, 5)+ plot2D{}(1/sin{}(x ), 0.01, 3.14)", true);
+   "plot2D{}(sin{}(x), -5, 5)+ plot2D{}(1/sin{}(x ), 0.1, 3.041592654)", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyToRatOrPoly, this->opRational(), this->opPoly(),
    "Adds a rational to a polynomial. ",

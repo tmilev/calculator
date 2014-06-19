@@ -2928,6 +2928,11 @@ public:
       this->sleepFunction(microseconds);
   }
   double MaxComputationTimeSecondsNonPositiveMeansNoLimit;
+  double MaxComputationTimeBeforeWeTakeAction;
+  bool flagDisplayTimeOutExplanation;
+  bool flagOutputTimedOut;
+  bool flagTimedOutComputationIsDone;
+
   FormatExpressions theDefaultFormat;
 //progress report flags:
   bool flagGaussianEliminationProgressReport;

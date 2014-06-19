@@ -56,9 +56,16 @@ void* RunTimerVoidPtr(void* ptr)
     elapsedtime=GetElapsedTimeInSeconds();
     if (onePredefinedCopyOfGlobalVariables.flagComputationComplete)
       break;
-    if (elapsedtime >=onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit && !
-        (onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit<=0))
-      break;
+    if (onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
+      if (elapsedtime>onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit)
+        break;
+    if (onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction>0)
+      if (elapsedtime>onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction)
+        if (onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection!=0)
+          if (!onePredefinedCopyOfGlobalVariables.flagOutputTimedOut!=0)
+          { onePredefinedCopyOfGlobalVariables.flagDisplayTimeOutExplanation=true;
+            onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
+          }
   }
   if (!onePredefinedCopyOfGlobalVariables.flagComputationComplete)
   { stOutput << "</div><br><br><br>Your computation has taken " << elapsedtime << " seconds so far.";

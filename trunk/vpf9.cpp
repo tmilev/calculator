@@ -73,10 +73,14 @@ GlobalVariables::GlobalVariables()
 { this->IndicatorStringOutputFunction=0;
   this->WebServerReturnDisplayIndicatorCloseConnection=0;
   this->MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000000;
+  this->MaxComputationTimeBeforeWeTakeAction=0;
   this->callSystem=0;
   this->sleepFunction=0;
   this->flagGaussianEliminationProgressReport=false;
   this->getElapsedTimePrivate=0;
+  this->flagDisplayTimeOutExplanation=false;
+  this->flagOutputTimedOut=false;
+  this->flagTimedOutComputationIsDone=false;
 //  stOutput << "Global variables created!";
 }
 

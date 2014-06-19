@@ -13,6 +13,7 @@ int main(int argc, char **argv)
 { MacroRegisterFunctionWithName("main");
   InitializeGlobalObjects();
   onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=5000;
+  onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction=5;
   //	stOutput <<  "<br>" << (int) &theGlobalVariables.callSystem ;
   ParallelComputing::cgiLimitRAMuseNumPointersInList=4000000000;
   if (argc>=1)

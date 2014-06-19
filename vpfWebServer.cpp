@@ -820,7 +820,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   std::stringstream out;
   out << " <!>\n";
 //  out << "\n<br>\n<button onclick=\"progressReport()\">Manual report</button>";
-  out << "\n<br>\n<button onclick=\"SendTogglePauseRequest()\">Pause</button>";
+  out << "\n<br>\n<button id=\"idButtonSendTogglePauseRequest\" onclick=\"SendTogglePauseRequest()\">Pause</button>";
   out << "<span id=\"idPauseToggleServerResponse\"></span>\n";
   out << "<span id=\"idProgressReportTimer\"></span>\n";
   out << "\n<br>\n<div id=\"idProgressReport\"></div>\n";
@@ -842,6 +842,10 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   out << "  if (pauseRequest.status!=200)\n";
   out << "    return;\n";
   out << "  isPaused=(pauseRequest.responseText==\"paused\");\n";
+  out << "  if (isPaused)\n";
+  out << "    document.getElementById(\"idButtonSendTogglePauseRequest\").innerHTML=\"Continue\";\n";
+  out << "  else\n";
+  out << "    document.getElementById(\"idButtonSendTogglePauseRequest\").innerHTML=\"Pause\";\n";
   out << "  document.getElementById(\"idPauseToggleServerResponse\").innerHTML=pauseRequest.responseText;\n";
   out << "  if (!isPaused)\n";
   out << "    progressReport();\n";

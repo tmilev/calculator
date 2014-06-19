@@ -182,8 +182,6 @@ void WebWorker::resetMessageComponentsExceptRawMessage()
   this->theStrings.SetSize(0);
   this->requestType=this->requestTypeUnknown;
   this->ContentLength=-1;
-  this->flagOutputTimedOut=false;
-  this->flagTimedOutComputationIsDone=false;
 }
 
 void WebWorker::StandardOutputPart1BeforeComputation()
@@ -228,7 +226,7 @@ void WebWorker::StandardOutputPart1BeforeComputation()
 
 void WebWorker::StandardOutputPart2ComputationTimeout()
 { MacroRegisterFunctionWithName("WebWorker::StandardOutputPart2ComputationTimeout");
-  theWebServer.GetActiveWorker().flagTimedOutComputationIsDone=true;
+  onePredefinedCopyOfGlobalVariables.flagTimedOutComputationIsDone=true;
   std::stringstream out;
   out << "<table><tr><td>" << theParser.outputString << "</td><td><b>Comments</b>"
   << theParser.outputCommentsString << "</td></tr></table>";
@@ -584,7 +582,7 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
   this->pipeServerToWorkerRequestIndicator.Read(true);
   if (this->pipeServerToWorkerRequestIndicator.lastRead.size==0)
     return;
-  if (this->flagTimedOutComputationIsDone)
+  if (onePredefinedCopyOfGlobalVariables.flagTimedOutComputationIsDone)
     return;
   theLog << "about to potentially block " << logger::endL;
   this->pipeServerToWorkerEmptyingPausesWorker.Read(false);     //if pause was requested, here we block
@@ -630,8 +628,6 @@ void WebWorker::reset()
   this->indexInParent=-1;
   this->parent=0;
   this->flagInUse=false;
-  this->flagOutputTimedOut=false;
-  this->flagTimedOutComputationIsDone=false;
   this->requestType=this->requestTypeUnknown;
   this->pipeServerToWorkerEmptyingPausesWorker.Release();
   this->pipeWorkerToServerControls.Release();
@@ -710,9 +706,8 @@ int WebWorker::ProcessGetRequestNonCalculator()
   bool isBinary=this->IsFileExtensionOfBinaryFile(fileExtension);
   std::fstream theFile;
   if (!FileOperations::OpenFile(theFile, this->PhysicalFileName, false, false, !isBinary))
-  { stOutput << "HTTP/1.1 200 OK\r\n" << "Content-Type: text/html\r\n";
-    stOutput << "\r\n"
-    << "<html><body><b>Error: file appears to exist but I could not open it.</b> "
+  { stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
+    stOutput << "<html><body><b>Error: file appears to exist but I could not open it.</b> "
     << "<br><b> File display name: </b>"
     << this->mainAddress << "<br><b>File physical name: </b>"
     << this->PhysicalFileName << "</body></html>";
@@ -748,9 +743,8 @@ int WebWorker::ProcessGetRequestNonCalculator()
 
 int WebWorker::ProcessRequestTypeUnknown()
 { MacroRegisterFunctionWithName("WebWorker::ProcessRequestTypeUnknown");
-  stOutput << "HTTP/1.1 501 Method Not Implemented\r\n";
-  stOutput << "Content-Type: text/html\r\n\r\n"
-  << "<b>Requested method is not implemented. </b> <hr>The original message received from the server follows."
+  stOutput << "HTTP/1.1 501 Method Not Implemented\r\nContent-Type: text/html\r\n\r\n";
+  stOutput << "<b>Requested method is not implemented. </b> <hr>The original message received from the server follows."
   << "<hr>\n" << this->ToStringMessage();
   return 0;
 }
@@ -762,12 +756,12 @@ int WebWorker::StandardOutput()
   stOutput << theParser.javaScriptDisplayingIndicator;
 //  theParser.inputString="%LogEvaluation 3 *3^{1/2}";
   if (theParser.inputString!="")
-  { theParser.Evaluate(theParser.inputString);
-    onePredefinedCopyOfGlobalVariables.flagComputationComplete=true;
-  }
+    theParser.Evaluate(theParser.inputString);
+  onePredefinedCopyOfGlobalVariables.flagComputationComplete=true;
   if (theWebServer.flagUsingBuiltInServer)
-    if (theWebServer.GetActiveWorker().flagOutputTimedOut)
+    if (onePredefinedCopyOfGlobalVariables.flagOutputTimedOut)
     { WebWorker::StandardOutputPart2ComputationTimeout();
+      stOutput.Flush();
       return 0;
     }
   WebWorker::StandardOutputPart2StandardExit();
@@ -945,11 +939,16 @@ void WebWorker::Release()
 
 void WebWorker::StandardOutputReturnIndicatorWaitForComputation()
 { MacroRegisterFunctionWithName("WebServer::StandardOutputReturnIndicatorWaitForComputation");
-  this->flagOutputTimedOut=true;
-  this->flagTimedOutComputationIsDone=false;
-  stOutput << this->GetJavaScriptIndicatorBuiltInServer()
-//  << "<script language=\"javascript\">progressReport();</script>"
-  << "</td></tr></table></body></html>";
+  onePredefinedCopyOfGlobalVariables.flagOutputTimedOut=true;
+  onePredefinedCopyOfGlobalVariables.flagTimedOutComputationIsDone=false;
+  stOutput << "</td></tr>";
+  if (onePredefinedCopyOfGlobalVariables.flagDisplayTimeOutExplanation)
+    stOutput << "<tr><td>Your computation is taking more than " << onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction
+    << " seconds.</td></tr>";
+  stOutput << "<tr><td>A progress indicator, as reported by your current computation, is displayed below. "
+  << "When done, your computation result will be displayed below. </td></tr>";
+  stOutput << "<tr><td>" << this->GetJavaScriptIndicatorBuiltInServer() << "</td></tr>"
+  << "</table></body></html>";
   theLog << logger::red << ("Indicator: sending all bytes") << logger::endL;
   this->SendAllBytes();
   theLog << logger::blue << ("Indicator: sending all bytes DONE") << logger::endL;

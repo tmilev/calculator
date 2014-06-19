@@ -48,8 +48,6 @@ class WebWorker
 public:
   WebServer* parent;
   bool flagInUse;
-  bool flagOutputTimedOut;
-  bool flagTimedOutComputationIsDone;
   int indexInParent;
   int ProcessPID;
   std::string userAddress;

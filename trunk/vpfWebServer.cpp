@@ -525,9 +525,9 @@ int WebWorker::ProcessPauseWorker()
   int inputWebWorkerNumber= atoi(this->mainArgumentRAW.substr(14, std::string::npos).c_str());
   int inputWebWorkerIndex= inputWebWorkerNumber-1;
   if (inputWebWorkerIndex<0 || inputWebWorkerIndex>=this->parent->theWorkers.size)
-  { stOutput << "<b>Indicator requested " << this->mainArgumentRAW
-    << " (extracted worker number " << inputWebWorkerNumber << " out of "
-    << this->parent->theWorkers.size << ") but the id is out of range. </b>";
+  { stOutput << "<b>Indicator requested " << this->mainArgumentRAW << " (extracted worker number "
+    << inputWebWorkerNumber << " out of " << this->parent->theWorkers.size
+    << ") but the id is out of range. </b>";
     return 0;
   }
   if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUse)
@@ -565,9 +565,8 @@ int WebWorker::ProcessGetRequestComputationIndicator()
   int inputWebWorkerNumber= atoi(this->mainArgumentRAW.substr(9, std::string::npos).c_str());
   int inputWebWorkerIndex= inputWebWorkerNumber-1;
   if (inputWebWorkerIndex<0 || inputWebWorkerIndex>=this->parent->theWorkers.size)
-  { stOutput << "<b>Indicator requested " << this->mainArgumentRAW
-    << " (extracted worker number " << inputWebWorkerNumber << " out of "
-    << this->parent->theWorkers.size << ") but the id is out of range. </b>";
+  { stOutput << "<b>Indicator requested " << this->mainArgumentRAW << " (extracted worker number "
+    << inputWebWorkerNumber << " out of " << this->parent->theWorkers.size << ") but the id is out of range. </b>";
     return 0;
   }
   if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUse)
@@ -676,12 +675,12 @@ bool WebWorker::IsFileExtensionOfBinaryFile(const std::string& fileExtension)
 void WebWorker::SignalIamDoneReleaseEverything()
 { MacroRegisterFunctionWithName("WebWorker::SignalIamDoneReleaseEverything");
   if (!this->IamActive())
-  { theLog << logger::red << ("Signal done called on non-active worker") << logger::endL;
+  { theLog << logger::red << "Signal done called on non-active worker" << logger::endL;
     return;
   }
-  theLog << logger::blue << ("worker ") << this->indexInParent+1 << logger::blue << (" is done with the work. ") << logger::endL;
+  theLog << logger::blue << "worker " << this->indexInParent+1 << " is done with the work. " << logger::endL;
   this->pipeWorkerToServerControls.WriteAfterClearingPipe("close", false);
-  theLog << logger::blue << ("Notification dispatched.") << logger::endL;
+  theLog << logger::blue << "Notification dispatched." << logger::endL;
   this->SendAllBytes();
   this->Release();
 }
@@ -713,8 +712,7 @@ int WebWorker::ProcessGetRequestNonCalculator()
   if (FileOperations::IsFolder(this->PhysicalFileName))
     return this->ProcessGetRequestFolder();
   if (!FileOperations::FileExists(this->PhysicalFileName))
-  { stOutput << "HTTP/1.1 404 Object not found\r\n";
-    stOutput << "Content-Type: text/html\r\n\r\n";
+  { stOutput << "HTTP/1.1 404 Object not found\r\nContent-Type: text/html\r\n\r\n";
     stOutput << "<html><body>";
     stOutput << "<b>File does not exist.</b><br><b> File display name:</b> " << this->mainAddress
     << "<br><b>File physical name:</b> " << this->PhysicalFileName;
@@ -1139,8 +1137,8 @@ void Pipe::Write(const std::string& toBeSent, bool doNotBlock)
       theLog << logger::green << ("worker ") << theWebServer.activeWorker;
     else
       theLog << logger::green << ("server ");
-    theLog << logger::green << (" is sending ") << toBeSent.size()
-    << logger::green << (" bytes through pipe "+this->ToString()) << logger::endL;
+    theLog << logger::green << (" is sending ") << toBeSent.size() << " bytes through pipe "
+    << this->ToString() << logger::endL;
   }
 /*  if (doNotBlock)
     theLog << ", NON-blocking." << logger::endL;
@@ -1262,8 +1260,8 @@ void Pipe::Read(bool doNotBlock)
   if (!doNotBlock)
     read(this->pipeEmptyingBlocksRead[0], buffer, 2);
   if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-    theLog << logger::blue << theWebServer.ToStringActiveWorker()
-    << " reading pipe " << this->ToString() << logger::endL;
+    theLog << logger::blue << theWebServer.ToStringActiveWorker() << " reading pipe "
+    << this->ToString() << logger::endL;
   this->ReadFileDescriptor(this->thePipe[0], doNotBlock);
   if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
     theLog << logger::blue << theWebServer.ToStringActiveWorker() << " read "
@@ -1325,7 +1323,7 @@ void WebServer::CheckExecutableVersionAndRestartIfNeeded()
   if (this->timeLastExecutableModification!=-1)
     if (this->timeLastExecutableModification!=theFileStat.st_ctime)
     { stOutput << "<b>The server executable was updated, but the server has not been restarted yet. "
-      << "Restarting in 0.5 seconds...";
+      << "Restarting in 0.5 seconds...</b>";
       stOutput << "<script language=\"javascript\">setTimeout(resubmit, 500); "
       << " function resubmit() { document.getElementById('formCalculator').submit();}</script>";
       if (this->activeWorker!=-1)

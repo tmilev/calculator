@@ -13,9 +13,16 @@ class logger
   public:
   int currentColor;
   std::fstream theFile;
+  bool flagStopWritingToFile;
   logger()
   { FileOperations::OpenFileCreateIfNotPresent(theFile, "./../LogFile.html", false, true, false);
-    currentColor=logger::normalColor;
+    this->currentColor=logger::normalColor;
+    this->flagStopWritingToFile=false;
+  }
+  void CheckLogSize()
+  { theFile.seekg(0, std::ios::end);
+    if (theFile.tellg()>500000)
+      this->flagStopWritingToFile=true;
   }
   enum loggerSpecialSymbols{ endL, red, blue, yellow, green, normalColor};
   std::string closeTagConsole()
@@ -55,9 +62,12 @@ class logger
     }
   }
   logger& operator << (const loggerSpecialSymbols& input)
-  { switch (input)
+  { this->CheckLogSize();
+    switch (input)
     { case logger::endL:
         std::cout << this->closeTagConsole() << std::endl;
+        if (this->flagStopWritingToFile)
+          return *this;
         theFile << this->closeTagHtml() << "\n<br>\n";
         theFile.flush();
         return *this;
@@ -65,9 +75,11 @@ class logger
       case logger::blue:
       case logger::yellow:
       case logger::green:
-        this->theFile << this->closeTagHtml();
         this->currentColor=input;
         std::cout << this->openTagConsole();
+        if (this->flagStopWritingToFile)
+          return *this;
+        this->theFile << this->closeTagHtml();
         this->theFile << this->openTagHtml();
         theFile.flush();
         return *this;
@@ -75,10 +87,12 @@ class logger
         return *this;
     }
   }
-
   template <typename theType>
   logger& operator << (const theType& toBePrinted)
   { std::cout << toBePrinted;
+    this->CheckLogSize();
+    if (this->flagStopWritingToFile)
+      return *this;
     std::stringstream out;
     out << toBePrinted;
     theFile << out.str();
@@ -522,16 +536,19 @@ int WebWorker::ProcessPauseWorker()
     return 0;
   }
   WebWorker& otherWorker=this->parent->theWorkers[inputWebWorkerIndex];
-  theLog << "About to read pipeServerToWorker..." << logger::endL;
+  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+    theLog << "About to read pipeServerToWorker..." << logger::endL;
   otherWorker.pipeServerToWorkerEmptyingPausesWorker.Read(true);
   if (otherWorker.pipeServerToWorkerEmptyingPausesWorker.lastRead.size>0)
-  { theLog << logger::yellow << "Successfully read pipeServerToWorkerEmptyingPausesWorker, result was NON EMPTY"
-    << logger::endL;
+  { if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+      theLog << logger::yellow << "Successfully read pipeServerToWorkerEmptyingPausesWorker, result was NON EMPTY"
+      << logger::endL;
     stOutput << "paused";
     return 0;
   }
-  theLog << logger::green << "Successfully read pipeServerToWorkerEmptyingPausesWorker, result was EMPTY"
-  << logger::endL;
+  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+    theLog << logger::green << "Successfully read pipeServerToWorkerEmptyingPausesWorker, result was EMPTY"
+    << logger::endL;
   stOutput << "unpaused";
   otherWorker.pipeServerToWorkerEmptyingPausesWorker.Write("!", false);
   return 0;
@@ -568,7 +585,7 @@ int WebWorker::ProcessGetRequestComputationIndicator()
   if (otherWorker.pipeWorkerToServerIndicatorData.lastRead.size>0)
   { std::string outputString;
     outputString.assign(otherWorker.pipeWorkerToServerIndicatorData.lastRead.TheObjects, otherWorker.pipeWorkerToServerIndicatorData.lastRead.size);
-    theLog << logger::yellow << "Indicator string read: " << logger::blue << outputString << logger::endL;
+    //theLog << logger::yellow << "Indicator string read: " << logger::blue << outputString << logger::endL;
     stOutput << outputString;
     otherWorker.pipeServerToWorkerComputationReportReceived.WriteAfterClearingPipe("!", true);
   }
@@ -584,11 +601,14 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
     return;
   if (onePredefinedCopyOfGlobalVariables.flagTimedOutComputationIsDone)
     return;
-  theLog << "about to potentially block " << logger::endL;
+  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+    theLog << "about to potentially block " << logger::endL;
   this->pipeServerToWorkerEmptyingPausesWorker.Read(false);     //if pause was requested, here we block
-  theLog << "block skipped" << logger::endL;
+  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+    theLog << "block skipped" << logger::endL;
   this->pipeServerToWorkerEmptyingPausesWorker.Write("!", false);
-  theLog << " data written!";
+  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+    theLog << " data written!";
   this->pipeWorkerToServerIndicatorData.Write(input, true);
 }
 
@@ -1114,12 +1134,14 @@ void Pipe::Write(const std::string& toBeSent, bool doNotBlock)
     return;
   char buffer[2];
   read(this->pipeEmptyingBlocksWrite[0], buffer, 2);
-  if (theWebServer.activeWorker!=-1)
-    theLog << logger::green << ("worker ") << theWebServer.activeWorker;
-  else
-    theLog << logger::green << ("server ");
-  theLog << logger::green << (" is sending ") << toBeSent.size()
-  << logger::green << (" bytes through pipe "+this->ToString()) << logger::endL;
+  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+  { if (theWebServer.activeWorker!=-1)
+      theLog << logger::green << ("worker ") << theWebServer.activeWorker;
+    else
+      theLog << logger::green << ("server ");
+    theLog << logger::green << (" is sending ") << toBeSent.size()
+    << logger::green << (" bytes through pipe "+this->ToString()) << logger::endL;
+  }
 /*  if (doNotBlock)
     theLog << ", NON-blocking." << logger::endL;
   else
@@ -1204,12 +1226,14 @@ void Pipe::ReadFileDescriptor(int readEnd, bool doNotBlock)
   const unsigned int bufferSize=4096;
   for (;;)
   { this->pipeBuffer.SetSize(bufferSize); // <-once the buffer is resized, this operation does no memory allocation and is fast.
-    theLog << logger::blue << (theWebServer.ToStringActiveWorker())
-    << logger::blue << (" pipe, " + this->ToString()) << " calling read." << logger::endL;
+    if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+      theLog << logger::blue << theWebServer.ToStringActiveWorker() << logger::blue
+      << " pipe, " << this->ToString() << " calling read." << logger::endL;
     int numReadBytes =read(readEnd, this->pipeBuffer.TheObjects, bufferSize);
     if (numReadBytes<0)
-    { theLog << logger::red << this->ToString() << ": " << theWebServer.ToStringLastErrorDescription()
-      << logger::endL;
+    { if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+        theLog << logger::red << this->ToString() << ": " << theWebServer.ToStringLastErrorDescription()
+        << logger::endL;
       return;
     }
     if (numReadBytes==0)
@@ -1218,8 +1242,9 @@ void Pipe::ReadFileDescriptor(int readEnd, bool doNotBlock)
     if (counter>10000)
       theLog << "This is not supposed to happen: more than 10000 iterations of read from pipe."
       << logger::endL;
-    theLog << logger::blue << theWebServer.ToStringActiveWorker() << " pipe, " << this->ToString()
-    << " " << numReadBytes << " bytes read. " << logger::endL;
+    if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+      theLog << logger::blue << theWebServer.ToStringActiveWorker() << " pipe, " << this->ToString()
+      << " " << numReadBytes << " bytes read. " << logger::endL;
     this->pipeBuffer.SetSize(numReadBytes);
     this->lastRead.AddListOnTop(this->pipeBuffer);
     if (numReadBytes<(signed) bufferSize)
@@ -1236,11 +1261,13 @@ void Pipe::Read(bool doNotBlock)
   char buffer[2];
   if (!doNotBlock)
     read(this->pipeEmptyingBlocksRead[0], buffer, 2);
-  theLog << logger::blue << theWebServer.ToStringActiveWorker()
-  << " reading pipe " << this->ToString() << logger::endL;
+  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+    theLog << logger::blue << theWebServer.ToStringActiveWorker()
+    << " reading pipe " << this->ToString() << logger::endL;
   this->ReadFileDescriptor(this->thePipe[0], doNotBlock);
-  theLog << logger::blue << theWebServer.ToStringActiveWorker() << " read "
-  << this->lastRead.size << " bytes." << logger::endL;
+  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+    theLog << logger::blue << theWebServer.ToStringActiveWorker() << " read "
+    << this->lastRead.size << " bytes." << logger::endL;
   if (!doNotBlock)
     write(this->pipeEmptyingBlocksRead[1], "!", 1);
 }

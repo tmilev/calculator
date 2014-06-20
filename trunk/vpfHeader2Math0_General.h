@@ -2932,6 +2932,7 @@ public:
   bool flagDisplayTimeOutExplanation;
   bool flagOutputTimedOut;
   bool flagTimedOutComputationIsDone;
+  bool flagLogInterProcessCommunication;
 
   FormatExpressions theDefaultFormat;
 //progress report flags:

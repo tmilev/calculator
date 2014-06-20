@@ -670,7 +670,7 @@ void SemisimpleSubalgebras::GetHCandidates
       { if (theGlobalVariables!=0)
         { std::stringstream out2;
           std::stringstream out3;
-          out3 << "So far, found" << outputHCandidatesScaledToActByTwo.size+1 << " good candidates. ";
+          out3 << "So far, found " << outputHCandidatesScaledToActByTwo.size+1 << " good candidates. ";
           theReport2.Report(out3.str());
           out2 << "sl(2) orbit " << j+1 << ", h orbit candidate " << k+1 << " out of " << currentOrbit.size
           << " has desired scalar products.";

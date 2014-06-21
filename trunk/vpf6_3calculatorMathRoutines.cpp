@@ -3831,7 +3831,7 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, con
 //  else
 //    std::cout << "WebServerReturnDisplayIndicatorCloseConnection IS ZERO!!!!" << std::endl;
   ProgressReport theReport(theCommands.theGlobalVariableS);
-  int numRuns = 20000;
+  int numRuns = 1000;
   for (int i=0; i<numRuns; i++)
   { std::stringstream reportStream;
     reportStream << " Running indicator test, " << i+1 << " out of " << numRuns << ".";

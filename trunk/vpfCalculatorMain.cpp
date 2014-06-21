@@ -76,5 +76,5 @@ int main_apache_client()
       IPAdressCaller[i]='A'+(IPAdressCaller[i]*SomeRandomPrimes[i])%26;
 	}
 	theParser.javaScriptDisplayingIndicator=WebWorker::GetJavaScriptIndicatorFromHD();
-  return WebWorker::StandardOutput();
+  return WebWorker::OutputWeb();
 }

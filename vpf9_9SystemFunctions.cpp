@@ -62,7 +62,8 @@ void* RunTimerVoidPtr(void* ptr)
     if (onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction>0)
       if (elapsedtime>onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction)
         if (onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection!=0)
-          if (!onePredefinedCopyOfGlobalVariables.flagOutputTimedOut!=0)
+          if (!onePredefinedCopyOfGlobalVariables.flagOutputTimedOut!=0 &&
+              !onePredefinedCopyOfGlobalVariables.flagDisplayTimeOutExplanation)
           { onePredefinedCopyOfGlobalVariables.flagDisplayTimeOutExplanation=true;
             onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
           }

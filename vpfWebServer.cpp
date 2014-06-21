@@ -198,8 +198,13 @@ void WebWorker::resetMessageComponentsExceptRawMessage()
   this->ContentLength=-1;
 }
 
-void WebWorker::StandardOutputPart1BeforeComputation()
-{ MacroRegisterFunctionWithName("WebServer::StandardOutputPart1BeforeComputation");
+std::stringstream standardOutputStreamAfterTimeout;
+void WebWorker::StandardOutputAfterTimeOut(const std::string& input)
+{ standardOutputStreamAfterTimeout << input;
+}
+
+void WebWorker::OutputBeforeComputation()
+{ MacroRegisterFunctionWithName("WebServer::OutputBeforeComputation");
   onePredefinedCopyOfGlobalVariables.flagComputationComplete=false;
 
   stOutput << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
@@ -238,19 +243,38 @@ void WebWorker::StandardOutputPart1BeforeComputation()
   //  stOutput << "<br>Number of lists created before evaluation: " << NumListsCreated;
 }
 
-void WebWorker::StandardOutputPart2ComputationTimeout()
-{ MacroRegisterFunctionWithName("WebWorker::StandardOutputPart2ComputationTimeout");
-  onePredefinedCopyOfGlobalVariables.flagTimedOutComputationIsDone=true;
+void WebWorker::OutputResultAfterTimeout()
+{ MacroRegisterFunctionWithName("WebWorker::OutputResultAfterTimeout");
   std::stringstream out;
+  if (standardOutputStreamAfterTimeout.str().size()!=0)
+    out << standardOutputStreamAfterTimeout.str() << "<hr>";
   out << "<table><tr><td>" << theParser.outputString << "</td><td><b>Comments</b>"
   << theParser.outputCommentsString << "</td></tr></table>";
+  WebWorker::OutputSendAfterTimeout(out.str());
+}
+
+void WebWorker::OutputCrashAfterTimeout()
+{ MacroRegisterFunctionWithName("WebWorker::OutputCrashAfterTimeout");
+  theLog << logger::red << theWebServer.ToStringActiveWorker() << ": crashing AFTER timeout!" << logger::endL;
+  if (standardOutputStreamAfterTimeout.str().size()!=0)
+    WebWorker::OutputSendAfterTimeout(standardOutputStreamAfterTimeout.str()+"<hr>"+crash.theCrashReport.str());
+  else
+    WebWorker::OutputSendAfterTimeout(crash.theCrashReport.str());
+  theWebServer.SignalActiveWorkerDoneReleaseEverything();
+}
+
+void WebWorker::OutputSendAfterTimeout(const std::string& input)
+{ MacroRegisterFunctionWithName("WebWorker::OutputSendAfterTimeout");
+  onePredefinedCopyOfGlobalVariables.flagTimedOutComputationIsDone=true;
+  theLog << "WebWorker::StandardOutputPart2ComputationTimeout called with worker number " << theWebServer.GetActiveWorker().indexInParent+1
+  << "." << logger::endL;
   //clearing the pipe which will signal our data has been received:
   theWebServer.GetActiveWorker().pipeServerToWorkerComputationReportReceived.Read(true);
   //making sure we are not paused:
 //  theWebServer.GetActiveWorker().pipeServerToWorkerEmptyingPausesWorker.Read(false);
 //  theWebServer.GetActiveWorker().pipeServerToWorkerEmptyingPausesWorker.Write("!", false);
   theLog << logger::red << "Writing final output to indicator." << logger::endL;
-  theWebServer.GetActiveWorker().pipeWorkerToServerIndicatorData.WriteAfterClearingPipe(out.str(), false);
+  theWebServer.GetActiveWorker().pipeWorkerToServerIndicatorData.WriteAfterClearingPipe(input, false);
   theLog << logger::red << "Final output written to indicator, blocking until data is received." << logger::endL;
   theWebServer.GetActiveWorker().pipeServerToWorkerComputationReportReceived.Read(false);
   theLog << logger::red << "We are unblocked (data was received), writing \"finished\"." << logger::endL;
@@ -259,8 +283,8 @@ void WebWorker::StandardOutputPart2ComputationTimeout()
   theWebServer.GetActiveWorker().pipeServerToWorkerComputationReportReceived.Read(false);
 }
 
-void WebWorker::StandardOutputPart2StandardExit()
-{ MacroRegisterFunctionWithName("WebServer::StandardOutputPart2StandardExit");
+void WebWorker::OutputStandardResult()
+{ MacroRegisterFunctionWithName("WebServer::OutputStandardResult");
   if (theParser.inputString!="")
   { if (theParser.flagProduceLatexLink)
       stOutput << "<br>LaTeX link (\\usepackage{hyperref}):<br> "
@@ -525,9 +549,9 @@ int WebWorker::ProcessPauseWorker()
   int inputWebWorkerNumber= atoi(this->mainArgumentRAW.substr(14, std::string::npos).c_str());
   int inputWebWorkerIndex= inputWebWorkerNumber-1;
   if (inputWebWorkerIndex<0 || inputWebWorkerIndex>=this->parent->theWorkers.size)
-  { stOutput << "<b>Indicator requested " << this->mainArgumentRAW << " (extracted worker number "
+  { stOutput << "<b>User requested " << this->mainArgumentRAW << " (worker number "
     << inputWebWorkerNumber << " out of " << this->parent->theWorkers.size
-    << ") but the id is out of range. </b>";
+    << ") but the worker number is out of range. </b>";
     return 0;
   }
   if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUse)
@@ -767,9 +791,9 @@ int WebWorker::ProcessRequestTypeUnknown()
   return 0;
 }
 
-int WebWorker::StandardOutput()
-{ MacroRegisterFunctionWithName("WebServer::StandardOutput");
-  WebWorker::StandardOutputPart1BeforeComputation();
+int WebWorker::OutputWeb()
+{ MacroRegisterFunctionWithName("WebServer::OutputWeb");
+  WebWorker::OutputBeforeComputation();
   theWebServer.CheckExecutableVersionAndRestartIfNeeded();
   stOutput << theParser.javaScriptDisplayingIndicator;
 //  theParser.inputString="%LogEvaluation 3 *3^{1/2}";
@@ -778,11 +802,11 @@ int WebWorker::StandardOutput()
   onePredefinedCopyOfGlobalVariables.flagComputationComplete=true;
   if (theWebServer.flagUsingBuiltInServer)
     if (onePredefinedCopyOfGlobalVariables.flagOutputTimedOut)
-    { WebWorker::StandardOutputPart2ComputationTimeout();
+    { WebWorker::OutputResultAfterTimeout();
       stOutput.Flush();
       return 0;
     }
-  WebWorker::StandardOutputPart2StandardExit();
+  WebWorker::OutputStandardResult();
   stOutput.Flush();
   //exit(0);
   return 0;
@@ -846,6 +870,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   out << "{ if (isFinished)\n";
   out << "    return;\n";
   out << "  var pauseRequest = new XMLHttpRequest();\n";
+  theLog << "Generating indicator address for worker number " << this->indexInParent+1 << "." << logger::endL;
   out << "  pauseURL  = \"" << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath
   << "?pauseIndicator" << this->indexInParent+1 << "\";\n";
   out << "  pauseRequest.open(\"GET\",pauseURL,false);\n";
@@ -853,7 +878,10 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   out << "  pauseRequest.send(null)\n";
   out << "  if (pauseRequest.status!=200)\n";
   out << "    return;\n";
-  out << "  isPaused=(pauseRequest.responseText==\"paused\");\n";
+  out << "  if(pauseRequest.responseText==\"paused\")\n";
+  out << "    isPaused=true;\n";
+  out << "  if(pauseRequest.responseText==\"unpaused\")\n";
+  out << "    isPaused=false;\n";
   out << "  if (isPaused)\n";
   out << "    document.getElementById(\"idButtonSendTogglePauseRequest\").innerHTML=\"Continue\";\n";
   out << "  else\n";
@@ -878,9 +906,9 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   out << "  timeOutCounter+=timeIncrementInTenthsOfSecond;\n";
   out << "  var oRequest = new XMLHttpRequest();\n";
   if (this->indexInParent==-1)
-    theLog << logger::red << ("Worker index in parent is -1!!!") << logger::endL;
+    theLog << logger::red << "Worker index in parent is -1!!!" << logger::endL;
   else
-    theLog << logger::yellow << ("Worker index: ") << this->indexInParent << logger::endL;
+    theLog << "Worker index: " << this->indexInParent << logger::endL;
 
   out << "  var sURL  = \"" << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath << "?indicator"
   << this->indexInParent+1 << "\";\n";
@@ -919,7 +947,7 @@ int WebWorker::ServeClient()
     theParser.inputStringRawestOfTheRaw=this->mainArgumentRAW;
 //    theParser.javaScriptDisplayingIndicator=this->GetJavaScriptIndicatorBuiltInServer(true);
     theParser.javaScriptDisplayingIndicator="";
-    this->StandardOutput();
+    this->OutputWeb();
   } else if (this->requestType==this->requestTypeGetNotCalculator)
     this->ProcessGetRequestNonCalculator();
   else if (this->requestType==this->requestTypeTogglePauseCalculator)
@@ -955,10 +983,11 @@ void WebWorker::Release()
   this->flagInUse=false;
 }
 
-void WebWorker::StandardOutputReturnIndicatorWaitForComputation()
-{ MacroRegisterFunctionWithName("WebServer::StandardOutputReturnIndicatorWaitForComputation");
-  onePredefinedCopyOfGlobalVariables.flagOutputTimedOut=true;
-  onePredefinedCopyOfGlobalVariables.flagTimedOutComputationIsDone=false;
+void WebWorker::OutputShowIndicatorOnTimeout()
+{ MacroRegisterFunctionWithName("WebServer::OutputShowIndicatorOnTimeout");
+
+  theLog << logger::blue << "Computation timeout, sending progress indicator instead of output. " << logger::endL;
+
   stOutput << "</td></tr>";
   if (onePredefinedCopyOfGlobalVariables.flagDisplayTimeOutExplanation)
     stOutput << "<tr><td>Your computation is taking more than " << onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction
@@ -967,9 +996,9 @@ void WebWorker::StandardOutputReturnIndicatorWaitForComputation()
   << "When done, your computation result will be displayed below. </td></tr>";
   stOutput << "<tr><td>" << this->GetJavaScriptIndicatorBuiltInServer() << "</td></tr>"
   << "</table></body></html>";
-  theLog << logger::red << ("Indicator: sending all bytes") << logger::endL;
+//  theLog << logger::red << "Indicator: sending all bytes" << logger::endL;
   this->SendAllBytes();
-  theLog << logger::blue << ("Indicator: sending all bytes DONE") << logger::endL;
+//  theLog << logger::blue << "Indicator: sending all bytes DONE" << logger::endL;
   for (int i=0; i<this->parent->theWorkers.size; i++)
     if (i!=this->indexInParent)
       this->parent->theWorkers[i].Release();
@@ -982,6 +1011,13 @@ void WebWorker::StandardOutputReturnIndicatorWaitForComputation()
 //  this->parent->Release(this->pipeWorkerToServerIndicator[0]);
 //  this->parent->Release(this->pipeWorkerToServerIndicator[1]);
   this->parent->Release(this->connectedSocketID);
+  //set flags properly:
+  onePredefinedCopyOfGlobalVariables.flagOutputTimedOut=true;
+  onePredefinedCopyOfGlobalVariables.flagTimedOutComputationIsDone=false;
+  //we need to rewire the standard output and the crashing mechanism:
+  crash.CleanUpFunction=WebWorker::OutputCrashAfterTimeout;
+  //note that standard output cannot be rewired in the beginning of the function as we use the old stOutput
+  stOutput.theOutputFunction=WebWorker::StandardOutputAfterTimeOut;
 
 //  this->SignalIamDoneReleaseEverything();
 //  theLog << consoleGreen("Indicator: released everything and signalled end.") << logger::endL;
@@ -1025,8 +1061,8 @@ WebServer::~WebServer()
 }
 
 void WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone()
-{ //theLog << logger::red << ("Got THUS far") << logger::endL;
-  theWebServer.GetActiveWorker().StandardOutputReturnIndicatorWaitForComputation();
+{ theLog << logger::red << ("Got THUS far") << logger::endL;
+  theWebServer.GetActiveWorker().OutputShowIndicatorOnTimeout();
 }
 
 void WebServer::FlushActiveWorker()
@@ -1225,8 +1261,7 @@ void Pipe::ReadFileDescriptor(int readEnd, bool doNotBlock)
   for (;;)
   { this->pipeBuffer.SetSize(bufferSize); // <-once the buffer is resized, this operation does no memory allocation and is fast.
     if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-      theLog << logger::blue << theWebServer.ToStringActiveWorker() << logger::blue
-      << " pipe, " << this->ToString() << " calling read." << logger::endL;
+      theLog << logger::blue << theWebServer.ToStringActiveWorker() << " pipe, " << this->ToString() << " calling read." << logger::endL;
     int numReadBytes =read(readEnd, this->pipeBuffer.TheObjects, bufferSize);
     if (numReadBytes<0)
     { if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
@@ -1452,6 +1487,7 @@ int WebServer::Run()
       InitializeTimer();
       CreateTimerThread();
       onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=5000;
+      /////////////////////////////////////////////////////////////////////////
       crash.CleanUpFunction=WebServer::SignalActiveWorkerDoneReleaseEverything;
       stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;
       stOutput.flushOutputFunction=this->FlushActiveWorker;

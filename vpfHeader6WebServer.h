@@ -80,14 +80,18 @@ public:
   int ProcessRequestTypeUnknown();
   int ServeClient();
   void QueueStringForSending(const std::string& stringToSend, bool MustSendAll=false);
-  void StandardOutputReturnIndicatorWaitForComputation();
   bool CheckConsistency();
   void PipeProgressReportToParentProcess(const std::string& input);
 
-  static int StandardOutput();
-  static void StandardOutputPart1BeforeComputation();
-  static void StandardOutputPart2StandardExit();
-  static void StandardOutputPart2ComputationTimeout();
+  static void StandardOutputAfterTimeOut(const std::string& input);
+
+  static int OutputWeb();
+  static void OutputBeforeComputation();
+  static void OutputStandardResult();
+  static void OutputSendAfterTimeout(const std::string& input);
+  static void OutputResultAfterTimeout();
+  static void OutputCrashAfterTimeout();
+  void OutputShowIndicatorOnTimeout();
 
   void QueueBytesForSending
   (const List<char>& bytesToSend, bool MustSendAll=false)

@@ -75,12 +75,14 @@ public:
 
   std::string error;
 
-  int ProcessGetRequestServerStatus();
-  int ProcessGetRequestComputationIndicator();
+  int ProcessServerStatus();
+  int ProcessComputationIndicator();
+  int ProcessNonCalculator();
+  int ProcessFolder();
   int ProcessPauseWorker();
-  int ProcessGetRequestNonCalculator();
-  int ProcessGetRequestFolder();
-  int ProcessRequestTypeUnknown();
+  int ProcessMonitor();
+  int ProcessUnknown();
+
   int ServeClient();
   void QueueStringForSending(const std::string& stringToSend, bool MustSendAll=false);
   bool CheckConsistency();
@@ -106,7 +108,7 @@ public:
   void SendAllBytes();
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
   static std::string GetJavaScriptIndicatorFromHD();
-  std::string GetJavaScriptIndicatorBuiltInServer();
+  std::string GetJavaScriptIndicatorBuiltInServer(int inputIndex);
   bool IsFileExtensionOfBinaryFile(const std::string& fileExtension);
   WebWorker();
   ~WebWorker();
@@ -114,9 +116,9 @@ public:
   bool ReceiveOnce();
   bool ReceiveAll();
   void SendDisplayUserInputToServer();
-  enum requestTypes {requestTypeUnknown, requestTypeGetCalculator, requestTypeTogglePauseCalculator,
-  requestTypePostCalculator, requestTypeGetNotCalculator, requestTypeGetServerStatus,
-  requestTypeGetComputationIndicator};
+  enum requestTypes {requestUnknown, requestGetCalculator, requestTogglePauseCalculator,
+  requestPostCalculator, requestGetNotCalculator, requestGetServerStatus,
+  requestGetComputationIndicator, requestGetMonitor};
   std::string ToStringStatus()const;
   std::string ToStringMessage()const;
   std::string ToStringMessageShort(FormatExpressions* theFormat=0)const;

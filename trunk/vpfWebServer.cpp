@@ -177,10 +177,8 @@ std::string WebWorker::ToStringMessage()const
 
   out << "<hr>";
   out << "Main address RAW: " << this->mainAddresSRAW << "<br>";
-  if (this->requestType==this->requestTypeGetCalculator ||
-      this->requestType==this->requestTypeGetNotCalculator ||
-      this->requestType==this->requestTypeGetServerStatus ||
-      this->requestType==this->requestTypeGetComputationIndicator)
+  if (this->requestType==this->requestTypeGetCalculator || this->requestType==this->requestTypeGetNotCalculator ||
+      this->requestType==this->requestTypeGetServerStatus || this->requestType==this->requestTypeGetComputationIndicator)
     out << "GET " << this->mainAddresSRAW;
   if (requestType==this->requestTypePostCalculator)
     out << "POST " << this->mainAddresSRAW;
@@ -193,6 +191,7 @@ void WebWorker::resetMessageComponentsExceptRawMessage()
   this->mainAddress="";
   this->mainAddresSRAW="";
   this->PhysicalFileName="";
+  this->displayUserInput="";
   this->theStrings.SetSize(0);
   this->requestType=this->requestTypeUnknown;
   this->ContentLength=-1;
@@ -467,14 +466,21 @@ bool WebWorker::ReceiveAll()
     crash << "Attempting to receive on a socket with ID equal to -1. " << crash;
   int numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
   if (numBytesInBuffer<0)
-  { theLog << "Socket::ReceiveAll on socket " << this->connectedSocketID << " failed. Error: "
-    << this->parent->ToStringLastErrorDescription() << logger::endL;
+  { std::stringstream out;
+    out << "Socket::ReceiveAll on socket " << this->connectedSocketID << " failed. Error: "
+    << this->parent->ToStringLastErrorDescription();
+    this->displayUserInput=out.str();
+    theLog << out.str() << logger::endL;
     return false;
   }
   this->theMessage.assign(buffer, numBytesInBuffer);
 //  theLog << this->parent->ToStringStatusActive() << ": received " << numBytesInBuffer << " bytes. " << logger::endL;
   this->ParseMessage();
 //  theLog << "Content length computed to be: " << this->ContentLength;
+  if (this->requestType==this->requestTypes::requestTypePostCalculator)
+    this->displayUserInput="POST " + this->mainArgumentRAW;
+  else
+    this->displayUserInput="GET " + this->mainAddresSRAW;
   if (this->ContentLength<=0)
     return true;
   if (this->mainArgumentRAW.size()==(unsigned) this->ContentLength)
@@ -484,11 +490,13 @@ bool WebWorker::ReceiveAll()
   if (this->ContentLength>10000000)
   { error="Content-length parsed to be more than 10 million bytes, aborting.";
     theLog << this->error << logger::endL;
+    this->displayUserInput=this->error;
     return false;
   }
   if (this->mainArgumentRAW!="")
   { error= "Content-length does not coincide with the size of the message-body, yet the message-body is non-empty. Aborting.";
     theLog << this->error << logger::endL;
+    this->displayUserInput=this->error;
     return false;
   }
   this->remainingBytesToSend=(std::string) "HTTP/1.1 100 Continue\r\n";
@@ -501,10 +509,13 @@ bool WebWorker::ReceiveAll()
     if (numBytesInBuffer==0)
     { this->error= "While trying to fetch message-body, received 0 bytes. " +
       this->parent->ToStringLastErrorDescription();
+      this->displayUserInput=this->error;
       return false;
     }
     if (numBytesInBuffer<0)
-    { theLog << "Error fetching message body: " << this->parent->ToStringLastErrorDescription() << logger::endL;
+    { this->error= "Error fetching message body: " + this->parent->ToStringLastErrorDescription();
+      theLog << this->error << logger::endL;
+      this->displayUserInput=this->error;
       return false;
     }
     bufferString.assign(buffer, numBytesInBuffer);
@@ -515,10 +526,18 @@ bool WebWorker::ReceiveAll()
     out << "The message-body received by me had length " << this->mainArgumentRAW.size()
     << " yet I expected a message of length " << this->ContentLength << ".";
     this->error=out.str();
+    this->displayUserInput=this->error;
     theLog << this->error << logger::endL;
     return false;
   }
   return true;
+}
+
+void WebWorker::SendDisplayUserInputToServer()
+{ if (this->displayUserInput.size()>3000)
+    this->displayUserInput.resize(3000);
+  this->pipeWorkerToServerUserInput.WriteAfterClearingPipe(this->displayUserInput, false);
+  theLog << logger::blue << "Piping " << this->displayUserInput << " to the server. " << logger::endL;
 }
 
 void WebWorker::ExtractPhysicalAddressFromMainAddress()
@@ -671,12 +690,14 @@ void WebWorker::reset()
   this->indexInParent=-1;
   this->parent=0;
   this->flagInUse=false;
+  this->displayUserInput="";
   this->requestType=this->requestTypeUnknown;
   this->pipeServerToWorkerEmptyingPausesWorker.Release();
   this->pipeWorkerToServerControls.Release();
   this->pipeServerToWorkerRequestIndicator.Release();
   this->pipeServerToWorkerComputationReportReceived.Release();
   this->pipeWorkerToServerIndicatorData.Release();
+  this->pipeWorkerToServerUserInput.Release();
 }
 
 WebWorker::WebWorker()
@@ -975,6 +996,7 @@ void WebWorker::ReleaseKeepInUseFlag()
   this->pipeServerToWorkerRequestIndicator.Release();
   this->pipeServerToWorkerComputationReportReceived.Release();
   this->pipeWorkerToServerIndicatorData.Release();
+  this->pipeWorkerToServerUserInput.Release();
   WebServer::Release(this->connectedSocketID);
 }
 
@@ -1027,9 +1049,14 @@ std::string WebWorker::ToStringStatus()const
 { std::stringstream out;
   out << "worker " << this->indexInParent+1;
   if (this->flagInUse)
-    out << ", <b>in use</b>";
-  else
+  { if (this->parent->activeWorker==this->indexInParent)
+      out << ", <span style=\"color:green\"><b>current process</b></span>";
+    else
+      out << ", <b>in use</b>";
+  } else
     out << ", not in use";
+  if (this->displayUserInput!="")
+    out << ", user input: <span style=\"color:blue\">" << this->displayUserInput << "</span>";
   out << ", connection " << this->connectionID << ", process ID: ";
   if (this->ProcessPID!=0)
     out << this->ProcessPID;
@@ -1045,8 +1072,8 @@ std::string WebWorker::ToStringStatus()const
   << ", server to worker request indicator: " << this->pipeServerToWorkerRequestIndicator.ToString()
   << ", server to worker computation report received: " << this->pipeServerToWorkerComputationReportReceived.ToString()
   << ", worker to server indicator data: " << this->pipeWorkerToServerIndicatorData.ToString()
+  << ", worker to server user input: " << this->pipeWorkerToServerUserInput.ToString()
   ;
-
   out << ", user address: " << this->userAddress << ".";
   return out.str();
 }
@@ -1061,7 +1088,7 @@ WebServer::~WebServer()
 }
 
 void WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone()
-{ theLog << logger::red << ("Got THUS far") << logger::endL;
+{ //theLog << logger::red << ("Got THUS far") << logger::endL;
   theWebServer.GetActiveWorker().OutputShowIndicatorOnTimeout();
 }
 
@@ -1151,6 +1178,7 @@ void WebServer::CreateNewActiveWorker()
   this->GetActiveWorker().pipeServerToWorkerRequestIndicator.CreateMe();
   this->GetActiveWorker().pipeWorkerToServerControls.CreateMe();
   this->GetActiveWorker().pipeWorkerToServerIndicatorData.CreateMe();
+  this->GetActiveWorker().pipeWorkerToServerUserInput.CreateMe();
   this->GetActiveWorker().indexInParent=this->activeWorker;
   this->GetActiveWorker().parent=this;
 }
@@ -1459,13 +1487,17 @@ int WebServer::Run()
     //crappy design (and is most likely due to both).
     for (int i=0; i<this->theWorkers.size; i++)
       if (this->theWorkers[i].flagInUse)
-      { Pipe& currentPipe=this->theWorkers[i].pipeWorkerToServerControls;
-        currentPipe.Read(true);
-        if (currentPipe.lastRead.size>0)
+      { this->theWorkers[i].pipeWorkerToServerControls.Read(true);
+        if (this->theWorkers[i].pipeWorkerToServerControls.lastRead.size>0)
         { this->theWorkers[i].flagInUse=false;
-          theLog << logger::green << ("worker ") << i+1 << logger::green << (" done, marking for reuse.") << logger::endL;
+          theLog << logger::green << "worker " << i+1 << " done, marking for reuse." << logger::endL;
         } else
-          theLog << logger::red << ("worker ") << i+1 << logger::red << (" not done yet.") << logger::endL;
+          theLog << logger::red << "worker " << i+1 << " not done yet." << logger::endL;
+        this->theWorkers[i].pipeWorkerToServerUserInput.Read(true);
+        if (this->theWorkers[i].pipeWorkerToServerUserInput.lastRead.size>0)
+          this->theWorkers[i].displayUserInput.assign
+          (this->theWorkers[i].pipeWorkerToServerUserInput.lastRead.TheObjects,
+           this->theWorkers[i].pipeWorkerToServerUserInput.lastRead.size);
       }
     this->CreateNewActiveWorker();
     this->GetActiveWorker().connectedSocketID=newConnectedSocket;
@@ -1497,6 +1529,7 @@ int WebServer::Run()
       { stOutput << "HTTP/1.1 400 Bad Request\r\nContent-type: text/html\r\n\r\n" << this->GetActiveWorker().error;
         return 0;
       }
+      this->GetActiveWorker().SendDisplayUserInputToServer();
       return 1;
     }
     this->ReleaseWorkerSideResources();

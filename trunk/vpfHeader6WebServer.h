@@ -50,6 +50,8 @@ public:
   bool flagInUse;
   int indexInParent;
   int ProcessPID;
+  std::string displayUserInput;
+
   std::string userAddress;
   std::string theMessage;
   std::string mainArgumentRAW;
@@ -69,6 +71,7 @@ public:
   Pipe pipeServerToWorkerRequestIndicator;
   Pipe pipeWorkerToServerControls;
   Pipe pipeWorkerToServerIndicatorData;
+  Pipe pipeWorkerToServerUserInput;
 
   std::string error;
 
@@ -110,7 +113,9 @@ public:
   bool IamActive();
   bool ReceiveOnce();
   bool ReceiveAll();
-  enum requestTypes {requestTypeUnknown, requestTypeGetCalculator, requestTypeTogglePauseCalculator, requestTypePostCalculator, requestTypeGetNotCalculator, requestTypeGetServerStatus,
+  void SendDisplayUserInputToServer();
+  enum requestTypes {requestTypeUnknown, requestTypeGetCalculator, requestTypeTogglePauseCalculator,
+  requestTypePostCalculator, requestTypeGetNotCalculator, requestTypeGetServerStatus,
   requestTypeGetComputationIndicator};
   std::string ToStringStatus()const;
   std::string ToStringMessage()const;

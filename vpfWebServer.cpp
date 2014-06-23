@@ -135,17 +135,17 @@ std::string WebWorker::ToStringMessageShort(FormatExpressions* theFormat)const
   bool useHtml=theFormat==0 ? false: theFormat->flagUseHTML;
   std::string lineBreak= useHtml ? "<br>\n" : "\r\n";
   out << lineBreak;
-  if (this->requestType==this->requestTypeGetCalculator)
+  if (this->requestType==this->requestGetCalculator)
     out << "GET " << "(from calculator)";
-  else if (this->requestType==this->requestTypePostCalculator)
+  else if (this->requestType==this->requestPostCalculator)
     out << "POST " << "(from calculator)";
-  else if (this->requestType==this->requestTypeGetNotCalculator)
+  else if (this->requestType==this->requestGetNotCalculator)
     out << "GET " << "(NOT from calculator)";
-  else if (this->requestType==this->requestTypeTogglePauseCalculator)
+  else if (this->requestType==this->requestTogglePauseCalculator)
     out << "GET " << "(pause computation)";
-  else if (this->requestType==this->requestTypeGetServerStatus)
+  else if (this->requestType==this->requestGetServerStatus)
     out << "GET (server status)";
-  else if (this->requestType==this->requestTypeGetComputationIndicator)
+  else if (this->requestType==this->requestGetComputationIndicator)
     out << "GET (computation indicator)";
   else
     out << "Request type undefined.";
@@ -177,10 +177,10 @@ std::string WebWorker::ToStringMessage()const
 
   out << "<hr>";
   out << "Main address RAW: " << this->mainAddresSRAW << "<br>";
-  if (this->requestType==this->requestTypeGetCalculator || this->requestType==this->requestTypeGetNotCalculator ||
-      this->requestType==this->requestTypeGetServerStatus || this->requestType==this->requestTypeGetComputationIndicator)
+  if (this->requestType==this->requestGetCalculator || this->requestType==this->requestGetNotCalculator ||
+      this->requestType==this->requestGetServerStatus || this->requestType==this->requestGetComputationIndicator)
     out << "GET " << this->mainAddresSRAW;
-  if (requestType==this->requestTypePostCalculator)
+  if (requestType==this->requestPostCalculator)
     out << "POST " << this->mainAddresSRAW;
   out << "\n<br>\nFull client message:\n" << this->theMessage;
   return out.str();
@@ -193,7 +193,7 @@ void WebWorker::resetMessageComponentsExceptRawMessage()
   this->PhysicalFileName="";
   this->displayUserInput="";
   this->theStrings.SetSize(0);
-  this->requestType=this->requestTypeUnknown;
+  this->requestType=this->requestUnknown;
   this->ContentLength=-1;
 }
 
@@ -340,15 +340,17 @@ void WebWorker::ExtractArgumentFromAddress()
   std::string calculatorArgumentRawWithQuestionMark, tempS;
   if (!MathRoutines::StringBeginsWith(this->mainAddresSRAW, onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath, &calculatorArgumentRawWithQuestionMark))
     return;
-  this->requestType=this->requestTypeGetCalculator;
+  this->requestType=this->requestGetCalculator;
   MathRoutines::SplitStringInTwo(calculatorArgumentRawWithQuestionMark, 1, tempS, this->mainArgumentRAW);
   theLog << logger::yellow << "this->mainArgumentRAW=" << this->mainArgumentRAW << logger::endL;
+  if (MathRoutines::StringBeginsWith(this->mainArgumentRAW, "monitor"))
+    this->requestType=this->requestGetMonitor;
   if (MathRoutines::StringBeginsWith(this->mainArgumentRAW, "indicator"))
-    this->requestType=this->requestTypeGetComputationIndicator;
+    this->requestType=this->requestGetComputationIndicator;
   if (MathRoutines::StringBeginsWith(this->mainArgumentRAW, "status"))
-    this->requestType=this->requestTypeGetServerStatus;
+    this->requestType=this->requestGetServerStatus;
   if (MathRoutines::StringBeginsWith(this->mainArgumentRAW, "pauseIndicator"))
-    this->requestType=this->requestTypeTogglePauseCalculator;
+    this->requestType=this->requestTogglePauseCalculator;
 }
 
 void WebWorker::ParseMessage()
@@ -373,14 +375,14 @@ void WebWorker::ParseMessage()
     }
   for (int i=0; i<this->theStrings.size; i++)
     if (this->theStrings[i]=="GET")
-    { this->requestType=this->requestTypeGetNotCalculator;
+    { this->requestType=this->requestGetNotCalculator;
       i++;
       if (i<this->theStrings.size)
       { this->mainAddresSRAW=this->theStrings[i];
         this->ExtractArgumentFromAddress();
       }
     } else if (this->theStrings[i]=="POST")
-    { this->requestType=this->requestTypePostCalculator;
+    { this->requestType=this->requestPostCalculator;
       i++;
       if (i<this->theStrings.size)
       { this->mainAddresSRAW=this->theStrings[i];
@@ -477,7 +479,7 @@ bool WebWorker::ReceiveAll()
 //  theLog << this->parent->ToStringStatusActive() << ": received " << numBytesInBuffer << " bytes. " << logger::endL;
   this->ParseMessage();
 //  theLog << "Content length computed to be: " << this->ContentLength;
-  if (this->requestType==this->requestTypes::requestTypePostCalculator)
+  if (this->requestType==this->requestTypes::requestPostCalculator)
     this->displayUserInput="POST " + this->mainArgumentRAW;
   else
     this->displayUserInput="GET " + this->mainAddresSRAW;
@@ -550,7 +552,7 @@ void WebWorker::ExtractPhysicalAddressFromMainAddress()
   this->mainAddress.substr(numBytesToChop, std::string::npos);
 }
 
-int WebWorker::ProcessGetRequestServerStatus()
+int WebWorker::ProcessServerStatus()
 { MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestServerStatus");
   stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
   stOutput << "<html><body> " << this->parent->ToStringStatusAll() << "</body></html>";
@@ -597,8 +599,22 @@ int WebWorker::ProcessPauseWorker()
   return 0;
 }
 
-int WebWorker::ProcessGetRequestComputationIndicator()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestComputationIndicator");
+int WebWorker::ProcessMonitor()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessMonitor");
+  theLog << "Processing get monitor." << logger::endL;
+  stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
+  if (this->mainArgumentRAW.size()<=7)
+  { stOutput << "<b>Monitor takes as argument the id of the child process that is running the computation.</b>";
+    return 0;
+  }
+  int inputWebWorkerNumber= atoi(this->mainArgumentRAW.substr(7, std::string::npos).c_str());
+  stOutput << "<html><body>" << this->GetJavaScriptIndicatorBuiltInServer(inputWebWorkerNumber-1)
+  << "</body></html>";
+  return 0;
+}
+
+int WebWorker::ProcessComputationIndicator()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessComputationIndicator");
   theLog << "Processing get request indicator." << logger::endL;
   stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
   if (this->mainArgumentRAW.size()<=9)
@@ -654,8 +670,8 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
   this->pipeWorkerToServerIndicatorData.Write(input, true);
 }
 
-int WebWorker::ProcessGetRequestFolder()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestFolder");
+int WebWorker::ProcessFolder()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessFolder");
   std::stringstream out;
   out << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
   << "<html><body>";
@@ -691,7 +707,7 @@ void WebWorker::reset()
   this->parent=0;
   this->flagInUse=false;
   this->displayUserInput="";
-  this->requestType=this->requestTypeUnknown;
+  this->requestType=this->requestUnknown;
   this->pipeServerToWorkerEmptyingPausesWorker.Release();
   this->pipeWorkerToServerControls.Release();
   this->pipeServerToWorkerRequestIndicator.Release();
@@ -750,12 +766,12 @@ std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExten
   return "Content-Type: application/octet-stream\r\n";
 }
 
-int WebWorker::ProcessGetRequestNonCalculator()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestNonCalculator");
+int WebWorker::ProcessNonCalculator()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessNonCalculator");
   this->ExtractPhysicalAddressFromMainAddress();
   //theLog << this->ToStringShort() << "\r\n";
   if (FileOperations::IsFolder(this->PhysicalFileName))
-    return this->ProcessGetRequestFolder();
+    return this->ProcessFolder();
   if (!FileOperations::FileExists(this->PhysicalFileName))
   { stOutput << "HTTP/1.1 404 Object not found\r\nContent-Type: text/html\r\n\r\n";
     stOutput << "<html><body>";
@@ -804,8 +820,8 @@ int WebWorker::ProcessGetRequestNonCalculator()
   return 0;
 }
 
-int WebWorker::ProcessRequestTypeUnknown()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessRequestTypeUnknown");
+int WebWorker::ProcessUnknown()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessUnknown");
   stOutput << "HTTP/1.1 501 Method Not Implemented\r\nContent-Type: text/html\r\n\r\n";
   stOutput << "<b>Requested method is not implemented. </b> <hr>The original message received from the server follows."
   << "<hr>\n" << this->ToStringMessage();
@@ -872,7 +888,7 @@ std::string WebWorker::GetJavaScriptIndicatorFromHD()
   return out.str();
 }
 
-std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
+std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex)
 { MacroRegisterFunctionWithName("WebWorker::GetJavaScriptIndicatorBuiltInServer");
   std::stringstream out;
   out << " <!>\n";
@@ -891,9 +907,9 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   out << "{ if (isFinished)\n";
   out << "    return;\n";
   out << "  var pauseRequest = new XMLHttpRequest();\n";
-  theLog << "Generating indicator address for worker number " << this->indexInParent+1 << "." << logger::endL;
+  theLog << "Generating indicator address for worker number " << inputIndex+1 << "." << logger::endL;
   out << "  pauseURL  = \"" << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath
-  << "?pauseIndicator" << this->indexInParent+1 << "\";\n";
+  << "?pauseIndicator" << inputIndex+1 << "\";\n";
   out << "  pauseRequest.open(\"GET\",pauseURL,false);\n";
 //  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
   out << "  pauseRequest.send(null)\n";
@@ -926,13 +942,13 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
 //  out << "  el.contentWindow.location.reload();";
   out << "  timeOutCounter+=timeIncrementInTenthsOfSecond;\n";
   out << "  var oRequest = new XMLHttpRequest();\n";
-  if (this->indexInParent==-1)
+  if (inputIndex==-1)
     theLog << logger::red << "Worker index in parent is -1!!!" << logger::endL;
   else
-    theLog << "Worker index: " << this->indexInParent << logger::endL;
+    theLog << "Worker index: " << inputIndex << logger::endL;
 
   out << "  var sURL  = \"" << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath << "?indicator"
-  << this->indexInParent+1 << "\";\n";
+  << inputIndex+1 << "\";\n";
   out << "  oRequest.open(\"GET\",sURL,false);\n";
 //  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
   out << "  oRequest.send(null)\n";
@@ -957,30 +973,34 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
 int WebWorker::ServeClient()
 { MacroRegisterFunctionWithName("WebServer::ServeClient");
   onePredefinedCopyOfGlobalVariables.IndicatorStringOutputFunction=WebServer::PipeProgressReportToParentProcess;
-  if (this->requestType!=this->requestTypeGetComputationIndicator &&
-      this->requestType!=this->requestTypeGetServerStatus &&
-      this->requestType!=this->requestTypeTogglePauseCalculator)
+  if (this->requestType!=this->requestGetComputationIndicator &&
+      this->requestType!=this->requestGetServerStatus &&
+      this->requestType!=this->requestTogglePauseCalculator &&
+      this->requestType!=this->requestGetMonitor)
     this->parent->ReleaseNonActiveWorkers();
     //unless the worker is an indicator, it has no access to communication channels of the other workers
-  if (this->requestType==this->requestTypeGetCalculator || this->requestType==this->requestTypePostCalculator)
+  if (this->requestType==this->requestGetCalculator || this->requestType==this->requestPostCalculator)
   { stOutput << "HTTP/1.1 200 OK\n";
     stOutput << "Content-Type: text/html\r\n\r\n";
     theParser.inputStringRawestOfTheRaw=this->mainArgumentRAW;
 //    theParser.javaScriptDisplayingIndicator=this->GetJavaScriptIndicatorBuiltInServer(true);
     theParser.javaScriptDisplayingIndicator="";
     this->OutputWeb();
-  } else if (this->requestType==this->requestTypeGetNotCalculator)
-    this->ProcessGetRequestNonCalculator();
-  else if (this->requestType==this->requestTypeTogglePauseCalculator)
+  } else if (this->requestType==this->requestGetNotCalculator)
+    this->ProcessNonCalculator();
+  else if (this->requestType==this->requestTogglePauseCalculator)
     this->ProcessPauseWorker();
-  else if (this->requestType==this->requestTypeGetServerStatus)
-  { this->ProcessGetRequestServerStatus();
+  else if (this->requestType==this->requestGetServerStatus)
+  { this->ProcessServerStatus();
     this->parent->ReleaseNonActiveWorkers();
-  } else if (this->requestType==this->requestTypeGetComputationIndicator)
-  { this->ProcessGetRequestComputationIndicator();
+  } else if (this->requestType==this->requestGetComputationIndicator)
+  { this->ProcessComputationIndicator();
     this->parent->ReleaseNonActiveWorkers();
-  } else if (this->requestType==this->requestTypeUnknown)
-    this->ProcessRequestTypeUnknown();
+  } else if (this->requestType==this->requestGetMonitor)
+  { this->ProcessMonitor();
+    this->parent->ReleaseNonActiveWorkers();
+  } else if (this->requestType==this->requestUnknown)
+    this->ProcessUnknown();
   this->SignalIamDoneReleaseEverything();
   return 0;
 }
@@ -1007,16 +1027,14 @@ void WebWorker::Release()
 
 void WebWorker::OutputShowIndicatorOnTimeout()
 { MacroRegisterFunctionWithName("WebServer::OutputShowIndicatorOnTimeout");
-
   theLog << logger::blue << "Computation timeout, sending progress indicator instead of output. " << logger::endL;
-
   stOutput << "</td></tr>";
   if (onePredefinedCopyOfGlobalVariables.flagDisplayTimeOutExplanation)
     stOutput << "<tr><td>Your computation is taking more than " << onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction
     << " seconds.</td></tr>";
   stOutput << "<tr><td>A progress indicator, as reported by your current computation, is displayed below. "
   << "When done, your computation result will be displayed below. </td></tr>";
-  stOutput << "<tr><td>" << this->GetJavaScriptIndicatorBuiltInServer() << "</td></tr>"
+  stOutput << "<tr><td>" << this->GetJavaScriptIndicatorBuiltInServer(this->indexInParent) << "</td></tr>"
   << "</table></body></html>";
 //  theLog << logger::red << "Indicator: sending all bytes" << logger::endL;
   this->SendAllBytes();

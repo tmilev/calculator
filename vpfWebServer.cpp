@@ -429,7 +429,7 @@ void WebWorker::SendAllBytes()
     return;
   MacroRegisterFunctionWithName("WebWorker::SendAllBytes");
   if (this->connectedSocketID==-1)
-  { theLog << logger::red << ("Socket::SendAllBytes failed: connectedSocketID=-1.") << logger::endL;
+  { theLog << logger::red << "Socket::SendAllBytes failed: connectedSocketID=-1." << logger::endL;
     return;
   }
   theLog << "Sending " << this->remainingBytesToSend.size << " bytes in chunks of: " << logger::endL;
@@ -570,9 +570,8 @@ int WebWorker::ProcessPauseWorker()
   int inputWebWorkerNumber= atoi(this->mainArgumentRAW.substr(14, std::string::npos).c_str());
   int inputWebWorkerIndex= inputWebWorkerNumber-1;
   if (inputWebWorkerIndex<0 || inputWebWorkerIndex>=this->parent->theWorkers.size)
-  { stOutput << "<b>User requested " << this->mainArgumentRAW << " (worker number "
-    << inputWebWorkerNumber << " out of " << this->parent->theWorkers.size
-    << ") but the worker number is out of range. </b>";
+  { stOutput << "<b>User requested " << this->mainArgumentRAW << " (worker number " << inputWebWorkerNumber
+    << " out of " << this->parent->theWorkers.size << ") but the worker number is out of range. </b>";
     return 0;
   }
   if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUse)
@@ -673,8 +672,7 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
 int WebWorker::ProcessFolder()
 { MacroRegisterFunctionWithName("WebWorker::ProcessFolder");
   std::stringstream out;
-  out << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
-  << "<html><body>";
+  out << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" << "<html><body>";
   //out << this->ToString();
   List<std::string> theFileNames, theFileTypes;
   if (!FileOperations::GetFolderFileNames(this->PhysicalFileName, theFileNames, &theFileTypes))
@@ -774,9 +772,8 @@ int WebWorker::ProcessNonCalculator()
     return this->ProcessFolder();
   if (!FileOperations::FileExists(this->PhysicalFileName))
   { stOutput << "HTTP/1.1 404 Object not found\r\nContent-Type: text/html\r\n\r\n";
-    stOutput << "<html><body>";
-    stOutput << "<b>File does not exist.</b><br><b> File display name:</b> " << this->mainAddress
-    << "<br><b>File physical name:</b> " << this->PhysicalFileName;
+    stOutput << "<html><body><b>File does not exist.</b><br><b> File display name:</b> "
+    << this->mainAddress << "<br><b>File physical name:</b> " << this->PhysicalFileName;
     stOutput << "<hr><hr><hr>Message details:<br>" <<  this->ToStringMessage();
     stOutput << "</body></html>";
     return 0;
@@ -946,7 +943,6 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex)
     theLog << logger::red << "Worker index in parent is -1!!!" << logger::endL;
   else
     theLog << "Worker index: " << inputIndex << logger::endL;
-
   out << "  var sURL  = \"" << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath << "?indicator"
   << inputIndex+1 << "\";\n";
   out << "  oRequest.open(\"GET\",sURL,false);\n";
@@ -980,8 +976,7 @@ int WebWorker::ServeClient()
     this->parent->ReleaseNonActiveWorkers();
     //unless the worker is an indicator, it has no access to communication channels of the other workers
   if (this->requestType==this->requestGetCalculator || this->requestType==this->requestPostCalculator)
-  { stOutput << "HTTP/1.1 200 OK\n";
-    stOutput << "Content-Type: text/html\r\n\r\n";
+  { stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
     theParser.inputStringRawestOfTheRaw=this->mainArgumentRAW;
 //    theParser.javaScriptDisplayingIndicator=this->GetJavaScriptIndicatorBuiltInServer(true);
     theParser.javaScriptDisplayingIndicator="";
@@ -1216,10 +1211,10 @@ void Pipe::Write(const std::string& toBeSent, bool doNotBlock)
   read(this->pipeEmptyingBlocksWrite[0], buffer, 2);
   if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
   { if (theWebServer.activeWorker!=-1)
-      theLog << logger::green << ("worker ") << theWebServer.activeWorker;
+      theLog << logger::green << "worker " << theWebServer.activeWorker;
     else
-      theLog << logger::green << ("server ");
-    theLog << logger::green << (" is sending ") << toBeSent.size() << " bytes through pipe "
+      theLog << logger::green << "server ";
+    theLog << " is sending " << toBeSent.size() << " bytes through pipe "
     << this->ToString() << logger::endL;
   }
 /*  if (doNotBlock)
@@ -1341,19 +1336,19 @@ void Pipe::Read(bool doNotBlock)
   if (!doNotBlock)
     read(this->pipeEmptyingBlocksRead[0], buffer, 2);
   if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-    theLog << logger::blue << theWebServer.ToStringActiveWorker() << " reading pipe "
-    << this->ToString() << logger::endL;
+    theLog << logger::blue << theWebServer.ToStringActiveWorker() << " reading pipe " << this->ToString()
+    << logger::endL;
   this->ReadFileDescriptor(this->thePipe[0], doNotBlock);
   if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-    theLog << logger::blue << theWebServer.ToStringActiveWorker() << " read "
-    << this->lastRead.size << " bytes." << logger::endL;
+    theLog << logger::blue << theWebServer.ToStringActiveWorker() << " read " << this->lastRead.size
+    << " bytes." << logger::endL;
   if (!doNotBlock)
     write(this->pipeEmptyingBlocksRead[1], "!", 1);
 }
 
 std::string WebServer::ToStringLastErrorDescription()
 { std::stringstream out;
-  out << this->ToStringActiveWorker() << ": " << logger::red << (strerror(errno)) << ". ";
+  out << logger::red << this->ToStringActiveWorker() << ": " << strerror(errno) << ". ";
   return out.str();
 }
 
@@ -1411,7 +1406,7 @@ void WebServer::CheckExecutableVersionAndRestartIfNeeded()
       { this->GetActiveWorker().SendAllBytes();
         this->ReleaseActiveWorker();
       }
-      theLog << logger::red << ("Time stamps are different, RESTARTING.") << logger::endL;
+      theLog << logger::red << "Time stamps are different, RESTARTING." << logger::endL;
       this->Restart();
     }
 }
@@ -1536,7 +1531,6 @@ int WebServer::Run()
       this->ReturnActiveIndicatorAlthoughComputationIsNotDone;
       InitializeTimer();
       CreateTimerThread();
-      onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=5000;
       /////////////////////////////////////////////////////////////////////////
       crash.CleanUpFunction=WebServer::SignalActiveWorkerDoneReleaseEverything;
       stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;

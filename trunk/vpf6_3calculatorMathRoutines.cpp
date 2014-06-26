@@ -3823,6 +3823,14 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
   return false;
 }
 
+bool CalculatorFunctionsGeneral::innerTestStandardOutput(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestStandardOutput");
+  FormatExpressions tempFormat;
+  tempFormat.flagExpressionIsFinal=true;
+  stOutput << "<b>Standard output test. Input string bounced back on the following line.</b><br>" << input.ToString(&tempFormat);
+  return output.AssignValue((std::string) "Standard output tested, verify your input is displayed correctly. ", theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestIndicator");
 //  stOutput << "Report html return!";

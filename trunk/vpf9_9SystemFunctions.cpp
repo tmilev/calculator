@@ -69,10 +69,10 @@ void* RunTimerVoidPtr(void* ptr)
           }
   }
   if (!onePredefinedCopyOfGlobalVariables.flagComputationComplete)
-  { stOutput << "</div><br><br><br>Your computation has taken " << elapsedtime << " seconds so far.";
-    stOutput << "<br>The maximum allowed run time for " << " the entire system is  " << onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
-    << " seconds (twice the amount of time allowed for calculator interpretation). <br>This safety limit is hard coded in this particular server. "
-    << "<br>However, if you install the calculator on your own machine you may <br>allow arbitrarily large execution time by modifying "
+  { crash << "Your computation ran for " << elapsedtime << " seconds and exceeded the allowed run time of "
+    << onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
+    << " seconds (twice the amount of time allowed for calculator interpretation). "
+    << "<br>This safety limit is hard coded in "
     << " the variable onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit located in file "
     << __FILE__ << "<br><b>Signalling ungraceful exit...</b> ";
     crash << crash;

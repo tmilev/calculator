@@ -14,6 +14,11 @@ void Calculator::initPredefinedInnerFunctions()
    "TestCalculatorIndicator(0)", true, false)
    ;
   this->AddOperationInnerHandler
+  ("TestStandardOutput", CalculatorFunctionsGeneral::innerTestStandardOutput, "",
+   "(This is not a mathematical function). Tests the calculator standard output.",
+   "TestStandardOutput(\"The quick brown fox jumps over the lazy dog\")", true, false)
+   ;
+  this->AddOperationInnerHandler
   ("crash", Calculator::innerCrash, "",
    "Crashes the calculator: tests the crashing mechanism (are crash logs properly created, etc.).",
    "crash(0)");

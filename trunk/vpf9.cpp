@@ -74,9 +74,12 @@ GlobalVariables::GlobalVariables()
   this->WebServerReturnDisplayIndicatorCloseConnection=0;
   this->MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000000;
   this->MaxComputationTimeBeforeWeTakeAction=0;
+  this->MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit=5;
   this->callSystem=0;
   this->sleepFunction=0;
-  this->flagGaussianEliminationProgressReport=false;
+  this->flagReportEverything=false;
+  this->flagReportGaussianElimination=false;
+  this->flagReportLargeIntArithmetic=false;
   this->getElapsedTimePrivate=0;
   this->flagDisplayTimeOutExplanation=false;
   this->flagOutputTimedOut=false;
@@ -1533,6 +1536,7 @@ void LargeIntUnsigned::SubtractSmallerPositive(const LargeIntUnsigned& x)
 //  if(!this->CheckForConsistensy())crash << crash;
 }
 
+extern GlobalVariables onePredefinedCopyOfGlobalVariables;
 void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& output)const
 { if (this==&output || &x==&output)
   { LargeIntUnsigned thisCopy=*this;
@@ -1543,6 +1547,12 @@ void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& o
   output.theDigits.SetSize(x.theDigits.size+this->theDigits.size);
   for(int i=0; i<output.theDigits.size; i++)
     output.theDigits[i]=0;
+  int doProgressReport=0;
+  ProgressReport theReport(&onePredefinedCopyOfGlobalVariables);
+  unsigned long long totalCycles=(unsigned long long) this->theDigits.size* (unsigned long long) x.theDigits.size;
+  if (totalCycles>2000)
+    if (onePredefinedCopyOfGlobalVariables.flagReportEverything || onePredefinedCopyOfGlobalVariables.flagReportLargeIntArithmetic)
+      doProgressReport=1;
   for (int i=0; i<this->theDigits.size; i++)
     for(int j=0; j<x.theDigits.size; j++)
     { unsigned long long tempLong= this->theDigits[i];
@@ -1552,6 +1562,21 @@ void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& o
       unsigned long long highPart= tempLong/LargeIntUnsigned::CarryOverBound;
       output.AddShiftedUIntSmallerThanCarryOverBound((unsigned int) lowPart, i+j);
       output.AddShiftedUIntSmallerThanCarryOverBound((unsigned int) highPart, i+j+1);
+      if (doProgressReport)
+      { doProgressReport++;
+        if (doProgressReport% 1024==0)
+        { std::stringstream out;
+          if (LargeIntUnsigned::CarryOverBound==1000000000UL)
+             out << "Large integer multiplication, crunching " << doProgressReport*9 << " out of "
+            << totalCycles*9 << " digits = " << this->theDigits.size << " x " << x.theDigits.size
+            << " digits.";
+          else
+            out << "Large integer multiplication, crunching " << doProgressReport << " out of "
+            << totalCycles << " digits = " << this->theDigits.size << " x " << x.theDigits.size
+            << " digits (base " << LargeIntUnsigned::CarryOverBound << ").";
+          theReport.Report(out.str());
+        }
+      }
     }
   output.FitSize();
 //  if(!this->CheckForConsistensy())crash << crash;

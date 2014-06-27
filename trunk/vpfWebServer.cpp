@@ -204,7 +204,7 @@ void WebWorker::StandardOutputAfterTimeOut(const std::string& input)
 
 void WebWorker::OutputBeforeComputation()
 { MacroRegisterFunctionWithName("WebServer::OutputBeforeComputation");
-  onePredefinedCopyOfGlobalVariables.flagComputationComplete=false;
+  onePredefinedCopyOfGlobalVariables.flagComputationCompletE=false;
 
   stOutput << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
   << "Root subalgebras, sl(2)-triples\"> <head> <title>calculator version  " << __DATE__ << ", " << __TIME__ << "</title>";
@@ -833,7 +833,7 @@ int WebWorker::OutputWeb()
 //  theParser.inputString="%LogEvaluation 3 *3^{1/2}";
   if (theParser.inputString!="")
     theParser.Evaluate(theParser.inputString);
-  onePredefinedCopyOfGlobalVariables.flagComputationComplete=true;
+  onePredefinedCopyOfGlobalVariables.flagComputationCompletE=true;
   if (theWebServer.flagUsingBuiltInServer)
     if (onePredefinedCopyOfGlobalVariables.flagOutputTimedOut)
     { WebWorker::OutputResultAfterTimeout();
@@ -968,6 +968,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex)
 
 int WebWorker::ServeClient()
 { MacroRegisterFunctionWithName("WebServer::ServeClient");
+  onePredefinedCopyOfGlobalVariables.flagComputationStarted=true;
   onePredefinedCopyOfGlobalVariables.IndicatorStringOutputFunction=WebServer::PipeProgressReportToParentProcess;
   if (this->requestType!=this->requestGetComputationIndicator &&
       this->requestType!=this->requestGetServerStatus &&

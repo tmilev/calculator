@@ -2927,6 +2927,7 @@ public:
   { if (this->sleepFunction!=0)
       this->sleepFunction(microseconds);
   }
+  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
   double MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   double MaxComputationTimeBeforeWeTakeAction;
   bool flagDisplayTimeOutExplanation;
@@ -2934,10 +2935,15 @@ public:
   bool flagTimedOutComputationIsDone;
   bool flagLogInterProcessCommunication;
 
+
   FormatExpressions theDefaultFormat;
+//status flags:
+  bool flagComputationCompletE;
+  bool flagComputationStarted;
 //progress report flags:
-  bool flagGaussianEliminationProgressReport;
-  bool flagComputationComplete;
+  bool flagReportEverything;
+  bool flagReportLargeIntArithmetic;
+  bool flagReportGaussianElimination;
 
   List<std::string> ProgressReportStringS;
   DrawingVariables theDrawingVariables;
@@ -4057,8 +4063,9 @@ std::string MonomialCollection<templateMonomial, coefficient>::ToString(FormatEx
 template <typename coefficient>
 inline void Matrix<coefficient>::AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const coefficient& scalar, GlobalVariables* theGlobalVariables)
 { ProgressReport theReport(theGlobalVariables);
-  bool doProgressReport=
-  theGlobalVariables==0 ? false : theGlobalVariables->flagGaussianEliminationProgressReport;
+  bool doProgressReport=false;
+  if (theGlobalVariables!=0)
+    doProgressReport=theGlobalVariables->flagReportGaussianElimination || theGlobalVariables->flagReportEverything;
   coefficient tempElement;
   for (int i = StartColIndex; i< this->NumCols; i++)
   { tempElement=this->elements[fromRowIndex][i];
@@ -4095,12 +4102,13 @@ void Matrix<coefficient>::GaussianEliminationByRows
     outputNonPivotColumns->init(this->NumCols);
   if (outputPivotColumns!=0)
     outputPivotColumns->init(this->NumCols);
-  bool doProgressReport= theGlobalVariables==0 ? false : theGlobalVariables->flagGaussianEliminationProgressReport;
+  bool doProgressReport= theGlobalVariables==0 ? false :
+  theGlobalVariables->flagReportGaussianElimination || theGlobalVariables->flagReportEverything;
   bool formatAsLinearSystem= theFormat==0? false : theFormat->flagFormatMatrixAsLinearSystem;
   ProgressReport theReport(theGlobalVariables);
   if (humanReadableReport!=0)
   { *humanReadableReport << "\n\n\n\n<table><tr><td style=\"border-bottom:3pt solid black;\">System status</td>"
-      << "<td style=\"border-bottom:3pt solid black;\">action</td></tr>";
+    << "<td style=\"border-bottom:3pt solid black;\">action</td></tr>";
   }
   //Initialization done! Time to do actual work:
   for (int i=0; i<this->NumCols; i++)

@@ -3834,12 +3834,23 @@ bool CalculatorFunctionsGeneral::innerTestStandardOutput(Calculator& theCommands
 bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestIndicator");
 //  stOutput << "Report html return!";
+  int numRuns=-1;
+  if (!input.IsSmallInteger(&numRuns))
+  { theCommands << "Argument of CalculatorFunctionsGeneral::innerTestIndicator is not a small integer, instead it equals: " << numRuns << ".";
+    return false;
+  }
+  if (numRuns>200000)
+  { theCommands << "The argument " << numRuns << " of CalculatorFunctionsGeneral::innerTestIndicator larger than 200000, trimming down to 200000.";
+    numRuns=200000;
+  }
+  if (numRuns<0)
+    numRuns=0;
   if (theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection!=0)
     theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection();
 //  else
 //    std::cout << "WebServerReturnDisplayIndicatorCloseConnection IS ZERO!!!!" << std::endl;
   ProgressReport theReport(theCommands.theGlobalVariableS);
-  int numRuns = 1000;
+
   for (int i=0; i<numRuns; i++)
   { std::stringstream reportStream;
     reportStream << " Running indicator test, " << i+1 << " out of " << numRuns << ".";
@@ -3848,7 +3859,9 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, con
       crash << "fall asleep function is zero!" << crash;
     theCommands.theGlobalVariableS->FallAsleep(4000);
   }
-  return output.AssignValue((std::string)"Indicator test executed. ", theCommands);
+  std::stringstream out;
+  out << numRuns << " iterations of the indicaor test executed. ";
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos

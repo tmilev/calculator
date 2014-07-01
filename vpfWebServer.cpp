@@ -658,11 +658,11 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
     return;
   if (onePredefinedCopyOfGlobalVariables.flagTimedOutComputationIsDone)
     return;
-  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-    theLog << "about to potentially block " << logger::endL;
+//  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+  theLog << "about to potentially block " << logger::endL;
   this->pipeServerToWorkerEmptyingPausesWorker.Read(false);     //if pause was requested, here we block
-  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-    theLog << "block skipped" << logger::endL;
+  //if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+  theLog << "(possible) block passed" << logger::endL;
   this->pipeServerToWorkerEmptyingPausesWorker.Write("!", false);
   if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
     theLog << " data written!";

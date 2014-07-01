@@ -834,7 +834,7 @@ int WebWorker::OutputWeb()
   if (theParser.inputString!="")
     theParser.Evaluate(theParser.inputString);
   onePredefinedCopyOfGlobalVariables.flagComputationCompletE=true;
-  if (theWebServer.flagUsingBuiltInServer)
+  if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
     if (onePredefinedCopyOfGlobalVariables.flagOutputTimedOut)
     { WebWorker::OutputResultAfterTimeout();
       stOutput.Flush();
@@ -1119,8 +1119,7 @@ void WebServer::PipeProgressReportToParentProcess(const std::string& theString)
 }
 
 WebServer::WebServer()
-{ this->flagUsingBuiltInServer=false;
-  this->flagTryToKillOlderProcesses=true;
+{ this->flagTryToKillOlderProcesses=true;
   this->activeWorker=-1;
   this->timeLastExecutableModification=-1;
 }

@@ -3002,7 +3002,7 @@ bool CalculatorFunctionsGeneral::innerDeterminant(Calculator& theCommands, const
   if (theCommands.GetMatriXFromArguments(input, matRat, 0, 0, 0))
   { if (matRat.NumRows==matRat.NumCols)
     { if (matRat.NumRows>100)
-      { theCommands.Comments << "<hr>I have been instructed not to compute determinants of rational matrices larger than 100 x 100 "
+      { theCommands << "<hr>I have been instructed not to compute determinants of rational matrices larger than 100 x 100 "
         << ", and your matrix had " << matRat.NumRows << " rows. " << "To lift the restriction "
         << "edit function located in file " << __FILE__ << ", line " << __LINE__ << ". ";
         return false;
@@ -3013,7 +3013,7 @@ bool CalculatorFunctionsGeneral::innerDeterminant(Calculator& theCommands, const
       return output.MakeError("Requesting to compute determinant of non-square matrix. ", theCommands);
   }
   if (!theCommands.GetMatriXFromArguments(input, matRF, &theContext, -1, CalculatorSerialization::innerRationalFunction))
-  { theCommands.Comments << "<hr>I have been instructed to only compute determinants of matrices whose entries are "
+  { theCommands << "<hr>I have been instructed to only compute determinants of matrices whose entries are "
     << " rational functions or rationals, and I failed to convert your matrix to either type. "
     << " If this is not how you expect this function to act, correct it: the code is located in  "
     << " file " << __FILE__ << ", line " << __LINE__ << ". ";
@@ -3021,7 +3021,7 @@ bool CalculatorFunctionsGeneral::innerDeterminant(Calculator& theCommands, const
   }
   if (matRF.NumRows==matRF.NumCols)
   { if (matRF.NumRows>10)
-    { theCommands.Comments << "I have been instructed not to compute determinants of matrices of rational functions larger than "
+    { theCommands << "I have been instructed not to compute determinants of matrices of rational functions larger than "
       << " 10 x 10, and your matrix had " << matRF.NumRows << " rows. To lift the restriction edit function located in file "
       << __FILE__ << ", line " << __LINE__ << ". ";
       return false;

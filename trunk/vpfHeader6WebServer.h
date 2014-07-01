@@ -134,7 +134,6 @@ class WebServer
 {
 public:
   int listeningSocketID;
-  bool flagUsingBuiltInServer;
   bool flagTryToKillOlderProcesses;
   List<WebWorker> theWorkers;
   int activeWorker;

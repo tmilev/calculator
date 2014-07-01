@@ -2934,7 +2934,7 @@ public:
   bool flagOutputTimedOut;
   bool flagTimedOutComputationIsDone;
   bool flagLogInterProcessCommunication;
-
+  bool flagUsingBuiltInWebServer;
 
   FormatExpressions theDefaultFormat;
 //status flags:

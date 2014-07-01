@@ -64,22 +64,24 @@ void* RunTimerVoidPtr(void* ptr)
       elapsedComputationTime=elapsedtime-computationStartTime;
     if (onePredefinedCopyOfGlobalVariables.flagComputationCompletE)
       break;
-    if (!onePredefinedCopyOfGlobalVariables.flagComputationStarted)
-      if (elapsedtime>onePredefinedCopyOfGlobalVariables.MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit)
-        break;
+    if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+      if (!onePredefinedCopyOfGlobalVariables.flagComputationStarted)
+        if (elapsedtime>onePredefinedCopyOfGlobalVariables.MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit)
+          break;
     if (onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
       if (elapsedComputationTime>0)
         if (elapsedComputationTime>onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit)
           break;
-    if (onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction>0)
-      if (elapsedComputationTime>0)
-        if (elapsedComputationTime>onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction)
-          if (onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection!=0)
-            if (!onePredefinedCopyOfGlobalVariables.flagOutputTimedOut!=0 &&
-                !onePredefinedCopyOfGlobalVariables.flagDisplayTimeOutExplanation)
-            { onePredefinedCopyOfGlobalVariables.flagDisplayTimeOutExplanation=true;
-              onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
-            }
+    if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+      if (onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction>0)
+        if (elapsedComputationTime>0)
+          if (elapsedComputationTime>onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction)
+            if (onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection!=0)
+              if (!onePredefinedCopyOfGlobalVariables.flagOutputTimedOut!=0 &&
+                  !onePredefinedCopyOfGlobalVariables.flagDisplayTimeOutExplanation)
+              { onePredefinedCopyOfGlobalVariables.flagDisplayTimeOutExplanation=true;
+                onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
+              }
   }
   if (!onePredefinedCopyOfGlobalVariables.flagComputationCompletE)
   { if (onePredefinedCopyOfGlobalVariables.flagComputationStarted)
@@ -95,15 +97,14 @@ void* RunTimerVoidPtr(void* ptr)
       << " the restriction can be altogether lifted by modifying source file "
       << __FILE__ << "<br>";
       crash << crash;
-      return 0;
     } else
     { crash << "Something has gone wrong. Computation has not started, yet " << elapsedtime << " seconds have already passed: the amount of time "
       << " allowed before a computation starts is " << onePredefinedCopyOfGlobalVariables.MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit
       << ". This may be an error in the web-server routines of the calculator!" << crash;
-      return 0;
     }
-  } else
-    pthread_exit(NULL);
+  }
+  pthread_exit(NULL);
+  return 0;
 }
 #endif
 

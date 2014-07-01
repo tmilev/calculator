@@ -77,6 +77,7 @@ GlobalVariables::GlobalVariables()
   this->MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit=5;
   this->callSystem=0;
   this->sleepFunction=0;
+  this->flagUsingBuiltInWebServer=false;
   this->flagReportEverything=false;
   this->flagReportGaussianElimination=false;
   this->flagReportLargeIntArithmetic=false;
@@ -1550,10 +1551,12 @@ void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& o
   unsigned long long numCycles=0;
   bool doProgressReporT=false;
   ProgressReport theReport(&onePredefinedCopyOfGlobalVariables);
-  unsigned long long totalCycles=(unsigned long long) this->theDigits.size* (unsigned long long) x.theDigits.size;
-  if (totalCycles>2000)
-    if (onePredefinedCopyOfGlobalVariables.flagReportEverything || onePredefinedCopyOfGlobalVariables.flagReportLargeIntArithmetic)
+  unsigned long long totalCycles;
+  if (onePredefinedCopyOfGlobalVariables.flagReportEverything || onePredefinedCopyOfGlobalVariables.flagReportLargeIntArithmetic)
+  { totalCycles=((unsigned long long) this->theDigits.size)* ((unsigned long long) x.theDigits.size);
+    if (totalCycles>2000)
       doProgressReporT=true;
+  }
   for (int i=0; i<this->theDigits.size; i++)
     for(int j=0; j<x.theDigits.size; j++)
     { unsigned long long tempLong= this->theDigits[i];
@@ -1565,19 +1568,17 @@ void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& o
       output.AddShiftedUIntSmallerThanCarryOverBound((unsigned int) highPart, i+j+1);
       if (doProgressReporT)
       { numCycles++;
-        if (numCycles% 1024==0)
+        if ((numCycles% 1024)==0)
         { std::stringstream out;
           if (LargeIntUnsigned::CarryOverBound==1000000000UL)
-             out << "Large integer multiplication, crunching " << numCycles*9 << " out of "
-            << totalCycles*9 << " digits = " << this->theDigits.size << " x " << x.theDigits.size
-            << " digits.";
+            out << "Large integer multiplication, crunching " << numCycles*9 << " out of " << totalCycles*9
+            << " digits = " << this->theDigits.size << " x " << x.theDigits.size << " digits.";
           else
-            out << "Large integer multiplication, crunching " << numCycles << " out of "
-            << totalCycles << " digits = " << this->theDigits.size << " x " << x.theDigits.size
+            out << "Large integer multiplication, crunching " << numCycles << " out of " << totalCycles
+            << " digits = " << this->theDigits.size << " x " << x.theDigits.size
             << " digits (base " << LargeIntUnsigned::CarryOverBound << ").";
           theReport.Report(out.str());
         }
-        numCycles++;
       }
     }
   output.FitSize();

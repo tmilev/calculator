@@ -14,23 +14,20 @@ int main(int argc, char **argv)
   InitializeGlobalObjects();
   onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=500000;
   onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction=5;
-
   onePredefinedCopyOfGlobalVariables.flagReportLargeIntArithmetic=true;
-
-
   //	stOutput <<  "<br>" << (int) &theGlobalVariables.callSystem ;
   ParallelComputing::cgiLimitRAMuseNumPointersInList=4000000000;
   if (argc>=1)
     onePredefinedCopyOfGlobalVariables.initDefaultFolderAndFileNames(argv[0], "");
-  theWebServer.flagUsingBuiltInServer=false;
+  onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer=false;
   if (argc>=2)
   { std::string tempArgument=argv[1];
-    theWebServer.flagUsingBuiltInServer=(tempArgument=="server");
+    onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer=(tempArgument=="server");
     if (argc>2)
     { tempArgument=argv[2];
       theWebServer.flagTryToKillOlderProcesses=!(tempArgument=="nokill");
     }
-    if (theWebServer.flagUsingBuiltInServer)
+    if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
       if (theWebServer.Run()==0)
       { stOutput << "Server exit normal. ";
         return 0;
@@ -38,9 +35,9 @@ int main(int argc, char **argv)
   }
   //  stOutput << "input path: " << pathDisplayPath << "\n\n";
   theParser.init(onePredefinedCopyOfGlobalVariables);
-	if (argc>1 && !theWebServer.flagUsingBuiltInServer)
+	if (argc>1 && !onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
     return main_command_input(argc, argv);
-  if (argc<=1 && !theWebServer.flagUsingBuiltInServer)
+  if (argc<=1 && !onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
     return main_apache_client();
   return theWebServer.GetActiveWorker().ServeClient();
 }

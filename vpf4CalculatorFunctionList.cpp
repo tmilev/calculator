@@ -11,7 +11,7 @@ void Calculator::initPredefinedInnerFunctions()
 { this->AddOperationInnerHandler
   ("TestCalculatorIndicator", CalculatorFunctionsGeneral::innerTestIndicator, "",
    "(This is not a mathematical function). Tests the calculator indicator mechanism.",
-   "TestCalculatorIndicator(0)", true, false)
+   "TestCalculatorIndicator(1000)", true, false)
    ;
   this->AddOperationInnerHandler
   ("TestStandardOutput", CalculatorFunctionsGeneral::innerTestStandardOutput, "",

@@ -4,11 +4,9 @@
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
 ProjectInformationInstance projectInfoInstanceCalculatorGlobal(__FILE__, "Global objects");
 
-
 GlobalVariables onePredefinedCopyOfGlobalVariables;
 Calculator theParser;
 FormatExpressions consoleFormat;
-
 
 void InitializeGlobalObjects()
 { //stOutput << "Content-Type: text/html\n\n";
@@ -26,10 +24,12 @@ void InitializeGlobalObjects()
 }
 
 void CGI::MakeReportIndicatorFile(const std::string& input)
-{ static int counter =-1;
+{ //calling stOutput forbidden! stOutput itself calls CGI::MakeReportIndicatorFile.
+  static int counter =-1;
   counter++;
   //  if (counter%10!=0)
   //    return;
+  //std::cout << "Making report " << counter << " in file " << theParser.theGlobalVariableS->PhysicalNameIndicatorWithPath << "<br>";
   std::fstream theFile;
   FileOperations::OpenFileCreateIfNotPresent(theFile, theParser.theGlobalVariableS->PhysicalNameIndicatorWithPath, false, true, false);
   std::stringstream outStream;

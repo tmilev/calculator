@@ -830,7 +830,7 @@ int WebWorker::OutputWeb()
   WebWorker::OutputBeforeComputation();
   theWebServer.CheckExecutableVersionAndRestartIfNeeded();
   stOutput << theParser.javaScriptDisplayingIndicator;
-//  theParser.inputString="%LogEvaluation 3 *3^{1/2}";
+//  theParser.inputString="TestCalculatorIndicator 0";
   if (theParser.inputString!="")
     theParser.Evaluate(theParser.inputString);
   onePredefinedCopyOfGlobalVariables.flagComputationCompletE=true;

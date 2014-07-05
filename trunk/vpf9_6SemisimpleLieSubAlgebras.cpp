@@ -186,6 +186,65 @@ std::string DynkinType::ToStringRelativeToAmbientType(const DynkinSimpleType& am
   return this->ToString(&tempFormat);
 }
 
+void SemisimpleSubalgebras::CheckFileWritePermissions()
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::CheckFileWritePermissions");
+  this->CheckConsistency();
+  this->ComputeFolderNames(this->currentFormat);
+  std::fstream testFile;
+  std::string testFileName= this->owneR->PhysicalNameMainOutputFolder+ "testFileWritePermissionsSSsas.txt";
+  this->theGlobalVariables->System("mkdir " +this->owneR->PhysicalNameMainOutputFolder);
+
+  if(!FileOperations::OpenFileCreateIfNotPresent(testFile, testFileName, false, true, false))
+  { crash << "<br>This may or may not be a programming error. I requested to create file " << this->PhysicalNameMainFile1
+    << " for output. However, the file failed to create. Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
+    << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. " << crash;
+  }
+  FileOperations::OpenFileCreateIfNotPresent(testFile, testFileName, false, true, false);
+  testFile << "Write permissions test file.";
+}
+
+void SemisimpleSubalgebras::WriteReportToFiles(const std::string& inputSSsubalgebraExpressionString)
+{ this->timeComputationEndInSeconds=this->theGlobalVariables->GetElapsedSeconds();
+  this->numAdditions=Rational::TotalSmallAdditions+Rational::TotalLargeAdditions;
+  this->numMultiplications=Rational::TotalSmallMultiplications+Rational::TotalLargeMultiplications;
+  this->currentFormat.flagUseHTML=true;
+  this->currentFormat.flagUseHtmlAndStoreToHD=true;
+  this->currentFormat.flagUseLatex=true;
+  this->currentFormat.flagUseMathSpanPureVsMouseHover=true;
+  std::fstream fileSlowLoad, fileFastLoad;
+  FileOperations::OpenFileCreateIfNotPresent(fileSlowLoad, this->PhysicalNameMainFile1, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(fileFastLoad, this->PhysicalNameMainFile2FastLoad, false, true, false);
+  fileSlowLoad << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
+  << this->owneR->theWeyl.theDynkinType.ToString()
+  << "</title><script src=\"../../jsmath/easy/load.js\"></script><body>" << this->ToString(&this->currentFormat)
+  << "<hr><hr>Calculator input for loading subalgebras directly without recomputation.\n<br>\n";
+  this->currentFormat.flagUseMathSpanPureVsMouseHover=false;
+  fileFastLoad << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
+  << this->owneR->theWeyl.theDynkinType.ToString()
+  << "</title><script src=\"../../jsmath/easy/load.js\"></script><body>" << this->ToString(&this->currentFormat)
+  << "<hr><hr>Calculator input for loading subalgebras directly without recomputation.\n<br>\n";
+  if (inputSSsubalgebraExpressionString!="")
+  { fileFastLoad << "Load{}" << inputSSsubalgebraExpressionString;
+    fileSlowLoad << "Load{}" << inputSSsubalgebraExpressionString;
+  }
+  fileFastLoad << "</body></html>";
+  fileSlowLoad << "</body></html>";
+}
+
+void SemisimpleSubalgebras::ComputeFolderNames(FormatExpressions& inputFormat)
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeFolderNames");
+  this->CheckConsistency();
+  this->owneR->ComputeFolderNames(*this->theGlobalVariables, this->currentFormat);
+  this->DisplayNameMainFile1NoPath= "SemisimpleSubalgebras_" + CGI::CleanUpForFileNameUse(this->owneR->theWeyl.theDynkinType.ToString()) + ".html";
+  this->DisplayNameMainFile2FastLoadNoPath= "SemisimpleSubalgebras_FastLoad_" + CGI::CleanUpForFileNameUse(this->owneR->theWeyl.theDynkinType.ToString()) + ".html";
+  this->DisplayNameMainFile1WithPath=this->owneR->DisplayNameMainOutputFolder+this->DisplayNameMainFile1NoPath;
+  this->DisplayNameMainFile2FastLoadWithPath= this->owneR->DisplayNameMainOutputFolder+ this->DisplayNameMainFile2FastLoadNoPath;
+
+  this->PhysicalNameMainFile1= this->owneR->PhysicalNameMainOutputFolder+this->DisplayNameMainFile1NoPath;
+  this->PhysicalNameMainFile2FastLoad= this->owneR->PhysicalNameMainOutputFolder+this->DisplayNameMainFile2FastLoadNoPath;
+
+}
+
 std::string SemisimpleSubalgebras::ToStringSSsumaryHTML(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToStringSSsumaryHTML");
   if (!this->flagComputeNilradicals)

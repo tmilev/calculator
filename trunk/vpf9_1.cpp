@@ -762,6 +762,25 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   return out.str();
 }
 
+void SemisimpleLieAlgebra::ComputeFolderNames(GlobalVariables& theGlobalVariables, FormatExpressions& outputFormat)
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeFolderNames");
+  std::stringstream outMainPath, outMainDisplayPath;
+  this->CheckConsistency();
+  DynkinType& theType=this->theWeyl.theDynkinType;
+  outMainPath << theGlobalVariables.PhysicalPathOutputFolder << CGI::CleanUpForFileNameUse(theType.ToString()) << "/";
+  this->PhysicalNameMainOutputFolder =outMainPath.str();
+  outMainDisplayPath << theGlobalVariables.DisplayPathOutputFolder
+  << CGI::CleanUpForFileNameUse(theType.ToString()) << "/";
+  this->DisplayNameMainOutputFolder=outMainDisplayPath.str();
+  outputFormat.flagUseHTML=true;
+  outputFormat.flagUseLatex=false;
+  outputFormat.flagUsePNG=true;
+  outputFormat.PathDisplayNameCalculator=theGlobalVariables.DisplayNameCalculatorWithPath;
+  outputFormat.PathPhysicalOutputFolder=this->PhysicalNameMainOutputFolder;
+  outputFormat.PathDisplayOutputFolder=this->DisplayNameMainOutputFolder;
+  outputFormat.PathDisplayServerBaseFolder=theGlobalVariables.DisplayPathServerBase;
+}
+
 void SemisimpleLieAlgebra::ComputeChevalleyConstants(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::ComputeChevalleyConstants");
   this->theWeyl.ComputeRho(true);

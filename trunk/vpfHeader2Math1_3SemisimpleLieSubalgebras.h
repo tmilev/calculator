@@ -269,6 +269,7 @@ class SemisimpleSubalgebras
 {
 public:
   GlobalVariables* theGlobalVariables;
+  FormatExpressions currentFormat;
   SemisimpleLieAlgebra* owneR;
   AlgebraicClosureRationals* ownerField;
   SltwoSubalgebras theSl2s;
@@ -293,9 +294,20 @@ public:
   signed long long int numAdditions;
   signed long long int numMultiplications;
   bool flagDeallocated;
+  std::string DisplayNameMainFile1NoPath;
+  std::string DisplayNameMainFile2FastLoadNoPath;
+  std::string DisplayNameMainFile1WithPath;
+  std::string DisplayNameMainFile2FastLoadWithPath;
+
+  std::string PhysicalNameMainFile1;
+  std::string PhysicalNameMainFile2FastLoad;
+
   int GetNumPossibleSAs()const;
-  std::string ToStringAlgebraLink(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
   int GetDisplayIndexFromActual(int ActualIndexSubalgebra)const;
+  void ComputeFolderNames(FormatExpressions& outputFormat);
+  void CheckFileWritePermissions();
+  void WriteReportToFiles(const std::string& inputSSsubalgebraExpressionString="");
+  std::string ToStringAlgebraLink(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
   std::string GetPhysicalFileNameSubalgebra(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
   std::string GetDisplayFileNameSubalgebraRelative(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
   std::string GetDisplayFileNameSubalgebraAbsolute(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;

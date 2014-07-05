@@ -31,6 +31,9 @@ public:
   Matrix<ElementSemisimpleLieAlgebra<Rational> > theLiebrackets;
 //  List<int> OppositeRootSpaces;
   List<int> UEGeneratorOrderIncludingCartanElts;
+  std::string PhysicalNameMainOutputFolder;
+  std::string DisplayNameMainOutputFolder;
+
   bool flagDeallocated;
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
@@ -38,6 +41,7 @@ public:
   static unsigned int HashFunction(const SemisimpleLieAlgebra& input)
   { return input.theWeyl.HashFunction();
   }
+  void ComputeFolderNames(GlobalVariables& theGlobalVariables, FormatExpressions& outputFormat);
   template <class coefficient>
   void GetGenericElementCartan(ElementSemisimpleLieAlgebra<Polynomial<coefficient> >& output, int indexFirstVar=0)
   { output.MakeZero();

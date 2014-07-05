@@ -3875,9 +3875,9 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
   std::stringstream outSltwoPath, outSltwoDisplayPath;
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
   FormatExpressions theFormat;
-  theCommands.GetOutputFolders(ownerSS->theWeyl.theDynkinType, outMainPatH, outMainDisplayPatH, theFormat);
-  outSltwoPath << outMainPatH << "sl2s/";
-  outSltwoDisplayPath << outMainDisplayPatH << "sl2s/";
+  ownerSS->ComputeFolderNames(*theCommands.theGlobalVariableS, theFormat);
+  outSltwoPath << ownerSS->PhysicalNameMainOutputFolder << "sl2s/";
+  outSltwoDisplayPath << ownerSS->DisplayNameMainOutputFolder << "sl2s/";
   bool NeedToCreateFolders=(!FileOperations::FileExists(outMainPatH) || !FileOperations::FileExists(outSltwoPath.str()));
   if (NeedToCreateFolders)
   { std::stringstream outMkDirCommand1, outMkDirCommand2;

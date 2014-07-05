@@ -453,8 +453,7 @@ bool Calculator::innerPrintSSsubalgebrasRegular(Calculator& theCommands, const E
 }
 
 bool Calculator::innerPrintSSsubalgebras
-(Calculator& theCommands, const Expression& input, Expression& output,
- bool doForceRecompute, bool doAttemptToSolveSystems,
+(Calculator& theCommands, const Expression& input, Expression& output, bool doForceRecompute, bool doAttemptToSolveSystems,
  bool doComputePairingTable, bool doComputeModuleDecomposition, bool doComputeNilradicals, bool doAdjustCentralizers)
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("Calculator::innerPrintSSsubalgebras");
@@ -476,15 +475,18 @@ bool Calculator::innerPrintSSsubalgebras
   if (ownerSSPointer==0)
     crash << crash;
   SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
-  std::string physicalFolder, displayFolder;
-  FormatExpressions theFormat;
-  theCommands.GetOutputFolders(ownerSS.theWeyl.theDynkinType, physicalFolder, displayFolder, theFormat);
-  std::string theTitlePageFileNameNoPath= "SemisimpleSubalgebras_" + CGI::CleanUpForFileNameUse(ownerSS.theWeyl.theDynkinType.ToString()) + ".html";
-  std::string theTitlePageFileNameNoPathFastLoad= "SemisimpleSubalgebras_FastLoad_" + CGI::CleanUpForFileNameUse(ownerSS.theWeyl.theDynkinType.ToString()) + ".html";
-  std::string theTitlePageFileNameSlowLoad= physicalFolder+theTitlePageFileNameNoPath;
-  std::string theTitlePageFileNameFastLoad= physicalFolder+theTitlePageFileNameNoPathFastLoad;
-  out << "<br>Output file: <a href= \"" << displayFolder << theTitlePageFileNameNoPath << "\"> " << theTitlePageFileNameNoPath << "</a>";
-  out << "<br>Output file, fast load, hover mouse over math expressions to get formulas: <a href= \"" << displayFolder << theTitlePageFileNameNoPathFastLoad << "\"> " << theTitlePageFileNameNoPathFastLoad << "</a>";
+  SemisimpleSubalgebras tempSSsas
+  (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
+  &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
+  int indexInContainer=theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas);
+  SemisimpleSubalgebras& theSSsubalgebras= isAlreadySubalgebrasObject ? input.GetValueNonConst<SemisimpleSubalgebras>() :
+  theCommands.theObjectContainer.theSSsubalgebras[indexInContainer];
+  theSSsubalgebras.ComputeFolderNames(theSSsubalgebras.currentFormat);
+  out << "<br>Output file: <a href= \""
+  << theSSsubalgebras.DisplayNameMainFile1WithPath << "\"> " << theSSsubalgebras.DisplayNameMainFile1NoPath << "</a>";
+  out << "<br>Output file, fast load, hover mouse over math expressions to get formulas: <a href= \""
+  << theSSsubalgebras.DisplayNameMainFile2FastLoadWithPath << "\"> "
+  << theSSsubalgebras.DisplayNameMainFile2FastLoadNoPath << "</a>";
   //  out << "<script> var reservedCountDownToRefresh = 5; setInterval(function(){document.getElementById('reservedCountDownToRefresh').innerHTML "
   //  << "= --reservedCountDownToRefresh;}, 1000); </script>";
   //  out << "<b>... Redirecting to output file in <span style=\"font-size:36pt;\"><span id=\"reservedCountDownToRefresh\">5</span></span> "
@@ -493,52 +495,22 @@ bool Calculator::innerPrintSSsubalgebras
   //<< displayFolder << theTitlePageFileNameNoPath
   //<< "\">"
   ;
-  if (!FileOperations::FileExists(theTitlePageFileNameSlowLoad)|| doForceRecompute)
-  { SemisimpleSubalgebras tempSSsas
-    (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
-     &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
-    SemisimpleSubalgebras& theSSsubalgebras= isAlreadySubalgebrasObject ? input.GetValueNonConst<SemisimpleSubalgebras>() :
-    theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
-    if (!isAlreadySubalgebrasObject)
+  if (!FileOperations::FileExists(theSSsubalgebras.PhysicalNameMainFile1)|| doForceRecompute)
+  { if (!isAlreadySubalgebrasObject)
       theSSsubalgebras.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
     theSSsubalgebras.flagComputeNilradicals=doComputeNilradicals;
     theSSsubalgebras.flagComputeModuleDecomposition=doComputeModuleDecomposition;
     theSSsubalgebras.flagAttemptToSolveSystems=doAttemptToSolveSystems;
     theSSsubalgebras.flagComputePairingTable=doComputePairingTable;
     theSSsubalgebras.flagAttemptToAdjustCentralizers=doAdjustCentralizers;
-    std::fstream theFileSlowLoad, theFileFastLoad;
-    theCommands.theGlobalVariableS->System("mkdir " +physicalFolder);
-    if(!FileOperations::OpenFileCreateIfNotPresent(theFileSlowLoad, theTitlePageFileNameSlowLoad, false, true, false))
-    { crash << "<br>This may or may not be a programming error. I requested to create file " << theTitlePageFileNameSlowLoad
-      << " for output. However, the file failed to create. Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
-      << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. " << crash;
-    }
-    FileOperations::OpenFileCreateIfNotPresent(theFileFastLoad, theTitlePageFileNameFastLoad, false, true, false);
-
+    theSSsubalgebras.CheckFileWritePermissions();
     if (!isAlreadySubalgebrasObject)
     { theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=500000;
       theSSsubalgebras.FindTheSSSubalgebras(ownerSS);
     }
-    theSSsubalgebras.timeComputationEndInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
-    theSSsubalgebras.numAdditions=Rational::TotalSmallAdditions+Rational::TotalLargeAdditions;
-    theSSsubalgebras.numMultiplications=Rational::TotalSmallMultiplications+Rational::TotalLargeMultiplications;
-
-    theFormat.flagUseHTML=true;
-    theFormat.flagUseHtmlAndStoreToHD=true;
-    theFormat.flagUseLatex=true;
-    theFormat.flagUseMathSpanPureVsMouseHover=true;
-    theFileSlowLoad << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of " << theSSsubalgebras.owneR->theWeyl.theDynkinType.ToString()
-    << "</title><script src=\"../../jsmath/easy/load.js\"></script><body>" << theSSsubalgebras.ToString(&theFormat)
-    << "<hr><hr>Calculator input for loading subalgebras directly without recomputation.\n<br>\n";
-    theFormat.flagUseMathSpanPureVsMouseHover=false;
-    theFileFastLoad << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of " << theSSsubalgebras.owneR->theWeyl.theDynkinType.ToString()
-    << "</title><script src=\"../../jsmath/easy/load.js\"></script><body>" << theSSsubalgebras.ToString(&theFormat)
-    << "<hr><hr>Calculator input for loading subalgebras directly without recomputation.\n<br>\n";
     Expression theSSE;
     CalculatorSerialization::innerStoreSemisimpleSubalgebras(theCommands, theSSsubalgebras, theSSE);
-    theFileFastLoad << "Load{}" << theSSE.ToString();
-    theFileFastLoad << "</body></html>";
-    theFileSlowLoad << "</body></html>";
+    theSSsubalgebras.WriteReportToFiles(theSSE.ToString());
   }
   return output.AssignValue(out.str(), theCommands);
 }

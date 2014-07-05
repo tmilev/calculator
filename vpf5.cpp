@@ -171,23 +171,6 @@ bool Calculator::fAnimateLittelmannPaths(Calculator& theCommands, const Expressi
   return output.AssignValue(thePath.GenerateOrbitAndAnimate(*theCommands.theGlobalVariableS), theCommands);
 }
 
-void Calculator::GetOutputFolders(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay, FormatExpressions& outputFormat)
-{ std::stringstream outMainPath, outMainDisplayPath;
-  outMainPath << this->theGlobalVariableS->PhysicalPathOutputFolder
-  << CGI::CleanUpForFileNameUse(theType.ToString()) << "/";
-  outputFolderPhysical=outMainPath.str();
-  outMainDisplayPath << this->theGlobalVariableS->DisplayPathOutputFolder
-  << CGI::CleanUpForFileNameUse(theType.ToString()) << "/";
-  outputFolderDisplay=outMainDisplayPath.str();
-  outputFormat.flagUseHTML=true;
-  outputFormat.flagUseLatex=false;
-  outputFormat.flagUsePNG=true;
-  outputFormat.PathDisplayNameCalculator=this->theGlobalVariableS->DisplayNameCalculatorWithPath;
-  outputFormat.PathPhysicalOutputFolder=outputFolderPhysical;
-  outputFormat.PathDisplayOutputFolder=outputFolderDisplay;
-  outputFormat.PathDisplayServerBaseFolder=this->theGlobalVariableS->DisplayPathServerBase;
-}
-
 bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   SemisimpleLieAlgebra* theSSalg=0;

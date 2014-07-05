@@ -835,7 +835,7 @@ public:
   std::string ToStringFunctionHandlers();
   std::string ToStringLinksToCalculator(const DynkinType& theType, FormatExpressions* theFormat=0);
   std::string ToStringLinksToCalculatorDirectlyFromHD(const DynkinType& theType, FormatExpressions* theFormat=0);
-  void GetOutputFolders(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay, FormatExpressions& outputFormat);
+  //void GetOutputFolders(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay, FormatExpressions& outputFormat);
   bool IsBoundVarInContext(int inputOp);
   bool IsNonBoundVarInContext(int inputOp);
   bool CheckConsistencyAfterInitializationExpressionStackEmpty();

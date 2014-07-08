@@ -209,8 +209,7 @@ std::string WebWorker::ToStringMessageShort(FormatExpressions* theFormat)const
   out << lineBreak << "Main address: " << this->mainAddress;
   out << lineBreak << "Main argument: " << this->mainArgumentRAW;
   out << lineBreak << "Physical file address referred to by main address: " << this->PhysicalFileName;
-  out << lineBreak << "Display path server base: "
-  << onePredefinedCopyOfGlobalVariables.DisplayPathServerBase;
+  out << lineBreak << "Display path server base: " << onePredefinedCopyOfGlobalVariables.DisplayPathServerBase;
   return out.str();
 }
 
@@ -643,8 +642,8 @@ int WebWorker::ProcessPauseWorker()
     return 0;
   }
   WebWorker& otherWorker=this->parent->theWorkers[inputWebWorkerIndex];
-  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-    theLog << "About to read pipeServerToWorker..." << logger::endL;
+//  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+//  theLog << "About to read pipeServerToWorker..." << logger::endL;
   if (!otherWorker.PauseWorker.CheckPauseIsRequested())
   { otherWorker.PauseWorker.RequestPause();
     stOutput << "paused";
@@ -711,26 +710,24 @@ int WebWorker::ProcessComputationIndicator()
 
 void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
 { MacroRegisterFunctionWithName("WebWorker::PipeProgressReportToParentProcess");
-  //  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-    theLog << "about to potentially block " << logger::endL;
+//    theLog << "about to potentially block " << logger::endL;
+  this->pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("PipeProgressReportToParentProcess running...", true);
   if (this->PauseWorker.CheckPauseIsRequested())
-    this->pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("Pausing as requested...", true);
+    this->pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("PipeProgressReportToParentProcess:Pausing as requested...", true);
 
   this->PauseWorker.PauseIfRequested();     //if pause was requested, here we block
-  //if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-    theLog << "(possible) block passed" << logger::endL;
-  this->pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("Computing...", true);
+//    theLog << "(possible) block passed" << logger::endL;
+  this->pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("PipeProgressReportToParentProcess:Computing...", true);
   this->pipeServerToWorkerRequestIndicator.Read(true);
   if (this->pipeServerToWorkerRequestIndicator.lastRead.size==0)
     return;
   if (onePredefinedCopyOfGlobalVariables.flagTimedOutComputationIsDone)
     return;
-  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-  { theLog << " data written!";
-    this->pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("Piping computation process...", true);
-  }
+//  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+//  theLog << " data written!";
+  this->pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("PipeProgressReportToParentProcess:Piping computation process...", true);
   this->pipeWorkerToServerIndicatorData.Write(input, true);
-  this->pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("Computing...", true);
+  this->pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("PipeProgressReportToParentProcess:Exiting...", true);
 }
 
 int WebWorker::ProcessFolder()
@@ -890,11 +887,11 @@ int WebWorker::OutputWeb()
   stOutput << theParser.javaScriptDisplayingIndicator;
 //  theParser.inputString="TestCalculatorIndicator 0";
   if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
-    theWebServer.GetActiveWorker().pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("Computing...", true);
+    theWebServer.GetActiveWorker().pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("OutputWeb:Computing...", true);
   if (theParser.inputString!="")
     theParser.Evaluate(theParser.inputString);
   if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
-    theWebServer.GetActiveWorker().pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("Computation complete, preparing output", true);
+    theWebServer.GetActiveWorker().pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("OutputWeb:Computation complete, preparing output", true);
   onePredefinedCopyOfGlobalVariables.flagComputationCompletE=true;
   if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
     if (onePredefinedCopyOfGlobalVariables.flagOutputTimedOut)
@@ -1262,7 +1259,7 @@ void WebServer::CreateNewActiveWorker()
 
 void Pipe::WriteAfterClearingPipe(const std::string& toBeSent, bool doNotBlock)
 { MacroRegisterFunctionWithName("Pipe::WriteAfterClearingPipe");
-  this->ReadFileDescriptor(this->pipeIndicesOnCreation[0], true);
+  this->ReadFileDescriptor(this->thePipe[0], true);
   this->lastRead.SetSize(0);
   this->Write(toBeSent, doNotBlock);
 }
@@ -1273,14 +1270,14 @@ void Pipe::Write(const std::string& toBeSent, bool doNotBlock)
     return;
   char buffer[2];
   read(this->pipeEmptyingBlocksWrite[0], buffer, 2);
-  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-  { if (theWebServer.activeWorker!=-1)
-      theLog << logger::green << "worker " << theWebServer.activeWorker;
-    else
-      theLog << logger::green << "server ";
-    theLog << " is sending " << toBeSent.size() << " bytes through pipe "
-    << this->ToString() << logger::endL;
-  }
+  //if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+  //{
+  //if (theWebServer.activeWorker!=-1)
+  //  theLog << logger::green << "worker " << theWebServer.activeWorker;
+  //else
+  //  theLog << logger::green << "server ";
+  //theLog << " is sending " << toBeSent.size() << " bytes through pipe "
+  //<< this->ToString() << logger::endL;
 /*  if (doNotBlock)
     theLog << ", NON-blocking." << logger::endL;
   else
@@ -1309,15 +1306,10 @@ void Pipe::Write(const std::string& toBeSent, bool doNotBlock)
 }
 
 std::string Pipe::ToString()const
-{ if (this->pipeIndicesOnCreation[0]==-1 && this->pipeIndicesOnCreation[1]==-1)
+{ if (this->thePipe[0]==-1 || this->thePipe[1]==-1)
     return "released";
   std::stringstream out;
-  out << this->pipeIndicesOnCreation[1];
-  if (this->thePipe[1]==-1)
-    out << "(outside)";
-  out << "->" << this->pipeIndicesOnCreation[0];
-  if (this->thePipe[0]==-1)
-    out << "(outside)";
+  out << this->thePipe[1] << "->" << this->thePipe[0];
   return out.str();
 }
 
@@ -1325,7 +1317,6 @@ void Pipe::CreateMe()
 { this->Release();
   if (pipe(this->thePipe.TheObjects)<0)
     crash << "Failed to open pipe from parent to child. " << crash;
-  this->pipeIndicesOnCreation=this->thePipe;
   if (pipe(this->pipeEmptyingBlocksRead.TheObjects)<0)
     crash << "Failed to open pipe from parent to child. " << crash;
   if (pipe(this->pipeEmptyingBlocksWrite.TheObjects)<0)
@@ -1349,8 +1340,6 @@ void Pipe::Release()
   WebServer::Release(this->pipeEmptyingBlocksRead[1]);
   WebServer::Release(this->pipeEmptyingBlocksWrite[0]);
   WebServer::Release(this->pipeEmptyingBlocksWrite[1]);
-  this->pipeIndicesOnCreation[0]=-1;
-  this->pipeIndicesOnCreation[1]=-1;
   this->lastRead.SetSize(0);
 }
 
@@ -1367,13 +1356,11 @@ void Pipe::ReadFileDescriptor(int readEnd, bool doNotBlock)
   const unsigned int bufferSize=4096;
   for (;;)
   { this->pipeBuffer.SetSize(bufferSize); // <-once the buffer is resized, this operation does no memory allocation and is fast.
-    if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-      theLog << logger::blue << theWebServer.ToStringActiveWorker() << " pipe, " << this->ToString() << " calling read." << logger::endL;
+    //theLog << logger::blue << theWebServer.ToStringActiveWorker() << " pipe, " << this->ToString() << " calling read." << logger::endL;
     int numReadBytes =read(readEnd, this->pipeBuffer.TheObjects, bufferSize);
     if (numReadBytes<0)
-    { if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-        theLog << logger::red << this->ToString() << ": " << theWebServer.ToStringLastErrorDescription()
-        << logger::endL;
+    { //theLog << logger::red << this->ToString() << ": " << theWebServer.ToStringLastErrorDescription()
+      //<< logger::endL;
       return;
     }
     if (numReadBytes==0)
@@ -1382,9 +1369,8 @@ void Pipe::ReadFileDescriptor(int readEnd, bool doNotBlock)
     if (counter>100)
       theLog << "This is not supposed to happen: more than 100 iterations of read from pipe."
       << logger::endL;
-    if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-      theLog << logger::blue << theWebServer.ToStringActiveWorker() << " pipe, " << this->ToString()
-      << " " << numReadBytes << " bytes read. " << logger::endL;
+    //theLog << logger::blue << theWebServer.ToStringActiveWorker() << " pipe, " << this->ToString()
+    //<< " " << numReadBytes << " bytes read. " << logger::endL;
     this->pipeBuffer.SetSize(numReadBytes);
     this->lastRead.AddListOnTop(this->pipeBuffer);
     if (numReadBytes<(signed) bufferSize)
@@ -1410,13 +1396,11 @@ void Pipe::Read(bool doNotBlock)
   char buffer[2];
   if (!doNotBlock)
     read(this->pipeEmptyingBlocksRead[0], buffer, 2);
-  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-    theLog << logger::blue << theWebServer.ToStringActiveWorker() << " reading pipe " << this->ToString()
-    << logger::endL;
+//    theLog << logger::blue << theWebServer.ToStringActiveWorker() << " reading pipe " << this->ToString()
+//    << logger::endL;
   this->ReadFileDescriptor(this->thePipe[0], doNotBlock);
-  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-    theLog << logger::blue << theWebServer.ToStringActiveWorker() << " read " << this->lastRead.size
-    << " bytes." << logger::endL;
+//  theLog << logger::blue << theWebServer.ToStringActiveWorker() << " read " << this->lastRead.size
+//    << " bytes." << logger::endL;
   if (!doNotBlock)
     write(this->pipeEmptyingBlocksRead[1], "!", 1);
 }

@@ -1573,20 +1573,21 @@ class GroebnerBasisComputation
   MemorySaving<Polynomial<coefficient> > startingPoly;
   MemorySaving<List<coefficient> > systemSolution;
   MemorySaving<Selection> solutionsFound;
+  FormatExpressions theFormat;
   void SetSerreLikeSolutionIndex(int theIndex, const coefficient& theConst);
   void GetSubFromPartialSolutionSerreLikeSystem(PolynomialSubstitution<coefficient>& outputSub);
-  std::string ToStringSerreLikeSolution(FormatExpressions* theFormat=0);
+  std::string ToStringSerreLikeSolution();
   std::string GetPolynomialStringSpacedMonomials
   (const Polynomial<coefficient>& thePoly, const HashedList<MonomialP>& theMonomialOrder, const std::string& extraStyle,
-   const std::string& extraHighlightStyle, FormatExpressions* theFormat=0, List<MonomialP>* theHighLightedMons=0);
-  std::string GetDivisionString(FormatExpressions* theFormat=0);
+   const std::string& extraHighlightStyle, List<MonomialP>* theHighLightedMons=0);
+  std::string GetDivisionString();
   bool AddPolyAndReduceBasis(GlobalVariables* theGlobalVariables);
   bool TransformToReducedGroebnerBasis(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables=0);
   bool TransformToReducedGroebnerBasisImprovedAlgorithm(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables=0, int upperComputationBound=-1);
   GroebnerBasisComputation();
   void MakeMinimalBasis();
   int GetNumVars()const;
-  std::string ToStringLetterOrder(FormatExpressions* theFormat=0)const;
+  std::string ToStringLetterOrder()const;
   static int GetNumEquationsThatWouldBeLinearIfIsubbedVar(int theVarIndex, List<Polynomial<coefficient> >& input);
   static int GetNumVarsToSolveFor(const List<Polynomial<coefficient> >& input);
   static void GetVarsToSolveFor(const List<Polynomial<coefficient> >& input, Selection& output);
@@ -2933,7 +2934,7 @@ public:
   bool flagDisplayTimeOutExplanation;
   bool flagOutputTimedOut;
   bool flagTimedOutComputationIsDone;
-  bool flagLogInterProcessCommunication;
+//  bool flagLogInterProcessCommunication;
   bool flagUsingBuiltInWebServer;
 
   FormatExpressions theDefaultFormat;

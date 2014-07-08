@@ -323,7 +323,7 @@ int GroebnerBasisComputation<coefficient>::GetNumVars()const
 
 template <class coefficient>
 std::string GroebnerBasisComputation<coefficient>::ToStringLetterOrder
-(FormatExpressions* theFormat)const
+()const
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::ToStringLetterOrder");
   std::stringstream out;
   int numVars=this->GetNumVars();
@@ -333,8 +333,9 @@ std::string GroebnerBasisComputation<coefficient>::ToStringLetterOrder
   for (int i=0; i<theVars.size; i++)
     theVars[i].MakeEi(i, 1);
   theVars.QuickSortAscending(this->thePolynomialOrder.theMonOrder);
+  FormatExpressions tempFormat=this->theFormat;
   for (int i=0; i<numVars; i++)
-  { out << theVars[i].ToString(theFormat);
+  { out << theVars[i].ToString(&tempFormat);
     if (i!=numVars-1)
       out << " < ";
   }
@@ -342,13 +343,11 @@ std::string GroebnerBasisComputation<coefficient>::ToStringLetterOrder
 }
 
 template <class coefficient>
-std::string GroebnerBasisComputation<coefficient>::GetDivisionString(FormatExpressions* theFormat)
+std::string GroebnerBasisComputation<coefficient>::GetDivisionString()
 { std::stringstream out;
   List<Polynomial<Rational> >& theRemainders=this->intermediateRemainders.GetElement();
   List<Polynomial<Rational> >& theSubtracands=this->intermediateSubtractands.GetElement();
-  if (theFormat!=0)
-    theFormat->thePolyMonOrder=this->thePolynomialOrder.theMonOrder;
-  bool flagUseLatex= theFormat==0 ? false : theFormat->flagUseLatex;
+  this->theFormat.thePolyMonOrder=this->thePolynomialOrder.theMonOrder;
   HashedList<MonomialP> totalMonCollection;
   std::string underlineStyle=" style=\"white-space: nowrap; border-bottom:1px solid black;\"";
   std::string underlineStyleHighlighted=" style=\"textcolor=red; white-space: nowrap; border-bottom:1px solid black;\"";
@@ -363,12 +362,12 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionString(FormatExpre
   totalMonCollection.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
 //  stOutput << "<hr>The monomials in play ordered: " << totalMonCollection.ToString(theFormat);
 //  int numVars=this->GetNumVars();
-  out << this->ToStringLetterOrder(theFormat);
+  out << this->ToStringLetterOrder();
   out << "<br>";
   out << theRemainders.size << " division steps total.<br>";
   out << "<table style=\"white-space: nowrap; border:1px solid black;\">";
   out << "<tr><td " << underlineStyle << "><b>Remainder:</b></td>";
-  out << this->GetPolynomialStringSpacedMonomials(this->remainderDivision, totalMonCollection, underlineStyle, HighlightedStyle, theFormat, &this->remainderDivision.theMonomials)
+  out << this->GetPolynomialStringSpacedMonomials(this->remainderDivision, totalMonCollection, underlineStyle, HighlightedStyle, &this->remainderDivision.theMonomials)
   << "</td></tr>";
   out << "<tr><td style=\"border-right:1px solid black;\"><b>Divisor(s)</b></td><td colspan=\"" << totalMonCollection.size+1 << "\"><b>Quotient(s) </b></td>"
   << "</tr>";
@@ -377,10 +376,10 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionString(FormatExpre
 //    else
     out << "<tr>";
     out << "<td style=\"border-right:1px solid black; border-bottom: 1px solid gray;\">";
-    if (flagUseLatex)
-      out << CGI::GetMathSpanPure(this->theBasiS[i].ToString(theFormat),-1 );
+    if (this->theFormat.flagUseLatex)
+      out << CGI::GetMathSpanPure(this->theBasiS[i].ToString(&this->theFormat),-1 );
     else
-      out << this->theBasiS[i].ToString(theFormat);
+      out << this->theBasiS[i].ToString(&this->theFormat);
     out << "</td>";
     out << "<td style=\"border-bottom:1px solid gray;\" colspan=\""
     << totalMonCollection.size+1 << "\">";
@@ -392,12 +391,12 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionString(FormatExpre
         continue;
       }
       out << "<td>";
-      if (flagUseLatex)
+      if (this->theFormat.flagUseLatex)
         out << CGI::GetMathSpanPure( Polynomial<Rational>::GetBlendCoeffAndMon
-        (this->intermediateHighestMonDivHighestMon.GetElement()[j], this->intermediateCoeffs.GetElement()[j], found, theFormat),-1);
+        (this->intermediateHighestMonDivHighestMon.GetElement()[j], this->intermediateCoeffs.GetElement()[j], found, &this->theFormat),-1);
       else
         out << Polynomial<Rational>::GetBlendCoeffAndMon
-        (this->intermediateHighestMonDivHighestMon.GetElement()[j], this->intermediateCoeffs.GetElement()[j], found, theFormat);
+        (this->intermediateHighestMonDivHighestMon.GetElement()[j], this->intermediateCoeffs.GetElement()[j], found, &this->theFormat);
       found=true;
       out << "</td>";
     }
@@ -408,14 +407,14 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionString(FormatExpre
   << "\"><b>Divident </b></td>" << "</tr>";
   out << "<tr><td style=\"border-right:1px solid black;\"></td>";
   out << this->GetPolynomialStringSpacedMonomials
-  (this->startingPoly.GetElement(), totalMonCollection, "", HighlightedStyle, theFormat, &this->intermediateHighlightedMons.GetElement()[0]);
+  (this->startingPoly.GetElement(), totalMonCollection, "", HighlightedStyle, &this->intermediateHighlightedMons.GetElement()[0]);
   out << "</tr>";
   for (int i=0; i<theRemainders.size; i++)
   { out << "<tr><td>-</td></tr>";
-    out << "<tr><td></td>"  << this->GetPolynomialStringSpacedMonomials(theSubtracands[i], totalMonCollection, underlineStyle, underlineStyleHighlighted, theFormat)
+    out << "<tr><td></td>" << this->GetPolynomialStringSpacedMonomials(theSubtracands[i], totalMonCollection, underlineStyle, underlineStyleHighlighted)
     << "</tr>";
     out << "<tr><td></td>"
-    << this->GetPolynomialStringSpacedMonomials(theRemainders[i], totalMonCollection, "", HighlightedStyle, theFormat, &this->intermediateHighlightedMons.GetElement()[i+1])
+    << this->GetPolynomialStringSpacedMonomials(theRemainders[i], totalMonCollection, "", HighlightedStyle, &this->intermediateHighlightedMons.GetElement()[i+1])
     << "</tr>";
   }
   out << "</table>";
@@ -654,11 +653,10 @@ void GroebnerBasisComputation<coefficient>::CheckConsistency()
 template<class coefficient>
 std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMonomials
 (const Polynomial<coefficient>& thePoly, const HashedList<MonomialP>& theMonomialOrder, const std::string& extraStyle, const std::string& extraHighlightStyle,
- FormatExpressions* theFormat, List<MonomialP>* theHighLightedMons)
+  List<MonomialP>* theHighLightedMons)
 { std::stringstream out;
   bool found=false;
   int countMons=0;
-  bool flagUseLatex= theFormat==0 ? false : theFormat->flagUseLatex;
   for (int i=0; i<theMonomialOrder.size; i++)
   { int theIndex= thePoly.theMonomials.GetIndex(theMonomialOrder[i]);
     if (theIndex==-1)
@@ -673,10 +671,10 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
     out << "<td" << extraStyle << ">";
     if (useHighlightStyle)
       out << "<span style=\"color:red\">";
-    if (flagUseLatex)
-      out << CGI::GetMathSpanPure( Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, theFormat));
+    if (this->theFormat.flagUseLatex)
+      out << CGI::GetMathSpanPure(Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat));
     else
-      out << Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, theFormat);
+      out << Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat);
     found=true;
     if (useHighlightStyle)
       out << "</span>";
@@ -867,7 +865,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
 (List<Polynomial<coefficient> >& inputSystem, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::SolveSerreLikeSystemRecursively");
   RecursionDepthCounter theCounter(&this->RecursionCounterSerreLikeSystem);
-  ProgressReport theReport1(theGlobalVariables);
+  ProgressReport theReport1(theGlobalVariables), theReport2(theGlobalVariables);
   int numVarsToSolveForStart=this->GetNumVarsToSolveFor(inputSystem);
   if (theGlobalVariables!=0)
   { std::stringstream out;
@@ -922,6 +920,19 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
       //  stOutput << "<br>" << CGI::GetMathSpanPure(inputSystem[i].ToString());
       this->MaxNumSerreSystemComputations+=startingMaxNumSerreSystemComputations;
     }
+  }
+  if (theGlobalVariables!=0 && theImpliedSubs.size>0)
+  { std::stringstream impliedSubs;
+    impliedSubs << "Implied subs: ";
+    for (int i=0; i<theImpliedSubs.size; i++)
+      for (int j=0; j<theImpliedSubs[i].size; j++)
+      { int letterIndex=-1;
+        if (theImpliedSubs[i][j].IsOneLetterFirstDegree(&letterIndex))
+          if (letterIndex==j)
+            continue;
+        impliedSubs << "<br>" << (MonomialP(j)).ToString(&this->theFormat) << ":=" << theImpliedSubs[i][j].ToString(&this->theFormat);
+      }
+    theReport2.Report(impliedSubs.str());
   }
   //stOutput << "<br>System has no more implied subs. At the moment, the system is: " << inputSystem.ToString();
   List<Polynomial<coefficient> > systemBeforeHeuristics=inputSystem;
@@ -1082,13 +1093,13 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial
 }
 
 template <class coefficient>
-std::string GroebnerBasisComputation<coefficient>::ToStringSerreLikeSolution(FormatExpressions* theFormat)
+std::string GroebnerBasisComputation<coefficient>::ToStringSerreLikeSolution()
 { std::stringstream out;
   Polynomial<Rational> tempP;
   for (int i=0; i<this->systemSolution.GetElement().size; i++)
     if (this->solutionsFound.GetElement().selected[i])
     { tempP.MakeMonomiaL(i, 1, 1);
-      out << " " << tempP.ToString(theFormat) << " := " << this->systemSolution.GetElement()[i] << ";";
+      out << " " << tempP.ToString(&this->theFormat) << " := " << this->systemSolution.GetElement()[i] << ";";
     }
   return out.str();
 }

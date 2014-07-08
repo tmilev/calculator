@@ -40,7 +40,6 @@ public:
   List<int> thePipe; //thePipe[0] is the read end; thePipe[1] is the write end.
   List<int> pipeEmptyingBlocksRead;
   List<int> pipeEmptyingBlocksWrite;
-  List<int> pipeIndicesOnCreation;
   List<char> lastRead;
   List<char> pipeBuffer;
 
@@ -55,7 +54,6 @@ public:
   ~Pipe();
   Pipe()
   { this->thePipe.initFillInObject(2,-1);
-    this->pipeIndicesOnCreation.initFillInObject(2,-1);
     this->pipeEmptyingBlocksRead.initFillInObject(2,-1);
     this->pipeEmptyingBlocksWrite.initFillInObject(2,-1);
   }

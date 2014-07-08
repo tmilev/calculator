@@ -272,7 +272,7 @@ public:
   { this->operator/=(other);
   }
   bool IsLinear()const
-  { return this->IsAConstant() || this->IsLinearNoConstantTerm();
+  { return this->IsConstant() || this->IsLinearNoConstantTerm();
   }
   bool IsLinearNoConstantTerm(int* whichLetter=0)const
   { return this->IsOneLetterFirstDegree(whichLetter);
@@ -347,7 +347,7 @@ public:
   bool IsGEQLexicographicLastVariableWeakest(const MonomialP& other)const;
   bool IsGEQTotalDegThenLexicographicLastVariableStrongest(const MonomialP& other)const;
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
-  bool IsAConstant()const
+  bool IsConstant()const
   { for (int i=0; i<this->monBody.size; i++)
       if (!this->monBody[i].IsEqualToZero())
         return false;
@@ -461,8 +461,8 @@ class MonomialWeylAlgebra
   static const inline bool IsMonEqualToZero()
   { return false;
   }
-  bool IsAConstant()const
-  { return this->polynomialPart.IsAConstant() && this->differentialPart.IsAConstant();
+  bool IsConstant()const
+  { return this->polynomialPart.IsConstant() && this->differentialPart.IsConstant();
   }
   std::string ToString(FormatExpressions* theFormat=0)const;
   static unsigned int HashFunction(const MonomialWeylAlgebra& input)
@@ -1169,7 +1169,7 @@ public:
   int TotalDegreeInt()const;
   bool IsEqualToOne()const
   { coefficient tempC;
-    if (this->IsAConstant(&tempC))
+    if (this->IsConstant(&tempC))
       return tempC.IsEqualToOne();
     return false;
   }
@@ -1183,7 +1183,7 @@ public:
       return false;
     return (*this)[0].IsOneLetterFirstDegree(whichLetter);
   }
-  bool IsAConstant(coefficient* whichConstant=0)const
+  bool IsConstant(coefficient* whichConstant=0)const
   { if (this->size()>1)
       return false;
     if (this->size()==0)
@@ -1194,11 +1194,11 @@ public:
     if (whichConstant!=0)
       *whichConstant=this->theCoeffs[0];
     const MonomialP& theMon=(*this)[0];
-    return theMon.IsAConstant();
+    return theMon.IsConstant();
   }
   bool IsNegative()const
   { coefficient tempC;
-    if(!this->IsAConstant(&tempC))
+    if(!this->IsConstant(&tempC))
       return false;
     return tempC.IsNegative();
   }
@@ -1218,7 +1218,7 @@ public:
   { outputRoot.MakeZero(this->GetMinNumVars()+1);
     int index;
     for (int i=0; i<this->size(); i++)
-      if((*this)[i].IsAConstant())
+      if((*this)[i].IsConstant())
         *outputRoot.LastObject()=this->theCoeffs[i];
       else
         if ((*this)[i].IsOneLetterFirstDegree(&index))
@@ -1266,7 +1266,7 @@ public:
   int GetMaxPowerOfVariableIndex(int VariableIndex);
   bool operator<=(const coefficient& other)const
   { coefficient constME;
-    if (!this->IsAConstant(&constME))
+    if (!this->IsConstant(&constME))
     { crash << "This may or may not be a programming error: attempting to compare a non-constant polynomial to "
       << " a constant. I cannot judge at the moment whether allowing that is a good decision. In any case, crashing to let you know. "
       << crash;
@@ -1276,7 +1276,7 @@ public:
   }
   bool operator<(const coefficient& other)const
   { coefficient constME;
-    if (!this->IsAConstant(&constME))
+    if (!this->IsConstant(&constME))
     { crash << "This may or may not be a programming error: attempting to compare a non-constant polynomial to "
       << " a constant. I cannot judge at the moment whether allowing  that is a good decision. In any case, crashing to let you know. "
       << crash;
@@ -1629,7 +1629,7 @@ private:
   void AddHonestRF(const RationalFunctionOld& other);
   void ReduceRFToPoly()
   { if (this->expressionType==this->typeRationalFunction)
-    { if (this->Denominator.GetElement().IsAConstant())
+    { if (this->Denominator.GetElement().IsConstant())
       { this->Numerator.GetElement()/=this->Denominator.GetElement().theCoeffs[0];
         this->Denominator.FreeMemory();
         this->expressionType=this->typePoly;
@@ -1640,7 +1640,7 @@ private:
   }
   void ReducePolyToRational()
   { if (this->expressionType==this->typePoly)
-      if(this->Numerator.GetElement().IsAConstant())
+      if(this->Numerator.GetElement().IsConstant())
       { this->expressionType=this->typeRational;
         if (this->Numerator.GetElement().IsEqualToZero())
           this->ratValue.MakeZero();
@@ -2073,7 +2073,7 @@ bool MonomialCollection<templateMonomial, coefficient>::IsInteger(LargeInt* whic
       *whichInteger=0;
     return true;
   }
-  bool result= (*this)[0].IsAConstant();
+  bool result= (*this)[0].IsConstant();
   if (result)
     result=this->theCoeffs[0].IsInteger(whichInteger);
   return result;
@@ -2088,7 +2088,7 @@ bool MonomialCollection<templateMonomial, coefficient>::IsSmallInteger(int* whic
       *whichInteger=0;
     return true;
   }
-  bool result= (*this)[0].IsAConstant();
+  bool result= (*this)[0].IsConstant();
   if (result)
     result=this->theCoeffs[0].IsSmallInteger(whichInteger);
   return result;
@@ -2927,7 +2927,7 @@ public:
   { if (this->sleepFunction!=0)
       this->sleepFunction(microseconds);
   }
-  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
+//  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
   double MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   double MaxComputationTimeBeforeWeTakeAction;
   bool flagDisplayTimeOutExplanation;
@@ -3947,7 +3947,7 @@ std::string MonomialCollection<templateMonomial, coefficient>::GetBlendCoeffAndM
 (const templateMonomial& inputMon, coefficient& inputCoeff, bool addPlusToFront, FormatExpressions* theFormat)
 { std::stringstream out;
   std::string coeffStr=inputCoeff.ToString();
-  if (inputMon.IsAConstant())
+  if (inputMon.IsConstant())
   { if (coeffStr[0]!='-' && addPlusToFront)
       out << "+" << coeffStr;
     else

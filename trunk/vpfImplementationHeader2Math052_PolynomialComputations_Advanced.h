@@ -487,7 +487,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
         { std::stringstream out;
           out << "Total number of polynomial operations so far: " << this->NumberGBComputations;
           if (this->MaxNumGBComputations>0)
-            out << ", with a limit of no more than " << this->MaxNumGBComputations << " operations.";
+            out << ", with a limit of " << this->MaxNumGBComputations << " operations.";
           out << "\n<br>Number of intermediate remainders: " << numIntermediateRemainders << "\n<br> Highest mon of current remainder: "
           << currentRemainder[indexLeadingMonRemainder].ToString() << ". \n<br>Current index we are dividing by: " << i+1
           << " out of " << this->theBasiS.size << "\n<br>" << currentRemainder.size() << " monomials in current remainder."
@@ -737,7 +737,7 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions
       outputSub[j]/=theCF;
 //      coefficient theConst;
 //      stOutput << "<hr>Output sub is: x_{" << j+1 << "}=" << outputSub[j].ToString();
-//      if (outputSub[j].IsAConstant(&theConst))
+//      if (outputSub[j].IsConstant(&theConst))
 //        this->SetSerreLikeSolutionIndex(j, theConst);
       //stOutput << "<br>Current solution candidate is: " << this->systemSolution.GetElement().ToString();
       return true;
@@ -817,7 +817,7 @@ void GroebnerBasisComputation<coefficient>::BackSubstituteIntoSinglePoly(Polynom
   if (changed)
     thePoly.Substitution(theFinalSub);
   coefficient tempCF;
-  if (!thePoly.IsAConstant(&tempCF))
+  if (!thePoly.IsConstant(&tempCF))
     crash << "\n<br>\nThis is a programming error: after carrying all implied substitutions the polynomial is not a constant, rather equals "
     << thePoly.ToString() << ". " << crash;
   theFinalSub[theIndex]=tempCF;
@@ -857,7 +857,7 @@ void GroebnerBasisComputation<coefficient>::GetVarsToSolveFor(const List<Polynom
 template <class coefficient>
 bool GroebnerBasisComputation<coefficient>::IsContradictoryReducedSystem(const List<Polynomial<coefficient> >& input)
 { if (input.size==1)
-    if (input[0].IsAConstant())
+    if (input[0].IsConstant())
       return true;
   return false;
 }

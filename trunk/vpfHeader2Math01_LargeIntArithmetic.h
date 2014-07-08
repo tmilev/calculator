@@ -88,7 +88,7 @@ public:
   inline void operator++(int)
   { this->AddUInt(1);
   }
-  bool IsSmallEnoughToFitInInt(int* whichInt);
+  bool IsIntegerFittingInInt(int* whichInt);
   void AssignFactorial(unsigned int x)
   { this->AssignFactorial(x, 0);
   }
@@ -198,7 +198,7 @@ public:
     this->ToString(tempS);
     return tempS;
   }
-  bool IsSmallEnoughToFitInInt(int* whichInt);
+  bool IsIntegerFittingInInt(int* whichInt);
   bool IsPositive()const
   { return this->sign==1 && (this->value.IsPositive());
   }
@@ -638,7 +638,7 @@ ParallelComputing::GlobalPointerCounter++;
   { LargeInt theInt;
     if (!this->IsInteger(&theInt))
       return false;
-    return theInt.IsSmallEnoughToFitInInt(whichInt);
+    return theInt.IsIntegerFittingInInt(whichInt);
   }
   bool IsSmallInteger(int* whichInteger=0)const
   { if (this->Extended!=0)

@@ -74,7 +74,7 @@ GlobalVariables::GlobalVariables()
   this->WebServerReturnDisplayIndicatorCloseConnection=0;
   this->MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000000;
   this->MaxComputationTimeBeforeWeTakeAction=0;
-  this->MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit=5;
+//  this->MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit=5;
   this->callSystem=0;
   this->sleepFunction=0;
   this->flagUsingBuiltInWebServer=false;
@@ -85,7 +85,7 @@ GlobalVariables::GlobalVariables()
   this->flagDisplayTimeOutExplanation=false;
   this->flagOutputTimedOut=false;
   this->flagTimedOutComputationIsDone=false;
-  this->flagLogInterProcessCommunication=false;
+  this->flagLogInterProcessCommunication=true;
 //  stOutput << "Global variables created!";
 }
 
@@ -867,7 +867,7 @@ unsigned int Selection::HashFunction() const
 }
 
 void Rational::operator=(const Polynomial<Rational>& other)
-{ if (!other.IsAConstant(this))
+{ if (!other.IsConstant(this))
     crash << "This is a programming error: attempting to assign non-constant polynomial to a Rational number is not allowed. "
     << crash;
 }
@@ -1288,7 +1288,7 @@ bool Rational::GetSquareRootIfRational(Rational& output)const
       return false;
     tempRat=primeFactorsNum[i];
     int currentMult=-1;
-    if (!multsNum[i].IsSmallEnoughToFitInInt(&currentMult))
+    if (!multsNum[i].IsIntegerFittingInInt(&currentMult))
       return false;
     tempRat.RaiseToPower(currentMult/2);
     output*=tempRat;
@@ -1298,7 +1298,7 @@ bool Rational::GetSquareRootIfRational(Rational& output)const
       return false;
     tempRat=primeFactorsDen[i];
     int currentMult=-1;
-    if (!multsDen[i].IsSmallEnoughToFitInInt(&currentMult))
+    if (!multsDen[i].IsIntegerFittingInInt(&currentMult))
       return false;
     tempRat.RaiseToPower(currentMult/2);
     output/=tempRat;
@@ -1609,7 +1609,7 @@ void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x)
 //  if(!this->CheckForConsistensy())crash << crash;
 }
 
-bool LargeIntUnsigned::IsSmallEnoughToFitInInt(int* whichInt)
+bool LargeIntUnsigned::IsIntegerFittingInInt(int* whichInt)
 { LargeIntUnsigned twoToThe31=2;
   MathRoutines::RaiseToPower(twoToThe31, 31, (LargeIntUnsigned) 1);
   if (*this>=twoToThe31)
@@ -1624,8 +1624,8 @@ bool LargeIntUnsigned::IsSmallEnoughToFitInInt(int* whichInt)
   return true;
 }
 
-bool LargeInt::IsSmallEnoughToFitInInt(int* whichInt)
-{ if (!this->value.IsSmallEnoughToFitInInt(whichInt))
+bool LargeInt::IsIntegerFittingInInt(int* whichInt)
+{ if (!this->value.IsIntegerFittingInInt(whichInt))
     return false;
   if (whichInt!=0)
     *whichInt*=this->sign;

@@ -163,6 +163,7 @@ class Expression
   void GetBaseExponentForm(Expression& outputBase, Expression& outputExponent)const;
   void GetCoefficientMultiplicandForm(Expression& outputCoeff, Expression& outputNoCoeff)const;
   void GetCoefficientMultiplicandForm(Rational& outputCoeff, Expression& outputNoCoeff)const;
+  bool SetChildAtomValue(int childIndex, const std::string& theAtom);
   bool SetChildAtomValue(int childIndex, int TheAtomValue);
   bool SetChilD(int childIndexInMe, const Expression& inputChild);
   bool SetChilD(int childIndexInMe, int childIndexInBoss);
@@ -415,6 +416,7 @@ class Expression
     return true;
   }
   bool CheckConsistency()const;
+  bool IsIntegerFittingInInt(int* whichInteger=0)const;
   bool IsSmallInteger(int* whichInteger=0)const;
   bool IsInteger(LargeInt* whichInteger=0)const;
   bool IsConstantNumber()const;
@@ -1558,6 +1560,8 @@ public:
   static bool innerSqrt(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFactorPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSolveSerreLikeSystem(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSolveSerreLikeSystemUpperLimit
+  (Calculator& theCommands, const Expression& input, Expression& output);
   static bool fLSPath(Calculator& theCommands, const Expression& input, Expression& output);
   static bool fTestMonomialBaseConjecture(Calculator& theCommands, const Expression& input, Expression& output);
   static bool fJacobiSymbol(Calculator& theCommands, const Expression& input, Expression& output);

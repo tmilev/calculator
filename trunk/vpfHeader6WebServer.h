@@ -15,6 +15,23 @@ static ProjectInformationInstance projectInfoInstanceWebServerHeader(__FILE__, "
 
 class WebServer;
 
+class PauseController
+{
+public:
+  List<int> thePausePipe; //thePipe[0] is the read end; thePipe[1] is the write end.
+  List<int> mutexPipe;
+  List<char> buffer;
+  std::string ToString()const;
+  void Release();
+  void CreateMe();
+
+  bool CheckPauseIsRequested();
+  void PauseIfRequested();
+  void RequestPause();
+  void Continue();
+  PauseController();
+};
+
 class Pipe
 {
 private:
@@ -28,6 +45,7 @@ public:
   List<char> pipeBuffer;
 
   void Read(bool doNotBlock);
+  void ReadWithoutEmptying(bool doNotBlock);
   void Write(const std::string& toBeSent, bool doNotBlock);
   void WriteAfterClearingPipe(const std::string& toBeSent, bool doNotBlock);
 
@@ -58,6 +76,7 @@ public:
   std::string mainAddresSRAW;
   std::string mainAddress;
   std::string PhysicalFileName;
+  std::string status;
   List<std::string> theStrings;
   int ContentLength;
   int requestType;
@@ -66,11 +85,12 @@ public:
   int connectionID;
   List<char> remainingBytesToSend;
   List<char> bufferFileIO;
-  Pipe pipeServerToWorkerComputationReportReceived;
-  Pipe pipeServerToWorkerEmptyingPausesWorker;
+  PauseController ComputationReportReceived;
+  PauseController PauseWorker;
   Pipe pipeServerToWorkerRequestIndicator;
   Pipe pipeWorkerToServerControls;
   Pipe pipeWorkerToServerIndicatorData;
+  Pipe pipeWorkerToServerWorkerStatus;
   Pipe pipeWorkerToServerUserInput;
 
   std::string error;
@@ -102,7 +122,8 @@ public:
   (const List<char>& bytesToSend, bool MustSendAll=false)
   ;
   void SignalIamDoneReleaseEverything();
-  void ReleaseServerSideResources();
+  void reset();
+  void resetMessageComponentsExceptRawMessage();
   void Release();
   void ReleaseKeepInUseFlag();
   void SendAllBytes();
@@ -126,8 +147,6 @@ public:
   void ParseMessage();
   void ExtractArgumentFromAddress();
   void ExtractPhysicalAddressFromMainAddress();
-  void reset();
-  void resetMessageComponentsExceptRawMessage();
 };
 
 class WebServer

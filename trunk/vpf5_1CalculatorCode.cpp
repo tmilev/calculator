@@ -576,8 +576,18 @@ bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Express
   return true;
 }
 
-bool Calculator::innerGroebner(Calculator& theCommands, const Expression& input, Expression& output, bool useGr, bool useRevLex, bool useModZp)
+bool Calculator::innerGroebner
+(Calculator& theCommands, const Expression& input, Expression& output, bool useGr, bool useRevLex, bool useModZp)
 { MacroRegisterFunctionWithName("Calculator::innerGroebner");
+ /* if (input.IsSequenceNElementS())
+  { output=input;
+    if (!useGr && !useRevLex)
+      return output.SetChildAtomValue(0, "GroebnerLexUpperLimit");
+    if (!useGr && useRevLex)
+      return output.SetChildAtomValue(0, "GroebnerRevLexUpperLimit");
+    if (useGr)
+      return output.SetChildAtomValue(0, "GroebnerGrLexUpperLimit");
+  }*/
   Vector<Polynomial<Rational> > inputVector;
   Vector<Polynomial<ElementZmodP> > inputVectorZmodP;
   Expression theContext;
@@ -671,8 +681,9 @@ bool Calculator::innerGroebner(Calculator& theCommands, const Expression& input,
     }
     out << ")";
   } else
-  { out << "<br>Minimal Groebner basis not computed due to exceeding the user-given limit of  " << upperBoundComputations << " polynomial operations. ";
-    out << "<br>A partial result, a (non-Groebner) basis of the ideal with " << theGroebnerComputation.theBasiS.size << " elements follows ";
+  { out << "<br>Minimal Groebner basis not computed: exceeded the user-given limit of  " << upperBoundComputations << " polynomial operations. ";
+    out << "<br>An intermediate non-Groebner basis of the ideal containing total " << theGroebnerComputation.theBasiS.size
+    << " basis elements follows ";
     out << "<br>GroebnerLexUpperLimit{}(";
     for (int i=0; i<theGroebnerComputation.theBasiS.size; i++)
     { out << theGroebnerComputation.theBasiS[i].ToString(&theFormat);
@@ -1059,9 +1070,60 @@ bool Calculator::innerSolveSerreLikeSystem(Calculator& theCommands, const Expres
   //int numVars=theContext.GetNumContextVariables();
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
+
   GroebnerBasisComputation<AlgebraicNumber> theComputation;
+
   theComputation.MaxNumGBComputations=2001;
   theComputation.MaxNumSerreSystemComputations=2001;
+  theCommands.theGlobalVariableS->theDefaultFormat=theFormat;
+//  stOutput << "<br>The context vars:<br>" << theContext.ToString();
+  theComputation.SolveSerreLikeSystem(thePolysAlgebraic, &theCommands.theObjectContainer.theAlgebraicClosure, theCommands.theGlobalVariableS);
+  std::stringstream out;
+  out << "<br>The context vars:<br>" << theContext.ToString();
+  out << "<br>The polynomials: " << thePolysAlgebraic.ToString(&theFormat);
+  out << "<br>Total number of polynomial computations: " << theComputation.NumberSerreSystemComputations;
+  if (theComputation.flagSystemProvenToHaveNoSolution)
+    out << "<br>The system does not have a solution. ";
+  else if(theComputation.flagSystemProvenToHaveSolution)
+    out << "<br>System proven to have solution.";
+  if (!theComputation.flagSystemProvenToHaveNoSolution)
+  { if (theComputation.flagSystemSolvedOverBaseField)
+      out << "<br>One solution follows. " << theComputation.ToStringSerreLikeSolution(&theFormat);
+    else
+      out << " However, I was unable to find such a solution: either my heuristics were not good enough, or no solution is rational.";
+  }
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool Calculator::innerSolveSerreLikeSystemUpperLimit(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerSolveSerreLikeSystem");
+  Vector<Polynomial<Rational> > thePolysRational;
+  Expression theContext(theCommands);
+  if (!theCommands.GetVectorFromFunctionArguments(input, thePolysRational, &theContext, 0, CalculatorSerialization::innerPolynomial<Rational>))
+    return output.MakeError("Failed to extract list of polynomials. ", theCommands);
+  FormatExpressions theFormat;
+  theContext.ContextGetFormatExpressions(theFormat);
+  int upperLimit=-1;
+  Rational upperLimitRat;
+  if (!thePolysRational[0].IsConstant(&upperLimitRat))
+  { theCommands << "Failed to extract a constant from the first argument "
+    << thePolysRational[0].ToString(&theFormat) << ". ";
+    return false;
+  }
+  if (!upperLimitRat.IsIntegerFittingInInt(&upperLimit))
+  { theCommands << "Failed to extract a small integer from the first argument "
+    << upperLimitRat.ToString(&theFormat) << ". ";
+    return false;
+  }
+  thePolysRational.RemoveIndexShiftDown(0);
+  Vector<Polynomial<AlgebraicNumber> > thePolysAlgebraic;
+  thePolysAlgebraic=thePolysRational;
+  //int numVars=theContext.GetNumContextVariables();
+
+  GroebnerBasisComputation<AlgebraicNumber> theComputation;
+
+  theComputation.MaxNumGBComputations=upperLimit;
+  theComputation.MaxNumSerreSystemComputations=upperLimit;
   theCommands.theGlobalVariableS->theDefaultFormat=theFormat;
 //  stOutput << "<br>The context vars:<br>" << theContext.ToString();
   theComputation.SolveSerreLikeSystem(thePolysAlgebraic, &theCommands.theObjectContainer.theAlgebraicClosure, theCommands.theGlobalVariableS);

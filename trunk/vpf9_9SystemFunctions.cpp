@@ -64,10 +64,10 @@ void* RunTimerVoidPtr(void* ptr)
       elapsedComputationTime=elapsedtime-computationStartTime;
     if (onePredefinedCopyOfGlobalVariables.flagComputationCompletE)
       break;
-    if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
-      if (!onePredefinedCopyOfGlobalVariables.flagComputationStarted)
-        if (elapsedtime>onePredefinedCopyOfGlobalVariables.MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit)
-          break;
+//    if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+//      if (!onePredefinedCopyOfGlobalVariables.flagComputationStarted)
+//        if (elapsedtime>onePredefinedCopyOfGlobalVariables.MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit)
+//          break;
     if (onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
       if (elapsedComputationTime>0)
         if (elapsedComputationTime>onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit)
@@ -98,9 +98,9 @@ void* RunTimerVoidPtr(void* ptr)
       << __FILE__ << "<br>";
       crash << crash;
     } else
-    { crash << "Something has gone wrong. Computation has not started, yet " << elapsedtime << " seconds have already passed: the amount of time "
-      << " allowed before a computation starts is " << onePredefinedCopyOfGlobalVariables.MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit
-      << ". This may be an error in the web-server routines of the calculator!" << crash;
+    { crash << "Something has gone wrong. Computation has not started, yet " << elapsedtime << " seconds have already passed."
+//      << " allowed before a computation starts is " << onePredefinedCopyOfGlobalVariables.MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit
+      << " This may be an error in the web-server routines of the calculator!" << crash;
     }
   }
   pthread_exit(NULL);

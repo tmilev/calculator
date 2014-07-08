@@ -81,7 +81,6 @@ class logger
           return *this;
         this->theFile << this->closeTagHtml();
         this->theFile << this->openTagHtml();
-        theFile.flush();
         return *this;
       default:
         return *this;
@@ -105,6 +104,63 @@ WebServer theWebServer;
 
 const char* PORT ="8080";  // the port users will be connecting to
 const int BACKLOG =10;     // how many pending connections queue will hold
+
+void PauseController::Release()
+{ WebServer::Release(this->mutexPipe[0]);
+  WebServer::Release(this->mutexPipe[1]);
+  WebServer::Release(this->thePausePipe[0]);
+  WebServer::Release(this->thePausePipe[1]);
+}
+
+PauseController::PauseController()
+{ this->thePausePipe.initFillInObject(2,-1);
+  this->mutexPipe.initFillInObject(2, -1);
+}
+
+void PauseController::CreateMe()
+{ this->Release();
+  this->buffer.SetSize(200);
+  if (pipe(this->thePausePipe.TheObjects)<0)
+    crash << "Failed to open pipe from parent to child. " << crash;
+  if (pipe(this->mutexPipe.TheObjects)<0)
+    crash << "Failed to open pipe from parent to child. " << crash;
+  fcntl(this->thePausePipe[1], F_SETFL, O_NONBLOCK);
+  write (this->thePausePipe[1], "!", 1);
+  write (this->mutexPipe[1], "!", 1);
+}
+
+void PauseController::RequestPause()
+{ read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size);
+}
+
+bool PauseController::CheckPauseIsRequested()
+{ read (this->mutexPipe[0], this->buffer.TheObjects, this->buffer.size);
+  fcntl(this->thePausePipe[0], F_SETFL, O_NONBLOCK);
+  bool result = !(read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size)>0);
+  if (!result)
+    write (this->thePausePipe[1], "!", 1);
+  fcntl(this->thePausePipe[0], F_SETFL, 0);
+  write (this->mutexPipe[1], "!", 1);
+  return result;
+}
+
+void PauseController::PauseIfRequested()
+{ bool pauseWasRequested= !((read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size))>0);
+  if (!pauseWasRequested)
+    write(this->thePausePipe[1], "!", 1);
+}
+
+void PauseController::Continue()
+{ write(this->thePausePipe[1], "!", 1);
+}
+
+std::string PauseController::ToString()const
+{ if (this->thePausePipe[0]==-1)
+    return "(not in use)";
+  std::stringstream out;
+  out << "pause-controller pipe " << this->thePausePipe[0] << "<-" << this->thePausePipe[1];
+  return out.str();
+}
 
 void WebServer::Signal_SIGINT_handler(int s)
 { theLog << "Signal interrupt handler called with input: " << s;
@@ -267,19 +323,26 @@ void WebWorker::OutputSendAfterTimeout(const std::string& input)
   onePredefinedCopyOfGlobalVariables.flagTimedOutComputationIsDone=true;
   theLog << "WebWorker::StandardOutputPart2ComputationTimeout called with worker number " << theWebServer.GetActiveWorker().indexInParent+1
   << "." << logger::endL;
-  //clearing the pipe which will signal our data has been received:
-  theWebServer.GetActiveWorker().pipeServerToWorkerComputationReportReceived.Read(true);
-  //making sure we are not paused:
-//  theWebServer.GetActiveWorker().pipeServerToWorkerEmptyingPausesWorker.Read(false);
-//  theWebServer.GetActiveWorker().pipeServerToWorkerEmptyingPausesWorker.Write("!", false);
-  theLog << logger::red << "Writing final output to indicator." << logger::endL;
+  //requesting pause which will be cleared by the receiver of pipeWorkerToServerIndicatorData
+  theWebServer.GetActiveWorker().ComputationReportReceived.RequestPause();
+  theLog << logger::red << "Sending result through indicator pipe." << logger::endL;
+  theWebServer.GetActiveWorker().pipeWorkerToServerWorkerStatus.
+  WriteAfterClearingPipe("Sending result through indicator pipe.", true);
+
   theWebServer.GetActiveWorker().pipeWorkerToServerIndicatorData.WriteAfterClearingPipe(input, false);
-  theLog << logger::red << "Final output written to indicator, blocking until data is received." << logger::endL;
-  theWebServer.GetActiveWorker().pipeServerToWorkerComputationReportReceived.Read(false);
-  theLog << logger::red << "We are unblocked (data was received), writing \"finished\"." << logger::endL;
+  theLog << logger::red << "Final output written to indicator, blocking until data is received on the other end." << logger::endL;
+  theWebServer.GetActiveWorker().pipeWorkerToServerWorkerStatus.
+  WriteAfterClearingPipe(" Blocking until result data is received.", true);
+  theWebServer.GetActiveWorker().ComputationReportReceived.PauseIfRequested();
+
+  //requesting pause which will be cleared by the receiver of pipeWorkerToServerIndicatorData
+  theWebServer.GetActiveWorker().ComputationReportReceived.RequestPause();
+  theLog << logger::red << "Result data is received, sending \"finished\"." << logger::endL;
   theWebServer.GetActiveWorker().pipeWorkerToServerIndicatorData.WriteAfterClearingPipe("finished", false);
-  theLog << logger::red << "\"finished\" written to indicator, blocking until received." << logger::endL;
-  theWebServer.GetActiveWorker().pipeServerToWorkerComputationReportReceived.Read(false);
+  theWebServer.GetActiveWorker().pipeWorkerToServerWorkerStatus.
+  WriteAfterClearingPipe(" \"finished\" sent through indicator pipe, waiting.", true);
+  theLog << logger::red << "\"finished\" sent through indicator pipe, waiting." << logger::endL;
+  theWebServer.GetActiveWorker().ComputationReportReceived.PauseIfRequested();
 }
 
 void WebWorker::OutputStandardResult()
@@ -397,7 +460,7 @@ void WebWorker::ParseMessage()
     { if (this->theStrings[i+1].size()<10000)
       { LargeIntUnsigned theLI;
         if (theLI.AssignStringFailureAllowed(this->theStrings[i+1], true))
-          if (!theLI.IsSmallEnoughToFitInInt(&this->ContentLength))
+          if (!theLI.IsIntegerFittingInInt(&this->ContentLength))
             this->ContentLength=-1;
       }
     }
@@ -582,19 +645,13 @@ int WebWorker::ProcessPauseWorker()
   WebWorker& otherWorker=this->parent->theWorkers[inputWebWorkerIndex];
   if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
     theLog << "About to read pipeServerToWorker..." << logger::endL;
-  otherWorker.pipeServerToWorkerEmptyingPausesWorker.Read(true);
-  if (otherWorker.pipeServerToWorkerEmptyingPausesWorker.lastRead.size>0)
-  { if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-      theLog << logger::yellow << "Successfully read pipeServerToWorkerEmptyingPausesWorker, result was NON EMPTY"
-      << logger::endL;
+  if (!otherWorker.PauseWorker.CheckPauseIsRequested())
+  { otherWorker.PauseWorker.RequestPause();
     stOutput << "paused";
     return 0;
   }
-  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-    theLog << logger::green << "Successfully read pipeServerToWorkerEmptyingPausesWorker, result was EMPTY"
-    << logger::endL;
   stOutput << "unpaused";
-  otherWorker.pipeServerToWorkerEmptyingPausesWorker.Write("!", false);
+  otherWorker.PauseWorker.Continue();
   return 0;
 }
 
@@ -616,6 +673,7 @@ int WebWorker::ProcessComputationIndicator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessComputationIndicator");
   theLog << "Processing get request indicator." << logger::endL;
   stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
+  this->pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("Preparing indicator report", true);
   if (this->mainArgumentRAW.size()<=9)
   { stOutput << "<b>Indicator takes as argument the id of the child process that is running the computation.</b>";
     return 0;
@@ -644,7 +702,7 @@ int WebWorker::ProcessComputationIndicator()
     outputString.assign(otherWorker.pipeWorkerToServerIndicatorData.lastRead.TheObjects, otherWorker.pipeWorkerToServerIndicatorData.lastRead.size);
     //theLog << logger::yellow << "Indicator string read: " << logger::blue << outputString << logger::endL;
     stOutput << outputString;
-    otherWorker.pipeServerToWorkerComputationReportReceived.WriteAfterClearingPipe("!", true);
+    otherWorker.ComputationReportReceived.Continue();
   }
 //  stOutput << "<b>Not implemented: request for indicator for worker " << inputWebWorkerNumber
 //  << " out of " << this->parent->theWorkers.size << ".</b>";
@@ -653,20 +711,26 @@ int WebWorker::ProcessComputationIndicator()
 
 void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
 { MacroRegisterFunctionWithName("WebWorker::PipeProgressReportToParentProcess");
+  //  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+    theLog << "about to potentially block " << logger::endL;
+  if (this->PauseWorker.CheckPauseIsRequested())
+    this->pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("Pausing as requested...", true);
+
+  this->PauseWorker.PauseIfRequested();     //if pause was requested, here we block
+  //if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+    theLog << "(possible) block passed" << logger::endL;
+  this->pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("Computing...", true);
   this->pipeServerToWorkerRequestIndicator.Read(true);
   if (this->pipeServerToWorkerRequestIndicator.lastRead.size==0)
     return;
   if (onePredefinedCopyOfGlobalVariables.flagTimedOutComputationIsDone)
     return;
-//  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-  theLog << "about to potentially block " << logger::endL;
-  this->pipeServerToWorkerEmptyingPausesWorker.Read(false);     //if pause was requested, here we block
-  //if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-  theLog << "(possible) block passed" << logger::endL;
-  this->pipeServerToWorkerEmptyingPausesWorker.Write("!", false);
   if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
-    theLog << " data written!";
+  { theLog << " data written!";
+    this->pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("Piping computation process...", true);
+  }
   this->pipeWorkerToServerIndicatorData.Write(input, true);
+  this->pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("Computing...", true);
 }
 
 int WebWorker::ProcessFolder()
@@ -703,15 +767,9 @@ void WebWorker::reset()
   this->connectionID=-1;
   this->indexInParent=-1;
   this->parent=0;
-  this->flagInUse=false;
   this->displayUserInput="";
   this->requestType=this->requestUnknown;
-  this->pipeServerToWorkerEmptyingPausesWorker.Release();
-  this->pipeWorkerToServerControls.Release();
-  this->pipeServerToWorkerRequestIndicator.Release();
-  this->pipeServerToWorkerComputationReportReceived.Release();
-  this->pipeWorkerToServerIndicatorData.Release();
-  this->pipeWorkerToServerUserInput.Release();
+  this->Release();
 }
 
 WebWorker::WebWorker()
@@ -831,8 +889,12 @@ int WebWorker::OutputWeb()
   theWebServer.CheckExecutableVersionAndRestartIfNeeded();
   stOutput << theParser.javaScriptDisplayingIndicator;
 //  theParser.inputString="TestCalculatorIndicator 0";
+  if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+    theWebServer.GetActiveWorker().pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("Computing...", true);
   if (theParser.inputString!="")
     theParser.Evaluate(theParser.inputString);
+  if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+    theWebServer.GetActiveWorker().pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("Computation complete, preparing output", true);
   onePredefinedCopyOfGlobalVariables.flagComputationCompletE=true;
   if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
     if (onePredefinedCopyOfGlobalVariables.flagOutputTimedOut)
@@ -1001,18 +1063,15 @@ int WebWorker::ServeClient()
   return 0;
 }
 
-void WebWorker::ReleaseServerSideResources()
-{ this->parent->Release(this->parent->listeningSocketID);//worker has no access to socket listener
-}
-
 void WebWorker::ReleaseKeepInUseFlag()
 { MacroRegisterFunctionWithName("WebServer::ReleaseMyPipe");
-  this->pipeServerToWorkerEmptyingPausesWorker.Release();
   this->pipeWorkerToServerControls.Release();
   this->pipeServerToWorkerRequestIndicator.Release();
-  this->pipeServerToWorkerComputationReportReceived.Release();
   this->pipeWorkerToServerIndicatorData.Release();
   this->pipeWorkerToServerUserInput.Release();
+  this->pipeWorkerToServerWorkerStatus.Release();
+  this->ComputationReportReceived.Release();
+  this->PauseWorker.Release();
   WebServer::Release(this->connectedSocketID);
 }
 
@@ -1067,6 +1126,8 @@ std::string WebWorker::ToStringStatus()const
       out << ", <span style=\"color:green\"><b>current process</b></span>";
     else
       out << ", <b>in use</b>";
+    out << ", <a href=\"calculator?monitor" << this->indexInParent +1 << "\">monitor process "
+    << this->indexInParent +1 << "</a>";
   } else
     out << ", not in use";
   if (this->displayUserInput!="")
@@ -1081,12 +1142,15 @@ std::string WebWorker::ToStringStatus()const
     out << "released in current process, value before release: " << this->connectedSocketIDLastValueBeforeRelease;
   else
     out << this->connectedSocketID;
-  out << ", pipe indices: worker to server controls: " << this->pipeWorkerToServerControls.ToString()
-  << ", server to worker pause signal pipe:  " << this->pipeServerToWorkerEmptyingPausesWorker.ToString()
+  out << ". ";
+  if (this->status!="")
+    out << " <span style=\"color:red\"><b> Status: " << this->status << ". </b></span>";
+  out << "Pipe indices: worker to server controls: " << this->pipeWorkerToServerControls.ToString()
   << ", server to worker request indicator: " << this->pipeServerToWorkerRequestIndicator.ToString()
-  << ", server to worker computation report received: " << this->pipeServerToWorkerComputationReportReceived.ToString()
   << ", worker to server indicator data: " << this->pipeWorkerToServerIndicatorData.ToString()
   << ", worker to server user input: " << this->pipeWorkerToServerUserInput.ToString()
+  << ", server to worker:  " << this->PauseWorker.ToString()
+  << ", server to worker computation report received: " << this->ComputationReportReceived.ToString()
   ;
   out << ", user address: " << this->userAddress << ".";
   return out.str();
@@ -1185,13 +1249,13 @@ void WebServer::CreateNewActiveWorker()
   this->GetActiveWorker().Release();
   this->theWorkers[this->activeWorker].flagInUse=true;
 
-  this->GetActiveWorker().pipeServerToWorkerComputationReportReceived.CreateMe();
-  this->GetActiveWorker().pipeServerToWorkerEmptyingPausesWorker.CreateMe();
-  this->GetActiveWorker().pipeServerToWorkerEmptyingPausesWorker.Write("!", false);
+  this->GetActiveWorker().ComputationReportReceived.CreateMe();
+  this->GetActiveWorker().PauseWorker.CreateMe();
   this->GetActiveWorker().pipeServerToWorkerRequestIndicator.CreateMe();
   this->GetActiveWorker().pipeWorkerToServerControls.CreateMe();
   this->GetActiveWorker().pipeWorkerToServerIndicatorData.CreateMe();
   this->GetActiveWorker().pipeWorkerToServerUserInput.CreateMe();
+  this->GetActiveWorker().pipeWorkerToServerWorkerStatus.CreateMe();
   this->GetActiveWorker().indexInParent=this->activeWorker;
   this->GetActiveWorker().parent=this;
 }
@@ -1267,6 +1331,8 @@ void Pipe::CreateMe()
   if (pipe(this->pipeEmptyingBlocksWrite.TheObjects)<0)
     crash << "Failed to open pipe from parent to child. " << crash;
   fcntl(this->thePipe[1], F_SETFL, 0);
+  fcntl(this->pipeEmptyingBlocksRead[1], F_SETFL, 0);
+  fcntl(this->pipeEmptyingBlocksWrite[1], F_SETFL, 0);
   write(this->pipeEmptyingBlocksRead[1], "!", 1);
   write(this->pipeEmptyingBlocksWrite[1], "!", 1);
 }
@@ -1313,8 +1379,8 @@ void Pipe::ReadFileDescriptor(int readEnd, bool doNotBlock)
     if (numReadBytes==0)
       return;
     counter++;
-    if (counter>10000)
-      theLog << "This is not supposed to happen: more than 10000 iterations of read from pipe."
+    if (counter>100)
+      theLog << "This is not supposed to happen: more than 100 iterations of read from pipe."
       << logger::endL;
     if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
       theLog << logger::blue << theWebServer.ToStringActiveWorker() << " pipe, " << this->ToString()
@@ -1323,6 +1389,15 @@ void Pipe::ReadFileDescriptor(int readEnd, bool doNotBlock)
     this->lastRead.AddListOnTop(this->pipeBuffer);
     if (numReadBytes<(signed) bufferSize)
       return;
+  }
+}
+
+void Pipe::ReadWithoutEmptying(bool doNotBlock)
+{ this->Read(doNotBlock);
+  if (this->lastRead.size>0)
+  { std::string tempS;
+    tempS.assign(this->lastRead.TheObjects, this->lastRead.size);
+    this->Write(tempS, false);
   }
 }
 
@@ -1384,6 +1459,15 @@ std::string WebServer::ToStringStatusAll()
   for (int i=0; i<this->theWorkers.size; i++)
     if (this->theWorkers[i].flagInUse)
       numInUse++;
+  for (int i=0; i<this->theWorkers.size; i++)
+  { WebWorker& currentWorker=this->theWorkers[i];
+    if (!currentWorker.flagInUse)
+      continue;
+    currentWorker.pipeWorkerToServerWorkerStatus.ReadWithoutEmptying(true);
+    currentWorker.status.assign
+    (currentWorker.pipeWorkerToServerWorkerStatus.lastRead.TheObjects,
+     currentWorker.pipeWorkerToServerWorkerStatus.lastRead.size);
+  }
   out << "<hr>" << numInUse << " workers in use out of total " << this->theWorkers.size << " workers.";
   for (int i=0; i<this->theWorkers.size; i++)
     out << "<br>" << this->theWorkers[i].ToStringStatus();
@@ -1525,8 +1609,7 @@ int WebServer::Run()
     //theLog << "\r\nChildPID: " << this->childPID;
     if (this->GetActiveWorker().ProcessPID!=0)
     { // this is the child (worker) process
-      //releasing all resources worker does not need:
-      this->GetActiveWorker().ReleaseServerSideResources();
+      this->Release(this->listeningSocketID);//worker has no access to socket listener
       onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=
       this->ReturnActiveIndicatorAlthoughComputationIsNotDone;
       InitializeTimer();

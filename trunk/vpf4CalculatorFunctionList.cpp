@@ -1085,16 +1085,15 @@ void Calculator::initPredefinedInnerFunctions()
    This suggests a certain heuristic solution strategy (will be documented as the code matures). \
    To stress it out explicitly, the algorithm is heuristic - i.e., is not guaranteed to work. \
    The result of the function is a printout with one of the possible outcomes.\
-   <br>Outcome 1. While processing the polynomial system, the limit of computations was \
-   hit and the computation was aborted (i.e., the system was too large). \
+   <br>Outcome 1. While processing the polynomial system, the computation limit was \
+   hit. The computation was aborted. \
    No information on the system can be given (except that it is large).\
-   <br>Outcome 2. The system was proven to be contradictory (no solution exists).\
-   <br>Outcome 3. The system was proven to be non-contradictory (a solution over the complex numbers \
-   was proven to exist by proving that a corresponding reduced Groebner basis is not equal to {1}). However, no\
-   solution over the rationals was found.\
-   <br>Outcome 4. The system has a solution over the rationals. A solution is given.\
+   <br>Outcome 2. The reduced Groebner basis of the system is {1}. Therefore the system is contradictory - no solution exists. \
+   <br>Outcome 3. The reduced Groebner basis was found and is not equal to {1}. Therefore a solution over the complex numbers \
+   exists. However, no such solution was found.\
+   <br>Outcome 4. A solution was found and is presented to the user.\
    ",
-   "FindOneSolutionSerreLikePolynomialSystem{}(\
+   "FindOneSolutionSerreLikePolynomialSystem{}(  \
     x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+1, \
     x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21},\
     x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21},\
@@ -1115,7 +1114,32 @@ void Calculator::initPredefinedInnerFunctions()
     x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13},\
     x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13},\
     x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true);
-
+this->AddOperationInnerHandler
+  ("FindOneSolutionSerreLikePolynomialSystemUpperLimit", this->innerSolveSerreLikeSystemUpperLimit, "",
+   "Same as FindOneSolutionSerreLikePolynomialSystem but the first arguments give upper limits \
+   to the number of polynomial computations that can be carried out.\
+    ",
+   "FindOneSolutionSerreLikePolynomialSystemUpperLimit{}( 2001, \
+    x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+1, \
+    x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21},\
+    x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21},\
+    x_{6}x_{24}+2x_{5}x_{23}-x_{4}x_{22}+2x_{3}x_{21}-2x_{2}x_{20}-x_{1}x_{19},\
+    x_{12}x_{23}-x_{11}x_{22}-x_{9}x_{20},\
+    x_{11}x_{23}+x_{10}x_{22}+x_{8}x_{20}-1,\
+    x_{9}x_{23}+x_{8}x_{22}-x_{7}x_{20},\
+    x_{12}x_{21}-x_{11}x_{20}+x_{9}x_{19},\
+    x_{11}x_{21}+x_{10}x_{20}-x_{8}x_{19},\
+    x_{9}x_{21}+x_{8}x_{20}+x_{7}x_{19}-1,\
+    x_{12}x_{18}+2x_{11}x_{17}-x_{10}x_{16}+2x_{9}x_{15}-2x_{8}x_{14}-x_{7}x_{13},\
+    x_{6}x_{18}-x_{4}x_{16}-2x_{2}x_{14}-x_{1}x_{13}+1,\
+    x_{5}x_{18}+x_{4}x_{17}+x_{2}x_{15},\
+    x_{3}x_{18}+x_{2}x_{17}-x_{1}x_{15},\
+    x_{6}x_{17}+x_{5}x_{16}+x_{3}x_{14},\
+    x_{5}x_{17}+x_{4}x_{16}+x_{2}x_{14}-1,\
+    x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14},\
+    x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13},\
+    x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13},\
+    x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true);
   this->AddOperationInnerHandler
   ("GroebnerLexUpperLimit", this->innerGroebnerLex, "",
    "Transforms to a reduced Groebner basis using the  \

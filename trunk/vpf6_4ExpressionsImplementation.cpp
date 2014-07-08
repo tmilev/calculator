@@ -865,6 +865,15 @@ bool Expression::SetChildAtomValue(int childIndex, int TheAtomValue)
   return true;
 }
 
+bool Expression::SetChildAtomValue(int childIndex, const std::string& theAtom)
+{ this->CheckInitialization();
+  Expression tempE;
+  tempE.MakeAtom(theAtom, *this->theBoss);
+  this->children.SetObjectAtIndex
+  (childIndex, this->theBoss->theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(tempE));
+  return true;
+}
+
 bool Expression::SetChilD(int childIndexInMe, const Expression& inputChild)
 { this->CheckInitialization();
   int theIndexOfTheExpression=this->theBoss->theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(inputChild);
@@ -1439,6 +1448,15 @@ bool Expression::IsInteger(LargeInt* whichInteger)const
   if (!this->IsOfType<Rational>(&theRat))
     return false;
   return theRat.IsInteger(whichInteger);
+}
+
+bool Expression::IsIntegerFittingInInt(int* whichInteger)const
+{ Rational theRat;
+//  stOutput << "Is integer fitting in int step 1: ";
+  if (!this->IsOfType<Rational>(&theRat))
+    return false;
+//  stOutput << "Is integer fitting in int step 2: " << theRat.ToString();
+  return theRat.IsIntegerFittingInInt(whichInteger);
 }
 
 template <class coefficient>

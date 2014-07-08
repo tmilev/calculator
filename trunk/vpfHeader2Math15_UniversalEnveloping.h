@@ -246,7 +246,7 @@ public:
   { output << theMon.ToString();
     return output;
   }
-  bool IsAConstant()const
+  bool IsConstant()const
   { return this->IsEqualToOne();
   }
   static const bool IsMonEqualToZero()

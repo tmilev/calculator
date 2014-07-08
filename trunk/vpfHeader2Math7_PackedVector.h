@@ -414,7 +414,7 @@ List<ClassFunction<WeylGroup::WeylGroupBase, Rational> > ComputeCharacterTable(s
     G.ComputeCCfromAllElements(0);
   List<int> classmap;
   int sizeOfG=-1;
-  G.size().IsSmallEnoughToFitInInt(&sizeOfG);
+  G.size().IsIntegerFittingInInt(&sizeOfG);
   classmap.SetSize(sizeOfG);
 //  classmap.SetSize(G.theElements.size);
   for(int i=0; i<G.ConjugacyClassCount(); i++)
@@ -507,7 +507,7 @@ template <typename somegroup>
 Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap = 0)
 { List<int> invl;
   int classSize=-1;
-  G.conjugacyClasseS[cci].size.IsSmallEnoughToFitInInt(&classSize);
+  G.conjugacyClasseS[cci].size.IsIntegerFittingInInt(&classSize);
   invl.SetSize(classSize);
   for(int i=0; i<G.conjugacyClasseS[cci].size; i++)
     invl[i] = G.Invert(G.theElements.GetIndex(G.conjugacyClasseS[cci].theElements[i]));

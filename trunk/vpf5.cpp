@@ -1607,7 +1607,7 @@ bool LargeIntUnsigned::Factor(List<LargeInt>& outputPrimeFactors, List<int>& out
     return false;
   outputMultiplicites.SetSize(buffer.size);
   for (int i=0; i<buffer.size; i++)
-    if (!buffer[i].IsSmallEnoughToFitInInt(&outputMultiplicites[i]))
+    if (!buffer[i].IsIntegerFittingInInt(&outputMultiplicites[i]))
       return false;
   return true;
 }

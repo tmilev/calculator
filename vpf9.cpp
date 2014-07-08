@@ -85,8 +85,8 @@ GlobalVariables::GlobalVariables()
   this->flagDisplayTimeOutExplanation=false;
   this->flagOutputTimedOut=false;
   this->flagTimedOutComputationIsDone=false;
-  this->flagLogInterProcessCommunication=true;
-//  stOutput << "Global variables created!";
+  //  this->flagLogInterProcessCommunication=true;
+  //  stOutput << "Global variables created!";
 }
 
 void ProgressReport::Report(const std::string& theReport)

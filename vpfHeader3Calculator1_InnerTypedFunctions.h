@@ -168,7 +168,7 @@ bool CalculatorSerialization::innerPolynomial(Calculator& theCommands, const Exp
       Polynomial<coefficient> resultP=theConverted.GetValue<Polynomial<coefficient> >();
       if (thePower<0)
       { coefficient theConst;
-        if (!resultP.IsAConstant(&theConst))
+        if (!resultP.IsConstant(&theConst))
         { theCommands.Comments << "<hr>Failed to extract polynomial from  " << input.ToString() << " because the exponent was negative. ";
           return false;
         }

@@ -661,11 +661,11 @@ bool ElementUniversalEnveloping<coefficient>::ConvertToRationalCoeff(ElementUniv
   for (int i=0; i<this->size; i++)
   { MonomialUniversalEnveloping<coefficient>& currentMon=this->TheObjects[i];
     tempMon.MakeOne(*this->owner);
-    if (!this->theCoeffs[i].IsAConstant(theCoeff))
+    if (!this->theCoeffs[i].IsConstant(theCoeff))
       return false;
     for (int j=0; j<currentMon.Powers.size; j++)
     { Rational tempRat;
-      if (!currentMon.Powers[j].IsAConstant(tempRat))
+      if (!currentMon.Powers[j].IsConstant(tempRat))
         return false;
       tempMon.MultiplyByGeneratorPowerOnTheRight(currentMon.generatorsIndices[j], tempRat);
     }

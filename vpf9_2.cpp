@@ -12,7 +12,7 @@
 ProjectInformationInstance ProjectInfoVpf9_2cpp(__FILE__, "Math routines implementation. ");
 
 std::string MonomialWeylAlgebra::ToString(FormatExpressions* theFormat)const
-{ if (this->IsAConstant())
+{ if (this->IsConstant())
     return "1";
   std::stringstream out;
   FormatExpressions tempFormat;
@@ -982,7 +982,7 @@ bool RationalFunctionOld::checkConsistency()const
     { crash << "This is a programming error: a rational function is flagged as being a non-constant polynomial, but the numerator pointer is zero. " << crash;
       return false;
     }
-    if (this->Numerator.GetElementConst().IsAConstant())
+    if (this->Numerator.GetElementConst().IsConstant())
     { crash << "This is a programming error: a rational funtion is flagged as having a non-constant numerator, but the numerator is constant. " << crash;
       return false;
     }
@@ -995,7 +995,7 @@ bool RationalFunctionOld::checkConsistency()const
       << crash;
       return false;
     }
-    if (this->Denominator.GetElementConst().IsAConstant())
+    if (this->Denominator.GetElementConst().IsConstant())
     { crash << "This is a programming error: a rational function is flagged as having non-constant denominator, but the denominator is constant. " << crash;
       return false;
     }
@@ -1414,7 +1414,7 @@ void RationalFunctionOld::SimplifyLeadingCoefficientOnly()
   this->Numerator.GetElement()*=(tempRat);
   if (this->Denominator.GetElement().IsEqualToOne())
   { this->expressionType=this->typePoly;
-    if (this->Numerator.GetElement().IsAConstant(&tempRat))
+    if (this->Numerator.GetElement().IsConstant(&tempRat))
     { this->ratValue=tempRat;
       this->expressionType=this->typeRational;
     }
@@ -2364,7 +2364,7 @@ std::string MonomialP::ToString(FormatExpressions* theFormat)const
   MemorySaving<FormatExpressions> tempFormat;
   if (theFormat==0)
     theFormat=&tempFormat.GetElement();
-  if (this->IsAConstant())
+  if (this->IsConstant())
     return "1";
   for (int i=0; i<this->monBody.size; i++)
     if (!(this->monBody[i].IsEqualToZero()))

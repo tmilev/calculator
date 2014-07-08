@@ -1026,7 +1026,7 @@ bool AlgebraicNumber::operator==(const AlgebraicNumber& other)const
 }
 
 void AlgebraicNumber::operator=(const Polynomial<AlgebraicNumber>& other)
-{ if (!other.IsAConstant(this))
+{ if (!other.IsConstant(this))
     crash << "This is a programming error: attempting to assign non-constant polynomial to a Rational number is not allowed. " << crash;
 }
 

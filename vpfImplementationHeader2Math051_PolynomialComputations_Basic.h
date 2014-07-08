@@ -10,7 +10,7 @@ template <class coefficient>
 bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstitution, Polynomial<coefficient>& output, const coefficient& theRingUnit)const
 { MacroRegisterFunctionWithName("MonomialP::Substitution");
   output.MakeConst(1);
-  if (this->IsAConstant())
+  if (this->IsConstant())
     return true;
   Polynomial<coefficient> tempPoly;
 //  stOutput << "<hr>subbing in monomial " << this->ToString();
@@ -528,7 +528,7 @@ bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output)
     output.AddListOnTop(tempList);
     return result;
   }
-  if (this->IsAConstant())
+  if (this->IsConstant())
     return true;
   int indexHighest= this->GetIndexMaxMonomialLexicographicLastVariableStrongest();
   highestTerm=this->theCoeffs[indexHighest];

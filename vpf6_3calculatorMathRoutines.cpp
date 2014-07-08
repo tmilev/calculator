@@ -522,7 +522,7 @@ bool CalculatorFunctionsGeneral::innerExpressionFromPoly(Calculator& theCommands
   Expression currentBase, currentPower, currentTerm, currentLetterE;
   Expression theContext=input.GetContext();
   for (int i=0; i<thePoly.size(); i++)
-  { if (thePoly[i].IsAConstant())
+  { if (thePoly[i].IsConstant())
     { currentTerm.AssignValue(1, theCommands);
       theTerms.AddMonomial(currentTerm, thePoly.theCoeffs[i]);
       continue;
@@ -616,7 +616,7 @@ bool Polynomial<coefficient>::GetLinearSystemFromLinearPolys
     for (int j=0; j<theLinPolys[i].size(); j++)
       if (theLinPolys[i][j].IsLinearNoConstantTerm(&theLetter))
         homogenousPart(i,theLetter)=theLinPolys[i].theCoeffs[j];
-      else if (theLinPolys[i][j].IsAConstant())
+      else if (theLinPolys[i][j].IsConstant())
       { constTerms(i,0)=theLinPolys[i].theCoeffs[j];
         constTerms(i,0)*=-1;
       } else

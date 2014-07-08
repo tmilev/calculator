@@ -850,12 +850,12 @@ bool CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors(Calculat
   int currentPower=-1;
   for (int i=0; i<numMults.size; i++)
   { currentMult= numMults[i]*exponentNumerator;
-    if(!(currentMult%exponentDenominator).IsSmallEnoughToFitInInt(&currentPower))
+    if(!(currentMult%exponentDenominator).IsIntegerFittingInInt(&currentPower))
       return false;
     currentContribution=numFactors[i];
     currentContribution.RaiseToPower(currentPower);
     insideTheRadical*=currentContribution;
-    if(!(currentMult/exponentDenominator).IsSmallEnoughToFitInInt(&currentPower))
+    if(!(currentMult/exponentDenominator).IsIntegerFittingInInt(&currentPower))
       return false;
     currentContribution=numFactors[i];
     currentContribution.RaiseToPower(currentPower);
@@ -863,12 +863,12 @@ bool CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors(Calculat
   }
   for (int i=0; i<denMults.size; i++)
   { currentMult= denMults[i]*exponentNumerator;
-    if(!(currentMult%exponentDenominator).IsSmallEnoughToFitInInt(&currentPower))
+    if(!(currentMult%exponentDenominator).IsIntegerFittingInInt(&currentPower))
       return false;
     currentContribution=denFactors[i];
     currentContribution.RaiseToPower(currentPower);
     insideTheRadical/=currentContribution;
-    if(!(currentMult/exponentDenominator).IsSmallEnoughToFitInInt(&currentPower))
+    if(!(currentMult/exponentDenominator).IsIntegerFittingInInt(&currentPower))
       return false;
     currentContribution=denFactors[i];
     currentContribution.RaiseToPower(currentPower);

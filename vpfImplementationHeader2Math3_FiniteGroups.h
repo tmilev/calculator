@@ -833,7 +833,7 @@ bool WeylGroup::GenerateOrbit
   Vector<coefficient> currentRoot;
   ElementWeylGroup<WeylGroup> currentElt;
   if (expectedOrbitSize<=0)
-    if (!this->GetGroupSizeByFormula().IsSmallEnoughToFitInInt(&expectedOrbitSize))
+    if (!this->GetGroupSizeByFormula().IsIntegerFittingInInt(&expectedOrbitSize))
       expectedOrbitSize=-1;
   if (UpperLimitNumElements>0 && expectedOrbitSize>UpperLimitNumElements)
     expectedOrbitSize=UpperLimitNumElements;

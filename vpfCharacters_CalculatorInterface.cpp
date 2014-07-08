@@ -678,7 +678,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(Calculator& theCommands, const
       differenceVector=outputOrbit[i]-currentWeight;
       bool isGood=!differenceVector.IsEqualToZero();
       for (int k=0; k<differenceVector.size; k++)
-        if (!differenceVector[k].IsAConstant(&currentCoordDifference))
+        if (!differenceVector[k].IsConstant(&currentCoordDifference))
         { isGood=false;
           break;
         } else

@@ -12,7 +12,7 @@ bool ElementWeylAlgebra<coefficient>::IsPolynomial(Polynomial<coefficient>* whic
 { if (whichPoly!=0)
     whichPoly->MakeZero();
   for (int i=0; i<this->size(); i++)
-  { if (!(*this)[i].differentialPart.IsAConstant())
+  { if (!(*this)[i].differentialPart.IsConstant())
       return false;
     if (whichPoly!=0)
       whichPoly->AddMonomial((*this)[i].polynomialPart, this->theCoeffs[i]);

@@ -85,6 +85,7 @@ GlobalVariables::GlobalVariables()
   this->flagDisplayTimeOutExplanation=false;
   this->flagOutputTimedOut=false;
   this->flagTimedOutComputationIsDone=false;
+  this->flagDisplayingTimeOutExplanationNoIndicators=false;
   //  this->flagLogInterProcessCommunication=true;
   //  stOutput << "Global variables created!";
 }

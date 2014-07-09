@@ -609,7 +609,7 @@ bool Calculator::innerGroebner
   { if (!output[1].IsSmallInteger(&theMod))
       return output.MakeError("Error: failed to extract modulo from the second argument. ", theCommands);
     if (!MathRoutines::IsPrime(theMod))
-      return output.MakeError("Error: modulo not prime. ", theCommands);
+      return output.MakeError("Error: modulus not prime. ", theCommands);
   }
   if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >(output, inputVector, &theContext, -1, CalculatorSerialization::innerPolynomial<Rational>))
     return output.MakeError("Failed to extract polynomial expressions", theCommands);

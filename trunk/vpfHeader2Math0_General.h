@@ -2931,9 +2931,6 @@ public:
 //  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
   double MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   double MaxComputationTimeBeforeWeTakeAction;
-  bool flagDisplayTimeOutExplanation;
-  bool flagOutputTimedOut;
-  bool flagTimedOutComputationIsDone;
 //  bool flagLogInterProcessCommunication;
   bool flagUsingBuiltInWebServer;
 
@@ -2941,6 +2938,10 @@ public:
 //status flags:
   bool flagComputationCompletE;
   bool flagComputationStarted;
+  bool flagDisplayingTimeOutExplanationNoIndicators;
+  bool flagDisplayTimeOutExplanation;
+  bool flagTimedOutComputationIsDone;
+  bool flagOutputTimedOut;
 //progress report flags:
   bool flagReportEverything;
   bool flagReportLargeIntArithmetic;

@@ -310,6 +310,7 @@ void WebWorker::OutputResultAfterTimeout()
 void WebWorker::OutputCrashAfterTimeout()
 { MacroRegisterFunctionWithName("WebWorker::OutputCrashAfterTimeout");
   theLog << logger::red << theWebServer.ToStringActiveWorker() << ": crashing AFTER timeout!" << logger::endL;
+
   if (standardOutputStreamAfterTimeout.str().size()!=0)
     WebWorker::OutputSendAfterTimeout(standardOutputStreamAfterTimeout.str()+"<hr>"+crash.theCrashReport.str());
   else
@@ -710,6 +711,8 @@ int WebWorker::ProcessComputationIndicator()
 
 void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
 { MacroRegisterFunctionWithName("WebWorker::PipeProgressReportToParentProcess");
+  if (onePredefinedCopyOfGlobalVariables.flagDisplayingTimeOutExplanationNoIndicators)
+    return;
 //    theLog << "about to potentially block " << logger::endL;
   this->pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("PipeProgressReportToParentProcess running...", true);
   if (this->PauseWorker.CheckPauseIsRequested())
@@ -1079,6 +1082,10 @@ void WebWorker::Release()
 
 void WebWorker::OutputShowIndicatorOnTimeout()
 { MacroRegisterFunctionWithName("WebServer::OutputShowIndicatorOnTimeout");
+  onePredefinedCopyOfGlobalVariables.flagOutputTimedOut=true;
+  onePredefinedCopyOfGlobalVariables.flagTimedOutComputationIsDone=false;
+  onePredefinedCopyOfGlobalVariables.flagDisplayingTimeOutExplanationNoIndicators=true;
+  this->pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe("WebServer::OutputShowIndicatorOnTimeout", true);
   theLog << logger::blue << "Computation timeout, sending progress indicator instead of output. " << logger::endL;
   stOutput << "</td></tr>";
   if (onePredefinedCopyOfGlobalVariables.flagDisplayTimeOutExplanation)
@@ -1088,8 +1095,13 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   << "When done, your computation result will be displayed below. </td></tr>";
   stOutput << "<tr><td>" << this->GetJavaScriptIndicatorBuiltInServer(this->indexInParent) << "</td></tr>"
   << "</table></body></html>";
+
 //  theLog << logger::red << "Indicator: sending all bytes" << logger::endL;
+  this->pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe
+  ("WebServer::OutputShowIndicatorOnTimeout: sending all bytes.", true);
   this->SendAllBytes();
+  this->pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe
+  ("WebServer::OutputShowIndicatorOnTimeout: all bytes sent.", true);
 //  theLog << logger::blue << "Indicator: sending all bytes DONE" << logger::endL;
   for (int i=0; i<this->parent->theWorkers.size; i++)
     if (i!=this->indexInParent)
@@ -1104,13 +1116,13 @@ void WebWorker::OutputShowIndicatorOnTimeout()
 //  this->parent->Release(this->pipeWorkerToServerIndicator[1]);
   this->parent->Release(this->connectedSocketID);
   //set flags properly:
-  onePredefinedCopyOfGlobalVariables.flagOutputTimedOut=true;
-  onePredefinedCopyOfGlobalVariables.flagTimedOutComputationIsDone=false;
   //we need to rewire the standard output and the crashing mechanism:
   crash.CleanUpFunction=WebWorker::OutputCrashAfterTimeout;
   //note that standard output cannot be rewired in the beginning of the function as we use the old stOutput
   stOutput.theOutputFunction=WebWorker::StandardOutputAfterTimeOut;
-
+  this->pipeWorkerToServerWorkerStatus.WriteAfterClearingPipe
+  ("WebServer::OutputShowIndicatorOnTimeout: continuing computation.", true);
+  onePredefinedCopyOfGlobalVariables.flagDisplayingTimeOutExplanationNoIndicators=false;
 //  this->SignalIamDoneReleaseEverything();
 //  theLog << consoleGreen("Indicator: released everything and signalled end.") << logger::endL;
 }

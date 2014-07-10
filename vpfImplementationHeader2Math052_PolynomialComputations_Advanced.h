@@ -865,7 +865,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
 (List<Polynomial<coefficient> >& inputSystem, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::SolveSerreLikeSystemRecursively");
   RecursionDepthCounter theCounter(&this->RecursionCounterSerreLikeSystem);
-  ProgressReport theReport1(theGlobalVariables), theReport2(theGlobalVariables);
+  ProgressReport theReport1(theGlobalVariables);
   int numVarsToSolveForStart=this->GetNumVarsToSolveFor(inputSystem);
   if (theGlobalVariables!=0)
   { std::stringstream out;
@@ -921,18 +921,17 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
       this->MaxNumSerreSystemComputations+=startingMaxNumSerreSystemComputations;
     }
   }
+  std::stringstream impliedSubsReport;
   if (theGlobalVariables!=0 && theImpliedSubs.size>0)
-  { std::stringstream impliedSubs;
-    impliedSubs << "Implied subs: ";
+  { impliedSubsReport << "Implied subs: ";
     for (int i=0; i<theImpliedSubs.size; i++)
       for (int j=0; j<theImpliedSubs[i].size; j++)
       { int letterIndex=-1;
         if (theImpliedSubs[i][j].IsOneLetterFirstDegree(&letterIndex))
           if (letterIndex==j)
             continue;
-        impliedSubs << "<br>" << (MonomialP(j)).ToString(&this->theFormat) << ":=" << theImpliedSubs[i][j].ToString(&this->theFormat);
+        impliedSubsReport << "<br>" << (MonomialP(j)).ToString(&this->theFormat) << ":=" << theImpliedSubs[i][j].ToString(&this->theFormat) << "; ";
       }
-    theReport2.Report(impliedSubs.str());
   }
   //stOutput << "<br>System has no more implied subs. At the moment, the system is: " << inputSystem.ToString();
   List<Polynomial<coefficient> > systemBeforeHeuristics=inputSystem;
@@ -966,7 +965,8 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   { std::stringstream out;
     out << "Solving Serre-like polynomial system, recursion depth: " << this->RecursionCounterSerreLikeSystem << ". Managed to reduce "
     << numVarsToSolveForStart-numVariablesToSolveForAfterReduction << " variables. Number remaining variables to solve for: "
-    << numVariablesToSolveForAfterReduction << ". Try 1 out of 2. ";
+    << numVariablesToSolveForAfterReduction << ". Try 1 out of 2. "
+    << impliedSubsReport.str() << "<br>Substitution attempts:<br>" << "x_{" << theVarIndex+1 << "}:=0;";
     theReport1.Report(out.str());
   }
 
@@ -1014,7 +1014,8 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   { std::stringstream out;
     out << "Solving Serre-like polynomial system, recursion depth: " << this->RecursionCounterSerreLikeSystem << ". Managed to reduce "
     << numVarsToSolveForStart-numVariablesToSolveForAfterReduction << " variables. Number remaining variables to solve for: "
-    << numVariablesToSolveForAfterReduction << ". Try 2 out of 2. ";
+    << numVariablesToSolveForAfterReduction << ". Try 2 out of 2. "
+    << impliedSubsReport.str() << "<br>Substitution attempts:<br>" << "x_{" << theVarIndex+1 << "}:=1;";
     theReport1.Report(out.str());
   }
   computationSecondTry.SolveSerreLikeSystemRecursively(inputSystem, theAlgebraicClosure, theGlobalVariables);

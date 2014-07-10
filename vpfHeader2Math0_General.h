@@ -2938,7 +2938,6 @@ public:
 //status flags:
   bool flagComputationCompletE;
   bool flagComputationStarted;
-  bool flagDisplayingTimeOutExplanationNoIndicators;
   bool flagDisplayTimeOutExplanation;
   bool flagTimedOutComputationIsDone;
   bool flagOutputTimedOut;

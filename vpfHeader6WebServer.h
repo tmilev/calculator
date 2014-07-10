@@ -27,7 +27,7 @@ public:
 
   bool CheckPauseIsRequested();
   void PauseIfRequested();
-  void RequestPause();
+  void PauseIfRequestedAndRequestPause();
   void Continue();
   PauseController();
 };
@@ -83,8 +83,9 @@ public:
   int connectionID;
   List<char> remainingBytesToSend;
   List<char> bufferFileIO;
-  PauseController ComputationReportReceived;
+  PauseController PauseComputationReportReceived;
   PauseController PauseWorker;
+  PauseController PauseIndicatorPipeInUse;
   Pipe pipeServerToWorkerRequestIndicator;
   Pipe pipeWorkerToServerControls;
   Pipe pipeWorkerToServerIndicatorData;

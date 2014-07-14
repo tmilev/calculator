@@ -83,6 +83,7 @@ class Crasher
   Crasher();
   void FirstRun();
   static std::string GetStackTraceEtcErrorMessage();
+  static std::string GetStackTraceShort();
   Crasher& operator<<(const std::string& input);
   Crasher& operator<<(int x);
   Crasher& operator<<(const Crasher& dummyCrasherSignalsActualCrash);

@@ -27,26 +27,25 @@ public:
 
   bool CheckPauseIsRequested();
   void PauseIfRequested();
-  void PauseIfRequestedAndRequestPause();
-  void Continue();
+  void LockMe();
+  void UnlockMe();
   PauseController();
 };
 
 class Pipe
 {
 private:
-  void ReadFileDescriptor(int readEnd, bool doNotBlock);
+  void ReadNoLocks();
+  void WriteNoLocks(const std::string& toBeSent);
 public:
   List<int> thePipe; //thePipe[0] is the read end; thePipe[1] is the write end.
-  List<int> pipeEmptyingBlocksRead;
-  List<int> pipeEmptyingBlocksWrite;
+  PauseController pipeAvailable;
   List<char> lastRead;
   List<char> pipeBuffer;
 
-  void Read(bool doNotBlock);
-  void ReadWithoutEmptying(bool doNotBlock);
-  void Write(const std::string& toBeSent, bool doNotBlock);
-  void WriteAfterClearingPipe(const std::string& toBeSent, bool doNotBlock);
+  void Read();
+  void ReadWithoutEmptying();
+  void WriteAfterEmptying(const std::string& toBeSent);
 
   std::string ToString()const;
   void Release();
@@ -54,8 +53,6 @@ public:
   ~Pipe();
   Pipe()
   { this->thePipe.initFillInObject(2,-1);
-    this->pipeEmptyingBlocksRead.initFillInObject(2,-1);
-    this->pipeEmptyingBlocksWrite.initFillInObject(2,-1);
   }
 };
 
@@ -180,5 +177,23 @@ public:
   std::string ToStringLastErrorDescription();
   std::string ToStringStatusActive();
   std::string ToStringStatusAll();
+};
+
+class ProgressReportWebServer
+{
+  static List<std::string> theProgressReports;
+  public:
+  int indexProgressReport;
+  ProgressReportWebServer(const std::string& inputStatus)
+  { this->indexProgressReport=this->theProgressReports.size;
+    this->SetStatus(inputStatus);
+  }
+  ProgressReportWebServer()
+  { this->indexProgressReport=this->theProgressReports.size;
+  }
+  void SetStatus (const std::string& inputStatus);
+  ~ProgressReportWebServer()
+  { this->theProgressReports.SetSize(this->indexProgressReport);
+  }
 };
 #endif

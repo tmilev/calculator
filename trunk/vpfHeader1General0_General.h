@@ -4,8 +4,10 @@
 #define vpfHeader1_h_already_included
 
 #include "vpfMacros.h"
+#include "vpfHeader1General2Multitasking.h"
 static ProjectInformationInstance vpfHeader1instance(__FILE__, "Header, general routines. ");
 
+//static bool cantfuckingbelievethisfuckingpieceofshitiscrashing=false;
 //IMPORTANT.
 //Convention on Hash functions.
 //1. C++ objects that represent mathematically equal objects
@@ -126,150 +128,12 @@ class Calculator;
 class Function;
 class Expression;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//The documentation of pthreads.h can be found at:
-// https://computing.llnl.gov/tutorials/pthreads/#MutexOverview
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//The below class is a wrapper for mutexes. All system dependent machinery for
-//mutexes should be put here.
-//MutexWrapper specification:
-//The mutex has two states: locked and unlocked.
-//When the caller calls UnlockMe() this unlocks the mutex if it were locked,
-//otherwise does nothing, and immediately returns.
-//When the caller calls LockMe() there are two cases.
-//1) First, If the mutex is unlocked, the mutex state changes to
-//locked and execution of the caller continues.
-//The preceding two operations are atomic: if the mutex happens to be unlocked,
-//no other processor instruction
-//can be executed before the mutex's state is changed to locked.
-//2) Second, if the mutex is locked, the calling thread must pause execution,
-//without consuming computational/processor power.
-// As soon as the mutex is unlocked (by another thread or by the system),
-//the calling thread is allowed to wake up and perform the sequence described in 1).
-// The wake-up time is unspecified/not guaranteed to be immediate: another thread
-//might "jump in" and overtake, again locking the calling thread.
-// In order to have guaranteed wake-up when coordinating two threads only, use the
-//controller object (which uses two mutexes to achieve guaranteed wake-up).
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//This is not guaranteed to work on Windows. Might cause crash.
-//Must be fixed to a proper set of Windows routines.
-//This is not possible at the moment since none of my legally owned (but outdated)
-//versions of Windows support the multitasking routines
-//that are officially documented at Microsoft's network.
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class MutexWrapper
-{
-private:
-#ifndef WIN32
-  pthread_mutex_t theMutex;
-#endif
-  bool locked;
-public:
-  bool isLockedUnsafeUseForWINguiOnly()
-  { return this->locked;
-  }
-  //locks the mutex if the mutex is free. If not it suspends calling thread until
-  //mutex becomes free and then locks it.
-  inline void LockMe()
-  {
-#ifndef WIN32
-    pthread_mutex_lock(&this->theMutex);
-    this->locked=true;
-#else
-    while(this->locked)
-    {}
-    this->locked=true;
-#endif
-  }
-  //unlocks the mutex.
-  inline void UnlockMe()
-  {
-#ifndef WIN32
-    pthread_mutex_unlock(&this->theMutex);
-#endif
-    this->locked=false;
-  }
-  MutexWrapper()
-  {
-#ifndef WIN32
-    pthread_mutex_init(&this->theMutex, NULL);
-#endif
-    this->locked=false;
-  }
-  ~MutexWrapper()
-  {
-#ifndef WIN32
-    pthread_mutex_destroy(&this->theMutex);
-#else
-#endif
-  }
-};
-
 //this class is used as a custom completely portable
 //stack trace log.
 class RegisterFunctionCall
 { public:
   RegisterFunctionCall(const char* fileName, int line, const std::string& functionName="");
   ~RegisterFunctionCall();
-};
-
-class Controller
-{
-  MutexWrapper mutexLockMeToPauseCallersOfSafePoint;
-  MutexWrapper mutexSignalMeWhenReachingSafePoint;
-  bool flagIsRunning;
-  bool flagIsPausedWhileRunning;
-  inline bool IsPausedWhileRunning(){ return this->flagIsPausedWhileRunning;}
-public:
-  MutexWrapper mutexHoldMeWhenReadingOrWritingInternalFlags;
-  inline void SafePointDontCallMeFromDestructors()
-  { this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
-    this->mutexLockMeToPauseCallersOfSafePoint.LockMe();
-    this->mutexSignalMeWhenReachingSafePoint.LockMe();
-    this->mutexLockMeToPauseCallersOfSafePoint.UnlockMe();
-  }
-  inline void SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint()
-  { this->mutexHoldMeWhenReadingOrWritingInternalFlags.LockMe();
-    if (this->flagIsPausedWhileRunning)
-    { this->mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
-      return;
-    }
-    this->mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
-    this->mutexLockMeToPauseCallersOfSafePoint.LockMe();
-    this->mutexSignalMeWhenReachingSafePoint.LockMe();
-    this->flagIsPausedWhileRunning=true;
-    this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
-  }
-  inline void UnlockSafePoint()
-  { this->flagIsPausedWhileRunning=false;
-    this->mutexLockMeToPauseCallersOfSafePoint.UnlockMe();
-  }
-  inline void InitComputation()
-  { this->mutexSignalMeWhenReachingSafePoint.LockMe();
-    this->flagIsRunning=true;
-  }
-  inline void ExitComputation()
-  { this->flagIsRunning=false;
-    this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
-  }
-  bool& GetFlagIsPausedWhileRunningUnsafeUseWithMutexHoldMe()
-  { return this->flagIsPausedWhileRunning;
-  }
-  bool& GetFlagIsRunningUnsafeUseWithMutexHoldMe()
-  { return this->flagIsRunning;
-  }
-  Controller()
-  { this->flagIsRunning=false;
-    this->flagIsPausedWhileRunning=false;
-  }
-};
-
-class ControllerStartsRunning: public Controller
-{
-  public:
-    ControllerStartsRunning()
-    { this->InitComputation();
-    }
 };
 
 class ParallelComputing
@@ -812,6 +676,8 @@ std::iostream& operator>>(std::iostream& input, List<Object>& theList)
 static unsigned int NumListsCreated=0;
 static unsigned int NumListResizesTotal=0;
 //List serves the same purpose as std::vector
+//List is not thread safe!!!!
+//Lists are used in the implementation of mutexes!!!
 template <class Object>
 class List
 { friend std::ostream& operator<< <Object>(std::ostream& output, const List<Object>& theList);
@@ -1733,7 +1599,6 @@ class ProjectInformation
   }
   std::string ToString();
   void AddProjectInfo(const std::string& fileName, const std::string& fileDescription);
-  std::string GetStackTraceReport();
 };
 
 class ProgressReport
@@ -3089,9 +2954,7 @@ template <class Object>
 void List<Object>::ReservE(int theSize)
 { // <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (this->ActualSize<theSize)
-  { ParallelComputing::SafePointDontCallMeFromDestructors();
     this->ExpandArrayOnTop(theSize- this->ActualSize);
-  }
 }
 
 template <class Object>
@@ -3108,8 +2971,21 @@ void List<Object>::SetSize(int theSize)
 {// <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (theSize<0)
     theSize=0;
+//  if (cantfuckingbelievethisfuckingpieceofshitiscrashing)
+//  { this->CheckConsistency();
+//    std::cout << "what teh fuck is fucking going on here this shit is fucking impossible: this->size: "
+//    << this->size << " theSize: " << theSize;
+//  }
   this->SetExpectedSize(theSize);
+//  if (cantfuckingbelievethisfuckingpieceofshitiscrashing)
+//  { this->CheckConsistency();
+//    std::cout << "gotthisfuckingfar -2 ";
+//  }
   this->ReservE(theSize);
+//  if (cantfuckingbelievethisfuckingpieceofshitiscrashing)
+//  { this->CheckConsistency();
+//    std::cout << "gotthisfuckingfar -3 ";
+//  }
   this->size=theSize;
 }
 

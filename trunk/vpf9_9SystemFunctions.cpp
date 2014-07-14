@@ -10,6 +10,7 @@
 //#define cgiLimitRAMuseNumPointersInList
 
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
+#include "vpfHeader6WebServer.h"
 ProjectInformationInstance projectInfoInstanceCalculatorSystem(__FILE__, "System functions, platform dependent code.");
 
 
@@ -50,20 +51,35 @@ void SleepFunction(int microseconds)
 
 #ifndef WIN32
 void* RunTimerVoidPtr(void* ptr)
-{ double elapsedtime=-1;
+{ MacroRegisterFunctionWithName("RunTimerVoidPtr");
+//  std::cout << "Got thus far RunTimerVoidPtr" << std::endl;
+
+  double elapsedtime=-1;
   double elapsedComputationTime=-1;
   double computationStartTime=-1;
-
+  ProgressReportWebServer theReport;
+//  std::cout << "Got thus far RunTimerVoidPtr - 2" << std::endl;
+  int counter=0;
   for (; ;)
-  { if (onePredefinedCopyOfGlobalVariables.flagComputationStarted)
+  { std::stringstream tempStream;
+    counter++;
+    tempStream << "Starting timer thread cycle " << counter << ". ";
+//    std::cout << "Got thus far RunTimerVoidPtr - 4" << std::endl;
+    theReport.SetStatus(tempStream.str());
+//    std::cout << "Got thus far RunTimerVoidPtr - 5" << std::endl;
+    if (onePredefinedCopyOfGlobalVariables.flagComputationStarted)
       if (computationStartTime<0)
         computationStartTime=GetElapsedTimeInSeconds();
     SleepFunction(100000);
     elapsedtime=GetElapsedTimeInSeconds();
+//    std::cout << "Got thus far RunTimerVoidPtr - 3" << std::endl;
     if (computationStartTime>0)
       elapsedComputationTime=elapsedtime-computationStartTime;
     if (onePredefinedCopyOfGlobalVariables.flagComputationCompletE)
+    { theReport.SetStatus("Starting timer cycle break: computation is complete.");
+//      std::cout << "Got thus far 2-1" << std::endl;
       break;
+    }
 //    if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
 //      if (!onePredefinedCopyOfGlobalVariables.flagComputationStarted)
 //        if (elapsedtime>onePredefinedCopyOfGlobalVariables.MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit)
@@ -71,7 +87,10 @@ void* RunTimerVoidPtr(void* ptr)
     if (onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
       if (elapsedComputationTime>0)
         if (elapsedComputationTime>onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit)
+        { theReport.SetStatus("Starting timer cycle break: computation time too long.");
+//          std::cout << "Got thus far 2-2" << std::endl;
           break;
+        }
     if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
       if (onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction>0)
         if (elapsedComputationTime>0)
@@ -80,8 +99,14 @@ void* RunTimerVoidPtr(void* ptr)
               if (!onePredefinedCopyOfGlobalVariables.flagOutputTimedOut!=0 &&
                   !onePredefinedCopyOfGlobalVariables.flagDisplayTimeOutExplanation)
               { onePredefinedCopyOfGlobalVariables.flagDisplayTimeOutExplanation=true;
+//                std::cout << "Got thus far 2-3" << std::endl;
+                theReport.SetStatus("Starting timer cycle displaying time out explanation.");
                 onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
+//                std::cout << "Got thus far 2-4" << std::endl;
+                theReport.SetStatus("Starting timer cycle displaying time out indicator done, continuing timer cycle.");
+//                std::cout << "Got thus far 2-5" << std::endl;
               }
+
   }
   if (!onePredefinedCopyOfGlobalVariables.flagComputationCompletE)
   { if (onePredefinedCopyOfGlobalVariables.flagComputationStarted)
@@ -103,6 +128,8 @@ void* RunTimerVoidPtr(void* ptr)
       << " This may be an error in the web-server routines of the calculator!" << crash;
     }
   }
+  RegisterFunctionCall(__FILE__, __LINE__, "exiting timer");
+  theReport.SetStatus("Starting timer thread: exiting.");
   pthread_exit(NULL);
   return 0;
 }

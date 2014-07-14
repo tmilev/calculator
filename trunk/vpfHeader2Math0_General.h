@@ -2778,7 +2778,7 @@ public:
   { PenStyleInvisible, PenStyleDashed, PenStyleDotted, PenStyleNormal, PenStyleZeroChamber, PenStylePermanentlyZeroChamber, PenStyleLinkToOriginZeroChamber, PenStyleLinkToOrigin, PenStyleLinkToOriginPermanentlyZeroChamber };
   enum TextStyles
   { TextStyleNormal, TextStyleInvisible, TextStyleChamber, TextStyleZeroChamber, TextStylePermanentlyZeroChamber };
-  MutexWrapper LockedWhileDrawing;
+  //MutexWrapper LockedWhileDrawing;
   int ColorDashes;
   bool flagLaTeXDraw;
   bool flag2DprojectionDraw;
@@ -2933,6 +2933,7 @@ public:
   double MaxComputationTimeBeforeWeTakeAction;
 //  bool flagLogInterProcessCommunication;
   bool flagUsingBuiltInWebServer;
+  bool flagAllowUseOfThreadsAndMutexes;
 
   FormatExpressions theDefaultFormat;
 //status flags:

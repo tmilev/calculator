@@ -64,6 +64,7 @@
 		<Unit filename="vpf9_7floating_point_routines.cpp" />
 		<Unit filename="vpf9_8GlobalObjects.cpp" />
 		<Unit filename="vpf9_91html_routines_calculator.cpp" />
+		<Unit filename="vpf9_92multitasking.cpp" />
 		<Unit filename="vpf9_9SystemFunctions.cpp" />
 		<Unit filename="vpfCalculatorMain.cpp">
 			<Option target="Debug" />
@@ -76,6 +77,7 @@
 		<Unit filename="vpfGraph.cpp" />
 		<Unit filename="vpfHeader1General0_General.h" />
 		<Unit filename="vpfHeader1General1_ListReferences.h" />
+		<Unit filename="vpfHeader1General2Multitasking.h" />
 		<Unit filename="vpfHeader2Math01_LargeIntArithmetic.h" />
 		<Unit filename="vpfHeader2Math02_Vectors.h" />
 		<Unit filename="vpfHeader2Math0_General.h" />

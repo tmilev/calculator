@@ -164,7 +164,8 @@ void DrawOperations::drawTextBuffer(double X1, double Y1, const std::string& inp
 }
 
 void DrawingVariables::drawBufferNoIniT(DrawOperations& theOps)
-{ this->LockedWhileDrawing.LockMe();
+{ MacroRegisterFunctionWithName("DrawingVariables::drawBufferNoIniT");
+  //this->LockedWhileDrawing.LockMe();
   theOps.EnsureProperInitialization();
   theOps.ComputeProjectionsEiVectors();
   theOps.ComputeXYsFromProjectionsEisAndGraphicsUnit();
@@ -175,10 +176,10 @@ void DrawingVariables::drawBufferNoIniT(DrawOperations& theOps)
   //the bad debugline is here:
   //numOps=(numOps>10)? 10: numOps;
   for (int i=0; i<numOps; i++)
-    switch (theOps.TypeNthDrawOperation.TheObjects[i])
+    switch (theOps.TypeNthDrawOperation[i])
     { case DrawOperations::typeDrawText:
         if (this->theDrawTextFunction!=0)
-        { DrawTextOperation& theDrawTextOp= theOps.theDrawTextOperations.TheObjects[theOps.IndexNthDrawOperation.TheObjects[i]];
+        { DrawTextOperation& theDrawTextOp= theOps.theDrawTextOperations[theOps.IndexNthDrawOperation[i]];
           currentTextStyle=this->GetActualTextStyleFromFlagsAnd(theDrawTextOp.TextStyle);
           if (currentTextStyle==this->TextStyleInvisible)
             break;
@@ -187,7 +188,7 @@ void DrawingVariables::drawBufferNoIniT(DrawOperations& theOps)
         break;
       case DrawOperations::typeDrawLine:
         if (this->theDrawLineFunction!=0)
-        { DrawLineOperation& theDrawLineOp= theOps.theDrawLineOperations.TheObjects[theOps.IndexNthDrawOperation.TheObjects[i]];
+        { DrawLineOperation& theDrawLineOp= theOps.theDrawLineOperations[theOps.IndexNthDrawOperation[i]];
           currentPenStyle= this->GetActualPenStyleFromFlagsAnd(theDrawLineOp.thePenStyle);
           if (currentPenStyle==this->PenStyleInvisible)
             break;
@@ -196,7 +197,7 @@ void DrawingVariables::drawBufferNoIniT(DrawOperations& theOps)
         break;
       case DrawOperations::typeDrawLineBetweenTwoVectors:
         if (this->theDrawLineFunction!=0)
-        { DrawLineBetweenTwoRootsOperation& theDrawLineBnTwoOp= theOps.theDrawLineBetweenTwoRootsOperations.TheObjects[theOps.IndexNthDrawOperation.TheObjects[i]];
+        { DrawLineBetweenTwoRootsOperation& theDrawLineBnTwoOp= theOps.theDrawLineBetweenTwoRootsOperations[theOps.IndexNthDrawOperation.TheObjects[i]];
           currentPenStyle= this->GetActualPenStyleFromFlagsAnd(theDrawLineBnTwoOp.thePenStyle);
           if (currentPenStyle==this->PenStyleInvisible)
             break;
@@ -205,7 +206,7 @@ void DrawingVariables::drawBufferNoIniT(DrawOperations& theOps)
         break;
       case DrawOperations::typeDrawTextAtVector:
         if (this->theDrawTextFunction!=0)
-        { DrawTextAtVectorOperation& theDrawTextOp= theOps.theDrawTextAtVectorOperations.TheObjects[theOps.IndexNthDrawOperation.TheObjects[i]];
+        { DrawTextAtVectorOperation& theDrawTextOp= theOps.theDrawTextAtVectorOperations[theOps.IndexNthDrawOperation.TheObjects[i]];
           currentTextStyle= this->GetActualTextStyleFromFlagsAnd(theDrawTextOp.TextStyle);
           if (currentTextStyle==this->TextStyleInvisible)
             break;
@@ -223,7 +224,7 @@ void DrawingVariables::drawBufferNoIniT(DrawOperations& theOps)
         break;
       default: break;
     }
-  this->LockedWhileDrawing.UnlockMe();
+//  this->LockedWhileDrawing.UnlockMe();
 }
 
 int DrawingVariables::GetActualPenStyleFromFlagsAnd(int inputPenStyle)

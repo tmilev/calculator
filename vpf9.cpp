@@ -85,6 +85,7 @@ GlobalVariables::GlobalVariables()
   this->flagDisplayTimeOutExplanation=false;
   this->flagOutputTimedOut=false;
   this->flagTimedOutComputationIsDone=false;
+  this->flagAllowUseOfThreadsAndMutexes=false;
   //  this->flagLogInterProcessCommunication=true;
   //  stOutput << "Global variables created!";
 }
@@ -130,17 +131,6 @@ RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const
 RegisterFunctionCall::~RegisterFunctionCall()
 { List<stackInfo>& theStack=ProjectInformation::GetMainProjectInfo().CustomStackTrace;
   theStack.size--;
-}
-
-std::string ProjectInformation::GetStackTraceReport()
-{ std::stringstream out;
-  for (int i=this->CustomStackTrace.size-1; i>=0; i--)
-  { out << "<tr><td>" << CGI::GetHtmlLinkFromProjectFileName(this->CustomStackTrace[i].fileName) << "</td><td>" << this->CustomStackTrace[i].line << "</td>";
-    if (this->CustomStackTrace[i].functionName!="")
-      out << "<td>" << this->CustomStackTrace[i].functionName << "</td>";
-    out << "</tr>";
-  }
-  return out.str();
 }
 
 int DrawingVariables::GetColorFromChamberIndex(int index, std::fstream* LaTexOutput)

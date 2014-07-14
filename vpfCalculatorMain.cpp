@@ -33,12 +33,15 @@ int main(int argc, char **argv)
         return 0;
       }
   }
+  if (!onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+    onePredefinedCopyOfGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
   //  stOutput << "input path: " << pathDisplayPath << "\n\n";
   theParser.init(onePredefinedCopyOfGlobalVariables);
 	if (argc>1 && !onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
     return main_command_input(argc, argv);
   if (argc<=1 && !onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
     return main_apache_client();
+  RegisterFunctionCall theReg(__FILE__, __LINE__, "About to serve Client");
   return theWebServer.GetActiveWorker().ServeClient();
 }
 

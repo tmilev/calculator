@@ -2537,12 +2537,13 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
 }
 
 void rootSubalgebras::ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed)
-{ this->NumSubalgebrasProcessed=0;
+{ static Controller localController;
+  this->NumSubalgebrasProcessed=0;
   this->NumConeConditionFailures=0;
   this->NumSubalgebrasCounted=0;
   for (int i=StartingIndex; i<NumToBeProcessed+StartingIndex; i++)
   { this->theSubalgebras[i].flagComputeConeCondition=this->flagComputeConeCondition;
-    this->theSubalgebras[i].GeneratePossibleNilradicals(this->controllerLProhibitingRelations, this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration, theGlobalVariables, false, *this, i);
+    this->theSubalgebras[i].GeneratePossibleNilradicals(localController, this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration, theGlobalVariables, false, *this, i);
     if (i!=NumToBeProcessed+StartingIndex-1)
       this->theSubalgebras[i+1].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration);
   }
@@ -2558,12 +2559,13 @@ SemisimpleLieAlgebra& rootSubalgebras::GetOwnerSSalgebra()const
 }
 
 void rootSubalgebras::ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables)
-{ if (this->flagStoringNilradicals)
+{ static Controller localController;
+  if (this->flagStoringNilradicals)
   { this->storedNilradicals.SetSize(this->theSubalgebras.size);
   }
   for (; this->IndexCurrentSANilradicalsGeneration<this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration; this->IndexCurrentSANilradicalsGeneration++)
   { this->theSubalgebras[this->IndexCurrentSANilradicalsGeneration].flagComputeConeCondition=this->flagComputeConeCondition;
-    this->theSubalgebras[this->IndexCurrentSANilradicalsGeneration].GeneratePossibleNilradicals(this->controllerLProhibitingRelations, this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration, theGlobalVariables, this->flagUsingParabolicsInCentralizers, *this, this->IndexCurrentSANilradicalsGeneration);
+    this->theSubalgebras[this->IndexCurrentSANilradicalsGeneration].GeneratePossibleNilradicals(localController, this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration, theGlobalVariables, this->flagUsingParabolicsInCentralizers, *this, this->IndexCurrentSANilradicalsGeneration);
     if (this->IndexCurrentSANilradicalsGeneration!= this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration-1)
       this->theSubalgebras[this->IndexCurrentSANilradicalsGeneration+1].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration);
   }

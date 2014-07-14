@@ -290,7 +290,6 @@ public:
   List<int> NumConeConditionHoldsBySSpart;
   List<rootSubalgebra> theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither;
   int RecursionDepthNilradicalsGeneration;
-  Controller controllerLProhibitingRelations;
   int NumSubalgebrasProcessed;
   int NumConeConditionFailures;
   int NumSubalgebrasCounted;

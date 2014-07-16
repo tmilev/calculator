@@ -118,7 +118,7 @@ ProjectInformationInstance::ProjectInformationInstance(const char* fileName, con
 
 RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const std::string& functionName)
 { List<stackInfo>& theStack=ProjectInformation::GetMainProjectInfo().CustomStackTrace;
-  static MutexWrapper inCaseOfMultithreading;
+  static MutexWrapper inCaseOfMultithreading("RegisterFunctionCall::RegisterFunctionCall");
   inCaseOfMultithreading.LockMe();
   theStack.SetSize(theStack.size+1);
   stackInfo& stackTop=*theStack.LastObject();

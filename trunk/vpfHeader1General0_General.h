@@ -147,7 +147,7 @@ public:
   static bool flagUngracefulExitInitiated;
   inline static void CheckPointerCounters()
   { if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList)
-    { static MutexWrapper tempMutex;
+    { static MutexWrapper tempMutex("CheckPointerCounters");
       tempMutex.LockMe();
       if (ParallelComputing::flagUngracefulExitInitiated)
       { tempMutex.UnlockMe();
@@ -1595,6 +1595,7 @@ class ProjectInformation
     static ProjectInformation MainProjectInfo;
     MainProjectInfo.CustomStackTrace.ReservE(30);
     MainProjectInfo.theFiles.SetExpectedSize(100);
+    MainProjectInfo.infoIsInitialized.mutexName="projectnfo";
     return MainProjectInfo;
   }
   std::string ToString();

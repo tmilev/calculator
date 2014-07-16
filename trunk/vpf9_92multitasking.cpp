@@ -4,82 +4,74 @@
 #include <assert.h> //Mutexes are way too basic infrastructure. We cannot crash using the standard crashing mechanism,
 //as that mechanism might depend on mutexes.
 
+List<MutexWrapper*>& theMutexWrappers() //<- if you are wondering why this code, google "static initialization order fiasco"
+{ static List<MutexWrapper*> tempObjects;
+  return tempObjects;
+}
+
 ProjectInformationInstance vpfGeneral2Mutexes(__FILE__, "Multitasking implementation.");
 extern GlobalVariables onePredefinedCopyOfGlobalVariables;
 
-//Why the code below? Because of the static initialization order fiasco!!!!!!!!!
-static ListReferences<pthread_mutex_t>& theMutexesGlobal()
-{ static ListReferences<pthread_mutex_t> theMutexesGlobalHolder;
-  return theMutexesGlobalHolder;
-}
-
-//Why the code below? Because of the static initialization order fiasco!!!!!!!!!
-static List<MutexWrapper*>& theMutexWrappersGlobal()
-{ static List<MutexWrapper*> theMutexWrappersGlobalHolder;
-  return theMutexWrappersGlobalHolder;
-}
-
 void MutexWrapper::CheckConsistency()
-{ if (this->theMutexIndex<0 || this->theMutexIndex>=theMutexesGlobal().size)
-  { std::cout << "Bad mutex with this->theMutexIndex= " << this->theMutexIndex << std::endl;
-    assert(false);
-  }
-  if (theMutexesGlobal().flagDeallocated)
-  { std::cout << "theMutexesGlobal has been deallocated but a mutex is still using it. " << std::endl;
-    assert(false);
-  }
-  if (theMutexWrappersGlobal().flagDeallocated)
-  { std::cout << "theMutexWrappersGlobal has been deallocated but a mutex is still using it. " << std::endl;
+{ if (this->flagDeallocated)
+  { std::cout << "Use after free mutex index: " << this->indexInContainer << crash.GetStackTraceShort() << std::endl;
     assert(false);
   }
 }
 
-MutexWrapper::MutexWrapper()
+void MutexWrapper::initConstructorCallOnly()
 { //    std::cout << "MutexWrapper::MutexWrapper. theMutexesGlobal.size: " << theMutexesGlobal.size << std::endl;
 //  static bool allowToRun=true;
 //  cantfuckingbelievethisfuckingpieceofshitiscrashing=true;
 //  while (!allowToRun)
 //  {}
 //  allowToRun=false;
-  this->theMutexIndex=-1;
-  int oldSize=theMutexesGlobal().size;
-  theMutexesGlobal().SetSize(theMutexesGlobal().size+1);
-  if (oldSize==theMutexesGlobal().size)
-    assert(false);
-  this->theMutexIndex=theMutexesGlobal().size-1;
-  if (this->theMutexIndex>=theMutexesGlobal().size)
-    assert(false);
 
-  //    std::cout << "MutexWrapper::MutexWrapper - 2." << std::endl;
-  this->flagUnsafeFlagForDebuggingIsLocked=false;
+  this->flagDeallocated=false;
   this->flagInitialized=false;
-  theMutexWrappersGlobal().AddOnTop(this);
-  if (theMutexWrappersGlobal().size!=theMutexesGlobal().size)
-  { std::cout << "theMutexWrappersGlobal.size!=theMutexesGlobal.size is not supposed to happen!" << std::endl;
+  this->flagUnsafeFlagForDebuggingIsLocked=false;
+  this->theMutexImplementation=0;
+  this->indexInContainer=theMutexWrappers().size;
+  theMutexWrappers().AddOnTop(this);
+  if (theMutexWrappers().size>1000)
+  { std::cout << "Too many mutexes. " << std::endl;
     assert(false);
   }
-  if (theMutexWrappersGlobal().size>10000)
-  { std::cout << "This is a programming error. Created total more than the hard-coded limit of 1000 mutexes. "
-    << "The number of mutexes is supposed to be bounded and much smaller. " << std::endl;
-    assert(false);
+  if (this->indexInContainer==7)
+  { std::cout << " naughty mutex: " << this->indexInContainer << "name: " << this->mutexName << " stack: " << crash.GetStackTraceShort() << std::endl;
   }
-  this->InitializeIfNeeded();
-//  std::cout << "Mutexes created so far: " << theMutexesGlobal().size << std::endl;
-//  allowToRun=true;
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter++;
+#endif
+}
+
+bool MutexWrapper::InitializeIfNeeded()
+{ if (this->flagInitialized)
+    return true;
+  if (!onePredefinedCopyOfGlobalVariables.flagAllowUseOfThreadsAndMutexes)
+    return false;
+  this->theMutexImplementation= new pthread_mutex_t;
+  pthread_mutex_init((pthread_mutex_t*) this->theMutexImplementation, NULL);
+  this->flagInitialized=true;
+  return true;
 }
 
 MutexWrapper::~MutexWrapper()
-{ if (this->theMutexIndex<0)
-    return;
-  if (theMutexesGlobal().flagDeallocated)
-  { std::cout << "Use after free of theMutexesGlobal()!" << std::endl;
-    assert(false);
-  }
-  std::cout << "Running mutex wrapper destructor, this->theMutexIndex= " << this->theMutexIndex << std::endl;
-//  if (theMutexWrappersGlobal()[this->theMutexIndex])
-  theMutexWrappersGlobal()[this->theMutexIndex]=0;
-  pthread_mutex_destroy(&theMutexesGlobal()[this->theMutexIndex]);
-  this->theMutexIndex=-1;
+{ if (!onePredefinedCopyOfGlobalVariables.flagAllowUseOfThreadsAndMutexes)
+    if (!theMutexWrappers().flagDeallocated)
+      theMutexWrappers()[this->indexInContainer]=0; //this line of code might be unsafe when the master process exits, but is safe in all fork()-ed processes
+  delete (pthread_mutex_t*)(this->theMutexImplementation);//whoever tells me this code is bad
+//will have to submit to me a written essay of how to avoid the static initialization/deinitialization order fiasco
+//AND write portable code, or will risk being verbally and possibly physically assaulted by myself.
+//I am writing this after having lost 3 days of my precious and highly qualified time (Yes I do have a Ph.D. in mathematics and am a published scientist)
+//on C++'s retarded design, because this retarded language doesn't have elementary means of specifying the order of destructors of objects.
+//To give you a hint of the pain this retarded language caused me: I need static mutexes, initialized
+//via user call after fork()-ing the process. I tried the
+  this->theMutexImplementation=0;
+#ifdef CGIversionLimitRAMuse
+ParallelComputing::GlobalPointerCounter--;
+#endif
+  this->flagDeallocated=true;
 }
 
 bool MutexWrapper::isLockedUnsafeUseForWINguiOnly()
@@ -91,13 +83,8 @@ void MutexWrapper::LockMe()
 { this->CheckConsistency();
   if (!this->InitializeIfNeeded())
     return;
-  if (this->theMutexIndex<0)
-  { std::cout << "this->theMutesIndex = " << this->theMutexIndex << " impossible!" << std::endl;
-    std::cout << crash.GetStackTraceShort();
-    assert(false);
-  }
 #ifndef WIN32
-  pthread_mutex_lock(&theMutexesGlobal()[this->theMutexIndex]);
+  pthread_mutex_lock((pthread_mutex_t*)this->theMutexImplementation);
   this->flagUnsafeFlagForDebuggingIsLocked=true;
 #else
   while(this->locked)
@@ -110,40 +97,22 @@ void MutexWrapper::UnlockMe()
 { this->CheckConsistency();
   if (!this->InitializeIfNeeded())
     return;
-  if (this->theMutexIndex<0)
-  { std::cout << crash.GetStackTraceShort() << std::endl;
-    std::cout << "this->theMutesIndex = " << this->theMutexIndex << " impossible! " << std::endl;
-    assert(false);
-  }
-
 #ifndef WIN32
-  pthread_mutex_unlock(&theMutexesGlobal()[this->theMutexIndex]);
+  pthread_mutex_unlock((pthread_mutex_t*)this->theMutexImplementation);
 #endif
   this->flagUnsafeFlagForDebuggingIsLocked=false;
 }
 
-bool MutexWrapper::InitializeIfNeeded()
-{ this->CheckConsistency();
-  if (this->flagInitialized)
-    return true;
-  if (!onePredefinedCopyOfGlobalVariables.flagAllowUseOfThreadsAndMutexes)
-    return false;
-  if (this->theMutexIndex>=theMutexesGlobal().size || this->theMutexIndex<0)
-  { std::cout << "this->theMutexIndex: " << this->theMutexIndex << ", theMutexesGlobal.size: " << theMutexesGlobal().size
-    << ", theMutexWrappersGlobal.size: " << theMutexWrappersGlobal().size;
-    assert(false);
-  }
-#ifndef WIN32
-  pthread_mutex_init(&theMutexesGlobal()[this->theMutexIndex], NULL);
-#endif
-  this->flagInitialized=true;
-  return true;
-}
-
-void MutexWrapper::InitializeAllAllocatedMutexes()
-{ for (int i=0; i<theMutexWrappersGlobal().size; i++)
-    if (theMutexWrappersGlobal()[i]!=0)
-      theMutexWrappersGlobal()[i]->InitializeIfNeeded();
+void MutexWrapper::InitializeAllAllocatedMutexesAllowMutexUse()
+{ MacroRegisterFunctionWithName("MutexWrapper::InitializeAllAllocatedMutexesAllowMutexUse");
+  static bool alreadyRan=false;
+  onePredefinedCopyOfGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
+  if (alreadyRan)
+    return;
+  alreadyRan=true;
+  for(int i=0; i<theMutexWrappers().size; i++)
+    if (theMutexWrappers()[i]!=0)
+      theMutexWrappers()[i]->InitializeIfNeeded();
 }
 
 void Controller::SafePointDontCallMeFromDestructors()

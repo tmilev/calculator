@@ -1631,7 +1631,7 @@ int WebServer::Run()
 //      std::cout << "Got thus far 2" << std::endl;
       onePredefinedCopyOfGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
 //      std::cout << "Got thus far 3" << std::endl;
-      MutexWrapper::InitializeAllAllocatedMutexes();
+      MutexWrapper::InitializeAllAllocatedMutexesAllowMutexUse();
 //      std::cout << "Got thus far 4" << std::endl;
       InitializeTimer();
 //      std::cout << "Got thus far 5" << std::endl;

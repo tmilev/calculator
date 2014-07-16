@@ -37,6 +37,7 @@ class ListReferences
 {
   void operator=(const ListReferences<Object>& other);//ListReferences can't be copied: it is not clear who owns the pointers.
 public:
+  bool flagDeallocated;
   List<Object*> theReferences;
   int size;
   Object& operator[](int i)const
@@ -89,10 +90,11 @@ public:
   Object& LastObject()const
   { return (*this)[this->size-1];
   }
-  ListReferences():size(0)
+  ListReferences():flagDeallocated(false), size(0)
   {}
   ~ListReferences()
-  { this->KillAllElements();
+  { this->flagDeallocated=true;
+    this->KillAllElements();
   }
 };
 

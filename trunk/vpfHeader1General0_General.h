@@ -706,9 +706,9 @@ private:
     this->flagDeallocated=false;
     MacroIncrementCounter(NumListsCreated);
   }
-  bool flagDeallocated;
   int ActualSize;
 public:
+  bool flagDeallocated;
   Object* TheObjects;
   int size;
   List(const List<Object>& other)

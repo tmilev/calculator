@@ -2982,6 +2982,8 @@ public:
   MemorySaving<Selection> selGetNewVerticesAppend2;
   MemorySaving<Selection> selSplitChamber;
 
+  MutexWrapper MutexRegisterFunctionCallMustBeHereStaticInitializationFiasco;
+
   MemorySaving<HashedList<Selection> > hashedSelSimplexAlg;
 
   MemorySaving<HashedList<Vector<Rational> > > hashedRootsNewChamberSplit;

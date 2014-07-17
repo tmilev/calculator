@@ -63,10 +63,12 @@ MutexWrapper::~MutexWrapper()
   delete (pthread_mutex_t*)(this->theMutexImplementation);//whoever tells me this code is bad
 //will have to submit to me a written essay of how to avoid the static initialization/deinitialization order fiasco
 //AND write portable code, or will risk being verbally and possibly physically assaulted by myself.
-//I am writing this after having lost 3 days of my precious and highly qualified time (Yes I do have a Ph.D. in mathematics and am a published scientist)
-//on C++'s retarded design, because this retarded language doesn't have elementary means of specifying the order of destructors of objects.
+//I am writing this after having lost 3 days of my precious and highly qualified time
+//(Yes I do have a Ph.D. in mathematics and am a published scientist)
+//on C++'s retarded design, because this retarded language doesn't have elementary means of
+//specifying the order of destructors of objects.
 //To give you a hint of the pain this retarded language caused me: I need static mutexes, initialized
-//via user call after fork()-ing the process. I tried the
+//via user call after fork()-ing the process.
   this->theMutexImplementation=0;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter--;
@@ -75,12 +77,14 @@ ParallelComputing::GlobalPointerCounter--;
 }
 
 bool MutexWrapper::isLockedUnsafeUseForWINguiOnly()
-{ this->CheckConsistency();
+{ std::cout << "checking consistency from isLockedUnsafeUseForWINguiOnly";
+  this->CheckConsistency();
   return this->flagUnsafeFlagForDebuggingIsLocked;
 }
 
 void MutexWrapper::LockMe()
-{ this->CheckConsistency();
+{ //std::cout << "checking consistency from lockme";
+  this->CheckConsistency();
   if (!this->InitializeIfNeeded())
     return;
 #ifndef WIN32
@@ -94,7 +98,8 @@ void MutexWrapper::LockMe()
 }
 
 void MutexWrapper::UnlockMe()
-{ this->CheckConsistency();
+{ std::cout << "checking consistency from unlockme";
+  this->CheckConsistency();
   if (!this->InitializeIfNeeded())
     return;
 #ifndef WIN32

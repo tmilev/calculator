@@ -116,9 +116,10 @@ ProjectInformationInstance::ProjectInformationInstance(const char* fileName, con
 { ProjectInformation::GetMainProjectInfo().AddProjectInfo(fileName, fileDescription);
 }
 
+extern GlobalVariables onePredefinedCopyOfGlobalVariables;
 RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const std::string& functionName)
 { List<stackInfo>& theStack=ProjectInformation::GetMainProjectInfo().CustomStackTrace;
-  static MutexWrapper inCaseOfMultithreading("RegisterFunctionCall::RegisterFunctionCall");
+  MutexWrapper& inCaseOfMultithreading=onePredefinedCopyOfGlobalVariables.MutexRegisterFunctionCallMustBeHereStaticInitializationFiasco;
   inCaseOfMultithreading.LockMe();
   theStack.SetSize(theStack.size+1);
   stackInfo& stackTop=*theStack.LastObject();

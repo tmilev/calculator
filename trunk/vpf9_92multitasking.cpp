@@ -77,7 +77,7 @@ ParallelComputing::GlobalPointerCounter--;
 }
 
 bool MutexWrapper::isLockedUnsafeUseForWINguiOnly()
-{ std::cout << "checking consistency from isLockedUnsafeUseForWINguiOnly";
+{// std::cout << "checking consistency from isLockedUnsafeUseForWINguiOnly";
   this->CheckConsistency();
   return this->flagUnsafeFlagForDebuggingIsLocked;
 }
@@ -98,7 +98,7 @@ void MutexWrapper::LockMe()
 }
 
 void MutexWrapper::UnlockMe()
-{ std::cout << "checking consistency from unlockme";
+{// std::cout << "checking consistency from unlockme";
   this->CheckConsistency();
   if (!this->InitializeIfNeeded())
     return;

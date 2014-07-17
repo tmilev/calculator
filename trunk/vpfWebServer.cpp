@@ -1635,7 +1635,7 @@ int WebServer::Run()
 //      std::cout << "Got thus far 4" << std::endl;
       InitializeTimer();
 //      std::cout << "Got thus far 5" << std::endl;
-      //CreateTimerThread();
+      CreateTimerThread();
 //      std::cout << "Got thus far 6" << std::endl;
       /////////////////////////////////////////////////////////////////////////
       crash.CleanUpFunction=WebServer::SignalActiveWorkerDoneReleaseEverything;

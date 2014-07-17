@@ -1563,10 +1563,10 @@ void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& o
         { std::stringstream out;
           if (LargeIntUnsigned::CarryOverBound==1000000000UL)
             out << "Large integer multiplication, crunching " << numCycles*9 << " out of " << totalCycles*9
-            << " digits = " << this->theDigits.size << " x " << x.theDigits.size << " digits.";
+            << " pairs of digits = " << this->theDigits.size << " x " << x.theDigits.size << " digits.";
           else
             out << "Large integer multiplication, crunching " << numCycles << " out of " << totalCycles
-            << " digits = " << this->theDigits.size << " x " << x.theDigits.size
+            << " pairs of digits = " << this->theDigits.size << " x " << x.theDigits.size
             << " digits (base " << LargeIntUnsigned::CarryOverBound << ").";
           theReport.Report(out.str());
         }

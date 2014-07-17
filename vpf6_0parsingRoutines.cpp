@@ -209,6 +209,7 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("sqrt");
   this->controlSequences.AddOnTop("arcsin");
   this->controlSequences.AddOnTop("arccos");
+  this->controlSequences.AddOnTop("arctan");
   this->controlSequences.AddOnTop("SequenceStatements");
   this->controlSequences.AddOnTop("MakeSequence");
   this->controlSequences.AddOnTop("SequenceMatrixRows");
@@ -1199,6 +1200,12 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceXByEusingO(this->opLog());
   if (lastS=="pi")
     return this->ReplaceXByEusingO(this->opPi());
+  if (lastS=="arcsin")
+    return this->ReplaceXByEusingO(this->opArcSin());
+  if (lastS=="arccos")
+    return this->ReplaceXByEusingO(this->opArcCos());
+  if (lastS=="arctan")
+    return this->ReplaceXByEusingO(this->opArcTan());
   if (lastS=="sin")
     return this->ReplaceXByEusingO(this->opSin());
   if (lastS=="cos")

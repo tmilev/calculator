@@ -768,7 +768,7 @@ std::string CGI::GetMathMouseHoverBeginArrayL(const std::string& input, int uppe
 
 std::string CGI::GetMathSpanBeginArrayL(const std::string& input, int upperNumChars)
 { std::stringstream out;
-  out << "\\begin{array}{l}" << input << "\\end{array}";
+  out << "\\begin{array}{l} " << input << " \\end{array}";
   return CGI::GetMathSpanPure(out.str(), upperNumChars);
 }
 

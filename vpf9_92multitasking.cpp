@@ -12,6 +12,27 @@ List<MutexWrapper*>& theMutexWrappers() //<- if you are wondering why this code,
 ProjectInformationInstance vpfGeneral2Mutexes(__FILE__, "Multitasking implementation.");
 extern GlobalVariables onePredefinedCopyOfGlobalVariables;
 
+void ParallelComputing::CheckPointerCounters()
+{ if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList)
+  { MutexWrapper& tempMutex=
+    onePredefinedCopyOfGlobalVariables.MutexParallelComputingStaticFiasco
+    ;
+    tempMutex.LockMe();
+    if (ParallelComputing::flagUngracefulExitInitiated)
+    { tempMutex.UnlockMe();
+      return;
+    }
+    ParallelComputing::flagUngracefulExitInitiated=true;
+    tempMutex.UnlockMe();
+    crash << "This may or may not be an error: the number of pointers "
+    << "allocated by the program exceeded the allowed <b>limit of "
+    << ParallelComputing::cgiLimitRAMuseNumPointersInList
+    << ".</b>" << crash;
+  }
+  if (ParallelComputing::PointerCounterPeakRamUse<ParallelComputing::GlobalPointerCounter)
+    ParallelComputing::PointerCounterPeakRamUse=ParallelComputing::GlobalPointerCounter;
+}
+
 void MutexWrapper::CheckConsistency()
 { if (this->flagDeallocated)
   { std::cout << "Use after free mutex index: " << this->indexInContainer << crash.GetStackTraceShort() << std::endl;

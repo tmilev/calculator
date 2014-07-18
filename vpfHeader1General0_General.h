@@ -142,28 +142,9 @@ public:
   static long long GlobalPointerCounter;
   static long long PointerCounterPeakRamUse;
   static ControllerStartsRunning controllerSignalPauseUseForNonGraciousExitOnly;
-#ifdef CGIversionLimitRAMuse
   static long long cgiLimitRAMuseNumPointersInList;
   static bool flagUngracefulExitInitiated;
-  inline static void CheckPointerCounters()
-  { if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList)
-    { static MutexWrapper tempMutex("CheckPointerCounters");
-      tempMutex.LockMe();
-      if (ParallelComputing::flagUngracefulExitInitiated)
-      { tempMutex.UnlockMe();
-        return;
-      }
-      ParallelComputing::flagUngracefulExitInitiated=true;
-      tempMutex.UnlockMe();
-      crash << "This may or may not be an error: the number of pointers "
-      << "allocated by the program exceeded the allowed <b>limit of "
-      << ParallelComputing::cgiLimitRAMuseNumPointersInList
-      << ".</b>" << crash;
-    }
-    if (ParallelComputing::PointerCounterPeakRamUse<ParallelComputing::GlobalPointerCounter)
-      ParallelComputing::PointerCounterPeakRamUse=ParallelComputing::GlobalPointerCounter;
-  }
-#endif
+  static void CheckPointerCounters();
   inline static void SafePointDontCallMeFromDestructors()
   { ParallelComputing::controllerSignalPauseUseForNonGraciousExitOnly.SafePointDontCallMeFromDestructors();
   }

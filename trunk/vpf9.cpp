@@ -119,7 +119,7 @@ ProjectInformationInstance::ProjectInformationInstance(const char* fileName, con
 extern GlobalVariables onePredefinedCopyOfGlobalVariables;
 RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const std::string& functionName)
 { List<stackInfo>& theStack=ProjectInformation::GetMainProjectInfo().CustomStackTrace;
-  MutexWrapper& inCaseOfMultithreading=onePredefinedCopyOfGlobalVariables.MutexRegisterFunctionCallMustBeHereStaticInitializationFiasco;
+  MutexWrapper& inCaseOfMultithreading=onePredefinedCopyOfGlobalVariables.MutexRegisterFunctionStaticFiasco;
   inCaseOfMultithreading.LockMe();
   theStack.SetSize(theStack.size+1);
   stackInfo& stackTop=*theStack.LastObject();

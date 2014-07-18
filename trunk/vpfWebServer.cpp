@@ -111,7 +111,7 @@ WebServer theWebServer;
 void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
 { MacroRegisterFunctionWithName("ProgressReportWebServer::SetStatus");
   theLog << "SetStatus start. " << logger::endL;
-  static MutexWrapper safetyFirst;
+  MutexWrapper& safetyFirst=onePredefinedCopyOfGlobalVariables.MutexWebWorkerStaticFiasco;
 //    std::cout << "Got thus far ProgressReportWebServer::SetStatus 2" << std::endl;
   safetyFirst.LockMe();
 //    std::cout << "Got thus far ProgressReportWebServer::SetStatus 3" << std::endl;
@@ -803,16 +803,28 @@ int WebWorker::ProcessFolder()
     return 0;
   }
   out << "Browsing folder: " << this->mainAddress << "<br>Physical address: " << this->PhysicalFileName << "<hr>";
+  List<std::string> theFolderNamesHtml, theFileNamesHtml;
   for (int i=0; i<theFileNames.size; i++)
-  { bool isDir= theFileTypes[i]==".d";
-    out << "<a href=\"" << this->mainAddress << theFileNames[i];
+  { std::stringstream currentStream;
+    bool isDir= theFileTypes[i]==".d";
+    currentStream << "<a href=\"" << this->mainAddress << theFileNames[i];
     if (isDir)
-      out << "/";
-    out << "\">" << theFileNames[i];
+      currentStream << "/";
+    currentStream << "\">" << theFileNames[i];
     if (isDir)
-      out << "/";
-    out << "</a><br>";
+      currentStream << "/";
+    currentStream << "</a><br>";
+    if (isDir)
+      theFolderNamesHtml.AddOnTop(currentStream.str());
+    else
+      theFileNamesHtml.AddOnTop(currentStream.str());
   }
+  theFolderNamesHtml.QuickSortAscending();
+  theFileNamesHtml.QuickSortAscending();
+  for (int i =0; i< theFolderNamesHtml.size; i++)
+    out << theFolderNamesHtml[i];
+  for (int i =0; i< theFileNamesHtml.size; i++)
+    out << theFileNamesHtml[i];
   out << "</body></html>";
   stOutput << out.str();
   return 0;

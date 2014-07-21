@@ -1495,7 +1495,7 @@ bool Calculator::GetFunctionFromDiffOneForm(const Expression& input, Expression&
 { MacroRegisterFunctionWithName("Calculator::GetFunctionFromDiffOneForm");
   Expression theFormE;
   if (!CalculatorFunctionsGeneral::innerExtractDifferentialOneFormOneVariable(*this, input, theFormE))
-  { *this << "<hr>Failed to extract one variable one-form from " << input.ToString();
+  { //*this << "<hr>Failed to extract one variable one-form from " << input.ToString();
     return false;
   }
   if (!this->EvaluateExpression(*this, theFormE[1], outputFunction))
@@ -1504,8 +1504,8 @@ bool Calculator::GetFunctionFromDiffOneForm(const Expression& input, Expression&
   }
 //  outputFunction=theFormE[1];
   outputVariable=theFormE[2][1];
-  *this << "Extracted differential: " << theFormE.ToString() << "(Variable: " << outputVariable.ToString()
-  << ", function: " << outputFunction.ToString() << ").";
+//  *this << "<hr>Extracted differential: " << theFormE.ToString() << "(Variable: " << outputVariable.ToString()
+//  << ", function: " << outputFunction.ToString() << ").";
   return true;
 }
 
@@ -1524,7 +1524,7 @@ bool CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst
   Expression newIntegral, theFunctionE, integrandE, newIntegralE, theVariableE;
   if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, theVariableE))
     return false;
-  stOutput << "<br>Integrating function " << theFunctionE.ToString();
+  stOutput << "<br>innerIntegratePowerByUncoveringParenthesisFirst: Integrating function " << theFunctionE.ToString();
   if (!theFunctionE.StartsWith(theCommands.opThePower()))
     return false;
   if (!CalculatorFunctionsGeneral::outerPolynomialize(theCommands, theFunctionE, integrandE))
@@ -1562,7 +1562,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateSum(Calculator& theCommands, cons
   Expression theFunctionE, theVariableE;
   if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, theVariableE))
     return false;
-  stOutput << "Integrating function " << theFunctionE.ToString();
+  stOutput << "<br>innerIntegrateSum: Integrating function " << theFunctionE.ToString();
   if (!theFunctionE.StartsWith(theCommands.opPlus()))
     return false;
   List<Expression> integralsOfSummands;
@@ -1589,7 +1589,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateXnDiffX(Calculator& theCommands, 
   Expression theFunctionE, theVariableE;
   if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, theVariableE))
     return false;
-  stOutput << "Integrating function " << theFunctionE.ToString();
+  stOutput << "<br>innerIntegrateXnDiffX: Integrating function " << theFunctionE.ToString();
   Expression theFunCoeff, theFunNoCoeff, outputNoCoeff;
   if (theFunctionE.IsConstantNumber())
   { output=theFunctionE*theVariableE;

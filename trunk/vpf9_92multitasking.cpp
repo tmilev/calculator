@@ -58,9 +58,6 @@ void MutexWrapper::initConstructorCallOnly()
   { std::cout << "Too many mutexes. " << std::endl;
     assert(false);
   }
-  if (this->indexInContainer==7)
-  { std::cout << " naughty mutex: " << this->indexInContainer << "name: " << this->mutexName << " stack: " << crash.GetStackTraceShort() << std::endl;
-  }
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter++;
 #endif

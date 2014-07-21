@@ -61,11 +61,11 @@ void* RunTimerVoidPtr(void* ptr)
 //  std::cout << "Got thus far RunTimerVoidPtr - 2" << std::endl;
   int counter=0;
   for (; ;)
-  { std::stringstream tempStream;
+  { //std::stringstream tempStream;
     counter++;
-    tempStream << "Starting timer thread cycle " << counter << ". ";
+    //tempStream << "Starting timer thread cycle " << counter << ". ";
 //    std::cout << "Got thus far RunTimerVoidPtr - 4" << std::endl;
-    theReport.SetStatus(tempStream.str());
+//    theReport.SetStatus(tempStream.str());
 //    std::cout << "Got thus far RunTimerVoidPtr - 5" << std::endl;
     if (onePredefinedCopyOfGlobalVariables.flagComputationStarted)
       if (computationStartTime<0)

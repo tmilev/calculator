@@ -1071,7 +1071,7 @@ bool Calculator::innerSolveSerreLikeSystem(Calculator& theCommands, const Expres
   theContext.ContextGetFormatExpressions(theComputation.theFormat);
 
   theComputation.MaxNumGBComputations=2001;
-  theComputation.MaxNumSerreSystemComputations=2001;
+  theComputation.MaxNumSerreSystemComputationsPreferred=2001;
   theCommands.theGlobalVariableS->theDefaultFormat=theComputation.theFormat;
 //  stOutput << "<br>The context vars:<br>" << theContext.ToString();
   theComputation.SolveSerreLikeSystem(thePolysAlgebraic, &theCommands.theObjectContainer.theAlgebraicClosure, theCommands.theGlobalVariableS);
@@ -1120,7 +1120,7 @@ bool Calculator::innerSolveSerreLikeSystemUpperLimit(Calculator& theCommands, co
 
 
   theComputation.MaxNumGBComputations=upperLimit;
-  theComputation.MaxNumSerreSystemComputations=upperLimit;
+  theComputation.MaxNumSerreSystemComputationsPreferred=upperLimit;
   theCommands.theGlobalVariableS->theDefaultFormat=theComputation.theFormat;
 //  stOutput << "<br>The context vars:<br>" << theContext.ToString();
   theComputation.SolveSerreLikeSystem(thePolysAlgebraic, &theCommands.theObjectContainer.theAlgebraicClosure, theCommands.theGlobalVariableS);

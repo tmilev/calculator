@@ -603,7 +603,7 @@ GroebnerBasisComputation<coefficient>::GroebnerBasisComputation()
   this->flagSystemProvenToHaveNoSolution=false;
   this->flagSystemSolvedOverBaseField=false;
   this->MaxNumGBComputations=0;
-  this->MaxNumSerreSystemComputations=0;
+  this->MaxNumSerreSystemComputationsPreferred=0;
 }
 
 template <class coefficient>
@@ -880,7 +880,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   List<PolynomialSubstitution<coefficient> > theImpliedSubs;
   theImpliedSubs.ReservE(inputSystem.size);
   List<Polynomial<coefficient> > startingSystemNoModifications=inputSystem;
-  int startingMaxNumSerreSystemComputations=this->MaxNumSerreSystemComputations;
+//  int startingMaxNumSerreSystemComputations=this->MaxNumSerreSystemComputations;
   while (changed)
   { this->NumberGBComputations=0;
     //stOutput << "<br>Transforming to reduced groebner basis: " << inputSystem.ToString();
@@ -918,7 +918,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
       //stOutput << " ... to get: ";
       //for (int i=0; i<inputSystem.size; i++)
       //  stOutput << "<br>" << CGI::GetMathSpanPure(inputSystem[i].ToString());
-      this->MaxNumSerreSystemComputations+=startingMaxNumSerreSystemComputations;
+//      this->MaxNumSerreSystemComputations+=startingMaxNumSerreSystemComputations;
     }
   }
   std::stringstream impliedSubsReport;
@@ -944,7 +944,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   GroebnerBasisComputation computationFirstTry;
   computationFirstTry.RecursionCounterSerreLikeSystem=this->RecursionCounterSerreLikeSystem;
   computationFirstTry.MaxNumGBComputations=this->MaxNumGBComputations;
-  computationFirstTry.MaxNumSerreSystemComputations=this->MaxNumSerreSystemComputations;
+  computationFirstTry.MaxNumSerreSystemComputationsPreferred=this->MaxNumSerreSystemComputationsPreferred;
   computationFirstTry.systemSolution=this->systemSolution;
   computationFirstTry.solutionsFound=this->solutionsFound;
   computationFirstTry.flagSystemProvenToHaveNoSolution=false;
@@ -992,7 +992,9 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   GroebnerBasisComputation computationSecondTry;
   computationSecondTry.RecursionCounterSerreLikeSystem=this->RecursionCounterSerreLikeSystem;
   computationSecondTry.MaxNumGBComputations=this->MaxNumGBComputations;
-  computationSecondTry.MaxNumSerreSystemComputations=this->MaxNumSerreSystemComputations;
+  computationSecondTry.MaxNumSerreSystemComputationsPreferred=
+  this->MaxNumSerreSystemComputationsPreferred;
+
   computationSecondTry.systemSolution=this->systemSolution;
   computationSecondTry.solutionsFound=this->solutionsFound;
   computationSecondTry.flagSystemProvenToHaveNoSolution=false;
@@ -1065,6 +1067,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial
     theReport.Report(reportStream.str());
   }
   this->SolveSerreLikeSystemRecursively(workingSystem, 0, theGlobalVariables);
+  this->NumberSerreVariablesOneGenerator= workingSystem[0].GetMinNumVars()/2;
   if (theAlgebraicClosure!=0)
     if (!this->flagSystemSolvedOverBaseField && !this->flagSystemProvenToHaveNoSolution)
     { if (theGlobalVariables!=0)

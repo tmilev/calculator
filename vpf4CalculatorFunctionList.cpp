@@ -542,7 +542,7 @@ void Calculator::initPredefinedInnerFunctions()
    ;
 
   this->AddOperationInnerHandler
-  ("gcdPoly", &this->fGCD, "",
+  ("gcdPoly", &this->innerGCD, "",
    "Greatest common divisor polynomial of two polynomials. \
    The divisor is scaled so that all coefficients are relatively prime integers, \
    and so that the leading monomial under the graded lexicographic order (x_2>x_1, etc.)\

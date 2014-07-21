@@ -1489,7 +1489,7 @@ public:
   static bool innerLCM(Calculator& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerGCDOrLCM(theCommands, input, output, false);
   }
-  static bool fGCD(Calculator& theCommands, const Expression& input, Expression& output)
+  static bool innerGCD(Calculator& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerGCDOrLCM(theCommands, input, output, true);
   }
   bool GetFunctionFromDiffOneForm

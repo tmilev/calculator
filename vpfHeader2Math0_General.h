@@ -1553,9 +1553,10 @@ class GroebnerBasisComputation
   List<MonomialP> leadingMons;
   List<coefficient> leadingCoeffs;
   int NumberSerreSystemComputations;
-  int MaxNumSerreSystemComputations;
+  int MaxNumSerreSystemComputationsPreferred;
   int NumberGBComputations;
   int MaxNumGBComputations;
+  int NumberSerreVariablesOneGenerator;
   int RecursionCounterSerreLikeSystem;
   bool flagBasisGuaranteedToGenerateIdeal;
   bool flagDoProgressReport;
@@ -1877,6 +1878,7 @@ public:
     if(!this->checkConsistency())
       crash << crash;
   }
+  void MakeMonomiaL(int LetterIndex, const Rational& Power, const Rational& Coeff=1, int ExpectedNumVars=0);
   void MakeConst(const Rational& theCoeff, GlobalVariables* theContext)
   { this->MakeZero(theContext);
     this->ratValue=theCoeff;

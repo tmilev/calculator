@@ -157,7 +157,7 @@ void PauseController::CreateMe()
 
 void PauseController::PauseIfRequested()
 { if (this->CheckPauseIsRequested())
-    theLog << logger::red << "BLOCKING on pause controller " << this->ToString() << logger::endL;
+    theLog << logger::red << "BLOCKING on " << this->ToString() << logger::endL;
   bool pauseWasRequested= !((read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size))>0);
   if (!pauseWasRequested)
     write(this->thePausePipe[1], "!", 1);

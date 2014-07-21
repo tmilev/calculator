@@ -1070,6 +1070,14 @@ void RationalFunctionOld::MakeOneLetterMoN(int theIndex, const Rational& theCoef
   this->context=theGlobalVariables;
 }
 
+void RationalFunctionOld::MakeMonomiaL
+(int LetterIndex, const Rational& Power, const Rational& Coeff, int ExpectedNumVars)
+{ if (LetterIndex<0)
+    crash << "This is a programming error: I am asked to create Monomial which has a variable of negative index " << LetterIndex << ". " << crash;
+  this->expressionType=this->typePoly;
+  this->Numerator.GetElement().MakeMonomiaL(LetterIndex, Power, Coeff, ExpectedNumVars);
+}
+
 void RationalFunctionOld::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
 { int oldNumVars=this->GetMinNumVars();
   this->Numerator.GetElement().SetNumVariablesSubDeletedVarsByOne(newNumVars);

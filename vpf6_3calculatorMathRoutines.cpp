@@ -644,7 +644,8 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(
   if (isGood)
     isGood=convertedInput.IsOfType<RationalFunctionOld>();
   if (!isGood)
-  { theCommands.Comments << "Failed to convert " << input.ToString() << " to rational function. ";
+  { theCommands.Comments << "CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals: Failed to convert "
+    << input.ToString() << " to rational function. ";
     return false;
   }
   const RationalFunctionOld& inputRF=convertedInput.GetValue<RationalFunctionOld>();
@@ -894,53 +895,6 @@ bool CalculatorFunctionsGeneral::innerGaussianEliminationMatrix(Calculator& theC
   std::stringstream out;
   theMat.GaussianEliminationByRows(0,0,0,0,&out);
   return output.AssignValue(out.str(), theCommands);
-}
-
-bool CalculatorFunctionsGeneral::innerIntegrateRF(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRF");
-  if (input.children.size!=3)
-    return false;
-  Expression theConvertedE;
-  bool isGood=CalculatorSerialization::innerRationalFunction(theCommands, input[2],theConvertedE);
-  if (isGood)
-    if (theConvertedE.IsOfType<RationalFunctionOld>())
-      isGood=false;
-  if (!isGood)
-  { theCommands.Comments << "<hr>Failed to convert " << input[2].ToString() << " to rational function. ";
-    return false;
-  }
-  if (theConvertedE.GetNumContextVariables()>1)
-  { theCommands.Comments << "<hr>I converted " << input[2].ToString() << " to rational function, but it is of " << theConvertedE.GetNumContextVariables()
-    << " variables. I have been taught to work with 1 variable only. ";
-    return false;
-  }
-  if (theConvertedE.GetNumContextVariables()==1)
-    if (theConvertedE.GetContext().ContextGetContextVariable(0)!=input[1])
-    { theCommands.Comments << "<hr>The univariate rational function was in variable " << theConvertedE.GetContext().ToString()
-      << " but the variable of integration is " << input[1].ToString();
-      return false;
-    }
-  RationalFunctionOld theRF=theConvertedE.GetValue<RationalFunctionOld>();
-  crash << "not implemented yet" << crash ;
-
-//  if (!CalculatorSerialization::inner)
-  return false;
-}
-
-bool CalculatorFunctionsGeneral::innerRationalFunctionSubstitution(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRationalFunctionSubstitution");
-//stOutput << "input of innerRationalFunctionSubstitution: " << input.ToString();
-  if (input.children.size!=2)
-    return false;
-  if (!input[0].IsOfType<RationalFunctionOld>())
-    return false;
-  if (input[0].GetValue<RationalFunctionOld>().GetMinNumVars()>1)
-    return false;
-  Expression ResultRationalForm;
-  Expression finalContext;
-  finalContext.ContextMakeContextWithOnePolyVar(theCommands, input[1]);
-  ResultRationalForm.AssignValueWithContext(input[0].GetValue<RationalFunctionOld>(), finalContext, theCommands);
-  return CalculatorFunctionsGeneral::innerExpressionFromRF(theCommands, ResultRationalForm, output);
 }
 
 bool CalculatorFunctionsGeneral::innerCompositeConstTimesAnyActOn(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1509,6 +1463,22 @@ bool Calculator::GetFunctionFromDiffOneForm(const Expression& input, Expression&
   return true;
 }
 
+bool CalculatorFunctionsGeneral::innerRationalFunctionSubstitution(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRationalFunctionSubstitution");
+//stOutput << "input of innerRationalFunctionSubstitution: " << input.ToString();
+  if (input.children.size!=2)
+    return false;
+  if (!input[0].IsOfType<RationalFunctionOld>())
+    return false;
+  if (input[0].GetValue<RationalFunctionOld>().GetMinNumVars()>1)
+    return false;
+  Expression ResultRationalForm;
+  Expression finalContext;
+  finalContext.ContextMakeContextWithOnePolyVar(theCommands, input[1]);
+  ResultRationalForm.AssignValueWithContext(input[0].GetValue<RationalFunctionOld>(), finalContext, theCommands);
+  return CalculatorFunctionsGeneral::innerExpressionFromRF(theCommands, ResultRationalForm, output);
+}
+
 bool CalculatorFunctionsGeneral::outerPolynomialize(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPolynomialize");
   Expression thePolyE;
@@ -1517,6 +1487,50 @@ bool CalculatorFunctionsGeneral::outerPolynomialize(Calculator& theCommands, con
   if (!CalculatorFunctionsGeneral::innerExpressionFromBuiltInType(theCommands, thePolyE, output))
     return false;
   return true;
+}
+
+bool CalculatorFunctionsGeneral::innerIntegrateRFcalculatorNotation(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRFcalculatorNotation");
+  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRFcalculatorNotation, input: " << input.ToString();
+  if (input.children.size!=3)
+    return false;
+  Expression theConvertedE;
+  if(!CalculatorSerialization::innerRationalFunction(theCommands, input[2], theConvertedE))
+  { theCommands << "<hr>Call of function CalculatorSerialization::innerRationalFunction failed, input was: " << input[2].ToString();
+    return false;
+  }
+  if (!theConvertedE.IsOfType<RationalFunctionOld>())
+  { theCommands << "<hr>CalculatorFunctionsGeneral::innerIntegrateRFcalculatorNotation: failed to convert " << input[2].ToString()
+    << " to rational function. Attempt to converted expression yielded: " << theConvertedE.ToString();
+    return false;
+  }
+  if (theConvertedE.GetNumContextVariables()>1)
+  { theCommands << "<hr>I converted " << input[2].ToString() << " to rational function, but it is of " << theConvertedE.GetNumContextVariables()
+    << " variables. I have been taught to work with 1 variable only. ";
+    return false;
+  }
+  if (theConvertedE.GetNumContextVariables()==1)
+    if (theConvertedE.GetContext().ContextGetContextVariable(0)!=input[1])
+    { theCommands << "<hr>The univariate rational function was in variable " << theConvertedE.GetContext().ToString()
+      << " but the variable of integration is " << input[1].ToString();
+      return false;
+    }
+  RationalFunctionOld theRF=theConvertedE.GetValue<RationalFunctionOld>();
+  crash << "not implemented yet" << crash ;
+
+//  if (!CalculatorSerialization::inner)
+  return false;
+}
+
+bool CalculatorFunctionsGeneral::innerIntegrateRationalFunction(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunction");
+  Expression theFunctionE, theVariableE, integralE(theCommands);
+  if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, theVariableE))
+    return false;
+  integralE.AddChildAtomOnTop("IntegrateRF");
+  integralE.AddChildOnTop(theVariableE);
+  integralE.AddChildOnTop(theFunctionE);
+  return CalculatorFunctionsGeneral::innerIntegrateRFcalculatorNotation(theCommands, integralE, output);
 }
 
 bool CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst(Calculator& theCommands, const Expression& input, Expression& output)

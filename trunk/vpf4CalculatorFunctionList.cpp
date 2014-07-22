@@ -126,6 +126,10 @@ void Calculator::initPredefinedInnerFunctions()
   ("\\int", CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst, "",
    "Attempts to rearrange into standard polynomial form and then integrate.  ",
    "\\int  \\left( \\frac{x(x+1) }{ 2} \\right)^2 dx ");
+  this->AddOperationInnerHandler
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunction, "",
+   "Attempts to integrate a rational function.  ",
+   "\\int  \frac{1}{x+1} dx ");
 
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateXnDiffX, "",
@@ -651,7 +655,7 @@ void Calculator::initPredefinedInnerFunctions()
    ",
    "plotWedge(2, 2, 1.1,1.570796327, 2*3.1415 )")
    ;
-  this->AddOperationInnerHandler ("IntegrateRF", CalculatorFunctionsGeneral::innerIntegrateRF, "",
+  this->AddOperationInnerHandler ("IntegrateRF", CalculatorFunctionsGeneral::innerIntegrateRFcalculatorNotation, "",
    "Provided that the second argument is a rational function which is sufficiently easy to factor, \
    integrates the second argument with respect to d of the first argument.",
    "IntegrateRF(x, \\frac{x^5 }{x^3-1})")

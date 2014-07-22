@@ -1014,7 +1014,7 @@ bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const Ra
 
 bool CalculatorSerialization::innerRationalFunction(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorSerialization::innerRationalFunction");
-  //stOutput << "converting to rf: " << input.ToString();
+  stOutput << "<br>converting to rf: " << input.ToString();
   Expression intermediate(theCommands);
   if (input.StartsWith(theCommands.opPlus(), 3) ||
       input.StartsWith(theCommands.opTimes(),3) ||
@@ -1022,11 +1022,11 @@ bool CalculatorSerialization::innerRationalFunction(Calculator& theCommands, con
   { Expression leftE, rightE;
     if (!CalculatorSerialization::innerRationalFunction(theCommands, input[1], leftE) ||
         !CalculatorSerialization::innerRationalFunction(theCommands, input[2], rightE) )
-    { theCommands.Comments << "<hr> Failed to convert " << input[1].ToString() << " and " << input[2].ToString() << " to rational function. ";
+    { theCommands << "<hr> Failed to convert " << input[1].ToString() << " and " << input[2].ToString() << " to rational function. ";
       return false;
     }
     if (leftE.IsError() || rightE.IsError())
-    { theCommands.Comments << "<hr> Conversion of " << input[1].ToString() << " and " << input[2].ToString() << "  returned error(s): "
+    { theCommands << "<hr> Conversion of " << input[1].ToString() << " and " << input[2].ToString() << "  returned error(s): "
       << leftE.ToString() << " and " << rightE.ToString();
       return false;
     }
@@ -1046,18 +1046,18 @@ bool CalculatorSerialization::innerRationalFunction(Calculator& theCommands, con
   { if (input[2].IsSmallInteger(&theSmallPower))
     { Expression leftE;
       if (!CalculatorSerialization::innerRationalFunction(theCommands, input[1], leftE))
-      { theCommands.Comments << "<hr> Failed to convert " << input[1].ToString() << " to rational function. ";
+      { theCommands << "<hr>CalculatorSerialization::innerRationalFunction: failed to convert " << input[1].ToString() << " to rational function. ";
         return false;
       }
       if (leftE.IsError())
-      { theCommands.Comments << "<hr> Conversion of " << input[1].ToString() << "  returned error: " << leftE.ToString();
+      { theCommands << "<hr> Conversion of " << input[1].ToString() << "  returned error: " << leftE.ToString();
         return false;
       }
       RationalFunctionOld theRF=leftE.GetValue<RationalFunctionOld>();
       theRF.RaiseToPower(theSmallPower);
       return output.AssignValueWithContext(theRF, leftE.GetContext(), theCommands);
     }
-    theCommands.Comments << "<hr>Failed to raise " << input[3].ToString() << " to power " << input[2].ToString()
+    theCommands << "<hr>Failed to raise " << input[3].ToString() << " to power " << input[2].ToString()
     << ": failed to convert the power to small integer";
     return false;
   }

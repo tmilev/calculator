@@ -724,6 +724,7 @@ bool Expression::ConvertToType<RationalFunctionOld>(Expression& output)const
   { output=*this;
     return true;
   }
+  (*this->theBoss) << "<hr>ConvertToType_RationalFunctionOld: Failed to convert " << this->ToString() << " to rational function. ";
   return false;
 }
 

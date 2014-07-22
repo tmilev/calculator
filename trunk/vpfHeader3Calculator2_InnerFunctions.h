@@ -89,8 +89,9 @@ public:
   static bool innerIsDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExtractDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerIntegratePowerByUncoveringParenthesisFirst
-  (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntegrateRFcalculatorNotation(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntegrateRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntegratePowerByUncoveringParenthesisFirst(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateSum(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateXnDiffX(Calculator& theCommands, const Expression& input, Expression& output);
 
@@ -140,7 +141,6 @@ public:
   static bool innerSplitFDpartB3overG2(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerIsConstant(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerIntegrateRF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGaussianEliminationMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitToPartialFractionsOverAlgebraicReals(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExpressionFromBuiltInType(Calculator& theCommands, const Expression& input, Expression& output);

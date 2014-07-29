@@ -1014,7 +1014,6 @@ bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const Ra
 
 bool CalculatorSerialization::innerRationalFunction(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorSerialization::innerRationalFunction");
-  stOutput << "<br>converting to rf: " << input.ToString();
   Expression intermediate(theCommands);
   if (input.StartsWith(theCommands.opPlus(), 3) ||
       input.StartsWith(theCommands.opTimes(),3) ||
@@ -1030,6 +1029,9 @@ bool CalculatorSerialization::innerRationalFunction(Calculator& theCommands, con
       << leftE.ToString() << " and " << rightE.ToString();
       return false;
     }
+//    stOutput << "<br>converting to rf: " << input.ToString();
+//    stOutput << "<br> context of leftE: " << leftE.ToString() << " is: " << leftE.GetContext().ToString()
+//    << "<br>context of rightE: " << rightE.ToString() << "is : " << rightE.GetContext().ToString();
     intermediate.AddChildOnTop(input[0]);
     intermediate.AddChildOnTop(leftE);
     intermediate.AddChildOnTop(rightE);
@@ -1043,7 +1045,8 @@ bool CalculatorSerialization::innerRationalFunction(Calculator& theCommands, con
   }
   int theSmallPower=-1;
   if (input.StartsWith(theCommands.opThePower(), 3) )
-  { if (input[2].IsSmallInteger(&theSmallPower))
+  { //stOutput << "here be i!";
+    if (input[2].IsSmallInteger(&theSmallPower))
     { Expression leftE;
       if (!CalculatorSerialization::innerRationalFunction(theCommands, input[1], leftE))
       { theCommands << "<hr>CalculatorSerialization::innerRationalFunction: failed to convert " << input[1].ToString() << " to rational function. ";
@@ -1057,7 +1060,7 @@ bool CalculatorSerialization::innerRationalFunction(Calculator& theCommands, con
       theRF.RaiseToPower(theSmallPower);
       return output.AssignValueWithContext(theRF, leftE.GetContext(), theCommands);
     }
-    theCommands << "<hr>Failed to raise " << input[3].ToString() << " to power " << input[2].ToString()
+    theCommands << "<hr>Failed to raise " << input[1].ToString() << " to power " << input[2].ToString()
     << ": failed to convert the power to small integer";
     return false;
   }
@@ -1066,9 +1069,24 @@ bool CalculatorSerialization::innerRationalFunction(Calculator& theCommands, con
     return true;
   }
   if (input.IsOfType<Polynomial<Rational> >() || input.IsOfType<Rational>())
+  { //stOutput << "<hr>Converting to rational function old: " << input.ToString();
     return input.ConvertToType<RationalFunctionOld> (output);
+  }
+  if (input.IsOfType<AlgebraicNumber>())
+  { AlgebraicNumber theNumber= input.GetValue<AlgebraicNumber>();
+    Rational theRat;
+    if (theNumber.IsRational(&theRat))
+    { Expression tempE;
+      tempE.AssignValue(theRat, theCommands);
+      return tempE.ConvertToType<RationalFunctionOld> (output);
+    }
+  }
   Expression theContext;
   theContext.ContextMakeContextWithOnePolyVar(theCommands, input);
+  //stOutput << "<br> context monomial: " << theContext.ToString();
+  //std::string tempS;
+  //if (input.IsBuiltInType(&tempS))
+  //  stOutput << ", input is of type: " << tempS;
   RationalFunctionOld theRF;
   theRF.MakeOneLetterMoN(0, 1, theCommands.theGlobalVariableS);
   return output.AssignValueWithContext(theRF, theContext, theCommands);

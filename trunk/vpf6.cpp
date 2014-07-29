@@ -1532,6 +1532,51 @@ bool Calculator::outerRightDistributeBracketIsOnTheRight(Calculator& theCommands
   return output.MakeXOX(theCommands, theAdditiveOp, leftE, rightE);
 }
 
+bool Calculator::CollectCoefficientsPowersVar
+  (const Expression& input, const Expression& theVariable,
+   VectorSparse<Expression>& outputPositionIiscoeffXtoIth)
+{ MacroRegisterFunctionWithName("Calculator::CollectCoefficientsPowersVar");
+  List<Expression> theSummands, currentMultiplicands, remainingMultiplicands;
+  Calculator& theCommands=*input.theBoss;
+  theCommands.CollectOpands(input, theCommands.opPlus(), theSummands);
+  Expression currentCoeff, constTerm;
+  outputPositionIiscoeffXtoIth.MakeZero();
+  for (int i=0; i<theSummands.size; i++)
+  { theCommands.CollectOpands(theSummands[i], theCommands.opTimes(), currentMultiplicands);
+    bool found=false;
+    for (int j=0; j<2; j++)
+    { const Expression& currentE=j==0 ? currentMultiplicands[0] : *currentMultiplicands.LastObject();
+      remainingMultiplicands=currentMultiplicands;
+      if (j==0)
+        remainingMultiplicands.RemoveIndexShiftDown(0);
+      else
+        remainingMultiplicands.RemoveLastObject();
+      if (remainingMultiplicands.size==0)
+        currentCoeff.AssignValue(1, theCommands);
+      else
+        currentCoeff.MakeProducT(theCommands, remainingMultiplicands);
+      if (currentE==theVariable)
+      { outputPositionIiscoeffXtoIth.AddMonomial(MonomialVector(1),currentCoeff);
+        found=true;
+        break;
+      }
+      if (currentE.StartsWith(theCommands.opThePower(), 3))
+      { int thePower;
+        if (currentE[1]==theVariable)
+          if (currentE[2].IsSmallInteger(&thePower))
+          { outputPositionIiscoeffXtoIth.AddMonomial(MonomialVector(thePower),currentCoeff);
+            found=true;
+            break;
+          }
+      }
+    }
+    if (!found)
+      outputPositionIiscoeffXtoIth.AddMonomial(MonomialVector(0), theSummands[i]);
+//    stOutput << "<br>Summand : " << theSummands[i] << ", vector status: " << outputPositionIiscoeffXtoIth.ToString();
+  }
+  return true;
+}
+
 bool Calculator::CollectOpands(const Expression& input, int theOp, List<Expression>& outputOpands)
 { MacroRegisterFunctionWithName("Calculator::CollectOpands");
   const Expression* currentE=&input;
@@ -1639,32 +1684,6 @@ bool Expression::MakeIdMatrixExpressions(int theDim, Calculator& inputBoss)
   zeroE.AssignValue(0, inputBoss);
   theMat.MakeIdMatrix(theDim, oneE, zeroE);
   return this->AssignMatrixExpressions(theMat, inputBoss);
-}
-
-bool Expression::MakeSum(Calculator& theCommands, const MonomialCollection<Expression, Rational>& theSum)
-{ MacroRegisterFunctionWithName("Expression::MakeSum");
-  Expression oneE; //used to record the constant term
-  oneE.AssignValue<Rational>(1, theCommands);
-  if (theSum.IsEqualToZero())
-    return this->AssignValue<Rational>(0, theCommands);
-  List<Expression> summandsWithCoeff;
-  summandsWithCoeff.SetSize(theSum.size());
-  for (int i=0; i<theSum.size(); i++)
-  { Expression& current=summandsWithCoeff[i];
-    if (theSum[i]==oneE)
-      current.AssignValue(theSum.theCoeffs[i], theCommands);
-    else if (!theSum.theCoeffs[i].IsEqualToOne())
-    { current.reset(theCommands, 3);
-      current.AddChildAtomOnTop(theCommands.opTimes());
-      current.AddChildValueOnTop(theSum.theCoeffs[i]);
-      current.AddChildOnTop(theSum[i]);
-    } else
-      current=theSum[i];
-  }
-  if (summandsWithCoeff.size>=2)
-    if (summandsWithCoeff[0]>summandsWithCoeff[1] && summandsWithCoeff[1]>summandsWithCoeff[0])
-      crash << "This is a pgoramming error: bad comparison! " << crash;
-  return this->MakeOXdotsX(theCommands, theCommands.opPlus(), summandsWithCoeff);
 }
 
 bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Expression& output)
@@ -2519,7 +2538,7 @@ bool Expression::MergeContextsMyAruments(Expression& output)const
 //  stOutput << " ... continuing to merge..." ;
   for (int i=1; i< this->children.size; i++)
     if (!(*this)[i].IsBuiltInType())
-    { this->theBoss->Comments << "<hr>Failed to merge the arguments of the expression" << this->ToString() << ": the argument "
+    { *this->theBoss << "<hr>Failed to merge the arguments of the expression" << this->ToString() << ": the argument "
       << (*this)[i].ToString() << "is not of built-in type";
       return false;
     }
@@ -2531,19 +2550,21 @@ bool Expression::MergeContextsMyAruments(Expression& output)const
       break;
     }
 //  if (needsMerge)
-//    stOutput << "needs merge!"; else stOutput << "no need merge no nothin";
+//    stOutput << "needs merge!";
+//  else
+//    stOutput << "no need merge no nothin";
   if (!needsMerge)
   { output=*this;
     return true;
   }
   for (int i=2; i<this->children.size; i++)
   { if (!(*this)[i].IsBuiltInType())
-    { this->theBoss->Comments << "<hr>Failed to merge contexts of arguments: an argument is not of built-in type";
+    { *this->theBoss << "<hr>Failed to merge contexts of arguments: an argument is not of built-in type";
       return false;
     }
 //    stOutput << "<br>Merging context " << commonContext.ToString() << " with " << (*this)[i].GetContext().ToString();
     if (!commonContext.ContextMergeContexts(commonContext, (*this)[i].GetContext(), commonContext))
-    { this->theBoss->Comments << "<hr>Failed to merge context " << commonContext.ToString() << " with " << (*this)[i].GetContext().ToString();
+    { *this->theBoss << "<hr>Failed to merge context " << commonContext.ToString() << " with " << (*this)[i].GetContext().ToString();
       return false;
     }
 //    stOutput << " ...  to get context: " << commonContext.ToString();
@@ -2553,12 +2574,12 @@ bool Expression::MergeContextsMyAruments(Expression& output)const
   Expression convertedE;
   for (int i=1; i<this->children.size; i++)
   { convertedE=(*this)[i];
-//    stOutput << "<hr>Setting context of " << convertedE.ToString() << " to be the context " << commonContext.ToString();
+    //stOutput << "<hr>Setting context of " << convertedE.ToString() << " to be the context " << commonContext.ToString();
     if (!convertedE.SetContextAtLeastEqualTo(commonContext))
-    { this->theBoss->Comments << "<hr>Failed to convert " << convertedE.ToString() << " to context " << commonContext.ToString();
+    { *this->theBoss << "<hr>Failed to convert " << convertedE.ToString() << " to context " << commonContext.ToString();
       return false;
     }
-//    stOutput << "... and the result is: " << convertedE.ToString();
+    //stOutput << "... and the result is: " << convertedE.ToString();
     output.AddChildOnTop(convertedE);
   }
   return true;
@@ -2573,7 +2594,7 @@ bool Calculator::ConvertExpressionsToCommonContext(List<Expression>& inputOutput
       commonContext=*inputOutputStartingContext;
   for (int i=0; i<inputOutputEs.size; i++)
   { if (!inputOutputEs[i].IsBuiltInType())
-    { this->Comments << "<hr>Possible programming error: calling ConvertExpressionsToCommonContext on expressions without context. "
+    { *this << "<hr>Possible programming error: calling ConvertExpressionsToCommonContext on expressions without context. "
       << Crasher::GetStackTraceEtcErrorMessage();
       return false;
     }

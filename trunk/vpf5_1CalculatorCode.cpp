@@ -1023,6 +1023,15 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool Expression::operator==(int other)const
+{ if (this->theBoss==0)
+    return false;
+  int theInt;
+  if (!this->IsSmallInteger(&theInt))
+    return false;
+  return theInt==other;
+}
+
 bool Expression::operator==(const std::string& other)const
 { std::string tempS;
   if (!this->IsAtom(&tempS))

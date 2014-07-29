@@ -127,9 +127,21 @@ void Calculator::initPredefinedInnerFunctions()
    "Attempts to rearrange into standard polynomial form and then integrate.  ",
    "\\int  \\left( \\frac{x(x+1) }{ 2} \\right)^2 dx ");
   this->AddOperationInnerHandler
-  ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunction, "",
-   "Attempts to integrate a rational function.  ",
-   "\\int  \frac{1}{x+1} dx ");
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks, "",
+   "Attempts to split an integral of a rational function into building block integrals.  ",
+   "\\int  \frac{1}{x(x+1)} dx ");
+  this->AddOperationInnerHandler
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa, "",
+   "Integrates building block Ia.  ",
+   "\\int  (\frac{3}{(x/2-1)} ) dx ");
+  this->AddOperationInnerHandler
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIb, "",
+   "Integrates building block Ib.  ",
+   "\\int  (\frac{2}{(3x-1)^2} ) dx ");
+  this->AddOperationInnerHandler
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIandIII, "",
+   "Integrates building blocks II and III.  ",
+   "\\int  (\frac{3x+2}{x^2+x+1} ) dx ");
 
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateXnDiffX, "",
@@ -470,6 +482,11 @@ void Calculator::initPredefinedInnerFunctions()
    please use only for freecalc.",
    "Crawl(\"~/math/freecalc/trunk/homework/UMB-M141-2014-spring/ReviewFinal_2014_Spring_Calculus_I_Math_140.tex\")", true, false)
    ;
+  this->AddOperationInnerHandler
+  ("CoefficientsPowersOf", CalculatorFunctionsGeneral::innerCoefficientsPowersOf, "",
+   "Extracts the coefficients of the powers of the first argument in the second argument.",
+   "CoefficientsPowersOf(x, a x^2+ b *3 x +c +\\pi +3)", true, false)
+   ;
 
   this->AddOperationInnerHandler
   ("\\log", CalculatorFunctionsGeneral::innerLog, "",
@@ -655,11 +672,7 @@ void Calculator::initPredefinedInnerFunctions()
    ",
    "plotWedge(2, 2, 1.1,1.570796327, 2*3.1415 )")
    ;
-  this->AddOperationInnerHandler ("IntegrateRF", CalculatorFunctionsGeneral::innerIntegrateRFcalculatorNotation, "",
-   "Provided that the second argument is a rational function which is sufficiently easy to factor, \
-   integrates the second argument with respect to d of the first argument.",
-   "IntegrateRF(x, \\frac{x^5 }{x^3-1})")
-   ;
+
   this->AddOperationInnerHandler ("GaussianElimination", CalculatorFunctionsGeneral::innerGaussianEliminationMatrix, "",
    "Gaussian elimination of a matrix. Prints a detailed string that shows the Gaussian elimination of \
     a matrix.",

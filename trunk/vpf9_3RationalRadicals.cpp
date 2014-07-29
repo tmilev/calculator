@@ -448,7 +448,7 @@ bool AlgebraicNumber::operator==(const Rational& other)const
   return this->theElT.theCoeffs[0]==other;
 }
 
-bool AlgebraicNumber::NeedsBrackets()const
+bool AlgebraicNumber::NeedsParenthesisForMultiplication()const
 { if (this->owner==0)
     return false;
   VectorSparse<Rational> additiveForm;

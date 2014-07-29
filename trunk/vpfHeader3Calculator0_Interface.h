@@ -337,7 +337,8 @@ class Expression
   bool EvaluatesToVariableNonBound()const;
   Expression::FunctionAddress GetHandlerFunctionIamNonBoundVar();
   bool MakeIntegral(Calculator& theCommands, const Expression& theFunction, const Expression& theVariable);
-  bool MakeSum(Calculator& theCommands, const MonomialCollection<Expression, Rational>& theSum);
+  template<class coefficient>
+  bool MakeSum(Calculator& theCommands, const MonomialCollection<Expression, coefficient>& theSum);
   bool MakeSum(Calculator& theCommands, const List<Expression>& theSum);
   bool MakeProducT(Calculator& owner, const List<Expression>& theMultiplicands);
   bool MakeProducT(Calculator& owner, const Expression& left, const Expression& right);
@@ -438,6 +439,7 @@ bool EvaluatesToDoubleUnderSubstitutions
   void operator+=(const Expression& other);
   void operator*=(const Expression& other);
 //  Rational GetConstantTerm() const;
+  bool operator==(int other)const;
   bool operator==(const Expression& other)const;
   bool operator==(const std::string& other)const;
   bool operator!=(const std::string& other)const
@@ -1413,6 +1415,10 @@ public:
   static bool outerStandardFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerPlus(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerPowerRaiseToFirst(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool CollectCoefficientsPowersVar
+  (const Expression& input, const Expression& theVariable,
+   VectorSparse<Expression>& outputPositionIiscoeffXtoIth)
+;
   bool CollectOpands
   (const Expression& input, int theOp, List<Expression>& outputOpands)
   ;
@@ -1859,6 +1865,33 @@ bool Calculator::GetMatrix
   return true;
 }
 
+template <class coefficient>
+bool Expression::MakeSum(Calculator& theCommands, const MonomialCollection<Expression, coefficient>& theSum)
+{ MacroRegisterFunctionWithName("Expression::MakeSum");
+  Expression oneE; //used to record the constant term
+  oneE.AssignValue<Rational>(1, theCommands);
+  if (theSum.IsEqualToZero())
+    return this->AssignValue<Rational>(0, theCommands);
+  List<Expression> summandsWithCoeff;
+  summandsWithCoeff.SetSize(theSum.size());
+  for (int i=0; i<theSum.size(); i++)
+  { Expression& current=summandsWithCoeff[i];
+    if (theSum[i]==oneE)
+      current.AssignValue(theSum.theCoeffs[i], theCommands);
+    else if (!theSum.theCoeffs[i].IsEqualToOne())
+    { current.reset(theCommands, 3);
+      current.AddChildAtomOnTop(theCommands.opTimes());
+      current.AddChildValueOnTop(theSum.theCoeffs[i]);
+      current.AddChildOnTop(theSum[i]);
+    } else
+      current=theSum[i];
+  }
+  if (summandsWithCoeff.size>=2)
+    if (summandsWithCoeff[0]>summandsWithCoeff[1] && summandsWithCoeff[1]>summandsWithCoeff[0])
+      crash << "This is a pgoramming error: bad comparison! " << crash;
+  return this->MakeOXdotsX(theCommands, theCommands.opPlus(), summandsWithCoeff);
+}
+
 template <class theType>
 bool Expression::AssignValueWithContext(const theType& inputValue, const Expression& theContext, Calculator& owner)
 { this->reset(owner, 3);
@@ -1898,7 +1931,7 @@ bool Expression::MergeContextsMyArumentsAndConvertThem(Expression& output)const
   for (int i=1; i<mergedContexts.children.size; i++)
   { //stOutput << "<hr>Converting: " << mergedContexts[i].ToString();
     if (!mergedContexts[i].ConvertToType<theType>(convertedE))
-    { this->theBoss->Comments << "<hr>Failed to convert " << mergedContexts[i].ToString() << " to the desired type. ";
+    { *this->theBoss << "<hr>Failed to convert " << mergedContexts[i].ToString() << " to the desired type. ";
       return false;
     }
     output.AddChildOnTop(convertedE);
@@ -1913,7 +1946,7 @@ bool Calculator::GetTypeWeight
  Expression::FunctionAddress ConversionFun)
 { MacroRegisterFunctionWithName("Calculator::GetTypeWeight");
   if (!input.IsListNElements(3))
-  { theCommands.Comments
+  { theCommands
     << "Function TypeHighestWeightParabolic is expected to have two arguments: "
     << "SS algebra type, highest weight in simple coords. ";
     return false;
@@ -1921,12 +1954,12 @@ bool Calculator::GetTypeWeight
   const Expression& leftE=input[1];
   const Expression& middleE=input[2];
   if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, leftE, ambientSSalgebra))
-  { theCommands.Comments << "Error extracting Lie algebra from " << leftE.ToString();
+  { theCommands << "Error extracting Lie algebra from " << leftE.ToString();
     return false;
   }
   if (!theCommands.GetVectoR<coefficient>
       (middleE, outputWeightSimpleCoords, &outputWeightContext, ambientSSalgebra->GetRank(), ConversionFun))
-  { theCommands.Comments << "Failed to convert the second argument of HWV to a list of " << ambientSSalgebra->GetRank()
+  { theCommands << "Failed to convert the second argument of HWV to a list of " << ambientSSalgebra->GetRank()
     << " polynomials. The second argument you gave is " << middleE.ToString() << ".";
     return false;
   }

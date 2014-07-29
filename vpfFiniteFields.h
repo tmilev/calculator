@@ -43,7 +43,7 @@ class f65521
   bool operator!=(const f65521 rhs) const;
   bool IsEqualToZero() const;
   bool IsEqualToOne() const;
-  bool NeedsBrackets()
+  bool NeedsParenthesisForMultiplication()
   { return false;
   }
 

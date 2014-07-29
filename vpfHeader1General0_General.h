@@ -300,7 +300,7 @@ public:
   }
   template<class Element>
   static inline std::string ElementToStringBrackets(const Element& input)
-  { if (!input.NeedsBrackets())
+  { if (!input.NeedsParenthesisForMultiplication())
       return input.ToString();
     std::string result;
     result.append("(");
@@ -310,7 +310,7 @@ public:
   }
   template<class Element>
   static inline std::string ElementToStringBrackets(const Element& input, FormatExpressions* theFormat)
-  { if (!input.NeedsBrackets())
+  { if (!input.NeedsParenthesisForMultiplication())
       return input.ToString(theFormat);
     std::string result;
     result.append("(");

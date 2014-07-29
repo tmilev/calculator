@@ -1021,7 +1021,7 @@ std::string RationalFunctionOld::ToString(FormatExpressions* theFormat)const
   bool useFrac= theFormat==0 ? false : theFormat->flagUseFrac;
   bool needParenthesis=false;
   if (!useFrac)
-    needParenthesis=this->Numerator.GetElementConst().NeedsBrackets();
+    needParenthesis=this->Numerator.GetElementConst().NeedsParenthesisForMultiplication();
   if(useFrac)
     out << "\\frac{";
   if (needParenthesis)
@@ -1666,7 +1666,7 @@ void RationalFunctionOld::ClearDenominators(RationalFunctionOld& outputWasMultip
 }
 
 template <class coefficient>
-bool ElementSemisimpleLieAlgebra<coefficient>::NeedsBrackets()const
+bool ElementSemisimpleLieAlgebra<coefficient>::NeedsParenthesisForMultiplication()const
 { return this->size>1;
 }
 

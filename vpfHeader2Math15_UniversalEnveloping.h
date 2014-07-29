@@ -112,7 +112,7 @@ public:
   { GlobalVariables theGlobalVariables;
     return this->ToString(PolyFormatLocal, theGlobalVariables);
   }
-  bool NeedsBrackets()const
+  bool NeedsParenthesisForMultiplication()const
   { return this->size>1;
   }
   void ComputeDebugString()
@@ -486,7 +486,7 @@ public:
   bool IsEqualToZero()const
   { return this->theElT.IsEqualToZero();
   }
-  bool NeedsBrackets()const;
+  bool NeedsParenthesisForMultiplication()const;
   void AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector
   (ElementUniversalEnvelopingOrdered<coefficient>& input, const ElementVermaModuleOrdered<coefficient>& theRingZero, GlobalVariables* theContext, const coefficient& theRingUnit);
   void ActOnMe

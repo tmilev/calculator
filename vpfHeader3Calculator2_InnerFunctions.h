@@ -58,7 +58,6 @@ public:
   static bool innerTestMathMouseHover(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCrawlTexFile(Calculator& theCommands, const Expression& input, Expression& output);
 
-
   static bool outerMergeConstantRadicals(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerCommuteConstants(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerDivideReplaceAdivBpowerItimesBpowerJ(Calculator& theCommands, const Expression& input, Expression& output);
@@ -89,8 +88,11 @@ public:
   static bool innerIsDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExtractDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerIntegrateRFcalculatorNotation(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerIntegrateRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntegrateRationalFunctionSplitToBuidingBlocks(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntegrateRationalFunctionBuidingBlockIa(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntegrateRationalFunctionBuidingBlockIb(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntegrateRationalFunctionBuidingBlockIIandIII(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerIntegratePowerByUncoveringParenthesisFirst(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateSum(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateXnDiffX(Calculator& theCommands, const Expression& input, Expression& output);
@@ -140,10 +142,12 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3data, int& desiredHeight, Expression& outputContext);
   static bool innerSplitFDpartB3overG2(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerCoefficientsPowersOf(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsConstant(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGaussianEliminationMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitToPartialFractionsOverAlgebraicReals(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExpressionFromBuiltInType(Calculator& theCommands, const Expression& input, Expression& output);
+  template <class coefficient>
   static bool innerExpressionFromPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExpressionFromRF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestIndicator(Calculator& theCommands, const Expression& input, Expression& output);

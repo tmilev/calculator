@@ -1053,8 +1053,8 @@ bool ElementVermaModuleOrdered<coefficient>::GetCoordsInBasis
 }
 
 template<class coefficient>
-bool ElementVermaModuleOrdered<coefficient>::NeedsBrackets()const
-{ return this->theElT.NeedsBrackets();
+bool ElementVermaModuleOrdered<coefficient>::NeedsParenthesisForMultiplication()const
+{ return this->theElT.NeedsParenthesisForMultiplication();
 }
 
 template <class coefficient>

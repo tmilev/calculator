@@ -45,7 +45,7 @@ class AlgebraicNumber
     return this->AssignCosRationalTimesPi(rHalf-input, inputOwner);
   }
 
-  bool NeedsBrackets()const;
+  bool NeedsParenthesisForMultiplication()const;
   bool CheckConsistency()const;
   bool CheckNonZeroOwner()const;
   bool CheckCommonOwner(const AlgebraicNumber& other)const;

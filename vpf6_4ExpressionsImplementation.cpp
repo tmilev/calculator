@@ -13,7 +13,7 @@ Expression operator*(const Expression& left, const Expression& right)
   Expression result;
 
   result.MakeXOX(*left.theBoss, left.theBoss->opTimes(), left, right);
-  stOutput << "<br>result: " << result.ToString();
+//  stOutput << "<br>result: " << result.ToString();
   return result;
 }
 
@@ -712,6 +712,8 @@ bool Expression::ConvertToType<RationalFunctionOld>(Expression& output)const
   if (this->IsOfType<Rational>())
   { RationalFunctionOld resultRF;
     resultRF.MakeConst(this->GetValue<Rational>(), this->theBoss->theGlobalVariableS);
+//    stOutput << "<hr>Converting to type: " << this->ToString();
+//    stOutput << "<br>My context is: " << this->GetContext().ToString();
     return output.AssignValueWithContext(resultRF, this->GetContext(), *this->theBoss);
   }
   if (this->IsOfType<Polynomial<Rational> >())
@@ -1146,10 +1148,10 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
     rightSSindex=leftSSindex;
   if (leftSSindex!=rightSSindex)
     return false;
-//  stOutput << "<br>Merging contexts: " << leftContext.ToString() << " and " << rightContext.ToString();
+//  stOutput << "<hr>Merging contexts: " << leftContext.ToString() << " and " << rightContext.ToString();
   Expression leftPolyV=leftContext.ContextGetPolynomialVariables();
   Expression rightPolyV=rightContext.ContextGetPolynomialVariables();
-//  stOutput << "<br>Merging contexts: " << leftContext.ToString() << " and " << rightContext.ToString();
+//  stOutput << "<br>Merging: leftPolyV: " << leftPolyV.ToString() << " and rightPolyV: " << rightPolyV.ToString();
   HashedList<Expression> polyVarUnion;
   MemorySaving<HashedList<Expression> > EWAVarUnion;
   polyVarUnion.SetExpectedSize(leftPolyV.children.size+rightPolyV.children.size-2);
@@ -1185,7 +1187,7 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
       { int theIndex=polyVarUnion.GetIndex((*currentPolyV)[i]);
         if (foundEWAVar.selected[theIndex])
           if ((*currentEWAV)[i]!=EWAVars[theIndex])
-          { owner.Comments << "<hr>Failed to merge contexts " << leftContext.ToString() << " and " << rightContext.ToString()
+          { owner << "<hr>Failed to merge contexts " << leftContext.ToString() << " and " << rightContext.ToString()
             << " because " << (*currentPolyV)[i].ToString() << " has two different corresponding differential operator variables: "
             << EWAVars[theIndex].ToString() << " and " << (*currentEWAV)[i].ToString();
             return false;

@@ -483,42 +483,13 @@ bool CalculatorFunctionsGeneral::innerConstantFunction(Calculator& theCommands, 
   return true;
 }
 
-bool CalculatorFunctionsGeneral::innerExpressionFromBuiltInType(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExpressionFromBuiltInType");
-  if (input.IsOfType<Polynomial<Rational> >())
-    return CalculatorFunctionsGeneral::innerExpressionFromPoly(theCommands, input, output);
-  if (input.IsOfType<RationalFunctionOld>())
-    return CalculatorFunctionsGeneral::innerExpressionFromRF(theCommands, input, output);
-  return false;
-}
-
-bool CalculatorFunctionsGeneral::innerExpressionFromRF(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExpressionFromRF");
-  if (!input.IsOfType<RationalFunctionOld>() )
-    return false;
-  const RationalFunctionOld& theRF=input.GetValue<RationalFunctionOld>();
-  Rational aConst;
-  if (theRF.IsConstant(&aConst))
-    return output.AssignValue(aConst, theCommands);
-  Expression numPolyE, denPolyE, numE, denE;
-  Polynomial<Rational> numP, denP;
-  theRF.GetNumerator(numP);
-  numPolyE.AssignValueWithContext(numP, input.GetContext(), theCommands);
-  if (theRF.expressionType==theRF.typePoly)
-    return CalculatorFunctionsGeneral::innerExpressionFromPoly(theCommands, numPolyE, output);
-  theRF.GetDenominator(denP);
-  denPolyE.AssignValueWithContext(denP, input.GetContext(), theCommands);
-  CalculatorFunctionsGeneral::innerExpressionFromPoly(theCommands, numPolyE, numE);
-  CalculatorFunctionsGeneral::innerExpressionFromPoly(theCommands, denPolyE, denE);
-  return output.MakeXOX(theCommands, theCommands.opDivide(), numE, denE);
-}
-
+template <class coefficient>
 bool CalculatorFunctionsGeneral::innerExpressionFromPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExpressionFromPoly");
-  if (!input.IsOfType<Polynomial<Rational> >() )
+  if (!input.IsOfType<Polynomial<coefficient> >() )
     return false;
-  const Polynomial<Rational>& thePoly=input.GetValue<Polynomial<Rational> >();
-  MonomialCollection<Expression, Rational> theTerms;
+  const Polynomial<coefficient>& thePoly=input.GetValue<Polynomial<coefficient> >();
+  MonomialCollection<Expression, coefficient> theTerms;
   Expression currentBase, currentPower, currentTerm, currentLetterE;
   Expression theContext=input.GetContext();
   for (int i=0; i<thePoly.size(); i++)
@@ -547,6 +518,38 @@ bool CalculatorFunctionsGeneral::innerExpressionFromPoly(Calculator& theCommands
   }
 //  stOutput << "Extracted expressions: " << theTerms.ToString();
   return output.MakeSum(theCommands, theTerms);
+}
+
+bool CalculatorFunctionsGeneral::innerExpressionFromBuiltInType(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExpressionFromBuiltInType");
+  if (input.IsOfType<Polynomial<Rational> >())
+    return CalculatorFunctionsGeneral::innerExpressionFromPoly<Rational>(theCommands, input, output);
+  if (input.IsOfType<Polynomial<AlgebraicNumber> >())
+    return CalculatorFunctionsGeneral::innerExpressionFromPoly<AlgebraicNumber>(theCommands, input, output);
+  if (input.IsOfType<RationalFunctionOld>())
+    return CalculatorFunctionsGeneral::innerExpressionFromRF(theCommands, input, output);
+  return false;
+}
+
+bool CalculatorFunctionsGeneral::innerExpressionFromRF(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExpressionFromRF");
+  if (!input.IsOfType<RationalFunctionOld>() )
+    return false;
+  const RationalFunctionOld& theRF=input.GetValue<RationalFunctionOld>();
+  Rational aConst;
+  if (theRF.IsConstant(&aConst))
+    return output.AssignValue(aConst, theCommands);
+  Expression numPolyE, denPolyE, numE, denE;
+  Polynomial<Rational> numP, denP;
+  theRF.GetNumerator(numP);
+  numPolyE.AssignValueWithContext(numP, input.GetContext(), theCommands);
+  if (theRF.expressionType==theRF.typePoly)
+    return CalculatorFunctionsGeneral::innerExpressionFromPoly<Rational>(theCommands, numPolyE, output);
+  theRF.GetDenominator(denP);
+  denPolyE.AssignValueWithContext(denP, input.GetContext(), theCommands);
+  CalculatorFunctionsGeneral::innerExpressionFromPoly<Rational>(theCommands, numPolyE, numE);
+  CalculatorFunctionsGeneral::innerExpressionFromPoly<Rational>(theCommands, denPolyE, denE);
+  return output.MakeXOX(theCommands, theCommands.opDivide(), numE, denE);
 }
 
 bool CalculatorFunctionsGeneral::outerCombineFractionsCommutative(Calculator& theCommands, const Expression& input, Expression& output)
@@ -637,54 +640,106 @@ coefficient Polynomial<coefficient>::GetDiscriminant()
   return b*b-a*c*4;
 }
 
-bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals");
-  Expression convertedInput;
-  bool isGood=CalculatorSerialization::innerRationalFunction(theCommands, input, convertedInput);
-  if (isGood)
-    isGood=convertedInput.IsOfType<RationalFunctionOld>();
-  if (!isGood)
-  { theCommands.Comments << "CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals: Failed to convert "
-    << input.ToString() << " to rational function. ";
-    return false;
-  }
-  const RationalFunctionOld& inputRF=convertedInput.GetValue<RationalFunctionOld>();
-  if (inputRF.GetMinNumVars()>1)
-  { theCommands.Comments << "The input rational function is of " << inputRF.GetMinNumVars() << " variables and "
-    << " I can handle only 1.";
-    return false;
-  }
-  std::stringstream out;
-  FormatExpressions theFormat;
-  convertedInput.GetContext().ContextGetFormatExpressions(theFormat);
-  if (inputRF.GetMinNumVars()<1 || inputRF.expressionType== inputRF.typeRational ||
-      inputRF.expressionType==inputRF.typePoly)
-  { out << inputRF.ToString(&theFormat) << " is already split into partial fractions. ";
-    return output.AssignValue(out.str(), theCommands);
-  }
+class IntegralRFComputation
+{
+public:
+  RationalFunctionOld theRF;
   Polynomial<Rational> theDen, theNum;
-  inputRF.GetDenominator(theDen);
-  inputRF.GetNumerator(theNum);
   List<Polynomial<Rational> > theFactors;
-  if (!theDen.FactorMe(theFactors, &theCommands.Comments))
-  { theCommands.Comments << "<hr>I failed to factor the denominator of the rational function, I surrender.";
+  FormatExpressions currentFormaT;
+  Expression contextE;
+  Expression inputE;
+  Expression outputIntegralE;
+  Calculator* owner;
+  std::stringstream printoutPFs;
+  std::stringstream printoutIntegration;
+  MonomialCollection<Polynomial<AlgebraicNumber>, Rational> theDenominatorFactorsWithMults;
+  List<List<Polynomial<AlgebraicNumber> > > theNumerators;
+  List<Expression> theIntegralSummands;
+  Expression theIntegralSum;
+  bool ComputePartialFractionDecomposition();
+  bool IntegrateRF();
+  IntegralRFComputation(Calculator* inputOwner):owner(inputOwner){}
+  bool CheckConsistency()const;
+};
+
+bool IntegralRFComputation::CheckConsistency()const
+{ if (this->owner==0)
+    crash << "Non-initialized rf computation" << crash;
+  return true;
+}
+
+bool IntegralRFComputation::IntegrateRF()
+{ MacroRegisterFunctionWithName("IntegralRFComputation::IntegrateRF");
+  this->CheckConsistency();
+  if (!this->ComputePartialFractionDecomposition())
+  { printoutIntegration << "Failed to decompose rational function into partial fractions. " << this->printoutPFs.str();
     return false;
   }
-  theFormat.flagUseFrac=true;
-  out << "The rational function is: " << CGI::GetMathSpanPure(inputRF.ToString(&theFormat)) << ".";
-  out << "<br>The denominator factors are: ";
+//  stOutput << "<hr>Context variable 1: " << this->contextE.ContextGetContextVariable(0);
+  printoutIntegration << this->printoutPFs.str();
+  Expression polyE, currentNum, denExpE, currentDenNoPower, currentDen, currentIntegrand, currentIntegral;
+  this->theIntegralSummands.SetSize(0);
+  for (int i=0; i<this->theNumerators.size; i++)
+    for (int j=0; j<this->theNumerators[i].size; j++)
+    { if (this->theNumerators[i][j].IsEqualToZero())
+        continue;
+      polyE.AssignValueWithContext(this->theNumerators[i][j], this->contextE, *this->owner);
+//      stOutput << "<br>polyE is: " << polyE.ToString();
+      if (!CalculatorFunctionsGeneral::innerExpressionFromBuiltInType(*this->owner, polyE, currentNum))
+        return false;
+//      stOutput << "<br>currentNum is: " << currentNum.ToString();
+      polyE.AssignValueWithContext(this->theDenominatorFactorsWithMults[i], this->contextE, *this->owner);
+      if(!CalculatorFunctionsGeneral::innerExpressionFromBuiltInType(*this->owner, polyE, currentDenNoPower))
+        return false;
+//      stOutput << "<br>currentDenNoPower is: " << currentDenNoPower.ToString();
+      denExpE.AssignValue(j+1, *this->owner);
+      currentDen.MakeXOX(*this->owner, this->owner->opThePower(), currentDenNoPower, denExpE);
+      currentIntegrand=currentNum;
+      currentIntegrand/=currentDen;
+//      stOutput << "<br>CurrentIntegrand is: " << currentIntegrand.ToString();
+      currentIntegral.MakeIntegral(*this->owner, currentIntegrand, this->contextE.ContextGetContextVariable(0));
+//      stOutput << "<br>Current integral is: " << currentIntegral.ToString();
+      this->theIntegralSummands.AddOnTop(currentIntegral);
+    }
+  return this->theIntegralSum.MakeSum(*this->owner, this->theIntegralSummands);
+}
+
+bool IntegralRFComputation::ComputePartialFractionDecomposition()
+{ MacroRegisterFunctionWithName("IntegralRFComputation::ComputePartialFractionDecomposition");
+  this->CheckConsistency();
+  this->contextE=this->inputE.GetContext();
+  //stOutput << "<hr>Context: " << this->contextE.ToString();
+  //stOutput << "<br>Context variable 1: " << this->contextE.ContextGetContextVariable(0).ToString();
+  //stOutput << "<br>Context variable 2: " << this->contextE.ContextGetContextVariable(1).ToString();
+
+  this->contextE.ContextGetFormatExpressions(this->currentFormaT);
+  if (this->theRF.GetMinNumVars()<1 || this->theRF.expressionType== this->theRF.typeRational ||
+      this->theRF.expressionType==this->theRF.typePoly)
+  { this->printoutPFs << this->theRF.ToString(&this->currentFormaT) << " is already split into partial fractions. ";
+    return true;
+  }
+  this->theRF.GetDenominator(this->theDen);
+  this->theRF.GetNumerator(this->theNum);
+  if (!this->theDen.FactorMe(theFactors, &this->printoutPFs))
+  { this->printoutPFs << "<hr>Failed to factor the denominator of the rational function, I surrender.";
+    return false;
+  }
+  this->currentFormaT.flagUseFrac=true;
+  this->printoutPFs << "The rational function is: " << CGI::GetMathSpanPure(this->theRF.ToString(&this->currentFormaT)) << ".";
+  this->printoutPFs << "<br>The denominator factors are: ";
   bool allFactorsAreOfDegree2orless=true;
   for (int i=0; i<theFactors.size; i++)
-  { out << CGI::GetMathSpanPure(theFactors[i].ToString(&theFormat));
+  { this->printoutPFs << CGI::GetMathSpanPure(theFactors[i].ToString(&this->currentFormaT));
     if (i!=theFactors.size-1)
-      out << ", ";
+      this->printoutPFs << ", ";
     if (theFactors[i].TotalDegree()>2)
       allFactorsAreOfDegree2orless=false;
   }
-  out << ". <br>";
+  this->printoutPFs << ". <br>";
   if (!allFactorsAreOfDegree2orless)
-  { out << "There were factors (over the rationals) of degree greater than 2. I surrender. ";
-    return output.AssignValue(out.str(), theCommands);
+  { this->printoutPFs << "There were factors (over the rationals) of degree greater than 2. I surrender. ";
+    return false;
   }
   Polynomial<Rational> quotientRat, remainderRat;
   Polynomial<AlgebraicNumber> quotientAlg, remainderAlg;
@@ -693,27 +748,24 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(
   quotientAlg=quotientRat;
   remainderAlg=remainderRat;
   if (!quotientRat.IsEqualToZero())
-  { out << "<br>The numerator " << CGI::GetMathSpanPure(theNum.ToString(&theFormat))
+  { this->printoutPFs << "<br>The numerator " << CGI::GetMathSpanPure(this->theNum.ToString(&this->currentFormaT))
     << " divided by the denominator "
-    << CGI::GetMathSpanPure(theDen.ToString(&theFormat)) << " yields "
-    << CGI::GetMathSpanPure(quotientRat.ToString(&theFormat))
-    << " with remainder "
-    << CGI::GetMathSpanPure(remainderRat.ToString(&theFormat)) << ". ";
-    Expression theDivStringArguments(theCommands), thePolyDivStringE, numE, denE;
+    << CGI::GetMathSpanPure(theDen.ToString(&this->currentFormaT)) << " yields "
+    << CGI::GetMathSpanPure(quotientRat.ToString(&this->currentFormaT)) << " with remainder "
+    << CGI::GetMathSpanPure(remainderRat.ToString(&this->currentFormaT)) << ". ";
+    Expression theDivStringArguments(*this->owner), thePolyDivStringE, numE, denE;
     theDivStringArguments.AddChildAtomOnTop("PolyDivStringGrLex");
-    numE.AssignValueWithContext(theNum, convertedInput.GetContext(), theCommands);
-    denE.AssignValueWithContext(theDen, convertedInput.GetContext(), theCommands);
+    numE.AssignValueWithContext(theNum, this->inputE.GetContext(), *this->owner);
+    denE.AssignValueWithContext(theDen, this->inputE.GetContext(), *this->owner);
     theDivStringArguments.AddChildOnTop(numE);
     theDivStringArguments.AddChildOnTop(denE);
-    theCommands.innerPolynomialDivisionVerboseGrLex(theCommands, theDivStringArguments, thePolyDivStringE);
+    this->owner->innerPolynomialDivisionVerboseGrLex(*this->owner, theDivStringArguments, thePolyDivStringE);
     if(thePolyDivStringE.IsOfType<std::string>())
-    { out << "<br>Here is a detailed long polynomial division:<br> ";
-      out << thePolyDivStringE.GetValue<std::string>();
+    { this->printoutPFs << "<br>Here is a detailed long polynomial division:<br> ";
+      this->printoutPFs << thePolyDivStringE.GetValue<std::string>();
     }
   }
   MonomialCollection<Polynomial<Rational>, Rational> theDenominatorFactorsWithMultsCopy;
-  MonomialCollection<Polynomial<AlgebraicNumber>, Rational> theDenominatorFactorsWithMults;
-  List<List<Polynomial<AlgebraicNumber> > > theNumerators;
   theDenominatorFactorsWithMultsCopy.MakeZero();
   for (int i=0; i<theFactors.size; i++)
     theDenominatorFactorsWithMultsCopy.AddMonomial(theFactors[i], 1);
@@ -721,6 +773,7 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(
   Polynomial<Rational> currentSecondDegreePoly;
   theDenominatorFactorsWithMults.MakeZero();
   Polynomial<AlgebraicNumber> currentLinPoly, currentSecondDegreePolyAlgebraic;
+
   for (int i=0; i<theDenominatorFactorsWithMultsCopy.size(); i++)
   { currentSecondDegreePoly=theDenominatorFactorsWithMultsCopy[i];
     currentSecondDegreePolyAlgebraic=currentSecondDegreePoly;
@@ -735,8 +788,8 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(
       continue;
     }
     AlgebraicNumber theDiscriminantSqrt;
-    if (!theDiscriminantSqrt.AssignRationalQuadraticRadical(theDiscriminant, theCommands.theObjectContainer.theAlgebraicClosure))
-    { theCommands.Comments << "Failed to take radical of " << theDiscriminant.ToString()
+    if (!theDiscriminantSqrt.AssignRationalQuadraticRadical(theDiscriminant, this->owner->theObjectContainer.theAlgebraicClosure))
+    { this->printoutPFs << "Failed to take radical of " << theDiscriminant.ToString()
       << " (radical too large?).";
       return false;
     }
@@ -756,14 +809,14 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(
 
   }
   theDenominatorFactorsWithMults.QuickSortAscending();
-  out << "<br><br>I need to find " << CGI::GetMathSpanPure("A_i")
+  this->printoutPFs << "<br><br>I need to find " << CGI::GetMathSpanPure("A_i")
   << "'s so that I have the equality of rational functions: ";
   RationalFunctionOld transformedRF;
   transformedRF=remainderRat;
   transformedRF/=theDen;
   std::stringstream rfStream, polyStream;
-  rfStream << transformedRF.ToString(&theFormat) << " = ";
-  polyStream << remainderRat.ToString(&theFormat) << "=";
+  rfStream << transformedRF.ToString(&this->currentFormaT) << " = ";
+  polyStream << remainderRat.ToString(&this->currentFormaT) << "=";
   int varCounter=0;
   Polynomial<AlgebraicNumber> thePolyThatMustVanish, currentSummand;
   MonomialP currentMon;
@@ -790,7 +843,7 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(
         currentSummand.AddMonomial(currentMon, 1);
         rfStream << varNameStream.str();
         polyStream << varNameStream.str();
-        theFormat.polyAlphabeT.AddOnTop(varNameStream.str());
+        this->currentFormaT.polyAlphabeT.AddOnTop(varNameStream.str());
         if (j>0)
         { rfStream << "x";
           polyStream << "x";
@@ -812,7 +865,7 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(
           theExp-=k+1;
         if (theExp==0)
           continue;
-        polyStream << "(" << theDenominatorFactorsWithMults[j].ToString(&theFormat) << ")";
+        polyStream << "(" << theDenominatorFactorsWithMults[j].ToString(&this->currentFormaT) << ")";
         if (theExp>1)
           polyStream << "^{" << theExp << "}";
         for (int p=0; p<theExp; p++)
@@ -821,7 +874,7 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(
       rfStream << "}{";
       if (k>0)
         rfStream << "(";
-      rfStream << theDenominatorFactorsWithMults[i].ToString(&theFormat);
+      rfStream << theDenominatorFactorsWithMults[i].ToString(&this->currentFormaT);
       if (k>0)
         rfStream << ")^{" << k+1 << "}";
       rfStream << "}";
@@ -832,48 +885,70 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(
       thePolyThatMustVanish+=currentSummand;
     }
   }
-  out << CGI::GetMathSpanPure(rfStream.str(), -1);
-  out << "<br><br>After clearing denominators, we get the equality: ";
-  out << "<br><br>" << CGI::GetMathSpanPure(polyStream.str());
+  this->printoutPFs << CGI::GetMathSpanPure(rfStream.str(), -1);
+  this->printoutPFs << "<br><br>After clearing denominators, we get the equality: ";
+  this->printoutPFs << "<br><br>" << CGI::GetMathSpanPure(polyStream.str());
   Polynomial<Polynomial<AlgebraicNumber> > univariateThatMustDie;
   thePolyThatMustVanish.GetPolyUnivariateWithPolyCoeffs(0, univariateThatMustDie);
-  out << "<br><br>After rearanging we get that the following polynomial must vanish: " << CGI::GetMathSpanPure(univariateThatMustDie.ToString(&theFormat));
-  out << "<br>Here, by ``vanish'', we mean that the coefficients in front of the powers of x must vanish.";
+  this->printoutPFs << "<br><br>After rearanging we get that the following polynomial must vanish: "
+  << CGI::GetMathSpanPure(univariateThatMustDie.ToString(&this->currentFormaT));
+  this->printoutPFs << "<br>Here, by ``vanish'', we mean that the coefficients in front of the powers of x must vanish.";
   Matrix<AlgebraicNumber> theSystemHomogeneous, theConstTerms;
   Polynomial<AlgebraicNumber>::GetLinearSystemFromLinearPolys(univariateThatMustDie.theCoeffs, theSystemHomogeneous, theConstTerms);
-  theFormat.flagFormatMatrixAsLinearSystem=true;
-  out << "<br>In other words, we need to solve the system: "
-  << CGI::GetMathSpanPure(theSystemHomogeneous.ToStringSystemLatex(&theConstTerms, &theFormat),-1);
-  theSystemHomogeneous.GaussianEliminationByRows(&theConstTerms, 0,0,0, &out, &theFormat);
+  this->currentFormaT.flagFormatMatrixAsLinearSystem=true;
+  this->printoutPFs << "<br>In other words, we need to solve the system: "
+  << CGI::GetMathSpanPure(theSystemHomogeneous.ToStringSystemLatex(&theConstTerms, &this->currentFormaT),-1);
+  theSystemHomogeneous.GaussianEliminationByRows(&theConstTerms, 0,0,0, &this->printoutPFs, &this->currentFormaT);
   PolynomialSubstitution<AlgebraicNumber> theSub;
   theSub.MakeIdSubstitution(varCounter+1);
   for (int i=1; i<theSub.size; i++)
     theSub[i].MakeConst(theConstTerms(i-1,0));
-//  out << "The sub is: " << theSub.ToString();
+//  this->printoutPFs << "The sub is: " << theSub.ToString();
   std::stringstream rfComputedStream;
   for (int i =0; i<theDenominatorFactorsWithMults.size(); i++)
     for (int k=0; k<theDenominatorFactorsWithMults.theCoeffs[i]; k++)
     { theNumerators[i][k].Substitution(theSub);
-      rfComputedStream << "\\frac{" << theNumerators[i][k].ToString(&theFormat) << "}";
+      rfComputedStream << "\\frac{" << theNumerators[i][k].ToString(&this->currentFormaT) << "}";
       rfComputedStream << "{";
-      rfComputedStream << "(" << theDenominatorFactorsWithMults[i].ToString(&theFormat) << ")";
+      rfComputedStream << "(" << theDenominatorFactorsWithMults[i].ToString(&this->currentFormaT) << ")";
       if (k>0)
         rfComputedStream << "^{" << k+1 << "}";
       rfComputedStream << "}";
       if (((theDenominatorFactorsWithMults.theCoeffs[i]-1)!=k) || (i!=theDenominatorFactorsWithMults.size()-1))
         rfComputedStream << "+";
     }
-  out << "<br>Therefore, the final partial fraction decomposition is: ";
+  this->printoutPFs << "<br>Therefore, the final partial fraction decomposition is: ";
   std::stringstream answerFinalStream;
-  answerFinalStream << inputRF.ToString(&theFormat) << "=";
+  answerFinalStream << this->theRF.ToString(&this->currentFormaT) << "=";
   if (!quotientRat.IsEqualToZero())
-    answerFinalStream << quotientRat.ToString(&theFormat) << "+ ";
-  answerFinalStream << transformedRF.ToString(&theFormat) << "=";
+    answerFinalStream << quotientRat.ToString(&this->currentFormaT) << "+ ";
+  answerFinalStream << transformedRF.ToString(&this->currentFormaT) << "=";
   if (!quotientRat.IsEqualToZero())
-    answerFinalStream << quotientRat.ToString(&theFormat) << "+ ";
+    answerFinalStream << quotientRat.ToString(&this->currentFormaT) << "+ ";
   answerFinalStream << rfComputedStream.str();
-  out << CGI::GetMathSpanPure(answerFinalStream.str());
-  return output.AssignValue(out.str(), theCommands);
+  this->printoutPFs << CGI::GetMathSpanPure(answerFinalStream.str());
+  return true;
+}
+
+bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals");
+  IntegralRFComputation theComputation(&theCommands);
+  bool isGood=CalculatorSerialization::innerRationalFunction(theCommands, input, theComputation.inputE);
+  if (isGood)
+    isGood=theComputation.inputE.IsOfType<RationalFunctionOld>();
+  if (!isGood)
+  { theCommands << "CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals: Failed to convert "
+    << input.ToString() << " to rational function. ";
+    return false;
+  }
+  theComputation.theRF=theComputation.inputE.GetValue<RationalFunctionOld>();
+  if (theComputation.theRF.GetMinNumVars()>1)
+  { theCommands << "The input rational function is of " << theComputation.theRF.GetMinNumVars() << " variables and "
+    << " I can handle only 1.";
+    return false;
+  }
+  theComputation.ComputePartialFractionDecomposition();
+  return output.AssignValue(theComputation.printoutPFs.str(), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerGaussianEliminationMatrix(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1489,48 +1564,274 @@ bool CalculatorFunctionsGeneral::outerPolynomialize(Calculator& theCommands, con
   return true;
 }
 
-bool CalculatorFunctionsGeneral::innerIntegrateRFcalculatorNotation(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRFcalculatorNotation");
-  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRFcalculatorNotation, input: " << input.ToString();
-  if (input.children.size!=3)
-    return false;
-  Expression theConvertedE;
-  if(!CalculatorSerialization::innerRationalFunction(theCommands, input[2], theConvertedE))
-  { theCommands << "<hr>Call of function CalculatorSerialization::innerRationalFunction failed, input was: " << input[2].ToString();
-    return false;
-  }
-  if (!theConvertedE.IsOfType<RationalFunctionOld>())
-  { theCommands << "<hr>CalculatorFunctionsGeneral::innerIntegrateRFcalculatorNotation: failed to convert " << input[2].ToString()
-    << " to rational function. Attempt to converted expression yielded: " << theConvertedE.ToString();
-    return false;
-  }
-  if (theConvertedE.GetNumContextVariables()>1)
-  { theCommands << "<hr>I converted " << input[2].ToString() << " to rational function, but it is of " << theConvertedE.GetNumContextVariables()
-    << " variables. I have been taught to work with 1 variable only. ";
-    return false;
-  }
-  if (theConvertedE.GetNumContextVariables()==1)
-    if (theConvertedE.GetContext().ContextGetContextVariable(0)!=input[1])
-    { theCommands << "<hr>The univariate rational function was in variable " << theConvertedE.GetContext().ToString()
-      << " but the variable of integration is " << input[1].ToString();
-      return false;
-    }
-  RationalFunctionOld theRF=theConvertedE.GetValue<RationalFunctionOld>();
-  crash << "not implemented yet" << crash ;
-
-//  if (!CalculatorSerialization::inner)
-  return false;
-}
-
-bool CalculatorFunctionsGeneral::innerIntegrateRationalFunction(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunction");
+bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks");
   Expression theFunctionE, theVariableE, integralE(theCommands);
   if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, theVariableE))
     return false;
-  integralE.AddChildAtomOnTop("IntegrateRF");
-  integralE.AddChildOnTop(theVariableE);
-  integralE.AddChildOnTop(theFunctionE);
-  return CalculatorFunctionsGeneral::innerIntegrateRFcalculatorNotation(theCommands, integralE, output);
+//  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRFcalculatorNotation, input: " << input.ToString();
+  IntegralRFComputation theComputation(&theCommands);
+  if(!CalculatorSerialization::innerRationalFunction(theCommands, theFunctionE, theComputation.inputE))
+  { theCommands << "<hr>Call of function CalculatorSerialization::innerRationalFunction failed, input was: "
+    << theFunctionE.ToString();
+    return false;
+  }
+  if (!theComputation.inputE.IsOfType<RationalFunctionOld>())
+  { theCommands << "<hr>CalculatorFunctionsGeneral::innerIntegrateRFcalculatorNotation: failed to convert "
+    << theFunctionE.ToString() << " to rational function. Attempt to converted expression yielded: " << theComputation.inputE.ToString();
+    return false;
+  }
+  if (theComputation.inputE.GetNumContextVariables()>1)
+  { theCommands << "<hr>I converted " << theFunctionE.ToString() << " to rational function, but it is of "
+    << theComputation.inputE.GetNumContextVariables() << " variables. I have been taught to work with 1 variable only. ";
+    theCommands << "<br>The context of the rational function is: " << theComputation.inputE.GetContext().ToString();
+    return false;
+  }
+  if (theComputation.inputE.GetNumContextVariables()==1)
+    if (theComputation.inputE.GetContext().ContextGetContextVariable(0)!=theVariableE)
+    { theCommands << "<hr>The univariate rational function was in variable " << theComputation.inputE.GetContext().ToString()
+      << " but the variable of integration is " << theVariableE.ToString();
+      return false;
+    }
+  theComputation.theRF=theComputation.inputE.GetValue<RationalFunctionOld>();
+  theComputation.theRF.GetDenominator(theComputation.theDen);
+  theComputation.theRF.GetNumerator(theComputation.theNum);
+  if (theComputation.theDen.TotalDegree()<1 )
+    return false;
+  theComputation.IntegrateRF();
+  if (theComputation.theIntegralSummands.size<2)
+    return false;
+  output=theComputation.theIntegralSum;
+  return true;
+}
+
+bool CalculatorFunctionsGeneral::innerCoefficientsPowersOf
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCoefficientsPowersOf");
+  if (input.children.size!=3)
+    return false;
+  const Expression& theVarE=input[1];
+  const Expression& theExpressionE=input[2];
+  VectorSparse<Expression> theCFs;
+  if (!theCommands.CollectCoefficientsPowersVar(theExpressionE, theVarE, theCFs))
+  { theCommands << "<hr>Failed to evaluate Calculator::CollectCoefficientsPowersVar";
+    return false;
+  }
+  int highestPowerPlus1=theCFs.GetLargestParticipatingBasisIndex()+1;
+  List<Expression> theCFsIncludingZeros;
+  Expression currentCF;
+  for (int i =0; i<highestPowerPlus1; i++)
+  { int theIndex=theCFs.theMonomials.GetIndex(MonomialVector(i));
+    if (theIndex==-1)
+      currentCF.AssignValue(0, theCommands);
+    else
+      currentCF=theCFs.theCoeffs[theIndex];
+//    stOutput << "<br>cf: " << theCFs.theCoeffs[theIndex].ToString();
+    theCFsIncludingZeros.AddOnTop(currentCF);
+  }
+  return output.MakeSequence(theCommands, theCFsIncludingZeros);
+}
+
+bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa");
+  Expression theFunctionE, theVariableE, integralE(theCommands);
+  if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, theVariableE))
+    return false;
+//  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockI, input: " << input.ToString();
+  if (!theFunctionE.StartsWith(theCommands.opDivide(), 3))
+    return false;
+  const Expression& A=theFunctionE[1];
+  const Expression& axPlusb=theFunctionE[2];
+  if (!A.IsConstantNumber())
+    return false;
+  if (!axPlusb.StartsWith(theCommands.opPlus(), 3))
+    return false;
+  Expression b=axPlusb[2];
+  Expression ax=axPlusb[1];
+  if (!b.IsConstantNumber())
+    MathRoutines::swap(b, ax);
+  if (!b.IsConstantNumber())
+    return false;
+  Expression a;
+  if (ax==theVariableE)
+    a.AssignValue(1, theCommands);
+  else
+  { if (!ax.StartsWith(theCommands.opTimes(), 3))
+      return false;
+    if (ax[1]==theVariableE)
+      a=ax[2];
+    else  if (ax[2]==theVariableE)
+      a=ax[1];
+    else
+      return false;
+    if (!a.IsConstantNumber())
+      return false;
+  }
+  Expression logaxPlusb;
+  logaxPlusb.reset(theCommands);
+  logaxPlusb.AddChildAtomOnTop(theCommands.opLog());
+  logaxPlusb.AddChildOnTop(axPlusb);
+  output=A;
+  output/=a;
+  output*=logaxPlusb;
+  return true;
+}
+
+bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIb(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa");
+  Expression theFunctionE, theVariableE, integralE(theCommands);
+  if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, theVariableE))
+    return false;
+//  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockI, input: " << input.ToString();
+  if (!theFunctionE.StartsWith(theCommands.opDivide(), 3))
+    return false;
+  const Expression& A=theFunctionE[1];
+  const Expression& axPlusbPowerN=theFunctionE[2];
+  if (!A.IsConstantNumber())
+    return false;
+  if (!axPlusbPowerN.StartsWith(theCommands.opThePower(), 3))
+    return false;
+  Expression N= axPlusbPowerN[2];
+  if (!N.IsConstantNumber())
+    return false;
+  const Expression& axPlusb=axPlusbPowerN[1];
+  Expression b=axPlusb[2];
+  Expression ax=axPlusb[1];
+  if (!b.IsConstantNumber())
+    MathRoutines::swap(b, ax);
+  if (!b.IsConstantNumber())
+    return false;
+  Expression a;
+  if (ax==theVariableE)
+    a.AssignValue(1, theCommands);
+  else
+  { if (!ax.StartsWith(theCommands.opTimes(), 3))
+      return false;
+    if (ax[1]==theVariableE)
+      a=ax[2];
+    else  if (ax[2]==theVariableE)
+      a=ax[1];
+    else
+      return false;
+    if (!a.IsConstantNumber())
+      return false;
+  }
+  Expression base, OneMinusN;
+  OneMinusN=N;
+  OneMinusN+=-1;
+  OneMinusN*=-1;
+  base.MakeXOX(theCommands, theCommands.opThePower(), axPlusb, OneMinusN);
+  output=A;
+  output/=a;
+  output/=OneMinusN;
+  output*=base;
+  return true;
+}
+
+bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIandIII(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIandIII");
+  Expression theFunctionE, theVariableE, integralE(theCommands);
+  if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, theVariableE))
+    return false;
+//  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockI, input: " << input.ToString();
+  if (!theFunctionE.StartsWith(theCommands.opDivide(), 3))
+    return false;
+  Expression denNoPower;
+  int theDenPower=0;
+  bool hasExponent=false;
+  if (theFunctionE[2].StartsWith(theCommands.opThePower(),3))
+  { denNoPower=theFunctionE[2][1];
+    if(!theFunctionE[2][2].IsSmallInteger(&theDenPower))
+      return false;
+    hasExponent=true;
+  } else
+    denNoPower=theFunctionE[2];
+  std::stringstream out;
+  VectorSparse<Expression> coeffsNum, coeffsDen;
+  theCommands.CollectCoefficientsPowersVar(theFunctionE[1], theVariableE, coeffsNum);
+  theCommands.CollectCoefficientsPowersVar(denNoPower, theVariableE, coeffsDen);
+  if (coeffsNum.GetLargestParticipatingBasisIndex()!=2)
+    return false;
+  if (coeffsDen.GetLargestParticipatingBasisIndex()>1)
+    return false;
+  out << "<hr>Numerator coeffs: " << coeffsNum.ToString();
+  out << "<br>Den coeffs: " << coeffsDen.ToString();
+  Expression a, b, c, A, B;
+  a.AssignValue(0, theCommands);
+  b.AssignValue(0, theCommands);
+  c.AssignValue(0, theCommands);
+  A.AssignValue(0, theCommands);
+  B.AssignValue(0, theCommands);
+  if (coeffsDen.theMonomials.Contains(MonomialVector(0)))
+    c=coeffsDen.GetMonomialCoefficient(MonomialVector(0));
+  if (coeffsDen.theMonomials.Contains(MonomialVector(1)))
+    b=coeffsDen.GetMonomialCoefficient(MonomialVector(1));
+  if (coeffsDen.theMonomials.Contains(MonomialVector(2)))
+    a=coeffsDen.GetMonomialCoefficient(MonomialVector(2));
+  if (coeffsNum.theMonomials.Contains(MonomialVector(1)))
+    A=coeffsNum.GetMonomialCoefficient(MonomialVector(1));
+  if (coeffsNum.theMonomials.Contains(MonomialVector(0)))
+    B=coeffsNum.GetMonomialCoefficient(MonomialVector(0));
+  if (!a.IsConstantNumber() || !b.IsConstantNumber() || !c.IsConstantNumber()||
+      !A.IsConstantNumber() || !B.IsConstantNumber())
+    return false;
+  double approxa, approxb, approxc;
+  if (!a.EvaluatesToDouble(&approxa) || !b.EvaluatesToDouble(&approxb) || !c.EvaluatesToDouble(&approxc))
+  { theCommands << "Failed to evaluate variable coefficients in denominator " << denNoPower.ToString()
+    << " to double. Possible user typo. ";
+    return false;
+  }
+  if (approxb*approxb>=approxa* approxc*4)
+    return false;
+
+return output.AssignValue(out.str(), theCommands);
+/*  const Expression& AxPlusB=theFunctionE[1];
+  const Expression& denPowerN=theFunctionE[2];
+  if (!A.IsConstantNumber())
+    return false;
+  Expression N;
+  bool hasPower=false;
+  if (!denPowerN.StartsWith(theCommands.opThePower(), 3))
+  { N= denPowerN[2];
+    hasPower=true;
+  }
+  if (!N.IsConstantNumber())
+    return false;
+  const Expression& axsquaredPlusbxPlusc=denPowerN[1];
+
+
+  Expression b=axPlusb[2];
+  Expression ax=axPlusb[1];
+  if (!b.IsConstantNumber())
+    MathRoutines::swap(b, ax);
+  if (!b.IsConstantNumber())
+    return false;
+  Expression a;
+  if (ax==theVariableE)
+    a.AssignValue(1, theCommands);
+  else
+  { if (!ax.StartsWith(theCommands.opTimes(), 3))
+      return false;
+    if (ax[1]==theVariableE)
+      a=ax[2];
+    else  if (ax[2]==theVariableE)
+      a=ax[1];
+    else
+      return false;
+    if (!a.IsConstantNumber())
+      return false;
+  }
+  Expression base, OneMinusN;
+  OneMinusN=N;
+  OneMinusN+=-1;
+  OneMinusN*=-1;
+  base.MakeXOX(theCommands, theCommands.opThePower(), axPlusb, OneMinusN);
+  output=A;
+  output/=a;
+  output/=OneMinusN;
+  output*=base;
+  return true;*/
 }
 
 bool CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1538,12 +1839,12 @@ bool CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst
   Expression newIntegral, theFunctionE, integrandE, newIntegralE, theVariableE;
   if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, theVariableE))
     return false;
-  stOutput << "<br>innerIntegratePowerByUncoveringParenthesisFirst: Integrating function " << theFunctionE.ToString();
+//  stOutput << "<br>innerIntegratePowerByUncoveringParenthesisFirst: Integrating function " << theFunctionE.ToString();
   if (!theFunctionE.StartsWith(theCommands.opThePower()))
     return false;
   if (!CalculatorFunctionsGeneral::outerPolynomialize(theCommands, theFunctionE, integrandE))
     return false;
-  stOutput << "<br>integrand polynomialized: " << integrandE.ToString();
+//  stOutput << "<br>integrand polynomialized: " << integrandE.ToString();
   if (integrandE==theFunctionE)
     return false;
   newIntegralE.MakeIntegral(theCommands, integrandE, theVariableE);
@@ -1911,6 +2212,7 @@ void Expression::GetBlocksOfCommutativity(HashedListSpecialized<Expression>& inp
 bool Expression::MakeSequence(Calculator& owner, List<Expression>& inputSequence)
 { this->reset(owner, inputSequence.size+1);
   this->AddChildAtomOnTop(owner.opSequence());
+//  stOutput << "Making sequence from: " << inputSequence.ToString();
   for (int i=0; i<inputSequence.size; i++)
     this->AddChildOnTop(inputSequence[i]);
   return true;

@@ -526,7 +526,7 @@ public:
   MonomialCollection(const MonomialCollection& other)
   { this->operator=(other);
   }
-  bool NeedsBrackets()const
+  bool NeedsParenthesisForMultiplication()const
   { return this->size()>1;
   }
   inline static std::string GetXMLClassName()
@@ -967,6 +967,12 @@ class VectorSparse : public MonomialCollection<MonomialVector, coefficient>
     MonomialVector theMon;
     theMon.MakeEi(NonZeroIndex);
     this->AddMonomial(theMon, theCoeff);
+  }
+  int GetLargestParticipatingBasisIndex()
+  { int result=-1;
+    for (int i=0; i<this->size(); i++)
+      result=MathRoutines::Maximum(result, (*this)[i].theIndex);
+    return result;
   }
   bool operator>(const VectorSparse<coefficient>& other)const
   { return this->::MonomialCollection<MonomialVector, coefficient>::operator>(other);
@@ -1669,10 +1675,10 @@ public:
   int expressionType;
   enum typeExpression{ typeRational=0, typePoly=1, typeRationalFunction=2, typeError=3};
   std::string ToString(FormatExpressions* theFormat=0)const;
-  bool NeedsBrackets()const
+  bool NeedsParenthesisForMultiplication()const
   { switch(this->expressionType)
     { case RationalFunctionOld::typeRational: return false;
-      case RationalFunctionOld::typePoly: return this->Numerator.GetElementConst().NeedsBrackets();
+      case RationalFunctionOld::typePoly: return this->Numerator.GetElementConst().NeedsParenthesisForMultiplication();
       case RationalFunctionOld::typeRationalFunction: return false;
     }
     return false;
@@ -3311,7 +3317,7 @@ class CompleX
   { this->Im=-this->Im;
     this->Re=-this->Re;
   }
-  bool NeedsBrackets()
+  bool NeedsParenthesisForMultiplication()
   { if (this->Re==0 && this->Im>=0)
       return false;
     if (this->Im==0 && this->Re>=0)
@@ -3340,7 +3346,7 @@ public:
         crash << "This is a programming error: ElementSemisimpleLieAlgebra contains Chevalley generators with different owners. " << crash;
     return true;
   }
-  bool NeedsBrackets()const;
+  bool NeedsParenthesisForMultiplication()const;
   Vector<coefficient> GetCartanPart()const;
   void MakeGGenerator(const Vector<Rational>& theRoot, SemisimpleLieAlgebra& inputOwner);
   bool IsElementCartan()const;
@@ -3761,7 +3767,7 @@ std::string Vector<coefficient>::ToStringLetterFormat(const std::string& inputLe
   for(int i=0; i<NumVars; i++)
     if (!this->TheObjects[i].IsEqualToZero())
     { tempS=this->TheObjects[i].ToString(theFormat);
-      if (this->TheObjects[i].NeedsBrackets())
+      if (this->TheObjects[i].NeedsParenthesisForMultiplication())
         tempS="("+tempS+")";
       if (tempS=="1")
         tempS="";
@@ -4016,7 +4022,7 @@ std::string MonomialCollection<templateMonomial, coefficient>::ToString(FormatEx
   for (int i=0; i<sortedMons.size; i++)
   { templateMonomial& currentMon=sortedMons[i];
     coefficient& currentCoeff=this->theCoeffs[this->theMonomials.GetIndex(currentMon)];
-    if (currentCoeff.NeedsBrackets())
+    if (currentCoeff.NeedsParenthesisForMultiplication())
       tempS1="("+currentCoeff.ToString(theFormat)+ ")";
     else
       tempS1=currentCoeff.ToString(theFormat);

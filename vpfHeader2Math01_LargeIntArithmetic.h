@@ -214,7 +214,7 @@ public:
   inline bool IsNonPositive()const
   { return !this->IsPositive();
   }
-  bool NeedsBrackets()const
+  bool NeedsParenthesisForMultiplication()const
   { return false;
   }
   bool operator==(const LargeInt& x)const;
@@ -522,7 +522,7 @@ public:
   static unsigned long long int TotalLargeMultiplications;
   static unsigned long long int TotalSmallGCDcalls;
   static unsigned long long int TotalLargeGCDcalls;
-  bool NeedsBrackets()const
+  bool NeedsParenthesisForMultiplication()const
   { return false;
     //return this->IsNegative();
   }

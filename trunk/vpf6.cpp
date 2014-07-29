@@ -122,14 +122,18 @@ bool Expression::ContextMakeContextWithOnePolyVar(Calculator& owner, const std::
 }
 
 bool Expression::MakeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex)
-{ this->reset(owner,3);
-  Expression radicalIndexE, argumentE;
-  radicalIndexE.AssignValue(radicalSuperIndex, owner);
+{ Expression argumentE;
   argumentE.AssignValue(argument, owner);
+  return this->MakeSqrt(owner, argumentE, radicalSuperIndex);
+}
+
+bool Expression::MakeSqrt(Calculator& owner, const Expression& argument, const Rational& radicalSuperIndex)
+{ this->reset(owner,3);
+  Expression radicalIndexE;
+  radicalIndexE.AssignValue(radicalSuperIndex, owner);
   this->AddChildAtomOnTop(owner.opSqrt());
   this->AddChildOnTop(radicalIndexE);
-  this->AddChildOnTop(argumentE);
-  return true;
+  return this->AddChildOnTop(argument);
 }
 
 bool Expression::MakeXOX(Calculator& owner, int theOp, const Expression& left, const Expression& right)

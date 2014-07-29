@@ -347,6 +347,7 @@ class Expression
   bool MakeSequence(Calculator& owner, List<Expression>& inputSequence);
   bool MakeXOX(Calculator& owner, int theOp, const Expression& left, const Expression& right);
   bool MakeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex=2);
+  bool MakeSqrt(Calculator& owner, const Expression& argument, const Rational& radicalSuperIndex=2);
 
   bool MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Expression>& theOpands);
   bool MakeOXdotsX(Calculator& owner, int theOp, const List<Expression>& input);

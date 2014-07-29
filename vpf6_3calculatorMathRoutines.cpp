@@ -247,7 +247,7 @@ bool CalculatorFunctionsGeneral::innerLog(Calculator& theCommands, const Express
   }
   theArgument*=-1;
   Expression iE, ipiE, piE, lnPart;
-  iE.MakeSqrt(theCommands, -1);
+  iE.MakeSqrt(theCommands, (Rational)-1, 2);
   piE.MakeAtom(theCommands.opPi(), theCommands);
   ipiE.MakeXOX(theCommands, theCommands.opTimes(), piE, iE);
   lnPart.AssignValue(FloatingPoint::log(theArgument), theCommands);
@@ -1731,8 +1731,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIb(Ca
 
 bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIandIII(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIandIII");
-  Expression theFunctionE, theVariableE, integralE(theCommands);
-  if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, theVariableE))
+  Expression theFunctionE, x, integralE(theCommands);
+  if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, x))
     return false;
 //  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockI, input: " << input.ToString();
   if (!theFunctionE.StartsWith(theCommands.opDivide(), 3))
@@ -1747,10 +1747,14 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIand
     hasExponent=true;
   } else
     denNoPower=theFunctionE[2];
+  if (!hasExponent)
+  { theCommands << "I have not been taught to integrate building block IIb and IIIb yet";
+    return false;
+  }
   std::stringstream out;
   VectorSparse<Expression> coeffsNum, coeffsDen;
-  theCommands.CollectCoefficientsPowersVar(theFunctionE[1], theVariableE, coeffsNum);
-  theCommands.CollectCoefficientsPowersVar(denNoPower, theVariableE, coeffsDen);
+  theCommands.CollectCoefficientsPowersVar(theFunctionE[1], x, coeffsNum);
+  theCommands.CollectCoefficientsPowersVar(denNoPower, x, coeffsDen);
   if (coeffsNum.GetLargestParticipatingBasisIndex()!=2)
     return false;
   if (coeffsDen.GetLargestParticipatingBasisIndex()>1)
@@ -1784,54 +1788,30 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIand
   }
   if (approxb*approxb>=approxa* approxc*4)
     return false;
+  Expression xSquared, bSquared, aSquared;
+  Expression twoE, oneE, fourE;
+  oneE.AssignValue(1, theCommands);
+  twoE.AssignValue(2, theCommands);
+  fourE.AssignValue(4, theCommands);
+  xSquared.MakeXOX(theCommands, theCommands.opThePower(), x, twoE);
+  bSquared.MakeXOX(theCommands, theCommands.opThePower(), b, twoE);
+  aSquared.MakeXOX(theCommands, theCommands.opThePower(), a, twoE);
 
-return output.AssignValue(out.str(), theCommands);
-/*  const Expression& AxPlusB=theFunctionE[1];
-  const Expression& denPowerN=theFunctionE[2];
-  if (!A.IsConstantNumber())
-    return false;
-  Expression N;
-  bool hasPower=false;
-  if (!denPowerN.StartsWith(theCommands.opThePower(), 3))
-  { N= denPowerN[2];
-    hasPower=true;
-  }
-  if (!N.IsConstantNumber())
-    return false;
-  const Expression& axsquaredPlusbxPlusc=denPowerN[1];
-
-
-  Expression b=axPlusb[2];
-  Expression ax=axPlusb[1];
-  if (!b.IsConstantNumber())
-    MathRoutines::swap(b, ax);
-  if (!b.IsConstantNumber())
-    return false;
-  Expression a;
-  if (ax==theVariableE)
-    a.AssignValue(1, theCommands);
-  else
-  { if (!ax.StartsWith(theCommands.opTimes(), 3))
-      return false;
-    if (ax[1]==theVariableE)
-      a=ax[2];
-    else  if (ax[2]==theVariableE)
-      a=ax[1];
-    else
-      return false;
-    if (!a.IsConstantNumber())
-      return false;
-  }
-  Expression base, OneMinusN;
-  OneMinusN=N;
-  OneMinusN+=-1;
-  OneMinusN*=-1;
-  base.MakeXOX(theCommands, theCommands.opThePower(), axPlusb, OneMinusN);
-  output=A;
-  output/=a;
-  output/=OneMinusN;
-  output*=base;
-  return true;*/
+  Expression theQuadraticDiva=xSquared+(b/a)*x+c/a;
+  Expression xplusbdiv2a = x+b/(twoE*a);
+  Expression D=(fourE*a*c-bSquared)/(fourE*aSquared);
+  Expression sqrtD;
+  sqrtD.MakeSqrt(theCommands, D, 2);
+  Expression arcTanArgument= xplusbdiv2a/sqrtD;
+  Expression theArcTan(theCommands);
+  theArcTan.AddChildOnTop(theArcTan);
+  theArcTan.AddChildOnTop(arcTanArgument);
+  Expression theLog(theCommands);
+  theLog.AddChildAtomOnTop(theCommands.opLog());
+  theLog.AddChildOnTop(theQuadraticDiva);
+  Expression C=B-(A*b)/(twoE*a);
+  output= (oneE/a)*((A/twoE )*theLog+(C/sqrtD)*theArcTan);
+  return true;
 }
 
 bool CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst(Calculator& theCommands, const Expression& input, Expression& output)

@@ -1747,7 +1747,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIand
     hasExponent=true;
   } else
     denNoPower=theFunctionE[2];
-  if (!hasExponent)
+  if (hasExponent)
   { theCommands << "I have not been taught to integrate building block IIb and IIIb yet";
     return false;
   }
@@ -1755,9 +1755,11 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIand
   VectorSparse<Expression> coeffsNum, coeffsDen;
   theCommands.CollectCoefficientsPowersVar(theFunctionE[1], x, coeffsNum);
   theCommands.CollectCoefficientsPowersVar(denNoPower, x, coeffsDen);
-  if (coeffsNum.GetLargestParticipatingBasisIndex()!=2)
+  //stOutput << "<br>largest participating index: " ;
+
+  if (coeffsDen.GetLargestParticipatingBasisIndex()!=2)
     return false;
-  if (coeffsDen.GetLargestParticipatingBasisIndex()>1)
+  if (coeffsNum.GetLargestParticipatingBasisIndex()>1)
     return false;
   out << "<hr>Numerator coeffs: " << coeffsNum.ToString();
   out << "<br>Den coeffs: " << coeffsDen.ToString();
@@ -1779,7 +1781,9 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIand
     B=coeffsNum.GetMonomialCoefficient(MonomialVector(0));
   if (!a.IsConstantNumber() || !b.IsConstantNumber() || !c.IsConstantNumber()||
       !A.IsConstantNumber() || !B.IsConstantNumber())
+  { theCommands << "Failed to evaluate to constant the coefficients of the block II/III integral";
     return false;
+  }
   double approxa, approxb, approxc;
   if (!a.EvaluatesToDouble(&approxa) || !b.EvaluatesToDouble(&approxb) || !c.EvaluatesToDouble(&approxc))
   { theCommands << "Failed to evaluate variable coefficients in denominator " << denNoPower.ToString()
@@ -1804,7 +1808,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIand
   sqrtD.MakeSqrt(theCommands, D, 2);
   Expression arcTanArgument= xplusbdiv2a/sqrtD;
   Expression theArcTan(theCommands);
-  theArcTan.AddChildOnTop(theArcTan);
+  theArcTan.AddChildAtomOnTop(theCommands.opArcTan());
   theArcTan.AddChildOnTop(arcTanArgument);
   Expression theLog(theCommands);
   theLog.AddChildAtomOnTop(theCommands.opLog());

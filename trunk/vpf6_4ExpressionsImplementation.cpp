@@ -1985,7 +1985,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       else
         out << " ";
       if (secondNeedsBrackets)
-        out << "(" << secondE << ")";
+        out << "\\left(" << secondE << "\\right)";
       else
         out << secondE;
     }
@@ -2085,10 +2085,10 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
           theFormat->flagExpressionNewLineAllowed=true;
         break;
       case Expression::formatFunctionUseCdot:
-        out <<  (*this)[1].ToString(theFormat) << "\\cdot(" << (*this)[1].ToString(theFormat) << ")";
+        out <<  (*this)[1].ToString(theFormat) << "\\cdot\\left(" << (*this)[1].ToString(theFormat) << "\\right)";
         break;
       default:
-        out << (*this)[1].ToString(theFormat) << "{}(" << (*this)[2].ToString(theFormat) << ")";
+        out << (*this)[1].ToString(theFormat) << "{}\\left(" << (*this)[2].ToString(theFormat) << "\\right)";
         break;
     }
   } else if (this->IsListStartingWithAtom(this->theBoss->opEqualEqual()))
@@ -2212,7 +2212,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     if(this->format== this->formatFunctionUseUnderscore)
       out << "{";
     else if (needParenthesis)
-      out << "(";
+      out << "\\left(";
     for (int i=1; i<this->children.size; i++)
     { out << (*this)[i].ToString(theFormat);
       if (i!=this->children.size-1)
@@ -2221,7 +2221,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     if(this->format== this->formatFunctionUseUnderscore)
       out << "}";
     else if (needParenthesis)
-      out << ")";
+      out << "\\right)";
 //    stOutput << "<br>tostringing: " << out.str() << "   lispified: " << this->ToStringFull();
 
   } else //<-not sure if this case is possible

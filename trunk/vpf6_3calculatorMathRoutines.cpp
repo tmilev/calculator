@@ -652,6 +652,7 @@ public:
   RationalFunctionOld theRF;
   Polynomial<Rational> theDen, theNum;
   Polynomial<Rational> quotientRat, remainderRat;
+//  Rational constantCoefficient;
   List<Polynomial<Rational> > theFactors;
   FormatExpressions currentFormaT;
   Expression contextE;
@@ -731,6 +732,36 @@ bool IntegralRFComputation::IntegrateRF()
   return true;
 }
 
+template <class coefficient>
+bool Polynomial<coefficient>::FactorMeNormalizedFactors
+(Rational& outputCoeff, List<Polynomial<Rational> >& outputFactors, std::stringstream* comments)const
+{ MacroRegisterFunctionWithName("Polynomial::FactorMeNormalizedFactors");
+  List<Polynomial<Rational> > factorsToBeProcessed;
+  outputFactors.SetSize(0);
+  factorsToBeProcessed.AddOnTop(*this);
+  outputCoeff=factorsToBeProcessed.LastObject()->ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+  outputCoeff.Invert();
+  Polynomial<Rational> currentFactor, divisor;
+  while (factorsToBeProcessed.size>0)
+  { currentFactor=factorsToBeProcessed.PopLastObject();
+//    stOutput << "<hr>Factoring " << currentFactor.ToString() << "<br>";
+    if(!currentFactor.FactorMeOutputIsADivisor(divisor, comments))
+      return false;
+    if (currentFactor.IsEqualToOne())
+    { outputFactors.AddOnTop(divisor);
+      continue;
+    }
+//    stOutput << "<br><b>Smallest divisor: " << divisor.ToString() << ", thepoly: "
+//    << currentFactor.ToString() << "</b>";
+    Rational tempRat=divisor.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+    outputCoeff/=tempRat;
+    factorsToBeProcessed.AddOnTop(divisor);
+    factorsToBeProcessed.AddOnTop(currentFactor);
+  }
+  outputFactors.QuickSortAscending();
+  return true;
+}
+
 bool IntegralRFComputation::ComputePartialFractionDecomposition()
 { MacroRegisterFunctionWithName("IntegralRFComputation::ComputePartialFractionDecomposition");
   this->CheckConsistency();
@@ -747,12 +778,17 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   }
   this->theRF.GetDenominator(this->theDen);
   this->theRF.GetNumerator(this->theNum);
-  if (!this->theDen.FactorMe(theFactors, &this->printoutPFs))
+  Rational theConstantCoeff;
+  if (!this->theDen.FactorMeNormalizedFactors(theConstantCoeff, theFactors, &this->printoutPFs))
   { this->printoutPFs << "<hr>Failed to factor the denominator of the rational function, I surrender.";
     return false;
   }
+  this->theNum/=theConstantCoeff;
+  this->theDen/=theConstantCoeff;
   this->currentFormaT.flagUseFrac=true;
-  this->printoutPFs << "The rational function is: " << CGI::GetMathSpanPure(this->theRF.ToString(&this->currentFormaT)) << ".";
+  this->printoutPFs << "The rational function is: " << CGI::GetMathSpanPure
+  ("\\frac{" + this->theNum.ToString(&this->currentFormaT) + "}{"
+   +this->theDen.ToString(&this->currentFormaT) +"}") << ".";
   this->printoutPFs << "<br>The denominator factors are: ";
   bool allFactorsAreOfDegree2orless=true;
   for (int i=0; i<theFactors.size; i++)
@@ -814,8 +850,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
     }
     AlgebraicNumber theDiscriminantSqrt;
     if (!theDiscriminantSqrt.AssignRationalQuadraticRadical(theDiscriminant, this->owner->theObjectContainer.theAlgebraicClosure))
-    { this->printoutPFs << "Failed to take radical of " << theDiscriminant.ToString()
-      << " (radical too large?).";
+    { this->printoutPFs << "Failed to take radical of " << theDiscriminant.ToString() << " (radical too large?).";
       return false;
     }
 //    stOutput << "<br>sqrt of discriminant: " << theDiscriminantSqrt.ToString();
@@ -946,8 +981,9 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   std::stringstream answerFinalStream;
   answerFinalStream << this->theRF.ToString(&this->currentFormaT) << "=";
   if (!this->quotientRat.IsEqualToZero())
-    answerFinalStream << this->quotientRat.ToString(&this->currentFormaT) << "+ ";
-  answerFinalStream << transformedRF.ToString(&this->currentFormaT) << "=";
+  { answerFinalStream << this->quotientRat.ToString(&this->currentFormaT) << "+ ";
+    answerFinalStream << transformedRF.ToString(&this->currentFormaT) << "=";
+  }
   if (!this->quotientRat.IsEqualToZero())
     answerFinalStream << this->quotientRat.ToString(&this->currentFormaT) << "+ ";
   answerFinalStream << rfComputedStream.str();

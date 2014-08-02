@@ -1076,6 +1076,8 @@ public:
   static void GetValuesLagrangeInterpolandsAtConsecutivePoints
   (Vector<Rational>& inputConsecutivePointsOfInterpolation, Vector<Rational>& inputPointsOfEvaluation, Vectors<Rational>& outputValuesInterpolands);
   bool FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* comments);
+  bool FactorMeNormalizedFactors
+  (Rational& outputCoeff, List<Polynomial<Rational> >& outputFactors, std::stringstream* comments)const;
   bool FactorMe(List<Polynomial<Rational> >& outputFactors, std::stringstream* comments)const;
   void Interpolate(const Vector<coefficient>& thePoints, const Vector<coefficient>& ValuesAtThePoints);
   bool FindOneVarRatRoots(List<Rational>& output);

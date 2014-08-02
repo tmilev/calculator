@@ -486,8 +486,12 @@ bool CalculatorFunctionsGeneral::innerConstantFunction(Calculator& theCommands, 
 template <class coefficient>
 bool CalculatorFunctionsGeneral::innerExpressionFromPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExpressionFromPoly");
+  stOutput << "<hr>Converting to expression: " << input.ToString() ;
   if (!input.IsOfType<Polynomial<coefficient> >() )
+  { stOutput << "<br>returning false from  innerExpressionFromPoly ";
     return false;
+  }
+  stOutput << "<br>input is of correct type: " << input.ToString() ;
   const Polynomial<coefficient>& thePoly=input.GetValue<Polynomial<coefficient> >();
   MonomialCollection<Expression, coefficient> theTerms;
   Expression currentBase, currentPower, currentTerm, currentLetterE;
@@ -516,8 +520,10 @@ bool CalculatorFunctionsGeneral::innerExpressionFromPoly(Calculator& theCommands
       }
     theTerms.AddMonomial(currentTerm, thePoly.theCoeffs[i]);
   }
-//  stOutput << "Extracted expressions: " << theTerms.ToString();
-  return output.MakeSum(theCommands, theTerms);
+  stOutput << "<br>Extracted expressions: " << theTerms.ToString();
+  bool result= output.MakeSum(theCommands, theTerms);
+  stOutput << "<br>Result is: " << result;
+  return result;
 }
 
 bool CalculatorFunctionsGeneral::innerExpressionFromBuiltInType(Calculator& theCommands, const Expression& input, Expression& output)
@@ -645,6 +651,7 @@ class IntegralRFComputation
 public:
   RationalFunctionOld theRF;
   Polynomial<Rational> theDen, theNum;
+  Polynomial<Rational> quotientRat, remainderRat;
   List<Polynomial<Rational> > theFactors;
   FormatExpressions currentFormaT;
   Expression contextE;
@@ -699,10 +706,29 @@ bool IntegralRFComputation::IntegrateRF()
       currentIntegrand/=currentDen;
 //      stOutput << "<br>CurrentIntegrand is: " << currentIntegrand.ToString();
       currentIntegral.MakeIntegral(*this->owner, currentIntegrand, this->contextE.ContextGetContextVariable(0));
+      currentIntegral.CheckConsistencyRecursively();
 //      stOutput << "<br>Current integral is: " << currentIntegral.ToString();
       this->theIntegralSummands.AddOnTop(currentIntegral);
     }
-  return this->theIntegralSum.MakeSum(*this->owner, this->theIntegralSummands);
+  if (!this->quotientRat.IsEqualToZero())
+  { Expression currentIntegrandPolyForm;
+    currentIntegrandPolyForm.AssignValueWithContext(this->quotientRat, this->contextE, *this->owner);
+    if (!CalculatorFunctionsGeneral::innerExpressionFromPoly<Rational>(*this->owner, currentIntegrandPolyForm, currentIntegrand))
+    { *this->owner << "<br>Something is wrong: failed to convert polynomial " << currentIntegrandPolyForm.ToString()
+      << " to expression. This shouldn't happen. ";
+      return false;
+    }
+    currentIntegral.MakeIntegral(*this->owner, currentIntegrand, this->contextE.ContextGetContextVariable(0));
+    currentIntegral.CheckConsistencyRecursively();
+
+    this->theIntegralSummands.AddOnTop(currentIntegral);
+  }
+//  if (this->the)
+  this->theIntegralSum.MakeSum(*this->owner, this->theIntegralSummands);
+//  stOutput << " got before consistency check";
+  this->theIntegralSum.CheckConsistencyRecursively();
+//  stOutput << " passed consistency check";
+  return true;
 }
 
 bool IntegralRFComputation::ComputePartialFractionDecomposition()
@@ -741,17 +767,16 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   { this->printoutPFs << "There were factors (over the rationals) of degree greater than 2. I surrender. ";
     return false;
   }
-  Polynomial<Rational> quotientRat, remainderRat;
   Polynomial<AlgebraicNumber> quotientAlg, remainderAlg;
 
-  theNum.DivideBy(theDen, quotientRat, remainderRat);
-  quotientAlg=quotientRat;
+  theNum.DivideBy(theDen, this->quotientRat, remainderRat);
+  quotientAlg=this->quotientRat;
   remainderAlg=remainderRat;
-  if (!quotientRat.IsEqualToZero())
+  if (!this->quotientRat.IsEqualToZero())
   { this->printoutPFs << "<br>The numerator " << CGI::GetMathSpanPure(this->theNum.ToString(&this->currentFormaT))
     << " divided by the denominator "
     << CGI::GetMathSpanPure(theDen.ToString(&this->currentFormaT)) << " yields "
-    << CGI::GetMathSpanPure(quotientRat.ToString(&this->currentFormaT)) << " with remainder "
+    << CGI::GetMathSpanPure(this->quotientRat.ToString(&this->currentFormaT)) << " with remainder "
     << CGI::GetMathSpanPure(remainderRat.ToString(&this->currentFormaT)) << ". ";
     Expression theDivStringArguments(*this->owner), thePolyDivStringE, numE, denE;
     theDivStringArguments.AddChildAtomOnTop("PolyDivStringGrLex");
@@ -822,24 +847,24 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   MonomialP currentMon;
   thePolyThatMustVanish.MakeZero();
   thePolyThatMustVanish-=remainderAlg;
-  theNumerators.SetSize(theDenominatorFactorsWithMults.size());
+  this->theNumerators.SetSize(theDenominatorFactorsWithMults.size());
   for (int i =0; i<theDenominatorFactorsWithMults.size(); i++)
   { int tempSize=-1;
     theDenominatorFactorsWithMults.theCoeffs[i].IsSmallInteger(&tempSize);
-    theNumerators[i].SetSize(tempSize);
+    this->theNumerators[i].SetSize(tempSize);
     for (int k=0; k<theDenominatorFactorsWithMults.theCoeffs[i]; k++)
     { rfStream << "\\frac{";
       if (theDenominatorFactorsWithMults[i].TotalDegree()>1)
         polyStream << "(";
       currentSummand.MakeZero();
-      theNumerators[i][k].MakeZero();
+      this->theNumerators[i][k].MakeZero();
       for (int j=0; j<theDenominatorFactorsWithMults[i].TotalDegree(); j++)
       { varCounter++;
         std::stringstream varNameStream;
         varNameStream << "A_{" << varCounter << "} ";
         currentMon.MakeEi(varCounter);
         currentMon[0]=j;
-        theNumerators[i][k].AddMonomial(currentMon, 1);
+        this->theNumerators[i][k].AddMonomial(currentMon, 1);
         currentSummand.AddMonomial(currentMon, 1);
         rfStream << varNameStream.str();
         polyStream << varNameStream.str();
@@ -907,8 +932,8 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   std::stringstream rfComputedStream;
   for (int i =0; i<theDenominatorFactorsWithMults.size(); i++)
     for (int k=0; k<theDenominatorFactorsWithMults.theCoeffs[i]; k++)
-    { theNumerators[i][k].Substitution(theSub);
-      rfComputedStream << "\\frac{" << theNumerators[i][k].ToString(&this->currentFormaT) << "}";
+    { this->theNumerators[i][k].Substitution(theSub);
+      rfComputedStream << "\\frac{" << this->theNumerators[i][k].ToString(&this->currentFormaT) << "}";
       rfComputedStream << "{";
       rfComputedStream << "(" << theDenominatorFactorsWithMults[i].ToString(&this->currentFormaT) << ")";
       if (k>0)
@@ -920,11 +945,11 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   this->printoutPFs << "<br>Therefore, the final partial fraction decomposition is: ";
   std::stringstream answerFinalStream;
   answerFinalStream << this->theRF.ToString(&this->currentFormaT) << "=";
-  if (!quotientRat.IsEqualToZero())
-    answerFinalStream << quotientRat.ToString(&this->currentFormaT) << "+ ";
+  if (!this->quotientRat.IsEqualToZero())
+    answerFinalStream << this->quotientRat.ToString(&this->currentFormaT) << "+ ";
   answerFinalStream << transformedRF.ToString(&this->currentFormaT) << "=";
-  if (!quotientRat.IsEqualToZero())
-    answerFinalStream << quotientRat.ToString(&this->currentFormaT) << "+ ";
+  if (!this->quotientRat.IsEqualToZero())
+    answerFinalStream << this->quotientRat.ToString(&this->currentFormaT) << "+ ";
   answerFinalStream << rfComputedStream.str();
   this->printoutPFs << CGI::GetMathSpanPure(answerFinalStream.str());
   return true;
@@ -1598,7 +1623,13 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlo
   theComputation.theRF.GetNumerator(theComputation.theNum);
   if (theComputation.theDen.TotalDegree()<1 )
     return false;
-  theComputation.IntegrateRF();
+  if (!theComputation.IntegrateRF())
+  { theCommands << theComputation.printoutIntegration.str();
+    return false;
+  }
+  stOutput << "got before check consistency 2";
+  theComputation.theIntegralSum.CheckConsistencyRecursively();
+  stOutput << "got before check consistency 3";
   if (theComputation.theIntegralSummands.size<2)
     return false;
   output=theComputation.theIntegralSum;

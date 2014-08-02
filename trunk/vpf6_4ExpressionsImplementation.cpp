@@ -809,6 +809,14 @@ bool Expression::ConvertToType<ElementTensorsGeneralizedVermas<RationalFunctionO
 }
 //end Expression::ConvertToType specializations.
 
+bool Expression::CheckConsistencyRecursively()const
+{ MacroRegisterFunctionWithName("Expression::CheckConsistencyRecursively");
+  this->CheckConsistency();
+  for (int i=0; i<this->children.size; i++)
+    (*this)[i].CheckConsistency();
+  return true;
+}
+
 bool Expression::CheckConsistency()const
 { MacroRegisterFunctionWithName("Expression::CheckConsistency");
   //warning: do not use ToString method from here: ToString itself calls CheckConosistency, so that causes an "infinite" recursion call cycle,

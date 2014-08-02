@@ -328,6 +328,7 @@ bool Calculator::innerPolynomialDivisionVerbose(Calculator& theCommands, const E
   theContext.ContextGetFormatExpressions(theGB.theFormat);
 //  stOutput << "context vars: " << theFormat.polyAlphabeT;
   theGB.theFormat.flagUseLatex=true;
+  theGB.theFormat.flagUseFrac=true;
   return output.AssignValue(theGB.GetDivisionString(), theCommands);
 }
 

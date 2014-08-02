@@ -65,7 +65,8 @@ bool Expression::MakeProducT(Calculator& owner, const List<Expression>& theMulti
 }
 
 bool Expression::MakeSum(Calculator& owner, const List<Expression>& theSummands)
-{ if (theSummands.size==0)
+{ MacroRegisterFunctionWithName("Expression::MakeSum");
+  if (theSummands.size==0)
     return this->AssignValue(0, owner);
   return this->MakeXOXOdotsOX(owner, owner.opPlus(), theSummands);
 }
@@ -81,6 +82,7 @@ bool Expression::MakeOXdotsX(Calculator& owner, int theOp, const List<Expression
   *this=*theOpands.LastObject();
   for (int i=theOpands.size-2; i>=0; i--)
     this->MakeXOX(owner, theOp, theOpands[i], *this);
+  this->CheckConsistencyRecursively();
   return true;
 }
 

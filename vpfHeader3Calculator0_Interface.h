@@ -418,6 +418,7 @@ class Expression
     return true;
   }
   bool CheckConsistency()const;
+  bool CheckConsistencyRecursively()const;
   bool IsIntegerFittingInInt(int* whichInteger=0)const;
   bool IsSmallInteger(int* whichInteger=0)const;
   bool IsInteger(LargeInt* whichInteger=0)const;

@@ -41,6 +41,7 @@ void Calculator::reset()
   this->DepthRecursionReached=0;
   this->flagLogSyntaxRules=false;
   this->flagLogEvaluatioN=false;
+  this->flagUseNumberColors=false;
   this->flagLogRules=false;
   this->flagLogCache=false;
   this->flagLogPatternMatching=false;
@@ -233,6 +234,7 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("ShowContext");
   this->controlSequences.AddOnTop("LogParsing");
   this->controlSequences.AddOnTop("LogEvaluation");
+  this->controlSequences.AddOnTop("NumberColors");
   this->controlSequences.AddOnTop("LogRules");
   this->controlSequences.AddOnTop("LogCache");
   this->controlSequences.AddOnTop("LogFull");
@@ -1035,6 +1037,16 @@ bool Calculator::ApplyOneRule()
   }
   if (secondToLastS=="%" && lastS=="LogEvaluation")
   { this->flagLogEvaluatioN=true;
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
+  if (secondToLastS=="%" && lastS=="NumberColors")
+  { if (!this->flagUseNumberColors)
+    { *this << "<span style=\"color:blue\">Floating point numbers</span> are displayed in <span style=\"color:blue\">blue</span>."
+      << "<br><span style=\"color:red\">Algebraic numbers</span> are displayed in <span style=\"color:red\">red</span>. "
+      << "<br>Rational numbers are displayed in default color.";
+    }
+    this->flagUseNumberColors=true;
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }

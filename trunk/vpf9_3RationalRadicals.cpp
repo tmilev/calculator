@@ -453,6 +453,7 @@ bool AlgebraicNumber::NeedsParenthesisForMultiplication()const
     return false;
   VectorSparse<Rational> additiveForm;
   this->owner->GetAdditionTo(*this, additiveForm);
+//  stOutput << "additive form size: " << additiveForm.size();
   return (additiveForm.size()>1);
 }
 

@@ -441,6 +441,7 @@ public:
   bool flagFormatWeightAsVectorSpaceIndex;
   bool flagFormatMatrixAsLinearSystem;
   bool flagUseFrac;
+  bool flagSuppresOneIn1overXtimesY;
 
   List<MonomialP>::OrderLeftGreaterThanRight thePolyMonOrder;
   template <typename templateMonomial>
@@ -4030,16 +4031,31 @@ std::string MonomialCollection<templateMonomial, coefficient>::ToString(FormatEx
       tempS1=currentCoeff.ToString(theFormat);
     tempS2=currentMon.ToString(theFormat);
     if (tempS2!="")
-    { if (!useCustomTimes)
-      { if (tempS1=="1" && tempS2!="1")
-          tempS1="";
-        if (tempS1=="-1"&& tempS2!="1")
-          tempS1="-";
-        if(tempS2!="1")
+    { bool useFracSpecial=false;
+      if (theFormat!=0)
+        if (theFormat->flagUseFrac && theFormat->flagSuppresOneIn1overXtimesY)
+          useFracSpecial=true;
+      if (useFracSpecial)
+      { std::string tempS3;
+        if (MathRoutines::StringBeginsWith(tempS1, "\\frac{1}", &tempS3))
+          tempS1="\\frac{"+ tempS2 + "}" +tempS3;
+        else if (MathRoutines::StringBeginsWith(tempS1, "-\\frac{1}", &tempS3))
+          tempS1="-\\frac{"+ tempS2 + "}" +tempS3;
+        else
+          useFracSpecial=false;
+      }
+      if (!useFracSpecial)
+      { if (!useCustomTimes)
+        { if (tempS1=="1" && tempS2!="1")
+            tempS1="";
+          if (tempS1=="-1"&& tempS2!="1")
+            tempS1="-";
+          if(tempS2!="1")
+            tempS1+=tempS2;
+        } else
+        { tempS1+=oldCustomTimes;
           tempS1+=tempS2;
-      } else
-      { tempS1+=oldCustomTimes;
-        tempS1+=tempS2;
+        }
       }
     }
     if (i>0)

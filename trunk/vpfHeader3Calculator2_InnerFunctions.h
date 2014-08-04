@@ -78,6 +78,7 @@ public:
   static bool innerComputeSemisimpleSubalgebras(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerComputePairingTablesAndFKFTsubalgebras(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool outerDivideByNumber(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerDivCancellations(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerAssociateDivisionDivision(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerAssociateAdivBdivCpowerD(Calculator& theCommands, const Expression& input, Expression& output);
@@ -91,7 +92,16 @@ public:
   static bool innerIntegrateRationalFunctionSplitToBuidingBlocks(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateRationalFunctionBuidingBlockIa(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateRationalFunctionBuidingBlockIb(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerIntegrateRationalFunctionBuidingBlockIIandIII(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntegrateRationalFunctionBuidingBlockIIaandIIIa(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntegrateRationalFunctionBuidingBlockIIb(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntegrateRationalFunctionBuidingBlockIIIb(Calculator& theCommands, const Expression& input, Expression& output);
+
+  static bool extractQuadraticCoeffsWRTvariable
+  (const Expression& theQuadratic, const Expression& theVariable,
+   Expression& outputCoeffVarSquared, Expression& outputCoeffLinTerm, Expression& outputConstTerm);
+  static bool extractLinearCoeffsWRTvariable
+  (const Expression& theLinearExpression, const Expression& theVariable,
+   Expression& outputCoeffLinTerm, Expression& outputConstTerm);
 
   static bool innerIntegratePowerByUncoveringParenthesisFirst(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateSum(Calculator& theCommands, const Expression& input, Expression& output);

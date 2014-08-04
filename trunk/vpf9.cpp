@@ -1051,6 +1051,7 @@ FormatExpressions::FormatExpressions()
   this->flagSupressDynkinIndexOne=false;
   this->flagFormatWeightAsVectorSpaceIndex=true;
   this->flagUseFrac=false;
+  this->flagSuppresOneIn1overXtimesY=true;
   this->flagFormatMatrixAsLinearSystem=false;
 }
 

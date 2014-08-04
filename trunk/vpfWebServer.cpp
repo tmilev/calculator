@@ -70,7 +70,8 @@ class logger
   { this->CheckLogSize();
     switch (input)
     { case logger::endL:
-        std::cout << this->closeTagConsole() << std::endl;
+        if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+          std::cout << this->closeTagConsole() << std::endl;
         if (this->flagStopWritingToFile)
           return *this;
         theFile << this->closeTagHtml() << "\n<br>\n";
@@ -82,7 +83,8 @@ class logger
       case logger::green:
       case logger::purple:
         this->currentColor=input;
-        std::cout << this->openTagConsole();
+        if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+          std::cout << this->openTagConsole();
         if (this->flagStopWritingToFile)
           return *this;
         this->theFile << this->closeTagHtml();
@@ -94,7 +96,8 @@ class logger
   }
   template <typename theType>
   logger& operator << (const theType& toBePrinted)
-  { std::cout << toBePrinted;
+  { if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+      std::cout << toBePrinted;
     this->CheckLogSize();
     if (this->flagStopWritingToFile)
       return *this;

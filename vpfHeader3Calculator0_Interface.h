@@ -774,6 +774,7 @@ public:
 
   bool flagLogSyntaxRules;
   bool flagLogEvaluatioN;
+  bool flagUseNumberColors;
   bool flagLogRules;
   bool flagLogCache;
   bool flagLogPatternMatching;
@@ -1426,7 +1427,6 @@ public:
   ;
   static bool CollectSummands(Calculator& theCommands, const Expression& input, MonomialCollection<Expression, Rational>& outputSum);
   static bool outerTensor(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool outerDivide(Calculator& theCommands, const Expression& input, Expression& output);
   static bool StandardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMatrixRational(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMatrixRationalTensorForm(Calculator& theCommands, const Expression& input, Expression& output);

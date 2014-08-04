@@ -1349,7 +1349,7 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(Calculator& theComman
     if (right->StartsWith(theCommands.opThePower(), 3))
     { if ((*right)[1]==(*left))
       { bool isGood=true;
-        stOutput << "<br>Right is: " << right->ToString();
+//        stOutput << "<br>Right is: " << right->ToString();
         if ((*right)[2].IsOfType<Rational>())
           if (!(*right)[2].GetValue<Rational>().IsInteger())
             isGood=false;
@@ -1595,23 +1595,51 @@ bool Calculator::CollectOpands(const Expression& input, int theOp, List<Expressi
   return true;
 }
 
-bool Calculator::CollectSummands(Calculator& theCommands, const Expression& input, MonomialCollection<Expression, Rational>& outputSum)
+bool Calculator::CollectSummands
+(Calculator& theCommands, const Expression& input, MonomialCollection<Expression, Rational>& outputSum)
 { MacroRegisterFunctionWithName("Calculator::CollectSummands");
   List<Expression> summands;
   theCommands.AppendSummandsReturnTrueIfOrderNonCanonical(input, summands);
   Expression oneE; //used to record the constant term
   oneE.AssignValue<Rational>(1, theCommands);
   outputSum.MakeZero();
+  MonomialCollection<Expression, AlgebraicNumber> sumOverAlgNums;
+  MonomialCollection<Expression, double> sumOverDoubles;
+  Rational coeffRat=1;
+  AlgebraicNumber coeffAlg=1;
+  double coeffDouble=1;
   for (int i=0; i<summands.size; i++)
-  { const Expression* currentSummandNoCoeff;
-    currentSummandNoCoeff=&summands[i];
-    Rational theCoeff=1;
-    if (currentSummandNoCoeff->IsListStartingWithAtom(theCommands.opTimes()))
-    { if((*currentSummandNoCoeff)[1].IsOfType<Rational>(&theCoeff))
-        currentSummandNoCoeff=&((*currentSummandNoCoeff)[2]);
-    } else if (currentSummandNoCoeff->IsOfType<Rational>(&theCoeff))
-      currentSummandNoCoeff=&oneE;
-    outputSum.AddMonomial(*currentSummandNoCoeff, theCoeff);
+  { if (summands[i].IsEqualToZero())
+      continue;
+    if (summands[i].StartsWith(theCommands.opTimes(), 3))
+    { if (summands[i][1].IsOfType<Rational>(&coeffRat))
+      { outputSum.AddMonomial(summands[i][2], coeffRat);
+        continue;
+      } else if (summands[i][1].IsOfType<AlgebraicNumber>(&coeffAlg))
+      { if (coeffAlg.IsRational(&coeffRat))
+        { outputSum.AddMonomial(summands[i][2], coeffRat);
+          continue;
+        }
+        sumOverAlgNums.AddMonomial(summands[i][2], coeffAlg);
+        continue;
+      } else if (summands[i][1].IsOfType<double>(&coeffDouble))
+      { sumOverDoubles.AddMonomial(summands[i][2], coeffDouble);
+        continue;
+      }
+    }
+    outputSum.AddMonomial(summands[i],1);
+  }
+  if (!sumOverDoubles.IsEqualToZero())
+  { sumOverDoubles.QuickSortDescending();
+    Expression doubleSum;
+    doubleSum.MakeSum(theCommands, sumOverAlgNums);
+    outputSum.AddMonomial(doubleSum, 1);
+  }
+  if (!sumOverAlgNums.IsEqualToZero())
+  { sumOverAlgNums.QuickSortDescending();
+    Expression algSum;
+    algSum.MakeSum(theCommands, sumOverAlgNums);
+    outputSum.AddMonomial(algSum, 1);
   }
 //  stOutput << "<hr> before mon sort, mon order: " << outputSum.theMonomials.ToString();
 //  if (outputSum.theMonomials[0]>outputSum.theMonomials[1])
@@ -1800,26 +1828,6 @@ bool Calculator::outerUnionNoRepetition(Calculator& theCommands, const Expressio
   output.children.AddOnTop(theIndices);
   output.format=output.formatDefault;
   return true;
-}
-
-bool Calculator::outerDivide(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::outerDivide");
-//  stOutput << "<br>Now I'm here 1! input: " << input.ToString() << " lisp: "
-//  << input.Lispify() ;
-  if (!input.StartsWith(theCommands.opDivide(), 3))
-    return false;
-//  stOutput << "<br>Now I'm here! 2";
-  Rational tempRat;
-  if (!input[2].IsOfType<Rational>(&tempRat))
-    return false;
-  if (tempRat.IsEqualToZero())
-    return output.MakeError("Division by zero. ", theCommands);
-  output=input;
-  tempRat.Invert();
-  output.SetChildAtomValue(0, theCommands.opTimes());
-  Expression tempE;
-  tempE.AssignValue(tempRat, theCommands);
-  return output.SetChilD(2, tempE);
 }
 
 bool Calculator::outerMinus(Calculator& theCommands, const Expression& input, Expression& output)

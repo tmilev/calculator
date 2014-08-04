@@ -632,10 +632,12 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(Calcu
   int thePower=0;
   if (!input[1].IsOfType(&base)|| !input[2].IsSmallInteger(&thePower))
     return false;
-  if (thePower<0)
-    return false;
   if (base.IsEqualToZero() && thePower<=0)
     return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+  if (thePower<0)
+  { thePower*=-1;
+    base.Invert();
+  }
   MathRoutines::RaiseToPower(base, thePower, (AlgebraicNumber) 1);
   return output.AssignValueWithContext(base, input[1].GetContext(), theCommands);
 }

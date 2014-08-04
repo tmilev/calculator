@@ -127,23 +127,6 @@ void Calculator::initPredefinedInnerFunctions()
    "Attempts to rearrange into standard polynomial form and then integrate.  ",
    "\\int  \\left( \\frac{x(x+1) }{ 2} \\right)^2 dx ");
   this->AddOperationInnerHandler
-  ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks, "",
-   "Attempts to split an integral of a rational function into building block integrals.  ",
-   "\\int  \frac{1}{x(x+1)} dx ");
-  this->AddOperationInnerHandler
-  ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa, "",
-   "Integrates building block Ia.  ",
-   "\\int  (\frac{3}{(x/2-1)} ) dx ");
-  this->AddOperationInnerHandler
-  ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIb, "",
-   "Integrates building block Ib.  ",
-   "\\int  (\frac{2}{(3x-1)^2} ) dx ");
-  this->AddOperationInnerHandler
-  ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIandIII, "",
-   "Integrates building blocks II and III.  ",
-   "\\int  (\frac{3x+2}{x^2+x+1} ) dx ");
-
-  this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateXnDiffX, "",
    "Integrates x^n dx.  ",
    "\\int x dx ");
@@ -157,6 +140,34 @@ void Calculator::initPredefinedInnerFunctions()
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateSqrt, "",
    "Differentiation - square root function.  ",
    "d/dx(sqrt(x)); Differentiate(x, \\sqrt)");
+
+
+  //the function integrating the building blocks must come in the exact order below:
+  //else we risk infinite substitution cycle. The reasons are implementation-specific.
+  this->AddOperationInnerHandler
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa, "",
+   "Integrates building block Ia.  ",
+   "\\int  (\frac{3}{(x/2-1)} ) dx ");
+  this->AddOperationInnerHandler
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIb, "",
+   "Integrates building block Ib.  ",
+   "\\int  (\frac{2}{(3x-1)^2} ) dx ");
+  this->AddOperationInnerHandler
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa, "",
+   "Integrates building blocks IIa and IIIa.  ",
+   "\\int  (\frac{3x+2}{x^2+x+1} ) dx ");
+  this->AddOperationInnerHandler
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb, "",
+   "Integrates building blocks IIIb.  ",
+   "\\int  (\frac{3x+2}{(x^2+x+1)^2} ) dx ");
+  this->AddOperationInnerHandler
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb, "",
+   "Integrates building blocks IIb.  ",
+   "\\int  (\frac{3x+2}{(x^2+x+1)^2} ) dx ");
+  this->AddOperationInnerHandler
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks, "",
+   "Attempts to split an integral of a rational function into building block integrals.  ",
+   "\\int  \frac{1}{x(x+1)} dx ");
 
 
 /*  this->AddOperationInnerHandler
@@ -1910,16 +1921,16 @@ void Calculator::initPredefinedStandardOperations()
    "1/(1+\\sqrt{}2+\\sqrt{}3+\\sqrt{}5+\\sqrt{}7)", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,  this->opRational(), this->opAlgNumber(),
-   "Divides algebraic numbers. ",
+   "Divides rational by algebraic number. ",
    "1/(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,  this->opAlgNumber(), this->opRational(),
-   "Divides algebraic numbers. ",
-   "1/(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)", true);
+   "Divides algebraic number by rational. ",
+   "(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)/5", true);
   this->AddOperationOuterHandler
-  ("/", this->outerDivide, "",
-    "If b is rational substitutes (anything)/b with anything* (1/b).",
-    "6/15+(a+b)/5; 6/4+3/0", true);
+  ("/", CalculatorFunctionsGeneral::outerDivideByNumber, "",
+    "If b is rational, algebraic, or double, substitutes (anything)/b with anything* (1/b).",
+    "6/15+(a+b)/5; a/\\sqrt{}2; x/DoubleValue{}10^10;x/DoubleValue{}5 ; 6/4+3/0", true);
   this->AddOperationOuterHandler
   ("/", this->innerSubZeroDivAnythingWithZero, "",
    "Provided that x is not equal to zero, substitutes 0/x with 0. ",

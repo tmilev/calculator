@@ -1393,8 +1393,8 @@ bool Expression::IsEqualToZero()const
     return this->GetValue<Rational>().IsEqualToZero();
   if (this->IsOfType<double>())
     return this->GetValue<double>()==0;
-  if (this->IsOfType<Rational>())
-    return this->GetValue<Rational>().IsEqualToZero();
+  if (this->IsOfType<AlgebraicNumber>())
+    return this->GetValue<AlgebraicNumber>().IsEqualToZero();
   if (this->IsOfType<Polynomial<Rational> >())
     return this->GetValue<Polynomial<Rational> >().IsEqualToZero();
   if (this->IsOfType<RationalFunctionOld>())
@@ -1694,6 +1694,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     result=true;
   } else if (this->IsOfType<Polynomial<Rational> >())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    contextFormat.GetElement().flagUseFrac=true;
     out << "Polynomial{}(";
     out << this->GetValue<Polynomial<Rational> >().ToString(&contextFormat.GetElement()) << ")";
     if (showContext)
@@ -1701,8 +1702,20 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     result=true;
   } else if (this->IsOfType<Polynomial<AlgebraicNumber> >())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    contextFormat.GetElement().flagUseFrac=true;
     out << "PolynomialAlgebraicNumbers{}(";
-    out << this->GetValue<Polynomial<AlgebraicNumber> >().ToString(&contextFormat.GetElement()) << ")";
+    std::string currentString=this->GetValue<Polynomial<AlgebraicNumber> >().ToString(&contextFormat.GetElement());
+    if (currentString.size()>0)
+      if (currentString[0]=='-')
+      { currentString= currentString.substr(1);
+        out << "-";
+      }
+    if (this->theBoss->flagUseNumberColors)
+      out << "\\color{red}{";
+    out << currentString;
+    if (this->theBoss->flagUseNumberColors)
+      out << "}";
+    out << ")";
     if (showContext)
       out << "[" << this->GetContext().ToString() << "]";
     result=true;
@@ -1802,13 +1815,33 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     out << theSubalgebras.ToString(&contextFormat.GetElement());
     result=true;
   } else if (this->IsOfType<double>())
-  { out << FloatingPoint::DoubleToString(this->GetValue<double>());
+  { std::string currentString=FloatingPoint::DoubleToString(this->GetValue<double>());
+    if (currentString.size()>0)
+      if (currentString[0]=='-')
+      { currentString= currentString.substr(1);
+        out << "-";
+      }
+    if (this->theBoss->flagUseNumberColors)
+      out << "\\color{blue}{";
+    out << currentString;
+    if (this->theBoss->flagUseNumberColors)
+      out << "}";
     //stOutput << " converting to string : " << this->GetValue<double>();
     result=true;
   } else if (this->IsOfType<AlgebraicNumber>())
   { if (this->theBoss->flagUseFracInRationalLaTeX)
       contextFormat.GetElement().flagUseFrac=true;
-    out << this->GetValue<AlgebraicNumber>().ToString(&contextFormat.GetElement());
+    std::string currentString= this->GetValue<AlgebraicNumber>().ToString(&contextFormat.GetElement());
+    if (currentString.size()>0)
+      if (currentString[0]=='-')
+      { currentString= currentString.substr(1);
+        out << "-";
+      }
+    if (this->theBoss->flagUseNumberColors)
+      out << "\\color{red}{";
+    out << currentString;
+    if (this->theBoss->flagUseNumberColors)
+      out << "}";
     result=true;
   } else if (this->IsOfType<LittelmannPath>())
   { out << this->GetValue<LittelmannPath>().ToString();
@@ -1885,6 +1918,8 @@ bool Expression::NeedsParenthesisForMultiplication()const
     return false;
   if (this->StartsWith(this->theBoss->opPlus()) || this->StartsWith(this->theBoss->opMinus()))
     return true;
+  if (this->IsOfType<AlgebraicNumber>())
+    return this->GetValue<AlgebraicNumber>().NeedsParenthesisForMultiplication();
   return false;
 }
 
@@ -2237,10 +2272,11 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   if (startingExpression!=0)
   { std::stringstream outTrue;
     outTrue << "<table>";
-    outTrue << "<tr><th>Input in LaTeX</th><th>Result in LaTeX</th></tr>";
-    outTrue << "<tr><td colspan=\"2\">Double click LaTeX image to get the LaTeX code. "
-    << "Javascript LaTeXing courtesy of <a href=\"http://www.math.union.edu/~dpvc/jsmath/\">jsmath</a>: many thanks for your great work!</td></tr>";
-   // stOutput << this->Lispify();
+
+    outTrue << "<tr><td colspan=\"2\">Double click expressions to get the LaTeX code. "
+    << "Many thanks to the <a href=\"http://www.math.union.edu/~dpvc/jsmath/\">jsmath</a> project!</td></tr>";
+    outTrue << "<tr><th>Input</th><th>Result</th></tr>";
+    // stOutput << this->Lispify();
     if (this->IsListStartingWithAtom(this->theBoss->opEndStatement()))
       outTrue << out.str();
     else

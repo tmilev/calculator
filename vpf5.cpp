@@ -1887,7 +1887,7 @@ bool Calculator::innerZmodP(Calculator& theCommands, const Expression& input, Ex
   if (!input.IsListNElements(3))
     return false;
   Rational left, right;
-  if (!input[1].IsOfType<Rational>(&left) || ! input[2].IsOfType<Rational>(&right))
+  if (!input[1].IsRational(&left) || ! input[2].IsRational(&right))
     return false;
   LargeInt base;
   if (!right.IsInteger(&base))
@@ -1919,12 +1919,13 @@ bool Calculator::innerSqrt(Calculator& theCommands, const Expression& input, Exp
     theExponent.AssignValue(thePowerRat, theCommands);
     return output.MakeXOX(theCommands, theCommands.opThePower(), input[2], theExponent);
   }
-  if (!input[2].IsOfType<Rational>())
+  Rational rationalValue;
+  if (!input[2].IsRational(&rationalValue))
     return false;
   if (thePower!=2)
     return false;
   AlgebraicNumber theNumber;
-  if (!theNumber.AssignRationalQuadraticRadical(input[2].GetValue<Rational>(), theCommands.theObjectContainer.theAlgebraicClosure))
+  if (!theNumber.AssignRationalQuadraticRadical(rationalValue, theCommands.theObjectContainer.theAlgebraicClosure))
     return false;
   return output.AssignValue(theNumber, theCommands);
 }

@@ -422,6 +422,7 @@ class Expression
   bool IsIntegerFittingInInt(int* whichInteger=0)const;
   bool IsSmallInteger(int* whichInteger=0)const;
   bool IsInteger(LargeInt* whichInteger=0)const;
+  bool IsRational(Rational* whichRational=0)const;
   bool IsConstantNumber()const;
   bool EvaluatesToDoubleInRange
   (const std::string& varName, double lowBound, double highBound, int numPoints,

@@ -1284,7 +1284,7 @@ bool Calculator::innerIsInteger(Calculator& theCommands, const Expression& input
 bool Calculator::innerIsRational(Calculator& theCommands, const Expression& input, Expression& output)
 { if (input.HasBoundVariables())
     return false;
-  if (input.IsOfType<Rational>())
+  if (input.IsRational())
     output.AssignValue(1, theCommands);
   else
     output.AssignValue(0, theCommands);
@@ -1753,7 +1753,7 @@ bool Calculator::outerGreaterThan(Calculator& theCommands, const Expression& inp
   const Expression& left=input[1];
   const Expression& right=input[2];
   Rational leftRat, rightRat;
-  if (!left.IsOfType<Rational> (&leftRat)|| ! right.IsOfType<Rational> (&rightRat))
+  if (!left.IsRational(&leftRat)|| ! right.IsRational(&rightRat))
     return false;
   if (leftRat>rightRat)
     return output.AssignValue(1, theCommands);
@@ -1766,7 +1766,7 @@ bool Calculator::outerLessThan(Calculator& theCommands, const Expression& input,
   const Expression& left=input[1];
   const Expression& right=input[2];
   Rational leftRat, rightRat;
-  if (!left.IsOfType<Rational> (&leftRat)|| ! right.IsOfType<Rational>(&rightRat))
+  if (!left.IsRational(&leftRat)|| ! right.IsRational(&rightRat))
     return false;
   if (rightRat>leftRat)
     return output.AssignValue(1, theCommands);

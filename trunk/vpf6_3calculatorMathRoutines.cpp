@@ -841,7 +841,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   for (int i=0; i<theFactors.size; i++)
   { theDenominatorFactorsWithMultsCopy.AddMonomial(theFactors[i], 1);
     //this->currentFormaT.flagSuppresOneIn1overXtimesY=false;
-    stOutput << "<br>Factor: " << theFactors[i].ToString(&this->currentFormaT);
+//    stOutput << "<br>Factor: " << theFactors[i].ToString(&this->currentFormaT);
   }
   theDenominatorFactorsWithMultsCopy.QuickSortAscending();
   Polynomial<Rational> currentSecondDegreePoly;
@@ -1684,7 +1684,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlo
   Expression theFunctionE, theVariableE, integralE(theCommands);
   if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, theVariableE))
     return false;
-  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks, input: " << input.ToString();
+  //stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks, input: " << input.ToString();
   IntegralRFComputation theComputation(&theCommands);
   if(!CalculatorSerialization::innerRationalFunction(theCommands, theFunctionE, theComputation.inputE))
   { theCommands << "<hr>Call of function CalculatorSerialization::innerRationalFunction failed, input was: "
@@ -1711,10 +1711,10 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlo
   theComputation.theRF=theComputation.inputE.GetValue<RationalFunctionOld>();
   theComputation.theRF.GetDenominator(theComputation.theDen);
   theComputation.theRF.GetNumerator(theComputation.theNum);
-  stOutput << "<br>partial fraction decompo called, the den is: " << theComputation.theDen.ToString();
+//  stOutput << "<br>partial fraction decompo called, the den is: " << theComputation.theDen.ToString();
   if (theComputation.theDen.TotalDegree()<1 )
     return false;
-  stOutput << "<br>calling integration... ";
+//  stOutput << "<br>calling integration... ";
   if (!theComputation.IntegrateRF())
   { theCommands << theComputation.printoutIntegration.str();
     return false;
@@ -1728,7 +1728,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlo
   { if (output[1]==input)
       return false;
   }
-  stOutput << "<hr>Transforming " << input.ToString() << " to " << output[1].ToString() << "<hr>";
+//  stOutput << "<hr>Transforming " << input.ToString() << " to " << output[1].ToString() << "<hr>";
   return true;
 }
 
@@ -1926,7 +1926,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaan
 }
 
 bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa");
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb");
   Expression theFunctionE, x, integralE(theCommands);
   if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, x))
     return false;
@@ -1978,15 +1978,15 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb(
   functionRemainingToIntegrate=oneE/theQuadraticPowerNMinusOne;
   remainingIntegral.MakeIntegral(theCommands, functionRemainingToIntegrate, x);
   output =oneE/D *
-  ((x+b)/(twoE*(numPowerE-oneE) )* theQuadraticPowerOneMinusN+
-   (twoE*numPowerE-threeE)/(twoE*numPowerE-twoE)*remainingIntegral);
-  stOutput << " <hr>replacing " << CGI::GetMathSpanPure(input.ToString() ) << " by "
-  << CGI::GetMathSpanPure(output.ToString());
+  ((x+b/twoE)/(twoE*numPowerE-twoE) * theQuadraticPowerOneMinusN+
+  (twoE*numPowerE-threeE)/(twoE*numPowerE-twoE)*remainingIntegral);
+  //stOutput << " <hr>innerIntegrateRationalFunctionBuidingBlockIIIb: replacing " << CGI::GetMathSpanPure(input.ToString() ) << " by "
+  //<< CGI::GetMathSpanPure(output.ToString());
   return true;
 }
 
 bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa");
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb");
   Expression theFunctionE, x, integralE(theCommands);
   if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, x))
     return false;
@@ -2042,7 +2042,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb(C
   Expression D=(fourE*a*c-bSquared)/(fourE*aSquared);
   Expression C=B-(A*b)/(twoE*a);
   output=(oneE/ apowerN)*(A/(twoE*(oneE-nE))*quadraticPowerOneMinusN +C*remainingIntegral);
-  stOutput << " <hr>replacing " << input.ToString() << " by " << output.ToString();
+  //stOutput << " <hr>innerIntegrateRationalFunctionBuidingBlockIIb: replacing " << input.ToString() << " by " << output.ToString();
   return true;
 }
 

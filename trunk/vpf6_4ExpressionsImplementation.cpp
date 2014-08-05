@@ -1410,9 +1410,22 @@ bool Expression::MakeError(const std::string& theError, Calculator& owner)
 
 bool Expression::IsSmallInteger(int* whichInteger)const
 { Rational theRat;
-  if (!this->IsOfType<Rational>(&theRat))
-    return false;
-  return theRat.IsSmallInteger(whichInteger);
+  if (this->IsOfType<Rational>(&theRat))
+    return theRat.IsSmallInteger(whichInteger);
+  AlgebraicNumber theAlgNum;
+  if (this->IsOfType<AlgebraicNumber>(&theAlgNum))
+    return theAlgNum.IsSmallInteger(whichInteger);
+  return false;
+
+}
+
+bool Expression::IsRational(Rational* whichRational)const
+{ if (this->IsOfType<Rational>(whichRational))
+    return true;
+  AlgebraicNumber theAlgNum;
+  if (this->IsOfType<AlgebraicNumber>(&theAlgNum))
+    return theAlgNum.IsRational(whichRational);
+  return false;
 }
 
 bool Expression::DivisionByMeShouldBeWrittenInExponentForm()const

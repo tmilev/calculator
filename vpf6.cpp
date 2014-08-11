@@ -223,7 +223,8 @@ bool ModuleSSalgebra<coefficient>::IsNotInLevi(int theGeneratorIndex)
 
 template <class coefficient>
 void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt
- (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables)
+ (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunctionOld>& output,
+  GlobalVariables& theGlobalVariables)
 { List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
   this->GetElementsNilradical(eltsNilrad, true);
   RationalFunctionOld tempRF;
@@ -244,7 +245,8 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt
 
 template <class coefficient>
 void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt
-(bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<Polynomial<Rational> >& output, GlobalVariables& theGlobalVariables)
+(bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<Polynomial<Rational> >& output,
+ GlobalVariables& theGlobalVariables)
 { List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
   this->GetElementsNilradical(eltsNilrad, true);
   Polynomial<Rational> tempRF;
@@ -648,8 +650,8 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
       ei.MakeEi(theSSalgebra.GetRank(), j);
       theGenerator.MakeGGenerator(ei, theSSalgebra);
       theGeneratorsItry.AddOnTop(theGenerator);
-      theGenerator.MakeHgenerator(ei, theSSalgebra);
-      theGeneratorsItry.AddOnTop(theGenerator);
+//      theGenerator.MakeHgenerator(ei, theSSalgebra);
+//      theGeneratorsItry.AddOnTop(theGenerator);
       ei.Minus();
       theGenerator.MakeGGenerator(ei, theSSalgebra);
       theGeneratorsItry.AddOnTop(theGenerator);
@@ -678,6 +680,11 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
   int numStartingVars=hwContext.ContextGetNumContextVariables();
   //stOutput << "<br>num starting vars:" << numStartingVars;
   std::stringstream reportFourierTransformedCalculatorCommands, reportCalculatorCommands;
+  long long totalAdditions=0;
+  long long currentAdditions=0;
+  long long totalMultiplications=0;
+  long long currentMultiplications=0;
+  double totalTime=0, currentTime=0;
   for (int i=0; i<theHws.size; i++)
   { ModuleSSalgebra<RationalFunctionOld>& theMod=theMods[i];
     tempV=theHws[i];
@@ -757,7 +764,13 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
     //stOutput << "<br>generic element: " << genericElt.ToString();
     for (int j=0; j<theGeneratorsItry.size; j++)
     { theGenerator=theGeneratorsItry[j];
+      currentTime= theCommands.theGlobalVariableS->GetElapsedSeconds();
+      currentAdditions=Rational::TotalAdditions();
+      currentMultiplications=Rational::TotalMultiplications();
       theMod.GetActionGenVermaModuleAsDiffOperator(theGenerator, theQDOs[j], *theCommands.theGlobalVariableS);
+      totalAdditions+=Rational::TotalAdditions()-currentAdditions;
+      totalMultiplications+=Rational::TotalMultiplications()-currentMultiplications;
+      totalTime+=theCommands.theGlobalVariableS->GetElapsedSeconds()-currentTime;
       theWeylFormat.CustomCoeffMonSeparator="\\otimes ";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX=2;
       out << "<td>" << CGI::GetMathMouseHover("\\begin{array}{|r|c|l|}&&"+theQDOs[j].ToString(&theWeylFormat)+"\\end{array}")
@@ -814,6 +827,9 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
   }
   latexReport << "\\end{longtable}";
   out << "</table>";
+  out << "<br>Multiplications needed to embed generators: " << totalMultiplications << ". ";
+  out << "<br>Additions needed to embed generators: " << totalAdditions << ". ";
+  out << "<br>Total time to embed generators: " << totalTime << " seconds. ";
   out << reportCalculatorCommands.str();
   out << reportFourierTransformedCalculatorCommands.str();
   out << "<br>" << latexReport.str();

@@ -961,7 +961,8 @@ int WebWorker::OutputWeb()
   WebWorker::OutputBeforeComputation();
   theWebServer.CheckExecutableVersionAndRestartIfNeeded();
   stOutput << theParser.javaScriptDisplayingIndicator;
-//  theParser.inputString="TestCalculatorIndicator 0";
+  //theParser.inputString="TestCalculatorIndicator 0";
+  //theParser.inputString="printSemisimpleSubalgebrasRecompute(B_3)";
   ProgressReportWebServer theReport;
   if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
     theReport.SetStatus("OutputWeb: Computing...");

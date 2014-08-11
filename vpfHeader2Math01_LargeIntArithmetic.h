@@ -784,10 +784,17 @@ ParallelComputing::GlobalPointerCounter++;
   }
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
   inline void AssignAbsoluteValue()
-  { if(this->IsNegative())this->Minus();
+  { if(this->IsNegative())
+      this->Minus();
+  }
+  static long long int TotalAdditions()
+  { return Rational::TotalLargeAdditions+Rational::TotalSmallAdditions;
+  }
+  static long long int TotalMultiplications()
+  { return Rational::TotalLargeMultiplications+Rational::TotalSmallMultiplications;
   }
   static long long int TotalArithmeticOperations()
-  { return Rational::TotalLargeAdditions+Rational::TotalLargeMultiplications+Rational::TotalSmallAdditions+Rational::TotalSmallMultiplications;
+  { return Rational::TotalAdditions()+Rational::TotalMultiplications();
   }
   static Rational NChooseK(const Rational& n, int k);
   static Rational Factorial(int n, GlobalVariables* theGlobalVariables);

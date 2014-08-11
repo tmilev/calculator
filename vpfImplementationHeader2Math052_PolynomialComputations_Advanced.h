@@ -1066,8 +1066,8 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial
   { reportStream << "Solving system " << this->GetCalculatorInputFromSystem(inputSystem);
     theReport.Report(reportStream.str());
   }
-  this->SolveSerreLikeSystemRecursively(workingSystem, 0, theGlobalVariables);
   this->NumberSerreVariablesOneGenerator= workingSystem[0].GetMinNumVars()/2;
+  this->SolveSerreLikeSystemRecursively(workingSystem, 0, theGlobalVariables);
   if (theAlgebraicClosure!=0)
     if (!this->flagSystemSolvedOverBaseField && !this->flagSystemProvenToHaveNoSolution)
     { if (theGlobalVariables!=0)

@@ -3725,7 +3725,7 @@ bool CalculatorFunctionsGeneral::innerWriteGenVermaModAsDiffOperatorUpToLevel(Ca
   }
   int desiredHeight;
   if (!levelNode.IsSmallInteger(&desiredHeight))
-    return output.MakeError("second argument of " + input.ToString()+ " must be a small integer", theCommands);
+    return output.MakeError("second argument of " + input.ToString() + " must be a small integer", theCommands);
 
 //  stOutput << "<br>highest weight in fundamental coords: " << highestWeightFundCoords.ToString() << "<br>";
 //  stOutput << "<br>parabolic selection: " << parabolicSel.ToString();

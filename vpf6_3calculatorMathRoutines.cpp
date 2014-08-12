@@ -652,18 +652,32 @@ public:
   Polynomial<Rational> quotientRat, remainderRat;
 //  Rational constantCoefficient;
   List<Polynomial<Rational> > theFactors;
+  Polynomial<AlgebraicNumber> thePolyThatMustVanish;
+  Polynomial<AlgebraicNumber> remainderRescaledAlgebraic;
+  RationalFunctionOld transformedRF;
   FormatExpressions currentFormaT;
   Expression contextE;
   Expression inputE;
   Expression outputIntegralE;
+  AlgebraicNumber additionalMultiple;
   Calculator* owner;
-  std::stringstream printoutPFs;
+  int NumberOfSystemVariables;
+  std::stringstream printoutPFsHtml;
+  std::stringstream printoutPFsLatex;
   std::stringstream printoutIntegration;
+  std::string stringPolyIndentityNonSimplifiedLatex;
+  std::string stringRationalFunctionLatex;
+  std::string stringRationalFunctionPartialFractionLatex;
+  std::string stringFinalAnswer;
   MonomialCollection<Polynomial<AlgebraicNumber>, Rational> theDenominatorFactorsWithMults;
   List<List<Polynomial<AlgebraicNumber> > > theNumerators;
   List<Expression> theIntegralSummands;
   Expression theIntegralSum;
   bool ComputePartialFractionDecomposition();
+  void PrepareFormatExpressions();
+  void PrepareNumerators();
+  void PrepareFinalAnswer();
+  std::string ToStringRationalFunctionLatex();
   bool IntegrateRF();
   IntegralRFComputation(Calculator* inputOwner):owner(inputOwner){}
   bool CheckConsistency()const;
@@ -679,11 +693,11 @@ bool IntegralRFComputation::IntegrateRF()
 { MacroRegisterFunctionWithName("IntegralRFComputation::IntegrateRF");
   this->CheckConsistency();
   if (!this->ComputePartialFractionDecomposition())
-  { printoutIntegration << "Failed to decompose rational function into partial fractions. " << this->printoutPFs.str();
+  { printoutIntegration << "Failed to decompose rational function into partial fractions. " << this->printoutPFsHtml.str();
     return false;
   }
 //  stOutput << "<hr>Context variable 1: " << this->contextE.ContextGetContextVariable(0);
-  printoutIntegration << this->printoutPFs.str();
+  printoutIntegration << this->printoutPFsHtml.str();
   Expression polyE, currentNum, denExpE, currentDenNoPower, currentDen, currentIntegrand, currentIntegral;
   this->theIntegralSummands.SetSize(0);
   for (int i=0; i<this->theNumerators.size; i++)
@@ -763,6 +777,134 @@ bool Polynomial<coefficient>::FactorMeNormalizedFactors
   return true;
 }
 
+void IntegralRFComputation::PrepareFormatExpressions()
+{ MacroRegisterFunctionWithName("IntegralRFComputation::PrepareFormatExpressions");
+  std::stringstream rfStream, polyStream;
+  rfStream << transformedRF.ToString(&this->currentFormaT) << " = ";
+  polyStream << remainderRescaledAlgebraic.ToString(&this->currentFormaT) << " = ";
+  int varCounter=0;
+  for (int i =0; i<this->theDenominatorFactorsWithMults.size(); i++)
+  { int tempSize=-1;
+    this->theDenominatorFactorsWithMults.theCoeffs[i].IsSmallInteger(&tempSize);
+    for (int k=0; k<this->theDenominatorFactorsWithMults.theCoeffs[i]; k++)
+    { rfStream << "\\frac{";
+      if (this->theDenominatorFactorsWithMults[i].TotalDegree()>1)
+        polyStream << "(";
+      for (int j=0; j<this->theDenominatorFactorsWithMults[i].TotalDegree(); j++)
+      { varCounter++;
+        std::stringstream varNameStream;
+        varNameStream << "A_{" << varCounter << "} ";
+        rfStream << varNameStream.str();
+        polyStream << varNameStream.str();
+        this->currentFormaT.polyAlphabeT.AddOnTop(varNameStream.str());
+        if (j>0)
+        { rfStream << "x";
+          polyStream << "x";
+        }
+        if (j>1)
+        { rfStream << "^{" << j << "}";
+          polyStream << "^{" << j << "}";
+        }
+        if ((this->theDenominatorFactorsWithMults[i].TotalDegree()-1)!=j)
+        { rfStream << " + ";
+          polyStream << " + ";
+        }
+      }
+      if (this->theDenominatorFactorsWithMults[i].TotalDegree()>1)
+        polyStream << ")";
+      for (int j=0; j<this->theDenominatorFactorsWithMults.size(); j++)
+      { Rational theExp=this->theDenominatorFactorsWithMults.theCoeffs[j];
+        if (j==i)
+          theExp-=k+1;
+        if (theExp==0)
+          continue;
+        polyStream << "(" << this->theDenominatorFactorsWithMults[j].ToString(&this->currentFormaT) << ")";
+        if (theExp>1)
+          polyStream << "^{" << theExp << "}";
+      }
+      rfStream << "}{";
+      if (k>0)
+        rfStream << "(";
+      rfStream << this->theDenominatorFactorsWithMults[i].ToString(&this->currentFormaT);
+      if (k>0)
+        rfStream << ")^{" << k+1 << "}";
+      rfStream << "}";
+      if (((this->theDenominatorFactorsWithMults.theCoeffs[i]-1)!=k) || (i!=this->theDenominatorFactorsWithMults.size()-1))
+      { rfStream << "+";
+        polyStream << "+";
+      }
+    }
+  }
+  this->stringRationalFunctionLatex=rfStream.str();
+  this->stringPolyIndentityNonSimplifiedLatex=polyStream.str();
+}
+
+void IntegralRFComputation::PrepareNumerators()
+{ MacroRegisterFunctionWithName("IntegralRFComputation::PrepareNumerators");
+  this->transformedRF=this->remainderRat;
+  this->transformedRF/=this->theDen;
+  this->remainderRescaledAlgebraic=this->remainderRat;
+  this->remainderRescaledAlgebraic/=additionalMultiple;
+  this->NumberOfSystemVariables=0;
+  Polynomial<AlgebraicNumber> currentSummand;
+  MonomialP currentMon;
+  this->thePolyThatMustVanish.MakeZero();
+  this->thePolyThatMustVanish-=remainderRescaledAlgebraic;
+  this->theNumerators.SetSize(this->theDenominatorFactorsWithMults.size());
+  for (int i =0; i<this->theDenominatorFactorsWithMults.size(); i++)
+  { int tempSize=-1;
+    this->theDenominatorFactorsWithMults.theCoeffs[i].IsSmallInteger(&tempSize);
+    this->theNumerators[i].SetSize(tempSize);
+    for (int k=0; k<this->theDenominatorFactorsWithMults.theCoeffs[i]; k++)
+    { currentSummand.MakeZero();
+      this->theNumerators[i][k].MakeZero();
+      for (int j=0; j<this->theDenominatorFactorsWithMults[i].TotalDegree(); j++)
+      { this->NumberOfSystemVariables++;
+        currentMon.MakeEi(this->NumberOfSystemVariables);
+        currentMon[0]=j;
+        this->theNumerators[i][k].AddMonomial(currentMon, 1);
+        currentSummand.AddMonomial(currentMon, 1);
+      }
+      for (int j=0; j<this->theDenominatorFactorsWithMults.size(); j++)
+      { Rational theExp=this->theDenominatorFactorsWithMults.theCoeffs[j];
+        if (j==i)
+          theExp-=k+1;
+        if (theExp==0)
+          continue;
+        for (int p=0; p<theExp; p++)
+          currentSummand*=this->theDenominatorFactorsWithMults[j];
+      }
+      this->thePolyThatMustVanish+=currentSummand;
+    }
+  }
+}
+
+void IntegralRFComputation::PrepareFinalAnswer()
+{ MacroRegisterFunctionWithName("IntegralRFComputation::PrepareFinalAnswer");
+  std::stringstream rfComputedStream, answerFinalStream;
+  for (int i =0; i<theDenominatorFactorsWithMults.size(); i++)
+    for (int k=0; k<theDenominatorFactorsWithMults.theCoeffs[i]; k++)
+    { rfComputedStream << "\\frac{" << this->theNumerators[i][k].ToString(&this->currentFormaT) << "}";
+      rfComputedStream << "{";
+      rfComputedStream << "(" << theDenominatorFactorsWithMults[i].ToString(&this->currentFormaT) << ")";
+      if (k>0)
+        rfComputedStream << "^{" << k+1 << "}";
+      rfComputedStream << "}";
+      if (((theDenominatorFactorsWithMults.theCoeffs[i]-1)!=k) || (i!=theDenominatorFactorsWithMults.size()-1))
+        rfComputedStream << "+";
+    }
+  this->stringRationalFunctionPartialFractionLatex=rfComputedStream.str();
+  answerFinalStream << this->theRF.ToString(&this->currentFormaT) << "=";
+  if (!this->quotientRat.IsEqualToZero())
+  { answerFinalStream << this->quotientRat.ToString(&this->currentFormaT) << "+ ";
+    answerFinalStream << this->transformedRF.ToString(&this->currentFormaT) << "=";
+  }
+  if (!this->quotientRat.IsEqualToZero())
+    answerFinalStream << this->quotientRat.ToString(&this->currentFormaT) << "+ ";
+  answerFinalStream << this->stringRationalFunctionPartialFractionLatex;
+  this->stringFinalAnswer=answerFinalStream.str();
+}
+
 bool IntegralRFComputation::ComputePartialFractionDecomposition()
 { MacroRegisterFunctionWithName("IntegralRFComputation::ComputePartialFractionDecomposition");
   this->CheckConsistency();
@@ -774,15 +916,15 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   this->contextE.ContextGetFormatExpressions(this->currentFormaT);
   if (this->theRF.GetMinNumVars()<1 || this->theRF.expressionType== this->theRF.typeRational ||
       this->theRF.expressionType==this->theRF.typePoly)
-  { this->printoutPFs << this->theRF.ToString(&this->currentFormaT) << " is already split into partial fractions. ";
+  { this->printoutPFsHtml << this->theRF.ToString(&this->currentFormaT) << " is already split into partial fractions. ";
     return true;
   }
   this->theRF.GetDenominator(this->theDen);
   this->theRF.GetNumerator(this->theNum);
   this->theNum*= this->theDen.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
   Rational theConstantCoeff;
-  if (!this->theDen.FactorMeNormalizedFactors(theConstantCoeff, theFactors, &this->printoutPFs))
-  { this->printoutPFs << "<hr>Failed to factor the denominator of the rational function, I surrender.";
+  if (!this->theDen.FactorMeNormalizedFactors(theConstantCoeff, theFactors, &this->printoutPFsHtml))
+  { this->printoutPFsHtml << "<hr>Failed to factor the denominator of the rational function, I surrender.";
     return false;
   }
   this->theNum/=theConstantCoeff;
@@ -796,21 +938,21 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
     << ", but the denominator equals: " << this->theDen.ToString(&this->currentFormaT);
 
   this->currentFormaT.flagUseFrac=true;
-  this->printoutPFs << "The rational function is: " << CGI::GetMathSpanPure
+  this->printoutPFsHtml << "The rational function is: " << CGI::GetMathSpanPure
   ("\\frac{" + this->theNum.ToString(&this->currentFormaT) + "}{" +this->theDen.ToString(&this->currentFormaT) +"}")
    << ".";
-  this->printoutPFs << "<br>The denominator factors are: ";
+  this->printoutPFsHtml << "<br>The denominator factors are: ";
   bool allFactorsAreOfDegree2orless=true;
-  for (int i=0; i<theFactors.size; i++)
-  { this->printoutPFs << CGI::GetMathSpanPure(theFactors[i].ToString(&this->currentFormaT));
-    if (i!=theFactors.size-1)
-      this->printoutPFs << ", ";
-    if (theFactors[i].TotalDegree()>2)
+  for (int i=0; i<this->theFactors.size; i++)
+  { this->printoutPFsHtml << CGI::GetMathSpanPure(this->theFactors[i].ToString(&this->currentFormaT));
+    if (i!=this->theFactors.size-1)
+      this->printoutPFsHtml << ", ";
+    if (this->theFactors[i].TotalDegree()>2)
       allFactorsAreOfDegree2orless=false;
   }
-  this->printoutPFs << ". <br>";
+  this->printoutPFsHtml << ". <br>";
   if (!allFactorsAreOfDegree2orless)
-  { this->printoutPFs << "There were factors (over the rationals) of degree greater than 2. I surrender. ";
+  { this->printoutPFsHtml << "There were factors (over the rationals) of degree greater than 2. I surrender. ";
     return false;
   }
 
@@ -819,7 +961,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
 //  << "<br>this->quotientRat= " << this->quotientRat.ToString(&this->currentFormaT)
 //  << "<br>this->remainderRat= " << this->remainderRat.ToString(&this->currentFormaT);
   if (!this->quotientRat.IsEqualToZero())
-  { this->printoutPFs << "<br>The numerator " << CGI::GetMathSpanPure(this->theNum.ToString(&this->currentFormaT))
+  { this->printoutPFsHtml << "<br>The numerator " << CGI::GetMathSpanPure(this->theNum.ToString(&this->currentFormaT))
     << " divided by the denominator "
     << CGI::GetMathSpanPure(theDen.ToString(&this->currentFormaT)) << " yields "
     << CGI::GetMathSpanPure(this->quotientRat.ToString(&this->currentFormaT)) << " with remainder "
@@ -832,14 +974,14 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
     theDivStringArguments.AddChildOnTop(denE);
     this->owner->innerPolynomialDivisionVerboseGrLex(*this->owner, theDivStringArguments, thePolyDivStringE);
     if(thePolyDivStringE.IsOfType<std::string>())
-    { this->printoutPFs << "<br>Here is a detailed long polynomial division:<br> ";
-      this->printoutPFs << thePolyDivStringE.GetValue<std::string>();
+    { this->printoutPFsHtml << "<br>Here is a detailed long polynomial division:<br> ";
+      this->printoutPFsHtml << thePolyDivStringE.GetValue<std::string>();
     }
   }
   MonomialCollection<Polynomial<Rational>, Rational> theDenominatorFactorsWithMultsCopy;
   theDenominatorFactorsWithMultsCopy.MakeZero();
-  for (int i=0; i<theFactors.size; i++)
-  { theDenominatorFactorsWithMultsCopy.AddMonomial(theFactors[i], 1);
+  for (int i=0; i<this->theFactors.size; i++)
+  { theDenominatorFactorsWithMultsCopy.AddMonomial(this->theFactors[i], 1);
     //this->currentFormaT.flagSuppresOneIn1overXtimesY=false;
 //    stOutput << "<br>Factor: " << theFactors[i].ToString(&this->currentFormaT);
   }
@@ -847,7 +989,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   Polynomial<Rational> currentSecondDegreePoly;
   this->theDenominatorFactorsWithMults.MakeZero();
   Polynomial<AlgebraicNumber> currentLinPoly, currentSecondDegreePolyAlgebraic;
-  AlgebraicNumber additionalMultiple=1;
+  this->additionalMultiple=1;
   for (int i=0; i<theDenominatorFactorsWithMultsCopy.size(); i++)
   { currentSecondDegreePoly=theDenominatorFactorsWithMultsCopy[i];
     currentSecondDegreePolyAlgebraic=currentSecondDegreePoly;
@@ -863,7 +1005,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
     }
     AlgebraicNumber theDiscriminantSqrt;
     if (!theDiscriminantSqrt.AssignRationalQuadraticRadical(theDiscriminant, this->owner->theObjectContainer.theAlgebraicClosure))
-    { this->printoutPFs << "Failed to take radical of " << theDiscriminant.ToString() << " (radical too large?).";
+    { this->printoutPFsHtml << "Failed to take radical of " << theDiscriminant.ToString() << " (radical too large?).";
       return false;
     }
 //    stOutput << "<br>sqrt of discriminant: " << theDiscriminantSqrt.ToString();
@@ -883,128 +1025,35 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
 
   }
   this->theDenominatorFactorsWithMults.QuickSortAscending();
-  this->printoutPFs << "<br><br>I need to find " << CGI::GetMathSpanPure("A_i")
-  << "'s so that I have the equality of rational functions: ";
-  RationalFunctionOld transformedRF;
-  transformedRF=this->remainderRat;
-  transformedRF/=this->theDen;
-  std::stringstream rfStream, polyStream;
-  rfStream << transformedRF.ToString(&this->currentFormaT) << " = ";
-  Polynomial<AlgebraicNumber> remainderRescaledAlgebraic;
-  remainderRescaledAlgebraic=this->remainderRat;
-  remainderRescaledAlgebraic/=additionalMultiple;
-  polyStream << remainderRescaledAlgebraic.ToString(&this->currentFormaT) << " = ";
-  int varCounter=0;
-  Polynomial<AlgebraicNumber> thePolyThatMustVanish, currentSummand;
-  MonomialP currentMon;
-  thePolyThatMustVanish.MakeZero();
-  thePolyThatMustVanish-=remainderRescaledAlgebraic;
-  this->theNumerators.SetSize(theDenominatorFactorsWithMults.size());
-  for (int i =0; i<theDenominatorFactorsWithMults.size(); i++)
-  { int tempSize=-1;
-    theDenominatorFactorsWithMults.theCoeffs[i].IsSmallInteger(&tempSize);
-    this->theNumerators[i].SetSize(tempSize);
-    for (int k=0; k<theDenominatorFactorsWithMults.theCoeffs[i]; k++)
-    { rfStream << "\\frac{";
-      if (theDenominatorFactorsWithMults[i].TotalDegree()>1)
-        polyStream << "(";
-      currentSummand.MakeZero();
-      this->theNumerators[i][k].MakeZero();
-      for (int j=0; j<theDenominatorFactorsWithMults[i].TotalDegree(); j++)
-      { varCounter++;
-        std::stringstream varNameStream;
-        varNameStream << "A_{" << varCounter << "} ";
-        currentMon.MakeEi(varCounter);
-        currentMon[0]=j;
-        this->theNumerators[i][k].AddMonomial(currentMon, 1);
-        currentSummand.AddMonomial(currentMon, 1);
-        rfStream << varNameStream.str();
-        polyStream << varNameStream.str();
-        this->currentFormaT.polyAlphabeT.AddOnTop(varNameStream.str());
-        if (j>0)
-        { rfStream << "x";
-          polyStream << "x";
-        }
-        if (j>1)
-        { rfStream << "^{" << j << "}";
-          polyStream << "^{" << j << "}";
-        }
-        if ((theDenominatorFactorsWithMults[i].TotalDegree()-1)!=j)
-        { rfStream << " + ";
-          polyStream << " + ";
-        }
-      }
-      if (theDenominatorFactorsWithMults[i].TotalDegree()>1)
-        polyStream << ")";
-      for (int j=0; j<theDenominatorFactorsWithMults.size(); j++)
-      { Rational theExp=theDenominatorFactorsWithMults.theCoeffs[j];
-        if (j==i)
-          theExp-=k+1;
-        if (theExp==0)
-          continue;
-        polyStream << "(" << theDenominatorFactorsWithMults[j].ToString(&this->currentFormaT) << ")";
-        if (theExp>1)
-          polyStream << "^{" << theExp << "}";
-        for (int p=0; p<theExp; p++)
-          currentSummand*=theDenominatorFactorsWithMults[j];
-      }
-      rfStream << "}{";
-      if (k>0)
-        rfStream << "(";
-      rfStream << theDenominatorFactorsWithMults[i].ToString(&this->currentFormaT);
-      if (k>0)
-        rfStream << ")^{" << k+1 << "}";
-      rfStream << "}";
-      if (((theDenominatorFactorsWithMults.theCoeffs[i]-1)!=k) || (i!=theDenominatorFactorsWithMults.size()-1))
-      { rfStream << "+";
-        polyStream << "+";
-      }
-      thePolyThatMustVanish+=currentSummand;
-    }
-  }
-  this->printoutPFs << CGI::GetMathSpanPure(rfStream.str(), -1);
-  this->printoutPFs << "<br><br>After clearing denominators, we get the equality: ";
-  this->printoutPFs << "<br><br>" << CGI::GetMathSpanPure(polyStream.str());
+//  this->printoutPFsHtml << "<hr>this->theDenominatorFactorsWithMults: " << this->theDenominatorFactorsWithMults.ToString();
+  this->printoutPFsHtml << "<br><br>I need to find " << CGI::GetMathSpanPure("A_i") << "'s so that I have the equality of rational functions: ";
+  this->PrepareNumerators();
+  this->PrepareFormatExpressions();
+  this->printoutPFsHtml << CGI::GetMathSpanPure(this->stringRationalFunctionLatex, -1);
+  this->printoutPFsHtml << "<br><br>After clearing denominators, we get the equality: ";
+  this->printoutPFsHtml << "<br><br>" << CGI::GetMathSpanPure(this->stringPolyIndentityNonSimplifiedLatex, -1);
   Polynomial<Polynomial<AlgebraicNumber> > univariateThatMustDie;
   thePolyThatMustVanish.GetPolyUnivariateWithPolyCoeffs(0, univariateThatMustDie);
-  this->printoutPFs << "<br><br>After rearanging we get that the following polynomial must vanish: "
+  this->printoutPFsHtml << "<br><br>After rearanging we get that the following polynomial must vanish: "
   << CGI::GetMathSpanPure(univariateThatMustDie.ToString(&this->currentFormaT));
-  this->printoutPFs << "<br>Here, by ``vanish'', we mean that the coefficients in front of the powers of x must vanish.";
+  this->printoutPFsHtml << "<br>Here, by ``vanish'', we mean that the coefficients in front of the powers of x must vanish.";
   Matrix<AlgebraicNumber> theSystemHomogeneous, theConstTerms;
   Polynomial<AlgebraicNumber>::GetLinearSystemFromLinearPolys(univariateThatMustDie.theCoeffs, theSystemHomogeneous, theConstTerms);
   this->currentFormaT.flagFormatMatrixAsLinearSystem=true;
-  this->printoutPFs << "<br>In other words, we need to solve the system: "
+  this->printoutPFsHtml << "<br>In other words, we need to solve the system: "
   << CGI::GetMathSpanPure(theSystemHomogeneous.ToStringSystemLatex(&theConstTerms, &this->currentFormaT),-1);
-  theSystemHomogeneous.GaussianEliminationByRows(&theConstTerms, 0,0,0, &this->printoutPFs, &this->currentFormaT);
+  theSystemHomogeneous.GaussianEliminationByRows(&theConstTerms, 0,0,0, &this->printoutPFsHtml, &this->currentFormaT);
   PolynomialSubstitution<AlgebraicNumber> theSub;
-  theSub.MakeIdSubstitution(varCounter+1);
+  theSub.MakeIdSubstitution(this->NumberOfSystemVariables+1);
   for (int i=1; i<theSub.size; i++)
     theSub[i].MakeConst(theConstTerms(i-1,0));
-//  this->printoutPFs << "The sub is: " << theSub.ToString();
-  std::stringstream rfComputedStream;
+  //this->printoutPFsHtml << "The sub is: " << theSub.ToString();
   for (int i =0; i<theDenominatorFactorsWithMults.size(); i++)
     for (int k=0; k<theDenominatorFactorsWithMults.theCoeffs[i]; k++)
-    { this->theNumerators[i][k].Substitution(theSub);
-      rfComputedStream << "\\frac{" << this->theNumerators[i][k].ToString(&this->currentFormaT) << "}";
-      rfComputedStream << "{";
-      rfComputedStream << "(" << theDenominatorFactorsWithMults[i].ToString(&this->currentFormaT) << ")";
-      if (k>0)
-        rfComputedStream << "^{" << k+1 << "}";
-      rfComputedStream << "}";
-      if (((theDenominatorFactorsWithMults.theCoeffs[i]-1)!=k) || (i!=theDenominatorFactorsWithMults.size()-1))
-        rfComputedStream << "+";
-    }
-  this->printoutPFs << "<br>Therefore, the final partial fraction decomposition is: ";
-  std::stringstream answerFinalStream;
-  answerFinalStream << this->theRF.ToString(&this->currentFormaT) << "=";
-  if (!this->quotientRat.IsEqualToZero())
-  { answerFinalStream << this->quotientRat.ToString(&this->currentFormaT) << "+ ";
-    answerFinalStream << transformedRF.ToString(&this->currentFormaT) << "=";
-  }
-  if (!this->quotientRat.IsEqualToZero())
-    answerFinalStream << this->quotientRat.ToString(&this->currentFormaT) << "+ ";
-  answerFinalStream << rfComputedStream.str();
-  this->printoutPFs << CGI::GetMathSpanPure(answerFinalStream.str());
+      this->theNumerators[i][k].Substitution(theSub);
+  this->PrepareFinalAnswer();
+  this->printoutPFsHtml << "<br>Therefore, the final partial fraction decomposition is: "
+  << CGI::GetMathSpanPure(this->stringFinalAnswer);
   return true;
 }
 
@@ -1026,7 +1075,7 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(
     return false;
   }
   theComputation.ComputePartialFractionDecomposition();
-  return output.AssignValue(theComputation.printoutPFs.str(), theCommands);
+  return output.AssignValue(theComputation.printoutPFsHtml.str(), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerGaussianEliminationMatrix(Calculator& theCommands, const Expression& input, Expression& output)

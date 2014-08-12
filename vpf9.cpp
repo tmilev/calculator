@@ -958,6 +958,11 @@ typename List<MonomialP>::OrderLeftGreaterThanRight FormatExpressions::GetMonOrd
 }
 
 template<>
+typename List<Polynomial<AlgebraicNumber> >::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<Polynomial<AlgebraicNumber> >()
+{ return 0;
+}
+
+template<>
 typename List<MonomialVector>::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialVector>()
 { return 0;

@@ -1035,15 +1035,13 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringLaTeX()
   out << "\\\\";
   for (int i=0; i<theRemainders.size; i++)
   { out << "&";
-    out << this->GetPolynomialStringSpacedMonomialsLaTeX
-    (theSubtracands[i], totalMonCollection, true, &HighlightedColor)
+    out << this->GetPolynomialStringSpacedMonomialsLaTeX(theSubtracands[i], totalMonCollection, true, &HighlightedColor)
     << "\\\\\\cline{2-" << totalMonCollection.size+1 << "}";
     if (i<theRemainders.size-1)
       out << "$\\underline{~}$";
     out << "&"
     << this->GetPolynomialStringSpacedMonomialsLaTeX
-    (theRemainders[i], totalMonCollection, false, &HighlightedColor,
-     &this->intermediateHighlightedMons.GetElement()[i+1])
+    (theRemainders[i], totalMonCollection, false, &HighlightedColor, &this->intermediateHighlightedMons.GetElement()[i+1])
     << "\\\\";
   }
   out << "\\hline";
@@ -1092,8 +1090,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   needPolyDivision=!this->quotientRat.IsEqualToZero();
   if (needPolyDivision)
   { this->printoutPFsHtml << "<br>The numerator " << CGI::GetMathSpanPure(this->theNum.ToString(&this->currentFormaT))
-    << " divided by the denominator "
-    << CGI::GetMathSpanPure(theDen.ToString(&this->currentFormaT)) << " yields "
+    << " divided by the denominator " << CGI::GetMathSpanPure(theDen.ToString(&this->currentFormaT)) << " yields "
     << CGI::GetMathSpanPure(this->quotientRat.ToString(&this->currentFormaT)) << " with remainder "
     << CGI::GetMathSpanPure(this->remainderRat.ToString(&this->currentFormaT)) << ". ";
     GroebnerBasisComputation<Rational> theGB;

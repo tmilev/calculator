@@ -50,9 +50,9 @@ jsMath.Easy = {
   //  to add the <DIV> and <SPAN> tags that jsMath needs.  See the
   //  documentation for the tex2math plugin for more information.
   //
-  processSlashParens: 1,       // process \(...\) in text?
-  processSlashBrackets: 1,     // process \[...\] in text?
-  processDoubleDollars: 1,     // process $$...$$ in text?
+  processSlashParens: 0,       // process \(...\) in text?
+  processSlashBrackets: 0,     // process \[...\] in text?
+  processDoubleDollars: 0,     // process $$...$$ in text?
   processSingleDollars: 0,     // process $...$ in text?
   processLaTeXenvironments: 0, // process \begin{xxx}...\end{xxx} outside math mode?
   fixEscapedDollars: 0,        // convert \$ to $ outside of math mode?

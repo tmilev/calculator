@@ -329,7 +329,14 @@ bool Calculator::innerPolynomialDivisionVerbose(Calculator& theCommands, const E
 //  stOutput << "context vars: " << theFormat.polyAlphabeT;
   theGB.theFormat.flagUseLatex=true;
   theGB.theFormat.flagUseFrac=true;
-  return output.AssignValue(theGB.GetDivisionString(), theCommands);
+  std::stringstream latexOutput;
+  latexOutput <<
+  "<br>In latex: <br>\\documentclass{article}\\usepackage{longtable}\\usepackage{xcolor}\\usepackage{multicol}"
+  << "\\begin{document} "
+  << theGB.GetDivisionStringLaTeX()
+  << "\\end{document}";
+  return output.AssignValue
+  (theGB.GetDivisionStringHtml()+latexOutput.str(), theCommands);
 }
 
 bool DynkinSimpleType::HasEasySubalgebras()const
@@ -656,7 +663,7 @@ bool Calculator::innerGroebner
   theGroebnerComputation.MaxNumGBComputations=upperBoundComputations;
   bool success=theGroebnerComputation.TransformToReducedGroebnerBasis(outputGroebner, theCommands.theGlobalVariableS);
   std::stringstream out;
-  out << theGroebnerComputation.ToStringLetterOrder();
+  out << theGroebnerComputation.ToStringLetterOrder(false);
   out << "Letter/expression order: ";
   for (int i=0; i<theContext.ContextGetNumContextVariables(); i++)
   { out << theContext.ContextGetContextVariable(i).ToString();

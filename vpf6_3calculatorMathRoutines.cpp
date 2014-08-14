@@ -661,6 +661,8 @@ public:
   Expression outputIntegralE;
   AlgebraicNumber additionalMultiple;
   Calculator* owner;
+  bool allFactorsAreOfDegree2orless;
+  bool needPolyDivision;
   int NumberOfSystemVariables;
   std::stringstream printoutPFsHtml;
   std::stringstream printoutPFsLatex;
@@ -669,12 +671,14 @@ public:
   std::string stringRationalFunctionLatex;
   std::string stringRationalFunctionPartialFractionLatex;
   std::string stringFinalAnswer;
+  std::string stringDenominatorFactors;
   MonomialCollection<Polynomial<AlgebraicNumber>, Rational> theDenominatorFactorsWithMults;
   List<List<Polynomial<AlgebraicNumber> > > theNumerators;
   List<Expression> theIntegralSummands;
   Expression theIntegralSum;
   bool ComputePartialFractionDecomposition();
   void PrepareFormatExpressions();
+  void PrepareDenominatorFactors();
   void PrepareNumerators();
   void PrepareFinalAnswer();
   std::string ToStringRationalFunctionLatex();
@@ -905,6 +909,148 @@ void IntegralRFComputation::PrepareFinalAnswer()
   this->stringFinalAnswer=answerFinalStream.str();
 }
 
+void IntegralRFComputation::PrepareDenominatorFactors()
+{ MacroRegisterFunctionWithName("IntegralRFComputation::PrepareDenominatorFactors");
+
+
+  this->printoutPFsHtml << "The rational function is: " << CGI::GetMathSpanPure
+  ("\\frac{" + this->theNum.ToString(&this->currentFormaT) + "}{" +this->theDen.ToString(&this->currentFormaT) +"}")
+  << ".";
+  this->printoutPFsHtml << "<br>The denominator factors are: ";
+  this->printoutPFsLatex << "We aim to decompose into partial fractions the following function "
+  << "(the denominator has been factored). \\[\\frac{"
+  << this->theNum.ToString(&this->currentFormaT) << "}{" << this->theDen.ToString(&this->currentFormaT) << "}=";
+  this->allFactorsAreOfDegree2orless =true;
+  for (int i=0; i<this->theFactors.size; i++)
+  { this->printoutPFsHtml << CGI::GetMathSpanPure(this->theFactors[i].ToString(&this->currentFormaT));
+    bool needsParenthesis= this->theFactors[i].NeedsParenthesisForMultiplication();
+    if (needsParenthesis)
+      this->printoutPFsLatex << "\\left(";
+    this->printoutPFsLatex << this->theFactors[i].ToString(&this->currentFormaT);
+    if (needsParenthesis)
+      this->printoutPFsLatex << "\\right)";
+    if (i!=this->theFactors.size-1)
+      this->printoutPFsHtml << ", ";
+    if (this->theFactors[i].TotalDegree()>2)
+      allFactorsAreOfDegree2orless=false;
+  }
+  this->printoutPFsLatex << "\\]";
+  this->printoutPFsHtml << ". <br>";
+}
+
+template<class coefficient>
+std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMonomialsLaTeX
+  (const Polynomial<coefficient>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
+   bool underline, std::string* highlightColor, List<MonomialP>* theHighLightedMons)
+{ MacroRegisterFunctionWithName("GroebnerBasisComputation::GetPolynomialStringSpacedMonomialsLaTeX");
+  std::stringstream out;
+  bool found=false;
+  int countMons=0;
+  for (int i=0; i<theMonomialOrder.size; i++)
+  { int theIndex= thePoly.theMonomials.GetIndex(theMonomialOrder[i]);
+    if (theIndex==-1)
+    { if (i!=theMonomialOrder.size-1)
+        out << "&";
+      continue;
+    }
+    countMons++;
+    bool useHighlightStyle=false;
+    if (highlightColor!=0)
+      if (theHighLightedMons!=0)
+        if (theHighLightedMons->Contains(theMonomialOrder[i]))
+          useHighlightStyle=true;
+    out << "$";
+    if (useHighlightStyle)
+      out << "\\color{" << *highlightColor << "}{";
+    out << Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat);
+    found=true;
+    if (useHighlightStyle)
+      out << "}\\color{black}";
+    out << "$ ";
+    if (i!=theMonomialOrder.size-1)
+      out << "& ";
+  }
+  if (countMons!=thePoly.size())
+    out << " Programming ERROR!";
+  return out.str();
+}
+
+template <class coefficient>
+std::string GroebnerBasisComputation<coefficient>::GetDivisionStringLaTeX()
+{ MacroRegisterFunctionWithName("GroebnerBasisComputation::GetDivisionStringLaTeX");
+  std::stringstream out;
+  List<Polynomial<Rational> >& theRemainders=this->intermediateRemainders.GetElement();
+  List<Polynomial<Rational> >& theSubtracands=this->intermediateSubtractands.GetElement();
+  this->theFormat.thePolyMonOrder=this->thePolynomialOrder.theMonOrder;
+  HashedList<MonomialP> totalMonCollection;
+  std::string HighlightedColor="red";
+  totalMonCollection.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
+  for (int i=0; i<theRemainders.size; i++)
+  { totalMonCollection.AddOnTopNoRepetition(theRemainders[i].theMonomials);
+    totalMonCollection.AddOnTopNoRepetition(theSubtracands[i].theMonomials);
+  }
+  //List<std::string> basisColorStyles;
+  //basisColorStyles.SetSize(this->theBasiS.size);
+  totalMonCollection.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
+//  stOutput << "<hr>The monomials in play ordered: " << totalMonCollection.ToString(theFormat);
+//  int numVars=this->GetNumVars();
+  this->theFormat.flagUseLatex=true;
+  out << this->ToStringLetterOrder(true);
+  out << theRemainders.size << " division steps total.";
+  out << "\\renewcommand{\\arraystretch}{1.2}";
+  out << "\\begin{longtable}{|c";
+  for (int i =0; i<totalMonCollection.size; i++)
+    out << "c";
+  out << "|} \\hline";
+  out << "&" <<  "\\multicolumn{" << totalMonCollection.size << "}{|c|}{\\textbf{Remainder}}" << "\\\\";
+  out << "\\multicolumn{1}{|c|}{} & ";
+  out << this->GetPolynomialStringSpacedMonomialsLaTeX
+  (this->remainderDivision, totalMonCollection, true, &HighlightedColor, &this->remainderDivision.theMonomials)
+  << "\\\\\\hline";
+  out << "\\textbf{Divisor(s)} &" << "\\multicolumn{" << totalMonCollection.size << "}{|c|}{\\textbf{Quotient(s)}}"
+  << "\\\\";
+  Polynomial<coefficient> currentQuotient;
+  for (int i=0; i<this->theBasiS.size; i++)
+  { out << "$";
+    out << this->theBasiS[i].ToString(&this->theFormat);
+    out << "$";
+    out << "& \\multicolumn{" << totalMonCollection.size << "}{|l|}{";
+    currentQuotient.MakeZero();
+    for (int j=0; j<theRemainders.size; j++)
+    { if (this->intermediateSelectedDivisors.GetElement()[j]!=i)
+        continue;
+      currentQuotient.AddMonomial(this->intermediateHighestMonDivHighestMon.GetElement()[j],
+      this->intermediateCoeffs.GetElement()[j]);
+    }
+    out << "$" << currentQuotient.ToString(&this->theFormat) << "$" << "}\\\\\\hline";
+  }
+  out << "& \\multicolumn{" << totalMonCollection.size << "}{|c|}{\\textbf{Dividend}}\\\\";
+  out << "\\multicolumn{1}{|c|}{";
+  if (theRemainders.size>0)
+    out << "$\\underline{~}$";
+  out << "} &";
+  out << this->GetPolynomialStringSpacedMonomialsLaTeX
+  (this->startingPoly.GetElement(), totalMonCollection, false, &HighlightedColor,
+   &this->intermediateHighlightedMons.GetElement()[0]);
+  out << "\\\\";
+  for (int i=0; i<theRemainders.size; i++)
+  { out << "&";
+    out << this->GetPolynomialStringSpacedMonomialsLaTeX
+    (theSubtracands[i], totalMonCollection, true, &HighlightedColor)
+    << "\\\\\\cline{2-" << totalMonCollection.size+1 << "}";
+    if (i<theRemainders.size-1)
+      out << "$\\underline{~}$";
+    out << "&"
+    << this->GetPolynomialStringSpacedMonomialsLaTeX
+    (theRemainders[i], totalMonCollection, false, &HighlightedColor,
+     &this->intermediateHighlightedMons.GetElement()[i+1])
+    << "\\\\";
+  }
+  out << "\\hline";
+  out << "\\end{longtable}";
+  return out.str();
+}
+
 bool IntegralRFComputation::ComputePartialFractionDecomposition()
 { MacroRegisterFunctionWithName("IntegralRFComputation::ComputePartialFractionDecomposition");
   this->CheckConsistency();
@@ -936,47 +1082,39 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   if (tempP!=this->theDen)
     crash << "Something is very wrong: product of denominator factors is " << tempP.ToString(&this->currentFormaT)
     << ", but the denominator equals: " << this->theDen.ToString(&this->currentFormaT);
+  this->printoutPFsLatex << "\\documentclass{article}\\usepackage{longtable}\\usepackage{xcolor}\\usepackage{multicol} \\begin{document}";
 
   this->currentFormaT.flagUseFrac=true;
-  this->printoutPFsHtml << "The rational function is: " << CGI::GetMathSpanPure
-  ("\\frac{" + this->theNum.ToString(&this->currentFormaT) + "}{" +this->theDen.ToString(&this->currentFormaT) +"}")
-   << ".";
-  this->printoutPFsHtml << "<br>The denominator factors are: ";
-  bool allFactorsAreOfDegree2orless=true;
-  for (int i=0; i<this->theFactors.size; i++)
-  { this->printoutPFsHtml << CGI::GetMathSpanPure(this->theFactors[i].ToString(&this->currentFormaT));
-    if (i!=this->theFactors.size-1)
-      this->printoutPFsHtml << ", ";
-    if (this->theFactors[i].TotalDegree()>2)
-      allFactorsAreOfDegree2orless=false;
-  }
-  this->printoutPFsHtml << ". <br>";
-  if (!allFactorsAreOfDegree2orless)
-  { this->printoutPFsHtml << "There were factors (over the rationals) of degree greater than 2. I surrender. ";
-    return false;
-  }
-
   this->theNum.DivideBy(this->theDen, this->quotientRat, this->remainderRat);
 //  stOutput << "this->TheDen= " << this->theDen.ToString(&this->currentFormaT)
 //  << "<br>this->quotientRat= " << this->quotientRat.ToString(&this->currentFormaT)
 //  << "<br>this->remainderRat= " << this->remainderRat.ToString(&this->currentFormaT);
-  if (!this->quotientRat.IsEqualToZero())
+  needPolyDivision=!this->quotientRat.IsEqualToZero();
+  if (needPolyDivision)
   { this->printoutPFsHtml << "<br>The numerator " << CGI::GetMathSpanPure(this->theNum.ToString(&this->currentFormaT))
     << " divided by the denominator "
     << CGI::GetMathSpanPure(theDen.ToString(&this->currentFormaT)) << " yields "
     << CGI::GetMathSpanPure(this->quotientRat.ToString(&this->currentFormaT)) << " with remainder "
     << CGI::GetMathSpanPure(this->remainderRat.ToString(&this->currentFormaT)) << ". ";
-    Expression theDivStringArguments(*this->owner), thePolyDivStringE, numE, denE;
-    theDivStringArguments.AddChildAtomOnTop("PolyDivStringGrLex");
-    numE.AssignValueWithContext(theNum, this->inputE.GetContext(), *this->owner);
-    denE.AssignValueWithContext(theDen, this->inputE.GetContext(), *this->owner);
-    theDivStringArguments.AddChildOnTop(numE);
-    theDivStringArguments.AddChildOnTop(denE);
-    this->owner->innerPolynomialDivisionVerboseGrLex(*this->owner, theDivStringArguments, thePolyDivStringE);
-    if(thePolyDivStringE.IsOfType<std::string>())
-    { this->printoutPFsHtml << "<br>Here is a detailed long polynomial division:<br> ";
-      this->printoutPFsHtml << thePolyDivStringE.GetValue<std::string>();
-    }
+    GroebnerBasisComputation<Rational> theGB;
+    theGB.flagDoLogDivision=true;
+    theGB.theBasiS.SetSize(1);
+    theGB.theBasiS[0]= this->theDen;
+    theGB.theFormat=this->currentFormaT;
+    //  Polynomial<Rational> outputRemainder;
+    theGB.thePolynomialOrder.theMonOrder=MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
+    theGB.initForDivisionAlone(theGB.theBasiS, this->owner->theGlobalVariableS);
+    Polynomial<Rational> theNumCopy=this->theNum;
+    theGB.RemainderDivisionWithRespectToBasis(theNumCopy, &theGB.remainderDivision, this->owner->theGlobalVariableS, -1);
+    this->printoutPFsLatex << "Here is a detailed long polynomial division. ";
+    this->printoutPFsLatex << theGB.GetDivisionStringLaTeX();
+    this->printoutPFsHtml << "<br>Here is a detailed long polynomial division:<br> ";
+    this->printoutPFsHtml << theGB.GetDivisionStringHtml();
+  }
+  this->PrepareDenominatorFactors();
+  if (!allFactorsAreOfDegree2orless)
+  { this->printoutPFsHtml << "There were factors (over the rationals) of degree greater than 2. I surrender. ";
+    return false;
   }
   MonomialCollection<Polynomial<Rational>, Rational> theDenominatorFactorsWithMultsCopy;
   theDenominatorFactorsWithMultsCopy.MakeZero();
@@ -1054,6 +1192,9 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   this->PrepareFinalAnswer();
   this->printoutPFsHtml << "<br>Therefore, the final partial fraction decomposition is: "
   << CGI::GetMathSpanPure(this->stringFinalAnswer);
+  this->printoutPFsLatex << "\\end{document}";
+  this->printoutPFsHtml << "<hr>The present printout, in latex format, in ready form for copy+paste to your latex editor, follows<hr> ";
+  this->printoutPFsHtml << this->printoutPFsLatex.str();
   return true;
 }
 

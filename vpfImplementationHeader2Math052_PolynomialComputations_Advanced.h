@@ -323,7 +323,7 @@ int GroebnerBasisComputation<coefficient>::GetNumVars()const
 
 template <class coefficient>
 std::string GroebnerBasisComputation<coefficient>::ToStringLetterOrder
-()const
+(bool addDollars)const
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::ToStringLetterOrder");
   std::stringstream out;
   int numVars=this->GetNumVars();
@@ -334,16 +334,20 @@ std::string GroebnerBasisComputation<coefficient>::ToStringLetterOrder
     theVars[i].MakeEi(i, 1);
   theVars.QuickSortAscending(this->thePolynomialOrder.theMonOrder);
   FormatExpressions tempFormat=this->theFormat;
+  if (addDollars)
+    out << "$";
   for (int i=0; i<numVars; i++)
   { out << theVars[i].ToString(&tempFormat);
     if (i!=numVars-1)
       out << " < ";
   }
+  if (addDollars)
+    out << "$";
   return out.str();
 }
 
 template <class coefficient>
-std::string GroebnerBasisComputation<coefficient>::GetDivisionString()
+std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml()
 { std::stringstream out;
   List<Polynomial<Rational> >& theRemainders=this->intermediateRemainders.GetElement();
   List<Polynomial<Rational> >& theSubtracands=this->intermediateSubtractands.GetElement();
@@ -362,12 +366,12 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionString()
   totalMonCollection.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
 //  stOutput << "<hr>The monomials in play ordered: " << totalMonCollection.ToString(theFormat);
 //  int numVars=this->GetNumVars();
-  out << this->ToStringLetterOrder();
+  out << this->ToStringLetterOrder(false);
   out << "<br>";
   out << theRemainders.size << " division steps total.<br>";
   out << "<table style=\"white-space: nowrap; border:1px solid black;\">";
   out << "<tr><td " << underlineStyle << "><b>Remainder:</b></td>";
-  out << this->GetPolynomialStringSpacedMonomials(this->remainderDivision, totalMonCollection, underlineStyle, HighlightedStyle, &this->remainderDivision.theMonomials)
+  out << this->GetPolynomialStringSpacedMonomialsHtml(this->remainderDivision, totalMonCollection, underlineStyle, HighlightedStyle, &this->remainderDivision.theMonomials)
   << "</td></tr>";
   out << "<tr><td style=\"border-right:1px solid black;\"><b>Divisor(s)</b></td><td colspan=\"" << totalMonCollection.size+1 << "\"><b>Quotient(s) </b></td>"
   << "</tr>";
@@ -406,15 +410,15 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionString()
   out << "<tr><td style=\"border-right:1px solid black;\"></td><td colspan=\"" << totalMonCollection.size+1
   << "\"><b>Divident </b></td>" << "</tr>";
   out << "<tr><td style=\"border-right:1px solid black;\"></td>";
-  out << this->GetPolynomialStringSpacedMonomials
+  out << this->GetPolynomialStringSpacedMonomialsHtml
   (this->startingPoly.GetElement(), totalMonCollection, "", HighlightedStyle, &this->intermediateHighlightedMons.GetElement()[0]);
   out << "</tr>";
   for (int i=0; i<theRemainders.size; i++)
   { out << "<tr><td>-</td></tr>";
-    out << "<tr><td></td>" << this->GetPolynomialStringSpacedMonomials(theSubtracands[i], totalMonCollection, underlineStyle, underlineStyleHighlighted)
+    out << "<tr><td></td>" << this->GetPolynomialStringSpacedMonomialsHtml(theSubtracands[i], totalMonCollection, underlineStyle, underlineStyleHighlighted)
     << "</tr>";
     out << "<tr><td></td>"
-    << this->GetPolynomialStringSpacedMonomials(theRemainders[i], totalMonCollection, "", HighlightedStyle, &this->intermediateHighlightedMons.GetElement()[i+1])
+    << this->GetPolynomialStringSpacedMonomialsHtml(theRemainders[i], totalMonCollection, "", HighlightedStyle, &this->intermediateHighlightedMons.GetElement()[i+1])
     << "</tr>";
   }
   out << "</table>";
@@ -651,9 +655,10 @@ void GroebnerBasisComputation<coefficient>::CheckConsistency()
 }
 
 template<class coefficient>
-std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMonomials
-(const Polynomial<coefficient>& thePoly, const HashedList<MonomialP>& theMonomialOrder, const std::string& extraStyle, const std::string& extraHighlightStyle,
-  List<MonomialP>* theHighLightedMons)
+std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMonomialsHtml
+(const Polynomial<coefficient>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
+ const std::string& extraStyle, const std::string& extraHighlightStyle,
+ List<MonomialP>* theHighLightedMons)
 { std::stringstream out;
   bool found=false;
   int countMons=0;

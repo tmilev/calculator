@@ -1587,17 +1587,21 @@ class GroebnerBasisComputation
   void SetSerreLikeSolutionIndex(int theIndex, const coefficient& theConst);
   void GetSubFromPartialSolutionSerreLikeSystem(PolynomialSubstitution<coefficient>& outputSub);
   std::string ToStringSerreLikeSolution();
-  std::string GetPolynomialStringSpacedMonomials
+  std::string GetPolynomialStringSpacedMonomialsHtml
   (const Polynomial<coefficient>& thePoly, const HashedList<MonomialP>& theMonomialOrder, const std::string& extraStyle,
    const std::string& extraHighlightStyle, List<MonomialP>* theHighLightedMons=0);
-  std::string GetDivisionString();
+  std::string GetPolynomialStringSpacedMonomialsLaTeX
+  (const Polynomial<coefficient>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
+   bool underline=false, std::string* highlightColor=0, List<MonomialP>* theHighLightedMons=0);
+  std::string GetDivisionStringHtml();
+  std::string GetDivisionStringLaTeX();
   bool AddPolyAndReduceBasis(GlobalVariables* theGlobalVariables);
   bool TransformToReducedGroebnerBasis(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables=0);
   bool TransformToReducedGroebnerBasisImprovedAlgorithm(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables=0, int upperComputationBound=-1);
   GroebnerBasisComputation();
   void MakeMinimalBasis();
   int GetNumVars()const;
-  std::string ToStringLetterOrder()const;
+  std::string ToStringLetterOrder(bool addDollars)const;
   static int GetNumEquationsThatWouldBeLinearIfIsubbedVar(int theVarIndex, List<Polynomial<coefficient> >& input);
   static int GetNumVarsToSolveFor(const List<Polynomial<coefficient> >& input);
   static void GetVarsToSolveFor(const List<Polynomial<coefficient> >& input, Selection& output);
@@ -3963,7 +3967,7 @@ template <class templateMonomial, class coefficient>
 std::string MonomialCollection<templateMonomial, coefficient>::GetBlendCoeffAndMon
 (const templateMonomial& inputMon, coefficient& inputCoeff, bool addPlusToFront, FormatExpressions* theFormat)
 { std::stringstream out;
-  std::string coeffStr=inputCoeff.ToString();
+  std::string coeffStr=inputCoeff.ToString(theFormat);
   if (inputMon.IsConstant())
   { if (coeffStr[0]!='-' && addPlusToFront)
       out << "+" << coeffStr;

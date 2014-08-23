@@ -817,30 +817,31 @@ void ModuleSSalgebra<coefficient>::IntermediateStepForMakeFromHW
 
 template <class coefficient>
 template <class ResultType>
-void ModuleSSalgebra<coefficient>::GetElementsNilradical(List<ElementUniversalEnveloping<ResultType> >& output, bool useNegativeNilradical, List<int>* listOfGenerators)
+void ModuleSSalgebra<coefficient>::GetElementsNilradical
+(List<ElementUniversalEnveloping<ResultType> >& output, bool useNegativeNilradical, List<int>* outputListOfGenerators,
+ bool useNilWeight, bool ascending)
 { SemisimpleLieAlgebra& ownerSS=this->GetOwner();
-  ownerSS.OrderSetNilradicalNegativeMost(this->parabolicSelectionNonSelectedAreElementsLevi);
-  ownerSS.OrderSetNilradicalNegativeMostReversed(this->parabolicSelectionNonSelectedAreElementsLevi);
+  ownerSS.OrderNilradical(this->parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
   ElementUniversalEnveloping<ResultType> theElt;
   output.SetSize(0);
   output.ReservE(ownerSS.GetNumPosRoots());
 
   int theBeginning=useNegativeNilradical ? 0: ownerSS.GetNumPosRoots()+ownerSS.GetRank();
   MemorySaving<List<int> > tempList;
-  if (listOfGenerators==0)
-    listOfGenerators=&tempList.GetElement();
-  listOfGenerators->SetSize(0);
-  listOfGenerators->ReservE(ownerSS.GetNumPosRoots());
+  if (outputListOfGenerators==0)
+    outputListOfGenerators=&tempList.GetElement();
+  outputListOfGenerators->SetSize(0);
+  outputListOfGenerators->ReservE(ownerSS.GetNumPosRoots());
   for (int i=theBeginning; i<theBeginning+ownerSS.GetNumPosRoots(); i++)
     if (this->IsNotInLevi(i))
-      listOfGenerators->AddOnTop(i);
+      outputListOfGenerators->AddOnTop(i);
   //bubble sort:
-  for (int i=0; i<listOfGenerators->size; i++)
-    for (int j=i+1; j<listOfGenerators->size; j++)
-      if (ownerSS.UEGeneratorOrderIncludingCartanElts[(*listOfGenerators)[i]]> ownerSS.UEGeneratorOrderIncludingCartanElts[(*listOfGenerators)[j]])
-        listOfGenerators->SwapTwoIndices(i, j);
-  for (int i=0; i<listOfGenerators->size; i++)
-  { theElt.MakeOneGeneratorCoeffOne(listOfGenerators->TheObjects[i], *this->owneR);
+  for (int i=0; i<outputListOfGenerators->size; i++)
+    for (int j=i+1; j<outputListOfGenerators->size; j++)
+      if (ownerSS.UEGeneratorOrderIncludingCartanElts[(*outputListOfGenerators)[i]]> ownerSS.UEGeneratorOrderIncludingCartanElts[(*outputListOfGenerators)[j]])
+        outputListOfGenerators->SwapTwoIndices(i, j);
+  for (int i=0; i<outputListOfGenerators->size; i++)
+  { theElt.MakeOneGeneratorCoeffOne(outputListOfGenerators->TheObjects[i], *this->owneR);
     output.AddOnTop(theElt);
   }
 }
@@ -1081,7 +1082,7 @@ bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft
           tempOutput.MakeZero();
         tempOutput.AddMonomial(currentSingleMon, this->theCoeffs[j]);
       }
-      tempOutput.MultiplyMeByUEEltOnTheLeft(theUE, theGlobalVariables, theRingUnit, theRingZero);
+      tempOutput.MultiplyMeByUEEltOnTheLeft(theUE, theGlobalVariables);
       output=tempOutput;
       return true;
     }
@@ -1176,7 +1177,7 @@ void ElementTensorsGeneralizedVermas<coefficient>::MultiplyByElementLieAlg
     { tempElt.MakeZero();
       tempElt.AddMonomial(currentMon.theMons[j], theRingUnit);
 //      stOutput << "<hr> Acting by " << theGenerator.ToString() << " on " << tempElt.ToString() << "<br>";
-      tempElt.MultiplyMeByUEEltOnTheLeft(theGenerator, theGlobalVariables, theRingUnit, theRingZero);
+      tempElt.MultiplyMeByUEEltOnTheLeft(theGenerator, theGlobalVariables);
 //      if (tempElt.size>0)
 //        stOutput << "<br> result: " << tempElt.ToString() << ", the first coeff of tempElt is : " << tempElt.theCoeffs[0].ToString();
       for (int k=0; k<tempElt.size(); k++)

@@ -988,13 +988,16 @@ bool Calculator::fSplitFDpartB3overG2inner(Calculator& theCommands, branchingDat
   theG2Casimir.checkConsistency();
   imageCasimirInB3.checkConsistency();
   RationalFunctionOld charDiff;
+  theG2B3Data.theHmm.theRange().OrderNilradical
+  (theMod.parabolicSelectionNonSelectedAreElementsLevi, theG2B3Data.flagUseNilWeightGeneratorOrder,
+   theG2B3Data.flagAscendingGeneratorOrder);
   for (int k=0; k<theG2B3Data.g2Weights.size; k++)
   { ElementSumGeneralizedVermas<RationalFunctionOld>& currentTensorEltLevi=theG2B3Data.theEigenVectorsLevi[k];
     ElementSumGeneralizedVermas<RationalFunctionOld>& currentTensorEltEigen=theG2B3Data.theEigenVectorS[k];
     ElementUniversalEnveloping<RationalFunctionOld>& currentUEelt=theG2B3Data.theUEelts[k];
     currentTensorEltLevi=theHWV;
     //stOutput << "<br>multiplying " << currentTensorElt.ToString() << " by " << theG2B3Data.outputEigenWords[k].ToString();
-    currentTensorEltLevi.MultiplyMeByUEEltOnTheLeft(theG2B3Data.outputEigenWords[k], *theCommands.theGlobalVariableS, 1, 0);
+    currentTensorEltLevi.MultiplyMeByUEEltOnTheLeft(theG2B3Data.outputEigenWords[k], *theCommands.theGlobalVariableS);
     currentTensorEltEigen=currentTensorEltLevi;
     //stOutput << "<br> to obtain " << currentTensorElt.ToString();
     if (theG2B3Data.selInducing.CardinalitySelection>0)
@@ -1006,8 +1009,7 @@ bool Calculator::fSplitFDpartB3overG2inner(Calculator& theCommands, branchingDat
           theG2CasimirCopy-=tempElt;
           theG2CasimirCopy*=12;
           //stOutput << "<hr>Multiplying " << theG2CasimirCopy.ToString() << " and " << currentTensorElt.ToString();
-          currentTensorEltEigen.MultiplyMeByUEEltOnTheLeft
-          (theG2CasimirCopy, *theCommands.theGlobalVariableS, 1, 0);
+          currentTensorEltEigen.MultiplyMeByUEEltOnTheLeft(theG2CasimirCopy, *theCommands.theGlobalVariableS);
           charDiff=theG2B3Data.theChars[j];
           charDiff-=*theG2B3Data.theChars.LastObject();
           theG2B3Data.theCharacterDifferences.AddOnTopNoRepetition(charDiff);

@@ -786,21 +786,56 @@ std::string SemisimpleLieAlgebra::GetStringFromChevalleyGenerator(int theIndex, 
   return out.str();
 }
 
-void SemisimpleLieAlgebra::OrderSetNilradicalNegativeMostReversed(Selection& parSelZeroMeansLeviPart)
-{ Vector<Rational> tempVect;
+void SemisimpleLieAlgebra::OrderNilradicalFirstTotalWeightDescending(const Selection& parSelZeroMeansLeviPart)
+{ MacroRegisterFunctionWithName("SemisimpleLieAlgebra::OrderNilradicalFirstTotalWeightDescending");
+  Vector<Rational> tempVect;
   tempVect=parSelZeroMeansLeviPart;
   for (int i=0; i<this->GetNumGenerators(); i++)
     if(this->GetWeightOfGenerator(i).ScalarEuclidean(tempVect)<0)
-      this->UEGeneratorOrderIncludingCartanElts[i]=-this->GetNumGenerators()*3 -i;
+      this->UEGeneratorOrderIncludingCartanElts[i]=-i-this->GetNumGenerators()*5;
 }
 
-void SemisimpleLieAlgebra::OrderSetNilradicalNegativeMost(Selection& parSelZeroMeansLeviPart)
+void SemisimpleLieAlgebra::OrderNilradicalFirstTotalWeightAscending(const Selection& parSelZeroMeansLeviPart)
+{ MacroRegisterFunctionWithName("SemisimpleLieAlgebra::OrderNilradicalFirstTotalWeightDescending");
+  Vector<Rational> tempVect;
+  tempVect=parSelZeroMeansLeviPart;
+  for (int i=0; i<this->GetNumGenerators(); i++)
+    if(this->GetWeightOfGenerator(i).ScalarEuclidean(tempVect)<0)
+      this->UEGeneratorOrderIncludingCartanElts[i]=i-this->GetNumGenerators()*5;
+}
+
+void SemisimpleLieAlgebra::OrderNilradicalNilWeightAscending(const Selection& parSelZeroMeansLeviPart)
 { Vector<Rational> tempVect;
   tempVect=parSelZeroMeansLeviPart;
   for (int i=0; i<this->GetNumGenerators(); i++)
   { Rational translationCoeff=this->GetWeightOfGenerator(i).ScalarEuclidean(tempVect)* this->GetNumPosRoots();
-    this->UEGeneratorOrderIncludingCartanElts[i]=i+translationCoeff.NumShort;
+    if (translationCoeff<0)
+      this->UEGeneratorOrderIncludingCartanElts[i]=i+translationCoeff.NumShort* this->GetNumGenerators()*5;
   }
+}
+
+void SemisimpleLieAlgebra::OrderNilradicalNilWeightDescending(const Selection& parSelZeroMeansLeviPart)
+{ Vector<Rational> tempVect;
+  tempVect=parSelZeroMeansLeviPart;
+  for (int i=0; i<this->GetNumGenerators(); i++)
+  { Rational translationCoeff=this->GetWeightOfGenerator(i).ScalarEuclidean(tempVect)* this->GetNumPosRoots();
+    if (translationCoeff<0)
+      this->UEGeneratorOrderIncludingCartanElts[i]=-i+translationCoeff.NumShort* this->GetNumGenerators()*5;
+  }
+}
+
+void SemisimpleLieAlgebra::OrderNilradical(const Selection& parSelZeroMeansLeviPart, bool useNilWeight, bool ascending)
+{ MacroRegisterFunctionWithName("SemisimpleLieAlgebra::OrderNilradical");
+  if (useNilWeight)
+  { if (ascending)
+      this->OrderNilradicalNilWeightAscending(parSelZeroMeansLeviPart);
+    else
+      this->OrderNilradicalNilWeightDescending(parSelZeroMeansLeviPart);
+  } else
+    if (ascending)
+      this->OrderNilradicalFirstTotalWeightAscending(parSelZeroMeansLeviPart);
+    else
+      this->OrderNilradicalFirstTotalWeightDescending(parSelZeroMeansLeviPart);
 }
 
 void SemisimpleLieAlgebra::OrderSSalgebraForHWbfComputation()
@@ -809,10 +844,16 @@ void SemisimpleLieAlgebra::OrderSSalgebraForHWbfComputation()
     this->UEGeneratorOrderIncludingCartanElts[i]=-1;
 }
 
-void SemisimpleLieAlgebra::OrderSSLieAlgebraStandard()
+void SemisimpleLieAlgebra::OrderStandardAscending()
 { int numGens=this->GetNumGenerators();
   for (int i=0; i<numGens; i++)
     this->UEGeneratorOrderIncludingCartanElts[i]=i;
+}
+
+void SemisimpleLieAlgebra::OrderStandardDescending()
+{ int numGens=this->GetNumGenerators();
+  for (int i=0; i<numGens; i++)
+    this->UEGeneratorOrderIncludingCartanElts[i]=numGens-i-1;
 }
 
 bool SemisimpleLieAlgebra::AreOrderedProperly(int leftIndex, int rightIndex)

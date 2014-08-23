@@ -1579,7 +1579,9 @@ public:
    Expression& hwContext, SemisimpleLieAlgebra* owner, bool Verbose=true);
   bool innerWriteGenVermaModAsDiffOperatorInner
   (Calculator& theCommands, const Expression& input, Expression& output, Vectors<Polynomial<Rational> >& theHws, Expression& hwContext,
-   Selection& selInducing, SemisimpleLieAlgebra* owner, bool AllGenerators, std::string* xLetter=0, std::string* partialLetter=0, std::string* exponentVariableLetter=0);
+   Selection& selInducing, SemisimpleLieAlgebra* owner, bool AllGenerators, std::string* xLetter,
+   std::string* partialLetter, std::string* exponentVariableLetter,
+   bool useNilWeight, bool ascending);
   template<class coefficient>
   static bool TypeHighestWeightParabolic
   (Calculator& theCommands, const Expression& input, Expression& output, Vector<coefficient>& outputWeight, Selection& outputInducingSel, Expression* outputContext=0);
@@ -1590,12 +1592,20 @@ public:
   static bool innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAdCommonEigenSpaces(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerEmbedG2inB3(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerWriteGenVermaModAsDiffOperators(Calculator& theCommands, const Expression& input, Expression& output, bool AllGenerators);
-  static bool innerWriteGenVermaModAsDiffOperatorsSimpleGensOnly(Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerWriteGenVermaModAsDiffOperators(theCommands, input, output, false);
+  static bool innerWriteGenVermaModAsDiffOperators
+  (Calculator& theCommands, const Expression& input, Expression& output,
+   bool AllGenerators, bool useNilWeight, bool ascending);
+  static bool innerWriteGenVermaModAsDiffOperatorsGeneratorOrder
+  (Calculator& theCommands, const Expression& input, Expression& output)
+  { return theCommands.innerWriteGenVermaModAsDiffOperators(theCommands, input, output, false, false, true);
   }
-  static bool innerWriteGenVermaModAsDiffOperatorsAllGens(Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerWriteGenVermaModAsDiffOperators(theCommands, input, output, true);
+  static bool innerWriteGenVermaModAsDiffOperatorsNilOrderDescending
+  (Calculator& theCommands, const Expression& input, Expression& output)
+  { return theCommands.innerWriteGenVermaModAsDiffOperators(theCommands, input, output, false, true, false);
+  }
+  static bool innerWriteGenVermaModAsDiffOperatorsAllGensNilOrderDescending
+  (Calculator& theCommands, const Expression& input, Expression& output)
+  { return theCommands.innerWriteGenVermaModAsDiffOperators(theCommands, input, output, true, false, false);
   }
   static bool innerCasimir(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const Expression& input, Expression& output);

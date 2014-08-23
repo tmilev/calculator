@@ -965,16 +965,8 @@ void Calculator::initPredefinedInnerFunctions()
    The second argument gives the weight level to which the computation should be carried out",
    "WriteGenVermaAsDiffOperatorsUpToWeightLevel{}(B_3, 1, (0, 0, y)); ");
   this->AddOperationInnerHandler
-  ("EmbedSSalgebraInWeylAlgebra", this->innerWriteGenVermaModAsDiffOperatorsSimpleGensOnly, "",
-   "Experimental, please don't use. Embeds a Lie algebra \
-   in the Weyl algebra with matrix coefficients.\
-   The second argument gives the highest weight. \
-   The third argument gives the\
-   parabolic subalgebra selection. \
-   The first argument gives the type of the Lie algebra. ",
-   "EmbedSSalgebraInWeylAlgebra{}(B_3, (0,0,0), (0, 0, 1)); ", false, false);
-  this->AddOperationInnerHandler
-  ("MapSemisimpleLieAlgebraInWeylAlgebra", this->innerWriteGenVermaModAsDiffOperatorsSimpleGensOnly, "",
+  ("MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder",
+   this->innerWriteGenVermaModAsDiffOperatorsGeneratorOrder, "",
    "Constructs a parabolically induced map from a semisimple Lie algebra \
    to a Weyl algebra with matrix coefficients. More precisely, this function constructs a \
    generalized Verma module and writes it using differential operators with matrix coefficients. \
@@ -986,11 +978,23 @@ void Calculator::initPredefinedInnerFunctions()
    vector must be small integers (because the highest\
    weight must be dominant and integral with respect to the Levi part of the inducing parabolic\
    subalgebra). In the crossed-out root positions, the coordiantes of the highest weight vector\
-   can be arbitrary polynomial expressions. In addition to the first 3 arguments, this function\
+   can be arbitrary polynomial expressions. \
+   The algorithm depends on an order chosen on the Chevalley-Weyl generators of the nilradical.\
+   Here, we sort the nilradical elements in descending order relative to the order of their roots.\
+   In addition to the first 3 arguments, this function\
    accepts further optional arguments, customizing the notation of the final printout.",
+   "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ", true, false);
+  this->AddOperationInnerHandler
+  ("MapSemisimpleLieAlgebraInWeylAlgebra", this->innerWriteGenVermaModAsDiffOperatorsNilOrderDescending, "",
+   "Same as MapSemisimpleLieAlgebraInWeylAlgebra, but with a different order on the elements of the nilradical. \
+   We sort the elements of the nilradical as follows. Consider the partial order given \
+   by the graded lex order on the coordinates that correspond to crossed-out roots. Then extend this partial order \
+   by ``breaking the ties'' via the graded lexicographic order on the non-crossed out roots. This extension we call\
+   the nil-order. Now this function sorts the elements of the nilradical in descending nil-order, that is, \
+   elements with higher nil-order come first.",
    "MapSemisimpleLieAlgebraInWeylAlgebra{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ", true, false);
   this->AddOperationInnerHandler
-  ("MapSemisimpleLieAlgebraInWeylAlgebraAllGens", this->innerWriteGenVermaModAsDiffOperatorsAllGens, "",
+  ("MapSemisimpleLieAlgebraInWeylAlgebraAllGens", this->innerWriteGenVermaModAsDiffOperatorsAllGensNilOrderDescending, "",
    "Constructs a parabolically induced map from a semisimple Lie algebra \
    to a Weyl algebra with matrix coefficients. More precisely, this function constructs a \
    generalized Verma module and writes it using differential operators with matrix coefficients. \
@@ -1003,7 +1007,9 @@ void Calculator::initPredefinedInnerFunctions()
    weight must be dominant and integral with respect to the Levi part of the inducing parabolic\
    subalgebra). In the crossed-out root positions, the coordiantes of the highest weight vector\
    can be arbitrary polynomial expressions. In addition to the first 3 arguments, this function\
-   accepts further optional arguments, customizing the notation of the final printout.",
+   accepts further optional arguments, customizing the notation of the final printout.\
+   The differential operator part of the algorithm uses the nil-order given by the function \
+   MapSemisimpleLieAlgebraInWeylAlgebra.",
    "MapSemisimpleLieAlgebraInWeylAlgebraAllGens{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ", true, false);
   this->AddOperationInnerHandler
   ("KLcoeffs", this->fKLcoeffs, "",
@@ -1916,15 +1922,15 @@ void Calculator::initPredefinedStandardOperations()
    "d/dx x", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("/", CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,  this->opAlgNumber(), this->opAlgNumber(),
+  ("/", CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat, this->opAlgNumber(), this->opAlgNumber(),
    "Divides algebraic numbers. ",
    "1/(1+\\sqrt{}2+\\sqrt{}3+\\sqrt{}5+\\sqrt{}7)", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("/", CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,  this->opRational(), this->opAlgNumber(),
+  ("/", CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat, this->opRational(), this->opAlgNumber(),
    "Divides rational by algebraic number. ",
    "1/(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("/", CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,  this->opAlgNumber(), this->opRational(),
+  ("/", CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat, this->opAlgNumber(), this->opRational(),
    "Divides algebraic number by rational. ",
    "(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)/5", true);
   this->AddOperationOuterHandler
@@ -1981,6 +1987,10 @@ void Calculator::initPredefinedStandardOperations()
   ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRat, this->opRational(), this->opRational(),
    "Raises rational to power, provided the power is a small integer. ",
    "{3^3}^3; 3^{3^3}; 3^3^3; 0^3; 0^{-3}; ", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRatGetAlgebraicNumber, this->opRational(), this->opRational(),
+   "Convert rational exponent to the sqrt function. ",
+   "10^{1/2}- 10* \\sqrt{1/10}", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors, this->opRational(), this->opRational(),
    "If a rational number is small enough to factor, reduces the rational exponents of the rational number. ",

@@ -205,7 +205,7 @@ std::string BoundVariablesSubstitution::ToString()
 
 template <class coefficient>
 bool ModuleSSalgebra<coefficient>::IsNotInParabolic(int theGeneratorIndex)
-{ Vector<Rational> theWeight=  this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
+{ Vector<Rational> theWeight=this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
   for (int j=0; j<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j++)
     if (!theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]]<0)
       return true;
@@ -214,7 +214,7 @@ bool ModuleSSalgebra<coefficient>::IsNotInParabolic(int theGeneratorIndex)
 
 template <class coefficient>
 bool ModuleSSalgebra<coefficient>::IsNotInLevi(int theGeneratorIndex)
-{ Vector<Rational> theWeight=  this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
+{ Vector<Rational> theWeight=this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
   for (int j=0; j<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j++)
     if (!theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]].IsEqualToZero())
       return true;
@@ -224,9 +224,10 @@ bool ModuleSSalgebra<coefficient>::IsNotInLevi(int theGeneratorIndex)
 template <class coefficient>
 void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt
  (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunctionOld>& output,
-  GlobalVariables& theGlobalVariables)
-{ List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
-  this->GetElementsNilradical(eltsNilrad, true);
+  GlobalVariables& theGlobalVariables, bool useNilWeight, bool ascending)
+{ MacroRegisterFunctionWithName("ModuleSSalgebra::GetGenericUnMinusElt");
+  List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
+  this->GetElementsNilradical(eltsNilrad, true, useNilWeight, ascending);
   RationalFunctionOld tempRF;
   output.MakeZero(*this->theAlgebras, this->indexAlgebra);
   MonomialUniversalEnveloping<RationalFunctionOld> tempMon;
@@ -246,9 +247,10 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt
 template <class coefficient>
 void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt
 (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<Polynomial<Rational> >& output,
- GlobalVariables& theGlobalVariables)
-{ List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
-  this->GetElementsNilradical(eltsNilrad, true);
+ GlobalVariables& theGlobalVariables, bool useNilWeight, bool ascending)
+{ MacroRegisterFunctionWithName("ModuleSSalgebra::GetGenericUnMinusElt");
+  List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
+  this->GetElementsNilradical(eltsNilrad, true, 0, useNilWeight, ascending);
   Polynomial<Rational> tempRF;
   output.MakeZero(*this->owneR);
   MonomialUniversalEnveloping<Polynomial<Rational> > tempMon;
@@ -507,13 +509,14 @@ bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart(const MonomialP& t
 
 template <class coefficient>
 bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
-(ElementSemisimpleLieAlgebra<Rational>& inputElt, quasiDiffOp<Rational>& output, GlobalVariables& theGlobalVariables)
+(ElementSemisimpleLieAlgebra<Rational>& inputElt, quasiDiffOp<Rational>& output,
+ GlobalVariables& theGlobalVariables, bool useNilWeight, bool ascending)
 { MacroRegisterFunctionWithName("ModuleSSalgebra_CoefficientType::GetActionGenVermaModuleAsDiffOperator");
   List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
   List<int> indicesNilrad;
-  this->GetElementsNilradical(eltsNilrad, true, &indicesNilrad);
+  this->GetElementsNilradical(eltsNilrad, true, &indicesNilrad, useNilWeight, ascending);
   ElementUniversalEnveloping<Polynomial<Rational> > theGenElt, result;
-  this->GetGenericUnMinusElt(true, theGenElt, theGlobalVariables);
+  this->GetGenericUnMinusElt(true, theGenElt, theGlobalVariables, useNilWeight, ascending);
 //  Polynomial<Rational> Pone, Pzero;
   result.AssignElementLieAlgebra(inputElt, *this->owneR, 1, 0);
   std::stringstream out;
@@ -615,7 +618,8 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
 
 bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
 (Calculator& theCommands, const Expression& input, Expression& output, Vectors<Polynomial<Rational> >& theHws, Expression& hwContext,
- Selection& selInducing, SemisimpleLieAlgebra* owner, bool AllGenerators, std::string* xLetter, std::string* partialLetter, std::string* exponentVariableLetter)
+ Selection& selInducing, SemisimpleLieAlgebra* owner, bool AllGenerators, std::string* xLetter,
+ std::string* partialLetter, std::string* exponentVariableLetter, bool useNilWeight, bool ascending)
 { MacroRegisterFunctionWithName("Calculator::innerWriteGenVermaModAsDiffOperatorInner");
    /////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////
@@ -691,11 +695,11 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
     if (!theMod.MakeFromHW(theSSalgebra, tempV, selInducing, *theCommands.theGlobalVariableS, 1, 0, 0, true))
       return output.MakeError("Failed to create module.", theCommands);
     if (i==0)
-    { theMod.GetElementsNilradical(elementsNegativeNilrad, true);
+    { theMod.GetElementsNilradical(elementsNegativeNilrad, true,0, useNilWeight, ascending);
       Polynomial<Rational> Pone, Pzero;
       Pone.MakeOne(elementsNegativeNilrad.size+theMod.GetMinNumVars());
       Pzero.MakeZero();
-      theMod.GetGenericUnMinusElt(true, genericElt, *theCommands.theGlobalVariableS);
+      theMod.GetGenericUnMinusElt(true, genericElt, *theCommands.theGlobalVariableS, useNilWeight, ascending);
       //stOutput << "<br>highest weight: " << tempV.ToString();
       //stOutput << "<br>generic elt: " <<  genericElt.ToString();
 
@@ -742,8 +746,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
       for (int j=0; j<theGeneratorsItry.size; j++)
       { actionOnGenericElt.AssignElementLieAlgebra(theGeneratorsItry[j], theSSalgebra, Pone, Pzero);
         actionOnGenericElt*=(genericElt);
-        theSSalgebra.OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
-        theSSalgebra.OrderSetNilradicalNegativeMostReversed(theMod.parabolicSelectionNonSelectedAreElementsLevi);
+        theSSalgebra.OrderNilradical(theMod.parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
         actionOnGenericElt.Simplify(theCommands.theGlobalVariableS);
         theUEformat.NumAmpersandsPerNewLineForLaTeX=2;
         out << "<td>" << CGI::GetMathMouseHover("\\begin{array}{rcl}&&" +actionOnGenericElt.ToString(&theUEformat)+"\\end{array}") << "</td>";
@@ -767,7 +770,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
       currentTime= theCommands.theGlobalVariableS->GetElapsedSeconds();
       currentAdditions=Rational::TotalAdditions();
       currentMultiplications=Rational::TotalMultiplications();
-      theMod.GetActionGenVermaModuleAsDiffOperator(theGenerator, theQDOs[j], *theCommands.theGlobalVariableS);
+      theMod.GetActionGenVermaModuleAsDiffOperator(theGenerator, theQDOs[j], *theCommands.theGlobalVariableS, useNilWeight, ascending);
       totalAdditions+=Rational::TotalAdditions()-currentAdditions;
       totalMultiplications+=Rational::TotalMultiplications()-currentMultiplications;
       totalTime+=theCommands.theGlobalVariableS->GetElapsedSeconds()-currentTime;
@@ -2466,7 +2469,9 @@ bool Calculator::IsNonBoundVarInContext(int inputOp)
   return false;
 }
 
-bool Calculator::innerWriteGenVermaModAsDiffOperators(Calculator& theCommands, const Expression& input, Expression& output, bool AllGenerators)
+bool Calculator::innerWriteGenVermaModAsDiffOperators
+(Calculator& theCommands, const Expression& input, Expression& output, bool AllGenerators,
+ bool useNilWeight, bool ascending)
 { MacroRegisterFunctionWithName("Calculator::innerWriteGenVermaModAsDiffOperators");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   Vectors<Polynomial<Rational> > theHWs;
@@ -2501,7 +2506,8 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(Calculator& theCommands, c
 //  theContext.ContextGetFormatExpressions(theFormat);
 //  stOutput << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
   return theCommands.innerWriteGenVermaModAsDiffOperatorInner
-  (theCommands, input, output, theHWs, theContext, theParSel, theSSalgebra, AllGenerators, &letterString, &partialString, &exponentLetterString);
+  (theCommands, input, output, theHWs, theContext, theParSel, theSSalgebra, AllGenerators, &letterString,
+   &partialString, &exponentLetterString, useNilWeight, ascending);
 }
 
 bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression& input, Expression& output)

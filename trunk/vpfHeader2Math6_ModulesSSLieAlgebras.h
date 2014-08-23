@@ -147,15 +147,23 @@ public:
    List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors=0, Vectors<coefficient>* outputWeightsFundCoords=0,
    Vectors<coefficient>* outputEigenSpace=0, std::stringstream* comments=0, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
   template<class ResultType>
-  void GetElementsNilradical(List<ElementUniversalEnveloping<ResultType> >& output, bool useNegativeNilradical, List<int>* listOfGenerators=0);
+  void GetElementsNilradical
+  (List<ElementUniversalEnveloping<ResultType> >& output, bool useNegativeNilradical,
+   List<int>* outputListOfGenerators, bool useNilWeight, bool ascending);
   bool IsNotInLevi(int theGeneratorIndex);
   bool IsNotInParabolic(int theGeneratorIndex);
-  void GetGenericUnMinusElt(bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<Polynomial<Rational> >& output, GlobalVariables& theGlobalVariables);
-  void GetGenericUnMinusElt(bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables);
+  void GetGenericUnMinusElt
+  (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<Polynomial<Rational> >& output, GlobalVariables& theGlobalVariables,
+   bool useNilWeight, bool ascending);
+  void GetGenericUnMinusElt
+  (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables,
+   bool useNilWeight, bool ascending);
   //The input of the following function is supposed to be an honest element of the
   //Universal enveloping,
   //i.e. inputElt is not allowed to have non-small integer exponents.
-  bool GetActionGenVermaModuleAsDiffOperator(ElementSemisimpleLieAlgebra<Rational>& inputElt, quasiDiffOp<Rational>& output, GlobalVariables& theGlobalVariables);
+  bool GetActionGenVermaModuleAsDiffOperator
+  (ElementSemisimpleLieAlgebra<Rational>& inputElt, quasiDiffOp<Rational>& output, GlobalVariables& theGlobalVariables,
+   bool useNilWeight, bool ascending);
   bool GetActionEulerOperatorPart(const MonomialP& theCoeff, ElementWeylAlgebra<Rational>& outputDO, GlobalVariables& theGlobalVariables);
   ModuleSSalgebra() : owneR(0), flagIsInitialized(false), MaxNumCachedPairs(1000000)
   {

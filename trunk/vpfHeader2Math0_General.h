@@ -3908,7 +3908,7 @@ std::string Matrix<coefficient>::ToStringSystemLatex
     if (!constTermsAreGood)
       out << "0";
     else
-      out << (*constTerms)(i,0);
+      out << (*constTerms)(i,0).ToString(theFormat);
     out << "\\\\";
   }
   out << "\\end{array}";
@@ -4141,10 +4141,14 @@ void Matrix<coefficient>::GaussianEliminationByRows
   bool doProgressReport= theGlobalVariables==0 ? false :
   theGlobalVariables->flagReportGaussianElimination || theGlobalVariables->flagReportEverything;
   bool formatAsLinearSystem= theFormat==0? false : theFormat->flagFormatMatrixAsLinearSystem;
+  bool useHtmlInReport=theFormat==0? true : theFormat->flagUseHTML;
   ProgressReport theReport(theGlobalVariables);
   if (humanReadableReport!=0)
-  { *humanReadableReport << "\n\n\n\n<table><tr><td style=\"border-bottom:3pt solid black;\">System status</td>"
-    << "<td style=\"border-bottom:3pt solid black;\">action</td></tr>";
+  { if(useHtmlInReport)
+      *humanReadableReport << "\n\n\n\n<table><tr><td style=\"border-bottom:3pt solid black;\">System status</td>"
+      << "<td style=\"border-bottom:3pt solid black;\">action</td></tr>";
+    else
+      *humanReadableReport << "\n\n\\begin{longtable}{cc} System status&Action \\\\\\hline\n";
   }
   //Initialization done! Time to do actual work:
   for (int i=0; i<this->NumCols; i++)
@@ -4161,15 +4165,25 @@ void Matrix<coefficient>::GaussianEliminationByRows
       continue;
     }
     if (humanReadableReport!=0)
-    { *humanReadableReport << "<tr><td style=\"border-bottom:1pt solid black;\">";
-      if (formatAsLinearSystem)
-        *humanReadableReport << CGI::GetMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat),-1);
-      else
-        *humanReadableReport << CGI::GetMathSpanPure(this->ToStringLatex(),-1);
-      *humanReadableReport << "</td><td style=\"border-bottom:1pt solid black;\">Selected pivot column "
-      << i+1 << ". ";
-      if (NumFoundPivots!=tempI)
-        *humanReadableReport << "Swapping rows so the pivot row is number " << NumFoundPivots << ". ";
+    { if (useHtmlInReport)
+      { *humanReadableReport << "<tr><td style=\"border-bottom:1pt solid black;\">";
+        if (formatAsLinearSystem)
+          *humanReadableReport << CGI::GetMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat),-1);
+        else
+          *humanReadableReport << CGI::GetMathSpanPure(this->ToStringLatex(),-1);
+        *humanReadableReport << "</td><td style=\"border-bottom:1pt solid black;\">Selected pivot column "
+        << i+1 << ". ";
+        if (NumFoundPivots!=tempI)
+          *humanReadableReport << "Swapping rows so the pivot row is number " << NumFoundPivots << ". ";
+      } else
+      { if (formatAsLinearSystem)
+          *humanReadableReport << "$" << this->ToStringSystemLatex(carbonCopyMat, theFormat) << "$";
+        else
+          *humanReadableReport << "$" << this->ToStringLatex() << "$";
+        *humanReadableReport << "& Selected pivot column " << i+1 << ". ";
+        if (NumFoundPivots!=tempI)
+          *humanReadableReport << "Swapping rows so the pivot row is number " << NumFoundPivots << ". ";
+      }
     }
     if (outputPivotColumns!=0)
       outputPivotColumns->AddSelectionAppendNewIndex(i);
@@ -4200,17 +4214,29 @@ void Matrix<coefficient>::GaussianEliminationByRows
           //this->ComputeDebugString();
         }
     if (humanReadableReport!=0)
-    { *humanReadableReport << "Eliminated the non-zero entries in the pivot column</td></tr>";
+    { if (useHtmlInReport)
+        *humanReadableReport << "Eliminated the non-zero entries in the pivot column</td></tr>";
+      else
+        *humanReadableReport << "Eliminated the non-zero entries in the pivot column. \\\\\\hline\n";
     }
     NumFoundPivots++;
   }
   if (humanReadableReport!=0)
-  { if (formatAsLinearSystem)
-      *humanReadableReport << "<tr><td>" << CGI::GetMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat),-1)
-      << "</td><td> Final result.</td></tr></table>\n\n\n\n";
-    else
-      *humanReadableReport << "<tr><td>" << CGI::GetMathSpanPure(this->ToStringLatex())
-      << "</td><td> Final result.</td></tr></table>\n\n\n\n";
+  { if (useHtmlInReport)
+    { if (formatAsLinearSystem)
+        *humanReadableReport << "<tr><td>" << CGI::GetMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat),-1)
+        << "</td><td> Final result.</td></tr></table>\n\n\n\n";
+      else
+        *humanReadableReport << "<tr><td>" << CGI::GetMathSpanPure(this->ToStringLatex())
+        << "</td><td> Final result.</td></tr></table>\n\n\n\n";
+    } else
+    { if (formatAsLinearSystem)
+        *humanReadableReport << "$" << this->ToStringSystemLatex(carbonCopyMat, theFormat)
+        << "$& Final result.\\\\\n";
+      else
+        *humanReadableReport << "$" << this->ToStringLatex() << "$& Final result.\\\\\n";
+      *humanReadableReport << "\\end{longtable}";
+    }
   }
 }
 
@@ -5759,7 +5785,9 @@ class MonomialGeneralizedVerma
     return output;
   }
   void MultiplyMeByUEEltOnTheLefT
-  (const ElementUniversalEnveloping<coefficient>& theUE, ElementSumGeneralizedVermas<coefficient>& output, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)const;
+  (const ElementUniversalEnveloping<coefficient>& theUE,
+   ElementSumGeneralizedVermas<coefficient>& output, GlobalVariables& theGlobalVariables
+   )const;
   void operator=(const MonomialGeneralizedVerma<coefficient>& other)
   { this->owneR=other.owneR;
     this->indexFDVector=other.indexFDVector;
@@ -5797,7 +5825,8 @@ class MonomialGeneralizedVerma
       return this->indexFDVector>other.indexFDVector;
     return this->theMonCoeffOne>other.theMonCoeffOne;
   }
-  void ReduceMe(ElementSumGeneralizedVermas<coefficient>& output, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)const;
+  void ReduceMe
+  (ElementSumGeneralizedVermas<coefficient>& output, GlobalVariables& theGlobalVariables)const;
   bool IsHWV()const
   { if (!this->theMonCoeffOne.IsEqualToOne())
       return false;
@@ -5819,7 +5848,8 @@ class ElementSumGeneralizedVermas : public MonomialCollection<MonomialGeneralize
 {
   public:
 //  ModuleSSalgebra<coefficient>* owneR;
-  void MultiplyMeByUEEltOnTheLeft(const ElementUniversalEnveloping<coefficient>& theUE, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero);
+  void MultiplyMeByUEEltOnTheLeft
+  (const ElementUniversalEnveloping<coefficient>& theUE, GlobalVariables& theGlobalVariables);
   unsigned int HashFunction()const
   { return this->MonomialCollection<MonomialGeneralizedVerma<coefficient>, coefficient >::HashFunction();
   }
@@ -6213,13 +6243,16 @@ void MonomialTensorGeneralizedVermas<coefficient>::operator=
 
 template <class coefficient>
 void MonomialGeneralizedVerma<coefficient>::MultiplyMeByUEEltOnTheLefT
-(const ElementUniversalEnveloping<coefficient>& theUE, ElementSumGeneralizedVermas<coefficient>& output,
-GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)const
+(const ElementUniversalEnveloping<coefficient>& theUE,
+ ElementSumGeneralizedVermas<coefficient>& output, GlobalVariables& theGlobalVariables)const
 { MacroRegisterFunctionWithName("MonomialGeneralizedVerma<coefficient>::MultiplyMeByUEEltOnTheLefT");
   MonomialGeneralizedVerma<coefficient> currentMon;
   output.MakeZero();
   ElementSumGeneralizedVermas<coefficient> buffer;
   ProgressReport theReport(&theGlobalVariables);
+  if (!this->GetOwner().owneR->flagHasNilradicalOrder)
+    crash << "Calling generalized verma module simplification requires nilradical order on the generators. "
+    << crash;
   for (int j=0; j<theUE.size(); j++)
   { currentMon.theMonCoeffOne=theUE[j];
 //    stOutput << "<br>currentMon: " << currentMon.theMonCoeffOne.ToString();
@@ -6233,7 +6266,7 @@ GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coeff
     reportStream << "reducing mon: " << currentMon.ToString() << ", index" << j+1 << " out of " << theUE.size() << "...";
 //    stOutput << "reducing mon: " << currentMon.ToString() << ", index" << j+1 << " out of " << theUE.size() << "...";
     theReport.Report(reportStream.str());
-    currentMon.ReduceMe(buffer, theGlobalVariables, theRingUnit, theRingZero);
+    currentMon.ReduceMe(buffer, theGlobalVariables);
     reportStream << " done.";
 //    stOutput << " done.";
     theReport.Report(reportStream.str());
@@ -6247,15 +6280,14 @@ GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coeff
 
 template <class coefficient>
 void ElementSumGeneralizedVermas<coefficient>::MultiplyMeByUEEltOnTheLeft
-  (const ElementUniversalEnveloping<coefficient>& theUE, GlobalVariables& theGlobalVariables,
-   const coefficient& theRingUnit, const coefficient& theRingZero)
+  (const ElementUniversalEnveloping<coefficient>& theUE, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("ElementSumGeneralizedVermas<coefficient>::MultiplyMeByUEEltOnTheLeft");
   ElementSumGeneralizedVermas<coefficient> buffer, Accum;
 //stOutput << "<br>Multiplying " << this->ToString() << " by " << theUE.ToString();
   Accum.MakeZero();
   for (int i=0; i<this->size(); i++)
   {// stOutput << "<br>Multiplying " << this->TheObjects[i].ToString() << " by " << theUE.ToString() << " by " << this->theCoeffs[i].ToString();
-    (*this)[i].MultiplyMeByUEEltOnTheLefT(theUE, buffer, theGlobalVariables, theRingUnit, theRingZero);
+    (*this)[i].MultiplyMeByUEEltOnTheLefT(theUE, buffer, theGlobalVariables);
     //stOutput << "<br>buffer " << buffer.ToString() << " multiplied by coeff " << this->theCoeffs[i].ToString();
     buffer*=this->theCoeffs[i];
 //    stOutput << "<br>to obtain " << buffer.ToString();
@@ -6267,7 +6299,8 @@ void ElementSumGeneralizedVermas<coefficient>::MultiplyMeByUEEltOnTheLeft
 }
 
 template <class coefficient>
-void MonomialGeneralizedVerma<coefficient>::ReduceMe(ElementSumGeneralizedVermas<coefficient>& output, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)const
+void MonomialGeneralizedVerma<coefficient>::ReduceMe
+(ElementSumGeneralizedVermas<coefficient>& output, GlobalVariables& theGlobalVariables)const
 { MacroRegisterFunctionWithName("MonomialGeneralizedVerma::ReduceMe");
   //stOutput << "<hr><hr>Reducing  " << this->ToString();
   ModuleSSalgebra<coefficient>& theMod=*this->owneR;
@@ -6276,11 +6309,13 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe(ElementSumGeneralizedVermas
   tempMon=this->theMonCoeffOne;
   tempMon*=theMod.theGeneratingWordsNonReduced[this->indexFDVector];
   int indexCheck=theMod.theGeneratingWordsNonReduced.GetIndex(tempMon);
+  if (!this->owneR->owneR->flagHasNilradicalOrder)
+    crash << "Owner needs nilradical order!!!" << crash;
   if (indexCheck!=-1)
   { MonomialGeneralizedVerma<coefficient> basisMon;
     basisMon.MakeConst(*this->owneR);
     basisMon.indexFDVector=indexCheck;
-    output.AddMonomial(basisMon, theRingUnit);
+    output.AddMonomial(basisMon, 1);
 //    stOutput << "<br>Reduced " << this->ToString() << " to " << output.ToString() << " = " << basisMon.ToString();
 //    stOutput << "<br> index check is " << indexCheck << " corresponding to " << theMod.theGeneratingWordsNonReduced[indexCheck].ToString();
 //    theGlobalVariables.MakeProgressReport("Monomial basis of fd part. ", 2);
@@ -6288,16 +6323,16 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe(ElementSumGeneralizedVermas
   }
 //  stOutput << "<br>Not a monomial basis of fd part";
 //  theGlobalVariables.MakeProgressReport("Monomial not basis of fd part. ", 2);
-  theMod.GetOwner().OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
+//  theMod.GetOwner().OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
 //  stOutput << "<br>";
 //  for (int i=0; i<theMod.GetOwner().UEGeneratorOrderIncludingCartanElts.size; i++)
 //  { stOutput << "<br>generator index " << i << " has order " << theMod.GetOwner().UEGeneratorOrderIncludingCartanElts[i];
 //  }
   ElementUniversalEnveloping<coefficient> theUEelt;
   theUEelt.MakeZero(*this->GetOwner().owneR);
-  theUEelt.AddMonomial(this->theMonCoeffOne, theRingUnit);
+  theUEelt.AddMonomial(this->theMonCoeffOne, 1);
 //  stOutput << " <br>the monomial:" << this->ToString();
-  theUEelt.Simplify(&theGlobalVariables, theRingUnit, theRingZero);
+  theUEelt.Simplify(&theGlobalVariables, 1, 0);
 //  stOutput << " <br>the corresponding ue with F.D. part cut off: " << theUEelt.ToString();
 
   MonomialUniversalEnveloping<coefficient> currentMon;
@@ -6324,8 +6359,7 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe(ElementSumGeneralizedVermas
       if (theMod.HasFreeAction(theIndex))
         break;
       tempMat2=tempMat1;
-      tempMat1=theMod.GetActionGeneratorIndeX
-      (theIndex, theGlobalVariables, theRingUnit, theRingZero);
+      tempMat1=theMod.GetActionGeneratorIndeX(theIndex, theGlobalVariables);
       tempMat1.RaiseToPower(thePower);
       tempMat1*=tempMat2;
       currentMon.Powers.size--;
@@ -6356,7 +6390,7 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe(ElementSumGeneralizedVermas
   }
 //  stOutput << "<br>Matrix of the action: " << tempMat1.ToString();
 //  stOutput << "<br> Final output: " << output.ToString();
-  theMod.GetOwner().OrderSSLieAlgebraStandard();
+  theMod.GetOwner().OrderStandardAscending();
 }
 
 template<class coefficient>

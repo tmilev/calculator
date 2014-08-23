@@ -34,6 +34,7 @@ public:
   std::string PhysicalNameMainOutputFolder;
   std::string DisplayNameMainOutputFolder;
 
+  bool flagHasNilradicalOrder;
   bool flagDeallocated;
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
@@ -73,7 +74,8 @@ public:
     (generatorIndex>=this->GetNumPosRoots()+this->GetRank() && generatorIndex<this->GetNumPosRoots()+this->GetRank()*2);
   }
   SemisimpleLieAlgebra()
-  { this->flagDeallocated=false;
+  { this->flagHasNilradicalOrder=false;
+    this->flagDeallocated=false;
   }
   ~SemisimpleLieAlgebra()
   { this->flagDeallocated=true;
@@ -109,10 +111,15 @@ public:
   inline int GetRank()const
   { return this->theWeyl.CartanSymmetric.NumRows;
   }
-  void OrderSetNilradicalNegativeMost(Selection& parSelZeroMeansLeviPart);
-  void OrderSetNilradicalNegativeMostReversed(Selection& parSelZeroMeansLeviPart);
+  void OrderNilradical(const Selection& parSelZeroMeansLeviPart, bool useNilWeight, bool ascending);
+  void OrderNilradicalFirstTotalWeightAscending(const Selection& parSelZeroMeansLeviPart);
+  void OrderNilradicalFirstTotalWeightDescending(const Selection& parSelZeroMeansLeviPart);
+  void OrderNilradicalNilWeightAscending(const Selection& parSelZeroMeansLeviPart);
+  void OrderNilradicalNilWeightDescending(const Selection& parSelZeroMeansLeviPart);
+  void OrderStandardAscending();
+  void OrderStandardDescending();
+
   void OrderSSalgebraForHWbfComputation();
-  void OrderSSLieAlgebraStandard();
   int GetCartanGeneratorIndex(int simpleRootIndex)
   { return this->theWeyl.RootsOfBorel.size+simpleRootIndex;
   }

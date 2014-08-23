@@ -695,11 +695,11 @@ bool CalculatorFunctionsBinaryOps::innerPowerRatByRat(Calculator& theCommands, c
     return false;
 //  stOutput << "<br>raising " << input[1].ToString() << " to power " << input[2].ToString();
   Rational base, exp;
-  if(!input[1].IsOfType(&base))
+  if(!input[1].IsRational(&base))
     return false;
   if (base.IsEqualToOne())
     return output.AssignValue(1, theCommands);
-  if(!input[2].IsOfType(&exp))
+  if(!input[2].IsRational(&exp))
     return false;
   int thePower;
   if (!exp.IsSmallInteger(&thePower))
@@ -708,6 +708,31 @@ bool CalculatorFunctionsBinaryOps::innerPowerRatByRat(Calculator& theCommands, c
     return output.MakeError("Division by zero: trying to raise 0 to negative or zero power. ", theCommands);
   base.RaiseToPower(thePower);
   return output.AssignValue(base, theCommands);
+}
+
+bool CalculatorFunctionsBinaryOps::innerPowerRatByRatGetAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerRatByRatGetAlgebraicNumber");
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  if (!input.IsListNElements(3))
+    return false;
+  //  stOutput << "<br>raising " << input[1].ToString() << " to power " << input[2].ToString();
+  Rational base, exp;
+  if(!input[1].IsRational(&base))
+    return false;
+  if(!input[2].IsRational(&exp))
+    return false;
+  if (exp.IsInteger())
+    return false;
+  LargeInt theDen=exp.GetDenominator();
+  int theRadical=0;
+  if (!theDen.IsIntegerFittingInInt(&theRadical))
+    return false;
+  if (theDen==1)
+    return false;
+  Expression sqrtE, powerE;
+  sqrtE.MakeSqrt(theCommands, base, theRadical);
+  powerE.AssignValue((Rational) exp.GetNumerator(), theCommands);
+  return output.MakeXOX(theCommands, theCommands.opThePower(), sqrtE, powerE);
 }
 
 bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(Calculator& theCommands, const Expression& input, Expression& output)
@@ -903,16 +928,16 @@ bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat(Calculator
 //  stOutput << "<br>attempting to exponentiate: " << input.ToString();
   Rational base, exp;
   double baseDouble, expDouble;
-  if(input[1].IsOfType(&base))
+  if(input[1].IsRational(&base))
     baseDouble=base.GetDoubleValue();
   else if (!input[1].IsOfType(&baseDouble))
     return false;
-  if(input[2].IsOfType(&exp))
+  if(input[2].IsRational(&exp))
     expDouble=exp.GetDoubleValue();
   else if (!input[2].IsOfType(&expDouble))
     return false;
   if (baseDouble<0)
-  { if(!input[2].IsOfType<Rational>())
+  { if(!input[2].IsRational())
       return false;
     int thePower=0;
     if (exp.IsEven())

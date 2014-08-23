@@ -911,15 +911,14 @@ void IntegralRFComputation::PrepareFinalAnswer()
 
 void IntegralRFComputation::PrepareDenominatorFactors()
 { MacroRegisterFunctionWithName("IntegralRFComputation::PrepareDenominatorFactors");
-
-
   this->printoutPFsHtml << "The rational function is: " << CGI::GetMathSpanPure
   ("\\frac{" + this->theNum.ToString(&this->currentFormaT) + "}{" +this->theDen.ToString(&this->currentFormaT) +"}")
   << ".";
   this->printoutPFsHtml << "<br>The denominator factors are: ";
   this->printoutPFsLatex << "We aim to decompose into partial fractions the following function "
   << "(the denominator has been factored). \\[\\frac{"
-  << this->theNum.ToString(&this->currentFormaT) << "}{" << this->theDen.ToString(&this->currentFormaT) << "}=";
+  << this->theNum.ToString(&this->currentFormaT) << "}{" << this->theDen.ToString(&this->currentFormaT) << "}="
+  << "\\frac{" << this->theNum.ToString(&this->currentFormaT)  << "}{ ";
   this->allFactorsAreOfDegree2orless =true;
   for (int i=0; i<this->theFactors.size; i++)
   { this->printoutPFsHtml << CGI::GetMathSpanPure(this->theFactors[i].ToString(&this->currentFormaT));
@@ -934,6 +933,7 @@ void IntegralRFComputation::PrepareDenominatorFactors()
     if (this->theFactors[i].TotalDegree()>2)
       allFactorsAreOfDegree2orless=false;
   }
+  this->printoutPFsLatex << "}";
   this->printoutPFsLatex << "\\]";
   this->printoutPFsHtml << ". <br>";
 }
@@ -1081,7 +1081,11 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
     crash << "Something is very wrong: product of denominator factors is " << tempP.ToString(&this->currentFormaT)
     << ", but the denominator equals: " << this->theDen.ToString(&this->currentFormaT);
   this->printoutPFsLatex << "\\documentclass{article}\\usepackage{longtable}\\usepackage{xcolor}\\usepackage{multicol} \\begin{document}";
-
+  this->PrepareDenominatorFactors();
+  if (!allFactorsAreOfDegree2orless)
+  { this->printoutPFsHtml << "There were factors (over the rationals) of degree greater than 2. I surrender. ";
+    return false;
+  }
   this->currentFormaT.flagUseFrac=true;
   this->theNum.DivideBy(this->theDen, this->quotientRat, this->remainderRat);
 //  stOutput << "this->TheDen= " << this->theDen.ToString(&this->currentFormaT)
@@ -1107,11 +1111,6 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
     this->printoutPFsLatex << theGB.GetDivisionStringLaTeX();
     this->printoutPFsHtml << "<br>Here is a detailed long polynomial division:<br> ";
     this->printoutPFsHtml << theGB.GetDivisionStringHtml();
-  }
-  this->PrepareDenominatorFactors();
-  if (!allFactorsAreOfDegree2orless)
-  { this->printoutPFsHtml << "There were factors (over the rationals) of degree greater than 2. I surrender. ";
-    return false;
   }
   MonomialCollection<Polynomial<Rational>, Rational> theDenominatorFactorsWithMultsCopy;
   theDenominatorFactorsWithMultsCopy.MakeZero();
@@ -1162,22 +1161,35 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   this->theDenominatorFactorsWithMults.QuickSortAscending();
 //  this->printoutPFsHtml << "<hr>this->theDenominatorFactorsWithMults: " << this->theDenominatorFactorsWithMults.ToString();
   this->printoutPFsHtml << "<br><br>I need to find " << CGI::GetMathSpanPure("A_i") << "'s so that I have the equality of rational functions: ";
+  this->printoutPFsLatex << "We need to find $A_i$'s so that we have the following equality of rational functions. ";
   this->PrepareNumerators();
   this->PrepareFormatExpressions();
   this->printoutPFsHtml << CGI::GetMathSpanPure(this->stringRationalFunctionLatex, -1);
   this->printoutPFsHtml << "<br><br>After clearing denominators, we get the equality: ";
+  this->printoutPFsLatex << "After clearing denominators, we get the following equality. ";
   this->printoutPFsHtml << "<br><br>" << CGI::GetMathSpanPure(this->stringPolyIndentityNonSimplifiedLatex, -1);
+  this->printoutPFsLatex << "\\[" << this->stringPolyIndentityNonSimplifiedLatex << "\\]";
   Polynomial<Polynomial<AlgebraicNumber> > univariateThatMustDie;
   thePolyThatMustVanish.GetPolyUnivariateWithPolyCoeffs(0, univariateThatMustDie);
-  this->printoutPFsHtml << "<br><br>After rearanging we get that the following polynomial must vanish: "
+  this->printoutPFsHtml << "<br><br>After rearranging we get that the following polynomial must vanish: "
   << CGI::GetMathSpanPure(univariateThatMustDie.ToString(&this->currentFormaT));
+  this->printoutPFsLatex << "After rearranging we get that the following polynomial must vanish. Here, by ``vanish'' "
+  << "we mean that the coefficients of the powers of $x$ must be equal to zero."
+  << "\\[" << univariateThatMustDie.ToString(&this->currentFormaT) << "\\]";
   this->printoutPFsHtml << "<br>Here, by ``vanish'', we mean that the coefficients in front of the powers of x must vanish.";
-  Matrix<AlgebraicNumber> theSystemHomogeneous, theConstTerms;
+  Matrix<AlgebraicNumber> theSystemHomogeneous, theSystemHomogeneousForLaTeX, theConstTerms, theConstTermsForLaTeX;
   Polynomial<AlgebraicNumber>::GetLinearSystemFromLinearPolys(univariateThatMustDie.theCoeffs, theSystemHomogeneous, theConstTerms);
+  theSystemHomogeneousForLaTeX=theSystemHomogeneous;
+  theConstTermsForLaTeX=theConstTerms;
   this->currentFormaT.flagFormatMatrixAsLinearSystem=true;
   this->printoutPFsHtml << "<br>In other words, we need to solve the system: "
   << CGI::GetMathSpanPure(theSystemHomogeneous.ToStringSystemLatex(&theConstTerms, &this->currentFormaT),-1);
+  this->printoutPFsLatex << "In other words, we need to solve the following system. "
+  << "\\[" << theSystemHomogeneous.ToStringSystemLatex(&theConstTerms, &this->currentFormaT) << "\\]";
+  this->currentFormaT.flagUseHTML=true;
   theSystemHomogeneous.GaussianEliminationByRows(&theConstTerms, 0,0,0, &this->printoutPFsHtml, &this->currentFormaT);
+  this->currentFormaT.flagUseHTML=false;
+  theSystemHomogeneousForLaTeX.GaussianEliminationByRows(&theConstTermsForLaTeX, 0,0,0, &this->printoutPFsLatex, &this->currentFormaT);
   PolynomialSubstitution<AlgebraicNumber> theSub;
   theSub.MakeIdSubstitution(this->NumberOfSystemVariables+1);
   for (int i=1; i<theSub.size; i++)
@@ -1189,6 +1201,9 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   this->PrepareFinalAnswer();
   this->printoutPFsHtml << "<br>Therefore, the final partial fraction decomposition is: "
   << CGI::GetMathSpanPure(this->stringFinalAnswer);
+  this->printoutPFsLatex << "Therefore, the final partial fraction decomposition is the following. "
+  << "\\[" << this->stringFinalAnswer << "\\]";
+
   this->printoutPFsLatex << "\\end{document}";
   this->printoutPFsHtml << "<hr>The present printout, in latex format, in ready form for copy+paste to your latex editor, follows<hr> ";
   this->printoutPFsHtml << this->printoutPFsLatex.str();
@@ -3954,7 +3969,8 @@ bool CalculatorFunctionsGeneral::innerWriteGenVermaModAsDiffOperatorUpToLevel(Ca
   FormatExpressions theFormat;
   hwContext.ContextGetFormatExpressions(theFormat);
 //  stOutput << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
-  return theCommands.innerWriteGenVermaModAsDiffOperatorInner(theCommands, input, output, theHws, hwContext, selInducing, theSSalgebra, false);
+  return theCommands.innerWriteGenVermaModAsDiffOperatorInner
+  (theCommands, input, output, theHws, hwContext, selInducing, theSSalgebra, false, 0, 0, 0, true, true);
 }
 
 bool CalculatorFunctionsGeneral::innerHWV(Calculator& theCommands, const Expression& input, Expression& output)

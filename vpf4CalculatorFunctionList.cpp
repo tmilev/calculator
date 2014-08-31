@@ -1427,33 +1427,33 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat, this->opRational(), this->opEltZmodP(),
    "Adds elements of Z_p. ",
-   " (2 mod  7)+3", true);
+   " (2 mod  7)+3", true, false, "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat, this->opEltZmodP(), this->opRational(),
    "Adds elements of Z_p. ",
-   " (2 mod  7)+3", true);
+   " (2 mod  7)+3", true, false, "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat, this->opEltZmodP(), this->opEltZmodP(),
    "Adds elements of Z_p. ",
-   " (2 mod  7)+3", true);
+   " (2 mod  7)+3", true, false, "CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber, this->opAlgNumber(), this->opAlgNumber(),
    "Adds two algebraic numbers. ",
-   "\\sqrt {2}+ \\sqrt {3} + \\sqrt{6}", true);
+   "\\sqrt {2}+ \\sqrt {3} + \\sqrt{6}", true, false, "CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber, this->opAlgNumber(), this->opRational(),
    "Adds algebraic number to rational. ",
-   "1/(\\sqrt {2}+ 1+\\sqrt{3}+\\sqrt{6})", true);
+   "1/(\\sqrt {2}+ 1+\\sqrt{3}+\\sqrt{6})", true, false, "CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber, this->opRational(), this->opAlgNumber(),
    "Adds rational to algebraic number. ",
-   "1/(1+\\sqrt {2}+\\sqrt{}6)", true);
+   "1/(1+\\sqrt {2}+\\sqrt{}6)", true, false, "CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat, this->opDouble(), this->opRational(),
    "Adds double or rational to a double or rational approximately using the built-in cpp \
    addition, returning double. ",
    "DoubleValue{}(3.14159265358979323846)+1"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat");
   this->AddOperationOuterHandler
   ("+", this->outerPlus, "",
    "Collects all terms (over the rationals), adding up terms proportional up to a rational number. \
@@ -1915,73 +1915,72 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationOuterHandler
   ("/", CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation, "",
    "Replaces \\diff /\\diff {}x by Differentiate{}(x). Note that the variable of differentiation is expected to be the string following the d letter. ",
-   "\\diff /\\diff {}x x", true);
+   "\\diff /\\diff {}x x", true, false, "CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation");
   this->AddOperationOuterHandler
   ("/", CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx, "",
    "Replaces d/dx by \\diff /\\diff{}x. Note that the variable of differentiation is expected to be the string following the d letter. ",
-   "d/dx x", true);
-
+   "d/dx x", true, false, "CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat, this->opAlgNumber(), this->opAlgNumber(),
    "Divides algebraic numbers. ",
-   "1/(1+\\sqrt{}2+\\sqrt{}3+\\sqrt{}5+\\sqrt{}7)", true);
+   "1/(1+\\sqrt{}2+\\sqrt{}3+\\sqrt{}5+\\sqrt{}7)", true, false, "CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat, this->opRational(), this->opAlgNumber(),
    "Divides rational by algebraic number. ",
-   "1/(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)", true);
+   "1/(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)", true, false, "");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat, this->opAlgNumber(), this->opRational(),
    "Divides algebraic number by rational. ",
-   "(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)/5", true);
+   "(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)/5", true, false, "CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat");
   this->AddOperationOuterHandler
   ("/", CalculatorFunctionsGeneral::outerDivideByNumber, "",
     "If b is rational, algebraic, or double, substitutes (anything)/b with anything* (1/b).",
-    "6/15+(a+b)/5; a/\\sqrt{}2; x/DoubleValue{}10^10;x/DoubleValue{}5 ; 6/4+3/0", true);
+    "6/15+(a+b)/5; a/\\sqrt{}2; x/DoubleValue{}10^10;x/DoubleValue{}5 ; 6/4+3/0", true, false, "CalculatorFunctionsGeneral::outerDivideByNumber");
   this->AddOperationOuterHandler
-  ("/", this->innerSubZeroDivAnythingWithZero, "",
+  ("/", Calculator::innerSubZeroDivAnythingWithZero, "",
    "Provided that x is not equal to zero, substitutes 0/x with 0. ",
-   "0/b; ", true);
+   "0/b; ", true, false, "Calculator::innerSubZeroDivAnythingWithZero");
   this->AddOperationOuterHandler
   ("/", CalculatorFunctionsGeneral::outerDivCancellations, "",
    "Division cancellations. Substitutes (a/b)/(a/d) with d/a and (a/b)/(c/b) with a/c. ",
-   " (a/b)/(a/d); (a/b)/(c/b)  ", true);
+   " (a/b)/(a/d); (a/b)/(c/b)  ", true, false, "CalculatorFunctionsGeneral::outerDivCancellations");
   this->AddOperationOuterHandler
   ("/", CalculatorFunctionsGeneral::outerAssociateDivisionDivision, "",
    "Substitutes (a/b)/c :=a/(c*b); a/(b/c):=a*c/b; .\
    Note the order of multiplication in the rules: this operation is safe and correct for \
    non-commutative rings as well.",
-   "(a/b)/c; a/(b/c);", true);
+   "(a/b)/c; a/(b/c);", true, false, "CalculatorFunctionsGeneral::outerAssociateDivisionDivision");
   this->AddOperationOuterHandler
   ("/", CalculatorFunctionsGeneral::outerAssociateAdivBdivCpowerD, "",
    "Substitutes a/(b/c)^d:=a c^d/b^d;.\
    Note the order of multiplication in the rules: this operation is safe and correct for \
    non-commutative rings as well.",
-   "a/(b/c)^d;", true);
+   "a/(b/c)^d;", true, false, "CalculatorFunctionsGeneral::outerAssociateAdivBdivCpowerD");
   this->AddOperationOuterHandler
   ("/", CalculatorFunctionsGeneral::outerAtimesBpowerJplusEtcDivBpowerI, "",
    "Rule: (a_0 + a_1 x^{c_1}+ ... + a_n x^{c_n}) /x^t:=a_0 x^{-t}+ a_1 x^{c_1-t}+...+a_n x^{c_n-t} ",
-   " (a x^{1/2} + b x )/x; (a x^{1/2} + b x )/x^2;", true);
+   " (a x^{1/2} + b x )/x; (a x^{1/2} + b x )/x^2;", true, false, "CalculatorFunctionsGeneral::outerAtimesBpowerJplusEtcDivBpowerI");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CalculatorFunctionsBinaryOps::innerDivideRatByRat, this->opRational(), this->opRational(),
    "Divides two rational numbers. ",
-   "4/6; 2/0;", true);
+   "4/6; 2/0;", true, false, "CalculatorFunctionsBinaryOps::innerDivideRatByRat");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble, this->opRational(), this->opDouble(),
    "Divides doubles. ",
-   "a:=0.5; b:=0.5; c:=DoubleValue{}3.3; a/c; c/a; c/c", true);
+   "a:=0.5; b:=0.5; c:=DoubleValue{}3.3; a/c; c/a; c/c", true, false, "CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble, this->opDouble(), this->opDouble(),
    "Divides doubles. ",
-   "a:=0.5; b:=0.5; c:=DoubleValue{}3.3; a/c; c/a; c/c", true);
+   "a:=0.5; b:=0.5; c:=DoubleValue{}3.3; a/c; c/a; c/c", true, false, "CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly, this->opRational(), this->opPoly(),
    "Divides rational by polynomial (to get a rational function).",
-   "z:=Polynomial{}(x^2+y^2);\n1/z", true);
+   "z:=Polynomial{}(x^2+y^2);\n1/z", true, false, "CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly, this->opPoly(), this->opPoly(),
    "Divides polynomial by polynomial (to get a rational function). ",
    "Polynomial{}(-x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}+x_{2}+1)/\
-   \nPolynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+1) ", true);
+   \nPolynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+1) ", true, false, "CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly");
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRat, this->opRational(), this->opRational(),

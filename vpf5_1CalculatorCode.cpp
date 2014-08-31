@@ -808,7 +808,7 @@ std::string PlotObject::GetPlotStringFromFunctionStringAndRanges
   //out << "\\rput(1,3){$y=" << functionStringCalculatorFormat << "$}\n\n";
   //if (useHtml)
   //  out << "<br>\n";
-  out << "\\psplot[linecolor=\\psColorGraph, plotpoints=1000]{"
+  out << "\\psplot[linecolor=\\fcColorGraph, plotpoints=1000]{"
   << FloatingPoint::DoubleToString(inputLowerBound) << "}{" << FloatingPoint::DoubleToString(inputUpperBound) << "}{";
   out << functionStringPostfixNotation << "}";
   return out.str();
@@ -828,12 +828,12 @@ std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)
 
   std::string lineSeparator= useHtml ? "<br>\n" : "\n";
   resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{auto-pst-pdf}\\usepackage{pst-math}\\usepackage{pst-plot}";
-  resultStream << lineSeparator << "\\newcommand{\\psLabels}[2]{\\rput[t](#1, -0.1){$x$}\\rput[r](-0.1, #2){$y$}}" << lineSeparator;
+  resultStream << lineSeparator << "\\newcommand{\\fcLabels}[2]{\\rput[t](#1, -0.1){$x$}\\rput[r](-0.1, #2){$y$}}" << lineSeparator;
   resultStream << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}\\addtolength{\\voffset}{-3.2cm}\\addtolength{\\textheight}{6.3cm}"
   << lineSeparator;
-  resultStream << "\\newcommand{\\psColorGraph}{red}" << lineSeparator << "\\begin{document} \\pagestyle{empty}" << lineSeparator
-  << "\\newcommand{\\psColorAreaUnderGraph}{cyan}" << lineSeparator << "\\newcommand{\\psColorNegativeAreaUnderGraph}{orange}"
-  << "\\newcommand{\\psaxesStandard}[4]{ \\psframe*[linecolor=white](! #1 #2)(! #3 0.1 add #4 01 add) \\psaxes[ticks=none, labels=none]{<->}(0,0)(#1, #2)(#3, #4)\\psLabels{#3}{#4}}"
+  resultStream << "\\newcommand{\\fcColorGraph}{red}" << lineSeparator << "\\begin{document} \\pagestyle{empty}" << lineSeparator
+  << "\\newcommand{\\fcColorAreaUnderGraph}{cyan}" << lineSeparator << "\\newcommand{\\fcColorNegativeAreaUnderGraph}{orange}"
+  << "\\newcommand{\\fcAxesStandard}[4]{ \\psframe*[linecolor=white](! #1 #2)(! #3 0.1 add #4 01 add) \\psaxes[ticks=none, labels=none]{<->}(0,0)(#1, #2)(#3, #4)\\fcLabels{#3}{#4}}"
   << lineSeparator << " \\psset{xunit=1cm, yunit=1cm}";
   resultStream << lineSeparator;
   resultStream << "\\begin{pspicture}(" << FloatingPoint::DoubleToString(theLowerBoundAxes-0.4) << ", "
@@ -841,7 +841,7 @@ std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)
   << FloatingPoint::DoubleToString(theUpperBoundAxes+0.4)
   << "," << FloatingPoint::DoubleToString(highBoundY+0.5) << ")\n\n";
   resultStream << lineSeparator << "\\tiny\n" << lineSeparator;
-  resultStream << " \\psaxesStandard{" << FloatingPoint::DoubleToString(theLowerBoundAxes-0.15)
+  resultStream << " \\fcAxesStandard{" << FloatingPoint::DoubleToString(theLowerBoundAxes-0.15)
   << "}{" << FloatingPoint::DoubleToString(lowBoundY-0.15) << "}{"
   << FloatingPoint::DoubleToString(theUpperBoundAxes+0.15) << "}{"
   << FloatingPoint::DoubleToString(highBoundY+0.15) << "}" << lineSeparator;

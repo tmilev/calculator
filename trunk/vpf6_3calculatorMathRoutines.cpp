@@ -2501,6 +2501,7 @@ bool CalculatorFunctionsGeneral::outerAtimesBpowerJplusEtcDivBpowerI(Calculator&
     return false;
   MonomialCollection<Expression, Rational> numerators, numeratorsNew;
   theCommands.CollectSummands(theCommands, input[1], numerators);
+  stOutput << "Collected numerators: " << numerators.ToString();
   numeratorsNew.SetExpectedSize(numerators.size());
   numeratorsNew.MakeZero();
   Expression numeratorMultiplicandLeft, numeratorMultiplicandRight, numeratorBaseRight, numeratorExponentRight;
@@ -2508,8 +2509,10 @@ bool CalculatorFunctionsGeneral::outerAtimesBpowerJplusEtcDivBpowerI(Calculator&
   mOneE.AssignValue(-1, theCommands);
   for (int i=0; i<numerators.size(); i++)
   { if (numerators[i].IsConstantNumber())
-    { newNumExponent.MakeXOX(theCommands, theCommands.opTimes(), mOneE, denominatorExponent);
-      newNumSummand.MakeXOX(theCommands, theCommands.opThePower(), denominatorBase, newNumExponent);
+    { newNumSummandRightPart.MakeXOX(theCommands, theCommands.opThePower(), denominatorBase, mOneE* denominatorExponent);
+      newNumSummand= numerators[i]*newNumSummandRightPart;
+      stOutput << "<br>Adding monomial: " << newNumSummand.ToString() << " with cf: "
+      << numerators.theCoeffs[i].ToString();
       numeratorsNew.AddMonomial(newNumSummand, numerators.theCoeffs[i]);
       continue;
     }
@@ -2817,10 +2820,10 @@ bool CalculatorFunctionsGeneral::innerPlotWedge(Calculator& theCommands, const E
   double startAngleDouble=MathRoutines::ReducePrecision(startAngle.GetDoubleValue());
   double radiusDouble=MathRoutines::ReducePrecision(radius.GetDoubleValue());
   double endAngleDouble=MathRoutines::ReducePrecision(endAngle.GetDoubleValue());
-  out << "\\pscustom*[linecolor=cyan]{ \\psparametricplot[algebraic,linecolor=\\psColorGraph]{" << startAngleDouble << "}{" << endAngleDouble
+  out << "\\pscustom*[linecolor=cyan]{ \\psparametricplot[algebraic,linecolor=\\fcColorGraph]{" << startAngleDouble << "}{" << endAngleDouble
   << "}{" << xCoordDouble << "+" << radiusDouble << "*cos(t)| " << yCoordDouble << "+" << radiusDouble << "*sin(t)} \\psline("
   << x2wedge << ", " << y2wedge << ")(" << xCoordDouble << ", " << yCoordDouble << ")" << "(" << x1wedge << ", " << y1wedge << ")}";
-  out << "\\pscustom[linecolor=blue]{ \\psparametricplot[algebraic,linecolor=\\psColorGraph]{" << startAngleDouble << "}{" << endAngleDouble
+  out << "\\pscustom[linecolor=blue]{ \\psparametricplot[algebraic,linecolor=\\fcColorGraph]{" << startAngleDouble << "}{" << endAngleDouble
   << "}{" << xCoordDouble << "+" << radiusDouble << "*cos(t)| " << yCoordDouble << "+" << radiusDouble << "*sin(t)} \\psline("
   << x2wedge << ", " << y2wedge << ")(" << xCoordDouble << ", " << yCoordDouble << ")" << "(" << x1wedge << ", " << y1wedge << ")}";
   PlotObject thePlot;
@@ -3015,9 +3018,9 @@ bool CalculatorFunctionsGeneral::innerDFQsEulersMethod(Calculator& theCommands, 
   thePlot.thePlotElement=input;
   std::stringstream outLatex, outHtml;
   outLatex << "\n\n%calculator input:" << input.ToString() << "\n\n"
-  << "\\psline[linecolor=\\psColorGraph]";
+  << "\\psline[linecolor=\\fcColorGraph]";
   outHtml << "\n<br>\n%calculator input:" << input.ToString() << "\n<br>\n"
-  << "\\psline[linecolor=\\psColorGraph]";
+  << "\\psline[linecolor=\\fcColorGraph]";
   for(int i=firstGoodXIndex; i<=lastGoodXIndex; i++)
   { outLatex << std::fixed << "(" << XValues[i] << ", " << YValues[i] << ")";
     outHtml << std::fixed << "(" << XValues[i] << ", " << YValues[i] << ")";
@@ -3152,12 +3155,12 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
     { //bool includePsLine=false;
       bool useNegativePattern=(fValuesLower[i]>fValuesUpper[i]);
       if (k==0 && useNegativePattern)
-      { outTex << "\\psline*[linecolor=\\psColorNegativeAreaUnderGraph, linewidth=0.1pt]";
-        outHtml << "<br>\\psline*[linecolor=\\psColorNegativeAreaUnderGraph, linewidth=0.1pt]";
+      { outTex << "\\psline*[linecolor=\\fcColorNegativeAreaUnderGraph, linewidth=0.1pt]";
+        outHtml << "<br>\\psline*[linecolor=\\fcColorNegativeAreaUnderGraph, linewidth=0.1pt]";
       }
       if (k==0 && !useNegativePattern)
-      { outTex << "\\psline*[linecolor=\\psColorAreaUnderGraph, linewidth=0.1pt]";
-        outHtml << "<br>\\psline*[linecolor=\\psColorAreaUnderGraph, linewidth=0.1pt]";
+      { outTex << "\\psline*[linecolor=\\fcColorAreaUnderGraph, linewidth=0.1pt]";
+        outHtml << "<br>\\psline*[linecolor=\\fcColorAreaUnderGraph, linewidth=0.1pt]";
       }
       if (k>0 && useNegativePattern)
       { outTex << "\\psline[linecolor=brown, linewidth=0.1pt]";
@@ -3234,9 +3237,9 @@ bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta(Calculator& theCom
   outCartesianLatex << "%Calculator command: " << input.ToString() << "\n";
   outCartesianHtml << "%Calculator command: " << input.ToString() << "\n<br>\n";
 
-  outCartesianLatex << "\\parametricplot[linecolor=\\psColorGraph, plotpoints=1000, algebraic=false]{" << lowerBound << "}{"
+  outCartesianLatex << "\\parametricplot[linecolor=\\fcColorGraph, plotpoints=1000, algebraic=false]{" << lowerBound << "}{"
   << upperBound << "}{";
-  outCartesianHtml << "\\parametricplot[linecolor=\\psColorGraph, plotpoints=1000, algebraic=false]{" << lowerBound << "}{"
+  outCartesianHtml << "\\parametricplot[linecolor=\\fcColorGraph, plotpoints=1000, algebraic=false]{" << lowerBound << "}{"
   << upperBound << "}{";
   std::string funString=functionE.GetValue<std::string>();
   outCartesianLatex << funString << " t 57.29578 mul cos mul " << funString << " t 57.29578 mul sin mul " << "}";
@@ -3266,9 +3269,9 @@ bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionThetaExtended(Calculator
   std::stringstream  outPolarLatex, outPolarHtml;
   outPolarLatex << "%Calculator command: " << input.ToString() << "\n";
   outPolarHtml << "%Calculator command: " << input.ToString() << "\n<br>\n";
-  outPolarLatex << "\\parametricplot[linecolor=\\psColorGraph, plotpoints=1000, algebraic=false]{" << thePlotPolar.xLow << "}{"
+  outPolarLatex << "\\parametricplot[linecolor=\\fcColorGraph, plotpoints=1000, algebraic=false]{" << thePlotPolar.xLow << "}{"
   << thePlotPolar.xHigh << "}{";
-  outPolarHtml << "\\parametricplot[linecolor=\\psColorGraph, plotpoints=1000, algebraic=false]{" << thePlotPolar.xLow << "}{"
+  outPolarHtml << "\\parametricplot[linecolor=\\fcColorGraph, plotpoints=1000, algebraic=false]{" << thePlotPolar.xLow << "}{"
   << thePlotPolar.xHigh << "}{";
   std::string funString=functionE.GetValue<std::string>();
   outPolarLatex << "t " << funString << "}";
@@ -3308,10 +3311,10 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
     return false;
   }
   std::stringstream outLatex, outHtml;
-  outLatex << "\\parametricplot[linecolor=\\psColorGraph, plotpoints=1000]{" << leftEndPoint << "}{" << rightEndPoint << "}{"
+  outLatex << "\\parametricplot[linecolor=\\fcColorGraph, plotpoints=1000]{" << leftEndPoint << "}{" << rightEndPoint << "}{"
   << theConvertedExpressions[0].GetValue<std::string>() << theConvertedExpressions[1].GetValue<std::string>() << "}";
   outHtml << "<br>%Calculator input: " << input.ToString()
-  << "<br>\\parametricplot[linecolor=\\psColorGraph, plotpoints=1000]{" << leftEndPoint << "}{" << rightEndPoint << "}{"
+  << "<br>\\parametricplot[linecolor=\\fcColorGraph, plotpoints=1000]{" << leftEndPoint << "}{" << rightEndPoint << "}{"
   << theConvertedExpressions[0].GetValue<std::string>() << theConvertedExpressions[1].GetValue<std::string>() << "}";
   PlotObject thePlot;
   if (!input[1].EvaluatesToDoubleInRange("t", leftEndPoint, rightEndPoint, 1000, &thePlot.xLow, &thePlot.xHigh))
@@ -3377,9 +3380,9 @@ bool CalculatorFunctionsGeneral::innerPlotConeUsualProjection(Calculator& theCom
   if (theConeProjectionHeight>theProjYradius)
   { double yCoordPointTangency= theProjYradius*theProjYradius/theConeProjectionHeight;
     double xCoordPointTangency=theProjXradius*FloatingPoint::sqrt(1- yCoordPointTangency/theConeProjectionHeight);
-    out << "\\psline[linecolor=\\psColorGraph](" << MathRoutines::ReducePrecision(xCoordPointTangency) << ", "
+    out << "\\psline[linecolor=\\fcColorGraph](" << MathRoutines::ReducePrecision(xCoordPointTangency) << ", "
     << MathRoutines::ReducePrecision(yCoordPointTangency) << ")(0, " << MathRoutines::ReducePrecision(theConeProjectionHeight) << ")";
-    out << "\\psline[linecolor=\\psColorGraph](" << MathRoutines::ReducePrecision(-xCoordPointTangency) << ", "
+    out << "\\psline[linecolor=\\fcColorGraph](" << MathRoutines::ReducePrecision(-xCoordPointTangency) << ", "
     << MathRoutines::ReducePrecision(yCoordPointTangency) << ")(0, " << MathRoutines::ReducePrecision(theConeProjectionHeight) << ")";
     double theAngleVisibleEnd=MathRoutines::Pi()/2;
     double theAngleVisibleStart=-theAngleVisibleEnd;
@@ -3389,15 +3392,15 @@ bool CalculatorFunctionsGeneral::innerPlotConeUsualProjection(Calculator& theCom
       theAngleVisibleStart = -MathRoutines::Pi()-theAngleVisibleEnd;
       theAngleHiddenEnd=MathRoutines::Pi()-theAngleVisibleEnd;
     }
-    out << "\\psparametricplot[algebraic,linecolor=\\psColorGraph]{" << MathRoutines::ReducePrecision(theAngleVisibleStart)
+    out << "\\psparametricplot[algebraic,linecolor=\\fcColorGraph]{" << MathRoutines::ReducePrecision(theAngleVisibleStart)
     << "}{" << MathRoutines::ReducePrecision(theAngleVisibleEnd) << "}{" << MathRoutines::ReducePrecision(theProjXradius)
     << "*cos(t) |" << MathRoutines::ReducePrecision(theProjYradius) << "*sin(t)}";
-    out << "\\psparametricplot[algebraic, linestyle=dashed, linecolor=\\psColorGraph]{" << MathRoutines::ReducePrecision(theAngleVisibleEnd)
+    out << "\\psparametricplot[algebraic, linestyle=dashed, linecolor=\\fcColorGraph]{" << MathRoutines::ReducePrecision(theAngleVisibleEnd)
     << "}{" << MathRoutines::ReducePrecision(theAngleHiddenEnd) << "}{" << MathRoutines::ReducePrecision(theProjXradius)
     << "*cos(t) |" << MathRoutines::ReducePrecision(theProjYradius) << "*sin(t)}";
   } else
   { theCommands.Comments << "<hr>Cone is not high enough and therefore has no tip. ";
-    out << "\\psparametricplot[algebraic,linecolor=\\psColorGraph]{0}{6.283185307}{cos(t)*" << MathRoutines::ReducePrecision(theProjXradius)
+    out << "\\psparametricplot[algebraic,linecolor=\\fcColorGraph]{0}{6.283185307}{cos(t)*" << MathRoutines::ReducePrecision(theProjXradius)
     << " |sin(t)*" << MathRoutines::ReducePrecision(theProjYradius) << "}";
   }
   PlotObject thePlot;

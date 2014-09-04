@@ -491,7 +491,8 @@ void Calculator::initPredefinedInnerFunctions()
    "Crawls a latex file collecting all local style files and all \\input commands to produce a single latex file. \
    The function was originally designed for the purposes of the freecalc project as not been tested on any other projects,\
    please use only for freecalc.",
-   "Crawl(\"~/math/freecalc/trunk/homework/UMB-M141-2014-spring/ReviewFinal_2014_Spring_Calculus_I_Math_140.tex\")", true, false)
+   "Crawl(\"~/math/freecalc/trunk/homework/UMB-M141-2014-spring/ReviewFinal_2014_Spring_Calculus_I_Math_140.tex\")", true, false
+   , "CalculatorFunctionsGeneral::innerCrawlTexFile")
    ;
   this->AddOperationInnerHandler
   ("CoefficientsPowersOf", CalculatorFunctionsGeneral::innerCoefficientsPowersOf, "",

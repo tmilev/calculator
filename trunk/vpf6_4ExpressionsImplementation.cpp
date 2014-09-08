@@ -2029,7 +2029,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       if (firstE=="1")
         firstE="";
       if (firstNeedsBrackets)
-        out << "(" << firstE << ")";
+        out << "\\left(" << firstE << "\\right)";
       else
         out << firstE;
       bool mustHaveTimes=this->format==this->formatTimesDenotedByStar && firstE!="-" && firstE!="";
@@ -2045,6 +2045,26 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       else
         out << secondE;
     }
+  } else if (this->StartsWith(this->theBoss->opCrossProduct()))
+  { std::string secondE=(*this)[2].ToString(theFormat);
+    std::string firstE= (*this)[1].ToString(theFormat);
+    bool firstNeedsBrackets=(*this)[1].NeedsParenthesisForMultiplication();
+    bool secondNeedsBrackets=(*this)[2].NeedsParenthesisForMultiplication();
+    if (firstE=="-1" )
+    { firstE="-";
+      firstNeedsBrackets=false;
+    }
+    if (firstE=="1")
+      firstE="";
+    if (firstNeedsBrackets)
+      out << "\\left(" << firstE << "\\right)";
+    else
+      out << firstE;
+    out << "\\times";
+    if (secondNeedsBrackets)
+      out << "\\left(" << secondE << "\\right)";
+    else
+      out << secondE;
   } else if (this->StartsWith(this->theBoss->opSqrt(), 3))
   { int thePower=0;
     bool hasPowerTwo=(*this)[1].IsSmallInteger(&thePower);

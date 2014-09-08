@@ -127,6 +127,7 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("*");
   this->AddOperationNoRepetitionAllowed("!");
   this->AddOperationNoRepetitionAllowed("mod");
+  this->AddOperationNoRepetitionAllowed("\\times");
   this->AddOperationNoRepetitionAllowed("\\otimes");
   this->AddOperationNoRepetitionAllowed("\\choose");
   this->AddOperationNoRepetitionAllowed("\\sqrt");
@@ -1170,6 +1171,8 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="Expression" && fourthToLastS=="\\frac")
     return this->ReplaceXEEXByEXusingO(this->opDivide(), Expression::formatUseFrac);
+  if (secondToLastS=="Expression" && thirdToLastS=="\\times" && fourthToLastS=="Expression" && this->AllowsTimesInPreceding(lastS) )
+    return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="*" && fourthToLastS=="Expression" && this->AllowsTimesInPreceding(lastS) )
     return this->ReplaceEOEXByEX(Expression::formatTimesDenotedByStar);
   if (secondToLastS=="Expression" && thirdToLastS=="/" && fourthToLastS=="Expression" && this->LookAheadAllowsDivide(lastS) )

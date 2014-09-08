@@ -2013,7 +2013,7 @@ void Calculator::AddOperationHandler
 
 void Calculator::AddOperationComposite
 (const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing,
- const std::string& opDescription, const std::string& opExample, bool isInner, bool visible, bool isExperimental)
+ const std::string& opDescription, const std::string& opExample, bool isInner, bool visible, bool isExperimental, const std::string& inputAdditionalIdentifier)
 { MacroRegisterFunctionWithName("Calculator::AddOperationComposite");
   int theIndex=this->operationsComposite.GetIndex(theOpName);
   if (opArgumentListIgnoredForTheTimeBeing!="")
@@ -2025,6 +2025,7 @@ void Calculator::AddOperationComposite
     this->operationsCompositeHandlers.LastObject()->SetSize(0);
   }
   Function theFun(*this, theIndex, this->operationsCompositeHandlers[theIndex].size, handler, 0, opDescription, opExample, isInner, visible, isExperimental);
+  theFun.additionalIdentifier=inputAdditionalIdentifier;
   theFun.flagIsCompositeHandler=true;
   this->operationsCompositeHandlers[theIndex].AddOnTop(theFun);
 }

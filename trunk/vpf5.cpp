@@ -1911,10 +1911,12 @@ bool Calculator::innerSqrt(Calculator& theCommands, const Expression& input, Exp
   if (input.children.size!=3)
     return false;
   int thePower;
+//  stOutput << "<br>Calling sqrt with input: " << input.ToString();
   if (!input[1].IsSmallInteger(&thePower))
     return false;
+//  stOutput << "<br>the power that be: " << thePower ;
   if (!input[2].IsConstantNumber())
-  { //stOutput << "input is: " << input[2].ToString();
+  {// stOutput << "<br>input is: " << input[2].ToString();
     theCommands.CheckInputNotSameAsOutput(input, output);
     Expression theExponent;
     Rational thePowerRat(1, thePower);
@@ -1924,8 +1926,13 @@ bool Calculator::innerSqrt(Calculator& theCommands, const Expression& input, Exp
   Rational rationalValue;
   if (!input[2].IsRational(&rationalValue))
     return false;
+  if (thePower<0)
+  { thePower*=-1;
+    rationalValue.Invert();
+  }
   if (thePower!=2)
     return false;
+//  stOutput << "<br>Got here: rat value is: " << rationalValue.ToString();
   AlgebraicNumber theNumber;
   if (!theNumber.AssignRationalQuadraticRadical(rationalValue, theCommands.theObjectContainer.theAlgebraicClosure))
     return false;

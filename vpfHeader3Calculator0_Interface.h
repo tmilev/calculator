@@ -1321,6 +1321,9 @@ public:
   int opTimes()
   { return this->theAtoms.GetIndexIMustContainTheObject("*");
   }
+  int opCrossProduct()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\times");
+  }
   int opTensor()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\otimes");
   }
@@ -1626,7 +1629,7 @@ public:
   void AddKnownDoubleConstant(const std::string& theConstantName, double theValue);
   void AddOperationComposite
   (const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing, const std::string& opDescription,
-   const std::string& opExample, bool isInner, bool visible=true, bool experimental=false);
+   const std::string& opExample, bool isInner, bool visible=true, bool experimental=false, const std::string& inputAdditionalIdentifier="");
   void AddOperationBinaryInnerHandlerWithTypes
   (const std::string& theOpName, Expression::FunctionAddress innerHandler, int leftType, int rightType, const std::string& opDescription,
    const std::string& opExample, bool visible=true, bool experimental=false, const std::string& inputAdditionalIdentifier="");

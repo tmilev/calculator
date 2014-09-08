@@ -1296,6 +1296,27 @@ bool CalculatorFunctionsGeneral::innerMakeMakeFile(Calculator& theCommands, cons
   return output.AssignValue(outHtml.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerCrossProduct(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrossProduct");
+  if (!input.IsListStartingWithAtom(theCommands.opCrossProduct()) || input.children.size!=3)
+    return false;
+  const Expression& leftE=input[1];
+  const Expression& rightE=input[2];
+  if (!leftE.IsSequenceNElementS(3) || !rightE.IsSequenceNElementS(3))
+  { std::stringstream out;
+    out << "Can't compute cross product of the non-3d vectors " << input[1].ToString() << " and "
+    << input[2].ToString() << ". ";
+    return output.MakeError(out.str(), theCommands);
+  }
+  List<Expression> outputSequence;
+  outputSequence.SetSize(3);
+  outputSequence[0]=leftE[2]*rightE[3]- leftE[3]*rightE[2];
+  outputSequence[1]=leftE[3]*rightE[1]- leftE[1]*rightE[3];
+  outputSequence[2]=leftE[1]*rightE[2]- leftE[2]*rightE[1];
+
+  return output.MakeSequence(theCommands, outputSequence);
+}
+
 bool CalculatorFunctionsGeneral::innerDifferentiateConstPower(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateConstPower");
   //////////////////////

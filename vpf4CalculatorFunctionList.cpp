@@ -215,6 +215,12 @@ void Calculator::initPredefinedInnerFunctions()
    "Differentiate(x, x^2 ); d/dx x^-1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}");
 
   this->AddOperationInnerHandler
+  ("\\times", CalculatorFunctionsGeneral::innerCrossProduct, "",
+   "Cross product in IIId. Returns error if given two non-3d vectors.",
+   "(1,-2,3 ) \times( 1,-1,-1)");
+
+
+  this->AddOperationInnerHandler
   ("ElementWeylAlgebraDO", Calculator::innerElementWeylAlgebra, "",
    "Creates element of a weyl algebra = polynomial coefficient differential operator. First argument denotes differential operator letter, \
    second argument - the dual polynomial expression. ",
@@ -2260,7 +2266,7 @@ void Calculator::initPredefinedOperationsComposite()
     \np(0,{{x}}):=0;\
     \np({{a}},{{x}} ):=p(a-1,x)+ p(a, x-Denominations_a);\
     \np(11,100)\
-  ", true);
+  ", true, true, false, "CalculatorFunctionsGeneral::innerDereferenceOperator");
   this->AddOperationComposite
   (";", CalculatorFunctionsGeneral::innerDereferenceOperator, "",
    "Dereferences a sequence of rules. The syntax is as illustrated by the example. ",

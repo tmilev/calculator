@@ -1446,7 +1446,8 @@ bool Expression::DivisionByMeShouldBeWrittenInExponentForm()const
 }
 
 bool Expression::IsConstantNumber()const
-{ //stOutput << "<br>Testing whether " << this->ToString() << " is constant.";
+{ MacroRegisterFunctionWithName("Expression::IsConstantNumber");
+//  stOutput << "<br>Testing whether " << this->ToString() << " is constant.";
   if (this->theBoss==0)
     return false;
   RecursionDepthCounter thecounter(&this->theBoss->RecursionDeptH);
@@ -1464,6 +1465,7 @@ bool Expression::IsConstantNumber()const
         return false;
     return true;
   }
+//  stOutput << this->Lispify() << " is ... not a constant apparently!";
   return false;
 }
 

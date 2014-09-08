@@ -1990,13 +1990,13 @@ void Calculator::initPredefinedStandardOperations()
    \nPolynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+1) ", true, false, "CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly");
 
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRat, this->opRational(), this->opRational(),
-   "Raises rational to power, provided the power is a small integer. ",
-   "{3^3}^3; 3^{3^3}; 3^3^3; 0^3; 0^{-3}; ", true);
-  this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRatGetAlgebraicNumber, this->opRational(), this->opRational(),
    "Convert rational exponent to the sqrt function. ",
    "10^{1/2}- 10* \\sqrt{1/10}", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRat, this->opRational(), this->opRational(),
+   "Raises rational to power, provided the power is a small integer. ",
+   "{3^3}^3; 3^{3^3}; 3^3^3; 0^3; 0^{-3}; ", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors, this->opRational(), this->opRational(),
    "If a rational number is small enough to factor, reduces the rational exponents of the rational number. ",

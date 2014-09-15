@@ -1462,9 +1462,10 @@ void Calculator::initPredefinedStandardOperations()
    "DoubleValue{}(3.14159265358979323846)+1"
    , true, false, "CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat");
   this->AddOperationOuterHandler
-  ("+", this->outerPlus, "",
+  ("+", Calculator::outerPlus, "",
    "Collects all terms (over the rationals), adding up terms proportional up to a rational number. \
-    Zero summands are removed, unless zero is the only term left. ", "1+a-2a_1+1/2+a_1", true);
+    Zero summands are removed, unless zero is the only term left. ", "1+a-2a_1+1/2+a_1", true, false,
+    "Calculator::outerPlus");
   this->AddOperationOuterHandler
   ("+", CalculatorFunctionsGeneral::outerCombineFractionsCommutative, "",
    "Combines fractions on condition that all participants commute. \
@@ -1480,139 +1481,139 @@ void Calculator::initPredefinedStandardOperations()
   ("+", CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor, this->opElementTensorGVM(), this->opElementTensorGVM(),
    "Adds two elements of tensor products of generalized Verma modules. ",
    "v:=hwv{}(G_2, (1,0),(0,0));\
-   \n(3/4 v)\\otimes v-3/4 (v\\otimes v)", true);
+   \n(3/4 v)\\otimes v-3/4 (v\\otimes v)", true, false, "CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddPlotToPlot, this->opCalculusPlot(), this->opCalculusPlot(),
    "Superimposes two plots. ",
-   "plot2D{}(sin{}(x), -5, 5)+ plot2D{}(1/sin{}(x ), 0.1, 3.041592654)", true);
+   "plot2D{}(sin{}(x), -5, 5)+ plot2D{}(1/sin{}(x ), 0.1, 3.041592654)", true, false, "CalculatorFunctionsBinaryOps::innerAddPlotToPlot");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyToRatOrPoly, this->opRational(), this->opPoly(),
    "Adds a rational to a polynomial. ",
    "1+Polynomial{}\\lambda; Polynomial{}\\lambda+1"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyToRatOrPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyToRatOrPoly, this->opPoly(), this->opRational(),
    "Adds a polynomial to a rational. ",
    "1+Polynomial{}\\lambda; Polynomial{}\\lambda+1"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyToRatOrPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyToRatOrPoly, this->opPoly(), this->opPoly(),
    "Adds a polynomial to a polynomial. ",
    "x:=1+Polynomial{}\\lambda; x+x"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyToRatOrPoly");
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly, this->opPolyOverANs(), this->opPolyOverANs(),
    "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
    "PolynomialAlgebraicNumbers(\\sqrt{12}x)+PolynomialAlgebraicNumbers(-\\sqrt{3}x)"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly, this->opAlgNumber(), this->opPolyOverANs(),
    "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
    "PolynomialAlgebraicNumbers(\\sqrt{12})+PolynomialAlgebraicNumbers(\\sqrt{3}x)"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly, this->opPolyOverANs(), this->opAlgNumber(),
    "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
    "PolynomialAlgebraicNumbers(\\sqrt{12}x)+PolynomialAlgebraicNumbers(-\\sqrt{3})"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly, this->opRational(), this->opPolyOverANs(),
    "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
    "1+PolynomialAlgebraicNumbers(\\sqrt{12}x)"
-   , true);
+   , true, "CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly, this->opPolyOverANs(), this->opRational(),
    "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
    "PolynomialAlgebraicNumbers(\\sqrt{12}x)+1"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly, this->opPoly(), this->opAlgNumber(),
    "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
    "PolynomialAlgebraicNumbers(x)+\\sqrt{2}"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly, this->opPoly(), this->opPolyOverANs(),
    "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
    "Polynomial{}x+ PolynomialAlgebraicNumbers(\\sqrt{2}x)"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly, this->opPolyOverANs(), this->opPoly(),
    "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
    "PolynomialAlgebraicNumbers(\\sqrt{2}x)+Polynomial{}x"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly, this->opAlgNumber(), this->opPoly(),
    "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
    "\\sqrt{2}+PolynomialAlgebraicNumbers(x)"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly");
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opRational(), this->opElementWeylAlgebra(),
    "Adds a rational or polynomial to element weyl algebra. ",
    " \\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opPoly(), this->opElementWeylAlgebra(),
    "Adds a rational or polynomial to element weyl algebra. ",
    " \\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i+\\partial_i+x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opPoly(),
    "Adds a rational or polynomial to element weyl algebra. ",
    " \\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i+x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opElementWeylAlgebra(),
    "Adds a rational or polynomial to element weyl algebra. ",
    " \\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF, this->opRationalFunction(), this->opRationalFunction(),
    "Adds a rational function to a rational function. ",
    "WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}(a_2, (1,1)) "
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat, this->opRational(), this->opDouble(),
    "Adds double or rational to a double or rational approximately using the built-in cpp \
    addition, returning double. ",
    "DoubleValue{}(3.14159265358979323846)+1"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat, this->opDouble(), this->opDouble(),
    "Adds double or rational to a double or rational approximately using the built-in cpp \
    addition, returning double. ",
    "DoubleValue{}(3.14159265358979323846)+1"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddWeightToWeight, this->opWeightLieAlgPoly(), this->opWeightLieAlgPoly(),
    "Adds two weights. ",
    "\\lambda:=Polynomial{}\\lambda; \\varepsilon_{{a}}:=MakeWeight{}(B_3, a, epsilon); (1/2+\\lambda)\\varepsilon_1+1/2\\varepsilon_2+1/2\\varepsilon_3  "
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddWeightToWeight");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddUEToAny, this->opElementUEoverRF(), this->opElementUEoverRF(),
    "Adds an element of UE (Universal Enveloping algebra) to an element of UE.",
    " g_{{{i}}}:=getChevalleyGenerator{}(F_{1}, {{i}});\nh_{{{i}}}:=getCartanGenerator{}(F_{1}, {{i}});\n\
    [g_{22}+g_{20}+g_{14},g_{-14}+g_{-20}+g_{-22}]"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddUEToAny");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddSequenceToSequence, this->opSequence(), this->opSequence(),
    "Adds two sequences (termwise), provided the sequences have the same number of entries. \
    In case the entries of the sequences are elements of a base field, corresponds to vector addition.",
    "v_{1}:=(1, 2, 3);\nv_{2}:=(1, 3, 2);\nv_{3}:=(3, 1, 1);\nv_{4}:=(-2, 2, 2);\n1/2v_{1}+1/2v_{2}+7/8v_{3}+13/16v_{4}"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddSequenceToSequence");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddMatrixRationalToMatrixRational,
    this->opMatRat(), this->opMatRat(),
    "Adds two matrices.",
    " A:=MatrixRationals{}((5, 8), (3, 5)); A*A-A;"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddMatrixRationalToMatrixRational");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor,
    this->opMatTensorRat(), this->opMatTensorRat(),
    "Adds two matrices.",
    " A:=MatrixRationalsTensorForm{}((5, 8), (3, 5)); 3A*A-A;"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor");
 
   this->AddOperationOuterHandler
   ("-", this->outerMinus, "",
@@ -1882,42 +1883,53 @@ void Calculator::initPredefinedStandardOperations()
    "v_{1}:=(1, 2, 3);\nv_{2}:=(1, 3, 2);\nv_{3}:=(3, 1, 1);\nv_{4}:=(-2, 2, 2);\n1/2v_{1}+1/2v_{2}+7/8v_{3}+13/16v_{4}"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence, this->opDouble(), this->opSequence(),
+   "Carries out multiplication between a double number on left \
+   and sequence on the right. Corresponds to multiplying a vector by a scalar.",
+   "(1 ,2)- DoubleValue{} 1 (2,3)"
+   , true, false, "CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence");
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence, this->opAlgNumber(), this->opSequence(),
+   "Multiplies a double number on left and a sequence on the right.scalar.",
+   "(1 ,2)- DoubleValue{} 1 (2,3)"
+   , true, false, "CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence");
+  this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence, this->opPoly(), this->opSequence(),
    "Carries out multiplication between a rational number on left \
    and sequence on the right.",
    "x:=Polynomial{}x; v:=x*(1, 2, 3);"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly, this->opWeylGroupElement(), this->opWeightLieAlgPoly(),
    "Element of weyl group action on a weight. ",
    "s_{{a}}:=MakeWeylGroupElement(B_3, a); \\varepsilon_{{a}}:=MakeWeight{}(B_3, a, epsilon);   \
    \nx:=Polynomial{}x; \\mu:= x\\varepsilon_1; s_1s_2s_3s_2s_1 \\mu"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly, this->opPoly(), this->opWeightLieAlgPoly(),
    "Carries out multiplication between a rational or polynomial on left and a weight on the right.",
    "\\varepsilon_{{a}}:=MakeWeight{}(B_3, a, epsilon);   x:=Polynomial{}x; x\\varepsilon_1"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly, this->opRational(), this->opWeightLieAlgPoly(),
    "Carries out multiplication between a rational or polynomial on left and a weight on the right.",
    "\\varepsilon_{{a}}:=MakeWeight{}(B_3, a, epsilon);   x:=Polynomial{}x; x\\varepsilon_1"
-   , true);
+   , true, false, "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplySequenceMatrixBySequenceMatrix,
    this->opSequence(), this->opSequence(),
    "Multiplies two sequences of sequences in a similar way as if those were matrices.",
-   "((1,-1),(0,-1))((1, 0), (-1,-1))", true);
+   "((1,-1),(0,-1))((1, 0), (-1,-1))", true, false, "CalculatorFunctionsBinaryOps::innerMultiplySequenceMatrixBySequenceMatrix");
 
   this->AddOperationInnerHandler
   ("\\choose", CalculatorFunctionsBinaryOps::innerNChooseK, "",
    "Evaluates the binomial coefficient if possible.",
-   "8 \\choose 3 ", true);
+   "8 \\choose 3 ", true, false, "CalculatorFunctionsBinaryOps::innerNChooseK");
 
   this->AddOperationOuterHandler
-  ("mod", this->innerZmodP, "",
+  ("mod", Calculator::innerZmodP, "",
     "Same as ModP but uses the mod notation.",
-    " 7 mod 3", true);
+    " 7 mod 3", true, false, "Calculator::innerZmodP");
 
   this->AddOperationOuterHandler
   ("/", CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation, "",

@@ -1016,13 +1016,14 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg(Calcu
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRationalBySequence");
-  //stOutput << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
+//  stOutput << "<br>here be trouble! input " << input.ToString()
+//  << " is a sequence of " << input.children.size << " elements.";
   if (!input.IsListNElements(3))
     return false;
-  //stOutput << "<br>trouble be double!";
+//  stOutput << "<br>trouble be double!";
   if (!input[1].IsBuiltInScalar())
     return false;
-  //stOutput << "<br>trouble be triple!";
+//  stOutput << "<br>trouble be triple!";
   if (!input[2].IsSequenceNElementS())
     return false;
   output.reset(theCommands);
@@ -1228,13 +1229,13 @@ bool CalculatorFunctionsBinaryOps::innerMultiplySequenceByAnyScalar(Calculator& 
 
 bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRationalBySequence");
-  //stOutput << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
+//  stOutput << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
   if (!input.IsListNElements(3))
     return false;
-  //stOutput << "<br>trouble be double!";
+//  stOutput << "<br>trouble be double!";
   if (!input[1].IsSequenceNElementS())
     return false;
-  //stOutput << "<br>trouble be triple!";
+//  stOutput << "<br>trouble be triple!";
   if (!input[2].IsSequenceNElementS())
     return false;
   if (input[2].children.size!=input[1].children.size)

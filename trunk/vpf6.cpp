@@ -1651,7 +1651,7 @@ bool Calculator::CollectSummands
   if (!sumOverDoubles.IsEqualToZero())
   { sumOverDoubles.QuickSortDescending();
     Expression doubleSum;
-    doubleSum.MakeSum(theCommands, sumOverAlgNums);
+    doubleSum.MakeSum(theCommands, sumOverDoubles);
     outputSum.AddMonomial(doubleSum, 1);
   }
   if (!sumOverAlgNums.IsEqualToZero())

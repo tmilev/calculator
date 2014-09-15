@@ -1894,7 +1894,7 @@ bool Expression::MakeSum(Calculator& theCommands, const MonomialCollection<Expre
   { Expression& current=summandsWithCoeff[i];
     if (theSum[i]==oneE)
       current.AssignValue(theSum.theCoeffs[i], theCommands);
-    else if (!theSum.theCoeffs[i].IsEqualToOne())
+    else if (!(theSum.theCoeffs[i]==1))
     { current.reset(theCommands, 3);
       current.AddChildAtomOnTop(theCommands.opTimes());
       current.AddChildValueOnTop(theSum.theCoeffs[i]);

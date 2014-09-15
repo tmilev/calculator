@@ -2511,7 +2511,7 @@ bool Expression::HasNonEmptyContext()const
 
 bool Expression::IsBuiltInScalar()const
 { return this->IsOfType<Rational>() || this->IsOfType<Polynomial<Rational> >()
-  || this->IsOfType<RationalFunctionOld>();
+  || this->IsOfType<RationalFunctionOld>() || this->IsOfType<double>() || this->IsOfType<AlgebraicNumber>();
 }
 
 bool Expression::IsBuiltInType(std::string* outputWhichOperation)const

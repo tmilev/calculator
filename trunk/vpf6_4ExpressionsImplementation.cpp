@@ -2062,7 +2062,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       out << "\\left(" << firstE << "\\right)";
     else
       out << firstE;
-    out << "\\times";
+    out << "\\times ";
     if (secondNeedsBrackets)
       out << "\\left(" << secondE << "\\right)";
     else

@@ -2583,6 +2583,8 @@ bool CalculatorFunctionsGeneral::innerGrowDynkinType(Calculator& theCommands, co
 
 void Expression::GetBlocksOfCommutativity(HashedListSpecialized<Expression>& inputOutputList)const
 { MacroRegisterFunctionWithName("Expression::GetBlocksOfCommutativity");
+  this->CheckInitializationRecursively();
+  stOutput << "turn me off when done";
   this->CheckInitialization();
   if (this->IsAtom())
   { inputOutputList.AddOnTopNoRepetition(*this);

@@ -410,13 +410,8 @@ class Expression
   ~Expression()
   { this->flagDeallocated=true;
   }
-  bool CheckInitialization()const
-  { if (this->theBoss==0)
-    { crash << "This is a programming error: " << "Expression has non-initialized owner. " << crash;
-      return false;
-    }
-    return true;
-  }
+  bool CheckInitialization()const;
+  bool CheckInitializationRecursively()const;
   bool CheckConsistency()const;
   bool CheckConsistencyRecursively()const;
   bool IsIntegerFittingInInt(int* whichInteger=0)const;

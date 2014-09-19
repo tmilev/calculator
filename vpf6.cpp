@@ -1266,6 +1266,22 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   return output.AssignValue<std::string>(out.str(), theCommands);
 }
 
+bool Expression::CheckInitializationRecursively()const
+{ MacroRegisterFunctionWithName("Expression::CheckInitializationRecursively");
+  this->CheckInitialization();
+  for (int i=0; i<this->children.size; i++)
+    (*this)[i].CheckConsistencyRecursively();
+  return true;
+}
+
+bool Expression::CheckInitialization()const
+{ if (this->theBoss==0)
+  { crash << "This is a programming error: " << "Expression has non-initialized owner. " << crash;
+    return false;
+  }
+  return true;
+}
+
 bool Expression::HasBoundVariables()const
 { if (this->theBoss==0)
     crash << "This is a programming error: calling function HasBoundVariables on non-initialized expression. " << crash;

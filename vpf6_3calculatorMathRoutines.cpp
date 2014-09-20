@@ -701,6 +701,7 @@ bool IntegralRFComputation::IntegrateRF()
   this->theIntegralSum.MakeSum(*this->owner, this->theIntegralSummands);
 //  stOutput << " got before consistency check";
   this->theIntegralSum.CheckConsistencyRecursively();
+//  this->theIntegralSum.CheckInitializationRecursively();
 //  stOutput << " passed consistency check";
   return true;
 }
@@ -1722,6 +1723,8 @@ bool CalculatorFunctionsGeneral::outerCommuteAtimesBifUnivariate(Calculator& the
 //  stOutput << "ere be i, number 1!";
   output=input;
   output.children.SwapTwoIndices(1,2);
+  stOutput << "turn me off when done";
+  output.CheckConsistencyRecursively();
   return true;
 }
 
@@ -1905,6 +1908,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlo
   { if (output[1]==input)
       return false;
   }
+  output.CheckConsistencyRecursively();
+  output.CheckInitializationRecursively();
 //  stOutput << "<hr>Transforming " << input.ToString() << " to " << output[1].ToString() << "<hr>";
   return true;
 }
@@ -1961,6 +1966,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa
   output=A;
   output/=a;
   output*=logaxPlusb;
+  output.CheckConsistencyRecursively();
+  output.CheckInitializationRecursively();
   return true;
 }
 
@@ -1996,6 +2003,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIb(Ca
   output/=a;
   output/=OneMinusN;
   output*=base;
+  output.CheckConsistencyRecursively();
+  output.CheckInitializationRecursively();
   return true;
 }
 
@@ -2099,6 +2108,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaan
   theLog.AddChildOnTop(theQuadraticDiva);
   Expression C=B-(A*b)/(twoE*a);
   output= (oneE/a)*((A/twoE )*theLog+(C/sqrtD)*theArcTan);
+  output.CheckConsistencyRecursively();
+  output.CheckInitializationRecursively();
   return true;
 }
 
@@ -2157,6 +2168,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb(
   output =oneE/D *
   ((x+b/twoE)/(twoE*numPowerE-twoE) * theQuadraticPowerOneMinusN+
   (twoE*numPowerE-threeE)/(twoE*numPowerE-twoE)*remainingIntegral);
+  output.CheckConsistencyRecursively();
+  output.CheckInitializationRecursively();
   //stOutput << " <hr>innerIntegrateRationalFunctionBuidingBlockIIIb: replacing " << CGI::GetMathSpanPure(input.ToString() ) << " by "
   //<< CGI::GetMathSpanPure(output.ToString());
   return true;
@@ -2173,6 +2186,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb(C
   if (!theFunctionE[2].StartsWith(theCommands.opThePower(), 3))
     return false;
   Expression nE=theFunctionE[2][2];
+  stOutput << "erase when done!";
+  nE.CheckInitializationRecursively();
   int numPower=0;
   if (!nE.IsSmallInteger(&numPower))
     return false;
@@ -2218,7 +2233,18 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb(C
   Expression xplusbdiv2a = x+b/(twoE*a);
   Expression D=(fourE*a*c-bSquared)/(fourE*aSquared);
   Expression C=B-(A*b)/(twoE*a);
+  oneE.CheckInitializationRecursively();
+  apowerN.CheckInitializationRecursively();
+  A.CheckInitializationRecursively();
+  twoE.CheckInitializationRecursively();
+  nE.CheckInitializationRecursively();
+  quadraticPowerOneMinusN .CheckInitializationRecursively();
+  C.CheckInitializationRecursively();
+  remainingIntegral.CheckInitializationRecursively();
+
   output=(oneE/ apowerN)*(A/(twoE*(oneE-nE))*quadraticPowerOneMinusN +C*remainingIntegral);
+  output.CheckConsistencyRecursively();
+  output.CheckInitializationRecursively();
   //stOutput << " <hr>innerIntegrateRationalFunctionBuidingBlockIIb: replacing " << input.ToString() << " by " << output.ToString();
   return true;
 }
@@ -2241,6 +2267,8 @@ bool CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst
     return false;
   if (output.ContainsAsSubExpression(theCommands.opIntegral()))
     return false;
+  output.CheckConsistencyRecursively();
+  output.CheckInitializationRecursively();
   return true;
 }
 
@@ -2285,6 +2313,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateSum(Calculator& theCommands, cons
       result+=newSummand;
   }
   output=result;
+  output.CheckConsistencyRecursively();
+  output.CheckInitializationRecursively();
   return true;
 }
 
@@ -2325,6 +2355,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateXnDiffX(Calculator& theCommands, 
   outputNoCoeff.MakeXOX(theCommands, theCommands.opThePower(), theVariableE, outputPower);
   outputNoCoeff/=outputPower;
   output=theFunCoeff*outputNoCoeff;
+  output.CheckConsistency();
+  output.CheckInitializationRecursively();
   return true;
 }
 
@@ -2424,7 +2456,9 @@ bool CalculatorFunctionsGeneral::outerCommuteConstants(Calculator& theCommands, 
     return false;
   if (input[1].IsConstantNumber())
     return false;
-  return output.MakeProducT(theCommands, input[2], input[1]);
+  output.MakeProducT(theCommands, input[2], input[1]);
+  output.CheckInitializationRecursively();
+  return true;
 }
 
 bool CalculatorFunctionsGeneral::outerDivideReplaceAdivBpowerItimesBpowerJ(Calculator& theCommands, const Expression& input, Expression& output)

@@ -2163,7 +2163,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
           theFormat->flagExpressionNewLineAllowed=true;
         break;
       case Expression::formatFunctionUseCdot:
-        out <<  (*this)[1].ToString(theFormat) << "\\cdot\\left(" << (*this)[1].ToString(theFormat) << "\\right)";
+        out << (*this)[1].ToString(theFormat) << "\\cdot\\left(" << (*this)[1].ToString(theFormat) << "\\right)";
         break;
       default:
         out << (*this)[1].ToString(theFormat) << "{}\\left(" << (*this)[2].ToString(theFormat) << "\\right)";

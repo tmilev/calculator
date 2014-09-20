@@ -1270,7 +1270,7 @@ bool Expression::CheckInitializationRecursively()const
 { MacroRegisterFunctionWithName("Expression::CheckInitializationRecursively");
   this->CheckInitialization();
   for (int i=0; i<this->children.size; i++)
-    (*this)[i].CheckConsistencyRecursively();
+    (*this)[i].CheckInitializationRecursively();
   return true;
 }
 
@@ -1508,6 +1508,9 @@ bool Calculator::innerMultiplyByOne(Calculator& theCommands, const Expression& i
   if (!input[1].IsEqualToOne())
     return false;
   output=input[2];
+  stOutput << "remove when done!";
+  input.CheckInitializationRecursively();
+  output.CheckInitializationRecursively();
   return true;
 }
 
@@ -1682,20 +1685,35 @@ bool Calculator::CollectSummands
 //  else
 //    stOutput << outputSum.theMonomials[0].ToString() << " < " << outputSum.theMonomials[1].ToString();
   outputSum.QuickSortDescending();
-
+  stOutput << "<br>remove when done";
+  for (int i =0; i<outputSum.size(); i++)
+    outputSum[i].CheckInitializationRecursively();
 //  stOutput << " after mon sort: " << outputSum.theMonomials.ToString();
   return true;
 }
 
 bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const Expression& input, Expression& output)
-{ int opPower=theCommands.opThePower();
+{ MacroRegisterFunctionWithName("Calculator::innerAssociateExponentExponent");
+  int opPower=theCommands.opThePower();
   if (!input.StartsWith(opPower, 3))
     return false;
   if (!input[1].StartsWith(opPower, 3))
     return false;
   Expression tempE;
   tempE.MakeProducT(theCommands, input[1][2], input[2]);
-  return output.MakeXOX(theCommands, opPower, input[1][1], tempE);
+  output.MakeXOX(theCommands, opPower, input[1][1], tempE);
+  stOutput << "remove when done! checking input: ";
+  input.CheckConsistencyRecursively();
+  input.CheckInitializationRecursively();
+  stOutput << "remove when done! checking input[1][1]: ";
+  input[1][1].CheckConsistencyRecursively();
+  stOutput << "remove when done! checking input[2]: ";
+  input[2].CheckConsistencyRecursively();
+  stOutput << "remove when done! checking tempE: ";
+  tempE.CheckConsistencyRecursively();
+  stOutput << "checkin output: ";
+  output.CheckConsistencyRecursively();
+  return true;
 }
 
 bool Calculator::innerDistributeExponent(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1762,7 +1780,10 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
     return false;
   MonomialCollection<Expression, Rational> theSum;
   theCommands.CollectSummands(theCommands, input, theSum);
-  return output.MakeSum(theCommands, theSum);
+  output.MakeSum(theCommands, theSum);
+  stOutput << "<br>Remove when done!";
+  output.CheckInitializationRecursively();
+  return true;
 }
 
 bool Calculator::EvaluateIf(Calculator& theCommands, const Expression& input, Expression& output)

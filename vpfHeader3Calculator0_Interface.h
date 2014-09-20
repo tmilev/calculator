@@ -1624,13 +1624,13 @@ public:
   void AddKnownDoubleConstant(const std::string& theConstantName, double theValue);
   void AddOperationComposite
   (const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing, const std::string& opDescription,
-   const std::string& opExample, bool isInner, bool visible=true, bool experimental=false, const std::string& inputAdditionalIdentifier="");
+   const std::string& opExample, bool isInner, bool visible, bool experimental, const std::string& inputAdditionalIdentifier);
   void AddOperationBinaryInnerHandlerWithTypes
   (const std::string& theOpName, Expression::FunctionAddress innerHandler, int leftType, int rightType, const std::string& opDescription,
    const std::string& opExample, bool visible=true, bool experimental=false, const std::string& inputAdditionalIdentifier="");
   void AddOperationHandler
   (const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing, const std::string& opDescription,
-   const std::string& opExample, bool isInner, bool visible=true, bool experimental=false, const std::string& inputAdditionalIdentifier="");
+   const std::string& opExample, bool isInner, bool visible, bool experimental, const std::string& inputAdditionalIdentifier);
   void AddOperationInnerHandler
   (const std::string& theOpName, Expression::FunctionAddress innerHandler, const std::string& opArgumentListIgnoredForTheTimeBeing,
    const std::string& opDescription, const std::string& opExample, bool visible=true, bool experimental=false, const std::string& inputAdditionalIdentifier="")

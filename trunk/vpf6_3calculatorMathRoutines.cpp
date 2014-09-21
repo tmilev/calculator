@@ -656,33 +656,49 @@ bool IntegralRFComputation::IntegrateRF()
   }
 //  stOutput << "<hr>Context variable 1: " << this->contextE.ContextGetContextVariable(0);
   printoutIntegration << this->printoutPFsHtml.str();
-  Expression polyE, currentNum, denExpE, currentDenNoPower, currentDen, currentIntegrand, currentIntegral;
+  Expression polyE, currentNum, denExpE, currentDenNoPowerMonic, currentDen, currentIntegrand,
+  currentIntegralNoCoeff, currentIntegralWithCoeff, coeffE;
   this->theIntegralSummands.SetSize(0);
+  AlgebraicNumber theCoefficient;
+  Polynomial<AlgebraicNumber> denRescaled, numRescaled;
+  AlgebraicNumber currentCoefficient, numScale;
   for (int i=0; i<this->theNumerators.size; i++)
     for (int j=0; j<this->theNumerators[i].size; j++)
     { if (this->theNumerators[i][j].IsEqualToZero())
         continue;
-      polyE.AssignValueWithContext(this->theNumerators[i][j], this->contextE, *this->owner);
+      denRescaled=this->theDenominatorFactorsWithMults[i];
+      numRescaled=this->theNumerators[i][j];
+      currentCoefficient=denRescaled.theCoeffs[denRescaled.GetIndexMaxMonomial()];
+      currentCoefficient.Invert();
+      denRescaled*=currentCoefficient;
+      MathRoutines::RaiseToPower(currentCoefficient, j+1, (AlgebraicNumber) 1);
+      numScale=numRescaled.theCoeffs[numRescaled.GetIndexMaxMonomial()];
+      numRescaled/=numScale;
+      currentCoefficient*=numScale;
+      polyE.AssignValueWithContext(numRescaled, this->contextE, *this->owner);
+
 //      stOutput << "<br>polyE is: " << polyE.ToString();
       if (!CalculatorFunctionsGeneral::innerExpressionFromBuiltInType(*this->owner, polyE, currentNum))
         return false;
 //      stOutput << "<br>currentNum is: " << currentNum.ToString();
-      polyE.AssignValueWithContext(this->theDenominatorFactorsWithMults[i], this->contextE, *this->owner);
-      if(!CalculatorFunctionsGeneral::innerExpressionFromBuiltInType(*this->owner, polyE, currentDenNoPower))
+      polyE.AssignValueWithContext(denRescaled, this->contextE, *this->owner);
+      if(!CalculatorFunctionsGeneral::innerExpressionFromBuiltInType(*this->owner, polyE, currentDenNoPowerMonic))
         return false;
 //      stOutput << "<br>currentDenNoPower is: " << currentDenNoPower.ToString();
       if (j!=0)
       { denExpE.AssignValue(j+1, *this->owner);
-        currentDen.MakeXOX(*this->owner, this->owner->opThePower(), currentDenNoPower, denExpE);
+        currentDen.MakeXOX(*this->owner, this->owner->opThePower(), currentDenNoPowerMonic, denExpE);
       } else
-        currentDen=currentDenNoPower;
+        currentDen=currentDenNoPowerMonic;
       currentIntegrand=currentNum;
       currentIntegrand/=currentDen;
 //      stOutput << "<br>CurrentIntegrand is: " << currentIntegrand.ToString();
-      currentIntegral.MakeIntegral(*this->owner, currentIntegrand, this->contextE.ContextGetContextVariable(0));
-      currentIntegral.CheckConsistencyRecursively();
+      currentIntegralNoCoeff.MakeIntegral(*this->owner, currentIntegrand, this->contextE.ContextGetContextVariable(0));
+      coeffE.AssignValue(currentCoefficient, *this->owner);
+      currentIntegralWithCoeff=coeffE*currentIntegralNoCoeff;
+      currentIntegralWithCoeff.CheckConsistencyRecursively();
 //      stOutput << "<br>Current integral is: " << currentIntegral.ToString();
-      this->theIntegralSummands.AddOnTop(currentIntegral);
+      this->theIntegralSummands.AddOnTop(currentIntegralWithCoeff);
     }
   if (!this->quotientRat.IsEqualToZero())
   { Expression currentIntegrandPolyForm;
@@ -692,10 +708,10 @@ bool IntegralRFComputation::IntegrateRF()
       << " to expression. This shouldn't happen. ";
       return false;
     }
-    currentIntegral.MakeIntegral(*this->owner, currentIntegrand, this->contextE.ContextGetContextVariable(0));
-    currentIntegral.CheckConsistencyRecursively();
+    currentIntegralWithCoeff.MakeIntegral(*this->owner, currentIntegrand, this->contextE.ContextGetContextVariable(0));
+    currentIntegralWithCoeff.CheckConsistencyRecursively();
 
-    this->theIntegralSummands.AddOnTop(currentIntegral);
+    this->theIntegralSummands.AddOnTop(currentIntegralWithCoeff);
   }
 //  if (this->the)
   this->theIntegralSum.MakeSum(*this->owner, this->theIntegralSummands);
@@ -1104,14 +1120,13 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
     a.CheckConsistency();
     b.CheckConsistency();
     currentLinPoly.MakeMonomiaL(0,1);
-    currentLinPoly-= (-b+theDiscriminantSqrt)/(a*2);
+    currentLinPoly-=(-b+theDiscriminantSqrt)/(a*2);
     this->theDenominatorFactorsWithMults.AddMonomial(currentLinPoly, theDenominatorFactorsWithMultsCopy.theCoeffs[i]);
     currentLinPoly.MakeMonomiaL(0,1);
-    currentLinPoly-= (-b-theDiscriminantSqrt)/(a*2);
+    currentLinPoly-=(-b-theDiscriminantSqrt)/(a*2);
     this->theDenominatorFactorsWithMults.AddMonomial(currentLinPoly, theDenominatorFactorsWithMultsCopy.theCoeffs[i]);
     additionalMultiple*=a;
 //    Rational c=currentSecondDegreePoly.GetMonomialCoefficient(MonomialP(0,0));
-
   }
   this->theDenominatorFactorsWithMults.QuickSortAscending();
 //  this->printoutPFsHtml << "<hr>this->theDenominatorFactorsWithMults: " << this->theDenominatorFactorsWithMults.ToString();
@@ -1158,6 +1173,10 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   << CGI::GetMathSpanPure(this->stringFinalAnswer);
   this->printoutPFsLatex << "Therefore, the final partial fraction decomposition is the following. "
   << "\\[" << this->stringFinalAnswer << "\\]";
+//  static bool tempBool=false;
+//  if (!tempBool)
+//    stOutput << "<hr>Here be the printout: " << this->printoutPFsHtml.str();
+//  tempBool=true;
 
   this->printoutPFsLatex << "\\end{document}";
   this->printoutPFsHtml << "<hr>The present printout, in latex format, in ready form for copy+paste to your latex editor, follows<hr> ";
@@ -1723,8 +1742,6 @@ bool CalculatorFunctionsGeneral::outerCommuteAtimesBifUnivariate(Calculator& the
 //  stOutput << "ere be i, number 1!";
   output=input;
   output.children.SwapTwoIndices(1,2);
-  stOutput << "turn me off when done";
-  output.CheckConsistencyRecursively();
   return true;
 }
 
@@ -2058,7 +2075,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaan
   Expression theFunctionE, x, integralE(theCommands);
   if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, x))
     return false;
-  //stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa, input: " << input.ToString();
+//  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa, input: " << input.ToString();
   if (!theFunctionE.StartsWith(theCommands.opDivide(), 3))
     return false;
   Expression denNoPower=theFunctionE[2];
@@ -2074,12 +2091,14 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaan
   }
   if (!a.IsConstantNumber() || !b.IsConstantNumber() || !c.IsConstantNumber()||
       !A.IsConstantNumber() || !B.IsConstantNumber())
-  { theCommands << "Failed to evaluate to constant the coefficients of the block II/III integral";
+  { theCommands << "<hr>Failed to evaluate to constant the coefficients of the block IIa and IIIa integral."
+    << "The coefficients are: " << a.ToString() << ", " << b.ToString() << ", " << c.ToString() << ", "
+    << A.ToString() << ", " << B.ToString() << ". ";
     return false;
   }
   double approxa, approxb, approxc;
   if (!a.EvaluatesToDouble(&approxa) || !b.EvaluatesToDouble(&approxb) || !c.EvaluatesToDouble(&approxc))
-  { theCommands << "Failed to evaluate variable coefficients in denominator " << denNoPower.ToString()
+  { theCommands << "<hr>Failed to evaluate variable coefficients in denominator " << denNoPower.ToString()
     << " to double. Possible user typo. ";
     return false;
   }
@@ -2118,7 +2137,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb(
   Expression theFunctionE, x, integralE(theCommands);
   if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, x))
     return false;
-//  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockI, input: " << input.ToString();
+  //stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockI, input: " << input.ToString();
   if (!theFunctionE.StartsWith(theCommands.opDivide(), 3))
     return false;
   if (!theFunctionE[2].StartsWith(theCommands.opThePower(), 3))
@@ -2137,7 +2156,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb(
   if (!CalculatorFunctionsGeneral::extractQuadraticCoeffsWRTvariable(denNoPower, x, a, b, c))
     return false;
   if (!a.IsEqualToOne() || !b.IsConstantNumber() || !c.IsConstantNumber())
-  { theCommands << "Failed to evaluate to constant the coefficients of the block II/III integral";
+  { theCommands << "<hr>Failed to evaluate to constant the coefficients of the block IIIb integral."
+    << "The coefficients are: " << a.ToString() << ", " << b.ToString() << ", " << c.ToString() << ". ";
     return false;
   }
   double approxa, approxb, approxc;
@@ -2186,8 +2206,6 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb(C
   if (!theFunctionE[2].StartsWith(theCommands.opThePower(), 3))
     return false;
   Expression nE=theFunctionE[2][2];
-  stOutput << "erase when done!";
-  nE.CheckInitializationRecursively();
   int numPower=0;
   if (!nE.IsSmallInteger(&numPower))
     return false;
@@ -2204,7 +2222,9 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb(C
     return false;
   if (!a.IsConstantNumber() || !b.IsConstantNumber() || !c.IsConstantNumber()||
       !A.IsConstantNumber() || !B.IsConstantNumber())
-  { theCommands << "Failed to evaluate to constant the coefficients of the block II/III integral";
+  { theCommands << "<hr>Failed to evaluate to constant the coefficients of the block IIb integral."
+    << "The coefficients are: " << a.ToString() << ", " << b.ToString() << ", " << c.ToString() << ", "
+    << A.ToString() << ", " << B.ToString() << ". ";
     return false;
   }
   double approxa, approxb, approxc;
@@ -2226,8 +2246,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb(C
   bSquared.MakeXOX(theCommands, theCommands.opThePower(), b, twoE);
   aSquared.MakeXOX(theCommands, theCommands.opThePower(), a, twoE);
   Expression theQuadraticDiva=xSquared+(b/a)*x+c/a;
-  quadraticPowerN.MakeXOX(theCommands, theCommands.opThePower(), quadraticPowerN, nE);
-  quadraticPowerOneMinusN.MakeXOX(theCommands, theCommands.opThePower(), quadraticPowerN, nE-oneE);
+  quadraticPowerN.MakeXOX(theCommands, theCommands.opThePower(), theQuadraticDiva, nE);
+  quadraticPowerOneMinusN.MakeXOX(theCommands, theCommands.opThePower(), theQuadraticDiva, oneE-nE);
   remainingFunctionToIntegrate=oneE/quadraticPowerN;
   remainingIntegral.MakeIntegral(theCommands, remainingFunctionToIntegrate, x);
   Expression xplusbdiv2a = x+b/(twoE*a);
@@ -2238,11 +2258,13 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb(C
   A.CheckInitializationRecursively();
   twoE.CheckInitializationRecursively();
   nE.CheckInitializationRecursively();
-  quadraticPowerOneMinusN .CheckInitializationRecursively();
+  stOutput << "quadratic power one minus n: " << quadraticPowerOneMinusN.ToString();
+  quadraticPowerOneMinusN.CheckInitializationRecursively();
   C.CheckInitializationRecursively();
   remainingIntegral.CheckInitializationRecursively();
 
   output=(oneE/ apowerN)*(A/(twoE*(oneE-nE))*quadraticPowerOneMinusN +C*remainingIntegral);
+
   output.CheckConsistencyRecursively();
   output.CheckInitializationRecursively();
   //stOutput << " <hr>innerIntegrateRationalFunctionBuidingBlockIIb: replacing " << input.ToString() << " by " << output.ToString();
@@ -2617,8 +2639,6 @@ bool CalculatorFunctionsGeneral::innerGrowDynkinType(Calculator& theCommands, co
 
 void Expression::GetBlocksOfCommutativity(HashedListSpecialized<Expression>& inputOutputList)const
 { MacroRegisterFunctionWithName("Expression::GetBlocksOfCommutativity");
-  this->CheckInitializationRecursively();
-  stOutput << "turn me off when done";
   this->CheckInitialization();
   if (this->IsAtom())
   { inputOutputList.AddOnTopNoRepetition(*this);

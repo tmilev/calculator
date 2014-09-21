@@ -1817,14 +1817,6 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
       theValuesAtPointsLeft+= valuesLeftInterpolands[j]*currentPointContribution;
 //      stOutput << " to get " << theValuesAtPointsLeft.ToString();
     }
-    //stOutput << (isGood ? " is good, " : " NO GOOD, ") << " final values at points left: " << theValuesAtPointsLeft.ToString();
-/*    if (true)
-    { //debugging code here! turn off when done debugging!
-      output.Interpolate((Vector<Rational>) PointsOfInterpolationLeft, (Vector<Rational>) theValuesAtPointsLeft);
-      stOutput << "<hr>Trying divisor: " << output.ToString();
-      if (!isGood)
-        stOutput << "<br>aint no good 'cause is constant";
-    }*/
     if (!isGood)
       continue;
     for (int j=0; j<AllPointsOfEvaluation.size; j++)

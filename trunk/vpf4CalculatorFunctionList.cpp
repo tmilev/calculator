@@ -125,16 +125,16 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst, "",
    "Attempts to rearrange into standard polynomial form and then integrate.  ",
-   "\\int  \\left( \\frac{x(x+1) }{ 2} \\right)^2 dx ");
+   "\\int  \\left( \\frac{x(x+1) }{ 2} \\right)^2 dx ", true, false, "CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateXnDiffX, "",
    "Integrates x^n dx.  ",
-   "\\int x dx ");
+   "\\int x dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateXnDiffX");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateSum, "",
    "If the integral is of the form \\int (A+B )dx, tries recursively to integrate A and B. \
    If successful, integrates the sum in the obvious way.",
-   "\\int (x+1+\\sqrt{}2) dx ");
+   "\\int (x+1+\\sqrt{}2) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateSum");
 
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateSqrt, "",
@@ -147,27 +147,27 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa, "",
    "Integrates building block Ia.  ",
-   "\\int  (\frac{3}{(x/2-1)} ) dx ");
+   "\\int  (\frac{3}{(x/2-1)} ) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIb, "",
    "Integrates building block Ib.  ",
-   "\\int  (\frac{2}{(3x-1)^2} ) dx ");
+   "\\int  (\frac{2}{(3x-1)^2} ) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIb");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa, "",
    "Integrates building blocks IIa and IIIa.  ",
-   "\\int  (\frac{3x+2}{x^2+x+1} ) dx ");
+   "\\int  (\frac{3x+2}{x^2+x+1} ) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb, "",
    "Integrates building blocks IIIb.  ",
-   "\\int  (\frac{3x+2}{(x^2+x+1)^2} ) dx ");
+   "\\int  (\frac{3x+2}{(x^2+x+1)^2} ) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb, "",
    "Integrates building blocks IIb.  ",
-   "\\int  (\frac{3x+2}{(x^2+x+1)^2} ) dx ");
+   "\\int  (\frac{3x+2}{(x^2+x+1)^2} ) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks, "",
    "Attempts to split an integral of a rational function into building block integrals.  ",
-   "\\int  \frac{1}{x(x+1)} dx ");
+   "\\int  \frac{1}{x(x+1)} dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks");
 
 
 /*  this->AddOperationInnerHandler
@@ -179,67 +179,69 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig, "",
    "Differentiation - product rule.  ",
-   "Differentiate(x,  (\\sin x) \\cos x )");
+   "Differentiate(x,  (\\sin x) \\cos x )", true, false, "CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateChainRule, "",
    "Differentiation - chain rule.  ",
-   "Differentiate(x,  \\sin x^2 \\cos (\\sin x))");
+   "Differentiate(x,  \\sin x^2 \\cos (\\sin x))", true, false, "CalculatorFunctionsGeneral::innerDifferentiateChainRule");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateAtimesB, "",
    "Differentiation - product rule.  ",
-   "Differentiate(x, f*g )");
+   "Differentiate(x, f*g )", true, false, "CalculatorFunctionsGeneral::innerDifferentiateAtimesB");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateAdivideBCommutative, "",
    "Differentiation - division rule, commutative. For the time being differentiation is assumed to be over commutative rings. \
    This might change in the future. The commutative division rule is d/dx (f/g^n)= ((d/dx f) g- n f (d/dx g))/g^{n+1}.  ",
-   "Differentiate(x, f/g ); Differentiate(x, f/g^5 ); Differentiate(x, f/g^n )");
+   "Differentiate(x, f/g ); Differentiate(x, f/g^5 ); Differentiate(x, f/g^n )", true, false, "CalculatorFunctionsGeneral::innerDifferentiateAdivideBCommutative");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateAplusB, "",
    "Differentiation - sum rule.  ",
-   "Differentiate(x, f+g )");
+   "Differentiate(x, f+g )", true, false, "CalculatorFunctionsGeneral::innerDifferentiateAplusB");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateConstant, "",
    "Differeniation - constant rule. ",
-   "Differentiate(x, 5 ); d/dx \\sqrt{5}");
+   "Differentiate(x, 5 ); d/dx \\sqrt{5}", true, false, "CalculatorFunctionsGeneral::innerDifferentiateConstant");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateX, "",
    "Differeniation - d/dx x= 1.",
-   "Differentiate(x, x ); d/dx x");
+   "Differentiate(x, x ); d/dx x", true, false, "CalculatorFunctionsGeneral::innerDifferentiateX");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateConstPower, "",
    "Differeniation - d/dx x^n= n x^{n-1}.",
-   "Differentiate(x, x^2 ); d/dx x^-1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}");
+   "Differentiate(x, x^2 ); d/dx x^-1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}", true, false,
+   "CalculatorFunctionsGeneral::innerDifferentiateConstPower");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateAPowerB, "",
    "Differeniation - d/dx a^b= d/dx(e^{b\\log a}) = a^b d/dx(b\\log a) .",
-   "Differentiate(x, x^2 ); d/dx x^-1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}");
+   "Differentiate(x, x^2 ); d/dx x^-1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}", true, false, "CalculatorFunctionsGeneral::innerDifferentiateAPowerB");
 
   this->AddOperationInnerHandler
   ("\\times", CalculatorFunctionsGeneral::innerCrossProduct, "",
    "Cross product in IIId. Returns error if given two non-3d vectors.",
-   "(1,-2,3 ) \times( 1,-1,-1)");
-
+   "(1,-2,3 ) \times( 1,-1,-1)", true, false, "CalculatorFunctionsGeneral::innerCrossProduct");
 
   this->AddOperationInnerHandler
   ("ElementWeylAlgebraDO", Calculator::innerElementWeylAlgebra, "",
    "Creates element of a weyl algebra = polynomial coefficient differential operator. First argument denotes differential operator letter, \
    second argument - the dual polynomial expression. ",
-   "\\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i; \n[\\partial_1, x_1]; \n\\partial_1 x_1; \nx_1\\partial_1");
+   "\\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i; \n[\\partial_1, x_1]; \n\\partial_1 x_1; \nx_1\\partial_1",
+   true, false, "Calculator::innerElementWeylAlgebra");
   this->AddOperationInnerHandler
   ("ElementWeylAlgebraPoly", Calculator::innerPolynomialWithEWA, "",
    "Creates a monomial from the second argument whose differential operator letter is the first argument. ",
-   "x_{{i}}:=ElementWeylAlgebraPoly{}(\\partial_i, x_i); \n\\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i);\n\\partial_1 x_1");
+   "x_{{i}}:=ElementWeylAlgebraPoly{}(\\partial_i, x_i); \n\\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i);\n\\partial_1 x_1", true, false,
+   "Calculator::innerPolynomialWithEWA");
   this->AddOperationInnerHandler
   ("MakeRationalFunction", CalculatorSerialization::innerRationalFunction, "",
    "Creates a built-in rational function.",
-   "MakeRationalFunction{}(x_1+MakeRationalFunction{}x_1+x_2)");
+   "MakeRationalFunction{}(x_1+MakeRationalFunction{}x_1+x_2)", true, false, "CalculatorSerialization::innerRationalFunction");
   this->AddOperationInnerHandler
   ("MatrixRationals", this->innerMatrixRational,"",
    "Creates an internal c++ matrix structure from double list of rationals. \
    ", "s_1:=MatrixRationals{}((-1,-1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1));\
    \ns_2:=MatrixRationals{}((1,0,0,0), (-1,-1,-1,0), (0,0,1,0), (0,0,0,1)); \
    \ns_3:=MatrixRationals{}((1,0,0,0), (0,1,0,0), (0,-2,-1,-1), (0,0,0,1)); \
-   \ns_4:=MatrixRationals{}((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,-1,-1)); ");
+   \ns_4:=MatrixRationals{}((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,-1,-1)); ", true, false, "this->innerMatrixRational");
   this->AddOperationInnerHandler
   ("MatrixRationalsTensorForm", this->innerMatrixRationalTensorForm,"",
    "Same as MatrixRationals but uses different c++ implementation (class MatrixTensor instead of class Matrix). \

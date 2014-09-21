@@ -48,8 +48,6 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsLisT())
     return false;
-  stOutput << "<br>remove me when done!";
-  input.CheckInitializationRecursively();
   const Expression& functionNameNode =input[0];
   if (functionNameNode.StartsWith())
   { const List<Function>* theHandlers=theCommands.GetOperationCompositeHandlers(functionNameNode[0].theData);
@@ -59,9 +57,6 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
         { if (theCommands.flagLogEvaluatioN)
             theCommands << "<hr>Built-in substitution: " << (*theHandlers)[i].ToStringSummary() << "<br>Rule stack id: "
             << theCommands.RuleStackCacheIndex;
-          { stOutput << "<br>turn me off when done: checking: " << (*theHandlers)[i].ToStringSummary();
-            output.CheckInitializationRecursively();
-          }
           return true;
         }
   }
@@ -78,10 +73,6 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
           if (theCommands.flagLogEvaluatioN)
             theCommands << "<hr>Built-in substitution: " << outerFun.ToStringSummary() << "<br>Rule stack id: "
             << theCommands.RuleStackCacheIndex;
-          { stOutput << "<br>turn me off when done: checking: " << outerFun.ToStringSummary();
-            output.CheckInitializationRecursively();
-          }
-
           return true;
         }
     } else
@@ -98,9 +89,6 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
             if (theCommands.flagLogEvaluatioN)
               theCommands << "<hr>Built-in substitution: " << innerFun.ToStringSummary() << "<br>Rule stack id: "
               << theCommands.RuleStackCacheIndex;
-            { stOutput << "<br>turn me off when done: checking: " << innerFun.ToStringSummary();
-              output.CheckInitializationRecursively();
-            }
             return true;
           }
       } else
@@ -110,9 +98,6 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
             if (theCommands.flagLogEvaluatioN)
               theCommands.Comments << "<hr>Built-in substitution: " << innerFun.ToStringSummary()
               << "<br>Rule stack id: " << theCommands.RuleStackCacheIndex;
-            { stOutput << "<br>turn me off when done: checking: " << innerFun.ToStringSummary();
-              output.CheckInitializationRecursively();
-            }
             return true;
           }
     }
@@ -283,9 +268,6 @@ bool Calculator::EvaluateExpression
   { StackMaintainerRules theRuleStackMaintainer(&theCommands);
     ReductionOcurred=false;
     counterNumTransformations++;
-    stOutput << "<br>Remove me when done!!!";
-    output.CheckInitializationRecursively();
-
     if (indexInCache!=-1)
       theCommands.imagesCachedExpressions[indexInCache]=output;
     //////------Handling naughty expressions------
@@ -510,8 +492,6 @@ void Calculator::EvaluateCommands()
 //  << "Starting expression: " << this->theProgramExpression.ToString()
 //  << "<hr>";
   Expression StartingExpression=this->theProgramExpression;
-//  stOutput << "comment me out when done with debugging";
-//  StartingExpression.HashFunction();
   this->flagAbortComputationASAP=false;
   this->Comments.clear();
   this->EvaluateExpression(*this, this->theProgramExpression, this->theProgramExpression);

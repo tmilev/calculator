@@ -310,7 +310,8 @@ void WebWorker::OutputBeforeComputation()
   PredefinedStrings(civilizedInput);
 
 //  civilizedInput="\\int( 1/x dx)";
-  civilizedInput="\\int (1/(x(1+x^2)^2))dx";
+//  civilizedInput="\\int (1/(x(1+x^2)^2))dx";
+//  civilizedInput="%LogEvaluation \\int (1/(5+2x+7x^2)^2)dx";
   crash.userInputStringIfAvailable=civilizedInput;
 
   std::stringstream tempStreamXX;

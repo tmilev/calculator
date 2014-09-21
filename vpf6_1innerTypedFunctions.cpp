@@ -68,8 +68,6 @@ bool Calculator::outerExtractBaseMultiplication(Calculator& theCommands, const E
   //handle 0*anything=0
   if (output[1].IsEqualToZero())
     return output.AssignValue(0, theCommands);
-  stOutput << "<br>Remove when done!!";
-  output.CheckInitializationRecursively();
   return result;
 }
 

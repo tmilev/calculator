@@ -534,10 +534,12 @@ void Calculator::ParseFillDictionary(const std::string& input)
       if (inQuotes)
         LookAheadChar='"';
     }
-    if (current=="\n")
-      current=" ";
-    if (current=="~")
-      current=" ";
+    if (!inQuotes)
+    { if (current=="\n")
+        current=" ";
+      if (current=="~")
+        current=" ";
+    }
     bool shouldSplit= (this->isLeftSeparator(current[0]) || this->isRightSeparator(LookAheadChar) || current==" ");
     if (MathRoutines::isADigit(LookAheadChar))
       if (current[current.size()-1]=='\\')

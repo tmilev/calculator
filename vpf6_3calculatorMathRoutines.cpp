@@ -4706,16 +4706,31 @@ class LaTeXcrawler
   public:
   int recursionDepth;
   std::string theFileToCrawl;
+  std::string baseFolderStartFile;
+  Calculator* owner;
   void Crawl();
   void CrawlRecursive(const std::string& currentFileName);
   std::stringstream crawlingResult;
+  std::stringstream displayResult;
   std::stringstream errorStream;
   std::string ToString();
 };
 
 void LaTeXcrawler::Crawl()
 { this->recursionDepth=0;
+  this->baseFolderStartFile=FileOperations::GetPathFromFileName(this->theFileToCrawl);
   this->CrawlRecursive(this->theFileToCrawl);
+  std::fstream outputFile;
+  std::string outputFileName=  this->owner->theGlobalVariableS->PhysicalPathOutputFolder + "latexOutput.tex";
+  if (!FileOperations::OpenFileCreateIfNotPresent(outputFile, outputFileName, false, true, false))
+  { this->displayResult << "Failed to open output file: " << outputFileName << ", check write permissions. ";
+    return;
+  }
+  outputFile << this->crawlingResult.str();
+  if (this->errorStream.str()!="")
+    this->displayResult << "Errors encountered. " << this->errorStream.str();
+  this->displayResult << "Output file: <a href=\"" << this->owner->theGlobalVariableS->DisplayPathOutputFolder
+  << "latexOutput.tex\">" << "latexOutput.tex" << "</a>";
 }
 
 void LaTeXcrawler::CrawlRecursive(const std::string& currentFileName)
@@ -4732,7 +4747,27 @@ void LaTeXcrawler::CrawlRecursive(const std::string& currentFileName)
   { this->errorStream << "Failed to open file " << currentFileName << ", aborting.";
     return;
   }
-
+  std::string buffer;
+  while (!theFile.eof())
+  { std::getline(theFile, buffer);
+    std::stringstream newFileName;
+    if (MathRoutines::StringBeginsWith(buffer, "\\input"))
+    { newFileName << this->baseFolderStartFile;
+      unsigned i=0;
+      for (i=7; buffer[i]!='}' && i< buffer.size();i++)
+        newFileName << buffer[i];
+      newFileName << ".tex";
+      this->crawlingResult << "%input from file: " << newFileName.str() << "\n";
+      this->CrawlRecursive(newFileName.str());
+      this->crawlingResult << "\n";
+      if (i+1<buffer.size())
+        buffer = buffer.substr(i+1);
+      else
+        continue;
+    }
+    this->crawlingResult << buffer;
+    this->crawlingResult << "\n";
+  }
 }
 
 bool CalculatorFunctionsGeneral::innerCrawlTexFile(Calculator& theCommands, const Expression& input, Expression& output)
@@ -4742,8 +4777,8 @@ bool CalculatorFunctionsGeneral::innerCrawlTexFile(Calculator& theCommands, cons
     return false;
   }
   LaTeXcrawler theCrawler;
+  theCrawler.owner=&theCommands;
   theCrawler.theFileToCrawl=input.GetValue<std::string>();
   theCrawler.Crawl();
-  return output.AssignValue(theCrawler.crawlingResult.str(), theCommands);
+  return output.AssignValue(theCrawler.displayResult.str(), theCommands);
 }
-

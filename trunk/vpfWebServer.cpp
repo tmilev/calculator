@@ -343,6 +343,13 @@ void WebWorker::OutputResultAfterTimeout()
     out << standardOutputStreamAfterTimeout.str() << "<hr>";
   out << "<table><tr><td>" << theParser.outputString << "</td><td><b>Comments</b>"
   << theParser.outputCommentsString << "</td></tr></table>";
+  std::stringstream outputTimeOutFileName;
+  std::fstream outputTimeOutFile;
+  outputTimeOutFileName << theParser.theGlobalVariableS->PhysicalPathOutputFolder
+  << theParser.inputStringRawestOfTheRaw << ".html";
+  FileOperations::OpenFileCreateIfNotPresent(outputTimeOutFile, outputTimeOutFileName.str(), false, true, false);
+  outputTimeOutFile << "<html><body>" << out.str() << "</body></html>";
+  outputTimeOutFile.close();
   WebWorker::OutputSendAfterTimeout(out.str());
 }
 

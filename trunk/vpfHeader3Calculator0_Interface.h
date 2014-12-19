@@ -1940,8 +1940,7 @@ bool Expression::MergeContextsMyArumentsAndConvertThem(Expression& output)const
   output.AddChildOnTop((*this)[0]);
   Expression convertedE;
   for (int i=1; i<mergedContexts.children.size; i++)
-  { //stOutput << "<hr>Converting: " << mergedContexts[i].ToString();
-    if (!mergedContexts[i].ConvertToType<theType>(convertedE))
+  { if (!mergedContexts[i].ConvertToType<theType>(convertedE))
     { *this->theBoss << "<hr>Failed to convert " << mergedContexts[i].ToString() << " to the desired type. ";
       return false;
     }

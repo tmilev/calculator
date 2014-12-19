@@ -666,6 +666,7 @@ WeylGroupVirtualRepresentation<Rational>& Expression::GetValueNonConst()const
 template< >
 bool Expression::ConvertToType<Polynomial<AlgebraicNumber> >(Expression& output)const
 { MacroRegisterFunctionWithName("ConvertToType_Polynomial_AlgebraicNumber");
+//  stOutput << "<br>got ere, converting " << this->ToString() << " to polynomial with algebraic number cfs.";
   this->CheckInitialization();
   if (this->IsOfType<Rational>())
   { Polynomial<AlgebraicNumber> resultP;
@@ -673,10 +674,13 @@ bool Expression::ConvertToType<Polynomial<AlgebraicNumber> >(Expression& output)
     return output.AssignValueWithContext(resultP, this->GetContext(), *this->theBoss);
   }
   if (this->IsOfType<AlgebraicNumber>())
-  { Polynomial<AlgebraicNumber> resultP;
+  { //stOutput << "<br>" << this->ToString() << " IS an algebraic number!";
+    Polynomial<AlgebraicNumber> resultP;
     resultP.MakeConst(this->GetValue<AlgebraicNumber>());
+    //stOutput << "<br>output gotta be assigned: " << resultP.ToString();
     return output.AssignValueWithContext(resultP, this->GetContext(), *this->theBoss);
   }
+//  stOutput << "<br>" << this->ToString() << " aint an algebraic number!";
   if (this->IsOfType<Polynomial<Rational> >())
   { Polynomial<AlgebraicNumber> resultP;
     resultP=this->GetValue<Polynomial<Rational> >();

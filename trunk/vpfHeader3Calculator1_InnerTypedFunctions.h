@@ -20,8 +20,7 @@ public:
   static bool innerAddRatOrPolyOrRFToRatOrPolyOrRF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddUEToAny(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddEltTensorToEltTensor(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddRatOrPolyToRatOrPoly(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddAlgNumPolyToAlgNumPoly(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddNumberOrPolyToNumberOrPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddPlotToPlot(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddSequenceToSequence(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddMatrixRationalToMatrixRational(Calculator& theCommands, const Expression& input, Expression& output);
@@ -31,9 +30,8 @@ public:
   static bool innerAddAlgebraicNumberToAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddWeightToWeight(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyAlgNumPolyByAlgNumPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyRatOrPolyByRatOrPoly(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyNumberOrPolyByNumberOrPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyLRObyLRO(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyLRObyLSPath(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyEltZmodPorRatByEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output);
@@ -129,7 +127,7 @@ bool CalculatorSerialization::innerPolynomial(Calculator& theCommands, const Exp
   RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
 //  stOutput << "Extracting poly from: " << input.ToString();
   if (theCommands.RecursionDeptH>theCommands.MaxRecursionDeptH)
-  { theCommands.Comments << "Max recursion depth of " << theCommands.MaxRecursionDeptH
+  { theCommands << "Max recursion depth of " << theCommands.MaxRecursionDeptH
     << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";
     return false;
   }
@@ -148,29 +146,29 @@ bool CalculatorSerialization::innerPolynomial(Calculator& theCommands, const Exp
     theComputed.AddChildOnTop(input[0]);
     for (int i=1; i<input.children.size; i++)
     { if (!CalculatorSerialization::innerPolynomial<coefficient>(theCommands, input[i], theConverted))
-      { theCommands.Comments << "<hr>Failed to extract polynomial from " << input[i].ToString();
+      { theCommands << "<hr>Failed to extract polynomial from " << input[i].ToString();
         return false;
       }
       theComputed.AddChildOnTop(theConverted);
     }
     if (input.IsListStartingWithAtom(theCommands.opTimes()))
-      return CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByRatOrPoly(theCommands, theComputed, output);
+      return CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly(theCommands, theComputed, output);
     if (input.IsListStartingWithAtom(theCommands.opPlus()))
-      return CalculatorFunctionsBinaryOps::innerAddRatOrPolyToRatOrPoly(theCommands, theComputed, output);
+      return CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly(theCommands, theComputed, output);
     crash << "Error, this line of code should never be reached. " << crash;
   }
   int thePower=-1;
   if (input.StartsWith(theCommands.opThePower(), 3))
     if (input[2].IsSmallInteger(&thePower))
     { if(!CalculatorSerialization::innerPolynomial<coefficient>(theCommands, input[1], theConverted))
-      { theCommands.Comments << "<hr>Failed to extract polynomial from " << input[1].ToString() << ".";
+      { theCommands << "<hr>Failed to extract polynomial from " << input[1].ToString() << ".";
         return false;
       }
       Polynomial<coefficient> resultP=theConverted.GetValue<Polynomial<coefficient> >();
       if (thePower<0)
       { coefficient theConst;
         if (!resultP.IsConstant(&theConst))
-        { theCommands.Comments << "<hr>Failed to extract polynomial from  " << input.ToString() << " because the exponent was negative. ";
+        { theCommands << "<hr>Failed to extract polynomial from  " << input.ToString() << " because the exponent was negative. ";
           return false;
         }
         theConst.Invert();

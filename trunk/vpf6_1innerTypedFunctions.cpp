@@ -433,16 +433,17 @@ bool CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly(Calculator
   return CalculatorFunctionsBinaryOps::innerDivideTypeByType<RationalFunctionOld>(theCommands, input, output);
 }
 
-bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByRatOrPoly(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByRatOrPoly");
+bool CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly");
   //stOutput << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  if (input.children.size<3)
+    return false;
+  const Expression leftE=input[1];
+  const Expression rightE=input[2];
+  if (    leftE.IsOfType<AlgebraicNumber>() || leftE.IsOfType <Polynomial<AlgebraicNumber> >()
+      || rightE.IsOfType<AlgebraicNumber>() || rightE.IsOfType<Polynomial<AlgebraicNumber> >() )
+    return CalculatorFunctionsBinaryOps::innerMultiplyTypeByType<Polynomial<AlgebraicNumber> >(theCommands, input, output);
   return CalculatorFunctionsBinaryOps::innerMultiplyTypeByType<Polynomial<Rational> >(theCommands, input, output);
-}
-
-bool CalculatorFunctionsBinaryOps::innerMultiplyAlgNumPolyByAlgNumPoly(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyAlgNumPolyByAlgNumPoly");
-  //stOutput << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  return CalculatorFunctionsBinaryOps::innerMultiplyTypeByType<Polynomial<AlgebraicNumber> >(theCommands, input, output);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAddUEToAny(Calculator& theCommands, const Expression& input, Expression& output)
@@ -525,14 +526,16 @@ bool CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor(Calculator& theC
   return CalculatorFunctionsBinaryOps::innerAddTypeToType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(theCommands, input, output);
 }
 
-bool CalculatorFunctionsBinaryOps::innerAddRatOrPolyToRatOrPoly(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddRatOrPolyToRatOrPoly");
+bool CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly");
+  if (input.children.size<3)
+    return false;
+  const Expression leftE=input[1];
+  const Expression rightE=input[2];
+  if (    leftE.IsOfType<AlgebraicNumber>() || leftE.IsOfType <Polynomial<AlgebraicNumber> >()
+      || rightE.IsOfType<AlgebraicNumber>() || rightE.IsOfType<Polynomial<AlgebraicNumber> >() )
+    return CalculatorFunctionsBinaryOps::innerAddTypeToType<Polynomial<AlgebraicNumber> >(theCommands, input, output);
   return CalculatorFunctionsBinaryOps::innerAddTypeToType<Polynomial<Rational> >(theCommands, input, output);
-}
-
-bool CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly");
-  return CalculatorFunctionsBinaryOps::innerAddTypeToType<Polynomial<AlgebraicNumber> >(theCommands, input, output);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAddPlotToPlot(Calculator& theCommands, const Expression& input, Expression& output)

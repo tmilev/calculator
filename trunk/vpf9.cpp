@@ -6007,7 +6007,7 @@ void SubgroupWeylGroupOLD::ToString(std::string& output, bool displayElements)
   out << "<br>Simple roots:\n<br>\n ";
   head << "\\begin{array}{rcl}";
   for (int i=0; i<this->simpleGenerators.size; i++)
-    head << "\n\\eta_{" << DisplayIndicesSimpleGenerators[i] << "}&:=&" << this->simpleGenerators[i].ToString() << "\\\\";
+    head << "\n\\eta_{" << DisplayIndicesSimpleGenerators[i] << "}&=&" << this->simpleGenerators[i].ToString() << "\\\\";
   head << "\\end{array}";
   out << CGI::GetMathMouseHover(head.str());
   if (this->ExternalAutomorphisms.size>0)
@@ -6017,7 +6017,7 @@ void SubgroupWeylGroupOLD::ToString(std::string& output, bool displayElements)
     for (int i=0; i<this->ExternalAutomorphisms.size; i++)
     { tempMat.AssignVectorsToRows(this->ExternalAutomorphisms[i]);
       tempMat.Transpose();
-      head2 << "a_{" << i+1 << "}&:=&" << tempMat.ToString(&latexFormat) << "\\\\";
+      head2 << "a_{" << i+1 << "}&=&" << tempMat.ToString(&latexFormat) << "\\\\";
     }
     head2 << "\\end{array}";
     out << CGI::GetMathMouseHover(head2.str());

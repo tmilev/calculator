@@ -1056,16 +1056,16 @@ public:
   { return this->controlSequences.GetIndexIMustContainTheObject(";");
   }
   int conDefineConditional()
-  { return this->controlSequences.GetIndexIMustContainTheObject("if:=");
+  { return this->controlSequences.GetIndexIMustContainTheObject("if=");
   }
   int conComma()
   { return this->controlSequences.GetIndexIMustContainTheObject(",");
   }
   int conDefine()
-  { return this->controlSequences.GetIndexIMustContainTheObject(":=");
+  { return this->controlSequences.GetIndexIMustContainTheObject("=");
   }
   int conIsDenotedBy()
-  { return this->controlSequences.GetIndexIMustContainTheObject(":=:");
+  { return this->controlSequences.GetIndexIMustContainTheObject("=:");
   }
   int conLisT()
   { return this->controlSequences.GetIndexIMustContainTheObject("");
@@ -1110,16 +1110,16 @@ public:
   { return this->theAtoms.GetIndexIMustContainTheObject("{}");
   }
   int opIsDenotedBy()
-  { return this->theAtoms.GetIndexIMustContainTheObject(":=:");
+  { return this->theAtoms.GetIndexIMustContainTheObject("=:");
   }
   int opDefine()
-  { return this->theAtoms.GetIndexIMustContainTheObject(":=");
+  { return this->theAtoms.GetIndexIMustContainTheObject("=");
   }
   int opSqrt()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\sqrt");
   }
   int opDefineConditional()
-  { return this->theAtoms.GetIndexIMustContainTheObject("if:=");
+  { return this->theAtoms.GetIndexIMustContainTheObject("if=");
   }
   int opThePower()
   { return this->theAtoms.GetIndexIMustContainTheObject("^");

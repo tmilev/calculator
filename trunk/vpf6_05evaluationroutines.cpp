@@ -115,7 +115,7 @@ bool Calculator::ExpressionMatchesPattern(const Expression& thePattern, const Ex
     << crash;
 //  static int ExpressionMatchesPatternDebugCounter=-1;
   static const bool printLocalDebugInfo=false;
-//  if (input.ToString()=="f{}((a)):=a+5")
+//  if (input.ToString()=="f{}((a))=a+5")
 //    printLocalDebugInfo=true;
   //ExpressionMatchesPatternDebugCounter++;
 //  stOutput << " ExpressionMatchesPatternDebugCounter: " << ExpressionMatchesPatternDebugCounter;
@@ -372,7 +372,7 @@ Expression* Calculator::PatternMatch
     theExpression.MakeError(out.str(), *this);
     return 0;
   }
-//  if (theExpression.ToString()=="f{}((a)):=a+5")
+//  if (theExpression.ToString()=="f{}((a))=a+5")
 //  { stOutput << "!here";
 //  }
   thePattern.CheckInitialization();

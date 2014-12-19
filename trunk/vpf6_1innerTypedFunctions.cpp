@@ -27,7 +27,7 @@ bool Calculator::outerExtractBaseMultiplication(Calculator& theCommands, const E
     return false;
   bool result=false;
   //  stOutput << "<br>handling base extraction of: " << input.ToString();
-  //handle Anything*Rational:=Rational*Anything
+  //handle Anything*Rational=Rational*Anything
   output=input;
 //  if (hereBeTrouble)
 //    stOutput << "handling: " << input.ToString() << ", semilisp: " << input.ToStringSemiFull() << ", lisp: " << input.ToStringFull();
@@ -48,7 +48,7 @@ bool Calculator::outerExtractBaseMultiplication(Calculator& theCommands, const E
       return result;
 //    Expression rightLeftE=rightE[1];
 //    Expression rightRightE=rightE[2];
-    //handle Anything1*(Rational*Anything2):=Rational*(Anything1*Anything2)
+    //handle Anything1*(Rational*Anything2)=Rational*(Anything1*Anything2)
     if (output[2][1].IsOfType<Rational>())
     { Expression tempRight;
       tempRight.MakeXOX(theCommands, theCommands.opTimes(), output[1], output[2][2]);

@@ -860,7 +860,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint(Calcul
   tempFormat.flagUseLatex=true;
   tempFormat.flagUseHTML=false;
   for (int i=0; i<groupGeneratedByMatrices.theGenerators.size; i++)
-  { outCommand << "<br>s_{" << i+1 << "}:=MatrixRationals" << groupGeneratedByMatrices.theGenerators[i].ToStringMatForm(&tempFormat) << ";";
+  { outCommand << "<br>s_{" << i+1 << "}=MatrixRationals" << groupGeneratedByMatrices.theGenerators[i].ToStringMatForm(&tempFormat) << ";";
     out << "<br>s_" << i+1 << " = " << CGI::GetMathSpanPure(groupGeneratedByMatrices.theGenerators[i].ToStringMatForm(&tempFormat) );
   }
   outCommand << "<br>GenerateFiniteMultiplicativelyClosedSet(1000, ";

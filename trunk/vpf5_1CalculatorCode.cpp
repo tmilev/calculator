@@ -548,8 +548,8 @@ bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommand
 //  stOutput << "<br>The elts: " <<  theOperators.ToString();
 //  stOutput << "<br> The common ad: " << commonAd.ToString();
   if (success)
-    out << CGI::GetMathSpanPure("F:="+theF.ToString() + ";") << "<br>" << CGI::GetMathSpanPure("H:="+theH.ToString() + ";") << "<br>"
-    << CGI::GetMathSpanPure("E:="+theE.ToString() + ";") << "<br><br>The log stream of the computation follows. " << logStream.str();
+    out << CGI::GetMathSpanPure("F="+theF.ToString() + ";") << "<br>" << CGI::GetMathSpanPure("H="+theH.ToString() + ";") << "<br>"
+    << CGI::GetMathSpanPure("E="+theE.ToString() + ";") << "<br><br>The log stream of the computation follows. " << logStream.str();
   else
     out << "<br>Couldn't extend E to sl(2)-triple. The log stream follows. " << logStream.str();
   return output.AssignValue(out.str(), theCommands);
@@ -1002,10 +1002,10 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
   coneStrictMatForm.GetVectorsFromRows(coneStrictGens);
   out << "<br>Input non-strict (i.e., over Z_{&gt;=0}) cone: ";
   for (int i=0; i<coneStrictGens.size; i++)
-    out << "<br>v_{" << i+1 << "}:=" << coneStrictGens[i].ToString() << ";";
+    out << "<br>v_{" << i+1 << "}=" << coneStrictGens[i].ToString() << ";";
   out << "<br>Input strict (i.e., over Z_{&gt;0}) cone: ";
   for (int i=0; i<coneNonStrictGens.size; i++)
-    out << "<br>v_{" << coneStrictGens.size+ i+1 << "}:=" << coneNonStrictGens[i].ToString() << ";";
+    out << "<br>v_{" << coneStrictGens.size+ i+1 << "}=" << coneNonStrictGens[i].ToString() << ";";
   Vector<Rational> outputIntersection, outputSeparatingNormal;
   bool conesDoIntersect=coneNonStrictGens.ConesIntersect(coneStrictGens, coneNonStrictGens, &outputIntersection, &outputSeparatingNormal, theCommands.theGlobalVariableS);
   if (conesDoIntersect)
@@ -1022,7 +1022,7 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
     out << "<br>Cones intersect, here is one intersection: 0= " << outputIntersection.ToStringLetterFormat("v");
   } else
   { out << "<br>Cones have empty intersection.";
-    out << "<br> A normal separating the cones is: n:=" << outputSeparatingNormal.ToString() << ". Indeed, ";
+    out << "<br> A normal separating the cones is: n=" << outputSeparatingNormal.ToString() << ". Indeed, ";
     for (int i=0; i<coneStrictGens.size; i++)
       out << "<br>\\langle v_{" << i+1 << "}, n\\rangle = " << outputSeparatingNormal.ScalarEuclidean(coneStrictGens[i]).ToString();
     for (int i=0; i<coneNonStrictGens.size; i++)

@@ -519,7 +519,7 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
   checkSub[0].MakeConst(outputRoot);
   algNumPoly.Substitution(checkSub);
   if (!algNumPoly.IsEqualToZero())
-    crash << "This is a programming error. The number z:=" << outputRoot.ToString() << " was just adjoined to the base field; z"
+    crash << "This is a programming error. The number z=" << outputRoot.ToString() << " was just adjoined to the base field; z"
     << " was given by requesting that it has minimial polynomial " << algNumPoly.ToString() << ", however, substituting z back in to the minimal polynomial "
     << "does not yield zero, rather yields " << algNumPoly.ToString() << ". " << crash;
   //check end
@@ -625,7 +625,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
   theSub[0].MakeConst(outputRoot);
   minPoly.Substitution(theSub);
   if (!minPoly.IsEqualToZero())
-    crash << "This is a programming error. The number z:=" << outputRoot.ToString() << " was just adjoined to the base field; z"
+    crash << "This is a programming error. The number z=" << outputRoot.ToString() << " was just adjoined to the base field; z"
     << " was given by requesting that it has minimial polynomial " << minPoly.ToString() << ", however, substituting z back in to the minimal polynomial "
     << "does not yield zero, rather yields " << minPoly.ToString() << ". " << crash;
   //
@@ -949,7 +949,7 @@ std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat)con
         theFlaStream << this->DisplayNamesBasisElements[i];
     } else
       theFlaStream << " e_{" << i+1 << "}";
-    theFlaStream << ":=" << this->theBasisMultiplicative[i].ToStringMatForm(&tempFormat);
+    theFlaStream << "=" << this->theBasisMultiplicative[i].ToStringMatForm(&tempFormat);
     out << CGI::GetMathSpanPure(theFlaStream.str());
     if (i!=this->theBasisMultiplicative.size-1)
       out << ",  ";

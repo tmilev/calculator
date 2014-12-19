@@ -147,7 +147,7 @@ void GlobalVariables::initDefaultFolderAndFileNames
   this->PhysicalNameExecutableWithPath=this->PhysicalNameFolderBelowExecutable+this->PhysicalNameExecutableNoPath;
   if (this->PhysicalPathServerBase=="")
   { this->PhysicalPathServerBase="./../";
-    this->DisplayPathServerBase="trunk/";
+    this->DisplayPathServerBase="";
   }
   this->DisplayPathServerBase="/"+this->DisplayPathServerBase;
   this->PhysicalPathOutputFolder = this->PhysicalPathServerBase + "output/";
@@ -719,7 +719,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex(GlobalVariab
 { std::stringstream out;
   FormatExpressions theFormat;
   Vector<Rational> tempRoot;
-  FileOperations::OpenFileCreateIfNotPresent(this->theMultiplicitiesMaxOutputReport2, "/home/todor/math/vectorpartition/trunk/ExtremaPolys.txt", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(this->theMultiplicitiesMaxOutputReport2, "/home/todor/math/vectorpartition/ExtremaPolys.txt", false, true, false);
   this->thePfs.initFromRoots(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
   this->thePfs.ComputeDebugString(theGlobalVariables);
   out << this->thePfs.DebugString;
@@ -1535,18 +1535,18 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase(std::fstre
 
 void GeneralizedVermaModuleCharacters::ReadFromDefaultFile(GlobalVariables* theGlobalVariables)
 { std::fstream input;
-  if (!FileOperations::FileExists( "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt"))
+  if (!FileOperations::FileExists( "/home/todor/math/vectorpartition/GenVermaComputation.txt"))
   { this->computationPhase=0;
     return;
   }
-  FileOperations::OpenFileCreateIfNotPresent(input, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, false, false);
+  FileOperations::OpenFileCreateIfNotPresent(input, "/home/todor/math/vectorpartition/GenVermaComputation.txt", false, false, false);
   this->ReadFromFile(input, theGlobalVariables);
   input.close();
 }
 
 void GeneralizedVermaModuleCharacters::WriteToDefaultFile(GlobalVariables* theGlobalVariables)
 { std::fstream output;
-  FileOperations::OpenFileCreateIfNotPresent(output, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(output, "/home/todor/math/vectorpartition/GenVermaComputation.txt", false, true, false);
   this->WriteToFile(output, theGlobalVariables);
 }
 

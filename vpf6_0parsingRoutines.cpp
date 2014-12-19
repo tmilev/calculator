@@ -117,9 +117,9 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   //operation List must always have index 0.
   this->AddOperationNoRepetitionAllowed("");
 
-  this->AddOperationNoRepetitionAllowed(":=");
+  this->AddOperationNoRepetitionAllowed("=");
   this->AddOperationNoRepetitionAllowed(";");
-  this->AddOperationNoRepetitionAllowed("if:=");
+  this->AddOperationNoRepetitionAllowed("if=");
   this->AddOperationNoRepetitionAllowed("{}");
   this->AddOperationNoRepetitionAllowed("+");
   this->AddOperationNoRepetitionAllowed("-");
@@ -132,7 +132,7 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("\\choose");
   this->AddOperationNoRepetitionAllowed("\\sqrt");
   this->AddOperationNoRepetitionAllowed("[]");
-  this->AddOperationNoRepetitionAllowed(":=:");
+  this->AddOperationNoRepetitionAllowed("=:");
   this->AddOperationNoRepetitionAllowed("^");
   this->AddOperationNoRepetitionAllowed(">");
   this->AddOperationNoRepetitionAllowed("<");
@@ -216,7 +216,6 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("MakeSequence");
   this->controlSequences.AddOnTop("SequenceMatrixRows");
   this->controlSequences.AddOnTop("MatrixRow");
-  this->controlSequences.AddOnTop("=");
   this->controlSequences.AddOnTop("\\circ");
   this->controlSequences.AddOnTop("$");
   this->controlSequences.AddOnTop("MatrixSeparator");
@@ -268,7 +267,7 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
 
 /*  this->Evaluate
   ("(InternalVariable1{}{{InternalVariableA}})_{{InternalVariableB}}\
-   :=getSemisimpleLieAlgGenerator{}\
+   =getSemisimpleLieAlgGenerator{}\
    (InternalVariable1{}InternalVariableA,\
    InternalVariableB)")
   ;
@@ -1105,10 +1104,8 @@ bool Calculator::ApplyOneRule()
     << " does not have properly initialized context. "
     << crash;
   }*/
-  if (secondToLastS==":" && lastS=="=")
-    return this->ReplaceXXByCon(this->conDefine());
-  if (secondToLastS==":=" && lastS==":")
-    return this->ReplaceXXByCon(this->conIsDenotedBy());
+//  if (secondToLastS=="=" && lastS==":")
+//    return this->ReplaceXXByCon(this->conIsDenotedBy());
   if (secondToLastS=="{" && lastS=="}")
     return this->ReplaceXXByCon(this->conApplyFunction(), Expression::formatDefault);
   if (lastS=="\\cdot")
@@ -1142,8 +1139,8 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceXYByY();
   }
   //there is an ambiguity on how should function application be associated
-  //Which is better: x{}y{}z:= x{} (y{}z), or x{}y{}z:=(x{}y){}z ?
-  //In our implementation, we choose x{}y{}z:= x{} (y{}z). Although this is slightly harder to implement,
+  //Which is better: x{}y{}z= x{} (y{}z), or x{}y{}z=(x{}y){}z ?
+  //In our implementation, we choose x{}y{}z= x{} (y{}z). Although this is slightly harder to implement,
   //it appears to be the more natural choice.
 //  if (fourthToLastS=="Expression" && thirdToLastS=="{}" && secondToLastS=="Expression"
 //      && this->LookAheadAllowsApplyFunction(lastS) )
@@ -1195,10 +1192,10 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceEOEXByEX();
   if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="<" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();
-  if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && fourthToLastS=="Expression" && thirdToLastS==":=" &&
+  if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && fourthToLastS=="Expression" && thirdToLastS=="=" &&
       secondToLastS=="Expression" && this->isSeparatorFromTheRightForDefinition(lastS))
     return this->ReplaceEOEXByEX();
-  if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && fourthToLastS=="Expression" && thirdToLastS==":=:" &&
+  if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && fourthToLastS=="Expression" && thirdToLastS=="=:" &&
       secondToLastS=="Expression" && this->isSeparatorFromTheRightForDefinition(lastS))
     return this->ReplaceEOEXByEX();
   if (lastS=="Sequence" && lastE.theData.children.size==0 && lastE.theData.theData==this->opLisT())
@@ -1296,7 +1293,7 @@ bool Calculator::ApplyOneRule()
   if (fifthToLastS=="[" && fourthToLastS=="Expression" && thirdToLastS=="," && secondToLastS=="Expression" && lastS=="]")
     return this->ReplaceXEXEXByEusingO(this->conLieBracket());
   if (this->isSeparatorFromTheLeftForDefinition(eighthToLastS) && seventhToLastS=="Expression" && sixthToLastS==":" &&
-      fifthToLastS=="if" && fourthToLastS=="Expression" && thirdToLastS==":=" && secondToLastS=="Expression" && this->isSeparatorFromTheRightForDefinition(lastS))
+      fifthToLastS=="if" && fourthToLastS=="Expression" && thirdToLastS=="=" && secondToLastS=="Expression" && this->isSeparatorFromTheRightForDefinition(lastS))
     return this->ReplaceEXXEXEXByEXusingO(this->conDefineConditional());
   if (lastS==";")
   { this->NonBoundVariablesStack.LastObject()->Clear();

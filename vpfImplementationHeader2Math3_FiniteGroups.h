@@ -1413,7 +1413,7 @@ std::string WeylGroupRepresentation<coefficient>::ToString(FormatExpressions* th
   for (int i=0; i<theRank; i++)
     if (i<this->generatorS.size)
     { std::stringstream tempStream;
-      tempStream << "s_" << i+1 << ":=MatrixRationals{}" << this->generatorS[i].ToString(theFormat) << "; \\\\\n";
+      tempStream << "s_" << i+1 << "=MatrixRationals{}" << this->generatorS[i].ToString(theFormat) << "; \\\\\n";
       forYourCopyConvenience << tempStream.str();
       out << CGI::GetMathSpanPure("\\begin{array}{l}"+ tempStream.str()+"\\end{array}", 3000);
     } else

@@ -1655,7 +1655,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAdivideBCommutative(Calculato
     << " - possible user typo?";
   const Expression& theDOvar=input[1], theArgument=input[2];
   //////////////////////
-  //Quotient rule (commutative): (a/b^n)':=(a'b-n a b')/b^{n+1}
+  //Quotient rule (commutative): (a/b^n)'=(a'b-n a b')/b^{n+1}
   if (!theArgument.StartsWith(theCommands.opDivide(), 3))
     return false;
   const Expression& numeratorE=theArgument[1];
@@ -4152,7 +4152,7 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
     out << "<tr><td>" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.ToStringLetterFormat("\\psi") << "</td><td>"
     << currentChar.ToString(&tempFormat) << "</td></tr>";
     latexReport1 << " $" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.ToStringLetterFormat("\\psi", &tempFormat) << "$"
-    << "&$p_{" << i+1 <<"}:=$ $" << currentChar.ToString(&tempFormat) << "$\\\\<br>";
+    << "&$p_{" << i+1 <<"}=$ $" << currentChar.ToString(&tempFormat) << "$\\\\<br>";
   }
   out << "</table>";
   latexReport1 << "\\end{longtable}<br>";

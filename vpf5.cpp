@@ -581,7 +581,7 @@ bool Calculator::fPrintB3G2branchingIntermediate(Calculator& theCommands, const 
   } else
   { out << "Let " << CGI::GetMathSpanPure("p\\subset so(7)") << " be the "
     << theG2B3Data.selInducing.ToString() << "-parabolic subalgebra"
-    << " and let " << CGI::GetMathSpanPure("{p}':= p\\cap G_2")
+    << " and let " << CGI::GetMathSpanPure("{p}'= p\\cap G_2")
     << ". Then  " << CGI::GetMathSpanPure("{p}'") << " is the "
     << theG2B3Data.selSmallParSel.ToString() << "- parabolic subalgebra of G_2"
     << "<br> <table border=\"1\"><tr><td>$so(7)$-highest weight</td>"
@@ -595,7 +595,7 @@ bool Calculator::fPrintB3G2branchingIntermediate(Calculator& theCommands, const 
     latexTable << "\\begin{longtable}{|cccclll|} \\caption{\\label{tableB3fdsOverG2charsAndHWV"
     << theG2B3Data.selInducing.ToString() << "} "
     << "Decomposition of inducing $" << theG2B3Data.selInducing.ToString() << "$-$\\mathfrak p$-module over $"
-    << theG2B3Data.selSmallParSel.ToString() << "$-$\\mathfrak p':=\\mathfrak p\\cap G_2$}\\\\"
+    << theG2B3Data.selSmallParSel.ToString() << "$-$\\mathfrak p'=\\mathfrak p\\cap G_2$}\\\\"
     << "\\hline $\\mathfrak p-inducing$& dim. &$\\mathfrak p' decomp. $&dim.&"
     << " $\\mathfrak b \\cap \\mathfrak p'$-singular vectors & Casimir projector "
     << "& Corresp. $\\mathfrak b \\cap G_2$-singular vectors  \\\\ \\hline"
@@ -642,7 +642,7 @@ bool Calculator::fPrintB3G2branchingIntermediate(Calculator& theCommands, const 
             for (int charcounter1=0; charcounter1<theG2B3Data.theCharacterDifferences.size; charcounter1++)
             { std::string tempS=theG2B3Data.theFormat.CustomPlusSign;
               theG2B3Data.theFormat.CustomPlusSign="";
-              out << "A_{" << charcounter1 << "}:=" << theG2B3Data.theCharacterDifferences[charcounter1].ToString(&theG2B3Data.theFormat) << ";";
+              out << "A_{" << charcounter1 << "}=" << theG2B3Data.theCharacterDifferences[charcounter1].ToString(&theG2B3Data.theFormat) << ";";
               if (charcounter1!=theG2B3Data.theCharacterDifferences.size-1)
                 out << "<br>";
               theG2B3Data.theFormat.CustomPlusSign=tempS;
@@ -772,7 +772,7 @@ bool Calculator::fPrintB3G2branchingTableCharsOnly(Calculator& theCommands, cons
   } else
   { out << "Let " << CGI::GetMathSpanPure("p\\subset so(7)") << " be the "
     << theg2b3data.selInducing.ToString() << "-parabolic subalgebra"
-    << " and let " << CGI::GetMathSpanPure("{p}':= p\\cap G_2")
+    << " and let " << CGI::GetMathSpanPure("{p}'= p\\cap G_2")
     << ". Then  " << CGI::GetMathSpanPure("{p}'") << " is the "
     << theg2b3data.selSmallParSel.ToString() << "- parabolic subalgebra of G_2"
     << "<br> <table><tr><td>$so(7)$-highest weight</td>"

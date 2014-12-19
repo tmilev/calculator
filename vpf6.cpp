@@ -797,18 +797,18 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
     { ElementWeylAlgebra<Rational> diffOpPart, transformedDO;
       reportFourierTransformedCalculatorCommands << "<hr>" << CGI::GetMathMouseHover(theMod.theChaR.ToString())
       << ", differential operators Fourier transformed - formatted for calculator input. <br><br>";
-      reportFourierTransformedCalculatorCommands << "x_{{i}}:=ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
-      << "\\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
+      reportFourierTransformedCalculatorCommands << "x_{{i}}=ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
+      << "\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
       reportCalculatorCommands << "<hr>" << CGI::GetMathMouseHover(theMod.theChaR.ToString())
       << ", differential operators - formatted for calculator input. <br><br>";
-      reportCalculatorCommands << "x_{{i}}:=ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
-      << "\\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
+      reportCalculatorCommands << "x_{{i}}=ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
+      << "\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
 
       for (int j=0; j<theGeneratorsItry.size; j++)
       { theQDOs[j].GetEWAsetMatrixPartsToId(diffOpPart);
         diffOpPart.FourierTransform(transformedDO);
-        reportFourierTransformedCalculatorCommands << "<br>" << theGeneratorsItry[j].ToString() << ":=" << transformedDO.ToString() << ";";
-        reportCalculatorCommands << "<br>" << theGeneratorsItry[j].ToString() << ":=" << diffOpPart.ToString() << ";";
+        reportFourierTransformedCalculatorCommands << "<br>" << theGeneratorsItry[j].ToString() << "=" << transformedDO.ToString() << ";";
+        reportCalculatorCommands << "<br>" << theGeneratorsItry[j].ToString() << "=" << diffOpPart.ToString() << ";";
       }
       reportFourierTransformedCalculatorCommands << "<br>GenerateVectorSpaceClosedWRTLieBracket{}(248," ;
       reportCalculatorCommands << "<br>GenerateVectorSpaceClosedWRTLieBracket{}(248," ;
@@ -1773,7 +1773,7 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
 
 bool Calculator::EvaluateIf(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.StartsWith(theCommands.opDefineConditional(), 4))
-    return output.MakeError("Error: operation :if := takes three arguments.", theCommands);
+    return output.MakeError("Error: operation :if = takes three arguments.", theCommands);
   Rational conditionRat;
   if (!input[1].IsOfType<Rational>(&conditionRat))
     return false;

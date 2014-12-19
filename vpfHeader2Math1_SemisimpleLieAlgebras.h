@@ -19,7 +19,7 @@ public:
   //will be located at the ij^{th} entry in the below matrix.
   //Let $\alpha$ be a root . Then our choice of the elements of the Cartan subalgebra is such that
   //1.   [g^{\alpha}, g^{-\alpha}]=h_\alpha * (2/ \langle\alpha,\alpha\rangle)
-  //2.   [h_{\alpha},g^\beta] :=\langle\alpha,\beta\rangle g^\beta
+  //2.   [h_{\alpha},g^\beta] =\langle\alpha,\beta\rangle g^\beta
   //Reference: Samelson, Notes on Lie algebras, pages 46-51
   Matrix<Rational> ChevalleyConstants;
   Matrix<bool> Computed;
@@ -335,7 +335,7 @@ class HomomorphismSemisimpleLieAlgebra
 public:
   SemisimpleLieAlgebra* domainAlg;
   SemisimpleLieAlgebra* rangeAlg;
-  //Let rk:=Rank(Domain)
+  //Let rk=Rank(Domain)
   //format of ImagesSimpleChevalleyGenerators: the first rk elements give
   //the images of the Chevalley generators corresponding to simple positive roots
   //the second rk elements give the images of the Chevalley generators corresponding to simple

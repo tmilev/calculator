@@ -1453,7 +1453,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(Calculator& theCommands
       return output.MakeError(errorStream.str(), theCommands);
     }
     EiVector.MakeEi(tempV.size, theWeightIndex-1);
-    stOutput << "Getting fundamental coords from eps coords: " << EiVector.ToString();
+//    stOutput << "Getting fundamental coords from eps coords: " << EiVector.ToString();
     resultWeight.weightFundamentalCoordS=theSSowner->theWeyl.GetFundamentalCoordinatesFromEpsilon(EiVector);
   }
   resultWeight.owner=theSSowner;

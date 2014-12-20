@@ -953,7 +953,7 @@ Vector<coefficient> WeylGroup::GetSimpleCoordinatesFromEpsilon(const Vector<coef
 { Vectors<Rational> simpleBasis, simpleBasisEpsCoords;
   simpleBasis.MakeEiBasis(this->GetDim());
   this->GetEpsilonCoords(simpleBasis, simpleBasisEpsCoords);
-  stOutput << "simple basis eps coords: " << simpleBasisEpsCoords.ToString();
+//  stOutput << "simple basis eps coords: " << simpleBasisEpsCoords.ToString();
   Vector<coefficient> result;
   result.SetSize(this->GetDim());
   for (int i=0; i<simpleBasisEpsCoords.size; i++)

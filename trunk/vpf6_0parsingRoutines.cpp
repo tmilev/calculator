@@ -878,7 +878,8 @@ bool Calculator::isSeparatorFromTheLeftGeneral(const std::string& input)
 }
 
 bool Calculator::isSeparatorFromTheRightGeneral(const std::string& input)
-{ return input=="}" || input==")" || input=="]" || input=="," || input==":" || input==";" || input=="MatrixSeparator"
+{ return input=="}" || input==")" || input=="]" || input=="," || input==":" || input==";"
+  || input=="MatrixSeparator" || input=="="
   || input=="MatrixRowSeparator" || input=="\\\\" || input=="\\end" || input=="&" || input=="EndProgram";
 }
 
@@ -925,7 +926,8 @@ bool Calculator::AllowsTensorInPreceding(const std::string& lookAhead)
 }
 
 bool Calculator::AllowsTimesInPreceding(const std::string& lookAhead)
-{ return lookAhead=="+" || lookAhead=="-" || lookAhead=="*" || lookAhead=="/" || lookAhead=="Expression" ||  lookAhead== "Integer"  ||
+{ return lookAhead=="+" || lookAhead=="-" || lookAhead=="*" || lookAhead=="/" ||
+  lookAhead=="Expression" ||  lookAhead== "Integer" || lookAhead=="\\cup" ||
   lookAhead=="(" || lookAhead=="[" ||
   lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||
   lookAhead=="=" || lookAhead=="Variable" || lookAhead=="," || lookAhead==";" ||
@@ -1104,8 +1106,8 @@ bool Calculator::ApplyOneRule()
     << " does not have properly initialized context. "
     << crash;
   }*/
-//  if (secondToLastS=="=" && lastS==":")
-//    return this->ReplaceXXByCon(this->conIsDenotedBy());
+  if (secondToLastS=="=" && lastS==":")
+    return this->ReplaceXXByCon(this->conIsDenotedBy());
   if (secondToLastS=="{" && lastS=="}")
     return this->ReplaceXXByCon(this->conApplyFunction(), Expression::formatDefault);
   if (lastS=="\\cdot")
@@ -1244,9 +1246,9 @@ bool Calculator::ApplyOneRule()
   if (thirdToLastS!="[" && secondToLastS=="Expression" && lastS==",")
     return this->ReplaceYXBySequenceX(this->conSequence(), secondToLastE.theData.format);
   if (thirdToLastS=="MakeSequence" && secondToLastS=="{}" && lastS=="Expression")
-    return this->ReplaceXXYBySequenceY(this->conSequence());
+    return this->ReplaceXXYBySequenceY(this->conExpression());
   if (fourthToLastS=="MakeSequence" && thirdToLastS=="{}" && secondToLastS=="Expression")
-    return this->ReplaceXXYXBySequenceYX(this->conSequence());
+    return this->ReplaceXXYXBySequenceYX(this->conExpression());
   if (fifthToLastS=="Expression" && fourthToLastS== "{}" && thirdToLastS=="(" && secondToLastS=="Sequence" && lastS==")")
     return this->ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   if (fifthToLastS=="Expression" && fourthToLastS== "{}" && thirdToLastS=="{" && secondToLastS=="Sequence" && lastS=="}")

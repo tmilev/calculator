@@ -297,11 +297,13 @@ bool CalculatorSerialization::innerSSLieAlgebra(Calculator& theCommands, const E
 
 bool CalculatorSerialization::innerLoadWeylGroup(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerLoadWeylGroup");
+//  stOutput << "got ere!";
   DynkinType theType;
   if (!CalculatorSerialization::innerLoadDynkinType(theCommands, input, theType))
     return false;
   WeylGroup theWeyl;
   theWeyl.MakeFromDynkinType(theType);
+//  stOutput << "got ere2!";
   return output.AssignValue(theWeyl, theCommands);
 }
 

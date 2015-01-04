@@ -767,10 +767,12 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS(Calculator& th
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS");
   if (!CalculatorSerialization::innerLoadWeylGroup(theCommands, input, output))
     return false;
+//  stOutput << "got ere3!";
   WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
+//  stOutput << "got ere4!";
   if (theGroup.GetDim()>8)
-  { theCommands.Comments << "Conjugacy classes computation disabled for rank >8, edit "
-    << "file " << __FILE__ << " line " << __LINE__ << " to change that.";
+  { theCommands.Comments << "Conjugacy classes computation disabled for rank >8. Modify source code "
+    << "file " << __FILE__ << " line " << __LINE__ << " and rebuild the calculator to change that.";
     return false;
   }
   std::stringstream out;

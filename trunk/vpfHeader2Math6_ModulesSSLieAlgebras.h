@@ -201,6 +201,9 @@ public:
       this->TheObjects[i].SetNumVariables(GoalNumVars);
   }
   SemisimpleLieAlgebra& GetOwnerSS()const
+  { return this->GetOwnerModule().GetOwner();
+  }
+  ModuleSSalgebra<coefficient>& GetOwnerModule()const
   { if (this->size() <=0)
       crash << "This is a programming error: calling GetOwnerModule() on a tensor element which has no monomials."
       << " This is not allowed as the index of the owner modules are stored in the monomials. " << crash;
@@ -209,7 +212,7 @@ public:
       crash << "This is a programming error: calling GetOwnerModule() on a tensor element which has a constant monomial."
       << " This is not allowed: constant monomials do not have owners. " << crash;
     MonomialGeneralizedVerma<coefficient>& theGmon=theMon.theMons[0];
-    return theGmon.owneR->GetOwner();
+    return *theGmon.owneR;
   }
   int GetNumVars()
   { if (this->size==0)

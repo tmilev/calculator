@@ -445,15 +445,13 @@ int Expression::AddObjectReturnIndex(const
 WeylGroup
 & inputValue)const
 { this->CheckInitialization();
-  int index=-1;
   for (int i=0; i<this->theBoss->theObjectContainer.theLieAlgebras.size; i++)
     if (this->theBoss->theObjectContainer.theLieAlgebras[i].theWeyl==inputValue)
-    { index=i;
-      break;
-    }
-  if (index==-1)
-    crash << "Weyl group must be allocated directly in the object container. " << crash;
-  return index;
+      return i;
+  SemisimpleLieAlgebra theLA;
+  theLA.theWeyl=inputValue;
+  this->theBoss->theObjectContainer.theLieAlgebras.AddOnTop(theLA);
+  return this->theBoss->theObjectContainer.theLieAlgebras.size-1;
 }
 
 template < >

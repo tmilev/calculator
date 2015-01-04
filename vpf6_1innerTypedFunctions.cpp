@@ -231,7 +231,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt(Calculato
   //  << theCommands.theObjectContainer.theCoxeterElements[i].ToString();
   //}
   if (leftR.owner!=rightR.owner)
-  { theCommands.Comments << "<hr>Attempting to multiply elements of different groups, possible user typo?";
+  { theCommands << "<hr>Attempting to multiply elements of different groups, possible user typo?";
     return false;
   }
   leftR*=rightR;
@@ -365,7 +365,8 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(Calculator& theCo
 //  stOutput << "<br>before merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
 //  stOutput << "<br>after merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
 //  stOutput << "<br>after conversion, before multiplying the tensor, left copy is: " << leftCopy.ToString();
-  SemisimpleLieAlgebra& theSSalg=inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().GetOwnerSS();
+  SemisimpleLieAlgebra& theSSalg=
+  inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().GetOwnerSS();
   Expression leftE;
 //  stOutput << "<hr>Got where i needa be";
   inputConverted[1].CheckConsistency();
@@ -381,9 +382,19 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(Calculator& theCo
   { stOutput << "Ere I am J.H. ... The ghost in the machine...<br>";
     theGhostHasAppeared=true;
   }
+  const ElementTensorsGeneralizedVermas<RationalFunctionOld>& rightEltETGVM
+  =inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
   ElementTensorsGeneralizedVermas<RationalFunctionOld> outputElt;
-  //stOutput << "<br>Multiplying " << leftUE->ToString() << " * " << output.ToString();
-  if (!inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().MultiplyOnTheLeft
+  if (rightEltETGVM.IsEqualToZero())
+  { output= inputConverted[2];
+    return true;
+  }
+//  stOutput << "<br>ordering " << theSSalg.ToString();
+  theSSalg.OrderNilradicalNilWeightAscending
+  (rightEltETGVM.GetOwnerModule().parabolicSelectionNonSelectedAreElementsLevi);
+  theSSalg.flagHasNilradicalOrder=true;
+//  stOutput << "<br>Ordering done! ";
+  if (!rightEltETGVM.MultiplyOnTheLeft
       (leftE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >(), outputElt, theSSalg, *theCommands.theGlobalVariableS, 1, 0))
   { //stOutput << "<br>failed to multiply on the left";
     return false;
@@ -402,7 +413,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(C
 //  stOutput << "<hr>Merged contexts, ready for multiplication: " << inputContextsMerged.ToString();
   if (inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >().HasNonSmallPositiveIntegerDerivation() ||
       inputContextsMerged[2].GetValue<ElementWeylAlgebra<Rational> >().HasNonSmallPositiveIntegerDerivation())
-  { theCommands.Comments << "<hr> Failed to multiply " << inputContextsMerged[1].ToString() << " by " << inputContextsMerged[2].ToString() << ": "
+  { theCommands << "<hr> Failed to multiply " << inputContextsMerged[1].ToString() << " by " << inputContextsMerged[2].ToString() << ": "
     << " one of the two differential operators has differential operator exponent that is not a small integer. ";
     return false;
   }
@@ -669,7 +680,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(Calculator& theCo
     else if (base.theCoeffs[0]!=1)
       isMon=false;
     if (!isMon)
-    { theCommands.Comments << "<hr>Failed to raise " << base.ToString() << " to power " << powerRat.ToString() << ": the exponent is not a "
+    { theCommands << "<hr>Failed to raise " << base.ToString() << " to power " << powerRat.ToString() << ": the exponent is not a "
       << " small integer and the base is not a coefficient one monomial. ";
       return false;
     }
@@ -679,7 +690,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(Calculator& theCo
     theMon.differentialPart.RaiseToPower(powerRat);
     for (int i=0; i<theMon.polynomialPart.GetMinNumVars(); i++)
       if (theMon.polynomialPart[i]!=0 && theMon.differentialPart[i]!=0)
-      { theCommands.Comments << "<hr>Failed to raise " << base.ToString() << " to power " << powerRat.ToString() << ": the exponent is not a "
+      { theCommands << "<hr>Failed to raise " << base.ToString() << " to power " << powerRat.ToString() << ": the exponent is not a "
         << " small integer, the base is a monomial, however the monomial contains derivative and polynomial with respect to the same variable. ";
         return false;
       }
@@ -813,7 +824,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat(Calculator& the
   if (!input[1].IsSequenceNElementS())
     return false;
   Matrix<Rational> theMatRat;
-  stOutput << "raising " << input[1].ToString() << " to " << input[2].ToString();
+//  stOutput << "raising " << input[1].ToString() << " to " << input[2].ToString();
   if (theCommands.GetMatrix<Rational>(input[1], theMatRat))
   { Expression inputCopy, baseRatMat, outputMatRat;
     baseRatMat.AssignValue(theMatRat, theCommands);
@@ -840,7 +851,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat(Calculator& the
   if (!theMat.IsSquare())
     return output.MakeError("Attempting to raise non-square matrix to power", theCommands);
   if (theMat.NumRows>10)
-  { theCommands.Comments << "I've been instructed not to exponentiate non-ratinoal matrices of dimension >10. ";
+  { theCommands << "I've been instructed not to exponentiate non-ratinoal matrices of dimension >10. ";
     return false;
   }
   Matrix<Expression> idMatE;
@@ -1007,12 +1018,12 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg(Calcu
   if (!input[2].IsOfType(&rightC))
     return false;
   if (leftC.GetOwner()!=rightC.GetOwner())
-  { theCommands.Comments << "You asked me to multiply characters over different semisimple Lie algebras. Could this be a typo?";
+  { theCommands << "You asked me to multiply characters over different semisimple Lie algebras. Could this be a typo?";
     return false;
   }
   std::string successString=(leftC*=rightC);
   if (successString!="")
-  { theCommands.Comments << "I tried to multiply character " << leftC.ToString() << " by " << rightC.ToString()
+  { theCommands << "I tried to multiply character " << leftC.ToString() << " by " << rightC.ToString()
     << " but I failed with the following message: " << successString;
     return false;
   }
@@ -1060,14 +1071,13 @@ bool CalculatorFunctionsBinaryOps::innerMultiplySequenceMatrixBySequenceMatrix(C
   for (int i=0; i<leftMat.NumRows; i++)
     for (int j=0; j<rightMat.NumCols; j++)
       for (int k=0; k<leftMat.NumCols; k++)
-      { if (k==0)
+        if (k==0)
           outputMat(i,j).MakeProducT(theCommands, leftMat(i,k), rightMat(k,j) );
         else
         { rightSummand=outputMat(i,j);
           leftSummand.MakeProducT(theCommands, leftMat(i,k), rightMat(k,j));
           outputMat(i,j).MakeXOX(theCommands, theCommands.opPlus(), leftSummand, rightSummand);
         }
-      }
   return output.AssignMatrixExpressions(outputMat, theCommands);
 }
 
@@ -1183,7 +1193,7 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(C
     return output.AssignValue(0, theCommands);
   Expression leftConverted, rightConverted;
   if (!leftE.ConvertToType<ElementWeylAlgebra<Rational> >(leftConverted) || !rightE.ConvertToType<ElementWeylAlgebra<Rational> >(rightConverted))
-  { theCommands.Comments << "<hr>Failed with conversion to Element weyl algebra - possible programming error?";
+  { theCommands << "<hr>Failed with conversion to Element weyl algebra - possible programming error?";
     return false;
   }
   ElementWeylAlgebra<Rational> resultE=rightConverted.GetValue<ElementWeylAlgebra<Rational> >();
@@ -1244,7 +1254,7 @@ bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(Calculator& theCom
   if (!input[2].IsSequenceNElementS())
     return false;
   if (input[2].children.size!=input[1].children.size)
-  { theCommands.Comments << "<hr>Attempting to add a sequence of length " << input[1].children.size-1 << "  to a sequence of length "
+  { theCommands << "<hr>Attempting to add a sequence of length " << input[1].children.size-1 << "  to a sequence of length "
     << input[2].children.size-1 << ", possible user typo?";
     return false;
   }

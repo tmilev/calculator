@@ -2354,9 +2354,9 @@ bool CalculatorFunctionsGeneral::innerIntegrateXnDiffX(Calculator& theCommands, 
   theFunctionE.GetCoefficientMultiplicandForm(theFunCoeff, theFunNoCoeff);
   if (theFunNoCoeff==theVariableE)
   { output=theFunCoeff*theVariableE*theVariableE;
-    stOutput << "<br>output: " << output.ToString();
+//    stOutput << "<br>output: " << output.ToString();
     output/=2;
-    stOutput << "<br>output: " << output.ToString();
+//    stOutput << "<br>output: " << output.ToString();
     return true;
   }
   if (!theFunNoCoeff.StartsWith(theCommands.opThePower(), 3))
@@ -2532,7 +2532,7 @@ bool CalculatorFunctionsGeneral::outerAtimesBpowerJplusEtcDivBpowerI(Calculator&
     return false;
   MonomialCollection<Expression, Rational> numerators, numeratorsNew;
   theCommands.CollectSummands(theCommands, input[1], numerators);
-  stOutput << "Collected numerators: " << numerators.ToString();
+//  stOutput << "Collected numerators: " << numerators.ToString();
   numeratorsNew.SetExpectedSize(numerators.size());
   numeratorsNew.MakeZero();
   Expression numeratorMultiplicandLeft, numeratorMultiplicandRight, numeratorBaseRight, numeratorExponentRight;
@@ -2542,8 +2542,8 @@ bool CalculatorFunctionsGeneral::outerAtimesBpowerJplusEtcDivBpowerI(Calculator&
   { if (numerators[i].IsConstantNumber())
     { newNumSummandRightPart.MakeXOX(theCommands, theCommands.opThePower(), denominatorBase, mOneE* denominatorExponent);
       newNumSummand= numerators[i]*newNumSummandRightPart;
-      stOutput << "<br>Adding monomial: " << newNumSummand.ToString() << " with cf: "
-      << numerators.theCoeffs[i].ToString();
+//      stOutput << "<br>Adding monomial: " << newNumSummand.ToString() << " with cf: "
+//      << numerators.theCoeffs[i].ToString();
       numeratorsNew.AddMonomial(newNumSummand, numerators.theCoeffs[i]);
       continue;
     }

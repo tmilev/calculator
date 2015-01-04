@@ -218,7 +218,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("\\times", CalculatorFunctionsGeneral::innerCrossProduct, "",
    "Cross product in IIId. Returns error if given two non-3d vectors.",
-   "(1,-2,3 ) \times( 1,-1,-1)", true, false, "CalculatorFunctionsGeneral::innerCrossProduct");
+   "(1,-2,3 ) \\times( 1,-1,-1)", true, false, "CalculatorFunctionsGeneral::innerCrossProduct");
 
   this->AddOperationInnerHandler
   ("ElementWeylAlgebraDO", Calculator::innerElementWeylAlgebra, "",
@@ -293,7 +293,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("WeylGroupConjugacyClassesFromAllElements", CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements, "",
    "For small ranks, computes the conjugacy classes of a Weyl group by enumerating all elements of the group. ",
-   "WeylGroupConjugacyClassesFromAllElements{}(A_2);", true, true)
+   "WeylGroupConjugacyClassesFromAllElements{}(A_2);", true, true, "CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements");
    ;
   this->AddOperationInnerHandler
   ("WeylGroupConjugacyClassesRepresentatives", CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives, "",
@@ -1782,7 +1782,7 @@ void Calculator::initPredefinedStandardOperations()
    this->opWeylGroupVirtualRep(), this->opWeylGroupVirtualRep(),
    "Tensor and decompose two virtual Weyl group representations. ",
    "W= WeylGroupNaturalRep{}(B_3); V=MakeVirtualWeylGroupRepresentation{}W; W\\otimes W; V*V", true,
-   false, "CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps");
+   true, "CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps");
   this->AddOperationInnerHandler
   ("*", Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY, "",
    "Collects multiplicand exponents. ",
@@ -2245,7 +2245,7 @@ void Calculator::initPredefinedStandardOperations()
    "If all arguments of \\cup are of type list, substitutes the expression with \
    a list containing \
    the union of all members (with repetition).",
-   "x\\cup MakeSequence{} x \\cup MakeSequence{}x \\cup (a,b,x)", true);
+   "x\\cup (MakeSequence{} x \\cup MakeSequence{}x \\cup (a,b,x))", true);
   this->AddOperationOuterHandler
   ("\\sqcup", this->outerUnionNoRepetition, "",
    "If all arguments of \\sqcup are of type list, substitutes the expression with a list \

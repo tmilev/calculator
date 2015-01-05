@@ -476,7 +476,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(Calculator&
     return output.MakeError("Raising to maximally dominant takes at least 2 arguments, type and vector", theCommands);
   const Expression& theSSalgebraNode=input[1];
   SemisimpleLieAlgebra* theSSalgebra;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, theSSalgebraNode, theSSalgebra))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, theSSalgebraNode, theSSalgebra))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   Vectors<Rational> theHWs;
   theHWs.SetSize(input.children.size-2);
@@ -499,11 +499,11 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(Calculator& th
   if (theSSalgebraNode.IsOfType<SemisimpleLieAlgebra>())
     theType=theSSalgebraNode.GetValue<SemisimpleLieAlgebra>().theWeyl.theDynkinType;
   else
-    if (!CalculatorSerialization::innerLoadDynkinType(theCommands, theSSalgebraNode, theType))
+    if (!CalculatorBuiltInTypeConversions::innerLoadDynkinType(theCommands, theSSalgebraNode, theType))
       return false;
   Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords, currentWeight;
   Expression theContext;
-  if (!theCommands.GetVectoR(vectorNode, theHWfundCoords, &theContext, theType.GetRank(), CalculatorSerialization::innerPolynomial<Rational>))
+  if (!theCommands.GetVectoR(vectorNode, theHWfundCoords, &theContext, theType.GetRank(), CalculatorBuiltInTypeConversions::innerPolynomial<Rational>))
     return output.MakeError("Failed to extract highest weight", theCommands);
   WeylGroup theWeyl;
   theWeyl.MakeFromDynkinType(theType);
@@ -605,7 +605,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize
   }
   Vector<Polynomial<Rational> > theWeightPoly;
   if (theCommands.GetTypeWeight<Polynomial<Rational> >
-      (theCommands, input, theWeightPoly, theContextE, theSSalgebra,CalculatorSerialization::innerPolynomial<Rational>))
+      (theCommands, input, theWeightPoly, theContextE, theSSalgebra,CalculatorBuiltInTypeConversions::innerPolynomial<Rational>))
   { Rational result=theSSalgebra->theWeyl.GetOrbitSize(theWeightPoly, theCommands.theGlobalVariableS);
     return output.AssignValue(result, theCommands);
   }
@@ -620,7 +620,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(Calculator& theCommands, const
   Vector<Polynomial<Rational> > theWeight;
   Expression theContextE;
   if (!theCommands.GetTypeWeight
-      (theCommands, input, theWeight, theContextE, theSSalgebra, CalculatorSerialization::innerPolynomial<Rational>))
+      (theCommands, input, theWeight, theContextE, theSSalgebra, CalculatorBuiltInTypeConversions::innerPolynomial<Rational>))
     return false;
   Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords, currentWeight;
   WeylGroup& theWeyl=theSSalgebra->theWeyl;
@@ -749,7 +749,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(Calculator& theCommands, const
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable");
-  if (!CalculatorSerialization::innerLoadWeylGroup(theCommands, input, output))
+  if (!CalculatorBuiltInTypeConversions::innerLoadWeylGroup(theCommands, input, output))
     return false;
   WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
   if (theGroup.GetDim()>8)
@@ -765,7 +765,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable(Calculat
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS");
-  if (!CalculatorSerialization::innerLoadWeylGroup(theCommands, input, output))
+  if (!CalculatorBuiltInTypeConversions::innerLoadWeylGroup(theCommands, input, output))
     return false;
 //  stOutput << "got ere3!";
   WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
@@ -783,7 +783,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS(Calculator& th
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements");
-  if (!CalculatorSerialization::innerLoadWeylGroup(theCommands, input, output))
+  if (!CalculatorBuiltInTypeConversions::innerLoadWeylGroup(theCommands, input, output))
     return false;
   WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
   if (theGroup.GetDim()>7)
@@ -801,7 +801,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives");
-  if (!CalculatorSerialization::innerLoadWeylGroup(theCommands, input, output))
+  if (!CalculatorBuiltInTypeConversions::innerLoadWeylGroup(theCommands, input, output))
     return false;
   WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
   theGroup.CheckConsistency();
@@ -853,7 +853,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromSc
 bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint");
   DynkinType theType;
-  if (!CalculatorSerialization::innerLoadDynkinType(theCommands, input, theType))
+  if (!CalculatorBuiltInTypeConversions::innerLoadDynkinType(theCommands, input, theType))
     return output.MakeError("Failed to extract Dynkin type from argument. ", theCommands);
   std::stringstream out, outCommand;
   FinitelyGeneratedMatrixMonoid<Rational> groupGeneratedByMatrices;
@@ -1188,7 +1188,7 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
 
 bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems");
-  if (!CalculatorSerialization::innerLoadWeylGroup(theCommands, input, output))
+  if (!CalculatorBuiltInTypeConversions::innerLoadWeylGroup(theCommands, input, output))
     return false;
   if (!output.IsOfType<WeylGroup>())
     return false;
@@ -1246,7 +1246,7 @@ bool CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup(Calculator& theComm
     return false;
   }
   DynkinType theType;
-  if (!CalculatorSerialization::innerLoadDynkinType(theCommands, input[1], theType))
+  if (!CalculatorBuiltInTypeConversions::innerLoadDynkinType(theCommands, input[1], theType))
   { theCommands.Comments << "<hr>Failed to get Dynkin type from argument. " << input[1].ToString();
     return false;
   }
@@ -1389,7 +1389,7 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
   //note that if input is list of 2 elements then input[0] is sequence atom, and your two elements are in fact
   //input[1] and input[2];
   SemisimpleLieAlgebra* thePointer=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input, thePointer))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input, thePointer))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   rootSubalgebras theRootSAs;
   theRootSAs.owneR=thePointer;
@@ -1416,7 +1416,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(Calculator& theCommands
   if (input.children.size!=4)
     return false;
   SemisimpleLieAlgebra* theSSowner;
-  if (!CalculatorSerialization::innerSSLieAlgebra(theCommands, input[1], theSSowner))
+  if (!CalculatorBuiltInTypeConversions::innerSSLieAlgebra(theCommands, input[1], theSSowner))
   { theCommands.Comments << "<hr>Failed to load semisimple Lie algebra";
     return false;
   }
@@ -1468,7 +1468,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight(Calculator& theComma
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight");
   Weight<Polynomial<Rational> > resultWeight;
   SemisimpleLieAlgebra* theSSowner;
-  if (!CalculatorSerialization::innerSSLieAlgebra(theCommands, input, theSSowner))
+  if (!CalculatorBuiltInTypeConversions::innerSSLieAlgebra(theCommands, input, theSSowner))
   { theCommands.Comments << "<hr>Failed to load semisimple Lie algebra";
     return false;
   }
@@ -1488,7 +1488,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(Calculator& theCommands
   //note that if input is list of 2 elements then input[0] is sequence atom, and your two elements are in fact
   //input[1] and input[2];
   SemisimpleLieAlgebra* thePointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[1], thePointer))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input[1], thePointer))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   ElementWeylGroup<WeylGroup> theElt;
   theElt.generatorsLastAppliedFirst.ReservE(input.children.size-2);

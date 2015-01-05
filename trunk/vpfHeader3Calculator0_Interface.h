@@ -1667,11 +1667,9 @@ public:
   void ParseFillDictionary(const std::string& input);
 };
 
-class CalculatorSerialization
+class CalculatorBuiltInTypeConversions
 {
 public:
-  static bool innerStore(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerLoad(Calculator& theCommands, const Expression& input, Expression& output);
   template <class coefficient>
   static bool innerPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
@@ -1691,7 +1689,7 @@ public:
   static bool innerStoreObject(Calculator& theCommands, const SemisimpleSubalgebras& input, Expression& output);
   static bool innerStoreCandidateSA(Calculator& theCommands, const CandidateSSSubalgebra& input, Expression& output);
   static bool innerStoreObject(Calculator& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output)
-  { return CalculatorSerialization::innerStoreElementSemisimpleLieAlgebraRationals(theCommands, input, output);
+  { return CalculatorBuiltInTypeConversions::innerStoreElementSemisimpleLieAlgebraRationals(theCommands, input, output);
   }
   static bool innerStoreElementSemisimpleLieAlgebraRationals
   (Calculator& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output);
@@ -1720,7 +1718,7 @@ public:
   static bool innerStoreObject(Calculator& theCommands, const ChevalleyGenerator& input, Expression& output, Expression* theContext=0, bool* isNonConst=0)
   { if (isNonConst!=0)
       *isNonConst=true;
-    return CalculatorSerialization::innerStoreChevalleyGenerator(theCommands, input, output);
+    return CalculatorBuiltInTypeConversions::innerStoreChevalleyGenerator(theCommands, input, output);
   }
   static bool innerStoreObject
   (Calculator& theCommands, const MonomialUniversalEnveloping<RationalFunctionOld>& input, Expression& output, Expression* theContext=0, bool* isNonConst=0);
@@ -1740,14 +1738,14 @@ public:
 };
 
 template <class TemplateList>
-bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const TemplateList& input, Expression& output, Expression* theContext)
+bool CalculatorBuiltInTypeConversions::innerStoreObject(Calculator& theCommands, const TemplateList& input, Expression& output, Expression* theContext)
 { output.reset(theCommands);
   output.children.ReservE(input.size+1);
   Expression tempE;
   tempE.MakeAtom(theCommands.opSequence(), theCommands);
   output.AddChildOnTop(tempE);
   for (int i=0; i<input.size; i++)
-  { if (!CalculatorSerialization::innerStoreObject(theCommands, input[i], tempE, theContext))
+  { if (!CalculatorBuiltInTypeConversions::innerStoreObject(theCommands, input[i], tempE, theContext))
       return false;
     output.AddChildOnTop(tempE);
   }
@@ -1755,16 +1753,16 @@ bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const Te
 }
 
 template <class templateMonomial, typename coefficient>
-bool CalculatorSerialization::innerStoreMonCollection
+bool CalculatorBuiltInTypeConversions::innerStoreMonCollection
 (Calculator& theCommands, const MonomialCollection<templateMonomial, coefficient>& input, Expression& output, Expression* theContext)
-{ MacroRegisterFunctionWithName("CalculatorSerialization::SerializeMonCollection");
+{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::SerializeMonCollection");
   Expression termE, coeffE, tempE;
   if (input.IsEqualToZero())
     return output.AssignValue(0, theCommands);
   for (int i=input.size()-1; i>=0; i--)
   { const templateMonomial& currentMon=input[i];
     bool isNonConst=true;
-    if (!CalculatorSerialization::innerStoreObject(theCommands, currentMon, termE, theContext, &isNonConst))
+    if (!CalculatorBuiltInTypeConversions::innerStoreObject(theCommands, currentMon, termE, theContext, &isNonConst))
     { theCommands.Comments << "<hr>Failed to store " << currentMon.ToString() << ". ";
       return false;
     }
@@ -1790,14 +1788,14 @@ bool CalculatorSerialization::innerStoreMonCollection
 }
 
 template <class templateMonomial, typename coefficient>
-bool CalculatorSerialization::DeSerializeMonCollection(Calculator& theCommands, const Expression& input, MonomialCollection<templateMonomial, coefficient>& output)
-{ MacroRegisterFunctionWithName("CalculatorSerialization::DeSerializeMonCollection");
+bool CalculatorBuiltInTypeConversions::DeSerializeMonCollection(Calculator& theCommands, const Expression& input, MonomialCollection<templateMonomial, coefficient>& output)
+{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::DeSerializeMonCollection");
   MonomialCollection<Expression, Rational> theSum;
   theCommands.CollectSummands(theCommands, input, theSum);
   Expression currentContext, finalContext;
   finalContext.MakeEmptyContext(theCommands);
   for (int i=0; i<theSum.size(); i++)
-  { if (!CalculatorSerialization::DeSerializeMonGetContext<templateMonomial>(theCommands, theSum[i], currentContext))
+  { if (!CalculatorBuiltInTypeConversions::DeSerializeMonGetContext<templateMonomial>(theCommands, theSum[i], currentContext))
     { theCommands.Comments << "<hr>Failed to load monomial context from " << input.ToString() << "</hr>";
       return false;
     }
@@ -1809,7 +1807,7 @@ bool CalculatorSerialization::DeSerializeMonCollection(Calculator& theCommands, 
   output.MakeZero();
   templateMonomial tempM;
   for (int i=0; i<theSum.size(); i++)
-  { if (!CalculatorSerialization::DeSerializeMon(theCommands, theSum[i], finalContext, tempM))
+  { if (!CalculatorBuiltInTypeConversions::DeSerializeMon(theCommands, theSum[i], finalContext, tempM))
     { theCommands.Comments << "<hr>Failed to load monomial from " << theSum[i].ToString() << " using monomial context " << finalContext.ToString() << ". </hr>";
       return false;
     }
@@ -1963,7 +1961,7 @@ bool Calculator::GetTypeWeight
   }
   const Expression& leftE=input[1];
   const Expression& middleE=input[2];
-  if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, leftE, ambientSSalgebra))
+  if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, leftE, ambientSSalgebra))
   { theCommands << "Error extracting Lie algebra from " << leftE.ToString();
     return false;
   }
@@ -1990,7 +1988,7 @@ bool Calculator::GetTypeHighestWeightParabolic
     ("Function TypeHighestWeightParabolic is expected to have two or three arguments: SS algebra type, highest weight, [optional] parabolic selection. ", theCommands);
   const Expression& leftE=input[1];
   const Expression& middleE=input[2];
-  if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, leftE, ambientSSalgebra))
+  if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, leftE, ambientSSalgebra))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   if (!theCommands.GetVectoR<coefficient>(middleE, outputWeightHWFundcoords, &outputHWContext, ambientSSalgebra->GetRank(), ConversionFun))
   { std::stringstream tempStream;

@@ -76,6 +76,7 @@ class Crasher
 {
   public:
   GlobalVariables* theGlobalVariables;
+  std::string userInputStringRAWIfAvailable;
   std::string userInputStringIfAvailable;
   std::stringstream theCrashReport;
   void (*CleanUpFunction)();

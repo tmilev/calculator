@@ -2344,11 +2344,17 @@ void Calculator::initArithmeticOperations()
 
 void Calculator::initOperationsWhoseDomainsAreTheConstants()
 { MacroRegisterFunctionWithName("Calculator::initOperationsWhoseDomainIsTheConstants");
-  this->knownFunctionsWithComplexRange.AddOnTop("+");
-  this->knownFunctionsWithComplexRange.AddOnTop("-");
-  this->knownFunctionsWithComplexRange.AddOnTop("*");
-  this->knownFunctionsWithComplexRange.AddOnTop("/");
-  this->knownFunctionsWithComplexRange.AddOnTop("^");
+  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("+");
+  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("-");
+  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("*");
+  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("/");
+  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("^");
+  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sin");
+  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cos");
+  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\tan");
+  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cot");
+  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sec");
+  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\csc");
 }
 
 void Calculator::initBuiltInAtomsWhosePowersAreInterprettedAsFunctions()

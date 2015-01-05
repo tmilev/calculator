@@ -61,10 +61,10 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
   if (stOutput.theOutputFunction!=0)
     std::cout << this->theCrashReport.str() << std::endl;
   std::fstream theFile;
-  std::string theFileName="../output/crashdumpInput"+ this->userInputStringIfAvailable +".txt";
+  std::string theFileName="../output/crashdumpInput"+ this->userInputStringRAWIfAvailable +".txt";
   bool succeededToDump=true;
   if (!FileOperations::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false))
-  { theFileName="../output/crashdump2.txt";
+  { theFileName="../output/crashdumpFilePermissionFailure.txt";
     succeededToDump=FileOperations::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
   }
   if (stOutput.theOutputFunction!=0)
@@ -567,7 +567,7 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent, c
     if (counter>3)
     { Matrix<Rational> theGram;
       currentComponent.GetGramMatrix(theGram, &theBilinearForm);
-      crash  << "This is a programming error: corrupt simple basis corresponding to Dynkin diagram: the Dynkin diagram should have nodes with"
+      crash << "This is a programming error: corrupt simple basis corresponding to Dynkin diagram: the Dynkin diagram should have nodes with"
       << " valency at most 3, but this diagram has node with valency " << counter << ". The current component is: "
       << currentComponent.ToString() << ". The corresponding Symmetric Cartan is: "
       << theGram.ToString() << ". " << crash;
@@ -582,13 +582,16 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent, c
     }
   }
   if (result>1)
-    crash << crash;
+    crash << "numEnds variable equals: " << numEnds << ", number of three-nodes equals: "
+    << result << "; this should not happen. The bilinear form is: " << theBilinearForm.ToString() << crash;
   if (result==1)
   { if(numEnds!=3)
-      crash << crash;
+      crash << "numEnds variable equals: " << numEnds << ", number of three-nodes equals: "
+      << result << "; this should not happen. The bilinear form is: " << theBilinearForm.ToString() << crash;
   } else
     if(numEnds>2)
-      crash << crash;
+      crash << "numEnds variable equals: " << numEnds << ", number of three-nodes equals: "
+      << result << "; this should not happen. The bilinear form is: " << theBilinearForm.ToString() << crash;
   return result;
 }
 

@@ -1393,7 +1393,7 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   rootSubalgebras theRootSAs;
   theRootSAs.owneR=thePointer;
-  theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphismOLD(*theCommands.theGlobalVariableS, true, false);
+  theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
   std::stringstream out;
   MonomialMacdonald theGenerator;
   HashedList<MonomialMacdonald> theOrbit;
@@ -1402,7 +1402,7 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
     theGenerator.MakeFromRootSubsystem(currentRootSA.PositiveRootsK, *thePointer);
     theGenerator.GenerateMyOrbit(theOrbit);
     out << "<hr>Root subsystem type " << currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(thePointer->theWeyl.theDynkinType[0]);
-    out << ". Orbit has " << theOrbit.size << " elements, here they are: ";
+    out << ". Orbit has " << theOrbit.size << " element(s), here they are: ";
     for (int j=0; j<theOrbit.size; j++)
       out << "<br>" << theOrbit[j].ToString();
   }

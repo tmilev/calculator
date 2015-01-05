@@ -255,6 +255,7 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->initAtomsNotGoodForChainRule();
   this->initBuiltInAtomsNotInterprettedAsFunctions();
   this->initBuiltInAtomsWhosePowersAreInterprettedAsFunctions();
+  this->initOperationsWhoseDomainsAreTheConstants();
   this->initArithmeticOperations();
 
   Expression theSSLieAlgrule;

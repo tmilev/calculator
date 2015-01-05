@@ -160,7 +160,7 @@ bool CalculatorFunctionsGeneral::innerCasimirWRTlevi(Calculator& theCommands, co
   if (!input.IsListNElements(3))
     return false;
   SemisimpleLieAlgebra* theSSalg=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[1], theSSalg))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input[1], theSSalg))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   if (theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit<50)
     theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=50;
@@ -391,7 +391,7 @@ bool CalculatorFunctionsGeneral::innerDereferenceOperator(Calculator& theCommand
 bool CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly");
   Expression polyE;
-  if (!CalculatorSerialization::innerPolynomial<AlgebraicNumber>(theCommands, input, polyE) )
+  if (!CalculatorBuiltInTypeConversions::innerPolynomial<AlgebraicNumber>(theCommands, input, polyE) )
   { theCommands.Comments << "<hr>Failed to convert " << input.ToString() << " to polynomial. ";
     return false;
   }
@@ -1187,7 +1187,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
 bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals");
   IntegralRFComputation theComputation(&theCommands);
-  bool isGood=CalculatorSerialization::innerRationalFunction(theCommands, input, theComputation.inputE);
+  bool isGood=CalculatorBuiltInTypeConversions::innerRationalFunction(theCommands, input, theComputation.inputE);
   if (isGood)
     isGood=theComputation.inputE.IsOfType<RationalFunctionOld>();
   if (!isGood)
@@ -1869,7 +1869,7 @@ bool CalculatorFunctionsGeneral::innerRationalFunctionSubstitution(Calculator& t
 bool CalculatorFunctionsGeneral::outerPolynomialize(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPolynomialize");
   Expression thePolyE;
-  if (!CalculatorSerialization::innerPolynomial<Rational>(theCommands, input, thePolyE))
+  if (!CalculatorBuiltInTypeConversions::innerPolynomial<Rational>(theCommands, input, thePolyE))
     return false;
   if (!CalculatorFunctionsGeneral::innerExpressionFromBuiltInType(theCommands, thePolyE, output))
     return false;
@@ -1883,8 +1883,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlo
     return false;
   //stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks, input: " << input.ToString();
   IntegralRFComputation theComputation(&theCommands);
-  if(!CalculatorSerialization::innerRationalFunction(theCommands, theFunctionE, theComputation.inputE))
-  { theCommands << "<hr>Call of function CalculatorSerialization::innerRationalFunction failed, input was: "
+  if(!CalculatorBuiltInTypeConversions::innerRationalFunction(theCommands, theFunctionE, theComputation.inputE))
+  { theCommands << "<hr>Call of function CalculatorBuiltInTypeConversions::innerRationalFunction failed, input was: "
     << theFunctionE.ToString();
     return false;
   }
@@ -2596,10 +2596,10 @@ bool CalculatorFunctionsGeneral::innerGrowDynkinType(Calculator& theCommands, co
     return false;
   const Expression& theSmallerTypeE=input[1];
   DynkinType theSmallDynkinType;
-  if (!CalculatorSerialization::innerLoadDynkinType(theCommands, theSmallerTypeE, theSmallDynkinType))
+  if (!CalculatorBuiltInTypeConversions::innerLoadDynkinType(theCommands, theSmallerTypeE, theSmallDynkinType))
     return false;
   SemisimpleLieAlgebra* theSSalg=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[2], theSSalg))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input[2], theSSalg))
     return output.MakeError("Error extracting ambient Lie algebra.", theCommands);
   SemisimpleSubalgebras tempSas;
   tempSas.owneR=theSSalg;
@@ -2677,7 +2677,7 @@ bool CalculatorFunctionsGeneral::innerComputeSemisimpleSubalgebras(Calculator& t
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerComputeSemisimpleSubalgebras");
   SemisimpleLieAlgebra* ownerSSPointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input, ownerSSPointer))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input, ownerSSPointer))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
   std::stringstream out;
@@ -3486,7 +3486,7 @@ bool CalculatorFunctionsGeneral::innerGetCentralizerChainsSemisimpleSubalgebras(
   for (int i=0; i<theChains.size; i++)
   { out << "<br>Chain " << i+1 << ": Load{}(Serialization{}(LoadSemisimpleSubalgebras, " << theSAs.owneR->theWeyl.theDynkinType.ToString() << ", (";
     for (int j=0; j<theChains[i].size; j++)
-    { CalculatorSerialization::innerStoreCandidateSA(theCommands, theSAs.theSubalgebraCandidates[theChains[i][j]], currentChainE);
+    { CalculatorBuiltInTypeConversions::innerStoreCandidateSA(theCommands, theSAs.theSubalgebraCandidates[theChains[i][j]], currentChainE);
       out << currentChainE.ToString();
       if (j!=theChains[i].size-1)
         out << ", ";
@@ -3517,7 +3517,7 @@ bool CalculatorFunctionsGeneral::innerCanBeExtendedParabolicallyTo(Calculator& t
   if (!input.IsListNElements(3))
     return false;
   DynkinType smallType, targetType;
-  if (!CalculatorSerialization::DeSerializeMonCollection(theCommands, input[1], smallType) || !CalculatorSerialization::DeSerializeMonCollection(theCommands, input[2], targetType))
+  if (!CalculatorBuiltInTypeConversions::DeSerializeMonCollection(theCommands, input[1], smallType) || !CalculatorBuiltInTypeConversions::DeSerializeMonCollection(theCommands, input[2], targetType))
   { theCommands.Comments << "Failed to convert arguments of " << input.ToString() << " to two DynkinType's.";
     return false;
   }
@@ -3527,7 +3527,7 @@ bool CalculatorFunctionsGeneral::innerCanBeExtendedParabolicallyTo(Calculator& t
 bool CalculatorFunctionsGeneral::innerGetSymmetricCartan(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetSymmetricCartan");
   DynkinType theType;
-  if (!CalculatorSerialization::DeSerializeMonCollection(theCommands, input, theType))
+  if (!CalculatorBuiltInTypeConversions::DeSerializeMonCollection(theCommands, input, theType))
   { theCommands.Comments << "Failed to convert " << input.ToString() << " to DynkinType.";
     return false;
   }
@@ -3548,10 +3548,10 @@ bool CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg(Calculator& theCommands,
   const Expression& ElargeSA=input[2];
 
   SemisimpleLieAlgebra* theSmallSapointer=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, EsmallSA, theSmallSapointer))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, EsmallSA, theSmallSapointer))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra* thelargeSapointer=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, ElargeSA, thelargeSapointer))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, ElargeSA, thelargeSapointer))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& ownerSS=*thelargeSapointer;
   std::stringstream out;
@@ -3575,12 +3575,12 @@ bool CalculatorFunctionsGeneral::innerWeylDimFormula(Calculator& theCommands, co
   if (!input.IsListNElements(3))
     return output.MakeError("This function takes 2 arguments", theCommands);
   SemisimpleLieAlgebra* theSSowner;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[1], theSSowner))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input[1], theSSowner))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   Vector<RationalFunctionOld> theWeight;
   Expression newContext(theCommands);
 //  stOutput << "<br>input[2] is: " << input[2].ToString();
-  if (!theCommands.GetVectoR<RationalFunctionOld>(input[2], theWeight, &newContext, theSSowner->GetRank(), CalculatorSerialization::innerRationalFunction))
+  if (!theCommands.GetVectoR<RationalFunctionOld>(input[2], theWeight, &newContext, theSSowner->GetRank(), CalculatorBuiltInTypeConversions::innerRationalFunction))
     return output.MakeError("Failed to convert the argument of the function to a highest weight vector", theCommands);
   RationalFunctionOld rfOne;
   rfOne.MakeOne(theCommands.theGlobalVariableS);
@@ -3604,7 +3604,7 @@ bool CalculatorFunctionsGeneral::innerDecomposeFDPartGeneralizedVermaModuleOverL
   const Expression& inducingParNode=input[3];
   const Expression& splittingParNode=input[4];
   SemisimpleLieAlgebra* ownerSSPointer=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, typeNode, ownerSSPointer))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, typeNode, ownerSSPointer))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   Vector<RationalFunctionOld> theWeightFundCoords;
   Vector<Rational> inducingParSel, splittingParSel;
@@ -3612,7 +3612,7 @@ bool CalculatorFunctionsGeneral::innerDecomposeFDPartGeneralizedVermaModuleOverL
   WeylGroup& theWeyl=ownerSS.theWeyl;
   int theDim=ownerSS.GetRank();
   Expression finalContext;
-  if (!theCommands.GetVectoR<RationalFunctionOld>(weightNode, theWeightFundCoords, &finalContext, theDim, CalculatorSerialization::innerRationalFunction))
+  if (!theCommands.GetVectoR<RationalFunctionOld>(weightNode, theWeightFundCoords, &finalContext, theDim, CalculatorBuiltInTypeConversions::innerRationalFunction))
     return output.MakeError("Failed to extract highest weight from the second argument.", theCommands);
   if (!theCommands.GetVectoR<Rational>(inducingParNode, inducingParSel, &finalContext, theDim, 0))
     return output.MakeError("Failed to extract parabolic selection from the third argument", theCommands);
@@ -3635,7 +3635,7 @@ bool CalculatorFunctionsGeneral::innerSplitFDpartB3overG2Init(Calculator& theCom
   if (!input.IsListNElements(4))
     return output.MakeError("Splitting the f.d. part of a B_3-representation over G_2 requires 3 arguments", theCommands);
   //stOutput << input.ToString();
-  if (!theCommands.GetVectorFromFunctionArguments<RationalFunctionOld>(input, theG2B3Data.theWeightFundCoords, &outputContext, 3, CalculatorSerialization::innerRationalFunction))
+  if (!theCommands.GetVectorFromFunctionArguments<RationalFunctionOld>(input, theG2B3Data.theWeightFundCoords, &outputContext, 3, CalculatorBuiltInTypeConversions::innerRationalFunction))
     output.MakeError("Failed to extract highest weight in fundamental coordinates. ", theCommands);
   theCommands.MakeHmmG2InB3(theG2B3Data.theHmm);
   theG2B3Data.selInducing.init(3);
@@ -3649,7 +3649,7 @@ bool CalculatorFunctionsGeneral::innerSplitFDpartB3overG2Init(Calculator& theCom
 bool CalculatorFunctionsGeneral::innerParabolicWeylGroups(Calculator& theCommands, const Expression& input, Expression& output)
 { Selection selectionParSel;
   SemisimpleLieAlgebra* theSSPointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input, theSSPointer))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input, theSSPointer))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& theSSalgebra=*theSSPointer;
   int numCycles=MathRoutines::TwoToTheNth(selectionParSel.MaxSize);
@@ -3669,7 +3669,7 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
   Vector<RationalFunctionOld> theHWfundcoords, tempRoot, theHWsimplecoords;
   Expression hwContext(theCommands);
   SemisimpleLieAlgebra* theSSalgPointer;
-  if(!theCommands.GetTypeHighestWeightParabolic(theCommands, input, output, theHWfundcoords, parabolicSel, hwContext, theSSalgPointer, CalculatorSerialization::innerRationalFunction))
+  if(!theCommands.GetTypeHighestWeightParabolic(theCommands, input, output, theHWfundcoords, parabolicSel, hwContext, theSSalgPointer, CalculatorBuiltInTypeConversions::innerRationalFunction))
     return output.MakeError("Failed to extract highest weight vector data", theCommands);
   else
     if (output.IsError())
@@ -3787,7 +3787,7 @@ bool CalculatorFunctionsGeneral::innerDeterminant(Calculator& theCommands, const
     } else
       return output.MakeError("Requesting to compute determinant of non-square matrix. ", theCommands);
   }
-  if (!theCommands.GetMatriXFromArguments(input, matRF, &theContext, -1, CalculatorSerialization::innerRationalFunction))
+  if (!theCommands.GetMatriXFromArguments(input, matRF, &theContext, -1, CalculatorBuiltInTypeConversions::innerRationalFunction))
   { theCommands << "<hr>I have been instructed to only compute determinants of matrices whose entries are "
     << " rational functions or rationals, and I failed to convert your matrix to either type. "
     << " If this is not how you expect this function to act, correct it: the code is located in  "
@@ -3810,7 +3810,7 @@ bool CalculatorFunctionsGeneral::innerMatrixRationalFunction(Calculator& theComm
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMatrixRationalFunction");
   Matrix<RationalFunctionOld> outputMat;
   Expression ContextE;
-  if (!theCommands.GetMatriXFromArguments(input, outputMat, &ContextE, -1, CalculatorSerialization::innerRationalFunction))
+  if (!theCommands.GetMatriXFromArguments(input, outputMat, &ContextE, -1, CalculatorBuiltInTypeConversions::innerRationalFunction))
   { theCommands.Comments << "<hr>Failed to get matrix of rational functions. ";
     return false;
   }
@@ -3827,7 +3827,7 @@ bool CalculatorFunctionsGeneral::innerDecomposeCharGenVerma(Calculator& theComma
   SemisimpleLieAlgebra* theSSlieAlg=0;
   output.reset(theCommands);
   if (!theCommands.GetTypeHighestWeightParabolic<RationalFunctionOld>
-      (theCommands, input, output, theHWfundcoords, parSel, theContext, theSSlieAlg, CalculatorSerialization::innerRationalFunction))
+      (theCommands, input, output, theHWfundcoords, parSel, theContext, theSSlieAlg, CalculatorBuiltInTypeConversions::innerRationalFunction))
    return false;
   if (output.IsError())
     return true;
@@ -3923,7 +3923,7 @@ bool CalculatorFunctionsGeneral::innerPrintGenVermaModule(Calculator& theCommand
   Expression hwContext(theCommands);
   SemisimpleLieAlgebra* theSSalgebra=0;
   if(!theCommands.GetTypeHighestWeightParabolic
-      (theCommands, input, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra, CalculatorSerialization::innerRationalFunction))
+      (theCommands, input, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra, CalculatorBuiltInTypeConversions::innerRationalFunction))
     return output.MakeError("Failed to extract highest weight vector data", theCommands);
   else
     if (output.IsError())
@@ -3948,12 +3948,12 @@ bool CalculatorFunctionsGeneral::innerWriteGenVermaModAsDiffOperatorUpToLevel(Ca
   Expression resultSSalgebraE;
   resultSSalgebraE=leftE;
   SemisimpleLieAlgebra* theSSalgebra;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, leftE, theSSalgebra))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, leftE, theSSalgebra))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   int theRank=theSSalgebra->GetRank();
   Vector<Polynomial<Rational> > highestWeightFundCoords;
   Expression hwContext(theCommands), emptyContext(theCommands);
-  if (!theCommands.GetVectoR(genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, CalculatorSerialization::innerPolynomial<Rational>))
+  if (!theCommands.GetVectoR(genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, CalculatorBuiltInTypeConversions::innerPolynomial<Rational>))
   { theCommands.Comments
     << "Failed to convert the third argument of innerSplitGenericGenVermaTensorFD to a list of " << theRank
     << " polynomials. The second argument you gave is " << genVemaWeightNode.ToString() << ".";
@@ -4012,7 +4012,7 @@ bool CalculatorFunctionsGeneral::innerHWV(Calculator& theCommands, const Express
   Vector<RationalFunctionOld> theHWfundcoords;
   Expression hwContext(theCommands);
   SemisimpleLieAlgebra* theSSalgebra=0;
-  if(!theCommands.GetTypeHighestWeightParabolic(theCommands, input, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra, CalculatorSerialization::innerRationalFunction) )
+  if(!theCommands.GetTypeHighestWeightParabolic(theCommands, input, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra, CalculatorBuiltInTypeConversions::innerRationalFunction) )
     return output.MakeError("Failed to extract highest weight vector data", theCommands);
   else
     if (output.IsError())
@@ -4030,12 +4030,12 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
   const Expression& genVemaWeightNode=input[3];
   const Expression& fdWeightNode=input[2];
   SemisimpleLieAlgebra* theSSalgebra;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, leftE, theSSalgebra))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, leftE, theSSalgebra))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   int theRank=theSSalgebra->GetRank();
   Vector<RationalFunctionOld> highestWeightFundCoords;
   Expression hwContext(theCommands);
-  if (!theCommands.GetVectoR<RationalFunctionOld>(genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, CalculatorSerialization::innerRationalFunction))
+  if (!theCommands.GetVectoR<RationalFunctionOld>(genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, CalculatorBuiltInTypeConversions::innerRationalFunction))
   { theCommands.Comments
     << "Failed to convert the third argument of innerSplitGenericGenVermaTensorFD to a list of " << theRank
     << " polynomials. The second argument you gave is " << genVemaWeightNode.ToString() << ".";
@@ -4259,7 +4259,7 @@ bool CalculatorFunctionsGeneral::innerHWTAABF(Calculator& theCommands, const Exp
   SemisimpleLieAlgebra* constSSalg= &theCommands.theObjectContainer.theLieAlgebras.GetElement(algebraIndex);
   const Expression& weightExpression=input[3];
   Vector<RationalFunctionOld> weight;
-  if (!theCommands.GetVectoR<RationalFunctionOld>(weightExpression, weight, &finalContext, constSSalg->GetRank(), CalculatorSerialization::innerRationalFunction))
+  if (!theCommands.GetVectoR<RationalFunctionOld>(weightExpression, weight, &finalContext, constSSalg->GetRank(), CalculatorBuiltInTypeConversions::innerRationalFunction))
   { theCommands.Comments << "<hr>Failed to obtain highest weight from the third argument which is " << weightExpression.ToString();
     return false;
   }
@@ -4645,7 +4645,7 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
 { MacroRegisterFunctionWithName("Calculator::innerRootSAsAndSltwos");
   //bool showIndicator=true;
   SemisimpleLieAlgebra* ownerSS;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input, ownerSS))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input, ownerSS))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   std::string outMainDisplayPatH, outMainPatH;
   std::stringstream outSltwoPath, outSltwoDisplayPath;

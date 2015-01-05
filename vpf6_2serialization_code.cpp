@@ -4,7 +4,7 @@
 #include "vpfHeader3Calculator1_InnerTypedFunctions.h"
 static ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "C++ object <-> calculator expression serialization/deserialization.");
 
-bool CalculatorSerialization::innerStoreChevalleyGenerator(Calculator& theCommands, const ChevalleyGenerator& input, Expression& output)
+bool CalculatorBuiltInTypeConversions::innerStoreChevalleyGenerator(Calculator& theCommands, const ChevalleyGenerator& input, Expression& output)
 { MacroRegisterFunctionWithName("innerStoreChevalleyGenerator");
   input.CheckInitialization();
   output.reset(theCommands, 2);
@@ -21,14 +21,14 @@ bool CalculatorSerialization::innerStoreChevalleyGenerator(Calculator& theComman
 }
 
 template <>
-bool CalculatorSerialization::DeSerializeMonGetContext<ChevalleyGenerator>(Calculator& theCommands, const Expression& input, Expression& outputContext)
+bool CalculatorBuiltInTypeConversions::DeSerializeMonGetContext<ChevalleyGenerator>(Calculator& theCommands, const Expression& input, Expression& outputContext)
 { if (!input.IsListNElements(4))
   { theCommands.Comments << "<hr>Failed to get ChevalleyGenerator context: input is not a sequence of 4 elements, instead it has "
     << input.children.size << " elements, i.e., is " << input.ToString() << "</hr>";
     return false;
   }
   DynkinType theType;
-  if (!CalculatorSerialization::DeSerializeMonCollection(theCommands, input[2], theType))
+  if (!CalculatorBuiltInTypeConversions::DeSerializeMonCollection(theCommands, input[2], theType))
   { theCommands.Comments << "<hr>Failed to load dynkin type from " << input[2].ToString() << ".";
     return false;
   }
@@ -44,15 +44,15 @@ bool CalculatorSerialization::DeSerializeMonGetContext<ChevalleyGenerator>(Calcu
 }
 
 template <>
-bool CalculatorSerialization::DeSerializeMonGetContext<DynkinSimpleType>
+bool CalculatorBuiltInTypeConversions::DeSerializeMonGetContext<DynkinSimpleType>
 (Calculator& theCommands, const Expression& input, Expression& outputContext)
 { outputContext.MakeEmptyContext(theCommands);
   return true;
 }
 
 template <>
-bool CalculatorSerialization::DeSerializeMon(Calculator& theCommands, const Expression& input, const Expression& inputContext, ChevalleyGenerator& outputMon)
-{ MacroRegisterFunctionWithName("CalculatorSerialization::DeSerializeMon");
+bool CalculatorBuiltInTypeConversions::DeSerializeMon(Calculator& theCommands, const Expression& input, const Expression& inputContext, ChevalleyGenerator& outputMon)
+{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::DeSerializeMon");
 //  stOutput << "here i am again -!. ";
 //  stOutput.flush();
   int AlgIndex=inputContext.ContextGetIndexAmbientSSalg();
@@ -94,7 +94,7 @@ bool CalculatorSerialization::DeSerializeMon(Calculator& theCommands, const Expr
   return true;
 }
 
-bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const MonomialUniversalEnveloping<RationalFunctionOld>& input, Expression& output, Expression* theContext, bool* isNonConst)
+bool CalculatorBuiltInTypeConversions::innerStoreObject(Calculator& theCommands, const MonomialUniversalEnveloping<RationalFunctionOld>& input, Expression& output, Expression* theContext, bool* isNonConst)
 { output.reset(theCommands);
   if (input.IsEqualToOne())
   { if (isNonConst!=0)
@@ -106,12 +106,12 @@ bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const Mo
   Expression baseE, exponentE, nextTermE;
   currentGen.theGeneratorIndex=input.generatorsIndices[0];
   bool tempNonConst;
-  if (!CalculatorSerialization::innerStoreObject(theCommands, currentGen, baseE, theContext, &tempNonConst))
+  if (!CalculatorBuiltInTypeConversions::innerStoreObject(theCommands, currentGen, baseE, theContext, &tempNonConst))
   { theCommands.Comments << "<hr>Failed to store " << currentGen.ToString() << ". ";
     return false;
   }
   if (!input.Powers[0].IsEqualToOne())
-  { if (!CalculatorSerialization::innerStoreObject(theCommands, input.Powers[0], exponentE, theContext))
+  { if (!CalculatorBuiltInTypeConversions::innerStoreObject(theCommands, input.Powers[0], exponentE, theContext))
     { theCommands.Comments << "<hr>Failed to store the exponent " << input.Powers[0].ToString();
       if (theContext!=0)
         theCommands.Comments << " with context " << theContext->ToString();
@@ -124,12 +124,12 @@ bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const Mo
     output=baseE;
   for (int i=1; i<input.generatorsIndices.size; i++)
   { currentGen.theGeneratorIndex=input.generatorsIndices[i];
-    if (!CalculatorSerialization::innerStoreObject(theCommands, currentGen, baseE, theContext, &tempNonConst))
+    if (!CalculatorBuiltInTypeConversions::innerStoreObject(theCommands, currentGen, baseE, theContext, &tempNonConst))
     { theCommands.Comments << "<hr>Failed to store " << currentGen.ToString() << ". ";
       return false;
     }
     if (!input.Powers[0].IsEqualToOne())
-    { if (!CalculatorSerialization::innerStoreObject(theCommands, input.Powers[0], exponentE, theContext))
+    { if (!CalculatorBuiltInTypeConversions::innerStoreObject(theCommands, input.Powers[0], exponentE, theContext))
       { theCommands.Comments << "<hr>Failed to store the exponent " << input.Powers[0].ToString() << " with context "
         << theContext->ToString();
         return false;
@@ -142,8 +142,8 @@ bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const Mo
   return true;
 }
 
-bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const MonomialP& input, Expression& output, Expression* theContext, bool* inputOutputNonConst)
-{ MacroRegisterFunctionWithName("CalculatorSerialization::SerializeMon_MonomialP");
+bool CalculatorBuiltInTypeConversions::innerStoreObject(Calculator& theCommands, const MonomialP& input, Expression& output, Expression* theContext, bool* inputOutputNonConst)
+{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::SerializeMon_MonomialP");
   if (theContext==0)
     crash << "This is a programming error: it is forbiddeen to call MonomialP storing without providing a context. " << crash;
   Expression exponentE, monE, tempE, letterE;
@@ -172,8 +172,8 @@ bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const Mo
 }
 
 template <>
-bool CalculatorSerialization::DeSerializeMon<DynkinSimpleType>(Calculator& theCommands, const Expression& input, const Expression& inputContext, DynkinSimpleType& outputMon)
-{ MacroRegisterFunctionWithName("CalculatorSerialization::DeSerializeMon_DynkinSimpleType");
+bool CalculatorBuiltInTypeConversions::DeSerializeMon<DynkinSimpleType>(Calculator& theCommands, const Expression& input, const Expression& inputContext, DynkinSimpleType& outputMon)
+{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::DeSerializeMon_DynkinSimpleType");
   Expression rankE, typeLetterE, scaleE;
   if (input.children.size==2)
   { rankE=input[1];
@@ -257,8 +257,8 @@ bool CalculatorSerialization::DeSerializeMon<DynkinSimpleType>(Calculator& theCo
   return true;
 }
 
-bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const DynkinSimpleType& input, Expression& output, Expression* theContext, bool* isNonConst)
-{ MacroRegisterFunctionWithName("CalculatorSerialization::DynkinSimpleType");
+bool CalculatorBuiltInTypeConversions::innerStoreObject(Calculator& theCommands, const DynkinSimpleType& input, Expression& output, Expression* theContext, bool* isNonConst)
+{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::DynkinSimpleType");
   if (isNonConst!=0)
     *isNonConst=true;
   Expression letterE, rankE, letterAndIndexE, indexE;
@@ -276,30 +276,30 @@ bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const Dy
   return true;
 }
 
-bool CalculatorSerialization::innerSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorBuiltInTypeConversions::innerSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerSSLieAlgebra");
-  CalculatorSerialization::innerLoadSSLieAlgebra(theCommands, input, output, (SemisimpleLieAlgebra**) 0);
+  CalculatorBuiltInTypeConversions::innerLoadSSLieAlgebra(theCommands, input, output, (SemisimpleLieAlgebra**) 0);
   //theCommands.ToString();
   //stOutput << "The semisimple lie alg: " << output.ToString();
 
   return true;
 }
 
-bool CalculatorSerialization::innerSSLieAlgebra(Calculator& theCommands, const Expression& input, SemisimpleLieAlgebra*& output)
+bool CalculatorBuiltInTypeConversions::innerSSLieAlgebra(Calculator& theCommands, const Expression& input, SemisimpleLieAlgebra*& output)
 { MacroRegisterFunctionWithName("Calculator::innerSSLieAlgebra");
   Expression tempE;
-  if (!CalculatorSerialization::innerLoadSSLieAlgebra(theCommands, input, tempE, &output))
+  if (!CalculatorBuiltInTypeConversions::innerLoadSSLieAlgebra(theCommands, input, tempE, &output))
     return false;
   if (tempE.IsError())
     return false;
   return true;
 }
 
-bool CalculatorSerialization::innerLoadWeylGroup(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorBuiltInTypeConversions::innerLoadWeylGroup(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerLoadWeylGroup");
 //  stOutput << "got ere!";
   DynkinType theType;
-  if (!CalculatorSerialization::innerLoadDynkinType(theCommands, input, theType))
+  if (!CalculatorBuiltInTypeConversions::innerLoadDynkinType(theCommands, input, theType))
     return false;
   WeylGroup theWeyl;
   theWeyl.MakeFromDynkinType(theType);
@@ -307,7 +307,7 @@ bool CalculatorSerialization::innerLoadWeylGroup(Calculator& theCommands, const 
   return output.AssignValue(theWeyl, theCommands);
 }
 
-bool CalculatorSerialization::innerLoadDynkinType(Calculator& theCommands, const Expression& input, DynkinType& output)
+bool CalculatorBuiltInTypeConversions::innerLoadDynkinType(Calculator& theCommands, const Expression& input, DynkinType& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::innerLoadDynkinType");
   MonomialCollection<Expression, Rational> theType;
@@ -317,7 +317,7 @@ bool CalculatorSerialization::innerLoadDynkinType(Calculator& theCommands, const
   output.MakeZero();
   Expression emptyE;
   for (int i=0; i<theType.size(); i++)
-  { if (!CalculatorSerialization::DeSerializeMon(theCommands, theType[i], emptyE, simpleComponent))
+  { if (!CalculatorBuiltInTypeConversions::DeSerializeMon(theCommands, theType[i], emptyE, simpleComponent))
       return false;
     int theMultiplicity=-1;
     if (!theType.theCoeffs[i].IsSmallInteger(&theMultiplicity))
@@ -332,13 +332,13 @@ bool CalculatorSerialization::innerLoadDynkinType(Calculator& theCommands, const
   return true;
 }
 
-bool CalculatorSerialization::innerLoadSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra** outputPointer)
+bool CalculatorBuiltInTypeConversions::innerLoadSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra** outputPointer)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::innerLoadSSLieAlgebra");
   DynkinType theDynkinType;
 //  stOutput << "<br>Now I'm here!";
 //  stOutput.flush();
-  if(!CalculatorSerialization::innerLoadDynkinType(theCommands, input, theDynkinType))
+  if(!CalculatorBuiltInTypeConversions::innerLoadDynkinType(theCommands, input, theDynkinType))
   { //  stOutput << "got to error";
   //stOutput.flush();
     return output.MakeError("Failed to extract Dynkin type.", theCommands);
@@ -378,11 +378,11 @@ bool CalculatorSerialization::innerLoadSSLieAlgebra(Calculator& theCommands, con
   return true;
 }
 
-bool CalculatorSerialization::innerStoreSemisimpleLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorBuiltInTypeConversions::innerStoreSemisimpleLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsOfType<SemisimpleLieAlgebra>())
     return output.MakeError("Asking serialization of non-semisimple Lie algebra to semisimple Lie algebra not allowed. ", theCommands);
   SemisimpleLieAlgebra& owner=input.GetValueNonConst<SemisimpleLieAlgebra>();
-  return CalculatorSerialization::innerStoreObject(theCommands, owner, output);
+  return CalculatorBuiltInTypeConversions::innerStoreObject(theCommands, owner, output);
 }
 
 void Expression::MakeSerialization(const std::string& secondEntry, Calculator& theCommands, int numElementsToReserve)
@@ -395,39 +395,39 @@ void Expression::MakeSerialization(const std::string& secondEntry, Calculator& t
   this->AddChildOnTop(tempE);
 }
 
-bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const Rational& input, Expression& output, Expression* theContext)
+bool CalculatorBuiltInTypeConversions::innerStoreObject(Calculator& theCommands, const Rational& input, Expression& output, Expression* theContext)
 { return output.AssignValue(input, theCommands);
 }
 
-bool CalculatorSerialization::innerStoreElementSemisimpleLieAlgebraRationals(Calculator& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorSerialization::innerStoreElementSemisimpleLieAlgebraRational");
+bool CalculatorBuiltInTypeConversions::innerStoreElementSemisimpleLieAlgebraRationals(Calculator& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerStoreElementSemisimpleLieAlgebraRational");
   Expression tempContext;
   tempContext.MakeEmptyContext(theCommands);
   if (!input.IsEqualToZero())
   { tempContext.ContextMakeContextSSLieAlgebrA(theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(*input.GetOwner()), theCommands);
   }
-  CalculatorSerialization::innerStoreMonCollection(theCommands, input, output, &tempContext);
+  CalculatorBuiltInTypeConversions::innerStoreMonCollection(theCommands, input, output, &tempContext);
   return true;
 }
 
-bool CalculatorSerialization::innerStoreElementSemisimpleLieAlgebraAlgebraicNumbers(Calculator& theCommands, const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorSerialization::innerStoreElementSemisimpleLieAlgebraAlgebraicNumbers");
+bool CalculatorBuiltInTypeConversions::innerStoreElementSemisimpleLieAlgebraAlgebraicNumbers(Calculator& theCommands, const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerStoreElementSemisimpleLieAlgebraAlgebraicNumbers");
   Expression tempContext;
   tempContext.MakeEmptyContext(theCommands);
   if (!input.IsEqualToZero())
   { tempContext.ContextMakeContextSSLieAlgebrA(theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(*input.GetOwner()), theCommands);
   }
-  CalculatorSerialization::innerStoreMonCollection(theCommands, input, output, &tempContext);
+  CalculatorBuiltInTypeConversions::innerStoreMonCollection(theCommands, input, output, &tempContext);
   return true;
 }
 
-bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const slTwoSubalgebra& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorSerialization::innerStoreObject");
+bool CalculatorBuiltInTypeConversions::innerStoreObject(Calculator& theCommands, const slTwoSubalgebra& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerStoreObject");
   output.MakeSerialization("LoadSltwoSubalgebra", theCommands);
   Expression tempE;
-  CalculatorSerialization::innerStoreObject(theCommands, input.theF, tempE);
+  CalculatorBuiltInTypeConversions::innerStoreObject(theCommands, input.theF, tempE);
   output.AddChildOnTop(tempE);
-  CalculatorSerialization::innerStoreObject(theCommands, input.theE, tempE);
+  CalculatorBuiltInTypeConversions::innerStoreObject(theCommands, input.theE, tempE);
   output.AddChildOnTop(tempE);
 
   /*List<int> highestWeights;
@@ -457,8 +457,8 @@ bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const sl
   return true;
 }
 
-bool CalculatorSerialization::innerLoadFromObject(Calculator& theCommands, const Expression& input, slTwoSubalgebra& output)
-{ MacroRegisterFunctionWithName("CalculatorSerialization::innerLoadFromObject slTwoSubalgebra");
+bool CalculatorBuiltInTypeConversions::innerLoadFromObject(Calculator& theCommands, const Expression& input, slTwoSubalgebra& output)
+{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerLoadFromObject slTwoSubalgebra");
   if (!input.IsListNElements(3))
   { theCommands.Comments << "<hr>input of innerLoadFromObject has " << input.children.size << " children, 3 expected. ";
     return false;
@@ -466,11 +466,11 @@ bool CalculatorSerialization::innerLoadFromObject(Calculator& theCommands, const
   const Expression& theF=input[1];
   const Expression& theE=input[2];
   ElementSemisimpleLieAlgebra<Rational> eltF, eltE;
-  if (!CalculatorSerialization::DeSerializeMonCollection(theCommands, theF, eltF))
+  if (!CalculatorBuiltInTypeConversions::DeSerializeMonCollection(theCommands, theF, eltF))
   { theCommands.Comments << "<hr>Failed to extract f element while loading sl(2) subalgebra<hr>";
     return false;
   }
-  if (!CalculatorSerialization::DeSerializeMonCollection(theCommands, theE, eltE))
+  if (!CalculatorBuiltInTypeConversions::DeSerializeMonCollection(theCommands, theE, eltE))
   { theCommands.Comments << "<hr>Failed to extract e element while loading sl(2) subalgebra<hr>";
     return false;
   }
@@ -497,18 +497,18 @@ bool CalculatorSerialization::innerLoadFromObject(Calculator& theCommands, const
   return true;
 }
 
-bool CalculatorSerialization::innerLoadSltwoSubalgebra(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorSerialization::innerLoadSltwoSubalgebra");
+bool CalculatorBuiltInTypeConversions::innerLoadSltwoSubalgebra(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerLoadSltwoSubalgebra");
   slTwoSubalgebra tempSL2;
-  if (!CalculatorSerialization::innerLoadFromObject(theCommands, input, tempSL2))
+  if (!CalculatorBuiltInTypeConversions::innerLoadFromObject(theCommands, input, tempSL2))
   { theCommands.Comments << "<hr>Failed to load sl(2) subalgebra. ";
     return false;
   }
   return output.AssignValue(tempSL2.ToString(), theCommands);
 }
 
-bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const SltwoSubalgebras& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorSerialization::innerStoreObject");
+bool CalculatorBuiltInTypeConversions::innerStoreObject(Calculator& theCommands, const SltwoSubalgebras& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerStoreObject");
   output.MakeSerialization("LoadSlTwoSubalgebras", theCommands, 1);
   Expression theSequence, tempE;
   theSequence.reset(theCommands);
@@ -516,7 +516,7 @@ bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const Sl
   theSequence.children.ReservE(input.size+1);
   theSequence.AddChildOnTop(tempE);
   for (int i=0; i<input.size; i++)
-  { if (!CalculatorSerialization::innerStoreObject(theCommands, input[i], tempE))
+  { if (!CalculatorBuiltInTypeConversions::innerStoreObject(theCommands, input[i], tempE))
       return false;
     theSequence.AddChildOnTop(tempE);
   }
@@ -524,13 +524,13 @@ bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const Sl
   return true;
 }
 
-bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const SemisimpleLieAlgebra& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorSerialization::innerStoreObject");
+bool CalculatorBuiltInTypeConversions::innerStoreObject(Calculator& theCommands, const SemisimpleLieAlgebra& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerStoreObject");
   output.MakeSerialization("SemisimpleLieAlgebra", theCommands, 1);
 //  stOutput << "<hr>" << output.ToString() << "<br>";
   Expression emptyC, tempE;
   emptyC.MakeEmptyContext(theCommands);
-  if (!CalculatorSerialization::innerStoreMonCollection
+  if (!CalculatorBuiltInTypeConversions::innerStoreMonCollection
       (theCommands, input.theWeyl.theDynkinType, tempE, &emptyC))
     return false;
 //  stOutput << "<br>The mon collection: " << tempE.ToString();
@@ -539,28 +539,28 @@ bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const Se
   return true;
 }
 
-bool CalculatorSerialization::innerLoadSltwoSubalgebras(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorBuiltInTypeConversions::innerLoadSltwoSubalgebras(Calculator& theCommands, const Expression& input, Expression& output)
 {
   return false;
 }
 
-bool CalculatorSerialization::innerStoreSemisimpleSubalgebrasFromExpression(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorBuiltInTypeConversions::innerStoreSemisimpleSubalgebrasFromExpression(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("innerStoreSemisimpleSubalgebrass");
   if (!input.IsOfType<SemisimpleSubalgebras>())
     return false;
   SemisimpleSubalgebras& theSubalgebras=input.GetValueNonConst<SemisimpleSubalgebras>();
-  return CalculatorSerialization::innerStoreSemisimpleSubalgebras(theCommands, theSubalgebras, output);
+  return CalculatorBuiltInTypeConversions::innerStoreSemisimpleSubalgebras(theCommands, theSubalgebras, output);
 }
 
-bool CalculatorSerialization::innerStoreCandidateSA(Calculator& theCommands, const CandidateSSSubalgebra& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorSerialization::innerStoreObject CandidateSSSubalgebra");
+bool CalculatorBuiltInTypeConversions::innerStoreCandidateSA(Calculator& theCommands, const CandidateSSSubalgebra& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerStoreObject CandidateSSSubalgebra");
   output.MakeSerialization("LoadCandidateSubalgebra", theCommands);
   Expression emptyContext;
   emptyContext.MakeEmptyContext(theCommands);
   Expression tempE;
-  CalculatorSerialization::innerStoreMonCollection(theCommands, input.theWeylNonEmbeddeD.theDynkinType, tempE, &emptyContext);
+  CalculatorBuiltInTypeConversions::innerStoreMonCollection(theCommands, input.theWeylNonEmbeddeD.theDynkinType, tempE, &emptyContext);
   output.AddChildOnTop(tempE);
-  CalculatorSerialization::innerStoreObject(theCommands, input.theHs, tempE);
+  CalculatorBuiltInTypeConversions::innerStoreObject(theCommands, input.theHs, tempE);
   output.AddChildOnTop(tempE);
 //  ElementSemisimpleLieAlgebra<Rational> convertedToRational;
   if (input.flagSystemSolved)
@@ -568,9 +568,9 @@ bool CalculatorSerialization::innerStoreCandidateSA(Calculator& theCommands, con
     listGenerators.reset(theCommands);
     listGenerators.AddChildAtomOnTop(theCommands.opSequence());
     for (int i=0; i<input.theNegGens.size; i++)
-    { CalculatorSerialization::innerStoreElementSemisimpleLieAlgebraAlgebraicNumbers(theCommands, input.theNegGens[i], tempE);
+    { CalculatorBuiltInTypeConversions::innerStoreElementSemisimpleLieAlgebraAlgebraicNumbers(theCommands, input.theNegGens[i], tempE);
       listGenerators.AddChildOnTop(tempE);
-      CalculatorSerialization::innerStoreElementSemisimpleLieAlgebraAlgebraicNumbers(theCommands, input.thePosGens[i], tempE);
+      CalculatorBuiltInTypeConversions::innerStoreElementSemisimpleLieAlgebraAlgebraicNumbers(theCommands, input.thePosGens[i], tempE);
       listGenerators.AddChildOnTop(tempE);
     }
     output.AddChildOnTop(listGenerators);
@@ -579,8 +579,8 @@ bool CalculatorSerialization::innerStoreCandidateSA(Calculator& theCommands, con
   return true;
 }
 
-bool CalculatorSerialization::innerLoadCandidateSA(Calculator& theCommands, const Expression& input, Expression& output, CandidateSSSubalgebra& outputSubalgebra, SemisimpleSubalgebras& owner)
-{ MacroRegisterFunctionWithName("CalculatorSerialization::innerLoadCandidateSA");
+bool CalculatorBuiltInTypeConversions::innerLoadCandidateSA(Calculator& theCommands, const Expression& input, Expression& output, CandidateSSSubalgebra& outputSubalgebra, SemisimpleSubalgebras& owner)
+{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerLoadCandidateSA");
   if (!input.IsListNElements(4) && !input.IsListNElements(5))
   { theCommands.Comments << "<hr>Failed to load candidate subalgebra: I expect to get a list of 4 or 5 children, but got one with "
     << input.children.size << " children instead.<hr> ";
@@ -588,7 +588,7 @@ bool CalculatorSerialization::innerLoadCandidateSA(Calculator& theCommands, cons
   }
   outputSubalgebra.owner=&owner;
   Expression tempE;
-  if (!CalculatorSerialization::DeSerializeMonCollection(theCommands, input[2], outputSubalgebra.theWeylNonEmbeddeD.theDynkinType))
+  if (!CalculatorBuiltInTypeConversions::DeSerializeMonCollection(theCommands, input[2], outputSubalgebra.theWeylNonEmbeddeD.theDynkinType))
   { theCommands.Comments << "<hr> Failed to load dynkin type of candidate subalgebra from "<< input[2].ToString() << "<hr>";
     return false;
   }
@@ -639,7 +639,7 @@ bool CalculatorSerialization::innerLoadCandidateSA(Calculator& theCommands, cons
     theGensE.Sequencefy();
     ElementSemisimpleLieAlgebra<AlgebraicNumber> curGenAlgebraic;
     for (int i=1; i<theGensE.children.size; i++)
-    { if (!CalculatorSerialization::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(theCommands, theGensE[i], curGenAlgebraic, *owner.owneR))
+    { if (!CalculatorBuiltInTypeConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(theCommands, theGensE[i], curGenAlgebraic, *owner.owneR))
       { theCommands.Comments << "<hr>Failed to load semisimple Lie algebra element from expression " << theGensE[i].ToString() << ". ";
         return false;
       }
@@ -669,22 +669,21 @@ bool CalculatorSerialization::innerLoadCandidateSA(Calculator& theCommands, cons
       return false;
     }
 
-  //CalculatorSerialization::innerLoadFromObject(theCommands,
+  //CalculatorBuiltInTypeConversions::innerLoadFromObject(theCommands,
   return output.MakeError("Candidate subalgebra is not a stand-alone object and its Expression output should not be used. ", theCommands);
 }
 
-bool CalculatorSerialization::innerLoadSemisimpleSubalgebras(Calculator& theCommands, const Expression& inpuT, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorSerialization::innerLoadSemisimpleSubalgebras");
+bool CalculatorBuiltInTypeConversions::innerLoadSemisimpleSubalgebras(Calculator& theCommands, const Expression& inpuT, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerLoadSemisimpleSubalgebras");
   Expression input=inpuT;
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
-  CalculatorSerialization::innerLoad(theCommands, inpuT, input);
   if (input.children.size!= 3)
   { theCommands.Comments << "<hr>Error loading semisimple subalgebras: I expect input with 3 children, got "
     << input.children.size << " children instead.<hr>";
     return false;
   }
   SemisimpleLieAlgebra* ownerSS;
-  if (!CalculatorSerialization::innerLoadSSLieAlgebra(theCommands, input[1], output, &ownerSS))
+  if (!CalculatorBuiltInTypeConversions::innerLoadSSLieAlgebra(theCommands, input[1], output, &ownerSS))
   { theCommands.Comments << "<hr>Error loading semisimple subalgebras: failed to extract ambient semisimple Lie algebra. ";
     return false;
   }
@@ -714,7 +713,7 @@ bool CalculatorSerialization::innerLoadSemisimpleSubalgebras(Calculator& theComm
     reportStream << "Loading subalgebra " << i << " out of " << theCandidatesE.children.size-1;
     theReport.Report(reportStream.str());
     CandidateSSSubalgebra tempCandidate;
-    if (!CalculatorSerialization::innerLoadCandidateSA(theCommands, theCandidatesE[i], tempE, tempCandidate, theSAs))
+    if (!CalculatorBuiltInTypeConversions::innerLoadCandidateSA(theCommands, theCandidatesE[i], tempE, tempCandidate, theSAs))
     { theCommands.Comments << "<hr>Error loading candidate subalgebra: failed to load candidate number " << i << " of type "
       << tempCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ". <hr>";
       return false;
@@ -732,11 +731,11 @@ bool CalculatorSerialization::innerLoadSemisimpleSubalgebras(Calculator& theComm
   return output.AssignValue(theSAs, theCommands);
 }
 
-bool CalculatorSerialization::innerStoreSemisimpleSubalgebras(Calculator& theCommands, const SemisimpleSubalgebras& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorSerialization::innerStoreSemisimpleSubalgebras");
+bool CalculatorBuiltInTypeConversions::innerStoreSemisimpleSubalgebras(Calculator& theCommands, const SemisimpleSubalgebras& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerStoreSemisimpleSubalgebras");
   output.MakeSerialization("LoadSemisimpleSubalgebras", theCommands);
   Expression tempE, tempE2, candidateE;
-  if (!CalculatorSerialization::innerStoreMonCollection(theCommands, input.owneR->theWeyl.theDynkinType, tempE))
+  if (!CalculatorBuiltInTypeConversions::innerStoreMonCollection(theCommands, input.owneR->theWeyl.theDynkinType, tempE))
     return false;
   output.AddChildOnTop(tempE);
   tempE.reset(theCommands);
@@ -744,62 +743,36 @@ bool CalculatorSerialization::innerStoreSemisimpleSubalgebras(Calculator& theCom
   tempE2.MakeAtom(theCommands.opSequence(), theCommands);
   tempE.AddChildOnTop(tempE2);
   for (int i=0; i<input.theSubalgebraCandidates.size; i++)
-  { if (!CalculatorSerialization::innerStoreCandidateSA(theCommands, input.theSubalgebraCandidates[i], candidateE))
+  { if (!CalculatorBuiltInTypeConversions::innerStoreCandidateSA(theCommands, input.theSubalgebraCandidates[i], candidateE))
       return false;
     tempE.AddChildOnTop(candidateE);
   }
   output.AddChildOnTop(tempE);
-  //if (!CalculatorSerialization::innerStoreObject(theCommands, input.theSl2s, tempE))
+  //if (!CalculatorBuiltInTypeConversions::innerStoreObject(theCommands, input.theSl2s, tempE))
   //  return false;
   //output.AddChildOnTop(tempE);
   return true;
 }
 
-bool CalculatorSerialization::innerStore(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("innerStore");
-  int theType;
-  if (!input.IsBuiltInType(&theType))
-    return false;
-  if (theType==theCommands.opSSLieAlg())
-    return CalculatorSerialization::innerStoreSemisimpleLieAlgebra(theCommands, input, output);
-  if (theType==theCommands.opPoly())
-    return CalculatorSerialization::innerStorePoly(theCommands, input, output);
-  if (theType==theCommands.opSemisimpleSubalgebras())
-    return CalculatorSerialization::innerStoreSemisimpleSubalgebrasFromExpression(theCommands, input, output);
-  if (theType==theCommands.opElementUEoverRF())
-    return CalculatorSerialization::innerStoreUE(theCommands, input, output);
-  return output.MakeError("Serialization not implemented for this data type.", theCommands);
-}
-
-bool CalculatorSerialization::innerStoreUE(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorBuiltInTypeConversions::innerStoreUE(Calculator& theCommands, const Expression& input, Expression& output)
 { ElementUniversalEnveloping<RationalFunctionOld> theUE;
   if (!input.IsOfType(&theUE))
     return output.MakeError("To ask to store a non-elementUE as an elementUE is not allowed", theCommands);
   output.MakeSerialization("UE", theCommands, 1);
   Expression tempE;
   Expression theContext=input.GetContext();
-  if(!CalculatorSerialization::innerStoreMonCollection(theCommands, theUE, tempE, &theContext))
+  if(!CalculatorBuiltInTypeConversions::innerStoreMonCollection(theCommands, theUE, tempE, &theContext))
   { theCommands.Comments << "<hr>Failed to store " << theUE.ToString();
     return false;
   }
   return output.AddChildOnTop(tempE);
 }
 
-bool CalculatorSerialization::innerLoad(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListStartingWithAtom(theCommands.opSerialization()))
-    return false;
-  if (input.children.size<2)
-    return false;
-  output=input;
-  output.children.RemoveIndexShiftDown(0);
-  return true;
-}
-
-bool CalculatorSerialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
+bool CalculatorBuiltInTypeConversions::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
 (Calculator& theCommands, const Expression& input, ElementSemisimpleLieAlgebra<Rational>& output, SemisimpleLieAlgebra& owner)
 { Expression genE;
   ElementUniversalEnveloping<RationalFunctionOld> curGenUErf;
-  if (!CalculatorSerialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input, genE, owner))
+  if (!CalculatorBuiltInTypeConversions::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input, genE, owner))
   { theCommands.Comments << "<hr> Failed to load element UE from " << input.ToString() << ". ";
     return false;
   }
@@ -815,12 +788,12 @@ bool CalculatorSerialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
   return true;
 }
 
-bool CalculatorSerialization::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
+bool CalculatorBuiltInTypeConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
 (Calculator& theCommands, const Expression& input, ElementSemisimpleLieAlgebra<AlgebraicNumber>& output, SemisimpleLieAlgebra& owner)
-{ MacroRegisterFunctionWithName("CalculatorSerialization::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers");
+{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers");
   Expression polyFormE;
   Polynomial<AlgebraicNumber> polyForm;
-  bool polyFormGood=CalculatorSerialization::innerPolynomial<AlgebraicNumber>(theCommands, input, polyFormE);
+  bool polyFormGood=CalculatorBuiltInTypeConversions::innerPolynomial<AlgebraicNumber>(theCommands, input, polyFormE);
   if (polyFormGood)
     polyFormGood=polyFormE.IsOfType<Polynomial<AlgebraicNumber> >(&polyForm);
   if (!polyFormGood)
@@ -871,7 +844,7 @@ bool CalculatorSerialization::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbe
   return true;
 }
 
-bool CalculatorSerialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra& owner)
+bool CalculatorBuiltInTypeConversions::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra& owner)
 { ChevalleyGenerator theChevGen;
   theChevGen.owneR=&owner;
   ElementUniversalEnveloping<RationalFunctionOld> outputUE;
@@ -882,7 +855,7 @@ bool CalculatorSerialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
   RationalFunctionOld currentMultiplicandRFpart;
   outputUE.MakeZero(owner);
   Expression polyE;
-  if (!CalculatorSerialization::innerPolynomial<Rational>(theCommands, input, polyE))
+  if (!CalculatorBuiltInTypeConversions::innerPolynomial<Rational>(theCommands, input, polyE))
   { theCommands.Comments << "<hr>Failed to convert " << input.ToString() << " to polynomial.<hr>";
     return false;
   }
@@ -965,14 +938,14 @@ bool CalculatorSerialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
   return output.AssignValueWithContext(outputUE, outputContext, theCommands);
 }
 
-bool CalculatorSerialization::innerStorePoly(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorSerialization::innerStorePoly");
+bool CalculatorBuiltInTypeConversions::innerStorePoly(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerStorePoly");
   Polynomial<Rational> thePoly;
   if (!input.IsOfType(&thePoly))
     return output.MakeError("To ask to store a non-polynomial to a polynomial is not allowed. ", theCommands);
   Expression theContext=input.GetContext();
   Expression resultE;
-  if (!CalculatorSerialization::innerStoreMonCollection(theCommands, thePoly, resultE, &theContext))
+  if (!CalculatorBuiltInTypeConversions::innerStoreMonCollection(theCommands, thePoly, resultE, &theContext))
     return false;
   resultE.CheckInitialization();
   output.MakeSerialization("Polynomial", theCommands, 1);
@@ -982,47 +955,47 @@ bool CalculatorSerialization::innerStorePoly(Calculator& theCommands, const Expr
   return true;
 }
 
-bool CalculatorSerialization::innerStoreRationalFunction(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorBuiltInTypeConversions::innerStoreRationalFunction(Calculator& theCommands, const Expression& input, Expression& output)
 { RationalFunctionOld theRF;
   if (!input.IsOfType(&theRF))
     return output.MakeError("To ask to store a non-rational function as a rational function is not allowed.", theCommands);
   Expression contextE=input.GetContext();
-  return CalculatorSerialization::innerStoreObject(theCommands, theRF, output, &contextE);
+  return CalculatorBuiltInTypeConversions::innerStoreObject(theCommands, theRF, output, &contextE);
 }
 
-bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const RationalFunctionOld& input, Expression& output, Expression* theContext)
+bool CalculatorBuiltInTypeConversions::innerStoreObject(Calculator& theCommands, const RationalFunctionOld& input, Expression& output, Expression* theContext)
 { if (input.expressionType==input.typeRational)
     return output.AssignValue(input.ratValue, theCommands);
   Polynomial<Rational> theNumerator;
   input.GetNumerator(theNumerator);
   if (input.expressionType==input.typePoly)
-    return CalculatorSerialization::innerStoreMonCollection(theCommands, theNumerator, output, theContext);
+    return CalculatorBuiltInTypeConversions::innerStoreMonCollection(theCommands, theNumerator, output, theContext);
   if (input.expressionType!=input.typeRationalFunction)
     crash << "This is a programming error: I am processing a rational function which is not of type rational polynomial or honest rataional "
     << "function. Something has gone very wrong. " << crash;
   Polynomial<Rational> theDenominator;
   input.GetDenominator(theDenominator);
   Expression denE, numE;
-  if (!CalculatorSerialization::innerStoreMonCollection(theCommands, theNumerator, numE, theContext))
+  if (!CalculatorBuiltInTypeConversions::innerStoreMonCollection(theCommands, theNumerator, numE, theContext))
   { theCommands.Comments << "<hr>Failed to serialize numerator of rational function. ";
     return false;
   }
-  if (!CalculatorSerialization::innerStoreMonCollection(theCommands, theDenominator, denE, theContext))
+  if (!CalculatorBuiltInTypeConversions::innerStoreMonCollection(theCommands, theDenominator, denE, theContext))
   { theCommands.Comments << "<hr>Failed to serialize denominator of rational function. ";
     return false;
   }
   return output.MakeXOX(theCommands, theCommands.opDivide(), numE, denE);
 }
 
-bool CalculatorSerialization::innerRationalFunction(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorSerialization::innerRationalFunction");
+bool CalculatorBuiltInTypeConversions::innerRationalFunction(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerRationalFunction");
   Expression intermediate(theCommands);
   if (input.StartsWith(theCommands.opPlus(), 3) ||
       input.StartsWith(theCommands.opTimes(),3) ||
       input.StartsWith(theCommands.opDivide(),3))
   { Expression leftE, rightE;
-    if (!CalculatorSerialization::innerRationalFunction(theCommands, input[1], leftE) ||
-        !CalculatorSerialization::innerRationalFunction(theCommands, input[2], rightE) )
+    if (!CalculatorBuiltInTypeConversions::innerRationalFunction(theCommands, input[1], leftE) ||
+        !CalculatorBuiltInTypeConversions::innerRationalFunction(theCommands, input[2], rightE) )
     { theCommands << "<hr> Failed to convert " << input[1].ToString() << " and " << input[2].ToString() << " to rational function. ";
       return false;
     }
@@ -1050,8 +1023,8 @@ bool CalculatorSerialization::innerRationalFunction(Calculator& theCommands, con
   { //stOutput << "here be i!";
     if (input[2].IsSmallInteger(&theSmallPower))
     { Expression leftE;
-      if (!CalculatorSerialization::innerRationalFunction(theCommands, input[1], leftE))
-      { theCommands << "<hr>CalculatorSerialization::innerRationalFunction: failed to convert " << input[1].ToString() << " to rational function. ";
+      if (!CalculatorBuiltInTypeConversions::innerRationalFunction(theCommands, input[1], leftE))
+      { theCommands << "<hr>CalculatorBuiltInTypeConversions::innerRationalFunction: failed to convert " << input[1].ToString() << " to rational function. ";
         return false;
       }
       if (leftE.IsError())

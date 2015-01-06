@@ -916,6 +916,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
   int theModIndex=theCommands.theObjectContainer.theCategoryOmodules.GetIndex(theModCopy);
   ModuleSSalgebra<RationalFunctionOld>& theMod=
   theCommands.theObjectContainer.theCategoryOmodules[theModIndex];
+  theMod.GetOwner().flagHasNilradicalOrder=true;
   std::stringstream out;
   theCommands.Comments << "<hr>Time elapsed before making B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
   double timeAtStart=theCommands.theGlobalVariableS->GetElapsedSeconds();

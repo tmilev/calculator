@@ -2258,7 +2258,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb(C
   A.CheckInitializationRecursively();
   twoE.CheckInitializationRecursively();
   nE.CheckInitializationRecursively();
-  stOutput << "quadratic power one minus n: " << quadraticPowerOneMinusN.ToString();
+//  stOutput << "quadratic power one minus n: " << quadraticPowerOneMinusN.ToString();
   quadraticPowerOneMinusN.CheckInitializationRecursively();
   C.CheckInitializationRecursively();
   remainingIntegral.CheckInitializationRecursively();
@@ -2324,7 +2324,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateSum(Calculator& theCommands, cons
   Expression newIntegralE, newDx, newDiffFormE, newFunctionE, result, newSummand;
   for (int i=1; i<theFunctionE.children.size; i++)
   { newIntegralE.MakeIntegral(theCommands, theFunctionE[i], theVariableE);
-    stOutput << "New integral: " << newIntegralE.ToString();
+//    stOutput << "New integral: " << newIntegralE.ToString();
     if (!theCommands.EvaluateExpression(theCommands, newIntegralE, newSummand))
       return false;
     if (newSummand.ContainsAsSubExpression(theCommands.opIntegral()))
@@ -2384,7 +2384,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateXnDiffX(Calculator& theCommands, 
 
 bool CalculatorFunctionsGeneral::innerDifferentiateSqrt(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateSqrt");
-  std::cout << "Here be i with input: " << input.ToString();
+  //stOutput << "Here be i with input: " << input.ToString();
   if (input.children.size!=3)
     return false;
   if (!input[1].IsAtom())
@@ -4381,7 +4381,7 @@ bool Calculator::fSplitFDpartB3overG2old(Calculator& theCommands, const Expressi
   if (output.IsError())
     return true;
   std::stringstream out;
-  theCommands.fSplitFDpartB3overG2inner(theCommands, theG2B3Data, output);
+  theCommands.innerSplitFDpartB3overG2inner(theCommands, theG2B3Data, output);
   out << "<br>Highest weight: " << theG2B3Data.theWeightFundCoords.ToString() << "<br>Parabolic selection: "
   << theG2B3Data.selInducing.ToString() << "<br>common Levi part of G_2 and B_3: "
   << theG2B3Data.selSmallParSel.ToString();

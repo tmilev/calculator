@@ -614,7 +614,7 @@ bool Calculator::fPrintB3G2branchingIntermediate(Calculator& theCommands, const 
   << "\\endhead";
   for (int i=0; i<theHWs.size; i++)
   { theG2B3Data.theWeightFundCoords=theHWs[i];
-    theCommands.fSplitFDpartB3overG2inner(theCommands, theG2B3Data, tempExpression);
+    theCommands.innerSplitFDpartB3overG2inner(theCommands, theG2B3Data, tempExpression);
     timeReport << tempExpression.GetValue<std::string>();
     RationalFunctionOld numEigenVectors;
     numEigenVectors=rfZero;
@@ -895,8 +895,8 @@ bool ElementSumGeneralizedVermas<coefficient>::ExtractElementUE(ElementUniversal
   return true;
 }
 
-bool Calculator::fSplitFDpartB3overG2inner(Calculator& theCommands, branchingData& theG2B3Data, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::fSplitFDpartB3overG2inner");
+bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchingData& theG2B3Data, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerSplitFDpartB3overG2inner");
 //  std::stringstream out;
 //  stOutput << "Highest weight: " << theWeightFundCoords.ToString() << "; Parabolic selection: " << selInducing.ToString();
   ModuleSSalgebra<RationalFunctionOld> theModCopy;
@@ -2198,7 +2198,8 @@ void Calculator::AutomatedTestRun
     for (int j=0; j<this->FunctionHandlers[i].size; j++)
       if (this->FunctionHandlers[i][j].theFunction!=Calculator::innerAutomatedTest &&
           this->FunctionHandlers[i][j].theFunction!=Calculator::innerAutomatedTestSetKnownGoodCopy &&
-          this->FunctionHandlers[i][j].theFunction!=Calculator::innerCrash)
+          this->FunctionHandlers[i][j].theFunction!=Calculator::innerCrash &&
+          ! this->FunctionHandlers[i][j].flagIsExperimental)
         outputCommandStrings.AddOnTop(this->FunctionHandlers[i][j].theExample);
   for (int i=0; i<this->operationsCompositeHandlers.size; i++)
     for (int j=0; j<this->operationsCompositeHandlers[i].size; j++)
@@ -2210,14 +2211,16 @@ void Calculator::AutomatedTestRun
   theFormat.flagExpressionIsFinal=true;
   for (int i=0; i<outputCommandStrings.size; i++)
   { double startingTime=this->theGlobalVariableS->GetElapsedSeconds();
+    std::stringstream reportStream;
+    reportStream << "<br>Testing expression:<br> " << outputCommandStrings[i]
+    << "<br>Test progress: testing " << i+1 << " out of " << outputCommandStrings.size << ". ";
+    theReport.Report(reportStream.str());
     theTester.reset();
     theTester.CheckConsistencyAfterInitializationExpressionStackEmpty();
     theTester.init(*this->theGlobalVariableS);
     theTester.Evaluate(outputCommandStrings[i]);
     outputResultsWithInit[i]=theTester.theProgramExpression.ToString(&theFormat);
-    std::stringstream reportStream;
-    reportStream << "<br>Tested expression " << i+1 << " out of " << outputCommandStrings.size << ". ";
-    reportStream << "<br>To get: " << theTester.theProgramExpression.ToString();
+    reportStream << "<br>Result: " << theTester.theProgramExpression.ToString();
     reportStream << "<br>Done in: " << this->theGlobalVariableS->GetElapsedSeconds()-startingTime << " seconds. ";
     theReport.Report(reportStream.str());
   }

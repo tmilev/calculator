@@ -762,7 +762,7 @@ bool CalculatorBuiltInTypeConversions::innerStoreUE(Calculator& theCommands, con
   Expression tempE;
   Expression theContext=input.GetContext();
   if(!CalculatorBuiltInTypeConversions::innerStoreMonCollection(theCommands, theUE, tempE, &theContext))
-  { theCommands.Comments << "<hr>Failed to store " << theUE.ToString();
+  { theCommands << "<hr>Failed to store " << theUE.ToString();
     return false;
   }
   return output.AddChildOnTop(tempE);
@@ -773,16 +773,16 @@ bool CalculatorBuiltInTypeConversions::innerLoadElementSemisimpleLieAlgebraRatio
 { Expression genE;
   ElementUniversalEnveloping<RationalFunctionOld> curGenUErf;
   if (!CalculatorBuiltInTypeConversions::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input, genE, owner))
-  { theCommands.Comments << "<hr> Failed to load element UE from " << input.ToString() << ". ";
+  { theCommands << "<hr> Failed to load element UE from " << input.ToString() << ". ";
     return false;
   }
   if (genE.IsError())
-  { theCommands.Comments << "<hr>Failed to load generator with error message " << genE.ToString();
+  { theCommands << "<hr>Failed to load generator with error message " << genE.ToString();
     return false;
   }
   curGenUErf=genE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> > ();
   if (!curGenUErf.GetLieAlgebraElementIfPossible(output))
-  { theCommands.Comments << "<hr> Failed to convert the UE element " << curGenUErf.ToString() << " to an honest Lie algebra element. ";
+  { theCommands << "<hr> Failed to convert the UE element " << curGenUErf.ToString() << " to an honest Lie algebra element. ";
     return false;
   }
   return true;
@@ -797,7 +797,7 @@ bool CalculatorBuiltInTypeConversions::innerLoadElementSemisimpleLieAlgebraAlgeb
   if (polyFormGood)
     polyFormGood=polyFormE.IsOfType<Polynomial<AlgebraicNumber> >(&polyForm);
   if (!polyFormGood)
-  { theCommands.Comments << "<hr>Failed to convert " << input.ToString() << " to polynomial.<hr>";
+  { theCommands << "<hr>Failed to convert " << input.ToString() << " to polynomial.<hr>";
     return false;
   }
   ChevalleyGenerator theChevGen;
@@ -808,17 +808,17 @@ bool CalculatorBuiltInTypeConversions::innerLoadElementSemisimpleLieAlgebraAlgeb
   { const MonomialP& currentMon=polyForm[j];
     int theGenIndex=0;
     if (!currentMon.IsOneLetterFirstDegree(&theGenIndex))
-    { theCommands.Comments << "<hr>Failed to convert semisimple Lie algebra input to linear poly: " << input.ToString() << ".<hr>";
+    { theCommands << "<hr>Failed to convert semisimple Lie algebra input to linear poly: " << input.ToString() << ".<hr>";
       return false;
     }
     Expression singleChevGenE=theContext.ContextGetContextVariable(theGenIndex);
     if (!singleChevGenE.IsListNElements(2))
-    { theCommands.Comments << "<hr>Failed to convert a summand of " << input.ToString() << " to Chevalley generator.<hr>";
+    { theCommands << "<hr>Failed to convert a summand of " << input.ToString() << " to Chevalley generator.<hr>";
       return false;
     }
     std::string theLetter;
     if (!singleChevGenE[0].IsAtom(&theLetter) || !singleChevGenE[1].IsSmallInteger(&theChevGen.theGeneratorIndex))
-    { theCommands.Comments << "<hr>Failed to convert summand " << singleChevGenE.ToString() << " to Chevalley generator of "
+    { theCommands << "<hr>Failed to convert summand " << singleChevGenE.ToString() << " to Chevalley generator of "
       << owner.GetLieAlgebraName();
       return false;
     }
@@ -835,7 +835,7 @@ bool CalculatorBuiltInTypeConversions::innerLoadElementSemisimpleLieAlgebraAlgeb
     } else
       isGood=false;
     if (!isGood)
-    { theCommands.Comments << "<hr>Failed to convert summand " << singleChevGenE.ToString() << " to Chevalley generator of "
+    { theCommands << "<hr>Failed to convert summand " << singleChevGenE.ToString() << " to Chevalley generator of "
       << owner.GetLieAlgebraName();
       return false;
     }
@@ -856,12 +856,12 @@ bool CalculatorBuiltInTypeConversions::innerLoadElementSemisimpleLieAlgebraRatio
   outputUE.MakeZero(owner);
   Expression polyE;
   if (!CalculatorBuiltInTypeConversions::innerPolynomial<Rational>(theCommands, input, polyE))
-  { theCommands.Comments << "<hr>Failed to convert " << input.ToString() << " to polynomial.<hr>";
+  { theCommands << "<hr>Failed to convert " << input.ToString() << " to polynomial.<hr>";
     return false;
   }
   Polynomial<Rational> theP;
   if (polyE.IsError() || !polyE.IsOfType<Polynomial<Rational> >(&theP))
-  { theCommands.Comments << "<hr>Failed to convert " << input.ToString() << " to polynomial. Instead I got " << polyE.ToString() << ". <hr>";
+  { theCommands << "<hr>Failed to convert " << input.ToString() << " to polynomial. Instead I got " << polyE.ToString() << ". <hr>";
     return false;
   }
   Expression theContext=polyE.GetContext();
@@ -875,7 +875,7 @@ bool CalculatorBuiltInTypeConversions::innerLoadElementSemisimpleLieAlgebraRatio
     for (int i=0; i<currentMon.GetMinNumVars(); i++)
     { int thePower;
       if (!currentMon(i).IsSmallInteger(&thePower))
-      { theCommands.Comments << "<hr>Failed to convert one of the exponents appearing in " << input.ToString()
+      { theCommands << "<hr>Failed to convert one of the exponents appearing in " << input.ToString()
         << " to  a small integer polynomial.<hr>";
         return false;
       }
@@ -883,12 +883,12 @@ bool CalculatorBuiltInTypeConversions::innerLoadElementSemisimpleLieAlgebraRatio
         continue;
       Expression singleChevGenE=theContext.ContextGetContextVariable(i);
       if (!singleChevGenE.IsListNElements(2))
-      { theCommands.Comments << "<hr>Failed to convert " << input.ToString() << " to polynomial.<hr>";
+      { theCommands << "<hr>Failed to convert " << input.ToString() << " to polynomial.<hr>";
         return false;
       }
       std::string theLetter;
       if (!singleChevGenE[0].IsAtom(&theLetter) || !singleChevGenE[1].IsSmallInteger(&theChevGen.theGeneratorIndex))
-      { theCommands.Comments << "<hr>Failed to convert summand " << singleChevGenE.ToString() << " to Chevalley generator of "
+      { theCommands << "<hr>Failed to convert summand " << singleChevGenE.ToString() << " to Chevalley generator of "
         << owner.GetLieAlgebraName();
         return false;
       }
@@ -977,11 +977,11 @@ bool CalculatorBuiltInTypeConversions::innerStoreObject(Calculator& theCommands,
   input.GetDenominator(theDenominator);
   Expression denE, numE;
   if (!CalculatorBuiltInTypeConversions::innerStoreMonCollection(theCommands, theNumerator, numE, theContext))
-  { theCommands.Comments << "<hr>Failed to serialize numerator of rational function. ";
+  { theCommands << "<hr>Failed to serialize numerator of rational function. ";
     return false;
   }
   if (!CalculatorBuiltInTypeConversions::innerStoreMonCollection(theCommands, theDenominator, denE, theContext))
-  { theCommands.Comments << "<hr>Failed to serialize denominator of rational function. ";
+  { theCommands << "<hr>Failed to serialize denominator of rational function. ";
     return false;
   }
   return output.MakeXOX(theCommands, theCommands.opDivide(), numE, denE);

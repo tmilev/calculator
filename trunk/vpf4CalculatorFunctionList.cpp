@@ -139,7 +139,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateSqrt, "",
    "Differentiation - square root function.  ",
-   "d/dx(sqrt(x)); Differentiate(x, \\sqrt)");
+   "d/dx(sqrt(x));");
 
 
   //the function integrating the building blocks must come in the exact order below:
@@ -147,27 +147,27 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa, "",
    "Integrates building block Ia.  ",
-   "\\int  (\frac{3}{(x/2-1)} ) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa");
+   "\\int  (\\frac{3}{(x/2-1)} ) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIb, "",
    "Integrates building block Ib.  ",
-   "\\int  (\frac{2}{(3x-1)^2} ) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIb");
+   "\\int  (\\frac{2}{(3x-1)^2} ) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIb");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa, "",
    "Integrates building blocks IIa and IIIa.  ",
-   "\\int  (\frac{3x+2}{x^2+x+1} ) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa");
+   "\\int  (\\frac{3x+2}{x^2+x+1} ) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb, "",
    "Integrates building blocks IIIb.  ",
-   "\\int  (\frac{3x+2}{(x^2+x+1)^2} ) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb");
+   "\\int  (\\frac{3x+2}{(x^2+x+1)^2} ) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb, "",
    "Integrates building blocks IIb.  ",
-   "\\int  (\frac{3x+2}{(x^2+x+1)^2} ) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb");
+   "\\int  (\\frac{3x+2}{(x^2+x+1)^2} ) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks, "",
    "Attempts to split an integral of a rational function into building block integrals.  ",
-   "\\int  \frac{1}{x(x+1)} dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks");
+   "\\int  \\frac{1}{x(x+1)} dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks");
 
 
 /*  this->AddOperationInnerHandler
@@ -438,7 +438,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("MakeVirtualWeylGroupRepresentation", CalculatorFunctionsWeylGroup::innerMakeVirtualWeylRep, "",
    "Convert a representation into virtual one.",
-   "MakeVirtualWeylGroupRepresentation{}(WeylGroupNaturalRep{}(B_3))", true, false)
+   "MakeVirtualWeylGroupRepresentation{}(WeylGroupNaturalRep{}(B_3))", true, true)
    ;
   this->AddOperationInnerHandler
   ("MinPoly", CalculatorFunctionsGeneral::innerMinPolyMatrix, "",

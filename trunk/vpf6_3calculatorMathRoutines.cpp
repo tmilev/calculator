@@ -4648,26 +4648,34 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
   SemisimpleLieAlgebra* ownerSS;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input, ownerSS))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
-  std::string outMainDisplayPatH, outMainPatH;
-  std::stringstream outSltwoPath, outSltwoDisplayPath;
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
+  ownerSS->ComputeFolderNames(*theCommands.theGlobalVariableS);
   FormatExpressions theFormat;
-  ownerSS->ComputeFolderNames(*theCommands.theGlobalVariableS, theFormat);
-  outSltwoPath << ownerSS->PhysicalNameMainOutputFolder << "sl2s/";
+  theFormat.flagUseHTML=true;
+  theFormat.flagUseLatex=false;
+  theFormat.flagUsePNG=true;
+  theFormat.PathPhysicalCurrentOutputFolder=ownerSS->PhysicalNameMainOutputFolder;
+  theFormat.PathDisplayCurrentOutputFolder=ownerSS->DisplayNameMainOutputFolder;
+
+  theFormat.PathDisplayNameCalculator=theCommands.theGlobalVariableS->DisplayNameCalculatorWithPath;
+  theFormat.PathDisplayServerBaseFolder=theCommands.theGlobalVariableS->DisplayPathServerBase;
+
+  std::stringstream outSltwoPath, outSltwoDisplayPath;
+  std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile, outSltwoFileDisplayName;
+  outSltwoPath << theFormat.PathPhysicalCurrentOutputFolder << "sl2s/";
   outSltwoDisplayPath << ownerSS->DisplayNameMainOutputFolder << "sl2s/";
-  bool NeedToCreateFolders=(!FileOperations::FileExists(outMainPatH) || !FileOperations::FileExists(outSltwoPath.str()));
+  outSltwoMainFile << outSltwoPath.str() << "sl2s.html";
+  outSltwoFileDisplayName << outSltwoDisplayPath.str() << "sl2s.html";
+  outRootHtmlFileName << ownerSS->PhysicalNameMainOutputFolder << "rootSubalgebras.html";
+  outRootHtmlDisplayName << ownerSS->DisplayNameMainOutputFolder << "rootSubalgebras.html";
+  bool NeedToCreateFolders=!FileOperations::FileExists(outSltwoMainFile.str());
   if (NeedToCreateFolders)
   { std::stringstream outMkDirCommand1, outMkDirCommand2;
-    outMkDirCommand1 << "mkdir " << outMainPatH;
+    outMkDirCommand1 << "mkdir " << ownerSS->PhysicalNameMainOutputFolder;
     outMkDirCommand2 << "mkdir " << outSltwoPath.str();
     theCommands.theGlobalVariableS->System(outMkDirCommand1.str());
     theCommands.theGlobalVariableS->System(outMkDirCommand2.str());
   }
-  std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile, outSltwoFileDisplayName;
-  outSltwoMainFile << outSltwoPath.str() << "sl2s.html";
-  outSltwoFileDisplayName << outSltwoDisplayPath.str() << "sl2s.html";
-  outRootHtmlFileName << outMainPatH << "rootSubalgebras.html";
-  outRootHtmlDisplayName << outMainDisplayPatH << "rootSubalgebras.html";
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit =1000;
   if (!FileOperations::FileExists(outSltwoMainFile.str()) || !FileOperations::FileExists(outRootHtmlFileName.str()))
     MustRecompute=true;

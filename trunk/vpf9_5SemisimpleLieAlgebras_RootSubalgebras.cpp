@@ -1084,7 +1084,7 @@ void rootSubalgebra::ToHTML(int index, FormatExpressions* theFormat, SltwoSubalg
   std::fstream output;
   std::stringstream myPath;
   if (theFormat!=0)
-    myPath << theFormat->PathPhysicalOutputFolder;
+    myPath << theFormat->PathPhysicalCurrentOutputFolder;
   myPath << "rootSubalgebra_" << index+1 << ".html";
   FileOperations::OpenFileCreateIfNotPresent(output, myPath.str(), false, true, false);
   output << "<html><title>" << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName() << " root subalgebra of type "
@@ -2605,7 +2605,7 @@ void rootSubalgebras::SortDescendingOrderBySSRank()
 
 void rootSubalgebras::ToHTML(FormatExpressions* theFormat, SltwoSubalgebras* Sl2s)
 { MacroRegisterFunctionWithName("rootSubalgebras::ToHTML");
-  std::string physicalPathSAs= theFormat==0 ? "": theFormat->PathPhysicalOutputFolder;
+  std::string physicalPathSAs= theFormat==0 ? "": theFormat->PathPhysicalCurrentOutputFolder;
   std::string MyPathPhysical=physicalPathSAs+"rootSubalgebras.html";
   std::fstream output;
   FileOperations::OpenFileCreateIfNotPresent(output, MyPathPhysical, false, true, false);

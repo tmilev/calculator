@@ -442,7 +442,7 @@ bool XML::GetStringEnclosedIn(const std::string& theTagName, std::string& output
   { numCharRead++;
     charReader.push_back(this->theString[this->positionInString]);
     bool tagStarted=false;
-  if (this->theString[this->positionInString]==theOpenTagWithSymbols[positionInOpenTag])
+    if (this->theString[this->positionInString]==theOpenTagWithSymbols[positionInOpenTag])
     { positionInOpenTag++;
       if (positionInOpenTag>=lengthOpenTag)
       { charReader="";

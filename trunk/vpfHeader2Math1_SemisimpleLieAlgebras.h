@@ -42,7 +42,7 @@ public:
   static unsigned int HashFunction(const SemisimpleLieAlgebra& input)
   { return input.theWeyl.HashFunction();
   }
-  void ComputeFolderNames(GlobalVariables& theGlobalVariables, FormatExpressions& outputFormat);
+  void ComputeFolderNames(GlobalVariables& theGlobalVariables);
   template <class coefficient>
   void GetGenericElementCartan(ElementSemisimpleLieAlgebra<Polynomial<coefficient> >& output, int indexFirstVar=0)
   { output.MakeZero();

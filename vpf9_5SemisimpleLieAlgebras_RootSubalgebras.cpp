@@ -2614,8 +2614,11 @@ void rootSubalgebras::ToHTML(FormatExpressions* theFormat, SltwoSubalgebras* Sl2
     << ". Possible explanations. 1. File permissions - can I write in that folder? 2. Programming error (less likely). "
     << crash;
   }
-  output << "<html><title> Root subsystems of " << this->theSubalgebras[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) << "</title>";
-  output << "<meta name=\"keywords\" content=\"" << this->theSubalgebras[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0])
+  output << "<html><title> Root subsystems of "
+  << this->theSubalgebras[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0])
+  << "</title>";
+  output << "<meta name=\"keywords\" content=\""
+  << this->theSubalgebras[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0])
   << " root subsystems, root subsystems, root systems";
   if (this->GetOwnerWeyl().theDynkinType.HasExceptionalComponent())
     output << ", exceptional Lie algebra";

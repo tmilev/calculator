@@ -68,9 +68,9 @@ void Calculator::initPredefinedInnerFunctions()
    "Runs a big bad automated test of all built in functions against a set of known good results. ",
    "AutomatedTest{}(0)", false);
   this->AddOperationInnerHandler
-  ("AutomatedTestSetGoodKnownCopy", this->innerAutomatedTestSetKnownGoodCopy, "",
+  ("AutomatedTestSetKnownGoodCopy", this->innerAutomatedTestSetKnownGoodCopy, "",
    "Runs a big bad automated test of all built in functions to create a file containing a set of known good results.",
-   "AutomatedTestSetGoodKnownCopy 0", false);
+   "AutomatedTestSetKnownGoodCopy 0", false);
   this->AddOperationInnerHandler
   ("!", CalculatorFunctionsGeneral::innerFactorial, "",
    "Factorial function. ",

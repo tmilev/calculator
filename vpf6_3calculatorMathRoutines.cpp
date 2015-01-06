@@ -4072,6 +4072,7 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
     if (!isGood)
       return output.MakeError("Error: the third argument of innerSplitGenericGenVermaTensorFD must be a list of small non-negative integers.", theCommands);
   }
+  theSSalgebra->flagHasNilradicalOrder=true;
   if (!theCommands.innerHWVCommon(theCommands, hwvGenVerma, highestWeightFundCoords, selParSel1, hwContext, theSSalgebra))
     return false;
   if (hwvGenVerma.IsError())

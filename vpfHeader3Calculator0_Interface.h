@@ -1559,7 +1559,7 @@ public:
 //  { return theCommands.innerSSLieAlgebra(theCommands, input, output, false);
 //  }
   static bool fSplitFDpartB3overG2old(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool fSplitFDpartB3overG2inner(Calculator& theCommands, branchingData& theG2B3Data, Expression& output);
+  static bool innerSplitFDpartB3overG2inner(Calculator& theCommands, branchingData& theG2B3Data, Expression& output);
   static bool innerDrawWeightSupportWithMults(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDrawWeightSupport(Calculator& theCommands, const Expression& input, Expression& output);
   static bool fLittelmannOperator(Calculator& theCommands, const Expression& input, Expression& output);

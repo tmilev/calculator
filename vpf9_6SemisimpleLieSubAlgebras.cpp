@@ -138,21 +138,21 @@ int SemisimpleSubalgebras::GetDisplayIndexFromActual(int ActualIndexSubalgebra)c
 
 std::string SemisimpleSubalgebras::GetPhysicalFileNameSubalgebra(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { std::stringstream out;
-  out << (theFormat==0 ? "./" : theFormat->PathPhysicalOutputFolder);
+  out << (theFormat==0 ? "./" : theFormat->PathPhysicalCurrentOutputFolder);
   out << CGI::CleanUpForFileNameUse(this->owneR->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
   return out.str();
 }
 
 std::string SemisimpleSubalgebras::GetPhysicalFileNameFKFTNilradicals(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { std::stringstream out;
-  out << (theFormat==0 ? "./" : theFormat->PathPhysicalOutputFolder);
+  out << (theFormat==0 ? "./" : theFormat->PathPhysicalCurrentOutputFolder);
   out << CGI::CleanUpForFileNameUse(this->owneR->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << "_FKFTnilradicals.html";
   return out.str();
 }
 
 std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebraAbsolute(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { std::stringstream out;
-  out << (theFormat==0 ? "./" : theFormat->PathDisplayOutputFolder);
+  out << (theFormat==0 ? "./" : theFormat->PathDisplayCurrentOutputFolder);
   out << CGI::CleanUpForFileNameUse(this->owneR->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
   return out.str();
 }
@@ -166,7 +166,7 @@ std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebraRelative(int Actu
 
 std::string SemisimpleSubalgebras::GetDisplayFileNameFKFTNilradicals(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { std::stringstream out;
-  out << (theFormat==0 ? "./" : theFormat->PathDisplayOutputFolder);
+  out << (theFormat==0 ? "./" : theFormat->PathDisplayCurrentOutputFolder);
   out << CGI::CleanUpForFileNameUse(this->owneR->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << "_FKFTnilradicals.html";
   return out.str();
 }
@@ -234,7 +234,13 @@ void SemisimpleSubalgebras::WriteReportToFiles(const std::string& inputSSsubalge
 void SemisimpleSubalgebras::ComputeFolderNames(FormatExpressions& inputFormat)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeFolderNames");
   this->CheckConsistency();
-  this->owneR->ComputeFolderNames(*this->theGlobalVariables, this->currentFormat);
+  this->owneR->ComputeFolderNames(*this->theGlobalVariables);
+  this->currentFormat.flagUseHTML=true;
+  this->currentFormat.flagUseLatex=false;
+  this->currentFormat.flagUsePNG=true;
+  this->currentFormat.PathPhysicalCurrentOutputFolder=this->owneR->PhysicalNameMainOutputFolder;
+  this->currentFormat.PathDisplayCurrentOutputFolder=this->owneR->DisplayNameMainOutputFolder;
+
   this->DisplayNameMainFile1NoPath= "SemisimpleSubalgebras_" + CGI::CleanUpForFileNameUse(this->owneR->theWeyl.theDynkinType.ToString()) + ".html";
   this->DisplayNameMainFile2FastLoadNoPath= "SemisimpleSubalgebras_FastLoad_" + CGI::CleanUpForFileNameUse(this->owneR->theWeyl.theDynkinType.ToString()) + ".html";
   this->DisplayNameMainFile1WithPath=this->owneR->DisplayNameMainOutputFolder+this->DisplayNameMainFile1NoPath;
@@ -2860,8 +2866,8 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
   bool useHtml=true;
   bool useLatex=false;
   if (theFormat!=0)
-    if (theFormat->PathPhysicalOutputFolder!="")
-    { physicalPath=theFormat->PathPhysicalOutputFolder+ "sl2s/";
+    if (theFormat->PathPhysicalCurrentOutputFolder!="")
+    { physicalPath=theFormat->PathPhysicalCurrentOutputFolder+ "sl2s/";
       htmlPathServer=theFormat->PathDisplayNameCalculator + "sl2s/";
       //usePNG=theFormat->flagUsePNG;
     }
@@ -3291,8 +3297,8 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
   bool useHtml=theFormat==0 ? true : theFormat->flagUseHTML;
   bool useLatex=theFormat==0 ? true : theFormat->flagUseLatex;
   std::string physicalPath, displayPath;
-  physicalPath=theFormat==0 ? "../" : theFormat->PathPhysicalOutputFolder;
-  displayPath=theFormat==0 ? "../" : theFormat->PathDisplayOutputFolder;
+  physicalPath=theFormat==0 ? "../" : theFormat->PathPhysicalCurrentOutputFolder;
+  displayPath=theFormat==0 ? "../" : theFormat->PathDisplayCurrentOutputFolder;
   out << "Number of sl(2) subalgebras " << this->size << ".\n";
   std::stringstream out2;
   out2 << "<br>Length longest root ambient algebra squared/4= " << this->GetOwnerWeyl().GetLongestRootLengthSquared()/4 << "<br>";
@@ -3395,10 +3401,10 @@ std::string SltwoSubalgebras::ToString(FormatExpressions* theFormat)
 
 void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SltwoSubalgebras::ToHTML");
-  std::string physicalPathSAs= theFormat==0 ? "": theFormat->PathPhysicalOutputFolder;
-  std::string htmlPathServerSAs= theFormat==0 ? "": theFormat->PathDisplayOutputFolder;
-  std::string physicalPathSl2s= theFormat==0 ? "": theFormat->PathPhysicalOutputFolder+"sl2s/";
-  std::string htmlPathServerSl2s= theFormat==0 ? "": theFormat->PathDisplayOutputFolder+"sl2s/";
+  std::string physicalPathSAs= theFormat==0 ? "": theFormat->PathPhysicalCurrentOutputFolder;
+  std::string htmlPathServerSAs= theFormat==0 ? "": theFormat->PathDisplayCurrentOutputFolder;
+  std::string physicalPathSl2s= theFormat==0 ? "": theFormat->PathPhysicalCurrentOutputFolder+"sl2s/";
+  std::string htmlPathServerSl2s= theFormat==0 ? "": theFormat->PathDisplayCurrentOutputFolder+"sl2s/";
   std::string PathDisplayServerBaseFolder= theFormat==0 ? "../../": theFormat->PathDisplayServerBaseFolder;
   std::string DisplayNameCalculator= theFormat==0 ? "" : theFormat->PathDisplayNameCalculator;
   ProgressReport theReport(theGlobalVariables);

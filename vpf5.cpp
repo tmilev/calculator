@@ -2044,12 +2044,12 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
   Vector<Polynomial<Rational> > inputPolForm;
   Expression startContext;
   if (!theCommands.GetVectorFromFunctionArguments(input, inputPolForm, &startContext, 2, CalculatorBuiltInTypeConversions::innerPolynomial<Rational>))
-  { theCommands.Comments << "<hr>Failed to extract polynomials from arguments of " << input.ToString();
+  { theCommands << "<hr>Failed to extract polynomials from arguments of " << input.ToString();
     return false;
   }
   int letterDiff=0, letterPol=0;
   if (!inputPolForm[0].IsOneLetterFirstDegree(&letterDiff) || !inputPolForm[1].IsOneLetterFirstDegree(&letterPol) || letterDiff==letterPol)
-  { theCommands.Comments << "<hr>Failed to get different one-variable polynomials from input.  " << input.ToString();
+  { theCommands << "<hr>Failed to get different one-variable polynomials from input.  " << input.ToString();
     return false;
   }
   Expression endContext;
@@ -2093,7 +2093,8 @@ bool Calculator::ReadTestStrings(HashedList<std::string, MathRoutines::hashStrin
 bool Calculator::WriteTestStrings(List<std::string>& inputCommands, List<std::string>& inputResults)
 { MacroRegisterFunctionWithName("Calculator::WriteTestStrings");
   for (int i=0; i<inputCommands.size; i++)
-    this->theTestFile << "<input>" << inputCommands[i] << "</input>" << "<output>" << inputResults[i] << "</output>\n\n";
+    this->theTestFile << "Command " << i+1 << ": <input>" << inputCommands[i] << "</input>" << "<output>" << inputResults[i] << "</output>\n\n";
+  this->theTestFile.flush();
   return true;
 }
 

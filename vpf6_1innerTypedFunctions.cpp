@@ -339,7 +339,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(Calcula
     return false;
   ElementWeylGroup<WeylGroup> theElt=inputConverted[1].GetValue<ElementWeylGroup<WeylGroup> >();
   if (theElt.owner!=&theWeight.owner->theWeyl)
-  { theCommands.Comments << "<hr>Possible user input error: attempting to apply Weyl group element to weight corresponding to different Weyl group.";
+  { theCommands << "<hr>Possible user input error: attempting to apply Weyl group element to weight corresponding to different Weyl group.";
     return false;
   }
   Vector<Polynomial<Rational> > theWeightSimpleCoords=theElt.owner->GetSimpleCoordinatesFromFundamental(theWeight.weightFundamentalCoordS);
@@ -373,7 +373,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(Calculator& theCo
   input[1].CheckConsistency();
   input[2].CheckConsistency();
   if (!inputConverted[1].ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >(leftE))
-  { //theCommands.Comments << "<hr>Failed to convert " << inputConverted[1].ToString() << " to element of Universal enveloping algebra. ";
+  { //theCommands << "<hr>Failed to convert " << inputConverted[1].ToString() << " to element of Universal enveloping algebra. ";
     return false;
   }
 //  stOutput << " ... and got my ue out!";

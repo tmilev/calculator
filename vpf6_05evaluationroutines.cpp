@@ -96,7 +96,7 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
           if (innerFun.theFunction(theCommands, input[1], output))
           { output.CheckConsistency();
             if (theCommands.flagLogEvaluatioN)
-              theCommands.Comments << "<hr>Built-in substitution: " << innerFun.ToStringSummary()
+              theCommands << "<hr>Built-in substitution: " << innerFun.ToStringSummary()
               << "<br>Rule stack id: " << theCommands.RuleStackCacheIndex;
             return true;
           }

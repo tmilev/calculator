@@ -23,13 +23,13 @@ bool CalculatorBuiltInTypeConversions::innerStoreChevalleyGenerator(Calculator& 
 template <>
 bool CalculatorBuiltInTypeConversions::DeSerializeMonGetContext<ChevalleyGenerator>(Calculator& theCommands, const Expression& input, Expression& outputContext)
 { if (!input.IsListNElements(4))
-  { theCommands.Comments << "<hr>Failed to get ChevalleyGenerator context: input is not a sequence of 4 elements, instead it has "
+  { theCommands << "<hr>Failed to get ChevalleyGenerator context: input is not a sequence of 4 elements, instead it has "
     << input.children.size << " elements, i.e., is " << input.ToString() << "</hr>";
     return false;
   }
   DynkinType theType;
   if (!CalculatorBuiltInTypeConversions::DeSerializeMonCollection(theCommands, input[2], theType))
-  { theCommands.Comments << "<hr>Failed to load dynkin type from " << input[2].ToString() << ".";
+  { theCommands << "<hr>Failed to load dynkin type from " << input[2].ToString() << ".";
     return false;
   }
   SemisimpleLieAlgebra tempAlgebra;
@@ -57,11 +57,11 @@ bool CalculatorBuiltInTypeConversions::DeSerializeMon(Calculator& theCommands, c
 //  stOutput.flush();
   int AlgIndex=inputContext.ContextGetIndexAmbientSSalg();
   if (AlgIndex==-1)
-  { theCommands.Comments << "<hr>Can't load Chevalley generator: failed extract ambient algebra index from context " << inputContext.ToString();
+  { theCommands << "<hr>Can't load Chevalley generator: failed extract ambient algebra index from context " << inputContext.ToString();
     return false;
   }
   if (!input.IsListNElements(4))
-  { theCommands.Comments << "<hr>Can't load Chevalley generator: input is not a list of 4 elements, instead it has " << input.children.size
+  { theCommands << "<hr>Can't load Chevalley generator: input is not a list of 4 elements, instead it has " << input.children.size
     << " elements, i.e., is " << input.ToString();
     return false;
   }
@@ -71,7 +71,7 @@ bool CalculatorBuiltInTypeConversions::DeSerializeMon(Calculator& theCommands, c
     return false;
   std::string theOperation;
   if (!input[1].IsAtom(&theOperation))
-  { theCommands.Comments << "<hr>Can't load Chevalley generator: second argument is not an operation, instead it is " << input[1].ToString();
+  { theCommands << "<hr>Can't load Chevalley generator: second argument is not an operation, instead it is " << input[1].ToString();
     return false;
   }
   outputMon.owneR=&theCommands.theObjectContainer.theLieAlgebras.GetElement(AlgIndex);
@@ -82,12 +82,12 @@ bool CalculatorBuiltInTypeConversions::DeSerializeMon(Calculator& theCommands, c
   else if (theOperation=="getChevalleyGenerator")
     generatorIndex=outputMon.owneR->GetGeneratorFromDisplayIndex(generatorIndex);
   else
-  { theCommands.Comments << "<hr>Failed to load Chevalley generator: the generator name was  " << theOperation
+  { theCommands << "<hr>Failed to load Chevalley generator: the generator name was  " << theOperation
     << "; it must either be getCartanGenerator or getChevalleyGenerator.";
     return false;
   }
   if (generatorIndex<0 || generatorIndex>=outputMon.owneR->GetNumGenerators())
-  { theCommands.Comments << "<hr>Failed to load Chevalley generator: final generator index is " << generatorIndex << ". ";
+  { theCommands << "<hr>Failed to load Chevalley generator: final generator index is " << generatorIndex << ". ";
     return false;
   }
   outputMon.theGeneratorIndex=generatorIndex;
@@ -107,16 +107,16 @@ bool CalculatorBuiltInTypeConversions::innerStoreObject(Calculator& theCommands,
   currentGen.theGeneratorIndex=input.generatorsIndices[0];
   bool tempNonConst;
   if (!CalculatorBuiltInTypeConversions::innerStoreObject(theCommands, currentGen, baseE, theContext, &tempNonConst))
-  { theCommands.Comments << "<hr>Failed to store " << currentGen.ToString() << ". ";
+  { theCommands << "<hr>Failed to store " << currentGen.ToString() << ". ";
     return false;
   }
   if (!input.Powers[0].IsEqualToOne())
   { if (!CalculatorBuiltInTypeConversions::innerStoreObject(theCommands, input.Powers[0], exponentE, theContext))
-    { theCommands.Comments << "<hr>Failed to store the exponent " << input.Powers[0].ToString();
+    { theCommands << "<hr>Failed to store the exponent " << input.Powers[0].ToString();
       if (theContext!=0)
-        theCommands.Comments << " with context " << theContext->ToString();
+        theCommands << " with context " << theContext->ToString();
       else
-        theCommands.Comments << " <b>without context!</b>";
+        theCommands << " <b>without context!</b>";
       return false;
     }
     output.MakeXOX(theCommands, theCommands.opThePower(), baseE, exponentE);
@@ -125,12 +125,12 @@ bool CalculatorBuiltInTypeConversions::innerStoreObject(Calculator& theCommands,
   for (int i=1; i<input.generatorsIndices.size; i++)
   { currentGen.theGeneratorIndex=input.generatorsIndices[i];
     if (!CalculatorBuiltInTypeConversions::innerStoreObject(theCommands, currentGen, baseE, theContext, &tempNonConst))
-    { theCommands.Comments << "<hr>Failed to store " << currentGen.ToString() << ". ";
+    { theCommands << "<hr>Failed to store " << currentGen.ToString() << ". ";
       return false;
     }
     if (!input.Powers[0].IsEqualToOne())
     { if (!CalculatorBuiltInTypeConversions::innerStoreObject(theCommands, input.Powers[0], exponentE, theContext))
-      { theCommands.Comments << "<hr>Failed to store the exponent " << input.Powers[0].ToString() << " with context "
+      { theCommands << "<hr>Failed to store the exponent " << input.Powers[0].ToString() << " with context "
         << theContext->ToString();
         return false;
       }
@@ -185,38 +185,38 @@ bool CalculatorBuiltInTypeConversions::DeSerializeMon<DynkinSimpleType>(Calculat
       scaleE.AssignValue(1, theCommands);
   } else if (input.children.size==3)
   { if (!input.StartsWith(theCommands.opThePower(),3))
-    { theCommands.Comments << "<hr>Failed to extract rank, type, first co-root length - input has 3 children but was not exponent."
+    { theCommands << "<hr>Failed to extract rank, type, first co-root length - input has 3 children but was not exponent."
       << " Input is " << input.ToString() << ".";
       return false;
     }
     scaleE=input[2];
     if (!input[1].IsListNElements(2))
-    { theCommands.Comments << "<hr>Failed to extract rank, type from " << input[1].ToString() << ". The expression does not have two children.";
+    { theCommands << "<hr>Failed to extract rank, type from " << input[1].ToString() << ". The expression does not have two children.";
       return false;
     }
     rankE=input[1][1];
     typeLetterE=input[1][0];
   } else
-  { theCommands.Comments << "<hr>Failed to extract rank, type, first co-root length from expression " << input.ToString();
+  { theCommands << "<hr>Failed to extract rank, type, first co-root length from expression " << input.ToString();
     return false;
   }
   Rational theScale;
   if (!scaleE.IsOfType<Rational>(&theScale))
-  { theCommands.Comments << "<hr>Failed to extract first co-root length: expression " << scaleE.ToString()
+  { theCommands << "<hr>Failed to extract first co-root length: expression " << scaleE.ToString()
     << " is not a rational number.";
     return false;
   }
   if (theScale<=0)
-  { theCommands.Comments << "<hr>Couldn't extract first co-root length: " << theScale.ToString() << " is non-positive.";
+  { theCommands << "<hr>Couldn't extract first co-root length: " << theScale.ToString() << " is non-positive.";
     return false;
   }
   std::string theTypeName;
   if (!typeLetterE.IsAtom(&theTypeName))
-  { theCommands.Comments << "I couldn't extract a type letter from " << typeLetterE.ToString();
+  { theCommands << "I couldn't extract a type letter from " << typeLetterE.ToString();
     return false;
   }
   if (theTypeName.size()!=1)
-  { theCommands.Comments << "<hr>Error while extracting Dynkin simple type: The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G."
+  { theCommands << "<hr>Error while extracting Dynkin simple type: The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G."
     << "Instead, it is " << theTypeName + ". Error encountered while processing " << input.ToString();
     return false;
   }
@@ -231,24 +231,24 @@ bool CalculatorBuiltInTypeConversions::DeSerializeMon<DynkinSimpleType>(Calculat
   if (theWeylLetter=='f') theWeylLetter='F';
   if (theWeylLetter=='g') theWeylLetter='G';
   if (!(theWeylLetter=='A' || theWeylLetter=='B' || theWeylLetter=='C' || theWeylLetter=='D' || theWeylLetter=='E' || theWeylLetter=='F' || theWeylLetter=='G'))
-  { theCommands.Comments << "The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G; error while processing " << input.ToString();
+  { theCommands << "The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G; error while processing " << input.ToString();
     return false;
   }
   int theRank;
   if (!rankE.IsSmallInteger(&theRank))
-  { theCommands.Comments << "I wasn't able to extract rank from " << input.ToString();
+  { theCommands << "I wasn't able to extract rank from " << input.ToString();
     return false;
   }
   if (theRank<1 || theRank>20)
-  { theCommands.Comments << "<hr>The rank of a simple Lie algebra must be between 1 and 20; error while processing " << input.ToString();
+  { theCommands << "<hr>The rank of a simple Lie algebra must be between 1 and 20; error while processing " << input.ToString();
     return false;
   }
   if (theWeylLetter=='E' &&(theRank>8 || theRank<3))
-  { theCommands.Comments << "<hr>Type E must have rank 6,7 or 8 ";
+  { theCommands << "<hr>Type E must have rank 6,7 or 8 ";
     return false;
   }
   if (theWeylLetter=='D' &&(theRank<3))
-  { theCommands.Comments << "<hr>Type D is expected to have rank 4 or more, your input was of rank " << theRank << ". ";
+  { theCommands << "<hr>Type D is expected to have rank 4 or more, your input was of rank " << theRank << ". ";
     return false;
   }
   //stOutput << "here i am again 3. ";
@@ -323,7 +323,7 @@ bool CalculatorBuiltInTypeConversions::innerLoadDynkinType(Calculator& theComman
     if (!theType.theCoeffs[i].IsSmallInteger(&theMultiplicity))
       theMultiplicity=-1;
     if (theMultiplicity<0)
-    { theCommands.Comments << "<hr>Failed to convert the coefficient " << theType.theCoeffs[i] << " of " << theType[i].ToString()
+    { theCommands << "<hr>Failed to convert the coefficient " << theType.theCoeffs[i] << " of " << theType[i].ToString()
       << " to a small positive integer. ";
       return false;
     }
@@ -372,7 +372,7 @@ bool CalculatorBuiltInTypeConversions::innerLoadSSLieAlgebra(Calculator& theComm
     theSSalgebra.ComputeChevalleyConstants(theCommands.theGlobalVariableS);
     Expression tempE;
     theCommands.innerPrintSSLieAlgebra(theCommands, output, tempE, false);
-    theCommands.Comments << tempE.GetValue<std::string>();
+    theCommands << tempE.GetValue<std::string>();
   }
   //theSSalgebra.TestForConsistency(*theCommands.theGlobalVariableS);
   return true;
@@ -460,27 +460,27 @@ bool CalculatorBuiltInTypeConversions::innerStoreObject(Calculator& theCommands,
 bool CalculatorBuiltInTypeConversions::innerLoadFromObject(Calculator& theCommands, const Expression& input, slTwoSubalgebra& output)
 { MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerLoadFromObject slTwoSubalgebra");
   if (!input.IsListNElements(3))
-  { theCommands.Comments << "<hr>input of innerLoadFromObject has " << input.children.size << " children, 3 expected. ";
+  { theCommands << "<hr>input of innerLoadFromObject has " << input.children.size << " children, 3 expected. ";
     return false;
   }
   const Expression& theF=input[1];
   const Expression& theE=input[2];
   ElementSemisimpleLieAlgebra<Rational> eltF, eltE;
   if (!CalculatorBuiltInTypeConversions::DeSerializeMonCollection(theCommands, theF, eltF))
-  { theCommands.Comments << "<hr>Failed to extract f element while loading sl(2) subalgebra<hr>";
+  { theCommands << "<hr>Failed to extract f element while loading sl(2) subalgebra<hr>";
     return false;
   }
   if (!CalculatorBuiltInTypeConversions::DeSerializeMonCollection(theCommands, theE, eltE))
-  { theCommands.Comments << "<hr>Failed to extract e element while loading sl(2) subalgebra<hr>";
+  { theCommands << "<hr>Failed to extract e element while loading sl(2) subalgebra<hr>";
     return false;
   }
   if (eltE.IsEqualToZero() || eltF.IsEqualToZero())
-  { theCommands.Comments << "<hr>Failed to load sl(2) subalgebra: either e or f is equal to zero. e and f are: " << eltE.ToString()
+  { theCommands << "<hr>Failed to load sl(2) subalgebra: either e or f is equal to zero. e and f are: " << eltE.ToString()
     << ", " << eltF.ToString() << ". ";
     return false;
   }
   if (eltE.GetOwner()!=eltF.GetOwner())
-  { theCommands.Comments << "<hr>Failed to load sl(2): E and F element of sl(2) have different owners. More precisely, the owner of e is "
+  { theCommands << "<hr>Failed to load sl(2): E and F element of sl(2) have different owners. More precisely, the owner of e is "
     << eltE.GetOwner()->ToString() << " and the owner of f is " << eltF.GetOwner()->ToString();
     return false;
   }
@@ -501,7 +501,7 @@ bool CalculatorBuiltInTypeConversions::innerLoadSltwoSubalgebra(Calculator& theC
 { MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerLoadSltwoSubalgebra");
   slTwoSubalgebra tempSL2;
   if (!CalculatorBuiltInTypeConversions::innerLoadFromObject(theCommands, input, tempSL2))
-  { theCommands.Comments << "<hr>Failed to load sl(2) subalgebra. ";
+  { theCommands << "<hr>Failed to load sl(2) subalgebra. ";
     return false;
   }
   return output.AssignValue(tempSL2.ToString(), theCommands);
@@ -582,14 +582,14 @@ bool CalculatorBuiltInTypeConversions::innerStoreCandidateSA(Calculator& theComm
 bool CalculatorBuiltInTypeConversions::innerLoadCandidateSA(Calculator& theCommands, const Expression& input, Expression& output, CandidateSSSubalgebra& outputSubalgebra, SemisimpleSubalgebras& owner)
 { MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerLoadCandidateSA");
   if (!input.IsListNElements(4) && !input.IsListNElements(5))
-  { theCommands.Comments << "<hr>Failed to load candidate subalgebra: I expect to get a list of 4 or 5 children, but got one with "
+  { theCommands << "<hr>Failed to load candidate subalgebra: I expect to get a list of 4 or 5 children, but got one with "
     << input.children.size << " children instead.<hr> ";
     return false;
   }
   outputSubalgebra.owner=&owner;
   Expression tempE;
   if (!CalculatorBuiltInTypeConversions::DeSerializeMonCollection(theCommands, input[2], outputSubalgebra.theWeylNonEmbeddeD.theDynkinType))
-  { theCommands.Comments << "<hr> Failed to load dynkin type of candidate subalgebra from "<< input[2].ToString() << "<hr>";
+  { theCommands << "<hr> Failed to load dynkin type of candidate subalgebra from "<< input[2].ToString() << "<hr>";
     return false;
   }
   //stOutput << "<br> input[2]: " << input[2].ToString();
@@ -602,11 +602,11 @@ bool CalculatorBuiltInTypeConversions::innerLoadCandidateSA(Calculator& theComma
   int theRank=owner.owneR->GetRank();
   Matrix<Rational> theHs;
   if (!theCommands.GetMatrix(input[3], theHs, 0, theRank, 0))
-  { theCommands.Comments << "<hr>Failed to load matrix of Cartan elements for candidate subalgebra of type " << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType << "<hr>";
+  { theCommands << "<hr>Failed to load matrix of Cartan elements for candidate subalgebra of type " << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType << "<hr>";
     return false;
   }
   if (theHs.NumRows!=outputSubalgebra.theWeylNonEmbeddeD.GetDim())
-  { theCommands.Comments << "<hr>Failed to load cartan elements: I expected " << outputSubalgebra.theWeylNonEmbeddeD.GetDim() << " elements, but failed to get them.";
+  { theCommands << "<hr>Failed to load cartan elements: I expected " << outputSubalgebra.theWeylNonEmbeddeD.GetDim() << " elements, but failed to get them.";
     return false;
   }
   List<int> theRanks, theMults;
@@ -628,7 +628,7 @@ bool CalculatorBuiltInTypeConversions::innerLoadCandidateSA(Calculator& theComma
   Matrix<Rational> tempMat1;
   outputSubalgebra.theHs.GetGramMatrix(tempMat1, &owner.GetSSowner().theWeyl.CartanSymmetric);
   if (!(outputSubalgebra.theWeylNonEmbeddeD.CartanSymmetric== tempMat1))
-  { theCommands.Comments << "<hr>Failed to load semisimple subalgebra: the gram matrix of the elements of its cartan is "
+  { theCommands << "<hr>Failed to load semisimple subalgebra: the gram matrix of the elements of its cartan is "
     << tempMat1.ToString() << " but it should be " << outputSubalgebra.theWeylNonEmbeddeD.CartanSymmetric.ToString() << "instead.";
     return false;
   }
@@ -640,7 +640,7 @@ bool CalculatorBuiltInTypeConversions::innerLoadCandidateSA(Calculator& theComma
     ElementSemisimpleLieAlgebra<AlgebraicNumber> curGenAlgebraic;
     for (int i=1; i<theGensE.children.size; i++)
     { if (!CalculatorBuiltInTypeConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(theCommands, theGensE[i], curGenAlgebraic, *owner.owneR))
-      { theCommands.Comments << "<hr>Failed to load semisimple Lie algebra element from expression " << theGensE[i].ToString() << ". ";
+      { theCommands << "<hr>Failed to load semisimple Lie algebra element from expression " << theGensE[i].ToString() << ". ";
         return false;
       }
       if (i%2 ==1)
@@ -658,14 +658,14 @@ bool CalculatorBuiltInTypeConversions::innerLoadCandidateSA(Calculator& theComma
   outputSubalgebra.theWeylNonEmbeddeD.ComputeRho(true);
   outputSubalgebra.ComputeSystem(false, true);
   if (!outputSubalgebra.ComputeChar(true))
-  { theCommands.Comments << "<hr>Failed to load semisimple Lie subalgebra: the ambient Lie algebra does not decompose properly over the candidate subalgebra. ";
+  { theCommands << "<hr>Failed to load semisimple Lie subalgebra: the ambient Lie algebra does not decompose properly over the candidate subalgebra. ";
     return false;
 //    outputSubalgebra.theCharNonPrimalFundCoords.MakeZero(owner.owneR);
 //    outputSubalgebra.theCharFundamentalCoordsRelativeToCartan.MakeZero(owner.owneR);
   }
   if (input.children.size==5)
     if (!outputSubalgebra.CheckGensBracketToHs())
-    { theCommands.Comments << "<hr>Lie brackets of generators do not equal the desired elements of the Cartan. ";
+    { theCommands << "<hr>Lie brackets of generators do not equal the desired elements of the Cartan. ";
       return false;
     }
 
@@ -678,13 +678,13 @@ bool CalculatorBuiltInTypeConversions::innerLoadSemisimpleSubalgebras(Calculator
   Expression input=inpuT;
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
   if (input.children.size!= 3)
-  { theCommands.Comments << "<hr>Error loading semisimple subalgebras: I expect input with 3 children, got "
+  { theCommands << "<hr>Error loading semisimple subalgebras: I expect input with 3 children, got "
     << input.children.size << " children instead.<hr>";
     return false;
   }
   SemisimpleLieAlgebra* ownerSS;
   if (!CalculatorBuiltInTypeConversions::innerLoadSSLieAlgebra(theCommands, input[1], output, &ownerSS))
-  { theCommands.Comments << "<hr>Error loading semisimple subalgebras: failed to extract ambient semisimple Lie algebra. ";
+  { theCommands << "<hr>Error loading semisimple subalgebras: failed to extract ambient semisimple Lie algebra. ";
     return false;
   }
   SemisimpleSubalgebras tempSAs;
@@ -714,7 +714,7 @@ bool CalculatorBuiltInTypeConversions::innerLoadSemisimpleSubalgebras(Calculator
     theReport.Report(reportStream.str());
     CandidateSSSubalgebra tempCandidate;
     if (!CalculatorBuiltInTypeConversions::innerLoadCandidateSA(theCommands, theCandidatesE[i], tempE, tempCandidate, theSAs))
-    { theCommands.Comments << "<hr>Error loading candidate subalgebra: failed to load candidate number " << i << " of type "
+    { theCommands << "<hr>Error loading candidate subalgebra: failed to load candidate number " << i << " of type "
       << tempCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ". <hr>";
       return false;
     }
@@ -906,7 +906,7 @@ bool CalculatorBuiltInTypeConversions::innerLoadElementSemisimpleLieAlgebraRatio
       } else
         isHonestElementUE=false;
       if (!isGood)
-      { theCommands.Comments << "<hr>Failed to convert summand " << singleChevGenE.ToString() << " to Chevalley generator of "
+      { theCommands << "<hr>Failed to convert summand " << singleChevGenE.ToString() << " to Chevalley generator of "
         << owner.GetLieAlgebraName();
         return false;
       }

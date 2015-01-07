@@ -165,7 +165,7 @@ bool Calculator::fAnimateLittelmannPaths(Calculator& theCommands, const Expressi
   Vector<Rational> theWeightInSimpleCoords;
   theWeightInSimpleCoords = theSSowner->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
   //stOutput << "The fundamental coords: " << theWeight.ToString();
-  theCommands.Comments << "<br>Function fAnimateLittelmannPaths: your input in simple coords: " << theWeightInSimpleCoords.ToString();
+  theCommands << "<br>Function fAnimateLittelmannPaths: your input in simple coords: " << theWeightInSimpleCoords.ToString();
   LittelmannPath thePath;
   thePath.MakeFromWeightInSimpleCoords(theWeightInSimpleCoords, theSSowner->theWeyl);
   return output.AssignValue(thePath.GenerateOrbitAndAnimate(*theCommands.theGlobalVariableS), theCommands);
@@ -182,7 +182,7 @@ bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, 
   ElementUniversalEnveloping<RationalFunctionOld> theCasimir;
   theCasimir.MakeCasimir(theSSowner);
 //  theCasimir.Simplify(*theCommands.theGlobalVariableS);
-  theCommands.Comments << "Context Lie algebra: " << ". The coefficient: " << theSSowner.theWeyl.GetKillingDivTraceRatio().ToString()
+  theCommands << "Context Lie algebra: " << ". The coefficient: " << theSSowner.theWeyl.GetKillingDivTraceRatio().ToString()
   <<  ". The Casimir element of the ambient Lie algebra. ";
   Expression contextE;
   contextE.MakeContextSSLieAlg(theCommands, theSSowner);
@@ -918,12 +918,12 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
   theCommands.theObjectContainer.theCategoryOmodules[theModIndex];
   theMod.GetOwner().flagHasNilradicalOrder=true;
   std::stringstream out;
-  theCommands.Comments << "<hr>Time elapsed before making B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
+  theCommands << "<hr>Time elapsed before making B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
   double timeAtStart=theCommands.theGlobalVariableS->GetElapsedSeconds();
   theMod.SplitFDpartOverFKLeviRedSubalg
   (theG2B3Data.theHmm, theG2B3Data.selSmallParSel, *theCommands.theGlobalVariableS, &theG2B3Data.outputEigenWords,
    &theG2B3Data.outputWeightsFundCoordS, &theG2B3Data.leviEigenSpace, 0);
-   theCommands.Comments << "<br>Time needed to make B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds()-timeAtStart;
+   theCommands << "<br>Time needed to make B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds()-timeAtStart;
   //out << report;
 //  int numVars=theWeightFundCoords[0].NumVars;
   theG2B3Data.g2Weights.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
@@ -1936,7 +1936,7 @@ bool Calculator::innerInterpolatePoly(Calculator& theCommands, const Expression&
 { MacroRegisterFunctionWithName("Calculator::innerInterpolatePoly");
   Matrix<Rational> pointsOfInterpoly;
   if (!theCommands.GetMatriXFromArguments(input, pointsOfInterpoly, 0, 2))
-  { theCommands.Comments << "<hr>Failed to extract points of interpolation from " << input.ToString();
+  { theCommands << "<hr>Failed to extract points of interpolation from " << input.ToString();
     return false;
   }
   Polynomial<Rational> interPoly;

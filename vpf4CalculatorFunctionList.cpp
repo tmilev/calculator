@@ -1285,7 +1285,7 @@ this->AddOperationInnerHandler
   ("LoadSemisimpleSubalgebras", CalculatorBuiltInTypeConversions::innerLoadSemisimpleSubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Loads a semisimpleSubalgebra from expression. ",
-   "Load{}(Store {}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)))", true, false)
+   "LoadSemisimpleSubalgebras {}(EmbedSemisimpleInSemisimple{}(G_2, B_3))", true, false)
    ;
   this->AddOperationInnerHandler
   ("LoadSltwoSubalgebra", CalculatorBuiltInTypeConversions::innerLoadSltwoSubalgebra, "",

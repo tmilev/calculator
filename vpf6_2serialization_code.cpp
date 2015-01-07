@@ -338,6 +338,7 @@ bool CalculatorBuiltInTypeConversions::innerLoadSSLieAlgebra(Calculator& theComm
   DynkinType theDynkinType;
 //  stOutput << "<br>Now I'm here!";
 //  stOutput.flush();
+  *outputPointer=0;
   if(!CalculatorBuiltInTypeConversions::innerLoadDynkinType(theCommands, input, theDynkinType))
   { //  stOutput << "got to error";
   //stOutput.flush();
@@ -682,14 +683,21 @@ bool CalculatorBuiltInTypeConversions::innerLoadSemisimpleSubalgebras(Calculator
     << input.children.size << " children instead.<hr>";
     return false;
   }
-  SemisimpleLieAlgebra* ownerSS;
+  SemisimpleLieAlgebra* ownerSS=0;
   if (!CalculatorBuiltInTypeConversions::innerLoadSSLieAlgebra(theCommands, input[1], output, &ownerSS))
   { theCommands << "<hr>Error loading semisimple subalgebras: failed to extract ambient semisimple Lie algebra. ";
     return false;
   }
+  if (ownerSS==0)
+    crash << "Loaded zero subalgebra " << crash;
   SemisimpleSubalgebras tempSAs;
   tempSAs.owneR=ownerSS;
+  stOutput << "here be i!";
+  for (int i =0; i<theCommands.theObjectContainer.theSSsubalgebras.size; i++)
+    if (theCommands.theObjectContainer.theSSsubalgebras[i].owneR==0)
+      crash << "semisimple subalgebra with index " << i << " has zero owner. " << crash;
   SemisimpleSubalgebras& theSAs=theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSAs)];
+  stOutput << "here be i! - 2";
   theSAs.initHookUpPointers
   (*ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
    &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);

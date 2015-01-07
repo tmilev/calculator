@@ -314,7 +314,8 @@ public:
   std::string GetPhysicalFileNameFKFTNilradicals(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
   std::string GetDisplayFileNameFKFTNilradicals(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
   bool operator==(const SemisimpleSubalgebras& other)
-  { if (this->owneR==other.owneR)
+  { MacroRegisterFunctionWithName("SemisimpleSubalgebras::operator==");
+    if (this->owneR==other.owneR)
       return true;
     if (this->owneR==0 || other.owneR==0)
       crash << "This is a programming error: comparing non-initialized Semisimple Lie Subalgebras. " << crash;

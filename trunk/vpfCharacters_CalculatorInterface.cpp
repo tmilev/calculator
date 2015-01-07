@@ -753,13 +753,13 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable(Calculat
     return false;
   WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
   if (theGroup.GetDim()>8)
-  { theCommands.Comments << "Computing character table disabled for rank>=8, modify file " << __FILE__
+  { theCommands << "Computing character table disabled for rank>=8, modify file " << __FILE__
     << " line "  << __LINE__ << " to change that. ";
     return false;
   }
   std::stringstream reportStream;
   theGroup.ComputeOrLoadCharacterTable(theCommands.theGlobalVariableS, &reportStream);
-  theCommands.Comments << reportStream.str();
+  theCommands << reportStream.str();
   return output.AssignValue(theGroup, theCommands);
 }
 
@@ -771,13 +771,13 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS(Calculator& th
   WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
 //  stOutput << "got ere4!";
   if (theGroup.GetDim()>8)
-  { theCommands.Comments << "Conjugacy classes computation disabled for rank >8. Modify source code "
+  { theCommands << "Conjugacy classes computation disabled for rank >8. Modify source code "
     << "file " << __FILE__ << " line " << __LINE__ << " and rebuild the calculator to change that.";
     return false;
   }
   std::stringstream out;
   theGroup.ComputeOrLoadConjugacyClasses(theCommands.theGlobalVariableS, &out);
-  theCommands.Comments << out.str();
+  theCommands << out.str();
   return output.AssignValue(theGroup, theCommands);
 }
 
@@ -787,14 +787,14 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements
     return false;
   WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
   if (theGroup.GetDim()>7)
-  { theCommands.Comments << "<hr>Loaded Dynkin type " << theGroup.theDynkinType.ToString() << " of rank " << theGroup.GetDim() << " but I've been told "
+  { theCommands << "<hr>Loaded Dynkin type " << theGroup.theDynkinType.ToString() << " of rank " << theGroup.GetDim() << " but I've been told "
     << "not to compute when the rank is larger than 7. ";
     return false;
   }
   double timeStart1=theCommands.theGlobalVariableS->GetElapsedSeconds();
   theGroup.ComputeCCfromAllElements(theCommands.theGlobalVariableS);
   //std::stringstream out;
-  theCommands.Comments << "<hr> Computed conjugacy classes of " << theGroup.ToString() << " in " << theCommands.theGlobalVariableS->GetElapsedSeconds()-timeStart1
+  theCommands << "<hr> Computed conjugacy classes of " << theGroup.ToString() << " in " << theCommands.theGlobalVariableS->GetElapsedSeconds()-timeStart1
   << " second(s). ";
   return output.AssignValue(theGroup, theCommands);
 }
@@ -806,7 +806,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives
   WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
   theGroup.CheckConsistency();
   if (theGroup.GetDim()>8)
-  { theCommands.Comments << "<hr>Loaded Dynkin type " << theGroup.theDynkinType.ToString() << " of rank " << theGroup.GetDim() << " but I've been told "
+  { theCommands << "<hr>Loaded Dynkin type " << theGroup.theDynkinType.ToString() << " of rank " << theGroup.GetDim() << " but I've been told "
     << "not to compute when the rank is larger than 8. ";
     return false;
   }
@@ -816,7 +816,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives
 //  theGroup.ComputeCCRepresentatives(theCommands.theGlobalVariableS);
   theGroup.ComputeCCSizesAndRepresentatives(theCommands.theGlobalVariableS);
   //std::stringstream out;
-  theCommands.Comments << "<hr> Computed conjugacy classes representatives of "
+  theCommands << "<hr> Computed conjugacy classes representatives of "
   << theGroup.theDynkinType.ToString() << " in " << theCommands.theGlobalVariableS->GetElapsedSeconds()-timeStart1
   << " second(s). ";
   return output.AssignValue(theGroup, theCommands);
@@ -1194,7 +1194,7 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(Calculator& 
     return false;
   WeylGroup& theWeyl=output.GetValueNonConst<WeylGroup>();
   if (theWeyl.GetDim()>8)
-  { theCommands.Comments << "<hr>Computing sign signatures restricted up to rank 8.";
+  { theCommands << "<hr>Computing sign signatures restricted up to rank 8.";
     return false;
   }
   std::stringstream out;
@@ -1242,22 +1242,22 @@ bool CalculatorFunctionsWeylGroup::innerDecomposeWeylRep(Calculator& theCommands
 bool CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup");
   if (input.children.size!=3)
-  { theCommands.Comments << "<hr>IsOuterAuto expects 2 arguments.";
+  { theCommands << "<hr>IsOuterAuto expects 2 arguments.";
     return false;
   }
   DynkinType theType;
   if (!CalculatorBuiltInTypeConversions::innerLoadDynkinType(theCommands, input[1], theType))
-  { theCommands.Comments << "<hr>Failed to get Dynkin type from argument. " << input[1].ToString();
+  { theCommands << "<hr>Failed to get Dynkin type from argument. " << input[1].ToString();
     return false;
   }
   Matrix<Rational> theMat;
   if (!input[2].IsOfType<Matrix<Rational> >(&theMat))
     if (!theCommands.GetMatrix(input[2], theMat))
-    { theCommands.Comments << "<hr>Failed to get matrix from argument. " << input[2].ToString();
+    { theCommands << "<hr>Failed to get matrix from argument. " << input[2].ToString();
       return false;
     }
   if (theMat.NumCols!=theMat.NumRows || theMat.NumCols!=theType.GetRank())
-  { theCommands.Comments << "<hr>Extracted Dynkin type " << theType.ToString() << " is of rank " << theType.GetRank()
+  { theCommands << "<hr>Extracted Dynkin type " << theType.ToString() << " is of rank " << theType.GetRank()
     << " but extracted linear operator has " << theMat.NumCols << " columns and " << theMat.NumRows << " rows.";
     return false;
   }
@@ -1417,7 +1417,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(Calculator& theCommands
     return false;
   SemisimpleLieAlgebra* theSSowner;
   if (!CalculatorBuiltInTypeConversions::innerSSLieAlgebra(theCommands, input[1], theSSowner))
-  { theCommands.Comments << "<hr>Failed to load semisimple Lie algebra";
+  { theCommands << "<hr>Failed to load semisimple Lie algebra";
     return false;
   }
   std::string theCoordsString;
@@ -1425,7 +1425,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(Calculator& theCommands
   if (isGood)
     isGood= (theCoordsString=="epsilon") || (theCoordsString=="fundamental") || (theCoordsString=="simple");
   if (!isGood)
-  { theCommands.Comments << "<hr>The third argument of MakeWeight is bad: must be one of the keywords: epsilon, fundamental, simple. ";
+  { theCommands << "<hr>The third argument of MakeWeight is bad: must be one of the keywords: epsilon, fundamental, simple. ";
     return false;
   }
   int theWeightIndex=-1;
@@ -1469,7 +1469,7 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight(Calculator& theComma
   Weight<Polynomial<Rational> > resultWeight;
   SemisimpleLieAlgebra* theSSowner;
   if (!CalculatorBuiltInTypeConversions::innerSSLieAlgebra(theCommands, input, theSSowner))
-  { theCommands.Comments << "<hr>Failed to load semisimple Lie algebra";
+  { theCommands << "<hr>Failed to load semisimple Lie algebra";
     return false;
   }
   Expression theContext;
@@ -1518,7 +1518,7 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(Calculator& theCommands,
     return output.MakeError("First argument must be a small integer, serving as upper bound for the set.", theCommands);
   if (upperLimit <=0)
   { upperLimit=10000;
-    theCommands.Comments << "The upper computation limit I got was 0 or less; I replaced it with the default value " << upperLimit << ".";
+    theCommands << "The upper computation limit I got was 0 or less; I replaced it with the default value " << upperLimit << ".";
   }
   HashedList<Expression> theSet;
   theSet.SetExpectedSize(input.children.size-2);
@@ -1550,7 +1550,7 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(Calculator& theCommands,
         i=theSet.size; break;
       }
     }
-  theCommands.Comments << "<hr>Generated a list of " << theSet.size << " elements";
+  theCommands << "<hr>Generated a list of " << theSet.size << " elements";
   output.reset(theCommands, theSet.size+1);
   output.AddChildAtomOnTop(theCommands.opSequence());
   for (int i=0; i<theSet.size; i++)

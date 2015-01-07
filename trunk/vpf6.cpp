@@ -835,7 +835,11 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
   out << "</table>";
   out << "<br>Multiplications needed to embed generators: " << totalMultiplications << ". ";
   out << "<br>Additions needed to embed generators: " << totalAdditions << ". ";
-  out << "<br>Total time to embed generators: " << totalTime << " seconds. ";
+  out << "<br>Total time to embed generators: see comments. ";
+  //please keep this report in the comments section for reasons of reproducibility of the
+  //string output!
+  theCommands << "<hr>Total time to embed generators invoked by command: " << input.ToString()
+  << ": <br>" << totalTime << " seconds. ";
   out << reportCalculatorCommands.str();
   out << reportFourierTransformedCalculatorCommands.str();
   out << "<br>" << latexReport.str();
@@ -985,7 +989,7 @@ bool Calculator::innerHWVCommon
   if (!theMod.flagIsInitialized)
   { bool isGood=theMod.MakeFromHW(*owner, highestWeightFundCoords, selectionParSel, *theCommands.theGlobalVariableS, RFOne, RFZero, &report);
     if (Verbose)
-      theCommands.Comments << theMod.ToString();
+      theCommands << theMod.ToString();
     if (!isGood)
       return output.MakeError("Error while generating highest weight module. See comments for details. ", theCommands);
   }
@@ -1041,7 +1045,7 @@ bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression
   if (numRows<=0 || numCols<=0)
     return false;
   if (numRows>1000 || numCols>1000)
-  { theCommands.Comments << "Max number of rows/columns is 1000. You requested " << numRows << " rows and " << numCols << " columns.<br>";
+  { theCommands << "Max number of rows/columns is 1000. You requested " << numRows << " rows and " << numCols << " columns.<br>";
     return false;
   }
   output.reset(theCommands, numRows+1);
@@ -1489,7 +1493,7 @@ bool Calculator::StandardIsDenotedBy(Calculator& theCommands, const Expression& 
     return false;
   const Expression& withNotation=input[2];
   const Expression& theNotation=input[1];
-  theCommands.Comments << "<br>Registering notation: globally, " << withNotation.ToString() << " will be denoted by "
+  theCommands << "<br>Registering notation: globally, " << withNotation.ToString() << " will be denoted by "
   << theNotation.ToString();
   theCommands.theObjectContainer.ExpressionNotation.AddOnTop(theNotation.ToString());
   theCommands.theObjectContainer.ExpressionWithNotation.AddOnTop(withNotation);
@@ -1762,7 +1766,7 @@ bool Expression::MakeIdMatrixExpressions(int theDim, Calculator& inputBoss)
 
 bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::outerPlus");
-//  theCommands.Comments << "<hr><hr>processing outer plus with input: " << input.Lispify();
+//  theCommands << "<hr><hr>processing outer plus with input: " << input.Lispify();
   if (!input.StartsWith(theCommands.opPlus()))
     return false;
   MonomialCollection<Expression, Rational> theSum;

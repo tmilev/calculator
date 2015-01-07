@@ -714,13 +714,13 @@ bool Calculator::innerDeterminantPolynomial(Calculator& theCommands, const Expre
   Matrix<Polynomial<Rational> > matPol;
   Expression theContext;
   if (!theCommands.GetMatrix(input, matPol, &theContext, -1, CalculatorBuiltInTypeConversions::innerPolynomial<Rational>))
-  { theCommands.Comments << "<hr>Failed to convert the input to matrix of polynomials. ";
+  { theCommands << "<hr>Failed to convert the input to matrix of polynomials. ";
     return false;
   }
   if (matPol.NumRows!=matPol.NumCols)
     return output.MakeError("<hr>Failed to compute determinant: matrix is non-square. ", theCommands);
   if (matPol.NumRows>8)
-  { theCommands.Comments << "<hr>Failed to compute determinant: matrix is larger than 8 x 8, and your matrix had "
+  { theCommands << "<hr>Failed to compute determinant: matrix is larger than 8 x 8, and your matrix had "
     << matPol.NumRows << " rows. Note that you can compute determinant using the \\det function which does Gaussian elimination "
     << " and will work for large rational matrices. This function is meant to be used with honest polynomial entries. ";
     return false;
@@ -739,7 +739,7 @@ bool Calculator::innerMatrixRational(Calculator& theCommands, const Expression& 
     return true;
   }
   if (!theCommands.GetMatriXFromArguments(input, outputMat, 0, -1, 0))
-  { theCommands.Comments << "<br>Failed to get matrix of rationals. ";
+  { theCommands << "<br>Failed to get matrix of rationals. ";
     return false;
   }
   return output.AssignValue(outputMat, theCommands);
@@ -977,7 +977,7 @@ bool Calculator::innerCharacterSSLieAlgFD(Calculator& theCommands, const Express
 bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerConesIntersect");
   if (!input.IsListNElements(3))
-  { theCommands.Comments << "Function ConesIntersection expects 2 arguments, got " << input.children.size-1 << " instead. ";
+  { theCommands << "Function ConesIntersection expects 2 arguments, got " << input.children.size-1 << " instead. ";
     return false;
   }
   Matrix<Rational> coneNonStrictMatForm;
@@ -985,11 +985,11 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
   Vectors<Rational> coneNonStrictGens;
   Vectors<Rational> coneStrictGens;
   if (!theCommands.GetMatrix(input[1], coneStrictMatForm))
-  { theCommands.Comments << "Failed to extract matrix from the first argument, " << input[1].ToString();
+  { theCommands << "Failed to extract matrix from the first argument, " << input[1].ToString();
     return false;
   }
   if (!theCommands.GetMatrix(input[2], coneNonStrictMatForm))
-  { theCommands.Comments << "Failed to extract matrix from the second argument, " << input[2].ToString();
+  { theCommands << "Failed to extract matrix from the second argument, " << input[2].ToString();
     return false;
   }
   std::stringstream out;
@@ -1238,7 +1238,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
   Vectors<Rational> outputRoots;
   WeylGroup& theWeyl=theSSlieAlg->theWeyl;
   if (!theWeyl.theDynkinType.IsSimple())
-  { theCommands.Comments << "<hr>Function root subsystem works for simple ambient types only.";
+  { theCommands << "<hr>Function root subsystem works for simple ambient types only.";
     return false;
   }
   for (int i=2; i<input.children.size; i++)

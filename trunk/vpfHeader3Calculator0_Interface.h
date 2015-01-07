@@ -1763,7 +1763,7 @@ bool CalculatorBuiltInTypeConversions::innerStoreMonCollection
   { const templateMonomial& currentMon=input[i];
     bool isNonConst=true;
     if (!CalculatorBuiltInTypeConversions::innerStoreObject(theCommands, currentMon, termE, theContext, &isNonConst))
-    { theCommands.Comments << "<hr>Failed to store " << currentMon.ToString() << ". ";
+    { theCommands << "<hr>Failed to store " << currentMon.ToString() << ". ";
       return false;
     }
     if (!isNonConst)
@@ -1796,11 +1796,11 @@ bool CalculatorBuiltInTypeConversions::DeSerializeMonCollection(Calculator& theC
   finalContext.MakeEmptyContext(theCommands);
   for (int i=0; i<theSum.size(); i++)
   { if (!CalculatorBuiltInTypeConversions::DeSerializeMonGetContext<templateMonomial>(theCommands, theSum[i], currentContext))
-    { theCommands.Comments << "<hr>Failed to load monomial context from " << input.ToString() << "</hr>";
+    { theCommands << "<hr>Failed to load monomial context from " << input.ToString() << "</hr>";
       return false;
     }
     if (!finalContext.ContextMergeContexts(finalContext, currentContext, finalContext))
-    { theCommands.Comments << "<hr>Failed to merge monomial contexts: " << finalContext.ToString() << " and " << currentContext.ToString() << "</hr>";
+    { theCommands << "<hr>Failed to merge monomial contexts: " << finalContext.ToString() << " and " << currentContext.ToString() << "</hr>";
       return false;
     }
   }
@@ -1808,7 +1808,7 @@ bool CalculatorBuiltInTypeConversions::DeSerializeMonCollection(Calculator& theC
   templateMonomial tempM;
   for (int i=0; i<theSum.size(); i++)
   { if (!CalculatorBuiltInTypeConversions::DeSerializeMon(theCommands, theSum[i], finalContext, tempM))
-    { theCommands.Comments << "<hr>Failed to load monomial from " << theSum[i].ToString() << " using monomial context " << finalContext.ToString() << ". </hr>";
+    { theCommands << "<hr>Failed to load monomial from " << theSum[i].ToString() << " using monomial context " << finalContext.ToString() << ". </hr>";
       return false;
     }
     output.AddMonomial(tempM, theSum.theCoeffs[i]);

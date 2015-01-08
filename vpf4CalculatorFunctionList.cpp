@@ -1291,18 +1291,18 @@ this->AddOperationInnerHandler
   ("LoadSltwoSubalgebra", CalculatorBuiltInTypeConversions::innerLoadSltwoSubalgebra, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Loads an sl(2) subalgebra from expression. ",
-   "Load{}Serialization{}(LoadSltwoSubalgebra, 2 (Serialization{}(getChevalleyGenerator, (B)_{3}, -3))\\\\\
-    +Serialization{}(getChevalleyGenerator, (B)_{3}, -1)\\\\\
-    +3 (Serialization{}(getChevalleyGenerator, (B)_{3}, -2)), \
-    3 (Serialization{}(getChevalleyGenerator, (B)_{3}, 3))\\\\\
-    +6 (Serialization{}(getChevalleyGenerator, (B)_{3}, 1))\\\\\
-    +10/3 (Serialization{}(getChevalleyGenerator, (B)_{3}, 2)))", true, true)
+   "Load{}(LoadSltwoSubalgebra, 2 ((getChevalleyGenerator, (B)_{3}, -3))\\\\\
+    +(getChevalleyGenerator, (B)_{3}, -1)\\\\\
+    +3 ((getChevalleyGenerator, (B)_{3}, -2)), \
+    3 ((getChevalleyGenerator, (B)_{3}, 3))\\\\\
+    +6 ((getChevalleyGenerator, (B)_{3}, 1))\\\\\
+    +10/3 ((getChevalleyGenerator, (B)_{3}, 2)))", true, true)
    ;
   this->AddOperationInnerHandler
   ("LoadSlTwoSubalgebras", CalculatorBuiltInTypeConversions::innerLoadSltwoSubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Loads the sl(2) subalgebras of a semisimple Lie algebra from expression. ",
-   "Load{}(Store {}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)))", true, true)
+   "LoadSemisimpleSubalgebras{}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3))", true, true)
    ;
 
 //     this->AddOperationInnerHandler

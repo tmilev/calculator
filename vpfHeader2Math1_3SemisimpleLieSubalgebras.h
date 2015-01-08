@@ -198,9 +198,10 @@ public:
   void AdjustCentralizerAndRecompute(bool allowNonPolynomialSystemFailure);
   void ComputeRatioKillingsByComponent();
   void AddToSystem(const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& elementThatMustVanish);
-  bool CreateAndAddByExtendingBaseSubalgebra
+  bool CreateAndAddExtendBaseSubalgebra
   (const CandidateSSSubalgebra& baseSubalgebra, Vector<Rational>& newHrescaledToActByTwo, const DynkinType& theNewType, const List<int>& theRootInjection)
   ;
+  void computeHsScaledToActByTwo();
   void SetUpInjectionHs
   (const CandidateSSSubalgebra& baseSubalgebra, const DynkinType& theNewType, const List<int>& theRootInjection, Vector<Rational>* newHScaledToActByTwo=0);
   void EnumerateAllNilradicals(GlobalVariables* theGlobalVariables);

@@ -3484,14 +3484,14 @@ bool CalculatorFunctionsGeneral::innerGetCentralizerChainsSemisimpleSubalgebras(
   Expression currentChainE;
   out << theChains.size << " chains total. <br>";
   for (int i=0; i<theChains.size; i++)
-  { out << "<br>Chain " << i+1 << ": Load{}(Serialization{}(LoadSemisimpleSubalgebras, " << theSAs.owneR->theWeyl.theDynkinType.ToString() << ", (";
+  { out << "<br>Chain " << i+1 << ": LoadSemisimpleSubalgebras{}( " << theSAs.owneR->theWeyl.theDynkinType.ToString() << ", (";
     for (int j=0; j<theChains[i].size; j++)
     { CalculatorBuiltInTypeConversions::innerStoreCandidateSA(theCommands, theSAs.theSubalgebraCandidates[theChains[i][j]], currentChainE);
       out << currentChainE.ToString();
       if (j!=theChains[i].size-1)
         out << ", ";
     }
-    out << ") ) )";
+    out << ")  )";
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -3717,7 +3717,7 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
     << " of the subgroup X is written in the form Xw, where w is one of the elements below. "
     << "<a href=\""
     << theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath
-    << "2.tex\"> " <<  theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath << "2.tex</a>";
+    << "2.tex\"> " << theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath << "2.tex</a>";
     out << ", <iframe src=\"" << theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath
     << "2.png\" width=\"800\" height=\"600\"> "
     << theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath << "2.png</iframe>";

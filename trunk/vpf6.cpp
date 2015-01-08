@@ -923,8 +923,7 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   for (int k=0; k<this->theBilinearFormsAtEachWeightLevel.size; k++)
   { Matrix<coefficient>& theBF=this->theBilinearFormsAtEachWeightLevel[k];
     Matrix<coefficient>& theBFinverted= this->theBilinearFormsInverted[k];
-    out << "<hr>weight in simple coords: "
-    << this->theModuleWeightsSimpleCoords[k].ToString();
+    out << "<hr>weight in simple coords: " << this->theModuleWeightsSimpleCoords[k].ToString();
     List<MonomialUniversalEnveloping<coefficient> >& currentList=this->theGeneratingWordsGrouppedByWeight[k];
     for (int i=0; i<currentList.size; i++)
     { MonomialUniversalEnveloping<coefficient>& currentElt=currentList[i];

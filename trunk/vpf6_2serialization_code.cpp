@@ -338,7 +338,8 @@ bool CalculatorBuiltInTypeConversions::innerLoadSSLieAlgebra(Calculator& theComm
   DynkinType theDynkinType;
 //  stOutput << "<br>Now I'm here!";
 //  stOutput.flush();
-  *outputPointer=0;
+  if (outputPointer!=0)
+    *outputPointer=0;
   if(!CalculatorBuiltInTypeConversions::innerLoadDynkinType(theCommands, input, theDynkinType))
   { //  stOutput << "got to error";
   //stOutput.flush();
@@ -657,6 +658,8 @@ bool CalculatorBuiltInTypeConversions::innerLoadCandidateSA(Calculator& theComma
   outputSubalgebra.indexInOwnersOfNonEmbeddedMe=owner.theSubalgebrasNonEmbedded->AddNoRepetitionOrReturnIndexFirst(tempSA);
   owner.theSubalgebrasNonEmbedded->GetElement(outputSubalgebra.indexInOwnersOfNonEmbeddedMe).theWeyl.ComputeRho(true);
   outputSubalgebra.theWeylNonEmbeddeD.ComputeRho(true);
+  stOutput << "Before calling compute system, output subalgebra is: " << outputSubalgebra.ToString();
+  outputSubalgebra.computeHsScaledToActByTwo();
   outputSubalgebra.ComputeSystem(false, true);
   if (!outputSubalgebra.ComputeChar(true))
   { theCommands << "<hr>Failed to load semisimple Lie subalgebra: the ambient Lie algebra does not decompose properly over the candidate subalgebra. ";
@@ -684,7 +687,7 @@ bool CalculatorBuiltInTypeConversions::innerLoadSemisimpleSubalgebras(Calculator
     return false;
   }
   SemisimpleLieAlgebra* ownerSS=0;
-  if (!CalculatorBuiltInTypeConversions::innerLoadSSLieAlgebra(theCommands, input[1], output, &ownerSS))
+  if (!CalculatorBuiltInTypeConversions::innerSSLieAlgebra(theCommands, input[1], ownerSS))
   { theCommands << "<hr>Error loading semisimple subalgebras: failed to extract ambient semisimple Lie algebra. ";
     return false;
   }
@@ -692,12 +695,12 @@ bool CalculatorBuiltInTypeConversions::innerLoadSemisimpleSubalgebras(Calculator
     crash << "Loaded zero subalgebra " << crash;
   SemisimpleSubalgebras tempSAs;
   tempSAs.owneR=ownerSS;
-  stOutput << "here be i!";
+//  stOutput << "here be i!";
   for (int i =0; i<theCommands.theObjectContainer.theSSsubalgebras.size; i++)
     if (theCommands.theObjectContainer.theSSsubalgebras[i].owneR==0)
       crash << "semisimple subalgebra with index " << i << " has zero owner. " << crash;
   SemisimpleSubalgebras& theSAs=theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSAs)];
-  stOutput << "here be i! - 2";
+//  stOutput << "here be i! - 2";
   theSAs.initHookUpPointers
   (*ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
    &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);

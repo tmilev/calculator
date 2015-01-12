@@ -327,7 +327,6 @@ class Expression
   bool MakeIdMatrixExpressions(int theDim, Calculator& inputBoss);
   void MakeMonomialGenVerma(const MonomialGeneralizedVerma<RationalFunctionOld>& inputMon, Calculator& newBoss);
   void MakeElementTensorsGeneralizedVermas(const ElementTensorsGeneralizedVermas<RationalFunctionOld>& inputMon, Calculator& newBoss);
-  void MakeSerialization(const std::string& secondEntry, Calculator& theCommands, int numElementsToReserve=0);
   bool MakeAtom(int input, Calculator& newBoss)
   { this->reset(newBoss);
     this->theData=input;
@@ -344,7 +343,7 @@ class Expression
   bool MakeProducT(Calculator& owner, const Expression& left, const Expression& right);
   void MakeFunction(Calculator& owner, const Expression& theFunction, const Expression& theArgument);
   int GetNumCols()const;
-  bool MakeSequence(Calculator& owner, List<Expression>& inputSequence);
+  bool MakeSequence(Calculator& owner, List<Expression>* inputSequence=0);
   bool MakeXOX(Calculator& owner, int theOp, const Expression& left, const Expression& right);
   bool MakeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex=2);
   bool MakeSqrt(Calculator& owner, const Expression& argument, const Rational& radicalSuperIndex=2);
@@ -836,6 +835,10 @@ public:
   std::string ToString();
   std::string ElementToStringNonBoundVars();
   std::string ToStringFunctionHandlers();
+  //the purpose of the operator below is to save on typing when returning false with a comment.
+  operator bool()const
+  { return false;
+  }
   std::string ToStringLinksToCalculator(const DynkinType& theType, FormatExpressions* theFormat=0);
   std::string ToStringLinksToCalculatorDirectlyFromHD(const DynkinType& theType, FormatExpressions* theFormat=0);
   //void GetOutputFolders(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay, FormatExpressions& outputFormat);
@@ -1150,9 +1153,6 @@ public:
   }
   int opMonomialPoly()
   { return this->theAtoms.GetIndexIMustContainTheObject("MonomialPoly");
-  }
-  int opSerialization()
-  { return this->theAtoms.GetIndexIMustContainTheObject("Serialization");
   }
   int opCalculusPlot()
   { return this->theAtoms.GetIndexIMustContainTheObject("CalculusPlot");
@@ -1667,157 +1667,72 @@ public:
   void ParseFillDictionary(const std::string& input);
 };
 
-class CalculatorBuiltInTypeConversions
+class CalculatorConversions
 {
 public:
+  ////////////////////Conversion from expresssion tree/////////////////////////////////
+  //conversions from expression tree to type
+  static bool innerElementSemisimpleLieAlgebraRationalCoeffs
+  (Calculator& theCommands, const Expression& input, ElementSemisimpleLieAlgebra<Rational>& output,
+   SemisimpleLieAlgebra& owner);
+  static bool innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
+  (Calculator& theCommands, const Expression& input, ElementSemisimpleLieAlgebra<AlgebraicNumber>& output,
+   SemisimpleLieAlgebra& owner);
+  static bool innerDynkinType(Calculator& theCommands, const Expression& input, DynkinType& output);
+  static bool innerDynkinSimpleType(Calculator& theCommands, const Expression& input, DynkinSimpleType& output);
+  static bool innerSlTwoSubalgebraPrecomputed(Calculator& theCommands, const Expression& input, slTwoSubalgebra& output);
+  static bool innerLoadFromObject(Calculator& theCommands, const Expression& input, RationalFunctionOld& output);
+  //conversions from expression tree to expression containing type
   template <class coefficient>
   static bool innerPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
-
-  static bool innerLoadElementSemisimpleLieAlgebraRationalCoeffs(Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra& owner);
-  static bool innerLoadElementSemisimpleLieAlgebraRationalCoeffs
-  (Calculator& theCommands, const Expression& input, ElementSemisimpleLieAlgebra<Rational>& output, SemisimpleLieAlgebra& owner);
-  static bool innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
-  (Calculator& theCommands, const Expression& input, ElementSemisimpleLieAlgebra<AlgebraicNumber>& output, SemisimpleLieAlgebra& owner);
-  static bool innerStoreUE(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerStorePoly(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerStoreSemisimpleLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerStoreObject(Calculator& theCommands, const SemisimpleLieAlgebra& input, Expression& output);
-  static bool innerStoreObject(Calculator& theCommands, const RationalFunctionOld& input, Expression& output, Expression* theContext);
-  static bool innerStoreObject(Calculator& theCommands, const SltwoSubalgebras& input, Expression& output);
-  static bool innerStoreObject(Calculator& theCommands, const slTwoSubalgebra& input, Expression& output);
-  static bool innerStoreObject(Calculator& theCommands, const SemisimpleSubalgebras& input, Expression& output);
-  static bool innerStoreCandidateSA(Calculator& theCommands, const CandidateSSSubalgebra& input, Expression& output);
-  static bool innerStoreObject(Calculator& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output)
-  { return CalculatorBuiltInTypeConversions::innerStoreElementSemisimpleLieAlgebraRationals(theCommands, input, output);
-  }
-  static bool innerStoreElementSemisimpleLieAlgebraRationals
-  (Calculator& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output);
-  static bool innerStoreElementSemisimpleLieAlgebraAlgebraicNumbers
+  static bool innerElementUE
+  (Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra& inputOwner);
+  ////////////////////Conversion to expression tree/////////////////////////////////////
+  //converstion from type to expression tree.
+  template <class coefficient>
+  static bool innerExpressionFromPoly
+  (Calculator& theCommands, const Polynomial<coefficient>& input, Expression& output,
+   Expression* inputContext=0);
+  static bool innerExpressionFromRF
+  (Calculator& theCommands, const RationalFunctionOld& input, Expression& output,
+   Expression* inputContext=0);
+  static bool innerStoreSemisimpleSubalgebras
+  (Calculator& theCommands, const SemisimpleSubalgebras& input, Expression& output);
+  static bool innerExpressionFromElementSemisimpleLieAlgebraAlgebraicNumbers
   (Calculator& theCommands, const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input, Expression& output);
-  static bool innerStoreObject(Calculator& theCommands, const Rational& input, Expression& output, Expression* theContext=0);
-  static bool innerLoadFromObject(Calculator& theCommands, const Expression& input, slTwoSubalgebra& output);
-  static bool innerLoadFromObject(Calculator& theCommands, const Expression& input, ElementSemisimpleLieAlgebra<Rational>& output);
-  static bool innerLoadFromObject(Calculator& theCommands, const Expression& input, RationalFunctionOld& output);
-
-  static bool innerLoadSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra** outputPointer=0);
+  static bool innerExpressionFromUE
+  (Calculator& theCommands, const ElementUniversalEnveloping<RationalFunctionOld>& input,
+   Expression& output, Expression* inputContext=0);
+  static bool innerStoreCandidateSA(Calculator& theCommands, const CandidateSSSubalgebra& input, Expression& output);
+  static bool innerExpressionFromDynkinType(Calculator& theCommands, const DynkinType& input, Expression& output);
+  static bool innerExpressionFromDynkinSimpleType(Calculator& theCommands, const DynkinSimpleType& input, Expression& output);
+  static bool innerExpressionFromElementSemisimpleLieAlgebraRationals
+  (Calculator& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output);
+  //conversions from expression containing type to expression tree
+  static bool innerStoreSemisimpleLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSSLieAlgebra(Calculator& theCommands, const Expression& input, SemisimpleLieAlgebra*& output);
-
-  static bool innerLoadCandidateSA
+  static bool innerSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra*& outputSSalgebra);
+  static bool innerCandidateSAPrecomputed
   (Calculator& theCommands, const Expression& input, Expression& output, CandidateSSSubalgebra& outputPointer, SemisimpleSubalgebras& owner);
-  static bool innerLoadDynkinType(Calculator& theCommands, const Expression& input, DynkinType& output);
   static bool innerLoadWeylGroup(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerStoreRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerStoreSemisimpleSubalgebrasFromExpression(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerStoreSemisimpleSubalgebras(Calculator& theCommands, const SemisimpleSubalgebras& input, Expression& output);
-  static bool innerLoadSltwoSubalgebra(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerStoreSemisimpleSubalgebras
+  (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSlTwoSubalgebraPrecomputed(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLoadSltwoSubalgebras(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLoadSemisimpleSubalgebras(Calculator& theCommands, const Expression& inpuT, Expression& output);
-  static bool innerStoreChevalleyGenerator(Calculator& theCommands, const ChevalleyGenerator& input, Expression& output);
-  static bool innerStoreObject(Calculator& theCommands, const ChevalleyGenerator& input, Expression& output, Expression* theContext=0, bool* isNonConst=0)
-  { if (isNonConst!=0)
-      *isNonConst=true;
-    return CalculatorBuiltInTypeConversions::innerStoreChevalleyGenerator(theCommands, input, output);
-  }
-  static bool innerStoreObject
-  (Calculator& theCommands, const MonomialUniversalEnveloping<RationalFunctionOld>& input, Expression& output, Expression* theContext=0, bool* isNonConst=0);
-  static bool innerStoreObject(Calculator& theCommands, const MonomialP& input, Expression& output, Expression* theContext=0, bool* inputOutputNonConst=0);
-  static bool innerStoreObject(Calculator& theCommands, const DynkinSimpleType& input, Expression& output, Expression* theContext=0, bool* inputOutputNonConst=0);
-  template <class TemplateList>
-  static bool innerStoreObject(Calculator& theCommands, const TemplateList& input, Expression& output, Expression* theContext=0);
-  template <class templateMonomial, typename coefficient>
-  static bool innerStoreMonCollection
-  (Calculator& theCommands, const MonomialCollection<templateMonomial, coefficient>& input, Expression& output, Expression* theContext=0);
-  template <class templateMonomial, typename coefficient>
-  static bool DeSerializeMonCollection(Calculator& theCommands, const Expression& input, MonomialCollection<templateMonomial, coefficient>& output);
-  template <class templateMonomial>
-  static bool DeSerializeMonGetContext(Calculator& theCommands, const Expression& input, Expression& outputContext);
-  template <class templateMonomial>
-  static bool DeSerializeMon(Calculator& theCommands, const Expression& input, const Expression& inputContext, templateMonomial& outputMon);
+  static bool innerExpressionFromChevalleyGenerator
+  (Calculator& theCommands, const ChevalleyGenerator& input, Expression& output);
+  static bool innerExpressionFromMonomialUE
+  (Calculator& theCommands, const MonomialUniversalEnveloping<RationalFunctionOld>& input,
+   Expression& output, Expression* inputContext=0);
+  static bool innerExpressionFromBuiltInType(Calculator& theCommands, const Expression& input, Expression& output);
+  template <class coefficient>
+  static bool innerExpressionFromPoly(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerExpressionFromRF(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerExpressionFromUE(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerExpressionFrom(Calculator& theCommands, const MonomialP& input, Expression& output);
 };
-
-template <class TemplateList>
-bool CalculatorBuiltInTypeConversions::innerStoreObject(Calculator& theCommands, const TemplateList& input, Expression& output, Expression* theContext)
-{ output.reset(theCommands);
-  output.children.ReservE(input.size+1);
-  Expression tempE;
-  tempE.MakeAtom(theCommands.opSequence(), theCommands);
-  output.AddChildOnTop(tempE);
-  for (int i=0; i<input.size; i++)
-  { if (!CalculatorBuiltInTypeConversions::innerStoreObject(theCommands, input[i], tempE, theContext))
-      return false;
-    output.AddChildOnTop(tempE);
-  }
-  return true;
-}
-
-template <class templateMonomial, typename coefficient>
-bool CalculatorBuiltInTypeConversions::innerStoreMonCollection
-(Calculator& theCommands, const MonomialCollection<templateMonomial, coefficient>& input, Expression& output, Expression* theContext)
-{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::SerializeMonCollection");
-  Expression termE, coeffE, tempE;
-  if (input.IsEqualToZero())
-    return output.AssignValue(0, theCommands);
-  for (int i=input.size()-1; i>=0; i--)
-  { const templateMonomial& currentMon=input[i];
-    bool isNonConst=true;
-    if (!CalculatorBuiltInTypeConversions::innerStoreObject(theCommands, currentMon, termE, theContext, &isNonConst))
-    { theCommands << "<hr>Failed to store " << currentMon.ToString() << ". ";
-      return false;
-    }
-    if (!isNonConst)
-      termE.AssignValue(input.theCoeffs[i], theCommands);
-    else
-      if (input.theCoeffs[i]!=1)
-      { tempE=termE;
-        coeffE.AssignValue(input.theCoeffs[i], theCommands);
-        termE.MakeXOX(theCommands, theCommands.opTimes(), coeffE, tempE);
-      }
-    if (i==input.size()-1)
-      output=termE;
-    else
-    { tempE=output;
-      output.MakeXOX(theCommands, theCommands.opPlus(), termE, tempE);
-    }
-    output.CheckInitialization();
-  }
-//  stOutput << " output: " << output.ToString();
-  output.CheckInitialization();
-  return true;
-}
-
-template <class templateMonomial, typename coefficient>
-bool CalculatorBuiltInTypeConversions::DeSerializeMonCollection(Calculator& theCommands, const Expression& input, MonomialCollection<templateMonomial, coefficient>& output)
-{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::DeSerializeMonCollection");
-  MonomialCollection<Expression, Rational> theSum;
-  theCommands.CollectSummands(theCommands, input, theSum);
-  Expression currentContext, finalContext;
-  finalContext.MakeEmptyContext(theCommands);
-  for (int i=0; i<theSum.size(); i++)
-  { if (!CalculatorBuiltInTypeConversions::DeSerializeMonGetContext<templateMonomial>(theCommands, theSum[i], currentContext))
-    { theCommands << "<hr>Failed to load monomial context from " << input.ToString() << "</hr>";
-      return false;
-    }
-    if (!finalContext.ContextMergeContexts(finalContext, currentContext, finalContext))
-    { theCommands << "<hr>Failed to merge monomial contexts: " << finalContext.ToString() << " and " << currentContext.ToString() << "</hr>";
-      return false;
-    }
-  }
-  output.MakeZero();
-  templateMonomial tempM;
-  for (int i=0; i<theSum.size(); i++)
-  { if (!CalculatorBuiltInTypeConversions::DeSerializeMon(theCommands, theSum[i], finalContext, tempM))
-    { theCommands << "<hr>Failed to load monomial from " << theSum[i].ToString() << " using monomial context " << finalContext.ToString() << ". </hr>";
-      return false;
-    }
-    output.AddMonomial(tempM, theSum.theCoeffs[i]);
-//    if (input.ToString()=="(C)^{2}_{3}+(A)^{2}_{1}")
-//    { stOutput << "<br>Loading (C)^{2}_{3}+(A)^{2}_{1} to get monomial: " << tempM.ToString();
-//    }
-  }
-  return true;
-}
 
 template <class theType>
 bool Calculator::GetVectoR
@@ -1961,7 +1876,7 @@ bool Calculator::GetTypeWeight
   }
   const Expression& leftE=input[1];
   const Expression& middleE=input[2];
-  if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, leftE, ambientSSalgebra))
+  if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, leftE, ambientSSalgebra))
   { theCommands << "Error extracting Lie algebra from " << leftE.ToString();
     return false;
   }
@@ -1988,7 +1903,7 @@ bool Calculator::GetTypeHighestWeightParabolic
     ("Function TypeHighestWeightParabolic is expected to have two or three arguments: SS algebra type, highest weight, [optional] parabolic selection. ", theCommands);
   const Expression& leftE=input[1];
   const Expression& middleE=input[2];
-  if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, leftE, ambientSSalgebra))
+  if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, leftE, ambientSSalgebra))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   if (!theCommands.GetVectoR<coefficient>(middleE, outputWeightHWFundcoords, &outputHWContext, ambientSSalgebra->GetRank(), ConversionFun))
   { std::stringstream tempStream;

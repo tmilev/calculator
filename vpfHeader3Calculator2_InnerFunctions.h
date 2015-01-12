@@ -158,10 +158,6 @@ public:
   static bool innerIsConstant(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGaussianEliminationMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitToPartialFractionsOverAlgebraicReals(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerExpressionFromBuiltInType(Calculator& theCommands, const Expression& input, Expression& output);
-  template <class coefficient>
-  static bool innerExpressionFromPoly(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerExpressionFromRF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestIndicator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestStandardOutput(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRootSAsAndSltwos(Calculator& theCommands, const Expression& input, Expression& output, bool showSLtwos, bool MustRecompute);

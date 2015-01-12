@@ -1896,7 +1896,7 @@ public:
   { this->MakeZero(theContext);
     this->ratValue=theCoeff;
   }
-  bool IsConstant(Rational* whichConstant)const
+  bool IsConstant(Rational* whichConstant=0)const
   { if (this->expressionType!=this->typeRational)
       return false;
     if (whichConstant!=0)

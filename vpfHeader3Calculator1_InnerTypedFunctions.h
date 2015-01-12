@@ -122,8 +122,8 @@ bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& theCommands
 }
 
 template <class coefficient>
-bool CalculatorBuiltInTypeConversions::innerPolynomial(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::innerPolynomial");
+bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorConversions::innerPolynomial");
   RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
 //  stOutput << "Extracting poly from: " << input.ToString();
   if (theCommands.RecursionDeptH>theCommands.MaxRecursionDeptH)
@@ -145,7 +145,7 @@ bool CalculatorBuiltInTypeConversions::innerPolynomial(Calculator& theCommands, 
   { theComputed.reset(theCommands, input.children.size);
     theComputed.AddChildOnTop(input[0]);
     for (int i=1; i<input.children.size; i++)
-    { if (!CalculatorBuiltInTypeConversions::innerPolynomial<coefficient>(theCommands, input[i], theConverted))
+    { if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, input[i], theConverted))
       { theCommands << "<hr>Failed to extract polynomial from " << input[i].ToString();
         return false;
       }
@@ -160,7 +160,7 @@ bool CalculatorBuiltInTypeConversions::innerPolynomial(Calculator& theCommands, 
   int thePower=-1;
   if (input.StartsWith(theCommands.opThePower(), 3))
     if (input[2].IsSmallInteger(&thePower))
-    { if(!CalculatorBuiltInTypeConversions::innerPolynomial<coefficient>(theCommands, input[1], theConverted))
+    { if(!CalculatorConversions::innerPolynomial<coefficient>(theCommands, input[1], theConverted))
       { theCommands << "<hr>Failed to extract polynomial from " << input[1].ToString() << ".";
         return false;
       }

@@ -156,7 +156,7 @@ bool Calculator::fAnimateLittelmannPaths(Calculator& theCommands, const Expressi
   if (!input.IsListNElements(3))
     return output.MakeError("This function takes 2 arguments", theCommands);
   SemisimpleLieAlgebra* theSSowner=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input[1], theSSowner))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], theSSowner))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   Vector<Rational> theWeight;
   Expression tempContext(theCommands);
@@ -174,7 +174,7 @@ bool Calculator::fAnimateLittelmannPaths(Calculator& theCommands, const Expressi
 bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   SemisimpleLieAlgebra* theSSalg=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input, theSSalg))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input, theSSalg))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& theSSowner=*theSSalg;
   if (theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit<50)
@@ -196,7 +196,7 @@ bool Calculator::innerDrawWeightSupportWithMults(Calculator& theCommands, const 
   const Expression& typeNode=input[1];
   const Expression& hwNode=input[2];
   SemisimpleLieAlgebra* theSSalgpointer=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, typeNode, theSSalgpointer))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, typeNode, theSSalgpointer))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   Vector<Rational> highestWeightFundCoords;
   Expression theContext;
@@ -221,7 +221,7 @@ bool Calculator::innerDrawRootSystem(Calculator& theCommands, const Expression& 
   bool hasPreferredProjectionPlane= input.IsListNElements(4);
   const Expression& typeNode= hasPreferredProjectionPlane ? input[1] : input;
   SemisimpleLieAlgebra* theAlgPointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, typeNode, theAlgPointer))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, typeNode, theAlgPointer))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& theAlg=*theAlgPointer;
   WeylGroup& theWeyl=theAlg.theWeyl;
@@ -251,7 +251,7 @@ bool Calculator::innerDrawWeightSupport(Calculator& theCommands, const Expressio
   const Expression& typeNode=input[1];
   const Expression& hwNode=input[2];
   SemisimpleLieAlgebra* theAlgPointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, typeNode, theAlgPointer))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, typeNode, theAlgPointer))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& theAlg=*theAlgPointer;
   Vector<Rational> highestWeightFundCoords;
@@ -1233,7 +1233,7 @@ bool Calculator::fPrintAllPartitions(Calculator& theCommands, const Expression& 
     return output.MakeError("Function fPrintAllPartitions expects 2 arguments.", theCommands);
 
   SemisimpleLieAlgebra* theSSowner;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input[1], theSSowner))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], theSSowner))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
 
   SemisimpleLieAlgebra& theSSalgebra=*theSSowner;
@@ -1484,7 +1484,7 @@ bool Calculator::fLSPath(Calculator& theCommands, const Expression& input, Expre
   if (input.children.size<3)
     return output.MakeError("LSPath needs at least two arguments.", theCommands);
   SemisimpleLieAlgebra* theSSowner;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input[1], theSSowner))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], theSSowner))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
 
   SemisimpleLieAlgebra& ownerSSalgebra=*theSSowner;
@@ -1855,7 +1855,7 @@ bool Calculator::innerFactorPoly(Calculator& theCommands, const Expression& inpu
 { MacroRegisterFunctionWithName("Calculator::innerFactorPoly");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   //stOutput << "here I am .";
-  if (!theCommands.CallCalculatorFunction(CalculatorBuiltInTypeConversions::innerPolynomial<Rational>, input, output))
+  if (!theCommands.CallCalculatorFunction(CalculatorConversions::innerPolynomial<Rational>, input, output))
     return false;
   //stOutput << "here I am .";
   Expression theContext=output.GetContext();
@@ -2043,7 +2043,7 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
   //  return false;
   Vector<Polynomial<Rational> > inputPolForm;
   Expression startContext;
-  if (!theCommands.GetVectorFromFunctionArguments(input, inputPolForm, &startContext, 2, CalculatorBuiltInTypeConversions::innerPolynomial<Rational>))
+  if (!theCommands.GetVectorFromFunctionArguments(input, inputPolForm, &startContext, 2, CalculatorConversions::innerPolynomial<Rational>))
   { theCommands << "<hr>Failed to extract polynomials from arguments of " << input.ToString();
     return false;
   }

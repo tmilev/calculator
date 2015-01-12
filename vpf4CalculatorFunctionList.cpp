@@ -81,16 +81,16 @@ void Calculator::initPredefinedInnerFunctions()
    "Prints macdonald polynomials from a semisimple type. ",
    "printMacdonaldPolys{}(B_3)", true);
   this->AddOperationInnerHandler
-  ("MakeExpression", CalculatorFunctionsGeneral::innerExpressionFromBuiltInType, "",
+  ("MakeExpression", CalculatorConversions::innerExpressionFromBuiltInType, "",
    "Creates expression from built-in polynomial. ",
    "MakeExpression(Polynomial{}((x-2y+z-1)^2(x+y-z)));\
    \nMakeExpression( MakeRationalFunction(1/(1+x^2)));");
   this->AddOperationInnerHandler
-  ("Polynomial", CalculatorBuiltInTypeConversions::innerPolynomial<Rational>, "",
+  ("Polynomial", CalculatorConversions::innerPolynomial<Rational>, "",
    "Creates a polynomial expression with rational coefficients. ",
    "Polynomial{}((x-2y+z-1)^2(x+y-z));\nPolynomial{}(y^2)-(Polynomial{}y)^2");
   this->AddOperationInnerHandler
-  ("PolynomialAlgebraicNumbers", CalculatorBuiltInTypeConversions::innerPolynomial<AlgebraicNumber>, "",
+  ("PolynomialAlgebraicNumbers", CalculatorConversions::innerPolynomial<AlgebraicNumber>, "",
    "Creates a polynomial expression with algebraic number coefficients. ",
    "PolynomialAlgebraicNumbers{}((x+\\sqrt{2})^2 (\\sqrt{3}x-\\sqrt{5}));");
   this->AddOperationInnerHandler
@@ -232,9 +232,9 @@ void Calculator::initPredefinedInnerFunctions()
    "x_{{i}}=ElementWeylAlgebraPoly{}(\\partial_i, x_i); \n\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i);\n\\partial_1 x_1", true, false,
    "Calculator::innerPolynomialWithEWA");
   this->AddOperationInnerHandler
-  ("MakeRationalFunction", CalculatorBuiltInTypeConversions::innerRationalFunction, "",
+  ("MakeRationalFunction", CalculatorConversions::innerRationalFunction, "",
    "Creates a built-in rational function.",
-   "MakeRationalFunction{}(x_1+MakeRationalFunction{}x_1+x_2)", true, false, "CalculatorBuiltInTypeConversions::innerRationalFunction");
+   "MakeRationalFunction{}(x_1+MakeRationalFunction{}x_1+x_2)", true, false, "CalculatorConversions::innerRationalFunction");
   this->AddOperationInnerHandler
   ("MatrixRationals", this->innerMatrixRational,"",
    "Creates an internal c++ matrix structure from double list of rationals. \
@@ -729,7 +729,7 @@ void Calculator::initPredefinedInnerFunctions()
    debugging purposes. First argument =dimension, second argument=grading leve. ",
    "PrintNonNegativeVectorsLevel{}(4, 5);PrintNonNegativeVectorsLevel{}(4, 0); ");
   this->AddOperationInnerHandler
-  ("SemisimpleLieAlgebra", CalculatorBuiltInTypeConversions::innerSSLieAlgebra, "",
+  ("SemisimpleLieAlgebra", CalculatorConversions::innerSSLieAlgebra, "",
    "Creates a semisimple Lie algebra. The semisimple Lie algebra is given via its Dynkin type. A simple Dynkin type is given by\
     type letter with upper index equal to the inverse of the scale of the symmetric Cartan matrix and lower index equal to \
     the rank of the subalgebra. For example A^2_3 stands for type A_3 (sl (4)) with symmetric Cartan matrix scale equal to 1/2.\
@@ -1282,24 +1282,23 @@ this->AddOperationInnerHandler
    " Trys to find all embeddings of the first semisimple type into the second. Records all intermediate subalgebras. ",
    "EmbedSemisimpleInSemisimple{}(G^3_2, B_3);EmbedSemisimpleInSemisimple{}(G_2, B_3)", true, false);
   this->AddOperationInnerHandler
-  ("LoadSemisimpleSubalgebras", CalculatorBuiltInTypeConversions::innerLoadSemisimpleSubalgebras, "",
+  ("LoadSemisimpleSubalgebras", CalculatorConversions::innerLoadSemisimpleSubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Loads a semisimpleSubalgebra from expression. ",
    "LoadSemisimpleSubalgebras {}(EmbedSemisimpleInSemisimple{}(G_2, B_3))", true, false)
    ;
   this->AddOperationInnerHandler
-  ("LoadSltwoSubalgebra", CalculatorBuiltInTypeConversions::innerLoadSltwoSubalgebra, "",
+  ("SltwoSubalgebra", CalculatorConversions::innerSlTwoSubalgebraPrecomputed, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Loads an sl(2) subalgebra from expression. ",
-   "Load{}(LoadSltwoSubalgebra, 2 ((getChevalleyGenerator, (B)_{3}, -3))\\\\\
-    +(getChevalleyGenerator, (B)_{3}, -1)\\\\\
+   "SltwoSubalgebra(B_{3},g_  +(B)_{3}, -1)\\\\\
     +3 ((getChevalleyGenerator, (B)_{3}, -2)), \
     3 ((getChevalleyGenerator, (B)_{3}, 3))\\\\\
     +6 ((getChevalleyGenerator, (B)_{3}, 1))\\\\\
     +10/3 ((getChevalleyGenerator, (B)_{3}, 2)))", true, true)
    ;
   this->AddOperationInnerHandler
-  ("LoadSlTwoSubalgebras", CalculatorBuiltInTypeConversions::innerLoadSltwoSubalgebras, "",
+  ("LoadSlTwoSubalgebras", CalculatorConversions::innerLoadSltwoSubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Loads the sl(2) subalgebras of a semisimple Lie algebra from expression. ",
    "LoadSemisimpleSubalgebras{}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3))", true, true)
@@ -2305,7 +2304,6 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler()
 
   this->AddOperationNoRepetitionAllowed("MonomialCollection");
   this->AddOperationNoRepetitionAllowed("MonomialPoly");
-  this->AddOperationNoRepetitionAllowed("Serialization");
   this->AddOperationNoRepetitionAllowed("Melt");
   this->AddOperationNoRepetitionAllowed("Bind");
   this->AddOperationNoRepetitionAllowed("\\log");

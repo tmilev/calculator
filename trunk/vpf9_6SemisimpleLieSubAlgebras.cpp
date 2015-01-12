@@ -224,8 +224,8 @@ void SemisimpleSubalgebras::WriteReportToFiles(const std::string& inputSSsubalge
   << "</title><script src=\"../../jsmath/easy/load.js\"></script><body>" << this->ToString(&this->currentFormat)
   << "<hr><hr>Calculator input for loading subalgebras directly without recomputation.\n<br>\n";
   if (inputSSsubalgebraExpressionString!="")
-  { fileFastLoad << "Load{}" << inputSSsubalgebraExpressionString;
-    fileSlowLoad << "Load{}" << inputSSsubalgebraExpressionString;
+  { fileFastLoad << inputSSsubalgebraExpressionString;
+    fileSlowLoad << inputSSsubalgebraExpressionString;
   }
   fileFastLoad << "</body></html>";
   fileSlowLoad << "</body></html>";

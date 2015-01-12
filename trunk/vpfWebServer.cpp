@@ -342,7 +342,7 @@ void WebWorker::OutputResultAfterTimeout()
   std::stringstream out;
   if (standardOutputStreamAfterTimeout.str().size()!=0)
     out << standardOutputStreamAfterTimeout.str() << "<hr>";
-  out << "<table><tr><td>" << theParser.outputString << "</td><td><b>Comments</b>"
+  out << "<table><tr><td>" << theParser.outputString << "</td><td>"
   << theParser.outputCommentsString << "</td></tr></table>";
   std::stringstream outputTimeOutFileName;
   std::fstream outputTimeOutFile;

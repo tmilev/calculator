@@ -1074,7 +1074,7 @@ bool Calculator::innerGetChevGen(Calculator& theCommands, const Expression& inpu
   if (!input.IsListNElements(3))
     return false;
   SemisimpleLieAlgebra* theSSalg;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input[1], theSSalg))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], theSSalg))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   int theIndex;
   if (!input[2].IsSmallInteger(&theIndex))
@@ -1105,7 +1105,7 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
   SemisimpleLieAlgebra* theSSalg=0;
 //  stOutput << "<br>before calling inner ss: " << input.ToString();
 //  stOutput.flush();
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input[1], theSSalg))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], theSSalg))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   if (theSSalg==0)
     crash << "This is a programming error: called conversion function successfully, but the output is a zero pointer to a semisimple Lie algebra. "
@@ -1137,7 +1137,7 @@ bool Calculator::fKLcoeffs(Calculator& theCommands, const Expression& input, Exp
 { MacroRegisterFunctionWithName("Calculator::fKLcoeffs");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   SemisimpleLieAlgebra* theSSalgebra=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input, theSSalgebra))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input, theSSalgebra))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   std::stringstream out;
   WeylGroup& theWeyl=theSSalgebra->theWeyl;
@@ -1162,7 +1162,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
 { MacroRegisterFunctionWithName("Calculator::innerPrintSSLieAlgebra");
   SemisimpleLieAlgebra *tempSSpointer=0;
   input.CheckInitialization();
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input, tempSSpointer))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input, tempSSpointer))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& theSSalgebra=*tempSSpointer;
   WeylGroup& theWeyl=theSSalgebra.theWeyl;
@@ -2512,7 +2512,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators
       truncatedInput.children.RemoveLastObject();
   }
   if (!theCommands.GetTypeHighestWeightParabolic<Polynomial<Rational> >
-      (theCommands, truncatedInput, output, theHWs[0], theParSel, theContext, theSSalgebra, CalculatorBuiltInTypeConversions::innerPolynomial<Rational>))
+      (theCommands, truncatedInput, output, theHWs[0], theParSel, theContext, theSSalgebra, CalculatorConversions::innerPolynomial<Rational>))
     return output.MakeError("Failed to extract type, highest weight, parabolic selection", theCommands);
   if (output.IsError())
     return true;

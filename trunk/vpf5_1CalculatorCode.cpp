@@ -225,7 +225,7 @@ bool Calculator::innerGCDOrLCM(Calculator& theCommands, const Expression& input,
   Expression theContext(theCommands);
 //  stOutput << "<br>Time elapsed before calling innerGCDOrLCM: " << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
 //  stOutput << "<br>Input lispified: " << input.Lispify();
-  if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 2, CalculatorBuiltInTypeConversions::innerPolynomial<Rational>))
+  if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 2, CalculatorConversions::innerPolynomial<Rational>))
     return output.MakeError("Failed to extract a list of 2 polynomials. ", theCommands);
 //  stOutput << "<br>Time elapsed after extracting two polynomials in innerGCDOrLCM: " << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
   Polynomial<Rational> outputP;
@@ -240,7 +240,7 @@ bool Calculator::innerGCDOrLCM(Calculator& theCommands, const Expression& input,
 
 bool Calculator::GetListPolysVariableLabelsInLex(const Expression& input, Vector<Polynomial<Rational> >& output, Expression& outputContext)
 { Expression theContextStart(*this);
-  if (!this->GetVectorFromFunctionArguments(input, output, &theContextStart, 0, CalculatorBuiltInTypeConversions::innerPolynomial<Rational>))
+  if (!this->GetVectorFromFunctionArguments(input, output, &theContextStart, 0, CalculatorConversions::innerPolynomial<Rational>))
     return false;
   if (output.size<2)
     return false;
@@ -470,7 +470,7 @@ bool Calculator::innerPrintSSsubalgebras
   SemisimpleLieAlgebra* ownerSSPointer=0;
   bool isAlreadySubalgebrasObject=input.IsOfType<SemisimpleSubalgebras>();
   if (!isAlreadySubalgebrasObject)
-  { if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input, ownerSSPointer))
+  { if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input, ownerSSPointer))
       return output.MakeError("Error extracting Lie algebra.", theCommands);
     if (ownerSSPointer->GetRank()>7)
     { out << "<b>This code is completely experimental and has been set to run up to rank 6. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
@@ -516,8 +516,8 @@ bool Calculator::innerPrintSSsubalgebras
       theSSsubalgebras.FindTheSSSubalgebras(ownerSS);
     }
     Expression theSSE;
-    CalculatorBuiltInTypeConversions::innerStoreSemisimpleSubalgebras(theCommands, theSSsubalgebras, theSSE);
-    theSSsubalgebras.WriteReportToFiles(theSSE.ToString());
+    CalculatorConversions::innerStoreSemisimpleSubalgebras(theCommands, theSSsubalgebras, theSSE);
+    theSSsubalgebras.WriteReportToFiles("LoadSemisimpleSubalgebras{}("+ theSSE.ToString()+")");
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -536,10 +536,10 @@ bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommand
   if (input.children.size!=3)
     return output.MakeError("Function takes 2 arguments - type and an element of the Lie algebra.", theCommands);
   SemisimpleLieAlgebra* ownerSS=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input[1], ownerSS))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], ownerSS))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   ElementSemisimpleLieAlgebra<Rational> theErational;
-  if (!CalculatorBuiltInTypeConversions::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[2], theErational, *ownerSS))
+  if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[2], theErational, *ownerSS))
     return output.MakeError("Failed to extract element of semisimple Lie algebra. ", theCommands);
   ElementSemisimpleLieAlgebra<AlgebraicNumber> theF, theH, theE;
   theE=theErational;
@@ -560,13 +560,13 @@ bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Express
   if (input.children.size<3)
     return output.MakeError("Function ad common eigenspaces needs at least 2 arguments - type and at least one element of the algebra.", theCommands);
   SemisimpleLieAlgebra* ownerSS;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input[1], ownerSS))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], ownerSS))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   List<ElementSemisimpleLieAlgebra<Rational> > theOperators, outputElts;
   theOperators.ReservE(input.children.size-2);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   for (int i=2; i<input.children.size; i++)
-  { if (!CalculatorBuiltInTypeConversions::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[i], tempElt, *ownerSS))
+  { if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[i], tempElt, *ownerSS))
       return output.MakeError("Failed to extract element of semisimple Lie algebra. ", theCommands);
     theOperators.AddOnTop(tempElt);
   }
@@ -619,10 +619,10 @@ bool Calculator::innerGroebner
     if (!MathRoutines::IsPrime(theMod))
       return output.MakeError("Error: modulus not prime. ", theCommands);
   }
-  if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >(output, inputVector, &theContext, -1, CalculatorBuiltInTypeConversions::innerPolynomial<Rational>))
+  if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >(output, inputVector, &theContext, -1, CalculatorConversions::innerPolynomial<Rational>))
     return output.MakeError("Failed to extract polynomial expressions", theCommands);
   //theCommands.GetVector<Polynomial<Rational> >
-  //(output, inputVector, &theContext, -1, CalculatorBuiltInTypeConversions::innerPolynomial);
+  //(output, inputVector, &theContext, -1, CalculatorConversions::innerPolynomial);
   for (int i=0; i<inputVector.size; i++)
     inputVector[i].ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
   GroebnerBasisComputation<AlgebraicNumber> theGroebnerComputation;
@@ -713,7 +713,7 @@ bool Calculator::innerDeterminantPolynomial(Calculator& theCommands, const Expre
 { MacroRegisterFunctionWithName("Calculator::innerDeterminantPolynomial");
   Matrix<Polynomial<Rational> > matPol;
   Expression theContext;
-  if (!theCommands.GetMatrix(input, matPol, &theContext, -1, CalculatorBuiltInTypeConversions::innerPolynomial<Rational>))
+  if (!theCommands.GetMatrix(input, matPol, &theContext, -1, CalculatorConversions::innerPolynomial<Rational>))
   { theCommands << "<hr>Failed to convert the input to matrix of polynomials. ";
     return false;
   }
@@ -1075,10 +1075,10 @@ bool Calculator::innerSolveSerreLikeSystem(Calculator& theCommands, const Expres
   Vector<Polynomial<Rational> > thePolysRational;
   Expression theContext(theCommands);
   if (input.StartsWith(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystem")))
-  { if (!theCommands.GetVectorFromFunctionArguments(input, thePolysRational, &theContext, 0, CalculatorBuiltInTypeConversions::innerPolynomial<Rational>))
+  { if (!theCommands.GetVectorFromFunctionArguments(input, thePolysRational, &theContext, 0, CalculatorConversions::innerPolynomial<Rational>))
       return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   } else
-    if (!theCommands.GetVectoR(input, thePolysRational, &theContext, 0, CalculatorBuiltInTypeConversions::innerPolynomial<Rational>))
+    if (!theCommands.GetVectoR(input, thePolysRational, &theContext, 0, CalculatorConversions::innerPolynomial<Rational>))
       return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   Vector<Polynomial<AlgebraicNumber> > thePolysAlgebraic;
   thePolysAlgebraic=thePolysRational;
@@ -1113,7 +1113,7 @@ bool Calculator::innerSolveSerreLikeSystemUpperLimit(Calculator& theCommands, co
 { MacroRegisterFunctionWithName("Calculator::innerSolveSerreLikeSystem");
   Vector<Polynomial<Rational> > thePolysRational;
   Expression theContext(theCommands);
-  if (!theCommands.GetVectorFromFunctionArguments(input, thePolysRational, &theContext, 0, CalculatorBuiltInTypeConversions::innerPolynomial<Rational>))
+  if (!theCommands.GetVectorFromFunctionArguments(input, thePolysRational, &theContext, 0, CalculatorConversions::innerPolynomial<Rational>))
     return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   GroebnerBasisComputation<AlgebraicNumber> theComputation;
 
@@ -1231,7 +1231,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
   if (input.children.size<3)
     return false;
   SemisimpleLieAlgebra* theSSlieAlg=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorBuiltInTypeConversions::innerSSLieAlgebra, input[1], theSSlieAlg))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], theSSlieAlg))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   int theRank=theSSlieAlg->GetRank();
   Vector<Rational> currentRoot;

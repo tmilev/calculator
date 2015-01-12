@@ -5338,6 +5338,7 @@ void WeylGroup::MakeFromDynkinType(const DynkinType& inputType)
 { this->init();
   this->theDynkinType=inputType;
   this->theDynkinType.GetCartanSymmetric(this->CartanSymmetric);
+  this->theDynkinType.GetCoCartanSymmetric(this->CoCartanSymmetric);
   this->MakeFinalSteps();
 }
 
@@ -5371,8 +5372,7 @@ void WeylGroup::ComputeOuterAutoGenerators()
   for (int i=0; i<theGens.size; i++)
     if (theGens[i].GetMinNumColsNumRows()!=this->GetDim() || theGens[i].GetMinNumCols()!=this->GetDim() ||
         theGens[i].GetMinNumRows()!=this->GetDim() )
-    { crash << "Bad outer automorphisms, type " << this->theDynkinType.ToString() << "." << crash;
-    }
+      crash << "Bad outer automorphisms, type " << this->theDynkinType.ToString() << "." << crash;
   this->flagOuterAutosGeneratorsComputed=true;
 }
 

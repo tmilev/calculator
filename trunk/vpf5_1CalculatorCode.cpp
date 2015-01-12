@@ -517,7 +517,8 @@ bool Calculator::innerPrintSSsubalgebras
     }
     Expression theSSE;
     CalculatorConversions::innerStoreSemisimpleSubalgebras(theCommands, theSSsubalgebras, theSSE);
-    theSSsubalgebras.WriteReportToFiles("LoadSemisimpleSubalgebras{}("+ theSSE.ToString()+")");
+    theSSE.SetChildAtomValue(0, "LoadSemisimpleSubalgebras");
+    theSSsubalgebras.WriteReportToFiles(theSSE.ToString());
   }
   return output.AssignValue(out.str(), theCommands);
 }

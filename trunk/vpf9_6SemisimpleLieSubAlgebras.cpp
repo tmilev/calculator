@@ -589,15 +589,13 @@ void CandidateSSSubalgebra::SetUpInjectionHs
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::SetUpInjectionHs");
   this->reset(baseSubalgebra.owner);
   this->theWeylNonEmbeddeD.MakeFromDynkinType(theNewType);
-  this->theWeylNonEmbeddeDdefaultScale.MakeFromDynkinTypeDefaultLengthKeepComponentOrder(theNewType);
-  this->theWeylNonEmbeddeDdefaultScale.ComputeRho(true);
   this->theHsScaledToActByTwoInOrderOfCreation.ReservE(baseSubalgebra.theHsScaledToActByTwoInOrderOfCreation.size+1);
   this->theHsScaledToActByTwoInOrderOfCreation=baseSubalgebra.theHsScaledToActByTwoInOrderOfCreation;
   if (newHScaledToActByTwo!=0)
     this->theHsScaledToActByTwoInOrderOfCreation.AddOnTop(*newHScaledToActByTwo);
-  DynkinSimpleType newComponent=theNewType.GetSmallestSimpleType();
+  DynkinSimpleType newComponent=this->theWeylNonEmbeddeD.theDynkinType.GetSmallestSimpleType();
   this->CartanSAsByComponent=baseSubalgebra.CartanSAsByComponent;
-  int indexOffset=theNewType.GetRank()-newComponent.theRank;
+  int indexOffset=this->theWeylNonEmbeddeD.theDynkinType.GetRank()-newComponent.theRank;
   int newIndexInNewComponent=0;
 //  if (!newComponent.IsEqualToZero())
   newIndexInNewComponent=*theRootInjection.LastObject()-indexOffset;
@@ -629,7 +627,10 @@ void CandidateSSSubalgebra::SetUpInjectionHs
 }
 
 void CandidateSSSubalgebra::computeHsScaledToActByTwo()
-{ this->theHsScaledToActByTwo.SetSize(this->theHs.size);
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::computeHsScaledToActByTwo");
+  this->theHsScaledToActByTwo.SetSize(this->theHs.size);
+  this->theWeylNonEmbeddeDdefaultScale.MakeFromDynkinTypeDefaultLengthKeepComponentOrder(this->theWeylNonEmbeddeD.theDynkinType);
+  this->theWeylNonEmbeddeDdefaultScale.ComputeRho(true);
   int counter=-1;
   List<DynkinSimpleType> theTypes;
   this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
@@ -1130,7 +1131,8 @@ int charSSAlgMod<coefficient>::GetIndexExtremeWeightRelativeToWeyl(WeylGroup& th
 }
 
 bool CandidateSSSubalgebra::IsWeightSystemSpaceIndex(int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace)
-{ for (int k=0; k<this->theHs.size; k++)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::IsWeightSystemSpaceIndex");
+  for (int k=0; k<this->theHs.size; k++)
   { Rational desiredScalarProd=this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric(theIndex, k);
     Rational actualScalar= this->GetAmbientWeyl().RootScalarCartanRoot(this->theHs[k], AmbientRootTestedForWeightSpace);
     if (desiredScalarProd!=actualScalar)
@@ -1142,7 +1144,9 @@ bool CandidateSSSubalgebra::IsWeightSystemSpaceIndex(int theIndex, const Vector<
 bool CandidateSSSubalgebra::ComputeSystem(bool AttemptToChooseCentalizer, bool allowNonPolynomialSystemFailure)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSystem");
   ChevalleyGenerator currentGen, currentOpGen;
-  stOutput << "the h's scaled to act by two: " << this->theHsScaledToActByTwo.ToString();
+  stOutput << "<hr>the h's scaled to act by two: " << this->theHsScaledToActByTwo.ToString();
+  stOutput << "<br>Involved neg gens: " << this->theInvolvedPosGenerators.ToString();
+  stOutput << "<br>Involved pos gens: " << this->theInvolvedPosGenerators.ToString();
   this->theInvolvedNegGenerators.SetSize(this->theHsScaledToActByTwo.size);
   this->theInvolvedPosGenerators.SetSize(this->theHsScaledToActByTwo.size);
   for (int i=0; i<this->theHsScaledToActByTwo.size; i++)
@@ -4493,7 +4497,7 @@ std::string CandidateSSSubalgebra::ToStringSystem(FormatExpressions* theFormat)c
       out << "<b>However, the centralizer is not well chosen.</b>";
   }
   out << "<br>" << this->theUnknownNegGens.size << "*2 (unknown) gens:<br>(";
-  stOutput << "Got here no crash -3.";
+//  stOutput << "Got here no crash -3.";
   for (int i=0; i<this->theUnknownNegGens.size; i++)
   { out << "<br>" << this->theUnknownNegGens[i].ToString(theFormat) << ", " ;
     out << this->theUnknownPosGens[i].ToString(theFormat);
@@ -4501,7 +4505,7 @@ std::string CandidateSSSubalgebra::ToStringSystem(FormatExpressions* theFormat)c
       out << ", ";
   }
   out << ")<br>";
-  stOutput << "Got here no crash -4.";
+//  stOutput << "Got here no crash -4.";
   if (this->theUnknownCartanCentralizerBasis.size>0)
   { out << "<br>Unknown splitting cartan of centralizer.<br>\n";
     for (int i=0; i<this->theUnknownCartanCentralizerBasis.size; i++)
@@ -4528,7 +4532,7 @@ std::string CandidateSSSubalgebra::ToStringSystem(FormatExpressions* theFormat)c
   out << "<br>Symmetric Cartan default scale: " << this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric.ToString(theFormat);
   out << "Character ambient Lie algebra: " << this->theCharFundamentalCoordsRelativeToCartan.ToString();
   out << "<br>A necessary system to realize the candidate subalgebra.  ";
-  stOutput << "Got here no crash -5.";
+//  stOutput << "Got here no crash -5.";
   FormatExpressions tempFormat;
   for (int i=0; i<this->theSystemToSolve.size; i++)
     out << "<br>" << this->theSystemToSolve[i].ToString(&tempFormat) << "= 0";
@@ -4544,7 +4548,7 @@ std::string CandidateSSSubalgebra::ToStringSystem(FormatExpressions* theFormat)c
     if (i!=this->theSystemToSolve.size-1)
       out << ", ";
   }
-  stOutput << "Got here no crash -6.";
+//  stOutput << "Got here no crash -6.";
   out << " )";
   out << "<br><b>For the calculator part 2: </b>";
   out << "<br>(";
@@ -4653,7 +4657,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   }
   out << "<br>" << this->ToStringCartanSA(theFormat);
   out << this->ToStringCentralizer(theFormat);
-  stOutput << "Got here no crash";
+  //stOutput << "Got here no crash";
   bool displayNilradSummary=(this->owner->flagComputeNilradicals && this->flagCentralizerIsWellChosen && this->flagSystemSolved);
   if (displayNilradSummary)
     displayNilradSummary=!shortReportOnly || (this->NumBadParabolics>0);

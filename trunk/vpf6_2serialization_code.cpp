@@ -136,8 +136,8 @@ bool CalculatorConversions::innerSSLieAlgebra(Calculator& theCommands, const Exp
   //stOutput.flush();
     return output.MakeError("Failed to extract Dynkin type.", theCommands);
   }
-  stOutput << "got to making semisimple Lie algebra of type " << theDynkinType.ToString() << " from input expression: "
-  << input.ToString();
+//  stOutput << "got to making semisimple Lie algebra of type " << theDynkinType.ToString() << " from input expression: "
+//  << input.ToString();
   if (theDynkinType.GetRank()>20)
   { std::stringstream out;
     out << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. If you would like to relax this limitation edit file " << __FILE__
@@ -260,8 +260,7 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(Calculator& theComma
   tempSubalgebras.owneR=output.owneR;
   int indexSubalgebras=
   theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSubalgebras);
-  SemisimpleSubalgebras& ownerSubalgebras=
-  theCommands.theObjectContainer.theSSsubalgebras[indexSubalgebras];
+  SemisimpleSubalgebras& ownerSubalgebras=theCommands.theObjectContainer.theSSsubalgebras[indexSubalgebras];
   output.container=&ownerSubalgebras.theSl2s;
   return true;
 }
@@ -284,6 +283,7 @@ bool CalculatorConversions::innerStoreCandidateSA(Calculator& theCommands, const
   output.MakeSequence(theCommands);
   Expression currentE;
   CalculatorConversions::innerExpressionFromDynkinType(theCommands, input.theWeylNonEmbeddeD.theDynkinType, currentE);
+  output.AddChildOnTop(currentE);
   Matrix<Rational> conversionMat;
   conversionMat.AssignVectorsToRows(input.theHs);
   currentE.AssignMatrix(conversionMat, theCommands);
@@ -305,26 +305,27 @@ bool CalculatorConversions::innerStoreCandidateSA(Calculator& theCommands, const
 
 bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands, const Expression& input, Expression& output, CandidateSSSubalgebra& outputSubalgebra, SemisimpleSubalgebras& owner)
 { MacroRegisterFunctionWithName("CalculatorConversions::innerCandidateSAPrecomputed");
-  if (!input.IsListNElements(4) && !input.IsListNElements(5))
-    return theCommands << "<hr>Failed to load candidate subalgebra: I expect to get a list of 4 or 5 children, but got one with "
-    << input.children.size << " children instead.<hr> ";
+  if (!input.IsListNElements(3) && !input.IsListNElements(4))
+    return theCommands << "<hr>Failed to load candidate subalgebra: I expect to get a list of 4 or 5 children. Input was: "
+    << input.ToString() << ", which has " << input.children.size << " children.<hr> ";
   outputSubalgebra.owner=&owner;
   Expression tempE;
-  if (!CalculatorConversions::innerDynkinType(theCommands, input[2], outputSubalgebra.theWeylNonEmbeddeD.theDynkinType))
-    return theCommands << "<hr> Failed to load dynkin type of candidate subalgebra from " << input[2].ToString() << "<hr>";
+  if (!CalculatorConversions::innerDynkinType(theCommands, input[1], outputSubalgebra.theWeylNonEmbeddeD.theDynkinType))
+    return theCommands << "<hr> Failed to load dynkin type of candidate subalgebra from " << input[1].ToString() << "<hr>";
   //stOutput << "<br> input[2]: " << input[2].ToString();
   //if (input[2].ToString()=="(C)^{2}_{3}+(A)^{2}_{1}")
   //  stOutput << "<br> loading " << input[2].ToString() << " to get "
   //  << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
-  //stOutput << "<hr>Making subalgebra from type " << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
+  stOutput << "<hr>Making subalgebra from type " << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
   outputSubalgebra.theWeylNonEmbeddeD.MakeFromDynkinType(outputSubalgebra.theWeylNonEmbeddeD.theDynkinType);
+  stOutput << "Corresponding Co-Cartan symmetric: " << outputSubalgebra.theWeylNonEmbeddeD.CoCartanSymmetric.ToString();
   //int theSmallRank=outputSubalgebra.theWeylNonEmbeddeD.GetDim();
   int theRank=owner.owneR->GetRank();
   Matrix<Rational> theHs;
-  if (!theCommands.GetMatrix(input[3], theHs, 0, theRank, 0))
+  if (!theCommands.GetMatrix(input[2], theHs, 0, theRank, 0))
     return theCommands << "<hr>Failed to load matrix of Cartan elements for candidate subalgebra of type " << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType << "<hr>";
   if (theHs.NumRows!=outputSubalgebra.theWeylNonEmbeddeD.GetDim())
-   return theCommands << "<hr>Failed to load cartan elements: I expected " << outputSubalgebra.theWeylNonEmbeddeD.GetDim() << " elements, but failed to get them.";
+    return theCommands << "<hr>Failed to load cartan elements: I expected " << outputSubalgebra.theWeylNonEmbeddeD.GetDim() << " elements, but failed to get them.";
   List<int> theRanks, theMults;
   outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.GetLettersTypesMults(0, &theRanks, &theMults, 0);
   outputSubalgebra.CartanSAsByComponent.SetSize(outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.GetNumSimpleComponents());
@@ -343,20 +344,19 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
   outputSubalgebra.theHs.AssignListList(outputSubalgebra.CartanSAsByComponent);
   Matrix<Rational> tempMat1;
   outputSubalgebra.theHs.GetGramMatrix(tempMat1, &owner.GetSSowner().theWeyl.CartanSymmetric);
-  if (!(outputSubalgebra.theWeylNonEmbeddeD.CartanSymmetric== tempMat1))
-    return theCommands << "<hr>Failed to load semisimple subalgebra: the gram matrix of the elements of its cartan is "
-    << tempMat1.ToString() << " but it should be " << outputSubalgebra.theWeylNonEmbeddeD.CartanSymmetric.ToString() << "instead.";
+  if (!(outputSubalgebra.theWeylNonEmbeddeD.CoCartanSymmetric== tempMat1))
+    return theCommands << "<hr>Failed to load semisimple subalgebra: the gram matrix of the elements of its Cartan, "
+    << outputSubalgebra.theHs.ToString() << " is " << tempMat1.ToString() << "; it should be "
+    << outputSubalgebra.theWeylNonEmbeddeD.CoCartanSymmetric.ToString() << ".";
   outputSubalgebra.thePosGens.SetSize(0);
   outputSubalgebra.theNegGens.SetSize(0);
-  if (input.children.size==5)
-  { Expression theGensE=input[4];
+  if (input.children.size==4)
+  { Expression theGensE=input[3];
     theGensE.Sequencefy();
     ElementSemisimpleLieAlgebra<AlgebraicNumber> curGenAlgebraic;
     for (int i=1; i<theGensE.children.size; i++)
     { if (!CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(theCommands, theGensE[i], curGenAlgebraic, *owner.owneR))
-      { theCommands << "<hr>Failed to load semisimple Lie algebra element from expression " << theGensE[i].ToString() << ". ";
-        return false;
-      }
+        return theCommands << "<hr>Failed to load semisimple Lie algebra element from expression " << theGensE[i].ToString() << ". ";
       if (i%2 ==1)
         outputSubalgebra.theNegGens.AddOnTop(curGenAlgebraic);
       else
@@ -370,12 +370,12 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
   outputSubalgebra.indexInOwnersOfNonEmbeddedMe=owner.theSubalgebrasNonEmbedded->AddNoRepetitionOrReturnIndexFirst(tempSA);
   owner.theSubalgebrasNonEmbedded->GetElement(outputSubalgebra.indexInOwnersOfNonEmbeddedMe).theWeyl.ComputeRho(true);
   outputSubalgebra.theWeylNonEmbeddeD.ComputeRho(true);
-  stOutput << "Before calling compute system, output subalgebra is: " << outputSubalgebra.ToString();
+  //stOutput << "Before calling compute system, output subalgebra is: " << outputSubalgebra.ToString();
   outputSubalgebra.computeHsScaledToActByTwo();
   outputSubalgebra.ComputeSystem(false, true);
   if (!outputSubalgebra.ComputeChar(true))
     return theCommands << "<hr>Failed to load semisimple Lie subalgebra: the ambient Lie algebra does not decompose properly over the candidate subalgebra. ";
-  if (input.children.size==5)
+  if (input.children.size==4)
     if (!outputSubalgebra.CheckGensBracketToHs())
       return theCommands << "<hr>Lie brackets of generators do not equal the desired elements of the Cartan. ";
   //CalculatorConversions::innerLoadFromObject(theCommands,
@@ -393,6 +393,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
   Expression tempE;
   if (!CalculatorConversions::innerSSLieAlgebra(theCommands, input[1], tempE, ownerSS))
     return theCommands << "<hr>Error loading semisimple subalgebras: failed to extract ambient semisimple Lie algebra. ";
+//  stOutput << "Loaded type: " << ownerSS->theWeyl.theDynkinType.ToString();
   if (ownerSS==0)
     crash << "Loaded zero subalgebra " << crash;
   SemisimpleSubalgebras tempSAs;
@@ -422,7 +423,8 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
   theSAs.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
   for (int i=1; i<theCandidatesE.children.size; i++)
   { std::stringstream reportStream;
-    reportStream << "Loading subalgebra " << i << " out of " << theCandidatesE.children.size-1;
+    reportStream << "Loading subalgebra " << i << " out of " << theCandidatesE.children.size-1 << " from expression " << theCandidatesE[i].ToString();
+    //stOutput << reportStream.str();
     theReport.Report(reportStream.str());
     CandidateSSSubalgebra tempCandidate;
     if (!CalculatorConversions::innerCandidateSAPrecomputed(theCommands, theCandidatesE[i], tempE, tempCandidate, theSAs))

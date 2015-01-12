@@ -5771,8 +5771,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
   std::stringstream out;
   if (highestWeightTrue!=highestWeightSimpleCoords)
     out << "<br>Cheater! The input weight is not highest... using the highest weight in the same orbit instead. "
-    << "Your input in simple coordinates was: "
-    << highestWeightSimpleCoords.ToString() << ".<br> ";
+    << "Your input in simple coordinates was: " << highestWeightSimpleCoords.ToString() << ".<br> ";
   out << "The highest weight in simple coordinates is: " << highestWeightTrue.ToString() << ".<br>";
   std::string tempS;
   bool isTrimmed = !this->GetAlLDominantWeightsHWFDIM(highestWeightSimpleCoords, theDominantWeights, upperBoundInt, &tempS, &theGlobalVariables);
@@ -6025,8 +6024,7 @@ void SubgroupWeylGroupOLD::ToString(std::string& output, bool displayElements)
   out << "<br>Half sum of the positive roots: " << this->GetRho().ToString();
   out << "<br>Roots of Borel (" << this->RootsOfBorel.size << " total): ";
   for (int i=0; i<this->RootsOfBorel.size; i++)
-  { out << this->RootsOfBorel[i].ToString();
-  }
+    out << this->RootsOfBorel[i].ToString();
   if (displayElements)
   { std::stringstream body;
     out << "<br>The elements of the weyl group of the subgroup written with minimal # of generators:<br>";
@@ -6092,7 +6090,7 @@ std::string SubgroupWeylGroupOLD::ElementToStringCosetGraph()
     for (int j=0; j<Layers[i].size; j++)
       for (int k=0; k<this->RepresentativesQuotientAmbientOrder.size; k++)
         if (this->AmbientWeyl.LeftIsHigherInBruhatOrderThanRight
-        ( this->RepresentativesQuotientAmbientOrder[k], this->RepresentativesQuotientAmbientOrder[Layers[i][j]]))
+            (this->RepresentativesQuotientAmbientOrder[k], this->RepresentativesQuotientAmbientOrder[Layers[i][j]]))
           if (this->RepresentativesQuotientAmbientOrder[Layers[i][j]].generatorsLastAppliedFirst.size==this->RepresentativesQuotientAmbientOrder[k].generatorsLastAppliedFirst.size-1)
             arrows[i][j].AddOnTop(k);
   }
@@ -6145,8 +6143,7 @@ void SubgroupWeylGroupOLD::ComputeRootSubsystem()
   for (int i=0; i<this->RootSubsystem.size; i++)
     for (int j=0; j<this->simpleGenerators.size; j++)
     { currentRoot=(this->RootSubsystem[i]);
-      this->AmbientWeyl.ReflectBetaWRTAlpha
-      (this->simpleGenerators[j], currentRoot, false, currentRoot);
+      this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[j], currentRoot, false, currentRoot);
       this->RootSubsystem.AddOnTopNoRepetition(currentRoot);
     }
   Vectors<Rational> tempRoots;
@@ -6203,10 +6200,8 @@ void KLpolys::Check()
   { this->Compute(i);
 //    bool found=false;
     for (int j=0; j<this->size; j++)
-    { if (this->TheMultiplicities[i]!=0 && this->TheMultiplicities[i]!=1 && this->TheMultiplicities[i]!=-1)
-      { this->ComputeDebugString();
-      }
-    }
+      if (this->TheMultiplicities[i]!=0 && this->TheMultiplicities[i]!=1 && this->TheMultiplicities[i]!=-1)
+        this->ComputeDebugString();
   }
 }
 

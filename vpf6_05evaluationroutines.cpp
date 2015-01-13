@@ -213,9 +213,7 @@ bool Calculator::EvaluateExpression
 //    stOutput << "Evaluating " << input.Lispify() << " with rule stack of size " << this->RuleStack.size; // << this->RuleStack.ToString();
   }
   if (theCommands.RecursionDepthExceededHandleRoughly())
-  { theCommands << " Evaluating expression: " << input.ToString() << " aborted. ";
-    return false;
-  }
+    return theCommands << " Evaluating expression: " << input.ToString() << " aborted. ";
   output=input;
   if (output.IsError())
   { theCommands.flagAbortComputationASAP=true;

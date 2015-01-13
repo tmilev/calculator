@@ -280,14 +280,17 @@ bool CalculatorConversions::innerLoadSltwoSubalgebras(Calculator& theCommands, c
 
 bool CalculatorConversions::innerStoreCandidateSA(Calculator& theCommands, const CandidateSSSubalgebra& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorConversions::innerStoreCandidateSA");
-  output.MakeSequence(theCommands);
   Expression currentE;
+  List<std::string> keys;
+  List<Expression> values;
   CalculatorConversions::innerExpressionFromDynkinType(theCommands, input.theWeylNonEmbeddeD.theDynkinType, currentE);
-  output.AddChildOnTop(currentE);
+  keys.AddOnTop("DynkinType");
+  values.AddOnTop(currentE);
   Matrix<Rational> conversionMat;
   conversionMat.AssignVectorsToRows(input.theHs);
   currentE.AssignMatrix(conversionMat, theCommands);
-  output.AddChildOnTop(currentE);
+  keys.AddOnTop("CoCartanSymmetric");
+  values.AddOnTop(currentE);
   //  ElementSemisimpleLieAlgebra<Rational> convertedToRational;
   if (input.flagSystemSolved)
   { Expression listGenerators;
@@ -298,9 +301,10 @@ bool CalculatorConversions::innerStoreCandidateSA(Calculator& theCommands, const
       CalculatorConversions::innerExpressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(theCommands, input.thePosGens[i], currentE);
       listGenerators.AddChildOnTop(currentE);
     }
-    output.AddChildOnTop(listGenerators);
+    keys.AddOnTop("generators");
+    values.AddOnTop(listGenerators);
   }
-  return true;
+  return output.MakeSequenceCommands(theCommands, keys, values);
 }
 
 bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands, const Expression& input, Expression& output, CandidateSSSubalgebra& outputSubalgebra, SemisimpleSubalgebras& owner)
@@ -316,9 +320,9 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
   //if (input[2].ToString()=="(C)^{2}_{3}+(A)^{2}_{1}")
   //  stOutput << "<br> loading " << input[2].ToString() << " to get "
   //  << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
-  stOutput << "<hr>Making subalgebra from type " << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
+//  stOutput << "<hr>Making subalgebra from type " << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
   outputSubalgebra.theWeylNonEmbeddeD.MakeFromDynkinType(outputSubalgebra.theWeylNonEmbeddeD.theDynkinType);
-  stOutput << "Corresponding Co-Cartan symmetric: " << outputSubalgebra.theWeylNonEmbeddeD.CoCartanSymmetric.ToString();
+//  stOutput << "Corresponding Co-Cartan symmetric: " << outputSubalgebra.theWeylNonEmbeddeD.CoCartanSymmetric.ToString();
   //int theSmallRank=outputSubalgebra.theWeylNonEmbeddeD.GetDim();
   int theRank=owner.owneR->GetRank();
   Matrix<Rational> theHs;
@@ -433,7 +437,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
     //stOutput << "<hr>read cartan elements: " << tempCandidate.theHs.size;
     theSAs.theSubalgebraCandidates.AddOnTop(tempCandidate);
   }
-  stOutput << "centralizers off";
+//  stOutput << "centralizers off";
   theSAs.flagAttemptToAdjustCentralizers=false;
   theSAs.HookUpCentralizers(true);
   //stOutput << "<hr>And the pointer is ....: " << &theSAs << "<br>";

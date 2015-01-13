@@ -2592,6 +2592,32 @@ bool Expression::MakeSequence(Calculator& owner, List<Expression>* inputSequence
   return true;
 }
 
+bool Expression::MakeSequenceCommands(Calculator& owner, List<std::string>& inputKeys, List<Expression>& inputValues)
+{ MacroRegisterFunctionWithName("Expression::MakeSequenceCommands");
+  List<Expression> theStatements;
+  Expression currentStatement, currentKey;
+  if (inputValues.size!=inputKeys.size)
+    crash << "This is a programming error: I am asked to create a sequence of statements but I was given different"
+    << " number of keys and expressions." << crash;
+  for (int i =0; i<inputValues.size; i++)
+  { currentKey.MakeAtom(inputKeys[i], owner);
+    currentStatement.MakeXOX(owner, owner.opDefine(), currentKey, inputValues[i] );
+    theStatements.AddOnTop(currentStatement);
+  }
+  return this->MakeSequenceStatements(owner, &theStatements);
+}
+
+bool Expression::MakeSequenceStatements(Calculator& owner, List<Expression>* inputStatements)
+{ MacroRegisterFunctionWithName("Expression::MakeSequence");
+  this->reset(owner, inputStatements==0 ? 1 : inputStatements->size+1);
+  this->AddChildAtomOnTop(owner.opEndStatement());
+//  stOutput << "Making sequence statements from: " << inputStatements.ToString();
+  if (inputStatements!=0)
+    for (int i=0; i<inputStatements->size; i++)
+      this->AddChildOnTop((*inputStatements)[i]);
+  return true;
+}
+
 bool CalculatorFunctionsGeneral::innerGetUserDefinedSubExpressions(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetUserDefinedSubExpressions");
   HashedListSpecialized<Expression> theList;

@@ -789,7 +789,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
   CandidateSSSubalgebra newCandidate;
   newCandidate.owner=this;
   Vector<Rational> weightHElementWeAreLookingFor;
-  ProgressReport theReport1(theGlobalVariables), theReport2(theGlobalVariables), theReport3(theGlobalVariables);
+  ProgressReport theReport0(theGlobalVariables), theReport1(theGlobalVariables), theReport2(theGlobalVariables), theReport3(theGlobalVariables);
   if (theGlobalVariables!=0)
   { std::stringstream reportStream;
     reportStream << "So far " << this->theSubalgebraCandidates.size << " subalgebras found. Inducing from type "
@@ -858,7 +858,13 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
           //stOutput << reportStream.str();
           theReport3.Report(reportStream.str());
         }
+        int oldSize=this->theSubalgebraCandidates.size;
         this->ExtendCandidatesRecursive(newCandidate, targetType);
+        if (oldSize<this->theSubalgebraCandidates.size)
+        { std::stringstream reportStream;
+          reportStream << "After latest extension, the semisimple subalgebras have increased. ";
+          reportStream << "Current subalgebras: ";
+        }
       } else
       { std::stringstream out2;
         out2 << "h element " << k+1 << " out of " << theHCandidatesScaledToActByTwo.size << ": did not succeed extending. ";
@@ -1144,9 +1150,9 @@ bool CandidateSSSubalgebra::IsWeightSystemSpaceIndex(int theIndex, const Vector<
 bool CandidateSSSubalgebra::ComputeSystem(bool AttemptToChooseCentalizer, bool allowNonPolynomialSystemFailure)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSystem");
   ChevalleyGenerator currentGen, currentOpGen;
-  stOutput << "<hr>the h's scaled to act by two: " << this->theHsScaledToActByTwo.ToString();
-  stOutput << "<br>Involved neg gens: " << this->theInvolvedPosGenerators.ToString();
-  stOutput << "<br>Involved pos gens: " << this->theInvolvedPosGenerators.ToString();
+//  stOutput << "<hr>the h's scaled to act by two: " << this->theHsScaledToActByTwo.ToString();
+//  stOutput << "<br>Involved neg gens: " << this->theInvolvedPosGenerators.ToString();
+//  stOutput << "<br>Involved pos gens: " << this->theInvolvedPosGenerators.ToString();
   this->theInvolvedNegGenerators.SetSize(this->theHsScaledToActByTwo.size);
   this->theInvolvedPosGenerators.SetSize(this->theHsScaledToActByTwo.size);
   for (int i=0; i<this->theHsScaledToActByTwo.size; i++)

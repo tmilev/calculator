@@ -343,6 +343,8 @@ class Expression
   bool MakeProducT(Calculator& owner, const Expression& left, const Expression& right);
   void MakeFunction(Calculator& owner, const Expression& theFunction, const Expression& theArgument);
   int GetNumCols()const;
+  bool MakeSequenceCommands(Calculator& owner, List<std::string>& inputKeys, List<Expression>& inputValues);
+  bool MakeSequenceStatements(Calculator& owner, List<Expression>* inputStatements=0);
   bool MakeSequence(Calculator& owner, List<Expression>* inputSequence=0);
   bool MakeXOX(Calculator& owner, int theOp, const Expression& left, const Expression& right);
   bool MakeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex=2);

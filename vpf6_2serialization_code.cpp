@@ -278,6 +278,20 @@ bool CalculatorConversions::innerLoadSltwoSubalgebras(Calculator& theCommands, c
   return false;
 }
 
+bool CalculatorConversions::innerLoadKey
+(Calculator& theCommands, const Expression& inputStatementList, const std::string& inputKey, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKey");
+  Expression theKeyE;
+  theKeyE.MakeAtom(inputKey, theCommands);
+  for (int i=0; i<inputStatementList.children.size; i++)
+    if (inputStatementList[i].StartsWith(theCommands.opDefine(), 3))
+      if (inputStatementList[i][1]==theKeyE)
+      { output=inputStatementList[i][2];
+        return true;
+      }
+  return theCommands << "<hr>Key " << inputKey << " not found in expression " << inputStatementList.ToString() << ".";
+}
+
 bool CalculatorConversions::innerStoreCandidateSA(Calculator& theCommands, const CandidateSSSubalgebra& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorConversions::innerStoreCandidateSA");
   Expression currentE;
@@ -289,7 +303,7 @@ bool CalculatorConversions::innerStoreCandidateSA(Calculator& theCommands, const
   Matrix<Rational> conversionMat;
   conversionMat.AssignVectorsToRows(input.theHs);
   currentE.AssignMatrix(conversionMat, theCommands);
-  keys.AddOnTop("CoCartanSymmetric");
+  keys.AddOnTop("ElementsCartan");
   values.AddOnTop(currentE);
   //  ElementSemisimpleLieAlgebra<Rational> convertedToRational;
   if (input.flagSystemSolved)
@@ -309,13 +323,13 @@ bool CalculatorConversions::innerStoreCandidateSA(Calculator& theCommands, const
 
 bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands, const Expression& input, Expression& output, CandidateSSSubalgebra& outputSubalgebra, SemisimpleSubalgebras& owner)
 { MacroRegisterFunctionWithName("CalculatorConversions::innerCandidateSAPrecomputed");
-  if (!input.IsListNElements(3) && !input.IsListNElements(4))
-    return theCommands << "<hr>Failed to load candidate subalgebra: I expect to get a list of 4 or 5 children. Input was: "
-    << input.ToString() << ", which has " << input.children.size << " children.<hr> ";
+  Expression DynkinTypeE, ElementsCartanE, generatorsE;
+  if (! CalculatorConversions::innerLoadKey(theCommands, input, "DynkinType", DynkinTypeE) ||
+      ! CalculatorConversions::innerLoadKey(theCommands, input, "ElementsCartan", ElementsCartanE))
+    return false;
   outputSubalgebra.owner=&owner;
-  Expression tempE;
-  if (!CalculatorConversions::innerDynkinType(theCommands, input[1], outputSubalgebra.theWeylNonEmbeddeD.theDynkinType))
-    return theCommands << "<hr> Failed to load dynkin type of candidate subalgebra from " << input[1].ToString() << "<hr>";
+  if (!CalculatorConversions::innerDynkinType(theCommands, DynkinTypeE, outputSubalgebra.theWeylNonEmbeddeD.theDynkinType))
+    return theCommands << "<hr> Failed to load dynkin type of candidate subalgebra from " << DynkinTypeE.ToString() << "<hr>";
   //stOutput << "<br> input[2]: " << input[2].ToString();
   //if (input[2].ToString()=="(C)^{2}_{3}+(A)^{2}_{1}")
   //  stOutput << "<br> loading " << input[2].ToString() << " to get "
@@ -326,8 +340,8 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
   //int theSmallRank=outputSubalgebra.theWeylNonEmbeddeD.GetDim();
   int theRank=owner.owneR->GetRank();
   Matrix<Rational> theHs;
-  if (!theCommands.GetMatrix(input[2], theHs, 0, theRank, 0))
-    return theCommands << "<hr>Failed to load matrix of Cartan elements for candidate subalgebra of type " << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType << "<hr>";
+  if (!theCommands.GetMatrix(ElementsCartanE, theHs, 0, theRank, 0))
+    return theCommands << "<hr>Failed to load Cartan elements for candidate subalgebra of type " << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType << "<hr>";
   if (theHs.NumRows!=outputSubalgebra.theWeylNonEmbeddeD.GetDim())
     return theCommands << "<hr>Failed to load cartan elements: I expected " << outputSubalgebra.theWeylNonEmbeddeD.GetDim() << " elements, but failed to get them.";
   List<int> theRanks, theMults;
@@ -354,13 +368,12 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
     << outputSubalgebra.theWeylNonEmbeddeD.CoCartanSymmetric.ToString() << ".";
   outputSubalgebra.thePosGens.SetSize(0);
   outputSubalgebra.theNegGens.SetSize(0);
-  if (input.children.size==4)
-  { Expression theGensE=input[3];
-    theGensE.Sequencefy();
+  if (CalculatorConversions::innerLoadKey(theCommands, input, "generators", generatorsE))
+  { generatorsE.Sequencefy();
     ElementSemisimpleLieAlgebra<AlgebraicNumber> curGenAlgebraic;
-    for (int i=1; i<theGensE.children.size; i++)
-    { if (!CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(theCommands, theGensE[i], curGenAlgebraic, *owner.owneR))
-        return theCommands << "<hr>Failed to load semisimple Lie algebra element from expression " << theGensE[i].ToString() << ". ";
+    for (int i=1; i<generatorsE.children.size; i++)
+    { if (!CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(theCommands, generatorsE[i], curGenAlgebraic, *owner.owneR))
+        return theCommands << "<hr>Failed to load semisimple Lie algebra element from expression " << generatorsE[i].ToString() << ". ";
       if (i%2 ==1)
         outputSubalgebra.theNegGens.AddOnTop(curGenAlgebraic);
       else

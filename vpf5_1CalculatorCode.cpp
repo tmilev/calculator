@@ -513,7 +513,7 @@ bool Calculator::innerPrintSSsubalgebras
     theSSsubalgebras.CheckFileWritePermissions();
     if (!isAlreadySubalgebrasObject)
     { theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=500000;
-      theSSsubalgebras.FindTheSSSubalgebras(ownerSS);
+      theSSsubalgebras.FindTheSSSubalgebrasFromScratch(ownerSS);
     }
     Expression theSSE;
     CalculatorConversions::innerStoreSemisimpleSubalgebras(theCommands, theSSsubalgebras, theSSE);

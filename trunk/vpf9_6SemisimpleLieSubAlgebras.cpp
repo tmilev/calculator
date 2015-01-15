@@ -520,14 +520,23 @@ void SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand()
     this->theOrbitHelementLengths.AddOnTop(this->theSl2s[i].LengthHsquared);
 }
 
-void SemisimpleSubalgebras::FindTheSSSubalgebras(SemisimpleLieAlgebra& newOwner, const DynkinType* targetType)
-{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebras");
+void SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch(SemisimpleLieAlgebra& newOwner, const DynkinType* targetType)
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch");
   this->owneR=&newOwner;
+  this->targetDynkinType.MakeZero();
+  if (targetType!=0)
+    this->targetDynkinType=*targetType;
   this->ComputeSl2sInitOrbitsForComputationOnDemand();
   this->CheckConsistency();
   CandidateSSSubalgebra emptyCandidate;
   emptyCandidate.owner=this;
-  this->ExtendCandidatesRecursive(emptyCandidate, targetType);
+  this->currentSubalgebraChain.SetExpectedSize(this->owneR->GetRank()+2);
+  this->currentSubalgebraChain.SetSize(0);
+  this->currentPossibleLargerDynkinTypes.SetSize(0);
+  this->currentSubalgebraChain.AddOnTop(emptyCandidate);
+  this->currentNumLargerTypesExplored.AddOnTop(0);
+  this->currentNumHcandidatesExplored.AddOnTop(0);
+  this->ExtendLastSubalgebraChainMember();
 //  stOutput << "Num candidates so far: " << this->theSubalgebraCandidates.size;
   if (targetType!=0)
     this->flagAttemptToAdjustCentralizers=false;
@@ -660,30 +669,20 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
   if (!this->ComputeChar(false))
   { if (this->owner->theGlobalVariables!=0)
       theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) + " doesn't have fitting chars.");
-    //stOutput << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " - bad character.";
     return false;
   }
   if (!this->ComputeSystem(false,false))
   { if (this->owner->theGlobalVariables!=0)
       theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) + " -> no system solution.");
-    //stOutput << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " - couldnt solve system.";
     return false;
   }
   for (int i=0; i<this->owner->theSubalgebraCandidates.size; i++)
     if (this->theWeylNonEmbeddeD.theDynkinType==this->owner->theSubalgebraCandidates[i].theWeylNonEmbeddeD.theDynkinType)
     { if (this->IsDirectSummandOf(this->owner->theSubalgebraCandidates[i], true))
-      { //stOutput << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " is equal to " << this->owner->theSubalgebraCandidates[i].theWeylNonEmbeddeD.theDynkinType.ToString();
         return false;
-      } //else
-        //stOutput << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " is not a direct summand of "
-        //<< this->owner->theSubalgebraCandidates[i].theWeylNonEmbeddeD.theDynkinType.ToString();
     } else
       if (this->theWeylNonEmbeddeD.theDynkinType.ToString()==this->owner->theSubalgebraCandidates[i].theWeylNonEmbeddeD.theDynkinType.ToString())
         crash << crash;
-  this->indexInOwner=this->owner->theSubalgebraCandidates.size;
-  this->owner->theSubalgebraCandidates.AddOnTop(*this);
-  if (!this->owner->theSubalgebraCandidates.LastObject()->indexInOwner==this->owner->theSubalgebraCandidates.size-1)
-    crash << "<hr>Something is very wrong: internal check failed! " << crash;
   return true;
 }
 
@@ -767,111 +766,129 @@ void SemisimpleSubalgebras::GetHCandidates
   }
 }
 
-void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebra& baseCandidate, const DynkinType* targetType)
-{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendCandidatesRecursive");
-  int baseRank=baseCandidate.theWeylNonEmbeddeD.GetDim();
-  if (baseRank>=this->owneR->GetRank())
-    return;
-//  if (targetType!=0)
-//  { stOutput << "<hr><b>I am aiming at extending " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()
-//    << " to " << targetType->ToString() << "</b>";
-//  }
-  if (targetType!=0)
-    if (!baseCandidate.theWeylNonEmbeddeD.theDynkinType.CanBeExtendedParabolicallyTo(*targetType))
-      return;
-//  if (targetType!=0)
-//  { stOutput << "<b>... continuing to actual computations!!!</b>";
-//  }
-  List<DynkinType> theLargerTypes;
-  List<List<int> > theRootInjections;
-  this->GrowDynkinType(baseCandidate.theWeylNonEmbeddeD.theDynkinType, theLargerTypes, &theRootInjections);
-//  stOutput << "<hr>Candidate extensions: " << theLargerTypes.ToString();
-  CandidateSSSubalgebra newCandidate;
-  newCandidate.owner=this;
-  Vector<Rational> weightHElementWeAreLookingFor;
-  ProgressReport theReport0(theGlobalVariables), theReport1(theGlobalVariables), theReport2(theGlobalVariables), theReport3(theGlobalVariables);
+const CandidateSSSubalgebra& SemisimpleSubalgebras::baseSubalgebra()
+{ return * this->currentSubalgebraChain.LastObject();
+}
+
+bool SemisimpleSubalgebras::RemoveLastSubalgebra()
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::RemoveLastSubalgebra");
+  this->currentSubalgebraChain.SetSize(this->currentSubalgebraChain.size-1);
+  this->currentPossibleLargerDynkinTypes.SetSize(this->currentSubalgebraChain.size);
+  this->currentNumLargerTypesExplored.SetSize(this->currentSubalgebraChain.size);
+  this->currentNumHcandidatesExplored.SetSize(this->currentSubalgebraChain.size);
+  this->currentRootInjections.SetSize(this->currentSubalgebraChain.size);
+  return this->currentSubalgebraChain.size>0;
+}
+
+bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeCurrentHCandidates");
+  int stackIndex=this->currentSubalgebraChain.size-1;
+  int typeIndex=this->currentNumLargerTypesExplored[stackIndex];
+  this->currentNumHcandidatesExplored[stackIndex]=0;
+  this->currentHCandidatesScaledToActByTwo.SetSize(0);
+  if (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].GetRootSystemSize()>this->owneR->GetNumPosRoots()*2)
+    return true;
+  if (!this->targetDynkinType.IsEqualToZero())
+    if (!this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].CanBeExtendedParabolicallyOrIsEqualTo(this->targetDynkinType))
+      if (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex]!=this->targetDynkinType)
+        return true;
+  ProgressReport theReport0(this->theGlobalVariables), theReport1(this->theGlobalVariables);
   if (theGlobalVariables!=0)
   { std::stringstream reportStream;
-    reportStream << "So far " << this->theSubalgebraCandidates.size << " subalgebras found. Inducing from type "
-    << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ". There are  " << theLargerTypes.size << " possible extensions total. ";
-//    stOutput << "<hr>" << reportStream.str();
-    theReport1.Report(reportStream.str());
+    reportStream << " Finding h-canddiates for extension " << typeIndex+1 << " out of "
+    << this->currentPossibleLargerDynkinTypes[stackIndex].size << ". We are trying to extend "
+    << this->baseSubalgebra().theWeylNonEmbeddeD.theDynkinType.ToString() << " to "
+    << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString() << ". ";
+    //stOutput << "<hr>" << reportStream.str();
+    theReport0.Report(reportStream.str());
   }
-  List<int> indicesModulesNewComponentExtensionMod;
-  indicesModulesNewComponentExtensionMod.ReservE(this->owneR->theWeyl.RootSystem.size);
-  Vectors<Rational> startingVector;
+  CandidateSSSubalgebra newCandidate;
+  newCandidate.owner=this;
+  if (this->baseSubalgebra().GetRank()!=0)
+  { Vector<Rational> weightHElementWeAreLookingFor=
+    this->GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot
+    (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex], this->currentRootInjections[stackIndex][typeIndex],
+     newCandidate);
+    List<int> indicesModulesNewComponentExtensionMod;
+    indicesModulesNewComponentExtensionMod.ReservE(this->owneR->theWeyl.RootSystem.size);
+    //stOutput << "<hr>Weight h element we are looking for: " << weightHElementWeAreLookingFor.ToString()
+    //<< " base candidate type is: " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString();
+    indicesModulesNewComponentExtensionMod.SetSize(0);
+    for (int j=0; j<this->baseSubalgebra().HighestWeightsNONPrimal.size; j++)
+      if (this->baseSubalgebra().HighestWeightsNONPrimal[j]==weightHElementWeAreLookingFor)
+        indicesModulesNewComponentExtensionMod.AddOnTop(j);
+    if (indicesModulesNewComponentExtensionMod.size==0)
+    { if (this->theGlobalVariables!=0)
+      { std::stringstream reportStream;
+        reportStream << " Extension " << typeIndex+1 << " out of " << this->currentPossibleLargerDynkinTypes[stackIndex].size
+        << ", type  " << this->currentPossibleLargerDynkinTypes[stackIndex].ToString()
+        << " cannot be realized: no appropriate module: desired weight of h element is: " << weightHElementWeAreLookingFor.ToString()
+        << " but the highest weights of the base candidate are: " << this->baseSubalgebra().HighestWeightsNONPrimal.ToString();
+        //stOutput << "<hr>" << reportStream.str();
+        theReport1.Report(reportStream.str());
+      }
+      return true;
+    }
+  }
+  newCandidate.SetUpInjectionHs
+  (this->baseSubalgebra(), this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
+   this->currentRootInjections[stackIndex][typeIndex]);
   Vectors<Rational> theHCandidatesScaledToActByTwo;
-  Selection oldRoots;
-  for (int i=0; i<theLargerTypes.size; i++)
-  { if (theLargerTypes[i].GetRootSystemSize()>this->owneR->GetNumPosRoots()*2)
-      continue;
-    if (targetType!=0)
-      if (!theLargerTypes[i].CanBeExtendedParabolicallyOrIsEqualTo(*targetType))
-        if (theLargerTypes[i]!=*targetType)
-        { //stOutput << "<br>" << theLargerTypes[i].ToString() << " cannot be extended to " << targetType->ToString();
-          continue;
-        }
-    if (theGlobalVariables!=0)
-    { std::stringstream reportStream;
-      reportStream << " Exploring extension " << i+1 << " out of " << theLargerTypes.size << ". We are trying to extend "
-      << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to " << theLargerTypes[i].ToString() << ". ";
-      //stOutput << "<hr>" << reportStream.str();
-      theReport2.Report(reportStream.str());
-    }
-    if (baseRank!=0)
-    { weightHElementWeAreLookingFor=this->GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot(theLargerTypes[i], theRootInjections[i], newCandidate);
-      //stOutput << "<hr>Weight h element we are looking for: " << weightHElementWeAreLookingFor.ToString()
-      //<< " base candidate type is: " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString();
-      indicesModulesNewComponentExtensionMod.SetSize(0);
-      for (int j=0; j<baseCandidate.HighestWeightsNONPrimal.size; j++)
-        if (baseCandidate.HighestWeightsNONPrimal[j]==weightHElementWeAreLookingFor)
-          indicesModulesNewComponentExtensionMod.AddOnTop(j);
-      if (indicesModulesNewComponentExtensionMod.size==0)
-      { if (theGlobalVariables!=0)
-        { std::stringstream reportStream;
-          reportStream << " Extension " << i+1 << " out of " << theLargerTypes.size << ", type  " << theLargerTypes[i].ToString()
-          << " cannot be realized: no appropriate module: desired weight of h element is: " << weightHElementWeAreLookingFor.ToString()
-          << " but the highest weights of the base candidate are: " << baseCandidate.HighestWeightsNONPrimal.ToString();
-          //stOutput << "<hr>" << reportStream.str();
-          theReport2.Report(reportStream.str());
-        }
-        continue;
-      }
-    }
-    newCandidate.SetUpInjectionHs(baseCandidate, theLargerTypes[i], theRootInjections[i]);
-    this->GetHCandidates(theHCandidatesScaledToActByTwo, newCandidate, theLargerTypes[i], theRootInjections[i]);
-    //stOutput << "<hr>Testing total of " << theHCandidatesScaledToActByTwo.size << " candidates: " << theHCandidatesScaledToActByTwo.ToString();
-    for (int k=0; k<theHCandidatesScaledToActByTwo.size; k++)
-    { if (theGlobalVariables!=0)
-      { std::stringstream out2;
-        out2 << "Attempting to extend " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to " << theLargerTypes[i].ToString()
-        << " using h element " << k+1 << " out of " << theHCandidatesScaledToActByTwo.size << ".";
-        theReport2.Report(out2.str());
-        //stOutput << "<br>" << out2.str();
-      }
-      if (newCandidate.CreateAndAddExtendBaseSubalgebra(baseCandidate, theHCandidatesScaledToActByTwo[k], theLargerTypes[i], theRootInjections[i]))
-      { if (theGlobalVariables!=0)
-        { std::stringstream reportStream;
-          reportStream << " Successfully extended " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to "
-          << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " (Type " << i+1 << " out of " << theLargerTypes.size
-          << ", h candidate " << k+1 << " out of " << theHCandidatesScaledToActByTwo.size << "). ";
-          //stOutput << reportStream.str();
-          theReport3.Report(reportStream.str());
-        }
-        int oldSize=this->theSubalgebraCandidates.size;
-        this->ExtendCandidatesRecursive(newCandidate, targetType);
-        if (oldSize<this->theSubalgebraCandidates.size)
-        { std::stringstream reportStream;
-          reportStream << "After latest extension, the semisimple subalgebras have increased. ";
-          reportStream << "Current subalgebras: ";
-        }
-      } else
-      { std::stringstream out2;
-        out2 << "h element " << k+1 << " out of " << theHCandidatesScaledToActByTwo.size << ": did not succeed extending. ";
-        //stOutput << out2.str();
-        theReport2.Report(out2.str());
-      }
-    }
+  this->GetHCandidates
+  (this->currentHCandidatesScaledToActByTwo[stackIndex], newCandidate,
+   this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
+   this->currentRootInjections[stackIndex][typeIndex]);
+  return true;
+}
+
+bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::IncrementState");
+  ProgressReport theReport(this->theGlobalVariables);
+  if (this->currentSubalgebraChain.size==0)
+    return false;
+  if (this->baseSubalgebra().GetRank()>=this->owneR->GetRank())
+    return this->RemoveLastSubalgebra();
+  int stackIndex=this->currentSubalgebraChain.size-1;
+  if (this->currentNumHcandidatesExplored[stackIndex]>=this->currentHCandidatesScaledToActByTwo.size)
+  { this->currentNumLargerTypesExplored[stackIndex]++;
+    if (this->currentNumLargerTypesExplored[stackIndex]>=this->currentPossibleLargerDynkinTypes.size)
+      return this->RemoveLastSubalgebra();
+    return this->ComputeCurrentHCandidates();
+  }
+  int typeIndex=this->currentNumLargerTypesExplored[stackIndex];
+  int hIndex=this->currentNumHcandidatesExplored[stackIndex];
+  CandidateSSSubalgebra newCandidate;
+  bool newSubalgebraCreated=
+  newCandidate.CreateAndAddExtendBaseSubalgebra
+  (this->baseSubalgebra(), this->currentHCandidatesScaledToActByTwo[stackIndex][hIndex],
+   this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
+   this->currentRootInjections[stackIndex][typeIndex]);
+  this->currentNumHcandidatesExplored[stackIndex]++;
+  if (newSubalgebraCreated)
+  { newCandidate.indexInOwner=this->theSubalgebraCandidates.size;
+    this->theSubalgebraCandidates.AddOnTop(newCandidate);
+    if (!this->theSubalgebraCandidates.LastObject()->indexInOwner==this->theSubalgebraCandidates.size-1)
+      crash << "<hr>Something is very wrong: internal check failed! " << crash;
+    this->currentSubalgebraChain.AddOnTop(newCandidate);
+    this->currentPossibleLargerDynkinTypes.SetSize(this->currentSubalgebraChain.size);
+    this->currentHCandidatesScaledToActByTwo.SetSize(this->currentSubalgebraChain.size);
+    this->currentRootInjections.SetSize(this->currentSubalgebraChain.size);
+    this->GrowDynkinType
+    (newCandidate.theWeylNonEmbeddeD.theDynkinType, *this->currentPossibleLargerDynkinTypes.LastObject(),
+     this->currentRootInjections.LastObject());
+  } else
+  { std::stringstream reportstream;
+    reportstream << "h element " << hIndex+1 << " out of " << this->currentHCandidatesScaledToActByTwo[stackIndex][hIndex].size
+    << ": did not succeed extending. ";
+    theReport.Report(reportstream.str());
+  }
+  return true;
+}
+
+void SemisimpleSubalgebras::ExtendLastSubalgebraChainMember()
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendLastSubalgebraChainMember");
+  while(this->IncrementReturnFalseIfPastLast())
+  {
   }
 }
 
@@ -2598,7 +2615,6 @@ void SemisimpleSubalgebras::reset()
 { this->theGlobalVariables=0;
   this->owneR=0;
   this->ownerField=0;
-  this->theRecursionCounter=0;
   this->theSl2s.owner=0;
   this->flagAttemptToSolveSystems=true;
   this->flagComputeModuleDecomposition=true;

@@ -273,6 +273,7 @@ public:
   FormatExpressions currentFormat;
   SemisimpleLieAlgebra* owneR;
   AlgebraicClosureRationals* ownerField;
+  DynkinType targetDynkinType;
   SltwoSubalgebras theSl2s;
   HashedListReferences<SemisimpleLieAlgebra>* theSubalgebrasNonEmbedded;
   ListReferences<SltwoSubalgebras>* theSl2sOfSubalgebras;
@@ -282,8 +283,21 @@ public:
   List<HashedList<ElementWeylGroup<WeylGroup> > > theOrbitGeneratingElts;
   List<bool> theOrbitsAreComputed;
 
+  //current computation state:
+  // state that gets stored to hd:
+  List<CandidateSSSubalgebra> currentSubalgebraChain;
+  List<int> currentNumLargerTypesExplored;
+  List<int> currentNumHcandidatesExplored;
+  // state that is recomputed each load:
+  List<List<DynkinType> > currentPossibleLargerDynkinTypes;
+  List<List<List<int> > > currentRootInjections;
+  List<Vectors<Rational> > currentHCandidatesScaledToActByTwo;
+
+  //end current computation state variables.
+
+
+
   List<CandidateSSSubalgebra> theSubalgebraCandidates;
-  int theRecursionCounter;
   bool flagAttemptToSolveSystems;
   bool flagComputePairingTable;
   bool flagComputeModuleDecomposition;
@@ -314,6 +328,7 @@ public:
   std::string GetDisplayFileNameSubalgebraAbsolute(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
   std::string GetPhysicalFileNameFKFTNilradicals(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
   std::string GetDisplayFileNameFKFTNilradicals(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
+  const CandidateSSSubalgebra& baseSubalgebra();
   bool operator==(const SemisimpleSubalgebras& other)
   { MacroRegisterFunctionWithName("SemisimpleSubalgebras::operator==");
     if (this->owneR==other.owneR)
@@ -327,6 +342,9 @@ public:
       crash << "This is a programming error: attempted to access non-initialized semisimple Lie subalgerbas. " << crash;
     return *this->owneR;
   }
+  bool IncrementReturnFalseIfPastLast();
+  bool RemoveLastSubalgebra();
+  bool ComputeCurrentHCandidates();
   void initHookUpPointers
   (SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField, HashedListReferences<SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
    ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras, GlobalVariables* inputGlobalVariables);
@@ -361,8 +379,9 @@ public:
   void HookUpCentralizers(bool allowNonPolynomialSystemFailure);
   void ComputeSl2sInitOrbitsForComputationOnDemand();
   void FindAllEmbeddings(DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner);
-  void FindTheSSSubalgebras(SemisimpleLieAlgebra& newOwner, const DynkinType* targetType=0);
-  void ExtendCandidatesRecursive(const CandidateSSSubalgebra& baseCandidate, const DynkinType* targetType=0);
+  void FindTheSSSubalgebrasFromScratch(SemisimpleLieAlgebra& newOwner, const DynkinType* targetType=0);
+
+  void ExtendLastSubalgebraChainMember();
   void GetHCandidates
 (Vectors<Rational>& outputHCandidatesScaledToActByTwo, CandidateSSSubalgebra& newCandidate,
  DynkinType& currentType, List<int>& currentRootInjection)

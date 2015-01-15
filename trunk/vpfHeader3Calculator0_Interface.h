@@ -1699,6 +1699,7 @@ public:
   static bool innerExpressionFromRF
   (Calculator& theCommands, const RationalFunctionOld& input, Expression& output,
    Expression* inputContext=0);
+  static bool innerLoadKey(Calculator& theCommands, const Expression& inputStatementList, const std::string& inputKey, Expression& output);
   static bool innerStoreSemisimpleSubalgebras
   (Calculator& theCommands, const SemisimpleSubalgebras& input, Expression& output);
   static bool innerExpressionFromElementSemisimpleLieAlgebraAlgebraicNumbers

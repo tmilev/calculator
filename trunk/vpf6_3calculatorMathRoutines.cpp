@@ -3438,7 +3438,7 @@ bool CalculatorFunctionsGeneral::innerGetCentralizerChainsSemisimpleSubalgebras(
   for (int i=0; i<theChains.size; i++)
   { out << "<br>Chain " << i+1 << ": LoadSemisimpleSubalgebras{}( " << theSAs.owneR->theWeyl.theDynkinType.ToString() << ", (";
     for (int j=0; j<theChains[i].size; j++)
-    { CalculatorConversions::innerStoreCandidateSA(theCommands, theSAs.theSubalgebraCandidates[theChains[i][j]], currentChainE);
+    { CalculatorConversions::innerStoreCandidateSA(theCommands, theSAs.theSubalgebras[theChains[i][j]], currentChainE);
       out << currentChainE.ToString();
       if (j!=theChains[i].size-1)
         out << ", ";

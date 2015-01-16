@@ -428,8 +428,8 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
 //  stOutput << ownerSS->ToString();
   Expression theCandidatesE=input[2];
   theCandidatesE.Sequencefy();
-  theSAs.theSubalgebraCandidates.ReservE(theCandidatesE.children.size-1);
-  theSAs.theSubalgebraCandidates.SetSize(0);
+  theSAs.theSubalgebras.ReservE(theCandidatesE.children.size-1);
+  theSAs.theSubalgebras.SetSize(0);
   theSAs.theSubalgebrasNonEmbedded->SetExpectedSize(theCandidatesE.children.size-1);
   ProgressReport theReport(theCommands.theGlobalVariableS);
   theSAs.flagAttemptToSolveSystems=true;
@@ -448,7 +448,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
       return theCommands << "<hr>Error loading candidate subalgebra: failed to load candidate number " << i << " of type "
       << tempCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " extracted from expression: " << input[1].ToString() << ". <hr>";
     //stOutput << "<hr>read cartan elements: " << tempCandidate.theHs.size;
-    theSAs.theSubalgebraCandidates.AddOnTop(tempCandidate);
+    theSAs.theSubalgebras.AddOnTop(tempCandidate);
   }
 //  stOutput << "centralizers off";
   theSAs.flagAttemptToAdjustCentralizers=false;
@@ -468,11 +468,11 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(Calculator& theComma
     return false;
   output.AddChildOnTop(tempE);
   tempE.reset(theCommands);
-  tempE.children.ReservE(input.theSubalgebraCandidates.size+1);
+  tempE.children.ReservE(input.theSubalgebras.size+1);
   tempE2.MakeAtom(theCommands.opSequence(), theCommands);
   tempE.AddChildOnTop(tempE2);
-  for (int i=0; i<input.theSubalgebraCandidates.size; i++)
-  { if (!CalculatorConversions::innerStoreCandidateSA(theCommands, input.theSubalgebraCandidates[i], candidateE))
+  for (int i=0; i<input.theSubalgebras.size; i++)
+  { if (!CalculatorConversions::innerStoreCandidateSA(theCommands, input.theSubalgebras[i], candidateE))
       return false;
     tempE.AddChildOnTop(candidateE);
   }

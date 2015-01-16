@@ -318,6 +318,8 @@ void WebWorker::OutputBeforeComputation()
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
 
+//stOutput << "Folders: " << theParser.theGlobalVariableS->ToStringFolderInfo();
+
   stOutput << tempStreamXX.str();
   stOutput << "<table>\n <tr valign=\"top\">\n <td>";
   stOutput << "\n<FORM method=\"POST\" id=\"formCalculator\" name=\"formCalculator\" action=\""

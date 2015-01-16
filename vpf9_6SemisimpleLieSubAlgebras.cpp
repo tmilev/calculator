@@ -773,6 +773,7 @@ bool SemisimpleSubalgebras::RemoveLastSubalgebra()
   this->currentPossibleLargerDynkinTypes.SetSize(this->currentSubalgebraChain.size);
   this->currentNumLargerTypesExplored.SetSize(this->currentSubalgebraChain.size);
   this->currentNumHcandidatesExplored.SetSize(this->currentSubalgebraChain.size);
+  this->currentHCandidatesScaledToActByTwo.SetSize(this->currentSubalgebraChain.size);
   this->currentRootInjections.SetSize(this->currentSubalgebraChain.size);
   return this->currentSubalgebraChain.size>0;
 }
@@ -839,7 +840,7 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
 }
 
 void SemisimpleSubalgebras::AddNewSubalgebra(CandidateSSSubalgebra& input)
-{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::AddNewCandidate");
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::AddNewSubalgebra");
   input.indexInOwner=this->theSubalgebras.size;
   this->theSubalgebras.AddOnTop(input);
   if (!this->theSubalgebras.LastObject()->indexInOwner==this->theSubalgebras.size-1)
@@ -853,10 +854,11 @@ void SemisimpleSubalgebras::AddNewSubalgebra(CandidateSSSubalgebra& input)
   this->currentNumHcandidatesExplored.AddOnTop(0);
   this->currentHCandidatesScaledToActByTwo.SetSize(this->currentSubalgebraChain.size);
   this->currentNumLargerTypesExplored.AddOnTop(0);
+  this->ComputeCurrentHCandidates();
 }
 
 bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
-{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::IncrementState");
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::IncrementReturnFalseIfPastLast");
   ProgressReport theReport(this->theGlobalVariables);
   if (this->currentSubalgebraChain.size==0)
     return false;

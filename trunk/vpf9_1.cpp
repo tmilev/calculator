@@ -77,7 +77,12 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
   theFile.close();
   stOutput.Flush();
   if (this->CleanUpFunction!=0)
-    this->CleanUpFunction();
+  { this->CleanUpFunction();
+    std::cout << "CLEAN UP FN is NONZERO";
+    std::cout.flush();
+  }
+  else
+    std::cout << "CLEAN UP FN is ZERO";
   assert(false);
   return *this;
 }

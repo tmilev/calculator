@@ -25,7 +25,7 @@ class logger
     if (theFile.tellg()>500000)
       this->flagStopWritingToFile=true;
   }
-  enum loggerSpecialSymbols{ endL, red, blue, yellow, green, purple, normalColor};
+  enum loggerSpecialSymbols{ endL, red, blue, yellow, green, purple, cyan, normalColor};
   std::string closeTagConsole()
   { return "\e[0m";
   }
@@ -40,12 +40,14 @@ class logger
         return "\e[1;31m";
       case logger::green:
         return "\e[1;32m";
-      case logger::blue:
-        return "\e[1;34m";
       case logger::yellow:
         return "\e[1;33m";
+      case logger::blue:
+        return "\e[1;34m";
       case logger::purple:
         return "\e[1;35m";
+      case logger::cyan:
+        return "\e[1;36m";
       default:
         return "";
     }
@@ -82,6 +84,7 @@ class logger
       case logger::yellow:
       case logger::green:
       case logger::purple:
+      case logger::cyan:
         this->currentColor=input;
         if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
           std::cout << this->openTagConsole();
@@ -113,7 +116,8 @@ WebServer theWebServer;
 
 void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
 { MacroRegisterFunctionWithName("ProgressReportWebServer::SetStatus");
-  theLog << "SetStatus start. " << logger::endL;
+  theLog << logger::endL << logger::red << "SetStatus: outputFunction: "
+  << (int) stOutput.theOutputFunction << logger::endL;
   MutexWrapper& safetyFirst=onePredefinedCopyOfGlobalVariables.MutexWebWorkerStaticFiasco;
 //    std::cout << "Got thus far ProgressReportWebServer::SetStatus 2" << std::endl;
   safetyFirst.LockMe();
@@ -128,8 +132,14 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
     toBePiped << "<br>" << this->theProgressReports[i];
   if (!onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
     return;
-  theWebServer.GetActiveWorker().pipeWorkerToServerWorkerStatus.WriteAfterEmptying(toBePiped.str());
-  theLog << "SetStatus end." << logger::endL;
+  theLog << logger::endL << logger::red << "SetStatus before the issue: outputFunction: "
+  << (int) stOutput.theOutputFunction << logger::endL;
+  Pipe& thePipe=theWebServer.GetActiveWorker().pipeWorkerToServerWorkerStatus;
+  theLog << logger::endL << logger::red << "SetStatus @ issue: outputFunction: "
+  << (int) stOutput.theOutputFunction << logger::endL;
+  thePipe.WriteAfterEmptying(toBePiped.str());
+  theLog << logger::endL << logger::red << "SetStatus: outputFunction: "
+  << (int) stOutput.theOutputFunction << logger::endL;
 }
 
 List<std::string> ProgressReportWebServer::theProgressReports;
@@ -167,7 +177,9 @@ void PauseController::PauseIfRequested()
 }
 
 void PauseController::LockMe()
-{ if (this->CheckPauseIsRequested())
+{ theLog << logger::endL << logger::cyan << "PauseController::LockMe: outputFunction: "
+  << (int) stOutput.theOutputFunction << logger::endL;
+  if (this->CheckPauseIsRequested())
     theLog << logger::red << "BLOCKING on pause controller " << this->ToString() << logger::endL;
   read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size);
 }
@@ -289,9 +301,11 @@ void WebWorker::resetMessageComponentsExceptRawMessage()
   this->ContentLength=-1;
 }
 
-std::stringstream standardOutputStreamAfterTimeout;
+static std::stringstream standardOutputStreamAfterTimeout;
 void WebWorker::StandardOutputAfterTimeOut(const std::string& input)
 { standardOutputStreamAfterTimeout << input;
+  theLog << logger::endL << logger::green << " Standard output: " << standardOutputStreamAfterTimeout.str()
+  << logger::endL;
 }
 
 void WebWorker::OutputBeforeComputation()
@@ -359,7 +373,9 @@ void WebWorker::OutputResultAfterTimeout()
 void WebWorker::OutputCrashAfterTimeout()
 { MacroRegisterFunctionWithName("WebWorker::OutputCrashAfterTimeout");
   theLog << logger::red << theWebServer.ToStringActiveWorker() << ": crashing AFTER timeout!" << logger::endL;
-
+  std::cout << "What the fucking hell is oging on here? the outstream is: \n\n\n" << standardOutputStreamAfterTimeout.str()
+  << "\n\n\n";
+  std::cout.flush();
   if (standardOutputStreamAfterTimeout.str().size()!=0)
     WebWorker::OutputSendAfterTimeout(standardOutputStreamAfterTimeout.str()+"<hr>"+crash.theCrashReport.str());
   else
@@ -1210,10 +1226,24 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   //we need to rewire the standard output and the crashing mechanism:
   crash.CleanUpFunction=WebWorker::OutputCrashAfterTimeout;
   //note that standard output cannot be rewired in the beginning of the function as we use the old stOutput
+  theLog << logger::endL << logger::green << "Before rewiring the output function is: "
+  << (int) stOutput.theOutputFunction << logger::endL;
   stOutput.theOutputFunction=WebWorker::StandardOutputAfterTimeOut;
+  theLog << logger::endL << logger::green << "Rewired the output function to: "
+  << (int) stOutput.theOutputFunction << logger::endL;
+  stOutput << "Point 1. ";
+  theLog << logger::endL << logger::purple << "The stoutput is via " << (int) stOutput.theOutputFunction
+  << " and is: " << logger::yellow << standardOutputStreamAfterTimeout.str() << logger::endL;
+
   theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: continuing computation.");
+  stOutput << "Point 2. ";
+  theLog << logger::endL << logger::purple << "The stoutput is via " << (int) stOutput.theOutputFunction
+  << " and is: " << logger::yellow << standardOutputStreamAfterTimeout.str() << logger::endL;
   this->PauseIndicatorPipeInUse.UnlockMe();
   theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: exiting function.");
+  stOutput  << "Point 3. ";
+  theLog << logger::endL << logger::purple << "The stoutput is via " << (int) stOutput.theOutputFunction
+  << " and is: " << logger::yellow << standardOutputStreamAfterTimeout.str() << logger::endL;
 //  this->SignalIamDoneReleaseEverything();
 //  theLog << consoleGreen("Indicator: released everything and signalled end.") << logger::endL;
 }
@@ -1268,7 +1298,11 @@ WebServer::~WebServer()
 
 void WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone()
 { //theLog << logger::red << ("Got THUS far") << logger::endL;
+  theLog << "here am i";
   theWebServer.GetActiveWorker().OutputShowIndicatorOnTimeout();
+  stOutput << "What the hell";
+  stOutput.Flush();
+  theLog << "here am i a-fucking-gain";
 }
 
 void WebServer::FlushActiveWorker()
@@ -1291,13 +1325,14 @@ WebServer::WebServer()
 
 WebWorker& WebServer::GetActiveWorker()
 { MacroRegisterFunctionWithName("WebServer::GetActiveWorker");
+  void (*oldOutputFunction)(const std::string& stringToOutput) =stOutput.theOutputFunction;
   stOutput.theOutputFunction=0; //<- We are checking if the web server is in order.
   //Before that we prevent the crashing mechanism from trying to use (the eventually corrput) web server
   //to report the error over the internet.
   if (this->activeWorker<0 || this->activeWorker>=this->theWorkers.size)
     crash << "Active worker index is " << this->activeWorker << " however I have " << this->theWorkers.size
     << " workers. " << crash;
-  stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;//<-the web server is in order,
+  stOutput.theOutputFunction=oldOutputFunction;//<-the web server is in order,
   //therefore we restore the ability to report crashes over the internet.
   return this->theWorkers[this->activeWorker];
 }
@@ -1363,12 +1398,18 @@ void WebServer::CreateNewActiveWorker()
 }
 
 void Pipe::WriteAfterEmptying(const std::string& toBeSent)
-{ MacroRegisterFunctionWithName("Pipe::WriteAfterEmptying");
+{ theLog << "Step -1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
+  MacroRegisterFunctionWithName("Pipe::WriteAfterEmptying");
+  theLog << "Step 1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
   this->pipeAvailable.LockMe();
+//  theLog << logger::endL << "Step 2: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction
+//  << logger::endL;
   this->ReadNoLocks();
   this->lastRead.SetSize(0);
   this->WriteNoLocks(toBeSent);
   this->pipeAvailable.UnlockMe();
+//  theLog << logger::endL << "Step 3: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction
+//  << logger::endL;
 }
 
 void Pipe::WriteNoLocks(const std::string& toBeSent)

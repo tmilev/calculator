@@ -466,6 +466,16 @@ bool Calculator::innerPrintSSsubalgebras
   MacroRegisterFunctionWithName("Calculator::innerPrintSSsubalgebras");
   if (theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection!=0)
     theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection();
+  else
+    std::cout << "Oh shit!";
+  stOutput << "Here be i!<br>";
+  stOutput.Flush();
+  std::cout << "the damned address: "
+  << std::hex << (int) theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection;
+  std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+  stOutput << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+  stOutput.Flush();
+  crash << crash;
   std::stringstream out;
   SemisimpleLieAlgebra* ownerSSPointer=0;
   bool isAlreadySubalgebrasObject=input.IsOfType<SemisimpleSubalgebras>();

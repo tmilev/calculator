@@ -532,6 +532,7 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch(SemisimpleLieAlgebra
   emptyCandidate.owner=this;
   this->currentSubalgebraChain.SetExpectedSize(this->owneR->GetRank()+2);
   this->currentSubalgebraChain.SetSize(0);
+  stOutput << "Got to ere! ";
   this->AddNewSubalgebra(emptyCandidate);
   this->ExtendLastSubalgebraChainMember();
 //  stOutput << "Num candidates so far: " << this->theSubalgebras.size;
@@ -780,10 +781,12 @@ bool SemisimpleSubalgebras::RemoveLastSubalgebra()
 
 bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeCurrentHCandidates");
+  stOutput << "got to here! - 0" ;
   int stackIndex=this->currentSubalgebraChain.size-1;
   int typeIndex=this->currentNumLargerTypesExplored[stackIndex];
   this->currentNumHcandidatesExplored[stackIndex]=0;
   this->currentHCandidatesScaledToActByTwo.SetSize(0);
+  stOutput << "got to here!" ;
   if (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].GetRootSystemSize()>this->owneR->GetNumPosRoots()*2)
     return true;
   if (!this->targetDynkinType.IsEqualToZero())
@@ -791,6 +794,7 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
       if (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex]!=this->targetDynkinType)
         return true;
   ProgressReport theReport0(this->theGlobalVariables), theReport1(this->theGlobalVariables);
+  stOutput << "got to here- 2!" ;
   if (theGlobalVariables!=0)
   { std::stringstream reportStream;
     reportStream << " Finding h-canddiates for extension " << typeIndex+1 << " out of "

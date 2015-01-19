@@ -161,8 +161,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     { std::stringstream tmpStream;
       tmpStream << "textEbasisReadOnly" << timesCalled << "_" << i << "_" << j;
       textEbasisNamesReadOnly[i][j]=tmpStream.str();
-      out << "<span id=\"" << textEbasisNamesReadOnly[i][j]
-      << "\"> </span>\n";
+      out << "<span id=\"" << textEbasisNamesReadOnly[i][j] << "\"> </span>\n";
     }
     out << "<br>";
   }

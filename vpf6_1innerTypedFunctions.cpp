@@ -231,9 +231,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt(Calculato
   //  << theCommands.theObjectContainer.theCoxeterElements[i].ToString();
   //}
   if (leftR.owner!=rightR.owner)
-  { theCommands << "<hr>Attempting to multiply elements of different groups, possible user typo?";
-    return false;
-  }
+    return theCommands << "<hr>Attempting to multiply elements of different groups, possible user typo?";
   leftR*=rightR;
   //stOutput << "<br>final output: " << leftR.ToString();
   return output.AssignValue(leftR, theCommands);
@@ -339,9 +337,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(Calcula
     return false;
   ElementWeylGroup<WeylGroup> theElt=inputConverted[1].GetValue<ElementWeylGroup<WeylGroup> >();
   if (theElt.owner!=&theWeight.owner->theWeyl)
-  { theCommands << "<hr>Possible user input error: attempting to apply Weyl group element to weight corresponding to different Weyl group.";
-    return false;
-  }
+    return theCommands << "<hr>Possible user input error: attempting to apply Weyl group element to weight corresponding to different Weyl group.";
   Vector<Polynomial<Rational> > theWeightSimpleCoords=theElt.owner->GetSimpleCoordinatesFromFundamental(theWeight.weightFundamentalCoordS);
   theElt.ActOn(theWeightSimpleCoords);
   theWeight.weightFundamentalCoordS=theElt.owner->GetFundamentalCoordinatesFromSimple(theWeightSimpleCoords);
@@ -413,10 +409,8 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(C
 //  stOutput << "<hr>Merged contexts, ready for multiplication: " << inputContextsMerged.ToString();
   if (inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >().HasNonSmallPositiveIntegerDerivation() ||
       inputContextsMerged[2].GetValue<ElementWeylAlgebra<Rational> >().HasNonSmallPositiveIntegerDerivation())
-  { theCommands << "<hr> Failed to multiply " << inputContextsMerged[1].ToString() << " by " << inputContextsMerged[2].ToString() << ": "
+    return theCommands << "<hr> Failed to multiply " << inputContextsMerged[1].ToString() << " by " << inputContextsMerged[2].ToString() << ": "
     << " one of the two differential operators has differential operator exponent that is not a small integer. ";
-    return false;
-  }
 //  stOutput << "<hr>Multiplying " << inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >().ToString()
 //  << " by " << inputContextsMerged[2].GetValue<ElementWeylAlgebra<Rational> >().ToString();
   ElementWeylAlgebra<Rational> result=inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >();
@@ -680,10 +674,8 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(Calculator& theCo
     else if (base.theCoeffs[0]!=1)
       isMon=false;
     if (!isMon)
-    { theCommands << "<hr>Failed to raise " << base.ToString() << " to power " << powerRat.ToString() << ": the exponent is not a "
+      return theCommands << "<hr>Failed to raise " << base.ToString() << " to power " << powerRat.ToString() << ": the exponent is not a "
       << " small integer and the base is not a coefficient one monomial. ";
-      return false;
-    }
     ElementWeylAlgebra<Rational> finalOutput;
     MonomialWeylAlgebra theMon=base[0];
     theMon.polynomialPart.RaiseToPower(powerRat);
@@ -851,9 +843,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat(Calculator& the
   if (!theMat.IsSquare())
     return output.MakeError("Attempting to raise non-square matrix to power", theCommands);
   if (theMat.NumRows>10)
-  { theCommands << "I've been instructed not to exponentiate non-ratinoal matrices of dimension >10. ";
-    return false;
-  }
+    return theCommands << "I've been instructed not to exponentiate non-ratinoal matrices of dimension >10. ";
   Matrix<Expression> idMatE;
   Expression oneE, zeroE;
   oneE.AssignValue(1, theCommands);
@@ -1018,15 +1008,11 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg(Calcu
   if (!input[2].IsOfType(&rightC))
     return false;
   if (leftC.GetOwner()!=rightC.GetOwner())
-  { theCommands << "You asked me to multiply characters over different semisimple Lie algebras. Could this be a typo?";
-    return false;
-  }
+    return theCommands << "You asked me to multiply characters over different semisimple Lie algebras. Could this be a typo?";
   std::string successString=(leftC*=rightC);
   if (successString!="")
-  { theCommands << "I tried to multiply character " << leftC.ToString() << " by " << rightC.ToString()
+    return theCommands << "I tried to multiply character " << leftC.ToString() << " by " << rightC.ToString()
     << " but I failed with the following message: " << successString;
-    return false;
-  }
   return output.AssignValue(leftC, theCommands);
 }
 
@@ -1254,10 +1240,8 @@ bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(Calculator& theCom
   if (!input[2].IsSequenceNElementS())
     return false;
   if (input[2].children.size!=input[1].children.size)
-  { theCommands << "<hr>Attempting to add a sequence of length " << input[1].children.size-1 << "  to a sequence of length "
+    return theCommands << "<hr>Attempting to add a sequence of length " << input[1].children.size-1 << "  to a sequence of length "
     << input[2].children.size-1 << ", possible user typo?";
-    return false;
-  }
   output.reset(theCommands);
   output.children.ReservE(input[1].children.size);
   output.AddChildAtomOnTop(theCommands.opSequence());

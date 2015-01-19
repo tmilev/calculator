@@ -116,8 +116,8 @@ WebServer theWebServer;
 
 void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
 { MacroRegisterFunctionWithName("ProgressReportWebServer::SetStatus");
-  theLog << logger::endL << logger::red << "SetStatus: outputFunction: "
-  << (int) stOutput.theOutputFunction << logger::endL;
+//  theLog << logger::endL << logger::red << "SetStatus: outputFunction: "
+//  << (int) stOutput.theOutputFunction << logger::endL;
   MutexWrapper& safetyFirst=onePredefinedCopyOfGlobalVariables.MutexWebWorkerStaticFiasco;
 //    std::cout << "Got thus far ProgressReportWebServer::SetStatus 2" << std::endl;
   safetyFirst.LockMe();
@@ -132,14 +132,9 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
     toBePiped << "<br>" << this->theProgressReports[i];
   if (!onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
     return;
-  theLog << logger::endL << logger::red << "SetStatus before the issue: outputFunction: "
-  << (int) stOutput.theOutputFunction << logger::endL;
-  Pipe& thePipe=theWebServer.GetActiveWorker().pipeWorkerToServerWorkerStatus;
-  theLog << logger::endL << logger::red << "SetStatus @ issue: outputFunction: "
-  << (int) stOutput.theOutputFunction << logger::endL;
-  thePipe.WriteAfterEmptying(toBePiped.str());
-  theLog << logger::endL << logger::red << "SetStatus: outputFunction: "
-  << (int) stOutput.theOutputFunction << logger::endL;
+  // theLog << logger::endL << logger::red << "SetStatus before the issue: outputFunction: "
+  // << (int) stOutput.theOutputFunction << logger::endL;
+  theWebServer.GetActiveWorker().pipeWorkerToServerWorkerStatus.WriteAfterEmptying(toBePiped.str());
 }
 
 List<std::string> ProgressReportWebServer::theProgressReports;
@@ -177,9 +172,7 @@ void PauseController::PauseIfRequested()
 }
 
 void PauseController::LockMe()
-{ theLog << logger::endL << logger::cyan << "PauseController::LockMe: outputFunction: "
-  << (int) stOutput.theOutputFunction << logger::endL;
-  if (this->CheckPauseIsRequested())
+{ if (this->CheckPauseIsRequested())
     theLog << logger::red << "BLOCKING on pause controller " << this->ToString() << logger::endL;
   read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size);
 }
@@ -376,10 +369,7 @@ void WebWorker::OutputCrashAfterTimeout()
   std::cout << "What the fucking hell is oging on here? the outstream is: \n\n\n" << standardOutputStreamAfterTimeout.str()
   << "\n\n\n";
   std::cout.flush();
-  if (standardOutputStreamAfterTimeout.str().size()!=0)
-    WebWorker::OutputSendAfterTimeout(standardOutputStreamAfterTimeout.str()+"<hr>"+crash.theCrashReport.str());
-  else
-    WebWorker::OutputSendAfterTimeout(crash.theCrashReport.str());
+  WebWorker::OutputSendAfterTimeout(crash.theCrashReport.str());
   theWebServer.SignalActiveWorkerDoneReleaseEverything();
 }
 
@@ -1226,24 +1216,10 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   //we need to rewire the standard output and the crashing mechanism:
   crash.CleanUpFunction=WebWorker::OutputCrashAfterTimeout;
   //note that standard output cannot be rewired in the beginning of the function as we use the old stOutput
-  theLog << logger::endL << logger::green << "Before rewiring the output function is: "
-  << (int) stOutput.theOutputFunction << logger::endL;
   stOutput.theOutputFunction=WebWorker::StandardOutputAfterTimeOut;
-  theLog << logger::endL << logger::green << "Rewired the output function to: "
-  << (int) stOutput.theOutputFunction << logger::endL;
-  stOutput << "Point 1. ";
-  theLog << logger::endL << logger::purple << "The stoutput is via " << (int) stOutput.theOutputFunction
-  << " and is: " << logger::yellow << standardOutputStreamAfterTimeout.str() << logger::endL;
-
   theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: continuing computation.");
-  stOutput << "Point 2. ";
-  theLog << logger::endL << logger::purple << "The stoutput is via " << (int) stOutput.theOutputFunction
-  << " and is: " << logger::yellow << standardOutputStreamAfterTimeout.str() << logger::endL;
   this->PauseIndicatorPipeInUse.UnlockMe();
   theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: exiting function.");
-  stOutput  << "Point 3. ";
-  theLog << logger::endL << logger::purple << "The stoutput is via " << (int) stOutput.theOutputFunction
-  << " and is: " << logger::yellow << standardOutputStreamAfterTimeout.str() << logger::endL;
 //  this->SignalIamDoneReleaseEverything();
 //  theLog << consoleGreen("Indicator: released everything and signalled end.") << logger::endL;
 }
@@ -1298,11 +1274,10 @@ WebServer::~WebServer()
 
 void WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone()
 { //theLog << logger::red << ("Got THUS far") << logger::endL;
-  theLog << "here am i";
+//  theLog << "here am i";
   theWebServer.GetActiveWorker().OutputShowIndicatorOnTimeout();
-  stOutput << "What the hell";
-  stOutput.Flush();
-  theLog << "here am i a-fucking-gain";
+//  stOutput << "What the hell";
+//  stOutput.Flush();
 }
 
 void WebServer::FlushActiveWorker()
@@ -1398,9 +1373,9 @@ void WebServer::CreateNewActiveWorker()
 }
 
 void Pipe::WriteAfterEmptying(const std::string& toBeSent)
-{ theLog << "Step -1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
+{ //theLog << "Step -1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
   MacroRegisterFunctionWithName("Pipe::WriteAfterEmptying");
-  theLog << "Step 1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
+  //theLog << "Step 1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
   this->pipeAvailable.LockMe();
 //  theLog << logger::endL << "Step 2: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction
 //  << logger::endL;

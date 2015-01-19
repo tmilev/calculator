@@ -466,16 +466,6 @@ bool Calculator::innerPrintSSsubalgebras
   MacroRegisterFunctionWithName("Calculator::innerPrintSSsubalgebras");
   if (theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection!=0)
     theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection();
-  else
-    std::cout << "Oh shit!";
-  stOutput << "Here be i!<br>";
-  stOutput.Flush();
-  std::cout << "the damned address: "
-  << std::hex << (int) theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection;
-  std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-  stOutput << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-  stOutput.Flush();
-  crash << crash;
   std::stringstream out;
   SemisimpleLieAlgebra* ownerSSPointer=0;
   bool isAlreadySubalgebrasObject=input.IsOfType<SemisimpleSubalgebras>();
@@ -725,17 +715,13 @@ bool Calculator::innerDeterminantPolynomial(Calculator& theCommands, const Expre
   Matrix<Polynomial<Rational> > matPol;
   Expression theContext;
   if (!theCommands.GetMatrix(input, matPol, &theContext, -1, CalculatorConversions::innerPolynomial<Rational>))
-  { theCommands << "<hr>Failed to convert the input to matrix of polynomials. ";
-    return false;
-  }
+    return theCommands << "<hr>Failed to convert the input to matrix of polynomials. ";
   if (matPol.NumRows!=matPol.NumCols)
     return output.MakeError("<hr>Failed to compute determinant: matrix is non-square. ", theCommands);
   if (matPol.NumRows>8)
-  { theCommands << "<hr>Failed to compute determinant: matrix is larger than 8 x 8, and your matrix had "
+    return theCommands << "<hr>Failed to compute determinant: matrix is larger than 8 x 8, and your matrix had "
     << matPol.NumRows << " rows. Note that you can compute determinant using the \\det function which does Gaussian elimination "
     << " and will work for large rational matrices. This function is meant to be used with honest polynomial entries. ";
-    return false;
-  }
   Polynomial<Rational> outputPoly;
   outputPoly.MakeDeterminantFromSquareMatrix(matPol);
   return output.AssignValueWithContext(outputPoly, theContext, theCommands);
@@ -750,9 +736,7 @@ bool Calculator::innerMatrixRational(Calculator& theCommands, const Expression& 
     return true;
   }
   if (!theCommands.GetMatriXFromArguments(input, outputMat, 0, -1, 0))
-  { theCommands << "<br>Failed to get matrix of rationals. ";
-    return false;
-  }
+    return theCommands << "<br>Failed to get matrix of rationals. ";
   return output.AssignValue(outputMat, theCommands);
 }
 
@@ -988,21 +972,15 @@ bool Calculator::innerCharacterSSLieAlgFD(Calculator& theCommands, const Express
 bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerConesIntersect");
   if (!input.IsListNElements(3))
-  { theCommands << "Function ConesIntersection expects 2 arguments, got " << input.children.size-1 << " instead. ";
-    return false;
-  }
+    return theCommands << "Function ConesIntersection expects 2 arguments, got " << input.children.size-1 << " instead. ";
   Matrix<Rational> coneNonStrictMatForm;
   Matrix<Rational> coneStrictMatForm;
   Vectors<Rational> coneNonStrictGens;
   Vectors<Rational> coneStrictGens;
   if (!theCommands.GetMatrix(input[1], coneStrictMatForm))
-  { theCommands << "Failed to extract matrix from the first argument, " << input[1].ToString();
-    return false;
-  }
+    return theCommands << "Failed to extract matrix from the first argument, " << input[1].ToString();
   if (!theCommands.GetMatrix(input[2], coneNonStrictMatForm))
-  { theCommands << "Failed to extract matrix from the second argument, " << input[2].ToString();
-    return false;
-  }
+    return theCommands << "Failed to extract matrix from the second argument, " << input[2].ToString();
   std::stringstream out;
   if (coneNonStrictMatForm.NumCols!=coneStrictMatForm.NumCols)
   { out << "I got as input vectors of different dimensions, first groups had vectors of dimension " << coneNonStrictMatForm.NumCols
@@ -1132,15 +1110,11 @@ bool Calculator::innerSolveSerreLikeSystemUpperLimit(Calculator& theCommands, co
   int upperLimit=-1;
   Rational upperLimitRat;
   if (!thePolysRational[0].IsConstant(&upperLimitRat))
-  { theCommands << "Failed to extract a constant from the first argument "
+    return theCommands << "Failed to extract a constant from the first argument "
     << thePolysRational[0].ToString(&theComputation.theFormat) << ". ";
-    return false;
-  }
   if (!upperLimitRat.IsIntegerFittingInInt(&upperLimit))
-  { theCommands << "Failed to extract a small integer from the first argument "
+    return theCommands << "Failed to extract a small integer from the first argument "
     << upperLimitRat.ToString(&theComputation.theFormat) << ". ";
-    return false;
-  }
   thePolysRational.RemoveIndexShiftDown(0);
   Vector<Polynomial<AlgebraicNumber> > thePolysAlgebraic;
   thePolysAlgebraic=thePolysRational;
@@ -1249,9 +1223,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
   Vectors<Rational> outputRoots;
   WeylGroup& theWeyl=theSSlieAlg->theWeyl;
   if (!theWeyl.theDynkinType.IsSimple())
-  { theCommands << "<hr>Function root subsystem works for simple ambient types only.";
-    return false;
-  }
+    return theCommands << "<hr>Function root subsystem works for simple ambient types only.";
   for (int i=2; i<input.children.size; i++)
   { if (!theCommands.GetVectoR(input[i], currentRoot, 0, theRank, 0))
       return false;

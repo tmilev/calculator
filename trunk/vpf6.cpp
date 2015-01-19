@@ -179,19 +179,15 @@ bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>&
   if (!input.IsSequenceNElementS())
   { if (targetDimNonMandatory>0)
       if (targetDimNonMandatory!=1)
-      { this->Comments << "<hr>GetVector failure: target dim is " << targetDimNonMandatory << " but the input " << input.ToString()
+        return this->Comments << "<hr>GetVector failure: target dim is " << targetDimNonMandatory << " but the input " << input.ToString()
         << " can only be interpretted as a single element";
-        return false;
-      }
     output.AddOnTop(input);
     return true;
   }
   if (targetDimNonMandatory>0)
     if (targetDimNonMandatory!=input.children.size-1)
-    { this->Comments << "<hr>Failed to GetVector: the input is required to have " << targetDimNonMandatory << " columns but it has "
+      return this->Comments << "<hr>Failed to GetVector: the input is required to have " << targetDimNonMandatory << " columns but it has "
       << input.children.size-1 << " columns instead. <hr>";
-      return false;
-    }
   targetDimNonMandatory=input.children.size-1;
   for (int i=0; i<targetDimNonMandatory; i++)
     output.AddOnTop(input[i+1]);
@@ -1358,8 +1354,7 @@ bool Calculator::outerTensor(Calculator& theCommands, const Expression& input, E
 { //stOutput << "<br>At start of evaluate standard times: " << theExpression.ToString();
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::StandardTensor");
-  if (theCommands.outerDistribute
-      (theCommands, input, output, theCommands.opPlus(), theCommands.opTensor()))
+  if (theCommands.outerDistribute(theCommands, input, output, theCommands.opPlus(), theCommands.opTensor()))
     return true;
   //stOutput << "<br>After distribute: " << theExpression.ToString();
   if (theCommands.outerAssociate(theCommands, input, output))
@@ -2656,14 +2651,10 @@ bool Calculator::ConvertExpressionsToCommonContext(List<Expression>& inputOutput
       commonContext=*inputOutputStartingContext;
   for (int i=0; i<inputOutputEs.size; i++)
   { if (!inputOutputEs[i].IsBuiltInType())
-    { *this << "<hr>Possible programming error: calling ConvertExpressionsToCommonContext on expressions without context. "
+      return *this << "<hr>Possible programming error: calling ConvertExpressionsToCommonContext on expressions without context. "
       << Crasher::GetStackTraceEtcErrorMessage();
-      return false;
-    }
     if (!commonContext.ContextMergeContexts(commonContext, inputOutputEs[i].GetContext(), commonContext))
-    { this->Comments << "<hr>Failed to merge context " << commonContext.ToString() << " with " << inputOutputEs[i].GetContext().ToString();
-      return false;
-    }
+      return *this << "<hr>Failed to merge context " << commonContext.ToString() << " with " << inputOutputEs[i].GetContext().ToString();
   }
   for (int i=0; i<inputOutputEs.size; i++)
     if (!inputOutputEs[i].::Expression::SetContextAtLeastEqualTo(commonContext))

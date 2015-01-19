@@ -795,8 +795,7 @@ bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >
   { outputUE.MakeConst(this->GetValue<RationalFunctionOld>(), *theOwner);
     return output.AssignValueWithContext(outputUE, this->GetContext(), *this->theBoss);
   }
-  this->theBoss->Comments << "<hr>Failed to convert " << this->ToString() << " to element of universal enveloping -  I don't know how. ";
-  return false;
+  return *this->theBoss << "<hr>Failed to convert " << this->ToString() << " to element of universal enveloping -  I don't know how. ";
 }
 
 template< >
@@ -1197,11 +1196,9 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
       { int theIndex=polyVarUnion.GetIndex((*currentPolyV)[i]);
         if (foundEWAVar.selected[theIndex])
           if ((*currentEWAV)[i]!=EWAVars[theIndex])
-          { owner << "<hr>Failed to merge contexts " << leftContext.ToString() << " and " << rightContext.ToString()
+            return owner << "<hr>Failed to merge contexts " << leftContext.ToString() << " and " << rightContext.ToString()
             << " because " << (*currentPolyV)[i].ToString() << " has two different corresponding differential operator variables: "
             << EWAVars[theIndex].ToString() << " and " << (*currentEWAV)[i].ToString();
-            return false;
-          }
         foundEWAVar.AddSelectionAppendNewIndex(theIndex);
         EWAVars[theIndex]=(*currentEWAV)[i];
       }
@@ -1214,11 +1211,9 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
         indexE.AssignValue(i, owner);
         currentEWAVar.AddChildOnTop(indexE);
         if (EWAVars.Contains(currentEWAVar))
-        { owner.Comments << "<hr>Failed to merge contexts " << leftContext.ToString() << " and " << rightContext.ToString()
+          return owner << "<hr>Failed to merge contexts " << leftContext.ToString() << " and " << rightContext.ToString()
           << ": " << polyVarUnion[i].ToString() << " had no differential letter assigned to it. I tried to assign automatically  "
           << currentEWAVar.ToString() << " as differential operator letter, but it was already taken. ";
-          return false;
-        }
       }
     Expression diffVarsE;
     diffVarsE.reset(owner, polyVarUnion.size+1);

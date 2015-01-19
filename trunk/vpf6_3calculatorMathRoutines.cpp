@@ -4722,9 +4722,7 @@ void LaTeXcrawler::CrawlRecursive(const std::string& currentFileName)
 bool CalculatorFunctionsGeneral::innerCrawlTexFile(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrawlTexFile");
   if (!input.IsOfType<std::string>())
-  { theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
-    return false;
-  }
+    return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
   LaTeXcrawler theCrawler;
   theCrawler.owner=&theCommands;
   theCrawler.theFileToCrawl=input.GetValue<std::string>();

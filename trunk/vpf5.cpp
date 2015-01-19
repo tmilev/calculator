@@ -2044,14 +2044,10 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
   Vector<Polynomial<Rational> > inputPolForm;
   Expression startContext;
   if (!theCommands.GetVectorFromFunctionArguments(input, inputPolForm, &startContext, 2, CalculatorConversions::innerPolynomial<Rational>))
-  { theCommands << "<hr>Failed to extract polynomials from arguments of " << input.ToString();
-    return false;
-  }
+    return theCommands << "<hr>Failed to extract polynomials from arguments of " << input.ToString();
   int letterDiff=0, letterPol=0;
   if (!inputPolForm[0].IsOneLetterFirstDegree(&letterDiff) || !inputPolForm[1].IsOneLetterFirstDegree(&letterPol) || letterDiff==letterPol)
-  { theCommands << "<hr>Failed to get different one-variable polynomials from input.  " << input.ToString();
-    return false;
-  }
+    return theCommands << "<hr>Failed to get different one-variable polynomials from input.  " << input.ToString();
   Expression endContext;
   endContext.MakeContextWithOnePolyVarOneDiffVar(theCommands, startContext.ContextGetContextVariable(letterPol), startContext.ContextGetContextVariable(letterDiff));
   ElementWeylAlgebra<Rational> outputEWA;
@@ -2078,15 +2074,11 @@ bool Calculator::ReadTestStrings(HashedList<std::string, MathRoutines::hashStrin
 //    stOutput << "<br>adding on top " << buffer;
     outputCommands.AddOnTop(buffer);
     if (!theFileReader.GetStringEnclosedIn("output", buffer))
-    { this->Comments << "<hr>Failed to read result string number " << outputResults.size+1 << ": is the test file corrupt?";
-      return false;
-    }
+      return this->Comments << "<hr>Failed to read result string number " << outputResults.size+1 << ": is the test file corrupt?";
     outputResults.AddOnTop(buffer);
   }
   if (outputCommands.size!=outputResults.size || outputCommands.size==0)
-  { this->Comments << "<hr>Corrupt test file: got " << outputCommands.size << " commands and " << outputResults.size << " results, which should not happen. ";
-    return false;
-  }
+    return this->Comments << "<hr>Corrupt test file: got " << outputCommands.size << " commands and " << outputResults.size << " results, which should not happen. ";
   return true;
 }
 

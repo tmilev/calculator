@@ -80,8 +80,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
   { this->CleanUpFunction();
     std::cout << "CLEAN UP FN is NONZERO";
     std::cout.flush();
-  }
-  else
+  } else
     std::cout << "CLEAN UP FN is ZERO";
   assert(false);
   return *this;

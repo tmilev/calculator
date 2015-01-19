@@ -464,8 +464,11 @@ bool Calculator::innerPrintSSsubalgebras
  bool doComputePairingTable, bool doComputeModuleDecomposition, bool doComputeNilradicals, bool doAdjustCentralizers)
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("Calculator::innerPrintSSsubalgebras");
+//  stOutput << "Does this show in the output? ";
   if (theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection!=0)
     theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection();
+//  stOutput << "After changing, does this show in output? ";
+//  crash << crash;
   std::stringstream out;
   SemisimpleLieAlgebra* ownerSSPointer=0;
   bool isAlreadySubalgebrasObject=input.IsOfType<SemisimpleSubalgebras>();

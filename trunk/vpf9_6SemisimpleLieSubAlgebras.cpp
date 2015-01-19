@@ -781,12 +781,10 @@ bool SemisimpleSubalgebras::RemoveLastSubalgebra()
 
 bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeCurrentHCandidates");
-  //stOutput << "got to here! - 0" ;
   int stackIndex=this->currentSubalgebraChain.size-1;
   int typeIndex=this->currentNumLargerTypesExplored[stackIndex];
   this->currentNumHcandidatesExplored[stackIndex]=0;
-  this->currentHCandidatesScaledToActByTwo.SetSize(0);
-  //stOutput << "got to here!" ;
+  this->currentHCandidatesScaledToActByTwo[stackIndex].SetSize(0);
   if (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].GetRootSystemSize()>this->owneR->GetNumPosRoots()*2)
     return true;
   if (!this->targetDynkinType.IsEqualToZero())
@@ -794,27 +792,32 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
       if (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex]!=this->targetDynkinType)
         return true;
   ProgressReport theReport0(this->theGlobalVariables), theReport1(this->theGlobalVariables);
-  //stOutput << "got to here- 2!" ;
   if (theGlobalVariables!=0)
   { std::stringstream reportStream;
     reportStream << " Finding h-canddiates for extension " << typeIndex+1 << " out of "
     << this->currentPossibleLargerDynkinTypes[stackIndex].size << ". We are trying to extend "
     << this->baseSubalgebra().theWeylNonEmbeddeD.theDynkinType.ToString() << " to "
     << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString() << ". ";
-    //stOutput << "<hr>" << reportStream.str();
+    stOutput << "<hr>" << reportStream.str();
     theReport0.Report(reportStream.str());
   }
   CandidateSSSubalgebra newCandidate;
   newCandidate.owner=this;
+  stOutput << "got here3";
+    this->baseSubalgebra().GetRank();
+  stOutput << "got here4";
   if (this->baseSubalgebra().GetRank()!=0)
-  { Vector<Rational> weightHElementWeAreLookingFor=
+  { stOutput << "got here";
+    this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex];
+    this->currentRootInjections[stackIndex][typeIndex];
+    stOutput << "got here2";
+    Vector<Rational> weightHElementWeAreLookingFor=
     this->GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot
-    (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex], this->currentRootInjections[stackIndex][typeIndex],
-     newCandidate);
+    (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex], this->currentRootInjections[stackIndex][typeIndex], newCandidate);
+    stOutput << "<hr>Weight h element we are looking for: " << weightHElementWeAreLookingFor.ToString()
+    << " base candidate type is: " << this->baseSubalgebra().theWeylNonEmbeddeD.theDynkinType.ToString();
     List<int> indicesModulesNewComponentExtensionMod;
     indicesModulesNewComponentExtensionMod.ReservE(this->owneR->theWeyl.RootSystem.size);
-    //stOutput << "<hr>Weight h element we are looking for: " << weightHElementWeAreLookingFor.ToString()
-    //<< " base candidate type is: " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString();
     indicesModulesNewComponentExtensionMod.SetSize(0);
     for (int j=0; j<this->baseSubalgebra().HighestWeightsNONPrimal.size; j++)
       if (this->baseSubalgebra().HighestWeightsNONPrimal[j]==weightHElementWeAreLookingFor)
@@ -832,13 +835,18 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
       return true;
     }
   }
+  stOutput << "got here5";
+  this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex];
+  this->currentRootInjections[stackIndex][typeIndex];
+  this->currentHCandidatesScaledToActByTwo[stackIndex];
+  stOutput << "got here6";
+
   newCandidate.SetUpInjectionHs
-  (this->baseSubalgebra(), this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
-   this->currentRootInjections[stackIndex][typeIndex]);
+  (this->baseSubalgebra(), this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex], this->currentRootInjections[stackIndex][typeIndex]);
   Vectors<Rational> theHCandidatesScaledToActByTwo;
+  stOutput << "got here7";
   this->GetHCandidates
-  (this->currentHCandidatesScaledToActByTwo[stackIndex], newCandidate,
-   this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
+  (this->currentHCandidatesScaledToActByTwo[stackIndex], newCandidate, this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
    this->currentRootInjections[stackIndex][typeIndex]);
   return true;
 }

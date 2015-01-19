@@ -366,10 +366,7 @@ void WebWorker::OutputResultAfterTimeout()
 void WebWorker::OutputCrashAfterTimeout()
 { MacroRegisterFunctionWithName("WebWorker::OutputCrashAfterTimeout");
   theLog << logger::red << theWebServer.ToStringActiveWorker() << ": crashing AFTER timeout!" << logger::endL;
-  std::cout << "What the fucking hell is oging on here? the outstream is: \n\n\n" << standardOutputStreamAfterTimeout.str()
-  << "\n\n\n";
-  std::cout.flush();
-  WebWorker::OutputSendAfterTimeout(crash.theCrashReport.str());
+  WebWorker::OutputSendAfterTimeout(standardOutputStreamAfterTimeout.str());
   theWebServer.SignalActiveWorkerDoneReleaseEverything();
 }
 

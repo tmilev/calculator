@@ -382,7 +382,6 @@ public:
   void FindAllEmbeddings(DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner);
   void FindTheSSSubalgebrasFromScratch(SemisimpleLieAlgebra& newOwner, const DynkinType* targetType=0);
 
-  void ExtendLastSubalgebraChainMember();
   void GetHCandidates
 (Vectors<Rational>& outputHCandidatesScaledToActByTwo, CandidateSSSubalgebra& newCandidate,
  DynkinType& currentType, List<int>& currentRootInjection)

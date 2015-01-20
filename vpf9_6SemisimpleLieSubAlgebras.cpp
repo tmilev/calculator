@@ -195,10 +195,9 @@ void SemisimpleSubalgebras::CheckFileWritePermissions()
   this->theGlobalVariables->System("mkdir " +this->owneR->PhysicalNameMainOutputFolder);
 
   if(!FileOperations::OpenFileCreateIfNotPresent(testFile, testFileName, false, true, false))
-  { crash << "<br>This may or may not be a programming error. I requested to create file " << this->PhysicalNameMainFile1
+    crash << "<br>This may or may not be a programming error. I requested to create file " << this->PhysicalNameMainFile1
     << " for output. However, the file failed to create. Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
     << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. " << crash;
-  }
   FileOperations::OpenFileCreateIfNotPresent(testFile, testFileName, false, true, false);
   testFile << "Write permissions test file.";
 }
@@ -534,8 +533,10 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch(SemisimpleLieAlgebra
   this->currentSubalgebraChain.SetSize(0);
 //  stOutput << "Got to ere! ";
   this->AddNewSubalgebra(emptyCandidate);
-  this->ExtendLastSubalgebraChainMember();
-//  stOutput << "Num candidates so far: " << this->theSubalgebras.size;
+  while(this->IncrementReturnFalseIfPastLast())
+  {
+  }
+  //  stOutput << "Num candidates so far: " << this->theSubalgebras.size;
   if (targetType!=0)
     this->flagAttemptToAdjustCentralizers=false;
   this->HookUpCentralizers(false);
@@ -558,6 +559,9 @@ bool SemisimpleSubalgebras::GrowDynkinType(const DynkinType& input, List<DynkinT
   theLengths.SetExpectedSize(this->theOrbitHelementLengths.size);
   for (int i=0; i<this->theOrbitHelementLengths.size; i++)
     theLengths.AddOnTopNoRepetition(this->theOrbitHelementLengths[i]/2);
+  output.SetSize(0);
+  if (outputImagesSimpleRoots!=0)
+    outputImagesSimpleRoots->SetSize(0);
   return input.Grow(theLengths, this->owneR->GetRank(), output, outputImagesSimpleRoots);
 }
 
@@ -785,6 +789,8 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
   int typeIndex=this->currentNumLargerTypesExplored[stackIndex];
   this->currentNumHcandidatesExplored[stackIndex]=0;
   this->currentHCandidatesScaledToActByTwo[stackIndex].SetSize(0);
+  if (typeIndex>=this->currentPossibleLargerDynkinTypes[stackIndex].size)
+    return true;
   if (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].GetRootSystemSize()>this->owneR->GetNumPosRoots()*2)
     return true;
   if (!this->targetDynkinType.IsEqualToZero())
@@ -794,24 +800,16 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
   ProgressReport theReport0(this->theGlobalVariables), theReport1(this->theGlobalVariables);
   if (theGlobalVariables!=0)
   { std::stringstream reportStream;
-    reportStream << " Finding h-canddiates for extension " << typeIndex+1 << " out of "
-    << this->currentPossibleLargerDynkinTypes[stackIndex].size << ". We are trying to extend "
-    << this->baseSubalgebra().theWeylNonEmbeddeD.theDynkinType.ToString() << " to "
-    << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString() << ". ";
+    reportStream << " Finding h-candidates for extension of " << this->baseSubalgebra().theWeylNonEmbeddeD.theDynkinType.ToString()
+    << " to " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString() << ": " << typeIndex+1 << " out of "
+    << this->currentPossibleLargerDynkinTypes[stackIndex].size << " possibilities.  ";
     stOutput << "<hr>" << reportStream.str();
     theReport0.Report(reportStream.str());
   }
   CandidateSSSubalgebra newCandidate;
   newCandidate.owner=this;
-  stOutput << "got here3";
-    this->baseSubalgebra().GetRank();
-  stOutput << "got here4";
   if (this->baseSubalgebra().GetRank()!=0)
-  { stOutput << "got here";
-    this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex];
-    this->currentRootInjections[stackIndex][typeIndex];
-    stOutput << "got here2";
-    Vector<Rational> weightHElementWeAreLookingFor=
+  { Vector<Rational> weightHElementWeAreLookingFor=
     this->GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot
     (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex], this->currentRootInjections[stackIndex][typeIndex], newCandidate);
     stOutput << "<hr>Weight h element we are looking for: " << weightHElementWeAreLookingFor.ToString()
@@ -835,16 +833,9 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
       return true;
     }
   }
-  stOutput << "got here5";
-  this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex];
-  this->currentRootInjections[stackIndex][typeIndex];
-  this->currentHCandidatesScaledToActByTwo[stackIndex];
-  stOutput << "got here6";
-
   newCandidate.SetUpInjectionHs
   (this->baseSubalgebra(), this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex], this->currentRootInjections[stackIndex][typeIndex]);
   Vectors<Rational> theHCandidatesScaledToActByTwo;
-  stOutput << "got here7";
   this->GetHCandidates
   (this->currentHCandidatesScaledToActByTwo[stackIndex], newCandidate, this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
    this->currentRootInjections[stackIndex][typeIndex]);
@@ -863,10 +854,19 @@ void SemisimpleSubalgebras::AddNewSubalgebra(CandidateSSSubalgebra& input)
   this->GrowDynkinType
   (input.theWeylNonEmbeddeD.theDynkinType, *this->currentPossibleLargerDynkinTypes.LastObject(),
    this->currentRootInjections.LastObject());
+  stOutput << "<hr>Possible extensions of " << input.theWeylNonEmbeddeD.theDynkinType.ToString()
+  << ": ";
+  for (int i=0; i<this->currentPossibleLargerDynkinTypes.LastObject()->size; i++)
+    stOutput << (*this->currentPossibleLargerDynkinTypes.LastObject())[i].ToString() << ", ";
+  stOutput << "Got here 2";
   this->currentNumHcandidatesExplored.AddOnTop(0);
+  stOutput << "Got here 3";
   this->currentHCandidatesScaledToActByTwo.SetSize(this->currentSubalgebraChain.size);
+  stOutput << "Got here 4";
   this->currentNumLargerTypesExplored.AddOnTop(0);
+  stOutput << "Got here 5";
   this->ComputeCurrentHCandidates();
+  stOutput << "Got here 6";
 }
 
 bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
@@ -877,15 +877,16 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
   if (this->baseSubalgebra().GetRank()>=this->owneR->GetRank())
     return this->RemoveLastSubalgebra();
   int stackIndex=this->currentSubalgebraChain.size-1;
-  if (this->currentNumHcandidatesExplored[stackIndex]>=this->currentHCandidatesScaledToActByTwo.size)
+  if (this->currentNumHcandidatesExplored[stackIndex]>=this->currentHCandidatesScaledToActByTwo[stackIndex].size)
   { this->currentNumLargerTypesExplored[stackIndex]++;
-    if (this->currentNumLargerTypesExplored[stackIndex]>=this->currentPossibleLargerDynkinTypes.size)
+    if (this->currentNumLargerTypesExplored[stackIndex]>=this->currentPossibleLargerDynkinTypes[stackIndex].size)
       return this->RemoveLastSubalgebra();
     return this->ComputeCurrentHCandidates();
   }
   int typeIndex=this->currentNumLargerTypesExplored[stackIndex];
   int hIndex=this->currentNumHcandidatesExplored[stackIndex];
   CandidateSSSubalgebra newCandidate;
+
   bool newSubalgebraCreated=
   newCandidate.CreateAndAddExtendBaseSubalgebra
   (this->baseSubalgebra(), this->currentHCandidatesScaledToActByTwo[stackIndex][hIndex],
@@ -901,13 +902,6 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
     theReport.Report(reportstream.str());
   }
   return true;
-}
-
-void SemisimpleSubalgebras::ExtendLastSubalgebraChainMember()
-{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendLastSubalgebraChainMember");
-  while(this->IncrementReturnFalseIfPastLast())
-  {
-  }
 }
 
 void SemisimpleSubalgebras::RegisterPossibleCandidate(CandidateSSSubalgebra& input)
@@ -1060,8 +1054,7 @@ const HashedList<Vector<Rational> >& SemisimpleSubalgebras::GetOrbitSl2Helement(
 //      if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
 //        stOutput << out.str();
   }
-  if (!this->GetSSowner().theWeyl.GenerateOuterOrbit
-      (startingVector, this->theOrbits[indexSl2], &this->theOrbitGeneratingElts[indexSl2], -1))
+  if (!this->GetSSowner().theWeyl.GenerateOuterOrbit(startingVector, this->theOrbits[indexSl2], &this->theOrbitGeneratingElts[indexSl2], -1))
     crash << "<hr> Failed to generate weight orbit: orbit has more than hard-coded limit of 30000000 elements. "
     << " This is not a programming error, but I am crashing in flames to let you know you hit the computational limits. "
     << "You might want to work on improving the algorithm for generating semisimple subalgebras. Here is a stack trace for you. " << crash;

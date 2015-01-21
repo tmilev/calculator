@@ -328,15 +328,19 @@ void WebWorker::OutputBeforeComputation()
 //stOutput << "Folders: " << theParser.theGlobalVariableS->ToStringFolderInfo();
 
   stOutput << tempStreamXX.str();
-  stOutput << "<table>\n <tr valign=\"top\">\n <td>";
+  stOutput << "<table>\n <tr valign=\"top\">\n ";
+  stOutput << "<td>"; //<td> tag will be closed later in WebWorker::OutputStandardResult
   stOutput << "\n<FORM method=\"POST\" id=\"formCalculator\" name=\"formCalculator\" action=\""
   << theParser.theGlobalVariableS->DisplayNameCalculatorWithPath << "\">\n" ;
   std::string civilizedInputSafish;
   if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, civilizedInputSafish))
     stOutput << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are "
     << " modified due to a javascript hijack issue. <br>";
-  stOutput << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\" onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {storeSettings(); "
-  << " this.form.submit(); return false;}\" >";
+  stOutput << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\", style=\"white-space:normal\" "
+  << "onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {storeSettings(); "
+  << " this.form.submit(); return false;}\" "
+  << "onkeyup=\"suggestWord();\", onkeydown=\"suggestWord(); arrowAction(event);\", onmouseup=\"suggestWord();\", oninput=\"suggestWord();\""
+  << ">";
   stOutput << civilizedInputSafish;
   stOutput << "</textarea>\n<br>\n";
   stOutput << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" > ";
@@ -405,6 +409,20 @@ void WebWorker::OutputStandardResult()
       stOutput << "<b> As requested, here is a calculator parsing log</b><br>" << theParser.parsingLog;
   }
   stOutput << "\n\n</td>\n\n";
+  stOutput << "<td>";
+  stOutput << "<table>"
+  << "<tr><td nowrap>"
+  << "<span \"style:nowrap\" id=\"idAutocompleteHints\">Ctrl+space autocompletes, ctrl+arrow selects word</span>"
+  << "</td></tr>"
+  << "<tr>"
+  << "<td id=\"idAutocompleteSpan\"></td>"
+  << "</tr>"
+  << "<tr>"
+  << "<td id=\"idAutocompleteDebug\"></td>"
+  << "</tr>"
+  << "</table>";
+  stOutput << "<script type=\"text/javascript\" src=\"../autocomplete.js\"></script>\n";
+  stOutput << "</td>";
 //  bool displayClientMessage=theWebServer.flagUsingBuiltInServer && theWebServer.activeWorker!=-1;
   //displayClientMessage=false;
   if (theParser.outputCommentsString!="")
@@ -426,8 +444,12 @@ void WebWorker::OutputStandardResult()
 
   stOutput << "</td></tr></table>";
   std::stringstream tempStream3;
-  stOutput << "\n\n<script language=\"javascript\">\n// List of words to show in drop down\n var functionNameArray = new Array(";
-  stOutput << ");\n  //var obj = actb(document.getElementById('textInputID'), functionNameArray);\n</script>\n";
+  stOutput << "\n\n<script language=\"javascript\">\n"
+  << "  var theAutocompleteDictionary = new Array;\n  ";
+  for (int i=0; i<theParser.theAtoms.size; i++)
+    if (theParser.theAtoms[i].size()>2)
+      stOutput << "  theAutocompleteDictionary.push(\"" << theParser.theAtoms[i] << "\");\n";
+  stOutput << "</script>\n";
   stOutput << "</body></html>";
   stOutput << "<!--";
   ProgressReport theReport(theParser.theGlobalVariableS);

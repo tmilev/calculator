@@ -503,15 +503,13 @@ void Calculator::EvaluateCommands()
   if (!this->flagDisplayFullExpressionTree)
     out << this->theProgramExpression.ToString(&this->theGlobalVariableS->theDefaultFormat, &StartingExpression);
   else
-  { out << "<hr>Input:<br> " << StartingExpression.ToStringFull() << "<hr>"
+    out << "<hr>Input:<br> " << StartingExpression.ToStringFull() << "<hr>"
     << "Output:<br>" << this->theProgramExpression.ToStringFull();
-  }
   this->outputString=out.str();
   std::stringstream commentsStream;
   if (this->theObjectContainer.theAlgebraicClosure.theBasisMultiplicative.size>1)
     commentsStream << "<b>Algebraic number closure status. </b><br>" << this->theObjectContainer.theAlgebraicClosure.ToString() << "<hr>";
   if (this->Comments.str()!="")
     commentsStream << "<b>Comments.</b><br><span>" << this->Comments.str() << "</span>";
-
   this->outputCommentsString=commentsStream.str();
 }

@@ -532,7 +532,7 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch(SemisimpleLieAlgebra
   this->currentSubalgebraChain.SetExpectedSize(this->owneR->GetRank()+2);
   this->currentSubalgebraChain.SetSize(0);
 //  stOutput << "Got to ere! ";
-  this->AddNewSubalgebra(emptyCandidate);
+  this->AddSubalgebraToStack(emptyCandidate);
   while(this->IncrementReturnFalseIfPastLast())
   {
   }
@@ -803,7 +803,7 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
     reportStream << " Finding h-candidates for extension of " << this->baseSubalgebra().theWeylNonEmbeddeD.theDynkinType.ToString()
     << " to " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString() << ": " << typeIndex+1 << " out of "
     << this->currentPossibleLargerDynkinTypes[stackIndex].size << " possibilities.  ";
-    stOutput << "<hr>" << reportStream.str();
+    //stOutput << "<hr>" << reportStream.str();
     theReport0.Report(reportStream.str());
   }
   CandidateSSSubalgebra newCandidate;
@@ -812,8 +812,8 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
   { Vector<Rational> weightHElementWeAreLookingFor=
     this->GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot
     (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex], this->currentRootInjections[stackIndex][typeIndex], newCandidate);
-    stOutput << "<hr>Weight h element we are looking for: " << weightHElementWeAreLookingFor.ToString()
-    << " base candidate type is: " << this->baseSubalgebra().theWeylNonEmbeddeD.theDynkinType.ToString();
+    //stOutput << "<hr>Weight h element we are looking for: " << weightHElementWeAreLookingFor.ToString()
+    //<< " base candidate type is: " << this->baseSubalgebra().theWeylNonEmbeddeD.theDynkinType.ToString();
     List<int> indicesModulesNewComponentExtensionMod;
     indicesModulesNewComponentExtensionMod.ReservE(this->owneR->theWeyl.RootSystem.size);
     indicesModulesNewComponentExtensionMod.SetSize(0);
@@ -846,27 +846,25 @@ void SemisimpleSubalgebras::AddNewSubalgebra(CandidateSSSubalgebra& input)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::AddNewSubalgebra");
   input.indexInOwner=this->theSubalgebras.size;
   this->theSubalgebras.AddOnTop(input);
-  if (!this->theSubalgebras.LastObject()->indexInOwner==this->theSubalgebras.size-1)
-    crash << "<hr>Something is very wrong: internal check failed! " << crash;
+  this->AddSubalgebraToStack(input);
+}
+
+void SemisimpleSubalgebras::AddSubalgebraToStack(CandidateSSSubalgebra& input)
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::AddSubalgebraToStack");
   this->currentSubalgebraChain.AddOnTop(input);
   this->currentPossibleLargerDynkinTypes.SetSize(this->currentSubalgebraChain.size);
   this->currentRootInjections.SetSize(this->currentSubalgebraChain.size);
   this->GrowDynkinType
   (input.theWeylNonEmbeddeD.theDynkinType, *this->currentPossibleLargerDynkinTypes.LastObject(),
    this->currentRootInjections.LastObject());
-  stOutput << "<hr>Possible extensions of " << input.theWeylNonEmbeddeD.theDynkinType.ToString()
-  << ": ";
-  for (int i=0; i<this->currentPossibleLargerDynkinTypes.LastObject()->size; i++)
-    stOutput << (*this->currentPossibleLargerDynkinTypes.LastObject())[i].ToString() << ", ";
-  stOutput << "Got here 2";
+//  stOutput << "<hr>Possible extensions of " << input.theWeylNonEmbeddeD.theDynkinType.ToString()
+//  << ": ";
+//  for (int i=0; i<this->currentPossibleLargerDynkinTypes.LastObject()->size; i++)
+//    stOutput << (*this->currentPossibleLargerDynkinTypes.LastObject())[i].ToString() << ", ";
   this->currentNumHcandidatesExplored.AddOnTop(0);
-  stOutput << "Got here 3";
   this->currentHCandidatesScaledToActByTwo.SetSize(this->currentSubalgebraChain.size);
-  stOutput << "Got here 4";
   this->currentNumLargerTypesExplored.AddOnTop(0);
-  stOutput << "Got here 5";
   this->ComputeCurrentHCandidates();
-  stOutput << "Got here 6";
 }
 
 bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()

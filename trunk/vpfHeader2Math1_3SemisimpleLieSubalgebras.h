@@ -356,6 +356,7 @@ public:
   { this->reset();
   }
   void AddNewSubalgebra(CandidateSSSubalgebra& input);
+  void AddSubalgebraToStack(CandidateSSSubalgebra& input);
   SemisimpleSubalgebras
   (SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField, HashedListReferences<SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
    ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras, GlobalVariables* inputGlobalVariables): flagDeallocated(false)

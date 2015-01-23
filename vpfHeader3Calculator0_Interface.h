@@ -1702,6 +1702,9 @@ public:
   static bool innerLoadKey(Calculator& theCommands, const Expression& inputStatementList, const std::string& inputKey, Expression& output);
   static bool innerStoreSemisimpleSubalgebras
   (Calculator& theCommands, const SemisimpleSubalgebras& input, Expression& output);
+  static std::string innerStoreSemisimpleSubalgebrasGetString
+  (SemisimpleSubalgebras& input);
+
   static bool innerExpressionFromElementSemisimpleLieAlgebraAlgebraicNumbers
   (Calculator& theCommands, const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input, Expression& output);
   static bool innerExpressionFromUE

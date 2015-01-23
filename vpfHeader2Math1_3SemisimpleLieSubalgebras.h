@@ -317,6 +317,7 @@ public:
   std::string PhysicalNameMainFile1;
   std::string PhysicalNameMainFile2FastLoad;
 
+  std::string (*ToStringExpressionString)(SemisimpleSubalgebras& input);
   int GetNumPossibleSAs()const;
   int GetDisplayIndexFromActual(int ActualIndexSubalgebra)const;
   void ComputeFolderNames(FormatExpressions& outputFormat);
@@ -364,6 +365,7 @@ public:
     this->initHookUpPointers(inputOwner, theField, inputSubalgebrasNonEmbedded, inputSl2sOfSubalgebras, inputGlobalVariables);
   }
   bool CheckConsistency()const;
+  std::string ToStringProgressReport(FormatExpressions* theFormat=0);
   std::string ToString(FormatExpressions* theFormat=0);
   std::string ToStringSSsumaryLaTeX(FormatExpressions* theFormat=0)const;
   std::string ToStringSSsumaryHTML(FormatExpressions* theFormat=0)const;

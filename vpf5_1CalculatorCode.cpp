@@ -491,6 +491,7 @@ bool Calculator::innerPrintSSsubalgebras
   int indexInContainer=theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas);
   SemisimpleSubalgebras& theSSsubalgebras= isAlreadySubalgebrasObject ? input.GetValueNonConst<SemisimpleSubalgebras>() :
   theCommands.theObjectContainer.theSSsubalgebras[indexInContainer];
+  theSSsubalgebras.ToStringExpressionString=CalculatorConversions::innerStoreSemisimpleSubalgebrasGetString;
   theSSsubalgebras.ComputeFolderNames(theSSsubalgebras.currentFormat);
   out << "<br>Output file: <a href= \""
   << theSSsubalgebras.DisplayNameMainFile1WithPath << "\"> " << theSSsubalgebras.DisplayNameMainFile1NoPath << "</a>";

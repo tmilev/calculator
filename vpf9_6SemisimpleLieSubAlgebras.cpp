@@ -417,12 +417,11 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
       out << "Summary in LaTeX<br><br>" << this->ToStringSSsumaryLaTeX(theFormat) << "<br><br><hr>";
   }
   if (!writingToHD)
-  { for (int i=0; i<this->theSubalgebras.size; i++)
+    for (int i=0; i<this->theSubalgebras.size; i++)
     { if (!this->theSubalgebras[i].flagSystemProvedToHaveNoSolution)
         out << "Subalgebra number " << this->GetDisplayIndexFromActual(i) << ".<br>";
       out << this->theSubalgebras[i].ToString(theFormat) << "\n<hr>\n ";
     }
-  }
   else
   { if (theFormat!=0)
     { theFormat->flagCandidateSubalgebraShortReportOnly=true;
@@ -867,9 +866,20 @@ void SemisimpleSubalgebras::AddSubalgebraToStack(CandidateSSSubalgebra& input)
   this->ComputeCurrentHCandidates();
 }
 
+std::string SemisimpleSubalgebras::ToStringProgressReport(FormatExpressions* theFormat)
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToStringProgressReport");
+  std::stringstream out;
+  if (this->ToStringExpressionString!=0)
+    out << this->ToStringExpressionString(*this);
+  for (int i=0; i<this->currentSubalgebraChain.size; i++)
+  {
+  }
+  return out.str();
+}
+
 bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::IncrementReturnFalseIfPastLast");
-  ProgressReport theReport(this->theGlobalVariables);
+  ProgressReport theReport1(this->theGlobalVariables), theReport0(this->theGlobalVariables);
   if (this->currentSubalgebraChain.size==0)
     return false;
   if (this->baseSubalgebra().GetRank()>=this->owneR->GetRank())
@@ -881,6 +891,7 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
       return this->RemoveLastSubalgebra();
     return this->ComputeCurrentHCandidates();
   }
+  theReport0.Report(this->ToStringProgressReport());
   int typeIndex=this->currentNumLargerTypesExplored[stackIndex];
   int hIndex=this->currentNumHcandidatesExplored[stackIndex];
   CandidateSSSubalgebra newCandidate;
@@ -897,7 +908,7 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
   { std::stringstream reportstream;
     reportstream << "h element " << hIndex+1 << " out of " << this->currentHCandidatesScaledToActByTwo[stackIndex][hIndex].size
     << ": did not succeed extending. ";
-    theReport.Report(reportstream.str());
+    theReport1.Report(reportstream.str());
   }
   return true;
 }
@@ -2233,9 +2244,9 @@ void Vector<coefficient>::PerturbNormalRelativeToVectorsInGeneralPosition(const 
         << " is supposed to have non-negative scalar product with the vector " << NonStrictConeNonPositiveScalar[i].ToString()
         << ", but it doesn't." << crash;
       else
-      if (this->ScalarEuclidean(NonStrictConeNonPositiveScalar[i])==0 && oldThis.ScalarEuclidean(NonStrictConeNonPositiveScalar[i])>0)
-        crash << "<br>This is a programming error: during perturbation, the splitting normal " << this->ToString()
-        << " lost  positive scalar product with " << NonStrictConeNonPositiveScalar[i].ToString() << "." << crash;
+        if (this->ScalarEuclidean(NonStrictConeNonPositiveScalar[i])==0 && oldThis.ScalarEuclidean(NonStrictConeNonPositiveScalar[i])>0)
+          crash << "<br>This is a programming error: during perturbation, the splitting normal " << this->ToString()
+          << " lost  positive scalar product with " << NonStrictConeNonPositiveScalar[i].ToString() << "." << crash;
     }
 //  return true;
 }
@@ -2325,8 +2336,7 @@ bool CandidateSSSubalgebra::IsPossibleNilradicalCarryOutSelectionImplications(Li
     for (int j=0; j<this->OppositeModulesByStructure[selectedIndices[i]].size; j++)
     { if (theSelection[this->OppositeModulesByStructure[selectedIndices[i]][j]]==1)
       { if (logStream!=0)
-        { *logStream << "<br>The subalgebra selection " << this->ToStringNilradicalSelection(theSelection) << " contains opposite modules and is therefore not allowed. ";
-        }
+          *logStream << "<br>The subalgebra selection " << this->ToStringNilradicalSelection(theSelection) << " contains opposite modules and is therefore not allowed. ";
         return false;
       }
       theSelection[this->OppositeModulesByStructure[selectedIndices[i]][j]]=0;
@@ -2622,6 +2632,7 @@ void SemisimpleSubalgebras:: initHookUpPointers
 
 void SemisimpleSubalgebras::reset()
 { this->theGlobalVariables=0;
+  this->ToStringExpressionString=0;
   this->owneR=0;
   this->ownerField=0;
   this->theSl2s.owner=0;

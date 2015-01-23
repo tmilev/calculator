@@ -460,6 +460,21 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
   return output.AssignValue(theSAs, theCommands);
 }
 
+
+Calculator tempCalculator; //<-needs a rewrite
+
+std::string CalculatorConversions::innerStoreSemisimpleSubalgebrasGetString(SemisimpleSubalgebras& input)
+{ MacroRegisterFunctionWithName("CalculatorConversions::innerStoreSemisimpleSubalgebrasGetString");
+  static bool staticFirstRun=true; //<-this needs a rewrite
+  if (staticFirstRun)
+  { staticFirstRun=false;
+    tempCalculator.init(*input.theGlobalVariables);
+  }
+  Expression tempE;
+  CalculatorConversions::innerStoreSemisimpleSubalgebras(tempCalculator, input, tempE);
+  return tempE.ToString();
+}
+
 bool CalculatorConversions::innerStoreSemisimpleSubalgebras(Calculator& theCommands, const SemisimpleSubalgebras& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorConversions::innerStoreSemisimpleSubalgebras");
   Expression tempE, tempE2, candidateE;

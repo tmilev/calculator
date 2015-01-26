@@ -403,12 +403,32 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
 { MacroRegisterFunctionWithName("CalculatorConversions::innerLoadSemisimpleSubalgebras");
   Expression input=inpuT;
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
-  if (input.children.size!= 3)
-    return theCommands << "<hr>Error loading semisimple subalgebras: I expect input with 3 children, got "
-    << input.children.size << " children instead.<hr>";
+  Expression theAmbientTypeE, numExploredHsE, numExploredTypesE, theSAsE, currentChainE;
+  if (!CalculatorConversions::innerLoadKey(theCommands, input, "AmbientDynkinType", theAmbientTypeE) )
+    return theCommands << "<hr>Failed to load Dynkin type from: " << input.ToString();
+  if (!CalculatorConversions::innerLoadKey(theCommands, input, "NumExploredHs", numExploredHsE) )
+    return theCommands << "<hr>Failed to load numExploredHs list from: " << input.ToString();
+  if (!CalculatorConversions::innerLoadKey(theCommands, input, "NumExploredTypes", numExploredTypesE) )
+    return theCommands << "<hr>Failed to load NumExploredTypes list from: " << input.ToString();
+  if (!CalculatorConversions::innerLoadKey(theCommands, input, "Subalgebras", theSAsE) )
+    return theCommands << "<hr>Failed to load Subalgebras list from: " << input.ToString();
+  if (!CalculatorConversions::innerLoadKey(theCommands, input, "CurrentChain", currentChainE) )
+    return theCommands << "<hr>Failed to load CurrentChain from: " << input.ToString();
+//  stOutput << "<br>dynkinTypeE: " << theAmbientTypeE.ToString();
+//  stOutput << "<br>numExploredHsE: " << numExploredHsE.ToString();
+//  stOutput << "<br>numExploredTypesE: " << numExploredTypesE.ToString();
+//  stOutput << "<br>theSAsE: " << theSAsE.ToString();
+//  stOutput << "<br>currentChainE: " << currentChainE.ToString();
+  List<int> currentChainInt, numExploredTypes, numExploredHs;
+  if (!theCommands.GetVectoRInt(currentChainE, currentChainInt))
+    return false;
+  if (!theCommands.GetVectoRInt(numExploredHsE, numExploredHs))
+    return false;
+  if (!theCommands.GetVectoRInt(numExploredTypesE, numExploredTypes))
+    return false;
   SemisimpleLieAlgebra* ownerSS=0;
   Expression tempE;
-  if (!CalculatorConversions::innerSSLieAlgebra(theCommands, input[1], tempE, ownerSS))
+  if (!CalculatorConversions::innerSSLieAlgebra(theCommands, theAmbientTypeE, tempE, ownerSS))
     return theCommands << "<hr>Error loading semisimple subalgebras: failed to extract ambient semisimple Lie algebra. ";
 //  stOutput << "Loaded type: " << ownerSS->theWeyl.theDynkinType.ToString();
   if (ownerSS==0)
@@ -421,16 +441,16 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
       crash << "semisimple subalgebra with index " << i << " has zero owner. " << crash;
   SemisimpleSubalgebras& theSAs=theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSAs)];
 //  stOutput << "here be i! - 2";
+//  std::cout << " got ere! - 2";
+//  std::cout.flush();
   theSAs.initHookUpPointers
   (*ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
    &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
-  //FormatExpressions tempFormat;
-//  stOutput << ownerSS->ToString();
-  Expression theCandidatesE=input[2];
-  theCandidatesE.Sequencefy();
-  theSAs.theSubalgebras.ReservE(theCandidatesE.children.size-1);
+  stOutput << ownerSS->ToString();
+  theSAsE.Sequencefy();
+  theSAs.theSubalgebras.ReservE(theSAsE.children.size-1);
   theSAs.theSubalgebras.SetSize(0);
-  theSAs.theSubalgebrasNonEmbedded->SetExpectedSize(theCandidatesE.children.size-1);
+  theSAs.theSubalgebrasNonEmbedded->SetExpectedSize(theSAsE.children.size-1);
   ProgressReport theReport(theCommands.theGlobalVariableS);
   theSAs.flagAttemptToSolveSystems=true;
   theSAs.flagComputeModuleDecomposition=true;
@@ -438,18 +458,31 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
   theSAs.flagComputeNilradicals=false;
   theSAs.theGlobalVariables=theCommands.theGlobalVariableS;
   theSAs.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
-  for (int i=1; i<theCandidatesE.children.size; i++)
+  for (int i=1; i<theSAsE.children.size; i++)
   { std::stringstream reportStream;
-    reportStream << "Loading subalgebra " << i << " out of " << theCandidatesE.children.size-1 << " from expression " << theCandidatesE[i].ToString();
+    reportStream << "Loading subalgebra " << i << " out of " << theSAsE.children.size-1 << " from expression "
+    << theSAsE[i].ToString();
     //stOutput << reportStream.str();
     theReport.Report(reportStream.str());
     CandidateSSSubalgebra tempCandidate;
-    if (!CalculatorConversions::innerCandidateSAPrecomputed(theCommands, theCandidatesE[i], tempE, tempCandidate, theSAs))
+    if (!CalculatorConversions::innerCandidateSAPrecomputed(theCommands, theSAsE[i], tempE, tempCandidate, theSAs))
       return theCommands << "<hr>Error loading candidate subalgebra: failed to load candidate number " << i << " of type "
       << tempCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " extracted from expression: " << input[1].ToString() << ". <hr>";
     //stOutput << "<hr>read cartan elements: " << tempCandidate.theHs.size;
     theSAs.theSubalgebras.AddOnTop(tempCandidate);
   }
+//  if (theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection!=0)
+//    theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection();
+  stOutput << "got to load state!";
+  stOutput.Flush();
+  if (!theSAs.LoadState(currentChainInt, numExploredTypes, numExploredHs, theCommands.Comments))
+    return false;
+  std::cout << "Got here!!!! step 9";
+  std::cout.flush();
+
+  theSAs.FindTheSSSubalgebrasContinue();
+  std::cout << "Got here!!!! step 10";
+  std::cout.flush();
 //  stOutput << "centralizers off";
   theSAs.flagAttemptToAdjustCentralizers=false;
   theSAs.HookUpCentralizers(true);
@@ -460,11 +493,9 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
   return output.AssignValue(theSAs, theCommands);
 }
 
-
 Calculator tempCalculator; //<-needs a rewrite
-
-std::string CalculatorConversions::innerStoreSemisimpleSubalgebrasGetString(SemisimpleSubalgebras& input)
-{ MacroRegisterFunctionWithName("CalculatorConversions::innerStoreSemisimpleSubalgebrasGetString");
+std::string CalculatorConversions::innerStringFromSemisimpleSubalgebras(SemisimpleSubalgebras& input)
+{ MacroRegisterFunctionWithName("CalculatorConversions::innerStringFromSemisimpleSubalgebras");
   static bool staticFirstRun=true; //<-this needs a rewrite
   if (staticFirstRun)
   { staticFirstRun=false;
@@ -477,21 +508,49 @@ std::string CalculatorConversions::innerStoreSemisimpleSubalgebrasGetString(Semi
 
 bool CalculatorConversions::innerStoreSemisimpleSubalgebras(Calculator& theCommands, const SemisimpleSubalgebras& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorConversions::innerStoreSemisimpleSubalgebras");
-  Expression tempE, tempE2, candidateE;
-  output.MakeSequence(theCommands);
-  if (!CalculatorConversions::innerExpressionFromDynkinType(theCommands, input.owneR->theWeyl.theDynkinType, tempE))
+  Expression dynkinTypeE;
+  List<std::string> theKeys;
+  List<Expression> theValues;
+  if (!CalculatorConversions::innerExpressionFromDynkinType(theCommands, input.owneR->theWeyl.theDynkinType, dynkinTypeE))
     return false;
-  output.AddChildOnTop(tempE);
-  tempE.reset(theCommands);
-  tempE.children.ReservE(input.theSubalgebras.size+1);
-  tempE2.MakeAtom(theCommands.opSequence(), theCommands);
-  tempE.AddChildOnTop(tempE2);
+  theKeys.AddOnTop("AmbientDynkinType");
+  theValues.AddOnTop(dynkinTypeE);
+
+  Expression currentChainE, numericalConvertorE(theCommands);
+  currentChainE.MakeSequence(theCommands);
+  for (int i=0; i<input.currentSubalgebraChain.size; i++)
+  { numericalConvertorE= input.currentSubalgebraChain[i].indexInOwner;
+    currentChainE.AddChildOnTop(numericalConvertorE);
+  }
+  theKeys.AddOnTop("CurrentChain");
+  theValues.AddOnTop(currentChainE);
+  Expression numTypesExploredE;
+  numTypesExploredE.MakeSequence(theCommands);
+  for (int i=0; i<input.currentNumLargerTypesExplored.size; i++)
+  { numericalConvertorE=input.currentNumLargerTypesExplored[i];
+    numTypesExploredE.AddChildOnTop(numericalConvertorE);
+  }
+  theKeys.AddOnTop("NumExploredTypes");
+  theValues.AddOnTop(numTypesExploredE);
+  Expression numHsExploredE;
+  numHsExploredE.MakeSequence(theCommands);
+  for (int i=0; i<input.currentNumLargerTypesExplored.size; i++)
+  { numericalConvertorE=input.currentNumLargerTypesExplored[i];
+    numHsExploredE.AddChildOnTop(numericalConvertorE);
+  }
+  theKeys.AddOnTop("NumExploredHs");
+  theValues.AddOnTop(numHsExploredE);
+  Expression subalgebrasListE, candidateE;
+  subalgebrasListE.MakeSequence(theCommands);
+  subalgebrasListE.children.ReservE(input.theSubalgebras.size+1);
   for (int i=0; i<input.theSubalgebras.size; i++)
   { if (!CalculatorConversions::innerStoreCandidateSA(theCommands, input.theSubalgebras[i], candidateE))
       return false;
-    tempE.AddChildOnTop(candidateE);
+    subalgebrasListE.AddChildOnTop(candidateE);
   }
-  return output.AddChildOnTop(tempE);
+  theKeys.AddOnTop("Subalgebras");
+  theValues.AddOnTop(subalgebrasListE);
+  return output.MakeSequenceCommands(theCommands, theKeys, theValues);
 }
 
 bool CalculatorConversions::innerExpressionFromMonomialUE

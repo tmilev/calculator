@@ -192,7 +192,7 @@ void PauseController::UnlockMe()
 { MacroRegisterFunctionWithName("PauseController::UnlockMe");
 //  theLog << crash.GetStackTraceShort() << logger::endL;
   write(this->thePausePipe[1], "!", 1);
-  theLog << "Unlocking done!" << logger::endL;
+//  theLog << "Unlocking done!" << logger::endL;
 
 }
 

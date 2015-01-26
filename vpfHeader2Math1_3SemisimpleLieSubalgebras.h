@@ -374,6 +374,7 @@ public:
     this->initHookUpPointers(inputOwner, theField, inputSubalgebrasNonEmbedded, inputSl2sOfSubalgebras, inputGlobalVariables);
   }
   bool CheckConsistency()const;
+  bool CheckInitialization() const;
   std::string ToStringProgressReport(FormatExpressions* theFormat=0);
   std::string ToString(FormatExpressions* theFormat=0);
   std::string ToStringSSsumaryLaTeX(FormatExpressions* theFormat=0)const;

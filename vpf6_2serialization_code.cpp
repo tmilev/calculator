@@ -435,18 +435,15 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
     crash << "Loaded zero subalgebra " << crash;
   SemisimpleSubalgebras tempSAs;
   tempSAs.owneR=ownerSS;
-//  stOutput << "here be i!";
   for (int i =0; i<theCommands.theObjectContainer.theSSsubalgebras.size; i++)
     if (theCommands.theObjectContainer.theSSsubalgebras[i].owneR==0)
       crash << "semisimple subalgebra with index " << i << " has zero owner. " << crash;
   SemisimpleSubalgebras& theSAs=theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSAs)];
-//  stOutput << "here be i! - 2";
-//  std::cout << " got ere! - 2";
 //  std::cout.flush();
   theSAs.initHookUpPointers
   (*ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
    &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
-  stOutput << ownerSS->ToString();
+  //stOutput << "Owner ss is here:  " << ownerSS->ToString();
   theSAsE.Sequencefy();
   theSAs.theSubalgebras.ReservE(theSAsE.children.size-1);
   theSAs.theSubalgebras.SetSize(0);
@@ -473,16 +470,16 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
   }
 //  if (theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection!=0)
 //    theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection();
-  stOutput << "got to load state!";
-  stOutput.Flush();
+//  stOutput << "got to load state!";
+//  stOutput.Flush();
   if (!theSAs.LoadState(currentChainInt, numExploredTypes, numExploredHs, theCommands.Comments))
     return false;
-  std::cout << "Got here!!!! step 9";
-  std::cout.flush();
+//  std::cout << "Got here!!!! step 9";
+//  std::cout.flush();
 
   theSAs.FindTheSSSubalgebrasContinue();
-  std::cout << "Got here!!!! step 10";
-  std::cout.flush();
+//  std::cout << "Got here!!!! step 10";
+//  std::cout.flush();
 //  stOutput << "centralizers off";
   theSAs.flagAttemptToAdjustCentralizers=false;
   theSAs.HookUpCentralizers(true);
@@ -857,8 +854,7 @@ bool CalculatorConversions::innerRationalFunction(Calculator& theCommands, const
   }
   int theSmallPower=-1;
   if (input.StartsWith(theCommands.opThePower(), 3) )
-  { //stOutput << "here be i!";
-    if (input[2].IsSmallInteger(&theSmallPower))
+  { if (input[2].IsSmallInteger(&theSmallPower))
     { Expression leftE;
       if (!CalculatorConversions::innerRationalFunction(theCommands, input[1], leftE))
         return theCommands << "<hr>CalculatorConversions::innerRationalFunction: failed to convert " << input[1].ToString() << " to rational function. ";

@@ -532,6 +532,7 @@ bool SemisimpleSubalgebras::LoadState
   for (int i=0; i<currentChainInt.size; i++)
   { if (currentChainInt[i]==-1 && i==0)
     { CandidateSSSubalgebra emptySA;
+      emptySA.owner=this;
       this->AddSubalgebraToStack(emptySA, numExploredTypes[i], numExploredHs[i]);
       continue;
     }
@@ -546,12 +547,12 @@ bool SemisimpleSubalgebras::LoadState
 
 void SemisimpleSubalgebras::FindTheSSSubalgebrasContinue()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasContinue");
-  std::cout << "Got here!!!! before entering cycle";
-  std::cout.flush();
+  //std::cout << "Got here!!!! before entering cycle";
+  //std::cout.flush();
+  stOutput << "Here i am";
   while(this->IncrementReturnFalseIfPastLast())
-  { std::cout << "Got here!!!! cycle step";
-    std::cout.flush();
-
+  { //std::cout << "Got here!!!! cycle step";
+    //std::cout.flush();
   }
   //  stOutput << "Num candidates so far: " << this->theSubalgebras.size;
   if (!this->targetDynkinType.IsEqualToZero())
@@ -697,9 +698,14 @@ void CandidateSSSubalgebra::computeHsScaledToActByTwo()
 bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
 (const CandidateSSSubalgebra& baseSubalgebra, Vector<Rational>& newHrescaledToActByTwo, const DynkinType& theNewType, const List<int>& theRootInjection)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra");
-  this->CheckInitialization();
+
   this->SetUpInjectionHs(baseSubalgebra, theNewType, theRootInjection, &newHrescaledToActByTwo);
+  std::cout << "create & extend sa - step 1.";
+  std::cout.flush();
   this->owner->RegisterPossibleCandidate(*this);
+  std::cout << "create & extend sa - step 2.";
+  std::cout.flush();
+  this->CheckInitialization();
   if (!baseSubalgebra.theWeylNonEmbeddeD.theDynkinType.IsEqualToZero() && baseSubalgebra.indexInOwner==-1)
     crash << "This is a programming error: attempting to induce a subalgebra from a non-registered base subalgebra. " << crash;
   //set up induction history:
@@ -875,26 +881,30 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
       return true;
     }
   }
-  std::cout << "Got here!!!! step 5";
-  std::cout.flush();
+  //std::cout << "Got here!!!! step 5";
+  //std::cout.flush();
 
   newCandidate.SetUpInjectionHs
   (this->baseSubalgebra(), this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex], this->currentRootInjections[stackIndex][typeIndex]);
-  std::cout << "Got here!!!! step 6";
-  std::cout.flush();
+  //std::cout << "Got here!!!! step 6";
+  //std::cout.flush();
   Vectors<Rational> theHCandidatesScaledToActByTwo;
   this->GetHCandidates
   (this->currentHCandidatesScaledToActByTwo[stackIndex], newCandidate, this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
    this->currentRootInjections[stackIndex][typeIndex]);
-  std::cout << "Got here!!!! step 7";
-  std::cout.flush();
+  //std::cout << "Got here!!!! step 7";
+  //std::cout.flush();
   return true;
 }
 
 void SemisimpleSubalgebras::AddNewSubalgebra(CandidateSSSubalgebra& input)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::AddNewSubalgebra");
+  //std::cout << "\n Adding new sa: ";
+  //std::cout.flush();
   input.indexInOwner=this->theSubalgebras.size;
   this->theSubalgebras.AddOnTop(input);
+  //std::cout << "\n New sa added. ";
+  //std::cout.flush();
   this->AddSubalgebraToStack(input, 0, 0);
 }
 
@@ -904,14 +914,14 @@ void SemisimpleSubalgebras::AddSubalgebraToStack
   this->currentSubalgebraChain.AddOnTop(input);
   this->currentPossibleLargerDynkinTypes.SetSize(this->currentSubalgebraChain.size);
   this->currentRootInjections.SetSize(this->currentSubalgebraChain.size);
-  std::cout << "Got here!!!! step 2";
-  std::cout.flush();
+  //std::cout << "Got here!!!! step 2";
+  //std::cout.flush();
 
   this->GrowDynkinType
   (input.theWeylNonEmbeddeD.theDynkinType, *this->currentPossibleLargerDynkinTypes.LastObject(),
    this->currentRootInjections.LastObject());
-  std::cout << "Got here!!!! step 3";
-  std::cout.flush();
+  //std::cout << "Got here!!!! step 3";
+  //std::cout.flush();
 
   this->currentNumLargerTypesExplored.AddOnTop(inputNumLargerTypesExplored);
   stOutput << "<hr>Possible extensions of " << input.theWeylNonEmbeddeD.theDynkinType.ToString()
@@ -920,8 +930,8 @@ void SemisimpleSubalgebras::AddSubalgebraToStack
     stOutput << (*this->currentPossibleLargerDynkinTypes.LastObject())[i].ToString() << ", ";
   this->currentHCandidatesScaledToActByTwo.SetSize(this->currentSubalgebraChain.size);
   this->currentNumHcandidatesExplored.AddOnTop(inputNumHcandidatesExplored);
-  std::cout << "Got here!!!! step 4";
-  std::cout.flush();
+  //std::cout << "Got here!!!! step 4";
+  //std::cout.flush();
   this->ComputeCurrentHCandidates();
 }
 
@@ -936,6 +946,7 @@ std::string SemisimpleSubalgebras::ToStringProgressReport(FormatExpressions* the
 
 bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::IncrementReturnFalseIfPastLast");
+  this->CheckConsistency();
   ProgressReport theReport1(this->theGlobalVariables), theReport0(this->theGlobalVariables);
   if (this->currentSubalgebraChain.size==0)
     return false;
@@ -948,40 +959,52 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
       return this->RemoveLastSubalgebra();
     return this->ComputeCurrentHCandidates();
   }
-  std::cout << "Got here!!!! main incrementing step";
-  std::cout.flush();
+//  std::cout << "Got here!!!! main incrementing step";
+//  std::cout.flush();
 
   theReport0.Report(this->ToStringProgressReport());
   int typeIndex=this->currentNumLargerTypesExplored[stackIndex];
   int hIndex=this->currentNumHcandidatesExplored[stackIndex];
   CandidateSSSubalgebra newCandidate;
+  newCandidate.owner=this;
 
   bool newSubalgebraCreated=
   newCandidate.CreateAndAddExtendBaseSubalgebra
   (this->baseSubalgebra(), this->currentHCandidatesScaledToActByTwo[stackIndex][hIndex],
    this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
    this->currentRootInjections[stackIndex][typeIndex]);
-  std::cout << "after create & extend sa";
-  std::cout.flush();
+  //std::cout << "after create & extend sa";
+  //std::cout.flush();
+  this->CheckConsistency();
+  //std::cout << this->currentNumHcandidatesExplored;
+  //std::cout.flush();
 
   this->currentNumHcandidatesExplored[stackIndex]++;
+  //std::cout << "after this->currentNumHcandidatesExplored[stackIndex]++;";
+  //std::cout.flush();
   if (newSubalgebraCreated)
     this->AddNewSubalgebra(newCandidate);
   else
-  { std::stringstream reportstream;
+  { //std::cout << "\n no sa created!";
+    //std::cout.flush();
+    std::stringstream reportstream;
     reportstream << "h element " << hIndex+1 << " out of " << this->currentHCandidatesScaledToActByTwo[stackIndex][hIndex].size
     << ": did not succeed extending. ";
     theReport1.Report(reportstream.str());
   }
+  //std::cout << "\n before return!";
+  //std::cout.flush();
   return true;
 }
 
 void SemisimpleSubalgebras::RegisterPossibleCandidate(CandidateSSSubalgebra& input)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::RegisterPossibleCandidate");
-  SemisimpleLieAlgebra tempSA;
-  tempSA.theWeyl=input.theWeylNonEmbeddeDdefaultScale;
-  bool needToComputeConstants=this->theSubalgebrasNonEmbedded->Contains(tempSA);
-  int theIndex=this->theSubalgebrasNonEmbedded->AddNoRepetitionOrReturnIndexFirst(tempSA);
+  this->CheckConsistency();
+  SemisimpleLieAlgebra candidateSAnonEmbedded;
+  candidateSAnonEmbedded.theWeyl=input.theWeylNonEmbeddeDdefaultScale;
+  this->CheckInitialization();
+  bool needToComputeConstants=this->theSubalgebrasNonEmbedded->Contains(candidateSAnonEmbedded);
+  int theIndex=this->theSubalgebrasNonEmbedded->AddNoRepetitionOrReturnIndexFirst(candidateSAnonEmbedded);
   if (needToComputeConstants)
     this->theSubalgebrasNonEmbedded->GetElement(theIndex).ComputeChevalleyConstants(theGlobalVariables);
   input.indexInOwnersOfNonEmbeddedMe=theIndex;
@@ -1313,9 +1336,8 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
   if (this->theHs.size==0)
     crash << "This is a programming error: the number of involved H's cannot be zero. " << crash;
   if (this->theInvolvedNegGenerators.size!=this->theHs.size)
-  { crash << "This is a programming error: the number of involved negative generators: " << this->theInvolvedNegGenerators.size
+    crash << "This is a programming error: the number of involved negative generators: " << this->theInvolvedNegGenerators.size
     << " is not equal to the subalgebra rank: " << this->theHs.size << ". " << crash;
-  }
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
     this->totalNumUnknownsNoCentralizer+=this->theInvolvedNegGenerators[i].size;
   if (this->theWeylNonEmbeddeD.RootSystem.size==0)
@@ -1605,7 +1627,6 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition(GlobalVariables* th
           << " has elements of the ambient Cartan and elements outside of the ambient Cartan, which is not allowed. "
           << "<br>Here is a detailed subalgebra printout. " << crash;
       this->primalSubalgebraModules.AddOnTop(i);
-
     }// else
     //stOutput << "... aint no cartan no centralizer. ";
   //}
@@ -1668,7 +1689,8 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition(GlobalVariables* th
 }
 
 void CandidateSSSubalgebra::reset(SemisimpleSubalgebras* inputOwner)
-{ this->owner=inputOwner;
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::reset");
+  this->owner=inputOwner;
   this->indexInOwner=(-1);
   this->indexIamInducedFrom=-1;
   this->indexInOwnersOfNonEmbeddedMe=(-1);
@@ -2676,8 +2698,21 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWVsOnly(GlobalVaria
   }
 }
 
+bool SemisimpleSubalgebras::CheckInitialization()const
+{ this->CheckConsistency();
+  if (this->owneR ==0)
+    crash << "No owner semisimple Lie algebra. " << crash;
+  if (this->theSl2sOfSubalgebras==0)
+    crash << "No owner of sl(2) subalgebras. " << crash;
+  if (this->theSubalgebrasNonEmbedded==0)
+    crash << "No container for non-embedded subalgebras. " << crash;
+  return true;
+}
+
 bool SemisimpleSubalgebras::CheckConsistency()const
-{ if (this->flagDeallocated)
+{ if (this==0)
+    crash << "Programming error: this pointer is zero." << crash;
+  if (this->flagDeallocated)
     crash << "This is a programming error: use after free of semisimple subalgebras. " << crash;
   return true;
 }

@@ -724,8 +724,8 @@ int WebWorker::ProcessPauseWorker()
     return 0;
   }
   if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUse)
-  { stOutput << "<b>Requested worker number " << inputWebWorkerNumber << " is not in use. "
-    << "Total number of workers: " << this->parent->theWorkers.size << ". </b>";
+  { stOutput << "<b>Requested worker number " << inputWebWorkerNumber << " is not in use. Total number of workers: "
+    << this->parent->theWorkers.size << ". </b>";
     return 0;
   }
   WebWorker& otherWorker=this->parent->theWorkers[inputWebWorkerIndex];
@@ -837,8 +837,7 @@ int WebWorker::ProcessFolder()
   //out << this->ToString();
   List<std::string> theFileNames, theFileTypes;
   if (!FileOperations::GetFolderFileNames(this->PhysicalFileName, theFileNames, &theFileTypes))
-  { out << "<b>Failed to open directory with physical address " << this->PhysicalFileName
-    << " </b></body></html>";
+  { out << "<b>Failed to open directory with physical address " << this->PhysicalFileName << " </b></body></html>";
     stOutput << out.str();
     return 0;
   }

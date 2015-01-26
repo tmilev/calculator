@@ -272,8 +272,7 @@ bool CalculatorFunctionsGeneral::innerCos(Calculator& theCommands, const Express
   if (input.StartsWith(theCommands.opTimes(), 3))
     if (input[2].IsAtomGivenData(theCommands.opPi()))
       if (input[1].IsOfType<Rational>(&piProportion))
-      { stOutput << " here be i!";
-        AlgebraicNumber algOutput;
+      { AlgebraicNumber algOutput;
         Rational ratOutput;
         if (algOutput.AssignCosRationalTimesPi(piProportion, theCommands.theObjectContainer.theAlgebraicClosure))
         { if (algOutput.IsRational(&ratOutput))
@@ -1489,10 +1488,8 @@ bool CalculatorFunctionsGeneral::outerAssociateDivisionDivision(Calculator& theC
 bool CalculatorFunctionsGeneral::innerDifferentiateChainRule(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateChainRule");
   /////////////////////
-//  stOutput << "here be i!";
   if (input.children.size!=3)
     return false;
-//  stOutput << "here be i number 2!";
   if (!input[1].IsAtom())
     theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
     << " - possible user typo?";
@@ -2308,7 +2305,6 @@ bool CalculatorFunctionsGeneral::innerIntegrateXnDiffX(Calculator& theCommands, 
 
 bool CalculatorFunctionsGeneral::innerDifferentiateSqrt(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateSqrt");
-  //stOutput << "Here be i with input: " << input.ToString();
   if (input.children.size!=3)
     return false;
   if (!input[1].IsAtom())

@@ -370,9 +370,9 @@ bool AlgebraicNumber::AssignCosRationalTimesPi(const Rational& input, AlgebraicC
   Rational halfFracPart=input-halfIntegerPart;
   Rational half(1,2);
   halfIntegerPartTimesTwo%=4;
-  stOutput << "input is: " << input.ToString();
-  stOutput << "Here be I: halfFracPart is: " << halfFracPart.ToString();
-  stOutput << "Here be I: halfIntegerPartTimesTwo is: " << halfIntegerPartTimesTwo.ToString();
+  stOutput << "<br>Note: input is: " << input.ToString();
+  stOutput << "<br>Note: halfFracPart is: " << halfFracPart.ToString();
+  stOutput << "<br>Note: halfIntegerPartTimesTwo is: " << halfIntegerPartTimesTwo.ToString();
   int sign=1;
   if (halfIntegerPartTimesTwo==1)
   { sign =-1;

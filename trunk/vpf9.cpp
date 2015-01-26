@@ -4018,8 +4018,6 @@ bool DynkinType::CanBeExtendedParabolicallyTo(const DynkinType& other)const
 bool DynkinType::Grow
 (const List<Rational>& allowedInverseScales, int AmbientWeylDim, List<DynkinType>& output, List<List<int> >* outputPermutationRoots)const
 { MacroRegisterFunctionWithName("DynkinType::Grow");
-  //if (this->ToString()=="2A^{1}_1[A^{1}_1]")
-    //stOutput << "<br>Here be I!!!!" << this->ToString();
   output.SetSize(0);
   if (outputPermutationRoots!=0)
     outputPermutationRoots->SetSize(0);

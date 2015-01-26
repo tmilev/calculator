@@ -491,7 +491,7 @@ bool Calculator::innerPrintSSsubalgebras
   int indexInContainer=theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas);
   SemisimpleSubalgebras& theSSsubalgebras= isAlreadySubalgebrasObject ? input.GetValueNonConst<SemisimpleSubalgebras>() :
   theCommands.theObjectContainer.theSSsubalgebras[indexInContainer];
-  theSSsubalgebras.ToStringExpressionString=CalculatorConversions::innerStoreSemisimpleSubalgebrasGetString;
+  theSSsubalgebras.ToStringExpressionString=CalculatorConversions::innerStringFromSemisimpleSubalgebras;
   theSSsubalgebras.ComputeFolderNames(theSSsubalgebras.currentFormat);
   out << "<br>Output file: <a href= \""
   << theSSsubalgebras.DisplayNameMainFile1WithPath << "\"> " << theSSsubalgebras.DisplayNameMainFile1NoPath << "</a>";
@@ -692,7 +692,7 @@ bool Calculator::innerGroebner
     }
     out << ")";
   } else
-  { out << "<br>Minimal Groebner basis not computed: exceeded the user-given limit of  " << upperBoundComputations << " polynomial operations. ";
+  { out << "<br>Minimal Groebner basis not computed: exceeded the user-given limit of " << upperBoundComputations << " polynomial operations. ";
     out << "<br>An intermediate non-Groebner basis containing total " << theGroebnerComputation.theBasiS.size
     << " basis elements: ";
     out << "<br>GroebnerLexUpperLimit{}(10000, <br>";

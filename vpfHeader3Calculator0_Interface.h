@@ -1480,6 +1480,7 @@ public:
   bool GetSumProductsExpressions(const Expression& inputSum, List<List<Expression> >& outputSumMultiplicands);
   bool GetVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory=-1);
   bool ConvertExpressionsToCommonContext(List<Expression>& inputOutputEs, Expression* inputOutputStartingContext=0);
+  bool GetVectoRInt(const Expression& input, List<int>& output);
   template <class theType>
   bool GetVectoR
   (const Expression& input, Vector<theType>& output, Expression* inputOutputStartingContext=0, int targetDimNonMandatory=-1,
@@ -1702,7 +1703,7 @@ public:
   static bool innerLoadKey(Calculator& theCommands, const Expression& inputStatementList, const std::string& inputKey, Expression& output);
   static bool innerStoreSemisimpleSubalgebras
   (Calculator& theCommands, const SemisimpleSubalgebras& input, Expression& output);
-  static std::string innerStoreSemisimpleSubalgebrasGetString
+  static std::string innerStringFromSemisimpleSubalgebras
   (SemisimpleSubalgebras& input);
 
   static bool innerExpressionFromElementSemisimpleLieAlgebraAlgebraicNumbers

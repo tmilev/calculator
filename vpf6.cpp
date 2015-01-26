@@ -1513,6 +1513,19 @@ bool Calculator::innerMultiplyByOne(Calculator& theCommands, const Expression& i
   return true;
 }
 
+bool Calculator::GetVectoRInt(const Expression& input, List<int>& output)
+{ MacroRegisterFunctionWithName("Calculator::GetVectoRInt");
+  Vector<Rational> theRats;
+  if (!this->GetVectoR(input, theRats))
+    return false;
+  output.initFillInObject(theRats.size,0);
+  for (int i=0; i< theRats.size; i++)
+    if (!theRats[i].IsSmallInteger(&output[i]))
+      return *this << "<hr>Succeeded to convert " << input.ToString() << " to the vector of rationals: "
+      << theRats.ToString() << " but failed to convert that to list of integers. ";
+  return true;
+}
+
 bool Calculator::outerTimesToFunctionApplication(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::outerTimesToFunctionApplication");
   if (!input.StartsWith(theCommands.opTimes()))
@@ -1576,8 +1589,7 @@ bool Calculator::outerRightDistributeBracketIsOnTheRight(Calculator& theCommands
 }
 
 bool Calculator::CollectCoefficientsPowersVar
-  (const Expression& input, const Expression& theVariable,
-   VectorSparse<Expression>& outputPositionIiscoeffXtoIth)
+(const Expression& input, const Expression& theVariable, VectorSparse<Expression>& outputPositionIiscoeffXtoIth)
 { MacroRegisterFunctionWithName("Calculator::CollectCoefficientsPowersVar");
   List<Expression> theSummands, currentMultiplicands, remainingMultiplicands;
   Calculator& theCommands=*input.theBoss;

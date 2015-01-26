@@ -318,6 +318,13 @@ public:
   std::string PhysicalNameMainFile2FastLoad;
 
   std::string (*ToStringExpressionString)(SemisimpleSubalgebras& input);
+  bool LoadState
+  ( List<int>& currentChainInt,
+    List<int>& numExploredTypes,
+    List<int>& numExploredHs,
+    std::stringstream& reportStream
+   )
+  ;
   int GetNumPossibleSAs()const;
   int GetDisplayIndexFromActual(int ActualIndexSubalgebra)const;
   void ComputeFolderNames(FormatExpressions& outputFormat);
@@ -357,7 +364,9 @@ public:
   { this->reset();
   }
   void AddNewSubalgebra(CandidateSSSubalgebra& input);
-  void AddSubalgebraToStack(CandidateSSSubalgebra& input);
+  void AddSubalgebraToStack
+(CandidateSSSubalgebra& input, int inputNumLargerTypesExplored, int inputNumHcandidatesExplored)
+;
   SemisimpleSubalgebras
   (SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField, HashedListReferences<SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
    ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras, GlobalVariables* inputGlobalVariables): flagDeallocated(false)
@@ -384,6 +393,8 @@ public:
   void ComputeSl2sInitOrbitsForComputationOnDemand();
   void FindAllEmbeddings(DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner);
   void FindTheSSSubalgebrasFromScratch(SemisimpleLieAlgebra& newOwner, const DynkinType* targetType=0);
+  void FindTheSSSubalgebrasInit();
+  void FindTheSSSubalgebrasContinue();
 
   void GetHCandidates
 (Vectors<Rational>& outputHCandidatesScaledToActByTwo, CandidateSSSubalgebra& newCandidate,

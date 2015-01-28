@@ -1095,19 +1095,14 @@ bool Calculator::innerGetChevGen(Calculator& theCommands, const Expression& inpu
 }
 
 bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& input, Expression& output)
-{ //stOutput << "<br>Here I am with input: " << input.ToString();
-  if (!input.IsListNElements(3))
+{ if (!input.IsListNElements(3))
     return false;
   SemisimpleLieAlgebra* theSSalg=0;
-//  stOutput << "<br>before calling inner ss: " << input.ToString();
-//  stOutput.flush();
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], theSSalg))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   if (theSSalg==0)
     crash << "This is a programming error: called conversion function successfully, but the output is a zero pointer to a semisimple Lie algebra. "
     << crash;
-//  stOutput << "<br>Here I am at next phase: " << input.ToString() << ", ss alg: " << theSSalg->ToString();
-//  stOutput.flush();
   int theIndex;
   if (!input[2].IsSmallInteger(&theIndex))
     return false;
@@ -1118,14 +1113,11 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
   theIndex--;
   theH.MakeEi(theSSalg->GetRank(), theIndex);
   theElt.MakeHgenerator(theH, *theSSalg);
-//  stOutput << "<br>good before ue! " << input.ToString();
-//  stOutput.flush();
   ElementUniversalEnveloping<RationalFunctionOld> theUE;
   theUE.AssignElementLieAlgebra(theElt, *theSSalg);
   Expression theContext;
   int theAlgIndex=theCommands.theObjectContainer.theLieAlgebras.GetIndex(*theSSalg);
   theContext.ContextMakeContextSSLieAlgebrA(theAlgIndex, theCommands);
-  //stOutput << "<br>And the context is: " << theContext.ToString();
   return output.AssignValueWithContext(theUE, theContext, theCommands);
 }
 

@@ -360,12 +360,6 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
       }
     }
   outputSubalgebra.theHs.AssignListList(outputSubalgebra.CartanSAsByComponent);
-  Matrix<Rational> tempMat1;
-  outputSubalgebra.theHs.GetGramMatrix(tempMat1, &owner.GetSSowner().theWeyl.CartanSymmetric);
-  if (!(outputSubalgebra.theWeylNonEmbeddeD.CoCartanSymmetric== tempMat1))
-    return theCommands << "<hr>Failed to load semisimple subalgebra: the gram matrix of the elements of its Cartan, "
-    << outputSubalgebra.theHs.ToString() << " is " << tempMat1.ToString() << "; it should be "
-    << outputSubalgebra.theWeylNonEmbeddeD.CoCartanSymmetric.ToString() << ".";
   outputSubalgebra.thePosGens.SetSize(0);
   outputSubalgebra.theNegGens.SetSize(0);
   if (CalculatorConversions::innerLoadKey(theCommands, input, "generators", generatorsE))
@@ -389,6 +383,12 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
   outputSubalgebra.theWeylNonEmbeddeD.ComputeRho(true);
   //stOutput << "Before calling compute system, output subalgebra is: " << outputSubalgebra.ToString();
   outputSubalgebra.computeHsScaledToActByTwo();
+  Matrix<Rational> tempMat1;
+  outputSubalgebra.theHsScaledToActByTwo.GetGramMatrix(tempMat1, &owner.GetSSowner().theWeyl.CartanSymmetric);
+  if (!(outputSubalgebra.theWeylNonEmbeddeD.CoCartanSymmetric== tempMat1))
+    return theCommands << "<hr>Failed to load semisimple subalgebra: the gram matrix of the elements of its Cartan, "
+    << outputSubalgebra.theHsScaledToActByTwo.ToString() << " is " << tempMat1.ToString() << "; it should be "
+    << outputSubalgebra.theWeylNonEmbeddeD.CoCartanSymmetric.ToString() << ".";
   outputSubalgebra.ComputeSystem(false, true);
   if (!outputSubalgebra.ComputeChar(true))
     return theCommands << "<hr>Failed to load semisimple Lie subalgebra: the ambient Lie algebra does not decompose properly over the candidate subalgebra. ";

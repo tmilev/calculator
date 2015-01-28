@@ -1854,10 +1854,8 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
 bool Calculator::innerFactorPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerFactorPoly");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  //stOutput << "here I am .";
   if (!theCommands.CallCalculatorFunction(CalculatorConversions::innerPolynomial<Rational>, input, output))
     return false;
-  //stOutput << "here I am .";
   Expression theContext=output.GetContext();
   Polynomial<Rational> thePoly=output.GetValue<Polynomial<Rational> >();
   if (thePoly.GetMinNumVars()>1)

@@ -522,8 +522,6 @@ bool SemisimpleSubalgebras::LoadState
 (List<int>& currentChainInt, List<int>& numExploredTypes, List<int>& numExploredHs, std::stringstream& reportStream)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::LoadStateAndContinueFindingSas");
   this->FindTheSSSubalgebrasInit();
-  std::cout << "Got here!!!!";
-  std::cout.flush();
   if (currentChainInt.size!=numExploredTypes.size || currentChainInt.size!=numExploredHs.size)
   { reportStream << "<hr>Input state is corrupt: currentChainInt.size: " << currentChainInt.size << ", numExploredTypes.size: "
     << numExploredTypes.size << ", numExploredHs.size: " << numExploredHs.size;
@@ -547,12 +545,9 @@ bool SemisimpleSubalgebras::LoadState
 
 void SemisimpleSubalgebras::FindTheSSSubalgebrasContinue()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasContinue");
-  //std::cout << "Got here!!!! before entering cycle";
-  //std::cout.flush();
   stOutput << "Here i am";
   while(this->IncrementReturnFalseIfPastLast())
-  { //std::cout << "Got here!!!! cycle step";
-    //std::cout.flush();
+  {
   }
   //  stOutput << "Num candidates so far: " << this->theSubalgebras.size;
   if (!this->targetDynkinType.IsEqualToZero())
@@ -700,11 +695,7 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra");
 
   this->SetUpInjectionHs(baseSubalgebra, theNewType, theRootInjection, &newHrescaledToActByTwo);
-  std::cout << "create & extend sa - step 1.";
-  std::cout.flush();
   this->owner->RegisterPossibleCandidate(*this);
-  std::cout << "create & extend sa - step 2.";
-  std::cout.flush();
   this->CheckInitialization();
   if (!baseSubalgebra.theWeylNonEmbeddeD.theDynkinType.IsEqualToZero() && baseSubalgebra.indexInOwner==-1)
     crash << "This is a programming error: attempting to induce a subalgebra from a non-registered base subalgebra. " << crash;
@@ -881,30 +872,20 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
       return true;
     }
   }
-  //std::cout << "Got here!!!! step 5";
-  //std::cout.flush();
 
   newCandidate.SetUpInjectionHs
   (this->baseSubalgebra(), this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex], this->currentRootInjections[stackIndex][typeIndex]);
-  //std::cout << "Got here!!!! step 6";
-  //std::cout.flush();
   Vectors<Rational> theHCandidatesScaledToActByTwo;
   this->GetHCandidates
   (this->currentHCandidatesScaledToActByTwo[stackIndex], newCandidate, this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
    this->currentRootInjections[stackIndex][typeIndex]);
-  //std::cout << "Got here!!!! step 7";
-  //std::cout.flush();
   return true;
 }
 
 void SemisimpleSubalgebras::AddNewSubalgebra(CandidateSSSubalgebra& input)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::AddNewSubalgebra");
-  //std::cout << "\n Adding new sa: ";
-  //std::cout.flush();
   input.indexInOwner=this->theSubalgebras.size;
   this->theSubalgebras.AddOnTop(input);
-  //std::cout << "\n New sa added. ";
-  //std::cout.flush();
   this->AddSubalgebraToStack(input, 0, 0);
 }
 
@@ -914,24 +895,19 @@ void SemisimpleSubalgebras::AddSubalgebraToStack
   this->currentSubalgebraChain.AddOnTop(input);
   this->currentPossibleLargerDynkinTypes.SetSize(this->currentSubalgebraChain.size);
   this->currentRootInjections.SetSize(this->currentSubalgebraChain.size);
-  //std::cout << "Got here!!!! step 2";
-  //std::cout.flush();
 
   this->GrowDynkinType
   (input.theWeylNonEmbeddeD.theDynkinType, *this->currentPossibleLargerDynkinTypes.LastObject(),
    this->currentRootInjections.LastObject());
-  //std::cout << "Got here!!!! step 3";
-  //std::cout.flush();
 
   this->currentNumLargerTypesExplored.AddOnTop(inputNumLargerTypesExplored);
-  stOutput << "<hr>Possible extensions of " << input.theWeylNonEmbeddeD.theDynkinType.ToString()
-  << ": ";
+//  stOutput << "<hr>Possible extensions of " << input.theWeylNonEmbeddeD.theDynkinType.ToString()
+//  << ": ";
   for (int i=0; i<this->currentPossibleLargerDynkinTypes.LastObject()->size; i++)
     stOutput << (*this->currentPossibleLargerDynkinTypes.LastObject())[i].ToString() << ", ";
   this->currentHCandidatesScaledToActByTwo.SetSize(this->currentSubalgebraChain.size);
   this->currentNumHcandidatesExplored.AddOnTop(inputNumHcandidatesExplored);
-  //std::cout << "Got here!!!! step 4";
-  //std::cout.flush();
+
   this->ComputeCurrentHCandidates();
 }
 
@@ -959,10 +935,12 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
       return this->RemoveLastSubalgebra();
     return this->ComputeCurrentHCandidates();
   }
-//  std::cout << "Got here!!!! main incrementing step";
-//  std::cout.flush();
+  std::stringstream out;
+  out << "Subalgebras found so far: " << this->theSubalgebras.size
+  << "<br>Current state:<br> " << this->ToStringProgressReport();
+  theReport0.Report(out.str());
 
-  theReport0.Report(this->ToStringProgressReport());
+//  theReport0.Report(this->ToStringProgressReport());
   int typeIndex=this->currentNumLargerTypesExplored[stackIndex];
   int hIndex=this->currentNumHcandidatesExplored[stackIndex];
   CandidateSSSubalgebra newCandidate;
@@ -973,27 +951,17 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
   (this->baseSubalgebra(), this->currentHCandidatesScaledToActByTwo[stackIndex][hIndex],
    this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
    this->currentRootInjections[stackIndex][typeIndex]);
-  //std::cout << "after create & extend sa";
-  //std::cout.flush();
   this->CheckConsistency();
-  //std::cout << this->currentNumHcandidatesExplored;
-  //std::cout.flush();
 
   this->currentNumHcandidatesExplored[stackIndex]++;
-  //std::cout << "after this->currentNumHcandidatesExplored[stackIndex]++;";
-  //std::cout.flush();
   if (newSubalgebraCreated)
     this->AddNewSubalgebra(newCandidate);
   else
-  { //std::cout << "\n no sa created!";
-    //std::cout.flush();
-    std::stringstream reportstream;
+  { std::stringstream reportstream;
     reportstream << "h element " << hIndex+1 << " out of " << this->currentHCandidatesScaledToActByTwo[stackIndex][hIndex].size
     << ": did not succeed extending. ";
     theReport1.Report(reportstream.str());
   }
-  //std::cout << "\n before return!";
-  //std::cout.flush();
   return true;
 }
 

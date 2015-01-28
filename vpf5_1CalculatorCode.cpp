@@ -519,10 +519,7 @@ bool Calculator::innerPrintSSsubalgebras
     { theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=500000;
       theSSsubalgebras.FindTheSSSubalgebrasFromScratch(ownerSS);
     }
-    Expression theSSE;
-    CalculatorConversions::innerStoreSemisimpleSubalgebras(theCommands, theSSsubalgebras, theSSE);
-    theSSE.SetChildAtomValue(0, "LoadSemisimpleSubalgebras");
-    theSSsubalgebras.WriteReportToFiles(theSSE.ToString());
+    theSSsubalgebras.WriteReportToFiles("LoadSemisimpleSubalgebras{}"+theSSsubalgebras.ToStringExpressionString(theSSsubalgebras));
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -745,12 +742,10 @@ bool Calculator::innerMatrixRational(Calculator& theCommands, const Expression& 
 }
 
 bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input, Expression& output)
-{ //stOutput << "here i am, input is: " << input.ToString() << ", in full detail: " << input.ToStringFull();
-  Matrix<Expression> theMat;
+{ Matrix<Expression> theMat;
   output=input;
   output.SetChildAtomValue(0, theCommands.opSequence());
   theCommands.GetMatrixExpressions(output, theMat);
-  //stOutput << "<br>" << theMat.ToString();
   theMat.Transpose();
   return output.AssignMatrixExpressions(theMat, theCommands);
 }

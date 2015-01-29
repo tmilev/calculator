@@ -545,11 +545,9 @@ bool SemisimpleSubalgebras::LoadState
 
 void SemisimpleSubalgebras::FindTheSSSubalgebrasContinue()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasContinue");
-  stOutput << "Here i am";
   while(this->IncrementReturnFalseIfPastLast())
   {
   }
-  //  stOutput << "Num candidates so far: " << this->theSubalgebras.size;
   if (!this->targetDynkinType.IsEqualToZero())
     this->flagAttemptToAdjustCentralizers=false;
   this->HookUpCentralizers(false);
@@ -903,8 +901,8 @@ void SemisimpleSubalgebras::AddSubalgebraToStack
   this->currentNumLargerTypesExplored.AddOnTop(inputNumLargerTypesExplored);
 //  stOutput << "<hr>Possible extensions of " << input.theWeylNonEmbeddeD.theDynkinType.ToString()
 //  << ": ";
-  for (int i=0; i<this->currentPossibleLargerDynkinTypes.LastObject()->size; i++)
-    stOutput << (*this->currentPossibleLargerDynkinTypes.LastObject())[i].ToString() << ", ";
+//  for (int i=0; i<this->currentPossibleLargerDynkinTypes.LastObject()->size; i++)
+//    stOutput << (*this->currentPossibleLargerDynkinTypes.LastObject())[i].ToString() << ", ";
   this->currentHCandidatesScaledToActByTwo.SetSize(this->currentSubalgebraChain.size);
   this->currentNumHcandidatesExplored.AddOnTop(inputNumHcandidatesExplored);
 
@@ -936,8 +934,8 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
     return this->ComputeCurrentHCandidates();
   }
   std::stringstream out;
-  out << "Subalgebras found so far: " << this->theSubalgebras.size
-  << "<br>Current state:<br> " << this->ToStringProgressReport();
+  out << "Subalgebras found so far: " << this->theSubalgebras.size << "<br>Current state:<br> "
+  << this->ToStringProgressReport();
   theReport0.Report(out.str());
 
 //  theReport0.Report(this->ToStringProgressReport());

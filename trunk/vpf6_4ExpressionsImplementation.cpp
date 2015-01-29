@@ -2127,8 +2127,6 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     std::string tempS2= (*this)[1].ToString(theFormat);
     tempS=(*this)[2].ToString(theFormat);
     out << tempS2;
-//    stOutput << "<br>here i am! tempS2.size=" << tempS2.size() << ", allowNewLine="
-//    << allowNewLine;
     if (allowNewLine && tempS2.size()>(unsigned)lineBreak)
       out << "\\\\\n";
     if (tempS.size()>0)

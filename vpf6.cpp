@@ -1237,8 +1237,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   DynkinSimpleType tempSimpleType;
   if (theWeyl.theDynkinType.IsSimple(&tempSimpleType.theLetter, &tempSimpleType.theRank, &tempSimpleType.CartanSymmetricInverseScale))
     if (tempSimpleType.CartanSymmetricInverseScale==1)
-    { //stOutput << "here i am";
-      Matrix<Rational> tempM, tempM2;
+    { Matrix<Rational> tempM, tempM2;
       theWeyl.theDynkinType.GetEpsilonMatrix(tempM);
       tempM2=tempM;
       tempM2.Transpose();

@@ -2463,7 +2463,6 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
   currentSA.ComputePotentialExtensions();
   this->theSubalgebras.ReservE(this->GetOwnerWeyl().RootsOfBorel.size);
   this->theSubalgebras.AddOnTop(currentSA);
-  //stOutput << "Here I am!";
   List<DynkinType> possibleExtensions;
   DynkinType currentType;
   std::string reportString;

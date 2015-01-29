@@ -75,8 +75,6 @@ bool CalculatorConversions::innerDynkinSimpleType(Calculator& theCommands, const
   if (theTypeName.size()!=1)
     return theCommands << "<hr>Error while extracting Dynkin simple type: The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G."
     << "Instead, it is " << theTypeName + ". Error encountered while processing " << input.ToString();
-  //stOutput << "here i am again 2. ";
-  //stOutput.flush();
   char theWeylLetter=theTypeName[0];
   if (theWeylLetter=='a') theWeylLetter='A';
   if (theWeylLetter=='b') theWeylLetter='B';
@@ -96,8 +94,6 @@ bool CalculatorConversions::innerDynkinSimpleType(Calculator& theCommands, const
     return theCommands << "<hr>Type E must have rank 6,7 or 8 ";
   if (theWeylLetter=='D' &&(theRank<3))
     return theCommands << "<hr>Type D is expected to have rank 4 or more, your input was of rank " << theRank << ". ";
-  //stOutput << "here i am again 3. ";
-  //stOutput.flush();
   outputMon.MakeArbitrary(theWeylLetter, theRank, theScale);
   return true;
 }

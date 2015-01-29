@@ -73,7 +73,6 @@ bool Calculator::outerExtractBaseMultiplication(Calculator& theCommands, const E
 
 bool CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat");
-  //stOutput << "<hr>here i am ";
   if (!input.IsListNElements(3))
     return false;
   const Expression* leftE;
@@ -219,8 +218,6 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt(Calculato
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt");
   if (!input.IsListNElements(3))
     return false;
-  //stOutput << "<br>Here i am!";
-  //stOutput << "Multiplying: " << input[1].ToString() << " by " << input[2].ToString();
   ElementWeylGroup<WeylGroup> leftR, rightR;
   if (!input[1].IsOfType(&leftR) || !input[2].IsOfType(&rightR))
     return false;
@@ -527,7 +524,6 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLSPath(Calculator& theComma
 
 bool CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor");
-//  stOutput << "<hr>HERE I am!";
   return CalculatorFunctionsBinaryOps::innerAddTypeToType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(theCommands, input, output);
 }
 

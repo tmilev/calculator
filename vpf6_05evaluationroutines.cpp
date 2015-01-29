@@ -77,10 +77,6 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
         }
     } else
     { Function& innerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
-      //if (functionNameNode.ToString()=="+")
-      //{ bool tempbool=true;
-      //   stOutput << "<br>Here i am!";
-      //}
       if (input.children.size>2)
       { //stOutput << "more than 2 children: " << input.Lispify();
         if (innerFun.inputFitsMyInnerType(input))

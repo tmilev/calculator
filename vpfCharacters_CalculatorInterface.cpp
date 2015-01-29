@@ -910,7 +910,6 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSimple
 
 bool CalculatorFunctionsWeylGroup::innerTensorWeylReps(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerTensorWeylReps");
-  //stOutput << "Here i am!";
   if (input.children.size!=3)
     return false;
   WeylGroupRepresentation<Rational> leftRep;

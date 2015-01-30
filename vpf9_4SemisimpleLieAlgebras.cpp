@@ -115,7 +115,7 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants(GlobalVariables* theGlobalV
   }
   for (int i=0; i<this->theWeyl.RootSystem.size; i++)
     for(int j=i; j<this->theWeyl.RootSystem.size; j++)
-    { tempRoot=this->theWeyl.RootSystem.TheObjects[i]+this->theWeyl.RootSystem.TheObjects[j];
+    { tempRoot=this->theWeyl.RootSystem[i]+this->theWeyl.RootSystem[j];
       if(!tempRoot.IsEqualToZero())
         if(!this->theWeyl.IsARoot(tempRoot))
         { this->Computed.elements[i][j]=true;

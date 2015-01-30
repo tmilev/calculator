@@ -545,8 +545,12 @@ bool SemisimpleSubalgebras::LoadState
 
 void SemisimpleSubalgebras::FindTheSSSubalgebrasContinue()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasContinue");
+  ProgressReport theReport(this->theGlobalVariables);
   while(this->IncrementReturnFalseIfPastLast())
-  {
+  { std::stringstream out;
+    out << "Subalgebras found so far: " << this->theSubalgebras.size << "<br>Current state:<br> "
+    << this->ToStringProgressReport();
+    theReport.Report(out.str());
   }
   if (!this->targetDynkinType.IsEqualToZero())
     this->flagAttemptToAdjustCentralizers=false;
@@ -914,14 +918,14 @@ std::string SemisimpleSubalgebras::ToStringProgressReport(FormatExpressions* the
   std::stringstream out;
   if (this->ToStringExpressionString!=0)
     out << "LoadSemisimpleSubalgebras {}" << this->ToStringExpressionString(*this);
-  out << "\n\n<br><br>";
+  out << "\n\n<hr>";
   return out.str();
 }
 
 bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::IncrementReturnFalseIfPastLast");
   this->CheckConsistency();
-  ProgressReport theReport1(this->theGlobalVariables), theReport0(this->theGlobalVariables);
+  ProgressReport theReport1(this->theGlobalVariables);
   if (this->currentSubalgebraChain.size==0)
     return false;
   if (this->baseSubalgebra().GetRank()>=this->owneR->GetRank())
@@ -933,12 +937,6 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
       return this->RemoveLastSubalgebra();
     return this->ComputeCurrentHCandidates();
   }
-  std::stringstream out;
-  out << "Subalgebras found so far: " << this->theSubalgebras.size << "<br>Current state:<br> "
-  << this->ToStringProgressReport();
-  theReport0.Report(out.str());
-
-//  theReport0.Report(this->ToStringProgressReport());
   int typeIndex=this->currentNumLargerTypesExplored[stackIndex];
   int hIndex=this->currentNumHcandidatesExplored[stackIndex];
   CandidateSSSubalgebra newCandidate;

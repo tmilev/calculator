@@ -836,6 +836,7 @@ public:
   List<std::string> SystemCommands;
   std::string ToString();
   std::string ElementToStringNonBoundVars();
+  std::string ToStringOutputAndSpecials();
   std::string ToStringFunctionHandlers();
   //the purpose of the operator below is to save on typing when returning false with a comment.
   operator bool()const

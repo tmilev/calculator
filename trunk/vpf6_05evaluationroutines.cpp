@@ -265,15 +265,16 @@ bool Calculator::EvaluateExpression
     if (indexInCache!=-1)
       theCommands.imagesCachedExpressions[indexInCache]=output;
     //////------Handling naughty expressions------
-    if (theCommands.theGlobalVariableS->GetElapsedSeconds()!=0)
-      if (theCommands.theGlobalVariableS->GetElapsedSeconds()>theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2)
-      { if (!theCommands.flagTimeLimitErrorDetected)
-          stOutput << "<br><b>Max allowed computational time is " << theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2 << ";  so far, "
-          << theCommands.theGlobalVariableS->GetElapsedSeconds()-theCommands.StartTimeEvaluationInSecondS << " have elapsed -> aborting computation ungracefully.</b>";
-        theCommands.flagTimeLimitErrorDetected=true;
-        theCommands.flagAbortComputationASAP=true;
-        break;
-      }
+    if (theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
+      if (theCommands.theGlobalVariableS->GetElapsedSeconds()!=0)
+        if (theCommands.theGlobalVariableS->GetElapsedSeconds()>theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2)
+        { if (!theCommands.flagTimeLimitErrorDetected)
+            stOutput << "<br><b>Max allowed computational time is " << theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2 << ";  so far, "
+            << theCommands.theGlobalVariableS->GetElapsedSeconds()-theCommands.StartTimeEvaluationInSecondS << " have elapsed -> aborting computation ungracefully.</b>";
+          theCommands.flagTimeLimitErrorDetected=true;
+          theCommands.flagAbortComputationASAP=true;
+          break;
+        }
     if (counterNumTransformations>theCommands.MaxAlgTransformationsPerExpression)
     { if (!theCommands.flagMaxTransformationsErrorEncountered)
       { std::stringstream out;

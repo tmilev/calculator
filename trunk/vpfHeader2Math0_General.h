@@ -1608,7 +1608,7 @@ class GroebnerBasisComputation
   static bool IsContradictoryReducedSystem(const List<Polynomial<coefficient> >& input);
   void RemainderDivisionWithRespectToBasis
   (Polynomial<coefficient>& inputOutput, Polynomial<coefficient>* outputRemainder=0, GlobalVariables* theGlobalVariables=0, int basisIndexToIgnore=-1);
-  static std::string GetCalculatorInputFromSystem(const List<Polynomial<coefficient> >& inputSystem);
+  std::string ToStringCalculatorInputFromSystem(const List<Polynomial<coefficient> >& inputSystem);
   void SolveSerreLikeSystem(List<Polynomial<coefficient> >& inputSystem, AlgebraicClosureRationals* theAlgebraicClosure=0, GlobalVariables* theGlobalVariables=0);
   bool HasImpliedSubstitutions
   (List<Polynomial<coefficient> >& inputSystem, PolynomialSubstitution<coefficient>& outputSub, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables)

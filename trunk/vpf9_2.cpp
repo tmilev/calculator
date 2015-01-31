@@ -2238,7 +2238,11 @@ bool CGI::AttemptToCivilize(std::string& readAhead, std::stringstream& out)
   { out << "!";
     return true;
   }
-  if (readAhead=="%09")//tab characters are ignored, replaced by spaces
+  if (readAhead=="%09")//code for tab character, replaced by space
+  { out << " ";
+    return true;
+  }
+  if (readAhead=="%A0")//code for &nbsp;, replaced by space
   { out << " ";
     return true;
   }

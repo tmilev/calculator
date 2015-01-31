@@ -2174,6 +2174,21 @@ std::string ObjectContainer::ToString()
   return out.str();
 }
 
+std::string Calculator::ToStringOutputAndSpecials()
+{ MacroRegisterFunctionWithName("Calculator::ToStringOutputSpecials");
+  if (this->inputString=="")
+    return "";
+  std::stringstream out;
+  out << this->outputString;
+  if (this->flagProduceLatexLink)
+    out << "<br>LaTeX link (\\usepackage{hyperref}):<br> "
+    << CGI::GetLatexEmbeddableLinkFromCalculatorInput(this->inputStringRawestOfTheRaw, this->inputString)
+    << "<br>Input string raw: <br>" << this->inputStringRawestOfTheRaw;
+  if (this->parsingLog!="")
+    out << "<b> As requested, here is a calculator parsing log</b><br>" << this->parsingLog;
+  return out.str();
+}
+
 std::string Calculator::ToString()
 { MacroRegisterFunctionWithName("Calculator::ToString");
   std::stringstream out, out2;

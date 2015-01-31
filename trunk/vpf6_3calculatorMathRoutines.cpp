@@ -4633,6 +4633,7 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
 //    << "<br>Appologies for this technical (Apache server configuration) problem. <br>Alleviating it is around the bottom of a very long to-do list.</b>"
 //    << "<br> The computation is slow, up to around 10 minutes for E_8.<br>";
     SltwoSubalgebras theSl2s(*ownerSS);
+    theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo=true;
     ownerSS->FindSl2Subalgebras(*ownerSS, theSl2s, *theCommands.theGlobalVariableS);
     std::string PathSl2= outSltwoPath.str();
     std::string DisplayPathSl2=outSltwoDisplayPath.str();

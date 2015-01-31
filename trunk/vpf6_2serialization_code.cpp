@@ -525,8 +525,8 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(Calculator& theComma
   theValues.AddOnTop(numTypesExploredE);
   Expression numHsExploredE;
   numHsExploredE.MakeSequence(theCommands);
-  for (int i=0; i<input.currentNumLargerTypesExplored.size; i++)
-  { numericalConvertorE=input.currentNumLargerTypesExplored[i];
+  for (int i=0; i<input.currentNumHcandidatesExplored.size; i++)
+  { numericalConvertorE=input.currentNumHcandidatesExplored[i];
     numHsExploredE.AddChildOnTop(numericalConvertorE);
   }
   theKeys.AddOnTop("NumExploredHs");

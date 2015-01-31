@@ -1247,6 +1247,7 @@ void Expression::ContextGetFormatExpressions(FormatExpressions& output)const
   output.polyAlphabeT.SetSize(thePolyE.children.size-1);
   for (int i=1; i<thePolyE.children.size; i++)
     output.polyAlphabeT[i-1]=thePolyE[i].ToString();
+//    stOutput << "Drum roll: the poly alphabet: " << output.polyAlphabeT;
   Expression theEWAE=this->ContextGetDifferentialOperatorVariables();
   output.weylAlgebraLetters.SetSize(theEWAE.children.size-1);
   for (int i=1; i<theEWAE.children.size; i++)

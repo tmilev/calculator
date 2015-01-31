@@ -527,11 +527,24 @@ bool SemisimpleSubalgebras::LoadState
     << numExploredTypes.size << ", numExploredHs.size: " << numExploredHs.size;
     return false;
   }
+//  static ProgressReport theReport(theGlobalVariables);
+//  std::stringstream progReportStream;
+//  progReportStream << "<br>Loadstate: currentChainInt: " << currentChainInt;
+//  progReportStream << "<br>Loadstate: numExploredTypes: " << numExploredTypes;
+//  progReportStream << "<br>Loadstate: numExploredHs: " << numExploredHs;
+  this->currentHCandidatesScaledToActByTwo.SetSize(0);
+  this->currentNumHcandidatesExplored.SetSize(0);
+  this->currentNumLargerTypesExplored.SetSize(0);
+  this->currentPossibleLargerDynkinTypes.SetSize(0);
+  this->currentRootInjections.SetSize(0);
+  this->currentSubalgebraChain.SetSize(0);
   for (int i=0; i<currentChainInt.size; i++)
   { if (currentChainInt[i]==-1 && i==0)
     { CandidateSSSubalgebra emptySA;
       emptySA.owner=this;
       this->AddSubalgebraToStack(emptySA, numExploredTypes[i], numExploredHs[i]);
+//      progReportStream << "<br>Called AddSubalgebraToStack with input: " << "0, " << numExploredTypes[i]
+//      << "," << numExploredHs[i];
       continue;
     }
     if (currentChainInt[i]<0 || currentChainInt[i]>=this->theSubalgebras.size)
@@ -539,7 +552,14 @@ bool SemisimpleSubalgebras::LoadState
       return false;
     }
     this->AddSubalgebraToStack(this->theSubalgebras[currentChainInt[i]], numExploredTypes[i], numExploredHs[i]);
+//    progReportStream << "<br>Called AddSubalgebraToStack with input: "
+//    << this->theSubalgebras[currentChainInt[i]].theWeylNonEmbeddeD.theDynkinType.ToString() << ", " << numExploredTypes[i]
+//    << "," << numExploredHs[i];
   }
+//  progReportStream << "<br>After load state call: <br>currentNumHcandidatesExplored:"
+//  << this->currentNumHcandidatesExplored
+//  << "<br>currentNumLargerTypesExplored: " << this->currentNumLargerTypesExplored;
+//  theReport.Report(progReportStream.str());
   return true;
 }
 
@@ -831,7 +851,6 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeCurrentHCandidates");
   int stackIndex=this->currentSubalgebraChain.size-1;
   int typeIndex=this->currentNumLargerTypesExplored[stackIndex];
-  this->currentNumHcandidatesExplored[stackIndex]=0;
   this->currentHCandidatesScaledToActByTwo[stackIndex].SetSize(0);
   if (typeIndex>=this->currentPossibleLargerDynkinTypes[stackIndex].size)
     return true;
@@ -927,7 +946,7 @@ std::string SemisimpleSubalgebras::ToStringProgressReport(FormatExpressions* the
   }
   out << "<hr>";
   for (int i=0; i<this->currentSubalgebraChain.size; i++)
-  { out << "<br>Extensions of " << this->currentSubalgebraChain[i].theWeylNonEmbeddeD.theDynkinType.ToString() << ":";
+  { out << "<br>Extensions of " << this->currentSubalgebraChain[i].theWeylNonEmbeddeD.theDynkinType.ToString() << ": &nbsp;&nbsp;&nbsp;&nbsp;";
     for (int j=0; j<this->currentPossibleLargerDynkinTypes[i].size; j++)
     { if (j==this->currentNumLargerTypesExplored[i])
         out << "<b>";
@@ -937,6 +956,12 @@ std::string SemisimpleSubalgebras::ToStringProgressReport(FormatExpressions* the
       if (j!=this->currentPossibleLargerDynkinTypes[i].size-1)
         out << ",";
     }
+    out << "<br> " << this->currentNumLargerTypesExplored[i] << " out of "
+    << this->currentPossibleLargerDynkinTypes[i].size << " types explored, current type: ";
+    if (this->currentNumLargerTypesExplored[i]< this->currentPossibleLargerDynkinTypes[i].size)
+      out << "<b>" << this->currentPossibleLargerDynkinTypes[i][this->currentNumLargerTypesExplored[i]] << "</b>";
+    else
+      out << "<b>All types explored.</b>";
     out << "<br>Explored " << this->currentNumHcandidatesExplored[i] << " out of "
     << this->currentHCandidatesScaledToActByTwo[i].size << " h-candidates. ";
   }
@@ -959,6 +984,7 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
   { this->currentNumLargerTypesExplored[stackIndex]++;
     if (this->currentNumLargerTypesExplored[stackIndex]>=this->currentPossibleLargerDynkinTypes[stackIndex].size)
       return this->RemoveLastSubalgebra();
+    this->currentNumHcandidatesExplored[stackIndex]=0;
     return this->ComputeCurrentHCandidates();
   }
   int typeIndex=this->currentNumLargerTypesExplored[stackIndex];

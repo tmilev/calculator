@@ -353,9 +353,10 @@ void WebWorker::OutputBeforeComputation()
 void WebWorker::OutputResultAfterTimeout()
 { MacroRegisterFunctionWithName("WebWorker::OutputResultAfterTimeout");
   std::stringstream out;
+//  out << theParser.ToStringOutputSpecials();
   if (standardOutputStreamAfterTimeout.str().size()!=0)
     out << standardOutputStreamAfterTimeout.str() << "<hr>";
-  out << "<table><tr><td>" << theParser.outputString << "</td><td>"
+  out << "<table><tr><td>" << theParser.ToStringOutputAndSpecials() << "</td><td>"
   << theParser.outputCommentsString << "</td></tr></table>";
   std::stringstream outputTimeOutFileName;
   std::fstream outputTimeOutFile;
@@ -400,14 +401,7 @@ void WebWorker::OutputSendAfterTimeout(const std::string& input)
 
 void WebWorker::OutputStandardResult()
 { MacroRegisterFunctionWithName("WebServer::OutputStandardResult");
-  if (theParser.inputString!="")
-  { if (theParser.flagProduceLatexLink)
-      stOutput << "<br>LaTeX link (\\usepackage{hyperref}):<br> "
-      << CGI::GetLatexEmbeddableLinkFromCalculatorInput(theParser.inputStringRawestOfTheRaw, theParser.inputString);
-    stOutput << theParser.outputString;
-    if (theParser.parsingLog!="")
-      stOutput << "<b> As requested, here is a calculator parsing log</b><br>" << theParser.parsingLog;
-  }
+  stOutput << theParser.ToStringOutputAndSpecials();
   stOutput << "\n\n</td>\n\n";
   stOutput << "<td>";
   stOutput << "<table>"

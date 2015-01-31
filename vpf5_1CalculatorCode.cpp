@@ -516,7 +516,7 @@ bool Calculator::innerPrintSSsubalgebras
     theSSsubalgebras.flagAttemptToAdjustCentralizers=doAdjustCentralizers;
     theSSsubalgebras.CheckFileWritePermissions();
     if (!isAlreadySubalgebrasObject)
-    { theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=500000;
+    { theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=-1;
       theSSsubalgebras.FindTheSSSubalgebrasFromScratch(ownerSS);
     }
     theSSsubalgebras.WriteReportToFiles("LoadSemisimpleSubalgebras{}"+theSSsubalgebras.ToStringExpressionString(theSSsubalgebras));

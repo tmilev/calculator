@@ -398,7 +398,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
 bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theCommands, const Expression& inpuT, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorConversions::innerLoadSemisimpleSubalgebras");
   Expression input=inpuT;
-  theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
+  theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=-1;
   Expression theAmbientTypeE, numExploredHsE, numExploredTypesE, theSAsE, currentChainE;
   if (!CalculatorConversions::innerLoadKey(theCommands, input, "AmbientDynkinType", theAmbientTypeE))
     return theCommands << "<hr>Failed to load Dynkin type from: " << input.ToString();
@@ -411,8 +411,8 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
   if (!CalculatorConversions::innerLoadKey(theCommands, input, "CurrentChain", currentChainE))
     return theCommands << "<hr>Failed to load CurrentChain from: " << input.ToString();
 //  stOutput << "<br>dynkinTypeE: " << theAmbientTypeE.ToString();
-//  stOutput << "<br>numExploredHsE: " << numExploredHsE.ToString();
-//  stOutput << "<br>numExploredTypesE: " << numExploredTypesE.ToString();
+  stOutput << "<br>numExploredHsE: " << numExploredHsE.ToString();
+  stOutput << "<br>numExploredTypesE: " << numExploredTypesE.ToString();
 //  stOutput << "<br>theSAsE: " << theSAsE.ToString();
 //  stOutput << "<br>currentChainE: " << currentChainE.ToString();
   List<int> currentChainInt, numExploredTypes, numExploredHs;
@@ -422,6 +422,8 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
     return false;
   if (!theCommands.GetVectoRInt(numExploredTypesE, numExploredTypes))
     return false;
+  stOutput << "<br>numExploredHs: " << numExploredHs;
+  stOutput << "<br>numExploredTypes: " << numExploredTypes;
   SemisimpleLieAlgebra* ownerSS=0;
   Expression tempE;
   if (!CalculatorConversions::innerSSLieAlgebra(theCommands, theAmbientTypeE, tempE, ownerSS))

@@ -963,16 +963,18 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   int theVarIndex=this->GetPreferredSerreSystemSubIndex(inputSystem);
   if (theVarIndex==-1)
     crash << "This is a programming error: preferred substitution variable index is -1. Input system in calculator-input format: <br>"
-    << this->GetCalculatorInputFromSystem(inputSystem) << "<br>" << crash;
+    << this->ToStringCalculatorInputFromSystem(inputSystem) << "<br>" << crash;
   theSub.MakeIdSubstitution(this->systemSolution.GetElement().size);
   theSub[theVarIndex]=twoSolutionsToTry[0];
   //stOutput << "<br>Setting x_{" << theVarIndex+1 << "}=0";
   if (theGlobalVariables!=0)
   { std::stringstream out;
+    MonomialP theMon(theVarIndex);
     out << "Solving Serre-like polynomial system, recursion depth: " << this->RecursionCounterSerreLikeSystem << ". Managed to reduce "
     << numVarsToSolveForStart-numVariablesToSolveForAfterReduction << " variables. Number remaining variables to solve for: "
     << numVariablesToSolveForAfterReduction << ". Try 1 out of 2. "
-    << impliedSubsReport.str() << "<br>Substitution attempts:<br>" << "x_{" << theVarIndex+1 << "}=0;";
+    << impliedSubsReport.str() << "<br>Substitution attempts:<br>"
+    << theMon.ToString(&this->theFormat) << "=0;";
     theReport1.Report(out.str());
   }
 
@@ -1021,10 +1023,12 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   //stOutput << "<br>Input system after sub second recursive call. " << inputSystem.ToString();
   if (theGlobalVariables!=0)
   { std::stringstream out;
+    MonomialP theMon(theVarIndex);
     out << "Solving Serre-like polynomial system, recursion depth: " << this->RecursionCounterSerreLikeSystem << ". Managed to reduce "
     << numVarsToSolveForStart-numVariablesToSolveForAfterReduction << " variables. Number remaining variables to solve for: "
     << numVariablesToSolveForAfterReduction << ". Try 2 out of 2. "
-    << impliedSubsReport.str() << "<br>Substitution attempts:<br>" << "x_{" << theVarIndex+1 << "}=1;";
+    << impliedSubsReport.str() << "<br>Substitution attempts:<br>"
+    << theMon.ToString(&theFormat) << "=1;";
     theReport1.Report(out.str());
   }
   computationSecondTry.SolveSerreLikeSystemRecursively(inputSystem, theAlgebraicClosure, theGlobalVariables);
@@ -1042,11 +1046,11 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
 }
 
 template <class coefficient>
-std::string GroebnerBasisComputation<coefficient>::GetCalculatorInputFromSystem(const List<Polynomial<coefficient> >& inputSystem)
+std::string GroebnerBasisComputation<coefficient>::ToStringCalculatorInputFromSystem(const List<Polynomial<coefficient> >& inputSystem)
 { std::stringstream out;
   out << "FindOneSolutionSerreLikePolynomialSystem{}(";
   for (int j=0; j<inputSystem.size; j++)
-  { out << inputSystem[j].ToString();
+  { out << inputSystem[j].ToString(&this->theFormat);
     if (j!=inputSystem.size-1)
       out << ", ";
   }
@@ -1061,7 +1065,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial
   this->flagSystemProvenToHaveSolution=false;
   this->RecursionCounterSerreLikeSystem=0;
   int numVars=0;
-//  stOutput << "<hr>" << this->GetCalculatorInputFromSystem(inputSystem) << "<hr>";
+//  stOutput << "<hr>" << this->ToStringCalculatorInputFromSystem(inputSystem) << "<hr>";
   List<Polynomial<coefficient> > workingSystem=inputSystem;
   for (int i=0; i<workingSystem.size; i++)
     numVars=MathRoutines::Maximum(numVars, workingSystem[i].GetMinNumVars());
@@ -1070,7 +1074,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial
   ProgressReport theReport(theGlobalVariables);
   std::stringstream reportStream;
   if (theGlobalVariables!=0)
-  { reportStream << "Solving system " << this->GetCalculatorInputFromSystem(inputSystem);
+  { reportStream << "Solving system " << this->ToStringCalculatorInputFromSystem(inputSystem);
     theReport.Report(reportStream.str());
   }
   this->NumberSerreVariablesOneGenerator= workingSystem[0].GetMinNumVars()/2;
@@ -1097,7 +1101,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial
         crash << "<br>This is a programming error. Function SolveSerreLikeSystem reports to have found a solution over the base field, "
         << "but substituting the solution back to the original system does not yield a zero system of equations. More precisely, "
         << "the reported solution was " << this->ToStringSerreLikeSolution() << " but substitution in equation " << inputSystem[i].ToString()
-        << " yields " << workingSystem[i].ToString() << ". Calculator input: <br>" << this->GetCalculatorInputFromSystem(inputSystem) << " <br>"
+        << " yields " << workingSystem[i].ToString() << ". Calculator input: <br>" << this->ToStringCalculatorInputFromSystem(inputSystem) << " <br>"
         << crash;
     }
   }

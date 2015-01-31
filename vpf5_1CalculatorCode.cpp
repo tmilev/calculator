@@ -1078,6 +1078,7 @@ bool Calculator::innerSolveSerreLikeSystem(Calculator& theCommands, const Expres
   theComputation.MaxNumGBComputations=2001;
   theComputation.MaxNumSerreSystemComputationsPreferred=2001;
   theCommands.theGlobalVariableS->theDefaultFormat=theComputation.theFormat;
+//  stOutput << "<br>the alphabet:" << theComputation.theFormat.polyAlphabeT;
 //  stOutput << "<br>The context vars:<br>" << theContext.ToString();
   theComputation.SolveSerreLikeSystem(thePolysAlgebraic, &theCommands.theObjectContainer.theAlgebraicClosure, theCommands.theGlobalVariableS);
   std::stringstream out;

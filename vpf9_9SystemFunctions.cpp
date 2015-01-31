@@ -110,18 +110,19 @@ void* RunTimerVoidPtr(void* ptr)
   }
   if (!onePredefinedCopyOfGlobalVariables.flagComputationCompletE)
   { if (onePredefinedCopyOfGlobalVariables.flagComputationStarted)
-    { crash << "<b>This is a safety time-out crash. You may have requested a computation that takes too long.</b> Your computation ran for ";
+    { std::stringstream out;
+      out << "<b>This is a safety time-out crash. You may have requested a computation that takes too long.</b> Your computation ran for ";
       if (elapsedComputationTime>0)
-        crash << elapsedComputationTime << "seconds";
+        out << elapsedComputationTime << "seconds";
       else
-        crash << " (unknown amount of time)";
-      crash << ". The allowed run time is "
+        out << " (unknown amount of time)";
+      out << ". The allowed run time is "
       << onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
       << " seconds (twice the amount of time allowed for calculator interpretation). "
       << "<br>The present timeout limit may be extended by modifying onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;"
       << " the restriction can be altogether lifted by modifying source file "
       << __FILE__ << "<br>";
-      crash << crash;
+      crash << out.str() << crash;
     } else
     { crash << "Something has gone wrong. Computation has not started, yet " << elapsedtime << " seconds have already passed."
 //      << " allowed before a computation starts is " << onePredefinedCopyOfGlobalVariables.MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit

@@ -546,6 +546,9 @@ bool SemisimpleSubalgebras::LoadState
 void SemisimpleSubalgebras::FindTheSSSubalgebrasContinue()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasContinue");
   ProgressReport theReport(this->theGlobalVariables);
+  std::stringstream reportstream;
+  reportstream << "State at beginning of computation: " << this->ToStringProgressReport();
+  theReport.Report(reportstream.str());
   while(this->IncrementReturnFalseIfPastLast())
   { std::stringstream out;
     out << "Subalgebras found so far: " << this->theSubalgebras.size << "<br>Current state:<br> "
@@ -916,8 +919,29 @@ void SemisimpleSubalgebras::AddSubalgebraToStack
 std::string SemisimpleSubalgebras::ToStringProgressReport(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToStringProgressReport");
   std::stringstream out;
+  out << "Current subalgebra chain length: " << this->currentSubalgebraChain.size << "<br>";
+  for (int i=0; i<this->currentSubalgebraChain.size; i++)
+  { out << this->currentSubalgebraChain[i].theWeylNonEmbeddeD.theDynkinType.ToString();
+    if (i!=this->currentSubalgebraChain.size-1)
+      out << "&lt;";
+  }
+  out << "<hr>";
+  for (int i=0; i<this->currentSubalgebraChain.size; i++)
+  { out << "<br>Extensions of " << this->currentSubalgebraChain[i].theWeylNonEmbeddeD.theDynkinType.ToString() << ":";
+    for (int j=0; j<this->currentPossibleLargerDynkinTypes[i].size; j++)
+    { if (j==this->currentNumLargerTypesExplored[i])
+        out << "<b>";
+      out << this->currentPossibleLargerDynkinTypes[i][j].ToString();
+      if (j==this->currentNumLargerTypesExplored[i])
+        out << "</b>";
+      if (j!=this->currentPossibleLargerDynkinTypes[i].size-1)
+        out << ",";
+    }
+    out << "<br>Explored " << this->currentNumHcandidatesExplored[i] << " out of "
+    << this->currentHCandidatesScaledToActByTwo[i].size << " h-candidates. ";
+  }
   if (this->ToStringExpressionString!=0)
-    out << "LoadSemisimpleSubalgebras {}" << this->ToStringExpressionString(*this);
+    out << "\n<hr>\n" << "LoadSemisimpleSubalgebras {}" << this->ToStringExpressionString(*this);
   out << "\n\n<hr>";
   return out.str();
 }
@@ -2716,6 +2740,11 @@ bool CandidateSSSubalgebra::AttemptToSolveSystem()
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::AttemptToSolveSystem");
   this->CheckInitialization();
   this->transformedSystem=this->theSystemToSolve;
+  ProgressReport theReport(this->owner->theGlobalVariables);
+  std::stringstream reportstream;
+  reportstream << "<hr>In order to realize type " << this->theWeylNonEmbeddeD.theDynkinType.ToString()
+  << " I need to solve the following system." << this->ToStringSystemPart2();
+  theReport.Report(reportstream.str());
 //  stOutput << "<br>Ere i am j h.";
 //  return true;
   GroebnerBasisComputation<AlgebraicNumber> theComputation;
@@ -4645,31 +4674,51 @@ std::string CandidateSSSubalgebra::ToStringSystem(FormatExpressions* theFormat)c
     out << "<br>" << this->transformedSystem[i].ToString(&tempFormat) << "= 0";
   if (!this->flagSystemGroebnerBasisFound)
     out << "<br><b>Failed to find Groebner basis of the above system (the computation is too large).</b>";
-  out << "<br><b>For the calculator part 1: </b>";
-  out << "<br>FindOneSolutionSerreLikePolynomialSystem{}( ";
+  out << this->ToStringSystemPart2(theFormat);
+  return out.str();
+}
+
+std::string CandidateSSSubalgebra::ToStringSystemPart2(FormatExpressions* theFormat)const
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringSystem");
+  std::stringstream out;
+  out << "<br><b>For the calculator: </b><br>\n" << this->ToStringLoadUnknown() << ";"
+  << "<br>FindOneSolutionSerreLikePolynomialSystem{}( ";
   for (int i=0; i<this->theSystemToSolve.size; i++)
-  { out << this->theSystemToSolve[i].ToString(&tempFormat);
+  { out << this->theSystemToSolve[i].ToString();
     if (i!=this->theSystemToSolve.size-1)
       out << ", ";
   }
 //  stOutput << "Got here no crash -6.";
+//  out << "<br><b>For the calculator part 2: </b>";
+//  out << "<br>GroebnerLexUpperLimit{}(10000, ";
+//  for (int i=0; i<this->theSystemToSolve.size; i++)
+//  { out << this->theSystemToSolve[i].ToString();
+//    if (i!=this->theSystemToSolve.size-1)
+//      out << ", ";
+//  }
   out << " )";
-  out << "<br><b>For the calculator part 2: </b>";
-  out << "<br>(";
-  for (int i=0; i<this->theUnknownNegGens.size; i++)
-  { out << this->theUnknownNegGens[i].ToString(theFormat) << ", " ;
-    out << this->theUnknownPosGens[i].ToString(theFormat);
+  return out.str();
+}
+
+std::string CandidateSSSubalgebra::ToStringLoadUnknown(FormatExpressions* theFormat)const
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringLoadUnknown");
+  std::stringstream out;
+  out << "(";
+  out << "DynkinType=" << this->theWeylNonEmbeddeD.theDynkinType.ToString() << "; ElementsCartan=";
+  out << "(";
+  for (int i=0; i<this->theHs.size; i++)
+  { out << this->theHs[i].ToString();
+    if (i!=this->theHs.size-1)
+      out << ", ";
+  }
+  out << ")";
+  out << "; generators=(";
+  for (int i=0; i< this->theUnknownNegGens.size; i++)
+  { out << this->theUnknownNegGens[i].ToString() << ", " <<  this->theUnknownPosGens[i].ToString();
     if (i!=this->theUnknownNegGens.size-1)
       out << ", ";
   }
-  out << ");";
-  out << "<br>GroebnerLexUpperLimit{}(10000, ";
-  for (int i=0; i<this->theSystemToSolve.size; i++)
-  { out << this->theSystemToSolve[i].ToString(&tempFormat);
-    if (i!=this->theSystemToSolve.size-1)
-      out << ", ";
-  }
-  out << " )";
+  out << ") )";
   return out.str();
 }
 

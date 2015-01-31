@@ -251,6 +251,8 @@ public:
   std::string ToStringGenerators(FormatExpressions* theFormat=0)const;
   std::string ToString(FormatExpressions* theFormat=0)const;
   std::string ToStringSystem(FormatExpressions* theFormat=0)const;
+  std::string ToStringSystemPart2(FormatExpressions* theFormat=0)const;
+  std::string ToStringLoadUnknown(FormatExpressions* theFormat=0)const;
   std::string ToStringCentralizer(FormatExpressions* theFormat=0)const;
   std::string ToStringCartanSA(FormatExpressions* theFormat=0)const;
   std::string ToStringPairingTable(FormatExpressions* theFormat=0)const;

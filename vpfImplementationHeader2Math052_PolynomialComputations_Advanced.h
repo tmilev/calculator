@@ -955,6 +955,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   computationFirstTry.flagSystemProvenToHaveNoSolution=false;
   computationFirstTry.flagSystemSolvedOverBaseField=false;
   computationFirstTry.flagSystemProvenToHaveSolution=false;
+  computationFirstTry.theFormat=this->theFormat;
 
 //  if (this->RecursionCounterSerreLikeSystem==1)
 //    twoSolutionsToTry.SwapTwoIndices(0,1);
@@ -1005,6 +1006,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   computationSecondTry.flagSystemProvenToHaveNoSolution=false;
   computationSecondTry.flagSystemSolvedOverBaseField=false;
   computationSecondTry.flagSystemProvenToHaveSolution=false;
+  computationSecondTry.theFormat=this->theFormat;
 
   theSub.MakeIdSubstitution(this->systemSolution.GetElement().size);
   theSub[theVarIndex]=twoSolutionsToTry[1];

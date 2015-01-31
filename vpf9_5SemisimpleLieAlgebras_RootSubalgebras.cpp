@@ -2454,7 +2454,6 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
   this->initOwnerMustBeNonZero();
   this->ComputeAllReductiveRootSAsInit();
   HashedList<Vector<Rational> > tempVs;
-  this->flagPrintParabolicPseudoParabolicInfo=true;
   this->flagPrintGAPinput= this->owneR->theWeyl.LoadGAPRootSystem(tempVs);
   ProgressReport theReport1(this->theGlobalVariables), theReport2(this->theGlobalVariables);
   rootSubalgebra currentSA;

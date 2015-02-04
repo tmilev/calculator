@@ -734,7 +734,8 @@ void FiniteGroup<elementSomeGroup>::ComputeCCfromAllElements(GlobalVariables* th
 
 template <class coefficient>
 bool WeylGroup::GenerateOuterOrbit
-(Vectors<coefficient>& theWeights, HashedList<Vector<coefficient> >& output, HashedList<ElementWeylGroup<WeylGroup> >* outputSubset,  int UpperLimitNumElements)
+(Vectors<coefficient>& theWeights, HashedList<Vector<coefficient> >& output, HashedList<ElementWeylGroup<WeylGroup> >* outputSubset,  int UpperLimitNumElements,
+ GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::GenerateOuterOrbit");
   this->ComputeOuterAutoGenerators();
   List<MatrixTensor<Rational> > theOuterGens=this->theOuterAutos.GetElement().theGenerators;
@@ -745,6 +746,7 @@ bool WeylGroup::GenerateOuterOrbit
   ElementWeylGroup<WeylGroup> currentElt;
   int numElementsToReserve=MathRoutines::Minimum(UpperLimitNumElements, 1000000);
   output.SetExpectedSize(numElementsToReserve);
+  ProgressReport theReport(theGlobalVariables);
   if (outputSubset!=0)
   { currentElt.MakeID(*this);
     outputSubset->SetExpectedSize(numElementsToReserve);
@@ -752,6 +754,7 @@ bool WeylGroup::GenerateOuterOrbit
     outputSubset->AddOnTop(currentElt);
   }
   int numGens=this->GetDim()+theOuterGens.size;
+  int orbitSizeDiv10000=0;
   for (int i=0; i<output.size; i++)
     for (int j=0; j<numGens; j++)
     { if (j<this->GetDim())
@@ -769,6 +772,16 @@ bool WeylGroup::GenerateOuterOrbit
       if (UpperLimitNumElements>0)
         if (output.size>=UpperLimitNumElements)
           return false;
+      if (theGlobalVariables!=0)
+      { if (output.size/10000>orbitSizeDiv10000)
+        { std::stringstream reportStream;
+          reportStream << "Generating outer orbit, " << output.size
+          << " elements found so far, Weyl group type: "
+          << this->theDynkinType.ToString() << ". ";
+          theReport.Report(reportStream.str());
+        }
+        orbitSizeDiv10000=output.size/10000;
+      }
     }
   return true;
 }

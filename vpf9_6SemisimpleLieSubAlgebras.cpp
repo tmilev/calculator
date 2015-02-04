@@ -944,7 +944,7 @@ std::string SemisimpleSubalgebras::ToStringProgressReport(FormatExpressions* the
   std::stringstream out;
   out << "Subalgebras found so far: " << this->theSubalgebras.size << "<br>Orbit sizes: ";
   for (int i=0; i<this->theOrbitsAreComputed.size; i++)
-  { out << "A^" << this->theOrbitHelementLengths[i].ToString() << ": ";
+  { out << "A^" << (this->theOrbitHelementLengths[i]/2).ToString() << ": ";
     if (this->theOrbitsAreComputed[i])
       out << this->theOrbits[i].size << "; ";
     else

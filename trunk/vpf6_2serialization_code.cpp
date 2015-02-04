@@ -411,8 +411,8 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
   if (!CalculatorConversions::innerLoadKey(theCommands, input, "CurrentChain", currentChainE))
     return theCommands << "<hr>Failed to load CurrentChain from: " << input.ToString();
 //  stOutput << "<br>dynkinTypeE: " << theAmbientTypeE.ToString();
-  stOutput << "<br>numExploredHsE: " << numExploredHsE.ToString();
-  stOutput << "<br>numExploredTypesE: " << numExploredTypesE.ToString();
+//  stOutput << "<br>numExploredHsE: " << numExploredHsE.ToString();
+//  stOutput << "<br>numExploredTypesE: " << numExploredTypesE.ToString();
 //  stOutput << "<br>theSAsE: " << theSAsE.ToString();
 //  stOutput << "<br>currentChainE: " << currentChainE.ToString();
   List<int> currentChainInt, numExploredTypes, numExploredHs;
@@ -422,8 +422,8 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
     return false;
   if (!theCommands.GetVectoRInt(numExploredTypesE, numExploredTypes))
     return false;
-  stOutput << "<br>numExploredHs: " << numExploredHs;
-  stOutput << "<br>numExploredTypes: " << numExploredTypes;
+//  stOutput << "<br>numExploredHs: " << numExploredHs;
+//  stOutput << "<br>numExploredTypes: " << numExploredTypes;
   SemisimpleLieAlgebra* ownerSS=0;
   Expression tempE;
   if (!CalculatorConversions::innerSSLieAlgebra(theCommands, theAmbientTypeE, tempE, ownerSS))
@@ -458,13 +458,20 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
     << theSAsE[i].ToString();
     //stOutput << reportStream.str();
     theReport.Report(reportStream.str());
-    CandidateSSSubalgebra tempCandidate;
-    if (!CalculatorConversions::innerCandidateSAPrecomputed(theCommands, theSAsE[i], tempE, tempCandidate, theSAs))
+    CandidateSSSubalgebra currentCandidate;
+    if (!CalculatorConversions::innerCandidateSAPrecomputed(theCommands, theSAsE[i], tempE, currentCandidate, theSAs))
       return theCommands << "<hr>Error loading candidate subalgebra: failed to load candidate number " << i << " of type "
-      << tempCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " extracted from expression: "
+      << currentCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " extracted from expression: "
       << theSAsE[i].ToString() << ". <hr>";
-    //stOutput << "<hr>read cartan elements: " << tempCandidate.theHs.size;
-    theSAs.theSubalgebras.AddOnTop(tempCandidate);
+    //stOutput << "<hr>read cartan elements: " << currentCandidate.theHs.size;
+    if (theSAs.theHsOfSubalgebras.Contains(currentCandidate.theHs))
+    { theCommands << "<hr>Did not load subalgebra of type " << currentCandidate.theWeylNonEmbeddeD.ToString()
+      << " because I've already loaded a subalgebra with the same cartan subalgebra. ";
+      continue;
+    }
+    currentCandidate.indexInOwner=theSAs.theSubalgebras.size;
+    theSAs.theSubalgebras.AddOnTop(currentCandidate);
+    theSAs.theHsOfSubalgebras.AddOnTop(currentCandidate.theHs);
   }
   std::stringstream reportStream;
   reportStream << "Loaded " << theSAs.theSubalgebras.size << " subalgebras total. ";

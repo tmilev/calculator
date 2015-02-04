@@ -279,10 +279,9 @@ public:
   SltwoSubalgebras theSl2s;
   HashedListReferences<SemisimpleLieAlgebra>* theSubalgebrasNonEmbedded;
   ListReferences<SltwoSubalgebras>* theSl2sOfSubalgebras;
-
-  List<HashedList<Vector<Rational> > > theOrbits;
+  List<Vectors<Rational> > theOrbits;
   HashedList<Rational> theOrbitHelementLengths;
-  List<HashedList<ElementWeylGroup<WeylGroup> > > theOrbitGeneratingElts;
+//  List<HashedList<ElementWeylGroup<WeylGroup> > > theOrbitGeneratingElts;
   List<bool> theOrbitsAreComputed;
 
   //current computation state:
@@ -297,8 +296,7 @@ public:
 
   //end current computation state variables.
 
-
-
+  HashedList<Vectors<Rational> > theHsOfSubalgebras; //used to search for subalgebras quickly
   List<CandidateSSSubalgebra> theSubalgebras;
   bool flagAttemptToSolveSystems;
   bool flagComputePairingTable;
@@ -365,7 +363,7 @@ public:
   SemisimpleSubalgebras(): flagDeallocated(false)
   { this->reset();
   }
-  void AddNewSubalgebra(CandidateSSSubalgebra& input);
+  void AddSubalgebraIfNewSetToStackTop(CandidateSSSubalgebra& input);
   void AddSubalgebraToStack
 (CandidateSSSubalgebra& input, int inputNumLargerTypesExplored, int inputNumHcandidatesExplored)
 ;
@@ -375,6 +373,7 @@ public:
   { this->reset();
     this->initHookUpPointers(inputOwner, theField, inputSubalgebrasNonEmbedded, inputSl2sOfSubalgebras, inputGlobalVariables);
   }
+  bool CheckConsistencyHs()const;
   bool CheckConsistency()const;
   bool CheckInitialization() const;
   std::string ToStringProgressReport(FormatExpressions* theFormat=0);
@@ -383,9 +382,9 @@ public:
   std::string ToStringSSsumaryHTML(FormatExpressions* theFormat=0)const;
   void ComputePairingTablesAndFKFTtypes();
   void GetCentralizerChains(List<List<int> >& outputChains);
-  const HashedList<Vector<Rational> >& GetOrbitSl2Helement(int indexSl2);
+  const Vectors<Rational>& GetOrbitSl2Helement(int indexSl2);
   int GetIndexFullSubalgebra()const;
-  const HashedList<ElementWeylGroup<WeylGroup> >& GetOrbitSl2HelementWeylGroupElt(int indexSl2);
+//  const HashedList<ElementWeylGroup<WeylGroup> >& GetOrbitSl2HelementWeylGroupElt(int indexSl2);
   bool RanksAndIndicesFit(const DynkinType& input)const;
   bool GrowDynkinType(const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputImagesSimpleRoots)const;
   Vector<Rational>

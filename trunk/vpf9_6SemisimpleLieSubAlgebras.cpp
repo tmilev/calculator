@@ -473,7 +473,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
     out << "<hr>Of the " << this->theOrbits.size << " h element conjugacy classes " << numComputedOrbits
     << " had their Weyl group orbits computed. The h elements and their computed orbit sizes follow. ";
     out << "<table><tr><td>h element</td><td>orbit size</td></tr>";
-    for (int i=0; i<this->theOrbitGeneratingElts.size; i++)
+    for (int i=0; i<this->theOrbits.size; i++)
     { out << "<tr><td>" << this->theSl2s[i].theH.GetCartanPart().ToString() << "</td>";
       if (this->theOrbitsAreComputed[i])
         out << "<td>" << this->theOrbits[i].size << "</td>";
@@ -510,7 +510,7 @@ void SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand");
   this->GetSSowner().FindSl2Subalgebras(this->GetSSowner(), this->theSl2s, *this->theGlobalVariables);
   this->theOrbits.SetSize(this->theSl2s.size);
-  this->theOrbitGeneratingElts.SetSize(this->theSl2s.size);
+//  this->theOrbitGeneratingElts.SetSize(this->theSl2s.size);
   this->theOrbitsAreComputed.initFillInObject(this->theSl2s.size, false);
   this->theOrbitHelementLengths.Clear();
   this->theOrbitHelementLengths.SetExpectedSize(this->theSl2s.size);
@@ -570,11 +570,7 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasContinue()
   reportstream << "State at beginning of computation: " << this->ToStringProgressReport();
   theReport.Report(reportstream.str());
   while(this->IncrementReturnFalseIfPastLast())
-  { std::stringstream out;
-    out << "Subalgebras found so far: " << this->theSubalgebras.size << "<br>Current state:<br> "
-    << this->ToStringProgressReport();
-    theReport.Report(out.str());
-  }
+    theReport.Report(this->ToStringProgressReport());
   if (!this->targetDynkinType.IsEqualToZero())
     this->flagAttemptToAdjustCentralizers=false;
   this->HookUpCentralizers(false);
@@ -720,6 +716,8 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra");
 
   this->SetUpInjectionHs(baseSubalgebra, theNewType, theRootInjection, &newHrescaledToActByTwo);
+  if (this->owner->theHsOfSubalgebras.Contains(this->theHs))
+    return true;
   this->owner->RegisterPossibleCandidate(*this);
   this->CheckInitialization();
   if (!baseSubalgebra.theWeylNonEmbeddeD.theDynkinType.IsEqualToZero() && baseSubalgebra.indexInOwner==-1)
@@ -798,7 +796,7 @@ void SemisimpleSubalgebras::GetHCandidates
       }
       continue;
     }
-    const HashedList<Vector<Rational> >& currentOrbit=this->GetOrbitSl2Helement(j);
+    const Vectors<Rational>& currentOrbit=this->GetOrbitSl2Helement(j);
     outputHCandidatesScaledToActByTwo.ReservE(outputHCandidatesScaledToActByTwo.size+ currentOrbit.size);
     for (int k=0; k<currentOrbit.size; k++)
     { if (newCandidate.IsGoodHnewActingByTwo(currentOrbit[k], currentRootInjection))
@@ -906,10 +904,16 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
   return true;
 }
 
-void SemisimpleSubalgebras::AddNewSubalgebra(CandidateSSSubalgebra& input)
+void SemisimpleSubalgebras::AddSubalgebraIfNewSetToStackTop(CandidateSSSubalgebra& input)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::AddNewSubalgebra");
-  input.indexInOwner=this->theSubalgebras.size;
-  this->theSubalgebras.AddOnTop(input);
+  this->CheckConsistencyHs();
+  if (this->theHsOfSubalgebras.Contains(input.theHs))
+    input=this->theSubalgebras[this->theHsOfSubalgebras.GetIndex(input.theHs)];
+  else
+  { input.indexInOwner=this->theSubalgebras.size;
+    this->theSubalgebras.AddOnTop(input);
+    this->theHsOfSubalgebras.AddOnTop(input.theHs);
+  }
   this->AddSubalgebraToStack(input, 0, 0);
 }
 
@@ -938,7 +942,15 @@ void SemisimpleSubalgebras::AddSubalgebraToStack
 std::string SemisimpleSubalgebras::ToStringProgressReport(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToStringProgressReport");
   std::stringstream out;
-  out << "Current subalgebra chain length: " << this->currentSubalgebraChain.size << "<br>";
+  out << "Subalgebras found so far: " << this->theSubalgebras.size << "<br>Orbit sizes: ";
+  for (int i=0; i<this->theOrbitsAreComputed.size; i++)
+  { out << "A^" << this->theOrbitHelementLengths[i].ToString() << ": ";
+    if (this->theOrbitsAreComputed[i])
+      out << this->theOrbits[i].size << "; ";
+    else
+      out << "n/a; ";
+  }
+  out << "<br>Current subalgebra chain length: " << this->currentSubalgebraChain.size << "<br>";
   for (int i=0; i<this->currentSubalgebraChain.size; i++)
   { out << this->currentSubalgebraChain[i].theWeylNonEmbeddeD.theDynkinType.ToString();
     if (i!=this->currentSubalgebraChain.size-1)
@@ -1001,7 +1013,7 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
 
   this->currentNumHcandidatesExplored[stackIndex]++;
   if (newSubalgebraCreated)
-    this->AddNewSubalgebra(newCandidate);
+    this->AddSubalgebraIfNewSetToStackTop(newCandidate);
   else
   { std::stringstream reportstream;
     reportstream << "h element " << hIndex+1 << " out of " << this->currentHCandidatesScaledToActByTwo[stackIndex][hIndex].size
@@ -1141,15 +1153,15 @@ DynkinSimpleType DynkinType::GetGreatestSimpleType()const
   return result;
 }
 
-const HashedList<ElementWeylGroup<WeylGroup> >& SemisimpleSubalgebras::GetOrbitSl2HelementWeylGroupElt(int indexSl2)
+/*const HashedList<ElementWeylGroup<WeylGroup> >& SemisimpleSubalgebras::GetOrbitSl2HelementWeylGroupElt(int indexSl2)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::GetOrbitSl2HelementWeylGroupElt");
   if (this->theOrbitsAreComputed[indexSl2])
     return this->theOrbitGeneratingElts[indexSl2];
   this->GetOrbitSl2Helement(indexSl2);
   return this->theOrbitGeneratingElts[indexSl2];
-}
+}*/
 
-const HashedList<Vector<Rational> >& SemisimpleSubalgebras::GetOrbitSl2Helement(int indexSl2)
+const Vectors<Rational>& SemisimpleSubalgebras::GetOrbitSl2Helement(int indexSl2)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::GetOrbitSl2Helement");
   if (this->theOrbitsAreComputed[indexSl2])
     return this->theOrbits[indexSl2];
@@ -1163,7 +1175,10 @@ const HashedList<Vector<Rational> >& SemisimpleSubalgebras::GetOrbitSl2Helement(
 //      if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
 //        stOutput << out.str();
   }
-  if (!this->GetSSowner().theWeyl.GenerateOuterOrbit(startingVector, this->theOrbits[indexSl2], &this->theOrbitGeneratingElts[indexSl2], -1))
+  HashedList<Vector<Rational> > currentOrbit;
+  if (!this->GetSSowner().theWeyl.GenerateOuterOrbit
+      (startingVector, currentOrbit,//&this->theOrbitGeneratingElts[indexSl2]
+       0, -1, this->theGlobalVariables))
     crash << "<hr> Failed to generate weight orbit: orbit has more than hard-coded limit of 30000000 elements. "
     << " This is not a programming error, but I am crashing in flames to let you know you hit the computational limits. "
     << "You might want to work on improving the algorithm for generating semisimple subalgebras. Here is a stack trace for you. " << crash;
@@ -1173,6 +1188,7 @@ const HashedList<Vector<Rational> >& SemisimpleSubalgebras::GetOrbitSl2Helement(
     //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
       //stOutput << " done. The size of the orbit is " << theOrbit.size;
   }
+  this->theOrbits[indexSl2]=currentOrbit;
   this->theOrbitsAreComputed[indexSl2]=true;
   return this->theOrbits[indexSl2];
 }
@@ -2712,6 +2728,16 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWVsOnly(GlobalVaria
   }
 }
 
+bool SemisimpleSubalgebras::CheckConsistencyHs()const
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::CheckConsistencyHs");
+  this->CheckInitialization();
+  for (int i=0; i<this->theHsOfSubalgebras.size; i++)
+    if (this->theHsOfSubalgebras[i]!=this->theSubalgebras[i].theHs)
+      crash << "List this->theHsOfSubalgebras does not match this->theSubalgebras" << crash;
+  return true;
+}
+
+
 bool SemisimpleSubalgebras::CheckInitialization()const
 { this->CheckConsistency();
   if (this->owneR ==0)
@@ -2726,6 +2752,10 @@ bool SemisimpleSubalgebras::CheckInitialization()const
 bool SemisimpleSubalgebras::CheckConsistency()const
 { if (this==0)
     crash << "Programming error: this pointer is zero." << crash;
+  if (this->theHsOfSubalgebras.size!=this->theSubalgebras.size)
+    crash << "The hashed list of h's used to identify the subalgebras is of size: " << this->theHsOfSubalgebras.size
+    << " while there are " << this->theSubalgebras.size << " subalgebras. "
+    << crash;
   if (this->flagDeallocated)
     crash << "This is a programming error: use after free of semisimple subalgebras. " << crash;
   return true;
@@ -5175,6 +5205,11 @@ void SemisimpleSubalgebras::HookUpCentralizers(bool allowNonPolynomialSystemFail
   for (int i=0; i<theCandidatePermutation.size; i++)
     theCandidatePermutation[i]=i;
   this->theSubalgebras.QuickSortAscending(0, &theCandidatePermutation);
+  List<Vectors<Rational> > theHsSortingCopy;
+  theHsSortingCopy.SetSize(this->theSubalgebras.size);
+  for (int i=0; i<theCandidatePermutation.size; i++)
+    theHsSortingCopy[i]=this->theHsOfSubalgebras[theCandidatePermutation[i]];
+  this->theHsOfSubalgebras=theHsSortingCopy;
   HashedList<int, MathRoutines::IntUnsignIdentity> theCandidatePermutationHashed;
   theCandidatePermutationHashed=theCandidatePermutation;
   ProgressReport theReport1(this->theGlobalVariables), theReport2(this->theGlobalVariables);

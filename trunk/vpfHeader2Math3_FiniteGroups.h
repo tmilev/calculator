@@ -546,7 +546,9 @@ public:
   void GenerateRootSubsystem(Vectors<Rational>& theRoots);
   template <class coefficient>
   bool GenerateOuterOrbit
-  (Vectors<coefficient>& theWeights, HashedList<Vector<coefficient> >& output, HashedList<ElementWeylGroup<WeylGroup> >* outputSubset=0,  int UpperLimitNumElements=-1);
+  (Vectors<coefficient>& theWeights, HashedList<Vector<coefficient> >& output,
+   HashedList<ElementWeylGroup<WeylGroup> >* outputSubset=0,  int UpperLimitNumElements=-1,
+   GlobalVariables* theGlobalVariables=0);
   template <class coefficient>
   bool GenerateOrbit
   (Vectors<coefficient>& theWeights, bool RhoAction, HashedList<Vector<coefficient> >& output, bool UseMinusRho, int expectedOrbitSize=-1,

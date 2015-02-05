@@ -360,8 +360,11 @@ void WebWorker::OutputResultAfterTimeout()
   << theParser.outputCommentsString << "</td></tr></table>";
   std::stringstream outputTimeOutFileName;
   std::fstream outputTimeOutFile;
+  std::string inputAbbreviated=theParser.inputStringRawestOfTheRaw;
+  if (theParser.inputStringRawestOfTheRaw.size()>100)
+    inputAbbreviated=inputAbbreviated.substr(0, 100)+ "_input_too_long_remainder_truncated";
   outputTimeOutFileName << theParser.theGlobalVariableS->PhysicalPathOutputFolder
-  << theParser.inputStringRawestOfTheRaw << ".html";
+  << inputAbbreviated << ".html";
   FileOperations::OpenFileCreateIfNotPresent(outputTimeOutFile, outputTimeOutFileName.str(), false, true, false);
   outputTimeOutFile << "<html><body>" << out.str() << "</body></html>";
   outputTimeOutFile.close();

@@ -28,10 +28,16 @@ int main(int argc, char **argv)
       theWebServer.flagTryToKillOlderProcesses=!(tempArgument=="nokill");
     }
     if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
-      if (theWebServer.Run()==0)
+    { int result=theWebServer.Run();
+      if (result==0)
       { stOutput << "Server exit normal. ";
         return 0;
       }
+      if (result==-1)
+      { stOutput << "Server process error. ";
+        return 0;
+      }
+    }
   }
   if (!onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
     onePredefinedCopyOfGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;

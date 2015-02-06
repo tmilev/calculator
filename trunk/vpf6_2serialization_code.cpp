@@ -371,7 +371,8 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
     }
     outputSubalgebra.flagSystemProvedToHaveNoSolution=false;
     outputSubalgebra.flagSystemSolved=true;
-  }
+  } else
+    return theCommands << "<hr>Failed to extract subalgebra generators from expression " << input.ToString() << ". ";
   SemisimpleLieAlgebra tempSA;
   tempSA.theWeyl.MakeFromDynkinType(outputSubalgebra.theWeylNonEmbeddeD.theDynkinType);
   outputSubalgebra.indexInOwnersOfNonEmbeddedMe=owner.theSubalgebrasNonEmbedded->AddNoRepetitionOrReturnIndexFirst(tempSA);

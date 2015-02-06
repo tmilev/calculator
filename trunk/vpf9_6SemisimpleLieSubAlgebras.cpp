@@ -2811,7 +2811,7 @@ bool CandidateSSSubalgebra::AttemptToSolveSystem()
   if (this->owner->theGlobalVariables==0)
     crash << crash;
   for (int i=401; i<5405; i+=5000)
-  { theComputation.MaxNumGBComputations=i;
+  { theComputation.MaxNumGBComputations=100000;
     theComputation.MaxNumSerreSystemComputationsPreferred=i;
     theComputation.SolveSerreLikeSystem(this->transformedSystem, this->owner->ownerField, this->owner->theGlobalVariables);
     if (theComputation.flagSystemProvenToHaveNoSolution || theComputation.flagSystemProvenToHaveSolution)

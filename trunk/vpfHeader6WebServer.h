@@ -72,6 +72,7 @@ public:
   std::string mainAddress;
   std::string PhysicalFileName;
   std::string status;
+  bool flagDeallocated;
   List<std::string> theStrings;
   int ContentLength;
   int requestType;
@@ -150,9 +151,11 @@ class WebServer
 public:
   int listeningSocketID;
   bool flagTryToKillOlderProcesses;
-  List<WebWorker> theWorkers;
+  ListReferences<WebWorker> theWorkers;
   int activeWorker;
   int timeLastExecutableModification;
+  List<std::string> theProgressReports;
+  bool flagDeallocated;
   WebServer();
   ~WebServer();
   void ReleaseWorkerSideResources();
@@ -160,6 +163,7 @@ public:
   void ReleaseSocketsNonActiveWorkers();
   void ReleaseNonActiveWorkers();
   void CreateNewActiveWorker();
+  bool CheckConsistency();
   int Run();
   WebWorker& GetActiveWorker();
   static void Release(int& theDescriptor);
@@ -181,19 +185,12 @@ public:
 
 class ProgressReportWebServer
 {
-  static List<std::string> theProgressReports;
   public:
   int indexProgressReport;
-  ProgressReportWebServer(const std::string& inputStatus)
-  { this->indexProgressReport=this->theProgressReports.size;
-    this->SetStatus(inputStatus);
-  }
-  ProgressReportWebServer()
-  { this->indexProgressReport=this->theProgressReports.size;
-  }
+  bool flagDeallocated;
+  ProgressReportWebServer(const std::string& inputStatus);
+  ProgressReportWebServer();
   void SetStatus (const std::string& inputStatus);
-  ~ProgressReportWebServer()
-  { this->theProgressReports.SetSize(this->indexProgressReport);
-  }
+  ~ProgressReportWebServer();
 };
 #endif

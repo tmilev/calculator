@@ -16,7 +16,7 @@ class logger
   std::fstream theFile;
   bool flagStopWritingToFile;
   logger()
-  { FileOperations::OpenFileCreateIfNotPresent(theFile, "./../LogFile.html", false, true, false);
+  { FileOperations::OpenFileCreateIfNotPresent(theFile, "./../output/LogFile.html", false, true, false);
     this->currentColor=logger::normalColor;
     this->flagStopWritingToFile=false;
   }
@@ -114,30 +114,45 @@ class logger
 logger theLog;
 WebServer theWebServer;
 
+ProgressReportWebServer::ProgressReportWebServer(const std::string& inputStatus)
+{ this->flagDeallocated=false;
+  this->indexProgressReport=theWebServer.theProgressReports.size;
+  this->SetStatus(inputStatus);
+}
+
+ProgressReportWebServer::ProgressReportWebServer()
+{ this->flagDeallocated=false;
+  this->indexProgressReport=theWebServer.theProgressReports.size;
+}
+
+ProgressReportWebServer::~ProgressReportWebServer()
+{ theWebServer.theProgressReports.SetSize(this->indexProgressReport);
+  this->flagDeallocated=true;
+}
+
 void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
 { MacroRegisterFunctionWithName("ProgressReportWebServer::SetStatus");
+  theWebServer.CheckConsistency();
 //  theLog << logger::endL << logger::red << "SetStatus: outputFunction: "
 //  << (int) stOutput.theOutputFunction << logger::endL;
   MutexWrapper& safetyFirst=onePredefinedCopyOfGlobalVariables.MutexWebWorkerStaticFiasco;
 //    std::cout << "Got thus far ProgressReportWebServer::SetStatus 2" << std::endl;
   safetyFirst.LockMe();
 //    std::cout << "Got thus far ProgressReportWebServer::SetStatus 3" << std::endl;
-  if (this->indexProgressReport>=this->theProgressReports.size)
-    this->theProgressReports.SetSize(this->indexProgressReport+1);
+  if (this->indexProgressReport>=theWebServer.theProgressReports.size)
+    theWebServer.theProgressReports.SetSize(this->indexProgressReport+1);
   safetyFirst.UnlockMe();
 //    std::cout << "SetStatus: passed mutex section" << std::endl;
-  this->theProgressReports[this->indexProgressReport]=inputStatus;
+  theWebServer.theProgressReports[this->indexProgressReport]=inputStatus;
   std::stringstream toBePiped;
-  for (int i=0; i<this->theProgressReports.size; i++)
-    toBePiped << "<br>" << this->theProgressReports[i];
+  for (int i=0; i<theWebServer.theProgressReports.size; i++)
+    toBePiped << "<br>" << theWebServer.theProgressReports[i];
   if (!onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
     return;
   // theLog << logger::endL << logger::red << "SetStatus before the issue: outputFunction: "
   // << (int) stOutput.theOutputFunction << logger::endL;
   theWebServer.GetActiveWorker().pipeWorkerToServerWorkerStatus.WriteAfterEmptying(toBePiped.str());
 }
-
-List<std::string> ProgressReportWebServer::theProgressReports;
 
 void PauseController::Release()
 { WebServer::Release(this->mutexPipe[0]);
@@ -562,6 +577,7 @@ void WebWorker::SendAllBytes()
 { if (this->remainingBytesToSend.size==0)
     return;
   MacroRegisterFunctionWithName("WebWorker::SendAllBytes");
+  this->CheckConsistency();
   ProgressReportWebServer theReport;
   theReport.SetStatus("WebWorker::SendAllBytes");
   if (this->connectedSocketID==-1)
@@ -589,6 +605,8 @@ void WebWorker::SendAllBytes()
 
 bool WebWorker::CheckConsistency()
 { stOutput.theOutputFunction=0;
+  if (this->flagDeallocated)
+    crash << "Use after free of webworker." << crash;
   if (this->parent==0)
     crash << "Parent of web worker is not initialized." << crash;
   if (this->indexInParent==-1)
@@ -635,13 +653,19 @@ bool WebWorker::ReceiveAll()
 //  theLog << "Content-length parsed to be: " << this->ContentLength
 //  << "However the size of mainArgumentRAW is: " << this->mainArgumentRAW.size();
   if (this->ContentLength>10000000)
-  { error="Content-length parsed to be more than 10 million bytes, aborting.";
+  { this->CheckConsistency();
+    error="Content-length parsed to be more than 10 million bytes, aborting.";
     theLog << this->error << logger::endL;
     this->displayUserInput=this->error;
     return false;
   }
+  std::cout << "Debug code here!!!";
   if (this->mainArgumentRAW!="")
-  { error= "Content-length does not coincide with the size of the message-body, yet the message-body is non-empty. Aborting.";
+  { std::stringstream errorstream;
+    errorstream << "Content-length equals: " << this->ContentLength
+    << " and does not coincide with the size of the message-body (total " << this->mainArgumentRAW.size()
+    << "bytes), yet the message-body is non-empty. Aborting.";
+    this->error=errorstream.str();
     theLog << this->error << logger::endL;
     this->displayUserInput=this->error;
     return false;
@@ -878,7 +902,8 @@ void WebWorker::reset()
 }
 
 WebWorker::WebWorker()
-{ this->reset();
+{ this->flagDeallocated=false;
+  this->reset();
 }
 
 bool WebWorker::IamActive()
@@ -909,8 +934,10 @@ void WebWorker::SignalIamDoneReleaseEverything()
 }
 
 WebWorker::~WebWorker()
-{ //Workers are not allowed to release resources in the destructor:
+{ MacroRegisterFunctionWithName("WebWorker::~WebWorker");
+  //Workers are not allowed to release resources in the destructor:
   //a Worker's destructor is called when expanding List<WebWorker>.
+  this->flagDeallocated=true;
 }
 
 std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExtension)
@@ -1278,6 +1305,12 @@ std::string WebWorker::ToStringStatus()const
   return out.str();
 }
 
+bool WebServer::CheckConsistency()
+{ if (this->flagDeallocated)
+    crash << "Use after free of WebServer." << crash;
+  return true;
+}
+
 WebServer::~WebServer()
 { if (this->activeWorker!=-1)
     this->GetActiveWorker().SendAllBytes();
@@ -1285,6 +1318,7 @@ WebServer::~WebServer()
     this->theWorkers[i].Release();
   this->activeWorker=-1;
   close(this->listeningSocketID);
+  this->flagDeallocated=true;
 }
 
 void WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone()
@@ -1308,7 +1342,8 @@ void WebServer::PipeProgressReportToParentProcess(const std::string& theString)
 }
 
 WebServer::WebServer()
-{ this->flagTryToKillOlderProcesses=true;
+{ this->flagDeallocated=false;
+  this->flagTryToKillOlderProcesses=true;
   this->activeWorker=-1;
   this->timeLastExecutableModification=-1;
 }
@@ -1704,8 +1739,17 @@ int WebServer::Run()
       this->GetActiveWorker().CheckConsistency();
 //      std::cout << "Got thus far 7" << std::endl;
       if (!this->GetActiveWorker().ReceiveAll())
-      { stOutput << "HTTP/1.1 400 Bad Request\r\nContent-type: text/html\r\n\r\n" << this->GetActiveWorker().error;
-        return 0;
+      { stOutput << "HTTP/1.1 400 Bad request\r\nContent-type: text/html\r\n\r\n"
+        << "<html><body><b>HTTP error 400 (bad request). </b> There was an error with the request. "
+        << "One possibility is that the input was too large. "
+        << "<br>The error message returned was:<br>"
+        << this->GetActiveWorker().error
+        << " <hr><hr>The message (part) that was received is: "
+        << this->GetActiveWorker().ToStringMessageFull()
+        << "</body></html>";
+        stOutput.Flush();
+        this->GetActiveWorker().SendAllBytes();
+        return -1;
       }
 //      std::cout << "Got thus far 8" << std::endl;
       this->GetActiveWorker().SendDisplayUserInputToServer();

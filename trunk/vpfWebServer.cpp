@@ -660,20 +660,21 @@ bool WebWorker::ReceiveAll()
     return false;
   }
   std::cout << "Debug code here!!!";
-  if (this->mainArgumentRAW!="")
+/*  if (this->mainArgumentRAW!="")
   { std::stringstream errorstream;
     errorstream << "Content-length equals: " << this->ContentLength
     << " and does not coincide with the size of the message-body (total " << this->mainArgumentRAW.size()
-    << "bytes), yet the message-body is non-empty. Aborting.";
+    << "bytes), yet the message-body is non-empty. ";
     this->error=errorstream.str();
     theLog << this->error << logger::endL;
+    theLog << logger::red << "The messaged received was: " << logger::endL;
+    theLog << this->mainArgumentRAW;
     this->displayUserInput=this->error;
     return false;
-  }
+  }*/
   this->remainingBytesToSend=(std::string) "HTTP/1.1 100 Continue\r\n";
   this->SendAllBytes();
   this->remainingBytesToSend.SetSize(0);
-  this->mainArgumentRAW="";
   std::string bufferString;
   while ((signed) this->mainArgumentRAW.size()<this->ContentLength)
   { numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);

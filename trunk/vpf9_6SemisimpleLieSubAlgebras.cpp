@@ -949,7 +949,7 @@ std::string SemisimpleSubalgebras::ToStringProgressReport(FormatExpressions* the
   std::stringstream out;
   out << "Subalgebras found so far: " << this->theSubalgebras.size << "<br>Orbit sizes: ";
   for (int i=0; i<this->theOrbitsAreComputed.size; i++)
-  { out << "A^" << (this->theOrbitHelementLengths[i]/2).ToString() << ": ";
+  { out << "A^" << (this->theOrbitHelementLengths[i]/2).ToString() << "_1: ";
     if (this->theOrbitsAreComputed[i])
       out << this->theOrbits[i].size << "; ";
     else
@@ -2825,8 +2825,8 @@ bool CandidateSSSubalgebra::AttemptToSolveSystem()
   //stOutput << "<br>additions so far: " << Rational::total
   if (this->owner->theGlobalVariables==0)
     crash << crash;
-  for (int i=401; i<5405; i+=5000)
-  { theComputation.MaxNumGBComputations=100000;
+  for (int i=5000; i<200000; i+=100000)
+  { theComputation.MaxNumGBComputations=i;
     theComputation.MaxNumSerreSystemComputationsPreferred=i;
     theComputation.SolveSerreLikeSystem(this->transformedSystem, this->owner->ownerField, this->owner->theGlobalVariables);
     if (theComputation.flagSystemProvenToHaveNoSolution || theComputation.flagSystemProvenToHaveSolution)

@@ -4979,6 +4979,7 @@ class DynkinSimpleType
     this->theLetter=inputLetter;
     this->CartanSymmetricInverseScale=inputLengthFirstCorRootSquared;
   }
+  Rational GetPrincipalSlTwoCSInverseScale()const;
   void GetCoCartanSymmetric(Matrix<Rational>& output)const;
   void GetCartanSymmetric(Matrix<Rational>& output)const;
   void GetAn(int n, Matrix<Rational>& output)const;

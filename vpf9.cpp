@@ -4755,6 +4755,32 @@ void DynkinSimpleType::GetCoCartanSymmetric(Matrix<Rational>& output)const
   WeylGroup::GetCoCartanSymmetric(currentCartan, output);
 }
 
+Rational DynkinSimpleType::GetPrincipalSlTwoCSInverseScale()const
+{ Rational nonScaled=0;
+  switch(this->theLetter)
+  { case 'A':
+    for (int i=0; i<this->theRank+1; i++)
+      nonScaled+= (this->theRank- 2*i)*(this->theRank- 2*i);
+    nonScaled/=2;
+    break;
+    case 'B':  break;
+    case 'C':  break;
+    case 'D':
+    for (int i=0; i<this->theRank; i++)
+      nonScaled+= i*i;
+    nonScaled/=2;
+    break;
+    case 'E': break;
+    case 'F': break;
+    case 'G': break;
+    default:
+      crash << "This is a programming error: requesting DynkinSimpleType::GetCartanSymmetric from a non-initialized Dynkin simple type. " << crash;
+      break;
+  }
+  crash << "not implemented yet" << crash;
+  return nonScaled*this->CartanSymmetricInverseScale;
+}
+
 void DynkinSimpleType::GetCartanSymmetric(Matrix<Rational>& output)const
 { switch(this->theLetter)
   { case 'A': this->GetAn(this->theRank, output); break;

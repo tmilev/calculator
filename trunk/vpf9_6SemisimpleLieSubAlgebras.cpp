@@ -563,19 +563,23 @@ bool SemisimpleSubalgebras::LoadState
   return true;
 }
 
-void SemisimpleSubalgebras::FindTheSSSubalgebrasContinue()
+bool SemisimpleSubalgebras::FindTheSSSubalgebrasContinue()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasContinue");
   ProgressReport theReport(this->theGlobalVariables);
   std::stringstream reportstream;
   reportstream << "State at beginning of computation: " << this->ToStringProgressReport();
   theReport.Report(reportstream.str());
   while(this->IncrementReturnFalseIfPastLast())
-    theReport.Report(this->ToStringProgressReport());
+  { theReport.Report(this->ToStringProgressReport());
+    if (!this->flagRealizedAllCandidates)
+      return false;
+  }
   if (!this->targetDynkinType.IsEqualToZero())
     this->flagAttemptToAdjustCentralizers=false;
   this->HookUpCentralizers(false);
   if (this->flagComputeNilradicals)
     this->ComputePairingTablesAndFKFTtypes();
+  return true;
 }
 
 void SemisimpleSubalgebras::FindTheSSSubalgebrasInit()
@@ -588,7 +592,7 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasInit()
   this->currentSubalgebraChain.SetSize(0);
 }
 
-void SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch(SemisimpleLieAlgebra& newOwner, const DynkinType* targetType)
+bool SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch(SemisimpleLieAlgebra& newOwner, const DynkinType* targetType)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch");
   this->owneR=&newOwner;
   this->targetDynkinType.MakeZero();
@@ -599,7 +603,7 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch(SemisimpleLieAlgebra
   emptyCandidate.owner=this;
 //  stOutput << "Got to ere! ";
   this->AddSubalgebraToStack(emptyCandidate, 0, 0);
-  this->FindTheSSSubalgebrasContinue();
+  return this->FindTheSSSubalgebrasContinue();
 }
 
 bool SemisimpleSubalgebras::RanksAndIndicesFit(const DynkinType& input)const
@@ -717,7 +721,9 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
 
   this->SetUpInjectionHs(baseSubalgebra, theNewType, theRootInjection, &newHrescaledToActByTwo);
   if (this->owner->theHsOfSubalgebras.Contains(this->theHs))
+  { *this=this->owner->theSubalgebras[this->owner->theHsOfSubalgebras.GetIndex(this->theHs)];
     return true;
+  }
   this->owner->RegisterPossibleCandidate(*this);
   this->CheckInitialization();
   if (!baseSubalgebra.theWeylNonEmbeddeD.theDynkinType.IsEqualToZero() && baseSubalgebra.indexInOwner==-1)
@@ -735,11 +741,10 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
       theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) + " doesn't have fitting chars.");
     return false;
   }
-  if (!this->ComputeSystem(false,false))
-  { if (this->owner->theGlobalVariables!=0)
+  this->ComputeSystem(false,false);
+  if (this->flagSystemProvedToHaveNoSolution)
+    if (this->owner->theGlobalVariables!=0)
       theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) + " -> no system solution.");
-    return false;
-  }
   for (int i=0; i<this->owner->theSubalgebras.size; i++)
     if (this->theWeylNonEmbeddeD.theDynkinType==this->owner->theSubalgebras[i].theWeylNonEmbeddeD.theDynkinType)
     { if (this->IsDirectSummandOf(this->owner->theSubalgebras[i], true))
@@ -1010,7 +1015,16 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
    this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
    this->currentRootInjections[stackIndex][typeIndex]);
   this->CheckConsistency();
-
+  if (newSubalgebraCreated)
+    if (! newCandidate.flagSystemSolved)
+    { this->flagRealizedAllCandidates=false;
+      std::stringstream out;
+      out << "<hr>Failed to realize type " << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()
+      << " because I couldn't handle the polynomial system. "
+      << " One poly system that governs the embedding follows.<hr>" << newCandidate.ToStringSystemPart2();
+      this->comments=out.str();
+      return true;
+    }
   this->currentNumHcandidatesExplored[stackIndex]++;
   if (newSubalgebraCreated)
     this->AddSubalgebraIfNewSetToStackTop(newCandidate);
@@ -2778,6 +2792,7 @@ void SemisimpleSubalgebras::reset()
   this->owneR=0;
   this->ownerField=0;
   this->theSl2s.owner=0;
+  this->flagRealizedAllCandidates=true;
   this->flagAttemptToSolveSystems=true;
   this->flagComputeModuleDecomposition=true;
   this->flagComputePairingTable=false;

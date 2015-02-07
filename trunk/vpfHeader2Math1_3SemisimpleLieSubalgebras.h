@@ -283,6 +283,7 @@ public:
   HashedList<Rational> theOrbitHelementLengths;
 //  List<HashedList<ElementWeylGroup<WeylGroup> > > theOrbitGeneratingElts;
   List<bool> theOrbitsAreComputed;
+  std::string comments;
 
   //current computation state:
   // state that gets stored to hd:
@@ -298,6 +299,7 @@ public:
 
   HashedList<Vectors<Rational> > theHsOfSubalgebras; //used to search for subalgebras quickly
   List<CandidateSSSubalgebra> theSubalgebras;
+  bool flagRealizedAllCandidates;
   bool flagAttemptToSolveSystems;
   bool flagComputePairingTable;
   bool flagComputeModuleDecomposition;
@@ -394,9 +396,9 @@ public:
   void HookUpCentralizers(bool allowNonPolynomialSystemFailure);
   void ComputeSl2sInitOrbitsForComputationOnDemand();
   void FindAllEmbeddings(DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner);
-  void FindTheSSSubalgebrasFromScratch(SemisimpleLieAlgebra& newOwner, const DynkinType* targetType=0);
+  bool FindTheSSSubalgebrasFromScratch(SemisimpleLieAlgebra& newOwner, const DynkinType* targetType=0);
   void FindTheSSSubalgebrasInit();
-  void FindTheSSSubalgebrasContinue();
+  bool FindTheSSSubalgebrasContinue();
 
   void GetHCandidates
 (Vectors<Rational>& outputHCandidatesScaledToActByTwo, CandidateSSSubalgebra& newCandidate,

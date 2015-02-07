@@ -482,7 +482,13 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
 //    theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection();
   if (!theSAs.LoadState(currentChainInt, numExploredTypes, numExploredHs, theCommands.Comments))
     return false;
-  theSAs.FindTheSSSubalgebrasContinue();
+  if (! theSAs.FindTheSSSubalgebrasContinue())
+  { std::stringstream out;
+    out << "<br>Failed to realize all subalgebras, computation aborted. The failure report follows. "
+    << theSAs.comments << "<br>The progress report for the entire computation follows.<br>"
+    << theSAs.ToStringProgressReport();
+    return output.AssignValue(out.str(), theCommands);
+  }
 //  stOutput << "centralizers off";
   theSAs.flagAttemptToAdjustCentralizers=false;
   theSAs.HookUpCentralizers(true);

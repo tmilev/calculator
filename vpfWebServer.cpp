@@ -817,6 +817,20 @@ int WebWorker::ProcessComputationIndicator()
   return 0;
 }
 
+void WebWorker::WriteProgressReportToFile(const std::string& input)
+{ MacroRegisterFunctionWithName("WebWorker::WriteProgressReportToFile");
+  std::string theFileName= "./../output/progressReport_" + theParser.inputStringRawestOfTheRaw;
+  if (theFileName.size()>200)
+    theFileName= theFileName.substr(0 , 200);
+  theFileName+=".html";
+  theLog << logger::green << "Progress report written to file: " << theFileName << logger::endL;
+  std::fstream theFile;
+  FileOperations::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
+  theFile << input;
+  theFile.flush();
+  theFile.close();
+}
+
 void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
 { MacroRegisterFunctionWithName("WebWorker::PipeProgressReportToParentProcess");
   static int counter=0;
@@ -829,8 +843,9 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
   debugStream2 << "PipeProgressReportToParentProcess called " << counter << " times. Pause passed...";
   theReport.SetStatus(debugStream2.str());
   if (this->PauseWorker.CheckPauseIsRequested())
-    theReport.SetStatus("PipeProgressReportToParentProcess: pausing as requested...");
-
+  { theReport.SetStatus("PipeProgressReportToParentProcess: pausing as requested...");
+    this->WriteProgressReportToFile(input);
+  }
   this->PauseWorker.PauseIfRequested();     //if pause was requested, here we block
 //    theLog << "(possible) block passed" << logger::endL;
   theReport.SetStatus("PipeProgressReportToParentProcess: computing...");
@@ -1490,7 +1505,7 @@ void Pipe::ReadNoLocks()
   if (this->thePipe[0]==-1)
     return;
   int counter=0;
-  const unsigned int bufferSize=200000;
+  const unsigned int bufferSize=2000000;
   this->pipeBuffer.SetSize(bufferSize); // <-once the buffer is resized, this operation does no memory allocation and is fast.
   int numReadBytes=0;
   for (;;)

@@ -1045,7 +1045,7 @@ public:
   static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
   static void CivilizedStringTranslationFromCGI(std::string& input, std::string& output);
   static std::string UnCivilizeStringCGI(const std::string& input);
-  static void ReplaceEqualitiesAndAmpersantsBySpaces(std::string& inputOutput);
+  static void ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput);
   static bool AttemptToCivilize(std::string& readAhead, std::stringstream& out);
   static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);
   inline static std::string GetHtmlLinkFromProjectFileName(const std::string& fileName)

@@ -922,7 +922,7 @@ void CGI::MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank)
     theRank=4;
 }
 
-void CGI::ReplaceEqualitiesAndAmpersantsBySpaces(std::string& inputOutput)
+void CGI::ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput)
 { for (int i=0; i<(signed)inputOutput.size(); i++)
     if (inputOutput[i]=='=' || inputOutput[i]=='&')
       inputOutput[i]=' ';

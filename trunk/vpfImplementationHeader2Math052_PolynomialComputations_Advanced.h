@@ -1064,6 +1064,8 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial
   this->flagSystemSolvedOverBaseField=false;
   this->flagSystemProvenToHaveSolution=false;
   this->RecursionCounterSerreLikeSystem=0;
+  this->NumberGBComputations=0;
+  this->NumberSerreSystemComputations=0;
   int numVars=0;
 //  stOutput << "<hr>" << this->ToStringCalculatorInputFromSystem(inputSystem) << "<hr>";
   List<Polynomial<coefficient> > workingSystem=inputSystem;

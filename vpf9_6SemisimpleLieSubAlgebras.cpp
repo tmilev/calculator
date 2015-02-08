@@ -752,7 +752,7 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
     } else
       if (this->theWeylNonEmbeddeD.theDynkinType.ToString()==this->owner->theSubalgebras[i].theWeylNonEmbeddeD.theDynkinType.ToString())
         crash << crash;
-  return true;
+  return !this->flagSystemProvedToHaveNoSolution;
 }
 
 void SemisimpleSubalgebras::GetHCandidates
@@ -1016,7 +1016,7 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
    this->currentRootInjections[stackIndex][typeIndex]);
   this->CheckConsistency();
   if (newSubalgebraCreated)
-    if (! newCandidate.flagSystemSolved)
+    if (! newCandidate.flagSystemSolved && !newCandidate.flagSystemProvedToHaveNoSolution)
     { this->flagRealizedAllCandidates=false;
       std::stringstream out;
       out << "<hr>Failed to realize type " << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()

@@ -171,6 +171,7 @@ public:
   HashedList<int, MathRoutines::IntUnsignIdentity> modulesWithZeroWeights;
   std::string nilradicalGenerationLog;
   Rational centralizerRank;
+  Rational centralizerDimension;
 
   bool flagDeallocated;
   CandidateSSSubalgebra();

@@ -3971,48 +3971,31 @@ std::string DynkinType::GetWeylGroupName(FormatExpressions* theFormat)const
 }
 
 bool DynkinType::CanBeExtendedParabolicallyOrIsEqualTo(const DynkinType& other)const
-{ if ((*this)==other)
+{ MacroRegisterFunctionWithName("DynkinType::CanBeExtendedParabolicallyOrIsEqualTo");
+  if (this->IsEqualToZero())
     return true;
-  return this->CanBeExtendedParabolicallyTo(other);
+  if (other.IsEqualToZero())
+    return false;
+  const DynkinSimpleType& currentSimpleType = (*this)[0];
+  DynkinType remainderThis, remainderOther;
+  for (int i=0; i<other.size(); i++)
+  { if(!currentSimpleType.CanBeExtendedParabolicallyTo(other[i]) and ! (currentSimpleType==other[i] ))
+      continue;
+    remainderThis=*this;
+    remainderThis-=currentSimpleType;
+    remainderOther=other;
+    remainderOther-=other[i];
+    if (remainderThis.CanBeExtendedParabolicallyOrIsEqualTo(remainderOther))
+      return true;
+  }
+  return false;
 }
 
 bool DynkinType::CanBeExtendedParabolicallyTo(const DynkinType& other)const
 { MacroRegisterFunctionWithName("DynkinType::CanBeExtendedParabolicallyTo");
-  //stOutput << "<br>computing whether  " << this->ToString() << " can be extended parabolically to "
-  //<< other.ToString();
-  if (other.IsEqualToZero())
-  { //stOutput << "... it can't";
+  if (*this==other)
     return false;
-  }
-  if (this->IsEqualToZero())
-  { //stOutput << "... it can";
-    return true;
-  }
-  DynkinSimpleType targetType, currentType;
-  targetType=other[0];
-  DynkinType remainderThis, remainderOther;
-  //stOutput << "<hr>Testing whether " << this->ToString() << " fits in " << other.ToString();
-  for (int i=0; i< this->size(); i++)
-  { currentType=(*this)[i];
-    if (currentType.CanBeExtendedParabolicallyTo(targetType) || currentType==targetType)
-    { remainderThis=*this;
-      remainderThis.SubtractMonomial(currentType, 1);
-      remainderOther= other;
-      remainderOther.SubtractMonomial(targetType, 1);
-      if (currentType==targetType)
-      { if (remainderThis.CanBeExtendedParabolicallyTo(remainderOther))
-        { //stOutput << " it can";
-          return true;
-        }
-      } else
-        if (remainderThis.CanBeExtendedParabolicallyOrIsEqualTo(remainderOther))
-        { //stOutput << " it can";
-          return true;
-        }
-    }
-  }
-  //stOutput << "...it cant";
-  return false;
+  return this->CanBeExtendedParabolicallyOrIsEqualTo(other);
 }
 
 bool DynkinType::Grow

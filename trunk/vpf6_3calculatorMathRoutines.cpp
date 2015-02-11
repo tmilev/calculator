@@ -3500,8 +3500,8 @@ bool CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg(Calculator& theCommands,
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& ownerSS=*thelargeSapointer;
   std::stringstream out;
-  if (ownerSS.GetRank()>6)
-  { out << "<b>This code is completely experimental and has been set to run up to rank 4. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
+  if (ownerSS.GetRank()>8)
+  { out << "<b>This code is has been set to run up to ambient Lie algebra of rank 8. </b>";
     return output.AssignValue(out.str(), theCommands);
   } else
     out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
@@ -3510,6 +3510,8 @@ bool CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg(Calculator& theCommands,
    &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
   SemisimpleSubalgebras& theSSsubalgebras=
   theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
+  theSSsubalgebras.ToStringExpressionString=CalculatorConversions::innerStringFromSemisimpleSubalgebras;
+
   out << "Attempting to embed " << theSmallSapointer->theWeyl.theDynkinType.ToString() << " in " << ownerSS.GetLieAlgebraName();
   theSSsubalgebras.FindTheSSSubalgebrasFromScratch(ownerSS, &theSmallSapointer->theWeyl.theDynkinType);
   return output.AssignValue(theSSsubalgebras, theCommands);

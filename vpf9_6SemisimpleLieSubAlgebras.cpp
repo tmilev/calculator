@@ -363,6 +363,8 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
   int candidatesRealized=0;
   int candidatesNotRealizedNotProvenImpossible=0;
   int candidatesProvenImpossible=0;
+  if (this->comments!="")
+    out << "<b>Comments.</b>" << this->comments;
   for (int i=0; i<this->theSubalgebras.size; i++)
   { CandidateSSSubalgebra& currentSA=this->theSubalgebras[i];
     if (currentSA.flagSystemProvedToHaveNoSolution)
@@ -484,6 +486,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
     out << "</table>";
     out << this->theSl2s.ToString(theFormat);
   }
+  out << "<hr>" << this->ToStringProgressReport(theFormat);
   return out.str();
 }
 
@@ -702,7 +705,8 @@ void CandidateSSSubalgebra::SetUpInjectionHs
 void CandidateSSSubalgebra::computeHsScaledToActByTwo()
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::computeHsScaledToActByTwo");
   this->theHsScaledToActByTwo.SetSize(this->theHs.size);
-  this->theWeylNonEmbeddeDdefaultScale.MakeFromDynkinTypeDefaultLengthKeepComponentOrder(this->theWeylNonEmbeddeD.theDynkinType);
+  this->theWeylNonEmbeddeDdefaultScale.MakeFromDynkinTypeDefaultLengthKeepComponentOrder
+  (this->theWeylNonEmbeddeD.theDynkinType);
   this->theWeylNonEmbeddeDdefaultScale.ComputeRho(true);
   int counter=-1;
   List<DynkinSimpleType> theTypes;
@@ -855,6 +859,7 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
   int stackIndex=this->currentSubalgebraChain.size-1;
   int typeIndex=this->currentNumLargerTypesExplored[stackIndex];
   this->currentHCandidatesScaledToActByTwo[stackIndex].SetSize(0);
+  stOutput << "<hr>Generating h candidates for type " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString();
   if (typeIndex>=this->currentPossibleLargerDynkinTypes[stackIndex].size)
     return true;
   if (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].GetRootSystemSize()>this->owneR->GetNumPosRoots()*2)
@@ -862,14 +867,20 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
   if (!this->targetDynkinType.IsEqualToZero())
     if (!this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].CanBeExtendedParabolicallyOrIsEqualTo(this->targetDynkinType))
       if (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex]!=this->targetDynkinType)
+      { stOutput << "<br>Dynkin type " <<  this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
+        << "  does not fit in the target Dynkin type " << this->targetDynkinType.ToString();
         return true;
+      }
+  stOutput << "<br>Dynkin type " <<  this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
+  << "  fits in the target Dynkin type " << this->targetDynkinType.ToString();
   ProgressReport theReport0(this->theGlobalVariables), theReport1(this->theGlobalVariables);
   if (theGlobalVariables!=0)
   { std::stringstream reportStream;
-    reportStream << " Finding h-candidates for extension of " << this->baseSubalgebra().theWeylNonEmbeddeD.theDynkinType.ToString()
-    << " to " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString() << ": " << typeIndex+1 << " out of "
+    reportStream << " Finding h-candidates for extension of "
+    << this->baseSubalgebra().theWeylNonEmbeddeD.theDynkinType.ToString()
+    << " to " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
+    << ": " << typeIndex+1 << " out of "
     << this->currentPossibleLargerDynkinTypes[stackIndex].size << " possibilities.  ";
-    //stOutput << "<hr>" << reportStream.str();
     theReport0.Report(reportStream.str());
   }
   CandidateSSSubalgebra newCandidate;
@@ -906,6 +917,9 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
   this->GetHCandidates
   (this->currentHCandidatesScaledToActByTwo[stackIndex], newCandidate, this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
    this->currentRootInjections[stackIndex][typeIndex]);
+  stOutput << "<br>Attempting to realize type: "
+  << this->currentHCandidatesScaledToActByTwo[stackIndex].ToString()
+  << " using h candidates: " << this->currentHCandidatesScaledToActByTwo[stackIndex].ToString();
   return true;
 }
 
@@ -932,12 +946,12 @@ void SemisimpleSubalgebras::AddSubalgebraToStack
   this->GrowDynkinType
   (input.theWeylNonEmbeddeD.theDynkinType, *this->currentPossibleLargerDynkinTypes.LastObject(),
    this->currentRootInjections.LastObject());
-
+  ///////////
   this->currentNumLargerTypesExplored.AddOnTop(inputNumLargerTypesExplored);
-//  stOutput << "<hr>Possible extensions of " << input.theWeylNonEmbeddeD.theDynkinType.ToString()
-//  << ": ";
-//  for (int i=0; i<this->currentPossibleLargerDynkinTypes.LastObject()->size; i++)
-//    stOutput << (*this->currentPossibleLargerDynkinTypes.LastObject())[i].ToString() << ", ";
+  stOutput << "<hr>Possible extensions of " << input.theWeylNonEmbeddeD.theDynkinType.ToString() << ": ";
+  for (int i=0; i<this->currentPossibleLargerDynkinTypes.LastObject()->size; i++)
+    stOutput << (*this->currentPossibleLargerDynkinTypes.LastObject())[i].ToString() << ", ";
+  ///////////
   this->currentHCandidatesScaledToActByTwo.SetSize(this->currentSubalgebraChain.size);
   this->currentNumHcandidatesExplored.AddOnTop(inputNumHcandidatesExplored);
 
@@ -1396,14 +1410,21 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
   { int rankCentralizer=-1;
     bool tempB= this->centralizerRank.IsSmallInteger(&rankCentralizer);
     if (!tempB || rankCentralizer<0 || rankCentralizer>this->GetAmbientWeyl().GetDim())
-    { if (allowNonPolynomialSystemFailure)
+      if (allowNonPolynomialSystemFailure)
         return false;
-      if (!tempB)
-        crash << "Error: rankCentralizer is not a small integer. ";
-      crash << "This is a programming error: rankCentralizer not computed, or not computed correctly, when it should be. "
-      << " Currently rankCentalizer is supposed to be " << rankCentralizer << ". Here is a detailed printout of the candidate subalgebra. "
+    if (!tempB)
+      crash << "Error: rankCentralizer is not a small integer. Detailed subalgebra printout: "
       << this->ToString() << crash;
-    }
+    if (rankCentralizer<0)
+      crash << "This is a programming error: centralizer rank extracted as a negative number. The centralizer rank is: "
+      << this->centralizerRank.ToString() << ". This most probably means the centralizer was not computed correctly. "
+      << "Here's a full subalgebra printout" << this->ToString()
+      << crash;
+    if (rankCentralizer>this->GetAmbientWeyl().GetDim())
+      crash << " Currently rankCentralizer is computed to be " << rankCentralizer << " which is greater than the rank "
+      << "of the ambient semisimple Lie algebra. Something has gone wrong. "
+      << "Here is a detailed printout of the candidate subalgebra. "
+      << this->ToString() << crash;
     this->totalNumUnknownsWithCentralizer+=rankCentralizer*this->GetAmbientWeyl().GetDim()+1;
     this->theUnknownCartanCentralizerBasis.SetSize(rankCentralizer);
   }
@@ -4649,13 +4670,16 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
 void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeCentralizerIsWellChosen");
   if (this->flagSystemProvedToHaveNoSolution)
-  { this->flagCentralizerIsWellChosen=false;
+  { stOutput << "This is unexpected, but not considered an error: "
+    << "I am asked to compute the centralizer of a candidate for a subalgebra which cannot be realized. ";
+    this->flagCentralizerIsWellChosen=false;
     return;
   }
   Weight<Rational> theZeroWeight;
   theZeroWeight.owner=0;
   theZeroWeight.weightFundamentalCoordS.MakeZero(this->theHs.size);
-  this->centralizerRank =this->theCharNonPrimalFundCoords.GetMonomialCoefficient(theZeroWeight);
+  this->centralizerDimension =this->theCharNonPrimalFundCoords.GetMonomialCoefficient(theZeroWeight);
+  this->centralizerRank=this->centralizerDimension;
   if (this->centralizerRank==0)
   { this->flagCentralizerIsWellChosen=true;
     return;
@@ -4693,13 +4717,14 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
 std::string CandidateSSSubalgebra::ToStringSystem(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringSystem");
   std::stringstream out;
-  if (!this->flagSystemSolved)
-    out << "<br><b> Subalgebra not realized, but it might have a solution. </b> ";
-  else
+  if (this->flagSystemSolved)
   { out << "<br>Subalgebra realized. ";
     if (!this->flagCentralizerIsWellChosen)
       out << "<b>However, the centralizer is not well chosen.</b>";
-  }
+  } else if (this->flagSystemProvedToHaveNoSolution)
+    out << "<br><b> Subalgebra candidate cannot be realized. </b> ";
+  else
+    out << "<br><b>Subalgebra candidate not realized, and this may or may not be possible.</b>";
   out << "<br>" << this->theUnknownNegGens.size << "*2 (unknown) gens:<br>(";
 //  stOutput << "Got here no crash -3.";
   for (int i=0; i<this->theUnknownNegGens.size; i++)
@@ -4879,6 +4904,8 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     }
     out << ". ";
   }
+  if (!this->flagCentralizerIsWellChosen)
+    out << "<br>The dimension of the centralizer is: " << this->centralizerDimension.ToString();
   out << "<br>" << this->ToStringCartanSA(theFormat);
   out << this->ToStringCentralizer(theFormat);
   //stOutput << "Got here no crash";

@@ -61,27 +61,25 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
   if (stOutput.theOutputFunction!=0)
     std::cout << this->theCrashReport.str() << std::endl;
   std::fstream theFile;
-  std::string theFileName="../output/crashdumpInput"+ this->userInputStringRAWIfAvailable +".txt";
-  bool succeededToDump=true;
-  if (!FileOperations::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false))
-  { theFileName="../output/crashdumpFilePermissionFailure.txt";
-    succeededToDump=FileOperations::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
-  }
+  std::string theFileName="../output/crash_"+ this->userInputStringRAWIfAvailable;
+  if (theFileName.size()>200)
+    theFileName=theFileName.substr(0, 200);
+  theFileName +=".html";
+  bool succeededToOpen=FileOperations::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
   if (stOutput.theOutputFunction!=0)
     std::cout << this->theCrashReport.str();
-  if (succeededToDump)
+  if (succeededToOpen)
     stOutput << "<hr>Crash dumped in file " << theFileName;
   else
-    stOutput << "<hr>Failed to dump crash: check if folder exists and the executable has file permissions for file " << theFileName << ".";
+    stOutput << "<hr>Failed to create a crash report: check if folder exists and the "
+    << "executable has file permissions for file " << theFileName << ".";
   theFile << this->theCrashReport.str();
   theFile.close();
   stOutput.Flush();
   if (this->CleanUpFunction!=0)
   { this->CleanUpFunction();
-    std::cout << "CLEAN UP FN is NONZERO";
     std::cout.flush();
-  } else
-    std::cout << "CLEAN UP FN is ZERO";
+  }
   assert(false);
   return *this;
 }

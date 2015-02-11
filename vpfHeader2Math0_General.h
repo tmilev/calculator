@@ -865,6 +865,9 @@ public:
   inline void operator+=(const templateMonomial& other)
   { this->AddMonomial(other, 1);
   }
+  inline void operator-=(const templateMonomial& other)
+  { this->SubtractMonomial(other, 1);
+  }
   inline void operator-=(const coefficient& other)
   { templateMonomial tempM;
     tempM.MakeOne();

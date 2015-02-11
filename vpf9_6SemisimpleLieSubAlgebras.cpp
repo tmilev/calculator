@@ -859,7 +859,7 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
   int stackIndex=this->currentSubalgebraChain.size-1;
   int typeIndex=this->currentNumLargerTypesExplored[stackIndex];
   this->currentHCandidatesScaledToActByTwo[stackIndex].SetSize(0);
-  stOutput << "<hr>Generating h candidates for type " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString();
+  //stOutput << "<hr>Generating h candidates for type " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString();
   if (typeIndex>=this->currentPossibleLargerDynkinTypes[stackIndex].size)
     return true;
   if (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].GetRootSystemSize()>this->owneR->GetNumPosRoots()*2)
@@ -867,12 +867,12 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
   if (!this->targetDynkinType.IsEqualToZero())
     if (!this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].CanBeExtendedParabolicallyOrIsEqualTo(this->targetDynkinType))
       if (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex]!=this->targetDynkinType)
-      { stOutput << "<br>Dynkin type " <<  this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
-        << "  does not fit in the target Dynkin type " << this->targetDynkinType.ToString();
+      { //stOutput << "<br>Dynkin type " <<  this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
+        //<< "  does not fit in the target Dynkin type " << this->targetDynkinType.ToString();
         return true;
       }
-  stOutput << "<br>Dynkin type " <<  this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
-  << "  fits in the target Dynkin type " << this->targetDynkinType.ToString();
+  //stOutput << "<br>Dynkin type " <<  this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
+  //<< "  fits in the target Dynkin type " << this->targetDynkinType.ToString();
   ProgressReport theReport0(this->theGlobalVariables), theReport1(this->theGlobalVariables);
   if (theGlobalVariables!=0)
   { std::stringstream reportStream;
@@ -917,9 +917,9 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
   this->GetHCandidates
   (this->currentHCandidatesScaledToActByTwo[stackIndex], newCandidate, this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
    this->currentRootInjections[stackIndex][typeIndex]);
-  stOutput << "<br>Attempting to realize type: "
-  << this->currentHCandidatesScaledToActByTwo[stackIndex].ToString()
-  << " using h candidates: " << this->currentHCandidatesScaledToActByTwo[stackIndex].ToString();
+  //stOutput << "<br>Attempting to realize type: "
+  //<< this->currentHCandidatesScaledToActByTwo[stackIndex].ToString()
+  //<< " using h candidates: " << this->currentHCandidatesScaledToActByTwo[stackIndex].ToString();
   return true;
 }
 
@@ -948,9 +948,10 @@ void SemisimpleSubalgebras::AddSubalgebraToStack
    this->currentRootInjections.LastObject());
   ///////////
   this->currentNumLargerTypesExplored.AddOnTop(inputNumLargerTypesExplored);
-  stOutput << "<hr>Possible extensions of " << input.theWeylNonEmbeddeD.theDynkinType.ToString() << ": ";
+/*  stOutput << "<hr>Possible extensions of " << input.theWeylNonEmbeddeD.theDynkinType.ToString() << ": ";
   for (int i=0; i<this->currentPossibleLargerDynkinTypes.LastObject()->size; i++)
     stOutput << (*this->currentPossibleLargerDynkinTypes.LastObject())[i].ToString() << ", ";
+*/
   ///////////
   this->currentHCandidatesScaledToActByTwo.SetSize(this->currentSubalgebraChain.size);
   this->currentNumHcandidatesExplored.AddOnTop(inputNumHcandidatesExplored);

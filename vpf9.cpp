@@ -3979,7 +3979,7 @@ bool DynkinType::CanBeExtendedParabolicallyOrIsEqualTo(const DynkinType& other)c
   const DynkinSimpleType& currentSimpleType = (*this)[0];
   DynkinType remainderThis, remainderOther;
   for (int i=0; i<other.size(); i++)
-  { if(!currentSimpleType.CanBeExtendedParabolicallyTo(other[i]) and ! (currentSimpleType==other[i] ))
+  { if(!currentSimpleType.CanBeExtendedParabolicallyOrIsEqualTo(other[i]))
       continue;
     remainderThis=*this;
     remainderThis-=currentSimpleType;

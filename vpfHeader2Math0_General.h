@@ -5023,6 +5023,11 @@ class DynkinSimpleType
   static Rational GetRatioLongRootToFirst(char inputWeylLetter, int inputRank);
 
   bool CanBeExtendedParabolicallyTo(const DynkinSimpleType& otherType)const;
+  bool CanBeExtendedParabolicallyOrIsEqualTo(const DynkinSimpleType& otherType)const
+  { if (*this==otherType)
+      return true;
+    return this->CanBeExtendedParabolicallyTo(otherType);
+  }
   bool HasEasySubalgebras()const;
   Rational GetRatioLongRootToFirst()const
   { return this->GetRatioLongRootToFirst(this->theLetter, this->theRank);

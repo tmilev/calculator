@@ -1346,9 +1346,8 @@ bool CandidateSSSubalgebra::ComputeSystem(bool AttemptToChooseCentalizer, bool a
     currentInvolvedPosGens.SetSize(0);
     for (int j=0; j<this->GetAmbientWeyl().RootSystem.size; j++)
 //    for (int j=this->GetAmbientWeyl().RootSystem.size-1; j>=0; j--)
-    { const Vector<Rational>& currentAmbRoot=this->GetAmbientWeyl().RootSystem[j];
-      int indexCurGen=this->GetAmbientSS().GetGeneratorFromRootIndex(j);
-      int opIndex= this->GetAmbientSS().GetGeneratorFromRoot(-currentAmbRoot);
+    { int indexCurGen=this->GetAmbientSS().GetGeneratorFromRootIndex(j);
+      int opIndex= this->GetAmbientSS().GetGeneratorFromRoot(-this->GetAmbientWeyl().RootSystem[j]);
       currentGen.MakeGenerator(*this->owner->owneR, indexCurGen);
       currentOpGen.MakeGenerator(*this->owner->owneR, opIndex);
       if (this->IsWeightSystemSpaceIndex(i, this->GetAmbientWeyl().RootSystem[j]))

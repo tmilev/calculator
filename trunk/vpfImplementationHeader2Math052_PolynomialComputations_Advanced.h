@@ -945,8 +945,8 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   twoSolutionsToTry.SetSize(2);
   twoSolutionsToTry[0]=0;
   twoSolutionsToTry[1]=1;
-  if (this->RecursionCounterSerreLikeSystem==1)
-    twoSolutionsToTry.SwapTwoIndices(0,1);
+//  if (this->RecursionCounterSerreLikeSystem==1)
+//    twoSolutionsToTry.SwapTwoIndices(0,1);
 
   GroebnerBasisComputation computationFirstTry;
   computationFirstTry.RecursionCounterSerreLikeSystem=this->RecursionCounterSerreLikeSystem;
@@ -974,7 +974,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
     << numVarsToSolveForStart-numVariablesToSolveForAfterReduction << " variables. Number remaining variables to solve for: "
     << numVariablesToSolveForAfterReduction << ". Try 1 out of 2. "
     << impliedSubsReport.str() << "<br>Substitution attempts:<br>"
-    << theMon.ToString(&this->theFormat) << "=0;";
+    << theMon.ToString(&this->theFormat) << "=" << twoSolutionsToTry[0] << ";";
     theReport1.Report(out.str());
   }
 
@@ -1028,7 +1028,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
     << numVarsToSolveForStart-numVariablesToSolveForAfterReduction << " variables. Number remaining variables to solve for: "
     << numVariablesToSolveForAfterReduction << ". Try 2 out of 2. "
     << impliedSubsReport.str() << "<br>Substitution attempts:<br>"
-    << theMon.ToString(&theFormat) << "=1;";
+    << theMon.ToString(&theFormat) << "=" << twoSolutionsToTry[1] <<";";
     theReport1.Report(out.str());
   }
   computationSecondTry.SolveSerreLikeSystemRecursively(inputSystem, theAlgebraicClosure, theGlobalVariables);

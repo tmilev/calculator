@@ -1486,8 +1486,8 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
   { desiredHpart=this->theHsScaledToActByTwo[i];//<-implicit type conversion here!
     goalValue.MakeHgenerator(desiredHpart, *this->owner->owneR);
     this->GetAmbientSS().LieBracket(this->theUnknownPosGens[i], this->theUnknownNegGens[i], lieBracketMinusGoalValue);
-    stOutput << "<hr>[" << this->theUnknownPosGens[i].ToString() << ", "
-    << this->theUnknownNegGens[i].ToString() << "] = " << lieBracketMinusGoalValue.ToString();
+//    stOutput << "<hr>[" << this->theUnknownPosGens[i].ToString() << ", "
+//    << this->theUnknownNegGens[i].ToString() << "] = " << lieBracketMinusGoalValue.ToString();
     lieBracketMinusGoalValue-=goalValue;
     this->AddToSystem(lieBracketMinusGoalValue);
     for (int j=0; j<this->theUnknownCartanCentralizerBasis.size; j++)
@@ -1499,8 +1499,8 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
     for (int j=0; j<this->theUnknownPosGens.size; j++)
       if (i!=j)
       { this->GetAmbientSS().LieBracket(this->theUnknownNegGens[i], this->theUnknownPosGens[j], lieBracketMinusGoalValue);
-        stOutput << "<hr>[" << this->theUnknownNegGens[i].ToString() << ", "
-        << this->theUnknownPosGens[j].ToString() << "] = " << lieBracketMinusGoalValue.ToString();
+//        stOutput << "<hr>[" << this->theUnknownNegGens[i].ToString() << ", "
+//        << this->theUnknownPosGens[j].ToString() << "] = " << lieBracketMinusGoalValue.ToString();
         this->AddToSystem(lieBracketMinusGoalValue);
         Vector<Rational> posRoot1, posRoot2;
         posRoot1.MakeEi(this->theWeylNonEmbeddeD.GetDim(), i);

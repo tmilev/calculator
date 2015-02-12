@@ -289,9 +289,19 @@ bool Calculator::EvaluateExpression
     //////------End of handling naughty expressions------
     /////-------Evaluating children if the expression is not of built-in type-------
     //bool foundError=false;
+    ProgressReport theReport(theCommands.theGlobalVariableS);
     if (!output.IsFrozen())
       for (int i=0; i<output.children.size && !theCommands.flagAbortComputationASAP; i++)
-      { if (theCommands.EvaluateExpression(theCommands, output[i], transformationE))
+      { if (theCommands.theGlobalVariableS!=0)
+          if (i>0 && output.StartsWith(theCommands.opEndStatement()))
+          { std::stringstream reportStream;
+            for (int j=1; j<i; j++)
+              if (output[j].StartsWith(theCommands.opDefine()) || output[j].StartsWith(theCommands.opDefineConditional()))
+                reportStream << "<br>" << output[j].ToString();
+            reportStream << "<br><b>" << output[i].ToString() << "</b>";
+            theReport.Report(reportStream.str());
+          }
+        if (theCommands.EvaluateExpression(theCommands, output[i], transformationE))
           output.SetChilD(i, transformationE);
         if (output[i].IsError())
         { theCommands.flagAbortComputationASAP=true;
@@ -489,6 +499,8 @@ void Calculator::EvaluateCommands()
   Expression StartingExpression=this->theProgramExpression;
   this->flagAbortComputationASAP=false;
   this->Comments.clear();
+  ProgressReport theReport(theGlobalVariableS);
+  theReport.Report("Evaluating expressions, current expression stack:");
   this->EvaluateExpression(*this, this->theProgramExpression, this->theProgramExpression);
   if (this->RecursionDeptH!=0)
     crash << "This is a programming error: the starting recursion depth before evaluation was 0, but after evaluation it is "

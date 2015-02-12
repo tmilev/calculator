@@ -1480,12 +1480,14 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
     theDeterminant+=-1;
     this->theSystemToSolve.AddOnTop(theDeterminant);
   }
-  for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
+  if (this->theUnknownNegGens.size!=this->theUnknownPosGens.size)
+    crash << "Error: number of unknown negative generators differs from number of unknown positive ones. " << crash;
+  for (int i=0; i<this->theUnknownNegGens.size; i++)
   { desiredHpart=this->theHsScaledToActByTwo[i];//<-implicit type conversion here!
     goalValue.MakeHgenerator(desiredHpart, *this->owner->owneR);
     this->GetAmbientSS().LieBracket(this->theUnknownPosGens[i], this->theUnknownNegGens[i], lieBracketMinusGoalValue);
-    //stOutput << "<hr>[" << this->theUnknownPosGens[i].ToString() << ", "
-    //<< this->theUnknownNegGens[i].ToString() << "] = " << lieBracketMinusGoalValue.ToString();
+    stOutput << "<hr>[" << this->theUnknownPosGens[i].ToString() << ", "
+    << this->theUnknownNegGens[i].ToString() << "] = " << lieBracketMinusGoalValue.ToString();
     lieBracketMinusGoalValue-=goalValue;
     this->AddToSystem(lieBracketMinusGoalValue);
     for (int j=0; j<this->theUnknownCartanCentralizerBasis.size; j++)
@@ -1494,29 +1496,37 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
       this->GetAmbientSS().LieBracket(this->theUnknownPosGens[i], this->theUnknownCartanCentralizerBasis[j], lieBracketMinusGoalValue);
       this->AddToSystem(lieBracketMinusGoalValue);
     }
-    for (int j=0; j<this->theInvolvedPosGenerators.size; j++)
+    for (int j=0; j<this->theUnknownPosGens.size; j++)
       if (i!=j)
       { this->GetAmbientSS().LieBracket(this->theUnknownNegGens[i], this->theUnknownPosGens[j], lieBracketMinusGoalValue);
-        //stOutput << "<hr>[" << this->theUnknownNegGens[i].ToString() << ", "
-        //<< this->theUnknownPosGens[j].ToString() << "] = " << lieBracketMinusGoalValue.ToString();
+        stOutput << "<hr>[" << this->theUnknownNegGens[i].ToString() << ", "
+        << this->theUnknownPosGens[j].ToString() << "] = " << lieBracketMinusGoalValue.ToString();
         this->AddToSystem(lieBracketMinusGoalValue);
         Vector<Rational> posRoot1, posRoot2;
         posRoot1.MakeEi(this->theWeylNonEmbeddeD.GetDim(), i);
         posRoot2.MakeEi(this->theWeylNonEmbeddeD.GetDim(), j);
-        int q;
-        if (!nonEmbeddedMe.GetMaxQForWhichBetaMinusQAlphaIsARoot(posRoot1, -posRoot2, q))
-          crash << "This is a programming error: the alpha-string along " << posRoot1.ToString() << " through " << (-posRoot2).ToString()
+        int alphaStringLength=-1;
+        if (!nonEmbeddedMe.GetMaxQForWhichBetaMinusQAlphaIsARoot(posRoot1, -posRoot2, alphaStringLength))
+          crash << "This is a programming error: the alpha-string along " << posRoot1.ToString()
+          << " through " << (-posRoot2).ToString()
           << " does not contain any root, which is impossible. " << crash;
-        //if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_2")
-        //{ stOutput << " <br>the q in the q-string is: " << q;
-        //}
+//////////positive-positive generator Serre relations
         lieBracketMinusGoalValue=this->theUnknownPosGens[j];
-        for (int k=0; k<q+1; k++)
+        for (int k=0; k<alphaStringLength+1; k++)
           this->GetAmbientSS().LieBracket(this->theUnknownPosGens[i], lieBracketMinusGoalValue, lieBracketMinusGoalValue);
-        //if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_2")
-        //  stOutput << "<hr>ad of " << this->theUnknownPosGens[i] << " applied to " << this->theUnknownPosGens[j]
-        //  << q+1 << " times = " << lieBracketMinusGoalValue;
         this->AddToSystem(lieBracketMinusGoalValue);
+//////////negative-negative generator Serre relations
+        lieBracketMinusGoalValue=this->theUnknownNegGens[j];
+        for (int k=0; k<alphaStringLength+1; k++)
+          this->GetAmbientSS().LieBracket(this->theUnknownNegGens[i], lieBracketMinusGoalValue, lieBracketMinusGoalValue);
+        this->AddToSystem(lieBracketMinusGoalValue);
+////////////////////////////////
+/*        if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_2")
+        { stOutput << " <br>the q in the q-string is: " << alphaStringLength;
+        }
+        if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_2")
+          stOutput << "<br>ad of " << this->theUnknownPosGens[i] << " applied to " << this->theUnknownPosGens[j]
+          << " a total of " << alphaStringLength+1 << " times = " << lieBracketMinusGoalValue;*/
       }
   }
   this->flagSystemSolved=false;

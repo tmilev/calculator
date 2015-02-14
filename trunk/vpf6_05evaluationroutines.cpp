@@ -294,12 +294,12 @@ bool Calculator::EvaluateExpression
       for (int i=0; i<output.children.size && !theCommands.flagAbortComputationASAP; i++)
       { if (theCommands.theGlobalVariableS!=0)
           if (i>0 && output.StartsWith(theCommands.opEndStatement()))
-          { std::stringstream reportStream;
-            for (int j=1; j<i; j++)
-              if (output[j].StartsWith(theCommands.opDefine()) || output[j].StartsWith(theCommands.opDefineConditional()))
-                reportStream << "<br>" << output[j].ToString();
-            reportStream << "<br><b>" << output[i].ToString() << "</b>";
-            theReport.Report(reportStream.str());
+          { // std::stringstream reportStream;
+//            for (int j=1; j<i; j++)
+//              if (output[j].StartsWith(theCommands.opDefine()) || output[j].StartsWith(theCommands.opDefineConditional()))
+//                reportStream << "<br>" << output[j].ToString();
+ //           reportStream << "<br><b>" << output[i].ToString() << "</b>";
+ //           theReport.Report(reportStream.str());
           }
         if (theCommands.EvaluateExpression(theCommands, output[i], transformationE))
           output.SetChilD(i, transformationE);

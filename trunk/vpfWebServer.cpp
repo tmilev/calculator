@@ -5,7 +5,6 @@
 ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 
 extern void static_html4(std::stringstream& output);
-extern void static_html3(std::stringstream& output);
 const char* PORT ="8080";  // the port users will be connecting to
 const int BACKLOG =10;     // how many pending connections queue will hold
 
@@ -329,7 +328,6 @@ void WebWorker::OutputBeforeComputation()
   if (inputStringNames.Contains("textInput"))
     civilizedInput= inputStrings[inputStringNames.GetIndex("textInput")];
   CGI::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
-  PredefinedStrings(civilizedInput);
 
 //  civilizedInput="\\int( 1/x dx)";
 //  civilizedInput="\\int (1/(x(1+x^2)^2))dx";

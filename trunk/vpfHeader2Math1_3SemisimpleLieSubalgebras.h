@@ -204,7 +204,8 @@ public:
   ;
   void computeHsScaledToActByTwo();
   void SetUpInjectionHs
-  (const CandidateSSSubalgebra& baseSubalgebra, const DynkinType& theNewType, const List<int>& theRootInjection, Vector<Rational>* newHScaledToActByTwo=0);
+  (const CandidateSSSubalgebra& baseSubalgebra, const DynkinType& theNewType, const List<int>& theRootInjection,
+   Vector<Rational>* newHScaledToActByTwo=0);
   void EnumerateAllNilradicals(GlobalVariables* theGlobalVariables);
   std::string ToStringNilradicalSelection(const List<int>& theSelection);
   void EnumerateNilradicalsRecursively(List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream=0);
@@ -379,6 +380,7 @@ public:
   bool CheckConsistencyHs()const;
   bool CheckConsistency()const;
   bool CheckInitialization() const;
+  std::string ToStringState(FormatExpressions* theFormat=0);
   std::string ToStringProgressReport(FormatExpressions* theFormat=0);
   std::string ToString(FormatExpressions* theFormat=0);
   std::string ToStringSSsumaryLaTeX(FormatExpressions* theFormat=0)const;

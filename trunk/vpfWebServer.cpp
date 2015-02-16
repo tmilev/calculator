@@ -311,8 +311,8 @@ void WebWorker::resetMessageComponentsExceptRawMessage()
 static std::stringstream standardOutputStreamAfterTimeout;
 void WebWorker::StandardOutputAfterTimeOut(const std::string& input)
 { standardOutputStreamAfterTimeout << input;
-  theLog << logger::endL << logger::green << " Standard output: " << standardOutputStreamAfterTimeout.str()
-  << logger::endL;
+//  theLog << logger::endL << logger::green << " Standard output: " << standardOutputStreamAfterTimeout.str()
+//  << logger::endL;
 }
 
 void WebWorker::OutputBeforeComputation()
@@ -708,7 +708,7 @@ void WebWorker::SendDisplayUserInputToServer()
   if (this->displayUserInput.size()>3000)
     this->displayUserInput.resize(3000);
   this->pipeWorkerToServerUserInput.WriteAfterEmptying(this->displayUserInput);
-  theLog << logger::blue << "Piping " << this->displayUserInput << " to the server. " << logger::endL;
+//  theLog << logger::blue << "Piping " << this->displayUserInput << " to the server. " << logger::endL;
 }
 
 void WebWorker::ExtractPhysicalAddressFromMainAddress()
@@ -824,7 +824,7 @@ void WebWorker::WriteProgressReportToFile(const std::string& input)
   theLog << logger::green << "Progress report written to file: " << theFileName << logger::endL;
   std::fstream theFile;
   FileOperations::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
-  theFile << input;
+  theFile << standardOutputStreamAfterTimeout.str() << "<hr>" << input;
   theFile.flush();
   theFile.close();
 }

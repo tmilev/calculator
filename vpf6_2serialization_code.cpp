@@ -463,7 +463,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
   theSAs.flagComputeNilradicals=false;
   theSAs.theGlobalVariables=theCommands.theGlobalVariableS;
   theSAs.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
-  reportStream << " done. Total subalgebras: " << theSAsE.children.size-1 << ". ";
+  reportStream << " done. <br>Total subalgebras: " << theSAsE.children.size-1 << ". ";
   theReport.Report(reportStream.str());
 
   for (int i=1; i<theSAsE.children.size; i++)

@@ -532,9 +532,9 @@ bool SemisimpleSubalgebras::LoadState
   }
 //  static ProgressReport theReport(theGlobalVariables);
 //  std::stringstream progReportStream;
-  stOutput << "<br>Loadstate: currentChainInt: " << currentChainInt;
-  stOutput << "<br>Loadstate: numExploredTypes: " << numExploredTypes;
-  stOutput << "<br>Loadstate: numExploredHs: " << numExploredHs;
+  //stOutput << "<br>Loadstate: currentChainInt: " << currentChainInt;
+  //stOutput << "<br>Loadstate: numExploredTypes: " << numExploredTypes;
+  //stOutput << "<br>Loadstate: numExploredHs: " << numExploredHs;
   this->currentHCandidatesScaledToActByTwo.SetSize(0);
   this->currentNumHcandidatesExplored.SetSize(0);
   this->currentNumLargerTypesExplored.SetSize(0);
@@ -804,7 +804,7 @@ void SemisimpleSubalgebras::GetHCandidates
   ProgressReport theReport3(this->theGlobalVariables);
   int baseRank=currentType.GetRank()-1;
 
-  stOutput << "<hr>Getting h-candidates to realize type: " << currentType.ToString();
+//  stOutput << "<hr>Getting h-candidates to realize type: " << currentType.ToString();
   DynkinSimpleType theSmallType;
   theSmallType=currentType.GetSmallestSimpleType();
 
@@ -829,7 +829,7 @@ void SemisimpleSubalgebras::GetHCandidates
       //else
         //stOutput << " The h element " << this->theSl2s[j].theH.GetCartanPart().ToString() << " generating orbit number "
         //<< j+1 << " out of " << this->theSl2s.size << " has the required length. ";
-      stOutput << "<br>" << reportStreamX.str();
+      //stOutput << "<br>" << reportStreamX.str();
       theReport2.Report(reportStreamX.str());
     }
     if (this->theSl2s[j].LengthHsquared!=desiredHLengthSquared)
@@ -854,7 +854,7 @@ void SemisimpleSubalgebras::GetHCandidates
           out2 << "sl(2) orbit " << j+1 << ", h orbit candidate " << k+1 << " out of " << currentOrbit.size
           << " has desired scalar products.";
           theReport3.Report(out2.str());
-          stOutput << "<hr>" << out2.str();
+          //stOutput << "<hr>" << out2.str();
         }
         outputHCandidatesScaledToActByTwo.AddOnTop(currentOrbit[k]);
       } else
@@ -863,7 +863,7 @@ void SemisimpleSubalgebras::GetHCandidates
           out2 << "sl(2) orbit " << j+1 << ", h orbit candidate " << k+1 << " out of " << currentOrbit.size
           << " is not a valid candidate. ";
           theReport3.Report(out2.str());
-          stOutput << "<br>" << out2.str();
+          //stOutput << "<br>" << out2.str();
         }
     }
     if (outputHCandidatesScaledToActByTwo.size==0)
@@ -871,10 +871,10 @@ void SemisimpleSubalgebras::GetHCandidates
       out2 << "Sl(2) orbit " << j+1 << ": extension to " << currentType.ToString()
       << " not possible because there were no h candidates.";
       theReport1.Report(out2.str());
-      stOutput << "<br>" << out2.str();
+      //stOutput << "<br>" << out2.str();
     }
   }
-  stOutput << "<br>Finished fetching h-candidates, total " << outputHCandidatesScaledToActByTwo.size << " found. <hr>";
+  //stOutput << "<br>Finished fetching h-candidates, total " << outputHCandidatesScaledToActByTwo.size << " found. <hr>";
 }
 
 const CandidateSSSubalgebra& SemisimpleSubalgebras::baseSubalgebra()
@@ -905,8 +905,8 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
   if (!this->targetDynkinType.IsEqualToZero())
     if (!this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].CanBeExtendedParabolicallyOrIsEqualTo(this->targetDynkinType))
       if (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex]!=this->targetDynkinType)
-      { stOutput << "<br>Dynkin type " <<  this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
-        << "  does not fit in the target Dynkin type " << this->targetDynkinType.ToString();
+      { //stOutput << "<br>Dynkin type " <<  this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
+        //<< "  does not fit in the target Dynkin type " << this->targetDynkinType.ToString();
         return true;
       }
   //stOutput << "<br>Dynkin type " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
@@ -942,9 +942,9 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
         << ", type  " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
         << " cannot be realized: no appropriate module: desired weight of h element is: " << weightHElementWeAreLookingFor.ToString()
         << " but the highest weights of the base candidate are: " << this->baseSubalgebra().HighestWeightsNONPrimal.ToString();
-        stOutput << "<br>Attempting to realize type "
-        << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString() << ":"
-        << reportStream.str();
+        //stOutput << "<br>Attempting to realize type "
+        //<< this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString() << ":"
+        //<< reportStream.str();
         theReport1.Report(reportStream.str());
       }
       return true;
@@ -959,9 +959,9 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
   this->GetHCandidates
   (this->currentHCandidatesScaledToActByTwo[stackIndex], newCandidate, this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
    this->currentRootInjections[stackIndex][typeIndex]);
-  stOutput << "<br>Attempting to realize type: " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
-  << " using " << this->currentHCandidatesScaledToActByTwo[stackIndex].size
-  << " h candidates. The candidates follow: " << this->currentHCandidatesScaledToActByTwo[stackIndex].ToString();
+  //stOutput << "<br>Attempting to realize type: " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
+  //<< " using " << this->currentHCandidatesScaledToActByTwo[stackIndex].size
+  //<< " h candidates. The candidates follow: " << this->currentHCandidatesScaledToActByTwo[stackIndex].ToString();
   return true;
 }
 
@@ -994,11 +994,11 @@ void SemisimpleSubalgebras::AddSubalgebraToStack
    this->currentRootInjections.LastObject());
   ///////////
   this->currentNumLargerTypesExplored.AddOnTop(inputNumLargerTypesExplored);
-  stOutput << "<hr>" << this->currentPossibleLargerDynkinTypes.LastObject()->size
+  /*stOutput << "<hr>" << this->currentPossibleLargerDynkinTypes.LastObject()->size
   << " possible extensions of " << input.theWeylNonEmbeddeD.theDynkinType.ToString() << ": ";
   for (int i=0; i<this->currentPossibleLargerDynkinTypes.LastObject()->size; i++)
     stOutput << (*this->currentPossibleLargerDynkinTypes.LastObject())[i].ToString() << ", ";
-
+  */
   ///////////
   this->currentHCandidatesScaledToActByTwo.SetSize(this->currentSubalgebraChain.size);
   this->currentNumHcandidatesExplored.AddOnTop(inputNumHcandidatesExplored);
@@ -1315,8 +1315,8 @@ void CandidateSSSubalgebra::AddHincomplete(const Vector<Rational>& theH, const E
 bool CandidateSSSubalgebra::IsGoodHnewActingByTwo(const Vector<Rational>& HNewActingByTwo, const List<int>& theRootInjections)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::isGoodHnew");
   //Check if input weight is maximally dominant:
-  stOutput << "<br>Checking whether " << HNewActingByTwo.ToString() << " is a good new vector... " << this->theHsScaledToActByTwoInOrderOfCreation.size
-  << " already created vectors to be respected... ";
+  //stOutput << "<br>Checking whether " << HNewActingByTwo.ToString() << " is a good new vector... " << this->theHsScaledToActByTwoInOrderOfCreation.size
+  //<< " already created vectors to be respected... ";
   Rational theScalarProd;
   int indexHneW=*theRootInjections.LastObject();
   for  (int i=0; i<this->GetAmbientWeyl().RootsOfBorel.size; i++)
@@ -1336,8 +1336,8 @@ bool CandidateSSSubalgebra::IsGoodHnewActingByTwo(const Vector<Rational>& HNewAc
     }
     if (canBeRaisingReflection)
       if (this->GetAmbientWeyl().RootScalarCartanRoot(currentPosRoot, HNewActingByTwo)<0)
-      { stOutput << HNewActingByTwo.ToString() << " is not a good vector because it has negative scalar product with "
-        << currentPosRoot.ToString() << ". ";
+      { //stOutput << HNewActingByTwo.ToString() << " is not a good vector because it has negative scalar product with "
+        //<< currentPosRoot.ToString() << ". ";
         return false;
       }
   }
@@ -1347,13 +1347,13 @@ bool CandidateSSSubalgebra::IsGoodHnewActingByTwo(const Vector<Rational>& HNewAc
     else
       theScalarProd=this->GetAmbientWeyl().RootScalarCartanRoot(HNewActingByTwo, HNewActingByTwo);
     if (theScalarProd!=this->theWeylNonEmbeddeD.CoCartanSymmetric(indexHneW, i))
-    { stOutput << HNewActingByTwo.ToString() << " is not a good vector because it has scalar product " << theScalarProd.ToString() << " with "
-      << (i==indexHneW ? HNewActingByTwo.ToString() : this->theHsScaledToActByTwo[i].ToString()) << " instead of the desired "
-      << this->theWeylNonEmbeddeD.CartanSymmetric(indexHneW, i).ToString() << ". <br>";
+    { //stOutput << HNewActingByTwo.ToString() << " is not a good vector because it has scalar product " << theScalarProd.ToString() << " with "
+      //<< (i==indexHneW ? HNewActingByTwo.ToString() : this->theHsScaledToActByTwo[i].ToString()) << " instead of the desired "
+      //<< this->theWeylNonEmbeddeD.CartanSymmetric(indexHneW, i).ToString() << ". <br>";
       return false;
     }
   }
-  stOutput << " YES, it is.";
+  //stOutput << " YES, it is.";
   return true;
 }
 
@@ -1724,8 +1724,8 @@ void CandidateSSSubalgebra::ComputeRatioKillingsByComponent()
       this->GetAmbientSS().LieBracket(currentElt, adActionElt, adadActionElt);
 
       bool tempB=currentElt.LinSpanContainsGetFirstLinearCombination(this->theBasis, adadActionElt, theLinearCombi);
-      stOutput << "<hr>" << this->theBasis.ToString() << " contains in linspan " << adadActionElt.ToString() << " as linear combi "
-      << theLinearCombi.ToString();
+      //stOutput << "<hr>" << this->theBasis.ToString() << " contains in linspan " << adadActionElt.ToString() << " as linear combi "
+      //<< theLinearCombi.ToString();
       if (!tempB)
         crash << "Programming error: Candidate subalgebra not closed under Lie bracket. " << crash;
       result+=theLinearCombi[k];

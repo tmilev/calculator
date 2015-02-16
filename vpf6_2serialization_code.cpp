@@ -427,9 +427,15 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
 //  stOutput << "<br>numExploredTypes: " << numExploredTypes;
   SemisimpleLieAlgebra* ownerSS=0;
   Expression tempE;
+  ProgressReport theReport(theCommands.theGlobalVariableS);
+  std::stringstream reportStream;
+  reportStream << "Extracting semisimple Lie algebra ... ";
+  theReport.Report(reportStream.str());
   if (!CalculatorConversions::innerSSLieAlgebra(theCommands, theAmbientTypeE, tempE, ownerSS))
     return theCommands << "<hr>Error loading semisimple subalgebras: failed to extract ambient semisimple Lie algebra. ";
-//  stOutput << "Loaded type: " << ownerSS->theWeyl.theDynkinType.ToString();
+  reportStream << " type: " << ownerSS->theWeyl.theDynkinType.ToString() << ". ";
+  theReport.Report(reportStream.str());
+
   if (ownerSS==0)
     crash << "Loaded zero subalgebra " << crash;
   SemisimpleSubalgebras tempSAs;
@@ -438,27 +444,34 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
     if (theCommands.theObjectContainer.theSSsubalgebras[i].owneR==0)
       crash << "semisimple subalgebra with index " << i << " has zero owner. " << crash;
   SemisimpleSubalgebras& theSAs=theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSAs)];
+  reportStream << " Initializing data structures... ";
+  theReport.Report(reportStream.str());
+
   theSAs.initHookUpPointers
   (*ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
    &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
+  reportStream << " done. Fetching subalgebra list ... ";
+  theReport.Report(reportStream.str());
   //stOutput << "Owner ss is here:  " << ownerSS->ToString();
   theSAsE.Sequencefy();
   theSAs.theSubalgebras.ReservE(theSAsE.children.size-1);
   theSAs.theSubalgebras.SetSize(0);
   theSAs.theSubalgebrasNonEmbedded->SetExpectedSize(theSAsE.children.size-1);
-  ProgressReport theReport(theCommands.theGlobalVariableS);
   theSAs.flagAttemptToSolveSystems=true;
   theSAs.flagComputeModuleDecomposition=true;
   theSAs.flagComputePairingTable=false;
   theSAs.flagComputeNilradicals=false;
   theSAs.theGlobalVariables=theCommands.theGlobalVariableS;
   theSAs.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
+  reportStream << " done. Total subalgebras: " << theSAsE.children.size-1 << ". ";
+  theReport.Report(reportStream.str());
+
   for (int i=1; i<theSAsE.children.size; i++)
-  { std::stringstream reportStream;
-    reportStream << "Loading subalgebra " << i << " out of " << theSAsE.children.size-1 << " from expression "
-    << theSAsE[i].ToString();
+  { std::stringstream reportStream2;
+    reportStream2 << reportStream.str() << "Subalgebra " << i << " is being loaded from expression "
+    << theSAsE[i].ToString() << ".";
     //stOutput << reportStream.str();
-    theReport.Report(reportStream.str());
+    theReport.Report(reportStream2.str());
     CandidateSSSubalgebra currentCandidate;
     if (!CalculatorConversions::innerCandidateSAPrecomputed(theCommands, theSAsE[i], tempE, currentCandidate, theSAs))
       return theCommands << "<hr>Error loading candidate subalgebra: failed to load candidate number " << i << " of type "
@@ -474,14 +487,16 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
     theSAs.theSubalgebras.AddOnTop(currentCandidate);
     theSAs.theHsOfSubalgebras.AddOnTop(currentCandidate.theHs);
   }
-  std::stringstream reportStream;
-  reportStream << "Loaded " << theSAs.theSubalgebras.size << " subalgebras total. ";
+  reportStream << "Subalgebra loading done. ";
   theReport.Report(reportStream.str());
   theSAs.ToStringExpressionString=CalculatorConversions::innerStringFromSemisimpleSubalgebras;
 //  if (theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection!=0)
 //    theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection();
   if (!theSAs.LoadState(currentChainInt, numExploredTypes, numExploredHs, theCommands.Comments))
     return false;
+//  reportStream << "<br> Computation state loaded: <br>" << theSAs.ToStringState();
+//  theReport.Report(reportStream.str());
+  theSAs.flagAttemptToAdjustCentralizers=false;
   if (! theSAs.FindTheSSSubalgebrasContinue())
   { std::stringstream out;
     out << "<br>Failed to realize all subalgebras, computation aborted. The failure report follows. "
@@ -489,9 +504,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
     << theSAs.ToStringProgressReport();
     return output.AssignValue(out.str(), theCommands);
   }
-//  stOutput << "centralizers off";
-  theSAs.flagAttemptToAdjustCentralizers=false;
-  theSAs.HookUpCentralizers(true);
+//  theReport.Report(reportStream.str());
   //stOutput << "<hr>And the pointer is ....: " << &theSAs << "<br>";
   //stOutput << "<hr>And the other pointer is: " << &theCommands.theObjectContainer.theSSsubalgebras[0];
   //stOutput << theCommands.theObjectContainer.ToString();

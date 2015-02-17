@@ -3628,8 +3628,8 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
   std::stringstream out;
   std::fstream outputFile, outputFile2;
   std::string fileName, filename2;
-  fileName=theCommands.theGlobalVariableS->PhysicalNameDefaultOutputWithPath+"1";
-  filename2=theCommands.theGlobalVariableS->PhysicalNameDefaultOutputWithPath+"2";
+  fileName=theCommands.theGlobalVariableS->PhysicalNameExtraOutputWithPath+"1";
+  filename2=theCommands.theGlobalVariableS->PhysicalNameExtraOutputWithPath+"2";
   FileOperations::OpenFileCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
   FileOperations::OpenFileCreateIfNotPresent(outputFile2, filename2+".tex", false, true, false);
   if (!theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl, parabolicSel, *theCommands.theGlobalVariableS, 500))
@@ -3655,19 +3655,19 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
     outputFile2 << "\n\\end{document}";
     out << "<hr>"
     << " The Hasse graph of the Weyl group of the Levi part follows. <a href=\""
-    << theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath << "1.tex\"> "
-    << theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath << "1.tex</a>";
-    out << ", <iframe src=\"" << theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath
+    << theCommands.theGlobalVariableS->DisplayNameExtraOutputNoPath << "1.tex\"> "
+    << theCommands.theGlobalVariableS->DisplayNameExtraOutputNoPath << "1.tex</a>";
+    out << ", <iframe src=\"" << theCommands.theGlobalVariableS->DisplayNameExtraOutputNoPath
     << "1.png\" width=\"800\" height=\"600\">"
-    << theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath << "1.png</iframe>";
+    << theCommands.theGlobalVariableS->DisplayNameExtraOutputNoPath << "1.png</iframe>";
     out << "<hr> The coset graph of the Weyl group of the Levi part follows. The cosets are right, i.e. a coset "
     << " of the subgroup X is written in the form Xw, where w is one of the elements below. "
     << "<a href=\""
-    << theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath
-    << "2.tex\"> " << theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath << "2.tex</a>";
-    out << ", <iframe src=\"" << theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath
+    << theCommands.theGlobalVariableS->DisplayNameExtraOutputNoPath
+    << "2.tex\"> " << theCommands.theGlobalVariableS->DisplayNameExtraOutputNoPath << "2.tex</a>";
+    out << ", <iframe src=\"" << theCommands.theGlobalVariableS->DisplayNameExtraOutputNoPath
     << "2.png\" width=\"800\" height=\"600\"> "
-    << theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath << "2.png</iframe>";
+    << theCommands.theGlobalVariableS->DisplayNameExtraOutputNoPath << "2.png</iframe>";
     out <<"<b>The .png file might be bad if LaTeX crashed while trying to process it; "
     << "please check whether the .tex corresponds to the .png.</b>";
     out << "<hr>Additional printout follows.<br> ";
@@ -4727,4 +4727,21 @@ bool CalculatorFunctionsGeneral::innerCrawlTexFile(Calculator& theCommands, cons
   theCrawler.theFileToCrawl=input.GetValue<std::string>();
   theCrawler.Crawl();
   return output.AssignValue(theCrawler.displayResult.str(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerSetOutputFile(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSetOutputFile");
+  std::string theFileName;
+  std::stringstream out;
+  if (!input.IsOfType<std::string>(&theFileName))
+    return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
+  for (unsigned i=0; i<theFileName.size(); i++)
+    if (theFileName[i]=='.' || theFileName[i]=='\\' || theFileName[i]=='/')
+    { out << theFileName << " is not a valid file name.  ";
+      return output.AssignValue(out.str(), theCommands);
+    }
+  theCommands.theGlobalVariableS->initOutputReportAndCrashFileNames(theFileName, theCommands.inputString);
+  out << "The default output filename has been changed to " << theFileName << ".";
+  return output.AssignValue(out.str(), theCommands);
+
 }

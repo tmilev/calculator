@@ -59,7 +59,7 @@ public:
   static bool innerDdivDxToDiffDivDiffx(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestMathMouseHover(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCrawlTexFile(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSetOutput(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSetOutputFile(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool outerMergeConstantRadicals(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerCommuteConstants(Calculator& theCommands, const Expression& input, Expression& output);

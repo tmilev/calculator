@@ -480,6 +480,13 @@ void Calculator::initPredefinedInnerFunctions()
    , "CalculatorFunctionsGeneral::innerCrawlTexFile")
    ;
   this->AddOperationInnerHandler
+  ("SetOutputFile", CalculatorFunctionsGeneral::innerSetOutputFile, "",
+   "Sets an output/progress report file different from the default one. No dots, forward slashes, back slashes or file extensions allowed.\
+   A .html will be appended to the output file name.",
+   "SetOutputFile(\"E7_subalgebras\"); SetOutputFile(\"/root/output.html\")", true, false
+   , "CalculatorFunctionsGeneral::innerSetOutputFile")
+   ;
+  this->AddOperationInnerHandler
   ("CoefficientsPowersOf", CalculatorFunctionsGeneral::innerCoefficientsPowersOf, "",
    "Extracts the coefficients of the powers of the first argument in the second argument.",
    "CoefficientsPowersOf(x, a x^2+ b *3 x +c +\\pi +3)", true, false)

@@ -76,8 +76,7 @@ class Crasher
 {
   public:
   GlobalVariables* theGlobalVariables;
-  std::string userInputStringRAWIfAvailable;
-  std::string userInputStringIfAvailable;
+
   std::stringstream theCrashReport;
   void (*CleanUpFunction)();
   bool flagFirstRun; //<-we crash only once, and we do not resume execution after a crash

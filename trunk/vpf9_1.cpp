@@ -48,8 +48,10 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
     this->theCrashReport << " " << this->theGlobalVariables->GetElapsedSeconds() << " second(s) from the start. ";
   else
     this->theCrashReport << ". ";
-  if (this->userInputStringIfAvailable!="")
-    this->theCrashReport << " The user input that caused the crash was: <hr> " << this->userInputStringIfAvailable << "<hr>";
+  if (this->theGlobalVariables!=0)
+    if (this->theGlobalVariables->userInputStringIfAvailable!="")
+      this->theCrashReport << " The user input that caused the crash was: <hr> "
+      << this->theGlobalVariables->userInputStringIfAvailable << "<hr>";
   this->theCrashReport << Crasher::GetStackTraceEtcErrorMessage();
   if (this->theGlobalVariables!=0)
     if (this->theGlobalVariables->ProgressReportStringS.size>0)
@@ -57,25 +59,22 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
       for (int i=this->theGlobalVariables->ProgressReportStringS.size-1; i>=0; i--)
         this->theCrashReport << this->theGlobalVariables->ProgressReportStringS[i] << "<br>";
     }
-  stOutput << this->theCrashReport.str();
   if (stOutput.theOutputFunction!=0)
     std::cout << this->theCrashReport.str() << std::endl;
-  std::fstream theFile;
-  std::string theFileName="../output/crash_"+ this->userInputStringRAWIfAvailable;
-  if (theFileName.size()>200)
-    theFileName=theFileName.substr(0, 200);
-  theFileName +=".html";
-  bool succeededToOpen=FileOperations::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
-  if (stOutput.theOutputFunction!=0)
-    std::cout << this->theCrashReport.str();
-  if (succeededToOpen)
-    stOutput << "<hr>Crash dumped in file " << theFileName;
-  else
-    stOutput << "<hr>Failed to create a crash report: check if folder exists and the "
-    << "executable has file permissions for file " << theFileName << ".";
-  theFile << this->theCrashReport.str();
-  theFile.close();
+  stOutput << this->theCrashReport.str();
   stOutput.Flush();
+  if (this->theGlobalVariables!=0)
+  { std::fstream theFile;
+    bool succeededToOpen=FileOperations::OpenFileCreateIfNotPresent
+    (theFile, this->theGlobalVariables->PhysicalNameCrashLog, false, true, false);
+    if (succeededToOpen)
+      stOutput << "<hr>Crash dumped in file " << this->theGlobalVariables->PhysicalNameCrashLog;
+    else
+      stOutput << "<hr>Failed to create a crash report: check if folder exists and the "
+      << "executable has file permissions for file " << this->theGlobalVariables->PhysicalNameCrashLog << ".";
+    theFile << this->theCrashReport.str();
+    theFile.close();
+  }
   if (this->CleanUpFunction!=0)
   { this->CleanUpFunction();
     std::cout.flush();
@@ -163,9 +162,24 @@ void GlobalVariables::initDefaultFolderAndFileNames
 
   this->PhysicalNameIndicatorWithPath = this->PhysicalPathOutputFolder + "indicator" + this->defaultUserLabel + ".html" ;
   this->DisplayNameIndicatorWithPath = this->DisplayPathOutputFolder + "indicator" + this->defaultUserLabel + ".html" ;
-  this->DisplayNameCalculatorWithPath =
-  this->DisplayPathServerBase +"cgi-bin/calculator";
+  this->DisplayNameCalculatorWithPath =  this->DisplayPathServerBase +"cgi-bin/calculator";
+  this->initReportAndCrashFileNames("", "");
+}
 
+
+void GlobalVariables::initReportAndCrashFileNames
+(const std::string& inputUserStringRAW,
+ const std::string& inputUserStringCivilized)
+{ this->userInputStringRAWIfAvailable=inputUserStringRAW;
+  this->userInputStringIfAvailable=inputUserStringCivilized;
+  this->PhysicalNameCrashLog="../output/crash_"+ this->userInputStringRAWIfAvailable;
+  if (this->PhysicalNameCrashLog.size()>230)
+    this->PhysicalNameCrashLog=this->PhysicalNameCrashLog.substr(0, 230);
+  this->PhysicalNameCrashLog +=".html";
+  this->PhysicalNameProgressReport="../output/progressReport_"+ this->userInputStringRAWIfAvailable;
+  if (this->PhysicalNameProgressReport.size()>230)
+    this->PhysicalNameProgressReport=this->PhysicalNameProgressReport.substr(0, 230);
+  this->PhysicalNameProgressReport +=".html";
 }
 
 template<>

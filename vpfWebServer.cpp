@@ -332,7 +332,7 @@ void WebWorker::OutputBeforeComputation()
 //  civilizedInput="\\int( 1/x dx)";
 //  civilizedInput="\\int (1/(x(1+x^2)^2))dx";
 //  civilizedInput="%LogEvaluation \\int (1/(5+2x+7x^2)^2)dx";
-  onePredefinedCopyOfGlobalVariables.initReportAndCrashFileNames
+  onePredefinedCopyOfGlobalVariables.initOutputReportAndCrashFileNames
   (theParser.inputStringRawestOfTheRaw, civilizedInput);
 
   std::stringstream tempStreamXX;
@@ -371,14 +371,8 @@ void WebWorker::OutputResultAfterTimeout()
     out << standardOutputStreamAfterTimeout.str() << "<hr>";
   out << "<table><tr><td>" << theParser.ToStringOutputAndSpecials() << "</td><td>"
   << theParser.outputCommentsString << "</td></tr></table>";
-  std::stringstream outputTimeOutFileName;
   std::fstream outputTimeOutFile;
-  std::string inputAbbreviated=theParser.inputStringRawestOfTheRaw;
-  if (theParser.inputStringRawestOfTheRaw.size()>100)
-    inputAbbreviated=inputAbbreviated.substr(0, 100)+ "_input_too_long_remainder_truncated";
-  outputTimeOutFileName << theParser.theGlobalVariableS->PhysicalPathOutputFolder
-  << inputAbbreviated << ".html";
-  FileOperations::OpenFileCreateIfNotPresent(outputTimeOutFile, outputTimeOutFileName.str(), false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(outputTimeOutFile, onePredefinedCopyOfGlobalVariables.PhysicalNameOutpuT, false, true, false);
   outputTimeOutFile << "<html><body>" << out.str() << "</body></html>";
   outputTimeOutFile.close();
   WebWorker::OutputSendAfterTimeout(out.str());
@@ -817,13 +811,9 @@ int WebWorker::ProcessComputationIndicator()
 
 void WebWorker::WriteProgressReportToFile(const std::string& input)
 { MacroRegisterFunctionWithName("WebWorker::WriteProgressReportToFile");
-  std::string theFileName= "./../output/progressReport_" + theParser.inputStringRawestOfTheRaw;
-  if (theFileName.size()>200)
-    theFileName= theFileName.substr(0 , 200);
-  theFileName+=".html";
-  theLog << logger::green << "Progress report written to file: " << theFileName << logger::endL;
+  theLog << logger::green << "Progress report written to file: " << onePredefinedCopyOfGlobalVariables.PhysicalNameProgressReport << logger::endL;
   std::fstream theFile;
-  FileOperations::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(theFile, onePredefinedCopyOfGlobalVariables.PhysicalNameProgressReport, false, true, false);
   theFile << standardOutputStreamAfterTimeout.str() << "<hr>" << input;
   theFile.flush();
   theFile.close();

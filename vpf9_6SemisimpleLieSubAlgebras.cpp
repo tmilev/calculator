@@ -1052,7 +1052,8 @@ std::string SemisimpleSubalgebras::ToStringProgressReport(FormatExpressions* the
   std::stringstream out;
   out << this->ToStringState(theFormat);
   if (this->ToStringExpressionString!=0)
-    out << "\n<hr>\n" << "LoadSemisimpleSubalgebras {}" << this->ToStringExpressionString(*this);
+    out << "\n<hr>\n" << "SetOutputFile(\"subalgebras_" << CGI::CleanUpForFileNameUse(this->owneR->theWeyl.theDynkinType.ToString()) << "\");\n<br>\n"
+    << "LoadSemisimpleSubalgebras {}" << this->ToStringExpressionString(*this);
   out << "\n\n<hr>";
   return out.str();
 }

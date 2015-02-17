@@ -2975,12 +2975,13 @@ public:
 
   std::string PhysicalNameProgressReport;
   std::string PhysicalNameCrashLog;
+  std::string PhysicalNameOutpuT;
 
   std::string PhysicalPathServerBase;
   std::string PhysicalPathOutputFolder;
   std::string PhysicalNameIndicatorWithPath;
-  std::string PhysicalNameDefaultOutputNoPatH;
-  std::string PhysicalNameDefaultOutputWithPath;
+  std::string PhysicalNameExtraOutputNoPatH;
+  std::string PhysicalNameExtraOutputWithPath;
   std::string PhysicalNameFolderBelowExecutable;
   std::string PhysicalNameExecutableNoPath;
   std::string PhysicalNameExecutableWithPath;
@@ -2988,8 +2989,8 @@ public:
   std::string DisplayPathServerBase;
   std::string DisplayPathExecutable;
   std::string DisplayPathOutputFolder;
-  std::string DisplayNameDefaultOutputNoPath;
-  std::string DisplayNameDefaultOutputWithPath;
+  std::string DisplayNameExtraOutputNoPath;
+  std::string DisplayNameExtraOutputWithPath;
   std::string DisplayNameExecutableWithPath;
   std::string DisplayNameIndicatorWithPath;
   std::string DisplayNameCalculatorWithPath;
@@ -3052,7 +3053,7 @@ public:
   void initDefaultFolderAndFileNames
 (const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow,
  const std::string& scrambledIP);
-  void initReportAndCrashFileNames
+  void initOutputReportAndCrashFileNames
 (const std::string& inputUserStringRAW,
  const std::string& inputUserStringCivilized);
 

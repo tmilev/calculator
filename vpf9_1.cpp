@@ -155,31 +155,29 @@ void GlobalVariables::initDefaultFolderAndFileNames
   this->DisplayPathOutputFolder = this->DisplayPathServerBase + "output/";
 
   this->defaultUserLabel=scrambledIP;
-  this->PhysicalNameDefaultOutputNoPatH="default" + this->defaultUserLabel + "output";
-  this->PhysicalNameDefaultOutputWithPath = this->PhysicalPathOutputFolder + this->PhysicalNameDefaultOutputNoPatH ;
-  this->DisplayNameDefaultOutputNoPath = "default" + this->defaultUserLabel + "output";
-  this->DisplayNameDefaultOutputWithPath = this->DisplayPathOutputFolder + this->DisplayNameDefaultOutputNoPath;
+  this->PhysicalNameExtraOutputNoPatH="default" + this->defaultUserLabel + "output";
+  this->PhysicalNameExtraOutputWithPath = this->PhysicalPathOutputFolder + this->PhysicalNameExtraOutputNoPatH ;
+  this->DisplayNameExtraOutputNoPath = "default" + this->defaultUserLabel + "output";
+  this->DisplayNameExtraOutputWithPath = this->DisplayPathOutputFolder + this->DisplayNameExtraOutputNoPath;
 
   this->PhysicalNameIndicatorWithPath = this->PhysicalPathOutputFolder + "indicator" + this->defaultUserLabel + ".html" ;
   this->DisplayNameIndicatorWithPath = this->DisplayPathOutputFolder + "indicator" + this->defaultUserLabel + ".html" ;
   this->DisplayNameCalculatorWithPath =  this->DisplayPathServerBase +"cgi-bin/calculator";
-  this->initReportAndCrashFileNames("", "");
+  this->initOutputReportAndCrashFileNames("", "");
 }
 
 
-void GlobalVariables::initReportAndCrashFileNames
+void GlobalVariables::initOutputReportAndCrashFileNames
 (const std::string& inputUserStringRAW,
  const std::string& inputUserStringCivilized)
 { this->userInputStringRAWIfAvailable=inputUserStringRAW;
   this->userInputStringIfAvailable=inputUserStringCivilized;
-  this->PhysicalNameCrashLog="../output/crash_"+ this->userInputStringRAWIfAvailable;
-  if (this->PhysicalNameCrashLog.size()>230)
-    this->PhysicalNameCrashLog=this->PhysicalNameCrashLog.substr(0, 230);
-  this->PhysicalNameCrashLog +=".html";
-  this->PhysicalNameProgressReport="../output/progressReport_"+ this->userInputStringRAWIfAvailable;
-  if (this->PhysicalNameProgressReport.size()>230)
-    this->PhysicalNameProgressReport=this->PhysicalNameProgressReport.substr(0, 230);
-  this->PhysicalNameProgressReport +=".html";
+  std::string inputAbbreviated=this->userInputStringRAWIfAvailable;
+  if (inputAbbreviated.size()>220)
+    inputAbbreviated=inputAbbreviated.substr(0,220)+"__input__truncated";
+  this->PhysicalNameCrashLog="../output/crash_"+ inputAbbreviated+".html";
+  this->PhysicalNameProgressReport="../output/progressReport_"+ inputAbbreviated+".html";
+  this->PhysicalNameOutpuT="../output/output_"+ inputAbbreviated+".html";
 }
 
 template<>

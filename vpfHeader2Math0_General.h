@@ -2970,6 +2970,12 @@ public:
   FormatExpressions thePolyFormat;
   Controller theLocalPauseController;
 
+  std::string userInputStringRAWIfAvailable;
+  std::string userInputStringIfAvailable;
+
+  std::string PhysicalNameProgressReport;
+  std::string PhysicalNameCrashLog;
+
   std::string PhysicalPathServerBase;
   std::string PhysicalPathOutputFolder;
   std::string PhysicalNameIndicatorWithPath;
@@ -3046,6 +3052,9 @@ public:
   void initDefaultFolderAndFileNames
 (const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow,
  const std::string& scrambledIP);
+  void initReportAndCrashFileNames
+(const std::string& inputUserStringRAW,
+ const std::string& inputUserStringCivilized);
 
   void operator=(const GlobalVariables& other)
   { this->IndicatorStringOutputFunction=other.IndicatorStringOutputFunction;

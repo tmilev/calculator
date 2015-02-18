@@ -555,6 +555,11 @@ bool SemisimpleSubalgebras::LoadState
       return false;
     }
     CandidateSSSubalgebra& currentSA=this->theSubalgebras[currentChainInt[i]];
+    if (!currentSA.ComputeAndVerifyFromGeneratorsAndHs())
+    { reportStream << "<hr>Subalgebra " << currentSA.theWeylNonEmbeddeD.theDynkinType.ToString()
+      << "is corrupt. " << currentSA.comments;
+      return false;
+    }
     bool isGood=true;
     if (! currentSA.theHs.ContainsAtLeastOneCopyOfEach(this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation))
       isGood=false;
@@ -762,7 +767,7 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
       this->owner->theSubalgebras[indexPrecomputed].theHsScaledToActByTwoInOrderOfCreation=
       this->theHsScaledToActByTwoInOrderOfCreation;
     *this=this->owner->theSubalgebras[indexPrecomputed];
-    return true;
+    return this->ComputeAndVerifyFromGeneratorsAndHs();
   }
   this->owner->RegisterPossibleCandidate(*this);
   this->CheckInitialization();
@@ -1831,6 +1836,7 @@ void CandidateSSSubalgebra::reset(SemisimpleSubalgebras* inputOwner)
   this->indexHcandidateBeingGrown=(-1);
   this->indexMaxSSContainer=(-1);
   this->indexSSPartCentralizer=-1;
+  this->flagSubalgebraPreloadedButNotVerified=false;
   this->flagSystemSolved=(false);
   this->flagSystemProvedToHaveNoSolution=(false);
   this->flagSystemGroebnerBasisFound=(false);
@@ -3328,6 +3334,11 @@ void SltwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner)
 
 void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, SltwoSubalgebras& output, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::FindSl2Subalgebras");
+  ProgressReport theReport0(&theGlobalVariables);
+  std::stringstream reportStream0;
+  reportStream0 << "Finding sl(2)-subalgebras (and thus a full list of the nilpotent orbits) of "
+  << inputOwner.theWeyl.theDynkinType.ToString();
+  theReport0.Report(reportStream0.str());
   inputOwner.CheckConsistency();
   output.reset(inputOwner);
   output.CheckConsistency();
@@ -3376,6 +3387,34 @@ bool CandidateSSSubalgebra::CheckConsistency()const
 { if (this->flagDeallocated)
     crash << "This is a programming error: use after free of CandidateSSSubalgebra. " << crash;
   return true;
+}
+
+bool CandidateSSSubalgebra::ComputeAndVerifyFromGeneratorsAndHs()
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeAndVerifyFromGeneratorsAndHs");
+  if (!this->flagSubalgebraPreloadedButNotVerified)
+    return true;
+  Matrix<Rational> actualCoCartan;
+  this->theHsScaledToActByTwo.GetGramMatrix(actualCoCartan, &this->owner->GetSSowner().theWeyl.CartanSymmetric);
+  std::stringstream out;
+  this->flagSubalgebraPreloadedButNotVerified=false;
+  if (!(this->theWeylNonEmbeddeD.CoCartanSymmetric== actualCoCartan))
+  { out << "<b>Corrupt semisimple subalgebra: the gram matrix of the elements of its Cartan, "
+    << this->theHsScaledToActByTwo.ToString() << " is " << actualCoCartan.ToString() << "; it should be "
+    << this->theWeylNonEmbeddeD.CoCartanSymmetric.ToString() << ".</b>";
+    this->flagSystemProvedToHaveNoSolution=true;
+  }
+  this->ComputeSystem(false, true);
+  if (!this->ComputeChar(true))
+  { out << "<b>Corrupt semisimple subalgebra: the ambient Lie algebra does not decompose "
+    << "properly over the candidate subalgebra. </b>";
+    this->flagSystemProvedToHaveNoSolution=true;
+  }
+  if (!this->CheckGensBracketToHs())
+  { out << "<b>Corrput semisimple subalgebra: Lie brackets of generators do not equal the desired elements of the Cartan. ";
+    this->flagSystemProvedToHaveNoSolution=true;
+  }
+  this->comments=out.str();
+  return !this->flagSystemProvedToHaveNoSolution;
 }
 
 bool CandidateSSSubalgebra::CheckMaximalDominance()const
@@ -4945,6 +4984,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   bool shortReportOnly=theFormat==0 ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
   bool useMouseHover=theFormat==0 ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
   out << "Subalgebra type: " << this->owner->ToStringAlgebraLink(this->indexInOwner, theFormat) << " (click on type for detailed printout).";
+  out << this->comments;
   if (this->AmRegularSA())
     out << "<br>The subalgebra is regular (= the semisimple part of a root subalgebra). ";
   if (this->indexIamInducedFrom!=-1)
@@ -5328,6 +5368,8 @@ void SemisimpleSubalgebras::HookUpCentralizers(bool allowNonPolynomialSystemFail
   theReport1.Report("<hr>\nHooking up centralizers ");
   for (int i=0; i<this->theSubalgebras.size; i++)
   { if (!this->theSubalgebras[i].flagSystemSolved)
+      continue;
+    if (!this->theSubalgebras[i].ComputeAndVerifyFromGeneratorsAndHs())
       continue;
     CandidateSSSubalgebra& currentSA=this->theSubalgebras[i];
     std::stringstream reportStream2;

@@ -1956,9 +1956,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   bool isFinal=theFormat==0 ? false : theFormat->flagExpressionIsFinal;
   bool allowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
   bool oldAllowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
-
-  if (this->theBoss->flagUseFracInRationalLaTeX)
-    allowNewLine=false;
+  bool useFrac =this->theBoss->flagUseFracInRationalLaTeX; //(theFormat==0) ? true : theFormat->flagUseFrac;
   int lineBreak=50;
   int charCounter=0;
   std::string tempS;
@@ -2128,7 +2126,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     std::string tempS2= (*this)[1].ToString(theFormat);
     tempS=(*this)[2].ToString(theFormat);
     out << tempS2;
-    if (allowNewLine && tempS2.size()>(unsigned)lineBreak)
+    if (allowNewLine && !useFrac && tempS2.size()>(unsigned)lineBreak)
       out << "\\\\\n";
     if (tempS.size()>0)
       if (tempS[0]!='-')
@@ -2183,7 +2181,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       case Expression::formatMatrix:
         if (theFormat!=0)
           if (theFormat->flagUseLatex)
-          out << "\\left(";
+            out << "\\left(";
         out << "\\begin{array}{";
         for (int i=0; i<this->GetNumCols(); i++)
           out << "c";
@@ -2208,8 +2206,13 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
           charCounter+=currentChildString.size();
           if (i!=this->children.size-1)
           { out << ", ";
-            if (allowNewLine && charCounter >50 )
-              out << "\\\\\n";
+            if (theFormat!=0)
+              if (allowNewLine && charCounter >50)
+              { if (theFormat->flagUseLatex)
+                  out << "\\\\\n";
+                if (theFormat->flagUseHTML)
+                  out << "\n<br>\n";
+              }
           }
           charCounter%=50;
         }
@@ -2243,7 +2246,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         } else
           out << "...";
         if (i!=this->children.size-1)
-          out << ";";
+          out << ";" << "QQQ";
         out << "</td><td valign=\"top\"><hr>";
         if ((*this)[i].IsOfType<std::string>() && isFinal)
           out << (*this)[i].GetValue<std::string>();

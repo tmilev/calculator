@@ -380,19 +380,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
   outputSubalgebra.theWeylNonEmbeddeD.ComputeRho(true);
   //stOutput << "Before calling compute system, output subalgebra is: " << outputSubalgebra.ToString();
   outputSubalgebra.computeHsScaledToActByTwo();
-  Matrix<Rational> tempMat1;
-  outputSubalgebra.theHsScaledToActByTwo.GetGramMatrix(tempMat1, &owner.GetSSowner().theWeyl.CartanSymmetric);
-  if (!(outputSubalgebra.theWeylNonEmbeddeD.CoCartanSymmetric== tempMat1))
-    return theCommands << "<hr>Failed to load semisimple subalgebra: the gram matrix of the elements of its Cartan, "
-    << outputSubalgebra.theHsScaledToActByTwo.ToString() << " is " << tempMat1.ToString() << "; it should be "
-    << outputSubalgebra.theWeylNonEmbeddeD.CoCartanSymmetric.ToString() << ".";
-  outputSubalgebra.ComputeSystem(false, true);
-  if (!outputSubalgebra.ComputeChar(true))
-    return theCommands << "<hr>Failed to load semisimple Lie subalgebra: the ambient Lie algebra does not decompose properly over the candidate subalgebra. ";
-  if (input.children.size==4)
-    if (!outputSubalgebra.CheckGensBracketToHs())
-      return theCommands << "<hr>Lie brackets of generators do not equal the desired elements of the Cartan. ";
-  //CalculatorConversions::innerLoadFromObject(theCommands,
+  outputSubalgebra.flagSubalgebraPreloadedButNotVerified=true;
   return output.MakeError("Candidate subalgebra is not a stand-alone object and its Expression output should not be used. ", theCommands);
 }
 
@@ -521,9 +509,10 @@ std::string CalculatorConversions::innerStringFromSemisimpleSubalgebras(Semisimp
     tempCalculator.init(*input.theGlobalVariables);
   }
   Expression tempE;
+  FormatExpressions theFormat;
   CalculatorConversions::innerStoreSemisimpleSubalgebras(tempCalculator, input, tempE);
-//  stOutput << "<hr>The fucking output: " << tempE.ToString();
-  return tempE.ToString();
+  theFormat.flagUseHTML=true;
+  return tempE.ToString(&theFormat);
 }
 
 bool CalculatorConversions::innerStoreSemisimpleSubalgebras(Calculator& theCommands, const SemisimpleSubalgebras& input, Expression& output)

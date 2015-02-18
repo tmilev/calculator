@@ -125,6 +125,7 @@ public:
   int indexSSPartCentralizer;
   List<int> indicesDirectSummandSuperAlgebra;
   MemorySaving<FormatExpressions> charFormaT;
+  bool flagSubalgebraPreloadedButNotVerified;
   bool flagSystemSolved;
   bool flagSystemProvedToHaveNoSolution;
   bool flagSystemGroebnerBasisFound;
@@ -169,6 +170,7 @@ public:
   List<List<int> > OppositeModulesByChar;
 
   HashedList<int, MathRoutines::IntUnsignIdentity> modulesWithZeroWeights;
+  std::string comments;
   std::string nilradicalGenerationLog;
   Rational centralizerRank;
   Rational centralizerDimension;
@@ -181,6 +183,7 @@ public:
   void reset(SemisimpleSubalgebras* inputOwner=0);
   bool CheckConsistency()const;
   bool CheckMaximalDominance()const;
+  bool ComputeAndVerifyFromGeneratorsAndHs();
   int GetPrimalRank()const;
   int GetRank()const;
   int GetSSpartCentralizerOfSSPartCentralizer()const;

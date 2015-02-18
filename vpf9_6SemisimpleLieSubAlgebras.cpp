@@ -980,6 +980,7 @@ void SemisimpleSubalgebras::AddSubalgebraIfNewSetToStackTop(CandidateSSSubalgebr
     this->theSubalgebras.AddOnTop(input);
     this->theHsOfSubalgebras.AddOnTop(input.theHs);
   }
+  input.ComputeAndVerifyFromGeneratorsAndHs();
   this->AddSubalgebraToStack(input, 0, 0);
 }
 

@@ -3510,9 +3510,6 @@ void oneFracWithMultiplicitiesAndElongations::ComputeOneCheckSum(Rational& outpu
     if (PartFraction::flagAnErrorHasOccurredTimeToPanic)
       tempS=output.ToString();
   }
-  if (output.IsEqualToZero())
-  { std::string tempS;
-  }
   output.Invert();
   if (PartFraction::flagAnErrorHasOccurredTimeToPanic)
     tempS=output.ToString();
@@ -3790,8 +3787,7 @@ void SelectionWithMaxMultiplicity::IncrementSubset()
         this->elements.AddOnTop(i);
       this->Multiplicities.TheObjects[i]++;
       return;
-    }
-    else
+    } else
     { this->Multiplicities.TheObjects[i]=0;
       this->elements.RemoveFirstOccurenceSwapWithLast(i);
     }
@@ -3861,7 +3857,7 @@ void SelectionWithDifferentMaxMultiplicities::IncrementSubset()
         this->elements.AddOnTop(i);
       this->Multiplicities[i]++;
       return;
-    }else
+    } else
     { this->Multiplicities[i]=0;
       this->elements.RemoveFirstOccurenceSwapWithLast(i);
     }
@@ -4314,8 +4310,7 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
       out << this->theRank;
       if (usePlusesAndExponents)
         out << "}";
-    }
-    else
+    } else
       out << "_" << this->theRank;
     //out << "[" << this->theLetter << "^{" << this->CartanSymmetricInverseScale << "}_" << this->theRank << "]";
   }

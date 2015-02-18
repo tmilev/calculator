@@ -3485,6 +3485,14 @@ bool CalculatorFunctionsGeneral::innerGetSymmetricCartan(Calculator& theCommands
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerGetPrincipalSl2Index(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetSymmetricCartan");
+  DynkinType theType;
+  if (!CalculatorConversions::innerDynkinType(theCommands, input, theType))
+    return theCommands << "Failed to convert " << input.ToString() << " to DynkinType.";
+  return output.AssignValue(theType.GetCartanSymmetricInverseScalePrincipalSl2(), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg");
   if (!input.IsListNElements(3))

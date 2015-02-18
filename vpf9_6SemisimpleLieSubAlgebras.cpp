@@ -1247,6 +1247,14 @@ DynkinSimpleType DynkinType::GetGreatestSimpleType()const
   return result;
 }
 
+Rational DynkinType::GetCartanSymmetricInverseScalePrincipalSl2()const
+{ MacroRegisterFunctionWithName("DynkinType::GetCartanSymmetricInverseScalePrincipalSl2");
+  Rational result=0;
+  for (int i=0; i<this->size(); i++)
+    result+=this->theCoeffs[i] * (*this)[i].GetPrincipalSlTwoCSInverseScale();
+  return result;
+}
+
 /*const HashedList<ElementWeylGroup<WeylGroup> >& SemisimpleSubalgebras::GetOrbitSl2HelementWeylGroupElt(int indexSl2)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::GetOrbitSl2HelementWeylGroupElt");
   if (this->theOrbitsAreComputed[indexSl2])

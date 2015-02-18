@@ -99,6 +99,11 @@ void Calculator::initPredefinedInnerFunctions()
    "AlgebraicNumberFromPoly{}(x^3+\\sqrt{2}x+1);");
 
   this->AddOperationInnerHandler
+  ("PrincipalSlTwoIndex", CalculatorFunctionsGeneral::innerGetPrincipalSl2Index, "",
+   "Gives the symmetric Cartan corresponding to a given dynkin type.",
+   "PrincipalSlTwoIndex(G_2^3+D_4^2);", true, false, "CalculatorFunctionsGeneral::innerGetPrincipalSl2Index");//, false);
+
+  this->AddOperationInnerHandler
   ("CartanSymmetric", CalculatorFunctionsGeneral::innerGetSymmetricCartan, "",
    "Gives the symmetric Cartan corresponding to a given dynkin type.",
    "CartanSymmetric(e^7_6);");//, false);

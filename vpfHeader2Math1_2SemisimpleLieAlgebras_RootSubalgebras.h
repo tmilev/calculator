@@ -474,13 +474,6 @@ public:
   }
   void ComputeModuleDecompositionsOfAmbientLieAlgebra(GlobalVariables& theGlobalVariables);
   void reset(SemisimpleLieAlgebra& inputOwners);
-  void ComputeModuleDecompositionsOfMinimalContainingRegularSAs(GlobalVariables& theGlobalVariables)
-  { crash << "This is a programming error. This function used to work in an older version of the program, but, as the requirements have changed, now needs a rewrite. "
-    << crash;
-    /*for(int i=0; i<this->size; i++)
-      (*this)[i].ComputeModuleDecompositionOfMinimalContainingRegularSAs(*this, i, theGlobalVariables);
-      */
-  }
   void ComputeDebugStringCurrent();
   bool ContainsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex);
   bool ContainsSl2WithGivenHCharacteristic(Vector<Rational>& theHCharacteristic, int* outputIndex);

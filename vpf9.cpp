@@ -4739,28 +4739,40 @@ void DynkinSimpleType::GetCoCartanSymmetric(Matrix<Rational>& output)const
 }
 
 Rational DynkinSimpleType::GetPrincipalSlTwoCSInverseScale()const
-{ Rational nonScaled=0;
+{ MacroRegisterFunctionWithName("DynkinSimpleType::GetPrincipalSlTwoCSInverseScale");
+  //Reference: Panyushev, On the Dynkin index of a principal sl(2)-subalgebra, Advances in Mathematics, 2008.
+  Rational nonScaled=0;
   switch(this->theLetter)
   { case 'A':
-    for (int i=0; i<this->theRank+1; i++)
-      nonScaled+= (this->theRank- 2*i)*(this->theRank- 2*i);
-    nonScaled/=2;
+      nonScaled=(this->theRank+2)*(this->theRank+1)*this->theRank/6;
     break;
-    case 'B':  break;
-    case 'C':  break;
+    case 'B':
+      nonScaled= this->theRank*(this->theRank+1)*(2*this->theRank+1)/3;
+      break;
+    case 'C':
+      nonScaled=(this->theRank*2+1)*(this->theRank*2)*(this->theRank*2-1)/6;
+      break;
     case 'D':
-    for (int i=0; i<this->theRank; i++)
-      nonScaled+= i*i;
-    nonScaled/=2;
+      nonScaled=(this->theRank-1)*this->theRank*(2*this->theRank-1)/3;
     break;
-    case 'E': break;
-    case 'F': break;
-    case 'G': break;
+    case 'E':
+      if (this->theRank==6)
+        nonScaled=156;
+      if (this->theRank==7)
+        nonScaled=399;
+      if (this->theRank==8)
+        nonScaled=1240;
+    break;
+    case 'F':
+      nonScaled=156;
+      break;
+    case 'G':
+      nonScaled=28;
+      break;
     default:
       crash << "This is a programming error: requesting DynkinSimpleType::GetCartanSymmetric from a non-initialized Dynkin simple type. " << crash;
       break;
   }
-  crash << "not implemented yet" << crash;
   return nonScaled*this->CartanSymmetricInverseScale;
 }
 

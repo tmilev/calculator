@@ -5083,6 +5083,7 @@ public:
   void GetOuterAutosGeneratorsActOnVectorColumn(List<MatrixTensor<Rational> >& output);
   bool IsSimple(char* outputtype=0, int* outputRank=0, Rational* outputLength=0)const;
   void GetSortedDynkinTypes(List<DynkinSimpleType>& output)const;
+  Rational GetCartanSymmetricInverseScalePrincipalSl2()const;
   void SortTheDynkinTypes();
   bool Grow(const List<Rational>& allowedInverseScales, int AmbientWeylDim, List<DynkinType>& output, List<List<int> >* outputPermutationRoots)const;
   bool ContainsType(char theTypeLetter)const;

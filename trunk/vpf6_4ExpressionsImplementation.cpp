@@ -2246,7 +2246,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         } else
           out << "...";
         if (i!=this->children.size-1)
-          out << ";" << "QQQ";
+          out << ";";
         out << "</td><td valign=\"top\"><hr>";
         if ((*this)[i].IsOfType<std::string>() && isFinal)
           out << (*this)[i].GetValue<std::string>();

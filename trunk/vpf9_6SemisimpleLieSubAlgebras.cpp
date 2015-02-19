@@ -516,9 +516,16 @@ void SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand()
 //  this->theOrbitGeneratingElts.SetSize(this->theSl2s.size);
   this->theOrbitsAreComputed.initFillInObject(this->theSl2s.size, false);
   this->theOrbitHelementLengths.Clear();
+  this->theOrbitDynkinIndices.Clear();
   this->theOrbitHelementLengths.SetExpectedSize(this->theSl2s.size);
+  this->theOrbitDynkinIndices.SetExpectedSize(this->theSl2s.size);
   for (int i=0; i<this->theSl2s.size; i++)
-    this->theOrbitHelementLengths.AddOnTop(this->theSl2s[i].LengthHsquared);
+  { this->theOrbitHelementLengths.AddOnTop(this->theSl2s[i].LengthHsquared);
+    this->theOrbitDynkinIndices.AddOnTop
+    (DynkinSimpleType('A', 1, this->theSl2s[i].LengthHsquared ));
+  }
+  stOutput << "H lengths:" << this->theOrbitHelementLengths.ToString() << " types: "
+  << this->theOrbitDynkinIndices.ToString();
 }
 
 bool SemisimpleSubalgebras::LoadState
@@ -910,10 +917,10 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
   if (!this->targetDynkinType.IsEqualToZero())
     if (!this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].CanBeExtendedParabolicallyOrIsEqualTo(this->targetDynkinType))
       if (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex]!=this->targetDynkinType)
-      { //stOutput << "<br>Dynkin type " <<  this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
-        //<< "  does not fit in the target Dynkin type " << this->targetDynkinType.ToString();
         return true;
-      }
+  Rational candidatePrincipalIndex=
+  this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].GetCartanSymmetricInverseScalePrincipalSl2();
+
   //stOutput << "<br>Dynkin type " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
   //<< "  fits in the target Dynkin type " << this->targetDynkinType.ToString();
   ProgressReport theReport0(this->theGlobalVariables), theReport1(this->theGlobalVariables);

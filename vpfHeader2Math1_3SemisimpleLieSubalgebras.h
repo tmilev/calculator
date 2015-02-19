@@ -286,6 +286,7 @@ public:
   ListReferences<SltwoSubalgebras>* theSl2sOfSubalgebras;
   List<Vectors<Rational> > theOrbits;
   HashedList<Rational> theOrbitHelementLengths;
+  HashedList<DynkinSimpleType> theOrbitDynkinIndices;
 //  List<HashedList<ElementWeylGroup<WeylGroup> > > theOrbitGeneratingElts;
   List<bool> theOrbitsAreComputed;
   std::string comments;

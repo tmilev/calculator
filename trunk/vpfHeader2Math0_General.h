@@ -5153,7 +5153,7 @@ public:
   List<List<int> > sameTypeComponents;
   List<int> indexUniComponent;
   List<int> indexInUniComponent;
-  std::string ToStringRelativeToAmbientType(const DynkinSimpleType& ambientType)const;
+  std::string ToString(FormatExpressions* theFormat=0)const;
   int RankTotal();
   int NumRootsGeneratedByDiagram();
   void Sort();

@@ -1235,7 +1235,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
   DynkinDiagramRootSubalgebra theDiagram;
   theWeyl.TransformToSimpleBasisGenerators(outputRoots, theWeyl.RootSystem);
   theDiagram.ComputeDiagramInputIsSimple(outputRoots, theWeyl.CartanSymmetric);
-  out << "Diagram final: " << theDiagram.ToStringRelativeToAmbientType(theWeyl.theDynkinType[0])
+  out << "Diagram final: " << theDiagram.ToString()
   << ". Simple basis: " << theDiagram.SimpleBasesConnectedComponents.ToString();
   return output.AssignValue(out.str(), theCommands);
 }

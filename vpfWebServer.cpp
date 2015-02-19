@@ -327,7 +327,7 @@ void WebWorker::OutputBeforeComputation()
   std::string& civilizedInput=theParser.inputString;
   if (inputStringNames.Contains("textInput"))
     civilizedInput= inputStrings[inputStringNames.GetIndex("textInput")];
-  CGI::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
+  CGI::CGIStringToNormalString(civilizedInput, civilizedInput);
 
 //  civilizedInput="\\int( 1/x dx)";
 //  civilizedInput="\\int (1/(x(1+x^2)^2))dx";
@@ -473,11 +473,13 @@ void WebWorker::ExtractArgumentFromAddress()
 //  << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath << "\nmainaddress.size: "
 //  << this->mainAddress.size() << "\nonePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size(): "
 //  << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size();
-  CGI::CivilizedStringTranslationFromCGI(this->mainAddresSRAW, this->mainAddress);
+  CGI::CGIStringToNormalString(this->mainAddresSRAW, this->mainAddress);
   this->mainArgumentRAW="";
   std::string calculatorArgumentRawWithQuestionMark, tempS;
   if (!MathRoutines::StringBeginsWith(this->mainAddresSRAW, onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath, &calculatorArgumentRawWithQuestionMark))
+  { CGI::CGIFileNameToFileName(this->mainAddresSRAW, this->mainAddress);
     return;
+  }
   this->requestType=this->requestGetCalculator;
   MathRoutines::SplitStringInTwo(calculatorArgumentRawWithQuestionMark, 1, tempS, this->mainArgumentRAW);
   theLog << logger::yellow << "this->mainArgumentRAW=" << this->mainArgumentRAW << logger::endL;

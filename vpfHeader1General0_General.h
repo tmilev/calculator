@@ -1043,10 +1043,13 @@ public:
   static int scale;
   static void outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter);
   static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
-  static void CivilizedStringTranslationFromCGI(std::string& input, std::string& output);
+  static void CGIStringToNormalString(std::string& input, std::string& output);
+  static bool CGIStringToNormalStringOneStep(std::string& readAhead, std::stringstream& out);
+
+  static void CGIFileNameToFileName(std::string& input, std::string& output);
+
   static std::string UnCivilizeStringCGI(const std::string& input);
   static void ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput);
-  static bool AttemptToCivilize(std::string& readAhead, std::stringstream& out);
   static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);
   inline static std::string GetHtmlLinkFromProjectFileName(const std::string& fileName)
   { return CGI::GetHtmlLinkFromProjectFileName(fileName, "");

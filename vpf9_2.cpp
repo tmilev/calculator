@@ -2081,7 +2081,7 @@ void RationalFunctionOld::AddHonestRF(const RationalFunctionOld& other)
     crash << crash;
 }
 
-void CGI::CivilizedStringTranslationFromCGI(std::string& input, std::string& output)
+void CGI::CGIStringToNormalString(std::string& input, std::string& output)
 { std::string readAhead;
   std::stringstream out;
   int inputSize=(signed) input.size();
@@ -2090,7 +2090,29 @@ void CGI::CivilizedStringTranslationFromCGI(std::string& input, std::string& out
     for (int j=0; j<6; j++)
     { if (i+j<inputSize)
         readAhead.push_back(input[i+j]);
-      if (CGI::AttemptToCivilize(readAhead, out))
+      if (CGI::CGIStringToNormalStringOneStep(readAhead, out))
+      { i+=j;
+        break;
+      }
+    }
+  }
+  output=out.str();
+}
+
+void CGI::CGIFileNameToFileName(std::string& input, std::string& output)
+{ std::string readAhead;
+  std::stringstream out;
+  int inputSize=(signed) input.size();
+  for (int i=0; i<inputSize; i++)
+  { readAhead="";
+    for (int j=0; j<6; j++)
+    { if (i+j<inputSize)
+        readAhead.push_back(input[i+j]);
+      if (readAhead=="+")
+      { out << "+";
+        break;
+      }
+      if (CGI::CGIStringToNormalStringOneStep(readAhead, out))
       { i+=j;
         break;
       }
@@ -2129,7 +2151,7 @@ void CGI::ChopCGIInputStringToMultipleStrings(const std::string& input, List<std
   }
 }
 
-bool CGI::AttemptToCivilize(std::string& readAhead, std::stringstream& out)
+bool CGI::CGIStringToNormalStringOneStep(std::string& readAhead, std::stringstream& out)
 { if (readAhead[0]!='%' && readAhead[0]!='&' && readAhead[0]!='+')
   { out << readAhead[0];
     return true;

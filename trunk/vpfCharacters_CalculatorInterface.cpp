@@ -1395,7 +1395,7 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
   { rootSubalgebra& currentRootSA=theRootSAs.theSubalgebras[i];
     theGenerator.MakeFromRootSubsystem(currentRootSA.PositiveRootsK, *thePointer);
     theGenerator.GenerateMyOrbit(theOrbit);
-    out << "<hr>Root subsystem type " << currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(thePointer->theWeyl.theDynkinType[0]);
+    out << "<hr>Root subsystem type " << currentRootSA.theDynkinDiagram.ToString();
     out << ". Orbit has " << theOrbit.size << " element(s), here they are: ";
     for (int j=0; j<theOrbit.size; j++)
       out << "<br>" << theOrbit[j].ToString();

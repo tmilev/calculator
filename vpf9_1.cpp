@@ -345,13 +345,13 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, const 
     currentComponent.ReverseOrderElements();//<-in G_2 and C_n the short root comes first so we need to reverse elements.
 }
 
-std::string DynkinDiagramRootSubalgebra::ToStringRelativeToAmbientType(const DynkinSimpleType& ambientType)const
+std::string DynkinDiagramRootSubalgebra::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
   DynkinType theType;
   theType.MakeZero();
   for (int j=0; j<this->SimpleComponentTypes.size; j++)
     theType.AddMonomial(this->SimpleComponentTypes[j], 1);
-  return theType.ToStringRelativeToAmbientType(ambientType);
+  return theType.ToString();
 }
 
 void DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple(const Vectors<Rational>& simpleBasisInput, const Matrix<Rational>& theBilinearForm)

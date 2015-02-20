@@ -1656,7 +1656,7 @@ int WebServer::Run()
   for(p = servinfo; p != NULL; p = p->ai_next)
   { this->listeningSocketID= socket(p->ai_family, p->ai_socktype, p->ai_protocol);
     if (this->listeningSocketID == -1)
-    { stOutput << "Error: socket failed\n";
+    { theLog << "Error: socket failed.\n";
       continue;
     }
     if (setsockopt(this->listeningSocketID, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
@@ -1728,15 +1728,10 @@ int WebServer::Run()
       this->Release(this->listeningSocketID);//worker has no access to socket listener
       onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=
       this->ReturnActiveIndicatorAlthoughComputationIsNotDone;
-//      std::cout << "Got thus far 2" << std::endl;
       onePredefinedCopyOfGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
-//      std::cout << "Got thus far 3" << std::endl;
       MutexWrapper::InitializeAllAllocatedMutexesAllowMutexUse();
-//      std::cout << "Got thus far 4" << std::endl;
       InitializeTimer();
-//      std::cout << "Got thus far 5" << std::endl;
       CreateTimerThread();
-//      std::cout << "Got thus far 6" << std::endl;
       /////////////////////////////////////////////////////////////////////////
       crash.CleanUpFunction=WebServer::SignalActiveWorkerDoneReleaseEverything;
 //      stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;

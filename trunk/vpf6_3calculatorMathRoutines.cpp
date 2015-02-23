@@ -3491,7 +3491,7 @@ bool CalculatorFunctionsGeneral::innerGetSymmetricCartan(Calculator& theCommands
   theType.GetCartanSymmetric(outputMat);
   theType.GetCoCartanSymmetric(outputCoMat);
   out << "Symmetric Cartan matrix: " << CGI::GetMathMouseHover(outputMat.ToStringLatex(),10000)
-  << "<br>Symmetric Cartan co-matrix: " << CGI::GetMathMouseHover(outputCoMat.ToStringLatex(), 10000);
+  << "<br>Co-symmetric Cartan matrix: " << CGI::GetMathMouseHover(outputCoMat.ToStringLatex(), 10000);
   return output.AssignValue(out.str(), theCommands);
 }
 

@@ -1185,9 +1185,9 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   out << "We define the symmetric Cartan matrix <br>by requesting that the entry in the i-th row and j-th column<br> "
   << " be the scalar product of the i^th and j^th roots. Symmetric Cartan matrix:<br>"
   << CGI::GetMathSpanPure(theWeyl.CartanSymmetric.ToString(&latexFormat));
-  out << "Let the (i,j)^{th} entry of the symmetric Cartan matrix be a_{ij}. <br> Then we define the symmetric Cartan co-matrix as "
-  << " the matrix whose (i,j)^{th} entry equals 4*a_{ij}/(a_{ii}*a_{jj}). In other words, the symmetric Cartan co-matrix is the "
-  << "symmetric Cartan matrix of the dual root system. The symmetric Cartan co-matrix equals:<br>"
+  out << "Let the (i,j)^{th} entry of the symmetric Cartan matrix be a_{ij}. <br> Then we define the co-symmetric Cartan matrix as "
+  << " the matrix whose (i,j)^{th} entry equals 4*a_{ij}/(a_{ii}*a_{jj}). In other words, the co-symmetric Cartan matrix is the "
+  << "symmetric Cartan matrix of the dual root system. The co-symmetric Cartan matrix equals:<br>"
   << CGI::GetMathSpanPure(theWeyl.CoCartanSymmetric.ToStringLatex());
   out << "<br>The determinant of the symmetric Cartan matrix is: " << theWeyl.CartanSymmetric.GetDeterminant().ToString();
   /*  Rational theRatio;

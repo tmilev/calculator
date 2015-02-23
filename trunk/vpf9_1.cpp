@@ -232,10 +232,11 @@ Rational DynkinDiagramRootSubalgebra::GetSquareLengthLongestRootLinkedTo(const V
 { MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::GetSquareLengthLongestRootLinkedTo");
   Rational result=0;
   for (int i=0; i<this->AmbientRootSystem.size; i++)
-  { Rational theScalarProduct=inputVector.ScalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm);
-    if (theScalarProduct>result)
-      result=theScalarProduct;
-  }
+    if (inputVector.ScalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm)!=0)
+    { Rational squareLength=this->AmbientRootSystem[i].ScalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm);
+      if (result< squareLength)
+        result=squareLength;
+    }
   return result;
 }
 
@@ -243,10 +244,11 @@ Rational DynkinDiagramRootSubalgebra::GetSquareLengthShortestRootLinkedTo(const 
 { MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::GetSquareLengthLongestRootLinkedTo");
   Rational result=inputVector.ScalarProduct(inputVector, this->AmbientBilinearForm);
   for (int i=0; i<this->AmbientRootSystem.size; i++)
-  { Rational theScalarProduct=inputVector.ScalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm);
-    if (theScalarProduct!=0 && theScalarProduct<result)
-      result=theScalarProduct;
-  }
+    if (inputVector.ScalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm)!=0)
+    { Rational squareLength=this->AmbientRootSystem[i].ScalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm);
+      if (squareLength<result)
+        result=squareLength;
+    }
   return result;
 }
 
@@ -332,9 +334,13 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent)
     { numLength2++;
       length2=currentComponent[i].ScalarProduct(currentComponent[i], this->AmbientBilinearForm);
     }
+  Rational LongestToShortestSquareRatio=
+  this->GetSquareLengthLongestRootLinkedTo(currentComponent[0])
+  /this->GetSquareLengthShortestRootLinkedTo(currentComponent[0]);
   if (numLength2==0)
   { //type A
-    outputType.MakeArbitrary('A', numLength1, this->GetSquareLengthLongestRootLinkedTo(currentComponent[0]) /length1);
+    outputType.MakeArbitrary
+    ('A', numLength1, LongestToShortestSquareRatio /length1);
   } else
   { if (length1<length2)
     { MathRoutines::swap(length1, length2);
@@ -345,23 +351,27 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent)
     {//B2, C2, F4 or G2
       if (numLength1==2)
         outputType.MakeArbitrary
-        ('F', 4, 2/length1);
+        ('F', 4, LongestToShortestSquareRatio/length1);
       else if (length1/length2==3)
         outputType.MakeArbitrary
-        ('G', 2, this->GetSquareLengthLongestRootLinkedTo(currentComponent[0])/length2);
+        ('G', 2, LongestToShortestSquareRatio/length2);
       else
         outputType.MakeArbitrary
-        ('B', 2, this->GetSquareLengthLongestRootLinkedTo(currentComponent[0])/length1);
+        ('B', 2, LongestToShortestSquareRatio/length1);
     } else
     { if (numLength1>numLength2)
         outputType.MakeArbitrary
-        ('B', currentComponent.size, this->GetSquareLengthLongestRootLinkedTo(currentComponent[0])/length1);
+        ('B', currentComponent.size, LongestToShortestSquareRatio/length1);
       else
         outputType.MakeArbitrary
-        ('C', currentComponent.size, this->GetSquareLengthLongestRootLinkedTo(currentComponent[0])/length2);
+        ('C', currentComponent.size, LongestToShortestSquareRatio/length2);
+    }
+    if (outputType.theLetter=='C' || outputType.theLetter=='G')
+    { //<- by convention, in types G and C, in the Dynkin diagram the long root comes last
+      currentEnds.SwapTwoIndices(0,1);
     }
   }
-//  stOutput << "<hr><hr>before swapping:" << currentComponent.ToString();
+  //The following code ensures the Dynkin diagram is properly ordered
   currentComponent.SwapTwoIndices(0, currentEnds[0]);
   for (int i=0; i<currentComponent.size; i++)
     for (int j=i+1; j<currentComponent.size; j++)

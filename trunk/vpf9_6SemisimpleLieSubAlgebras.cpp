@@ -5058,7 +5058,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
       out << CGI::GetMathSpanPure(this->theWeylNonEmbeddeD.CartanSymmetric.ToString(&tempFormat));
   } else
     out << this->theWeylNonEmbeddeD.CartanSymmetric.ToString(theFormat);
-  out << "<br>Scalar products of elements of Cartan subalgebra scaled to act by 2 (Cartan symmetric co-matrix): ";
+  out << "<br>Scalar products of elements of Cartan subalgebra scaled to act by 2 (co-symmetric Cartan matrix): ";
   if (useLaTeX && useHtml)
   { if (useMouseHover)
       out << CGI::GetMathMouseHover(this->theWeylNonEmbeddeD.CoCartanSymmetric.ToString(&tempFormat));

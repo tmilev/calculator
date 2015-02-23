@@ -3539,12 +3539,16 @@ void slTwoSubalgebra::MakeReportPrecomputations
   tempRoots=(MinimalContainingRegularSubalgebra.SimpleBasisK);
   this->GetOwnerSSAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.GetCartanPart());
   DynkinDiagramRootSubalgebra theDiagram;
-  theDiagram.ComputeDiagramInputIsSimple(tempRoots, this->GetOwnerSSAlgebra().theWeyl.CartanSymmetric);
+  theDiagram.AmbientBilinearForm=this->GetOwnerWeyl().CartanSymmetric;
+  theDiagram.AmbientRootSystem=this->GetOwnerWeyl().RootSystem;
+  theDiagram.ComputeDiagramInputIsSimple(tempRoots);
   this->IndicesContainingRootSAs.AddOnTop(indexMinimalContainingRegularSA);
   tempRoots.MakeEiBasis(theDimension);
   this->GetOwnerSSAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.GetCartanPart());
   DynkinDiagramRootSubalgebra tempDiagram;
-  tempDiagram.ComputeDiagramInputIsSimple(tempRoots, this->GetOwnerSSAlgebra().theWeyl.CartanSymmetric);
+  tempDiagram.AmbientBilinearForm=this->GetOwnerWeyl().CartanSymmetric;
+  tempDiagram.AmbientRootSystem=this->GetOwnerWeyl().RootSystem;
+  tempDiagram.ComputeDiagramInputIsSimple(tempRoots);
   this->preferredAmbientSimpleBasis=tempRoots;
   this->hCharacteristic.SetSize(theDimension);
   for (int i=0; i<theDimension; i++)

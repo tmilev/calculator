@@ -144,6 +144,7 @@ public:
   static bool innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerParabolicWeylGroups(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerParabolicWeylGroupsBruhatGraph(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAllPartitions(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDeterminant(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMatrixRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPrintGenVermaModule(Calculator& theCommands, const Expression& input, Expression& output);
@@ -157,6 +158,7 @@ public:
   static bool innerSplitFDpartB3overG2(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerCoefficientsPowersOf(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIsNonEmptySequence(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsConstant(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGaussianEliminationMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitToPartialFractionsOverAlgebraicReals(Calculator& theCommands, const Expression& input, Expression& output);
@@ -172,7 +174,10 @@ public:
   static bool innerPrintSltwos(Calculator& theCommands, const Expression& input, Expression& output)
   { return CalculatorFunctionsGeneral::innerRootSAsAndSltwos(theCommands, input, output, true, false);
   }
-
+  static bool innerFindProductDistanceModN
+  (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSolveProductSumEquationOverSetModN
+  (Calculator& theCommands, const Expression& input, Expression& output);
 };
 
 #endif

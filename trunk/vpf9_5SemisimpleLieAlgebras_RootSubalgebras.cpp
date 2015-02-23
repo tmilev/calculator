@@ -1953,7 +1953,9 @@ void rootSubalgebra::ComputeEssentialS()
 { MacroRegisterFunctionWithName("rootSubalgebra::ComputeEssentialS");
   this->SimpleBasisK=this->genK;
   this->SimpleBasisK.GetGramMatrix(this->scalarProdMatrixOrdered, &this->GetAmbientWeyl().CartanSymmetric);
-  this->theDynkinDiagram.ComputeDiagramInputIsSimple(this->SimpleBasisK, this->GetAmbientWeyl().CartanSymmetric);
+  this->theDynkinDiagram.AmbientRootSystem=this->GetAmbientWeyl().RootSystem;
+  this->theDynkinDiagram.AmbientBilinearForm=this->GetAmbientWeyl().CartanSymmetric;
+  this->theDynkinDiagram.ComputeDiagramInputIsSimple(this->SimpleBasisK);
   this->theDynkinDiagram.GetDynkinType(this->theDynkinType);
   if (this->SimpleBasisK.size!=0)
     if (this->theDynkinType.ToString()=="0")
@@ -2027,7 +2029,9 @@ bool rootSubalgebra::ComputeEssentialsIfNew()
   { reportStream << "...the candidate's roots are maximally dominant... ";
     theReport.Report(reportStream.str());
   }
-  this->theDynkinDiagram.ComputeDiagramInputIsSimple(this->SimpleBasisK, this->GetAmbientWeyl().CartanSymmetric);
+  this->theDynkinDiagram.AmbientBilinearForm=this->GetAmbientWeyl().CartanSymmetric;
+  this->theDynkinDiagram.AmbientRootSystem=this->GetAmbientWeyl().RootSystem;
+  this->theDynkinDiagram.ComputeDiagramInputIsSimple(this->SimpleBasisK);
   this->theDynkinDiagram.GetDynkinType(this->theDynkinType);
   this->ComputeKModules();
   this->ComputeCentralizerFromKModulesAndSortKModules();
@@ -2885,7 +2889,6 @@ void rootSubalgebras::initOwnerMustBeNonZero()
   this->CheckInitialization();
   this->theSubalgebras.SetSize(0);
   this->owneR->theWeyl.ComputeRho(false);
-
 }
 
 int rootSubalgebras::GetIndexUpToEquivalenceByDiagramsAndDimensions(const rootSubalgebra& theSA)

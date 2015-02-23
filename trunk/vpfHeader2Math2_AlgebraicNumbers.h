@@ -303,7 +303,7 @@ public:
       crash << "This is a programming error: using ElementZmodP::operator= to assign a Rational number failed. "
       << " Operator= does not allow failure. " << crash;
   }
-  void operator/=(const ElementZmodP& den);
+  bool operator/=(const ElementZmodP& den);
   void ScaleToIntegralMinHeightAndGetPoly(const Polynomial<Rational>& input, Polynomial<ElementZmodP>& output, const LargeIntUnsigned& newModulo)
   { Polynomial<Rational> rescaled;
     rescaled=input;

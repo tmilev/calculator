@@ -727,6 +727,11 @@ void Calculator::initPredefinedInnerFunctions()
    " If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. ",
    "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}=IsInteger{}a;\nf{}1;\nf{}b");
   this->AddOperationInnerHandler
+  ("IsNonEmptySequence", CalculatorFunctionsGeneral::innerIsNonEmptySequence, "",
+   " If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. ",
+   "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}=IsInteger{}a;\nf{}1;\nf{}b", true, false,
+   "CalculatorFunctionsGeneral::innerIsNonEmptySequence");
+  this->AddOperationInnerHandler
   ("IsRational", this->innerIsRational, "",
    " If the argument has no bound variables, returns 1 if the argument is an rational, 0 otherwise. ",
    "IsRational{}a;IsRational{}-1;\nf{}{{a}}=IsRational{}a;\nIsRational{}1;\nIsRational{}b");
@@ -736,9 +741,15 @@ void Calculator::initPredefinedInnerFunctions()
    If the argument is not a small integer, does nothing. ",
    "Not{}1;Not{}a; Not{}0; Not{}(3==4)");
     this->AddOperationInnerHandler
+  ("AllPartitions", CalculatorFunctionsGeneral::innerAllPartitions, "",
+   "Prints all partitions of the vector (first argument) using a given list of vectors (second argument). \
+   All partitioning vectors should have positive coordinates. ",
+   "AllPartitions((10,11), ((1,2), (2,3), (4,5), (2,1), (3,2), (5,4))) ");
+
+    this->AddOperationInnerHandler
   ("PrintNonNegativeVectorsLevel", this->innerPrintZnEnumeration, "",
    " Prints all vectors of grade level d with n coordinates lying in Z_{>=0}. Function meant for \
-   debugging purposes. First argument =dimension, second argument=grading leve. ",
+   debugging purposes. First argument =dimension, second argument=grading level. ",
    "PrintNonNegativeVectorsLevel{}(4, 5);PrintNonNegativeVectorsLevel{}(4, 0); ");
   this->AddOperationInnerHandler
   ("SemisimpleLieAlgebra", CalculatorConversions::innerSSLieAlgebra, "",
@@ -1088,6 +1099,20 @@ void Calculator::initPredefinedInnerFunctions()
    respect to root of index i. If i is negative then the e_i root operator is defined to be \
    the f_\alpha operator.",
    "e_{{i}}=LROdefine_i; e_{-1} e_{-1} LSpath{}(G_2, (0,0), (2,1))", true, true);
+  this->AddOperationInnerHandler
+  ("printProductDistancesModN", CalculatorFunctionsGeneral::innerFindProductDistanceModN, "",
+   "First argument = number N. Second argument = list of positive numbers. This function finds, modulo N, \
+   the product distance between 1 and each number mod N. We define the product distance between 1 and a number X as \
+   the minimal sum of elements whose product equals X mod N, where the elements are taken from the predefined list of \
+   positive integers given by the second argument.",
+   "printProductDistancesModN( 65537, (97,98,99,100,101,102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122)) ",
+   false, true, "CalculatorFunctionsGeneral::innerFindProductDistanceModN");
+  this->AddOperationInnerHandler
+  ("SolveProductSumEquationOverSetModN", CalculatorFunctionsGeneral::innerSolveProductSumEquationOverSetModN, "",
+   "Tries to find one solution of the system a_1*a_2* ...= X mod N a_1+a_2+...=Y where the a_i's belong to a \
+   predefined set of positive numbers. ",
+   "SolveProductSumEquationOverSetModN(theMod=65537; theProduct=16628; theSum=1286; theSet= (97,98,99,100,101,102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122)) ",
+   true, false, "CalculatorFunctionsGeneral::innerFindProductDistanceModN");
   this->AddOperationInnerHandler
   ("InvertMatrixVerbose", this->innerInvertMatrixVerbose, "",
    "<b>Calculus teaching function.</b> Inverts a matrix of rationals if invertible, in any other case generates an error. Makes a detailed \
@@ -1931,6 +1956,10 @@ void Calculator::initPredefinedStandardOperations()
     "Same as ModP but uses the mod notation.",
     " 7 mod 3", true, false, "Calculator::innerZmodP");
 
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("/", CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat, this->opEltZmodP(), this->opEltZmodP(),
+   "Divides elements of Z_p. ",
+   " (2 mod  7) / (3 mod 7)", true, false, "CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat");
   this->AddOperationOuterHandler
   ("/", CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation, "",
    "Replaces \\diff /\\diff {}x by Differentiate{}(x). Note that the variable of differentiation is expected to be the string following the d letter. ",

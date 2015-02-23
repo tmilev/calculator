@@ -928,49 +928,100 @@ void CGI::ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput)
       inputOutput[i]=' ';
 }
 
-void VectorPartition::ComputeAllPartitions()
-{ List<int> currentPartition;
-  currentPartition.initFillInObject(this->PartitioningRoots.size, 0);
-  this->thePartitions.size=0;
-  this->ComputeAllPartitionsRecursive(0, currentPartition, -1, theRoot);
+bool VectorPartition::init(const Vectors<Rational>& inputPartitioningRoots, const Vector<Rational>& inputRoot)
+{ MacroRegisterFunctionWithName("VectorPartition::init");
+  for (int i=0; i<inputPartitioningRoots.size; i++)
+    if (!inputPartitioningRoots[i].IsPositive())
+      return false;
+  this->PartitioningRoots=inputPartitioningRoots;
+  if (this->PartitioningRoots.size==0)
+    return false;
+  if (this->goalVector.IsEqualToZero())
+    return false;
+  this->goalVector=inputRoot;
+  this->currentPartition.initFillInObject(this->PartitioningRoots.size, 0);
+  this->currentPartitionSum.MakeZero(this->goalVector.size);
+  return true;
 }
 
-void VectorPartition::ComputeAllPartitionsRecursive(int currentIndex, List<int>& CurrentPartition, int UpperBoundEachIndex, Vector<Rational>& toBePartitioned)
-{ if (currentIndex>=this->PartitioningRoots.size)
-    return;
-  Vector<Rational> currentRoot=toBePartitioned;
-  while (currentRoot.IsPositiveOrZero() && (CurrentPartition.TheObjects[currentIndex]<=UpperBoundEachIndex || UpperBoundEachIndex==-1))
-  { if (currentRoot.IsEqualToZero())
-      this->thePartitions.AddOnTop(CurrentPartition);
-    else
-    { this->ComputeAllPartitionsRecursive(currentIndex+1, CurrentPartition , UpperBoundEachIndex, currentRoot);
-      for (int i=currentIndex+1; i<CurrentPartition.size; i++)
-        CurrentPartition[i]=0;
-    }
-    currentRoot-=(this->PartitioningRoots[currentIndex]);
-    CurrentPartition[currentIndex]++;
+Vector<Rational> VectorPartition::GetPartitionSum()
+{ Vector<Rational> result;
+  result.MakeZero(this->goalVector.size);
+  for (int i=0; i<this->currentPartition.size; i++)
+    result+=this->PartitioningRoots[i]*this->currentPartition[i];
+  return result;
+}
+
+void VectorPartition::BeefUpPartition()
+{ MacroRegisterFunctionWithName("VectorPartition::BeefUpPartition");
+  Vector<Rational> remainder=this->goalVector-this->currentPartitionSum;
+  while((remainder-*this->PartitioningRoots.LastObject()).IsPositiveOrZero())
+  { (*this->currentPartition.LastObject())++;
+    this->currentPartitionSum+=*(this->PartitioningRoots.LastObject());
+    remainder-=*this->PartitioningRoots.LastObject();
   }
 }
 
-std::string VectorPartition::ToString(bool useHtml)
-{ std::stringstream out;
-  out << this->theRoot.ToString() << "\n\n";
+bool VectorPartition::NudgePartition()
+{ MacroRegisterFunctionWithName("VectorPartition::NudgePartition");
+  int indexFirstNonZero=-1;
+  for (int i=this->currentPartition.size-1; i>=0; i--)
+    if (this->currentPartition[i]!=0)
+    { indexFirstNonZero=i;
+      break;
+    }
+  if (indexFirstNonZero==-1)
+    crash << "Error: an internal check has failed in VectorPartition::IncrementReturnFalseIfPastLast." << crash;
+  if (indexFirstNonZero==0)
+    return false;
+  this->currentPartition[indexFirstNonZero-1]++;
+  this->currentPartitionSum+=this->PartitioningRoots[indexFirstNonZero-1];
+  this->currentPartitionSum-=this->PartitioningRoots[indexFirstNonZero]* this->currentPartition[indexFirstNonZero];
+  this->currentPartition[indexFirstNonZero]=0;
+  return true;
+}
+
+bool VectorPartition::IncrementReturnFalseIfPastLast()
+{ MacroRegisterFunctionWithName("VectorPartition::IncrementReturnFalseIfPastLast");
+  if (this->currentPartitionSum==this->goalVector)
+    this->NudgePartition();
+  while (true)
+  { this->BeefUpPartition();
+//    stOutput << "<br>Nudged and beefed: " << this->ToStringOnePartition(this->currentPartition);
+    if (this->currentPartitionSum==this->goalVector)
+      return true;
+    if (!this->NudgePartition())
+      return false;
+  }
+  return false;
+}
+
+std::string VectorPartition::ToStringPartitioningVectors()
+{ MacroRegisterFunctionWithName("VectorPartition::ToStringPartitioningVectors");
+  std::stringstream out;
+  for (int i=0; i<this->PartitioningRoots.size; i++)
+    out << "e_{" << i+1 << "}=" << this->PartitioningRoots[i].ToString() << "<br>";
+  out << "<hr>";
+  out << "Looking for partitions of: " << this->goalVector.ToString();
+  out << "<hr>";
+  return out.str();
+}
+
+std::string VectorPartition::ToStringOnePartition(const List<int>& currentPartition)
+{ Vector<Rational> theV;
+  theV=currentPartition;
+  return theV.ToStringLetterFormat("e");
+}
+
+std::string VectorPartition::ToStringAllPartitions(bool useHtml)
+{ MacroRegisterFunctionWithName("VectorPartition::ToString");
+  std::stringstream out;
+  out << this->goalVector.ToString() << "\n\n";
   if (useHtml)
     out << "<br>";
   for (int i=0; i<this->thePartitions.size; i++)
-  { bool found=false;
-    out << "=";
-    for (int j=0; j<this->thePartitions[i].size; j++)
-    { int theCoefficient=thePartitions[i][j];
-      if (theCoefficient!=0)
-      { if(found)
-          out << "+";
-        found=true;
-        if (theCoefficient>1)
-          out << theCoefficient;
-        out << this->PartitioningRoots[j].ToString();
-      }
-    }
+  { out << "=";
+    out << this->ToStringOnePartition(this->thePartitions[i]);
     out << "\n\n";
     if (useHtml)
       out << "<br>\n";

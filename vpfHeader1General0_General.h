@@ -159,7 +159,7 @@ class MathRoutines
 {
 public:
   template <class coefficient>
-  static coefficient InvertXModN(const coefficient& X, const coefficient& N)
+  static bool InvertXModN(const coefficient& X, const coefficient& N, coefficient& output)
   { coefficient q, r, p, d; // d - divisor, q - quotient, r - remainder, p is the number to be divided
     coefficient vD[2], vP[2], temp;
     vP[0]=1; vP[1]=0; // at any given moment, p=vP[0]*N+vP[1]*X
@@ -182,13 +182,12 @@ public:
       }
     }
     if (!(p==1))
-      crash << "This is a programming error: the invert X mod N algorithm requires that X and N be relatively prime, which appears to have not been the case. "
-      << crash;
-    //if d and p were relatively prime this should be so. Otherwise the function was not called properly.
+      return false;//d and p were not relatively prime.
     p=vP[1]%N;
     if (p<0)
       p+=N;
-    return p;
+    output=p;
+    return true;
   }
   static int lcm(int a, int b);
   template <typename integral>

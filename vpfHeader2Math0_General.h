@@ -5143,7 +5143,8 @@ public:
 class DynkinDiagramRootSubalgebra
 {
 public:
-//  std::string DynkinStrinG;
+  Vectors<Rational> AmbientRootSystem;
+  Matrix<Rational> AmbientBilinearForm;
   List<Vectors<Rational> > SimpleBasesConnectedComponents;
   //to each connected component of the simple bases corresponds
   //its dynkin string with the same index
@@ -5153,12 +5154,15 @@ public:
   List<List<int> > sameTypeComponents;
   List<int> indexUniComponent;
   List<int> indexInUniComponent;
+  bool CheckInitialization()const;
   std::string ToString(FormatExpressions* theFormat=0)const;
   int RankTotal();
   int NumRootsGeneratedByDiagram();
   void Sort();
   void GetDynkinType(DynkinType& output)const;
   void SwapDynkinStrings(int i, int j);
+  Rational GetSquareLengthLongestRootLinkedTo(const Vector<Rational>& inputVector);
+  Rational GetSquareLengthShortestRootLinkedTo(const Vector<Rational>& inputVector);
   bool LetterIsDynkinGreaterThanLetter(char letter1, char letter2);
   //the below function takes as an input a set of roots and computes the corredponding Dynkin diagram of the
   //root  subsystem. Note: the simleBasisInput is required to be a set of simple roots.
@@ -5167,12 +5171,13 @@ public:
   //simple as required!
   void ComputeDiagramTypeModifyInput(Vectors<Rational>& inputRoots, WeylGroup& theWeyl);
   //the below function is just as the above but doesn't modify simpleBasisInput
-  void ComputeDiagramInputIsSimple(const Vectors<Rational>& simpleBasisInput, const Matrix<Rational>& theBilinearForm);
+  void ComputeDiagramInputIsSimple
+  (const Vectors<Rational>& simpleBasisInput);
   void ComputeDiagramTypeModifyInputRelative
   (Vectors<Rational>& inputOutputSimpleWeightSystem, const HashedList<Vector<Rational> >& weightSystem, const Matrix<Rational>& theBilinearForm);
-  void ComputeDynkinStrings(const Matrix<Rational>& theBilinearForm);
-  void ComputeDynkinString(int indexComponent, const Matrix<Rational>& theBilinearForm);
-  int numberOfThreeValencyNodes(int indexComponent, const Matrix<Rational>& theBilinearForm);
+  void ComputeDynkinStrings();
+  void ComputeDynkinString(int indexComponent);
+  int numberOfThreeValencyNodes(int indexComponent);
   bool operator==(const DynkinDiagramRootSubalgebra& right) const;
   bool IsGreaterThan(DynkinDiagramRootSubalgebra& right);
   Rational GetSizeCorrespondingWeylGroupByFormula();
@@ -5185,21 +5190,27 @@ class VectorPartition
 {
 public:
   Vectors<Rational> PartitioningRoots;
-  Vector<Rational> theRoot;
+  Vector<Rational> goalVector;
+  List<int> currentPartition;
+  Vector<Rational> currentPartitionSum;
   //format: each element of thePartitions gives an array whose entries give
   // the multiplicity of the weights. I.e. if PartitioningRoots has 2 elements, then thePartitions[0]
   // would have 2 elements: the first giving the multiplicity of PartitioningRoots[0]
   //and the second - the multiplicity of
   // PartitioningRoots[1]
   List<List<int> > thePartitions;
-  std::string DebugString;
-  std::string ToString(bool useHtml);
-  void ComputeDebugString(bool useHtml)
-  { this->DebugString=this->ToString(useHtml);
+  bool flagStoreAllPartitions;
+  VectorPartition()
+  { this->flagStoreAllPartitions=false;
   }
-  int ComputeVectorPartitionFunctionSmall(Vector<Rational>& theRoot, Vectors<Rational>& theRoots);
-  void ComputeAllPartitions();
-  void ComputeAllPartitionsRecursive(int currentIndex, List<int>& CurrentPartition, int UpperBoundEachIndex, Vector<Rational>& toBePartitioned);
+  Vector<Rational> GetPartitionSum();
+  void BeefUpPartition();
+  bool NudgePartition();
+  std::string ToStringPartitioningVectors();
+  std::string ToStringOnePartition(const List<int>& currentPartition);
+  std::string ToStringAllPartitions(bool useHtml);
+  bool init(const Vectors<Rational>& inputPartitioningRoots, const Vector<Rational>& inputRoot);
+  bool IncrementReturnFalseIfPastLast();
 };
 
 template <class coefficient>

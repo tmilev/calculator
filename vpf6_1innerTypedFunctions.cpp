@@ -127,6 +127,41 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat(Cal
   return false;
 }
 
+bool CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat");
+  if (!input.IsListNElements(3))
+    return false;
+  const Expression* leftE;
+  const Expression* rightE;
+  leftE=&input[1];
+  rightE=&input[2];
+  ElementZmodP theElt1, theElt2;
+  for (int i=0; i<2; i++, MathRoutines::swap(leftE, rightE))
+    if (leftE->IsOfType<ElementZmodP>(&theElt1))
+    { if (rightE->IsOfType<ElementZmodP>(&theElt2))
+      { if (theElt1.theModulo!=theElt2.theModulo)
+          return false;
+      } else
+      { Rational tempRat;
+        if (!rightE->IsOfType<Rational>(&tempRat))
+          return false;
+        theElt2.theModulo=theElt1.theModulo;
+        if (!theElt2.AssignRational(tempRat))
+          return false;
+      }
+      if (i==1)
+        MathRoutines::swap(theElt1, theElt2);
+      if (!(theElt1/=theElt2))
+      { std::stringstream out;
+        out << "Got division by zero while attempting to divide "
+        << theElt1.ToString() << " by " << theElt2.ToString();
+        return output.MakeError(out.str(), theCommands);
+      }
+      return output.AssignValue(theElt1, theCommands);
+    }
+  return false;
+}
+
 bool CalculatorFunctionsBinaryOps::innerAddRatToRat(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddRatToRat");
   if (!input.IsListNElements(3))

@@ -1731,6 +1731,16 @@ bool CalculatorFunctionsGeneral::innerIsConstant(Calculator& theCommands, const 
   return output.AssignValue(result, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerIsNonEmptySequence(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsNonEmptySequence");
+  //stOutput << "<br>Evaluating isconstant on: " << input.ToString();
+  if (input.HasBoundVariables())
+    return false;
+  if (!input.IsSequenceNElementS() || input.children.size<2)
+    return output.AssignValue(0, theCommands);
+  return output.AssignValue(1, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable");
   return output.AssignValue((int) input.IsDifferentialOneFormOneVariable(), theCommands);
@@ -2748,7 +2758,7 @@ bool CalculatorFunctionsGeneral::innerRemoveLastElement(Calculator& theCommands,
     if (input.IsAtom())
       out << "Error: requesting to remove the last element of the atom " << input.ToString();
     else
-      out << "Error: requesting to remove the last element of the one-element list " << input.ToString();
+      out << "Error: requesting to remove the last element of the zero-element list " << input.ToString();
     return output.MakeError(out.str(), theCommands);
   }
   std::string firstAtom;
@@ -3721,6 +3731,43 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
   theCommands.theGlobalVariableS->System(command3);
   theCommands.theGlobalVariableS->System(command4);
   stOutput << "-->";
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerAllPartitions(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerAllPartitions");
+  if (input.children.size!=3)
+    return theCommands << "<hr>AllPartitions function takes 3 arguments.";
+  VectorPartition thePartition;
+  const Expression& theVectorE=input[1];
+  const Expression& thePartitioningVectorsE=input[2];
+  if (!theCommands.GetVectoR(theVectorE, thePartition.goalVector))
+    return theCommands << "<hr>Failed to extract vector from " << theVectorE.ToString();
+  Matrix<Rational> vectorsMatForm;
+  if (!theCommands.GetMatrix(thePartitioningVectorsE, vectorsMatForm, 0, thePartition.goalVector.size))
+    return theCommands << "<hr>Failed to extract list of vectors from " << thePartitioningVectorsE.ToString();
+  Vectors<Rational> theInputVectors;
+  theInputVectors.AssignMatrixRows(vectorsMatForm);
+  for (int i=0; i<theInputVectors.size; i++)
+    if (!theInputVectors[i].IsPositive())
+      return theCommands << "<hr>Input vector " << theInputVectors[i].ToString() << " is non-positive";
+  if (!thePartition.init(theInputVectors, thePartition.goalVector))
+    return theCommands << "<hr>Failed to initialize vector partition object";
+//  stOutput << "<br>at start: " << thePartition.ToStringPartitioningVectors();
+  std::stringstream out;
+  int numFound=0;
+  ProgressReport theReport(theCommands.theGlobalVariableS);
+  out << thePartition.ToStringPartitioningVectors();
+  while (thePartition.IncrementReturnFalseIfPastLast())
+  { out << "<br>" << thePartition.ToStringOnePartition(thePartition.currentPartition);
+    numFound++;
+    if (numFound%1000==0)
+    { std::stringstream reportStream;
+      reportStream << "Found " << numFound << " partitions of " << thePartition.goalVector.ToString()
+      << "<br>Current partition: " << thePartition.currentPartition;
+      theReport.Report(reportStream.str());
+    }
+  }
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -4752,4 +4799,174 @@ bool CalculatorFunctionsGeneral::innerSetOutputFile(Calculator& theCommands, con
   out << "The default output filename has been changed to " << theFileName << ".";
   return output.AssignValue(out.str(), theCommands);
 
+}
+
+bool CalculatorFunctionsGeneral::innerFindProductDistanceModN(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFindProductDistanceModN");
+  if (input.children.size!=3)
+    return theCommands << "<hr>Product distance f-n takes as input 2 arguments, modulo and a list of integers";
+  const Expression& theModuloE= input[1];
+  const Expression& theIntegersE=input[2];
+  int theSize;
+  if (!theModuloE.IsIntegerFittingInInt(&theSize))
+    return theCommands << " <hr> Failed to extract modulus from " << theModuloE.ToString();
+  if (theSize==0)
+    return theCommands << "<hr>Zero modulus not allowed.";
+  if (theSize<0)
+    theSize*=-1;
+  if (theSize>10000000)
+    return theCommands << "<hr>I've been instructed to compute with moduli no larger than 10000000.";
+  List<int> theInts, theIntsReduced;
+  if (!theCommands.GetVectoRInt(theIntegersE, theInts))
+    return theCommands << "<hr>Failed to extract integer list from " << theIntegersE.ToString();
+  theIntsReduced.SetSize(theInts.size);
+  for (int i=0; i<theInts.size; i++)
+  { if (theInts[i]<=0)
+      return theCommands << "<hr>The integer list " << theInts << " contains non-positive numbers.";
+    theIntsReduced[i]=theInts[i]% theSize;
+  }
+  List<LargeIntUnsigned> theList;
+  List<int> theIndexStack;
+  theList.initFillInObject(theSize, 0);
+  theIndexStack.ReservE(theSize);
+  LargeIntUnsigned theMod;
+  theMod=theSize;
+  int numElementsCovered=0;
+  for (int i=0; i<theInts.size; i++)
+  { if (theList[theIntsReduced[i]]==0)
+      numElementsCovered++;
+    theList[theIntsReduced[i]]=theInts[i];
+    theIndexStack.AddOnTop(theIntsReduced[i]);
+  }
+  LargeIntUnsigned currentIndexLarge, currentDistance, maxDistanceGenerated;
+  int currentIndex;
+  ProgressReport theReport(theCommands.theGlobalVariableS);
+  ProgressReport theReport0(theCommands.theGlobalVariableS);
+  std::stringstream reportstream;
+  reportstream << "Finding product distance mod " << theMod.ToString() << " w.r.t. elements "
+  << theInts;
+  int numElementsNotAddedToStack=0;
+  maxDistanceGenerated=0;
+  for (int i=0; i<theIndexStack.size; i++)
+  { for (int j=0; j<theIntsReduced.size; j++)
+    { currentIndexLarge=theIndexStack[i];
+      currentIndexLarge *=theIntsReduced[j];
+      currentIndexLarge%=theMod;
+      if (!currentIndexLarge.IsIntegerFittingInInt(&currentIndex))
+        return theCommands << "An internal check has failed. This shouldn't happen, this is possibly a programming bug.";
+      currentDistance=theList[theIndexStack[i]];
+      currentDistance+=theIntsReduced[j];
+      if (theList[currentIndex]>0 )
+        if (theList[currentIndex]<currentDistance )
+        { numElementsNotAddedToStack++;
+          if (numElementsNotAddedToStack%50000==0)
+          { std::stringstream out;
+            out << "While computing product distance, explored " << i+1 << " out of "
+            << theIndexStack.size << " indices. " << numElementsNotAddedToStack << " candidates were not added to the stack. "
+            << "Number of elements reached: " << numElementsCovered << ". "
+            << "Max distance generated while searching: " << maxDistanceGenerated.ToString();
+            theReport.Report(out.str());
+          }
+          continue;
+        }
+      if (theList[currentIndex]==0)
+        numElementsCovered++;
+      theList[currentIndex]=currentDistance;
+      if (currentDistance>maxDistanceGenerated)
+        maxDistanceGenerated=currentDistance;
+      theIndexStack.AddOnTop(currentIndex);
+      if (theIndexStack.size%10000==0)
+      { std::stringstream out;
+        out << "While computing product distance, explored " << i+1 << " out of "
+        << theIndexStack.size << " indices. " << numElementsNotAddedToStack << " candidates were not added to the stack. "
+        << "Number of elements reached: " << numElementsCovered << ". "
+        << "Max distance generated while searching: " << maxDistanceGenerated.ToString();
+        theReport.Report(out.str());
+      }
+    }
+    if (theIndexStack.size>1000000000)
+      return theCommands << "While computing product distance, exceeded allowed stack size of 1000000000";
+  }
+  std::stringstream out;
+  for (int i=0; i<theList.size; i++)
+    out << "<br>" << i << ": " << theList[i].ToString();
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerSolveProductSumEquationOverSetModN(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSolveProductSumEquationOverSetModN");
+  Expression theModuloE, theIntegersE, theProductE, theSumE;
+  if (!CalculatorConversions::innerLoadKey(theCommands, input, "theMod", theModuloE))
+    return theCommands << "<hr>Value theMod not found.";
+  int theMod;
+  if (!theModuloE.IsIntegerFittingInInt(&theMod))
+    return theCommands << " <hr> Failed to extract modulus from " << theModuloE.ToString();
+  if (theMod==0)
+    return theCommands << "<hr>Zero modulus not allowed.";
+  if (theMod<0)
+    theMod*=-1;
+  if (theMod>10000000)
+    return theCommands << "<hr>I've been instructed to compute with moduli no larger than 10000000.";
+  if (!CalculatorConversions::innerLoadKey(theCommands, input, "theSet", theIntegersE))
+    return theCommands << "<hr>Value theSet not found.";
+  List<int> theInts;
+  if (!theCommands.GetVectoRInt(theIntegersE, theInts))
+    return theCommands << "<hr>Failed to extract integer list from " << theIntegersE.ToString();
+  for (int i=0; i<theInts.size; i++)
+    if (theInts[i]<=0)
+      return theCommands << "<hr>The integer list " << theInts << " contains non-positive numbers.";
+  if (!CalculatorConversions::innerLoadKey(theCommands, input, "theProduct", theProductE))
+    return theCommands << "<hr>Value theProduct not found.";
+  LargeInt goalProduct;
+  if (!theProductE.IsInteger(&goalProduct))
+    return theCommands << "<hr>Failed to extract integer from " << theProductE.ToString();
+  if (goalProduct.IsNegative())
+    return theCommands << "<hr>I am expecting a positive product as input. ";
+  if (!CalculatorConversions::innerLoadKey(theCommands, input, "theSum", theSumE))
+    return theCommands << "<hr>Value theSum not found.";
+  int theSum=-1;
+  if (!theSumE.IsSmallInteger(&theSum))
+    return theCommands << "Failed to extract small integer from " << theSumE.ToString();
+  VectorPartition thePartition;
+  Vectors<Rational> theOneDimVectors;
+  theOneDimVectors.SetSize(theInts.size);
+  for (int i=0; i<theInts.size; i++)
+  { theOneDimVectors[i].MakeZero(1);
+    theOneDimVectors[i][0]=theInts[i];
+  }
+  thePartition.goalVector.MakeZero(1);
+  thePartition.goalVector[0]=theSum;
+  if(!thePartition.init(theOneDimVectors, thePartition.goalVector))
+    return theCommands << "Failed to initialize the computation. ";
+  LargeIntUnsigned theModLarge;
+  theModLarge=theMod;
+  int numTestedSoFar=0;
+  ProgressReport theReport(theCommands.theGlobalVariableS);
+  LargeIntUnsigned oneUI=1;
+  while (thePartition.IncrementReturnFalseIfPastLast())
+  { LargeIntUnsigned theProduct=1;
+    for (int i=0; i<thePartition.currentPartition.size; i++)
+    { LargeIntUnsigned theNumber=theInts[i];
+      MathRoutines::RaiseToPower(theNumber, thePartition.currentPartition[i], oneUI);
+      theProduct*=theNumber;
+      theProduct%=theModLarge;
+    }
+    if (theProduct==goalProduct.value)
+    { std::stringstream out;
+      out << "Found one solution: ";
+      for (int i=0; i<thePartition.currentPartition.size; i++)
+        if (thePartition.currentPartition[i]>0)
+        { out << theInts[i];
+          if (thePartition.currentPartition[i]>1)
+            out << "^{" << thePartition.currentPartition[i] << "}";
+          out << " ";
+        }
+      return output.AssignValue(out.str(), theCommands);
+    }
+    numTestedSoFar++;
+    std::stringstream reportStream;
+    reportStream << numTestedSoFar << " tested so far ...";
+    theReport.Report(reportStream.str());
+  }
+  return output.AssignValue((std::string)"Couldn't find solution", theCommands);
 }

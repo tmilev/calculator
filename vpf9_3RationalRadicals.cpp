@@ -1061,12 +1061,14 @@ bool ElementZmodP::AssignRational(const Rational& other)
   return true;
 }
 
-void ElementZmodP::operator/=(const ElementZmodP& other)
+bool ElementZmodP::operator/=(const ElementZmodP& other)
 { this->CheckIamInitialized();
   this->CheckEqualModuli(other);
   LargeInt theInverted, otherValue, theMod;
   theMod=this->theModulo;
   otherValue=other.theValue;
-  theInverted=MathRoutines::InvertXModN(otherValue, theMod);
+  if (!MathRoutines::InvertXModN(otherValue, theMod, theInverted))
+    return false;
   *this*=theInverted;
+  return true;
 }

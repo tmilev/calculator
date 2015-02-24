@@ -4248,7 +4248,15 @@ Rational DynkinSimpleType::GetLongRootLengthSquared()const
 }
 
 Rational DynkinSimpleType::GetDefaultLongRootLengthSquared()const
-{ switch (this->theLetter)
+{ //Dynkin's convention says that the default long root length is 2.
+  return 2;
+}
+
+Rational DynkinSimpleType::GetEpsilonRealizationLongRootLengthSquared()const
+{ //Dynkin's convention says that the default long root length is 2.
+  //However, the accepted epsilon coordinate realizations of the root systems
+  //of G_2 and C_n do not have long root length of 2.
+   switch (this->theLetter)
   { case 'A':
     case 'B':
     case 'D':
@@ -4676,7 +4684,6 @@ bool DynkinSimpleType::operator>(const DynkinSimpleType& other)const
 //  return this->CartanSymmetricScale>other.CartanSymmetricScale;
 }
 
-
 void DynkinSimpleType::GetCn(int n, Matrix<Rational>& output)const
 { this->GetAn(n, output);
   if(n<2)
@@ -4684,6 +4691,7 @@ void DynkinSimpleType::GetCn(int n, Matrix<Rational>& output)const
   output(n-1,n-1)= 4;
   output(n-2,n-1)=-2;
   output(n-1,n-2)=-2;
+  output/=2;
 }
 
 void DynkinSimpleType::GetDn(int n, Matrix<Rational>& output)const
@@ -4725,6 +4733,7 @@ void DynkinSimpleType::GetG2(Matrix<Rational>& output)const
   output(1,1)=6;
   output(1,0)=-3;
   output(0,1)=-3;
+  output/=3;
 }
 
 void DynkinSimpleType::GetCoCartanSymmetric(Matrix<Rational>& output)const

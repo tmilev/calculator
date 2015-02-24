@@ -1226,7 +1226,12 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
     << "</td></tr>";
   }
   out << "</table>";
-  out << "<hr>Simple basis in epsilon coordinates: <table>";
+  out << "<hr>Below is the simple basis realized in epsilon coordinates. "
+  << "Please note that the epsilon coordinate realizations "
+  << "do not have long roots of length of 2 in types G and C. "
+  << "This means that gramm matrix (w.r.t. the standard scalar product)"
+  << " of the epsilon coordinate realizations in types G and C does not equal the  corresponding symmetric Cartan matrix."
+  << "  <table>";
   simpleBasis.MakeEiBasis(theWeyl.GetDim());
   theWeyl.GetEpsilonCoords(simpleBasis, simplebasisEpsCoords);
   for (int i=0; i< simplebasisEpsCoords.size; i++)
@@ -1242,6 +1247,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
       tempM2=tempM;
       tempM2.Transpose();
       tempM2.MultiplyOnTheRight(tempM);
+      tempM2*=2/tempSimpleType.GetEpsilonRealizationLongRootLengthSquared();
       if (!(tempM2==theWeyl.CartanSymmetric))
         crash << "This is a (non-critical) programming error: the epsilon coordinates of the vectors are incorrect. "
         << "Please fix function DynkinType::GetEpsilonMatrix. The matrix of the epsilon coordinates is " << tempM.ToString()

@@ -5028,6 +5028,7 @@ class DynkinSimpleType
   Rational GetDefaultCoRootLengthSquared(int rootIndex)const;
   Rational GetDefaultRootLengthSquared(int rootIndex)const;
   Rational GetDefaultLongRootLengthSquared()const;
+  Rational GetEpsilonRealizationLongRootLengthSquared()const;
   static Rational GetDefaultLongRootLengthSquared(char theInputType)
   { DynkinSimpleType theType(theInputType, 2);
     return theType.GetDefaultLongRootLengthSquared();

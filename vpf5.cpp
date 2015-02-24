@@ -1589,66 +1589,6 @@ bool Calculator::fDifferential(Calculator& theCommands, const Expression& input,
   return true;
 }
 
-void LargeIntUnsigned::AccountPrimeFactor(const LargeInt& theP, List<LargeInt>& outputPrimeFactors, List<LargeIntUnsigned>& outputMults)
-{ if (outputPrimeFactors.size==0)
-  { outputPrimeFactors.AddOnTop(theP);
-    outputMults.AddOnTop(1);
-    return;
-  }
-  if ((*outputPrimeFactors.LastObject()).operator==(theP))
-    (*outputMults.LastObject())++;
-  else
-  { outputPrimeFactors.AddOnTop(theP);
-    outputMults.AddOnTop(1);
-  }
-}
-
-bool LargeIntUnsigned::Factor(List<LargeInt>& outputPrimeFactors, List<int>& outputMultiplicites)
-{ MacroRegisterFunctionWithName("LargeIntUnsigned::Factor");
-  List<LargeIntUnsigned> buffer;
-  if (!this->Factor(outputPrimeFactors, buffer))
-    return false;
-  outputMultiplicites.SetSize(buffer.size);
-  for (int i=0; i<buffer.size; i++)
-    if (!buffer[i].IsIntegerFittingInInt(&outputMultiplicites[i]))
-      return false;
-  return true;
-}
-
-bool LargeIntUnsigned::Factor(List<LargeInt>& outputPrimeFactors, List<LargeIntUnsigned>& outputMultiplicites)
-{ MacroRegisterFunctionWithName("LargeIntUnsigned::Factor");
-  if (this->theDigits.size>1)
-    return false;
-  if (this->IsEqualToZero())
-    crash << "This is a programming error: it was requested that I factor 0, which is forbidden." << crash;
-  //stOutput << "Factoring: " << this->ToString();
-  unsigned int n=this->theDigits[0];
-  outputPrimeFactors.SetSize(0);
-  outputMultiplicites.SetSize(0);
-  while (n%2==0)
-  { this->AccountPrimeFactor(2, outputPrimeFactors, outputMultiplicites);
-    n/=2;
-  }
-  unsigned int upperboundPrimeDivisors= (unsigned int) FloatingPoint::sqrt((double)n);
-  List<bool> theSieve;
-  theSieve.initFillInObject(upperboundPrimeDivisors+1,true);
-  for (unsigned int i=3; i<=upperboundPrimeDivisors; i+=2)
-    if (theSieve[i])
-    { while (n%i==0)
-      { this->AccountPrimeFactor(i, outputPrimeFactors, outputMultiplicites);
-        n/=i;
-        upperboundPrimeDivisors= (unsigned int) FloatingPoint::sqrt((double)n);
-      }
-      for (unsigned int j=i; j<=upperboundPrimeDivisors; j+=i)
-        theSieve[j]=false;
-    }
-  if (n>1)
-    this->AccountPrimeFactor(n, outputPrimeFactors, outputMultiplicites);
-  //stOutput << " ... and the factors are: " << outputPrimeFactors
-  //<< " with mults: " << outputMultiplicites;
-  return true;
-}
-
 template <class coefficient>
 void Polynomial<coefficient>::Interpolate(const Vector<coefficient>& thePoints, const Vector<coefficient>& ValuesAtThePoints)
 { Polynomial<coefficient> theLagrangeInterpolator, tempP;

@@ -293,11 +293,11 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent)
       for(int j=i+1; j<3; j++)
         if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[i].size<diagramWithoutTripleNode.SimpleBasesConnectedComponents[j].size)
           diagramWithoutTripleNode.SwapDynkinStrings(i,j);
-    Rational theScale=2/tripleNode.ScalarProduct(tripleNode, this->AmbientBilinearForm);
     currentComponent.SetSize(0);
     if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].size==1)
     { //<- components are sorted by length, therefore the second and third component are of length 1,
       //therefore we have type D_n
+      Rational theScale=DynkinSimpleType::GetDefaultLongRootLengthSquared('D') /tripleNode.ScalarProduct(tripleNode, this->AmbientBilinearForm);
       currentComponent.AddListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[0]);//<-first long component
       if (!tripleNode.ScalarProduct(currentComponent[0], this->AmbientBilinearForm).IsEqualToZero())
         currentComponent.ReverseOrderElements();
@@ -307,6 +307,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent)
       outputType.MakeArbitrary('D', currentComponent.size, theScale);
     } else
     { //the second largest component has more than one element, hence we are in type E_n.
+      Rational theScale=DynkinSimpleType::GetDefaultLongRootLengthSquared('E') /tripleNode.ScalarProduct(tripleNode, this->AmbientBilinearForm);
       if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].size!=2)
         crash << "This is a programming error: the dynkin diagram has two components of length larger than 2 linked to the triple node."
         << crash;
@@ -334,41 +335,36 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent)
     { numLength2++;
       length2=currentComponent[i].ScalarProduct(currentComponent[i], this->AmbientBilinearForm);
     }
-  Rational LongestToShortestSquareRatio=
-  this->GetSquareLengthLongestRootLinkedTo(currentComponent[0])
-  /this->GetSquareLengthShortestRootLinkedTo(currentComponent[0]);
   if (numLength2==0)
   { //type A
     outputType.MakeArbitrary
-    ('A', numLength1, LongestToShortestSquareRatio /length1);
+    ('A', numLength1, this->GetSquareLengthLongestRootLinkedTo(currentComponent[0]) /length1);
   } else
   { if (length1<length2)
     { MathRoutines::swap(length1, length2);
       MathRoutines::swap(numLength1, numLength2);
       currentEnds.SwapTwoIndices(0,1);
     }//<-so far we made sure the first length is long
+    //By convention, in types G and C, in the Dynkin diagram the long root comes last
+    //This is handled at the very end of this function (outside all the if clauses).
     if (numLength1==numLength2)
     {//B2, C2, F4 or G2
       if (numLength1==2)
         outputType.MakeArbitrary
-        ('F', 4, LongestToShortestSquareRatio/length1);
+        ('F', 4, DynkinSimpleType::GetDefaultLongRootLengthSquared('F')/length1);
       else if (length1/length2==3)
         outputType.MakeArbitrary
-        ('G', 2, LongestToShortestSquareRatio/length2);
+        ('G', 2, DynkinSimpleType::GetDefaultLongRootLengthSquared('G') /length2);
       else
         outputType.MakeArbitrary
-        ('B', 2, LongestToShortestSquareRatio/length1);
+        ('B', 2, DynkinSimpleType::GetDefaultLongRootLengthSquared('B')/length1);
     } else
     { if (numLength1>numLength2)
         outputType.MakeArbitrary
-        ('B', currentComponent.size, LongestToShortestSquareRatio/length1);
+        ('B', currentComponent.size, DynkinSimpleType::GetDefaultLongRootLengthSquared('B')/length2);
       else
         outputType.MakeArbitrary
-        ('C', currentComponent.size, LongestToShortestSquareRatio/length2);
-    }
-    if (outputType.theLetter=='C' || outputType.theLetter=='G')
-    { //<- by convention, in types G and C, in the Dynkin diagram the long root comes last
-      currentEnds.SwapTwoIndices(0,1);
+        ('C', currentComponent.size, DynkinSimpleType::GetDefaultLongRootLengthSquared('C')/length1);
     }
   }
   //The following code ensures the Dynkin diagram is properly ordered

@@ -2464,8 +2464,6 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
   currentSA.ComputePotentialExtensions();
   this->theSubalgebras.ReservE(this->GetOwnerWeyl().RootsOfBorel.size);
   this->theSubalgebras.AddOnTop(currentSA);
-  List<DynkinType> possibleExtensions;
-  DynkinType currentType;
   std::string reportString;
   for (int i=0; i<this->theSubalgebras.size; i++)
   { if (theGlobalVariables!=0)
@@ -2523,6 +2521,8 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
       theReport2.Report(reportStream.str());
     }
   }
+  stOutput << "TEMPORARY CODE fix me!";
+  this->flagPrintParabolicPseudoParabolicInfo=false;
   if (this->flagPrintParabolicPseudoParabolicInfo)
   { if (this->theGlobalVariables!=0)
     { reportStream << "Computing which subalgebras are pseudo parabolic/parabolic/neither... ";

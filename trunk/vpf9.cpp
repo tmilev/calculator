@@ -4583,7 +4583,7 @@ bool DynkinSimpleType::CanBeExtendedParabolicallyTo(const DynkinSimpleType& othe
 
 void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* outputPermutationRoots)const
 { MacroRegisterFunctionWithName("DynkinSimpleType::Grow");
-  //almost all simple types are grown from type A. Exceptions only for types F4 (grown from C_3),
+  //almost all simple types are grown from type A. Exceptions only for types F4 (grown from B_3),
   //E6 (grown from D_5), E7 (grown from E6) and E8 (grown from E7).
   output.SetSize(0);
   List<int> currentImagesSimpleRootsCurrent;
@@ -4636,7 +4636,7 @@ void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* ou
   if (outputPermutationRoots!=0)
     outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
   if (this->theRank>1)
-  { newType.MakeArbitrary('C', this->theRank+1, this->CartanSymmetricInverseScale);
+  { newType.MakeArbitrary('C', this->theRank+1, this->CartanSymmetricInverseScale/2);
     output.AddOnTop(newType);
     if (outputPermutationRoots!=0)
       outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
@@ -4648,7 +4648,7 @@ void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* ou
       outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
   }
   if (this->theRank==1)
-  { newType.MakeArbitrary('G', 2, this->CartanSymmetricInverseScale);
+  { newType.MakeArbitrary('G', 2, this->CartanSymmetricInverseScale/3);
     output.AddOnTop(newType);
     if (outputPermutationRoots!=0)
       outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);

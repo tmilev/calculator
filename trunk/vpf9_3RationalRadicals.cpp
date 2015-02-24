@@ -1037,12 +1037,6 @@ void AlgebraicNumber::operator=(const Rational& other)
   this->basisIndex=0;
 }
 
-void Rational::operator=(const AlgebraicNumber& other)
-{ bool isGood=other.IsRational(this);
-  if (!isGood)
-    crash << "This is a programming error: attempting to assign the non-rational algebraic number " << other.ToString() << "to a rational number. " << crash;
-}
-
 std::string ElementZmodP::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
   out << "(" << this->theValue.ToString() << " ~mod~ " << this->theModulo.ToString() << ")";

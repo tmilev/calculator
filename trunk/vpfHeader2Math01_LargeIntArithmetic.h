@@ -573,10 +573,6 @@ public:
   Rational RationalValue()
   { return *this;
   }
-//  inline int GetNumValueTruncated(){return this->NumShort; };
-//  inline int GetDenValueTruncated(){return this->denShort; };
-//  static bool flagMinorRoutinesOnDontUseFullPrecision;
-  static bool flagAnErrorHasOccurredTimeToPanic;
   void Subtract(const Rational& r);
   void AdD(const Rational& r)
   { this->operator+=(r);

@@ -2,8 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader1General0_General.h"
 #include "vpfHeader2Math0_General.h"
-#include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
-#include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
+#include "vpfHeader2Math2_AlgebraicNumbers.h"
 
 ProjectInformationInstance ProjectInfoVpf8cpp(__FILE__, "Math routines implementation. ");
 

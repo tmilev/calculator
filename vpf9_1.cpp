@@ -354,14 +354,14 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent)
         ('F', 4, DynkinSimpleType::GetDefaultLongRootLengthSquared('F')/length1);
       else if (length1/length2==3)
         outputType.MakeArbitrary
-        ('G', 2, DynkinSimpleType::GetDefaultLongRootLengthSquared('G') /length2);
+        ('G', 2, DynkinSimpleType::GetDefaultLongRootLengthSquared('G') /length1);
       else
         outputType.MakeArbitrary
         ('B', 2, DynkinSimpleType::GetDefaultLongRootLengthSquared('B')/length1);
     } else
     { if (numLength1>numLength2)
         outputType.MakeArbitrary
-        ('B', currentComponent.size, DynkinSimpleType::GetDefaultLongRootLengthSquared('B')/length2);
+        ('B', currentComponent.size, DynkinSimpleType::GetDefaultLongRootLengthSquared('B')/length1);
       else
         outputType.MakeArbitrary
         ('C', currentComponent.size, DynkinSimpleType::GetDefaultLongRootLengthSquared('C')/length1);

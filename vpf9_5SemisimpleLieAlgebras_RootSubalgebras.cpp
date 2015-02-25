@@ -2521,8 +2521,6 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
       theReport2.Report(reportStream.str());
     }
   }
-  stOutput << "TEMPORARY CODE fix me!";
-  this->flagPrintParabolicPseudoParabolicInfo=false;
   if (this->flagPrintParabolicPseudoParabolicInfo)
   { if (this->theGlobalVariables!=0)
     { reportStream << "Computing which subalgebras are pseudo parabolic/parabolic/neither... ";

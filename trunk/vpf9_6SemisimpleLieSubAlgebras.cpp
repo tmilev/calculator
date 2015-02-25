@@ -1836,9 +1836,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition(GlobalVariables* th
   Vectors<Rational> simpleSubSystem;
   simpleSubSystem=this->RootSystemCentralizerPrimalCoords;
   this->theCentralizerSubDiagram.ComputeDiagramTypeModifyInputRelative(simpleSubSystem, this->RootSystemCentralizerPrimalCoords, this->BilinearFormFundPrimal);
-  this->theCentralizerType.MakeZero();
-  for (int i=0; i<this->theCentralizerSubDiagram.SimpleComponentTypes.size; i++)
-    this->theCentralizerType+=this->theCentralizerSubDiagram.SimpleComponentTypes[i];
+  this->theCentralizerSubDiagram.GetDynkinType(this->theCentralizerType);
   this->ComputeCharsPrimalModules();
  // this->ComputeRatioKillingsByComponent();
 }

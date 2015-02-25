@@ -392,10 +392,11 @@ std::string DynkinDiagramRootSubalgebra::ToString(FormatExpressions* theFormat)c
 
 bool DynkinDiagramRootSubalgebra::CheckInitialization() const
 { MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::CheckInitialization");
-  if (this->AmbientRootSystem.size==0)
-    crash << "Cannot compute Dynkin diagram root subalgebra: ambient root system not initialized" << crash;
-  if (this->AmbientBilinearForm.NumRows!=this->AmbientRootSystem[0].size)
-    crash << "Ambient bilinear form of Dynkin subdiagram not initialized" << crash;
+//  if (this->AmbientRootSystem.size==0 )
+//    crash << "Cannot compute Dynkin diagram root subalgebra: ambient root system not initialized" << crash;
+  if (this->AmbientRootSystem.size!=0)
+    if (this->AmbientBilinearForm.NumRows!=this->AmbientRootSystem[0].size)
+      crash << "Ambient bilinear form of Dynkin subdiagram not initialized" << crash;
   return true;
 }
 

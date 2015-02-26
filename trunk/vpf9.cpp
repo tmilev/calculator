@@ -3492,18 +3492,18 @@ Rational DynkinSimpleType::GetDefaultRootLengthSquared(int rootIndex)const
       if (rootIndex==this->theRank-1)
         return 1;
       return 2;
-    case 'C':
-      if (rootIndex==this->theRank-1)
-        return 4;
-      return 2;
     case 'F':
       if (rootIndex<2)
         return 2;
       return 1;
+    case 'C':
+      if (rootIndex==this->theRank-1)
+        return 2;
+      return 1;
     case 'G':
       if (rootIndex==1)
-        return 6;
-      return 2;
+        return 2;
+      return Rational(2,3);
     default:
       crash << "This is a programming error: calling DynkinSimpleType::GetDefaultRootLengthSquared on the non-initialized Dynkin type "
       << this->ToString() << crash;
@@ -3648,12 +3648,30 @@ void DynkinSimpleType::GetBn(int n, Matrix<Rational>& output)const
   output(n-1,n-1)=1;
 }
 
+Rational DynkinSimpleType::GetDynkinIndexParabolicallyInducingSubalgebra(char inputType)
+{ switch (inputType)
+  { case 'A':
+    case 'B':
+    case 'D':
+    case 'E':
+    case 'F':
+      return 1;
+    case 'G':
+      return 3;
+    case 'C':
+      return 2;
+    default:
+      crash << "DynkinSimpleType::GetDynkinIndexParabolicallyInducingSubalgebra called with input " << inputType << ", this is not allowed. " << crash;
+      return -1;
+  }
+}
+
 bool DynkinSimpleType::CanBeExtendedParabolicallyTo(const DynkinSimpleType& other)const
 { MacroRegisterFunctionWithName("DynkinSimpleType::CanBeExtendedParabolicallyTo");
   //stOutput << "<br>checking whether " << this->ToString() << " can be extended to " << other.ToString();
-  if (this->CartanSymmetricInverseScale!=other.CartanSymmetricInverseScale)
-    return false;
   if (other.theRank<=this->theRank)
+    return false;
+  if (this->CartanSymmetricInverseScale/this->GetDynkinIndexParabolicallyInducingSubalgebra(other.theLetter)!=other.CartanSymmetricInverseScale)
     return false;
   if (other.theLetter=='F')
   { if (this->theLetter=='A' && this->theRank<3)

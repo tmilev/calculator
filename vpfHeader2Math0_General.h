@@ -5037,6 +5037,7 @@ class DynkinSimpleType
   Rational GetRatioRootSquaredToFirstSquared(int rootIndex)const;
   static Rational GetRatioLongRootToFirst(char inputWeylLetter, int inputRank);
 
+  static Rational GetDynkinIndexParabolicallyInducingSubalgebra(char inputType);
   bool CanBeExtendedParabolicallyTo(const DynkinSimpleType& otherType)const;
   bool CanBeExtendedParabolicallyOrIsEqualTo(const DynkinSimpleType& otherType)const
   { if (*this==otherType)

@@ -816,7 +816,7 @@ void SemisimpleSubalgebras::GetHCandidates
   ProgressReport theReport3(this->theGlobalVariables);
   int baseRank=currentType.GetRank()-1;
 
-//  stOutput << "<hr>Getting h-candidates to realize type: " << currentType.ToString();
+  stOutput << "<hr>Getting h-candidates to realize type: " << currentType.ToString();
   DynkinSimpleType theSmallType;
   theSmallType=currentType.GetSmallestSimpleType();
 
@@ -825,10 +825,11 @@ void SemisimpleSubalgebras::GetHCandidates
     reportStream << "the latest root of the candidate simple component " << theSmallType.ToString();
     theReport1.Report(reportStream.str());
   }
-  int indexNewRooT=*currentRootInjection.LastObject();
-  int indexNewRootInSmallType=indexNewRooT-currentType.GetRank()+theSmallType.theRank;
-  Rational desiredHLengthSquared=theSmallType.CartanSymmetricInverseScale*2*theSmallType.GetDefaultRootLengthSquared(0)/
-  theSmallType.GetDefaultRootLengthSquared(indexNewRootInSmallType);
+//  int indexNewRooT=*currentRootInjection.LastObject();
+//  int indexNewRootInSmallType=indexNewRooT-currentType.GetRank()+theSmallType.theRank;
+  stOutput << "Ere be trouble!!!!";
+  Rational desiredHLengthSquared=theSmallType.CartanSymmetricInverseScale*2/
+  DynkinSimpleType::GetDynkinIndexParabolicallyInducingSubalgebra(theSmallType.theLetter);
   outputHCandidatesScaledToActByTwo.SetSize(0);
   for (int j=0; j<this->theSl2s.size; j++)
   { if (this->theGlobalVariables!=0)
@@ -886,7 +887,8 @@ void SemisimpleSubalgebras::GetHCandidates
       //stOutput << "<br>" << out2.str();
     }
   }
-  //stOutput << "<br>Finished fetching h-candidates, total " << outputHCandidatesScaledToActByTwo.size << " found. <hr>";
+  stOutput << "<br>Finished fetching h-candidates, total " << outputHCandidatesScaledToActByTwo.size << " found. <br>"
+  << "The candidates are: " << outputHCandidatesScaledToActByTwo.ToString();
 }
 
 const CandidateSSSubalgebra& SemisimpleSubalgebras::baseSubalgebra()
@@ -1007,11 +1009,11 @@ void SemisimpleSubalgebras::AddSubalgebraToStack
    this->currentRootInjections.LastObject());
   ///////////
   this->currentNumLargerTypesExplored.AddOnTop(inputNumLargerTypesExplored);
-  /*stOutput << "<hr>" << this->currentPossibleLargerDynkinTypes.LastObject()->size
+  stOutput << "<hr>" << this->currentPossibleLargerDynkinTypes.LastObject()->size
   << " possible extensions of " << input.theWeylNonEmbeddeD.theDynkinType.ToString() << ": ";
   for (int i=0; i<this->currentPossibleLargerDynkinTypes.LastObject()->size; i++)
     stOutput << (*this->currentPossibleLargerDynkinTypes.LastObject())[i].ToString() << ", ";
-  */
+
   ///////////
   this->currentHCandidatesScaledToActByTwo.SetSize(this->currentSubalgebraChain.size);
   this->currentNumHcandidatesExplored.AddOnTop(inputNumHcandidatesExplored);
@@ -1120,6 +1122,7 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
     reportstream << "h element " << hIndex+1 << " out of " << this->currentHCandidatesScaledToActByTwo[stackIndex][hIndex].size
     << ": did not succeed extending. ";
     theReport1.Report(reportstream.str());
+    stOutput << "<br>Report: " << reportstream.str();
   }
   return true;
 }

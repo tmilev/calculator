@@ -714,7 +714,7 @@ void CandidateSSSubalgebra::SetUpInjectionHs
   if (newHScaledToActByTwo!=0)
     this->theHsScaledToActByTwoInOrderOfCreation.AddOnTop(*newHScaledToActByTwo);
   DynkinSimpleType newComponent=this->theWeylNonEmbeddeD.theDynkinType.GetSmallestSimpleType();
-  this->CartanSAsByComponent=baseSubalgebra.CartanSAsByComponent;
+  this->CartanSAsByComponentScaledToActByTwo=baseSubalgebra.CartanSAsByComponentScaledToActByTwo;
   int indexOffset=this->theWeylNonEmbeddeD.theDynkinType.GetRank()-newComponent.theRank;
   int newIndexInNewComponent=0;
 //  if (!newComponent.IsEqualToZero())
@@ -723,17 +723,19 @@ void CandidateSSSubalgebra::SetUpInjectionHs
   if (newHScaledToActByTwo!=0)
   { NewH= *newHScaledToActByTwo;
     NewH*= newComponent.GetDefaultRootLengthSquared(newIndexInNewComponent)/2;
+    stOutput << "<br>.. the new h scaled to act by two: " << newHScaledToActByTwo->ToString();
   }
+  stOutput << " <br>... And the NewH is: " << NewH.ToString();
   if (newComponent.theRank==1)
-  { this->CartanSAsByComponent.SetSize(this->CartanSAsByComponent.size+1);
-    this->CartanSAsByComponent.LastObject()->SetSize(1);
+  { this->CartanSAsByComponentScaledToActByTwo.SetSize(this->CartanSAsByComponentScaledToActByTwo.size+1);
+    this->CartanSAsByComponentScaledToActByTwo.LastObject()->SetSize(1);
     if (newHScaledToActByTwo!=0)
-      (*this->CartanSAsByComponent.LastObject())[0]=NewH;
+      (*this->CartanSAsByComponentScaledToActByTwo.LastObject())[0]=NewH;
     else
-      (*this->CartanSAsByComponent.LastObject())[0].SetSize(0);
+      (*this->CartanSAsByComponentScaledToActByTwo.LastObject())[0].SetSize(0);
   } else
-  { Vectors<Rational>& oldComponentHs=*baseSubalgebra.CartanSAsByComponent.LastObject();
-    Vectors<Rational>& currentHs=*this->CartanSAsByComponent.LastObject();
+  { Vectors<Rational>& oldComponentHs=*baseSubalgebra.CartanSAsByComponentScaledToActByTwo.LastObject();
+    Vectors<Rational>& currentHs=*this->CartanSAsByComponentScaledToActByTwo.LastObject();
     currentHs.SetSize(currentHs.size+1);
     for (int i=0; i<newComponent.theRank-1; i++)
       currentHs[theRootInjection[indexOffset+i]-indexOffset]=oldComponentHs[i];
@@ -742,25 +744,26 @@ void CandidateSSSubalgebra::SetUpInjectionHs
     else
       currentHs[newIndexInNewComponent].SetSize(0);
   }
-  this->theHs.AssignListList(this->CartanSAsByComponent);
-  this->computeHsScaledToActByTwo();
+  this->ComputeHsAndHsScaledToActByTwoFromComponents();
 }
 
-void CandidateSSSubalgebra::computeHsScaledToActByTwo()
-{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::computeHsScaledToActByTwo");
-  this->theHsScaledToActByTwo.SetSize(this->theHs.size);
+void CandidateSSSubalgebra::ComputeHsAndHsScaledToActByTwoFromComponents()
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeHsScaledToActByTwo");
+  this->theHsScaledToActByTwo.AssignListList(this->CartanSAsByComponentScaledToActByTwo);
+  this->theHs.SetSize(this->theHsScaledToActByTwo.size);
   this->theWeylNonEmbeddeDdefaultScale.MakeFromDynkinTypeDefaultLengthKeepComponentOrder
   (this->theWeylNonEmbeddeD.theDynkinType);
   this->theWeylNonEmbeddeDdefaultScale.ComputeRho(true);
   int counter=-1;
   List<DynkinSimpleType> theTypes;
   this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
-  for (int i=0; i<this->CartanSAsByComponent.size; i++)
-    for (int j=0; j< this->CartanSAsByComponent[i].size; j++)
+  stOutput << "<br>type: " << this->theWeylNonEmbeddeD.theDynkinType.ToString()
+  << " Computing h's scaled by two: Cartan is: " << this->theHs.ToString();
+  for (int i=0; i<this->CartanSAsByComponentScaledToActByTwo.size; i++)
+    for (int j=0; j< this->CartanSAsByComponentScaledToActByTwo[i].size; j++)
     { counter++;
-      this->theHsScaledToActByTwo[counter]=(this->theHs[counter]/theTypes[i].GetDefaultRootLengthSquared(j))*2;
+      this->theHs[counter]=(this->theHsScaledToActByTwo[counter]*theTypes[i].GetDefaultRootLengthSquared(j))/2;
     }
-  this->theHs.AssignListList(this->CartanSAsByComponent);
 }
 
 bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
@@ -781,9 +784,9 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
   if (!baseSubalgebra.theWeylNonEmbeddeD.theDynkinType.IsEqualToZero() && baseSubalgebra.indexInOwner==-1)
     crash << "This is a programming error: attempting to induce a subalgebra from a non-registered base subalgebra. " << crash;
   //set up induction history:
-//  stOutput << "<hr><b>Testing actual extension!!! Type base: "
-//  << baseSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString()
-//  << ", type target: " << this->theWeylNonEmbeddeD.theDynkinType.ToString() << "</b><br>";
+  stOutput << "<hr><b>Testing actual extension!!! Type base: "
+  << baseSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString()
+  << ", type target: " << this->theWeylNonEmbeddeD.theDynkinType.ToString() << "</b><br>";
   this->indexIamInducedFrom=baseSubalgebra.indexInOwner;
   this->RootInjectionsFromInducer=theRootInjection;
   //induction history is complete.
@@ -791,12 +794,15 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
   if (!this->ComputeChar(false))
   { if (this->owner->theGlobalVariables!=0)
       theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) + " doesn't have fitting chars.");
+    stOutput << "Compute char returned false.";
     return false;
   }
   this->ComputeSystem(false, false);
   if (this->flagSystemProvedToHaveNoSolution)
     if (this->owner->theGlobalVariables!=0)
-      theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) + " -> no system solution.");
+    { theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) + " -> no system solution.");
+      stOutput << "No system solution.";
+    }
   for (int i=0; i<this->owner->theSubalgebras.size; i++)
     if (this->theWeylNonEmbeddeD.theDynkinType==this->owner->theSubalgebras[i].theWeylNonEmbeddeD.theDynkinType)
     { if (this->IsDirectSummandOf(this->owner->theSubalgebras[i], true))
@@ -825,27 +831,28 @@ void SemisimpleSubalgebras::GetHCandidates
     reportStream << "the latest root of the candidate simple component " << theSmallType.ToString();
     theReport1.Report(reportStream.str());
   }
-//  int indexNewRooT=*currentRootInjection.LastObject();
-//  int indexNewRootInSmallType=indexNewRooT-currentType.GetRank()+theSmallType.theRank;
+  int indexNewRooT=*currentRootInjection.LastObject();
+  int indexNewRootInSmallType=indexNewRooT-currentType.GetRank()+theSmallType.theRank;
   stOutput << "Ere be trouble!!!!";
-  Rational desiredHLengthSquared=theSmallType.CartanSymmetricInverseScale*2/
-  DynkinSimpleType::GetDynkinIndexParabolicallyInducingSubalgebra(theSmallType.theLetter);
+  Rational desiredHScaledToActByTwoLengthSquared=theSmallType.CartanSymmetricInverseScale*4/
+  theSmallType.GetDefaultRootLengthSquared(indexNewRootInSmallType);
+  stOutput << " Desired h length: " << desiredHScaledToActByTwoLengthSquared.ToString();
   outputHCandidatesScaledToActByTwo.SetSize(0);
   for (int j=0; j<this->theSl2s.size; j++)
   { if (this->theGlobalVariables!=0)
     { std::stringstream reportStreamX;
       reportStreamX << "Trying to realize via orbit number " << j+1 << ".";
-      if (this->theSl2s[j].LengthHsquared!=desiredHLengthSquared)
+      if (this->theSl2s[j].LengthHsquared!=desiredHScaledToActByTwoLengthSquared)
         reportStreamX << " The h element "  << this->theSl2s[j].theH.GetCartanPart().ToString() << " of length "
         << this->theOrbitHelementLengths[j].ToString() << " generating orbit number " << j+1 << " out of "
-        << this->theSl2s.size << " does not have the required length of " << desiredHLengthSquared.ToString();
+        << this->theSl2s.size << " does not have the required length of " << desiredHScaledToActByTwoLengthSquared.ToString();
       //else
         //stOutput << " The h element " << this->theSl2s[j].theH.GetCartanPart().ToString() << " generating orbit number "
         //<< j+1 << " out of " << this->theSl2s.size << " has the required length. ";
       //stOutput << "<br>" << reportStreamX.str();
       theReport2.Report(reportStreamX.str());
     }
-    if (this->theSl2s[j].LengthHsquared!=desiredHLengthSquared)
+    if (this->theSl2s[j].LengthHsquared!=desiredHScaledToActByTwoLengthSquared)
       continue;
     if (baseRank==0)
     { outputHCandidatesScaledToActByTwo.AddOnTop(this->theSl2s[j].theH.GetCartanPart());
@@ -1326,15 +1333,15 @@ SemisimpleLieAlgebra& CandidateSSSubalgebra::GetAmbientSS()const
 void CandidateSSSubalgebra::AddHincomplete(const Vector<Rational>& theH, const ElementWeylGroup<WeylGroup>& theWE, int indexOfOrbit)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::AddHincomplete");
   this->CheckInitialization();
-  if (this->CartanSAsByComponent.size==1)
-    if (this->CartanSAsByComponent.LastObject()->size==0)
+  if (this->CartanSAsByComponentScaledToActByTwo.size==1)
+    if (this->CartanSAsByComponentScaledToActByTwo.LastObject()->size==0)
       this->PosRootsPerpendicularPrecedingWeights=this->GetAmbientWeyl().RootsOfBorel;
   for (int i=0; i<this->PosRootsPerpendicularPrecedingWeights.size; i++)
     if (this->GetAmbientWeyl().RootScalarCartanRoot(this->PosRootsPerpendicularPrecedingWeights[i], theH)!=0)
     { this->PosRootsPerpendicularPrecedingWeights.RemoveIndexShiftDown(i);
       i--;
     }
-  this->CartanSAsByComponent.LastObject()->AddOnTop(theH);
+  this->CartanSAsByComponentScaledToActByTwo.LastObject()->AddOnTop(theH);
 }
 
 bool CandidateSSSubalgebra::IsGoodHnewActingByTwo(const Vector<Rational>& HNewActingByTwo, const List<int>& theRootInjections)const
@@ -1739,10 +1746,10 @@ void CandidateSSSubalgebra::ComputeRatioKillingsByComponent()
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeRatioKillingsByComponent");
   ElementSemisimpleLieAlgebra<AlgebraicNumber> currentElt, adActionElt, adadActionElt;
   Vector<AlgebraicNumber> theLinearCombi;
-  this->RatioKillingsByComponent.SetSize(this->CartanSAsByComponent.size);
+  this->RatioKillingsByComponent.SetSize(this->CartanSAsByComponentScaledToActByTwo.size);
   Matrix<AlgebraicNumber> theAdMat;
-  for (int i=0; i<this->CartanSAsByComponent.size; i++)
-  { currentElt.MakeHgenerator(this->CartanSAsByComponent[i][0], this->GetAmbientSS());
+  for (int i=0; i<this->CartanSAsByComponentScaledToActByTwo.size; i++)
+  { currentElt.MakeHgenerator(this->CartanSAsByComponentScaledToActByTwo[i][0], this->GetAmbientSS());
     AlgebraicNumber result=0;
     for (int k=0; k<this->theBasis.size; k++)
     { this->GetAmbientSS().LieBracket(currentElt, this->theBasis[k], adActionElt);
@@ -3041,24 +3048,44 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter)
   this->theCharFundamentalCoordsRelativeToCartan.AddMonomial(tempMon, this->GetAmbientSS().GetRank());
   List<DynkinSimpleType> theTypes;
   this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
-  //stOutput << "<br>Cartan symmetric, type  "
-  //<< this->theWeylNonEmbeddeD.theDynkinType.ToString() << " <br>"
-  //<< this->theWeylNonEmbeddeD.CartanSymmetric.ToString();
+  stOutput << "<br>Cartan symmetric, type  "
+  << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " <br>"
+  << this->theWeylNonEmbeddeD.CartanSymmetric.ToString()
+  << "<br> Co-Cartan symmetric: "
+  << this->theWeylNonEmbeddeD.CoCartanSymmetric.ToString()
+  << "<br> hs scaled to act by two: " << this->theHsScaledToActByTwo.ToString()
+  << "<br> hs non-scaled: " << this->theHs.ToString();
+  Matrix<Rational> coCartanCandidate;
+  this->theHsScaledToActByTwo.GetGramMatrix(coCartanCandidate, &this->GetAmbientWeyl().CartanSymmetric);
+  if (coCartanCandidate!=this->theWeylNonEmbeddeD.CoCartanSymmetric)
+  { if (!allowBadCharacter)
+      crash << "This is a mathematical error. The co-Cartan symmetric matrix is: " << this->theWeylNonEmbeddeD.CoCartanSymmetric.ToString()
+      << " but co-Cartan of the computed candidate elements of the Cartan, " << this->theHsScaledToActByTwo.ToString()
+      << " is different, namely, " << coCartanCandidate.ToString();
+  }
   for (int k=0; k<this->GetAmbientWeyl().RootSystem.size; k++)
   { int counter=-1;
-    for (int i=0; i<this->CartanSAsByComponent.size; i++)
-      for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
+    for (int i=0; i<this->CartanSAsByComponentScaledToActByTwo.size; i++)
+      for (int j=0; j<this->CartanSAsByComponentScaledToActByTwo[i].size; j++)
       { counter++;
         tempMon.weightFundamentalCoordS[counter]=
-        (this->GetAmbientWeyl().RootScalarCartanRoot(this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j])/theTypes[i].GetDefaultRootLengthSquared(j))*2;
-//        stOutput << "<br>Scalar of " << this->GetAmbientWeyl().RootSystem[k].ToString()
-//        << " and " << this->CartanSAsByComponent[i][j].ToString() << "="
-//        << this->GetAmbientWeyl().RootScalarCartanRoot
-//        (this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j]).ToString()
-//        << " -> "
-//        << (this->GetAmbientWeyl().RootScalarCartanRoot
-//        (this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j])
-//        /theTypes[i].GetDefaultRootLengthSquared(j))*2;
+        (this->GetAmbientWeyl().RootScalarCartanRoot(this->GetAmbientWeyl().RootSystem[k], this->theHsScaledToActByTwo[counter]));
+//        (this->GetAmbientWeyl().RootScalarCartanRoot(this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j])
+//         /theTypes[i].GetDefaultRootLengthSquared(j))*2;
+        stOutput << "<br>Scalar of " << this->GetAmbientWeyl().RootSystem[k].ToString()
+        << " and " << this->theHsScaledToActByTwo[counter].ToString() << "="
+        << this->GetAmbientWeyl().RootScalarCartanRoot
+        (this->GetAmbientWeyl().RootSystem[k], this->theHsScaledToActByTwo[counter]).ToString()
+        << ". Resulting monomial: " << tempMon.ToString();
+
+/*        stOutput << "<br>Scalar of " << this->GetAmbientWeyl().RootSystem[k].ToString()
+        << " and " << this->CartanSAsByComponent[i][j].ToString() << "="
+        << this->GetAmbientWeyl().RootScalarCartanRoot
+        (this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j]).ToString()
+        << " -> "
+        << (this->GetAmbientWeyl().RootScalarCartanRoot
+        (this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j])
+        /theTypes[i].GetDefaultRootLengthSquared(j))*2;*/
         if(!tempMon.weightFundamentalCoordS[counter].IsInteger())
         { if (!allowBadCharacter)
             crash << "This is a programming error: function ComputeChar called with Cartan that suggests non-integral characters. At "
@@ -3073,23 +3100,23 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter)
   SemisimpleLieAlgebra* nonEmbeddedMe= &this->owner->theSubalgebrasNonEmbedded->GetElement(this->indexInOwnersOfNonEmbeddedMe);
   this->theCharNonPrimalFundCoords.MakeZero();
 
-//  stOutput << "<hr>Current candidate: " << this->ToStringCartanSA();
-//  stOutput << "<br>reducing: " << accumChar.ToString();
+  stOutput << "<hr>Current candidate: " << this->ToStringCartanSA();
+  stOutput << "<br>reducing: " << accumChar.ToString();
   while (accumChar.size()>0)
   { int currentIndex=accumChar.GetIndexExtremeWeightRelativeToWeyl(this->theWeylNonEmbeddeD);
     if (currentIndex==-1)
       crash << "This is a programming error: while decomposing ambient Lie algebra over the candidate subalgebra, I got "
       << "that there is no extreme weight. This is impossible: something has gone very wrong. " << crash;
-//    stOutput << "<br>Extreme weight: " << //this->theWeylNonEmbeddeD.GetSimpleCoordinatesFromFundamental
-//    (accumChar[currentIndex].weightFundamentalCoords).ToString();
+    stOutput << "<br>Extreme weight: " << this->theWeylNonEmbeddeD.GetSimpleCoordinatesFromFundamental
+    (accumChar[currentIndex].weightFundamentalCoordS).ToString();
 
     if (accumChar.theCoeffs[currentIndex]<0)
-    { //stOutput << "<br>accumChar has negative coeff!";
+    { stOutput << "<br>accumChar has negative coeff!";
       return false;
     }
     for (int i=0; i<accumChar[currentIndex].weightFundamentalCoordS.size; i++)
       if (accumChar[currentIndex].weightFundamentalCoordS[i]<0)
-      { //stOutput << "<br>accumChar[currentIndex].weightFundamentalCoords[i] is less than 0.";
+      { stOutput << "<br>accumChar[currentIndex].weightFundamentalCoords[i] is less than 0.";
         return false;
       }
     freudenthalChar.MakeZero();
@@ -3099,14 +3126,16 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter)
     this->theCharNonPrimalFundCoords.AddMonomial(accumChar[currentIndex], accumChar.theCoeffs[currentIndex]);
     std::string tempS;
     bool tempBool=freudenthalChar.FreudenthalEvalMeFullCharacter(outputChar, -1, &tempS, this->owner->theGlobalVariables);
+    stOutput << "Freudenthal char of " << freudenthalChar.ToString() << " equals: " << outputChar.ToString();
     if (!tempBool && !allowBadCharacter)
     { crash << "This is a programming error: failed to evaluate full character via the Freudenthal formula on a relatively small example, namely "
       << freudenthalChar.ToString() << ". The failure message was: " << tempS << ". This shouldn't happen. " << crash;
       return false;
     }
     accumChar-=outputChar;
-    //stOutput << "<br>remaining char:" << accumChar.ToString();
+    stOutput << "<br>remaining char:" << accumChar.ToString();
   }
+  stOutput << "<br>GOT to returning true!";
   return true;
 }
 
@@ -3441,16 +3470,16 @@ bool CandidateSSSubalgebra::CheckMaximalDominance()const
   for (int i=0; i<this->GetAmbientWeyl().RootsOfBorel.size; i++)
   { Vector<Rational>& currentPosRoot=this->GetAmbientWeyl().RootsOfBorel[i];
     bool canBeRaisingReflection=true;
-    for (int k=0; k<this->CartanSAsByComponent.size && canBeRaisingReflection; k++)
-      for (int l=0; l<this->CartanSAsByComponent[k].size && canBeRaisingReflection; l++)
-      { theScalarProd=this->GetAmbientWeyl().RootScalarCartanRoot(currentPosRoot, this->CartanSAsByComponent[k][l]);
+    for (int k=0; k<this->CartanSAsByComponentScaledToActByTwo.size && canBeRaisingReflection; k++)
+      for (int l=0; l<this->CartanSAsByComponentScaledToActByTwo[k].size && canBeRaisingReflection; l++)
+      { theScalarProd=this->GetAmbientWeyl().RootScalarCartanRoot(currentPosRoot, this->CartanSAsByComponentScaledToActByTwo[k][l]);
         if (theScalarProd>0)
           canBeRaisingReflection=false;
         if (theScalarProd<0)
         { crash << "This is a programming error. The candidate h elements of the semisimple subalgebra are supposed to be maximally dominant, "
           << "however the scalar product of the positive root " << currentPosRoot.ToString() << " with the subalgebra root "
-          << this->CartanSAsByComponent[k][l].ToString() << " is negative, while the very same positive root has had zero scalar products with all "
-          << " preceding roots. Here are all preceding roots: " << this->CartanSAsByComponent.ToString() << crash;
+          << this->CartanSAsByComponentScaledToActByTwo[k][l].ToString() << " is negative, while the very same positive root has had zero scalar products with all "
+          << " preceding roots. Here are all preceding roots: " << this->CartanSAsByComponentScaledToActByTwo.ToString() << crash;
           return false;
         }
       }
@@ -4698,8 +4727,8 @@ std::string CandidateSSSubalgebra::ToStringCartanSA(FormatExpressions* theFormat
   FormatExpressions tempFormat;
   tempFormat.AmbientWeylLetter=this->GetAmbientWeyl().theDynkinType[0].theLetter;
   tempFormat.AmbientCartanSymmetricInverseScale=this->GetAmbientWeyl().theDynkinType[0].CartanSymmetricInverseScale;
-  out << "<br>Elements Cartan subalgebra by components: ";
-  for (int i=0; i<this->CartanSAsByComponent.size; i++)
+  out << "<br>Elements Cartan subalgebra scaled to act by two by components: ";
+  for (int i=0; i<this->CartanSAsByComponentScaledToActByTwo.size; i++)
   { if (useLaTeX && useHtml)
     { if (useMouseHover)
         out << CGI::GetMathMouseHover(theSimpleTypes[i].ToString(&tempFormat), 1000) << ": ";
@@ -4707,26 +4736,11 @@ std::string CandidateSSSubalgebra::ToStringCartanSA(FormatExpressions* theFormat
         out << CGI::GetMathSpanPure(theSimpleTypes[i].ToString(&tempFormat), 1000) << ": ";
     } else
       out << theSimpleTypes[i].ToString(&tempFormat) << ":";
-    for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
-    { out << this->CartanSAsByComponent[i][j].ToString() << ": "
-      << this->GetAmbientWeyl().RootScalarCartanRoot(this->CartanSAsByComponent[i][j],this->CartanSAsByComponent[i][j]);
-      if (j!=this->CartanSAsByComponent[i].size-1 || i!=this->CartanSAsByComponent.size-1)
-        out << ", ";
-    }
-  }
-  out << "<br>Elements Cartan subalgebra scaled to act by 2: ";
-  for (int i=0; i<this->CartanSAsByComponent.size; i++)
-  { if (useLaTeX && useHtml)
-    { if (useMouseHover)
-        out << CGI::GetMathMouseHover(theSimpleTypes[i].ToString(&tempFormat), 1000) << ": ";
-      else
-        out << CGI::GetMathSpanPure(theSimpleTypes[i].ToString(&tempFormat), 1000) << ": ";
-    } else
-      out << theSimpleTypes[i].ToString(&tempFormat) << ":";
-    for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
-    { Vector<Rational> rescaledH=this->CartanSAsByComponent[i][j]*2/theSimpleTypes[i].GetDefaultRootLengthSquared(j);
-      out << rescaledH.ToString() << ": " << this->GetAmbientWeyl().RootScalarCartanRoot(rescaledH,rescaledH).ToString();
-      if (j!=this->CartanSAsByComponent[i].size-1 || i!=this->CartanSAsByComponent.size-1)
+    for (int j=0; j<this->CartanSAsByComponentScaledToActByTwo[i].size; j++)
+    { out << this->CartanSAsByComponentScaledToActByTwo[i][j].ToString() << ": "
+      << this->GetAmbientWeyl().RootScalarCartanRoot
+      (this->CartanSAsByComponentScaledToActByTwo[i][j],this->CartanSAsByComponentScaledToActByTwo[i][j]);
+      if (j!=this->CartanSAsByComponentScaledToActByTwo[i].size-1 || i!=this->CartanSAsByComponentScaledToActByTwo.size-1)
         out << ", ";
     }
   }
@@ -5163,8 +5177,8 @@ void CandidateSSSubalgebra::GetHsByType(List<List<Vectors<Rational> > >& outputH
   this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(allTypes);
   outputHsByType.SetSize(0);
   outputTypeList.SetSize(0);
-  if (allTypes.size!=this->CartanSAsByComponent.size)
-    crash << "This is a programming error: allTypes.size must equal this->CartanSAsByComponent.size. " << crash;
+  if (allTypes.size!=this->CartanSAsByComponentScaledToActByTwo.size)
+    crash << "This is a programming error: allTypes.size must equal this->CartanSAsByComponentScaledToActByTwo.size. " << crash;
   for (int i=0; i<allTypes.size; i++)
   { bool shouldOpenNewType=true;
     if (i!=0)
@@ -5174,7 +5188,7 @@ void CandidateSSSubalgebra::GetHsByType(List<List<Vectors<Rational> > >& outputH
       outputHsByType.LastObject()->SetSize(0);
       outputTypeList.AddOnTop(allTypes[i]);
     }
-    outputHsByType.LastObject()->AddOnTop(this->CartanSAsByComponent[i]);
+    outputHsByType.LastObject()->AddOnTop(this->CartanSAsByComponentScaledToActByTwo[i]);
   }
 }
 

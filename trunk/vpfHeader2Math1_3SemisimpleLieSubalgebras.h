@@ -85,7 +85,7 @@ public:
   DynkinDiagramRootSubalgebra theCentralizerSubDiagram;
   DynkinType theCentralizerType;
 
-  List<Vectors<Rational> > CartanSAsByComponent;
+  List<Vectors<Rational> > CartanSAsByComponentScaledToActByTwo;
   List<AlgebraicNumber> RatioKillingsByComponent;
   Vectors<Rational> theHsScaledToActByTwo;
   Vectors<Rational> theHs;
@@ -205,7 +205,7 @@ public:
   bool CreateAndAddExtendBaseSubalgebra
   (const CandidateSSSubalgebra& baseSubalgebra, Vector<Rational>& newHrescaledToActByTwo, const DynkinType& theNewType, const List<int>& theRootInjection)
   ;
-  void computeHsScaledToActByTwo();
+  void ComputeHsAndHsScaledToActByTwoFromComponents();
   void SetUpInjectionHs
   (const CandidateSSSubalgebra& baseSubalgebra, const DynkinType& theNewType, const List<int>& theRootInjection,
    Vector<Rational>* newHScaledToActByTwo=0);

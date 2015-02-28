@@ -342,20 +342,19 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
     return theCommands << "<hr>Failed to load cartan elements: I expected " << outputSubalgebra.theWeylNonEmbeddeD.GetDim() << " elements, but failed to get them.";
   List<int> theRanks, theMults;
   outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.GetLettersTypesMults(0, &theRanks, &theMults, 0);
-  outputSubalgebra.CartanSAsByComponent.SetSize(outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.GetNumSimpleComponents());
+  outputSubalgebra.CartanSAsByComponentScaledToActByTwo.SetSize(outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.GetNumSimpleComponents());
   int componentCounter=-1;
   int counter=-1;
   for (int i=0; i<theMults.size; i++)
     for (int j=0; j<theMults[i]; j++)
     { componentCounter++;
-      Vectors<Rational>& currentComponent=outputSubalgebra.CartanSAsByComponent[componentCounter];
+      Vectors<Rational>& currentComponent=outputSubalgebra.CartanSAsByComponentScaledToActByTwo[componentCounter];
       currentComponent.SetSize(theRanks[i]);
       for (int k=0; k<theRanks[i]; k++)
       { counter++;
         theHs.GetVectorFromRow(counter, currentComponent[k]);
       }
     }
-  outputSubalgebra.theHs.AssignListList(outputSubalgebra.CartanSAsByComponent);
   outputSubalgebra.thePosGens.SetSize(0);
   outputSubalgebra.theNegGens.SetSize(0);
   if (CalculatorConversions::innerLoadKey(theCommands, input, "generators", generatorsE))
@@ -379,7 +378,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
   owner.theSubalgebrasNonEmbedded->GetElement(outputSubalgebra.indexInOwnersOfNonEmbeddedMe).theWeyl.ComputeRho(true);
   outputSubalgebra.theWeylNonEmbeddeD.ComputeRho(true);
   //stOutput << "Before calling compute system, output subalgebra is: " << outputSubalgebra.ToString();
-  outputSubalgebra.computeHsScaledToActByTwo();
+  outputSubalgebra.ComputeHsAndHsScaledToActByTwoFromComponents();
   outputSubalgebra.flagSubalgebraPreloadedButNotVerified=true;
   return output.MakeError("Candidate subalgebra is not a stand-alone object and its Expression output should not be used. ", theCommands);
 }

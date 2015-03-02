@@ -297,7 +297,7 @@ bool CalculatorConversions::innerStoreCandidateSA(Calculator& theCommands, const
   keys.AddOnTop("DynkinType");
   values.AddOnTop(currentE);
   Matrix<Rational> conversionMat;
-  conversionMat.AssignVectorsToRows(input.theHs);
+  conversionMat.AssignVectorsToRows(input.theHsScaledToActByTwo);
   currentE.AssignMatrix(conversionMat, theCommands);
   keys.AddOnTop("ElementsCartan");
   values.AddOnTop(currentE);

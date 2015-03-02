@@ -524,8 +524,8 @@ void SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand()
     this->theOrbitDynkinIndices.AddOnTop
     (DynkinSimpleType('A', 1, this->theSl2s[i].LengthHsquared ));
   }
-  stOutput << "H lengths:" << this->theOrbitHelementLengths.ToString() << " types: "
-  << this->theOrbitDynkinIndices.ToString();
+//  stOutput << "H lengths:" << this->theOrbitHelementLengths.ToString() << " types: "
+//  << this->theOrbitDynkinIndices.ToString();
 }
 
 bool SemisimpleSubalgebras::LoadState
@@ -719,30 +719,23 @@ void CandidateSSSubalgebra::SetUpInjectionHs
   int newIndexInNewComponent=0;
 //  if (!newComponent.IsEqualToZero())
   newIndexInNewComponent=*theRootInjection.LastObject()-indexOffset;
-  Vector<Rational> NewH;
-  if (newHScaledToActByTwo!=0)
-  { NewH= *newHScaledToActByTwo;
-    NewH*= newComponent.GetDefaultRootLengthSquared(newIndexInNewComponent)/2;
-    stOutput << "<br>.. the new h scaled to act by two: " << newHScaledToActByTwo->ToString();
-  }
-  stOutput << " <br>... And the NewH is: " << NewH.ToString();
   if (newComponent.theRank==1)
   { this->CartanSAsByComponentScaledToActByTwo.SetSize(this->CartanSAsByComponentScaledToActByTwo.size+1);
     this->CartanSAsByComponentScaledToActByTwo.LastObject()->SetSize(1);
     if (newHScaledToActByTwo!=0)
-      (*this->CartanSAsByComponentScaledToActByTwo.LastObject())[0]=NewH;
+      (*this->CartanSAsByComponentScaledToActByTwo.LastObject())[0]=*newHScaledToActByTwo;
     else
       (*this->CartanSAsByComponentScaledToActByTwo.LastObject())[0].SetSize(0);
   } else
   { Vectors<Rational>& oldComponentHs=*baseSubalgebra.CartanSAsByComponentScaledToActByTwo.LastObject();
-    Vectors<Rational>& currentHs=*this->CartanSAsByComponentScaledToActByTwo.LastObject();
-    currentHs.SetSize(currentHs.size+1);
+    Vectors<Rational>& currentHsScaledToActByTwo=*this->CartanSAsByComponentScaledToActByTwo.LastObject();
+    currentHsScaledToActByTwo.SetSize(currentHsScaledToActByTwo.size+1);
     for (int i=0; i<newComponent.theRank-1; i++)
-      currentHs[theRootInjection[indexOffset+i]-indexOffset]=oldComponentHs[i];
+      currentHsScaledToActByTwo[theRootInjection[indexOffset+i]-indexOffset]=oldComponentHs[i];
     if (newHScaledToActByTwo!=0)
-      currentHs[newIndexInNewComponent]=NewH;
+      currentHsScaledToActByTwo[newIndexInNewComponent]=*newHScaledToActByTwo;
     else
-      currentHs[newIndexInNewComponent].SetSize(0);
+      currentHsScaledToActByTwo[newIndexInNewComponent].SetSize(0);
   }
   this->ComputeHsAndHsScaledToActByTwoFromComponents();
 }
@@ -757,8 +750,8 @@ void CandidateSSSubalgebra::ComputeHsAndHsScaledToActByTwoFromComponents()
   int counter=-1;
   List<DynkinSimpleType> theTypes;
   this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
-  stOutput << "<br>type: " << this->theWeylNonEmbeddeD.theDynkinType.ToString()
-  << " Computing h's scaled by two: Cartan is: " << this->theHs.ToString();
+//  stOutput << "<br>type: " << this->theWeylNonEmbeddeD.theDynkinType.ToString()
+//  << " Computing h's scaled by two: Cartan is: " << this->theHs.ToString();
   for (int i=0; i<this->CartanSAsByComponentScaledToActByTwo.size; i++)
     for (int j=0; j< this->CartanSAsByComponentScaledToActByTwo[i].size; j++)
     { counter++;
@@ -784,9 +777,9 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
   if (!baseSubalgebra.theWeylNonEmbeddeD.theDynkinType.IsEqualToZero() && baseSubalgebra.indexInOwner==-1)
     crash << "This is a programming error: attempting to induce a subalgebra from a non-registered base subalgebra. " << crash;
   //set up induction history:
-  stOutput << "<hr><b>Testing actual extension!!! Type base: "
-  << baseSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString()
-  << ", type target: " << this->theWeylNonEmbeddeD.theDynkinType.ToString() << "</b><br>";
+//  stOutput << "<hr><b>Testing actual extension!!! Type base: "
+//  << baseSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString()
+//  << ", type target: " << this->theWeylNonEmbeddeD.theDynkinType.ToString() << "</b><br>";
   this->indexIamInducedFrom=baseSubalgebra.indexInOwner;
   this->RootInjectionsFromInducer=theRootInjection;
   //induction history is complete.
@@ -801,7 +794,7 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
   if (this->flagSystemProvedToHaveNoSolution)
     if (this->owner->theGlobalVariables!=0)
     { theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) + " -> no system solution.");
-      stOutput << "No system solution.";
+//      stOutput << "No system solution.";
     }
   for (int i=0; i<this->owner->theSubalgebras.size; i++)
     if (this->theWeylNonEmbeddeD.theDynkinType==this->owner->theSubalgebras[i].theWeylNonEmbeddeD.theDynkinType)
@@ -980,9 +973,9 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
   this->GetHCandidates
   (this->currentHCandidatesScaledToActByTwo[stackIndex], newCandidate, this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
    this->currentRootInjections[stackIndex][typeIndex]);
-  //stOutput << "<br>Attempting to realize type: " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
-  //<< " using " << this->currentHCandidatesScaledToActByTwo[stackIndex].size
-  //<< " h candidates. The candidates follow: " << this->currentHCandidatesScaledToActByTwo[stackIndex].ToString();
+  stOutput << "<br>Attempting to realize type: " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
+  << " using " << this->currentHCandidatesScaledToActByTwo[stackIndex].size
+  << " h candidates. The candidates follow: " << this->currentHCandidatesScaledToActByTwo[stackIndex].ToString();
   return true;
 }
 
@@ -1016,11 +1009,10 @@ void SemisimpleSubalgebras::AddSubalgebraToStack
    this->currentRootInjections.LastObject());
   ///////////
   this->currentNumLargerTypesExplored.AddOnTop(inputNumLargerTypesExplored);
-  stOutput << "<hr>" << this->currentPossibleLargerDynkinTypes.LastObject()->size
-  << " possible extensions of " << input.theWeylNonEmbeddeD.theDynkinType.ToString() << ": ";
-  for (int i=0; i<this->currentPossibleLargerDynkinTypes.LastObject()->size; i++)
-    stOutput << (*this->currentPossibleLargerDynkinTypes.LastObject())[i].ToString() << ", ";
-
+//  stOutput << "<hr>" << this->currentPossibleLargerDynkinTypes.LastObject()->size
+//  << " possible extensions of " << input.theWeylNonEmbeddeD.theDynkinType.ToString() << ": ";
+//  for (int i=0; i<this->currentPossibleLargerDynkinTypes.LastObject()->size; i++)
+//    stOutput << (*this->currentPossibleLargerDynkinTypes.LastObject())[i].ToString() << ", ";
   ///////////
   this->currentHCandidatesScaledToActByTwo.SetSize(this->currentSubalgebraChain.size);
   this->currentNumHcandidatesExplored.AddOnTop(inputNumHcandidatesExplored);
@@ -1129,7 +1121,7 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
     reportstream << "h element " << hIndex+1 << " out of " << this->currentHCandidatesScaledToActByTwo[stackIndex][hIndex].size
     << ": did not succeed extending. ";
     theReport1.Report(reportstream.str());
-    stOutput << "<br>Report: " << reportstream.str();
+//    stOutput << "<br>Report: " << reportstream.str();
   }
   return true;
 }
@@ -3053,6 +3045,7 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter)
   << this->theWeylNonEmbeddeD.CartanSymmetric.ToString()
   << "<br> Co-Cartan symmetric: "
   << this->theWeylNonEmbeddeD.CoCartanSymmetric.ToString()
+  << "<br>Cartan by compo: " << this->CartanSAsByComponentScaledToActByTwo.ToString()
   << "<br> hs scaled to act by two: " << this->theHsScaledToActByTwo.ToString()
   << "<br> hs non-scaled: " << this->theHs.ToString();
   Matrix<Rational> coCartanCandidate;
@@ -3072,11 +3065,11 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter)
         (this->GetAmbientWeyl().RootScalarCartanRoot(this->GetAmbientWeyl().RootSystem[k], this->theHsScaledToActByTwo[counter]));
 //        (this->GetAmbientWeyl().RootScalarCartanRoot(this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j])
 //         /theTypes[i].GetDefaultRootLengthSquared(j))*2;
-        stOutput << "<br>Scalar of " << this->GetAmbientWeyl().RootSystem[k].ToString()
-        << " and " << this->theHsScaledToActByTwo[counter].ToString() << "="
-        << this->GetAmbientWeyl().RootScalarCartanRoot
-        (this->GetAmbientWeyl().RootSystem[k], this->theHsScaledToActByTwo[counter]).ToString()
-        << ". Resulting monomial: " << tempMon.ToString();
+//        stOutput << "<br>Scalar of " << this->GetAmbientWeyl().RootSystem[k].ToString()
+//        << " and " << this->theHsScaledToActByTwo[counter].ToString() << "="
+//        << this->GetAmbientWeyl().RootScalarCartanRoot
+//        (this->GetAmbientWeyl().RootSystem[k], this->theHsScaledToActByTwo[counter]).ToString()
+//        << ". Resulting monomial: " << tempMon.ToString();
 
 /*        stOutput << "<br>Scalar of " << this->GetAmbientWeyl().RootSystem[k].ToString()
         << " and " << this->CartanSAsByComponent[i][j].ToString() << "="
@@ -3100,23 +3093,23 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter)
   SemisimpleLieAlgebra* nonEmbeddedMe= &this->owner->theSubalgebrasNonEmbedded->GetElement(this->indexInOwnersOfNonEmbeddedMe);
   this->theCharNonPrimalFundCoords.MakeZero();
 
-  stOutput << "<hr>Current candidate: " << this->ToStringCartanSA();
-  stOutput << "<br>reducing: " << accumChar.ToString();
+//  stOutput << "<hr>Current candidate: " << this->ToStringCartanSA();
+//  stOutput << "<br>reducing: " << accumChar.ToString();
   while (accumChar.size()>0)
   { int currentIndex=accumChar.GetIndexExtremeWeightRelativeToWeyl(this->theWeylNonEmbeddeD);
     if (currentIndex==-1)
       crash << "This is a programming error: while decomposing ambient Lie algebra over the candidate subalgebra, I got "
       << "that there is no extreme weight. This is impossible: something has gone very wrong. " << crash;
-    stOutput << "<br>Extreme weight: " << this->theWeylNonEmbeddeD.GetSimpleCoordinatesFromFundamental
-    (accumChar[currentIndex].weightFundamentalCoordS).ToString();
+    //stOutput << "<br>Extreme weight: " << this->theWeylNonEmbeddeD.GetSimpleCoordinatesFromFundamental
+    //(accumChar[currentIndex].weightFundamentalCoordS).ToString();
 
     if (accumChar.theCoeffs[currentIndex]<0)
-    { stOutput << "<br>accumChar has negative coeff!";
+    { //stOutput << "<br>accumChar has negative coeff!";
       return false;
     }
     for (int i=0; i<accumChar[currentIndex].weightFundamentalCoordS.size; i++)
       if (accumChar[currentIndex].weightFundamentalCoordS[i]<0)
-      { stOutput << "<br>accumChar[currentIndex].weightFundamentalCoords[i] is less than 0.";
+      { //stOutput << "<br>accumChar[currentIndex].weightFundamentalCoords[i] is less than 0.";
         return false;
       }
     freudenthalChar.MakeZero();
@@ -3126,16 +3119,16 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter)
     this->theCharNonPrimalFundCoords.AddMonomial(accumChar[currentIndex], accumChar.theCoeffs[currentIndex]);
     std::string tempS;
     bool tempBool=freudenthalChar.FreudenthalEvalMeFullCharacter(outputChar, -1, &tempS, this->owner->theGlobalVariables);
-    stOutput << "Freudenthal char of " << freudenthalChar.ToString() << " equals: " << outputChar.ToString();
+    //stOutput << "Freudenthal char of " << freudenthalChar.ToString() << " equals: " << outputChar.ToString();
     if (!tempBool && !allowBadCharacter)
     { crash << "This is a programming error: failed to evaluate full character via the Freudenthal formula on a relatively small example, namely "
       << freudenthalChar.ToString() << ". The failure message was: " << tempS << ". This shouldn't happen. " << crash;
       return false;
     }
     accumChar-=outputChar;
-    stOutput << "<br>remaining char:" << accumChar.ToString();
+    //stOutput << "<br>remaining char:" << accumChar.ToString();
   }
-  stOutput << "<br>GOT to returning true!";
+  //stOutput << "<br>GOT to returning true!";
   return true;
 }
 

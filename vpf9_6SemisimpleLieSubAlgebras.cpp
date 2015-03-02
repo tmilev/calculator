@@ -3398,6 +3398,12 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
     theReport.Report(tempStream.str());
     output.theRootSAs.theSubalgebras[i].GetSsl2SubalgebrasAppendListNoRepetition(output, i, theGlobalVariables);
   }
+  //sort subalgebras by dynkin index
+  List<int> thePermutation;
+  thePermutation.SetSize(output.theRootSAs.theSubalgebras.size);
+  for (int i=0; i<thePermutation.size; i++)
+    thePermutation[i]=i;
+  output.theRootSAs.theSubalgebras.QuickSortDescending(0, &thePermutation);
   inputOwner.CheckConsistency();
   for (int i=0; i<output.size; i++)
   { //slTwoSubalgebra& theSl2= output.GetElement(i);

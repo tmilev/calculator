@@ -3194,6 +3194,17 @@ WeylGroup& slTwoSubalgebra::GetOwnerWeyl()
 { return this->GetOwnerSSAlgebra().theWeyl;
 }
 
+bool slTwoSubalgebra::operator>(const slTwoSubalgebra& right)const
+{ MacroRegisterFunctionWithName("slTwoSubalgebra::operatorGT");
+  if (this->owneR!=right.owneR)
+    crash << "Error: comparing sl(2) subalgebras with different owners." << crash;
+  if ( this->LengthHsquared>right.LengthHsquared)
+    return true;
+  if (right.LengthHsquared>this->LengthHsquared)
+    return false;
+  return this->hCharacteristic>right.hCharacteristic;
+}
+
 bool slTwoSubalgebra::operator==(const slTwoSubalgebra& right)const
 {// See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, chapter 7-10
   if (this->owneR!=right.owneR)
@@ -3357,7 +3368,6 @@ void slTwoSubalgebra::ToHTML(std::string& filePath)
 
 void SltwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner)
 { MacroRegisterFunctionWithName("SltwoSubalgebras::reset");
-  MultiplicitiesFixedHweight.SetSize(0);
   this->IndicesSl2sContainedInRootSA.SetSize(0);
   this->IndicesSl2decompositionFlas.SetSize(0);
   this->BadHCharacteristics.SetSize(0);
@@ -3399,11 +3409,18 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
     output.theRootSAs.theSubalgebras[i].GetSsl2SubalgebrasAppendListNoRepetition(output, i, theGlobalVariables);
   }
   //sort subalgebras by dynkin index
-  List<int> thePermutation;
+  List<int> thePermutation, theIndexMap;
   thePermutation.SetSize(output.theRootSAs.theSubalgebras.size);
+  theIndexMap.SetSize(thePermutation.size);
   for (int i=0; i<thePermutation.size; i++)
     thePermutation[i]=i;
-  output.theRootSAs.theSubalgebras.QuickSortDescending(0, &thePermutation);
+  output.QuickSortDescending(0, &thePermutation);
+  for (int i=0; i<theIndexMap.size; i++)
+    theIndexMap[thePermutation[i]]=i;
+  for (int j=0; j<output.IndicesSl2sContainedInRootSA.size; j++)
+    for (int k=0; output.IndicesSl2sContainedInRootSA[j].size; k++)
+      output.IndicesSl2sContainedInRootSA[j][k]=theIndexMap[output.IndicesSl2sContainedInRootSA[j][k]];
+//  for (int i=0)
   inputOwner.CheckConsistency();
   for (int i=0; i<output.size; i++)
   { //slTwoSubalgebra& theSl2= output.GetElement(i);
@@ -3582,7 +3599,6 @@ void slTwoSubalgebra::MakeReportPrecomputations
   this->hCharacteristic.SetSize(theDimension);
   for (int i=0; i<theDimension; i++)
     this->hCharacteristic[i]= this->GetOwnerSSAlgebra().theWeyl.RootScalarCartanRoot(this->theH.GetCartanPart(), this->preferredAmbientSimpleBasis[i]);
-  this->LengthHsquared=this->GetOwnerSSAlgebra().theWeyl.RootScalarCartanRoot(this->theH.GetCartanPart(), this->theH.GetCartanPart());
   //this->hCharacteristic.ComputeDebugString();
 //  if (this->theE.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size
 //      && this->theF.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size

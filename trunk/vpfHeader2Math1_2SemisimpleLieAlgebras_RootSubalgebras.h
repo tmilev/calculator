@@ -238,7 +238,7 @@ public:
   bool RootsDefineASubalgebra(Vectors<Rational>& theRoots);
   void GenerateKmodMultTable(List<List<List<int> > >& output, List<int>& oppositeKmods, GlobalVariables* theGlobalVariables);
   void KmodTimesKmod(int index1, int index2, List<int>& oppositeKmods, List<int>& output);
-  void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables);
+  void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexRootSAinContainer, GlobalVariables& theGlobalVariables);
   void ComputeDynkinDiagramKandCentralizer();
   bool CheckRankInequality()const;
   bool ComputeEssentialsIfNew();
@@ -356,6 +356,12 @@ public:
 class slTwoSubalgebra
 {
 public:
+/////////////////////////////////////////////
+  friend std::ostream& operator << (std::ostream& output, const slTwoSubalgebra& theSl2)
+  { output << theSl2.ToString();
+    return output;
+  }
+/////////////////////////////////////////////
   List<int> highestWeights;
   List<int> multiplicitiesHighestWeights;
   List<int> weightSpaceDimensions;
@@ -419,6 +425,7 @@ public:
   void ElementToHtmlCreateFormulaOutputReference
   (const std::string& formulaTex, std::stringstream& output, bool usePNG, bool useHtml, SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer)const;
   bool operator==(const slTwoSubalgebra& right)const;
+  bool operator>(const slTwoSubalgebra& right)const;
   unsigned int HashFunction() const
   { int tempI=MathRoutines::Minimum(SomeRandomPrimesSize, this->hCharacteristic.size);
     int result=0;
@@ -436,7 +443,6 @@ class SltwoSubalgebras : public HashedList<slTwoSubalgebra>
   friend class SemisimpleSubalgebras;
   SemisimpleLieAlgebra* owner;
 public:
-  List<int> MultiplicitiesFixedHweight;
   List<List<int> > IndicesSl2sContainedInRootSA;
   List<int> IndicesSl2decompositionFlas;
   Vectors<Rational> BadHCharacteristics;

@@ -819,7 +819,9 @@ public:
   void QuickSortAscending(List<Object>::OrderLeftGreaterThanRight theOrder=0, List<otherType>* carbonCopy=0)
   { if (carbonCopy!=0)
       if (carbonCopy->size!=this->size)
-        crash << "Programming error: requesting to quick with carbon copy, but the carbon copy has a different number of elements." << crash;
+        crash << "Programming error: requesting quicksort with carbon copy on a list with "
+        << this->size << " elements, but the but the carbon copy has "
+        << carbonCopy->size << " elements. " << crash;
     if (this->size==0)
       return;
     if (theOrder==0)

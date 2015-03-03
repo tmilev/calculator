@@ -422,8 +422,6 @@ public:
   //the below is outdated, must be deleted as soon as equivalent code is written.
   void ComputeDynkinsEpsilon(WeylGroup& theWeyl);
   void ToHTML(std::string& filePath);
-  void ElementToHtmlCreateFormulaOutputReference
-  (const std::string& formulaTex, std::stringstream& output, bool usePNG, bool useHtml, SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer)const;
   bool operator==(const slTwoSubalgebra& right)const;
   bool operator>(const slTwoSubalgebra& right)const;
   unsigned int HashFunction() const
@@ -448,10 +446,6 @@ public:
   Vectors<Rational> BadHCharacteristics;
   int IndexZeroWeight;
   rootSubalgebras theRootSAs;
-  List<std::string> texFileNamesForPNG;
-  List<std::string> texStringsEachFile;
-  List<std::string> listSystemCommandsLatex;
-  List<std::string> listSystemCommandsDVIPNG;
   bool flagDeallocated;
   ~SltwoSubalgebras()
   { this->flagDeallocated=true;

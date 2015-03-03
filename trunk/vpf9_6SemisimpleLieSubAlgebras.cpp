@@ -623,6 +623,8 @@ bool SemisimpleSubalgebras::FindTheSSSubalgebrasContinue()
   theReport2.Report(reportStream2.str());
   if (!this->targetDynkinType.IsEqualToZero())
     this->flagAttemptToAdjustCentralizers=false;
+  this->flagAttemptToAdjustCentralizers=true;
+
   this->HookUpCentralizers(false);
   if (this->flagComputeNilradicals)
     this->ComputePairingTablesAndFKFTtypes();
@@ -787,7 +789,7 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
   if (!this->ComputeChar(false))
   { if (this->owner->theGlobalVariables!=0)
       theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) + " doesn't have fitting chars.");
-    stOutput << "Compute char returned false.";
+    //stOutput << "Compute char returned false.";
     return false;
   }
   this->ComputeSystem(false, false);
@@ -815,7 +817,7 @@ void SemisimpleSubalgebras::GetHCandidates
   ProgressReport theReport3(this->theGlobalVariables);
   int baseRank=currentType.GetRank()-1;
 
-  stOutput << "<hr>Getting h-candidates to realize type: " << currentType.ToString();
+//  stOutput << "<hr>Getting h-candidates to realize type: " << currentType.ToString();
   DynkinSimpleType theSmallType;
   theSmallType=currentType.GetSmallestSimpleType();
 
@@ -826,10 +828,10 @@ void SemisimpleSubalgebras::GetHCandidates
   }
   int indexNewRooT=*currentRootInjection.LastObject();
   int indexNewRootInSmallType=indexNewRooT-currentType.GetRank()+theSmallType.theRank;
-  stOutput << "Ere be trouble!!!!";
+//  stOutput << "Ere be trouble!!!!";
   Rational desiredHScaledToActByTwoLengthSquared=theSmallType.CartanSymmetricInverseScale*4/
   theSmallType.GetDefaultRootLengthSquared(indexNewRootInSmallType);
-  stOutput << " Desired h length: " << desiredHScaledToActByTwoLengthSquared.ToString();
+//  stOutput << " Desired h length: " << desiredHScaledToActByTwoLengthSquared.ToString();
   outputHCandidatesScaledToActByTwo.SetSize(0);
   for (int j=0; j<this->theSl2s.size; j++)
   { if (this->theGlobalVariables!=0)
@@ -887,8 +889,8 @@ void SemisimpleSubalgebras::GetHCandidates
       //stOutput << "<br>" << out2.str();
     }
   }
-  stOutput << "<br>Finished fetching h-candidates, total " << outputHCandidatesScaledToActByTwo.size << " found. <br>"
-  << "The candidates are: " << outputHCandidatesScaledToActByTwo.ToString();
+//  stOutput << "<br>Finished fetching h-candidates, total " << outputHCandidatesScaledToActByTwo.size << " found. <br>"
+//  << "The candidates are: " << outputHCandidatesScaledToActByTwo.ToString();
 }
 
 const CandidateSSSubalgebra& SemisimpleSubalgebras::baseSubalgebra()
@@ -973,9 +975,9 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
   this->GetHCandidates
   (this->currentHCandidatesScaledToActByTwo[stackIndex], newCandidate, this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
    this->currentRootInjections[stackIndex][typeIndex]);
-  stOutput << "<br>Attempting to realize type: " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
-  << " using " << this->currentHCandidatesScaledToActByTwo[stackIndex].size
-  << " h candidates. The candidates follow: " << this->currentHCandidatesScaledToActByTwo[stackIndex].ToString();
+//  stOutput << "<br>Attempting to realize type: " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
+//  << " using " << this->currentHCandidatesScaledToActByTwo[stackIndex].size
+//  << " h candidates. The candidates follow: " << this->currentHCandidatesScaledToActByTwo[stackIndex].ToString();
   return true;
 }
 
@@ -3040,14 +3042,14 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter)
   this->theCharFundamentalCoordsRelativeToCartan.AddMonomial(tempMon, this->GetAmbientSS().GetRank());
   List<DynkinSimpleType> theTypes;
   this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
-  stOutput << "<br>Cartan symmetric, type  "
+/*  stOutput << "<br>Cartan symmetric, type  "
   << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " <br>"
   << this->theWeylNonEmbeddeD.CartanSymmetric.ToString()
   << "<br> Co-Cartan symmetric: "
   << this->theWeylNonEmbeddeD.CoCartanSymmetric.ToString()
   << "<br>Cartan by compo: " << this->CartanSAsByComponentScaledToActByTwo.ToString()
   << "<br> hs scaled to act by two: " << this->theHsScaledToActByTwo.ToString()
-  << "<br> hs non-scaled: " << this->theHs.ToString();
+  << "<br> hs non-scaled: " << this->theHs.ToString();*/
   Matrix<Rational> coCartanCandidate;
   this->theHsScaledToActByTwo.GetGramMatrix(coCartanCandidate, &this->GetAmbientWeyl().CartanSymmetric);
   if (coCartanCandidate!=this->theWeylNonEmbeddeD.CoCartanSymmetric)
@@ -4800,15 +4802,20 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
       << centralizerType.ToString();
       theReport1.Report(reportStream.str());
     }
-    //stOutput << "<br>centralizerType: " << centralizerType.ToString() ;
+    stOutput << "<br>The centralizer of " << this->theWeylNonEmbeddeD.theDynkinType.ToString()
+    << " was computed to be: " << centralizerType.ToString()
+    << "<br> The largest type containing the sa is: "
+    << this->owner->theSubalgebras[this->indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType.ToString();
     this->centralizerRank-=centralizerType.GetRootSystemSize();
     if (this->RootSystemCentralizerPrimalCoords.size>0)
       if (centralizerType!=this->theCentralizerType)
         crash << "This is a programming error: two different methods for computing the centralizer type yield different results: by sub-diagram I computed the type as "
         << this->theCentralizerType.ToString() << " but looking at subalgerba containing the current one I got centralizer type "
         << centralizerType.ToString() << crash;
-  }
-  //stOutput << "<br>centralizer rank: " << this->centralizerRank << ", cartan centralizer size: " << this->CartanOfCentralizer.size;
+  } else
+    stOutput << "<br>Type: " << this->theWeylNonEmbeddeD.theDynkinType.ToString() << ", " << " indexMaxSSContainer is -1. ";
+  stOutput << "<br>centralizer dimension: " << this->centralizerDimension << ", centralizer rank computed to be: "
+  << this->centralizerRank << ", cartan centralizer computed to be of dimension: " << this->CartanOfCentralizer.size;
   this->flagCentralizerIsWellChosen=(this->centralizerRank==this->CartanOfCentralizer.size);
   if (this->indexMaxSSContainer!=-1 && this->flagCentralizerIsWellChosen)
     for (int i=0; i<this->owner->theSubalgebras.size; i++)

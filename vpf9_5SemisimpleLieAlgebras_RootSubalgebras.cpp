@@ -2242,7 +2242,7 @@ void SemisimpleLieAlgebra::initHEFSystemFromECoeffs
 //  outputSystemToBeSolved.ComputeDebugString();
 }
 
-void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables)
+void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexRootSAinContainer, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition");
   //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1-10.4
   int theRelativeDimension= this->SimpleBasisK.size;
@@ -2338,8 +2338,8 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
     for (int i=0; i<theSl2.RootsWithScalar2WithH.size; i++)
       if (this->GetAmbientWeyl().RootScalarCartanRoot(characteristicH, theSl2.RootsWithScalar2WithH[i])!=2)
         crash << "Programming error, bad scalar product after raising!" << crash;
-
     theSl2.theH.MakeHgenerator(characteristicH, theLieAlgebra);
+    theSl2.LengthHsquared=theSl2.GetOwnerSSAlgebra().theWeyl.RootScalarCartanRoot(characteristicH, characteristicH);
     theSl2.theE.MakeZero();
     theSl2.theF.MakeZero();
     //theSl2.ComputeDebugString(false, false, theGlobalVariables);
@@ -2348,12 +2348,12 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
        (theSl2.RootsWithScalar2WithH, selectionRootsWithZeroCharacteristic, reflectedSimpleBasisK, characteristicH, theSl2.theE,
         theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
     { int indexIsoSl2;
-      theSl2.MakeReportPrecomputations(theGlobalVariables, output, output.size, indexInContainer, *this);
+      theSl2.MakeReportPrecomputations(theGlobalVariables, output, output.size, indexRootSAinContainer, *this);
       if(output.ContainsSl2WithGivenHCharacteristic(theSl2.hCharacteristic, &indexIsoSl2))
-      { output.GetElement(indexIsoSl2).IndicesContainingRootSAs.AddOnTop(indexInContainer);
-        output.IndicesSl2sContainedInRootSA[indexInContainer].AddOnTop(indexIsoSl2);
+      { output.GetElement(indexIsoSl2).IndicesContainingRootSAs.AddOnTop(indexRootSAinContainer);
+        output.IndicesSl2sContainedInRootSA[indexRootSAinContainer].AddOnTop(indexIsoSl2);
       } else
-      { output.IndicesSl2sContainedInRootSA[indexInContainer].AddOnTop(output.size);
+      { output.IndicesSl2sContainedInRootSA[indexRootSAinContainer].AddOnTop(output.size);
         theSl2.indexInContainer=output.size;
         output.AddOnTop(theSl2);
       }

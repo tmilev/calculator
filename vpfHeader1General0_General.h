@@ -1400,16 +1400,18 @@ public:
         this->TheHashedArrays[theIndex].AddOnTop(i);
       }
   }
-  void QuickSortAscending(typename List<Object>::OrderLeftGreaterThanRight theOrder=0)
+  template<typename otherType=int>
+  void QuickSortAscending(typename List<Object>::OrderLeftGreaterThanRight theOrder=0, List<otherType>* carbonCopy=0)
   { List<Object> theList;
     theList=*this;
     theList.QuickSortAscending(theOrder);
     this->operator=(theList);
   }
-  void QuickSortDescending(typename List<Object>::OrderLeftGreaterThanRight theOrder=0)
+  template<typename otherType>
+  void QuickSortDescending(typename List<Object>::OrderLeftGreaterThanRight theOrder=0, List<otherType>* carbonCopy=0)
   { List<Object> theList;
     theList=*this;
-    theList.QuickSortDescending(theOrder);
+    theList.QuickSortDescending(theOrder, carbonCopy);
     this->operator=(theList);
   }
   void initHashesToOne()
@@ -1518,11 +1520,13 @@ public:
   inline int AddNoRepetitionOrReturnIndexFirst(const Object& o)
   { return this->::HashTemplate<Object, List<Object>, hashFunction>::AddNoRepetitionOrReturnIndexFirst(o);
   }
-  inline void QuickSortAscending(typename List<Object>::OrderLeftGreaterThanRight theOrder=0)
-  { this->::HashTemplate<Object, List<Object>, hashFunction>::QuickSortAscending(theOrder);
+  template <typename otherType=int>
+  inline void QuickSortAscending(typename List<Object>::OrderLeftGreaterThanRight theOrder=0, List<otherType>* carbonCopy=0)
+  { this->::HashTemplate<Object, List<Object>, hashFunction>::QuickSortAscending(theOrder, carbonCopy);
   }
-  inline void QuickSortDescending(typename List<Object>::OrderLeftGreaterThanRight theOrder=0)
-  { this->::HashTemplate<Object, List<Object>, hashFunction>::QuickSortDescending(theOrder);
+  template <typename otherType=int>
+  inline void QuickSortDescending(typename List<Object>::OrderLeftGreaterThanRight theOrder=0, List<otherType>* carbonCopy=0)
+  { this->::HashTemplate<Object, List<Object>, hashFunction>::QuickSortDescending(theOrder, carbonCopy);
   }
   inline void SetExpectedSize(int expectedSize)
   { this->::HashTemplate<Object, List<Object>, hashFunction>::SetExpectedSize(expectedSize);

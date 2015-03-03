@@ -474,7 +474,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
     theSAs.theSubalgebras.AddOnTop(currentCandidate);
     theSAs.theHsOfSubalgebras.AddOnTop(currentCandidate.theHs);
   }
-  reportStream << "Subalgebra loading done. ";
+  reportStream << "Subalgebra loading done, total  " << theSAs.theSubalgebras.size << " subalgebras loaded. ";
   theReport.Report(reportStream.str());
   theSAs.ToStringExpressionString=CalculatorConversions::innerStringFromSemisimpleSubalgebras;
 //  if (theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection!=0)

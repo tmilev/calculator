@@ -3170,26 +3170,6 @@ void slTwoSubalgebra::ElementToStringModuleDecompositionMinimalContainingRegular
   output=out.str();
 }
 
-void slTwoSubalgebra::ElementToHtmlCreateFormulaOutputReference
-(const std::string& formulaTex, std::stringstream& output, bool usePNG, bool useHtml, SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer)const
-{ if (!usePNG)
-  { output << formulaTex;
-    //if (useHtml)
-      //output<<"\n<br>\n";
-    return;
-  }
-  std::stringstream tempStream;
-  container.texFileNamesForPNG.SetSize(container.texFileNamesForPNG.size+1);
-  container.texStringsEachFile.SetSize(container.texFileNamesForPNG.size);
-  (*container.texStringsEachFile.LastObject())=formulaTex;
-  tempStream << (*physicalPath) << "fla";
-  tempStream << container.texFileNamesForPNG.size << ".tex";
-  container.texFileNamesForPNG[container.texFileNamesForPNG.size-1]=tempStream.str();
-  output << "<img src=\"" << (*htmlPathServer) << "fla" << container.texFileNamesForPNG.size << ".png\">";
-  if (useHtml)
-    output << "\n<br>\n";
-}
-
 WeylGroup& slTwoSubalgebra::GetOwnerWeyl()
 { return this->GetOwnerSSAlgebra().theWeyl;
 }
@@ -3267,11 +3247,6 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
   out << "\nsl(2)-module decomposition of the ambient Lie algebra: ";
   this->ElementToStringModuleDecomposition(useLatex, useHtml, tempS);
   out << CGI::GetMathMouseHover(tempS) << "\n<br>\n";
-  if (indexInContainer!=-1)
-  { this->container->IndicesSl2decompositionFlas.SetSize(this->container->size);
-    this->container->IndicesSl2decompositionFlas[indexInContainer]=
-    this->container->texFileNamesForPNG.size-1;
-  }
   out << "\nBelow is one possible realization of the sl(2) subalgebra.";
   if (useHtml)
     out << "\n<br>\n";
@@ -3372,11 +3347,6 @@ void SltwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner)
   this->IndicesSl2decompositionFlas.SetSize(0);
   this->BadHCharacteristics.SetSize(0);
   this->IndexZeroWeight=-1;
-  this->texFileNamesForPNG.SetSize(0);
-  this->texStringsEachFile.SetSize(0);
-  this->listSystemCommandsLatex.SetSize(0);
-  this->listSystemCommandsDVIPNG.SetSize(0);
-
   this->owner=& inputOwner;
   this->theRootSAs.owneR=&inputOwner;
 }
@@ -3410,17 +3380,20 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
   }
   //sort subalgebras by dynkin index
   List<int> thePermutation, theIndexMap;
-  thePermutation.SetSize(output.theRootSAs.theSubalgebras.size);
+  thePermutation.SetSize(output.size);
   theIndexMap.SetSize(thePermutation.size);
   for (int i=0; i<thePermutation.size; i++)
     thePermutation[i]=i;
   output.QuickSortDescending(0, &thePermutation);
   for (int i=0; i<theIndexMap.size; i++)
     theIndexMap[thePermutation[i]]=i;
+ // stOutput << "we have that output.size= " << output.size << " the permutation= " <<  thePermutation
+  //<< " the index map= " << theIndexMap;
   for (int j=0; j<output.IndicesSl2sContainedInRootSA.size; j++)
-    for (int k=0; output.IndicesSl2sContainedInRootSA[j].size; k++)
+    for (int k=0; k<output.IndicesSl2sContainedInRootSA[j].size; k++)
       output.IndicesSl2sContainedInRootSA[j][k]=theIndexMap[output.IndicesSl2sContainedInRootSA[j][k]];
-//  for (int i=0)
+//  stOutput << "<br>got to ere";
+
   inputOwner.CheckConsistency();
   for (int i=0; i<output.size; i++)
   { //slTwoSubalgebra& theSl2= output.GetElement(i);
@@ -3439,6 +3412,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
       if (isMinimalContaining)
         output.GetElement(i).IndicesMinimalContainingRootSA.AddOnTopNoRepetition(output.GetElement(i).IndicesContainingRootSAs[j]);
     }
+//    stOutput << "<br>got to ere";
     output.CheckConsistency();
     output.ComputeModuleDecompositionsOfAmbientLieAlgebra(theGlobalVariables);
   }
@@ -3821,17 +3795,6 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat, GlobalVariables* the
   bool usePNG=true;
   if (physicalPathSAs=="")
     usePNG=false;
-  if(usePNG)
-  { int numExpectedFiles= this->size*8;
-    this->texFileNamesForPNG.ReservE(numExpectedFiles);
-    this->texStringsEachFile.ReservE(numExpectedFiles);
-    this->listSystemCommandsLatex.ReservE(numExpectedFiles);
-    this->listSystemCommandsDVIPNG.ReservE(numExpectedFiles);
-  }
-  this->texFileNamesForPNG.size=0;
-  this->texStringsEachFile.size=0;
-  this->listSystemCommandsLatex.size=0;
-  this->listSystemCommandsDVIPNG.size=0;
   std::stringstream out, outNotation, outNotationCommand;
   std::string fileName;
   std::fstream theFile, fileFlas;
@@ -3857,7 +3820,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat, GlobalVariables* the
     << ", sl(2)-triples of "
     << this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString()
     << " \">";
-    theFile << "<BODY>" << notation << "<a href=\"" << htmlPathServerSl2s << "sl2s_nopng.html\"> plain html for your copy+paste convenience</a><br>\n"
+    theFile << "<BODY>" << notation << "<a href=\"" << htmlPathServerSl2s << "sl2s_nopng.html\"> Plain html for your copy+paste convenience</a><br>\n"
     << tempS << "</HTML></BODY>";
     theFile.close();
   }
@@ -3868,25 +3831,9 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat, GlobalVariables* the
   tempS = this->ToString(theFormat);
   theFormat->flagUsePNG=tempB;
   FileOperations::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
-  theFile << "<HMTL><BODY>" << notation << "<a href=\"" << htmlPathServerSl2s << "sl2s.html\"> .png rich html for your viewing pleasure</a><br>\n"
+  theFile << "<HMTL><BODY>" << notation << "<a href=\"" << htmlPathServerSl2s << "sl2s.html\"> Math formulas rendered via jsmath</a><br>\n"
   << tempS << "</HTML></BODY>";
   theFile.close();
-  if (usePNG)
-  { this->listSystemCommandsLatex.SetSize(this->texFileNamesForPNG.size);
-    this->listSystemCommandsDVIPNG.SetSize(this->texFileNamesForPNG.size);
-    for (int i=0; i<this->texFileNamesForPNG.size; i++)
-    { FileOperations::OpenFileCreateIfNotPresent(fileFlas, this->texFileNamesForPNG[i], false, true, false);
-      fileFlas << "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n" << this->texStringsEachFile[i] << "\n\\end{document}";
-      std::stringstream tempStreamLatex, tempStreamPNG;
-      tempStreamLatex << "latex " << " -output-directory=" << physicalPathSl2s << " " << this->texFileNamesForPNG[i];
-      tempS= this->texFileNamesForPNG[i];
-      tempS.resize(tempS.size()-4);
-      tempStreamPNG << "dvipng " << tempS << ".dvi -o " << tempS << ".png -T tight";
-      this->listSystemCommandsLatex[i]= tempStreamLatex.str();
-      this->listSystemCommandsDVIPNG[i]=tempStreamPNG.str();
-      fileFlas.close();
-    }
-  }
 }
 
 bool CandidateSSSubalgebra::IsExtremeWeight(int moduleIndex, int indexInIsoComponent)const

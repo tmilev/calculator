@@ -4969,7 +4969,7 @@ class DynkinSimpleType
     this->CartanSymmetricInverseScale=1;
   }
   int GetRootSystemSize()const;
-  int GetRootSystemPlusRank()const
+  int GetLieAlgebraDimension()const
   { return this->GetRootSystemSize()+this->theRank;
   }
   int GetSSAlgDim()const
@@ -5118,10 +5118,10 @@ public:
       crash << "This is a programming error: multiplicity of simple type is not a small integer. " << crash;
     return intResult;
   }
-  int GetRootSystemPlusRank()const
+  int GetLieAlgebraDimension()const
   { Rational result=0;
     for (int i=0; i<this->size(); i++)
-      result+=this->theCoeffs[i]*(*this)[i].GetRootSystemPlusRank();
+      result+=this->theCoeffs[i]*(*this)[i].GetLieAlgebraDimension();
     int intResult;
     if (!result.IsSmallInteger(&intResult))
       crash << "This is a programming error: multiplicity of simple type is not a small integer. " << crash;

@@ -800,7 +800,7 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
     }
   for (int i=0; i<this->owner->theSubalgebras.size; i++)
     if (this->theWeylNonEmbeddeD.theDynkinType==this->owner->theSubalgebras[i].theWeylNonEmbeddeD.theDynkinType)
-    { if (this->IsDirectSummandOf(this->owner->theSubalgebras[i], true))
+    { if (this->IsDirectSummandOf(this->owner->theSubalgebras[i]))
         return false;
     } else
       if (this->theWeylNonEmbeddeD.theDynkinType.ToString()==this->owner->theSubalgebras[i].theWeylNonEmbeddeD.theDynkinType.ToString())
@@ -1648,10 +1648,10 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
     this->theBasis.AddListOnTop(this->thePosGens);
     if (this->theBasis.size>0)
     { this->owner->owneR->GenerateLieSubalgebra(this->theBasis);
-      if (this->theBasis.size!=this->theWeylNonEmbeddeD.theDynkinType.GetRootSystemPlusRank())
+      if (this->theBasis.size!=this->theWeylNonEmbeddeD.theDynkinType.GetLieAlgebraDimension())
       { if (!allowNonPolynomialSystemFailure)
           crash << "This is a programming error. Lie subalgebra dimension doesn't fit: dimension of generated subalgebra is "
-          << this->theBasis.size << ", must be " << this->theWeylNonEmbeddeD.theDynkinType.GetRootSystemPlusRank()
+          << this->theBasis.size << ", must be " << this->theWeylNonEmbeddeD.theDynkinType.GetLieAlgebraDimension()
           << ". The subalgebra is " << this->ToString() << "<br>Involved generators: " << this->theInvolvedNegGenerators.ToString()
           << "<br>and<br>" << this->theInvolvedPosGenerators.ToString() << crash;
         return false;
@@ -5210,36 +5210,38 @@ void WeylGroup::RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeights,
 
 bool CandidateSSSubalgebra::HasConjugateHsTo(List<Vector<Rational> >& input)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::HasConjugateHsTo");
-//  bool doDebug=this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{2}_1";
-//  if (doDebug)
-//    stOutput << "<br>Checking whether " << this->theHs.ToString() << " are conjugated to " << input.ToString();
+  bool doDebug=this->theWeylNonEmbeddeD.theDynkinType.ToString()=="B^{1}_2";
+  if (doDebug)
+    stOutput << "<br>Checking whether " << this->theHs.ToString() << " are conjugated to " << input.ToString();
   if (input.size!=this->theHs.size)
     return false;
   List<Vector<Rational> > raisedInput=input;
   List<Vector<Rational> > myVectors=this->theHs;
-  //if (doDebug)
-  //  stOutput << "<br>Comparing simultaneously: " << raisedInput.ToString() << " with " << myVectors.ToString();
+  if (doDebug)
+    stOutput << "<br>Comparing simultaneously: " << raisedInput.ToString() << " with " << myVectors.ToString();
   WeylGroup& ambientWeyl=this->GetAmbientWeyl();
   ambientWeyl.RaiseToMaximallyDominant(raisedInput, true);
   ambientWeyl.RaiseToMaximallyDominant(myVectors, true);
-  //if (doDebug)
-  //  stOutput << "<br>raised input is: " << raisedInput.ToString() << ", my raised h's are: " << myVectors.ToString();
+  if (doDebug)
+    stOutput << "<br>raised input is: " << raisedInput.ToString() << ", my raised h's are: " << myVectors.ToString();
   return myVectors==raisedInput;
 }
 
-bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other, bool computeImmediateDirectSummandOnly)
+bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::IsDirectSummandOf");
+  bool doDebug=(this->theWeylNonEmbeddeD.theDynkinType.ToString()== "B^{1}_2" && other.theWeylNonEmbeddeD.theDynkinType.ToString()=="2B^{1}_2");
+  if (doDebug)
+    stOutput << " <hr><hr>Testing whether " << this->theWeylNonEmbeddeD.theDynkinType.ToString()
+    << " is a direct summand of " << other.theWeylNonEmbeddeD.theDynkinType.ToString() << "...<br>";
   if (other.flagSystemProvedToHaveNoSolution)
     return false;
-//  bool doDebug=(this->theWeylNonEmbeddeD.theDynkinType.ToString()== "A^{2}_1" && other.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{2}_1+A^{1}_1");
-//  if (doDebug)
-//    stOutput << " <hr><hr>Testing whether " << this->ToString() << " is a direct summand of " << other.ToString() << "...<br>";
   DynkinType theDifference;
   theDifference= other.theWeylNonEmbeddeD.theDynkinType;
   theDifference-=this->theWeylNonEmbeddeD.theDynkinType;
   for (int i=0; i<theDifference.size(); i++)
     if (theDifference.theCoeffs[i]<0)
-    { //stOutput << " it's not because types don't match.";
+    { if (doDebug)
+        stOutput << " it's not because types don't match.";
       return false;
     }
   Incrementable<SelectionFixedRank> selectedTypes;
@@ -5256,6 +5258,8 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
     currentTypeSelection.SetNumItemsAndDesiredSubsetSize(intMult, theHsByType[i].size);
     selectedTypes.theElements.AddOnTop(currentTypeSelection);
   }
+  if (doDebug)
+    stOutput << "Selected types: " << selectedTypes.ToString();
   FinitelyGeneratedMatrixMonoid<Rational> theOuterAutos;
   this->theWeylNonEmbeddeD.theDynkinType.GetOuterAutosGeneratorsActOnVectorColumn(theOuterAutos.theGenerators);
   for (int i=0; i<theOuterAutos.theGenerators.size; i++)
@@ -5281,6 +5285,8 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
         reportStream << "... and so on, only the first 100 elements printed out of total " << theOuterAutos.theElements.size << ". ";
       else
         reportStream << "<br>" << CGI::GetMathMouseHover(theOuterAutos.theElements[i].ToStringMatForm(&theFormat));
+    if (doDebug)
+      stOutput << "<br>report current: " << reportStream.str();
     theReport.Report(reportStream.str());
   }
   do
@@ -5294,6 +5300,8 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
         }
       }
       theOuterAutos.theElements[k].ActOnVectorROWSOnTheLeft(conjugationCandidates, conjugationCandidates);
+      if (doDebug)
+        stOutput << "<br>In while cycle: selectedTypes: " << selectedTypes.ToString();
       if (this->HasConjugateHsTo(conjugationCandidates))
         return true;
     }
@@ -5384,21 +5392,26 @@ void SemisimpleSubalgebras::HookUpCentralizers(bool allowNonPolynomialSystemFail
     currentSA.indexIamInducedFrom=theCandidatePermutationHashed.GetIndex(currentSA.indexIamInducedFrom);
     currentSA.indicesDirectSummandSuperAlgebra.SetSize(0);
     currentSA.indexMaxSSContainer=-1;
-//    stOutput << "<hr>Exploring centralizers of " << currentSA.theWeylNonEmbeddeD.theDynkinType.ToString();
+    stOutput << "<hr>Finding max container of " << currentSA.theWeylNonEmbeddeD.theDynkinType.ToString();
     for (int j=0; j<this->theSubalgebras.size; j++)
     { if (i==j)
         continue;
       CandidateSSSubalgebra& otherSA=this->theSubalgebras[j];
-      if (currentSA.IsDirectSummandOf(otherSA, true))
+      if (currentSA.IsDirectSummandOf(otherSA))
       { currentSA.indicesDirectSummandSuperAlgebra.AddOnTop(j);
         if (currentSA.indexMaxSSContainer==-1)
           currentSA.indexMaxSSContainer=j;
-        if (this->theSubalgebras[currentSA.indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType.GetRootSystemPlusRank()
-            <otherSA.theWeylNonEmbeddeD.theDynkinType.GetRootSystemPlusRank())
+        if (this->theSubalgebras[currentSA.indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType.GetLieAlgebraDimension()
+            <otherSA.theWeylNonEmbeddeD.theDynkinType.GetLieAlgebraDimension())
           currentSA.indexMaxSSContainer=j;
-//        stOutput << " direct summand of " << otherSA.theWeylNonEmbeddeD.theDynkinType.ToString() << ", ";
-      }// else stOutput << " NOT direct summand of " << otherSA.theWeylNonEmbeddeD.theDynkinType.ToString() << ", ";
+        stOutput << " direct summand of " << otherSA.theWeylNonEmbeddeD.theDynkinType.ToString() << ", ";
+      } //else stOutput << " NOT direct summand of " << otherSA.theWeylNonEmbeddeD.theDynkinType.ToString() << ", ";
     }
+    if (currentSA.indexMaxSSContainer!=-1)
+      stOutput << "<br> Max semisimple container of " << currentSA.theWeylNonEmbeddeD.theDynkinType.ToString()
+      << " is computed to be: " << this->theSubalgebras[currentSA.indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType.ToString();
+    else
+      stOutput << "<br> Max semisimple container equals original subalgebra. ";
   }
   theReport1.Report("<hr>\nCentralizers computed, adjusting centralizers with respect to the Cartan subalgebra.");
   for (int i=0; i<this->theSubalgebras.size; i++)

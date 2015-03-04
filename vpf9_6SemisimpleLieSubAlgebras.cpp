@@ -5140,7 +5140,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   return out.str();
 }
 
-void CandidateSSSubalgebra::GetHsByType(List<List<Vectors<Rational> > >& outputHsByType, List<DynkinSimpleType>& outputTypeList)const
+void CandidateSSSubalgebra::GetHsScaledToActByTwoByType(List<List<Vectors<Rational> > >& outputHsByType, List<DynkinSimpleType>& outputTypeList)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::GetHsByType");
   List<DynkinSimpleType> allTypes;
   this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(allTypes);
@@ -5208,15 +5208,15 @@ void WeylGroup::RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeights,
     } while (found);
 }
 
-bool CandidateSSSubalgebra::HasConjugateHsTo(List<Vector<Rational> >& input)const
+bool CandidateSSSubalgebra::HasHsScaledByTwoConjugateTo(List<Vector<Rational> >& input)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::HasConjugateHsTo");
   bool doDebug=this->theWeylNonEmbeddeD.theDynkinType.ToString()=="B^{1}_2";
   if (doDebug)
-    stOutput << "<br>Checking whether " << this->theHs.ToString() << " are conjugated to " << input.ToString();
-  if (input.size!=this->theHs.size)
+    stOutput << "<br>Checking whether " << this->theHsScaledToActByTwo.ToString() << " are conjugated to " << input.ToString();
+  if (input.size!=this->theHsScaledToActByTwo.size)
     return false;
   List<Vector<Rational> > raisedInput=input;
-  List<Vector<Rational> > myVectors=this->theHs;
+  List<Vector<Rational> > myVectors=this->theHsScaledToActByTwo;
   if (doDebug)
     stOutput << "<br>Comparing simultaneously: " << raisedInput.ToString() << " with " << myVectors.ToString();
   WeylGroup& ambientWeyl=this->GetAmbientWeyl();
@@ -5248,14 +5248,14 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
   List<DynkinSimpleType> isoTypes;
   SelectionFixedRank currentTypeSelection;
   SelectionWithMaxMultiplicity outerIsoSelector;
-  List<List<Vectors<Rational> > > theHsByType;
-  other.GetHsByType(theHsByType, isoTypes);
+  List<List<Vectors<Rational> > > theHsScaledToActByTwoByType;
+  other.GetHsScaledToActByTwoByType(theHsScaledToActByTwoByType, isoTypes);
   for (int i=0; i<isoTypes.size; i++)
   { Rational ratMult=this->theWeylNonEmbeddeD.theDynkinType.GetMonomialCoefficient(isoTypes[i]);
     int intMult;
     if (!ratMult.IsSmallInteger(&intMult))
       return false;
-    currentTypeSelection.SetNumItemsAndDesiredSubsetSize(intMult, theHsByType[i].size);
+    currentTypeSelection.SetNumItemsAndDesiredSubsetSize(intMult, theHsScaledToActByTwoByType[i].size);
     selectedTypes.theElements.AddOnTop(currentTypeSelection);
   }
   if (doDebug)
@@ -5295,14 +5295,14 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
       for (int i=0; i<selectedTypes.theElements.size; i++)
       { Selection& currentSel=selectedTypes.theElements[i].theSelection;
         for (int j=0; j<currentSel.CardinalitySelection; j++)
-        { currentComponent= theHsByType[i][currentSel.elements[j]];
+        { currentComponent= theHsScaledToActByTwoByType[i][currentSel.elements[j]];
           conjugationCandidates.AddListOnTop(currentComponent);
         }
       }
       theOuterAutos.theElements[k].ActOnVectorROWSOnTheLeft(conjugationCandidates, conjugationCandidates);
       if (doDebug)
         stOutput << "<br>In while cycle: selectedTypes: " << selectedTypes.ToString();
-      if (this->HasConjugateHsTo(conjugationCandidates))
+      if (this->HasHsScaledByTwoConjugateTo(conjugationCandidates))
         return true;
     }
   while (selectedTypes.IncrementReturnFalseIfPastLast());

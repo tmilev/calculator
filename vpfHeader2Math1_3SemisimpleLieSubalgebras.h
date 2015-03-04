@@ -187,8 +187,8 @@ public:
   int GetPrimalRank()const;
   int GetRank()const;
   int GetSSpartCentralizerOfSSPartCentralizer()const;
-  void GetHsByType(List<List<Vectors<Rational> > >& outputHsByType, List<DynkinSimpleType>& outputTypeList)const;
-  bool HasConjugateHsTo(List<Vector<Rational> >& other)const;
+  void GetHsScaledToActByTwoByType(List<List<Vectors<Rational> > >& outputHsByType, List<DynkinSimpleType>& outputTypeList)const;
+  bool HasHsScaledByTwoConjugateTo(List<Vector<Rational> >& other)const;
   bool IsDirectSummandOf(const CandidateSSSubalgebra& other);
   void GetGenericCartanCentralizerLinearCombination(int indexCartanCentralizerGen, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output);
   void GetGenericPosGenLinearCombination(int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output);

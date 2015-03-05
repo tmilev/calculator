@@ -259,12 +259,12 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent)
     crash << crash;
   DynkinSimpleType& outputType=this->SimpleComponentTypes[indexComponent];
   Vectors<Rational>& currentComponent= this->SimpleBasesConnectedComponents[indexComponent];
-  //stOutput << "<hr><hr>Computing dynkin string from " << currentComponent.ToString();
+//  stOutput << "<hr><hr>Computing dynkin string from " << currentComponent.ToString();
   List<int>& currentEnds=this->indicesEnds[indexComponent];
   if (currentComponent.size<1)
     crash << "This is a programming error: currentComponent is empty which is impossible. " << crash;
 //  stOutput << "<hr> Extracting component from " << currentComponent.ToString() << " with bilinear form "
-//  << theBilinearForm.ToString();
+//  << this->AmbientBilinearForm.ToString();
   if (this->numberOfThreeValencyNodes(indexComponent)==1)
   { //type D or E
     //in type D first comes the triple node, then the long string, then the one-root strings
@@ -338,7 +338,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent)
   if (numLength2==0)
   { //type A
     outputType.MakeArbitrary
-    ('A', numLength1, this->GetSquareLengthLongestRootLinkedTo(currentComponent[0]) /length1);
+    ('A', numLength1, DynkinSimpleType::GetDefaultLongRootLengthSquared('A') /length1);
   } else
   { if (length1<length2)
     { MathRoutines::swap(length1, length2);
@@ -379,6 +379,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent)
   //so far we made sure the entire component is one properly ordered string, starting with the long root.
   if (outputType.theLetter=='G' || outputType.theLetter=='C' )
     currentComponent.ReverseOrderElements();//<-in G_2 and C_n the short root comes first so we need to reverse elements.
+  //stOutput << "The output type was computed to be: " << outputType.ToString();
 }
 
 std::string DynkinDiagramRootSubalgebra::ToString(FormatExpressions* theFormat)const

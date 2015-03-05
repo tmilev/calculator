@@ -4691,6 +4691,8 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
 //    << "<br> The computation is slow, up to around 10 minutes for E_8.<br>";
     SltwoSubalgebras theSl2s(*ownerSS);
     theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo=true;
+//    stOutput << "ChangeME";
+//    theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo=false;
     ownerSS->FindSl2Subalgebras(*ownerSS, theSl2s, *theCommands.theGlobalVariableS);
     std::string PathSl2= outSltwoPath.str();
     std::string DisplayPathSl2=outSltwoDisplayPath.str();

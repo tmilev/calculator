@@ -337,7 +337,7 @@ public:
   int GetDisplayIndexFromActual(int ActualIndexSubalgebra)const;
   void ComputeFolderNames(FormatExpressions& outputFormat);
   void CheckFileWritePermissions();
-  void WriteReportToFiles(const std::string& inputSSsubalgebraExpressionString="");
+  void WriteReportToFiles();
   std::string ToStringAlgebraLink(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
   std::string GetPhysicalFileNameSubalgebra(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
   std::string GetDisplayFileNameSubalgebraRelative(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;

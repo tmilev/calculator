@@ -202,7 +202,7 @@ void SemisimpleSubalgebras::CheckFileWritePermissions()
   testFile << "Write permissions test file.";
 }
 
-void SemisimpleSubalgebras::WriteReportToFiles(const std::string& inputSSsubalgebraExpressionString)
+void SemisimpleSubalgebras::WriteReportToFiles()
 { this->timeComputationEndInSeconds=this->theGlobalVariables->GetElapsedSeconds();
   this->numAdditions=Rational::TotalSmallAdditions+Rational::TotalLargeAdditions;
   this->numMultiplications=Rational::TotalSmallMultiplications+Rational::TotalLargeMultiplications;
@@ -222,10 +222,6 @@ void SemisimpleSubalgebras::WriteReportToFiles(const std::string& inputSSsubalge
   << this->owneR->theWeyl.theDynkinType.ToString()
   << "</title><script src=\"../../jsmath/easy/load.js\"></script><body>" << this->ToString(&this->currentFormat)
   << "<hr><hr>Calculator input for loading subalgebras directly without recomputation.\n<br>\n";
-  if (inputSSsubalgebraExpressionString!="")
-  { fileFastLoad << inputSSsubalgebraExpressionString;
-    fileSlowLoad << inputSSsubalgebraExpressionString;
-  }
   fileFastLoad << "</body></html>";
   fileSlowLoad << "</body></html>";
 }
@@ -616,6 +612,7 @@ bool SemisimpleSubalgebras::FindTheSSSubalgebrasContinue()
     if (!this->flagRealizedAllCandidates)
       return false;
   }
+  stOutput << "got to here";
   ProgressReport theReport2(this->theGlobalVariables);
   std::stringstream reportStream2;
   reportStream2 << "Found a total of " << this->theSubalgebras.size << " subalgebras. Proceding to"
@@ -1077,13 +1074,15 @@ std::string SemisimpleSubalgebras::ToStringProgressReport(FormatExpressions* the
 bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::IncrementReturnFalseIfPastLast");
   this->CheckConsistency();
+  if (this->currentSubalgebraChain.size==0)
+    return false;
+  //  stOutput << "got to here0";
   if (this->baseSubalgebra().theHs.size!=this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation.size)
     crash << " The order of creation of the elements of the Cartan is missing in base subalgebra of type "
     << this->baseSubalgebra().theWeylNonEmbeddeD.theDynkinType.ToString()
     << ", and this order is needed to construct extensions. " << crash;
+  //stOutput << "got to here1";
   ProgressReport theReport1(this->theGlobalVariables);
-  if (this->currentSubalgebraChain.size==0)
-    return false;
   if (this->baseSubalgebra().GetRank()>=this->owneR->GetRank())
     return this->RemoveLastSubalgebra();
   int stackIndex=this->currentSubalgebraChain.size-1;
@@ -1094,16 +1093,19 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
     this->currentNumHcandidatesExplored[stackIndex]=0;
     return this->ComputeCurrentHCandidates();
   }
+  //stOutput << "got to here2";
   int typeIndex=this->currentNumLargerTypesExplored[stackIndex];
   int hIndex=this->currentNumHcandidatesExplored[stackIndex];
   CandidateSSSubalgebra newCandidate;
   newCandidate.owner=this;
 
+  //stOutput << "got to here3";
   bool newSubalgebraCreated=
   newCandidate.CreateAndAddExtendBaseSubalgebra
   (this->baseSubalgebra(), this->currentHCandidatesScaledToActByTwo[stackIndex][hIndex],
    this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
    this->currentRootInjections[stackIndex][typeIndex]);
+  //stOutput << "got to here4";
   this->CheckConsistency();
   if (newSubalgebraCreated)
     if (! newCandidate.flagSystemSolved && !newCandidate.flagSystemProvedToHaveNoSolution)
@@ -3765,7 +3767,9 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
 }
 
 std::string SltwoSubalgebras::ToString(FormatExpressions* theFormat)
-{ std::string tempS; std::stringstream out; std::stringstream body;
+{ std::string tempS;
+  std::stringstream out;
+  std::stringstream body;
   bool useHtml= theFormat==0 ? true : theFormat->flagUseHTML;
   for (int i=0; i<this->size; i++)
   { tempS=(*this)[i].ToString(theFormat);

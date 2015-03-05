@@ -519,7 +519,7 @@ bool Calculator::innerPrintSSsubalgebras
     { theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=-1;
       theSSsubalgebras.FindTheSSSubalgebrasFromScratch(ownerSS);
     }
-    theSSsubalgebras.WriteReportToFiles("LoadSemisimpleSubalgebras{}"+theSSsubalgebras.ToStringExpressionString(theSSsubalgebras));
+    theSSsubalgebras.WriteReportToFiles();
   }
   return output.AssignValue(out.str(), theCommands);
 }

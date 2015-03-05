@@ -1835,6 +1835,8 @@ bool rootSubalgebra::CheckScalarProdMatrixOrdered()const
 void rootSubalgebra::ComputePotentialExtensions()
 { MacroRegisterFunctionWithName("rootSubalgebra::ComputePotentialExtensions");
   this->ownEr->GrowDynkinType(this->theDynkinType, this->potentialExtensionDynkinTypes, &this->potentialExtensionRootPermutations);
+  //stOutput << "<hr>" << this->theDynkinType.ToString() << " may potentially extend to "
+  //<< this->potentialExtensionDynkinTypes.ToString();
   this->potentialExtensionCartanSymmetrics.SetSize(this->potentialExtensionDynkinTypes.size);
   for (int i=0; i<this->potentialExtensionDynkinTypes.size; i++)
     this->potentialExtensionDynkinTypes[i].GetCartanSymmetric(this->potentialExtensionCartanSymmetrics[i]);
@@ -1904,38 +1906,38 @@ void rootSubalgebra::ComputeOuterSAautosExtendingToAmbientAutosGenerators()
     resultingOperator*=basisMatrixInverted;
     this->outerSAautos.theGenerators[i]=resultingOperator;
   }
-  bool doDebug=false;
-  if (this->theDynkinType.ToString()=="E^{1}_6")
-    doDebug=true;
+//  bool doDebug=false;
+//  if (this->theDynkinType.ToString()=="E^{1}_6")
+//    doDebug=true;
   this->outerSAautos.GenerateElements(0, this->ownEr->theGlobalVariables);
-  if (doDebug)
-  { stOutput << "<br>Outer autos: ";
-    for (int i=0; i<this->outerSAautos.theElements.size; i++)
-      stOutput << "<br>" << this->outerSAautos.theElements[i].ToStringMatForm();
-  }
+//  if (doDebug)
+//  { stOutput << "<br>Outer autos: ";
+//    for (int i=0; i<this->outerSAautos.theElements.size; i++)
+//      stOutput << "<br>" << this->outerSAautos.theElements[i].ToStringMatForm();
+//  }
   this->outerSAautosExtendingToAmbientAutosGenerators.theElements.Clear();
   for (int i=0; i<this->outerSAautos.theElements.size; i++)
     if (this->GetAmbientWeyl().IsElementWeylGroupOrOuterAuto(this->outerSAautos.theElements[i]))
       this->outerSAautosExtendingToAmbientAutosGenerators.theElements.AddOnTop(this->outerSAautos.theElements[i]);
-    else
-      if (doDebug)
-        stOutput << "<br>" << this->outerSAautos.theElements[i].ToStringMatForm() << " ain't no good. ";
+//    else
+//      if (doDebug)
+//        stOutput << "<br>" << this->outerSAautos.theElements[i].ToStringMatForm() << " ain't no good. ";
 }
 
 bool rootSubalgebra::CheckForMaximalDominanceCartanSA()
 { MacroRegisterFunctionWithName("rootSubalgebra::CheckForMaximalDominanceCartanSA");
   Vectors<Rational> simpleBasisOriginalOrderCopy;
-  bool doDebug=false;
+  //bool doDebug=false;
   for (int i=0; i<this->outerSAautos.theElements.size; i++)
     if (!this->outerSAautos.theElements[i].IsID())
     { simpleBasisOriginalOrderCopy=this->SimpleBasisKinOrderOfGeneration;
       this->outerSAautos.theElements[i].ActOnVectorsColumn(simpleBasisOriginalOrderCopy);
-      if (doDebug)
-        stOutput << "<br>" << this->outerSAautos.theElements[i].ToStringMatForm()
-        << " acting on " << this->SimpleBasisKinOrderOfGeneration.ToString() << " yields " << simpleBasisOriginalOrderCopy.ToString();
+      //if (doDebug)
+      //  stOutput << "<br>" << this->outerSAautos.theElements[i].ToStringMatForm()
+      //  << " acting on " << this->SimpleBasisKinOrderOfGeneration.ToString() << " yields " << simpleBasisOriginalOrderCopy.ToString();
       this->GetAmbientWeyl().RaiseToMaximallyDominant(simpleBasisOriginalOrderCopy, true);
-      if (doDebug)
-        stOutput << "which get raised to: " << simpleBasisOriginalOrderCopy.ToString();
+      //if (doDebug)
+      //  stOutput << "which get raised to: " << simpleBasisOriginalOrderCopy.ToString();
       for (int j=0; j<simpleBasisOriginalOrderCopy.size; j++)
         if (simpleBasisOriginalOrderCopy[j]!=this->SimpleBasisKinOrderOfGeneration[j])
         { if (simpleBasisOriginalOrderCopy[j].IsGreaterThanLexicographic(this->SimpleBasisKinOrderOfGeneration[j]))
@@ -1979,7 +1981,8 @@ bool rootSubalgebra::ComputeEssentialsIfNew()
 //  stOutput << "Simple basis k: " << this->SimpleBasisK.ToString();
   for (int i=0; i<this->SimpleBasisK.size; i++)
 //  { stOutput << "the scalar prod: " << this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[i], this->SimpleBasisK[i]).ToString();
-    this->SimpleBasisKScaledToActByTwo[i]*=2/this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[i], this->SimpleBasisK[i]);
+    this->SimpleBasisKScaledToActByTwo[i]*=2/this->GetAmbientWeyl().RootScalarCartanRoot
+    (this->SimpleBasisK[i], this->SimpleBasisK[i]);
 //  }
   if (this->ownEr->theGlobalVariables!=0)
   { reportStream << "Computing root subalgebra... ";
@@ -2031,6 +2034,8 @@ bool rootSubalgebra::ComputeEssentialsIfNew()
   }
   this->theDynkinDiagram.AmbientBilinearForm=this->GetAmbientWeyl().CartanSymmetric;
   this->theDynkinDiagram.AmbientRootSystem=this->GetAmbientWeyl().RootSystem;
+//  stOutput << "<br>Ambient bilinear form: " << this->theDynkinDiagram.AmbientBilinearForm.ToString();
+//  stOutput << "<br>Computing Dynkin diagram from roots: " << this->SimpleBasisK.ToString();
   this->theDynkinDiagram.ComputeDiagramInputIsSimple(this->SimpleBasisK);
   this->theDynkinDiagram.GetDynkinType(this->theDynkinType);
   this->ComputeKModules();
@@ -2466,12 +2471,18 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
   this->theSubalgebras.AddOnTop(currentSA);
   std::string reportString;
   for (int i=0; i<this->theSubalgebras.size; i++)
-  { if (theGlobalVariables!=0)
+  { //bool doDebug;
+    //doDebug= (this->theSubalgebras[i].theDynkinType.ToString()=="A^{3}_1+G^{1}_2");
+    //doDebug=true;
+    if (theGlobalVariables!=0)
     { std::stringstream reportStream;
       for (int j=0; j<this->theSubalgebras[i].potentialExtensionDynkinTypes.size; j++)
         reportStream << this->theSubalgebras[i].potentialExtensionDynkinTypes[j].ToString() << ", ";
       reportString=reportStream.str();
     }
+//    if (doDebug)
+//      stOutput << "Potential extensions of " << this->theSubalgebras[i].theDynkinType.ToString()
+//      << ": " << reportString;
     for (int j=0; j<this->theSubalgebras[i].Modules.size; j++)
     { if (this->theSubalgebras[i].HighestWeightsPrimalSimple[j].IsEqualToZero())
         continue;

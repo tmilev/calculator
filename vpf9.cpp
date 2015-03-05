@@ -3100,50 +3100,54 @@ bool DynkinType::Grow
   }
   //  Rational minCoRootLengthSquared=-1;
   //growth is allowed from the minimal component only
-  int indexMinComponentByLengthAndSimpleType=0;
-  for (int i=1; i<this->size(); i++)
-    if ((*this)[indexMinComponentByLengthAndSimpleType]>(*this)[i])
-      indexMinComponentByLengthAndSimpleType=i;
-  DynkinType typeMinusMin=(*this);
-  typeMinusMin.SubtractMonomial((*this)[indexMinComponentByLengthAndSimpleType], 1);
-  List<DynkinSimpleType> theSimpleTypes;
-  List<List<int> > lastComponentRootInjections;
-  (*this)[indexMinComponentByLengthAndSimpleType].Grow(theSimpleTypes, &lastComponentRootInjections);
+  DynkinSimpleType minComponent;
+  Rational coeffMinCompo;
   List<int> currentRootInjection;
-  currentRootInjection.SetSize(this->GetRank()+1);
-  for (int i=0; i<theSimpleTypes.size; i++)
-  { bool isGood=true;
-    for (int j=0; j<typeMinusMin.size(); j++)
-      if (theSimpleTypes[i]>typeMinusMin[j])
-      { isGood=false;
-        break;
-      }
-    if (!isGood)
-      continue;
-    output.AddOnTop(typeMinusMin);
-    output.LastObject()->AddMonomial(theSimpleTypes[i],1);
-    if (outputPermutationRoots!=0)
-    { int baseTypeRank=typeMinusMin.GetRank();
-      for (int j=0; j<baseTypeRank; j++)
-        currentRootInjection[j]=j;
-      for (int j=0; j<lastComponentRootInjections[i].size; j++)
-        currentRootInjection[j+baseTypeRank]=lastComponentRootInjections[i][j]+baseTypeRank;
-      outputPermutationRoots->AddOnTop(currentRootInjection);
-    }
-  }
-  for (int i=0; i<allowedInverseScales.size; i++)
-    if (allowedInverseScales[i]<=(*this)[indexMinComponentByLengthAndSimpleType].CartanSymmetricInverseScale)
-    { output.SetSize(output.size+1);
-      output.LastObject()->MakeSimpleType('A', 1, &allowedInverseScales[i]);
-      *output.LastObject()+=*this;
+  this->GetMinMonomial(minComponent, coeffMinCompo);
+  if (coeffMinCompo==1)
+  { DynkinType typeMinusMin=(*this);
+    typeMinusMin.SubtractMonomial(minComponent, 1);
+    List<DynkinSimpleType> theSimpleTypes;
+    List<List<int> > lastComponentRootInjections;
+    minComponent.Grow(theSimpleTypes, &lastComponentRootInjections);
+    currentRootInjection.SetSize(this->GetRank()+1);
+    for (int i=0; i<theSimpleTypes.size; i++)
+    { bool isGood=true;
+      for (int j=0; j<typeMinusMin.size(); j++)
+        if (theSimpleTypes[i]>typeMinusMin[j])
+        { isGood=false;
+          break;
+        }
+      if (!isGood)
+        continue;
+      output.AddOnTop(typeMinusMin);
+      output.LastObject()->AddMonomial(theSimpleTypes[i],1);
       if (outputPermutationRoots!=0)
-      { for (int j=0; j<currentRootInjection.size; j++)
+      { int baseTypeRank=typeMinusMin.GetRank();
+        for (int j=0; j<baseTypeRank; j++)
           currentRootInjection[j]=j;
+        for (int j=0; j<lastComponentRootInjections[i].size; j++)
+          currentRootInjection[j+baseTypeRank]=lastComponentRootInjections[i][j]+baseTypeRank;
         outputPermutationRoots->AddOnTop(currentRootInjection);
       }
     }
-  //if (this->ToString()=="2A^{1}_1[A^{1}_1]")
-    //stOutput << "<br>output be: " << output.ToString();
+  }
+  DynkinSimpleType currentA1;
+  for (int i=0; i<allowedInverseScales.size; i++)
+  { currentA1.MakeArbitrary('A', 1, allowedInverseScales[i]);
+    if (minComponent<currentA1)
+      continue;
+    output.AddOnTop(*this);
+    *output.LastObject()+=currentA1;
+    currentRootInjection.SetSize(output.LastObject()->GetRank());
+    if (outputPermutationRoots!=0)
+    { for (int j=0; j<currentRootInjection.size; j++)
+        currentRootInjection[j]=j;
+      outputPermutationRoots->AddOnTop(currentRootInjection);
+    }
+  }
+//  if (this->ToString()=="G^{1}_2")
+//    stOutput << "<hr>Extensions of " << this->ToString() << " be: " << output.ToString() << "<br>";
   return true;
 }
 
@@ -3765,13 +3769,13 @@ void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* ou
 }
 
 bool DynkinSimpleType::operator>(const DynkinSimpleType& other)const
-{ if (this->CartanSymmetricInverseScale>other.CartanSymmetricInverseScale)
-    return true;
-  if (this->CartanSymmetricInverseScale<other.CartanSymmetricInverseScale)
-    return false;
-  if (this->theRank>other.theRank)
+{ if (this->theRank>other.theRank)
     return true;
   if (this->theRank<other.theRank)
+    return false;
+  if (this->CartanSymmetricInverseScale>other.CartanSymmetricInverseScale)
+    return true;
+  if (this->CartanSymmetricInverseScale<other.CartanSymmetricInverseScale)
     return false;
   if ((this->theLetter=='B' ||this->theLetter=='C') && other.theLetter=='D')
     return true;

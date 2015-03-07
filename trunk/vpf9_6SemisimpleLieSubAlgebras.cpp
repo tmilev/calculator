@@ -215,13 +215,11 @@ void SemisimpleSubalgebras::WriteReportToFiles()
   FileOperations::OpenFileCreateIfNotPresent(fileFastLoad, this->PhysicalNameMainFile2FastLoad, false, true, false);
   fileSlowLoad << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
   << this->owneR->theWeyl.theDynkinType.ToString()
-  << "</title><script src=\"../../jsmath/easy/load.js\"></script><body>" << this->ToString(&this->currentFormat)
-  << "<hr><hr>Calculator input for loading subalgebras directly without recomputation.\n<br>\n";
+  << "</title><script src=\"../../jsmath/easy/load.js\"></script><body>" << this->ToString(&this->currentFormat);
   this->currentFormat.flagUseMathSpanPureVsMouseHover=false;
   fileFastLoad << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
   << this->owneR->theWeyl.theDynkinType.ToString()
-  << "</title><script src=\"../../jsmath/easy/load.js\"></script><body>" << this->ToString(&this->currentFormat)
-  << "<hr><hr>Calculator input for loading subalgebras directly without recomputation.\n<br>\n";
+  << "</title><script src=\"../../jsmath/easy/load.js\"></script><body>" << this->ToString(&this->currentFormat);
   fileFastLoad << "</body></html>";
   fileSlowLoad << "</body></html>";
 }
@@ -482,7 +480,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
     out << "</table>";
     out << this->theSl2s.ToString(theFormat);
   }
-  out << "<hr>" << this->ToStringProgressReport(theFormat);
+  out << "<hr>Calculator input for loading subalgebras directly without recomputation." << this->ToStringProgressReport(theFormat);
   return out.str();
 }
 
@@ -609,19 +607,21 @@ bool SemisimpleSubalgebras::FindTheSSSubalgebrasContinue()
   theReport.Report(reportstream.str());
   while(this->IncrementReturnFalseIfPastLast())
   { theReport.Report(this->ToStringProgressReport());
+//    stOutput << "<hr>" << this->ToStringCurrentChain();
     if (!this->flagRealizedAllCandidates)
+    { this->comments=this->comments+  "Failed to realize all candidates, aborting computation.";
       return false;
+    }
   }
-  stOutput << "got to here";
+//  stOutput << "got to here";
   ProgressReport theReport2(this->theGlobalVariables);
   std::stringstream reportStream2;
   reportStream2 << "Found a total of " << this->theSubalgebras.size << " subalgebras. Proceding to"
   << " adjust centralizers. ";
   theReport2.Report(reportStream2.str());
+  this->flagAttemptToAdjustCentralizers=true;
   if (!this->targetDynkinType.IsEqualToZero())
     this->flagAttemptToAdjustCentralizers=false;
-  this->flagAttemptToAdjustCentralizers=true;
-
   this->HookUpCentralizers(false);
   if (this->flagComputeNilradicals)
     this->ComputePairingTablesAndFKFTtypes();
@@ -910,20 +910,31 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
   int stackIndex=this->currentSubalgebraChain.size-1;
   int typeIndex=this->currentNumLargerTypesExplored[stackIndex];
   this->currentHCandidatesScaledToActByTwo[stackIndex].SetSize(0);
-//  stOutput << "<hr>Generating h candidates for type " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString();
   if (typeIndex>=this->currentPossibleLargerDynkinTypes[stackIndex].size)
     return true;
+//  bool doDebug=false;
+//  if (stackIndex!=-1 && typeIndex!=-1)
+//    doDebug=
+//    (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()== "A^{2}_1+A^{1}_1");
+//  if (doDebug)
+//    stOutput << "<br>trying to realize type " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
+//    << this->ToStringCurrentChain();
   if (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].GetRootSystemSize()>this->owneR->GetNumPosRoots()*2)
     return true;
   if (!this->targetDynkinType.IsEqualToZero())
     if (!this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].CanBeExtendedParabolicallyOrIsEqualTo(this->targetDynkinType))
-      if (this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex]!=this->targetDynkinType)
-        return true;
+    { //if (doDebug)
+        //stOutput << "<br>" << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString() << " doesn't fit in "
+        //<< this->targetDynkinType.ToString();
+      return true;
+    }
   Rational candidatePrincipalIndex=
   this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].GetCartanSymmetricInverseScalePrincipalSl2();
-
-  //stOutput << "<br>Dynkin type " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
-  //<< "  fits in the target Dynkin type " << this->targetDynkinType.ToString();
+//  if (doDebug)
+//  { stOutput << "<br>Generating h candidates for type " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString();
+    //stOutput << "<br>Dynkin type " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
+    //<< "  fits in the target Dynkin type " << this->targetDynkinType.ToString();
+//  }
   ProgressReport theReport0(this->theGlobalVariables), theReport1(this->theGlobalVariables);
   if (theGlobalVariables!=0)
   { std::stringstream reportStream;
@@ -972,9 +983,10 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
   this->GetHCandidates
   (this->currentHCandidatesScaledToActByTwo[stackIndex], newCandidate, this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
    this->currentRootInjections[stackIndex][typeIndex]);
-//  stOutput << "<br>Attempting to realize type: " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
-//  << " using " << this->currentHCandidatesScaledToActByTwo[stackIndex].size
-//  << " h candidates. The candidates follow: " << this->currentHCandidatesScaledToActByTwo[stackIndex].ToString();
+//  if (doDebug)
+//    stOutput << "<br>Attempting to realize type: " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
+//    << " using " << this->currentHCandidatesScaledToActByTwo[stackIndex].size
+//    << " h candidates. The candidates follow: " << this->currentHCandidatesScaledToActByTwo[stackIndex].ToString();
   return true;
 }
 
@@ -1019,6 +1031,18 @@ void SemisimpleSubalgebras::AddSubalgebraToStack
   this->ComputeCurrentHCandidates();
 }
 
+std::string SemisimpleSubalgebras::ToStringCurrentChain(FormatExpressions* theFormat)
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToStringCurrentChain");
+  std::stringstream out;
+  out << "<br>Current subalgebra chain length: " << this->currentSubalgebraChain.size << "<br>";
+  for (int i=0; i<this->currentSubalgebraChain.size; i++)
+  { out << this->currentSubalgebraChain[i].theWeylNonEmbeddeD.theDynkinType.ToString();
+    if (i!=this->currentSubalgebraChain.size-1)
+      out << "&lt;";
+  }
+  return out.str();
+}
+
 std::string SemisimpleSubalgebras::ToStringState(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToStringState");
   std::stringstream out;
@@ -1030,12 +1054,7 @@ std::string SemisimpleSubalgebras::ToStringState(FormatExpressions* theFormat)
     else
       out << "n/a; ";
   }
-  out << "<br>Current subalgebra chain length: " << this->currentSubalgebraChain.size << "<br>";
-  for (int i=0; i<this->currentSubalgebraChain.size; i++)
-  { out << this->currentSubalgebraChain[i].theWeylNonEmbeddeD.theDynkinType.ToString();
-    if (i!=this->currentSubalgebraChain.size-1)
-      out << "&lt;";
-  }
+  out << this->ToStringCurrentChain(theFormat);
   out << "<hr>";
   for (int i=0; i<this->currentSubalgebraChain.size; i++)
   { out << "<br>Extensions of " << this->currentSubalgebraChain[i].theWeylNonEmbeddeD.theDynkinType.ToString() << ": &nbsp;&nbsp;&nbsp;&nbsp;";
@@ -1074,9 +1093,9 @@ std::string SemisimpleSubalgebras::ToStringProgressReport(FormatExpressions* the
 bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::IncrementReturnFalseIfPastLast");
   this->CheckConsistency();
+//  stOutput << "<hr>Chain before check" << this->ToStringCurrentChain();
   if (this->currentSubalgebraChain.size==0)
     return false;
-  //  stOutput << "got to here0";
   if (this->baseSubalgebra().theHs.size!=this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation.size)
     crash << " The order of creation of the elements of the Cartan is missing in base subalgebra of type "
     << this->baseSubalgebra().theWeylNonEmbeddeD.theDynkinType.ToString()
@@ -1113,7 +1132,7 @@ bool SemisimpleSubalgebras::IncrementReturnFalseIfPastLast()
       std::stringstream out;
       out << "<hr>Failed to realize type " << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()
       << " because I couldn't handle the polynomial system. "
-      << " One poly system that governs the embedding follows.<hr>" << newCandidate.ToStringSystemPart2();
+      << " One poly system that governs the embedding follows.<br>" << newCandidate.ToStringSystemPart2() << "<hr>";
       this->comments=out.str();
       return true;
     }
@@ -1418,9 +1437,14 @@ bool CandidateSSSubalgebra::IsWeightSystemSpaceIndex(int theIndex, const Vector<
 bool CandidateSSSubalgebra::ComputeSystem(bool AttemptToChooseCentalizer, bool allowNonPolynomialSystemFailure)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSystem");
   ChevalleyGenerator currentGen, currentOpGen;
-//  stOutput << "<hr>the h's scaled to act by two: " << this->theHsScaledToActByTwo.ToString();
-//  stOutput << "<br>Involved neg gens: " << this->theInvolvedPosGenerators.ToString();
-//  stOutput << "<br>Involved pos gens: " << this->theInvolvedPosGenerators.ToString();
+  //bool doDebug=(this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_2+A^{2}_1");
+  /*if (doDebug)
+  { stOutput << "<hr>the h's scaled to act by two: " << this->theHsScaledToActByTwo.ToString();
+    stOutput << "<br>the h's default scale: " << this->theHs.ToString();
+    stOutput << "<br>Cartan symmetric: " << this->theWeylNonEmbeddeD.CartanSymmetric.ToString();
+    stOutput << "<br>Involved neg gens: " << this->theInvolvedPosGenerators.ToString();
+    stOutput << "<br>Involved pos gens: " << this->theInvolvedPosGenerators.ToString();
+  }*/
   this->theInvolvedNegGenerators.SetSize(this->theHsScaledToActByTwo.size);
   this->theInvolvedPosGenerators.SetSize(this->theHsScaledToActByTwo.size);
   for (int i=0; i<this->theHsScaledToActByTwo.size; i++)
@@ -1446,9 +1470,15 @@ bool CandidateSSSubalgebra::ComputeSystem(bool AttemptToChooseCentalizer, bool a
     if (currentInvolvedNegGens.size==0)
     { if (currentInvolvedPosGens.size!=0)
         crash << "The number of involved negative generators is different from the number of involved positive generators. " << crash;
+      this->flagSystemProvedToHaveNoSolution=true;
       return false;
     }
   }
+  /*if (doDebug)
+  { stOutput << "<hr>the h's scaled to act by two: " << this->theHsScaledToActByTwo.ToString();
+    stOutput << "<br>Involved neg gens: " << this->theInvolvedPosGenerators.ToString();
+    stOutput << "<br>Involved pos gens: " << this->theInvolvedPosGenerators.ToString();
+  }*/
   this->flagUsedInducingSubalgebraRealization=true;
   return this->ComputeSystemPart2(AttemptToChooseCentalizer, allowNonPolynomialSystemFailure);
 }
@@ -1474,6 +1504,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > lieBracketMinusGoalValue, goalValue;
   Vector<Polynomial<Rational> > desiredHpart;
   this->CheckInitialization();
+  bool doDebug=(this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_2+A^{2}_1");
 //  if (this->indexInOwnersOfNonEmbeddedMe<0 || this->indexInOwnersOfNonEmbeddedMe >=this->owner->theSubalgebrasNonEmbedded
   const SemisimpleLieAlgebra& nonEmbeddedMe=(*this->owner->theSubalgebrasNonEmbedded)[this->indexInOwnersOfNonEmbeddedMe];
   this->totalNumUnknownsNoCentralizer=0;
@@ -1540,7 +1571,8 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
       continue;
     this->GetGenericNegGenLinearCombination(i, this->theUnknownNegGens[i]);
     this->GetGenericPosGenLinearCombination(i, this->theUnknownPosGens[i]);
-    //stOutput << "<hr>Unknown generator index " << i << ": " << this->theUnknownNegGens[i].ToString();
+    if (doDebug)
+      stOutput << "<hr>Unknown generator index " << i << ": " << this->theUnknownNegGens[i].ToString();
   }
   //if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_2")
   //  stOutput << "<br>Finally, the neg gens be: " << this->theUnknownNegGens.ToString()

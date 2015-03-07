@@ -385,6 +385,7 @@ public:
   bool CheckConsistency()const;
   bool CheckInitialization() const;
   std::string ToStringState(FormatExpressions* theFormat=0);
+  std::string ToStringCurrentChain(FormatExpressions* theFormat=0);
   std::string ToStringProgressReport(FormatExpressions* theFormat=0);
   std::string ToString(FormatExpressions* theFormat=0);
   std::string ToStringSSsumaryLaTeX(FormatExpressions* theFormat=0)const;

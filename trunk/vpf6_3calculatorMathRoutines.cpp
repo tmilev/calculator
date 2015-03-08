@@ -3500,7 +3500,7 @@ bool CalculatorFunctionsGeneral::innerGetPrincipalSl2Index(Calculator& theComman
   DynkinType theType;
   if (!CalculatorConversions::innerDynkinType(theCommands, input, theType))
     return theCommands << "Failed to convert " << input.ToString() << " to DynkinType.";
-  return output.AssignValue(theType.GetCartanSymmetricInverseScalePrincipalSl2(), theCommands);
+  return output.AssignValue(theType.GetPrincipalSlTwoCSInverseScale(), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg(Calculator& theCommands, const Expression& input, Expression& output)

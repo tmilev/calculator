@@ -928,8 +928,12 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
         //<< this->targetDynkinType.ToString();
       return true;
     }
-  Rational candidatePrincipalIndex=
-  this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].GetCartanSymmetricInverseScalePrincipalSl2();
+  Rational candidatePrincipalLength=
+  this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].GetPrincipalSlTwoCSInverseScale()*2;
+  stOutput << "<br>Candidate principal length is: " << candidatePrincipalLength.ToString()
+  << " h element lengths are: " << this->theOrbitHelementLengths.ToString();
+  if (!this->theOrbitHelementLengths.Contains(candidatePrincipalLength))
+    return true;
 //  if (doDebug)
 //  { stOutput << "<br>Generating h candidates for type " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString();
     //stOutput << "<br>Dynkin type " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString()
@@ -1279,8 +1283,8 @@ DynkinSimpleType DynkinType::GetGreatestSimpleType()const
   return result;
 }
 
-Rational DynkinType::GetCartanSymmetricInverseScalePrincipalSl2()const
-{ MacroRegisterFunctionWithName("DynkinType::GetCartanSymmetricInverseScalePrincipalSl2");
+Rational DynkinType::GetPrincipalSlTwoCSInverseScale()const
+{ MacroRegisterFunctionWithName("DynkinType::GetPrincipalSlTwoCSInverseScale");
   Rational result=0;
   for (int i=0; i<this->size(); i++)
     result+=this->theCoeffs[i] * (*this)[i].GetPrincipalSlTwoCSInverseScale();

@@ -930,8 +930,8 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
     }
   Rational candidatePrincipalLength=
   this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].GetPrincipalSlTwoCSInverseScale()*2;
-  stOutput << "<br>Candidate principal length is: " << candidatePrincipalLength.ToString()
-  << " h element lengths are: " << this->theOrbitHelementLengths.ToString();
+//  stOutput << "<br>Candidate principal length is: " << candidatePrincipalLength.ToString()
+//  << " h element lengths are: " << this->theOrbitHelementLengths.ToString();
   if (!this->theOrbitHelementLengths.Contains(candidatePrincipalLength))
     return true;
 //  if (doDebug)

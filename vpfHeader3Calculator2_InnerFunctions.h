@@ -159,6 +159,7 @@ public:
 
   static bool innerCoefficientsPowersOf(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsNonEmptySequence(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIsEven(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsConstant(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGaussianEliminationMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitToPartialFractionsOverAlgebraicReals(Calculator& theCommands, const Expression& input, Expression& output);

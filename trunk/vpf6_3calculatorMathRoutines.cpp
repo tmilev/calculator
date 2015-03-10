@@ -1724,6 +1724,18 @@ bool CalculatorFunctionsGeneral::innerExtractDifferentialOneFormOneVariable
   return true;
 }
 
+bool CalculatorFunctionsGeneral::innerIsEven(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsEven");
+  if (input.HasBoundVariables())
+    return false;
+  LargeInt theInt;
+  if (!input.IsInteger(&theInt))
+    return output.AssignValue(0, theCommands);
+  if (theInt.IsEven())
+    return output.AssignValue(1, theCommands);
+  return output.AssignValue(0, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerIsConstant(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsConstant");
   //stOutput << "<br>Evaluating isconstant on: " << input.ToString();

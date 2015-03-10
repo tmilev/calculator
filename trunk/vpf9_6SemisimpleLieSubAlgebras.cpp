@@ -620,6 +620,8 @@ bool SemisimpleSubalgebras::FindTheSSSubalgebrasContinue()
   << " adjust centralizers. ";
   theReport2.Report(reportStream2.str());
   this->flagAttemptToAdjustCentralizers=true;
+//  stOutput << "Fix me!!!";
+//  this->flagAttemptToAdjustCentralizers=false;
   if (!this->targetDynkinType.IsEqualToZero())
     this->flagAttemptToAdjustCentralizers=false;
   this->HookUpCentralizers(false);
@@ -2977,7 +2979,7 @@ bool CandidateSSSubalgebra::AttemptToSolveSystem()
   //stOutput << "<br>additions so far: " << Rational::total
   if (this->owner->theGlobalVariables==0)
     crash << crash;
-  for (int i=5000; i<200000; i+=100000)
+  for (int i=200; i<200000; i+=100000)
   { theComputation.MaxNumGBComputations=i;
     theComputation.MaxNumSerreSystemComputationsPreferred=i;
     theComputation.SolveSerreLikeSystem(this->transformedSystem, this->owner->ownerField, this->owner->theGlobalVariables);

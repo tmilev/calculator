@@ -1495,7 +1495,7 @@ void Pipe::ReadNoLocks()
   if (this->thePipe[0]==-1)
     return;
   int counter=0;
-  const unsigned int bufferSize=2000000;
+  const unsigned int bufferSize=20000000;
   this->pipeBuffer.SetSize(bufferSize); // <-once the buffer is resized, this operation does no memory allocation and is fast.
   int numReadBytes=0;
   for (;;)

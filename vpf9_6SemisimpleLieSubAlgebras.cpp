@@ -2979,7 +2979,7 @@ bool CandidateSSSubalgebra::AttemptToSolveSystem()
   //stOutput << "<br>additions so far: " << Rational::total
   if (this->owner->theGlobalVariables==0)
     crash << crash;
-  for (int i=200; i<200000; i+=100000)
+  for (int i=500; i<200000; i+=100000)
   { theComputation.MaxNumGBComputations=i;
     theComputation.MaxNumSerreSystemComputationsPreferred=i;
     theComputation.SolveSerreLikeSystem(this->transformedSystem, this->owner->ownerField, this->owner->theGlobalVariables);

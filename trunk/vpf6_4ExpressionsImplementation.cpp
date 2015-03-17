@@ -1734,6 +1734,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     result=true;
   } else if (this->IsOfType<RationalFunctionOld>())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    contextFormat.GetElement().flagUseFrac=true;
     out << "RationalFunction{}("
     << this->GetValue<RationalFunctionOld>().ToString(&contextFormat.GetElement()) << ")";
     if (showContext)

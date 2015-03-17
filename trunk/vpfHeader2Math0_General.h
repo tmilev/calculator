@@ -1577,6 +1577,9 @@ class GroebnerBasisComputation
   bool flagSystemProvenToHaveNoSolution;
   bool flagSystemProvenToHaveSolution;
   bool flagSystemSolvedOverBaseField;
+  bool flagUsingAlgebraicClosuRe;
+  bool flagTryDirectlySolutionOverAlgebraicClosure;
+  AlgebraicClosureRationals* theAlgebraicClosurE;
   MemorySaving<List<Polynomial<coefficient> > > intermediateRemainders;
   MemorySaving<List<List<MonomialP> > > intermediateHighlightedMons;
   MemorySaving<List<MonomialP> > intermediateHighestMonDivHighestMon;
@@ -1612,16 +1615,16 @@ class GroebnerBasisComputation
   void RemainderDivisionWithRespectToBasis
   (Polynomial<coefficient>& inputOutput, Polynomial<coefficient>* outputRemainder=0, GlobalVariables* theGlobalVariables=0, int basisIndexToIgnore=-1);
   std::string ToStringCalculatorInputFromSystem(const List<Polynomial<coefficient> >& inputSystem);
-  void SolveSerreLikeSystem(List<Polynomial<coefficient> >& inputSystem, AlgebraicClosureRationals* theAlgebraicClosure=0, GlobalVariables* theGlobalVariables=0);
+  void SolveSerreLikeSystem(List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables=0);
   bool HasImpliedSubstitutions
-  (List<Polynomial<coefficient> >& inputSystem, PolynomialSubstitution<coefficient>& outputSub, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables)
+  (List<Polynomial<coefficient> >& inputSystem, PolynomialSubstitution<coefficient>& outputSub, GlobalVariables* theGlobalVariables)
   ;
   int GetPreferredSerreSystemSubIndex(List<Polynomial<coefficient> >& inputSystem);
-  void SolveSerreLikeSystemRecursively(List<Polynomial<coefficient> >& inputSystem, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables);
+  void SolveSerreLikeSystemRecursively(List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables);
   void BackSubstituteIntoPolySystem(List<PolynomialSubstitution<coefficient> >& theImpliedSubs, GlobalVariables* theGlobalVariables);
   void BackSubstituteIntoSinglePoly(Polynomial<coefficient>& thePoly, int theIndex, PolynomialSubstitution<coefficient>& theFinalSub, GlobalVariables* theGlobalVariables);
   bool AddRemainderToBasis(GlobalVariables* theGlobalVariables);
-  bool GetOneVarPolySolution(const Polynomial<coefficient>& thePoly, coefficient& outputSolution, AlgebraicClosureRationals& theAlgebraicClosure, GlobalVariables* theGlobalVariables=0);
+  bool GetOneVarPolySolution(const Polynomial<coefficient>& thePoly, coefficient& outputSolution, GlobalVariables* theGlobalVariables=0);
    //Criterion from Cox, Little, O'Shea:
   static bool CriterionCLOsh
   (HashedListSpecialized<Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> >& thePairs,

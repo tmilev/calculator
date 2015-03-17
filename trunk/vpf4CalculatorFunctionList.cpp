@@ -1138,7 +1138,7 @@ void Calculator::initPredefinedInnerFunctions()
    "Reverse{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)");
 
   this->AddOperationInnerHandler
-  ("FindOneSolutionSerreLikePolynomialSystem", this->innerSolveSerreLikeSystem, "",
+  ("FindOneSolutionSerreLikePolynomialSystem", CalculatorFunctionsGeneral::innerSolveSerreLikeSystemNoUpperLimit, "",
    "Attempts to heuristically solve a system of polynomial of equations over the rationals. \
    The input system of equations can be arbitrary, \
    however it is assumed that the system is Serre-like, i.e., comes \
@@ -1174,10 +1174,10 @@ void Calculator::initPredefinedInnerFunctions()
     x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14},\
     x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13},\
     x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13},\
-    x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true);
-this->AddOperationInnerHandler
-  ("FindOneSolutionSerreLikePolynomialSystemUpperLimit", this->innerSolveSerreLikeSystemUpperLimit, "",
-   "Same as FindOneSolutionSerreLikePolynomialSystem but the first arguments give upper limits \
+    x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true, false, "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemNoUpperLimit");
+  this->AddOperationInnerHandler
+  ("FindOneSolutionSerreLikePolynomialSystemUpperLimit", CalculatorFunctionsGeneral::innerSolveSerreLikeSystemUpperLimit, "",
+   "Same as FindOneSolutionSerreLikePolynomialSystem but the first argument gives upper limits \
    to the number of polynomial computations that can be carried out.\
     ",
    "FindOneSolutionSerreLikePolynomialSystemUpperLimit{}( 2001, \
@@ -1200,7 +1200,21 @@ this->AddOperationInnerHandler
     x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14},\
     x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13},\
     x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13},\
-    x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true);
+    x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true, false, "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemUpperLimit");
+  this->AddOperationInnerHandler
+  ("FindOneSolutionSerreLikePolynomialSystemAlgebraic", CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraic, "",
+   "Same as FindOneSolutionSerreLikePolynomialSystem but starts directly over algebraic closure.\
+    ",
+   "FindOneSolutionSerreLikePolynomialSystemAlgebraic{}(  \
+    x^2+1, y x z -1, z^2 x+y-1)", true, false, "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraic");
+  this->AddOperationInnerHandler
+  ("FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit",
+   CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraicUpperLimit, "",
+   "Same as FindOneSolutionSerreLikePolynomialSystemAlgebraic but the first argument gives upper limits \
+   to the number of polynomial computations that can be carried out.\
+    ",
+   "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit{}(  \
+    x^2+1, y x z -1, z^2 x+y-1)", true, false, "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraicUpperLimit");
   this->AddOperationInnerHandler
   ("GroebnerLexUpperLimit", this->innerGroebnerLex, "",
    "Transforms to a reduced Groebner basis using the  \

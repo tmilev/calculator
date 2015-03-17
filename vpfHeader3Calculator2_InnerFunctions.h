@@ -179,6 +179,25 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSolveProductSumEquationOverSetModN
   (Calculator& theCommands, const Expression& input, Expression& output);
+
+  static bool innerSolveSerreLikeSystem
+  (Calculator& theCommands, const Expression& input, Expression& output, bool useUpperLimit, bool startWithAlgebraicClosure);
+  static bool innerSolveSerreLikeSystemNoUpperLimit
+  (Calculator& theCommands, const Expression& input, Expression& output)
+  { return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, false, false);
+  }
+  static bool innerSolveSerreLikeSystemUpperLimit
+  (Calculator& theCommands, const Expression& input, Expression& output)
+  { return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, true, false);
+  }
+  static bool innerSolveSerreLikeSystemAlgebraic
+  (Calculator& theCommands, const Expression& input, Expression& output)
+  { return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, false, true);
+  }
+  static bool innerSolveSerreLikeSystemAlgebraicUpperLimit
+  (Calculator& theCommands, const Expression& input, Expression& output)
+  { return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, true, true);
+  }
 };
 
 #endif

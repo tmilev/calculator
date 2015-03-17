@@ -1570,9 +1570,6 @@ public:
   static bool fAnimateLittelmannPaths(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSqrt(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFactorPoly(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSolveSerreLikeSystem(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSolveSerreLikeSystemUpperLimit
-  (Calculator& theCommands, const Expression& input, Expression& output);
   static bool fLSPath(Calculator& theCommands, const Expression& input, Expression& output);
   static bool fTestMonomialBaseConjecture(Calculator& theCommands, const Expression& input, Expression& output);
   static bool fJacobiSymbol(Calculator& theCommands, const Expression& input, Expression& output);

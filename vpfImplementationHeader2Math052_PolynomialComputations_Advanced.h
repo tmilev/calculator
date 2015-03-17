@@ -606,6 +606,9 @@ GroebnerBasisComputation<coefficient>::GroebnerBasisComputation()
   this->flagDoLogDivision=false;
   this->flagSystemProvenToHaveNoSolution=false;
   this->flagSystemSolvedOverBaseField=false;
+  this->flagTryDirectlySolutionOverAlgebraicClosure=false;
+  this->flagUsingAlgebraicClosuRe=false;
+  this->theAlgebraicClosurE=0;
   this->MaxNumGBComputations=0;
   this->MaxNumSerreSystemComputationsPreferred=0;
 }
@@ -698,9 +701,11 @@ void GroebnerBasisComputation<coefficient>::GetSubFromPartialSolutionSerreLikeSy
 }
 
 template <class coefficient>
-bool GroebnerBasisComputation<coefficient>::GetOneVarPolySolution(const Polynomial<coefficient>& thePoly, coefficient& outputSolution, AlgebraicClosureRationals& theAlgebraicClosure, GlobalVariables* theGlobalVariables)
+bool GroebnerBasisComputation<coefficient>::GetOneVarPolySolution(const Polynomial<coefficient>& thePoly, coefficient& outputSolution, GlobalVariables* theGlobalVariables)
 { AlgebraicNumber theAN;
-  if (!theAN.ConstructFromMinPoly(thePoly, theAlgebraicClosure, theGlobalVariables))
+  if (this->theAlgebraicClosurE==0)
+    return false;
+  if (!theAN.ConstructFromMinPoly(thePoly, *this->theAlgebraicClosurE, theGlobalVariables))
     return false;
   outputSolution=theAN;
   return true;
@@ -708,7 +713,7 @@ bool GroebnerBasisComputation<coefficient>::GetOneVarPolySolution(const Polynomi
 
 template <class coefficient>
 bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions
-(List<Polynomial<coefficient> >& inputSystem, PolynomialSubstitution<coefficient>& outputSub, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables)
+(List<Polynomial<coefficient> >& inputSystem, PolynomialSubstitution<coefficient>& outputSub, GlobalVariables* theGlobalVariables)
 { int numVars=this->systemSolution.GetElement().size;
   MonomialP tempM;
   Polynomial<coefficient> tempP;
@@ -747,8 +752,8 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions
     }
     int oneVarIndex;
     if (tempP.IsOneVariableNonConstPoly(&oneVarIndex))
-      if (theAlgebraicClosure!=0)
-        if (this->GetOneVarPolySolution(tempP, theCF, *theAlgebraicClosure, theGlobalVariables))
+      if (this->flagUsingAlgebraicClosuRe && this->theAlgebraicClosurE!=0)
+        if (this->GetOneVarPolySolution(tempP, theCF, theGlobalVariables))
         { //stOutput << "<br>adjoining root of " << tempP.ToString();
           outputSub.MakeIdSubstitution(numVars);
           outputSub[oneVarIndex].MakeConst(theCF);
@@ -867,7 +872,7 @@ bool GroebnerBasisComputation<coefficient>::IsContradictoryReducedSystem(const L
 
 template <class coefficient>
 void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
-(List<Polynomial<coefficient> >& inputSystem, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables)
+(List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::SolveSerreLikeSystemRecursively");
   RecursionDepthCounter theCounter(&this->RecursionCounterSerreLikeSystem);
   ProgressReport theReport1(theGlobalVariables);
@@ -912,7 +917,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
         }
       }
     }
-    changed = this->HasImpliedSubstitutions(inputSystem, theSub, theAlgebraicClosure, theGlobalVariables);
+    changed = this->HasImpliedSubstitutions(inputSystem, theSub, theGlobalVariables);
     if (changed)
     { theImpliedSubs.AddOnTop(theSub);
       //stOutput << "<hr>Carrying out IMPLIED sub: " << CGI::GetMathSpanPure(theImpliedSubs.ToString()) << " in the system ";
@@ -984,7 +989,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
     inputSystem[i].Substitution(theSub);
 //  stOutput << "<hr>Input system after sub first recursive call. " << inputSystem.ToString();
 
-  computationFirstTry.SolveSerreLikeSystemRecursively(inputSystem, theAlgebraicClosure, theGlobalVariables);
+  computationFirstTry.SolveSerreLikeSystemRecursively(inputSystem, theGlobalVariables);
   this->NumberSerreSystemComputations+=computationFirstTry.NumberSerreSystemComputations;
   if (computationFirstTry.flagSystemSolvedOverBaseField)
   { //stOutput << "<hr>System solved after first recursive call. The input system before back sub: " << CGI::GetMathSpanPure(inputSystem.ToString());
@@ -1031,7 +1036,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
     << theMon.ToString(&theFormat) << "=" << twoSolutionsToTry[1] <<";";
     theReport1.Report(out.str());
   }
-  computationSecondTry.SolveSerreLikeSystemRecursively(inputSystem, theAlgebraicClosure, theGlobalVariables);
+  computationSecondTry.SolveSerreLikeSystemRecursively(inputSystem, theGlobalVariables);
   this->NumberSerreSystemComputations+=computationSecondTry.NumberSerreSystemComputations;
   if (computationSecondTry.flagSystemSolvedOverBaseField)
   { //stOutput << "<hr>System solved after second recursive call. The input system before back sub: " << CGI::GetMathSpanPure(inputSystem.ToString());
@@ -1059,7 +1064,8 @@ std::string GroebnerBasisComputation<coefficient>::ToStringCalculatorInputFromSy
 }
 
 template <class coefficient>
-void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial<coefficient> >& inputSystem, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables)
+void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem
+(List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables)
 { this->flagSystemProvenToHaveNoSolution=false;
   this->flagSystemSolvedOverBaseField=false;
   this->flagSystemProvenToHaveSolution=false;
@@ -1080,14 +1086,22 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial
     theReport.Report(reportStream.str());
   }
   this->NumberSerreVariablesOneGenerator= workingSystem[0].GetMinNumVars()/2;
-  this->SolveSerreLikeSystemRecursively(workingSystem, 0, theGlobalVariables);
-  if (theAlgebraicClosure!=0)
+  if (this->theAlgebraicClosurE==0)
+    this->flagTryDirectlySolutionOverAlgebraicClosure=false;
+  if (!this->flagTryDirectlySolutionOverAlgebraicClosure)
+  { this->flagUsingAlgebraicClosuRe=false;
+    this->SolveSerreLikeSystemRecursively(workingSystem, theGlobalVariables);
+  }
+  if (this->theAlgebraicClosurE!=0)
     if (!this->flagSystemSolvedOverBaseField && !this->flagSystemProvenToHaveNoSolution)
     { if (theGlobalVariables!=0)
-      { reportStream << "<br><b>Failed to solve system over the rationals... attempting to solve allowing algebraic extensions.</b> ";
+      { if (!this->flagTryDirectlySolutionOverAlgebraicClosure)
+          reportStream << "<br><b>Failed to solve system over the rationals... </b>";
+        reportStream << "<br><b>Attempting to solve allowing algebraic extensions.</b> ";
         theReport.Report(reportStream.str());
       }
-      this->SolveSerreLikeSystemRecursively(workingSystem, theAlgebraicClosure, theGlobalVariables);
+      this->flagUsingAlgebraicClosuRe=true;
+      this->SolveSerreLikeSystemRecursively(workingSystem, theGlobalVariables);
     }
   if (this->flagSystemSolvedOverBaseField)
   { if (this->solutionsFound.GetElement().CardinalitySelection!= this->solutionsFound.GetElement().MaxSize)

@@ -59,7 +59,7 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF
   }
   theComputation.MaxNumSerreSystemComputationsPreferred=4001;
   theComputation.MaxNumGBComputations=2001;
-  theComputation.SolveSerreLikeSystem(theSystem, 0, theGlobalVariables);
+  theComputation.SolveSerreLikeSystem(theSystem, theGlobalVariables);
   if (!theComputation.flagSystemSolvedOverBaseField)
   { if (logStream!=0)
     { if (theComputation.flagSystemProvenToHaveNoSolution)
@@ -2982,7 +2982,8 @@ bool CandidateSSSubalgebra::AttemptToSolveSystem()
   for (int i=500; i<200000; i+=100000)
   { theComputation.MaxNumGBComputations=i;
     theComputation.MaxNumSerreSystemComputationsPreferred=i;
-    theComputation.SolveSerreLikeSystem(this->transformedSystem, this->owner->ownerField, this->owner->theGlobalVariables);
+    theComputation.theAlgebraicClosurE=this->owner->ownerField;
+    theComputation.SolveSerreLikeSystem(this->transformedSystem, this->owner->theGlobalVariables);
     if (theComputation.flagSystemProvenToHaveNoSolution || theComputation.flagSystemProvenToHaveSolution)
       break;
   }

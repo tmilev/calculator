@@ -387,6 +387,65 @@ bool CalculatorFunctionsGeneral::innerDereferenceOperator(Calculator& theCommand
   return false;
 }
 
+bool CalculatorFunctionsGeneral::innerSolveSerreLikeSystem
+(Calculator& theCommands, const Expression& input, Expression& output, bool useUpperLimit, bool startWithAlgebraicClosure)
+{ MacroRegisterFunctionWithName("Calculator::innerSolveSerreLikeSystem");
+  Vector<Polynomial<Rational> > thePolysRational;
+  Expression theContext(theCommands);
+  bool useArguments=
+  input.StartsWith(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystem")) ||
+  input.StartsWith(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystemAlgebraic")) ||
+  input.StartsWith(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystemUpperLimit")) ||
+  input.StartsWith(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"))
+  ;
+
+  if (useArguments)
+  { if (!theCommands.GetVectorFromFunctionArguments(input, thePolysRational, &theContext, 0, CalculatorConversions::innerPolynomial<Rational>))
+      return output.MakeError("Failed to extract list of polynomials. ", theCommands);
+  } else
+    if (!theCommands.GetVectoR(input, thePolysRational, &theContext, 0, CalculatorConversions::innerPolynomial<Rational>))
+      return output.MakeError("Failed to extract list of polynomials. ", theCommands);
+  GroebnerBasisComputation<AlgebraicNumber> theComputation;
+  theContext.ContextGetFormatExpressions(theComputation.theFormat);
+  int upperLimit=2001;
+  if (useUpperLimit)
+  { Rational upperLimitRat;
+    if (!thePolysRational[0].IsConstant(&upperLimitRat))
+      return theCommands << "Failed to extract a constant from the first argument "
+      << thePolysRational[0].ToString(&theComputation.theFormat) << ". ";
+    if (!upperLimitRat.IsIntegerFittingInInt(&upperLimit))
+      return theCommands << "Failed to extract a small integer from the first argument "
+      << upperLimitRat.ToString(&theComputation.theFormat) << ". ";
+    thePolysRational.PopIndexShiftDown(0);
+  }
+  Vector<Polynomial<AlgebraicNumber> > thePolysAlgebraic;
+  thePolysAlgebraic=thePolysRational;
+  //int numVars=theContext.GetNumContextVariables();
+  theComputation.MaxNumGBComputations=upperLimit;
+  theComputation.MaxNumSerreSystemComputationsPreferred=upperLimit;
+  theComputation.theAlgebraicClosurE=&theCommands.theObjectContainer.theAlgebraicClosure;
+  theComputation.flagTryDirectlySolutionOverAlgebraicClosure=startWithAlgebraicClosure;
+  theCommands.theGlobalVariableS->theDefaultFormat=theComputation.theFormat;
+//  stOutput << "<br>the alphabet:" << theComputation.theFormat.polyAlphabeT;
+//  stOutput << "<br>The context vars:<br>" << theContext.ToString();
+  theComputation.SolveSerreLikeSystem(thePolysAlgebraic, theCommands.theGlobalVariableS);
+  std::stringstream out;
+  out << "<br>The context vars:<br>" << theContext.ToString();
+  out << "<br>The polynomials: " << thePolysAlgebraic.ToString(&theComputation.theFormat);
+  out << "<br>Total number of polynomial computations: " << theComputation.NumberSerreSystemComputations;
+  if (theComputation.flagSystemProvenToHaveNoSolution)
+    out << "<br>The system does not have a solution. ";
+  else if(theComputation.flagSystemProvenToHaveSolution)
+    out << "<br>System proven to have solution.";
+  if (!theComputation.flagSystemProvenToHaveNoSolution)
+  { if (theComputation.flagSystemSolvedOverBaseField)
+      out << "<br>One solution follows. " << theComputation.ToStringSerreLikeSolution();
+    else
+      out << " However, I was unable to find such a solution: my heuristics are not good enough.";
+  }
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly");
   Expression polyE;

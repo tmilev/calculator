@@ -957,8 +957,8 @@ std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat)con
   if (this->flagIsQuadraticRadicalExtensionRationals)
     out << "<br>Generating element not selected. ";
   else
-    out << this->GeneratingElementMatForm.ToString(&tempFormat);
-  out << "<br>There are " <<  this->theBasesAdditive.size << " registered old bases. ";
+    out << "<br>Generating element: " << CGI::GetMathSpanPure(this->GeneratingElementMatForm.ToString(&tempFormat));
+  out << "<br>There are " << this->theBasesAdditive.size << " registered old bases. ";
   for (int i=0; i<this->theBasesAdditive.size; i++)
   { out << "<hr>Basis " << i+1 << " has " << this->theBasesAdditive[i].size << " elements: ";
     for (int j=0; j<this->theBasesAdditive[i].size; j++)

@@ -1564,12 +1564,15 @@ class GroebnerBasisComputation
   List<Polynomial<coefficient> > basisCandidates;
   List<MonomialP> leadingMons;
   List<coefficient> leadingCoeffs;
-  int NumberSerreSystemComputations;
-  int MaxNumSerreSystemComputationsPreferred;
-  int NumberGBComputations;
-  int MaxNumGBComputations;
-  int NumberSerreVariablesOneGenerator;
   int RecursionCounterSerreLikeSystem;
+  int NumVarsToSolveForStarT;
+  int NumVariablesToSolveForAfterReduction;
+  int NumberSerreSystemComputations;
+  int NumberSerreVariablesOneGenerator;
+  int NumberGBComputations;
+
+  int MaxNumSerreSystemComputationsPreferred;
+  int MaxNumGBComputations;
   bool flagBasisGuaranteedToGenerateIdeal;
   bool flagDoProgressReport;
   bool flagDoSortBasis;
@@ -1589,6 +1592,7 @@ class GroebnerBasisComputation
   MemorySaving<Polynomial<coefficient> > startingPoly;
   MemorySaving<List<coefficient> > systemSolution;
   MemorySaving<Selection> solutionsFound;
+  List<PolynomialSubstitution<coefficient> > theImpliedSubS;
   FormatExpressions theFormat;
   void SetSerreLikeSolutionIndex(int theIndex, const coefficient& theConst);
   void GetSubFromPartialSolutionSerreLikeSystem(PolynomialSubstitution<coefficient>& outputSub);
@@ -1604,10 +1608,15 @@ class GroebnerBasisComputation
   bool AddPolyAndReduceBasis(GlobalVariables* theGlobalVariables);
   bool TransformToReducedGroebnerBasis(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables=0);
   bool TransformToReducedGroebnerBasisImprovedAlgorithm(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables=0, int upperComputationBound=-1);
+  void TrySettingValuesToVariablesReturnTrueIfDone
+(List<Polynomial<coefficient> >& inputSystem, const Rational& aValueToTryOnPreferredVariable,
+ GlobalVariables* theGlobalVariables)
+;
   GroebnerBasisComputation();
   void MakeMinimalBasis();
   int GetNumVars()const;
   std::string ToStringLetterOrder(bool addDollars)const;
+  std::string ToStringImpliedSubs();
   static int GetNumEquationsThatWouldBeLinearIfIsubbedVar(int theVarIndex, List<Polynomial<coefficient> >& input);
   static int GetNumVarsToSolveFor(const List<Polynomial<coefficient> >& input);
   static void GetVarsToSolveFor(const List<Polynomial<coefficient> >& input, Selection& output);
@@ -1621,6 +1630,7 @@ class GroebnerBasisComputation
   ;
   int GetPreferredSerreSystemSubIndex(List<Polynomial<coefficient> >& inputSystem);
   void SolveSerreLikeSystemRecursively(List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables);
+  void PolySystemSolutionSimplificationPhase(List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables);
   void BackSubstituteIntoPolySystem(List<PolynomialSubstitution<coefficient> >& theImpliedSubs, GlobalVariables* theGlobalVariables);
   void BackSubstituteIntoSinglePoly(Polynomial<coefficient>& thePoly, int theIndex, PolynomialSubstitution<coefficient>& theFinalSub, GlobalVariables* theGlobalVariables);
   bool AddRemainderToBasis(GlobalVariables* theGlobalVariables);

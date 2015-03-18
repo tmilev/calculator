@@ -1205,16 +1205,16 @@ void Calculator::initPredefinedInnerFunctions()
   ("FindOneSolutionSerreLikePolynomialSystemAlgebraic", CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraic, "",
    "Same as FindOneSolutionSerreLikePolynomialSystem but starts directly over algebraic closure.\
     ",
-   "FindOneSolutionSerreLikePolynomialSystemAlgebraic{}(  \
-    x^2+1, y x z -1, z^2 x+y-1)", true, false, "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraic");
+   "FindOneSolutionSerreLikePolynomialSystemAlgebraic{}( \
+    x^2+1, y x z -1, z^2 x+y-1, w u)", true, false, "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraic");
   this->AddOperationInnerHandler
   ("FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit",
    CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraicUpperLimit, "",
    "Same as FindOneSolutionSerreLikePolynomialSystemAlgebraic but the first argument gives upper limits \
    to the number of polynomial computations that can be carried out.\
     ",
-   "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit{}(  \
-    x^2+1, y x z -1, z^2 x+y-1)", true, false, "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraicUpperLimit");
+   "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit{}( 10000, \
+    x^2+1, y x z -1, z^2 x+y-1, w u)", true, false, "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraicUpperLimit");
   this->AddOperationInnerHandler
   ("GroebnerLexUpperLimit", this->innerGroebnerLex, "",
    "Transforms to a reduced Groebner basis using the  \

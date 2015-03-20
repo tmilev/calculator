@@ -1718,7 +1718,7 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
   Polynomial<Rational> quotient, remainder;
   Vectors<Rational> valuesLeftInterpolands;
   Vector<Rational> PointsOfInterpolationLeft;
-  PointsOfInterpolationLeft.ReservE(degreeLeft+1);
+  PointsOfInterpolationLeft.Reserve(degreeLeft+1);
   Rational currentPrimePowerContribution, currentPointContribution;
   for (int i=0; i<=degreeLeft; i++)
     PointsOfInterpolationLeft.AddOnTop(AllPointsOfEvaluation[i]);
@@ -1916,7 +1916,7 @@ bool Expression::AssignMatrixExpressions(const Matrix<Expression>& input, Calcul
   Expression currentRow;
   for (int i=0; i<input.NumRows; i++)
   { currentRow.reset(owner);
-    currentRow.children.ReservE(input.NumCols+1);
+    currentRow.children.Reserve(input.NumCols+1);
     currentRow.AddChildAtomOnTop(owner.opSequence());
     for (int j=0; j<input.NumCols; j++)
       currentRow.AddChildOnTop(input(i,j));
@@ -2004,7 +2004,7 @@ bool Calculator::ReadTestStrings(HashedList<std::string, MathRoutines::hashStrin
   outputCommands.Clear();
   outputResults.SetSize(0);
   outputCommands.SetExpectedSize(this->GetNumBuiltInFunctions());
-  outputResults.ReservE(this->GetNumBuiltInFunctions());
+  outputResults.Reserve(this->GetNumBuiltInFunctions());
   std::string buffer;
   while (theFileReader.positionInString<(signed) theFileReader.theString.size())
   { if(!theFileReader.GetStringEnclosedIn("input", buffer))

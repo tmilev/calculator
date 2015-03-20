@@ -324,9 +324,9 @@ bool FileOperations::GetFolderFileNames
   DIR *theDirectory = opendir(theFolderName.c_str());
   if (theDirectory==NULL)
     return false;
-  outputFileNamesNoPath.ReservE(1000);
+  outputFileNamesNoPath.Reserve(1000);
   if (outputFileTypes!=0)
-    outputFileTypes->ReservE(1000);
+    outputFileTypes->Reserve(1000);
   std::string fullName;
   for (dirent *fileOrFolder=readdir(theDirectory); fileOrFolder!=0; fileOrFolder= readdir (theDirectory))
   { outputFileNamesNoPath.AddOnTop(fileOrFolder->d_name);
@@ -580,11 +580,11 @@ bool WeylGroup::HasStronglyPerpendicularDecompositionWRT
       outputCoeffs.LastObject()->MakeOne();
       return true;
     }
-    output.ReservE(theSet.size);
-    outputCoeffs.ReservE(theSet.size);
+    output.Reserve(theSet.size);
+    outputCoeffs.Reserve(theSet.size);
   }
   Vectors<Rational> theNewSet;
-  theNewSet.ReservE(theSet.size);
+  theNewSet.Reserve(theSet.size);
   Vector<Rational> tempRoot;
   Rational tempRat;
   for (int indexFirstNonZeroRoot=0; indexFirstNonZeroRoot<theSet.size; indexFirstNonZeroRoot++)
@@ -1629,7 +1629,7 @@ PartFraction::PartFraction()
 }
 
 void PartFraction::init(int numRoots)
-{ this->IndicesNonZeroMults.ReservE(numRoots);
+{ this->IndicesNonZeroMults.Reserve(numRoots);
   this->IndicesNonZeroMults.size=0;
   this->SetSize(numRoots);
   for (int i=0; i<this->size; i++)
@@ -2768,7 +2768,7 @@ void SelectionWithMultiplicities::initWithMultiplicities(int NumElements)
 { this->Multiplicities.SetSize(NumElements);
   for (int i=0; i<this->Multiplicities.size; i++)
     this->Multiplicities.TheObjects[i]=0;
-  this->elements.ReservE(NumElements);
+  this->elements.Reserve(NumElements);
   this->elements.size=0;
 }
 
@@ -2948,7 +2948,7 @@ void SelectionWithDifferentMaxMultiplicities::IncrementSubset()
 
 void DynkinType::GetTypesWithMults(List<DynkinSimpleType>& output)const
 { output.SetSize(0);
-  output.ReservE(this->GetNumSimpleComponents());
+  output.Reserve(this->GetNumSimpleComponents());
   List<DynkinSimpleType> componentsSorted;
   this->GetSortedDynkinTypes(componentsSorted);
   for (int i=0; i<componentsSorted.size; i++)
@@ -4230,7 +4230,7 @@ void WeylGroup::GenerateRootSystem()
   this->RootSystem.Clear();
   this->RootSystem.SetExpectedSize(theRootsFinder.size);
   this->RootsOfBorel.SetSize(0);
-  this->RootsOfBorel.ReservE(theRootsFinder.size/2);
+  this->RootsOfBorel.Reserve(theRootsFinder.size/2);
   for (int i=0; i<theRootsFinder.size; i++)
     if (theRootsFinder[i].IsPositiveOrZero())
       this->RootsOfBorel.AddOnTop(theRootsFinder[i]);
@@ -4249,7 +4249,7 @@ void WeylGroup::ActOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rat
 void WeylGroup::ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output)
 { this->ComputeAllElements();
   output.size=0;
-  output.ReservE(this->RootSystem.size/2);
+  output.Reserve(this->RootSystem.size/2);
   for (int i=0; i<this->RootSystem.size; i++)
     if (this->RootSystem[i].IsPositiveOrZero())
       output.AddOnTop(this->RootSystem[i]);
@@ -4913,7 +4913,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
   int estimatedNumWeights=(int)
   ( ((Rational)this->GetGroupSizeByFormula()).GetDoubleValue()*theDominantWeights.size);
   estimatedNumWeights= MathRoutines::Minimum(10000, estimatedNumWeights);
-  finalWeights.ReservE(estimatedNumWeights);
+  finalWeights.Reserve(estimatedNumWeights);
   finalWeights.SetHashSizE(estimatedNumWeights);
   Vectors<Rational> dominantWeightsNonHashed;
   dominantWeightsNonHashed=(theDominantWeights);
@@ -5075,7 +5075,7 @@ std::string SubgroupWeylGroupOLD::ElementToStringBruhatGraph()
   List<List<List<int> > > arrows;
   List<List<int> > Layers;
   Vector<Rational> tempRoot;
-  Layers.ReservE(this->size);
+  Layers.Reserve(this->size);
   int GraphWidth=1;
   int oldLayerElementLength=-1;
   for (int i=0; i< this->size; i++)
@@ -5087,7 +5087,7 @@ std::string SubgroupWeylGroupOLD::ElementToStringBruhatGraph()
     GraphWidth=MathRoutines::Maximum(GraphWidth, Layers.LastObject()->size);
   }
   HashedList<Vector<Rational> > orbit;
-  orbit.ReservE(this->size);
+  orbit.Reserve(this->size);
   for (int i=0; i<this->size; i++)
   { this->ActByElement(i, this->AmbientWeyl.rho, tempRoot);
     orbit.AddOnTop(tempRoot);
@@ -5173,7 +5173,7 @@ bool SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots
 (WeylGroup& inputWeyl, const Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
 { MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots");
   Vectors<Rational> selectedRoots;
-  selectedRoots.ReservE(ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize- ZeroesMeanSimpleRootSpaceIsInParabolic.CardinalitySelection);
+  selectedRoots.Reserve(ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize- ZeroesMeanSimpleRootSpaceIsInParabolic.CardinalitySelection);
   this->AmbientWeyl=inputWeyl;
   if (this->AmbientWeyl.GetDim()!=ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize)
     crash << "This is a programming error: parabolic selection selects out of " << ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize
@@ -5195,7 +5195,7 @@ std::string SubgroupWeylGroupOLD::ElementToStringCosetGraph()
   List<List<List<int> > > arrows;
   List<List<int> > Layers;
   Vector<Rational> tempRoot;
-  Layers.ReservE(this->RepresentativesQuotientAmbientOrder.size);
+  Layers.Reserve(this->RepresentativesQuotientAmbientOrder.size);
   int GraphWidth=1;
   int oldLayerElementLength=-1;
   for (int i=0; i< this->RepresentativesQuotientAmbientOrder.size; i++)
@@ -5231,7 +5231,7 @@ void SubgroupWeylGroupOLD::FindQuotientRepresentatives(int UpperLimit)
 { this->AmbientWeyl.ComputeAllElements(UpperLimit);
   Vector<Rational> image1;
   this->RepresentativesQuotientAmbientOrder.size=0;
-  this->RepresentativesQuotientAmbientOrder.ReservE(this->AmbientWeyl.theElements.size);
+  this->RepresentativesQuotientAmbientOrder.Reserve(this->AmbientWeyl.theElements.size);
   for (int i=0; i<this->AmbientWeyl.theElements.size; i++)
   { image1=this->AmbientWeyl.rho;
     this->AmbientWeyl.ActOnRootByGroupElement(i, image1, false, false);
@@ -5437,7 +5437,7 @@ void KLpolys::GeneratePartialBruhatOrder()
   this->SimpleReflectionsActionList.SetSize(this->size);
   this->ComputeDebugString();
   for (int i=0; i<this->size; i++)
-  { this->SimpleReflectionsActionList[i].ReservE(theDimension);
+  { this->SimpleReflectionsActionList[i].Reserve(theDimension);
     for (int j=0; j<theDimension; j++)
     { Vector<Rational> tempRoot, tempRoot2;
       tempRoot=(*this)[i];
@@ -6743,8 +6743,8 @@ bool QuasiPolynomial::SubstitutionLessVariables(const PolynomialSubstitution<Rat
   Matrix<Rational> theShiftImage, shiftMatForm;
   output.LatticeShifts.size=0;
   output.valueOnEachLatticeShift.size=0;
-  output.valueOnEachLatticeShift.ReservE(this->LatticeShifts.size);
-  output.LatticeShifts.ReservE(this->LatticeShifts.size);
+  output.valueOnEachLatticeShift.Reserve(this->LatticeShifts.size);
+  output.LatticeShifts.Reserve(this->LatticeShifts.size);
   Vector<Rational> tempRoot;
   Polynomial<Rational> tempP;
   for (int i=0; i<this->LatticeShifts.size; i++)
@@ -6824,7 +6824,7 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& t
   //stOutput << "<br>The Zn-Lattice: " << theZnLattice.ToString(true, false);
   theZnLattice.IntersectWithBothOfMaxRank(eigenLattice);
   //stOutput << "<br>Zn intersected with eigen-Lattice: " << theZnLattice.ToString(true, false);
-  resultBasis.ReservE(theScalarProducts.size-1);
+  resultBasis.Reserve(theScalarProducts.size-1);
   Vector<Rational> tempRoot, resultRoot; Rational orthogonalComponent;
   for (int i=0; i<theZnLattice.basisRationalForm.NumRows; i++)
   { theZnLattice.basisRationalForm.GetVectorFromRow(i, tempRoot);
@@ -7864,11 +7864,11 @@ std::iostream& operator<< (std::iostream& output, const CompleX<Base>& input)
 }
 
 void DrawOperations::init()
-{ this->IndexNthDrawOperation.ReservE(10000);
-  this->TypeNthDrawOperation.ReservE(10000);
-  this->theDrawLineBetweenTwoRootsOperations.ReservE(10000);
-  this->theDrawTextAtVectorOperations.ReservE(15);
-  this->theDrawCircleAtVectorOperations.ReservE(280);
+{ this->IndexNthDrawOperation.Reserve(10000);
+  this->TypeNthDrawOperation.Reserve(10000);
+  this->theDrawLineBetweenTwoRootsOperations.Reserve(10000);
+  this->theDrawTextAtVectorOperations.Reserve(15);
+  this->theDrawCircleAtVectorOperations.Reserve(280);
   this->IndexNthDrawOperation.size=0;
   this->TypeNthDrawOperation.size=0;
   this->theDrawTextOperations.size=0;
@@ -7915,7 +7915,7 @@ void AnimationBuffer::operator+=(const DrawOperations& other)
   if (this->theVirtualOpS.size>0)
     theOp.indexPhysicalFrame=this->theVirtualOpS.LastObject()->indexPhysicalFrame+1;
   theOp.selectedPlaneInPhysicalDrawOp=0;
-  this->theVirtualOpS.ReservE(this->theVirtualOpS.size+other.BasisProjectionPlane.size);
+  this->theVirtualOpS.Reserve(this->theVirtualOpS.size+other.BasisProjectionPlane.size);
   for (int i=0; i<other.BasisProjectionPlane.size; i++)
   { this->theVirtualOpS.AddOnTop(theOp);
     theOp.indexPhysicalFrame++;
@@ -7929,7 +7929,7 @@ void AnimationBuffer::AddPause(int numFrames)
   theVOp.selectedPlaneInPhysicalDrawOp=-1;
   theVOp.theVirtualOp=this->typePause;
   theVOp.indexPhysicalDrawOp=this->thePhysicalDrawOps.size-1;
-  this->theVirtualOpS.ReservE(this->theVirtualOpS.size+numFrames);
+  this->theVirtualOpS.Reserve(this->theVirtualOpS.size+numFrames);
   for (int i=0; i<numFrames; i++)
     this->theVirtualOpS.AddOnTop(theVOp);
 }
@@ -7978,10 +7978,10 @@ void AnimationBuffer::operator+=(const AnimationBuffer& other)
   int physicalFrameShift=0;
   if (this->theVirtualOpS.size>0)
     physicalFrameShift=this->theVirtualOpS.LastObject()->indexPhysicalFrame+1;
-  this->thePhysicalDrawOps.ReservE(this->thePhysicalDrawOps.size+other.thePhysicalDrawOps.size);
+  this->thePhysicalDrawOps.Reserve(this->thePhysicalDrawOps.size+other.thePhysicalDrawOps.size);
   for (int i=0; i<other.thePhysicalDrawOps.size; i++)
     this->thePhysicalDrawOps.AddOnTop(other.thePhysicalDrawOps[i]);
-  this->theVirtualOpS.ReservE(this->theVirtualOpS.size+other.theVirtualOpS.size);
+  this->theVirtualOpS.Reserve(this->theVirtualOpS.size+other.theVirtualOpS.size);
   VirtualDrawOp currentOp;
   for (int i=0; i<other.theVirtualOpS.size; i++)
   { currentOp=other.theVirtualOpS[i];
@@ -8146,7 +8146,7 @@ void DrawOperations::ComputeXYsFromProjectionsEisAndGraphicsUnit()
   }
 }
 
-void DrawOperations::changeBasisPreserveAngles(double newX, double newY, GlobalVariables& theGlobalVariables)
+void DrawOperations::changeBasisPReserveAngles(double newX, double newY, GlobalVariables& theGlobalVariables)
 { double bufferCenterX=this->centerX[this->SelectedPlane];
   double bufferCenterY=this->centerY[this->SelectedPlane];
   double bufferGraphicsUnit=this->GraphicsUnit[this->SelectedPlane];
@@ -8344,7 +8344,7 @@ void DrawOperations::operator+=(const DrawOperations& other)
   int shiftDrawLine=this->theDrawLineOperations.size;
   int shiftDrawLineBnVectors=this->theDrawLineBetweenTwoRootsOperations.size;
   int shiftDrawCircleAtVector=this->theDrawCircleAtVectorOperations.size;
-  this->IndexNthDrawOperation.ReservE
+  this->IndexNthDrawOperation.Reserve
   (this->IndexNthDrawOperation.size+other.IndexNthDrawOperation.size);
   for (int i=0; i<other.TypeNthDrawOperation.size; i++)
     switch(other.TypeNthDrawOperation[i])
@@ -8519,7 +8519,7 @@ bool Cone::GetLatticePointsInCone
   //This is very restrictive: in 8 dimensions, selecting upperBoundPointsInEachDim=2,
   //we get a total of (2*2+1)^8=390625 points to test, which is a pretty darn small box
     return false;
-  outputPoints.ReservE(numCycles);
+  outputPoints.Reserve(numCycles);
   outputPoints.size=0;
   Vector<Rational> candidatePoint;
   Vectors<Rational> LatticeBasis;
@@ -9655,7 +9655,7 @@ bool Cone::EliminateFakeNormalsUsingVertices(int theDiM, int numAddedFakeWalls, 
       }
       //all normals should now lie in the subspace spanned by the vertices
       //add the walls needed to go down to the subspace
-      this->Normals.ReservE(this->Normals.size+2*NormalsToSubspace.size);
+      this->Normals.Reserve(this->Normals.size+2*NormalsToSubspace.size);
       for (int i=0; i<NormalsToSubspace.size; i++)
       { NormalsToSubspace[i].ScaleByPositiveRationalToIntegralMinHeight();
         this->Normals.AddOnTop(NormalsToSubspace[i]);
@@ -9966,7 +9966,7 @@ void RationalFunctionOld::GetRelations(List<Polynomial<Rational> >& theGenerator
 //  for (int i=0; i<theGroebnerBasis.size; i++)
 //  { stOutput << theGroebnerBasis.TheObjects[i].ToString(false, tempFormat) << "<br>";
 //  }
-  theGenerators.ReservE(theGroebnerBasis.size);
+  theGenerators.Reserve(theGroebnerBasis.size);
   theGenerators.size=0;
   for (int i=0; i<theGroebnerBasis.size; i++)
   { Polynomial<Rational> & currentPoly= theGroebnerBasis.TheObjects[i];

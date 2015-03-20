@@ -1190,7 +1190,7 @@ void ElementUniversalEnvelopingOrdered<coefficient>::CleanUpZeroCoeff()
 
 template <class coefficient>
 void ElementUniversalEnvelopingOrdered<coefficient>::operator+=(const ElementUniversalEnvelopingOrdered<coefficient>& other)
-{ this->ReservE(this->size+other.size);
+{ this->Reserve(this->size+other.size);
   for (int i=0; i<other.size; i++)
     this->AddMonomialNoCleanUpZeroCoeff(other.TheObjects[i]);
   this->CleanUpZeroCoeff();
@@ -1198,7 +1198,7 @@ void ElementUniversalEnvelopingOrdered<coefficient>::operator+=(const ElementUni
 
 template <class coefficient>
 void ElementUniversalEnvelopingOrdered<coefficient>::operator-=(const ElementUniversalEnvelopingOrdered<coefficient>& other)
-{ this->ReservE(this->size+other.size);
+{ this->Reserve(this->size+other.size);
   MonomialUniversalEnvelopingOrdered<coefficient> tempMon;
   for (int i=0; i<other.size; i++)
   { tempMon=other.TheObjects[i];
@@ -1296,7 +1296,7 @@ template <class coefficient>
 void ElementUniversalEnvelopingOrdered<coefficient>::operator*=(const ElementUniversalEnvelopingOrdered<coefficient>& other)
 { ElementUniversalEnvelopingOrdered output;
   output.MakeZero(*this->owner);
-  output.ReservE(this->size*other.size);
+  output.Reserve(this->size*other.size);
   MonomialUniversalEnvelopingOrdered<coefficient> tempMon;
   for (int i=0; i<this->size; i++)
     for(int j=0; j<other.size; j++)
@@ -1376,8 +1376,8 @@ bool MonomialUniversalEnvelopingOrdered<coefficient>::SwitchConsecutiveIndicesIf
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   this->owner->theOwner.LieBracket(this->owner->theOrder.TheObjects[theLeftGeneratorIndex], this->owner->theOrder.TheObjects[theRightGeneratorIndex], tempElt);
   if (tempElt.IsEqualToZero())
-  { output.generatorsIndices.ReservE(this->generatorsIndices.size);
-    output.Powers.ReservE(this->generatorsIndices.size);
+  { output.generatorsIndices.Reserve(this->generatorsIndices.size);
+    output.Powers.Reserve(this->generatorsIndices.size);
     output.MakeZero(theRingZero, *this->owner);
     output.Coefficient=this->Coefficient;
     //output.ComputeDebugString();
@@ -1405,8 +1405,8 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::CommuteConsecutiveIndicesR
   output.MakeZero(*this->owner);
   MonomialUniversalEnvelopingOrdered tempMon;
   tempMon.MakeZero(theRingZero, *this->owner);
-  tempMon.Powers.ReservE(this->generatorsIndices.size+2);
-  tempMon.generatorsIndices.ReservE(this->generatorsIndices.size+2);
+  tempMon.Powers.Reserve(this->generatorsIndices.size+2);
+  tempMon.generatorsIndices.Reserve(this->generatorsIndices.size+2);
   tempMon.Powers.size=0;
   tempMon.generatorsIndices.size=0;
   int rightGeneratorIndeX= this->generatorsIndices.TheObjects[theIndeX+1];

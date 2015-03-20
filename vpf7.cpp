@@ -319,7 +319,7 @@ bool LittelmannPath::GenerateOrbit
   outputOperators[0].SetSize(0);
   List<int> currentSequence;
   if (UpperBoundNumElts>0)
-    currentSequence.ReservE(UpperBoundNumElts);
+    currentSequence.Reserve(UpperBoundNumElts);
   LittelmannPath currentPath;
   bool result=true;
   Selection parabolicSelectionSelectedAreInLeviPart;
@@ -631,7 +631,7 @@ std::string ElementUniversalEnveloping<coefficient>::IsInProperSubmodule
 (const Vector<coefficient>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
 { std::stringstream out;
   List<ElementUniversalEnveloping<coefficient> > theOrbit;
-  theOrbit.ReservE(1000);
+  theOrbit.Reserve(1000);
   ElementUniversalEnveloping<coefficient> theElt;
   int theDim=this->GetOwner().GetRank();
   int numPosRoots=this->GetOwner().GetNumPosRoots();
@@ -967,7 +967,7 @@ void SubgroupWeylGroupOLD::GetGroupElementsIndexedAsAmbientGroup(List<ElementWey
 { if (this->ExternalAutomorphisms.size>0)
     crash << "This is  a programming error: a function meant for subgroups that are Weyl groups of Levi parts of parabolics is called on a subgroup that is not of that type. "
     << crash;
-  output.ReservE(this->size);
+  output.Reserve(this->size);
   output.SetSize(0);
   ElementWeylGroup<WeylGroup> tempElt;
   Vector<int> indexShifts;

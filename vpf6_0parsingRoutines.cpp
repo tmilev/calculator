@@ -519,7 +519,7 @@ bool Calculator::isLeftSeparator(char c)
 
 void Calculator::ParseFillDictionary(const std::string& input)
 { std::string current;
-  (*this->CurrrentSyntacticSouP).ReservE(input.size());
+  (*this->CurrrentSyntacticSouP).Reserve(input.size());
   (*this->CurrrentSyntacticSouP).SetSize(0);
   char LookAheadChar;
   SyntacticElement currentElement;
@@ -604,7 +604,7 @@ bool Calculator::ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence(int
   SyntacticElement& theFunctionElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5];
   Expression newExpr;
   newExpr.reset(*this);
-  newExpr.children.ReservE(theSequenceElt.theData.children.size);
+  newExpr.children.Reserve(theSequenceElt.theData.children.size);
   newExpr.AddChildOnTop(theFunctionElt.theData);
   if (theSequenceElt.theData.IsAtom())
     newExpr.AddChildOnTop(theSequenceElt.theData);
@@ -951,7 +951,7 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
 { MacroRegisterFunctionWithName("Calculator::ExtractExpressions");
   //std::string lookAheadToken;
   std::stringstream errorLog;
-  (*this->CurrentSyntacticStacK).ReservE((*this->CurrrentSyntacticSouP).size+this->numEmptyTokensStart);
+  (*this->CurrentSyntacticStacK).Reserve((*this->CurrrentSyntacticSouP).size+this->numEmptyTokensStart);
   (*this->CurrentSyntacticStacK).SetSize(this->numEmptyTokensStart);
   this->registerNumNonClosedBeginArray=0;
   this->registerPositionAfterDecimalPoint=0;

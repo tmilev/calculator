@@ -722,7 +722,7 @@ public:
   void SetExpectedSize(int theSize)
   { // <-Registering stack trace forbidden! Multithreading deadlock alert.
     if ((this->ActualSize)*5/6<theSize)
-      this->ReservE(this->GetNewSizeRelativeToExpectedSize(theSize));
+      this->Reserve(this->GetNewSizeRelativeToExpectedSize(theSize));
   }
   void AssignLight(const ListLight<Object>& from);
   void ExpandOnTop(int theIncrease)
@@ -739,7 +739,7 @@ public:
   }
   void initFillInObject(int theSize, const Object& o);
   inline void AddObjectOnTopCreateNew();
-  void ReservE(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
+  void Reserve(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void SortedInsert(const Object& o)
   { this->InsertAtIndexShiftElementsUp(o,this->BSExpectedIndex(o));
   }
@@ -811,7 +811,7 @@ public:
       carbonCopy->ReverseOrderElements();
     return result;
   }
-  //The below function is required to preserve the order of elements given by theSelection.elements.
+  //The below function is required to pReserve the order of elements given by theSelection.elements.
   void SubSelection(const Selection& theSelection, List<Object>& output);
   //If comparison function is not specified, QuickSortAscending usese operator>, else it uses the given
   //comparison function
@@ -1442,7 +1442,7 @@ public:
     if (From.IsSparse())
     { for (int i=0; i<this->size; i++)
       { unsigned int hashIndex=this->GetHash(this->TheObjects[i]);
-        this->TheHashedArrays[hashIndex].ReservE(From.TheHashedArrays[hashIndex].size);
+        this->TheHashedArrays[hashIndex].Reserve(From.TheHashedArrays[hashIndex].size);
         this->TheHashedArrays[hashIndex].AddOnTop(i);
       }
     } else
@@ -1592,7 +1592,7 @@ class ProjectInformation
     //For more information, google "static initialization order fiasco"
     //and go to the first link. The solution used here was proposed inside that link.
     static ProjectInformation MainProjectInfo;
-    MainProjectInfo.CustomStackTrace.ReservE(30);
+    MainProjectInfo.CustomStackTrace.Reserve(30);
     MainProjectInfo.theFiles.SetExpectedSize(100);
     MainProjectInfo.infoIsInitialized.mutexName="projectnfo";
     return MainProjectInfo;
@@ -1660,7 +1660,7 @@ public:
           return false;
     return true;
   }
-  void Resize(int r, int c, bool PreserveValues, const coefficient* TheRingZero=0);
+  void Resize(int r, int c, bool PReserveValues, const coefficient* TheRingZero=0);
   inline static std::string GetXMLClassName()
   { std::string result="Matrix_";
     result.append(coefficient::GetXMLClassName());
@@ -2187,7 +2187,7 @@ public:
 };
 
 template <typename Element>
-inline void Matrix<Element>::Resize(int r, int c, bool PreserveValues, const Element* const TheRingZero)
+inline void Matrix<Element>::Resize(int r, int c, bool PReserveValues, const Element* const TheRingZero)
 { if (r<0)
     r=0;
   if (c<0)
@@ -2218,12 +2218,12 @@ inline void Matrix<Element>::Resize(int r, int c, bool PreserveValues, const Ele
   }
   int firstInvalidRow=MathRoutines::Minimum(this->NumRows, r);
   int firstInvalidCol=MathRoutines::Minimum(this->NumCols, c);
-  if (PreserveValues && newElements!=0)
+  if (PReserveValues && newElements!=0)
     for (int j=0; j<firstInvalidRow; j++)
       for (int i=0; i<firstInvalidCol; i++)
         newElements[j][i]= this->elements[j][i];
   if (TheRingZero!=0)
-  { if (!PreserveValues)
+  { if (!PReserveValues)
     { firstInvalidRow=0;
       firstInvalidCol=0;
     }
@@ -2951,7 +2951,7 @@ void List<Object>::AssignLight(const ListLight<Object>& From)
 }
 
 template <class Object>
-void List<Object>::ReservE(int theSize)
+void List<Object>::Reserve(int theSize)
 { // <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (this->ActualSize<theSize)
     this->ExpandArrayOnTop(theSize- this->ActualSize);
@@ -2981,7 +2981,7 @@ void List<Object>::SetSize(int theSize)
 //  { this->CheckConsistency();
 //    std::cout << "gotthisfuckingfar -2 ";
 //  }
-  this->ReservE(theSize);
+  this->Reserve(theSize);
 //  if (cantfuckingbelievethisfuckingpieceofshitiscrashing)
 //  { this->CheckConsistency();
 //    std::cout << "gotthisfuckingfar -3 ";

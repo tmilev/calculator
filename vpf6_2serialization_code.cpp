@@ -137,7 +137,7 @@ bool CalculatorConversions::innerSSLieAlgebra(Calculator& theCommands, const Exp
   if (theDynkinType.GetRank()>20)
   { std::stringstream out;
     out << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. If you would like to relax this limitation edit file " << __FILE__
-    << " line " << __LINE__ << ". Note that the Chevalley constant computation reserves a dim(g)*dim(g) table of RAM memory, which means the RAM memory rises with the 4^th power of rank(g). "
+    << " line " << __LINE__ << ". Note that the Chevalley constant computation Reserves a dim(g)*dim(g) table of RAM memory, which means the RAM memory rises with the 4^th power of rank(g). "
     << " You have been warned. Alternatively, you may want to implement a sparse structure constant table (write me an email if you want to do that, I will help you). ";
     return output.MakeError(out.str(), theCommands);
   }
@@ -441,7 +441,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
   theReport.Report(reportStream.str());
   //stOutput << "Owner ss is here:  " << ownerSS->ToString();
   theSAsE.Sequencefy();
-  theSAs.theSubalgebras.ReservE(theSAsE.children.size-1);
+  theSAs.theSubalgebras.Reserve(theSAsE.children.size-1);
   theSAs.theSubalgebras.SetSize(0);
   theSAs.theSubalgebrasNonEmbedded->SetExpectedSize(theSAsE.children.size-1);
   theSAs.flagAttemptToSolveSystems=true;
@@ -550,7 +550,7 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(Calculator& theComma
   theValues.AddOnTop(numHsExploredE);
   Expression subalgebrasListE, candidateE;
   subalgebrasListE.MakeSequence(theCommands);
-  subalgebrasListE.children.ReservE(input.theSubalgebras.size+1);
+  subalgebrasListE.children.Reserve(input.theSubalgebras.size+1);
   for (int i=0; i<input.theSubalgebras.size; i++)
   { if (!CalculatorConversions::innerStoreCandidateSA(theCommands, input.theSubalgebras[i], candidateE))
       return false;

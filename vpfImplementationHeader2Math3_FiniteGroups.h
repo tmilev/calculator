@@ -75,7 +75,7 @@ void ElementWeylGroup<templateWeylGroup>::Conjugate
     return;
   }
   output.owner=elementWeConjugateBy.owner;
-  output.generatorsLastAppliedFirst.ReservE(elementWeConjugateBy.generatorsLastAppliedFirst.size*2+inputToBeConjugated.generatorsLastAppliedFirst.size);
+  output.generatorsLastAppliedFirst.Reserve(elementWeConjugateBy.generatorsLastAppliedFirst.size*2+inputToBeConjugated.generatorsLastAppliedFirst.size);
   output.generatorsLastAppliedFirst=elementWeConjugateBy.generatorsLastAppliedFirst;
   output.generatorsLastAppliedFirst.AddListOnTop(inputToBeConjugated.generatorsLastAppliedFirst);
   for (int i=elementWeConjugateBy.generatorsLastAppliedFirst.size-1; i>=0; i--)
@@ -713,7 +713,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCfromAllElements(GlobalVariables* th
     inversesOfGenerators[i] = this->generators[i].Inverse();
   elementSomeGroup currentElement;
   List<List<int> > ccIndices;
-  ccIndices.ReservE(120);
+  ccIndices.Reserve(120);
   for(int i=0; i<this->theElements.size; i++)
     if (!Accounted[i])
     { theStack.Clear();

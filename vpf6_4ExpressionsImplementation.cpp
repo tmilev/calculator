@@ -953,7 +953,7 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
   this->CheckInitialization();
   if (!this->IsBuiltInType())
     crash << "This is a programming error: calling Expression::SetContextAtLeastEqualTo on an expression that is not of built-in type. "
-    << "Contexts are reserved for built-in data types. " << crash;
+    << "Contexts are Reserved for built-in data types. " << crash;
   if (!inputOutputMinContext.IsContext())
   { this->theBoss->Comments << "<br>Warning: non-initialized input context in Expression::SetContextAtLeastEqualTo. Stack trace: "
     << Crasher::GetStackTraceEtcErrorMessage();

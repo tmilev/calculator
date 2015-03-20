@@ -815,7 +815,10 @@ void WebWorker::WriteProgressReportToFile(const std::string& input)
 { MacroRegisterFunctionWithName("WebWorker::WriteProgressReportToFile");
   theLog << logger::green << "Progress report written to file: " << onePredefinedCopyOfGlobalVariables.PhysicalNameProgressReport << logger::endL;
   std::fstream theFile;
-  FileOperations::OpenFileCreateIfNotPresent(theFile, onePredefinedCopyOfGlobalVariables.PhysicalNameProgressReport, false, true, false);
+  if (!FileOperations::OpenFileCreateIfNotPresent(theFile, onePredefinedCopyOfGlobalVariables.PhysicalNameProgressReport, false, true, false))
+    FileOperations::OpenFileCreateIfNotPresent
+    (theFile, onePredefinedCopyOfGlobalVariables.PhysicalPathOutputFolder+"progressReport_failed_to_create_file.html",
+     false, true, false);
   theFile << standardOutputStreamAfterTimeout.str() << "<hr>" << input;
   theFile.flush();
   theFile.close();

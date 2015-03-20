@@ -30,8 +30,8 @@ Rational ModuleSSalgebra<coefficient>::hwTrace
   int theIndexMinus=2*this->GetOwner().GetNumPosRoots() + this->GetOwner().GetRank()-theIndex-1;
   int theSimpleIndex= theIndex-this->GetOwner().GetNumPosRoots()-this->GetOwner().GetRank();
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> Accum;
-  Accum.Powers.ReservE(oldRight.Powers.size);
-  Accum.generatorsIndices.ReservE(oldRight.generatorsIndices.size);
+  Accum.Powers.Reserve(oldRight.Powers.size);
+  Accum.generatorsIndices.Reserve(oldRight.generatorsIndices.size);
   Vector<Rational> RemainingWeight;
   Rational result=0;
   Rational summand;
@@ -675,7 +675,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
   this->theGeneratingWordsNonReducedInt.SetExpectedSize(this->thePaths.size);
   this->theGeneratingWordsNonReduced.size=0;
   this->theGeneratingWordsWeightsPlusWeightFDpart.SetSize(0);
-  this->theGeneratingWordsWeightsPlusWeightFDpart.ReservE(this->thePaths.size);
+  this->theGeneratingWordsWeightsPlusWeightFDpart.Reserve(this->thePaths.size);
   HashedList<ElementWeylGroup<WeylGroup>> theWeylElts;
 //  int wordCounter=-1;
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
@@ -824,14 +824,14 @@ void ModuleSSalgebra<coefficient>::GetElementsNilradical
   ownerSS.OrderNilradical(this->parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
   ElementUniversalEnveloping<ResultType> theElt;
   output.SetSize(0);
-  output.ReservE(ownerSS.GetNumPosRoots());
+  output.Reserve(ownerSS.GetNumPosRoots());
 
   int theBeginning=useNegativeNilradical ? 0: ownerSS.GetNumPosRoots()+ownerSS.GetRank();
   MemorySaving<List<int> > tempList;
   if (outputListOfGenerators==0)
     outputListOfGenerators=&tempList.GetElement();
   outputListOfGenerators->SetSize(0);
-  outputListOfGenerators->ReservE(ownerSS.GetNumPosRoots());
+  outputListOfGenerators->Reserve(ownerSS.GetNumPosRoots());
   for (int i=theBeginning; i<theBeginning+ownerSS.GetNumPosRoots(); i++)
     if (this->IsNotInLevi(i))
       outputListOfGenerators->AddOnTop(i);

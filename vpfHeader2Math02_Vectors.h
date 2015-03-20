@@ -651,7 +651,7 @@ class Vectors: public List<Vector<coefficient> >
     for (int i=0; i<input.size; i++)
       count+=input[i].size;
     this->SetSize(0);
-    this->ReservE(count);
+    this->Reserve(count);
     for (int i=0; i<input.size; i++)
       for (int j=0; j<input[i].size; j++)
         this->AddOnTop(input[i][j]);
@@ -953,7 +953,7 @@ bool Vector<coefficient>::GetCoordsInBasiS(const Vectors<coefficient>& inputBasi
   if (this->size!=inputBasis[0].size)
     crash << "This is a programming error: asking to get coordinates of vector of " << this->size << " coordinates using a basis whose first vector has "
     << inputBasis[0].size << " coordinates." << crash;
-  bufferVectors.ReservE(inputBasis.size+1);
+  bufferVectors.Reserve(inputBasis.size+1);
   bufferVectors.AddListOnTop(inputBasis);
   bufferVectors.AddOnTop(*this);
 //  stOutput << "<br>input for GetLinearDependence: " << bufferVectors.ToString();

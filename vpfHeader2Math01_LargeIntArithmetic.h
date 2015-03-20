@@ -52,7 +52,7 @@ public:
   static void GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(unsigned int n, List<unsigned int>& output)
   { List<int> theSieve;
     theSieve.initFillInObject(n+1,1);
-    output.ReservE(n/2);
+    output.Reserve(n/2);
     output.size=0;
     for (unsigned int i=2; i<=n; i++)
       if (theSieve.TheObjects[i]!=0)

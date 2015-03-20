@@ -174,7 +174,7 @@ bool Expression::Sequencefy()
 
 bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory)
 { MacroRegisterFunctionWithName("Calculator::GetVectorExpressions");
-  output.ReservE(input.children.size);
+  output.Reserve(input.children.size);
   output.SetSize(0);
   if (!input.IsSequenceNElementS())
   { if (targetDimNonMandatory>0)
@@ -722,7 +722,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
         tempStream4 << theFinalPartialLetter << "_{" << k-numStartingVars+1 << "}";
         if (theWeylFormat.polyAlphabeT.Contains(tempstream2.str()) || theWeylFormat.polyAlphabeT.Contains(tempstream3.str()))
           return output.MakeError
-          ("Error: the variable "+ tempstream2.str()+" is reserved for me: you are not allowed to use it as a coordinate of the highest weight. ", theCommands);
+          ("Error: the variable "+ tempstream2.str()+" is Reserved for me: you are not allowed to use it as a coordinate of the highest weight. ", theCommands);
         theWeylFormat.polyAlphabeT[k]=tempstream2.str();
         theWeylFormat.weylAlgebraLetters[k]=tempStream4.str();
       }
@@ -1870,7 +1870,7 @@ bool Calculator::outerUnionNoRepetition(Calculator& theCommands, const Expressio
   theIndices.SetSize(theList.size);
   for (int i=0; i<theList.size; i++)
     theIndices[i]=theCommands.theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(theList[i]);
-  output.children.ReservE(numElts);
+  output.children.Reserve(numElts);
   output.reset(theCommands, theIndices.size+1);
   output.AddChildAtomOnTop(theCommands.opSequence());
   output.children.AddOnTop(theIndices);
@@ -2015,7 +2015,7 @@ void Calculator::AddOperationBinaryInnerHandlerWithTypes
   innerFunction.theArgumentTypes.AddChildAtomOnTop(leftType);
   innerFunction.theArgumentTypes.AddChildAtomOnTop(rightType);
   innerFunction.additionalIdentifier=inputAdditionalIdentifier;
-  this->FunctionHandlers[indexOp].ReservE(10);
+  this->FunctionHandlers[indexOp].Reserve(10);
   this->FunctionHandlers[indexOp].AddOnTop(innerFunction);
 }
 
@@ -2034,9 +2034,9 @@ void Calculator::AddOperationHandler
   Function theFun(*this, indexOp, this->FunctionHandlers[indexOp].size, handler, 0, opDescription, opExample, isInner, visible, isExperimental);
   theFun.additionalIdentifier=inputAdditionalIdentifier;
   if (theOpName=="*" || theOpName=="+" || theOpName=="/" || theOpName=="\\otimes" || theOpName=="^")
-    this->FunctionHandlers[indexOp].ReservE(100);
+    this->FunctionHandlers[indexOp].Reserve(100);
   else
-    this->FunctionHandlers[indexOp].ReservE(10);
+    this->FunctionHandlers[indexOp].Reserve(10);
   this->FunctionHandlers[indexOp].AddOnTop(theFun);
 }
 
@@ -2321,7 +2321,7 @@ bool Calculator::ReplaceEXdotsXbySsXdotsX(int numDots)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numDots-1];
   Expression newExpr;
   newExpr.reset(*this);
-  newExpr.children.ReservE(2);
+  newExpr.children.Reserve(2);
   newExpr.AddChildAtomOnTop(this->opEndStatement());
   newExpr.AddChildOnTop(left.theData);
   left.theData=newExpr;
@@ -2335,7 +2335,7 @@ bool Calculator::ReplaceSsSsXdotsXbySsXdotsX(int numDots)
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numDots-1];
   if (!left.theData.StartsWith(this->opEndStatement()))
     crash << "This is a programming error: ReplaceSsSsXdotsXbySsXdotsX called but left expression is not EndStatement." << crash;
-  left.theData.children.ReservE(left.theData.children.size+ right.theData.children.size-1);
+  left.theData.children.Reserve(left.theData.children.size+ right.theData.children.size-1);
   for (int i=1; i<right.theData.children.size; i++)
     left.theData.AddChildOnTop(right.theData[i]);
   left.theData.format=Expression::formatDefault;

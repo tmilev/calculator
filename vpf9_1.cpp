@@ -214,7 +214,7 @@ void DynkinDiagramRootSubalgebra::Sort()
   this->sameTypeComponents.size=0;
   this->indexInUniComponent.SetSize(this->SimpleBasesConnectedComponents.size);
   this->indexUniComponent.SetSize(this->SimpleBasesConnectedComponents.size);
-  this->sameTypeComponents.ReservE(this->SimpleBasesConnectedComponents.size);
+  this->sameTypeComponents.Reserve(this->SimpleBasesConnectedComponents.size);
   DynkinSimpleType tempType;
   for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
   { if (!(this->SimpleComponentTypes[i]==tempType))
@@ -406,7 +406,7 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple(const Vectors<Rati
   this->CheckInitialization();
   //stOutput << "<br>Computing diagram from " << simpleBasisInput.ToString();
   this->SimpleBasesConnectedComponents.size=0;
-  this->SimpleBasesConnectedComponents.ReservE(simpleBasisInput.size);
+  this->SimpleBasesConnectedComponents.Reserve(simpleBasisInput.size);
   for (int i=0; i<simpleBasisInput.size; i++)
   { int indexFirstComponentConnectedToRoot=-1;
     for (int j=0; j<this->SimpleBasesConnectedComponents.size; j++)
@@ -976,7 +976,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
     */
   }
 //  stOutput << "<hr>so far so good!";
-  drawOps.theBuffer.theDrawCircleAtVectorOperations.ReservE(2500);
+  drawOps.theBuffer.theDrawCircleAtVectorOperations.Reserve(2500);
   Accum.DrawMe(drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged);
 //  smallWeylChamber.DrawMeProjective(0, false, drawOps, theFormat);
 //  out << tempVars.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
@@ -1491,8 +1491,8 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport(GlobalVariables& the
 
 void GeneralizedVermaModuleCharacters::InitTheMaxComputation(GlobalVariables& theGlobalVariables)
 { this->theMaxComputation.numNonParaM=2;
-  this->theMaxComputation.theConesLargerDim.ReservE(this->projectivizedChambeR.size);
-  this->theMaxComputation.LPtoMaximizeLargerDim.ReservE(this->theMultiplicities.size);
+  this->theMaxComputation.theConesLargerDim.Reserve(this->projectivizedChambeR.size);
+  this->theMaxComputation.LPtoMaximizeLargerDim.Reserve(this->theMultiplicities.size);
   this->theMaxComputation.theConesLargerDim.SetSize(0);
   this->theMaxComputation.LPtoMaximizeLargerDim.SetSize(0);
   Lattice ZnLattice;

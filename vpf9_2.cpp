@@ -1228,18 +1228,21 @@ void RationalFunctionOld::lcm(const Polynomial<Rational>& left, const Polynomial
   theBasis.size=0;
   theBasis.AddOnTop(leftTemp);
   theBasis.AddOnTop(rightTemp);
-/*  stOutput << "<br>In the beginning: <br>";
-  for (int i=0; i<theBasis.size; i++)
-  { stOutput << theBasis[i].ToString() << "<br>\n";
-  }*/
+//  stOutput << "<br>In the beginning: <br>";
+//  for (int i=0; i<theBasis.size; i++)
+//  { stOutput << theBasis[i].ToString() << "<br>\n";
+//  }
   MemorySaving<GroebnerBasisComputation<Rational> > bufComp;
   GroebnerBasisComputation<Rational>& theComp=theGlobalVariables==0?
   bufComp.GetElement(): theGlobalVariables->theGroebnerBasisComputation.GetElement();
   theComp.thePolynomialOrder.theMonOrder=MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
-  theComp.TransformToReducedGroebnerBasis(theBasis, theGlobalVariables);
+  theComp.MaxNumGBComputations=-1;
+  if (!theComp.TransformToReducedGroebnerBasis(theBasis, theGlobalVariables))
+    crash << "Transformation to reduced Groebner basis is not allowed to fail in this function. " << crash;
+
 //  stOutput << "<br><br> ... and the basis is: <br>";
-//  for (int i=0; i<tempList.size; i++)
-//  { stOutput << tempList[i].ToString() << "<br>\n";
+//  for (int i=0; i<theBasis.size; i++)
+//  { stOutput << theBasis[i].ToString() << "<hr>\n";
 //  }
   int maxMonNoTIndex=-1;
   Rational MaxTotalDeg;
@@ -2167,8 +2170,8 @@ void CGI::CGIFileNameToFileName(std::string& input, std::string& output)
 void CGI::ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& outputData, List<std::string>& outputFieldNames)
 { int inputLength= (signed) input.size();
   bool readingData=false;
-  outputData.ReservE(10);
-  outputFieldNames.ReservE(10);
+  outputData.Reserve(10);
+  outputFieldNames.Reserve(10);
   outputData.SetSize(1);
   outputFieldNames.SetSize(1);
   outputData[0]="";

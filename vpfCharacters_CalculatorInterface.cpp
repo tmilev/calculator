@@ -1204,7 +1204,7 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(Calculator& 
     theWeyl.GetSignSignatureExtendedParabolics(extendedParabolicSubgroups, theCommands.theGlobalVariableS);
     theWeyl.GetSignSignatureAllRootSubsystems(allRootSubgroups, theCommands.theGlobalVariableS);
     List<Pair<std::string, List<Rational>, MathRoutines::hashString> > tauSigPairs;
-    finalSubGroups.ReservE(allRootSubgroups.size);
+    finalSubGroups.Reserve(allRootSubgroups.size);
     Pair<std::string, List<Rational>, MathRoutines::hashString> currentTauSig;
     for (int j=0; j<3; j++)
     { List<SubgroupRootReflections>* currentSGs=0;
@@ -1481,7 +1481,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(Calculator& theCommands
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], thePointer))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   ElementWeylGroup<WeylGroup> theElt;
-  theElt.generatorsLastAppliedFirst.ReservE(input.children.size-2);
+  theElt.generatorsLastAppliedFirst.Reserve(input.children.size-2);
   for(int i=2; i<input.children.size; i++)
   { int tmp;
     if (!input[i].IsSmallInteger(& tmp))

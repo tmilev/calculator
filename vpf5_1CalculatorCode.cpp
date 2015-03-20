@@ -258,7 +258,7 @@ bool Calculator::GetListPolysVariableLabelsInLex(const Expression& input, Vector
   outputContext.MakeEmptyContext(*this);
   Expression PolyVarsE, tempE;
   PolyVarsE.reset(*this);
-  PolyVarsE.children.ReservE(numVars+1);
+  PolyVarsE.children.Reserve(numVars+1);
   tempE.MakeAtom(this->opPolynomialVariables(), *this);
   PolyVarsE.AddChildOnTop(tempE);
 
@@ -498,9 +498,9 @@ bool Calculator::innerPrintSSsubalgebras
   out << "<br>Output file, fast load, hover mouse over math expressions to get formulas: <a href= \""
   << theSSsubalgebras.DisplayNameMainFile2FastLoadWithPath << "\"> "
   << theSSsubalgebras.DisplayNameMainFile2FastLoadNoPath << "</a>";
-  //  out << "<script> var reservedCountDownToRefresh = 5; setInterval(function(){document.getElementById('reservedCountDownToRefresh').innerHTML "
-  //  << "= --reservedCountDownToRefresh;}, 1000); </script>";
-  //  out << "<b>... Redirecting to output file in <span style=\"font-size:36pt;\"><span id=\"reservedCountDownToRefresh\">5</span></span> "
+  //  out << "<script> var ReservedCountDownToRefresh = 5; setInterval(function(){document.getElementById('ReservedCountDownToRefresh').innerHTML "
+  //  << "= --ReservedCountDownToRefresh;}, 1000); </script>";
+  //  out << "<b>... Redirecting to output file in <span style=\"font-size:36pt;\"><span id=\"ReservedCountDownToRefresh\">5</span></span> "
   //  << "seconds...  </b>"
   //<< "<meta http-equiv=\"refresh\" content=\"5; url="
   //<< displayFolder << theTitlePageFileNameNoPath
@@ -565,7 +565,7 @@ bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Express
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], ownerSS))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   List<ElementSemisimpleLieAlgebra<Rational> > theOperators, outputElts;
-  theOperators.ReservE(input.children.size-2);
+  theOperators.Reserve(input.children.size-2);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   for (int i=2; i<input.children.size; i++)
   { if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[i], tempElt, *ownerSS))
@@ -677,7 +677,7 @@ bool Calculator::innerGroebner
     out << "<br>" << CGI::GetMathSpanPure(inputVector[i].ToString(&theGroebnerComputation.theFormat));
   if (success)
   { out << "<br>Minimal Groebner basis with " << outputGroebner.size << " elements, computed using algorithm 1, using "
-    << theGroebnerComputation.MaxNumGBComputations << " polynomial operations. ";
+    << theGroebnerComputation.NumberGBComputations << " polynomial operations. ";
     for(int i=0; i<outputGroebner.size; i++)
       out << "<br> " << CGI::GetMathSpanPure(outputGroebner[i].ToString(&theGroebnerComputation.theFormat));
     out << "<br>Output in calculator-ready format: ";

@@ -489,7 +489,7 @@ void SemisimpleSubalgebras::GetCentralizerChains(List<List<int> >& outputChains)
   outputChains.SetSize(0);
   Selection Explored;
   Explored.init(this->theSubalgebras.size);
-  outputChains.ReservE(this->theSubalgebras.size);
+  outputChains.Reserve(this->theSubalgebras.size);
   for (int i=0; i< this->theSubalgebras.size; i++)
     if (!Explored.selected[i])
     { outputChains.SetSize(outputChains.size+1);
@@ -710,7 +710,7 @@ void CandidateSSSubalgebra::SetUpInjectionHs
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::SetUpInjectionHs");
   this->reset(baseSubalgebra.owner);
   this->theWeylNonEmbeddeD.MakeFromDynkinType(theNewType);
-  this->theHsScaledToActByTwoInOrderOfCreation.ReservE(baseSubalgebra.theHsScaledToActByTwoInOrderOfCreation.size+1);
+  this->theHsScaledToActByTwoInOrderOfCreation.Reserve(baseSubalgebra.theHsScaledToActByTwoInOrderOfCreation.size+1);
   this->theHsScaledToActByTwoInOrderOfCreation=baseSubalgebra.theHsScaledToActByTwoInOrderOfCreation;
   if (newHScaledToActByTwo!=0)
     this->theHsScaledToActByTwoInOrderOfCreation.AddOnTop(*newHScaledToActByTwo);
@@ -857,7 +857,7 @@ void SemisimpleSubalgebras::GetHCandidates
       continue;
     }
     const Vectors<Rational>& currentOrbit=this->GetOrbitSl2Helement(j);
-    outputHCandidatesScaledToActByTwo.ReservE(outputHCandidatesScaledToActByTwo.size+ currentOrbit.size);
+    outputHCandidatesScaledToActByTwo.Reserve(outputHCandidatesScaledToActByTwo.size+ currentOrbit.size);
     for (int k=0; k<currentOrbit.size; k++)
     { if (newCandidate.IsGoodHnewActingByTwo(currentOrbit[k], currentRootInjection))
       { if (theGlobalVariables!=0)
@@ -960,7 +960,7 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
     //stOutput << "<hr>Weight h element we are looking for: " << weightHElementWeAreLookingFor.ToString()
     //<< " base candidate type is: " << this->baseSubalgebra().theWeylNonEmbeddeD.theDynkinType.ToString();
     List<int> indicesModulesNewComponentExtensionMod;
-    indicesModulesNewComponentExtensionMod.ReservE(this->owneR->theWeyl.RootSystem.size);
+    indicesModulesNewComponentExtensionMod.Reserve(this->owneR->theWeyl.RootSystem.size);
     indicesModulesNewComponentExtensionMod.SetSize(0);
     for (int j=0; j<this->baseSubalgebra().HighestWeightsNONPrimal.size; j++)
       if (this->baseSubalgebra().HighestWeightsNONPrimal[j]==weightHElementWeAreLookingFor)
@@ -1831,8 +1831,8 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition(GlobalVariables* th
   //}
   this->fullBasisByModules.SetSize(0);
   this->fullBasisOwnerModules.SetSize(0);
-  this->fullBasisByModules.ReservE(this->GetAmbientSS().GetNumGenerators());
-  this->fullBasisOwnerModules.ReservE(this->GetAmbientSS().GetNumGenerators());
+  this->fullBasisByModules.Reserve(this->GetAmbientSS().GetNumGenerators());
+  this->fullBasisOwnerModules.Reserve(this->GetAmbientSS().GetNumGenerators());
   for (int i=0; i<this->ModulesIsotypicallyMerged.size; i++)
     for (int j=0; j<this->ModulesIsotypicallyMerged[i].size; j++)
     { this->fullBasisByModules.AddOnTop(this->ModulesIsotypicallyMerged[i][j]);
@@ -2184,8 +2184,8 @@ void NilradicalCandidate::ComputeParabolicACextendsToParabolicAC(GlobalVariables
 { MacroRegisterFunctionWithName("NilradicalCandidate::ComputeParabolicACextendsToParabolicAC");
   Vector<Rational> projectionRoot;
   WeylGroup& theWeyl=this->owner->owner->owneR->theWeyl;
-  this->leviRootsAmbienT.ReservE(theWeyl.RootSystem.size);
-  this->leviRootsSmallPrimalFundCoords.ReservE(theWeyl.RootSystem.size);
+  this->leviRootsAmbienT.Reserve(theWeyl.RootSystem.size);
+  this->leviRootsSmallPrimalFundCoords.Reserve(theWeyl.RootSystem.size);
 //  stOutput << "<hr>this->ConeSeparatingNormal: " << this->ConeSeparatingNormal.ToString();
  // if (this->ConeSeparatingNormal.size==0)
   //{ stOutput << this->owner->theWeylNonEmbeddeD.theDynkinType.ToString()
@@ -3410,7 +3410,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
   output.theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
   //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
   output.IndicesSl2sContainedInRootSA.SetSize(output.theRootSAs.theSubalgebras.size);
-  output.IndicesSl2sContainedInRootSA.ReservE(output.theRootSAs.theSubalgebras.size*2);
+  output.IndicesSl2sContainedInRootSA.Reserve(output.theRootSAs.theSubalgebras.size*2);
   for (int i=0; i<output.IndicesSl2sContainedInRootSA.size; i++)
     output.IndicesSl2sContainedInRootSA[i].size=0;
   ProgressReport theReport(&theGlobalVariables);
@@ -3440,7 +3440,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
   inputOwner.CheckConsistency();
   for (int i=0; i<output.size; i++)
   { //slTwoSubalgebra& theSl2= output.GetElement(i);
-    output.GetElement(i).IndicesMinimalContainingRootSA.ReservE(output.GetElement(i).IndicesContainingRootSAs.size);
+    output.GetElement(i).IndicesMinimalContainingRootSA.Reserve(output.GetElement(i).IndicesContainingRootSAs.size);
     output.GetElement(i).IndicesMinimalContainingRootSA.size=0;
     for (int j=0; j<output.GetElement(i).IndicesContainingRootSAs.size; j++)
     { bool isMinimalContaining=true;
@@ -3661,8 +3661,8 @@ void slTwoSubalgebra::ComputePrimalModuleDecomposition
     outputWeightSpaceDimensions[IndexZeroWeight-tempRat.NumShort]++;
   }
   BufferHighestWeights=(outputWeightSpaceDimensions);
-  outputHighestWeights.ReservE(positiveRootsContainingRegularSA.size*2);
-  outputMultiplicitiesHighestWeights.ReservE(positiveRootsContainingRegularSA.size*2);
+  outputHighestWeights.Reserve(positiveRootsContainingRegularSA.size*2);
+  outputMultiplicitiesHighestWeights.Reserve(positiveRootsContainingRegularSA.size*2);
   outputHighestWeights.size=0;
   outputMultiplicitiesHighestWeights.size=0;
 //  this->hCharacteristic.ComputeDebugString();
@@ -5105,7 +5105,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   } else
     out << this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst);
   if (this->CartanOfCentralizer.size>0)
-  { out << "<br>Primal decomposition of the ambient Lie algebra (refining the above decomposition; the order from the above decomposition is not preserved): ";
+  { out << "<br>Primal decomposition of the ambient Lie algebra (refining the above decomposition; the order from the above decomposition is not pReserved): ";
     if (useLaTeX)
     { if (useMouseHover)
         out << CGI::GetMathMouseHover(this->thePrimalChaR.ToString(&charFormatNonConst), 20000);
@@ -5130,7 +5130,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     << " weights of the highest weight vectors relative to the Cartan of the semisimple subalgebra. ";
     if (this->flagCentralizerIsWellChosen && this->CartanOfCentralizer.size>0)
     { out << "As the centralizer is well-chosen and the centralizer of our subalgebra is non-trivial, we may in addition split highest weight vectors"
-      << " with the same weight over the semisimple part over the centralizer (recall that the centralizer preserves the weights over the subalgebra "
+      << " with the same weight over the semisimple part over the centralizer (recall that the centralizer pReserves the weights over the subalgebra "
       << " and in particular acts on the highest weight vectors). Therefore we have chosen our highest weight vectors to be, in addition, weight vectors"
       << " over the Cartan of the centralizer of the  starting subalgebra. Their weight over the sum of the Cartans of the semisimple subalgebra and "
       << " its centralizer is indicated in the third row. The weights corresponding to the Cartan of the centralizer are again indicated with the letter"

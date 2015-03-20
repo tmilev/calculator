@@ -423,6 +423,7 @@ bool CalculatorFunctionsGeneral::innerSolveSerreLikeSystem
   //int numVars=theContext.GetNumContextVariables();
   theComputation.MaxNumGBComputations=upperLimit;
   theComputation.MaxNumSerreSystemComputationsPreferred=upperLimit;
+  stOutput << "Calling SolveSerreLikeSystem with upperLimit= " << upperLimit;
   theComputation.theAlgebraicClosurE=&theCommands.theObjectContainer.theAlgebraicClosure;
   theComputation.flagTryDirectlySolutionOverAlgebraicClosure=startWithAlgebraicClosure;
   theCommands.theGlobalVariableS->theDefaultFormat=theComputation.theFormat;
@@ -2580,7 +2581,7 @@ bool CalculatorFunctionsGeneral::innerSort(Calculator& theCommands, const Expres
   if (!input.IsSequenceNElementS())
     return false;
   List<Expression> sortedExpressions;
-  sortedExpressions.ReservE(input.children.size-1);
+  sortedExpressions.Reserve(input.children.size-1);
   for (int i=1; i<input.children.size; i++)
     sortedExpressions.AddOnTop(input[i]);
   sortedExpressions.QuickSortAscending();
@@ -4901,7 +4902,7 @@ bool CalculatorFunctionsGeneral::innerFindProductDistanceModN(Calculator& theCom
   List<LargeIntUnsigned> theList;
   List<int> theIndexStack;
   theList.initFillInObject(theSize, 0);
-  theIndexStack.ReservE(theSize);
+  theIndexStack.Reserve(theSize);
   LargeIntUnsigned theMod;
   theMod=theSize;
   int numElementsCovered=0;

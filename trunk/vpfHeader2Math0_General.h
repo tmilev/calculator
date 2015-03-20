@@ -84,8 +84,8 @@ public:
   { return this->generatorsIndices.size==0;
   }
   void operator=(List<int>& other)
-  { this->generatorsIndices.ReservE(other.size);
-    this->Powers.ReservE(other.size);
+  { this->generatorsIndices.Reserve(other.size);
+    this->Powers.Reserve(other.size);
     this->MakeConst();
     for (int i=0; i<other.size; i++)
       this->MultiplyByGeneratorPowerOnTheRight(other[i], 1);
@@ -1573,7 +1573,8 @@ class GroebnerBasisComputation
 
   int MaxNumSerreSystemComputationsPreferred;
   int MaxNumGBComputations;
-  bool flagBasisGuaranteedToGenerateIdeal;
+  int MaxNumBasisReductionComputations;
+//  bool flagBasisGuaranteedToGenerateIdeal;
   bool flagDoProgressReport;
   bool flagDoSortBasis;
   bool flagDoLogDivision;
@@ -1605,17 +1606,25 @@ class GroebnerBasisComputation
    bool underline=false, std::string* highlightColor=0, List<MonomialP>* theHighLightedMons=0);
   std::string GetDivisionStringHtml();
   std::string GetDivisionStringLaTeX();
-  bool AddPolyAndReduceBasis(GlobalVariables* theGlobalVariables);
+  int SelectPolyIndexToAddNext();
+  bool AddPolysAndReduceBasis(GlobalVariables* theGlobalVariables);
+  bool TransformToReducedBasis
+  (List<Polynomial<coefficient> >& inputOutpuT, int upperLimitPolyComputations,
+   GlobalVariables* theGlobalVariables);
+
   bool TransformToReducedGroebnerBasis(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables=0);
   bool TransformToReducedGroebnerBasisImprovedAlgorithm(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables=0, int upperComputationBound=-1);
-  void TrySettingValuesToVariablesReturnTrueIfDone
+  void TrySettingValueToVariable
 (List<Polynomial<coefficient> >& inputSystem, const Rational& aValueToTryOnPreferredVariable,
  GlobalVariables* theGlobalVariables)
 ;
+  bool WrapUpGroebnerOnExceedingComputationLimit(List<Polynomial<coefficient> >& inputOutpuT);
+  bool WrapUpOnGroebnerBasisSuccess(List<Polynomial<coefficient> >& inputOutpuT);
   GroebnerBasisComputation();
   void MakeMinimalBasis();
   int GetNumVars()const;
   std::string ToStringLetterOrder(bool addDollars)const;
+  std::string ToStringPolynomialBasisStatus()const;
   std::string ToStringImpliedSubs();
   static int GetNumEquationsThatWouldBeLinearIfIsubbedVar(int theVarIndex, List<Polynomial<coefficient> >& input);
   static int GetNumVarsToSolveFor(const List<Polynomial<coefficient> >& input);
@@ -1628,6 +1637,11 @@ class GroebnerBasisComputation
   bool HasImpliedSubstitutions
   (List<Polynomial<coefficient> >& inputSystem, PolynomialSubstitution<coefficient>& outputSub, GlobalVariables* theGlobalVariables)
   ;
+  bool HasSingleMonomialEquation(const List<Polynomial<coefficient> >& inputSystem, MonomialP& outputMon);
+  void SetUpRecursiveComputation(GroebnerBasisComputation& toBeModified);
+  void ProcessSolvedSubcaseIfSolvedOrProvenToHaveSolution
+  (GroebnerBasisComputation& potentiallySolvedCase, GlobalVariables* theGlobalVariables);
+  void SolveWhenSystemHasSingleMonomial(List<Polynomial<coefficient> >& inputSystem, const MonomialP& theMon, GlobalVariables* theGlobalVariables);
   int GetPreferredSerreSystemSubIndex(List<Polynomial<coefficient> >& inputSystem);
   void SolveSerreLikeSystemRecursively(List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables);
   void PolySystemSolutionSimplificationPhase(List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables);
@@ -2609,7 +2623,7 @@ public:
 class DrawOperations
 {
 private:
-  void changeBasisPreserveAngles(double newX, double newY, GlobalVariables& theGlobalVariables);
+  void changeBasisPReserveAngles(double newX, double newY, GlobalVariables& theGlobalVariables);
 public:
   List<int> IndexNthDrawOperation;
   List<int> TypeNthDrawOperation;
@@ -2710,7 +2724,7 @@ public:
     }
     if (this->SelectedCircleMinus2noneMinus1Center>=0)
     { if (this->flagRotatingPreservingAngles)
-      { this->changeBasisPreserveAngles((double) X , (double) Y, theGlobalVariables);
+      { this->changeBasisPReserveAngles((double) X , (double) Y, theGlobalVariables);
         return true;
       }
     }
@@ -4897,7 +4911,7 @@ public:
   Vector<Rational> weights;
   void initFromRoots(Vectors<Rational>& theAlgorithmBasis, Vector<Rational>* theWeights);
   int AddRootAndSort(Vector<Rational>& theRoot);
-  int AddRootPreserveOrder(Vector<Rational>& theRoot);
+  int AddRootPReserveOrder(Vector<Rational>& theRoot);
   int getIndex(const Vector<Rational>& TheRoot);
   int getIndexDoubleOfARoot(const Vector<Rational>& TheRoot);
   void ComputeTable(int theDimension);
@@ -5307,7 +5321,7 @@ public:
   void ActByEFDisplayIndex(int displayIndex);
 //   List<Rational> Speeds;
   void operator+=(const LittelmannPath& other)
-  { this->Waypoints.ReservE(this->Waypoints.size+other.Waypoints.size);
+  { this->Waypoints.Reserve(this->Waypoints.size+other.Waypoints.size);
     Vector<Rational> endPoint=*this->Waypoints.LastObject();
     for (int i=0; i<other.Waypoints.size; i++)
       this->Waypoints.AddOnTop(other.Waypoints[i]+endPoint);
@@ -5707,7 +5721,7 @@ public:
     output.MakeZero(this->GetMinNumRows());
     otherType currentCF;
     for (int i=0; i<this->size(); i++)
-    { //note that, at the cost of one extra implicit conversion below, we preserve the order of multiplication:
+    { //note that, at the cost of one extra implicit conversion below, we pReserve the order of multiplication:
       //first is matrix element, then vector coordinate. The code should work as-is for non-commutative fields.
       //(think in the generality of quaternion matrix acting on quaternion-coefficient polynomials!)
       currentCF=this->theCoeffs[i];
@@ -6473,7 +6487,7 @@ void Vectors<coefficient>::IntersectTwoLinSpaces
 //  stOutput << "<br>The matrix before the gaussian elimination:" << theMat.ToString();
   theMat.GaussianEliminationByRows(0, &tempSel);
 //  stOutput << "<br>The matrix after the gaussian elimination:" << theMat.ToString();
-  output.ReservE(tempSel.CardinalitySelection);
+  output.Reserve(tempSel.CardinalitySelection);
   output.size=0;
   Vector<coefficient> nextIntersection;
   for(int i=0; i<tempSel.CardinalitySelection; i++)

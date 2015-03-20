@@ -295,7 +295,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeCC()
   List<bool> Accounted;
   Accounted.initFillInObject(this->size(), false);
   this->conjugacyClasses.SetSize(0);
-  this->conjugacyClasses.ReservE(50);
+  this->conjugacyClasses.Reserve(50);
   HashedList<int, MathRoutines::IntUnsignIdentity> theStack;
   theStack.SetExpectedSize(this->size());
   int theRank=this->GetRank();

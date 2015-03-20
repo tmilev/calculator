@@ -288,7 +288,7 @@ Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(const Matrix
 
 template <class coefficient>
 int Polynomial<coefficient>::GetIndexMaxMonomialLexicographicLastVariableStrongest()const
-{ return this->GetIndexMaxMonomial(MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest);
+{ return this->GetIndexMaxMonomial(MonomialP::LeftGreaterThanLexicographicLastVariableStrongest);
 }
 
 template <class coefficient>

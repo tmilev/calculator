@@ -117,9 +117,9 @@ void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
 { MacroRegisterFunctionWithName("rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules");
   this->CentralizerKmods.init(this->Modules.size);
   this->CentralizerRoots.size=0;
-  this->CentralizerRoots.ReservE(this->Modules.size);
+  this->CentralizerRoots.Reserve(this->Modules.size);
   this->SimpleBasisCentralizerRoots.size=0;
-  this->SimpleBasisCentralizerRoots.ReservE(this->Modules.size);
+  this->SimpleBasisCentralizerRoots.Reserve(this->Modules.size);
   if (this->SimpleBasisK.size==0)
   { if (this->Modules.size!=this->GetOwnerSSalg().GetNumGenerators())
       crash << " bad number of modules!" << crash;
@@ -1556,7 +1556,7 @@ void rootSubalgebra::GeneratePossibleNilradicals
   owner.ComputeActionNormalizerOfCentralizerIntersectNilradical(emptySel, *this, theGlobalVariables);
   int numCycles= MathRoutines::TwoToTheNth(this->SimpleBasisCentralizerRoots.size);
   List<Selection> StartingNilradicalsNoRepetition;
-  StartingNilradicalsNoRepetition.ReservE(numCycles);
+  StartingNilradicalsNoRepetition.Reserve(numCycles);
   Selection tempSel, ParabolicsGenerator;
   if (!owner.flagNilradicalComputationInitialized)
     owner.CountersNilradicalsGeneration.SetSize(this->Modules.size+1);
@@ -2257,7 +2257,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
   Selection simpleRootsChar2;
   Vectors<Rational> rootsScalarProduct2HnonRaised;
   Vectors<Rational> reflectedSimpleBasisK;
-  rootsScalarProduct2HnonRaised.ReservE(this->PositiveRootsK.size);
+  rootsScalarProduct2HnonRaised.Reserve(this->PositiveRootsK.size);
   ElementWeylGroup<WeylGroup> raisingElt;
   selectionRootsWithZeroCharacteristic.init(theRelativeDimension);
   Matrix<Rational> InvertedRelativeKillingForm;
@@ -2269,7 +2269,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
   int numCycles= MathRoutines::TwoToTheNth(selectionRootsWithZeroCharacteristic.MaxSize);
   ProgressReport theReport(&theGlobalVariables);
   Vectors<Rational> rootsZeroChar;
-  rootsZeroChar.ReservE(selectionRootsWithZeroCharacteristic.MaxSize);
+  rootsZeroChar.Reserve(selectionRootsWithZeroCharacteristic.MaxSize);
   Vectors<Rational> relativeRootSystem, bufferVectors;
   Matrix<Rational> tempMat;
 //  Selection tempSel;
@@ -2467,7 +2467,7 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
   currentSA.ownEr=this;
   currentSA.ComputeEssentialsIfNew();
   currentSA.ComputePotentialExtensions();
-  this->theSubalgebras.ReservE(this->GetOwnerWeyl().RootsOfBorel.size);
+  this->theSubalgebras.Reserve(this->GetOwnerWeyl().RootsOfBorel.size);
   this->theSubalgebras.AddOnTop(currentSA);
   std::string reportString;
   for (int i=0; i<this->theSubalgebras.size; i++)
@@ -2596,12 +2596,12 @@ void rootSubalgebras::SortDescendingOrderBySSRank()
   inverseOfSortingArray.SetSize(SortingArray.size);
   for(int i=0; i<SortingArray.size; i++)
     inverseOfSortingArray[SortingArray[i]]=i;
-  output.theSubalgebras.ReservE(this->theSubalgebras.size);
+  output.theSubalgebras.Reserve(this->theSubalgebras.size);
   for (int i=0; i<this->theSubalgebras.size; i++)
   { output.theSubalgebras.AddOnTop(this->theSubalgebras[SortingArray[i]]);
     rootSubalgebra& currentSA=*output.theSubalgebras.LastObject();
     List<int>& otherArray=this->theSubalgebras[SortingArray[i]].indicesSubalgebrasContainingK;
-    currentSA.indicesSubalgebrasContainingK.ReservE(otherArray.size);
+    currentSA.indicesSubalgebrasContainingK.Reserve(otherArray.size);
     currentSA.indicesSubalgebrasContainingK.SetSize(0);
     for(int j=0; j<otherArray.size; j++)
       currentSA.indicesSubalgebrasContainingK.AddOnTop(inverseOfSortingArray[otherArray[j]]);
@@ -3018,8 +3018,8 @@ void rootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical
   outputSubgroup.ComputeSubGroupFromGeneratingReflections
   (&selectedRootsBasisCentralizer, &outputSubgroup.ExternalAutomorphisms, &theGlobalVariables, this->UpperLimitNumElementsWeyl, false);
   outputSubgroup.simpleGenerators=(selectedRootsBasisCentralizer);
-  this->CentralizerIsomorphisms.ReservE(this->theSubalgebras.size);
-  this->CentralizerOuterIsomorphisms.ReservE(this->theSubalgebras.size);
+  this->CentralizerIsomorphisms.Reserve(this->theSubalgebras.size);
+  this->CentralizerOuterIsomorphisms.Reserve(this->theSubalgebras.size);
   this->CentralizerIsomorphisms.AddOnTop(outputSubgroup);
   this->CentralizerOuterIsomorphisms.SetSize(this->CentralizerIsomorphisms.size);
   this->CentralizerOuterIsomorphisms.LastObject()->ExternalAutomorphisms=(outputSubgroup.ExternalAutomorphisms);
@@ -3702,7 +3702,7 @@ void coneRelation::ComputeKComponents(Vectors<Rational>& input, List<List<int> >
 void coneRelation::ComputeDiagramRelAndK(rootSubalgebra& owner)
 { Vectors<Rational> tempRoots;
   tempRoots.size=0;
-  tempRoots.ReservE(owner.GetAmbientWeyl().CartanSymmetric.NumRows*2);
+  tempRoots.Reserve(owner.GetAmbientWeyl().CartanSymmetric.NumRows*2);
   tempRoots.AddListOnTop(owner.SimpleBasisK);
   for (int i=0; i<this->theDiagram.SimpleBasesConnectedComponents.size; i++)
     tempRoots.AddListOnTop(this->theDiagram.SimpleBasesConnectedComponents[i]);

@@ -826,7 +826,7 @@ bool Expression::AssignMatrix(const Matrix<coefficient>& input, Calculator& owne
   Expression currentRow, currentElt;
   for (int i=0; i<input.NumRows; i++)
   { currentRow.reset(owner);
-    currentRow.children.ReservE(input.NumCols+1);
+    currentRow.children.Reserve(input.NumCols+1);
     currentRow.AddChildAtomOnTop(owner.opSequence());
     for (int j=0; j<input.NumCols; j++)
     { currentElt.AssignValue(input(i,j), owner);
@@ -1060,7 +1060,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(Calculator& 
   if (!input[2].IsSequenceNElementS())
     return false;
   output.reset(theCommands);
-  output.children.ReservE(input[2].children.size);
+  output.children.Reserve(input[2].children.size);
   output.AddChildAtomOnTop(theCommands.opSequence());
   Expression tempProduct;
   for (int i=1; i<input[2].children.size; i++)
@@ -1274,7 +1274,7 @@ bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(Calculator& theCom
     return theCommands << "<hr>Attempting to add a sequence of length " << input[1].children.size-1 << "  to a sequence of length "
     << input[2].children.size-1 << ", possible user typo?";
   output.reset(theCommands);
-  output.children.ReservE(input[1].children.size);
+  output.children.Reserve(input[1].children.size);
   output.AddChildAtomOnTop(theCommands.opSequence());
   if (input[1].format==Expression::formatMatrixRow || input[2].format==Expression::formatMatrixRow)
     output.format=Expression::formatMatrixRow;

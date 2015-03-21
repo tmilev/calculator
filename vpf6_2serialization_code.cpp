@@ -599,14 +599,16 @@ bool CalculatorConversions::innerExpressionFromUE
 bool CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs
 (Calculator& theCommands, const Expression& input, ElementSemisimpleLieAlgebra<Rational>& output, SemisimpleLieAlgebra& owner)
 { MacroRegisterFunctionWithName("CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs");
-  Expression genE;
-  if (!CalculatorConversions::innerElementUE(theCommands, input, genE, owner))
-    return theCommands << "<hr> Failed to load element UE from " << input.ToString() << ". ";
-  if (genE.IsError())
-    return theCommands << "<hr>Failed to load generator with error message " << genE.ToString();
-  ElementUniversalEnveloping<RationalFunctionOld> curGenUErf=genE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> > ();
-  if (!curGenUErf.GetLieAlgebraElementIfPossible(output))
-    return theCommands << "<hr> Failed to convert the UE element " << curGenUErf.ToString() << " to an honest Lie algebra element. ";
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> outputAlgebraic;
+  if (!CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(theCommands, input, outputAlgebraic, owner))
+    return theCommands << "<hr> Failed to semisimple Lie algebra element from " << input.ToString() << ". ";
+  for (int i=0; i<outputAlgebraic.theCoeffs.size; i++)
+    if (!outputAlgebraic.theCoeffs[i].IsRational())
+      return theCommands << "<hr>From input: " << input.ToString() << ", I managed to extract element: "
+      << outputAlgebraic.ToString() << " but that appears to not have rational coefficients.";
+  output=outputAlgebraic; //<-implicit conversion here!
+//  if (!curGenUErf.GetLieAlgebraElementIfPossible(output))
+//    return theCommands << "<hr> Failed to convert the UE element " << curGenUErf.ToString() << " to an honest Lie algebra element. ";
   return true;
 }
 
@@ -621,6 +623,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
   if (!polyFormGood)
     return theCommands << "<hr>Failed to convert " << input.ToString() << " to polynomial.<hr>";
   ChevalleyGenerator theChevGen;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> currentElt;
   theChevGen.owneR=&owner;
   output.MakeZero();
   Expression theContext=polyFormE.GetContext();
@@ -641,17 +644,22 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
     { theChevGen.theGeneratorIndex=owner.GetGeneratorFromDisplayIndex(theChevGen.theGeneratorIndex);
       if (theChevGen.theGeneratorIndex<0 || theChevGen.theGeneratorIndex>=owner.GetNumGenerators())
         isGood=false;
+      output.AddMonomial(theChevGen, polyForm.theCoeffs[j]);
     } else if (theLetter=="h")
-    { if (theChevGen.theGeneratorIndex <1 || theChevGen.theGeneratorIndex>owner.GetRank())
+    { //stOutput << "HERE I AM";
+      int theRootIndex=owner.GetRootIndexFromDisplayIndex(theChevGen.theGeneratorIndex);
+      if (theRootIndex<0)
         isGood=false;
       else
-        theChevGen.theGeneratorIndex=theChevGen.theGeneratorIndex+owner.GetNumPosRoots()-1;
+      { currentElt.MakeHgenerator(owner.theWeyl.RootSystem[theRootIndex], owner);
+        currentElt*=polyForm.theCoeffs[j];
+        output+=currentElt;
+      }
     } else
       isGood=false;
     if (!isGood)
       return theCommands << "<hr>Failed to convert summand " << singleChevGenE.ToString() << " to Chevalley generator of "
       << owner.GetLieAlgebraName();
-    output.AddMonomial(theChevGen, polyForm.theCoeffs[j]);
   }
   return true;
 }

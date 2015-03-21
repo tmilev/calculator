@@ -771,6 +771,8 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
       this->owner->theSubalgebras[indexPrecomputed].theHsScaledToActByTwoInOrderOfCreation=
       this->theHsScaledToActByTwoInOrderOfCreation;
     *this=this->owner->theSubalgebras[indexPrecomputed];
+    this->indexIamInducedFrom=baseSubalgebra.indexInOwner;
+    this->RootInjectionsFromInducer=theRootInjection;
     return this->ComputeAndVerifyFromGeneratorsAndHs();
   }
   this->owner->RegisterPossibleCandidate(*this);
@@ -1451,6 +1453,10 @@ bool CandidateSSSubalgebra::ComputeSystem(bool AttemptToChooseCentalizer, bool a
     stOutput << "<br>Involved neg gens: " << this->theInvolvedPosGenerators.ToString();
     stOutput << "<br>Involved pos gens: " << this->theInvolvedPosGenerators.ToString();
   }*/
+  if (this->GetRank()>1 && this->indexIamInducedFrom==-1)
+    crash << "Subalgebra candidate of type " << this->theWeylNonEmbeddeD.theDynkinType.ToString()
+    << " is of rank higher than 1 but I have no record from which subalgebra it is parabolically induced. "
+    << crash;
   this->theInvolvedNegGenerators.SetSize(this->theHsScaledToActByTwo.size);
   this->theInvolvedPosGenerators.SetSize(this->theHsScaledToActByTwo.size);
   for (int i=0; i<this->theHsScaledToActByTwo.size; i++)
@@ -1510,7 +1516,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > lieBracketMinusGoalValue, goalValue;
   Vector<Polynomial<Rational> > desiredHpart;
   this->CheckInitialization();
-  bool doDebug=(this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_2+A^{2}_1");
+//  bool doDebug=(this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_2+A^{2}_1");
 //  if (this->indexInOwnersOfNonEmbeddedMe<0 || this->indexInOwnersOfNonEmbeddedMe >=this->owner->theSubalgebrasNonEmbedded
   const SemisimpleLieAlgebra& nonEmbeddedMe=(*this->owner->theSubalgebrasNonEmbedded)[this->indexInOwnersOfNonEmbeddedMe];
   this->totalNumUnknownsNoCentralizer=0;
@@ -1577,12 +1583,16 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
       continue;
     this->GetGenericNegGenLinearCombination(i, this->theUnknownNegGens[i]);
     this->GetGenericPosGenLinearCombination(i, this->theUnknownPosGens[i]);
-    if (doDebug)
-      stOutput << "<hr>Unknown generator index " << i << ": " << this->theUnknownNegGens[i].ToString();
+//    if (doDebug)
+//      stOutput << "<hr>Unknown generator index " << i << ": " << this->theUnknownNegGens[i].ToString();
   }
   //if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_2")
-  //  stOutput << "<br>Finally, the neg gens be: " << this->theUnknownNegGens.ToString()
-  //  << "<br>'n the pos gens be: " << this->theUnknownPosGens.ToString();
+//    stOutput << "<br>Finally, the neg gens be: " ;
+//    for (int i=0; i<this->theUnknownNegGens.size; i++)
+//      stOutput << this->theUnknownNegGens[i].ToString() << ", ";
+//    stOutput << "<br>'n the pos gens be: ";
+//    for (int i=0; i<this->theUnknownPosGens.size; i++)
+//      stOutput << this->theUnknownPosGens[i].ToString() << ", ";
 
   if (this->theUnknownCartanCentralizerBasis.size>0)
   { Matrix<Polynomial<AlgebraicNumber> > theCentralizerCartanVars;
@@ -1672,6 +1682,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
   }
   if (!this->flagSystemSolved && this->flagUsedInducingSubalgebraRealization)
   { //bool seedHadNoSolution=this->flagSystemProvedToHaveNoSolution;
+//    stOutput << "SEED has no SOLUTION!";
     this->flagUsedInducingSubalgebraRealization=false;
     bool result=this->ComputeSystemPart2(AttemptToChooseCentalizer, allowNonPolynomialSystemFailure);
     //if (seedHadNoSolution && this->flagSystemSolved)

@@ -1286,6 +1286,9 @@ public:
   int opUnion()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\cup");
   }
+  int opIntersection()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\cap");
+  }
   int opPolynomialVariables()
   { return this->theAtoms.GetIndexIMustContainTheObject("PolyVars");
   }
@@ -1397,8 +1400,6 @@ public:
   { return theCommands.innerEWAorPoly(theCommands, input, output, false);
   }
   static bool innerEWAorPoly(Calculator& theCommands, const Expression& input, Expression& output, bool assignPoly);
-  static bool outerUnion(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool outerUnionNoRepetition(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerOperationBinary(Calculator& theCommands, const Expression& input, Expression& output, int theOp);
   static bool innerInterpolatePoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTimes(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1414,8 +1415,6 @@ public:
   (List<std::string>& outputCommandStrings, List<std::string>& outputResultsWithInit, List<std::string>& outputResultsNoInit);
   static bool innerTranspose(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetElementWeylGroup(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerUnion(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerUnionNoRepetition(Calculator& theCommands, const Expression& input, Expression& output);
   static bool EvaluateCarryOutActionSSAlgebraOnGeneralizedVermaModule(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerStandardFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerPlus(Calculator& theCommands, const Expression& input, Expression& output);

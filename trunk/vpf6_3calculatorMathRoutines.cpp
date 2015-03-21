@@ -1302,6 +1302,78 @@ bool CalculatorFunctionsGeneral::innerMakeMakeFile(Calculator& theCommands, cons
   return output.AssignValue(outHtml.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerIntersection(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntersection");
+  if (!input.StartsWith(theCommands.opIntersection()))
+    return false;
+  int numElts=1;
+  for (int i=1; i<input.children.size; i++)
+    if (!input[i].IsSequenceNElementS())
+      return false;
+    else
+      numElts+=input[i].children.size-1;
+  List<List<Expression> > theListsToBeIntersected;
+  theListsToBeIntersected.SetSize(input.children.size-1);
+  for (int i=1; i<input.children.size; i++)
+  { theListsToBeIntersected[i-1].Reserve(input[i].children.size);
+    for (int j=1; j<input[i].children.size; j++)
+      theListsToBeIntersected[i-1].AddOnTop(input[i][j]);
+  }
+  if (theListsToBeIntersected.size==0)
+    return false;
+  List<Expression> outputList=theListsToBeIntersected[0];
+  for (int i=1; i<theListsToBeIntersected.size; i++)
+    outputList.IntersectWith(theListsToBeIntersected[i], outputList);
+  return output.MakeSequence(theCommands, &outputList);
+}
+
+
+bool CalculatorFunctionsGeneral::innerUnion(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerUnion");
+  if (!input.StartsWith(theCommands.opUnion()))
+    return false;
+  int numElts=1;
+  for (int i=1; i<input.children.size; i++)
+    if (!input[i].IsSequenceNElementS())
+      return false;
+    else
+      numElts+=input[i].children.size-1;
+  output.reset(theCommands, numElts);
+  output.AddChildAtomOnTop(theCommands.opSequence());
+  for (int i=1; i<input.children.size; i++)
+    for (int j=1; j<input[i].children.size; j++)
+      output.AddChildOnTop(input[i][j]);
+  output.format=input.formatDefault;
+  return true;
+}
+
+bool CalculatorFunctionsGeneral::innerUnionNoRepetition(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerUnionNoRepetition");
+  if (!input.IsLisT())
+    return false;
+  int numElts=1;
+  for (int i=1; i<input.children.size; i++)
+    if (!input[i].IsListStartingWithAtom(theCommands.opSequence()))
+      return false;
+    else
+      numElts+=input[i].children.size-1;
+  HashedList<Expression> theList;
+  List<int> theIndices;
+  theList.SetExpectedSize(numElts);
+  for (int i=1; i<input.children.size; i++)
+    for (int j=1; j<input[i].children.size; j++)
+      theList.AddOnTopNoRepetition(input[i][j]);
+  theIndices.SetSize(theList.size);
+  for (int i=0; i<theList.size; i++)
+    theIndices[i]=theCommands.theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(theList[i]);
+  output.children.Reserve(numElts);
+  output.reset(theCommands, theIndices.size+1);
+  output.AddChildAtomOnTop(theCommands.opSequence());
+  output.children.AddOnTop(theIndices);
+  output.format=output.formatDefault;
+  return true;
+}
+
 bool CalculatorFunctionsGeneral::innerCrossProduct(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrossProduct");
   if (!input.IsListStartingWithAtom(theCommands.opCrossProduct()) || input.children.size!=3)

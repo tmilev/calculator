@@ -1832,50 +1832,6 @@ bool Calculator::outerEqualEqual(Calculator& theCommands, const Expression& inpu
     return output.AssignValue(0, theCommands);
 }
 
-bool Calculator::outerUnion(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!input.StartsWith(theCommands.opUnion()))
-    return false;
-  int numElts=1;
-  for (int i=1; i<input.children.size; i++)
-    if (!input[i].IsSequenceNElementS())
-      return false;
-    else
-      numElts+=input[i].children.size-1;
-  output.reset(theCommands, numElts);
-  output.AddChildAtomOnTop(theCommands.opSequence());
-  for (int i=1; i<input.children.size; i++)
-    for (int j=1; j<input[i].children.size; j++)
-      output.AddChildOnTop(input[i][j]);
-  output.format=input.formatDefault;
-  return true;
-}
-
-bool Calculator::outerUnionNoRepetition(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsLisT())
-    return false;
-  int numElts=1;
-  for (int i=1; i<input.children.size; i++)
-    if (!input[i].IsListStartingWithAtom(theCommands.opSequence()))
-      return false;
-    else
-      numElts+=input[i].children.size-1;
-  HashedList<Expression> theList;
-  List<int> theIndices;
-  theList.SetExpectedSize(numElts);
-  for (int i=1; i<input.children.size; i++)
-    for (int j=1; j<input[i].children.size; j++)
-      theList.AddOnTopNoRepetition(input[i][j]);
-  theIndices.SetSize(theList.size);
-  for (int i=0; i<theList.size; i++)
-    theIndices[i]=theCommands.theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(theList[i]);
-  output.children.Reserve(numElts);
-  output.reset(theCommands, theIndices.size+1);
-  output.AddChildAtomOnTop(theCommands.opSequence());
-  output.children.AddOnTop(theIndices);
-  output.format=output.formatDefault;
-  return true;
-}
-
 bool Calculator::outerMinus(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!(input.StartsWith(theCommands.opMinus(), 3) || input.StartsWith(theCommands.opMinus(), 2)) )
     return false;

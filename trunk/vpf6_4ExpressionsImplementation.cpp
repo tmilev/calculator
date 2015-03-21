@@ -2227,8 +2227,10 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << "[" << (*this)[1].ToString(theFormat) << "," << (*this)[2].ToString(theFormat) << "]";
   else if (this->IsListStartingWithAtom(this->theBoss->opMod()))
     out << (*this)[1].ToString(theFormat) << " mod " << (*this)[2].ToString(theFormat);
-  else if (this->IsListStartingWithAtom(this->theBoss->opUnion()))
+  else if (this->IsListStartingWithAtom(this->theBoss->opUnion()) && this->children.size==3)
     out << (*this)[1].ToString(theFormat) << "\\cup " << (*this)[2].ToString(theFormat);
+  else if (this->IsListStartingWithAtom(this->theBoss->opIntersection()) && this->children.size==3)
+    out << (*this)[1].ToString(theFormat) << "\\cap " << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->theBoss->opUnionNoRepetition()))
     out << (*this)[1].ToString(theFormat) << "\\sqcup " << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->theBoss->opEndStatement()))

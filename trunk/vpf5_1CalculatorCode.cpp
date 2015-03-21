@@ -576,11 +576,14 @@ bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Express
 //  stOutput << "<br>The elts: " <<  theOperators.ToString();
 //  stOutput << "<br> The common ad: " << commonAd.ToString();
   std::stringstream out;
-  out << "<br>EigenSpace basis (" << outputElts.size << " elements total): ";
+  out << "<br>EigenSpace basis (" << outputElts.size << " elements total):<br> (";
   for (int i=0; i<outputElts.size; i++)
   { ElementSemisimpleLieAlgebra<Rational>& currentElt=outputElts[i];
-    out << "<br>" << currentElt.ToString();
+    out << currentElt.ToString();
+    if (i!=outputElts.size-1)
+      out << ", ";
   }
+  out << ")";
   output.AssignValue(out.str(), theCommands);
   return true;
 }

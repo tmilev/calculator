@@ -858,7 +858,7 @@ int SemisimpleLieAlgebra::GetRootIndexFromDisplayIndex(int theIndex)
     return theIndex+numPosRoots;
   if (theIndex>0)
     return theIndex+numPosRoots-1;
-  return -10000000;
+  return -1;
 }
 
 int SemisimpleLieAlgebra::GetDisplayIndexFromRootIndex(int theIndex)const

@@ -972,13 +972,27 @@ void GroebnerBasisComputation<coefficient>::PolySystemSolutionSimplificationPhas
 //  int startingMaxNumSerreSystemComputations=this->MaxNumSerreSystemComputations;
   while (changed)
   { this->NumberGBComputations=0;
-    this->TransformToReducedBasis(inputSystem, this->MaxNumBasisReductionComputations, theGlobalVariables);
+    List<Polynomial<coefficient> > oldSystem=inputSystem;
+    bool success=
+    this->TransformToReducedBasis
+    (inputSystem, this->MaxNumBasisReductionComputations, theGlobalVariables);
+    if (!success)
+      inputSystem=oldSystem;
+    else
+      oldSystem=inputSystem;
     if (theGlobalVariables!=0 && this->flagDoProgressReport)
     { std::stringstream reportStream;
       reportStream << "Attempting to transform system to a groebner basis... ";
       theReport2.Report(reportStream.str());
     }
-    bool success=this->TransformToReducedGroebnerBasis(inputSystem, theGlobalVariables);
+    if (success && inputSystem.size>0)
+    { this->NumberGBComputations=0;
+      success=this->TransformToReducedGroebnerBasis(inputSystem, theGlobalVariables);
+    }
+    if (!success)
+      inputSystem=oldSystem;
+    else
+      oldSystem=inputSystem;
     if (theGlobalVariables!=0 && this->flagDoProgressReport)
     { std::stringstream reportStream;
       reportStream << "Transforming system to a groebner basis... ";
@@ -1091,15 +1105,15 @@ void GroebnerBasisComputation<coefficient>::TrySettingValueToVariable
   PolynomialSubstitution<coefficient> theSub;
   theSub.MakeIdSubstitution(this->systemSolution.GetElement().size);
   theSub[theVarIndex]=aValueToTryOnPreferredVariable;
-  stOutput << "<br>Setting " << (MonomialP(theVarIndex)).ToString(&this->theFormat) << "="
-  << aValueToTryOnPreferredVariable.ToString();
+//  stOutput << "<br>Setting " << (MonomialP(theVarIndex)).ToString(&this->theFormat) << "="
+//  << aValueToTryOnPreferredVariable.ToString();
   if (theGlobalVariables!=0)
   { std::stringstream out;
     MonomialP theMon(theVarIndex);
-    out << this->ToStringImpliedSubs() << "Attempting an (a priori random) substitution:<br>"
+    out << this->ToStringImpliedSubs() << "<br>Attempting an (a priori random) substitution:<br>"
     << theMon.ToString(&this->theFormat) << "=" << aValueToTryOnPreferredVariable << ";";
     theReport1.Report(out.str());
-    stOutput << out.str();
+//    stOutput << out.str();
   }
   theHeuristicAttempt.SetSerreLikeSolutionIndex(theVarIndex, aValueToTryOnPreferredVariable);
   //stOutput << "<br>Input system before sub first recursive call. " << inputSystem.ToString();
@@ -1175,14 +1189,14 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   RecursionDepthCounter theCounter(&this->RecursionCounterSerreLikeSystem);
   ProgressReport theReport1(theGlobalVariables), theReport2(theGlobalVariables);
   List<Polynomial<coefficient> > startingSystemNoModifications=inputSystem;
+  this->NumVarsToSolveForStarT=this->GetNumVarsToSolveFor(inputSystem);
   if (theGlobalVariables!=0)
   { std::stringstream out;
-    out << "<hr>Solving Serre-like polynomial system, recursion depth: "
-    << this->RecursionCounterSerreLikeSystem << ". ";
+    out << "<hr>Solving Serre-like polynomial system with " << this->NumVarsToSolveForStarT
+    << " variables at recursion depth: " << this->RecursionCounterSerreLikeSystem << ". ";
     theReport1.Report(out.str());
 //    stOutput << out.str();
   }
-  this->NumVarsToSolveForStarT=this->GetNumVarsToSolveFor(inputSystem);
   this->PolySystemSolutionSimplificationPhase(inputSystem, theGlobalVariables);
   if (this->flagSystemProvenToHaveNoSolution || this->flagSystemSolvedOverBaseField)
   { //if (this->flagSystemProvenToHaveNoSolution)
@@ -1196,13 +1210,15 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   { std::stringstream out;
     out << "Without using heuristics, I managed to reduce "
     << this->NumVarsToSolveForStarT-this->NumVariablesToSolveForAfterReduction
-    << " variables. <br>Number of remaining variables to solve for: "
+    << " variables via the substitutions " << this->ToStringImpliedSubs()
+    << "<br>Number of remaining variables to solve for: "
     << this->NumVariablesToSolveForAfterReduction;
     theReport2.Report(out.str());
 //    stOutput << out.str();
   }
   List<Polynomial<coefficient> > systemBeforeHeuristics=inputSystem;
   MonomialP singleMonEquation;
+  if (false)
   if (this->HasSingleMonomialEquation(inputSystem, singleMonEquation))
   { this->SolveWhenSystemHasSingleMonomial(inputSystem, singleMonEquation, theGlobalVariables);
     return;

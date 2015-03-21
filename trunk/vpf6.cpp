@@ -1106,12 +1106,10 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
   int theIndex;
   if (!input[2].IsSmallInteger(&theIndex))
     return false;
-  if (theIndex<1 || theIndex>theSSalg->GetRank() )
-    return output.MakeError("Bad Cartan subalgebra genrator index.", theCommands);
+  if (theIndex==0 || theIndex>theSSalg->GetNumPosRoots() || theIndex <-theSSalg->GetNumPosRoots() )
+    return output.MakeError("Bad Cartan subalgebra generator index.", theCommands);
   ElementSemisimpleLieAlgebra<Rational> theElt;
-  Vector<Rational> theH;
-  theIndex--;
-  theH.MakeEi(theSSalg->GetRank(), theIndex);
+  Vector<Rational> theH=theSSalg->theWeyl.RootSystem[theSSalg->GetRootIndexFromDisplayIndex(theIndex)];
   theElt.MakeHgenerator(theH, *theSSalg);
   ElementUniversalEnveloping<RationalFunctionOld> theUE;
   theUE.AssignElementLieAlgebra(theElt, *theSSalg);

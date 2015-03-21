@@ -828,16 +828,7 @@ void Calculator::initPredefinedInnerFunctions()
   ("BlocksOfCommutativity", CalculatorFunctionsGeneral::innerGetUserDefinedSubExpressions, "",
    "Returns subexpression blocks of commutativity. ",
    "BlocksOfCommutativity(\\sin x + x^2+ 3x y +18x ^{3/4 y}+\\sqrt{2}^{\\sqrt{2}c})");
-
-/*  this->AddOperationInnerHandler
-  ("Union", this->innerUnion, "",
-   "Makes a union of the elements of its arguments. Same action as \\cup but different syntax; useful for matrices. ",
-   "X=FunctionToMatrix{}(A,3,4); Union{}X; A{}({{i}},{{j}})=i*i-j*j; Union{}X ");
   this->AddOperationInnerHandler
-  ("UnionNoRepetition", this->innerUnionNoRepetition, "",
-   "Same action as \\sqcup (union no repetition) but different syntax; useful for matrices. ",
-   "X=FunctionToMatrix{}(A,3,4); UnionNoRepetition{}X; A{}({{i}},{{j}})=i*i-j*j; UnionNoRepetition{}X");
-*/  this->AddOperationInnerHandler
   ("hwv", CalculatorFunctionsGeneral::innerHWV, "",
    "Highest weight vector in a generalized Verma module. \
    The first argument gives the semisimple Lie algebra. The second argument \
@@ -2276,13 +2267,17 @@ void Calculator::initPredefinedStandardOperations()
    "Returns a list with the last element removed, provided the argument has no bound variables. If the expression has bound variables does nothing.",
    "X=(a,b,c); Y= (removeLast X)\\cup Sequence{}(last X)-X; ", true);
   this->AddOperationOuterHandler
-  ("\\cup", this->outerUnion, "",
+  ("\\cap", CalculatorFunctionsGeneral::innerIntersection, "",
+   "Intersects lists. For the time being, the output order is not specified (will be fixed in the future).",
+   "(a,b,c)\\cap (c, d, e);x=(a,b,c)\\cap (c, d, e);\na= 1;\nd=1;(a,b,c)\\cap (c, d, e); x", true);
+  this->AddOperationOuterHandler
+  ("\\cup", CalculatorFunctionsGeneral::innerUnion, "",
    "If all arguments of \\cup are of type list, substitutes the expression with \
    a list containing \
    the union of all members (with repetition).",
    "x\\cup (MakeSequence{} x \\cup MakeSequence{}x \\cup (a,b,x))", true);
   this->AddOperationOuterHandler
-  ("\\sqcup", this->outerUnionNoRepetition, "",
+  ("\\sqcup", CalculatorFunctionsGeneral::innerUnionNoRepetition, "",
    "If all arguments of \\sqcup are of type list, substitutes the expression with a list \
    containing \
    the union of all members; all repeating members are discarded.",

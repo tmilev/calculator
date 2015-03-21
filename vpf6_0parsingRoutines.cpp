@@ -139,6 +139,7 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("==");
   this->AddOperationNoRepetitionAllowed("\\cup");
   this->AddOperationNoRepetitionAllowed("\\sqcup");
+  this->AddOperationNoRepetitionAllowed("\\cap");
   this->AddOperationNoRepetitionAllowed("Error");
   this->AddOperationNoRepetitionAllowed("Sequence");
   this->AddOperationNoRepetitionAllowed("Context");
@@ -1239,6 +1240,8 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\sqrt"));
   //end of some synonyms
   if (fourthToLastS=="Expression" && thirdToLastS=="\\cup" && secondToLastS== "Expression" && this->AllowsTimesInPreceding(lastS))
+    return this->ReplaceEOEXByEX();
+  if (fourthToLastS=="Expression" && thirdToLastS=="\\cap" && secondToLastS== "Expression" && this->AllowsTimesInPreceding(lastS))
     return this->ReplaceEOEXByEX();
   if (fourthToLastS=="Expression" && thirdToLastS=="\\sqcup" && secondToLastS== "Expression" && this->AllowsTimesInPreceding(lastS))
     return this->ReplaceEOEXByEX();

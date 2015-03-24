@@ -926,6 +926,14 @@ bool SemisimpleSubalgebras::GetCentralizerTypeIfComputableAndKnown(const DynkinT
   return true;
 }
 
+void DynkinType::GetDynkinIndicesSl2Subalgebras
+  (List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
+   HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
+   HashedList<Rational>& outputDynkinIndices)
+{
+
+}
+
 bool SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization");
   int stackIndex=this->currentSubalgebraChain.size-1;
@@ -938,7 +946,6 @@ bool SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization()
 //  << " h element lengths are: " << this->theOrbitHelementLengths.ToString();
   if (!this->theOrbitHelementLengths.Contains(candidatePrincipalLength))
     return false;
-  DynkinType centralizerOfSummandOfCurrentType;
   SelectionWithDifferentMaxMultiplicities simpleSummandSelection;
   List<int> theMults;
   theMults.SetSize(currentType.size());
@@ -946,11 +953,26 @@ bool SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization()
     if (!currentType.theCoeffs[i].IsSmallInteger(& theMults[i]))
       crash << "This is not supposed to happen: Dynkin type with multiplicity that doesn't fit in a small int. " << crash;
   simpleSummandSelection.initFromInts(theMults);
-  //while (simpleSummandSelection.IncrementReturnFalseIfPastLast())
-  //{ for (int i=0; i<simpleSummandSelection.elements.size; i++)
-  //    centralizerOfSummandOfCurrentType+=currentType[]
-  //  this->GetCentralizerTypeIfComputableAndKnown()
-  //}
+  DynkinType currentComplementSummand, centralizerOfComplementOfCurrentSummand, currentSummand;
+  HashedList<Rational> theDynkinIndicesCurrentSummand, theDynkinIndicesCentralizerComplementCurrentSummand;
+  while (simpleSummandSelection.IncrementReturnFalseIfPastLast())
+  { currentComplementSummand.MakeZero();
+    for (int i=0; i<simpleSummandSelection.elements.size; i++)
+      currentComplementSummand.AddMonomial(currentType[simpleSummandSelection.elements[i]], currentType.theCoeffs[i]);
+    if (this->GetCentralizerTypeIfComputableAndKnown(currentComplementSummand, centralizerOfComplementOfCurrentSummand))
+    { currentSummand=currentType-currentComplementSummand;
+      currentSummand.GetDynkinIndicesSl2Subalgebras
+      (this->CachedDynkinIndicesSl2subalgebrasSimpleTypes, this->CachedDynkinSimpleTypesWithComputedSl2Subalgebras,
+       theDynkinIndicesCurrentSummand);
+      centralizerOfComplementOfCurrentSummand.GetDynkinIndicesSl2Subalgebras
+      (this->CachedDynkinIndicesSl2subalgebrasSimpleTypes, this->CachedDynkinSimpleTypesWithComputedSl2Subalgebras,
+       theDynkinIndicesCentralizerComplementCurrentSummand);
+      if (!theDynkinIndicesCentralizerComplementCurrentSummand.Contains(theDynkinIndicesCurrentSummand))
+      { stOutput << "<hr>Attention: non-tested optimization ..." ;
+        return false;
+      }
+    }
+  }
   return true;
 }
 
@@ -2962,8 +2984,6 @@ bool SemisimpleSubalgebras::CheckInitialization()const
 { this->CheckConsistency();
   if (this->owneR ==0)
     crash << "No owner semisimple Lie algebra. " << crash;
-  if (this->theSl2sOfSubalgebras==0)
-    crash << "No owner of sl(2) subalgebras. " << crash;
   if (this->theSubalgebrasNonEmbedded==0)
     crash << "No container for non-embedded subalgebras. " << crash;
   return true;
@@ -2988,7 +3008,6 @@ void SemisimpleSubalgebras:: initHookUpPointers
   this->theSl2s.owner=&inputOwner;
   this->ownerField=theField;
   this->theSubalgebrasNonEmbedded=inputSubalgebrasNonEmbedded;
-  this->theSl2sOfSubalgebras=inputSl2sOfSubalgebras;
   this->theGlobalVariables=inputGlobalVariables;
 }
 
@@ -3010,7 +3029,6 @@ void SemisimpleSubalgebras::reset()
   this->numAdditions=-1;
   this->numMultiplications=-1;
   this->theSubalgebrasNonEmbedded=0;
-  this->theSl2sOfSubalgebras=0;
 }
 
 bool CandidateSSSubalgebra::AttemptToSolveSystem()

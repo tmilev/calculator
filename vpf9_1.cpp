@@ -717,7 +717,7 @@ void permutation::initPermutation(List<int>& disjointSubsets, int TotalNumElemen
 }
 
 void permutation::incrementAndGetPermutation(List<int>& output)
-{ this->IncrementSubset();
+{ this->IncrementReturnFalseIfPastLast();
   this->GetPermutationLthElementIsTheImageofLthIndex(output);
 }
 

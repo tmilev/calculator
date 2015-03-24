@@ -205,6 +205,8 @@ public:
   bool CreateAndAddExtendBaseSubalgebra
   (const CandidateSSSubalgebra& baseSubalgebra, Vector<Rational>& newHrescaledToActByTwo, const DynkinType& theNewType, const List<int>& theRootInjection)
   ;
+  bool ComputeSltwoDynkinIndices(const DynkinType& input);
+  bool GetCentralizerTypeIfComputableAndKnown(const DynkinType& input, DynkinType& output);
   void ComputeHsAndHsScaledToActByTwoFromComponents();
   void SetUpInjectionHs
   (const CandidateSSSubalgebra& baseSubalgebra, const DynkinType& theNewType, const List<int>& theRootInjection,
@@ -360,6 +362,8 @@ public:
   }
   bool IncrementReturnFalseIfPastLast();
   bool RemoveLastSubalgebra();
+  bool GetCentralizerTypeIfComputableAndKnown(const DynkinType& input, DynkinType& output);
+  bool CombinatorialCriteriaAllowRealization();
   bool ComputeCurrentHCandidates();
   void initHookUpPointers
   (SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField, HashedListReferences<SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,

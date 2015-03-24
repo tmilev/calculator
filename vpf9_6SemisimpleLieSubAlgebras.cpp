@@ -819,8 +819,7 @@ void SemisimpleSubalgebras::GetHCandidates
   int baseRank=currentType.GetRank()-1;
 
 //  stOutput << "<hr>Getting h-candidates to realize type: " << currentType.ToString();
-  DynkinSimpleType theSmallType;
-  theSmallType=currentType.GetSmallestSimpleType();
+  DynkinSimpleType theSmallType=currentType.GetSmallestSimpleType();
 
   if (this->theGlobalVariables!=0)
   { std::stringstream reportStream;
@@ -909,6 +908,52 @@ bool SemisimpleSubalgebras::RemoveLastSubalgebra()
   return this->currentSubalgebraChain.size>0;
 }
 
+bool SemisimpleSubalgebras::GetCentralizerTypeIfComputableAndKnown(const DynkinType& input, DynkinType& output)
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::GetCentralizerTypeIfComputableAndKnown");
+  //this function is rudimentary and fails to return a good result in many cases when
+  // a result is actually computable. This needs to be improved.
+  if (!input.IsSimple())
+    return false;
+  int theIndex=-1;
+  for (int i=0; i<this->theSl2s.theRootSAs.theSubalgebras.size; i++)
+    if (this->theSl2s.theRootSAs.theSubalgebras[i].theDynkinType==input)
+    { theIndex=i;
+      break;
+    }
+  if (theIndex==-1)
+    return false;
+  output=this->theSl2s.theRootSAs.theSubalgebras[theIndex].theCentralizerDynkinType;
+  return true;
+}
+
+bool SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization()
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization");
+  int stackIndex=this->currentSubalgebraChain.size-1;
+  int typeIndex=this->currentNumLargerTypesExplored[stackIndex];
+  if (typeIndex>=this->currentPossibleLargerDynkinTypes[stackIndex].size)
+    return false;
+  DynkinType& currentType=this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex];
+  Rational candidatePrincipalLength=currentType.GetPrincipalSlTwoCSInverseScale()*2;
+//  stOutput << "<br>Candidate principal length is: " << candidatePrincipalLength.ToString()
+//  << " h element lengths are: " << this->theOrbitHelementLengths.ToString();
+  if (!this->theOrbitHelementLengths.Contains(candidatePrincipalLength))
+    return false;
+  DynkinType centralizerOfSummandOfCurrentType;
+  SelectionWithDifferentMaxMultiplicities simpleSummandSelection;
+  List<int> theMults;
+  theMults.SetSize(currentType.size());
+  for (int i=0; i<currentType.size(); i++)
+    if (!currentType.theCoeffs[i].IsSmallInteger(& theMults[i]))
+      crash << "This is not supposed to happen: Dynkin type with multiplicity that doesn't fit in a small int. " << crash;
+  simpleSummandSelection.initFromInts(theMults);
+  //while (simpleSummandSelection.IncrementReturnFalseIfPastLast())
+  //{ for (int i=0; i<simpleSummandSelection.elements.size; i++)
+  //    centralizerOfSummandOfCurrentType+=currentType[]
+  //  this->GetCentralizerTypeIfComputableAndKnown()
+  //}
+  return true;
+}
+
 bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeCurrentHCandidates");
   int stackIndex=this->currentSubalgebraChain.size-1;
@@ -932,11 +977,7 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
         //<< this->targetDynkinType.ToString();
       return true;
     }
-  Rational candidatePrincipalLength=
-  this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].GetPrincipalSlTwoCSInverseScale()*2;
-//  stOutput << "<br>Candidate principal length is: " << candidatePrincipalLength.ToString()
-//  << " h element lengths are: " << this->theOrbitHelementLengths.ToString();
-  if (!this->theOrbitHelementLengths.Contains(candidatePrincipalLength))
+  if (!this->CombinatorialCriteriaAllowRealization())
     return true;
 //  if (doDebug)
 //  { stOutput << "<br>Generating h candidates for type " << this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex].ToString();

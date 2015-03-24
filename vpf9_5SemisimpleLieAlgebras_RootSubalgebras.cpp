@@ -1665,7 +1665,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
           return true;
       if (outputAutomorphisms!=0)
         theDomainRootSA.MakeProgressReportGenAutos(l+NumAutosCentralizer*j, tempI2*NumAutosCentralizer, outputAutomorphisms->ExternalAutomorphisms.size, theGlobalVariables);
-      tempAutosCentralizer.IncrementSubset();
+      tempAutosCentralizer.IncrementReturnFalseIfPastLast();
     }
     permComponentsCentralizer.incrementAndGetPermutation(tempPermutation2);
   }
@@ -1729,9 +1729,9 @@ bool rootSubalgebra::GenerateIsomorphismsPreservingBorel(rootSubalgebra& right, 
               return true;
           if (outputAutomorphisms!=0)
             this->MakeProgressReportGenAutos( l+NumAutosCentralizer*(k+NumAutos*(j+i*tempI2)), tempI1*tempI2*NumAutos*NumAutosCentralizer, outputAutomorphisms->ExternalAutomorphisms.size, theGlobalVariables);
-          tempAutosCentralizer.IncrementSubset();
+          tempAutosCentralizer.IncrementReturnFalseIfPastLast();
         }
-        tempAutos.IncrementSubset();
+        tempAutos.IncrementReturnFalseIfPastLast();
       }
       permComponentsCentralizer.incrementAndGetPermutation(tempPermutation2);
     }

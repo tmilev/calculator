@@ -968,7 +968,21 @@ bool SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization()
       (this->CachedDynkinIndicesSl2subalgebrasSimpleTypes, this->CachedDynkinSimpleTypesWithComputedSl2Subalgebras,
        theDynkinIndicesCentralizerComplementCurrentSummand);
       if (!theDynkinIndicesCentralizerComplementCurrentSummand.Contains(theDynkinIndicesCurrentSummand))
-      { stOutput << "<hr>Attention: non-tested optimization ..." ;
+      { std::stringstream reportStream;
+        reportStream << "<hr>Attention: using non-tested optimization, please double-check by hand. "
+        << "I have just rejected type " << currentType.ToString() << " as non-realizable for the following reasons. "
+        << "I computed that the type's summand " << currentSummand.ToString()
+        << " has complement summand " << currentComplementSummand.ToString() << ". "
+        << " Then I computed the latter complement summand has centralizer "
+        << centralizerOfComplementOfCurrentSummand.ToString() << ". "
+        << "Then I computed the absolute Dynkin indices of the centralizer's sl(2)-subalgebras, namely "
+        << theDynkinIndicesCentralizerComplementCurrentSummand.ToStringCommaDelimited();
+        reportStream << ". If the type was realizable, those would have to contain "
+        << " the absolute Dynkin indices of sl(2) subalgebras of the original summand. However, that is not the case."
+        << " The absolute Dynkin indices of the sl(2) subalgebras of the original summand I computed to be "
+        << theDynkinIndicesCurrentSummand.ToStringCommaDelimited() << ". ";
+        this->comments+=reportStream.str();
+        stOutput << reportStream.str();
         return false;
       }
     }

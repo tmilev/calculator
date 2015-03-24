@@ -285,7 +285,8 @@ public:
   DynkinType targetDynkinType;
   SltwoSubalgebras theSl2s;
   HashedListReferences<SemisimpleLieAlgebra>* theSubalgebrasNonEmbedded;
-  ListReferences<SltwoSubalgebras>* theSl2sOfSubalgebras;
+  List<List<Rational> > CachedDynkinIndicesSl2subalgebrasSimpleTypes;
+  HashedList<DynkinSimpleType> CachedDynkinSimpleTypesWithComputedSl2Subalgebras;
   List<Vectors<Rational> > theOrbits;
   HashedList<Rational> theOrbitHelementLengths;
   HashedList<DynkinSimpleType> theOrbitDynkinIndices;

@@ -61,7 +61,7 @@ void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(const MonomialWeylAlg
       buffer.differentialPart[k]= left.differentialPart(k)+right.differentialPart(k)-multDrop;
     }
     output.AddMonomial(buffer, coeffBuff);
-    tempSel.IncrementSubset();
+    tempSel.IncrementReturnFalseIfPastLast();
   }
 }
 

@@ -386,6 +386,17 @@ Rational operator/(int left, const Rational& right);
 class Rational
 {
 private:
+//C++ official feature which is so bad I call it a bug:
+//the following doesn't compile, when it should. The standard is BAD.
+//  friend int operator=(int& left, const Rational& right)
+//  { if (!right.IsSmallInteger(&left))
+//      crash << "This is a programming error. I am asked to assign a rational number to a small integer, but the rational "
+//      << " number is either too large or is not an integer. Namely, the rational number equals " << this->ToString()
+//      << ". The programmer is supposed to write something of the sort int = rational only on condition that "
+//      << " the programmer is sure that the rational contains is a small int. "
+//      << crash;
+//    return left;
+//  }
   struct LargeRationalExtended
   {
   public:
@@ -522,6 +533,16 @@ public:
   static unsigned long long int TotalLargeMultiplications;
   static unsigned long long int TotalSmallGCDcalls;
   static unsigned long long int TotalLargeGCDcalls;
+/*  operator int()const
+  { int result=0;
+    if (!this->IsSmallInteger(&result))
+      crash << "This is a programming error. I am asked to assign a rational number to a small integer, but the rational "
+      << " number is either too large or is not an integer. Namely, the rational number equals " << this->ToString()
+      << ". The programmer is supposed to write something of the sort int = rational only on condition that "
+      << " the programmer is sure that the rational contains is a small int. "
+      << crash;
+    return result;
+  }*/
   bool NeedsParenthesisForMultiplication()const
   { return false;
     //return this->IsNegative();

@@ -1382,15 +1382,15 @@ void PartFraction::ApplyGeneralizedSzenesVergneFormulA
   int TotalMultiplicity;
   TotalMultiplicity=0;
   for (int i=0; i<theSelectedIndices.size; i++)
-  { int tempI= this->TheObjects[theSelectedIndices.TheObjects[i]].GetMultiplicityLargestElongation()-1;
-    TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i]=tempI;
+  { int tempI= (*this)[theSelectedIndices[i]].GetMultiplicityLargestElongation()-1;
+    TheBigBadIndexingSet.MaxMultiplicities[i]=tempI;
     TotalMultiplicity+=tempI;
   }
   Polynomial<LargeInt> currentCoeff;
   for (int i=0; i<theSelectedIndices.size; i++)
   { TheBigBadIndexingSet.clearNoMaxMultiplicitiesChange();
-    int oldMaxMultiplicity= TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i];
-    TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i]=0;
+    int oldMaxMultiplicity= TheBigBadIndexingSet.MaxMultiplicities[i];
+    TheBigBadIndexingSet.MaxMultiplicities[i]=0;
     int NumSubsets=TheBigBadIndexingSet.getTotalNumSubsets();
     for (int j=0; j<NumSubsets; j++)
     { tempFrac.Assign(*this);
@@ -1401,10 +1401,10 @@ void PartFraction::ApplyGeneralizedSzenesVergneFormulA
       for (int k=0; k<theSelectedIndices.size; k++)
       { int multiplicityChange;
         if (k!=i)
-          multiplicityChange= TheBigBadIndexingSet.Multiplicities.TheObjects[k];
+          multiplicityChange= TheBigBadIndexingSet.Multiplicities[k];
         else
           multiplicityChange= oldMaxMultiplicity+1;
-        tempFrac.TheObjects[theSelectedIndices.TheObjects[k]].AddMultiplicity(-multiplicityChange , theGreatestElongations.TheObjects[k]);
+        tempFrac[theSelectedIndices[k]].AddMultiplicity(-multiplicityChange , theGreatestElongations[k]);
         this->GetNElongationPolyWithMonomialContribution(startingVectors, theSelectedIndices, theCoefficients, theGreatestElongations, k, tempP, theDim);
         tempP.RaiseToPower(multiplicityChange, (LargeInt) 1);
         ComputationalBufferCoefficient*=(tempP);
@@ -1421,9 +1421,9 @@ void PartFraction::ApplyGeneralizedSzenesVergneFormulA
       tempFrac[GainingMultiplicityIndex].AddMultiplicity(TheBigBadIndexingSet.TotalMultiplicity()+oldMaxMultiplicity+1, ElongationGainingMultiplicityIndex);
       tempFrac.ComputeIndicesNonZeroMults();
       output.AddMonomial(tempFrac, ComputationalBufferCoefficient);
-      TheBigBadIndexingSet.IncrementSubset();
+      TheBigBadIndexingSet.IncrementReturnFalseIfPastLast();
     }
-    TheBigBadIndexingSet.MaxMultiplicities.TheObjects[i]= oldMaxMultiplicity;
+    TheBigBadIndexingSet.MaxMultiplicities[i]= oldMaxMultiplicity;
   }
   if (this->flagAnErrorHasOccurredTimeToPanic)
   { //Rational tempRat;
@@ -2933,17 +2933,19 @@ void ::SelectionWithDifferentMaxMultiplicities::clearNoMaxMultiplicitiesChange()
     this->Multiplicities[i]=0;
 }
 
-void SelectionWithDifferentMaxMultiplicities::IncrementSubset()
-{ for (int i=this->Multiplicities.size-1; i>=0; i--)
+bool SelectionWithDifferentMaxMultiplicities::IncrementReturnFalseIfPastLast()
+{ MacroRegisterFunctionWithName("SelectionWithDifferentMaxMultiplicities::IncrementReturnFalseIfPastLast");
+  for (int i=this->Multiplicities.size-1; i>=0; i--)
     if (this->Multiplicities[i]<this->MaxMultiplicities[i])
     { if (this->Multiplicities[i]==0)
         this->elements.AddOnTop(i);
       this->Multiplicities[i]++;
-      return;
+      return true;
     } else
     { this->Multiplicities[i]=0;
       this->elements.RemoveFirstOccurenceSwapWithLast(i);
     }
+  return false;
 }
 
 void DynkinType::GetTypesWithMults(List<DynkinSimpleType>& output)const
@@ -6059,7 +6061,7 @@ bool Lattice::GetAllRepresentatives(const Lattice& rougherLattice, Vectors<Ratio
   theCoeffSelection.initFromInts(thePeriods);
   int NumCycles=theCoeffSelection.getTotalNumSubsets();
   output.SetSize(NumCycles);
-  for (int i=0; i<NumCycles; i++, theCoeffSelection.IncrementSubset())
+  for (int i=0; i<NumCycles; i++, theCoeffSelection.IncrementReturnFalseIfPastLast())
   { output[i].MakeZero(theDim);
     for (int j=0; j<theCoeffSelection.Multiplicities.size; j++)
       output[i]+=thePeriodVectors[j]*theCoeffSelection.Multiplicities[j];

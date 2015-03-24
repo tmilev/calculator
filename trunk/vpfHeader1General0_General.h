@@ -840,6 +840,8 @@ public:
   void SwapTwoIndices(int index1, int index2);
   std::string ToString(FormatExpressions* theFormat)const;
   std::string ToString()const;
+  std::string ToStringCommaDelimited(FormatExpressions* theFormat)const;
+  std::string ToStringCommaDelimited()const;
   void ToString(std::string& output, FormatExpressions* theFormat=0)const
   { output= this->ToString(theFormat);
   }
@@ -1921,7 +1923,7 @@ void List<Object>::SetSize(int theSize)
 }
 
 template <class Object>
-inline std::string List<Object>::ToString()const
+std::string List<Object>::ToString()const
 { std::stringstream out;
   for (int i=0; i<this->size; i++)
     out << this->TheObjects[i].ToString() << "\n";
@@ -1929,10 +1931,32 @@ inline std::string List<Object>::ToString()const
 }
 
 template <class Object>
-inline std::string List<Object>::ToString(FormatExpressions* theFormat)const
+std::string List<Object>::ToStringCommaDelimited()const
+{ std::stringstream out;
+  for (int i=0; i<this->size; i++)
+  { out << this->TheObjects[i].ToString();
+    if (i!=this->size-1)
+      out << ", ";
+  }
+  return out.str();
+}
+
+template <class Object>
+std::string List<Object>::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
   for (int i=0; i<this->size; i++)
     out << this->TheObjects[i].ToString(theFormat) << "\n";
+  return out.str();
+}
+
+template <class Object>
+std::string List<Object>::ToStringCommaDelimited(FormatExpressions* theFormat)const
+{ std::stringstream out;
+  for (int i=0; i<this->size; i++)
+  { out << this->TheObjects[i].ToString(theFormat);
+    if (i!=this->size-1)
+      out << ", ";
+  }
   return out.str();
 }
 

@@ -2350,8 +2350,9 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
     //theSl2.ComputeDebugString(false, false, theGlobalVariables);
 //    stOutput << "<br>accounting " << characteristicH.ToString();
     if(theLieAlgebra.AttemptExtendingHFtoHEFWRTSubalgebra
-       (theSl2.RootsWithScalar2WithH, selectionRootsWithZeroCharacteristic, reflectedSimpleBasisK, characteristicH, theSl2.theE,
-        theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
+       (theSl2.RootsWithScalar2WithH, selectionRootsWithZeroCharacteristic, reflectedSimpleBasisK,
+        characteristicH, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved,
+        theSl2.theSystemColumnVector, theGlobalVariables))
     { int indexIsoSl2;
       theSl2.MakeReportPrecomputations(theGlobalVariables, output, output.size, indexRootSAinContainer, *this);
       if(output.ContainsSl2WithGivenHCharacteristic(theSl2.hCharacteristic, &indexIsoSl2))

@@ -734,7 +734,8 @@ void FiniteGroup<elementSomeGroup>::ComputeCCfromAllElements(GlobalVariables* th
 
 template <class coefficient>
 bool WeylGroup::GenerateOuterOrbit
-(Vectors<coefficient>& theWeights, HashedList<Vector<coefficient> >& output, HashedList<ElementWeylGroup<WeylGroup> >* outputSubset,  int UpperLimitNumElements,
+(Vectors<coefficient>& theWeights, HashedList<Vector<coefficient> >& output,
+ HashedList<ElementWeylGroup<WeylGroup> >* outputSubset,  int UpperLimitNumElements,
  GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::GenerateOuterOrbit");
   this->ComputeOuterAutoGenerators();
@@ -787,8 +788,11 @@ bool WeylGroup::GenerateOuterOrbit
 }
 
 template <class coefficient>
-void WeylGroup::RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign, bool* stabilizerFound, ElementWeylGroup<WeylGroup>* raisingElt)
-{ if (sign!=0)
+void WeylGroup::RaiseToDominantWeight
+(Vector<coefficient>& theWeight, int* sign, bool* stabilizerFound,
+ ElementWeylGroup<WeylGroup>* raisingElt)
+{ MacroRegisterFunctionWithName("WeylGroup::RaiseToDominantWeight");
+  if (sign!=0)
     *sign=1;
   if (stabilizerFound!=0)
     *stabilizerFound=false;
@@ -838,9 +842,11 @@ void WeylGroup::SimpleReflectionRhoModified(int index, Vector<coefficient>& theV
 
 template <class coefficient>
 bool WeylGroup::GenerateOrbit
-(Vectors<coefficient>& theWeights, bool RhoAction, HashedList<Vector<coefficient> >& output, bool UseMinusRho, int expectedOrbitSize,
- HashedList<ElementWeylGroup<WeylGroup> >* outputSubset, int UpperLimitNumElements, GlobalVariables* theGlobalVariables)
-{ output.Clear();
+(Vectors<coefficient>& theWeights, bool RhoAction, HashedList<Vector<coefficient> >& output,
+ bool UseMinusRho, int expectedOrbitSize, HashedList<ElementWeylGroup<WeylGroup> >* outputSubset,
+ int UpperLimitNumElements, GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("WeylGroup::GenerateOrbit");
+  output.Clear();
   for (int i=0; i<theWeights.size; i++)
     output.AddOnTopNoRepetition(theWeights[i]);
   Vector<coefficient> currentRoot;

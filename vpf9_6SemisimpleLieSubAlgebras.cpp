@@ -177,15 +177,6 @@ std::string DynkinType::ToString(FormatExpressions* theFormat)const
   return this->::MonomialCollection<DynkinSimpleType, Rational>::ToString(theFormat);
 }
 
-std::string DynkinType::ToStringRelativeToAmbientType(const DynkinSimpleType& ambientType, FormatExpressions* theFormat)const
-{ FormatExpressions tempFormat;
-  tempFormat.AmbientWeylLetter=ambientType.theLetter;
-  tempFormat.AmbientCartanSymmetricInverseScale=ambientType.CartanSymmetricInverseScale;
-  if (theFormat!=0)
-    tempFormat.flagSupressDynkinIndexOne=theFormat->flagSupressDynkinIndexOne;
-  return this->ToString(&tempFormat);
-}
-
 void SemisimpleSubalgebras::CheckFileWritePermissions()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::CheckFileWritePermissions");
   this->CheckConsistency();
@@ -305,8 +296,8 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryLaTeX(FormatExpressions* theF
   if (numBadParabolics>0)
     out << "<br><span style=\"color:#FF0000\">There are " << numBadParabolics << " bad parabolic subalgebras!</span><br>";
   out << "\n<br>\n\\begin{longtable}{ccp{3cm}p{3cm}cc}";
-  out << "\\caption{Semisimple subalgebras in type $" << this->owneR->theWeyl.theDynkinType.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0], theFormat)
-  << "$ \\label{tableSSSubalgerbas" << this->owneR->theWeyl.theDynkinType.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0], theFormat) << "}. ";
+  out << "\\caption{Semisimple subalgebras in type $" << this->owneR->theWeyl.theDynkinType.ToString(theFormat)
+  << "$ \\label{tableSSSubalgerbas" << this->owneR->theWeyl.theDynkinType.ToString(theFormat) << "}. ";
   out << "Number of isotypically complete nilradicals: " << numIsotypicallyCompleteNilrads << ", of them "
   << numFailingConeCondition << " fail the cone condition.";
   if (numNoLinfRelFound==0)
@@ -322,7 +313,7 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryLaTeX(FormatExpressions* theF
   { const CandidateSSSubalgebra& currentSA=this->theSubalgebras[i];
     if (currentSA.flagSystemProvedToHaveNoSolution)
       continue;
-    out << "$" << currentSA.theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0], theFormat) << "$";
+    out << "$" << currentSA.theWeylNonEmbeddeD.theDynkinType.ToString(theFormat) << "$";
     if (!currentSA.flagCentralizerIsWellChosen)
       continue;
     typeCentralizer.MakeZero();
@@ -789,14 +780,14 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
   ProgressReport theReport(this->owner->theGlobalVariables);
   if (!this->ComputeChar(false))
   { if (this->owner->theGlobalVariables!=0)
-      theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) + " doesn't have fitting chars.");
+      theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToString() + " doesn't have fitting chars.");
     //stOutput << "Compute char returned false.";
     return false;
   }
   this->ComputeSystem(false, false);
   if (this->flagSystemProvedToHaveNoSolution)
     if (this->owner->theGlobalVariables!=0)
-    { theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) + " -> no system solution.");
+    { theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToString() + " -> no system solution.");
 //      stOutput << "No system solution.";
     }
   for (int i=0; i<this->owner->theSubalgebras.size; i++)
@@ -927,9 +918,9 @@ bool SemisimpleSubalgebras::GetCentralizerTypeIfComputableAndKnown(const DynkinT
 }
 
 void DynkinType::GetDynkinIndicesSl2Subalgebras
-  (List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
-   HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
-   HashedList<Rational>& outputDynkinIndices)
+(List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
+ HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
+ HashedList<Rational>& outputDynkinIndices)
 {
 
 }
@@ -958,7 +949,8 @@ bool SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization()
   while (simpleSummandSelection.IncrementReturnFalseIfPastLast())
   { currentComplementSummand.MakeZero();
     for (int i=0; i<simpleSummandSelection.elements.size; i++)
-      currentComplementSummand.AddMonomial(currentType[simpleSummandSelection.elements[i]], currentType.theCoeffs[i]);
+      currentComplementSummand.AddMonomial
+      (currentType[simpleSummandSelection.elements[i]], currentType.theCoeffs[simpleSummandSelection.elements[i]]);
     if (this->GetCentralizerTypeIfComputableAndKnown(currentComplementSummand, centralizerOfComplementOfCurrentSummand))
     { currentSummand=currentType-currentComplementSummand;
       currentSummand.GetDynkinIndicesSl2Subalgebras
@@ -976,8 +968,8 @@ bool SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization()
         << " Then I computed the latter complement summand has centralizer "
         << centralizerOfComplementOfCurrentSummand.ToString() << ". "
         << "Then I computed the absolute Dynkin indices of the centralizer's sl(2)-subalgebras, namely "
-        << theDynkinIndicesCentralizerComplementCurrentSummand.ToStringCommaDelimited();
-        reportStream << ". If the type was realizable, those would have to contain "
+        << theDynkinIndicesCentralizerComplementCurrentSummand.ToStringCommaDelimited()
+        << ". If the type was realizable, those would have to contain "
         << " the absolute Dynkin indices of sl(2) subalgebras of the original summand. However, that is not the case."
         << " The absolute Dynkin indices of the sl(2) subalgebras of the original summand I computed to be "
         << theDynkinIndicesCurrentSummand.ToStringCommaDelimited() << ". ";
@@ -1857,7 +1849,7 @@ bool CandidateSSSubalgebra::CheckModuleDimensions()const
   if (totalDim!=this->GetAmbientSS().GetNumGenerators())
   { FormatExpressions theFormat;
     theFormat.flagCandidateSubalgebraShortReportOnly=false;
-    crash << "<br><b>Something went very wrong with candidate " << this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) << ": dimensions DONT FIT!!! More precisely, "
+    crash << "<br><b>Something went very wrong with candidate " << this->theWeylNonEmbeddeD.theDynkinType.ToString() << ": dimensions DONT FIT!!! More precisely, "
     << "I am getting total module dimension sum  " << totalDim << " instead of " << this->GetAmbientSS().GetNumGenerators()
     << ".</b> Here is a detailed subalgebra printout. " << this->ToString(&theFormat) << crash;
   }
@@ -2534,7 +2526,7 @@ void CandidateSSSubalgebra::EnumerateAllNilradicals(GlobalVariables* theGlobalVa
   this->EnumerateNilradicalsRecursively(theSel, theGlobalVariables, &out);
   if (this->FKNilradicalCandidates.size<1)
     crash << "This is a programming error:" << " while enumerating nilradicals of "
-    << this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0])
+    << this->theWeylNonEmbeddeD.theDynkinType.ToString()
     << " got 0 nilradical candidates which is impossible (the zero nilradical is always possible). " << crash;
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
   { std::stringstream reportStream2;
@@ -3928,7 +3920,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat, GlobalVariables* the
   std::string fileName;
   std::fstream theFile, fileFlas;
   outNotationCommand << "printSemisimpleLieAlgebra{}("
-  << this->GetOwnerWeyl().theDynkinType.ToStringRelativeToAmbientType(this->GetOwnerWeyl().theDynkinType[0]) << ")" ;
+  << this->GetOwnerWeyl().theDynkinType.ToString() << ")" ;
   outNotation << "Notation, structure constants and Weyl group info: " << CGI::GetCalculatorLink(DisplayNameCalculator, outNotationCommand.str())
   << "<br> <a href=\"" << DisplayNameCalculator << "\"> Calculator main page</a><br><a href=\"../rootSubalgebras.html\">Root subsystem table</a><br>";
   std::string notation= outNotation.str();
@@ -4168,7 +4160,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompoLaTeX(FormatExpressions*
   out << "\\documentclass{article}\\usepackage{amssymb}\\usepackage{longtable}\\usepackage{multirow}\\begin{document}" ;
   out << "<br> \\begin{longtable}{c|c|c|c|c|c}\n<br>\n\\caption{Module decomposition of $"
   << this->owner->owneR->theWeyl.theDynkinType.ToString() << "$ over $"
-  << this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0])
+  << this->theWeylNonEmbeddeD.theDynkinType.ToString()
   << " \\oplus \\mathfrak h_c$\\label{tableModuleDecompo} }\\\\"
   << "Component &Module & elements & elt. weights& $h$-element $\\mathfrak k-sl(2)$-triple& $f$-element $\\mathfrak k-sl(2)$-triple\\\\";
   ElementSemisimpleLieAlgebra<AlgebraicNumber> tempLieBracket;
@@ -4794,7 +4786,7 @@ std::string SemisimpleSubalgebras::ToStringAlgebraLink(int ActualIndexSubalgebra
   bool makeLink= theFormat==0? false : theFormat->flagUseHtmlAndStoreToHD;
   if (this->theSubalgebras[ActualIndexSubalgebra].flagSystemProvedToHaveNoSolution)
     makeLink=false;
-  std::string theTypeString=this->theSubalgebras[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetSSowner().theWeyl.theDynkinType[0]);
+  std::string theTypeString=this->theSubalgebras[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType.ToString();
   if (makeLink)
   { out << "<a href=\"" << this->GetDisplayFileNameSubalgebraRelative(ActualIndexSubalgebra, theFormat) << "\" style=\"text-decoration: none\">";
     if (useMouseHover)
@@ -4864,9 +4856,9 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
         out << " + ";
     } else if (!this->theCentralizerType.IsEqualToZero())
     { if (useMouseHover)
-        out << CGI::GetMathMouseHover(this->theCentralizerType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) );
+        out << CGI::GetMathMouseHover(this->theCentralizerType.ToString());
       else
-        out << CGI::GetMathSpanPure(this->theCentralizerType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]));
+        out << CGI::GetMathSpanPure(this->theCentralizerType.ToString());
       out << " (can't determine subalgebra number - subalgebras computed partially?)";
       dimToralPartCentralizer-=this->theCentralizerType.GetRank();
     }

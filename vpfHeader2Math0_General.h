@@ -6045,11 +6045,6 @@ class DynkinSimpleType
   }
   std::string ToString(FormatExpressions* theFormat=0)const;
   void operator++(int);
-  //DynksinSimpleTypes are compared as follows.
-  //First, we compare the length of the first co-root. Larger co-root length= larger simple type.
-  //Second, we comare ranks. Larger rank = larger simple type. Note that an sl(2) with large co-root length will be considered
-  //larger than an sl(100) with small root length.
-  //Finally, we compare types. The convention here is: larger root system=larger type. In other words, A<D<B<C<E<F<G
   bool operator>(const DynkinSimpleType& other)const;
   static void GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>& output);
   inline bool operator<(const DynkinSimpleType& other)const
@@ -6058,9 +6053,10 @@ class DynkinSimpleType
   bool operator<(int otherRank)const;
 };
 
-//this class needs a fix: it should not inherit monomial collection, rather have a monomial collection as a private member.
-//Most important operations with Dynkin types require fixed order of monomils, which makes using monomial collections
-// a bad design decision.
+//this class may need a modification: perhaps it should not inherit monomial collection,
+//but rather have a monomial collection as a private member.
+//Many important operations with Dynkin types require fixed order of monomials,
+//which may impose this reorganization.
 class DynkinType: public MonomialCollection<DynkinSimpleType, Rational>
 {
 public:
@@ -6093,7 +6089,7 @@ public:
   DynkinSimpleType GetSmallestSimpleType()const;
   LargeInt GetWeylGroupSizeByFormula()const;
   std::string ToString(FormatExpressions* theFormat=0)const;
-  std::string ToStringRelativeToAmbientType(const DynkinSimpleType& ambientType, FormatExpressions* theFormat=0)const;
+//  std::string ToStringRelativeToAmbientType(const DynkinSimpleType& ambientType, FormatExpressions* theFormat=0)const;
   void ScaleFirstCoRootSquaredLength(const Rational& multiplyCoRootSquaredLengthBy);
   int GetMult(int SimpleTypeIdentifier)const
   { int result;

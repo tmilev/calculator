@@ -1103,7 +1103,7 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
     mainTableStream << "Irrep label";
     if (this->theDynkinType.IsSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale))
       for (int i=startIndex; i<startIndexNextCol; i++)
-        mainTableStream << "&$" << inputSubgroups[i].theDynkinType.ToStringRelativeToAmbientType(simpleType, &formatSupressUpperIndexOne) << "$";
+        mainTableStream << "&$" << inputSubgroups[i].theDynkinType.ToString(&formatSupressUpperIndexOne) << "$";
     else
       for (int i=startIndex; i<startIndexNextCol; i++)
         mainTableStream << "&$" << inputSubgroups[i].theDynkinType.ToString() << "$";
@@ -1132,7 +1132,7 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
     }
     if (this->theDynkinType.IsSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale))
       for (int i=0; i<inputSubgroups.size; i++)
-        out << "<td>" << inputSubgroups[i].theDynkinType.ToStringRelativeToAmbientType(simpleType, &formatSupressUpperIndexOne)
+        out << "<td>" << inputSubgroups[i].theDynkinType.ToString(&formatSupressUpperIndexOne)
         << "</td>";
     else
       for (int i=0; i<inputSubgroups.size; i++)

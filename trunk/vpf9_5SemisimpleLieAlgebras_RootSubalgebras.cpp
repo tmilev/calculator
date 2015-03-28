@@ -2100,7 +2100,7 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphismOLD(Globa
 bool SemisimpleLieAlgebra::AttemptExtendingHFtoHEFWRTSubalgebra
 (Vectors<Rational>& RootsWithCharacteristic2, Selection& theZeroCharacteristics, Vectors<Rational>& simpleBasisSA, Vector<Rational>& h,
  ElementSemisimpleLieAlgebra<Rational>& outputE, ElementSemisimpleLieAlgebra<Rational>& outputF, Matrix<Rational>& outputMatrixSystemToBeSolved,
- PolynomialSubstitution<Rational>& outputSystemToBeSolved, Matrix<Rational>& outputSystemColumnVector, GlobalVariables& theGlobalVariables)
+ PolynomialSubstitution<Rational>& outputSystemToBeSolved, Matrix<Rational>& outputSystemColumnVector, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::AttemptExtendingHFtoHEFWRTSubalgebra");
   if (theZeroCharacteristics.CardinalitySelection== theZeroCharacteristics.MaxSize)
     return false;
@@ -2247,7 +2247,8 @@ void SemisimpleLieAlgebra::initHEFSystemFromECoeffs
 //  outputSystemToBeSolved.ComputeDebugString();
 }
 
-void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexRootSAinContainer, GlobalVariables& theGlobalVariables)
+void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
+(SltwoSubalgebras& output, int indexRootSAinContainer, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition");
   //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1-10.4
   int theRelativeDimension= this->SimpleBasisK.size;
@@ -2267,7 +2268,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
       InvertedRelativeKillingForm(k,j)=this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[k], this->SimpleBasisK[j]);
   InvertedRelativeKillingForm.Invert();
   int numCycles= MathRoutines::TwoToTheNth(selectionRootsWithZeroCharacteristic.MaxSize);
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport(theGlobalVariables);
   Vectors<Rational> rootsZeroChar;
   rootsZeroChar.Reserve(selectionRootsWithZeroCharacteristic.MaxSize);
   Vectors<Rational> relativeRootSystem, bufferVectors;

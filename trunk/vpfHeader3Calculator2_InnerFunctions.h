@@ -80,6 +80,7 @@ public:
   static bool innerGetUserDefinedSubExpressions(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGrowDynkinType(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetPrincipalSl2Index(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerGetDynkinIndicesSlTwoSubalgebras(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerGetCentralizerChainsSemisimpleSubalgebras(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerComputeSemisimpleSubalgebras(Calculator& theCommands, const Expression& input, Expression& output);

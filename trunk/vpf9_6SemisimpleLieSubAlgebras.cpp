@@ -496,7 +496,7 @@ void SemisimpleSubalgebras::GetCentralizerChains(List<List<int> >& outputChains)
 
 void SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand");
-  this->GetSSowner().FindSl2Subalgebras(this->GetSSowner(), this->theSl2s, *this->theGlobalVariables);
+  this->GetSSowner().FindSl2Subalgebras(this->GetSSowner(), this->theSl2s, this->theGlobalVariables);
   this->theOrbits.SetSize(this->theSl2s.size);
 //  this->theOrbitGeneratingElts.SetSize(this->theSl2s.size);
   this->theOrbitsAreComputed.initFillInObject(this->theSl2s.size, false);
@@ -917,12 +917,64 @@ bool SemisimpleSubalgebras::GetCentralizerTypeIfComputableAndKnown(const DynkinT
   return true;
 }
 
+void DynkinType::GetDynkinIndicesSl2SubalgebrasSimpleType
+  (const DynkinSimpleType& theType, List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
+   HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
+   HashedList<Rational>& outputDynkinIndices, GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("DynkinType::GetDynkinIndicesSl2SubalgebrasSimpleType");
+  DynkinSimpleType theTypeDefaultScale(theType.theLetter, theType.theRank, 1);
+  if (!dynkinSimpleTypesWithComputedSl2Subalgebras.Contains(theTypeDefaultScale))
+  { HashedList<Rational> outputIndicesDefaultScale;
+    SemisimpleLieAlgebra simpleAlgebra;
+    SltwoSubalgebras theSl2s;
+    simpleAlgebra.theWeyl.MakeArbitrarySimple(theTypeDefaultScale.theLetter, theTypeDefaultScale.theRank);
+    simpleAlgebra.ComputeChevalleyConstants(theGlobalVariables);
+    simpleAlgebra.FindSl2Subalgebras(simpleAlgebra, theSl2s, theGlobalVariables);
+    dynkinSimpleTypesWithComputedSl2Subalgebras.AddOnTop(theTypeDefaultScale);
+    outputIndicesDefaultScale.SetExpectedSize(theSl2s.size);
+    for (int i=0; i<theSl2s.size; i++)
+      outputIndicesDefaultScale.AddOnTopNoRepetition(theSl2s[i].LengthHsquared/2);
+    precomputedDynkinIndicesSl2subalgebrasSimpleTypes.AddOnTop(outputIndicesDefaultScale);
+  }
+  List<Rational>& outputIndicesDefaultScale=precomputedDynkinIndicesSl2subalgebrasSimpleTypes
+  [dynkinSimpleTypesWithComputedSl2Subalgebras.GetIndex(theTypeDefaultScale)];
+  outputDynkinIndices.SetExpectedSize(outputIndicesDefaultScale.size);
+  outputDynkinIndices.Clear();
+  for (int i=0; i<outputIndicesDefaultScale.size; i++)
+    outputDynkinIndices.AddOnTop(outputIndicesDefaultScale[i]*theType.CartanSymmetricInverseScale);
+}
+
 void DynkinType::GetDynkinIndicesSl2Subalgebras
 (List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
  HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
- HashedList<Rational>& outputDynkinIndices)
-{
-
+ HashedList<Rational>& outputDynkinIndices, GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("DynkinType::GetDynkinIndicesSl2Subalgebras");
+  List<DynkinSimpleType> theTypes;
+  this->GetTypesWithMults(theTypes);
+  List<List<Rational> > DynkinIndicesPerType;
+  HashedList<Rational> bufferIndices;
+  for (int i=0; i<theTypes.size; i++)
+  { this->GetDynkinIndicesSl2SubalgebrasSimpleType
+    (theTypes[i], precomputedDynkinIndicesSl2subalgebrasSimpleTypes, dynkinSimpleTypesWithComputedSl2Subalgebras,
+     bufferIndices, theGlobalVariables);
+    DynkinIndicesPerType.SetSize(DynkinIndicesPerType.size+1);
+    DynkinIndicesPerType.LastObject()->AddOnTop(0);
+    DynkinIndicesPerType.LastObject()->AddListOnTop(bufferIndices);
+  }
+  SelectionWithDifferentMaxMultiplicities dynkinIndexSelector;
+  List<int> theMults;
+  theMults.SetSize(theTypes.size);
+  for (int i=0; i<theMults.size; i++)
+    theMults[i]=DynkinIndicesPerType[i].size-1;
+  dynkinIndexSelector.initFromInts(theMults);
+  outputDynkinIndices.Clear();
+  while (dynkinIndexSelector.IncrementReturnFalseIfPastLast())
+  { Rational currentIndex=0;
+    //  stOutput << "here be i";
+    for (int i=0; i<dynkinIndexSelector.Multiplicities.size; i++)
+      currentIndex+=DynkinIndicesPerType[i][dynkinIndexSelector.Multiplicities[i]];
+    outputDynkinIndices.AddOnTopNoRepetition(currentIndex);
+  }
 }
 
 bool SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization()
@@ -955,10 +1007,10 @@ bool SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization()
     { currentSummand=currentType-currentComplementSummand;
       currentSummand.GetDynkinIndicesSl2Subalgebras
       (this->CachedDynkinIndicesSl2subalgebrasSimpleTypes, this->CachedDynkinSimpleTypesWithComputedSl2Subalgebras,
-       theDynkinIndicesCurrentSummand);
+       theDynkinIndicesCurrentSummand, this->theGlobalVariables);
       centralizerOfComplementOfCurrentSummand.GetDynkinIndicesSl2Subalgebras
       (this->CachedDynkinIndicesSl2subalgebrasSimpleTypes, this->CachedDynkinSimpleTypesWithComputedSl2Subalgebras,
-       theDynkinIndicesCentralizerComplementCurrentSummand);
+       theDynkinIndicesCentralizerComplementCurrentSummand, this->theGlobalVariables);
       if (!theDynkinIndicesCentralizerComplementCurrentSummand.Contains(theDynkinIndicesCurrentSummand))
       { std::stringstream reportStream;
         reportStream << "<hr>Attention: using non-tested optimization, please double-check by hand. "
@@ -3470,18 +3522,21 @@ void SltwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner)
   this->theRootSAs.owneR=&inputOwner;
 }
 
-void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, SltwoSubalgebras& output, GlobalVariables& theGlobalVariables)
+void SemisimpleLieAlgebra::FindSl2Subalgebras
+(SemisimpleLieAlgebra& inputOwner, SltwoSubalgebras& output, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::FindSl2Subalgebras");
-  ProgressReport theReport0(&theGlobalVariables);
-  std::stringstream reportStream0;
-  reportStream0 << "Finding sl(2)-subalgebras (and thus a full list of the nilpotent orbits) of "
-  << inputOwner.theWeyl.theDynkinType.ToString();
-  theReport0.Report(reportStream0.str());
+  ProgressReport theReport0(theGlobalVariables);
+  if (theGlobalVariables!=0)
+  { std::stringstream reportStream0;
+    reportStream0 << "Finding sl(2)-subalgebras (and thus a full list of the nilpotent orbits) of "
+    << inputOwner.theWeyl.theDynkinType.ToString();
+    theReport0.Report(reportStream0.str());
+  }
   inputOwner.CheckConsistency();
   output.reset(inputOwner);
   output.CheckConsistency();
-  output.GetOwner().ComputeChevalleyConstants(&theGlobalVariables);
-  output.theRootSAs.theGlobalVariables=&theGlobalVariables;
+  output.GetOwner().ComputeChevalleyConstants(theGlobalVariables);
+  output.theRootSAs.theGlobalVariables=theGlobalVariables;
   output.theRootSAs.owneR=&inputOwner;
   output.theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
   //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
@@ -3489,7 +3544,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
   output.IndicesSl2sContainedInRootSA.Reserve(output.theRootSAs.theSubalgebras.size*2);
   for (int i=0; i<output.IndicesSl2sContainedInRootSA.size; i++)
     output.IndicesSl2sContainedInRootSA[i].size=0;
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport(theGlobalVariables);
   for (int i=0; i<output.theRootSAs.theSubalgebras.size; i++)
   { std::stringstream tempStream;
     tempStream << "\nExploring root subalgebra " << output.theRootSAs.theSubalgebras[i].theDynkinDiagram.ToString()
@@ -3606,7 +3661,7 @@ bool SltwoSubalgebras::CheckConsistency()const
   return true;
 }
 
-void SltwoSubalgebras::ComputeModuleDecompositionsOfAmbientLieAlgebra(GlobalVariables& theGlobalVariables)
+void SltwoSubalgebras::ComputeModuleDecompositionsOfAmbientLieAlgebra(GlobalVariables* theGlobalVariables)
 { this->GrandMasterConsistencyCheck();
   this->CheckConsistency();
   for(int i=0; i<this->size; i++)
@@ -3654,23 +3709,26 @@ void slTwoSubalgebra::ElementToStringModuleDecomposition(bool useLatex, bool use
   output=CGI::GetMathMouseHover(out.str());
 }
 
-void slTwoSubalgebra::ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables& theGlobalVariables)
+void slTwoSubalgebra::ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables* theGlobalVariables)
 { this->CheckConsistency();
   this->ComputePrimalModuleDecomposition(this->GetOwnerWeyl().RootsOfBorel, this->GetOwnerWeyl().CartanSymmetric.NumRows, this->highestWeights, this->multiplicitiesHighestWeights, this->weightSpaceDimensions, theGlobalVariables);
 }
 
-void slTwoSubalgebra::ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables& theGlobalVariables)
+void slTwoSubalgebra::ComputeModuleDecompositionOfMinimalContainingRegularSAs
+(SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables* theGlobalVariables)
 { this->MultiplicitiesDecompositionMinimalContainingRootSA.SetSize(this->IndicesMinimalContainingRootSA.size);
   this->HighestWeightsDecompositionMinimalContainingRootSA.SetSize(this->IndicesMinimalContainingRootSA.size);
   List<int> buffer;
   for (int i=0; i<this->IndicesMinimalContainingRootSA.size; i++)
   { rootSubalgebra& theSA= owner.theRootSAs.theSubalgebras[this->IndicesMinimalContainingRootSA[i]];
-    this->ComputePrimalModuleDecomposition(theSA.PositiveRootsK, theSA.SimpleBasisK.size, this->HighestWeightsDecompositionMinimalContainingRootSA[i], this->MultiplicitiesDecompositionMinimalContainingRootSA[i], buffer, theGlobalVariables);
+    this->ComputePrimalModuleDecomposition
+    (theSA.PositiveRootsK, theSA.SimpleBasisK.size, this->HighestWeightsDecompositionMinimalContainingRootSA[i],
+     this->MultiplicitiesDecompositionMinimalContainingRootSA[i], buffer, theGlobalVariables);
   }
 }
 
 void slTwoSubalgebra::MakeReportPrecomputations
-(GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra)
+(GlobalVariables* theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra)
 { MacroRegisterFunctionWithName("slTwoSubalgebra::MakeReportPrecomputations");
   int theDimension=this->GetOwnerSSAlgebra().GetRank();
   this->IndicesContainingRootSAs.size=0;
@@ -3709,7 +3767,7 @@ void slTwoSubalgebra::MakeReportPrecomputations
 //The below code is related to sl(2) subalgebras of simple Lie algebras
 void slTwoSubalgebra::ComputePrimalModuleDecomposition
 (Vectors<Rational>& positiveRootsContainingRegularSA, int dimensionContainingRegularSA, List<int>& outputHighestWeights,
- List<int>& outputMultiplicitiesHighestWeights, List<int>& outputWeightSpaceDimensions, GlobalVariables& theGlobalVariables)
+ List<int>& outputMultiplicitiesHighestWeights, List<int>& outputWeightSpaceDimensions, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("slTwoSubalgebra::ComputePrimalModuleDecomposition");
   this->CheckConsistency();
   positiveRootsContainingRegularSA.CheckConsistency();

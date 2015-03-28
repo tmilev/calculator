@@ -102,7 +102,16 @@ void Calculator::initPredefinedInnerFunctions()
   ("PrincipalSlTwoIndex", CalculatorFunctionsGeneral::innerGetPrincipalSl2Index, "",
    "Gives the symmetric Cartan corresponding to a given dynkin type.",
    "PrincipalSlTwoIndex(G_2^3+D_4^2);", true, false, "CalculatorFunctionsGeneral::innerGetPrincipalSl2Index");//, false);
-
+  this->AddOperationInnerHandler
+  ("DynkinIndicesSlTwoSubalgebras", CalculatorFunctionsGeneral::innerGetDynkinIndicesSlTwoSubalgebras, "",
+   "Fetches the absolute Dynkin indices of the sl(2) subalgebras of the input Dynkin type. The indices of each simple \
+    component are computed by actually constructing the sl(2)-subalgebras; clearly this can be greatly optimized\
+    but we postpone that for a future version. ",
+   "  DynkinIndicesSlTwoSubalgebras(2A_2);\
+    \n DynkinIndicesSlTwoSubalgebras(2A_2+A_2^2);\
+    \n DynkinIndicesSlTwoSubalgebras(2A_2+A_2^7);\
+    \n DynkinIndicesSlTwoSubalgebras(2G_2+G_2^7+F_4+F_4^19);", true, false,
+    "CalculatorFunctionsGeneral::innerGetDynkinIndicesSlTwoSubalgebras");//, false);
   this->AddOperationInnerHandler
   ("CartanSymmetric", CalculatorFunctionsGeneral::innerGetSymmetricCartan, "",
    "Gives the symmetric Cartan corresponding to a given dynkin type.",

@@ -3640,11 +3640,29 @@ bool CalculatorFunctionsGeneral::innerGetSymmetricCartan(Calculator& theCommands
 }
 
 bool CalculatorFunctionsGeneral::innerGetPrincipalSl2Index(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetSymmetricCartan");
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetPrincipalSl2Index");
   DynkinType theType;
   if (!CalculatorConversions::innerDynkinType(theCommands, input, theType))
     return theCommands << "Failed to convert " << input.ToString() << " to DynkinType.";
   return output.AssignValue(theType.GetPrincipalSlTwoCSInverseScale(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerGetDynkinIndicesSlTwoSubalgebras(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetDynkinIndicesSlTwoSubalgebras");
+  DynkinType theType;
+  if (!CalculatorConversions::innerDynkinType(theCommands, input, theType))
+    return theCommands << "Failed to convert " << input.ToString() << " to DynkinType.";
+  if (theType.GetRank()>20)
+    return theCommands << "Getting absolute Dynkin indices of sl(2)-subalgebras is restricted up to rank 20 "
+    << "(for computational feasibility reasons).";
+  List<List<Rational> > bufferIndices;
+  HashedList<DynkinSimpleType> bufferTypes;
+  HashedList<Rational> theIndices;
+  theType.GetDynkinIndicesSl2Subalgebras(bufferIndices, bufferTypes, theIndices, theCommands.theGlobalVariableS);
+  std::stringstream out;
+  out << "There are " << theIndices.size << " aboslute Dynkin indices. The indices are: "
+  << theIndices.ToStringCommaDelimited();
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg(Calculator& theCommands, const Expression& input, Expression& output)
@@ -4837,7 +4855,7 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
     theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo=true;
 //    stOutput << "ChangeME";
 //    theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo=false;
-    ownerSS->FindSl2Subalgebras(*ownerSS, theSl2s, *theCommands.theGlobalVariableS);
+    ownerSS->FindSl2Subalgebras(*ownerSS, theSl2s, theCommands.theGlobalVariableS);
     std::string PathSl2= outSltwoPath.str();
     std::string DisplayPathSl2=outSltwoDisplayPath.str();
     theSl2s.ToHTML(&theFormat, theCommands.theGlobalVariableS);

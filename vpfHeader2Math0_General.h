@@ -6130,10 +6130,15 @@ public:
   int GetCoxeterEdgeWeight(int v, int w);
   std::string GetLieAlgebraName(FormatExpressions* theFormat=0)const;
   std::string GetWeylGroupName(FormatExpressions* theFormat=0)const;
+
+  static void GetDynkinIndicesSl2SubalgebrasSimpleType
+  (const DynkinSimpleType& theType, List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
+   HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
+   HashedList<Rational>& outputDynkinIndices, GlobalVariables* theGlobalVariables);
   void GetDynkinIndicesSl2Subalgebras
   (List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
    HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
-   HashedList<Rational>& outputDynkinIndices);
+   HashedList<Rational>& outputDynkinIndices, GlobalVariables* theGlobalVariables);
   bool HasExceptionalComponent()const;
   bool operator>(const DynkinType& other)const;
   void operator=(const MonomialCollection<DynkinSimpleType, Rational>& other)

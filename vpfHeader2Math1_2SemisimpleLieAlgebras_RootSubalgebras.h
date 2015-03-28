@@ -238,7 +238,7 @@ public:
   bool RootsDefineASubalgebra(Vectors<Rational>& theRoots);
   void GenerateKmodMultTable(List<List<List<int> > >& output, List<int>& oppositeKmods, GlobalVariables* theGlobalVariables);
   void KmodTimesKmod(int index1, int index2, List<int>& oppositeKmods, List<int>& output);
-  void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexRootSAinContainer, GlobalVariables& theGlobalVariables);
+  void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexRootSAinContainer, GlobalVariables* theGlobalVariables);
   void ComputeDynkinDiagramKandCentralizer();
   bool CheckRankInequality()const;
   bool ComputeEssentialsIfNew();
@@ -411,14 +411,17 @@ public:
   void ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output)const;
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs
   (bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output)const;
-  void ComputePrimalModuleDecomposition(Vectors<Rational>& positiveRootsContainingRegularSA, int dimensionContainingRegularSA, List<int>& outputHighestWeights, List<int>& outputMultiplicitiesHighestWeights, List<int>& outputWeightSpaceDimensions, GlobalVariables& theGlobalVariables);
-  void ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables& theGlobalVariables);
-  void ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables& theGlobalVariables);
+  void ComputePrimalModuleDecomposition
+  (Vectors<Rational>& positiveRootsContainingRegularSA, int dimensionContainingRegularSA, List<int>& outputHighestWeights, List<int>& outputMultiplicitiesHighestWeights,
+   List<int>& outputWeightSpaceDimensions, GlobalVariables* theGlobalVariables);
+  void ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables* theGlobalVariables);
+  void ComputeModuleDecompositionOfMinimalContainingRegularSAs
+  (SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables* theGlobalVariables);
   bool ModuleDecompositionFitsInto(const slTwoSubalgebra& other)const;
   static bool ModuleDecompositionFitsInto
   (const List<int>& highestWeightsLeft, const List<int>& multiplicitiesHighestWeightsLeft,
    const List<int>& highestWeightsRight, const List<int>& multiplicitiesHighestWeightsRight);
-  void MakeReportPrecomputations(GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra);
+  void MakeReportPrecomputations(GlobalVariables* theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra);
   //the below is outdated, must be deleted as soon as equivalent code is written.
   void ComputeDynkinsEpsilon(WeylGroup& theWeyl);
   void ToHTML(std::string& filePath);
@@ -472,7 +475,7 @@ public:
   { this->CheckForCorrectInitializationCrashIfNot();
     return *this->owner;
   }
-  void ComputeModuleDecompositionsOfAmbientLieAlgebra(GlobalVariables& theGlobalVariables);
+  void ComputeModuleDecompositionsOfAmbientLieAlgebra(GlobalVariables* theGlobalVariables);
   void reset(SemisimpleLieAlgebra& inputOwners);
   void ComputeDebugStringCurrent();
   bool ContainsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex);

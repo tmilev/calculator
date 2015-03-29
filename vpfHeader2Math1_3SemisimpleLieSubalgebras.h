@@ -293,6 +293,7 @@ public:
 //  List<HashedList<ElementWeylGroup<WeylGroup> > > theOrbitGeneratingElts;
   List<bool> theOrbitsAreComputed;
   std::string comments;
+  std::string fileNameToLogComments;
 
   //current computation state:
   // state that gets stored to hd:

@@ -626,6 +626,15 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasInit()
   this->CheckConsistency();
   if (this->owneR==0)
     crash << "<hr>Owner of semisimple subalgebras is zero" << crash;
+  if (this->theGlobalVariables!=0)
+  { this->fileNameToLogComments=this->theGlobalVariables->PhysicalPathOutputFolder+ "LogFileComments_"
+    + CGI::CleanUpForFileNameUse( this->owneR->theWeyl.theDynkinType.ToString()) + ".html";
+    std::fstream LogFile;
+    if (!FileOperations::OpenFileCreateIfNotPresent(LogFile, this->fileNameToLogComments, true, false, false))
+      crash << "Failed to open/create log file " << this->fileNameToLogComments
+      << ". This is not fatal but I am crashing to let you know. ";
+    LogFile.close();
+  }
   this->ComputeSl2sInitOrbitsForComputationOnDemand();
   this->currentSubalgebraChain.SetExpectedSize(this->owneR->GetRank()+2);
   this->currentSubalgebraChain.SetSize(0);
@@ -903,6 +912,7 @@ bool SemisimpleSubalgebras::GetCentralizerTypeIfComputableAndKnown(const DynkinT
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::GetCentralizerTypeIfComputableAndKnown");
   //this function is rudimentary and fails to return a good result in many cases when
   // a result is actually computable. This needs to be improved.
+//  stOutput << "<br>Running GetCentralizerTypeIfComputableAndKnown with input: " << input.ToString();
   if (!input.IsSimple())
     return false;
   int theIndex=-1;
@@ -914,6 +924,7 @@ bool SemisimpleSubalgebras::GetCentralizerTypeIfComputableAndKnown(const DynkinT
   if (theIndex==-1)
     return false;
   output=this->theSl2s.theRootSAs.theSubalgebras[theIndex].theCentralizerDynkinType;
+//  stOutput << "<br>GetCentralizerTypeIfComputableAndKnown exited with success, output is: " << output.ToString();
   return true;
 }
 
@@ -979,6 +990,7 @@ void DynkinType::GetDynkinIndicesSl2Subalgebras
 
 bool SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization");
+//  stOutput << "Running SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization:";
   int stackIndex=this->currentSubalgebraChain.size-1;
   int typeIndex=this->currentNumLargerTypesExplored[stackIndex];
   if (typeIndex>=this->currentPossibleLargerDynkinTypes[stackIndex].size)
@@ -986,7 +998,7 @@ bool SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization()
   DynkinType& currentType=this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex];
   Rational candidatePrincipalLength=currentType.GetPrincipalSlTwoCSInverseScale()*2;
 //  stOutput << "<br>Candidate principal length is: " << candidatePrincipalLength.ToString()
-//  << " h element lengths are: " << this->theOrbitHelementLengths.ToString();
+//  << ". <br>Its h element lengths are: " << this->theOrbitHelementLengths.ToString();
   if (!this->theOrbitHelementLengths.Contains(candidatePrincipalLength))
     return false;
   SelectionWithDifferentMaxMultiplicities simpleSummandSelection;
@@ -999,10 +1011,13 @@ bool SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization()
   DynkinType currentComplementSummand, centralizerOfComplementOfCurrentSummand, currentSummand;
   HashedList<Rational> theDynkinIndicesCurrentSummand, theDynkinIndicesCentralizerComplementCurrentSummand;
   while (simpleSummandSelection.IncrementReturnFalseIfPastLast())
-  { currentComplementSummand.MakeZero();
-    for (int i=0; i<simpleSummandSelection.elements.size; i++)
-      currentComplementSummand.AddMonomial
-      (currentType[simpleSummandSelection.elements[i]], currentType.theCoeffs[simpleSummandSelection.elements[i]]);
+  { //stOutput << "<br>simpleSummandSelection: " << simpleSummandSelection.ToString();
+    currentComplementSummand.MakeZero();
+    for (int i=0; i<simpleSummandSelection.Multiplicities.size; i++)
+      currentComplementSummand.AddMonomial(currentType[i], simpleSummandSelection.Multiplicities[i]);
+    //stOutput << "<br>getting centralizer type if computable and known: currentComplementSummand is: "
+    //<< simpleSummandSelection.ToString() << ". <br> centralizerOfComplementOfCurrentSummand is: "
+    //<< centralizerOfComplementOfCurrentSummand.ToString() << ". ";
     if (this->GetCentralizerTypeIfComputableAndKnown(currentComplementSummand, centralizerOfComplementOfCurrentSummand))
     { currentSummand=currentType-currentComplementSummand;
       currentSummand.GetDynkinIndicesSl2Subalgebras
@@ -1019,13 +1034,18 @@ bool SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization()
         << " has complement summand " << currentComplementSummand.ToString() << ". "
         << " Then I computed the latter complement summand has centralizer "
         << centralizerOfComplementOfCurrentSummand.ToString() << ". "
-        << "Then I computed the absolute Dynkin indices of the centralizer's sl(2)-subalgebras, namely "
+        << "Then I computed the absolute Dynkin indices of the centralizer's sl(2)-subalgebras, namely:<br> "
         << theDynkinIndicesCentralizerComplementCurrentSummand.ToStringCommaDelimited()
         << ". If the type was realizable, those would have to contain "
         << " the absolute Dynkin indices of sl(2) subalgebras of the original summand. However, that is not the case."
-        << " The absolute Dynkin indices of the sl(2) subalgebras of the original summand I computed to be "
+        << " The absolute Dynkin indices of the sl(2) subalgebras of the original summand I computed to be:<br> "
         << theDynkinIndicesCurrentSummand.ToStringCommaDelimited() << ". ";
         this->comments+=reportStream.str();
+        std::fstream theLogFile;
+        if (!FileOperations::OpenFileCreateIfNotPresent(theLogFile, this->fileNameToLogComments, true, false, false))
+          crash << "Failed to open log file: " << this->fileNameToLogComments << ". This is not fatal but "
+          << " I am crashing to let you know. " << crash;
+        theLogFile << reportStream.str();
         stOutput << reportStream.str();
         return false;
       }

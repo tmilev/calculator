@@ -1159,7 +1159,7 @@ void GroebnerBasisComputation<coefficient>::SolveWhenSystemHasSingleMonomial
         out << "The system has the single monomial: " << theMon.ToString(&this->theFormat)
         << "<br>Trying case:<br>" << tempMon.ToString(&this->theFormat) << "=0;";
         theReport1.Report(out.str());
-        stOutput << out.str();
+//        stOutput << out.str();
       }
       PolynomialSubstitution<coefficient> theSub;
       theSub.MakeIdSubstitution(this->systemSolution.GetElement().size);

@@ -362,19 +362,20 @@ public:
     return output;
   }
 /////////////////////////////////////////////
-  List<int> highestWeights;
-  List<int> multiplicitiesHighestWeights;
-  List<int> weightSpaceDimensions;
+  charSSAlgMod<Rational> moduleDecompositionAmbientSA;
+  List<int> moduleDimensions;
   ElementSemisimpleLieAlgebra<Rational> theH, theE, theF;
   ElementSemisimpleLieAlgebra<Rational> bufferHbracketE, bufferHbracketF, bufferEbracketF;
   SemisimpleLieAlgebra* owneR;
   SltwoSubalgebras* container;
   Rational LengthHsquared;
   int indexInContainer;
+  int dimensionCentralizer;
+  DynkinType CentralizerTypeIfKnown;
+  bool flagCentralizerTypeComputed;
   List<int> IndicesContainingRootSAs;
-  List<int> IndicesMinimalContainingRootSA;
-  List<List<int> > HighestWeightsDecompositionMinimalContainingRootSA;
-  List<List<int> > MultiplicitiesDecompositionMinimalContainingRootSA;
+  List<int> IndicesMinimalContainingRootSAs;
+  List<charSSAlgMod<Rational> > moduleDecompositionMinimalContainingRootSAs;
   Vectors<Rational> preferredAmbientSimpleBasis;
   Vector<Rational> hCharacteristic;
   Vector<Rational> hElementCorrespondingToCharacteristic;
@@ -388,7 +389,11 @@ public:
   bool DifferenceTwoHsimpleRootsIsARoot;
   int DynkinsEpsilon;
   bool flagDeallocated;
-  slTwoSubalgebra(): owneR(0), container(0), indexInContainer(-1), flagDeallocated(false){}
+  void init();
+  slTwoSubalgebra()
+  { this->flagDeallocated=false;
+    this->init();
+  }
   ~slTwoSubalgebra()
   { this->flagDeallocated=true;
   }
@@ -408,19 +413,21 @@ public:
   std::string ToString(FormatExpressions* theFormat=0)const;
   void GetInvolvedPosGenerators(List<ChevalleyGenerator>& output);
   void GetInvolvedNegGenerators(List<ChevalleyGenerator>& output);
-  void ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output)const;
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs
   (bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output)const;
-  void ComputePrimalModuleDecomposition
-  (Vectors<Rational>& positiveRootsContainingRegularSA, int dimensionContainingRegularSA, List<int>& outputHighestWeights, List<int>& outputMultiplicitiesHighestWeights,
-   List<int>& outputWeightSpaceDimensions, GlobalVariables* theGlobalVariables);
+  void ComputeModuleDecomposition
+  (Vectors<Rational>& positiveRootsContainingRegularSA, int dimensionContainingRegularSA,
+   charSSAlgMod<Rational>& outputHWs, List<int>& outputModuleDimensions,
+   GlobalVariables* theGlobalVariables)
+   ;
   void ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables* theGlobalVariables);
+  bool AttemptToComputeCentralizer(GlobalVariables* theGlobalVariables);
   void ComputeModuleDecompositionOfMinimalContainingRegularSAs
   (SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables* theGlobalVariables);
   bool ModuleDecompositionFitsInto(const slTwoSubalgebra& other)const;
-  static bool ModuleDecompositionFitsInto
-  (const List<int>& highestWeightsLeft, const List<int>& multiplicitiesHighestWeightsLeft,
-   const List<int>& highestWeightsRight, const List<int>& multiplicitiesHighestWeightsRight);
+  static bool ModuleDecompositionLeftFitsIntoRight
+  (const charSSAlgMod<Rational>& moduleDecompoLeft,
+   const charSSAlgMod<Rational>& moduleDecompoRight);
   void MakeReportPrecomputations(GlobalVariables* theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra);
   //the below is outdated, must be deleted as soon as equivalent code is written.
   void ComputeDynkinsEpsilon(WeylGroup& theWeyl);

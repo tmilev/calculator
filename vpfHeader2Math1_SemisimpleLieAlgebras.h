@@ -326,6 +326,11 @@ class charSSAlgMod : public MonomialCollection<Weight<coefficient>, coefficient>
   std::string MultiplyBy(const charSSAlgMod& other, GlobalVariables& theGlobalVariables);
   std::string operator*=(const charSSAlgMod& other);
   std::string operator*=(const Weight<Rational>& other);
+  charSSAlgMod<coefficient> operator-(const charSSAlgMod<coefficient>& right)const
+  { charSSAlgMod<coefficient> output=*this;
+    output-=right;
+    return output;
+  }
   void operator*=(const coefficient& other)
   { this->::MonomialCollection<Weight<coefficient>, coefficient>::operator*=(other);
   }

@@ -372,7 +372,9 @@ public:
   int indexInContainer;
   int dimensionCentralizer;
   DynkinType CentralizerTypeIfKnown;
+  Rational dimCentralizerToralPart;
   bool flagCentralizerTypeComputed;
+  bool flagCentralizerIsRegular;
   List<int> IndicesContainingRootSAs;
   List<int> IndicesMinimalContainingRootSAs;
   List<charSSAlgMod<Rational> > moduleDecompositionMinimalContainingRootSAs;
@@ -382,7 +384,7 @@ public:
   Vectors<Rational> hCommutingRootSpaces;
   Vectors<Rational> RootsWithScalar2WithH;
   DynkinDiagramRootSubalgebra DiagramM;
-  DynkinDiagramRootSubalgebra CentralizerDiagram;
+//  DynkinDiagramRootSubalgebra CentralizerDiagram;
   PolynomialSubstitution<Rational> theSystemToBeSolved;
   Matrix<Rational> theSystemMatrixForm;
   Matrix<Rational> theSystemColumnVector;
@@ -488,7 +490,7 @@ public:
   bool ContainsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex);
   bool ContainsSl2WithGivenHCharacteristic(Vector<Rational>& theHCharacteristic, int* outputIndex);
   void ToHTML(FormatExpressions* theFormat=0, GlobalVariables* theGlobalVariables=0);
-  std::string ElementToStringNoGenerators(FormatExpressions* theFormat=0);
+  std::string ToStringSummary(FormatExpressions* theFormat=0);
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs(std::string& output, bool useLatex, bool useHtml);
   std::string ToString(FormatExpressions* theFormat=0);
 };

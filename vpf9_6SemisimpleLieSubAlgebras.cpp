@@ -3474,6 +3474,7 @@ void slTwoSubalgebra::init()
   this->container=0;
   this->indexInContainer=-1;
   this->flagCentralizerTypeComputed=false;
+  this->flagCentralizerIsRegular=false;
   this->dimensionCentralizer=-1;
 }
 
@@ -3690,7 +3691,6 @@ void SltwoSubalgebras::ComputeModuleDecompositionsOfAmbientLieAlgebra(GlobalVari
   this->GrandMasterConsistencyCheck();
 }
 
-
 bool SltwoSubalgebras::ContainsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex)
 { if (outputIndex!=0)
     *outputIndex=-1;
@@ -3720,15 +3720,44 @@ bool SltwoSubalgebras::ContainsSl2WithGivenHCharacteristic(Vector<Rational>& the
 
 bool slTwoSubalgebra::AttemptToComputeCentralizer(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("slTwoSubalgebra::AttemptToComputeCentralizer");
-  Vector<Rational> zeroWeight;
-  zeroWeight.MakeZero(1);
+  this->flagCentralizerIsRegular=false;
+  this->flagCentralizerTypeComputed=false;
+  Weight<Rational> zeroWeight;
+  zeroWeight.weightFundamentalCoordS.MakeZero(1);
+  if (!this->moduleDecompositionAmbientSA.GetMonomialCoefficient(zeroWeight).IsSmallInteger
+      (&this->dimensionCentralizer))
+    crash << "Dimension of centralizer of sl(2) subalgebra is not a small integer. This shouldn't happen. " << crash;
   for (int i=0; i<this->IndicesMinimalContainingRootSAs.size; i++)
   { rootSubalgebra& currentMinimalContainer=
     this->container->theRootSAs.theSubalgebras[this->IndicesMinimalContainingRootSAs[i]];
+    Rational dimOfSSpartOfCentralizerOfRootSA=
+    currentMinimalContainer.theCentralizerDynkinType.GetRankRational()+
+    currentMinimalContainer.theCentralizerDynkinType.GetRootSystemSize();
+//    stOutput << "<hr>Current minimal container: " << currentMinimalContainer.theDynkinType.ToString()
+//    << "<br> with centralizer: " << currentMinimalContainer.theCentralizerDynkinType.ToString()
+//    << ". <br>dimOfSSpartOfCentralizerOfRootSA is: " << dimOfSSpartOfCentralizerOfRootSA.ToString()
+//    << ". ";
+    this->dimCentralizerToralPart=
+    this->owneR->GetRank()-
+    currentMinimalContainer.theDynkinType.GetRank()-
+    currentMinimalContainer.theCentralizerDynkinType.GetRank();
+//    stOutput << "<br>this->dimCentralizerToralPart is: " << this->dimCentralizerToralPart.ToString();
 
+    Rational totalCentalizerCandidateDim=dimOfSSpartOfCentralizerOfRootSA+this->dimCentralizerToralPart;
+//    stOutput << "<br>totalCentalizerCandidateDim is: " << totalCentalizerCandidateDim.ToString()
+//    << "<br>this->dimensionCentralizer is: " << this->dimensionCentralizer;
+
+    if (totalCentalizerCandidateDim==this->dimensionCentralizer)
+    { //stOutput << "<br>Centralizer computed successfully to be: "
+      //<< currentMinimalContainer.theCentralizerDynkinType.ToString();
+      this->flagCentralizerIsRegular=true;
+      this->flagCentralizerTypeComputed=true;
+      this->CentralizerTypeIfKnown=currentMinimalContainer.theCentralizerDynkinType;
+      return true;
+    }
 
   }
-
+  return false;
 }
 
 void slTwoSubalgebra::ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables* theGlobalVariables)
@@ -3868,8 +3897,8 @@ void SltwoSubalgebras::ElementToStringModuleDecompositionMinimalContainingRegula
   output=out.str();
 }
 
-std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* theFormat)
-{ MacroRegisterFunctionWithName("SltwoSubalgebras::ElementToStringNoGenerators");
+std::string SltwoSubalgebras::ToStringSummary(FormatExpressions* theFormat)
+{ MacroRegisterFunctionWithName("SltwoSubalgebras::ToStringSummary");
   std::string tempS; std::stringstream out;
   std::string tooltipHchar="Let h be in the Cartan s.a. Let \\alpha_1, ..., \\alpha_n be simple root w.r.t. h. Then the h-characteristic is the n-tuple (\\alpha_1(h), ..., \\alpha_n(h))";
   std::string tooltipVDecomposition="The sl(2) submodules of g are parametrized by their highest weight w.r.t. h. V_l is l+1 dimensional";
@@ -3919,7 +3948,10 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
   if(useHtml)
     out << "<br><br><table><tr><td style=\"padding-right:20px\">" << CGI::ElementToStringTooltip("Characteristic", tooltipHchar)
     << "</td><td align=\"center\" title=\"" << tooltipHvalue << "\"> h</td><td style=\"padding-left:20px\" title=\""
-    << tooltipVDecomposition << "\"> Decomposition of ambient Lie algebra: \\psi stands for the fundamental sl(2)-weight. </td><td>The square of the length of the weight dual to h.</td>"
+    << tooltipVDecomposition << "\"> Decomposition of ambient Lie algebra: \\psi stands for the fundamental sl(2)-weight. </td>"
+    << "<td>Centralizer dimension</td>"
+    << "<td>Centralizer type if known</td>"
+    << "<td>The square of the length of the weight dual to h.</td>"
     << "<td>Dynkin index </td><td>Minimal containing regular semisimple SAs</td><td title=\""
     << tooltipContainingRegular << "\">Containing regular semisimple SAs in which the sl(2) has no centralizer</td> </tr>";
   for (int i=0; i<this->size; i++)
@@ -3931,7 +3963,8 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
       out << "</a></td><td title=\"" << tooltipHvalue << "\">";
     out << theSl2.theH.GetCartanPart().ToString();
     if(!this->GetOwnerWeyl().IsDominantWeight(theSl2.theH.GetCartanPart()))
-      out << "<b>This is wrong!!!!!!!!!!!!! The h is not dual to a dominant weight... </b>";
+      out << "<b>Something has gone very wrong! The h is not dual to a dominant weight. This shouldn't happen: "
+      << "this is either a programming or mathematical error. </b>";
     if (useHtml)
       out << "</td><td style=\"padding-left:20px\" title=\"" << tooltipVDecomposition << "\">";
     FormatExpressions formatCharacter;
@@ -3939,7 +3972,15 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
     out << CGI::GetMathMouseHover((theSl2.moduleDecompositionAmbientSA.ToString(&formatCharacter)))
     << "\n<br>\n";
     if (useHtml)
-      out << "</td><td>";
+      out << "</td>";
+    out << "<td>" << theSl2.dimensionCentralizer << "</td>";
+    if (theSl2.flagCentralizerTypeComputed)
+    { out << "<td> " << CGI::GetMathSpanPure(theSl2.CentralizerTypeIfKnown.ToString()) << "</td>";
+    }
+    else
+      out << "<td> not computed</td>";
+    if (useHtml)
+      out << "<td>";
     out << theSl2.LengthHsquared;
     if (useHtml)
       out << "</td><td>";
@@ -3983,7 +4024,7 @@ std::string SltwoSubalgebras::ToString(FormatExpressions* theFormat)
   }
   if(useHtml)
     out << "<br>";
-  out << this->ElementToStringNoGenerators(theFormat);
+  out << this->ToStringSummary(theFormat);
   out << body.str();
   return out.str();
 }

@@ -493,8 +493,10 @@ void rootSubalgebra::ComputeHighestVectorsHighestWeights()
 { MacroRegisterFunctionWithName("rootSubalgebra::ComputeHighestVectorsHighestWeights");
   this->HighestVectors.SetExpectedSize(this->GetOwnerSSalg().GetNumGenerators());
   this->HighestWeightsPrimalSimple.SetExpectedSize(this->GetOwnerSSalg().GetNumGenerators());
+  this->HighestWeightsNONPrimalFundamental.SetExpectedSize(this->GetOwnerSSalg().GetNumGenerators());
   this->HighestWeightsPrimalSimple.SetSize(0);
   this->HighestVectors.SetSize(0);
+  this->HighestWeightsNONPrimalFundamental.SetSize(0);
   ElementSemisimpleLieAlgebra<Rational> currentElt;
   List<Vector<Rational> >& ambientRootSystem=this->GetAmbientWeyl().RootSystem;
   for (int i=0; i<ambientRootSystem.size; i++)
@@ -503,6 +505,7 @@ void rootSubalgebra::ComputeHighestVectorsHighestWeights()
       this->HighestVectors.AddOnTop(currentElt);
       this->HighestWeightsPrimalSimple.AddOnTop(ambientRootSystem[i]);
       this->HighestWeightsNONPrimalFundamental.AddOnTop(this->GetFundamentalCoordsOverKss(ambientRootSystem[i]));
+//      stOutput << "Accounted highest weight non-primal: " << this->HighestWeightsNONPrimalFundamental.LastObject()->ToString();
     }
   Vectors<Rational> cartanCentralizer;
   this->SimpleBasisK.GetOrthogonalComplement(cartanCentralizer, &this->GetAmbientWeyl().CartanSymmetric);
@@ -601,6 +604,10 @@ void rootSubalgebra::ComputeModuleDecompo()
   Weight<Rational> theM;
   for (int i=0; i<this->Modules.size; i++)
   { theM.weightFundamentalCoordS=this->HighestWeightsNONPrimalFundamental[i];
+//    stOutput << "<br>weightFundamentalCoords equals: " << theM.ToString()
+//    << " and this->HighestWeightsNONPrimalFundamental[i] equals: "
+//    << this->HighestWeightsNONPrimalFundamental[i].ToString();
+
     this->ModuleDecompoHighestWeights.AddMonomial(theM, 1);
   }
 }

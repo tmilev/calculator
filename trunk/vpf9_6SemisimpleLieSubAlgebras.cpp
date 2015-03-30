@@ -3330,26 +3330,20 @@ void slTwoSubalgebra::ElementToStringModuleDecompositionMinimalContainingRegular
     out << "$";
   if (useHtml)
   { out << "<table><tr><td align=\"center\">Char.</td>";
-    for (int i=0; i<this->IndicesMinimalContainingRootSA.size; i++)
-    { rootSubalgebra& theSA= owner.theRootSAs.theSubalgebras[this->IndicesMinimalContainingRootSA[i]];
+    for (int i=0; i<this->IndicesMinimalContainingRootSAs.size; i++)
+    { rootSubalgebra& theSA= owner.theRootSAs.theSubalgebras[this->IndicesMinimalContainingRootSAs[i]];
       out << "<td align=\"center\">Decomp. "
       << theSA.theDynkinDiagram.ToString() << "</td>";
     }
     out << "</tr>\n";
   }
   out << "<tr><td align=\"center\"> " << this->hCharacteristic.ToString() << "</td>";
-  for (int k=0; k<this->IndicesMinimalContainingRootSA.size; k++)
-  { rootSubalgebra& theSA= owner.theRootSAs.theSubalgebras[this->IndicesMinimalContainingRootSA[k]];
+  for (int k=0; k<this->IndicesMinimalContainingRootSAs.size; k++)
+  { rootSubalgebra& theSA= owner.theRootSAs.theSubalgebras[this->IndicesMinimalContainingRootSAs[k]];
     tempS=theSA.theDynkinDiagram.ToString();
     if (useHtml)
       out << "<td align=\"center\">";
-    for (int i=0; i<this->HighestWeightsDecompositionMinimalContainingRootSA[k].size; i++)
-    { if (this->MultiplicitiesDecompositionMinimalContainingRootSA[k][i]>1)
-        out << this->MultiplicitiesDecompositionMinimalContainingRootSA[k][i];
-      out << "V_{"<<this->HighestWeightsDecompositionMinimalContainingRootSA[k][i] << "}";
-      if (i!=this->HighestWeightsDecompositionMinimalContainingRootSA[k].size-1)
-        out << "+";
-    }
+    out << this->moduleDecompositionMinimalContainingRootSAs[k].ToString();
     if (useHtml)
       out << "</td>";
     out << "\n";
@@ -3436,8 +3430,9 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
   if (useHtml)
     out << "<br>";
   out << "\nsl(2)-module decomposition of the ambient Lie algebra: ";
-  this->ElementToStringModuleDecomposition(useLatex, useHtml, tempS);
-  out << CGI::GetMathMouseHover(tempS) << "\n<br>\n";
+  FormatExpressions formatCharacter;
+  formatCharacter.vectorSpaceEiBasisNames.AddOnTop("\\psi");
+  out << CGI::GetMathMouseHover((this->moduleDecompositionAmbientSA.ToString(&formatCharacter))) << "\n<br>\n";
   out << "\nBelow is one possible realization of the sl(2) subalgebra.";
   if (useHtml)
     out << "\n<br>\n";
@@ -3462,16 +3457,24 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
   //out <<"\nSystem matrix form we try to solve:\n"<< tempS;
   //this->theSystemColumnVector.ToString(tempS);
   //out <<"\nColumn vector of the system:\n"<<tempS;
-  std::stringstream tempStreamActual;
-  tempStreamActual << "\\begin{array}{l}";
+  std::stringstream latexStreamActual;
+  latexStreamActual << "\\begin{array}{l}";
   for (int i=0; i<this->theSystemToBeSolved.size; i++)
-    tempStreamActual << this->theSystemToBeSolved[i].ToString(theFormat) << "~\\\\";
-  tempStreamActual << "\\end{array}";
+    latexStreamActual << this->theSystemToBeSolved[i].ToString(theFormat) << "~\\\\";
+  latexStreamActual << "\\end{array}";
   out << "\nThe polynomial system that corresponds to finding the h,e,f triple:\n";
   if (useHtml)
     out << "\n<br>\n";
-  out << CGI::GetMathMouseHover(tempStreamActual.str()) << "\n<br>\n";
+  out << CGI::GetMathMouseHover(latexStreamActual.str()) << "\n<br>\n";
   return out.str();
+}
+
+void slTwoSubalgebra::init()
+{ this->owneR=0;
+  this->container=0;
+  this->indexInContainer=-1;
+  this->flagCentralizerTypeComputed=false;
+  this->dimensionCentralizer=-1;
 }
 
 bool slTwoSubalgebra::CheckConsistency()const
@@ -3509,19 +3512,17 @@ void slTwoSubalgebra::ComputeDynkinsEpsilon(WeylGroup& theWeyl)
 }
 
 bool slTwoSubalgebra::ModuleDecompositionFitsInto(const slTwoSubalgebra& other)const
-{ return this->ModuleDecompositionFitsInto(this->highestWeights, this->multiplicitiesHighestWeights, other.highestWeights, other.multiplicitiesHighestWeights);
+{ return this->ModuleDecompositionLeftFitsIntoRight
+  (this->moduleDecompositionAmbientSA, other.moduleDecompositionAmbientSA);
 }
 
-bool slTwoSubalgebra::ModuleDecompositionFitsInto
-(const List<int>& highestWeightsLeft, const List<int>& multiplicitiesHighestWeightsLeft, const List<int>& highestWeightsRight, const List<int>& multiplicitiesHighestWeightsRight)
-{ for (int i=0; i<highestWeightsLeft.size; i++)
-  { int theIndex= highestWeightsRight.GetIndex(highestWeightsLeft[i]);
-    if (theIndex==-1)
+bool slTwoSubalgebra::ModuleDecompositionLeftFitsIntoRight
+(const charSSAlgMod<Rational>& moduleDecompoLeft, const charSSAlgMod<Rational>& moduleDecompoRight)
+{ MacroRegisterFunctionWithName("slTwoSubalgebra::ModuleDecompositionLeftFitsIntoRight");
+  charSSAlgMod<Rational> moduleDifference= moduleDecompoRight-moduleDecompoLeft;
+  for (int i=0; i<moduleDifference.size(); i++)
+    if (moduleDifference.theCoeffs[i]<0)
       return false;
-    else
-      if (multiplicitiesHighestWeightsLeft[i]>multiplicitiesHighestWeightsRight[theIndex])
-        return false;
-  }
   return true;
 }
 
@@ -3591,8 +3592,8 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras
   inputOwner.CheckConsistency();
   for (int i=0; i<output.size; i++)
   { //slTwoSubalgebra& theSl2= output.GetElement(i);
-    output.GetElement(i).IndicesMinimalContainingRootSA.Reserve(output.GetElement(i).IndicesContainingRootSAs.size);
-    output.GetElement(i).IndicesMinimalContainingRootSA.size=0;
+    output.GetElement(i).IndicesMinimalContainingRootSAs.Reserve(output.GetElement(i).IndicesContainingRootSAs.size);
+    output.GetElement(i).IndicesMinimalContainingRootSAs.size=0;
     for (int j=0; j<output.GetElement(i).IndicesContainingRootSAs.size; j++)
     { bool isMinimalContaining=true;
 //      rootSubalgebra& currentRootSA = output.theRootSAs.TheObjects[];
@@ -3604,7 +3605,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras
         }
       }
       if (isMinimalContaining)
-        output.GetElement(i).IndicesMinimalContainingRootSA.AddOnTopNoRepetition(output.GetElement(i).IndicesContainingRootSAs[j]);
+        output.GetElement(i).IndicesMinimalContainingRootSAs.AddOnTopNoRepetition(output.GetElement(i).IndicesContainingRootSAs[j]);
     }
 //    stOutput << "<br>got to ere";
     output.CheckConsistency();
@@ -3717,33 +3718,37 @@ bool SltwoSubalgebras::ContainsSl2WithGivenHCharacteristic(Vector<Rational>& the
   return false;
 }
 
-void slTwoSubalgebra::ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output)const
-{ std::stringstream out;
-  for (int i=0; i<this->highestWeights.size; i++)
-  { if (this->multiplicitiesHighestWeights[i]>1)
-      out << this->multiplicitiesHighestWeights[i];
-    out << "V_{" << this->highestWeights[i] << "}";
-    if (i!=this->highestWeights.size-1)
-      out << "+";
+bool slTwoSubalgebra::AttemptToComputeCentralizer(GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("slTwoSubalgebra::AttemptToComputeCentralizer");
+  Vector<Rational> zeroWeight;
+  zeroWeight.MakeZero(1);
+  for (int i=0; i<this->IndicesMinimalContainingRootSAs.size; i++)
+  { rootSubalgebra& currentMinimalContainer=
+    this->container->theRootSAs.theSubalgebras[this->IndicesMinimalContainingRootSAs[i]];
+
+
   }
-  output=CGI::GetMathMouseHover(out.str());
+
 }
 
 void slTwoSubalgebra::ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables* theGlobalVariables)
 { this->CheckConsistency();
-  this->ComputePrimalModuleDecomposition(this->GetOwnerWeyl().RootsOfBorel, this->GetOwnerWeyl().CartanSymmetric.NumRows, this->highestWeights, this->multiplicitiesHighestWeights, this->weightSpaceDimensions, theGlobalVariables);
+  this->ComputeModuleDecomposition
+  (this->GetOwnerWeyl().RootsOfBorel, this->GetOwnerWeyl().CartanSymmetric.NumRows,
+   this->moduleDecompositionAmbientSA, this->moduleDimensions, theGlobalVariables);
+   this->AttemptToComputeCentralizer(theGlobalVariables);
 }
 
 void slTwoSubalgebra::ComputeModuleDecompositionOfMinimalContainingRegularSAs
 (SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables* theGlobalVariables)
-{ this->MultiplicitiesDecompositionMinimalContainingRootSA.SetSize(this->IndicesMinimalContainingRootSA.size);
-  this->HighestWeightsDecompositionMinimalContainingRootSA.SetSize(this->IndicesMinimalContainingRootSA.size);
+{ MacroRegisterFunctionWithName("slTwoSubalgebra::ComputeModuleDecompositionOfMinimalContainingRegularSAs");
+  this->moduleDecompositionMinimalContainingRootSAs.SetSize(this->IndicesMinimalContainingRootSAs.size);
   List<int> buffer;
-  for (int i=0; i<this->IndicesMinimalContainingRootSA.size; i++)
-  { rootSubalgebra& theSA= owner.theRootSAs.theSubalgebras[this->IndicesMinimalContainingRootSA[i]];
-    this->ComputePrimalModuleDecomposition
-    (theSA.PositiveRootsK, theSA.SimpleBasisK.size, this->HighestWeightsDecompositionMinimalContainingRootSA[i],
-     this->MultiplicitiesDecompositionMinimalContainingRootSA[i], buffer, theGlobalVariables);
+  for (int i=0; i<this->IndicesMinimalContainingRootSAs.size; i++)
+  { rootSubalgebra& theSA= owner.theRootSAs.theSubalgebras[this->IndicesMinimalContainingRootSAs[i]];
+    this->ComputeModuleDecomposition
+    (theSA.PositiveRootsK, theSA.SimpleBasisK.size, this->moduleDecompositionMinimalContainingRootSAs[i],
+     buffer, theGlobalVariables);
   }
 }
 
@@ -3785,22 +3790,24 @@ void slTwoSubalgebra::MakeReportPrecomputations
 }
 
 //The below code is related to sl(2) subalgebras of simple Lie algebras
-void slTwoSubalgebra::ComputePrimalModuleDecomposition
-(Vectors<Rational>& positiveRootsContainingRegularSA, int dimensionContainingRegularSA, List<int>& outputHighestWeights,
- List<int>& outputMultiplicitiesHighestWeights, List<int>& outputWeightSpaceDimensions, GlobalVariables* theGlobalVariables)
+void slTwoSubalgebra::ComputeModuleDecomposition
+(Vectors<Rational>& positiveRootsContainingRegularSA, int dimensionContainingRegularSA,
+ charSSAlgMod<Rational>& outputHWs, List<int>& outputModuleDimensions,
+ GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("slTwoSubalgebra::ComputePrimalModuleDecomposition");
   this->CheckConsistency();
   positiveRootsContainingRegularSA.CheckConsistency();
   if (positiveRootsContainingRegularSA.size<=0)
     crash << "This is a programming error: positiveRootsContainingRegularSA has less than one element. " << crash;
   int IndexZeroWeight=positiveRootsContainingRegularSA.size*2;
-  outputWeightSpaceDimensions.initFillInObject(4*positiveRootsContainingRegularSA.size+1, 0);
-  outputWeightSpaceDimensions[IndexZeroWeight]=dimensionContainingRegularSA;
+  outputModuleDimensions.initFillInObject(4*positiveRootsContainingRegularSA.size+1, 0);
+  outputModuleDimensions[IndexZeroWeight]=dimensionContainingRegularSA;
   List<int> BufferHighestWeights;
   Rational tempRat;
   Vectors<Rational> coordsInPreferredSimpleBasis, tempRoots2;
   Matrix<Rational> tempMat;
-  positiveRootsContainingRegularSA.GetCoordsInBasis(this->preferredAmbientSimpleBasis, coordsInPreferredSimpleBasis, tempRoots2, tempMat);
+  positiveRootsContainingRegularSA.GetCoordsInBasis
+  (this->preferredAmbientSimpleBasis, coordsInPreferredSimpleBasis, tempRoots2, tempMat);
   for (int k=0; k<positiveRootsContainingRegularSA.size; k++)
   { tempRat=this->hCharacteristic.ScalarEuclidean(coordsInPreferredSimpleBasis[k]);
     if(tempRat.DenShort!=1)
@@ -3811,24 +3818,24 @@ void slTwoSubalgebra::ComputePrimalModuleDecomposition
       << ". The affected sl(2) subalgebra is " << this->ToString() << ". " << crash;
       break;
     }
-    outputWeightSpaceDimensions[IndexZeroWeight+tempRat.NumShort]++;
-    outputWeightSpaceDimensions[IndexZeroWeight-tempRat.NumShort]++;
+    outputModuleDimensions[IndexZeroWeight+tempRat.NumShort]++;
+    outputModuleDimensions[IndexZeroWeight-tempRat.NumShort]++;
   }
-  BufferHighestWeights=(outputWeightSpaceDimensions);
-  outputHighestWeights.Reserve(positiveRootsContainingRegularSA.size*2);
-  outputMultiplicitiesHighestWeights.Reserve(positiveRootsContainingRegularSA.size*2);
-  outputHighestWeights.size=0;
-  outputMultiplicitiesHighestWeights.size=0;
+  BufferHighestWeights=(outputModuleDimensions);
+  outputHWs.SetExpectedSize( positiveRootsContainingRegularSA.size*2);
+  outputHWs.MakeZero();
 //  this->hCharacteristic.ComputeDebugString();
 //  stOutput << "Starting weights:  " << BufferHighestWeights;
+  Weight<Rational> currentHW;
+  currentHW.weightFundamentalCoordS.MakeEi(1, 0);
   for (int j=BufferHighestWeights.size-1; j>=IndexZeroWeight; j--)
   { int topMult = BufferHighestWeights[j];
     if (topMult<0)
       crash << "This is a programming error: the sl(2)-module decomposition shows an sl(2)-module with highest weight "
       << topMult << " which is impossible. Here is the sl(2) subalgebra. " << this->ToString() << "." << crash;
     if (topMult>0)
-    { outputHighestWeights.AddOnTop(j-IndexZeroWeight);
-      outputMultiplicitiesHighestWeights.AddOnTop(topMult);
+    { currentHW.weightFundamentalCoordS[0]=j-IndexZeroWeight;
+      outputHWs.AddMonomial(currentHW, topMult);
       if (j!=IndexZeroWeight)
         BufferHighestWeights[IndexZeroWeight*2-j]-=topMult;
       for (int k=j-2; k>=IndexZeroWeight; k-=2)
@@ -3839,7 +3846,7 @@ void slTwoSubalgebra::ComputePrimalModuleDecomposition
         { crash.theCrashReport << " This is a programming error: an error check has failed. While trying to decompose with respect to  h-characteristic <br> "
           << this->hCharacteristic.ToString() << ". The positive root system of the containing root subalgebra is <br>" << positiveRootsContainingRegularSA.ToString()
           << ". <br>The preferred simple basis is <br>" << this->preferredAmbientSimpleBasis.ToString() << ". The coordinates relative to the preferred simple basis are<br>"
-          << coordsInPreferredSimpleBasis.ToString() << " The starting weights list is <br>" << outputWeightSpaceDimensions << ". "
+          << coordsInPreferredSimpleBasis.ToString() << " The starting weights list is <br>" << outputModuleDimensions << ". "
           << " I got that the root space of index  " <<  k+1 << " has negative dimension. Something is wrong. ";
           crash << crash;
         }
@@ -3874,7 +3881,6 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
   "The actual realization of h. The coordinates of h are given with respect to the fixed original simple basis. Note that the characteristic of h is given \
   *with respect to another basis* (namely, with respect to an h-positive simple basis). I will fix this in the future (email me if you want that done sooner).";
   bool useHtml=theFormat==0 ? true : theFormat->flagUseHTML;
-  bool useLatex=theFormat==0 ? true : theFormat->flagUseLatex;
   std::string physicalPath, displayPath;
   physicalPath=theFormat==0 ? "../" : theFormat->PathPhysicalCurrentOutputFolder;
   displayPath=theFormat==0 ? "../" : theFormat->PathDisplayCurrentOutputFolder;
@@ -3913,7 +3919,7 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
   if(useHtml)
     out << "<br><br><table><tr><td style=\"padding-right:20px\">" << CGI::ElementToStringTooltip("Characteristic", tooltipHchar)
     << "</td><td align=\"center\" title=\"" << tooltipHvalue << "\"> h</td><td style=\"padding-left:20px\" title=\""
-    << tooltipVDecomposition << "\"> Decomposition of ambient Lie algebra</td><td>The square of the length of the weight dual to h.</td>"
+    << tooltipVDecomposition << "\"> Decomposition of ambient Lie algebra: \\psi stands for the fundamental sl(2)-weight. </td><td>The square of the length of the weight dual to h.</td>"
     << "<td>Dynkin index </td><td>Minimal containing regular semisimple SAs</td><td title=\""
     << tooltipContainingRegular << "\">Containing regular semisimple SAs in which the sl(2) has no centralizer</td> </tr>";
   for (int i=0; i<this->size; i++)
@@ -3928,8 +3934,10 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
       out << "<b>This is wrong!!!!!!!!!!!!! The h is not dual to a dominant weight... </b>";
     if (useHtml)
       out << "</td><td style=\"padding-left:20px\" title=\"" << tooltipVDecomposition << "\">";
-    theSl2.ElementToStringModuleDecomposition(useLatex, useHtml, tempS);
-    out << tempS;
+    FormatExpressions formatCharacter;
+    formatCharacter.vectorSpaceEiBasisNames.AddOnTop("\\psi");
+    out << CGI::GetMathMouseHover((theSl2.moduleDecompositionAmbientSA.ToString(&formatCharacter)))
+    << "\n<br>\n";
     if (useHtml)
       out << "</td><td>";
     out << theSl2.LengthHsquared;
@@ -3938,9 +3946,9 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
     out << theSl2.LengthHsquared * this->GetOwnerWeyl().GetLongestRootLengthSquared()/4;
     if (useHtml)
       out << "</td><td>";
-    for (int j=0; j<theSl2.IndicesMinimalContainingRootSA.size; j++)
-    { rootSubalgebra& currentSA= this->theRootSAs.theSubalgebras[theSl2.IndicesMinimalContainingRootSA[j]];
-      out << "<a href=\"" << displayPath << "rootSubalgebra_" << theSl2.IndicesMinimalContainingRootSA[j]+1 << ".html\">"
+    for (int j=0; j<theSl2.IndicesMinimalContainingRootSAs.size; j++)
+    { rootSubalgebra& currentSA= this->theRootSAs.theSubalgebras[theSl2.IndicesMinimalContainingRootSAs[j]];
+      out << "<a href=\"" << displayPath << "rootSubalgebra_" << theSl2.IndicesMinimalContainingRootSAs[j]+1 << ".html\">"
       << currentSA.theDynkinDiagram.ToString() << "</a>" << ";  ";
     }
     if (useHtml)

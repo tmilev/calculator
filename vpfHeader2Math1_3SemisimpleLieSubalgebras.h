@@ -366,6 +366,9 @@ public:
   bool RemoveLastSubalgebra();
   bool GetCentralizerTypeIfComputableAndKnown(const DynkinType& input, DynkinType& output);
   bool CombinatorialCriteriaAllowRealization();
+  bool CentralizersComputedToHaveUnsuitableNilpotentOrbits();
+  bool CentralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits();
+
   bool ComputeCurrentHCandidates();
   void initHookUpPointers
   (SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField, HashedListReferences<SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,

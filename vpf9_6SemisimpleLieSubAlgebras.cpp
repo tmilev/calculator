@@ -988,19 +988,11 @@ void DynkinType::GetDynkinIndicesSl2Subalgebras
   }
 }
 
-bool SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization()
-{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization");
-//  stOutput << "Running SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization:";
+bool SemisimpleSubalgebras::CentralizersComputedToHaveUnsuitableNilpotentOrbits()
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::CentralizersComputedToHaveUnsuitableNilpotentOrbits");
   int stackIndex=this->currentSubalgebraChain.size-1;
   int typeIndex=this->currentNumLargerTypesExplored[stackIndex];
-  if (typeIndex>=this->currentPossibleLargerDynkinTypes[stackIndex].size)
-    return false;
   DynkinType& currentType=this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex];
-  Rational candidatePrincipalLength=currentType.GetPrincipalSlTwoCSInverseScale()*2;
-//  stOutput << "<br>Candidate principal length is: " << candidatePrincipalLength.ToString()
-//  << ". <br>Its h element lengths are: " << this->theOrbitHelementLengths.ToString();
-  if (!this->theOrbitHelementLengths.Contains(candidatePrincipalLength))
-    return false;
   SelectionWithDifferentMaxMultiplicities simpleSummandSelection;
   List<int> theMults;
   theMults.SetSize(currentType.size());
@@ -1047,10 +1039,36 @@ bool SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization()
           << " I am crashing to let you know. " << crash;
         theLogFile << reportStream.str();
         stOutput << reportStream.str();
-        return false;
+        return true;
       }
     }
   }
+  return false;
+}
+
+
+bool SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits()
+{
+
+}
+
+bool SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization()
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization");
+//  stOutput << "Running SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization:";
+  int stackIndex=this->currentSubalgebraChain.size-1;
+  int typeIndex=this->currentNumLargerTypesExplored[stackIndex];
+  if (typeIndex>=this->currentPossibleLargerDynkinTypes[stackIndex].size)
+    return false;
+  DynkinType& currentType=this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex];
+  Rational candidatePrincipalLength=currentType.GetPrincipalSlTwoCSInverseScale()*2;
+//  stOutput << "<br>Candidate principal length is: " << candidatePrincipalLength.ToString()
+//  << ". <br>Its h element lengths are: " << this->theOrbitHelementLengths.ToString();
+  if (!this->theOrbitHelementLengths.Contains(candidatePrincipalLength))
+    return false;
+  if (this->CentralizersComputedToHaveUnsuitableNilpotentOrbits())
+    return false;
+  if (this->CentralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits())
+    return false;
   return true;
 }
 
@@ -1881,7 +1899,8 @@ template <class MonomialCollectionTemplate>
 void MonomialCollection<templateMonomial, coefficient>::IntersectVectorSpaces
 (const List<MonomialCollectionTemplate>& vectorSpace1, const List<MonomialCollectionTemplate>& vectorSpace2, List<MonomialCollectionTemplate>& outputIntersection,
  HashedList<templateMonomial>* seedMonomials)
-{ List<MonomialCollectionTemplate> theVspaces=vectorSpace1;
+{ MacroRegisterFunctionWithName("MonomialCollection::IntersectVectorSpaces");
+  List<MonomialCollectionTemplate> theVspaces=vectorSpace1;
   List<MonomialCollectionTemplate> vectorSpace2eliminated=vectorSpace2;
   MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(vectorSpace2eliminated, 0, seedMonomials);
   MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(theVspaces, 0, seedMonomials);
@@ -1914,7 +1933,8 @@ void MonomialCollection<templateMonomial, coefficient>::IntersectVectorSpaces
 }
 
 bool CandidateSSSubalgebra::CheckModuleDimensions()const
-{ int totalDim=0;
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::CheckModuleDimensions");
+  int totalDim=0;
   for (int i=0; i<this->Modules.size; i++)
     for (int j=0; j<this->Modules[i].size; j++)
       totalDim+=this->Modules[i][j].size;

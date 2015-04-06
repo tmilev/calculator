@@ -6144,6 +6144,11 @@ public:
   void operator=(const MonomialCollection<DynkinSimpleType, Rational>& other)
   { this->::MonomialCollection<DynkinSimpleType, Rational>::operator=(other);
   }
+  DynkinType operator-(const MonomialCollection<DynkinSimpleType, Rational>& other)
+  { DynkinType result=*this;
+    result-=(other);
+    return result;
+  }
 };
 
 class DynkinDiagramRootSubalgebra

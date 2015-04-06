@@ -773,7 +773,10 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
     *this=this->owner->theSubalgebras[indexPrecomputed];
     this->indexIamInducedFrom=baseSubalgebra.indexInOwner;
     this->RootInjectionsFromInducer=theRootInjection;
-    return this->ComputeAndVerifyFromGeneratorsAndHs();
+    bool result=this->ComputeAndVerifyFromGeneratorsAndHs();
+    if (result)
+      this->ComputeCentralizerTypeFailureAllowed();
+    return result;
   }
   this->owner->RegisterPossibleCandidate(*this);
   this->CheckInitialization();
@@ -806,6 +809,8 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
     } else
       if (this->theWeylNonEmbeddeD.theDynkinType.ToString()==this->owner->theSubalgebras[i].theWeylNonEmbeddeD.theDynkinType.ToString())
         crash << crash;
+  if (this->flagSystemSolved)
+    this->ComputeCentralizerTypeFailureAllowed();
   return !this->flagSystemProvedToHaveNoSolution;
 }
 
@@ -1046,10 +1051,65 @@ bool SemisimpleSubalgebras::CentralizersComputedToHaveUnsuitableNilpotentOrbits(
   return false;
 }
 
+bool CandidateSSSubalgebra::ComputeCentralizerTypeFailureAllowed()
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeCentralizerTypeFailureAllowed");
+  if (this->GetRank()!=1)
+    return false;
+  Vector<Rational> theH= this->theHsScaledToActByTwo[0];
+  int indexSl2=-1;
+  bool mustBeTrue=  this->owner->theSl2s.ContainsSl2WithGivenH(theH, &indexSl2);
+  if (!mustBeTrue)
+    crash << "Something went very wrong: the semisimple subalgebra is of rank 1, hence an sl(2) subalgebra, yet "
+    << "I can't find its H element in the list of sl(2) subalgebras. " << crash;
+  const slTwoSubalgebra& theSl2=this->owner->theSl2s[indexSl2];
+  if (!theSl2.flagCentralizerTypeComputed)
+    return false;
+  this->theCentralizerType=theSl2.CentralizerTypeIfKnown;
+  return true;
+}
 
 bool SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits()
-{
-
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits");
+  if (!this->baseSubalgebra().flagCentralizerTypeIsComputed)
+    return false;
+  int stackIndex=this->currentSubalgebraChain.size-1;
+  int typeIndex=this->currentNumLargerTypesExplored[stackIndex];
+  DynkinType& currentType=this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex];
+  DynkinType complementNewSummandType=this->baseSubalgebra().theWeylNonEmbeddeD.theDynkinType;
+  DynkinType newSummandType=currentType-complementNewSummandType;
+  DynkinType centralizerComplementNewSummandType=
+  this->baseSubalgebra().theCentralizerType;
+  if (newSummandType.size()!=1)
+    return false;
+  HashedList<Rational> theDynkinIndicesNewSummand, DynkinIndicesTheyGotToFitIn;
+  centralizerComplementNewSummandType.GetDynkinIndicesSl2Subalgebras
+  (this->CachedDynkinIndicesSl2subalgebrasSimpleTypes, this->CachedDynkinSimpleTypesWithComputedSl2Subalgebras,
+   DynkinIndicesTheyGotToFitIn, this->theGlobalVariables);
+  newSummandType.GetDynkinIndicesSl2Subalgebras
+  (this->CachedDynkinIndicesSl2subalgebrasSimpleTypes, this->CachedDynkinSimpleTypesWithComputedSl2Subalgebras,
+   theDynkinIndicesNewSummand, this->theGlobalVariables);
+  if (!DynkinIndicesTheyGotToFitIn.Contains( theDynkinIndicesNewSummand))
+    return false;
+  std::fstream theLogFile;
+  if (!FileOperations::OpenFileCreateIfNotPresent(theLogFile, this->fileNameToLogComments, true, false, false))
+    crash << "Failed to open log file: " << this->fileNameToLogComments << ". This is not fatal but "
+    << " I am crashing to let you know. " << crash;
+  std::stringstream reportStream;
+  reportStream << "<hr>Attention: using non-tested optimization, please double-check by hand. "
+  << "I have just rejected type " << currentType.ToString() << " as non-realizable for the following reasons. "
+  << "The type's summand " << newSummandType.ToString()
+  << " has complement summand " << complementNewSummandType.ToString() << ". "
+  << " I computed the latter complement summand has centralizer "
+  << centralizerComplementNewSummandType.ToString() << ". "
+  << "Then I computed the absolute Dynkin indices of the centralizer's sl(2)-subalgebras, namely:<br> "
+  << DynkinIndicesTheyGotToFitIn.ToStringCommaDelimited()
+  << ". If the type was realizable, those would have to contain "
+  << " the absolute Dynkin indices of sl(2) subalgebras of the original summand. However, that is not the case:"
+  << " the absolute Dynkin indices of the sl(2) subalgebras of the original summand I computed to be:<br> "
+  << theDynkinIndicesNewSummand.ToStringCommaDelimited() << ". ";
+  theLogFile << reportStream.str();
+  stOutput << reportStream.str();
+  return true;
 }
 
 bool SemisimpleSubalgebras::CombinatorialCriteriaAllowRealization()
@@ -2053,6 +2113,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition(GlobalVariables* th
   simpleSubSystem=this->RootSystemCentralizerPrimalCoords;
   this->theCentralizerSubDiagram.ComputeDiagramTypeModifyInputRelative(simpleSubSystem, this->RootSystemCentralizerPrimalCoords, this->BilinearFormFundPrimal);
   this->theCentralizerSubDiagram.GetDynkinType(this->theCentralizerType);
+  this->flagCentralizerTypeIsComputed=true;
   this->ComputeCharsPrimalModules();
  // this->ComputeRatioKillingsByComponent();
 }
@@ -2071,6 +2132,7 @@ void CandidateSSSubalgebra::reset(SemisimpleSubalgebras* inputOwner)
   this->flagSystemProvedToHaveNoSolution=(false);
   this->flagSystemGroebnerBasisFound=(false);
   this->flagCentralizerIsWellChosen=(false);
+  this->flagCentralizerTypeIsComputed=false;
   this->flagUsedInducingSubalgebraRealization=true;
   this->totalNumUnknownsNoCentralizer=(0);
   this->totalNumUnknownsWithCentralizer=(0);
@@ -5058,34 +5120,36 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
     return;
   }
   ProgressReport theReport1(this->owner->theGlobalVariables);
-  DynkinType centralizerType;
+  DynkinType centralizerTypeAlternative;
   if (this->indexMaxSSContainer!=-1)
-  { centralizerType =this->owner->theSubalgebras[this->indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType;
-    centralizerType-=this->theWeylNonEmbeddeD.theDynkinType;
+  { centralizerTypeAlternative =this->owner->theSubalgebras[this->indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType;
+    centralizerTypeAlternative-=this->theWeylNonEmbeddeD.theDynkinType;
     if (this->owner->theGlobalVariables!=0)
     { std::stringstream reportStream;
       reportStream << "<hr>The centralizer of subalgebra of type " << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " is of type "
-      << centralizerType.ToString();
+      << centralizerTypeAlternative.ToString();
       theReport1.Report(reportStream.str());
     }
 //    stOutput << "<br>The centralizer of " << this->theWeylNonEmbeddeD.theDynkinType.ToString()
-//    << " was computed to be: " << centralizerType.ToString()
+//    << " was computed to be: " << centralizerTypeAlternative.ToString()
 //    << "<br> The largest type containing the sa is: "
 //    << this->owner->theSubalgebras[this->indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType.ToString();
-    this->centralizerRank-=centralizerType.GetRootSystemSize();
+    this->centralizerRank-=centralizerTypeAlternative.GetRootSystemSize();
     if (this->RootSystemCentralizerPrimalCoords.size>0)
-      if (centralizerType!=this->theCentralizerType)
+      if (centralizerTypeAlternative!=this->theCentralizerType)
         crash << "This is a programming error: two different methods for computing the centralizer type yield different results: by sub-diagram I computed the type as "
         << this->theCentralizerType.ToString() << " but looking at subalgerba containing the current one I got centralizer type "
-        << centralizerType.ToString() << crash;
+        << centralizerTypeAlternative.ToString() << crash;
   } //else
     //stOutput << "<br>Type: " << this->theWeylNonEmbeddeD.theDynkinType.ToString() << ", " << " indexMaxSSContainer is -1. ";
   //stOutput << "<br>centralizer dimension: " << this->centralizerDimension << ", centralizer rank computed to be: "
   //<< this->centralizerRank << ", cartan centralizer computed to be of dimension: " << this->CartanOfCentralizer.size;
   this->flagCentralizerIsWellChosen=(this->centralizerRank==this->CartanOfCentralizer.size);
+  if (this->flagCentralizerIsWellChosen)
+    this->flagCentralizerTypeIsComputed=true;
   if (this->indexMaxSSContainer!=-1 && this->flagCentralizerIsWellChosen)
     for (int i=0; i<this->owner->theSubalgebras.size; i++)
-      if (centralizerType==this->owner->theSubalgebras[i].theWeylNonEmbeddeD.theDynkinType)
+      if (centralizerTypeAlternative==this->owner->theSubalgebras[i].theWeylNonEmbeddeD.theDynkinType)
         if(this->owner->theSubalgebras[i].indicesDirectSummandSuperAlgebra.Contains(this->indexMaxSSContainer))
         { this->indexSSPartCentralizer=i;
           break;

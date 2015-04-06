@@ -130,6 +130,7 @@ public:
   bool flagSystemProvedToHaveNoSolution;
   bool flagSystemGroebnerBasisFound;
   bool flagCentralizerIsWellChosen;
+  bool flagCentralizerTypeIsComputed;
   bool flagUsedInducingSubalgebraRealization;
   int RecursionDepthCounterForNilradicalGeneration;
   int totalNumUnknownsNoCentralizer;
@@ -189,6 +190,7 @@ public:
   int GetSSpartCentralizerOfSSPartCentralizer()const;
   void GetHsScaledToActByTwoByType(List<List<Vectors<Rational> > >& outputHsByType, List<DynkinSimpleType>& outputTypeList)const;
   bool HasHsScaledByTwoConjugateTo(List<Vector<Rational> >& other)const;
+  bool ComputeCentralizerTypeFailureAllowed();
   bool IsDirectSummandOf(const CandidateSSSubalgebra& other);
   void GetGenericCartanCentralizerLinearCombination(int indexCartanCentralizerGen, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output);
   void GetGenericPosGenLinearCombination(int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output);

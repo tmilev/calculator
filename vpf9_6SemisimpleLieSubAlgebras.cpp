@@ -773,10 +773,7 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
     *this=this->owner->theSubalgebras[indexPrecomputed];
     this->indexIamInducedFrom=baseSubalgebra.indexInOwner;
     this->RootInjectionsFromInducer=theRootInjection;
-    bool result=this->ComputeAndVerifyFromGeneratorsAndHs();
-    if (result)
-      this->ComputeCentralizerTypeFailureAllowed();
-    return result;
+    return this->ComputeAndVerifyFromGeneratorsAndHs();
   }
   this->owner->RegisterPossibleCandidate(*this);
   this->CheckInitialization();
@@ -809,8 +806,6 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
     } else
       if (this->theWeylNonEmbeddeD.theDynkinType.ToString()==this->owner->theSubalgebras[i].theWeylNonEmbeddeD.theDynkinType.ToString())
         crash << crash;
-  if (this->flagSystemSolved)
-    this->ComputeCentralizerTypeFailureAllowed();
   return !this->flagSystemProvedToHaveNoSolution;
 }
 
@@ -1053,6 +1048,8 @@ bool SemisimpleSubalgebras::CentralizersComputedToHaveUnsuitableNilpotentOrbits(
 
 bool CandidateSSSubalgebra::ComputeCentralizerTypeFailureAllowed()
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeCentralizerTypeFailureAllowed");
+  //stOutput << "<hr>Entering CandidateSSSubalgebra::ComputeCentralizerTypeFailureAllowed, type is: "
+  //<< this->ToStringType();
   if (this->GetRank()!=1)
     return false;
   Vector<Rational> theH= this->theHsScaledToActByTwo[0];
@@ -1065,15 +1062,16 @@ bool CandidateSSSubalgebra::ComputeCentralizerTypeFailureAllowed()
   if (!theSl2.flagCentralizerTypeComputed)
     return false;
   this->theCentralizerType=theSl2.CentralizerTypeIfKnown;
+  this->flagCentralizerTypeIsComputed=true;
   return true;
 }
 
 bool SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits");
-  stOutput << "<hr>Entering centralizer criterion. Base subalgebra: "
-  << this->baseSubalgebra().theWeylNonEmbeddeD.theDynkinType.ToString();
-  if (!this->baseSubalgebra().flagCentralizerTypeIsComputed)
-    stOutput << "Centralizer is not computed, exiting. ";
+  //stOutput << "<hr>Entering centralizer criterion. Base subalgebra: "
+  //<< this->baseSubalgebra().theWeylNonEmbeddeD.theDynkinType.ToString();
+  //if (!this->baseSubalgebra().flagCentralizerTypeIsComputed)
+  //  stOutput << "Centralizer is not computed, exiting. ";
   if (!this->baseSubalgebra().flagCentralizerTypeIsComputed)
     return false;
   int stackIndex=this->currentSubalgebraChain.size-1;
@@ -1083,9 +1081,9 @@ bool SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOr
   DynkinType newSummandType=currentType-complementNewSummandType;
   DynkinType centralizerComplementNewSummandType=
   this->baseSubalgebra().theCentralizerType;
-  stOutput << "<br>currentType: " << currentType.ToString()
-  << "<br> complement new summand: " << complementNewSummandType.ToString()
-  << "<br>centralizer of complement: " << centralizerComplementNewSummandType.ToString();
+  //stOutput << "<br>currentType: " << currentType.ToString()
+  //<< "<br> complement new summand: " << complementNewSummandType.ToString()
+  //<< "<br>centralizer of complement: " << centralizerComplementNewSummandType.ToString();
   if (newSummandType.size()!=1)
     return false;
   HashedList<Rational> theDynkinIndicesNewSummand, DynkinIndicesTheyGotToFitIn;
@@ -1095,7 +1093,7 @@ bool SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOr
   newSummandType.GetDynkinIndicesSl2Subalgebras
   (this->CachedDynkinIndicesSl2subalgebrasSimpleTypes, this->CachedDynkinSimpleTypesWithComputedSl2Subalgebras,
    theDynkinIndicesNewSummand, this->theGlobalVariables);
-  stOutput << "The type's summand " << newSummandType.ToString()
+/*  stOutput << "The type's summand " << newSummandType.ToString()
   << " has complement summand " << complementNewSummandType.ToString() << ". "
   << " I computed the latter complement summand has centralizer "
   << centralizerComplementNewSummandType.ToString() << ". "
@@ -1104,7 +1102,7 @@ bool SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOr
   << ". If the type is realizable, those have to contain "
   << " the absolute Dynkin indices of sl(2) subalgebras of the original summand. "
   << " The absolute Dynkin indices of the sl(2) subalgebras of the original summand I computed to be:<br> "
-  << theDynkinIndicesNewSummand.ToStringCommaDelimited() << ". ";
+  << theDynkinIndicesNewSummand.ToStringCommaDelimited() << ". ";*/
 
   if (DynkinIndicesTheyGotToFitIn.Contains(theDynkinIndicesNewSummand))
     return false;
@@ -1256,6 +1254,7 @@ void SemisimpleSubalgebras::AddSubalgebraToStack
     crash << "In order to add subalgebra " << input.theWeylNonEmbeddeD.theDynkinType.ToString()
     << " to the stack I need to know the order of creation of its h-vectors. "
     << crash;
+  input.ComputeCentralizerTypeFailureAllowed();//<- trying to compute the centralizer of a subalgebra on the stack.
   this->currentSubalgebraChain.AddOnTop(input);
   this->currentPossibleLargerDynkinTypes.SetSize(this->currentSubalgebraChain.size);
   this->currentRootInjections.SetSize(this->currentSubalgebraChain.size);
@@ -5276,6 +5275,10 @@ std::string CandidateSSSubalgebra::ToStringLoadUnknown(FormatExpressions* theFor
   }
   out << ") )";
   return out.str();
+}
+
+std::string CandidateSSSubalgebra::ToStringType(FormatExpressions* theFormat)const
+{ return this->theWeylNonEmbeddeD.theDynkinType.ToString(theFormat);
 }
 
 std::string CandidateSSSubalgebra::ToStringTypeAndHs(FormatExpressions* theFormat)const

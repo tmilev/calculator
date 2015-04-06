@@ -256,6 +256,7 @@ public:
   bool AttemptToSolveSystem();
   bool IsGoodHnewActingByTwo(const Vector<Rational>& HNewActingByTwo, const List<int>& theRootInjections)const;
   Rational GetScalarSA(const Vector<Rational>& primalWeightLeft, const Vector<Rational>& primalWeightRight)const;
+  std::string ToStringType(FormatExpressions* theFormat=0)const;
   std::string ToStringTypeAndHs(FormatExpressions* theFormat=0)const;
   std::string ToStringGenerators(FormatExpressions* theFormat=0)const;
   std::string ToString(FormatExpressions* theFormat=0)const;

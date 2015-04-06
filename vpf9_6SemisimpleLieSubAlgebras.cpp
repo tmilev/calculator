@@ -1070,6 +1070,10 @@ bool CandidateSSSubalgebra::ComputeCentralizerTypeFailureAllowed()
 
 bool SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits");
+  stOutput << "<hr>Entering centralizer criterion. Base subalgebra: "
+  << this->baseSubalgebra().theWeylNonEmbeddeD.theDynkinType.ToString();
+  if (!this->baseSubalgebra().flagCentralizerTypeIsComputed)
+    stOutput << "Centralizer is not computed, exiting. ";
   if (!this->baseSubalgebra().flagCentralizerTypeIsComputed)
     return false;
   int stackIndex=this->currentSubalgebraChain.size-1;
@@ -1079,6 +1083,9 @@ bool SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOr
   DynkinType newSummandType=currentType-complementNewSummandType;
   DynkinType centralizerComplementNewSummandType=
   this->baseSubalgebra().theCentralizerType;
+  stOutput << "<br>currentType: " << currentType.ToString()
+  << "<br> complement new summand: " << complementNewSummandType.ToString()
+  << "<br>centralizer of complement: " << centralizerComplementNewSummandType.ToString();
   if (newSummandType.size()!=1)
     return false;
   HashedList<Rational> theDynkinIndicesNewSummand, DynkinIndicesTheyGotToFitIn;
@@ -1088,7 +1095,18 @@ bool SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOr
   newSummandType.GetDynkinIndicesSl2Subalgebras
   (this->CachedDynkinIndicesSl2subalgebrasSimpleTypes, this->CachedDynkinSimpleTypesWithComputedSl2Subalgebras,
    theDynkinIndicesNewSummand, this->theGlobalVariables);
-  if (DynkinIndicesTheyGotToFitIn.Contains( theDynkinIndicesNewSummand))
+  stOutput << "The type's summand " << newSummandType.ToString()
+  << " has complement summand " << complementNewSummandType.ToString() << ". "
+  << " I computed the latter complement summand has centralizer "
+  << centralizerComplementNewSummandType.ToString() << ". "
+  << "Then I computed the absolute Dynkin indices of the centralizer's sl(2)-subalgebras, namely:<br> "
+  << DynkinIndicesTheyGotToFitIn.ToStringCommaDelimited()
+  << ". If the type is realizable, those have to contain "
+  << " the absolute Dynkin indices of sl(2) subalgebras of the original summand. "
+  << " The absolute Dynkin indices of the sl(2) subalgebras of the original summand I computed to be:<br> "
+  << theDynkinIndicesNewSummand.ToStringCommaDelimited() << ". ";
+
+  if (DynkinIndicesTheyGotToFitIn.Contains(theDynkinIndicesNewSummand))
     return false;
   std::fstream theLogFile;
   if (!FileOperations::OpenFileCreateIfNotPresent(theLogFile, this->fileNameToLogComments, true, false, false))

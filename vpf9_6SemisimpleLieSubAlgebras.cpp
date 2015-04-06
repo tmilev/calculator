@@ -1088,7 +1088,7 @@ bool SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOr
   newSummandType.GetDynkinIndicesSl2Subalgebras
   (this->CachedDynkinIndicesSl2subalgebrasSimpleTypes, this->CachedDynkinSimpleTypesWithComputedSl2Subalgebras,
    theDynkinIndicesNewSummand, this->theGlobalVariables);
-  if (!DynkinIndicesTheyGotToFitIn.Contains( theDynkinIndicesNewSummand))
+  if (DynkinIndicesTheyGotToFitIn.Contains( theDynkinIndicesNewSummand))
     return false;
   std::fstream theLogFile;
   if (!FileOperations::OpenFileCreateIfNotPresent(theLogFile, this->fileNameToLogComments, true, false, false))

@@ -423,6 +423,8 @@ bool CalculatorFunctionsGeneral::innerSolveSerreLikeSystem
   //int numVars=theContext.GetNumContextVariables();
   theComputation.MaxNumGBComputations=upperLimit;
   theComputation.MaxNumSerreSystemComputationsPreferred=upperLimit;
+  theComputation.thePolynomialOrder.theMonOrder=
+  MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
   stOutput << "Calling SolveSerreLikeSystem with upperLimit= " << upperLimit;
   theComputation.theAlgebraicClosurE=&theCommands.theObjectContainer.theAlgebraicClosure;
   theComputation.flagTryDirectlySolutionOverAlgebraicClosure=startWithAlgebraicClosure;

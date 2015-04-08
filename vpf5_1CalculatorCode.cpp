@@ -653,19 +653,20 @@ bool Calculator::innerGroebner
   outputGroebner=inputVector;
   outputGroebner2=inputVector;
 //  stOutput << outputGroebner.ToString(&theFormat);
-
-
   if (useGr)
   { if (!useRevLex)
       theGroebnerComputation.thePolynomialOrder.theMonOrder=MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
     else
-      theGroebnerComputation.thePolynomialOrder.theMonOrder=MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
+      theGroebnerComputation.thePolynomialOrder.theMonOrder=MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableWeakest;
   } else if (!useRevLex)
     theGroebnerComputation.thePolynomialOrder.theMonOrder=MonomialP::LeftGreaterThanLexicographicLastVariableStrongest;
   else
     theGroebnerComputation.thePolynomialOrder.theMonOrder=MonomialP::LeftGreaterThanLexicographicLastVariableWeakest;
   theGroebnerComputation.theFormat.thePolyMonOrder=theGroebnerComputation.thePolynomialOrder.theMonOrder;
   theGroebnerComputation.MaxNumGBComputations=upperBoundComputations;
+
+  theGroebnerComputation.flagUseTheMonomialBranchingOptimization=true;
+
   bool success=theGroebnerComputation.TransformToReducedGroebnerBasis(outputGroebner, theCommands.theGlobalVariableS);
   std::stringstream out;
   out << theGroebnerComputation.ToStringLetterOrder(false);

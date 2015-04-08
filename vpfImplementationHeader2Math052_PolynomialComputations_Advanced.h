@@ -686,6 +686,7 @@ GroebnerBasisComputation<coefficient>::GroebnerBasisComputation()
   this-> flagSystemSolvedOverBaseField=false;
   this-> flagUsingAlgebraicClosuRe=false;
   this-> flagTryDirectlySolutionOverAlgebraicClosure=false;
+  this->flagUseTheMonomialBranchingOptimization=false;
 
   this->theAlgebraicClosurE=0;
 }
@@ -1073,6 +1074,9 @@ void GroebnerBasisComputation<coefficient>::SetUpRecursiveComputation
   toBeModified.flagSystemSolvedOverBaseField=false;
   toBeModified.flagSystemProvenToHaveSolution=false;
   toBeModified.theFormat=this->theFormat;
+  toBeModified.thePolynomialOrder=this->thePolynomialOrder;
+  toBeModified.flagUseTheMonomialBranchingOptimization=
+  this->flagUseTheMonomialBranchingOptimization;
 }
 
 template <class coefficient>
@@ -1096,7 +1100,8 @@ void GroebnerBasisComputation<coefficient>::TrySettingValueToVariable
  GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::TrySettingValueToVariable");
   ProgressReport theReport1(theGlobalVariables);
-  GroebnerBasisComputation theHeuristicAttempt;
+  GroebnerBasisComputation& theHeuristicAttempt=
+  this->ComputationUsedInRecursiveCalls.GetElement();
   this->SetUpRecursiveComputation(theHeuristicAttempt);
   int theVarIndex=this->GetPreferredSerreSystemSubIndex(inputSystem);
   if (theVarIndex==-1)
@@ -1164,7 +1169,7 @@ void GroebnerBasisComputation<coefficient>::SolveWhenSystemHasSingleMonomial
       PolynomialSubstitution<coefficient> theSub;
       theSub.MakeIdSubstitution(this->systemSolution.GetElement().size);
       theSub[i]=0;
-      GroebnerBasisComputation theCase;
+      GroebnerBasisComputation& theCase=this->ComputationUsedInRecursiveCalls.GetElement();
       this->SetUpRecursiveComputation(theCase);
       theCase.SetSerreLikeSolutionIndex(i, 0);
       inputSystem=inputSystemCopy;
@@ -1220,11 +1225,11 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   }
   List<Polynomial<coefficient> > systemBeforeHeuristics=inputSystem;
   MonomialP singleMonEquation;
-  if (false)
-  if (this->HasSingleMonomialEquation(inputSystem, singleMonEquation))
-  { this->SolveWhenSystemHasSingleMonomial(inputSystem, singleMonEquation, theGlobalVariables);
-    return;
-  }
+  if (this->flagUseTheMonomialBranchingOptimization)
+    if (this->HasSingleMonomialEquation(inputSystem, singleMonEquation))
+    { this->SolveWhenSystemHasSingleMonomial(inputSystem, singleMonEquation, theGlobalVariables);
+      return;
+    }
   std::stringstream reportStreamHeuristics;
   for (int randomValueItry=0; randomValueItry<2; randomValueItry++)
   { this->TrySettingValueToVariable(inputSystem, randomValueItry, theGlobalVariables);
@@ -1232,17 +1237,17 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
     { //stOutput << "System solved over base field.";
       return;
     }
+    inputSystem=systemBeforeHeuristics;
     if (theGlobalVariables!=0)
     { MonomialP theMon(this->GetPreferredSerreSystemSubIndex(inputSystem));
       reportStreamHeuristics << "<br>The substitution  " << theMon.ToString(&this->theFormat) << "=" << randomValueItry << ";"
       << " did not produce a solution over the base field ";
-      if (this->flagSystemProvenToHaveNoSolution)
+      if (this->ComputationUsedInRecursiveCalls.GetElement().flagSystemProvenToHaveNoSolution)
         reportStreamHeuristics << " as it resulted in a system which has no solution. ";
       else
         reportStreamHeuristics << " as it resulted in a system which exceeded the computation limits. ";
       theReport3.Report(reportStreamHeuristics.str());
     }
-    inputSystem=systemBeforeHeuristics;
   }
 //  stOutput << "<br>After two tries, I wasn't able to solve the system. ";
   inputSystem=startingSystemNoModifications;

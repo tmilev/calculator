@@ -59,6 +59,8 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF
   }
   theComputation.MaxNumSerreSystemComputationsPreferred=4001;
   theComputation.MaxNumGBComputations=2001;
+  theComputation.thePolynomialOrder.theMonOrder=
+  MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
   theComputation.SolveSerreLikeSystem(theSystem, theGlobalVariables);
   if (!theComputation.flagSystemSolvedOverBaseField)
   { if (logStream!=0)
@@ -3226,6 +3228,8 @@ bool CandidateSSSubalgebra::AttemptToSolveSystem()
   //stOutput << "<br>additions so far: " << Rational::total
   if (this->owner->theGlobalVariables==0)
     crash << crash;
+  theComputation.thePolynomialOrder.theMonOrder=
+  MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
   for (int i=500; i<200000; i+=100000)
   { theComputation.MaxNumGBComputations=i;
     theComputation.MaxNumSerreSystemComputationsPreferred=i;

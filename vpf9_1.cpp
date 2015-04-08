@@ -166,7 +166,6 @@ void GlobalVariables::initDefaultFolderAndFileNames
   this->initOutputReportAndCrashFileNames("", "");
 }
 
-
 void GlobalVariables::initOutputReportAndCrashFileNames
 (const std::string& inputUserStringRAW,
  const std::string& inputUserStringCivilized)
@@ -174,7 +173,11 @@ void GlobalVariables::initOutputReportAndCrashFileNames
   this->userInputStringIfAvailable=inputUserStringCivilized;
   std::string inputAbbreviated=this->userInputStringRAWIfAvailable;
   if (inputAbbreviated.size()>220)
-    inputAbbreviated=inputAbbreviated.substr(0,220)+"__input__truncated";
+  { std::stringstream inputAbbreviatedStream;
+    inputAbbreviatedStream << "hash_" << MathRoutines::hashString(inputAbbreviated)
+    << " _abbreviated_input_" << inputAbbreviated.substr(0, 220);
+    inputAbbreviated=inputAbbreviatedStream.str();
+  }
   this->PhysicalNameCrashLog="../output/crash_"+ inputAbbreviated+".html";
   this->PhysicalNameProgressReport="../output/progressReport_"+ inputAbbreviated+".html";
   this->PhysicalNameOutpuT="../output/output_"+ inputAbbreviated+".html";

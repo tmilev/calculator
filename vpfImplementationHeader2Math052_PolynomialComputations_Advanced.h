@@ -1187,7 +1187,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
 (List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::SolveSerreLikeSystemRecursively");
   RecursionDepthCounter theCounter(&this->RecursionCounterSerreLikeSystem);
-  ProgressReport theReport1(theGlobalVariables), theReport2(theGlobalVariables);
+  ProgressReport theReport1(theGlobalVariables), theReport2(theGlobalVariables), theReport3(theGlobalVariables);
   List<Polynomial<coefficient> > startingSystemNoModifications=inputSystem;
   this->NumVarsToSolveForStarT=this->GetNumVarsToSolveFor(inputSystem);
   if (theGlobalVariables!=0)
@@ -1210,8 +1210,10 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   { std::stringstream out;
     out << "Without using heuristics, I managed to reduce "
     << this->NumVarsToSolveForStarT-this->NumVariablesToSolveForAfterReduction
-    << " variables via the substitutions " << this->ToStringImpliedSubs()
-    << "<br>Number of remaining variables to solve for: "
+    << " variables. ";
+    if (this->NumVarsToSolveForStarT-this->NumVariablesToSolveForAfterReduction!=0)
+      out << "I did this via the substitutions " << this->ToStringImpliedSubs();
+    out << "<br>Number of remaining variables to solve for: "
     << this->NumVariablesToSolveForAfterReduction;
     theReport2.Report(out.str());
 //    stOutput << out.str();
@@ -1223,11 +1225,22 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   { this->SolveWhenSystemHasSingleMonomial(inputSystem, singleMonEquation, theGlobalVariables);
     return;
   }
+  std::stringstream reportStreamHeuristics;
   for (int randomValueItry=0; randomValueItry<2; randomValueItry++)
   { this->TrySettingValueToVariable(inputSystem, randomValueItry, theGlobalVariables);
     if (this->flagSystemSolvedOverBaseField)
     { //stOutput << "System solved over base field.";
       return;
+    }
+    if (theGlobalVariables!=0)
+    { MonomialP theMon(this->GetPreferredSerreSystemSubIndex(inputSystem));
+      reportStreamHeuristics << "<br>The substitution  " << theMon.ToString(&this->theFormat) << "=" << randomValueItry << ";"
+      << " did not produce a solution over the base field ";
+      if (this->flagSystemProvenToHaveNoSolution)
+        reportStreamHeuristics << " as it resulted in a system which has no solution. ";
+      else
+        reportStreamHeuristics << " as it resulted in a system which exceeded the computation limits. ";
+      theReport3.Report(reportStreamHeuristics.str());
     }
     inputSystem=systemBeforeHeuristics;
   }

@@ -2543,6 +2543,7 @@ class GroebnerBasisComputation
   int MaxNumGBComputations;
   int MaxNumBasisReductionComputations;
 //  bool flagBasisGuaranteedToGenerateIdeal;
+  bool flagUseTheMonomialBranchingOptimization;
   bool flagDoProgressReport;
   bool flagDoSortBasis;
   bool flagDoLogDivision;
@@ -2552,6 +2553,7 @@ class GroebnerBasisComputation
   bool flagUsingAlgebraicClosuRe;
   bool flagTryDirectlySolutionOverAlgebraicClosure;
   AlgebraicClosureRationals* theAlgebraicClosurE;
+  MemorySaving<GroebnerBasisComputation<coefficient> > ComputationUsedInRecursiveCalls;
   MemorySaving<List<Polynomial<coefficient> > > intermediateRemainders;
   MemorySaving<List<List<MonomialP> > > intermediateHighlightedMons;
   MemorySaving<List<MonomialP> > intermediateHighestMonDivHighestMon;

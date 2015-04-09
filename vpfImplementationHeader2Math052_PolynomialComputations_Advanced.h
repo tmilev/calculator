@@ -28,7 +28,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedBasis
 (List<Polynomial<coefficient> >& inputOutpuT, int upperLimitPolyComputations,
  GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::TransformToReducedBasis");
-  this->initForGroebnerComputation(inputOutpuT, theGlobalVariables);
+  this->initForGroebnerComputation(inputOutpuT.size, theGlobalVariables);
   this->basisCandidates=inputOutpuT;
   ProgressReport theReport1(theGlobalVariables), theReport2(theGlobalVariables);
   if (theGlobalVariables!=0 && this->flagDoProgressReport)
@@ -53,7 +53,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis
 (List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::TransformToReducedGroebnerBasis");
   //stOutput << "<hr>Processing" << inputOutpuT.ToString() << ".<br>";
-  this->initForGroebnerComputation(inputOutpuT, theGlobalVariables);
+  this->initForGroebnerComputation(inputOutpuT.size, theGlobalVariables);
   this->basisCandidates=inputOutpuT;
   ProgressReport theReport1(theGlobalVariables), theReport2(theGlobalVariables);
   if (theGlobalVariables!=0 && this->flagDoProgressReport)
@@ -713,17 +713,17 @@ void GroebnerBasisComputation<coefficient>::initForDivisionAlone(List<Polynomial
 }
 
 template <class coefficient>
-void GroebnerBasisComputation<coefficient>::initForGroebnerComputation(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables)
+void GroebnerBasisComputation<coefficient>::initForGroebnerComputation(int expectedNumInputPolys, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::initForGroebnerComputation");
-  if (inputOutpuT.size<=0)
+  if (expectedNumInputPolys<=0)
     crash << "This is a programming error: I cannot transform an empty list to a Groebner basis. " << crash;
   this->basisCandidates.SetSize(0);
   this->theBasiS.SetSize(0);
-  this->theBasiS.Reserve(inputOutpuT.size);
+  this->theBasiS.Reserve(expectedNumInputPolys);
   this->leadingMons.SetSize(0);
-  this->leadingMons.Reserve(inputOutpuT.size);
+  this->leadingMons.Reserve(expectedNumInputPolys);
   this->leadingCoeffs.SetSize(0);
-  this->leadingCoeffs.Reserve(inputOutpuT.size);
+  this->leadingCoeffs.Reserve(expectedNumInputPolys);
   this->NumberGBComputations=0;
 }
 
@@ -1065,6 +1065,7 @@ template <class coefficient>
 void GroebnerBasisComputation<coefficient>::SetUpRecursiveComputation
 (GroebnerBasisComputation& toBeModified)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::SetUpRecursiveComputation");
+  toBeModified.initForGroebnerComputation(0, 0);
   toBeModified.RecursionCounterSerreLikeSystem=this->RecursionCounterSerreLikeSystem;
   toBeModified.MaxNumGBComputations=this->MaxNumGBComputations;
   toBeModified.MaxNumSerreSystemComputationsPreferred=this->MaxNumSerreSystemComputationsPreferred;

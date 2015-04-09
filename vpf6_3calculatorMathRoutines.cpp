@@ -431,6 +431,7 @@ bool CalculatorFunctionsGeneral::innerSolveSerreLikeSystem
   theCommands.theGlobalVariableS->theDefaultFormat=theComputation.theFormat;
 //  stOutput << "<br>the alphabet:" << theComputation.theFormat.polyAlphabeT;
 //  stOutput << "<br>The context vars:<br>" << theContext.ToString();
+  theComputation.  flagUseTheMonomialBranchingOptimization=true;
   theComputation.SolveSerreLikeSystem(thePolysAlgebraic, theCommands.theGlobalVariableS);
   std::stringstream out;
   out << "<br>The context vars:<br>" << theContext.ToString();

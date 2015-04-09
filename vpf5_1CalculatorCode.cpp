@@ -665,7 +665,6 @@ bool Calculator::innerGroebner
   theGroebnerComputation.theFormat.thePolyMonOrder=theGroebnerComputation.thePolynomialOrder.theMonOrder;
   theGroebnerComputation.MaxNumGBComputations=upperBoundComputations;
 
-  theGroebnerComputation.flagUseTheMonomialBranchingOptimization=true;
 
   bool success=theGroebnerComputation.TransformToReducedGroebnerBasis(outputGroebner, theCommands.theGlobalVariableS);
   std::stringstream out;

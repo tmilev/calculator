@@ -715,8 +715,6 @@ void GroebnerBasisComputation<coefficient>::initForDivisionAlone(List<Polynomial
 template <class coefficient>
 void GroebnerBasisComputation<coefficient>::initForGroebnerComputation(int expectedNumInputPolys, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::initForGroebnerComputation");
-  if (expectedNumInputPolys<=0)
-    crash << "This is a programming error: I cannot transform an empty list to a Groebner basis. " << crash;
   this->basisCandidates.SetSize(0);
   this->theBasiS.SetSize(0);
   this->theBasiS.Reserve(expectedNumInputPolys);
@@ -773,7 +771,8 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
 
 template <class coefficient>
 void GroebnerBasisComputation<coefficient>::GetSubFromPartialSolutionSerreLikeSystem(PolynomialSubstitution<coefficient>& outputSub)
-{ outputSub.MakeIdSubstitution(this->systemSolution.GetElement().size);
+{ MacroRegisterFunctionWithName("GroebnerBasisComputation::GetSubFromPartialSolutionSerreLikeSystem");
+  outputSub.MakeIdSubstitution(this->systemSolution.GetElement().size);
   for (int i=0; i<this->solutionsFound.GetElement().CardinalitySelection; i++)
     outputSub[this->solutionsFound.GetElement().elements[i]]= this->systemSolution.GetElement()[this->solutionsFound.GetElement().elements[i]];
 }
@@ -905,7 +904,8 @@ void GroebnerBasisComputation<coefficient>::BackSubstituteIntoSinglePoly(Polynom
     thePoly.Substitution(theFinalSub);
   coefficient tempCF;
   if (!thePoly.IsConstant(&tempCF))
-    crash << "\n<br>\nThis is a programming error: after carrying all implied substitutions the polynomial is not a constant, rather equals "
+    crash << "\n<br>\nThis is a programming error: after carrying all implied substitutions "
+    << "the polynomial is not a constant, rather equals "
     << thePoly.ToString() << ". " << crash;
   theFinalSub[theIndex]=tempCF;
   this->SetSerreLikeSolutionIndex(theIndex, tempCF);
@@ -1060,24 +1060,33 @@ std::string GroebnerBasisComputation<coefficient>::ToStringImpliedSubs()
   return out.str();
 }
 
+template <class coefficient>
+void GroebnerBasisComputation<coefficient>::initForSystemSolution()
+{ MacroRegisterFunctionWithName("GroebnerBasisComputation::initForSystemSolution");
+  this->initForGroebnerComputation(0, 0);
+  this->theImpliedSubS.SetSize(0);
+  this->flagSystemProvenToHaveNoSolution=false;
+  this->flagSystemSolvedOverBaseField=false;
+  this->flagSystemProvenToHaveSolution=false;
+
+}
 
 template <class coefficient>
 void GroebnerBasisComputation<coefficient>::SetUpRecursiveComputation
 (GroebnerBasisComputation& toBeModified)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::SetUpRecursiveComputation");
-  toBeModified.initForGroebnerComputation(0, 0);
+  toBeModified.initForSystemSolution();
   toBeModified.RecursionCounterSerreLikeSystem=this->RecursionCounterSerreLikeSystem;
   toBeModified.MaxNumGBComputations=this->MaxNumGBComputations;
   toBeModified.MaxNumSerreSystemComputationsPreferred=this->MaxNumSerreSystemComputationsPreferred;
+  toBeModified.MaxNumBasisReductionComputations=this->MaxNumBasisReductionComputations;
   toBeModified.systemSolution=this->systemSolution;
   toBeModified.solutionsFound=this->solutionsFound;
-  toBeModified.flagSystemProvenToHaveNoSolution=false;
-  toBeModified.flagSystemSolvedOverBaseField=false;
-  toBeModified.flagSystemProvenToHaveSolution=false;
   toBeModified.theFormat=this->theFormat;
   toBeModified.thePolynomialOrder=this->thePolynomialOrder;
-  toBeModified.flagUseTheMonomialBranchingOptimization=
-  this->flagUseTheMonomialBranchingOptimization;
+  toBeModified.flagUseTheMonomialBranchingOptimization= this->flagUseTheMonomialBranchingOptimization;
+  toBeModified.theAlgebraicClosurE=this->theAlgebraicClosurE;
+  toBeModified.flagUsingAlgebraicClosuRe=this->flagUsingAlgebraicClosuRe;
 }
 
 template <class coefficient>
@@ -1087,9 +1096,20 @@ void GroebnerBasisComputation<coefficient>::ProcessSolvedSubcaseIfSolvedOrProven
   if (potentiallySolvedCase.flagSystemSolvedOverBaseField)
   { //stOutput << "<hr>System solved after first recursive call. The input system before back sub: " << CGI::GetMathSpanPure(inputSystem.ToString());
     potentiallySolvedCase.NumberSerreSystemComputations=this->NumberSerreSystemComputations;
-    potentiallySolvedCase.theImpliedSubS=this->theImpliedSubS;
-    *this=potentiallySolvedCase;
+//    List<PolynomialSubstitution<coefficient> > impliedSubsCopy=this->theImpliedSubS;
+//    stOutput << "<br>potentially solved case: system solution:  "
+//    << potentiallySolvedCase.systemSolution.GetElement().ToStringCommaDelimited();
+    this->solutionsFound=potentiallySolvedCase.solutionsFound;
+    this->systemSolution=potentiallySolvedCase.systemSolution;
+    this->flagSystemProvenToHaveNoSolution=potentiallySolvedCase.flagSystemProvenToHaveNoSolution;
+    this->flagSystemProvenToHaveSolution=potentiallySolvedCase.flagSystemProvenToHaveSolution;
+    this->flagSystemSolvedOverBaseField=potentiallySolvedCase.flagSystemSolvedOverBaseField;
+//    this->theImpliedSubS=impliedSubsCopy;
+//    stOutput << "<br>this: system solution:  "
+//    << this->systemSolution.GetElement().ToStringCommaDelimited();
     this->BackSubstituteIntoPolySystem(this->theImpliedSubS, theGlobalVariables);
+//    stOutput << "<br> after back sub in poly: " << this->systemSolution.GetElement().ToString()
+//    << "<br> the implied subs are: " << this->theImpliedSubS.ToString()
   }
   if (potentiallySolvedCase.flagSystemProvenToHaveSolution)
     this->flagSystemProvenToHaveSolution=true;
@@ -1187,7 +1207,6 @@ void GroebnerBasisComputation<coefficient>::SolveWhenSystemHasSingleMonomial
     this->flagSystemProvenToHaveNoSolution=true;
 }
 
-
 template <class coefficient>
 void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
 (List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables)
@@ -1273,7 +1292,8 @@ std::string GroebnerBasisComputation<coefficient>::ToStringCalculatorInputFromSy
 template <class coefficient>
 void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem
 (List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables)
-{ this->flagSystemProvenToHaveNoSolution=false;
+{ MacroRegisterFunctionWithName("GroebnerBasisComputation::SolveSerreLikeSystem");
+  this->flagSystemProvenToHaveNoSolution=false;
   this->flagSystemSolvedOverBaseField=false;
   this->flagSystemProvenToHaveSolution=false;
   this->RecursionCounterSerreLikeSystem=0;
@@ -1317,7 +1337,10 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem
           this->SetSerreLikeSolutionIndex(i, 0);
     PolynomialSubstitution<coefficient> theSub;
     this->GetSubFromPartialSolutionSerreLikeSystem(theSub);
+//    stOutput << "<br>inputSystem was: " << inputSystem.ToString();
+//    stOutput << "<br>In it, we gotta use the solution: " << theSub.ToString();
     workingSystem=inputSystem;
+
     for (int i=0; i<workingSystem.size; i++)
     { workingSystem[i].Substitution(theSub);
       if (!workingSystem[i].IsEqualToZero())
@@ -1332,12 +1355,14 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem
 
 template <class coefficient>
 std::string GroebnerBasisComputation<coefficient>::ToStringSerreLikeSolution()
-{ std::stringstream out;
-  Polynomial<Rational> tempP;
+{ MacroRegisterFunctionWithName("GroebnerBasisComputation::ToStringSerreLikeSolution");
+  std::stringstream out;
+  Polynomial<Rational> theMon;
   for (int i=0; i<this->systemSolution.GetElement().size; i++)
     if (this->solutionsFound.GetElement().selected[i])
-    { tempP.MakeMonomiaL(i, 1, 1);
-      out << " " << tempP.ToString(&this->theFormat) << " = " << this->systemSolution.GetElement()[i] << ";";
+    { theMon.MakeMonomiaL(i, 1, 1);
+      out << " " << theMon.ToString(&this->theFormat)
+      << " = " << this->systemSolution.GetElement()[i] << ";";
     }
   return out.str();
 }

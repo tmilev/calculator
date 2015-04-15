@@ -162,7 +162,7 @@ void GlobalVariables::initDefaultFolderAndFileNames
 
   this->PhysicalNameIndicatorWithPath = this->PhysicalPathOutputFolder + "indicator" + this->defaultUserLabel + ".html" ;
   this->DisplayNameIndicatorWithPath = this->DisplayPathOutputFolder + "indicator" + this->defaultUserLabel + ".html" ;
-  this->DisplayNameCalculatorWithPath =  this->DisplayPathServerBase +"cgi-bin/calculator";
+  this->DisplayNameCalculatorWithPath = this->DisplayPathServerBase + "cgi-bin/calculator";
   this->initOutputReportAndCrashFileNames("", "");
 }
 

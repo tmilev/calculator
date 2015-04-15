@@ -435,7 +435,8 @@ private:
   }
 public:
   void operator=(const MemorySaving<Object>& other)
-  { if (!other.IsZeroPointer())
+  { //stOutput << "Calling memorysaving=";
+    if (!other.IsZeroPointer())
       (this->GetElement()).operator=(other.GetElementConst());
     else
       this->FreeMemory();

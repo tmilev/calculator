@@ -1641,7 +1641,8 @@ public:
   }
   template<class baseType>
   void SubstitutionCoefficients(const List<Polynomial<baseType> >& theSub)
-  { coefficient newCoeff;
+  { MacroRegisterFunctionWithName("Polynomial::SubstitutionCoefficients");
+    coefficient newCoeff;
     for (int i=0; i<this->size(); i++)
     { newCoeff=this->theCoeffs[i];
       newCoeff.Substitution(theSub);
@@ -2624,6 +2625,7 @@ class GroebnerBasisComputation
   (HashedListSpecialized<Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> >& thePairs,
    List<MonomialP>& theLeadingMons, MonomialP& leadingTermLCM);
   void CheckConsistency();
+  void initForSystemSolution();
   void initForGroebnerComputation(int expectedNumInputPolys, GlobalVariables* theGlobalVariables);
   void initForDivisionAlone(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables);
 };

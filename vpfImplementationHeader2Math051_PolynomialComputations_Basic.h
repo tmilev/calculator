@@ -17,9 +17,12 @@ bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstituti
   for (int i=0; i<this->monBody.size; i++)
     if (this->monBody[i]!=0)
     { if(i>=TheSubstitution.size)
-        crash << "This is a programming error. Attempting to carry out a substitution in the monomial" << this->ToString()
-        << " which does have non-zero exponent of variable x_" << i+1 << "; however, the input substitution has " << TheSubstitution.size
-        << " variable images (more precisely, the input substitution is:  " << TheSubstitution.ToString() << ". " << crash;
+        crash << "This is a programming error. Attempting to carry out a substitution in the monomial "
+        << this->ToString()
+        << " which does have non-zero exponent of variable x_{" << i+1 << "}; however, the input substitution has "
+        << TheSubstitution.size
+        << " variable images. More precisely, the input substitution is:  "
+        << TheSubstitution.ToString() << ". " << crash;
       int theExponent=0;
       if (!this->monBody[i].IsSmallInteger(&theExponent) || this->monBody[i]<0)
       { if (TheSubstitution[i].IsMonomialCoeffOne())

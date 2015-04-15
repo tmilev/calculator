@@ -425,14 +425,15 @@ bool CalculatorFunctionsGeneral::innerSolveSerreLikeSystem
   theComputation.MaxNumSerreSystemComputationsPreferred=upperLimit;
   theComputation.thePolynomialOrder.theMonOrder=
   MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
-  stOutput << "Calling SolveSerreLikeSystem with upperLimit= " << upperLimit;
+//  stOutput << "Calling SolveSerreLikeSystem with upperLimit= " << upperLimit;
   theComputation.theAlgebraicClosurE=&theCommands.theObjectContainer.theAlgebraicClosure;
   theComputation.flagTryDirectlySolutionOverAlgebraicClosure=startWithAlgebraicClosure;
   theCommands.theGlobalVariableS->theDefaultFormat=theComputation.theFormat;
 //  stOutput << "<br>the alphabet:" << theComputation.theFormat.polyAlphabeT;
 //  stOutput << "<br>The context vars:<br>" << theContext.ToString();
-  theComputation.  flagUseTheMonomialBranchingOptimization=true;
+  theComputation.flagUseTheMonomialBranchingOptimization=true;
   theComputation.SolveSerreLikeSystem(thePolysAlgebraic, theCommands.theGlobalVariableS);
+//  stOutput << "<br>Got to ere";
   std::stringstream out;
   out << "<br>The context vars:<br>" << theContext.ToString();
   out << "<br>The polynomials: " << thePolysAlgebraic.ToString(&theComputation.theFormat);

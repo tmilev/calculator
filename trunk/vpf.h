@@ -14,7 +14,6 @@
 //
 //Additional contributions.
 //Thomas Bliem (svn server set-up, first gcc compile).
-//Madan Chaudhary (javascript autocomplete code).
 //Steven Jackson @ UMass (server set-up).
 //the Jacobs University IT staff (server set-up).
 //

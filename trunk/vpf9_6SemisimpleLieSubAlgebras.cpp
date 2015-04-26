@@ -517,7 +517,7 @@ void SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand()
 
 bool SemisimpleSubalgebras::LoadState
 (List<int>& currentChainInt, List<int>& numExploredTypes, List<int>& numExploredHs, std::stringstream& reportStream)
-{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::LoadStateAndContinueFindingSas");
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::LoadState");
   this->FindTheSSSubalgebrasInit();
   if (currentChainInt.size!=numExploredTypes.size || currentChainInt.size!=numExploredHs.size)
   { reportStream << "<hr>Input state is corrupt: currentChainInt.size: " << currentChainInt.size << ", numExploredTypes.size: "
@@ -762,32 +762,39 @@ void CandidateSSSubalgebra::ComputeHsAndHsScaledToActByTwoFromComponents()
     }
 }
 
+bool SemisimpleSubalgebras::SetUpParabolicInductionDataPrecomputedSA(CandidateSSSubalgebra& theCandidate)
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::SetUpParabolicInductionDataPrecomputedSA");
+  int indexPrecomputed=this->theHsOfSubalgebras.GetIndex(theCandidate.theHs);
+  if (indexPrecomputed==-1)
+    return false;
+  if (this->theSubalgebras[indexPrecomputed].theHsScaledToActByTwoInOrderOfCreation.size!=
+      theCandidate.theHs.size)
+    this->theSubalgebras[indexPrecomputed].theHsScaledToActByTwoInOrderOfCreation=
+    theCandidate.theHsScaledToActByTwoInOrderOfCreation;
+  this->theSubalgebras[indexPrecomputed].indexIamInducedFrom=theCandidate.indexIamInducedFrom;
+  this->theSubalgebras[indexPrecomputed].RootInjectionsFromInducer=theCandidate.RootInjectionsFromInducer;
+  theCandidate=this->theSubalgebras[indexPrecomputed];
+  return theCandidate.ComputeAndVerifyFromGeneratorsAndHs();
+}
+
+
 bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
 (const CandidateSSSubalgebra& baseSubalgebra, Vector<Rational>& newHrescaledToActByTwo, const DynkinType& theNewType, const List<int>& theRootInjection)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra");
   this->SetUpInjectionHs(baseSubalgebra, theNewType, theRootInjection, &newHrescaledToActByTwo);
-  if (this->owner->theHsOfSubalgebras.Contains(this->theHs))
-  { int indexPrecomputed=this->owner->theHsOfSubalgebras.GetIndex(this->theHs);
-    if (this->owner->theSubalgebras[indexPrecomputed].theHsScaledToActByTwoInOrderOfCreation.size!=
-        this->theHs.size)
-      this->owner->theSubalgebras[indexPrecomputed].theHsScaledToActByTwoInOrderOfCreation=
-      this->theHsScaledToActByTwoInOrderOfCreation;
-    *this=this->owner->theSubalgebras[indexPrecomputed];
-    this->indexIamInducedFrom=baseSubalgebra.indexInOwner;
-    this->RootInjectionsFromInducer=theRootInjection;
-    return this->ComputeAndVerifyFromGeneratorsAndHs();
-  }
+  //set up induction history:
+  //  stOutput << "<hr><b>Testing actual extension!!! Type base: "
+  //  << baseSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString()
+  //  << ", type target: " << this->theWeylNonEmbeddeD.theDynkinType.ToString() << "</b><br>";
+  this->indexIamInducedFrom=baseSubalgebra.indexInOwner;
+  this->RootInjectionsFromInducer=theRootInjection;
+  //induction history is complete.
+  if (this->owner->SetUpParabolicInductionDataPrecomputedSA(*this))
+    return true;
   this->owner->RegisterPossibleCandidate(*this);
   this->CheckInitialization();
   if (!baseSubalgebra.theWeylNonEmbeddeD.theDynkinType.IsEqualToZero() && baseSubalgebra.indexInOwner==-1)
     crash << "This is a programming error: attempting to induce a subalgebra from a non-registered base subalgebra. " << crash;
-  //set up induction history:
-//  stOutput << "<hr><b>Testing actual extension!!! Type base: "
-//  << baseSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString()
-//  << ", type target: " << this->theWeylNonEmbeddeD.theDynkinType.ToString() << "</b><br>";
-  this->indexIamInducedFrom=baseSubalgebra.indexInOwner;
-  this->RootInjectionsFromInducer=theRootInjection;
-  //induction history is complete.
   ProgressReport theReport(this->owner->theGlobalVariables);
   if (!this->ComputeChar(false))
   { if (this->owner->theGlobalVariables!=0)
@@ -1616,7 +1623,8 @@ bool CandidateSSSubalgebra::IsGoodHnewActingByTwo(const Vector<Rational>& HNewAc
   { Vector<Rational>& currentPosRoot=this->GetAmbientWeyl().RootsOfBorel[i];
     bool canBeRaisingReflection=true;
     for (int l=0; l<this->theHsScaledToActByTwoInOrderOfCreation.size && canBeRaisingReflection; l++)
-    { theScalarProd=this->GetAmbientWeyl().RootScalarCartanRoot(currentPosRoot, this->theHsScaledToActByTwoInOrderOfCreation[l]);
+    { theScalarProd=this->GetAmbientWeyl().RootScalarCartanRoot
+      (currentPosRoot, this->theHsScaledToActByTwoInOrderOfCreation[l]);
       if (theScalarProd>0)
         canBeRaisingReflection=false;
       if (theScalarProd<0)
@@ -1691,10 +1699,10 @@ bool CandidateSSSubalgebra::ComputeSystem(bool AttemptToChooseCentalizer, bool a
     stOutput << "<br>Involved neg gens: " << this->theInvolvedPosGenerators.ToString();
     stOutput << "<br>Involved pos gens: " << this->theInvolvedPosGenerators.ToString();
   }*/
-  if (this->GetRank()>1 && this->indexIamInducedFrom==-1)
-    crash << "Subalgebra candidate of type " << this->theWeylNonEmbeddeD.theDynkinType.ToString()
-    << " is of rank higher than 1 but I have no record from which subalgebra it is parabolically induced. "
-    << crash;
+//  if (this->GetRank()>1 && this->indexIamInducedFrom==-1)
+//    crash << "Subalgebra candidate of type " << this->theWeylNonEmbeddeD.theDynkinType.ToString()
+//    << " is of rank higher than 1 but I have no record from which subalgebra it is parabolically induced. "
+//    << crash;
   this->theInvolvedNegGenerators.SetSize(this->theHsScaledToActByTwo.size);
   this->theInvolvedPosGenerators.SetSize(this->theHsScaledToActByTwo.size);
   for (int i=0; i<this->theHsScaledToActByTwo.size; i++)

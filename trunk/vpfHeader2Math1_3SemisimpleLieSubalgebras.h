@@ -393,6 +393,7 @@ public:
   { this->reset();
     this->initHookUpPointers(inputOwner, theField, inputSubalgebrasNonEmbedded, inputSl2sOfSubalgebras, inputGlobalVariables);
   }
+  bool SetUpParabolicInductionDataPrecomputedSA(CandidateSSSubalgebra& theCandidate);
   bool CheckConsistencyHs()const;
   bool CheckConsistency()const;
   bool CheckInitialization() const;

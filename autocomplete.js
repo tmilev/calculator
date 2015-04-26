@@ -63,6 +63,9 @@ function isSeparator(theChar)
 { switch(theChar)
   { case '+':
     case ' ':
+    case ',':
+    case '(':
+    case ')':
     case '\n':
     case '\r':
     case '\"':
@@ -79,6 +82,7 @@ function getLastWord()
   lastWordLength=0;
 
 //  for (i=theText.value.length-1; i>=0; i--)
+	
   for (i=cursorPosition-1; i>=0; i--)
   { if (isSeparator(theText.value[i]))
       break;

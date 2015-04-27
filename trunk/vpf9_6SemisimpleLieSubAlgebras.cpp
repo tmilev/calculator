@@ -1797,7 +1797,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
       << crash;
     if (rankCentralizer>this->GetAmbientWeyl().GetDim())
       crash << " Currently rankCentralizer is computed to be " << rankCentralizer << " which is greater than the rank "
-      << "of the ambient semisimple Lie algebra. Something has gone wrong. "
+      << this->GetAmbientWeyl().GetDim() << " of the ambient semisimple Lie algebra. Something has gone wrong. "
       << "Here is a detailed printout of the candidate subalgebra. "
       << this->ToString() << crash;
     this->totalNumUnknownsWithCentralizer+=rankCentralizer*this->GetAmbientWeyl().GetDim()+1;
@@ -5120,7 +5120,8 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
   if (!this->flagCentralizerIsWellChosen)
   { //if (this->owner->flagAttemptToAdjustCentralizers)
     out << "<br><span style=\"color:#FF0000\"><b>The Cartan of the centralizer does not lie in the ambient Cartan (the computation was too large?).</b></span> "
-    << "The intersection of the ambient Cartan with the centralizer is of dimension " << this->CartanOfCentralizer.size << " instead of the desired dimension " << this->centralizerRank.ToString() << ". ";
+    << "The intersection of the ambient Cartan with the centralizer is of dimension " << this->CartanOfCentralizer.size << " instead of the desired dimension "
+    << this->centralizerRank.ToString() << ". ";
     //else
     //  out << "<br><span style=\"color:#FF0000\"><b>I was unable to compute the centralizer (not all subalgebras were computed?).</b></span> ";
   }

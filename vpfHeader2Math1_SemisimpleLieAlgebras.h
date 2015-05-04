@@ -82,7 +82,7 @@ public:
   }
   bool CheckConsistency()const;
   template <class coefficient>
-  void GenerateLieSubalgebra(List<ElementSemisimpleLieAlgebra<coefficient> >& inputOutputGenerators);
+  void GenerateLieSubalgebra(List<ElementSemisimpleLieAlgebra<coefficient> >& inputOutputGenerators, GlobalVariables* theGlobalVariables=0);
   void ComputeMultTable(GlobalVariables& theGlobalVariables);
   bool IsOfSimpleType(char desiredType, int desiredRank)const
   { return this->theWeyl.IsOfSimpleType(desiredType, desiredRank);
@@ -209,6 +209,8 @@ public:
   void GetSl2SubalgebraFromRootSA(GlobalVariables& theGlobalVariables);
   template<class coefficient>
   void GetAd(Matrix<coefficient>& output, ElementSemisimpleLieAlgebra<coefficient>& e);
+  template<class coefficient>
+  void GetAd(MatrixTensor<coefficient>& output, ElementSemisimpleLieAlgebra<coefficient>& e);
   void initHEFSystemFromECoeffs
   (int theRelativeDimension, Vectors<Rational>& rootsInPlay, Vectors<Rational>& simpleBasisSA, Vectors<Rational>& SelectedExtraPositiveRoots,
    int numberVariables, int numRootsChar2, int halfNumberVariables, Vector<Rational>& targetH, Matrix<Rational>& inputFCoeffs,

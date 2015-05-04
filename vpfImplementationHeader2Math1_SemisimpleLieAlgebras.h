@@ -228,6 +228,13 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeDominantWeightsOnly
 }
 
 template <class coefficient>
+void SemisimpleLieAlgebra::GetAd(MatrixTensor<coefficient>& output, ElementSemisimpleLieAlgebra<coefficient>& e)
+{ Matrix<coefficient> matForm;
+  this->GetAd(matForm, e);
+  output=matForm;
+}
+
+template <class coefficient>
 void SemisimpleLieAlgebra::GetAd(Matrix<coefficient>& output, ElementSemisimpleLieAlgebra<coefficient>& e)
 { int NumGenerators=this->GetNumGenerators();
   output.init(NumGenerators, NumGenerators);

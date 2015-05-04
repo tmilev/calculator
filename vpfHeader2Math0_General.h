@@ -4415,8 +4415,8 @@ public:
   static unsigned int HashFunction(const ElementSemisimpleLieAlgebra& input)
   { return input.HashFunction();
   }
-  template<class otherType>
-  void operator=(const ElementSemisimpleLieAlgebra<otherType>& other)
+  template<class otherElement>
+  void operator=(const otherElement& other)
   { this->::MonomialCollection<ChevalleyGenerator, coefficient>::operator=(other);
   }
   Vector<Rational> GetRootIMustBeWeight()const;
@@ -6692,6 +6692,16 @@ public:
       for (int j=0; j<inputVectors[i].size(); j++)
         this->AddMonomial(MonomialMatrix(i,inputVectors[i][j].theIndex), inputVectors[i].theCoeffs[j]);
   }
+  bool IsNilpotent()const
+  { MatrixTensor<coefficient> theMat, theMatCopy;
+    theMat=*this;
+    for (int theDim= this->GetMinNumColsNumRows()+1; theDim>0; theDim/=2)
+    { theMat*=theMat;
+      if (theMat.IsEqualToZero())
+        return true;
+    }
+    return false;
+  }
   void GaussianEliminationByRowsMatrix(MatrixTensor<coefficient>* carbonCopyMat=0);
   template <class otherType>
   void ActOnVectorColumn(const Vector<otherType>& input, Vector<otherType>& output)const
@@ -6756,6 +6766,16 @@ public:
   }
   static inline unsigned int HashFunction(const MatrixTensor<coefficient>& input)
   { return input.HashFunction();
+  }
+  template<class otherClass>
+  void operator=(const otherClass& other)
+  { this->::MonomialCollection<MonomialMatrix, coefficient>::operator=(other);
+  }
+  MatrixTensor<coefficient> operator+(const MatrixTensor<coefficient>& rightM)const
+  { MatrixTensor output;
+    output=*this;
+    output+=rightM;
+    return output;
   }
 };
 

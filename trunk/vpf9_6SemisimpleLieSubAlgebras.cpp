@@ -14,12 +14,28 @@ FormatExpressions::GetMonOrder<DynkinSimpleType>()
 }
 
 template<class coefficient>
-void SemisimpleLieAlgebra::GenerateLieSubalgebra(List<ElementSemisimpleLieAlgebra<coefficient> >& inputOutputGenerators)
+void SemisimpleLieAlgebra::GenerateLieSubalgebra
+(List<ElementSemisimpleLieAlgebra<coefficient> >& inputOutputGenerators, GlobalVariables* theGlobalVariables)
 { ElementSemisimpleLieAlgebra<coefficient> theBracket;
   HashedList<ChevalleyGenerator> seedMons;
+  ProgressReport theReport(theGlobalVariables);
+  List<ElementSemisimpleLieAlgebra<coefficient> > inputLinIndep;
   for (int i=0; i<inputOutputGenerators.size; i++)
-    for (int j=0; j<inputOutputGenerators.size; j++)
-    { this->LieBracket(inputOutputGenerators[i], inputOutputGenerators[j], theBracket);
+  { inputLinIndep.AddOnTop(inputOutputGenerators[i]);
+    if (theBracket.GetRankOfSpanOfElements(inputLinIndep, &seedMons)< inputLinIndep.size)
+      inputLinIndep.RemoveLastObject();
+  }
+  inputOutputGenerators=inputLinIndep;
+  for (int i=0; i<inputOutputGenerators.size; i++)
+    for (int j=i+1; j<inputOutputGenerators.size; j++)
+    { if (theGlobalVariables!=0)
+      { std::stringstream reportStream;
+        reportStream << "Generating Lie subalgebra of a semisimple Lie algebra. "
+        << "I am taking the Lie bracket of elements "
+        << i+1 << " and " << j+1 << " out of " << inputOutputGenerators.size;
+        theReport.Report(reportStream.str());
+      }
+      this->LieBracket(inputOutputGenerators[i], inputOutputGenerators[j], theBracket);
       inputOutputGenerators.AddOnTop(theBracket);
       if (theBracket.GetRankOfSpanOfElements(inputOutputGenerators, &seedMons)<inputOutputGenerators.size)
         inputOutputGenerators.RemoveLastObject();
@@ -108,6 +124,64 @@ bool SemisimpleLieAlgebra::AttemptExtendingEtoHEFwithHinCartan
   outputH=unknownH;
   outputF=unknownF;
   return true;
+}
+
+SubalgebraSemisimpleLieAlgebra::SubalgebraSemisimpleLieAlgebra()
+{ this->theGlobalVariables=0;
+  this->owner=0;
+}
+
+bool SubalgebraSemisimpleLieAlgebra::CheckInitialization()
+{ if (this->owner==0)
+    crash << "Non-initilized (no owner) subalgebra of semisimple Lie algebra." << crash;
+  return true;
+}
+
+void SubalgebraSemisimpleLieAlgebra::ComputeBasis()
+{ MacroRegisterFunctionWithName("SubalgebraSemisimpleLieAlgebra::ComputeBasis");
+  this->CheckInitialization();
+  this->theBasis=this->theGenerators;
+  this->owner->GenerateLieSubalgebra(this->theBasis, this->theGlobalVariables);
+}
+
+void SubalgebraSemisimpleLieAlgebra::ComputeCartanSA()
+{ MacroRegisterFunctionWithName("SubalgebraSemisimpleLieAlgebra::ComputeCartanSA");
+  this->CheckInitialization();
+  List<MatrixTensor<AlgebraicNumber> > theAds;
+  MatrixTensor<AlgebraicNumber> theAd;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > CurrentCentralizer;
+  this->CartanSA.SetSize(0);
+  CurrentCentralizer=this->theBasis;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> newElt;
+  while(CurrentCentralizer.size>0)
+  { theAds.SetSize(CurrentCentralizer.size);
+    for (int i=0; i<CurrentCentralizer.size; i++)
+      this->owner->GetAd(theAds[i], CurrentCentralizer[i]);
+    bool foundNewElement=false;
+    for (int i=0; i<theAds.size; i++)
+      if (!theAds[i].IsNilpotent())
+      { foundNewElement=true;
+        newElt=CurrentCentralizer[i];
+        break;
+      }
+    if (!foundNewElement)
+      for (int i=0; i<theAds.size; i++)
+        for (int j=i+1; j<theAds.size; j++)
+        { theAd=theAds[i]+theAds[j];
+          if (!theAd.IsNilpotent())
+          { newElt=CurrentCentralizer[i]+CurrentCentralizer[j];
+            foundNewElement=true;
+            i=theAds.size+1;
+            break;
+          }
+        }
+    if (!foundNewElement)
+      crash  << "This shouldn't happen: could not found a new nilpotent element. " << crash;
+    this->CartanSA.AddOnTop(newElt);
+    this->owner->GetCommonCentralizer(this->CartanSA, CurrentCentralizer);
+    newElt.IntersectVectorSpaces(CurrentCentralizer, this->theBasis, CurrentCentralizer, 0);
+  }
+
 }
 
 void WeylGroup::operator+=(const WeylGroup& other)
@@ -5149,6 +5223,9 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
   { this->flagCentralizerIsWellChosen=true;
     return;
   }
+  if (this->centralizerRank>this->owner->owneR->GetRank())
+    crash << "Something is wrong: this->centralizerRank computed to be " << this->centralizerRank.ToString()
+    << " but the rank of the ambient Lie algebra is only " << this->owner->owneR->GetRank() << crash;
   ProgressReport theReport1(this->owner->theGlobalVariables);
   DynkinType centralizerTypeAlternative;
   if (this->indexMaxSSContainer!=-1)
@@ -5359,6 +5436,9 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     out << "<br>Subalgebra is (parabolically) induced from " << this->owner->ToStringAlgebraLink(this->indexIamInducedFrom, theFormat) << ". ";
 //  else
 //    out << "<br>subalgebra outta nowhere!";
+  if (!this->flagCentralizerIsWellChosen)
+    out << "<br>The dimension of the centralizer is: " << this->centralizerDimension.ToString();
+  out << this->ToStringCentralizer(theFormat);
   if (this->flagSystemProvedToHaveNoSolution)
   { out << " <b> Subalgebra candidate proved to be impossible! </b> ";
     return out.str();
@@ -5381,10 +5461,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     }
     out << ". ";
   }
-  if (!this->flagCentralizerIsWellChosen)
-    out << "<br>The dimension of the centralizer is: " << this->centralizerDimension.ToString();
   out << "<br>" << this->ToStringCartanSA(theFormat);
-  out << this->ToStringCentralizer(theFormat);
   //stOutput << "Got here no crash";
   bool displayNilradSummary=(this->owner->flagComputeNilradicals && this->flagCentralizerIsWellChosen && this->flagSystemSolved);
   if (displayNilradSummary)
@@ -5771,6 +5848,11 @@ void SemisimpleSubalgebras::HookUpCentralizers(bool allowNonPolynomialSystemFail
         //stOutput << " direct summand of " << otherSA.theWeylNonEmbeddeD.theDynkinType.ToString() << ", ";
       } //else stOutput << " NOT direct summand of " << otherSA.theWeylNonEmbeddeD.theDynkinType.ToString() << ", ";
     }
+    currentSA.ComputeCentralizerIsWellChosen();
+    if (currentSA.centralizerRank>this->owneR->GetRank())
+      crash << "Subalgebra " << currentSA.ToStringType() << " has rank "
+      << currentSA.centralizerRank.ToString() << " but the ambient Lie algebra isonly of rank "
+      << this->owneR->GetRank() << ". " << crash;
 //    if (currentSA.indexMaxSSContainer!=-1)
 //      stOutput << "<br> Max semisimple container of " << currentSA.theWeylNonEmbeddeD.theDynkinType.ToString()
 //      << " is computed to be: " << this->theSubalgebras[currentSA.indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType.ToString();

@@ -71,6 +71,7 @@ public:
 
   static bool outerCombineFractionsCommutative(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerIsNilpotent(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerInvertMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDFQsEulersMethod(Calculator& theCommands, const Expression& input, Expression& output);
 
@@ -81,6 +82,8 @@ public:
   static bool innerGrowDynkinType(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetPrincipalSl2Index(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetDynkinIndicesSlTwoSubalgebras(Calculator& theCommands, const Expression& input, Expression& output);
+
+  static bool innerConstructCartanSA(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerGetCentralizerChainsSemisimpleSubalgebras(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerComputeSemisimpleSubalgebras(Calculator& theCommands, const Expression& input, Expression& output);

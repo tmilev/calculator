@@ -2920,6 +2920,27 @@ bool CalculatorFunctionsGeneral::innerRemoveLastElement(Calculator& theCommands,
   return output.SetChildAtomValue(0, theCommands.opSequence());
 }
 
+bool CalculatorFunctionsGeneral::innerIsNilpotent(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsNilpotent");
+  Matrix<Rational> theMat;
+  MatrixTensor<Rational> theMatTensor;
+  bool found=false;
+  if (input.IsOfType<Matrix<Rational> >(&theMat))
+  { found=true;
+    theMatTensor=theMat;
+  } else if (!input.IsOfType<MatrixTensor<Rational> >(&theMatTensor))
+    found =true;
+  else if (!theCommands.GetMatriXFromArguments<Rational>(input, theMat, 0, -1, 0))
+  { theMatTensor=theMat;
+    found=true;
+  }
+  if (!found)
+    return output.MakeError("Failed to extract matrix with rational coefficients", theCommands);
+  if (theMatTensor.IsNilpotent())
+    return output.AssignValue(1, theCommands);
+  return output.AssignValue(0, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerInvertMatrix(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInvertMatrix");
   Matrix<Rational> theMat;

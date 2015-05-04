@@ -9,6 +9,7 @@ static ProjectInformationInstance ProjectInfoVpfHeader1_4(__FILE__, "Header, sem
 
 class SemisimpleSubalgebras;
 class CandidateSSSubalgebra;
+class SubalgebraSemisimpleLieAlgebra;
 
 class NilradicalCandidate
 {
@@ -70,6 +71,22 @@ class NilradicalCandidate
   std::string ToStringTableElementWithWeights(const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& theElts, const Vectors<Rational>& theWeights)const;
   void ComputeTheTwoCones(GlobalVariables* theGlobalVariables);
   void ComputeTheTwoConesRelativeToNilradicalSubset();
+};
+
+class SubalgebraSemisimpleLieAlgebra
+{
+public:
+  std::string ToString(FormatExpressions* theFormat);
+  SemisimpleLieAlgebra* owner;
+  GlobalVariables* theGlobalVariables;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theGenerators;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theBasis;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > CartanSA;
+  void ComputeBasis();
+  void ComputeCartanSA();
+  SubalgebraSemisimpleLieAlgebra();
+  bool CheckInitialization();
+
 };
 
 class CandidateSSSubalgebra

@@ -1118,6 +1118,11 @@ void Calculator::initPredefinedInnerFunctions()
    "SolveProductSumEquationOverSetModN(theMod=65537; theProduct=16628; theSum=1286; theSet= (97,98,99,100,101,102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122)) ",
    true, false, "CalculatorFunctionsGeneral::innerFindProductDistanceModN");
   this->AddOperationInnerHandler
+  ("IsNilpotent", CalculatorFunctionsGeneral::innerIsNilpotent, "",
+   "Computes whether a matrix is nilpotent. May/will be extended to work for an arbitrary object \
+   for which the term \"nilpotent\" makes sense. ",
+   "IsNilpotent{}((0,1),(0,0))");
+  this->AddOperationInnerHandler
   ("InvertMatrixVerbose", this->innerInvertMatrixVerbose, "",
    "<b>Calculus teaching function.</b> Inverts a matrix of rationals if invertible, in any other case generates an error. Makes a detailed \
    printout of all Gaussian elimantion steps. ",

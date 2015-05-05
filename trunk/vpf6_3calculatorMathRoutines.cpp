@@ -53,7 +53,7 @@ bool CalculatorFunctionsGeneral::innerConstructCartanSA(Calculator& theCommands,
     theSA.theGenerators.AddOnTop(theElt);
   else
     for (int i=1; i<input.children.size; i++)
-      if (input.ConvertsToType(&theElt))
+      if (input[i].ConvertsToType(&theElt))
         theSA.theGenerators.AddOnTop(theElt);
       else
         return theCommands << "Failed to extract element of a semisimple Lie algebra from " << input[i].ToString();

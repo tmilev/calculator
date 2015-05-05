@@ -164,8 +164,18 @@ void SubalgebraSemisimpleLieAlgebra::ComputeCartanSA()
   this->CartanSA.SetSize(0);
   CurrentCentralizer=this->theBasis;
   ElementSemisimpleLieAlgebra<AlgebraicNumber> newElt;
+  ProgressReport theReport0(this->theGlobalVariables), theReport1(this->theGlobalVariables);
+  std::stringstream reportStream0;
+  reportStream0 << "Computing Cartan subalgebra of a subalgebra of " << this->owner->theWeyl.theDynkinType.ToString()
+  << " with basis " << this->theBasis.ToStringCommaDelimited();
+  theReport0.Report(reportStream0.str());
   while(CurrentCentralizer.size>0)
-  { theAds.SetSize(CurrentCentralizer.size);
+  { std::stringstream reportStream1;
+    reportStream1 << "Currently, the Cartan subalgebra basis candidates are: "
+    << this->CartanSA.ToStringCommaDelimited() << "; remaining centralizer: "
+    << CurrentCentralizer.ToStringCommaDelimited();
+    theReport1.Report(reportStream1.str());
+    theAds.SetSize(CurrentCentralizer.size);
     for (int i=0; i<CurrentCentralizer.size; i++)
       this->owner->GetAd(theAds[i], CurrentCentralizer[i]);
     bool foundNewElement=false;

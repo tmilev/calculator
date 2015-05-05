@@ -6693,7 +6693,7 @@ public:
         this->AddMonomial(MonomialMatrix(i,inputVectors[i][j].theIndex), inputVectors[i].theCoeffs[j]);
   }
   bool IsNilpotent()const
-  { MatrixTensor<coefficient> theMat, theMatCopy;
+  { MatrixTensor<coefficient> theMat;
     theMat=*this;
     for (int theDim= this->GetMinNumColsNumRows()+1; theDim>0; theDim/=2)
     { theMat*=theMat;

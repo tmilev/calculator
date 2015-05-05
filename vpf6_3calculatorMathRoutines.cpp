@@ -2928,14 +2928,15 @@ bool CalculatorFunctionsGeneral::innerIsNilpotent(Calculator& theCommands, const
   if (input.IsOfType<Matrix<Rational> >(&theMat))
   { found=true;
     theMatTensor=theMat;
-  } else if (!input.IsOfType<MatrixTensor<Rational> >(&theMatTensor))
+  } else if (input.IsOfType<MatrixTensor<Rational> >(&theMatTensor))
     found =true;
-  else if (!theCommands.GetMatriXFromArguments<Rational>(input, theMat, 0, -1, 0))
+  else if (theCommands.GetMatriXFromArguments<Rational>(input, theMat, 0, -1, 0))
   { theMatTensor=theMat;
     found=true;
   }
   if (!found)
     return output.MakeError("Failed to extract matrix with rational coefficients", theCommands);
+  stOutput << "mat tensor: " << theMatTensor.ToString();
   if (theMatTensor.IsNilpotent())
     return output.AssignValue(1, theCommands);
   return output.AssignValue(0, theCommands);

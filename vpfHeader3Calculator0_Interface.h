@@ -230,9 +230,10 @@ class Expression
   bool NeedsParenthesisForMultiplication()const;
 
   int GetExpressionTreeSize()const;
-
   template <class theType>
   bool ConvertToType(Expression& output)const;
+  template <class theType>
+  bool ConvertsToType(theType* whichElement=0)const;
   template <class theType>
   bool IsOfType(theType* whichElement=0)const
   { MacroRegisterFunctionWithName("Expression::IsOfType");

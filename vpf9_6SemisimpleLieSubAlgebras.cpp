@@ -137,6 +137,17 @@ bool SubalgebraSemisimpleLieAlgebra::CheckInitialization()
   return true;
 }
 
+std::string SubalgebraSemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
+{ MacroRegisterFunctionWithName("SubalgebraSemisimpleLieAlgebra::ToString");
+  if(this->owner==0)
+    return "A non-initialized subalgebra of a semisimple Lie algebra; ";
+  std::stringstream out;
+  out << "A subalgebra of dimension " << this->theBasis.size << " lying in "
+  << this->owner->theWeyl.theDynkinType.ToString() << ".<br>The subalgebra has basis: "
+  << this->theBasis.ToStringCommaDelimited();
+  return out.str();
+}
+
 void SubalgebraSemisimpleLieAlgebra::ComputeBasis()
 { MacroRegisterFunctionWithName("SubalgebraSemisimpleLieAlgebra::ComputeBasis");
   this->CheckInitialization();

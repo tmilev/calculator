@@ -45,6 +45,34 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation
   return true;
 }
 
+bool CalculatorFunctionsGeneral::innerConstructCartanSA(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConstructCartanSA");
+  SubalgebraSemisimpleLieAlgebra theSA;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> theElt;
+  if (input.ConvertsToType(&theElt))
+    theSA.theGenerators.AddOnTop(theElt);
+  else
+    for (int i=1; i<input.children.size; i++)
+      if (input.ConvertsToType(&theElt))
+        theSA.theGenerators.AddOnTop(theElt);
+      else
+        return theCommands << "Failed to extract element of a semisimple Lie algebra from " << input[i].ToString();
+  for (int i=0; i<theSA.theGenerators.size; i++)
+    if (!theSA.theGenerators[i].IsEqualToZero())
+    { if (theSA.owner!=0)
+        if (theSA.owner!=theSA.theGenerators[i].GetOwner())
+          return theCommands << "The input elements in " << input.ToString()
+          << " belong to different semisimple Lie algebras";
+      theSA.owner=theSA.theGenerators[i].GetOwner();
+    }
+  if (theSA.owner==0)
+    return theCommands << "Failed to extract input semisimple Lie algebra elements from the inputs of " << input.ToString();
+  theSA.theGlobalVariables=theCommands.theGlobalVariableS;
+  theSA.ComputeBasis();
+  theSA.ComputeCartanSA();
+  return output.AssignValue(theSA.ToString(), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket");
   Vector<ElementWeylAlgebra<Rational> > theOps;

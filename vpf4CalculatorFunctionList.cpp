@@ -416,6 +416,15 @@ void Calculator::initPredefinedInnerFunctions()
     \nGenerateFiniteMultiplicativelyClosedSet{}(48, s_1, s_2, s_3);", true, false)
    ;
   this->AddOperationInnerHandler
+  ("CartanSA", CalculatorFunctionsGeneral::innerConstructCartanSA, "",
+   "Generates a Cartan subalgebra, code is still experimental.",
+    "g_{{i}}=getChevalleyGenerator{}(b_3, i);\
+   \nh_{{i}}=getCartanGenerator{}(b_3, i);\
+   CartanSA(g_1+g_3, g_-1+g_-3, g_2, g_-2);\
+   "
+    , true, false, "CalculatorFunctionsGeneral::innerConstructCartanSA")
+   ;
+  this->AddOperationInnerHandler
   ("GenerateVectorSpaceClosedWRTLieBracket", CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket, "",
    "Generates a vector space closed with respect to the Lie bracket from input of type elements of weyl algebra or Lie algebra. \
    The first argument of the input is an upper bound for the dimension of the vector space. The remaining \

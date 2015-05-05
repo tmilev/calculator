@@ -76,7 +76,7 @@ class NilradicalCandidate
 class SubalgebraSemisimpleLieAlgebra
 {
 public:
-  std::string ToString(FormatExpressions* theFormat);
+  std::string ToString(FormatExpressions* theFormat=0);
   SemisimpleLieAlgebra* owner;
   GlobalVariables* theGlobalVariables;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theGenerators;

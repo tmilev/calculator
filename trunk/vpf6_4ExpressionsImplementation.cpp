@@ -218,7 +218,26 @@ int Expression::GetTypeOperation<WeylGroupVirtualRepresentation<Rational> >()con
 }
 
 //Expression::GetTypeOperation specializations end.
+//Expression::ConvertsToType specializations follow.
+template < >
+bool Expression::ConvertsToType(
+ElementSemisimpleLieAlgebra<AlgebraicNumber>* whichElement
+)const
+{ MacroRegisterFunctionWithName("Expression::ConvertsToType");
+  if (this->theBoss==0)
+    return false;
+  ElementUniversalEnveloping<RationalFunctionOld> theUEElt;
+  if (!this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >(&theUEElt))
+    return false;
+  ElementSemisimpleLieAlgebra<Rational> theRatElt;
+  if (!theUEElt.GetLieAlgebraElementIfPossible(theRatElt))
+    return false;
+  if (whichElement!=0)
+    *whichElement=theRatElt;
+  return true;
+}
 
+//Expression::ConvertsToType specializations end.
 //Expression::AddObjectReturnIndex specializations follow
 template < >
 int Expression::AddObjectReturnIndex(const

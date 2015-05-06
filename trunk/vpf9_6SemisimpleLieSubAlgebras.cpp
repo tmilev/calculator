@@ -5244,9 +5244,6 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
   { this->flagCentralizerIsWellChosen=true;
     return;
   }
-  if (this->centralizerRank>this->owner->owneR->GetRank())
-    crash << "Something is wrong: this->centralizerRank computed to be " << this->centralizerRank.ToString()
-    << " but the rank of the ambient Lie algebra is only " << this->owner->owneR->GetRank() << crash;
   ProgressReport theReport1(this->owner->theGlobalVariables);
   DynkinType centralizerTypeAlternative;
   if (this->indexMaxSSContainer!=-1)
@@ -5268,7 +5265,17 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
         crash << "This is a programming error: two different methods for computing the centralizer type yield different results: by sub-diagram I computed the type as "
         << this->theCentralizerType.ToString() << " but looking at subalgerba containing the current one I got centralizer type "
         << centralizerTypeAlternative.ToString() << crash;
-  } //else
+    if (this->centralizerRank>this->owner->owneR->GetRank())
+      crash << "Something is wrong: this->centralizerRank computed to be " << this->centralizerRank.ToString()
+      << " but the rank of the ambient Lie algebra is only " << this->owner->owneR->GetRank() << crash;
+  } else
+  { if (this->centralizerDimension+this->GetRank() > this->owner->owneR->GetRank())
+      crash << "Something is wrong: this->centralizerDimension is "<< this->centralizerDimension.ToString()
+      << " which is larger than the rank of the ambient Lie algebra. At the same time the subalgebra "
+      << " is not contained in any larger semisimple subalagebra - this is not possible." << crash;
+  }
+
+  //else
     //stOutput << "<br>Type: " << this->theWeylNonEmbeddeD.theDynkinType.ToString() << ", " << " indexMaxSSContainer is -1. ";
   //stOutput << "<br>centralizer dimension: " << this->centralizerDimension << ", centralizer rank computed to be: "
   //<< this->centralizerRank << ", cartan centralizer computed to be of dimension: " << this->CartanOfCentralizer.size;

@@ -1753,6 +1753,9 @@ bool Calculator::GetVectoR
       return false;
   if (!this->ConvertExpressionsToCommonContext(convertedEs, inputOutputStartingContext))
     return false;
+  if (targetDimNonMandatory>0)
+    if (convertedEs.size!=targetDimNonMandatory)
+      return false;
   output.SetSize(convertedEs.size);
   for (int i=0; i<convertedEs.size; i++)
     output[i]=convertedEs[i].GetValue<theType>();

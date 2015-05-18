@@ -5227,6 +5227,22 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
   return out.str();
 }
 
+std::string CandidateSSSubalgebra::ToStringCentralizerDebugData(FormatExpressions* theFormat)const
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringCentralizerDebugData");
+  std::stringstream out;
+  out << "Subalgebra of type: " << this->theWeylNonEmbeddeD.theDynkinType.ToString()
+  << ". this->centralizerRank computed: " << this->centralizerRank.ToString()
+  << ". this->centralizerDimension: " << this->centralizerDimension.ToString()
+  << ". The max semisimple subalgebra container computed: "
+  << this->owner->theSubalgebras[this->indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType.ToString()
+  << ". The rank of the ambient Lie algebra is " << this->owner->owneR->GetRank()
+  << ". The indices of the direct containers of the subalgebra are: ";
+  for (int k=0; k<this->indicesDirectSummandSuperAlgebra.size; k++)
+    out << this->owner->theSubalgebras[this->indicesDirectSummandSuperAlgebra[k]].theWeylNonEmbeddeD.theDynkinType.ToString()
+    << ", ";
+  return out.str();
+}
+
 void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeCentralizerIsWellChosen");
   if (this->flagSystemProvedToHaveNoSolution)
@@ -5266,15 +5282,10 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
         << this->theCentralizerType.ToString() << " but looking at subalgerba containing the current one I got centralizer type "
         << centralizerTypeAlternative.ToString() << crash;
     if (this->centralizerRank>this->owner->owneR->GetRank())
-      crash << "Something is wrong: this->centralizerRank computed to be " << this->centralizerRank.ToString()
-      << " but the rank of the ambient Lie algebra is only " << this->owner->owneR->GetRank() << crash;
+      crash << "Something is wrong." << this->ToStringCentralizerDebugData() << crash;
   } else
-  { if (this->centralizerDimension+this->GetRank() > this->owner->owneR->GetRank())
-      crash << "Something is wrong: this->centralizerDimension is "<< this->centralizerDimension.ToString()
-      << " which is larger than the rank of the ambient Lie algebra. At the same time the subalgebra "
-      << " is not contained in any larger semisimple subalagebra - this is not possible." << crash;
-  }
-
+    if (this->centralizerDimension+this->GetRank() > this->owner->owneR->GetRank())
+      crash << "Something is wrong. " << this->ToStringCentralizerDebugData() << crash;
   //else
     //stOutput << "<br>Type: " << this->theWeylNonEmbeddeD.theDynkinType.ToString() << ", " << " indexMaxSSContainer is -1. ";
   //stOutput << "<br>centralizer dimension: " << this->centralizerDimension << ", centralizer rank computed to be: "

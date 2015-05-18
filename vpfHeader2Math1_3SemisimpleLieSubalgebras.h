@@ -281,6 +281,7 @@ public:
   std::string ToStringSystemPart2(FormatExpressions* theFormat=0)const;
   std::string ToStringLoadUnknown(FormatExpressions* theFormat=0)const;
   std::string ToStringCentralizer(FormatExpressions* theFormat=0)const;
+  std::string ToStringCentralizerDebugData(FormatExpressions* theFormat=0)const;
   std::string ToStringCartanSA(FormatExpressions* theFormat=0)const;
   std::string ToStringPairingTable(FormatExpressions* theFormat=0)const;
   std::string ToStringPairingTableLaTeX(FormatExpressions* theFormat=0)const;

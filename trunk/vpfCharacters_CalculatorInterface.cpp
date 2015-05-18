@@ -472,7 +472,8 @@ void WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion(GlobalVariables* 
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(Calculator& theCommands, const Expression& input, Expression& output, bool useOuter)
-{ if (input.children.size<2)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant");
+  if (input.children.size<2)
     return output.MakeError("Raising to maximally dominant takes at least 2 arguments, type and vector", theCommands);
   const Expression& theSSalgebraNode=input[1];
   SemisimpleLieAlgebra* theSSalgebra;
@@ -480,11 +481,26 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(Calculator&
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   Vectors<Rational> theHWs;
   theHWs.SetSize(input.children.size-2);
+  bool isGood=true;
   for (int i=2; i<input.children.size; i++)
     if (!theCommands.GetVectoR<Rational>(input[i], theHWs[i-2], 0, theSSalgebra->GetRank()))
-      return output.MakeError("Failed to extract rational vectors from arguments", theCommands);
+    { isGood=false;
+      break;
+    }
+  if (!isGood && input.children.size==3)
+  { stOutput << "here be i";
+    Matrix<Rational> theHWsMatForm;
+    if (theCommands.GetMatrix(input[2], theHWsMatForm, 0, theSSalgebra->GetRank()))
+    { theHWsMatForm.GetVectorsFromRows(theHWs);
+      isGood=true;
+    }
+  }
+  if (theHWs.size==0 || !isGood)
+    return output.MakeError("Failed to extract rational vectors from expression " + input.ToString() + ". ", theCommands);
   std::stringstream out;
-  out << "Input: " << theHWs.ToString() << ", simultaneously raising to maximally dominant ";
+  out << "Input: " << theHWs.ToString() << ", simultaneously raising to maximally dominant in Weyl group of type "
+  << theSSalgebra->theWeyl.theDynkinType.ToString();
+  stOutput << out.str();
   theSSalgebra->theWeyl.RaiseToMaximallyDominant(theHWs, useOuter);
   out << "<br>Maximally dominant output: " << theHWs.ToString();
   return output.AssignValue(out.str(), theCommands);

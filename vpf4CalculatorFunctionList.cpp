@@ -422,7 +422,7 @@ void Calculator::initPredefinedInnerFunctions()
    \nh_{{i}}=getCartanGenerator{}(b_3, i);\
    CartanSA(g_1+g_3, g_-1+g_-3, g_2, g_-2);\
    "
-    , true, false, "CalculatorFunctionsGeneral::innerConstructCartanSA")
+    , true, true, "CalculatorFunctionsGeneral::innerConstructCartanSA")
    ;
   this->AddOperationInnerHandler
   ("GenerateVectorSpaceClosedWRTLieBracket", CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket, "",

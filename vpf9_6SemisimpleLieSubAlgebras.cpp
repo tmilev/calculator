@@ -710,11 +710,13 @@ bool SemisimpleSubalgebras::FindTheSSSubalgebrasContinue()
   this->flagAttemptToAdjustCentralizers=true;
 //  stOutput << "Fix me!!!";
 //  this->flagAttemptToAdjustCentralizers=false;
+  stOutput << "The dynkin type, before hooking up the centralizers: " << this->targetDynkinType.ToString();
   if (!this->targetDynkinType.IsEqualToZero())
-    this->flagAttemptToAdjustCentralizers=false;
-  this->HookUpCentralizers(false);
-  if (this->flagComputeNilradicals)
-    this->ComputePairingTablesAndFKFTtypes();
+  { this->flagAttemptToAdjustCentralizers=false;
+    this->HookUpCentralizers(false);
+    if (this->flagComputeNilradicals)
+      this->ComputePairingTablesAndFKFTtypes();
+  }
   return true;
 }
 
@@ -5746,10 +5748,12 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
     theOuterAutos.theGenerators[i].Transpose();
   bool mustBeTrue=theOuterAutos.GenerateElements(100000);
   if (!mustBeTrue)
-    crash << "Failed to generate outer automorphisms of Dynkin simple type. The upper limit for such automorphism group size is 100000" << crash;
+    crash << "Failed to generate outer automorphisms of Dynkin simple type. "
+    << "The upper limit for such automorphism group size is 100000" << crash;
   Rational numCyclesFromTypes=selectedTypes.GetNumTotalCombinations();
   if (!numCyclesFromTypes.IsSmallInteger())
-    crash << "Computation is too large: I am crashing to let you know that the program cannot handle such a large number of outer automorphisms" << crash;
+    crash << "Computation is too large: I am crashing to let you know that the program cannot "
+    << "handle such a large number of outer automorphisms" << crash;
   List<Vector<Rational> > conjugationCandidates;
   Vectors<Rational> currentComponent;
   ProgressReport theReport(this->owner->theGlobalVariables);

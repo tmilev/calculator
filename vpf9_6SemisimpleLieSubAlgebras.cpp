@@ -711,7 +711,7 @@ bool SemisimpleSubalgebras::FindTheSSSubalgebrasContinue()
 //  stOutput << "Fix me!!!";
 //  this->flagAttemptToAdjustCentralizers=false;
   stOutput << "The dynkin type, before hooking up the centralizers: " << this->targetDynkinType.ToString();
-  if (!this->targetDynkinType.IsEqualToZero())
+  if (this->targetDynkinType.IsEqualToZero())
   { this->flagAttemptToAdjustCentralizers=false;
     this->HookUpCentralizers(false);
     if (this->flagComputeNilradicals)
@@ -1024,8 +1024,11 @@ bool SemisimpleSubalgebras::GetCentralizerTypeIfComputableAndKnown(const DynkinT
   int theIndex=-1;
   for (int i=0; i<this->theSl2s.theRootSAs.theSubalgebras.size; i++)
     if (this->theSl2s.theRootSAs.theSubalgebras[i].theDynkinType==input)
-    { theIndex=i;
-      break;
+    { if (theIndex!=-1)
+      { theIndex=-1;
+        break;
+      }
+      theIndex=i;
     }
   if (theIndex==-1)
     return false;

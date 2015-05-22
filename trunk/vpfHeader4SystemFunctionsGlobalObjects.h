@@ -19,6 +19,7 @@ extern Calculator theParser;
 
 extern double GetElapsedTimeInSeconds();
 extern void CallSystemWrapper(const std::string& theCommand);
+extern void CallChDirWrapper(const std::string& theCommand);
 extern void ignoreUserAbortSignal();
 
 extern void SleepFunction(int nanoseconds);

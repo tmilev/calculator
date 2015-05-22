@@ -3932,6 +3932,7 @@ class GlobalVariables
 private:
   double (*getElapsedTimePrivate)();
   void (*callSystem)(const std::string& theSystemCommand);
+  void (*callChDir)(const std::string& theDirectoryName);
 public:
   void (*IndicatorStringOutputFunction)(const std::string& input);
   void (*sleepFunction)(int microseconds);
@@ -4066,9 +4067,16 @@ public:
   void SetCallSystem(void (*theSystemCall)(const std::string&))
   { this->callSystem=theSystemCall;
   }
+  void SetCallChDir(void (*theChDir)(const std::string&))
+  { this->callChDir=theChDir;
+  }
   void System(const std::string& systemCommand)
   { if (this->callSystem!=0)
       this->callSystem(systemCommand);
+  }
+  void ChDir(const std::string& systemCommand)
+  { if (this->callChDir!=0)
+      this->callChDir(systemCommand);
   }
   std::string ToStringFolderInfo()const;
   inline void MakeReport(const std::string& input)

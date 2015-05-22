@@ -139,3 +139,7 @@ void* RunTimerVoidPtr(void* ptr)
 void CallSystemWrapper(const std::string& theCommand)
 { system(theCommand.c_str());
 }
+
+void CallChDirWrapper(const std::string& theDir)
+{ chdir(theDir.c_str());
+}

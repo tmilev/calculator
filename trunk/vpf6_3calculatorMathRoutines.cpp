@@ -4928,8 +4928,11 @@ class LaTeXcrawler
   int recursionDepth;
   std::string theFileToCrawl;
   std::string baseFolderStartFile;
+  std::string theFileToCrawlNoPath;
+  std::string theFileWorkingCopy;
   Calculator* owner;
   void Crawl();
+  void BuildFreecalc();
   void CrawlRecursive(const std::string& currentFileName);
   std::stringstream crawlingResult;
   std::stringstream displayResult;
@@ -4937,8 +4940,138 @@ class LaTeXcrawler
   std::string ToString();
 };
 
+void LaTeXcrawler::BuildFreecalc()
+{ MacroRegisterFunctionWithName("LaTeXcrawler::BuildFreecalc");
+  this->baseFolderStartFile=FileOperations::GetPathFromFileName(this->theFileToCrawl);
+  MathRoutines::StringBeginsWith(this->theFileToCrawl, this->baseFolderStartFile, & this->theFileToCrawlNoPath);
+  std::fstream inputFile;
+  if (!FileOperations::OpenFileCreateIfNotPresent(inputFile, this->theFileToCrawl, false, false, false))
+  { this->displayResult << "Failed to open input file: " << this->theFileToCrawl << ", aborting.";
+    return;
+  }
+  List<std::string> theLectureNumbers, theLectureDesiredNames;
+  inputFile.seekg(0);
+  std::string buffer;
+  ProgressReport theReport(this->owner->theGlobalVariableS);
+  theReport.Report("Processing input file: extracting lecture numbers.");
+  stOutput << "Processing input file: extracting lecture numbers.";
+  while (!inputFile.eof())
+  { std::getline(inputFile, buffer);
+    if (MathRoutines::StringBeginsWith(buffer, "\\lect"))
+    { int leftBracketsMinusRight=0;
+      int numBallancedBracketGroups=0;
+      std::string lectureNumber;
+      bool recordingLectureNumber=false;
+      for (unsigned i=0; i<buffer.size(); i++)
+      { if (buffer[i]=='}')
+        { leftBracketsMinusRight--;
+          if (leftBracketsMinusRight==0)
+          { numBallancedBracketGroups++;
+            if (recordingLectureNumber)
+              break;
+          }
+        }
+        if (buffer[i]=='{')
+        { leftBracketsMinusRight++;
+          if (leftBracketsMinusRight==1 && numBallancedBracketGroups==2)
+            recordingLectureNumber=true;
+        }
+        if (recordingLectureNumber)
+          lectureNumber.push_back(buffer[i]);
+      }
+      if (lectureNumber.size()>0)
+        theLectureNumbers.AddOnTop(lectureNumber.substr(1, lectureNumber.size()-1));
+      else
+      { this->displayResult << "Failed to extract lecture number from line: " << buffer;
+        return;
+      }
+      std::getline(inputFile, buffer);
+      std::string desiredName;
+      if (!MathRoutines::StringBeginsWith(buffer, "%DesiredLectureName: ", &desiredName))
+        desiredName="";
+      for (unsigned i=0; i<desiredName.size(); i++)
+        if (desiredName[i]== '.' || desiredName[i]=='/' || desiredName[i]=='\\')
+          desiredName="";
+      if (desiredName=="")
+        this->displayResult << "Failed to extract desired lecture name from: " << buffer
+        << "<br>This is the line immediately after the \\lect command. It should begin with the string \"%DesiredLectureName: \""
+        << "(<-has space bar in the end). The name itself should not contain the characters . / or \\"
+        << "I am assigning an automatic file name.";
+      theLectureDesiredNames.AddOnTop(desiredName);
+    }
+  }
+  std::stringstream reportStream2;
+  reportStream2 << "Processing input file done: extracted " << theLectureNumbers.size << " lecture numbers. ";
+  theReport.Report(reportStream2.str());
+  stOutput << reportStream2.str();
+  std::stringstream LectureContentNoDocumentClassNoCurrentLecture;
+  inputFile.clear();
+  inputFile.seekg(0);
+  while (!inputFile.eof())
+  { std::getline(inputFile, buffer);
+    if (!MathRoutines::StringBeginsWith(buffer, "\\documentclass") &&
+        !MathRoutines::StringBeginsWith(buffer, "[handout]") &&
+        !MathRoutines::StringBeginsWith(buffer, "{beamer}") &&
+        !MathRoutines::StringBeginsWith(buffer, "\\newcommand{\\currentLecture}")
+       )
+      LectureContentNoDocumentClassNoCurrentLecture << buffer << "\n";
+  }
+  reportStream2 << " Extracted Lecture content. Proceding to compile lectures. ";
+  theReport.Report(reportStream2.str());
+  stOutput << reportStream2.str();
+  this->displayResult << "<table><tr><td>Lecture number</td><td>Lecture Name</td><td>Lecture pdf</td>"
+  << "<td>Lecture handout pdf</td><td>Comments</td></tr>";
+  this->theFileWorkingCopy=this->baseFolderStartFile+ "working_file_"+ this->theFileToCrawlNoPath;
+  std::string theFileWorkingCopyPDF=this->baseFolderStartFile+ "working_file_"
+  +this->theFileToCrawlNoPath.substr(0, this->theFileToCrawlNoPath.size()-3)+"pdf";
+  std::string lectureFileNameEnd;
+  if (!MathRoutines::StringBeginsWith(this->theFileToCrawlNoPath, "Lecture_", &lectureFileNameEnd))
+    lectureFileNameEnd="";
+  if (lectureFileNameEnd.size()>4)
+    lectureFileNameEnd=lectureFileNameEnd.substr(0, lectureFileNameEnd.size()-4);
+  std::stringstream executedCommands, resultTable;
+  executedCommands << "Commands executed:";
+  std::string currentSysCommand="ch " + this->baseFolderStartFile+"\n\n\n\n";
+  executedCommands << "<br>" << currentSysCommand;
+  this->owner->theGlobalVariableS->ChDir(this->baseFolderStartFile );
+  for (int i=0; i<
+  theLectureNumbers.size
+  ; i++)
+  { resultTable << "<tr>";
+    resultTable << "<td>" << theLectureNumbers[i] << "</td>";
+    resultTable << "<td>" << theLectureDesiredNames[i] << "</td>";
+    std::fstream workingFile;
+    if (!FileOperations::OpenFileCreateIfNotPresent(workingFile, this->theFileWorkingCopy, false, true, false))
+    { resultTable << "<td>-</td><td>-</td><td>Failed to open working file: "
+      << this->theFileWorkingCopy << ", aborting.</td> </tr>";
+      break;
+    }
+    workingFile << "\\documentclass[handout]{beamer}\n\\newcommand{\\currentLecture}{"
+    << theLectureNumbers[i] << "}\n";
+    workingFile << LectureContentNoDocumentClassNoCurrentLecture.str();
+    currentSysCommand="pdflatex -shell-escape "+this->theFileWorkingCopy;
+    executedCommands << "<br>" << currentSysCommand;
+    this->owner->theGlobalVariableS->System(currentSysCommand);
+    std::stringstream thePdfFileName;
+    thePdfFileName << "Lecture" << theLectureNumbers[i] << "Handout_" << theLectureDesiredNames[i] << "_"
+    << lectureFileNameEnd << ".pdf";
+    currentSysCommand="mv " +theFileWorkingCopyPDF+" " + thePdfFileName.str();
+    executedCommands << "<br>" << currentSysCommand;
+    std::stringstream reportStream;
+    reportStream << "Compiling lecture " << i+1 << " out of " << theLectureNumbers.size << ". Executing command: "
+    << currentSysCommand;
+    theReport.Report(reportStream.str());
+    this->owner->theGlobalVariableS->System(currentSysCommand);
+    resultTable << "<td></td>" << "<td>" << thePdfFileName.str() << "</td>";
+    resultTable << "</tr>";
+  }
+  resultTable << "</table>";
+  this->displayResult << executedCommands.str() << "<br>" << resultTable.str();
+}
+
 void LaTeXcrawler::Crawl()
-{ this->recursionDepth=0;
+{ MacroRegisterFunctionWithName("LaTeXcrawler::Crawl");
+  this->recursionDepth=0;
   this->baseFolderStartFile=FileOperations::GetPathFromFileName(this->theFileToCrawl);
   this->CrawlRecursive(this->theFileToCrawl);
   std::fstream outputFile;
@@ -4999,6 +5132,17 @@ bool CalculatorFunctionsGeneral::innerCrawlTexFile(Calculator& theCommands, cons
   theCrawler.owner=&theCommands;
   theCrawler.theFileToCrawl=input.GetValue<std::string>();
   theCrawler.Crawl();
+  return output.AssignValue(theCrawler.displayResult.str(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerBuildFreecalc(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrawlTexFile");
+  if (!input.IsOfType<std::string>())
+    return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
+  LaTeXcrawler theCrawler;
+  theCrawler.owner=&theCommands;
+  theCrawler.theFileToCrawl=input.GetValue<std::string>();
+  theCrawler.BuildFreecalc();
   return output.AssignValue(theCrawler.displayResult.str(), theCommands);
 }
 

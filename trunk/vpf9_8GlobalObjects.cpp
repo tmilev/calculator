@@ -16,6 +16,8 @@ void InitializeGlobalObjects()
   onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=-1;
   onePredefinedCopyOfGlobalVariables.sleepFunction=SleepFunction;
   onePredefinedCopyOfGlobalVariables.SetCallSystem(&CallSystemWrapper);
+  onePredefinedCopyOfGlobalVariables.SetCallChDir(&CallChDirWrapper);
+
   crash.theGlobalVariables=&onePredefinedCopyOfGlobalVariables;
   //stOutput << "address of get elapsed seconds: " << (int) &GetElapsedTimeInSeconds;
   //Change the below line to modify the computation time of the calculator.

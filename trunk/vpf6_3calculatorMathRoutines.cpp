@@ -5060,17 +5060,42 @@ void LaTeXcrawler::BuildFreecalc()
     reportStream << "<b>[x2]</b>";
     theReport.Report(reportStream.str());
     this->owner->theGlobalVariableS->System(currentSysCommand);
-    std::stringstream thePdfFileName;
-    thePdfFileName << "Lecture" << theLectureNumbers[i] << "Handout_" << theLectureDesiredNames[i] << "_"
+    std::stringstream thePdfFileNameHandout;
+    thePdfFileNameHandout << "Lecture" << theLectureNumbers[i] << "Handout_" << theLectureDesiredNames[i] << "_"
     << lectureFileNameEnd << ".pdf";
-    currentSysCommand="mv " +theFileWorkingCopyPDF+" " + thePdfFileName.str();
+    currentSysCommand="mv " +theFileWorkingCopyPDF+" " + thePdfFileNameHandout.str();
     executedCommands << "<br>" << currentSysCommand;
-    reportStream << "<br>Lecture " << i+1 << " compiled, renaming file ... ";
+    reportStream << "<br>Lecture " << i+1 << "handout compiled, renaming file ... ";
     theReport.Report(reportStream.str());
     this->owner->theGlobalVariableS->System(currentSysCommand);
     reportStream << " done.";
     theReport.Report(reportStream.str());
-    resultTable << "<td></td>" << "<td>" << thePdfFileName.str() << "</td>";
+    workingFile.close();
+
+    if (!FileOperations::OpenFileCreateIfNotPresent(workingFile, this->theFileWorkingCopy, false, true, false))
+    { resultTable << "<td>-</td><td>-</td><td>Failed to open working file: "
+      << this->theFileWorkingCopy << ", aborting.</td> </tr>";
+      break;
+    }
+    workingFile << "\\documentclass{beamer}\n\\newcommand{\\currentLecture}{"
+    << theLectureNumbers[i] << "}\n";
+    workingFile << LectureContentNoDocumentClassNoCurrentLecture.str();
+    currentSysCommand="pdflatex -shell-escape "+this->theFileWorkingCopy;
+    executedCommands << "<br>" << currentSysCommand;
+    reportStream << currentSysCommand;
+    theReport.Report(reportStream.str());
+    this->owner->theGlobalVariableS->System(currentSysCommand);
+    std::stringstream thePdfFileNameNormal;
+    thePdfFileNameNormal << "Lecture" << theLectureNumbers[i] << "_" << theLectureDesiredNames[i] << "_"
+    << lectureFileNameEnd << ".pdf";
+    currentSysCommand="mv " +theFileWorkingCopyPDF+" " + thePdfFileNameNormal.str();
+    executedCommands << "<br>" << currentSysCommand;
+    reportStream << "<br>Lecture " << i+1 << "regular slides compiled, renaming file ... ";
+    theReport.Report(reportStream.str());
+    this->owner->theGlobalVariableS->System(currentSysCommand);
+    reportStream << " done.";
+    theReport.Report(reportStream.str());
+    resultTable << "<td>" << thePdfFileNameNormal.str() << "</td>" << "<td>" << thePdfFileNameHandout.str() << "</td>";
     resultTable << "</tr>";
   }
   resultTable << "</table>";

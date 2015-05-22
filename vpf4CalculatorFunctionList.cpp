@@ -503,6 +503,13 @@ void Calculator::initPredefinedInnerFunctions()
    , "CalculatorFunctionsGeneral::innerCrawlTexFile")
    ;
   this->AddOperationInnerHandler
+  ("BuildFreecalc", CalculatorFunctionsGeneral::innerBuildFreecalc, "",
+   "Builds the freecalc lecture pdfs. \
+   Takes as argument the lecuture file.",
+   "BuildFreecalc(\"/home/todor/math/freecalc/lectures/UMB-M140-2015-Summer/Lecture_2015_Summer_Calculus_I_Math_140.tex\")", true, false
+   , "CalculatorFunctionsGeneral::innerBuildFreecalc")
+   ;
+  this->AddOperationInnerHandler
   ("SetOutputFile", CalculatorFunctionsGeneral::innerSetOutputFile, "",
    "Sets an output/progress report file different from the default one. No dots, forward slashes, back slashes or file extensions allowed.\
    A .html will be appended to the output file name.",

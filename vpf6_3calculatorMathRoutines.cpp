@@ -4953,8 +4953,10 @@ void LaTeXcrawler::BuildFreecalc()
   inputFile.seekg(0);
   std::string buffer;
   ProgressReport theReport(this->owner->theGlobalVariableS);
-  theReport.Report("Processing input file: extracting lecture numbers.");
-  stOutput << "Processing input file: extracting lecture numbers.";
+  std::stringstream reportStream;
+  reportStream << "Processing input file: extracting lecture numbers...";
+  theReport.Report(reportStream.str());
+//  stOutput << "Processing input file: extracting lecture numbers.";
   while (!inputFile.eof())
   { std::getline(inputFile, buffer);
     if (MathRoutines::StringBeginsWith(buffer, "\\lect"))
@@ -5000,10 +5002,9 @@ void LaTeXcrawler::BuildFreecalc()
       theLectureDesiredNames.AddOnTop(desiredName);
     }
   }
-  std::stringstream reportStream2;
-  reportStream2 << "Processing input file done: extracted " << theLectureNumbers.size << " lecture numbers. ";
-  theReport.Report(reportStream2.str());
-  stOutput << reportStream2.str();
+  reportStream << " done. Extracted: " << theLectureNumbers.size << " lecture numbers. Preparing Lecture content ... ";
+  theReport.Report(reportStream.str());
+//  stOutput << reportStream.str();
   std::stringstream LectureContentNoDocumentClassNoCurrentLecture;
   inputFile.clear();
   inputFile.seekg(0);
@@ -5016,9 +5017,9 @@ void LaTeXcrawler::BuildFreecalc()
        )
       LectureContentNoDocumentClassNoCurrentLecture << buffer << "\n";
   }
-  reportStream2 << " Extracted Lecture content. Proceding to compile lectures. ";
-  theReport.Report(reportStream2.str());
-  stOutput << reportStream2.str();
+  reportStream << " done. Proceding to compile lectures. ";
+  theReport.Report(reportStream.str());
+//  stOutput << reportStream2.str();
   this->displayResult << "<table><tr><td>Lecture number</td><td>Lecture Name</td><td>Lecture pdf</td>"
   << "<td>Lecture handout pdf</td><td>Comments</td></tr>";
   this->theFileWorkingCopy=this->baseFolderStartFile+ "working_file_"+ this->theFileToCrawlNoPath;
@@ -5033,11 +5034,13 @@ void LaTeXcrawler::BuildFreecalc()
   executedCommands << "Commands executed:";
   std::string currentSysCommand="ch " + this->baseFolderStartFile+"\n\n\n\n";
   executedCommands << "<br>" << currentSysCommand;
+  reportStream << "<br>Directory changed: " << currentSysCommand;
   this->owner->theGlobalVariableS->ChDir(this->baseFolderStartFile );
   for (int i=0; i<
   theLectureNumbers.size
   ; i++)
-  { resultTable << "<tr>";
+  { reportStream << "<br>Processing lecture " << i+1 << " out of " << theLectureNumbers.size << ". ";
+    resultTable << "<tr>";
     resultTable << "<td>" << theLectureNumbers[i] << "</td>";
     resultTable << "<td>" << theLectureDesiredNames[i] << "</td>";
     std::fstream workingFile;
@@ -5051,17 +5054,22 @@ void LaTeXcrawler::BuildFreecalc()
     workingFile << LectureContentNoDocumentClassNoCurrentLecture.str();
     currentSysCommand="pdflatex -shell-escape "+this->theFileWorkingCopy;
     executedCommands << "<br>" << currentSysCommand;
+    reportStream << currentSysCommand;
+    theReport.Report(reportStream.str());
+    this->owner->theGlobalVariableS->System(currentSysCommand);
+    reportStream << "<b>[x2]</b>";
+    theReport.Report(reportStream.str());
     this->owner->theGlobalVariableS->System(currentSysCommand);
     std::stringstream thePdfFileName;
     thePdfFileName << "Lecture" << theLectureNumbers[i] << "Handout_" << theLectureDesiredNames[i] << "_"
     << lectureFileNameEnd << ".pdf";
     currentSysCommand="mv " +theFileWorkingCopyPDF+" " + thePdfFileName.str();
     executedCommands << "<br>" << currentSysCommand;
-    std::stringstream reportStream;
-    reportStream << "Compiling lecture " << i+1 << " out of " << theLectureNumbers.size << ". Executing command: "
-    << currentSysCommand;
+    reportStream << "<br>Lecture " << i+1 << " compiled, renaming file ... ";
     theReport.Report(reportStream.str());
     this->owner->theGlobalVariableS->System(currentSysCommand);
+    reportStream << " done.";
+    theReport.Report(reportStream.str());
     resultTable << "<td></td>" << "<td>" << thePdfFileName.str() << "</td>";
     resultTable << "</tr>";
   }

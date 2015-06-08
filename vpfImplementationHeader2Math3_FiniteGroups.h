@@ -104,22 +104,14 @@ Vector<Rational> ElementWeylGroup<templateWeylGroup>::operator*(const Vector<Rat
 }
 
 template <class templateWeylGroup>
-std::string ElementWeylGroup<templateWeylGroup>::ToString(int NumSimpleGens, FormatExpressions* theFormat, List<int>* DisplayIndicesOfSimpleRoots)const
+std::string ElementWeylGroup<templateWeylGroup>::ToString
+(FormatExpressions* theFormat, List<int>* DisplayIndicesOfSimpleRoots)const
 { MacroRegisterFunctionWithName("ElementWeylGroup::ToString");
   if (this->generatorsLastAppliedFirst.size==0)
     return "id";
-  std::string outerAutoLetter= "a";
   std::stringstream out;
   for (int i=0; i<this->generatorsLastAppliedFirst.size; i++)
-    if (NumSimpleGens<0 || this->generatorsLastAppliedFirst[i]<NumSimpleGens)
-    { out << "s_{";
-      if (DisplayIndicesOfSimpleRoots==0)
-        out << this->generatorsLastAppliedFirst[i]+1;
-      else
-        out << (*DisplayIndicesOfSimpleRoots)[this->generatorsLastAppliedFirst[i]];
-      out << "}";
-    } else
-      out << outerAutoLetter << "_{" << this->generatorsLastAppliedFirst[i]-NumSimpleGens+1 << "}";
+    out << this->generatorsLastAppliedFirst[i].ToString();
   return out.str();
 }
 
@@ -128,14 +120,14 @@ unsigned int ElementWeylGroup<templateWeylGroup>::HashFunction() const
 { int top = MathRoutines::Minimum(this->generatorsLastAppliedFirst.size, ::SomeRandomPrimesSize);
   unsigned int result =0;
   for (int i=0; i<top; i++)
-    result+=this->generatorsLastAppliedFirst[i]*::SomeRandomPrimes[i];
+    result+=this->generatorsLastAppliedFirst[i].HashFunction()*::SomeRandomPrimes[i];
   return result;
 }
 
 template <class templateWeylGroup>
 bool ElementWeylGroup<templateWeylGroup>::operator>(const ElementWeylGroup<templateWeylGroup>& other)const
 { if (this->owner!=other.owner)
-    crash << "Comparing elements of different weyl groups. " << crash;
+    crash << "Comparing elements of different Weyl groups. " << crash;
   return this->generatorsLastAppliedFirst>other.generatorsLastAppliedFirst;
 }
 
@@ -160,7 +152,14 @@ template <class templateWeylGroup>
 void ElementWeylGroup<templateWeylGroup>::MakeSimpleReflection(int simpleRootIndex, WeylGroup& inputWeyl)
 { this->owner=&inputWeyl;
   this->generatorsLastAppliedFirst.SetSize(1);
-  this->generatorsLastAppliedFirst[0]=simpleRootIndex;
+  this->generatorsLastAppliedFirst[0].MakeSimpleReflection(simpleRootIndex);
+}
+
+template <class templateWeylGroup>
+void ElementWeylGroup<templateWeylGroup>::MakeOuterAuto(int outerAutoIndex, WeylGroup& inputWeyl)
+{ this->owner=&inputWeyl;
+  this->generatorsLastAppliedFirst.SetSize(1);
+  this->generatorsLastAppliedFirst[0].MakeOuterAuto(outerAutoIndex);
 }
 
 template <class templateWeylGroup>
@@ -170,12 +169,14 @@ void ElementWeylGroup<templateWeylGroup>::MakeFromRhoImage(const Vector<Rational
   this->generatorsLastAppliedFirst.SetSize(0);
   //stOutput << theVector.ToString();
   Vector<Rational> theVector=inputRhoImage;
+  simpleReflectionOrOuterAuto theGen;
   while (theVector!=this->owner->rho)
     for (int i=0; i<theRank; i++)
       if (this->owner->GetScalarProdSimpleRoot(theVector, i)<0)
       { this->owner->SimpleReflection(i, theVector);
+        theGen.MakeSimpleReflection(i);
         //stOutput << "--"  << i+1 << "-- > " << theVector.ToString() ;
-        this->generatorsLastAppliedFirst.AddOnTop(i);
+        this->generatorsLastAppliedFirst.AddOnTop(theGen);
         break;
       }
 //  stOutput << ", finally: " << this->ToString();
@@ -187,8 +188,8 @@ void ElementWeylGroup<templateWeylGroup>::MakeCanonical()
   this->CheckInitialization();
   if (this->owner->rho.size==0)
     this->owner->ComputeRho(false);
-  Vector<Rational> theVector=this->owner->rho;
-  this->owner->ActOn(*this, theVector);
+  Vector<Rational> theVector;
+  this->owner->ActOn(*this, this->owner->rho, theVector);
   this->MakeFromRhoImage(theVector, *this->owner);
 }
 
@@ -244,7 +245,7 @@ void ElementWeylGroup<templateWeylGroup>::GetCycleStructure
     if (!Explored[i])
     { int currentCycleSize=1;
       currentRoot=theRootSystem[i];
-      for (this->owner->ActOn(*this, currentRoot); currentRoot!=theRootSystem[i]; this->owner->ActOn(*this, currentRoot))
+      for (this->owner->ActOn(*this, currentRoot, currentRoot); currentRoot!=theRootSystem[i]; this->owner->ActOn(*this, currentRoot, currentRoot))
       { currentCycleSize++;
         Explored[theRootSystem.GetIndex(currentRoot)]=true;
       }
@@ -748,6 +749,7 @@ bool WeylGroup::GenerateOuterOrbit
   int numElementsToReserve=MathRoutines::Minimum(UpperLimitNumElements, 1000000);
   output.SetExpectedSize(numElementsToReserve);
   ProgressReport theReport(theGlobalVariables);
+  simpleReflectionOrOuterAuto theGen;
   if (outputSubset!=0)
   { currentElt.MakeID(*this);
     outputSubset->SetExpectedSize(numElementsToReserve);
@@ -766,7 +768,8 @@ bool WeylGroup::GenerateOuterOrbit
       if (output.AddOnTopNoRepetition(currentRoot))
         if (outputSubset!=0)
         { currentElt.MakeID(*this);
-          currentElt.generatorsLastAppliedFirst.AddOnTop(j);
+          theGen.MakeSimpleReflection(j);
+          currentElt.generatorsLastAppliedFirst.AddOnTop(theGen);
           currentElt.generatorsLastAppliedFirst.AddListOnTop((*outputSubset)[i].generatorsLastAppliedFirst);
           outputSubset->AddOnTop(currentElt);
         }
@@ -798,6 +801,7 @@ void WeylGroup::RaiseToDominantWeight
     *stabilizerFound=false;
   coefficient theScalarProd;
   int theDim=this->GetDim();
+  simpleReflectionOrOuterAuto theGen;
   if (raisingElt!=0)
     raisingElt->MakeID(*this);
   for (bool found = true; found; )
@@ -811,8 +815,9 @@ void WeylGroup::RaiseToDominantWeight
         theWeight[i]-=theScalarProd;
         if (sign!=0)
           *sign*=-1;
+        theGen.MakeSimpleReflection(i);
         if (raisingElt!=0)
-          raisingElt->generatorsLastAppliedFirst.AddOnTop(i);//warning order of raising element is reversed, must reverse back
+          raisingElt->generatorsLastAppliedFirst.AddOnTop(theGen);//warning order of raising element is reversed, must reverse back
       }
       if (stabilizerFound!=0)
         if (theScalarProd.IsEqualToZero())
@@ -867,6 +872,7 @@ bool WeylGroup::GenerateOrbit
     outputSubset->AddOnTop(currentElt);
   }
   ProgressReport theReport(theGlobalVariables);
+  simpleReflectionOrOuterAuto theGen;
   for (int i=0; i<output.size; i++)
     for (int j=0; j<this->CartanSymmetric.NumRows; j++)
     { currentRoot=output[i];
@@ -885,7 +891,8 @@ bool WeylGroup::GenerateOrbit
       if (output.AddOnTopNoRepetition(currentRoot))
         if (outputSubset!=0)
         { currentElt.generatorsLastAppliedFirst.SetSize(1);
-          currentElt.generatorsLastAppliedFirst[0]=j;
+          theGen.MakeSimpleReflection(j);
+          currentElt.generatorsLastAppliedFirst[0]=theGen;
           currentElt.generatorsLastAppliedFirst.AddListOnTop((*outputSubset)[i].generatorsLastAppliedFirst);
           currentElt.MakeCanonical();
           outputSubset->AddOnTop(currentElt);
@@ -1308,7 +1315,12 @@ void WeylGroupRepresentation<coefficient>::GetMatrixElement(const ElementWeylGro
   this->ownerGroup->CheckInitializationConjugacyClasses();
   output.MakeIdMatrix(this->GetDim());
   for (int i=0; i<input.generatorsLastAppliedFirst.size; i++)
-    output.MultiplyOnTheRight(this->generatorS[input.generatorsLastAppliedFirst[i]]);
+  { if (input.generatorsLastAppliedFirst[i].flagIsOuter)
+      crash << "WeylGroupRepresentation::GetMatrixElement called on an element that has outer automorphisms. "
+      << "This is not allowed. "
+      << crash;
+    output.MultiplyOnTheRight(this->generatorS[input.generatorsLastAppliedFirst[i].index]);
+  }
 }
 
 template <typename coefficient>
@@ -1460,7 +1472,7 @@ void SubgroupWeylGroupOLD::ActByElement(const ElementWeylGroup<WeylGroup>& theEl
   Vector<coefficient> tempRoot, tempRoot2;
   output=(input);
   for (int i=theElement.generatorsLastAppliedFirst.size-1; i>=0; i--)
-  { int tempI=theElement.generatorsLastAppliedFirst[i];
+  { int tempI=theElement.generatorsLastAppliedFirst[i].index;
     if(tempI<this->simpleGenerators.size)
       this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[tempI], output, false, output);
     else

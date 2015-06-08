@@ -4042,9 +4042,11 @@ void WeylGroup::init()
 void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho)
 { int numGens= this->theElements[index].generatorsLastAppliedFirst.size;
   for (int i=numGens-1; i>=0; i--)
-  { this->SimpleReflectionRoot(this->theElements[index].generatorsLastAppliedFirst[i], output.affinePoint, RhoAction, UseMinusRho);
+  { this->SimpleReflectionRoot
+    (this->theElements[index].generatorsLastAppliedFirst[i].index, output.affinePoint, RhoAction, UseMinusRho);
 //    output.affinePoint.ComputeDebugString();
-    this->SimpleReflectionDualSpace(this->theElements[index].generatorsLastAppliedFirst[numGens-i-1], output.normal);
+    this->SimpleReflectionDualSpace
+    (this->theElements[index].generatorsLastAppliedFirst[numGens-i-1].index, output.normal);
   }
 }
 
@@ -4195,7 +4197,9 @@ int WeylGroup::Invert(int g) const
 }
 
 void WeylGroup::GetGeneratorList(int g, List<int>& out) const
-{ out = this->theElements[g].generatorsLastAppliedFirst;
+{ out.SetSize(this->theElements[g].generatorsLastAppliedFirst.size);
+  for (int i=0; i<this->theElements[g].generatorsLastAppliedFirst.size; i++)
+    out[i] = this->theElements[g].generatorsLastAppliedFirst[i].index;
 }
 
 bool WeylGroup::operator==(const WeylGroup& other)const
@@ -4205,7 +4209,7 @@ bool WeylGroup::operator==(const WeylGroup& other)const
 void WeylGroup::ActOnRootByGroupElement(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho)
 { const ElementWeylGroup<WeylGroup>& currentElt=this->theElements[index];
   for (int i=currentElt.generatorsLastAppliedFirst.size-1; i>=0; i--)
-    this->SimpleReflectionRoot(currentElt.generatorsLastAppliedFirst[i], theRoot, RhoAction, UseMinusRho);
+    this->SimpleReflectionRoot(currentElt.generatorsLastAppliedFirst[i].index, theRoot, RhoAction, UseMinusRho);
 }
 
 void WeylGroup::GetCoCartanSymmetric(const Matrix<Rational>& input, Matrix<Rational>& output)
@@ -4245,7 +4249,7 @@ void WeylGroup::GenerateRootSystem()
 
 void WeylGroup::ActOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction)
 { for (int i=this->theElements[index].generatorsLastAppliedFirst.size-1; i>=0; i--)
-    this->SimpleReflectionRootAlg(this->theElements[index].generatorsLastAppliedFirst[i], theRoot, RhoAction);
+    this->SimpleReflectionRootAlg(this->theElements[index].generatorsLastAppliedFirst[i].index, theRoot, RhoAction);
 }
 
 void WeylGroup::ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output)
@@ -4258,10 +4262,12 @@ void WeylGroup::ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output)
 }
 
 bool WeylGroup::LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup<WeylGroup>& left, ElementWeylGroup<WeylGroup>& right)
-{ Vector<Rational> leftImage; leftImage=this->rho;
-  Vector<Rational> rightImage; rightImage=this->rho;
-  this->ActOn(left, leftImage);
-  this->ActOn(right, rightImage);
+{ Vector<Rational> leftImage;
+  leftImage=this->rho;
+  Vector<Rational> rightImage;
+  rightImage=this->rho;
+  this->ActOn(left, leftImage, leftImage);
+  this->ActOn(right, rightImage, rightImage);
   return (rightImage-leftImage).IsPositiveOrZero() && !(rightImage-leftImage).IsEqualToZero();
 }
 
@@ -4328,7 +4334,7 @@ std::string WeylGroup::ToStringCppConjugacyClasses(FormatExpressions* theFormat)
       out << "&nbsp;"; // making sure index has width exactly 3 spaces
     out << "].representative.MakeFromReadableReflections(output, false, \"";
     for (int j=0; j<this->conjugacyClasseS[i].representative.generatorsLastAppliedFirst.size; j++)
-    { out << this->conjugacyClasseS[i].representative.generatorsLastAppliedFirst[j]+1;
+    { out << this->conjugacyClasseS[i].representative.generatorsLastAppliedFirst[j].index+1;
       if (j!=this->conjugacyClasseS[i].representative.generatorsLastAppliedFirst.size-1)
         out << ",";
     }
@@ -4976,7 +4982,7 @@ void WeylGroup::GetMatrixStandardRep(const ElementWeylGroup<WeylGroup>& input, M
   outputMatrix.init(theDim, theDim);
   for (int i=0; i<theDim; i++)
   { tempRoot.MakeEi(theDim, i);
-    this->ActOn(input, tempRoot);
+    this->ActOn(input, tempRoot, tempRoot);
     for (int j=0; j<theDim; j++)
       outputMatrix(j,i)=tempRoot[j];
   }
@@ -5163,7 +5169,7 @@ void SubgroupWeylGroupOLD::ToString(std::string& output, bool displayElements)
     body << "\\begin{array}{l}";
     for (int i=0; i<this->size; i++)
     { const ElementWeylGroup<WeylGroup>& currentElt=(*this)[i];
-      body << currentElt.ToString(this->simpleGenerators.size, 0, &DisplayIndicesSimpleGenerators) << "\\\\";
+      body << currentElt.ToString(0, &DisplayIndicesSimpleGenerators) << "\\\\";
     }
     body << "\\end{array}";
     out << CGI::GetMathMouseHover(body.str());
@@ -5638,7 +5644,7 @@ int KLpolys::ComputeProductfromSimpleReflectionsActionList(int x, int y)
 { int start = y;
   const ElementWeylGroup<WeylGroup>& currentElement=this->TheWeylGroup->theElements[x];
   for (int i=currentElement.generatorsLastAppliedFirst.size-1; i>=0; i--)
-    start=this->SimpleReflectionsActionList[start][this->TheWeylGroup->theElements[x].generatorsLastAppliedFirst[i]];
+    start=this->SimpleReflectionsActionList[start][this->TheWeylGroup->theElements[x].generatorsLastAppliedFirst[i].index];
   return start;
 }
 

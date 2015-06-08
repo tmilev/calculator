@@ -872,6 +872,7 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   out << "<table><tr><td>Monomial label</td><td>Definition</td><td>Littelmann path string</td></tr>";
   ElementWeylGroup<WeylGroup> tempWelt;
   int wordCounter=0;
+  simpleReflectionOrOuterAuto aGen;
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
   { List<MonomialUniversalEnveloping<coefficient> >& currentList=this->theGeneratingWordsGrouppedByWeight[i];
     List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentListInt=this->theGeneratingWordsIntGrouppedByWeight[i];
@@ -879,7 +880,9 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
     { wordCounter++;
       tempWelt.generatorsLastAppliedFirst.SetSize(currentListInt[j].generatorsIndices.size);
       for (int k=0; k<currentListInt[j].generatorsIndices.size; k++)
-        tempWelt.generatorsLastAppliedFirst[k]=theWeyl.RootsOfBorel.size-1 -currentListInt[j].generatorsIndices[k];
+      { aGen.MakeSimpleReflection(theWeyl.RootsOfBorel.size-1 -currentListInt[j].generatorsIndices[k]);
+        tempWelt.generatorsLastAppliedFirst[k]=aGen;
+      }
       out << "<tr><td>m_{ " << wordCounter << "} </td><td>" << currentList[j].ToString(&theGlobalVariables.theDefaultFormat)
       << "  v_\\lambda</td><td>" << tempWelt.ToString() << "</td> </tr>";
     }

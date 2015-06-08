@@ -97,7 +97,7 @@ bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
     { this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[j], orbitRho[i], false, currentRoot);
       if (!orbitRho.Contains(currentRoot))
       { orbitRho.AddOnTop(currentRoot);
-        tempEW.generatorsLastAppliedFirst.AddOnTop(j);
+        tempEW.MultiplyOnTheRightBySimpleReflection(j);
         this->AddOnTop(tempEW);
         tempEW.generatorsLastAppliedFirst.RemoveLastObject();
       }
@@ -106,7 +106,7 @@ bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
     { orbitRho[i].GetCoordsInBasiS(this->ExternalAutomorphisms[j], currentRoot);
       if (!orbitRho.Contains(currentRoot))
       { orbitRho.AddOnTop(currentRoot);
-        tempEW.generatorsLastAppliedFirst.AddOnTop(j+this->simpleGenerators.size);
+        tempEW.MultiplyOnTheRightByOuterAuto(j);
         this->AddOnTop(tempEW);
         tempEW.generatorsLastAppliedFirst.RemoveLastObject();
       }

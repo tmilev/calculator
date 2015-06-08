@@ -737,7 +737,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(Calculator& theCommands, const
       standardElt.MakeOne(*theSSalgebra);
       bool isGood=true;
       for (int j=orbitGeneratingSet[i].generatorsLastAppliedFirst.size-1; j>=0; j--)
-      { int simpleIndex=orbitGeneratingSet[i].generatorsLastAppliedFirst[j];
+      { int simpleIndex=orbitGeneratingSet[i].generatorsLastAppliedFirst[j].index;
         theExp=theWeyl.GetScalarProdSimpleRoot(currentWeight, simpleIndex);
         theWeyl.SimpleReflectionRhoModified(simpleIndex, currentWeight);
         theExp*=2;
@@ -1502,13 +1502,14 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(Calculator& theCommands
   { int tmp;
     if (!input[i].IsSmallInteger(& tmp))
       return false;
-    theElt.generatorsLastAppliedFirst.AddOnTop(tmp-1);
+    theElt.MultiplyOnTheRightBySimpleReflection(tmp-1);
   }
   theElt.owner=&thePointer->theWeyl;
   //stOutput << "<br>theElt.owner: " << theElt.owner;
 //  stOutput << "<b>Not implemented!!!!!</b> You requested reflection indexed by " << theReflection;
   for(int i=0; i<theElt.generatorsLastAppliedFirst.size; i++)
-    if (theElt.generatorsLastAppliedFirst[i] >= thePointer->GetRank() || theElt.generatorsLastAppliedFirst[i] < 0)
+    if (theElt.generatorsLastAppliedFirst[i].index >= thePointer->GetRank() ||
+        theElt.generatorsLastAppliedFirst[i].index < 0)
       return output.MakeError("Bad reflection index", theCommands);
 //  stOutput << "\n" << theGroup.rho << " " << theElt.owner->rho << "\n";
   theElt.MakeCanonical();

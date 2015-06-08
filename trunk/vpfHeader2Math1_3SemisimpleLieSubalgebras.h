@@ -308,11 +308,12 @@ public:
   HashedListReferences<SemisimpleLieAlgebra>* theSubalgebrasNonEmbedded;
   List<List<Rational> > CachedDynkinIndicesSl2subalgebrasSimpleTypes;
   HashedList<DynkinSimpleType> CachedDynkinSimpleTypesWithComputedSl2Subalgebras;
-  List<Vectors<Rational> > theOrbits;
+  List<OrbitFDRepIteratorWeylGroup> theOrbiTs;
   HashedList<Rational> theOrbitHelementLengths;
   HashedList<DynkinSimpleType> theOrbitDynkinIndices;
 //  List<HashedList<ElementWeylGroup<WeylGroup> > > theOrbitGeneratingElts;
-  List<bool> theOrbitsAreComputed;
+  //if an entry in orbit sizes is -1 this means the corresponding orbit size has not been computed yet.
+  int maxStoredOrbitSize;
   std::string comments;
   std::string fileNameToLogComments;
 
@@ -423,7 +424,6 @@ public:
   std::string ToStringSSsumaryHTML(FormatExpressions* theFormat=0)const;
   void ComputePairingTablesAndFKFTtypes();
   void GetCentralizerChains(List<List<int> >& outputChains);
-  const Vectors<Rational>& GetOrbitSl2Helement(int indexSl2);
   int GetIndexFullSubalgebra()const;
 //  const HashedList<ElementWeylGroup<WeylGroup> >& GetOrbitSl2HelementWeylGroupElt(int indexSl2);
   bool RanksAndIndicesFit(const DynkinType& input)const;

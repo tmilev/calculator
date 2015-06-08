@@ -551,18 +551,21 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
   }
   if (this->theSl2s.size!=0)
   { int numComputedOrbits=0;
-    for (int i=0; i<this->theOrbitsAreComputed.size; i++)
-      if (this->theOrbitsAreComputed[i])
+    for (int i=0; i<this->theOrbiTs.size; i++)
+      if (this->theOrbiTs[i].flagOrbitIsBuffered)
         numComputedOrbits++;
-    out << "<hr>Of the " << this->theOrbits.size << " h element conjugacy classes " << numComputedOrbits
-    << " had their Weyl group orbits computed. The h elements and their computed orbit sizes follow. ";
+    out << "<hr>Of the " << this->theOrbiTs.size << " h element conjugacy classes " << numComputedOrbits
+    << " had their Weyl group orbits computed and buffered. The h elements and their computed orbit sizes follow. ";
     out << "<table><tr><td>h element</td><td>orbit size</td></tr>";
-    for (int i=0; i<this->theOrbits.size; i++)
+    for (int i=0; i<this->theOrbiTs.size; i++)
     { out << "<tr><td>" << this->theSl2s[i].theH.GetCartanPart().ToString() << "</td>";
-      if (this->theOrbitsAreComputed[i])
-        out << "<td>" << this->theOrbits[i].size << "</td>";
-      else
-        out << "<td>not computed</td>";
+      if (this->theOrbiTs[i].orbitSize!=-1)
+      { out << "<td>" << this->theOrbiTs[i].orbitSize;
+        if (this->theOrbiTs[i].flagOrbitIsBuffered==0)
+          out << "<b>(orbit enumerated but not stored)</b>";
+        out << "</td>";
+      } else
+        out << "<td>size not computed</td>";
       out << "</tr>";
     }
     out << "</table>";
@@ -594,17 +597,31 @@ void SemisimpleSubalgebras::GetCentralizerChains(List<List<int> >& outputChains)
 void SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand");
   this->GetSSowner().FindSl2Subalgebras(this->GetSSowner(), this->theSl2s, this->theGlobalVariables);
-  this->theOrbits.SetSize(this->theSl2s.size);
 //  this->theOrbitGeneratingElts.SetSize(this->theSl2s.size);
-  this->theOrbitsAreComputed.initFillInObject(this->theSl2s.size, false);
   this->theOrbitHelementLengths.Clear();
   this->theOrbitDynkinIndices.Clear();
   this->theOrbitHelementLengths.SetExpectedSize(this->theSl2s.size);
   this->theOrbitDynkinIndices.SetExpectedSize(this->theSl2s.size);
+  this->theOrbiTs.SetSize(this->theSl2s.size);
+  List<ElementWeylGroup<WeylGroup> > theGens;
+  ElementWeylGroup<WeylGroup> theElt;
+  WeylGroup& theWeyl=this->owneR->theWeyl;
+  theWeyl.ComputeOuterAutoGenerators();
+  for (int i=0; i<this->owneR->GetRank(); i++)
+  { theElt.MakeSimpleReflection(i, theWeyl);
+    theGens.AddOnTop(theElt);
+  }
+  List<MatrixTensor<Rational> >& outerAutos=theWeyl.theOuterAutos.GetElement().theGenerators;
+  for (int i=0; i<outerAutos.size; i++)
+    if (!outerAutos[i].IsID())
+    { theElt.MakeOuterAuto(i, theWeyl);
+      theGens.AddOnTop(theElt);
+    }
   for (int i=0; i<this->theSl2s.size; i++)
   { this->theOrbitHelementLengths.AddOnTop(this->theSl2s[i].LengthHsquared);
     this->theOrbitDynkinIndices.AddOnTop
     (DynkinSimpleType('A', 1, this->theSl2s[i].LengthHsquared ));
+    this->theOrbiTs[i].init(theGens, this->theSl2s[i].theH.GetCartanPart(), theElt.ActOn);
   }
 //  stOutput << "H lengths:" << this->theOrbitHelementLengths.ToString() << " types: "
 //  << this->theOrbitDynkinIndices.ToString();
@@ -915,6 +932,100 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
   return !this->flagSystemProvedToHaveNoSolution;
 }
 
+const Vector<Rational>& OrbitFDRepIteratorWeylGroup::GetCurrentElement()
+{ MacroRegisterFunctionWithName("OrbitFDRepIteratorWeylGroup::GetCurrentElement");
+  if (this->flagOrbitIsBuffered)
+    return this->orbitBuffer[this->currentIndexInBuffer];
+  return this->theIterator.GetCurrentElement();
+}
+
+bool OrbitFDRepIteratorWeylGroup::IncrementReturnFalseIfPastLast()
+{ MacroRegisterFunctionWithName("OrbitFDRepIteratorWeylGroup::IncrementReturnFalseIfPastLast");
+  if (this->flagOrbitIsBuffered)
+  { this->currentIndexInBuffer++;
+    if (this->currentIndexInBuffer>=this->orbitSize)
+    { this->currentIndexInBuffer=0;
+      return false;
+    }
+    return true;
+  }
+  this->currentIndexInBuffer++;
+  if (this->flagOrbitEnumeratedOnce)
+    return this->theIterator.IncrementReturnFalseIfPastLast();
+  if (!this->theIterator.IncrementReturnFalseIfPastLast())
+  { this->orbitSize=this->currentIndexInBuffer;
+    this->flagOrbitEnumeratedOnce=true;
+    if (this->orbitBuffer.size<=this->maxOrbitBufferSize)
+      this->flagOrbitIsBuffered=true;
+    else
+    { this->orbitBuffer.SetSize(0);
+      this->orbitBuffer.ReleaseMemory();
+    }
+    return false;
+  }
+  if (this->orbitBuffer.size<this->maxOrbitBufferSize)
+    this->orbitBuffer.AddOnTop(this->theIterator.GetCurrentElement());
+  return true;
+}
+
+void OrbitFDRepIteratorWeylGroup::init()
+{ MacroRegisterFunctionWithName("OrbitFDRepIteratorWeylGroup::init");
+  if (this->flagOrbitIsBuffered)
+  { this->currentIndexInBuffer=0;
+    return;
+  }
+  this->theIterator.init
+  (this->theIterator.theGroupGeneratingElements, this->orbitDefiningElement, this->theIterator.theGroupAction);
+}
+
+void OrbitFDRepIteratorWeylGroup::init
+(const List<ElementWeylGroup<WeylGroup> >& inputGenerators, const Vector<Rational>& inputElement,
+   OrbitIterator<ElementWeylGroup<WeylGroup>, Vector<Rational> >::GroupAction inputGroupAction)
+{ MacroRegisterFunctionWithName("OrbitFDRepIteratorWeylGroup::init");
+  if (this->theIterator.theGroupAction==inputGroupAction &&
+      this->orbitDefiningElement==inputElement )
+  { if (this->flagOrbitIsBuffered)
+    { this->currentIndexInBuffer=0;
+      return;
+    }
+  } else
+    this->reset();
+  this->orbitDefiningElement=inputElement;
+  this->theIterator.init(inputGenerators, this->orbitDefiningElement, inputGroupAction);
+}
+
+void OrbitFDRepIteratorWeylGroup::reset()
+{ this->flagOrbitIsBuffered=false;
+  this->flagOrbitEnumeratedOnce=false;
+  this->orbitSize=-1;
+  this->currentIndexInBuffer=-1;
+  this->maxOrbitBufferSize=2;
+  this->orbitBuffer.SetSize(0);
+  this->theIterator.reset();
+}
+
+std::string OrbitFDRepIteratorWeylGroup::ToString()const
+{ std::stringstream out;
+  out << " Element: " << this->currentIndexInBuffer+1;
+  if (this->flagOrbitIsBuffered)
+    out << " out of " << this->orbitSize << ". ";
+  else
+    out << "?";
+  return out.str();
+}
+
+std::string OrbitFDRepIteratorWeylGroup::ToStringSize()const
+{ std::stringstream out;
+  if (this->orbitSize!=-1)
+  { out << this->orbitSize;
+    if (!this->flagOrbitIsBuffered)
+      out << "(enumerated but not stored)";
+    out << "; ";
+  } else
+    out << "n/a; ";
+  return out.str();
+}
+
 void SemisimpleSubalgebras::GetHCandidates
 (Vectors<Rational>& outputHCandidatesScaledToActByTwo, CandidateSSSubalgebra& newCandidate,
  DynkinType& currentType, List<int>& currentRootInjection)
@@ -963,30 +1074,31 @@ void SemisimpleSubalgebras::GetHCandidates
       }
       continue;
     }
-    const Vectors<Rational>& currentOrbit=this->GetOrbitSl2Helement(j);
-    outputHCandidatesScaledToActByTwo.Reserve(outputHCandidatesScaledToActByTwo.size+ currentOrbit.size);
-    for (int k=0; k<currentOrbit.size; k++)
-    { if (newCandidate.IsGoodHnewActingByTwo(currentOrbit[k], currentRootInjection))
+    Vector<Rational> currentCandidate;
+    OrbitFDRepIteratorWeylGroup& currentOrbit=this->theOrbiTs[j];
+    currentOrbit.init();
+    do
+    { currentCandidate= currentOrbit.GetCurrentElement();
+      if (newCandidate.IsGoodHnewActingByTwo(currentCandidate, currentRootInjection))
       { if (theGlobalVariables!=0)
-        { std::stringstream out2;
-          std::stringstream out3;
+        { std::stringstream out2, out3;
           out3 << "So far, found " << outputHCandidatesScaledToActByTwo.size+1 << " good candidates. ";
           theReport2.Report(out3.str());
-          out2 << "sl(2) orbit " << j+1 << ", h orbit candidate " << k+1 << " out of " << currentOrbit.size
-          << " has desired scalar products.";
+          out2 << "sl(2) orbit " << j+1 << ". " << currentOrbit.ToString();
+          out2 << "Current element has desired scalar products. ";
           theReport3.Report(out2.str());
           //stOutput << "<hr>" << out2.str();
         }
-        outputHCandidatesScaledToActByTwo.AddOnTop(currentOrbit[k]);
+        outputHCandidatesScaledToActByTwo.AddOnTop(currentOrbit.GetCurrentElement());
       } else
         if (theGlobalVariables!=0)
         { std::stringstream out2;
-          out2 << "sl(2) orbit " << j+1 << ", h orbit candidate " << k+1 << " out of " << currentOrbit.size
-          << " is not a valid candidate. ";
+          out2 << "sl(2) orbit " << j+1 << ". " << currentOrbit.ToString()
+          << "Current element is not a valid candidate. ";
           theReport3.Report(out2.str());
           //stOutput << "<br>" << out2.str();
         }
-    }
+    } while (this->theOrbiTs[j].IncrementReturnFalseIfPastLast());
     if (outputHCandidatesScaledToActByTwo.size==0)
     { std::stringstream out2;
       out2 << "Sl(2) orbit " << j+1 << ": extension to " << currentType.ToString()
@@ -1400,13 +1512,9 @@ std::string SemisimpleSubalgebras::ToStringState(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToStringState");
   std::stringstream out;
   out << "Subalgebras found so far: " << this->theSubalgebras.size << "<br>Orbit sizes: ";
-  for (int i=0; i<this->theOrbitsAreComputed.size; i++)
-  { out << "A^" << (this->theOrbitHelementLengths[i]/2).ToString() << "_1: ";
-    if (this->theOrbitsAreComputed[i])
-      out << this->theOrbits[i].size << "; ";
-    else
-      out << "n/a; ";
-  }
+  for (int i=0; i<this->theOrbiTs.size; i++)
+    out << "A^" << (this->theOrbitHelementLengths[i]/2).ToString() << "_1: "
+    << this->theOrbiTs[i].ToStringSize();
   out << this->ToStringCurrentChain(theFormat);
   out << "<hr>";
   for (int i=0; i<this->currentSubalgebraChain.size; i++)
@@ -1647,38 +1755,6 @@ Rational DynkinType::GetPrincipalSlTwoCSInverseScale()const
   this->GetOrbitSl2Helement(indexSl2);
   return this->theOrbitGeneratingElts[indexSl2];
 }*/
-
-const Vectors<Rational>& SemisimpleSubalgebras::GetOrbitSl2Helement(int indexSl2)
-{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::GetOrbitSl2Helement");
-  if (this->theOrbitsAreComputed[indexSl2])
-    return this->theOrbits[indexSl2];
-  Vectors<Rational> startingVector;
-  startingVector.AddOnTop(this->theSl2s[indexSl2].theH.GetCartanPart());
-  std::stringstream out;
-  ProgressReport theReport(this->theGlobalVariables);
-  if (this->theGlobalVariables!=0)
-  { out << "Generating orbit of " << startingVector[0].ToString() << "...";
-    theReport.Report(out.str());
-//      if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-//        stOutput << out.str();
-  }
-  HashedList<Vector<Rational> > currentOrbit;
-  if (!this->GetSSowner().theWeyl.GenerateOuterOrbit
-      (startingVector, currentOrbit,//&this->theOrbitGeneratingElts[indexSl2]
-       0, -1, this->theGlobalVariables))
-    crash << "<hr> Failed to generate weight orbit: orbit has more than hard-coded limit of 30000000 elements. "
-    << " This is not a programming error, but I am crashing in flames to let you know you hit the computational limits. "
-    << "You might want to work on improving the algorithm for generating semisimple subalgebras. Here is a stack trace for you. " << crash;
-  if (this->theGlobalVariables!=0)
-  { out << " done. The size of the orbit is " << this->theOrbits[indexSl2].size;
-    theReport.Report(out.str());
-    //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-      //stOutput << " done. The size of the orbit is " << theOrbit.size;
-  }
-  this->theOrbits[indexSl2]=currentOrbit;
-  this->theOrbitsAreComputed[indexSl2]=true;
-  return this->theOrbits[indexSl2];
-}
 
 bool CandidateSSSubalgebra::CheckInitialization()const
 { if (this->flagDeallocated)
@@ -5710,6 +5786,20 @@ bool CandidateSSSubalgebra::HasHsScaledByTwoConjugateTo(List<Vector<Rational> >&
 //  if (doDebug)
 //    stOutput << "<br>raised input is: " << raisedInput.ToString() << ", my raised h's are: " << myVectors.ToString();
   return myVectors==raisedInput;
+}
+
+std::string simpleReflectionOrOuterAuto::ToString()const
+{ std::stringstream out;
+  if (!this->flagIsOuter)
+  { out << "s_{";
+//    if (DisplayIndicesOfSimpleRoots==0)
+    out << this->index+1;
+//    else
+//      out << (*DisplayIndicesOfSimpleRoots)[this->generatorsLastAppliedFirst[i].index];
+    out << "}";
+  } else
+    out << "a_{" << this->index << "}";
+  return out.str();
 }
 
 bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other)

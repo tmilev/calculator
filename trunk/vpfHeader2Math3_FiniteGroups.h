@@ -182,6 +182,35 @@ public:
   coefficient GetHermitianProduct(const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter)const;
 };
 
+struct simpleReflectionOrOuterAuto
+{
+  bool flagIsOuter;
+  int index;
+  simpleReflectionOrOuterAuto(): flagIsOuter(false), index(-1)
+  {
+  }
+  std::string ToString()const;
+  void MakeOuterAuto(int inputIndex)
+  { this->flagIsOuter=true;
+    this->index=inputIndex;
+  }
+  void MakeSimpleReflection(int inputIndex)
+  { this->flagIsOuter=false;
+    this->index=inputIndex;
+  }
+  unsigned int HashFunction()const
+  { return index+100*flagIsOuter;
+  }
+  bool operator==(const simpleReflectionOrOuterAuto& other)const
+  { return this->flagIsOuter==other.flagIsOuter && this->index==other.index;
+  }
+  bool operator>(const simpleReflectionOrOuterAuto& right)const
+  { if (right.flagIsOuter!=this->flagIsOuter)
+      return this->flagIsOuter> right.flagIsOuter;
+    return this->index>right.index;
+  }
+};
+
 template <class templateWeylGroup>
 class ElementWeylGroup
 { friend std::ostream& operator << (std::ostream& output, const ElementWeylGroup<templateWeylGroup>& theElement)
@@ -190,7 +219,7 @@ class ElementWeylGroup
   }
 public:
   templateWeylGroup* owner;
-  List<int> generatorsLastAppliedFirst;
+  List<simpleReflectionOrOuterAuto> generatorsLastAppliedFirst;
   bool flagDeallocated;
   ElementWeylGroup(const ElementWeylGroup& other)
   { this->flagDeallocated=false;
@@ -207,9 +236,14 @@ public:
     this->generatorsLastAppliedFirst=other.generatorsLastAppliedFirst;
   }
   template<class coefficient>
+  static void ActOn(const ElementWeylGroup& inputElt, const Vector<coefficient>& inputV, Vector<coefficient>& output)
+  { inputElt.CheckInitialization();
+    inputElt.owner->ActOn(inputElt, inputV, output);
+  }
+  template<class coefficient>
   void ActOn(Vector<coefficient>& inputOutput)const
   { this->CheckInitialization();
-    this->owner->ActOn(*this, inputOutput);
+    this->owner->ActOn(*this, inputOutput, inputOutput);
   }
   bool CheckConsistency()const
   { if (this->flagDeallocated)
@@ -228,22 +262,27 @@ public:
   int Sign()const
   { return this->generatorsLastAppliedFirst.size %2 ==0 ? 1 : -1;
   }
+  void MultiplyOnTheRightBySimpleReflection(int reflectionIndex)
+  { simpleReflectionOrOuterAuto theGen;
+    theGen.MakeSimpleReflection(reflectionIndex);
+    this->generatorsLastAppliedFirst.AddOnTop(theGen);
+  }
+  void MultiplyOnTheRightByOuterAuto(int outerAutoIndex)
+  { simpleReflectionOrOuterAuto theGen;
+    theGen.index=outerAutoIndex;
+    theGen.flagIsOuter=true;
+    this->generatorsLastAppliedFirst.AddOnTop(theGen);
+  }
   static void Conjugate(const ElementWeylGroup& elementWeConjugateBy, const ElementWeylGroup& inputToBeConjugated, ElementWeylGroup& output);
   void MakeFromRhoImage(const Vector<Rational>& inputRhoImage, WeylGroup& inputWeyl);
+  void MakeOuterAuto(int outerAutoIndex, WeylGroup& inputWeyl);
   void MakeSimpleReflection(int simpleRootIndex, WeylGroup& inputWeyl);
   void MakeRootReflection(const Vector<Rational>& mustBeRoot, WeylGroup& inputWeyl);
   void MakeCanonical();
   void MakeID(templateWeylGroup& inputWeyl);
   void MakeID(const ElementWeylGroup& initializeFrom);
-
-  void ToString(std::string& output)
-  { output=this->ToString();
-  }
   std::string ToStringInvariants(FormatExpressions* theFormat)const;
-  std::string ToString(FormatExpressions* theFormat=0, List<int>* DisplayIndicesOfSimpleRoots=0)const
-  { return this->ToString(-1, theFormat, DisplayIndicesOfSimpleRoots);
-  }
-  std::string ToString(int NumSimpleGens, FormatExpressions* theFormat=0, List<int>* DisplayIndicesOfSimpleRoots=0)const;
+  std::string ToString(FormatExpressions* theFormat=0, List<int>* DisplayIndicesOfSimpleRoots=0)const;
   unsigned int HashFunction() const;
   static inline unsigned int HashFunction(const ElementWeylGroup<templateWeylGroup>& input)
   { return input.HashFunction();
@@ -309,13 +348,6 @@ class SubgroupRootReflections;
 
 class WeylGroup : public FiniteGroup<ElementWeylGroup<WeylGroup> >
 {
-//  Matrix<int> CartanSymmetricIntBuffer;
-//  void UpdateIntBuffer()
-//  { this->CartanSymmetricIntBuffer.init(this->CartanSymmetric.NumRows, this->CartanSymmetric.NumCols);
-//    for (int i=0; i<this->CartanSymmetric.NumRows; i++)
-//      for (int j=0; j<this->CartanSymmetric.NumCols; j++)
-//        this->CartanSymmetricIntBuffer.elements[i][j]=this->CartanSymmetric.elements[i][j].NumShort;
-//  }
   Matrix<Rational> FundamentalToSimpleCoords;
   Matrix<Rational> SimpleToFundamentalCoords;
   MemorySaving<Matrix<Rational> > MatrixSendsSimpleVectorsToEpsilonVectors;
@@ -585,19 +617,41 @@ public:
   void GetCoxeterElement(ElementWeylGroup<WeylGroup>& outputWeylElt)
   { outputWeylElt.generatorsLastAppliedFirst.SetSize(this->GetDim());
     for (int i=0; i<outputWeylElt.generatorsLastAppliedFirst.size; i++)
-      outputWeylElt.generatorsLastAppliedFirst[i]=i;
+      outputWeylElt.generatorsLastAppliedFirst[i].MakeSimpleReflection(i);
   }
   Vector<Rational> ApplyReflectionList(const List<int>& rightReflectionsActFirst, const Vector<Rational> &vv) const;
 
   template <class coefficient>
-  void ActOn(const ElementWeylGroup<WeylGroup>& theGroupElement, Vector<coefficient>& theVector)const
-  { for (int i=theGroupElement.generatorsLastAppliedFirst.size-1; i>=0; i--)
-      this->SimpleReflection(theGroupElement.generatorsLastAppliedFirst[i], theVector);
+  void ActOn(const ElementWeylGroup<WeylGroup>& theGroupElement, Vector<coefficient>& inputOutput)const
+  { this->ActOn(theGroupElement, inputOutput, inputOutput);
+  }
+  template <class coefficient>
+  void ActOn(const ElementWeylGroup<WeylGroup>& theGroupElement, const Vector<coefficient>& inputVector, Vector<coefficient>& outputVector)const
+  { if (&inputVector==&outputVector)
+    { Vector<coefficient> inputCopy=inputVector;
+      this->ActOn(theGroupElement, inputCopy, outputVector);
+      return;
+    }
+    for (int i=theGroupElement.generatorsLastAppliedFirst.size-1; i>=0; i--)
+      if (!theGroupElement.generatorsLastAppliedFirst[i].flagIsOuter)
+      { outputVector=inputVector;
+        this->SimpleReflection(theGroupElement.generatorsLastAppliedFirst[i].index, outputVector);
+      } else
+        if (!this->theOuterAutos.IsZeroPointer())
+          this->theOuterAutos.GetElementConst()
+          .theGenerators[theGroupElement.generatorsLastAppliedFirst[i].index]
+          .ActOnVectorColumn(inputVector, outputVector);
+        else
+          crash << "Weyl group of type " << this->theDynkinType.ToString()
+          << " does not have its outer autos computed at a place where it should. " << crash;
   }
   template <class coefficient>
   void ActOnRhoModified(const ElementWeylGroup<WeylGroup>& theGroupElement, Vector<coefficient>& theVector)const
-  { for (int i=theGroupElement.generatorsLastAppliedFirst.size-1; i>=0; i--)
-      this->SimpleReflectionRhoModified(theGroupElement.generatorsLastAppliedFirst[i], theVector);
+  { Vector<coefficient> tempV;
+    theVector+=this->rho;
+    this->ActOn(theGroupElement, theVector, tempV);
+    theVector=tempV;
+    theVector-=this->rho;
   }
   template <class coefficient>
   void ActOnRhoModified(int indexOfWeylElement, Vector<coefficient>& theVector)const
@@ -605,7 +659,7 @@ public:
   }
   template <class coefficient>
   void ActOn(int indexOfWeylElement, Vector<coefficient>& theVector)const
-  { this->ActOn(this->theElements[indexOfWeylElement], theVector);
+  { this->ActOn(this->theElements[indexOfWeylElement], theVector, theVector);
   }
   template <class coefficient>
   void ActOnDual(int index,Vector<coefficient>& theVector, bool RhoAction, const coefficient& theRingZero);
@@ -813,6 +867,31 @@ public:
 
 class OrbitIteratorWeylGroup: public OrbitIterator<ElementWeylGroup<WeylGroup>, ElementWeylGroup<WeylGroup> >
 {
+};
+
+class OrbitFDRepIteratorWeylGroup
+{
+  OrbitIterator<ElementWeylGroup<WeylGroup>, Vector<Rational> > theIterator;
+  List<Vector<Rational> > orbitBuffer;
+  Vector<Rational> orbitDefiningElement;
+  int maxOrbitBufferSize;
+public:
+  int orbitSize;
+  int currentIndexInBuffer;
+  bool flagOrbitIsBuffered;
+  bool flagOrbitEnumeratedOnce;
+  OrbitFDRepIteratorWeylGroup()
+  { this->reset();
+  }
+  void reset();
+  bool IncrementReturnFalseIfPastLast();
+  const Vector<Rational>& GetCurrentElement();
+  std::string ToString()const;
+  std::string ToStringSize()const;
+  void init();
+  void init
+  (const List<ElementWeylGroup<WeylGroup> >& inputGenerators, const Vector<Rational>& inputElement,
+   OrbitIterator<ElementWeylGroup<WeylGroup>, Vector<Rational> >::GroupAction inputGroupAction);
 };
 
 template <typename coefficient>

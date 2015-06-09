@@ -2350,7 +2350,12 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
       this->GetAmbientWeyl().ActOn(raisingElt, theSl2.RootsWithScalar2WithH[k]);
     for (int i=0; i<theSl2.RootsWithScalar2WithH.size; i++)
       if (this->GetAmbientWeyl().RootScalarCartanRoot(characteristicH, theSl2.RootsWithScalar2WithH[i])!=2)
-        crash << "Programming error, bad scalar product after raising!" << crash;
+        crash << "Programming error, bad scalar product after raising: characteristic: "
+        << characteristicH.ToString() << ", theSl2.RootsWithScalar2WithH[i]: "
+        << theSl2.RootsWithScalar2WithH[i].ToString()
+        << " scalar product: "
+        << this->GetAmbientWeyl().RootScalarCartanRoot(characteristicH, theSl2.RootsWithScalar2WithH[i]).ToString()
+        << crash;
     theSl2.theH.MakeHgenerator(characteristicH, theLieAlgebra);
     theSl2.LengthHsquared=theSl2.GetOwnerSSAlgebra().theWeyl.RootScalarCartanRoot(characteristicH, characteristicH);
     theSl2.theE.MakeZero();

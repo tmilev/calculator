@@ -2272,7 +2272,8 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
   InvertedRelativeKillingForm.init(theRelativeDimension, theRelativeDimension);
   for (int k=0; k<theRelativeDimension; k++)
     for (int j=0; j<theRelativeDimension; j++)
-      InvertedRelativeKillingForm(k,j)=this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[k], this->SimpleBasisK[j]);
+      InvertedRelativeKillingForm(k,j)=this->GetAmbientWeyl().RootScalarCartanRoot
+      (this->SimpleBasisK[k], this->SimpleBasisK[j]);
   InvertedRelativeKillingForm.Invert();
   int numCycles= MathRoutines::TwoToTheNth(selectionRootsWithZeroCharacteristic.MaxSize);
   ProgressReport theReport(theGlobalVariables);
@@ -2294,7 +2295,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
   //}
   //if (ereBeProbs)
   //  stOutput << "<br>Simple basis k: " << this->SimpleBasisK.ToString();
-  for (int i=0; i<numCycles; i++, selectionRootsWithZeroCharacteristic.incrementSelection())
+  for (int cyclecounter=0; cyclecounter<numCycles; cyclecounter++, selectionRootsWithZeroCharacteristic.incrementSelection())
   { this->SimpleBasisK.SubSelection(selectionRootsWithZeroCharacteristic, rootsZeroChar);
     diagramZeroCharRoots.ComputeDiagramTypeModifyInput(rootsZeroChar, this->GetAmbientWeyl());
     int theSlack=0;
@@ -2318,43 +2319,57 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
 //      stOutput << "<br>Sel: " << selectionRootsWithZeroCharacteristic.ToString() << ", dynkin epsilon: " << theDynkinEpsilon;
     if (theDynkinEpsilon!=0)
       continue;
-    Vector<Rational> tempRoot, tempRoot2;
-    tempRoot.MakeZero(theRelativeDimension);
+    Vector<Rational> relativeCharacteristic, relativeSimpleCoords;
+    relativeCharacteristic.MakeZero(theRelativeDimension);
     for (int k=0; k<theRelativeDimension; k++)
       if(!selectionRootsWithZeroCharacteristic.selected[k])
-        tempRoot[k]=2;
-    InvertedRelativeKillingForm.ActOnVectorColumn(tempRoot, tempRoot2);
+        relativeCharacteristic[k]=2;
+    InvertedRelativeKillingForm.ActOnVectorColumn(relativeCharacteristic, relativeSimpleCoords);
     Vector<Rational> characteristicH;
     characteristicH.MakeZero(theLieAlgebra.GetRank());
     for(int j=0; j<theRelativeDimension; j++)
-      characteristicH+=this->SimpleBasisK[j]*tempRoot2[j];
-    for (int i=0; i<rootsScalarProduct2HnonRaised.size; i++)
-      if (this->GetAmbientWeyl().RootScalarCartanRoot(characteristicH, rootsScalarProduct2HnonRaised[i])!=2)
-        crash << "Programming error, bad scalar product before raising!" << crash;
-
+      characteristicH+=this->SimpleBasisK[j]*relativeSimpleCoords[j];
+    for (int k=0; k<rootsScalarProduct2HnonRaised.size; k++)
+      if (this->GetAmbientWeyl().RootScalarCartanRoot(characteristicH, rootsScalarProduct2HnonRaised[k])!=2)
+        crash << "Programming error: characteristicH is: " << characteristicH.ToString()
+        << "; rootsWithScalarProduct2NonRaised: "
+        << rootsScalarProduct2HnonRaised.ToString()
+        << "; the scalar product with vector "<< rootsScalarProduct2HnonRaised[k].ToString() << " is:  "
+        << this->GetAmbientWeyl().RootScalarCartanRoot
+        (characteristicH, rootsScalarProduct2HnonRaised[k]).ToString()
+        << " which is supposed to equal 2. " << crash;
+    stOutput << "Before raising char is: " << characteristicH.ToString();
     this->GetAmbientWeyl().RaiseToDominantWeight(characteristicH, 0, 0, &raisingElt);
-    //bool ereBeProbs=(characteristicH.ToString()=="(6, 10, 14, 8)");
+    stOutput << " After raising char is: " << characteristicH.ToString();
+    bool ereBeProbs=(characteristicH.ToString()=="(18, 10)");
     ////////////////////
     reflectedSimpleBasisK=this->SimpleBasisK;
-    //if (ereBeProbs)
-    //stOutput << "<hr>'n the raising element is: drumroll..." << raisingElt.ToString()
-    //<< ", acting on: " << reflectedSimpleBasisK.ToString();
+    if (ereBeProbs)
+      stOutput << "<hr>'n the raising element is: drumroll..." << raisingElt.ToString()
+      << ", acting on: " << reflectedSimpleBasisK.ToString();
     for (int k=0; k<reflectedSimpleBasisK.size; k++)
       this->GetAmbientWeyl().ActOn(raisingElt, reflectedSimpleBasisK[k]);
     ////////////////////
-    //if (ereBeProbs)
-    //  stOutput << "<br>so the reflected simple basis becomes: " << reflectedSimpleBasisK.ToString();
-
+    if (ereBeProbs)
+      stOutput << "<br>so the reflected simple basis becomes: " << reflectedSimpleBasisK.ToString();
     theSl2.RootsWithScalar2WithH=rootsScalarProduct2HnonRaised;
     for (int k=0; k<theSl2.RootsWithScalar2WithH.size; k++)
       this->GetAmbientWeyl().ActOn(raisingElt, theSl2.RootsWithScalar2WithH[k]);
     for (int i=0; i<theSl2.RootsWithScalar2WithH.size; i++)
       if (this->GetAmbientWeyl().RootScalarCartanRoot(characteristicH, theSl2.RootsWithScalar2WithH[i])!=2)
-        crash << "Programming error, bad scalar product after raising: characteristic: "
-        << characteristicH.ToString() << ", theSl2.RootsWithScalar2WithH[i]: "
+        crash << "Programming error, bad scalar product after raising: raised characteristic: "
+        << characteristicH.ToString()
+        << " simplebasisK: " << this->SimpleBasisK.ToString()
+        << "raised by: " << raisingElt.ToString()
+        << " to get: " << reflectedSimpleBasisK.ToString()
+        << " theSl2.RootsWithScalar2WithH: "
+        << theSl2.RootsWithScalar2WithH.ToString()
+        << ", theSl2.RootsWithScalar2WithH[i]: "
         << theSl2.RootsWithScalar2WithH[i].ToString()
         << " scalar product: "
         << this->GetAmbientWeyl().RootScalarCartanRoot(characteristicH, theSl2.RootsWithScalar2WithH[i]).ToString()
+        << ". The inverted relative cartan: " << InvertedRelativeKillingForm.ToString()
+        << ". The cartan: " << this->GetAmbientWeyl().CartanSymmetric.ToString() << ". "
         << crash;
     theSl2.theH.MakeHgenerator(characteristicH, theLieAlgebra);
     theSl2.LengthHsquared=theSl2.GetOwnerSSAlgebra().theWeyl.RootScalarCartanRoot(characteristicH, characteristicH);
@@ -2387,7 +2402,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
 //      stOutput << "<br> I was exploring " << this->ToString();
     }
     std::stringstream out;
-    out << "Exploring Dynkin characteristics case " << i+1 << " out of " << numCycles;
+    out << "Exploring Dynkin characteristics case " << cyclecounter+1 << " out of " << numCycles;
 //    stOutput << "<br>" << out.str();
     theReport.Report(out.str());
   }

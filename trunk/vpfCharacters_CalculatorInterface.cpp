@@ -488,7 +488,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(Calculator&
       break;
     }
   if (!isGood && input.children.size==3)
-  { stOutput << "here be i";
+  { //stOutput << "here be i";
     Matrix<Rational> theHWsMatForm;
     if (theCommands.GetMatrix(input[2], theHWsMatForm, 0, theSSalgebra->GetRank()))
     { theHWsMatForm.GetVectorsFromRows(theHWs);
@@ -498,9 +498,10 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(Calculator&
   if (theHWs.size==0 || !isGood)
     return output.MakeError("Failed to extract rational vectors from expression " + input.ToString() + ". ", theCommands);
   std::stringstream out;
-  out << "Input: " << theHWs.ToString() << ", simultaneously raising to maximally dominant in Weyl group of type "
+  out << "Input: " << theHWs.ToString()
+  << ", simultaneously raising to maximally dominant in Weyl group of type "
   << theSSalgebra->theWeyl.theDynkinType.ToString();
-  stOutput << out.str();
+//  stOutput << out.str();
   theSSalgebra->theWeyl.RaiseToMaximallyDominant(theHWs, useOuter);
   out << "<br>Maximally dominant output: " << theHWs.ToString();
   return output.AssignValue(out.str(), theCommands);

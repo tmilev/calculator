@@ -632,15 +632,15 @@ public:
       this->ActOn(theGroupElement, inputCopy, outputVector);
       return;
     }
+    outputVector=inputVector;
     for (int i=theGroupElement.generatorsLastAppliedFirst.size-1; i>=0; i--)
       if (!theGroupElement.generatorsLastAppliedFirst[i].flagIsOuter)
-      { outputVector=inputVector;
         this->SimpleReflection(theGroupElement.generatorsLastAppliedFirst[i].index, outputVector);
-      } else
+      else
         if (!this->theOuterAutos.IsZeroPointer())
           this->theOuterAutos.GetElementConst()
           .theGenerators[theGroupElement.generatorsLastAppliedFirst[i].index]
-          .ActOnVectorColumn(inputVector, outputVector);
+          .ActOnVectorColumn(outputVector, outputVector);
         else
           crash << "Weyl group of type " << this->theDynkinType.ToString()
           << " does not have its outer autos computed at a place where it should. " << crash;

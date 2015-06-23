@@ -891,7 +891,6 @@ bool SemisimpleSubalgebras::SetUpParabolicInductionDataPrecomputedSA(CandidateSS
   return theCandidate.ComputeAndVerifyFromGeneratorsAndHs();
 }
 
-
 bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
 (const CandidateSSSubalgebra& baseSubalgebra, Vector<Rational>& newHrescaledToActByTwo, const DynkinType& theNewType, const List<int>& theRootInjection)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra");

@@ -724,13 +724,9 @@ bool SemisimpleSubalgebras::FindTheSSSubalgebrasContinue()
   reportStream2 << "Found a total of " << this->theSubalgebras.size << " subalgebras. Proceding to"
   << " adjust centralizers. ";
   theReport2.Report(reportStream2.str());
-  this->flagAttemptToAdjustCentralizers=true;
-//  stOutput << "Fix me!!!";
-//  this->flagAttemptToAdjustCentralizers=false;
   stOutput << "The dynkin type, before hooking up the centralizers: " << this->targetDynkinType.ToString();
   if (this->targetDynkinType.IsEqualToZero())
-  { this->flagAttemptToAdjustCentralizers=false;
-    this->HookUpCentralizers(false);
+  { this->HookUpCentralizers(false);
     if (this->flagComputeNilradicals)
       this->ComputePairingTablesAndFKFTtypes();
   }
@@ -934,16 +930,39 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
 const Vector<Rational>& OrbitFDRepIteratorWeylGroup::GetCurrentElement()
 { MacroRegisterFunctionWithName("OrbitFDRepIteratorWeylGroup::GetCurrentElement");
   if (this->flagOrbitIsBuffered)
+  { stOutput << "<br>Fetching cached element. Orbit iterator status before fetching: " << this->ToString();
     return this->orbitBuffer[this->currentIndexInBuffer];
+  }
   return this->theIterator.GetCurrentElement();
+}
+
+bool OrbitFDRepIteratorWeylGroup::CheckConsistency()
+{ if (this->flagOrbitIsBuffered)
+    if (this->currentIndexInBuffer>=this->orbitBuffer.size)
+      crash << "Current buffer index is: " << this->currentIndexInBuffer << " but the orbit has "
+      << this->orbitBuffer.size << " elements. " << crash;
+  if (this->flagOrbitEnumeratedOnce)
+    if (this->currentIndexInBuffer >=this->orbitSize)
+      crash << "Current buffer index is: " << this->currentIndexInBuffer << " but the orbit was computed to have "
+      << this->orbitSize << " elements. " << crash;
+  if (this->flagOrbitIsBuffered)
+    if (this->orbitSize!=this->orbitBuffer.size)
+     crash << "Orbit is supposed to be buffered but the orbit buffer has " << this->orbitBuffer.size << " elements "
+     << " and the orbit size is reported to be: " << this->orbitSize << ". A detailed orbit printout: <br>"
+     << this->ToString() << crash;
+  if (!this->flagOrbitEnumeratedOnce && this->flagOrbitIsBuffered)
+    crash << "Orbit reported to be buffered but at the same time it hasn't been enumerated yet. "
+    << this->ToString() << crash;
+  return true;
 }
 
 bool OrbitFDRepIteratorWeylGroup::IncrementReturnFalseIfPastLast()
 { MacroRegisterFunctionWithName("OrbitFDRepIteratorWeylGroup::IncrementReturnFalseIfPastLast");
+  this->CheckConsistency();
   if (this->flagOrbitIsBuffered)
   { this->currentIndexInBuffer++;
     if (this->currentIndexInBuffer>=this->orbitSize)
-    { this->currentIndexInBuffer=0;
+    { this->currentIndexInBuffer=-1;
       return false;
     }
     return true;
@@ -953,13 +972,16 @@ bool OrbitFDRepIteratorWeylGroup::IncrementReturnFalseIfPastLast()
     return this->theIterator.IncrementReturnFalseIfPastLast();
   if (!this->theIterator.IncrementReturnFalseIfPastLast())
   { this->orbitSize=this->currentIndexInBuffer;
+    this->currentIndexInBuffer=-1;
     this->flagOrbitEnumeratedOnce=true;
-    if (this->orbitBuffer.size<=this->maxOrbitBufferSize)
+    if (this->orbitSize<=this->maxOrbitBufferSize)
       this->flagOrbitIsBuffered=true;
     else
-    { this->orbitBuffer.SetSize(0);
+    { this->flagOrbitIsBuffered=false;
+      this->orbitBuffer.SetSize(0);
       this->orbitBuffer.ReleaseMemory();
     }
+    this->CheckConsistency();
     return false;
   }
   if (this->orbitBuffer.size<this->maxOrbitBufferSize)
@@ -969,10 +991,9 @@ bool OrbitFDRepIteratorWeylGroup::IncrementReturnFalseIfPastLast()
 
 void OrbitFDRepIteratorWeylGroup::init()
 { MacroRegisterFunctionWithName("OrbitFDRepIteratorWeylGroup::init");
+  this->currentIndexInBuffer=0;
   if (this->flagOrbitIsBuffered)
-  { this->currentIndexInBuffer=0;
     return;
-  }
   this->theIterator.init
   (this->theIterator.theGroupGeneratingElements, this->orbitDefiningElement, this->theIterator.theGroupAction);
 }
@@ -1005,11 +1026,15 @@ void OrbitFDRepIteratorWeylGroup::reset()
 
 std::string OrbitFDRepIteratorWeylGroup::ToString()const
 { std::stringstream out;
-  out << " Element: " << this->currentIndexInBuffer+1;
+  out << " The orbit defining element is: " << this->orbitDefiningElement.ToString() << ". ";
+  out << "<br>Current element number: " << this->currentIndexInBuffer+1 << ". ";
+  if (this->orbitSize!=-1)
+    out << "<br>The orbit size is: " << this->orbitSize << ".";
   if (this->flagOrbitIsBuffered)
-    out << " out of " << this->orbitSize << ". ";
+    out << "<br> The orbit is buffered, the orbit elements are: " << this->orbitBuffer.ToString();
   else
-    out << "?";
+    out << "<br> The orbit is either too large or not yet fully enumerated. ";
+  out << "<br> Max buffer size: " << this->maxOrbitBufferSize;
   return out.str();
 }
 
@@ -1076,8 +1101,11 @@ void SemisimpleSubalgebras::GetHCandidates
     Vector<Rational> currentCandidate;
     OrbitFDRepIteratorWeylGroup& currentOrbit=this->theOrbiTs[j];
     currentOrbit.init();
+//    int counter=0;
     do
-    { currentCandidate= currentOrbit.GetCurrentElement();
+    { //counter++;
+      //stOutput << "Counter: " << counter << "<br>";
+      currentCandidate= currentOrbit.GetCurrentElement();
       if (newCandidate.IsGoodHnewActingByTwo(currentCandidate, currentRootInjection))
       { if (theGlobalVariables!=0)
         { std::stringstream out2, out3;
@@ -5293,8 +5321,7 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
     << this->owner->ToStringAlgebraLink(this->GetSSpartCentralizerOfSSPartCentralizer(), theFormat);
   }
   if (!this->flagCentralizerIsWellChosen)
-  { //if (this->owner->flagAttemptToAdjustCentralizers)
-    out << "<br><span style=\"color:#FF0000\"><b>The Cartan of the centralizer does not lie in the ambient Cartan (the computation was too large?).</b></span> "
+  { out << "<br><span style=\"color:#FF0000\"><b>The Cartan of the centralizer does not lie in the ambient Cartan (the computation was too large?).</b></span> "
     << "The intersection of the ambient Cartan with the centralizer is of dimension " << this->CartanOfCentralizer.size << " instead of the desired dimension "
     << this->centralizerRank.ToString() << ". ";
     //else

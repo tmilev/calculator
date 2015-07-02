@@ -627,11 +627,11 @@ public:
   }
   template <class coefficient>
   void ActOn(const ElementWeylGroup<WeylGroup>& theGroupElement, const Vector<coefficient>& inputVector, Vector<coefficient>& outputVector)const
-  { if (&inputVector==&outputVector)
-    { Vector<coefficient> inputCopy=inputVector;
-      this->ActOn(theGroupElement, inputCopy, outputVector);
-      return;
-    }
+  { //if (&inputVector==&outputVector)
+    //{ Vector<coefficient> inputCopy=inputVector;
+    //  this->ActOn(theGroupElement, inputCopy, outputVector);
+    //  return;
+    //}
     outputVector=inputVector;
     for (int i=theGroupElement.generatorsLastAppliedFirst.size-1; i>=0; i--)
       if (!theGroupElement.generatorsLastAppliedFirst[i].flagIsOuter)

@@ -184,14 +184,14 @@ void ElementWeylGroup<templateWeylGroup>::MakeFromRhoImage(const Vector<Rational
 
 template <class templateWeylGroup>
 void ElementWeylGroup<templateWeylGroup>::MakeCanonical()
-{ stOutput << "<hr>making " << this->ToString() << " canonical: ";
+{ //stOutput << "<hr>making " << this->ToString() << " canonical: ";
   this->CheckInitialization();
   if (this->owner->rho.size==0)
     this->owner->ComputeRho(false);
   Vector<Rational> theVector;
   this->owner->ActOn(*this, this->owner->rho, theVector);
   this->MakeFromRhoImage(theVector, *this->owner);
-  stOutput << " end result: " << this->ToString() << ". ";
+  //stOutput << " end result: " << this->ToString() << ". ";
 }
 
 template <class templateWeylGroup>

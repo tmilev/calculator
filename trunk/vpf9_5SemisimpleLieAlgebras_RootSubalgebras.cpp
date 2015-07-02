@@ -2338,20 +2338,20 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
         << this->GetAmbientWeyl().RootScalarCartanRoot
         (characteristicH, rootsScalarProduct2HnonRaised[k]).ToString()
         << " which is supposed to equal 2. " << crash;
-    stOutput << "Before raising char is: " << characteristicH.ToString();
+//    stOutput << "Before raising char is: " << characteristicH.ToString();
     this->GetAmbientWeyl().RaiseToDominantWeight(characteristicH, 0, 0, &raisingElt);
-    stOutput << " After raising char is: " << characteristicH.ToString();
-    bool ereBeProbs=(characteristicH.ToString()=="(18, 10)");
+//    stOutput << " After raising char is: " << characteristicH.ToString();
     ////////////////////
+    bool ereBeProbs=(characteristicH.ToString()=="(18, 10)");
     reflectedSimpleBasisK=this->SimpleBasisK;
     if (ereBeProbs)
-      stOutput << "<hr>'n the raising element is: drumroll..." << raisingElt.ToString()
+    { stOutput << "<hr>'n the raising element is: drumroll..." << raisingElt.ToString()
       << ", acting on: " << reflectedSimpleBasisK.ToString();
-    for (int k=0; k<reflectedSimpleBasisK.size; k++)
-      this->GetAmbientWeyl().ActOn(raisingElt, reflectedSimpleBasisK[k]);
-    ////////////////////
-    if (ereBeProbs)
+      for (int k=0; k<reflectedSimpleBasisK.size; k++)
+        this->GetAmbientWeyl().ActOn(raisingElt, reflectedSimpleBasisK[k]);
       stOutput << "<br>so the reflected simple basis becomes: " << reflectedSimpleBasisK.ToString();
+    }
+    ////////////////////
     theSl2.RootsWithScalar2WithH=rootsScalarProduct2HnonRaised;
     for (int k=0; k<theSl2.RootsWithScalar2WithH.size; k++)
       this->GetAmbientWeyl().ActOn(raisingElt, theSl2.RootsWithScalar2WithH[k]);
@@ -2822,8 +2822,8 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
   int col=0;
   int row=0;
   out << "g: " << this->theSubalgebras[0].theDynkinDiagram.ToString()
-  << ". There are " << this->theSubalgebras.size << " table entries= " << this->theSubalgebras.size-2
-  << " larger than the Cartan subalgebra + the Cartan subalgebra+ the full subalgebra)\n\n";
+  << ". There are " << this->theSubalgebras.size << " table entries (= " << this->theSubalgebras.size-2
+  << " larger than the Cartan subalgebra + the Cartan subalgebra+ the full subalgebra).\n\n";
   out << "<table border=\"1\">\n <colgroup>";
   for (int i=0; i<this->NumColsPerTableLatex; i++)
     out << "<col width=\"180\">";

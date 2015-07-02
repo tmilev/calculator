@@ -888,6 +888,7 @@ public:
   const Vector<Rational>& GetCurrentElement();
   std::string ToString()const;
   std::string ToStringSize()const;
+  bool CheckConsistency();
   void init();
   void init
   (const List<ElementWeylGroup<WeylGroup> >& inputGenerators, const Vector<Rational>& inputElement,

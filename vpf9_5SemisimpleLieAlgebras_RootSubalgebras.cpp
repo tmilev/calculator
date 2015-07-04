@@ -2109,6 +2109,11 @@ bool SemisimpleLieAlgebra::AttemptExtendingHFtoHEFWRTSubalgebra
  ElementSemisimpleLieAlgebra<Rational>& outputE, ElementSemisimpleLieAlgebra<Rational>& outputF, Matrix<Rational>& outputMatrixSystemToBeSolved,
  PolynomialSubstitution<Rational>& outputSystemToBeSolved, Matrix<Rational>& outputSystemColumnVector, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::AttemptExtendingHFtoHEFWRTSubalgebra");
+  bool ereBeProbs=(h.ToString()=="(18, 10)") || (h.ToString()=="(6, 10, 12)") ||
+  h.ToString()=="(6, 4)" || h.ToString() =="(3, 4, 3)";
+  if (ereBeProbs)
+  { stOutput << "<br>Ere be probs ! hChar: " << h.ToString() << "<br>" ;
+  }
   if (theZeroCharacteristics.CardinalitySelection== theZeroCharacteristics.MaxSize)
     return false;
   Vectors<Rational> rootsInPlay;
@@ -2140,9 +2145,8 @@ bool SemisimpleLieAlgebra::AttemptExtendingHFtoHEFWRTSubalgebra
       SelectedExtraPositiveRoots.AddOnTop(RootsWithCharacteristic2[i]);
   int numRootsChar2 = rootsInPlay.size;
   rootsInPlay.AddListOnTop(SelectedExtraPositiveRoots);
-//  bool ereBeProbs=(h.ToString()=="(6, 10, 14, 8)");
-//  if (ereBeProbs)
-//    stOutput << "<hr>The roots in play are: " << rootsInPlay.ToString();
+  if (ereBeProbs)
+    stOutput << "<hr>The roots in play are: " << rootsInPlay.ToString();
 
   int halfNumberVariables = rootsInPlay.size;
   int numberVariables = halfNumberVariables*2;
@@ -2151,9 +2155,9 @@ bool SemisimpleLieAlgebra::AttemptExtendingHFtoHEFWRTSubalgebra
   Matrix<Rational> coeffsF;
   coeffsF.init(1, halfNumberVariables);
   for (int i=0; i<numRootsChar2; i++)
-    coeffsF.elements[0][i]=i+1; //(i%2==0)? 1: 2;
+    coeffsF.elements[0][i]=i*i+1; //(i%2==0)? 1: 2;
   for (int i=numRootsChar2; i<coeffsF.NumCols; i++)
-    coeffsF.elements[0][i]=i+1;
+    coeffsF.elements[0][i]=i*i+1;
   this->initHEFSystemFromECoeffs
   (theRelativeDimension, rootsInPlay, simpleBasisSA, SelectedExtraPositiveRoots, numberVariables, numRootsChar2, halfNumberVariables,
    h, coeffsF, outputMatrixSystemToBeSolved, outputSystemColumnVector, outputSystemToBeSolved);
@@ -2163,16 +2167,22 @@ bool SemisimpleLieAlgebra::AttemptExtendingHFtoHEFWRTSubalgebra
   outputF.MakeZero();
   outputE.MakeZero();
 //  if(Matrix<Rational> ::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(outputMatrixSystemToBeSolved, outputSystemColumnVector, tempMatResult))
+  if (ereBeProbs)
+    stOutput << "<br>Solving system with mat: " << tempMat.ToString() << " col v-r: " << tempMatColumn.ToString();
   ChevalleyGenerator tempGen;
   if(Matrix<Rational>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(tempMat, tempMatColumn, tempMatResult))
-  { for (int i=0; i<rootsInPlay.size; i++)
+  { if (ereBeProbs)
+      stOutput << "<br>'n the system is solved like a charm.";
+    for (int i=0; i<rootsInPlay.size; i++)
     { tempGen.MakeGenerator(*this, this->GetGeneratorFromRoot(-rootsInPlay[i]));
       outputF.AddMonomial(tempGen, coeffsF.elements[0][i]);
       tempGen.MakeGenerator(*this, this->GetGeneratorFromRoot(rootsInPlay[i]));
       outputE.AddMonomial(tempGen, tempMatResult.elements[i][0]);
     }
     return true;
-  }
+  } else
+//    if (ereBeProbs)
+      stOutput << "<br><b>System for hChar: " << h.ToString() << " not solved!!!</b>";
   return false;
 }
 
@@ -2189,6 +2199,11 @@ void SemisimpleLieAlgebra::initHEFSystemFromECoeffs
   outputSystemToBeSolved.size=0;
   outputMatrixSystemToBeSolved.init(0, numberVariables);
   //outputSystemToBeSolved.ComputeDebugString();
+  for (int i=0; i<rootsInPlay.size; i++)
+    if(this->theWeyl.RootScalarCartanRoot(targetH, rootsInPlay[i])!=2)
+      crash << "The scalar product of the h element: " << targetH.ToString()
+      << " and the root in play " << rootsInPlay[i].ToString() << " must be 2, but equals instead "
+      << this->theWeyl.RootScalarCartanRoot(targetH, rootsInPlay[i]).ToString() << crash;
   for (int i=0; i<rootsInPlay.size; i++)
     for (int j=0; j<rootsInPlay.size; j++)
     { tempRoot= rootsInPlay[i]-rootsInPlay[j];
@@ -2342,16 +2357,20 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
     this->GetAmbientWeyl().RaiseToDominantWeight(characteristicH, 0, 0, &raisingElt);
 //    stOutput << " After raising char is: " << characteristicH.ToString();
     ////////////////////
-    bool ereBeProbs=(characteristicH.ToString()=="(18, 10)");
+    bool ereBeProbs=
+    (characteristicH.ToString()=="(18, 10)") || (characteristicH.ToString()=="(6, 10, 12)")||
+    (characteristicH.ToString()=="(6, 4)")
+  ;
+
     reflectedSimpleBasisK=this->SimpleBasisK;
+    ////////////////////
+    for (int k=0; k<reflectedSimpleBasisK.size; k++)
+      this->GetAmbientWeyl().ActOn(raisingElt, reflectedSimpleBasisK[k]);
     if (ereBeProbs)
     { stOutput << "<hr>'n the raising element is: drumroll..." << raisingElt.ToString()
       << ", acting on: " << reflectedSimpleBasisK.ToString();
-      for (int k=0; k<reflectedSimpleBasisK.size; k++)
-        this->GetAmbientWeyl().ActOn(raisingElt, reflectedSimpleBasisK[k]);
       stOutput << "<br>so the reflected simple basis becomes: " << reflectedSimpleBasisK.ToString();
     }
-    ////////////////////
     theSl2.RootsWithScalar2WithH=rootsScalarProduct2HnonRaised;
     for (int k=0; k<theSl2.RootsWithScalar2WithH.size; k++)
       this->GetAmbientWeyl().ActOn(raisingElt, theSl2.RootsWithScalar2WithH[k]);
@@ -2371,6 +2390,8 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
         << ". The inverted relative cartan: " << InvertedRelativeKillingForm.ToString()
         << ". The cartan: " << this->GetAmbientWeyl().CartanSymmetric.ToString() << ". "
         << crash;
+    if (ereBeProbs)
+      stOutput << "roots scalar 2 with h:" << theSl2.RootsWithScalar2WithH.ToString();
     theSl2.theH.MakeHgenerator(characteristicH, theLieAlgebra);
     theSl2.LengthHsquared=theSl2.GetOwnerSSAlgebra().theWeyl.RootScalarCartanRoot(characteristicH, characteristicH);
     theSl2.theE.MakeZero();
@@ -2393,12 +2414,12 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
       }
     } else
     { output.BadHCharacteristics.AddOnTop(characteristicH);
-//      DynkinType tempType;
-//      diagramZeroCharRoots.GetDynkinType(tempType);
-//      stOutput << "<br>obtained bad characteristic " << characteristicH.ToString() << ". The zero char root diagram is "
-//      << tempType.ToString() << "; the Dynkin epsilon is " << theDynkinEpsilon << "= the num roots generated by diagram "
-//      << diagramZeroCharRoots.NumRootsGeneratedByDiagram() << " + the relative dimension " << theRelativeDimension
-//      << " - the slack " << theSlack << "<br>The relative root system is: " << relativeRootSystem.ToString();
+      DynkinType tempType;
+      diagramZeroCharRoots.GetDynkinType(tempType);
+      stOutput << "<br>obtained bad characteristic " << characteristicH.ToString() << ". The zero char root diagram is "
+      << tempType.ToString() << "; the Dynkin epsilon is " << theDynkinEpsilon << "= the num roots generated by diagram "
+      << diagramZeroCharRoots.NumRootsGeneratedByDiagram() << " + the relative dimension " << theRelativeDimension
+      << " - the slack " << theSlack << "<br>The relative root system is: " << relativeRootSystem.ToString();
 //      stOutput << "<br> I was exploring " << this->ToString();
     }
     std::stringstream out;

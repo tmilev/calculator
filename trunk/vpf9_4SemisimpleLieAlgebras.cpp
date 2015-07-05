@@ -409,16 +409,12 @@ bool SemisimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariable
   return true;
 }
 
-Rational SemisimpleLieAlgebra::GetConstant(const Vector<Rational> &root1, const  Vector<Rational> &root2)
+Rational SemisimpleLieAlgebra::GetConstant(const Vector<Rational>& root1, const Vector<Rational>& root2)
 { int index1=this->theWeyl.RootSystem.GetIndex(root1);
   int index2= this->theWeyl.RootSystem.GetIndex(root2);
-  Rational tempRat;
   if (index1==-1 || index2==-1)
-  { tempRat.MakeZero();
-    return tempRat;
-  }
-  tempRat.Assign(this->ChevalleyConstants.elements[index1][index2]);
-  return tempRat;
+    return 0;
+  return this->ChevalleyConstants(index1,index2);
 }
 
 bool SemisimpleLieAlgebra::GetConstantOrHElement

@@ -930,7 +930,7 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
 const Vector<Rational>& OrbitFDRepIteratorWeylGroup::GetCurrentElement()
 { MacroRegisterFunctionWithName("OrbitFDRepIteratorWeylGroup::GetCurrentElement");
   if (this->flagOrbitIsBuffered)
-  { stOutput << "<br>Fetching cached element. Orbit iterator status before fetching: " << this->ToString();
+  { //stOutput << "<br>Fetching cached element. Orbit iterator status before fetching: " << this->ToString();
     return this->orbitBuffer[this->currentIndexInBuffer];
   }
   return this->theIterator.GetCurrentElement();
@@ -1011,6 +1011,8 @@ void OrbitFDRepIteratorWeylGroup::init
   } else
     this->reset();
   this->orbitDefiningElement=inputElement;
+  if (this->maxOrbitBufferSize>=1)
+    this->orbitBuffer.AddOnTop(this->orbitDefiningElement);
   this->theIterator.init(inputGenerators, this->orbitDefiningElement, inputGroupAction);
 }
 
@@ -1019,7 +1021,7 @@ void OrbitFDRepIteratorWeylGroup::reset()
   this->flagOrbitEnumeratedOnce=false;
   this->orbitSize=-1;
   this->currentIndexInBuffer=-1;
-  this->maxOrbitBufferSize=2;
+  this->maxOrbitBufferSize=5000000;
   this->orbitBuffer.SetSize(0);
   this->theIterator.reset();
 }

@@ -189,6 +189,7 @@ public:
   void GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables);
   void GetCoxeterElement(Matrix<Rational>& output);
   void ComputePotentialExtensions();
+  void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexRootSAinContainer, GlobalVariables* theGlobalVariables);
   bool IsEquivalentToByDiagramsAndDimensions(const rootSubalgebra& other)const;
   void ComputeOuterSAautosExtendingToAmbientAutosGenerators();
   bool IsGeneratingSingularVectors(int indexKmod, Vectors<Rational>& NilradicalRoots);
@@ -238,7 +239,6 @@ public:
   bool RootsDefineASubalgebra(Vectors<Rational>& theRoots);
   void GenerateKmodMultTable(List<List<List<int> > >& output, List<int>& oppositeKmods, GlobalVariables* theGlobalVariables);
   void KmodTimesKmod(int index1, int index2, List<int>& oppositeKmods, List<int>& output);
-  void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexRootSAinContainer, GlobalVariables* theGlobalVariables);
   void ComputeDynkinDiagramKandCentralizer();
   bool CheckRankInequality()const;
   bool ComputeEssentialsIfNew();
@@ -424,6 +424,15 @@ public:
    ;
   void ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables* theGlobalVariables);
   bool AttemptToComputeCentralizer(GlobalVariables* theGlobalVariables);
+  bool AttemptExtendingHFtoHEFWRTSubalgebra
+  (Vectors<Rational>& RootsWithCharacteristic2, Selection& theZeroCharacteristics, Vectors<Rational>& simpleBasisSA, Vector<Rational>& h,
+   ElementSemisimpleLieAlgebra<Rational>& outputE, ElementSemisimpleLieAlgebra<Rational>& outputF, Matrix<Rational>& outputMatrixSystemToBeSolved,
+   PolynomialSubstitution<Rational>& outputSystemToBeSolved, Matrix<Rational>& outputSystemColumnVector, GlobalVariables* theGlobalVariables);
+  void initHEFSystemFromECoeffs
+  (int theRelativeDimension, Vectors<Rational>& rootsInPlay, Vectors<Rational>& simpleBasisSA, Vectors<Rational>& SelectedExtraPositiveRoots,
+   int numberVariables, int numRootsChar2, int halfNumberVariables, Vector<Rational>& targetH, Matrix<Rational>& inputFCoeffs,
+   Matrix<Rational>& outputMatrixSystemToBeSolved, Matrix<Rational>& outputSystemColumnVector, PolynomialSubstitution<Rational>& outputSystemToBeSolved);
+
   void ComputeModuleDecompositionOfMinimalContainingRegularSAs
   (SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables* theGlobalVariables);
   bool ModuleDecompositionFitsInto(const slTwoSubalgebra& other)const;

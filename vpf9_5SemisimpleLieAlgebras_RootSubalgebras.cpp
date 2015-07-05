@@ -2104,16 +2104,16 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphismOLD(Globa
       this->theSubalgebras[i].ComputeEpsCoordsWRTk(theGlobalVariables);
 }
 
-bool SemisimpleLieAlgebra::AttemptExtendingHFtoHEFWRTSubalgebra
+bool slTwoSubalgebra::AttemptExtendingHFtoHEFWRTSubalgebra
 (Vectors<Rational>& RootsWithCharacteristic2, Selection& theZeroCharacteristics, Vectors<Rational>& simpleBasisSA, Vector<Rational>& h,
  ElementSemisimpleLieAlgebra<Rational>& outputE, ElementSemisimpleLieAlgebra<Rational>& outputF, Matrix<Rational>& outputMatrixSystemToBeSolved,
  PolynomialSubstitution<Rational>& outputSystemToBeSolved, Matrix<Rational>& outputSystemColumnVector, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::AttemptExtendingHFtoHEFWRTSubalgebra");
-  bool ereBeProbs=(h.ToString()=="(18, 10)") || (h.ToString()=="(6, 10, 12)") ||
-  h.ToString()=="(6, 4)" || h.ToString() =="(3, 4, 3)";
-  if (ereBeProbs)
-  { stOutput << "<br>Ere be probs ! hChar: " << h.ToString() << "<br>" ;
-  }
+  //bool ereBeProbs=(h.ToString()=="(18, 10)") || (h.ToString()=="(6, 10, 12)") ||
+  //h.ToString()=="(6, 4)" || h.ToString() =="(3, 4, 3)";
+  //if (ereBeProbs)
+  //{ stOutput << "<br>Ere be probs ! hChar: " << h.ToString() << "<br>" ;
+  //}
   if (theZeroCharacteristics.CardinalitySelection== theZeroCharacteristics.MaxSize)
     return false;
   Vectors<Rational> rootsInPlay;
@@ -2145,8 +2145,8 @@ bool SemisimpleLieAlgebra::AttemptExtendingHFtoHEFWRTSubalgebra
       SelectedExtraPositiveRoots.AddOnTop(RootsWithCharacteristic2[i]);
   int numRootsChar2 = rootsInPlay.size;
   rootsInPlay.AddListOnTop(SelectedExtraPositiveRoots);
-  if (ereBeProbs)
-    stOutput << "<hr>The roots in play are: " << rootsInPlay.ToString();
+//  if (ereBeProbs)
+//    stOutput << "<hr>The roots in play are: " << rootsInPlay.ToString();
 
   int halfNumberVariables = rootsInPlay.size;
   int numberVariables = halfNumberVariables*2;
@@ -2167,47 +2167,48 @@ bool SemisimpleLieAlgebra::AttemptExtendingHFtoHEFWRTSubalgebra
   outputF.MakeZero();
   outputE.MakeZero();
 //  if(Matrix<Rational> ::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(outputMatrixSystemToBeSolved, outputSystemColumnVector, tempMatResult))
-  if (ereBeProbs)
-    stOutput << "<br>Solving system with mat: " << tempMat.ToString() << " col v-r: " << tempMatColumn.ToString();
+//  if (ereBeProbs)
+//    stOutput << "<br>Solving system with mat: " << tempMat.ToString() << " col v-r: " << tempMatColumn.ToString();
   ChevalleyGenerator tempGen;
   if(Matrix<Rational>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(tempMat, tempMatColumn, tempMatResult))
-  { if (ereBeProbs)
-      stOutput << "<br>'n the system is solved like a charm.";
+  { //if (ereBeProbs)
+    //  stOutput << "<br>'n the system is solved like a charm.";
     for (int i=0; i<rootsInPlay.size; i++)
-    { tempGen.MakeGenerator(*this, this->GetGeneratorFromRoot(-rootsInPlay[i]));
+    { tempGen.MakeGenerator(this->GetOwnerSSAlgebra(), this->GetOwnerSSAlgebra().GetGeneratorFromRoot(-rootsInPlay[i]));
       outputF.AddMonomial(tempGen, coeffsF.elements[0][i]);
-      tempGen.MakeGenerator(*this, this->GetGeneratorFromRoot(rootsInPlay[i]));
+      tempGen.MakeGenerator(this->GetOwnerSSAlgebra(), this->GetOwnerSSAlgebra().GetGeneratorFromRoot(rootsInPlay[i]));
       outputE.AddMonomial(tempGen, tempMatResult.elements[i][0]);
     }
     return true;
-  } else
+  } //else
 //    if (ereBeProbs)
-      stOutput << "<br><b>System for hChar: " << h.ToString() << " not solved!!!</b>";
+     // stOutput << "<br><b>System for hChar: " << h.ToString() << " not solved!!!</b>";
   return false;
 }
 
-void SemisimpleLieAlgebra::initHEFSystemFromECoeffs
+void slTwoSubalgebra::initHEFSystemFromECoeffs
 (int theRelativeDimension, Vectors<Rational>& rootsInPlay, Vectors<Rational>& simpleBasisSA, Vectors<Rational>& SelectedExtraPositiveRoots,
  int numberVariables, int numRootsChar2, int halfNumberVariables, Vector<Rational>& targetH, Matrix<Rational>& inputFCoeffs, Matrix<Rational>& outputMatrixSystemToBeSolved,
  Matrix<Rational>& outputSystemColumnVector, PolynomialSubstitution<Rational>& outputSystemToBeSolved)
-{ Vector<Rational> tempRoot;
+{ MacroRegisterFunctionWithName("slTwoSubalgebra::initHEFSystemFromECoeffs");
+  Vector<Rational> tempRoot;
   MonomialP tempM;
   Rational tempRat;
   HashedList<Vector<Rational> > RootSpacesThatNeedToBeKilled;
-  RootSpacesThatNeedToBeKilled.SetExpectedSize(this->theWeyl.RootSystem.size);
+  RootSpacesThatNeedToBeKilled.SetExpectedSize(this->GetOwnerWeyl().RootSystem.size);
 //  IndicesEquationsByRootSpace.Reserve(this->theWeyl.RootSystem.size);
   outputSystemToBeSolved.size=0;
   outputMatrixSystemToBeSolved.init(0, numberVariables);
   //outputSystemToBeSolved.ComputeDebugString();
   for (int i=0; i<rootsInPlay.size; i++)
-    if(this->theWeyl.RootScalarCartanRoot(targetH, rootsInPlay[i])!=2)
+    if(this->GetOwnerWeyl().RootScalarCartanRoot(targetH, rootsInPlay[i])!=2)
       crash << "The scalar product of the h element: " << targetH.ToString()
       << " and the root in play " << rootsInPlay[i].ToString() << " must be 2, but equals instead "
-      << this->theWeyl.RootScalarCartanRoot(targetH, rootsInPlay[i]).ToString() << crash;
+      << this->GetOwnerWeyl().RootScalarCartanRoot(targetH, rootsInPlay[i]).ToString() << crash;
   for (int i=0; i<rootsInPlay.size; i++)
     for (int j=0; j<rootsInPlay.size; j++)
     { tempRoot= rootsInPlay[i]-rootsInPlay[j];
-      if (this->theWeyl.IsARoot(tempRoot))
+      if (this->GetOwnerWeyl().IsARoot(tempRoot))
       { int indexEquation= RootSpacesThatNeedToBeKilled.GetIndex(tempRoot);
         if (indexEquation==-1)
         { RootSpacesThatNeedToBeKilled.AddOnTop(tempRoot);
@@ -2219,13 +2220,13 @@ void SemisimpleLieAlgebra::initHEFSystemFromECoeffs
         tempM.MakeOne(numberVariables);
         tempM[i]=1;
         tempM[j+halfNumberVariables]=1;
-        Rational tempCoeff= this->GetConstant(rootsInPlay[i], -rootsInPlay[j]);
+        Rational tempCoeff= this->GetOwnerSSAlgebra().GetConstant(rootsInPlay[i], -rootsInPlay[j]);
         outputSystemToBeSolved[indexEquation].AddMonomial(tempM, tempCoeff);
         //outputSystemToBeSolved.ComputeDebugString();
       }
     }
   int oldSize=outputSystemToBeSolved.size;
-  outputSystemToBeSolved.SetSize(oldSize+this->theWeyl.CartanSymmetric.NumRows);
+  outputSystemToBeSolved.SetSize(oldSize+this->GetOwnerWeyl().CartanSymmetric.NumRows);
   for(int i=oldSize; i<outputSystemToBeSolved.size; i++)
     outputSystemToBeSolved[i].MakeZero();
   //outputSystemToBeSolved.ComputeDebugString();
@@ -2233,15 +2234,15 @@ void SemisimpleLieAlgebra::initHEFSystemFromECoeffs
   for (int i=0; i<rootsInPlay.size; i++)
   { if(rootsInPlay.size!=halfNumberVariables)
       crash << crash;
-    this->GetConstantOrHElement(rootsInPlay[i], -rootsInPlay[i], tempRat, tempRoot);
-    for (int j=0; j<this->theWeyl.CartanSymmetric.NumRows; j++)
+    this->GetOwnerSSAlgebra().GetConstantOrHElement(rootsInPlay[i], -rootsInPlay[i], tempRat, tempRoot);
+    for (int j=0; j<this->GetOwnerSSAlgebra().GetRank(); j++)
     { tempM.MakeOne(numberVariables);
       tempM[i]=1;
       tempM[i+halfNumberVariables]=1;
       outputSystemToBeSolved[j+oldSize].AddMonomial(tempM, tempRoot[j]);
     }
   }
-  for (int i=0; i<this->theWeyl.CartanSymmetric.NumRows; i++)
+  for (int i=0; i<this->GetOwnerSSAlgebra().GetRank(); i++)
     outputSystemToBeSolved[i+oldSize].AddConstant(targetH[i]*(-1));
   outputMatrixSystemToBeSolved.init(outputSystemToBeSolved.size, halfNumberVariables);
   outputSystemColumnVector.init(outputSystemToBeSolved.size, 1);
@@ -2357,20 +2358,20 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
     this->GetAmbientWeyl().RaiseToDominantWeight(characteristicH, 0, 0, &raisingElt);
 //    stOutput << " After raising char is: " << characteristicH.ToString();
     ////////////////////
-    bool ereBeProbs=
-    (characteristicH.ToString()=="(18, 10)") || (characteristicH.ToString()=="(6, 10, 12)")||
-    (characteristicH.ToString()=="(6, 4)")
-  ;
+    //bool ereBeProbs=
+    //(characteristicH.ToString()=="(18, 10)") || (characteristicH.ToString()=="(6, 10, 12)")||
+    //(characteristicH.ToString()=="(6, 4)")
+    //;
 
     reflectedSimpleBasisK=this->SimpleBasisK;
     ////////////////////
     for (int k=0; k<reflectedSimpleBasisK.size; k++)
       this->GetAmbientWeyl().ActOn(raisingElt, reflectedSimpleBasisK[k]);
-    if (ereBeProbs)
-    { stOutput << "<hr>'n the raising element is: drumroll..." << raisingElt.ToString()
-      << ", acting on: " << reflectedSimpleBasisK.ToString();
-      stOutput << "<br>so the reflected simple basis becomes: " << reflectedSimpleBasisK.ToString();
-    }
+    //if (ereBeProbs)
+    //{ stOutput << "<hr>'n the raising element is: drumroll..." << raisingElt.ToString()
+    //  << ", acting on: " << reflectedSimpleBasisK.ToString();
+    //  stOutput << "<br>so the reflected simple basis becomes: " << reflectedSimpleBasisK.ToString();
+    //}
     theSl2.RootsWithScalar2WithH=rootsScalarProduct2HnonRaised;
     for (int k=0; k<theSl2.RootsWithScalar2WithH.size; k++)
       this->GetAmbientWeyl().ActOn(raisingElt, theSl2.RootsWithScalar2WithH[k]);
@@ -2390,15 +2391,15 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
         << ". The inverted relative cartan: " << InvertedRelativeKillingForm.ToString()
         << ". The cartan: " << this->GetAmbientWeyl().CartanSymmetric.ToString() << ". "
         << crash;
-    if (ereBeProbs)
-      stOutput << "roots scalar 2 with h:" << theSl2.RootsWithScalar2WithH.ToString();
+    //if (ereBeProbs)
+    //  stOutput << "roots scalar 2 with h:" << theSl2.RootsWithScalar2WithH.ToString();
     theSl2.theH.MakeHgenerator(characteristicH, theLieAlgebra);
     theSl2.LengthHsquared=theSl2.GetOwnerSSAlgebra().theWeyl.RootScalarCartanRoot(characteristicH, characteristicH);
     theSl2.theE.MakeZero();
     theSl2.theF.MakeZero();
     //theSl2.ComputeDebugString(false, false, theGlobalVariables);
 //    stOutput << "<br>accounting " << characteristicH.ToString();
-    if(theLieAlgebra.AttemptExtendingHFtoHEFWRTSubalgebra
+    if(theSl2.AttemptExtendingHFtoHEFWRTSubalgebra
        (theSl2.RootsWithScalar2WithH, selectionRootsWithZeroCharacteristic, reflectedSimpleBasisK,
         characteristicH, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved,
         theSl2.theSystemColumnVector, theGlobalVariables))

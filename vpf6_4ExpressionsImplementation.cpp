@@ -1060,7 +1060,21 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
       theWeight.weightFundamentalCoordS[i].Substitution(subPolyPart);
     return this->AssignValueWithContext(theWeight, inputOutputMinContext, *this->theBoss);
   }
-  this->theBoss->Comments << "Expression " << this->ToString() << " is of built-in type but is not handled by Expression::SetContextAtLeastEqualTo";
+  if (this->IsOfType<Matrix<RationalFunctionOld> >())
+  { Matrix<RationalFunctionOld> newMat=this->GetValue<Matrix< RationalFunctionOld> >();
+    //stOutput << "<br>Subbing " << polySub.ToString() << " in "
+    PolynomialSubstitution<Rational> subPolyPart;
+    //<< newPoly.ToString();
+    myOldContext.ContextGetPolySubFromSuperContextNoFailure<Rational>(newContext, subPolyPart);
+    for (int i=0; i< newMat.NumRows; i++)
+      for (int j=0; j<newMat.NumCols; j++)
+        if (!newMat(i,j).Substitution(subPolyPart))
+          return *this->theBoss << "Failed to carry out the substitution "
+          << subPolyPart.ToString() << " in the matrix " << this->ToString() << ". ";
+    return this->AssignValueWithContext(newMat, inputOutputMinContext, *this->theBoss);
+  }
+  this->theBoss->Comments << "Expression " << this->ToString()
+  << " is of built-in type but is not handled by Expression::SetContextAtLeastEqualTo. ";
   return false;
 }
 

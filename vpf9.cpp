@@ -8393,40 +8393,41 @@ DrawOperations& AnimationBuffer::GetLastDrawOps()
   return *this->thePhysicalDrawOps.LastObject();
 }
 
-void RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& theSub)
-{ if (theSub.size<1)
-    return;
+bool RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& theSub)
+{ MacroRegisterFunctionWithName("RationalFunctionOld::Substitution");
+  if (theSub.size<1)
+    return false;
 //  FormatExpressions tempFormat;
 //  int commentMEWhenDone;
   switch(this->expressionType)
   { case RationalFunctionOld::typeRational:
 //      if(!this->checkConsistency())crash << crash;
-      return;
+      return true;
     case RationalFunctionOld::typePoly:
 //      stOutput <<"<hr>subbing in<br>" << this->ToString(tempFormat) << " using " << theSub.ToString()
 //      << " to get ";
       if (!this->Numerator.GetElement().Substitution(theSub, 1))
-        crash << "This is a programming error: substitution   " << theSub.ToString() << " into polynomial " << this->Numerator.GetElement().ToString()
-        << " failed but the current function does not handle this properly. " << crash;
+        return false;
 //      stOutput << "<br>finally:<br>" << this->Numerator.GetElement().ToString();
       this->Simplify();
 //      stOutput << ", which, simplified, yields<br> " << this->ToString(tempFormat);
 //      if(!this->checkConsistency())crash << crash;
-      return;
+      return true;
     case RationalFunctionOld::typeRationalFunction:
       if (!this->Numerator.GetElement().Substitution(theSub, 1))
-        crash << "This is a programming error: substitution " << theSub.ToString() << " into polynomial " << this->Numerator.GetElement().ToString()
-        << " failed but the current function does not handle this properly. " << crash;
+        return false;
       if (!this->Denominator.GetElement().Substitution(theSub, 1))
-        crash << "This is a programming error: substitution   " << theSub.ToString() << " into polynomial " << this->Denominator.GetElement().ToString()
-        << " failed but the current function does not handle this properly. " << crash;
+        return false;
+      if (this->Denominator.GetElement().IsEqualToZero())
+        return false;
       this->Simplify();
 //      if(!this->checkConsistency())crash << crash;
-      return;
+      return true;
     default:
       crash << crash;
       break;
   }
+  return false;
 }
 
 void Selection::operator=(const Vector<Rational>& other)

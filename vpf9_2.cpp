@@ -1404,7 +1404,7 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other)
   if (this->context!=0)
   { std::stringstream out;
     out << "Multiplying " << this->ToString() << " by " << other.ToString();
-    stOutput << out.str();
+    //stOutput << out.str();
     theReport.Report(out.str());
   }
   RationalFunctionOld::gcd(other.Denominator.GetElementConst(), this->Numerator.GetElement(), theGCD1, this->context);
@@ -2116,7 +2116,7 @@ void RationalFunctionOld::AddHonestRF(const RationalFunctionOld& other)
     this->Simplify();
 //    this->ComputeDebugString();
   } else
-  { stOutput << "Adding " << this->ToString() << " + " << other.ToString();
+  { //stOutput << "Adding " << this->ToString() << " + " << other.ToString();
     this->Numerator.GetElement()*=(tempRat);
     this->Denominator.GetElement()*=(tempRat);
     this->Numerator.GetElement()+=(other.Numerator.GetElementConst());

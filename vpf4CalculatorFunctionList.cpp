@@ -1663,6 +1663,12 @@ void Calculator::initPredefinedStandardOperations()
    " A=MatrixRationals{}((5, 8), (3, 5)); A*A-A;"
    , true, false, "CalculatorFunctionsBinaryOps::innerAddMatrixRationalToMatrixRational");
   this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs,
+   this->opMatRF(), this->opMatRF(),
+   "Adds two matrices.",
+   " A=MatrixRFs{}((5, 8z), (3, 5)); A*A-A;"
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddMatrixRationalToMatrixRational");
+  this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor,
    this->opMatTensorRat(), this->opMatTensorRat(),
    "Adds two matrices.",
@@ -1814,6 +1820,30 @@ void Calculator::initPredefinedStandardOperations()
    this->opMatRat(), this->opMatRat(),
    "Multiplies matrix rational by matrix rational. ",
    "M=MatrixRationals{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational");
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF,
+   this->opRational(), this->opMatRF(),
+   "Multiplies matrix of rational functions by matrix of rational functions. ",
+   "M=MatrixRFs{}((x,1/x), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false,
+   "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF");
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF,
+   this->opPoly(), this->opMatRF(),
+   "Multiplies matrix of rational functions by matrix of rational functions. ",
+   "M=MatrixRFs{}((x,1/x), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false,
+   "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF");
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF,
+   this->opMatRF(), this->opMatRF(),
+   "Multiplies matrix of rational functions by matrix of rational functions. ",
+   "M=MatrixRFs{}((x,1/x), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false,
+   "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF");
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF,
+   this->opRationalFunction(), this->opMatRF(),
+   "Multiplies matrix of rational functions by matrix of rational functions. ",
+   "M=MatrixRFs{}((x^2,1), (0,1)); (MakeRationalFunction{}(1/x)) M; ", true, false,
+   "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor,
    this->opMatTensorRat(), this->opMatTensorRat(),

@@ -24,6 +24,7 @@ public:
   static bool innerAddPlotToPlot(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddSequenceToSequence(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddMatrixRationalToMatrixRational(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddMatrixRFsToMatrixRFs(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddMatrixTensorToMatrixTensor(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddRatToRat(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddEltZmodPorRatToEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output);
@@ -39,6 +40,7 @@ public:
   static bool innerMultiplySequenceByAnyScalar(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplySequenceMatrixBySequenceMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyMatrixRationalOrRationalByMatrixRational(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyMatrixRFOrRFByMatrixRF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyMatrixTensorOrRationalByMatrixTensor(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyAlgebraicNumberByAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyRatByRat(Calculator& theCommands, const Expression& input, Expression& output);

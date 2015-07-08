@@ -2722,7 +2722,7 @@ public:
     return tempRat;
   }
   int GetMinNumVars()const;
-  void Substitution(const PolynomialSubstitution<Rational>& theSub);
+  bool Substitution(const PolynomialSubstitution<Rational>& theSub);
   RationalFunctionOld(const RationalFunctionOld& other): context(0), expressionType(RationalFunctionOld::typeError)
   { this->operator=(other);
   }

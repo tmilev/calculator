@@ -1975,6 +1975,192 @@ bool CalculatorFunctionsGeneral::innerRationalFunctionSubstitution(Calculator& t
   return CalculatorConversions::innerExpressionFromRF(theCommands, ResultRationalForm, output);
 }
 
+bool CalculatorFunctionsGeneral::innerInvertMatrixRFsVerbose(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerInvertMatrixVerbose");
+  Matrix<RationalFunctionOld> mat, outputMat, tempMat;
+  Expression theContext;
+  if (!input.IsOfType<Matrix<RationalFunctionOld> >(& mat))
+    return output.MakeError("Failed to extract matrix. ", theCommands);
+  theContext=input.GetContext();
+  if (mat.NumRows!=mat.NumCols || mat.NumCols<1)
+  { std::stringstream out;
+    out << "The matrix " << mat.ToString( ) << " has " << mat.NumCols << " columns and " << mat.NumRows << " rows. "
+    << "The matrix is not square.";
+    return output.MakeError(out.str(), theCommands);
+  }
+  outputMat.MakeIdMatrix(mat.NumRows);
+  int tempI;
+  int NumFoundPivots = 0;
+  std::stringstream out, outLaTeX;
+
+  RationalFunctionOld tempElement;
+  FormatExpressions theFormat;
+  theContext.ContextGetFormatExpressions(theFormat);
+  theFormat.flagUseLatex=true;
+  theFormat.flagUseHTML=false;
+  theFormat.flagUseFrac=true;
+  theFormat.MatrixColumnVerticalLineIndex=mat.NumCols-1;
+  out << "Computing " << CGI::GetMathSpanPure(mat.ToString(&theFormat) + "^{-1}");
+  tempMat=mat;
+  tempMat.AppendMatrixOnTheRight(outputMat);
+  out << "<br>" << CGI::GetMathSpanPure(tempMat.ToString(&theFormat)) ;
+  outLaTeX << "\\begin{tabular}{ll}";
+  outLaTeX << "$" << tempMat.ToString(& theFormat) << "$";
+
+  for (int i=0; i<mat.NumCols; i++)
+  { tempI = mat.FindPivot(i, NumFoundPivots);
+    if (tempI!=-1)
+    { if (tempI!=NumFoundPivots)
+      { mat.SwitchTwoRows(NumFoundPivots, tempI);
+        outputMat.SwitchTwoRows (NumFoundPivots, tempI);
+        out << "<br>Swap row " << NumFoundPivots+1 << " and row " << tempI+1 << ": ";
+        outLaTeX << "& Swap row " << NumFoundPivots+1 << " and row " << tempI+1 << ". ";
+        tempMat=mat;
+        tempMat.AppendMatrixOnTheRight(outputMat);
+        out << "<br>" << CGI::GetMathSpanPure(outputMat.ToString(&theFormat));
+        outLaTeX << "\\\\" << "$" << outputMat.ToString(&theFormat) << "$";
+      }
+      tempElement=mat.elements[NumFoundPivots][i];
+      tempElement.Invert();
+      if (tempElement!=1)
+      { out << "<br> multiply row number " << NumFoundPivots+1 << " by "
+        << tempElement.ToString(&theFormat) << ": ";
+        outLaTeX << "& multiply row number " << NumFoundPivots+1 << " by $"
+        << tempElement.ToString(&theFormat) << "$. \\\\";
+      }
+      mat.RowTimesScalar(NumFoundPivots, tempElement);
+      outputMat.RowTimesScalar(NumFoundPivots, tempElement);
+      if (tempElement!=1)
+      { tempMat=mat;
+        tempMat.AppendMatrixOnTheRight(outputMat);
+        out << CGI::GetMathSpanPure(tempMat.ToString(&theFormat));
+        outLaTeX << "$" << tempMat.ToString(&theFormat) << "$";
+      }
+      bool found = false;
+      for (int j = 0; j<mat.NumRows; j++)
+        if (j!=NumFoundPivots)
+          if (!mat.elements[j][i].IsEqualToZero())
+          { tempElement=(mat.elements[j][i]);
+            tempElement.Minus();
+            mat.AddTwoRows(NumFoundPivots, j, i, tempElement);
+            outputMat.AddTwoRows(NumFoundPivots, j, 0, tempElement);
+            if(!found)
+            { out << "<br>";
+              outLaTeX << "&";
+              outLaTeX << "\\begin{tabular}{l}";
+            } else
+            { out << ", ";
+              outLaTeX << ", ";
+            }
+            found =true;
+            out << " Row index " << NumFoundPivots+1 << " times "
+            << tempElement.ToString(&theFormat) << " added to row index " << j+1;
+            outLaTeX << " Row index " << NumFoundPivots+1 << " times $"
+            << tempElement.ToString(&theFormat) << "$ added to row index " << j+1 << "\\\\";
+          }
+      if (found)
+      { out << ": <br> ";
+        outLaTeX << "\\end{tabular}";
+        outLaTeX << "\\\\";
+        tempMat=mat;
+        tempMat.AppendMatrixOnTheRight(outputMat);
+        out << CGI::GetMathSpanPure(tempMat.ToString(&theFormat));
+        outLaTeX << "$" << tempMat.ToString(&theFormat) << "$";
+      }
+      NumFoundPivots++;
+    }
+  }
+
+  outLaTeX << "\\end{tabular}";
+  theFormat.MatrixColumnVerticalLineIndex=-1;
+  if (NumFoundPivots<mat.NumRows)
+  { out << "<br>Matrix to the right of the vertical line not transformed to the identity matrix => starting matrix is not invertible. ";
+    outLaTeX << "Matrix to the right of the vertical line not transformed to the identity matrix => starting matrix is not invertible. ";
+  } else
+  { out << "<br>The inverse of the starting matrix can be read off on the matrix to the left of the id matrix: "
+    << CGI::GetMathSpanPure(outputMat.ToString(&theFormat));
+    outLaTeX << " The inverse matrix can now be read off as the matrix to the left of the identity matrix: $"
+    << outputMat.ToString(&theFormat) << "$";
+  }
+  out << "Output in LaTeX: <br><br>" << outLaTeX.str();
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool Calculator::innerInvertMatrixVerbose(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerInvertMatrixVerbose");
+  Matrix<Rational> mat, outputMat, tempMat;
+  if (!theCommands.GetMatriXFromArguments<Rational>(input, mat, 0, -1, 0))
+    return CalculatorFunctionsGeneral::innerInvertMatrixRFsVerbose(theCommands, input, output);
+  if (mat.NumRows!=mat.NumCols || mat.NumCols<1)
+    return output.MakeError("The matrix is not square", theCommands);
+  outputMat.MakeIdMatrix(mat.NumRows);
+  int tempI;
+  int NumFoundPivots = 0;
+  std::stringstream out;
+  Rational tempElement;
+  FormatExpressions theFormat;
+  theFormat.flagUseLatex=true;
+  theFormat.flagUseHTML=false;
+  theFormat.MatrixColumnVerticalLineIndex=mat.NumCols-1;
+  out << "Computing " << CGI::GetMathSpanPure(mat.ToString(&theFormat) + "^{-1}");
+  tempMat=mat;
+  tempMat.AppendMatrixOnTheRight(outputMat);
+  out << "<br>" << CGI::GetMathSpanPure(tempMat.ToString(&theFormat)) ;
+  for (int i=0; i<mat.NumCols; i++)
+  { tempI = mat.FindPivot(i, NumFoundPivots);
+    if (tempI!=-1)
+    { if (tempI!=NumFoundPivots)
+      { mat.SwitchTwoRows(NumFoundPivots, tempI);
+        outputMat.SwitchTwoRows (NumFoundPivots, tempI);
+        out << "<br>switch row " << NumFoundPivots+1 << " and row " << tempI+1 << ": ";
+        tempMat=mat;
+        tempMat.AppendMatrixOnTheRight(outputMat);
+        out << "<br>" << CGI::GetMathSpanPure(outputMat.ToString(&theFormat));
+      }
+      tempElement=mat.elements[NumFoundPivots][i];
+      tempElement.Invert();
+      if (tempElement!=1)
+        out << "<br> multiply row " << NumFoundPivots+1 << " by " << tempElement << ": ";
+      mat.RowTimesScalar(NumFoundPivots, tempElement);
+      outputMat.RowTimesScalar(NumFoundPivots, tempElement);
+      if (tempElement!=1)
+      { tempMat=mat;
+        tempMat.AppendMatrixOnTheRight(outputMat);
+        out << CGI::GetMathSpanPure(tempMat.ToString(&theFormat));
+      }
+      bool found = false;
+      for (int j = 0; j<mat.NumRows; j++)
+        if (j!=NumFoundPivots)
+          if (!mat.elements[j][i].IsEqualToZero())
+          { tempElement=(mat.elements[j][i]);
+            tempElement.Minus();
+            mat.AddTwoRows(NumFoundPivots, j, i, tempElement);
+            outputMat.AddTwoRows(NumFoundPivots, j, 0, tempElement);
+            if(!found)
+              out << "<br>";
+            else
+              out << ", ";
+            found =true;
+            out << " Row index " << NumFoundPivots+1 << " times "
+            << tempElement << " added to row index " << j+1;
+          }
+      if (found)
+      { out << ": <br> ";
+        tempMat=mat;
+        tempMat.AppendMatrixOnTheRight(outputMat);
+        out << CGI::GetMathSpanPure(tempMat.ToString(&theFormat));
+      }
+      NumFoundPivots++;
+    }
+  }
+  if (NumFoundPivots<mat.NumRows)
+    out << "<br>Matrix to the right of the vertical line not transformed to the identity matrix => starting matrix is not invertible. ";
+  else
+    out << "<br>The inverse of the starting matrix can be read off on the matrix to the left of the id matrix: "
+    << CGI::GetMathSpanPure(output.ToString(&theFormat));
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::outerPolynomialize(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPolynomialize");
   Expression thePolyE;

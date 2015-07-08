@@ -1127,7 +1127,8 @@ bool CalculatorFunctionsBinaryOps::innerTensorMatByMatTensor(Calculator& theComm
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElements(3))
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational");
+  if (!input.IsListNElements(3))
     return false;
   const Expression& leftE=input[1];
   const Expression& rightE=input[2];
@@ -1147,6 +1148,38 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrix
   Matrix<Rational> result=leftE.GetValue<Matrix<Rational> >();
   result.MultiplyOnTheRight(rightMat);
   return output.AssignValue(result, theCommands);
+}
+
+bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF");
+  if (!input.IsListNElements(3))
+    return false;
+  Expression leftE=input[1];
+  Expression rightE=input[2];
+    if (!rightE.IsOfType<Matrix<RationalFunctionOld> >() ||
+        !(leftE.IsOfType<Rational>() ||
+          leftE.IsOfType<Polynomial<Rational> >() ||
+          leftE.IsOfType<RationalFunctionOld>() ||
+          leftE.IsOfType<Matrix<RationalFunctionOld> >()))
+    return false;
+  if (!leftE.MergeContexts(leftE, rightE))
+    return theCommands << "Failed to convert " << leftE.ToString() << " and " << rightE.ToString()
+    << " to common context";
+  if (!leftE.IsOfType<Matrix<RationalFunctionOld> >())
+  { Expression leftErfForm;
+    if (!leftE.ConvertToType<RationalFunctionOld>(leftErfForm))
+      return theCommands << "Failed to convert " << leftE.ToString() << " to rational function. ";
+    Matrix<RationalFunctionOld> result=rightE.GetValue<Matrix<RationalFunctionOld> >();
+    RationalFunctionOld theScalar=leftErfForm.GetValue<RationalFunctionOld>();
+    result*=theScalar;
+    return output.AssignValueWithContext(result, leftE.GetContext(), theCommands);
+  }
+  const Matrix<RationalFunctionOld>& rightMat=rightE.GetValue<Matrix<RationalFunctionOld> >();
+  Matrix<RationalFunctionOld> result=leftE.GetValue<Matrix<RationalFunctionOld> >();
+  if (result.NumCols!=rightMat.NumRows)
+    return false;
+  result.MultiplyOnTheRight(rightMat);
+  return output.AssignValueWithContext(result, leftE.GetContext(), theCommands);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1233,6 +1266,25 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalToMatrixRational(Calcul
   Matrix<Rational> result=leftMat;
   result+=rightMat;
   return output.AssignValue(result, theCommands);
+}
+
+bool CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs");
+  if (!input.IsListNElements(3))
+    return false;
+  Expression leftE=input[1];
+  Expression rightE=input[2];
+  if (!rightE.IsOfType<Matrix<RationalFunctionOld> >()|| !leftE.IsOfType<Matrix<RationalFunctionOld> >())
+    return false;
+  if (!leftE.MergeContexts(leftE, rightE))
+    return false;
+  const Matrix<RationalFunctionOld>& rightMat=rightE.GetValue<Matrix<RationalFunctionOld> >();
+  const Matrix<RationalFunctionOld>& leftMat=leftE.GetValue<Matrix<RationalFunctionOld> >();
+  if (rightMat.NumRows!=leftMat.NumRows || rightMat.NumCols!=leftMat.NumCols)
+    return false;
+  Matrix<RationalFunctionOld> result=leftMat;
+  result+=rightMat;
+  return output.AssignValueWithContext(result, leftE.GetContext(), theCommands);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor(Calculator& theCommands, const Expression& input, Expression& output)

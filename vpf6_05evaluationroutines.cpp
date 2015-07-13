@@ -62,8 +62,7 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
   }
   if (!functionNameNode.IsAtom())
     return false;
-//  stOutput << "<br>Evaluating: " << input.ToString();
-//  stOutput.flush();
+//  stOutput << "<br>Evaluating: " << input.ToString() << "<br>Lispified: " << input.ToStringSemiFull();
   for (int i=0; i<theCommands.FunctionHandlers[functionNameNode.theData].size; i++)
     if (!theCommands.FunctionHandlers[functionNameNode.theData][i].flagIsInner)
     { Function& outerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
@@ -88,6 +87,7 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
             return true;
           }
       } else
+      if (input.children.size==2)
         if (innerFun.inputFitsMyInnerType(input[1]))
           if (innerFun.theFunction(theCommands, input[1], output))
           { output.CheckConsistency();

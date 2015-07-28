@@ -885,8 +885,10 @@ bool CalculatorConversions::innerRationalFunction(Calculator& theCommands, const
       theRF.RaiseToPower(theSmallPower);
       return output.AssignValueWithContext(theRF, leftE.GetContext(), theCommands);
     }
-    return theCommands << "<hr>Failed to raise " << input[1].ToString() << " to power " << input[2].ToString()
-    << ": failed to convert the power to small integer";
+    //return
+    theCommands << "<hr>Warning: failed to raise " << input[1].ToString() << " to power " << input[2].ToString()
+    << ": failed to convert the power to small integer. I am treating " << input.ToString()
+    << " as a single variable: please make sure that is what you want.";
   }
   if (input.IsOfType<RationalFunctionOld>())
   { output=input;

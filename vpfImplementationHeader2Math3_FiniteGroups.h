@@ -1822,10 +1822,10 @@ std::ostream& operator<<(std::ostream& out, const ClassFunction<someFiniteGroup,
 template<class someFiniteGroup, typename coefficient>
 unsigned int ClassFunction<someFiniteGroup, coefficient>::HashFunction(const ClassFunction<someFiniteGroup, coefficient>& input)
 {
-  unsigned int acc;
+  unsigned int acc = 0;
   int N = (input.data.size < SomeRandomPrimesSize) ? input.data.size : SomeRandomPrimesSize;
   for(int i=0; i<N; i++)
-    acc = input.data[i].HashFunction()*SomeRandomPrimes[i];
+    acc += input.data[i].HashFunction()*SomeRandomPrimes[i];
   return acc;
 }
 

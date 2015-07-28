@@ -2619,7 +2619,7 @@ void oneFracWithMultiplicitiesAndElongations::AddMultiplicity(int MultiplicityIn
     ElongationIndex= this->Multiplicities.size-1;
   }
   this->Multiplicities[ElongationIndex]+=MultiplicityIncrement;
-  if(!this->Multiplicities[ElongationIndex]>=0)
+  if(!(this->Multiplicities[ElongationIndex]>=0))
     crash << crash;
   if (this->Multiplicities[ElongationIndex]==0)
   { this->Multiplicities.PopIndexSwapWithLastLight(ElongationIndex);
@@ -2996,12 +2996,12 @@ void DynkinType::GetOuterAutosGeneratorsActOnVectorColumn(List<MatrixTensor<Rati
   this->SortTheDynkinTypes();
   List<MatrixTensor<Rational> > intermediateGenerators;
   MatrixTensor<Rational> matrixFinal, matrixToGo;
-  int currentMult;
+  int currentMult=0;
   output.SetSize(0);
   int numRowsSoFar=0;
   for (int i=0; i<this->size(); i++)
   { if (!this->theCoeffs[i].IsSmallInteger(&currentMult))
-      crash << crash;
+      crash << "This is not supposed to happen in function DynkinType::GetOuterAutosGeneratorsActOnVectorColumn." << crash;
     this->GetOuterAutosGeneratorsOneTypeActOnVectorColumn(intermediateGenerators,(*this)[i], currentMult);
     matrixToGo.MakeId(this->GetRank()-numRowsSoFar-currentMult*(*this)[i].theRank);
     for (int j=0; j<intermediateGenerators.size; j++)
@@ -3205,7 +3205,7 @@ int DynkinType::GetNumSimpleComponents()const
 { Rational result=0;
   for (int i=0; i<this->size(); i++)
     result+=this->theCoeffs[i];
-  int output;
+  int output=0;
   if (!result.IsSmallInteger(&output))
     crash << "This is a programming error: Dynkin type has a number of simple components which is not a small integer. " << crash;
   return output;
@@ -3220,7 +3220,7 @@ Rational DynkinType::GetRankRational()const
 
 int DynkinType::GetRank()const
 { Rational tempRat = this->GetRankRational();
-  int result;
+  int result = 0;
   if (!tempRat.IsSmallInteger(&result))
     crash << "This is a programming error: attempting to get a small integer rank from a Dynkin type whose rank is not a small integer, but is instead "
     << tempRat.ToString() << ". " << crash;

@@ -949,7 +949,7 @@ bool CalculatorFunctionsWeylGroup::innerTensorWeylReps(Calculator& theCommands, 
 bool CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps");
   Expression theTensor;
-  if (!input.children.size==3)
+  if (!(input.children.size==3))
     return false;
   const Expression& leftE=input[1];
   const Expression& rightE=input[2];

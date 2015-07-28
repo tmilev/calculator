@@ -179,14 +179,14 @@ bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>&
   if (!input.IsSequenceNElementS())
   { if (targetDimNonMandatory>0)
       if (targetDimNonMandatory!=1)
-        return this->Comments << "<hr>GetVector failure: target dim is " << targetDimNonMandatory << " but the input " << input.ToString()
+        return *this << "<hr>GetVector failure: target dim is " << targetDimNonMandatory << " but the input " << input.ToString()
         << " can only be interpretted as a single element";
     output.AddOnTop(input);
     return true;
   }
   if (targetDimNonMandatory>0)
     if (targetDimNonMandatory!=input.children.size-1)
-      return this->Comments << "<hr>Failed to GetVector: the input is required to have " << targetDimNonMandatory << " columns but it has "
+      return *this << "<hr>Failed to GetVector: the input is required to have " << targetDimNonMandatory << " columns but it has "
       << input.children.size-1 << " columns instead. <hr>";
   targetDimNonMandatory=input.children.size-1;
   for (int i=0; i<targetDimNonMandatory; i++)
@@ -206,7 +206,7 @@ template <class coefficient>
 bool ModuleSSalgebra<coefficient>::IsNotInParabolic(int theGeneratorIndex)
 { Vector<Rational> theWeight=this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
   for (int j=0; j<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j++)
-    if (!theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]]<0)
+    if (!(theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]]<0))
       return true;
   return false;
 }

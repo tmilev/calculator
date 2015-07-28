@@ -406,7 +406,7 @@ void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& o
   unsigned long long numCycles=0;
   bool doProgressReporT=false;
   ProgressReport theReport(&onePredefinedCopyOfGlobalVariables);
-  unsigned long long totalCycles;
+  unsigned long long totalCycles=0;
   if (onePredefinedCopyOfGlobalVariables.flagReportEverything || onePredefinedCopyOfGlobalVariables.flagReportLargeIntArithmetic)
   { totalCycles=((unsigned long long) this->theDigits.size)* ((unsigned long long) x.theDigits.size);
     if (totalCycles>2000)

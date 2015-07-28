@@ -77,7 +77,7 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket");
   Vector<ElementWeylAlgebra<Rational> > theOps;
   Expression theContext;
-  if (!input.children.size>1)
+  if (!(input.children.size>1))
     return false;
   int upperBound=-1;
   if (!input[1].IsSmallInteger(&upperBound))

@@ -6104,7 +6104,7 @@ public:
 //  std::string ToStringRelativeToAmbientType(const DynkinSimpleType& ambientType, FormatExpressions* theFormat=0)const;
   void ScaleFirstCoRootSquaredLength(const Rational& multiplyCoRootSquaredLengthBy);
   int GetMult(int SimpleTypeIdentifier)const
-  { int result;
+  { int result=0;
     if(!this->theCoeffs[SimpleTypeIdentifier].IsSmallInteger(&result))
       crash << "This is a programming error: Dynkin type has multiplicity that is not a small integer " << crash;
     return result;
@@ -6116,7 +6116,7 @@ public:
   { Rational result=0;
     for (int i=0; i<this->size(); i++)
       result+=this->theCoeffs[i]*(*this)[i].GetRootSystemSize();
-    int intResult;
+    int intResult=0;
     if (!result.IsSmallInteger(&intResult))
       crash << "This is a programming error: multiplicity of simple type is not a small integer. " << crash;
     return intResult;
@@ -6125,7 +6125,7 @@ public:
   { Rational result=0;
     for (int i=0; i<this->size(); i++)
       result+=this->theCoeffs[i]*(*this)[i].GetLieAlgebraDimension();
-    int intResult;
+    int intResult=0;
     if (!result.IsSmallInteger(&intResult))
       crash << "This is a programming error: multiplicity of simple type is not a small integer. " << crash;
     return intResult;
@@ -7426,7 +7426,7 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe
       reportStream << "accounting monomial " << currentMon.ToString() << " of index " << l+1 << " out of "
       << theUEelt.size() << " and letter index " << currentMon.Powers.size-k << " out of " << currentMon.Powers.size << "...";
       theReport.Report(reportStream.str());
-      int thePower;
+      int thePower=-1;
       if (!currentMon.Powers[k].IsSmallInteger(&thePower))
         break;
       int theIndex=currentMon.generatorsIndices[k];

@@ -5066,7 +5066,7 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
 }
 
 std::string CandidateSSSubalgebra::ToStringPairingTableLaTeX(FormatExpressions* theFormat)const
-{ if (!this->NilradicalPairingTable.size>0)
+{ if (!(this->NilradicalPairingTable.size>0))
     return "";
   std::stringstream out;
   out << "\\documentclass{article}\\usepackage{longtable} \\begin{document}<br>";
@@ -5130,7 +5130,7 @@ std::string CandidateSSSubalgebra::ToStringPairingTableLaTeX(FormatExpressions* 
 
 std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringPairingTable");
-  if (!this->NilradicalPairingTable.size>0)
+  if (!(this->NilradicalPairingTable.size>0))
     return "";
   std::stringstream out;
   out << "<br>Below is the pairing table of the modules, defined as follows. Let g' be the subalgebra obtained by extending the current semisimple subalgebra "
@@ -5855,7 +5855,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
   other.GetHsScaledToActByTwoByType(theHsScaledToActByTwoByType, isoTypes);
   for (int i=0; i<isoTypes.size; i++)
   { Rational ratMult=this->theWeylNonEmbeddeD.theDynkinType.GetMonomialCoefficient(isoTypes[i]);
-    int intMult;
+    int intMult=0;
     if (!ratMult.IsSmallInteger(&intMult))
       return false;
     currentTypeSelection.SetNumItemsAndDesiredSubsetSize(intMult, theHsScaledToActByTwoByType[i].size);

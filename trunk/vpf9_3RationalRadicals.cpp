@@ -277,7 +277,7 @@ bool AlgebraicClosureRationals::ReduceMe()
     { zToTheNth.MakeMonomiaL(0, i+j, 1, 1);
       zToTheNth.DivideBy(smallestFactor, tempP, remainderAfterReduction);
       for (int k=0; k<remainderAfterReduction.size(); k++)
-      { int theIndex;
+      { int theIndex=-666;
         remainderAfterReduction[k](0).IsSmallInteger(&theIndex);
         tempM.vIndex=theIndex;
         tempM.dualIndex=j;
@@ -821,7 +821,7 @@ bool AlgebraicNumber::EvaluatesToDouble(double* outputWhichDouble)const
   if (outputWhichDouble!=0)
     *outputWhichDouble=0;
   Selection currentRadicalSelection;
-  double currentMultiplicand;
+  double currentMultiplicand=0;
 //  stOutput << "<br>Radicals: " << this->owner->theQuadraticRadicals.ToString();
   for (int i=0; i<this->theElT.size(); i++)
   { this->owner->GetRadicalSelectionFromIndex(this->theElT[i].theIndex, currentRadicalSelection);
@@ -833,8 +833,9 @@ bool AlgebraicNumber::EvaluatesToDouble(double* outputWhichDouble)const
       if (this->owner->theQuadraticRadicals[currentRadicalSelection.elements[j]]<0)
         return false;
       else
-        currentMultiplicand*=
-        FloatingPoint::sqrt(this->owner->theQuadraticRadicals[currentRadicalSelection.elements[j]].GetDoubleValue());
+        if (outputWhichDouble!=0)
+          currentMultiplicand*=
+          FloatingPoint::sqrt(this->owner->theQuadraticRadicals[currentRadicalSelection.elements[j]].GetDoubleValue());
     if (outputWhichDouble!=0)
       *outputWhichDouble+=currentMultiplicand;
   }

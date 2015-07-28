@@ -2531,7 +2531,7 @@ bool Expression::RemoveContext()
 
 bool Expression::HasContext()const
 { this->CheckInitialization();
-  if (!this->IsBuiltInType() || !this->children.size==3)
+  if (!this->IsBuiltInType() || !(this->children.size==3))
     return false;
   //std::string debugString=(*this)[1].ToString();
   //stOutput << "<br>Trying to fetch context from: " << debugString ;

@@ -202,7 +202,7 @@ coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input)
     coefficient accum=this->theCoeffs[i];
     coefficient tempElt;
     for (int j=0; j<currentMon.GetMinNumVars(); j++)
-    { int numCycles;
+    { int numCycles=0;
       if (!(*this)[i](j).IsSmallInteger(&numCycles) )
         crash << "This is a programming error. Attempting to evaluate a polynomial whose" <<  i+1 << "^{th} variable is raised to the power "
         << (*this)[i](j).ToString() << ". Raising variables to power is allowed only if the power is a small integer. "

@@ -683,7 +683,7 @@ bool Calculator::fPrintB3G2branchingIntermediate(Calculator& theCommands, const 
           out << "<td>" << CGI::GetMathSpanPure(tempS2) << "</td>";
           out << "<td>" << theG2B3Data.theShapovalovProducts[eigenIndexcounter].ToString(&theG2B3Data.theFormat);
           out << "</td>";
-          int theIndex;
+          int theIndex=-1;
           numEigenVectors.IsSmallInteger(&theIndex);
           if (theIndex- eigenIndexcounter -1>0)
           { List<Rational> tempList, tempList2;

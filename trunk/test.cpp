@@ -1219,6 +1219,7 @@ bool GetCoordsInBasisInputIsGaussianEliminated
   return v.IsEqualToZero();
 }
 
+/*
 void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieAlg)
 { WeylGroup& W = theSSlieAlg.theWeyl;
 
@@ -1280,6 +1281,7 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
     stOutput << "elapsed seconds: " << theGlobalVariables.GetElapsedSeconds() << "\n";
   }
 }
+*/
 
 class lennum
 { public:
@@ -1700,331 +1702,497 @@ int pointis(int d, int n)
 */
 
 
-WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, const List<Vector<Rational> >& roots)
-{ stOutput << "starting with roots " << roots << " at time " << theGlobalVariables.GetElapsedSeconds() << "\n";
-  List<Vector<Rational> > monomial;
-  HashedList<List<Vector<Rational> > > monomials;
-  Matrix<Rational> m;
-  for(int i=0; (Rational) i<W.GetGroupSizeByFormula(); i++)
-  { W.GetStandardRepresentationMatrix(i,m);
-    monomial.SetSize(roots.size);
-    for(int j=0; j<roots.size; j++)
-    { monomial[j] = m*roots[j];
-      if(monomial[j].IsNegative())
-        monomial[j] = -monomial[j];
+//WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, const List<Vector<Rational> >& roots)
+//{ stOutput << "starting with roots " << roots << " at time " << theGlobalVariables.GetElapsedSeconds() << "\n";
+//  List<Vector<Rational> > monomial;
+//  HashedList<List<Vector<Rational> > > monomials;
+//  Matrix<Rational> m;
+//  for(int i=0; (Rational) i<W.GetGroupSizeByFormula(); i++)
+//  { W.GetStandardRepresentationMatrix(i,m);
+//    monomial.SetSize(roots.size);
+//    for(int j=0; j<roots.size; j++)
+//    { monomial[j] = m*roots[j];
+//      if(monomial[j].IsNegative())
+//        monomial[j] = -monomial[j];
+//    }
+//    monomial.QuickSortAscending();
+//    monomials.AddNoRepetitionOrReturnIndexFirst(monomial);
+//  }
+//  stOutput << "have all " << monomials.size << " monomials (" << theGlobalVariables.GetElapsedSeconds() << ")";
+//
+//  // Σ(n choose k)x<<k
+//  int number_of_images = 1;
+//  for(int i=0; i<W.GetDim(); i++)
+//    number_of_images *= 3;
+//  number_of_images /= 3;
+//
+//
+//  List<lennum> lens;
+//  List<Vector<Rational> > images;
+//  images.SetSize(monomials.size);
+//  lens.SetSize(monomials.size);
+//  for(int i=0; i<monomials.size; i++)
+//    lens[i].len = 0;
+//
+//  for(int i=0; i<monomials.size; i++)
+//  { images[i].SetSize(number_of_images);
+//    for(int j=0; j<number_of_images; j++)
+//    { Vector<int> point = pointi(W.GetDim(),j);
+//      Rational p=1;
+//      for(int k1=0; k1<monomials[i].size; k1++)
+//      { Rational s=0;
+//        for(int k2=0; k2<monomials[i][k1].size; k2++)
+//          s += monomials[i][k1][k2] * point[k2];
+//        p *= s;
+//      }
+//      images[i][j] = p;
+//      lens[i].len += p*p;
+//    }
+//    lens[i].num = i;
+//  }
+//  lens.QuickSortAscending();
+//  stOutput << " ... sorted (" << theGlobalVariables.GetElapsedSeconds() << ")" << "\n";
+//
+//  for(int i=0; i<monomials.size; i++)
+//  { stOutput << lens[i].num << ": ";
+//    Rational is = 0;
+//    for(int j=0; j<monomials[lens[i].num].size; j++)
+//    { Rational js=0;
+//      for(int k=0; k<monomials[lens[i].num][j].size; k++)
+//        js += monomials[lens[i].num][j][k];
+//      stOutput << monomials[lens[i].num][j] << " [" << js << "], ";
+//      is += js;
+//    }
+//    stOutput << "[[" << is << "]]" << "\n";
+//  }
+//
+//  List<Vector<f65521> > images65521;
+//  images65521.SetSize(monomials.size);
+//  getting_images_time:
+//  stOutput << "using " << number_of_images << " points";
+//  if(maxpoints > 0 && number_of_images >= maxpoints)
+//  { number_of_images = maxpoints;
+//    stOutput << "... max points reached, actually using " << number_of_images;
+//  }
+//  stOutput << "\n";
+//
+//  for(int i=0; i<monomials.size; i++)
+//  { int images_old_size = images65521[i].size;
+//    images65521[i].SetSize(number_of_images);
+//    for(int j=images_old_size; j<number_of_images; j++)
+//    { Vector<int> point = pointi(W.GetDim(),j);
+//      f65521 p=1;
+//      for(int k1=0; k1<monomials[i].size; k1++)
+//      { f65521 s=0;
+//        for(int k2=0; k2<monomials[i][k1].size; k2++)
+//          s += monomials[i][k1][k2] * point[k2];
+//        p *= s;
+//      }
+//      images65521[i][j] = p;
+//    }
+//  }
+//
+//  /*
+//  List<int> monomials_used_rational;
+//  VectorSpace<Rational> vsr;
+//  for(int i=0; i<monomials.size; i++)
+//  { if(vsr.AddVectorToBasis(images[lens[i].num]))
+//      monomials_used_rational.AddOnTop(lens[i].num);
+//  }
+//  stOutput << "rational module rank is " << monomials_used_rational.size << "\n";
+//  //stOutput << vsr.fastbasis.ToString(&consoleFormat) << "\n";
+//  stOutput << "monomials used: ";
+//  for(int i=0; i<monomials_used_rational.size; i++)
+//    stOutput << monomials_used_rational[i] << " ";
+//  stOutput << "\n";
+//  */
+//
+//  List<int> monomials_used;
+//  VectorSpace<f65521> vs;
+//  for(int i=0; i<monomials.size; i++)
+//  { if(vs.AddVectorToBasis(images65521[lens[i].num]))
+//      monomials_used.AddOnTop(lens[i].num);
+//  }
+//
+//  stOutput << "finite module rank is " << monomials_used.size << " (" << theGlobalVariables.GetElapsedSeconds() << ")" << "\n";
+//  //stOutput << vs.fastbasis.ToString(&consoleFormat) << "\n";
+//  stOutput << "monomials used: ";
+//  for(int i=0; i<monomials_used.size; i++)
+//    stOutput << monomials_used[i] << " ";
+//  stOutput << "\n";
+//
+//  /*
+//  if(monomials_used_rational.size != monomials_used.size)
+//  { stOutput << "linear combinations over Z and Zp are different" << "\n";
+//    for(int i=0; i<monomials_used_rational.size; i++)
+//      stOutput << monomials_used_rational[i] << " " << images[monomials_used_rational[i]] << "\n";
+//    for(int i=0; i<monomials_used.size; i++)
+//      stOutput << monomials_used[i] << " " << images65521[monomials_used[i]] << "\n";
+//    assert(false);
+//  }*/
+//
+//  Basis<f65521> B65521;
+//  for(int i=0; i<monomials_used.size; i++)
+//    B65521.AddVector(images65521[monomials_used[i]]);
+//
+//  WeylGroupRepresentation<f65521> rep65521;
+//  rep65521.init(W);
+//  for(int i=1; i<W.GetDim()+1; i++)
+//  { Matrix<Rational> m;
+//    W.GetStandardRepresentationMatrix(i,m);
+//    Matrix<f65521> rm;
+//    rm.init(monomials_used.size, monomials_used.size);
+//    for(int j=0; j<monomials_used.size; j++)
+//    { List<Vector<Rational> > monomial;
+//      monomial.SetSize(roots.size);
+//      for(int k=0; k<roots.size; k++)
+//        monomial[k] = m*monomials[monomials_used[j]][k];
+//      Vector<f65521> evaluated;
+//      evaluated.SetSize(number_of_images);
+//      for(int ei=0; ei<number_of_images; ei++)
+//      { f65521 p = 1;
+//        for(int ej=0; ej<monomial.size; ej++)
+//        { f65521 s = 0;
+//          for(int ek=0; ek<monomial[ej].size; ek++)
+//          { s += monomial[ej][ek] * pointi(W.GetDim(),ei)[ek];
+//          }
+//          p *= s;
+//        }
+//        evaluated[ei] = p;
+//      }
+//      Vector<f65521> be;
+//      /*Vector<f65521> evbackup = evaluated;
+//      if(!vs.GetCoordinatesDestructively(evaluated, be))
+//      { stOutput << "error: vector " << evbackup << " not in vector space " << vs.fastbasis.ToString(&consoleFormat) << " made with vectors " << "\n";
+//        for(int i=0; i<monomials_used.size; i++)
+//          stOutput << images65521[monomials_used[i]] << "\n";
+//        assert(false);
+//      }*/
+//      be = B65521.PutInBasis(evaluated);
+//      for(int mnop=0; mnop<be.size; mnop++)
+//        rm.elements[j][mnop] = be[mnop];
+//    }
+//    rep65521.SetElementImage(i,rm);
+//    stOutput << rm.ToString(&consoleFormat) << "\n";
+//    if((rm*rm).IsIdMatrix())
+//      stOutput << "passed reflection test " <<  " (" << theGlobalVariables.GetElapsedSeconds() << ")" << "\n";
+//    else
+//    { stOutput << "failed reflection test; retrying with more points " <<  " (" << theGlobalVariables.GetElapsedSeconds() << ")"  << "\n";
+//      //stOutput << "failed finite reflection test; trying rational anyway" << "\n";
+//      //goto make_rational_matrices;
+//      number_of_images *= 2;
+//      goto getting_images_time;
+//    }
+//  }
+//
+//
+//  Matrix<f65521> idr65521;
+//  idr65521.MakeIdMatrix(rep65521.GetDim());
+//
+//  for(int i=0; i<W.GetDim(); i++)
+//  { for(int j=0; j<W.GetDim(); j++)
+//    { if(j == i)
+//        continue;
+//      int w = W.theDynkinType.GetCoxeterEdgeWeight(i,j);
+//      if(w <= 2)
+//        continue;
+//      Matrix<f65521> M1 = rep65521.GetMatrixElement(i+1);
+//      Matrix<f65521> M2 = rep65521.GetMatrixElement(j+1);
+//      Matrix<f65521> M3 = M1*M2;
+//      MathRoutines::RaiseToPower(M3,w,idr65521);
+//      if(M3.IsIdMatrix())
+//        stOutput << "passed Coxeter presentation test " << i << "," << j << "\n";
+//      else
+//      { stOutput << "failed Coxeter presentation test " << i << "," << j << ", retrying with more points" << "\n";
+//        number_of_images *= 2;
+//        goto getting_images_time;
+//      }
+//    }
+//  }
+//
+//  for(int i=0; i<monomials.size; i++)
+//  { int images_old_size = images[i].size;
+//    images[i].SetSize(number_of_images);
+//    for(int j=images_old_size; j<number_of_images; j++)
+//    { Vector<int> point = pointi(W.GetDim(),j);
+//      Rational p=1;
+//      for(int k1=0; k1<monomials[i].size; k1++)
+//      { Rational s=0;
+//        for(int k2=0; k2<monomials[i][k1].size; k2++)
+//          s += monomials[i][k1][k2] * point[k2];
+//        p *= s;
+//      }
+//      images[i][j] = p;
+//    }
+//  }
+//
+//  Basis<Rational> B;
+//  for(int i=0; i<monomials_used.size; i++)
+//    B.AddVector(images[monomials_used[i]]);
+//
+//  WeylGroupRepresentation<Rational> rep;
+//  rep.init(W);
+//  for(int i=1; i<W.GetDim()+1; i++)
+//  { Matrix<Rational> m;
+//    W.GetStandardRepresentationMatrix(i,m);
+//    Matrix<Rational> rm;
+//    rm.init(monomials_used.size, monomials_used.size);
+//    for(int j=0; j<monomials_used.size; j++)
+//    { List<Vector<Rational> > monomial;
+//      monomial.SetSize(roots.size);
+//      for(int k=0; k<roots.size; k++)
+//        monomial[k] = m*monomials[monomials_used[j]][k];
+//      Vector<Rational> evaluated;
+//      evaluated.SetSize(number_of_images);
+//      for(int ei=0; ei<number_of_images; ei++)
+//      { Rational p = 1;
+//        for(int ej=0; ej<monomial.size; ej++)
+//        { Rational s = 0;
+//          for(int ek=0; ek<monomial[ej].size; ek++)
+//          { s += monomial[ej][ek] * pointi(W.GetDim(),ei)[ek];
+//          }
+//          p *= s;
+//        }
+//        evaluated[ei] = p;
+//      }
+//      Vector<Rational> be = B.PutInBasis(evaluated);
+//      for(int mnop=0; mnop<be.size; mnop++)
+//        rm.elements[j][mnop] = be[mnop];
+//    }
+//    rep.SetElementImage(i,rm);
+//    stOutput << rm.ToString(&consoleFormat) << "\n";
+//    if((rm*rm).IsIdMatrix())
+//      stOutput << "passed reflection test " <<  " (" << theGlobalVariables.GetElapsedSeconds() << ")" << "\n";
+//    else
+//    { stOutput << "failed reflection test; retrying with more points " <<  " (" << theGlobalVariables.GetElapsedSeconds() << ")"  << "\n";
+//      number_of_images *= 2;
+//      goto getting_images_time;
+//    }
+//  }
+//
+//
+//  Matrix<Rational> idr;
+//  idr.MakeIdMatrix(rep.GetDim());
+//
+//  for(int i=0; i<W.GetDim(); i++)
+//  { for(int j=0; j<W.GetDim(); j++)
+//    { if(j == i)
+//        continue;
+//      int w = W.theDynkinType.GetCoxeterEdgeWeight(i,j);
+//      if(w <= 2)
+//        continue;
+//      Matrix<Rational> M1 = rep.GetMatrixElement(i+1);
+//      Matrix<Rational> M2 = rep.GetMatrixElement(j+1);
+//      Matrix<Rational> M3 = M1*M2;
+//      MathRoutines::RaiseToPower(M3,w,idr);
+//      if(M3.IsIdMatrix())
+//        stOutput << "passed Coxeter presentation test " << i << "," << j << "\n";
+//      else
+//      { stOutput << "failed Coxeter presentation test " << i << "," << j << ", retrying with more points" << "\n";
+//        number_of_images *= 2;
+//        goto getting_images_time;
+//      }
+//    }
+//  }
+//  return rep;
+//}
+//
+//void get_macdonald_representations_of_weyl_group_v2(SemisimpleLieAlgebra& theSSlieAlg)
+//{ WeylGroup& W = theSSlieAlg.theWeyl;
+//  theGlobalVariables.SetStandardStringOutput(CGI::MakeStdCoutReport);
+//
+//  rootSubalgebras theRootSAs;
+//  theRootSAs.owneR=&theSSlieAlg;
+//  DynkinSimpleType dt = W.theDynkinType.GetGreatestSimpleType();
+//  theRootSAs.theGlobalVariables=&theGlobalVariables;
+//  theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
+//  List<Vector<Rational> > roots;
+//
+//  for (int k=0; k<theRootSAs.theSubalgebras.size; k++)
+//  { rootSubalgebra& currentRootSA=theRootSAs.theSubalgebras[k];
+//    roots=currentRootSA.PositiveRootsK;
+//    stOutput << "I am processing root subalgebra of type "
+//              << currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
+//    WeylGroupRepresentation<Rational> rep = get_macdonald_representation_v2(W,roots);
+//    rep.names.SetSize(1);
+//    rep.names[0] = currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
+//    stOutput << " has character ";
+//    stOutput << rep.GetCharacter() << "\n";
+//    W.AddIrreducibleRepresentation(rep);
+//  }
+//}
+
+void lie_bracket_relations(Vector<Polynomial<Rational> >& out, int N)
+{ Matrix<Vector<Polynomial<Rational> > > brackets;
+  brackets.init(N,N);
+  for(int i=0; i<N; i++)
+    for(int j=0; j<N; j++)
+    { brackets.elements[i][j].SetSize(N);
+      for(int k=0; k<N; k++)
+        brackets.elements[i][j][k].MakeMonomiaL(i*N*N+j*N+k,1);
     }
-    monomial.QuickSortAscending();
-    monomials.AddNoRepetitionOrReturnIndexFirst(monomial);
-  }
-  stOutput << "have all " << monomials.size << " monomials (" << theGlobalVariables.GetElapsedSeconds() << ")";
-
-  // Σ(n choose k)x<<k
-  int number_of_images = 1;
-  for(int i=0; i<W.GetDim(); i++)
-    number_of_images *= 3;
-  number_of_images /= 3;
-
-
-  List<lennum> lens;
-  List<Vector<Rational> > images;
-  images.SetSize(monomials.size);
-  lens.SetSize(monomials.size);
-  for(int i=0; i<monomials.size; i++)
-    lens[i].len = 0;
-
-  for(int i=0; i<monomials.size; i++)
-  { images[i].SetSize(number_of_images);
-    for(int j=0; j<number_of_images; j++)
-    { Vector<int> point = pointi(W.GetDim(),j);
-      Rational p=1;
-      for(int k1=0; k1<monomials[i].size; k1++)
-      { Rational s=0;
-        for(int k2=0; k2<monomials[i][k1].size; k2++)
-          s += monomials[i][k1][k2] * point[k2];
-        p *= s;
-      }
-      images[i][j] = p;
-      lens[i].len += p*p;
-    }
-    lens[i].num = i;
-  }
-  lens.QuickSortAscending();
-  stOutput << " ... sorted (" << theGlobalVariables.GetElapsedSeconds() << ")" << "\n";
-
-  for(int i=0; i<monomials.size; i++)
-  { stOutput << lens[i].num << ": ";
-    Rational is = 0;
-    for(int j=0; j<monomials[lens[i].num].size; j++)
-    { Rational js=0;
-      for(int k=0; k<monomials[lens[i].num][j].size; k++)
-        js += monomials[lens[i].num][j][k];
-      stOutput << monomials[lens[i].num][j] << " [" << js << "], ";
-      is += js;
-    }
-    stOutput << "[[" << is << "]]" << "\n";
-  }
-
-  List<Vector<f65521> > images65521;
-  images65521.SetSize(monomials.size);
-  getting_images_time:
-  stOutput << "using " << number_of_images << " points";
-  if(maxpoints > 0 && number_of_images >= maxpoints)
-  { number_of_images = maxpoints;
-    stOutput << "... max points reached, actually using " << number_of_images;
-  }
-  stOutput << "\n";
-
-  for(int i=0; i<monomials.size; i++)
-  { int images_old_size = images65521[i].size;
-    images65521[i].SetSize(number_of_images);
-    for(int j=images_old_size; j<number_of_images; j++)
-    { Vector<int> point = pointi(W.GetDim(),j);
-      f65521 p=1;
-      for(int k1=0; k1<monomials[i].size; k1++)
-      { f65521 s=0;
-        for(int k2=0; k2<monomials[i][k1].size; k2++)
-          s += monomials[i][k1][k2] * point[k2];
-        p *= s;
-      }
-      images65521[i][j] = p;
-    }
-  }
-
-  /*
-  List<int> monomials_used_rational;
-  VectorSpace<Rational> vsr;
-  for(int i=0; i<monomials.size; i++)
-  { if(vsr.AddVectorToBasis(images[lens[i].num]))
-      monomials_used_rational.AddOnTop(lens[i].num);
-  }
-  stOutput << "rational module rank is " << monomials_used_rational.size << "\n";
-  //stOutput << vsr.fastbasis.ToString(&consoleFormat) << "\n";
-  stOutput << "monomials used: ";
-  for(int i=0; i<monomials_used_rational.size; i++)
-    stOutput << monomials_used_rational[i] << " ";
-  stOutput << "\n";
-  */
-
-  List<int> monomials_used;
-  VectorSpace<f65521> vs;
-  for(int i=0; i<monomials.size; i++)
-  { if(vs.AddVectorToBasis(images65521[lens[i].num]))
-      monomials_used.AddOnTop(lens[i].num);
-  }
-
-  stOutput << "finite module rank is " << monomials_used.size << " (" << theGlobalVariables.GetElapsedSeconds() << ")" << "\n";
-  //stOutput << vs.fastbasis.ToString(&consoleFormat) << "\n";
-  stOutput << "monomials used: ";
-  for(int i=0; i<monomials_used.size; i++)
-    stOutput << monomials_used[i] << " ";
-  stOutput << "\n";
-
-  /*
-  if(monomials_used_rational.size != monomials_used.size)
-  { stOutput << "linear combinations over Z and Zp are different" << "\n";
-    for(int i=0; i<monomials_used_rational.size; i++)
-      stOutput << monomials_used_rational[i] << " " << images[monomials_used_rational[i]] << "\n";
-    for(int i=0; i<monomials_used.size; i++)
-      stOutput << monomials_used[i] << " " << images65521[monomials_used[i]] << "\n";
-    assert(false);
-  }*/
-
-  Basis<f65521> B65521;
-  for(int i=0; i<monomials_used.size; i++)
-    B65521.AddVector(images65521[monomials_used[i]]);
-
-  WeylGroupRepresentation<f65521> rep65521;
-  rep65521.init(W);
-  for(int i=1; i<W.GetDim()+1; i++)
-  { Matrix<Rational> m;
-    W.GetStandardRepresentationMatrix(i,m);
-    Matrix<f65521> rm;
-    rm.init(monomials_used.size, monomials_used.size);
-    for(int j=0; j<monomials_used.size; j++)
-    { List<Vector<Rational> > monomial;
-      monomial.SetSize(roots.size);
-      for(int k=0; k<roots.size; k++)
-        monomial[k] = m*monomials[monomials_used[j]][k];
-      Vector<f65521> evaluated;
-      evaluated.SetSize(number_of_images);
-      for(int ei=0; ei<number_of_images; ei++)
-      { f65521 p = 1;
-        for(int ej=0; ej<monomial.size; ej++)
-        { f65521 s = 0;
-          for(int ek=0; ek<monomial[ej].size; ek++)
-          { s += monomial[ej][ek] * pointi(W.GetDim(),ei)[ek];
+  stOutput << brackets << '\n';
+  for(int i=0; i<N; i++)
+    for(int j=0; j<i; j++)
+    { for(int k=0; k<j; k++)
+      { stOutput << i << j << k;
+        Vector<Polynomial<Rational> > w;
+        w.MakeZero(N);
+        for(int l=0; l<N; l++)
+          for(int m=0; m<N; m++)
+          { Polynomial<Rational> p;
+            p = brackets.elements[i][j][l];
+            p *= brackets.elements[k][m][l];
+            w[l] += p;
+            p = brackets.elements[j][k][l];
+            p *= brackets.elements[i][m][l];
+            w[l] += p;
+            p = brackets.elements[k][i][l];
+            p *= brackets.elements[j][m][l];
+            w[l] += p;
           }
-          p *= s;
-        }
-        evaluated[ei] = p;
-      }
-      Vector<f65521> be;
-      /*Vector<f65521> evbackup = evaluated;
-      if(!vs.GetCoordinatesDestructively(evaluated, be))
-      { stOutput << "error: vector " << evbackup << " not in vector space " << vs.fastbasis.ToString(&consoleFormat) << " made with vectors " << "\n";
-        for(int i=0; i<monomials_used.size; i++)
-          stOutput << images65521[monomials_used[i]] << "\n";
-        assert(false);
-      }*/
-      be = B65521.PutInBasis(evaluated);
-      for(int mnop=0; mnop<be.size; mnop++)
-        rm.elements[j][mnop] = be[mnop];
-    }
-    rep65521.SetElementImage(i,rm);
-    stOutput << rm.ToString(&consoleFormat) << "\n";
-    if((rm*rm).IsIdMatrix())
-      stOutput << "passed reflection test " <<  " (" << theGlobalVariables.GetElapsedSeconds() << ")" << "\n";
-    else
-    { stOutput << "failed reflection test; retrying with more points " <<  " (" << theGlobalVariables.GetElapsedSeconds() << ")"  << "\n";
-      //stOutput << "failed finite reflection test; trying rational anyway" << "\n";
-      //goto make_rational_matrices;
-      number_of_images *= 2;
-      goto getting_images_time;
-    }
-  }
-
-
-  Matrix<f65521> idr65521;
-  idr65521.MakeIdMatrix(rep65521.GetDim());
-
-  for(int i=0; i<W.GetDim(); i++)
-  { for(int j=0; j<W.GetDim(); j++)
-    { if(j == i)
-        continue;
-      int w = W.theDynkinType.GetCoxeterEdgeWeight(i,j);
-      if(w <= 2)
-        continue;
-      Matrix<f65521> M1 = rep65521.GetMatrixElement(i+1);
-      Matrix<f65521> M2 = rep65521.GetMatrixElement(j+1);
-      Matrix<f65521> M3 = M1*M2;
-      MathRoutines::RaiseToPower(M3,w,idr65521);
-      if(M3.IsIdMatrix())
-        stOutput << "passed Coxeter presentation test " << i << "," << j << "\n";
-      else
-      { stOutput << "failed Coxeter presentation test " << i << "," << j << ", retrying with more points" << "\n";
-        number_of_images *= 2;
-        goto getting_images_time;
+        stOutput << w << '\n';
+        out.AddListOnTop(w);
       }
     }
-  }
-
-  for(int i=0; i<monomials.size; i++)
-  { int images_old_size = images[i].size;
-    images[i].SetSize(number_of_images);
-    for(int j=images_old_size; j<number_of_images; j++)
-    { Vector<int> point = pointi(W.GetDim(),j);
-      Rational p=1;
-      for(int k1=0; k1<monomials[i].size; k1++)
-      { Rational s=0;
-        for(int k2=0; k2<monomials[i][k1].size; k2++)
-          s += monomials[i][k1][k2] * point[k2];
-        p *= s;
-      }
-      images[i][j] = p;
+  stOutput << "done with Jacobi relations\n";
+  for(int i=0; i<N; i++)
+    for(int j=0; j<i; j++)
+    { Vector<Polynomial<Rational> > v;
+      v = brackets.elements[i][j];
+      v += brackets.elements[j][i];
+      stOutput << v << '\n';
+      out.AddListOnTop(v);
     }
-  }
-
-  Basis<Rational> B;
-  for(int i=0; i<monomials_used.size; i++)
-    B.AddVector(images[monomials_used[i]]);
-
-  WeylGroupRepresentation<Rational> rep;
-  rep.init(W);
-  for(int i=1; i<W.GetDim()+1; i++)
-  { Matrix<Rational> m;
-    W.GetStandardRepresentationMatrix(i,m);
-    Matrix<Rational> rm;
-    rm.init(monomials_used.size, monomials_used.size);
-    for(int j=0; j<monomials_used.size; j++)
-    { List<Vector<Rational> > monomial;
-      monomial.SetSize(roots.size);
-      for(int k=0; k<roots.size; k++)
-        monomial[k] = m*monomials[monomials_used[j]][k];
-      Vector<Rational> evaluated;
-      evaluated.SetSize(number_of_images);
-      for(int ei=0; ei<number_of_images; ei++)
-      { Rational p = 1;
-        for(int ej=0; ej<monomial.size; ej++)
-        { Rational s = 0;
-          for(int ek=0; ek<monomial[ej].size; ek++)
-          { s += monomial[ej][ek] * pointi(W.GetDim(),ei)[ek];
-          }
-          p *= s;
-        }
-        evaluated[ei] = p;
-      }
-      Vector<Rational> be = B.PutInBasis(evaluated);
-      for(int mnop=0; mnop<be.size; mnop++)
-        rm.elements[j][mnop] = be[mnop];
-    }
-    rep.SetElementImage(i,rm);
-    stOutput << rm.ToString(&consoleFormat) << "\n";
-    if((rm*rm).IsIdMatrix())
-      stOutput << "passed reflection test " <<  " (" << theGlobalVariables.GetElapsedSeconds() << ")" << "\n";
-    else
-    { stOutput << "failed reflection test; retrying with more points " <<  " (" << theGlobalVariables.GetElapsedSeconds() << ")"  << "\n";
-      number_of_images *= 2;
-      goto getting_images_time;
-    }
-  }
-
-
-  Matrix<Rational> idr;
-  idr.MakeIdMatrix(rep.GetDim());
-
-  for(int i=0; i<W.GetDim(); i++)
-  { for(int j=0; j<W.GetDim(); j++)
-    { if(j == i)
-        continue;
-      int w = W.theDynkinType.GetCoxeterEdgeWeight(i,j);
-      if(w <= 2)
-        continue;
-      Matrix<Rational> M1 = rep.GetMatrixElement(i+1);
-      Matrix<Rational> M2 = rep.GetMatrixElement(j+1);
-      Matrix<Rational> M3 = M1*M2;
-      MathRoutines::RaiseToPower(M3,w,idr);
-      if(M3.IsIdMatrix())
-        stOutput << "passed Coxeter presentation test " << i << "," << j << "\n";
-      else
-      { stOutput << "failed Coxeter presentation test " << i << "," << j << ", retrying with more points" << "\n";
-        number_of_images *= 2;
-        goto getting_images_time;
-      }
-    }
-  }
-  return rep;
 }
 
-void get_macdonald_representations_of_weyl_group_v2(SemisimpleLieAlgebra& theSSlieAlg)
-{ WeylGroup& W = theSSlieAlg.theWeyl;
-  theGlobalVariables.SetStandardStringOutput(CGI::MakeStdCoutReport);
+// wrapper class for partitions, which are lists of integers
+class Partition
+{ public:
+  int n;
+  List<int> p;
 
-  rootSubalgebras theRootSAs;
-  theRootSAs.owneR=&theSSlieAlg;
-  DynkinSimpleType dt = W.theDynkinType.GetGreatestSimpleType();
-  theRootSAs.theGlobalVariables=&theGlobalVariables;
-  theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
-  List<Vector<Rational> > roots;
+  int& operator[](int i) const;
+  void FromListInt(const List<int> &in, int lastElement = -1);
+  static void GetPartitions(List<Partition> &out, int n);
+  template <typename somestream>
+  somestream& IntoStream(somestream& out) const;
+  std::string ToString() const;
+};
 
-  for (int k=0; k<theRootSAs.theSubalgebras.size; k++)
-  { rootSubalgebra& currentRootSA=theRootSAs.theSubalgebras[k];
-    roots=currentRootSA.PositiveRootsK;
-    stOutput << "I am processing root subalgebra of type "
-              << currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
-    WeylGroupRepresentation<Rational> rep = get_macdonald_representation_v2(W,roots);
-    rep.names.SetSize(1);
-    rep.names[0] = currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
-    stOutput << " has character ";
-    stOutput << rep.GetCharacter() << "\n";
-    W.AddIrreducibleRepresentation(rep);
+int& Partition::operator[](int i) const
+{ return p[i];
+}
+
+void Partition::FromListInt(const List<int> &in, int lastElement)
+{ int n = 0;
+  int l = -1;
+  int i=0;
+  if(lastElement == -1)
+    lastElement = in.size;
+  for(; i<lastElement; i++)
+  { if(in[i] < 0)
+      crash << "Partitions should not have negative numbers in them";
+    if(l == -1)
+      l = in[i];
+    else
+      if(in[i] > l)
+        crash << "Partitions should be sorted in descending order";
+    if(in[i] == 0)
+      break;
+    n += in[i];
+  }
+  this->p.SetSize(i);
+  this->n = n;
+  for(int j=0; j<i; j++)
+    p[j] = in[j];
+}
+
+void Partition::GetPartitions(List<Partition>& out, int n)
+{ out.SetSize(0);
+  List<int> p;
+  p.SetSize(n);
+  for(int i=0; i<n; i++)
+    p[i] = 0;
+  p[1] = n;
+  int k = 1;
+  while(k != 0)
+  { int x = p[k-1] + 1;
+    int y = p[k] - 1;
+    k -= 1;
+    while(x <= y)
+    { p[k] = x;
+      y -= x;
+      k += 1;
+    }
+    p[k] = x+y;
+    out.SetSize(out.size+1);
+    out[out.size-1].FromListInt(p,k+1);
+    //int os = out.size;
+    //out.SetSize(os+1);
+    //out[os].SetSize(k+1);
+    //for(int i=0; i<k+1; i++)
+    //  out[os][i] = p[i];
   }
 }
 
+template <typename somestream>
+somestream& Partition::IntoStream(somestream& out) const
+{ out << this->n << ": ";
+  for(int i=0; i<this->p.size-1; i++)
+    out << this->p[i] << " ";
+  out << this->p[this->p.size-1];
+  return out;
+}
 
+std::string Partition::ToString() const
+{ std::stringstream out;
+  this->IntoStream(out);
+  return out.str();
+}
 
+std::ostream& operator<<(std::ostream& out, const Partition& data)
+{ return data.IntoStream(out);
+}
 
+// Tableaux
+class Tableau
+{ public:
+  Partition p;
+};
 
+/*
+// sparse vector terms
+template <typename basisvector, typename scalar>
+class SVT
+{ basisvector direction;
+  scalar coefficient;
 
+  unsigned int HashFunction() const
+  {return HashFunction(this->direction)};
+  bool operator<(const SVT )
+};
+unsigned int HashFunction(SVT& in) const
+{return in.HashFunction();}
+
+template <typename basisvector, typename scalar>
+class SparseVector
+{ List<SVT>
+};
+
+template <typename scalar>
+class SparseTensor
+{ List<List<int> > basisforms;
+  List<scalar> coefficients;
+
+  void Canonicalize();
+
+};
+
+void SparseTensor::Canonicalize()
+{
+}
+*/
 
 int main(void)
 { InitializeGlobalObjects();
@@ -2722,10 +2890,10 @@ int main(void)
   char letter = 'F';
   int number = 4;
 
-  LoadAndPrintTauSignatures(letter, number);
+  //LoadAndPrintTauSignatures(letter, number);
 
 
-  theGlobalVariables.SetStandardStringOutput(CGI::MakeStdCoutReport);
+/*  theGlobalVariables.SetStandardStringOutput(CGI::MakeStdCoutReport);
   SemisimpleLieAlgebra theSSlieAlg;
   theSSlieAlg.theWeyl.MakeArbitrarySimple(letter, number);
   theSSlieAlg.ComputeChevalleyConstants(&theGlobalVariables);
@@ -2736,7 +2904,7 @@ int main(void)
   for(int i=0; i<W.irreps.size; i++)
     stOutput << W.irreps[i].GetName() << '\t' << W.irreps[i].GetCharacter() << "\n";
 
-  ComputeCharacterTable(W);
+  ComputeCharacterTable(W);*/
 
   //ComputeIrreps(W);
 /*UDPolynomial<Rational> p;
@@ -2773,17 +2941,52 @@ int main(void)
        stOutput << chars[i] << "\n";
        */
 
-/*
-  AnotherWeylGroup<f211,PackedVector<f211> > G;
-  G.MakeArbitrarySimple('E',8);
-  G.ComputeConjugacyClasses();
-  JSData out;
-  for(int i=0; i<G.conjugacyClasses.size; i++)
-    out[i] = (double) G.conjugacyClasses[i].size;
-  stOutput << out << "\n";
-  */
+
+//  AnotherWeylGroup<f211,PackedVector<f211> > G;
+//  WeylGroup G;
+//  G.MakeArbitrarySimple(letter,number);
+//  G.ComputeConjugacyClasses();
+//  stOutput << G.ConjugacyClassCount() << "\n";
+//  JSData out;
+//  for(int i=0; i<G.conjugacyClasses.size; i++)
+//    out[i] = (double) G.conjugacyClasses[i].size;
+//  stOutput << out << "\n";
+
 //  stOutput <<
 //  stOutput << FindConjugacyClassRepresentatives(G,500);
+
+  Polynomial<Rational> p,q;
+  p.MakeMonomiaL(0,1);
+  q.MakeMonomiaL(1,1);
+  stOutput << p << " " << q << " " << p+q << " " << '\n';
+  Vector<Polynomial<Rational> > relations;
+  lie_bracket_relations(relations, 3);
+
+  List<Partition> partitions;
+  Partition::GetPartitions(partitions, 3);
+  for(int i=0; i<partitions.size; i++)
+    stOutput << partitions[i] << '\n';
+  Partition::GetPartitions(partitions, 4);
+  for(int i=0; i<partitions.size; i++)
+    stOutput << partitions[i] << '\n';
+  Partition::GetPartitions(partitions, 8);
+  for(int i=0; i<partitions.size; i++)
+    stOutput << partitions[i] << '\n';
+
+  MonomialTensor<int,MathRoutines::IntUnsignIdentity> tt1,tt2;
+  tt1.generatorsIndices.SetSize(1); tt1.Powers.SetSize(1);
+  tt2.generatorsIndices.SetSize(1); tt2.Powers.SetSize(1);
+  tt1.generatorsIndices[0] = 0; tt1.Powers[0] = 1;
+  tt2.generatorsIndices[0] = 1; tt2.Powers[0] = 1;
+  stOutput << tt1 << " " << tt2 << '\n';
+  ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,Rational> t1, t2, t3;
+  t1.AddMonomial(tt1,1);
+  t1.AddMonomial(tt2,1);
+  t2.AddMonomial(tt1,2);
+  stOutput << t1 << " " << t2 << '\n';
+  t3 = t1;
+  t3 *= t2;
+  stOutput << t3 << '\n';
 
   stOutput << "Rational.TotalSmallAdditions: " << Rational::TotalSmallAdditions;
   stOutput << "\nRational.TotalLargeAdditions: " << Rational::TotalLargeAdditions;

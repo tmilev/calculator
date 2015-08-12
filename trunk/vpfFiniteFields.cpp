@@ -278,6 +278,10 @@ bool f211::operator<(f211 rhs) const
   return false;
 }
 
+unsigned int f211::HashFunction() const
+{ return (unsigned int) this->n;
+}
+
 std::string f211::ToString(FormatExpressions* f) const
 { return std::to_string(n);
 }

@@ -84,6 +84,7 @@ public:
   bool IsEqualToOne()const
   { return this->generatorsIndices.size==0;
   }
+  bool IsMonEqualToZero()const{return false;}
   void operator=(List<int>& other)
   { this->generatorsIndices.Reserve(other.size);
     this->Powers.Reserve(other.size);

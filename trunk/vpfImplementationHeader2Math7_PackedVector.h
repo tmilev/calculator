@@ -125,7 +125,7 @@ template <typename scalar>
 unsigned int PackedVector<scalar>::HashFunction() const
 { unsigned int result=0;
   for (int i=0; i<this->size; i++)
-    result += (unsigned int) (this->data[i] *  SomeRandomPrimes[i]);
+    result += this->data[i].HashFunction() *  SomeRandomPrimes[i];
   return result;
 }
 

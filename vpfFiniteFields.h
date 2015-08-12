@@ -94,6 +94,8 @@ class f211
   bool operator<(f211 rhs) const;
   bool operator>(f211 rhs) const;
 
+  unsigned int HashFunction() const;
+
   std::string ToString(FormatExpressions* f = 0) const;
 };
 std::ostream& operator<<(std::ostream& out, const f211& data);

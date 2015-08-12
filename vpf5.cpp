@@ -1937,11 +1937,11 @@ bool Calculator::ReadTestStrings(HashedList<std::string, MathRoutines::hashStrin
 //    stOutput << "<br>adding on top " << buffer;
     outputCommands.AddOnTop(buffer);
     if (!theFileReader.GetStringEnclosedIn("output", buffer))
-      return this->Comments << "<hr>Failed to read result string number " << outputResults.size+1 << ": is the test file corrupt?";
+      return *this << "<hr>Failed to read result string number " << outputResults.size+1 << ": is the test file corrupt?";
     outputResults.AddOnTop(buffer);
   }
   if (outputCommands.size!=outputResults.size || outputCommands.size==0)
-    return this->Comments << "<hr>Corrupt test file: got " << outputCommands.size << " commands and " << outputResults.size << " results, which should not happen. ";
+    return *this << "<hr>Corrupt test file: got " << outputCommands.size << " commands and " << outputResults.size << " results, which should not happen. ";
   return true;
 }
 

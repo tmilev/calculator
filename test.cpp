@@ -98,18 +98,257 @@ unsigned int Vector<int>::HashFunction() const
   return result;
 }
 
+
+class Partition
+{ public:
+  int n;
+  List<int> p;
+
+  int& operator[](int i) const;
+  void FromListInt(const List<int> &in, int lastElement = -1);
+  static void GetPartitions(List<Partition> &out, int n);
+  template <typename somestream>
+  somestream& IntoStream(somestream& out) const;
+  std::string ToString() const;
+};
+
+class Tableau
+{ public:
+  Partition p;
+  List<List<int> > t;
+
+  bool IsStandard() const;
+  template <typename somestream>
+  somestream& IntoStream(somestream& out) const;
+  std::string ToString() const;
+};
+
 class PermutationR2
 {
 public:
+  int N;
   List<List<int> > cycles;
 
-  //void MakeCanonical();
-  //unsigned int HashFunction();
+  void MakeCanonical();
+  unsigned int HashFunction() const;
+  static inline unsigned int HashFunction(const PermutationR2& in)
+                                      { return in.HashFunction();};
+  bool operator==(const PermutationR2& right) const;
+  int BiggestOccurringNumber() const;
+  int operator*(int i) const;
+  int sign() const;
+  void AddTransposition(int i, int j);
+  void AddCycle(const List<int>& cycle);
+  void GetCycleStructure(List<int>& out) const;
+  void GetCycleStructure(Partition& out, int n_in_Sn = -1) const;
+  void MakeFromTableau(const Tableau& in);
+  // this type is hard to *=
+  void MakeFromMul(const PermutationR2& left, const PermutationR2& right);
 
-  void GetCycleStructure(List<int>& out);
+  template <typename somestream>
+  somestream& IntoStream(somestream& out) const;
+  std::string ToString() const;
 };
 
-void PermutationR2::GetCycleStructure(List<int>& out)
+class PermutationGroup
+{ public:
+  List<PermutationR2> gens;
+  int subSn;
+  int permutedn;
+  HashedList<PermutationR2> G;
+
+  void PermutationGroupSn(int n)
+  { this->gens.SetSize(n-1);
+    for(int i=0; i<n-1; i++)
+    { this->gens[i].AddTransposition(0,i);
+    }
+    this->subSn = n;
+    this->permutedn = n;
+  }
+
+  void AddGenDontCompute(const PermutationR2& gen) { this->gens.AddOnTop(gen); }
+  void ComputeAllElements();
+
+
+  template <typename somestream>
+  somestream& IntoStream(somestream& out) const;
+  std::string ToString() const;
+};
+
+
+
+int& Partition::operator[](int i) const
+{ return p[i];
+}
+
+void Partition::FromListInt(const List<int> &in, int lastElement)
+{ int n = 0;
+  int l = -1;
+  int i=0;
+  if(lastElement == -1)
+    lastElement = in.size;
+  for(; i<lastElement; i++)
+  { if(in[i] < 0)
+      crash << "Partitions should not have negative numbers in them";
+    if(l == -1)
+      l = in[i];
+    else
+      if(in[i] > l)
+        crash << "Partitions should be sorted in descending order";
+    if(in[i] == 0)
+      break;
+    n += in[i];
+  }
+  this->p.SetSize(i);
+  this->n = n;
+  for(int j=0; j<i; j++)
+    p[j] = in[j];
+}
+
+void Partition::GetPartitions(List<Partition>& out, int n)
+{ out.SetSize(0);
+  List<int> p;
+  p.SetSize(n);
+  for(int i=0; i<n; i++)
+    p[i] = 0;
+  p[1] = n;
+  int k = 1;
+  while(k != 0)
+  { int x = p[k-1] + 1;
+    int y = p[k] - 1;
+    k -= 1;
+    while(x <= y)
+    { p[k] = x;
+      y -= x;
+      k += 1;
+    }
+    p[k] = x+y;
+    out.SetSize(out.size+1);
+    out[out.size-1].FromListInt(p,k+1);
+    //int os = out.size;
+    //out.SetSize(os+1);
+    //out[os].SetSize(k+1);
+    //for(int i=0; i<k+1; i++)
+    //  out[os][i] = p[i];
+  }
+}
+
+template <typename somestream>
+somestream& Partition::IntoStream(somestream& out) const
+{ out << this->n << ": ";
+  for(int i=0; i<this->p.size-1; i++)
+    out << this->p[i] << " ";
+  out << this->p[this->p.size-1];
+  return out;
+}
+
+std::string Partition::ToString() const
+{ std::stringstream out;
+  this->IntoStream(out);
+  return out.str();
+}
+
+std::ostream& operator<<(std::ostream& out, const Partition& data)
+{ return data.IntoStream(out);
+}
+
+
+
+void PermutationR2::MakeCanonical()
+{ for(int i=0; i<this->cycles.size; i++)
+  { int smallest = -1;
+    int iSmallest;
+    for(int j=0; j < this->cycles[i].size; j++)
+      if(smallest == -1 || smallest < this->cycles[i][j])
+      { smallest = this->cycles[i][j];
+        iSmallest = j;
+      }
+    cycles[i].Rotate(iSmallest);
+  }
+  cycles.QuickSortAscending();
+}
+
+int PermutationR2::BiggestOccurringNumber() const
+{ int bon=0;
+  for(int i=0; i<this->cycles.size; i++)
+    for(int j=0; j<this->cycles[i].size; j++)
+      if(bon < this->cycles[i][j])
+        bon = this->cycles[i][j];
+  return bon;
+}
+
+int PermutationR2::operator*(int cur) const
+{ for(int i=0; i<this->cycles.size; i++)
+    for(int j=0; j<this->cycles[i].size; j++)
+      if(this->cycles[i][j] == cur)
+      { if(j+1 != this->cycles[i].size)
+          cur = this->cycles[i][j+1];
+        else
+          cur = this->cycles[i][0];
+        break;
+      }
+  return cur;
+}
+
+void PermutationR2::MakeFromMul(const PermutationR2& left, const PermutationR2& right)
+{ int lbon = left.BiggestOccurringNumber();
+  int rbon = right.BiggestOccurringNumber();
+  int bon = (lbon > rbon)?lbon:rbon;
+  List<bool> unused;
+  unused.SetSize(bon+1);
+  for(int i=0; i<bon; i++)
+    unused[i] = true;
+  bool incycle = false;
+  for(int head=0; head<bon; head++)
+  { if(!unused[head])
+      continue;
+    unused[head] = false;
+    int cur = head;
+    while(true)
+    { cur = right*cur;
+      cur = left*cur;
+      if(cur == head)
+      { incycle = false;
+        break;
+      }
+      if(!incycle)
+      { this->cycles.SetSize(this->cycles.size+1);
+        this->cycles[this->cycles.size-1].AddOnTop(head);
+        incycle = true;
+      }
+      this->cycles[this->cycles.size-1].AddOnTop(cur);
+      unused[cur] = false;
+    }
+  }
+  this->MakeCanonical();
+}
+
+int PermutationR2::sign() const
+{ int sign = 1;
+  for(int i=0; i<this->cycles.size; i++)
+    if(!(this->cycles[i].size % 2))
+      sign *= -1;
+  return sign;
+}
+
+void PermutationR2::AddCycle(const List<int>& cycle)
+{ this->cycles.AddOnTop(cycle);
+}
+
+void PermutationR2::AddTransposition(int i, int j)
+{ this->cycles.SetSize(this->cycles.size+1);
+  this->cycles[0].SetSize(2);
+  if(i<j)
+  { this->cycles[0][0] = i;
+    this->cycles[0][1] = j;
+  }
+  else
+  { this->cycles[0][0] = j;
+    this->cycles[0][1] = i;
+  }
+}
+
+void PermutationR2::GetCycleStructure(List<int>& out) const
 { int N = 0;
   for(int i=0; i<this->cycles.size; i++)
     if(N < this->cycles[i].size)
@@ -119,6 +358,74 @@ void PermutationR2::GetCycleStructure(List<int>& out)
     out[i] = 0;
   for(int i=0; i<this->cycles.size; i++)
     out[this->cycles[i].size] += 1;
+}
+
+void PermutationR2::GetCycleStructure(Partition& out, int n_in_Sn) const
+{ // guessing at this is a terrible idea in general
+  if(n_in_Sn == -1)
+  { if(this->N > 0)
+      n_in_Sn = this->N;
+    else
+      for(int i=0; i<this->cycles.size; i++)
+        for(int j=0; j<this->cycles.size; j++)
+          if(n_in_Sn < this->cycles[i][j])
+            n_in_Sn = this->cycles[i][j];
+  }
+  out.n = n_in_Sn;
+  out.p.SetSize(this->cycles.size);
+  for(int i=0; i<this->cycles.size; i++)
+    out.p[i] = this->cycles[i].size;
+  out.p.QuickSortDescending();
+}
+
+void PermutationR2::MakeFromTableau(const Tableau& in)
+{ this->cycles.SetSize(in.t.size);
+  for(int i=0; i<in.t.size; i++)
+    this->cycles[i] = in.t[i];
+  this->MakeCanonical();
+}
+
+bool PermutationR2::operator==(const PermutationR2& right) const
+{ return this->cycles == right.cycles;
+}
+
+unsigned int PermutationR2::HashFunction() const
+{ unsigned int acc = 0;
+  unsigned int n = 0;
+  for(int i=0; i<this->cycles.size; i++)
+    for(int j=0; j<this->cycles.size; j++)
+    { acc += SomeRandomPrimes[n] * this->cycles[i][j];
+      n++;
+      if(n >= SomeRandomPrimesSize)
+        n = 0;
+    }
+  return acc;
+}
+
+template <typename somestream>
+somestream& PermutationR2::IntoStream(somestream& out) const
+{ out << "[";
+  for(int i=0; i<this->cycles.size; i++)
+  { out << "(";
+    for(int j=0; j<this->cycles[i].size; j++)
+    { out << this->cycles[i][j];
+      if(j!=this->cycles[i].size-1)
+        out << ", ";
+    }
+    out << ")";
+  }
+  out << "]";
+  return out;
+}
+
+std::string PermutationR2::ToString() const
+{ std::stringstream out;
+  this->IntoStream(out);
+  return out.str();
+}
+
+std::ostream& operator<<(std::ostream& out, const PermutationR2& data)
+{ return data.IntoStream(out);
 }
 
 void WeylElementPermutesRootSystem(const ElementWeylGroup<WeylGroup>& g, PermutationR2& p)
@@ -144,19 +451,56 @@ void WeylElementPermutesRootSystem(const ElementWeylGroup<WeylGroup>& g, Permuta
   }
 }
 
-std::ostream& operator<<(std::ostream& out, const PermutationR2& p)
-{ for(int i=0; i<p.cycles.size; i++)
-  { out << '(';
-    for(int j=0; j<p.cycles[i].size; j++)
-    { out << p.cycles[i][j];
-      if(j!=p.cycles[i].size-1)
-        out << ' ';
+//std::ostream& operator<<(std::ostream& out, const PermutationGroup& p)
+//{ for(int i=0; i<p.cycles.size; i++)
+//  { out << '(';
+//    for(int j=0; j<p.cycles[i].size; j++)
+//    { out << p.cycles[i][j];
+//      if(j!=p.cycles[i].size-1)
+//        out << ' ';
+//    }
+//    out << ')';
+//  }
+//  return out;
+//}
+
+void PermutationGroup::ComputeAllElements()
+{ PermutationR2 e;
+  this->G.AddOnTop(e);
+  List<PermutationR2> recentadds;
+  recentadds.SetSize(1); // equivalent to .AddOnTop(e), right?
+  while(recentadds.size > 0)
+  { // this is a necessary copy.  I wish I could tell cxx it is a move.
+    PermutationR2 r = recentadds.PopLastObject();
+    for(int i=0; i<this->gens.size; i++)
+    { PermutationR2 p;
+      p.MakeFromMul(r,gens[i]);
+      if(this->G.AddOnTopNoRepetition(p))
+        recentadds.AddOnTop(p);
     }
-    out << ')';
+  }
+}
+
+template <typename somestream>
+somestream& PermutationGroup::IntoStream(somestream& out) const
+{ out << "Permutation Group with " << this->G.size << " generated by: ";
+  for(int i=0; i<this->gens.size; i++)
+  { out << this->gens[i];
+    if(i != this->gens.size-1)
+      out << ", ";
   }
   return out;
 }
 
+std::string PermutationGroup::ToString() const
+{ std::stringstream out;
+  this->IntoStream(out);
+  return out.str();
+}
+
+std::ostream& operator<<(std::ostream& out, const PermutationGroup& data)
+{ return data.IntoStream(out);
+}
 
 
 List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkDivisorsOf=0);
@@ -2066,100 +2410,6 @@ void lie_bracket_relations(Vector<Polynomial<Rational> >& out, int N)
     }
 }
 
-// wrapper class for partitions, which are lists of integers
-class Partition
-{ public:
-  int n;
-  List<int> p;
-
-  int& operator[](int i) const;
-  void FromListInt(const List<int> &in, int lastElement = -1);
-  static void GetPartitions(List<Partition> &out, int n);
-  template <typename somestream>
-  somestream& IntoStream(somestream& out) const;
-  std::string ToString() const;
-};
-
-int& Partition::operator[](int i) const
-{ return p[i];
-}
-
-void Partition::FromListInt(const List<int> &in, int lastElement)
-{ int n = 0;
-  int l = -1;
-  int i=0;
-  if(lastElement == -1)
-    lastElement = in.size;
-  for(; i<lastElement; i++)
-  { if(in[i] < 0)
-      crash << "Partitions should not have negative numbers in them";
-    if(l == -1)
-      l = in[i];
-    else
-      if(in[i] > l)
-        crash << "Partitions should be sorted in descending order";
-    if(in[i] == 0)
-      break;
-    n += in[i];
-  }
-  this->p.SetSize(i);
-  this->n = n;
-  for(int j=0; j<i; j++)
-    p[j] = in[j];
-}
-
-void Partition::GetPartitions(List<Partition>& out, int n)
-{ out.SetSize(0);
-  List<int> p;
-  p.SetSize(n);
-  for(int i=0; i<n; i++)
-    p[i] = 0;
-  p[1] = n;
-  int k = 1;
-  while(k != 0)
-  { int x = p[k-1] + 1;
-    int y = p[k] - 1;
-    k -= 1;
-    while(x <= y)
-    { p[k] = x;
-      y -= x;
-      k += 1;
-    }
-    p[k] = x+y;
-    out.SetSize(out.size+1);
-    out[out.size-1].FromListInt(p,k+1);
-    //int os = out.size;
-    //out.SetSize(os+1);
-    //out[os].SetSize(k+1);
-    //for(int i=0; i<k+1; i++)
-    //  out[os][i] = p[i];
-  }
-}
-
-template <typename somestream>
-somestream& Partition::IntoStream(somestream& out) const
-{ out << this->n << ": ";
-  for(int i=0; i<this->p.size-1; i++)
-    out << this->p[i] << " ";
-  out << this->p[this->p.size-1];
-  return out;
-}
-
-std::string Partition::ToString() const
-{ std::stringstream out;
-  this->IntoStream(out);
-  return out.str();
-}
-
-std::ostream& operator<<(std::ostream& out, const Partition& data)
-{ return data.IntoStream(out);
-}
-
-// Tableaux
-class Tableau
-{ public:
-  Partition p;
-};
 
 /*
 // sparse vector terms
@@ -2972,6 +3222,20 @@ int main(void)
   Partition::GetPartitions(partitions, 8);
   for(int i=0; i<partitions.size; i++)
     stOutput << partitions[i] << '\n';
+
+  PermutationR2 p1;
+  p1.AddTransposition(1,2);
+  PermutationR2 p2;
+  List<int> l; l.AddOnTop(2); l.AddOnTop(3); l.AddOnTop(4);
+  p2.AddCycle(l);
+  PermutationR2 p3;
+  p3.MakeFromMul(p1,p2);
+  stOutput << p1 << " " << p2 << " " << p3 << '\n';
+  PermutationGroup pg;
+  pg.AddGenDontCompute(p1);
+  pg.AddGenDontCompute(p2);
+  pg.ComputeAllElements();
+  stOutput << pg << '\n';
 
   MonomialTensor<int,MathRoutines::IntUnsignIdentity> tt1,tt2;
   tt1.generatorsIndices.SetSize(1); tt1.Powers.SetSize(1);

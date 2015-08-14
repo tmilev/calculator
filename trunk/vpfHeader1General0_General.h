@@ -5,6 +5,7 @@
 
 #include "vpfMacros.h"
 #include "vpfHeader1General2Multitasking.h"
+#include <algorithm>
 static ProjectInformationInstance vpfHeader1instance(__FILE__, "Header, general routines. ");
 
 //static bool cantfuckingbelievethisfuckingpieceofshitiscrashing=false;
@@ -900,6 +901,9 @@ public:
       return true;
     this->InsertAtIndexShiftElementsUp(o,n);
     return false;
+  }
+  void Rotate(int r)
+  { std::rotate(this->TheObjects, this->TheObjects+r, this->TheObjects+(this->size-1));
   }
   bool ReadFromFile(std::fstream& input){ return this->ReadFromFile(input, 0, -1);}
   bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitForDebugPurposes);

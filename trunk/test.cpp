@@ -99,6 +99,11 @@ unsigned int Vector<int>::HashFunction() const
 }
 
 
+class Partition;
+class Tableau;
+class PermutationR2;
+class PermutationGroup;
+
 class Partition
 { public:
   int n;
@@ -107,6 +112,8 @@ class Partition
   int& operator[](int i) const;
   void FromListInt(const List<int> &in, int lastElement = -1);
   static void GetPartitions(List<Partition> &out, int n);
+  void FillTableau(Tableau& in, List<int>& stuffing) const;
+
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
   std::string ToString() const;
@@ -114,10 +121,11 @@ class Partition
 
 class Tableau
 { public:
-  Partition p;
   List<List<int> > t;
 
   bool IsStandard() const;
+  void RowStabilizer(PermutationGroup& in) const;
+  void ColumnStabilizer(PermutationGroup& in) const;
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
   std::string ToString() const;
@@ -126,7 +134,8 @@ class Tableau
 class PermutationR2
 {
 public:
-  int N;
+  int bon;
+  List<bool> used;
   List<List<int> > cycles;
 
   void MakeCanonical();
@@ -137,6 +146,8 @@ public:
   int BiggestOccurringNumber() const;
   int operator*(int i) const;
   int sign() const;
+  void BuildTransposition(int i, int j);
+  void BuildCycle(const List<int>& cycle);
   void AddTransposition(int i, int j);
   void AddCycle(const List<int>& cycle);
   void GetCycleStructure(List<int>& out) const;
@@ -223,13 +234,29 @@ void Partition::GetPartitions(List<Partition>& out, int n)
       k += 1;
     }
     p[k] = x+y;
-    out.SetSize(out.size+1);
-    out[out.size-1].FromListInt(p,k+1);
-    //int os = out.size;
-    //out.SetSize(os+1);
-    //out[os].SetSize(k+1);
-    //for(int i=0; i<k+1; i++)
-    //  out[os][i] = p[i];
+    //out.SetSize(out.size+1);
+    //out[out.size-1].FromListInt(p,k+1);
+    int s = out.size;
+    out.SetSize(s+1);
+    out[s].p.SetSize(k+1);
+    for(int i=0; i<k+1; i++)
+      out[s].p[i] = p[k-i];
+    out[s].n = n;
+  }
+}
+
+void Partition::FillTableau(Tableau& in, List<int>& stuffing) const
+{ //if(stuffing.size < this->n)
+  //  crash << "need at least " << this->n << " things to stuff tableau with partition " << *this << " but you provided only " << stuffing.size << '\n';
+  // whatever it will crash anyway
+  in.t.SetSize(this->p.size);
+  int cur = 0;
+  for(int i=0; i<this->p.size; i++)
+  { in.t[i].SetSize(this->p[i]);
+    for(int j=0; j<this->p[i]; j++)
+    { in.t[i][j] = stuffing[cur];
+      cur++;
+    }
   }
 }
 
@@ -252,20 +279,109 @@ std::ostream& operator<<(std::ostream& out, const Partition& data)
 { return data.IntoStream(out);
 }
 
+// Tableau implementation
 
+bool Tableau::IsStandard() const
+{ if(this->t.size == 0)
+    return true;
+  for(int i=0; i<this->t.size; i++)
+  { int cur=0;
+    for(int j=0; j<this->t[i].size; j++)
+    { if(!(cur < this->t[i][j]))
+        return false;
+      cur = this->t[i][j];
+    }
+  }
+  for(int i=0; i<this->t[0].size; i++)
+  { int cur = 0;
+    int j=0;
+    while(true)
+    { if(j == this->t.size)
+        break;
+      if(this->t[j].size <= i)
+        break;
+      if(!(this->t[j][i]) < cur)
+        return false;
+      cur = this->t[j][i];
+      j++;
+    }
+  }
+  return true;
+}
+
+void Tableau::RowStabilizer(PermutationGroup& in) const
+{ for(int i=0; i<this->t.size; i++)
+  { if(this->t[i].size == 1)
+      continue;
+    for(int j=1; j<this->t[i].size; j++)
+    { in.gens.SetSize(in.gens.size+1);
+      in.gens[in.gens.size-1].BuildTransposition(this->t[i][0],this->t[i][j]);
+    }
+  }
+}
+
+void Tableau::ColumnStabilizer(PermutationGroup& in) const
+{ if(this->t.size == 0)
+    return;
+  for(int i=0; i<this->t[0].size; i++)
+  { int j=1;
+    while(true)
+    { if(this->t[j].size <= i)
+        break;
+      in.gens.SetSize(in.gens.size+1);
+      in.gens[in.gens.size-1].BuildTransposition(this->t[0][i],this->t[j][i]);
+      j++;
+    }
+  }
+}
 
 void PermutationR2::MakeCanonical()
-{ for(int i=0; i<this->cycles.size; i++)
-  { int smallest = -1;
-    int iSmallest;
-    for(int j=0; j < this->cycles[i].size; j++)
-      if(smallest == -1 || smallest < this->cycles[i][j])
-      { smallest = this->cycles[i][j];
-        iSmallest = j;
+{ this->bon = this->BiggestOccurringNumber();
+  this->used.SetSize(this->bon+1);
+  for(int i=0; i<this->used.size; i++)
+    this->used[i] = false;
+  List<List<int> > tmp;
+  for(int i=0; i<=this->bon; i++)
+  { if(this->used[i])
+      continue;
+    int head = i;
+    int cur = head;
+    bool incycle = false;
+    for(int j=this->cycles.size-1; j>=0; j--)
+    { for(int k=0; k<this->cycles[j].size; k++)
+      { if(this->cycles[j][k] != cur)
+          continue;
+        if(k != this->cycles[j].size-1)
+          cur = this->cycles[j][k+1];
+        else
+          cur = this->cycles[j][0];
+        break;
       }
-    cycles[i].Rotate(iSmallest);
+      if(cur == head)
+      { // if this was a well-formed permutation, we would be done
+        if(incycle)
+        { incycle = false;
+          tmp.SetSize(tmp.size - 1);
+        }
+      }
+      else
+      { if(!incycle)
+        { tmp.SetSize(tmp.size + 1);
+          tmp[tmp.size-1].AddOnTop(head);
+          incycle = true;
+        }
+        tmp[tmp.size-1].AddOnTop(cur);
+      }
+    }
+    if(incycle)
+      for(int j=0; j<tmp[tmp.size-1].size; j++)
+        this->used[tmp[tmp.size-1][j]] = true;
   }
-  cycles.QuickSortAscending();
+  // dr milev is going to be angry about this
+  List<int>* ptmp;
+  ptmp = this->cycles.TheObjects;
+  this->cycles.TheObjects = tmp.TheObjects;
+  tmp.TheObjects = ptmp;
 }
 
 int PermutationR2::BiggestOccurringNumber() const
@@ -320,7 +436,6 @@ void PermutationR2::MakeFromMul(const PermutationR2& left, const PermutationR2& 
       unused[cur] = false;
     }
   }
-  this->MakeCanonical();
 }
 
 int PermutationR2::sign() const
@@ -331,11 +446,11 @@ int PermutationR2::sign() const
   return sign;
 }
 
-void PermutationR2::AddCycle(const List<int>& cycle)
+void PermutationR2::BuildCycle(const List<int>& cycle)
 { this->cycles.AddOnTop(cycle);
 }
 
-void PermutationR2::AddTransposition(int i, int j)
+void PermutationR2::BuildTransposition(int i, int j)
 { this->cycles.SetSize(this->cycles.size+1);
   this->cycles[0].SetSize(2);
   if(i<j)
@@ -348,6 +463,15 @@ void PermutationR2::AddTransposition(int i, int j)
   }
 }
 
+void PermutationR2::AddCycle(const List<int>& cycle)
+{ this->BuildCycle(cycle);
+  this->MakeCanonical();
+}
+
+void PermutationR2::AddTransposition(int i, int j)
+{ this->BuildTransposition(i,j);
+  this->MakeCanonical();
+}
 void PermutationR2::GetCycleStructure(List<int>& out) const
 { int N = 0;
   for(int i=0; i<this->cycles.size; i++)
@@ -363,8 +487,8 @@ void PermutationR2::GetCycleStructure(List<int>& out) const
 void PermutationR2::GetCycleStructure(Partition& out, int n_in_Sn) const
 { // guessing at this is a terrible idea in general
   if(n_in_Sn == -1)
-  { if(this->N > 0)
-      n_in_Sn = this->N;
+  { if(this->bon > 0)
+      n_in_Sn = this->bon;
     else
       for(int i=0; i<this->cycles.size; i++)
         for(int j=0; j<this->cycles.size; j++)
@@ -3236,6 +3360,7 @@ int main(void)
   pg.AddGenDontCompute(p2);
   pg.ComputeAllElements();
   stOutput << pg << '\n';
+  stOutput << pg.G << '\n';
 
   MonomialTensor<int,MathRoutines::IntUnsignIdentity> tt1,tt2;
   tt1.generatorsIndices.SetSize(1); tt1.Powers.SetSize(1);

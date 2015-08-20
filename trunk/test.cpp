@@ -18,6 +18,7 @@
 
 GlobalVariables& theGlobalVariables=onePredefinedCopyOfGlobalVariables;
 
+#define TENSOR_MONOMIAL MonomialTensor<int,MathRoutines::IntUnsignIdentity>
 
 class CharacterTable
 {
@@ -113,6 +114,8 @@ class Partition
   void FromListInt(const List<int> &in, int lastElement = -1);
   static void GetPartitions(List<Partition> &out, int n);
   void FillTableau(Tableau& in, List<int>& stuffing) const;
+  template <typename scalar>
+  void SpechtModule(List<Matrix<scalar> >& out) const;
 
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
@@ -155,6 +158,12 @@ public:
   void MakeFromTableau(const Tableau& in);
   // this type is hard to *=
   void MakeFromMul(const PermutationR2& left, const PermutationR2& right);
+
+//  MonomialTensor<T1, T2> operator*(MonomialTensor<T1,T2>& right) const;
+  void ActOnMonomialTensor(TENSOR_MONOMIAL& out, const TENSOR_MONOMIAL& in) const;
+
+  template <typename coefficient>
+  void ActOnTensor(ElementMonomialAlgebra<TENSOR_MONOMIAL,T3>& out, const ElementMonomialAlgebra<TENSOR_MONOMIAL,T3>& in) const;
 
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
@@ -258,6 +267,16 @@ void Partition::FillTableau(Tableau& in, List<int>& stuffing) const
       cur++;
     }
   }
+}
+
+void Partition::SpechtModule(List<Matrix<scalar> >& out)
+{ Tableau initialTableau;
+  List<int> stuffing;
+  stuffing.SetSize(this->n);
+  for(int i=0; i<this->n; i++)
+    stuffing[i] = i;
+  this->FillTableau(initialTableau, stuffing);
+
 }
 
 template <typename somestream>
@@ -550,6 +569,23 @@ std::string PermutationR2::ToString() const
 
 std::ostream& operator<<(std::ostream& out, const PermutationR2& data)
 { return data.IntoStream(out);
+}
+
+
+//  MonomialTensor<T1, T2> operator*(MonomialTensor<T1,T2>& right) const;
+void PermutationR2::ActOnMonomialTensor(TENSOR_MONOMIAL& out, const TENSOR_MONOMIAL& in) const
+{ int rank=0;
+  for(int i=0; i<in.Powers.size; i++)
+    rank += Powers[i];
+  List<int> expanded;
+  expanded.SetSize(rank);
+  for(int i=0,cur=0; i<in.generatorsIndices.size; i++)
+}
+
+template <typename coefficient>
+void PermutationR2::ActOnTensor(ElementMonomialAlgebra<TENSOR_MONOMIAL,coefficient>& out,
+  const ElementMonomialAlgebra<TENSOR_MONOMIAL,coefficient>& in) const
+{
 }
 
 void WeylElementPermutesRootSystem(const ElementWeylGroup<WeylGroup>& g, PermutationR2& p)

@@ -840,6 +840,8 @@ public:
   }
   bool HasACommonElementWith(List<Object>& right);
   void SwapTwoIndices(int index1, int index2);
+  void CycleIndices(const List<int>& cycle);
+  void PermuteIndices(const List<List<int> >& cycles);
   std::string ToString(FormatExpressions* theFormat)const;
   std::string ToString()const;
   std::string ToStringCommaDelimited(FormatExpressions* theFormat)const;
@@ -1759,6 +1761,29 @@ void List<Object>::SwapTwoIndices(int index1, int index2)
   this->TheObjects[index1]=this->TheObjects[index2];
   this->TheObjects[index2]=tempO;
 }
+
+template<class Object>
+void List<Object>::CycleIndices(const List<int>& cycle)
+{ if(cycle.size < 2)
+    return;
+  for(int i=0; i<cycle.size; i++)
+  { if((cycle[i] >= this->size) || (cycle[i] < 0)
+      crash << "Programming error: request to cycle indices " << cycle << " in list of " << this->size << " elements." << crash;
+  }
+  Object head;
+  head = this->TheObjects[cycle[0]];
+  for(int i=1; i<cycle.size; i++)
+    this->TheObjects[cycle[i-1]] = this->TheObjects[cycle[i]];
+  this->TheObjects[cycle[cycle.size-1]] = head;
+}
+
+template<class Object>
+void List<Object>::PermuteIndices(const List<List<int> >& cycles)
+{ for(int i=0; i<cycles.size; i++)
+    this->CycleIndices(cycles[i]);
+}
+
+
 
 template<class Object>
 int List<Object>::GetIndex(const Object& o) const

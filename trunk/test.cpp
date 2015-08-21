@@ -276,7 +276,17 @@ void Partition::SpechtModule(List<Matrix<scalar> >& out)
   for(int i=0; i<this->n; i++)
     stuffing[i] = i;
   this->FillTableau(initialTableau, stuffing);
-
+  PermutationGroup rs;
+  initialTableau.RowStabilizer(rs);
+  rs.ComputeAllElements();
+  initialTableau.ColumnStabilizer(cs);
+  cs.ComputeAllElements();
+  MonomialTensor<int,MathRoutines::IntUnsignIdentity> tm1;
+  tm1.generatorsIndices.SetSize(n);
+  tm1.Powers.SetSize(n);
+  ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,Rational> t1, t2, t3,tmp;
+  t1.AddMonomial(tm1,1);
+  for(int i=0; i<
 }
 
 template <typename somestream>
@@ -573,6 +583,7 @@ std::ostream& operator<<(std::ostream& out, const PermutationR2& data)
 
 
 //  MonomialTensor<T1, T2> operator*(MonomialTensor<T1,T2>& right) const;
+// should this get stuffed in MonomialTensor?
 void PermutationR2::ActOnMonomialTensor(TENSOR_MONOMIAL& out, const TENSOR_MONOMIAL& in) const
 { int rank=0;
   for(int i=0; i<in.Powers.size; i++)
@@ -580,12 +591,30 @@ void PermutationR2::ActOnMonomialTensor(TENSOR_MONOMIAL& out, const TENSOR_MONOM
   List<int> expanded;
   expanded.SetSize(rank);
   for(int i=0,cur=0; i<in.generatorsIndices.size; i++)
+     for(int j=0; j<in.Powers[i]; j++)
+      { expanded[cur] = generatorsIndices[i];
+         cur++;
+       }
+  expanded.PermuteIndices(this->cycles);
+  for(int xi=0, ti=0; xi<expanded.size; xi++,ti++)
+  { out.generatorIndices[ti].AddOnTop(expanded[xi]);
+     for(int tj=1; ; tj++,xi++)
+       if((expanded[xi]!=out.generatorIndices[ti]) || (xi==expanded.size))
+       { out.Powers.AddOnTop(tj);
+          break;    
+        }
+   }
 }
 
 template <typename coefficient>
 void PermutationR2::ActOnTensor(ElementMonomialAlgebra<TENSOR_MONOMIAL,coefficient>& out,
   const ElementMonomialAlgebra<TENSOR_MONOMIAL,coefficient>& in) const
-{
+{ for(int i=0; i<in.monomials.size; i++)
+  { TENSOR_MONOMIAL tmpout,tmpin;
+    tmp = in.monomials[i];
+    this->ActOnTensorMonomial(tmpout,tmpin);
+    out.AddMonomial(tmpout,in.coefficients[i]);
+  }
 }
 
 void WeylElementPermutesRootSystem(const ElementWeylGroup<WeylGroup>& g, PermutationR2& p)
@@ -3397,6 +3426,16 @@ int main(void)
   pg.ComputeAllElements();
   stOutput << pg << '\n';
   stOutput << pg.G << '\n';
+
+  
+  Partition thePartition;
+  thePartition.MakeFromList(
+
+  Tableau initialTableau;
+  thePartition.FillTableau(initialTableau,initialList);
+  initialTableau.RowStabilizer()
+  initialTableau.ColumnStabilizer()
+
 
   MonomialTensor<int,MathRoutines::IntUnsignIdentity> tt1,tt2;
   tt1.generatorsIndices.SetSize(1); tt1.Powers.SetSize(1);

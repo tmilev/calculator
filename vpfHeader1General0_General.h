@@ -1767,9 +1767,8 @@ void List<Object>::CycleIndices(const List<int>& cycle)
 { if(cycle.size < 2)
     return;
   for(int i=0; i<cycle.size; i++)
-  { if((cycle[i] >= this->size) || (cycle[i] < 0)
+    if((cycle[i] >= this->size) || (cycle[i] < 0))
       crash << "Programming error: request to cycle indices " << cycle << " in list of " << this->size << " elements." << crash;
-  }
   Object head;
   head = this->TheObjects[cycle[0]];
   for(int i=1; i<cycle.size; i++)

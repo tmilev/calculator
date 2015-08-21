@@ -21,25 +21,13 @@ void Crasher::FirstRun()
   this->flagFirstRun=false;
 }
 
-Crasher& Crasher::operator<<(const std::string& input)
-{ this->FirstRun();
-  this->theCrashReport << input;
-  return *this;
-}
-
-Crasher& Crasher::operator<<(int x)
-{ this->FirstRun();
-  this->theCrashReport << x;
-  return *this;
-}
-
 Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
 { this->FirstRun();
   static bool ThisCodeHasntRunYet=true;
   if (!ThisCodeHasntRunYet)
   //this would mean one of the crash-processing functions below has requested a crash, which is an
   //unbounded recursion.
-  { std::cout << "Unbounded recursion detected! Crash report so far: " << this->theCrashReport.str() << std::endl;
+  { std::cout << "Recursion within the crashing mechanism detected! Something is very wrong. Crash report so far: " << this->theCrashReport.str() << std::endl;
     assert(false);
   }
   ThisCodeHasntRunYet=false;

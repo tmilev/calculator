@@ -84,9 +84,13 @@ class Crasher
   void FirstRun();
   static std::string GetStackTraceEtcErrorMessage();
   static std::string GetStackTraceShort();
-  Crasher& operator<<(const std::string& input);
-  Crasher& operator<<(int x);
   Crasher& operator<<(const Crasher& dummyCrasherSignalsActualCrash);
+  template <class AnyObject>
+  Crasher& operator<<(const AnyObject& input)
+  { this->FirstRun();
+    this->theCrashReport << input;
+    return *this;
+  }
 };
 
 class StdoutClass

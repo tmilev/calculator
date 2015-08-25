@@ -5143,77 +5143,109 @@ void LaTeXcrawler::BuildFreecalc()
   reportStream << "Processing input file: extracting lecture numbers...";
   theReport.Report(reportStream.str());
 //  stOutput << "Processing input file: extracting lecture numbers.";
+  bool isLecturE =false;
+  bool isHW=false;
   while (!inputFile.eof())
   { std::getline(inputFile, buffer);
+    bool isInput=false;
     if (MathRoutines::StringBeginsWith(buffer, "\\lect"))
-    { int leftBracketsMinusRight=0;
-      int numBallancedBracketGroups=0;
-      std::string lectureNumber;
-      bool recordingLectureNumber=false;
-      for (unsigned i=0; i<buffer.size(); i++)
-      { if (buffer[i]=='}')
-        { leftBracketsMinusRight--;
-          if (leftBracketsMinusRight==0)
-          { numBallancedBracketGroups++;
-            if (recordingLectureNumber)
-              break;
-          }
-        }
-        if (buffer[i]=='{')
-        { leftBracketsMinusRight++;
-          if (leftBracketsMinusRight==1 && numBallancedBracketGroups==2)
-            recordingLectureNumber=true;
-        }
-        if (recordingLectureNumber)
-          lectureNumber.push_back(buffer[i]);
-      }
-      if (lectureNumber.size()>0)
-        theLectureNumbers.AddOnTop(lectureNumber.substr(1, lectureNumber.size()-1));
-      else
-      { this->displayResult << "Failed to extract lecture number from line: " << buffer;
-        return;
-      }
-      std::getline(inputFile, buffer);
-      std::string desiredName;
-      if (!MathRoutines::StringBeginsWith(buffer, "%DesiredLectureName: ", &desiredName))
-        desiredName="";
-      for (unsigned i=0; i<desiredName.size(); i++)
-        if (desiredName[i]== '.' || desiredName[i]=='/' || desiredName[i]=='\\')
-          desiredName="";
-      if (desiredName=="")
-        this->displayResult << "Failed to extract desired lecture name from: " << buffer
-        << "<br>This is the line immediately after the \\lect command. It should begin with the string \"%DesiredLectureName: \""
-        << "(<-has space bar in the end). The name itself should not contain the characters . / or \\"
-        << "I am assigning an automatic file name.";
-      theLectureDesiredNames.AddOnTop(desiredName);
+    { isInput=true;
+      isLecturE=true;
     }
+    if (MathRoutines::StringBeginsWith(buffer, "\\homeworkOnATopic"))
+    { isInput=true;
+      isHW=true;
+    }
+    if (!isInput)
+      continue;
+    int leftBracketsMinusRight=0;
+    int numBallancedBracketGroups=0;
+    std::string lectureNumber;
+    bool recordingLectureNumber=false;
+    for (unsigned i=0; i<buffer.size(); i++)
+    { if (buffer[i]=='}')
+      { leftBracketsMinusRight--;
+        if (leftBracketsMinusRight==0)
+        { numBallancedBracketGroups++;
+          if (recordingLectureNumber)
+            break;
+        }
+      }
+      if (buffer[i]=='{')
+      { leftBracketsMinusRight++;
+        if (leftBracketsMinusRight==1 && numBallancedBracketGroups==2)
+          recordingLectureNumber=true;
+      }
+      if (recordingLectureNumber)
+        lectureNumber.push_back(buffer[i]);
+    }
+    if (lectureNumber.size()>0)
+      theLectureNumbers.AddOnTop(lectureNumber.substr(1, lectureNumber.size()-1));
+    else
+    { this->displayResult << "Failed to extract lecture/homework number from line: " << buffer;
+      return;
+    }
+    std::getline(inputFile, buffer);
+    std::string desiredName;
+    if (!MathRoutines::StringBeginsWith(buffer, "%DesiredLectureName: ", &desiredName))
+      if(!MathRoutines::StringBeginsWith(buffer, "%DesiredHomeworkName: ", &desiredName))
+        desiredName="";
+    for (unsigned i=0; i<desiredName.size(); i++)
+      if (desiredName[i]== '.' || desiredName[i]=='/' || desiredName[i]=='\\')
+        desiredName="";
+    if (desiredName=="")
+      this->displayResult << "Failed to extract desired homework/lecture name from: " << buffer
+      << "<br>This is the line immediately after the \\lect command. It should begin with the string \"%DesiredLectureName: \""
+      << "(<-has space bar in the end). The name itself should not contain the characters . / or \\"
+      << "I am assigning an automatic file name.";
+    theLectureDesiredNames.AddOnTop(desiredName);
   }
-  reportStream << " done. Extracted: " << theLectureNumbers.size << " lecture numbers. Preparing Lecture content ... ";
+  reportStream << " done. Extracted: " << theLectureNumbers.size << " homework/lecture numbers. Preparing Homework/Lecture content ... ";
   theReport.Report(reportStream.str());
 //  stOutput << reportStream.str();
+  if (isLecturE && isHW)
+  { this->displayResult << "I was not able to determine whether the file is a homework or a lecture file. Aborting.";
+    return;
+  }
+  if (!isLecturE && !isHW)
+  { this->displayResult << "Could not find any lecture or homework entries. Aborting.";
+    return;
+  }
   std::stringstream LectureContentNoDocumentClassNoCurrentLecture;
   inputFile.clear();
   inputFile.seekg(0);
-  while (!inputFile.eof())
-  { std::getline(inputFile, buffer);
-    if (!MathRoutines::StringBeginsWith(buffer, "\\documentclass") &&
-        !MathRoutines::StringBeginsWith(buffer, "[handout]") &&
-        !MathRoutines::StringBeginsWith(buffer, "{beamer}") &&
-        !MathRoutines::StringBeginsWith(buffer, "\\newcommand{\\currentLecture}")
-       )
-      LectureContentNoDocumentClassNoCurrentLecture << buffer << "\n";
-  }
-  reportStream << " done. Proceding to compile lectures. ";
+  if (isLecturE)
+    while (!inputFile.eof())
+    { std::getline(inputFile, buffer);
+      if (!MathRoutines::StringBeginsWith(buffer, "\\documentclass") &&
+          !MathRoutines::StringBeginsWith(buffer, "[handout]") &&
+          !MathRoutines::StringBeginsWith(buffer, "{beamer}") &&
+          !MathRoutines::StringBeginsWith(buffer, "\\newcommand{\\currentLecture}")
+         )
+        LectureContentNoDocumentClassNoCurrentLecture << buffer << "\n";
+    }
+  else
+    while (!inputFile.eof())
+    { std::getline(inputFile, buffer);
+      if (!MathRoutines::StringBeginsWith(buffer, "\\newcommand{\\currentHW}"))
+        LectureContentNoDocumentClassNoCurrentLecture << buffer << "\n";
+    }
+  reportStream << " done. Proceding to compile homeworks/lectures. ";
   theReport.Report(reportStream.str());
 //  stOutput << reportStream2.str();
-  this->displayResult << "<table><tr><td>Lecture number</td><td>Lecture Name</td><td>Lecture pdf</td>"
-  << "<td>Lecture handout pdf</td><td>Comments</td></tr>";
+  if(isLecturE)
+    this->displayResult << "<table><tr><td>Lecture number</td><td>Lecture Name</td><td>Lecture pdf</td>"
+    << "<td>Lecture handout pdf</td><td>Comments</td></tr>";
+  else
+    this->displayResult << "<table><tr><td>Homework number</td><td>Homework Name</td><td>Homework pdf</td>"
+    << "<td>Homework handout pdf</td><td>Comments</td></tr>";
   this->theFileWorkingCopy=this->baseFolderStartFile+ "working_file_"+ this->theFileToCrawlNoPath;
   std::string theFileWorkingCopyPDF=this->baseFolderStartFile+ "working_file_"
   +this->theFileToCrawlNoPath.substr(0, this->theFileToCrawlNoPath.size()-3)+"pdf";
   std::string lectureFileNameEnd;
   if (!MathRoutines::StringBeginsWith(this->theFileToCrawlNoPath, "Lecture_", &lectureFileNameEnd))
-    lectureFileNameEnd="";
+    if (!MathRoutines::StringBeginsWith(this->theFileToCrawlNoPath, "Homework_", &lectureFileNameEnd))
+      lectureFileNameEnd="";
   if (lectureFileNameEnd.size()>4)
     lectureFileNameEnd=lectureFileNameEnd.substr(0, lectureFileNameEnd.size()-4);
   std::stringstream executedCommands, resultTable;
@@ -5235,9 +5267,13 @@ void LaTeXcrawler::BuildFreecalc()
       << this->theFileWorkingCopy << ", aborting.</td> </tr>";
       break;
     }
-    workingFile << "\\documentclass[handout]{beamer}\n\\newcommand{\\currentLecture}{"
-    << theLectureNumbers[i] << "}\n";
-    workingFile << LectureContentNoDocumentClassNoCurrentLecture.str();
+    if (isLecturE)
+      workingFile << "\\documentclass[handout]{beamer}\n\\newcommand{\\currentLecture}{"
+      << theLectureNumbers[i] << "}\n"
+      << LectureContentNoDocumentClassNoCurrentLecture.str();
+    else
+      workingFile << "\\newcommand{\\currentHW}{" << theLectureNumbers[i] << "}\n"
+      << LectureContentNoDocumentClassNoCurrentLecture.str();
     currentSysCommand="pdflatex -shell-escape "+this->theFileWorkingCopy;
     executedCommands << "<br>" << currentSysCommand;
     reportStream << currentSysCommand;
@@ -5247,17 +5283,26 @@ void LaTeXcrawler::BuildFreecalc()
     theReport.Report(reportStream.str());
     this->owner->theGlobalVariableS->System(currentSysCommand);
     std::stringstream thePdfFileNameHandout;
-    thePdfFileNameHandout << "Lecture" << theLectureNumbers[i] << "Handout_" << theLectureDesiredNames[i] << "_"
-    << lectureFileNameEnd << ".pdf";
+    if (isLecturE)
+      thePdfFileNameHandout << "Lecture" << theLectureNumbers[i] << "Handout_" << theLectureDesiredNames[i] << "_"
+      << lectureFileNameEnd << ".pdf";
+    else
+      thePdfFileNameHandout << "Homework" << theLectureNumbers[i] << "_" << theLectureDesiredNames[i] << "_"
+      << lectureFileNameEnd << ".pdf";
     currentSysCommand="mv " +theFileWorkingCopyPDF+" " + thePdfFileNameHandout.str();
     executedCommands << "<br>" << currentSysCommand;
-    reportStream << "<br>Lecture " << i+1 << "handout compiled, renaming file ... ";
+    reportStream << "<br>Lecture/Homework " << i+1 << "handout compiled, renaming file ... ";
     theReport.Report(reportStream.str());
     this->owner->theGlobalVariableS->System(currentSysCommand);
     reportStream << " done.";
     theReport.Report(reportStream.str());
     workingFile.close();
-
+    if (!isLecturE)
+    { theReport.Report(reportStream.str());
+      resultTable << "<td>" << thePdfFileNameHandout.str() << "</td>";
+      resultTable << "</tr>";
+      continue;
+    }
     if (!FileOperations::OpenFileCreateIfNotPresent(workingFile, this->theFileWorkingCopy, false, true, false))
     { resultTable << "<td>-</td><td>-</td><td>Failed to open working file: "
       << this->theFileWorkingCopy << ", aborting.</td> </tr>";

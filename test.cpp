@@ -99,6 +99,50 @@ unsigned int Vector<int>::HashFunction() const
   return result;
 }
 
+// dense bases for sparse spaces
+// should this carry around the
+// List<MonomialCollection<templateMonomial, coefficient> >
+// it came from?
+template <class templateVector, class templateMonomial, class coefficient>
+class SparseSubspaceBasis
+{ public:
+  int rank;
+  List<templateMonomial> involvedMonomials;
+  Matrix<coefficient> projectionOperator;
+
+  void SetBasis(const List<templateVector>& basis);
+  void DenseVectorInBasis(Vector<coefficient>& out, const templateVector& in);
+};
+
+template <class templateVector, class templateMonomial, class coefficient>
+void SparseSubspaceBasis<templateVector, templateMonomial, coefficient>::SetBasis(const List<templateVector>& basis)
+{ for(int i=0; i<basis.size; i++)
+    for(int j=0; j<basis[i].theMonomials.size; j++)
+      this->involvedMonomials.BSInsertDontDup(basis[i].theMonomials[j]);
+  Matrix<coefficient> basisMatrix;
+  basisMatrix.init(this->involvedMonomials.size, basis.size);
+  for(int j=0; j<basis.size; j++)
+    for(int i=0; i<involvedMonomials.size; i++)
+      basisMatrix.elements[i][j] = basis[j].GetMonomialCoefficient(involvedMonomials[i]);
+  Matrix<coefficient> basisMatrixT = basisMatrix;
+  basisMatrixT.Transpose();
+  Matrix<coefficient> tmp;
+  basisMatrix.MultiplyOnTheLeft(basisMatrixT,this->projectionOperator);
+  this->projectionOperator.Invert();
+  this->projectionOperator *= basisMatrixT;
+  this->rank = basis.size;
+}
+
+template <class templateVector, class templateMonomial, class coefficient>
+void SparseSubspaceBasis<templateVector,templateMonomial,coefficient>::DenseVectorInBasis(Vector<coefficient>& out, const templateVector& in)
+{ Vector<coefficient> inDense;
+  inDense.SetSize(this->involvedMonomials.size);
+  for(int i=0; i<involvedMonomials.size; i++)
+    inDense[i] = in.GetMonomialCoefficient(involvedMonomials[i]);
+  out = this->projectionOperator * inDense;
+}
+
+
 
 class Partition;
 class Tableau;
@@ -113,9 +157,11 @@ class Partition
   int& operator[](int i) const;
   void FromListInt(const List<int> &in, int lastElement = -1);
   static void GetPartitions(List<Partition> &out, int n);
-  void FillTableau(Tableau& in, List<int>& stuffing) const;
+  void FillTableau(Tableau& out, List<int>& stuffing) const;
+  void FillTableauOrdered(Tableau& out) const;
+  void GetAllStandardTableaux(List<Tableau>& out) const;
   template <typename scalar>
-  void SpechtModule(List<Matrix<scalar> >& out) const;
+  void SpechtModuleMatricesOfTranspositions(List<Matrix<scalar> >& out) const;
 
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
@@ -129,6 +175,9 @@ class Tableau
   bool IsStandard() const;
   void RowStabilizer(PermutationGroup& in) const;
   void ColumnStabilizer(PermutationGroup& in) const;
+  template <typename coefficient>
+  void YoungSymmetrizerAction(ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient>&out, const ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient>& in);
+
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
   std::string ToString() const;
@@ -159,11 +208,13 @@ public:
   // this type is hard to *=
   void MakeFromMul(const PermutationR2& left, const PermutationR2& right);
 
+  template <typename Object>
+  void ActOnList(List<Object>& in) const;
 //  MonomialTensor<T1, T2> operator*(MonomialTensor<T1,T2>& right) const;
-  void ActOnMonomialTensor(TENSOR_MONOMIAL& out, const TENSOR_MONOMIAL& in) const;
+  void ActOnMonomialTensor(MonomialTensor<int,MathRoutines::IntUnsignIdentity>& out, const MonomialTensor<int,MathRoutines::IntUnsignIdentity>& in) const;
 
   template <typename coefficient>
-  void ActOnTensor(ElementMonomialAlgebra<TENSOR_MONOMIAL,T3>& out, const ElementMonomialAlgebra<TENSOR_MONOMIAL,T3>& in) const;
+  void ActOnTensor(ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient>& out, const ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient>& in) const;
 
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
@@ -269,24 +320,98 @@ void Partition::FillTableau(Tableau& in, List<int>& stuffing) const
   }
 }
 
-void Partition::SpechtModule(List<Matrix<scalar> >& out)
+void Partition::FillTableauOrdered(Tableau& in) const
+{ in.t.SetSize(this->p.size);
+  int cur = 0;
+  for(int i=0; i<this->p.size; i++)
+  { in.t[i].SetSize(this->p[i]);
+    for(int j=0; j<this->p[i]; j++)
+    { in.t[i][j] = cur;
+      cur++;
+    }
+  }
+}
+
+void Partition::GetAllStandardTableaux(List<Tableau>& out) const
+{ PermutationGroup sn;
+  sn.PermutationGroupSn(this->n);
+  sn.ComputeAllElements();
+  List<int> ordered;
+  ordered.SetSize(this->n);
+  for(int i=0; i<this->n; i++)
+    ordered[i] = i;
+  for(int i=0; i<sn.G.size; i++)
+  { List<int> permuted = ordered;
+    sn.G[i].ActOnList(permuted);
+    Tableau theTableau;
+    this->FillTableau(theTableau,permuted);
+    if(theTableau.IsStandard())
+      out.AddOnTop(theTableau);
+  }
+}
+
+template <typename scalar>
+void Partition::SpechtModuleMatricesOfTranspositions(List<Matrix<scalar> >& out) const
 { Tableau initialTableau;
   List<int> stuffing;
   stuffing.SetSize(this->n);
   for(int i=0; i<this->n; i++)
     stuffing[i] = i;
   this->FillTableau(initialTableau, stuffing);
-  PermutationGroup rs;
-  initialTableau.RowStabilizer(rs);
-  rs.ComputeAllElements();
-  initialTableau.ColumnStabilizer(cs);
-  cs.ComputeAllElements();
   MonomialTensor<int,MathRoutines::IntUnsignIdentity> tm1;
   tm1.generatorsIndices.SetSize(n);
   tm1.Powers.SetSize(n);
-  ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,Rational> t1, t2, t3,tmp;
+  ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,scalar> t1, t2, t3;
   t1.AddMonomial(tm1,1);
-  for(int i=0; i<
+  initialTableau.YoungSymmetrizerAction(t2,t1);
+  List<ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,scalar> > basisvs;
+  SparseSubspaceBasis<ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,scalar>,MonomialTensor<int,MathRoutines::IntUnsignIdentity>,scalar> basis;
+  List<Tableau> standardTableaux;
+  this->GetAllStandardTableaux(standardTableaux);
+  basisvs.SetSize(standardTableaux.size);
+  for(int i=0; i<standardTableaux.size; i++)
+  { PermutationR2 p;
+    p.MakeFromTableau(standardTableaux[i]);
+    p.ActOnTensor(basisvs[i],t2);
+  }
+  basis.SetBasis(basisvs);
+  PermutationGroup sn;
+  sn.PermutationGroupSn(this->n);
+  out.SetSize(sn.gens.size);
+  for(int sni=0; sni<sn.gens.size; sni++)
+  { out[sni].init(basis.rank,basis.rank);
+    for(int bi=0; bi<basis.rank; bi++)
+    { ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,scalar> sparse;
+      sn.gens[sni].ActOnTensor(sparse,basisvs[bi]);
+      //tmp.GetCoefficients(out[sni].elements[bi],basis);
+      Vector<scalar> dense;
+      basis.DenseVectorInBasis(dense, sparse);
+      // AssignColumnFromVector?  oh well.
+      for(int j=0; j<basis.rank; j++)
+        out[sni].elements[j][bi] = dense[j];
+    }
+  }
+}
+
+template <typename coefficient>
+void Tableau::YoungSymmetrizerAction(ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient>&out, const ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient>& in)
+{ PermutationGroup rs,cs;
+  this->RowStabilizer(rs);
+  rs.ComputeAllElements();
+  this->ColumnStabilizer(cs);
+  cs.ComputeAllElements();
+
+  ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient> rst;
+  for(int i=0; i<rs.G.size; i++)
+  { ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient> tmp;
+    rs.G[i].ActOnTensor(tmp, in);
+    rst += tmp;
+  }
+  for(int i=0; i<cs.G.size; i++)
+  { ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient> tmp;
+    cs.G[i].ActOnTensor(tmp,rst);
+    out += tmp;
+  }
 }
 
 template <typename somestream>
@@ -355,7 +480,7 @@ void Tableau::ColumnStabilizer(PermutationGroup& in) const
   for(int i=0; i<this->t[0].size; i++)
   { int j=1;
     while(true)
-    { if(this->t[j].size <= i)
+    { if((j<this->t.size) && (this->t[j].size <= i))2
         break;
       in.gens.SetSize(in.gens.size+1);
       in.gens[in.gens.size-1].BuildTransposition(this->t[0][i],this->t[j][i]);
@@ -581,39 +706,43 @@ std::ostream& operator<<(std::ostream& out, const PermutationR2& data)
 { return data.IntoStream(out);
 }
 
+template <typename Object>
+void PermutationR2::ActOnList(List<Object>& in) const
+{ in.PermuteIndices(this->cycles);
+}
 
 //  MonomialTensor<T1, T2> operator*(MonomialTensor<T1,T2>& right) const;
 // should this get stuffed in MonomialTensor?
-void PermutationR2::ActOnMonomialTensor(TENSOR_MONOMIAL& out, const TENSOR_MONOMIAL& in) const
+void PermutationR2::ActOnMonomialTensor(MonomialTensor<int,MathRoutines::IntUnsignIdentity>& out, const MonomialTensor<int,MathRoutines::IntUnsignIdentity>& in) const
 { int rank=0;
   for(int i=0; i<in.Powers.size; i++)
-    rank += Powers[i];
+    rank += in.Powers[i];
   List<int> expanded;
   expanded.SetSize(rank);
   for(int i=0,cur=0; i<in.generatorsIndices.size; i++)
      for(int j=0; j<in.Powers[i]; j++)
-      { expanded[cur] = generatorsIndices[i];
+     { expanded[cur] = in.generatorsIndices[i];
          cur++;
-       }
+     }
   expanded.PermuteIndices(this->cycles);
   for(int xi=0, ti=0; xi<expanded.size; xi++,ti++)
-  { out.generatorIndices[ti].AddOnTop(expanded[xi]);
+  { out.generatorsIndices.AddOnTop(expanded[xi]);
      for(int tj=1; ; tj++,xi++)
-       if((expanded[xi]!=out.generatorIndices[ti]) || (xi==expanded.size))
+       if((expanded[xi]!=out.generatorsIndices[ti]) || (xi==expanded.size))
        { out.Powers.AddOnTop(tj);
-          break;    
-        }
+          break;
+       }
    }
 }
 
 template <typename coefficient>
-void PermutationR2::ActOnTensor(ElementMonomialAlgebra<TENSOR_MONOMIAL,coefficient>& out,
-  const ElementMonomialAlgebra<TENSOR_MONOMIAL,coefficient>& in) const
-{ for(int i=0; i<in.monomials.size; i++)
-  { TENSOR_MONOMIAL tmpout,tmpin;
-    tmp = in.monomials[i];
-    this->ActOnTensorMonomial(tmpout,tmpin);
-    out.AddMonomial(tmpout,in.coefficients[i]);
+void PermutationR2::ActOnTensor(ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient>& out,
+  const ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient>& in) const
+{ for(int i=0; i<in.theMonomials.size; i++)
+  { MonomialTensor<int,MathRoutines::IntUnsignIdentity> tmpout,tmpin;
+    tmpin = in.theMonomials[i];
+    this->ActOnMonomialTensor(tmpout,tmpin);
+    out.AddMonomial(tmpout,in.theCoeffs[i]);
   }
 }
 
@@ -692,7 +821,35 @@ std::ostream& operator<<(std::ostream& out, const PermutationGroup& data)
 }
 
 
-List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkDivisorsOf=0);
+void WeylGroup::ComputeIrreducibleRepresentationsUsingSpechtModules(GlobalVariables* globalVariableThing)
+{ List<char> letters;
+  List<int> ranks;
+  this->theDynkinType.GetLettersTypesMults(&letters,&ranks,NULL);
+  if((letters.size == 1)&&(letters[0] == 'A'))
+  { int theRank = ranks[0];
+    List<Partition> thePartitions;
+    Partition::GetPartitions(thePartitions,theRank);
+    this->irreps.SetSize(thePartitions.size);
+    #pragma omp parallel for
+    for(int i=0; i<thePartitions.size; i++)
+    { List<Matrix<Rational> > repGens;
+      thePartitions[i].SpechtModuleMatricesOfTranspositions(repGens);
+      // so much of programming is boxing and unboxing things.  we use c++
+      // to do it by hand.  I forget if the first [1,n] items were supposed
+      // to be the generators; it's not like that was intended to be documented
+      // anyway
+      for(int i=0; i<repGens.size; i++)
+        this->irreps[i].SetElementImage(i+1,repGens[i]);
+      stOutput << this->irreps[i] << '\n';
+    }
+    this->irreps.QuickSortAscending();
+  }
+}
+
+
+
+
+//List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkDivisorsOf=0);
 
 
 
@@ -3331,19 +3488,18 @@ int main(void)
 
   //LoadAndPrintTauSignatures(letter, number);
 
+  //theGlobalVariables.SetStandardStringOutput(CGI::MakeStdCoutReport);
+  //SemisimpleLieAlgebra theSSlieAlg;
+  //theSSlieAlg.theWeyl.MakeArbitrarySimple(letter, number);
+  //theSSlieAlg.ComputeChevalleyConstants(&theGlobalVariables);
+  //WeylGroup& W=theSSlieAlg.theWeyl;
+  //W.ComputeConjugacyClassesThomasVersion();
 
-/*  theGlobalVariables.SetStandardStringOutput(CGI::MakeStdCoutReport);
-  SemisimpleLieAlgebra theSSlieAlg;
-  theSSlieAlg.theWeyl.MakeArbitrarySimple(letter, number);
-  theSSlieAlg.ComputeChevalleyConstants(&theGlobalVariables);
-  WeylGroup& W=theSSlieAlg.theWeyl;
-  W.ComputeConjugacyClassesThomasVersion();
+  //get_macdonald_representations_of_weyl_group_v2(theSSlieAlg);
+  //for(int i=0; i<W.irreps.size; i++)
+  //  stOutput << W.irreps[i].GetName() << '\t' << W.irreps[i].GetCharacter() << "\n";
 
-  get_macdonald_representations_of_weyl_group_v2(theSSlieAlg);
-  for(int i=0; i<W.irreps.size; i++)
-    stOutput << W.irreps[i].GetName() << '\t' << W.irreps[i].GetCharacter() << "\n";
-
-  ComputeCharacterTable(W);*/
+  //ComputeCharacterTable(W);
 
   //ComputeIrreps(W);
 /*UDPolynomial<Rational> p;
@@ -3427,14 +3583,6 @@ int main(void)
   stOutput << pg << '\n';
   stOutput << pg.G << '\n';
 
-  
-  Partition thePartition;
-  thePartition.MakeFromList(
-
-  Tableau initialTableau;
-  thePartition.FillTableau(initialTableau,initialList);
-  initialTableau.RowStabilizer()
-  initialTableau.ColumnStabilizer()
 
 
   MonomialTensor<int,MathRoutines::IntUnsignIdentity> tt1,tt2;
@@ -3451,6 +3599,13 @@ int main(void)
   t3 = t1;
   t3 *= t2;
   stOutput << t3 << '\n';
+
+  WeylGroup W;
+  W.MakeArbitrarySimple('A', 4);
+  W.ComputeCCSizesAndRepresentatives(NULL);
+  stOutput << W.theDynkinType << " :" << W.size() << " elements, in " << W.conjugacyClasseS.size << " conjugacy classes\n";
+  W.ComputeIrreducibleRepresentationsUsingSpechtModules();
+
 
   stOutput << "Rational.TotalSmallAdditions: " << Rational::TotalSmallAdditions;
   stOutput << "\nRational.TotalLargeAdditions: " << Rational::TotalLargeAdditions;

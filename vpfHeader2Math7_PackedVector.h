@@ -393,6 +393,9 @@ Rational AnotherWeylGroup<scalar, templateVector>::GetHermitianProduct(const Vec
   return acc / this->size();
 }
 
+List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkDivisorsOf=0);
+
+
 template <typename coefficient>
 List<VectorSpace<coefficient> > GetEigenspaces(const Matrix<coefficient> &M)
 { List<List<Vector<coefficient> > > es = eigenspaces(M);

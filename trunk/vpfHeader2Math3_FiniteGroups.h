@@ -403,6 +403,7 @@ public:
 
   void ComputeIrreducibleRepresentationsTodorsVersion(GlobalVariables* theGlobalVariables=0);
   void ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* theGlobalVariables=0);
+  void ComputeIrreducibleRepresentationsUsingSpechtModules(GlobalVariables* theGlobalVariables=0);
   void ComputeExtremeRootInTheSameKMod(const Vectors<Rational>& inputSimpleBasisK, const Vector<Rational>& inputRoot, Vector<Rational>& output, bool lookingForHighest);
   void AddIrreducibleRepresentation(const WeylGroupRepresentation<Rational>& p);
   void AddCharacter(const ClassFunction<WeylGroup::WeylGroupBase, Rational>& X);

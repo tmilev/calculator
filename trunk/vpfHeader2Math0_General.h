@@ -146,6 +146,30 @@ public:
   bool operator==(const MonomialTensor<coefficient, inputHashFunction>& other)const
   { return this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;
   }
+  bool operator<(const MonomialTensor<coefficient, inputHashFunction>& right) const
+  { coefficient leftrank = 0;
+    for(int i=0; i<this->Powers.size; i++)
+      leftrank += this->Powers[i];
+    coefficient rightrank = 0;
+    for(int i=0; i<right.Powers.size; i++)
+      rightrank += right.Powers[i];
+    if(leftrank < rightrank)
+      return true;
+    if(rightrank < leftrank)
+      return false;
+    // this provably does not crash for coefficient = int
+    for(int i=0; i<this->generatorsIndices.size; i++)
+    { if(this->generatorsIndices[i] < right.generatorsIndices[i])
+        return false;
+      if(right.generatorsIndices[i] < this->generatorsIndices[i])
+        return true;
+      if(this->Powers[i] < right.Powers[i])
+        return false;
+      if(right.Powers[i] < this->Powers[i])
+        return true;
+    }
+    return false;
+  }
   inline void operator*=(const MonomialTensor<coefficient, inputHashFunction>& standsOnTheRight)
   { if (standsOnTheRight.generatorsIndices.size==0)
       return;

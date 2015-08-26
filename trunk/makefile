@@ -1,5 +1,6 @@
-CFLAGS=-Wall -Wno-address -pthread -openmp --std=c++11 -c
-LDFLAGS=--std=c++11 -pthread
+FEATUREFLAGS=--std=c++11 -pthread -fopenmp
+CFLAGS=-Wall -Wno-address $(FEATUREFLAGS) -c
+LDFLAGS=$(FEATUREFLAGS)
 
 ifeq ($(hsa), 1)
 	CXX=/home/user/gcc/bin/g++

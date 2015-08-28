@@ -948,6 +948,7 @@ public:
   }
   static void swap(List<Object>& l1, List<Object>& l2);
   void ReverseOrderElements();
+  void ReverseRange(int rangeBegin, int rangeEnd);
   bool IsEqualTo(const List<Object>& Other)const
   { if (this->size!=Other.size)
       return false;
@@ -2092,6 +2093,11 @@ void List<Object>::ReverseOrderElements()
 { int tempI= this->size/2;
   for (int i=0; i<tempI; i++)
     this->SwapTwoIndices(i, this->size-i-1);
+}
+
+template <class Object>
+void List<Object>::ReverseRange(int rangeBegin, int rangeEnd)
+{ std::reverse(this->TheObjects+rangeBegin, this->TheObjects+rangeEnd);
 }
 
 template <class Object>

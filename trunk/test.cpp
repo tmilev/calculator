@@ -207,6 +207,7 @@ public:
   void MakeFromTableau(const Tableau& in);
   // this type is hard to *=
   void MakeFromMul(const PermutationR2& left, const PermutationR2& right);
+  void Invert();
 
   template <typename Object>
   void ActOnList(List<Object>& in) const;
@@ -361,6 +362,10 @@ void Partition::SpechtModuleMatricesOfTranspositions(List<Matrix<scalar> >& out)
   MonomialTensor<int,MathRoutines::IntUnsignIdentity> tm1;
   tm1.generatorsIndices.SetSize(n);
   tm1.Powers.SetSize(n);
+  for(int i=0; i<n; i++)
+  { tm1.generatorsIndices[i] = i;
+    tm1.Powers[i] = 1;
+  }
   ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,scalar> t1, t2, t3;
   t1.AddMonomial(tm1,1);
   initialTableau.YoungSymmetrizerAction(t2,t1);
@@ -480,7 +485,7 @@ void Tableau::ColumnStabilizer(PermutationGroup& in) const
   for(int i=0; i<this->t[0].size; i++)
   { int j=1;
     while(true)
-    { if((j<this->t.size) && (this->t[j].size <= i))2
+    { if((j==this->t.size) || (this->t[j].size <= i))
         break;
       in.gens.SetSize(in.gens.size+1);
       in.gens[in.gens.size-1].BuildTransposition(this->t[0][i],this->t[j][i]);
@@ -589,6 +594,14 @@ void PermutationR2::MakeFromMul(const PermutationR2& left, const PermutationR2& 
       this->cycles[this->cycles.size-1].AddOnTop(cur);
       unused[cur] = false;
     }
+  }
+}
+
+void PermutationR2::Invert()
+{ for(int i=0; i<this->cycles.size; i++)
+  { if(this->cycles[i].size == 2)
+      continue;
+    this->cycles[i].ReverseRange(1,this->cycles.size);
   }
 }
 
@@ -847,7 +860,142 @@ void WeylGroup::ComputeIrreducibleRepresentationsUsingSpechtModules(GlobalVariab
 }
 
 
+class ElementHyperoctahedralGroup
+{ public:
+  PermutationR2 p;
+  List<bool> s;
 
+  void MakeFromPermutation(const PermutationR2& in);
+  void MakeFromBits(const List<bool>& in);
+  void MakeFromMul(const ElementHyperoctahedralGroup& left, const ElementHyperoctahedralGroup& right);
+
+  ElementHyperoctahedralGroup operator*(const ElementHyperoctahedralGroup& right) const;
+
+  static void Conjugate(const ElementHyperoctahedralGroup& element, const ElementHyperoctahedralGroup& conjugateBy, ElementHyperoctahedralGroup& out);
+
+  bool operator==(const ElementHyperoctahedralGroup& right) const;
+  unsigned int HashFunction() const;
+  static inline unsigned int HashFunction(const ElementHyperoctahedralGroup& in)
+                                      { return in.HashFunction();};
+
+  template <typename somestream>
+  somestream& IntoStream(somestream& out) const;
+
+  std::string ToString() const;
+};
+
+void ElementHyperoctahedralGroup::MakeFromPermutation(const PermutationR2& in)
+{ this->p = in;
+}
+
+void ElementHyperoctahedralGroup::MakeFromBits(const List<bool>& in)
+{ this->s = in;
+}
+
+void ElementHyperoctahedralGroup::MakeFromMul(const ElementHyperoctahedralGroup& left, const ElementHyperoctahedralGroup& right)
+{ this->s = right.s;
+  left.p.ActOnList(this->s);
+  for(int i=0; i<this->s.size; i++)
+    this->s[i] ^= this->s[i];
+  this->p.MakeFromMul(left.p,right.p);
+}
+
+ElementHyperoctahedralGroup ElementHyperoctahedralGroup::operator*(const ElementHyperoctahedralGroup& right) const
+{ ElementHyperoctahedralGroup out;
+  out.MakeFromMul(*this, right);
+  return out;
+}
+
+void ElementHyperoctahedralGroup::Invert()
+{ this->p.Invert();
+}
+
+static void ElementHyperoctahedralGroup::Conjugate(const ElementHyperoctahedralGroup& element, const ElementHyperoctahedralGroup& conjugateBy, ElementHyperoctahedralGroup& out);
+{ ElementHyperoctahedralGroup conjugateInverse = conjugateBy;
+  conjugateInverse.Invert();
+  ElementHyperoctahedralGroup tmp;
+  tmp.MakeFromMul(element,conjugateBy);
+  out.MakeFromMul(conjugateInverse,tmp);
+}
+
+bool ElementHyperoctahedralGroup::operator==(const ElementHyperoctahedralGroup& right) const
+{ return (this->p == right.p) && (this->s == right.s);
+}
+
+unsigned int ElementHyperoctahedralGroup::HashFunction() const
+{ int acc = this->p.HashFunction();
+  // idk how to make bools their own like hash function or whatever lol
+  // I mean why not just have a parametric collection of global HashFunction
+  // that does normal stuff to normal types and calls .HashFunction() on
+  // class types or whatever
+  for(int i=0; (i<this->s.size)&&(i<SomeRandomPrimesSize); i++)
+    acc += this->s[i] ? SomeRandomPrimes[i] : 0;
+  return acc;
+}
+
+template <typename somestream>
+somestream& ElementHyperoctahedralGroup::IntoStream(somestream& out) const
+{ out << '[' << this->p << ',';
+  for(int i=0; i<this->s.size; i++)
+    if(this->s[i])
+      out << '1';
+    else
+      out << '0';
+  out << ']';
+  return out;
+}
+
+std::string ElementHyperoctahedralGroup::ToString() const
+{ std::stringstream out;
+  this->IntoStream(out);
+  return out.str();
+}
+
+std::ostream& operator<<(std::ostream& out, const ElementHyperoctahedralGroup& data)
+{ return data.IntoStream(out);
+}
+
+
+class HyperoctahedralGroup: FiniteGroup<ElementHyperoctahedralGroup>
+{ public:
+  void MakeHyperoctahedralGroup(int in);
+
+  template <typename somestream>
+  somestream& IntoStream(somestream& out) const;
+
+  std::string ToString() const;
+};
+
+void HyperoctahedralGroup::MakeHyperoctahedralGroup(int n)
+{ this->generators.SetSize(n-1+n);
+  for(int i=0; i<n-1; i++)
+    this->generators[i].p.AddTransposition(0,i+1);
+  for(int i=0; i<n; i++)
+  { this->generators[i+n-1].s.SetSize(n);
+    for(int j=0; j<n; j++)
+    { this->generators[i+n-1].s[j] = false;
+    }
+    this->generators[i+n-1].s[i] = true;
+  }
+}
+
+template <typename somestream>
+somestream& HyperoctahedralGroup::IntoStream(somestream& out) const
+{ out << "Hyperoctahedral Group of rank " << this->generators[0].s.size;
+  out << " thus having " << this->theElements.size << " elements";
+
+  return out;
+}
+
+std::string HyperoctahedralGroup::ToString() const
+{ std::stringstream out;
+  this->IntoStream(out);
+  return out.str();
+}
+
+std::ostream& operator<<(std::ostream& out, const HyperoctahedralGroup& data)
+{ return data.IntoStream(out);
+}
 
 //List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkDivisorsOf=0);
 
@@ -3599,6 +3747,15 @@ int main(void)
   t3 = t1;
   t3 *= t2;
   stOutput << t3 << '\n';
+
+  HyperoctahedralGroup B4;
+  B4.MakeHyperoctahedralGroup(4);
+  B4.ComputeCCRepresentatives(NULL);
+  stOutput << B4 << '\n';
+//  for(int i=0; i<B4.conjugacyClasseS.size; i++)
+//  { stOutput << B4.conjugacyClasseS[i].representative << ", ";
+//  }
+//  stOutput << "\n";
 
   WeylGroup W;
   W.MakeArbitrarySimple('A', 4);

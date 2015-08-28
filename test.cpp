@@ -149,6 +149,7 @@ class Tableau;
 class PermutationR2;
 class PermutationGroup;
 
+// Partitions are ordered from largest to smallest
 class Partition
 { public:
   int n;
@@ -168,6 +169,7 @@ class Partition
   std::string ToString() const;
 };
 
+// Tableau methods assume the partition ordering from largest to smallest
 class Tableau
 { public:
   List<List<int> > t;
@@ -183,6 +185,10 @@ class Tableau
   std::string ToString() const;
 };
 
+
+// Permutations are expected to be represented as a list of cycles
+// with the smallest numbers coming first.  each cycle is expected
+// to be at least a transposition
 class PermutationR2
 {
 public:
@@ -222,6 +228,8 @@ public:
   std::string ToString() const;
 };
 
+// this is here until I figure out how to use FiniteGroup
+// that, and I guess it might be useful for some Tableau stuff
 class PermutationGroup
 { public:
   List<PermutationR2> gens;
@@ -859,7 +867,13 @@ void WeylGroup::ComputeIrreducibleRepresentationsUsingSpechtModules(GlobalVariab
   }
 }
 
-
+// a hyperoctahedral group is a semidirect product of a symmetric group and
+// a group of bits.  is there a better name for the group of bits than s?
+// the goal of this class is to find conjugacy class representatives
+// i don't actually know what they are lol
+// and then induce representations from the symmetric group
+// matrices will need to be temporarily expanded in size by 2**n unless there's
+// a better way idk
 class ElementHyperoctahedralGroup
 { public:
   PermutationR2 p;
@@ -910,7 +924,7 @@ void ElementHyperoctahedralGroup::Invert()
 { this->p.Invert();
 }
 
-static void ElementHyperoctahedralGroup::Conjugate(const ElementHyperoctahedralGroup& element, const ElementHyperoctahedralGroup& conjugateBy, ElementHyperoctahedralGroup& out);
+static void ElementHyperoctahedralGroup::Conjugate(const ElementHyperoctahedralGroup& element, const ElementHyperoctahedralGroup& conjugateBy, ElementHyperoctahedralGroup& out)
 { ElementHyperoctahedralGroup conjugateInverse = conjugateBy;
   conjugateInverse.Invert();
   ElementHyperoctahedralGroup tmp;

@@ -354,8 +354,8 @@ class PermutationGroup: public SimpleFiniteGroup<PermutationR2>
 };
 
 template <>
-template <>
-bool FiniteGroup<ElementHyperoctahedralGroup>::AreConjugate(const ElementHyperoctahedralGroup& x, const ElementHyperoctahedralGroup& y) const
+bool FiniteGroup<ElementHyperoctahedralGroup>::AreConjugate
+(const ElementHyperoctahedralGroup& x, const ElementHyperoctahedralGroup& y)
 {return ElementHyperoctahedralGroup::AreConjugate(x,y);}
 
 

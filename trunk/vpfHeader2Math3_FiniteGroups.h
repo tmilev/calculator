@@ -78,6 +78,32 @@ public:
   }
 };
 
+// To make a FiniteGroup, define an element class with the following methods
+// elementSomeGroup operator*(const elementSomeGroup& right) const;
+// static void Conjugate(const elementSomeGroup& middle,
+//                       const elementSomeGroup& conjugateBy,
+//                       elementSomeGroup& out);
+// bool HasDifferentConjugacyInvariantsFrom(const elementSomeGroup& other) const;
+// //the purpose of this is to test if it is possible for two elements to be conjugate
+// //return true if there is an easy way to tell if they are not conjugate
+// //return false otherwise
+// void GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& out) const;
+// bool operator==(const elementSomeGroup& right) const;
+// bool operator>(const elementSomeGroup& right) const;
+// //group elements are not in general comparable, but do something consistent
+// //and reasonable for collating and printing purposes
+// //is there any reason > is used here and < is used elsewhere?  is < strictly
+// //mathematical and > for non-mathematical orderings?
+// unsigned int HashFunction() const;
+//
+// In addition we require an overload:
+// template <>
+// bool FiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& x, const elementSomeGroup& y) const
+// In general we need to know what the group is to tell if two elements are conjugate.
+// However, this does not actually permit access to anything but the contents of
+// FiniteGroup and elementSomeGroup
+//
+//
 //assumptions on the FiniteGroup:
 //1. The finite group has a small number of conjugacy classes. Z/10000000Z is not OK
 template <typename elementSomeGroup>

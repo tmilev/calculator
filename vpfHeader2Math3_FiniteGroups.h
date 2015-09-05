@@ -98,7 +98,7 @@ public:
 //
 // In addition we require an overload:
 // template <>
-// bool FiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& x, const elementSomeGroup& y) const
+// bool FiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& x, const elementSomeGroup& y)
 // In general we need to know what the group is to tell if two elements are conjugate.
 // However, this does not actually permit access to anything but the contents of
 // FiniteGroup and elementSomeGroup

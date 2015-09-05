@@ -499,7 +499,7 @@ void Calculator::initPredefinedInnerFunctions()
    "Crawls a latex file collecting all local style files and all \\input commands to produce a single latex file. \
    The function was originally designed for the purposes of the freecalc project as not been tested on any other projects,\
    please use only for freecalc.",
-   "Crawl(\"/home/todor/math/freecalc/homework/UMB-All-Problems-By-Course/.tex\")", true, false
+   "Crawl(\"/home/todor/math/freecalc/homework/UMB-All-Problems-By-Course/Calc-I-MasterProblemSheet.tex\")", true, false
    , "CalculatorFunctionsGeneral::innerCrawlTexFile")
    ;
   this->AddOperationInnerHandler

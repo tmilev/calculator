@@ -631,6 +631,8 @@ public:
   std::string ToString(FormatExpressions* theFormat=0)const;
   std::string ToStringLatex(FormatExpressions* theFormat=0)const;
   std::string ToStringSystemLatex(Matrix<coefficient>* constTerms=0, FormatExpressions* theFormat=0)const;
+  std::string ToStringPlainText(bool jsonFormat=false)const;
+  std::string ToStringOneLine(bool jsonFormat=false)const;
   std::string ElementToStringWithBlocks(List<int>& theBlocks);
   void MakeIdMatrix(int theDimension, const coefficient& theRingUnit=1, const coefficient& theRingZero=0)
   { this->init(theDimension, theDimension);
@@ -4879,11 +4881,34 @@ std::string MonomialTensor<coefficient, inputHashFunction>::ToString(FormatExpre
 { if (this->generatorsIndices.size==0)
     return "1";
   std::string theLetter= theFormat==0 ?  "g" : theFormat->chevalleyGgeneratorLetter;
+  std::string letters = "abcdefghijklmnopqrstuvwxyz";
+  std::string exponents[10] = {"⁰","¹","²","³","⁴","⁵","⁶","⁷","⁸","⁹"};
   std::stringstream out;
   for (int i=0; i< this->generatorsIndices.size; i++)
-  { out << theLetter << "_{" << this->generatorsIndices[i] << "}";
+  { if(generatorsIndices[i] < letters.size())
+      out << letters[this->generatorsIndices[i]];
+    else
+      out << theLetter << "_{" << this->generatorsIndices[i] << "}";
     if (!(this->Powers[i]==1))
-      out << "^{" << this->Powers[i] << "}";
+    { if(this->Powers[i] == 2)
+        out << exponents[2];
+      else if(this->Powers[i] == 3)
+        out << exponents[3];
+      else if(this->Powers[i] == 4)
+        out << exponents[4];
+      else if(this->Powers[i] == 5)
+        out << exponents[5];
+      else if(this->Powers[i] == 6)
+        out << exponents[6];
+      else if(this->Powers[i] == 7)
+        out << exponents[7];
+      else if(this->Powers[i] == 8)
+        out << exponents[8];
+      else if(this->Powers[i] == 9)
+        out << exponents[9];
+      else
+        out << "^{" << this->Powers[i] << "}";
+    }
   }
   return out.str();
 }
@@ -5007,6 +5032,82 @@ std::string Matrix<coefficient>::ToString(FormatExpressions* theFormat)const
     out << "\\end{array}\\right)";
   return out.str();
 }
+
+template <typename coefficient>
+std::string Matrix<coefficient>::ToStringOneLine(bool jsonFormat)const
+{ std::stringstream out;
+  out << "[";
+  for(int i=0; i<this->NumRows; i++)
+  { if(jsonFormat)
+      out << "[";
+    for(int j=0; j<this->NumCols; j++)
+    { out << this->elements[i][j];
+      if(j != this->NumCols-1)
+        out << ", ";
+    }
+    if(jsonFormat)
+      out << "]";
+    if(i != this->NumRows-1)
+    { if(jsonFormat)
+        out << ", ";
+      else
+        out << "; ";
+    }
+  }
+  out << "]";
+  return out.str();
+}
+
+template <typename coefficient>
+std::string Matrix<coefficient>::ToStringPlainText(bool jsonFormat)const
+{ // I'm pretty sure C++ supports having a block of memory with
+  // multiple indices into it.  oh well.
+  List<List<std::string> > element_strings;
+  element_strings.SetSize(this->NumRows);
+  int cols_per_elt=0;
+  for(int i=0; i<this->NumRows; i++)
+  { element_strings[i].SetSize(this->NumCols);
+    for(int j=0; j<this->NumCols; j++)
+    { std::stringstream ss;
+      ss << this->elements[i][j];
+      element_strings[i][j] = ss.str();
+      int sl = element_strings[i][j].length();
+      if(sl > cols_per_elt)
+        cols_per_elt = sl;
+    }
+  }
+  std::stringstream out;
+  for(int i=0; i<this->NumRows; i++)
+  { if(jsonFormat)
+    { if(i==0)
+        out << '[';
+      else
+        out << ' ';
+    }
+    out << '[';
+    for(int j=0; j<this->NumCols; j++)
+    { int sl = element_strings[i][j].length();
+      int pad = cols_per_elt - sl;
+      for(int pi=0; pi<pad; pi++)
+        out << ' ';
+      out << element_strings[i][j];
+      if(j != this->NumCols-1)
+      { if(jsonFormat)
+          out << ',';
+        out << ' ';
+      }
+    }
+    out << ']';
+    if(i!=this->NumRows-1)
+      out << '\n';
+    else
+      if(jsonFormat)
+        out << ']';
+  }
+  return out.str();
+}
+
+
 
 template <class templateMonomial, class coefficient>
 std::string MonomialCollection<templateMonomial, coefficient>::GetBlendCoeffAndMon

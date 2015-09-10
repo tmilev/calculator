@@ -419,7 +419,7 @@ void WeylGroup::AddIrreducibleRepresentation(const WeylGroupRepresentation<Ratio
 }
 
 void WeylGroup::AddCharacter(const ClassFunction<WeylGroup::WeylGroupBase, Rational>& X)
-{ int i = this->characterTable.BSExpectedIndex(X);
+{ /*int i = this->characterTable.BSExpectedIndex(X);
   if(i==this->characterTable.size){
     this->characterTable.AddOnTop(X);
     return;
@@ -427,7 +427,8 @@ void WeylGroup::AddCharacter(const ClassFunction<WeylGroup::WeylGroupBase, Ratio
   if(this->characterTable[i] != X)
   { this->characterTable.InsertAtIndexShiftElementsUp(X,i);
     return;
-  }
+  }*/
+  this->characterTable.BSInsertDontDup(X);
 }
 
 void WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion(GlobalVariables* theGlobalVariables)

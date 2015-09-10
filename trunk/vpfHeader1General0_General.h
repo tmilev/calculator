@@ -743,13 +743,17 @@ public:
   inline void AddObjectOnTopCreateNew();
   void Reserve(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void SortedInsert(const Object& o)
-  { this->InsertAtIndexShiftElementsUp(o,this->BSExpectedIndex(o));
+  { this->BSInsert(o); //fixed :) now all this function does is throw away the return value
   }
   void InsertAtIndexShiftElementsUp(const Object& o, int desiredIndex)
-  { this->AddOnTop(o);
-    for(int i=this->size-1; i>desiredIndex; i--)
-    { this->SwapTwoIndices(i,i-1);
-    }
+  { int num_to_move = this->size - desiredIndex;
+    this->SetSize(this->size+1);
+    // is this not a nice thing to do to c++ objects?  or, not a nice thing
+    // to do to milev objects?  what if the assignment operator as a side effect
+    // informed some other object of the object's address, then moving an object
+    // without using assignment operator would cause trouble
+    memmove(this->TheObjects+desiredIndex+1, this->TheObjects+desiredIndex, num_to_move);
+    this->TheObjects[desiredIndex] = o;
   }
   void AddOnTop(const Object& o);
   void AddListOnTop(const List<Object>& theList);
@@ -859,51 +863,126 @@ public:
         return false;
     return true;
   }
-  // Perform a binary search, assuming the list is sorted
+
+  // The BS family of operations assume that the list is sorted in ascending order
+  // and that each object has a comparison operator, since there should be one, it
+  // should be <=.  This project appears to use its logical complement > everywhere
+  // The objective is fast, stable insertion sorting of partially ordered data.
+  // The data that has x <= y and y <= x is called a bin.  The methods
+  // BSIndexFirstGreaterThan and BSIndexFirstNotLessThan find the edges of the bin.
+  // The insertion methods return the index at which the object was inserted, or -1
+  // BSInsert inserts the element at the end of the bin.
+  // BSInsertDontDup searches the bin for the element before inserting.
+  // BSInsertNextTo searches the bin for an equal element and inserts the new element
+  //   next to the existing element
+  // BSGetIndex searches the bin for the element and returns its index
+  // BSContains searches the bin for the element and returns whether it was found.
+  int BSIndexFirstNotLessThan(const Object& o) const
+  { if(this->size == 0)
+      return 0;
+    int start = 0;
+    int end = this->size;
+    while(true)
+    { int halflength = (end-start)/2;
+      if(halflength == 0)
+      { if(o > this->TheObjects[start])
+          return end;
+        else
+          return start;
+      }
+      int n = start + halflength;
+      if(o > this->TheObjects[n])
+        start = n+1;
+      else
+        end = n;
+    }
+  }
+
+  int BSIndexFirstGreaterThan(const Object& o) const
+  { if(this->size == 0)
+      return 0;
+    int start = 0;
+    int end = this->size;
+    while(true)
+    { int halflength = (end-start)/2;
+      if(halflength == 0)
+      { if(!(this->TheObjects[start] > o))
+          return end;
+        else
+          return start;
+      }
+      int n = start + halflength;
+      if(!(this->TheObjects[n] > o))
+        start = n+1;
+      else
+        end = n;
+    }
+  }
+
+  // BSGetIndex
+  int BSGetIndex(const Object& o) const
+  { int n = this->BSIndexFirstNotLessThan(o);
+    if(n != this->size)
+      if(this->TheObjects[n]==o)
+        return n;
+    for(int i=n-1; i>-1; i--)
+    { if(this->TheObjects[i]==o)
+        return i;
+      if(o > this->TheObjects[i])
+        return -1;
+    }
+    return -1;
+  }
+
   bool BSContains(const Object& o) const
   { return this->BSGetIndex(o)!=-1;
   }
-  int BSGetIndex(const Object& o) const
-  { int n = this->BSExpectedIndex(o);
-    if(n == this->size)
-      return -1;
-    return (this->TheObjects[n]==o) ? n : -1;
-  }
-  // return the last index n of which we can say o <= l[n], or l.size
-  // i.e. not the first index at which o <= l[n], as if we were implementing l.GetIndex(o)
-  // the reason we want the last index is to support insertion sorting
-  int BSExpectedIndex(const Object& o) const
-  { if(this->size == 0)
-      return 0;
-    int i = 0, j = this->size-1;
-    while(true)
-    { int s=(j-i)/2;
-      int n = j-s;
-      if(s == 0)
-      { if(this->TheObjects[n]<o)
-          return n+1;
-        return n;
-      }
-      if(o<this->TheObjects[n])
-      { j = n-1;
-        continue;
-      }
-      i = n;
-    }
-  }
   // indexing is O(n log n) and insertion is O(n), whereas hash table insertion and indexing
   // are both O(1)
-  bool BSInsertDontDup(const Object& o){
-    int n = BSExpectedIndex(o);
+  int BSInsert(const Object& o)
+  { int n = BSIndexFirstGreaterThan(o);
     if(n==this->size)
-    { this->AddOnTop(o);
-      return false;
-    }
-    if(this->TheObjects[n] == o)
-      return true;
-    this->InsertAtIndexShiftElementsUp(o,n);
-    return false;
+      this->AddOnTop(o);
+    else
+      this->InsertAtIndexShiftElementsUp(o,n);
+    return n;
   }
+
+  int BSInsertDontDup(const Object& o)
+  { int n = BSIndexFirstNotLessThan(o);
+    for(int i=n; i<this->size; i++)
+    { if(this->TheObjects[i] == o)
+        return -1;
+      if(this->TheObjects[i] > o)
+        this->InsertAtIndexShiftElementsUp(o,i);
+        return i;
+    }
+    this->AddOnTop(o);
+    return this->size-1;
+  }
+
+  int BSInsertNextToExisting(const Object& o)
+  { int n = BSIndexFirstNotLessThan(o);
+    int existing_index = -1;
+    int bin_end_index = -1;
+    for(int i=n; i<this->size; i++)
+    { if(this->TheObjects[i] == o)
+        existing_index = i;
+      if(this->TheObjects[i] > o)
+        bin_end_index = i;
+        break;
+    }
+    int outdex;
+    if(existing_index != -1)
+      outdex = existing_index+1;
+    else if(bin_end_index != -1)
+      outdex = bin_end_index;
+    else
+      outdex = this->size;
+    this->InsertAtIndexShiftElementsUp(o,outdex);
+    return outdex;
+  }
+
   void Rotate(int r)
   { std::rotate(this->TheObjects, this->TheObjects+r, this->TheObjects+(this->size-1));
   }
@@ -1770,11 +1849,12 @@ void List<Object>::CycleIndices(const List<int>& cycle)
   for(int i=0; i<cycle.size; i++)
     if((cycle[i] >= this->size) || (cycle[i] < 0))
       crash << "Programming error: request to cycle indices " << cycle << " in list of " << this->size << " elements." << crash;
-  Object head;
-  head = this->TheObjects[cycle[0]];
-  for(int i=1; i<cycle.size; i++)
-    this->TheObjects[cycle[i-1]] = this->TheObjects[cycle[i]];
-  this->TheObjects[cycle[cycle.size-1]] = head;
+  // ironically, it's easier to program the cycles to go backwards XD
+  Object tail;
+  tail = this->TheObjects[cycle[cycle.size-1]];
+  for(int i=cycle.size-1; i!=0; i--)
+    this->TheObjects[cycle[i]] = this->TheObjects[cycle[i-1]];
+  this->TheObjects[cycle[0]] = tail;
 }
 
 template<class Object>
@@ -1964,7 +2044,7 @@ template <class Object>
 std::string List<Object>::ToStringCommaDelimited()const
 { std::stringstream out;
   for (int i=0; i<this->size; i++)
-  { out << this->TheObjects[i].ToString();
+  { out << this->TheObjects[i]; // was this calling ToString() for a reason other than not having decided to implement operator<< on all objects?
     if (i!=this->size-1)
       out << ", ";
   }

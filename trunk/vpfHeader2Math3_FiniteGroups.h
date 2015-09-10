@@ -76,6 +76,11 @@ public:
       return false;
     return true;
   }
+  bool operator<=(const ClassFunction& right) const
+  { if (*this > right)
+      return false;
+    return true;
+  }
 };
 
 // To make a FiniteGroup, define an element class with the following methods
@@ -106,6 +111,34 @@ public:
 //
 //assumptions on the FiniteGroup:
 //1. The finite group has a small number of conjugacy classes. Z/10000000Z is not OK
+
+// ok new FiniteGroup design
+// * z.MakeFromMul(x,y)
+// * z.MakeFromInverse(x)
+// * z.MakeFromConjugating(x,y)
+// * z.GetCharacteristicPolyStandardRepresentation(p)
+// * x == y
+// * x > y (for sorting)
+// * x.HashFunction()
+// * Elements can print themselves
+// The following methods are desirable and need to work with the cxx
+// object model.  They need to somehow take the subclassed G, and
+// the elemnts x and y.
+// * PossiblyConjugate
+// * AreConjugate
+//
+//
+// An uninitialized element is expected to be the identity element to the full
+// extent allowed by law.  Two uninitialized elements can be expected to multiply,
+// an an uninitialized element can multiply by an initialized element and where
+// needed thereby discover what group it belongs to.  Equality and sorting operators
+// and the HashFunction need to be aware that there is more than one representation
+// of the identity.  The identity must hash to 0 and sort first.
+//
+// Elements generally know of a faithful representation, which may by reducible,
+// especially over a group that isn't their entire group they want to belong to.
+// That is the representation they give the characteristic polynomial for.
+
 template <typename elementSomeGroup>
 class FiniteGroup
 {

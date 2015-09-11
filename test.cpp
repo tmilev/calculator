@@ -271,6 +271,8 @@ class Partition
   void GetAllStandardTableaux(List<Tableau>& out) const;
   template <typename scalar>
   void SpechtModuleMatricesOfTranspositions(List<Matrix<scalar> >& out) const;
+  // int might not be wide enough
+  int Fulton61z() const;
   bool operator==(const Partition& right) const;
   bool operator!=(const Partition& right) const;
   bool operator<(const Partition& right) const;
@@ -291,6 +293,7 @@ class Tableau
   void ColumnStabilizer(PermutationGroup& in) const;
   template <typename coefficient>
   void YoungSymmetrizerAction(ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient>&out, const ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient>& in);
+  List<int> TurnIntoList() const;
 
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
@@ -311,7 +314,7 @@ public:
   // but it seems to be typical of this project
   void MakeCanonical();
   unsigned int HashFunction() const;
-  static inline unsigned int HashFunction(const PermutationR2& in)
+  static  unsigned int HashFunction(const PermutationR2& in)
                                       { return in.HashFunction();};
   bool operator==(const PermutationR2& right) const;
   int BiggestOccurringNumber() const;
@@ -324,12 +327,14 @@ public:
   // properly.
   void AddTransposition(int i, int j);
   void AddCycle(const List<int>& cycle);
+  // A jumbled up list of integers 0-n
+  void MakeFromActionDescription(const List<int>& actionDescription);
   // Cycle structure as a histogram of cycle lengths
   void GetCycleStructure(List<int>& out) const;
   // Cycle structure as the related partition
   void GetCycleStructure(Partition& out, int n_in_Sn = -1) const;
   // Row by row
-  void MakeFromTableau(const Tableau& in);
+  void MakeFromTableauRows(const Tableau& in);
   // this type is hard to *=
   // we are returing the smallest n such that this is an element of Sn
   int MakeFromMul(const PermutationR2& left, const PermutationR2& right);
@@ -395,7 +400,7 @@ class ElementHyperoctahedralGroup
   bool operator==(const ElementHyperoctahedralGroup& right) const;
   bool operator>(const ElementHyperoctahedralGroup& right) const;
   unsigned int HashFunction() const;
-  static inline unsigned int HashFunction(const ElementHyperoctahedralGroup& in)
+  static  unsigned int HashFunction(const ElementHyperoctahedralGroup& in)
                                       { return in.HashFunction();};
 
   template <typename somestream>
@@ -500,6 +505,30 @@ class HyperoctahedralGroup: public SimpleFiniteGroup<ElementHyperoctahedralGroup
   std::string ToString() const;
 };
 
+// conjugacy classes of type P are of size |Sn|/P.Fulton61z()
+int Partition::Fulton61z() const
+{ int acc = 1;
+  List<int> nums;
+  List<int> counts;
+  for(int i=0; i<this->p.size; i++)
+  { int numdex = nums.GetIndex(this->p[i]);
+    if(numdex == -1)
+    { nums.AddOnTop(this->p[i]);
+      counts.AddOnTop(1);
+    } else
+    { counts[numdex] += 1;
+    }
+  }
+  for(int i=0; i<nums.size; i++)
+  { int acci = 1;
+    for(int j=0; j<counts[i]; j++)
+      acci *= nums[i];
+    for(int j=1; j<counts[i]; j++)
+      acci *= j;
+    acc *= acci;
+  }
+  return acc;
+}
 
 int& Partition::operator[](int i) const
 { return p[i];
@@ -634,11 +663,16 @@ void Partition::SpechtModuleMatricesOfTranspositions(List<Matrix<scalar> >& out)
   basisvs.SetSize(standardTableaux.size);
   for(int i=0; i<standardTableaux.size; i++)
   { PermutationR2 p;
-    p.MakeFromTableau(standardTableaux[i]);
+    p.MakeFromActionDescription(standardTableaux[i].TurnIntoList());
     p.ActOnTensor(basisvs[i],t2);
     stOutput << "Tableau " << standardTableaux[i] << " is assigned permutation " << p;
     stOutput << " permuting Young symmetrized tensor to " << basisvs[i] << '\n';
   }
+//  for(int i=0; i<standardTableaux.size; i++)
+//  { standardTableaux[i].YoungSymmetrizerAction(basisvs[i],t1);
+//    stOutput << "Young symmetrizer of tableau " << standardTableaux[i];
+//    stOutput << " turns " << t1 << " into " << basisvs[i] << "\n";
+//  }
   basis.SetBasis(basisvs);
   stOutput << "Basis generated: " << basis << '\n';
   PermutationGroup sn;
@@ -741,6 +775,14 @@ std::ostream& operator<<(std::ostream& out, const Partition& data)
 }
 
 // Tableau implementation
+
+List<int> Tableau::TurnIntoList() const
+{ List<int> out;
+  for(int i=0; i<this->t.size; i++)
+    for(int j=0; j<this->t[i].size; j++)
+      out.AddOnTop(this->t[i][j]);
+  return out;
+}
 
 bool Tableau::IsStandard() const
 {// stOutput << "Debugging Tableau::IsStandard: ";
@@ -1004,6 +1046,38 @@ void PermutationR2::AddTransposition(int i, int j)
   this->MakeCanonical();
 }
 
+// same code as operator* lolol
+void PermutationR2::MakeFromActionDescription(const List<int>& actionDescription)
+{ int bon = actionDescription.size-1;
+  List<bool> unused;
+  unused.SetSize(bon+1);
+  for(int i=0; i<bon; i++)
+    unused[i] = true;
+  bool incycle = false;
+  this->cycles.SetSize(0);
+  for(int head=0; head<bon; head++)
+  { if(!unused[head])
+      continue;
+    unused[head] = false;
+    int cur = head;
+    while(true)
+    { cur = actionDescription[cur];
+      if(cur == head)
+      { incycle = false;
+        break;
+      }
+      if(!incycle)
+      { this->cycles.SetSize(this->cycles.size+1);
+        this->cycles[this->cycles.size-1].SetSize(0);
+        this->cycles[this->cycles.size-1].AddOnTop(head);
+        incycle = true;
+      }
+      this->cycles[this->cycles.size-1].AddOnTop(cur);
+      unused[cur] = false;
+    }
+  }
+}
+
 void PermutationR2::GetCycleStructure(List<int>& out) const
 { int N = 0;
   for(int i=0; i<this->cycles.size; i++)
@@ -1027,7 +1101,7 @@ void PermutationR2::GetCycleStructure(Partition& out, int n_in_Sn) const
   out.p.QuickSortDescending();
 }
 
-void PermutationR2::MakeFromTableau(const Tableau& in)
+void PermutationR2::MakeFromTableauRows(const Tableau& in)
 { this->cycles.SetSize(in.t.size);
   for(int i=0; i<in.t.size; i++)
     this->cycles[i] = in.t[i];
@@ -4385,14 +4459,19 @@ int main(void)
   stOutput << pg << '\n';
   stOutput << pg.theElements << '\n';
 
-  Partition::GetPartitions(partitions, 4);
+  for(int sni = 2; sni<6; sni++)
+  {
+  Partition::GetPartitions(partitions, sni);
   for(int i=0; i<partitions.size; i++)
   { stOutput << partitions[i] << '\n';
     List<Matrix<Rational> > repgens;
     partitions[i].SpechtModuleMatricesOfTranspositions(repgens);
     for(int ri=0; ri<repgens.size; ri++)
-      stOutput << repgens[ri].ToStringPlainText() << "\n\n";
+    { stOutput << repgens[ri].ToStringPlainText();
+      stOutput << " determinant is " << repgens[ri].GetDeterminant() << "\n\n";
+    }
     stOutput << "\n\n";
+  }
   }
   PermutationGroup S4;
   S4.MakeSymmetricGroup(4);

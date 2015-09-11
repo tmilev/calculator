@@ -6,6 +6,7 @@
 #include "vpfMacros.h"
 #include "vpfHeader1General2Multitasking.h"
 #include <algorithm>
+#include <string.h>
 static ProjectInformationInstance vpfHeader1instance(__FILE__, "Header, general routines. ");
 
 //static bool cantfuckingbelievethisfuckingpieceofshitiscrashing=false;
@@ -746,14 +747,20 @@ public:
   { this->BSInsert(o); //fixed :) now all this function does is throw away the return value
   }
   void InsertAtIndexShiftElementsUp(const Object& o, int desiredIndex)
-  { int num_to_move = this->size - desiredIndex;
-    this->SetSize(this->size+1);
-    // is this not a nice thing to do to c++ objects?  or, not a nice thing
+  { // is this not a nice thing to do to c++ objects?  or, not a nice thing
     // to do to milev objects?  what if the assignment operator as a side effect
     // informed some other object of the object's address, then moving an object
     // without using assignment operator would cause trouble
-    memmove(this->TheObjects+desiredIndex+1, this->TheObjects+desiredIndex, num_to_move);
-    this->TheObjects[desiredIndex] = o;
+    // this->SetSize(this->size+1);
+    // memmove(this->TheObjects+desiredIndex+1, this->TheObjects+desiredIndex, num_to_move*sizeof(o));
+    // std::copy_backward(this->TheObjects+desiredIndex, this->TheObjects+this->size-1, this->TheObjects+this->size);
+    // std::move_backward(this->TheObjects+desiredIndex, this->TheObjects+this->size-1, this->TheObjects+this->size);
+    // this->TheObjects[desiredIndex] = o;
+    // ok whatever if this program was supposed to be fast it would be optimizable
+    this->AddOnTop(o);
+    for(int i=this->size-1; i>desiredIndex; i--)
+    { this->SwapTwoIndices(i,i-1);
+    }
   }
   void AddOnTop(const Object& o);
   void AddListOnTop(const List<Object>& theList);

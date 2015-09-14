@@ -293,9 +293,19 @@ void Calculator::initPredefinedInnerFunctions()
     )", true, false)
    ;
   this->AddOperationInnerHandler
-  ("MakeWeylGroupElement", CalculatorFunctionsWeylGroup::innerWeylGroupElement, "",
+  ("TestSpechtModules", CalculatorFunctionsWeylGroup::innerTestSpechtModules, "",
+   "Tests all Specht modules of S_n, where n is the only argument taken by the function.",
+   "TestSpechtModules(4); ", true, false)
+   ;
+  this->AddOperationInnerHandler
+  ("MakeElementWeylGroup", CalculatorFunctionsWeylGroup::innerWeylGroupElement, "",
    "Needs a group name and a list of generators",
-   "s_{{i}}=MakeWeylGroupElement{}(A_2, i);\n(s_1+s_2)(2s_1+s_2)(3s_1+s_2)", true, false)
+   "s_{{i}}=MakeElementWeylGroup{}(A_2, i);\n(s_1+s_2)(2s_1+s_2)(3s_1+s_2)", true, false)
+   ;
+  this->AddOperationInnerHandler
+  ("MakeElementWeylGroup", CalculatorFunctionsWeylGroup::innerWeylGroupElement, "",
+   "Needs a group name and a list of generators",
+   "s_{{i}}=MakeElementWeylGroup{}(A_2, i);\n(s_1+s_2)(2s_1+s_2)(3s_1+s_2)", true, false)
    ;
 
   this->AddOperationInnerHandler
@@ -494,6 +504,7 @@ void Calculator::initPredefinedInnerFunctions()
    "v_1=(1, 2, 3 ); v_2=(1, 3, 2); v_3=(3,1,1); v_4=(-2,2, 2);\
    \n ConesIntersection{}((v_1,v_2 ), (v_3,v_4 ));\nConesIntersection{}((v_1,v_2 ), (v_3,-v_4 ));", true, false)
    ;
+
   this->AddOperationInnerHandler
   ("Crawl", CalculatorFunctionsGeneral::innerCrawlTexFile, "",
    "Crawls a latex file collecting all local style files and all \\input commands to produce a single latex file. \
@@ -1747,7 +1758,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt, this->opWeylGroupElement(), this->opWeylGroupElement(),
    "Multiplies two coxeter elements if possible. ",
-   "x=MakeWeylGroupElement{}(A_2, 1); x*x", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt");
+   "x=MakeElementWeylGroup{}(A_2, 1); x*x", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg, this->opCharSSAlgMod(), this->opCharSSAlgMod(),
    "Multiplies two semisimple Lie algebra finite dimensinal characters and decomposes using the \
@@ -1996,7 +2007,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly, this->opWeylGroupElement(), this->opWeightLieAlgPoly(),
    "Element of weyl group action on a weight. ",
-   "s_{{a}}=MakeWeylGroupElement(B_3, a); \\varepsilon_{{a}}=MakeWeight{}(B_3, a, epsilon);   \
+   "s_{{a}}=MakeElementWeylGroup(B_3, a); \\varepsilon_{{a}}=MakeWeight{}(B_3, a, epsilon);   \
    \nx=Polynomial{}x; \\mu= x\\varepsilon_1; s_1s_2s_3s_2s_1 \\mu"
    , true, false, "CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly");
   this->AddOperationBinaryInnerHandlerWithTypes

@@ -1487,6 +1487,24 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight(Calculator& theComma
   return output.AssignValueWithContext(resultWeight, theContext, theCommands);
 }
 
+bool CalculatorFunctionsWeylGroup::innerTestSpechtModules(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerTestSpechtModules");
+  int theSymmetricGroupRank=0;
+  if (!input.IsSmallInteger(&theSymmetricGroupRank))
+    return theCommands << "innerTestSpechtModules called with input that is not a small integer, not performing any tests.";
+  if (theSymmetricGroupRank <1)
+    return theCommands << "innerTestSpechtModules takes as input a small positive integer, instead the input I got was "
+    << theSymmetricGroupRank << ". ";
+  if (theSymmetricGroupRank>6)
+    return theCommands
+    << "For speed/memory reasons, innerTestSpechtModules is currently restricted to take input no larger than 6. Your input was: "
+    << theSymmetricGroupRank;
+  std::stringstream out;
+  out << "User has requested the test of Specht modules of S_"
+  << theSymmetricGroupRank << ". The test has not been implemented yet. ";
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupElement");
   //if (!input.IsSequenceNElementS(2))

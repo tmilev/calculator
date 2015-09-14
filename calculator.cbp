@@ -40,6 +40,7 @@
 			<Option target="test" />
 		</Unit>
 		<Unit filename="vpf.h" />
+		<Unit filename="vpf2Math3_SymmetricGroupsAndGeneralizations.cpp" />
 		<Unit filename="vpf4CalculatorFunctionList.cpp" />
 		<Unit filename="vpf5.cpp" />
 		<Unit filename="vpf5_1CalculatorCode.cpp" />
@@ -88,6 +89,7 @@
 		<Unit filename="vpfHeader2Math1_SemisimpleLieAlgebras.h" />
 		<Unit filename="vpfHeader2Math2_AlgebraicNumbers.h" />
 		<Unit filename="vpfHeader2Math3_FiniteGroups.h" />
+		<Unit filename="vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h" />
 		<Unit filename="vpfHeader2Math4_Graph.h" />
 		<Unit filename="vpfHeader2Math5_SubsetsSelections.h" />
 		<Unit filename="vpfHeader2Math6_ModulesSSLieAlgebras.h" />

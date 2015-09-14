@@ -458,6 +458,11 @@ void PermutationR2::AddTransposition(int i, int j)
   this->MakeCanonical();
 }
 
+void PermutationR2::MakeFromListOfCycles(const List<List<int> >& inCycles)
+{ this->cycles = inCycles;
+  this->MakeCanonical();
+}
+
 // same code as operator* lolol
 void PermutationR2::MakeFromActionDescription(const List<int>& actionDescription)
 { int bon = actionDescription.size-1;

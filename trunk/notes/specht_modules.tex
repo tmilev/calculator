@@ -1,0 +1,21 @@
+
+(1) There exists a one to one correspondence between all permutations of (0..n-1) and all tableaux of size n, and, of course, to the lists of the integers (0..n-1).
+
+(2) Permutations act on tableaux by shuffling the boxes.  
+[[3 1], [2 5], 4] -- [(1,3,4)] -> [[2 1],[5 3], 4]
+
+Permutations act on weighted sums of tableaux componentwise.
+
+
+(3) The Young symmetrizer of the tableau T projects into the Specht module.  For the tableau [[1 2],[3 4], 5], it is
+\[
+\Sum_{CS=<S_{135},S_{24}} Sgn(\sigma)\sigma (\Sum_{RS=<S_{12},S_{34}} \tau v)
+\]
+
+(4) When we have a (?) vector v inside the Specht module, we act on it with each standard tableau.  This gives a basis for the Specht module.
+
+(5) To get a matrix corresponding to a particular permutation p, we build the matrix [p(b0).. p(bₙ₋₁)] 
+
+(6) Magically, these matrices look nice.
+
+(7) Then the Bₙ case follows somehow.

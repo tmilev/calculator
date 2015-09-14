@@ -270,7 +270,7 @@ class Partition
   void FillTableauOrdered(Tableau& out) const;
   void GetAllStandardTableaux(List<Tableau>& out) const;
   template <typename scalar>
-  void SpechtModuleMatricesOfTranspositions(List<Matrix<scalar> >& out) const;
+  void SpechtModuleMatricesOfTranspositions1j(List<Matrix<scalar> >& out) const;
   // int might not be wide enough
   int Fulton61z() const;
   bool operator==(const Partition& right) const;
@@ -636,8 +636,8 @@ void Partition::GetAllStandardTableaux(List<Tableau>& out) const
 }
 
 template <typename scalar>
-void Partition::SpechtModuleMatricesOfTranspositions(List<Matrix<scalar> >& out) const
-{ stOutput << "Debugging Partition::SpechtModuleMatricesOfTranspositions: " << *this << '\n';
+void Partition::SpechtModuleMatricesOfTranspositions1j(List<Matrix<scalar> >& out) const
+{ stOutput << "Debugging Partition::SpechtModuleMatricesOfTranspositions1j: " << *this << '\n';
   Tableau initialTableau;
   List<int> stuffing;
   stuffing.SetSize(this->n);
@@ -1396,7 +1396,7 @@ void WeylGroup::ComputeIrreducibleRepresentationsUsingSpechtModules(GlobalVariab
     #pragma omp parallel for
     for(int i=0; i<thePartitions.size; i++)
     { List<Matrix<Rational> > repGens;
-      thePartitions[i].SpechtModuleMatricesOfTranspositions(repGens);
+      thePartitions[i].SpechtModuleMatricesOfTranspositions1j(repGens);
       // so much of programming is boxing and unboxing things.  we use c++
       // to do it by hand.  I forget if the first [1,n] items were supposed
       // to be the generators; it's not like that was intended to be documented
@@ -4465,7 +4465,7 @@ int main(void)
   for(int i=0; i<partitions.size; i++)
   { stOutput << partitions[i] << '\n';
     List<Matrix<Rational> > repgens;
-    partitions[i].SpechtModuleMatricesOfTranspositions(repgens);
+    partitions[i].SpechtModuleMatricesOfTranspositions1j(repgens);
     for(int ri=0; ri<repgens.size; ri++)
     { stOutput << repgens[ri].ToStringPlainText();
       stOutput << " determinant is " << repgens[ri].GetDeterminant() << "\n\n";

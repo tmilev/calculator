@@ -271,6 +271,12 @@ class Partition
   void GetAllStandardTableaux(List<Tableau>& out) const;
   template <typename scalar>
   void SpechtModuleMatricesOfTranspositions1j(List<Matrix<scalar> >& out) const;
+  template <typename scalar>
+  void SpechtModuleMatricesOfTranspositionsjjplusone(List<Matrix<scalar> >& out) const;
+  template <typename scalar>
+  void SpechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, const List<PermutationR2>& perms) const;
+  template <typename scalar>
+  void SpechtModuleMatrixOfPermutation(List<Matrix<scalar> >& out, const PermutationR2& p) const;
   // int might not be wide enough
   int Fulton61z() const;
   bool operator==(const Partition& right) const;
@@ -449,17 +455,17 @@ class SimpleFiniteGroup
 { public:
   List<elementSomeGroup> generators;
   HashedList<elementSomeGroup> theElements;
-  bool haveElements;
+  bool haveElements = false;
 
   List<ConjugacyClassR2<elementSomeGroup> > conjugacyClasseS;
-  bool haveConjugacyClasses;
+  bool haveConjugacyClasses = false;
 
   bool easyConjugacyDetermination = false;
 
   void AddGenDontCompute(const elementSomeGroup& gen) { this->generators.AddOnTop(gen); }
   void ComputeAllElements();
-  void ComputeCCRepresentatives(void* unused);
-  void ComputeElementsAndCCs(void* unused);
+  void ComputeCCRepresentatives(void* unused = NULL);
+  void ComputeElementsAndCCs(void* unused = NULL);
 
 
   bool AreConjugate(const elementSomeGroup& x, const elementSomeGroup& y);
@@ -637,7 +643,34 @@ void Partition::GetAllStandardTableaux(List<Tableau>& out) const
 
 template <typename scalar>
 void Partition::SpechtModuleMatricesOfTranspositions1j(List<Matrix<scalar> >& out) const
-{ stOutput << "Debugging Partition::SpechtModuleMatricesOfTranspositions1j: " << *this << '\n';
+{ List<PermutationR2> perms;
+  perms.SetSize(this->n-1);
+  for(int i=0; i<this->n-1; i++)
+    perms[i].BuildTransposition(0,i+1);
+  this->SpechtModuleMatricesOfPermutations(out, perms);
+}
+
+template <typename scalar>
+void Partition::SpechtModuleMatricesOfTranspositionsjjplusone(List<Matrix<scalar> >& out) const
+{ List<PermutationR2> perms;
+  perms.SetSize(this->n-1);
+  for(int i=0; i<this->n-1; i++)
+    perms[i].BuildTransposition(i,i+1);
+  this->SpechtModuleMatricesOfPermutations(out, perms);
+}
+
+template <typename scalar>
+void Partition::SpechtModuleMatrixOfPermutation(List<Matrix<scalar> >& out, const PermutationR2& p) const
+{ List<PermutationR2> perms;
+  perms.AddOnTop(p);
+  this->SpechtModuleMatricesOfPermutations(out, perms);
+}
+
+
+template <typename scalar>
+void Partition::SpechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, const List<PermutationR2>& perms) const
+{ stOutput << "Debugging Partition::SpechtModuleMatricesOfPermutations: " << *this;
+  stOutput << " with permutations " << perms.ToStringCommaDelimited() << '\n';
   Tableau initialTableau;
   List<int> stuffing;
   stuffing.SetSize(this->n);
@@ -675,19 +708,17 @@ void Partition::SpechtModuleMatricesOfTranspositions1j(List<Matrix<scalar> >& ou
 //  }
   basis.SetBasis(basisvs);
   stOutput << "Basis generated: " << basis << '\n';
-  PermutationGroup sn;
-  sn.MakeSymmetricGroup(this->n);
-  out.SetSize(sn.generators.size);
-  for(int sni=0; sni<sn.generators.size; sni++)
-  { out[sni].init(basis.rank,basis.rank);
+  out.SetSize(perms.size);
+  for(int permi=0; permi<perms.size; permi++)
+  { out[permi].init(basis.rank,basis.rank);
     for(int bi=0; bi<basis.rank; bi++)
     { ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,scalar> sparse;
-      sn.generators[sni].ActOnTensor(sparse,basisvs[bi]);
+      perms[permi].ActOnTensor(sparse,basisvs[bi]);
       Vector<scalar> dense;
       basis.DenseVectorInBasis(dense, sparse);
       // AssignColumnFromVector?  oh well.
       for(int j=0; j<basis.rank; j++)
-        out[sni].elements[j][bi] = dense[j];
+        out[permi].elements[j][bi] = dense[j];
     }
   }
 }
@@ -1261,12 +1292,18 @@ bool SimpleFiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& x
 template <typename elementSomeGroup>
 void SimpleFiniteGroup<elementSomeGroup>::ComputeAllElements()
 { elementSomeGroup e;
+  // if the user thinks its a good idea to instantiate a group of this type
+  // without giving it a single element, it had better be a type of element
+  // that can be used without initialization.
+  if(this->generators.size > 0)
+    e.MakeID(this->generators[0]);
   this->theElements.AddOnTop(e);
   List<elementSomeGroup> recentadds;
-  recentadds.SetSize(1); // equivalent to .AddOnTop(e), right?
+  recentadds.AddOnTop(e);
   if(easyConjugacyDetermination)
   { this->conjugacyClasseS.SetSize(1);
-    this->conjugacyClasseS[0].theElements.SetSize(1);
+    this->conjugacyClasseS[0].representative = e;
+    this->conjugacyClasseS[0].theElements.AddOnTop(0);
   }
   while(recentadds.size > 0)
   { // this is a necessary copy.  I wish I could tell cxx it is a move.
@@ -1325,9 +1362,19 @@ void SimpleFiniteGroup<elementSomeGroup>::ComputeCCRepresentatives(void* unused)
 }
 
 template <typename elementSomeGroup>
+void SimpleFiniteGroup<elementSomeGroup>::ComputeElementsAndCCs(void* unused)
+{ this->ComputeCCRepresentatives();
+}
+
+template <typename elementSomeGroup>
 template <typename somestream>
 somestream& SimpleFiniteGroup<elementSomeGroup>::IntoStream(somestream& out) const
-{ out << "Finite Group (computationally small) with " << this->theElements.size << " elements, generated by: ";
+{ out << "Finite Group with " << this->generators.size << " generators";
+  if(this->haveElements)
+    out << ", " << this->theElements.size << " elements";
+  if(this->haveConjugacyClasses)
+    out << ", " << this->conjugacyClasseS.size << " conjugacy classes";
+  out <<", generated by: ";
   for(int i=0; i<this->generators.size; i++)
   { out << this->generators[i];
     if(i != this->generators.size-1)
@@ -1396,7 +1443,7 @@ void WeylGroup::ComputeIrreducibleRepresentationsUsingSpechtModules(GlobalVariab
     #pragma omp parallel for
     for(int i=0; i<thePartitions.size; i++)
     { List<Matrix<Rational> > repGens;
-      thePartitions[i].SpechtModuleMatricesOfTranspositions1j(repGens);
+      thePartitions[i].SpechtModuleMatricesOfTranspositionsjjplusone(repGens);
       // so much of programming is boxing and unboxing things.  we use c++
       // to do it by hand.  I forget if the first [1,n] items were supposed
       // to be the generators; it's not like that was intended to be documented
@@ -1406,6 +1453,7 @@ void WeylGroup::ComputeIrreducibleRepresentationsUsingSpechtModules(GlobalVariab
       stOutput << this->irreps[i] << '\n';
     }
     this->irreps.QuickSortAscending();
+
   }
 }
 
@@ -4459,22 +4507,30 @@ int main(void)
   stOutput << pg << '\n';
   stOutput << pg.theElements << '\n';
 
-  for(int sni = 2; sni<6; sni++)
-  {
-  Partition::GetPartitions(partitions, sni);
-  for(int i=0; i<partitions.size; i++)
-  { stOutput << partitions[i] << '\n';
-    List<Matrix<Rational> > repgens;
-    partitions[i].SpechtModuleMatricesOfTranspositions1j(repgens);
-    for(int ri=0; ri<repgens.size; ri++)
-    { stOutput << repgens[ri].ToStringPlainText();
-      stOutput << " determinant is " << repgens[ri].GetDeterminant() << "\n\n";
+  for(int sni = 2; sni<9; sni++)
+  { Partition::GetPartitions(partitions, sni);
+    int fac = 1;
+    for(int i=1; i<=sni; i++)
+      fac *= i;
+    for(int i=0; i<partitions.size; i++)
+    { stOutput << partitions[i] << '\n';
+      List<Matrix<Rational> > repgens;
+      partitions[i].SpechtModuleMatricesOfTranspositionsjjplusone(repgens);
+      for(int ri=0; ri<repgens.size; ri++)
+      { stOutput << repgens[ri].ToStringPlainText();
+        Rational det = repgens[ri].GetDeterminant();
+        stOutput << " determinant is " << det << "\n\n";
+        if((det != 1) && (det != -1))
+          crash << "invalid determinant" << crash;
+      }
+      SimpleFiniteGroup<Matrix<Rational> > outg;
+      outg.generators = repgens;
+      outg.ComputeElementsAndCCs();
+      stOutput << outg << "\n\n\n";
+      if((fac % outg.theElements.size) != 0)
+        crash << "invalid elements count" << crash;
     }
-    stOutput << "\n\n";
   }
-  }
-  PermutationGroup S4;
-  S4.MakeSymmetricGroup(4);
 
 
   MonomialTensor<int,MathRoutines::IntUnsignIdentity> tt1,tt2;
@@ -4509,7 +4565,7 @@ int main(void)
   stOutput << q1*q2 << " ";
   stOutput << q2*q1*q2 << '\n';
 
-  for(int bni=1; bni<11;bni++)
+  for(int bni=1; bni<6;bni++)
   { HyperoctahedralGroup Bn;
     Bn.MakeHyperoctahedralGroup(bni);
     Bn.ComputeAllElements();
@@ -4520,11 +4576,12 @@ int main(void)
       stOutput << Bn.conjugacyClasseS[i] << ", ";
     stOutput << "\n\n";
   }
-//  WeylGroup W;
-//  W.MakeArbitrarySimple('A', 4);
-//  W.ComputeCCSizesAndRepresentatives(NULL);
-//  stOutput << W.theDynkinType << " :" << W.size() << " elements, in " << W.conjugacyClasseS.size << " conjugacy classes\n";
-//  W.ComputeIrreducibleRepresentationsUsingSpechtModules();
+
+  WeylGroup W;
+  W.MakeArbitrarySimple('A', 4);
+  W.ComputeCCSizesAndRepresentatives(NULL);
+  stOutput << W.theDynkinType << " :" << W.size() << " elements, in " << W.conjugacyClasseS.size << " conjugacy classes\n";
+  W.ComputeIrreducibleRepresentationsUsingSpechtModules();
 
 
   stOutput << "Rational.TotalSmallAdditions: " << Rational::TotalSmallAdditions;

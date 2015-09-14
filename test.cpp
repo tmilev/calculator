@@ -2961,61 +2961,6 @@ int main(void)
   for(int i=0; i<partitions.size; i++)
     stOutput << partitions[i] << '\n';
 
-  PermutationR2 p1;
-  p1.AddTransposition(1,2);
-  PermutationR2 p2;
-  List<int> l; l.AddOnTop(2); l.AddOnTop(3); l.AddOnTop(4);
-  p2.AddCycle(l);
-  PermutationR2 p3;
-  p3.MakeFromMul(p1,p2);
-  stOutput << p1 << " " << p2 << " " << p3 << '\n';
-  PermutationGroup pg;
-  pg.AddGenDontCompute(p1);
-  pg.AddGenDontCompute(p2);
-  pg.ComputeAllElements();
-  stOutput << pg << '\n';
-  stOutput << pg.theElements << '\n';
-
-  for(int sni = 2; sni<9; sni++)
-  { Partition::GetPartitions(partitions, sni);
-    int fac = 1;
-    for(int i=1; i<=sni; i++)
-      fac *= i;
-    for(int i=0; i<partitions.size; i++)
-    { stOutput << partitions[i] << '\n';
-      List<Matrix<Rational> > repgens;
-      partitions[i].SpechtModuleMatricesOfTranspositionsjjplusone(repgens);
-      for(int ri=0; ri<repgens.size; ri++)
-      { stOutput << repgens[ri].ToStringPlainText();
-        Rational det = repgens[ri].GetDeterminant();
-        stOutput << " determinant is " << det << "\n\n";
-        if((det != 1) && (det != -1))
-          crash << "invalid determinant" << crash;
-      }
-      SimpleFiniteGroup<Matrix<Rational> > outg;
-      outg.generators = repgens;
-      outg.ComputeElementsAndCCs();
-      stOutput << outg << "\n\n\n";
-      if((fac % outg.theElements.size) != 0)
-        crash << "invalid elements count" << crash;
-    }
-  }
-
-
-  MonomialTensor<int,MathRoutines::IntUnsignIdentity> tt1,tt2;
-  tt1.generatorsIndices.SetSize(1); tt1.Powers.SetSize(1);
-  tt2.generatorsIndices.SetSize(1); tt2.Powers.SetSize(1);
-  tt1.generatorsIndices[0] = 0; tt1.Powers[0] = 1;
-  tt2.generatorsIndices[0] = 1; tt2.Powers[0] = 1;
-  stOutput << tt1 << " " << tt2 << '\n';
-  ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,Rational> t1, t2, t3;
-  t1.AddMonomial(tt1,1);
-  t1.AddMonomial(tt2,1);
-  t2.AddMonomial(tt1,2);
-  stOutput << t1 << " " << t2 << '\n';
-  t3 = t1;
-  t3 *= t2;
-  stOutput << t3 << '\n';
 
 
   ElementHyperoctahedralGroup q1,q2;

@@ -7,7 +7,6 @@
 #include "vpfHeader2Math8_VectorSpace.h"
 #include "vpfHeader2Math4_Graph.h"
 
-//To do: move Weyl groups to this file. Eliminate all redundant code and organize nicely.
 
 static ProjectInformationInstance ProjectInfoVpfSymmetricGroups(__FILE__, "Header file, symmetric and related groups. Work in progress.");
 
@@ -169,6 +168,7 @@ public:
   // properly.
   void AddTransposition(int i, int j);
   void AddCycle(const List<int>& cycle);
+  void MakeFromListOfCycles(const List<List<int> >& cycle);
   // A jumbled up list of integers 0-n
   void MakeFromActionDescription(const List<int>& actionDescription);
   // Cycle structure as a histogram of cycle lengths
@@ -396,11 +396,6 @@ void Partition::SpechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, c
     stOutput << "Tableau " << standardTableaux[i] << " is assigned permutation " << p;
     stOutput << " permuting Young symmetrized tensor to " << basisvs[i] << '\n';
   }
-//  for(int i=0; i<standardTableaux.size; i++)
-//  { standardTableaux[i].YoungSymmetrizerAction(basisvs[i],t1);
-//    stOutput << "Young symmetrizer of tableau " << standardTableaux[i];
-//    stOutput << " turns " << t1 << " into " << basisvs[i] << "\n";
-//  }
   basis.SetBasis(basisvs);
   stOutput << "Basis generated: " << basis << '\n';
   out.SetSize(perms.size);

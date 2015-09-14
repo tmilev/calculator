@@ -757,10 +757,8 @@ public:
     // std::move_backward(this->TheObjects+desiredIndex, this->TheObjects+this->size-1, this->TheObjects+this->size);
     // this->TheObjects[desiredIndex] = o;
     // ok whatever if this program was supposed to be fast it would be optimizable
-    this->AddOnTop(o);
-    for(int i=this->size-1; i>desiredIndex; i--)
-    { this->SwapTwoIndices(i,i-1);
-    }
+    this->ShiftUpExpandOnTop(desiredIndex);
+    (*this)[desiredIndex]=o;
   }
   void AddOnTop(const Object& o);
   void AddListOnTop(const List<Object>& theList);

@@ -742,7 +742,7 @@ public:
     if (theCarbonCopy!=0)
       theCarbonCopy->SubtractRows(indexRowWeSubtractFrom, indexSubtracted, StartColIndex, scalar);
   }
-  void MultiplyOnTheLeft(const Matrix<coefficient>& standsOnTheLeft, Matrix<coefficient>& output, const coefficient& theRingZero=0);
+  void MultiplyOnTheLeft(const Matrix<coefficient>& standsOnTheLeft, Matrix<coefficient>& output, const coefficient& theRingZero=0) const;
   void MultiplyOnTheLeft(const Matrix<coefficient>& standsOnTheLeft, const coefficient& theRingZero=0);
   void MultiplyOnTheRight(const Matrix<coefficient>& standsOnTheRight, const coefficient& theRingZero=0)
   { Matrix<coefficient> temp=*this;
@@ -763,7 +763,10 @@ public:
 //  bool ExpressColumnAsALinearCombinationOfColumnsModifyMyself
 //    (Matrix<coefficient>& inputColumn, Matrix<coefficient>* outputTheGaussianTransformations Matrix<coefficient>& outputColumn);
   bool Invert(GlobalVariables* theGlobalVariables=0);
+  static void Conjugate(const Matrix<coefficient>& conjugateMe, const Matrix<coefficient>& conjugateBy,
+                        Matrix<coefficient>& out);
   void MakeZero(const coefficient& theRingZero=0);
+  void MakeID(const Matrix<coefficient>& prototype, const coefficient& theRingZero=0, const coefficient& theRingOne=1);
   //if m1 corresponds to a linear operator from V1 to V2 and
   // m2 to a linear operator from W1 to W2, then the result of the below function
   //corresponds to the linear operator from V1+W1 to V2+W2 (direct sum)
@@ -1153,6 +1156,15 @@ bool Matrix<Element>::Invert(GlobalVariables* theGlobalVariables)
 }
 
 template <typename Element>
+void Matrix<Element>::Conjugate(const Matrix<Element>& conjugateMe, const Matrix<Element>& conjugateBy, Matrix<Element>& out)
+{ Matrix<Element> conjugateInverse = conjugateBy;
+  conjugateInverse.Invert();
+  Matrix<Element> tmp;
+  conjugateMe.MultiplyOnTheLeft(conjugateInverse,tmp);
+  conjugateBy.MultiplyOnTheLeft(tmp, out);
+}
+
+template <typename Element>
 void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& standsOnTheLeft, const Element& theRingZero)
 { Matrix<Element> tempMat;
   this->MultiplyOnTheLeft(standsOnTheLeft, tempMat, theRingZero);
@@ -1160,7 +1172,7 @@ void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& standsOnTheLeft, 
 }
 
 template <typename Element>
-void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& standsOnTheLeft, Matrix<Element>& output, const Element& theRingZero)
+void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& standsOnTheLeft, Matrix<Element>& output, const Element& theRingZero) const
 { if (&output==this || &output==&standsOnTheLeft)
   { Matrix<Element> thisCopy=*this;
     Matrix<Element> standsOnTheLeftCopy=standsOnTheLeft;
@@ -1376,6 +1388,14 @@ inline void Matrix<Element>::MakeZero(const Element& theRingZero)
 { for (int i=0; i<this->NumRows; i++)
     for (int j=0; j<this->NumCols; j++)
       this->elements[i][j]=theRingZero;
+}
+
+template <typename Element>
+inline void Matrix<Element>::MakeID(const Matrix<Element>& prototype, const Element& theRingZero, const Element& theRingOne)
+{ this->init(prototype.NumRows, prototype.NumCols);
+  for(int i=0; i<this->NumRows; i++)
+    for(int j=0; j<this->NumCols; j++)
+      this->elements[i][j] = i == j ? theRingOne : theRingZero;
 }
 
 template <typename Element>

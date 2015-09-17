@@ -343,6 +343,13 @@ public:
   }
   template <class Element>
   static void LieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output);
+  template <typename number>
+  static number ComplexConjugate(number x)
+  {return x.GetComplexConjugate();}
+  static int ComplexConjugate(int x)
+  {return x;}
+  static double ComplexConjugate(double x)
+  {return x;}
 };
 
 class XML

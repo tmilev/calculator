@@ -242,7 +242,7 @@ void PrintCharTable(const somegroup& G, const char* filename)
   data.obj[0].value.list.SetSize(G.conjugacyClasses.size);
   for(int i=0; i<G.conjugacyClasses.size; i++)
   { List<int> reprefs;
-    G.GetGeneratorList(G.conjugacyClasses[i][0],reprefs);
+    G.GetWord(G.conjugacyClasses[i][0],reprefs);
     data.obj[0].value.list[i].type = JSLIST;
     data.obj[0].value.list[i].list.SetSize(reprefs.size);
     for(int j=0; j<reprefs.size; j++)
@@ -431,7 +431,7 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
 
   for(int i=0; i<G.conjugacyClasses.size; i++)
   { List<int> g;
-    G.GetGeneratorList(G.conjugacyClasses[i][0],g);
+    G.GetWord(G.conjugacyClasses[i][0],g);
     stOutput << "&\\rotatebox{90}{";
     for(int k=0; k<g.size; k++)
       stOutput << g[k] << ' ';
@@ -488,7 +488,7 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
 // WeylGroup is alittle different from AnotherWeylGroup<derp>
 //    ElementWeylGroup<WeylGroup> hr = G.theElements[G.GetRootReflection(G.RootSystem.size-1)];
       List<int> hr;
-      G.GetGeneratorList(G.GetRootReflection(G.RootSystem.size-1), hr);
+      G.GetWord(G.GetRootReflection(G.RootSystem.size-1), hr);
       for(int i=0; i<hr.size; i++)
         stOutput << hr[i] << ' ';
       stOutput << "\n";

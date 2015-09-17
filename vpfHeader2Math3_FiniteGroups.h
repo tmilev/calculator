@@ -740,7 +740,15 @@ public:
   template <class coefficient>
   void SimpleReflectionMinusRhoModified(int index, Vector<coefficient>& theVector)const;
   ElementWeylGroup<WeylGroup> GetRootReflection(int rootIndex);
-  void GetGeneratorList(int g, List<int>& out)const;
+  void GetWord(int g, List<int>& out)const;
+  void GetWord(ElementWeylGroup<WeylGroup> g, List<int>& out)const
+  { out.SetSize(g.generatorsLastAppliedFirst.size);
+    for(int i=0; i<g.generatorsLastAppliedFirst.size; i++)
+    { if(g.generatorsLastAppliedFirst[i].flagIsOuter)
+        crash << "group::GetWord(element, List<int>) called on an element that isn't described by a simple word in generators or whatever.  You probably meant to do something else, and at any rate need to do some refactoring to do this " << __FILE__ << ":" << __LINE__ << crash;
+      out[i] = g.generatorsLastAppliedFirst[i].index;
+    }
+  }
   int MultiplyElements(int left, int right) const;
   //<-multiply elements is better name than multiply (groups can be tensored/direct product multiplied.
   //MultiplyElements is unambiguous.
@@ -805,7 +813,7 @@ class GroupRepresentation
   ClassFunction<someGroup, coefficient> theCharacteR;
   bool haveCharacter = false;
 
-  void ComputeCharacter();
+  void GetCharacter();
 
   template <typename somestream>
   somestream& IntoStream(somestream& out);
@@ -816,14 +824,16 @@ class GroupRepresentation
 };
 
 template <typename someGroup, typename coefficient>
-void GroupRepresentation<someGroup, coefficient>::ComputeCharacter()
+void GroupRepresentation<someGroup, coefficient>::GetCharacter()
 { if(!this->ownerGroup->flagCCsComputed)
     this->ownerGroup->ComputeCCRepresentatives(NULL);
+  this->theCharacteR.G = ownerGroup;
+  this->theCharacteR.data.SetSize(this->ownerGroup->conjugacyClasseS.size);
   for(int cci=0; cci < this->ownerGroup->conjugacyClasseS.size; cci++)
   { Matrix<coefficient> M;
     M.MakeID(this->generatorS[0]);
     List<int> ccirWord;
-    this->ownerGroup->GetGeneratorList(this->ownerGroup->conjugacyClasseS[cci].indicesEltsInOwner[0], ccirWord);
+    this->ownerGroup->GetWord(this->ownerGroup->conjugacyClasseS[cci].representative, ccirWord);
     for(int i=0; i<ccirWord.size; i++)
       M *= this->generatorS[ccirWord[i]];
     this->theCharacteR.data[cci] = M.GetTrace();
@@ -842,9 +852,10 @@ template <typename someGroup, typename coefficient>
 template <typename somestream>
 somestream& GroupRepresentation<someGroup, coefficient>::IntoStream(somestream& out)
 { if(!this->haveCharacter)
-    this->ComputeCharacter();
+    this->GetCharacter();
 // WeylGroup needs to be printable
-  out << "Representation of group " << ownerGroup->ToString() << " with character " << this->theCharacteR;
+// WeylGroup really needs to be printable lol
+  out << "Representation of group " << "BUG: WeylGroup crashes here" << " with character " << this->theCharacteR;
   return out;
 }
 

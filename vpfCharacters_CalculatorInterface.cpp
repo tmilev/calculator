@@ -481,16 +481,16 @@ void WeylGroup::ComputeIrreducibleRepresentationsUsingSpechtModules(GlobalVariab
   if((letters.size == 1)&&(letters[0] == 'A'))
   { int theRank = ranks[0];
     List<Partition> thePartitions;
-    Partition::GetPartitions(thePartitions,theRank);
+    Partition::GetPartitions(thePartitions,theRank+1);
     List<GroupRepresentation<WeylGroup, Rational> > theRepresentations;
     theRepresentations.SetSize(thePartitions.size);
     #pragma omp parallel for
     for(int i=0; i<thePartitions.size; i++)
     { thePartitions[i].SpechtModuleMatricesOfTranspositionsjjplusone(theRepresentations[i].generatorS);
       theRepresentations[i].ownerGroup = this;
+      theRepresentations[i].GetCharacter();
       stOutput << theRepresentations[i].ToString() << '\n';
     }
-    this->irreps.QuickSortAscending();
     return;
   }
   crash << "ComputeIrreducibleRepresentationsUsingSpechtModules: Type " << this->theDynkinType << " is unsupported.  If you think it should work, edit " << __FILE__ << ":" << __LINE__ << crash;

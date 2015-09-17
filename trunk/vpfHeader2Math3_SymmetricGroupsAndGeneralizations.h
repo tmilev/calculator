@@ -258,10 +258,14 @@ class ElementHyperoctahedralGroup
   }
 };
 
+// it is forseen that an implementation may throw away theElements
 template <typename elementSomeGroup>
 class ConjugacyClassR2
 { public:
   elementSomeGroup representative;
+  int representativeIndex;
+//  List<int> representativeWord;
+//  bool haveRepresentativeWord = false;
   List<int> theElements;
 
 
@@ -281,9 +285,13 @@ class SimpleFiniteGroup
   List<elementSomeGroup> generators;
   HashedList<elementSomeGroup> theElements;
   bool haveElements = false;
+  int GetSize();
+
+//  List<List<int> > theWords;
+//  bool haveWords;
 
   List<ConjugacyClassR2<elementSomeGroup> > conjugacyClasseS;
-  bool haveConjugacyClasses = false;
+  bool flagCCsComputed = false;
 
   bool easyConjugacyDetermination = false;
 
@@ -295,6 +303,9 @@ class SimpleFiniteGroup
 
   bool AreConjugate(const elementSomeGroup& x, const elementSomeGroup& y);
   bool PossiblyConjugate(const elementSomeGroup& x, const elementSomeGroup& y);
+
+  template <typename coefficient>
+  coefficient GetHermitianProduct(const Vector<coefficient>& x1, const Vector<coefficient>& X2);
 
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
@@ -516,6 +527,17 @@ bool SimpleFiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& x
 }
 
 template <typename elementSomeGroup>
+template <typename coefficient>
+coefficient SimpleFiniteGroup<elementSomeGroup>::GetHermitianProduct(const Vector<coefficient>& X1, const Vector<coefficient>& X2)
+{ if(!this->haveConjugacyClasses)
+    this->ComputeCCRepresentatives(NULL);
+  coefficient acc = 0;
+  for(int i=0; i<this->conjugacyClasseS.size; i++)
+    acc += MathRoutines::ComplexConjugate(X1[i]) * X2[i] * this->conjugacyClasseS[i].size;
+  return  acc / this->GetSize();
+}
+
+template <typename elementSomeGroup>
 void SimpleFiniteGroup<elementSomeGroup>::ComputeAllElements()
 { elementSomeGroup e;
   // if the user thinks its a good idea to instantiate a group of this type
@@ -530,14 +552,23 @@ void SimpleFiniteGroup<elementSomeGroup>::ComputeAllElements()
   { this->conjugacyClasseS.SetSize(1);
     this->conjugacyClasseS[0].representative = e;
     this->conjugacyClasseS[0].theElements.AddOnTop(0);
+    this->conjugacyClasseS[0].representativeIndex = 0;
+//    this->conjugacyClasseS[0].haveRepresentativeWord = true;
   }
+//  List<List<int> > recentwords;
+//  recentwords.SetSize(1);
   while(recentadds.size > 0)
   { // this is a necessary copy.  I wish I could tell cxx it is a move.
     elementSomeGroup r = recentadds.PopLastObject();
+//    List<int> rword = recentwords.PopLastObject();
     for(int i=0; i<this->generators.size; i++)
     { elementSomeGroup p = r*generators[i];
       if(this->theElements.AddOnTopNoRepetition(p))
       { recentadds.AddOnTop(p);
+//        recentwords.AddOnTop(rword);
+//        recentwords[recentwords.size-1].AddOnTop(i);
+//        if(andWords)
+//          this->theWords.AddOnTop(recentwords[recentwords.size-1]);
         if(easyConjugacyDetermination)
         { int pindex = this->theElements.GetIndex(p);
           bool alreadyHaveClass = false;
@@ -553,6 +584,8 @@ void SimpleFiniteGroup<elementSomeGroup>::ComputeAllElements()
             this->conjugacyClasseS.SetSize(ncc+1);
             this->conjugacyClasseS[ncc].representative = p;
             this->conjugacyClasseS[ncc].theElements.AddOnTop(pindex);
+//            this->conjugacyClasseS[ncc].representativeIndex = pindex;
+//            this->conjugacyClasseS[ncc].representativeWord = recentwords[recentwords.size-1];
           }
         }
       }
@@ -560,15 +593,22 @@ void SimpleFiniteGroup<elementSomeGroup>::ComputeAllElements()
   }
   this->haveElements = true;
   if(easyConjugacyDetermination)
-    this->haveConjugacyClasses = true;
+    this->flagCCsComputed = true;
+//  if(andWords)
+//    this->haveWords = true;
 }
 
 template <typename elementSomeGroup>
 void SimpleFiniteGroup<elementSomeGroup>::ComputeCCRepresentatives(void* unused)
-{ if(!this->haveElements)
-    this->ComputeAllElements();
-  if(this->haveConjugacyClasses)
+{ if(this->flagCCsComputed)
     return;
+  if(this->easyConjugacyDetermination)
+  { this->ComputeAllElements();
+    return;
+  }
+//  if(!this->haveWords)
+//    this->ComputeAllElements(true);
+
   GraphOLD conjugacygraph = GraphOLD(this->theElements.size, this->generators.size);
   for(int i=0; i<this->theElements.size; i++)
     for(int j=0; j<this->generators.size; j++)
@@ -584,12 +624,21 @@ void SimpleFiniteGroup<elementSomeGroup>::ComputeCCRepresentatives(void* unused)
   for(int i=0; i<components.size; i++)
   { this->conjugacyClasseS[i].representative = this->theElements[components[i][0]];
     this->conjugacyClasseS[i].theElements = components[i];
+//    this->conjugacyClasseS[i].representativeIndex = components[i][0];
+//    this->conjugacyClasseS[i].representativeWord = this->theWords[components[i][0]];
   }
 }
 
 template <typename elementSomeGroup>
 void SimpleFiniteGroup<elementSomeGroup>::ComputeElementsAndCCs(void* unused)
 { this->ComputeCCRepresentatives();
+}
+
+template <typename elementSomeGroup>
+int SimpleFiniteGroup<elementSomeGroup>::GetSize()
+{ if(!this->haveElements)
+    this->ComputeAllElements();
+  return this->theElements.size;
 }
 
 template <typename elementSomeGroup>

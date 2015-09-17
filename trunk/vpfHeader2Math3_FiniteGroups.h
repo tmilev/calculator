@@ -81,6 +81,10 @@ public:
       return false;
     return true;
   }
+  friend std::ostream& operator<<(std::ostream& out, const ClassFunction<someFiniteGroup, coefficient>& data)
+  { out << data.ToString();
+    return out;
+  }
 };
 
 // To make a FiniteGroup, define an element class with the following methods
@@ -793,6 +797,64 @@ public:
   void operator+=(const WeylGroup& other);
 };
 
+template <typename someGroup, typename coefficient>
+class GroupRepresentation
+{ public:
+  someGroup* ownerGroup;
+  List<Matrix<coefficient> > generatorS;
+  ClassFunction<someGroup, coefficient> theCharacteR;
+  bool haveCharacter = false;
+
+  void ComputeCharacter();
+
+  template <typename somestream>
+  somestream& IntoStream(somestream& out);
+  std::string ToString();
+  friend std::ostream& operator<< (std::ostream& out, GroupRepresentation<someGroup, coefficient>& data)
+  { return data.IntoStream(out);
+  }
+};
+
+template <typename someGroup, typename coefficient>
+void GroupRepresentation<someGroup, coefficient>::ComputeCharacter()
+{ if(!this->ownerGroup->flagCCsComputed)
+    this->ownerGroup->ComputeCCRepresentatives(NULL);
+  for(int cci=0; cci < this->ownerGroup->conjugacyClasseS.size; cci++)
+  { Matrix<coefficient> M;
+    M.MakeID(this->generatorS[0]);
+    List<int> ccirWord;
+    this->ownerGroup->GetGeneratorList(this->ownerGroup->conjugacyClasseS[cci].indicesEltsInOwner[0], ccirWord);
+    for(int i=0; i<ccirWord.size; i++)
+      M *= this->generatorS[ccirWord[i]];
+    this->theCharacteR.data[cci] = M.GetTrace();
+  }
+  this->theCharacteR.G = ownerGroup;
+}
+
+/* this is unused because it's stupid, no one wants to carry around a billion matrices just for no reason
+template <typename someGroup, typename coefficient>
+void GroupRepresentation<someGroup, coefficient>::SetElementImage(int i, Matrix<coefficient> M)
+{ this->theElementImageS[i] = M;
+  this->theElementIsComputed[i] = true;
+}*/
+
+template <typename someGroup, typename coefficient>
+template <typename somestream>
+somestream& GroupRepresentation<someGroup, coefficient>::IntoStream(somestream& out)
+{ if(!this->haveCharacter)
+    this->ComputeCharacter();
+// WeylGroup needs to be printable
+  out << "Representation of group " << ownerGroup->ToString() << " with character " << this->theCharacteR;
+  return out;
+}
+
+template <typename someGroup, typename coefficient>
+std::string GroupRepresentation<someGroup, coefficient>::ToString()
+{ std::stringstream out;
+  this->IntoStream(out);
+  return out.str();
+}
+
 template <class coefficient>
 class WeylGroupRepresentation
 {
@@ -870,6 +932,9 @@ class WeylGroupRepresentation
   void SetElementImage(int elementIndex, const Matrix<coefficient>& input)
   { this->theElementImageS[elementIndex] = input;
     this->theElementIsComputed[elementIndex] = true;
+  }
+  void SetGenerator(int generatorIndex, const Matrix<coefficient>& input)
+  { this->generatorS[generatorIndex] = input;
   }
   bool operator>(const WeylGroupRepresentation<coefficient>& other)const;
   bool operator<(const WeylGroupRepresentation<coefficient>& other)const;

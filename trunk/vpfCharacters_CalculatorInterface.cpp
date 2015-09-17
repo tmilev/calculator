@@ -1,4 +1,5 @@
 #include "vpf.h"
+#include "vpfHeader2Math3_FiniteGroups.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 #include "vpfHeader2Math4_Graph.h"
@@ -481,22 +482,18 @@ void WeylGroup::ComputeIrreducibleRepresentationsUsingSpechtModules(GlobalVariab
   { int theRank = ranks[0];
     List<Partition> thePartitions;
     Partition::GetPartitions(thePartitions,theRank);
-    this->irreps.SetSize(thePartitions.size);
+    List<GroupRepresentation<WeylGroup, Rational> > theRepresentations;
+    theRepresentations.SetSize(thePartitions.size);
     #pragma omp parallel for
     for(int i=0; i<thePartitions.size; i++)
-    { List<Matrix<Rational> > repGens;
-      thePartitions[i].SpechtModuleMatricesOfTranspositionsjjplusone(repGens);
-      // so much of programming is boxing and unboxing things.  we use c++
-      // to do it by hand.  I forget if the first [1,n] items were supposed
-      // to be the generators; it's not like that was intended to be documented
-      // anyway
-      for(int i=0; i<repGens.size; i++)
-        this->irreps[i].SetElementImage(i+1,repGens[i]);
-      stOutput << this->irreps[i] << '\n';
+    { thePartitions[i].SpechtModuleMatricesOfTranspositionsjjplusone(theRepresentations[i].generatorS);
+      theRepresentations[i].ownerGroup = this;
+      stOutput << theRepresentations[i].ToString() << '\n';
     }
     this->irreps.QuickSortAscending();
-
+    return;
   }
+  crash << "ComputeIrreducibleRepresentationsUsingSpechtModules: Type " << this->theDynkinType << " is unsupported.  If you think it should work, edit " << __FILE__ << ":" << __LINE__ << crash;
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(Calculator& theCommands, const Expression& input, Expression& output, bool useOuter)

@@ -378,7 +378,7 @@ coefficient FiniteGroup<elementSomeGroup>::GetHermitianProduct
 (const Vector<coefficient>& X1, const Vector<coefficient>& X2) const
 { coefficient acc = 0;
   for(int i=0; i<X1.size; i++)
-  { acc += X1[i].GetComplexConjugate() * X2[i] * this->conjugacyClasseS[i].size;
+  { acc += MathRoutines::ComplexConjugate(X1[i]) * X2[i] * this->conjugacyClasseS[i].size;
     if (this->conjugacyClasseS[i].size==0)
       crash << "Error: conjugacy class size is zero." << crash;
   }

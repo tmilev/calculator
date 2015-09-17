@@ -20,7 +20,8 @@
 
 GlobalVariables& theGlobalVariables=onePredefinedCopyOfGlobalVariables;
 
-#define TENSOR_MONOMIAL MonomialTensor<int,MathRoutines::IntUnsignIdentity>
+
+
 
 class CharacterTable
 {

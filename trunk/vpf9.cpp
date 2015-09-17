@@ -4196,7 +4196,7 @@ int WeylGroup::Invert(int g) const
 { return this->theElements.GetIndex(this->theElements[g].Inverse());
 }
 
-void WeylGroup::GetGeneratorList(int g, List<int>& out) const
+void WeylGroup::GetWord(int g, List<int>& out) const
 { out.SetSize(this->theElements[g].generatorsLastAppliedFirst.size);
   for (int i=0; i<this->theElements[g].generatorsLastAppliedFirst.size; i++)
     out[i] = this->theElements[g].generatorsLastAppliedFirst[i].index;
@@ -4385,7 +4385,7 @@ std::string WeylGroup::ToString(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("WeylGroup::ToString");
   std::stringstream out;
   out << "<br>Size: " << this->theElements.size << "\n";
-//  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n
+  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n";
   out << "<br>Half-sum positive roots:" << this->rho.ToString() << "\n";
   out << this->ToStringRootsAndRootReflections();
   out << "<br>Symmetric cartan: " << this->CartanSymmetric.ToString();

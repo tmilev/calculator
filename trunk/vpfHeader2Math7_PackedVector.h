@@ -61,7 +61,7 @@ public:
   void SimpleReflection(int i, const templateVector& v, templateVector& out) const;
   void SimpleReflection(int i, templateVector& v) const;
   void GetSimpleReflections(const templateVector& v, List<int>& out) const;
-  void GetGeneratorList(int i, List<int>& out) const;
+  void GetWord(int i, List<int>& out) const;
   void ApplyReflectionList(const List<int>& simpleReflections, templateVector& v) const;
   void ActOn(int g, templateVector& v) const;
   void ActOn(int g, const templateVector& v, templateVector& out) const;
@@ -144,7 +144,7 @@ void AnotherWeylGroup<scalar, templateVector>::GetSimpleReflections(const templa
 }
 
 template <typename scalar, typename templateVector>
-void AnotherWeylGroup<scalar, templateVector>::GetGeneratorList(int i, List<int>& out) const
+void AnotherWeylGroup<scalar, templateVector>::GetWord(int i, List<int>& out) const
 { this->GetSimpleReflections(this->rhoOrbit[i], out);
 }
 
@@ -374,7 +374,7 @@ void AnotherWeylGroup<scalar, templateVector>::GetSignCharacter(Vector<Rational>
   out.SetSize(this->ConjugacyClassCount());
   for(int i=0; i<this->ConjugacyClassCount(); i++)
   { List<int> srs;
-    this->GetGeneratorList(this->conjugacyClasses[i][0], srs);
+    this->GetWord(this->conjugacyClasses[i][0], srs);
     int yn = srs.size % 2;
     if(yn == 0)
       out[i] = 1;
@@ -652,7 +652,7 @@ void ExportCharTable(const somegroup& G, JSData &data)
   data.obj[0].value.list.SetSize(G.ConjugacyClassCount());
   for(int i=0; i<G.ConjugacyClassCount(); i++)
   { List<int> reprefs;
-    G.GetGeneratorList(G.conjugacyClasseS[i].indicesEltsInOwner[0],reprefs);
+    G.GetWord(G.conjugacyClasseS[i].indicesEltsInOwner[0],reprefs);
     data.obj[0].value.list[i].type = JSLIST;
     data.obj[0].value.list[i].list.SetSize(reprefs.size);
     for(int j=0; j<reprefs.size; j++)
@@ -758,7 +758,7 @@ void LoadAndPrintTauSignatures(char letter, int number)
 // WeylGroup is alittle different from AnotherWeylGroup<derp>
 //    ElementWeylGroup<WeylGroup> hr = G.theElements[G.GetRootReflection(G.RootSystem.size-1)];
       List<int> hr;
-      G.GetGeneratorList(G.GetRootReflection(G.RootSystem.size-1), hr);
+      G.GetWord(G.GetRootReflection(G.RootSystem.size-1), hr);
       for(int i=0; i<hr.size; i++)
         stOutput << hr[i] << ' ';
       stOutput << "\n";

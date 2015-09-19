@@ -52,10 +52,15 @@ void AlgebraicClosureRationals::ComputeDisplayStringsFromRadicals()
   theSel.init(this->theQuadraticRadicals.size);
   do
   { std::stringstream out;
+    //for (int i=0; i<theSel.CardinalitySelection; i++)
+    //{ const LargeInt& theRad=this->theQuadraticRadicals[theSel.elements[i]];
+    //  out << "\\sqrt{" << theRad.ToString() << "}";
+    //}
+    LargeInt theRad=1;
     for (int i=0; i<theSel.CardinalitySelection; i++)
-    { const LargeInt& theRad=this->theQuadraticRadicals[theSel.elements[i]];
+      theRad*=this->theQuadraticRadicals[theSel.elements[i]];
+    if (theRad!=1)
       out << "\\sqrt{" << theRad.ToString() << "}";
-    }
     this->DisplayNamesBasisElements[this->GetIndexFromRadicalSelection(theSel)]=out.str();
   } while (theSel.IncrementReturnFalseIfPastLast());
 }

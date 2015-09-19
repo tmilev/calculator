@@ -274,6 +274,20 @@ bool CalculatorConversions::innerLoadSltwoSubalgebras(Calculator& theCommands, c
   return false;
 }
 
+bool CalculatorConversions::innerAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorConversions::innerAlgebraicNumber");
+  if(input.IsOfType<AlgebraicNumber>())
+  { output=input;
+    return true;
+  }
+  if (input.IsOfType<Rational>())
+  { AlgebraicNumber theNum;
+    theNum=input.GetValue<Rational>();
+    return output.AssignValue(theNum, theCommands);
+  }
+  return false;
+}
+
 bool CalculatorConversions::innerLoadKey
 (Calculator& theCommands, const Expression& inputStatementList, const std::string& inputKey, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKey");

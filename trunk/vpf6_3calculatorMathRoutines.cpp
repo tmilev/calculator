@@ -1209,16 +1209,12 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(
   if (isGood)
     isGood=theComputation.inputE.IsOfType<RationalFunctionOld>();
   if (!isGood)
-  { theCommands << "CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals: Failed to convert "
+    return theCommands << "CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals: Failed to convert "
     << input.ToString() << " to rational function. ";
-    return false;
-  }
   theComputation.theRF=theComputation.inputE.GetValue<RationalFunctionOld>();
   if (theComputation.theRF.GetMinNumVars()>1)
-  { theCommands << "The input rational function is of " << theComputation.theRF.GetMinNumVars() << " variables and "
+    return theCommands << "The input rational function is of " << theComputation.theRF.GetMinNumVars() << " variables and "
     << " I can handle only 1.";
-    return false;
-  }
   theComputation.ComputePartialFractionDecomposition();
   return output.AssignValue(theComputation.printoutPFsHtml.str(), theCommands);
 }
@@ -1226,21 +1222,18 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(
 bool CalculatorFunctionsGeneral::innerGaussianEliminationMatrix(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("innerGaussianEliminationMatrix");
   Expression theConverted;
-  if (!Calculator::innerMatrixRational(theCommands, input, theConverted))
-  { theCommands << "<hr>Failed to extract rational matrix from " << input.ToString();
-    return false;
-  }
-  Matrix<Rational> theMat;
-  if (!theConverted.IsOfType<Matrix<Rational> >(&theMat))
-  { theCommands << "<hr>Failed to extract rational matrix, got intermediate conversion to: " << theConverted.ToString();
-    return false;
-  }
+  if (!Calculator::innerMatrixAlgebraic(theCommands, input, theConverted))
+    return theCommands << "<hr>Failed to extract algebraic number matrix from " << input.ToString();
+  Matrix<AlgebraicNumber> theMat;
+  if (!theConverted.IsOfType<Matrix<AlgebraicNumber> >(&theMat))
+    return theCommands << "<hr>Failed to extract algebraic number matrix, got intermediate conversion to: "
+    << theConverted.ToString();
   if (theMat.NumRows<2)
-  { theCommands << "<hr>The matrix I got as input had only 1 row. Possible user typo?";
-    return false;
-  }
+    return theCommands << "<hr>The matrix I got as input had only 1 row. Possible user typo?";
   std::stringstream out;
-  theMat.GaussianEliminationByRows(0,0,0,0,&out);
+  FormatExpressions theFormat;
+  theFormat.flagUseFrac=true;
+  theMat.GaussianEliminationByRows(0, 0, 0, 0, &out, & theFormat);
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -1283,10 +1276,8 @@ bool CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly(Calculator& theComma
     return false;
   const ElementWeylAlgebra<Rational>& theEWA=theEWAE.GetValue<ElementWeylAlgebra<Rational> >();
   if (theEWA.HasNonSmallPositiveIntegerDerivation())
-  { theCommands << "<hr> I cannot apply " << theEWA.ToString() << " onto " << theArgumentPoly.ToString() << " as "
+    return theCommands << "<hr> I cannot apply " << theEWA.ToString() << " onto " << theArgumentPoly.ToString() << " as "
     << "the differential operator contains non-integral differential operator exponents. ";
-    return false;
-  }
   if (!theEWA.ActOnPolynomial(theArgumentPoly))
   { std::stringstream out;
     out << "Failed to act by operator " << theEWA.ToString() << " on polynomial " << theArgumentPoly.ToString()

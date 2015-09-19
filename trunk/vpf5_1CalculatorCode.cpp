@@ -744,6 +744,19 @@ bool Calculator::innerMatrixRational(Calculator& theCommands, const Expression& 
   return output.AssignValue(outputMat, theCommands);
 }
 
+bool Calculator::innerMatrixAlgebraic(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerMatrixAlgebraic");
+//  stOutput << "ere i am, jh";
+  Matrix<AlgebraicNumber> outputMat;
+  if (input.IsOfType<Matrix<AlgebraicNumber> >())
+  { output=input;
+    return true;
+  }
+  if (!theCommands.GetMatriXFromArguments(input, outputMat, 0, -1, CalculatorConversions::innerAlgebraicNumber))
+    return theCommands << "<br>Failed to get matrix of rationals. ";
+  return output.AssignValue(outputMat, theCommands);
+}
+
 bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input, Expression& output)
 { Matrix<Expression> theMat;
   output=input;

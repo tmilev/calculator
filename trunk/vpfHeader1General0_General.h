@@ -1181,10 +1181,10 @@ public:
     theString=tempS;
   }
   static std::string DoubleBackslashes(const std::string& input);
-  static std::string GetMathSpanPure(const std::string& input, int upperNumChars=700);
-  static std::string GetMathSpanBeginArrayL(const std::string& input, int upperNumChars=700);
-  static std::string GetMathMouseHover(const std::string& input, int upperNumChars=700);
-  static std::string GetMathMouseHoverBeginArrayL(const std::string& input, int upperNumChars=700);
+  static std::string GetMathSpanPure(const std::string& input, int upperNumChars=5000);
+  static std::string GetMathSpanBeginArrayL(const std::string& input, int upperNumChars=5000);
+  static std::string GetMathMouseHover(const std::string& input, int upperNumChars=5000);
+  static std::string GetMathMouseHoverBeginArrayL(const std::string& input, int upperNumChars=5000);
   static std::string GetStyleButtonLikeHtml()
   { return " style=\"background:none; border:0; text-decoration:underline; color:blue; cursor:pointer\" ";
   }

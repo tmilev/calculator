@@ -638,6 +638,7 @@ public:
   HashedListReferences<Expression> ExpressionWithNotation;
   HashedListReferences<LittelmannPath> theLSpaths;
   HashedListReferences<Matrix<Rational> > theMatRats;
+  HashedListReferences<Matrix<AlgebraicNumber> > theMatsAlgebraic;
   HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
   HashedListReferences<Matrix<RationalFunctionOld> > theMatRFs;
   HashedListReferences<ElementZmodP> theEltsModP;
@@ -1200,6 +1201,9 @@ public:
   int opIntegral()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\int");
   }
+  int opMatAlgebraic()
+  { return this->theAtoms.GetIndexIMustContainTheObject("Matrix_Algebraic");
+  }
   int opMatRat()
   { return this->theAtoms.GetIndexIMustContainTheObject("Matrix_Rational");
   }
@@ -1430,6 +1434,7 @@ public:
   static bool CollectSummands(Calculator& theCommands, const Expression& input, MonomialCollection<Expression, Rational>& outputSum);
   static bool outerTensor(Calculator& theCommands, const Expression& input, Expression& output);
   static bool StandardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMatrixAlgebraic(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMatrixRational(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMatrixRationalTensorForm(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerMinus(Calculator& theCommands, const Expression& input, Expression& output);
@@ -1683,6 +1688,7 @@ public:
   static bool innerDynkinSimpleType(Calculator& theCommands, const Expression& input, DynkinSimpleType& output);
   static bool innerSlTwoSubalgebraPrecomputed(Calculator& theCommands, const Expression& input, slTwoSubalgebra& output);
   static bool innerLoadFromObject(Calculator& theCommands, const Expression& input, RationalFunctionOld& output);
+  static bool innerAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
   //conversions from expression tree to expression containing type
   template <class coefficient>
   static bool innerPolynomial(Calculator& theCommands, const Expression& input, Expression& output);

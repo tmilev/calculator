@@ -721,7 +721,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler ("GaussianElimination", CalculatorFunctionsGeneral::innerGaussianEliminationMatrix, "",
    "Gaussian elimination of a matrix. Prints a detailed string that shows the Gaussian elimination of \
     a matrix.",
-   "GaussianElimination(\\begin{array}{ccc}2& 3& 5& 7\\\\11&13&17&19\\\\23&29&31&37 \\end{array})")
+   "GaussianElimination(\\begin{array}{cccccc} sqrt 1 & sqrt 2 & sqrt 3 & 1 & 0& 0\\\\ sqrt 4 & sqrt 5 & sqrt 6 & 0 &1&0\\\\ sqrt 7 & sqrt 8 & sqrt 9 & 0 & 0 & 1     \\end{array})")
    ;
   this->AddOperationInnerHandler ("UnivariatePartialFractions", CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals, "",
    "Attempts to splits a univariate rational function into partial fractions over the real algebraic numbers.\

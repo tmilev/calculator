@@ -92,6 +92,12 @@ int Expression::GetTypeOperation<Matrix<Rational> >()const
 }
 
 template < >
+int Expression::GetTypeOperation<Matrix<AlgebraicNumber> >()const
+{ this->CheckInitialization();
+  return this->theBoss->opMatAlgebraic();
+}
+
+template < >
 int Expression::GetTypeOperation<Weight<Rational> >()const
 { this->CheckInitialization();
   return this->theBoss->opWeightLieAlg();
@@ -423,6 +429,15 @@ Matrix<Rational>
 
 template < >
 int Expression::AddObjectReturnIndex(const
+Matrix<AlgebraicNumber>
+& inputValue)const
+{ this->CheckInitialization();
+  return this->theBoss->theObjectContainer.theMatsAlgebraic
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
 MatrixTensor<Rational>
 & inputValue)const
 { this->CheckInitialization();
@@ -623,6 +638,14 @@ Matrix<Rational>& Expression::GetValueNonConst()const
 }
 
 template < >
+Matrix<AlgebraicNumber>& Expression::GetValueNonConst()const
+{ if (!this->IsOfType<Matrix<AlgebraicNumber> >())
+    crash << "This is a programming error: expression not of required type Matrix_Algebraic. The expression equals "
+    << this->ToString() << "." << crash;
+  return this->theBoss->theObjectContainer.theMatsAlgebraic.GetElement(this->GetLastChild().theData);
+}
+
+template < >
 MatrixTensor<Rational>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<MatrixTensor<Rational> >())
     crash << "This is a programming error: expression not of required type MatrixTensor_Rational. The expression equals " << this->ToString() << "." << crash;
@@ -797,10 +820,8 @@ bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >
 //  stOutput << "<hr>Getting ue from: " << this->ToString();
   SemisimpleLieAlgebra* theOwner=this->GetAmbientSSAlgebraNonConstUseWithCaution();
   if (theOwner==0)
-  { this->theBoss->Comments << "<hr>Failed to convert " << this->ToString() << " (Lispified: " << this->ToStringFull()
+    return this->theBoss->Comments << "<hr>Failed to convert " << this->ToString() << " (Lispified: " << this->ToStringFull()
     << ") to element of universal enveloping -  failed to extract ambient Lie algebra. ";
-    return false;
-  }
   ElementUniversalEnveloping<RationalFunctionOld> outputUE;
   if (this->IsOfType<Rational>())
   { outputUE.MakeConst(this->GetValue<Rational>(), *theOwner);

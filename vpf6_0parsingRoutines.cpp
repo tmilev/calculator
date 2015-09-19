@@ -163,6 +163,7 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("LittelmannPath");
   this->AddOperationBuiltInType("LRO");
   this->AddOperationBuiltInType("Matrix_Rational");
+  this->AddOperationBuiltInType("Matrix_Algebraic");
   this->AddOperationBuiltInType("MatrixTensor_Rational");
   this->AddOperationBuiltInType("Matrix_RF");
   this->AddOperationBuiltInType("CalculusPlot");

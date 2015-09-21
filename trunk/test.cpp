@@ -197,6 +197,7 @@ class GeneratorElementsSnxSnOnIndicesAndIndices
   { indiceses = theIndiceses;
     stack.SetSize(indiceses.size);
     frame_pointer = 0;
+    stack[frame_pointer].program_counter = pcpositions::beginning;
     ++(*this);
   }
 
@@ -2424,9 +2425,19 @@ void SparseTensor::Canonicalize()
 }
 */
 
-int mainTest(List<std::string>& inputArguments)
-{ InitializeGlobalObjects();
 
+
+void TestCountPermutations(int N)
+{ long long cnt = 0;
+  GeneratorPermutationsOfList<int> perms;
+  for(perms.Initialize(N); !perms.DoneIterating(); ++perms)
+    //stOutput << (*perms).ToStringCommaDelimited() << '\n';
+    cnt++;
+  stOutput << "Generated " << cnt << " permutations of " << N << " objects\n";
+}
+
+void LegacyTest()
+{
   BSTest();
 
   /*
@@ -3239,24 +3250,19 @@ int mainTest(List<std::string>& inputArguments)
   W.ComputeIrreducibleRepresentationsUsingSpechtModules();
 
   GeneratorPermutationsOfList<int> perms;
-  for(perms.Initialize(7); !perms.DoneIterating(); ++perms)
+  for(perms.Initialize(10); !perms.DoneIterating(); ++perms)
     stOutput << (*perms).ToStringCommaDelimited() << '\n';
 
   GeneratorElementsSnxSnOnIndicesAndIndices permssxsxs;
   List<List<int> > indiceses;
   indiceses.SetSize(3);
   indiceses[0].AddOnTop(1); indiceses[0].AddOnTop(2); indiceses[0].AddOnTop(3); indiceses[0].AddOnTop(4);
-  indiceses[1].AddOnTop(5); indiceses[1].AddOnTop(6); indiceses[0].AddOnTop(7);
-  indiceses[1].AddOnTop(8); indiceses[1].AddOnTop(9);
+  indiceses[1].AddOnTop(5); indiceses[1].AddOnTop(6); indiceses[1].AddOnTop(7);
+  indiceses[2].AddOnTop(8); indiceses[2].AddOnTop(9);
   for(permssxsxs.Initialize(indiceses); !permssxsxs.DoneIterating(); ++permssxsxs)
     stOutput << *permssxsxs << '\n';
 
-  stOutput << "Rational::TotalSmallAdditions: " << Rational::TotalSmallAdditions;
-  stOutput << "\nRational::TotalLargeAdditions: " << Rational::TotalLargeAdditions;
-  stOutput << "\nRational::TotalSmallMultiplications: " << Rational::TotalSmallMultiplications;
-  stOutput << "\nRational::TotalLargeMultiplications: " << Rational::TotalLargeMultiplications << "\n";
-  stOutput << "GetElapsedTimeInSeconds(): " << GetElapsedTimeInSeconds() << "\n";
-
+}
   /*  f65521 a;
     a.n = 2;
     f65521 b;
@@ -3267,5 +3273,27 @@ int mainTest(List<std::string>& inputArguments)
 
 //   std::string s;
 //   std::cin >> s;
+
+int mainTest(List<std::string>& inputArguments)
+{ InitializeGlobalObjects();
+  stOutput << inputArguments.ToStringCommaDelimited();
+  if(inputArguments.size == 0)
+    LegacyTest();
+  else
+  { if(inputArguments[0] == "count_permutations")
+    { int N;
+      if(inputArguments.size == 2)
+        N = atoi(inputArguments[1].c_str());
+      else
+        N = 10;
+      TestCountPermutations(N);
+    }
+  }
+
+  stOutput << "Rational::TotalSmallAdditions: " << Rational::TotalSmallAdditions;
+  stOutput << "\nRational::TotalLargeAdditions: " << Rational::TotalLargeAdditions;
+  stOutput << "\nRational::TotalSmallMultiplications: " << Rational::TotalSmallMultiplications;
+  stOutput << "\nRational::TotalLargeMultiplications: " << Rational::TotalLargeMultiplications << "\n";
+  stOutput << "GetElapsedTimeInSeconds(): " << GetElapsedTimeInSeconds() << "\n";
   return 0;
 }

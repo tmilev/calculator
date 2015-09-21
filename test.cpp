@@ -17,11 +17,251 @@
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
+#include "vpfHeader1General3_Test.h"
 
 GlobalVariables& theGlobalVariables=onePredefinedCopyOfGlobalVariables;
 
+template <typename object>
+class GeneratorPermutationsOfList
+{ public:
+  List<object> l;
+  bool done_iterating;
+
+  struct stack_frame
+  { int c;
+    int loop_i;
+    int program_counter;
+  };
+  List<struct stack_frame> stack;
+  int frame_pointer;
+
+  enum pcpositions
+  { beginning, loop, firstout, afterloop, end};
+
+  void Initialize(List<object> theL)
+  { this->l = theL;
+    this->done_iterating = false;
+    this->frame_pointer = 0;
+    this->stack.SetSize(this->l.size);
+    this->stack[0].c = this->l.size-1;
+    this->stack[0].program_counter = 0;
+    ++(*this);
+  }
+  // this function is the only one that is mathematically interesting
+  // by the way what's with the signature lol
+  GeneratorPermutationsOfList& operator++()
+  { //stOutput << "++ called, ";
+    while(true)
+    { //varsout();
+      if(frame_pointer == -1)
+      { done_iterating = true;
+        return *this;
+      }
+      switch(stack[frame_pointer].program_counter)
+      { case pcpositions::beginning:
+        if(stack[frame_pointer].c == 0)
+        { frame_pointer--;
+          return *this;
+        }
+        stack[frame_pointer].loop_i = 0;
+        case pcpositions::loop:
+        if(stack[frame_pointer].loop_i == stack[frame_pointer].c)
+        { stack[frame_pointer].program_counter = pcpositions::afterloop;
+          break;
+        }
+        stack[frame_pointer].program_counter = pcpositions::firstout;
+        frame_pointer++;
+        stack[frame_pointer].c = stack[frame_pointer-1].c-1;
+        stack[frame_pointer].program_counter = pcpositions::beginning;
+        break;
+        case firstout:
+        if(stack[frame_pointer].c%2!=0)
+          l.SwapTwoIndices(l.size-1-stack[frame_pointer].loop_i,l.size-1-stack[frame_pointer].c);
+        else
+          l.SwapTwoIndices(l.size-1,l.size-1-stack[frame_pointer].c);
+        stack[frame_pointer].loop_i++;
+        stack[frame_pointer].program_counter = pcpositions::loop;
+        break;
+        case afterloop:
+        stack[frame_pointer].program_counter = pcpositions::end;
+        frame_pointer++;
+        stack[frame_pointer].c = stack[frame_pointer-1].c-1;
+        stack[frame_pointer].program_counter = pcpositions::beginning;
+        break;
+        case end:
+        frame_pointer--;
+      }
+    }
+  }
+
+  void Initialize(int theN)
+  { List<int> ll;
+    ll.SetSize(theN);
+    for(int i=0; i<theN; i++)
+      ll[i] = i;
+    this->Initialize(ll);
+  }
+
+  // get current element, using bizarre cxx syntax because why not
+  // apparently you can't return a reference from a const method?
+  List<int>& operator*()
+  { return l;
+  }
+
+  bool DoneIterating() const
+  { if(frame_pointer == -1)
+      return true;
+    return false;
+  }
 
 
+  void varsout() const
+  { stOutput << "stack: [";
+    for(int i=0; i<stack.size; i++)
+    { stOutput << "(";
+      if(i==frame_pointer)
+        stOutput << "(";
+
+      stOutput << "pc=" << stack[i].program_counter;
+      stOutput << ",li=" << stack[i].loop_i;
+      stOutput << ",c=" << stack[i].c;
+
+      if(i==frame_pointer)
+        stOutput << ")";
+      stOutput << ")";
+      if(i != stack.size-1)
+        stOutput << ", ";
+    }
+    stOutput << "] l=" << l.ToStringCommaDelimited() << "\n";
+  }
+};
+
+// PermutationR2::bon was never intended to be configured properly everywhere
+// and PermutationR2s returned from here don't have it set
+// is it even a good idea for a PermutationR2 to carry it around?
+class GeneratorPermutationR2sOnIndices
+{ public:
+  List<int> replacements;
+  GeneratorPermutationsOfList<int> pads;
+
+  void Initialize(const List<int>& l)
+  { replacements = l;
+    replacements.QuickSortAscending();
+    pads.Initialize(l.size);
+  }
+
+  GeneratorPermutationR2sOnIndices& operator++()
+  { ++pads;
+    return *this; // what the fuck does this even mean how the hell
+  }
+
+  // this method name is such bullshit lol
+  PermutationR2 operator*()
+  { List<int> l = *pads; // for this line, it can't be const, since the other method can't return
+    PermutationR2 out;    // a const list& or even verify that the list isn't being modified
+    out.MakeFromActionDescription(l);
+    for(int i=0; i<out.cycles.size; i++)
+      for(int j=0; j<out.cycles[i].size; j++)
+        out.cycles[i][j] = replacements[out.cycles[i][j]];
+    return out;
+  }
+
+  void Initialize(int n)
+  { List<int> l;
+    l.SetSize(n);
+    for(int i=0; i<n; i++)
+      l[i] = i;
+    Initialize(l);
+  }
+
+  bool DoneIterating() const
+  { return pads.DoneIterating();
+  }
+};
+
+class GeneratorElementsSnxSnOnIndicesAndIndices
+{ public:
+  List<List<int> > indiceses;
+
+  enum pcpositions {beginning, loop, midloop, end};
+  struct frame
+  { int program_counter;
+    GeneratorPermutationR2sOnIndices permgen;
+    PermutationR2 subprod;
+  };
+  List<struct frame> stack;
+  int frame_pointer;
+
+
+  void Initialize(List<List<int> > theIndiceses)
+  { indiceses = theIndiceses;
+    stack.SetSize(indiceses.size);
+    frame_pointer = 0;
+    ++(*this);
+  }
+
+  /* This program is too confusing to write without writing it in python first
+  def operator++(frame_pointer):
+    permgens[frame_pointer].Initialize(indiceses[frame_pointer])
+    for permi in permgens[frame_pointer]:
+      if(frame_pointer > 0):
+        subprods[frame_pointer] = subprods[frame_pointer-1]*permi
+      else:
+        subprods[frame_pointer] = permi
+      if(frame_pointer == len(permgens)-1):
+        yield subprods[frame_pointer]
+      else
+        self.operator++(frame_pointer+1)
+      ++permgens[frame_pointer]
+  */
+
+  GeneratorElementsSnxSnOnIndicesAndIndices& operator++()
+  { while(true)
+    { switch(stack[frame_pointer].program_counter)
+      { case pcpositions::beginning:
+        stack[frame_pointer].permgen.Initialize(indiceses[frame_pointer]);
+        case pcpositions::loop:
+        if(stack[frame_pointer].permgen.DoneIterating())
+        { stack[frame_pointer].program_counter = pcpositions::end;
+          break;
+        }
+        { // permi is a block local variable, so no "jump to case label crosses initialization" error lol
+        PermutationR2 permi = *(stack[frame_pointer].permgen);
+        if(frame_pointer == 0)
+          stack[frame_pointer].subprod = permi;
+        else
+          stack[frame_pointer].subprod.MakeFromMul(stack[frame_pointer-1].subprod,permi);
+        if(frame_pointer == indiceses.size-1)
+        { stack[frame_pointer].program_counter = pcpositions::midloop;
+          return *this;
+        } else
+        { stack[frame_pointer].program_counter = pcpositions::midloop;
+          frame_pointer++;
+          stack[frame_pointer].program_counter = pcpositions::beginning;
+          break;
+        }
+        }
+        case pcpositions::midloop:
+        ++stack[frame_pointer].permgen;
+        stack[frame_pointer].program_counter = pcpositions::loop;
+        break;
+        case pcpositions::end:
+        frame_pointer--;
+      }
+    }
+  }
+
+  PermutationR2 operator*()
+  { return stack[indiceses.size-1].subprod;
+  }
+
+  bool DoneIterating()
+  { for(int i=0; i<stack.size; i++)
+      if(!stack[i].permgen.DoneIterating())
+        return false;
+    return true;
+  }
+};
 
 class CharacterTable
 {
@@ -91,7 +331,7 @@ bool CharacterComparator(const Vector<Rational>& left, const Vector<Rational>& r
       return true;
   }
   return false;
-}
+};
 
 template <>
 unsigned int Vector<int>::HashFunction() const
@@ -2184,7 +2424,7 @@ void SparseTensor::Canonicalize()
 }
 */
 
-int main(void)
+int mainTest(List<std::string>& inputArguments)
 { InitializeGlobalObjects();
 
   BSTest();
@@ -2993,17 +3233,29 @@ int main(void)
   }
 
   WeylGroup W;
-  W.MakeArbitrarySimple('A', 4);
+  W.MakeArbitrarySimple('A', 5);
   W.ComputeCCSizesAndRepresentatives(NULL);
   stOutput << W.theDynkinType << " :" << W.size() << " elements, in " << W.conjugacyClasseS.size << " conjugacy classes\n";
   W.ComputeIrreducibleRepresentationsUsingSpechtModules();
 
+  GeneratorPermutationsOfList<int> perms;
+  for(perms.Initialize(7); !perms.DoneIterating(); ++perms)
+    stOutput << (*perms).ToStringCommaDelimited() << '\n';
 
-  stOutput << "Rational.TotalSmallAdditions: " << Rational::TotalSmallAdditions;
-  stOutput << "\nRational.TotalLargeAdditions: " << Rational::TotalLargeAdditions;
-  stOutput << "\nRational.TotalSmallMultiplications: " << Rational::TotalSmallMultiplications;
-  stOutput << "\nRational.TotalLargeMultiplications: " << Rational::TotalLargeMultiplications << "\n";
+  GeneratorElementsSnxSnOnIndicesAndIndices permssxsxs;
+  List<List<int> > indiceses;
+  indiceses.SetSize(3);
+  indiceses[0].AddOnTop(1); indiceses[0].AddOnTop(2); indiceses[0].AddOnTop(3); indiceses[0].AddOnTop(4);
+  indiceses[1].AddOnTop(5); indiceses[1].AddOnTop(6); indiceses[0].AddOnTop(7);
+  indiceses[1].AddOnTop(8); indiceses[1].AddOnTop(9);
+  for(permssxsxs.Initialize(indiceses); !permssxsxs.DoneIterating(); ++permssxsxs)
+    stOutput << *permssxsxs << '\n';
 
+  stOutput << "Rational::TotalSmallAdditions: " << Rational::TotalSmallAdditions;
+  stOutput << "\nRational::TotalLargeAdditions: " << Rational::TotalLargeAdditions;
+  stOutput << "\nRational::TotalSmallMultiplications: " << Rational::TotalSmallMultiplications;
+  stOutput << "\nRational::TotalLargeMultiplications: " << Rational::TotalLargeMultiplications << "\n";
+  stOutput << "GetElapsedTimeInSeconds(): " << GetElapsedTimeInSeconds() << "\n";
 
   /*  f65521 a;
     a.n = 2;

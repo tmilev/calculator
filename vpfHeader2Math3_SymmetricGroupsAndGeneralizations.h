@@ -18,13 +18,24 @@ static ProjectInformationInstance ProjectInfoVpfSymmetricGroups(__FILE__, "Heade
 template <class templateVector, class templateMonomial, class coefficient>
 class SparseSubspaceBasis
 { public:
+  bool flagDeallocated;
   int rank;
   List<templateMonomial> involvedMonomials;
   Matrix<coefficient> projectionOperator;
 
   void SetBasis(const List<templateVector>& basis);
   void DenseVectorInBasis(Vector<coefficient>& out, const templateVector& in);
-
+  bool CheckConsistency() const
+  { if (this->flagDeallocated)
+      crash << "This is a programming error: use of SparseSubspaceBasis after free. " << crash;
+    for (int i=0; i<this->involvedMonomials.size; i++)
+    { this->involvedMonomials[i].CheckConsistency();
+    }
+    this->projectionOperator.CheckConsistency();
+    return true;
+  }
+  SparseSubspaceBasis(){this->flagDeallocated=false;}
+  ~SparseSubspaceBasis(){this->flagDeallocated=true;}
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
   std::string ToString() const;
@@ -32,7 +43,9 @@ class SparseSubspaceBasis
 
 template <class templateVector, class templateMonomial, class coefficient>
 void SparseSubspaceBasis<templateVector, templateMonomial, coefficient>::SetBasis(const List<templateVector>& basis)
-{ for(int i=0; i<basis.size; i++)
+{ this->CheckConsistency();
+
+  for(int i=0; i<basis.size; i++)
     for(int j=0; j<basis[i].theMonomials.size; j++)
       this->involvedMonomials.BSInsertDontDup(basis[i].theMonomials[j]);
   Matrix<coefficient> basisMatrix;

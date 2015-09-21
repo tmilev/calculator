@@ -80,6 +80,7 @@ private:
 public:
   List<int> generatorsIndices;
   List<coefficient> Powers;
+  bool flagDeallocated;
   std::string ToString(FormatExpressions* theFormat=0)const;
   bool IsEqualToOne()const
   { return this->generatorsIndices.size==0;
@@ -92,9 +93,20 @@ public:
     for (int i=0; i<other.size; i++)
       this->MultiplyByGeneratorPowerOnTheRight(other[i], 1);
   }
+  bool CheckConsistency()
+  { if (this->flagDeallocated)
+      crash << "Programming error: use after free of MonomialTensor." << crash;
+    return true;
+  }
   void operator=(const MonomialTensor<coefficient, inputHashFunction>& other)
   { this->generatorsIndices=(other.generatorsIndices);
     this->Powers=other.Powers;
+  }
+  MonomialTensor()
+  { this->flagDeallocated=false;
+  }
+  ~MonomialTensor()
+  { this->flagDeallocated =true;
   }
   int GetMinNumVars()
   { int result=0;
@@ -428,6 +440,7 @@ public:
   int NumCols; int ActualNumCols;
   coefficient** elements;
   static bool flagComputingDebugInfo;
+  bool flagDeallocated;
   void init(int r, int c);
   void ReleaseMemory();
   bool IsPositiveDefinite();
@@ -444,12 +457,13 @@ public:
     result.append(coefficient::GetXMLClassName());
     return result;
   }
-  Matrix():NumRows(0), ActualNumRows(0), NumCols(0), ActualNumCols(0), elements(0){}
-  Matrix(const Matrix<coefficient>& other):NumRows(0), ActualNumRows(0), NumCols(0), ActualNumCols(0), elements(0)
+  Matrix():NumRows(0), ActualNumRows(0), NumCols(0), ActualNumCols(0), elements(0), flagDeallocated(false){}
+  Matrix(const Matrix<coefficient>& other):NumRows(0), ActualNumRows(0), NumCols(0), ActualNumCols(0), elements(0), flagDeallocated(false)
   { *this=other;
   }
   ~Matrix()
   { this->ReleaseMemory();
+    this->flagDeallocated=true;
   }
   void Transpose()
   { if (this->NumCols==this->NumRows)
@@ -516,6 +530,11 @@ public:
     for (int i=oldNumRows; i<this->NumRows; i++)
       for (int j=0; j<this->NumCols; j++)
         this->elements[i][j]=standsBelow(i-oldNumRows, j);
+  }
+  bool CheckConsistency()const
+  { if (this->flagDeallocated)
+      crash << "Programming error: use after free of Matrix. " << crash;
+    return true;
   }
   static void MatrixInBasis(const Matrix<coefficient>& input, Matrix<coefficient>& output, const List<Vector<coefficient> >& basis, const Matrix<coefficient>& gramMatrixInverted)
   { int d = basis.size;
@@ -4057,6 +4076,7 @@ public:
   MutexWrapper MutexRegisterFunctionStaticFiasco;
   MutexWrapper MutexParallelComputingStaticFiasco;
   MutexWrapper MutexWebWorkerStaticFiasco;
+  MutexWrapper MutexProgressReporting;
 
   MemorySaving<HashedList<Selection> > hashedSelSimplexAlg;
 

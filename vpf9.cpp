@@ -100,9 +100,11 @@ void ProgressReport::initFromGV(GlobalVariables* theGlobalVariables)
 { this->pointerGV=theGlobalVariables;
   if (this->pointerGV==0)
     return;
+  this->pointerGV->MutexProgressReporting.LockMe();
   currentLevel=this->pointerGV->ProgressReportStringS.size;
   this->pointerGV->ProgressReportStringS.SetSize(this->pointerGV->ProgressReportStringS.size+1);
   *this->pointerGV->ProgressReportStringS.LastObject()="";
+  this->pointerGV->MutexProgressReporting.UnlockMe();
 }
 
 ProgressReport::~ProgressReport()

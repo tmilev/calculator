@@ -2,6 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
 #include "vpfHeader6WebServer.h"
+#include "vpfHeader1General3_Test.h"
 
 ProjectInformationInstance projectInfoInstanceCalculatorCpp(__FILE__, "Calculator web interface.");
 
@@ -23,6 +24,13 @@ int main(int argc, char **argv)
   if (argc>=2)
   { std::string tempArgument=argv[1];
     onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer=(tempArgument=="server");
+    if (tempArgument=="test")
+    { List<std::string> remainingArguments;
+      remainingArguments.SetSize(argc-2);
+      for (int i=2; i<argc; i++)
+        remainingArguments[i]=argv[i];
+      return mainTest(remainingArguments);
+    }
     if (argc>2)
     { tempArgument=argv[2];
       theWebServer.flagTryToKillOlderProcesses=!(tempArgument=="nokill");

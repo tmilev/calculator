@@ -499,8 +499,10 @@ void Calculator::EvaluateCommands()
   Expression StartingExpression=this->theProgramExpression;
   this->flagAbortComputationASAP=false;
   this->Comments.clear();
+  bool usingCommandline=!this->flagDisplayFullExpressionTree && !this->flagUseHtml;
   ProgressReport theReport(theGlobalVariableS);
-  theReport.Report("Evaluating expressions, current expression stack:");
+  if (!usingCommandline)
+    theReport.Report("Evaluating expressions, current expression stack:\n");
   this->EvaluateExpression(*this, this->theProgramExpression, this->theProgramExpression);
   if (this->RecursionDeptH!=0)
     crash << "This is a programming error: the starting recursion depth before evaluation was 0, but after evaluation it is "
@@ -509,7 +511,10 @@ void Calculator::EvaluateCommands()
   this->theGlobalVariableS->theDefaultFormat.flagUseLatex=true;
   this->theGlobalVariableS->theDefaultFormat.flagExpressionIsFinal=true;
   this->theGlobalVariableS->theDefaultFormat.flagExpressionNewLineAllowed=true;
-  if (!this->flagDisplayFullExpressionTree)
+  if(usingCommandline)
+  { out << "Input: " << "\e[1;32m" << StartingExpression.ToString() << "\033[0m" << std::endl;
+    out << "Output: " << "\e[1;33m" << this->theProgramExpression.ToString() << "\033[0m" << std::endl;
+  } else if (!this->flagDisplayFullExpressionTree)
     out << this->theProgramExpression.ToString(&this->theGlobalVariableS->theDefaultFormat, &StartingExpression);
   else
     out << "<hr>Input:<br> " << StartingExpression.ToStringFull() << "<hr>"

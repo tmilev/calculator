@@ -782,6 +782,7 @@ public:
   bool flagHideLHS;
   bool flagDisplayFullExpressionTree;
   bool flagUseFracInRationalLaTeX;
+  bool flagUseHtml;
   bool flagDisplayContext;
 
   bool flagDontDistribute;

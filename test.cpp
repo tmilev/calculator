@@ -3276,7 +3276,7 @@ void LegacyTest()
 
 int mainTest(List<std::string>& inputArguments)
 { InitializeGlobalObjects();
-  stOutput << inputArguments.ToStringCommaDelimited() << std::endl;
+  stOutput << inputArguments.ToStringCommaDelimited();
   if(inputArguments.size == 0)
     LegacyTest();
   else

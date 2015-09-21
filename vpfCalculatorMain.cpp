@@ -28,7 +28,7 @@ int main(int argc, char **argv)
     { List<std::string> remainingArguments;
       remainingArguments.SetSize(argc-2);
       for (int i=2; i<argc; i++)
-        remainingArguments[i]=argv[i];
+        remainingArguments[i-2]=argv[i];
       return mainTest(remainingArguments);
     }
     if (argc>2)

@@ -2061,7 +2061,7 @@ public:
   unsigned int HashFunction()const
   { return this->::MonomialCollection<MonomialP, coefficient>::HashFunction();
   }
-  static inline unsigned int HashFunction(const Polynomial<coefficient>& input)
+  static unsigned int HashFunction(const Polynomial<coefficient>& input)
   { return input.HashFunction();
   }
   void MultiplyBy(const MonomialP& other, const coefficient& theCoeff)

@@ -4,6 +4,7 @@
 #include "vpfHeader3Calculator3_WeylGroupCharacters.h"
 #include "vpfHeader3Calculator1_InnerTypedFunctions.h"
 #include "vpfHeader3Calculator2_InnerFunctions.h"
+#include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h" //undefined reference to Polynomial<AlgebraicNumber>::MakeOne(int)
 ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator functions. ");
 //This file lists calculator functions and various hard-coded rules. Please do not use for any other purposes.
 

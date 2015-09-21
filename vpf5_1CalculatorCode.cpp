@@ -6,6 +6,7 @@
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 #include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
+#include "vpfImplementationHeader2Math3_FiniteGroups.h" // undefined reference to `WeylGroupRepresentation<Rational>::reset()
 
 static ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "Calculator built-in functions. ");
 

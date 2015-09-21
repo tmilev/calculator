@@ -50,7 +50,7 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
   return out.str();
 }
 
-inline int IntIdentity(const int& x)
+int IntIdentity(const int& x)
 { return x;
 }
 

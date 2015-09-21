@@ -8269,13 +8269,13 @@ class ImpreciseDouble
       return (-theValue)< this->precision;
     return this->theValue<this->precision;
   }
-  inline bool operator<=(const ImpreciseDouble& other)
+  bool operator<=(const ImpreciseDouble& other)
   { return ! (other<*this);
   }
   bool IsPositive()const
   { return this->theValue>this->precision;
   }
-  inline bool IsNegative()const
+  bool IsNegative()const
   { return *this<this->GetZero();
   }
   bool operator<(const ImpreciseDouble& other)const
@@ -8291,7 +8291,7 @@ class ImpreciseDouble
     copyMe=*this;
     *this=copyMe/other;
   }
-  inline ImpreciseDouble operator/(const ImpreciseDouble& other)const
+  ImpreciseDouble operator/(const ImpreciseDouble& other)const
   { ImpreciseDouble result;
     result=*this;
     if (other.IsEqualToZero())
@@ -8315,13 +8315,13 @@ class ImpreciseDouble
       diff=-diff;
     return diff<this->precision;
   }
-  static inline ImpreciseDouble GetMinusOne()
+  static ImpreciseDouble GetMinusOne()
   { return -1;
   }
-  static inline ImpreciseDouble GetOne()
+  static ImpreciseDouble GetOne()
   { return 1;
   }
-  static inline ImpreciseDouble GetZero()
+  static ImpreciseDouble GetZero()
   { return 0;
   }
 };

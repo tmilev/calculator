@@ -660,13 +660,13 @@ bool affineCone::WallIsInternalInCone(affineHyperplane<Rational>& theKillerCandi
 { return true;
 }
 
-inline int affineCone::GetDimension()
+int affineCone::GetDimension()
 { if (this->theWalls.size==0)
     return 0;
   return this->theWalls.TheObjects[0].affinePoint.size;
 }
 
-inline unsigned int affineCone::HashFunction() const
+unsigned int affineCone::HashFunction() const
 { int tempMin=MathRoutines::Minimum(this->theWalls.size, ::SomeRandomPrimesSize);
   unsigned int result=0;
   for (int i=0; i<tempMin; i++)

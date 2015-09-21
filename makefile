@@ -12,7 +12,7 @@ endif
 ifeq ($(debug), 1)
 	CFLAGS += -g
 else
-#	CFLAGS += -O3 -march=native
+	CFLAGS += -O3 -march=native
 endif
 
 #if this is missing something, add it, or, ls | grep cpp | xargs echo

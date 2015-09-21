@@ -288,7 +288,7 @@ LargeIntUnsigned::  LargeIntUnsigned(const LargeIntUnsigned& x)
 { (*this)=x;
 }
 
-inline void LargeIntUnsigned::AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift)
+void LargeIntUnsigned::AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift)
 { if(!(x<LargeIntUnsigned::CarryOverBound))
     crash << crash;
   while (x>0)
@@ -309,7 +309,7 @@ inline void LargeIntUnsigned::AddShiftedUIntSmallerThanCarryOverBound(unsigned i
 //  this->FitSize();
 }
 
-inline void LargeIntUnsigned::AssignShiftedUInt(unsigned int x, int shift)
+void LargeIntUnsigned::AssignShiftedUInt(unsigned int x, int shift)
 { if (x==0)
   { this->MakeZero();
     return;
@@ -327,7 +327,7 @@ inline void LargeIntUnsigned::AssignShiftedUInt(unsigned int x, int shift)
   }
 }
 
-inline void LargeIntUnsigned::AddNoFitSize(const LargeIntUnsigned& x)
+void LargeIntUnsigned::AddNoFitSize(const LargeIntUnsigned& x)
 { MacroIncrementCounter(Rational::TotalLargeAdditions);
   int oldsize= this->theDigits.size;
   this->theDigits.SetSize(MathRoutines::Maximum(this->theDigits.size, x.theDigits.size)+1);
@@ -821,7 +821,7 @@ void Rational::WriteToFile(std::fstream& output)
 { output << this->ToString();
 }
 
-inline void Rational::RaiseToPower(int x)
+void Rational::RaiseToPower(int x)
 { Rational tempRat;
   tempRat.MakeOne();
   if (x<0)
@@ -842,7 +842,7 @@ inline void Rational::RaiseToPower(int x)
   this->ShrinkExtendedPartIfPossible();
 }
 
-inline void Rational::Invert()
+void Rational::Invert()
 { if (this->Extended==0)
   { int tempI= this->DenShort;
     if(tempI<=0)
@@ -866,13 +866,13 @@ void Rational::ReadFromFile(std::istream& input)
   this->AssignString(tempS);
 }
 
-inline void Rational::MultiplyByInt(int x)
+void Rational::MultiplyByInt(int x)
 { Rational tempRat;
   tempRat.AssignInteger(x);
   this->MultiplyBy(tempRat);
 }
 
-inline void Rational::MultiplyBy(const Rational& r)
+void Rational::MultiplyBy(const Rational& r)
 { if (r.Extended==0 && this->Extended==0)
     if (this->TryToMultiplyQuickly(r.NumShort, r.DenShort))
       return;
@@ -901,7 +901,7 @@ Rational operator-(const Rational& argument)
   return tempRat;
 }
 
-inline void Rational::MultiplyByLargeInt(LargeInt& x)
+void Rational::MultiplyByLargeInt(LargeInt& x)
 { this->InitExtendedFromShortIfNeeded();
   this->Extended->num*=(x);
   this->Simplify();
@@ -913,7 +913,7 @@ void Rational::MultiplyByLargeIntUnsigned(LargeIntUnsigned& x)
   this->Simplify();
 }
 
-inline void Rational::DivideBy(const Rational& r)
+void Rational::DivideBy(const Rational& r)
 { if (this==&r)
   { this->MakeOne();
     return;

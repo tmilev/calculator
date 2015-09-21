@@ -3,6 +3,11 @@
 
 static ProjectInformationInstance ProjectInfoVpfHardCodedLoader(__FILE__, "Hard-coded data loading");
 
+template <>
+unsigned int Polynomial<Rational>::HashFunction(const Polynomial<Rational>& input)
+{ return input.HashFunction();
+}
+
 template<class templateWeylGroup>
 void ElementWeylGroup<templateWeylGroup>::MakeFromReadableReflections
 (WeylGroup& input, bool dontMakeCanonical_SET_TRUE_ON_YOUR_OWN_RISK, const std::string& inputReflections)

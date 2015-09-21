@@ -4,6 +4,7 @@
 #define vpfImplementationHeaderSemisimpleLieAlgebrasIncluded
 
 #include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
+#include "vpfHeader2Math1_LieTheoryExtras.h" // error: invalid use of incomplete type ‘struct branchingData’
 static ProjectInformationInstance ProjectInfovpfImplementationHeaderSemisimpleLieAlgebras(__FILE__, "Implementation header, semisimple Lie algebra routines. ");
 
 template <class coefficient>
@@ -478,5 +479,194 @@ std::string charSSAlgMod<coefficient>::MultiplyBy(const charSSAlgMod& other, Glo
   this->operator=(result);
   return "";
 }
+
+template <class coefficient>
+bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, charSSAlgMod& output, branchingData& inputData, GlobalVariables& theGlobalVariables)
+{ if (this->IsEqualToZero())
+    return false;
+  this->CheckNonZeroOwner();
+  WeylGroup& theWeyL=this->GetOwner()->theWeyl;
+  std::stringstream out;
+  std::string tempS;
+  inputData.initAssumingParSelAndHmmInitted(theGlobalVariables);
+  SubgroupWeylGroupOLD& WeylFDSmallAsSubInLarge=inputData.WeylFDSmallAsSubInLarge;
+  SubgroupWeylGroupOLD& WeylFDSmall=inputData.WeylFDSmall;
+  SemisimpleLieAlgebra& theSmallAlgebra= inputData.theHmm.theDomain();
+  Vectors<Rational>& embeddingsSimpleEiGoesTo=inputData.theHmm.ImagesCartanDomain;
+
+//  stOutput << "the ambient Weyl of levi of parabolic: <br>" << inputData.WeylFD.ToString();
+//  stOutput << "the small subgroup embedded: <br>" << WeylFDSmallAsSubInLarge.ToString();
+//  stOutput << "the small subgroup: <br>" << WeylFDSmall.ToString();
+//  stOutput << "<br>starting char: " << this->ToString();
+  charSSAlgMod charAmbientFDWeyl, remainingCharProjected, remainingCharDominantLevI;
+
+  Weight<coefficient> tempMon, localHighest;
+  List<coefficient> tempMults;
+  HashedList<Vector<coefficient> > tempHashedRoots;
+  coefficient bufferCoeff, highestCoeff;
+  for (int i=0; i<this->size(); i++)
+  { const Weight<coefficient>& currentMon=(*this)[i];
+    if (!inputData.WeylFD.FreudenthalEvalIrrepIsWRTLeviPart(currentMon.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
+    { if (Report!=0)
+        *Report=tempS;
+      return false;
+    }
+//    stOutput << "<hr>FreudenthalEval on " << currentMon.ToString() << " generated the following report: "
+//    << tempS << "<hr>";
+    for (int j=0; j<tempHashedRoots.size; j++)
+    { bufferCoeff=this->theCoeffs[i];
+      tempMon.weightFundamentalCoordS=theWeyL.GetFundamentalCoordinatesFromSimple(tempHashedRoots[j]);
+      tempMon.owner=this->GetOwner();
+      bufferCoeff*=tempMults[j];
+      charAmbientFDWeyl.AddMonomial(tempMon, bufferCoeff);
+    }
+  }
+//  stOutput << "<hr>" << tempS;
+//  stOutput << "<hr>Freudenthal eval ends up being: " << charAmbientFDWeyl.ToString();
+  Vectors<coefficient> orbitDom;
+  for (int i=0; i<charAmbientFDWeyl.size(); i++)
+  { orbitDom.SetSize(0);
+    if (!inputData.WeylFD.GenerateOrbitReturnFalseIfTruncated(theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS), orbitDom, 10000))
+    { out << "failed to generate the complement-sub-Weyl-orbit of weight "
+      << theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS).ToString();
+//      stOutput << "failed to generate the complement-sub-Weyl-orbit of weight "
+//      << theWeyL.GetSimpleCoordinatesFromFundamental
+//      (charAmbientFDWeyl[i].weightFundamentalCoords).ToString();
+      if (Report!=0)
+        *Report=out.str();
+      return false;
+    }
+//    stOutput << "<hr>the orbit with highest weight "
+//    << theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoords).ToString()
+//    << " is: ";
+//    for (int l=0; l<orbitDom.size; l++)
+//      stOutput <<"<br>" << orbitDom[l].ToString();
+//    stOutput << "<hr>of them dominant are: <br>";
+    tempMon.owner=this->GetOwner();
+    for (int k=0; k<orbitDom.size; k++)
+      if (WeylFDSmallAsSubInLarge.IsDominantWeight(orbitDom[k]))
+      { tempMon.weightFundamentalCoordS=theWeyL.GetFundamentalCoordinatesFromSimple(orbitDom[k]);
+        remainingCharDominantLevI.AddMonomial(tempMon, charAmbientFDWeyl.theCoeffs[i]);
+        //stOutput << "<br>" << orbitDom[k].ToString() << " with coeff " << charAmbientFDWeyl.theCoeffs[i].ToString();
+      }// else
+       //stOutput << "<br>" << orbitDom[k].ToString() << " is not dominant ";
+  }
+  FormatExpressions theFormat;
+  theFormat.flagUseLatex=true;
+  theFormat.CustomPlusSign="\\oplus ";
+  theFormat.fundamentalWeightLetter="\\omega";
+  out << "<br>Character w.r.t Levi part of the parabolic of the larger algebra: " << CGI::GetMathSpanPure(remainingCharDominantLevI.ToString(&theFormat));
+  //stOutput << "<br>Character w.r.t Levi part: " << CGI::GetMathSpanPure
+  //(remainingCharDominantLevI.ToString());
+  remainingCharProjected.MakeZero();
+  Vector<coefficient> fundCoordsSmaller, theProjection, inSimpleCoords;
+  fundCoordsSmaller.SetSize(WeylFDSmall.AmbientWeyl.GetDim());
+  for (int i=0; i<remainingCharDominantLevI.size(); i++)
+  { inSimpleCoords=theWeyL.GetSimpleCoordinatesFromFundamental(remainingCharDominantLevI[i].weightFundamentalCoordS);
+    for (int j=0; j<WeylFDSmall.AmbientWeyl.GetDim(); j++)
+    { fundCoordsSmaller[j]=theWeyL.RootScalarCartanRoot(inSimpleCoords, embeddingsSimpleEiGoesTo[j]);
+      fundCoordsSmaller[j]/=WeylFDSmall.AmbientWeyl.CartanSymmetric.elements[j][j]/2;
+    }
+    //stOutput << "<br>insimple coords: " << inSimpleCoords.ToString() << "; fundcoordssmaller: " << fundCoordsSmaller.ToString();
+    tempMon.owner=&theSmallAlgebra;
+    tempMon.weightFundamentalCoordS=fundCoordsSmaller;
+    remainingCharProjected.AddMonomial(tempMon, remainingCharDominantLevI.theCoeffs[i]);
+  }
+//  stOutput << "<br>Character w.r.t subalgebra: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
+// (remainingCharProjected.ToString());
+  Vector<coefficient> simpleGeneratorBaseField;
+  output.MakeZero();
+  while(!remainingCharProjected.IsEqualToZero())
+  { localHighest=*remainingCharProjected.theMonomials.LastObject();
+    for (bool Found=true; Found; )
+    { Found=false;
+      for (int i=0; i<WeylFDSmall.RootsOfBorel.size; i++)
+      { tempMon=localHighest;
+        simpleGeneratorBaseField=WeylFDSmall.RootsOfBorel[i]; // <- implicit type conversion here!
+        tempMon.weightFundamentalCoordS+=WeylFDSmall.AmbientWeyl.GetFundamentalCoordinatesFromSimple(simpleGeneratorBaseField);
+//        stOutput << "<br>candidate highest mon found simple & usual coords: "
+//        << WeylFDSmall.AmbientWeyl.GetSimpleCoordinatesFromFundamental(tempMon.weightFundamentalCoords).ToString()
+//        << " = " << tempMon.ToString();
+        if (remainingCharProjected.theMonomials.Contains(tempMon))
+        { localHighest=tempMon;
+          Found=true;
+        }
+      }
+    }
+//    stOutput << "<br>The highest mon found simple & usual coords: "
+//    << WeylFDSmall.AmbientWeyl.GetSimpleCoordinatesFromFundamental(localHighest.weightFundamentalCoords).ToString()
+//    << " = " << localHighest.ToString();
+    highestCoeff=remainingCharProjected.theCoeffs[remainingCharProjected.theMonomials.GetIndex(localHighest)];
+    output.AddMonomial(localHighest, highestCoeff);
+    if (!WeylFDSmall.FreudenthalEvalIrrepIsWRTLeviPart
+        (localHighest.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
+    { if (Report!=0)
+        *Report=tempS;
+      return false;
+    }
+//    stOutput << "<br>Freudenthal eval w.r.t. smaller subalgebra report: " << tempS;
+//    stOutput << "<hr>accounting " << localHighest.ToString() << " with coeff "
+//    << highestCoeff.ToString() << "<br>"
+//    << remainingCharProjected.ToString();
+    for (int i=0; i<tempHashedRoots.size; i++)
+    { tempMon.owner=&theSmallAlgebra;
+      tempMon.weightFundamentalCoordS=WeylFDSmall.AmbientWeyl.GetFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
+      bufferCoeff=tempMults[i];
+      bufferCoeff*=highestCoeff;
+      remainingCharProjected.SubtractMonomial(tempMon, bufferCoeff);
+//      stOutput << "<br>-(" << bufferCoeff.ToString() << ")" << tempMon.ToString();
+    }
+//    stOutput << "<br>remaining character after accounting:<br>" << remainingCharProjected.ToString();
+  }
+  theFormat.fundamentalWeightLetter="\\psi";
+  out << "<br>Character w.r.t the Levi part of the parabolic of the small algebra: " << CGI::GetMathSpanPure(output.ToString(&theFormat));
+//  stOutput << "<br>Character w.r.t Levi part: " << CGI::GetMathSpanPure
+//  (output.ToString())
+//  ;
+
+  if (Report!=0)
+  { //out << "<hr>"  << "The split character is: " << output.ToString("V", "\\omega", false);
+    DrawingVariables theDV1;
+    std::string tempS;
+    output.DrawMeNoMults(tempS, theGlobalVariables, theDV1, 10000);
+    Vector<Rational> tempRoot, tempRoot2;
+    WeylFDSmall.AmbientWeyl.ComputeAllElements(20);
+    out << "<hr>";//In the following weight visualization, a yellow line is drawn if the corresponding weights are "
+    //<< " simple reflections of one another, with respect to a simple Vector<Rational> of the Levi part of the parabolic subalgebra. ";
+    for (int i=0; i<output.size(); i++)
+    { tempRoot=WeylFDSmall.AmbientWeyl.GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordS).GetVectorRational();
+//      smallWeyl.DrawContour
+ //     (tempRoot, theDV1, theGlobalVariables, CGI::RedGreenBlue(200, 200, 0), 1000);
+      std::stringstream tempStream;
+      tempStream << output.theCoeffs[i].ToString();
+      theDV1.drawTextAtVectorBuffer(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal, 0);
+      for (int j=1; j<WeylFDSmall.AmbientWeyl.theElements.size; j++)
+      { tempRoot2=tempRoot;
+        WeylFDSmall.AmbientWeyl.ActOnRhoModified(j, tempRoot2);
+        theDV1.drawCircleAtVectorBuffer(tempRoot2, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(200,0,0));
+      }
+    }
+    out << "<hr>" << theDV1.GetHtmlFromDrawOperationsCreateDivWithUniqueName(WeylFDSmall.AmbientWeyl.GetDim());
+/*    DrawingVariables theDV2;
+    std::string tempS;
+    this->DrawMeNoMults(tempS, theGlobalVariables, theDV2, 10000);
+    Vector<Rational> tempRoot;
+    out << "<hr>In the following weight visualization, a yellow line is drawn if the corresponding weights are "
+    << " simple reflections of one another, with respect to a simple Vector<Rational> of the Levi part of the parabolic subalgebra. ";
+    for (int i=0; i<output.size; i++)
+    { tempRoot=theWeyl.GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoords).GetVectorRational();
+      outputSubGroup.DrawContour
+      (tempRoot, theDV2, theGlobalVariables, CGI::RedGreenBlue(200, 200, 0), 1000);
+      std::stringstream tempStream;
+      tempStream << output.theCoeffs[i].ToString();
+      theDV2.drawTextAtVectorBuffer(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal, 0);
+    }
+    out << "<hr>" << theDV2.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());*/
+    *Report=out.str();
+  }
+//  stOutput << "<br>time at finish: " << theGlobalVariables.GetElapsedSeconds();
+  return true;
+}
+
 
 #endif

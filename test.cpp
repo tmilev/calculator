@@ -3276,7 +3276,7 @@ void LegacyTest()
 
 int mainTest(List<std::string>& inputArguments)
 { InitializeGlobalObjects();
-  stOutput << inputArguments.ToStringCommaDelimited();
+  stOutput << inputArguments.ToStringCommaDelimited() << std::endl;
   if(inputArguments.size == 0)
     LegacyTest();
   else
@@ -3288,6 +3288,7 @@ int mainTest(List<std::string>& inputArguments)
         N = 10;
       TestCountPermutations(N);
     }
+
   }
 
   stOutput << "Rational::TotalSmallAdditions: " << Rational::TotalSmallAdditions;

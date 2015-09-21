@@ -13,6 +13,7 @@ Calculator::Calculator()
 { this->theGlobalVariableS=0;
   this->numOutputFiles=0;
   this->flagHideLHS=false;
+  this->flagUseHtml=true;
 }
 
 std::string Calculator::GetCalculatorLink(const std::string& input)

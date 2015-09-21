@@ -71,6 +71,7 @@ int main_command_input(int argc, char **argv)
   //  stOutput << "\n\n\n" << theParser.DisplayPathServerBase << "\n\n";
   //  return 0;
   theParser.inputStringRawestOfTheRaw =theInputStream.str();
+  theParser.flagUseHtml=false;
   theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
   std::fstream outputFile;
   FileOperations::OpenFileCreateIfNotPresent(outputFile, "./outputFileCommandLine.html", false, true, false);

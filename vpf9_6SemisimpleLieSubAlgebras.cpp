@@ -1280,6 +1280,8 @@ bool SemisimpleSubalgebras::CentralizersComputedToHaveUnsuitableNilpotentOrbits(
         << theDynkinIndicesCentralizerComplementCurrentSummand.ToStringCommaDelimited()
         << ". If the type was realizable, those would have to contain "
         << " the absolute Dynkin indices of sl(2) subalgebras of the original summand. However, that is not the case."
+        << " I can therefore conclude that the Dynkin type " << currentType.ToString()
+        << " is not realizable. "
         << " The absolute Dynkin indices of the sl(2) subalgebras of the original summand I computed to be:<br> "
         << theDynkinIndicesCurrentSummand.ToStringCommaDelimited() << ". ";
         this->comments+=reportStream.str();
@@ -1370,8 +1372,9 @@ bool SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOr
   << "Then I computed the absolute Dynkin indices of the centralizer's sl(2)-subalgebras, namely:<br> "
   << DynkinIndicesTheyGotToFitIn.ToStringCommaDelimited()
   << ". If the type was realizable, those would have to contain "
-  << " the absolute Dynkin indices of sl(2) subalgebras of the original summand. However, that is not the case:"
-  << " the absolute Dynkin indices of the sl(2) subalgebras of the original summand I computed to be:<br> "
+  << " the absolute Dynkin indices of sl(2) subalgebras of the original summand. However, that is not the case. "
+  << " I can therefore conclude that the Dynkin type " << currentType.ToString() << " is not realizable. "
+  << " The absolute Dynkin indices of the sl(2) subalgebras of the original summand I computed to be:<br> "
   << theDynkinIndicesNewSummand.ToStringCommaDelimited() << ". ";
   theLogFile << reportStream.str();
   stOutput << reportStream.str();

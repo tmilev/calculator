@@ -1617,6 +1617,16 @@ void WebServer::CheckExecutableVersionAndRestartIfNeeded()
 void WebServer::Restart()
 { theLog << "Killing all copies of the calculator and restarting..." << logger::endL;
   this->Release(this->listeningSocketID);
+//  char arg1[7]="server";
+//  char arg2[7]="nokill";
+//  char* args[2];
+//  args[1]=arg1;
+//  args[2]=arg2;
+//  char** args=0 ;
+//  execv("./calculator server nokill", args);
+//char *exec_argv[] = { "./calculator", "server", "nokill"};
+//sleep(1);
+//execv("/proc/self/exe", exec_argv);
   system("killall calculator \r\n./calculator server nokill"); //kill any other running copies of the calculator.
 }
 

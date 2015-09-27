@@ -1123,7 +1123,7 @@ void SemisimpleSubalgebras::GetHCandidates
         if (theGlobalVariables!=0)
         { std::stringstream out2;
           out2 << "sl(2) orbit " << j+1 << ". " << currentOrbit.ToString()
-          << "Current element is not a valid candidate. ";
+          << "\n<br>Current element is not a valid candidate. ";
           theReport3.Report(out2.str());
           //stOutput << "<br>" << out2.str();
         }

@@ -11,7 +11,9 @@ int main_apache_client();
 int main_command_input(int argc, char **argv);
 
 int main(int argc, char **argv)
-{ MacroRegisterFunctionWithName("main");
+{ //for (int i=0; i<argc; i++)
+  //  std::cout << "argument " << i << ": " << argv[i] << "\n";
+  MacroRegisterFunctionWithName("main");
   InitializeGlobalObjects();
   onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=500000;
   onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction=5;

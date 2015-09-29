@@ -299,9 +299,15 @@ class charSSAlgMod : public MonomialCollection<Weight<coefficient>, coefficient>
   (charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails, GlobalVariables* theGlobalVariables);
   bool FreudenthalEvalMeFullCharacter
   (charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails, GlobalVariables* theGlobalVariables);
+  std::string ToStringFullCharacterWeightsTable();
   bool DrawMeNoMults(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars, int upperBoundWeights)
   { return this->DrawMe(outputDetails, theGlobalVariables, theDrawingVars, upperBoundWeights, false);
   }
+  int
+GetPosNstringSuchThatWeightMinusNalphaIsWeight
+(const Weight<coefficient>& theWeightInFundCoords, const Vector<coefficient>& theAlphaInFundCoords)
+;
+
   bool DrawMeWithMults(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars, int upperBoundWeights)
   { return this->DrawMe(outputDetails, theGlobalVariables, theDrawingVars, upperBoundWeights, true);
   }

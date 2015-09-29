@@ -244,6 +244,58 @@ bool Calculator::innerDrawRootSystem(Calculator& theCommands, const Expression& 
   return output.AssignValue(out.str(), theCommands);
 }
 
+template <class coefficient>
+int charSSAlgMod<coefficient>::GetPosNstringSuchThatWeightMinusNalphaIsWeight
+(const Weight<coefficient>& theWeightInFundCoords, const Vector<coefficient>& theAlphaInFundCoords)
+{ MacroRegisterFunctionWithName("charSSAlgMod_coefficient::GetMaxNSuchThatWeightMinusNalphaIsAWeight");
+  int result=-1;
+  Weight<coefficient> currentWeight;
+  currentWeight=theWeightInFundCoords;
+  for (;this->theMonomials.Contains(currentWeight);
+       result++, currentWeight.weightFundamentalCoordS-=theAlphaInFundCoords){}
+  if (result==-1)
+    crash << "temporary wrong check" <<crash;
+  return result;
+}
+
+template <class coefficient>
+std::string charSSAlgMod<coefficient>::ToStringFullCharacterWeightsTable()
+{ MacroRegisterFunctionWithName("charSSAlgMod_CoefficientType::ToStringFullCharacterWeightsTable");
+  std::stringstream out;
+  charSSAlgMod<coefficient> outputChar;
+  if (!this->FreudenthalEvalMeFullCharacter(outputChar, 10000, 0, 0))
+  { out << "Failed to compute the character with highest weight " << this->ToString()
+    << " I used Fredenthal's formula; likely the computation was too large. ";
+    return out.str();
+  }
+  out << "<table><tr><td>Weight in fund. coords</td><td>simple coords.</td>"
+  << "<td>Simple string coords</td></tr>";
+  Vector<coefficient> outputSimpleStringCoords;
+  Vector<coefficient> theSimpleRoot;
+  Vector<coefficient> theSimpleRootFundCoords;
+  for (int k=0; k<outputChar.size(); k++)
+  { out << "<tr>";
+    out << "<td>" << outputChar[k].weightFundamentalCoordS.ToString() << "</td>";
+    Vector<coefficient> weightSimple=this->GetOwner()->theWeyl.GetSimpleCoordinatesFromFundamental
+    (outputChar[k].weightFundamentalCoordS);
+    out << "<td>" << weightSimple.ToString() << "</td>";
+    outputSimpleStringCoords.MakeZero(this->GetOwner()->GetRank());
+    for (int j=0; j<this->GetOwner()->GetRank(); j++)
+    { theSimpleRoot.MakeEi(this->GetOwner()->GetRank(), j);
+      theSimpleRootFundCoords=
+      this->GetOwner()->theWeyl.GetFundamentalCoordinatesFromSimple(theSimpleRoot);
+      outputSimpleStringCoords[j]=outputChar.GetPosNstringSuchThatWeightMinusNalphaIsWeight
+      (outputChar[k], theSimpleRootFundCoords)-
+      outputChar.GetPosNstringSuchThatWeightMinusNalphaIsWeight
+      (outputChar[k], -theSimpleRootFundCoords);
+    }
+    out << "<td>" << outputSimpleStringCoords.ToString() << "</td>";
+    out << "</tr>";
+  }
+  out << "</table>";
+  return out.str();
+}
+
 bool Calculator::innerDrawWeightSupport(Calculator& theCommands, const Expression& input, Expression& output)
 { //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
   if (!input.IsListNElements(3))
@@ -269,6 +321,8 @@ bool Calculator::innerDrawWeightSupport(Calculator& theCommands, const Expressio
   std::string report;
   theChar.DrawMeNoMults(report, *theCommands.theGlobalVariableS, theDV, 10000);
   out << report << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+  out << "<br>A table with the weights of the character follows. <br>";
+  out << theChar.ToStringFullCharacterWeightsTable();
   return output.AssignValue(out.str(), theCommands);
 }
 

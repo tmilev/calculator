@@ -290,6 +290,15 @@ const elementRepresentation& OrbitIterator<elementGroup, elementRepresentation>:
 }
 
 template <class elementGroup, class elementRepresentation>
+std::string OrbitIterator<elementGroup, elementRepresentation>::ToStringLayerSize()const
+{ std::stringstream out;
+  out << " Total number of elements stored in layers: " << this->privateLayer1.size+ this->privateLayer2.size +this->privateLayer3.size;
+  out << " Previous layer: " << this->previousLayer->size << "; current layer: " << this->currentLayer->size
+  << "; next layer: " << this->nextLayer->size;
+  return out.str();
+}
+
+template <class elementGroup, class elementRepresentation>
 bool OrbitIterator<elementGroup, elementRepresentation>::IncrementReturnFalseIfPastLast()
 { MacroRegisterFunctionWithName("OrbitIterator::IncrementReturnFalseIfPastLast");
   if (this->theGroupGeneratingElements.size==0)

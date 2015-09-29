@@ -518,7 +518,11 @@ void Calculator::initPredefinedInnerFunctions()
   ("BuildFreecalc", CalculatorFunctionsGeneral::innerBuildFreecalc, "",
    "Builds the freecalc lecture pdfs. \
    Takes as argument the lecuture file.",
-   "BuildFreecalc(\"/home/todor/math/freecalc/lectures/UMB-M141-2015-Fall/Lecture_2015_Fall_Calculus_II_Math_141.tex\")", true, false
+   "BuildFreecalc(\"/home/todor/math/freecalc/lectures/UMB-M141-2015-Fall/Lecture_2015_Fall_Calculus_II_Math_141.tex\");\
+   \nBuildFreecalc(\"/home/todor/math/freecalc/lectures/UMB-M140-2015-Fall/Lecture_2015_Fall_Calculus_I_Math_140.tex\");\
+   \nBuildFreecalc(\"/home/todor/math/freecalc/homework/UMB-M141-2015-Fall/Homework_2015_Fall_Calculus_II_Math_141.tex\");\
+   \nBuildFreecalc(\"/home/todor/math/freecalc/homework/UMB-M140-2015-Fall/Homework_2015_Fall_Calculus_I_Math_140.tex\");\
+   ", true, false
    , "CalculatorFunctionsGeneral::innerBuildFreecalc")
    ;
   this->AddOperationInnerHandler

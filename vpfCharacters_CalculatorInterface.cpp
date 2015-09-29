@@ -1525,7 +1525,7 @@ bool CalculatorFunctionsWeylGroup::innerTestSpechtModules(Calculator& theCommand
     << theSymmetricGroupRank;
   std::stringstream out;
   out << "User has requested the test of Specht modules of S_"
-  << theSymmetricGroupRank << ". The test has not been implemented yet. ";
+  << theSymmetricGroupRank << ". ";
   Partition::TestAllSpechtModules(theSymmetricGroupRank);
   return output.AssignValue(out.str(), theCommands);
 }

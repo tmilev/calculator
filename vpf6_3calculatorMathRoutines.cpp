@@ -5227,10 +5227,10 @@ void LaTeXcrawler::BuildFreecalc()
   theReport.Report(reportStream.str());
 //  stOutput << reportStream2.str();
   if(isLecturE)
-    this->displayResult << "<table><tr><td>Lecture number</td><td>Lecture Name</td><td>Lecture pdf</td>"
+    this->displayResult << "<table><tr><td>Lecture number</td><td>Lecture name</td><td>Lecture pdf</td>"
     << "<td>Lecture handout pdf</td><td>Comments</td></tr>";
   else
-    this->displayResult << "<table><tr><td>Homework number</td><td>Homework Name</td><td>Homework pdf</td>"
+    this->displayResult << "<table><tr><td>Homework number</td><td>Homework name</td><td>Homework pdf</td>"
     << "<td>Homework handout pdf</td><td>Comments</td></tr>";
   this->theFileWorkingCopy=this->baseFolderStartFile+ "working_file_"+ this->theFileToCrawlNoPath;
   std::string theFileWorkingCopyPDF=this->baseFolderStartFile+ "working_file_"
@@ -5242,7 +5242,7 @@ void LaTeXcrawler::BuildFreecalc()
   if (lectureFileNameEnd.size()>4)
     lectureFileNameEnd=lectureFileNameEnd.substr(0, lectureFileNameEnd.size()-4);
   std::stringstream executedCommands, resultTable;
-  executedCommands << "Commands executed:";
+  executedCommands << "Commands executed: ";
   std::string currentSysCommand="ch " + this->baseFolderStartFile+"\n\n\n\n";
   executedCommands << "<br>" << currentSysCommand;
   reportStream << "<br>Directory changed: " << currentSysCommand;
@@ -5284,7 +5284,7 @@ void LaTeXcrawler::BuildFreecalc()
       << lectureFileNameEnd << ".pdf";
     currentSysCommand="mv " +theFileWorkingCopyPDF+" " + thePdfFileNameHandout.str();
     executedCommands << "<br>" << currentSysCommand;
-    reportStream << "<br>Lecture/Homework " << i+1 << "handout compiled, renaming file ... ";
+    reportStream << "<br>Lecture/Homework " << i+1 << " handout compiled, renaming file ... ";
     theReport.Report(reportStream.str());
     this->owner->theGlobalVariableS->System(currentSysCommand);
     reportStream << " done.";
@@ -5314,7 +5314,7 @@ void LaTeXcrawler::BuildFreecalc()
     << lectureFileNameEnd << ".pdf";
     currentSysCommand="mv " +theFileWorkingCopyPDF+" " + thePdfFileNameNormal.str();
     executedCommands << "<br>" << currentSysCommand;
-    reportStream << "<br>Lecture " << i+1 << "regular slides compiled, renaming file ... ";
+    reportStream << "<br>Lecture " << i+1 << " regular slides compiled, renaming file ... ";
     theReport.Report(reportStream.str());
     this->owner->theGlobalVariableS->System(currentSysCommand);
     reportStream << " done.";

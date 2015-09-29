@@ -988,6 +988,7 @@ public:
   OrbitIterator()
   { this->reset();
   }
+  std::string ToStringLayerSize() const;
   void reset()
   { this->previousLayer=&this->privateLayer1;
     this->currentLayer=&this->privateLayer2;
@@ -1013,6 +1014,7 @@ class OrbitFDRepIteratorWeylGroup
   int maxOrbitBufferSize;
 public:
   int orbitSize;
+  LargeInt computedSize;
   int currentIndexInBuffer;
   bool flagOrbitIsBuffered;
   bool flagOrbitEnumeratedOnce;

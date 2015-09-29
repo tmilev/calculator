@@ -134,28 +134,42 @@ void Partition::GetAllStandardTableaux(List<Tableau>& out) const
 
 
 void Partition::TestAllSpechtModules(int n)
-{ List<Partition> partitions;
+{ MacroRegisterFunctionWithName("Partition::TestAllSpechtModules");
+  List<Partition> partitions;
   Partition::GetPartitions(partitions, n);
   int fac = 1;
   for(int i=1; i<=n; i++)
     fac *= i;
   for(int i=0; i<partitions.size; i++)
-  { stOutput << partitions[i] << '\n';
+  { //std::cout << partitions[i] << "\n";
+    stOutput << partitions[i] << "\n";
+    //std::cout << "got to here\n";
+
     List<Matrix<Rational> > repgens;
+    //std::cout << "got to here2\n";
     partitions[i].SpechtModuleMatricesOfTranspositionsjjplusone(repgens);
+    //std::cout << "got to here3\n";
     for(int ri=0; ri<repgens.size; ri++)
-    { stOutput << repgens[ri].ToStringPlainText();
+    { //std::cout << "got to here4\n";
+      stOutput << repgens[ri].ToStringPlainText();
+      //std::cout << "got to here5\n";
       Rational det = repgens[ri].GetDeterminant();
       stOutput << " determinant is " << det << "\n\n";
       if((det != 1) && (det != -1))
         crash << "invalid determinant" << crash;
     }
+    std::cout << "got to here7\n";
     SimpleFiniteGroup<Matrix<Rational> > outg;
+    std::cout << "got to here8\n";
     outg.generators = repgens;
+    std::cout << "got to here9\n";
     outg.ComputeElementsAndCCs();
+    std::cout << "got to here10\n";
     stOutput << outg << "\n\n\n";
-    if((fac % outg.theElements.size) != 0)
-      crash << "invalid elements count" << crash;
+    std::cout << "got to here11\n";
+    if (outg.theElements.size!=0)
+      if((fac % outg.theElements.size) != 0)
+        crash << "invalid elements count" << crash;
   }
 }
 

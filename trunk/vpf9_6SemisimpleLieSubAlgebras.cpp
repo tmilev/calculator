@@ -972,6 +972,11 @@ bool OrbitFDRepIteratorWeylGroup::IncrementReturnFalseIfPastLast()
     return this->theIterator.IncrementReturnFalseIfPastLast();
   if (!this->theIterator.IncrementReturnFalseIfPastLast())
   { this->orbitSize=this->currentIndexInBuffer;
+    if (this->computedSize!=-1)
+      if (this->computedSize!=this->orbitSize)
+        crash << "This is a mathematical error: the computed size of the orbit is " << this->computedSize.ToString()
+        << " but I enumerated an orbit of size " << this->orbitSize << ". More details on the orbit: "
+        << this->ToString() << crash;
     this->currentIndexInBuffer=-1;
     this->flagOrbitEnumeratedOnce=true;
     if (this->orbitSize<=this->maxOrbitBufferSize)
@@ -996,6 +1001,10 @@ void OrbitFDRepIteratorWeylGroup::init()
     return;
   this->theIterator.init
   (this->theIterator.theGroupGeneratingElements, this->orbitDefiningElement, this->theIterator.theGroupAction);
+  if(this->theIterator.theGroupGeneratingElements.size>0)
+  { WeylGroup& ownerGroup=*this->theIterator.theGroupGeneratingElements[0].owner;
+    this->computedSize=ownerGroup.GetOrbitSize(this->orbitDefiningElement);
+  }
 }
 
 void OrbitFDRepIteratorWeylGroup::init
@@ -1020,6 +1029,7 @@ void OrbitFDRepIteratorWeylGroup::reset()
 { this->flagOrbitIsBuffered=false;
   this->flagOrbitEnumeratedOnce=false;
   this->orbitSize=-1;
+  this->computedSize=-1;
   this->currentIndexInBuffer=-1;
   this->maxOrbitBufferSize=5000000;
   this->orbitBuffer.SetSize(0);
@@ -1032,10 +1042,17 @@ std::string OrbitFDRepIteratorWeylGroup::ToString()const
   out << "<br>Current element number: " << this->currentIndexInBuffer+1 << ". ";
   if (this->orbitSize!=-1)
     out << "<br>The orbit size is: " << this->orbitSize << ".";
+  if (this->computedSize!=-1)
+    out << "<br>The computed orbit size is: " << this->computedSize.ToString()<< ". ";
   if (this->flagOrbitIsBuffered)
     out << "<br> The orbit is buffered, the orbit elements are: " << this->orbitBuffer.ToString();
   else
-    out << "<br> The orbit is either too large or not yet fully enumerated. ";
+  { out << "<br> The orbit is either too large or not yet fully enumerated. "
+    << this->theIterator.ToStringLayerSize() << ". The current buffer size is: " << this->orbitBuffer.size << ". ";
+    if (this->currentIndexInBuffer+1>this->orbitBuffer.size)
+      out << " The orbit buffer appears to have exceeded the allowed maximum, "
+      << "I am enumerating without storing the elements. ";
+  }
   out << "<br> Max buffer size: " << this->maxOrbitBufferSize;
   return out.str();
 }

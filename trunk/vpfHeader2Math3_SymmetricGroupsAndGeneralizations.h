@@ -440,9 +440,8 @@ void Partition::SpechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, c
 template <typename somestream>
 somestream& Partition::IntoStream(somestream& out) const
 { out << this->n << ": ";
-  for(int i=0; i<this->p.size-1; i++)
+  for(int i=0; i<this->p.size; i++)
     out << this->p[i] << " ";
-  out << this->p[this->p.size-1];
   return out;
 }
 

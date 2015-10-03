@@ -1593,7 +1593,7 @@ std::string WebServer::ToStringStatusAll()
 
 void WebServer::CheckExecutableVersionAndRestartIfNeeded()
 { struct stat theFileStat;
-  if (stat(onePredefinedCopyOfGlobalVariables.PhysicalNameFolderBelowExecutable.c_str(), &theFileStat)!=0)
+  if (stat(onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat)!=0)
     return;
   theLog << "current process spawned from file with time stamp: " << this->timeLastExecutableModification
   << "; latest executable time stamp: " << theFileStat.st_ctime << logger::endL;
@@ -1634,7 +1634,7 @@ void WebServer::Restart()
 void WebServer::initDates()
 { this->timeLastExecutableModification=-1;
   struct stat theFileStat;
-  if (stat(onePredefinedCopyOfGlobalVariables.PhysicalNameFolderBelowExecutable.c_str(), &theFileStat)!=0)
+  if (stat(onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat)!=0)
     return;
   this->timeLastExecutableModification=theFileStat.st_ctime;
 }

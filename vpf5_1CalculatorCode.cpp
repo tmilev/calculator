@@ -1052,7 +1052,30 @@ bool Expression::operator==(const std::string& other)const
   return tempS==other;
 }
 
-bool Calculator::innerReverseOrder(Calculator& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerReverseOrderRecursively(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerReverseOrderRecursively");
+  if (input.IsBuiltInType()||input.IsAtom())
+  { output=input;
+    return true;
+  }
+  if (input[0]=="ReverseRecursively")
+  { Expression tempE=input;
+    tempE.SetChildAtomValue(0, theCommands.opSequence());
+    return theCommands.innerReverseOrderRecursively(theCommands, tempE, output);
+  }
+  output.reset(theCommands, input.children.size);
+  output.AddChildOnTop(input[0]);
+  for (int i=input.children.size-1; i>=1; i--)
+  { Expression currentE=input[i];
+    Expression reversedCurrentE;
+    if (!theCommands.innerReverseOrderRecursively(theCommands,  currentE, reversedCurrentE))
+      return false;
+    output.AddChildOnTop(reversedCurrentE);
+  }
+  return true;
+}
+
+bool Calculator::innerReverseOrdeR(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerReverse");
   if (input.IsBuiltInType()||input.IsAtom())
   { output=input;
@@ -1061,17 +1084,12 @@ bool Calculator::innerReverseOrder(Calculator& theCommands, const Expression& in
   if (input[0]=="Reverse")
   { Expression tempE=input;
     tempE.SetChildAtomValue(0, theCommands.opSequence());
-    return theCommands.innerReverseOrder(theCommands, tempE, output);
+    return theCommands.innerReverseOrdeR(theCommands, tempE, output);
   }
   output.reset(theCommands, input.children.size);
   output.AddChildOnTop(input[0]);
   for (int i=input.children.size-1; i>=1; i--)
-  { Expression currentE=input[i];
-    Expression reversedCurrentE;
-    if (!theCommands.innerReverseOrder(theCommands,  currentE, reversedCurrentE))
-      return false;
-    output.AddChildOnTop(reversedCurrentE);
-  }
+    output.AddChildOnTop(input[i]);
   return true;
 }
 

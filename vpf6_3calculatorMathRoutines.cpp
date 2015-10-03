@@ -1107,7 +1107,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   theDenominatorFactorsWithMultsCopy.MakeZero();
   for (int i=0; i<this->theFactors.size; i++)
   { theDenominatorFactorsWithMultsCopy.AddMonomial(this->theFactors[i], 1);
-    //this->currentFormaT.flagSuppresOneIn1overXtimesY=false;
+    //this->currentFormaT.flagSuppressOneIn1overXtimesY=false;
 //    stOutput << "<br>Factor: " << theFactors[i].ToString(&this->currentFormaT);
   }
   theDenominatorFactorsWithMultsCopy.QuickSortAscending();

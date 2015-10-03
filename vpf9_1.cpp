@@ -379,7 +379,7 @@ std::string DynkinDiagramRootSubalgebra::ToString(FormatExpressions* theFormat)c
   theType.MakeZero();
   for (int j=0; j<this->SimpleComponentTypes.size; j++)
     theType.AddMonomial(this->SimpleComponentTypes[j], 1);
-  return theType.ToString();
+  return theType.ToString(theFormat);
 }
 
 bool DynkinDiagramRootSubalgebra::CheckInitialization() const

@@ -2684,7 +2684,10 @@ void rootSubalgebras::ToHTML(FormatExpressions* theFormat, SltwoSubalgebras* Sl2
     output << ", exceptional Lie algebra";
   output << " \">";
   output << "<script src=\"../../jsmath/easy/load.js\"></script> ";
-  output << "<body>" << this->ToString(theFormat, Sl2s) << "</body></html>";
+  output << "<body>" << this->ToString(theFormat, Sl2s)
+  << "<hr>LaTeX table with root subalgebra details.<br>"
+  << this->ToStringDynkinTableFormat2LaTeX(theFormat)
+  << "</body></html>";
   output.close();
   for (int i=0; i<this->theSubalgebras.size; i++)
     this->theSubalgebras[i].ToHTML(i, theFormat, Sl2s, theGlobalVariables);
@@ -2930,6 +2933,50 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
         out << ",";
     }
   }
+  return out.str();
+}
+
+std::string rootSubalgebras::ToStringDynkinTableFormat2LaTeX(FormatExpressions* theFormat)
+{ MacroRegisterFunctionWithName("rootSubalgebras::ToStringDynkinTableFormat2LaTeX");
+  std::stringstream out;
+  std::string tempS, tempS2, tempS3;
+  std::string endline="\n<br>";
+  if (theFormat!=0)
+    theFormat->flagSupressDynkinIndexOne=true;
+  out << "\\documentclass{article}" << endline
+  << "\\usepackage{longtable, amssymb, lscape}" << endline
+  << "\\begin{document}" << endline;
+  out << "Lie algebra type: $" << this->theSubalgebras[0].theDynkinType.ToString(theFormat)
+  << "$. There are " << this->theSubalgebras.size << " table entries (= " << this->theSubalgebras.size-2
+  << " larger than the Cartan subalgebra + the Cartan subalgebra+ the full subalgebra)." << endline
+  << "Let $\\mathfrak g$ stand for the type of the regular subalgebra and $C(\\mathfrak g)$ for the type of the centralizer."
+  << " Let $r$ stand for the rank of $\\mathfrak g$, let $r_c$ stand for the rank of the semisimple part of the centralizer,"
+  << " let $p$ stand for the number of positive roots of $\\mathfrak g$, "
+  << "let $q$ stand for the number of positive roots of the centralizer, and let $m$ stand for the number of "
+  << " $A_1$ components (of all root lengths) of $\\mathfrak g$. ";
+//  out << "\\begin{landscape}" << endline;
+  out << "\\begin{longtable}{cccccccc}" << endline;
+  out << "$\\mathfrak g$ & $C(\\mathfrak g)$& $p$ & $q$&  $m$& $r$ & $c_r$ \\\\\\endhead" << endline;
+  for (int i=0; i<this->theSubalgebras.size; i++)
+  { rootSubalgebra& currentSA= this->theSubalgebras[i];
+    out << "$" << currentSA.theDynkinType.ToString(theFormat) << "$&" ;
+    out << "$" << currentSA.theCentralizerDynkinType.ToString(theFormat) << "$&" ;
+    out << "$" << (currentSA.theDynkinType.GetRootSystemSize()/2) << "$&" ;
+    out << "$" << (currentSA.theCentralizerDynkinType.GetRootSystemSize()/2)<< "$&" ;
+    out << "$" << currentSA.theDynkinType.GetNumSimpleComponentsOfGivenRank(1) << "$&" ;
+    out << "$" << currentSA.theDynkinType.GetRank() << "$&" ;
+    out << "$" << currentSA.theCentralizerDynkinType.GetRank() << "$&" ;
+    out << "\\\\" << endline;
+/*    if (i==0)
+      out << "<b>(Full subalgebra)</b>";
+    if (i==this->theSubalgebras.size-1)
+      out << "<b>(Cartan subalgebra)</b>";
+    out << "\n<br>\nType C(k_{ss})_{ss}: " << this->theSubalgebras[i].theCentralizerDiagram.ToString();
+    out << "</td>";*/
+  }
+  out << "\\end{longtable}" << endline;
+//  out << "\\end{landscape}" << endline;
+  out << "\\end{document}" << endline;
   return out.str();
 }
 

@@ -1475,8 +1475,7 @@ public:
   bool flagFormatWeightAsVectorSpaceIndex;
   bool flagFormatMatrixAsLinearSystem;
   bool flagUseFrac;
-  bool flagSuppresOneIn1overXtimesY;
-
+  bool flagSuppressOneIn1overXtimesY;
   List<MonomialP>::OrderLeftGreaterThanRight thePolyMonOrder;
   template <typename templateMonomial>
   typename List<templateMonomial>::OrderLeftGreaterThanRight GetMonOrder();
@@ -5223,7 +5222,7 @@ std::string MonomialCollection<templateMonomial, coefficient>::ToString(FormatEx
     if (tempS2!="")
     { bool useFracSpecial=false;
       if (theFormat!=0)
-        if (theFormat->flagUseFrac && theFormat->flagSuppresOneIn1overXtimesY)
+        if (theFormat->flagUseFrac && theFormat->flagSuppressOneIn1overXtimesY)
           useFracSpecial=true;
       if (useFracSpecial)
       { std::string tempS3;
@@ -6275,6 +6274,7 @@ public:
       crash << "This is a programming error: Dynkin type has multiplicity that is not a small integer " << crash;
     return result;
   }
+  int GetNumSimpleComponentsOfGivenRank(int desiredRank)const;
   int GetNumSimpleComponents()const;
   Rational GetRankRational()const;
   int GetRank()const;

@@ -345,6 +345,7 @@ public:
   std::string ToString(FormatExpressions* theFormat, SltwoSubalgebras* sl2s);
   std::string ToStringAlgebraLink(int index);
   std::string ToStringDynkinTableHTML(FormatExpressions* theFormat);
+  std::string ToStringDynkinTableFormat2LaTeX(FormatExpressions* theFormat);
   void ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables);
   void ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
   void MakeProgressReportAutomorphisms(SubgroupWeylGroupOLD& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);

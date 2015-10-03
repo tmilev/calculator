@@ -20,15 +20,23 @@ std::string Calculator::ToStringFunctionHandlers()
   out << "\n <b> " << numOpsHandled << " built-in atoms are handled by a total of " << numHandlers << " handler functions ("
   << numInnerHandlers << " inner and " << numHandlers-numInnerHandlers << " outer).</b><br>\n";
   bool found=false;
-  for (int i=0; i<this->theAtoms.size; i++)
-  { int indexCompositeHander=this->operationsComposite.GetIndex(this->theAtoms[i]);
-    if (this->FunctionHandlers[i].size>0)
-      for (int j=0; j<this->FunctionHandlers[i].size; j++)
-        if (this->FunctionHandlers[i][j].flagIamVisible)
+  List<std::string> atomsSorted=this->theAtoms;
+  List<int> theIndices;
+  theIndices.SetSize(this->theAtoms.size);
+  for (int i=0; i<theIndices.size; i++)
+    theIndices[i]=i;
+  atomsSorted.QuickSortAscending(0, &theIndices);
+
+  for (int k=0; k<this->theAtoms.size; k++)
+  { int theAtomIndex=theIndices[k];
+    int indexCompositeHander=this->operationsComposite.GetIndex(this->theAtoms[theAtomIndex]);
+    if (this->FunctionHandlers[theAtomIndex].size>0)
+      for (int j=0; j<this->FunctionHandlers[theAtomIndex].size; j++)
+        if (this->FunctionHandlers[theAtomIndex][j].flagIamVisible)
         { if (found)
             out << "<br>\n";
           found=true;
-          out << this->FunctionHandlers[i][j].ToStringFull();
+          out << this->FunctionHandlers[theAtomIndex][j].ToStringFull();
         }
     if (indexCompositeHander!=-1)
       for (int j=0; j<this->operationsCompositeHandlers[indexCompositeHander].size; j++)

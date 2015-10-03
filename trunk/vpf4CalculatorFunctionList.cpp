@@ -1168,11 +1168,15 @@ void Calculator::initPredefinedInnerFunctions()
    "Gets trace of a square matrix. ",
    "X=MatrixRationals((1,2,1), (1,0,1), (-1,1,0)); Trace X");
   this->AddOperationInnerHandler
-  ("Reverse", this->innerReverseOrder, "",
-   "Reverses order of elements recursively. This operation will reverse products, orderes of lists, etc. \
+  ("Reverse", this->innerReverseOrdeR, "",
+   "Reverses order of elements. This operation will reverse products, orderes of lists, etc. \
     More precisely, the command leaves the fist child in the internal representation of the object in place\
     and flips the order of all other children.",
-   "Reverse{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)");
+   "Reverse{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)", true, false, "Calculator::innerReverseOrdeR");
+  this->AddOperationInnerHandler
+  ("ReverseRecursively", this->innerReverseOrderRecursively, "",
+   "Same as Reverse but will apply recursively to the children expressions as well.",
+   "Reverse{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)", true, false, "Calculator::innerReverseOrderRecursively");
 
   this->AddOperationInnerHandler
   ("FindOneSolutionSerreLikePolynomialSystem", CalculatorFunctionsGeneral::innerSolveSerreLikeSystemNoUpperLimit, "",

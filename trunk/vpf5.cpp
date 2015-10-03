@@ -253,8 +253,8 @@ int charSSAlgMod<coefficient>::GetPosNstringSuchThatWeightMinusNalphaIsWeight
   currentWeight=theWeightInFundCoords;
   for (;this->theMonomials.Contains(currentWeight);
        result++, currentWeight.weightFundamentalCoordS-=theAlphaInFundCoords){}
-  if (result==-1)
-    crash << "temporary wrong check" <<crash;
+//  if (result==-1)
+//    crash << "temporary wrong check" <<crash;
   return result;
 }
 
@@ -269,8 +269,8 @@ std::string charSSAlgMod<coefficient>::ToStringFullCharacterWeightsTable()
     return out.str();
   }
   out << "<table><tr><td>Weight in fund. coords</td><td>simple coords.</td>"
-  << "<td>Simple string coords</td></tr>";
-  Vector<coefficient> outputSimpleStringCoords;
+  << "<td>Simple strings</td><td>Simple half-strings</td></tr>";
+  Vector<coefficient> outputSimpleStringCoords, outputSimpleHalfStringCoords;
   Vector<coefficient> theSimpleRoot;
   Vector<coefficient> theSimpleRootFundCoords;
   for (int k=0; k<outputChar.size(); k++)
@@ -280,6 +280,7 @@ std::string charSSAlgMod<coefficient>::ToStringFullCharacterWeightsTable()
     (outputChar[k].weightFundamentalCoordS);
     out << "<td>" << weightSimple.ToString() << "</td>";
     outputSimpleStringCoords.MakeZero(this->GetOwner()->GetRank());
+    outputSimpleHalfStringCoords.MakeZero(this->GetOwner()->GetRank());
     for (int j=0; j<this->GetOwner()->GetRank(); j++)
     { theSimpleRoot.MakeEi(this->GetOwner()->GetRank(), j);
       theSimpleRootFundCoords=
@@ -288,8 +289,17 @@ std::string charSSAlgMod<coefficient>::ToStringFullCharacterWeightsTable()
       (outputChar[k], theSimpleRootFundCoords)-
       outputChar.GetPosNstringSuchThatWeightMinusNalphaIsWeight
       (outputChar[k], -theSimpleRootFundCoords);
+      outputSimpleHalfStringCoords[j]=outputChar.GetPosNstringSuchThatWeightMinusNalphaIsWeight
+      (outputChar[k], theSimpleRootFundCoords);
     }
-    out << "<td>" << outputSimpleStringCoords.ToString() << "</td>";
+    if (outputSimpleStringCoords!=outputChar[k].weightFundamentalCoordS)
+      out << "<td><span style=\"color:#FF0000\"><b>" << outputSimpleStringCoords.ToString() << "</b></span></td>" ;
+    else
+      out << "<td>" << outputSimpleStringCoords.ToString() << "</td>";
+    if (outputSimpleHalfStringCoords!=outputChar[k].weightFundamentalCoordS)
+      out << "<td><span style=\"color:#FF0000\"><b>" << outputSimpleHalfStringCoords.ToString() << "</b></span></td>" ;
+    else
+      out << "<td>" << outputSimpleHalfStringCoords.ToString() << "</td>";
     out << "</tr>";
   }
   out << "</table>";

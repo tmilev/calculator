@@ -963,7 +963,7 @@ FormatExpressions::FormatExpressions()
   this->flagSupressDynkinIndexOne=false;
   this->flagFormatWeightAsVectorSpaceIndex=true;
   this->flagUseFrac=false;
-  this->flagSuppresOneIn1overXtimesY=true;
+  this->flagSuppressOneIn1overXtimesY=true;
   this->flagFormatMatrixAsLinearSystem=false;
 }
 
@@ -3201,6 +3201,17 @@ bool DynkinType::IsSimple(char* outputtype, int* outputRank, Rational* outputLen
   if (outputLength!=0)
     *outputLength=theMon.CartanSymmetricInverseScale;
   return true;
+}
+
+int DynkinType::GetNumSimpleComponentsOfGivenRank(int desiredRank)const
+{ Rational result=0;
+  for (int i=0; i<this->size(); i++)
+    if ((*this)[i].theRank==desiredRank)
+      result+=this->theCoeffs[i];
+  int output=0;
+  if (!result.IsSmallInteger(&output))
+    crash << "This is a programming error: Dynkin type has a number of simple components which is not a small integer. " << crash;
+  return output;
 }
 
 int DynkinType::GetNumSimpleComponents()const

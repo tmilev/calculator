@@ -5,8 +5,6 @@
 ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 
 extern void static_html4(std::stringstream& output);
-const char* PORT ="8080";  // the port users will be connecting to
-const int BACKLOG =10;     // how many pending connections queue will hold
 
 class logger
 {
@@ -1542,7 +1540,7 @@ void Pipe::Read()
 
 std::string WebServer::ToStringLastErrorDescription()
 { std::stringstream out;
-  out << logger::red << this->ToStringActiveWorker() << ": " << strerror(errno) << ". ";
+  out << logger::red << "Process " << this->ToStringActiveWorker() << ": " << strerror(errno) << ". ";
   return out.str();
 }
 
@@ -1627,7 +1625,10 @@ void WebServer::Restart()
 //char *exec_argv[] = { "./calculator", "server", "nokill"};
 //sleep(1);
 //execv("/proc/self/exe", exec_argv);
-  system("killall calculator \r\n./calculator server nokill"); //kill any other running copies of the calculator.
+  std::string theCommand="killall "+
+  onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath + " \r\n./" +
+  onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath + " server nokill";
+  system(theCommand.c_str()); //kill any other running copies of the calculator.
 }
 
 void WebServer::initDates()
@@ -1645,8 +1646,16 @@ void WebServer::ReleaseWorkerSideResources()
   this->activeWorker=-1; //<-The active worker is needed only in the child process.
 }
 
+//const char* PORT ="8080";  // the port users will be connecting to
+const int BACKLOG =10;     // how many pending connections queue will hold
+
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
+  List<std::string> thePorts;
+  thePorts.AddOnTop("8080");
+  thePorts.AddOnTop("8081");
+  thePorts.AddOnTop("8082");
+
   if (this->flagTryToKillOlderProcesses)
     this->Restart();
   usleep(10000);
@@ -1661,28 +1670,34 @@ int WebServer::Run()
   hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE; // use my IP
-  if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0)
-  { theLog << "getaddrinfo: " << gai_strerror(rv) << logger::endL;
-    return 1;
-  }
   // loop through all the results and bind to the first we can
-  for(p = servinfo; p != NULL; p = p->ai_next)
-  { this->listeningSocketID= socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-    if (this->listeningSocketID == -1)
-    { theLog << "Error: socket failed.\n";
-      continue;
+  for (int i=0; i<thePorts.size; i++)
+  { if ((rv = getaddrinfo(NULL, thePorts[i].c_str(), &hints, &servinfo)) != 0)
+    { theLog << "getaddrinfo: " << gai_strerror(rv) << logger::endL;
+      return 1;
     }
-    if (setsockopt(this->listeningSocketID, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
-      crash << "Error: setsockopt failed.\n" << crash;
-    if (bind(this->listeningSocketID, p->ai_addr, p->ai_addrlen) == -1)
-    { close(this->listeningSocketID);
-      theLog << "Error: bind failed. " << this->ToStringLastErrorDescription() << logger::endL;
-      continue;
+    for(p = servinfo; p != NULL; p = p->ai_next)
+    { this->listeningSocketID= socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+      if (this->listeningSocketID == -1)
+      { theLog << "Error: socket failed.\n";
+        continue;
+      }
+      if (setsockopt(this->listeningSocketID, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
+        crash << "Error: setsockopt failed.\n" << crash;
+      if (bind(this->listeningSocketID, p->ai_addr, p->ai_addrlen) == -1)
+      { close(this->listeningSocketID);
+        theLog << "Error: bind failed. " << this->ToStringLastErrorDescription() << logger::endL;
+        continue;
+      }
+      break;
     }
-    break;
+    if (p!=NULL)
+    { theLog << logger::yellow << "Successfully bounded to port " << thePorts[i] << logger::endL;
+      break;
+    }
   }
   if (p == NULL)
-    crash << "Failed to bind to port " << PORT << "\n" << crash;
+    crash << "Failed to bind to any of the ports " << thePorts.ToStringCommaDelimited() << "\n" << crash;
   freeaddrinfo(servinfo); // all done with this structure
   if (listen(this->listeningSocketID, BACKLOG) == -1)
     crash << "Listen function failed." << crash;

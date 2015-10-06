@@ -1004,6 +1004,10 @@ void OrbitFDRepIteratorWeylGroup::init()
   if(this->theIterator.theGroupGeneratingElements.size>0)
   { WeylGroup& ownerGroup=*this->theIterator.theGroupGeneratingElements[0].owner;
     this->computedSize=ownerGroup.GetOrbitSize(this->orbitDefiningElement);
+    if (this->computedSize>this->maxOrbitBufferSize)
+    { this->maxOrbitBufferSize=0;
+      this->orbitBuffer.SetSize(0);
+    }
   }
 }
 

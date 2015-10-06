@@ -136,7 +136,7 @@ void GlobalVariables::initDefaultFolderAndFileNames
   this->PhysicalNameExecutableWithPath=this->PhysicalNameFolderBelowExecutable+this->PhysicalNameExecutableNoPath;
   if (this->PhysicalPathServerBase=="")
   { this->PhysicalPathServerBase="./../";
-    this->DisplayPathServerBase="";
+    this->DisplayPathServerBase="vectorpartition/";
   }
   this->DisplayPathServerBase="/"+this->DisplayPathServerBase;
   this->PhysicalPathOutputFolder = this->PhysicalPathServerBase + "output/";

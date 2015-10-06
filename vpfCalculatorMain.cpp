@@ -88,6 +88,7 @@ int main_apache_client()
   stOutput << "Content-Type: text/html\n\n";
   theParser.theGlobalVariableS->IndicatorStringOutputFunction=CGI::MakeReportIndicatorFile;
   std::cin >> theParser.inputStringRawestOfTheRaw;
+  stOutput << "remove me when done " << theParser.theGlobalVariableS->PhysicalNameProgressReport;
 	if (theParser.inputStringRawestOfTheRaw=="")
 	{ theParser.inputStringRawestOfTheRaw=getenv("QUERY_STRING");
     std::string& IPAdressCaller=onePredefinedCopyOfGlobalVariables.IPAdressCaller;

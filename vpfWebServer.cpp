@@ -317,9 +317,14 @@ void WebWorker::OutputBeforeComputation()
 { MacroRegisterFunctionWithName("WebServer::OutputBeforeComputation");
   onePredefinedCopyOfGlobalVariables.flagComputationCompletE=false;
 
-  stOutput << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
+  stOutput << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, "
+  << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
   << "Root subalgebras, sl(2)-triples\"> <head> <title>calculator version  " << __DATE__ << ", " << __TIME__ << "</title>";
-  stOutput << "<script src=\"../jsmath/easy/load.js\"></script>\n</head>\n<body onload=\"checkCookie();\">\n";
+//  if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+    stOutput << "<script src=\"../jsmath/easy/load.js\">";
+//  else
+//    stOutput << "<script src=\"" << onePredefinedCopyOfGlobalVariables.DisplayPathServerBase << "/jsmath/easy/load.js\">";
+  stOutput << "</script>\n</head>\n<body onload=\"checkCookie();\">\n";
   List<std::string> inputStrings, inputStringNames;
   CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
   std::string& civilizedInput=theParser.inputString;
@@ -452,6 +457,7 @@ void WebWorker::OutputStandardResult()
     if (theParser.theAtoms[i].size()>2)
       stOutput << "  theAutocompleteDictionary.push(\"" << theParser.theAtoms[i] << "\");\n";
   stOutput << "</script>\n";
+  stOutput << "remove me when done " << theParser.theGlobalVariableS->PhysicalNameProgressReport;
   stOutput << "</body></html>";
   stOutput << "<!--";
   ProgressReport theReport(theParser.theGlobalVariableS);
@@ -462,6 +468,7 @@ void WebWorker::OutputStandardResult()
     system(theParser.SystemCommands[i].c_str());
   }
   stOutput << "-->";
+
   //close()
 }
 

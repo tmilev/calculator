@@ -550,7 +550,7 @@ unsigned int PermutationR2::HashFunction() const
     for(int j=0; j<this->cycles[i].size; j++)
     { acc += SomeRandomPrimes[n] * this->cycles[i][j];
       n++;
-      if(n >= SomeRandomPrimesSize)
+      if(n >= (unsigned) SomeRandomPrimesSize)
         n = 0;
     }
   return acc;

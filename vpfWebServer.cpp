@@ -457,7 +457,6 @@ void WebWorker::OutputStandardResult()
     if (theParser.theAtoms[i].size()>2)
       stOutput << "  theAutocompleteDictionary.push(\"" << theParser.theAtoms[i] << "\");\n";
   stOutput << "</script>\n";
-  stOutput << "remove me when done " << theParser.theGlobalVariableS->PhysicalNameProgressReport;
   stOutput << "</body></html>";
   stOutput << "<!--";
   ProgressReport theReport(theParser.theGlobalVariableS);

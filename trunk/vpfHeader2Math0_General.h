@@ -4924,7 +4924,7 @@ std::string MonomialTensor<coefficient, inputHashFunction>::ToString(FormatExpre
   std::string exponents[10] = {"⁰","¹","²","³","⁴","⁵","⁶","⁷","⁸","⁹"};
   std::stringstream out;
   for (int i=0; i< this->generatorsIndices.size; i++)
-  { if(generatorsIndices[i] < letters.size())
+  { if((unsigned) generatorsIndices[i] <  letters.size())
       out << letters[this->generatorsIndices[i]];
     else
       out << theLetter << "_{" << this->generatorsIndices[i] << "}";

@@ -640,7 +640,7 @@ bool WebWorker::ReceiveAll()
 //    std::cout << "Got thus far 12" << std::endl;
 
 //  theLog << "Content length computed to be: " << this->ContentLength;
-  if (this->requestType==this->requestTypes::requestPostCalculator)
+  if (this->requestType==WebWorker::requestTypes::requestPostCalculator)
     this->displayUserInput="POST " + this->mainArgumentRAW;
   else
     this->displayUserInput="GET " + this->mainAddresSRAW;

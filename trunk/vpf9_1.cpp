@@ -2,6 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader2Math0_General.h"
 #include "vpfHeader2Math1_LieTheoryExtras.h"
+#include "vpfHeader2Math3_FiniteGroups.h"
 #include <assert.h>
 
 ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Math routines implementation. ");

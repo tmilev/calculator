@@ -73,6 +73,8 @@ public:
   std::string PhysicalFileName;
   std::string status;
   bool flagDeallocated;
+  bool flagMainAddressSanitized;
+  std::string mainAddressNonSanitized;
   List<std::string> theStrings;
   int ContentLength;
   int requestType;
@@ -144,6 +146,7 @@ public:
   std::string ToStringMessageFull()const;
   void ParseMessage();
   void ExtractArgumentFromAddress();
+  void SanitizeMainAddress();
   void ExtractPhysicalAddressFromMainAddress();
 };
 

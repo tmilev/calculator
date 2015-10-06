@@ -480,8 +480,11 @@ void WebWorker::ExtractArgumentFromAddress()
   CGI::CGIStringToNormalString(this->mainAddresSRAW, this->mainAddress);
   this->mainArgumentRAW="";
   std::string calculatorArgumentRawWithQuestionMark, tempS;
-  if (!MathRoutines::StringBeginsWith(this->mainAddresSRAW, onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath, &calculatorArgumentRawWithQuestionMark))
+  if (!MathRoutines::StringBeginsWith
+      (this->mainAddresSRAW, onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath,
+       &calculatorArgumentRawWithQuestionMark))
   { CGI::CGIFileNameToFileName(this->mainAddresSRAW, this->mainAddress);
+
     return;
   }
   this->requestType=this->requestGetCalculator;
@@ -711,12 +714,26 @@ void WebWorker::SendDisplayUserInputToServer()
 //  theLog << logger::blue << "Piping " << this->displayUserInput << " to the server. " << logger::endL;
 }
 
+void WebWorker::SanitizeMainAddress()
+{ MacroRegisterFunctionWithName("WebWorker::SanitizeMainAddress");
+  std::string resultAddress;
+  this->mainAddressNonSanitized=this->mainAddress;
+  resultAddress.reserve(this->mainAddress.size());
+  for (unsigned i=0; i<this->mainAddress.size(); i++)
+    if (this->mainAddress[i]=='.')
+      this->flagMainAddressSanitized=true;
+    else
+      resultAddress.push_back(this->mainAddress[i]);
+  this->mainAddress=resultAddress;
+}
+
 void WebWorker::ExtractPhysicalAddressFromMainAddress()
 { MacroRegisterFunctionWithName("WebWorker::ExtractPhysicalAddressFromMainAddress");
   int numBytesToChop=onePredefinedCopyOfGlobalVariables.DisplayPathServerBase.size();
   std::string displayAddressStart= this->mainAddress.substr(0, numBytesToChop);
   if (displayAddressStart!=onePredefinedCopyOfGlobalVariables.DisplayPathServerBase)
     numBytesToChop=0;
+  this->SanitizeMainAddress();
   this->PhysicalFileName=onePredefinedCopyOfGlobalVariables.PhysicalPathServerBase+
   this->mainAddress.substr(numBytesToChop, std::string::npos);
 }
@@ -868,7 +885,7 @@ int WebWorker::ProcessFolder()
 { MacroRegisterFunctionWithName("WebWorker::ProcessFolder");
   std::stringstream out;
   out << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" << "<html><body>";
-  //out << this->ToString();
+//  out << this->ToString();
   List<std::string> theFileNames, theFileTypes;
   if (!FileOperations::GetFolderFileNames(this->PhysicalFileName, theFileNames, &theFileTypes))
   { out << "<b>Failed to open directory with physical address " << this->PhysicalFileName << " </b></body></html>";
@@ -876,6 +893,12 @@ int WebWorker::ProcessFolder()
     return 0;
   }
   out << "Browsing folder: " << this->mainAddress << "<br>Physical address: " << this->PhysicalFileName << "<hr>";
+  if (this->flagMainAddressSanitized)
+  { out << "<hr>The original main address I extracted was: " << this->mainAddressNonSanitized
+    << "<br>However, I do not allow addresses that contain dots (to avoid access to folders below the server). "
+    << " Therefore I have sanitized the main address to: " << this->mainAddress
+    << "<br>The full message I received follows. <hr>" << this->ToStringMessageFull();
+  }
   List<std::string> theFolderNamesHtml, theFileNamesHtml;
   for (int i=0; i<theFileNames.size; i++)
   { std::stringstream currentStream;
@@ -911,6 +934,7 @@ void WebWorker::reset()
   this->parent=0;
   this->displayUserInput="";
   this->requestType=this->requestUnknown;
+  this->flagMainAddressSanitized=false;
   this->Release();
 }
 

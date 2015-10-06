@@ -704,7 +704,7 @@ bool CalculatorConversions::innerElementUE(Calculator& theCommands, const Expres
     currentSummand.MakeConst(theP.theCoeffs[j], owner);
     currentMultiplicandRFpartMon.MakeOne();
     for (int i=0; i<currentMon.GetMinNumVars(); i++)
-    { int thePower;
+    { int thePower=-1;
       if (!currentMon(i).IsSmallInteger(&thePower))
         return theCommands << "<hr>Failed to convert one of the exponents appearing in " << input.ToString()
         << " to  a small integer polynomial.<hr>";

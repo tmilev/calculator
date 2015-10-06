@@ -719,12 +719,18 @@ void WebWorker::SanitizeMainAddress()
   std::string resultAddress;
   this->mainAddressNonSanitized=this->mainAddress;
   resultAddress.reserve(this->mainAddress.size());
-  for (unsigned i=0; i<this->mainAddress.size(); i++)
-    if (this->mainAddress[i]=='.')
+  bool foundslash=false;
+  for (signed i=(signed) this->mainAddress.size()-1; i>=0; i--)
+  { if (foundslash && this->mainAddress[i]=='.')
       this->flagMainAddressSanitized=true;
     else
       resultAddress.push_back(this->mainAddress[i]);
-  this->mainAddress=resultAddress;
+    if (this->mainAddress[i]=='/')
+      foundslash=true;
+  }
+  this->mainAddress="";
+  for (int i=resultAddress.size()-1; i>=0;i--)
+    this->mainAddress.push_back(resultAddress[i]);
 }
 
 void WebWorker::ExtractPhysicalAddressFromMainAddress()
@@ -886,6 +892,11 @@ int WebWorker::ProcessFolder()
   std::stringstream out;
   out << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" << "<html><body>";
 //  out << this->ToString();
+  if (this->flagMainAddressSanitized)
+  { out << "<hr>The original main address I extracted was: " << this->mainAddressNonSanitized
+    << "<br>However, I do not allow addresses that contain dots (to avoid access to folders below the server). "
+    << " Therefore I have sanitized the main address to: " << this->mainAddress;
+  }
   List<std::string> theFileNames, theFileTypes;
   if (!FileOperations::GetFolderFileNames(this->PhysicalFileName, theFileNames, &theFileTypes))
   { out << "<b>Failed to open directory with physical address " << this->PhysicalFileName << " </b></body></html>";
@@ -893,12 +904,6 @@ int WebWorker::ProcessFolder()
     return 0;
   }
   out << "Browsing folder: " << this->mainAddress << "<br>Physical address: " << this->PhysicalFileName << "<hr>";
-  if (this->flagMainAddressSanitized)
-  { out << "<hr>The original main address I extracted was: " << this->mainAddressNonSanitized
-    << "<br>However, I do not allow addresses that contain dots (to avoid access to folders below the server). "
-    << " Therefore I have sanitized the main address to: " << this->mainAddress
-    << "<br>The full message I received follows. <hr>" << this->ToStringMessageFull();
-  }
   List<std::string> theFolderNamesHtml, theFileNamesHtml;
   for (int i=0; i<theFileNames.size; i++)
   { std::stringstream currentStream;
@@ -1000,7 +1005,13 @@ int WebWorker::ProcessNonCalculator()
     return this->ProcessFolder();
   if (!FileOperations::FileExists(this->PhysicalFileName))
   { stOutput << "HTTP/1.1 404 Object not found\r\nContent-Type: text/html\r\n\r\n";
-    stOutput << "<html><body><b>File does not exist.</b><br><b> File display name:</b> "
+    stOutput << "<html><body><b>File does not exist.</b>";
+    if (this->flagMainAddressSanitized)
+    { stOutput << "<hr>The original main address I extracted was: " << this->mainAddressNonSanitized
+      << "<br>However, I do not allow addresses that contain dots (to avoid access to folders below the server). "
+      << " Therefore I have sanitized the main address to: " << this->mainAddress;
+    }
+    stOutput << "<br><b> File display name:</b> "
     << this->mainAddress << "<br><b>File physical name:</b> " << this->PhysicalFileName;
     stOutput << "<hr><hr><hr>Message details:<br>" <<  this->ToStringMessage();
     stOutput << "</body></html>";
@@ -1011,8 +1022,13 @@ int WebWorker::ProcessNonCalculator()
   std::fstream theFile;
   if (!FileOperations::OpenFile(theFile, this->PhysicalFileName, false, false, !isBinary))
   { stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-    stOutput << "<html><body><b>Error: file appears to exist but I could not open it.</b> "
-    << "<br><b> File display name: </b>"
+    stOutput << "<html><body><b>Error: file appears to exist but I could not open it.</b> ";
+    if (this->flagMainAddressSanitized)
+    { stOutput << "<hr>The original main address I extracted was: " << this->mainAddressNonSanitized
+      << "<br>However, I do not allow addresses that contain dots (to avoid access to folders below the server). "
+      << " Therefore I have sanitized the main address to: " << this->mainAddress;
+    }
+    stOutput << "<br><b> File display name: </b>"
     << this->mainAddress << "<br><b>File physical name: </b>"
     << this->PhysicalFileName << "</body></html>";
     return 0;

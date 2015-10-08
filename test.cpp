@@ -21,248 +21,88 @@
 
 GlobalVariables& theGlobalVariables=onePredefinedCopyOfGlobalVariables;
 
-template <typename object>
-class GeneratorPermutationsOfList
-{ public:
-  List<object> l;
-  bool done_iterating;
-
-  struct stack_frame
-  { int c;
-    int loop_i;
-    int program_counter;
-  };
-  List<struct stack_frame> stack;
-  int frame_pointer;
-
-  enum pcpositions
-  { beginning, loop, firstout, afterloop, end};
-
-  void Initialize(List<object> theL)
-  { this->l = theL;
-    this->done_iterating = false;
-    this->frame_pointer = 0;
-    this->stack.SetSize(this->l.size);
-    this->stack[0].c = this->l.size-1;
-    this->stack[0].program_counter = 0;
-    ++(*this);
-  }
-  // this function is the only one that is mathematically interesting
-  // by the way what's with the signature lol
-  GeneratorPermutationsOfList& operator++()
-  { //stOutput << "++ called, ";
-    while(true)
-    { //varsout();
-      if(frame_pointer == -1)
-      { done_iterating = true;
-        return *this;
-      }
-      switch(stack[frame_pointer].program_counter)
-      { case pcpositions::beginning:
-        if(stack[frame_pointer].c == 0)
-        { frame_pointer--;
-          return *this;
-        }
-        stack[frame_pointer].loop_i = 0;
-        case pcpositions::loop:
-        if(stack[frame_pointer].loop_i == stack[frame_pointer].c)
-        { stack[frame_pointer].program_counter = pcpositions::afterloop;
-          break;
-        }
-        stack[frame_pointer].program_counter = pcpositions::firstout;
-        frame_pointer++;
-        stack[frame_pointer].c = stack[frame_pointer-1].c-1;
-        stack[frame_pointer].program_counter = pcpositions::beginning;
-        break;
-        case firstout:
-        if(stack[frame_pointer].c%2!=0)
-          l.SwapTwoIndices(l.size-1-stack[frame_pointer].loop_i,l.size-1-stack[frame_pointer].c);
-        else
-          l.SwapTwoIndices(l.size-1,l.size-1-stack[frame_pointer].c);
-        stack[frame_pointer].loop_i++;
-        stack[frame_pointer].program_counter = pcpositions::loop;
-        break;
-        case afterloop:
-        stack[frame_pointer].program_counter = pcpositions::end;
-        frame_pointer++;
-        stack[frame_pointer].c = stack[frame_pointer-1].c-1;
-        stack[frame_pointer].program_counter = pcpositions::beginning;
-        break;
-        case end:
-        frame_pointer--;
-      }
-    }
+template <typename helt, typename kelt>
+class TrivialOuterAutomorphism
+{ // operator overloading is gr8 <3 <3 <3
+  kelt operator()(helt& x, kelt& y)
+  { kelt z = y;
+    return z;
   }
 
-  void Initialize(int theN)
-  { List<int> ll;
-    ll.SetSize(theN);
-    for(int i=0; i<theN; i++)
-      ll[i] = i;
-    this->Initialize(ll);
+  template <typename somestream>
+  somestream& IntoStream(somestream& out)
+  { out << "Identity function";
   }
-
-  // get current element, using bizarre cxx syntax because why not
-  // apparently you can't return a reference from a const method?
-  List<int>& operator*()
-  { return l;
+  std::string ToString(FormatExpressions* theFormat=0) const
+  { std::stringstream ss;
+    ss << *this;
+    return ss.str();
   }
-
-  bool DoneIterating() const
-  { if(frame_pointer == -1)
-      return true;
-    return false;
-  }
-
-
-  void varsout() const
-  { stOutput << "stack: [";
-    for(int i=0; i<stack.size; i++)
-    { stOutput << "(";
-      if(i==frame_pointer)
-        stOutput << "(";
-
-      stOutput << "pc=" << stack[i].program_counter;
-      stOutput << ",li=" << stack[i].loop_i;
-      stOutput << ",c=" << stack[i].c;
-
-      if(i==frame_pointer)
-        stOutput << ")";
-      stOutput << ")";
-      if(i != stack.size-1)
-        stOutput << ", ";
-    }
-    stOutput << "] l=" << l.ToStringCommaDelimited() << "\n";
-  }
-};
-
-// PermutationR2::bon was never intended to be configured properly everywhere
-// and PermutationR2s returned from here don't have it set
-// is it even a good idea for a PermutationR2 to carry it around?
-class GeneratorPermutationR2sOnIndices
-{ public:
-  List<int> replacements;
-  GeneratorPermutationsOfList<int> pads;
-
-  void Initialize(const List<int>& l)
-  { replacements = l;
-    replacements.QuickSortAscending();
-    pads.Initialize(l.size);
-  }
-
-  GeneratorPermutationR2sOnIndices& operator++()
-  { ++pads;
-    return *this; // what the fuck does this even mean how the hell
-  }
-
-  // this method name is such bullshit lol
-  PermutationR2 operator*()
-  { List<int> l = *pads; // for this line, it can't be const, since the other method can't return
-    PermutationR2 out;    // a const list& or even verify that the list isn't being modified
-    out.MakeFromActionDescription(l);
-    for(int i=0; i<out.cycles.size; i++)
-      for(int j=0; j<out.cycles[i].size; j++)
-        out.cycles[i][j] = replacements[out.cycles[i][j]];
+  friend std::ostream& operator<<(std::ostream& out, const TrivialOuterAutomorphism<helt,kelt>& data)
+  { out << data.ToString();
     return out;
   }
-
-  void Initialize(int n)
-  { List<int> l;
-    l.SetSize(n);
-    for(int i=0; i<n; i++)
-      l[i] = i;
-    Initialize(l);
-  }
-
-  bool DoneIterating() const
-  { return pads.DoneIterating();
-  }
 };
 
-class GeneratorElementsSnxSnOnIndicesAndIndices
+template <typename helt, typename kelt, typename oa>
+class SemidirectProductElement
 { public:
-  List<List<int> > indiceses;
+  helt h;
+  kelt k;
 
-  enum pcpositions {beginning, loop, midloop, end};
-  struct frame
-  { int program_counter;
-    GeneratorPermutationR2sOnIndices permgen;
-    PermutationR2 subprod;
-  };
-  List<struct frame> stack;
-  int frame_pointer;
-
-
-  void Initialize(List<List<int> > theIndiceses)
-  { indiceses = theIndiceses;
-    stack.SetSize(indiceses.size);
-    frame_pointer = 0;
-    stack[frame_pointer].program_counter = pcpositions::beginning;
-    ++(*this);
-  }
-
-  /* This program is too confusing to write without writing it in python first
-  def operator++(frame_pointer):
-    permgens[frame_pointer].Initialize(indiceses[frame_pointer])
-    for permi in permgens[frame_pointer]:
-      if(frame_pointer > 0):
-        subprods[frame_pointer] = subprods[frame_pointer-1]*permi
-      else:
-        subprods[frame_pointer] = permi
-      if(frame_pointer == len(permgens)-1):
-        yield subprods[frame_pointer]
-      else
-        self.operator++(frame_pointer+1)
-      ++permgens[frame_pointer]
-  */
-
-  GeneratorElementsSnxSnOnIndicesAndIndices& operator++()
-  { while(true)
-    { switch(stack[frame_pointer].program_counter)
-      { case pcpositions::beginning:
-        stack[frame_pointer].permgen.Initialize(indiceses[frame_pointer]);
-        case pcpositions::loop:
-        if(stack[frame_pointer].permgen.DoneIterating())
-        { stack[frame_pointer].program_counter = pcpositions::end;
-          break;
-        }
-        { // permi is a block local variable, so no "jump to case label crosses initialization" error lol
-        PermutationR2 permi = *(stack[frame_pointer].permgen);
-        if(frame_pointer == 0)
-          stack[frame_pointer].subprod = permi;
-        else
-          stack[frame_pointer].subprod.MakeFromMul(stack[frame_pointer-1].subprod,permi);
-        if(frame_pointer == indiceses.size-1)
-        { stack[frame_pointer].program_counter = pcpositions::midloop;
-          return *this;
-        } else
-        { stack[frame_pointer].program_counter = pcpositions::midloop;
-          frame_pointer++;
-          stack[frame_pointer].program_counter = pcpositions::beginning;
-          break;
-        }
-        }
-        case pcpositions::midloop:
-        ++stack[frame_pointer].permgen;
-        stack[frame_pointer].program_counter = pcpositions::loop;
-        break;
-        case pcpositions::end:
-        frame_pointer--;
-      }
-    }
-  }
-
-  PermutationR2 operator*()
-  { return stack[indiceses.size-1].subprod;
-  }
-
-  bool DoneIterating()
-  { for(int i=0; i<stack.size; i++)
-      if(!stack[i].permgen.DoneIterating())
-        return false;
-    return true;
+  SemidirectProductElement<helt, kelt, oa> operator*(const SemidirectProductElement<helt, kelt, oa>& right) const
+  { SemidirectProductElement<helt, kelt, oa> out;
+    out.h = this->h * right.h;
+    out.k = oa(right.h,this->k) * right.k;
+    return out;
   }
 };
+
+template <typename helt, typename kelt>
+class DirectProductElement: SemidirectProductElement<helt, kelt, TrivialOuterAutomorphism<helt, kelt> >
+{};
+
+template <typename hg, typename kg, typename helt, typename kelt, typename oa>
+class SemidirectProductGroup: public SimpleFiniteGroup<SemidirectProductElement<helt, kelt, oa> >
+{ public:
+  hg* H;
+  kg* K;
+
+  void init(hg* inH, kg* inK);
+  void GetWord(SemidirectProductElement<helt, kelt, oa>& g, List<int>& out);
+};
+
+template <typename hg, typename kg, typename helt, typename kelt, typename oa>
+void SemidirectProductGroup<hg, kg, helt, kelt, oa>::init(hg* inH, kg* inK)
+{ this->H = inH;
+  this->K = inK;
+  this->generators.SetSize(inH->generators.size + inK->generators.size);
+  int i=0;
+  for(; i<this->H.generators.size; i++)
+  { this->generators[i].h = this->H.generators[i];
+    this->generators[i].k = this->K.MakeID();
+  }
+  for(; i<this->H.generators.size+this->K.generators.size; i++)
+  { this->generators[i].h = this->H.MakeID();
+    this->generators[i].k = this->K.generators[i-this->H.generators.size];
+  }
+}
+
+template <typename hg, typename kg, typename helt, typename kelt, typename oa>
+void SemidirectProductGroup<hg, kg, helt, kelt, oa>::GetWord(SemidirectProductElement<helt, kelt, oa>& g, List<int>& out)
+{ this->H.GetWord(g.h, out);
+  List<int> kword;
+  this->K.GetWord(g.k, kword);
+  out.AddListOnTop(kword);
+}
+
+template <typename hg, typename kg, typename helt, typename kelt>
+class DirectProductGroup: public SemidirectProductGroup<hg, kg, helt, kelt, TrivialOuterAutomorphism<helt, kelt> >
+{};
+
+
+
+
 
 class CharacterTable
 {
@@ -2425,7 +2265,21 @@ void SparseTensor::Canonicalize()
 }
 */
 
+void TestPermutationGenerators()
+{ GeneratorPermutationsOfList<int> perms;
+  for(int i=1; i<8; i++)
+    for(perms.Initialize(i); !perms.DoneIterating(); ++perms)
+      stOutput << (*perms).ToStringCommaDelimited() << '\n';
 
+  GeneratorElementsSnxSnOnIndicesAndIndices permssxsxs;
+  List<List<int> > indiceses;
+  indiceses.SetSize(3);
+  indiceses[0].AddOnTop(1); indiceses[0].AddOnTop(2); indiceses[0].AddOnTop(3); indiceses[0].AddOnTop(4);
+  indiceses[1].AddOnTop(5); indiceses[1].AddOnTop(6); indiceses[1].AddOnTop(7);
+  indiceses[2].AddOnTop(8); indiceses[2].AddOnTop(9);
+  for(permssxsxs.Initialize(indiceses); !permssxsxs.DoneIterating(); ++permssxsxs)
+    stOutput << *permssxsxs << '\n';
+}
 
 void TestCountPermutations(int N)
 { long long cnt = 0;
@@ -2436,10 +2290,113 @@ void TestCountPermutations(int N)
   stOutput << "Generated " << cnt << " permutations of " << N << " objects\n";
 }
 
+void TestPermutationWords()
+{ PermutationGroup G;
+  G.MakeSymmetricGroupGeneratorsjjPlus1(5);
+  G.ComputeAllElements();
+  for(int i=0; i<G.theElements.size; i++)
+  { List<int> word;
+    G.GetWord(G.theElements[i],word);
+    PermutationR2 p;
+    for(int wi=0; wi<word.size; wi++)
+      p = p*G.generators[word[wi]];
+    stOutput << ((p == G.theElements[i]) ? "☑ ":"☒ ");
+    stOutput << G.theElements[i] << " has word (" << word.ToStringCommaDelimited() << ") which multiplies out to " << p << "\n";
+  }
+}
+
+void TestPartitionsTableaux()
+{  List<Partition> partitions;
+  Partition::GetPartitions(partitions, 3);
+  for(int i=0; i<partitions.size; i++)
+    stOutput << partitions[i] << '\n';
+  Partition::GetPartitions(partitions, 4);
+  for(int i=0; i<partitions.size; i++)
+    stOutput << partitions[i] << '\n';
+  Partition::GetPartitions(partitions, 8);
+  for(int i=0; i<partitions.size; i++)
+    stOutput << partitions[i] << '\n';
+
+  Partition D;
+  List<int> Dl;
+  Dl.AddOnTop(5); Dl.AddOnTop(3); Dl.AddOnTop(2);
+  D.FromListInt(Dl);
+  Tableau T;
+  D.FillTableauOrdered(T);
+  stOutput << D << ".FillTableauOrdered -> " << T << '\n';
+  stOutput << "T.GetColumns() -> [";
+  List<List<int> > columns = T.GetColumns();
+  for(int i=0; i<columns.size; i++)
+  { stOutput << "[" << columns[i].ToStringCommaDelimited() << "]";
+    if(i!=columns.size-1)
+      stOutput << ", ";
+  }
+  stOutput << "]\n";
+  stOutput << "Is T standard? " << T.IsStandard() << '\n';
+  List<Matrix<Rational> > Ms;
+  stOutput << "D.SpechtModuleMatricesOfTranspositions1j\n";
+  D.SpechtModuleMatricesOfTranspositions1j(Ms);
+  for(int i=0; i<Ms.size; i++)
+    stOutput << Ms[i].ToStringPlainText() << "\n\n";
+}
+
+void TestSpechtModules(int N = 7)
+{ List<Partition> parts;
+  Partition::GetPartitions(parts, N);
+  PermutationGroup G;
+  G.MakeSymmetricGroupGeneratorsjjPlus1(N);
+  List<GroupRepresentation<PermutationGroup, Rational> > reps;
+  reps.SetSize(parts.size);
+  Matrix<int> commutation_relations;
+  G.GeneratorCommutationRelations(commutation_relations);
+  stOutput << G.PrettyPrintGeneratorsCommutationRelations();
+  stOutput << "Testing Specht modules for S_" << N << '\n';
+  //#pragma omp parallel for
+  for(int pi=0; pi<parts.size; pi++)
+  { G.SpechtModuleOfPartition(parts[pi], reps[pi]);
+    for(int i=0; i<reps[pi].generatorS.size; i++)
+      stOutput << reps[pi].generatorS[i].ToStringPlainText() << ",\n\n";
+    stOutput << "\n";
+    bool badrep = false;
+/*    for(int i=0; i<G.generators.size; i++)
+    { Matrix<Rational> M = reps[pi].generatorS[i];
+      M *= reps[pi].generatorS[i];
+      if(!M.IsIdMatrix())
+      { stOutput << "Coxeter relations error, generator " << i << " of module " << parts[pi] << " corresponding to permutation " << G.generators[i] << '\n' << reps[pi].generatorS[i].ToStringPlainText() << '\n';
+        badrep = true;
+      }
+    }
+    for(int i=0; i<G.generators.size-1; i++)
+    { Matrix<Rational> M = reps[pi].generatorS[i];
+      M *= reps[pi].generatorS[i+1];
+      Matrix<Rational> M3 = M*M;
+      M3 *= M;
+      if(!M3.IsIdMatrix())
+      { stOutput << "Coxeter relations error, generators " << i << ", " << i+1 << " of module " << parts[pi] << " corresponding to permutations " << G.generators[i] << ", " << G.generators[i+1] << '\n' << reps[pi].generatorS[i].ToStringPlainText() << '\n' << reps[pi].generatorS[i+1].ToStringPlainText() << '\n';
+        badrep = true;
+      }
+    }*/
+    for(int gi=0; gi<reps[pi].generatorS.size; gi++)
+      for(int gj=gi; gj<reps[pi].generatorS.size; gj++)
+      { Matrix<Rational> M1 = reps[pi].generatorS[gi] * reps[pi].generatorS[gj];
+        Matrix<Rational> Mi = M1;
+        for(int n=1; n<commutation_relations(gi,gj); n++)
+          Mi *= M1;
+        if(!Mi.IsIdMatrix())
+        { stOutput << "generators " << gi << ", " << gj << " i.e. elements " << G.generators[gi] << ", " << G.generators[gj] << " are assigned matrices which fail to have commutation relations " << commutation_relations(gi,gj) << "\n" << reps[pi].generatorS[gi].ToStringPlainText() << ",\n" << reps[pi].generatorS[gj].ToStringPlainText() << "\n\n";
+          badrep = true;
+        }
+      }
+    if(badrep)
+      crash << "crashing now" << crash;
+  }
+  reps.QuickSortAscending();
+  for(int i=0; i<reps.size; i++)
+    stOutput << reps[i] << '\n';
+}
+
 void LegacyTest()
 {
-  BSTest();
-
   /*
       Rational zero = Rational(0,1);
       Rational one = Rational(1,1);
@@ -3195,27 +3152,38 @@ void LegacyTest()
 //  stOutput <<
 //  stOutput << FindConjugacyClassRepresentatives(G,500);
 
-  Polynomial<Rational> p,q;
-  p.MakeMonomiaL(0,1);
-  q.MakeMonomiaL(1,1);
-  stOutput << p << " " << q << " " << p+q << " " << '\n';
-  Vector<Polynomial<Rational> > relations;
-  lie_bracket_relations(relations, 3);
+//  Polynomial<Rational> p,q;
+//  p.MakeMonomiaL(0,1);
+//  q.MakeMonomiaL(1,1);
+//  stOutput << p << " " << q << " " << p+q << " " << '\n';
+//  Vector<Polynomial<Rational> > relations;
+//  lie_bracket_relations(relations, 3);
 
-  List<Partition> partitions;
-  Partition::GetPartitions(partitions, 3);
-  for(int i=0; i<partitions.size; i++)
-    stOutput << partitions[i] << '\n';
-  Partition::GetPartitions(partitions, 4);
-  for(int i=0; i<partitions.size; i++)
-    stOutput << partitions[i] << '\n';
-  Partition::GetPartitions(partitions, 8);
-  for(int i=0; i<partitions.size; i++)
-    stOutput << partitions[i] << '\n';
+  TestSpechtModules();
 
+  HyperoctahedralGroup G;
+  G.MakeHyperoctahedralGroup(5);
+  stOutput << G.PrettyPrintGeneratorsCommutationRelations();
+  G.AllSpechtModules();
 
+  WeylGroup W;
+  W.MakeArbitrarySimple('A', 8);
+  W.ComputeCCSizesAndRepresentatives(NULL);
+  stOutput << W.theDynkinType << " :" << W.size() << " elements, in " << W.conjugacyClasseS.size << " conjugacy classes\n";
+  W.ComputeIrreducibleRepresentationsUsingSpechtModules();
+}
 
-  ElementHyperoctahedralGroup q1,q2;
+void TestFiniteFields()
+{ f65521 a;
+  a.n = 2;
+  f65521 b;
+  b.n = 5;
+  stOutput << (a*b).n << "\n";
+  stOutput << (a/b).n << "\n";
+}
+
+void TestHyperoctahedralStuff()
+{ ElementHyperoctahedralGroup q1,q2;
   q1.p.AddTransposition(0,2);
   q1.p.AddTransposition(1,3);
   q1.s.SetSize(4);
@@ -3235,48 +3203,26 @@ void LegacyTest()
   { HyperoctahedralGroup Bn;
     Bn.MakeHyperoctahedralGroup(bni);
     Bn.ComputeAllElements();
-    Bn.ComputeCCRepresentatives(NULL);
+    Bn.ComputeCCSizesAndRepresentatives(NULL);
     stOutput << Bn << '\n';
     stOutput << Bn.conjugacyClasseS.size << " conjugacy classes\n";
     for(int i=0; i<Bn.conjugacyClasseS.size; i++)
       stOutput << Bn.conjugacyClasseS[i] << ", ";
     stOutput << "\n\n";
   }
-
-  WeylGroup W;
-  W.MakeArbitrarySimple('A', 5);
-  W.ComputeCCSizesAndRepresentatives(NULL);
-  stOutput << W.theDynkinType << " :" << W.size() << " elements, in " << W.conjugacyClasseS.size << " conjugacy classes\n";
-  W.ComputeIrreducibleRepresentationsUsingSpechtModules();
-
-  GeneratorPermutationsOfList<int> perms;
-  for(perms.Initialize(10); !perms.DoneIterating(); ++perms)
-    stOutput << (*perms).ToStringCommaDelimited() << '\n';
-
-  GeneratorElementsSnxSnOnIndicesAndIndices permssxsxs;
-  List<List<int> > indiceses;
-  indiceses.SetSize(3);
-  indiceses[0].AddOnTop(1); indiceses[0].AddOnTop(2); indiceses[0].AddOnTop(3); indiceses[0].AddOnTop(4);
-  indiceses[1].AddOnTop(5); indiceses[1].AddOnTop(6); indiceses[1].AddOnTop(7);
-  indiceses[2].AddOnTop(8); indiceses[2].AddOnTop(9);
-  for(permssxsxs.Initialize(indiceses); !permssxsxs.DoneIterating(); ++permssxsxs)
-    stOutput << *permssxsxs << '\n';
-
 }
-  /*  f65521 a;
-    a.n = 2;
-    f65521 b;
-    b.n = 5;
-    stOutput << (a*b).n << "\n";
-    stOutput << (a/b).n << "\n";
-  */
+
 
 //   std::string s;
 //   std::cin >> s;
 
 int mainTest(List<std::string>& inputArguments)
 { InitializeGlobalObjects();
+<<<<<<< HEAD
   stOutput << inputArguments.ToStringCommaDelimited();
+=======
+  stOutput << inputArguments.ToStringCommaDelimited() << '\n';
+>>>>>>> Specht modules verified.  Bₙ modules are wrong somehow
   if(inputArguments.size == 0)
     LegacyTest();
   else

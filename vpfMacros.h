@@ -107,6 +107,17 @@ public:
     }
     return *this;
   }
+  template <typename anyType>
+  StdoutClass& operator<<(anyType& toBePiped)
+  { if (this->theOutputFunction==0)
+      std::cout << toBePiped;
+    else
+    { std::stringstream out;
+      out << toBePiped;
+      this->theOutputFunction(out.str());
+    }
+    return *this;
+  }
   void (*theOutputFunction)(const std::string& stringToOutput);
   void (*flushOutputFunction)();
   StdoutClass(): theOutputFunction(0), flushOutputFunction(0){}

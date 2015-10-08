@@ -140,6 +140,7 @@ class Tableau
   List<List<int> > t;
 
   bool IsStandard() const;
+  List<List<int> > GetColumns() const;
   void RowStabilizer(PermutationGroup& in) const;
   void ColumnStabilizer(PermutationGroup& in) const;
   template <typename coefficient>
@@ -171,6 +172,7 @@ public:
   static  unsigned int HashFunction(const PermutationR2& in)
                                       { return in.HashFunction();};
   bool operator==(const PermutationR2& right) const;
+  bool IsID() const;
   int BiggestOccurringNumber() const;
   int operator*(int i) const;
   int Sign() const;
@@ -213,6 +215,8 @@ public:
   template <typename coefficient>
   void ActOnTensor(ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient>& out, const ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient>& in) const;
 
+  void GetWordjjPlus1(List<int>& word) const;
+
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
   std::string ToString() const;
@@ -246,10 +250,12 @@ class ElementHyperoctahedralGroup
   // for compatibility with element classes that need a prototype to be able to
   // turn themselves into the identity element
   void MakeID(const ElementHyperoctahedralGroup& unused);
+  bool IsID() const;
   void Invert();
 
   ElementHyperoctahedralGroup operator*(const ElementHyperoctahedralGroup& right) const;
 
+  int SmallestN() const;
   int CountSetBits() const;
   static void Conjugate(const ElementHyperoctahedralGroup& element, const ElementHyperoctahedralGroup& conjugateBy, ElementHyperoctahedralGroup& out);
   bool HasDifferentConjugacyInvariantsFrom(const ElementHyperoctahedralGroup& other) const;
@@ -271,14 +277,15 @@ class ElementHyperoctahedralGroup
   }
 };
 
-// it is forseen that an implementation may throw away theElements
 template <typename elementSomeGroup>
 class ConjugacyClassR2
 { public:
   elementSomeGroup representative;
+  int size;
+  bool haveRepresentativeWord = false;
+  List<int> representativeWord;
+  // the other members are not necessarily meaningful
   int representativeIndex;
-//  List<int> representativeWord;
-//  bool haveRepresentativeWord = false;
   List<int> theElements;
 
 
@@ -287,35 +294,435 @@ class ConjugacyClassR2
   std::string ToString() const;
 };
 
+template <typename object>
+class GeneratorPermutationsOfList
+{ public:
+  List<object> l;
+  bool done_iterating;
+  bool go_once;
+
+  struct stack_frame
+  { int c;
+    int loop_i;
+    int program_counter;
+  };
+  List<struct stack_frame> stack;
+  int frame_pointer;
+
+  enum pcpositions
+  { beginning, loop, firstout, afterloop, end};
+
+  void Initialize(List<object> theL)
+  { this->l = theL;
+    this->done_iterating = false;
+    this->go_once = false;
+    this->frame_pointer = 0;
+    this->stack.SetSize(this->l.size);
+    this->stack[0].c = this->l.size-1;
+    this->stack[0].program_counter = 0;
+    ++(*this);
+  }
+  // this function is the only one that is mathematically interesting
+  // by the way what's with the signature lol
+  GeneratorPermutationsOfList& operator++()
+  { //stOutput << "++ called, ";
+    while(true)
+    { //varsout();
+      if(frame_pointer == -1)
+      { if(this->l.size == 1)
+        { if(!go_once)
+            go_once = true;
+          else
+            done_iterating = true;
+        }
+        else
+          done_iterating = true;
+        return *this;
+      }
+      switch(stack[frame_pointer].program_counter)
+      { case pcpositions::beginning:
+        if(stack[frame_pointer].c == 0)
+        { frame_pointer--;
+          return *this;
+        }
+        stack[frame_pointer].loop_i = 0;
+        case pcpositions::loop:
+        if(stack[frame_pointer].loop_i == stack[frame_pointer].c)
+        { stack[frame_pointer].program_counter = pcpositions::afterloop;
+          break;
+        }
+        stack[frame_pointer].program_counter = pcpositions::firstout;
+        frame_pointer++;
+        stack[frame_pointer].c = stack[frame_pointer-1].c-1;
+        stack[frame_pointer].program_counter = pcpositions::beginning;
+        break;
+        case firstout:
+        if(stack[frame_pointer].c%2!=0)
+          l.SwapTwoIndices(l.size-1-stack[frame_pointer].loop_i,l.size-1-stack[frame_pointer].c);
+        else
+          l.SwapTwoIndices(l.size-1,l.size-1-stack[frame_pointer].c);
+        stack[frame_pointer].loop_i++;
+        stack[frame_pointer].program_counter = pcpositions::loop;
+        break;
+        case afterloop:
+        stack[frame_pointer].program_counter = pcpositions::end;
+        frame_pointer++;
+        stack[frame_pointer].c = stack[frame_pointer-1].c-1;
+        stack[frame_pointer].program_counter = pcpositions::beginning;
+        break;
+        case end:
+        frame_pointer--;
+      }
+    }
+  }
+
+  void Initialize(int theN)
+  { List<int> ll;
+    ll.SetSize(theN);
+    for(int i=0; i<theN; i++)
+      ll[i] = i;
+    this->Initialize(ll);
+  }
+
+  // get current element, using bizarre cxx syntax because why not
+  // apparently you can't return a reference from a const method?
+  List<int>& operator*()
+  { return l;
+  }
+
+  bool DoneIterating() const
+  { return done_iterating;
+  }
+
+
+  void varsout() const
+  { stOutput << "stack: [";
+    for(int i=0; i<stack.size; i++)
+    { stOutput << "(";
+      if(i==frame_pointer)
+        stOutput << "(";
+
+      stOutput << "pc=" << stack[i].program_counter;
+      stOutput << ",li=" << stack[i].loop_i;
+      stOutput << ",c=" << stack[i].c;
+
+      if(i==frame_pointer)
+        stOutput << ")";
+      stOutput << ")";
+      if(i != stack.size-1)
+        stOutput << ", ";
+    }
+    stOutput << "] l=" << l.ToStringCommaDelimited() << "\n";
+  }
+};
+
+// PermutationR2::bon was never intended to be configured properly everywhere
+// and PermutationR2s returned from here don't have it set
+// is it even a good idea for a PermutationR2 to carry it around?
+class GeneratorPermutationR2sOnIndices
+{ public:
+  List<int> replacements;
+  GeneratorPermutationsOfList<int> pads;
+
+  void Initialize(const List<int>& l)
+  { replacements = l;
+    replacements.QuickSortAscending();
+    pads.Initialize(l.size);
+  }
+
+  GeneratorPermutationR2sOnIndices& operator++()
+  { ++pads;
+    return *this; // what the fuck does this even mean how the hell
+  }
+
+  // this method name is such bullshit lol
+  PermutationR2 operator*()
+  { List<int> l = *pads; // for this line, it can't be const, since the other method can't return
+    PermutationR2 out;    // a const list& or even verify that the list isn't being modified
+    out.MakeFromActionDescription(l);
+    for(int i=0; i<out.cycles.size; i++)
+      for(int j=0; j<out.cycles[i].size; j++)
+        out.cycles[i][j] = replacements[out.cycles[i][j]];
+    return out;
+  }
+
+  void Initialize(int n)
+  { List<int> l;
+    l.SetSize(n);
+    for(int i=0; i<n; i++)
+      l[i] = i;
+    Initialize(l);
+  }
+
+  bool DoneIterating() const
+  { return pads.DoneIterating();
+  }
+
+  void ResetIteration()
+  { this->Initialize(replacements);
+  }
+};
+
+
+template <typename TElementGenerator, typename TElement>
+class GeneratorProductOfGenerators
+{ public:
+  List<TElementGenerator > generators;
+
+  enum pcpositions {beginning, loop, midloop, end};
+  struct frame
+  { int program_counter;
+    TElement subprod;
+  };
+  List<struct frame> stack;
+  int frame_pointer;
+
+
+  void Initialize(List<TElementGenerator> theGenerators)
+  { generators = theGenerators;
+    stack.SetSize(generators.size);
+    frame_pointer = 0;
+    stack[frame_pointer].program_counter = pcpositions::beginning;
+    ++(*this);
+  }
+
+  /* This program is too confusing to write without writing it in python first
+  def operator++(frame_pointer):
+    permgens[frame_pointer].Initialize(indiceses[frame_pointer])
+    for permi in permgens[frame_pointer]:
+      if(frame_pointer > 0):
+        subprods[frame_pointer] = subprods[frame_pointer-1]*permi
+      else:
+        subprods[frame_pointer] = permi
+      if(frame_pointer == len(permgens)-1):
+        yield subprods[frame_pointer]
+      else
+        self.operator++(frame_pointer+1)
+      ++permgens[frame_pointer]
+  */
+
+  GeneratorProductOfGenerators& operator++()
+  { while(true)
+    { if(frame_pointer == -1)
+        return  *this; // seriously tho what the fuck does this even mean
+      switch(stack[frame_pointer].program_counter)
+      { case pcpositions::beginning:
+        generators[frame_pointer].ResetIteration();
+        case pcpositions::loop:
+        if(generators[frame_pointer].DoneIterating())
+        { stack[frame_pointer].program_counter = pcpositions::end;
+          break;
+        }
+        { // permi is a block local variable, so no "jump to case label crosses initialization" error lol
+        TElement permi = *(generators[frame_pointer]);
+        if(frame_pointer == 0)
+          stack[frame_pointer].subprod = permi;
+        else
+          stack[frame_pointer].subprod.MakeFromMul(stack[frame_pointer-1].subprod,permi);
+        if(frame_pointer == generators.size-1)
+        { stack[frame_pointer].program_counter = pcpositions::midloop;
+          return *this;
+        } else
+        { stack[frame_pointer].program_counter = pcpositions::midloop;
+          frame_pointer++;
+          stack[frame_pointer].program_counter = pcpositions::beginning;
+          break;
+        }
+        }
+        case pcpositions::midloop:
+        ++generators[frame_pointer];
+        stack[frame_pointer].program_counter = pcpositions::loop;
+        break;
+        case pcpositions::end:
+        frame_pointer--;
+      }
+    }
+  }
+
+  TElement operator*()
+  { return stack.LastObject()->subprod;
+  }
+
+  bool DoneIterating()
+  { if(frame_pointer == -1)
+      return true;
+    return false;
+  }
+};
+
+/* Apparently, parametric polymorphism doesn't work well with inheritance and templates.
+class GeneratorElementsSnxSnOnIndicesAndIndices: public GeneratorProductOfGenerators<GeneratorPermutationR2sOnIndices, PermutationR2>
+{ public:
+  void Initialize(List<List<int> > indiceses)
+  { List<GeneratorPermutationR2sOnIndices> gens;
+    gens.SetSize(indiceses.size);
+    for(int i=0; i<indiceses.size; i++)
+    { gens[i].Initialize(indiceses[i]);
+    }
+    this->Initialize(gens);
+  }
+};
+*/
+
+class GeneratorElementsSnxSnOnIndicesAndIndices
+{ public:
+  List<GeneratorPermutationR2sOnIndices> generators;
+
+  enum pcpositions {beginning, loop, midloop, end};
+  struct frame
+  { int program_counter;
+    PermutationR2 subprod;
+  };
+  List<struct frame> stack;
+  int frame_pointer;
+
+
+  void Initialize(List<GeneratorPermutationR2sOnIndices> theGenerators)
+  { generators = theGenerators;
+    stack.SetSize(generators.size);
+    frame_pointer = 0;
+    stack[frame_pointer].program_counter = pcpositions::beginning;
+    ++(*this);
+  }
+
+  /* This program is too confusing to write without writing it in python first
+  def operator++(frame_pointer):
+    permgens[frame_pointer].Initialize(indiceses[frame_pointer])
+    for permi in permgens[frame_pointer]:
+      if(frame_pointer > 0):
+        subprods[frame_pointer] = subprods[frame_pointer-1]*permi
+      else:
+        subprods[frame_pointer] = permi
+      if(frame_pointer == len(permgens)-1):
+        yield subprods[frame_pointer]
+      else
+        self.operator++(frame_pointer+1)
+      ++permgens[frame_pointer]
+  */
+
+  GeneratorElementsSnxSnOnIndicesAndIndices& operator++()
+  { while(true)
+    { if(frame_pointer == -1)
+        return  *this; // seriously tho what the fuck does this even mean
+      switch(stack[frame_pointer].program_counter)
+      { case pcpositions::beginning:
+        generators[frame_pointer].ResetIteration();
+        case pcpositions::loop:
+        if(generators[frame_pointer].DoneIterating())
+        { stack[frame_pointer].program_counter = pcpositions::end;
+          break;
+        }
+        { // permi is a block local variable, so no "jump to case label crosses initialization" error lol
+        PermutationR2 permi = *(generators[frame_pointer]);
+        if(frame_pointer == 0)
+          stack[frame_pointer].subprod = permi;
+        else
+          stack[frame_pointer].subprod.MakeFromMul(stack[frame_pointer-1].subprod,permi);
+        if(frame_pointer == generators.size-1)
+        { stack[frame_pointer].program_counter = pcpositions::midloop;
+          return *this;
+        } else
+        { stack[frame_pointer].program_counter = pcpositions::midloop;
+          frame_pointer++;
+          stack[frame_pointer].program_counter = pcpositions::beginning;
+          break;
+        }
+        }
+        case pcpositions::midloop:
+        ++generators[frame_pointer];
+        stack[frame_pointer].program_counter = pcpositions::loop;
+        break;
+        case pcpositions::end:
+        frame_pointer--;
+      }
+    }
+  }
+
+  PermutationR2 operator*()
+  { return stack.LastObject()->subprod;
+  }
+
+  bool DoneIterating()
+  { if(frame_pointer == -1)
+      return true;
+    return false;
+  }
+
+  void Initialize(List<List<int> > indiceses)
+  { List<GeneratorPermutationR2sOnIndices> gens;
+    gens.SetSize(indiceses.size);
+    for(int i=0; i<indiceses.size; i++)
+    { gens[i].Initialize(indiceses[i]);
+    }
+    this->Initialize(gens);
+  }
+};
+
+// sample element class.  Functional, verifiable documentation
+// give it a multiplication function, feed it to SimpleFiniteGroup, and...
+class ElementFiniteGroup
+{ void* data = NULL;
+
+  void* (*mul)(void*, void*) = NULL;
+  // the rest is optional
+  void* (*inv)(void*) = NULL;
+
+
+  ElementFiniteGroup operator*(ElementFiniteGroup right)
+  { ElementFiniteGroup out;
+    out.data = this->mul(this->data, right.data);
+    out.mul = this->mul;
+    out.inv = this->inv;
+    return out;
+  }
+  ElementFiniteGroup Invert()
+  { ElementFiniteGroup out;
+    if(inv != NULL)
+    { out.data = this->inv(this->data);
+      return out;
+    }
+  }
+  ElementFiniteGroup MakeID(const ElementFiniteGroup& prototype)
+  { ElementFiniteGroup out;
+    out.mul = prototype.mul;
+    out.inv = prototype.inv;
+    return out;
+  }
+};
 
 // this is here until I figure out how to use FiniteGroup
 // that, and I guess it might be useful for some Tableau stuff
 // ok scratch that, it is a SimpleFiniteGroup class with easier criteria
 // for being an element than FiniteGroup
+// the reason so few methods are const is that there should ideally be very few SimpleFiniteGroup's and they
+// should constantly be updating their state with calculations
 template <typename elementSomeGroup>
 class SimpleFiniteGroup
 { public:
   List<elementSomeGroup> generators;
   HashedList<elementSomeGroup> theElements;
   bool haveElements = false;
-  int GetSize();
-
+  bool flagCCsComputed = false;
+  bool easyConjugacyDetermination = false;
+  bool conjugacyClassesSizesAndRepresentativesByFormula = false;
+  List<ConjugacyClassR2<elementSomeGroup> > conjugacyClasseS;
 //  List<List<int> > theWords;
 //  bool haveWords;
 
-  List<ConjugacyClassR2<elementSomeGroup> > conjugacyClasseS;
-  bool flagCCsComputed = false;
-
-  bool easyConjugacyDetermination = false;
-
   void AddGenDontCompute(const elementSomeGroup& gen) { this->generators.AddOnTop(gen); }
   void ComputeAllElements();
-  void ComputeCCRepresentatives(void* unused = NULL);
+  void ComputeCCSizesAndRepresentatives(void* unused = NULL);
   void ComputeElementsAndCCs(void* unused = NULL);
 
-
+  int GetSize();
   bool AreConjugate(const elementSomeGroup& x, const elementSomeGroup& y);
   bool PossiblyConjugate(const elementSomeGroup& x, const elementSomeGroup& y);
+
+  // the intention for this being here is to override it in maybe some kind
+  // of coset like quotient group class or whatever lol
+  bool IsID(const elementSomeGroup& g);
+  void GeneratorCommutationRelations(Matrix<int>& out);
+  std::string PrettyPrintGeneratorsCommutationRelations();
 
   template <typename coefficient>
   coefficient GetHermitianProduct(const Vector<coefficient>& x1, const Vector<coefficient>& X2);
@@ -327,29 +734,51 @@ class SimpleFiniteGroup
 
 class PermutationGroup: public SimpleFiniteGroup<PermutationR2>
 { public:
-  bool isSymmetricGroup;
+  bool isSymmetricGroup = false;
+  bool hasGenerators1j = false;
+  bool hasGeneratorsjjPlus1 = false;
 
   void MakeSymmetricGroup(int n);
+  void MakeSymmetricGroupGeneratorsjjPlus1(int n);
 
   bool AreConjugate(const PermutationR2& x, const PermutationR2& y);
 
+  void ComputeCCSizesAndRepresentatives(void* unused);
+  void GetWord(const PermutationR2& g, List<int>& word);
+
+  template <typename coefficient>
+  void SpechtModuleOfPartition(const Partition& p, GroupRepresentation<PermutationGroup, coefficient>& rep);
   // haha, whatever this means
   template <typename somestream>
-  somestream& IntoStream(somestream& out) const;
-  std::string ToString() const;
-  friend std::ostream& operator<<(std::ostream& out, const PermutationGroup& data)
+  somestream& IntoStream(somestream& out);
+  std::string ToString();
+  friend std::ostream& operator<<(std::ostream& out, PermutationGroup& data)
   { return data.IntoStream(out);
   }
 };
 
+// the int N field may or may not be meaningful
 class HyperoctahedralGroup: public SimpleFiniteGroup<ElementHyperoctahedralGroup>
 { public:
   bool isEntireHyperoctahedralGroup;
   bool isEntireDn;
+  int N;
 
   void MakeHyperoctahedralGroup(int n);
 
+  // it is conceivable that someone could give an element that doesn't belong to the group
+  // but actually that isn't going to happen and we're going to crash if it does
+  void GetWord(const ElementHyperoctahedralGroup& element, List<int>& word);
+
+  int GetN();
+  int GetSize();
+
   bool AreConjugate(const ElementHyperoctahedralGroup& x, const ElementHyperoctahedralGroup& y);
+
+  void ComputeCCSizesAndRepresentatives(void* unused);
+  void AllSpechtModules();
+  void SpechtModuleOfPartititons(const Partition& positive, const Partition& negative, GroupRepresentation<HyperoctahedralGroup, Rational>& out);
+
 
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
@@ -388,8 +817,8 @@ void Partition::SpechtModuleMatrixOfPermutation(List<Matrix<scalar> >& out, cons
 
 template <typename scalar>
 void Partition::SpechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, const List<PermutationR2>& perms) const
-{ stOutput << "Debugging Partition::SpechtModuleMatricesOfPermutations: " << *this;
-  stOutput << " with permutations " << perms.ToStringCommaDelimited() << '\n';
+{ //stOutput << "Debugging Partition::SpechtModuleMatricesOfPermutations: " << *this;
+  //stOutput << " with permutations " << perms.ToStringCommaDelimited() << '\n';
   Tableau initialTableau;
   List<int> stuffing;
   stuffing.SetSize(this->n);
@@ -406,22 +835,22 @@ void Partition::SpechtModuleMatricesOfPermutations(List<Matrix<scalar> >& out, c
   ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,scalar> t1, t2, t3;
   t1.AddMonomial(tm1,1);
   initialTableau.YoungSymmetrizerAction(t2,t1);
-  stOutput << "Young symmetrizer: " << t1 << " projects to " << t2 << '\n';
+  //stOutput << "Young symmetrizer: " << t1 << " projects to " << t2 << '\n';
   List<ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,scalar> > basisvs;
   SparseSubspaceBasis<ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,scalar>,MonomialTensor<int,MathRoutines::IntUnsignIdentity>,scalar> basis;
   List<Tableau> standardTableaux;
   this->GetAllStandardTableaux(standardTableaux);
-  stOutput << "Standard tableaux are " << standardTableaux.ToStringCommaDelimited() << '\n';
+  //stOutput << "Standard tableaux are " << standardTableaux.ToStringCommaDelimited() << '\n';
   basisvs.SetSize(standardTableaux.size);
   for(int i=0; i<standardTableaux.size; i++)
   { PermutationR2 p;
     p.MakeFromActionDescription(standardTableaux[i].TurnIntoList());
     p.ActOnTensor(basisvs[i],t2);
-    stOutput << "Tableau " << standardTableaux[i] << " is assigned permutation " << p;
-    stOutput << " permuting Young symmetrized tensor to " << basisvs[i] << '\n';
+    //stOutput << "Tableau " << standardTableaux[i] << " is assigned permutation " << p;
+    //stOutput << " permuting Young symmetrized tensor to " << basisvs[i] << '\n';
   }
   basis.SetBasis(basisvs);
-  stOutput << "Basis generated: " << basis << '\n';
+  //stOutput << "Basis generated: " << basis << '\n';
   out.SetSize(perms.size);
   for(int permi=0; permi<perms.size; permi++)
   { out[permi].init(basis.rank,basis.rank);
@@ -448,28 +877,22 @@ somestream& Partition::IntoStream(somestream& out) const
 template <typename coefficient>
 void Tableau::YoungSymmetrizerAction(ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient>&out, const ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient>& in)
 { //stOutput << "Debugging Tableau::YoungSymmetrizerAction: " << *this << " acts on " << in << '\n';
-  PermutationGroup rs,cs;
-  this->RowStabilizer(rs);
-  rs.ComputeAllElements();
-  //stOutput << "Row stabilizer group: " << rs << '\n';
-  this->ColumnStabilizer(cs);
-  cs.ComputeAllElements();
-  //stOutput << "Column stabilizer group: " << cs << '\n';
-
+  GeneratorElementsSnxSnOnIndicesAndIndices rs,cs;
   ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient> rst;
-  for(int i=0; i<rs.theElements.size; i++)
+  for(rs.Initialize(this->t); !rs.DoneIterating(); ++rs)
   { ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient> tmp;
-    rs.theElements[i].ActOnTensor(tmp, in);
+    (*rs).ActOnTensor(tmp, in);
     rst += tmp;
   }
-  //stOutput << "Row stabilized: " << rst << '\n';
+//  stOutput << "Row stabilized: " << rst << '\n';
   out.MakeZero();
-  for(int i=0; i<cs.theElements.size; i++)
+  for(cs.Initialize(this->GetColumns()); !cs.DoneIterating(); ++cs)
   { ElementMonomialAlgebra<MonomialTensor<int,MathRoutines::IntUnsignIdentity>,coefficient> tmp;
-    cs.theElements[i].ActOnTensor(tmp,rst);
-    out += tmp * cs.theElements[i].Sign();
+    PermutationR2 csi = *cs;
+    csi.ActOnTensor(tmp,rst);
+    out += tmp * csi.Sign();
   }
-  //stOutput << "Young symmetrized: " << out << '\n';
+//  stOutput << "Young symmetrized: " << out << '\n';
 }
 
 template <typename somestream>
@@ -528,7 +951,7 @@ bool SimpleFiniteGroup<elementSomeGroup>::PossiblyConjugate(const elementSomeGro
 template <typename elementSomeGroup>
 bool SimpleFiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& x, const elementSomeGroup& y)
 { if(!this->flagCCsComputed)
-    this->ComputeCCRepresentatives(NULL);
+    this->ComputeCCSizesAndRepresentatives(NULL);
   int xi = this->theElements.GetIndex(x);
   int yi = this->theElements.GetIndex(y);
   for(int i=0; i<this->conjugacyClasseS.size; i++)
@@ -541,8 +964,8 @@ bool SimpleFiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& x
 template <typename elementSomeGroup>
 template <typename coefficient>
 coefficient SimpleFiniteGroup<elementSomeGroup>::GetHermitianProduct(const Vector<coefficient>& X1, const Vector<coefficient>& X2)
-{ if(!this->haveConjugacyClasses)
-    this->ComputeCCRepresentatives(NULL);
+{ if(!this->flagCCsComputed)
+    this->ComputeCCSizesAndRepresentatives(NULL);
   coefficient acc = 0;
   for(int i=0; i<this->conjugacyClasseS.size; i++)
     acc += MathRoutines::ComplexConjugate(X1[i]) * X2[i] * this->conjugacyClasseS[i].size;
@@ -551,7 +974,11 @@ coefficient SimpleFiniteGroup<elementSomeGroup>::GetHermitianProduct(const Vecto
 
 template <typename elementSomeGroup>
 void SimpleFiniteGroup<elementSomeGroup>::ComputeAllElements()
-{ elementSomeGroup e;
+{ if(this->haveElements)
+  { stOutput << "Recomputing elements of some group, for God only knows why" << '\n';
+    this->theElements.SetSize(0);
+  }
+  elementSomeGroup e;
   // if the user thinks its a good idea to instantiate a group of this type
   // without giving it a single element, it had better be a type of element
   // that can be used without initialization.
@@ -560,7 +987,7 @@ void SimpleFiniteGroup<elementSomeGroup>::ComputeAllElements()
   this->theElements.AddOnTop(e);
   List<elementSomeGroup> recentadds;
   recentadds.AddOnTop(e);
-  if(easyConjugacyDetermination)
+  if(easyConjugacyDetermination && !conjugacyClassesSizesAndRepresentativesByFormula)
   { this->conjugacyClasseS.SetSize(1);
     this->conjugacyClasseS[0].representative = e;
     this->conjugacyClasseS[0].theElements.AddOnTop(0);
@@ -581,7 +1008,7 @@ void SimpleFiniteGroup<elementSomeGroup>::ComputeAllElements()
 //        recentwords[recentwords.size-1].AddOnTop(i);
 //        if(andWords)
 //          this->theWords.AddOnTop(recentwords[recentwords.size-1]);
-        if(easyConjugacyDetermination)
+        if(easyConjugacyDetermination && !conjugacyClassesSizesAndRepresentativesByFormula)
         { int pindex = this->theElements.GetIndex(p);
           bool alreadyHaveClass = false;
           for(int i=0; i<this->conjugacyClasseS.size; i++)
@@ -604,15 +1031,17 @@ void SimpleFiniteGroup<elementSomeGroup>::ComputeAllElements()
     }
   }
   this->haveElements = true;
-  if(easyConjugacyDetermination)
+  if(easyConjugacyDetermination && !conjugacyClassesSizesAndRepresentativesByFormula)
     this->flagCCsComputed = true;
 //  if(andWords)
 //    this->haveWords = true;
 }
 
 template <typename elementSomeGroup>
-void SimpleFiniteGroup<elementSomeGroup>::ComputeCCRepresentatives(void* unused)
-{ if(this->flagCCsComputed)
+void SimpleFiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives(void* unused)
+{ if(this->conjugacyClassesSizesAndRepresentativesByFormula)
+    crash << "Call the superclass method instead " << __FILE__ << ":" << __LINE__ << crash;
+  if(this->flagCCsComputed)
     return;
   if(this->easyConjugacyDetermination)
   { this->ComputeAllElements();
@@ -620,7 +1049,8 @@ void SimpleFiniteGroup<elementSomeGroup>::ComputeCCRepresentatives(void* unused)
   }
 //  if(!this->haveWords)
 //    this->ComputeAllElements(true);
-
+  if(!this->haveElements)
+    this->ComputeAllElements();
   GraphOLD conjugacygraph = GraphOLD(this->theElements.size, this->generators.size);
   for(int i=0; i<this->theElements.size; i++)
     for(int j=0; j<this->generators.size; j++)
@@ -643,7 +1073,7 @@ void SimpleFiniteGroup<elementSomeGroup>::ComputeCCRepresentatives(void* unused)
 
 template <typename elementSomeGroup>
 void SimpleFiniteGroup<elementSomeGroup>::ComputeElementsAndCCs(void* unused)
-{ this->ComputeCCRepresentatives();
+{ this->ComputeCCSizesAndRepresentatives();
 }
 
 template <typename elementSomeGroup>
@@ -651,6 +1081,53 @@ int SimpleFiniteGroup<elementSomeGroup>::GetSize()
 { if(!this->haveElements)
     this->ComputeAllElements();
   return this->theElements.size;
+}
+
+template <typename elementSomeGroup>
+bool SimpleFiniteGroup<elementSomeGroup>::IsID(const elementSomeGroup& g)
+{ return g.IsID();
+}
+
+/*// If it's ever needed, this might be the way to build a SimpleFiniteGroup<Matrix<coefficient> >
+template <typename coefficient>
+bool SimpleFiniteGroup<Matrix<coefficient> >::IsID(const Matrix<coefficient>& g)
+{ return g.IsIdMatrix();
+}
+*/
+
+template <typename elementSomeGroup>
+void SimpleFiniteGroup<elementSomeGroup>::GeneratorCommutationRelations(Matrix<int>& out)
+{ out.init(this->generators.size, this-> generators.size);
+  for(int i=0; i<this->generators.size; i++)
+    for(int j=i; j<this->generators.size; j++)
+    { elementSomeGroup g = this->generators[i] * this->generators[j];
+      elementSomeGroup gi = g;
+      int cr = 1;
+      do
+      { gi = gi * g;
+        cr++;
+      } while(!gi.IsID());
+      out(i,j) = cr;
+      out(j,i) = cr;
+    }
+}
+
+template <typename elementSomeGroup>
+std::string SimpleFiniteGroup<elementSomeGroup>::PrettyPrintGeneratorsCommutationRelations()
+{ Matrix<int> cr;
+  this->GeneratorCommutationRelations(cr);
+  std::string crs = cr.ToStringPlainText();
+  List<char*> rows;
+  int i;
+  rows.AddOnTop(&crs[0]);
+  while((i = crs.find('\n')) != -1)
+  { crs[i] = 0;
+    rows.AddOnTop(&crs[i+1]);
+  }
+  std::stringstream out;
+  for(int i=0; i<this->generators.size; i++)
+    out << rows[i] << " " << this->generators[i] << '\n';
+  return out.str().c_str();
 }
 
 template <typename elementSomeGroup>
@@ -671,13 +1148,21 @@ somestream& SimpleFiniteGroup<elementSomeGroup>::IntoStream(somestream& out) con
 }
 
 template <typename somestream>
-somestream& PermutationGroup::IntoStream(somestream& out) const
-{ out << "Permutation Group with " << this->theElements.size << " elements, generated by: ";
-  for(int i=0; i<this->generators.size; i++)
-  { out << this->generators[i];
-    if(i != this->generators.size-1)
-      out << ", ";
+somestream& PermutationGroup::IntoStream(somestream& out)
+{ if(!this->isSymmetricGroup)
+  { out << "Permutation Group with " << this->theElements.size << " elements, generated by: ";
+    for(int i=0; i<this->generators.size; i++)
+    { out << this->generators[i];
+      if(i != this->generators.size-1)
+        out << ", ";
+    }
   }
+  out << "Symmetric Group on " << this->generators.size + 1 << " letters (";
+  if(this->hasGenerators1j)
+    out << "generators are (1 j))";
+  if(this->hasGeneratorsjjPlus1)
+    out << "generators are (j j+1))";
+  out << " thus having " << this->GetSize() << " elements.";
   return out;
 }
 
@@ -686,6 +1171,13 @@ std::string SimpleFiniteGroup<elementSomeGroup>::ToString() const
 { std::stringstream out;
   this->IntoStream(out);
   return out.str();
+}
+
+template <typename coefficient>
+void PermutationGroup::SpechtModuleOfPartition(const Partition& p,
+                                               GroupRepresentation<PermutationGroup, coefficient>& rep)
+{ p.SpechtModuleMatricesOfPermutations(rep.generatorS, this->generators);
+  rep.ownerGroup = this;
 }
 
 template <typename elementSomeGroup>

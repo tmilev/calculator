@@ -813,7 +813,9 @@ class GroupRepresentation
   ClassFunction<someGroup, coefficient> theCharacteR;
   bool haveCharacter = false;
 
-  void GetCharacter();
+  void ComputeCharacter();
+
+  bool operator>(GroupRepresentation& right);
 
   template <typename somestream>
   somestream& IntoStream(somestream& out);
@@ -824,9 +826,9 @@ class GroupRepresentation
 };
 
 template <typename someGroup, typename coefficient>
-void GroupRepresentation<someGroup, coefficient>::GetCharacter()
+void GroupRepresentation<someGroup, coefficient>::ComputeCharacter()
 { if(!this->ownerGroup->flagCCsComputed)
-    this->ownerGroup->ComputeCCRepresentatives(NULL);
+    this->ownerGroup->ComputeCCSizesAndRepresentatives(NULL);
   this->theCharacteR.G = ownerGroup;
   this->theCharacteR.data.SetSize(this->ownerGroup->conjugacyClasseS.size);
   for(int cci=0; cci < this->ownerGroup->conjugacyClasseS.size; cci++)
@@ -839,6 +841,16 @@ void GroupRepresentation<someGroup, coefficient>::GetCharacter()
     this->theCharacteR.data[cci] = M.GetTrace();
   }
   this->theCharacteR.G = ownerGroup;
+  this->haveCharacter = true;
+}
+
+template <typename someGroup, typename coefficient>
+bool GroupRepresentation<someGroup, coefficient>::operator>(GroupRepresentation<someGroup, coefficient>& right)
+{ if(!this->haveCharacter)
+    this->ComputeCharacter();
+  if(!right.haveCharacter)
+    right.ComputeCharacter();
+  return this->theCharacteR > right.theCharacteR;
 }
 
 /* this is unused because it's stupid, no one wants to carry around a billion matrices just for no reason
@@ -852,10 +864,10 @@ template <typename someGroup, typename coefficient>
 template <typename somestream>
 somestream& GroupRepresentation<someGroup, coefficient>::IntoStream(somestream& out)
 { if(!this->haveCharacter)
-    this->GetCharacter();
+    this->ComputeCharacter();
 // WeylGroup needs to be printable
 // WeylGroup really needs to be printable lol
-  out << "Representation of group " << "BUG: WeylGroup crashes here" << " with character " << this->theCharacteR;
+  out << "Representation of group " << ownerGroup->ToString() << " with character " << this->theCharacteR;
   return out;
 }
 

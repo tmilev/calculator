@@ -1,4 +1,5 @@
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
+#include "vpfImplementationHeader2Math3_FiniteGroups.h"
 
 ProjectInformationInstance ProjectInfoVpf2Math3_SymmetricGroupsAndGeneralizations(__FILE__, "Symmetric groups and generalizations ");
 

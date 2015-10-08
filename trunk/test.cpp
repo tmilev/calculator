@@ -3218,11 +3218,8 @@ void TestHyperoctahedralStuff()
 
 int mainTest(List<std::string>& inputArguments)
 { InitializeGlobalObjects();
-<<<<<<< HEAD
   stOutput << inputArguments.ToStringCommaDelimited();
-=======
   stOutput << inputArguments.ToStringCommaDelimited() << '\n';
->>>>>>> Specht modules verified.  Bₙ modules are wrong somehow
   if(inputArguments.size == 0)
     LegacyTest();
   else

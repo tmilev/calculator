@@ -3218,7 +3218,6 @@ void TestHyperoctahedralStuff()
 
 int mainTest(List<std::string>& inputArguments)
 { InitializeGlobalObjects();
-  stOutput << inputArguments.ToStringCommaDelimited();
   stOutput << inputArguments.ToStringCommaDelimited() << '\n';
   if(inputArguments.size == 0)
     LegacyTest();

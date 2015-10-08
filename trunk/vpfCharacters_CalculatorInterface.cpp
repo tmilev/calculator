@@ -488,7 +488,7 @@ void WeylGroup::ComputeIrreducibleRepresentationsUsingSpechtModules(GlobalVariab
     for(int i=0; i<thePartitions.size; i++)
     { thePartitions[i].SpechtModuleMatricesOfTranspositionsjjplusone(theRepresentations[i].generatorS);
       theRepresentations[i].ownerGroup = this;
-      theRepresentations[i].GetCharacter();
+      theRepresentations[i].ComputeCharacter();
       stOutput << theRepresentations[i].ToString() << '\n';
     }
     return;

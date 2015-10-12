@@ -1085,7 +1085,7 @@ void Calculator::initPredefinedInnerFunctions()
   ("printRootSubalgebrasRecompute", CalculatorFunctionsGeneral::innerPrintRootSAsForceRecompute, "",
    "Same as printRootSubalgebras but forces recomputation. Use to  \
    recompute obsolete or interrupted output files.",
-   "printRootSubalgebras(f_4)");
+   "printRootSubalgebras(f_4)", false, false, "CalculatorFunctionsGeneral::innerPrintRootSAsForceRecompute");
   this->AddOperationInnerHandler
   ("printSlTwoSubalgebras", CalculatorFunctionsGeneral::innerPrintSltwos, "",
    "Prints sl(2) subalgebras and root subalgebras. \
@@ -1352,10 +1352,10 @@ void Calculator::initPredefinedInnerFunctions()
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
    "printSemisimpleSubalgebras(B_3)", true, false);
   this->AddOperationInnerHandler
-  ("printSemisimpleSubalgebrasRecompute", this->innerPrintSSsubalgebrasRecompute, "",
+  ("printSemisimpleSubalgebrasRecompute", Calculator::innerPrintSSsubalgebrasRecompute, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
-   "printSemisimpleSubalgebrasRecompute(C_3)", false, false);
+   "printSemisimpleSubalgebrasRecompute(C_3)", false, false, "Calculator::innerPrintSSsubalgebrasRecompute");
   this->AddOperationInnerHandler
   ("printSemisimpleSubalgebrasNoCentralizers", this->innerPrintSSsubalgebrasNoCentralizers, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \

@@ -183,6 +183,27 @@ void PauseController::PauseIfRequested()
     write(this->thePausePipe[1], "!", 1);
 }
 
+void PauseController::PauseIfRequestedWithTimeOut()
+{ fd_set read_fds, write_fds, except_fds;
+  FD_ZERO(&read_fds);
+  FD_ZERO(&write_fds);
+  FD_ZERO(&except_fds);
+  FD_SET(this->thePausePipe[0], &read_fds);
+  struct timeval timeout;
+  timeout.tv_sec = 10;
+  timeout.tv_usec = 0;
+  if (this->CheckPauseIsRequested())
+    theLog << logger::red << "BLOCKING on " << this->ToString() << logger::endL;
+  bool pauseWasRequested=false;
+  if (select(this->thePausePipe[0]+1, &read_fds, &write_fds, &except_fds, &timeout) == 1)
+  { pauseWasRequested = !((read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size))>0);
+    if (!pauseWasRequested)
+      write(this->thePausePipe[1], "!", 1);
+  } else
+    theLog << logger::red << "BLOCKING on " << this->ToString() << logger::green
+    << " TIMED OUT!!!" << logger::endL;
+}
+
 void PauseController::LockMe()
 { if (this->CheckPauseIsRequested())
     theLog << logger::red << "BLOCKING on pause controller " << this->ToString() << logger::endL;
@@ -401,7 +422,7 @@ void WebWorker::OutputSendAfterTimeout(const std::string& input)
   theWebServer.GetActiveWorker().pipeWorkerToServerIndicatorData.WriteAfterEmptying(input);
   theLog << logger::red << "Final output written to indicator, blocking until data is received on the other end." << logger::endL;
   theReport.SetStatus("Blocking until result data is received.");
-  theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequested();
+  theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequestedWithTimeOut();
 
   //requesting pause which will be cleared by the receiver of pipeWorkerToServerIndicatorData
   theWebServer.GetActiveWorker().PauseComputationReportReceived.LockMe();
@@ -409,7 +430,7 @@ void WebWorker::OutputSendAfterTimeout(const std::string& input)
   theWebServer.GetActiveWorker().pipeWorkerToServerIndicatorData.WriteAfterEmptying("finished");
   theReport.SetStatus(" \"finished\" sent through indicator pipe, waiting.");
   theLog << logger::red << "\"finished\" sent through indicator pipe, waiting." << logger::endL;
-  theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequested();
+  theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequestedWithTimeOut();
 }
 
 void WebWorker::OutputStandardResult()
@@ -866,7 +887,6 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
   { theReport.SetStatus("PipeProgressReportToParentProcess: pausing as requested...");
     this->WriteProgressReportToFile(input);
   }
-  this->WriteProgressReportToFile(input);
   this->PauseWorker.PauseIfRequested();     //if pause was requested, here we block
 //    theLog << "(possible) block passed" << logger::endL;
   theReport.SetStatus("PipeProgressReportToParentProcess: computing...");

@@ -27,6 +27,7 @@ public:
 
   bool CheckPauseIsRequested();
   void PauseIfRequested();
+  void PauseIfRequestedWithTimeOut();
   void LockMe();
   void UnlockMe();
   PauseController();

@@ -866,6 +866,7 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
   { theReport.SetStatus("PipeProgressReportToParentProcess: pausing as requested...");
     this->WriteProgressReportToFile(input);
   }
+  this->WriteProgressReportToFile(input);
   this->PauseWorker.PauseIfRequested();     //if pause was requested, here we block
 //    theLog << "(possible) block passed" << logger::endL;
   theReport.SetStatus("PipeProgressReportToParentProcess: computing...");
@@ -1695,6 +1696,20 @@ void WebServer::ReleaseWorkerSideResources()
 //const char* PORT ="8080";  // the port users will be connecting to
 const int BACKLOG =10;     // how many pending connections queue will hold
 
+
+void segfault_sigaction(int signal, siginfo_t *si, void *arg)
+{
+  crash << "Caught segfault at address: " << si->si_addr << crash;
+  exit(0);
+}
+
+void fperror_sigaction(int signal)
+{
+  crash << "Fatal arithmetic error. " << crash;
+  exit(0);
+}
+
+
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
   List<std::string> thePorts;
@@ -1706,7 +1721,9 @@ int WebServer::Run()
     this->Restart();
   usleep(10000);
   this->initDates();
-  addrinfo hints, *servinfo, *p;
+  addrinfo hints;
+  addrinfo *servinfo=0;
+  addrinfo *p=0;
   sockaddr_storage their_addr; // connector's address information
   socklen_t sin_size;
   int yes=1;
@@ -1747,7 +1764,32 @@ int WebServer::Run()
   freeaddrinfo(servinfo); // all done with this structure
   if (listen(this->listeningSocketID, BACKLOG) == -1)
     crash << "Listen function failed." << crash;
-// The following code does not appear to do anything on my system:
+
+//  struct sigaction sa;
+//  memset(&sa, 0, sizeof(sigaction));
+//  sigemptyset(&sa.sa_mask);
+//  sa.sa_sigaction = segfault_sigaction;
+//  sa.sa_flags   = SA_SIGINFO;
+//  sigaction(SIGSEGV, &sa, NULL);
+  //catch segfaults:
+  struct sigaction sa;
+  sa.sa_sigaction = &segfault_sigaction;
+  sigemptyset(&sa.sa_mask);
+  sa.sa_flags = SA_SIGINFO;
+  if (sigaction(SIGSEGV, &sa, NULL) == -1)
+  { theLog << "sigaction returned -1" << logger::endL;
+    crash << "Was not able to register SIGSEGV handler. Crashing to let you know. " << crash;
+  }
+  //catch floating point exceptions
+  sa.sa_sigaction=0;
+  sa.sa_handler= &fperror_sigaction;
+  sigemptyset(&sa.sa_mask);
+//  sa.sa_flags = SA_SIGINFO;
+  if (sigaction(SIGFPE, &sa, NULL) == -1)
+  { theLog << "sigaction returned -1" << logger::endL;
+    crash << "Was not able to register SIGFPE handler. Crashing to let you know. " << crash;
+  }
+//  int x=1/0;
 /*  struct sigaction sa;
   sa.sa_handler = &WebServer::Signal_SIGCHLD_handler; // reap all dead processes
   sigemptyset(&sa.sa_mask);

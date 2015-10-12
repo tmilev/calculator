@@ -520,8 +520,8 @@ void Calculator::EvaluateCommands()
   this->theGlobalVariableS->theDefaultFormat.flagExpressionIsFinal=true;
   this->theGlobalVariableS->theDefaultFormat.flagExpressionNewLineAllowed=true;
   if(usingCommandline)
-  { out << "Input: " << "\e[1;32m" << StartingExpression.ToString() << "\033[0m" << std::endl;
-    out << "Output: " << "\e[1;33m" << this->theProgramExpression.ToString() << "\033[0m" << std::endl;
+  { out << "Input: " << "\e[1;32m" << StartingExpression.ToString(&this->theGlobalVariableS->theDefaultFormat) << "\033[0m" << std::endl;
+    out << "Output: " << "\e[1;33m" << this->theProgramExpression.ToString(&this->theGlobalVariableS->theDefaultFormat) << "\033[0m" << std::endl;
   } else if (!this->flagDisplayFullExpressionTree)
     out << this->theProgramExpression.ToString(&this->theGlobalVariableS->theDefaultFormat, &StartingExpression);
   else
@@ -534,4 +534,6 @@ void Calculator::EvaluateCommands()
   if (this->Comments.str()!="")
     commentsStream << "<b>Comments.</b><br><span>" << this->Comments.str() << "</span>";
   this->outputCommentsString=commentsStream.str();
+  if(usingCommandline && this->Comments.str()!="")
+    this->outputString+=this->outputCommentsString;
 }

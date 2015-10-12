@@ -5411,7 +5411,7 @@ bool CalculatorFunctionsGeneral::innerSetOutputFile(Calculator& theCommands, con
     return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
   for (unsigned i=0; i<theFileName.size(); i++)
     if (theFileName[i]=='.' || theFileName[i]=='\\' || theFileName[i]=='/')
-    { out << theFileName << " is not a valid file name.  ";
+    { out << theFileName << " rejected as a file name as it contains the characters one of the three characters .\\/  ";
       return output.AssignValue(out.str(), theCommands);
     }
   theCommands.theGlobalVariableS->initOutputReportAndCrashFileNames(theFileName, theCommands.inputString);

@@ -607,6 +607,8 @@ LargeInt WeylGroup::GetOrbitSize(Vector<coefficient>& theWeight, GlobalVariables
   //In particular, we will compute all root reflections that stabilize the weight,
   //then get a Dynkin diagram from these roots, then compute the size of the stabilizer,
   // and finally compute the size of the orbit. I will check numerically if everything is ok all the way up to E6.
+  stOutput << "Calling WeylGroup::GetOrbitSize with input: " << theWeight.ToString()
+  << ". The weyl type is: " << this->theDynkinType.ToString();
   Vector<coefficient> currentWeight;
   Vectors<Rational> theStabilizingRoots;
   for (int i=0; i<this->RootsOfBorel.size; i++)

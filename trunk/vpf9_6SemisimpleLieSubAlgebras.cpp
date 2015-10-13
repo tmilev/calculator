@@ -303,11 +303,15 @@ void SemisimpleSubalgebras::WriteReportToFiles()
   FileOperations::OpenFileCreateIfNotPresent(fileFastLoad, this->PhysicalNameMainFile2FastLoad, false, true, false);
   fileSlowLoad << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
   << this->owneR->theWeyl.theDynkinType.ToString()
-  << "</title><script src=\"../../jsmath/easy/load.js\"></script><body>" << this->ToString(&this->currentFormat);
+  << "</title>"
+  << CGI::GetLaTeXProcessingJavascript()
+  << "<body>" << this->ToString(&this->currentFormat);
   this->currentFormat.flagUseMathSpanPureVsMouseHover=false;
   fileFastLoad << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
   << this->owneR->theWeyl.theDynkinType.ToString()
-  << "</title><script src=\"../../jsmath/easy/load.js\"></script><body>" << this->ToString(&this->currentFormat);
+  << "</title>"
+  << CGI::GetLaTeXProcessingJavascript()
+  << "<body>" << this->ToString(&this->currentFormat);
   fileFastLoad << "</body></html>";
   fileSlowLoad << "</body></html>";
 }
@@ -532,7 +536,8 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
           << "2. The calculator has no write permission to the folder in which the file is located. "
           << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
         }
-        outputFileSubalgebra << "<html>" << "<script src=\"../../jsmath/easy/load.js\"></script>\n<body>Subalgebra number "
+        outputFileSubalgebra << "<html>" << CGI::GetLaTeXProcessingJavascript()
+        << "\n<body>Subalgebra number "
         << this->GetDisplayIndexFromActual(i) << ".<br>" << this->theSubalgebras[i].ToString(&theFormatCopy);
         if (this->flagComputeNilradicals)
         { std::fstream outputFileFKFTnilradicals;
@@ -543,7 +548,9 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
             << " Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
             << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. " << crash;
           }
-          outputFileFKFTnilradicals << "<html>" << "<script src=\"" << theFormatCopy.PathDisplayServerBaseFolder << "jsmath/easy/load.js\"></script><body>"
+          outputFileFKFTnilradicals << "<html>"
+          << CGI::GetLaTeXProcessingJavascript()
+          << "<body>"
           << this->ToStringAlgebraLink(i, &theFormatCopy) << this->theSubalgebras[i].ToStringNilradicals(&theFormatCopy) << "\n</body></html>";
         }
         outputFileSubalgebra << "\n</body></html>\n ";
@@ -4400,7 +4407,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat, GlobalVariables* the
     tempS= out.str();
     theFile << "<HMTL><title>sl(2)-subalgebras of "
     << this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString() << "</title>";
-    theFile << "<script src=\"../../../jsmath/easy/load.js\"></script> ";
+    theFile << CGI::GetLaTeXProcessingJavascript();
     theFile << "<meta name=\"keywords\" content=\""
     <<  this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString()
     << " sl(2)-triples, sl(2)-subalgebras, nilpotent orbits simple Lie algebras, nilpotent orbits of "
@@ -4419,7 +4426,8 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat, GlobalVariables* the
   tempS = this->ToString(theFormat);
   theFormat->flagUsePNG=tempB;
   FileOperations::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
-  theFile << "<HMTL><BODY>" << notation << "<a href=\"" << htmlPathServerSl2s << "sl2s.html\"> Math formulas rendered via jsmath</a><br>\n"
+  theFile << "<HMTL><BODY>" << notation << "<a href=\"" << htmlPathServerSl2s
+  << "sl2s.html\"> Math formulas rendered via javascript.</a><br>\n"
   << tempS << "</HTML></BODY>";
   theFile.close();
 }

@@ -183,7 +183,7 @@ void PauseController::PauseIfRequested()
     write(this->thePausePipe[1], "!", 1);
 }
 
-void PauseController::PauseIfRequestedWithTimeOut()
+bool PauseController::PauseIfRequestedWithTimeOut()
 { fd_set read_fds, write_fds, except_fds;
   FD_ZERO(&read_fds);
   FD_ZERO(&write_fds);
@@ -195,16 +195,18 @@ void PauseController::PauseIfRequestedWithTimeOut()
   if (this->CheckPauseIsRequested())
     theLog << logger::red << "BLOCKING on " << this->ToString() << logger::endL;
   bool pauseWasRequested=false;
-  if (select(this->thePausePipe[0]+1, &read_fds, &write_fds, &except_fds, &timeout) == 1)
-  { pauseWasRequested = !((read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size))>0);
-    if (!pauseWasRequested)
-      write(this->thePausePipe[1], "!", 1);
-  } else
-    theLog << logger::red << "BLOCKING on " << this->ToString() << logger::green
+  if (!select(this->thePausePipe[0]+1, &read_fds, &write_fds, &except_fds, &timeout) == 1)
+  { theLog << logger::red << "BLOCKING on " << this->ToString() << logger::green
     << " TIMED OUT!!!" << logger::endL;
+    return false;
+  }
+  pauseWasRequested = !((read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size))>0);
+  if (!pauseWasRequested)
+    write(this->thePausePipe[1], "!", 1);
+  return true;
 }
 
-void PauseController::LockMe()
+void PauseController::RequestPausePauseIfLocked()
 { if (this->CheckPauseIsRequested())
     theLog << logger::red << "BLOCKING on pause controller " << this->ToString() << logger::endL;
   read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size);
@@ -221,12 +223,11 @@ bool PauseController::CheckPauseIsRequested()
   return result;
 }
 
-void PauseController::UnlockMe()
-{ MacroRegisterFunctionWithName("PauseController::UnlockMe");
+void PauseController::ResumePausedProcessesIfAny()
+{ MacroRegisterFunctionWithName("PauseController::ResumePausedProcessesIfAny");
 //  theLog << crash.GetStackTraceShort() << logger::endL;
   write(this->thePausePipe[1], "!", 1);
 //  theLog << "Unlocking done!" << logger::endL;
-
 }
 
 std::string PauseController::ToString()const
@@ -342,10 +343,10 @@ void WebWorker::OutputBeforeComputation()
   << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
   << "Root subalgebras, sl(2)-triples\"> <head> <title>calculator version  " << __DATE__ << ", " << __TIME__ << "</title>";
 //  if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
-    stOutput << "<script src=\"../jsmath/easy/load.js\">";
+  stOutput << CGI::GetLaTeXProcessingJavascript();
 //  else
 //    stOutput << "<script src=\"" << onePredefinedCopyOfGlobalVariables.DisplayPathServerBase << "/jsmath/easy/load.js\">";
-  stOutput << "</script>\n</head>\n<body onload=\"checkCookie();\">\n";
+  stOutput << "\n</head>\n<body onload=\"checkCookie();\">\n";
   List<std::string> inputStrings, inputStringNames;
   CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
   std::string& civilizedInput=theParser.inputString;
@@ -412,21 +413,25 @@ void WebWorker::OutputCrashAfterTimeout()
 void WebWorker::OutputSendAfterTimeout(const std::string& input)
 { MacroRegisterFunctionWithName("WebWorker::OutputSendAfterTimeout");
   onePredefinedCopyOfGlobalVariables.flagTimedOutComputationIsDone=true;
-  theLog << "WebWorker::StandardOutputPart2ComputationTimeout called with worker number " << theWebServer.GetActiveWorker().indexInParent+1
-  << "." << logger::endL;
+  theLog << "WebWorker::StandardOutputPart2ComputationTimeout called with worker number "
+  << theWebServer.GetActiveWorker().indexInParent+1 << "." << logger::endL;
   //requesting pause which will be cleared by the receiver of pipeWorkerToServerIndicatorData
-  theWebServer.GetActiveWorker().PauseComputationReportReceived.LockMe();
+  theWebServer.GetActiveWorker().PauseComputationReportReceived.RequestPausePauseIfLocked();
   theLog << logger::red << "Sending result through indicator pipe." << logger::endL;
   ProgressReportWebServer theReport("Sending result through indicator pipe.");
 
   theWebServer.GetActiveWorker().pipeWorkerToServerIndicatorData.WriteAfterEmptying(input);
-  theLog << logger::red << "Final output written to indicator, blocking until data is received on the other end." << logger::endL;
+  theLog << logger::red << "Final output written to indicator, blocking until data "
+  << "is received on the other end." << logger::endL;
   theReport.SetStatus("Blocking until result data is received.");
-  theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequestedWithTimeOut();
-
+  if(!theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequestedWithTimeOut())
+    theReport.SetStatus("Computation report NOT RECEIVED (timed out).");
+  else
+  { theReport.SetStatus("Computation report received.");
   //requesting pause which will be cleared by the receiver of pipeWorkerToServerIndicatorData
-  theWebServer.GetActiveWorker().PauseComputationReportReceived.LockMe();
-  theLog << logger::red << "Result data is received, sending \"finished\"." << logger::endL;
+    theWebServer.GetActiveWorker().PauseComputationReportReceived.RequestPausePauseIfLocked();
+  }
+//  theLog << logger::red << "Result data is received, sending \"finished\"." << logger::endL;
   theWebServer.GetActiveWorker().pipeWorkerToServerIndicatorData.WriteAfterEmptying("finished");
   theReport.SetStatus(" \"finished\" sent through indicator pipe, waiting.");
   theLog << logger::red << "\"finished\" sent through indicator pipe, waiting." << logger::endL;
@@ -796,12 +801,12 @@ int WebWorker::ProcessPauseWorker()
 //  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
 //  theLog << "About to read pipeServerToWorker..." << logger::endL;
   if (!otherWorker.PauseWorker.CheckPauseIsRequested())
-  { otherWorker.PauseWorker.LockMe();
+  { otherWorker.PauseWorker.RequestPausePauseIfLocked();
     stOutput << "paused";
     return 0;
   }
   stOutput << "unpaused";
-  otherWorker.PauseWorker.UnlockMe();
+  otherWorker.PauseWorker.ResumePausedProcessesIfAny();
   return 0;
 }
 
@@ -852,7 +857,7 @@ int WebWorker::ProcessComputationIndicator()
     outputString.assign(otherWorker.pipeWorkerToServerIndicatorData.lastRead.TheObjects, otherWorker.pipeWorkerToServerIndicatorData.lastRead.size);
     //theLog << logger::yellow << "Indicator string read: " << logger::blue << outputString << logger::endL;
     stOutput << outputString;
-    otherWorker.PauseComputationReportReceived.UnlockMe();
+    otherWorker.PauseComputationReportReceived.ResumePausedProcessesIfAny();
   }
 //  stOutput << "<b>Not implemented: request for indicator for worker " << inputWebWorkerNumber
 //  << " out of " << this->parent->theWorkers.size << ".</b>";
@@ -879,7 +884,7 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
   std::stringstream debugStream1, debugStream2;
   debugStream1 << "PipeProgressReportToParentProcess called " << counter << " times. Calling pause...";
   ProgressReportWebServer theReport(debugStream1.str());
-  this->PauseIndicatorPipeInUse.LockMe();
+  this->PauseIndicatorPipeInUse.RequestPausePauseIfLocked();
 //    theLog << "about to potentially block " << logger::endL;
   debugStream2 << "PipeProgressReportToParentProcess called " << counter << " times. Pause passed...";
   theReport.SetStatus(debugStream2.str());
@@ -892,11 +897,11 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
   theReport.SetStatus("PipeProgressReportToParentProcess: computing...");
   this->pipeServerToWorkerRequestIndicator.Read();
   if (this->pipeServerToWorkerRequestIndicator.lastRead.size==0)
-  { this->PauseIndicatorPipeInUse.UnlockMe();
+  { this->PauseIndicatorPipeInUse.ResumePausedProcessesIfAny();
     return;
   }
   if (onePredefinedCopyOfGlobalVariables.flagTimedOutComputationIsDone)
-  { this->PauseIndicatorPipeInUse.UnlockMe();
+  { this->PauseIndicatorPipeInUse.ResumePausedProcessesIfAny();
     return;
   }
 //  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
@@ -904,7 +909,7 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
   theReport.SetStatus("PipeProgressReportToParentProcess: piping computation process...");
   this->pipeWorkerToServerIndicatorData.WriteAfterEmptying(input);
   theReport.SetStatus("PipeProgressReportToParentProcess: exiting 1...");
-  this->PauseIndicatorPipeInUse.UnlockMe();
+  this->PauseIndicatorPipeInUse.ResumePausedProcessesIfAny();
   theReport.SetStatus("PipeProgressReportToParentProcess: exiting 2...");
 }
 
@@ -1297,7 +1302,7 @@ void WebWorker::Release()
 
 void WebWorker::OutputShowIndicatorOnTimeout()
 { MacroRegisterFunctionWithName("WebServer::OutputShowIndicatorOnTimeout");
-  this->PauseIndicatorPipeInUse.LockMe();
+  this->PauseIndicatorPipeInUse.RequestPausePauseIfLocked();
   onePredefinedCopyOfGlobalVariables.flagOutputTimedOut=true;
   onePredefinedCopyOfGlobalVariables.flagTimedOutComputationIsDone=false;
   ProgressReportWebServer theReport("WebServer::OutputShowIndicatorOnTimeout");
@@ -1334,7 +1339,7 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   //note that standard output cannot be rewired in the beginning of the function as we use the old stOutput
   stOutput.theOutputFunction=WebWorker::StandardOutputAfterTimeOut;
   theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: continuing computation.");
-  this->PauseIndicatorPipeInUse.UnlockMe();
+  this->PauseIndicatorPipeInUse.ResumePausedProcessesIfAny();
   theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: exiting function.");
 //  this->SignalIamDoneReleaseEverything();
 //  theLog << consoleGreen("Indicator: released everything and signalled end.") << logger::endL;
@@ -1500,13 +1505,13 @@ void Pipe::WriteAfterEmptying(const std::string& toBeSent)
 { //theLog << "Step -1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
   MacroRegisterFunctionWithName("Pipe::WriteAfterEmptying");
   //theLog << "Step 1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
-  this->pipeAvailable.LockMe();
+  this->pipeAvailable.RequestPausePauseIfLocked();
 //  theLog << logger::endL << "Step 2: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction
 //  << logger::endL;
   this->ReadNoLocks();
   this->lastRead.SetSize(0);
   this->WriteNoLocks(toBeSent);
-  this->pipeAvailable.UnlockMe();
+  this->pipeAvailable.ResumePausedProcessesIfAny();
 //  theLog << logger::endL << "Step 3: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction
 //  << logger::endL;
 }
@@ -1588,21 +1593,21 @@ void Pipe::ReadNoLocks()
 
 void Pipe::ReadWithoutEmptying()
 { MacroRegisterFunctionWithName("Pipe::ReadWithoutEmptying");
-  this->pipeAvailable.LockMe();
+  this->pipeAvailable.RequestPausePauseIfLocked();
   this->ReadNoLocks();
   if (this->lastRead.size>0)
   { std::string tempS;
     tempS.assign(this->lastRead.TheObjects, this->lastRead.size);
     this->WriteNoLocks(tempS);
   }
-  this->pipeAvailable.UnlockMe();
+  this->pipeAvailable.ResumePausedProcessesIfAny();
 }
 
 void Pipe::Read()
 { MacroRegisterFunctionWithName("Pipe::Read");
-  this->pipeAvailable.LockMe();
+  this->pipeAvailable.RequestPausePauseIfLocked();
   this->ReadNoLocks();
-  this->pipeAvailable.UnlockMe();
+  this->pipeAvailable.ResumePausedProcessesIfAny();
 }
 
 std::string WebServer::ToStringLastErrorDescription()

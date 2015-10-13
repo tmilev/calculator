@@ -1336,11 +1336,13 @@ void Calculator::initPredefinedInnerFunctions()
   ("ComputeFKFT", CalculatorFunctionsGeneral::innerComputePairingTablesAndFKFTsubalgebras, "",
    "Attempts to compute all Fernando-Kac subalgebras according to the most experimental, latest and greatest algorithm. Argument must be of type \
    semisimple Lie subalgebras. ",
-   "ComputeFKFT( ComputeSemisimpleSubalgebras(c_3))");
+   "ComputeFKFT( ComputeSemisimpleSubalgebras(c_3))", false, false,
+   "CalculatorFunctionsGeneral::innerComputePairingTablesAndFKFTsubalgebras");
   this->AddOperationInnerHandler
   ("ComputeSemisimpleSubalgebras", CalculatorFunctionsGeneral::innerComputeSemisimpleSubalgebras, "",
    "Computes the semisimple subalgebras of a semisimple Lie algebra and creates a data structure containing them. ",
-   "ComputeSemisimpleSubalgebras(A_2)", false);
+   "ComputeSemisimpleSubalgebras(A_2)", false,
+   false, "CalculatorFunctionsGeneral::innerComputeSemisimpleSubalgebras");
   this->AddOperationInnerHandler
   ("CentralizerChains", CalculatorFunctionsGeneral::innerGetCentralizerChainsSemisimpleSubalgebras, "",
    "Creates a printout with centralizer chains of semisimple Lie subalgebras. ",

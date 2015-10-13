@@ -2168,6 +2168,31 @@ void CGI::CGIFileNameToFileName(std::string& input, std::string& output)
   output=out.str();
 }
 
+std::string CGI::GetLaTeXProcessingJavascript()
+{ std::stringstream out;
+  out << "  <script type=\"text/x-mathjax-config\">\n"
+  << "//mathjax configuration comes before loading the mathjax script, as requested by the documentation.\n"
+  << "  MathJax.Hub.Config({\n"
+  << "    extensions: [\"tex2jax.js\"],\n"
+  << "    jax: [\"input/TeX\", \"output/HTML-CSS\"],\n"
+  << "    tex2jax: {\n"
+  << "      inlineMath: [ ['\\\\(','\\\\)'] ],\n"
+  << "      displayMath: [ ['\\\\[','\\\\]'] ],\n"
+  << "      processEscapes: true\n"
+  << "    },\n"
+  << "    \"HTML-CSS\": { availableFonts: [\"TeX\"] },\n"
+  << "    TeX: {\n"
+  << "      Macros: {\n"
+  << "        diff: \"{\\\\text {d}}\",\n"
+  << "      }\n"
+  << "    }\n"
+  << "  });\n"
+  << "</script>\n"
+  << "<script src=\"//beta.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full\"></script>\n";
+  return out.str();
+//   return "<script src=\"../../jsmath/easy/load.js\"></script>";
+}
+
 void CGI::ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& outputData, List<std::string>& outputFieldNames)
 { int inputLength= (signed) input.size();
   bool readingData=false;

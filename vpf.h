@@ -18,7 +18,7 @@
 //the Jacobs University IT staff (server set-up).
 //
 //We want to thank the following projects and tools:
-//user interface: jsmath, LaTeX, javascript, google chrome browser/firefox;
+//user interface: mathjax, jsmath, LaTeX, javascript, google chrome browser/firefox;
 //server: apache web server, linux (ubuntu & openSUSE);
 //development: sourceforge, C++, gcc, code::blocks, svn.
 //

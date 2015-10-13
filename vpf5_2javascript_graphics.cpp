@@ -707,7 +707,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "  { labelString+=\"</tr></table>\";"
   << "    document.getElementById(\"canvas" << timesCalled << "Notes\").innerHTML=labelString;\n"
   << "    " << theDrawFunctionName << "();\n"
-  << "    jsMath.Process(document.getElementById(\"canvas" << timesCalled << "Notes\"));\n"
+  //<< "    jsMath.Process(document.getElementById(\"canvas" << timesCalled << "Notes\"));\n"
   << "  }\n"
   << "\n}\n";
   out << "\nfunction clickCanvasCone" << timesCalled << "(cx,cy)\n"

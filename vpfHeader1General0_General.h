@@ -1169,7 +1169,6 @@ public:
   static std::string GetHtmlLinkFromProjectFileName(const std::string& fileName, const std::string& fileDesc);
   static std::string GetHtmlSwitchMenuDoNotEncloseInTags(const std::string& serverBase)
   { std::stringstream output;
-    output << "<script src=\"" << serverBase << "jsmath/easy/load.js\"></script> ";
     output << " <script type=\"text/javascript\"> \n";
     output << " function switchMenu(obj)\n";
     output << " { var el = document.getElementById(obj);	\n";
@@ -1188,6 +1187,7 @@ public:
     CGI::GetHtmlStringSafeishReturnFalseIfIdentical(theString, tempS);
     theString=tempS;
   }
+  static std::string GetLaTeXProcessingJavascript();
   static std::string DoubleBackslashes(const std::string& input);
   static std::string GetMathSpanPure(const std::string& input, int upperNumChars=5000);
   static std::string GetMathSpanBeginArrayL(const std::string& input, int upperNumChars=5000);

@@ -1100,7 +1100,8 @@ void rootSubalgebra::ToHTML(int index, FormatExpressions* theFormat, SltwoSubalg
   << " root subsystems, root subsystems, root systems";
   if (this->GetAmbientWeyl().theDynkinType.HasExceptionalComponent())
     output << ", exceptional Lie algebra";
-  output << " \"><script src=\"../../jsmath/easy/load.js\"></script>";
+  output << " \">";
+  output << CGI::GetLaTeXProcessingJavascript();
   //  output << CGI::GetHtmlSwitchMenuDoNotEncloseInTags();
   output << "<body>" << this->ToString(theFormat, theGlobalVariables) << "</body></html>";
   output.close();
@@ -2683,7 +2684,7 @@ void rootSubalgebras::ToHTML(FormatExpressions* theFormat, SltwoSubalgebras* Sl2
   if (this->GetOwnerWeyl().theDynkinType.HasExceptionalComponent())
     output << ", exceptional Lie algebra";
   output << " \">";
-  output << "<script src=\"../../jsmath/easy/load.js\"></script> ";
+  output << CGI::GetLaTeXProcessingJavascript();
   output << "<body>" << this->ToString(theFormat, Sl2s)
   << "<hr>LaTeX table with root subalgebra details.<br>"
   << this->ToStringDynkinTableFormat2LaTeX(theFormat)

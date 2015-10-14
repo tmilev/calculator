@@ -432,7 +432,7 @@ class GeneratorPermutationR2sOnIndices
 
   GeneratorPermutationR2sOnIndices& operator++()
   { ++pads;
-    return *this; // what the fuck does this even mean how the hell
+    return *this; // what the f*** does this even mean how the hell
   }
 
   // this method name is such bullshit lol
@@ -504,7 +504,7 @@ class GeneratorProductOfGenerators
   GeneratorProductOfGenerators& operator++()
   { while(true)
     { if(frame_pointer == -1)
-        return  *this; // seriously tho what the fuck does this even mean
+        return  *this; // seriously tho what the f*** does this even mean
       switch(stack[frame_pointer].program_counter)
       { case pcpositions::beginning:
         generators[frame_pointer].ResetIteration();
@@ -603,7 +603,7 @@ class GeneratorElementsSnxSnOnIndicesAndIndices
   GeneratorElementsSnxSnOnIndicesAndIndices& operator++()
   { while(true)
     { if(frame_pointer == -1)
-        return  *this; // seriously tho what the fuck does this even mean
+        return  *this; // seriously tho what the f*** does this even mean
       switch(stack[frame_pointer].program_counter)
       { case pcpositions::beginning:
         generators[frame_pointer].ResetIteration();

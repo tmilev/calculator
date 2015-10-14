@@ -836,7 +836,6 @@ std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)
     highBoundY=MathRoutines::Maximum(this->thePlots[i].yHigh, highBoundY);
     lowBoundY=MathRoutines::Minimum(this->thePlots[i].yLow, lowBoundY);
   }
-
   std::string lineSeparator= useHtml ? "<br>\n" : "\n";
   resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{auto-pst-pdf}\\usepackage{pst-math}\\usepackage{pst-plot}";
   resultStream << lineSeparator << "\\newcommand{\\fcLabels}[2]{\\rput[t](#1, -0.1){$x$}\\rput[r](-0.1, #2){$y$}}" << lineSeparator;

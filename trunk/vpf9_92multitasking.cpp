@@ -43,7 +43,6 @@ void MutexWrapper::CheckConsistency()
 void MutexWrapper::initConstructorCallOnly()
 { //    std::cout << "MutexWrapper::MutexWrapper. theMutexesGlobal.size: " << theMutexesGlobal.size << std::endl;
 //  static bool allowToRun=true;
-//  cantfuckingbelievethisfuckingpieceofshitiscrashing=true;
 //  while (!allowToRun)
 //  {}
 //  allowToRun=false;

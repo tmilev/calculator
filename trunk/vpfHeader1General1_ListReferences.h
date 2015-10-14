@@ -106,12 +106,11 @@ void ListReferences<Object>::AllocateElements(int newSize)
     << " List is to be set empty, then one should call SetSize(0), rather than provide a negative argument to SetSize." << crash;
   //std::cout << "newSize: " << newSize << ", this->theReferences.size: " << this->theReferences.size << std::endl;
   if (newSize<=this->theReferences.size)
-  { //std::cout << "Got no fucking clue what's going on here: " << newSize
+  { //std::cout << "Got no f***ing clue what's going on here: " << newSize
     //<< ", this->theReferences.size: " << this->theReferences.size << std::endl;
     return;
   }
   int oldReferencesSize=this->theReferences.size;
-  //std::cout << "how the fuck can this operation fucking fail " << std::endl;
   this->theReferences.SetSize(newSize);
   //std::cout << "old ref size " << oldReferencesSize << ", newsize: " << newSize << std::endl;
   for (int i=oldReferencesSize; i<newSize; i++)

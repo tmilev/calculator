@@ -9,7 +9,6 @@
 #include <string.h>
 static ProjectInformationInstance vpfHeader1instance(__FILE__, "Header, general routines. ");
 
-//static bool cantfuckingbelievethisfuckingpieceofshitiscrashing=false;
 //IMPORTANT.
 //Convention on Hash functions.
 //1. C++ objects that represent mathematically equal objects
@@ -2034,21 +2033,8 @@ void List<Object>::SetSize(int theSize)
 {// <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (theSize<0)
     theSize=0;
-//  if (cantfuckingbelievethisfuckingpieceofshitiscrashing)
-//  { this->CheckConsistency();
-//    std::cout << "what teh fuck is fucking going on here this shit is fucking impossible: this->size: "
-//    << this->size << " theSize: " << theSize;
-//  }
   this->SetExpectedSize(theSize);
-//  if (cantfuckingbelievethisfuckingpieceofshitiscrashing)
-//  { this->CheckConsistency();
-//    std::cout << "gotthisfuckingfar -2 ";
-//  }
   this->Reserve(theSize);
-//  if (cantfuckingbelievethisfuckingpieceofshitiscrashing)
-//  { this->CheckConsistency();
-//    std::cout << "gotthisfuckingfar -3 ";
-//  }
   this->size=theSize;
 }
 

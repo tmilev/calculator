@@ -4035,6 +4035,9 @@ public:
   FormatExpressions thePolyFormat;
   Controller theLocalPauseController;
 
+  static const std::string hopefullyPermanentWebAdressOfServerExecutable;
+  static const std::string hopefullyPermanentWebAdressOfServerOutputFolder;
+
   std::string userInputStringRAWIfAvailable;
   std::string userInputStringIfAvailable;
 

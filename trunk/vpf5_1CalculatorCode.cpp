@@ -358,39 +358,51 @@ bool DynkinSimpleType::HasEasySubalgebras()const
   return false;
 }
 
+const std::string GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable=
+"http://vector-partition.jacobs-university.de:8080/vectorpartition/cgi-bin/calculator";
+const std::string GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder=
+"http://vector-partition.jacobs-university.de:8080/vectorpartition/output/";
+
 std::string Calculator::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType& theType, FormatExpressions* theFormat)
 { std::stringstream out;
   std::string theTitlePageFileNameNoPathSlowLoad= "SemisimpleSubalgebras_" + theType.ToString() + ".html";
   std::string theTitlePageFileNameNoPathFastLoad= "SemisimpleSubalgebras_FastLoad_" + theType.ToString() + ".html";
-  out << "<tr><td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?textInput=printSemisimpleLieAlgebra%7B%7D"
-  << theType[0].theLetter << "_" << theType[0].theRank << "\">" << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
+  out << "<tr><td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
+  << "?textInput=printSemisimpleLieAlgebra%7B%7D"
+  << theType[0].theLetter << "_" << theType[0].theRank << "\">"
+  << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
   if (theType[0].HasEasySubalgebras())
-  { out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/output/" << theType.ToString() << "/" << theTitlePageFileNameNoPathSlowLoad << "\">"
+  { out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder
+    << theType.ToString() << "/" << theTitlePageFileNameNoPathSlowLoad << "\">"
     << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a><br>"
-    << "<a href=\"http://vector-partition.jacobs-university.de/vpf/output/" << theType.ToString() << "/" << theTitlePageFileNameNoPathFastLoad << "\">"
+    << "<a href=\"" <<  GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder
+    << theType.ToString() << "/" << theTitlePageFileNameNoPathFastLoad << "\">"
     << theType[0].theLetter << theType[0].theRank << " semisipmles subalgebras, fast load</a></td>\n ";
   }
   else
     out << "<td>Not available</td>\n";
-  out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=printSlTwoSubalgebras%7B%7D%28"
+  out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
+  << "?%20textType=Calculator&textDim=1&textInput=printSlTwoSubalgebras%7B%7D%28"
   << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " sl(2) triples</a></td>\n";
-  out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=printRootSubalgebras%7B%7D%28"
+  out << "<td><a href=\""
+  << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?%20textType=Calculator&textDim=1&textInput=printRootSubalgebras%7B%7D%28"
   << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " root subalgebras</a></td>\n";
   return out.str();
 }
 
 std::string Calculator::ToStringLinksToCalculator(const DynkinType& theType, FormatExpressions* theFormat)
 { std::stringstream out;
-  out << "<tr><td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?textInput=printSemisimpleLieAlgebra%7B%7D"
+  out << "<tr><td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
+  << "?textInput=printSemisimpleLieAlgebra%7B%7D"
   << theType[0].theLetter << "_" << theType[0].theRank << "\">" << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
   if (theType[0].HasEasySubalgebras())
-    out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=printSemisimpleSubalgebras%7B%7D%28"
+    out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?%20textType=Calculator&textDim=1&textInput=printSemisimpleSubalgebras%7B%7D%28"
     << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a></td>\n ";
   else
     out << "<td>Not available</td>\n";
-  out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=printSlTwoSubalgebras%7B%7D%28"
+  out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?%20textType=Calculator&textDim=1&textInput=printSlTwoSubalgebras%7B%7D%28"
   << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " sl(2) triples</a></td>\n";
-  out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=printRootSubalgebras%7B%7D%28"
+  out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?%20textType=Calculator&textDim=1&textInput=printRootSubalgebras%7B%7D%28"
   << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " root subalgebras</a></td>\n";
   return out.str();
 }

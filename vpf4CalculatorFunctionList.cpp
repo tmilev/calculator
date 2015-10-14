@@ -752,7 +752,7 @@ void Calculator::initPredefinedInnerFunctions()
    We recall that in the calculator, {}  stands for function application (the symbols {} were\
    chosen as they produce invisible LaTeX output).\
    ",
-   "plot2D{}(\\sin{}x+cos{}x, 0, 5)")
+   "plot2D{}(\\sin{}x+cos{}x, 0, 5)", true, false, "CalculatorFunctionsGeneral::innerPlot2D")
    ;
   this->AddOperationInnerHandler ("plot2DWithBars", CalculatorFunctionsGeneral::innerPlot2DWithBars, "",
    "<b>Calculus teaching function.</b> Same as plot2D but plots two functions with bars locked between the two functions; \
@@ -1561,7 +1561,8 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddPlotToPlot, this->opCalculusPlot(), this->opCalculusPlot(),
    "Superimposes two plots. ",
-   "plot2D{}(sin{}(x), -5, 5)+ plot2D{}(1/sin{}(x ), 0.1, 3.041592654)", true, false, "CalculatorFunctionsBinaryOps::innerAddPlotToPlot");
+   "plot2D{}(sin{}(x), -5, 5)+ plot2D{}(1/sin{}(x ), 0.1, 3.041592654)",
+   true, false, "CalculatorFunctionsBinaryOps::innerAddPlotToPlot");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly, this->opRational(), this->opPoly(),
    "Adds a rational to a polynomial. ",

@@ -1765,7 +1765,7 @@ void slTwoInSlN::ClimbDownFromHighestWeightAlongSl2String(Matrix<Rational>& inpu
   Matrix<Rational> ::LieBracket(this->theH, input, output);
   bool tempBool=input.IsProportionalTo(output, currentWeight);
   if (!tempBool)
-    stOutput << "<br>oh no! climbing down is fucked up!";
+    stOutput << "<br>oh no! climbing down is f***ed up!";
   Rational RaiseCoeff;
   RaiseCoeff.MakeZero();
   outputCoeff.MakeOne();

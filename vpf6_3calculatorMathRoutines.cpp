@@ -3403,7 +3403,8 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlot2D");
   //stOutput << input.ToString();
   if (input.children.size<4)
-    return output.MakeError("Plotting coordinates takes at least three arguments: function, lower and upper bound. ", theCommands);
+    return output.MakeError
+    ("Plotting coordinates takes at least three arguments: function, lower and upper bound. ", theCommands);
   if (input.HasBoundVariables())
     return false;
   const Expression& lowerE=input[2];
@@ -3422,9 +3423,7 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
   Plot thePlot;
   double yLow, yHigh;
   if (!input[1].EvaluatesToDoubleInRange("x", lowerBound, upperBound, 500, &yLow, &yHigh))
-  { theCommands << "<hr>I failed to evaluate the input function, something is wrong!";
-    return false;
-  }
+    return theCommands << "<hr>I failed to evaluate the input function, something is wrong!";
   thePlot.AddFunctionPlotOnTop(input[1], functionE.GetValue<std::string>(), lowerBound, upperBound, yLow, yHigh);
   return output.AssignValue(thePlot, theCommands);
 }

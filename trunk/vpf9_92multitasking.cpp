@@ -3,6 +3,7 @@
 #include "vpfHeader2Math0_General.h"
 #include <assert.h> //Mutexes are way too basic infrastructure. We cannot crash using the standard crashing mechanism,
 //as that mechanism might depend on mutexes.
+#include <mutex>
 
 List<MutexWrapper*>& theMutexWrappers() //<- if you are wondering why this code, google "static initialization order fiasco"
 { static List<MutexWrapper*> tempObjects;
@@ -35,7 +36,8 @@ void ParallelComputing::CheckPointerCounters()
 
 void MutexWrapper::CheckConsistency()
 { if (this->flagDeallocated)
-  { std::cout << "Use after free mutex index: " << this->indexInContainer << crash.GetStackTraceShort() << std::endl;
+  { std::cout << "Use after free mutex index: " << this->indexInContainer
+    << crash.GetStackTraceShort() << std::endl;
     assert(false);
   }
 }
@@ -67,8 +69,7 @@ bool MutexWrapper::InitializeIfNeeded()
     return true;
   if (!onePredefinedCopyOfGlobalVariables.flagAllowUseOfThreadsAndMutexes)
     return false;
-  this->theMutexImplementation= new pthread_mutex_t;
-  pthread_mutex_init((pthread_mutex_t*) this->theMutexImplementation, NULL);
+  this->theMutexImplementation= new std::mutex;
   this->flagInitialized=true;
   return true;
 }
@@ -77,16 +78,8 @@ MutexWrapper::~MutexWrapper()
 { if (!onePredefinedCopyOfGlobalVariables.flagAllowUseOfThreadsAndMutexes)
     if (!theMutexWrappers().flagDeallocated)
       theMutexWrappers()[this->indexInContainer]=0; //this line of code might be unsafe when the master process exits, but is safe in all fork()-ed processes
-  delete (pthread_mutex_t*)(this->theMutexImplementation);//whoever tells me this code is bad
-//will have to submit to me a written essay of how to avoid the static initialization/deinitialization order fiasco
-//AND write portable code, or will risk being verbally and possibly physically assaulted by myself.
-//I am writing this after having lost 3 days of my precious and highly qualified time
-//(Yes I do have a Ph.D. in mathematics and am a published scientist)
-//on C++'s retarded design, because this retarded language doesn't have elementary means of
-//specifying the order of destructors of objects.
-//To give you a hint of the pain this retarded language caused me: I need static mutexes, initialized
-//via user call after fork()-ing the process.
-  this->theMutexImplementation=0;
+  delete (std::mutex*)(this->theMutexImplementation);
+    this->theMutexImplementation=0;
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter--;
 #endif
@@ -104,14 +97,13 @@ void MutexWrapper::LockMe()
   this->CheckConsistency();
   if (!this->InitializeIfNeeded())
     return;
-#ifndef WIN32
-  pthread_mutex_lock((pthread_mutex_t*)this->theMutexImplementation);
+  try{
+  ((std::mutex*)this->theMutexImplementation)->lock();
+  }
+  catch(int theException)
+  { std::cout << "Mutex Lock failed!!!!" << std::endl;
+  }
   this->flagUnsafeFlagForDebuggingIsLocked=true;
-#else
-  while(this->locked)
-  {}
-  this->locked=true;
-#endif
 }
 
 void MutexWrapper::UnlockMe()
@@ -119,9 +111,7 @@ void MutexWrapper::UnlockMe()
   this->CheckConsistency();
   if (!this->InitializeIfNeeded())
     return;
-#ifndef WIN32
-  pthread_mutex_unlock((pthread_mutex_t*)this->theMutexImplementation);
-#endif
+  ((std::mutex*)this->theMutexImplementation)->unlock();
   this->flagUnsafeFlagForDebuggingIsLocked=false;
 }
 

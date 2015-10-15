@@ -47,12 +47,8 @@ private:
   bool InitializeIfNeeded();
 public:
   std::string mutexName;
-  void* theMutexImplementation; //note: the mutex implementation is not a named type for system portability. Other options, such as
-  //using an index of a mutex object were a royal pain in the ass because of C++'s insane static initialization/deinitialization order fiasco.
-  //Since that horrible buggy behavior (dare say to me that the static initialization order fiasco is not a design bug...)
-  //is over-the top difficult to manage, we use a simple solution: a void pointer with a static cast.
-  //Once again, DO NOT DARE tell me this is a bad solution: I am very very mad after debugging C++'s retarded static initialization/deinitialization order
-  //fiasco for 3 days (no kidding!). You have been warned.
+  void* theMutexImplementation;
+  //note: the mutex implementation is not a named type for system portability.
   bool isLockedUnsafeUseForWINguiOnly();
   //locks the mutex if the mutex is free. If not it suspends calling thread until
   //mutex becomes free and then locks it.

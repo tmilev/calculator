@@ -15,6 +15,9 @@ static ProjectInformationInstance projectInfoInstanceWebServerHeader(__FILE__, "
 
 class WebServer;
 
+//this class is similar to the controller class but coordinates across different processes,
+//rather than across different threads.
+//inter-process communication is achieved via pipes.
 class PauseController
 {
 public:

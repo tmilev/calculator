@@ -228,3 +228,94 @@ std::string Crypto::CharsToBase64String(const List<unsigned char>& input)
   }
   return result;
 }
+
+uint32_t Crypto::leftRotateAsIfBigEndian(uint32_t input, int numBitsToRotate)
+{ uint32_t result=input;
+  for (int i=0; i<numBitsToRotate; i++)
+  { uint32_t last_bit = result/2147483648;
+    result*=2;
+    result+=last_bit;
+  }
+  return result;
+}
+
+void Crypto::convertUint64toBigendianStringAppendResult(uint64_t& input, std::string& outputAppend)
+{ //the following code should work on both big- and little-endian systems:
+  outputAppend.push_back((unsigned char)  (input/72057594037927936) );
+  outputAppend.push_back((unsigned char) ((input/281474976710656)%256 ));
+  outputAppend.push_back((unsigned char) ((input/1099511627776)%256 ));
+  outputAppend.push_back((unsigned char) ((input/4294967296)%256 ));
+  outputAppend.push_back((unsigned char) ((input/16777216)%256 ));
+  outputAppend.push_back((unsigned char) ((input/65536)%256 ));
+  outputAppend.push_back((unsigned char) ((input/256)%256 ));
+  outputAppend.push_back((unsigned char)  (input%256 ));
+}
+
+void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
+{ MacroRegisterFunctionWithName("Crypto::computeSha1");
+  //Reference: wikipedia page on sha1.
+  //the Algorithm here is a direct implementation of the Wikipedia pseudocode.
+  uint32_t h0=0x67452301;
+  uint32_t h1 = 0xEFCDAB89;
+  uint32_t h2 = 0x98BADCFE;
+  uint32_t h3 = 0x10325476;
+  uint32_t h4 = 0xC3D2E1F0;
+  uint64_t messageLength=inputString.size()*sizeof(char);
+  std::string inputStringPreprocessed=inputString;
+  inputStringPreprocessed.push_back(0x80);
+  unsigned numbytesMod64=inputStringPreprocessed.size() %64;
+  for (int i=numbytesMod64; i<56; i++)
+    inputStringPreprocessed.push_back(0);
+  Crypto::convertUint64toBigendianStringAppendResult(messageLength, inputStringPreprocessed);
+  List<uint32_t> currentChunk;
+  currentChunk.SetSize(80);
+  uint32_t a=0,b=0,c=0,d=0,e=0, f=0, k=0, temp=0;
+  for (unsigned i=0; i<inputStringPreprocessed.size(); i+=16)
+  { for (int j=0; j<16; j++)
+      currentChunk[j]=inputStringPreprocessed[i+j];
+    for (int j=16; j<80; j++)
+    { currentChunk[j]=currentChunk[j-3] xor
+                      currentChunk[j-8] xor
+                      currentChunk[j-14] xor
+                      currentChunk[j-16] ;
+      Crypto::leftRotateAsIfBigEndian(currentChunk[j], 1);
+    }
+    a=h0;
+    b=h1;
+    c=h2;
+    d=h3;
+    e=h4;
+    for (int j=0; j<80; j++)
+    { if (j<20)
+      { f= (b bitand c) bitor ((compl b) bitand d);
+        k=0x5A827999;
+      } else if (20 <=j and j<40)
+      { f= b xor c xor d;
+        k=0x6ED9EBA1;
+      } else if (40<=j and j<60)
+      { f = (b bitand c) or (b bitand d) or (c bitand d);
+        k = 0x8F1BBCDC;
+      } else //60<=j
+      { f = b xor c xor d;
+        k = 0xCA62C1D6;
+      }
+      temp= Crypto::leftRotateAsIfBigEndian(a, 5)+ f + e + k + currentChunk[i];
+      e = d;
+      d = c;
+      c = Crypto::leftRotateAsIfBigEndian(b, 30);
+      b = a;
+      a = temp;
+    }
+    h0+=a;
+    h1+=b;
+    h2+=c;
+    h3+=d;
+    h4+=e;
+  }
+  output.SetSize(5);
+  output[0]=h0;
+  output[1]=h1;
+  output[2]=h2;
+  output[3]=h3;
+  output[4]=h4;
+}

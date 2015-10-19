@@ -717,7 +717,7 @@ std::string ProjectInformation::ToString()
   << "\n<br>\n7) Type the following command. Make sure to include the dot.  <br>./calculator server"
   << "\n<br>\n8) The calculator will display a message saying on which port it got bound. "
   << "The default port is 8080. Type the address:  <br>localhost:8080/vectorpartition/cgi-bin/calculator<br>"
-  << " in your web server to get to the calculator. If the calculator doesn't succeed in binding to port 8080"
+  << " in your web browser to get to the calculator. If the calculator doesn't succeed in binding to port 8080"
   << " (say, the port is already taken) it may bind to ports 8081 or 8082. In that case replace "
   << " the 8080 in the address above with the port number reported by the calculator. ";
   out << "<hr>" << this->theFiles.size << " files total. ";

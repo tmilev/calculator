@@ -1373,9 +1373,7 @@ public:
     if (theFun==0)
       return false;
     if (!theFun(*this, input, output))
-    { this->Comments << "<hr>Conversion function failed on " << input.ToString() << ". ";
-      return false;
-    }
+      return this->Comments << "<hr>Conversion function failed on " << input.ToString() << ". ";
     return output.IsOfType<theType>();
   }
   template <class theType>
@@ -1678,7 +1676,7 @@ public:
 class CalculatorConversions
 {
 public:
-  ////////////////////Conversion from expresssion tree/////////////////////////////////
+  ////////////////////Conversion from expression tree/////////////////////////////////
   //conversions from expression tree to type
   static bool innerElementSemisimpleLieAlgebraRationalCoeffs
   (Calculator& theCommands, const Expression& input, ElementSemisimpleLieAlgebra<Rational>& output,

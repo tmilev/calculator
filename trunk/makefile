@@ -10,7 +10,7 @@ else
 endif
 
 ifeq ($(debug), 1)
-	CFLAGS += -g
+	CFLAGS += -g -Og
 else
 	CFLAGS += -O3 -march=native
 endif

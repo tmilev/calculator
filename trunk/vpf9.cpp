@@ -3342,6 +3342,9 @@ LargeInt DynkinType::GetWeylGroupSizeByFormula()const
     tempLI.RaiseToPower(this->GetMult(i));
     result*=tempLI;
   }
+  if (result<=0)
+    crash << "Something has gone very wrong: weyl group size reported to be " << result.ToString()
+    << " which appears to not be a positive integer! " << crash;
   return result;
 }
 

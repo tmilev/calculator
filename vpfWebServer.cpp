@@ -605,6 +605,10 @@ void WebWorker::SendAllBytes()
     return;
   MacroRegisterFunctionWithName("WebWorker::SendAllBytes");
   this->CheckConsistency();
+  struct timeval tv; //<- code involving tv taken from stackexchange
+  tv.tv_sec = 30;  // 30 Secs Timeout
+  tv.tv_usec = 0;  // Not init'ing this can cause strange errors
+  setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO,(void*)(&tv), sizeof(timeval));
   ProgressReportWebServer theReport;
   theReport.SetStatus("WebWorker::SendAllBytes");
   if (this->connectedSocketID==-1)
@@ -615,9 +619,11 @@ void WebWorker::SendAllBytes()
   theLog << "Sending " << this->remainingBytesToSend.size << " bytes in chunks of: " << logger::endL;
   //  theLog << "\r\nIn response to: " << this->theMessage;
   while (this->remainingBytesToSend.size>0)
-  { int numBytesSent=send(this->connectedSocketID, &this->remainingBytesToSend[0], this->remainingBytesToSend.size,0);
+  { int numBytesSent=send
+    (this->connectedSocketID, &this->remainingBytesToSend[0], this->remainingBytesToSend.size,0);
     if (numBytesSent<0)
-    { theLog << "WebWorker::SendAllBytes failed. Error: " << this->parent->ToStringLastErrorDescription() << logger::endL;
+    { theLog << "WebWorker::SendAllBytes failed. Error: "
+      << this->parent->ToStringLastErrorDescription() << logger::endL;
       theReport.SetStatus("WebWorker::SendAllBytes - continue ...");
       return;
     }
@@ -653,6 +659,10 @@ bool WebWorker::ReceiveAll()
   if (this->connectedSocketID==-1)
     crash << "Attempting to receive on a socket with ID equal to -1. " << crash;
 //  std::cout << "Got thus far 10" << std::endl;
+  struct timeval tv; //<- code involving tv taken from stackexchange
+  tv.tv_sec = 30;  // 30 Secs Timeout
+  tv.tv_usec = 0;  // Not init'ing this can cause strange errors
+  setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO,(void*)(&tv), sizeof(timeval));
   int numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
 //  std::cout << "Got thus far 11" << std::endl;
   if (numBytesInBuffer<0 || numBytesInBuffer>(signed)bufferSize)

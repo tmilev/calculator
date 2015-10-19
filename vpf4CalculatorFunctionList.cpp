@@ -58,6 +58,13 @@ void Calculator::initPredefinedInnerFunctions()
     CharToBase64(\"asure.\");\
     CharToBase64(\"sure.\");\
    ");
+  this->AddOperationInnerHandler
+  ("Sha1", CalculatorFunctionsGeneral::innerSha1OfString, "",
+   "Converts characters to a sequence of bits and computes the sha1 hash value of those bits. \
+   The examples below are taken from Wikipedia. ",
+   "Sha1(\"The quick brown fox jumps over the lazy dog\");\
+    Sha1(\"The quick brown fox jumps over the lazy cog\");\
+   ");
 
   this->AddOperationInnerHandler
   ("MakeMakefile", CalculatorFunctionsGeneral::innerMakeMakeFile, "",

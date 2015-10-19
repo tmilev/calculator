@@ -190,6 +190,21 @@ bool Crypto::StringBase64ToBitStream(const std::string& input, List<unsigned cha
   return true;
 }
 
+void Crypto::ConvertBitStreamToString(const List<unsigned char>& input, std::string& output)
+{ MacroRegisterFunctionWithName("Crypto::ConvertBitStreamToString");
+  output.clear();
+  output.reserve(input.size);
+  for (int i=0; i<input.size; i++)
+    output.push_back(input[i]);
+}
+
+void Crypto::ConvertStringToBitStream(const std::string& input, List<unsigned char>& output)
+{ MacroRegisterFunctionWithName("Crypto::ConvertStringToBitStream");
+  output.SetSize(input.size());
+  for (unsigned i=0; i<input.size(); i++)
+    output[i]=input[i];
+}
+
 std::string Crypto::CharsToBase64String(const List<unsigned char>& input)
 { MacroRegisterFunctionWithName("Crypto::CharsToBase64String");
   uint32_t theStack=0;
@@ -239,6 +254,18 @@ uint32_t Crypto::leftRotateAsIfBigEndian(uint32_t input, int numBitsToRotate)
   return result;
 }
 
+void Crypto::ConvertUint32ToUcharBigendian(const List<uint32_t>& input, List<unsigned char>& output)
+{ MacroRegisterFunctionWithName("Crypto::ConvertUint32ToUcharBigendian");
+  output.SetSize(input.size*4);
+  for (int i=0; i<input.size; i++)
+  { output[i*4+0]=input[i]/16777216;
+    output[i*4+1]=(input[i]/65536)%256;
+    output[i*4+2]=(input[i]/256)%256;
+    output[i*4+3]=input[i]%256;
+  }
+
+}
+
 void Crypto::convertUint64toBigendianStringAppendResult(uint64_t& input, std::string& outputAppend)
 { //the following code should work on both big- and little-endian systems:
   outputAppend.push_back((unsigned char)  (input/72057594037927936) );
@@ -251,35 +278,61 @@ void Crypto::convertUint64toBigendianStringAppendResult(uint64_t& input, std::st
   outputAppend.push_back((unsigned char)  (input%256 ));
 }
 
+uint32_t Crypto::GetUInt32FromCharBigendian(const List<unsigned char>& input)
+{ uint32_t result=input[0];
+  for (int i=1; i<4; i++)
+  { result*=256;
+    result+=input[i];
+  }
+  return result;
+}
+
 void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
 { MacroRegisterFunctionWithName("Crypto::computeSha1");
   //Reference: wikipedia page on sha1.
   //the Algorithm here is a direct implementation of the Wikipedia pseudocode.
-  uint32_t h0=0x67452301;
+  uint32_t h0 = 0x67452301;
   uint32_t h1 = 0xEFCDAB89;
   uint32_t h2 = 0x98BADCFE;
   uint32_t h3 = 0x10325476;
   uint32_t h4 = 0xC3D2E1F0;
-  uint64_t messageLength=inputString.size()*sizeof(char);
+  uint64_t messageLength=inputString.size()*8;//*sizeof(unsigned char);
   std::string inputStringPreprocessed=inputString;
+//  if (messageLength%256==0)
   inputStringPreprocessed.push_back(0x80);
-  unsigned numbytesMod64=inputStringPreprocessed.size() %64;
+  unsigned numbytesMod64= inputStringPreprocessed.size() %64;
+  if (numbytesMod64>56)
+  { for (unsigned i=numbytesMod64; i<64; i++)
+      inputStringPreprocessed.push_back(0);
+    numbytesMod64=0;
+  }
   for (int i=numbytesMod64; i<56; i++)
     inputStringPreprocessed.push_back(0);
   Crypto::convertUint64toBigendianStringAppendResult(messageLength, inputStringPreprocessed);
+  List<unsigned char> convertorToUint32;
+  List<uint32_t> inputStringUint32;
+  inputStringUint32.Reserve(inputStringPreprocessed.size()/4);
+  convertorToUint32.SetSize(4);
+  for (unsigned i=0; i<inputStringPreprocessed.size()/4; i++)
+  { convertorToUint32[0]=inputStringPreprocessed[i*4];
+    convertorToUint32[1]=inputStringPreprocessed[i*4+1];
+    convertorToUint32[2]=inputStringPreprocessed[i*4+2];
+    convertorToUint32[3]=inputStringPreprocessed[i*4+3];
+    inputStringUint32.AddOnTop(Crypto::GetUInt32FromCharBigendian(convertorToUint32));
+  }
   List<uint32_t> currentChunk;
   currentChunk.SetSize(80);
   uint32_t a=0,b=0,c=0,d=0,e=0, f=0, k=0, temp=0;
-  for (unsigned i=0; i<inputStringPreprocessed.size(); i+=16)
+  for (int chunkCounter=0; chunkCounter<inputStringUint32.size; chunkCounter+=16)
   { for (int j=0; j<16; j++)
-      currentChunk[j]=inputStringPreprocessed[i+j];
+      currentChunk[j]=inputStringUint32[chunkCounter+j];
     for (int j=16; j<80; j++)
-    { currentChunk[j]=currentChunk[j-3] xor
-                      currentChunk[j-8] xor
-                      currentChunk[j-14] xor
-                      currentChunk[j-16] ;
-      Crypto::leftRotateAsIfBigEndian(currentChunk[j], 1);
-    }
+      currentChunk[j]=
+      Crypto::leftRotateAsIfBigEndian((
+      currentChunk[j-3] xor
+      currentChunk[j-8] xor
+      currentChunk[j-14] xor
+      currentChunk[j-16]), 1 );
     a=h0;
     b=h1;
     c=h2;
@@ -293,13 +346,13 @@ void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
       { f= b xor c xor d;
         k=0x6ED9EBA1;
       } else if (40<=j and j<60)
-      { f = (b bitand c) or (b bitand d) or (c bitand d);
+      { f = (b bitand c) bitor (b bitand d) bitor (c bitand d);
         k = 0x8F1BBCDC;
       } else //60<=j
       { f = b xor c xor d;
         k = 0xCA62C1D6;
       }
-      temp= Crypto::leftRotateAsIfBigEndian(a, 5)+ f + e + k + currentChunk[i];
+      temp= Crypto::leftRotateAsIfBigEndian(a, 5)+ f + e + k + currentChunk[j];
       e = d;
       d = c;
       c = Crypto::leftRotateAsIfBigEndian(b, 30);

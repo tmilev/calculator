@@ -422,6 +422,14 @@ bool Calculator::ReplaceOEXByEX(int formatOptions)
   return true;
 }
 
+bool Calculator::ReplaceXXByEmptyString()
+{ SyntacticElement& left=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  Expression newExpr;
+  left.theData.AssignValue((std::string)"", *this);
+  left.controlIndex=this->conExpression();
+  return this->DecreaseStackSetCharacterRangeS(1);
+}
+
 bool Calculator::ReplaceEOByE(int formatOptions)
 { SyntacticElement& left=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
@@ -623,7 +631,6 @@ bool Calculator::ReplaceXEXByE(int inputFormat)
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3].theData.format=inputFormat;
   return this->DecreaseStackSetCharacterRangeS(2);
 }
-
 
 bool Calculator::ReplaceXEXByEcontainingOE(int inputOpIndex, int inputFormat)
 { SyntacticElement& outputElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
@@ -1189,6 +1196,8 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceXEXByE(secondToLastE.theData.format);
   if (thirdToLastS=="\"" && secondToLastS=="Expression" && lastS=="\"")
     return this->ReplaceXEXByEcontainingOE(this->opQuote());
+  if (secondToLastS=="\"" && lastS=="\"")
+    return this->ReplaceXXByEmptyString();
   if (lastS=="Expression" && secondToLastS=="~" && thirdToLastS=="Expression" )
     return this->ReplaceEOEByE();
   if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="==" && fourthToLastS=="Expression")

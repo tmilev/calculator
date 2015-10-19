@@ -1024,6 +1024,7 @@ public:
   bool ReplaceOXbyEX(int inputFormat=Expression::formatDefault);
   bool ReplaceOXbyEXusingO(int theControlIndex, int inputFormat=Expression::formatDefault);
   bool ReplaceXEXByEcontainingOE(int inputOpIndex, int inputFormat=Expression::formatDefault);
+  bool ReplaceXXByEmptyString();
   bool ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence(int inputFormat=Expression::formatDefault);
   bool ReplaceOXbyE(int inputFormat=Expression::formatDefault);
   bool ReplaceIntIntBy10IntPlusInt();

@@ -183,89 +183,95 @@ unsigned int Vector<int>::HashFunction() const
   return result;
 }
 
-/*
-class ListListInt;
+
 // A ListListInt is a size and a List containing a bunch of pointers followed by
-// pointed to sublists.  The purpose of this class is unknown, but it might
-// be a bit more efficient than a List<List<int> > if that ever matters ever lol
+// pointed to sublists.  This might be a good idea because valgrind says the non-local
+// data structure List[List[int]] leads to lots and lots of memory accesses
+class SubListListInt;
+
+class ListListInt
+{ public:
+  int size;
+  List<int> things;
+
+  SubListListInt operator[](int i);
+  void SetSize(int s);
+};
+
 class SubListListInt
 { public:
   ListListInt* viewed;
   int sublist;
 
-  int& operator[](int in)
-  { int slp = viewed.things[sublist];
-    if((viewed.size-1) == sublist)
-    { if(slp+in >= viewed.things)
-        crash << "Attempt to access out of bounds index " << in << " from sublist " << sublist << crash;
-    } else
-    { int nslp = viewed.things[sublist+1];
-      if(slp+in >= nslp)
-        crash << "Attempt to access out of bounds index " << in << " from sublist " << sublist << crash;
-    }
-    return viewed.things[slp+in];
-  }
-
-  void SetSize(int newsz)
-  { int slp = viewed.things[sublist];
-    if((viewed.size-1) == sublist)
-    { viewed.things.SetSize(slp+newsz);
-      return;
-    }
-    int nslp = viewed.things[sublist+1];
-    int sz = (nslp - slp);
-    int deltas = newsz - sz;
-    if(deltas == 0)
-      return;
-    if(deltas < 0)
-    { memmove(viewed->things.TheObjects + nslp + deltas, viewed->things.TheObjects + nslp, viewed.things.size - nslp);
-      viewed->things.SetSize(viewed.things.size + deltas);
-    } else
-    { viewed->things.SetSize(viewed->things.size + deltas);
-      memmove(viewed.things.TheObjects + nslp + deltas, viewed->things.TheObjects + nslp, viewed.things.size - nslp);
-    }
-  }
+  int& operator[](int i);
+  void SetSize(int s);
 };
 
-class ListListInt
-{ int size;
-  List<int> things;
+SubListListInt ListListInt::operator[](int in)
+{ if(in >= this->size)
+    crash << "Attempt to access invalid sublist " << in << " from list " << this->things << crash;
+  SubListListInt out;
+  out.viewed = this;
+  out.sublist = in;
+  return out;
+}
 
-  SubListListInt operator[](int in)
-  { if(in >= this->size)
-      crash << "Attempt to access invalid sublist " << in << " from list " << this->things << crash;
-    SubListListInt out;
-    out.viewed = this;
-    out.sublist = in;
-    return out;
-  }
-
-  void SetSize(int newsz)
-  { deltas = newsz - size;
-    if(deltas == 0)
-      return;
-    if(deltas < 0)
-    { this->things.SetSize(things[newsz+1]);
-      size = newsz;
+void ListListInt::SetSize(int newsz)
+{ int deltas = newsz - size;
+  if(deltas == 0)
+    return;
+  if(deltas < 0)
+  { this->things.SetSize(things[newsz+1]);
+    size = newsz;
+  } else
+  { if(newsz < this->things[0])
+    { for(int i=size; i<newsz; i++)
+        this->things[i] = this->things.size;
     } else
-    { if(newsz < this->things[0])
-      { for(int i=size; i<newsz; i++)
-          this->things[i] = this->things.size;
-      } else
-      { int oldos = this->things.size;
-        int newos = this->things.size + deltas;
-        this->things.SetSize(this->things.size+deltas);
-        memmove(this->things.TheObjects+newsz, this->things.TheObjects+size, oldos-size);
-        for(int i=0; i<size; i++)
-          this->things[i] += deltas;
-        for(int i=size; i<newsz; i++)
-          this->things[i] = newos;
-      }
+    { int oldos = this->things.size;
+      int newos = this->things.size + deltas;
+      this->things.SetSize(this->things.size+deltas);
+      memmove(this->things.TheObjects+newsz, this->things.TheObjects+size, oldos-size);
+      for(int i=0; i<size; i++)
+        this->things[i] += deltas;
+      for(int i=size; i<newsz; i++)
+        this->things[i] = newos;
     }
-
   }
-};
-*/
+}
+
+int& SubListListInt::operator[](int in)
+{ int slp = viewed->things[sublist];
+  if((viewed->size-1) == sublist)
+  { if(slp+in >= viewed->things.size)
+      crash << "Attempt to access out of bounds index " << in << " from sublist " << sublist << crash;
+  } else
+  { int nslp = viewed->things[sublist+1];
+    if(slp+in >= nslp)
+      crash << "Attempt to access out of bounds index " << in << " from sublist " << sublist << crash;
+  }
+  return viewed->things[slp+in];
+}
+
+void SubListListInt::SetSize(int newsz)
+{ int slp = viewed->things[sublist];
+  if((viewed->size-1) == sublist)
+  { viewed->things.SetSize(slp+newsz);
+    return;
+  }
+  int nslp = viewed->things[sublist+1];
+  int sz = (nslp - slp);
+  int deltas = newsz - sz;
+  if(deltas == 0)
+    return;
+  if(deltas < 0)
+  { memmove(viewed->things.TheObjects + nslp + deltas, viewed->things.TheObjects + nslp, viewed->things.size - nslp);
+    viewed->things.SetSize(viewed->things.size + deltas);
+  } else
+  { viewed->things.SetSize(viewed->things.size + deltas);
+    memmove(viewed->things.TheObjects + nslp + deltas, viewed->things.TheObjects + nslp, viewed->things.size - nslp);
+  }
+}
 
 void WeylElementPermutesRootSystem(const ElementWeylGroup<WeylGroup>& g, PermutationR2& p)
 { int rss = g.owner->RootSystem.size;

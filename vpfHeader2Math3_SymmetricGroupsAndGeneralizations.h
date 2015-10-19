@@ -44,7 +44,8 @@ class SparseSubspaceBasis
 template <class templateVector, class templateMonomial, class coefficient>
 void SparseSubspaceBasis<templateVector, templateMonomial, coefficient>::SetBasis(const List<templateVector>& basis)
 { this->CheckConsistency();
-
+  if(basis.size == 0)
+    return;
   for(int i=0; i<basis.size; i++)
     for(int j=0; j<basis[i].theMonomials.size; j++)
       this->involvedMonomials.BSInsertDontDup(basis[i].theMonomials[j]);
@@ -313,7 +314,11 @@ class GeneratorPermutationsOfList
   { beginning, loop, firstout, afterloop, end};
 
   void Initialize(List<object> theL)
-  { this->l = theL;
+  { if(theL.size == 0)
+     { done_iterating = true;
+       return;
+     }
+    this->l = theL;
     this->done_iterating = false;
     this->go_once = false;
     this->frame_pointer = 0;
@@ -578,7 +583,11 @@ class GeneratorElementsSnxSnOnIndicesAndIndices
 
 
   void Initialize(List<GeneratorPermutationR2sOnIndices> theGenerators)
-  { generators = theGenerators;
+  { if(theGenerators.size == 0)
+    {  frame_pointer = -1;
+       return;
+    }
+    generators = theGenerators;
     stack.SetSize(generators.size);
     frame_pointer = 0;
     stack[frame_pointer].program_counter = pcpositions::beginning;
@@ -702,27 +711,38 @@ class SimpleFiniteGroup
   List<elementSomeGroup> generators;
   HashedList<elementSomeGroup> theElements;
   bool haveElements = false;
-  bool flagCCsComputed = false;
-  bool easyConjugacyDetermination = false;
-  bool conjugacyClassesSizesAndRepresentativesByFormula = false;
+  bool (*AreConjugateByFormula)(const elementSomeGroup& x, const elementSomeGroup& y) = NULL;
+  void (*ComputeCCSizesAndRepresentativesByFormula)(void* G) = NULL;
+  void (*GetWordByFormula)(void* G, const elementSomeGroup& g, List<int>& word) = NULL;
+  int (*GetSizeByFormula)(void* G) = NULL;
   List<ConjugacyClassR2<elementSomeGroup> > conjugacyClasseS;
-//  List<List<int> > theWords;
-//  bool haveWords;
+  bool flagCCsComputed = false;
+  Matrix<int> generatorCommutationRelations;
+  List<List<int> > theWords;
+  bool haveWords = false;
+
+  // This is mathematically unsound.  However, since c++ is not an object oriented
+  // language (much less so than c), I can't think of a way to make this generic
+  List<GroupRepresentation<SimpleFiniteGroup, Rational> > irreps;
 
   void AddGenDontCompute(const elementSomeGroup& gen) { this->generators.AddOnTop(gen); }
-  void ComputeAllElements();
+  void ComputeAllElements(bool andWords = false);
   void ComputeCCSizesAndRepresentatives(void* unused = NULL);
   void ComputeElementsAndCCs(void* unused = NULL);
-
+  void GetWord(const elementSomeGroup& g, List<int>& word);
   int GetSize();
   bool AreConjugate(const elementSomeGroup& x, const elementSomeGroup& y);
   bool PossiblyConjugate(const elementSomeGroup& x, const elementSomeGroup& y);
+  void MakeID(elementSomeGroup& x);
 
   // the intention for this being here is to override it in maybe some kind
   // of coset like quotient group class or whatever lol
   bool IsID(const elementSomeGroup& g);
-  void GeneratorCommutationRelations(Matrix<int>& out);
+  void ComputeGeneratorCommutationRelations();
+  void VerifyCCSizesAndRepresentativesFormula();
+  void VerifyWords();
   std::string PrettyPrintGeneratorsCommutationRelations();
+  std::string PrettyPrintCharacterTable();
 
   template <typename coefficient>
   coefficient GetHermitianProduct(const Vector<coefficient>& x1, const Vector<coefficient>& X2);
@@ -741,13 +761,14 @@ class PermutationGroup: public SimpleFiniteGroup<PermutationR2>
   void MakeSymmetricGroup(int n);
   void MakeSymmetricGroupGeneratorsjjPlus1(int n);
 
-  bool AreConjugate(const PermutationR2& x, const PermutationR2& y);
+  //bool AreConjugate(const PermutationR2& x, const PermutationR2& y);
 
-  void ComputeCCSizesAndRepresentatives(void* unused);
-  void GetWord(const PermutationR2& g, List<int>& word);
+  static void ComputeCCSizesAndRepresentativesByFormulaImplementation(void* G);
+  static int GetSizeByFormulaImplementation(void* G);
+  static void GetWordjjPlus1Implementation(void* G, const PermutationR2& g, List<int>& word);
 
   template <typename coefficient>
-  void SpechtModuleOfPartition(const Partition& p, GroupRepresentation<PermutationGroup, coefficient>& rep);
+  void SpechtModuleOfPartition(const Partition& p, GroupRepresentation<SimpleFiniteGroup<PermutationR2>, coefficient>& rep);
   // haha, whatever this means
   template <typename somestream>
   somestream& IntoStream(somestream& out);
@@ -760,24 +781,23 @@ class PermutationGroup: public SimpleFiniteGroup<PermutationR2>
 // the int N field may or may not be meaningful
 class HyperoctahedralGroup: public SimpleFiniteGroup<ElementHyperoctahedralGroup>
 { public:
-  bool isEntireHyperoctahedralGroup;
-  bool isEntireDn;
-  int N;
+  bool isEntireHyperoctahedralGroup = false;
+  bool isEntireDn = false;
+  int N = -1;
 
   void MakeHyperoctahedralGroup(int n);
 
-  // it is conceivable that someone could give an element that doesn't belong to the group
-  // but actually that isn't going to happen and we're going to crash if it does
-  void GetWord(const ElementHyperoctahedralGroup& element, List<int>& word);
+  static void ComputeCCSizesAndRepresentativesByFormulaImplementation(void* G);
+  static void GetWordByFormulaImplementation(void* G, const ElementHyperoctahedralGroup& element, List<int>& word);
+  static int GetSizeByFormulaImplementation(void* G);
+
 
   int GetN();
-  int GetSize();
 
-  bool AreConjugate(const ElementHyperoctahedralGroup& x, const ElementHyperoctahedralGroup& y);
+  //bool AreConjugate(const ElementHyperoctahedralGroup& x, const ElementHyperoctahedralGroup& y);
 
-  void ComputeCCSizesAndRepresentatives(void* unused);
   void AllSpechtModules();
-  void SpechtModuleOfPartititons(const Partition& positive, const Partition& negative, GroupRepresentation<HyperoctahedralGroup, Rational>& out);
+  void SpechtModuleOfPartititons(const Partition& positive, const Partition& negative, GroupRepresentation<SimpleFiniteGroup<ElementHyperoctahedralGroup>, Rational>& out);
 
 
   template <typename somestream>
@@ -950,7 +970,9 @@ bool SimpleFiniteGroup<elementSomeGroup>::PossiblyConjugate(const elementSomeGro
 
 template <typename elementSomeGroup>
 bool SimpleFiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& x, const elementSomeGroup& y)
-{ if(!this->flagCCsComputed)
+{ if(this->AreConjugateByFormula)
+    return this->AreConjugateByFormula(x,y);
+  if(!this->flagCCsComputed)
     this->ComputeCCSizesAndRepresentatives(NULL);
   int xi = this->theElements.GetIndex(x);
   int yi = this->theElements.GetIndex(y);
@@ -973,82 +995,104 @@ coefficient SimpleFiniteGroup<elementSomeGroup>::GetHermitianProduct(const Vecto
 }
 
 template <typename elementSomeGroup>
-void SimpleFiniteGroup<elementSomeGroup>::ComputeAllElements()
+void SimpleFiniteGroup<elementSomeGroup>::MakeID(elementSomeGroup& e)
+{ if(this->generators.size != 0)
+    e.MakeID(this->generators[0]);
+}
+
+template <typename elementSomeGroup>
+void SimpleFiniteGroup<elementSomeGroup>::ComputeAllElements(bool andWords)
 { if(this->haveElements)
   { stOutput << "Recomputing elements of some group, for God only knows why" << '\n';
     this->theElements.SetSize(0);
   }
   elementSomeGroup e;
-  // if the user thinks its a good idea to instantiate a group of this type
-  // without giving it a single element, it had better be a type of element
-  // that can be used without initialization.
-  if(this->generators.size > 0)
-    e.MakeID(this->generators[0]);
+  this->MakeID(e);
   this->theElements.AddOnTop(e);
+  if(andWords && !GetWordByFormula)
+    this->theWords.SetSize(1);
   List<elementSomeGroup> recentadds;
   recentadds.AddOnTop(e);
-  if(easyConjugacyDetermination && !conjugacyClassesSizesAndRepresentativesByFormula)
+  List<List<int> > recentwords;
+  if(andWords && !GetWordByFormula)
+    recentwords.SetSize(1);
+  if(AreConjugateByFormula && (ComputeCCSizesAndRepresentativesByFormula == NULL))
   { this->conjugacyClasseS.SetSize(1);
+    this->conjugacyClasseS[0].size = 1;
     this->conjugacyClasseS[0].representative = e;
-    this->conjugacyClasseS[0].theElements.AddOnTop(0);
-    this->conjugacyClasseS[0].representativeIndex = 0;
-//    this->conjugacyClasseS[0].haveRepresentativeWord = true;
+    if(andWords)
+    { if(!GetWordByFormula)
+        this->conjugacyClasseS[0].representativeIndex = 0;
+      this->conjugacyClasseS[0].haveRepresentativeWord = true;
+    }
   }
-//  List<List<int> > recentwords;
-//  recentwords.SetSize(1);
   while(recentadds.size > 0)
   { // this is a necessary copy.  I wish I could tell cxx it is a move.
     elementSomeGroup r = recentadds.PopLastObject();
-//    List<int> rword = recentwords.PopLastObject();
+    List<int> rword;
+    if(andWords && !GetWordByFormula)
+      rword = recentwords.PopLastObject();
+    for(int i=0; i<this->generators.size; i++)
     for(int i=0; i<this->generators.size; i++)
     { elementSomeGroup p = r*generators[i];
       if(this->theElements.AddOnTopNoRepetition(p))
       { recentadds.AddOnTop(p);
-//        recentwords.AddOnTop(rword);
-//        recentwords[recentwords.size-1].AddOnTop(i);
-//        if(andWords)
-//          this->theWords.AddOnTop(recentwords[recentwords.size-1]);
-        if(easyConjugacyDetermination && !conjugacyClassesSizesAndRepresentativesByFormula)
+        if(andWords && !GetWordByFormula)
+        { recentwords.AddOnTop(rword);
+          recentwords[recentwords.size-1].AddOnTop(i);
+        }
+        if(andWords && !GetWordByFormula)
+          this->theWords.AddOnTop(recentwords[recentwords.size-1]);
+        if(AreConjugateByFormula && (ComputeCCSizesAndRepresentativesByFormula == NULL))
         { int pindex = this->theElements.GetIndex(p);
           bool alreadyHaveClass = false;
           for(int i=0; i<this->conjugacyClasseS.size; i++)
           { if(this->AreConjugate(this->conjugacyClasseS[i].representative,p))
-            { this->conjugacyClasseS[i].theElements.AddOnTop(pindex);
+            { this->conjugacyClasseS[i].size++;
               alreadyHaveClass = true;
+              break;
             }
-            break;
           } // if only cxx had for...else
           if(!alreadyHaveClass)
           { int ncc = this->conjugacyClasseS.size;
             this->conjugacyClasseS.SetSize(ncc+1);
             this->conjugacyClasseS[ncc].representative = p;
-            this->conjugacyClasseS[ncc].theElements.AddOnTop(pindex);
-//            this->conjugacyClasseS[ncc].representativeIndex = pindex;
-//            this->conjugacyClasseS[ncc].representativeWord = recentwords[recentwords.size-1];
+            this->conjugacyClasseS[ncc].size = 1;
+            if(andWords && !GetWordByFormula)
+            { this->conjugacyClasseS[ncc].representativeIndex = pindex;
+              this->conjugacyClasseS[ncc].representativeWord = recentwords[recentwords.size-1];
+              this->conjugacyClasseS[ncc].haveRepresentativeWord = true;
+            }
+            if(GetWordByFormula)
+            { this->GetWord(this->conjugacyClasseS[ncc].representative, this->conjugacyClasseS[ncc].representativeWord);
+              this->conjugacyClasseS[ncc].haveRepresentativeWord = true;
+            }
           }
         }
       }
     }
   }
   this->haveElements = true;
-  if(easyConjugacyDetermination && !conjugacyClassesSizesAndRepresentativesByFormula)
+  if(AreConjugateByFormula && (ComputeCCSizesAndRepresentativesByFormula == NULL))
     this->flagCCsComputed = true;
-//  if(andWords)
-//    this->haveWords = true;
+  if(andWords)
+    this->haveWords = true;
 }
 
 template <typename elementSomeGroup>
 void SimpleFiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives(void* unused)
-{ if(this->conjugacyClassesSizesAndRepresentativesByFormula)
-    crash << "Call the superclass method instead " << __FILE__ << ":" << __LINE__ << crash;
-  if(this->flagCCsComputed)
+{ if(this->flagCCsComputed)
     return;
-  if(this->easyConjugacyDetermination)
+  if(this->ComputeCCSizesAndRepresentativesByFormula)
+  { this->ComputeCCSizesAndRepresentativesByFormula(this);
+    return;
+  }
+  if(this->AreConjugateByFormula)
   { this->ComputeAllElements();
     return;
   }
-//  if(!this->haveWords)
-//    this->ComputeAllElements(true);
+  if(!this->haveWords)
+    this->ComputeAllElements(true);
   if(!this->haveElements)
     this->ComputeAllElements();
   GraphOLD conjugacygraph = GraphOLD(this->theElements.size, this->generators.size);
@@ -1065,10 +1109,13 @@ void SimpleFiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives(void*
   this->conjugacyClasseS.SetSize(components.size);
   for(int i=0; i<components.size; i++)
   { this->conjugacyClasseS[i].representative = this->theElements[components[i][0]];
+    this->conjugacyClasseS[i].size = components[i].size;
     this->conjugacyClasseS[i].theElements = components[i];
-//    this->conjugacyClasseS[i].representativeIndex = components[i][0];
-//    this->conjugacyClasseS[i].representativeWord = this->theWords[components[i][0]];
+    this->conjugacyClasseS[i].representativeIndex = components[i][0];
+    if(this->haveWords)
+      this->conjugacyClasseS[i].representativeWord = this->theWords[components[i][0]];
   }
+  this->flagCCsComputed = true;
 }
 
 template <typename elementSomeGroup>
@@ -1084,6 +1131,15 @@ int SimpleFiniteGroup<elementSomeGroup>::GetSize()
 }
 
 template <typename elementSomeGroup>
+void SimpleFiniteGroup<elementSomeGroup>::GetWord(const elementSomeGroup& g, List<int>& word)
+{ if(GetWordByFormula)
+    return this->GetWordByFormula(this,g,word);
+  if(!this->haveWords)
+    this->ComputeAllElements(true);
+  word = this->theWords[this->theElements.GetIndex(g)];
+}
+
+template <typename elementSomeGroup>
 bool SimpleFiniteGroup<elementSomeGroup>::IsID(const elementSomeGroup& g)
 { return g.IsID();
 }
@@ -1096,8 +1152,10 @@ bool SimpleFiniteGroup<Matrix<coefficient> >::IsID(const Matrix<coefficient>& g)
 */
 
 template <typename elementSomeGroup>
-void SimpleFiniteGroup<elementSomeGroup>::GeneratorCommutationRelations(Matrix<int>& out)
-{ out.init(this->generators.size, this-> generators.size);
+void SimpleFiniteGroup<elementSomeGroup>::ComputeGeneratorCommutationRelations()
+{ if(this->generatorCommutationRelations.NumRows == this->generators.size)
+    return;
+  this->generatorCommutationRelations.init(this->generators.size, this-> generators.size);
   for(int i=0; i<this->generators.size; i++)
     for(int j=i; j<this->generators.size; j++)
     { elementSomeGroup g = this->generators[i] * this->generators[j];
@@ -1107,16 +1165,15 @@ void SimpleFiniteGroup<elementSomeGroup>::GeneratorCommutationRelations(Matrix<i
       { gi = gi * g;
         cr++;
       } while(!gi.IsID());
-      out(i,j) = cr;
-      out(j,i) = cr;
+      this->generatorCommutationRelations(i,j) = cr;
+      this->generatorCommutationRelations(j,i) = cr;
     }
 }
 
 template <typename elementSomeGroup>
 std::string SimpleFiniteGroup<elementSomeGroup>::PrettyPrintGeneratorsCommutationRelations()
-{ Matrix<int> cr;
-  this->GeneratorCommutationRelations(cr);
-  std::string crs = cr.ToStringPlainText();
+{ this->ComputeGeneratorCommutationRelations();
+  std::string crs = this->generatorCommutationRelations.ToStringPlainText();
   List<char*> rows;
   int i;
   rows.AddOnTop(&crs[0]);
@@ -1128,6 +1185,137 @@ std::string SimpleFiniteGroup<elementSomeGroup>::PrettyPrintGeneratorsCommutatio
   for(int i=0; i<this->generators.size; i++)
     out << rows[i] << " " << this->generators[i] << '\n';
   return out.str().c_str();
+}
+
+template <typename elementSomeGroup>
+std::string SimpleFiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable()
+{ std::stringstream out;
+  out << *this;
+  out << this->GetSize() << "elements.  Representatives and sizes are ";
+  for(int i=0; i<this->conjugacyClasseS.size; i++)
+  { out << this->conjugacyClasseS[i].representative << " " << this->conjugacyClasseS[i].size;
+    if(i != this->conjugacyClasseS.size-1)
+      out << ", ";
+    else
+      out << "\n";
+  }
+  List<std::string> numbers;
+  int numpad = 0;
+  // what the hell lol
+  for(int i=0; i<this->irreps.size; i++)
+  { std::stringstream ns;
+    ns << i;
+    numbers.AddOnTop(ns.str());
+    int nil = numbers.LastObject()->length();
+    if(numpad < nil);
+      numpad = nil;
+  }
+  numpad++;
+
+  List<List<std::string> > values;
+  values.SetSize(this->irreps.size);
+  int cols_per_elt = 0;
+  for(int i=0; i<this->irreps.size; i++)
+  { values[i].SetSize(this->irreps[i].theCharacteR.data.size);
+    for(int j=0; j<this->irreps[i].theCharacteR.data.size; j++)
+    { values[i][j] = irreps[i].theCharacteR.data[j].ToString();
+      int vijcols = values[i][j].length();
+      if(vijcols > cols_per_elt)
+        cols_per_elt = vijcols;
+    }
+  }
+  cols_per_elt++;
+  for(int i=0; i<values.size; i++)
+  { int padn = numpad - numbers[i].length();
+    for(int pp = 0; pp < padn; pp++)
+      out << ' ';
+    out << numbers[i];
+    out << ' ';
+    out << '[';
+    for(int j=0; j<values[i].size; j++)
+    { int padl = cols_per_elt - values[i][j].length();
+      for(int pp=0; pp<padl; pp++)
+        out << ' ';
+      out << values[i][j];
+    }
+    out << "] " << this->irreps[i].identifyingString;
+    Rational x = this->irreps[i].theCharacteR.Norm();
+    if(x != 1)
+      out << " character norm is " << x;
+    out << '\n';
+  }
+  for(int i=0; i<this->irreps.size; i++)
+    for(int j=i+1; j<this->irreps.size; j++)
+    { Rational x = this->irreps[i].theCharacteR.InnerProduct(this->irreps[j].theCharacteR);
+      if(x != 0)
+        out << "characters " << i << ", " << j << " have inner product " << x << '\n';
+    }
+  return out.str();
+}
+
+template <typename elementSomeGroup>
+void SimpleFiniteGroup<elementSomeGroup>::VerifyCCSizesAndRepresentativesFormula()
+{ this->ComputeCCSizesAndRepresentatives();
+  SimpleFiniteGroup<elementSomeGroup> GG;
+  GG.generators = this->generators;
+  //GG.AreConjugateByFormula = this->AreConjugateByFormula;
+  GG.ComputeCCSizesAndRepresentatives();
+  stOutput << "Conjugacy class sizes by formula: ";
+  for(int i=0; i<this->conjugacyClasseS.size; i++)
+    stOutput << this->conjugacyClasseS[i].size << ", ";
+  stOutput << '\n';
+  for(int i=0; i<this->conjugacyClasseS.size; i++)
+  { stOutput << this->conjugacyClasseS[i].representative;
+    stOutput << '\n';
+  }
+  stOutput << "Conjugacy class sizes by brute force: ";
+  for(int i=0; i<GG.conjugacyClasseS.size; i++)
+    stOutput << GG.conjugacyClasseS[i].size << ", ";
+  stOutput << '\n';
+  for(int i=0; i<GG.conjugacyClasseS.size; i++)
+  { stOutput << GG.conjugacyClasseS[i].representative << "\n";
+  }
+  stOutput << '\n';
+  if(GG.conjugacyClasseS.size != this->conjugacyClasseS.size)
+    stOutput << "Error: wrong number of conjugacy classes, " << this->conjugacyClasseS.size << " should be " << GG.conjugacyClasseS.size << '\n';
+  List<int> classes_found;
+  for(int i=0; i<this->conjugacyClasseS.size; i++)
+  { int gcc;
+    if(GG.AreConjugateByFormula)
+    { for(int gci=0; gci<GG.conjugacyClasseS.size; gci++)
+        if(GG.AreConjugateByFormula(GG.conjugacyClasseS[gci].representative, this->conjugacyClasseS[i].representative))
+        { gcc = gci;
+          break;
+        }
+    } else
+    { int cri = GG.theElements.GetIndex(this->conjugacyClasseS[i].representative);
+      for(int gci=0; gci<GG.conjugacyClasseS.size; gci++)
+        if(GG.conjugacyClasseS[gci].theElements.BSContains(cri))
+        { gcc = gci;
+          break;
+        }
+    }
+    stOutput << "class " << i << " representative " << this->conjugacyClasseS[i].representative << " belongs to cc " << gcc << " with representative " << GG.conjugacyClasseS[gcc].representative << '\n';
+    if(classes_found.BSInsertDontDup(gcc) == -1)
+      stOutput << "error\n";
+  }
+  stOutput << "classes found are " << classes_found.ToStringCommaDelimited() << '\n';
+}
+
+template <typename elementSomeGroup>
+void SimpleFiniteGroup<elementSomeGroup>::VerifyWords()
+{ if(!this->haveElements)
+    this->ComputeAllElements(true);
+  for(int i=0; i<this->theElements.size; i++)
+  { List<int> word;
+    GetWord(this->theElements[i], word);
+    elementSomeGroup g;
+    this->MakeID(g);
+    for(int j=0; j<word.size; j++)
+      g = g*this->generators[word[j]];
+    if(!(g == this->theElements[i]))
+      stOutput << this->theElements[i] << " has word " << word.ToStringCommaDelimited() << " which corresponds to " << g << "\n";
+  }
 }
 
 template <typename elementSomeGroup>
@@ -1175,7 +1363,7 @@ std::string SimpleFiniteGroup<elementSomeGroup>::ToString() const
 
 template <typename coefficient>
 void PermutationGroup::SpechtModuleOfPartition(const Partition& p,
-                                               GroupRepresentation<PermutationGroup, coefficient>& rep)
+                                               GroupRepresentation<SimpleFiniteGroup<PermutationR2>, coefficient>& rep)
 { p.SpechtModuleMatricesOfPermutations(rep.generatorS, this->generators);
   rep.ownerGroup = this;
 }
@@ -1207,9 +1395,7 @@ somestream& HyperoctahedralGroup::IntoStream(somestream& out) const
   { out << "Finite group of hyperoctahedral elements, generated by ";
     for(int i=0; i<this->generators.size; i++)
       out << this->generators[i];
-    out << " and having " << this->theElements.size << " elements.";
   }
-  out << " thus having " << this->theElements.size << " elements";
   return out;
 }
 
@@ -1231,5 +1417,38 @@ template <typename elementSomeGroup>
 std::ostream& operator<<(std::ostream& out, const ConjugacyClassR2<elementSomeGroup>& data)
 { return data.IntoStream(out);
 }
+
+template <typename someGroup, typename coefficient>
+bool GroupRepresentation<someGroup,coefficient>::VerifyRepresentation()
+{ bool badrep = false;
+  if(this->generatorS.size != this->ownerGroup->generatorCommutationRelations.NumRows)
+    this->ownerGroup->ComputeGeneratorCommutationRelations();
+    for(int i=0; i<this->generatorS.size; i++)
+      for(int j=i; j<this->generatorS.size; j++)
+      { Matrix<Rational> M1 = this->generatorS[i] * this->generatorS[j];
+        Matrix<Rational> Mi = M1;
+        for(int n=1; n<this->ownerGroup->generatorCommutationRelations(i,j); n++)
+          Mi *= M1;
+        if(!Mi.IsIdMatrix())
+        { stOutput << "generators " << i << ", " << j << " i.e. elements ";
+          stOutput << this->ownerGroup->generators[i] << ", " << this->ownerGroup->generators[j];
+          stOutput << " are assigned matrices which fail to have commutation relations ";
+          stOutput << this->ownerGroup->generatorCommutationRelations(i,j) << "\n";
+          stOutput << this->generatorS[i].ToStringPlainText() << ",\n";
+          stOutput << this->generatorS[j].ToStringPlainText() << "\n\n";
+          badrep = true;
+        }
+      }
+  if(badrep)
+  { SimpleFiniteGroup<Matrix<Rational> > RG;
+    RG.generators = this->generatorS;
+    int GS = this->ownerGroup->GetSize();
+    int RGS = RG.GetSize();
+    if((GS % RGS) != 0)
+      crash << "Violation of Lagrange's theorem (" << RGS << "∤" << GS << " " << __FILE__ << ":" << __LINE__ << crash;
+  }
+  return !badrep;
+}
+
 
 #endif

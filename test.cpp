@@ -2340,59 +2340,61 @@ void TestPartitionsTableaux()
     stOutput << Ms[i].ToStringPlainText() << "\n\n";
 }
 
+void TestHyperoctahedralStuff()
+{ ElementHyperoctahedralGroup q1,q2;
+  q1.p.AddTransposition(0,2);
+  q1.p.AddTransposition(1,3);
+  q1.s.SetSize(4);
+  for(int i=0; i<4; i++)
+    q1.s[i] = false;
+  q2.s.SetSize(4);
+  q2.s[0] = false;
+  q2.s[1] = true;
+  q2.s[2] = true;
+  q2.s[3] = false;
+  ElementHyperoctahedralGroup q3,q4;
+  stOutput << "Q1=" << q1 << ", Q2=" << q2 << "\n";
+  stOutput << "Q1*Q2=" << q1*q2 << " Q2*Q1*Q2=" << q2*q1*q2;
+  q4 = q2;
+  q4.Invert();
+  ElementHyperoctahedralGroup::Conjugate(q1,q2,q3);
+  stOutput << " Q1^Q2=" << q3 << " Q2*Q1*Q4=" << q2*q1*q4;
+
+  for(int bni=1; bni<6;bni++)
+  { HyperoctahedralGroup Bn;
+    Bn.MakeHyperoctahedralGroup(bni);
+    Bn.ComputeAllElements();
+    Bn.ComputeCCSizesAndRepresentatives(NULL);
+    stOutput << Bn << '\n';
+    stOutput << Bn.conjugacyClasseS.size << " conjugacy classes\n";
+    for(int i=0; i<Bn.conjugacyClasseS.size; i++)
+      stOutput << Bn.conjugacyClasseS[i] << ", ";
+    stOutput << '\n';
+    Bn.VerifyCCSizesAndRepresentativesFormula();
+    stOutput << "\n\n";
+  }
+}
+
 void TestSpechtModules(int N = 7)
 { List<Partition> parts;
   Partition::GetPartitions(parts, N);
   PermutationGroup G;
   G.MakeSymmetricGroupGeneratorsjjPlus1(N);
-  List<GroupRepresentation<PermutationGroup, Rational> > reps;
-  reps.SetSize(parts.size);
-  Matrix<int> commutation_relations;
-  G.GeneratorCommutationRelations(commutation_relations);
+  G.irreps.SetSize(parts.size);
   stOutput << G.PrettyPrintGeneratorsCommutationRelations();
   stOutput << "Testing Specht modules for S_" << N << '\n';
   //#pragma omp parallel for
   for(int pi=0; pi<parts.size; pi++)
-  { G.SpechtModuleOfPartition(parts[pi], reps[pi]);
-    for(int i=0; i<reps[pi].generatorS.size; i++)
-      stOutput << reps[pi].generatorS[i].ToStringPlainText() << ",\n\n";
+  { G.SpechtModuleOfPartition(parts[pi], G.irreps[pi]);
+    for(int i=0; i<G.irreps[pi].generatorS.size; i++)
+      stOutput << G.irreps[pi].generatorS[i].ToStringPlainText() << ",\n\n";
     stOutput << "\n";
-    bool badrep = false;
-/*    for(int i=0; i<G.generators.size; i++)
-    { Matrix<Rational> M = reps[pi].generatorS[i];
-      M *= reps[pi].generatorS[i];
-      if(!M.IsIdMatrix())
-      { stOutput << "Coxeter relations error, generator " << i << " of module " << parts[pi] << " corresponding to permutation " << G.generators[i] << '\n' << reps[pi].generatorS[i].ToStringPlainText() << '\n';
-        badrep = true;
-      }
-    }
-    for(int i=0; i<G.generators.size-1; i++)
-    { Matrix<Rational> M = reps[pi].generatorS[i];
-      M *= reps[pi].generatorS[i+1];
-      Matrix<Rational> M3 = M*M;
-      M3 *= M;
-      if(!M3.IsIdMatrix())
-      { stOutput << "Coxeter relations error, generators " << i << ", " << i+1 << " of module " << parts[pi] << " corresponding to permutations " << G.generators[i] << ", " << G.generators[i+1] << '\n' << reps[pi].generatorS[i].ToStringPlainText() << '\n' << reps[pi].generatorS[i+1].ToStringPlainText() << '\n';
-        badrep = true;
-      }
-    }*/
-    for(int gi=0; gi<reps[pi].generatorS.size; gi++)
-      for(int gj=gi; gj<reps[pi].generatorS.size; gj++)
-      { Matrix<Rational> M1 = reps[pi].generatorS[gi] * reps[pi].generatorS[gj];
-        Matrix<Rational> Mi = M1;
-        for(int n=1; n<commutation_relations(gi,gj); n++)
-          Mi *= M1;
-        if(!Mi.IsIdMatrix())
-        { stOutput << "generators " << gi << ", " << gj << " i.e. elements " << G.generators[gi] << ", " << G.generators[gj] << " are assigned matrices which fail to have commutation relations " << commutation_relations(gi,gj) << "\n" << reps[pi].generatorS[gi].ToStringPlainText() << ",\n" << reps[pi].generatorS[gj].ToStringPlainText() << "\n\n";
-          badrep = true;
-        }
-      }
-    if(badrep)
-      crash << "crashing now" << crash;
+    G.irreps[pi].VerifyRepresentation();
   }
-  reps.QuickSortAscending();
-  for(int i=0; i<reps.size; i++)
-    stOutput << reps[i] << '\n';
+  G.irreps.QuickSortAscending();
+  for(int i=0; i<G.irreps.size; i++)
+    stOutput << G.irreps[i] << '\n';
+  stOutput << G.PrettyPrintCharacterTable() << '\n';
 }
 
 void LegacyTest()
@@ -3085,8 +3087,8 @@ void LegacyTest()
   stOutput << n2 << " " << n2 + two << " " << n2 + three << " " << " " << one / three << " " << n2 / three << " " << (n2/three)*three << "\n";
   */
 
-  char letter = 'F';
-  int number = 4;
+//  char letter = 'F';
+//  int number = 4;
 
   //LoadAndPrintTauSignatures(letter, number);
 
@@ -3159,11 +3161,17 @@ void LegacyTest()
 //  Vector<Polynomial<Rational> > relations;
 //  lie_bracket_relations(relations, 3);
 
-  TestSpechtModules();
+  PermutationGroup PG;
+  PG.MakeSymmetricGroupGeneratorsjjPlus1(5);
+  PG.VerifyCCSizesAndRepresentativesFormula();
+
+  TestSpechtModules(5);
+  TestHyperoctahedralStuff();
 
   HyperoctahedralGroup G;
   G.MakeHyperoctahedralGroup(5);
   stOutput << G.PrettyPrintGeneratorsCommutationRelations();
+  G.VerifyWords();
   G.AllSpechtModules();
 
   WeylGroup W;
@@ -3182,35 +3190,7 @@ void TestFiniteFields()
   stOutput << (a/b).n << "\n";
 }
 
-void TestHyperoctahedralStuff()
-{ ElementHyperoctahedralGroup q1,q2;
-  q1.p.AddTransposition(0,2);
-  q1.p.AddTransposition(1,3);
-  q1.s.SetSize(4);
-  for(int i=0; i<4; i++)
-    q1.s[i] = false;
-  q2.s.SetSize(4);
-  q2.s[0] = false;
-  q2.s[1] = true;
-  q2.s[2] = true;
-  q2.s[3] = false;
-  ElementHyperoctahedralGroup q3,q4;
-  stOutput << q1 << " " << q2 << " ";
-  stOutput << q1*q2 << " ";
-  stOutput << q2*q1*q2 << '\n';
 
-  for(int bni=1; bni<6;bni++)
-  { HyperoctahedralGroup Bn;
-    Bn.MakeHyperoctahedralGroup(bni);
-    Bn.ComputeAllElements();
-    Bn.ComputeCCSizesAndRepresentatives(NULL);
-    stOutput << Bn << '\n';
-    stOutput << Bn.conjugacyClasseS.size << " conjugacy classes\n";
-    for(int i=0; i<Bn.conjugacyClasseS.size; i++)
-      stOutput << Bn.conjugacyClasseS[i] << ", ";
-    stOutput << "\n\n";
-  }
-}
 
 
 //   std::string s;

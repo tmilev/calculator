@@ -812,10 +812,13 @@ class GroupRepresentation
   List<Matrix<coefficient> > generatorS;
   ClassFunction<someGroup, coefficient> theCharacteR;
   bool haveCharacter = false;
+  std::string identifyingString; // in Python, this would be an anonymous object
 
   void ComputeCharacter();
 
   bool operator>(GroupRepresentation& right);
+
+  bool VerifyRepresentation();
 
   template <typename somestream>
   somestream& IntoStream(somestream& out);
@@ -860,6 +863,7 @@ void GroupRepresentation<someGroup, coefficient>::SetElementImage(int i, Matrix<
   this->theElementIsComputed[i] = true;
 }*/
 
+
 template <typename someGroup, typename coefficient>
 template <typename somestream>
 somestream& GroupRepresentation<someGroup, coefficient>::IntoStream(somestream& out)
@@ -867,7 +871,10 @@ somestream& GroupRepresentation<someGroup, coefficient>::IntoStream(somestream& 
     this->ComputeCharacter();
 // WeylGroup needs to be printable
 // WeylGroup really needs to be printable lol
-  out << "Representation of group " << ownerGroup->ToString() << " with character " << this->theCharacteR;
+  out << "Representation of group " << ownerGroup->ToString();
+  if(!this->identifyingString.empty())
+    out << "identified as " << identifyingString;
+  out << " with character " << this->theCharacteR;
   return out;
 }
 

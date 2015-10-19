@@ -83,9 +83,7 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
     return false;
   int upperBound=-1;
   if (!input[1].IsSmallInteger(&upperBound))
-  { theCommands << "<hr>Failed to extract upper bound for the vector space dimension from the first argument. ";
-    return false;
-  }
+    return theCommands << "<hr>Failed to extract upper bound for the vector space dimension from the first argument. ";
   Expression inputModded=input;
   inputModded.children.RemoveIndexShiftDown(1);
 
@@ -93,10 +91,8 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
   { Vector<ElementUniversalEnveloping<RationalFunctionOld> > theLieAlgElts;
     theContext.MakeEmptyContext(theCommands);
     if (!theCommands.GetVectorFromFunctionArguments(inputModded, theLieAlgElts, &theContext))
-    { theCommands << "<hr>Failed to extract elements of weyl algebra and failed to extract elements of UE algebra from input "
+      return theCommands << "<hr>Failed to extract elements of weyl algebra and failed to extract elements of UE algebra from input "
       << input.ToString();
-      return false;
-    }
     FormatExpressions theFormat;
     theContext.ContextGetFormatExpressions(theFormat);
     std::stringstream out;
@@ -139,6 +135,31 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
         out << CGI::GetMathSpanPure(theOps[i].ToString(&theFormat));
     }
   }
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerSha1OfString(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSha1OfString");
+  if (!input.IsOfType<std::string>())
+    return false;
+  List<unsigned char> theBitStream;
+  const std::string& inputString=input.GetValue<std::string>();
+  theBitStream.SetSize(inputString.size());
+  for (unsigned i =0; i<inputString.size(); i++)
+    theBitStream[i]=inputString[i];
+  std::stringstream out;
+  out << "<br>Input: " << inputString;
+  out << "<br>Base64 conversion: " << Crypto::CharsToBase64String(theBitStream);
+  List<uint32_t> theSha1Uint;
+  List<unsigned char> theSha1Uchar;
+  std::string theSha1base64string;
+  Crypto::computeSha1(inputString, theSha1Uint);
+  Crypto::ConvertUint32ToUcharBigendian(theSha1Uint, theSha1Uchar);
+  theSha1base64string=Crypto::CharsToBase64String(theSha1Uchar);
+  out << "<br>Sha1 in base64: " << theSha1base64string;
+  out << "<br>Sha1 hex: ";
+  for (int i=0; i<theSha1Uint.size; i++)
+    out << std::hex << theSha1Uint[i];
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -376,9 +397,7 @@ bool CalculatorFunctionsGeneral::innerCoefficientOf(Calculator& theCommands, con
     return output.MakeXOX(theCommands, theCommands.opDivide(), output, input[2][2]);
   }
   if (!theCommands.GetSumProductsExpressions(input[2], theSummands))
-  { theCommands << "Failed to extract product of expressions from " << input[2].ToString();
-    return false;
-  }
+    return theCommands << "Failed to extract product of expressions from " << input[2].ToString();
   for(int i=0; i<theSummands.size; i++)
   { bool isGood=false;
     for (int j=0; j<theSummands[i].size; j++)
@@ -485,18 +504,12 @@ bool CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly(Calculator& 
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly");
   Expression polyE;
   if (!CalculatorConversions::innerPolynomial<AlgebraicNumber>(theCommands, input, polyE) )
-  { theCommands << "<hr>Failed to convert " << input.ToString() << " to polynomial. ";
-    return false;
-  }
+    return theCommands << "<hr>Failed to convert " << input.ToString() << " to polynomial. ";
   Polynomial<AlgebraicNumber> thePoly;
   if (!polyE.IsOfType<Polynomial<AlgebraicNumber> >(&thePoly))
-  { theCommands << "<hr>Failed to convert " << input.ToString() << " to polynomial, instead got " << polyE.ToString();
-    return false;
-  }
+   return theCommands << "<hr>Failed to convert " << input.ToString() << " to polynomial, instead got " << polyE.ToString();
   if (polyE.GetNumContextVariables()!=1)
-  { theCommands << "<hr>After conversion, I got the polynomial " << polyE.ToString() << ", which is not in one variable.";
-    return false;
-  }
+    return theCommands << "<hr>After conversion, I got the polynomial " << polyE.ToString() << ", which is not in one variable.";
   AlgebraicNumber theAN;
   if (!theAN.ConstructFromMinPoly(thePoly, theCommands.theObjectContainer.theAlgebraicClosure, theCommands.theGlobalVariableS))
     return false;

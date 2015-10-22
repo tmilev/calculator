@@ -863,8 +863,8 @@ bool WeylGroup::GenerateOrbit
  int UpperLimitNumElements, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::GenerateOrbit");
   output.Clear();
-  stOutput << "<br>Generating orbit in type " << this->theDynkinType.ToString() << " of weights: "
-  << theWeights.ToString();
+//  stOutput << "<br>Generating orbit in type " << this->theDynkinType.ToString() << " of weights: "
+//  << theWeights.ToString();
   for (int i=0; i<theWeights.size; i++)
     output.AddOnTopNoRepetition(theWeights[i]);
   Vector<coefficient> currentRoot;
@@ -876,9 +876,9 @@ bool WeylGroup::GenerateOrbit
     expectedOrbitSize=UpperLimitNumElements;
   if (expectedOrbitSize>10000000 )
     expectedOrbitSize=10000000;
-  stOutput << "<br>Setting expected orbit size: " << expectedOrbitSize;
+  //stOutput << "<br>Setting expected orbit size: " << expectedOrbitSize;
   output.SetExpectedSize(expectedOrbitSize);
-  stOutput << "<br>Orbit size set successfully: " << expectedOrbitSize;
+  //stOutput << "<br>Orbit size set successfully: " << expectedOrbitSize;
   if (outputSubset!=0)
   { if (UpperLimitNumElements>0)
       expectedOrbitSize=MathRoutines::Minimum(UpperLimitNumElements, expectedOrbitSize);
@@ -889,7 +889,7 @@ bool WeylGroup::GenerateOrbit
   }
   ProgressReport theReport(theGlobalVariables);
   simpleReflectionOrOuterAuto theGen;
-  stOutput << "<br>Got to main cycle of: WeylGroup::GenerateOrbit. ";
+  // stOutput << "<br>Got to main cycle of: WeylGroup::GenerateOrbit. ";
   for (int i=0; i<output.size; i++)
     for (int j=0; j<this->CartanSymmetric.NumRows; j++)
     { currentRoot=output[i];
@@ -898,7 +898,7 @@ bool WeylGroup::GenerateOrbit
         reportStream << "So far found " << i+1 << " elements in the orbit(s) of the starting weight(s) "
         << theWeights.ToString() << ". ";
         theReport.Report(reportStream.str());
-        stOutput << reportStream.str();
+        //stOutput << reportStream.str();
       }
       if (!RhoAction)
         this->SimpleReflection(j, currentRoot);

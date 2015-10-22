@@ -320,6 +320,36 @@ std::string FileOperations::GetFileExtensionWithDot(const std::string& theFileNa
   return "";
 }
 
+bool FileOperations::IsFileNameWithoutDotsAndSlashes(const std::string& theFileName)
+{ MacroRegisterFunctionWithName("FileOperations::IsFileNameWithoutDotsAndSlashes");
+  for (unsigned i=0; i<theFileName.size(); i++)
+    if (theFileName[i]=='/' || theFileName[i]=='\\' || theFileName[i]=='.')
+      return false;
+  return true;
+}
+
+std::string FileOperations::RemovePathFromFileName(const std::string& fileName)
+{ unsigned startNameWithoutFolderInfo=0;
+  for (unsigned i=0; i<fileName.size(); i++)
+    if (fileName[i]=='/' || fileName[i]=='\\')
+      startNameWithoutFolderInfo=i+1;
+  std::stringstream nameWithoutFolderInfo;
+  for (unsigned i=startNameWithoutFolderInfo; i<fileName.size(); i++)
+    nameWithoutFolderInfo << fileName[i];
+  return nameWithoutFolderInfo.str();
+}
+
+std::string FileOperations::GetPathFromFileName(const std::string& fileName)
+{ unsigned startNameWithoutFolderInfo=0;
+  for (unsigned i=0; i<fileName.size(); i++)
+    if (fileName[i]=='/' || fileName[i]=='\\')
+      startNameWithoutFolderInfo=i+1;
+  std::stringstream folderName;
+  for (unsigned i=0; i<startNameWithoutFolderInfo; i++)
+    folderName << fileName[i];
+  return folderName.str();
+}
+
 bool FileOperations::GetFolderFileNames
 (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath, List<std::string>* outputFileTypes)
 { MacroRegisterFunctionWithName("FileOperations::GetFolderFileNames");

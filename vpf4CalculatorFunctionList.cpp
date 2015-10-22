@@ -59,6 +59,13 @@ void Calculator::initPredefinedInnerFunctions()
     CharToBase64(\"sure.\");\
    ");
   this->AddOperationInnerHandler
+  ("x509CertificateCrunch", CalculatorFunctionsGeneral::innerX509certificateCrunch, "",
+   "Processes a x509 certificate database. This function is part of a security research project and \
+   will be documented at a later time (if at all). Please do not use this function. ",
+   "x509CertificateCrunch(\"certificates\");\
+   ", false, true, "CalculatorFunctionsGeneral::innerX509certificateCrunch");
+
+  this->AddOperationInnerHandler
   ("Sha1", CalculatorFunctionsGeneral::innerSha1OfString, "",
    "Converts characters to a sequence of bits and computes the sha1 hash value of those bits. \
    The examples below are taken from Wikipedia. ",

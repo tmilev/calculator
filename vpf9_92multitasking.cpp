@@ -101,7 +101,7 @@ void MutexWrapper::LockMe()
   ((std::mutex*)this->theMutexImplementation)->lock();
   }
   catch(int theException)
-  { std::cout << "Mutex Lock failed!!!!" << std::endl;
+  { crash << "Fatal error: mutex lock failed." << crash;
   }
   this->flagUnsafeFlagForDebuggingIsLocked=true;
 }

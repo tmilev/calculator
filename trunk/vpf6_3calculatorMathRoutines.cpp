@@ -138,6 +138,45 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerX509certificateCrunch(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerX509certificateCrunch");
+  std::string theCertificateFileNameNoFolder;
+  if (!input.IsOfType<std::string>(&theCertificateFileNameNoFolder))
+    return false;
+  if (!FileOperations::IsFileNameWithoutDotsAndSlashes(theCertificateFileNameNoFolder))
+    return theCommands << "The file name contains forbidden characters, computation aborted. ";
+  std::string theCertificateFileName=
+  theCommands.theGlobalVariableS->PhysicalPathServerBase+theCertificateFileNameNoFolder;
+  std::fstream theCertFile;
+  if (!FileOperations::OpenFile(theCertFile, theCertificateFileName, false, false, false))
+    return theCommands << "Failed to open file " << theCertificateFileName;
+  theCertFile.seekg(0);
+  List<std::string> theCerts, theShas, certsAndShas;
+  List<List<unsigned char> > theCertsRAW;
+  const int sampleSize=100;
+  theCerts.SetSize(sampleSize);
+  theShas.SetSize(sampleSize);
+  certsAndShas.SetSize(sampleSize);
+  theCertsRAW.SetSize(sampleSize);
+  std::stringstream out;
+  for (int i=0; i<sampleSize; i++)
+  { theCertFile >> certsAndShas[i];
+    unsigned commaPosition=0;
+    for (;commaPosition< certsAndShas[i].size(); commaPosition++)
+      if (certsAndShas[i][commaPosition]==',')
+        break;
+    MathRoutines::SplitStringInTwo(certsAndShas[i], commaPosition+1, theShas[i], theCerts[i]);
+    if (theShas[i].size()>0)
+      theShas[i].resize(theShas[i].size()-1);
+    out << "Raw cert+sha:<br>" << certsAndShas[i] << "<br>Certificate " << i+1
+    << ":<br>" << theCerts[i] << "<br>Sha1:<br>" << theShas[i]
+    << "<br>Comments while extracting the raw certificate: ";
+    Crypto::StringBase64ToBitStream(theCerts[i], theCertsRAW[i], &out);
+//    Crypto::GetUInt32FromCharBigendian(theCertsRAW[i], )
+  }
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerSha1OfString(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSha1OfString");
   if (!input.IsOfType<std::string>())
@@ -217,9 +256,7 @@ bool CalculatorFunctionsGeneral::innerCasimirWRTlevi(Calculator& theCommands, co
     theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=50;
   Vector<Rational> leviSelection;
   if(!theCommands.GetVectoR(input[2], leviSelection, 0, theSSalg->GetRank()))
-  { theCommands << "<hr>Failed to extract parabolic selection. ";
-    return false;
-  }
+    return theCommands << "<hr>Failed to extract parabolic selection. ";
   Selection theParSel;
   theParSel=leviSelection;
   theParSel.InvertSelection();

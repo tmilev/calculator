@@ -1105,26 +1105,9 @@ public:
 struct FileOperations
 {
 public:
-  static std::string RemovePathFromFileName(const std::string& fileName)
-  { unsigned startNameWithoutFolderInfo=0;
-    for (unsigned i=0; i<fileName.size(); i++)
-      if (fileName[i]=='/' || fileName[i]=='\\')
-        startNameWithoutFolderInfo=i+1;
-    std::stringstream nameWithoutFolderInfo;
-    for (unsigned i=startNameWithoutFolderInfo; i<fileName.size(); i++)
-      nameWithoutFolderInfo << fileName[i];
-    return nameWithoutFolderInfo.str();
-  }
-  static std::string GetPathFromFileName(const std::string& fileName)
-  { unsigned startNameWithoutFolderInfo=0;
-    for (unsigned i=0; i<fileName.size(); i++)
-      if (fileName[i]=='/' || fileName[i]=='\\')
-        startNameWithoutFolderInfo=i+1;
-    std::stringstream folderName;
-    for (unsigned i=0; i<startNameWithoutFolderInfo; i++)
-      folderName << fileName[i];
-    return folderName.str();
-  }
+  static bool IsFileNameWithoutDotsAndSlashes(const std::string& fileName);
+  static std::string RemovePathFromFileName(const std::string& fileName);
+  static std::string GetPathFromFileName(const std::string& fileName);
   static std::string GetFileExtensionWithDot(const std::string& theFileName);
   static bool FileExists(const std::string& theFileName);
   static bool IsFolder(const std::string& theFolderName);

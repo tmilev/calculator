@@ -152,12 +152,14 @@ bool CalculatorFunctionsGeneral::innerX509certificateCrunch(Calculator& theComma
     return theCommands << "Failed to open file " << theCertificateFileName;
   theCertFile.seekg(0);
   List<std::string> theCerts, theShas, certsAndShas;
-  List<List<unsigned char> > theCertsRAW;
+  List<List<unsigned char> > theCertsRAWuchars;
+  List<std::string> theCertsRAWstrings;
   const int sampleSize=100;
   theCerts.SetSize(sampleSize);
   theShas.SetSize(sampleSize);
   certsAndShas.SetSize(sampleSize);
-  theCertsRAW.SetSize(sampleSize);
+  theCertsRAWuchars.SetSize(sampleSize);
+  theCertsRAWstrings.SetSize(sampleSize);
   std::stringstream out;
   for (int i=0; i<sampleSize; i++)
   { theCertFile >> certsAndShas[i];
@@ -169,9 +171,11 @@ bool CalculatorFunctionsGeneral::innerX509certificateCrunch(Calculator& theComma
     if (theShas[i].size()>0)
       theShas[i].resize(theShas[i].size()-1);
     out << "Raw cert+sha:<br>" << certsAndShas[i] << "<br>Certificate " << i+1
-    << ":<br>" << theCerts[i] << "<br>Sha1:<br>" << theShas[i]
+    << " (base64):<br>" << theCerts[i] << "<br>Sha1:<br>" << theShas[i]
     << "<br>Comments while extracting the raw certificate: ";
-    Crypto::StringBase64ToBitStream(theCerts[i], theCertsRAW[i], &out);
+    Crypto::StringBase64ToBitStream(theCerts[i], theCertsRAWuchars[i], &out);
+    Crypto::ConvertBitStreamToString(theCertsRAWuchars[i], theCertsRAWstrings[i]);
+    out << "<br>Raw certificate: " << theCertsRAWstrings[i];
 //    Crypto::GetUInt32FromCharBigendian(theCertsRAW[i], )
   }
   return output.AssignValue(out.str(), theCommands);
@@ -5638,3 +5642,67 @@ bool CalculatorFunctionsGeneral::innerSolveProductSumEquationOverSetModN(Calcula
   }
   return output.AssignValue((std::string)"Couldn't find solution", theCommands);
 }
+
+void Calculator::AutomatedTestRun
+(List<std::string>& outputCommandStrings, List<std::string>& outputResultsWithInit, List<std::string>& outputResultsNoInit)
+{ MacroRegisterFunctionWithName("Calculator::AutomatedTestRun");
+  Calculator theTester;
+  int numFunctionsToTest=this->GetNumBuiltInFunctions();
+  outputCommandStrings.SetExpectedSize(numFunctionsToTest);
+  outputCommandStrings.SetSize(0);
+  for (int i=0; i<this->FunctionHandlers.size; i++)
+    for (int j=0; j<this->FunctionHandlers[i].size; j++)
+      if (this->FunctionHandlers[i][j].theFunction!=Calculator::innerAutomatedTest &&
+          this->FunctionHandlers[i][j].theFunction!=Calculator::innerAutomatedTestSetKnownGoodCopy &&
+          this->FunctionHandlers[i][j].theFunction!=CalculatorFunctionsGeneral::innerCrash &&
+          this->FunctionHandlers[i][j].theFunction!=CalculatorFunctionsGeneral::innerCrashByListOutOfBounds &&
+          ! this->FunctionHandlers[i][j].flagIsExperimental)
+        outputCommandStrings.AddOnTop(this->FunctionHandlers[i][j].theExample);
+  for (int i=0; i<this->operationsCompositeHandlers.size; i++)
+    for (int j=0; j<this->operationsCompositeHandlers[i].size; j++)
+      outputCommandStrings.AddOnTop(this->operationsCompositeHandlers[i][j].theExample);
+  outputResultsWithInit.SetSize(outputCommandStrings.size);
+  outputResultsNoInit.SetSize(outputCommandStrings.size);
+  ProgressReport theReport(this->theGlobalVariableS);
+  FormatExpressions theFormat;
+  theFormat.flagExpressionIsFinal=true;
+  for (int i=0; i<outputCommandStrings.size; i++)
+  { double startingTime=this->theGlobalVariableS->GetElapsedSeconds();
+    std::stringstream reportStream;
+    reportStream << "<br>Testing expression:<br> " << outputCommandStrings[i]
+    << "<br>Test progress: testing " << i+1 << " out of " << outputCommandStrings.size << ". ";
+    theReport.Report(reportStream.str());
+    theTester.reset();
+    theTester.CheckConsistencyAfterInitializationExpressionStackEmpty();
+    theTester.init(*this->theGlobalVariableS);
+    theTester.Evaluate(outputCommandStrings[i]);
+    outputResultsWithInit[i]=theTester.theProgramExpression.ToString(&theFormat);
+    reportStream << "<br>Result: " << theTester.theProgramExpression.ToString();
+    reportStream << "<br>Done in: " << this->theGlobalVariableS->GetElapsedSeconds()-startingTime << " seconds. ";
+    theReport.Report(reportStream.str());
+  }
+}
+
+bool CalculatorFunctionsGeneral::innerCrash
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrash");
+  crash << "<hr>This is a test of the crashing mechanism of the calculator. Are log files created correctly? Check the /output/ directory." << crash;
+  return output.AssignValue((std::string)"Crashed succesfully", theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerCrashByListOutOfBounds
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrashByListOutOfBounds");
+  List<int> theList;
+  std::vector<int> theVector;
+  for (int i=0; i<5; i++)
+  { theList.AddOnTop(0);
+    theVector.push_back(0);
+  }
+  theList.SetSize(0);
+  theVector.resize(0);
+  theVector[1]=1;
+  theList[1]=1;
+  return output.AssignValue((std::string) "Crashing: list out of bounds.", theCommands);
+}
+

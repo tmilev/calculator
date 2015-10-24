@@ -5,13 +5,12 @@
 #include "vpfHeader1General0_General.h"
 #include "vpfHeader2Math0_General.h"
 #include "vpfHeader2Math8_VectorSpace.h"
+#include "vpfHeader2Math4_Graph.h"
 
 //To do: move Weyl groups to this file. Eliminate all redundant code and organize nicely.
 
 static ProjectInformationInstance ProjectInfoVpfFiniteGroups(__FILE__, "Header file, finite groups. Work in progress.");
 
-template <typename somegroup, class elementSomeGroup>
-class Subgroup;
 
 template <typename ElementEuclideanDomain>
 struct DivisionResult
@@ -805,14 +804,16 @@ public:
   void operator+=(const WeylGroup& other);
 };
 
-template <typename someGroup, typename coefficient>
+template <typename someGroup, typename elementSomeGroup, typename coefficient>
 class GroupRepresentation
 { public:
-  someGroup* ownerGroup;
+  someGroup* ownerGroup = NULL;
   List<Matrix<coefficient> > generatorS;
   ClassFunction<someGroup, coefficient> theCharacteR;
   bool haveCharacter = false;
   std::string identifyingString; // in Python, this would be an anonymous object
+
+  void GetMatrixOfElement(elementSomeGroup& word, Matrix<coefficient>& out);
 
   void ComputeCharacter();
 
@@ -828,6 +829,15 @@ class GroupRepresentation
   }
 };
 
+template <typename someGroup, typename elementSomeGroup, typename coefficient>
+GroupRepresentation<someGroup, elementSomeGroup, coefficient>::GetMatrixOfElement(elementSomeGroup &g, Matrix<coefficient> &out)
+{ out.MakeID(this->generatorS[0]);
+  List<int> word;
+  this->ownerGroup->GetWord(g, word);
+  for(int i=0; i<word.size; i++)
+    out *= this->generatorS[word[i]];
+}
+
 template <typename someGroup, typename coefficient>
 void GroupRepresentation<someGroup, coefficient>::ComputeCharacter()
 { if(!this->ownerGroup->flagCCsComputed)
@@ -836,8 +846,7 @@ void GroupRepresentation<someGroup, coefficient>::ComputeCharacter()
   this->theCharacteR.data.SetSize(this->ownerGroup->conjugacyClasseS.size);
   for(int cci=0; cci < this->ownerGroup->conjugacyClasseS.size; cci++)
   { Matrix<coefficient> M;
-    M.MakeID(this->generatorS[0]);
-    List<int> ccirWord;
+    this->GetMatrixOfElement(this->ownerGroup->conjugacyClasseS[cci].representative);
     this->ownerGroup->GetWord(this->ownerGroup->conjugacyClasseS[cci].representative, ccirWord);
     for(int i=0; i<ccirWord.size; i++)
       M *= this->generatorS[ccirWord[i]];
@@ -1055,6 +1064,14 @@ public:
 template <typename coefficient>
 std::ostream& operator<<(std::ostream& out, const ClassFunction<WeylGroup, coefficient> X);
 
+template <typename elementSomeGroup>
+class Coset
+{ elementSomeGroup representative;
+  List<int> representativeWord;
+  List<int> supergroupIndices;
+};
+
+
 template <typename somegroup, class elementSomeGroup>
 class Subgroup : public FiniteGroup<elementSomeGroup>
 {
@@ -1062,6 +1079,7 @@ public:
   somegroup *parent;
   List<int> ccRepresentativesPreimages;
   List<int> generatorPreimages;
+  List<Coset> cosets;
   Subgroup();
   bool CheckInitialization();
   void init();
@@ -1074,7 +1092,123 @@ public:
   { this->ComputeCCSizesAndRepresentatives(theGlobalVariables);
     this->ComputeCCRepresentativesPreimages(theGlobalVariables);
   }
+  template <typename coefficient>
+  void QuotientGroupPermutationRepresentation(GroupRepresentation<somegroup, coefficient>& out);
+  template <typename coefficient>
+  void InduceRepresentation(GroupRepresentation<Subgroup<somegroup, elementSomeGroup>, coefficient>& in,
+                            GroupRepresentation<somegroup, coefficient>& out);
+  void ComputeCosets();
+  bool SameCosetAs(elementSomeGroup& g1, elementSomeGroup& g2);
+  int GetCosetId(elementSomeGroup& g);
+  bool flagCosetSetsComputed = false;
+  bool flagCosetRepresentativesComputed = false;
+  void (*CosetRepresentativeEnumerator)(void* H) = NULL;
+  bool (*SameCosetAsByFormula)(void* H, elementSomeGroup& g1, elementSomeGroup& g2) = NULL;
 };
+
+template <typename somegroup, typename elementSomeGroup>
+void Subgroup<somegroup, elementSomeGroup>::ComputeCosets()
+{ if(flagCosetSetsComputed)
+    return;
+  if(this->CosetRepresentativeEnumerator && this->SameCosetAsByFormula)
+    return this->CosetRepresetativeEnumerator();
+  this->ComputeAllElements();
+  parent->ComputeAllElements();
+  GraphOLD orbitg = GraphOLD(parent->theElements.size, this->generators.size);
+  for(int i=0; i<parent->theElements.size; i++)
+    for(int j=0; j<this->generator.size; j++)
+      orbitg.AddEdge(i,parent->theElements.GetIndex(this->generators[j]*parent->theElements[i]));
+  List<List<int> > orbits;
+  orbits = orbitg.DestructivelyGetConnectedComponents();
+  this->cosets.SetSize(orbits.size);
+  for(int i=0; i<orbits.size; i++)
+  { cosets[i].supergroupIndices = orbits[i];
+    cosets[i].representative = parent->theElements[orbits[i][0]];
+    parent->GetWord(parent->theElements[orbits[i][0]], cosets[i].representativeWord);
+  }
+  this->flagCosetSetsComputed = true;
+  this->flagCosetRepresentativesComputed = true;
+}
+
+template <typename somegroup, typename elementSomeGroup>
+bool Subgroup<somegroup, elementSomeGroup>::SameCosetAs(elementSomeGroup& g1, elementSomeGroup& g2)
+{ if(this->SameCosetAsByFormula)
+    return SameCosetAsByFormula(this, g1, g2);
+  this->ComputeCosets();
+  int g1i = parent->theElements.GetIndex(g1);
+  int g2i = parent->theElements.GetIndex(g2);
+  for(int i=0; i<this->cosets.size; i++)
+    if(this->cosets[i].BSContains(g1i))
+      if(this->cosets[i].BSContains(g2i))
+        return true;
+  return false;
+}
+
+template <typename somegroup, typename elementSomeGroup>
+int Subgroup<somegroup, elementSomeGroup>::GetCosetId(elementSomeGroup& g)
+{ int gi;
+  if(this->CosetRepresentativeEnumerator && this->SameCosetAsByFormula)
+  { if(!this->flagCosetRepresentativesComputed)
+      this->CosetRepresentativeEnumerator();
+  } else
+    if(!flagCosetSetsComputed)
+    { this->ComputeCosets();
+      gi = this->parent->theElements.GetIndex(g);
+    }
+  for(int i=0; i<this->cosets.size; i++)
+  { if(this->SameCosetAsByFormula)
+    { if(this->SameCosetAsByFormula(this->cosets[i].representative, g))
+        return i;
+    } else
+      if(this->cosets[i].supergroupIndices.BSContains(gi))
+        return i;
+  }
+  crash << "Error: element " << g << " not found in cosets of " << *this << " in group " << *parent << crash;
+}
+
+template <typename somegroup, typename elementSomeGroup, typename coefficient>
+void Subgroup<somegroup, elementSomeGroup>::QuotientGroupPermutationRepresentation(GroupRepresentation<somegroup, coefficient>& out)
+{ this->ComputeCosets();
+  out.ownerGroup = this->parent;
+  out.identifyingString = "Quotient permutation representation";
+  out.generatorS.SetSize(this->parent.generators.size);
+  for(int i=0; i<this->parent.generators.size; i++)
+  { out.generatorS[i].init(this->cosets.size, this->cosets.size);
+    out.generatorS[i].MakeZero();
+    for(int ci=0; ci<out.generatorS[i].NumCols; ci++)
+    { elementSomeGroup g = this->cosets[i].representative * out.generatorS[i];
+      int j = this->GetCosetId(g);
+      out.generatorS[i](ci,j) = 1;
+    }
+  }
+}
+
+// G⊗_H V
+// g(w) = h[g](Ⓧv) where [g] rearranges the v's
+//
+template <typename somegroup, typename elementSomeGroup, typename coefficient>
+void Subgroup<somegroup, elementSomeGroup>::InduceRepresentation
+    (GroupRepresentation<Subgroup<somegroup, elementSomeGroup>, coefficient>& in,
+     GroupRepresentation<somegroup, coefficient>& out)
+{ GroupRepresentation<somegroup, coefficient> qr;
+  this->QuotientGroupPermutationRepresentation(qr);
+  GroupRepresentation<somegroup, coefficient> sr;
+  sr.generatorS.SetSize(parent->generators.size);
+  for(int i=0; i<parent->generators.size; i++)
+  { elementSomeGroup g;
+    int csi = this->GetCosetId(parent->generators[i]);
+    if(csi == 0)
+      g = parent->generators[i];
+    else
+    { elementSomeGroup cg = cosets[csi].representative;
+      cg.Invert();
+      g = cg*parent->generators[i];
+    }
+    in.GetMatrixOfElement(g,sr.generatorS[i]);
+  }
+  out.MakeTensorRepresentation(qr,sr);
+}
+
 
 class SubgroupWeylGroup: public Subgroup<WeylGroup, ElementWeylGroup<WeylGroup> >
 {

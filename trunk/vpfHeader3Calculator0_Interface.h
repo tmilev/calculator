@@ -1410,7 +1410,6 @@ public:
   static bool innerTimes(Calculator& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerOperationBinary(theCommands, input, output, theCommands.opTimes());
   }
-  static bool innerCrash(Calculator& theCommands, const Expression& input, Expression& output);
   bool ReadTestStrings(HashedList<std::string, MathRoutines::hashString>& outputCommands, List<std::string>& outputResults);
   bool WriteTestStrings(List<std::string>& inputCommands, List<std::string>& inputResults);
   static bool innerAutomatedTest(Calculator& theCommands, const Expression& input, Expression& output);

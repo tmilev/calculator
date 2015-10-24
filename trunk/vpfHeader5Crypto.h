@@ -8,7 +8,8 @@ class Crypto
 public:
   static std::string CharsToBase64String(const List<unsigned char>& input);
   static uint32_t GetUInt32FromCharBigendian(const List<unsigned char>& input);
-  static void GetUInt32FromCharBigendian(const List<unsigned char>& input, List<uint32_t>& output);
+  static void GetUInt32FromCharBigendianPadLastIntWithZeroes
+  (const List<unsigned char>& input, List<uint32_t>& output);
   static void ConvertUint32ToUcharBigendian(const List<uint32_t>& input, List<unsigned char>& output);
   static bool StringBase64ToBitStream(const std::string& input, List<unsigned char>& output, std::stringstream* comments=0);
 

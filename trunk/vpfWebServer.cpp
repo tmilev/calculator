@@ -618,8 +618,15 @@ void WebWorker::SendAllBytes()
   }
   theLog << "Sending " << this->remainingBytesToSend.size << " bytes in chunks of: " << logger::endL;
   //  theLog << "\r\nIn response to: " << this->theMessage;
+  double startTime=onePredefinedCopyOfGlobalVariables.GetElapsedSeconds();
   while (this->remainingBytesToSend.size>0)
-  { int numBytesSent=send
+  { if (onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-startTime>180)
+    { theLog << "WebWorker::SendAllBytes failed: more than 180 seconds have elapsed. "
+      << logger::endL;
+      theReport.SetStatus("WebWorker::SendAllBytes - continue ...");
+      return;
+    }
+    int numBytesSent=send
     (this->connectedSocketID, &this->remainingBytesToSend[0], this->remainingBytesToSend.size,0);
     if (numBytesSent<0)
     { theLog << "WebWorker::SendAllBytes failed. Error: "

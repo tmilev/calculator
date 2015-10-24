@@ -58,7 +58,7 @@
 		<Unit filename="vpfCalculatorMain.cpp" />
 		<Unit filename="vpfCharacters.cpp" />
 		<Unit filename="vpfCharacters_CalculatorInterface.cpp" />
-		<Unit filename="vpfCrypo.cpp" />
+		<Unit filename="vpfCrypto.cpp" />
 		<Unit filename="vpfFiniteFields.cpp" />
 		<Unit filename="vpfFiniteFields.h" />
 		<Unit filename="vpfGraph.cpp" />

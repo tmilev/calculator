@@ -1011,12 +1011,6 @@ bool Calculator::RecursionDepthExceededHandleRoughly(const std::string& addition
   return true;
 }
 
-bool Calculator::innerCrash(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrash");
-  crash << "<hr>This is a test of the crashing mechanism of the calculator. Are log files created correctly? Check the /output/ directory." << crash;
-  return output.AssignValue((std::string)"Crashed succesfully", theCommands);
-}
-
 bool Calculator::CheckConsistencyAfterInitializationExpressionStackEmpty()
 { this->theExpressionContainer.GrandMasterConsistencyCheck();
   this->EvaluatedExpressionsStack.GrandMasterConsistencyCheck();

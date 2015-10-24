@@ -20,7 +20,11 @@ void Calculator::initPredefinedInnerFunctions()
    "TestStandardOutput(\"The quick brown fox jumps over the lazy dog\")", true, false)
    ;
   this->AddOperationInnerHandler
-  ("crash", Calculator::innerCrash, "",
+  ("crash", CalculatorFunctionsGeneral::innerCrash, "",
+   "Crashes the calculator: tests the crashing mechanism (are crash logs properly created, etc.).",
+   "crash(0)");
+  this->AddOperationInnerHandler
+  ("crashListOutOfBounds", CalculatorFunctionsGeneral::innerCrashByListOutOfBounds, "",
    "Crashes the calculator: tests the crashing mechanism (are crash logs properly created, etc.).",
    "crash(0)");
   this->AddOperationInnerHandler

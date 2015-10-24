@@ -190,6 +190,7 @@ bool Crypto::StringBase64ToBitStream(const std::string& input, List<unsigned cha
   return true;
 }
 
+
 void Crypto::ConvertBitStreamToString(const List<unsigned char>& input, std::string& output)
 { MacroRegisterFunctionWithName("Crypto::ConvertBitStreamToString");
   output.clear();
@@ -276,6 +277,21 @@ void Crypto::convertUint64toBigendianStringAppendResult(uint64_t& input, std::st
   outputAppend.push_back((unsigned char) ((input/65536)%256 ));
   outputAppend.push_back((unsigned char) ((input/256)%256 ));
   outputAppend.push_back((unsigned char)  (input%256 ));
+}
+
+void Crypto::GetUInt32FromCharBigendianPadLastIntWithZeroes(const List<unsigned char>& input, List<uint32_t>& output)
+{ MacroRegisterFunctionWithName("Crypto::GetUInt32FromCharBigendianPadLastIntWithZeroes");
+  List<unsigned char> theConvertor;
+  theConvertor.SetSize(4);
+  int finalSize=input.size/4;
+  if (input.size%4!=0)
+    finalSize++;
+  output.SetSize(finalSize);
+  for (int i=0; i<output.size; i++)
+  { for (int j=0; j<4; j++)
+      theConvertor[j]= (i*4+j<input.size) ? input[i*4+j] : 0;
+    output[i]=Crypto::GetUInt32FromCharBigendian(theConvertor);
+  }
 }
 
 uint32_t Crypto::GetUInt32FromCharBigendian(const List<unsigned char>& input)

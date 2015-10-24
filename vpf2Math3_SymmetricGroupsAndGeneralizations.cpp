@@ -1031,8 +1031,17 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition& positive, 
   // the next two things should be done in parallel.  How can I make that happen?
   positive.SpechtModuleMatricesOfTranspositionsjjplusone(pozm);
   negative.SpechtModuleMatricesOfTranspositionsjjplusone(negm);
-  out.ownerGroup = this;
-  out.generatorS.SetSize(this->generators.size);
+
+  List<ElementHyperoctahedralGroup> subgens;
+  subgens = this->generators;
+  if(pozm.size + negm.size != this->generators.size / 2)
+    subgens.RemoveIndexShiftDown(pozm.size);
+  Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup> PxM;
+  PxM.initFromGroupAndGenerators(*this, subgens);
+  PxM.CosetRepresentativeEnumerator = HyperoctahedralGroup::ParabolicSubgroupCosetRepresentativeEnumerator;
+  GroupRepresentation<Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>, Rational> pxmr;
+  pxmr.ownerGroup = &PxM;
+  pxmr.generatorS.SetSize(PxM.generatorS.size);
   Matrix<Rational> hid, kid;
   if(pozm.size == 0)
     hid.MakeIdMatrix(1);
@@ -1044,19 +1053,16 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition& positive, 
     kid.MakeID(negm[0]);
   int i=0;
   for(int pi=0; pi<pozm.size; i++, pi++)
-    out.generatorS[i].AssignTensorProduct(pozm[pi], kid);
-  if(pozm.size + negm.size != this->generators.size / 2)
-  { out.generatorS[i].AssignTensorProduct(hid, kid);
-    i++;
-  }
+    pxmr.generatorS[i].AssignTensorProduct(pozm[pi], kid);
   for(int ni=0; ni<negm.size; i++, ni++)
-    out.generatorS[i].AssignTensorProduct(hid,negm[ni]);
+    pmxr.generatorS[i].AssignTensorProduct(hid,negm[ni]);
   for(int psi=0; psi<positive.n; i++, psi++)
-    out.generatorS[i].AssignTensorProduct(hid,kid);
+    pxmr.generatorS[i].AssignTensorProduct(hid,kid);
   for(int nsi=0; nsi<negative.n; i++, nsi++)
-  { out.generatorS[i].AssignTensorProduct(hid,kid);
-    out.generatorS[i] *= -1;
+  { pxmr.generatorS[i].AssignTensorProduct(hid,kid);
+    pxmr.generatorS[i] *= -1;
   }
+  PxM.InduceRepresentation(pxmr,out);
   std::stringstream ids;
   ids << negative << ", " << positive;
   out.identifyingString = ids.str();

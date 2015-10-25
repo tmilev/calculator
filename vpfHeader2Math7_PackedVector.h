@@ -383,7 +383,6 @@ void AnotherWeylGroup<scalar, templateVector>::GetSignCharacter(Vector<Rational>
   }
 }
 
-
 // there are like 3 copies of this function with slightly different argument types
 template <typename scalar, typename templateVector>
 Rational AnotherWeylGroup<scalar, templateVector>::GetHermitianProduct(const Vector<Rational>& X1, const Vector<Rational>& X2) const
@@ -486,7 +485,7 @@ List<ClassFunction<WeylGroup::WeylGroupBase, Rational> > ComputeCharacterTable(s
   for(int i=0; i<spaces.size; i++)
   { Rational x = chars[i].InnerProduct(chars[i]);
     int x2 = x.GetDenominator().GetUnsignedIntValueTruncated();
-    x2 = sqrt(x2);
+    x2 = FloatingPoint::sqrt(x2);
     chars[i] *= x2;
     if(chars[i][0] < 0)
       chars[i] *= -1;

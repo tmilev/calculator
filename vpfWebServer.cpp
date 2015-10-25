@@ -672,6 +672,7 @@ bool WebWorker::ReceiveAll()
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO,(void*)(&tv), sizeof(timeval));
   int numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
 //  std::cout << "Got thus far 11" << std::endl;
+  double numSecondsAtStart=onePredefinedCopyOfGlobalVariables.GetElapsedSeconds();
   if (numBytesInBuffer<0 || numBytesInBuffer>(signed)bufferSize)
   { std::stringstream out;
     out << "Socket::ReceiveAll on socket " << this->connectedSocketID << " failed. Error: "
@@ -703,7 +704,7 @@ bool WebWorker::ReceiveAll()
     this->displayUserInput=this->error;
     return false;
   }
-  std::cout << "Debug code here!!!";
+//  std::cout << "Debug code here!!!";
 /*  if (this->mainArgumentRAW!="")
   { std::stringstream errorstream;
     errorstream << "Content-length equals: " << this->ContentLength
@@ -721,7 +722,13 @@ bool WebWorker::ReceiveAll()
   this->remainingBytesToSend.SetSize(0);
   std::string bufferString;
   while ((signed) this->mainArgumentRAW.size()<this->ContentLength)
-  { numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
+  { if (onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-numSecondsAtStart>180)
+    { this->error= "Receiving bytes timed out (180 seconds).";
+      theLog << this->error << logger::endL;
+      this->displayUserInput=this->error;
+      return false;
+    }
+    numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
     if (numBytesInBuffer==0)
     { this->error= "While trying to fetch message-body, received 0 bytes. " +
       this->parent->ToStringLastErrorDescription();

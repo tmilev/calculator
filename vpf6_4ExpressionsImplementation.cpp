@@ -42,8 +42,8 @@ Expression operator-(const Expression& left, const Expression& right)
 //the following template specialization funcitons must appear
 //here and nowhere else (discovered through extremely painful experimentation).
 
-template<>
-typename List<Expression>::OrderLeftGreaterThanRight
+template < >
+List<Expression>::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<Expression>()
 { return 0;
 }

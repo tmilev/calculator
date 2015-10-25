@@ -269,20 +269,21 @@ void Calculator::initPredefinedInnerFunctions()
    "Creates a built-in rational function.",
    "MakeRationalFunction{}(x_1+MakeRationalFunction{}x_1+x_2)", true, false, "CalculatorConversions::innerRationalFunction");
   this->AddOperationInnerHandler
-  ("MatrixRationals", this->innerMatrixRational,"",
+  ("MakeMatrix", CalculatorConversions::innerMakeMatrix,"",
    "Creates an internal c++ matrix structure from double list of rationals. \
    ", "s_1=MatrixRationals{}((-1,-1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1));\
-   \ns_2=MatrixRationals{}((1,0,0,0), (-1,-1,-1,0), (0,0,1,0), (0,0,0,1)); \
-   \ns_3=MatrixRationals{}((1,0,0,0), (0,1,0,0), (0,-2,-1,-1), (0,0,0,1)); \
-   \ns_4=MatrixRationals{}((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,-1,-1)); ", true, false, "this->innerMatrixRational");
+   \ns_2=MakeMatrix{}((1,0,0,0), (-1,-1,-1,0), (0,0,1,0), (0,0,0,1)); \
+   \ns_3=MakeMatrix{}((1,0,0,0), (0,1,0,0), (0,-2,-1,-1), (0,0,0,1)); \
+   \ns_4=MakeMatrix{}((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,-1,-1)); ", true, false, "this->innerMatrixRational");
   this->AddOperationInnerHandler
-  ("MatrixRationalsTensorForm", this->innerMatrixRationalTensorForm,"",
-   "Same as MatrixRationals but uses different c++ implementation (class MatrixTensor instead of class Matrix). \
-   ", "s_1=MatrixRationalsTensorForm{}((-1,-1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)); ");
+  ("MakeMatrixTensorForm", CalculatorConversions::innerMatrixRationalTensorForm,"",
+   "Same as MakeMatrix but uses different c++ implementation (class MatrixTensor instead of class Matrix). \
+   ", "s_1=MakeMatrixTensorForm{}((-1,-1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)); ", true, false,
+   "CalculatorConversions::innerMatrixRationalTensorForm");
   this->AddOperationInnerHandler
-  ("MatrixRFs", CalculatorFunctionsGeneral::innerMatrixRationalFunction,"",
+  ("MakeMatrixRFs", CalculatorConversions::innerMatrixRationalFunction,"",
    "Creates an internal c++ matrix structure from double list of rational functions. \
-   ", "s_1=MatrixRFs{}((1-t, 2), (3, 2-t))");
+   ", "s_1=MatrixRFs{}((1-t, 2), (3, 2-t))", true, false, "CalculatorConversions::innerMatrixRationalFunction");
   this->AddOperationInnerHandler
   ("FourierTransformDO", CalculatorFunctionsGeneral::innerFourierTransformEWA, "",
    "Fourier-transforms an element of a weyl algebra. Multiplies each monomial term of odd total degree by -1 \
@@ -416,7 +417,7 @@ void Calculator::initPredefinedInnerFunctions()
   ("IsOuterAuto", CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup, "",
    "Checks if element is outer automorphism of a root system. First argument = type. \
    Second argument = matrix linear operator corresponding written in simple basis. ",
-   "A=MatrixRationals\
+   "A=MakeMatrix\
 ((1, 0, 0, 0, 0, -1),\
 (0, 0, 0, 0, 1, -2),\
 (0, 0, 1, 0, 0, -2),\
@@ -439,9 +440,9 @@ void Calculator::initPredefinedInnerFunctions()
    Generates a finite multiplicatively closed set of at most upper_bound elements, \
    or returns error indicating the multiplicatively closed \
    set is larger than the upper bound.",
-   "s_1=MatrixRationals{}((-1 , 1 , 0),(0 , 1 , 0),(0 , 0 , 1));\
-    \ns_2=MatrixRationals{}((1 , 0 , 0),(1 , -1 , 1),(0 , 0 , 1));\
-    \ns_3=MatrixRationals{}((1 , 0 , 0),(0 , 1 , 0),(0 , 2 , -1));\
+   "s_1=MakeMatrix{}((-1 , 1 , 0),(0 , 1 , 0),(0 , 0 , 1));\
+    \ns_2=MakeMatrix{}((1 , 0 , 0),(1 , -1 , 1),(0 , 0 , 1));\
+    \ns_3=MakeMatrix{}((1 , 0 , 0),(0 , 1 , 0),(0 , 2 , -1));\
     \nGenerateFiniteMultiplicativelyClosedSet{}(48, s_1, s_2, s_3);", true, false)
    ;
   this->AddOperationInnerHandler
@@ -495,7 +496,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("MinPoly", CalculatorFunctionsGeneral::innerMinPolyMatrix, "",
    "Computes the minimal polynomial of a matrix, provided that the matrix is not too large.",
-   "A=MatrixRationals{}((0,1), (-1,0)); p=MinPoly{}A", true, false)
+   "A=MakeMatrix{}((0,1), (-1,0)); p=MinPoly{}A", true, false)
    ;
   this->AddOperationInnerHandler
   ("CharPoly", CalculatorFunctionsGeneral::innerCharPolyMatrix, "",
@@ -1180,11 +1181,11 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("InvertMatrix", CalculatorFunctionsGeneral::innerInvertMatrix, "",
    "Inverts a matrix of rationals if invertible, in any other case generates an error. ",
-   "X=MatrixRationals((1,2,1), (1,0,1), (-1,1,0)); InvertMatrix X- X^{-1}");
+   "X=MakeMatrix((1,2,1), (1,0,1), (-1,1,0)); InvertMatrix X- X^{-1}");
   this->AddOperationInnerHandler
   ("Trace", CalculatorFunctionsGeneral::innerTrace, "",
    "Gets trace of a square matrix. ",
-   "X=MatrixRationals((1,2,1), (1,0,1), (-1,1,0)); Trace X");
+   "X=MakeMatrix((1,2,1), (1,0,1), (-1,1,0)); Trace X");
   this->AddOperationInnerHandler
   ("Reverse", this->innerReverseOrdeR, "",
    "Reverses order of elements. This operation will reverse products, orderes of lists, etc. \
@@ -1701,7 +1702,7 @@ void Calculator::initPredefinedStandardOperations()
   ("+", CalculatorFunctionsBinaryOps::innerAddMatrixRationalToMatrixRational,
    this->opMatRat(), this->opMatRat(),
    "Adds two matrices.",
-   " A=MatrixRationals{}((5, 8), (3, 5)); A*A-A;"
+   " A=MakeMatrix{}((5, 8), (3, 5)); A*A-A;"
    , true, false, "CalculatorFunctionsBinaryOps::innerAddMatrixRationalToMatrixRational");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs,
@@ -1713,7 +1714,7 @@ void Calculator::initPredefinedStandardOperations()
   ("+", CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor,
    this->opMatTensorRat(), this->opMatTensorRat(),
    "Adds two matrices.",
-   " A=MatrixRationalsTensorForm{}((5, 8), (3, 5)); 3A*A-A;"
+   " A=MakeMatrixTensorForm{}((5, 8), (3, 5)); 3A*A-A;"
    , true, false, "CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor");
 
   this->AddOperationOuterHandler
@@ -1860,7 +1861,7 @@ void Calculator::initPredefinedStandardOperations()
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational,
    this->opMatRat(), this->opMatRat(),
    "Multiplies matrix rational by matrix rational. ",
-   "M=MatrixRationals{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational");
+   "M=MakeMatrix{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF,
    this->opRational(), this->opMatRF(),
@@ -1889,17 +1890,17 @@ void Calculator::initPredefinedStandardOperations()
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor,
    this->opMatTensorRat(), this->opMatTensorRat(),
    "Multiplies matrix rational by matrix tensor. ",
-   "M=MatrixRationalsTensorForm{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor");
+   "M=MakeMatrixTensorForm{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational,
    this->opRational(), this->opMatRat(),
    "Multiplies rational by matrix rational. ",
-   "M=MatrixRationals{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational");
+   "M=MakeMatrix{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor,
    this->opRational(), this->opMatTensorRat(),
    "Multiplies rational by matrix tensor form. ",
-   "M=MatrixRationalsTensorForm{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor");
+   "M=MakeMatrixTensorForm{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor");
    this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps,
    this->opWeylGroupVirtualRep(), this->opWeylGroupVirtualRep(),
@@ -2186,8 +2187,8 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerMatRatBySmallInteger, this->opMatRat(), this->opRational(),
    "Raises matrix rationals to small integer power. ",
-   "X=MatrixRationals((0,1),(1,1)); q=100; \nX^q; \nFibonacci{}0=1; \nFibonacci{}1=1; \nFibonacci{}{{n}}:if((n>0)* (IsInteger{}n))=Fibonacci{}(n-1)+Fibonacci{}(n-2); \
-   \nMatrixRationals((Fibonacci{}(q-2), Fibonacci{}(q-1)), (Fibonacci{}q-1, Fibonacci{}q))",
+   "X=MakeMatrix((0,1),(1,1)); q=100; \nX^q; \nFibonacci{}0=1; \nFibonacci{}1=1; \nFibonacci{}{{n}}:if((n>0)* (IsInteger{}n))=Fibonacci{}(n-1)+Fibonacci{}(n-2); \
+   \nMakeMatrix((Fibonacci{}(q-2), Fibonacci{}(q-1)), (Fibonacci{}q-1, Fibonacci{}q))",
    true, false, "CalculatorFunctionsBinaryOps::innerPowerMatRatBySmallInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger, this->opPolyOverANs(), this->opRational(),
@@ -2282,7 +2283,7 @@ void Calculator::initPredefinedStandardOperations()
    this->opMatRat(), this->opMatRat(),
    "Tensor product of two matrices.",
     "P=((0 , 2 ),(1 , 0)); Q=((0 , 3 ),(1 , 0)); \
-    \nX=MatrixRationals{}P; Y=MatrixRationals{}Q; \
+    \nX=MakeMatrix{}P; Y=MatrixRationals{}Q; \
     \nZ=MatrixRationalsTensorForm{}P; W=MatrixRationalsTensorForm{}Q; \
     X\\otimes Y; Z\\otimes W", true);
   this->AddOperationBinaryInnerHandlerWithTypes

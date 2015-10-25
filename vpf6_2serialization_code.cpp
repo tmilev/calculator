@@ -932,3 +932,61 @@ bool CalculatorConversions::innerRationalFunction(Calculator& theCommands, const
   theRF.MakeOneLetterMoN(0, 1, theCommands.theGlobalVariableS);
   return output.AssignValueWithContext(theRF, theContext, theCommands);
 }
+
+bool CalculatorConversions::innerMatrixRational(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorConversions::innerMatrixRational");
+//  stOutput << "ere i am, jh";
+  Matrix<Rational> outputMat;
+  if (input.IsOfType<Matrix<Rational> >())
+  { output=input;
+    return true;
+  }
+  if (!theCommands.GetMatriXFromArguments(input, outputMat, 0, -1, 0))
+    return theCommands << "<br>Failed to get matrix of rationals. ";
+  return output.AssignValue(outputMat, theCommands);
+}
+
+bool CalculatorConversions::innerMatrixRationalTensorForm(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerMatrixRationalTensorForm");
+  MatrixTensor<Rational> outputMat;
+  output=input;
+  if (!output.IsOfType<Matrix<Rational> >())
+    if (!CalculatorConversions::innerMatrixRational(theCommands, input, output))
+      return false;
+  if (!output.IsOfType<Matrix<Rational> >())
+    return false;
+  outputMat=output.GetValue<Matrix<Rational> >();
+  return output.AssignValue(outputMat, theCommands);
+}
+
+bool CalculatorConversions::innerMakeMatrix(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorConversions::innerMakeMatrix");
+  if (CalculatorConversions::innerMatrixRational(theCommands, input, output))
+    return true;
+  if (CalculatorConversions::innerMatrixAlgebraic(theCommands, input, output))
+    return true;
+  return false;
+}
+
+bool CalculatorConversions::innerMatrixAlgebraic(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorConversions::innerMatrixAlgebraic");
+//  stOutput << "ere i am, jh";
+  Matrix<AlgebraicNumber> outputMat;
+  if (input.IsOfType<Matrix<AlgebraicNumber> >())
+  { output=input;
+    return true;
+  }
+  if (!theCommands.GetMatriXFromArguments(input, outputMat, 0, -1, CalculatorConversions::innerAlgebraicNumber))
+    return theCommands << "<br>Failed to get matrix of algebraic numbers. ";
+  return output.AssignValue(outputMat, theCommands);
+}
+
+bool CalculatorConversions::innerMatrixRationalFunction(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorConversions::innerMatrixRationalFunction");
+  Matrix<RationalFunctionOld> outputMat;
+  Expression ContextE;
+  if (!theCommands.GetMatriXFromArguments(input, outputMat, &ContextE, -1, CalculatorConversions::innerRationalFunction))
+    return theCommands << "<hr>Failed to get matrix of rational functions. ";
+//  stOutput << "<hr>And the context is: " << ContextE.ToString();
+  return output.AssignValueWithContext(outputMat, ContextE, theCommands);
+}

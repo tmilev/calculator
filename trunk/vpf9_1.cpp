@@ -173,13 +173,13 @@ void GlobalVariables::initOutputReportAndCrashFileNames
 }
 
 template<>
-typename List<Weight<RationalFunctionOld> >::OrderLeftGreaterThanRight
+List<Weight<RationalFunctionOld> >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<Weight<RationalFunctionOld> >()
 { return 0;
 }
 
 template<>
-typename List<Weight<Rational> >::OrderLeftGreaterThanRight
+List<Weight<Rational> >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<Weight<Rational> >()
 { return 0;
 }

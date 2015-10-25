@@ -1758,6 +1758,7 @@ int WebServer::Run()
   thePorts.AddOnTop("8080");
   thePorts.AddOnTop("8081");
   thePorts.AddOnTop("8082");
+  thePorts.AddOnTop("8155");
 
   if (this->flagTryToKillOlderProcesses)
     this->Restart();

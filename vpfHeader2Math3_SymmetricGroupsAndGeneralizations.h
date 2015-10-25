@@ -710,18 +710,28 @@ class SimpleFiniteGroup
 { public:
   List<elementSomeGroup> generators;
   HashedList<elementSomeGroup> theElements;
-  bool haveElements = false;
-  bool (*AreConjugateByFormula)(const elementSomeGroup& x, const elementSomeGroup& y) = NULL;
-  void (*ComputeCCSizesAndRepresentativesByFormula)(void* G) = NULL;
-  void (*GetWordByFormula)(void* G, const elementSomeGroup& g, List<int>& word) = NULL;
-  int (*GetSizeByFormula)(void* G) = NULL;
+  bool haveElements;
+  bool (*AreConjugateByFormula)(const elementSomeGroup& x, const elementSomeGroup& y);
+  void (*ComputeCCSizesAndRepresentativesByFormula)(void* G);
+  void (*GetWordByFormula)(void* G, const elementSomeGroup& g, List<int>& word);
+  int (*GetSizeByFormula)(void* G);
   List<ConjugacyClassR2<elementSomeGroup> > conjugacyClasseS;
-  bool flagCCsComputed = false;
+  bool flagCCsComputed;
   Matrix<int> generatorCommutationRelations;
   List<List<int> > theWords;
-  bool haveWords = false;
+  bool haveWords;
 
   List<GroupRepresentation<SimpleFiniteGroup<elementSomeGroup>, Rational> > irreps;
+
+  SimpleFiniteGroup()
+  { this->AreConjugateByFormula=0;
+    this->ComputeCCSizesAndRepresentativesByFormula=0;
+    this->GetWordByFormula=0;
+    this->GetSizeByFormula=0;
+    this->flagCCsComputed=false;
+    this->haveElements=false;
+    this->haveWords=false;
+  }
 
   void AddGenDontCompute(const elementSomeGroup& gen) { this->generators.AddOnTop(gen); }
   void ComputeAllElements(bool andWords = false);

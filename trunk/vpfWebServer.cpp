@@ -1718,9 +1718,9 @@ void WebServer::Restart()
   std::string theCommand="killall "+
   onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath + " \r\n./";
   if (this->flagPort8155)
-    onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath += " server8155 nokill";
+    theCommand+=onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath + " server8155 nokill";
   else
-    onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath += " server nokill";
+    theCommand+=onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath + " server nokill";
   system(theCommand.c_str()); //kill any other running copies of the calculator.
 }
 

@@ -266,7 +266,7 @@ class ElementHyperoctahedralGroup
   bool operator>(const ElementHyperoctahedralGroup& right) const;
   unsigned int HashFunction() const;
   static  unsigned int HashFunction(const ElementHyperoctahedralGroup& in)
-                                      { return in.HashFunction();};
+                                      { return in.HashFunction();}
 
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
@@ -283,7 +283,7 @@ class ConjugacyClassR2
 { public:
   elementSomeGroup representative;
   int size;
-  bool haveRepresentativeWord = false;
+  bool haveRepresentativeWord;
   List<int> representativeWord;
   // the other members are not necessarily meaningful
   int representativeIndex;
@@ -293,6 +293,7 @@ class ConjugacyClassR2
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
   std::string ToString() const;
+  ConjugacyClassR2(){this->haveRepresentativeWord=false;}
 };
 
 template <typename object>

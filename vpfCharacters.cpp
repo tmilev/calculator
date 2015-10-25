@@ -8,7 +8,7 @@ static ProjectInformationInstance ProjectInfoVpfCharacters(__FILE__, "Finite gro
 extern FormatExpressions consoleFormat;
 
 template<>
-typename List<ElementWeylGroup<WeylGroup> >::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<ElementWeylGroup<WeylGroup> >()
+List<ElementWeylGroup<WeylGroup> >::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<ElementWeylGroup<WeylGroup> >()
 { return 0;
 }
 

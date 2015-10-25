@@ -8,7 +8,7 @@
 static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceCPP(__FILE__, "Weyl group calculator interface. Work in progress by Thomas & Todor. ");
 
 template<>
-typename List<ClassFunction<WeylGroup::WeylGroupBase, Rational> >::OrderLeftGreaterThanRight
+List<ClassFunction<WeylGroup::WeylGroupBase, Rational> >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<ClassFunction<WeylGroup::WeylGroupBase, Rational> >()
 { return 0;
 }

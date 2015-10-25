@@ -890,71 +890,71 @@ unsigned int Selection::HashFunction() const
 
 //Format expression monomial orders (for the ToString() function follow.
 template<>
-typename List<MonomialP>::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<MonomialP>()
+List<MonomialP>::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<MonomialP>()
 { return this->thePolyMonOrder;
 }
 
 template<>
-typename List<Polynomial<AlgebraicNumber> >::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<Polynomial<AlgebraicNumber> >()
+List<Polynomial<AlgebraicNumber> >::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<Polynomial<AlgebraicNumber> >()
 { return 0;
 }
 
 template<>
-typename List<MonomialVector>::OrderLeftGreaterThanRight
+List<MonomialVector>::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialVector>()
 { return 0;
 }
 
 template<>
-typename List<MonomialWeylAlgebra>::OrderLeftGreaterThanRight
+List<MonomialWeylAlgebra>::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialWeylAlgebra>()
 { return 0;
 }
 
 template<>
-typename List<MonomialUniversalEnveloping<RationalFunctionOld> >::OrderLeftGreaterThanRight
+List<MonomialUniversalEnveloping<RationalFunctionOld> >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialUniversalEnveloping<RationalFunctionOld> >()
 { return 0;
 }
 
 template<>
-typename List<MonomialGeneralizedVerma<RationalFunctionOld> >::OrderLeftGreaterThanRight
+List<MonomialGeneralizedVerma<RationalFunctionOld> >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialGeneralizedVerma<RationalFunctionOld> >()
 { return 0;
 }
 
 template<>
-typename List<ChevalleyGenerator >::OrderLeftGreaterThanRight
+List<ChevalleyGenerator >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<ChevalleyGenerator>()
 { return 0;
 }
 
 template<>
-typename List<MonomialMatrix>::OrderLeftGreaterThanRight
+List<MonomialMatrix>::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialMatrix>()
 { return 0;
 }
 
 template<>
-typename List<MonomialUniversalEnveloping<Rational> >::OrderLeftGreaterThanRight
+List<MonomialUniversalEnveloping<Rational> >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialUniversalEnveloping<Rational> >()
 { return 0;
 }
 
 template<>
-typename List<MonomialTensorGeneralizedVermas<RationalFunctionOld> >::OrderLeftGreaterThanRight
+List<MonomialTensorGeneralizedVermas<RationalFunctionOld> >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialTensorGeneralizedVermas<RationalFunctionOld> >()
 { return 0;
 }
 
 template<>
-typename List<quasiDiffMon>::OrderLeftGreaterThanRight
+List<quasiDiffMon>::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<quasiDiffMon>()
 { return 0;
 }
 
 template<>
-typename List<MonomialUniversalEnveloping<Polynomial<Rational> > >::OrderLeftGreaterThanRight
+List<MonomialUniversalEnveloping<Polynomial<Rational> > >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialUniversalEnveloping<Polynomial<Rational> > >()
 { return 0;
 }

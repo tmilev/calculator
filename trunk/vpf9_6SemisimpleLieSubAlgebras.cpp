@@ -8,7 +8,7 @@
 ProjectInformationInstance ProjectInfoVpfSemisimpleSubalgebras(__FILE__, "Semisimple subalgebras of the semisimple Lie algebras. ");
 
 template<>
-typename List<DynkinSimpleType>::OrderLeftGreaterThanRight
+List<DynkinSimpleType>::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<DynkinSimpleType>()
 { return 0;
 }

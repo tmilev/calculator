@@ -1,4 +1,4 @@
-FEATUREFLAGS=--std=c++11 -pthread -fopenmp
+FEATUREFLAGS=--std=c++0x -pthread -fopenmp
 CFLAGS=-Wall -Wno-address $(FEATUREFLAGS) -c
 LDFLAGS=$(FEATUREFLAGS)
 

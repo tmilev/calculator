@@ -5,12 +5,14 @@
 #include "vpfHeader1General0_General.h"
 #include "vpfHeader2Math0_General.h"
 #include "vpfHeader2Math8_VectorSpace.h"
-#include "vpfHeader2Math4_Graph.h"
+//#include "vpfHeader2Math4_Graph.h"
 
 //To do: move Weyl groups to this file. Eliminate all redundant code and organize nicely.
 
 static ProjectInformationInstance ProjectInfoVpfFiniteGroups(__FILE__, "Header file, finite groups. Work in progress.");
 
+template <typename somegroup, class elementSomeGroup>
+class Subgroup;
 
 template <typename ElementEuclideanDomain>
 struct DivisionResult
@@ -98,10 +100,9 @@ public:
 // void GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& out) const;
 // bool operator==(const elementSomeGroup& right) const;
 // bool operator>(const elementSomeGroup& right) const;
+// the choice of operator> vs operator< is arbitrary.
 // //group elements are not in general comparable, but do something consistent
 // //and reasonable for collating and printing purposes
-// //is there any reason > is used here and < is used elsewhere?  is < strictly
-// //mathematical and > for non-mathematical orderings?
 // unsigned int HashFunction() const;
 //
 // In addition we require an overload:
@@ -804,16 +805,17 @@ public:
   void operator+=(const WeylGroup& other);
 };
 
-template <typename someGroup, typename elementSomeGroup, typename coefficient>
+//template <typename someGroup, typename elementSomeGroup, typename coefficient>
+template <typename someGroup, typename coefficient>
 class GroupRepresentation
 { public:
-  someGroup* ownerGroup = NULL;
+  someGroup* ownerGroup;
   List<Matrix<coefficient> > generatorS;
   ClassFunction<someGroup, coefficient> theCharacteR;
   bool haveCharacter = false;
   std::string identifyingString; // in Python, this would be an anonymous object
 
-  void GetMatrixOfElement(elementSomeGroup& word, Matrix<coefficient>& out);
+//  void GetMatrixOfElement(elementSomeGroup& word, Matrix<coefficient>& out);
 
   void ComputeCharacter();
 
@@ -829,14 +831,14 @@ class GroupRepresentation
   }
 };
 
-template <typename someGroup, typename elementSomeGroup, typename coefficient>
+/*template <typename someGroup, typename elementSomeGroup, typename coefficient>
 GroupRepresentation<someGroup, elementSomeGroup, coefficient>::GetMatrixOfElement(elementSomeGroup &g, Matrix<coefficient> &out)
 { out.MakeID(this->generatorS[0]);
   List<int> word;
   this->ownerGroup->GetWord(g, word);
   for(int i=0; i<word.size; i++)
     out *= this->generatorS[word[i]];
-}
+}*/
 
 template <typename someGroup, typename coefficient>
 void GroupRepresentation<someGroup, coefficient>::ComputeCharacter()
@@ -846,7 +848,9 @@ void GroupRepresentation<someGroup, coefficient>::ComputeCharacter()
   this->theCharacteR.data.SetSize(this->ownerGroup->conjugacyClasseS.size);
   for(int cci=0; cci < this->ownerGroup->conjugacyClasseS.size; cci++)
   { Matrix<coefficient> M;
-    this->GetMatrixOfElement(this->ownerGroup->conjugacyClasseS[cci].representative);
+    M.MakeID(this->generatorS[0]);
+    List<int> ccirWord;
+    //    this->GetMatrixOfElement(this->ownerGroup->conjugacyClasseS[cci].representative);
     this->ownerGroup->GetWord(this->ownerGroup->conjugacyClasseS[cci].representative, ccirWord);
     for(int i=0; i<ccirWord.size; i++)
       M *= this->generatorS[ccirWord[i]];
@@ -1064,12 +1068,12 @@ public:
 template <typename coefficient>
 std::ostream& operator<<(std::ostream& out, const ClassFunction<WeylGroup, coefficient> X);
 
-template <typename elementSomeGroup>
+/*template <typename elementSomeGroup>
 class Coset
 { elementSomeGroup representative;
   List<int> representativeWord;
   List<int> supergroupIndices;
-};
+};*/
 
 
 template <typename somegroup, class elementSomeGroup>
@@ -1079,7 +1083,7 @@ public:
   somegroup *parent;
   List<int> ccRepresentativesPreimages;
   List<int> generatorPreimages;
-  List<Coset> cosets;
+//  List<Coset> cosets;
   Subgroup();
   bool CheckInitialization();
   void init();
@@ -1092,7 +1096,7 @@ public:
   { this->ComputeCCSizesAndRepresentatives(theGlobalVariables);
     this->ComputeCCRepresentativesPreimages(theGlobalVariables);
   }
-  template <typename coefficient>
+/*  template <typename coefficient>
   void QuotientGroupPermutationRepresentation(GroupRepresentation<somegroup, coefficient>& out);
   template <typename coefficient>
   void InduceRepresentation(GroupRepresentation<Subgroup<somegroup, elementSomeGroup>, coefficient>& in,
@@ -1104,8 +1108,10 @@ public:
   bool flagCosetRepresentativesComputed = false;
   void (*CosetRepresentativeEnumerator)(void* H) = NULL;
   bool (*SameCosetAsByFormula)(void* H, elementSomeGroup& g1, elementSomeGroup& g2) = NULL;
+*/
 };
 
+/*
 template <typename somegroup, typename elementSomeGroup>
 void Subgroup<somegroup, elementSomeGroup>::ComputeCosets()
 { if(flagCosetSetsComputed)
@@ -1208,7 +1214,7 @@ void Subgroup<somegroup, elementSomeGroup>::InduceRepresentation
   }
   out.MakeTensorRepresentation(qr,sr);
 }
-
+*/
 
 class SubgroupWeylGroup: public Subgroup<WeylGroup, ElementWeylGroup<WeylGroup> >
 {

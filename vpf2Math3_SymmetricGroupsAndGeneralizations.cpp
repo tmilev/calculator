@@ -1026,7 +1026,7 @@ void HyperoctahedralGroup::MakeHyperoctahedralGroup(int n)
 // Bn ⊃ Bp × Bm, with [34:] missing, we represent [34:] with an identity matrix
 // It is conceivable that this function can be replaced with a geneneric induce function
 // in a subgroup datatype that maps generators to generators.
-void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition& positive, const Partition& negative, GroupRepresentation<SimpleFiniteGroup<ElementHyperoctahedralGroup>, Rational>& out)
+/*void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition& positive, const Partition& negative, GroupRepresentation<SimpleFiniteGroup<ElementHyperoctahedralGroup>, Rational>& out)
 { List<Matrix<Rational> > pozm, negm;
   // the next two things should be done in parallel.  How can I make that happen?
   positive.SpechtModuleMatricesOfTranspositionsjjplusone(pozm);
@@ -1066,10 +1066,11 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition& positive, 
   std::stringstream ids;
   ids << negative << ", " << positive;
   out.identifyingString = ids.str();
-}
+}*/
 
 void HyperoctahedralGroup::AllSpechtModules()
-{ int N = this->GetN();
+{ crash << "not implemented yet" << crash;
+  /*int N = this->GetN();
   for(int p=0; p<=N; p++)
   { List<Partition> nps;
     Partition::GetPartitions(nps,p);
@@ -1079,7 +1080,8 @@ void HyperoctahedralGroup::AllSpechtModules()
       for(int ppi=0; ppi<pps.size; ppi++)
       { GroupRepresentation<SimpleFiniteGroup<ElementHyperoctahedralGroup>, Rational> sm;
         stOutput << "Computing representation {" << nps[npi] << "}, {" << pps[ppi] << "}\n";
-        this->SpechtModuleOfPartititons(pps[ppi],nps[npi],sm);
+        crash << "Code not implemented yet." << crash;
+        //this->SpechtModuleOfPartititons(pps[ppi],nps[npi],sm);
         sm.VerifyRepresentation();
         stOutput << sm << '\n';
         this->irreps.AddOnTop(sm);
@@ -1087,7 +1089,7 @@ void HyperoctahedralGroup::AllSpechtModules()
     }
   }
   this->irreps.QuickSortAscending();
-  stOutput << this->PrettyPrintCharacterTable() << '\n';
+  stOutput << this->PrettyPrintCharacterTable() << '\n';*/
 }
 
 int HyperoctahedralGroup::GetN()

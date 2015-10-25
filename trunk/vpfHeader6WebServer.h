@@ -164,10 +164,12 @@ public:
   int listeningSocketID;
   bool flagTryToKillOlderProcesses;
   ListReferences<WebWorker> theWorkers;
+
   int activeWorker;
   int timeLastExecutableModification;
   List<std::string> theProgressReports;
   bool flagDeallocated;
+  bool flagPort8155;
   WebServer();
   ~WebServer();
   void ReleaseWorkerSideResources();

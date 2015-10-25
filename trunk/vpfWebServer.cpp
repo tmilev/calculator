@@ -1440,6 +1440,7 @@ void WebServer::PipeProgressReportToParentProcess(const std::string& theString)
 WebServer::WebServer()
 { this->flagDeallocated=false;
   this->flagTryToKillOlderProcesses=true;
+  this->flagPort8155=false;
   this->activeWorker=-1;
   this->timeLastExecutableModification=-1;
 }
@@ -1715,8 +1716,11 @@ void WebServer::Restart()
 //sleep(1);
 //execv("/proc/self/exe", exec_argv);
   std::string theCommand="killall "+
-  onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath + " \r\n./" +
-  onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath + " server nokill";
+  onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath + " \r\n./";
+  if (this->flagPort8155)
+    onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath += " server8155 nokill";
+  else
+    onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath += " server nokill";
   system(theCommand.c_str()); //kill any other running copies of the calculator.
 }
 
@@ -1751,10 +1755,11 @@ void fperror_sigaction(int signal)
   exit(0);
 }
 
-
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
   List<std::string> thePorts;
+  if (this->flagPort8155)
+    thePorts.AddOnTop("8155");
   thePorts.AddOnTop("8080");
   thePorts.AddOnTop("8081");
   thePorts.AddOnTop("8082");

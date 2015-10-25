@@ -25,7 +25,10 @@ int main(int argc, char **argv)
   onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer=false;
   if (argc>=2)
   { std::string tempArgument=argv[1];
-    onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer=(tempArgument=="server");
+    onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer=
+    (tempArgument=="server" || tempArgument=="server8155");
+    if (tempArgument=="server8155")
+      theWebServer.flagPort8155=true;
     if (tempArgument=="test")
     { List<std::string> remainingArguments;
       remainingArguments.SetSize(argc-2);

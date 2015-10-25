@@ -744,32 +744,6 @@ bool Calculator::innerDeterminantPolynomial(Calculator& theCommands, const Expre
   return output.AssignValueWithContext(outputPoly, theContext, theCommands);
 }
 
-bool Calculator::innerMatrixRational(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::innerMatrixRational");
-//  stOutput << "ere i am, jh";
-  Matrix<Rational> outputMat;
-  if (input.IsOfType<Matrix<Rational> >())
-  { output=input;
-    return true;
-  }
-  if (!theCommands.GetMatriXFromArguments(input, outputMat, 0, -1, 0))
-    return theCommands << "<br>Failed to get matrix of rationals. ";
-  return output.AssignValue(outputMat, theCommands);
-}
-
-bool Calculator::innerMatrixAlgebraic(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::innerMatrixAlgebraic");
-//  stOutput << "ere i am, jh";
-  Matrix<AlgebraicNumber> outputMat;
-  if (input.IsOfType<Matrix<AlgebraicNumber> >())
-  { output=input;
-    return true;
-  }
-  if (!theCommands.GetMatriXFromArguments(input, outputMat, 0, -1, CalculatorConversions::innerAlgebraicNumber))
-    return theCommands << "<br>Failed to get matrix of rationals. ";
-  return output.AssignValue(outputMat, theCommands);
-}
-
 bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input, Expression& output)
 { Matrix<Expression> theMat;
   output=input;
@@ -777,19 +751,6 @@ bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input
   theCommands.GetMatrixExpressions(output, theMat);
   theMat.Transpose();
   return output.AssignMatrixExpressions(theMat, theCommands);
-}
-
-bool Calculator::innerMatrixRationalTensorForm(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::innerMatrixRationalTensorForm");
-  MatrixTensor<Rational> outputMat;
-  output=input;
-  if (!output.IsOfType<Matrix<Rational> >())
-    if (!theCommands.innerMatrixRational(theCommands, input, output))
-      return false;
-  if (!output.IsOfType<Matrix<Rational> >())
-    return false;
-  outputMat=output.GetValue<Matrix<Rational> >();
-  return output.AssignValue(outputMat, theCommands);
 }
 
 void Plot::operator+=(const Plot& other)

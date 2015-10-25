@@ -640,7 +640,7 @@ Matrix<Rational>& Expression::GetValueNonConst()const
 template < >
 Matrix<AlgebraicNumber>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<Matrix<AlgebraicNumber> >())
-    crash << "This is a programming error: expression not of required type Matrix_Algebraic. The expression equals "
+    crash << "This is a programming error: expression not of required type MatrixAlgebraic. The expression equals "
     << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theMatsAlgebraic.GetElement(this->GetLastChild().theData);
 }
@@ -648,14 +648,14 @@ Matrix<AlgebraicNumber>& Expression::GetValueNonConst()const
 template < >
 MatrixTensor<Rational>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<MatrixTensor<Rational> >())
-    crash << "This is a programming error: expression not of required type MatrixTensor_Rational. The expression equals " << this->ToString() << "." << crash;
+    crash << "This is a programming error: expression not of required type MatrixTensorRational. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theMatTensorRats.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 Matrix<RationalFunctionOld>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<Matrix<RationalFunctionOld> >())
-    crash << "This is a programming error: expression not of required type Matrix_RF. The expression equals " << this->ToString() << "." << crash;
+    crash << "This is a programming error: expression not of required type MatrixRF. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theMatRFs.GetElement(this->GetLastChild().theData);
 }
 

@@ -5610,6 +5610,7 @@ bool CalculatorFunctionsGeneral::innerCrash
   return output.AssignValue((std::string)"Crashed succesfully", theCommands);
 }
 
+#include <vector>
 bool CalculatorFunctionsGeneral::innerCrashByListOutOfBounds
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrashByListOutOfBounds");

@@ -812,11 +812,13 @@ class GroupRepresentation
   someGroup* ownerGroup;
   List<Matrix<coefficient> > generatorS;
   ClassFunction<someGroup, coefficient> theCharacteR;
-  bool haveCharacter = false;
+  bool haveCharacter;
   std::string identifyingString; // in Python, this would be an anonymous object
 
 //  void GetMatrixOfElement(elementSomeGroup& word, Matrix<coefficient>& out);
-
+  GroupRepresentation()
+  { this->haveCharacter=false;
+  }
   void ComputeCharacter();
 
   bool operator>(GroupRepresentation& right);

@@ -721,9 +721,7 @@ class SimpleFiniteGroup
   List<List<int> > theWords;
   bool haveWords = false;
 
-  // This is mathematically unsound.  However, since c++ is not an object oriented
-  // language (much less so than c), I can't think of a way to make this generic
-  List<GroupRepresentation<SimpleFiniteGroup, Rational> > irreps;
+  List<GroupRepresentation<SimpleFiniteGroup<elementSomeGroup>, Rational> > irreps;
 
   void AddGenDontCompute(const elementSomeGroup& gen) { this->generators.AddOnTop(gen); }
   void ComputeAllElements(bool andWords = false);
@@ -769,7 +767,6 @@ class PermutationGroup: public SimpleFiniteGroup<PermutationR2>
 
   template <typename coefficient>
   void SpechtModuleOfPartition(const Partition& p, GroupRepresentation<SimpleFiniteGroup<PermutationR2>, coefficient>& rep);
-  // haha, whatever this means
   template <typename somestream>
   somestream& IntoStream(somestream& out);
   std::string ToString();
@@ -797,7 +794,9 @@ class HyperoctahedralGroup: public SimpleFiniteGroup<ElementHyperoctahedralGroup
   //bool AreConjugate(const ElementHyperoctahedralGroup& x, const ElementHyperoctahedralGroup& y);
 
   void AllSpechtModules();
-  void SpechtModuleOfPartititons(const Partition& positive, const Partition& negative, GroupRepresentation<SimpleFiniteGroup<ElementHyperoctahedralGroup>, Rational>& out);
+//  void SpechtModuleOfPartititons
+//  (const Partition& positive, const Partition& negative,
+//   GroupRepresentation<SimpleFiniteGroup<ElementHyperoctahedralGroup>, Rational>& out);
 
 
   template <typename somestream>
@@ -1362,8 +1361,8 @@ std::string SimpleFiniteGroup<elementSomeGroup>::ToString() const
 }
 
 template <typename coefficient>
-void PermutationGroup::SpechtModuleOfPartition(const Partition& p,
-                                               GroupRepresentation<SimpleFiniteGroup<PermutationR2>, coefficient>& rep)
+void PermutationGroup::SpechtModuleOfPartition
+(const Partition& p, GroupRepresentation<SimpleFiniteGroup<PermutationR2>, coefficient>& rep)
 { p.SpechtModuleMatricesOfPermutations(rep.generatorS, this->generators);
   rep.ownerGroup = this;
 }
@@ -1419,7 +1418,7 @@ std::ostream& operator<<(std::ostream& out, const ConjugacyClassR2<elementSomeGr
 }
 
 template <typename someGroup, typename coefficient>
-bool GroupRepresentation<someGroup,coefficient>::VerifyRepresentation()
+bool GroupRepresentation<someGroup, coefficient>::VerifyRepresentation()
 { bool badrep = false;
   if(this->generatorS.size != this->ownerGroup->generatorCommutationRelations.NumRows)
     this->ownerGroup->ComputeGeneratorCommutationRelations();

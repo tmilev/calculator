@@ -172,7 +172,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateSqrt, "",
    "Differentiation - square root function.  ",
-   "d/dx(sqrt(x));");
+   "d/dx(sqrt(x));", true, false, "CalculatorFunctionsGeneral::innerDifferentiateSqrt");
 
 
   //the function integrating the building blocks must come in the exact order below:

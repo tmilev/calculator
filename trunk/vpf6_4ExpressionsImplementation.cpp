@@ -1825,7 +1825,13 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseLatex=true;
     contextFormat.GetElement().flagUseHTML=false;
-    out << "innerMatrixRational{}(" << this->GetValue<Matrix<Rational> >().ToString(&contextFormat.GetElement()) << ")";
+    out << "MakeMatrix{}(" << this->GetValue<Matrix<Rational> >().ToString(&contextFormat.GetElement()) << ")";
+    result=true;
+  } else if (this->IsOfType<Matrix<AlgebraicNumber> >())
+  { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    contextFormat.GetElement().flagUseLatex=true;
+    contextFormat.GetElement().flagUseHTML=false;
+    out << "MakeMatrix{}(" << this->GetValue<Matrix<AlgebraicNumber> >().ToString(&contextFormat.GetElement()) << ")";
     result=true;
   } else if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());

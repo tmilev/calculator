@@ -1204,19 +1204,19 @@ public:
   { return this->theAtoms.GetIndexIMustContainTheObject("\\int");
   }
   int opMatAlgebraic()
-  { return this->theAtoms.GetIndexIMustContainTheObject("Matrix_Algebraic");
+  { return this->theAtoms.GetIndexIMustContainTheObject("MatrixAlgebraic");
   }
   int opMatRat()
   { return this->theAtoms.GetIndexIMustContainTheObject("Matrix_Rational");
   }
   int opMatTensorRat()
-  { return this->theAtoms.GetIndexIMustContainTheObject("MatrixTensor_Rational");
+  { return this->theAtoms.GetIndexIMustContainTheObject("MatrixTensorRational");
   }
   int opWeylGroupRep()
   { return this->theAtoms.GetIndexIMustContainTheObject("WeylGroupRep");
   }
   int opMatRF()
-  { return this->theAtoms.GetIndexIMustContainTheObject("Matrix_RF");
+  { return this->theAtoms.GetIndexIMustContainTheObject("MatrixRF");
   }
   int opString()
   { return this->theAtoms.GetIndexIMustContainTheObject("string");
@@ -1433,9 +1433,6 @@ public:
   static bool CollectSummands(Calculator& theCommands, const Expression& input, MonomialCollection<Expression, Rational>& outputSum);
   static bool outerTensor(Calculator& theCommands, const Expression& input, Expression& output);
   static bool StandardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMatrixAlgebraic(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMatrixRational(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMatrixRationalTensorForm(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerMinus(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerEqualEqual(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerGreaterThan(Calculator& theCommands, const Expression& input, Expression& output);
@@ -1694,6 +1691,13 @@ public:
   static bool innerRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerElementUE
   (Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra& inputOwner);
+
+  static bool innerMakeMatrix(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMatrixAlgebraic(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMatrixRational(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMatrixRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMatrixRationalTensorForm(Calculator& theCommands, const Expression& input, Expression& output);
+
   ////////////////////Conversion to expression tree/////////////////////////////////////
   //converstion from type to expression tree.
   template <class coefficient>

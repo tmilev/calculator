@@ -274,7 +274,7 @@ void Calculator::initPredefinedInnerFunctions()
    ", "s_1=MatrixRationals{}((-1,-1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1));\
    \ns_2=MakeMatrix{}((1,0,0,0), (-1,-1,-1,0), (0,0,1,0), (0,0,0,1)); \
    \ns_3=MakeMatrix{}((1,0,0,0), (0,1,0,0), (0,-2,-1,-1), (0,0,0,1)); \
-   \ns_4=MakeMatrix{}((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,-1,-1)); ", true, false, "this->innerMatrixRational");
+   \ns_4=MakeMatrix{}((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,-1,-1)); ", true, false, "CalculatorConversions::innerMatrixRational");
   this->AddOperationInnerHandler
   ("MakeMatrixTensorForm", CalculatorConversions::innerMatrixRationalTensorForm,"",
    "Same as MakeMatrix but uses different c++ implementation (class MatrixTensor instead of class Matrix). \

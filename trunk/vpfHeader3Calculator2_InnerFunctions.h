@@ -164,7 +164,6 @@ public:
   static bool innerParabolicWeylGroupsBruhatGraph(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAllPartitions(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDeterminant(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMatrixRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPrintGenVermaModule(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWriteGenVermaModAsDiffOperatorUpToLevel(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerHWV(Calculator& theCommands, const Expression& input, Expression& output);

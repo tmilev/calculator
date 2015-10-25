@@ -671,12 +671,17 @@ class GeneratorElementsSnxSnOnIndicesAndIndices
 // sample element class.  Functional, verifiable documentation
 // give it a multiplication function, feed it to SimpleFiniteGroup, and...
 class ElementFiniteGroup
-{ void* data = NULL;
+{ void* data;
 
-  void* (*mul)(void*, void*) = NULL;
+  void* (*mul)(void*, void*);
   // the rest is optional
-  void* (*inv)(void*) = NULL;
+  void* (*inv)(void*) ;
 
+  ElementFiniteGroup()
+  { this->data=0;
+    this->mul=0;
+    this->inv=0;
+  }
 
   ElementFiniteGroup operator*(ElementFiniteGroup right)
   { ElementFiniteGroup out;
@@ -763,9 +768,9 @@ class SimpleFiniteGroup
 
 class PermutationGroup: public SimpleFiniteGroup<PermutationR2>
 { public:
-  bool isSymmetricGroup = false;
-  bool hasGenerators1j = false;
-  bool hasGeneratorsjjPlus1 = false;
+  bool isSymmetricGroup ;
+  bool hasGenerators1j ;
+  bool hasGeneratorsjjPlus1 ;
 
   void MakeSymmetricGroup(int n);
   void MakeSymmetricGroupGeneratorsjjPlus1(int n);
@@ -776,6 +781,11 @@ class PermutationGroup: public SimpleFiniteGroup<PermutationR2>
   static int GetSizeByFormulaImplementation(void* G);
   static void GetWordjjPlus1Implementation(void* G, const PermutationR2& g, List<int>& word);
 
+  PermutationGroup()
+  { this->isSymmetricGroup=false;
+    this->hasGenerators1j=false;
+    this->hasGeneratorsjjPlus1=false;
+  }
   template <typename coefficient>
   void SpechtModuleOfPartition(const Partition& p, GroupRepresentation<SimpleFiniteGroup<PermutationR2>, coefficient>& rep);
   template <typename somestream>
@@ -789,10 +799,15 @@ class PermutationGroup: public SimpleFiniteGroup<PermutationR2>
 // the int N field may or may not be meaningful
 class HyperoctahedralGroup: public SimpleFiniteGroup<ElementHyperoctahedralGroup>
 { public:
-  bool isEntireHyperoctahedralGroup = false;
-  bool isEntireDn = false;
-  int N = -1;
+  bool isEntireHyperoctahedralGroup;
+  bool isEntireDn ;
+  int N;
 
+  HyperoctahedralGroup()
+  { this->isEntireHyperoctahedralGroup=false;
+    this->isEntireDn=false;
+    this->N=-1;
+  }
   void MakeHyperoctahedralGroup(int n);
 
   static void ComputeCCSizesAndRepresentativesByFormulaImplementation(void* G);

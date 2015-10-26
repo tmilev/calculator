@@ -985,7 +985,12 @@ public:
 
   void operator=(const Matrix<coefficient>& other);
   template<class otherType>
-  void operator=(const Matrix<otherType>& other);
+  void operator=(const Matrix<otherType>& other)
+  { this->Resize(other.NumRows, other.NumCols, false);
+    for (int i=0; i<this->NumRows; i++)
+      for (int j=0; j<this->NumCols; j++)
+        (*this)(i,j)=other(i,j);
+  }
 };
 
 template <typename Element>

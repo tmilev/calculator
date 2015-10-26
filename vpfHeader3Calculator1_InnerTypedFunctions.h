@@ -23,7 +23,7 @@ public:
   static bool innerAddNumberOrPolyToNumberOrPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddPlotToPlot(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddSequenceToSequence(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddMatrixRationalToMatrixRational(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddMatrixRFsToMatrixRFs(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddMatrixTensorToMatrixTensor(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddRatToRat(Calculator& theCommands, const Expression& input, Expression& output);
@@ -62,7 +62,7 @@ public:
   static bool innerDivideRFOrPolyOrRatByRFOrPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDivideEltZmodPorRatByEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerPowerMatRatBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerMatBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerRatByRatReducePrimeFactors(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerRatByRat(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerRatByRatGetAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);

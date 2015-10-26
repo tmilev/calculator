@@ -1699,11 +1699,29 @@ void Calculator::initPredefinedStandardOperations()
    "v_{1}=(1, 2, 3);\nv_{2}=(1, 3, 2);\nv_{3}=(3, 1, 1);\nv_{4}=(-2, 2, 2);\n1/2v_{1}+1/2v_{2}+7/8v_{3}+13/16v_{4}"
    , true, false, "CalculatorFunctionsBinaryOps::innerAddSequenceToSequence");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", CalculatorFunctionsBinaryOps::innerAddMatrixRationalToMatrixRational,
+  ("+", CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic,
    this->opMatRat(), this->opMatRat(),
    "Adds two matrices.",
-   " A=MakeMatrix{}((5, 8), (3, 5)); A*A-A;"
-   , true, false, "CalculatorFunctionsBinaryOps::innerAddMatrixRationalToMatrixRational");
+   " A=MakeMatrix{}((5, 8), (3, 5)); A*A-A; B=MakeMatrix{}((5, 8), (3, 5)); A+B"
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic");
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic,
+   this->opMatAlgebraic(), this->opMatAlgebraic(),
+   "Adds two matrices.",
+   " A=MakeMatrix{}((\\sqrt{}5, 8), (\\sqrt{}3, 5)); A*A-A; A+A*A;"
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic");
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic,
+   this->opMatRat(), this->opMatAlgebraic(),
+   "Adds two matrices.",
+   " A=MakeMatrix{}((5, 8), (3, 5)); B=MakeMatrix{}((\\sqrt{}5, 8), (\\sqrt{}3, 5)); A+B; B+A"
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic");
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic,
+   this->opMatAlgebraic(), this->opMatRat(),
+   "Adds two matrices.",
+   " A=MakeMatrix{}((5, 8), (3, 5)); B=MakeMatrix{}((\\sqrt{}5, 8), (\\sqrt{}3, 5)); A+B; B+A"
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs,
    this->opMatRF(), this->opMatRF(),
@@ -2185,11 +2203,21 @@ void Calculator::initPredefinedStandardOperations()
    "x=Polynomial{}x; y=Polynomial{}y;(x+2y+x y+x^2+3y^2)^3",
    true, false, "CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerMatRatBySmallInteger, this->opMatRat(), this->opRational(),
+  ("^", CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger, this->opMatRat(), this->opRational(),
    "Raises matrix rationals to small integer power. ",
    "X=MakeMatrix((0,1),(1,1)); q=100; \nX^q; \nFibonacci{}0=1; \nFibonacci{}1=1; \nFibonacci{}{{n}}:if((n>0)* (IsInteger{}n))=Fibonacci{}(n-1)+Fibonacci{}(n-2); \
    \nMakeMatrix((Fibonacci{}(q-2), Fibonacci{}(q-1)), (Fibonacci{}q-1, Fibonacci{}q))",
-   true, false, "CalculatorFunctionsBinaryOps::innerPowerMatRatBySmallInteger");
+   true, false, "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger");
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("^", CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger, this->opMatRF(), this->opRational(),
+   "Raises rational function matrix to small integer power. ",
+   "X=MakeMatrixRFs((x,y),(1/x,1/y)); X^5",
+   true, false, "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger");
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("^", CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger, this->opMatAlgebraic(), this->opRational(),
+   "Raises algebraic number matrix to small integer power. ",
+   "X=MakeMatrix((\\sqrt{}2,1),(\\sqrt{}3,3)); X^100",
+   true, false, "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger, this->opPolyOverANs(), this->opRational(),
    "Raises poly over algebraic numbers to small integer power. ",

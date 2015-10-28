@@ -751,10 +751,8 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(Calculator& theCo
     theMon.differentialPart.RaiseToPower(powerRat);
     for (int i=0; i<theMon.polynomialPart.GetMinNumVars(); i++)
       if (theMon.polynomialPart[i]!=0 && theMon.differentialPart[i]!=0)
-      { theCommands << "<hr>Failed to raise " << base.ToString() << " to power " << powerRat.ToString() << ": the exponent is not a "
+        return theCommands << "<hr>Failed to raise " << base.ToString() << " to power " << powerRat.ToString() << ": the exponent is not a "
         << " small integer, the base is a monomial, however the monomial contains derivative and polynomial with respect to the same variable. ";
-        return false;
-      }
     finalOutput.MakeZero();
     finalOutput.AddMonomial(theMon, 1);
     return output.AssignValueWithContext(finalOutput, input[1].GetContext(), theCommands);

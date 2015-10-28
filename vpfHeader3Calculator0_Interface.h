@@ -30,18 +30,18 @@ class Expression
   //     We will say informally "an atom equals (the keyword) X" to mean that
   //     the theData of the corresponding atom equals the integer Calculator::opX().
   //     Note that this language use is completely informal, and could be ambiguous:
-  //     the theData entry of an atom can be intepretted either as keyword or as an
+  //     the theData entry of an atom can be interpreted either as keyword or as an
   //     an actual piece of data (not necessarily equal to Calculator::opX() for some X).
-  //     Whenever this ambiguity becomes and issue, the informal language should be dropped,
+  //     Whenever this ambiguity becomes an issue, the informal language should be dropped,
   //     and explicit reference to the Expression::theData and Expression::children members
   //     should be made.
   //1.2. A list is an expression with 1 or more children whose theData entry equals
-  //     0 which *MUST* be equal to Calculator::opList().
+  //     0. The atom 0 *MUST* be equal to Calculator::opList().
   //1.3. An expression with 1 or more children is not allowed to have theData entry different
   //     from 0=Calculator::opList(). The system is instructed to
   //     crash and burn shall such a configuration be detected.
   //2. Basic building blocks
-  //2.1. A quote, or a frozen expression, is list whose first entry is an atom equal to Quote.
+  //2.1. A frozen expression is a list whose first entry is an atom equal to Freeze.
   //2.2. A sequence is a list whose first entry is an atom equal to Sequence.
   //2.3. A bound variable is a list with two atomic entries, the first of which
   //     equals Bind.
@@ -51,16 +51,16 @@ class Expression
   //This is GUARANTEED, and you MAY assume it.
   //If you want to have a list of mathematical objects, use the Sequence
   //data structure. A sequence is a List whose first entry is an atom whose value
-  //is opSequence.
+  //is Sequence=Calculator::opSequence().
   //
   //-------------------------------------------------------
   //
   //Expressions of built-in types.
-  //1. An expression of built-in type represent hard-coded C++ types.
+  //1. Expressions of built-in types represent hard-coded C++ types.
   //2. An expression is said to be of built-in type if it is a list of 2 or 3 elements
   //   starting with an atom
   //   equal to one of a set of hard-coded names, and ending in an atom whose value
-  //   is an integer that uniquely (up to operator==) identifies the C++ structure.
+  //   is an integer that uniquely (up to operator==) identifies a C++ structure with the corresponding type.
   //3. A context is a list of 1 or more elements starting with the atom Context. If
   //   a context has only one child (which must then be equal to the atom Context),
   //   then we say that we have an "empty context".
@@ -1218,6 +1218,9 @@ public:
   int opMatRF()
   { return this->theAtoms.GetIndexIMustContainTheObject("MatrixRF");
   }
+  int opFreeze()
+  { return this->theAtoms.GetIndexIMustContainTheObject("Freeze");
+  }
   int opString()
   { return this->theAtoms.GetIndexIMustContainTheObject("string");
   }
@@ -1565,8 +1568,6 @@ public:
 //  }
   static bool fSplitFDpartB3overG2old(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitFDpartB3overG2inner(Calculator& theCommands, branchingData& theG2B3Data, Expression& output);
-  static bool innerDrawWeightSupportWithMults(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerDrawWeightSupport(Calculator& theCommands, const Expression& input, Expression& output);
   static bool fLittelmannOperator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool fAnimateLittelmannPaths(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSqrt(Calculator& theCommands, const Expression& input, Expression& output);
@@ -1585,7 +1586,6 @@ public:
   template<class coefficient>
   static bool TypeHighestWeightParabolic
   (Calculator& theCommands, const Expression& input, Expression& output, Vector<coefficient>& outputWeight, Selection& outputInducingSel, Expression* outputContext=0);
-  static bool innerDrawRootSystem(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPrintZnEnumeration(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerNot(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerZmodP(Calculator& theCommands, const Expression& input, Expression& output);

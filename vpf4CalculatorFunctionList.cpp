@@ -28,6 +28,14 @@ void Calculator::initPredefinedInnerFunctions()
    "Crashes the calculator: tests the crashing mechanism (are crash logs properly created, etc.).",
    "crash(0)");
   this->AddOperationInnerHandler
+  ("DrawExpressionTree", CalculatorFunctionsGeneral::innerDrawExpressionGraph, "",
+   "Draws the internal tree structure of an expression. Does not unfold built-in types.",
+   "DrawExpressionTree( e^x)");
+  this->AddOperationInnerHandler
+  ("DrawExpressionTreeFull", CalculatorFunctionsGeneral::innerDrawExpressionGraphFull, "",
+   "Draws the internal tree structure of an expression. Unfolds built-in types. ",
+   "DrawExpressionTreeFull( 1); DrawExpressionTree(1+ 1);DrawExpressionTree( Freeze{}(1+1));");
+  this->AddOperationInnerHandler
   ("Lispify", CalculatorFunctionsGeneral::innerLispify, "",
    "Shows the internal tree structure of an expression, without completely unfolding the tree structure of expressions that represent a single mathematical\
    entity.",
@@ -954,7 +962,7 @@ void Calculator::initPredefinedInnerFunctions()
    "Embeds elements of the Universal enveloping of G_2 in B_3, following an embedding found in a paper by McGovern.",
    "g_{{a}}=getChevalleyGenerator{} (G_2, a); hmmG2inB3{}(g_1);\nhmmG2inB3{}(g_2) ");
   this->AddOperationInnerHandler
-  ("drawRootSystem", this->innerDrawRootSystem, "",
+  ("drawRootSystem", CalculatorFunctionsGeneral::innerDrawRootSystem, "",
    "Draws the root system of a semisimple Lie algebra. Takes one or three arguments: \
     if one argument is provided, that must be a semisimple Lie algebra or a semisimple Lie algebra \
     type; if three arguments are provided, the first must be a semisimple Lie algebra or a semisimple \
@@ -966,7 +974,7 @@ void Calculator::initPredefinedInnerFunctions()
     change animations ideal for presentations.",
    "drawRootSystem{}(A_7, (1, 0 , 2, 2, 2, 0, 1), (1, 3, 2, 2, 2, 3, 1));");
   this->AddOperationInnerHandler
-  ("drawWeightSupportWithMults", this->innerDrawWeightSupportWithMults, "",
+  ("drawWeightSupportWithMults", CalculatorFunctionsGeneral::innerDrawWeightSupportWithMults, "",
    "Draws the weight support of an irreducible finite-dimensional highest weight module. \
    The first argument gives the type and the second gives the highest weight given in \
    fundamendal weight basis. \
@@ -976,7 +984,7 @@ void Calculator::initPredefinedInnerFunctions()
    is very javascrtipt-processor-intensive. Use only for *small* examples, else you might hang your browser. </b>",
    "drawWeightSupportWithMults{}(B_3,(0,1,1));\n drawWeightSupportWithMults{}(G_2,(1,0))");
   this->AddOperationInnerHandler
-  ("drawWeightSupport", this->innerDrawWeightSupport, "",
+  ("drawWeightSupport", CalculatorFunctionsGeneral::innerDrawWeightSupport, "",
    "Same as drawWeightSupportWithMults but displays no multiplicities. Same warning for hanging up your browser \
     with javascript holds.",
    "drawWeightSupport{}(B_3,(1,1,1)); drawWeightSupport{}(G_2,(1,2))");
@@ -2566,8 +2574,9 @@ void Calculator::initBuiltInAtomsNotInterprettedAsFunctions()
 
 void Calculator::initAtomsThatFreezeArguments()
 { MacroRegisterFunctionWithName("Calculator::initAtomsThatFreezeArguments");
-  this->atomsThatFreezeArguments.SetExpectedSize(this->builtInTypes.size+50);
+  this->atomsThatFreezeArguments.SetExpectedSize(this->builtInTypes.size+100);
   this->atomsThatFreezeArguments.AddOnTop(this->builtInTypes);
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("ElementWeylAlgebraDO"); //<-needed to facilitate civilized context handling
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("ElementWeylAlgebraPoly"); //<-needed to facilitate civilized context handling
+  this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("Freeze");
 }

@@ -146,6 +146,7 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("\"");
   this->AddOperationNoRepetitionAllowed("PolyVars");
   this->AddOperationNoRepetitionAllowed("DiffOpVars");
+  this->AddOperationNoRepetitionAllowed("Freeze");
 
 
   this->AddOperationBuiltInType("Rational");

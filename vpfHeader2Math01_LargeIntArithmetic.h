@@ -420,7 +420,7 @@ private:
   inline bool TryToAddQuickly(int OtherNum, int OtherDen)
   { register int OtherNumAbs, thisNumAbs;
     if (this->DenShort<=0 || OtherDen<=0)
-      crash << "This is a programming error: corrupt rational number(s) with denominators " << this->DenShort << " and " << OtherDen
+      crash << "This is a programming error: trying to add corrupt rational number(s) with denominators " << this->DenShort << " and " << OtherDen
       << ". The cause of the error should be in some of the calling functions. " << crash;
     if (OtherNum<0)
       OtherNumAbs=-OtherNum;
@@ -455,9 +455,9 @@ private:
   { register int OtherNumAbs, thisNumAbs;
     if (this->DenShort<=0 || OtherDen<=0)
     { if (DenShort==0 || OtherDen==0)
-        stOutput << "This is a programming error: division by zero. ";
+        crash << "This is a programming error: division by zero. ";
       else
-        stOutput << "This is a programming error: corrupt rational number denominator. ";
+        crash << "This is a programming error during rational number multiplication: corrupt rational number denominator. ";
       crash << crash;
     }
     if (OtherNum<0)
@@ -947,6 +947,9 @@ ParallelComputing::GlobalPointerCounter++;
 //    result*=right;
 //    return result;
 //  }
+  inline void operator++(int)
+  { *this+=1;
+  }
   Rational operator*(int right)const
   { Rational tempRat;
     tempRat.Assign(*this);

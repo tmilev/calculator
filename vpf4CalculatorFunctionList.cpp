@@ -290,7 +290,7 @@ void Calculator::initPredefinedInnerFunctions()
    "CalculatorConversions::innerMatrixRationalTensorForm");
   this->AddOperationInnerHandler
   ("MakeMatrixRFs", CalculatorConversions::innerMatrixRationalFunction,"",
-   "Creates an internal c++ matrix structure from double list of rational functions. \
+   "Creates an internal c++ matrix structure from double list of polynomial functions. \
    ", "s_1=MatrixRFs{}((1-t, 2), (3, 2-t))", true, false, "CalculatorConversions::innerMatrixRationalFunction");
   this->AddOperationInnerHandler
   ("FourierTransformDO", CalculatorFunctionsGeneral::innerFourierTransformEWA, "",
@@ -1891,25 +1891,25 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF,
    this->opRational(), this->opMatRF(),
-   "Multiplies matrix of rational functions by matrix of rational functions. ",
+   "Multiplies a rational number by matrix of polynomial functions. ",
    "M=MatrixRFs{}((x,1/x), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF,
    this->opPoly(), this->opMatRF(),
-   "Multiplies matrix of rational functions by matrix of rational functions. ",
+   "Multiplies matrix of polynomial functions by polynomial. ",
    "M=MatrixRFs{}((x,1/x), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF,
    this->opMatRF(), this->opMatRF(),
-   "Multiplies matrix of rational functions by matrix of rational functions. ",
+   "Multiplies matrix of polynomial functions by matrix of polynomial functions. ",
    "M=MatrixRFs{}((x,1/x), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF,
    this->opRationalFunction(), this->opMatRF(),
-   "Multiplies matrix of rational functions by matrix of rational functions. ",
+   "Multiplies a polynomial by a matrix of polynomials. ",
    "M=MatrixRFs{}((x^2,1), (0,1)); (MakeRationalFunction{}(1/x)) M; ", true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF");
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -2218,8 +2218,8 @@ void Calculator::initPredefinedStandardOperations()
    true, false, "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger, this->opMatRF(), this->opRational(),
-   "Raises rational function matrix to small integer power. ",
-   "X=MakeMatrixRFs((x,y),(1/x,1/y)); X^5",
+   "Raises a polynomial matrix to small integer power. ",
+   "X=MakeMatrixRFs((x,y),(1,2)); X^5",
    true, false, "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger, this->opMatAlgebraic(), this->opRational(),

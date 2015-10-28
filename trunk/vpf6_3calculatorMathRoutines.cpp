@@ -5748,14 +5748,16 @@ class ExpressionTreeDrawer
 {
 public:
   int MaxDepth;
-  int MaxWidth;
+  int MaxAllowedWidth;
   int MaxDisplayedNodes;
   int indexInCurrentLayer;
   int indexCurrentChild;
+  Rational widthMaxLayer;
   int numLayers;
   bool flagUseFullTree;
   Expression baseExpression;
   HashedList<std::string, MathRoutines::hashString> DisplayedEstrings;
+  List<bool> DisplayedStringIsLeaf;
   List<Vector<Rational> > NodePositions;
   List<int> LayerSizes;
   List<int> LayerFirstIndices;
@@ -5765,10 +5767,10 @@ public:
   List<Expression> nextLayer;
   List<Expression> currentEchildrenTruncated;
   Calculator* theBoss;
-  Rational charWidth, padding, layerHeight;
+  Rational charWidth, padding, layerHeight, charHeight;
   ExpressionTreeDrawer()
   { this->MaxDepth=10;
-    this->MaxWidth=10;
+    this->MaxAllowedWidth=10;
     this->MaxDisplayedNodes=1000;
     this->flagUseFullTree=false;
     this->indexInCurrentLayer=-1;
@@ -5778,6 +5780,8 @@ public:
     this->charWidth.AssignNumeratorAndDenominator(1,3);
     this->padding=1;
     this->layerHeight=2;
+    this->widthMaxLayer=0;
+    this->charHeight.AssignNumeratorAndDenominator(1,5);
   }
   Expression& GetCurrentE()
   { MacroRegisterFunctionWithName("ExpressionTreeDrawer::GetCurrentE");
@@ -5791,13 +5795,20 @@ public:
         return;
     for (int i=0; i< this->GetCurrentE().children.size; i++)
     { this->currentEchildrenTruncated.AddOnTop(this->GetCurrentE()[i]);
-      if (i+1+this->indexCurrentChild>this->MaxDisplayedNodes || i>this->MaxWidth)
+      if (i+1+this->indexCurrentChild>this->MaxDisplayedNodes || i>this->MaxAllowedWidth)
       { Expression dotsAtom;
         dotsAtom.MakeAtom((std::string)"...", *this->theBoss);
         this->currentEchildrenTruncated.AddOnTop(dotsAtom);
         break;
       }
     }
+  }
+  bool isLeaf(const Expression& input)
+  { if (this->flagUseFullTree)
+      return input.IsAtom();
+    if (input.IsAtom() || input.IsBuiltInType())
+      return true;
+    return false;
   }
   std::string GetDisplayString(const Expression& input)
   { MacroRegisterFunctionWithName("ExpressionTreeDrawer::GetDisplayString");
@@ -5811,8 +5822,7 @@ public:
           out << "...";
       }
     } else
-      if (input.IsAtom() || input.IsBuiltInType())
-        out << input.ToString();
+      out << input.ToString();
     return out.str();
   }
   void ComputeCurrentEContributionToNextLayer()
@@ -5822,8 +5832,9 @@ public:
     List<int> emptyArrows;
     for (int i=0; i<this->currentEchildrenTruncated.size; i++)
     { this->arrows[this->indexCurrentChild].AddOnTop(this->DisplayedEstrings.size);
-      this->DisplayedEstrings.AddOnTop
-      (this->GetDisplayString(this->currentEchildrenTruncated[i]));
+      this->AddStringTruncate
+      (this->GetDisplayString(this->currentEchildrenTruncated[i]),
+       this->isLeaf(this->currentEchildrenTruncated[i]));
       this->arrows.AddOnTop(emptyArrows);
     }
   }
@@ -5841,7 +5852,7 @@ public:
     this->padding=1;
     this->charWidth.AssignNumeratorAndDenominator(1,2);
     this->DisplayedEstrings.Clear();
-    this->DisplayedEstrings.AddOnTop(this->baseExpression.ToString());
+    this->AddStringTruncate(this->baseExpression.ToString(), this->isLeaf(this->baseExpression));
     this->ComputeCurrentEContributionToNextLayer();
     this->DisplayedEstrings.SetExpectedSize(this->MaxDisplayedNodes);
     this->arrows.SetExpectedSize(this->MaxDisplayedNodes);
@@ -5855,11 +5866,25 @@ public:
     out << "<br>Displayed strings: " << this->DisplayedEstrings.ToStringCommaDelimited() ;
     out << "<br>Node positions: " << this->NodePositions.ToStringCommaDelimited() ;
     out << "<br>Arrows: " << this->arrows.ToStringCommaDelimited() ;
+    out << "<br>Width max layer: " << this->widthMaxLayer;
+    out << "<br>DrawOps centerX, centerY: " << this->theDV.theBuffer.centerX[0] << ", "
+    << this->theDV.theBuffer.centerY[0];
     return out.str();
+  }
+  void AddStringTruncate(const std::string& input, bool isLeaf)
+  { this->DisplayedStringIsLeaf.AddOnTop(isLeaf);
+    if (input.size()<=100)
+    { this->DisplayedEstrings.AddOnTop(input);
+      return;
+    }
+    std::string truncatedInput=input;
+    truncatedInput.resize(97);
+    truncatedInput+="...";
+    this->DisplayedEstrings.AddOnTop(truncatedInput);
   }
   bool IncrementReturnFalseIfPastLast()
   { MacroRegisterFunctionWithName("ExpressionTreeDrawer::IncrementReturnFalseIfPastLast");
-    stOutput << "At start of incrementing function: " << this->ToString() << "<hr>";
+    //stOutput << "At start of incrementing function: " << this->ToString() << "<hr>";
     this->indexInCurrentLayer++;
     this->indexCurrentChild++;
     if (this->indexInCurrentLayer>=this->currentLayer.size)
@@ -5876,12 +5901,17 @@ public:
     this->ComputeCurrentEContributionToNextLayer();
     return true;
   }
+  Rational GetStringWidthTruncated(int theIndex)
+  { return this->charWidth* MathRoutines::Minimum(20, (signed) this->DisplayedEstrings[theIndex].size());
+  }
   Rational GetLayerWidth(int layerIndex)
   { MacroRegisterFunctionWithName("ExpressionTreeDrawer::GetLayerWidth");
     Rational result=0;
     for (int i=this->LayerFirstIndices[layerIndex]; i<this->LayerFirstIndices[layerIndex]+this->LayerSizes[layerIndex]; i++)
-      result+=this->charWidth*this->DisplayedEstrings[i].size()+this->padding;
+      result+=this->GetStringWidthTruncated(i) +this->padding;
     result-=this->padding;
+    if (result>this->widthMaxLayer)
+      this->widthMaxLayer=result;
     return result;
   }
   void ComputeLayerPositions(int layerIndex)
@@ -5889,12 +5919,12 @@ public:
     Rational currentX =-this->GetLayerWidth(layerIndex)/2;
     for (int i=this->LayerFirstIndices[layerIndex]; i<this->LayerFirstIndices[layerIndex]+this->LayerSizes[layerIndex]; i++)
     { this->NodePositions[i].SetSize(2);
-      this->NodePositions[i][0]=currentX+(this->charWidth*this->DisplayedEstrings[i].size())/2;
+      this->NodePositions[i][0]=currentX+this->GetStringWidthTruncated(i)/2;
       this->NodePositions[i][1]=this->layerHeight* layerIndex*(-1);
       currentX+=this->charWidth*this->DisplayedEstrings[i].size()+this->padding;
     }
   }
-  void ExtractDisplayedExpressions()
+  void DrawToDV()
   { MacroRegisterFunctionWithName("ExpressionTreeDrawer::ExtractDisplayedExpressions");
     this->init();
     while (this->IncrementReturnFalseIfPastLast())
@@ -5902,20 +5932,37 @@ public:
     this->NodePositions.SetSize(this->DisplayedEstrings.size);
     for (int i=0; i<this->LayerFirstIndices.size; i++)
       this->ComputeLayerPositions(i);
-    stOutput << this->ToString();
+    //stOutput << this->ToString();
+    Vector<Rational> arrowBase, arrowHead;
     for (int i=0; i<this->DisplayedEstrings.size; i++)
     { if (this->DisplayedEstrings[i]!="")
+      { int theColor= this->DisplayedStringIsLeaf[i] ? CGI::RedGreenBlue(255, 0,0) : CGI::RedGreenBlue(100,100,100);
         theDV.drawTextAtVectorBuffer
-        (this->NodePositions[i], this->DisplayedEstrings[i],
-         CGI::RedGreenBlue(0,0,0), theDV.TextStyleNormal, 0);
-      else
+        (this->NodePositions[i],
+         CGI::clearNewLines(CGI::backslashQuotes(
+         CGI::DoubleBackslashes( this->DisplayedEstrings[i]) )),
+         theColor, theDV.TextStyleNormal, 0);
+      } else
         theDV.drawCircleAtVectorBuffer
-        (this->NodePositions[i], 0.02, theDV.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+        (this->NodePositions[i], 0.04, theDV.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
       for (int j=0; j<this->arrows[i].size; j++)
+      { arrowBase= this->NodePositions[i];
+        arrowHead=this->NodePositions[this->arrows[i][j]];
+        arrowHead[1]+=this->charHeight/2;
+        //arrowHead=arrowHead*nineTenths+arrowBase*oneTenth;
         theDV.drawLineBetweenTwoVectorsBuffer
-        (this->NodePositions[i], this->NodePositions[this->arrows[i][j]], theDV.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+        (arrowBase, arrowHead, theDV.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+      }
     }
-    theDV.DefaultHtmlHeight=(int)( (this->layerHeight* this->LayerSizes.size*200+10).GetDoubleValue());
+    double& theGraphicsUnit =theDV.theBuffer.GraphicsUnit[0];
+    theGraphicsUnit=100;
+    theDV.DefaultHtmlHeight=(int)( (this->layerHeight* (this->LayerSizes.size-1)*theGraphicsUnit+100).GetDoubleValue());
+    theDV.DefaultHtmlWidth=(int)( (this->widthMaxLayer*theGraphicsUnit+40).GetDoubleValue());
+    theDV.theBuffer.centerX.SetSize(1);
+    theDV.theBuffer.centerY.SetSize(1);
+    theDV.theBuffer.centerX[0]= (this->widthMaxLayer/2).GetDoubleValue()*theGraphicsUnit;
+    theDV.theBuffer.centerY[0]= 40;
+//    stOutput << this->ToString();
   }
 };
 
@@ -5923,10 +5970,10 @@ bool CalculatorFunctionsGeneral::innerDrawExpressionGraphWithOptions
 (Calculator& theCommands, const Expression& input, Expression& output, bool useFullTree)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDrawExpressionGraph");
   ExpressionTreeDrawer theEdrawer;
+  theEdrawer.flagUseFullTree=useFullTree;
   theEdrawer.theBoss=&theCommands;
   theEdrawer.baseExpression=input;
-
-  theEdrawer.ExtractDisplayedExpressions();
+  theEdrawer.DrawToDV();
   std::stringstream out;
   out << theEdrawer.theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
   return output.AssignValue(out.str(), theCommands);

@@ -1180,6 +1180,8 @@ public:
   }
   static std::string GetHtmlButton(const std::string& buttonID, const std::string& theScript, const std::string& buttonText);
   static std::string GetHtmlSpanHidableStartsHiddeN(const std::string& input);
+  static std::string clearNewLines(const std::string& theString);
+  static std::string backslashQuotes(const std::string& theString);
   static std::string clearSlashes(const std::string& theString);
   static std::string CleanUpForFileNameUse(const std::string& inputString);
   static std::string CleanUpForLaTeXLabelUse(const std::string& inputString);

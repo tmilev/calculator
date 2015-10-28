@@ -848,6 +848,9 @@ ParallelComputing::GlobalPointerCounter++;
   { this->Extended=0; this->Assign(right);
     ParallelComputing::SafePointDontCallMeFromDestructors();
   }
+  Rational(const std::string& input): NumShort(0), DenShort(0), Extended(0)
+  { this->AssignString(input);
+  }
 //  Rational(int x){this->Extended=0; this->AssignInteger(x); };
   ~Rational()
   { this->FreeExtended();

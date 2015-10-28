@@ -2493,7 +2493,7 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler()
 { MacroRegisterFunctionWithName("Calculator::initPredefinedStandardOperationsWithoutHandler");
   //additional operations treated like function names but otherwise not parsed as syntactic elements.
 
-
+  this->AddOperationNoRepetitionAllowed("Freeze");
   this->AddOperationNoRepetitionAllowed("MonomialCollection");
   this->AddOperationNoRepetitionAllowed("MonomialPoly");
   this->AddOperationNoRepetitionAllowed("Melt");
@@ -2568,6 +2568,7 @@ void Calculator::AddKnownDoubleConstant(const std::string& theConstantName, doub
 void Calculator::initBuiltInAtomsNotInterprettedAsFunctions()
 { MacroRegisterFunctionWithName("Calculator::initBuiltInAtomsNotInterprettedAsFunctions");
   this->atomsNotInterprettedAsFunctions.SetExpectedSize(30);
+
   this->AddKnownDoubleConstant("\\pi", MathRoutines::Pi());
   this->AddKnownDoubleConstant("e", MathRoutines::E());
 }

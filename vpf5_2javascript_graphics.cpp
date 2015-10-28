@@ -96,7 +96,8 @@ std::string CreateStaticJavaScriptTextArray(List<std::string>& theLabels, const 
 }
 
 std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(int theDimension)
-{ if (theDimension<2)
+{ MacroRegisterFunctionWithName("DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName");
+  if (theDimension<2)
     return "<br><b>Pictures of dimension less than two are not drawn.</b><br>";
   std::stringstream out, tempStream1, tempStream2, tempStream3, tempStream4, tempStream5, tempStream6;
   std::stringstream tempStream7, tempStream8, tempStream9, tempStream10, tempStream11,
@@ -187,7 +188,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "<script type=\"text/javascript\">"
   << "function snapShotLaTeX" << timesCalled << "(){\n"
   << "theText=document.getElementById(\"snapShotLateXspan" << timesCalled << "\");\n"
-  << "theText.innerHTML=\"\\\\documentclass{article} \\\\usepackage{auto-pst-pdf}\\\\usepackage{pst-plot}\\\\begin{document}<br>\\n\";\n"
+  << "theText.innerHTML=\"\\\\documentclass{article} \\\\usepackage{auto-pst-pdf}<br>\\n%\\\\usepackage{pst-plot}<br>\\n\\\\begin{document}<br>\\n\";\n"
   << "theText.innerHTML+=\"\\\\psset{xunit=0.01cm, yunit=0.01cm} <br>\\n\\\\begin{pspicture}(0,0)(1,1)\";\n";
   out << "ComputeProjections" << timesCalled << "();\n";
   for (int i=0; i<this->theBuffer.IndexNthDrawOperation.size; i++)
@@ -201,12 +202,12 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
         << functionConvertToXYName << "( " << Points1ArrayName << "[" << currentIndex<< "])[0]"
         << "+\",\"+"
         << functionConvertToXYName << "( " << Points1ArrayName << "["
-        << currentIndex << "])[1] +\")\";\n ";
+        << currentIndex << "])[1]*-1 +\")\";\n ";
         out << "theText.innerHTML+=\"(\"+"
         << functionConvertToXYName << "( " << Points2ArrayName << "["
         << currentIndex << "])[0]+\",\"+"
         << " " << functionConvertToXYName << "( " << Points2ArrayName << "["
-        << currentIndex << "])[1]+\")<br>\"; \n";
+        << currentIndex << "])[1]*-1+\")<br>\"; \n";
         break;
       case DrawOperations::typeDrawCircleAtVector:
         out << "theText.innerHTML+=\""
@@ -216,16 +217,19 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
         << functionConvertToXYName << "( " << circArrayName << "["
         << currentIndex << "])[0]" << "+\",\"+"
         << functionConvertToXYName << "( " << circArrayName << "["
-        << currentIndex << "])[1]" << "+ \"){\"+"
+        << currentIndex << "])[1]*-1" << "+ \"){\"+"
         << (((double)this->theBuffer.theDrawCircleAtVectorOperations[currentIndex].radius)/40) << "+\"}<br>\";\n";
         break;
-      case DrawOperations::typeDrawTextAtVector:/*
-        out << theSurfaceName << ".strokeStyle=\""
-        << this->GetColorHtmlFromColorIndex(this->theBuffer.theDrawTextAtVectorOperations[currentIndex].ColorIndex)
-        << "\"; ";
-        out << theSurfaceName << ".strokeText(\"" << this->theBuffer.theDrawTextAtVectorOperations[currentIndex].theText << "\", "
-        << functionConvertToXYName << "( " << txtArrayName << "[" << currentIndex<< "])[0],"
-        << functionConvertToXYName << "( " << txtArrayName << "[" << currentIndex << "])[1]);\n";*/
+      case DrawOperations::typeDrawTextAtVector:
+        out << "theText.innerHTML+=\""
+        << this->GetColorPsTricksFromColorIndex(this->theBuffer.theDrawTextAtVectorOperations[currentIndex].ColorIndex)
+        << "<br>\";\n";
+        out << "theText.innerHTML+=\"\\\\rput(\"+ "
+        << functionConvertToXYName << "( " << txtArrayName << "["
+        << currentIndex << "])[0]" << "+\",\"+"
+        << functionConvertToXYName << "( " << txtArrayName << "["
+        << currentIndex << "])[1]*-1" << "+ \"){\\\\color{currentColor}"
+        << this->theBuffer.theDrawTextAtVectorOperations[currentIndex].theText << "}<br>\";\n";
         break;
       default: break;
     }

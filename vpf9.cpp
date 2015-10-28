@@ -220,6 +220,26 @@ std::string CGI::DoubleBackslashes(const std::string& input)
   return out.str();
 }
 
+std::string CGI::clearNewLines(const std::string& input)
+{ std::stringstream out;
+  for (int i=0; i<(signed) input.size(); i++)
+    if (input[i]=='\n' || input[i]=='\r')
+      out << " ";
+    else
+      out << input[i];
+  return out.str();
+}
+
+std::string CGI::backslashQuotes(const std::string& input)
+{ std::stringstream out;
+  for (int i=0; i<(signed) input.size(); i++)
+  { if (input[i]=='"')
+      out << "\\";
+    out << input[i];
+  }
+  return out.str();
+}
+
 std::string CGI::clearSlashes(const std::string& theString)
 { std::stringstream out;
   for(unsigned int i=0; i<theString.size(); i++)

@@ -39,6 +39,17 @@ int main(int argc, char **argv)
     if (argc>2)
     { tempArgument=argv[2];
       theWebServer.flagTryToKillOlderProcesses=!(tempArgument=="nokill");
+      if (tempArgument=="nokill")
+      { if (argc>3)
+          tempArgument=argv[3];
+        else
+          tempArgument="100";
+      }
+      Rational timeLimit;
+      timeLimit.AssignString(tempArgument);
+      int timeLimitInt=0;
+      if (timeLimit.IsIntegerFittingInInt(& timeLimitInt))
+        onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=timeLimitInt;
     }
     if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
     { int result=theWebServer.Run();

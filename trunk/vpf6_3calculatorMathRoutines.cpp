@@ -5626,3 +5626,339 @@ bool CalculatorFunctionsGeneral::innerCrashByListOutOfBounds
   theList[1]=1;
   return output.AssignValue((std::string) "Crashing: list out of bounds.", theCommands);
 }
+
+bool CalculatorFunctionsGeneral::innerDrawWeightSupportWithMults(Calculator& theCommands, const Expression& input, Expression& output)
+{ //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
+  if (!input.IsListNElements(3))
+    return output.MakeError("Error: the function for drawing weight support takes two  arguments (type and highest weight)", theCommands);
+  const Expression& typeNode=input[1];
+  const Expression& hwNode=input[2];
+  SemisimpleLieAlgebra* theSSalgpointer=0;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, typeNode, theSSalgpointer))
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
+  Vector<Rational> highestWeightFundCoords;
+  Expression theContext;
+  if (!theCommands.GetVectoR<Rational>  (hwNode, highestWeightFundCoords, &theContext, theSSalgpointer->GetRank(), 0))
+    return output.MakeError("Failed to extract highest weight vector", theCommands);
+  Vector<Rational> highestWeightSimpleCoords;
+  WeylGroup& theWeyl=theSSalgpointer->theWeyl;
+  highestWeightSimpleCoords= theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
+  //Vectors<Rational> theWeightsToBeDrawn;
+  std::stringstream out;
+  charSSAlgMod<Rational> theChar;
+  theChar.MakeFromWeight(highestWeightSimpleCoords, theSSalgpointer);
+  DrawingVariables theDV;
+  std::string report;
+  theChar.DrawMeWithMults(report, *theCommands.theGlobalVariableS, theDV, 10000);
+  out << report << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerDrawRootSystem(Calculator& theCommands, const Expression& input, Expression& output)
+{ //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
+  bool hasPreferredProjectionPlane= input.IsListNElements(4);
+  const Expression& typeNode= hasPreferredProjectionPlane ? input[1] : input;
+  SemisimpleLieAlgebra* theAlgPointer;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, typeNode, theAlgPointer))
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
+  SemisimpleLieAlgebra& theAlg=*theAlgPointer;
+  WeylGroup& theWeyl=theAlg.theWeyl;
+  Vectors<Rational> preferredProjectionPlane;
+  if (hasPreferredProjectionPlane)
+  { preferredProjectionPlane.SetSize(2);
+    bool isGood=
+    theCommands.GetVectoR(input[2], preferredProjectionPlane[0], 0, theWeyl.GetDim(), 0) && theCommands.GetVectoR(input[3], preferredProjectionPlane[1], 0, theWeyl.GetDim(), 0);
+    if (!isGood)
+      return output.MakeError("Failed to convert second or third argument to vector of desired dimension", theCommands);
+  }
+  std::stringstream out;
+  DrawingVariables theDV;
+  theWeyl.DrawRootSystem(theDV, true, *theCommands.theGlobalVariableS, false, 0, true, 0);
+  if (hasPreferredProjectionPlane)
+  { theDV.flagFillUserDefinedProjection=true;
+    theDV.FillUserDefinedProjection=preferredProjectionPlane;
+  }
+  out << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+  return output.AssignValue(out.str(), theCommands);
+}
+
+template <class coefficient>
+int charSSAlgMod<coefficient>::GetPosNstringSuchThatWeightMinusNalphaIsWeight
+(const Weight<coefficient>& theWeightInFundCoords, const Vector<coefficient>& theAlphaInFundCoords)
+{ MacroRegisterFunctionWithName("charSSAlgMod_coefficient::GetMaxNSuchThatWeightMinusNalphaIsAWeight");
+  int result=-1;
+  Weight<coefficient> currentWeight;
+  currentWeight=theWeightInFundCoords;
+  for (;this->theMonomials.Contains(currentWeight);
+       result++, currentWeight.weightFundamentalCoordS-=theAlphaInFundCoords){}
+//  if (result==-1)
+//    crash << "temporary wrong check" <<crash;
+  return result;
+}
+
+template <class coefficient>
+std::string charSSAlgMod<coefficient>::ToStringFullCharacterWeightsTable()
+{ MacroRegisterFunctionWithName("charSSAlgMod_CoefficientType::ToStringFullCharacterWeightsTable");
+  std::stringstream out;
+  charSSAlgMod<coefficient> outputChar;
+  if (!this->FreudenthalEvalMeFullCharacter(outputChar, 10000, 0, 0))
+  { out << "Failed to compute the character with highest weight " << this->ToString()
+    << " I used Fredenthal's formula; likely the computation was too large. ";
+    return out.str();
+  }
+  out << "<table><tr><td>Weight in fund. coords</td><td>simple coords.</td>"
+  << "<td>Simple strings</td><td>Simple half-strings</td></tr>";
+  Vector<coefficient> outputSimpleStringCoords, outputSimpleHalfStringCoords;
+  Vector<coefficient> theSimpleRoot;
+  Vector<coefficient> theSimpleRootFundCoords;
+  for (int k=0; k<outputChar.size(); k++)
+  { out << "<tr>";
+    out << "<td>" << outputChar[k].weightFundamentalCoordS.ToString() << "</td>";
+    Vector<coefficient> weightSimple=this->GetOwner()->theWeyl.GetSimpleCoordinatesFromFundamental
+    (outputChar[k].weightFundamentalCoordS);
+    out << "<td>" << weightSimple.ToString() << "</td>";
+    outputSimpleStringCoords.MakeZero(this->GetOwner()->GetRank());
+    outputSimpleHalfStringCoords.MakeZero(this->GetOwner()->GetRank());
+    for (int j=0; j<this->GetOwner()->GetRank(); j++)
+    { theSimpleRoot.MakeEi(this->GetOwner()->GetRank(), j);
+      theSimpleRootFundCoords=
+      this->GetOwner()->theWeyl.GetFundamentalCoordinatesFromSimple(theSimpleRoot);
+      outputSimpleStringCoords[j]=outputChar.GetPosNstringSuchThatWeightMinusNalphaIsWeight
+      (outputChar[k], theSimpleRootFundCoords)-
+      outputChar.GetPosNstringSuchThatWeightMinusNalphaIsWeight
+      (outputChar[k], -theSimpleRootFundCoords);
+      outputSimpleHalfStringCoords[j]=outputChar.GetPosNstringSuchThatWeightMinusNalphaIsWeight
+      (outputChar[k], theSimpleRootFundCoords);
+    }
+    if (outputSimpleStringCoords!=outputChar[k].weightFundamentalCoordS)
+      out << "<td><span style=\"color:#FF0000\"><b>" << outputSimpleStringCoords.ToString() << "</b></span></td>" ;
+    else
+      out << "<td>" << outputSimpleStringCoords.ToString() << "</td>";
+    if (outputSimpleHalfStringCoords!=outputChar[k].weightFundamentalCoordS)
+      out << "<td><span style=\"color:#FF0000\"><b>" << outputSimpleHalfStringCoords.ToString() << "</b></span></td>" ;
+    else
+      out << "<td>" << outputSimpleHalfStringCoords.ToString() << "</td>";
+    out << "</tr>";
+  }
+  out << "</table>";
+  return out.str();
+}
+
+class ExpressionTreeDrawer
+{
+public:
+  int MaxDepth;
+  int MaxWidth;
+  int MaxDisplayedNodes;
+  int indexInCurrentLayer;
+  int indexCurrentChild;
+  int numLayers;
+  bool flagUseFullTree;
+  Expression baseExpression;
+  HashedList<std::string, MathRoutines::hashString> DisplayedEstrings;
+  List<Vector<Rational> > NodePositions;
+  List<int> LayerSizes;
+  List<int> LayerFirstIndices;
+  List<List<int> > arrows;
+  DrawingVariables theDV;
+  List<Expression> currentLayer;
+  List<Expression> nextLayer;
+  List<Expression> currentEchildrenTruncated;
+  Calculator* theBoss;
+  Rational charWidth, padding, layerHeight;
+  ExpressionTreeDrawer()
+  { this->MaxDepth=10;
+    this->MaxWidth=10;
+    this->MaxDisplayedNodes=1000;
+    this->flagUseFullTree=false;
+    this->indexInCurrentLayer=-1;
+    this->indexCurrentChild=-1;
+    this->numLayers=0;
+    this->theBoss=0;
+    this->charWidth.AssignNumeratorAndDenominator(1,3);
+    this->padding=1;
+    this->layerHeight=2;
+  }
+  Expression& GetCurrentE()
+  { MacroRegisterFunctionWithName("ExpressionTreeDrawer::GetCurrentE");
+    return this->currentLayer[this->indexInCurrentLayer];
+  }
+  void ComputeCurrentEchildrenTruncated()
+  { MacroRegisterFunctionWithName("ExpressionTreeDrawer::ComputeCurrentEchildrenTruncated");
+    this->currentEchildrenTruncated.SetSize(0);
+    if (!this->flagUseFullTree)
+      if (this->GetCurrentE().IsBuiltInType())
+        return;
+    for (int i=0; i< this->GetCurrentE().children.size; i++)
+    { this->currentEchildrenTruncated.AddOnTop(this->GetCurrentE()[i]);
+      if (i+1+this->indexCurrentChild>this->MaxDisplayedNodes || i>this->MaxWidth)
+      { Expression dotsAtom;
+        dotsAtom.MakeAtom((std::string)"...", *this->theBoss);
+        this->currentEchildrenTruncated.AddOnTop(dotsAtom);
+        break;
+      }
+    }
+  }
+  std::string GetDisplayString(const Expression& input)
+  { MacroRegisterFunctionWithName("ExpressionTreeDrawer::GetDisplayString");
+    std::stringstream out;
+    if (this->flagUseFullTree)
+    { std::string atomName;
+      if (input.IsAtom(&atomName))
+      { if (atomName!="...")
+          out << input.theData;
+        else
+          out << "...";
+      }
+    } else
+      if (input.IsAtom() || input.IsBuiltInType())
+        out << input.ToString();
+    return out.str();
+  }
+  void ComputeCurrentEContributionToNextLayer()
+  { MacroRegisterFunctionWithName("ExpressionTreeDrawer::ComputeCurrentEContributionToNextLayer");
+    this->ComputeCurrentEchildrenTruncated();
+    this->nextLayer.AddListOnTop(this->currentEchildrenTruncated);
+    List<int> emptyArrows;
+    for (int i=0; i<this->currentEchildrenTruncated.size; i++)
+    { this->arrows[this->indexCurrentChild].AddOnTop(this->DisplayedEstrings.size);
+      this->DisplayedEstrings.AddOnTop
+      (this->GetDisplayString(this->currentEchildrenTruncated[i]));
+      this->arrows.AddOnTop(emptyArrows);
+    }
+  }
+  void init()
+  { this->indexInCurrentLayer=0;
+    this->indexCurrentChild=0;
+    this->currentLayer.SetSize(1);
+    this->LayerFirstIndices.SetSize(1);
+    this->LayerFirstIndices[0]=0;
+    this->LayerSizes.SetSize(1);
+    this->LayerSizes[0]=1;
+    List<int> emptyArrows;
+    this->arrows.AddOnTop(emptyArrows);
+    this->currentLayer[0]=this->baseExpression;
+    this->padding=1;
+    this->charWidth.AssignNumeratorAndDenominator(1,2);
+    this->DisplayedEstrings.Clear();
+    this->DisplayedEstrings.AddOnTop(this->baseExpression.ToString());
+    this->ComputeCurrentEContributionToNextLayer();
+    this->DisplayedEstrings.SetExpectedSize(this->MaxDisplayedNodes);
+    this->arrows.SetExpectedSize(this->MaxDisplayedNodes);
+  }
+  std::string ToString()
+  { std::stringstream out;
+    out << "<br>Index in current layer: " << this->indexInCurrentLayer;
+    out << "<br>Index in displayed strings: " << this->indexCurrentChild;
+    out << "<br>Current layer: " << this->currentLayer.ToStringCommaDelimited();
+    out << "<br>Next layer: " << this->nextLayer.ToStringCommaDelimited();
+    out << "<br>Displayed strings: " << this->DisplayedEstrings.ToStringCommaDelimited() ;
+    out << "<br>Node positions: " << this->NodePositions.ToStringCommaDelimited() ;
+    out << "<br>Arrows: " << this->arrows.ToStringCommaDelimited() ;
+    return out.str();
+  }
+  bool IncrementReturnFalseIfPastLast()
+  { MacroRegisterFunctionWithName("ExpressionTreeDrawer::IncrementReturnFalseIfPastLast");
+    stOutput << "At start of incrementing function: " << this->ToString() << "<hr>";
+    this->indexInCurrentLayer++;
+    this->indexCurrentChild++;
+    if (this->indexInCurrentLayer>=this->currentLayer.size)
+    { this->indexInCurrentLayer=0;
+      this->currentLayer=this->nextLayer;
+      if (this->currentLayer.size==0)
+        return false;
+      this->LayerFirstIndices.AddOnTop(this->indexCurrentChild);
+      this->LayerSizes.AddOnTop(this->nextLayer.size);
+      this->nextLayer.SetSize(0);
+      this->ComputeCurrentEContributionToNextLayer();
+      return this->currentLayer.size>0;
+    }
+    this->ComputeCurrentEContributionToNextLayer();
+    return true;
+  }
+  Rational GetLayerWidth(int layerIndex)
+  { MacroRegisterFunctionWithName("ExpressionTreeDrawer::GetLayerWidth");
+    Rational result=0;
+    for (int i=this->LayerFirstIndices[layerIndex]; i<this->LayerFirstIndices[layerIndex]+this->LayerSizes[layerIndex]; i++)
+      result+=this->charWidth*this->DisplayedEstrings[i].size()+this->padding;
+    result-=this->padding;
+    return result;
+  }
+  void ComputeLayerPositions(int layerIndex)
+  { MacroRegisterFunctionWithName("ExpressionTreeDrawer::ComputeLayerPositions");
+    Rational currentX =-this->GetLayerWidth(layerIndex)/2;
+    for (int i=this->LayerFirstIndices[layerIndex]; i<this->LayerFirstIndices[layerIndex]+this->LayerSizes[layerIndex]; i++)
+    { this->NodePositions[i].SetSize(2);
+      this->NodePositions[i][0]=currentX+(this->charWidth*this->DisplayedEstrings[i].size())/2;
+      this->NodePositions[i][1]=this->layerHeight* layerIndex*(-1);
+      currentX+=this->charWidth*this->DisplayedEstrings[i].size()+this->padding;
+    }
+  }
+  void ExtractDisplayedExpressions()
+  { MacroRegisterFunctionWithName("ExpressionTreeDrawer::ExtractDisplayedExpressions");
+    this->init();
+    while (this->IncrementReturnFalseIfPastLast())
+    {}
+    this->NodePositions.SetSize(this->DisplayedEstrings.size);
+    for (int i=0; i<this->LayerFirstIndices.size; i++)
+      this->ComputeLayerPositions(i);
+    stOutput << this->ToString();
+    for (int i=0; i<this->DisplayedEstrings.size; i++)
+    { if (this->DisplayedEstrings[i]!="")
+        theDV.drawTextAtVectorBuffer
+        (this->NodePositions[i], this->DisplayedEstrings[i],
+         CGI::RedGreenBlue(0,0,0), theDV.TextStyleNormal, 0);
+      else
+        theDV.drawCircleAtVectorBuffer
+        (this->NodePositions[i], 0.02, theDV.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+      for (int j=0; j<this->arrows[i].size; j++)
+        theDV.drawLineBetweenTwoVectorsBuffer
+        (this->NodePositions[i], this->NodePositions[this->arrows[i][j]], theDV.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+    }
+    theDV.DefaultHtmlHeight=(int)( (this->layerHeight* this->LayerSizes.size*200+10).GetDoubleValue());
+  }
+};
+
+bool CalculatorFunctionsGeneral::innerDrawExpressionGraphWithOptions
+(Calculator& theCommands, const Expression& input, Expression& output, bool useFullTree)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDrawExpressionGraph");
+  ExpressionTreeDrawer theEdrawer;
+  theEdrawer.theBoss=&theCommands;
+  theEdrawer.baseExpression=input;
+
+  theEdrawer.ExtractDisplayedExpressions();
+  std::stringstream out;
+  out << theEdrawer.theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerDrawWeightSupport(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDrawWeightSupport");
+  //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
+  if (!input.IsListNElements(3))
+    return output.MakeError("Wrong number of arguments, must be 2. ", theCommands);
+  const Expression& typeNode=input[1];
+  const Expression& hwNode=input[2];
+  SemisimpleLieAlgebra* theAlgPointer;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, typeNode, theAlgPointer))
+    return output.MakeError("Error extracting Lie algebra.", theCommands);
+  SemisimpleLieAlgebra& theAlg=*theAlgPointer;
+  Vector<Rational> highestWeightFundCoords;
+  Expression tempContext;
+  if (!theCommands.GetVectoR<Rational>(hwNode, highestWeightFundCoords, &tempContext, theAlg.GetRank(), 0))
+    return false;
+  Vector<Rational> highestWeightSimpleCoords;
+  WeylGroup& theWeyl=theAlg.theWeyl;
+  highestWeightSimpleCoords= theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
+  //Vectors<Rational> theWeightsToBeDrawn;
+  std::stringstream out;
+  charSSAlgMod<Rational> theChar;
+  theChar.MakeFromWeight(highestWeightSimpleCoords, theAlgPointer);
+  DrawingVariables theDV;
+  std::string report;
+  theChar.DrawMeNoMults(report, *theCommands.theGlobalVariableS, theDV, 10000);
+  out << report << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+  out << "<br>A table with the weights of the character follows. <br>";
+  out << theChar.ToStringFullCharacterWeightsTable();
+  return output.AssignValue(out.str(), theCommands);
+}

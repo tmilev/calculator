@@ -139,6 +139,20 @@ public:
   static bool innerMinPolyMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCharPolyMatrix(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerDrawRootSystem(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDrawWeightSupportWithMults(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDrawWeightSupport(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDrawExpressionGraphWithOptions
+  (Calculator& theCommands, const Expression& input, Expression& output, bool useFullTree);
+  static bool innerDrawExpressionGraph
+  (Calculator& theCommands, const Expression& input, Expression& output)
+  { return innerDrawExpressionGraphWithOptions(theCommands, input, output, false);
+  }
+  static bool innerDrawExpressionGraphFull
+  (Calculator& theCommands, const Expression& input, Expression& output)
+  { return innerDrawExpressionGraphWithOptions(theCommands, input, output, true);
+  }
+
   static bool innerPlotConeUsualProjection(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotParametricCurve(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotIntegralOf(Calculator& theCommands, const Expression& input, Expression& output);

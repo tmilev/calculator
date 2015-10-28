@@ -1722,13 +1722,15 @@ void WebServer::Restart()
 //char *exec_argv[] = { "./calculator", "server", "nokill"};
 //sleep(1);
 //execv("/proc/self/exe", exec_argv);
-  std::string theCommand="killall "+
-  onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath + " \r\n./";
+  std::stringstream theCommand;
+  theCommand << "killall " <<  onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath + " \r\n./";
   if (this->flagPort8155)
-    theCommand+=onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath + " server8155 nokill";
+    theCommand << onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath << " server8155 nokill "
+    << onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   else
-    theCommand+=onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath + " server nokill";
-  system(theCommand.c_str()); //kill any other running copies of the calculator.
+    theCommand << onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath << " server nokill "
+    << onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
+  system(theCommand.str().c_str()); //kill any other running copies of the calculator.
 }
 
 void WebServer::initDates()

@@ -17,7 +17,7 @@ int main(int argc, char **argv)
   InitializeGlobalObjects();
   onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=500000;
   onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction=5;
-  onePredefinedCopyOfGlobalVariables.flagReportLargeIntArithmetic=true;
+  onePredefinedCopyOfGlobalVariables.flagReportEverything=true;
   //	stOutput <<  "<br>" << (int) &theGlobalVariables.callSystem ;
   ParallelComputing::cgiLimitRAMuseNumPointersInList=4000000000;
   if (argc>=1)

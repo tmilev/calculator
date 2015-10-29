@@ -224,7 +224,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
         out << "theText.innerHTML+=\""
         << this->GetColorPsTricksFromColorIndex(this->theBuffer.theDrawTextAtVectorOperations[currentIndex].ColorIndex)
         << "<br>\";\n";
-        out << "theText.innerHTML+=\"\\\\rput(\"+ "
+        out << "theText.innerHTML+=\"\\\\rput[b](\"+ "
         << functionConvertToXYName << "( " << txtArrayName << "["
         << currentIndex << "])[0]" << "+\",\"+"
         << functionConvertToXYName << "( " << txtArrayName << "["

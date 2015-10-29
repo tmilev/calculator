@@ -364,7 +364,7 @@ template<class coefficient>
 bool ElementSemisimpleLieAlgebra<coefficient>::IsElementCartan()const
 { if (this->size()==0)
     return true;
-  SemisimpleLieAlgebra* owner= (*this)[0].owneR;
+  SemisimpleLieAlgebra* owner= (*this)[0].owner;
   for (int i=0; i<this->size(); i++)
     if (!owner->IsGeneratorFromCartan((*this)[i].theGeneratorIndex))
       return false;

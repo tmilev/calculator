@@ -1119,7 +1119,7 @@ void WeylGroup::GetSignSignatureAllRootSubsystems(List<SubgroupRootReflections>&
   theSSlieAlg.theWeyl=*this;
 //  theSSlieAlg.ComputeChevalleyConstants(theGlobalVariables);
   theRootSAs.theGlobalVariables=theGlobalVariables;
-  theRootSAs.owneR=&theSSlieAlg;
+  theRootSAs.owner=&theSSlieAlg;
   theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism
   ();
   List<Vectors<Rational> > theRootSAsBases;

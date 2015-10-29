@@ -17,7 +17,7 @@ static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file, 
 
 class Expression
 { void reset()
-  { this->theBoss=0;
+  { this->owner=0;
     this->children.size=0;
     this->theData=-1;
     this->format=this->formatDefault;
@@ -108,7 +108,7 @@ class Expression
   public:
   int theData;
   HashedList<int, MathRoutines::IntUnsignIdentity> children;
-  Calculator* theBoss;
+  Calculator* owner;
   ///////////////////////////////////////
   //The status of the following data has not been decided:
   int format;
@@ -119,16 +119,16 @@ class Expression
   void operator=(const Expression& other)
   { this->theData=other.theData;
     this->children=other.children;
-    this->theBoss=other.theBoss;
+    this->owner=other.owner;
     this->format=other.format;
   }
   void operator=(const Rational& other)
   { this->CheckInitialization();
-    this->AssignValue(other, *this->theBoss);
+    this->AssignValue(other, *this->owner);
   }
   void operator=(int other)
   { this->CheckInitialization();
-    this->AssignValue(other, *this->theBoss);
+    this->AssignValue(other, *this->owner);
   }
   enum format
   { formatDefault, formatFunctionUseUnderscore, formatTimesDenotedByStar,
@@ -144,7 +144,7 @@ class Expression
   friend Expression operator-(const Expression& left, const Expression& right);
 
   void reset(Calculator& newBoss, int numExpectedChildren=0)
-  { this->theBoss=&newBoss;
+  { this->owner=&newBoss;
     this->theData=0;
     this->format=this->formatDefault;
     this->children.Clear();
@@ -155,7 +155,7 @@ class Expression
   bool AddChildAtomOnTop(int theOp)
   { this->CheckInitialization();
     Expression tempE;
-    tempE.MakeAtom(theOp, *this->theBoss);
+    tempE.MakeAtom(theOp, *this->owner);
     return this->AddChildOnTop(tempE);
   }
   void GetBlocksOfCommutativity(HashedListSpecialized<Expression>& inputOutputList)const;
@@ -237,7 +237,7 @@ class Expression
   template <class theType>
   bool IsOfType(theType* whichElement=0)const
   { MacroRegisterFunctionWithName("Expression::IsOfType");
-    if (this->theBoss==0)
+    if (this->owner==0)
       return false;
     if (!this->StartsWith(this->GetTypeOperation<theType>()))
       return false;
@@ -270,7 +270,7 @@ class Expression
   bool AddChildValueOnTop(const theType& inputValue)
   { this->CheckInitialization();
     Expression tempE;
-    tempE.AssignValue(inputValue, *this->theBoss);
+    tempE.AssignValue(inputValue, *this->owner);
     return this->AddChildOnTop(tempE);
   }
   template <class theType>
@@ -433,7 +433,7 @@ bool EvaluatesToDoubleUnderSubstitutions
   bool HasBoundVariables()const;
   bool IsMeltable(int* numResultingChildren=0)const;
   bool AreEqualExcludingChildren(const Expression& other) const
-  { return this->theBoss==other.theBoss && this->theData==other.theData && this->children.size==other.children.size;
+  { return this->owner==other.owner && this->theData==other.theData && this->children.size==other.children.size;
   }
   void operator/=(const Expression& other);
   void operator+=(const Expression& other);
@@ -1844,12 +1844,12 @@ bool Expression::AssignValueWithContext(const theType& inputValue, const Express
 template <class theType>
 bool Expression::AssignValue(const theType& inputValue, Calculator& owner)
 { Expression tempE;
-  tempE.theBoss=&owner;
+  tempE.owner=&owner;
   int curType=tempE.GetTypeOperation<theType>();
   if (curType==owner.opPoly() || curType==owner.opRationalFunction() || curType==owner.opElementTensorGVM() || curType==owner.opElementUEoverRF() ||
       curType==owner.opMatRF() || curType==owner.opElementWeylAlgebra() || curType==owner.opWeightLieAlgPoly())
   { crash << "This may or may not be a programming error. Assigning value WITHOUT CONTEXT to data type "
-    << this->theBoss->GetOperations()[curType] << " is discouraged, and most likely is an error. Crashing to let you know. "
+    << this->owner->GetOperations()[curType] << " is discouraged, and most likely is an error. Crashing to let you know. "
     << crash;
   }
   Expression emptyContext;
@@ -1866,12 +1866,12 @@ bool Expression::MergeContextsMyArumentsAndConvertThem(Expression& output)const
   if (!this->MergeContextsMyAruments(mergedContexts))
     return false;
 //  stOutput << "<br> continuing to merge " << mergedContexts.ToString();
-  output.reset(*this->theBoss, this->children.size);
+  output.reset(*this->owner, this->children.size);
   output.AddChildOnTop((*this)[0]);
   Expression convertedE;
   for (int i=1; i<mergedContexts.children.size; i++)
   { if (!mergedContexts[i].ConvertToType<theType>(convertedE))
-    { *this->theBoss << "<hr>Failed to convert " << mergedContexts[i].ToString() << " to the desired type. ";
+    { *this->owner << "<hr>Failed to convert " << mergedContexts[i].ToString() << " to the desired type. ";
       return false;
     }
     output.AddChildOnTop(convertedE);

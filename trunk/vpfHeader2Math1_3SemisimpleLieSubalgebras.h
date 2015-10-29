@@ -301,7 +301,7 @@ class SemisimpleSubalgebras
 public:
   GlobalVariables* theGlobalVariables;
   FormatExpressions currentFormat;
-  SemisimpleLieAlgebra* owneR;
+  SemisimpleLieAlgebra* owner;
   AlgebraicClosureRationals* ownerField;
   DynkinType targetDynkinType;
   SltwoSubalgebras theSl2s;
@@ -373,16 +373,16 @@ public:
   const CandidateSSSubalgebra& baseSubalgebra();
   bool operator==(const SemisimpleSubalgebras& other)
   { MacroRegisterFunctionWithName("SemisimpleSubalgebras::operator==");
-    if (this->owneR==other.owneR)
+    if (this->owner==other.owner)
       return true;
-    if (this->owneR==0 || other.owneR==0)
+    if (this->owner==0 || other.owner==0)
       crash << "This is a programming error: comparing non-initialized Semisimple Lie Subalgebras. " << crash;
-    return *this->owneR==*other.owneR;
+    return *this->owner==*other.owner;
   }
   SemisimpleLieAlgebra& GetSSowner()const
-  { if (this->owneR==0)
+  { if (this->owner==0)
       crash << "This is a programming error: attempted to access non-initialized semisimple Lie subalgerbas. " << crash;
-    return *this->owneR;
+    return *this->owner;
   }
   bool IncrementReturnFalseIfPastLast();
   bool RemoveLastSubalgebra();

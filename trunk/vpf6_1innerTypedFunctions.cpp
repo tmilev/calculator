@@ -837,7 +837,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(Calculator
   theMon=theUE[0];
   theMon.Powers[0]*= exponentConverted.GetValue<RationalFunctionOld>();
   ElementUniversalEnveloping<RationalFunctionOld> outputUE;
-  outputUE.MakeZero(*theUE.owneR);
+  outputUE.MakeZero(*theUE.owner);
   outputUE.AddMonomial(theMon, 1);
   return output.AssignValueWithContext(outputUE, copyBase.GetContext(), theCommands);
 }

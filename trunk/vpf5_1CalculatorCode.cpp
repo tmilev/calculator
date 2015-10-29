@@ -494,7 +494,7 @@ bool Calculator::innerPrintSSsubalgebras
     } else
       out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
   } else
-    ownerSSPointer=input.GetValue<SemisimpleSubalgebras>().owneR;
+    ownerSSPointer=input.GetValue<SemisimpleSubalgebras>().owner;
   if (ownerSSPointer==0)
     crash << crash;
   SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
@@ -1008,21 +1008,6 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool Expression::operator==(int other)const
-{ if (this->theBoss==0)
-    return false;
-  int theInt;
-  if (!this->IsSmallInteger(&theInt))
-    return false;
-  return theInt==other;
-}
-
-bool Expression::operator==(const std::string& other)const
-{ std::string tempS;
-  if (!this->IsAtom(&tempS))
-    return false;
-  return tempS==other;
-}
 
 bool Calculator::innerReverseOrderRecursively(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerReverseOrderRecursively");

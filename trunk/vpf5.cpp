@@ -802,8 +802,8 @@ bool ElementSumGeneralizedVermas<coefficient>::ExtractElementUE(ElementUniversal
   for (int i=0; i<this->size(); i++)
   { const MonomialGeneralizedVerma<coefficient>& currentMon=(*this)[i];
     if (i==0)
-      theModPtr=currentMon.owneR;
-    if (currentMon.owneR!=theModPtr)
+      theModPtr=currentMon.owner;
+    if (currentMon.owner!=theModPtr)
       return false;
     tempMon=currentMon.theMonCoeffOne;
     tempMon*=currentMon.GetOwner().theGeneratingWordsNonReduced[currentMon.indexFDVector];
@@ -935,7 +935,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
         }
       }
     theG2B3Data.additionalMultipliers[k]= currentTensorEltEigen.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-    currentTensorEltEigen.ExtractElementUE(currentUEelt, *theMod.owneR);
+    currentTensorEltEigen.ExtractElementUE(currentUEelt, *theMod.owner);
     currentUEelt.HWTAAbilinearForm(currentUEelt, theG2B3Data.theShapovalovProducts[k], &theMod.theHWDualCoordsBaseFielD, *theCommands.theGlobalVariableS,1,0,0);
   }
   return output.AssignValue(out.str(), theCommands);

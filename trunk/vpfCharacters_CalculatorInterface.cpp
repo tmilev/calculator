@@ -1434,7 +1434,7 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input, thePointer))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   rootSubalgebras theRootSAs;
-  theRootSAs.owneR=thePointer;
+  theRootSAs.owner=thePointer;
   theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
   std::stringstream out;
   MonomialMacdonald theGenerator;
@@ -1448,7 +1448,7 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
     for (int j=0; j<theOrbit.size; j++)
       out << "<br>" << theOrbit[j].ToString();
   }
-  out << "Type: " << theRootSAs.owneR->theWeyl.theDynkinType.ToString() << ". Number of root subsystems: " << theRootSAs.theSubalgebras.size;
+  out << "Type: " << theRootSAs.owner->theWeyl.theDynkinType.ToString() << ". Number of root subsystems: " << theRootSAs.theSubalgebras.size;
   return output.AssignValue(out.str(), theCommands);
 }
 

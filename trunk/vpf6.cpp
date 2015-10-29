@@ -55,124 +55,6 @@ int IntIdentity(const int& x)
 { return x;
 }
 
-bool Expression::MakeProducT(Calculator& owner, const Expression& left, const Expression& right)
-{ return this->MakeXOX(owner, owner.opTimes(), left, right);
-}
-
-bool Expression::MakeProducT(Calculator& owner, const List<Expression>& theMultiplicands)
-{ if (theMultiplicands.size==0)
-    return this->AssignValue(1, owner);
-  return this->MakeXOXOdotsOX(owner, owner.opTimes(), theMultiplicands);
-}
-
-bool Expression::MakeSum(Calculator& owner, const List<Expression>& theSummands)
-{ MacroRegisterFunctionWithName("Expression::MakeSum");
-  if (theSummands.size==0)
-    return this->AssignValue(0, owner);
-  return this->MakeXOXOdotsOX(owner, owner.opPlus(), theSummands);
-}
-
-bool Expression::MakeOXdotsX(Calculator& owner, int theOp, const List<Expression>& theOpands)
-{ MacroRegisterFunctionWithName("Expression::MakeOXdotsX");
-  if (theOpands.size==0)
-    crash << "Zero opands not allowed at this point. " << crash;
-  if (theOpands.size==1)
-  { *this=theOpands[0];
-    return true;
-  }
-  *this=*theOpands.LastObject();
-  for (int i=theOpands.size-2; i>=0; i--)
-    this->MakeXOX(owner, theOp, theOpands[i], *this);
-  this->CheckConsistencyRecursively();
-  return true;
-}
-
-void Expression::MakeFunction(Calculator& owner, const Expression& theFunction, const Expression& theArgument)
-{ this->reset(owner, 2);
-  this->AddChildOnTop(theFunction);
-  this->AddChildOnTop(theArgument);
-  this->format=this->formatFunctionUseUnderscore;
-}
-
-bool Expression::MakeEmptyContext(Calculator& owner)
-{ this->reset(owner, 1);
-  return this->AddChildAtomOnTop(owner.opContexT());
-}
-
-bool Expression::ContextMakeContextWithOnePolyVar(Calculator& owner, const Expression& inputPolyVarE)
-{ this->MakeEmptyContext(owner);
-  Expression thePolyVars;
-  thePolyVars.reset(owner, 2);
-  thePolyVars.AddChildAtomOnTop(owner.opPolynomialVariables());
-  thePolyVars.AddChildOnTop(inputPolyVarE);
-  return this->AddChildOnTop(thePolyVars);
-}
-
-bool Expression::MakeContextWithOnePolyVarOneDiffVar(Calculator& owner, const Expression& inputPolyVarE, const Expression& inputDiffVarE)
-{ this->MakeEmptyContext(owner);
-  return this->ContextSetDiffOperatorVar(inputPolyVarE, inputDiffVarE);
-}
-
-bool Expression::MakeContextSSLieAlg(Calculator& owner, const SemisimpleLieAlgebra& theSSLiealg)
-{ this->MakeEmptyContext(owner);
-  return this->ContextSetSSLieAlgebrA(owner.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(theSSLiealg), owner);
-}
-
-bool Expression::ContextMakeContextWithOnePolyVar(Calculator& owner, const std::string& inputPolyVarName)
-{ Expression varNameE;
-  varNameE.MakeAtom(owner.AddOperationNoRepetitionOrReturnIndexFirst(inputPolyVarName), owner);
-  return this->ContextMakeContextWithOnePolyVar(owner, varNameE);
-}
-
-bool Expression::MakeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex)
-{ Expression argumentE;
-  argumentE.AssignValue(argument, owner);
-  return this->MakeSqrt(owner, argumentE, radicalSuperIndex);
-}
-
-bool Expression::MakeSqrt(Calculator& owner, const Expression& argument, const Rational& radicalSuperIndex)
-{ this->reset(owner,3);
-  Expression radicalIndexE;
-  radicalIndexE.AssignValue(radicalSuperIndex, owner);
-  this->AddChildAtomOnTop(owner.opSqrt());
-  this->AddChildOnTop(radicalIndexE);
-  return this->AddChildOnTop(argument);
-}
-
-bool Expression::MakeXOX(Calculator& owner, int theOp, const Expression& left, const Expression& right)
-{ MacroRegisterFunctionWithName("Expression::MakeXOX");
-  if (&left==this || &right==this)
-  { Expression leftCopy=left;
-    Expression rightCopy=right;
-    return this->MakeXOX(owner, theOp, leftCopy, rightCopy);
-  }
-  left.CheckInitialization();
-  right.CheckInitialization();
-  this->reset(owner, 3);
-  this->theData=owner.opLisT();
-  this->AddChildAtomOnTop(theOp);
-  this->AddChildOnTop(left);
-  return this->AddChildOnTop(right);
-}
-
-bool Expression::MakeOX(Calculator& owner, int theOp, const Expression& opArgument)
-{ if (&opArgument==this)
-  { Expression copyE=opArgument;
-    return this->MakeOX(owner, theOp, copyE);
-  }
-  this->reset(owner);
-  this->theData=owner.opLisT();
-  this->AddChildAtomOnTop(theOp);
-  return this->AddChildOnTop(opArgument);
-}
-
-bool Expression::Sequencefy()
-{ this->CheckInitialization();
-  if (this->IsSequenceNElementS())
-    return true;
-  return this->MakeOX(*this->theBoss, this->theBoss->opSequence(), *this);
-}
-
 bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory)
 { MacroRegisterFunctionWithName("Calculator::GetVectorExpressions");
   output.Reserve(input.children.size);
@@ -252,9 +134,9 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt
   List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
   this->GetElementsNilradical(eltsNilrad, true, 0, useNilWeight, ascending);
   Polynomial<Rational> tempRF;
-  output.MakeZero(*this->owneR);
+  output.MakeZero(*this->owner);
   MonomialUniversalEnveloping<Polynomial<Rational> > tempMon;
-  tempMon.MakeOne(*this->owneR);
+  tempMon.MakeOne(*this->owner);
   int varShift=0;
   if (shiftPowersByNumVarsBaseField)
     varShift=this->GetMinNumVars();
@@ -518,7 +400,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
   ElementUniversalEnveloping<Polynomial<Rational> > theGenElt, result;
   this->GetGenericUnMinusElt(true, theGenElt, theGlobalVariables, useNilWeight, ascending);
 //  Polynomial<Rational> Pone, Pzero;
-  result.AssignElementLieAlgebra(inputElt, *this->owneR, 1, 0);
+  result.AssignElementLieAlgebra(inputElt, *this->owner, 1, 0);
   std::stringstream out;
 //  stOutput << "<br>the generic elt:" << CGI::GetHtmlMathSpanPure(theGenElt.ToString());
   theGenElt.Simplify(&theGlobalVariables);
@@ -847,9 +729,9 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
 template <class coefficient>
 std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("ModuleSSalgebra::ToString");
-  if (this->owneR==0)
+  if (this->owner==0)
     return "(Error: module not initialized)";
-  SemisimpleLieAlgebra& theAlgebrA=*this->owneR;
+  SemisimpleLieAlgebra& theAlgebrA=*this->owner;
   WeylGroup theWeyl;
   theWeyl=theAlgebrA.theWeyl;
   std::stringstream out;
@@ -974,7 +856,7 @@ bool Calculator::innerHWVCommon
 
   for (int i=0; i<theMods.size; i++)
   { ModuleSSalgebra<RationalFunctionOld>& currentMod=theMods[i];
-    if (highestWeightFundCoords==currentMod.theHWFundamentalCoordsBaseField && selectionParSel==currentMod.parabolicSelectionNonSelectedAreElementsLevi && currentMod.owneR==owner)
+    if (highestWeightFundCoords==currentMod.theHWFundamentalCoordsBaseField && selectionParSel==currentMod.parabolicSelectionNonSelectedAreElementsLevi && currentMod.owner==owner)
     { indexOfModule=i;
       break;
     }
@@ -1270,7 +1152,7 @@ bool Expression::CheckInitializationRecursively()const
 }
 
 bool Expression::CheckInitialization()const
-{ if (this->theBoss==0)
+{ if (this->owner==0)
   { crash << "This is a programming error: " << "Expression has non-initialized owner. " << crash;
     return false;
   }
@@ -1278,13 +1160,13 @@ bool Expression::CheckInitialization()const
 }
 
 bool Expression::HasBoundVariables()const
-{ if (this->theBoss==0)
+{ if (this->owner==0)
     crash << "This is a programming error: calling function HasBoundVariables on non-initialized expression. " << crash;
-  RecursionDepthCounter recursionCounter(&this->theBoss->RecursionDeptH);
+  RecursionDepthCounter recursionCounter(&this->owner->RecursionDeptH);
   MacroRegisterFunctionWithName("Expression::HasBoundVariables");
-  if (this->theBoss->RecursionDeptH>this->theBoss->MaxRecursionDeptH)
+  if (this->owner->RecursionDeptH>this->owner->MaxRecursionDeptH)
     crash << "This is a programming error: function HasBoundVariables has exceeded recursion depth limit. " << crash;
-  if (this->IsListOfTwoAtomsStartingWith(this->theBoss->opBind()))
+  if (this->IsListOfTwoAtomsStartingWith(this->owner->opBind()))
     return true;
   for (int i=0; i<this->children.size; i++)
     if ((*this)[i].HasBoundVariables())
@@ -1585,7 +1467,7 @@ bool Calculator::CollectCoefficientsPowersVar
 (const Expression& input, const Expression& theVariable, VectorSparse<Expression>& outputPositionIiscoeffXtoIth)
 { MacroRegisterFunctionWithName("Calculator::CollectCoefficientsPowersVar");
   List<Expression> theSummands, currentMultiplicands, remainingMultiplicands;
-  Calculator& theCommands=*input.theBoss;
+  Calculator& theCommands=*input.owner;
   theCommands.CollectOpands(input, theCommands.opPlus(), theSummands);
   Expression currentCoeff, constTerm;
   outputPositionIiscoeffXtoIth.MakeZero();
@@ -1846,75 +1728,75 @@ bool Calculator::outerMinus(Calculator& theCommands, const Expression& input, Ex
 
 void Expression::operator+=(const Expression& other)
 { MacroRegisterFunctionWithName("Expression::operator+=");
-  if (this->theBoss==0 && other.theBoss==0)
+  if (this->owner==0 && other.owner==0)
   { this->theData+=other.theData;
     if (this->theData!=1 && this->theData!=0)
       crash << "Attempting to add non-initialized expressions" << crash;
     return;
   }
-  if (other.theBoss==0)
+  if (other.owner==0)
   { Expression otherCopy;
-    otherCopy.AssignValue(other.theData, *this->theBoss);
+    otherCopy.AssignValue(other.theData, *this->owner);
     (*this)+=otherCopy;
     return;
   }
-  if (this->theBoss==0)
-    this->AssignValue(this->theData, *other.theBoss);
-  if (this->theBoss!=other.theBoss)
+  if (this->owner==0)
+    this->AssignValue(this->theData, *other.owner);
+  if (this->owner!=other.owner)
     crash << "Error: adding expressions with different owners. " << crash;
   Expression resultE;
-  resultE.MakeXOX(*this->theBoss, this->theBoss->opPlus(), *this, other);
+  resultE.MakeXOX(*this->owner, this->owner->opPlus(), *this, other);
   *this=resultE;
 }
 
 void Expression::operator/=(const Expression& other)
 { MacroRegisterFunctionWithName("Expression::operator/=");
-  if (this->theBoss==0 && other.theBoss==0)
+  if (this->owner==0 && other.owner==0)
   { this->theData/=other.theData;
     if (this->theData!=1 && this->theData!=0)
       crash << "Attempting to add non-initialized expressions" << crash;
     return;
   }
-  if (other.theBoss==0)
+  if (other.owner==0)
   { Expression otherCopy;
-    otherCopy.AssignValue(other.theData, *this->theBoss);
+    otherCopy.AssignValue(other.theData, *this->owner);
     (*this)/=otherCopy;
     return;
   }
-  if (this->theBoss==0)
-    this->AssignValue(this->theData, *other.theBoss);
-  if (this->theBoss!=other.theBoss)
+  if (this->owner==0)
+    this->AssignValue(this->theData, *other.owner);
+  if (this->owner!=other.owner)
     crash << "Error: adding expressions with different owners. " << crash;
   Expression resultE;
-  resultE.MakeXOX(*this->theBoss, this->theBoss->opDivide(), *this, other);
+  resultE.MakeXOX(*this->owner, this->owner->opDivide(), *this, other);
   *this=resultE;
 }
 
 void Expression::operator*=(const Expression& other)
 { MacroRegisterFunctionWithName("Expression::operator*=");
-  if (this->theBoss==0 && other.theBoss==0)
+  if (this->owner==0 && other.owner==0)
   { this->theData*=other.theData;
     if (this->theData!=1 && this->theData!=0)
       crash << "Attempting to add non-initialized expressions" << crash;
     return;
   }
-  if (other.theBoss==0)
+  if (other.owner==0)
   { Expression otherCopy;
-    otherCopy.AssignValue(other.theData, *this->theBoss);
+    otherCopy.AssignValue(other.theData, *this->owner);
     (*this)*=otherCopy;
     return;
   }
-  if (this->theBoss==0)
-    this->AssignValue(this->theData, *other.theBoss);
-  if (this->theBoss!=other.theBoss)
+  if (this->owner==0)
+    this->AssignValue(this->theData, *other.owner);
+  if (this->owner!=other.owner)
     crash << "Error: adding expressions with different owners. " << crash;
   Expression resultE;
-  resultE.MakeXOX(*this->theBoss, this->theBoss->opTimes(), *this, other);
+  resultE.MakeXOX(*this->owner, this->owner->opTimes(), *this, other);
   *this=resultE;
 }
 
 bool Expression::operator==(const Expression& other)const
-{ if (this->theBoss!=other.theBoss)
+{ if (this->owner!=other.owner)
     return false;
   return this->theData==other.theData && this->children==other.children;
 }
@@ -1925,7 +1807,7 @@ SemisimpleLieAlgebra* Expression::GetAmbientSSAlgebraNonConstUseWithCaution()con
   int indexSSalg=myContext.ContextGetIndexAmbientSSalg();
   if (indexSSalg==-1)
     return 0;
-  return &this->theBoss->theObjectContainer.theLieAlgebras.GetElement(indexSSalg);
+  return &this->owner->theObjectContainer.theLieAlgebras.GetElement(indexSSalg);
 }
 
 int Calculator::AddOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName)
@@ -2123,7 +2005,7 @@ std::string ObjectContainer::ToString()
   if (this->theSSsubalgebras.size>0)
   { out << "<br>Lie semisimple subalgebras computation data structures (" << this->theLieAlgebras.size << " total): ";
     for (int i=0; i<this->theSSsubalgebras.size; i++)
-    { out << " Type " << this->theSSsubalgebras[i].owneR->GetLieAlgebraName() << " with "
+    { out << " Type " << this->theSSsubalgebras[i].owner->GetLieAlgebraName() << " with "
       << this->theSSsubalgebras[i].theSubalgebras.size << " candidates";
       if (i!=this->theLieAlgebras.size-1)
         out << ", ";
@@ -2551,10 +2433,10 @@ bool Calculator::innerFreudenthalEval(Calculator& theCommands, const Expression&
 
 bool Expression::IsMeltable(int* numResultingChildren)const
 { this->CheckInitialization();
-  if (!this->StartsWith(this->theBoss->opMelt(), 2))
+  if (!this->StartsWith(this->owner->opMelt(), 2))
     return false;
   if (numResultingChildren!=0)
-  { if (!(*this)[1].StartsWith(this->theBoss->opEndStatement()))
+  { if (!(*this)[1].StartsWith(this->owner->opEndStatement()))
       *numResultingChildren=1;
     else
       *numResultingChildren=(*this)[1].children.size-1;
@@ -2571,7 +2453,7 @@ bool Expression::MergeContextsMyAruments(Expression& output)const
 //  stOutput << " ... continuing to merge..." ;
   for (int i=1; i< this->children.size; i++)
     if (!(*this)[i].IsBuiltInType())
-    { *this->theBoss << "<hr>Failed to merge the arguments of the expression" << this->ToString() << ": the argument "
+    { *this->owner << "<hr>Failed to merge the arguments of the expression" << this->ToString() << ": the argument "
       << (*this)[i].ToString() << "is not of built-in type";
       return false;
     }
@@ -2592,24 +2474,24 @@ bool Expression::MergeContextsMyAruments(Expression& output)const
   }
   for (int i=2; i<this->children.size; i++)
   { if (!(*this)[i].IsBuiltInType())
-    { *this->theBoss << "<hr>Failed to merge contexts of arguments: an argument is not of built-in type";
+    { *this->owner << "<hr>Failed to merge contexts of arguments: an argument is not of built-in type";
       return false;
     }
 //    stOutput << "<br>Merging context " << commonContext.ToString() << " with " << (*this)[i].GetContext().ToString();
     if (!commonContext.ContextMergeContexts(commonContext, (*this)[i].GetContext(), commonContext))
-    { *this->theBoss << "<hr>Failed to merge context " << commonContext.ToString() << " with " << (*this)[i].GetContext().ToString();
+    { *this->owner << "<hr>Failed to merge context " << commonContext.ToString() << " with " << (*this)[i].GetContext().ToString();
       return false;
     }
 //    stOutput << " ...  to get context: " << commonContext.ToString();
   }
-  output.reset(*this->theBoss, this->children.size);
+  output.reset(*this->owner, this->children.size);
   output.AddChildOnTop((*this)[0]);
   Expression convertedE;
   for (int i=1; i<this->children.size; i++)
   { convertedE=(*this)[i];
     //stOutput << "<hr>Setting context of " << convertedE.ToString() << " to be the context " << commonContext.ToString();
     if (!convertedE.SetContextAtLeastEqualTo(commonContext))
-    { *this->theBoss << "<hr>Failed to convert " << convertedE.ToString() << " to context " << commonContext.ToString();
+    { *this->owner << "<hr>Failed to convert " << convertedE.ToString() << " to context " << commonContext.ToString();
       return false;
     }
     //stOutput << "... and the result is: " << convertedE.ToString();

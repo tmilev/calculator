@@ -3125,29 +3125,6 @@ inline bool MonomialCollection<templateMonomial, coefficient>::ReadFromFile(std:
 }
 
 template <class templateMonomial, class coefficient>
-inline void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy
-(const ElementMonomialAlgebra<templateMonomial, coefficient>& other, ElementMonomialAlgebra<templateMonomial, coefficient>& output,
- ElementMonomialAlgebra<templateMonomial, coefficient>& bufferPoly, templateMonomial& bufferMon)const
-{ if (other.IsEqualToZero())
-  { output.MakeZero();
-    return;
-  }
-  int maxNumMonsFinal=this->size()*other.size();
-  bufferPoly.SetExpectedSize(maxNumMonsFinal);
-  coefficient theCoeff;
-  for (int i=0; i<other.size(); i++)
-    for (int j=0; j<this->size(); j++)
-    { bufferMon=(*this)[j];
-      bufferMon*=(other[i]);
-      theCoeff=this->theCoeffs[j];
-      theCoeff*=other.theCoeffs[i];
-      bufferPoly.AddMonomial(bufferMon, theCoeff);
-      ParallelComputing::SafePointDontCallMeFromDestructors();
-    }
-  output=bufferPoly;
-}
-
-template <class templateMonomial, class coefficient>
 bool MonomialCollection<templateMonomial, coefficient>::IsEqualToZero()const
 { return this->size()==0;
 }
@@ -4034,6 +4011,7 @@ public:
   bool flagReportEverything;
   bool flagReportLargeIntArithmetic;
   bool flagReportGaussianElimination;
+  bool flagReportProductsMonomialAlgebras;
 
   List<std::string> ProgressReportStringS;
   DrawingVariables theDrawingVariables;
@@ -4160,6 +4138,43 @@ public:
   void MakeReport();
   /// @endcond
 };
+extern GlobalVariables onePredefinedCopyOfGlobalVariables;
+
+template <class templateMonomial, class coefficient>
+inline void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy
+(const ElementMonomialAlgebra<templateMonomial, coefficient>& other, ElementMonomialAlgebra<templateMonomial, coefficient>& output,
+ ElementMonomialAlgebra<templateMonomial, coefficient>& bufferPoly, templateMonomial& bufferMon)const
+{ if (other.IsEqualToZero())
+  { output.MakeZero();
+    return;
+  }
+  int maxNumMonsFinal=this->size()*other.size();
+  bool shouldReport=false;
+  int totalMonPairs=0;
+  ProgressReport theReport1(&onePredefinedCopyOfGlobalVariables), theReport2(&onePredefinedCopyOfGlobalVariables);
+  if (onePredefinedCopyOfGlobalVariables.flagReportEverything ||
+      onePredefinedCopyOfGlobalVariables.flagReportProductsMonomialAlgebras)
+  { totalMonPairs=other.size()*this->size();
+    shouldReport=(totalMonPairs>2000 && other.size()>10 && this->size()>10);
+  }
+  if (shouldReport)
+  { std::stringstream reportStream;
+    reportStream << "Large polynomial computation: multiplying " << this->ToString() << " by " << other.ToString();
+    theReport2.Report(reportStream.str());
+  }
+  bufferPoly.SetExpectedSize(maxNumMonsFinal);
+  coefficient theCoeff;
+  for (int i=0; i<other.size(); i++)
+    for (int j=0; j<this->size(); j++)
+    { bufferMon=(*this)[j];
+      bufferMon*=(other[i]);
+      theCoeff=this->theCoeffs[j];
+      theCoeff*=other.theCoeffs[i];
+      bufferPoly.AddMonomial(bufferMon, theCoeff);
+      ParallelComputing::SafePointDontCallMeFromDestructors();
+    }
+  output=bufferPoly;
+}
 
 template <class coefficient>
 void Matrix<coefficient>::GaussianEliminationEuclideanDomain
@@ -5331,11 +5346,15 @@ void Matrix<coefficient>::GaussianEliminationByRows
     outputNonPivotColumns->init(this->NumCols);
   if (outputPivotColumns!=0)
     outputPivotColumns->init(this->NumCols);
-  bool doProgressReport= theGlobalVariables==0 ? false :
-  theGlobalVariables->flagReportGaussianElimination || theGlobalVariables->flagReportEverything;
+  bool doProgressReport=false;
+  if (theGlobalVariables==0)
+  { if (onePredefinedCopyOfGlobalVariables.flagReportEverything || onePredefinedCopyOfGlobalVariables.flagReportGaussianElimination)
+      doProgressReport=this->NumRows*this->NumCols>=400 && this->NumRows>10 && this->NumCols>10;
+  } else
+    doProgressReport=theGlobalVariables->flagReportGaussianElimination || theGlobalVariables->flagReportEverything;
   bool formatAsLinearSystem= theFormat==0? false : theFormat->flagFormatMatrixAsLinearSystem;
   bool useHtmlInReport=theFormat==0? true : theFormat->flagUseHTML;
-  ProgressReport theReport(theGlobalVariables);
+  ProgressReport theReport(&onePredefinedCopyOfGlobalVariables);
   if (humanReadableReport!=0)
   { if(useHtmlInReport)
       *humanReadableReport << "\n\n\n\n<table><tr><td style=\"border-bottom:3pt solid black;\">System status</td>"
@@ -5395,7 +5414,8 @@ void Matrix<coefficient>::GaussianEliminationByRows
           tempElement.Minus();
           if (doProgressReport)
           { std::stringstream reportStream;
-            reportStream << "Gaussian elimination (" << this->NumRows << "x" << this->NumCols << "): column " << i+1 << " out of " << this->NumCols
+            reportStream << "Gaussian elimination (" << this->NumRows << "x" << this->NumCols
+            << "): column " << i+1 << " out of " << this->NumCols
             << ".\n<br>Pivot row: " << NumFoundPivots+1 << ", eliminating row " << j+1 << " out of " << this->NumRows;
             theReport.Report(reportStream.str());
           }
@@ -7321,7 +7341,12 @@ public:
 
 template <class coefficient>
 void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(coefficient& output, const coefficient& theRingOne, const coefficient& theRingZero)
-{ int tempI;
+{ MacroRegisterFunctionWithName("Matrix::ComputeDeterminantOverwriteMatrix");
+  bool doReport=false;
+  if (onePredefinedCopyOfGlobalVariables.flagReportEverything || onePredefinedCopyOfGlobalVariables.flagReportGaussianElimination)
+    doReport=this->NumCols>10 && this->NumRows>10 && this->NumCols*this->NumRows>=400;
+  ProgressReport theReport(&onePredefinedCopyOfGlobalVariables), theReport2(&onePredefinedCopyOfGlobalVariables);
+  int tempI;
   output=theRingOne;
   coefficient tempRat;
   if (this->NumCols!=this->NumRows)
@@ -7341,11 +7366,27 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(coefficient& output,
     output*=(tempRat);
     tempRat.Invert();
     this->RowTimesScalar(i, tempRat);
+    if (doReport)
+    { std::stringstream reportStream;
+      reportStream << "Pivot row " << i+1 << " out of " << dim << ": ";
+      for (int colCounter=0; colCounter<this->NumCols; colCounter++)
+      { reportStream << (*this)(i,colCounter).ToString();
+        if (colCounter!=this->NumCols-1)
+          reportStream << ", ";
+      }
+      theReport.Report(reportStream.str());
+    }
     for (int j=i+1; j<dim; j++)
       if (!this->elements[j][i].IsEqualToZero())
       { tempRat=(this->elements[j][i]);
         tempRat.Minus();
         this->AddTwoRows (i, j, i, tempRat);
+        if (doReport)
+        { std::stringstream reportStream;
+          reportStream << "Computing large determinant: pivot " << i+1 << ", row " << j << " out of "
+          << dim <<  " times  " << dim << " total.";
+          theReport2.Report(reportStream.str());
+        }
       }
   }
 }

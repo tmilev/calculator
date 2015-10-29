@@ -4168,7 +4168,6 @@ bool CalculatorFunctionsGeneral::innerAllPartitions(Calculator& theCommands, con
 bool CalculatorFunctionsGeneral::innerDeterminant(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDeterminant");
   Matrix<Rational> matRat;
-  Matrix<RationalFunctionOld> matRF;
   Expression theContext;
   if (theCommands.GetMatriXFromArguments(input, matRat, 0, 0, 0))
   { if (matRat.NumRows==matRat.NumCols)
@@ -4181,19 +4180,33 @@ bool CalculatorFunctionsGeneral::innerDeterminant(Calculator& theCommands, const
     } else
       return output.MakeError("Requesting to compute determinant of non-square matrix. ", theCommands);
   }
+  Matrix<AlgebraicNumber> matAlg;
+  if (theCommands.GetMatriXFromArguments(input, matAlg, 0,0,0))
+  { if (matAlg.NumRows==matAlg.NumCols)
+    { if (matAlg.NumRows>100)
+        return theCommands << "<hr>I have been instructed not to compute determinants of algebraic number matrices larger than 100 x 100 "
+        << ", and your matrix had " << matAlg.NumRows << " rows. " << "To lift the restriction "
+        << "edit function located in file " << __FILE__ << ", line " << __LINE__ << ". ";
+      //stOutput << " <br> ... and the matRat is: " << matRat.ToString();
+      return output.AssignValue(matAlg.GetDeterminant(), theCommands);
+    } else
+      return output.MakeError("Requesting to compute determinant of non-square matrix. ", theCommands);
+  }
+
+  Matrix<RationalFunctionOld> matRF;
   if (!theCommands.GetMatriXFromArguments(input, matRF, &theContext, -1, CalculatorConversions::innerRationalFunction))
     return theCommands << "<hr>I have been instructed to only compute determinants of matrices whose entries are "
     << " rational functions or rationals, and I failed to convert your matrix to either type. "
     << " If this is not how you expect this function to act, correct it: the code is located in  "
     << " file " << __FILE__ << ", line " << __LINE__ << ". ";
   if (matRF.NumRows==matRF.NumCols)
-  { if (matRF.NumRows>10)
+  { if (matRF.NumRows>50)
       return theCommands << "I have been instructed not to compute determinants of matrices of rational functions larger than "
-      << " 10 x 10, and your matrix had " << matRF.NumRows << " rows. To lift the restriction edit function located in file "
+      << " 50 x 50, and your matrix had " << matRF.NumRows << " rows. To lift the restriction edit function located in file "
       << __FILE__ << ", line " << __LINE__ << ". ";
     return output.AssignValueWithContext(matRF.GetDeterminant(), theContext, theCommands);
   } else
-    return output.MakeError("Requesting to comptue determinant of non-square matrix. ", theCommands);
+    return output.MakeError("Requesting to compute determinant of non-square matrix given by:  "+input.ToString(), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerDecomposeCharGenVerma(Calculator& theCommands, const Expression& input, Expression& output)
@@ -5754,6 +5767,7 @@ public:
   int indexCurrentChild;
   Rational widthMaxLayer;
   int numLayers;
+  int maxNumCharsInString;
   bool flagUseFullTree;
   Expression baseExpression;
   HashedList<std::string, MathRoutines::hashString> DisplayedEstrings;
@@ -5775,9 +5789,10 @@ public:
     this->flagUseFullTree=false;
     this->indexInCurrentLayer=-1;
     this->indexCurrentChild=-1;
+    this->maxNumCharsInString=100;
     this->numLayers=0;
     this->owner=0;
-    this->charWidth.AssignNumeratorAndDenominator(1,3);
+    this->charWidth.AssignNumeratorAndDenominator(1,20);
     this->padding=1;
     this->layerHeight=2;
     this->widthMaxLayer=0;
@@ -5820,7 +5835,8 @@ public:
           out << input.theData;
         else
           out << "...";
-      }
+      } else
+        out << input.ToString();
     } else
       out << input.ToString();
     return out.str();
@@ -5849,8 +5865,6 @@ public:
     List<int> emptyArrows;
     this->arrows.AddOnTop(emptyArrows);
     this->currentLayer[0]=this->baseExpression;
-    this->padding=1;
-    this->charWidth.AssignNumeratorAndDenominator(1,2);
     this->DisplayedEstrings.Clear();
     this->AddStringTruncate(this->baseExpression.ToString(), this->isLeaf(this->baseExpression));
     this->ComputeCurrentEContributionToNextLayer();
@@ -5873,12 +5887,12 @@ public:
   }
   void AddStringTruncate(const std::string& input, bool isLeaf)
   { this->DisplayedStringIsLeaf.AddOnTop(isLeaf);
-    if (input.size()<=100)
+    if (input.size()<= (unsigned) this->maxNumCharsInString)
     { this->DisplayedEstrings.AddOnTop(input);
       return;
     }
     std::string truncatedInput=input;
-    truncatedInput.resize(97);
+    truncatedInput.resize(this->maxNumCharsInString-3);
     truncatedInput+="...";
     this->DisplayedEstrings.AddOnTop(truncatedInput);
   }
@@ -5902,7 +5916,8 @@ public:
     return true;
   }
   Rational GetStringWidthTruncated(int theIndex)
-  { return this->charWidth* MathRoutines::Minimum(20, (signed) this->DisplayedEstrings[theIndex].size());
+  { return this->charWidth*
+    MathRoutines::Minimum(this->maxNumCharsInString, (signed) this->DisplayedEstrings[theIndex].size());
   }
   Rational GetLayerWidth(int layerIndex)
   { MacroRegisterFunctionWithName("ExpressionTreeDrawer::GetLayerWidth");

@@ -80,6 +80,7 @@ GlobalVariables::GlobalVariables()
   this->flagReportEverything=false;
   this->flagReportGaussianElimination=false;
   this->flagReportLargeIntArithmetic=false;
+  this->flagReportProductsMonomialAlgebras=false;
   this->getElapsedTimePrivate=0;
   this->flagDisplayTimeOutExplanation=false;
   this->flagOutputTimedOut=false;

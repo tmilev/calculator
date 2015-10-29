@@ -565,7 +565,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
  GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero, std::string* outputReport, bool computeSimpleGens)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::MakeFromHW");
   ProgressReport theReport(&theGlobalVariables);
-  this->owneR=&inputAlgebra;
+  this->owner=&inputAlgebra;
   SemisimpleLieAlgebra& theAlgebrA=inputAlgebra;
 
   int theRank=theAlgebrA.GetRank();
@@ -603,7 +603,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
   this->theHWFDpartSimpleCoordS=theWeyl.GetSimpleCoordinatesFromFundamental(this->theHWFDpartFundamentalCoordS);
   this->theHWFDpartDualCoords= theWeyl.GetDualCoordinatesFromFundamental(this->theHWFDpartFundamentalCoordS);
   this->theHWSimpleCoordSBaseField=theWeyl.GetSimpleCoordinatesFromFundamental(this->theHWFundamentalCoordsBaseField);
-  this->theChaR.MakeFromWeight(this->theHWSimpleCoordSBaseField, this->owneR);
+  this->theChaR.MakeFromWeight(this->theHWSimpleCoordSBaseField, this->owner);
 
  // stOutput << "<br>input fund coords base field: " << HWFundCoords.ToString();
  // stOutput << "<br>dual coords no base field: " << this->theHWDualCoordS.ToString();
@@ -841,7 +841,7 @@ void ModuleSSalgebra<coefficient>::GetElementsNilradical
       if (ownerSS.UEGeneratorOrderIncludingCartanElts[(*outputListOfGenerators)[i]]> ownerSS.UEGeneratorOrderIncludingCartanElts[(*outputListOfGenerators)[j]])
         outputListOfGenerators->SwapTwoIndices(i, j);
   for (int i=0; i<outputListOfGenerators->size; i++)
-  { theElt.MakeOneGeneratorCoeffOne(outputListOfGenerators->TheObjects[i], *this->owneR);
+  { theElt.MakeOneGeneratorCoeffOne(outputListOfGenerators->TheObjects[i], *this->owner);
     output.AddOnTop(theElt);
   }
 }
@@ -951,7 +951,7 @@ void ModuleSSalgebra<coefficient>::reset()
 { this->actionsGeneratorsMaT.SetSize(0);
   this->actionsGeneratorS.SetSize(0);
   this->ComputedGeneratorActions.init(0);
-  this->owneR=0;
+  this->owner=0;
   this->theGeneratingWordsNonReduced.Clear();
   //Note: for some reason, the linker fails to resolve without the explicit template
   //specialization below.

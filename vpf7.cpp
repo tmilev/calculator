@@ -533,14 +533,14 @@ template<class coefficient>
 bool ElementUniversalEnveloping<coefficient>::ApplyMinusTransposeAutoOnMe()
 { MonomialUniversalEnveloping<coefficient> tempMon;
   ElementUniversalEnveloping<coefficient> result;
-  result.MakeZero(*this->owneR);
+  result.MakeZero(*this->owner);
   int numPosRoots=this->GetOwner().GetNumPosRoots();
   int theRank=this->GetOwner().GetRank();
   coefficient theCoeff;
   for (int i=0; i<this->size; i++)
   { MonomialUniversalEnveloping<coefficient>& currentMon=this->TheObjects[i];
     theCoeff=this->theCoeffs[i];
-    tempMon.owneR=currentMon.owneR;
+    tempMon.owner=currentMon.owner;
     tempMon.Powers.size=0;
     tempMon.generatorsIndices.size=0;
     for (int j=0; j<currentMon.Powers.size; j++)
@@ -638,7 +638,7 @@ std::string ElementUniversalEnveloping<coefficient>::IsInProperSubmodule
   theOrbit.AddOnTop(*this);
   for (int i=0; i<theOrbit.size; i++)
     for (int j=0; j<theDim; j++)
-    { theElt.MakeOneGenerator(j+numPosRoots+theDim, *this->owneR, theRingUnit);
+    { theElt.MakeOneGenerator(j+numPosRoots+theDim, *this->owner, theRingUnit);
       theElt*=(theOrbit[i]);
       theElt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
       theElt.ModOutVermaRelations(&theGlobalVariables, subHiGoesToIthElement, theRingUnit, theRingZero);

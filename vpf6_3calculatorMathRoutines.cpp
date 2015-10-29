@@ -2370,9 +2370,9 @@ bool CalculatorFunctionsGeneral::extractQuadraticCoeffsWRTvariable
    Expression& outputCoeffVarSquared, Expression& outputCoeffLinTerm, Expression& outputConstTerm)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::extractQuadraticCoeffsWRTvariable");
   VectorSparse<Expression> theCoeffs;
-  if (theQuadratic.theBoss==0)
+  if (theQuadratic.owner==0)
     return false;
-  Calculator& theCommands=*theQuadratic.theBoss;
+  Calculator& theCommands=*theQuadratic.owner;
   if(!theCommands.CollectCoefficientsPowersVar(theQuadratic, theVariable, theCoeffs))
     return false;
   if (theCoeffs.GetLargestParticipatingBasisIndex()!=2)
@@ -2395,9 +2395,9 @@ bool CalculatorFunctionsGeneral::extractLinearCoeffsWRTvariable
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::extractLinearCoeffsWRTvariable");
   VectorSparse<Expression> theCoeffs;
   //stOutput << "extracting lin expression from : " << theLinearExpression.ToString();
-  if (theLinearExpression.theBoss==0)
+  if (theLinearExpression.owner==0)
     return false;
-  Calculator& theCommands=*theLinearExpression.theBoss;
+  Calculator& theCommands=*theLinearExpression.owner;
   theCommands.CollectCoefficientsPowersVar(theLinearExpression, theVariable, theCoeffs);
   if (theCoeffs.GetLargestParticipatingBasisIndex()>1)
     return false;
@@ -2847,15 +2847,15 @@ bool Expression::SplitProduct(int numDesiredMultiplicandsLeft, Expression& outpu
     return false;
   this->CheckInitialization();
   List<Expression> theMultiplicandsLeft, theMultiplicandsRight;
-  this->theBoss->AppendOpandsReturnTrueIfOrderNonCanonical(*this, theMultiplicandsLeft, this->theBoss->opTimes());
+  this->owner->AppendOpandsReturnTrueIfOrderNonCanonical(*this, theMultiplicandsLeft, this->owner->opTimes());
   if (theMultiplicandsLeft.size<=numDesiredMultiplicandsLeft)
     return false;
   theMultiplicandsRight.SetExpectedSize(theMultiplicandsLeft.size-numDesiredMultiplicandsLeft);
   for (int i=numDesiredMultiplicandsLeft; i<theMultiplicandsLeft.size; i++)
     theMultiplicandsRight.AddOnTop(theMultiplicandsLeft[i]);
   theMultiplicandsLeft.SetSize(numDesiredMultiplicandsLeft);
-  outputLeftMultiplicand.MakeOXdotsX(*this->theBoss, this->theBoss->opTimes(), theMultiplicandsLeft);
-  return outputRightMultiplicand.MakeOXdotsX(*this->theBoss, this->theBoss->opTimes(), theMultiplicandsRight);
+  outputLeftMultiplicand.MakeOXdotsX(*this->owner, this->owner->opTimes(), theMultiplicandsLeft);
+  return outputRightMultiplicand.MakeOXdotsX(*this->owner, this->owner->opTimes(), theMultiplicandsRight);
 }
 
 bool CalculatorFunctionsGeneral::outerAtimesBpowerJplusEtcDivBpowerI(Calculator& theCommands, const Expression& input, Expression& output)
@@ -2941,7 +2941,7 @@ bool CalculatorFunctionsGeneral::innerGrowDynkinType(Calculator& theCommands, co
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[2], theSSalg))
     return output.MakeError("Error extracting ambient Lie algebra.", theCommands);
   SemisimpleSubalgebras tempSas;
-  tempSas.owneR=theSSalg;
+  tempSas.owner=theSSalg;
   tempSas.ownerField=&theCommands.theObjectContainer.theAlgebraicClosure;
   tempSas.theGlobalVariables=theCommands.theGlobalVariableS;
   tempSas.ComputeSl2sInitOrbitsForComputationOnDemand();
@@ -2987,7 +2987,7 @@ void Expression::GetBlocksOfCommutativity(HashedListSpecialized<Expression>& inp
     return;
   std::string whichOperation;
   if ((*this)[0].IsAtom(&whichOperation))
-    if (this->theBoss->atomsThatAllowCommutingOfCompositesStartingWithThem.Contains(whichOperation))
+    if (this->owner->atomsThatAllowCommutingOfCompositesStartingWithThem.Contains(whichOperation))
     { for (int i=1; i<this->children.size; i++)
         (*this)[i].GetBlocksOfCommutativity(inputOutputList);
       return;
@@ -3818,7 +3818,7 @@ bool CalculatorFunctionsGeneral::innerGetCentralizerChainsSemisimpleSubalgebras(
   Expression currentChainE;
   out << theChains.size << " chains total. <br>";
   for (int i=0; i<theChains.size; i++)
-  { out << "<br>Chain " << i+1 << ": LoadSemisimpleSubalgebras{}( " << theSAs.owneR->theWeyl.theDynkinType.ToString() << ", (";
+  { out << "<br>Chain " << i+1 << ": LoadSemisimpleSubalgebras{}( " << theSAs.owner->theWeyl.theDynkinType.ToString() << ", (";
     for (int j=0; j<theChains[i].size; j++)
     { CalculatorConversions::innerStoreCandidateSA(theCommands, theSAs.theSubalgebras[theChains[i][j]], currentChainE);
       out << currentChainE.ToString();
@@ -4311,7 +4311,7 @@ bool CalculatorFunctionsGeneral::innerPrintGenVermaModule(Calculator& theCommand
   if (output.IsError())
     return true;
   ElementTensorsGeneralizedVermas<RationalFunctionOld> theElt=output.GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
-  ModuleSSalgebra<RationalFunctionOld>& theModule= *theElt[0].theMons[0].owneR;
+  ModuleSSalgebra<RationalFunctionOld>& theModule= *theElt[0].theMons[0].owner;
   return output.AssignValue(theModule.ToString(), theCommands);
 }
 
@@ -4467,7 +4467,7 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
   ModuleSSalgebra<RationalFunctionOld>& theGenMod=theHWgenVerma[0].theMons[0].GetOwner();
   //int indexGenMod=theHWgenVerma[0].theMons[0].indexInOwner;
   ModuleSSalgebra<RationalFunctionOld>& theFDMod=theHWfd[0].theMons[0].GetOwner();
-  if (theGenMod.owneR!=theFDMod.owneR ||
+  if (theGenMod.owner!=theFDMod.owner ||
       theGenMod.GetOwner().GetRank()!=theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize ||
       theFDMod.GetOwner().GetRank()!=theFDMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize
       )
@@ -4805,14 +4805,14 @@ bool Calculator::fSplitFDpartB3overG2old(Calculator& theCommands, const Expressi
 bool Expression::EvaluatesToDoubleInRange
 (const std::string& varName, double lowBound, double highBound, int numIntervals, double* outputYmin, double* outputYmax)const
 { MacroRegisterFunctionWithName("Expression::EvaluatesToDoubleInRange");
-  if (numIntervals<1 || this->theBoss==0)
+  if (numIntervals<1 || this->owner==0)
     return false;
-  HashedList<Expression> knownEs= this->theBoss->knownDoubleConstants;
-  List<double> knownValues=this->theBoss->knownDoubleConstantValues;
+  HashedList<Expression> knownEs= this->owner->knownDoubleConstants;
+  List<double> knownValues=this->owner->knownDoubleConstantValues;
   Expression theVarNameE;
-  theVarNameE.MakeAtom(varName, *this->theBoss);
+  theVarNameE.MakeAtom(varName, *this->owner);
   if (knownEs.Contains(theVarNameE))
-    return *(this->theBoss) << "Variable name is an already known constant, variable name is bad.";
+    return *(this->owner) << "Variable name is an already known constant, variable name is bad.";
   knownEs.AddOnTop(theVarNameE);
   knownValues.AddOnTop(0);
   int numPoints=numIntervals+1;
@@ -4821,7 +4821,7 @@ bool Expression::EvaluatesToDoubleInRange
   double currentValue=0;
   for (int i=0; i<numIntervals; i++)
   { if (!this->EvaluatesToDoubleUnderSubstitutions(knownEs, knownValues, & currentValue))
-      return *(this->theBoss) << "<hr>Failed to evaluate " << this->ToString() << " at " << varName << "="
+      return *(this->owner) << "<hr>Failed to evaluate " << this->ToString() << " at " << varName << "="
       << *knownValues.LastObject() << ". ";
     *knownValues.LastObject()+=delta;
     if (outputYmin!=0)
@@ -4842,17 +4842,17 @@ bool Expression::EvaluatesToDoubleInRange
 
 bool Expression::EvaluatesToDouble(double* whichDouble)const
 { return this->EvaluatesToDoubleUnderSubstitutions
-  (this->theBoss->knownDoubleConstants, this->theBoss->knownDoubleConstantValues, whichDouble);
+  (this->owner->knownDoubleConstants, this->owner->knownDoubleConstantValues, whichDouble);
 }
 
 bool Expression::EvaluatesToDoubleUnderSubstitutions
 (const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble)const
 { MacroRegisterFunctionWithName("Expression::EvaluatesToDoubleUnderSubstitutions");
-  if (this->theBoss==0)
+  if (this->owner==0)
     return false;
 //  stOutput << "<br>Evaluating to double: " << this->ToString();
-  Calculator& theCommands=*this->theBoss;
-  RecursionDepthCounter theRcounter(&this->theBoss->RecursionDeptH);
+  Calculator& theCommands=*this->owner;
+  RecursionDepthCounter theRcounter(&this->owner->RecursionDeptH);
   //stOutput << "<br>evaluatetodouble: " << input.ToString();
   if (this->IsOfType<double>(whichDouble))
     return true;
@@ -4864,9 +4864,9 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
   if (this->IsOfType<AlgebraicNumber>())
     if (this->GetValue<AlgebraicNumber>().EvaluatesToDouble(whichDouble))
       return true;
-  RecursionDepthCounter theCounter(&this->theBoss->RecursionDeptH);
-  if (this->theBoss->RecursionDeptH >this->theBoss->MaxRecursionDeptH)
-    *(this->theBoss) << "<hr>Recursion depth exceeded while evaluating innerEvaluateToDouble. This may be a programming error. ";
+  RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
+  if (this->owner->RecursionDeptH >this->owner->MaxRecursionDeptH)
+    *(this->owner) << "<hr>Recursion depth exceeded while evaluating innerEvaluateToDouble. This may be a programming error. ";
   if (knownEs.Contains(*this))
   { if (whichDouble!=0)
       *whichDouble=valuesKnownEs[knownEs.GetIndex(*this)];
@@ -5766,7 +5766,7 @@ public:
   List<Expression> currentLayer;
   List<Expression> nextLayer;
   List<Expression> currentEchildrenTruncated;
-  Calculator* theBoss;
+  Calculator* owner;
   Rational charWidth, padding, layerHeight, charHeight;
   ExpressionTreeDrawer()
   { this->MaxDepth=10;
@@ -5776,7 +5776,7 @@ public:
     this->indexInCurrentLayer=-1;
     this->indexCurrentChild=-1;
     this->numLayers=0;
-    this->theBoss=0;
+    this->owner=0;
     this->charWidth.AssignNumeratorAndDenominator(1,3);
     this->padding=1;
     this->layerHeight=2;
@@ -5797,7 +5797,7 @@ public:
     { this->currentEchildrenTruncated.AddOnTop(this->GetCurrentE()[i]);
       if (i+1+this->indexCurrentChild>this->MaxDisplayedNodes || i>this->MaxAllowedWidth)
       { Expression dotsAtom;
-        dotsAtom.MakeAtom((std::string)"...", *this->theBoss);
+        dotsAtom.MakeAtom((std::string)"...", *this->owner);
         this->currentEchildrenTruncated.AddOnTop(dotsAtom);
         break;
       }
@@ -5971,7 +5971,7 @@ bool CalculatorFunctionsGeneral::innerDrawExpressionGraphWithOptions
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDrawExpressionGraph");
   ExpressionTreeDrawer theEdrawer;
   theEdrawer.flagUseFullTree=useFullTree;
-  theEdrawer.theBoss=&theCommands;
+  theEdrawer.owner=&theCommands;
   theEdrawer.baseExpression=input;
   theEdrawer.DrawToDV();
   std::stringstream out;

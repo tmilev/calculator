@@ -18,7 +18,7 @@ class ModuleSSalgebra
   (const Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& thePair, ProgressReport* theProgressReport=0);
   void CheckConsistency(GlobalVariables& theGlobalVariables);
 public:
-  SemisimpleLieAlgebra* owneR;
+  SemisimpleLieAlgebra* owner;
   HashedList<MonomialUniversalEnveloping<coefficient> > theGeneratingWordsNonReduced;
   //Note: for some reason, the linker fails to resolve without the explicit template
   //specialization below.
@@ -62,7 +62,7 @@ public:
   void reset();
   bool operator==(const ModuleSSalgebra<coefficient>& other)
   { return
-    this->owneR==other.owneR && this->theHWFundamentalCoordsBaseField==other.theHWFundamentalCoordsBaseField
+    this->owner==other.owner && this->theHWFundamentalCoordsBaseField==other.theHWFundamentalCoordsBaseField
     && this->parabolicSelectionNonSelectedAreElementsLevi==other.parabolicSelectionNonSelectedAreElementsLevi;
   }
   bool HasFreeAction(int generatorIndex)const
@@ -114,9 +114,9 @@ public:
    GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero, std::string* outputReport,
   bool computeSimpleGens=true);
   SemisimpleLieAlgebra& GetOwner()const
-  { if (this->owneR==0)
+  { if (this->owner==0)
       crash << "This is a programming error: calling GetOwner() on a non-initialized generalized Verma module. " << crash;
-    return *this->owneR;
+    return *this->owner;
   }
   void GetAdActionHomogenousElT
   (ElementUniversalEnveloping<coefficient>& inputHomogeneous, Vector<Rational> & weightUEEltSimpleCoords, List<List<ElementUniversalEnveloping<coefficient> > >& outputSortedByArgumentWeight,
@@ -165,7 +165,7 @@ public:
   (ElementSemisimpleLieAlgebra<Rational>& inputElt, quasiDiffOp<Rational>& output, GlobalVariables& theGlobalVariables,
    bool useNilWeight, bool ascending);
   bool GetActionEulerOperatorPart(const MonomialP& theCoeff, ElementWeylAlgebra<Rational>& outputDO, GlobalVariables& theGlobalVariables);
-  ModuleSSalgebra() : owneR(0), flagIsInitialized(false), MaxNumCachedPairs(1000000)
+  ModuleSSalgebra() : owner(0), flagIsInitialized(false), MaxNumCachedPairs(1000000)
   {
   }
 };
@@ -212,7 +212,7 @@ public:
       crash << "This is a programming error: calling GetOwnerModule() on a tensor element which has a constant monomial."
       << " This is not allowed: constant monomials do not have owners. " << crash;
     MonomialGeneralizedVerma<coefficient>& theGmon=theMon.theMons[0];
-    return *theGmon.owneR;
+    return *theGmon.owner;
   }
   int GetNumVars()
   { if (this->size==0)

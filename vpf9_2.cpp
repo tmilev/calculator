@@ -740,12 +740,12 @@ bool HomomorphismSemisimpleLieAlgebra::CheckClosednessLieBracket(GlobalVariables
 }
 
 void ChevalleyGenerator::CheckConsistencyWithOther(const ChevalleyGenerator& other)const
-{ if (this->owneR!=other.owneR)
+{ if (this->owner!=other.owner)
     crash << "This is a programming error: attempting to compare Chevalley generators of different Lie algebras. " << crash;
 }
 
 bool ChevalleyGenerator::CheckInitialization()const
-{ if (this->owneR==0)
+{ if (this->owner==0)
   { crash << "This is a programming error: attempting to use a non-initialized Chevalley generator. " << crash;
     return false;
   }
@@ -754,7 +754,7 @@ bool ChevalleyGenerator::CheckInitialization()const
 
 std::string ChevalleyGenerator::ToString(FormatExpressions* inputFormat)const
 { this->CheckInitialization();
-  return this->owneR->GetStringFromChevalleyGenerator(this->theGeneratorIndex, inputFormat);
+  return this->owner->GetStringFromChevalleyGenerator(this->theGeneratorIndex, inputFormat);
 }
 
 bool ChevalleyGenerator::operator>(const ChevalleyGenerator& other)const

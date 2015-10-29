@@ -112,7 +112,7 @@ bool Calculator::ExpressionMatchesPattern(const Expression& thePattern, const Ex
 { MacroRegisterFunctionWithName("Calculator::ExpressionMatchesPattern");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  if (!(thePattern.theBoss==this && input.theBoss==this))
+  if (!(thePattern.owner==this && input.owner==this))
     crash << "This is a programming error. Either a pattern or an input has a wrongly  initialized owner: the pattern is "
     << thePattern.ToString() << " and the input is " << input.ToString() << ". The error is certainly in the preceding code; here "
     << "is a stack trace, however beware that the error might be in code preceding the stack loading. "
@@ -165,7 +165,7 @@ bool Calculator::ExpressionMatchesPattern(const Expression& thePattern, const Ex
 struct StackMaintainerRules
 {
 public:
-  Calculator* theBoss;
+  Calculator* owner;
   int startingRuleStackIndex;
   int startingRuleStackSize;
   StackMaintainerRules(Calculator* inputBoss);
@@ -174,34 +174,34 @@ public:
 };
 
 void StackMaintainerRules::AddRule(const Expression& theRule)
-{ if (this->theBoss==0)
+{ if (this->owner==0)
     crash << crash;
-  this->theBoss->RuleStack.AddChildOnTop(theRule);
-  this->theBoss->RuleStackCacheIndex=this->theBoss->cachedRuleStacks.GetIndex(this->theBoss->RuleStack);
-  if (this->theBoss->RuleStackCacheIndex==-1)
-    if (this->theBoss->cachedRuleStacks.size<this->theBoss->MaxCachedExpressionPerRuleStack)
-    { this->theBoss->RuleStackCacheIndex=this->theBoss->cachedRuleStacks.size;
-      this->theBoss->cachedRuleStacks.AddOnTop(this->theBoss->RuleStack);
+  this->owner->RuleStack.AddChildOnTop(theRule);
+  this->owner->RuleStackCacheIndex=this->owner->cachedRuleStacks.GetIndex(this->owner->RuleStack);
+  if (this->owner->RuleStackCacheIndex==-1)
+    if (this->owner->cachedRuleStacks.size<this->owner->MaxCachedExpressionPerRuleStack)
+    { this->owner->RuleStackCacheIndex=this->owner->cachedRuleStacks.size;
+      this->owner->cachedRuleStacks.AddOnTop(this->owner->RuleStack);
     }
-  if (this->theBoss->flagLogRules)
-    *this->theBoss << "<hr>Added rule " << theRule.ToString() << " with state identifier "
-    << this->theBoss->RuleStackCacheIndex;
+  if (this->owner->flagLogRules)
+    *this->owner << "<hr>Added rule " << theRule.ToString() << " with state identifier "
+    << this->owner->RuleStackCacheIndex;
 }
 
 StackMaintainerRules::StackMaintainerRules(Calculator* inputBoss)
-{ this->theBoss=inputBoss;
-  if (this->theBoss==0)
+{ this->owner=inputBoss;
+  if (this->owner==0)
     return;
   this->startingRuleStackIndex=inputBoss->RuleStackCacheIndex;
   this->startingRuleStackSize=inputBoss->RuleStack.children.size;
 }
 
 StackMaintainerRules::~StackMaintainerRules()
-{ if (this->theBoss==0)
+{ if (this->owner==0)
     return;
-  this->theBoss->RuleStackCacheIndex=this->startingRuleStackIndex;
-  this->theBoss->RuleStack.children.SetSize(this->startingRuleStackSize);
-  this->theBoss=0;
+  this->owner->RuleStackCacheIndex=this->startingRuleStackIndex;
+  this->owner->RuleStack.children.SetSize(this->startingRuleStackSize);
+  this->owner=0;
 }
 
 bool Calculator::EvaluateExpression

@@ -1398,7 +1398,7 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
   rootSubalgebras theRootSAs;
   theGlobalVariables.SetStandardStringOutput(CGI::MakeStdCoutReport);
   theRootSAs.theGlobalVariables=&theGlobalVariables;
-  theRootSAs.owneR=&theSSlieAlg;
+  theRootSAs.owner=&theSSlieAlg;
   DynkinSimpleType dt = W.theDynkinType.GetGreatestSimpleType();
   theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
 
@@ -2173,7 +2173,7 @@ int pointis(int d, int n)
 //  theGlobalVariables.SetStandardStringOutput(CGI::MakeStdCoutReport);
 //
 //  rootSubalgebras theRootSAs;
-//  theRootSAs.owneR=&theSSlieAlg;
+//  theRootSAs.owner=&theSSlieAlg;
 //  DynkinSimpleType dt = W.theDynkinType.GetGreatestSimpleType();
 //  theRootSAs.theGlobalVariables=&theGlobalVariables;
 //  theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();

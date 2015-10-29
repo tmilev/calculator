@@ -13,7 +13,7 @@ class MonomialUniversalEnveloping : public MonomialTensor<coefficient>
 private:
 public:
   std::string ToString(FormatExpressions* theFormat=0)const;
-  SemisimpleLieAlgebra* owneR;
+  SemisimpleLieAlgebra* owner;
   // SelectedIndices gives the non-zero powers of the chevalley generators participating in the monomial
   // Powers gives the powers of the Chevalley generators in the order they appear in generatorsIndices
   friend std::ostream& operator << (std::ostream& output, const MonomialUniversalEnveloping<coefficient>& theMon)
@@ -34,12 +34,12 @@ public:
     this->indexInOwners=other.indexInOwners;
   }
   SemisimpleLieAlgebra& GetOwner()const
-  { return *this->owneR;
+  { return *this->owner;
   }
   void MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner)
   { if (generatorIndex<0 || generatorIndex>inputOwner.GetNumGenerators())
       crash << "This is a programming error: attempting to assign impossible index to monomial UE. " << crash;
-    this->owneR=&inputOwner;
+    this->owner=&inputOwner;
     this->generatorsIndices.SetSize(1);
     this->generatorsIndices[0]=generatorIndex;
     this->Powers.SetSize(1);
@@ -73,7 +73,7 @@ public:
   void MakeOne(SemisimpleLieAlgebra& inputOwner)
   { this->generatorsIndices.size=0;
     this->Powers.size=0;
-    this->owneR=&inputOwner;
+    this->owner=&inputOwner;
   }
   //we assume the standard order for being simplified to be Ascending.
   //this way the positive roots will end up being in the end, which is very
@@ -88,16 +88,16 @@ public:
   void Simplify(ElementUniversalEnveloping<coefficient>& output, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
   void CommuteABntoBnAPlusLowerOrder(int theIndeX, ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
   void CommuteAnBtoBAnPlusLowerOrder(int indexA, ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
-  MonomialUniversalEnveloping():owneR(0){}
+  MonomialUniversalEnveloping():owner(0){}
   bool operator>(const MonomialUniversalEnveloping& other)
   { return this->::MonomialTensor<coefficient>::operator>(other);
   }
   bool operator==(const MonomialUniversalEnveloping& other)const
-  { return this->owneR==other.owneR && this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;
+  { return this->owner==other.owner && this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;
   }
   inline void operator=(const MonomialUniversalEnveloping& other)
   { this->::MonomialTensor<coefficient>::operator=(other);
-    this->owneR=other.owneR;
+    this->owner=other.owner;
   }
   inline void operator*=(const MonomialUniversalEnveloping& other)
   { this->::MonomialTensor<coefficient>::operator*=(other);
@@ -111,7 +111,7 @@ private:
   void CleanUpZeroCoeff();
   friend class MonomialUniversalEnveloping<coefficient>;
 public:
-  SemisimpleLieAlgebra* owneR;
+  SemisimpleLieAlgebra* owner;
   bool AdjointRepresentationAction(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output, GlobalVariables* theGlobalVariables=0)const;
   bool ConvertToRationalCoeff(ElementUniversalEnveloping<Rational>& output);
   bool IsEqualToZero()const
@@ -207,7 +207,7 @@ public:
     this->MakeConst(tempRat, numVars, &theOwner);
   }
   SemisimpleLieAlgebra& GetOwner()const
-  { return *this->owneR;
+  { return *this->owner;
   }
   template <class otherType>
   void Assign(const ElementUniversalEnveloping<otherType>& other)
@@ -226,7 +226,7 @@ public:
   }
   void operator=(const ElementUniversalEnveloping<coefficient>& other)
   { this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>::operator=(other);
-    this->owneR=other.owneR;
+    this->owner=other.owner;
   }
   void operator*=(const ElementUniversalEnveloping<coefficient>& standsOnTheRight);
   void operator*=(const coefficient& other)
@@ -238,7 +238,7 @@ public:
   { this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>
     ::operator/=(other);
   }
-  ElementUniversalEnveloping<coefficient>():owneR(0){}
+  ElementUniversalEnveloping<coefficient>():owner(0){}
   ElementUniversalEnveloping<coefficient>(const ElementUniversalEnveloping<coefficient>& other){this->operator=(other);}
 };
 

@@ -36,9 +36,9 @@ class MatrixTensor;
 class ChevalleyGenerator
 {
 public:
-  SemisimpleLieAlgebra* owneR;
+  SemisimpleLieAlgebra* owner;
   int theGeneratorIndex;
-  ChevalleyGenerator(): owneR(0), theGeneratorIndex(-1){}
+  ChevalleyGenerator(): owner(0), theGeneratorIndex(-1){}
   friend std::ostream& operator << (std::ostream& output, const ChevalleyGenerator& theGen)
   { output << theGen.ToString();
     return output;
@@ -54,11 +54,11 @@ public:
   { return this->HashFunction(*this);
   }
   void MakeGenerator(SemisimpleLieAlgebra& inputOwner, int inputGeneratorIndex)
-  { this->owneR=&inputOwner;
+  { this->owner=&inputOwner;
     this->theGeneratorIndex=inputGeneratorIndex;
   }
   void operator=(const ChevalleyGenerator& other)
-  { this->owneR=other.owneR;
+  { this->owner=other.owner;
     this->theGeneratorIndex=other.theGeneratorIndex;
   }
   bool operator>(const ChevalleyGenerator& other)const;
@@ -4441,9 +4441,9 @@ public:
   bool CheckConsistency()const
   { if (this->size()==0)
       return true;
-    SemisimpleLieAlgebra* owner= (*this)[0].owneR;
+    SemisimpleLieAlgebra* owner= (*this)[0].owner;
     for (int i=1; i<this->size(); i++)
-      if (owner!=(*this)[i].owneR)
+      if (owner!=(*this)[i].owner)
         crash << "This is a programming error: ElementSemisimpleLieAlgebra contains Chevalley generators with different owners. " << crash;
     return true;
   }
@@ -4460,7 +4460,7 @@ public:
   { this->CheckConsistency();
     if (this->size()==0)
       return 0;
-    return (*this)[0].owneR;
+    return (*this)[0].owner;
   }
   bool GetCoordsInBasis
   (const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables)const
@@ -7024,10 +7024,10 @@ template<class coefficient>
 class MonomialGeneralizedVerma
 {
   public:
-  ModuleSSalgebra<coefficient>* owneR;
+  ModuleSSalgebra<coefficient>* owner;
   MonomialUniversalEnveloping<coefficient> theMonCoeffOne;
   int indexFDVector;
-  MonomialGeneralizedVerma(): owneR(0), indexFDVector(-1) { }
+  MonomialGeneralizedVerma(): owner(0), indexFDVector(-1) { }
   friend std::ostream& operator << (std::ostream& output, const MonomialGeneralizedVerma<coefficient>& theGen)
   { output << theGen.ToString();
     return output;
@@ -7037,7 +7037,7 @@ class MonomialGeneralizedVerma
    ElementSumGeneralizedVermas<coefficient>& output, GlobalVariables& theGlobalVariables
    )const;
   void operator=(const MonomialGeneralizedVerma<coefficient>& other)
-  { this->owneR=other.owneR;
+  { this->owner=other.owner;
     this->indexFDVector=other.indexFDVector;
     this->theMonCoeffOne=other.theMonCoeffOne;
   }
@@ -7047,28 +7047,28 @@ class MonomialGeneralizedVerma
   { return false;
   }
   bool operator==(const MonomialGeneralizedVerma<coefficient>& other)const
-  { if (this->indexFDVector==other.indexFDVector && this->owneR==other.owneR)
+  { if (this->indexFDVector==other.indexFDVector && this->owner==other.owner)
       return this->theMonCoeffOne==other.theMonCoeffOne;
     return false;
   }
   void SetNumVariables(int GoalNumVars)
-  { if (this->owneR->size<=this->indexInOwner)
+  { if (this->owner->size<=this->indexInOwner)
       crash << crash;
     this->theMonCoeffOne.SetNumVariables(GoalNumVars);
-    this->owneR->TheObjects[this->indexInOwner].SetNumVariables(GoalNumVars);
+    this->owner->TheObjects[this->indexInOwner].SetNumVariables(GoalNumVars);
   }
   void Substitution(const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<coefficient> >& theMods);
   unsigned int HashFunction()const
-  { return this->indexFDVector*SomeRandomPrimes[0]+ ((unsigned int)(uintptr_t)this->owneR)*SomeRandomPrimes[1];
+  { return this->indexFDVector*SomeRandomPrimes[0]+ ((unsigned int)(uintptr_t)this->owner)*SomeRandomPrimes[1];
   }
   static inline unsigned int HashFunction(const MonomialGeneralizedVerma<coefficient>& input)
   { return input.HashFunction();
   }
   bool operator>(const MonomialGeneralizedVerma<coefficient>& other)
-  { if (this->owneR!=other.owneR)
+  { if (this->owner!=other.owner)
   // use of ulong is correct on i386, amd64, and a number of other popular platforms
   // uintptr_t is only available in c++0x
-      return (unsigned long)this->owneR>(unsigned long)other.owneR;
+      return (unsigned long)this->owner>(unsigned long)other.owner;
     if (this->indexFDVector!=other.indexFDVector)
       return this->indexFDVector>other.indexFDVector;
     return this->theMonCoeffOne>other.theMonCoeffOne;
@@ -7083,11 +7083,11 @@ class MonomialGeneralizedVerma
     return this->GetOwner().GetDim()-1==this->indexFDVector;
   }
   void MakeConst(ModuleSSalgebra<coefficient>& inputOwner)
-  { this->owneR=&inputOwner;
-    this->theMonCoeffOne.MakeOne(*inputOwner.owneR);
+  { this->owner=&inputOwner;
+    this->theMonCoeffOne.MakeOne(*inputOwner.owner);
   }
   ModuleSSalgebra<coefficient>& GetOwner()const
-  { return *this->owneR;
+  { return *this->owner;
   }
 };
 
@@ -7095,7 +7095,7 @@ template<class coefficient>
 class ElementSumGeneralizedVermas : public MonomialCollection<MonomialGeneralizedVerma<coefficient>, coefficient>
 {
   public:
-//  ModuleSSalgebra<coefficient>* owneR;
+//  ModuleSSalgebra<coefficient>* owner;
   void MultiplyMeByUEEltOnTheLeft
   (const ElementUniversalEnveloping<coefficient>& theUE, GlobalVariables& theGlobalVariables);
   unsigned int HashFunction()const
@@ -7107,13 +7107,13 @@ class ElementSumGeneralizedVermas : public MonomialCollection<MonomialGeneralize
   ElementSumGeneralizedVermas(){}
   void MakeHWV(ModuleSSalgebra<coefficient>& theOwner, const coefficient& theRingUnit);
   int GetNumVars()
-  { if (this->owneR==0)
+  { if (this->owner==0)
       return -1;
-    if (this->owneR->size==0)
+    if (this->owner->size==0)
       return -1;
-    int theAnswer=this->owneR->TheObjects[0].GetNumVars();
-    for (int i=1; i<this->owneR->size; i++)
-      if (theAnswer!=this->owneR->TheObjects[i].GetNumVars())
+    int theAnswer=this->owner->TheObjects[0].GetNumVars();
+    for (int i=1; i<this->owner->size; i++)
+      if (theAnswer!=this->owner->TheObjects[i].GetNumVars())
         return -1;
     return theAnswer;
   }
@@ -7382,9 +7382,9 @@ std::string MonomialTensorGeneralizedVermas<coefficient>::ToString(FormatExpress
 
 template <class coefficient>
 std::string MonomialGeneralizedVerma<coefficient>::ToString(FormatExpressions* theFormat, bool includeV)const
-{ if (this->owneR==0)
+{ if (this->owner==0)
     crash << "This is a programming error: non-initialized generalized Verma monomial (owner is 0)." << crash;
-  ModuleSSalgebra<coefficient>& theMod=*this->owneR;
+  ModuleSSalgebra<coefficient>& theMod=*this->owner;
   std::string tempS;
   if (tempS=="1")
     tempS="";
@@ -7474,11 +7474,11 @@ void MonomialGeneralizedVerma<coefficient>::Substitution(const PolynomialSubstit
   this->theMonCoeffOne.Substitution(theSub);
   //stOutput << "<br>ze ue mon after sub: " << this->theMonCoeffOne.ToString();
   ModuleSSalgebra<coefficient> newOwner;
-  newOwner=*this->owneR;
+  newOwner=*this->owner;
   newOwner.Substitution(theSub);
   //stOutput << "<br>old index in owner: " << this->indexInOwner;
   int newModIndex=theMods.AddNoRepetitionOrReturnIndexFirst(newOwner);
-  this->owneR=&theMods[newModIndex];
+  this->owner=&theMods[newModIndex];
   //stOutput << "<br>new index in owner: " << this->indexInOwner;
 }
 
@@ -7498,7 +7498,7 @@ void MonomialGeneralizedVerma<coefficient>::MultiplyMeByUEEltOnTheLefT
   output.MakeZero();
   ElementSumGeneralizedVermas<coefficient> buffer;
   ProgressReport theReport(&theGlobalVariables);
-  if (!this->GetOwner().owneR->flagHasNilradicalOrder)
+  if (!this->GetOwner().owner->flagHasNilradicalOrder)
     crash << "Calling generalized verma module simplification requires nilradical order on the generators. "
     << crash;
   for (int j=0; j<theUE.size(); j++)
@@ -7506,9 +7506,9 @@ void MonomialGeneralizedVerma<coefficient>::MultiplyMeByUEEltOnTheLefT
 //    stOutput << "<br>currentMon: " << currentMon.theMonCoeffOne.ToString();
     currentMon.theMonCoeffOne*=this->theMonCoeffOne;
 //    stOutput << "<br>currentMon after multi: " << currentMon.theMonCoeffOne.ToString();
-    currentMon.owneR=this->owneR;
+    currentMon.owner=this->owner;
     currentMon.indexFDVector=this->indexFDVector;
-    currentMon.owneR=this->owneR;
+    currentMon.owner=this->owner;
 //    stOutput << "<hr>Applying " <<theUE.theCoeffs[j].ToString() << " times " << theUE[j].ToString() << " on " << this->ToString();
     std::stringstream reportStream;
     reportStream << "reducing mon: " << currentMon.ToString() << ", index" << j+1 << " out of " << theUE.size() << "...";
@@ -7551,17 +7551,17 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe
 (ElementSumGeneralizedVermas<coefficient>& output, GlobalVariables& theGlobalVariables)const
 { MacroRegisterFunctionWithName("MonomialGeneralizedVerma::ReduceMe");
   //stOutput << "<hr><hr>Reducing  " << this->ToString();
-  ModuleSSalgebra<coefficient>& theMod=*this->owneR;
+  ModuleSSalgebra<coefficient>& theMod=*this->owner;
   output.MakeZero();
   MonomialUniversalEnveloping<coefficient> tempMon;
   tempMon=this->theMonCoeffOne;
   tempMon*=theMod.theGeneratingWordsNonReduced[this->indexFDVector];
   int indexCheck=theMod.theGeneratingWordsNonReduced.GetIndex(tempMon);
-  if (!this->owneR->owneR->flagHasNilradicalOrder)
+  if (!this->owner->owner->flagHasNilradicalOrder)
     crash << "Owner needs nilradical order!!!" << crash;
   if (indexCheck!=-1)
   { MonomialGeneralizedVerma<coefficient> basisMon;
-    basisMon.MakeConst(*this->owneR);
+    basisMon.MakeConst(*this->owner);
     basisMon.indexFDVector=indexCheck;
     output.AddMonomial(basisMon, 1);
 //    stOutput << "<br>Reduced " << this->ToString() << " to " << output.ToString() << " = " << basisMon.ToString();
@@ -7577,7 +7577,7 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe
 //  { stOutput << "<br>generator index " << i << " has order " << theMod.GetOwner().UEGeneratorOrderIncludingCartanElts[i];
 //  }
   ElementUniversalEnveloping<coefficient> theUEelt;
-  theUEelt.MakeZero(*this->GetOwner().owneR);
+  theUEelt.MakeZero(*this->GetOwner().owner);
   theUEelt.AddMonomial(this->theMonCoeffOne, 1);
 //  stOutput << " <br>the monomial:" << this->ToString();
   theUEelt.Simplify(&theGlobalVariables, 1, 0);
@@ -7616,7 +7616,7 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe
       theReport.Report(reportStream.str());
     }
 //    stOutput << "<br> Action is the " << currentMon.ToString() << " free action plus <br>" << tempMat1.ToString();
-    newMon.owneR=this->owneR;
+    newMon.owner=this->owner;
     for (int i=0; i<tempMat1.size(); i++)
     { int otherIndex=-1;
       if (tempMat1[i].dualIndex==this->indexFDVector)
@@ -7695,7 +7695,7 @@ void ElementSumGeneralizedVermas<coefficient>::MakeHWV(ModuleSSalgebra<coefficie
   MonomialGeneralizedVerma<coefficient> theMon;
   theMon.indexFDVector=theOwner.theGeneratingWordsNonReduced.size-1;
   theMon.theMonCoeffOne.MakeOne(theOwner.GetOwner());
-  theMon.owneR=&theOwner;
+  theMon.owner=&theOwner;
   this->AddMonomial(theMon, theRingUnit);
 }
 

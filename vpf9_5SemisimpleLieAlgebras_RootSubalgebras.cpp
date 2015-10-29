@@ -137,7 +137,7 @@ void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
   this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->GetAmbientWeyl());
   this->theCentralizerDiagram.GetDynkinType(this->theCentralizerDynkinType);
   if (this->theDynkinType.IsEqualToZero())
-    if (this->theCentralizerDynkinType.GetRank()+this->theDynkinType.GetRank()!=this->ownEr->owneR->GetRank())
+    if (this->theCentralizerDynkinType.GetRank()+this->theDynkinType.GetRank()!=this->ownEr->owner->GetRank())
       crash << "Centralizer of " << this->theDynkinType.ToString() << " computed to be " << this->theCentralizerDynkinType.ToString()
       << " which is impossible. " << crash;
 }
@@ -680,7 +680,7 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables, roo
 }
 
 bool rootSubalgebra::CheckRankInequality()const
-{ if ((this->theDynkinType.GetRank()+this->theCentralizerDynkinType.GetRank())*2<this->ownEr->owneR->GetRank())
+{ if ((this->theDynkinType.GetRank()+this->theCentralizerDynkinType.GetRank())*2<this->ownEr->owner->GetRank())
     crash << "2*(Centralizer rank + rank) < ambient rank, which is mathematically impossible. There was a programming error. "
     << crash;
   return true;
@@ -1533,7 +1533,7 @@ bool rootSubalgebra::LinCombToStringDistinguishedIndex(int distinguished, Vector
 SemisimpleLieAlgebra& rootSubalgebra::GetOwnerSSalg()const
 { if (this->ownEr==0)
     crash << "This is a programming error. Attempting to access ambient Lie algebra of non-initialized root subalgebras. " << crash;
-  return *this->ownEr->owneR;
+  return *this->ownEr->owner;
 }
 
 bool rootSubalgebra::operator>(const rootSubalgebra& other)const //current implementation does not work as expected in types E_7 and for large D_n's
@@ -1854,7 +1854,7 @@ bool rootSubalgebras::GrowDynkinType(const DynkinType& input, List<DynkinType>& 
 { MacroRegisterFunctionWithName("rootSubalgebras::GrowDynkinType");
   input.Grow(this->validScales, this->GetOwnerWeyl().GetDim(), output, outputPermutationSimpleRoots);
   char theLetter;
-  if (!this->owneR->theWeyl.theDynkinType.IsSimple(&theLetter))
+  if (!this->owner->theWeyl.theDynkinType.IsSimple(&theLetter))
     return true;
   for (int i=output.size-1; i>=0; i--)
   { bool isGood=true;
@@ -2302,11 +2302,11 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
   this->PositiveRootsK.GetCoordsInBasis(this->SimpleBasisK, relativeRootSystem, bufferVectors, tempMat);
   slTwoSubalgebra theSl2;
   theSl2.container= &output;
-  theSl2.owneR= &this->GetOwnerSSalg();
+  theSl2.owner= &this->GetOwnerSSalg();
   SemisimpleLieAlgebra& theLieAlgebra= this->GetOwnerSSalg();
   DynkinDiagramRootSubalgebra diagramZeroCharRoots;
-//  stOutput << "<br>problems abound here!" << this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
-  //bool ereBeProbs=this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0])=="3A^{1}_1";
+//  stOutput << "<br>problems abound here!" << this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owner->theWeyl.theDynkinType[0]);
+  //bool ereBeProbs=this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owner->theWeyl.theDynkinType[0])=="3A^{1}_1";
   //if (ereBeProbs)
   //{ stOutput << "<hr>Ere be probs. ";
   //}
@@ -2435,16 +2435,16 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
 void rootSubalgebras::ComputeAllReductiveRootSAsInit()
 { this->GetOwnerWeyl().ComputeRho(true);
   this->validScales.Clear();
-  this->validScales.SetExpectedSize(this->owneR->GetRank()*2);
-  for (int i=0; i<this->owneR->GetRank(); i++)
-    this->validScales.AddOnTopNoRepetition(2/this->owneR->theWeyl.CartanSymmetric(i,i));
+  this->validScales.SetExpectedSize(this->owner->GetRank()*2);
+  for (int i=0; i<this->owner->GetRank(); i++)
+    this->validScales.AddOnTopNoRepetition(2/this->owner->theWeyl.CartanSymmetric(i,i));
 //  stOutput << "Valid scales: " << this->validScales.ToString();
 }
 
 void rootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("rootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder");
   Selection parSel;
-  parSel.init(this->owneR->GetRank());
+  parSel.init(this->owner->GetRank());
   Vectors<Rational> basis, currentBasis;
   List<bool> Explored;
   Explored.initFillInObject(this->theSubalgebras.size, false);
@@ -2454,7 +2454,7 @@ void rootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder(GlobalVariable
   this->NumPseudoParabolicNonParabolic=0;
   rootSubalgebra currentSA;
   currentSA.ownEr=this;
-  basis.MakeEiBasis(this->owneR->GetRank());
+  basis.MakeEiBasis(this->owner->GetRank());
   List<rootSubalgebra> currentList;
   ProgressReport theReport(theGlobalVariables);
   for (int i=0; i<2; i++)
@@ -2496,8 +2496,8 @@ void rootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder(GlobalVariable
     } while (parSel.IncrementReturnFalseIfPastLast());
     currentList.QuickSortAscending();
     this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.AddListOnTop(currentList);
-    basis.AddOnTop(this->owneR->theWeyl.RootSystem[0]);
-    parSel.init(this->owneR->GetRank()+1);
+    basis.AddOnTop(this->owner->theWeyl.RootSystem[0]);
+    parSel.init(this->owner->GetRank()+1);
   }
   this->NumNonPseudoParabolic=this->theSubalgebras.size-this->NumParabolic-this->NumPseudoParabolicNonParabolic;
   currentList.SetSize(0);
@@ -2513,7 +2513,7 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
   this->initOwnerMustBeNonZero();
   this->ComputeAllReductiveRootSAsInit();
   HashedList<Vector<Rational> > tempVs;
-  this->flagPrintGAPinput= this->owneR->theWeyl.LoadGAPRootSystem(tempVs);
+  this->flagPrintGAPinput= this->owner->theWeyl.LoadGAPRootSystem(tempVs);
   ProgressReport theReport1(this->theGlobalVariables), theReport2(this->theGlobalVariables);
   rootSubalgebra currentSA;
   currentSA.ownEr=this;
@@ -2616,7 +2616,7 @@ WeylGroup& rootSubalgebras::GetOwnerWeyl()const
 
 SemisimpleLieAlgebra& rootSubalgebras::GetOwnerSSalgebra()const
 { this->CheckInitialization();
-  return *this->owneR;
+  return *this->owner;
 }
 
 void rootSubalgebras::ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables)
@@ -2878,7 +2878,7 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
   { out << "<hr>There are " << this->NumParabolic << " parabolic, " << this->NumPseudoParabolicNonParabolic << " pseudo-parabolic but not parabolic and "
     << this->NumNonPseudoParabolic << " non pseudo-parabolic root subsystems.";
     HashedList<Vector<Rational> > GAPPosRootSystem;
-    if (this->flagPrintGAPinput && this->owneR->theWeyl.LoadGAPRootSystem(GAPPosRootSystem))
+    if (this->flagPrintGAPinput && this->owner->theWeyl.LoadGAPRootSystem(GAPPosRootSystem))
     { out << " The roots needed to generate the root subsystems are listed below using the root indices in GAP. ";
       for (int i=0; i<this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size; i++)
       { rootSubalgebra& currentSA=this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither[i];
@@ -2987,7 +2987,7 @@ void rootSubalgebras::ComputeKmodMultTables(GlobalVariables* theGlobalVariables)
 }
 
 bool rootSubalgebras::CheckInitialization()const
-{ if (this->owneR==0)
+{ if (this->owner==0)
     crash << "This is a programming error: root subalgebras with non-initialized owner. " << crash;
   return true;
 }
@@ -2996,7 +2996,7 @@ void rootSubalgebras::initOwnerMustBeNonZero()
 { MacroRegisterFunctionWithName("rootSubalgebras::initOwnerMustBeNonZero");
   this->CheckInitialization();
   this->theSubalgebras.SetSize(0);
-  this->owneR->theWeyl.ComputeRho(false);
+  this->owner->theWeyl.ComputeRho(false);
 }
 
 int rootSubalgebras::GetIndexUpToEquivalenceByDiagramsAndDimensions(const rootSubalgebra& theSA)
@@ -3139,7 +3139,7 @@ rootSubalgebras::rootSubalgebras()
   this->NumLinesPerTableLatex=20;
   this->NumColsPerTableLatex=4;
   this->UpperLimitNumElementsWeyl=0;
-  this->owneR=0;
+  this->owner=0;
   this->flagPrintGAPinput=false;
   this->flagPrintParabolicPseudoParabolicInfo=false;
   this->initForNilradicalGeneration();

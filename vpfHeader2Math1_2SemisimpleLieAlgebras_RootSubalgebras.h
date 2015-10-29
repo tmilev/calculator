@@ -280,7 +280,7 @@ public:
   List<Selection> ImpiedSelectionsNilradical;
   List<List<List<int> > > storedNilradicals;
   HashedList<Rational> validScales;
-  SemisimpleLieAlgebra* owneR;
+  SemisimpleLieAlgebra* owner;
   GlobalVariables* theGlobalVariables;
   int parabolicsCounterNilradicalGeneration;
   List<int> numNilradicalsBySA;
@@ -367,7 +367,7 @@ public:
   List<int> moduleDimensions;
   ElementSemisimpleLieAlgebra<Rational> theH, theE, theF;
   ElementSemisimpleLieAlgebra<Rational> bufferHbracketE, bufferHbracketF, bufferEbracketF;
-  SemisimpleLieAlgebra* owneR;
+  SemisimpleLieAlgebra* owner;
   SltwoSubalgebras* container;
   Rational LengthHsquared;
   int indexInContainer;
@@ -409,9 +409,9 @@ public:
   }
   WeylGroup& GetOwnerWeyl();
   SemisimpleLieAlgebra& GetOwnerSSAlgebra()
-  { if (this->owneR==0)
+  { if (this->owner==0)
       crash << "This is a programming error: attempting to access the ambient Lie algebra of a non-initialized sl(2)-subalgebra. " << crash;
-    return *this->owneR;
+    return *this->owner;
   }
   std::string ToString(FormatExpressions* theFormat=0)const;
   void GetInvolvedPosGenerators(List<ChevalleyGenerator>& output);

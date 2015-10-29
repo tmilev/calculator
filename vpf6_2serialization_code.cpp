@@ -10,13 +10,13 @@ bool CalculatorConversions::innerExpressionFromChevalleyGenerator(Calculator& th
   input.CheckInitialization();
   output.reset(theCommands, 2);
   Expression generatorLetterE, generatorIndexE;
-  if (input.theGeneratorIndex>=input.owneR->GetNumPosRoots() && input.theGeneratorIndex< input.owneR->GetNumPosRoots()+input.owneR->GetRank())
+  if (input.theGeneratorIndex>=input.owner->GetNumPosRoots() && input.theGeneratorIndex< input.owner->GetNumPosRoots()+input.owner->GetRank())
     generatorLetterE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("h"), theCommands);
   else
     generatorLetterE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("g"), theCommands);
   output.AddChildOnTop(generatorLetterE);
   output.format=output.formatFunctionUseUnderscore;
-  generatorIndexE.AssignValue(input.owneR->GetDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
+  generatorIndexE.AssignValue(input.owner->GetDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
   return output.AddChildOnTop(generatorIndexE);
 }
 
@@ -234,15 +234,15 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(Calculator& theComma
     return theCommands << "<hr>input of innerLoadFromObject has " << input.children.size << " children, 4 expected. ";
   const Expression& theOwnerE=input[1];
   Expression tempE;
-  if (!CalculatorConversions::innerSSLieAlgebra(theCommands, theOwnerE, tempE, output.owneR))
+  if (!CalculatorConversions::innerSSLieAlgebra(theCommands, theOwnerE, tempE, output.owner))
     return theCommands << "<hr>Failed to extract semisimple Lie algebra from " << theOwnerE.ToString()
     << " while extracting its sl(2) subalgebra.";
   const Expression& theF=input[2];
   const Expression& theE=input[3];
   ElementSemisimpleLieAlgebra<Rational> eltF, eltE;
-  if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(theCommands, theF, eltF, *output.owneR))
+  if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(theCommands, theF, eltF, *output.owner))
     return theCommands << "<hr>Failed to extract f element while loading sl(2) subalgebra<hr>";
-  if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(theCommands, theE, eltE, *output.owneR))
+  if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(theCommands, theE, eltE, *output.owner))
     return theCommands << "<hr>Failed to extract e element while loading sl(2) subalgebra<hr>";
   if (eltE.IsEqualToZero() || eltF.IsEqualToZero())
     return theCommands << "<hr>Failed to load sl(2) subalgebra: either e or f is equal to zero. e and f are: " << eltE.ToString()
@@ -252,9 +252,9 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(Calculator& theComma
     << eltE.GetOwner()->ToString() << " and the owner of f is " << eltF.GetOwner()->ToString();
   output.theE=eltE;
   output.theF=eltF;
-  output.owneR=eltE.GetOwner();
+  output.owner=eltE.GetOwner();
   SemisimpleSubalgebras tempSubalgebras;
-  tempSubalgebras.owneR=output.owneR;
+  tempSubalgebras.owner=output.owner;
   int indexSubalgebras=
   theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSubalgebras);
   SemisimpleSubalgebras& ownerSubalgebras=theCommands.theObjectContainer.theSSsubalgebras[indexSubalgebras];
@@ -349,7 +349,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
   outputSubalgebra.theWeylNonEmbeddeD.MakeFromDynkinType(outputSubalgebra.theWeylNonEmbeddeD.theDynkinType);
 //  stOutput << "Corresponding Co-Cartan symmetric: " << outputSubalgebra.theWeylNonEmbeddeD.CoCartanSymmetric.ToString();
   //int theSmallRank=outputSubalgebra.theWeylNonEmbeddeD.GetDim();
-  int theRank=owner.owneR->GetRank();
+  int theRank=owner.owner->GetRank();
   Matrix<Rational> theHs;
   if (!theCommands.GetMatrix(ElementsCartanE, theHs, 0, theRank, 0))
     return theCommands << "<hr>Failed to load Cartan elements for candidate subalgebra of type " << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType << "<hr>";
@@ -376,7 +376,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
   { generatorsE.Sequencefy();
     ElementSemisimpleLieAlgebra<AlgebraicNumber> curGenAlgebraic;
     for (int i=1; i<generatorsE.children.size; i++)
-    { if (!CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(theCommands, generatorsE[i], curGenAlgebraic, *owner.owneR))
+    { if (!CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(theCommands, generatorsE[i], curGenAlgebraic, *owner.owner))
         return theCommands << "<hr>Failed to load semisimple Lie algebra element from expression " << generatorsE[i].ToString() << ". ";
       if (i%2 ==1)
         outputSubalgebra.theNegGens.AddOnTop(curGenAlgebraic);
@@ -441,9 +441,9 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
   if (ownerSS==0)
     crash << "Loaded zero subalgebra " << crash;
   SemisimpleSubalgebras tempSAs;
-  tempSAs.owneR=ownerSS;
+  tempSAs.owner=ownerSS;
   for (int i =0; i<theCommands.theObjectContainer.theSSsubalgebras.size; i++)
-    if (theCommands.theObjectContainer.theSSsubalgebras[i].owneR==0)
+    if (theCommands.theObjectContainer.theSSsubalgebras[i].owner==0)
       crash << "semisimple subalgebra with index " << i << " has zero owner. " << crash;
   SemisimpleSubalgebras& theSAs=theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSAs)];
   reportStream << " Initializing data structures... ";
@@ -534,7 +534,7 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(Calculator& theComma
   Expression dynkinTypeE;
   List<std::string> theKeys;
   List<Expression> theValues;
-  if (!CalculatorConversions::innerExpressionFromDynkinType(theCommands, input.owneR->theWeyl.theDynkinType, dynkinTypeE))
+  if (!CalculatorConversions::innerExpressionFromDynkinType(theCommands, input.owner->theWeyl.theDynkinType, dynkinTypeE))
     return false;
   theKeys.AddOnTop("AmbientDynkinType");
   theValues.AddOnTop(dynkinTypeE);
@@ -584,7 +584,7 @@ bool CalculatorConversions::innerExpressionFromMonomialUE
   if (input.IsConstant())
     return output.AssignValue(1, theCommands);
   ChevalleyGenerator theGen;
-  theGen.owneR=input.owneR;
+  theGen.owner=input.owner;
   Expression chevGenE, powerE, termE;
   List<Expression> theTerms;
   for (int i=0; i<input.generatorsIndices.size; i++)
@@ -639,7 +639,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
     return theCommands << "<hr>Failed to convert " << input.ToString() << " to polynomial.<hr>";
   ChevalleyGenerator theChevGen;
   ElementSemisimpleLieAlgebra<AlgebraicNumber> currentElt;
-  theChevGen.owneR=&owner;
+  theChevGen.owner=&owner;
   output.MakeZero();
   Expression theContext=polyFormE.GetContext();
   for (int j=0; j<polyForm.size(); j++)
@@ -681,7 +681,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
 
 bool CalculatorConversions::innerElementUE(Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra& owner)
 { ChevalleyGenerator theChevGen;
-  theChevGen.owneR=&owner;
+  theChevGen.owner=&owner;
   ElementUniversalEnveloping<RationalFunctionOld> outputUE;
   ElementUniversalEnveloping<RationalFunctionOld> currentSummand;
   ElementUniversalEnveloping<RationalFunctionOld> currentMultiplicand;

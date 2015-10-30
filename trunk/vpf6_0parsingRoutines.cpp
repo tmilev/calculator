@@ -974,10 +974,15 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
   const int maxNumTimesOneRuleCanBeCalled=1000;
   for (this->counterInSyntacticSoup=0; this->counterInSyntacticSoup<(*this->CurrrentSyntacticSouP).size; this->counterInSyntacticSoup++)
   { (*this->CurrentSyntacticStacK).AddOnTop((*this->CurrrentSyntacticSouP)[this->counterInSyntacticSoup]);
-    int numberOfTimesApplyOneRuleCalled=0;
+    int numTimesRulesCanBeAppliedWithoutStackDecrease=0;
+    int minStackSize=this->CurrentSyntacticStacK->size ;
     while(this->ApplyOneRule())
-    { numberOfTimesApplyOneRuleCalled++;
-      if (numberOfTimesApplyOneRuleCalled>maxNumTimesOneRuleCanBeCalled)
+    { if (this->CurrentSyntacticStacK->size <minStackSize)
+      { numTimesRulesCanBeAppliedWithoutStackDecrease=0;
+        minStackSize=this->CurrentSyntacticStacK->size ;
+      } else
+        numTimesRulesCanBeAppliedWithoutStackDecrease++;
+      if (numTimesRulesCanBeAppliedWithoutStackDecrease>maxNumTimesOneRuleCanBeCalled)
         crash << "This may be a programming error: Calculator::ApplyOneRule called more than " << maxNumTimesOneRuleCanBeCalled
         << " times without advancing to the next syntactic element in the syntactic soup. If this is indeed an expression which requires that"
         << " many application of a single parsing rule, then you should modify function Calculator::ExtractExpressions"

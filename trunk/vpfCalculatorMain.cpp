@@ -14,6 +14,7 @@ int main(int argc, char **argv)
 { //for (int i=0; i<argc; i++)
   //  std::cout << "argument " << i << ": " << argv[i] << "\n";
   MacroRegisterFunctionWithName("main");
+  try {
   InitializeGlobalObjects();
   onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=500000;
   onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction=5;
@@ -73,6 +74,11 @@ int main(int argc, char **argv)
     return main_apache_client();
   RegisterFunctionCall theReg(__FILE__, __LINE__, "About to serve Client");
   return theWebServer.GetActiveWorker().ServeClient();
+  }
+  catch (...)
+  { crash << "Something very wrong has happened. " << crash;
+  }
+  return -1;
 }
 
 int main_command_input(int argc, char **argv)

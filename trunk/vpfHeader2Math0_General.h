@@ -4013,6 +4013,7 @@ public:
   bool flagReportGaussianElimination;
   bool flagReportProductsMonomialAlgebras;
 
+  int progressReportStringsRegistered;
   List<std::string> ProgressReportStringS;
   DrawingVariables theDrawingVariables;
   FormatExpressions thePolyFormat;

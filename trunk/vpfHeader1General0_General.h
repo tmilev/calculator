@@ -1699,6 +1699,7 @@ class ProgressReport
 public:
   GlobalVariables* pointerGV;
   int currentLevel;
+  bool flagProgReportStringsExpanded;
   void Report(const std::string& theReport);
   void initFromGV(GlobalVariables* theGlobalVariables);
   ProgressReport(GlobalVariables* theGlobalVariables)

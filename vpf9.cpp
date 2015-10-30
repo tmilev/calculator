@@ -86,6 +86,7 @@ GlobalVariables::GlobalVariables()
   this->flagOutputTimedOut=false;
   this->flagTimedOutComputationIsDone=false;
   this->flagAllowUseOfThreadsAndMutexes=false;
+  this->progressReportStringsRegistered=0;
   //  this->flagLogInterProcessCommunication=true;
   //  stOutput << "Global variables created!";
 }
@@ -93,25 +94,36 @@ GlobalVariables::GlobalVariables()
 void ProgressReport::Report(const std::string& theReport)
 { if (this->pointerGV==0)
     return;
-  this->pointerGV->ProgressReportStringS[currentLevel]=theReport;
-  this->pointerGV->MakeReport();
+  if (!this->flagProgReportStringsExpanded)
+  { this->flagProgReportStringsExpanded=true;
+    this->pointerGV->MutexProgressReporting.LockMe();
+    this->pointerGV->ProgressReportStringS.SetSize(this->pointerGV->ProgressReportStringS.size+1);
+    *this->pointerGV->ProgressReportStringS.LastObject()="";
+    this->pointerGV->MutexProgressReporting.UnlockMe();
+  }
+  if (this->pointerGV->ProgressReportStringS.size>this->currentLevel)
+  { this->pointerGV->ProgressReportStringS[this->currentLevel]=theReport;
+    this->pointerGV->MakeReport();
+  }
 }
 
 void ProgressReport::initFromGV(GlobalVariables* theGlobalVariables)
 { this->pointerGV=theGlobalVariables;
+  this->flagProgReportStringsExpanded=false;
   if (this->pointerGV==0)
-    return;
-  this->pointerGV->MutexProgressReporting.LockMe();
-  currentLevel=this->pointerGV->ProgressReportStringS.size;
-  this->pointerGV->ProgressReportStringS.SetSize(this->pointerGV->ProgressReportStringS.size+1);
-  *this->pointerGV->ProgressReportStringS.LastObject()="";
-  this->pointerGV->MutexProgressReporting.UnlockMe();
+    this->currentLevel=-1;
+  else
+  { this->pointerGV->progressReportStringsRegistered++;
+    currentLevel=this->pointerGV->progressReportStringsRegistered;
+  }
 }
 
 ProgressReport::~ProgressReport()
 { if (this->pointerGV==0)
     return;
-  pointerGV->ProgressReportStringS.size--;
+  this->pointerGV->progressReportStringsRegistered--;
+  if (this->flagProgReportStringsExpanded)
+    this->pointerGV->ProgressReportStringS.size--;
 }
 
 ProjectInformationInstance::ProjectInformationInstance(const char* fileName, const std::string& fileDescription)

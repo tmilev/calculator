@@ -12,6 +12,8 @@ public:
   static bool innerCrash(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCrashByListOutOfBounds
   (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerCrashByVectorOutOfBounds
+  (Calculator& theCommands, const Expression& input, Expression& output);
 
 
   static bool innerQuoteToString(Calculator& theCommands, const Expression& input, Expression& output);

@@ -25,8 +25,12 @@ void Calculator::initPredefinedInnerFunctions()
    "crash(0)");
   this->AddOperationInnerHandler
   ("crashListOutOfBounds", CalculatorFunctionsGeneral::innerCrashByListOutOfBounds, "",
-   "Crashes the calculator: tests the crashing mechanism (are crash logs properly created, etc.).",
-   "crash(0)");
+   "Crashes the calculator by attempting to use data out-of-bounds in a List data structure.",
+   "crashListOutOfBounds(0)");
+  this->AddOperationInnerHandler
+  ("crashVectorOutOfBounds", CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds, "",
+   "Crashes the calculator by attempting to use data out-of-bounds in a std::vector.",
+   "crashVectorOutOfBounds(0)");
   this->AddOperationInnerHandler
   ("DrawExpressionTree", CalculatorFunctionsGeneral::innerDrawExpressionGraph, "",
    "Draws the internal tree structure of an expression. Does not unfold built-in types.",

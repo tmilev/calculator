@@ -5640,6 +5640,14 @@ bool CalculatorFunctionsGeneral::innerCrashByListOutOfBounds
   return output.AssignValue((std::string) "Crashing: list out of bounds.", theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds");
+  std::vector<int> theVector;
+  theVector[1]=1;
+  return output.AssignValue((std::string) "Crashing: std::vector out of bounds.", theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerDrawWeightSupportWithMults(Calculator& theCommands, const Expression& input, Expression& output)
 { //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
   if (!input.IsListNElements(3))

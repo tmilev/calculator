@@ -114,7 +114,7 @@ void ProgressReport::initFromGV(GlobalVariables* theGlobalVariables)
     this->currentLevel=-1;
   else
   { this->pointerGV->progressReportStringsRegistered++;
-    currentLevel=this->pointerGV->progressReportStringsRegistered;
+    this->currentLevel=this->pointerGV->ProgressReportStringS.size;
   }
 }
 

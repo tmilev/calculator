@@ -1050,6 +1050,9 @@ std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExten
 int WebWorker::ProcessNonCalculator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessNonCalculator");
   this->ExtractPhysicalAddressFromMainAddress();
+//  ProgressReportWebServer theProgressReport;
+  ProgressReportWebServer theProgressReport2;
+//  theProgressReport.SetStatus("<br>Processing non-computational web-server request.");
   //theLog << this->ToStringShort() << "\r\n";
   if (FileOperations::IsFolder(this->PhysicalFileName))
     return this->ProcessFolder();
@@ -1085,6 +1088,10 @@ int WebWorker::ProcessNonCalculator()
   }
   theFile.seekp(0, std::ifstream::end);
   unsigned int fileSize=theFile.tellp();
+  std::stringstream reportStream;
+  reportStream << "<br>Serving file " << this->PhysicalFileName << " ...";
+  theProgressReport2.SetStatus(reportStream.str());
+
   std::stringstream theHeader;
   theHeader << "HTTP/1.1 200 OK\r\n" << this->GetMIMEtypeFromFileExtension(fileExtension)
   << "Content-length: " << fileSize << "\r\n\r\n";
@@ -1108,6 +1115,8 @@ int WebWorker::ProcessNonCalculator()
     numBytesRead=theFile.gcount();
   }
   this->SendAllBytes();
+  reportStream << " done!";
+  theProgressReport2.SetStatus(reportStream.str());
   return 0;
 }
 

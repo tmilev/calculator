@@ -902,7 +902,11 @@ bool ElementHyperoctahedralGroup::AreConjugate(const ElementHyperoctahedralGroup
 
 void ElementHyperoctahedralGroup::GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& out) const
 { Matrix<Rational> M;
-  int n = this->s.size;
+  int n = this->SmallestN();
+  if(n==0) // this is the identity element.  it thinks it lives in the zero group, because it lives in all the groups
+  { out.MakeConst(1);
+    return;
+  }
   M.init(n,n);
   M.MakeZero();
   for(int i=0; i<n; i++)
@@ -984,7 +988,7 @@ bool ElementHyperoctahedralGroup::operator>(const ElementHyperoctahedralGroup& r
 }
 
 
-std::string ElementHyperoctahedralGroup::ToString() const
+std::string ElementHyperoctahedralGroup::ToString(FormatExpressions* unused) const
 { std::stringstream out;
   this->IntoStream(out);
   return out.str();
@@ -992,10 +996,12 @@ std::string ElementHyperoctahedralGroup::ToString() const
 
 void HyperoctahedralGroup::MakeHyperoctahedralGroup(int n)
 { this->isEntireHyperoctahedralGroup = true;
-//  this->ComputeCCSizesAndRepresentativesByFormula = HyperoctahedralGroup::ComputeCCSizesAndRepresentativesByFormulaImplementation;
+// these methods are currently broken because I don't actually know what conjugacy
+// in hyperoctahedral groups means
+//this->ComputeCCSizesAndRepresentativesByFormula = HyperoctahedralGroup::ComputeCCSizesAndRepresentativesByFormulaImplementation;
 //  this->AreConjugateByFormula = ElementHyperoctahedralGroup::AreConjugate;
-//  this->GetWordByFormula = HyperoctahedralGroup::GetWordByFormulaImplementation;
-//  this->GetSizeByFormula = HyperoctahedralGroup::GetSizeByFormulaImplementation;
+  this->GetWordByFormula = HyperoctahedralGroup::GetWordByFormulaImplementation;
+  this->GetSizeByFormula = HyperoctahedralGroup::GetSizeByFormulaImplementation;
   this->N = n;
   this->generators.SetSize(n-1+n);
   for(int i=0; i<n-1; i++)
@@ -1013,35 +1019,60 @@ void HyperoctahedralGroup::MakeHyperoctahedralGroup(int n)
   }
 }
 
-/*bool HyperoctahedralGroup::AreConjugate(const ElementHyperoctahedralGroup& x, const ElementHyperoctahedralGroup& y)
-{ if(this->isEntireHyperoctahedralGroup)
-    return ElementHyperoctahedralGroup::AreConjugate(x,y);
-//  if(this->isEntireDn)
-//    return ElementHyperoctahedralGroup::AreConjugateDn(x,y);
-  return SimpleFiniteGroup::AreConjugate(x,y);
-}*/
+
+void ParabolicSubHyperoctahedralGroupGetWord(void* Hp, ElementHyperoctahedralGroup& g, List<int>& out)
+{ Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup> *H = (Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>*) Hp;
+  HyperoctahedralGroup* G = H->parent;
+  List<int> superword;
+  G->GetWord(g, superword);
+  out.SetSize(0);
+  for(int i=0; i<superword.size; i++)
+  { if(!H->superGeneratorWordExists[superword[i]])
+      crash << "element " << g << " is assigned parent word " << superword.ToStringCommaDelimited() << " containing generator not found in subgroup " << superword[i] << " so if this does belong to the subgroup, we need a better algorithm at "  << __FILE__ << ":" << __LINE__ << crash;
+    out.AddListOnTop(H->superGeneratorWords[superword[i]]);
+  }
+  stOutput << "ParabolicSubHyperoctahedralGroupGetWord: " << g << " is assigned word " << out.ToStringCommaDelimited() << " translated from parent group's word " << superword.ToStringCommaDelimited() << '\n';
+}
 
 // Bp = <[12:],[23:],[:001],[:010],[:100]>
 // Bm = <[45:],[56:],[:001],[:010],[:100]>
 // Bn ⊃ Bp × Bm, with [34:] missing, we represent [34:] with an identity matrix
 // It is conceivable that this function can be replaced with a geneneric induce function
 // in a subgroup datatype that maps generators to generators.
-/*void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition& positive, const Partition& negative, GroupRepresentation<SimpleFiniteGroup<ElementHyperoctahedralGroup>, Rational>& out)
+void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition& positive, const Partition& negative, GroupRepresentation<SimpleFiniteGroup<ElementHyperoctahedralGroup>, Rational> &out)
 { List<Matrix<Rational> > pozm, negm;
   // the next two things should be done in parallel.  How can I make that happen?
   positive.SpechtModuleMatricesOfTranspositionsjjplusone(pozm);
   negative.SpechtModuleMatricesOfTranspositionsjjplusone(negm);
 
+
+  Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup> PxM;
   List<ElementHyperoctahedralGroup> subgens;
   subgens = this->generators;
   if(pozm.size + negm.size != this->generators.size / 2)
     subgens.RemoveIndexShiftDown(pozm.size);
-  Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup> PxM;
   PxM.initFromGroupAndGenerators(*this, subgens);
-  PxM.CosetRepresentativeEnumerator = HyperoctahedralGroup::ParabolicSubgroupCosetRepresentativeEnumerator;
+  PxM.superGeneratorWords.SetSize(generators.size);
+  PxM.superGeneratorWordExists.SetSize(generators.size);
+  for(int i=0; i<pozm.size; i++)
+  { PxM.superGeneratorWords[i].AddOnTop(i);
+    PxM.superGeneratorWordExists[i] = true;
+  }
+  if(pozm.size + negm.size != this->generators.size / 2)
+  { PxM.superGeneratorWordExists[pozm.size-1] = false;
+    for(int i=pozm.size; i<generators.size; i++)
+      PxM.superGeneratorWords[i][0] -= 1;
+  }
+  stOutput << "Generating subgroup:\n";
+  for(int i=0; i<this->generators.size; i++)
+    stOutput << i << this->generators[i] << PxM.superGeneratorWordExists[i] << PxM.superGeneratorWords[i] << '\n';
+  for(int i=0; i<PxM.generators.size; i++)
+    stOutput << i << PxM.generators[i] << '\n';
+  //PxM.CosetRepresentativeEnumerator = HyperoctahedralGroup::ParabolicSubgroupCosetRepresentativeEnumerator;
+  PxM.GetWordByFormula = ParabolicSubHyperoctahedralGroupGetWord;
   GroupRepresentation<Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>, Rational> pxmr;
   pxmr.ownerGroup = &PxM;
-  pxmr.generatorS.SetSize(PxM.generatorS.size);
+  pxmr.generatorS.SetSize(PxM.generators.size);
   Matrix<Rational> hid, kid;
   if(pozm.size == 0)
     hid.MakeIdMatrix(1);
@@ -1055,22 +1086,24 @@ void HyperoctahedralGroup::MakeHyperoctahedralGroup(int n)
   for(int pi=0; pi<pozm.size; i++, pi++)
     pxmr.generatorS[i].AssignTensorProduct(pozm[pi], kid);
   for(int ni=0; ni<negm.size; i++, ni++)
-    pmxr.generatorS[i].AssignTensorProduct(hid,negm[ni]);
+    pxmr.generatorS[i].AssignTensorProduct(hid, negm[ni]);
   for(int psi=0; psi<positive.n; i++, psi++)
     pxmr.generatorS[i].AssignTensorProduct(hid,kid);
   for(int nsi=0; nsi<negative.n; i++, nsi++)
   { pxmr.generatorS[i].AssignTensorProduct(hid,kid);
     pxmr.generatorS[i] *= -1;
   }
-  PxM.InduceRepresentation(pxmr,out);
+  GroupRepresentation<HyperoctahedralGroup, Rational> out_reboxme;
+  PxM.InduceRepresentation(pxmr,out_reboxme);
+  out.generatorS = out_reboxme.generatorS;
   std::stringstream ids;
   ids << negative << ", " << positive;
   out.identifyingString = ids.str();
-}*/
+  out.ownerGroup = this;
+}
 
 void HyperoctahedralGroup::AllSpechtModules()
-{ crash << "not implemented yet" << crash;
-  /*int N = this->GetN();
+{ int N = this->GetN();
   for(int p=0; p<=N; p++)
   { List<Partition> nps;
     Partition::GetPartitions(nps,p);
@@ -1080,8 +1113,7 @@ void HyperoctahedralGroup::AllSpechtModules()
       for(int ppi=0; ppi<pps.size; ppi++)
       { GroupRepresentation<SimpleFiniteGroup<ElementHyperoctahedralGroup>, Rational> sm;
         stOutput << "Computing representation {" << nps[npi] << "}, {" << pps[ppi] << "}\n";
-        crash << "Code not implemented yet." << crash;
-        //this->SpechtModuleOfPartititons(pps[ppi],nps[npi],sm);
+        this->SpechtModuleOfPartititons(pps[ppi],nps[npi],sm);
         sm.VerifyRepresentation();
         stOutput << sm << '\n';
         this->irreps.AddOnTop(sm);
@@ -1089,7 +1121,7 @@ void HyperoctahedralGroup::AllSpechtModules()
     }
   }
   this->irreps.QuickSortAscending();
-  stOutput << this->PrettyPrintCharacterTable() << '\n';*/
+  stOutput << this->PrettyPrintCharacterTable() << '\n';
 }
 
 int HyperoctahedralGroup::GetN()

@@ -417,6 +417,8 @@ void Polynomial<coefficient>::AssignCharPoly(const Matrix<coefficient>& input)
   if (input.NumCols!=input.NumRows)
     crash << "Programming error: requesting the minimimal polynomial of a non-square matrix. " << crash;
   int n = input.NumCols;
+  if (n == 0)
+    crash << "Why are you takig the characteristic polyomial of a 0x0 matrix?  If you have a good reason, change " << __FILE__ << ":" << __LINE__ << crash;
   this->MakeConst(1);
   Matrix<coefficient> acc = input;
   coefficient currenCF;

@@ -343,7 +343,7 @@ template <typename somegroup, class elementSomeGroup>
 void Subgroup<somegroup, elementSomeGroup>::initFromGroupAndGenerators(somegroup& inputGroup, const List<elementSomeGroup>& inputGenerators)
 { MacroRegisterFunctionWithName("Subgroup::initFromGroupAndGenerators");
   if (&inputGenerators==&this->generators)//<-handle naughty programmers
-  { List<ElementWeylGroup<somegroup> > inputGeneratorsCopy=inputGenerators;
+  { List<elementSomeGroup> inputGeneratorsCopy=inputGenerators;
     this->initFromGroupAndGenerators(inputGroup, inputGeneratorsCopy);
     return;
   }
@@ -358,6 +358,13 @@ bool Subgroup<somegroup, elementSomeGroup>::CheckInitialization()
 { if (this->parent==0)
     crash << "This is a programming error: subgroup not initialized when it should be";
   return true;
+}
+
+template <typename elementSomeGroup>
+void FiniteGroup<elementSomeGroup>::GetWord(elementSomeGroup& g, List<int>& out)
+{ if(GetWordByFormula)
+    return GetWordByFormula(this, g, out);
+  crash << "Words for generic FiniteGroup instances are not (yet?) implemented, see " << __FILE__ << ':' << __LINE__ << crash;
 }
 
 template <class elementSomeGroup>
@@ -462,7 +469,7 @@ std::string FiniteGroup<elementSomeGroup>::ToStringConjugacyClasses(FormatExpres
     { out << "<hr>Conjugacy class " << i+1 << ": ";
       if (this->conjugacyClasseS[i].flagRepresentativeComputed)
       { out << " represented by " << this->conjugacyClasseS[i].representative.ToString(theFormat) << ". ";
-        out << this->conjugacyClasseS[i].representative.ToStringInvariants(theFormat);
+        //out << this->conjugacyClasseS[i].ToStringInvariants(theFormat); FIXME: do this sanely
       } else
         out << " representative not computed. ";
       out << "Class size: " << this->conjugacyClasseS[i].size.ToString() << ".\n<br>\n";

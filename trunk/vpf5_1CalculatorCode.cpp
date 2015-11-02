@@ -846,19 +846,51 @@ void Plot::ComputeAxesAndBoundingBox()
   }
 }
 
+std::string Plot::GetPlotHtml()
+{ MacroRegisterFunctionWithName("Plot::GetPlotHtml");
+  std::stringstream resultStream;
+  this->ComputeAxesAndBoundingBox();
+  DrawingVariables theDVs;
+  theDVs.DefaultHtmlHeight=400;
+  theDVs.DefaultHtmlWidth=600;
+  Vector<double> v1, v2;
+  v1.MakeZero(2);
+  v2.MakeZero(2);
+  v1[0]=this->theLowerBoundAxes-0.1;
+  v1[1]=0;
+  v2[0]=this->theUpperBoundAxes+0.1;
+  v2[1]=0;
+  double theWidth=this->theUpperBoundAxes-this->theLowerBoundAxes+0.2;
+  double theHeight=this->highBoundY-this->lowBoundY+0.2;
+  theDVs.theBuffer.centerX[0]=((-this->theLowerBoundAxes+0.1)/theWidth)*((double) theDVs.DefaultHtmlWidth);
+  theDVs.theBuffer.centerY[0]=((-this->lowBoundY+0.1)/theHeight)*((double) theDVs.DefaultHtmlHeight);
+  theDVs.theBuffer.GraphicsUnit[0]=
+  MathRoutines::Minimum( ((double)theDVs.DefaultHtmlWidth)/theWidth,((double)theDVs.DefaultHtmlHeight)/theHeight );
+  theDVs.drawLineBetweenTwoVectorsBuffer(v1, v2, theDVs.PenStyles::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+  stOutput << "The width: " << theWidth
+  << "<br> theLowerBoundAxes equals: " << this->theLowerBoundAxes
+  << "<br> theUpperBoundAxes equals: " << this->theUpperBoundAxes
+  << "<br> GraphicsUnit equals: " << theDVs.theBuffer.GraphicsUnit[0];
+  ;
+  v1[0]=0;
+  v1[1]=this->lowBoundY-0.1;
+  v2[0]=0;
+  v2[1]=this->highBoundY-0.1;
+  //theDVs.theBuffer.centerX=
+  theDVs.drawLineBetweenTwoVectorsBuffer(v1, v2, theDVs.PenStyles::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+  for (int i=0; i<this->thePlots.size; i++)
+    for (int j=1; j<thePlots[i].thePoints.size; j++)
+      theDVs.drawLineBetweenTwoVectorsBuffer
+      (thePlots[i].thePoints[j-1], thePlots[i].thePoints[j], theDVs.PenStyles::PenStyleNormal,
+        CGI::RedGreenBlue(255,0,0));
+  resultStream << theDVs.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
+  return resultStream.str();
+}
+
 std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)
 { MacroRegisterFunctionWithName("Plot::GetPlotStringAddLatexCommands");
   std::stringstream resultStream;
   this->ComputeAxesAndBoundingBox();
-  if (useHtml)
-  { DrawingVariables theDVs;
-    for (int i=0; i<this->thePlots.size; i++)
-      for (int j=1; j<thePlots[i].thePoints.size; j++)
-        theDVs.drawLineBetweenTwoVectorsBuffer
-        (thePlots[i].thePoints[j-1], thePlots[i].thePoints[j], theDVs.PenStyles::PenStyleNormal,
-         CGI::RedGreenBlue(0,0,0));
-    resultStream << theDVs.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
-  }
   std::string lineSeparator= useHtml ? "<br>\n" : "\n";
   resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{auto-pst-pdf}\\usepackage{pst-math}\\usepackage{pst-plot}";
   resultStream << lineSeparator << "\\newcommand{\\fcLabels}[2]{\\rput[t](#1, -0.1){$x$}\\rput[r](-0.1, #2){$y$}}" << lineSeparator;

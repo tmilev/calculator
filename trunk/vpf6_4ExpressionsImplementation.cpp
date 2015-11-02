@@ -1842,6 +1842,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   } else if (this->IsOfType<Plot>())
   { if (isFinal)
     { Plot& thePlot=this->GetValueNonConst<Plot>();
+      out << thePlot.GetPlotHtml();
       out << this->owner->WriteDefaultLatexFileReturnHtmlLink(thePlot.GetPlotStringAddLatexCommands(false), true);
       out << "<br><b>LaTeX code used to generate the output. </b><br>" << thePlot.GetPlotStringAddLatexCommands(true);
     } else

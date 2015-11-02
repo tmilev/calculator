@@ -600,6 +600,7 @@ class Plot
   double theUpperBoundAxes;
   double lowBoundY;
   double highBoundY;
+  std::string GetPlotHtml();
   std::string GetPlotStringAddLatexCommands(bool useHtml);
   Plot();
   void ComputeAxesAndBoundingBox();

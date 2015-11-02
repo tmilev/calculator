@@ -3,6 +3,7 @@
 #include "vpfHeader2Math0_General.h"
 #include "vpfHeader2Math1_LieTheoryExtras.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
+#include "vpfHeader2Math9DrawingVariables.h"
 #include <assert.h>
 
 ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Math routines implementation. ");
@@ -872,7 +873,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
 
 
   Vector<Rational> tempRoot, ZeroRoot;
-  DrawingVariables& drawOps=theGlobalVariables.theDrawingVariables;
+  DrawingVariables drawOps;
   int theSmallDim=SmallerWeyl.CartanSymmetric.NumRows;
 //  drawOps.theBuffer.initDimensions(theSmallDim, 1);
   Vectors<double> theDraggableBasis;
@@ -881,8 +882,10 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   tmpWeyl.MakeArbitrarySimple('A',2);
   drawOps.theBuffer.initDimensions(tmpWeyl.CartanSymmetric, theDraggableBasis, theDraggableBasis, 1);
   FormatExpressions theFormat;
-  drawOps.theBuffer.BasisProjectionPlane[0][0][0]=1; drawOps.theBuffer.BasisProjectionPlane[0][0][1]=0;
-  drawOps.theBuffer.BasisProjectionPlane[0][1][0]=1;  drawOps.theBuffer.BasisProjectionPlane[0][1][1]=1;
+  drawOps.theBuffer.BasisProjectionPlane[0][0][0]=1;
+  drawOps.theBuffer.BasisProjectionPlane[0][0][1]=0;
+  drawOps.theBuffer.BasisProjectionPlane[0][1][0]=1;
+  drawOps.theBuffer.BasisProjectionPlane[0][1][1]=1;
   drawOps.theBuffer.ModifyToOrthonormalNoShiftSecond
   (drawOps.theBuffer.BasisProjectionPlane[0][1], drawOps.theBuffer.BasisProjectionPlane[0][0]);
   drawOps.theBuffer.GraphicsUnit[0]=50;

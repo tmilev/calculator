@@ -135,6 +135,43 @@ void DrawOperations::drawLineBetweenTwoVectorsBuffer(const Vector<Rational>& vec
   this->theDrawLineBetweenTwoRootsOperations.LastObject()->init(vector1, vector2, thePenStyle, ColorIndex);
 }
 
+void DrawOperations::drawLineBetweenTwoVectorsBuffer(const Vector<double>& vector1, const Vector<double>& vector2, unsigned long thePenStyle, int ColorIndex)
+{ this->TypeNthDrawOperation.AddOnTop(this->typeDrawLineBetweenTwoVectors);
+  this->IndexNthDrawOperation.AddOnTop(this->theDrawLineBetweenTwoRootsOperations.size);
+  this->theDrawLineBetweenTwoRootsOperations.AddObjectOnTopCreateNew();
+  this->theDrawLineBetweenTwoRootsOperations.LastObject()->init(vector1, vector2, thePenStyle, ColorIndex);
+}
+
+void DrawLineBetweenTwoRootsOperation::init
+(const Vector<Rational>& input1, const Vector<Rational>& input2, unsigned long PenStyle, int colorIndex)
+{ if(input1.size!=input2.size)
+    crash << crash;
+  int theDimension=input1.size;
+  this->v1.SetSize(theDimension);
+  this->v2.SetSize(theDimension);
+  for (int i=0; i<theDimension; i++)
+  { this->v1[i]=input1[i].GetDoubleValue();
+    this->v2[i]=input2[i].GetDoubleValue();
+  }
+  this->thePenStyle=PenStyle;
+  this->ColorIndex=colorIndex;
+}
+
+void DrawLineBetweenTwoRootsOperation::init
+(const Vector<double>& input1, const Vector<double>& input2, unsigned long PenStyle, int colorIndex)
+{ if(input1.size!=input2.size)
+    crash << crash;
+  int theDimension=input1.size;
+  this->v1.SetSize(theDimension);
+  this->v2.SetSize(theDimension);
+  for (int i=0; i<theDimension; i++)
+  { this->v1[i]=input1[i];
+    this->v2[i]=input2[i];
+  }
+  this->thePenStyle=PenStyle;
+  this->ColorIndex=colorIndex;
+}
+
 void DrawOperations::drawCircleAtVectorBuffer
 (const Vector<Rational>& input, double radius, unsigned long thePenStyle, int theColor)
 { this->TypeNthDrawOperation.AddOnTop(this->typeDrawCircleAtVector);
@@ -148,6 +185,10 @@ void DrawOperations::drawTextAtVectorBuffer(const Vector<Rational>& input, const
   this->IndexNthDrawOperation.AddOnTop(this->theDrawTextAtVectorOperations.size);
   this->theDrawTextAtVectorOperations.AddObjectOnTopCreateNew();
   this->theDrawTextAtVectorOperations.LastObject()->init(input, inputText, ColorIndex, theFontSize, theTextStyle);
+}
+
+void DrawingVariables::drawLineDirectly(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
+{ this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex);
 }
 
 void DrawOperations::drawLineBuffer(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)

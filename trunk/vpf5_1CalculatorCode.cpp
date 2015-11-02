@@ -761,23 +761,50 @@ void Plot::operator+=(const PlotObject& other)
 { this->thePlots.AddOnTop(other);
 }
 
+void PlotObject::CreatePlotFunction
+(const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound,
+ double inputYmin, double inputYmax, Vectors<double>* inputPoints)
+{ MacroRegisterFunctionWithName("PlotObject::Create");
+  this->xLow=inputLowerBound;
+  this->xHigh=inputUpperBound;
+  this->yLow=inputYmin;
+  this->yHigh=inputYmax;
+  this->thePlotElement=(inputE);
+  this->thePlotString=
+  GetPlotStringFromFunctionStringAndRanges
+  (false, inputPostfixNotation, inputE.ToString(), inputLowerBound, inputUpperBound);
+  this->thePlotStringWithHtml=
+  this->GetPlotStringFromFunctionStringAndRanges
+  (true, inputPostfixNotation, inputE.ToString(), inputLowerBound, inputUpperBound);
+  if (inputPoints!=0)
+    this->thePoints=*inputPoints;
+  this->thePlotType="plotFunction";
+}
+
 void Plot::AddFunctionPlotOnTop
 (const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound,
- double inputYmin, double inputYmax)
+ double inputYmin, double inputYmax, Vectors<double>* inputPoints)
 { PlotObject thePlot;
-  thePlot.xLow=inputLowerBound;
-  thePlot.xHigh=inputUpperBound;
-  thePlot.yLow=inputYmin;
-  thePlot.yHigh=inputYmax;
-  thePlot.thePlotElement=(inputE);
-  thePlot.thePlotString=
-  thePlot.GetPlotStringFromFunctionStringAndRanges
-  (false, inputPostfixNotation, inputE.ToString(), inputLowerBound, inputUpperBound);
-  thePlot.thePlotStringWithHtml=
-  thePlot.GetPlotStringFromFunctionStringAndRanges
-  (true, inputPostfixNotation, inputE.ToString(), inputLowerBound, inputUpperBound);
-  thePlot.thePlotType="plotFunction";
+  thePlot.CreatePlotFunction
+  (inputE, inputPostfixNotation, inputLowerBound, inputUpperBound, inputYmin, inputYmax, inputPoints);
   this->thePlots.AddOnTop(thePlot);
+}
+
+bool PlotObject::operator==(const PlotObject& other)const
+{ return this->thePlotStringWithHtml==other.thePlotStringWithHtml &&
+  this->xLow==other.xLow&&
+  this->xHigh==other.xHigh &&
+  this->yLow==other.yLow &&
+  this->yHigh==other.yHigh &&
+  this->thePlotElement==other.thePlotElement &&
+  this->thePlotType==other.thePlotType;
+}
+
+PlotObject::PlotObject()
+{ this-> xLow=(0);
+  this-> xHigh=(0);
+  this-> yLow=(0);
+  this-> yHigh=(0);
 }
 
 std::string PlotObject::GetPlotStringFromFunctionStringAndRanges
@@ -798,16 +825,39 @@ std::string PlotObject::GetPlotStringFromFunctionStringAndRanges
   return out.str();
 }
 
+Plot::Plot()
+{ this->theLowerBoundAxes=-0.5;
+  this->theUpperBoundAxes=1;
+  this->lowBoundY=-0.5;
+  this->highBoundY=0.5;
+}
+
+void Plot::ComputeAxesAndBoundingBox()
+{ MacroRegisterFunctionWithName("Plot::ComputeAxesAndBoundingBox");
+  this->theLowerBoundAxes=-0.5;
+  this->theUpperBoundAxes=1;
+  this->lowBoundY=-0.5;
+  this->highBoundY=0.5;
+  for (int i=0; i<this->thePlots.size; i++)
+  { this->theLowerBoundAxes=MathRoutines::Minimum(this->thePlots[i].xLow, theLowerBoundAxes);
+    this->theUpperBoundAxes=MathRoutines::Maximum(this->thePlots[i].xHigh, theUpperBoundAxes);
+    this->highBoundY=MathRoutines::Maximum(this->thePlots[i].yHigh, highBoundY);
+    this->lowBoundY=MathRoutines::Minimum(this->thePlots[i].yLow, lowBoundY);
+  }
+}
+
 std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)
 { MacroRegisterFunctionWithName("Plot::GetPlotStringAddLatexCommands");
   std::stringstream resultStream;
-  double theLowerBoundAxes=-0.5, theUpperBoundAxes=1;
-  double lowBoundY=-0.5, highBoundY=0.5;
-  for (int i=0; i<this->thePlots.size; i++)
-  { theLowerBoundAxes=MathRoutines::Minimum(this->thePlots[i].xLow, theLowerBoundAxes);
-    theUpperBoundAxes=MathRoutines::Maximum(this->thePlots[i].xHigh, theUpperBoundAxes);
-    highBoundY=MathRoutines::Maximum(this->thePlots[i].yHigh, highBoundY);
-    lowBoundY=MathRoutines::Minimum(this->thePlots[i].yLow, lowBoundY);
+  this->ComputeAxesAndBoundingBox();
+  if (useHtml)
+  { DrawingVariables theDVs;
+    for (int i=0; i<this->thePlots.size; i++)
+      for (int j=1; j<thePlots[i].thePoints.size; j++)
+        theDVs.drawLineBetweenTwoVectorsBuffer
+        (thePlots[i].thePoints[j-1], thePlots[i].thePoints[j], theDVs.PenStyles::PenStyleNormal,
+         CGI::RedGreenBlue(0,0,0));
+    resultStream << theDVs.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
   }
   std::string lineSeparator= useHtml ? "<br>\n" : "\n";
   resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{auto-pst-pdf}\\usepackage{pst-math}\\usepackage{pst-plot}";

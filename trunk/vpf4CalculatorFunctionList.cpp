@@ -938,7 +938,7 @@ void Calculator::initPredefinedInnerFunctions()
    The second argument gives the highest weight in fundamental coordinates. ",
    "WeylDimFormula{}(G_2, (x,0));\nWeylDimFormula{}(B_3, (x,0,0));");
   this->AddOperationInnerHandler
-  ("animateLittelmannPaths", this->fAnimateLittelmannPaths, "",
+  ("animateLittelmannPaths", this->innerAnimateLittelmannPaths, "",
    "Generates all Littelmann-Lakshmibai-Seshadri paths, draws them and animates them. \
    Presented first on the seminar in Charles University Prague. \
    The first argument gives the type of the semisimple  Lie algebra, the second gives the highest weight. \
@@ -993,7 +993,7 @@ void Calculator::initPredefinedInnerFunctions()
     with javascript holds.",
    "drawWeightSupport{}(B_3,(1,1,1)); drawWeightSupport{}(G_2,(1,2))");
   this->AddOperationInnerHandler
-  ("SplitFDpartB3overG2CharsOnly", this->fSplitFDpartB3overG2CharsOnly, "",
+  ("SplitFDpartB3overG2CharsOnly", this->innerSplitFDpartB3overG2CharsOnly, "",
    "Splits the finite dimensional part of the inducing module of the generalized Verma module of\
     B_3(so(7)) into G_2-components. \
    The argument is gives the highest weight of the generalized Verma module in fundamental \
@@ -1011,7 +1011,7 @@ void Calculator::initPredefinedInnerFunctions()
    subalgebra of B_3. ",
    "SplitFDpartB3overG2{}(x_1,1,0)");
   this->AddOperationInnerHandler
-  ("PrintB3G2branchingTableCharsOnly",this->fPrintB3G2branchingTableCharsOnly, "",
+  ("PrintB3G2branchingTableCharsOnly",this->innerPrintB3G2branchingTableCharsOnly, "",
    "Creates a table of branching of finite dimensional B_3-modules over G_2. The argument of the \
    function gives the maximum height \
    of the B_3-weight. The second argument indicates the parabolic subalgebra of B_3- zero entry \
@@ -1021,7 +1021,7 @@ void Calculator::initPredefinedInnerFunctions()
    in that coordinate is used as the corresponding highest weight. ",
    "PrintB3G2branchingTableCharsOnly{}(2, (0,0,0)); PrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))", true, true);
   this->AddOperationInnerHandler
-  ("PrintB3G2branchingTable", this->fPrintB3G2branchingTable, "",
+  ("PrintB3G2branchingTable", this->innerPrintB3G2branchingTable, "",
    "Creates a table of branching of finite dimensional B_3-modules over G_2. \
     The argument of the function gives the maximum height \
    of the B_3-weight. The function works with arguments 0 or 1; values of 2 or more must be run off-line.",
@@ -1088,7 +1088,7 @@ void Calculator::initPredefinedInnerFunctions()
    MapSemisimpleLieAlgebraInWeylAlgebra.",
    "MapSemisimpleLieAlgebraInWeylAlgebraAllGens{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ", true, false);
   this->AddOperationInnerHandler
-  ("KLcoeffs", this->fKLcoeffs, "",
+  ("KLcoeffs", this->innerKLcoeffs, "",
    "Computes the n by n tables of 1) Kazhdan-Lusztig polynomials, 2) R polynomials and 3) Kazhdan-Lusztig \
    polynomials evaluated at one, where n<=192  is the size of the Weyl group (i.e. no larger than D_4(so(8)).\
    The notation follows the original paper by Kazhdan and Lusztig, \"\
@@ -1142,7 +1142,7 @@ void Calculator::initPredefinedInnerFunctions()
    function up to E_6 but LaTeX crashes trying to process the output. </b>",
    "parabolicsInfoBruhatGraph{}(B_3,(1,0,0),(1,0,0))");
   this->AddOperationInnerHandler
-  ("fTestMonomialBasisConjecture", this->fTestMonomialBaseConjecture, "",
+  ("fTestMonomialBasisConjecture", this->innerTestMonomialBaseConjecture, "",
    "Tests the monomial basis conjecture from the Jackson-Milev paper. First argument gives rank bound. \
     Second argument gives dimension bound. ",
    "fTestMonomialBasisConjecture{}(2, 50)");
@@ -1156,12 +1156,12 @@ void Calculator::initPredefinedInnerFunctions()
     First argument = type. Second argument = highest weight. Non-integer entries give parabolic selection. ",
    "DecomposeCharGenVermaToIrreps{}(G_2, (x_1, 0))");*/
   this->AddOperationInnerHandler
-  ("LSpath", this->fLSPath, "",
+  ("LSpath", this->innerLSPath, "",
    "Lakshmibai-Seshadri path starting at 0. The first argument gives the semisimple Lie algebra, \
     the next arguments give the waypoints of the path.",
    "LSpath{}(G_2, (0,0), (2,1) )");
   this->AddOperationInnerHandler
-  ("LROdefine", this->fLittelmannOperator, "",
+  ("LROdefine", this->innerLittelmannOperator, "",
    "Littelmann root operator e_i, where e_i is the Littelmann root operator with \
    respect to root of index i. If i is negative then the e_i root operator is defined to be \
    the f_\alpha operator.",
@@ -1434,7 +1434,7 @@ void Calculator::initPredefinedInnerFunctions()
    ;
 
 //     this->AddOperationInnerHandler
-//  ("printAllPartitions", & this->fPrintAllPartitions, "",
+//  ("printAllPartitions", & this->innerPrintAllPartitions, "",
 //   "Prints (Kostant) partitions . ",
 //   "printAllPartitions{}(A_2, (2,3))");
 //  this->AddOperationInnerHandler

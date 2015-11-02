@@ -3,6 +3,7 @@
 #ifndef vpfHeader_ImplementationHeaderModulesSSLielgebras
 #define vpfHeader_ImplementationHeaderModulesSSLielgebras
 #include "vpfHeader2Math6_ModulesSSLieAlgebras.h"
+#include "vpfHeader2Math9DrawingVariables.h"
 
 static ProjectInformationInstance ProjectInfoVpfImplementationHeaderModulesSSLielgebras(__FILE__, "Implementation header, generalized Verma modules. ");
 

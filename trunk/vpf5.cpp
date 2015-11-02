@@ -151,7 +151,7 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebr
   return (numTotalWeightsFound<=upperBoundDominantWeights);
 }
 
-bool Calculator::fAnimateLittelmannPaths(Calculator& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerAnimateLittelmannPaths(Calculator& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(3))
     return output.MakeError("This function takes 2 arguments", theCommands);
@@ -165,7 +165,7 @@ bool Calculator::fAnimateLittelmannPaths(Calculator& theCommands, const Expressi
   Vector<Rational> theWeightInSimpleCoords;
   theWeightInSimpleCoords = theSSowner->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
   //stOutput << "The fundamental coords: " << theWeight.ToString();
-  theCommands << "<br>Function fAnimateLittelmannPaths: your input in simple coords: " << theWeightInSimpleCoords.ToString();
+  theCommands << "<br>Function innerAnimateLittelmannPaths: your input in simple coords: " << theWeightInSimpleCoords.ToString();
   LittelmannPath thePath;
   thePath.MakeFromWeightInSimpleCoords(theWeightInSimpleCoords, theSSowner->theWeyl);
   return output.AssignValue(thePath.GenerateOrbitAndAnimate(*theCommands.theGlobalVariableS), theCommands);
@@ -227,8 +227,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate(GlobalVariables& theGlobalVa
   List<LittelmannPath> theOrbit;
   List<List<int> > theGens;
   if (!this->GenerateOrbit(theOrbit, theGens, theGlobalVariables, 1000, 0))
-  { out  << "<b>Not all paths were genenerated, only the first " << theOrbit.size << "</b>";
-  }
+    out  << "<b>Not all paths were genenerated, only the first " << theOrbit.size << "</b>";
   AnimationBuffer theBuffer;
 //  int theDim=this->owner->GetDim();
   Vectors<double> coxPlane;
@@ -483,8 +482,8 @@ void Calculator::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
   output.GetRestrictionAmbientRootSystemToTheSmallerCartanSA(output.RestrictedRootSystem, *this->theGlobalVariableS);
 }
 
-bool Calculator::fPrintB3G2branchingIntermediate(Calculator& theCommands, const Expression& input, Expression& output, Vectors<RationalFunctionOld>& theHWs, branchingData& theG2B3Data, Expression& theContext)
-{ MacroRegisterFunctionWithName("Calculator::fPrintB3G2branchingIntermediate");
+bool Calculator::innerPrintB3G2branchingIntermediate(Calculator& theCommands, const Expression& input, Expression& output, Vectors<RationalFunctionOld>& theHWs, branchingData& theG2B3Data, Expression& theContext)
+{ MacroRegisterFunctionWithName("Calculator::innerPrintB3G2branchingIntermediate");
   std::stringstream out, timeReport;
   std::stringstream latexTable, latexTable2;
   bool isFD=(theG2B3Data.selInducing.CardinalitySelection==0);
@@ -654,25 +653,25 @@ bool Calculator::fPrintB3G2branchingIntermediate(Calculator& theCommands, const 
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool Calculator::fPrintB3G2branchingTable(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::fPrintB3G2branchingTable");
+bool Calculator::innerPrintB3G2branchingTable(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerPrintB3G2branchingTable");
   Vectors<RationalFunctionOld> theHWs;
   branchingData theG2B3Data;
   Expression theContext(theCommands);
-  if (!theCommands.fPrintB3G2branchingTableCommon(theCommands, input, output, theHWs, theG2B3Data, theContext))
+  if (!theCommands.innerPrintB3G2branchingTableCommon(theCommands, input, output, theHWs, theG2B3Data, theContext))
     return false;
   if (output.IsError())
     return true;
 //  stOutput << " <br>the highest weights: " << theHWs.ToString();
-  return theCommands.fPrintB3G2branchingIntermediate(theCommands, input, output, theHWs, theG2B3Data, theContext);
+  return theCommands.innerPrintB3G2branchingIntermediate(theCommands, input, output, theHWs, theG2B3Data, theContext);
 }
 
-bool Calculator::fPrintB3G2branchingTableCharsOnly(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::fPrintB3G2branchingTableCharsOnly");
+bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerPrintB3G2branchingTableCharsOnly");
   branchingData theg2b3data;
   Expression theContext(theCommands);
   Vectors<RationalFunctionOld> theHWs;
-  theCommands.fPrintB3G2branchingTableCommon
+  theCommands.innerPrintB3G2branchingTableCommon
   (theCommands, input, output, theHWs, theg2b3data, theContext);
   if (output.IsError())
     return true;
@@ -941,8 +940,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
   return output.AssignValue(out.str(), theCommands);
 }
 
-
-bool Calculator::fJacobiSymbol(Calculator& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerJacobiSymbol(Calculator& theCommands, const Expression& input, Expression& output)
 { //this function is not implemented yet.
   return false;
   if (input.children.size!=3)
@@ -956,11 +954,11 @@ bool Calculator::fJacobiSymbol(Calculator& theCommands, const Expression& input,
   return true;
 }
 
-bool Calculator::fPrintAllPartitions(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::fPrintAllPartitions");
+bool Calculator::innerPrintAllPartitions(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerPrintAllPartitions");
   RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(3))
-    return output.MakeError("Function fPrintAllPartitions expects 2 arguments.", theCommands);
+    return output.MakeError("Function innerPrintAllPartitions expects 2 arguments.", theCommands);
 
   SemisimpleLieAlgebra* theSSowner;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], theSSowner))
@@ -1042,11 +1040,11 @@ void WeylGroup::GetHighestWeightsAllRepsDimLessThanOrEqualTo(List<Vector<Rationa
   outputHighestWeightsFundCoords=output;
 }
 
-bool Calculator::fTestMonomialBaseConjecture(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::fTestMonomialBaseConjecture");
+bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerTestMonomialBaseConjecture");
   RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(3))
-    return output.MakeError("fTestMonomialBaseConjecture takes two arguments as input", theCommands);
+    return output.MakeError("innerTestMonomialBaseConjecture takes two arguments as input", theCommands);
   const Expression& rankE=input[1];
   const Expression& dimE=input[2];
   int rankBound=0;
@@ -1195,8 +1193,8 @@ bool Calculator::fTestMonomialBaseConjecture(Calculator& theCommands, const Expr
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool Calculator::fLittelmannOperator(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::fLittelmannOperator");
+bool Calculator::innerLittelmannOperator(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerLittelmannOperator");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (input.HasBoundVariables())
     return false;
@@ -1208,9 +1206,9 @@ bool Calculator::fLittelmannOperator(Calculator& theCommands, const Expression& 
   return output.AssignValue(theIndex, theCommands);
 }
 
-bool Calculator::fLSPath(Calculator& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerLSPath(Calculator& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter theRecutionIncrementer(&theCommands.RecursionDeptH);
-  MacroRegisterFunctionWithName("Calculator::fLSPath");
+  MacroRegisterFunctionWithName("Calculator::innerLSPath");
   if (input.children.size<3)
     return output.MakeError("LSPath needs at least two arguments.", theCommands);
   SemisimpleLieAlgebra* theSSowner;
@@ -1227,21 +1225,6 @@ bool Calculator::fLSPath(Calculator& theCommands, const Expression& input, Expre
   LittelmannPath theLSpath;
   theLSpath.MakeFromWaypoints(waypoints, ownerSSalgebra.theWeyl);
   return output.AssignValue(theLSpath, theCommands);
-}
-
-bool Calculator::fDifferential(Calculator& theCommands, const Expression& input, Expression& output)
-{ return false;
-  /* if (!theExpression.EvaluatesToAtom())
-    if (!theCommands.CallCalculatorFunction
-        (theCommands., inputIndexBoundVars, theExpression, comments))
-      return output.MakeError("Failed to convert argument of differential to differential form. ");
-  Data theData;
-  theData=theExpression.GetAtomicValue();
-  if (!theData.ConvertToTypE<DifferentialForm<Rational> >())
-    return output.MakeError("Failed to convert argument of differential to differential form.");
-
-  theCommands.innerPolynomial(the)*/
-  return true;
 }
 
 template <class coefficient>
@@ -1529,9 +1512,7 @@ bool Calculator::innerInterpolatePoly(Calculator& theCommands, const Expression&
 { MacroRegisterFunctionWithName("Calculator::innerInterpolatePoly");
   Matrix<Rational> pointsOfInterpoly;
   if (!theCommands.GetMatriXFromArguments(input, pointsOfInterpoly, 0, 2))
-  { theCommands << "<hr>Failed to extract points of interpolation from " << input.ToString();
-    return false;
-  }
+    return theCommands << "<hr>Failed to extract points of interpolation from " << input.ToString();
   Polynomial<Rational> interPoly;
   Vector<Rational> theArgs, theValues;
   pointsOfInterpoly.GetVectorFromColumn(0, theArgs);

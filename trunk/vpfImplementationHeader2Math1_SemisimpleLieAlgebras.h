@@ -5,6 +5,7 @@
 
 #include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfHeader2Math1_LieTheoryExtras.h" // error: invalid use of incomplete type ‘struct branchingData’
+#include "vpfHeader2Math9DrawingVariables.h"
 static ProjectInformationInstance ProjectInfovpfImplementationHeaderSemisimpleLieAlgebras(__FILE__, "Implementation header, semisimple Lie algebra routines. ");
 
 template <class coefficient>

@@ -24,6 +24,7 @@ public:
   List<int> thePausePipe; //thePipe[0] is the read end; thePipe[1] is the write end.
   List<int> mutexPipe;
   List<char> buffer;
+  MemorySaving<MutexWrapper> mutexForProcessBlocking; //<- to avoid two threads from the same process blocking the process.
   std::string ToString()const;
   void Release();
   void CreateMe();

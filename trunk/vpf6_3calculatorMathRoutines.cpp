@@ -10,7 +10,6 @@
 #include "vpfHeader5Crypto.h"
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h" // undefined reference to `charSSAlgMod<RationalFunctionOld>::SplitCharOverRedSubalg(std::string*, charSSAlgMod<RationalFunctionOld>&, branchingData&, GlobalVariables&)'
 
-
 ProjectInformationInstance ProjectInfoVpf6_3cpp(__FILE__, "Calculator built-in functions. ");
 
 template <class theType>
@@ -2226,27 +2225,19 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlo
   //stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks, input: " << input.ToString();
   IntegralRFComputation theComputation(&theCommands);
   if(!CalculatorConversions::innerRationalFunction(theCommands, theFunctionE, theComputation.inputE))
-  { theCommands << "<hr>Call of function CalculatorConversions::innerRationalFunction failed, input was: "
+    return theCommands << "<hr>Call of function CalculatorConversions::innerRationalFunction failed, input was: "
     << theFunctionE.ToString();
-    return false;
-  }
   if (!theComputation.inputE.IsOfType<RationalFunctionOld>())
-  { theCommands << "<hr>CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks: failed to convert "
+    return theCommands << "<hr>CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks: failed to convert "
     << theFunctionE.ToString() << " to rational function. Attempt to converted expression yielded: " << theComputation.inputE.ToString();
-    return false;
-  }
   if (theComputation.inputE.GetNumContextVariables()>1)
-  { theCommands << "<hr>I converted " << theFunctionE.ToString() << " to rational function, but it is of "
-    << theComputation.inputE.GetNumContextVariables() << " variables. I have been taught to work with 1 variable only. ";
-    theCommands << "<br>The context of the rational function is: " << theComputation.inputE.GetContext().ToString();
-    return false;
-  }
+    return theCommands << "<hr>I converted " << theFunctionE.ToString() << " to rational function, but it is of "
+    << theComputation.inputE.GetNumContextVariables() << " variables. I have been taught to work with 1 variable only. "
+    << "<br>The context of the rational function is: " << theComputation.inputE.GetContext().ToString();
   if (theComputation.inputE.GetNumContextVariables()==1)
     if (theComputation.inputE.GetContext().ContextGetContextVariable(0)!=theVariableE)
-    { theCommands << "<hr>The univariate rational function was in variable " << theComputation.inputE.GetContext().ToString()
+      return theCommands << "<hr>The univariate rational function was in variable " << theComputation.inputE.GetContext().ToString()
       << " but the variable of integration is " << theVariableE.ToString();
-      return false;
-    }
   theComputation.theRF=theComputation.inputE.GetValue<RationalFunctionOld>();
   theComputation.theRF.GetDenominator(theComputation.theDen);
   theComputation.theRF.GetNumerator(theComputation.theNum);
@@ -2255,18 +2246,15 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlo
     return false;
 //  stOutput << "<br>calling integration... ";
   if (!theComputation.IntegrateRF())
-  { theCommands << theComputation.printoutIntegration.str();
-    return false;
-  }
+    return theCommands << theComputation.printoutIntegration.str();
   //stOutput << "got before check consistency 2";
   theComputation.theIntegralSum.CheckConsistencyRecursively();
   //stOutput << "got before check consistency 3";
   //stOutput << "result of "
   output=theComputation.theIntegralSum;
   if (output.StartsWith(theCommands.opIntegral(),2))
-  { if (output[1]==input)
+    if (output[1]==input)
       return false;
-  }
   output.CheckConsistencyRecursively();
   output.CheckInitializationRecursively();
 //  stOutput << "<hr>Transforming " << input.ToString() << " to " << output[1].ToString() << "<hr>";
@@ -2431,17 +2419,13 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaan
   }
   if (!a.IsConstantNumber() || !b.IsConstantNumber() || !c.IsConstantNumber()||
       !A.IsConstantNumber() || !B.IsConstantNumber())
-  { theCommands << "<hr>Failed to evaluate to constant the coefficients of the block IIa and IIIa integral."
+    return theCommands << "<hr>Failed to evaluate to constant the coefficients of the block IIa and IIIa integral."
     << "The coefficients are: " << a.ToString() << ", " << b.ToString() << ", " << c.ToString() << ", "
     << A.ToString() << ", " << B.ToString() << ". ";
-    return false;
-  }
   double approxa, approxb, approxc;
   if (!a.EvaluatesToDouble(&approxa) || !b.EvaluatesToDouble(&approxb) || !c.EvaluatesToDouble(&approxc))
-  { theCommands << "<hr>Failed to evaluate variable coefficients in denominator " << denNoPower.ToString()
+    return theCommands << "<hr>Failed to evaluate variable coefficients in denominator " << denNoPower.ToString()
     << " to double. Possible user typo. ";
-    return false;
-  }
   if (approxb*approxb>=approxa* approxc*4)
     return false;
   Expression xSquared, bSquared, aSquared;
@@ -3284,7 +3268,8 @@ bool CalculatorFunctionsGeneral::innerPlotIntegralOf(Calculator& theCommands, co
   thePlot.thePlotElement=(input[1]);
   Plot plotFinal;
   plotFinal+=thePlot;
-  plotFinal.AddFunctionPlotOnTop(input[1], functionE.GetValue<std::string>(), lowerBound, upperBound, -4,  4);
+  plotFinal.AddFunctionPlotOnTop
+  (input[1], functionE.GetValue<std::string>(), lowerBound, upperBound, -4,  4, 0);
   return output.AssignValue(plotFinal, theCommands);
 }
 
@@ -3446,11 +3431,12 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
     out << "Failed to convert expression " << input[1].ToString() << " to postfix notation. ";
     return output.MakeError(out.str(), theCommands);
   }
-  Plot thePlot;
   double yLow, yHigh;
-  if (!input[1].EvaluatesToDoubleInRange("x", lowerBound, upperBound, 500, &yLow, &yHigh))
+  Vectors<double> thePoints;
+  if (!input[1].EvaluatesToDoubleInRange("x", lowerBound, upperBound, 500, &yLow, &yHigh, &thePoints))
     return theCommands << "<hr>I failed to evaluate the input function, something is wrong!";
-  thePlot.AddFunctionPlotOnTop(input[1], functionE.GetValue<std::string>(), lowerBound, upperBound, yLow, yHigh);
+  Plot thePlot;
+  thePlot.AddFunctionPlotOnTop(input[1], functionE.GetValue<std::string>(), lowerBound, upperBound, yLow, yHigh, &thePoints);
   return output.AssignValue(thePlot, theCommands);
 }
 
@@ -3694,9 +3680,11 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
   << "<br>\\parametricplot[linecolor=\\fcColorGraph, plotpoints=1000]{" << leftEndPoint << "}{" << rightEndPoint << "}{"
   << theConvertedExpressions[0].GetValue<std::string>() << theConvertedExpressions[1].GetValue<std::string>() << "}";
   PlotObject thePlot;
-  if (!input[1].EvaluatesToDoubleInRange("t", leftEndPoint, rightEndPoint, 1000, &thePlot.xLow, &thePlot.xHigh))
+  if (!input[1].EvaluatesToDoubleInRange
+      ("t", leftEndPoint, rightEndPoint, 1000, &thePlot.xLow, &thePlot.xHigh, &thePlot.thePoints))
     return theCommands << "<hr>Failed to evaluate curve function. ";
-  if (!input[2].EvaluatesToDoubleInRange("t", leftEndPoint, rightEndPoint, 1000, &thePlot.yLow, &thePlot.yHigh))
+  if (!input[2].EvaluatesToDoubleInRange
+      ("t", leftEndPoint, rightEndPoint, 1000, &thePlot.yLow, &thePlot.yHigh, &thePlot.thePoints))
     return theCommands << "<hr>Failed to evaluate curve function. ";
   thePlot.thePlotElement=input;
   thePlot.thePlotString=outLatex.str();
@@ -4719,17 +4707,17 @@ bool CalculatorFunctionsGeneral::innerSplitFDpartB3overG2(Calculator& theCommand
   std::stringstream out;
   Vectors<RationalFunctionOld> theHWs;
   theHWs.AddOnTop(theG2B3Data.theWeightFundCoords);
-  return theCommands.fPrintB3G2branchingIntermediate(theCommands, input, output, theHWs, theG2B3Data, theContext);
+  return theCommands.innerPrintB3G2branchingIntermediate(theCommands, input, output, theHWs, theG2B3Data, theContext);
 }
 
-bool Calculator::fSplitFDpartB3overG2CharsOnly(Calculator& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerSplitFDpartB3overG2CharsOnly(Calculator& theCommands, const Expression& input, Expression& output)
 { branchingData theG2B3Data;
   return CalculatorFunctionsGeneral::innerSplitFDpartB3overG2CharsOutput(theCommands, input, output, theG2B3Data);
 }
 
-bool Calculator::fPrintB3G2branchingTableCommon
+bool Calculator::innerPrintB3G2branchingTableCommon
 (Calculator& theCommands, const Expression& input, Expression& output, Vectors<RationalFunctionOld>& outputHWs, branchingData& theG2B3Data, Expression& theContext)
-{ MacroRegisterFunctionWithName("Calculator::fPrintB3G2branchingTableCommon");
+{ MacroRegisterFunctionWithName("Calculator::innerPrintB3G2branchingTableCommon");
   std::stringstream out, timeReport;
   Vector<Rational> theHW;
   Vector<RationalFunctionOld> theHWrf;
@@ -4758,8 +4746,8 @@ bool Calculator::fPrintB3G2branchingTableCommon
   return true;
 }
 
-bool Calculator::fSplitFDpartB3overG2old(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::fSplitFDpartB3overG2old");
+bool Calculator::innerSplitFDpartB3overG2old(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerSplitFDpartB3overG2old");
   branchingData theG2B3Data;
   CalculatorFunctionsGeneral::innerSplitFDpartB3overG2CharsOutput(theCommands, input, output, theG2B3Data);
   if (output.IsError())
@@ -4816,7 +4804,8 @@ bool Calculator::fSplitFDpartB3overG2old(Calculator& theCommands, const Expressi
 }
 
 bool Expression::EvaluatesToDoubleInRange
-(const std::string& varName, double lowBound, double highBound, int numIntervals, double* outputYmin, double* outputYmax)const
+(const std::string& varName, double lowBound, double highBound, int numIntervals,
+ double* outputYmin, double* outputYmax, Vectors<double>* outputPoints)const
 { MacroRegisterFunctionWithName("Expression::EvaluatesToDoubleInRange");
   if (numIntervals<1 || this->owner==0)
     return false;
@@ -4832,10 +4821,17 @@ bool Expression::EvaluatesToDoubleInRange
   double delta=(highBound-lowBound)/(numPoints);
   *knownValues.LastObject()=lowBound;
   double currentValue=0;
+  if (outputPoints!=0)
+    outputPoints->SetSize(numIntervals);
   for (int i=0; i<numIntervals; i++)
-  { if (!this->EvaluatesToDoubleUnderSubstitutions(knownEs, knownValues, & currentValue))
+  { if (!this->EvaluatesToDoubleUnderSubstitutions(knownEs, knownValues, &currentValue))
       return *(this->owner) << "<hr>Failed to evaluate " << this->ToString() << " at " << varName << "="
       << *knownValues.LastObject() << ". ";
+    if (outputPoints!=0)
+    { (*outputPoints)[i].SetSize(2);
+      (*outputPoints)[i][0]=*knownValues.LastObject();
+      (*outputPoints)[i][1]=currentValue;
+    }
     *knownValues.LastObject()+=delta;
     if (outputYmin!=0)
     { if (i==0)

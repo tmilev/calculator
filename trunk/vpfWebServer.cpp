@@ -207,9 +207,12 @@ bool PauseController::PauseIfRequestedWithTimeOut()
 }
 
 void PauseController::RequestPausePauseIfLocked()
-{ if (this->CheckPauseIsRequested())
+{ this->mutexForProcessBlocking.GetElement().LockMe();//<- make sure the pause controller is not locking itself
+  //through competing threads
+  if (this->CheckPauseIsRequested())
     theLog << logger::red << "BLOCKING on pause controller " << this->ToString() << logger::endL;
   read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size);
+  this->mutexForProcessBlocking.GetElement().UnlockMe();
 }
 
 bool PauseController::CheckPauseIsRequested()
@@ -1878,8 +1881,7 @@ int WebServer::Run()
     }
     //Listen for children who have exited properly.
     //This might need to be rewritten: I wasn't able to make this work with any
-    //mechanism other than pipes. This probably due to my lack of skill or UNIX's
-    //crappy design (and is most likely due to both).
+    //mechanism other than pipes.
     for (int i=0; i<this->theWorkers.size; i++)
       if (this->theWorkers[i].flagInUse)
       { this->theWorkers[i].pipeWorkerToServerControls.Read();

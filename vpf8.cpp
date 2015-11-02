@@ -1194,13 +1194,15 @@ void Rational::Simplify()
   this->ShrinkExtendedPartIfPossible();
 }
 
+/*
 void Rational::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData)
 { std::string tempS;
   tempS=this->ToString();
-  theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer(theDrawData.TopLeftCornerX, theDrawData.TopLeftCornerY, tempS, 0, theGlobalVariables.theDrawingVariables.fontSizeNormal, theGlobalVariables.theDrawingVariables.TextStyleNormal);
+  theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer
+  (theDrawData.TopLeftCornerX, theDrawData.TopLeftCornerY, tempS, 0, theGlobalVariables.theDrawingVariables.fontSizeNormal, theGlobalVariables.theDrawingVariables.TextStyleNormal);
   theDrawData.outputHeight=10;
   theDrawData.outputWidth=10*tempS.size();
-}
+}*/
 
 void Rational::operator=(const Polynomial<Rational>& other)
 { if (!other.IsConstant(this))

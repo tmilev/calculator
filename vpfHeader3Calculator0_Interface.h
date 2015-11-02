@@ -423,7 +423,7 @@ class Expression
   bool IsConstantNumber()const;
   bool EvaluatesToDoubleInRange
   (const std::string& varName, double lowBound, double highBound, int numPoints,
-   double* outputYmin=0, double* outputYmax=0)const
+   double* outputYmin=0, double* outputYmax=0, Vectors<double>* outputPoints=0)const
    ;
   bool EvaluatesToDouble(double* whichDouble=0)const;
 bool EvaluatesToDoubleUnderSubstitutions
@@ -580,31 +580,32 @@ public:
   double xHigh;
   double yLow;
   double yHigh;
+  Vectors<double> thePoints;
   Expression thePlotElement;
   std::string thePlotType;
   std::string GetPlotStringFromFunctionStringAndRanges
   (bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat, double lowerBound, double upperBound);
-  PlotObject(): xLow(0), xHigh(0), yLow(0), yHigh(0) {}
-  bool operator==(const PlotObject& other)const
-  { return this->thePlotStringWithHtml==other.thePlotStringWithHtml &&
-    this->xLow==other.xLow&&
-    this->xHigh==other.xHigh &&
-    this->yLow==other.yLow &&
-    this->yHigh==other.yHigh &&
-    this->thePlotElement==other.thePlotElement &&
-    this->thePlotType==other.thePlotType;
-  }
+  void CreatePlotFunction
+  (const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound,
+   double inputYmin, double inputYmax, Vectors<double>* inputPoints);
+  PlotObject();
+  bool operator==(const PlotObject& other)const;
 };
 
 //the following class is meant to use to draw plots for calculus students.
 class Plot
 { public:
   List<PlotObject> thePlots;
-
+  double theLowerBoundAxes;
+  double theUpperBoundAxes;
+  double lowBoundY;
+  double highBoundY;
   std::string GetPlotStringAddLatexCommands(bool useHtml);
+  Plot();
+  void ComputeAxesAndBoundingBox();
   void AddFunctionPlotOnTop
   (const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound,
-   double inputUpperBound, double inputYmin, double inputYmax);
+   double inputUpperBound, double inputYmin, double inputYmax, Vectors<double>* inputPoints);
   void operator+=(const Plot& other);
   void operator+=(const PlotObject& other);
   bool operator==(const Plot& other)const
@@ -1517,17 +1518,16 @@ public:
   static bool innerPolynomialDivisionVerboseGrLexRev(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialDivisionVerboseLexRev(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialDivisionVerboseLex(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool fPrintAllPartitions(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool fPrintB3G2branchingTableCharsOnly(Calculator& theCommands, const Expression& input, Expression& output);
-  bool fPrintB3G2branchingIntermediate
+  static bool innerPrintAllPartitions(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, const Expression& input, Expression& output);
+  bool innerPrintB3G2branchingIntermediate
   (Calculator& theCommands, const Expression& input, Expression& output, Vectors<RationalFunctionOld>& theHWs, branchingData& theG2B3Data, Expression& theContext);
-  static bool fPrintB3G2branchingTable(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool fDifferential(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool fPrintB3G2branchingTableCommon
+  static bool innerPrintB3G2branchingTable(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPrintB3G2branchingTableCommon
   (Calculator& theCommands, const Expression& input, Expression& output, Vectors<RationalFunctionOld>& outputHWs, branchingData& theG2B3Data, Expression& theContext);
   static bool innerGetChevGen(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetCartanGen(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool fSplitFDpartB3overG2CharsOnly(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSplitFDpartB3overG2CharsOnly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPrintSSLieAlgebraShort(Calculator& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerPrintSSLieAlgebra(theCommands, input, output, false);
   }
@@ -1561,20 +1561,20 @@ public:
   { return theCommands.innerGroebner(theCommands, input, output, false, false, true);
   }
   static bool innerGroebner(Calculator& theCommands, const Expression& input, Expression& output, bool useGr, bool useRevLex=false, bool useModZp=false);
-  static bool fKLcoeffs(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerKLcoeffs(Calculator& theCommands, const Expression& input, Expression& output);
 //  static bool innerSSLieAlgebra
 //  (Calculator& theCommands, const Expression& input, Expression& output)
 //  { return theCommands.innerSSLieAlgebra(theCommands, input, output, false);
 //  }
-  static bool fSplitFDpartB3overG2old(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSplitFDpartB3overG2old(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitFDpartB3overG2inner(Calculator& theCommands, branchingData& theG2B3Data, Expression& output);
-  static bool fLittelmannOperator(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool fAnimateLittelmannPaths(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerLittelmannOperator(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAnimateLittelmannPaths(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSqrt(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFactorPoly(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool fLSPath(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool fTestMonomialBaseConjecture(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool fJacobiSymbol(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerLSPath(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTestMonomialBaseConjecture(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerJacobiSymbol(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerHWVCommon
   (Calculator& theCommands, Expression& output, Vector<RationalFunctionOld>& highestWeightFundCoords, Selection& selectionParSel,
    Expression& hwContext, SemisimpleLieAlgebra* owner, bool Verbose=true);

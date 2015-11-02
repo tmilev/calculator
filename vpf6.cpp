@@ -999,8 +999,8 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
   return output.AssignValueWithContext(theUE, theContext, theCommands);
 }
 
-bool Calculator::fKLcoeffs(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::fKLcoeffs");
+bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerKLcoeffs");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   SemisimpleLieAlgebra* theSSalgebra=0;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input, theSSalgebra))

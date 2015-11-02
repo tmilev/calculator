@@ -5,6 +5,7 @@
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 #include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
+#include "vpfHeader2Math9DrawingVariables.h"
 ProjectInformationInstance ProjectInfoVpf9cpp(__FILE__, "Math routines implementation. ");
 
 //the below gives upper limit to the amount of pointers that are allowed to be allocated by the program. Can be changed dynamically.
@@ -27,8 +28,8 @@ bool PartFraction::MakingConsistencyCheck=false;
 Rational PartFractions::CheckSum;
 Rational PartFraction::CheckSum;
 Rational PartFraction::CheckSum2;
-int DrawingVariables::NumHtmlGraphics=0;
 
+int DrawingVariables::NumHtmlGraphics=0;
 int CGI::GlobalMathSpanID=0;
 int CGI::GlobalCanvasID=0;
 int CGI::GlobalGeneralPurposeID=0;
@@ -4926,8 +4927,8 @@ void WeylGroup::DrawRootSystem
     FormatExpressions tempFormat;
     theWeylChamber.DrawMeProjective(0, false, outputDV, tempFormat);
   }
-  theGlobalVariables.theDrawingVariables.DefaultHtmlHeight=600;
-  theGlobalVariables.theDrawingVariables.DefaultHtmlWidth=600;
+  outputDV.DefaultHtmlHeight=600;
+  outputDV.DefaultHtmlWidth=600;
   output.centerX[0]=300;
   output.centerY[0]=300;
   for (int i=0; i<RootSystemSorted.size; i++)
@@ -6671,11 +6672,12 @@ std::string PartFractions::DoTheFullComputationReturnLatexFileString
 //  this->theChambers.AssignCombinatorialChamberComplex(this->theChambersOld, theGlobalVariables);
 //  this->theChambersOld.drawOutput(theGlobalVariables.theDrawingVariables, tempRoot, 0);
 //  this->theChambersOld.thePauseController.ExitComputation();
-  this->theChambers.DrawMeProjective(0, true, theGlobalVariables.theDrawingVariables, theFormat);
-  outHtml << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->AmbientDimension);
-  Vector<Rational> tempRoot; tempRoot.MakeZero(this->AmbientDimension);
+  DrawingVariables theDVs;
+  this->theChambers.DrawMeProjective(0, true, theDVs, theFormat);
+  outHtml << theDVs.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->AmbientDimension);
+  Vector<Rational> tempRoot;
   tempRoot.MakeZero(this->AmbientDimension);
-  crash << crash;
+  crash << "not implemented yet" << crash;
 //  this->initFromRoots(theChambersOld.theDirections, theGlobalVariables);
   out << "\\documentclass{article}\\usepackage{amsmath, amsfonts, amssymb} \n\\begin{document}\n";
   out << "The vector partition funciton is the number of ways you can represent a vector $(x_1,\\dots, x_n)$ as a non-negative integral linear combination of "

@@ -1,6 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader2Math0_General.h"
+#include "vpfHeader2Math1_2SemisimpleLieAlgebras_RootSubalgebras.h" // WeylGroup::GetSignSignatureAllRootSubsystems
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 #include "vpfHeader2Math4_Graph.h"
 static ProjectInformationInstance ProjectInfoVpfCharacters(__FILE__, "Finite group characters sandbox. Work in progress by Thomas. ");
@@ -1102,14 +1103,6 @@ bool FiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& left, c
       return true;
   } while (theIterator.IncrementReturnFalseIfPastLast());
   return false;
-}
-
-template <class elementSomeGroup>
-std::string FiniteGroup<elementSomeGroup>::ToString(FormatExpressions* theFormat)const
-{ std::stringstream out;
-  out << this->ToStringElements(theFormat);
-  out << this->ToStringConjugacyClasses(theFormat);
-  return out.str();
 }
 
 void WeylGroup::GetSignSignatureAllRootSubsystems(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables)

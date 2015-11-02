@@ -6,6 +6,7 @@
 #include "vpfHeader2Math0_General.h"
 #include "vpfHeader2Math8_VectorSpace.h"
 #include "vpfHeader2Math4_Graph.h"
+#include "vpfHeader2Math3_FiniteGroups.h"
 
 
 static ProjectInformationInstance ProjectInfoVpfSymmetricGroups(__FILE__, "Header file, symmetric and related groups. Work in progress.");
@@ -271,7 +272,7 @@ class ElementHyperoctahedralGroup
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
 
-  std::string ToString() const;
+  std::string ToString(FormatExpressions* unused = 0) const;
 
   friend std::ostream& operator<<(std::ostream& out, const ElementHyperoctahedralGroup& data)
   { return data.IntoStream(out);
@@ -817,12 +818,10 @@ class HyperoctahedralGroup: public SimpleFiniteGroup<ElementHyperoctahedralGroup
 
   int GetN();
 
-  //bool AreConjugate(const ElementHyperoctahedralGroup& x, const ElementHyperoctahedralGroup& y);
 
   void AllSpechtModules();
-//  void SpechtModuleOfPartititons
-//  (const Partition& positive, const Partition& negative,
-//   GroupRepresentation<SimpleFiniteGroup<ElementHyperoctahedralGroup>, Rational>& out);
+  void SpechtModuleOfPartititons(const Partition& positive, const Partition& negative,
+                                 GroupRepresentation<SimpleFiniteGroup<ElementHyperoctahedralGroup>, Rational> &out);
 
 
   template <typename somestream>
@@ -1028,7 +1027,10 @@ void SimpleFiniteGroup<elementSomeGroup>::MakeID(elementSomeGroup& e)
 template <typename elementSomeGroup>
 void SimpleFiniteGroup<elementSomeGroup>::ComputeAllElements(bool andWords)
 { if(this->haveElements)
-  { stOutput << "Recomputing elements of some group, for God only knows why" << '\n';
+  { if(!(andWords && !haveWords))
+      if(!(!this->flagCCsComputed && AreConjugateByFormula))
+        return; // no reason to recompute.  skipping
+    stOutput << "Recomputing elements of some group, for God only knows why.  Check frames above " << __FILE__ << ':' << __LINE__ << '\n';
     this->theElements.SetSize(0);
   }
   elementSomeGroup e;
@@ -1138,7 +1140,7 @@ void SimpleFiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives(void*
     this->conjugacyClasseS[i].theElements = components[i];
     this->conjugacyClasseS[i].representativeIndex = components[i][0];
     if(this->haveWords)
-      this->conjugacyClasseS[i].representativeWord = this->theWords[components[i][0]];
+      GetWord(conjugacyClasseS[i].representative, conjugacyClasseS[i].representativeWord);
   }
   this->flagCCsComputed = true;
 }

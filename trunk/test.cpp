@@ -2403,8 +2403,7 @@ void TestSpechtModules(int N = 7)
   stOutput << G.PrettyPrintCharacterTable() << '\n';
 }
 
-void LegacyTest()
-{
+
   /*
       Rational zero = Rational(0,1);
       Rational one = Rational(1,1);
@@ -3166,7 +3165,8 @@ void LegacyTest()
 //  stOutput << p << " " << q << " " << p+q << " " << '\n';
 //  Vector<Polynomial<Rational> > relations;
 //  lie_bracket_relations(relations, 3);
-
+void LegacyTest()
+{
   PermutationGroup PG;
   PG.MakeSymmetricGroupGeneratorsjjPlus1(5);
   PG.VerifyCCSizesAndRepresentativesFormula();
@@ -3181,7 +3181,7 @@ void LegacyTest()
   G.AllSpechtModules();
 
   WeylGroup W;
-  W.MakeArbitrarySimple('A', 8);
+  W.MakeArbitrarySimple('A', 7);
   W.ComputeCCSizesAndRepresentatives(NULL);
   stOutput << W.theDynkinType << " :" << W.size() << " elements, in " << W.conjugacyClasseS.size << " conjugacy classes\n";
   W.ComputeIrreducibleRepresentationsUsingSpechtModules();
@@ -3216,7 +3216,6 @@ int mainTest(List<std::string>& inputArguments)
         N = 10;
       TestCountPermutations(N);
     }
-
   }
 
   stOutput << "Rational::TotalSmallAdditions: " << Rational::TotalSmallAdditions;

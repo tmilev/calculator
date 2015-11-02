@@ -1256,7 +1256,7 @@ public:
   }
   inline unsigned int GetHash(const Object& input)const
   { unsigned int result=hashFunction(input);
-    result%=this->TheHashedArrays.size;
+    result%=this->TheHashedArrays.size; // how did TheHashedArrays.size == 0?
     if (result<0)
       result+=this->TheHashedArrays.size;
     return result;

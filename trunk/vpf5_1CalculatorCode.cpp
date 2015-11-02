@@ -867,11 +867,11 @@ std::string Plot::GetPlotHtml()
   theDVs.theBuffer.GraphicsUnit[0]=
   MathRoutines::Minimum( ((double)theDVs.DefaultHtmlWidth)/theWidth,((double)theDVs.DefaultHtmlHeight)/theHeight );
   theDVs.drawLineBetweenTwoVectorsBuffer(v1, v2, theDVs.PenStyles::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
-  stOutput << "The width: " << theWidth
+ /* stOutput << "The width: " << theWidth
   << "<br> theLowerBoundAxes equals: " << this->theLowerBoundAxes
   << "<br> theUpperBoundAxes equals: " << this->theUpperBoundAxes
   << "<br> GraphicsUnit equals: " << theDVs.theBuffer.GraphicsUnit[0];
-  ;
+  ;*/
   v1[0]=0;
   v1[1]=this->lowBoundY-0.1;
   v2[0]=0;

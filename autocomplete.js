@@ -69,6 +69,7 @@ function isSeparator(theChar)
     case '\n':
     case '\r':
     case '\"':
+    case '=':
       return true;
     default: return false;
   }
@@ -173,7 +174,7 @@ function replaceLastWord()
   setCursorPosition(lastWordStart+theSuggestions[indexInAutocomplete].length+1);
 }
 
-function arrowAction()
+function arrowAction(event)
 { if (event.ctrlKey!=true)
     return;
   if (event.keyCode==32)//32-space bar, 13-enter key, 9-tab key
@@ -185,6 +186,9 @@ function arrowAction()
   else 
     return;
   displaySuggestions();
+//  event.stopPropagation();
+  event.preventDefault();
+//  event.cancelBubble = true;
 }
 
 function accountWordAtCursor(amount)

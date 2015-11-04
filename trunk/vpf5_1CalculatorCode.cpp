@@ -883,14 +883,12 @@ std::string Plot::GetPlotHtml()
   v1[1]=this->lowBoundY-0.1;
   v2[0]=0;
   v2[1]=this->highBoundY-0.1;
-  //theDVs.theBuffer.centerX=
-//  theDVs.drawLineBetweenTwoVectorsBufferDouble(v1, v2, theDVs.PenStyles::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+  theDVs.drawLineBetweenTwoVectorsBufferDouble(v1, v2, theDVs.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
   for (int i=0; i<this->thePlots.size; i++)
     for (int j=1; j<thePlots[i].thePoints.size; j++)
- ;
- //     theDVs.drawLineBetweenTwoVectorsBufferDouble
- //     (thePlots[i].thePoints[j-1], thePlots[i].thePoints[j], theDVs.PenStyles::PenStyleNormal,
- //       CGI::RedGreenBlue(255,0,0));
+      theDVs.drawLineBetweenTwoVectorsBufferDouble
+      (thePlots[i].thePoints[j-1], thePlots[i].thePoints[j], theDVs.PenStyleNormal,
+        CGI::RedGreenBlue(255,0,0));
   std::stringstream resultStream;
   resultStream << theDVs.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
   return resultStream.str();

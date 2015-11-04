@@ -850,8 +850,8 @@ void Plot::ComputeAxesAndBoundingBox()
   { this->thePlots[i].ComputeYbounds();
     this->theLowerBoundAxes=MathRoutines::Minimum(this->thePlots[i].xLow, theLowerBoundAxes);
     this->theUpperBoundAxes=MathRoutines::Maximum(this->thePlots[i].xHigh, theUpperBoundAxes);
-    this->highBoundY=MathRoutines::Maximum(this->thePlots[i].yHigh, this->highBoundY);
     this->lowBoundY=MathRoutines::Minimum(this->thePlots[i].yLow, this->lowBoundY);
+    this->highBoundY=MathRoutines::Maximum(this->thePlots[i].yHigh, this->highBoundY);
   }
 }
 
@@ -863,16 +863,16 @@ std::string Plot::GetPlotHtml()
   theDVs.DefaultHtmlWidth=600;
   Vector<double> v1;
   Vector<double> v2;
-  v1.MakeZero(2);
-  v2.MakeZero(2);
   double theWidth=this->theUpperBoundAxes-this->theLowerBoundAxes+0.2;
   double theHeight=this->highBoundY-this->lowBoundY+0.2;
   theDVs.theBuffer.centerX[0]=((-this->theLowerBoundAxes+0.1)/theWidth)*((double) theDVs.DefaultHtmlWidth);
-  theDVs.theBuffer.centerY[0]=((-this->lowBoundY+0.1)/theHeight)*((double) theDVs.DefaultHtmlHeight);
+  theDVs.theBuffer.centerY[0]=((this->highBoundY+0.1)/theHeight)*((double) theDVs.DefaultHtmlHeight);
 
-  double heightUnit=((double)theDVs.DefaultHtmlWidth)/theWidth;
-  double widthUnit=((double)theDVs.DefaultHtmlHeight)/theHeight;
-  theDVs.theBuffer.GraphicsUnit[0]= heightUnit>widthUnit ? widthUnit : heightUnit;
+  double widthUnit=((double)theDVs.DefaultHtmlWidth)/theWidth;
+  double heightUnit=((double)theDVs.DefaultHtmlHeight)/theHeight;
+  theDVs.theBuffer.GraphicsUnit[0]= heightUnit<widthUnit ? heightUnit : widthUnit;
+  v1.MakeZero(2);
+  v2.MakeZero(2);
   v1[0]=this->theLowerBoundAxes-0.1;
   v1[1]=0;
   v2[0]=this->theUpperBoundAxes+0.1;

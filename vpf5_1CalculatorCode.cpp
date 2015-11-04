@@ -847,12 +847,12 @@ void Plot::ComputeAxesAndBoundingBox()
 }
 
 std::string Plot::GetPlotHtml()
-{ //MacroRegisterFunctionWithName("Plot::GetPlotHtml");
-/*  this->ComputeAxesAndBoundingBox();
+{ MacroRegisterFunctionWithName("Plot::GetPlotHtml");
+  this->ComputeAxesAndBoundingBox();
   DrawingVariables theDVs;
   theDVs.DefaultHtmlHeight=400;
   theDVs.DefaultHtmlWidth=600;
-  Vector<double> v1;
+  /*Vector<double> v1;
   Vector<double> v2;
   v1.MakeZero(2);
   v2.MakeZero(2);
@@ -883,12 +883,12 @@ std::string Plot::GetPlotHtml()
     for (int j=1; j<thePlots[i].thePoints.size; j++)
       theDVs.drawLineBetweenTwoVectorsBufferDouble
       (thePlots[i].thePoints[j-1], thePlots[i].thePoints[j], theDVs.PenStyles::PenStyleNormal,
-        CGI::RedGreenBlue(255,0,0));
+        CGI::RedGreenBlue(255,0,0));*/
   std::stringstream resultStream;
   resultStream << theDVs.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
   std::string tempString=resultStream.str();
 
-  return tempString;*/
+  return tempString;
   return "";
 }
 

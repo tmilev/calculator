@@ -807,6 +807,14 @@ PlotObject::PlotObject()
   this-> yHigh=(0);
 }
 
+void PlotObject::ComputeYbounds()
+{ MacroRegisterFunctionWithName("PlotObject::ComputeYbounds");
+  for (int i=0; i<this->thePoints.size; i++)
+  { this->yHigh=MathRoutines::Maximum(this->yHigh, this->thePoints[i][1]);
+    this->yLow=MathRoutines::Minimum(this->yLow, this->thePoints[i][1])
+  }
+}
+
 std::string PlotObject::GetPlotStringFromFunctionStringAndRanges
 (bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat,
  double inputLowerBound, double inputUpperBound)
@@ -839,10 +847,11 @@ void Plot::ComputeAxesAndBoundingBox()
   this->lowBoundY=-0.5;
   this->highBoundY=0.5;
   for (int i=0; i<this->thePlots.size; i++)
-  { this->theLowerBoundAxes=MathRoutines::Minimum(this->thePlots[i].xLow, theLowerBoundAxes);
+  { this->thePlots[i].ComputeYbounds();
+    this->theLowerBoundAxes=MathRoutines::Minimum(this->thePlots[i].xLow, theLowerBoundAxes);
     this->theUpperBoundAxes=MathRoutines::Maximum(this->thePlots[i].xHigh, theUpperBoundAxes);
-    this->highBoundY=MathRoutines::Maximum(this->thePlots[i].yHigh, highBoundY);
-    this->lowBoundY=MathRoutines::Minimum(this->thePlots[i].yLow, lowBoundY);
+    this->highBoundY=MathRoutines::Maximum(this->thePlots[i].yHigh, this->highBoundY);
+    this->lowBoundY=MathRoutines::Minimum(this->thePlots[i].yLow, this->lowBoundY);
   }
 }
 
@@ -865,7 +874,8 @@ std::string Plot::GetPlotHtml()
   double widthUnit=((double)theDVs.DefaultHtmlHeight)/theHeight;
   theDVs.theBuffer.GraphicsUnit[0]= heightUnit>widthUnit ? widthUnit : heightUnit;
 
-  theDVs.drawLineBetweenTwoVectorsBufferDouble(v1, v2, theDVs.PenStyles::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+  theDVs.drawLineBetweenTwoVectorsBufferDouble
+  (v1, v2, (uint32_t) theDVs.PenStyles::PenStyleNormal, (int) CGI::RedGreenBlue(0,0,0));
 
   //stOutput << "The width: " << theWidth
   //<< "<br> theLowerBoundAxes equals: " << this->theLowerBoundAxes

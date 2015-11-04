@@ -852,9 +852,9 @@ std::string Plot::GetPlotHtml()
   DrawingVariables theDVs;
   theDVs.DefaultHtmlHeight=400;
   theDVs.DefaultHtmlWidth=600;
-  /*Vector<double> v1;
+  Vector<double> v1;
   Vector<double> v2;
-  v1.MakeZero(2);
+  /*v1.MakeZero(2);
   v2.MakeZero(2);
   v1[0]=this->theLowerBoundAxes-0.1;
   v1[1]=0;

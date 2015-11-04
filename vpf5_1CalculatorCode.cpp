@@ -848,12 +848,12 @@ void Plot::ComputeAxesAndBoundingBox()
 
 std::string Plot::GetPlotHtml()
 { MacroRegisterFunctionWithName("Plot::GetPlotHtml");
-  std::stringstream resultStream;
   this->ComputeAxesAndBoundingBox();
   DrawingVariables theDVs;
   theDVs.DefaultHtmlHeight=400;
   theDVs.DefaultHtmlWidth=600;
-  Vector<double> v1, v2;
+  Vector<double> v1;
+  Vector<double> v2;
   v1.MakeZero(2);
   v2.MakeZero(2);
   v1[0]=this->theLowerBoundAxes-0.1;
@@ -864,8 +864,9 @@ std::string Plot::GetPlotHtml()
   double theHeight=this->highBoundY-this->lowBoundY+0.2;
   theDVs.theBuffer.centerX[0]=((-this->theLowerBoundAxes+0.1)/theWidth)*((double) theDVs.DefaultHtmlWidth);
   theDVs.theBuffer.centerY[0]=((-this->lowBoundY+0.1)/theHeight)*((double) theDVs.DefaultHtmlHeight);
-  theDVs.theBuffer.GraphicsUnit[0]=
-  MathRoutines::Minimum( ((double)theDVs.DefaultHtmlWidth)/theWidth,((double)theDVs.DefaultHtmlHeight)/theHeight );
+  double heightUnit=((double)theDVs.DefaultHtmlWidth)/theWidth;
+  double widthUnit=((double)theDVs.DefaultHtmlHeight)/theHeight;
+  theDVs.theBuffer.GraphicsUnit[0]= heightUnit>widthUnit ? widthUnit : heightUnit;
   theDVs.drawLineBetweenTwoVectorsBuffer(v1, v2, theDVs.PenStyles::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
  /* stOutput << "The width: " << theWidth
   << "<br> theLowerBoundAxes equals: " << this->theLowerBoundAxes
@@ -883,6 +884,7 @@ std::string Plot::GetPlotHtml()
       theDVs.drawLineBetweenTwoVectorsBuffer
       (thePlots[i].thePoints[j-1], thePlots[i].thePoints[j], theDVs.PenStyles::PenStyleNormal,
         CGI::RedGreenBlue(255,0,0));
+  std::stringstream resultStream;
   resultStream << theDVs.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
   return resultStream.str();
 }

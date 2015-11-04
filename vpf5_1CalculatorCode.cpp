@@ -864,10 +864,11 @@ std::string Plot::GetPlotHtml()
   double theHeight=this->highBoundY-this->lowBoundY+0.2;
   theDVs.theBuffer.centerX[0]=((-this->theLowerBoundAxes+0.1)/theWidth)*((double) theDVs.DefaultHtmlWidth);
   theDVs.theBuffer.centerY[0]=((-this->lowBoundY+0.1)/theHeight)*((double) theDVs.DefaultHtmlHeight);
-/*
+
   double heightUnit=((double)theDVs.DefaultHtmlWidth)/theWidth;
   double widthUnit=((double)theDVs.DefaultHtmlHeight)/theHeight;
   theDVs.theBuffer.GraphicsUnit[0]= heightUnit>widthUnit ? widthUnit : heightUnit;
+/*
   theDVs.drawLineBetweenTwoVectorsBufferDouble(v1, v2, theDVs.PenStyles::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
 
   //stOutput << "The width: " << theWidth

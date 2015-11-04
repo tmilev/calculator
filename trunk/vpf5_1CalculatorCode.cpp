@@ -847,7 +847,7 @@ void Plot::ComputeAxesAndBoundingBox()
 }
 
 std::string Plot::GetPlotHtml()
-{ MacroRegisterFunctionWithName("Plot::GetPlotHtml");
+{ //MacroRegisterFunctionWithName("Plot::GetPlotHtml");
   this->ComputeAxesAndBoundingBox();
   DrawingVariables theDVs;
   theDVs.DefaultHtmlHeight=400;

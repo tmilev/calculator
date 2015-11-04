@@ -3506,7 +3506,7 @@ public:
   static const int FigureCenterCoordSystemY=8; //in centimeters
   static const int TextPrintCenteringAdjustmentX=3;
   static const int TextPrintCenteringAdjustmentY=3;
-  static void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream& output, DrawingVariables& drawInput);
+  static void drawline(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, std::fstream& output, DrawingVariables& drawInput);
   static void drawTextDirectly(double X1, double Y1, const std::string& theText, int ColorIndex, std::fstream& output);
   static void beginDocument(std::fstream& output);
   static void endLatexDocument(std::fstream& output);

@@ -856,13 +856,13 @@ std::string Plot::GetPlotHtml()
   Vector<double> v2;
   v1.MakeZero(2);
   v2.MakeZero(2);
-  /*
   v1[0]=this->theLowerBoundAxes-0.1;
   v1[1]=0;
   v2[0]=this->theUpperBoundAxes+0.1;
   v2[1]=0;
   double theWidth=this->theUpperBoundAxes-this->theLowerBoundAxes+0.2;
   double theHeight=this->highBoundY-this->lowBoundY+0.2;
+  /*
   theDVs.theBuffer.centerX[0]=((-this->theLowerBoundAxes+0.1)/theWidth)*((double) theDVs.DefaultHtmlWidth);
   theDVs.theBuffer.centerY[0]=((-this->lowBoundY+0.1)/theHeight)*((double) theDVs.DefaultHtmlHeight);
   double heightUnit=((double)theDVs.DefaultHtmlWidth)/theWidth;

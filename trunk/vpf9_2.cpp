@@ -135,7 +135,7 @@ void DrawOperations::drawLineBetweenTwoVectorsBuffer(const Vector<Rational>& vec
   this->theDrawLineBetweenTwoRootsOperations.LastObject()->init(vector1, vector2, thePenStyle, ColorIndex);
 }
 
-void DrawOperations::drawLineBetweenTwoVectorsBuffer(const Vector<double>& vector1, const Vector<double>& vector2, unsigned long thePenStyle, int ColorIndex)
+void DrawOperations::drawLineBetweenTwoVectorsBufferDouble(const Vector<double>& vector1, const Vector<double>& vector2, unsigned long thePenStyle, int ColorIndex)
 { this->TypeNthDrawOperation.AddOnTop(this->typeDrawLineBetweenTwoVectors);
   this->IndexNthDrawOperation.AddOnTop(this->theDrawLineBetweenTwoRootsOperations.size);
   this->theDrawLineBetweenTwoRootsOperations.AddObjectOnTopCreateNew();

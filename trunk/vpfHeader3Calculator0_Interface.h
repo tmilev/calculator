@@ -583,6 +583,7 @@ public:
   Vectors<double> thePoints;
   Expression thePlotElement;
   std::string thePlotType;
+  void ComputeYbounds();
   std::string GetPlotStringFromFunctionStringAndRanges
   (bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat, double lowerBound, double upperBound);
   void CreatePlotFunction

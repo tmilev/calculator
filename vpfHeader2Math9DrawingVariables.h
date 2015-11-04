@@ -213,7 +213,7 @@ public:
   void drawLineBuffer(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
   void drawTextBuffer(double X1, double Y1, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
   void drawLineBetweenTwoVectorsBuffer(const Vector<Rational>& vector1, const Vector<Rational>& vector2, unsigned long thePenStyle, int ColorIndex);
-  void drawLineBetweenTwoVectorsBuffer(const Vector<double>& vector1, const Vector<double>& vector2, unsigned long thePenStyle, int ColorIndex);
+  void drawLineBetweenTwoVectorsBufferDouble(const Vector<double>& vector1, const Vector<double>& vector2, unsigned long thePenStyle, int ColorIndex);
   void drawTextAtVectorBuffer(const Vector<Rational>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
   void drawCircleAtVectorBuffer(const Vector<Rational>& input, double radius, unsigned long thePenStyle, int theColor);
   double getAngleFromXandY(double x, double y, double neighborX, double neighborY);
@@ -369,8 +369,8 @@ public:
   void drawLineBetweenTwoVectorsBuffer(const Vector<Rational>& r1, const Vector<Rational>& r2, int PenStyle, int PenColor)
   { this->theBuffer.drawLineBetweenTwoVectorsBuffer(r1, r2, PenStyle, PenColor);
   }
-  void drawLineBetweenTwoVectorsBuffer(const Vector<double>& r1, const Vector<double>& r2, int PenStyle, int PenColor)
-  { this->theBuffer.drawLineBetweenTwoVectorsBuffer(r1, r2, PenStyle, PenColor);
+  void drawLineBetweenTwoVectorsBufferDouble(const Vector<double>& r1, const Vector<double>& r2, int PenStyle, int PenColor)
+  { this->theBuffer.drawLineBetweenTwoVectorsBufferDouble(r1, r2, PenStyle, PenColor);
   }
   void drawTextAtVectorBuffer(const Vector<Rational>& point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile);
   void drawCircleAtVectorBuffer(const Vector<Rational>& point, double radius, unsigned long thePenStyle, int theColor);

@@ -886,7 +886,8 @@ std::string Plot::GetPlotHtml()
         CGI::RedGreenBlue(255,0,0));
   std::stringstream resultStream;
   resultStream << theDVs.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
-  return resultStream.str();
+  std::string tempString=resultStream.str();
+  return tempString;
 }
 
 std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)

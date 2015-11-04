@@ -854,7 +854,7 @@ std::string Plot::GetPlotHtml()
   theDVs.DefaultHtmlWidth=600;
   Vector<double> v1;
   Vector<double> v2;
-  /*v1.MakeZero(2);
+  v1.MakeZero(2);
   v2.MakeZero(2);
   v1[0]=this->theLowerBoundAxes-0.1;
   v1[1]=0;
@@ -868,6 +868,7 @@ std::string Plot::GetPlotHtml()
   double widthUnit=((double)theDVs.DefaultHtmlHeight)/theHeight;
   theDVs.theBuffer.GraphicsUnit[0]= heightUnit>widthUnit ? widthUnit : heightUnit;
   theDVs.drawLineBetweenTwoVectorsBufferDouble(v1, v2, theDVs.PenStyles::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+  /*
   //stOutput << "The width: " << theWidth
   //<< "<br> theLowerBoundAxes equals: " << this->theLowerBoundAxes
   //<< "<br> theUpperBoundAxes equals: " << this->theUpperBoundAxes

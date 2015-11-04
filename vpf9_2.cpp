@@ -128,14 +128,14 @@ bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
   return true;
 }
 
-void DrawOperations::drawLineBetweenTwoVectorsBuffer(const Vector<Rational>& vector1, const Vector<Rational>& vector2, unsigned long thePenStyle, int ColorIndex)
+void DrawOperations::drawLineBetweenTwoVectorsBuffer(const Vector<Rational>& vector1, const Vector<Rational>& vector2, uint32_t thePenStyle, int ColorIndex)
 { this->TypeNthDrawOperation.AddOnTop(this->typeDrawLineBetweenTwoVectors);
   this->IndexNthDrawOperation.AddOnTop(this->theDrawLineBetweenTwoRootsOperations.size);
   this->theDrawLineBetweenTwoRootsOperations.AddObjectOnTopCreateNew();
   this->theDrawLineBetweenTwoRootsOperations.LastObject()->init(vector1, vector2, thePenStyle, ColorIndex);
 }
 
-void DrawOperations::drawLineBetweenTwoVectorsBufferDouble(const Vector<double>& vector1, const Vector<double>& vector2, unsigned long thePenStyle, int ColorIndex)
+void DrawOperations::drawLineBetweenTwoVectorsBufferDouble(const Vector<double>& vector1, const Vector<double>& vector2, uint32_t thePenStyle, int ColorIndex)
 { this->TypeNthDrawOperation.AddOnTop(this->typeDrawLineBetweenTwoVectors);
   this->IndexNthDrawOperation.AddOnTop(this->theDrawLineBetweenTwoRootsOperations.size);
   this->theDrawLineBetweenTwoRootsOperations.AddObjectOnTopCreateNew();
@@ -143,7 +143,7 @@ void DrawOperations::drawLineBetweenTwoVectorsBufferDouble(const Vector<double>&
 }
 
 void DrawLineBetweenTwoRootsOperation::init
-(const Vector<Rational>& input1, const Vector<Rational>& input2, unsigned long PenStyle, int colorIndex)
+(const Vector<Rational>& input1, const Vector<Rational>& input2, uint32_t PenStyle, int colorIndex)
 { if(input1.size!=input2.size)
     crash << crash;
   int theDimension=input1.size;
@@ -158,7 +158,7 @@ void DrawLineBetweenTwoRootsOperation::init
 }
 
 void DrawLineBetweenTwoRootsOperation::init
-(const Vector<double>& input1, const Vector<double>& input2, unsigned long PenStyle, int colorIndex)
+(const Vector<double>& input1, const Vector<double>& input2, uint32_t PenStyle, int colorIndex)
 { if(input1.size!=input2.size)
     crash << crash;
   int theDimension=input1.size;
@@ -173,7 +173,7 @@ void DrawLineBetweenTwoRootsOperation::init
 }
 
 void DrawOperations::drawCircleAtVectorBuffer
-(const Vector<Rational>& input, double radius, unsigned long thePenStyle, int theColor)
+(const Vector<Rational>& input, double radius, uint32_t thePenStyle, int theColor)
 { this->TypeNthDrawOperation.AddOnTop(this->typeDrawCircleAtVector);
   this->IndexNthDrawOperation.AddOnTop(this->theDrawCircleAtVectorOperations.size);
   this->theDrawCircleAtVectorOperations.AddObjectOnTopCreateNew();
@@ -187,11 +187,11 @@ void DrawOperations::drawTextAtVectorBuffer(const Vector<Rational>& input, const
   this->theDrawTextAtVectorOperations.LastObject()->init(input, inputText, ColorIndex, theFontSize, theTextStyle);
 }
 
-void DrawingVariables::drawLineDirectly(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
+void DrawingVariables::drawLineDirectly(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex)
 { this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex);
 }
 
-void DrawOperations::drawLineBuffer(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
+void DrawOperations::drawLineBuffer(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex)
 { this->TypeNthDrawOperation.AddOnTop(this->typeDrawLine);
   this->IndexNthDrawOperation.AddOnTop(this->theDrawLineOperations.size);
   this->theDrawLineOperations.AddObjectOnTopCreateNew();
@@ -304,7 +304,7 @@ int DrawingVariables::GetActualTextStyleFromFlagsAnd(int inputTextStyle)
   return this->TextStyleNormal;
 }
 
-void DrawingVariables::drawLineBuffer(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
+void DrawingVariables::drawLineBuffer(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex)
 { this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex);
 }
 

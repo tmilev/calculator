@@ -577,7 +577,7 @@ void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& TDV, int theDimen
   TDV.theBuffer.BasisToDrawCirclesAt.MakeEiBasis(theDimension, 1, 0);
 }
 
-void DrawingVariables::drawLineBufferOld(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile)
+void DrawingVariables::drawLineBufferOld(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, std::fstream* LatexOutFile)
 { this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex);
   if (LatexOutFile!=0)
     LaTeXProcedures::drawline(X1, Y1, X2, Y2, thePenStyle, ColorIndex, *LatexOutFile, *this);
@@ -588,7 +588,7 @@ void DrawingVariables::drawTextAtVectorBuffer(const Vector<Rational>& point, con
 }
 
 void DrawingVariables::drawCircleAtVectorBuffer
-(const Vector<Rational>& point, double radius, unsigned long thePenStyle, int theColor)
+(const Vector<Rational>& point, double radius, uint32_t thePenStyle, int theColor)
 { this->theBuffer.drawCircleAtVectorBuffer(point, radius, thePenStyle, theColor);
 }
 
@@ -5923,12 +5923,14 @@ void LaTeXProcedures::drawTextDirectly(double X1, double Y1, const std::string& 
   output << "\\put(" << X1-LaTeXProcedures::FigureCenterCoordSystemX << ", " << LaTeXProcedures::FigureCenterCoordSystemY-Y1 << "){\\tiny{" << theText << "}}";
 }
 
-void LaTeXProcedures::drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream& output, DrawingVariables& drawInput)
+void LaTeXProcedures::drawline(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, std::fstream& output, DrawingVariables& drawInput)
 { if ((int)thePenStyle== DrawingVariables::PenStyleInvisible)
     return;
   output.precision(4);
-  X1/=LaTeXProcedures::ScaleFactor; X2/=LaTeXProcedures::ScaleFactor;
-  Y1/=LaTeXProcedures::ScaleFactor; Y2/=LaTeXProcedures::ScaleFactor;
+  X1/=LaTeXProcedures::ScaleFactor;
+  X2/=LaTeXProcedures::ScaleFactor;
+  Y1/=LaTeXProcedures::ScaleFactor;
+  Y2/=LaTeXProcedures::ScaleFactor;
   std::string tempS;
   if (thePenStyle==(unsigned)DrawingVariables::PenStyleDashed)
     tempS="lightgray";

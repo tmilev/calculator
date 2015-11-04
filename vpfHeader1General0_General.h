@@ -1191,7 +1191,7 @@ public:
   static void ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml);
   static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml){ std::string result; CGI::ElementToStringTooltip(input, inputTooltip, result, useHtml); return result; };
   static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip){ return CGI::ElementToStringTooltip(input, inputTooltip, true); };
-  static inline int RedGreenBlue(int r, int g, int b)
+  static inline uint32_t RedGreenBlue(unsigned int r, unsigned int g, unsigned int b)
   { r=r%256;
     g=g%256;
     b=b%256;

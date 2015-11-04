@@ -878,7 +878,7 @@ std::string Plot::GetPlotHtml()
   v2[0]=this->theUpperBoundAxes+0.1;
   v2[1]=0;
   theDVs.drawLineBetweenTwoVectorsBufferDouble
-  (v1, v2, 0,0);//(uint32_t) theDVs.PenStyles::PenStyleNormal, (int) CGI::RedGreenBlue(0,0,0));
+  (v1, v2, ((uint32_t) theDVs.PenStyles::PenStyleNormal), ((int) CGI::RedGreenBlue(0,0,0)));
   v1[0]=0;
   v1[1]=this->lowBoundY-0.1;
   v2[0]=0;

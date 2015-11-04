@@ -848,7 +848,7 @@ void Plot::ComputeAxesAndBoundingBox()
 
 std::string Plot::GetPlotHtml()
 { //MacroRegisterFunctionWithName("Plot::GetPlotHtml");
-  this->ComputeAxesAndBoundingBox();
+/*  this->ComputeAxesAndBoundingBox();
   DrawingVariables theDVs;
   theDVs.DefaultHtmlHeight=400;
   theDVs.DefaultHtmlWidth=600;
@@ -868,11 +868,11 @@ std::string Plot::GetPlotHtml()
   double widthUnit=((double)theDVs.DefaultHtmlHeight)/theHeight;
   theDVs.theBuffer.GraphicsUnit[0]= heightUnit>widthUnit ? widthUnit : heightUnit;
   theDVs.drawLineBetweenTwoVectorsBufferDouble(v1, v2, theDVs.PenStyles::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
- /* stOutput << "The width: " << theWidth
-  << "<br> theLowerBoundAxes equals: " << this->theLowerBoundAxes
-  << "<br> theUpperBoundAxes equals: " << this->theUpperBoundAxes
-  << "<br> GraphicsUnit equals: " << theDVs.theBuffer.GraphicsUnit[0];
-  ;*/
+  //stOutput << "The width: " << theWidth
+  //<< "<br> theLowerBoundAxes equals: " << this->theLowerBoundAxes
+  //<< "<br> theUpperBoundAxes equals: " << this->theUpperBoundAxes
+  //<< "<br> GraphicsUnit equals: " << theDVs.theBuffer.GraphicsUnit[0];
+  //;
   v1[0]=0;
   v1[1]=this->lowBoundY-0.1;
   v2[0]=0;
@@ -887,7 +887,9 @@ std::string Plot::GetPlotHtml()
   std::stringstream resultStream;
   resultStream << theDVs.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
   std::string tempString=resultStream.str();
-  return tempString;
+
+  return tempString;*/
+  return "";
 }
 
 std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)

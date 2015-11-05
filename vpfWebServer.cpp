@@ -1286,6 +1286,8 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex)
 
 int WebWorker::ServeClient()
 { MacroRegisterFunctionWithName("WebServer::ServeClient");
+  ProgressReportWebServer theReport;
+  theReport.SetStatus("Serving client, worker in use ...");
   onePredefinedCopyOfGlobalVariables.flagComputationStarted=true;
   onePredefinedCopyOfGlobalVariables.IndicatorStringOutputFunction=WebServer::PipeProgressReportToParentProcess;
   if (this->requestType!=this->requestGetComputationIndicator &&
@@ -1315,6 +1317,7 @@ int WebWorker::ServeClient()
     this->parent->ReleaseNonActiveWorkers();
   } else if (this->requestType==this->requestUnknown)
     this->ProcessUnknown();
+  theReport.SetStatus("Client served, proceeding to release resources...");
   this->SignalIamDoneReleaseEverything();
   return 0;
 }

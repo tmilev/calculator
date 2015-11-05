@@ -834,7 +834,7 @@ public:
   std::string javaScriptDisplayingIndicator;
   std::fstream theTestFile;
   std::string theTestFileName;
-  int numOutputFiles;
+  int numOutputFileS;
   std::string userLabel;
   std::stringstream Comments;
   FormatExpressions formatVisibleStrings;

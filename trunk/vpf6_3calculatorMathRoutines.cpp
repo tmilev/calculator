@@ -3680,12 +3680,20 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
   << "<br>\\parametricplot[linecolor=\\fcColorGraph, plotpoints=1000]{" << leftEndPoint << "}{" << rightEndPoint << "}{"
   << theConvertedExpressions[0].GetValue<std::string>() << theConvertedExpressions[1].GetValue<std::string>() << "}";
   PlotObject thePlot;
+  Vectors<double> theXs, theYs;
+
   if (!input[1].EvaluatesToDoubleInRange
-      ("t", leftEndPoint, rightEndPoint, 1000, &thePlot.xLow, &thePlot.xHigh, &thePlot.thePoints))
+      ("t", leftEndPoint, rightEndPoint, 1000, &thePlot.xLow, &thePlot.xHigh, &theXs))
     return theCommands << "<hr>Failed to evaluate curve function. ";
   if (!input[2].EvaluatesToDoubleInRange
-      ("t", leftEndPoint, rightEndPoint, 1000, &thePlot.yLow, &thePlot.yHigh, &thePlot.thePoints))
+      ("t", leftEndPoint, rightEndPoint, 1000, &thePlot.yLow, &thePlot.yHigh, &theYs))
     return theCommands << "<hr>Failed to evaluate curve function. ";
+  thePlot.thePoints.SetSize(theXs.size);
+  for (int i=0; i<theXs.size; i++)
+  { thePlot.thePoints[i].SetSize(2);
+    thePlot.thePoints[i][0]=theXs[i][1];
+    thePlot.thePoints[i][1]=theYs[i][1];
+  }
   thePlot.thePlotElement=input;
   thePlot.thePlotString=outLatex.str();
   thePlot.thePlotStringWithHtml=outHtml.str();

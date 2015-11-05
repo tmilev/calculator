@@ -11,7 +11,7 @@ ProjectInformationInstance ProjectInfoVpf6cpp(__FILE__, "Calculator parser, impl
 
 Calculator::Calculator()
 { this->theGlobalVariableS=0;
-  this->numOutputFiles=0;
+  this->numOutputFileS=0;
   this->flagHideLHS=false;
   this->flagUseHtml=true;
 }
@@ -25,8 +25,9 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
 { std::fstream theFile;
   std::stringstream fileName;
   std::stringstream systemCommand1, systemCommand2, systemCommand3;
+  unsigned int fileIdentifier=MathRoutines::hashString(fileContent);
 
-  fileName << this->theGlobalVariableS->PhysicalNameExtraOutputWithPath << this->numOutputFiles;
+  fileName << this->theGlobalVariableS->PhysicalNameExtraOutputWithPath << fileIdentifier;
   FileOperations::OpenFileCreateIfNotPresent(theFile, fileName.str()+".tex", false, true, false);
   theFile << fileContent;
   theFile.flush();
@@ -44,10 +45,10 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
   }
   std::stringstream out;
   out << "<img src=\"" << this->theGlobalVariableS->DisplayNameExtraOutputWithPath
-  << this->numOutputFiles << ".png\"></img><a href=\"" << this->theGlobalVariableS->DisplayNameExtraOutputWithPath
-  << this->numOutputFiles << ".png\">" << this->theGlobalVariableS->DisplayNameExtraOutputWithPath
-  << this->numOutputFiles << ".png</a>";
-  this->numOutputFiles++;
+  << fileIdentifier << ".png\"></img><a href=\"" << this->theGlobalVariableS->DisplayNameExtraOutputWithPath
+  << fileIdentifier << ".png\">" << this->theGlobalVariableS->DisplayNameExtraOutputWithPath
+  << fileIdentifier << ".png</a>";
+  this->numOutputFileS++;
   return out.str();
 }
 

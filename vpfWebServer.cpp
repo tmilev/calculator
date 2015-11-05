@@ -143,7 +143,8 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
   theWebServer.theProgressReports[this->indexProgressReport]=inputStatus;
   std::stringstream toBePiped;
   for (int i=0; i<theWebServer.theProgressReports.size; i++)
-    toBePiped << "<br>" << theWebServer.theProgressReports[i];
+    if (theWebServer.theProgressReports[i]!="")
+      toBePiped << "<br>" << theWebServer.theProgressReports[i];
   if (!onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
     return;
   // theLog << logger::endL << logger::red << "SetStatus before the issue: outputFunction: "
@@ -1479,7 +1480,7 @@ WebWorker& WebServer::GetActiveWorker()
 }
 
 void WebServer::SignalActiveWorkerDoneReleaseEverything()
-{ MacroRegisterFunctionWithName("WebServer::ReleaseActiveWorker");
+{ MacroRegisterFunctionWithName("WebServer::SignalActiveWorkerDoneReleaseEverything");
   if (theWebServer.activeWorker==-1)
     return;
   theWebServer.GetActiveWorker().SignalIamDoneReleaseEverything();
@@ -1914,10 +1915,10 @@ int WebServer::Run()
       this->ReturnActiveIndicatorAlthoughComputationIsNotDone;
       onePredefinedCopyOfGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
       MutexWrapper::InitializeAllAllocatedMutexesAllowMutexUse();
+      crash.CleanUpFunction=WebServer::SignalActiveWorkerDoneReleaseEverything;
       InitializeTimer();
       CreateTimerThread();
       /////////////////////////////////////////////////////////////////////////
-      crash.CleanUpFunction=WebServer::SignalActiveWorkerDoneReleaseEverything;
 //      stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;
 //      stOutput.flushOutputFunction=this->FlushActiveWorker;
 //      theLog << this->ToStringStatusActive() << logger::endL;

@@ -57,7 +57,7 @@ void* RunTimerVoidPtr(void* ptr)
   double elapsedtime=-1;
   double elapsedComputationTime=-1;
   double computationStartTime=-1;
-  ProgressReportWebServer theReport;
+  ProgressReportWebServer theReport1, theReport2;
 //  std::cout << "Got thus far RunTimerVoidPtr - 2" << std::endl;
   int counter=0;
   for (; ;)
@@ -76,7 +76,7 @@ void* RunTimerVoidPtr(void* ptr)
     if (computationStartTime>0)
       elapsedComputationTime=elapsedtime-computationStartTime;
     if (onePredefinedCopyOfGlobalVariables.flagComputationCompletE)
-    { theReport.SetStatus("Starting timer cycle break: computation is complete.");
+    { theReport1.SetStatus("Starting timer cycle break: computation is complete.");
 //      std::cout << "Got thus far 2-1" << std::endl;
       break;
     }
@@ -87,7 +87,7 @@ void* RunTimerVoidPtr(void* ptr)
     if (onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
       if (elapsedComputationTime>0)
         if (elapsedComputationTime>onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit)
-        { theReport.SetStatus("Starting timer cycle break: computation time too long.");
+        { theReport1.SetStatus("Starting timer cycle break: computation time too long.");
 //          std::cout << "Got thus far 2-2" << std::endl;
           break;
         }
@@ -100,10 +100,10 @@ void* RunTimerVoidPtr(void* ptr)
                   !onePredefinedCopyOfGlobalVariables.flagDisplayTimeOutExplanation)
               { onePredefinedCopyOfGlobalVariables.flagDisplayTimeOutExplanation=true;
 //                std::cout << "Got thus far 2-3" << std::endl;
-                theReport.SetStatus("Starting timer cycle displaying time out explanation.");
+                theReport1.SetStatus("Starting timer cycle displaying time out explanation.");
                 onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
 //                std::cout << "Got thus far 2-4" << std::endl;
-                theReport.SetStatus("Starting timer cycle displaying time out indicator done, continuing timer cycle.");
+                theReport1.SetStatus("Starting timer cycle displaying time out indicator done, continuing timer cycle.");
 //                std::cout << "Got thus far 2-5" << std::endl;
               }
 
@@ -130,7 +130,7 @@ void* RunTimerVoidPtr(void* ptr)
     }
   }
   RegisterFunctionCall(__FILE__, __LINE__, "exiting timer");
-  theReport.SetStatus("Starting timer thread: exiting.");
+  theReport2.SetStatus("Starting timer thread: exiting.");
   pthread_exit(NULL);
   return 0;
 }

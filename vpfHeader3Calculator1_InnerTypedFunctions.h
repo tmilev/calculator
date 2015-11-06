@@ -39,6 +39,8 @@ public:
   static bool innerMultiplyAnyScalarBySequence(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplySequenceByAnyScalar(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplySequenceMatrixBySequenceMatrix(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyRatOrAlgebraicByMatRatOrMatAlg(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyMatrixRationalOrRationalByMatrixRational(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyMatrixRFOrRFByMatrixRF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyMatrixTensorOrRationalByMatrixTensor(Calculator& theCommands, const Expression& input, Expression& output);

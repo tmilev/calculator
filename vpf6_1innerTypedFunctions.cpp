@@ -1162,6 +1162,61 @@ bool CalculatorFunctionsBinaryOps::innerTensorMatByMatTensor(Calculator& theComm
   return output.AssignValue(result, theCommands);
 }
 
+bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg");
+  if (!input.IsListNElements(3))
+    return false;
+  const Expression *matE;
+  const Expression *scalarE;
+  matE  =&input[1];
+  scalarE=& input[2];
+  if (!matE->IsOfType<Matrix<Rational> >() && !matE->IsOfType<Matrix<AlgebraicNumber> >())
+    MathRoutines::swap(matE, scalarE);
+  if (!matE->IsOfType<Matrix<Rational> >() && !matE->IsOfType<Matrix<AlgebraicNumber> >())
+    return false;
+  Matrix<AlgebraicNumber> theMatAlg;
+  AlgebraicNumber theScalar;
+  Matrix<Rational> theMatRat;
+  Rational theScalarRat;
+  if (matE->IsOfType(&theMatRat))
+    theMatAlg=theMatRat;
+  else
+    if (!matE->IsOfType(&theMatAlg))
+      return false;
+  if (scalarE->IsOfType(&theScalarRat))
+    theScalar=theScalarRat;
+  else
+    if (!scalarE->IsOfType(&theScalar))
+      return false;
+  theMatAlg*=theScalar;
+  return output.AssignValue(theMatAlg, theCommands);
+}
+
+bool CalculatorFunctionsBinaryOps::innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg");
+  if (!input.IsListNElements(3))
+    return false;
+  Matrix<AlgebraicNumber> matAlgLeft, matAlgRight;
+  Matrix<Rational> matRatLeft, matRatRight;
+  const Expression& leftE=input[1];
+  const Expression& rightE=input[2];
+  if (leftE.IsOfType<Matrix<Rational> >() && rightE.IsOfType<Matrix<Rational> >() )
+    return false;
+  if (leftE.IsOfType(&matRatLeft))
+    matAlgLeft=matRatLeft;
+  else
+    if (!leftE.IsOfType(&matAlgLeft))
+      return false;
+  if (rightE.IsOfType(&matRatRight))
+    matAlgRight=matRatRight;
+  else
+    if (!rightE.IsOfType(&matAlgRight))
+      return false;
+  matAlgLeft*=matAlgRight;
+  return output.AssignValue(matAlgLeft, theCommands);
+}
+
 bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational");
   if (!input.IsListNElements(3))

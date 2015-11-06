@@ -1893,6 +1893,21 @@ void Calculator::initPredefinedStandardOperations()
    "Multiplies matrix rational by matrix rational. ",
    "M=MakeMatrix{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational");
   this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg,
+   this->opMatRat(), this->opMatAlgebraic(),
+   "Multiplies matrix rational by matrix rational. ",
+   "M=MakeMatrix{}((1,1), (0,1)); N=MakeMatrix{}((1,2),(3, sqrt 5)); L=MakeMatrix{}((1,2),(3, sqrt 5)); M*N; N*M; M*L ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational");
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg,
+   this->opMatAlgebraic(), this->opMatRat(),
+   "Multiplies matrix rational by matrix rational. ",
+   "M=MakeMatrix{}((1,1), (0,1)); N=MakeMatrix{}((1,2),(3, sqrt 5)); L=MakeMatrix{}((1,2),(3, sqrt 5)); M*N; N*M; M*L ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational");
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg,
+   this->opMatAlgebraic(), this->opMatAlgebraic(),
+   "Multiplies matrix rational by matrix rational. ",
+   "M=MakeMatrix{}((1,1), (0,1)); N=MakeMatrix{}((1,2),(3, sqrt 5)); L=MakeMatrix{}((1,2),(3, sqrt 5)); M*N; N*M; M*L ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational");
+  this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF,
    this->opRational(), this->opMatRF(),
    "Multiplies a rational number by matrix of polynomial functions. ",
@@ -1921,6 +1936,22 @@ void Calculator::initPredefinedStandardOperations()
    this->opMatTensorRat(), this->opMatTensorRat(),
    "Multiplies matrix rational by matrix tensor. ",
    "M=MakeMatrixTensorForm{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor");
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg,
+   this->opAlgNumber(), this->opMatRat(),
+   "Multiplies rational by algebraic matrix or algebraic number matrix of rational or algebraic numbers. ",
+   "A=MakeMatrix((1,2),(3,4)); B=MakeMatrix((1, sqrt(2)),(sqrt (3), sqrt(4))); sqrt{}2 A; 2B; sqrt{}2 B ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg");
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg,
+   this->opRational(), this->opMatAlgebraic(),
+   "Multiplies rational by algebraic matrix or algebraic number matrix of rational or algebraic numbers. ",
+   "A=MakeMatrix((1,2),(3,4)); B=MakeMatrix((1, sqrt(2)),(sqrt (3), sqrt(4))); sqrt{}2 A; 2B; sqrt{}2 B ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg");
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg,
+   this->opAlgNumber(), this->opMatAlgebraic(),
+   "Multiplies rational by algebraic matrix or algebraic number matrix of rational or algebraic numbers. ",
+   "A=MakeMatrix((1,2),(3,4)); B=MakeMatrix((1, sqrt(2)),(sqrt (3), sqrt(4))); sqrt{}2 A; 2B; sqrt{}2 B ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg");
+
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational,
    this->opRational(), this->opMatRat(),

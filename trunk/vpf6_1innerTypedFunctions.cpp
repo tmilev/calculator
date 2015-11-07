@@ -1213,6 +1213,12 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg
   else
     if (!rightE.IsOfType(&matAlgRight))
       return false;
+  if (matAlgLeft.NumCols!=matAlgRight.NumRows)
+  { std::stringstream errorStream;
+    errorStream << "Error: attempting to multiply matrix with " << matAlgLeft.NumCols << " columns by a "
+    << " matrix with " << matAlgRight.NumRows << " rows. ";
+    return output.MakeError(errorStream.str(), theCommands);
+  }
   matAlgLeft*=matAlgRight;
   return output.AssignValue(matAlgLeft, theCommands);
 }
@@ -1377,7 +1383,11 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRati
   const Matrix<Rational>& rightMat=rightE.GetValue<Matrix<Rational> >();
   const Matrix<Rational>& leftMat=leftE.GetValue<Matrix<Rational> >();
   if (rightMat.NumRows!=leftMat.NumRows || rightMat.NumCols!=leftMat.NumCols)
-    return false;
+  { std::stringstream errorStream;
+    errorStream << "Error: attempting to add a " << rightMat.NumRows << " x " << rightMat.NumCols << " matrix to a "
+    << leftMat.NumRows << " x " << leftMat.NumCols << " matrix. ";
+    return output.MakeError(errorStream.str(), theCommands);
+  }
   Matrix<Rational> result=leftMat;
   result+=rightMat;
   return output.AssignValue(result, theCommands);

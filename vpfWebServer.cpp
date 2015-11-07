@@ -177,8 +177,11 @@ void PauseController::CreateMe()
 }
 
 void PauseController::PauseIfRequested()
-{ if (this->CheckPauseIsRequested())
-    theLog << logger::red << "BLOCKING on " << this->ToString() << logger::endL;
+{ ProgressReportWebServer theReport;
+  if (this->CheckPauseIsRequested())
+  { theLog << logger::red << "BLOCKING on " << this->ToString() << logger::endL;
+    theReport.SetStatus("BLOCKING on " +this->ToString());
+  }
   bool pauseWasRequested= !((read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size))>0);
   if (!pauseWasRequested)
     write(this->thePausePipe[1], "!", 1);
@@ -193,14 +196,19 @@ bool PauseController::PauseIfRequestedWithTimeOut()
   struct timeval timeout;
   timeout.tv_sec = 10;
   timeout.tv_usec = 0;
+  ProgressReportWebServer theReport;
   if (this->CheckPauseIsRequested())
-    theLog << logger::red << "BLOCKING on " << this->ToString() << logger::endL;
+  { theLog << logger::red << "BLOCKING on " << this->ToString() << logger::endL;
+    theReport.SetStatus("Blocking on " + this->ToString());
+  }
   bool pauseWasRequested=false;
   if (!select(this->thePausePipe[0]+1, &read_fds, &write_fds, &except_fds, &timeout) == 1)
   { theLog << logger::red << "BLOCKING on " << this->ToString() << logger::green
     << " TIMED OUT!!!" << logger::endL;
+    theReport.SetStatus("Blocking on " + this->ToString()+ " timed out.");
     return false;
   }
+
   pauseWasRequested = !((read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size))>0);
   if (!pauseWasRequested)
     write(this->thePausePipe[1], "!", 1);
@@ -210,8 +218,11 @@ bool PauseController::PauseIfRequestedWithTimeOut()
 void PauseController::RequestPausePauseIfLocked()
 { this->mutexForProcessBlocking.GetElement().LockMe();//<- make sure the pause controller is not locking itself
   //through competing threads
+  ProgressReportWebServer theReport;
   if (this->CheckPauseIsRequested())
+  { theReport.SetStatus("BLOCKING on pause controller " +this->ToString());
     theLog << logger::red << "BLOCKING on pause controller " << this->ToString() << logger::endL;
+  }
   read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size);
   this->mutexForProcessBlocking.GetElement().UnlockMe();
 }

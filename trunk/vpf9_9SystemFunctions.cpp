@@ -60,6 +60,7 @@ void* RunTimerVoidPtr(void* ptr)
   ProgressReportWebServer theReport1, theReport2;
 //  std::cout << "Got thus far RunTimerVoidPtr - 2" << std::endl;
   int counter=0;
+  int microsecondsleep=100000;
   for (; ;)
   { //std::stringstream tempStream;
     counter++;
@@ -67,10 +68,11 @@ void* RunTimerVoidPtr(void* ptr)
 //    std::cout << "Got thus far RunTimerVoidPtr - 4" << std::endl;
 //    theReport.SetStatus(tempStream.str());
 //    std::cout << "Got thus far RunTimerVoidPtr - 5" << std::endl;
+    std::stringstream reportStream;
     if (onePredefinedCopyOfGlobalVariables.flagComputationStarted)
       if (computationStartTime<0)
         computationStartTime=GetElapsedTimeInSeconds();
-    SleepFunction(100000);
+    SleepFunction(microsecondsleep);
     elapsedtime=GetElapsedTimeInSeconds();
 //    std::cout << "Got thus far RunTimerVoidPtr - 3" << std::endl;
     if (computationStartTime>0)
@@ -79,6 +81,10 @@ void* RunTimerVoidPtr(void* ptr)
     { theReport1.SetStatus("Starting timer cycle break: computation is complete.");
 //      std::cout << "Got thus far 2-1" << std::endl;
       break;
+    }
+    if (counter%20==0)
+    { reportStream << "Timer: " << elapsedtime << " seconds elapsed since the timer was launched.";
+      theReport1.SetStatus(reportStream.str());
     }
 //    if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
 //      if (!onePredefinedCopyOfGlobalVariables.flagComputationStarted)
@@ -130,7 +136,7 @@ void* RunTimerVoidPtr(void* ptr)
     }
   }
   RegisterFunctionCall(__FILE__, __LINE__, "exiting timer");
-  theReport2.SetStatus("Starting timer thread: exiting.");
+  theReport2.SetStatus("Timer thread: finished.");
   pthread_exit(NULL);
   return 0;
 }

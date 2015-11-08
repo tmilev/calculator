@@ -625,20 +625,25 @@ void WebWorker::SendAllBytes()
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO,(void*)(&tv), sizeof(timeval));
   ProgressReportWebServer theReport;
-  theReport.SetStatus("WebWorker::SendAllBytes");
+  theReport.SetStatus("WebWorker::SendAllBytes: starting ...");
   if (this->connectedSocketID==-1)
   { theLog << logger::red << "Socket::SendAllBytes failed: connectedSocketID=-1." << logger::endL;
-    theReport.SetStatus("WebWorker::SendAllBytes - continue ...");
+    theReport.SetStatus("Socket::SendAllBytes failed: connectedSocketID=-1. WebWorker::SendAllBytes - finished.");
     return;
   }
   theLog << "Sending " << this->remainingBytesToSend.size << " bytes in chunks of: " << logger::endL;
+  std::stringstream reportStream;
+  ProgressReportWebServer theReport2;
+  reportStream << "Sending " << this->remainingBytesToSend.size << " bytes in chunks of: " << logger::endL;
+  theReport2.SetStatus(reportStream.str());
   //  theLog << "\r\nIn response to: " << this->theMessage;
   double startTime=onePredefinedCopyOfGlobalVariables.GetElapsedSeconds();
   while (this->remainingBytesToSend.size>0)
   { if (onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-startTime>180)
     { theLog << "WebWorker::SendAllBytes failed: more than 180 seconds have elapsed. "
       << logger::endL;
-      theReport.SetStatus("WebWorker::SendAllBytes - continue ...");
+      theReport.SetStatus((std::string)"WebWorker::SendAllBytes failed: more than 180 seconds have elapsed. "
+                          +(std::string) "Continuing ...");
       return;
     }
     int numBytesSent=send
@@ -646,7 +651,9 @@ void WebWorker::SendAllBytes()
     if (numBytesSent<0)
     { theLog << "WebWorker::SendAllBytes failed. Error: "
       << this->parent->ToStringLastErrorDescription() << logger::endL;
-      theReport.SetStatus("WebWorker::SendAllBytes - continue ...");
+      theReport.SetStatus
+      ("WebWorker::SendAllBytes failed. Error: " + this->parent->ToStringLastErrorDescription()
+       + "WebWorker::SendAllBytes - continue ...");
       return;
     }
     theLog << numBytesSent;
@@ -655,7 +662,7 @@ void WebWorker::SendAllBytes()
       theLog << ", ";
     theLog << logger::endL;
   }
-  theReport.SetStatus("WebWorker::SendAllBytes - continue ...");
+  theReport.SetStatus("WebWorker::SendAllBytes - finished.");
 }
 
 bool WebWorker::CheckConsistency()
@@ -1065,9 +1072,8 @@ std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExten
 int WebWorker::ProcessNonCalculator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessNonCalculator");
   this->ExtractPhysicalAddressFromMainAddress();
-//  ProgressReportWebServer theProgressReport;
-  ProgressReportWebServer theProgressReport2;
-//  theProgressReport.SetStatus("<br>Processing non-computational web-server request.");
+  ProgressReportWebServer theProgressReport;
+  theProgressReport.SetStatus("<br>Processing non-computational web-server request.");
   //theLog << this->ToStringShort() << "\r\n";
   if (FileOperations::IsFolder(this->PhysicalFileName))
     return this->ProcessFolder();
@@ -1105,6 +1111,7 @@ int WebWorker::ProcessNonCalculator()
   unsigned int fileSize=theFile.tellp();
   std::stringstream reportStream;
   reportStream << "<br>Serving file " << this->PhysicalFileName << " ...";
+  ProgressReportWebServer theProgressReport2;
   theProgressReport2.SetStatus(reportStream.str());
 
   std::stringstream theHeader;

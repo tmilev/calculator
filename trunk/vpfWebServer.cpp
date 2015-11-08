@@ -637,6 +637,7 @@ void WebWorker::SendAllBytes()
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 30;  // 30 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
+  int numTimesRunWithoutSending=0;
   while (this->remainingBytesToSend.size>0)
   { std::stringstream reportStream2;
     reportStream2 << this->remainingBytesToSend.size << " bytes remaining to send";
@@ -659,10 +660,22 @@ void WebWorker::SendAllBytes()
        + "WebWorker::SendAllBytes - continue ...");
       return;
     }
+    if (numBytesSent==0)
+      numTimesRunWithoutSending++;
+    else
+      numTimesRunWithoutSending=0;
     theLog << numBytesSent;
     this->remainingBytesToSend.Slice(numBytesSent, this->remainingBytesToSend.size-numBytesSent);
     if (this->remainingBytesToSend.size>0)
       theLog << ", ";
+    if (numTimesRunWithoutSending>3)
+    { theLog << "WebWorker::SendAllBytes failed: send function went through 3 cycles without "
+      << " sending any bytes. "
+      << logger::endL;
+      theReport.SetStatus
+      ("WebWorker::SendAllBytes failed: send function went through 3 cycles without sending any bytes. ");
+      return;
+    }
     theLog << logger::endL;
   }
   reportStream << " done. ";

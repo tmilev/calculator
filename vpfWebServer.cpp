@@ -620,10 +620,6 @@ void WebWorker::SendAllBytes()
     return;
   MacroRegisterFunctionWithName("WebWorker::SendAllBytes");
   this->CheckConsistency();
-  struct timeval tv; //<- code involving tv taken from stackexchange
-  tv.tv_sec = 30;  // 30 Secs Timeout
-  tv.tv_usec = 0;  // Not init'ing this can cause strange errors
-  setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO,(void*)(&tv), sizeof(timeval));
   ProgressReportWebServer theReport;
   theReport.SetStatus("WebWorker::SendAllBytes: starting ...");
   if (this->connectedSocketID==-1)
@@ -638,6 +634,9 @@ void WebWorker::SendAllBytes()
   theReport2.SetStatus(reportStream.str());
   //  theLog << "\r\nIn response to: " << this->theMessage;
   double startTime=onePredefinedCopyOfGlobalVariables.GetElapsedSeconds();
+  struct timeval tv; //<- code involving tv taken from stackexchange
+  tv.tv_sec = 30;  // 30 Secs Timeout
+  tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   while (this->remainingBytesToSend.size>0)
   { if (onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-startTime>180)
     { theLog << "WebWorker::SendAllBytes failed: more than 180 seconds have elapsed. "
@@ -646,6 +645,7 @@ void WebWorker::SendAllBytes()
                           +(std::string) "Continuing ...");
       return;
     }
+    setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO,(void*)(&tv), sizeof(timeval));
     int numBytesSent=send
     (this->connectedSocketID, &this->remainingBytesToSend[0], this->remainingBytesToSend.size,0);
     if (numBytesSent<0)
@@ -1425,7 +1425,7 @@ void WebWorker::OutputShowIndicatorOnTimeout()
 
 std::string WebWorker::ToStringStatus()const
 { std::stringstream out;
-  out << "worker " << this->indexInParent+1;
+  out << "Worker " << this->indexInParent+1;
   if (this->flagInUse)
   { if (this->parent->activeWorker==this->indexInParent)
       out << ", <span style=\"color:green\"><b>current process</b></span>";

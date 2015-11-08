@@ -638,7 +638,10 @@ void WebWorker::SendAllBytes()
   tv.tv_sec = 30;  // 30 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   while (this->remainingBytesToSend.size>0)
-  { if (onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-startTime>180)
+  { std::stringstream reportStream2;
+    reportStream2 << this->remainingBytesToSend << " out of " << this->ContentLength << " bytes remaining to send";
+    theReport2.SetStatus(reportStream2.str());
+    if (onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-startTime>180)
     { theLog << "WebWorker::SendAllBytes failed: more than 180 seconds have elapsed. "
       << logger::endL;
       theReport.SetStatus((std::string)"WebWorker::SendAllBytes failed: more than 180 seconds have elapsed. "

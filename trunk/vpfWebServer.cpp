@@ -639,7 +639,7 @@ void WebWorker::SendAllBytes()
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   while (this->remainingBytesToSend.size>0)
   { std::stringstream reportStream2;
-    reportStream2 << this->remainingBytesToSend << " out of " << this->ContentLength << " bytes remaining to send";
+    reportStream2 << this->remainingBytesToSend.size << " out of " << this->ContentLength << " bytes remaining to send";
     theReport2.SetStatus(reportStream2.str());
     if (onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-startTime>180)
     { theLog << "WebWorker::SendAllBytes failed: more than 180 seconds have elapsed. "

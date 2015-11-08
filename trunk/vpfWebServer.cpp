@@ -635,18 +635,24 @@ void WebWorker::SendAllBytes()
   //  theLog << "\r\nIn response to: " << this->theMessage;
   double startTime=onePredefinedCopyOfGlobalVariables.GetElapsedSeconds();
   struct timeval tv; //<- code involving tv taken from stackexchange
-  tv.tv_sec = 30;  // 30 Secs Timeout
+  tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   int numTimesRunWithoutSending=0;
+  int timeOutInSeconds =20;
   while (this->remainingBytesToSend.size>0)
   { std::stringstream reportStream2;
-    reportStream2 << this->remainingBytesToSend.size << " bytes remaining to send";
+    reportStream2 << this->remainingBytesToSend.size << " bytes remaining to send. ";
+    if (numTimesRunWithoutSending>0)
+      reportStream2 << "Previous attempt to send bytes resulted in 0 bytes sent; this is attempt number "
+      << numTimesRunWithoutSending+1 << ". ";
     theReport2.SetStatus(reportStream2.str());
-    if (onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-startTime>180)
-    { theLog << "WebWorker::SendAllBytes failed: more than 180 seconds have elapsed. "
+    if (onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-startTime>timeOutInSeconds)
+    { theLog << "WebWorker::SendAllBytes failed: more than " << timeOutInSeconds << " seconds have elapsed. "
       << logger::endL;
-      theReport.SetStatus((std::string)"WebWorker::SendAllBytes failed: more than 180 seconds have elapsed. "
-                          +(std::string) "Continuing ...");
+      std::stringstream reportStream3;
+      reportStream3 << "WebWorker::SendAllBytes failed: more than "
+      << timeOutInSeconds << " seconds have elapsed. Continuing ...";
+      theReport.SetStatus(reportStream3.str());
       return;
     }
     setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO,(void*)(&tv), sizeof(timeval));

@@ -634,7 +634,7 @@ void WebWorker::SendAllBytes()
   theLog << "Sending " << this->remainingBytesToSend.size << " bytes in chunks of: " << logger::endL;
   std::stringstream reportStream;
   ProgressReportWebServer theReport2;
-  reportStream << "Sending " << this->remainingBytesToSend.size << " bytes in chunks of: " << logger::endL;
+  reportStream << "Sending " << this->remainingBytesToSend.size << " bytes...";
   theReport2.SetStatus(reportStream.str());
   //  theLog << "\r\nIn response to: " << this->theMessage;
   double startTime=onePredefinedCopyOfGlobalVariables.GetElapsedSeconds();
@@ -662,6 +662,8 @@ void WebWorker::SendAllBytes()
       theLog << ", ";
     theLog << logger::endL;
   }
+  reportStream << " done. ";
+  theReport2.SetStatus(reportStream.str());
   theReport.SetStatus("WebWorker::SendAllBytes - finished.");
 }
 
@@ -692,8 +694,11 @@ bool WebWorker::ReceiveAll()
   tv.tv_sec = 30;  // 30 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO,(void*)(&tv), sizeof(timeval));
+  ProgressReportWebServer theReport;
+  theReport.SetStatus("WebWorker: receiving bytes...");
   int numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
 //  std::cout << "Got thus far 11" << std::endl;
+  theReport.SetStatus("WebWorker: first bytes received...");
   double numSecondsAtStart=onePredefinedCopyOfGlobalVariables.GetElapsedSeconds();
   if (numBytesInBuffer<0 || numBytesInBuffer>(signed)bufferSize)
   { std::stringstream out;
@@ -719,6 +724,10 @@ bool WebWorker::ReceiveAll()
     return true;
 //  theLog << "Content-length parsed to be: " << this->ContentLength
 //  << "However the size of mainArgumentRAW is: " << this->mainArgumentRAW.size();
+  std::stringstream reportStream;
+  reportStream << "WebWorker: received first message of "
+  << this->ContentLength << " bytes. ";
+  theReport.SetStatus(reportStream.str());
   if (this->ContentLength>10000000)
   { this->CheckConsistency();
     error="Content-length parsed to be more than 10 million bytes, aborting.";
@@ -739,9 +748,18 @@ bool WebWorker::ReceiveAll()
     this->displayUserInput=this->error;
     return false;
   }*/
+  reportStream << "Sending continue message ...";
+  theReport.SetStatus(reportStream.str());
   this->remainingBytesToSend=(std::string) "HTTP/1.1 100 Continue\r\n";
   this->SendAllBytes();
   this->remainingBytesToSend.SetSize(0);
+  reportStream << " done. ";
+  theReport.SetStatus(reportStream.str());
+  if ((signed) this->mainArgumentRAW.size()<this->ContentLength)
+  { reportStream << " Only " << this->mainArgumentRAW.size() << " out of "
+    << this->ContentLength << " bytes received, proceeding to receive the rest. ";
+    theReport.SetStatus(reportStream.str());
+  }
   std::string bufferString;
   while ((signed) this->mainArgumentRAW.size()<this->ContentLength)
   { if (onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-numSecondsAtStart>180)
@@ -773,8 +791,10 @@ bool WebWorker::ReceiveAll()
     this->error=out.str();
     this->displayUserInput=this->error;
     theLog << this->error << logger::endL;
+    theReport.SetStatus(out.str());
     return false;
   }
+  theReport.SetStatus("Webworker: received everything, processing. ");
   return true;
 }
 

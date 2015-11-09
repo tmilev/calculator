@@ -801,10 +801,10 @@ bool PlotObject::operator==(const PlotObject& other)const
 }
 
 PlotObject::PlotObject()
-{ this-> xLow=(0);
-  this-> xHigh=(0);
-  this-> yLow=(0);
-  this-> yHigh=(0);
+{ this->xLow=(0);
+  this->xHigh=(0);
+  this->yLow=(0);
+  this->yHigh=(0);
 }
 
 void PlotObject::ComputeYbounds()
@@ -882,7 +882,7 @@ std::string Plot::GetPlotHtml()
   v1[0]=0;
   v1[1]=this->lowBoundY-0.1;
   v2[0]=0;
-  v2[1]=this->highBoundY-0.1;
+  v2[1]=this->highBoundY+0.1;
   theDVs.drawLineBetweenTwoVectorsBufferDouble(v1, v2, theDVs.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
   v1[0]=1;
   v1[1]=-0.1;

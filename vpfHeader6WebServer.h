@@ -81,6 +81,8 @@ public:
   std::string mainAddress;
   std::string PhysicalFileName;
   std::string status;
+  std::string pingMessage;
+  double timeOfLastPingServerSideOnly;
   bool flagDeallocated;
   bool flagMainAddressSanitized;
   std::string mainAddressNonSanitized;
@@ -97,6 +99,7 @@ public:
   PauseController PauseIndicatorPipeInUse;
   Pipe pipeServerToWorkerRequestIndicator;
   Pipe pipeWorkerToServerControls;
+  Pipe pipeWorkerToServerTimerPing;
   Pipe pipeWorkerToServerIndicatorData;
   Pipe pipeWorkerToServerWorkerStatus;
   Pipe pipeWorkerToServerUserInput;
@@ -181,6 +184,7 @@ public:
   bool CheckConsistency();
   int Run();
   WebWorker& GetActiveWorker();
+  static void WorkerTimerPing(double pingTime);
   static void Release(int& theDescriptor);
   static void SignalActiveWorkerDoneReleaseEverything();
   static void FlushActiveWorker();
@@ -190,6 +194,7 @@ public:
   static void Signal_SIGINT_handler(int s);
   static void Signal_SIGCHLD_handler(int s);
   static std::string ToStringActiveWorker();
+  void RecycleChildrenIfPossible();
   void Restart();
   void CheckExecutableVersionAndRestartIfNeeded();
   void initDates();

@@ -3594,6 +3594,7 @@ public:
   void (*IndicatorStringOutputFunction)(const std::string& input);
   void (*sleepFunction)(int microseconds);
   void (*WebServerReturnDisplayIndicatorCloseConnection)();
+  void (*WebServerTimerPing)(double pingTime);
   void (*PauseUponUserRequest)();
   void Pause()
   { if (this->PauseUponUserRequest!=0)
@@ -3614,9 +3615,10 @@ public:
 //status flags:
   bool flagComputationCompletE;
   bool flagComputationStarted;
-  bool flagDisplayTimeOutExplanation;
+  bool flagTimeOutExplanationAlreadyDisplayed;
   bool flagTimedOutComputationIsDone;
   bool flagOutputTimedOut;
+  bool flagComputationFinishedAllOutputSentClosing;
 //progress report flags:
   bool flagReportEverything;
   bool flagReportLargeIntArithmetic;

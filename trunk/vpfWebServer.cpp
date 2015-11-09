@@ -1060,6 +1060,7 @@ void WebWorker::reset()
   this->displayUserInput="";
   this->requestType=this->requestUnknown;
   this->flagMainAddressSanitized=false;
+  this->timeOfLastPingServerSideOnly=-1;
   this->Release();
 }
 
@@ -1088,11 +1089,12 @@ void WebWorker::SignalIamDoneReleaseEverything()
     return;
   }
   theLog << logger::blue << "worker " << this->indexInParent+1 << " is done with the work. " << logger::endL;
-//  std::cout << "got thus far xxxxxxx" << std::endl;
+//  std::cout << "got thus far xxxxxxx" << std:SignalIamDoneReleaseEverything:endl;
   this->pipeWorkerToServerControls.WriteAfterEmptying("close");
   theLog << logger::blue << "Notification dispatched." << logger::endL;
   this->SendAllBytes();
   this->Release();
+  onePredefinedCopyOfGlobalVariables.flagComputationFinishedAllOutputSentClosing=true;
 }
 
 WebWorker::~WebWorker()
@@ -1390,6 +1392,7 @@ int WebWorker::ServeClient()
 
 void WebWorker::ReleaseKeepInUseFlag()
 { MacroRegisterFunctionWithName("WebServer::ReleaseMyPipe");
+  this->pipeWorkerToServerTimerPing.Release();
   this->pipeWorkerToServerControls.Release();
   this->pipeServerToWorkerRequestIndicator.Release();
   this->pipeWorkerToServerIndicatorData.Release();
@@ -1398,6 +1401,7 @@ void WebWorker::ReleaseKeepInUseFlag()
   this->PauseComputationReportReceived.Release();
   this->PauseWorker.Release();
   this->PauseIndicatorPipeInUse.Release();
+  this->timeOfLastPingServerSideOnly=-1;
   WebServer::Release(this->connectedSocketID);
 }
 
@@ -1414,7 +1418,7 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   ProgressReportWebServer theReport("WebServer::OutputShowIndicatorOnTimeout");
   theLog << logger::blue << "Computation timeout, sending progress indicator instead of output. " << logger::endL;
   stOutput << "</td></tr>";
-  if (onePredefinedCopyOfGlobalVariables.flagDisplayTimeOutExplanation)
+  if (onePredefinedCopyOfGlobalVariables.flagTimeOutExplanationAlreadyDisplayed)
     stOutput << "<tr><td>Your computation is taking more than " << onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction
     << " seconds.</td></tr>";
   stOutput << "<tr><td>A progress indicator, as reported by your current computation, is displayed below. "
@@ -1476,9 +1480,13 @@ std::string WebWorker::ToStringStatus()const
   else
     out << this->connectedSocketID;
   out << ". ";
+  out << " Server time at last ping: " << this->timeOfLastPingServerSideOnly << " seconds. ";
+  if (this->pingMessage!="")
+    out << " Message at last ping: " << this->pingMessage;
   if (this->status!="")
     out << "<br><span style=\"color:red\"><b> Status: " << this->status << "</b></span><br>";
   out << "Pipe indices: worker to server controls: " << this->pipeWorkerToServerControls.ToString()
+  << ", worker to server timer ping: " << this->pipeWorkerToServerTimerPing.ToString()
   << ", server to worker request indicator: " << this->pipeServerToWorkerRequestIndicator.ToString()
   << ", worker to server indicator data: " << this->pipeWorkerToServerIndicatorData.ToString()
   << ", worker to server user input: " << this->pipeWorkerToServerUserInput.ToString()
@@ -1564,6 +1572,12 @@ void WebServer::ReleaseActiveWorker()
   this->activeWorker=-1;
 }
 
+void WebServer::WorkerTimerPing(double pingTime)
+{ std::stringstream outTimestream;
+  outTimestream << pingTime << " seconds passed ";
+  theWebServer.GetActiveWorker().pipeWorkerToServerTimerPing.WriteAfterEmptying(outTimestream.str());
+}
+
 void WebServer::ReleaseNonActiveWorkers()
 { MacroRegisterFunctionWithName("WebServer::ReleaseNonActiveWorkers");
   for (int i=0; i<this->theWorkers.size; i++)
@@ -1600,12 +1614,14 @@ void WebServer::CreateNewActiveWorker()
   this->GetActiveWorker().PauseWorker.CreateMe();
   this->GetActiveWorker().PauseIndicatorPipeInUse.CreateMe();
   this->GetActiveWorker().pipeServerToWorkerRequestIndicator.CreateMe();
+  this->GetActiveWorker().pipeWorkerToServerTimerPing.CreateMe();
   this->GetActiveWorker().pipeWorkerToServerControls.CreateMe();
   this->GetActiveWorker().pipeWorkerToServerIndicatorData.CreateMe();
   this->GetActiveWorker().pipeWorkerToServerUserInput.CreateMe();
   this->GetActiveWorker().pipeWorkerToServerWorkerStatus.CreateMe();
   this->GetActiveWorker().indexInParent=this->activeWorker;
   this->GetActiveWorker().parent=this;
+  this->GetActiveWorker().timeOfLastPingServerSideOnly=onePredefinedCopyOfGlobalVariables.GetElapsedSeconds();
 }
 
 void Pipe::WriteAfterEmptying(const std::string& toBeSent)
@@ -1846,6 +1862,44 @@ void fperror_sigaction(int signal)
   exit(0);
 }
 
+void WebServer::RecycleChildrenIfPossible()
+{ //Listen for children who have exited properly.
+  //This might need to be rewritten: I wasn't able to make this work with any
+  //mechanism other than pipes.
+  for (int i=0; i<this->theWorkers.size; i++)
+    if (this->theWorkers[i].flagInUse)
+    { this->theWorkers[i].pipeWorkerToServerControls.Read();
+      if (this->theWorkers[i].pipeWorkerToServerControls.lastRead.size>0)
+      { this->theWorkers[i].flagInUse=false;
+        theLog << logger::green << "worker " << i+1 << " done, marking for reuse." << logger::endL;
+      } else
+        theLog << logger::red << "worker " << i+1 << " not done yet." << logger::endL;
+      this->theWorkers[i].pipeWorkerToServerUserInput.Read();
+      if (this->theWorkers[i].pipeWorkerToServerUserInput.lastRead.size>0)
+        this->theWorkers[i].displayUserInput.assign
+        (this->theWorkers[i].pipeWorkerToServerUserInput.lastRead.TheObjects,
+          this->theWorkers[i].pipeWorkerToServerUserInput.lastRead.size);
+      this->theWorkers[i].pipeWorkerToServerTimerPing.Read();
+      if (this->theWorkers[i].pipeWorkerToServerTimerPing.lastRead.size>0)
+      { this->theWorkers[i].pingMessage.assign
+        (this->theWorkers[i].pipeWorkerToServerTimerPing.lastRead.TheObjects,
+         this->theWorkers[i].pipeWorkerToServerTimerPing.lastRead.size);
+        this->theWorkers[i].timeOfLastPingServerSideOnly=onePredefinedCopyOfGlobalVariables.GetElapsedSeconds();
+      }
+      else
+        if (onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly>10)
+        { this->theWorkers[i].flagInUse=false;
+          std::stringstream pingTimeoutStream;
+          pingTimeoutStream << "<span style=\"color:red\"><b>"
+          << onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
+          << " seconds have passed since worker " <<  i+1
+          << " pinged the server. I assuming the worker no longer functions, and am marking it as free for reuse. "
+          << "</b></span>";
+          this->theWorkers[i].pingMessage=pingTimeoutStream.str();
+        }
+    }
+}
+
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
   List<std::string> thePorts;
@@ -1946,23 +2000,7 @@ int WebServer::Run()
     { theLog << "Accept failed. Error: " << this->ToStringLastErrorDescription() << logger::endL;
       continue;
     }
-    //Listen for children who have exited properly.
-    //This might need to be rewritten: I wasn't able to make this work with any
-    //mechanism other than pipes.
-    for (int i=0; i<this->theWorkers.size; i++)
-      if (this->theWorkers[i].flagInUse)
-      { this->theWorkers[i].pipeWorkerToServerControls.Read();
-        if (this->theWorkers[i].pipeWorkerToServerControls.lastRead.size>0)
-        { this->theWorkers[i].flagInUse=false;
-          theLog << logger::green << "worker " << i+1 << " done, marking for reuse." << logger::endL;
-        } else
-          theLog << logger::red << "worker " << i+1 << " not done yet." << logger::endL;
-        this->theWorkers[i].pipeWorkerToServerUserInput.Read();
-        if (this->theWorkers[i].pipeWorkerToServerUserInput.lastRead.size>0)
-          this->theWorkers[i].displayUserInput.assign
-          (this->theWorkers[i].pipeWorkerToServerUserInput.lastRead.TheObjects,
-           this->theWorkers[i].pipeWorkerToServerUserInput.lastRead.size);
-      }
+    this->RecycleChildrenIfPossible();
     this->CreateNewActiveWorker();
     this->GetActiveWorker().connectedSocketID=newConnectedSocket;
     this->GetActiveWorker().connectedSocketIDLastValueBeforeRelease=newConnectedSocket;
@@ -1979,6 +2017,7 @@ int WebServer::Run()
       this->Release(this->listeningSocketID);//worker has no access to socket listener
       onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=
       this->ReturnActiveIndicatorAlthoughComputationIsNotDone;
+      onePredefinedCopyOfGlobalVariables.WebServerTimerPing=this->WorkerTimerPing;
       onePredefinedCopyOfGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
       MutexWrapper::InitializeAllAllocatedMutexesAllowMutexUse();
       crash.CleanUpFunction=WebServer::SignalActiveWorkerDoneReleaseEverything;

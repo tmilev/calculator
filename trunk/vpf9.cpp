@@ -72,6 +72,7 @@ unsigned long long int Rational::TotalSmallMultiplications=0;
 GlobalVariables::GlobalVariables()
 { this->IndicatorStringOutputFunction=0;
   this->WebServerReturnDisplayIndicatorCloseConnection=0;
+  this->WebServerTimerPing=0;
   this->MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000000;
   this->MaxComputationTimeBeforeWeTakeAction=0;
 //  this->MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit=5;
@@ -83,10 +84,12 @@ GlobalVariables::GlobalVariables()
   this->flagReportLargeIntArithmetic=false;
   this->flagReportProductsMonomialAlgebras=false;
   this->getElapsedTimePrivate=0;
-  this->flagDisplayTimeOutExplanation=false;
+  this->flagTimeOutExplanationAlreadyDisplayed=false;
   this->flagOutputTimedOut=false;
   this->flagTimedOutComputationIsDone=false;
   this->flagAllowUseOfThreadsAndMutexes=false;
+  this->flagComputationCompletE=false;
+  this->flagComputationFinishedAllOutputSentClosing=false;
   this->progressReportStringsRegistered=0;
   //  this->flagLogInterProcessCommunication=true;
   //  stOutput << "Global variables created!";

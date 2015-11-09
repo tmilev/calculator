@@ -884,6 +884,19 @@ std::string Plot::GetPlotHtml()
   v2[0]=0;
   v2[1]=this->highBoundY-0.1;
   theDVs.drawLineBetweenTwoVectorsBufferDouble(v1, v2, theDVs.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+  v1[0]=1;
+  v1[1]=-0.1;
+  v2[0]=1;
+  v2[1]=0.1;
+  theDVs.drawLineBetweenTwoVectorsBufferDouble(v1, v2, theDVs.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+  v1.SwapTwoIndices(0,1);
+  v2.SwapTwoIndices(0,1);
+  theDVs.drawLineBetweenTwoVectorsBufferDouble(v1, v2, theDVs.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+  v1[0]=1;
+  v1[1]=-0.2;
+  theDVs.drawTextAtVectorBuffer(v1, (std::string)"1", CGI::RedGreenBlue(0,0,0), theDVs.TextStyleNormal,0);
+  v1.SwapTwoIndices(0,1);
+  theDVs.drawTextAtVectorBuffer(v1, (std::string)"1", CGI::RedGreenBlue(0,0,0), theDVs.TextStyleNormal,0);
   for (int i=0; i<this->thePlots.size; i++)
     for (int j=1; j<thePlots[i].thePoints.size; j++)
       theDVs.drawLineBetweenTwoVectorsBufferDouble

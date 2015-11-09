@@ -587,6 +587,10 @@ void DrawingVariables::drawTextAtVectorBuffer(const Vector<Rational>& point, con
 { this->theBuffer.drawTextAtVectorBuffer(point, inputText, textColor, this->fontSizeNormal, theTextStyle);
 }
 
+void DrawingVariables::drawTextAtVectorBuffer(const Vector<double>& point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile)
+{ this->theBuffer.drawTextAtVectorBuffer(point, inputText, textColor, this->fontSizeNormal, theTextStyle);
+}
+
 void DrawingVariables::drawCircleAtVectorBuffer
 (const Vector<Rational>& point, double radius, uint32_t thePenStyle, int theColor)
 { this->theBuffer.drawCircleAtVectorBuffer(point, radius, thePenStyle, theColor);

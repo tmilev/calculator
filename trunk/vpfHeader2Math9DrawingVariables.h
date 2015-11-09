@@ -49,10 +49,17 @@ public:
   int fontSize;
   int TextStyle;
   double precomputedX, precomputedY;
-  void init(const Vector<Rational> & input, const std::string& inputText, int colorIndex, int theFontSize, int theTextStyle)
+  void init(const Vector<Rational>& input, const std::string& inputText, int colorIndex, int theFontSize, int theTextStyle)
   { this->theVector.SetSize(input.size);
     for (int i=0; i<input.size; i++)
       this->theVector[i]=input.TheObjects[i].GetDoubleValue();
+    this->ColorIndex=colorIndex;
+    this->theText=inputText;
+    this->fontSize=theFontSize;
+    this->TextStyle=theTextStyle;
+  }
+  void init(const Vector<double>& input, const std::string& inputText, int colorIndex, int theFontSize, int theTextStyle)
+  { this->theVector=input;
     this->ColorIndex=colorIndex;
     this->theText=inputText;
     this->fontSize=theFontSize;
@@ -215,6 +222,7 @@ public:
   void drawLineBetweenTwoVectorsBuffer(const Vector<Rational>& vector1, const Vector<Rational>& vector2, uint32_t thePenStyle, int ColorIndex);
   void drawLineBetweenTwoVectorsBufferDouble(const Vector<double>& vector1, const Vector<double>& vector2, uint32_t thePenStyle, int ColorIndex);
   void drawTextAtVectorBuffer(const Vector<Rational>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
+  void drawTextAtVectorBuffer(const Vector<double>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
   void drawCircleAtVectorBuffer(const Vector<Rational>& input, double radius, uint32_t thePenStyle, int theColor);
   double getAngleFromXandY(double x, double y, double neighborX, double neighborY);
   void ScaleToUnitLength(Vector<double>& theRoot)
@@ -373,6 +381,7 @@ public:
   { this->theBuffer.drawLineBetweenTwoVectorsBufferDouble(r1, r2, PenStyle, PenColor);
   }
   void drawTextAtVectorBuffer(const Vector<Rational>& point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile);
+  void drawTextAtVectorBuffer(const Vector<double>& point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile);
   void drawCircleAtVectorBuffer(const Vector<Rational>& point, double radius, uint32_t thePenStyle, int theColor);
   void operator=(const DrawingVariables& other)
   { this->theDrawLineFunction=other.theDrawLineFunction;

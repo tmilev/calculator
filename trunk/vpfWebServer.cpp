@@ -266,8 +266,14 @@ void WebServer::Signal_SIGINT_handler(int s)
 
 void WebServer::Signal_SIGCHLD_handler(int s)
 { theLog << "Signal child handler called with input: " << s << "." << logger::endL;
-  while(waitpid(-1, NULL, WNOHANG) > 0)
-  { }
+  int waitResult=0;
+  do
+  { waitResult= waitpid(-1, NULL, WNOHANG);
+    if (waitResult>0)
+      for (int i=0; i<theWebServer.theWorkers.size; i++)
+        if (theWebServer.theWorkers[i].ProcessPID==waitResult)
+          theWebServer.theWorkers[i].pipeWorkerToServerControls.WriteAfterEmptying("close");
+  }while (waitResult>0);
 }
 
 // get sockaddr, IPv4 or IPv6:
@@ -1922,17 +1928,14 @@ int WebServer::Run()
   { theLog << "sigaction returned -1" << logger::endL;
     crash << "Was not able to register SIGFPE handler. Crashing to let you know. " << crash;
   }
-//  int x=1/0;
-/*  struct sigaction sa;
+  sa.sa_handler=&WebServer::Signal_SIGINT_handler;
+  if (sigaction(SIGINT, &sa, NULL) == -1)
+    theLog << "sigaction returned -1" << logger::endL;
   sa.sa_handler = &WebServer::Signal_SIGCHLD_handler; // reap all dead processes
   sigemptyset(&sa.sa_mask);
   sa.sa_flags = SA_RESTART;
   if (sigaction(SIGCHLD, &sa, NULL) == -1)
     theLog << "sigaction returned -1" << logger::endL;
-  sa.sa_handler=&WebServer::Signal_SIGINT_handler;
-  if (sigaction(SIGINT, &sa, NULL) == -1)
-    theLog << "sigaction returned -1" << logger::endL;
-*/
   theLog << logger::purple <<  "server: waiting for connections...\r\n" << logger::endL;
   unsigned int connectionsSoFar=0;
   while(true)

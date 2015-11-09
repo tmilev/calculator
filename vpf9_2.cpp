@@ -187,6 +187,13 @@ void DrawOperations::drawTextAtVectorBuffer(const Vector<Rational>& input, const
   this->theDrawTextAtVectorOperations.LastObject()->init(input, inputText, ColorIndex, theFontSize, theTextStyle);
 }
 
+void DrawOperations::drawTextAtVectorBuffer(const Vector<double>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle)
+{ this->TypeNthDrawOperation.AddOnTop(this->typeDrawTextAtVector);
+  this->IndexNthDrawOperation.AddOnTop(this->theDrawTextAtVectorOperations.size);
+  this->theDrawTextAtVectorOperations.AddObjectOnTopCreateNew();
+  this->theDrawTextAtVectorOperations.LastObject()->init(input, inputText, ColorIndex, theFontSize, theTextStyle);
+}
+
 void DrawingVariables::drawLineDirectly(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex)
 { this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex);
 }

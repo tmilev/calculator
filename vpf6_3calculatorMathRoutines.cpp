@@ -3600,10 +3600,17 @@ bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta(Calculator& theCom
   sintE.AddChildAtomOnTop("t");
   xCoordE.MakeProducT(theCommands, input[1], costE);
   yCoordE.MakeProducT(theCommands, input[1], sintE);
-  if (!xCoordE.EvaluatesToDoubleInRange("t", lowerBound, upperBound, 500, &thePlotCartesian.xLow, &thePlotCartesian.xHigh))
+  Vectors<double> theXCoords, theYCoords;
+  if (!xCoordE.EvaluatesToDoubleInRange("t", lowerBound, upperBound, 500, &thePlotCartesian.xLow, &thePlotCartesian.xHigh, &theXCoords))
     return false;
-  if (!yCoordE.EvaluatesToDoubleInRange("t", lowerBound, upperBound, 500, &thePlotCartesian.yLow, &thePlotCartesian.yHigh))
+  if (!yCoordE.EvaluatesToDoubleInRange("t", lowerBound, upperBound, 500, &thePlotCartesian.yLow, &thePlotCartesian.yHigh, &theYCoords))
     return false;
+  thePlotCartesian.thePoints.SetSize(theXCoords.size);
+  for (int i=0; i<thePlotCartesian.thePoints.size; i++)
+  { thePlotCartesian.thePoints[i].SetSize(2);
+    thePlotCartesian.thePoints[i][0]=theXCoords[i][1];
+    thePlotCartesian.thePoints[i][1]=theYCoords[i][1];
+  }
   std::stringstream outCartesianLatex, outCartesianHtml;
   outCartesianLatex << "%Calculator command: " << input.ToString() << "\n";
   outCartesianHtml << "%Calculator command: " << input.ToString() << "\n<br>\n";

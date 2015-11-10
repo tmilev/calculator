@@ -238,6 +238,14 @@ void quasiDiffOp<coefficient>::GetEWAsetMatrixPartsToId(ElementWeylAlgebra<coeff
     output.AddMonomial((*this)[i].theWeylMon, this->theCoeffs[i]);
 }
 
+unsigned int MathRoutines::hashString(const std::string& x)
+{ int numCycles=x.size();
+  unsigned int result=0;
+  for (int i=0; i<numCycles; i++)
+    result+=x[i]*SomeRandomPrimes[i%SomeRandomPrimesSize];
+  return result;
+}
+
 template<class Element>
 void MathRoutines::LieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output)
 { if (&standsOnTheLeft==&output || &standsOnTheRight==&output)

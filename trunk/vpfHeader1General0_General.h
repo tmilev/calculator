@@ -339,15 +339,7 @@ public:
   }
   inline static unsigned int ListIntsHash(const List<int>& input)
   ;
-  static unsigned int hashString(const std::string& x)
-  { int numCycles=x.size();
-    if (numCycles>SomeRandomPrimesSize)
-      numCycles=SomeRandomPrimesSize;
-    unsigned int result=0;
-    for (int i=0; i<numCycles; i++)
-      result+=x[i]*SomeRandomPrimes[i];
-    return result;
-  }
+  static unsigned int hashString(const std::string& x);
   template <class Element>
   static void LieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output);
   template <typename number>

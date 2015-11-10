@@ -1546,8 +1546,8 @@ WebWorker& WebServer::GetActiveWorker()
 { MacroRegisterFunctionWithName("WebServer::GetActiveWorker");
   void (*oldOutputFunction)(const std::string& stringToOutput) =stOutput.theOutputFunction;
   stOutput.theOutputFunction=0; //<- We are checking if the web server is in order.
-  //Before that we prevent the crashing mechanism from trying to use (the eventually corrput) web server
-  //to report the error over the internet.
+  //Before that we prevent the crashing mechanism from trying to use (the eventually corrupt) web server
+  //to report the error over the Internet.
   if (this->activeWorker<0 || this->activeWorker>=this->theWorkers.size)
     crash << "Active worker index is " << this->activeWorker << " however I have " << this->theWorkers.size
     << " workers. " << crash;
@@ -1574,7 +1574,7 @@ void WebServer::ReleaseActiveWorker()
 
 void WebServer::WorkerTimerPing(double pingTime)
 { std::stringstream outTimestream;
-  outTimestream << pingTime << " seconds passed ";
+  outTimestream << "Worker: " << pingTime << " seconds passed. ";
   theWebServer.GetActiveWorker().pipeWorkerToServerTimerPing.WriteAfterEmptying(outTimestream.str());
 }
 
@@ -1601,6 +1601,7 @@ void WebServer::CreateNewActiveWorker()
   for (int i=0; i<this->theWorkers.size; i++)
     if (!this->theWorkers[i].flagInUse)
     { this->activeWorker=i;
+      this->theWorkers[i].pingMessage="";
       break;
     }
   if (this->activeWorker==-1)
@@ -1622,6 +1623,7 @@ void WebServer::CreateNewActiveWorker()
   this->GetActiveWorker().indexInParent=this->activeWorker;
   this->GetActiveWorker().parent=this;
   this->GetActiveWorker().timeOfLastPingServerSideOnly=onePredefinedCopyOfGlobalVariables.GetElapsedSeconds();
+  this->GetActiveWorker().pingMessage="";
 }
 
 void Pipe::WriteAfterEmptying(const std::string& toBeSent)
@@ -1893,7 +1895,7 @@ void WebServer::RecycleChildrenIfPossible()
           pingTimeoutStream << "<span style=\"color:red\"><b>"
           << onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
           << " seconds have passed since worker " <<  i+1
-          << " pinged the server. I assuming the worker no longer functions, and am marking it as free for reuse. "
+          << " pinged the server. I am assuming the worker no longer functions, and am marking it as free for reuse. "
           << "</b></span>";
           this->theWorkers[i].pingMessage=pingTimeoutStream.str();
         }

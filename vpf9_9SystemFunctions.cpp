@@ -87,6 +87,7 @@ bool TimerThreadData::HandleTimerSignalToServer()
   std::stringstream reportStream;
   reportStream << "Timer: " << this->elapsedtime << " seconds elapsed since the timer was launched.";
   theReport1.SetStatus(reportStream.str());
+  return false;
 }
 
 bool TimerThreadData::HandleMaxComputationTime()
@@ -141,6 +142,7 @@ bool TimerThreadData::HandleComputationTimeout()
   theReport2.SetStatus("Starting timer cycle displaying time out explanation.");
   onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
   theReport2.SetStatus("Starting timer cycle displaying time out indicator done, continuing timer cycle.");
+  return false;
 }
 
 bool TimerThreadData::HandlePingServerIamAlive()

@@ -767,13 +767,19 @@ std::string CGI::GetLatexEmbeddableLinkFromCalculatorInput(const std::string& ad
 std::string CGI::GetMathMouseHoverBeginArrayL(const std::string& input, int upperNumChars)
 { std::stringstream out;
   out << "\\begin{array}{l}" << input << "\\end{array}";
-  return CGI::GetMathMouseHover(out.str(), upperNumChars);
+  if (out.str().size()<(unsigned) upperNumChars && upperNumChars>0)
+    return CGI::GetMathMouseHover(out.str(), upperNumChars);
+  else
+    return CGI::GetMathMouseHover(input, upperNumChars);
 }
 
 std::string CGI::GetMathSpanBeginArrayL(const std::string& input, int upperNumChars)
 { std::stringstream out;
   out << "\\begin{array}{l} " << input << " \\end{array}";
-  return CGI::GetMathSpanPure(out.str(), upperNumChars);
+  if (out.str().size()<(unsigned) upperNumChars && upperNumChars>0)
+    return CGI::GetMathSpanPure(out.str(), upperNumChars);
+  else
+    return CGI::GetMathSpanPure(input, upperNumChars);
 }
 
 std::string CGI::GetCalculatorLink(const std::string& DisplayNameCalculator, const std::string& input)

@@ -3762,6 +3762,8 @@ inline void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy
     return;
   }
   int maxNumMonsFinal=this->size()*other.size();
+  if (maxNumMonsFinal>2000000)
+    maxNumMonsFinal=2000000;
   bool shouldReport=false;
   int totalMonPairs=0;
   ProgressReport theReport1(&onePredefinedCopyOfGlobalVariables), theReport2(&onePredefinedCopyOfGlobalVariables);

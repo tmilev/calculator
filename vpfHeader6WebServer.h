@@ -24,10 +24,11 @@ public:
   List<int> thePausePipe; //thePipe[0] is the read end; thePipe[1] is the write end.
   List<int> mutexPipe;
   List<char> buffer;
+  std::string name;
   MemorySaving<MutexWrapper> mutexForProcessBlocking; //<- to avoid two threads from the same process blocking the process.
   std::string ToString()const;
   void Release();
-  void CreateMe();
+  void CreateMe(const std::string& inputName);
 
   bool CheckPauseIsRequested();
   void PauseIfRequested();
@@ -51,6 +52,7 @@ public:
   PauseController pipeAvailable;
   List<char> lastRead;
   List<char> pipeBuffer;
+  std::string name;
 
   void Read();
   void ReadWithoutEmptying();
@@ -58,7 +60,7 @@ public:
 
   std::string ToString()const;
   void Release();
-  void CreateMe();
+  void CreateMe(const std::string& inputPipeName);
   ~Pipe();
   Pipe()
   { this->thePipe.initFillInObject(2,-1);
@@ -208,6 +210,7 @@ class ProgressReportWebServer
   public:
   int indexProgressReport;
   bool flagDeallocated;
+  static bool flagServerExists;
   ProgressReportWebServer(const std::string& inputStatus);
   ProgressReportWebServer();
   void SetStatus (const std::string& inputStatus);

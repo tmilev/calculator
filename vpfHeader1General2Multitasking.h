@@ -41,7 +41,6 @@ private:
   bool flagUnsafeFlagForDebuggingIsLocked;
   bool flagDeallocated;
   bool flagInitialized;
-  int indexInContainer;
   void operator=(const MutexWrapper& other);
   MutexWrapper(const MutexWrapper& other);
   bool InitializeIfNeeded();
@@ -56,7 +55,6 @@ public:
   //unlocks the mutex.
   void UnlockMe();
   void CheckConsistency();
-  static void InitializeAllAllocatedMutexesAllowMutexUse();
   void initConstructorCallOnly();
   MutexWrapper()
   { this->initConstructorCallOnly();

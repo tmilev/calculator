@@ -5,11 +5,6 @@
 //as that mechanism might depend on mutexes.
 #include <mutex>
 
-List<MutexWrapper*>& theMutexWrappers() //<- if you are wondering why this code, google "static initialization order fiasco"
-{ static List<MutexWrapper*> tempObjects;
-  return tempObjects;
-}
-
 ProjectInformationInstance vpfGeneral2Mutexes(__FILE__, "Multitasking implementation.");
 extern GlobalVariables onePredefinedCopyOfGlobalVariables;
 
@@ -36,8 +31,7 @@ void ParallelComputing::CheckPointerCounters()
 
 void MutexWrapper::CheckConsistency()
 { if (this->flagDeallocated)
-  { std::cout << "Use after free mutex index: " << this->indexInContainer
-    << crash.GetStackTraceShort() << std::endl;
+  { std::cout << "Use after free of mutex. " << crash.GetStackTraceShort() << std::endl;
     assert(false);
   }
 }
@@ -53,12 +47,6 @@ void MutexWrapper::initConstructorCallOnly()
   this->flagInitialized=false;
   this->flagUnsafeFlagForDebuggingIsLocked=false;
   this->theMutexImplementation=0;
-  this->indexInContainer=theMutexWrappers().size;
-  theMutexWrappers().AddOnTop(this);
-  if (theMutexWrappers().size>1000)
-  { std::cout << "Too many mutexes. " << std::endl;
-    assert(false);
-  }
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter++;
 #endif
@@ -75,14 +63,8 @@ bool MutexWrapper::InitializeIfNeeded()
 }
 
 MutexWrapper::~MutexWrapper()
-{ if (!onePredefinedCopyOfGlobalVariables.flagAllowUseOfThreadsAndMutexes)
-    if (!theMutexWrappers().flagDeallocated)
-      theMutexWrappers()[this->indexInContainer]=0; //this line of code might be unsafe when the master process exits, but is safe in all fork()-ed processes
-  delete (std::mutex*)(this->theMutexImplementation);
-    this->theMutexImplementation=0;
-#ifdef CGIversionLimitRAMuse
-ParallelComputing::GlobalPointerCounter--;
-#endif
+{ delete (std::mutex*)(this->theMutexImplementation);
+  this->theMutexImplementation=0;
   this->flagDeallocated=true;
 }
 
@@ -113,18 +95,6 @@ void MutexWrapper::UnlockMe()
     return;
   ((std::mutex*)this->theMutexImplementation)->unlock();
   this->flagUnsafeFlagForDebuggingIsLocked=false;
-}
-
-void MutexWrapper::InitializeAllAllocatedMutexesAllowMutexUse()
-{ MacroRegisterFunctionWithName("MutexWrapper::InitializeAllAllocatedMutexesAllowMutexUse");
-  static bool alreadyRan=false;
-  onePredefinedCopyOfGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
-  if (alreadyRan)
-    return;
-  alreadyRan=true;
-  for(int i=0; i<theMutexWrappers().size; i++)
-    if (theMutexWrappers()[i]!=0)
-      theMutexWrappers()[i]->InitializeIfNeeded();
 }
 
 void Controller::SafePointDontCallMeFromDestructors()

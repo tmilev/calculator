@@ -12,8 +12,8 @@ class logger
   int currentColor;
   std::fstream theFile;
   bool flagStopWritingToFile;
-  logger()
-  { FileOperations::OpenFileCreateIfNotPresent(theFile, "./../output/LogFile.html", false, true, false);
+  logger(const std::string& logFileName )
+  { FileOperations::OpenFileCreateIfNotPresent(theFile,logFileName, false, true, false);
     this->currentColor=logger::normalColor;
     this->flagStopWritingToFile=false;
   }
@@ -108,8 +108,11 @@ class logger
   }
 };
 
-logger theLog;
+logger theLog( "./../output/LogFile.html");
+logger blockingLog( "./../output/BlockEventsLogFile.html");
+
 WebServer theWebServer;
+bool ProgressReportWebServer::flagServerExists=true;
 
 ProgressReportWebServer::ProgressReportWebServer(const std::string& inputStatus)
 { this->flagDeallocated=false;
@@ -123,12 +126,16 @@ ProgressReportWebServer::ProgressReportWebServer()
 }
 
 ProgressReportWebServer::~ProgressReportWebServer()
-{ theWebServer.theProgressReports.SetSize(this->indexProgressReport);
+{ if (!this->flagServerExists)
+    return;
+  theWebServer.theProgressReports.SetSize(this->indexProgressReport);
   this->flagDeallocated=true;
 }
 
 void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
 { MacroRegisterFunctionWithName("ProgressReportWebServer::SetStatus");
+  if (onePredefinedCopyOfGlobalVariables.flagComputationFinishedAllOutputSentClosing || !this->flagServerExists)
+    return;
   theWebServer.CheckConsistency();
 //  theLog << logger::endL << logger::red << "SetStatus: outputFunction: "
 //  << (int) stOutput.theOutputFunction << logger::endL;
@@ -164,8 +171,9 @@ PauseController::PauseController()
   this->mutexPipe.initFillInObject(2, -1);
 }
 
-void PauseController::CreateMe()
+void PauseController::CreateMe(const std::string& inputName)
 { this->Release();
+  this->name=inputName;
   this->buffer.SetSize(200);
   if (pipe(this->thePausePipe.TheObjects)<0)
     crash << "Failed to open pipe from parent to child. " << crash;
@@ -179,8 +187,8 @@ void PauseController::CreateMe()
 void PauseController::PauseIfRequested()
 { ProgressReportWebServer theReport;
   if (this->CheckPauseIsRequested())
-  { theLog << logger::red << "BLOCKING on " << this->ToString() << logger::endL;
-    theReport.SetStatus("BLOCKING on " +this->ToString());
+  { blockingLog << logger::red << "Blocking on " << this->ToString() << logger::endL;
+    theReport.SetStatus("Blocking on " +this->ToString());
   }
   bool pauseWasRequested= !((read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size))>0);
   if (!pauseWasRequested)
@@ -198,13 +206,13 @@ bool PauseController::PauseIfRequestedWithTimeOut()
   timeout.tv_usec = 0;
   ProgressReportWebServer theReport;
   if (this->CheckPauseIsRequested())
-  { theLog << logger::red << "BLOCKING on " << this->ToString() << logger::endL;
+  { blockingLog << logger::red << "Blocking on " << this->ToString() << logger::endL;
     theReport.SetStatus("Blocking on " + this->ToString());
   }
   bool pauseWasRequested=false;
   if (!select(this->thePausePipe[0]+1, &read_fds, &write_fds, &except_fds, &timeout) == 1)
-  { theLog << logger::red << "BLOCKING on " << this->ToString() << logger::green
-    << " TIMED OUT!!!" << logger::endL;
+  { blockingLog << logger::red << "Blocking on " << this->ToString() << logger::green
+    << " timed out. " << logger::endL;
     theReport.SetStatus("Blocking on " + this->ToString()+ " timed out.");
     return false;
   }
@@ -220,8 +228,8 @@ void PauseController::RequestPausePauseIfLocked()
   //through competing threads
   ProgressReportWebServer theReport;
   if (this->CheckPauseIsRequested())
-  { theReport.SetStatus("BLOCKING on pause controller " +this->ToString());
-    theLog << logger::red << "BLOCKING on pause controller " << this->ToString() << logger::endL;
+  { blockingLog << logger::red << "Blocking on " << this->ToString() << logger::endL;
+    theReport.SetStatus("Blocking on " +this->ToString());
   }
   read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size);
   this->mutexForProcessBlocking.GetElement().UnlockMe();
@@ -246,9 +254,11 @@ void PauseController::ResumePausedProcessesIfAny()
 }
 
 std::string PauseController::ToString()const
-{ if (this->thePausePipe[0]==-1)
+{ std::stringstream out;
+  if (this->name!="")
+    out << this->name << ": ";
+  if (this->thePausePipe[0]==-1)
     return "(not in use)";
-  std::stringstream out;
   out << "pause-controller pipe " << this->thePausePipe[0] << "<-" << this->thePausePipe[1];
   return out.str();
 }
@@ -442,7 +452,7 @@ void WebWorker::OutputSendAfterTimeout(const std::string& input)
   ProgressReportWebServer theReport("Sending result through indicator pipe.");
 
   theWebServer.GetActiveWorker().pipeWorkerToServerIndicatorData.WriteAfterEmptying(input);
-  theLog << logger::red << "Final output written to indicator, blocking until data "
+  blockingLog << logger::red << "Final output written to indicator, blocking until data "
   << "is received on the other end." << logger::endL;
   theReport.SetStatus("Blocking until result data is received.");
   if(!theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequestedWithTimeOut())
@@ -1507,6 +1517,7 @@ bool WebServer::CheckConsistency()
 WebServer::~WebServer()
 { if (this->activeWorker!=-1)
     this->GetActiveWorker().SendAllBytes();
+  ProgressReportWebServer::flagServerExists=false;
   for (int i=0; i<this->theWorkers.size; i++)
     this->theWorkers[i].Release();
   onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=0;
@@ -1577,7 +1588,13 @@ void WebServer::ReleaseActiveWorker()
 }
 
 void WebServer::WorkerTimerPing(double pingTime)
-{ std::stringstream outTimestream;
+{
+  if (theWebServer.activeWorker==-1)
+  { if (!onePredefinedCopyOfGlobalVariables.flagComputationFinishedAllOutputSentClosing)
+      crash << "WebServer::WorkerTimerPing called when the computation is not entirely complete. " << crash;
+    return;
+  }
+  std::stringstream outTimestream;
   outTimestream << "Worker: " << pingTime << " seconds passed. ";
   theWebServer.GetActiveWorker().pipeWorkerToServerTimerPing.WriteAfterEmptying(outTimestream.str());
 }
@@ -1615,15 +1632,15 @@ void WebServer::CreateNewActiveWorker()
   this->GetActiveWorker().Release();
   this->theWorkers[this->activeWorker].flagInUse=true;
 
-  this->GetActiveWorker().PauseComputationReportReceived.CreateMe();
-  this->GetActiveWorker().PauseWorker.CreateMe();
-  this->GetActiveWorker().PauseIndicatorPipeInUse.CreateMe();
-  this->GetActiveWorker().pipeServerToWorkerRequestIndicator.CreateMe();
-  this->GetActiveWorker().pipeWorkerToServerTimerPing.CreateMe();
-  this->GetActiveWorker().pipeWorkerToServerControls.CreateMe();
-  this->GetActiveWorker().pipeWorkerToServerIndicatorData.CreateMe();
-  this->GetActiveWorker().pipeWorkerToServerUserInput.CreateMe();
-  this->GetActiveWorker().pipeWorkerToServerWorkerStatus.CreateMe();
+  this->GetActiveWorker().PauseComputationReportReceived.CreateMe("PauseComputationReportReceived");
+  this->GetActiveWorker().PauseWorker.CreateMe("PauseWorker");
+  this->GetActiveWorker().PauseIndicatorPipeInUse.CreateMe("PauseIndicatorPipeInUse");
+  this->GetActiveWorker().pipeServerToWorkerRequestIndicator.CreateMe("pipeServerToWorkerRequestIndicator");
+  this->GetActiveWorker().pipeWorkerToServerTimerPing.CreateMe("pipeWorkerToServerTimerPing");
+  this->GetActiveWorker().pipeWorkerToServerControls.CreateMe("pipeWorkerToServerControls");
+  this->GetActiveWorker().pipeWorkerToServerIndicatorData.CreateMe("pipeWorkerToServerIndicatorData");
+  this->GetActiveWorker().pipeWorkerToServerUserInput.CreateMe("pipeWorkerToServerUserInput");
+  this->GetActiveWorker().pipeWorkerToServerWorkerStatus.CreateMe("pipeWorkerToServerWorkerStatus");
   this->GetActiveWorker().indexInParent=this->activeWorker;
   this->GetActiveWorker().parent=this;
   this->GetActiveWorker().timeOfLastPingServerSideOnly=onePredefinedCopyOfGlobalVariables.GetElapsedSeconds();
@@ -1663,20 +1680,25 @@ void Pipe::WriteNoLocks(const std::string& toBeSent)
 }
 
 std::string Pipe::ToString()const
-{ if (this->thePipe[0]==-1 || this->thePipe[1]==-1)
-    return "released";
-  std::stringstream out;
+{ std::stringstream out;
+  if (this->name!="")
+    out << this->name << ": ";
+  if (this->thePipe[0]==-1 || this->thePipe[1]==-1)
+  { out << "released";
+    return out.str();
+  }
   out << this->thePipe[1] << "->" << this->thePipe[0];
   return out.str();
 }
 
-void Pipe::CreateMe()
+void Pipe::CreateMe(const std::string& inputPipeName)
 { this->Release();
   if (pipe(this->thePipe.TheObjects)<0)
     crash << "Failed to open pipe from parent to child. " << crash;
   fcntl(this->thePipe[1], F_SETFL, O_NONBLOCK);
   fcntl(this->thePipe[0], F_SETFL, O_NONBLOCK);
-  this->pipeAvailable.CreateMe();
+  this->name=inputPipeName;
+  this->pipeAvailable.CreateMe("pause controller for pipe: "+ inputPipeName);
 }
 
 Pipe::~Pipe()
@@ -1891,17 +1913,22 @@ void WebServer::RecycleChildrenIfPossible()
         (this->theWorkers[i].pipeWorkerToServerTimerPing.lastRead.TheObjects,
          this->theWorkers[i].pipeWorkerToServerTimerPing.lastRead.size);
         this->theWorkers[i].timeOfLastPingServerSideOnly=onePredefinedCopyOfGlobalVariables.GetElapsedSeconds();
-      }
-      else
-        if (onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly>10)
-        { this->theWorkers[i].flagInUse=false;
-          std::stringstream pingTimeoutStream;
-          pingTimeoutStream << onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
-          << " seconds have passed since worker " <<  i+1
-          << " pinged the server. I am assuming the worker no longer functions, and am marking it as free for reuse. ";
-          theLog << logger::red << pingTimeoutStream.str() << logger::endL;
-          this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>"+ pingTimeoutStream.str()+"</b></span>";
-        }
+      } if (this->theWorkers[i].PauseWorker.CheckPauseIsRequested())
+      { this->theWorkers[i].pingMessage="worker paused, no pings.";
+        this->theWorkers[i].timeOfLastPingServerSideOnly=onePredefinedCopyOfGlobalVariables.GetElapsedSeconds();
+      } else
+        if (onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0 &&
+            onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly>
+            onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
+            )
+          { this->theWorkers[i].flagInUse=false;
+            std::stringstream pingTimeoutStream;
+            pingTimeoutStream << onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
+            << " seconds have passed since worker " <<  i+1
+            << " pinged the server. I am assuming the worker no longer functions, and am marking it as free for reuse. ";
+            theLog << logger::red << pingTimeoutStream.str() << logger::endL;
+            this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>"+ pingTimeoutStream.str()+"</b></span>";
+          }
     }
 }
 
@@ -2024,7 +2051,6 @@ int WebServer::Run()
       this->ReturnActiveIndicatorAlthoughComputationIsNotDone;
       onePredefinedCopyOfGlobalVariables.WebServerTimerPing=this->WorkerTimerPing;
       onePredefinedCopyOfGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
-      MutexWrapper::InitializeAllAllocatedMutexesAllowMutexUse();
       crash.CleanUpFunction=WebServer::SignalActiveWorkerDoneReleaseEverything;
       InitializeTimer();
       CreateTimerThread();

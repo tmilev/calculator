@@ -2,70 +2,12 @@
 //For additional information refer to the file "vpf.h".
 #ifndef vpfHeaderWebServerAlreadyDefined
 #define vpfHeaderWebServerAlreadyDefined
-#include <unistd.h>
-#include <string.h>
-#include <netdb.h> //<-addrinfo and related data structures defined here
-#include <arpa/inet.h> // <- inet_ntop declared here (ntop= network to presentation)
-#include <sys/wait.h>
-#include <sys/stat.h>
-#include <fcntl.h> //<- setting of flags for pipes and the like (example: making a pipe non-blocking).
+#include "vpfHeader6WebServerInterprocessLogistics.h"
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
 
 static ProjectInformationInstance projectInfoInstanceWebServerHeader(__FILE__, "Web server classes declarations.");
 
 class WebServer;
-
-//this class is similar to the controller class but coordinates across different processes,
-//rather than across different threads.
-//inter-process communication is achieved via pipes.
-class PauseController
-{
-public:
-  List<int> thePausePipe; //thePipe[0] is the read end; thePipe[1] is the write end.
-  List<int> mutexPipe;
-  List<char> buffer;
-  std::string name;
-  MemorySaving<MutexWrapper> mutexForProcessBlocking; //<- to avoid two threads from the same process blocking the process.
-  std::string ToString()const;
-  void Release();
-  void CreateMe(const std::string& inputName);
-
-  bool CheckPauseIsRequested();
-  void PauseIfRequested();
-  bool PauseIfRequestedWithTimeOut();
-
-  void RequestPausePauseIfLocked();
-
-  void ResumePausedProcessesIfAny();
-  void LoCkMe();
-  void UnloCkMe();
-  PauseController();
-};
-
-class Pipe
-{
-private:
-  void ReadNoLocks();
-  void WriteNoLocks(const std::string& toBeSent);
-public:
-  List<int> thePipe; //thePipe[0] is the read end; thePipe[1] is the write end.
-  PauseController pipeAvailable;
-  List<char> lastRead;
-  List<char> pipeBuffer;
-  std::string name;
-
-  void Read();
-  void ReadWithoutEmptying();
-  void WriteAfterEmptying(const std::string& toBeSent);
-
-  std::string ToString()const;
-  void Release();
-  void CreateMe(const std::string& inputPipeName);
-  ~Pipe();
-  Pipe()
-  { this->thePipe.initFillInObject(2,-1);
-  }
-};
 
 class WebWorker
 {

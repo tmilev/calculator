@@ -1,115 +1,19 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader6WebServer.h"
+#include <sys/wait.h>//<-waitpid f-n here
+#include <netdb.h> //<-addrinfo and related data structures defined here
+#include <arpa/inet.h> // <- inet_ntop declared here (ntop= network to presentation)
+#include <unistd.h>
+#include <sys/stat.h>//<-for file statistics
 
 ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 
 extern void static_html4(std::stringstream& output);
 
-class logger
-{
-  public:
-  int currentColor;
-  std::fstream theFile;
-  bool flagStopWritingToFile;
-  logger(const std::string& logFileName )
-  { FileOperations::OpenFileCreateIfNotPresent(theFile,logFileName, false, true, false);
-    this->currentColor=logger::normalColor;
-    this->flagStopWritingToFile=false;
-  }
-  void CheckLogSize()
-  { theFile.seekg(0, std::ios::end);
-    if (theFile.tellg()>500000)
-      this->flagStopWritingToFile=true;
-  }
-  enum loggerSpecialSymbols{ endL, red, blue, yellow, green, purple, cyan, normalColor};
-  std::string closeTagConsole()
-  { return "\e[0m";
-  }
-  std::string closeTagHtml()
-  { if (currentColor==logger::normalColor)
-      return "";
-    return "</span>";
-  }
-  std::string openTagConsole()
-  { switch (this->currentColor)
-    { case logger::red:
-        return "\e[1;31m";
-      case logger::green:
-        return "\e[1;32m";
-      case logger::yellow:
-        return "\e[1;33m";
-      case logger::blue:
-        return "\e[1;34m";
-      case logger::purple:
-        return "\e[1;35m";
-      case logger::cyan:
-        return "\e[1;36m";
-      default:
-        return "";
-    }
-  }
-  std::string openTagHtml()
-  { switch (this->currentColor)
-    { case logger::red:
-        return "<span style=\"color:red\">";
-      case logger::green:
-        return "<span style=\"color:green\">";
-      case logger::blue:
-        return "<span style=\"color:blue\">";
-      case logger::yellow:
-        return "<span style=\"color:yellow\">";
-      case logger::purple:
-        return "<span style=\"color:purple\">";
-      default:
-        return "";
-    }
-  }
-  logger& operator << (const loggerSpecialSymbols& input)
-  { this->CheckLogSize();
-    switch (input)
-    { case logger::endL:
-        if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
-          std::cout << this->closeTagConsole() << std::endl;
-        if (this->flagStopWritingToFile)
-          return *this;
-        theFile << this->closeTagHtml() << "\n<br>\n";
-        theFile.flush();
-        return *this;
-      case logger::red:
-      case logger::blue:
-      case logger::yellow:
-      case logger::green:
-      case logger::purple:
-      case logger::cyan:
-        this->currentColor=input;
-        if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
-          std::cout << this->openTagConsole();
-        if (this->flagStopWritingToFile)
-          return *this;
-        this->theFile << this->closeTagHtml();
-        this->theFile << this->openTagHtml();
-        return *this;
-      default:
-        return *this;
-    }
-  }
-  template <typename theType>
-  logger& operator << (const theType& toBePrinted)
-  { if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
-      std::cout << toBePrinted;
-    this->CheckLogSize();
-    if (this->flagStopWritingToFile)
-      return *this;
-    std::stringstream out;
-    out << toBePrinted;
-    theFile << out.str();
-    return *this;
-  }
-};
-
-logger theLog( "./../output/LogFile.html");
-logger blockingLog( "./../output/BlockEventsLogFile.html");
+logger theLog( "./../output/LogStandard.html");
+logger logBlock( "./../output/LogBlockingEvents.html");
+logger logIO( "./../output/LogIOErrorsEvents.html");
 
 WebServer theWebServer;
 bool ProgressReportWebServer::flagServerExists=true;
@@ -136,6 +40,8 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
 { MacroRegisterFunctionWithName("ProgressReportWebServer::SetStatus");
   if (onePredefinedCopyOfGlobalVariables.flagComputationFinishedAllOutputSentClosing || !this->flagServerExists)
     return;
+  if (!onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+    return;
   theWebServer.CheckConsistency();
 //  theLog << logger::endL << logger::red << "SetStatus: outputFunction: "
 //  << (int) stOutput.theOutputFunction << logger::endL;
@@ -145,122 +51,18 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
 //    std::cout << "Got thus far ProgressReportWebServer::SetStatus 3" << std::endl;
   if (this->indexProgressReport>=theWebServer.theProgressReports.size)
     theWebServer.theProgressReports.SetSize(this->indexProgressReport+1);
-  safetyFirst.UnlockMe();
-//    std::cout << "SetStatus: passed mutex section" << std::endl;
   theWebServer.theProgressReports[this->indexProgressReport]=inputStatus;
+//    std::cout << "SetStatus: passed mutex section" << std::endl;
   std::stringstream toBePiped;
   for (int i=0; i<theWebServer.theProgressReports.size; i++)
     if (theWebServer.theProgressReports[i]!="")
       toBePiped << "<br>" << theWebServer.theProgressReports[i];
-  if (!onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
-    return;
+  safetyFirst.UnlockMe();
   // theLog << logger::endL << logger::red << "SetStatus before the issue: outputFunction: "
   // << (int) stOutput.theOutputFunction << logger::endL;
+  if (!onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+    return;
   theWebServer.GetActiveWorker().pipeWorkerToServerWorkerStatus.WriteAfterEmptying(toBePiped.str());
-}
-
-void PauseController::Release()
-{ WebServer::Release(this->mutexPipe[0]);
-  WebServer::Release(this->mutexPipe[1]);
-  WebServer::Release(this->thePausePipe[0]);
-  WebServer::Release(this->thePausePipe[1]);
-}
-
-PauseController::PauseController()
-{ this->thePausePipe.initFillInObject(2,-1);
-  this->mutexPipe.initFillInObject(2, -1);
-}
-
-void PauseController::CreateMe(const std::string& inputName)
-{ this->Release();
-  this->name=inputName;
-  this->buffer.SetSize(200);
-  if (pipe(this->thePausePipe.TheObjects)<0)
-    crash << "Failed to open pipe from parent to child. " << crash;
-  if (pipe(this->mutexPipe.TheObjects)<0)
-    crash << "Failed to open pipe from parent to child. " << crash;
-  fcntl(this->thePausePipe[1], F_SETFL, O_NONBLOCK);
-  write (this->thePausePipe[1], "!", 1);
-  write (this->mutexPipe[1], "!", 1);
-}
-
-void PauseController::PauseIfRequested()
-{ ProgressReportWebServer theReport;
-  if (this->CheckPauseIsRequested())
-  { blockingLog << logger::red << "Blocking on " << this->ToString() << logger::endL;
-    theReport.SetStatus("Blocking on " +this->ToString());
-  }
-  bool pauseWasRequested= !((read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size))>0);
-  if (!pauseWasRequested)
-    write(this->thePausePipe[1], "!", 1);
-}
-
-bool PauseController::PauseIfRequestedWithTimeOut()
-{ fd_set read_fds, write_fds, except_fds;
-  FD_ZERO(&read_fds);
-  FD_ZERO(&write_fds);
-  FD_ZERO(&except_fds);
-  FD_SET(this->thePausePipe[0], &read_fds);
-  struct timeval timeout;
-  timeout.tv_sec = 10;
-  timeout.tv_usec = 0;
-  ProgressReportWebServer theReport;
-  if (this->CheckPauseIsRequested())
-  { blockingLog << logger::red << "Blocking on " << this->ToString() << logger::endL;
-    theReport.SetStatus("Blocking on " + this->ToString());
-  }
-  bool pauseWasRequested=false;
-  if (!select(this->thePausePipe[0]+1, &read_fds, &write_fds, &except_fds, &timeout) == 1)
-  { blockingLog << logger::red << "Blocking on " << this->ToString() << logger::green
-    << " timed out. " << logger::endL;
-    theReport.SetStatus("Blocking on " + this->ToString()+ " timed out.");
-    return false;
-  }
-
-  pauseWasRequested = !((read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size))>0);
-  if (!pauseWasRequested)
-    write(this->thePausePipe[1], "!", 1);
-  return true;
-}
-
-void PauseController::RequestPausePauseIfLocked()
-{ this->mutexForProcessBlocking.GetElement().LockMe();//<- make sure the pause controller is not locking itself
-  //through competing threads
-  ProgressReportWebServer theReport;
-  if (this->CheckPauseIsRequested())
-  { blockingLog << logger::red << "Blocking on " << this->ToString() << logger::endL;
-    theReport.SetStatus("Blocking on " +this->ToString());
-  }
-  read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size);
-  this->mutexForProcessBlocking.GetElement().UnlockMe();
-}
-
-bool PauseController::CheckPauseIsRequested()
-{ read (this->mutexPipe[0], this->buffer.TheObjects, this->buffer.size);
-  fcntl(this->thePausePipe[0], F_SETFL, O_NONBLOCK);
-  bool result = !(read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size)>0);
-  if (!result)
-    write (this->thePausePipe[1], "!", 1);
-  fcntl(this->thePausePipe[0], F_SETFL, 0);
-  write (this->mutexPipe[1], "!", 1);
-  return result;
-}
-
-void PauseController::ResumePausedProcessesIfAny()
-{ MacroRegisterFunctionWithName("PauseController::ResumePausedProcessesIfAny");
-//  theLog << crash.GetStackTraceShort() << logger::endL;
-  write(this->thePausePipe[1], "!", 1);
-//  theLog << "Unlocking done!" << logger::endL;
-}
-
-std::string PauseController::ToString()const
-{ std::stringstream out;
-  if (this->name!="")
-    out << this->name << ": ";
-  if (this->thePausePipe[0]==-1)
-    return "(not in use)";
-  out << "pause-controller pipe " << this->thePausePipe[0] << "<-" << this->thePausePipe[1];
-  return out.str();
 }
 
 void WebServer::Signal_SIGINT_handler(int s)
@@ -452,7 +254,7 @@ void WebWorker::OutputSendAfterTimeout(const std::string& input)
   ProgressReportWebServer theReport("Sending result through indicator pipe.");
 
   theWebServer.GetActiveWorker().pipeWorkerToServerIndicatorData.WriteAfterEmptying(input);
-  blockingLog << logger::red << "Final output written to indicator, blocking until data "
+  logBlock << logger::red << "Final output written to indicator, blocking until data "
   << "is received on the other end." << logger::endL;
   theReport.SetStatus("Blocking until result data is received.");
   if(!theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequestedWithTimeOut())
@@ -1647,119 +1449,7 @@ void WebServer::CreateNewActiveWorker()
   this->GetActiveWorker().pingMessage="";
 }
 
-void Pipe::WriteAfterEmptying(const std::string& toBeSent)
-{ //theLog << "Step -1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
-  MacroRegisterFunctionWithName("Pipe::WriteAfterEmptying");
-  //theLog << "Step 1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
-  this->pipeAvailable.RequestPausePauseIfLocked();
-//  theLog << logger::endL << "Step 2: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction
-//  << logger::endL;
-  this->ReadNoLocks();
-  this->lastRead.SetSize(0);
-  this->WriteNoLocks(toBeSent);
-  this->pipeAvailable.ResumePausedProcessesIfAny();
-//  theLog << logger::endL << "Step 3: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction
-//  << logger::endL;
-}
 
-void Pipe::WriteNoLocks(const std::string& toBeSent)
-{ MacroRegisterFunctionWithName("WebServer::WriteToPipe");
-  if (this->thePipe[1]==-1)
-    return;
-//  std::string toBeSentCopy=toBeSent;
-  int numBytesWritten=0;
-  for (;;)
-  { numBytesWritten=write(this->thePipe[1], toBeSent.c_str(), toBeSent.size());
-    if (numBytesWritten<0)
-      if (errno==EAI_AGAIN)
-        continue;
-    break;
-  }
-  if (numBytesWritten<0)
-    theLog << logger::red << theWebServer.ToStringLastErrorDescription();
-}
-
-std::string Pipe::ToString()const
-{ std::stringstream out;
-  if (this->name!="")
-    out << this->name << ": ";
-  if (this->thePipe[0]==-1 || this->thePipe[1]==-1)
-  { out << "released";
-    return out.str();
-  }
-  out << this->thePipe[1] << "->" << this->thePipe[0];
-  return out.str();
-}
-
-void Pipe::CreateMe(const std::string& inputPipeName)
-{ this->Release();
-  if (pipe(this->thePipe.TheObjects)<0)
-    crash << "Failed to open pipe from parent to child. " << crash;
-  fcntl(this->thePipe[1], F_SETFL, O_NONBLOCK);
-  fcntl(this->thePipe[0], F_SETFL, O_NONBLOCK);
-  this->name=inputPipeName;
-  this->pipeAvailable.CreateMe("pause controller for pipe: "+ inputPipeName);
-}
-
-Pipe::~Pipe()
-{ //Pipes are not allowed to release resources in the destructor:
-  //a pipe's destructor is called when expanding List<Pipe>.
-}
-
-void Pipe::Release()
-{ WebServer::Release(this->thePipe[0]);
-  WebServer::Release(this->thePipe[1]);
-  this->pipeAvailable.Release();
-  this->lastRead.SetSize(0);
-}
-
-void Pipe::ReadNoLocks()
-{ MacroRegisterFunctionWithName("Pipe::ReadFileDescriptor");
-  this->lastRead.SetSize(0);
-  if (this->thePipe[0]==-1)
-    return;
-  int counter=0;
-  const unsigned int bufferSize=20000000;
-  this->pipeBuffer.SetSize(bufferSize); // <-once the buffer is resized, this operation does no memory allocation and is fast.
-  int numReadBytes=0;
-  for (;;)
-  { //theLog << logger::blue << theWebServer.ToStringActiveWorker() << " pipe, " << this->ToString() << " calling read." << logger::endL;
-    numReadBytes =read(this->thePipe[0], this->pipeBuffer.TheObjects, bufferSize);
-    if (numReadBytes<0)
-      if (errno==EAI_AGAIN || errno==EWOULDBLOCK)
-        numReadBytes=0;
-    if (numReadBytes>=0)
-      break;
-    counter++;
-    if (counter>100)
-      theLog << theWebServer.ToStringLastErrorDescription() << ". This is not supposed to happen: more than 100 iterations of read from pipe." << logger::endL;
-  }
-  if (numReadBytes>150000)
-    theLog << "This is not supposed to happen: pipe read more than 150000 bytes." << logger::endL;
-  if (numReadBytes>0)
-  { this->pipeBuffer.SetSize(numReadBytes);
-    this->lastRead=this->pipeBuffer;
-  }
-}
-
-void Pipe::ReadWithoutEmptying()
-{ MacroRegisterFunctionWithName("Pipe::ReadWithoutEmptying");
-  this->pipeAvailable.RequestPausePauseIfLocked();
-  this->ReadNoLocks();
-  if (this->lastRead.size>0)
-  { std::string tempS;
-    tempS.assign(this->lastRead.TheObjects, this->lastRead.size);
-    this->WriteNoLocks(tempS);
-  }
-  this->pipeAvailable.ResumePausedProcessesIfAny();
-}
-
-void Pipe::Read()
-{ MacroRegisterFunctionWithName("Pipe::Read");
-  this->pipeAvailable.RequestPausePauseIfLocked();
-  this->ReadNoLocks();
-  this->pipeAvailable.ResumePausedProcessesIfAny();
-}
 
 std::string WebServer::ToStringLastErrorDescription()
 { std::stringstream out;
@@ -2084,6 +1774,5 @@ int WebServer::Run()
 }
 
 void WebServer::Release(int& theDescriptor)
-{ close(theDescriptor);
-  theDescriptor=-1;
+{ PauseController::Release(theDescriptor);
 }

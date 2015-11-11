@@ -3678,6 +3678,8 @@ public:
   MemorySaving<Selection> selGetNewVerticesAppend2;
   MemorySaving<Selection> selSplitChamber;
 
+  MutexWrapper MutexWebWorkerPipeWriteLock;
+  MutexWrapper MutexWebWorkerPipeReadLock;
   MutexWrapper MutexRegisterFunctionStaticFiasco;
   MutexWrapper MutexParallelComputingStaticFiasco;
   MutexWrapper MutexWebWorkerStaticFiasco;

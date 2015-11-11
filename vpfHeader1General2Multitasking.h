@@ -66,6 +66,20 @@ public:
   ~MutexWrapper();
 };
 
+//this class uses RAII to lock MutexWrapper's -> equivalent to std::lock_guard
+class MutexLockGuard{
+public:
+  MutexWrapper* theMutex;
+  MutexLockGuard(MutexWrapper& inputMutex)
+  { this->theMutex=&inputMutex;
+    this->theMutex->LockMe();
+  }
+  ~MutexLockGuard()
+  { this->theMutex->UnlockMe();
+    this->theMutex=0;
+  }
+};
+
 class Controller
 {
   private:

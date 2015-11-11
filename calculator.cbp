@@ -90,6 +90,7 @@
 		<Unit filename="vpfHeader4SystemFunctionsGlobalObjects.h" />
 		<Unit filename="vpfHeader5Crypto.h" />
 		<Unit filename="vpfHeader6WebServer.h" />
+		<Unit filename="vpfHeader6WebServerInterprocessLogistics.h" />
 		<Unit filename="vpfImplementationHeader2Math051_PolynomialComputations_Basic.h" />
 		<Unit filename="vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h" />
 		<Unit filename="vpfImplementationHeader2Math15_UniversalEnveloping.h" />
@@ -102,6 +103,7 @@
 		<Unit filename="vpfJson.h" />
 		<Unit filename="vpfMacros.h" />
 		<Unit filename="vpfWebServer.cpp" />
+		<Unit filename="vpfWebServerInterProcessLogistics.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

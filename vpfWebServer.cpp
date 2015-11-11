@@ -258,7 +258,7 @@ void WebServer::Signal_SIGINT_handler(int s)
 //  << ". Waiting for children to exit... " << logger::endL;
   theWebServer.ReleaseActiveWorker();
   theWebServer.ReleaseNonActiveWorkers();
-  while(waitpid(-1, NULL, WNOHANG) > 0)
+  while(waitpid(-1, NULL, WNOHANG | WEXITED) > 0)
   { }
   theLog << "All children have exited. " << logger::endL;
   exit(0);
@@ -268,7 +268,7 @@ void WebServer::Signal_SIGCHLD_handler(int s)
 { theLog << "Signal child handler called with input: " << s << "." << logger::endL;
   int waitResult=0;
   do
-  { waitResult= waitpid(-1, NULL, WNOHANG);
+  { waitResult= waitpid(-1, NULL, WNOHANG| WEXITED);
     if (waitResult>0)
       for (int i=0; i<theWebServer.theWorkers.size; i++)
         if (theWebServer.theWorkers[i].ProcessPID==waitResult)
@@ -1892,12 +1892,11 @@ void WebServer::RecycleChildrenIfPossible()
         if (onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly>10)
         { this->theWorkers[i].flagInUse=false;
           std::stringstream pingTimeoutStream;
-          pingTimeoutStream << "<span style=\"color:red\"><b>"
-          << onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
+          pingTimeoutStream << onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
           << " seconds have passed since worker " <<  i+1
-          << " pinged the server. I am assuming the worker no longer functions, and am marking it as free for reuse. "
-          << "</b></span>";
-          this->theWorkers[i].pingMessage=pingTimeoutStream.str();
+          << " pinged the server. I am assuming the worker no longer functions, and am marking it as free for reuse. ";
+          theLog << logger::red << pingTimeoutStream.str() << logger::endL;
+          this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>"+ pingTimeoutStream.str()+"</b></span>";
         }
     }
 }

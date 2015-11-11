@@ -6,6 +6,7 @@
 #include "vpfHeader2Math0_General.h"
 #include "vpfHeader2Math8_VectorSpace.h"
 #include "vpfHeader2Math4_Graph.h"
+#include "vpfJson.h"
 
 //To do: move Weyl groups to this file. Eliminate all redundant code and organize nicely.
 
@@ -237,6 +238,7 @@ public:
   (GlobalVariables* theGlobalVariables)
   ;
   void ComputeCCSizesAndRepresentatives(GlobalVariables* theGlobalVariables);
+  bool HasElement(elementSomeGroup& g);
   void GetWord(elementSomeGroup& g, List<int>& out);
   void (*GetWordByFormula)(void* G, elementSomeGroup& g, List<int>& out);
   void GetSignCharacter(Vector<Rational>& outputCharacter);
@@ -831,6 +833,8 @@ class GroupRepresentation
 
   bool VerifyRepresentation();
 
+  JSData JSOut();
+
   template <typename somestream>
   somestream& IntoStream(somestream& out);
   std::string ToString();
@@ -922,6 +926,19 @@ std::string GroupRepresentation<someGroup, coefficient>::ToString()
 { std::stringstream out;
   this->IntoStream(out);
   return out.str();
+}
+
+template <typename someGroup, typename coefficient>
+JSData GroupRepresentation<someGroup, coefficient>::JSOut()
+{ JSData out;
+  out["identifyingString"] = identifyingString;
+  if(this->haveCharacter)
+    out["character"] = this->theCharacteR.data;
+  else
+    out["character"].type = JSNULL;
+  for(int i=0; i<generatorS.size; i++)
+    out["generators"][i] = generatorS[i];
+  return out;
 }
 
 template <class coefficient>
@@ -1137,47 +1154,50 @@ public:
   { this->ComputeCCSizesAndRepresentatives(theGlobalVariables);
     this->ComputeCCRepresentativesPreimages(theGlobalVariables);
   }
+  // Note: Cosets are... whichever of left coset or right coset they are
+  bool flagCosetSetsComputed = false;
+  bool flagCosetRepresentativesComputed = false;
+  void ComputeCosets();
+  bool VerifyCosets();
+  bool VerifyNormal();
+  bool SameCosetAs(elementSomeGroup& g1, elementSomeGroup& g2);
+  int GetCosetId(elementSomeGroup& g);
+  int QIDMul(int i, int j);
   template <typename coefficient>
   void QuotientGroupPermutationRepresentation(GroupRepresentation<somegroup, coefficient>& out);
   template <typename coefficient>
   void InduceRepresentation(GroupRepresentation<Subgroup<somegroup, elementSomeGroup>, coefficient>& in,
                             GroupRepresentation<somegroup, coefficient>& out);
-  void ComputeCosets();
-  bool SameCosetAs(elementSomeGroup& g1, elementSomeGroup& g2);
-  int GetCosetId(elementSomeGroup& g);
-  bool flagCosetSetsComputed = false;
-  bool flagCosetRepresentativesComputed = false;
+  template <typename coefficient>
+  void InduceRepresentationNormalSubgroup(GroupRepresentation<Subgroup<somegroup, elementSomeGroup>, coefficient>& in,
+                            GroupRepresentation<somegroup, coefficient>& out);
   void (*CosetRepresentativeEnumerator)(void* H) = NULL;
   bool (*SameCosetAsByFormula)(void* H, elementSomeGroup& g1, elementSomeGroup& g2) = NULL;
 };
 
+
+
 template <typename somegroup, typename elementSomeGroup>
-void Subgroup<somegroup, elementSomeGroup>::ComputeCosets()
-{ if(flagCosetSetsComputed)
-    return;
-  if(this->CosetRepresentativeEnumerator && this->SameCosetAsByFormula)
-    return this->CosetRepresentativeEnumerator(this);
-  this->ComputeAllElements();
-  parent->ComputeAllElements();
-  GraphOLD orbitg = GraphOLD(parent->theElements.size, this->generators.size);
-  for(int i=0; i<parent->theElements.size; i++)
-    for(int j=0; j<this->generators.size; j++)
-      orbitg.AddEdge(i,parent->theElements.GetIndex(this->generators[j]*parent->theElements[i]));
-  List<List<int> > orbits;
-  orbits = orbitg.DestructivelyGetConnectedComponents();
-  this->cosets.SetSize(orbits.size);
-  for(int i=0; i<orbits.size; i++)
-  { cosets[i].supergroupIndices = orbits[i];
-    //stOutput << cosets[i].supergroupIndices;
-    cosets[i].representative = parent->theElements[orbits[i][0]];
-    parent->GetWord(parent->theElements[orbits[i][0]], cosets[i].representativeWord);
-  }
-  this->flagCosetSetsComputed = true;
-  this->flagCosetRepresentativesComputed = true;
-  stOutput << "Computed cosets of group " /*<< *parent*/ << " have " << cosets.size << '\n';
+int Subgroup<somegroup, elementSomeGroup>::QIDMul(int i, int j)
+{ this->ComputeCosets();
+  auto g = this->cosets[i].representative * this->cosets[j].representative;
+  return this->GetCosetId(g);
+}
+
+template <typename somegroup, typename elementSomeGroup>
+bool Subgroup<somegroup, elementSomeGroup>::VerifyNormal()
+{ Matrix<int> csmt;
+  csmt.init(cosets.size, cosets.size);
   for(int i=0; i<cosets.size; i++)
-    stOutput << cosets[i].ToString() << ", ";
-  stOutput << '\n';
+    for(int j=0; j<cosets.size; j++)
+      csmt(i,j) = QIDMul(i,j);
+  stOutput << "Coset multiplication table\n" << csmt.ToStringPlainText() << '\n';
+  for(int i=0; i<cosets.size; i++)
+    for(int j=i; j<cosets.size; j++)
+      for(int k=j; k<cosets.size; k++)
+        if(csmt(i,csmt(j,k)) != csmt(csmt(i,j),k))
+          return false;
+  return true;
 }
 
 template <typename somegroup, typename elementSomeGroup>
@@ -1225,15 +1245,18 @@ void Subgroup<somegroup, elementSomeGroup>::QuotientGroupPermutationRepresentati
 { this->ComputeCosets();
   out.ownerGroup = this->parent;
   out.identifyingString = "Quotient permutation representation";
+  stOutput << "Subgroup::QuotientGroupPermutationRepresentation: Permuting " << cosets.size << " cosets.\n";
   out.generatorS.SetSize(this->parent->generators.size);
   for(int i=0; i<this->parent->generators.size; i++)
   { out.generatorS[i].init(this->cosets.size, this->cosets.size);
     out.generatorS[i].MakeZero();
     for(int ci=0; ci<out.generatorS[i].NumCols; ci++)
-    { elementSomeGroup g = this->cosets[ci].representative * parent->generators[i];
+    { elementSomeGroup g =  parent->generators[i] * this->cosets[ci].representative;
       int j = this->GetCosetId(g);
-      out.generatorS[i](ci,j) = 1;
+      out.generatorS[i](j,ci) = 1;
     }
+    stOutput << "Element " << parent->generators[i] << " of coset " << this->GetCosetId(parent->generators[i]);
+    stOutput << " permutes the other cosets as\n" << out.generatorS[i].ToStringPlainText() << '\n';
   }
 }
 
@@ -1242,7 +1265,7 @@ void Subgroup<somegroup, elementSomeGroup>::QuotientGroupPermutationRepresentati
 //
 template <typename somegroup, typename elementSomeGroup>
 template <typename coefficient>
-void Subgroup<somegroup, elementSomeGroup>::InduceRepresentation
+void Subgroup<somegroup, elementSomeGroup>::InduceRepresentationNormalSubgroup
     (GroupRepresentation<Subgroup<somegroup, elementSomeGroup>, coefficient>& in,
      GroupRepresentation<somegroup, coefficient>& out)
 { GroupRepresentation<somegroup, coefficient> qr;
@@ -1263,22 +1286,63 @@ void Subgroup<somegroup, elementSomeGroup>::InduceRepresentation
       cg.Invert();
       g = cg*parent->generators[i];
     }
-    in.GetMatrixOfElement(g,sr.generatorS[i]);
     stOutput << "element " << parent->generators[i] << " belongs to coset " << csi;
-    stOutput << " represented by " << cosets[csi].representative << " and corresponds to subgroup element ";
-    stOutput << g << " which is assigned matrix\n" << sr.generatorS[i].ToStringPlainText() << '\n';
+    stOutput << " represented by " << cosets[csi].representative << " and corresponds to subgroup element " << g;
+    in.GetMatrixOfElement(g,sr.generatorS[i]);
+    stOutput << " which is assigned matrix\n" << sr.generatorS[i].ToStringPlainText() << '\n';
   }
   out.MakeTensorRepresentation(qr,sr);
-  stOutput << "Subgroup representation: " << sr.ToString() << "\n"; // something about a SIGFPE from the hashedlist code lol
+  stOutput << "Subgroup representation: " << sr.ToString() << "\n";
   for(int i=0; i<parent->generators.size; i++)
-    stOutput << parent->generators[i] << '\n' << sr.generatorS[i].ToStringPlainText() << '\n';
+    stOutput << parent->generators[i] << ' ' << sr.generatorS[i].GetTrace() << '\n' << sr.generatorS[i].ToStringPlainText() << '\n';
   stOutput << "Quotient representation: " << qr.ToString() << "\n";
   for(int i=0; i<parent->generators.size; i++)
-    stOutput << parent->generators[i] << '\n' << qr.generatorS[i].ToStringPlainText() << '\n';
+    stOutput << parent->generators[i] << ' ' << qr.generatorS[i].GetTrace() << '\n' << qr.generatorS[i].ToStringPlainText() << '\n';
   stOutput << "Induced representation: " << out.ToString() << '\n';
   for(int i=0; i<out.generatorS.size; i++)
-    stOutput << parent->generators[i] << '\n' << out.generatorS[i].ToStringPlainText() << '\n';
+    stOutput << parent->generators[i] << ' ' << out.generatorS[i].GetTrace() << '\n' << out.generatorS[i].ToStringPlainText() << '\n';
 }
+
+template <typename somegroup, typename elementSomeGroup>
+template <typename coefficient>
+void Subgroup<somegroup, elementSomeGroup>::InduceRepresentation
+    (GroupRepresentation<Subgroup<somegroup, elementSomeGroup>, coefficient>& in,
+     GroupRepresentation<somegroup, coefficient>& out)
+{ out.generatorS.SetSize(parent->generators.size);
+  for(int i=0; i<parent->generators.size; i++)
+  { this->ComputeCosets();
+    // parent->generators[i] = cg * h
+    // g1 * g2 = cg1 * h1 * cg2 * h2
+    elementSomeGroup g = parent->generators[i];
+
+    if(in.generatorS.size == 0)
+      out.generatorS[i].MakeZeroMatrix(1*this->cosets.size);
+    else
+      out.generatorS[i].MakeZeroMatrix(in.generatorS[0].NumRows*this->cosets.size);
+    for(int ci=0; ci<cosets.size; ci++)
+    { elementSomeGroup k = g * cosets[ci].representative;
+      int kcsi = this->GetCosetId(k);
+      elementSomeGroup ck = cosets[kcsi].representative;
+      elementSomeGroup cki = ck;
+      cki.Invert();
+      stOutput << "Inverting: " << ck << " inverse is " << cki << '\n';
+      elementSomeGroup hk = cki * k;
+      stOutput << "Multiplying cosets: " << ci << " represented by " << cosets[ci].representative
+               << " multiplied on the left by " << g << " returns " << k << "which belongs to coset "
+               << kcsi << " and is designated (" << ck << ", " << hk << ")\n";
+      Matrix<Rational> ikblock;
+      in.GetMatrixOfElement(hk,ikblock);
+      out.generatorS[i].AssignBlock(ikblock, kcsi*ikblock.NumRows, ci*ikblock.NumCols);
+    }
+  }
+  out.ownerGroup = parent;
+  stOutput << "Induced representation: " << out.ToString() << '\n';
+  for(int i=0; i<out.generatorS.size; i++)
+    stOutput << parent->generators[i] << ' ' << out.generatorS[i].GetTrace() << '\n' << out.generatorS[i].ToStringPlainText() << '\n';
+  if(!out.VerifyRepresentation())
+    crash << crash;
+}
+
 
 class SubgroupWeylGroup: public Subgroup<WeylGroup, ElementWeylGroup<WeylGroup> >
 {

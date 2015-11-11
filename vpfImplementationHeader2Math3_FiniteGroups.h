@@ -361,6 +361,13 @@ bool Subgroup<somegroup, elementSomeGroup>::CheckInitialization()
 }
 
 template <typename elementSomeGroup>
+bool FiniteGroup<elementSomeGroup>::HasElement(elementSomeGroup& g)
+{ if(!this->flagAllElementsAreComputed)
+    this->ComputeAllElements();
+  return this->theElements.Contains(g);
+}
+
+template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::GetWord(elementSomeGroup& g, List<int>& out)
 { if(GetWordByFormula)
     return GetWordByFormula(this, g, out);
@@ -1869,5 +1876,62 @@ bool ClassFunction<someFiniteGroup, coefficient>::operator>(const ClassFunction<
     if(!(this->data[i] == right.data[i]))
       return this->data[i] > right.data[i];
   return false;
+}
+
+// Interal API of Subgroup class can go here
+template <typename somegroup, typename elementSomeGroup>
+void Subgroup<somegroup, elementSomeGroup>::ComputeCosets()
+{ if(flagCosetSetsComputed)
+    return;
+  if(this->CosetRepresentativeEnumerator && this->SameCosetAsByFormula)
+    return this->CosetRepresentativeEnumerator(this);
+  this->ComputeAllElements();
+  parent->ComputeAllElements();
+  GraphOLD orbitg = GraphOLD(parent->theElements.size, this->generators.size);
+  for(int i=0; i<parent->theElements.size; i++)
+    for(int j=0; j<this->generators.size; j++)
+      orbitg.AddEdge(parent->theElements.GetIndex(parent->theElements[i]*this->generators[j]), i);
+  List<List<int> > orbits;
+  orbits = orbitg.DestructivelyGetConnectedComponents();
+  this->cosets.SetSize(orbits.size);
+  for(int i=0; i<orbits.size; i++)
+  { cosets[i].supergroupIndices = orbits[i];
+    //stOutput << cosets[i].supergroupIndices;
+    cosets[i].representative = parent->theElements[orbits[i][0]];
+    parent->GetWord(parent->theElements[orbits[i][0]], cosets[i].representativeWord);
+  }
+  this->flagCosetSetsComputed = true;
+  this->flagCosetRepresentativesComputed = true;
+  stOutput << "Computed cosets of group " /*<< *parent*/ << " have " << cosets.size << '\n';
+  for(int i=0; i<cosets.size; i++)
+    stOutput << cosets[i].ToString() << ", ";
+  stOutput << '\n';
+  this->VerifyCosets();
+}
+
+template <typename somegroup, typename elementSomeGroup>
+bool Subgroup<somegroup, elementSomeGroup>::VerifyCosets()
+{ // this returns true or crashes because if the cosets aren't cosets something is seriously wrong
+  ComputeCosets();
+  for(int i=0; i<this->generators.size; i++)
+    for(int cs=0; cs<this->cosets.size; cs++)
+    { auto g = cosets[cs].representative * this->generators[i];
+      if(this->GetCosetId(g) != cs)
+        crash << "Error: element " << g << " not found in coset " << cs
+              << " despite being product of subgroup generator " << this->generators[i] << " by coset representative "
+              << cosets[cs].representative << crash;
+    }
+  if(this->flagCosetSetsComputed)
+    for(int cs=0; cs<this->cosets.size; cs++)
+    { auto g = this->cosets[cs].representative;
+      g.Invert();
+      for(int i=0; i<this->cosets[cs].supergroupIndices.size; i++)
+      { auto g2 = parent->theElements[this->cosets[cs].supergroupIndices[i]];
+        auto g3 = g * g2;
+        if(!this->HasElement(g3))
+          crash << g << " * " << g2 << " = " << g3 << crash;
+      }
+    }
+  return true;
 }
 #endif

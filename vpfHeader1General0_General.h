@@ -2232,7 +2232,13 @@ void List<Object>::ReverseOrderElements()
 
 template <class Object>
 void List<Object>::ReverseRange(int rangeBegin, int rangeEnd)
-{ std::reverse(this->TheObjects+rangeBegin, this->TheObjects+rangeEnd);
+{ //std::reverse(this->TheObjects+rangeBegin, this->TheObjects+rangeEnd);
+  // the compiler can optimize this, right?
+  for(int i=rangeBegin, j=rangeEnd-1; i<j; i++, j--)
+  { Object oi = this->TheObjects[i];
+    this->TheObjects[i] = this->TheObjects[j];
+    this->TheObjects[j] = oi;
+  }
 }
 
 template <class Object>

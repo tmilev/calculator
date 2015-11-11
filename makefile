@@ -11,8 +11,10 @@ endif
 
 ifeq ($(debug), 1)
 	CFLAGS += -g -Og
+	LDFLAGS += -Og
 else
-	CFLAGS += -O3 -march=native
+	CFLAGS += -O3 -march=native -flto
+	LDFLAGS += -O3 -march=native -flto
 endif
 
 ifeq ($(AllocationStatistics), 1)
@@ -25,15 +27,15 @@ SOURCES=test.cpp vpf2Math3_SymmetricGroupsAndGeneralizations.cpp vpf4CalculatorF
 OBJECTS=$(SOURCES:.cpp=.o)
 DEPS=$(SOURCES:.cpp=.d)
 
-all: directories calculator 
+all: directories Debug/calculator 
 directories: Debug
 Debug:
 	mkdir ./Debug
 
-calculator: $(OBJECTS)
+Debug/calculator: $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) -o ./Debug/calculator
 
-testrun: calculator
+testrun: Debug/calculator
 	time ./Debug/calculator test
 
 %.o:%.cpp

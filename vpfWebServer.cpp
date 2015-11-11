@@ -1509,6 +1509,10 @@ WebServer::~WebServer()
     this->GetActiveWorker().SendAllBytes();
   for (int i=0; i<this->theWorkers.size; i++)
     this->theWorkers[i].Release();
+  onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=0;
+  onePredefinedCopyOfGlobalVariables.WebServerTimerPing=0;
+  onePredefinedCopyOfGlobalVariables.IndicatorStringOutputFunction=0;
+  onePredefinedCopyOfGlobalVariables.PauseUponUserRequest=0;
   this->activeWorker=-1;
   close(this->listeningSocketID);
   this->flagDeallocated=true;

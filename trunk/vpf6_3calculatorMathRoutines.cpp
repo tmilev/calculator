@@ -4999,7 +4999,7 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, con
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestIndicator");
 //  stOutput << "Report html return!";
   int numRuns=-1;
-  if (!input.IsSmallInteger(&numRuns))
+  if (!input.IsIntegerFittingInInt(&numRuns))
     return theCommands << "Argument of CalculatorFunctionsGeneral::innerTestIndicator is not a small integer, instead it equals: " << numRuns << ".";
   if (numRuns>200000)
   { theCommands << "The argument " << numRuns << " of CalculatorFunctionsGeneral::innerTestIndicator larger than 200000, trimming down to 200000.";
@@ -5009,8 +5009,8 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, con
     numRuns=0;
   if (theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection!=0)
     theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection();
-//  else
-//    std::cout << "WebServerReturnDisplayIndicatorCloseConnection IS ZERO!!!!" << std::endl;
+  else
+    theCommands << "WebServerReturnDisplayIndicatorCloseConnection is zero.";
   ProgressReport theReport(theCommands.theGlobalVariableS);
 
   for (int i=0; i<numRuns; i++)
@@ -5022,7 +5022,7 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, con
     theCommands.theGlobalVariableS->FallAsleep(4000);
   }
   std::stringstream out;
-  out << numRuns << " iterations of the indicaor test executed. ";
+  out << numRuns << " iterations of the indicator test executed. ";
   return output.AssignValue(out.str(), theCommands);
 }
 

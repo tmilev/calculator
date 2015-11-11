@@ -758,6 +758,7 @@ class SimpleFiniteGroup
   void VerifyWords();
   std::string PrettyPrintGeneratorsCommutationRelations();
   std::string PrettyPrintCharacterTable();
+  JSData RepresentationDataIntoJS();
 
   template <typename coefficient>
   coefficient GetHermitianProduct(const Vector<coefficient>& x1, const Vector<coefficient>& X2);
@@ -821,7 +822,8 @@ class HyperoctahedralGroup: public SimpleFiniteGroup<ElementHyperoctahedralGroup
 
   void AllSpechtModules();
   void SpechtModuleOfPartititons(const Partition& positive, const Partition& negative,
-                                 GroupRepresentation<SimpleFiniteGroup<ElementHyperoctahedralGroup>, Rational> &out);
+                                 GroupRepresentation<SimpleFiniteGroup<ElementHyperoctahedralGroup>, Rational> &out,
+                                 PermutationGroup* subsn = NULL);
 
 
   template <typename somestream>
@@ -914,7 +916,10 @@ template <typename somestream>
 somestream& Partition::IntoStream(somestream& out) const
 { out << this->n << ": ";
   for(int i=0; i<this->p.size; i++)
-    out << this->p[i] << " ";
+  { out << this->p[i];
+    if(i != (this->p.size-1))
+      out << " ";
+  }
   return out;
 }
 
@@ -1226,9 +1231,10 @@ std::string SimpleFiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable()
     else
       out << "\n";
   }
+
+  // pad the numbers out front
   List<std::string> numbers;
   int numpad = 0;
-  // what the hell lol
   for(int i=0; i<this->irreps.size; i++)
   { std::stringstream ns;
     ns << i;
@@ -1237,8 +1243,8 @@ std::string SimpleFiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable()
     if(numpad < nil);
       numpad = nil;
   }
-  numpad++;
 
+  // pad the character values
   List<List<std::string> > values;
   values.SetSize(this->irreps.size);
   int cols_per_elt = 0;
@@ -1252,6 +1258,8 @@ std::string SimpleFiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable()
     }
   }
   cols_per_elt++;
+
+  // ok print it all up
   for(int i=0; i<values.size; i++)
   { int padn = numpad - numbers[i].length();
     for(int pp = 0; pp < padn; pp++)
@@ -1265,12 +1273,18 @@ std::string SimpleFiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable()
         out << ' ';
       out << values[i][j];
     }
-    out << "] " << this->irreps[i].identifyingString;
     Rational x = this->irreps[i].theCharacteR.Norm();
     if(x != 1)
-      out << " character norm is " << x;
+      out << "][" << x;
+    out << "] " << this->irreps[i].identifyingString;
     out << '\n';
   }
+
+  Rational x = 0;
+  for(int i=0; i<this->irreps.size; i++)
+    x += irreps[i].theCharacteR.data[0] * irreps[i].theCharacteR.data[0];
+  out << "Sum of squares of first column: " << x << '\n';
+  // print information about if anything's wrong
   for(int i=0; i<this->irreps.size; i++)
     for(int j=i+1; j<this->irreps.size; j++)
     { Rational x = this->irreps[i].theCharacteR.InnerProduct(this->irreps[j].theCharacteR);
@@ -1278,6 +1292,14 @@ std::string SimpleFiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable()
         out << "characters " << i << ", " << j << " have inner product " << x << '\n';
     }
   return out.str();
+}
+
+template <typename elementSomeGroup>
+JSData SimpleFiniteGroup<elementSomeGroup>::RepresentationDataIntoJS()
+{ JSData out;
+  for(int i=0; i<irreps.size; i++)
+    out[i] = irreps[i].JSOut();
+  return out;
 }
 
 template <typename elementSomeGroup>
@@ -1474,6 +1496,8 @@ bool GroupRepresentation<someGroup, coefficient>::VerifyRepresentation()
     if((GS % RGS) != 0)
       crash << "Violation of Lagrange's theorem (" << RGS << "∤" << GS << " " << __FILE__ << ":" << __LINE__ << crash;
   }
+  if(!badrep)
+    stOutput << "VerifyRepresentation: this has the proper commutation relations\n";
   return !badrep;
 }
 

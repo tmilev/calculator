@@ -828,6 +828,13 @@ public:
     for (int i=0; i<this->NumRows; i++)
       this->elements[i][colIndex]=input[i];
   }
+  void AssignBlock(Matrix<coefficient>& block, int starti, int startj)
+  { if(starti+block.NumRows > this->NumRows || startj+block.NumCols > this->NumCols)
+      crash << crash;
+    for(int i=0; i<block.NumRows; i++)
+      for(int j=0; j<block.NumCols; j++)
+        this->elements[starti+i][startj+j] = block.elements[i][j];
+  }
   void AssignVectorRow(const Vector<coefficient>& input)
   { this->init(1, input.size);
     for (int i=0; i<input.size; i++)

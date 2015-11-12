@@ -1135,12 +1135,10 @@ public:
   static std::string UnCivilizeStringCGI(const std::string& input);
   static void ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput);
   static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);
-  inline static std::string GetHtmlLinkFromProjectFileName(const std::string& fileName)
-  { return CGI::GetHtmlLinkFromProjectFileName(fileName, "");
-  }
   static std::string GetCalculatorLink(const std::string& DisplayNameCalculator, const std::string& input);
   static std::string GetSliderSpanStartsHidden(const std::string& content, const std::string& label="Expand/collapse", const std::string& desiredID="");
-  static std::string GetHtmlLinkFromProjectFileName(const std::string& fileName, const std::string& fileDesc);
+  static std::string GetHtmlLinkFromProjectFileName
+  (const std::string& fileName, const std::string& fileDesc="", int line=-1);
   static std::string GetHtmlSwitchMenuDoNotEncloseInTags(const std::string& serverBase)
   { std::stringstream output;
     output << " <script type=\"text/javascript\"> \n";

@@ -681,10 +681,13 @@ void ProjectInformation::AddProjectInfo(const std::string& fileName, const std::
   this->theFiles.AddOnTopNoRepetition(theInfo);
 }
 
-std::string CGI::GetHtmlLinkFromProjectFileName(const std::string& fileName, const std::string& fileDesc)
+std::string CGI::GetHtmlLinkFromProjectFileName(const std::string& fileName, const std::string& fileDesc, int line)
 { std::stringstream out;
-  out << " <a href=\"https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/" << FileOperations::RemovePathFromFileName(fileName) << "\">"
+  out << " <a href=\"https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/"
   << FileOperations::RemovePathFromFileName(fileName);
+  if (line>0)
+    out << "#l" << line;
+  out << "\">" << FileOperations::RemovePathFromFileName(fileName);
   if (fileDesc!="")
     out << " (" << fileDesc << ")";
   out << "</a>\n";

@@ -79,7 +79,8 @@ std::string Crasher::GetStackTraceEtcErrorMessage()
   out << "<table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr>";
   ProjectInformation& theInfo=ProjectInformation::GetMainProjectInfo();
   for (int i=theInfo.CustomStackTrace.size-1; i>=0; i--)
-  { out << "<tr><td>" << CGI::GetHtmlLinkFromProjectFileName(theInfo.CustomStackTrace[i].fileName)
+  { out << "<tr><td>" << CGI::GetHtmlLinkFromProjectFileName
+    (theInfo.CustomStackTrace[i].fileName, "", theInfo.CustomStackTrace[i].line)
     << "</td><td>" << theInfo.CustomStackTrace[i].line << "</td>";
     if (theInfo.CustomStackTrace[i].functionName!="")
       out << "<td>" << theInfo.CustomStackTrace[i].functionName << "</td>";

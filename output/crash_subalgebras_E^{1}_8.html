@@ -1,8 +1,8 @@
 
 <hr>
 
-Fatal arithmetic error. <hr>This is a program crash 324.16 second(s) from the start.  The user input that caused the crash was: <hr> SetOutputFile("subalgebras_E^{1}_8"); 
-LoadSemisimpleSubalgebras {}(AmbientDynkinType=E^{1}_{8};CurrentChain=(-1, 42);NumExploredTypes=(23, 40);NumExploredHs=(1, 0);Subalgebras=((DynkinType=A^{1240}_{1};ElementsCartan=\begin{array}{cccccccc} 92& 136& 182& 270& 220& 168& 114& 58 \end{array};generators=(g_{-1}+g_{-2}+g_{-3}+g_{-4}+g_{-5}+g_{-6}+g_{-7}+g_{-8}, 
+<b>This is a safety time-out crash. You may have requested a computation that takes too long.</b> Your computation ran for 30.794 seconds. The allowed run time is -1 seconds (twice the amount of time allowed for calculator interpretation). <br>The present timeout limit may be extended by modifying onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit; the restriction can be altogether lifted by modifying source file /home/todor/math/vectorpartition/vpf9_9SystemFunctions.cpp<br><hr>This is a program crash 30.998 second(s) from the start.  The user input that caused the crash was: <hr> SetOutputFile("subalgebras_E^{1}_8"); 
+LoadSemisimpleSubalgebras {}(AmbientDynkinType=E^{1}_{8};CurrentChain=(-1, 67);NumExploredTypes=(28, 14);NumExploredHs=(1, 87);Subalgebras=((DynkinType=A^{1240}_{1};ElementsCartan=\begin{array}{cccccccc} 92& 136& 182& 270& 220& 168& 114& 58 \end{array};generators=(g_{-1}+g_{-2}+g_{-3}+g_{-4}+g_{-5}+g_{-6}+g_{-7}+g_{-8}, 
 58 g_{8}+114 g_{7}+168 g_{6}+220 g_{5}+270 g_{4}+182 g_{3}+136 g_{2}+92 g_{1})), 
 (DynkinType=A^{760}_{1};ElementsCartan=\begin{array}{cccccccc} 72& 106& 142& 210& 172& 132& 90& 46 \end{array};generators=(g_{-1}+g_{-2}+g_{-3}+g_{-6}+g_{-7}+g_{-8}+g_{-11}+g_{-12}, 
 172 g_{12}+38 g_{11}-38 g_{10}+46 g_{8}+90 g_{7}+132 g_{6}+104 g_{5}+104 g_{3}+106 g_{2}+72 g_{1})), 
@@ -93,231 +93,79 @@ g_{-2}- g_{-3}+g_{-5}+g_{-8}, g_{8}+g_{5}- g_{3}+g_{2})),
 (DynkinType=A^{64}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 30& 40& 60& 50& 38& 26& 14 \end{array};generators=(g_{-5}+g_{-22}- g_{-25}+g_{-26}+g_{-27}+g_{-30}+g_{-31}+g_{-32}- g_{-33}+g_{-47}+g_{-48}+2 g_{-51}+g_{-58}, 
 2 g_{58}+2 g_{48}+8 g_{47}+8 g_{45}-2 g_{44}-4 g_{40}-10 g_{37}+10 g_{32}+16 g_{31}+2 g_{26}+10 g_{24}+14 g_{22}-10 g_{21}-6 g_{20}+8 g_{18}+14 g_{15}+26 g_{12}+14 g_{8}+10 g_{5})), 
 (DynkinType=A^{63}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 30& 40& 60& 49& 38& 26& 14 \end{array};generators=(g_{-8}+g_{-26}+g_{-27}+g_{-28}+g_{-32}+g_{-37}+g_{-41}, 
--9 g_{47}+18 g_{41}+11 g_{37}+9 g_{32}-2 g_{31}+8 g_{28}+2 g_{27}+g_{26}+14 g_{8}))))<hr>A partial stack trace follows (function calls not explicitly logged not included).<table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpfImplementationHeader2Math3_FiniteGroups.h">vpfImplementationHeader2Math3_FiniteGroups.h</a>
-</td><td>864</td><td>WeylGroup::GenerateOrbit</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpfCharacters_CalculatorInterface.cpp">vpfCharacters_CalculatorInterface.cpp</a>
-</td><td>603</td><td>WeylGroup::GetOrbitSize</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpf9_6SemisimpleLieSubAlgebras.cpp">vpf9_6SemisimpleLieSubAlgebras.cpp</a>
-</td><td>1005</td><td>OrbitFDRepIteratorWeylGroup::init</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpf9_6SemisimpleLieSubAlgebras.cpp">vpf9_6SemisimpleLieSubAlgebras.cpp</a>
-</td><td>1086</td><td>SemisimpleSubalgebras::GetHCandidates</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpf9_6SemisimpleLieSubAlgebras.cpp">vpf9_6SemisimpleLieSubAlgebras.cpp</a>
-</td><td>1433</td><td>SemisimpleSubalgebras::ComputeCurrentHCandidates</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpf9_6SemisimpleLieSubAlgebras.cpp">vpf9_6SemisimpleLieSubAlgebras.cpp</a>
-</td><td>1615</td><td>SemisimpleSubalgebras::IncrementReturnFalseIfPastLast</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpf9_6SemisimpleLieSubAlgebras.cpp">vpf9_6SemisimpleLieSubAlgebras.cpp</a>
-</td><td>715</td><td>SemisimpleSubalgebras::FindTheSSSubalgebrasContinue</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpf6_2serialization_code.cpp">vpf6_2serialization_code.cpp</a>
-</td><td>402</td><td>CalculatorConversions::innerLoadSemisimpleSubalgebras</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpf6_05evaluationroutines.cpp">vpf6_05evaluationroutines.cpp</a>
-</td><td>54</td><td>Calculator::outerStandardFunction</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpf6_05evaluationroutines.cpp">vpf6_05evaluationroutines.cpp</a>
-</td><td>210</td><td>Calculator::EvaluateExpression</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpf6_05evaluationroutines.cpp">vpf6_05evaluationroutines.cpp</a>
-</td><td>210</td><td>Calculator::EvaluateExpression</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpf6_05evaluationroutines.cpp">vpf6_05evaluationroutines.cpp</a>
-</td><td>493</td><td>Calculator::EvaluateCommands</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpf6_05evaluationroutines.cpp">vpf6_05evaluationroutines.cpp</a>
-</td><td>481</td><td>Calculator::Evaluate</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpfWebServer.cpp">vpfWebServer.cpp</a>
-</td><td>1109</td><td>WebServer::OutputWeb</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpfWebServer.cpp">vpfWebServer.cpp</a>
-</td><td>1261</td><td>WebServer::ServeClient</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpfCalculatorMain.cpp">vpfCalculatorMain.cpp</a>
-</td><td>60</td><td>About to serve Client</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpfWebServer.cpp">vpfWebServer.cpp</a>
-</td><td>1749</td><td>WebServer::Run</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpfCalculatorMain.cpp">vpfCalculatorMain.cpp</a>
-</td><td>16</td><td>main</td></tr></table><hr>In addition, I have an account of the computation progress report strings, attached below.<hr><br>Trying to realize via orbit number 69.<br>the latest root of the candidate simple component A^{1}_1<br><br> Finding h-candidates for extension of A^{63}_1 to A^{63}_1+A^{1}_1: 42 out of 42 possibilities.  <br><br>State at beginning of computation: Subalgebras found so far: 43<br>Orbit sizes: A^1240_1: n/a; A^760_1: n/a; A^520_1: n/a; A^400_1: n/a; A^399_1: n/a; A^280_1: n/a; A^232_1: n/a; A^231_1: n/a; A^184_1: n/a; A^182_1: n/a; A^160_1: n/a; A^159_1: n/a; A^157_1: n/a; A^156_1: n/a; A^120_1: n/a; A^112_1: n/a; A^111_1: n/a; A^110_1: n/a; A^88_1: n/a; A^85_1: n/a; A^84_1: n/a; A^84_1: n/a; A^70_1: n/a; A^64_1: n/a; A^63_1: n/a; A^62_1: n/a; A^61_1: n/a; A^60_1: n/a; A^57_1: n/a; A^56_1: n/a; A^40_1: n/a; A^39_1: n/a; A^38_1: n/a; A^37_1: n/a; A^36_1: n/a; A^36_1: n/a; A^35_1: n/a; A^34_1: n/a; A^32_1: n/a; A^31_1: n/a; A^30_1: n/a; A^30_1: n/a; A^29_1: n/a; A^28_1: n/a; A^25_1: n/a; A^24_1: n/a; A^22_1: n/a; A^21_1: n/a; A^20_1: n/a; A^20_1: n/a; A^16_1: n/a; A^15_1: n/a; A^14_1: n/a; A^13_1: n/a; A^12_1: n/a; A^12_1: n/a; A^11_1: n/a; A^10_1: n/a; A^10_1: n/a; A^9_1: n/a; A^8_1: n/a; A^7_1: n/a; A^6_1: n/a; A^5_1: n/a; A^4_1: n/a; A^4_1: n/a; A^3_1: n/a; A^2_1: n/a; A^1_1: n/a; <br>Current subalgebra chain length: 2<br>0&lt;A^{63}_1<hr><br>Extensions of 0: &nbsp;&nbsp;&nbsp;&nbsp;A^{1240}_1,A^{760}_1,A^{520}_1,A^{400}_1,A^{399}_1,A^{280}_1,A^{232}_1,A^{231}_1,A^{184}_1,A^{182}_1,A^{160}_1,A^{159}_1,A^{157}_1,A^{156}_1,A^{120}_1,A^{112}_1,A^{111}_1,A^{110}_1,A^{88}_1,A^{85}_1,A^{84}_1,A^{70}_1,A^{64}_1,<b>A^{63}_1</b>,A^{62}_1,A^{61}_1,A^{60}_1,A^{57}_1,A^{56}_1,A^{40}_1,A^{39}_1,A^{38}_1,A^{37}_1,A^{36}_1,A^{35}_1,A^{34}_1,A^{32}_1,A^{31}_1,A^{30}_1,A^{29}_1,A^{28}_1,A^{25}_1,A^{24}_1,A^{22}_1,A^{21}_1,A^{20}_1,A^{16}_1,A^{15}_1,A^{14}_1,A^{13}_1,A^{12}_1,A^{11}_1,A^{10}_1,A^{9}_1,A^{8}_1,A^{7}_1,A^{6}_1,A^{5}_1,A^{4}_1,A^{3}_1,A^{2}_1,A^{1}_1<br> 23 out of 62 types explored, current type: <b>A^{63}_1</b><br>Explored 1 out of 1 h-candidates. <br>Extensions of A^{63}_1: &nbsp;&nbsp;&nbsp;&nbsp;A^{63}_2,B^{63}_2,G^{21}_2,2A^{63}_1,A^{63}_1+A^{62}_1,A^{63}_1+A^{61}_1,A^{63}_1+A^{60}_1,A^{63}_1+A^{57}_1,A^{63}_1+A^{56}_1,A^{63}_1+A^{40}_1,A^{63}_1+A^{39}_1,A^{63}_1+A^{38}_1,A^{63}_1+A^{37}_1,A^{63}_1+A^{36}_1,A^{63}_1+A^{35}_1,A^{63}_1+A^{34}_1,A^{63}_1+A^{32}_1,A^{63}_1+A^{31}_1,A^{63}_1+A^{30}_1,A^{63}_1+A^{29}_1,A^{63}_1+A^{28}_1,A^{63}_1+A^{25}_1,A^{63}_1+A^{24}_1,A^{63}_1+A^{22}_1,A^{63}_1+A^{21}_1,A^{63}_1+A^{20}_1,A^{63}_1+A^{16}_1,A^{63}_1+A^{15}_1,A^{63}_1+A^{14}_1,A^{63}_1+A^{13}_1,A^{63}_1+A^{12}_1,A^{63}_1+A^{11}_1,A^{63}_1+A^{10}_1,A^{63}_1+A^{9}_1,A^{63}_1+A^{8}_1,A^{63}_1+A^{7}_1,A^{63}_1+A^{6}_1,A^{63}_1+A^{5}_1,A^{63}_1+A^{4}_1,A^{63}_1+A^{3}_1,<b>A^{63}_1+A^{2}_1</b>,A^{63}_1+A^{1}_1<br> 40 out of 42 types explored, current type: <b>A^{63}_1+A^{2}_1</b><br>Explored 0 out of 0 h-candidates. 
-<hr>
-SetOutputFile("subalgebras_E^{1}_8");
-<br>
-LoadSemisimpleSubalgebras {}(AmbientDynkinType=E^{1}_{8};CurrentChain=(-1, 42);NumExploredTypes=(23, 40);NumExploredHs=(1, 0);Subalgebras=((DynkinType=A^{1240}_{1};ElementsCartan=\begin{array}{cccccccc} 92& 136& 182& 270& 220& 168& 114& 58 \end{array};generators=(g_{-1}+g_{-2}+g_{-3}+g_{-4}+g_{-5}+g_{-6}+g_{-7}+g_{-8}, 
-<br>
-58 g_{8}+114 g_{7}+168 g_{6}+220 g_{5}+270 g_{4}+182 g_{3}+136 g_{2}+92 g_{1})), 
-<br>
-(DynkinType=A^{760}_{1};ElementsCartan=\begin{array}{cccccccc} 72& 106& 142& 210& 172& 132& 90& 46 \end{array};generators=(g_{-1}+g_{-2}+g_{-3}+g_{-6}+g_{-7}+g_{-8}+g_{-11}+g_{-12}, 
-<br>
-172 g_{12}+38 g_{11}-38 g_{10}+46 g_{8}+90 g_{7}+132 g_{6}+104 g_{5}+104 g_{3}+106 g_{2}+72 g_{1})), 
-<br>
-(DynkinType=A^{520}_{1};ElementsCartan=\begin{array}{cccccccc} 60& 88& 118& 174& 142& 108& 74& 38 \end{array};generators=(g_{-1}+g_{-2}+g_{-5}+g_{-7}+g_{-8}+g_{-11}+g_{-14}+g_{-20}, 
-<br>
-56 g_{20}+52 g_{14}+52 g_{13}+22 g_{12}+118 g_{11}+22 g_{10}+38 g_{8}+22 g_{7}+86 g_{5}+52 g_{3}+88 g_{2}+60 g_{1})), 
-<br>
-(DynkinType=A^{400}_{1};ElementsCartan=\begin{array}{cccccccc} 52& 76& 102& 152& 124& 96& 66& 34 \end{array};generators=(g_{-1}+g_{-6}+g_{-7}+g_{-8}+g_{-10}+g_{-11}+g_{-12}+g_{-25}, 
-<br>
-75 g_{25}+49 g_{12}+27 g_{11}+g_{10}+34 g_{8}+66 g_{7}+96 g_{6}+52 g_{1})), 
-<br>
-(DynkinType=A^{399}_{1};ElementsCartan=\begin{array}{cccccccc} 52& 76& 102& 151& 124& 96& 66& 34 \end{array};generators=(g_{-1}+g_{-6}+g_{-7}+g_{-8}+g_{-17}+g_{-18}+g_{-19}, 
-<br>
-75 g_{19}+49 g_{18}+27 g_{17}+34 g_{8}+66 g_{7}+96 g_{6}+52 g_{1})), 
-<br>
-(DynkinType=A^{399}_{1}+A^{1}_{1};ElementsCartan=\begin{array}{cccccccc} 52& 76& 102& 151& 124& 96& 66& 34\\ 
-0& 0& 0& 1& 0& 0& 0& 0 \end{array};generators=(g_{-1}+g_{-6}+g_{-7}+g_{-8}+g_{-17}+g_{-18}+g_{-19}, 
-<br>
-75 g_{19}+49 g_{18}+27 g_{17}+34 g_{8}+66 g_{7}+96 g_{6}+52 g_{1}, 
-<br>
-g_{-4}, g_{4})), 
-<br>
-(DynkinType=A^{280}_{1};ElementsCartan=\begin{array}{cccccccc} 44& 64& 86& 128& 104& 80& 54& 28 \end{array};generators=(g_{-1}+g_{-6}+g_{-10}+g_{-11}+g_{-12}+g_{-15}+g_{-21}+g_{-25}, 
-<br>
-50 g_{25}+26 g_{21}+28 g_{15}+28 g_{12}+36 g_{11}+14 g_{10}+54 g_{6}+44 g_{1})), 
-<br>
-(DynkinType=A^{232}_{1};ElementsCartan=\begin{array}{cccccccc} 40& 58& 78& 116& 94& 72& 50& 26 \end{array};generators=(g_{-1}+g_{-4}+g_{-7}+g_{-8}+g_{-18}+g_{-19}+15 g_{-20}+g_{-33}, 
-<br>
-57 g_{33}+g_{21}+g_{20}+21 g_{19}+g_{18}-330 g_{17}+26 g_{8}+50 g_{7}+22 g_{4}+40 g_{1})), 
-<br>
-(DynkinType=A^{231}_{1};ElementsCartan=\begin{array}{cccccccc} 40& 58& 78& 115& 94& 72& 50& 26 \end{array};generators=(g_{-1}+g_{-7}+g_{-8}+g_{-17}+g_{-18}-\frac{1}{22} g_{-26}+g_{-27}, 
-<br>
-57 g_{27}-330 g_{26}+g_{19}+22 g_{18}+21 g_{17}-330 g_{14}+26 g_{8}+50 g_{7}+40 g_{1})), 
-<br>
-(DynkinType=A^{231}_{1}+A^{1}_{1};ElementsCartan=\begin{array}{cccccccc} 40& 58& 78& 115& 94& 72& 50& 26\\ 
-0& 0& 0& 1& 0& 0& 0& 0 \end{array};generators=(g_{-1}+g_{-7}+g_{-8}+g_{-17}+g_{-18}-\frac{1}{22} g_{-26}+g_{-27}, 
-<br>
-57 g_{27}-330 g_{26}+g_{19}+22 g_{18}+21 g_{17}-330 g_{14}+26 g_{8}+50 g_{7}+40 g_{1}, 
-<br>
-g_{-4}, g_{4})), 
-<br>
-(DynkinType=A^{184}_{1};ElementsCartan=\begin{array}{cccccccc} 36& 52& 70& 104& 84& 64& 44& 22 \end{array};generators=(g_{-1}+g_{-4}+g_{-17}+g_{-18}+g_{-19}+g_{-20}+g_{-21}+g_{-22}, 
-<br>
--20 g_{33}+22 g_{22}+22 g_{21}+20 g_{20}+30 g_{19}+12 g_{18}+40 g_{17}+2 g_{7}+2 g_{4}+36 g_{1})), 
-<br>
-(DynkinType=A^{182}_{1};ElementsCartan=\begin{array}{cccccccc} 36& 52& 70& 103& 84& 64& 43& 22 \end{array};generators=(g_{-1}+g_{-13}+g_{-17}+g_{-18}+g_{-19}+g_{-22}+g_{-28}, 
-<br>
-21 g_{28}+22 g_{22}+30 g_{19}+12 g_{18}+40 g_{17}+21 g_{13}+36 g_{1})), 
-<br>
-(DynkinType=A^{182}_{1}+A^{2}_{1};ElementsCartan=\begin{array}{cccccccc} 36& 52& 70& 103& 84& 64& 43& 22\\ 
-0& 0& 0& 1& 0& 0& 1& 0 \end{array};generators=(g_{-1}+g_{-17}+g_{-18}+g_{-19}+g_{-20}+g_{-21}+g_{-22}, 
-<br>
-22 g_{22}+21 g_{21}+21 g_{20}+30 g_{19}+12 g_{18}+40 g_{17}+36 g_{1}, 
-<br>
-g_{-4}+g_{-7}, g_{7}+g_{4})), 
-<br>
-(DynkinType=A^{160}_{1};ElementsCartan=\begin{array}{cccccccc} 32& 48& 64& 96& 78& 60& 42& 22 \end{array};generators=(g_{-4}+g_{-7}+g_{-8}-72 g_{-12}+\frac{32}{3} g_{-18}-\frac{10}{3} g_{-20}+g_{-25}+g_{-27}+36 g_{-32}+g_{-38}, 
-<br>
-30 g_{38}-888 g_{33}+\frac{1}{18} g_{32}-\frac{1}{18} g_{30}+\frac{74}{3} g_{27}+36 g_{26}+\frac{22}{3} g_{25}+\frac{1}{324} g_{24}+24 g_{23}- g_{21}- g_{20}-\frac{1}{18} g_{19}+g_{18}+1296 g_{17}+g_{16}-432 g_{14}+22 g_{8}+42 g_{7}+18 g_{4})), 
-<br>
-(DynkinType=A^{159}_{1};ElementsCartan=\begin{array}{cccccccc} 32& 48& 64& 95& 78& 60& 42& 22 \end{array};generators=(g_{-7}+g_{-8}+g_{-17}+g_{-18}+g_{-19}+g_{-26}+g_{-32}, 
-<br>
-32 g_{32}+28 g_{26}-3 g_{24}+3 g_{23}+15 g_{19}+3 g_{18}+17 g_{17}+28 g_{14}+22 g_{8}+42 g_{7})), 
-<br>
-(DynkinType=A^{159}_{1}+A^{1}_{1};ElementsCartan=\begin{array}{cccccccc} 32& 48& 64& 95& 78& 60& 42& 22\\ 
-0& 0& 0& 1& 0& 0& 0& 0 \end{array};generators=(g_{-7}+g_{-8}+g_{-17}+g_{-18}+g_{-19}+g_{-26}+g_{-32}, 
-<br>
-32 g_{32}+28 g_{26}-3 g_{24}+3 g_{23}+15 g_{19}+3 g_{18}+17 g_{17}+28 g_{14}+22 g_{8}+42 g_{7}, 
-<br>
-g_{-4}, 
-<br>
-g_{4})), 
-<br>
-(DynkinType=A^{157}_{1};ElementsCartan=\begin{array}{cccccccc} 32& 47& 63& 94& 77& 60& 42& 22 \end{array};generators=(g_{-7}+g_{-8}+g_{-16}+g_{-20}+g_{-30}+g_{-31}+g_{-33}, 
-<br>
-30 g_{33}+g_{31}+16 g_{30}+30 g_{20}+16 g_{16}+22 g_{8}+42 g_{7})), 
-<br>
-(DynkinType=A^{157}_{1}+A^{3}_{1};ElementsCartan=\begin{array}{cccccccc} 32& 47& 63& 94& 77& 60& 42& 22\\ 
-0& 1& 1& 0& 1& 0& 0& 0 \end{array};generators=(g_{-7}+g_{-8}+g_{-23}+g_{-24}+g_{-26}+g_{-27}+g_{-31}, 
-<br>
-g_{31}+30 g_{27}+30 g_{26}+16 g_{24}+16 g_{23}+22 g_{8}+42 g_{7}, 
-<br>
-g_{-2}- g_{-3}+g_{-5}, g_{5}- g_{3}+g_{2})), 
-<br>
-(DynkinType=A^{156}_{1};ElementsCartan=\begin{array}{cccccccc} 32& 46& 62& 92& 76& 60& 42& 22 \end{array};generators=(g_{-7}+g_{-8}+g_{-9}+g_{-13}+g_{-37}+g_{-39}, 30 g_{39}+16 g_{37}+30 g_{13}+16 g_{9}+22 g_{8}+42 g_{7})), 
-<br>
-(DynkinType=A^{156}_{1}+A^{28}_{1};ElementsCartan=\begin{array}{cccccccc} 32& 46& 62& 92& 76& 60& 42& 22\\ 
-0& 6& 6& 10& 6& 0& 0& 0 \end{array};generators=(g_{-7}+g_{-8}+g_{-23}+g_{-24}+g_{-26}+g_{-27}, 30 g_{27}+30 g_{26}+16 g_{24}+16 g_{23}+22 g_{8}+42 g_{7}, 
-<br>
-g_{-2}- g_{-3}+g_{-4}+g_{-5}, 6 g_{5}+10 g_{4}-6 g_{3}+6 g_{2})), 
-<br>
-(DynkinType=A^{156}_{1}+A^{4}_{1};ElementsCartan=\begin{array}{cccccccc} 32& 46& 62& 92& 76& 60& 42& 22\\ 
-0& 2& 2& 4& 2& 0& 0& 0 \end{array};generators=(g_{-7}+g_{-8}+g_{-23}+g_{-24}+g_{-26}+g_{-27}, 30 g_{27}+30 g_{26}+16 g_{24}+16 g_{23}+22 g_{8}+42 g_{7}, 
-<br>
-g_{-4}+g_{-25}, 2 g_{25}+2 g_{4})), 
-<br>
-(DynkinType=A^{156}_{1}+A^{3}_{1};ElementsCartan=\begin{array}{cccccccc} 32& 46& 62& 92& 76& 60& 42& 22\\ 
-0& 2& 2& 3& 2& 0& 0& 0 \end{array};generators=(g_{-7}+g_{-8}+g_{-23}+g_{-24}+g_{-26}+g_{-27}, 30 g_{27}+30 g_{26}+16 g_{24}+16 g_{23}+22 g_{8}+42 g_{7}, 
-<br>
-g_{-17}+g_{-18}- g_{-19}, - g_{19}+g_{18}+g_{17})), 
-<br>
-(DynkinType=A^{156}_{1}+A^{3}_{1}+A^{1}_{1};ElementsCartan=\begin{array}{cccccccc} 32& 46& 62& 92& 76& 60& 42& 22\\ 
-0& 2& 2& 3& 2& 0& 0& 0\\ 
-0& 0& 0& 1& 0& 0& 0& 0 \end{array};generators=(g_{-7}+g_{-8}+g_{-23}+g_{-24}+g_{-26}+g_{-27}, 30 g_{27}+30 g_{26}+16 g_{24}+16 g_{23}+22 g_{8}+42 g_{7}, 
-<br>
-g_{-17}+g_{-18}- g_{-19}, - g_{19}+g_{18}+g_{17}, g_{-4}, 
-<br>
-g_{4})), 
-<br>
-(DynkinType=A^{156}_{1}+A^{1}_{1};ElementsCartan=\begin{array}{cccccccc} 32& 46& 62& 92& 76& 60& 42& 22\\ 
-0& 1& 1& 2& 1& 0& 0& 0 \end{array};generators=(g_{-7}+g_{-8}+g_{-16}+g_{-20}+g_{-30}+g_{-33}, 30 g_{33}+16 g_{30}+30 g_{20}+16 g_{16}+22 g_{8}+42 g_{7}, 
-<br>
-g_{-31}, g_{31})), 
-<br>
-(DynkinType=A^{120}_{1};ElementsCartan=\begin{array}{cccccccc} 28& 42& 56& 84& 68& 52& 36& 18 \end{array};generators=(g_{-7}+g_{-10}+g_{-11}+g_{-12}+g_{-25}+g_{-29}+g_{-32}+g_{-33}, 
-<br>
-6 g_{33}+28 g_{32}+18 g_{29}+12 g_{25}-12 g_{24}+12 g_{23}+6 g_{14}+4 g_{12}+10 g_{11}+24 g_{10}+18 g_{7})), 
-<br>
-(DynkinType=A^{112}_{1};ElementsCartan=\begin{array}{cccccccc} 28& 40& 54& 80& 66& 50& 34& 18 \end{array};generators=(g_{-1}+g_{-5}+g_{-8}+g_{-20}+g_{-31}+g_{-33}+g_{-34}+g_{-35}, 
-<br>
-24 g_{35}+10 g_{34}+15 g_{33}+15 g_{31}+g_{20}+18 g_{8}+g_{5}+28 g_{1})), 
-<br>
-(DynkinType=A^{111}_{1};ElementsCartan=\begin{array}{cccccccc} 28& 40& 54& 80& 65& 50& 34& 18 \end{array};generators=(g_{-1}+g_{-8}+g_{-26}+g_{-27}+g_{-28}+g_{-31}+g_{-41}, 
-<br>
-24 g_{41}+15 g_{31}+10 g_{28}+15 g_{27}+g_{26}+18 g_{8}+28 g_{1})), 
-<br>
-(DynkinType=A^{111}_{1}+A^{1}_{1};ElementsCartan=\begin{array}{cccccccc} 28& 40& 54& 80& 65& 50& 34& 18\\ 
-0& 0& 0& 0& 1& 0& 0& 0 \end{array};generators=(g_{-1}+g_{-8}+g_{-26}+g_{-27}+g_{-28}+g_{-31}+g_{-41}, 
-<br>
-24 g_{41}+15 g_{31}+10 g_{28}+15 g_{27}+g_{26}+18 g_{8}+28 g_{1}, 
-<br>
+-9 g_{47}+18 g_{41}+11 g_{37}+9 g_{32}-2 g_{31}+8 g_{28}+2 g_{27}+g_{26}+14 g_{8})), 
+(DynkinType=A^{63}_{1}+A^{1}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 30& 40& 60& 49& 38& 26& 14\\ 0& 0& 0& 0& 1& 0& 0& 0 \end{array};generators=(g_{-8}+g_{-26}+g_{-27}+g_{-28}+g_{-32}+g_{-37}+g_{-41}, 
+-9 g_{47}+18 g_{41}+11 g_{37}+9 g_{32}-2 g_{31}+8 g_{28}+2 g_{27}+g_{26}+14 g_{8}, 
 g_{-5}, g_{5})), 
-<br>
-(DynkinType=A^{110}_{1};ElementsCartan=\begin{array}{cccccccc} 28& 40& 54& 79& 64& 49& 34& 18 \end{array};generators=(g_{-1}+g_{-8}+g_{-25}+g_{-34}+g_{-35}+g_{-39}, 15 g_{39}+24 g_{35}+10 g_{34}+15 g_{25}+18 g_{8}+28 g_{1})), 
-<br>
-(DynkinType=A^{110}_{1}+A^{10}_{1};ElementsCartan=\begin{array}{cccccccc} 28& 40& 54& 79& 64& 49& 34& 18\\ 
-0& 0& 0& 3& 4& 3& 0& 0 \end{array};generators=(g_{-1}+g_{-8}+g_{-31}+g_{-33}+g_{-34}+g_{-35}, 24 g_{35}+10 g_{34}+15 g_{33}+15 g_{31}+18 g_{8}+28 g_{1}, 
-<br>
-g_{-4}+g_{-5}+g_{-6}, 3 g_{6}+4 g_{5}+3 g_{4})), 
-<br>
-(DynkinType=A^{110}_{1}+A^{2}_{1};ElementsCartan=\begin{array}{cccccccc} 28& 40& 54& 79& 64& 49& 34& 18\\ 
-0& 0& 0& 1& 2& 1& 0& 0 \end{array};generators=(g_{-1}+g_{-8}+g_{-25}+g_{-34}+g_{-35}+g_{-39}, 15 g_{39}+24 g_{35}+10 g_{34}+15 g_{25}+18 g_{8}+28 g_{1}, 
-<br>
-- g_{-5}+g_{-20}, g_{20}- g_{5})), 
-<br>
-(DynkinType=A^{110}_{1}+A^{1}_{1};ElementsCartan=\begin{array}{cccccccc} 28& 40& 54& 79& 64& 49& 34& 18\\ 
-0& 0& 0& 1& 1& 1& 0& 0 \end{array};generators=(g_{-1}+g_{-8}+g_{-31}+g_{-33}+g_{-34}+g_{-35}, 24 g_{35}+10 g_{34}+15 g_{33}+15 g_{31}+18 g_{8}+28 g_{1}, 
-<br>
+(DynkinType=A^{62}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 30& 40& 59& 48& 37& 26& 14 \end{array};generators=(g_{-8}+g_{-31}-9 g_{-33}+g_{-34}+g_{-38}+g_{-40}, 18 g_{40}+2 g_{38}+18 g_{37}+g_{35}+8 g_{34}- g_{33}+11 g_{31}+14 g_{8})), 
+(DynkinType=A^{62}_{1}+A^{2}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 30& 40& 59& 48& 37& 26& 14\\ 0& 0& 0& 1& 2& 1& 0& 0 \end{array};generators=(g_{-8}+g_{-31}-9 g_{-33}+g_{-34}+g_{-38}+g_{-40}, 18 g_{40}+2 g_{38}+18 g_{37}+g_{35}+8 g_{34}- g_{33}+11 g_{31}+14 g_{8}, 
+g_{-5}+g_{-20}, g_{20}+g_{5})), 
+(DynkinType=A^{62}_{1}+A^{1}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 30& 40& 59& 48& 37& 26& 14\\ 0& 0& 0& 1& 1& 1& 0& 0 \end{array};generators=(g_{-8}+g_{-31}-9 g_{-33}+g_{-34}+g_{-38}+g_{-40}, 18 g_{40}+2 g_{38}+18 g_{37}+g_{35}+8 g_{34}- g_{33}+11 g_{31}+14 g_{8}, 
 g_{-20}, g_{20})), 
-<br>
-(DynkinType=A^{110}_{1}+2 A^{1}_{1};ElementsCartan=\begin{array}{cccccccc} 28& 40& 54& 79& 64& 49& 34& 18\\ 
-0& 0& 0& 1& 1& 1& 0& 0\\ 
-0& 0& 0& 0& 1& 0& 0& 0 \end{array};generators=(g_{-1}+g_{-8}+g_{-31}+g_{-33}+g_{-34}+g_{-35}, 24 g_{35}+10 g_{34}+15 g_{33}+15 g_{31}+18 g_{8}+28 g_{1}, 
-<br>
+(DynkinType=A^{62}_{1}+2 A^{1}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 30& 40& 59& 48& 37& 26& 14\\ 0& 0& 0& 1& 1& 1& 0& 0\\ 0& 0& 0& 0& 1& 0& 0& 0 \end{array};generators=(g_{-8}+g_{-31}-9 g_{-33}+g_{-34}+g_{-38}+g_{-40}, 18 g_{40}+2 g_{38}+18 g_{37}+g_{35}+8 g_{34}- g_{33}+11 g_{31}+14 g_{8}, 
 g_{-20}, g_{20}, g_{-5}, g_{5})), 
-<br>
-(DynkinType=A^{88}_{1};ElementsCartan=\begin{array}{cccccccc} 24& 36& 48& 72& 58& 44& 30& 16 \end{array};generators=(g_{-4}+g_{-8}+g_{-18}+g_{-19}-\frac{1}{2} g_{-20}+g_{-32}+g_{-33}+g_{-35}+g_{-47}, 
-<br>
-18 g_{47}+12 g_{35}+8 g_{33}+6 g_{32}-4 g_{30}+12 g_{22}+4 g_{19}+10 g_{18}+7 g_{16}+16 g_{8}+14 g_{4})), 
-<br>
-(DynkinType=A^{85}_{1};ElementsCartan=\begin{array}{cccccccc} 24& 35& 47& 70& 57& 44& 30& 16 \end{array};generators=(g_{-8}+g_{-16}+g_{-20}+8 g_{-28}+g_{-30}+g_{-31}+g_{-41}, 
-<br>
-22 g_{41}-112 g_{33}+g_{31}+12 g_{30}+g_{28}+14 g_{20}+12 g_{16}+g_{15}+16 g_{8})), 
-<br>
-(DynkinType=A^{84}_{1};ElementsCartan=\begin{array}{cccccccc} 24& 34& 46& 68& 56& 44& 30& 16 \end{array};generators=(g_{-8}+g_{-16}+g_{-27}+g_{-30}+g_{-34}+g_{-35}, 8 g_{35}+22 g_{34}+12 g_{30}+14 g_{27}-14 g_{26}+12 g_{16}+8 g_{15}+16 g_{8})), 
-<br>
-(DynkinType=A^{84}_{1}+A^{4}_{1};ElementsCartan=\begin{array}{cccccccc} 24& 34& 46& 68& 56& 44& 30& 16\\ 
-0& 2& 2& 4& 2& 0& 0& 0 \end{array};generators=(g_{-8}+g_{-16}+g_{-27}+g_{-30}+g_{-34}+g_{-35}, 8 g_{35}+22 g_{34}+12 g_{30}+14 g_{27}-14 g_{26}+12 g_{16}+8 g_{15}+16 g_{8}, 
-<br>
-g_{-12}+g_{-17}, 2 g_{17}+2 g_{12})), 
-<br>
-(DynkinType=A^{84}_{1}+A^{1}_{1};ElementsCartan=\begin{array}{cccccccc} 24& 34& 46& 68& 56& 44& 30& 16\\ 
-0& 1& 1& 2& 1& 0& 0& 0 \end{array};generators=(g_{-8}+g_{-16}+g_{-27}+g_{-30}+g_{-34}+g_{-35}, 8 g_{35}+22 g_{34}+12 g_{30}+14 g_{27}-14 g_{26}+12 g_{16}+8 g_{15}+16 g_{8}, 
-<br>
-g_{-31}, g_{31})), 
-<br>
-(DynkinType=A^{84}_{1};ElementsCartan=\begin{array}{cccccccc} 24& 35& 47& 70& 57& 44& 30& 15 \end{array};generators=(g_{-14}+g_{-16}+g_{-20}+g_{-29}+g_{-30}+g_{-31}+g_{-33}, 
-<br>
-7 g_{33}+16 g_{31}+12 g_{30}+15 g_{29}+7 g_{20}+12 g_{16}+15 g_{14})), 
-<br>
-(DynkinType=A^{84}_{1}+A^{4}_{1};ElementsCartan=\begin{array}{cccccccc} 24& 35& 47& 70& 57& 44& 30& 15\\ 
-0& 1& 1& 0& 1& 0& 0& 1 \end{array};generators=(g_{-21}+g_{-22}+g_{-23}+g_{-24}+g_{-26}+g_{-27}+g_{-31}, 
-<br>
-16 g_{31}+7 g_{27}+7 g_{26}+12 g_{24}+12 g_{23}+15 g_{22}+15 g_{21}, 
-<br>
-g_{-2}- g_{-3}+g_{-5}+g_{-8}, g_{8}+g_{5}- g_{3}+g_{2})), 
-<br>
-(DynkinType=A^{70}_{1};ElementsCartan=\begin{array}{cccccccc} 22& 32& 43& 64& 52& 40& 27& 14 \end{array};generators=(g_{-16}-6 g_{-20}-3 g_{-24}+g_{-26}+g_{-29}+g_{-30}+g_{-31}+g_{-41}, 
-<br>
-13 g_{41}+g_{35}+8 g_{31}+4 g_{30}+14 g_{29}+7 g_{26}+54 g_{23}- g_{20}+18 g_{16})), 
-<br>
-(DynkinType=A^{64}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 30& 40& 60& 50& 38& 26& 14 \end{array};generators=(g_{-5}+g_{-22}- g_{-25}+g_{-26}+g_{-27}+g_{-30}+g_{-31}+g_{-32}- g_{-33}+g_{-47}+g_{-48}+2 g_{-51}+g_{-58}, 
-<br>
-2 g_{58}+2 g_{48}+8 g_{47}+8 g_{45}-2 g_{44}-4 g_{40}-10 g_{37}+10 g_{32}+16 g_{31}+2 g_{26}+10 g_{24}+14 g_{22}-10 g_{21}-6 g_{20}+8 g_{18}+14 g_{15}+26 g_{12}+14 g_{8}+10 g_{5})), 
-<br>
-(DynkinType=A^{63}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 30& 40& 60& 49& 38& 26& 14 \end{array};generators=(g_{-8}+g_{-26}+g_{-27}+g_{-28}+g_{-32}+g_{-37}+g_{-41}, 
-<br>
--9 g_{47}+18 g_{41}+11 g_{37}+9 g_{32}-2 g_{31}+8 g_{28}+2 g_{27}+g_{26}+14 g_{8}))))
-
-<hr><br>Extracting semisimple Lie algebra ...  type: E^{1}_8.  Initializing data structures...  done. Fetching subalgebra list ...  done. <br>Total subalgebras: 43. Subalgebra loading done, total  43 subalgebras loaded. <br><br><br>Evaluating expressions, current expression stack:
+(DynkinType=A^{61}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 29& 39& 58& 48& 37& 26& 14 \end{array};generators=(g_{-8}+g_{-28}+g_{-32}+g_{-37}+g_{-41}+g_{-46}, g_{46}+18 g_{41}+10 g_{37}+10 g_{32}+8 g_{28}+14 g_{8})), 
+(DynkinType=A^{61}_{1}+A^{3}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 29& 39& 58& 48& 37& 26& 14\\ 0& 1& 1& 2& 0& 1& 0& 0 \end{array};generators=(g_{-8}+g_{-28}+g_{-32}+g_{-37}+g_{-41}+g_{-46}, g_{46}+18 g_{41}+10 g_{37}+10 g_{32}+8 g_{28}+14 g_{8}, 
+- g_{-6}+g_{-10}+g_{-11}, g_{11}+g_{10}- g_{6})), 
+(DynkinType=A^{61}_{1}+A^{2}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 29& 39& 58& 48& 37& 26& 14\\ 0& 1& 1& 1& 0& 1& 0& 0 \end{array};generators=(g_{-8}+g_{-32}+g_{-34}+g_{-35}+g_{-44}+g_{-46}, g_{46}+10 g_{44}+8 g_{35}+18 g_{34}+10 g_{32}+14 g_{8}, 
+g_{-6}- g_{-17}, - g_{17}+g_{6})), 
+(DynkinType=A^{61}_{1}+A^{2}_{1}+A^{1}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 29& 39& 58& 48& 37& 26& 14\\ 0& 1& 1& 1& 0& 1& 0& 0\\ 0& 0& 0& 1& 0& 0& 0& 0 \end{array};generators=(g_{-8}+g_{-32}+g_{-34}+g_{-35}+g_{-44}+g_{-46}, g_{46}+10 g_{44}+8 g_{35}+18 g_{34}+10 g_{32}+14 g_{8}, 
+g_{-6}- g_{-17}, - g_{17}+g_{6}, g_{-4}, g_{4})), 
+(DynkinType=A^{61}_{1}+A^{1}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 29& 39& 58& 48& 37& 26& 14\\ 0& 1& 1& 1& 0& 0& 0& 0 \end{array};generators=(g_{-8}+g_{-30}+g_{-34}+g_{-35}+g_{-45}+g_{-46}, g_{46}+10 g_{45}+18 g_{35}+8 g_{34}+10 g_{30}+14 g_{8}, 
+g_{-17}, g_{17})), 
+(DynkinType=A^{60}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 28& 38& 56& 46& 36& 26& 14 \end{array};generators=(g_{-54}+g_{-52}+g_{-8}+g_{-44}+g_{-14}, 8 g_{54}+10 g_{52}+14 g_{8}+10 g_{44}+18 g_{14})), 
+(DynkinType=A^{60}_{1}+A^{28}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 28& 38& 56& 46& 36& 26& 14\\ 0& 6& 6& 12& 10& 6& 0& 0 \end{array};generators=(g_{-8}- g_{-44}+g_{-38}+g_{-34}+g_{-35}+g_{-37}, 14 g_{8}+10 g_{28}-10 g_{32}+8 g_{34}+18 g_{35}+10 g_{37}+10 g_{38}, 
+g_{-4}+g_{-5}+g_{-6}+g_{-10}- g_{-11}, 
+6 g_{17}+10 g_{5}+6 g_{6}+6 g_{10}-6 g_{11})), 
+(DynkinType=A^{60}_{1}+A^{10}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 28& 38& 56& 46& 36& 26& 14\\ 0& 4& 4& 7& 6& 3& 0& 0 \end{array};generators=(g_{-8}+g_{-38}+g_{-34}+g_{-35}+g_{-37}, 14 g_{8}+10 g_{38}+8 g_{34}+18 g_{35}+10 g_{37}, 
+g_{-17}+g_{-12}- g_{-13}, 
+4 g_{17}+3 g_{12}-3 g_{13})), 
+(DynkinType=A^{60}_{1}+A^{4}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 28& 38& 56& 46& 36& 26& 14\\ 0& 2& 2& 4& 4& 2& 0& 0 \end{array};generators=(g_{-8}+g_{-21}-\frac{1}{10} g_{-51}+g_{-48}+g_{-45}+g_{-44}, 
+14 g_{8}+18 g_{21}+8 g_{48}+10 g_{45}+10 g_{44}+g_{37}, 
+- g_{-26}+g_{-12}+g_{-25}-\frac{1}{20} g_{-20}-\frac{1}{20} g_{-19}, 
+-400 g_{27}- g_{26}+g_{25}-20 g_{20}-20 g_{19})), 
+(DynkinType=A^{60}_{1}+A^{3}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 28& 38& 56& 46& 36& 26& 14\\ 0& 2& 2& 4& 3& 2& 0& 0 \end{array};generators=(g_{-8}+g_{-41}+8 g_{-32}+g_{-34}+8 g_{-35}+g_{-37}, 14 g_{8}- g_{28}+\frac{5}{4} g_{32}+8 g_{34}+g_{35}+10 g_{37}-10 g_{38}+10 g_{41}-10 g_{44}, 
+g_{-31}+g_{-26}-8 g_{-27}, 
+g_{31}+g_{26}-\frac{1}{8} g_{27})), 
+(DynkinType=A^{60}_{1}+A^{3}_{1}+A^{1}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 28& 38& 56& 46& 36& 26& 14\\ 0& 2& 2& 4& 3& 2& 0& 0\\ 0& 0& 0& 0& 1& 0& 0& 0 \end{array};generators=(g_{-8}+g_{-41}+8 g_{-32}+g_{-34}+8 g_{-35}+g_{-37}, 14 g_{8}- g_{28}+\frac{5}{4} g_{32}+8 g_{34}+g_{35}+10 g_{37}-10 g_{38}+10 g_{41}-10 g_{44}, 
+g_{-31}+g_{-26}-8 g_{-27}, 
+g_{31}+g_{26}-\frac{1}{8} g_{27}, g_{-5}, 
+g_{5})), 
+(DynkinType=A^{60}_{1}+A^{2}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 28& 38& 56& 46& 36& 26& 14\\ 0& 2& 2& 3& 2& 1& 0& 0 \end{array};generators=(g_{-8}+g_{-38}+g_{-37}+g_{-34}+g_{-35}, 14 g_{8}+10 g_{38}+10 g_{37}+8 g_{34}+18 g_{35}, 
+- g_{-33}+g_{-31}, 
+- g_{33}+g_{31})), 
+(DynkinType=A^{60}_{1}+2 A^{2}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 28& 38& 56& 46& 36& 26& 14\\ 0& 2& 2& 3& 2& 1& 0& 0\\ 0& 0& 0& 1& 2& 1& 0& 0 \end{array};generators=(g_{-8}+g_{-38}+g_{-37}+g_{-34}+g_{-35}, 14 g_{8}+10 g_{38}+10 g_{37}+8 g_{34}+18 g_{35}, 
+- g_{-33}+g_{-31}, 
+- g_{33}+g_{31}, g_{-5}+g_{-20}, g_{5}+g_{20})), 
+(DynkinType=A^{60}_{1}+A^{2}_{1}+A^{1}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 28& 38& 56& 46& 36& 26& 14\\ 0& 2& 2& 3& 2& 1& 0& 0\\ 0& 0& 0& 1& 1& 1& 0& 0 \end{array};generators=(g_{-8}+g_{-38}+g_{-37}+g_{-34}+g_{-35}, 14 g_{8}+10 g_{38}+10 g_{37}+8 g_{34}+18 g_{35}, 
+- g_{-33}+g_{-31}, 
+- g_{33}+g_{31}, g_{-20}, g_{20})), 
+(DynkinType=A^{60}_{1}+A^{2}_{1}+2 A^{1}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 28& 38& 56& 46& 36& 26& 14\\ 0& 2& 2& 3& 2& 1& 0& 0\\ 0& 0& 0& 1& 1& 1& 0& 0\\ 0& 0& 0& 0& 1& 0& 0& 0 \end{array};generators=(g_{-8}+g_{-38}+g_{-37}+g_{-34}+g_{-35}, 14 g_{8}+10 g_{38}+10 g_{37}+8 g_{34}+18 g_{35}, 
+- g_{-33}+g_{-31}, 
+- g_{33}+g_{31}, g_{-20}, g_{20}, g_{-5}, g_{5})), 
+(DynkinType=A^{60}_{1}+A^{1}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 28& 38& 56& 46& 36& 26& 14\\ 0& 1& 1& 2& 2& 1& 0& 0 \end{array};generators=(g_{-8}+g_{-41}+g_{-37}+g_{-28}+g_{-32}, 14 g_{8}+18 g_{41}+10 g_{37}+8 g_{28}+10 g_{32}, 
+g_{-46}, g_{46})), 
+(DynkinType=A^{60}_{1}+2 A^{1}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 28& 38& 56& 46& 36& 26& 14\\ 0& 1& 1& 2& 2& 1& 0& 0\\ 0& 1& 1& 1& 0& 0& 0& 0 \end{array};generators=(g_{-8}+g_{-30}+g_{-34}+g_{-35}+g_{-45}, 14 g_{8}+10 g_{30}+8 g_{34}+18 g_{35}+10 g_{45}, 
+g_{-46}, g_{46}, g_{-17}, 
+g_{17})), 
+(DynkinType=A^{57}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 29& 39& 58& 47& 36& 24& 12 \end{array};generators=(g_{-16}+g_{-20}+g_{-50}+g_{-35}+g_{-34}+g_{-31}+g_{-30}, 
+10 g_{16}+12 g_{20}+12 g_{50}+6 g_{35}+6 g_{34}+g_{31}+10 g_{30})), 
+(DynkinType=A^{57}_{1}+A^{7}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 29& 39& 58& 47& 36& 24& 12\\ 0& 1& 1& 0& 1& 0& 2& 2 \end{array};generators=(g_{-23}+g_{-24}+g_{-31}+g_{-33}+g_{-34}+g_{-35}+g_{-36}, 
+10 g_{23}+10 g_{24}+g_{31}+12 g_{33}+6 g_{34}+6 g_{35}+12 g_{36}, 
+g_{-2}+g_{-3}+g_{-5}+2 g_{-7}+g_{-8}, 
+g_{2}+g_{3}+g_{5}+g_{7}+2 g_{8})), 
+(DynkinType=A^{56}_{1};ElementsCartan=\begin{array}{cccccccc} 20& 28& 38& 56& 46& 36& 24& 12 \end{array};generators=(g_{-50}+g_{-35}+g_{-34}+g_{-30}+g_{-20}+g_{-16}, 12 g_{50}+6 g_{35}+6 g_{34}+10 g_{30}+12 g_{20}+10 g_{16}))))<hr>A partial stack trace follows (function calls not explicitly logged not included).<table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpf9_4SemisimpleLieAlgebras.cpp#l98">vpf9_4SemisimpleLieAlgebras.cpp</a>
+</td><td>98</td><td>SemisimpleLieAlgebra::ComputeChevalleyConstants</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpf6_2serialization_code.cpp#l126">vpf6_2serialization_code.cpp</a>
+</td><td>126</td><td>Calculator::innerLoadSSLieAlgebra</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpf6_2serialization_code.cpp#l402">vpf6_2serialization_code.cpp</a>
+</td><td>402</td><td>CalculatorConversions::innerLoadSemisimpleSubalgebras</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpf6_05evaluationroutines.cpp#l54">vpf6_05evaluationroutines.cpp</a>
+</td><td>54</td><td>Calculator::outerStandardFunction</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpf6_05evaluationroutines.cpp#l210">vpf6_05evaluationroutines.cpp</a>
+</td><td>210</td><td>Calculator::EvaluateExpression</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpf6_05evaluationroutines.cpp#l210">vpf6_05evaluationroutines.cpp</a>
+</td><td>210</td><td>Calculator::EvaluateExpression</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpf6_05evaluationroutines.cpp#l493">vpf6_05evaluationroutines.cpp</a>
+</td><td>493</td><td>Calculator::EvaluateCommands</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpf6_05evaluationroutines.cpp#l481">vpf6_05evaluationroutines.cpp</a>
+</td><td>481</td><td>Calculator::Evaluate</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpfWebServer.cpp#l1016">vpfWebServer.cpp</a>
+</td><td>1016</td><td>WebServer::OutputWeb</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpfWebServer.cpp#l1168">vpfWebServer.cpp</a>
+</td><td>1168</td><td>WebServer::ServeClient</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpfCalculatorMain.cpp#l75">vpfCalculatorMain.cpp</a>
+</td><td>75</td><td>About to serve Client</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpfWebServer.cpp#l1626">vpfWebServer.cpp</a>
+</td><td>1626</td><td>WebServer::Run</td></tr><tr><td> <a href="https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/vpfCalculatorMain.cpp#l16">vpfCalculatorMain.cpp</a>
+</td><td>16</td><td>main</td></tr></table><hr>In addition, I have an account of the computation progress report strings, attached below.<hr>Extracting semisimple Lie algebra ... <br>Evaluating expressions, current expression stack:
 <br>

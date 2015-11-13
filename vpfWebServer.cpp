@@ -1297,14 +1297,15 @@ std::string WebWorker::ToStringStatus()const
     out << " Message at last ping: " << this->pingMessage;
   if (this->status!="")
     out << "<br><span style=\"color:red\"><b> Status: " << this->status << "</b></span><br>";
-  out << "Pipe indices: worker to server controls: " << this->pipeWorkerToServerControls.ToString()
-  << ", worker to server timer ping: " << this->pipeWorkerToServerTimerPing.ToString()
-  << ", server to worker request indicator: " << this->pipeServerToWorkerRequestIndicator.ToString()
-  << ", worker to server indicator data: " << this->pipeWorkerToServerIndicatorData.ToString()
-  << ", worker to server user input: " << this->pipeWorkerToServerUserInput.ToString()
-  << ", server to worker:  " << this->PauseWorker.ToString()
-  << ", server to worker computation report received: " << this->PauseComputationReportReceived.ToString()
-  << ", server to worker indicator pipe in use: " << this->PauseIndicatorPipeInUse.ToString()
+  out << "Pipe indices: " << this->pipeWorkerToServerControls.ToString()
+  << ", " << this->pipeWorkerToServerTimerPing.ToString()
+  << ", " << this->pipeServerToWorkerRequestIndicator.ToString()
+  << ", " << this->pipeWorkerToServerIndicatorData.ToString()
+  << ", " << this->pipeWorkerToServerUserInput.ToString()
+  << ", " << this->pipeWorkerToServerWorkerStatus.ToString()
+  << ", " << this->PauseWorker.ToString()
+  << ", " << this->PauseComputationReportReceived.ToString()
+  << ", " << this->PauseIndicatorPipeInUse.ToString()
   ;
   out << ", user address: " << this->userAddress << ".";
   return out.str();
@@ -1434,15 +1435,15 @@ void WebServer::CreateNewActiveWorker()
   this->GetActiveWorker().Release();
   this->theWorkers[this->activeWorker].flagInUse=true;
 
-  this->GetActiveWorker().PauseComputationReportReceived.CreateMe("PauseComputationReportReceived");
-  this->GetActiveWorker().PauseWorker.CreateMe("PauseWorker");
-  this->GetActiveWorker().PauseIndicatorPipeInUse.CreateMe("PauseIndicatorPipeInUse");
-  this->GetActiveWorker().pipeServerToWorkerRequestIndicator.CreateMe("pipeServerToWorkerRequestIndicator");
-  this->GetActiveWorker().pipeWorkerToServerTimerPing.CreateMe("pipeWorkerToServerTimerPing");
-  this->GetActiveWorker().pipeWorkerToServerControls.CreateMe("pipeWorkerToServerControls");
-  this->GetActiveWorker().pipeWorkerToServerIndicatorData.CreateMe("pipeWorkerToServerIndicatorData");
-  this->GetActiveWorker().pipeWorkerToServerUserInput.CreateMe("pipeWorkerToServerUserInput");
-  this->GetActiveWorker().pipeWorkerToServerWorkerStatus.CreateMe("pipeWorkerToServerWorkerStatus");
+  this->GetActiveWorker().PauseComputationReportReceived.CreateMe("server to worker computation report received");
+  this->GetActiveWorker().PauseWorker.CreateMe("server to worker pause");
+  this->GetActiveWorker().PauseIndicatorPipeInUse.CreateMe("server to worker indicator pipe in use");
+  this->GetActiveWorker().pipeServerToWorkerRequestIndicator.CreateMe("server to worker request indicator");
+  this->GetActiveWorker().pipeWorkerToServerTimerPing.CreateMe("worker to server timer ping");
+  this->GetActiveWorker().pipeWorkerToServerControls.CreateMe("worker to server controls");
+  this->GetActiveWorker().pipeWorkerToServerIndicatorData.CreateMe("worker to server indicator data");
+  this->GetActiveWorker().pipeWorkerToServerUserInput.CreateMe("worker to server user input");
+  this->GetActiveWorker().pipeWorkerToServerWorkerStatus.CreateMe("worker to server worker status");
   this->GetActiveWorker().indexInParent=this->activeWorker;
   this->GetActiveWorker().parent=this;
   this->GetActiveWorker().timeOfLastPingServerSideOnly=onePredefinedCopyOfGlobalVariables.GetElapsedSeconds();

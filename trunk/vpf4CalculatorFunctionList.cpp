@@ -771,7 +771,7 @@ void Calculator::initPredefinedInnerFunctions()
    "<b>Calculus teaching function.</b> Plots a curve sitting in 2-dimensional space. \
     The first and second argument give the x and y coordinate functions; the curve parameter must be t.\
    ",
-   "plotCurve{}(sin{}t,\\cos(2t), 0, 5)")
+   "plotCurve(sin(12t),cos(13t), 0, 2\\pi)")
    ;
 
   this->AddOperationInnerHandler ("plot2D", CalculatorFunctionsGeneral::innerPlot2D, "",

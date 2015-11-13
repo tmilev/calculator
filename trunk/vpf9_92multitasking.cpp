@@ -66,6 +66,7 @@ MutexWrapper::~MutexWrapper()
 { delete (std::mutex*)(this->theMutexImplementation);
   this->theMutexImplementation=0;
   this->flagDeallocated=true;
+  this->flagInitialized=false;
 }
 
 bool MutexWrapper::isLockedUnsafeUseForWINguiOnly()

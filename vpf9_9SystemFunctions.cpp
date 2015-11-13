@@ -91,7 +91,7 @@ bool TimerThreadData::HandleTimerSignalToServer()
 }
 
 bool TimerThreadData::HandleMaxComputationTime()
-{ if (onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit<=0)
+{ if (onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction<=0)
     return false;
   if (elapsedComputationTime<=0)
     return false;
@@ -111,7 +111,7 @@ bool TimerThreadData::HandleMaxComputationTime()
   out << "<b>This is a safety time-out crash. You may have requested a computation that takes too long."
   << "</b> Your computation ran for ";
   if (elapsedComputationTime>0)
-    out << elapsedComputationTime << "seconds";
+    out << elapsedComputationTime << " seconds";
   else
     out << " (unknown amount of time)";
   out << ". The allowed run time is "
@@ -133,11 +133,13 @@ bool TimerThreadData::HandleComputationTimeout()
     return false;
   if (elapsedComputationTime<=onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction)
     return false;
+//  std::cout << "GOT TO HERE\n";
   if (onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection==0)
     return false;
-  if (! onePredefinedCopyOfGlobalVariables.flagOutputTimedOut ||
-      onePredefinedCopyOfGlobalVariables.flagTimeOutExplanationAlreadyDisplayed)
+//  std::cout << "GOT TO HERE pt 2\n";
+  if (onePredefinedCopyOfGlobalVariables.flagOutputTimedOut )
     return false;
+//  std::cout << "GOT TO HERE pt 3\n";
   onePredefinedCopyOfGlobalVariables.flagTimeOutExplanationAlreadyDisplayed=true;
   theReport2.SetStatus("Starting timer cycle displaying time out explanation.");
   onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();

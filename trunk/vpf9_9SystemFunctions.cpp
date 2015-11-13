@@ -91,7 +91,7 @@ bool TimerThreadData::HandleTimerSignalToServer()
 }
 
 bool TimerThreadData::HandleMaxComputationTime()
-{ if (onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction<=0)
+{ if (onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit<=0)
     return false;
   if (elapsedComputationTime<=0)
     return false;

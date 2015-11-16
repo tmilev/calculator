@@ -13,8 +13,9 @@ ifeq ($(debug), 1)
 	CFLAGS += -g -Og
 	LDFLAGS += -Og
 else
-	CFLAGS += -O3 -march=native -flto
-	LDFLAGS += -O3 -march=native -flto
+#optimizations make linking unacceptably slow. 
+	#CFLAGS += -O3 -march=native -flto
+	#LDFLAGS += -O3 -march=native -flto
 endif
 
 ifeq ($(AllocationStatistics), 1)

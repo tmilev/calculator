@@ -1,12 +1,9 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#ifndef WIN32
+#include <chrono>
 #include <sys/time.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <stdlib.h>
-#include <signal.h>
-#endif
 //#define cgiLimitRAMuseNumPointersInList
 
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
@@ -25,24 +22,12 @@ double GetElapsedTimeInSeconds()
 
 void InitializeTimer()
 {
-#ifndef WIN32
   gettimeofday(&ComputationStartGlobal, NULL);
-#endif
-}
-
-void ignoreUserAbortSignal()
-{
-#ifndef WIN32
-  signal(SIGABRT,SIG_IGN);
-  signal(SIGTERM,SIG_IGN);
-#endif
 }
 
 void CreateTimerThread()
 {
-#ifndef WIN32
   pthread_create(&TimerThread, NULL,*RunTimerVoidPtr, 0);
-#endif
 }
 
 void SleepFunction(int microseconds)
@@ -56,6 +41,7 @@ struct TimerThreadData{
   int counter=0;
   int microsecondsleep=100000;
   ProgressReportWebServer theReport1, theReport2;
+//  ThreadWrapper theThread;
   void Run();
   bool HandleComputationTimer();
   bool HandleComputationCompleteStandard();
@@ -179,7 +165,6 @@ void TimerThreadData::Run()
 }
 
 
-#ifndef WIN32
 void* RunTimerVoidPtr(void* ptr)
 { MacroRegisterFunctionWithName("RunTimerVoidPtr");
 //  std::cout << "Got thus far RunTimerVoidPtr" << std::endl;
@@ -190,7 +175,6 @@ void* RunTimerVoidPtr(void* ptr)
   pthread_exit(NULL);
   return 0;
 }
-#endif
 
 void CallSystemWrapper(const std::string& theCommand)
 { system(theCommand.c_str());

@@ -98,13 +98,7 @@ GlobalVariables::GlobalVariables()
 void ProgressReport::Report(const std::string& theReport)
 { if (this->pointerGV==0)
     return;
-  if (!this->flagProgReportStringsExpanded)
-  { this->flagProgReportStringsExpanded=true;
-    this->pointerGV->MutexProgressReporting.LockMe();
-    this->pointerGV->ProgressReportStringS.SetSize(this->pointerGV->ProgressReportStringS.size+1);
-    *this->pointerGV->ProgressReportStringS.LastObject()="";
-    this->pointerGV->MutexProgressReporting.UnlockMe();
-  }
+  MutexLockGuard theLock(this->pointerGV->MutexProgressReporting);
   if (this->pointerGV->ProgressReportStringS.size>this->currentLevel)
   { this->pointerGV->ProgressReportStringS[this->currentLevel]=theReport;
     this->pointerGV->MakeReport();
@@ -113,12 +107,14 @@ void ProgressReport::Report(const std::string& theReport)
 
 void ProgressReport::initFromGV(GlobalVariables* theGlobalVariables)
 { this->pointerGV=theGlobalVariables;
-  this->flagProgReportStringsExpanded=false;
+  this->flagProgReportStringsExpanded=true;
   if (this->pointerGV==0)
     this->currentLevel=-1;
   else
-  { this->pointerGV->progressReportStringsRegistered++;
+  { MutexLockGuard theLock(this->pointerGV->MutexProgressReporting);
+    this->pointerGV->progressReportStringsRegistered++;
     this->currentLevel=this->pointerGV->ProgressReportStringS.size;
+    this->pointerGV->ProgressReportStringS.AddOnTop("");
   }
 }
 
@@ -126,8 +122,7 @@ ProgressReport::~ProgressReport()
 { if (this->pointerGV==0)
     return;
   this->pointerGV->progressReportStringsRegistered--;
-  if (this->flagProgReportStringsExpanded)
-    this->pointerGV->ProgressReportStringS.size--;
+  this->pointerGV->ProgressReportStringS.size--;
 }
 
 ProjectInformationInstance::ProjectInformationInstance(const char* fileName, const std::string& fileDescription)
@@ -136,19 +131,18 @@ ProjectInformationInstance::ProjectInformationInstance(const char* fileName, con
 
 extern GlobalVariables onePredefinedCopyOfGlobalVariables;
 RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const std::string& functionName)
-{ List<stackInfo>& theStack=ProjectInformation::GetMainProjectInfo().CustomStackTrace;
-  MutexWrapper& inCaseOfMultithreading=onePredefinedCopyOfGlobalVariables.MutexRegisterFunctionStaticFiasco;
-  inCaseOfMultithreading.LockMe();
+{ MutexLockGuard theLock(onePredefinedCopyOfGlobalVariables.MutexRegisterFunctionStaticFiasco);
+  List<stackInfo>& theStack=ProjectInformation::GetMainProjectInfo().CustomStackTrace;
   theStack.SetSize(theStack.size+1);
   stackInfo& stackTop=*theStack.LastObject();
   stackTop.fileName=fileName;
   stackTop.line=line;
   stackTop.functionName=functionName;
-  inCaseOfMultithreading.UnlockMe();
 }
 
 RegisterFunctionCall::~RegisterFunctionCall()
-{ List<stackInfo>& theStack=ProjectInformation::GetMainProjectInfo().CustomStackTrace;
+{ MutexLockGuard theLock(onePredefinedCopyOfGlobalVariables.MutexRegisterFunctionStaticFiasco);
+  List<stackInfo>& theStack=ProjectInformation::GetMainProjectInfo().CustomStackTrace;
   theStack.size--;
 }
 

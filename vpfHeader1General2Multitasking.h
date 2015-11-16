@@ -80,6 +80,15 @@ public:
   }
 };
 
+class ThreadWrapper
+{
+public:
+  void* theThreadData;
+  void (*theFunction)();
+  ThreadWrapper(void (*inputFunction)());
+  ~ThreadWrapper();
+};
+
 class Controller
 {
   private:

@@ -1,8 +1,8 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader2Math0_General.h"
-#include <assert.h> //Mutexes are way too basic infrastructure. We cannot crash using the standard crashing mechanism,
-//as that mechanism might depend on mutexes.
+#include <assert.h>
+#include <thread>
 #include <mutex>
 
 ProjectInformationInstance vpfGeneral2Mutexes(__FILE__, "Multitasking implementation.");
@@ -150,3 +150,7 @@ bool Controller::IsPausedWhileRunning()const
 { return this->flagIsPausedWhileRunning;
 }
 
+ThreadWrapper::ThreadWrapper(void(*inputFunction)())
+{ this->theFunction=inputFunction;
+  this->theThreadData= new std::thread(this->theFunction);
+}

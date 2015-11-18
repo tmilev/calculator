@@ -4,7 +4,8 @@
 #ifndef vpfHeaderSystemGlobalObjects_already_included
 #define vpfHeaderSystemGlobalObjects_already_included
 #include <iostream>
-#include "vpfHeader1General0_General.h"
+#include "vpfHeader1General1_ListReferences.h"
+#include <thread>
 //#include "vpfHeader3Calculator0_Interface.h"
 //#include "vpfHeader6WebServer.h"
 #ifndef __DATE__
@@ -14,15 +15,18 @@
 
 static ProjectInformationInstance projectInfoInstanceCalculatorGlobalAndSystemHeader(__FILE__, "Global objects and system calls header");
 
+
+extern ListReferences<std::thread> theThreads; //<-must be declared before global variables, d-tor of global vars uses it.
+extern ListReferences<std::thread::id> theThreadIds; //<-must be declared before global variables, d-tor of global vars uses it.
 class WebServer;
 class logger;
 class Calculator;
-extern FormatExpressions consoleFormat;
-extern Calculator theParser;
-extern WebServer theWebServer;
 extern logger theLog  ;
 extern logger logBlock;
 extern logger logIO   ;
+extern FormatExpressions consoleFormat;
+extern Calculator theParser;
+extern WebServer theWebServer;
 
 extern double GetElapsedTimeInSeconds();
 extern void CallSystemWrapper(const std::string& theCommand);

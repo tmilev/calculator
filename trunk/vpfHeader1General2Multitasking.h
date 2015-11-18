@@ -77,10 +77,14 @@ public:
 class ThreadData
 {
 public:
-  void* id;
+  int index;
+  std::string name;
   void* threadPointer;
-  void* getThreadId();
-  void CreateThread( void (*InputFunction)());
+  std::string ToString()const;
+  static int getCurrentThreadId();
+  static void RegisterCurrentThread(const std::string& inputName="");
+  static void CreateThread(void (*InputFunction)());
+  static std::string ToStringAllThreads();
   ThreadData();
   ~ThreadData();
 };

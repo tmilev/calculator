@@ -3672,10 +3672,11 @@ public:
 
   MutexRecursiveWrapper MutexWebWorkerPipeWriteLock;
   MutexRecursiveWrapper MutexWebWorkerPipeReadLock;
+  MutexRecursiveWrapper MutexWebWorkerStaticFiasco;
   MutexRecursiveWrapper MutexRegisterFunctionStaticFiasco;
   MutexRecursiveWrapper MutexParallelComputingStaticFiasco;
-  MutexRecursiveWrapper MutexWebWorkerStaticFiasco;
   MutexRecursiveWrapper MutexProgressReporting;
+  MutexRecursiveWrapper MutexRegisterNewThread;
 
   MemorySaving<HashedList<Selection> > hashedSelSimplexAlg;
 
@@ -3694,7 +3695,6 @@ public:
   MemorySaving<GroebnerBasisComputation<Rational> > theGroebnerBasisComputation;
 
   GlobalVariables();
-  void InitializeThreadData();
   void SetTimerFunction(double (*timerFunction)())
   { this->getElapsedTimePrivate=timerFunction;
   }

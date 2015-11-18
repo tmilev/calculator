@@ -12,7 +12,6 @@ ProjectInformationInstance projectInfoInstanceCalculatorSystem(__FILE__, "System
 
 
 timeval ComputationStartGlobal, LastMeasureOfCurrentTime;
-pthread_t TimerThread;
 
 double GetElapsedTimeInSeconds()
 { gettimeofday(&LastMeasureOfCurrentTime, NULL);
@@ -23,11 +22,6 @@ double GetElapsedTimeInSeconds()
 void InitializeTimer()
 {
   gettimeofday(&ComputationStartGlobal, NULL);
-}
-
-void CreateTimerThread()
-{
-  pthread_create(&TimerThread, NULL,*RunTimerVoidPtr, 0);
 }
 
 void SleepFunction(int microseconds)
@@ -47,6 +41,7 @@ struct TimerThreadData{
   bool HandleComputationCompleteStandard();
   bool HandleTimerSignalToServer();
   bool HandleMaxComputationTime();
+  bool HandleEverythingIsDone();
   bool HandlePingServerIamAlive();
   bool HandleComputationTimeout();
 };
@@ -133,6 +128,10 @@ bool TimerThreadData::HandleComputationTimeout()
   return false;
 }
 
+bool TimerThreadData::HandleEverythingIsDone()
+{ return theGlobalVariables.flagComputationFinishedAllOutputSentClosing;
+}
+
 bool TimerThreadData::HandlePingServerIamAlive()
 { if (theGlobalVariables.flagComputationFinishedAllOutputSentClosing)
     return true;
@@ -157,23 +156,23 @@ void TimerThreadData::Run()
     this->HandleTimerSignalToServer();
     this->HandleMaxComputationTime();
     this->HandleComputationTimeout();
-    if (this->HandlePingServerIamAlive())
+    this->HandlePingServerIamAlive();
+    if (this->HandleEverythingIsDone())
       break;
   }
-  RegisterFunctionCall(__FILE__, __LINE__, "exiting timer");
-  theReport2.SetStatus("Timer thread: finished.");
 }
 
-
-void* RunTimerVoidPtr(void* ptr)
-{ MacroRegisterFunctionWithName("RunTimerVoidPtr");
+void RunTimerThread()
+{ ThreadData::RegisterCurrentThread("timer thread");
+  MacroRegisterFunctionWithName("RunTimerThread");
 //  std::cout << "Got thus far RunTimerVoidPtr" << std::endl;
   TimerThreadData theThread;
   theThread.Run();
+}
 
-
-  pthread_exit(NULL);
-  return 0;
+void CreateTimerThread()
+{
+  ThreadData::CreateThread(RunTimerThread);
 }
 
 void CallSystemWrapper(const std::string& theCommand)

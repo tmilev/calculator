@@ -1,6 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader6WebServerInterprocessLogistics.h"
+#include "vpfHeader1General4_Logging.h"
 #include <fcntl.h> //<- setting of flags for pipes and the like (example: making a pipe non-blocking).
 #include <unistd.h>
 #include <netdb.h> //<-addrinfo and related data structures defined here
@@ -42,7 +43,7 @@ void PauseController::CreateMe(const std::string& inputName)
 
 void PauseController::PauseIfRequested()
 { if (this->CheckPauseIsRequested())
-    logBlock << logger::red << "Blocking on " << this->ToString() << logger::endL;
+    logBlock << logger::blue << "Blocking on " << this->ToString() << logger::endL;
   bool pauseWasRequested= !((read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size))>0);
   if (!pauseWasRequested)
     write(this->thePausePipe[1], "!", 1);
@@ -58,10 +59,10 @@ bool PauseController::PauseIfRequestedWithTimeOut()
   timeout.tv_sec = 10;
   timeout.tv_usec = 0;
   if (this->CheckPauseIsRequested())
-    logBlock << logger::red << "Blocking on " << this->ToString() << logger::endL;
+    logBlock << logger::blue << "Blocking on " << this->ToString() << logger::endL;
   bool pauseWasRequested=false;
   if (!select(this->thePausePipe[0]+1, &read_fds, &write_fds, &except_fds, &timeout) == 1)
-  { logBlock << logger::red << "Blocking on " << this->ToString() << logger::green
+  { logBlock << logger::green << "Blocking on " << this->ToString() << logger::green
     << " timed out. " << logger::endL;
     return false;
   }
@@ -75,7 +76,7 @@ void PauseController::RequestPausePauseIfLocked()
 { this->mutexForProcessBlocking.GetElement().LockMe();//<- make sure the pause controller is not locking itself
   //through competing threads
   if (this->CheckPauseIsRequested())
-    logBlock << logger::red << "Blocking on " << this->ToString() << logger::endL;
+    logBlock << logger::blue << "Blocking on " << this->ToString() << logger::endL;
   read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size);
   this->mutexForProcessBlocking.GetElement().UnlockMe();
 }

@@ -1,6 +1,8 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader2Math0_General.h"
+#include "vpfHeader1General4_Logging.h"
+#include "vpfHeader4SystemFunctionsGlobalObjects.h"
 #include <assert.h>
 #include <thread>
 #include <mutex>
@@ -30,7 +32,8 @@ void ParallelComputing::CheckPointerCounters()
 
 void MutexRecursiveWrapper::CheckConsistency()
 { if (this->flagDeallocated)
-  { std::cout << "Use after free of mutex. " << crash.GetStackTraceShort() << std::endl;
+  { logBlock << logger::red << "Use after free of mutex. "
+    << crash.GetStackTraceShort() << logger::endL;
     assert(false);
   }
 }
@@ -150,15 +153,68 @@ bool Controller::IsPausedWhileRunning()const
 }
 
 ThreadData::ThreadData()
-{ this->id=0;
+{ this->index=0;
   this->threadPointer=0;
 }
 
 ThreadData::~ThreadData()
-{
+{ //this may be use after free depending on whether GetThreads is destroyed first
+  logBlock << "joining threads ...";
+  for (int i=1; i<theThreads.size; i++)
+    theThreads[i].join();
+
+  logBlock << "joining threads done.";
 }
 
-void GlobalVariables::InitializeThreadData()
-{
+void ThreadData::RegisterCurrentThread(const std::string& inputName)
+{ int threadID=ThreadData::getCurrentThreadId();
+  ListReferences<ThreadData>& theThreads=theGlobalVariables.theThreadData;
+  for (int i=0; i<theThreads.size; i++)
+    if (threadID==theThreads[i].index)
+      return;
+  MutexLockGuard theLock(theGlobalVariables.MutexRegisterNewThread);
+  theThreads.SetSize(theThreads.size+1);
+  ThreadData& currentThread=theThreads.LastObject();
+  currentThread.index=threadID;
+  currentThread.name=inputName;
+}
 
+void ThreadData::CreateThread(void (*InputFunction)())
+{ MutexLockGuard(theGlobalVariables.MutexRegisterNewThread);
+  theThreads.SetSize(theThreadIds.size+1);
+  theThreads.LastObject()=std::thread(InputFunction);
+}
+
+int ThreadData::getCurrentThreadId()
+{ std::thread::id currentId= std::this_thread::get_id();
+  int result=-1;
+  for (int i=0; i<theThreadIds.size; i++)
+    if (currentId==theThreadIds[i])
+    { result=i;
+      break;
+    }
+  if (result==-1)
+  { MutexLockGuard theLock(theGlobalVariables.MutexRegisterNewThread);
+    result=theThreadIds.size;
+    theThreadIds.AddOnTop(currentId);
+  }
+  return result;
+}
+
+std::string ThreadData::ToString()const
+{ std::stringstream out;
+  out << "Thread ";
+  if (this->name=="")
+    out << "(thread name not set)";
+  else
+    out << this->name;
+  out << ". Index: " << this->index << ", id: " << theThreadIds[this->index] << ".";
+  return out.str();
+}
+
+std::string ThreadData::ToStringAllThreads()
+{ std::stringstream out;
+  for (int i=0; i<theGlobalVariables.theThreadData.size; i++)
+    out << theGlobalVariables.theThreadData[i].ToString() << "<br>";
+  return out.str();
 }

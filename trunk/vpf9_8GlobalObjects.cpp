@@ -2,23 +2,31 @@
 //For additional information refer to the file "vpf.h".
 
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
+#include "vpfHeader6WebServer.h"
+#include "vpfHeader3Calculator0_Interface.h"
 ProjectInformationInstance projectInfoInstanceCalculatorGlobal(__FILE__, "Global objects");
 
-GlobalVariables onePredefinedCopyOfGlobalVariables;
+logger theLog( "./../output/LogStandard.html");
+logger logBlock( "./../output/LogBlockingEvents.html");
+logger logIO( "./../output/LogIOErrorsEvents.html");
+WebServer theWebServer;
+GlobalVariables theGlobalVariables;
 Calculator theParser;
 FormatExpressions consoleFormat;
+Crasher crash;
+StdoutClass stOutput;
 
 void InitializeGlobalObjects()
 { //stOutput << "Content-Type: text/html\n\n";
   InitializeTimer();
-  onePredefinedCopyOfGlobalVariables.IndicatorStringOutputFunction=&CGI::MakeReportIndicatorFile;
-  onePredefinedCopyOfGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
-  onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=-1;
-  onePredefinedCopyOfGlobalVariables.sleepFunction=SleepFunction;
-  onePredefinedCopyOfGlobalVariables.SetCallSystem(&CallSystemWrapper);
-  onePredefinedCopyOfGlobalVariables.SetCallChDir(&CallChDirWrapper);
+  theGlobalVariables.IndicatorStringOutputFunction=&CGI::MakeReportIndicatorFile;
+  theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=-1;
+  theGlobalVariables.sleepFunction=SleepFunction;
+  theGlobalVariables.SetCallSystem(&CallSystemWrapper);
+  theGlobalVariables.SetCallChDir(&CallChDirWrapper);
 
-  crash.theGlobalVariables=&onePredefinedCopyOfGlobalVariables;
+  crash.theGlobalVariables=&theGlobalVariables;
   //stOutput << "address of get elapsed seconds: " << (int) &GetElapsedTimeInSeconds;
   //Change the below line to modify the computation time of the calculator.
   consoleFormat.flagUseHTML = false;

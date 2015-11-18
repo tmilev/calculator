@@ -162,7 +162,7 @@ void ModuleSSalgebra<coefficient>::Substitution(const PolynomialSubstitution<Rat
 
 template <class coefficient>
 MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionGeneratorIndeX
-(int generatorIndex, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
+(int generatorIndex, const coefficient& theRingUnit, const coefficient& theRingZero)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::GetActionGeneratorIndeX");
   int numGenerators=this->GetOwner().GetNumGenerators();
   if (generatorIndex<0 || generatorIndex>=numGenerators)
@@ -185,7 +185,7 @@ MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionGeneratorIndeX
     return this->actionsGeneratorsMaT[generatorIndex];
   }
   if (this->GetOwner().IsASimpleGenerator(generatorIndex))
-    return this->GetActionSimpleGeneratorIndex(generatorIndex, theGlobalVariables, theRingUnit, theRingZero);
+    return this->GetActionSimpleGeneratorIndex(generatorIndex, theRingUnit, theRingZero);
   MatrixTensor<coefficient>& output=this->actionsGeneratorsMaT[generatorIndex];
   if (this->GetOwner().IsGeneratorFromCartan(generatorIndex))
   { output.MakeZero();
@@ -213,9 +213,9 @@ MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionGeneratorIndeX
   Rational theCoeff;
   this->GetOwner().GetChevalleyGeneratorAsLieBracketsSimpleGens(generatorIndex, adActions, theCoeff);
   MatrixTensor<coefficient> tempO;
-  output=this->GetActionGeneratorIndeX(*adActions.LastObject(), theGlobalVariables);
+  output=this->GetActionGeneratorIndeX(*adActions.LastObject());
   for (int i=adActions.size-2; i>=0; i--)
-  { tempO=this->GetActionGeneratorIndeX(adActions[i], theGlobalVariables);
+  { tempO=this->GetActionGeneratorIndeX(adActions[i]);
     output.LieBracketOnTheLeft(tempO);
   }
   coefficient tempCF;
@@ -451,14 +451,14 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi
   for (int i=0; i<splittingParSelectedInLevi.CardinalitySelection; i++)
   { int theGenIndex=splittingParSelectedInLevi.elements[i]+this->GetOwner().GetRank()+this->GetOwner().GetNumPosRoots();
     MatrixTensor<coefficient>& currentOp=
-    this->GetActionGeneratorIndeX(theGenIndex, theGlobalVariables, theRingUnit, theRingZero);
+    this->GetActionGeneratorIndeX(theGenIndex, theRingUnit, theRingZero);
     Matrix<coefficient> currentOpMat;
     currentOp.GetMatrix(currentOpMat, this->GetDim() );
     currentOpMat.GetZeroEigenSpaceModifyMe(eigenSpacesPerSimpleGenerator[i]);
     tempSpace1=theFinalEigenSpace;
     tempSpace2=eigenSpacesPerSimpleGenerator[i];
     theFinalEigenSpace.IntersectTwoLinSpaces
-    (tempSpace1, tempSpace2, theFinalEigenSpace, &theGlobalVariables)
+    (tempSpace1, tempSpace2, theFinalEigenSpace)
     ;
   }
   out << "<br>Eigenvectors:<table> ";
@@ -512,7 +512,7 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi
 
 template <class coefficient>
 MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionSimpleGeneratorIndex
-(int generatorIndex, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
+(int generatorIndex, const coefficient& theRingUnit, const coefficient& theRingZero)
 { Vector<Rational> genWeight=this->GetOwner().GetWeightOfGenerator(generatorIndex);
   Vector<Rational> targetWeight;
   Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> >
@@ -722,7 +722,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
           tempSSElt.MakeGenerator(theIndex, this->GetOwner());
           if (outputReport!=0)
             out2 << "<hr>Simple generator: " << tempSSElt.ToString(&theGlobalVariables.theDefaultFormat);
-          MatrixTensor<coefficient>& theMatrix=this->GetActionGeneratorIndeX(theIndex, theGlobalVariables, theRingUnit, theRingZero);
+          MatrixTensor<coefficient>& theMatrix=this->GetActionGeneratorIndeX(theIndex, theRingUnit, theRingZero);
           std::stringstream tempStream;
           tempStream << "computing action simple generator index " << (2*k-1)*(j+1) << " ... ";
           theReport.Report(tempStream.str());
@@ -744,7 +744,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
             }*/
           if (k==1)
             this->GetActionGeneratorIndeX
-            (this->GetOwner().GetNumPosRoots()+j, theGlobalVariables, theRingUnit, theRingZero);
+            (this->GetOwner().GetNumPosRoots()+j, theRingUnit, theRingZero);
         }
   if (outputReport!=0)
     *outputReport= out2.str();

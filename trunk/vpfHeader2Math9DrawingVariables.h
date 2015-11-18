@@ -310,7 +310,7 @@ public:
   { PenStyleInvisible, PenStyleDashed, PenStyleDotted, PenStyleNormal, PenStyleZeroChamber, PenStylePermanentlyZeroChamber, PenStyleLinkToOriginZeroChamber, PenStyleLinkToOrigin, PenStyleLinkToOriginPermanentlyZeroChamber };
   enum TextStyles
   { TextStyleNormal, TextStyleInvisible, TextStyleChamber, TextStyleZeroChamber, TextStylePermanentlyZeroChamber };
-  //MutexWrapper LockedWhileDrawing;
+  //MutexRecursiveWrapper LockedWhileDrawing;
   int ColorDashes;
   bool flagLaTeXDraw;
   bool flag2DprojectionDraw;

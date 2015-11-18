@@ -9,7 +9,7 @@ static ProjectInformationInstance vpfHeader1General2Mutexes(__FILE__, "Header, m
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //The below class is a wrapper for mutexes. All system dependent machinery for
 //mutexes should be put here.
-//MutexWrapper specification:
+//MutexRecursiveWrapper specification:
 //The mutex has two states: locked and unlocked.
 //When the caller calls UnlockMe() this unlocks the mutex if it were locked,
 //otherwise does nothing, and immediately returns.
@@ -29,20 +29,14 @@ static ProjectInformationInstance vpfHeader1General2Mutexes(__FILE__, "Header, m
 //controller object (which uses two mutexes to achieve guaranteed wake-up).
 //3) Mutexes cannot be copied: once allocated, they stay in place.
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//This is not guaranteed to work on Windows. Might cause crash.
-//Must be fixed to a proper set of Windows routines.
-//This is not possible at the moment since none of my legally owned (but outdated)
-//versions of Windows support the multitasking routines
-//that are officially documented at Microsoft's network.
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class MutexWrapper
+class MutexRecursiveWrapper
 {
 private:
   bool flagUnsafeFlagForDebuggingIsLocked;
   bool flagDeallocated;
   bool flagInitialized;
-  void operator=(const MutexWrapper& other);
-  MutexWrapper(const MutexWrapper& other);
+  void operator=(const MutexRecursiveWrapper& other);
+  MutexRecursiveWrapper(const MutexRecursiveWrapper& other);
   bool InitializeIfNeeded();
 public:
   std::string mutexName;
@@ -56,21 +50,21 @@ public:
   void UnlockMe();
   void CheckConsistency();
   void initConstructorCallOnly();
-  MutexWrapper()
+  MutexRecursiveWrapper()
   { this->initConstructorCallOnly();
   }
-  MutexWrapper(const std::string& inputMutexName)
+  MutexRecursiveWrapper(const std::string& inputMutexName)
   { this->mutexName=inputMutexName;
     this->initConstructorCallOnly();
   }
-  ~MutexWrapper();
+  ~MutexRecursiveWrapper();
 };
 
-//this class uses RAII to lock MutexWrapper's -> equivalent to std::lock_guard
+//this class uses RAII to lock MutexRecursiveWrapper's -> equivalent to std::lock_guard
 class MutexLockGuard{
 public:
-  MutexWrapper* theMutex;
-  MutexLockGuard(MutexWrapper& inputMutex)
+  MutexRecursiveWrapper* theMutex;
+  MutexLockGuard(MutexRecursiveWrapper& inputMutex)
   { this->theMutex=&inputMutex;
     this->theMutex->LockMe();
   }
@@ -80,27 +74,29 @@ public:
   }
 };
 
-class ThreadWrapper
+class ThreadData
 {
 public:
-  void* theThreadData;
-  void (*theFunction)();
-  ThreadWrapper(void (*inputFunction)());
-  ~ThreadWrapper();
+  void* id;
+  void* threadPointer;
+  void* getThreadId();
+  void CreateThread( void (*InputFunction)());
+  ThreadData();
+  ~ThreadData();
 };
 
 class Controller
 {
   private:
-  MutexWrapper mutexLockMeToPauseCallersOfSafePoint;
-  MutexWrapper mutexSignalMeWhenReachingSafePoint;
+  MutexRecursiveWrapper mutexLockMeToPauseCallersOfSafePoint;
+  MutexRecursiveWrapper mutexSignalMeWhenReachingSafePoint;
   bool flagIsRunning;
   bool flagIsPausedWhileRunning;
   bool IsPausedWhileRunning()const;
   void operator=(const Controller& other);
   Controller(const Controller& other);
 public:
-  MutexWrapper mutexHoldMeWhenReadingOrWritingInternalFlags;
+  MutexRecursiveWrapper mutexHoldMeWhenReadingOrWritingInternalFlags;
   void SafePointDontCallMeFromDestructors();
   void SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
   void UnlockSafePoint();

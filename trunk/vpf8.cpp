@@ -404,10 +404,10 @@ void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& o
     output.theDigits[i]=0;
   unsigned long long numCycles=0;
   bool doProgressReporT=false;
-  ProgressReport theReport1(&onePredefinedCopyOfGlobalVariables);
-  ProgressReport theReport2(&onePredefinedCopyOfGlobalVariables);
+  ProgressReport theReport1(&theGlobalVariables);
+  ProgressReport theReport2(&theGlobalVariables);
   unsigned long long totalCycles=0;
-  if (onePredefinedCopyOfGlobalVariables.flagReportEverything || onePredefinedCopyOfGlobalVariables.flagReportLargeIntArithmetic)
+  if (theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportLargeIntArithmetic)
   { totalCycles=((unsigned long long) this->theDigits.size)* ((unsigned long long) x.theDigits.size);
     if (totalCycles>2000)
       doProgressReporT=true;

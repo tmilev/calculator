@@ -749,7 +749,7 @@ public:
     if (theCarbonCopy!=0)
       theCarbonCopy->RowTimesScalar(rowIndex, scalar);
   }
-  void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const coefficient& scalar, GlobalVariables* theGlobalVariables=0);
+  void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const coefficient& scalar);
   inline void AddTwoRowsWithCarbonCopy(int fromRowIndex, int ToRowIndex, int StartColIndex, const coefficient& scalar, Matrix<coefficient>* theCarbonCopy)
   { this->AddTwoRows(fromRowIndex, ToRowIndex, StartColIndex, scalar);
     if (theCarbonCopy!=0)
@@ -781,9 +781,8 @@ public:
   //returns true if successful, false otherwise
 //  bool ExpressColumnAsALinearCombinationOfColumnsModifyMyself
 //    (Matrix<coefficient>& inputColumn, Matrix<coefficient>* outputTheGaussianTransformations Matrix<coefficient>& outputColumn);
-  bool Invert(GlobalVariables* theGlobalVariables=0);
-  static void Conjugate(const Matrix<coefficient>& conjugateMe, const Matrix<coefficient>& conjugateBy,
-                        Matrix<coefficient>& out);
+  bool Invert();
+  static void Conjugate(const Matrix<coefficient>& conjugateMe, const Matrix<coefficient>& conjugateBy, Matrix<coefficient>& out);
   void MakeZero(const coefficient& theRingZero=0);
   void MakeID(const Matrix<coefficient>& prototype, const coefficient& theRingZero=0, const coefficient& theRingOne=1);
   //if m1 corresponds to a linear operator from V1 to V2 and
@@ -946,13 +945,12 @@ public:
   // In the above example, the third (index 2) and fifth (index 4) columns do not have a pivot 1 in them.
   void GaussianEliminationByRows
   (Matrix<coefficient>* carbonCopyMat=0, Selection* outputNonPivotColumns=0,
-   Selection* outputPivotColumns=0, GlobalVariables* theGlobalVariables=0,
-   std::stringstream* humanReadableReport=0, FormatExpressions* theFormat=0)
+   Selection* outputPivotColumns=0, std::stringstream* humanReadableReport=0, FormatExpressions* theFormat=0)
   ;
   void GaussianEliminationByRowsNoRowSwapPivotPointsByRows(int firstNonProcessedRow, Matrix<coefficient>& output, List<int>& outputPivotPointCols, Selection* outputNonPivotPoints__WarningSelectionNotInitialized);
   void GaussianEliminationEuclideanDomain
   (Matrix<coefficient>* otherMatrix=0, const coefficient& theRingMinusUnit=-1, const coefficient& theRingUnit=1,
-   bool (*comparisonGEQFunction) (const coefficient& left, const coefficient& right)=0, GlobalVariables* theGlobalVariables=0);
+   bool (*comparisonGEQFunction) (const coefficient& left, const coefficient& right)=0);
   static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(Matrix<coefficient>& A, Matrix<coefficient>& b, Matrix<coefficient>& output);
   coefficient GetDeterminant();
   coefficient GetTrace()const;
@@ -975,7 +973,7 @@ public:
     this->GetZeroEigenSpaceModifyMe(outputEigenspace);
   }
   static bool SystemLinearInequalitiesHasSolution(Matrix<coefficient>& matA, Matrix<coefficient>& matb, Matrix<coefficient>& outputPoint);
-  static bool SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(Matrix<coefficient>& matA, Matrix<coefficient>& matb, Vector<coefficient>* outputSolution=0, GlobalVariables* theGlobalVariables=0);
+  static bool SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(Matrix<coefficient>& matA, Matrix<coefficient>& matb, Vector<coefficient>* outputSolution=0);
   static void ComputePotentialChangeGradient(Matrix<coefficient>& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational& outputChangeGradient, bool& hasAPotentialLeavingVariable);
   static void GetMaxMovementAndLeavingVariableRow
   (Rational& maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, Matrix<coefficient>& tempMatA, Vector<coefficient>& inputVectorX,
@@ -1168,8 +1166,8 @@ bool Matrix<Element>::ReadFromFile(std::fstream& input)
   return true;
 }
 
-template <typename Element>
-bool Matrix<Element>::Invert(GlobalVariables* theGlobalVariables)
+template <typename coefficient>
+bool Matrix<coefficient>::Invert()
 { if (this->NumCols!=this->NumRows)
     crash << "This is a programming error: requesting to invert a non-square matrix of " << this->NumRows << " rows and "
     << this->NumCols << " columns. " << crash;
@@ -1179,41 +1177,41 @@ bool Matrix<Element>::Invert(GlobalVariables* theGlobalVariables)
   Matrix theInverse;
   theInverse.MakeIdMatrix(this->NumRows);
   Selection NonPivotCols;
-  this->GaussianEliminationByRows(&theInverse, &NonPivotCols, 0, theGlobalVariables);
+  this->GaussianEliminationByRows(&theInverse, &NonPivotCols, 0);
   if(NonPivotCols.CardinalitySelection!=0)
     return false;
   *this=theInverse;
   return true;
 }
 
-template <typename Element>
-void Matrix<Element>::Conjugate(const Matrix<Element>& conjugateMe, const Matrix<Element>& conjugateBy, Matrix<Element>& out)
-{ Matrix<Element> conjugateInverse = conjugateBy;
+template <typename coefficient>
+void Matrix<coefficient>::Conjugate(const Matrix<coefficient>& conjugateMe, const Matrix<coefficient>& conjugateBy, Matrix<coefficient>& out)
+{ Matrix<coefficient> conjugateInverse = conjugateBy;
   conjugateInverse.Invert();
-  Matrix<Element> tmp;
+  Matrix<coefficient> tmp;
   conjugateMe.MultiplyOnTheLeft(conjugateInverse,tmp);
   conjugateBy.MultiplyOnTheLeft(tmp, out);
 }
 
-template <typename Element>
-void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& standsOnTheLeft, const Element& theRingZero)
-{ Matrix<Element> tempMat;
+template <typename coefficient>
+void Matrix<coefficient>::MultiplyOnTheLeft(const Matrix<coefficient>& standsOnTheLeft, const coefficient& theRingZero)
+{ Matrix<coefficient> tempMat;
   this->MultiplyOnTheLeft(standsOnTheLeft, tempMat, theRingZero);
   this->operator=(tempMat);
 }
 
-template <typename Element>
-void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& standsOnTheLeft, Matrix<Element>& output, const Element& theRingZero) const
+template <typename coefficient>
+void Matrix<coefficient>::MultiplyOnTheLeft(const Matrix<coefficient>& standsOnTheLeft, Matrix<coefficient>& output, const coefficient& theRingZero) const
 { if (&output==this || &output==&standsOnTheLeft)
-  { Matrix<Element> thisCopy=*this;
-    Matrix<Element> standsOnTheLeftCopy=standsOnTheLeft;
+  { Matrix<coefficient> thisCopy=*this;
+    Matrix<coefficient> standsOnTheLeftCopy=standsOnTheLeft;
     thisCopy.MultiplyOnTheLeft(standsOnTheLeftCopy, output, theRingZero);
     return;
   }
   if (this->NumRows!=standsOnTheLeft.NumCols)
     crash << "This is a programming error: attempting to multiply a matrix with " << standsOnTheLeft.NumCols
     << " columns by a matrix with " << this->NumRows << "rows. " << crash;
-  Element tempEl;
+  coefficient tempEl;
   output.init(standsOnTheLeft.NumRows, this->NumCols);
   for (int i=0; i< standsOnTheLeft.NumRows; i++)
     for(int j=0; j< this->NumCols; j++)
@@ -1863,7 +1861,7 @@ public:
         output*=tempRat;
       }
   }
-  bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
+  bool ReadFromFile(std::fstream& input);
   inline bool operator!=(const MonomialCollection<templateMonomial, coefficient>& other)const
   { return !(*this==other);
   }
@@ -3100,7 +3098,7 @@ void MonomialCollection<templateMonomial, coefficient>::WriteToFile(std::fstream
 }
 
 template <class templateMonomial, class coefficient>
-inline bool MonomialCollection<templateMonomial, coefficient>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
+inline bool MonomialCollection<templateMonomial, coefficient>::ReadFromFile(std::fstream& input)
 { int numReadWords, targetSize;
   XML::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
   std::string ReaderString;
@@ -3628,11 +3626,13 @@ public:
   bool flagComputationFinishedAllOutputSentClosing;
 //progress report flags:
   bool flagReportEverything;
+  bool flagReportFileIO;
   bool flagReportLargeIntArithmetic;
   bool flagReportGaussianElimination;
   bool flagReportProductsMonomialAlgebras;
 
   int progressReportStringsRegistered;
+  ListReferences<ThreadData> theThreadData;
   List<std::string> ProgressReportStringS;
 //  MemorySaving<DrawingVariables> theDrawingVariables;
   FormatExpressions thePolyFormat;
@@ -3669,21 +3669,13 @@ public:
 
   std::string IPAdressCaller;
   std::string defaultUserLabel;
-  //buffers:
-  MemorySaving<Selection> selWallSelection;
-  MemorySaving<Selection> selComputeNormalExcludingIndex;
-  MemorySaving<Selection> selApproveSelAgainstOneGenerator;
-  MemorySaving<Selection> selSimplexAlg2;
-  MemorySaving<Selection> selGetNewVerticesAppend;
-  MemorySaving<Selection> selGetNewVerticesAppend2;
-  MemorySaving<Selection> selSplitChamber;
 
-  MutexWrapper MutexWebWorkerPipeWriteLock;
-  MutexWrapper MutexWebWorkerPipeReadLock;
-  MutexWrapper MutexRegisterFunctionStaticFiasco;
-  MutexWrapper MutexParallelComputingStaticFiasco;
-  MutexWrapper MutexWebWorkerStaticFiasco;
-  MutexWrapper MutexProgressReporting;
+  MutexRecursiveWrapper MutexWebWorkerPipeWriteLock;
+  MutexRecursiveWrapper MutexWebWorkerPipeReadLock;
+  MutexRecursiveWrapper MutexRegisterFunctionStaticFiasco;
+  MutexRecursiveWrapper MutexParallelComputingStaticFiasco;
+  MutexRecursiveWrapper MutexWebWorkerStaticFiasco;
+  MutexRecursiveWrapper MutexProgressReporting;
 
   MemorySaving<HashedList<Selection> > hashedSelSimplexAlg;
 
@@ -3691,21 +3683,7 @@ public:
 
   MemorySaving<Matrix<Rational> > matIdMatrix;
   MemorySaving<Matrix<Rational> > matOneColumn;
-  MemorySaving<Matrix<Rational> > matReduceMonomialByMonomial2;
-  MemorySaving<Matrix<Rational> > matReduceMonomialByMonomial;
-  MemorySaving<Matrix<Rational> > matConeCondition1;
-  MemorySaving<Matrix<Rational> > matConeCondition2;
-  MemorySaving<Matrix<Rational> > matConeCondition3;
-  MemorySaving<Vector<Rational> > vectConeCondition3;
-  MemorySaving<Matrix<Rational> > matComputeEpsCoordsWRTk;
-  MemorySaving<Matrix<Rational> > matSimplexAlgorithm1;
-  MemorySaving<Matrix<Rational> > matSimplexAlgorithm2;
-  MemorySaving<Matrix<Rational> > matSimplexAlgorithm3;
-  MemorySaving<Matrix<Rational> > matGetNewVerticesAppend;
-  MemorySaving<Matrix<Rational> > matSplitChamberBuff;
 
-  MemorySaving<Polynomial<LargeInt> > PolyLargeIntPartFracBuffer5;
-  MemorySaving<Polynomial<LargeInt> > PolyLargeIntPartFracBuffer6;
 
   MemorySaving<DynkinDiagramRootSubalgebra > dynGetEpsCoords;
 
@@ -3716,6 +3694,7 @@ public:
   MemorySaving<GroebnerBasisComputation<Rational> > theGroebnerBasisComputation;
 
   GlobalVariables();
+  void InitializeThreadData();
   void SetTimerFunction(double (*timerFunction)())
   { this->getElapsedTimePrivate=timerFunction;
   }
@@ -3760,7 +3739,7 @@ public:
   void MakeReport();
   /// @endcond
 };
-extern GlobalVariables onePredefinedCopyOfGlobalVariables;
+extern GlobalVariables theGlobalVariables;
 
 template <class templateMonomial, class coefficient>
 inline void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy
@@ -3775,9 +3754,9 @@ inline void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy
     maxNumMonsFinal=2000000;
   bool shouldReport=false;
   int totalMonPairs=0;
-  ProgressReport theReport1(&onePredefinedCopyOfGlobalVariables), theReport2(&onePredefinedCopyOfGlobalVariables);
-  if (onePredefinedCopyOfGlobalVariables.flagReportEverything ||
-      onePredefinedCopyOfGlobalVariables.flagReportProductsMonomialAlgebras)
+  ProgressReport theReport1(&theGlobalVariables), theReport2(&theGlobalVariables);
+  if (theGlobalVariables.flagReportEverything ||
+      theGlobalVariables.flagReportProductsMonomialAlgebras)
   { totalMonPairs=other.size()*this->size();
     shouldReport=(totalMonPairs>2000 && other.size()>10 && this->size()>10);
   }
@@ -3802,10 +3781,9 @@ inline void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy
 
 template <class coefficient>
 void Matrix<coefficient>::GaussianEliminationEuclideanDomain
-(Matrix<coefficient>* otherMatrix, const coefficient& theRingMinusUnit, const coefficient& theRingUnit, bool (*comparisonGEQFunction) (const coefficient& left, const coefficient& right),
- GlobalVariables* theGlobalVariables)
+(Matrix<coefficient>* otherMatrix, const coefficient& theRingMinusUnit, const coefficient& theRingUnit, bool (*comparisonGEQFunction) (const coefficient& left, const coefficient& right))
 { MacroRegisterFunctionWithName("Matrix_Element::GaussianEliminationEuclideanDomain");
-  ProgressReport theReport(theGlobalVariables);
+  ProgressReport theReport(&theGlobalVariables);
   if (otherMatrix==this)
     crash << "This is a programming error: the Carbon copy in the Gaussian elimination coincides with the matrix which we are row-reducing "
     << "(most probably this is a wrong pointer typo). " << crash;
@@ -3839,7 +3817,7 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain
       int ExploringRow= row+1;
 //      stOutput << "<br>before second while: " << this->ToString(true, false);
       while (ExploringRow<this->NumRows)
-      { if (theGlobalVariables!=0)
+      { if (theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportGaussianElimination)
         { std::stringstream out;
           out << "Pivotting on row of index " << row +1 << " with exploring row of index " << ExploringRow+1 << "; total rows: " << this->NumRows;
           theReport.Report(out.str());
@@ -3888,10 +3866,10 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain
 
 template <class coefficient>
 void Vectors<coefficient>::SelectABasisInSubspace
-(const List<Vector<coefficient> >& input, List<Vector<coefficient> >& output, Selection& outputSelectedPivotColumns, GlobalVariables* theGlobalVariables)
+(const List<Vector<coefficient> >& input, List<Vector<coefficient> >& output, Selection& outputSelectedPivotColumns)
 { if (&input==&output)
   { List<Vector<coefficient> > inputCopy=input;
-    Vectors<coefficient>::SelectABasisInSubspace(inputCopy, output, outputSelectedPivotColumns, theGlobalVariables);
+    Vectors<coefficient>::SelectABasisInSubspace(inputCopy, output, outputSelectedPivotColumns);
     return;
   }
   if (input.size==0)
@@ -3899,9 +3877,10 @@ void Vectors<coefficient>::SelectABasisInSubspace
     return;
   }
   MacroRegisterFunctionWithName("Vectors::SelectABasisInSubspace");
-  ProgressReport theReport(theGlobalVariables);
+  ProgressReport theReport(&theGlobalVariables);
   int theDim=input[0].size;
-  if (theGlobalVariables!=0)
+  bool doProgressReport=theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportGaussianElimination;
+  if (doProgressReport)
   { std::stringstream reportStream;
     reportStream << "Selecting a basis of a vector space with " << input.size << " generators in dimension " << theDim << "... " ;
     theReport.Report(reportStream.str());
@@ -3924,31 +3903,29 @@ void Vectors<coefficient>::SelectABasisInSubspace
   output.SetSize(outputSelectedPivotColumns.CardinalitySelection);
   for (int i=0; i<output.size; i++)
     theMat.GetVectorFromRow(i, output[i]);
-  if (theGlobalVariables!=0)
+  if (doProgressReport)
   { std::stringstream reportStream;
-    reportStream << "Selecting a basis of a vector space with " << input.size << " generators in dimension " << theDim << "... DONE! " ;
+    reportStream << "Selecting a basis of a vector space with " << input.size << " generators in dimension " << theDim << "... done. " ;
     theReport.Report(reportStream.str());
   }
 }
 
 template <class Object>
-void List<Object>::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables, int UpperLimitForDebugPurposes)const
+void List<Object>::WriteToFile(std::fstream& output, int UpperLimitForDebugPurposes)const
 { int NumWritten=this->size;
   if (UpperLimitForDebugPurposes>0 && UpperLimitForDebugPurposes<NumWritten)
     NumWritten=UpperLimitForDebugPurposes;
   output << XML::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
   output << "size: " << NumWritten << "\n";
   for (int i=0; i<NumWritten; i++)
-  { this->TheObjects[i].WriteToFile(output, theGlobalVariables);
+  { this->TheObjects[i].WriteToFile(output);
     output << "\n";
-    if (theGlobalVariables!=0)
-      theGlobalVariables->theLocalPauseController.SafePointDontCallMeFromDestructors();
   }
   output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName()) << "\n";
 }
 
 template <class Object>
-bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitForDebugPurposes)
+bool List<Object>::ReadFromFile(std::fstream& input, int UpperLimitForDebugPurposes)
 { std::string tempS;
   int ActualListSize; int NumWordsBeforeTag;
   XML::ReadThroughFirstOpenTag(input, NumWordsBeforeTag, this->GetXMLClassName());
@@ -3964,17 +3941,17 @@ bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalV
     CappedListSize=UpperLimitForDebugPurposes;
   this->SetSize(CappedListSize);
   for (int i=0; i<CappedListSize; i++)
-  { this->TheObjects[i].ReadFromFile(input, theGlobalVariables);
+  { this->TheObjects[i].ReadFromFile(input);
     //<reporting_and_safepoint_duties>
-    if (theGlobalVariables!=0)
+    if (theGlobalVariables.flagReportFileIO)
     { if (ActualListSize>30)
       { std::stringstream report;
         report << "Reading object number " << i+1 << " out of " << ActualListSize;
         if (CappedListSize<ActualListSize)
           report << " capped at " << CappedListSize;
-        ProgressReport tempReport(theGlobalVariables, report.str());
+        ProgressReport tempReport(&theGlobalVariables, report.str());
       }
-      theGlobalVariables->theLocalPauseController.SafePointDontCallMeFromDestructors();
+      theGlobalVariables.theLocalPauseController.SafePointDontCallMeFromDestructors();
     }
     //</reporting_and_safepoint_duties>
   }
@@ -4292,14 +4269,10 @@ void Polynomial<coefficient> ::MakePolyFromDirectionAndNormal(Vector<coefficient
 
 template <class coefficient>
 bool Vectors<coefficient>::GetNormalSeparatingCones
-(List<Vector<coefficient> >& coneStrictlyPositiveCoeffs, List<Vector<coefficient> >& coneNonNegativeCoeffs, Vector<coefficient>& outputNormal,
- GlobalVariables* theGlobalVariables)
-{ MemorySaving<Matrix<Rational> > tempA;
-  MemorySaving<Matrix<Rational> > tempB;
-  MemorySaving<Vector<Rational> > tempX;
-  Matrix<Rational>& matA=theGlobalVariables==0 ? tempA.GetElement() : theGlobalVariables->matConeCondition1.GetElement();
-  Matrix<Rational>& matb=theGlobalVariables==0 ? tempB.GetElement() : theGlobalVariables->matConeCondition2.GetElement();
-  Vector<Rational>& matX=theGlobalVariables==0 ? tempX.GetElement() : theGlobalVariables->vectConeCondition3.GetElement();
+(List<Vector<coefficient> >& coneStrictlyPositiveCoeffs, List<Vector<coefficient> >& coneNonNegativeCoeffs, Vector<coefficient>& outputNormal)
+{ Matrix<Rational> matA;
+  Matrix<Rational> matb;
+  Vector<Rational> matX;
   int theDimension=coneStrictlyPositiveCoeffs[0].size;
   if (coneStrictlyPositiveCoeffs.size==0)
   { if (coneNonNegativeCoeffs.size>0)
@@ -4332,7 +4305,7 @@ bool Vectors<coefficient>::GetNormalSeparatingCones
   //matA.ComputeDebugString();
   //matb.ComputeDebugString();
   //matX.ComputeDebugString();
-  bool result=Matrix<Rational>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(matA, matb, &matX, theGlobalVariables);
+  bool result=Matrix<Rational>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(matA, matb, &matX);
   //matA.ComputeDebugString();
   //matb.ComputeDebugString();
   //matX.ComputeDebugString();
@@ -4929,11 +4902,10 @@ std::string MonomialCollection<templateMonomial, coefficient>::ToString(FormatEx
 }
 
 template <typename coefficient>
-inline void Matrix<coefficient>::AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const coefficient& scalar, GlobalVariables* theGlobalVariables)
-{ ProgressReport theReport(theGlobalVariables);
+inline void Matrix<coefficient>::AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const coefficient& scalar)
+{ ProgressReport theReport(&theGlobalVariables);
   bool doProgressReport=false;
-  if (theGlobalVariables!=0)
-    doProgressReport=theGlobalVariables->flagReportGaussianElimination || theGlobalVariables->flagReportEverything;
+  doProgressReport=theGlobalVariables.flagReportGaussianElimination || theGlobalVariables.flagReportEverything;
   coefficient tempElement;
   for (int i = StartColIndex; i< this->NumCols; i++)
   { tempElement=this->elements[fromRowIndex][i];
@@ -4950,8 +4922,7 @@ inline void Matrix<coefficient>::AddTwoRows(int fromRowIndex, int ToRowIndex, in
 template <typename coefficient>
 void Matrix<coefficient>::GaussianEliminationByRows
 (Matrix<coefficient>* carbonCopyMat, Selection* outputNonPivotColumns,
- Selection* outputPivotColumns, GlobalVariables* theGlobalVariables,
- std::stringstream* humanReadableReport, FormatExpressions* theFormat)
+ Selection* outputPivotColumns, std::stringstream* humanReadableReport, FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("Matrix::GaussianEliminationByRows");
   //Checking for bees
   if (this->NumRows==0)
@@ -4970,15 +4941,10 @@ void Matrix<coefficient>::GaussianEliminationByRows
     outputNonPivotColumns->init(this->NumCols);
   if (outputPivotColumns!=0)
     outputPivotColumns->init(this->NumCols);
-  bool doProgressReport=false;
-  if (theGlobalVariables==0)
-  { if (onePredefinedCopyOfGlobalVariables.flagReportEverything || onePredefinedCopyOfGlobalVariables.flagReportGaussianElimination)
-      doProgressReport=this->NumRows*this->NumCols>=400 && this->NumRows>10 && this->NumCols>10;
-  } else
-    doProgressReport=theGlobalVariables->flagReportGaussianElimination || theGlobalVariables->flagReportEverything;
+  bool doProgressReport=theGlobalVariables.flagReportGaussianElimination || theGlobalVariables.flagReportEverything;
   bool formatAsLinearSystem= theFormat==0? false : theFormat->flagFormatMatrixAsLinearSystem;
   bool useHtmlInReport=theFormat==0? true : theFormat->flagUseHTML;
-  ProgressReport theReport(&onePredefinedCopyOfGlobalVariables);
+  ProgressReport theReport(&theGlobalVariables);
   if (humanReadableReport!=0)
   { if(useHtmlInReport)
       *humanReadableReport << "\n\n\n\n<table><tr><td style=\"border-bottom:3pt solid black;\">System status</td>"
@@ -5043,9 +5009,9 @@ void Matrix<coefficient>::GaussianEliminationByRows
             << ".\n<br>Pivot row: " << NumFoundPivots+1 << ", eliminating row " << j+1 << " out of " << this->NumRows;
             theReport.Report(reportStream.str());
           }
-          this->AddTwoRows(NumFoundPivots, j, i, tempElement, theGlobalVariables);
+          this->AddTwoRows(NumFoundPivots, j, i, tempElement);
           if (carbonCopyMat!=0)
-            carbonCopyMat->AddTwoRows(NumFoundPivots, j, 0, tempElement, theGlobalVariables);
+            carbonCopyMat->AddTwoRows(NumFoundPivots, j, 0, tempElement);
           //if(!tempElement.checkConsistency())
           //  crash << crash;
           //this->ComputeDebugString();
@@ -5179,10 +5145,10 @@ public:
     this->basisRationalForm=other.basisRationalForm;
   }
   void WriteToFile
-  (std::fstream& output, GlobalVariables* theGlobalVariables)
+  (std::fstream& output)
   ;
   bool ReadFromFile
-  (std::fstream& input, GlobalVariables* theGlobalVariables)
+  (std::fstream& input)
   ;
   void MakeZn(int theDim);
   void RefineByOtherLattice(const Lattice& other);
@@ -5201,7 +5167,6 @@ class QuasiPolynomial
 public:
   inline static std::string GetXMLClassName(){ return "Quasipolynomial";}
   int GetNumVars()const{return this->AmbientLatticeReduced.basis.NumRows;}
-  GlobalVariables* buffers;
   Lattice AmbientLatticeReduced;
   Vectors<Rational> LatticeShifts;
   std::string DebugString;
@@ -5237,16 +5202,15 @@ public:
   (const PolynomialSubstitution<Rational>& theSub, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)const
   ;
   void operator+=(const QuasiPolynomial& other);
-  QuasiPolynomial(){this->buffers=0;}
-  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
-  bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
+  QuasiPolynomial(){}
+  void WriteToFile(std::fstream& output);
+  bool ReadFromFile(std::fstream& input);
   QuasiPolynomial(const QuasiPolynomial& other){this->operator=(other);}
   void operator*=(const Rational& theConst);
   void operator=(const QuasiPolynomial& other)
   { this->AmbientLatticeReduced=other.AmbientLatticeReduced;
     this->LatticeShifts=other.LatticeShifts;
     this->valueOnEachLatticeShift=other.valueOnEachLatticeShift;
-    this->buffers=other.buffers;
   }
 
 };
@@ -5502,8 +5466,8 @@ public:
   }
   bool ProduceNormalFromTwoNormalsAndSlicingDirection
   (Vector<Rational> & SlicingDirection, Vector<Rational>& normal1, Vector<Rational>& normal2, Vector<Rational>& output);
-  bool ReadFromFile(std::fstream& output, GlobalVariables* theGlobalVariables);
-  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
+  bool ReadFromFile(std::fstream& output);
+  void WriteToFile(std::fstream& output);
   void operator=(const Cone& other)
   { //this->flagHasSufficientlyManyVertices=other.flagHasSufficientlyManyVertices;
     this->flagIsTheZeroCone=other.flagIsTheZeroCone;
@@ -5549,11 +5513,11 @@ class ConeLatticeAndShift
     this->theLattice=other.theLattice;
     this->theShift=other.theShift;
   }
-  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
+  void WriteToFile(std::fstream& output);
   void FindExtremaInDirectionOverLatticeOneNonParamDegenerateCase
   (Vector<Rational>& theLPToMaximizeAffine, Vectors<Rational>& outputAppendLPToMaximizeAffine, List<ConeLatticeAndShift>& outputAppend,
    Matrix<Rational>& theProjectionLatticeLevel, GlobalVariables& theGlobalVariables);
-  bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
+  bool ReadFromFile(std::fstream& input);
   std::string ToString(FormatExpressions& theFormat);
   int GetDimProjectivized()
   { return this->theProjectivizedCone.GetDim();
@@ -5638,14 +5602,8 @@ public:
   { this->flagChambersHaveTooFewVertices=false;
     this->flagIsRefined=false;
   }
-  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
-  { this->WriteToFile(output, theGlobalVariables, -1);
-  }
-  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables, int UpperLimit);
-  bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
-  { return this->ReadFromFile(input, theGlobalVariables, -1);
-  }
-  bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitDebugPurposes);
+  void WriteToFile(std::fstream& output, int UpperLimit=-1);
+  bool ReadFromFile(std::fstream& input, int UpperLimitDebugPurposes=-1);
   void operator=(const ConeComplex& other)
   { this->::HashedList<Cone>::operator=(other);
     this->splittingNormals=other.splittingNormals;
@@ -6191,8 +6149,8 @@ class ConeLatticeAndShiftMaxComputation
   void FindExtremaParametricStep3(Controller& thePauseController, GlobalVariables& theGlobalVariables);
   void FindExtremaParametricStep4(Controller& thePauseController, GlobalVariables& theGlobalVariables);
   void FindExtremaParametricStep5(Controller& thePauseController, GlobalVariables& theGlobalVariables);
-  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
-  bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitDebugPurposes);
+  void WriteToFile(std::fstream& output);
+  bool ReadFromFile(std::fstream& input, int UpperLimitDebugPurposes);
 };
 
 class PiecewiseQuasipolynomial
@@ -6967,9 +6925,9 @@ template <class coefficient>
 void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(coefficient& output, const coefficient& theRingOne, const coefficient& theRingZero)
 { MacroRegisterFunctionWithName("Matrix::ComputeDeterminantOverwriteMatrix");
   bool doReport=false;
-  if (onePredefinedCopyOfGlobalVariables.flagReportEverything || onePredefinedCopyOfGlobalVariables.flagReportGaussianElimination)
+  if (theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportGaussianElimination)
     doReport=this->NumCols>10 && this->NumRows>10 && this->NumCols*this->NumRows>=400;
-  ProgressReport theReport(&onePredefinedCopyOfGlobalVariables), theReport2(&onePredefinedCopyOfGlobalVariables);
+  ProgressReport theReport(&theGlobalVariables), theReport2(&theGlobalVariables);
   int tempI;
   output=theRingOne;
   coefficient tempRat;
@@ -7272,7 +7230,7 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe
       if (theMod.HasFreeAction(theIndex))
         break;
       tempMat2=tempMat1;
-      tempMat1=theMod.GetActionGeneratorIndeX(theIndex, theGlobalVariables);
+      tempMat1=theMod.GetActionGeneratorIndeX(theIndex);
       tempMat1.RaiseToPower(thePower);
       tempMat1*=tempMat2;
       currentMon.Powers.size--;
@@ -7308,14 +7266,14 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe
 
 template<class coefficient>
 void Vectors<coefficient>::IntersectTwoLinSpaces
-(const List<Vector<coefficient> >& firstSpace, const List<Vector<coefficient> >& secondSpace, List<Vector<coefficient> >& output, GlobalVariables* theGlobalVariables)
+(const List<Vector<coefficient> >& firstSpace, const List<Vector<coefficient> >& secondSpace, List<Vector<coefficient> >& output)
 { //stOutput << "<br>*****Debugging Intersection linear spaces: ";
   //stOutput << "<br>input first space: " << firstSpace.ToString();
   //stOutput << "<br>input second space: " << secondSpace.ToString();
   Vectors<coefficient> firstReduced, secondReduced;
   Selection tempSel;
-  Vectors<coefficient>::SelectABasisInSubspace(firstSpace, firstReduced, tempSel, theGlobalVariables);
-  Vectors<coefficient>::SelectABasisInSubspace(secondSpace, secondReduced, tempSel, theGlobalVariables);
+  Vectors<coefficient>::SelectABasisInSubspace(firstSpace, firstReduced, tempSel);
+  Vectors<coefficient>::SelectABasisInSubspace(secondSpace, secondReduced, tempSel);
 //  stOutput << "<br>first selected basis: " << firstReduced.ToString();
 //  stOutput << "<br>second selected basis: " << secondReduced.ToString();
   if (firstReduced.size==0 || secondReduced.size==0)

@@ -2774,7 +2774,7 @@ bool NilradicalCandidate::TryFindingLInfiniteRels(GlobalVariables* theGlobalVari
     for (int j=0; j<numcycles; j++, this->theNilradSubsel.incrementSelectionFixedCardinality(i))
       if (this->IsCommutingSelectionNilradicalElements(this->theNilradSubsel))
       { this->theNilradicalWeights.SubSelection(this->theNilradSubsel, this->theNilradicalSubsetWeights);
-        if (this->theNilradicalSubsetWeights.ConesIntersect(this->theNilradicalSubsetWeights, this->theNonFKhwsStronglyTwoSided, &betterIntersection, 0, theGlobalVariables))
+        if (this->theNilradicalSubsetWeights.ConesIntersect(this->theNilradicalSubsetWeights, this->theNonFKhwsStronglyTwoSided, &betterIntersection, 0))
         { betterIntersection.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
           this->ConeStrongIntersection.MakeZero(this->theNilradicalWeights.size+this->theNonFKhwsStronglyTwoSided.size);
           this->ConeRelativelyStrongIntersection.SetSize(0);
@@ -2814,7 +2814,7 @@ bool NilradicalCandidate::TryFindingLInfiniteRels(GlobalVariables* theGlobalVari
       theReport.Report(out.str());
       if (this->IsCommutingSelectionNilradicalElements(this->theNilradSubsel))
       { this->ComputeTheTwoConesRelativeToNilradicalSubset();
-        if (this->theNilradicalSubsetWeights.ConesIntersect(this->theNilradicalSubsetWeights, this->theNonFKhwVectorsStrongRelativeToSubsetWeights, &this->ConeRelativelyStrongIntersection, 0, theGlobalVariables))
+        if (this->theNilradicalSubsetWeights.ConesIntersect(this->theNilradicalSubsetWeights, this->theNonFKhwVectorsStrongRelativeToSubsetWeights, &this->ConeRelativelyStrongIntersection, 0))
         { this->ConeRelativelyStrongIntersection.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
           return true;
         } else
@@ -3038,7 +3038,7 @@ void NilradicalCandidate::ProcessMe(GlobalVariables* theGlobalVariables)
   this->flagParabolicACextendsToParabolicAC=true;
   this->ComputeTheTwoCones(theGlobalVariables);
   this->flagNilradicalConesIntersect=this->theNilradicalWeights.ConesIntersect
-  (this->theNilradicalWeights, this->theNonFKhws, &this->ConeIntersection, &this->ConeSeparatingNormal, theGlobalVariables);
+  (this->theNilradicalWeights, this->theNonFKhws, &this->ConeIntersection, &this->ConeSeparatingNormal);
   this->flagLinfiniteRelFound=false;
   if (!this->flagNilradicalConesIntersect)
   { if (this->theNonFKhws.size==0 && this->theNilradicalWeights.size==0)
@@ -3050,7 +3050,7 @@ void NilradicalCandidate::ProcessMe(GlobalVariables* theGlobalVariables)
     return;
   }
   this->flagNilradicalConesStronglyIntersect=this->theNilradicalWeights.ConesIntersect
-  (this->theNilradicalWeights, this->theNonFKhwsStronglyTwoSided, &this->ConeStrongIntersection, 0, theGlobalVariables);
+  (this->theNilradicalWeights, this->theNonFKhwsStronglyTwoSided, &this->ConeStrongIntersection, 0);
   if (this->flagNilradicalConesStronglyIntersect)
     this->flagLinfiniteRelFound= this->TryFindingLInfiniteRels(theGlobalVariables);
 }
@@ -3917,7 +3917,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras
   for (int i=0; i<output.theRootSAs.theSubalgebras.size; i++)
   { std::stringstream tempStream;
     tempStream << "\nExploring root subalgebra " << output.theRootSAs.theSubalgebras[i].theDynkinDiagram.ToString()
-    << "(" << (i+1) << " out of " << output.theRootSAs.theSubalgebras.size << ")\n";
+    << " (" << (i+1) << " out of " << output.theRootSAs.theSubalgebras.size << ")\n";
     theReport.Report(tempStream.str());
     output.theRootSAs.theSubalgebras[i].GetSsl2SubalgebrasAppendListNoRepetition(output, i, theGlobalVariables);
   }
@@ -6123,7 +6123,7 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGloba
   }
   Vectors<AlgebraicNumber> outputCartanCentralizer;
   Vector<AlgebraicNumber> theCentralizerH;
-  theHWsNonSorted.IntersectTwoLinSpaces(theHWsNonSorted, theCartan, outputCartanCentralizer, theGlobalVariables);
+  theHWsNonSorted.IntersectTwoLinSpaces(theHWsNonSorted, theCartan, outputCartanCentralizer);
   this->CartanOfCentralizer.SetSize(outputCartanCentralizer.size);
   AlgebraicNumber theFirstNonZeroCoeff;
   for (int i=0; i<this->CartanOfCentralizer.size; i++)

@@ -6,12 +6,11 @@
 #include <mutex>
 
 ProjectInformationInstance vpfGeneral2Mutexes(__FILE__, "Multitasking implementation.");
-extern GlobalVariables onePredefinedCopyOfGlobalVariables;
 
 void ParallelComputing::CheckPointerCounters()
 { if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList)
-  { MutexWrapper& tempMutex=
-    onePredefinedCopyOfGlobalVariables.MutexParallelComputingStaticFiasco
+  { MutexRecursiveWrapper& tempMutex=
+    theGlobalVariables.MutexParallelComputingStaticFiasco
     ;
     tempMutex.LockMe();
     if (ParallelComputing::flagUngracefulExitInitiated)
@@ -29,15 +28,15 @@ void ParallelComputing::CheckPointerCounters()
     ParallelComputing::PointerCounterPeakRamUse=ParallelComputing::GlobalPointerCounter;
 }
 
-void MutexWrapper::CheckConsistency()
+void MutexRecursiveWrapper::CheckConsistency()
 { if (this->flagDeallocated)
   { std::cout << "Use after free of mutex. " << crash.GetStackTraceShort() << std::endl;
     assert(false);
   }
 }
 
-void MutexWrapper::initConstructorCallOnly()
-{ //    std::cout << "MutexWrapper::MutexWrapper. theMutexesGlobal.size: " << theMutexesGlobal.size << std::endl;
+void MutexRecursiveWrapper::initConstructorCallOnly()
+{ //    std::cout << "MutexRecursiveWrapper::MutexRecursiveWrapper. theMutexesGlobal.size: " << theMutexesGlobal.size << std::endl;
 //  static bool allowToRun=true;
 //  while (!allowToRun)
 //  {}
@@ -52,30 +51,30 @@ ParallelComputing::GlobalPointerCounter++;
 #endif
 }
 
-bool MutexWrapper::InitializeIfNeeded()
+bool MutexRecursiveWrapper::InitializeIfNeeded()
 { if (this->flagInitialized)
     return true;
-  if (!onePredefinedCopyOfGlobalVariables.flagAllowUseOfThreadsAndMutexes)
+  if (!theGlobalVariables.flagAllowUseOfThreadsAndMutexes)
     return false;
   this->theMutexImplementation= new std::mutex;
   this->flagInitialized=true;
   return true;
 }
 
-MutexWrapper::~MutexWrapper()
+MutexRecursiveWrapper::~MutexRecursiveWrapper()
 { delete (std::mutex*)(this->theMutexImplementation);
   this->theMutexImplementation=0;
   this->flagDeallocated=true;
   this->flagInitialized=false;
 }
 
-bool MutexWrapper::isLockedUnsafeUseForWINguiOnly()
+bool MutexRecursiveWrapper::isLockedUnsafeUseForWINguiOnly()
 {// std::cout << "checking consistency from isLockedUnsafeUseForWINguiOnly";
   this->CheckConsistency();
   return this->flagUnsafeFlagForDebuggingIsLocked;
 }
 
-void MutexWrapper::LockMe()
+void MutexRecursiveWrapper::LockMe()
 { //std::cout << "checking consistency from lockme";
   this->CheckConsistency();
   if (!this->InitializeIfNeeded())
@@ -89,7 +88,7 @@ void MutexWrapper::LockMe()
   this->flagUnsafeFlagForDebuggingIsLocked=true;
 }
 
-void MutexWrapper::UnlockMe()
+void MutexRecursiveWrapper::UnlockMe()
 {// std::cout << "checking consistency from unlockme";
   this->CheckConsistency();
   if (!this->InitializeIfNeeded())
@@ -150,7 +149,16 @@ bool Controller::IsPausedWhileRunning()const
 { return this->flagIsPausedWhileRunning;
 }
 
-ThreadWrapper::ThreadWrapper(void(*inputFunction)())
-{ this->theFunction=inputFunction;
-  this->theThreadData= new std::thread(this->theFunction);
+ThreadData::ThreadData()
+{ this->id=0;
+  this->threadPointer=0;
+}
+
+ThreadData::~ThreadData()
+{
+}
+
+void GlobalVariables::InitializeThreadData()
+{
+
 }

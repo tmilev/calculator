@@ -8,9 +8,6 @@
 
 ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Math routines implementation. ");
 
-Crasher crash;
-StdoutClass stOutput;
-
 Crasher::Crasher()
 { this->theGlobalVariables=0;
   this->flagFirstRun=true;
@@ -1116,46 +1113,46 @@ void GeneralizedVermaModuleCharacters::WriteToFile(std::fstream& output, GlobalV
   this->preferredBasiS.WriteToFile(output);
   this->preferredBasisChangE.WriteToFile(output);
   this->preferredBasisChangeInversE.WriteToFile(output);
-  this->theExtendedIntegralLatticeMatForM.WriteToFile(output, theGlobalVariables);
+  this->theExtendedIntegralLatticeMatForM.WriteToFile(output);
   ProgressReport theReport(theGlobalVariables);
   if (theGlobalVariables!=0)
     theReport.Report("Writing small data... ");
-  this->theMaxComputation.WriteToFile(output, theGlobalVariables);
-  this->GmodKnegativeWeightS.WriteToFile(output, theGlobalVariables);
-  this->GmodKNegWeightsBasisChanged.WriteToFile(output, theGlobalVariables);
+  this->theMaxComputation.WriteToFile(output);
+  this->GmodKnegativeWeightS.WriteToFile(output);
+  this->GmodKNegWeightsBasisChanged.WriteToFile(output);
   this->theLinearOperators.WriteToFile(output);
   this->theLinearOperatorsExtended.WriteToFile(output);
-  this->PreimageWeylChamberLargerAlgebra.WriteToFile(output, theGlobalVariables);
-  this->PreimageWeylChamberSmallerAlgebra.WriteToFile(output, theGlobalVariables);
-  this->WeylChamberSmallerAlgebra.WriteToFile(output, theGlobalVariables);
+  this->PreimageWeylChamberLargerAlgebra.WriteToFile(output);
+  this->PreimageWeylChamberSmallerAlgebra.WriteToFile(output);
+  this->WeylChamberSmallerAlgebra.WriteToFile(output);
   if (theGlobalVariables!=0)
     theReport.Report("Writing QP's non-subbed... ");
-  this->theQPsNonSubstituted.WriteToFile(output, theGlobalVariables);
+  this->theQPsNonSubstituted.WriteToFile(output);
   if (theGlobalVariables!=0)
     theReport.Report("Writing QP's subbed... ");
   output << XML::GetOpenTagNoInputCheckAppendSpacE("QPsSubbed");
-  this->theQPsSubstituted.WriteToFile(output, theGlobalVariables);
+  this->theQPsSubstituted.WriteToFile(output);
   output << XML::GetCloseTagNoInputCheckAppendSpacE("QPsSubbed");
   if (theGlobalVariables!=0)
     theReport.Report("Writing small data... ");
 
   output << XML::GetOpenTagNoInputCheckAppendSpacE("theMultiplicities");
-  this->theMultiplicities.WriteToFile(output, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
+  this->theMultiplicities.WriteToFile(output, this->UpperLimitChambersForDebugPurposes);
   output << XML::GetCloseTagNoInputCheckAppendSpacE("theMultiplicities");
 //  this->theMultiplicitiesExtremaCandidates.WriteToFile(output, theGlobalVariables);
   this->theCoeffs.WriteToFile(output);
-  this->theTranslationS.WriteToFile(output, theGlobalVariables);
-  this->theTranslationsProjectedBasisChanged.WriteToFile(output, theGlobalVariables);
+  this->theTranslationS.WriteToFile(output);
+  this->theTranslationsProjectedBasisChanged.WriteToFile(output);
   this->thePfs.WriteToFile(output, theGlobalVariables);
 //  this->paramSubChambers.WriteToFile(output, theGlobalVariables);
 //  this->nonParamVertices.WriteToFile(output, theGlobalVariables);
   if (theGlobalVariables!=0)
     theReport.Report("Writing param chamber complex... ");
-  this->projectivizedParamComplex.WriteToFile(output, theGlobalVariables);
+  this->projectivizedParamComplex.WriteToFile(output);
   if (theGlobalVariables!=0)
     theReport.Report("Writing projectivized chamber complex... ");
-  this->smallerAlgebraChamber.WriteToFile(output, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
-  this->projectivizedChambeR.WriteToFile(output, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
+  this->smallerAlgebraChamber.WriteToFile(output, this->UpperLimitChambersForDebugPurposes);
+  this->projectivizedChambeR.WriteToFile(output, this->UpperLimitChambersForDebugPurposes);
   if (theGlobalVariables!=0)
     theReport.Report("Writing to file done...");
   output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
@@ -1183,7 +1180,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
 //  this->log << "weights of g mod k: " << this->GmodKnegativeWeights.ToString();
   Matrix<Rational>  tempMat;
   tempMat=input.theDomain().theWeyl.CartanSymmetric;
-  tempMat.Invert(&theGlobalVariables);
+  tempMat.Invert();
 //  tempMat.ActOnVectorsColumn(this->GmodKnegativeWeightS);
   this->log << this->GmodKnegativeWeightS.ToString();
   this->preferredBasiS.SetSize(2);
@@ -1324,7 +1321,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   this->theExtendedIntegralLatticeMatForM.basisRationalForm.DirectSumWith(tempLattice.basisRationalForm, (Rational) 0);
   this->theExtendedIntegralLatticeMatForM.MakeFromMat(this->theExtendedIntegralLatticeMatForM.basisRationalForm);
   tempMat=theWeYl.CartanSymmetric;
-  tempMat.Invert(&theGlobalVariables);
+  tempMat.Invert();
   Vectors<Rational> WallsWeylChamberLargerAlgebra;
   for (int i=0; i<tempMat.NumRows; i++)
   { tempMat.GetVectorFromRow(i, tempRoot);
@@ -1350,7 +1347,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
     this->PreimageWeylChamberLargerAlgebra.Normals[i]=tempRoot;
   }
   tempMat=input.theDomain().theWeyl.CartanSymmetric;
-  tempMat.Invert(&theGlobalVariables);
+  tempMat.Invert();
   tempRoots.size=0;
   Vector<Rational> ParabolicEvaluationRootSmallerAlgebra;
   ParabolicEvaluationRootSmallerAlgebra=this->ParabolicSelectionSmallerAlgebra;
@@ -1556,10 +1553,10 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase(std::fstre
   this->ParabolicSelectionSmallerAlgebra.ReadFromFile(input);
   this->WeylLarger.ReadFromFile(input);
   this->WeylSmaller.ReadFromFile(input);
-  this->preferredBasiS.ReadFromFile(input, theGlobalVariables);
+  this->preferredBasiS.ReadFromFile(input);
   this->preferredBasisChangE.ReadFromFile(input, theGlobalVariables);
   this->preferredBasisChangeInversE.ReadFromFile(input);
-  this->theExtendedIntegralLatticeMatForM.ReadFromFile(input, theGlobalVariables);
+  this->theExtendedIntegralLatticeMatForM.ReadFromFile(input);
   if (theGlobalVariables!=0)
 {} //   this->theParser.theHmm.MakeG2InB3(this->theParser, *theGlobalVariables);
   else
@@ -1567,33 +1564,33 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase(std::fstre
 {}//    this->theParser.theHmm.MakeG2InB3(this->theParser, tempGlobalVars);
   }
   theReport.Report("Loading param subchambers cone form... ");
-  this->theMaxComputation.ReadFromFile(input, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
+  this->theMaxComputation.ReadFromFile(input, this->UpperLimitChambersForDebugPurposes);
   theReport.Report("Loading more pieces of data... ");
-  this->GmodKnegativeWeightS.ReadFromFile(input, theGlobalVariables);
-  this->GmodKNegWeightsBasisChanged.ReadFromFile(input, theGlobalVariables);
-  this->theLinearOperators.ReadFromFile(input, theGlobalVariables);
-  this->theLinearOperatorsExtended.ReadFromFile(input, theGlobalVariables);
-  this->PreimageWeylChamberLargerAlgebra.ReadFromFile(input, theGlobalVariables);
-  this->PreimageWeylChamberSmallerAlgebra.ReadFromFile(input, theGlobalVariables);
-  this->WeylChamberSmallerAlgebra.ReadFromFile(input, theGlobalVariables);
-  this->theQPsNonSubstituted.ReadFromFile(input, theGlobalVariables);
+  this->GmodKnegativeWeightS.ReadFromFile(input);
+  this->GmodKNegWeightsBasisChanged.ReadFromFile(input);
+  this->theLinearOperators.ReadFromFile(input);
+  this->theLinearOperatorsExtended.ReadFromFile(input);
+  this->PreimageWeylChamberLargerAlgebra.ReadFromFile(input);
+  this->PreimageWeylChamberSmallerAlgebra.ReadFromFile(input);
+  this->WeylChamberSmallerAlgebra.ReadFromFile(input);
+  this->theQPsNonSubstituted.ReadFromFile(input);
   XML::ReadThroughFirstOpenTag(input, numReadWords, "QPsSubbed");
-  this->theQPsSubstituted.ReadFromFile(input, theGlobalVariables);
+  this->theQPsSubstituted.ReadFromFile(input);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, "QPsSubbed");
   theReport.Report("Loading multiplicities... ");
   XML::ReadThroughFirstOpenTag(input, numReadWords, "theMultiplicities");
-  this->theMultiplicities.ReadFromFile(input, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
+  this->theMultiplicities.ReadFromFile(input, this->UpperLimitChambersForDebugPurposes);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, "theMultiplicities");
   this->theCoeffs.ReadFromFile(input);
-  this->theTranslationS.ReadFromFile(input, theGlobalVariables);
-  this->theTranslationsProjectedBasisChanged.ReadFromFile(input, theGlobalVariables);
+  this->theTranslationS.ReadFromFile(input);
+  this->theTranslationsProjectedBasisChanged.ReadFromFile(input);
   theReport.Report("Loading partial fractions... ");
 //  this->thePfs.ReadFromFile(input, theGlobalVariables);
   theReport.Report("Loading projectivized param complex... ");
-  this->projectivizedParamComplex.ReadFromFile(input, theGlobalVariables, -1);
+  this->projectivizedParamComplex.ReadFromFile(input);
   theReport.Report("Loading the complex... ");
-  this->smallerAlgebraChamber.ReadFromFile(input, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
-  this->projectivizedChambeR.ReadFromFile(input, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
+  this->smallerAlgebraChamber.ReadFromFile(input, this->UpperLimitChambersForDebugPurposes);
+  this->projectivizedChambeR.ReadFromFile(input, this->UpperLimitChambersForDebugPurposes);
   theReport.Report("Loading complete... ");
   return true;
 }

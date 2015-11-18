@@ -83,6 +83,7 @@ GlobalVariables::GlobalVariables()
   this->flagReportGaussianElimination=false;
   this->flagReportLargeIntArithmetic=false;
   this->flagReportProductsMonomialAlgebras=false;
+  this->flagReportFileIO=true;
   this->getElapsedTimePrivate=0;
   this->flagTimeOutExplanationAlreadyDisplayed=false;
   this->flagOutputTimedOut=false;
@@ -129,9 +130,8 @@ ProjectInformationInstance::ProjectInformationInstance(const char* fileName, con
 { ProjectInformation::GetMainProjectInfo().AddProjectInfo(fileName, fileDescription);
 }
 
-extern GlobalVariables onePredefinedCopyOfGlobalVariables;
 RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const std::string& functionName)
-{ MutexLockGuard theLock(onePredefinedCopyOfGlobalVariables.MutexRegisterFunctionStaticFiasco);
+{ MutexLockGuard theLock(theGlobalVariables.MutexRegisterFunctionStaticFiasco);
   List<stackInfo>& theStack=ProjectInformation::GetMainProjectInfo().CustomStackTrace;
   theStack.SetSize(theStack.size+1);
   stackInfo& stackTop=*theStack.LastObject();
@@ -141,7 +141,7 @@ RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const
 }
 
 RegisterFunctionCall::~RegisterFunctionCall()
-{ MutexLockGuard theLock(onePredefinedCopyOfGlobalVariables.MutexRegisterFunctionStaticFiasco);
+{ MutexLockGuard theLock(theGlobalVariables.MutexRegisterFunctionStaticFiasco);
   List<stackInfo>& theStack=ProjectInformation::GetMainProjectInfo().CustomStackTrace;
   theStack.size--;
 }
@@ -7018,8 +7018,7 @@ void QuasiPolynomial::operator*=(const Rational& theConst)
     this->valueOnEachLatticeShift.TheObjects[i]*=theConst;
 }
 
-void Cone::WriteToFile
-  (std::fstream& output, GlobalVariables* theGlobalVariables)
+void Cone::WriteToFile(std::fstream& output)
 { output << XML::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
   output << "Cone( ";
   for (int i=0; i<this->Normals.size; i++)
@@ -7037,7 +7036,7 @@ void Cone::WriteToFile
   output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
 }
 
-bool Cone::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
+bool Cone::ReadFromFile(std::fstream& input)
 { std::string tempS, rootString;
   Vectors<Rational> buffer;
   int NumWordsRead;
@@ -7068,42 +7067,39 @@ bool Cone::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables
       return false;
     }
   bool result;
-  result=this->CreateFromNormals(buffer, theGlobalVariables);
+  result=this->CreateFromNormals(buffer);
   result= XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName()) && result;
 //  if(!tempBool) crash << crash;
   return result;
 }
 
-void ConeLatticeAndShift::WriteToFile
-  (std::fstream& output, GlobalVariables* theGlobalVariables)
+void ConeLatticeAndShift::WriteToFile(std::fstream& output)
 { output << XML::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
-  this->theLattice.WriteToFile(output, theGlobalVariables);
-  this->theProjectivizedCone.WriteToFile(output, theGlobalVariables);
+  this->theLattice.WriteToFile(output);
+  this->theProjectivizedCone.WriteToFile(output);
   this->theShift.WriteToFile(output);
   output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
 }
 
-bool ConeLatticeAndShift::ReadFromFile
-  (std::fstream& output, GlobalVariables* theGlobalVariables)
+bool ConeLatticeAndShift::ReadFromFile(std::fstream& output)
 { XML::ReadThroughFirstOpenTag(output, this->GetXMLClassName());
-  this->theLattice.ReadFromFile(output, theGlobalVariables);
-  this->theProjectivizedCone.ReadFromFile(output, theGlobalVariables);
+  this->theLattice.ReadFromFile(output);
+  this->theProjectivizedCone.ReadFromFile(output);
   this->theShift.ReadFromFile(output);
   XML::ReadEverythingPassedTagOpenUntilTagClose(output, this->GetXMLClassName());
   return true;
 }
 
-void ConeLatticeAndShiftMaxComputation::WriteToFile
-  (std::fstream& output, GlobalVariables* theGlobalVariables)
+void ConeLatticeAndShiftMaxComputation::WriteToFile(std::fstream& output)
 { output << XML::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
   output << " NumParam: " << this->numNonParaM << " numProcessedNonParam: " << this->numProcessedNonParam << "\n";
 
   output << XML::GetOpenTagNoInputCheckAppendSpacE("complexStartingPerRepresentative");
-  this->complexStartingPerRepresentative.WriteToFile(output, theGlobalVariables);
+  this->complexStartingPerRepresentative.WriteToFile(output);
   output << XML::GetCloseTagNoInputCheckAppendSpacE("complexStartingPerRepresentative");
 
   output << XML::GetOpenTagNoInputCheckAppendSpacE("complexRefinedPerRepresentative");
-  this->complexRefinedPerRepresentative.WriteToFile(output, theGlobalVariables);
+  this->complexRefinedPerRepresentative.WriteToFile(output);
   output << XML::GetCloseTagNoInputCheckAppendSpacE("complexRefinedPerRepresentative");
 
   output << XML::GetOpenTagNoInputCheckAppendSpacE("theMaximaCandidates");
@@ -7119,11 +7115,11 @@ void ConeLatticeAndShiftMaxComputation::WriteToFile
   output << XML::GetCloseTagNoInputCheckAppendSpacE("finalMaxima");
 
   output << XML::GetOpenTagNoInputCheckAppendSpacE("theStartingLattice");
-  this->theStartingLattice.WriteToFile(output, theGlobalVariables);
+  this->theStartingLattice.WriteToFile(output);
   output << XML::GetCloseTagNoInputCheckAppendSpacE("theStartingLattice");
 
   output << XML::GetOpenTagNoInputCheckAppendSpacE("theFinalRougherLattice");
-  this->theFinalRougherLattice.WriteToFile(output, theGlobalVariables);
+  this->theFinalRougherLattice.WriteToFile(output);
   output << XML::GetCloseTagNoInputCheckAppendSpacE("theFinalRougherLattice");
 
   output << XML::GetOpenTagNoInputCheckAppendSpacE("theStartingRepresentative");
@@ -7131,15 +7127,15 @@ void ConeLatticeAndShiftMaxComputation::WriteToFile
   output << XML::GetCloseTagNoInputCheckAppendSpacE("theStartingRepresentative");
 
   output << XML::GetOpenTagNoInputCheckAppendSpacE("theFinalRepresentatives");
-  this->theFinalRepresentatives.WriteToFile(output, theGlobalVariables);
+  this->theFinalRepresentatives.WriteToFile(output);
   output << XML::GetCloseTagNoInputCheckAppendSpacE("theFinalRepresentatives");
 
   output << XML::GetOpenTagNoInputCheckAppendSpacE("theConesLargerDim");
-  this->theConesLargerDim.WriteToFile(output, theGlobalVariables);
+  this->theConesLargerDim.WriteToFile(output);
   output << XML::GetCloseTagNoInputCheckAppendSpacE("theConesLargerDim");
 
   output << XML::GetOpenTagNoInputCheckAppendSpacE("theConesSmallerDim");
-  this->theConesSmallerDim.WriteToFile(output, theGlobalVariables);
+  this->theConesSmallerDim.WriteToFile(output);
   output << XML::GetCloseTagNoInputCheckAppendSpacE("theConesSmallerDim");
 
   output << XML::GetOpenTagNoInputCheckAppendSpacE("IsInfinity");
@@ -7147,50 +7143,50 @@ void ConeLatticeAndShiftMaxComputation::WriteToFile
   output << XML::GetCloseTagNoInputCheckAppendSpacE("IsInfinity");
 
   output << XML::GetOpenTagNoInputCheckAppendSpacE("LPtoMaximizeLargerDim");
-  this->LPtoMaximizeLargerDim.WriteToFile(output, theGlobalVariables);
+  this->LPtoMaximizeLargerDim.WriteToFile(output);
   output << XML::GetCloseTagNoInputCheckAppendSpacE("LPtoMaximizeLargerDim");
 
   output << XML::GetOpenTagNoInputCheckAppendSpacE("LPtoMaximizeSmallerDim");
-  this->LPtoMaximizeSmallerDim.WriteToFile(output, theGlobalVariables);
+  this->LPtoMaximizeSmallerDim.WriteToFile(output);
   output << XML::GetCloseTagNoInputCheckAppendSpacE("LPtoMaximizeSmallerDim");
 
   output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName()) << "\n";
 }
 
 bool ConeLatticeAndShiftMaxComputation::ReadFromFile
-(std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitDebugPurposes)
-{ ProgressReport theReport(theGlobalVariables);
+(std::fstream& input, int UpperLimitDebugPurposes)
+{ ProgressReport theReport(&theGlobalVariables);
   int numReadWords;
   XML::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
   std::string tempS;
   input >> tempS >> this->numNonParaM >> tempS >> this->numProcessedNonParam;
   theReport.Report("Loading complex starting per representative...");
   XML::ReadThroughFirstOpenTag(input, "complexStartingPerRepresentative");
-  this->complexStartingPerRepresentative.ReadFromFile(input, theGlobalVariables);
+  this->complexStartingPerRepresentative.ReadFromFile(input);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, "complexStartingPerRepresentative");
   theReport.Report("Loading complex refined per representative...");
   XML::ReadThroughFirstOpenTag(input, "complexRefinedPerRepresentative");
-  this->complexRefinedPerRepresentative.ReadFromFile(input, theGlobalVariables);
+  this->complexRefinedPerRepresentative.ReadFromFile(input);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, "complexRefinedPerRepresentative");
   theReport.Report("Loading the max candidates...");
   XML::ReadThroughFirstOpenTag(input, "theMaximaCandidates");
-  this->theMaximaCandidates.ReadFromFile(input, theGlobalVariables);
+  this->theMaximaCandidates.ReadFromFile(input);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, "theMaximaCandidates");
   theReport.Report("Loading starting linear polys...");
   XML::ReadThroughFirstOpenTag(input, "startingLPtoMaximize");
-  this->startingLPtoMaximize.ReadFromFile(input, theGlobalVariables);
+  this->startingLPtoMaximize.ReadFromFile(input);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, "startingLPtoMaximize");
   theReport.Report("Loading final maxima...");
   XML::ReadThroughFirstOpenTag(input, "finalMaxima");
-  this->finalMaxima.ReadFromFile(input, theGlobalVariables);
+  this->finalMaxima.ReadFromFile(input);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, "finalMaxima");
   theReport.Report("Loading starting lattice...");
   XML::ReadThroughFirstOpenTag(input, "theStartingLattice");
-  this->theStartingLattice.ReadFromFile(input, theGlobalVariables);
+  this->theStartingLattice.ReadFromFile(input);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, "theStartingLattice");
   theReport.Report("Loading final rougher lattice...");
   XML::ReadThroughFirstOpenTag(input, "theFinalRougherLattice");
-  this->theFinalRougherLattice.ReadFromFile(input, theGlobalVariables);
+  this->theFinalRougherLattice.ReadFromFile(input);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, "theFinalRougherLattice");
   theReport.Report("Loading starting representative...");
   XML::ReadThroughFirstOpenTag(input, "theStartingRepresentative");
@@ -7198,15 +7194,15 @@ bool ConeLatticeAndShiftMaxComputation::ReadFromFile
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, "theStartingRepresentative");
   theReport.Report("Loading final representatives...");
   XML::ReadThroughFirstOpenTag(input, "theFinalRepresentatives");
-  this->theFinalRepresentatives.ReadFromFile(input, theGlobalVariables);
+  this->theFinalRepresentatives.ReadFromFile(input);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, "theFinalRepresentatives");
   theReport.Report("Loading cones larger dim...");
   XML::ReadThroughFirstOpenTag(input, "theConesLargerDim");
-  this->theConesLargerDim.ReadFromFile(input, theGlobalVariables, UpperLimitDebugPurposes);
+  this->theConesLargerDim.ReadFromFile(input, UpperLimitDebugPurposes);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, "theConesLargerDim");
   theReport.Report("Loading cones smaller dim...");
   XML::ReadThroughFirstOpenTag(input, "theConesSmallerDim");
-  this->theConesSmallerDim.ReadFromFile(input, theGlobalVariables);
+  this->theConesSmallerDim.ReadFromFile(input);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, "theConesSmallerDim");
   theReport.Report("Loading IsInfinite array...");
   XML::ReadThroughFirstOpenTag(input, "IsInfinity");
@@ -7214,11 +7210,11 @@ bool ConeLatticeAndShiftMaxComputation::ReadFromFile
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, "IsInfinity");
   theReport.Report("Loading LPtoMaximizeLargerDim...");
   XML::ReadThroughFirstOpenTag(input, "LPtoMaximizeLargerDim");
-  this->LPtoMaximizeLargerDim.ReadFromFile(input, theGlobalVariables, UpperLimitDebugPurposes);
+  this->LPtoMaximizeLargerDim.ReadFromFile(input, UpperLimitDebugPurposes);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, "LPtoMaximizeLargerDim");
   theReport.Report("Loading LPtoMaximizeSmallerDim...");
   XML::ReadThroughFirstOpenTag(input, "LPtoMaximizeSmallerDim");
-  this->LPtoMaximizeSmallerDim.ReadFromFile(input, theGlobalVariables);
+  this->LPtoMaximizeSmallerDim.ReadFromFile(input);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, "LPtoMaximizeSmallerDim");
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
   if(numReadWords!=0)
@@ -7226,27 +7222,26 @@ bool ConeLatticeAndShiftMaxComputation::ReadFromFile
   return true;
 }
 
-void QuasiPolynomial::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
-{ this->valueOnEachLatticeShift.WriteToFile(output, theGlobalVariables);
-  this->AmbientLatticeReduced.WriteToFile(output, theGlobalVariables);
-  this->LatticeShifts.WriteToFile(output, theGlobalVariables);
+void QuasiPolynomial::WriteToFile(std::fstream& output)
+{ this->valueOnEachLatticeShift.WriteToFile(output);
+  this->AmbientLatticeReduced.WriteToFile(output);
+  this->LatticeShifts.WriteToFile(output);
 }
 
-bool QuasiPolynomial::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
-{ this->valueOnEachLatticeShift.ReadFromFile(input, theGlobalVariables);
-  this->AmbientLatticeReduced.ReadFromFile(input, theGlobalVariables);
-  this->LatticeShifts.ReadFromFile(input, theGlobalVariables);
-  this->buffers=theGlobalVariables;
+bool QuasiPolynomial::ReadFromFile(std::fstream& input)
+{ this->valueOnEachLatticeShift.ReadFromFile(input);
+  this->AmbientLatticeReduced.ReadFromFile(input);
+  this->LatticeShifts.ReadFromFile(input);
   return true;
 }
 
-void Lattice::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
+void Lattice::WriteToFile(std::fstream& output)
 { output << XML::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
   this->basisRationalForm.WriteToFile(output);
   output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
 }
 
-bool Lattice::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
+bool Lattice::ReadFromFile(std::fstream& input)
 { int numReadWords;
   XML::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
   bool result=this->basisRationalForm.ReadFromFile(input);
@@ -7257,16 +7252,16 @@ bool Lattice::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariab
   return result;
 }
 
-void ConeComplex::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables, int UpperLimit)
-{ this->List<Cone>::WriteToFile(output, theGlobalVariables, UpperLimit);
+void ConeComplex::WriteToFile(std::fstream& output, int UpperLimit)
+{ this->List<Cone>::WriteToFile(output, UpperLimit);
   output << "IndexLowestNonRefined: " << this->indexLowestNonRefinedChamber << "\n";
   this->splittingNormals.WriteToFile(output);
   this->slicingDirections.WriteToFile(output);
-  this->ConvexHull.WriteToFile(output, theGlobalVariables);
+  this->ConvexHull.WriteToFile(output);
 }
 
-bool ConeComplex::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitDebugPurposes)
-{ if(!this->List<Cone>::ReadFromFile(input, theGlobalVariables, UpperLimitDebugPurposes))
+bool ConeComplex::ReadFromFile(std::fstream& input, int UpperLimitDebugPurposes)
+{ if(!this->List<Cone>::ReadFromFile(input, UpperLimitDebugPurposes))
   { crash << crash ;
     return false;
   }
@@ -7280,8 +7275,8 @@ bool ConeComplex::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVa
   { crash << crash;
     return false;
   }
-  this->slicingDirections.ReadFromFile(input, theGlobalVariables);
-  this->ConvexHull.ReadFromFile(input, theGlobalVariables);
+  this->slicingDirections.ReadFromFile(input);
+  this->ConvexHull.ReadFromFile(input);
   return true;
 }
 
@@ -9483,11 +9478,11 @@ void ConeComplex::GetNewVerticesAppend
 { int theDimMinusTwo=killerNormal.size-2;
   int theDim=killerNormal.size;
   int numCycles=MathRoutines::NChooseK(myDyingCone.Normals.size, theDimMinusTwo);
-  Selection theSel=theGlobalVariables.selGetNewVerticesAppend.GetElement();
-  Selection nonPivotPoints=theGlobalVariables.selGetNewVerticesAppend2.GetElement();
+  Selection theSel;
+  Selection nonPivotPoints;
   theSel.init(myDyingCone.Normals.size);
 //  int IndexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore;
-  Matrix<Rational>& theLinearAlgebra=theGlobalVariables.matGetNewVerticesAppend.GetElement();
+  Matrix<Rational> theLinearAlgebra;
   theLinearAlgebra.init(theDimMinusTwo+1, theDim);
   Vector<Rational> tempRoot;
   for (int i=0; i<numCycles; i++)
@@ -9524,8 +9519,8 @@ bool ConeComplex::SplitChamber
     return false;
   }*/
   Cone newPlusCone, newMinusCone;
-  Matrix<Rational>& bufferMat=theGlobalVariables.matSplitChamberBuff.GetElement();
-  Selection& bufferSel=theGlobalVariables.selSplitChamber.GetElement();
+  Matrix<Rational> bufferMat;
+  Selection bufferSel;
   bool needToRecomputeVertices=
   (myDyingCone.Normals.GetRankOfSpanOfElements(&bufferMat, &bufferSel)<this->GetDim());
 //  newPlusCone.flagHasSufficientlyManyVertices=true;
@@ -9733,7 +9728,7 @@ bool Cone::EliminateFakeNormalsUsingVertices(int theDiM, int numAddedFakeWalls, 
       gramMatrixInverted=matNormals;
       gramMatrixInverted.Transpose();
       gramMatrixInverted.MultiplyOnTheLeft(matNormals);
-      gramMatrixInverted.Invert(theGlobalVariables);
+      gramMatrixInverted.Invert();
       Vector<Rational> tempRoot;
       for (int i=0; i<this->Normals.size; i++)
       { matNormals.ActOnVectorColumn(this->Normals[i], tempRoot);

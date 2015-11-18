@@ -195,7 +195,7 @@ class quasiDiffOp : public MonomialCollection<quasiDiffMon, coefficient>
 {
 public:
   std::string ToString(FormatExpressions* theFormat=0)const;
-  void GenerateBasisLieAlgebra(List<quasiDiffOp<coefficient> >& theElts, FormatExpressions* theFormat=0, GlobalVariables* theGlobalVariables=0);
+  void GenerateBasisLieAlgebra(List<quasiDiffOp<coefficient> >& theElts, FormatExpressions* theFormat=0);
   void operator*=(const quasiDiffOp<coefficient>& standsOnTheRight);
   void operator=(const  MonomialCollection<quasiDiffMon, coefficient>& other)
   { this->MonomialCollection<quasiDiffMon, coefficient>::operator=(other);
@@ -276,7 +276,7 @@ void MathRoutines::LieBracket(const Element& standsOnTheLeft, const Element& sta
 }
 
 template <class coefficient>
-void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(List<quasiDiffOp<coefficient> >& theElts, FormatExpressions* theFormat, GlobalVariables* theGlobalVariables)
+void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(List<quasiDiffOp<coefficient> >& theElts, FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("quasiDiffOp<coefficient>::GenerateBasisLieAlgebra");
   ProgressReport theReport (theGlobalVariables);
   HashedList<quasiDiffMon> bufferMons;
@@ -441,7 +441,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
     { int thePower=0;
       if (!currentMon.Powers[j].IsSmallInteger(&thePower))
         return false;
-      tempMat1=this->GetActionGeneratorIndeX(currentMon.generatorsIndices[j], theGlobalVariables);
+      tempMat1=this->GetActionGeneratorIndeX(currentMon.generatorsIndices[j]);
       tempMT.MakeZero();
       for (int k=0; k<tempMat1.size(); k++)
       { if (tempMat1.theCoeffs[k].expressionType==RationalFunctionOld::typeRationalFunction)

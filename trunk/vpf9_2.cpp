@@ -34,9 +34,9 @@ std::string MonomialWeylAlgebra::ToString(FormatExpressions* theFormat)const
 
 void SubgroupWeylGroupOLD::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
 { output << "generator_reflections: ";
-  this->simpleGenerators.WriteToFile(output, theGlobalVariables);
+  this->simpleGenerators.WriteToFile(output);
   output << "\nouter_generators: ";
-  this->ExternalAutomorphisms.WriteToFile(output, theGlobalVariables);
+  this->ExternalAutomorphisms.WriteToFile(output);
 }
 
 Vector<Rational> SubgroupWeylGroupOLD::GetRho()
@@ -57,9 +57,9 @@ void SubgroupWeylGroupOLD::GetMatrixOfElement(const ElementWeylGroup<WeylGroup>&
 void SubgroupWeylGroupOLD::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
 { std::string tempS;
   input >> tempS;
-  this->simpleGenerators.ReadFromFile(input, theGlobalVariables);
+  this->simpleGenerators.ReadFromFile(input);
   input >> tempS;
-  this->ExternalAutomorphisms.ReadFromFile(input, theGlobalVariables);
+  this->ExternalAutomorphisms.ReadFromFile(input);
 }
 
 bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
@@ -626,9 +626,9 @@ void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan(Vectors<Rational>&
 }
 
 void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan(Vector<Rational>& input, Vector<Rational>& output, GlobalVariables& theGlobalVariables)
-{ Matrix<Rational>  invertedSmallCartan;
+{ Matrix<Rational> invertedSmallCartan;
   invertedSmallCartan=this->theDomain().theWeyl.CartanSymmetric;
-  invertedSmallCartan.Invert(&theGlobalVariables);
+  invertedSmallCartan.Invert();
   int theSmallDimension=this->theDomain().theWeyl.CartanSymmetric.NumRows;
   output.MakeZero(theSmallDimension);
   for (int i=0; i<theSmallDimension; i++)
@@ -751,7 +751,7 @@ void HomomorphismSemisimpleLieAlgebra::GetRestrictionAmbientRootSystemToTheSmall
   int rankSA=this->theDomain().theWeyl.GetDim();
   Matrix<Rational> tempMat;
   tempMat=(this->theDomain().theWeyl.CartanSymmetric);
-  tempMat.Invert(&theGlobalVariables);
+  tempMat.Invert();
   int numPosRootsDomain=this->theDomain().theWeyl.RootsOfBorel.size;
   output.SetSize(theRootSystem.size);
   Vector<Rational> theScalarProducts;
@@ -1715,7 +1715,7 @@ void ElementSemisimpleLieAlgebra<coefficient>::GetBasisFromSpanOfElements
 //  { theRank=theElements.TheObjects[0].Hcomponent.size;
 //    numRoots=theElements.TheObjects[0].coeffsRootSpaces.size;
 //  }
-  theRootForm.ChooseABasis(theGlobalVariables);
+  theRootForm.ChooseABasis();
   outputTheBasis.SetSize(theRootForm.size);
   for(int i=0; i<theRootForm.size; i++)
   { ElementSemisimpleLieAlgebra& currentElt=outputTheBasis[i];
@@ -1724,7 +1724,7 @@ void ElementSemisimpleLieAlgebra<coefficient>::GetBasisFromSpanOfElements
 
 }
 
-bool RationalFunctionOld::gcdQuicK(const Polynomial<Rational>& left, const Polynomial<Rational> & right, Polynomial<Rational> & output)
+bool RationalFunctionOld::gcdQuicK(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output)
 { if (left.TotalDegree()>1 && right.TotalDegree()>1)
     return false;
   Polynomial<Rational> quotient, remainder;

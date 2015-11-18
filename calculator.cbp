@@ -66,6 +66,7 @@
 		<Unit filename="vpfHeader1General1_ListReferences.h" />
 		<Unit filename="vpfHeader1General2Multitasking.h" />
 		<Unit filename="vpfHeader1General3_Test.h" />
+		<Unit filename="vpfHeader1General4_Logging.h" />
 		<Unit filename="vpfHeader2Math01_LargeIntArithmetic.h" />
 		<Unit filename="vpfHeader2Math02_Vectors.h" />
 		<Unit filename="vpfHeader2Math0_General.h" />

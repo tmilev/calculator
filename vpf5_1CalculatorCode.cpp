@@ -219,11 +219,11 @@ bool Calculator::innerGCDOrLCM(Calculator& theCommands, const Expression& input,
 { MacroRegisterFunctionWithName("Calculator::fGCD");
   Vector<Polynomial<Rational> > thePolys;
   Expression theContext(theCommands);
-//  stOutput << "<br>Time elapsed before calling innerGCDOrLCM: " << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
+//  stOutput << "<br>Time elapsed before calling innerGCDOrLCM: " << theGlobalVariables.GetElapsedSeconds() << " seconds.";
 //  stOutput << "<br>Input lispified: " << input.Lispify();
   if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 2, CalculatorConversions::innerPolynomial<Rational>))
     return output.MakeError("Failed to extract a list of 2 polynomials. ", theCommands);
-//  stOutput << "<br>Time elapsed after extracting two polynomials in innerGCDOrLCM: " << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
+//  stOutput << "<br>Time elapsed after extracting two polynomials in innerGCDOrLCM: " << theGlobalVariables.GetElapsedSeconds() << " seconds.";
   Polynomial<Rational> outputP;
 //  stOutput << "<br>context: " << theContext.ToString();
 //  stOutput << "<br>The polys: " << thePolys.ToString();
@@ -282,8 +282,8 @@ bool Calculator::innerPolynomialDivisionRemainder(Calculator& theCommands, const
 //  stOutput << "<hr>The polys: " << thePolys.ToString() << "<br>The gb basis: "
 //  << theGB.theBasiS.ToString() << "<hr>";
   Polynomial<Rational> outputRemainder;
-  theGB.initForDivisionAlone(theGB.theBasiS, theCommands.theGlobalVariableS);
-  theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &outputRemainder, theCommands.theGlobalVariableS, -1);
+  theGB.initForDivisionAlone(theGB.theBasiS, &theGlobalVariables);
+  theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &outputRemainder, &theGlobalVariables, -1);
   return output.AssignValueWithContext(outputRemainder, theContext, theCommands);
 }
 
@@ -318,9 +318,9 @@ bool Calculator::innerPolynomialDivisionVerbose(Calculator& theCommands, const E
     theGB.theBasiS[i-1]=thePolys[i];
   }
 //  Polynomial<Rational> outputRemainder;
-  theGB.initForDivisionAlone(theGB.theBasiS, theCommands.theGlobalVariableS);
+  theGB.initForDivisionAlone(theGB.theBasiS, &theGlobalVariables);
   theGB.thePolynomialOrder.theMonOrder= theMonOrder;
-  theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &theGB.remainderDivision, theCommands.theGlobalVariableS, -1);
+  theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &theGB.remainderDivision, &theGlobalVariables, -1);
   theContext.ContextGetFormatExpressions(theGB.theFormat);
 //  stOutput << "context vars: " << theFormat.polyAlphabeT;
   theGB.theFormat.flagUseLatex=true;
@@ -473,8 +473,8 @@ bool Calculator::innerPrintSSsubalgebras
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("Calculator::innerPrintSSsubalgebras");
 //  stOutput << "Does this show in the output? ";
-  if (theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection!=0)
-    theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection();
+  if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection!=0)
+    theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
 //  stOutput << "After changing, does this show in output? ";
 //  crash << crash;
   std::stringstream out;
@@ -495,7 +495,7 @@ bool Calculator::innerPrintSSsubalgebras
   SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
   SemisimpleSubalgebras tempSSsas
   (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
-  &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
+  &theCommands.theObjectContainer.theSltwoSAs, &theGlobalVariables);
   int indexInContainer=theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas);
   SemisimpleSubalgebras& theSSsubalgebras= isAlreadySubalgebrasObject ? input.GetValueNonConst<SemisimpleSubalgebras>() :
   theCommands.theObjectContainer.theSSsubalgebras[indexInContainer];
@@ -516,7 +516,7 @@ bool Calculator::innerPrintSSsubalgebras
   ;
   if (!FileOperations::FileExists(theSSsubalgebras.PhysicalNameMainFile1)|| doForceRecompute)
   { if (!isAlreadySubalgebrasObject)
-      theSSsubalgebras.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
+      theSSsubalgebras.timeComputationStartInSeconds=theGlobalVariables.GetElapsedSeconds();
     theSSsubalgebras.flagComputeNilradicals=doComputeNilradicals;
     theSSsubalgebras.flagComputeModuleDecomposition=doComputeModuleDecomposition;
     theSSsubalgebras.flagAttemptToSolveSystems=doAttemptToSolveSystems;
@@ -524,7 +524,7 @@ bool Calculator::innerPrintSSsubalgebras
     theSSsubalgebras.flagAttemptToAdjustCentralizers=doAdjustCentralizers;
     theSSsubalgebras.CheckFileWritePermissions();
     if (!isAlreadySubalgebrasObject)
-    { theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=-1;
+    { theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=-1;
       theSSsubalgebras.FindTheSSSubalgebrasFromScratch(ownerSS);
     }
     theSSsubalgebras.WriteReportToFiles();
@@ -554,7 +554,7 @@ bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommand
   ElementSemisimpleLieAlgebra<AlgebraicNumber> theF, theH, theE;
   theE=theErational;
   std::stringstream out, logStream;
-  bool success=ownerSS->AttemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &logStream, theCommands.theGlobalVariableS);
+  bool success=ownerSS->AttemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &logStream, &theGlobalVariables);
 //  stOutput << "<br>The elts: " <<  theOperators.ToString();
 //  stOutput << "<br> The common ad: " << commonAd.ToString();
   if (success)
@@ -642,7 +642,7 @@ bool Calculator::innerGroebner
   theContext.ContextGetFormatExpressions(theGroebnerComputation.theFormat);
 //  stOutput << "context vars: " << theFormat.polyAlphabeT;
 
-  theContext.ContextGetFormatExpressions(theCommands.theGlobalVariableS->theDefaultFormat);
+  theContext.ContextGetFormatExpressions(theGlobalVariables.theDefaultFormat.GetElement());
   if (useModZp)
   { ElementZmodP tempElt;
     tempElt.MakeMOne(theMod);
@@ -674,7 +674,7 @@ bool Calculator::innerGroebner
   theGroebnerComputation.MaxNumGBComputations=upperBoundComputations;
 
 
-  bool success=theGroebnerComputation.TransformToReducedGroebnerBasis(outputGroebner, theCommands.theGlobalVariableS);
+  bool success=theGroebnerComputation.TransformToReducedGroebnerBasis(outputGroebner, &theGlobalVariables);
   std::stringstream out;
   out << theGroebnerComputation.ToStringLetterOrder(false);
   out << "Letter/expression order: ";
@@ -712,7 +712,7 @@ bool Calculator::innerGroebner
     out << ");";
   }
 /*  theGroebnerComputation.TransformToReducedGroebnerBasisImprovedAlgorithm
-(outputGroebner2, theCommands.theGlobalVariableS);
+(outputGroebner2, &theGlobalVariables);
 
   out << "<br>Minimal Groebner basis algorithm 2 (" << outputGroebner2.size << " elements):";
   for(int i=0; i<outputGroebner2.size; i++)

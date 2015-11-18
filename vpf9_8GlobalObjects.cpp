@@ -4,7 +4,7 @@
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
 #include "vpfHeader6WebServer.h"
 #include "vpfHeader3Calculator0_Interface.h"
-#include "vpfHeader1General4_Logging.h"
+#include "vpfHeader1General4General_Logging_GlobalVariables.h"
 #include <thread>
 ProjectInformationInstance projectInfoInstanceCalculatorGlobal(__FILE__, "Global objects");
 
@@ -43,9 +43,9 @@ void CGI::MakeReportIndicatorFile(const std::string& input)
   counter++;
   //  if (counter%10!=0)
   //    return;
-  //std::cout << "Making report " << counter << " in file " << theParser.theGlobalVariableS->PhysicalNameIndicatorWithPath << "<br>";
+  //std::cout << "Making report " << counter << " in file " << theGlobalVariables.PhysicalNameIndicatorWithPath << "<br>";
   std::fstream theFile;
-  FileOperations::OpenFileCreateIfNotPresent(theFile, theParser.theGlobalVariableS->PhysicalNameIndicatorWithPath, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(theFile, theGlobalVariables.PhysicalNameIndicatorWithPath, false, true, false);
   std::stringstream outStream;
   theFile << " Elapsed calculator time: " << GetElapsedTimeInSeconds() << " second(s).";
   theFile << input;

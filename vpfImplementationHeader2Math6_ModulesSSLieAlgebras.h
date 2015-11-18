@@ -495,7 +495,7 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi
       outputEigenVectors->AddOnTop(currentElt);
     if (outputWeightsFundCoords!=0)
       outputWeightsFundCoords->AddOnTop(currentWeight);
-    out << currentElt.ToString(&theGlobalVariables.theDefaultFormat);
+    out << currentElt.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
     if (currentElt.size()>1)
       out << ")";
     out << " v_\\lambda";
@@ -721,7 +721,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
             theIndex=this->GetOwner().GetNumPosRoots()+this->GetOwner().GetRank()+j;
           tempSSElt.MakeGenerator(theIndex, this->GetOwner());
           if (outputReport!=0)
-            out2 << "<hr>Simple generator: " << tempSSElt.ToString(&theGlobalVariables.theDefaultFormat);
+            out2 << "<hr>Simple generator: " << tempSSElt.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
           MatrixTensor<coefficient>& theMatrix=this->GetActionGeneratorIndeX(theIndex, theRingUnit, theRingZero);
           std::stringstream tempStream;
           tempStream << "computing action simple generator index " << (2*k-1)*(j+1) << " ... ";
@@ -1083,7 +1083,7 @@ bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft
           tempOutput.MakeZero();
         tempOutput.AddMonomial(currentSingleMon, this->theCoeffs[j]);
       }
-      tempOutput.MultiplyMeByUEEltOnTheLeft(theUE, theGlobalVariables);
+      tempOutput.MultiplyMeByUEEltOnTheLeft(theUE);
       output=tempOutput;
       return true;
     }
@@ -1178,7 +1178,7 @@ void ElementTensorsGeneralizedVermas<coefficient>::MultiplyByElementLieAlg
     { tempElt.MakeZero();
       tempElt.AddMonomial(currentMon.theMons[j], theRingUnit);
 //      stOutput << "<hr> Acting by " << theGenerator.ToString() << " on " << tempElt.ToString() << "<br>";
-      tempElt.MultiplyMeByUEEltOnTheLeft(theGenerator, theGlobalVariables);
+      tempElt.MultiplyMeByUEEltOnTheLeft(theGenerator);
 //      if (tempElt.size>0)
 //        stOutput << "<br> result: " << tempElt.ToString() << ", the first coeff of tempElt is : " << tempElt.theCoeffs[0].ToString();
       for (int k=0; k<tempElt.size(); k++)

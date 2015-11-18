@@ -9537,17 +9537,16 @@ bool ConeComplex::SplitChamber
   }
   newPlusCone.Vertices.size=0; newPlusCone.Normals.size=0;
   newMinusCone.Vertices.size=0; newMinusCone.Normals.size=0;
-  HashedList<Vector<Rational> >& ZeroVertices=theGlobalVariables.hashedRootsNewChamberSplit.GetElement();
-  ZeroVertices.Clear();
+  HashedList<Vector<Rational> > ZeroVertices;
   Rational tempRat;
   for (int i=0; i<myDyingCone.Vertices.size; i++)
   { killerNormal.ScalarEuclidean(myDyingCone.Vertices[i], tempRat);
     if (tempRat.IsPositive())
       newPlusCone.Vertices.AddOnTop(myDyingCone.Vertices[i]);
     if (tempRat.IsEqualToZero())
-      ZeroVertices.AddOnTopNoRepetition(myDyingCone.Vertices.TheObjects[i]);
+      ZeroVertices.AddOnTopNoRepetition(myDyingCone.Vertices[i]);
     if (tempRat.IsNegative())
-      newMinusCone.Vertices.AddOnTop(myDyingCone.Vertices.TheObjects[i]);
+      newMinusCone.Vertices.AddOnTop(myDyingCone.Vertices[i]);
   }
   if (newPlusCone.Vertices.size==0 || newMinusCone.Vertices.size==0)
     return false;

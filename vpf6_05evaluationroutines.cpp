@@ -273,12 +273,12 @@ bool Calculator::EvaluateExpression
     if (indexInCache!=-1)
       theCommands.imagesCachedExpressions[indexInCache]=output;
     //////------Handling naughty expressions------
-    if (theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
-      if (theCommands.theGlobalVariableS->GetElapsedSeconds()!=0)
-        if (theCommands.theGlobalVariableS->GetElapsedSeconds()>theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2)
+    if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
+      if (theGlobalVariables.GetElapsedSeconds()!=0)
+        if (theGlobalVariables.GetElapsedSeconds()>theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit/2)
         { if (!theCommands.flagTimeLimitErrorDetected)
-            stOutput << "<br><b>Max allowed computational time is " << theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2 << ";  so far, "
-            << theCommands.theGlobalVariableS->GetElapsedSeconds()-theCommands.StartTimeEvaluationInSecondS << " have elapsed -> aborting computation ungracefully.</b>";
+            stOutput << "<br><b>Max allowed computational time is " << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit/2 << ";  so far, "
+            << theGlobalVariables.GetElapsedSeconds()-theCommands.StartTimeEvaluationInSecondS << " have elapsed -> aborting computation ungracefully.</b>";
           theCommands.flagTimeLimitErrorDetected=true;
           theCommands.flagAbortComputationASAP=true;
           break;
@@ -297,18 +297,17 @@ bool Calculator::EvaluateExpression
     //////------End of handling naughty expressions------
     /////-------Evaluating children if the expression is not of built-in type-------
     //bool foundError=false;
-    ProgressReport theReport(theCommands.theGlobalVariableS);
+    ProgressReport theReport(&theGlobalVariables);
     if (!output.IsFrozen())
       for (int i=0; i<output.children.size && !theCommands.flagAbortComputationASAP; i++)
-      { if (theCommands.theGlobalVariableS!=0)
-          if (i>0 && output.StartsWith(theCommands.opEndStatement()))
-          { // std::stringstream reportStream;
-//            for (int j=1; j<i; j++)
-//              if (output[j].StartsWith(theCommands.opDefine()) || output[j].StartsWith(theCommands.opDefineConditional()))
-//                reportStream << "<br>" << output[j].ToString();
- //           reportStream << "<br><b>" << output[i].ToString() << "</b>";
- //           theReport.Report(reportStream.str());
-          }
+      { if (i>0 && output.StartsWith(theCommands.opEndStatement()))
+        { // std::stringstream reportStream;
+//           for (int j=1; j<i; j++)
+//             if (output[j].StartsWith(theCommands.opDefine()) || output[j].StartsWith(theCommands.opDefineConditional()))
+//               reportStream << "<br>" << output[j].ToString();
+ //          reportStream << "<br><b>" << output[i].ToString() << "</b>";
+ //          theReport.Report(reportStream.str());
+        }
         if (theCommands.EvaluateExpression(theCommands, output[i], transformationE))
           output.SetChilD(i, transformationE);
         if (output[i].IsError())
@@ -479,11 +478,7 @@ bool Calculator::ParseAndExtractExpressions
 
 void Calculator::Evaluate(const std::string& theInput)
 { MacroRegisterFunctionWithName("Calculator::Evaluate");
-  if (this->theGlobalVariableS==0)
-  { this->outputString= "This is a programming error: commandList not initialized properly. Please report this bug. ";
-    return;
-  }
-  this->StartTimeEvaluationInSecondS=this->theGlobalVariableS->GetElapsedSeconds();
+  this->StartTimeEvaluationInSecondS=theGlobalVariables.GetElapsedSeconds();
   this->inputString=theInput;
   this->ParseAndExtractExpressions(theInput, this->theProgramExpression, this->syntacticSouP, this->syntacticStacK, & this->syntaxErrors);
   this->EvaluateCommands();
@@ -508,22 +503,22 @@ void Calculator::EvaluateCommands()
   this->flagAbortComputationASAP=false;
   this->Comments.clear();
   bool usingCommandline=!this->flagDisplayFullExpressionTree && !this->flagUseHtml;
-  ProgressReport theReport(theGlobalVariableS);
+  ProgressReport theReport(&theGlobalVariables);
   if (!usingCommandline)
     theReport.Report("Evaluating expressions, current expression stack:\n");
   this->EvaluateExpression(*this, this->theProgramExpression, this->theProgramExpression);
   if (this->RecursionDeptH!=0)
     crash << "This is a programming error: the starting recursion depth before evaluation was 0, but after evaluation it is "
     << this->RecursionDeptH << "." << crash;
-  this->theGlobalVariableS->theDefaultFormat.flagMakingExpressionTableWithLatex=true;
-  this->theGlobalVariableS->theDefaultFormat.flagUseLatex=true;
-  this->theGlobalVariableS->theDefaultFormat.flagExpressionIsFinal=true;
-  this->theGlobalVariableS->theDefaultFormat.flagExpressionNewLineAllowed=true;
+  theGlobalVariables.theDefaultFormat.GetElement().flagMakingExpressionTableWithLatex=true;
+  theGlobalVariables.theDefaultFormat.GetElement().flagUseLatex=true;
+  theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal=true;
+  theGlobalVariables.theDefaultFormat.GetElement().flagExpressionNewLineAllowed=true;
   if(usingCommandline)
-  { out << "Input: " << "\e[1;32m" << StartingExpression.ToString(&this->theGlobalVariableS->theDefaultFormat) << "\033[0m" << std::endl;
-    out << "Output: " << "\e[1;33m" << this->theProgramExpression.ToString(&this->theGlobalVariableS->theDefaultFormat) << "\033[0m" << std::endl;
+  { out << "Input: " << "\e[1;32m" << StartingExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\033[0m" << std::endl;
+    out << "Output: " << "\e[1;33m" << this->theProgramExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\033[0m" << std::endl;
   } else if (!this->flagDisplayFullExpressionTree)
-    out << this->theProgramExpression.ToString(&this->theGlobalVariableS->theDefaultFormat, &StartingExpression);
+    out << this->theProgramExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement(), &StartingExpression);
   else
     out << "<hr>Input:<br> " << StartingExpression.ToStringFull() << "<hr>"
     << "Output:<br>" << this->theProgramExpression.ToStringFull();

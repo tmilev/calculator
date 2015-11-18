@@ -98,7 +98,7 @@ void Calculator::reset()
   this->theExpressionContainer.Clear();
 }
 
-void Calculator::init(GlobalVariables& inputGlobalVariables)
+void Calculator::init()
 { MacroRegisterFunctionWithName("Calculator::init");
   this->reset();
 
@@ -109,8 +109,7 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->operationsCompositeHandlers.SetExpectedSize(50);
 
   this->formatVisibleStrings.flagExpressionIsFinal=true;
-  this->theGlobalVariableS=&inputGlobalVariables;
-  this->theObjectContainer.theAlgebraicClosure.theGlobalVariables=&inputGlobalVariables;
+  this->theObjectContainer.theAlgebraicClosure.theGlobalVariables=&theGlobalVariables;
 
   //operation List is the very first operation. It signifies a non-atomic expression.
   //operation List is signified by the empty string

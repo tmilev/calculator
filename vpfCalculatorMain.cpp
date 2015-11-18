@@ -69,7 +69,7 @@ int main(int argc, char **argv)
   if (!theGlobalVariables.flagUsingBuiltInWebServer)
     theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
   //  stOutput << "input path: " << pathDisplayPath << "\n\n";
-  theParser.init(theGlobalVariables);
+  theParser.init();
 	if (argc>1 && !theGlobalVariables.flagUsingBuiltInWebServer)
     return main_command_input(argc, argv);
   if (argc<=1 && !theGlobalVariables.flagUsingBuiltInWebServer)
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 int main_command_input(int argc, char **argv)
 { MacroRegisterFunctionWithName("main_command_input");
   std::stringstream theInputStream;
-  theParser.theGlobalVariableS->IndicatorStringOutputFunction=CGI::MakeStdCoutReport;
+  theGlobalVariables.IndicatorStringOutputFunction=CGI::MakeStdCoutReport;
   for (int i=1; i<argc; i++)
   { theInputStream << argv[i];
     if (i<argc-1)
@@ -108,7 +108,7 @@ int main_command_input(int argc, char **argv)
 int main_apache_client()
 { MacroRegisterFunctionWithName("main_apache_client");
   stOutput << "Content-Type: text/html\n\n";
-  theParser.theGlobalVariableS->IndicatorStringOutputFunction=CGI::MakeReportIndicatorFile;
+  theGlobalVariables.IndicatorStringOutputFunction=CGI::MakeReportIndicatorFile;
   std::cin >> theParser.inputStringRawestOfTheRaw;
 
 	if (theParser.inputStringRawestOfTheRaw=="")

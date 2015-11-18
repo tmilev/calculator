@@ -1229,7 +1229,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
       this->ParabolicSelectionSmallerAlgebra.AddSelectionAppendNewIndex(i);
   }
   this->log << "\nDual cartan embedding smaller into larger:\n" <<
-  DualCartanEmbedding.ToString(&theGlobalVariables.theDefaultFormat);
+  DualCartanEmbedding.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
   this->log << "\nParabolic subalgebra large algebra: " << this->ParabolicLeviPartRootSpacesZeroStandsForSelected.ToString();
   tempRoot= this->ParabolicSelectionSmallerAlgebra;
   this->log << "\nParabolic subalgebra smaller algebra: " << tempRoot.ToString();
@@ -1247,7 +1247,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   { Matrix<Rational>& currentLinearOperator=this->theLinearOperators[i];
     theSubgroup.GetMatrixOfElement(theSubgroup[i], currentLinearOperator);
 //    currentLinearOperator.MultiplyOnTheLeft(preferredBasisChangeInverse);
-    this->log << "\n" << currentLinearOperator.ToString(&theGlobalVariables.theDefaultFormat);
+    this->log << "\n" << currentLinearOperator.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
     currentLinearOperator.ActOnVectorColumn(theSubgroup.GetRho(), this->theTranslationS[i]);
     this->theTranslationS[i]-=theSubgroup.GetRho();
     this->theTranslationS[i].Minus();
@@ -1258,12 +1258,12 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
       this->theCoeffs[i]=-1;
   }
   this->log << "\n\n\nMatrix of the projection operator (basis-changed):\n"
-  << theProjectionBasisChanged.ToString(&theGlobalVariables.theDefaultFormat);
+  << theProjectionBasisChanged.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
   this->log << "\n\n\nMatrix form of the operators $u_w$, the translations $\tau_w$ and their projections (" << this->theLinearOperatorsExtended.size << "):";
   //List<Matrix<Rational> > tempList;
   for (int k=0; k<this->theLinearOperators.size; k++)
-  { Matrix<Rational> & currentLO=this->theLinearOperators.TheObjects[k];
-    Matrix<Rational> & currentLOExtended=this->theLinearOperatorsExtended.TheObjects[k];
+  { Matrix<Rational>& currentLO=this->theLinearOperators[k];
+    Matrix<Rational>& currentLOExtended=this->theLinearOperatorsExtended[k];
     currentLO.MultiplyOnTheLeft(theProjectionBasisChanged);
     currentLO*=-1;
     //tempList.AddOnTopNoRepetition(this->theLinearOperators.TheObjects[i]);
@@ -1272,7 +1272,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
     for (int i=0; i<currentLO.NumRows; i++)
       for (int j=0; j<currentLO.NumCols; j++)
         currentLOExtended.elements[i][j+currentLO.NumRows]=currentLO.elements[i][j];
-    this->log << "\n\n" << currentLOExtended.ToString(&theGlobalVariables.theDefaultFormat);
+    this->log << "\n\n" << currentLOExtended.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
     this->log << this->theTranslationS[k].ToString() << ";   " << this->theTranslationsProjectedBasisChanged[k].ToString();
   }
 
@@ -1335,7 +1335,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   Vectors<Rational> rootsGeneratingExtendedLattice;
   int totalDim=input.theRange().GetRank()+input.theDomain().GetRank();
   rootsGeneratingExtendedLattice.SetSize(totalDim);
-  this->log << "\n" << tempMat.ToString(&theGlobalVariables.theDefaultFormat) << "\n";
+  this->log << "\n" << tempMat.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\n";
   this->log << this->theExtendedIntegralLatticeMatForM.ToString(false, false);
   this->WeylChamberSmallerAlgebra.CreateFromNormals(WallsWeylChamberLargerAlgebra, &theGlobalVariables);
   this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->WeylChamberSmallerAlgebra.ToString(&theFormat) << "\n";
@@ -1365,8 +1365,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   this->PreimageWeylChamberSmallerAlgebra.CreateFromVertices(tempRoots, &theGlobalVariables);
   this->log << "\nWeyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ToString(&theFormat) << "\n";
   this->log << "**********************\n\n\n";
-  this->log << "\nThe first operator extended:\n" << this->theLinearOperatorsExtended[0].ToString(&theGlobalVariables.theDefaultFormat) << "\n";
-  this->log << "\nThe second operator extended:\n" << this->theLinearOperatorsExtended[1].ToString(&theGlobalVariables.theDefaultFormat) << "\n";
+  this->log << "\nThe first operator extended:\n" << this->theLinearOperatorsExtended[0].ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\n";
+  this->log << "\nThe second operator extended:\n" << this->theLinearOperatorsExtended[1].ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\n";
   /*tempMat=this->theLinearOperatorsExtended.TheObjects[0];
   tempMat.Transpose();
   tempMat.ActOnVectorsColumn(this->PreimageWeylChamberSmallerAlgebra);

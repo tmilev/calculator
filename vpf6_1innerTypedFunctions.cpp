@@ -317,7 +317,7 @@ bool CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor(Calculator& t
     return false;
   ElementTensorsGeneralizedVermas<RationalFunctionOld>
   resultTensor=inputConverted[1].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
-  resultTensor.TensorOnTheRight(inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(), *theCommands.theGlobalVariableS);
+  resultTensor.TensorOnTheRight(inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(), theGlobalVariables);
   return output.AssignValueWithContext(resultTensor, inputConverted[1].GetContext(), theCommands);
 }
 
@@ -425,7 +425,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(Calculator& theCo
   theSSalg.flagHasNilradicalOrder=true;
 //  stOutput << "<br>Ordering done! ";
   if (!rightEltETGVM.MultiplyOnTheLeft
-      (leftE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >(), outputElt, theSSalg, *theCommands.theGlobalVariableS, 1, 0))
+      (leftE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >(), outputElt, theSSalg, theGlobalVariables, 1, 0))
   { //stOutput << "<br>failed to multiply on the left";
     return false;
   }
@@ -502,7 +502,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE(Calculator& theCommands,
   ElementUniversalEnveloping<RationalFunctionOld> result=inputContextsMerged[1].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
   result*=inputContextsMerged[2].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
   //stOutput << "before simplification: " << result.ToString() << " and after: " << result.ToString();
-  result.Simplify(theCommands.theGlobalVariableS);
+  result.Simplify(&theGlobalVariables);
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
 
@@ -1316,7 +1316,7 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE(Calculator&
   { ElementUniversalEnveloping<RationalFunctionOld> result;
     leftE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >().LieBracketOnTheRight(rightE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >(), result);
     //stOutput << "before simplification: " << result.ToString();
-    result.Simplify(theCommands.theGlobalVariableS);
+    result.Simplify(&theGlobalVariables);
     //stOutput << " after: " << result.ToString();
     return output.AssignValueWithContext(result, leftE.GetContext(), theCommands);
   }
@@ -1344,7 +1344,7 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(C
     return false;
   }
   ElementWeylAlgebra<Rational> resultE=rightConverted.GetValue<ElementWeylAlgebra<Rational> >();
-  resultE.LieBracketOnTheLeft(leftConverted.GetValue<ElementWeylAlgebra<Rational> >(), theCommands.theGlobalVariableS);
+  resultE.LieBracketOnTheLeft(leftConverted.GetValue<ElementWeylAlgebra<Rational> >(), &theGlobalVariables);
   return output.AssignValueWithContext(resultE, leftConverted.GetContext(), theCommands);
 }
 

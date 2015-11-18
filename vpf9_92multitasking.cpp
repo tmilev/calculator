@@ -1,7 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader2Math0_General.h"
-#include "vpfHeader1General4_Logging.h"
+#include "vpfHeader1General4General_Logging_GlobalVariables.h"
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
 #include <assert.h>
 #include <thread>

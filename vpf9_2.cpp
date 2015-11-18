@@ -65,8 +65,7 @@ void SubgroupWeylGroupOLD::ReadFromFile(std::fstream& input, GlobalVariables* th
 bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
 (Vectors<Rational>* inputGenerators, List<Vectors<Rational> >* inputExternalAutos, GlobalVariables* theGlobalVariables, int UpperLimitNumElements, bool recomputeAmbientRho)
 { MemorySaving< HashedList<Vector<Rational> > > bufferOrbit;
-  HashedList<Vector<Rational> >& orbitRho = (theGlobalVariables==0) ? bufferOrbit.GetElement() :
-  theGlobalVariables->hashedRootsComputeSubGroupFromGeneratingReflections.GetElement();
+  HashedList<Vector<Rational> > orbitRho;
   this->truncated=false;
   this->Clear();
   orbitRho.Clear();
@@ -732,14 +731,14 @@ void HomomorphismSemisimpleLieAlgebra::ToString(std::string& output, bool useHtm
   if (useHtml)
     out << "<br>";
   for (int i=0; i<this->imagesSimpleChevalleyGenerators.size; i++)
-  { out <<  this->imagesSimpleChevalleyGenerators[i].ToString(&theGlobalVariables.theDefaultFormat) << "\n\n";
+  { out <<  this->imagesSimpleChevalleyGenerators[i].ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\n\n";
     if (useHtml)
       out << "<br>";
   }
   out << "Maps of Chevalley generators:\n\n";
   for (int i=0; i<this->domainAllChevalleyGenerators.size; i++)
-  { out << "<br>" << this->domainAllChevalleyGenerators[i].ToString(&theGlobalVariables.theDefaultFormat)
-    << " \\mapsto " << this->imagesAllChevalleyGenerators[i].ToString(&theGlobalVariables.theDefaultFormat);
+  { out << "<br>" << this->domainAllChevalleyGenerators[i].ToString(&theGlobalVariables.theDefaultFormat.GetElement())
+    << " \\mapsto " << this->imagesAllChevalleyGenerators[i].ToString(&theGlobalVariables.theDefaultFormat.GetElement());
   }
   output=out.str();
 }
@@ -1345,8 +1344,8 @@ void RationalFunctionOld::operator*=(const Polynomial<Rational>& other)
   ProgressReport theReport(this->context);
   if (this->context!=0)
   { std::stringstream out;
-    out << "Multiplying " << this->ToString(&this->context->theDefaultFormat) << " by "
-    << other.ToString(&this->context->theDefaultFormat);
+    out << "Multiplying " << this->ToString(&this->context->theDefaultFormat.GetElement()) << " by "
+    << other.ToString(&this->context->theDefaultFormat.GetElement());
     theReport.Report(out.str());
   }
   RationalFunctionOld::gcd(this->Denominator.GetElement(), other, theGCD, this->context);
@@ -1369,8 +1368,8 @@ void RationalFunctionOld::operator*=(const Polynomial<Rational>& other)
   this->SimplifyLeadingCoefficientOnly();
   if (this->context!=0)
   { std::stringstream out;
-    out << "Multiplying " << this->ToString(&this->context->theDefaultFormat) << " by "
-    << other.ToString(&this->context->theDefaultFormat);
+    out << "Multiplying " << this->ToString(&this->context->theDefaultFormat.GetElement()) << " by "
+    << other.ToString(&this->context->theDefaultFormat.GetElement());
     out << " and the result is:\n" << this->ToString();
     theReport.Report(out.str());
   }

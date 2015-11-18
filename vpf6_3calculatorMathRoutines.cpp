@@ -68,7 +68,7 @@ bool CalculatorFunctionsGeneral::innerConstructCartanSA(Calculator& theCommands,
     }
   if (theSA.owner==0)
     return theCommands << "Failed to extract input semisimple Lie algebra elements from the inputs of " << input.ToString();
-  theSA.theGlobalVariables=theCommands.theGlobalVariableS;
+  theSA.theGlobalVariables=&theGlobalVariables;
   theSA.ComputeBasis();
   theSA.ComputeCartanSA();
   return output.AssignValue(theSA.ToString(), theCommands);
@@ -145,7 +145,7 @@ bool CalculatorFunctionsGeneral::innerX509certificateCrunch(Calculator& theComma
   if (!FileOperations::IsFileNameWithoutDotsAndSlashes(theCertificateFileNameNoFolder))
     return theCommands << "The file name contains forbidden characters, computation aborted. ";
   std::string theCertificateFileName=
-  theCommands.theGlobalVariableS->PhysicalPathServerBase+theCertificateFileNameNoFolder;
+  theGlobalVariables.PhysicalPathServerBase+theCertificateFileNameNoFolder;
   std::fstream theCertFile;
   if (!FileOperations::OpenFile(theCertFile, theCertificateFileName, false, false, false))
     return theCommands << "Failed to open file " << theCertificateFileName;
@@ -255,8 +255,8 @@ bool CalculatorFunctionsGeneral::innerCasimirWRTlevi(Calculator& theCommands, co
   SemisimpleLieAlgebra* theSSalg=0;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], theSSalg))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
-  if (theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit<50)
-    theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=50;
+  if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit<50)
+    theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=50;
   Vector<Rational> leviSelection;
   if(!theCommands.GetVectoR(input[2], leviSelection, 0, theSSalg->GetRank()))
     return theCommands << "<hr>Failed to extract parabolic selection. ";
@@ -265,7 +265,7 @@ bool CalculatorFunctionsGeneral::innerCasimirWRTlevi(Calculator& theCommands, co
   theParSel.InvertSelection();
   ElementUniversalEnveloping<RationalFunctionOld> theCasimir;
   theCasimir.MakeCasimirWRTLeviParabolic(*theSSalg, theParSel);
-//  theCasimir.Simplify(*theCommands.theGlobalVariableS);
+//  theCasimir.Simplify(theGlobalVariables);
   Expression contextE;
   contextE.MakeContextSSLieAlg(theCommands, *theSSalg);
   return output.AssignValueWithContext(theCasimir, contextE, theCommands);
@@ -517,11 +517,11 @@ bool CalculatorFunctionsGeneral::innerSolveSerreLikeSystem
 //  stOutput << "Calling SolveSerreLikeSystem with upperLimit= " << upperLimit;
   theComputation.theAlgebraicClosurE=&theCommands.theObjectContainer.theAlgebraicClosure;
   theComputation.flagTryDirectlySolutionOverAlgebraicClosure=startWithAlgebraicClosure;
-  theCommands.theGlobalVariableS->theDefaultFormat=theComputation.theFormat;
+  theGlobalVariables.theDefaultFormat.GetElement()=theComputation.theFormat;
 //  stOutput << "<br>the alphabet:" << theComputation.theFormat.polyAlphabeT;
 //  stOutput << "<br>The context vars:<br>" << theContext.ToString();
   theComputation.flagUseTheMonomialBranchingOptimization=true;
-  theComputation.SolveSerreLikeSystem(thePolysAlgebraic, theCommands.theGlobalVariableS);
+  theComputation.SolveSerreLikeSystem(thePolysAlgebraic, &theGlobalVariables);
 //  stOutput << "<br>Got to ere";
   std::stringstream out;
   out << "<br>The context vars:<br>" << theContext.ToString();
@@ -551,7 +551,7 @@ bool CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly(Calculator& 
   if (polyE.GetNumContextVariables()!=1)
     return theCommands << "<hr>After conversion, I got the polynomial " << polyE.ToString() << ", which is not in one variable.";
   AlgebraicNumber theAN;
-  if (!theAN.ConstructFromMinPoly(thePoly, theCommands.theObjectContainer.theAlgebraicClosure, theCommands.theGlobalVariableS))
+  if (!theAN.ConstructFromMinPoly(thePoly, theCommands.theObjectContainer.theAlgebraicClosure, &theGlobalVariables))
     return false;
   return output.AssignValue(theAN, theCommands);
 }
@@ -1148,9 +1148,9 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
     theGB.theFormat=this->currentFormaT;
     //  Polynomial<Rational> outputRemainder;
     theGB.thePolynomialOrder.theMonOrder=MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
-    theGB.initForDivisionAlone(theGB.theBasiS, this->owner->theGlobalVariableS);
+    theGB.initForDivisionAlone(theGB.theBasiS, &theGlobalVariables);
     Polynomial<Rational> theNumCopy=this->theNum;
-    theGB.RemainderDivisionWithRespectToBasis(theNumCopy, &theGB.remainderDivision, this->owner->theGlobalVariableS, -1);
+    theGB.RemainderDivisionWithRespectToBasis(theNumCopy, &theGB.remainderDivision, &theGlobalVariables, -1);
     this->printoutPFsLatex << "Here is a detailed long polynomial division. ";
     this->printoutPFsLatex << theGB.GetDivisionStringLaTeX();
     this->printoutPFsHtml << "<br>Here is a detailed long polynomial division:<br> ";
@@ -1362,7 +1362,7 @@ bool CalculatorFunctionsGeneral::innerMakeMakeFile(Calculator& theCommands, cons
     cppFilesNoExtension.AddOnTop(theFileNameNoPathNoExtension);
   }
   std::fstream theFileStream;
-  FileOperations::OpenFileCreateIfNotPresent(theFileStream, theCommands.theGlobalVariableS->PhysicalPathOutputFolder+"makefile", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(theFileStream, theGlobalVariables.PhysicalPathOutputFolder+"makefile", false, true, false);
   std::stringstream outHtml;
   theFileStream << "all: directories calculator\n\n";
   theFileStream << "directories: Debug\n";
@@ -1376,7 +1376,7 @@ bool CalculatorFunctionsGeneral::innerMakeMakeFile(Calculator& theCommands, cons
   theFileStream << "-o ./Debug/calculator\n\n";
   for (int i=0; i<cppFilesNoExtension.size; i++)
     theFileStream << cppFilesNoExtension[i] << ".o: " << cppFilesNoExtension[i] << ".cpp\n\tg++ -std=c++0x -pthread -c " << cppFilesNoExtension[i] << ".cpp\n\n";
-  outHtml << "<a href=\" " << theCommands.theGlobalVariableS->DisplayPathOutputFolder << "makefile" << "\"> makefile </a>";
+  outHtml << "<a href=\" " << theGlobalVariables.DisplayPathOutputFolder << "makefile" << "\"> makefile </a>";
   return output.AssignValue(outHtml.str(), theCommands);
 }
 
@@ -1572,7 +1572,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig(Calculator
     RationalFunctionOld oneOverOnePlusXsquared;
     onePlusXsquared.MakeMonomiaL(0,2);
     onePlusXsquared+=1;
-    oneOverOnePlusXsquared.MakeOne(theCommands.theGlobalVariableS);
+    oneOverOnePlusXsquared.MakeOne(&theGlobalVariables);
     oneOverOnePlusXsquared/=onePlusXsquared;
     Expression theContext;
     theContext.ContextMakeContextWithOnePolyVar(theCommands, "x");
@@ -2927,7 +2927,7 @@ bool CalculatorFunctionsGeneral::innerGrowDynkinType(Calculator& theCommands, co
   SemisimpleSubalgebras tempSas;
   tempSas.owner=theSSalg;
   tempSas.ownerField=&theCommands.theObjectContainer.theAlgebraicClosure;
-  tempSas.theGlobalVariables=theCommands.theGlobalVariableS;
+  tempSas.theGlobalVariables=&theGlobalVariables;
   tempSas.ComputeSl2sInitOrbitsForComputationOnDemand();
   if (!tempSas.RanksAndIndicesFit(theSmallDynkinType))
     return output.MakeError("Error: type "+theSmallDynkinType.ToString()+" does not fit inside "+theSSalg->theWeyl.theDynkinType.ToString(), theCommands);
@@ -3038,7 +3038,7 @@ bool CalculatorFunctionsGeneral::innerComputeSemisimpleSubalgebras(Calculator& t
   } else
     out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
   SemisimpleSubalgebras tempSSsas
-  (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras, &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
+  (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras, &theCommands.theObjectContainer.theSltwoSAs, &theGlobalVariables);
   SemisimpleSubalgebras& theSSsubalgebras=theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
   theSSsubalgebras.flagComputePairingTable=false;
   theSSsubalgebras.flagComputeNilradicals=false;
@@ -3797,7 +3797,7 @@ bool CalculatorFunctionsGeneral::innerComputePairingTablesAndFKFTsubalgebras(Cal
   output=input;
   std::fstream theFile;
   std::string theFileName;
-  theFileName=theCommands.theGlobalVariableS->PhysicalPathOutputFolder + "FKFTcomputation.html";
+  theFileName=theGlobalVariables.PhysicalPathOutputFolder + "FKFTcomputation.html";
   FormatExpressions tempFormat;
   tempFormat.flagUseHTML=true;
   tempFormat.flagUseLatex=true;
@@ -3806,7 +3806,7 @@ bool CalculatorFunctionsGeneral::innerComputePairingTablesAndFKFTsubalgebras(Cal
   FileOperations::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
   theFile << theSAs.ToString(&tempFormat);
   std::stringstream out;
-  out << "<a href=\"" << theCommands.theGlobalVariableS->DisplayPathOutputFolder << "FKFTcomputation.html\">FKFTcomputation.html</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayPathOutputFolder << "FKFTcomputation.html\">FKFTcomputation.html</a>";
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -3893,7 +3893,7 @@ bool CalculatorFunctionsGeneral::innerGetDynkinIndicesSlTwoSubalgebras(Calculato
   List<List<Rational> > bufferIndices;
   HashedList<DynkinSimpleType> bufferTypes;
   HashedList<Rational> theIndices;
-  theType.GetDynkinIndicesSl2Subalgebras(bufferIndices, bufferTypes, theIndices, theCommands.theGlobalVariableS);
+  theType.GetDynkinIndicesSl2Subalgebras(bufferIndices, bufferTypes, theIndices, &theGlobalVariables);
   std::stringstream out;
   out << "There are " << theIndices.size << " aboslute Dynkin indices. The indices are: "
   << theIndices.ToStringCommaDelimited();
@@ -3922,7 +3922,7 @@ bool CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg(Calculator& theCommands,
     out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
   SemisimpleSubalgebras tempSSsas
   (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
-   &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
+   &theCommands.theObjectContainer.theSltwoSAs, &theGlobalVariables);
   SemisimpleSubalgebras& theSSsubalgebras=
   theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
   theSSsubalgebras.ToStringExpressionString=CalculatorConversions::innerStringFromSemisimpleSubalgebras;
@@ -3945,7 +3945,7 @@ bool CalculatorFunctionsGeneral::innerWeylDimFormula(Calculator& theCommands, co
   if (!theCommands.GetVectoR<RationalFunctionOld>(input[2], theWeight, &newContext, theSSowner->GetRank(), CalculatorConversions::innerRationalFunction))
     return output.MakeError("Failed to convert the argument of the function to a highest weight vector", theCommands);
   RationalFunctionOld rfOne;
-  rfOne.MakeOne(theCommands.theGlobalVariableS);
+  rfOne.MakeOne(&theGlobalVariables);
   Vector<RationalFunctionOld> theWeightInSimpleCoords;
   FormatExpressions theFormat;
   newContext.ContextGetFormatExpressions(theFormat);
@@ -3986,9 +3986,9 @@ bool CalculatorFunctionsGeneral::innerDecomposeFDPartGeneralizedVermaModuleOverL
   ModuleSSalgebra<RationalFunctionOld> theMod;
   Selection selInducing= inducingParSel;
   Selection selSplittingParSel=splittingParSel;
-  theMod.MakeFromHW(ownerSS, theWeightFundCoords, selInducing, *theCommands.theGlobalVariableS, 1, 0, 0, false);
+  theMod.MakeFromHW(ownerSS, theWeightFundCoords, selInducing, theGlobalVariables, 1, 0, 0, false);
   std::string report;
-  theMod.SplitOverLevi(&report, selSplittingParSel, *theCommands.theGlobalVariableS, 1, 0);
+  theMod.SplitOverLevi(&report, selSplittingParSel, theGlobalVariables, 1, 0);
   return output.AssignValue(report, theCommands);
 }
 
@@ -4004,7 +4004,7 @@ bool CalculatorFunctionsGeneral::innerSplitFDpartB3overG2Init(Calculator& theCom
   for (int i=0; i<theG2B3Data.theWeightFundCoords.size; i++)
     if (!theG2B3Data.theWeightFundCoords[i].IsSmallInteger())
       theG2B3Data.selInducing.AddSelectionAppendNewIndex(i);
-  theG2B3Data.initAssumingParSelAndHmmInittedPart1NoSubgroups(*theCommands.theGlobalVariableS);
+  theG2B3Data.initAssumingParSelAndHmmInittedPart1NoSubgroups(theGlobalVariables);
   return true;
 }
 
@@ -4018,7 +4018,7 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroups(Calculator& theCommand
   SubgroupWeylGroupOLD theSubgroup;
   std::stringstream out;
   for (int i=0; i<numCycles; i++, selectionParSel.incrementSelection())
-  { theSubgroup.MakeParabolicFromSelectionSimpleRoots(theSSalgebra.theWeyl, selectionParSel, *theCommands.theGlobalVariableS, 2000);
+  { theSubgroup.MakeParabolicFromSelectionSimpleRoots(theSSalgebra.theWeyl, selectionParSel, theGlobalVariables, 2000);
     out << "<hr>" << CGI::GetMathSpanPure(theSubgroup.ToString());
   }
   return output.AssignValue(out.str(), theCommands);
@@ -4043,11 +4043,11 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
   std::stringstream out;
   std::fstream outputFile, outputFile2;
   std::string fileName, filename2;
-  fileName=theCommands.theGlobalVariableS->PhysicalNameExtraOutputWithPath+"1";
-  filename2=theCommands.theGlobalVariableS->PhysicalNameExtraOutputWithPath+"2";
+  fileName=theGlobalVariables.PhysicalNameExtraOutputWithPath+"1";
+  filename2=theGlobalVariables.PhysicalNameExtraOutputWithPath+"2";
   FileOperations::OpenFileCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
   FileOperations::OpenFileCreateIfNotPresent(outputFile2, filename2+".tex", false, true, false);
-  if (!theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl, parabolicSel, *theCommands.theGlobalVariableS, 500))
+  if (!theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl, parabolicSel, theGlobalVariables, 500))
     return output.MakeError("<br><br>Failed to generate Weyl subgroup, 500 elements is the limit", theCommands);
   theSubgroup.FindQuotientRepresentatives(2000);
   out << "<br>Number elements of the coset: " << theSubgroup.RepresentativesQuotientAmbientOrder.size;
@@ -4070,19 +4070,19 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
     outputFile2 << "\n\\end{document}";
     out << "<hr>"
     << " The Hasse graph of the Weyl group of the Levi part follows. <a href=\""
-    << theCommands.theGlobalVariableS->DisplayNameExtraOutputNoPath << "1.tex\"> "
-    << theCommands.theGlobalVariableS->DisplayNameExtraOutputNoPath << "1.tex</a>";
-    out << ", <iframe src=\"" << theCommands.theGlobalVariableS->DisplayNameExtraOutputNoPath
+    << theGlobalVariables.DisplayNameExtraOutputNoPath << "1.tex\"> "
+    << theGlobalVariables.DisplayNameExtraOutputNoPath << "1.tex</a>";
+    out << ", <iframe src=\"" << theGlobalVariables.DisplayNameExtraOutputNoPath
     << "1.png\" width=\"800\" height=\"600\">"
-    << theCommands.theGlobalVariableS->DisplayNameExtraOutputNoPath << "1.png</iframe>";
+    << theGlobalVariables.DisplayNameExtraOutputNoPath << "1.png</iframe>";
     out << "<hr> The coset graph of the Weyl group of the Levi part follows. The cosets are right, i.e. a coset "
     << " of the subgroup X is written in the form Xw, where w is one of the elements below. "
     << "<a href=\""
-    << theCommands.theGlobalVariableS->DisplayNameExtraOutputNoPath
-    << "2.tex\"> " << theCommands.theGlobalVariableS->DisplayNameExtraOutputNoPath << "2.tex</a>";
-    out << ", <iframe src=\"" << theCommands.theGlobalVariableS->DisplayNameExtraOutputNoPath
+    << theGlobalVariables.DisplayNameExtraOutputNoPath
+    << "2.tex\"> " << theGlobalVariables.DisplayNameExtraOutputNoPath << "2.tex</a>";
+    out << ", <iframe src=\"" << theGlobalVariables.DisplayNameExtraOutputNoPath
     << "2.png\" width=\"800\" height=\"600\"> "
-    << theCommands.theGlobalVariableS->DisplayNameExtraOutputNoPath << "2.png</iframe>";
+    << theGlobalVariables.DisplayNameExtraOutputNoPath << "2.png</iframe>";
     out <<"<b>The .png file might be bad if LaTeX crashed while trying to process it; "
     << "please check whether the .tex corresponds to the .png.</b>";
     out << "<hr>Additional printout follows.<br> ";
@@ -4115,18 +4115,18 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
   outputFile.close();
   outputFile2.close();
   stOutput << "<!--";
-  std::string command1="latex  -output-directory=" + theCommands.theGlobalVariableS->PhysicalPathOutputFolder + " " + fileName + ".tex";
+  std::string command1="latex  -output-directory=" + theGlobalVariables.PhysicalPathOutputFolder + " " + fileName + ".tex";
   std::string command2="dvipng " + fileName + ".dvi -o " + fileName + ".png -T tight";
-  std::string command3="latex  -output-directory=" + theCommands.theGlobalVariableS->PhysicalPathOutputFolder + " " + filename2 + ".tex";
+  std::string command3="latex  -output-directory=" + theGlobalVariables.PhysicalPathOutputFolder + " " + filename2 + ".tex";
   std::string command4="dvipng " + filename2 + ".dvi -o " + filename2 + ".png -T tight";
 //  stOutput << "<br>" << command1;
 //  stOutput << "<br>" << command2;
 //  stOutput << "<br>" << command3;
 //  stOutput << "<br>" << command4;
-  theCommands.theGlobalVariableS->System(command1);
-  theCommands.theGlobalVariableS->System(command2);
-  theCommands.theGlobalVariableS->System(command3);
-  theCommands.theGlobalVariableS->System(command4);
+  theGlobalVariables.System(command1);
+  theGlobalVariables.System(command2);
+  theGlobalVariables.System(command3);
+  theGlobalVariables.System(command4);
   stOutput << "-->";
   return output.AssignValue(out.str(), theCommands);
 }
@@ -4153,7 +4153,7 @@ bool CalculatorFunctionsGeneral::innerAllPartitions(Calculator& theCommands, con
 //  stOutput << "<br>at start: " << thePartition.ToStringPartitioningVectors();
   std::stringstream out;
   int numFound=0;
-  ProgressReport theReport(theCommands.theGlobalVariableS);
+  ProgressReport theReport(&theGlobalVariables);
   out << thePartition.ToStringPartitioningVectors();
   while (thePartition.IncrementReturnFalseIfPastLast())
   { out << "<br>" << thePartition.ToStringOnePartition(thePartition.currentPartition);
@@ -4248,7 +4248,7 @@ bool CalculatorFunctionsGeneral::innerDecomposeCharGenVerma(Calculator& theComma
 //  theSSlieAlg.theWeyl.RaiseToDominantWeight
 //  (theHWSimpCoordsFDPart, 0, 0, &raisingElt);
   SubgroupWeylGroupOLD theSub;
-  if (!theSub.MakeParabolicFromSelectionSimpleRoots(theWeyl, parSel, *theCommands.theGlobalVariableS, 1000))
+  if (!theSub.MakeParabolicFromSelectionSimpleRoots(theWeyl, parSel, theGlobalVariables, 1000))
     return output.MakeError("Failed to generate Weyl subgroup of Levi part (possibly too large? element limit is 1000).", theCommands);
   theHWsimpCoords=theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords);
   List<ElementWeylGroup<WeylGroup> > theWeylElements;
@@ -4360,8 +4360,8 @@ bool CalculatorFunctionsGeneral::innerWriteGenVermaModAsDiffOperatorUpToLevel(Ca
 
 //  int theNumVars=hwContext.VariableImages.size;
   RationalFunctionOld RFOne, RFZero;
-  RFOne.MakeOne(theCommands.theGlobalVariableS);
-  RFZero.MakeZero(theCommands.theGlobalVariableS);
+  RFOne.MakeOne(&theGlobalVariables);
+  RFZero.MakeZero(&theGlobalVariables);
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFunctionOld> theElt;
   //=theElementData.theElementTensorGenVermas.GetElement();
@@ -4440,8 +4440,8 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
 //  stOutput << "<br>parabolic selection: " << parabolicSel.ToString();
   int theNumVars=hwContext.ContextGetNumContextVariables();
   RationalFunctionOld RFOne, RFZero;
-  RFOne.MakeOne(theCommands.theGlobalVariableS);
-  RFZero.MakeZero(theCommands.theGlobalVariableS);
+  RFOne.MakeOne(&theGlobalVariables);
+  RFZero.MakeZero(&theGlobalVariables);
   ElementTensorsGeneralizedVermas<RationalFunctionOld> theElt;
   //=theElementData.theElementTensorGenVermas.GetElement();
   Selection selParSel1, selFD;
@@ -4502,7 +4502,7 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
     << theGenMod.GetOwner().GetRank() << ". " << crash;
   std::string report;
   theFDMod.SplitOverLevi
-  (&report, theGenMod.parabolicSelectionNonSelectedAreElementsLevi, *theCommands.theGlobalVariableS, RFOne, RFZero,
+  (&report, theGenMod.parabolicSelectionNonSelectedAreElementsLevi, theGlobalVariables, RFOne, RFZero,
    &theLeviEigenVectors, &theEigenVectorWeightsFund, 0, &theFDLeviSplit);
   theFDMod.GetFDchar(theFDChaR);
   List<ElementUniversalEnveloping<RationalFunctionOld> > theCentralCharacters;
@@ -4536,7 +4536,7 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
     theFDLeviSplitShifteD.AddMonomial(tempMon, RFOne);
     currentHWdualcoords=theSSalgebra->theWeyl.GetDualCoordinatesFromFundamental(tempMon.weightFundamentalCoordS);
     currentChar=theCasimir;
-    currentChar.ModOutVermaRelations(theCommands.theGlobalVariableS, & currentHWdualcoords, RFOne, RFZero);
+    currentChar.ModOutVermaRelations(&theGlobalVariables, & currentHWdualcoords, RFOne, RFZero);
     theCentralCharacters.AddOnTop(currentChar);
     out << "<tr><td>" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.ToStringLetterFormat("\\psi") << "</td><td>"
     << currentChar.ToString(&tempFormat) << "</td></tr>";
@@ -4567,13 +4567,13 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
   { Vector<RationalFunctionOld> currentWeightSimpleCoords=
     theSSalgebra->theWeyl.GetSimpleCoordinatesFromFundamental(theEigenVectorWeightsFund[i]);
     tempElt.MakeHWV(theFDMod, RFOne);
-    tempElt.MultiplyOnTheLeft(theLeviEigenVectors[i], theElt, *theSSalgebra, *theCommands.theGlobalVariableS, RFOne, RFZero);
+    tempElt.MultiplyOnTheLeft(theLeviEigenVectors[i], theElt, *theSSalgebra, theGlobalVariables, RFOne, RFZero);
     tempElt.MakeHWV(theGenMod, RFOne);
 //      tempElt.MultiplyOnTheLeft
 //      (theGenMod.theGeneratingWordsNonReduced[0], tempElt2, theMods, theSSalgebra,
-//         *theCommands.theGlobalVariableS,
+//         theGlobalVariables,
 //       RFOne, RFZero);
-    theElt.TensorOnTheRight(tempElt, *theCommands.theGlobalVariableS, RFOne, RFZero);
+    theElt.TensorOnTheRight(tempElt, theGlobalVariables, RFOne, RFZero);
     theElt*=-1;
     std::string startingEltString=theElt.ToString(&tempFormat);
     std::stringstream tempStream, tempStream2;
@@ -4585,7 +4585,7 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
       if ((otherWeightSimpleCoords-currentWeightSimpleCoords).IsPositive())
       { theCasimirMinusChar=theCasimir;
         theCasimirMinusChar-=theCentralCharacters[j];
-        theElt.MultiplyOnTheLeft(theCasimirMinusChar, tempElt2, *theSSalgebra, *theCommands.theGlobalVariableS, RFOne, RFZero);
+        theElt.MultiplyOnTheLeft(theCasimirMinusChar, tempElt2, *theSSalgebra, theGlobalVariables, RFOne, RFZero);
         theElt=tempElt2;
         tempStream << "(i(\\bar c)- (" << theCentralCharacters[j].ToString() << ") )\\\\";
         tempStream2 << " $(\\bar c-p_" << j+1 << ") $ ";
@@ -4668,7 +4668,7 @@ bool CalculatorFunctionsGeneral::innerHWTAABF(Calculator& theCommands, const Exp
   hwDualCoords=theWeyl.GetDualCoordinatesFromFundamental(weight);
   RationalFunctionOld outputRF;
   //stOutput << "<br>The highest weight in dual coordinates, as I understand it:" << hwDualCoords.ToString();
-  if(!leftUE.HWTAAbilinearForm(rightUE, outputRF, &hwDualCoords, *theCommands.theGlobalVariableS, 1, 0, &theCommands.Comments))
+  if(!leftUE.HWTAAbilinearForm(rightUE, outputRF, &hwDualCoords, 1, 0, &theCommands.Comments))
     return output.MakeError("Error: couldn't compute Shapovalov form, see comments.", theCommands);
   return output.AssignValueWithContext(outputRF, finalContext, theCommands);
 }
@@ -4690,7 +4690,7 @@ bool CalculatorFunctionsGeneral::innerSplitFDpartB3overG2CharsOutput(Calculator&
   charSSAlgMod<RationalFunctionOld> tempChar;
   charSSAlgMod<RationalFunctionOld> startingChar;
   startingChar.MakeFromWeight(theG2B3Data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(theG2B3Data.theWeightFundCoords), &theG2B3Data.theHmm.theRange());
-  startingChar.SplitCharOverRedSubalg(&report, tempChar, theG2B3Data, *theCommands.theGlobalVariableS);
+  startingChar.SplitCharOverRedSubalg(&report, tempChar, theG2B3Data, theGlobalVariables);
   out << report;
   return output.AssignValue(out.str(), theCommands);
 }
@@ -4814,7 +4814,7 @@ bool Calculator::innerSplitFDpartB3overG2old(Calculator& theCommands, const Expr
     out << CGI::GetMathSpanPure(formulaStream1.str()) << "</td><td>" << CGI::GetMathSpanPure(theG2B3Data.theEigenVectorS[k].ToString()) << "</td></tr>";
   }
   out << "</table>";
-  out << "<br>Time final: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
+  out << "<br>Time final: " << theGlobalVariables.GetElapsedSeconds();
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -5007,19 +5007,19 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, con
   }
   if (numRuns<0)
     numRuns=0;
-  if (theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection!=0)
-    theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection();
+  if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection!=0)
+    theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
   else
     theCommands << "WebServerReturnDisplayIndicatorCloseConnection is zero.";
-  ProgressReport theReport(theCommands.theGlobalVariableS);
+  ProgressReport theReport(&theGlobalVariables);
 
   for (int i=0; i<numRuns; i++)
   { std::stringstream reportStream;
     reportStream << " Running indicator test, " << i+1 << " out of " << numRuns << ".";
     theReport.Report(reportStream.str());
-    if (theCommands.theGlobalVariableS->sleepFunction==0)
+    if (theGlobalVariables.sleepFunction==0)
       crash << "fall asleep function is zero!" << crash;
-    theCommands.theGlobalVariableS->FallAsleep(4000);
+    theGlobalVariables.FallAsleep(4000);
   }
   std::stringstream out;
   out << numRuns << " iterations of the indicator test executed. ";
@@ -5033,8 +5033,8 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
   SemisimpleLieAlgebra* ownerSS;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input, ownerSS))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
-  theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
-  ownerSS->ComputeFolderNames(*theCommands.theGlobalVariableS);
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
+  ownerSS->ComputeFolderNames(theGlobalVariables);
   FormatExpressions theFormat;
   theFormat.flagUseHTML=true;
   theFormat.flagUseLatex=false;
@@ -5042,8 +5042,8 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
   theFormat.PathPhysicalCurrentOutputFolder=ownerSS->PhysicalNameMainOutputFolder;
   theFormat.PathDisplayCurrentOutputFolder=ownerSS->DisplayNameMainOutputFolder;
 
-  theFormat.PathDisplayNameCalculator=theCommands.theGlobalVariableS->DisplayNameCalculatorWithPath;
-  theFormat.PathDisplayServerBaseFolder=theCommands.theGlobalVariableS->DisplayPathServerBase;
+  theFormat.PathDisplayNameCalculator=theGlobalVariables.DisplayNameCalculatorWithPath;
+  theFormat.PathDisplayServerBaseFolder=theGlobalVariables.DisplayPathServerBase;
 
   std::stringstream outSltwoPath, outSltwoDisplayPath;
   std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile, outSltwoFileDisplayName;
@@ -5058,17 +5058,17 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
   { std::stringstream outMkDirCommand1, outMkDirCommand2;
     outMkDirCommand1 << "mkdir " << ownerSS->PhysicalNameMainOutputFolder;
     outMkDirCommand2 << "mkdir " << outSltwoPath.str();
-    theCommands.theGlobalVariableS->System(outMkDirCommand1.str());
-    theCommands.theGlobalVariableS->System(outMkDirCommand2.str());
+    theGlobalVariables.System(outMkDirCommand1.str());
+    theGlobalVariables.System(outMkDirCommand2.str());
   }
-  theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit =1000;
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit =1000;
   if (!FileOperations::FileExists(outSltwoMainFile.str()) || !FileOperations::FileExists(outRootHtmlFileName.str()))
     MustRecompute=true;
   std::stringstream out;
   if (MustRecompute)
   { //stOutput << theCommands.javaScriptDisplayingIndicator;
-/*    if (theCommands.theGlobalVariableS->Fork())
-      if (theCommands.theGlobalVariableS->ProcessIDforForking>0)//parent
+/*    if (theGlobalVariables.Fork())
+      if (theGlobalVariables.ProcessIDforForking>0)//parent
       { theCommands.flagAbortComputationASAP=true;
         out << "<br>Computation of the root subalgebras is in progress. Below is a progress report. "
         << "Evaluation of all other commands has been stopped. " << theCommands.javaScriptDisplayingIndicator;
@@ -5085,10 +5085,10 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
     theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo=true;
 //    stOutput << "ChangeME";
 //    theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo=false;
-    ownerSS->FindSl2Subalgebras(*ownerSS, theSl2s, theCommands.theGlobalVariableS);
+    ownerSS->FindSl2Subalgebras(*ownerSS, theSl2s, &theGlobalVariables);
     std::string PathSl2= outSltwoPath.str();
     std::string DisplayPathSl2=outSltwoDisplayPath.str();
-    theSl2s.ToHTML(&theFormat, theCommands.theGlobalVariableS);
+    theSl2s.ToHTML(&theFormat, &theGlobalVariables);
   } else
     out << "The table is precomputed and served from the hard disk. <br>";
 //  out << "The full file name: " << outSltwoFileDisplayName.str();
@@ -5128,7 +5128,7 @@ void LaTeXcrawler::BuildFreecalc()
   List<std::string> theLectureNumbers, theLectureDesiredNames;
   inputFile.seekg(0);
   std::string buffer;
-  ProgressReport theReport(this->owner->theGlobalVariableS);
+  ProgressReport theReport(&theGlobalVariables);
   std::stringstream reportStream;
   reportStream << "Processing input file: extracting lecture numbers...";
   theReport.Report(reportStream.str());
@@ -5243,7 +5243,7 @@ void LaTeXcrawler::BuildFreecalc()
   std::string currentSysCommand="ch " + this->baseFolderStartFile+"\n\n\n\n";
   executedCommands << "<br>" << currentSysCommand;
   reportStream << "<br>Directory changed: " << currentSysCommand;
-  this->owner->theGlobalVariableS->ChDir(this->baseFolderStartFile );
+  theGlobalVariables.ChDir(this->baseFolderStartFile );
   for (int i=0; i<
   theLectureNumbers.size
   ; i++)
@@ -5268,10 +5268,10 @@ void LaTeXcrawler::BuildFreecalc()
     executedCommands << "<br>" << currentSysCommand;
     reportStream << currentSysCommand;
     theReport.Report(reportStream.str());
-    this->owner->theGlobalVariableS->System(currentSysCommand);
+    theGlobalVariables.System(currentSysCommand);
     reportStream << "<b>[x2]</b>";
     theReport.Report(reportStream.str());
-    this->owner->theGlobalVariableS->System(currentSysCommand);
+    theGlobalVariables.System(currentSysCommand);
     std::stringstream thePdfFileNameHandout;
     if (isLecturE)
       thePdfFileNameHandout << "Lecture" << theLectureNumbers[i] << "Handout_" << theLectureDesiredNames[i] << "_"
@@ -5283,7 +5283,7 @@ void LaTeXcrawler::BuildFreecalc()
     executedCommands << "<br>" << currentSysCommand;
     reportStream << "<br>Lecture/Homework " << i+1 << " handout compiled, renaming file ... ";
     theReport.Report(reportStream.str());
-    this->owner->theGlobalVariableS->System(currentSysCommand);
+    theGlobalVariables.System(currentSysCommand);
     reportStream << " done.";
     theReport.Report(reportStream.str());
     workingFile.close();
@@ -5305,7 +5305,7 @@ void LaTeXcrawler::BuildFreecalc()
     executedCommands << "<br>" << currentSysCommand;
     reportStream << currentSysCommand;
     theReport.Report(reportStream.str());
-    this->owner->theGlobalVariableS->System(currentSysCommand);
+    theGlobalVariables.System(currentSysCommand);
     std::stringstream thePdfFileNameNormal;
     thePdfFileNameNormal << "Lecture" << theLectureNumbers[i] << "_" << theLectureDesiredNames[i] << "_"
     << lectureFileNameEnd << ".pdf";
@@ -5313,7 +5313,7 @@ void LaTeXcrawler::BuildFreecalc()
     executedCommands << "<br>" << currentSysCommand;
     reportStream << "<br>Lecture " << i+1 << " regular slides compiled, renaming file ... ";
     theReport.Report(reportStream.str());
-    this->owner->theGlobalVariableS->System(currentSysCommand);
+    theGlobalVariables.System(currentSysCommand);
     reportStream << " done.";
     theReport.Report(reportStream.str());
     resultTable << "<td>" << thePdfFileNameNormal.str() << "</td>" << "<td>" << thePdfFileNameHandout.str() << "</td>";
@@ -5329,7 +5329,7 @@ void LaTeXcrawler::Crawl()
   this->baseFolderStartFile=FileOperations::GetPathFromFileName(this->theFileToCrawl);
   this->CrawlRecursive(this->theFileToCrawl);
   std::fstream outputFile;
-  std::string outputFileName=  this->owner->theGlobalVariableS->PhysicalPathOutputFolder + "latexOutput.tex";
+  std::string outputFileName=  theGlobalVariables.PhysicalPathOutputFolder + "latexOutput.tex";
   if (!FileOperations::OpenFileCreateIfNotPresent(outputFile, outputFileName, false, true, false))
   { this->displayResult << "Failed to open output file: " << outputFileName << ", check write permissions. ";
     return;
@@ -5337,7 +5337,7 @@ void LaTeXcrawler::Crawl()
   outputFile << this->crawlingResult.str();
   if (this->errorStream.str()!="")
     this->displayResult << "Errors encountered. " << this->errorStream.str();
-  this->displayResult << "Output file: <a href=\"" << this->owner->theGlobalVariableS->DisplayPathOutputFolder
+  this->displayResult << "Output file: <a href=\"" << theGlobalVariables.DisplayPathOutputFolder
   << "latexOutput.tex\">" << "latexOutput.tex" << "</a>";
 }
 
@@ -5411,7 +5411,7 @@ bool CalculatorFunctionsGeneral::innerSetOutputFile(Calculator& theCommands, con
     { out << theFileName << " rejected as a file name as it contains the characters one of the three characters .\\/  ";
       return output.AssignValue(out.str(), theCommands);
     }
-  theCommands.theGlobalVariableS->initOutputReportAndCrashFileNames(theFileName, theCommands.inputString);
+  theGlobalVariables.initOutputReportAndCrashFileNames(theFileName, theCommands.inputString);
   out << "The default output filename has been changed to " << theFileName << ".";
   return output.AssignValue(out.str(), theCommands);
 
@@ -5456,8 +5456,8 @@ bool CalculatorFunctionsGeneral::innerFindProductDistanceModN(Calculator& theCom
   }
   LargeIntUnsigned currentIndexLarge, currentDistance, maxDistanceGenerated;
   int currentIndex;
-  ProgressReport theReport(theCommands.theGlobalVariableS);
-  ProgressReport theReport0(theCommands.theGlobalVariableS);
+  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport0(&theGlobalVariables);
   std::stringstream reportstream;
   reportstream << "Finding product distance mod " << theMod.ToString() << " w.r.t. elements "
   << theInts;
@@ -5557,7 +5557,7 @@ bool CalculatorFunctionsGeneral::innerSolveProductSumEquationOverSetModN(Calcula
   LargeIntUnsigned theModLarge;
   theModLarge=theMod;
   int numTestedSoFar=0;
-  ProgressReport theReport(theCommands.theGlobalVariableS);
+  ProgressReport theReport(&theGlobalVariables);
   LargeIntUnsigned oneUI=1;
   while (thePartition.IncrementReturnFalseIfPastLast())
   { LargeIntUnsigned theProduct=1;
@@ -5607,22 +5607,22 @@ void Calculator::AutomatedTestRun
       outputCommandStrings.AddOnTop(this->operationsCompositeHandlers[i][j].theExample);
   outputResultsWithInit.SetSize(outputCommandStrings.size);
   outputResultsNoInit.SetSize(outputCommandStrings.size);
-  ProgressReport theReport(this->theGlobalVariableS);
+  ProgressReport theReport(&theGlobalVariables);
   FormatExpressions theFormat;
   theFormat.flagExpressionIsFinal=true;
   for (int i=0; i<outputCommandStrings.size; i++)
-  { double startingTime=this->theGlobalVariableS->GetElapsedSeconds();
+  { double startingTime=theGlobalVariables.GetElapsedSeconds();
     std::stringstream reportStream;
     reportStream << "<br>Testing expression:<br> " << outputCommandStrings[i]
     << "<br>Test progress: testing " << i+1 << " out of " << outputCommandStrings.size << ". ";
     theReport.Report(reportStream.str());
     theTester.reset();
     theTester.CheckConsistencyAfterInitializationExpressionStackEmpty();
-    theTester.init(*this->theGlobalVariableS);
+    theTester.init();
     theTester.Evaluate(outputCommandStrings[i]);
     outputResultsWithInit[i]=theTester.theProgramExpression.ToString(&theFormat);
     reportStream << "<br>Result: " << theTester.theProgramExpression.ToString();
-    reportStream << "<br>Done in: " << this->theGlobalVariableS->GetElapsedSeconds()-startingTime << " seconds. ";
+    reportStream << "<br>Done in: " << theGlobalVariables.GetElapsedSeconds()-startingTime << " seconds. ";
     theReport.Report(reportStream.str());
   }
 }
@@ -5681,7 +5681,7 @@ bool CalculatorFunctionsGeneral::innerDrawWeightSupportWithMults(Calculator& the
   theChar.MakeFromWeight(highestWeightSimpleCoords, theSSalgpointer);
   DrawingVariables theDV;
   std::string report;
-  theChar.DrawMeWithMults(report, *theCommands.theGlobalVariableS, theDV, 10000);
+  theChar.DrawMeWithMults(report, theGlobalVariables, theDV, 10000);
   out << report << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
   return output.AssignValue(out.str(), theCommands);
 }
@@ -5705,7 +5705,7 @@ bool CalculatorFunctionsGeneral::innerDrawRootSystem(Calculator& theCommands, co
   }
   std::stringstream out;
   DrawingVariables theDV;
-  theWeyl.DrawRootSystem(theDV, true, *theCommands.theGlobalVariableS, false, 0, true, 0);
+  theWeyl.DrawRootSystem(theDV, true, theGlobalVariables, false, 0, true, 0);
   if (hasPreferredProjectionPlane)
   { theDV.flagFillUserDefinedProjection=true;
     theDV.FillUserDefinedProjection=preferredProjectionPlane;
@@ -6037,7 +6037,7 @@ bool CalculatorFunctionsGeneral::innerDrawWeightSupport(Calculator& theCommands,
   theChar.MakeFromWeight(highestWeightSimpleCoords, theAlgPointer);
   DrawingVariables theDV;
   std::string report;
-  theChar.DrawMeNoMults(report, *theCommands.theGlobalVariableS, theDV, 10000);
+  theChar.DrawMeNoMults(report, theGlobalVariables, theDV, 10000);
   out << report << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
   out << "<br>A table with the weights of the character follows. <br>";
   out << theChar.ToStringFullCharacterWeightsTable();

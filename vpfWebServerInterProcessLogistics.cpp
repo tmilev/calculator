@@ -10,10 +10,6 @@
 ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogisticsImplementation
 (__FILE__, "Web server interprocess communication implementation.");
 
-extern logger logBlock;
-extern logger logIO;
-//extern logger theLog;
-
 void PauseController::Release(int& theDescriptor)
 { close(theDescriptor);
   theDescriptor=-1;
@@ -116,7 +112,7 @@ void Pipe::WriteAfterEmptying(const std::string& toBeSent)
 { //theLog << "Step -1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
   MacroRegisterFunctionWithName("Pipe::WriteAfterEmptying");
   //theLog << "Step 1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
-  MutexLockGuard safety(onePredefinedCopyOfGlobalVariables.MutexWebWorkerPipeWriteLock);
+  MutexLockGuard safety(theGlobalVariables.MutexWebWorkerPipeWriteLock);
   this->pipeAvailable.RequestPausePauseIfLocked();
 //  theLog << logger::endL << "Step 2: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction
 //  << logger::endL;
@@ -211,7 +207,7 @@ void Pipe::ReadNoLocks()
 
 void Pipe::ReadWithoutEmptying()
 { MacroRegisterFunctionWithName("Pipe::ReadWithoutEmptying");
-  MutexWrapper& safetyFirst=onePredefinedCopyOfGlobalVariables.MutexWebWorkerPipeReadLock;
+  MutexRecursiveWrapper& safetyFirst=theGlobalVariables.MutexWebWorkerPipeReadLock;
   safetyFirst.LockMe(); //preventing threads from locking one another
   this->pipeAvailable.RequestPausePauseIfLocked();
   this->ReadNoLocks();
@@ -226,7 +222,7 @@ void Pipe::ReadWithoutEmptying()
 
 void Pipe::Read()
 { MacroRegisterFunctionWithName("Pipe::Read");
-  MutexWrapper& safetyFirst=onePredefinedCopyOfGlobalVariables.MutexWebWorkerPipeReadLock;
+  MutexRecursiveWrapper& safetyFirst=theGlobalVariables.MutexWebWorkerPipeReadLock;
   safetyFirst.LockMe(); //preventing threads from locking one another
   this->pipeAvailable.RequestPausePauseIfLocked();
   this->ReadNoLocks();
@@ -296,7 +292,7 @@ logger& logger::operator << (const loggerSpecialSymbols& input)
 { this->CheckLogSize();
   switch (input)
   { case logger::endL:
-      if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+      if (theGlobalVariables.flagUsingBuiltInWebServer)
         std::cout << this->closeTagConsole() << std::endl;
       if (this->flagStopWritingToFile)
         return *this;
@@ -310,7 +306,7 @@ logger& logger::operator << (const loggerSpecialSymbols& input)
     case logger::purple:
     case logger::cyan:
       this->currentColor=input;
-      if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+      if (theGlobalVariables.flagUsingBuiltInWebServer)
         std::cout << this->openTagConsole();
       if (this->flagStopWritingToFile)
         return *this;

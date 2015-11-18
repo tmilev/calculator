@@ -367,7 +367,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
     currentOp.MakeZero();
     for (int j=0; j<currentElt.size(); j++)
     { //stOutput << "<br>fetching action of generator of index " << currentElt[j].theGeneratorIndex;
-      tempMat=this->GetActionGeneratorIndeX(currentElt[j].theGeneratorIndex, theGlobalVariables, theRingUnit, theRingZero);
+      tempMat=this->GetActionGeneratorIndeX(currentElt[j].theGeneratorIndex, theRingUnit, theRingZero);
       tempMat*=currentElt.theCoeffs[j];
       currentOp+=tempMat;
     }
@@ -389,7 +389,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
       tempSpace1=theFinalEigenSpace;
         theReport.Report(tempStream4.str());
       tempSpace2=eigenSpacesPerSimpleGenerator[i];
-      theFinalEigenSpace.IntersectTwoLinSpaces(tempSpace1, tempSpace2, theFinalEigenSpace, &theGlobalVariables);
+      theFinalEigenSpace.IntersectTwoLinSpaces(tempSpace1, tempSpace2, theFinalEigenSpace);
         tempStream4 << " done in " << theGlobalVariables.GetElapsedSeconds()-timeAtStart2 << " seconds.";
         theReport.Report(tempStream4.str());
     }

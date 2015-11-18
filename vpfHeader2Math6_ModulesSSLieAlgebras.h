@@ -94,8 +94,8 @@ public:
 //  HashedList<MonomialUniversalEnveloping<coefficient> > theGeneratingMonsPBWform;
 //  List
 //  List<Matrix<coefficient> > ActionsChevalleyGenerators;
-  MatrixTensor<coefficient>& GetActionGeneratorIndeX(int generatorIndex, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
-  MatrixTensor<coefficient>& GetActionSimpleGeneratorIndex(int generatorIndex, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
+  MatrixTensor<coefficient>& GetActionGeneratorIndeX(int generatorIndex, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
+  MatrixTensor<coefficient>& GetActionSimpleGeneratorIndex(int generatorIndex, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
   int GetMinNumVars()
   { if (this->theHWFundamentalCoordsBaseField.size<=0)
       return -1;

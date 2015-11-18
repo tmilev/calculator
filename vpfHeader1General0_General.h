@@ -225,13 +225,12 @@ public:
     return result;
   }
   template <class theType>
-  static bool GenerateVectorSpaceClosedWRTLieBracket(List<theType>& inputOutputElts, int upperDimensionBound, GlobalVariables* theGlobalVariables=0)
-  { return MathRoutines::GenerateVectorSpaceClosedWRTOperation(inputOutputElts, upperDimensionBound, theType::LieBracket, theGlobalVariables);
+  static bool GenerateVectorSpaceClosedWRTLieBracket(List<theType>& inputOutputElts, int upperDimensionBound)
+  { return MathRoutines::GenerateVectorSpaceClosedWRTOperation(inputOutputElts, upperDimensionBound, theType::LieBracket);
   }
   template <class theType>
   static bool GenerateVectorSpaceClosedWRTOperation
-  (List<theType>& inputOutputElts, int upperDimensionBound, void (*theBinaryOperation)(const theType& left, const theType& right, theType& output),
-   GlobalVariables* theGlobalVariables=0);
+  (List<theType>& inputOutputElts, int upperDimensionBound, void (*theBinaryOperation)(const theType& left, const theType& right, theType& output));
 //  static void NChooseK(int n, int k, LargeInt& output);//
   static bool StringBeginsWith(const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd=0)
   { std::string actualBeginning, tempS;
@@ -997,16 +996,8 @@ public:
   void Rotate(int r)
   { std::rotate(this->TheObjects, this->TheObjects+r, this->TheObjects+(this->size-1));
   }
-  bool ReadFromFile(std::fstream& input){ return this->ReadFromFile(input, 0, -1);}
-  bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitForDebugPurposes);
-  bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables){return this->ReadFromFile(input, theGlobalVariables, -1);}
-  void WriteToFile(std::fstream& output)const
-  { this->WriteToFile(output, 0, -1);
-  }
-  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)const
-  { this->WriteToFile(output, theGlobalVariables, -1);
-  }
-  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables, int UpperLimitForDebugPurposes)const;
+  bool ReadFromFile(std::fstream& input, int UpperLimitForDebugPurposes=-1);
+  void WriteToFile(std::fstream& output, int UpperLimitForDebugPurposes=-1)const;
 //  inline bool Contains(Object& o){return this->Contains(o)!=-1; };
   int SizeWithoutObjects()const;
   inline Object* LastObject()const;// <-Registering stack trace forbidden! Multithreading deadlock alert.
@@ -1668,7 +1659,7 @@ class ProjectInformation
 {
   public:
   List<stackInfo> CustomStackTrace;
-  MutexWrapper infoIsInitialized;
+  MutexRecursiveWrapper infoIsInitialized;
   HashedList<FileInformation> theFiles;
   static ProjectInformation& GetMainProjectInfo()
   { //This is required to avoid the static initialization order fiasco.

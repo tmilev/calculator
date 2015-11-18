@@ -19,8 +19,6 @@
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 #include "vpfHeader1General3_Test.h"
 
-GlobalVariables& theGlobalVariables=onePredefinedCopyOfGlobalVariables;
-
 template <typename helt, typename kelt>
 class TrivialOuterAutomorphism
 { // operator overloading is gr8 <3 <3 <3

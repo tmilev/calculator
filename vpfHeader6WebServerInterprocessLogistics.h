@@ -3,6 +3,7 @@
 #ifndef vpfHeaderWebServerInterProcessLogisticsAlreadyDefined
 #define vpfHeaderWebServerInterProcessLogisticsAlreadyDefined
 
+#include "vpfHeader2Math0_General.h"
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
 
 static ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogisticsHeader
@@ -18,7 +19,7 @@ public:
   List<int> mutexPipe;
   List<char> buffer;
   std::string name;
-  MemorySaving<MutexWrapper> mutexForProcessBlocking; //<- to avoid two threads from the same process blocking the process.
+  MemorySaving<MutexRecursiveWrapper> mutexForProcessBlocking; //<- to avoid two threads from the same process blocking the process.
   std::string ToString()const;
   void Release();
   void CreateMe(const std::string& inputName);
@@ -77,7 +78,7 @@ class logger
   logger& operator << (const loggerSpecialSymbols& input);
   template <typename theType>
   logger& operator << (const theType& toBePrinted)
-  { if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+  { if (theGlobalVariables.flagUsingBuiltInWebServer)
       std::cout << toBePrinted;
     this->CheckLogSize();
     if (this->flagStopWritingToFile)

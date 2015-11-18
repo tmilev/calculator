@@ -12,17 +12,13 @@ static ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "Calculator bui
 
 template<class Element>
 bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
-(Matrix<Element>& matA, Matrix<Element>& matb, Vector<Element>* outputSolution, GlobalVariables* theGlobalVariables)
+(Matrix<Element>& matA, Matrix<Element>& matb, Vector<Element>* outputSolution)
 //this function return true if Ax=b>=0 has a solution with x>=0 and records a solution x at outputPoint
 //else returns false, where b is a given nonnegative column vector, A is an n by m matrix
 //and x is a column vector with m entries
-{ MemorySaving<Matrix<Rational> > tempA;
-  MemorySaving<Vector<Rational> > tempX;
-  Matrix<Rational>& tempMatA=theGlobalVariables==0 ? tempA.GetElement() : theGlobalVariables->matSimplexAlgorithm1.GetElement();
-  Vector<Rational>& matX=theGlobalVariables==0 ? tempX.GetElement() : theGlobalVariables->vectConeCondition3.GetElement();
-
-  MemorySaving<Selection> tempSel;
-  Selection& BaseVariables =theGlobalVariables==0 ? tempSel.GetElement() : theGlobalVariables->selSimplexAlg2.GetElement();
+{ Matrix<Rational> tempMatA;
+  Vector<Rational> matX;
+  Selection BaseVariables;
   Rational GlobalGoal;
   GlobalGoal.MakeZero();
   if (matA.NumRows!= matb.NumRows)
@@ -40,8 +36,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   //tempMatb.Assign(matb);
   tempMatA.init(matA.NumRows, NumTrueVariables+matA.NumRows);
   MemorySaving<HashedList<Selection> > tempSelList;
-  HashedList<Selection>& VisitedVertices =
-  theGlobalVariables==0 ? tempSelList.GetElement() : theGlobalVariables->hashedSelSimplexAlg.GetElement();
+  HashedList<Selection> VisitedVertices;
   VisitedVertices.Clear();
   BaseVariables.init(tempMatA.NumCols);
   tempMatA.MakeZero();
@@ -174,7 +169,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
 
 template <class coefficient>
 bool Vectors<coefficient>::ConesIntersect
-(List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone, Vector<Rational>* outputLinearCombo, Vector<Rational>* outputSplittingNormal, GlobalVariables* theGlobalVariables)
+(List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone, Vector<Rational>* outputLinearCombo, Vector<Rational>* outputSplittingNormal)
 { Matrix<Rational> matA;
   Matrix<Rational> matb;
   if (StrictCone.size==0)
@@ -204,9 +199,9 @@ bool Vectors<coefficient>::ConesIntersect
   //matA.ComputeDebugString();
   //matb.ComputeDebugString();
   //matX.ComputeDebugString();
-  if (!Matrix<Rational>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(matA, matb, outputLinearCombo, theGlobalVariables))
+  if (!Matrix<Rational>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(matA, matb, outputLinearCombo))
   { if (outputSplittingNormal!=0)
-    { bool tempBool=Vectors<coefficient>::GetNormalSeparatingCones(StrictCone, NonStrictCone, *outputSplittingNormal, theGlobalVariables);
+    { bool tempBool=Vectors<coefficient>::GetNormalSeparatingCones(StrictCone, NonStrictCone, *outputSplittingNormal);
       if (!tempBool)
         crash << "This is an algorithmic/mathematical (hence also programming) error: I get that two cones do not intersect, yet there exists no plane separating them. "
         << "Something is wrong with the implementation of the simplex algorithm. The input which manifested the problem was: <br>StrictCone: <br>"
@@ -1086,7 +1081,7 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
   for (int i=0; i<coneNonStrictGens.size; i++)
     out << "<br>v_{" << coneStrictGens.size+ i+1 << "}=" << coneNonStrictGens[i].ToString() << ";";
   Vector<Rational> outputIntersection, outputSeparatingNormal;
-  bool conesDoIntersect=coneNonStrictGens.ConesIntersect(coneStrictGens, coneNonStrictGens, &outputIntersection, &outputSeparatingNormal, theCommands.theGlobalVariableS);
+  bool conesDoIntersect=coneNonStrictGens.ConesIntersect(coneStrictGens, coneNonStrictGens, &outputIntersection, &outputSeparatingNormal);
   if (conesDoIntersect)
   { Vector<Rational> checkVector;
     checkVector.MakeZero(coneStrictMatForm.NumCols);

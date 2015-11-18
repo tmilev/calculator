@@ -14,13 +14,13 @@ ProjectInformationInstance ProjectInfoVpf6_3cpp(__FILE__, "Calculator built-in f
 
 template <class theType>
 bool MathRoutines::GenerateVectorSpaceClosedWRTOperation
-(List<theType>& inputOutputElts, int upperDimensionBound, void (*theBinaryOperation)(const theType& left, const theType& right, theType& output),
- GlobalVariables* theGlobalVariables)
+(List<theType>& inputOutputElts, int upperDimensionBound, void (*theBinaryOperation)(const theType& left, const theType& right, theType& output))
 { MacroRegisterFunctionWithName("MathRoutines::GenerateVectorSpaceClosedWRTOperation");
   inputOutputElts[0].GaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
   theType theOpResult;
-  ProgressReport theReport1(theGlobalVariables), theReport2(theGlobalVariables);
-  if (theGlobalVariables!=0)
+  ProgressReport theReport1(&theGlobalVariables), theReport2(&theGlobalVariables);
+  bool flagDoReport=theGlobalVariables.flagReportEverything|| theGlobalVariables.flagReportGaussianElimination;
+  if (flagDoReport)
     theReport1.Report("Extending vector space to closed with respect to binary operation. ");
   List<theType> theEltsForGaussianElimination=inputOutputElts;
   for (int i=0; i<inputOutputElts.size; i++)
@@ -36,7 +36,7 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation
         //<< theOpResult.ToString();
       if (upperDimensionBound>0 && inputOutputElts.size>upperDimensionBound)
         return false;
-      if (theGlobalVariables!=0)
+      if (flagDoReport)
       { std::stringstream reportStream;
         reportStream << "Accounted operation between elements " << i+1 << " and " << j+1 << " out of " << inputOutputElts.size;
         theReport2.Report(reportStream.str());
@@ -98,7 +98,7 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
     out << "Starting elements: <br>";
     for (int i=0; i<theLieAlgElts.size; i++)
       out << CGI::GetMathSpanPure(theLieAlgElts[i].ToString(&theFormat)) << "<br>";
-    bool success=MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theLieAlgElts, upperBound, theCommands.theGlobalVariableS);
+    bool success=MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theLieAlgElts, upperBound);
     if (!success)
       out << "<br>Did not succeed with generating vector space, instead got a vector space with basis " << theLieAlgElts.size << " exceeding the limit. "
       << "The basis generated before exceeding the limit was: " << theLieAlgElts.ToString();
@@ -120,7 +120,7 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
   out << "Starting elements: <br>";
   for (int i=0; i<theOps.size; i++)
     out << CGI::GetMathSpanPure(theOps[i].ToString(&theFormat)) << "<br>";
-  bool success=MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theOps, upperBound, theCommands.theGlobalVariableS);
+  bool success=MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theOps, upperBound);
   if (!success)
     out << "<br>Did not succeed with generating vector space, instead got a vector space with basis " << theOps.size << " exceeding the limit. "
     << "The basis generated before exceeding the limit was: " << theOps.ToString();
@@ -1230,9 +1230,9 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   this->printoutPFsLatex << "In other words, we need to solve the following system. "
   << "\\[" << theSystemHomogeneous.ToStringSystemLatex(&theConstTerms, &this->currentFormaT) << "\\]";
   this->currentFormaT.flagUseHTML=true;
-  theSystemHomogeneous.GaussianEliminationByRows(&theConstTerms, 0,0,0, &this->printoutPFsHtml, &this->currentFormaT);
+  theSystemHomogeneous.GaussianEliminationByRows(&theConstTerms, 0,0, &this->printoutPFsHtml, &this->currentFormaT);
   this->currentFormaT.flagUseHTML=false;
-  theSystemHomogeneousForLaTeX.GaussianEliminationByRows(&theConstTermsForLaTeX, 0,0,0, &this->printoutPFsLatex, &this->currentFormaT);
+  theSystemHomogeneousForLaTeX.GaussianEliminationByRows(&theConstTermsForLaTeX, 0,0, &this->printoutPFsLatex, &this->currentFormaT);
   PolynomialSubstitution<AlgebraicNumber> theSub;
   theSub.MakeIdSubstitution(this->NumberOfSystemVariables+1);
   for (int i=1; i<theSub.size; i++)
@@ -1288,7 +1288,7 @@ bool CalculatorFunctionsGeneral::innerGaussianEliminationMatrix(Calculator& theC
   std::stringstream out;
   FormatExpressions theFormat;
   theFormat.flagUseFrac=true;
-  theMat.GaussianEliminationByRows(0, 0, 0, 0, &out, & theFormat);
+  theMat.GaussianEliminationByRows(0, 0, 0, &out, & theFormat);
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -3194,7 +3194,7 @@ bool CalculatorFunctionsGeneral::innerInvertMatrix(Calculator& theCommands, cons
     return output.MakeError("The matrix is not square", theCommands);
   if (theMat.GetDeterminant()==0)
     return output.MakeError("Matrix determinant is zero.", theCommands);
-  theMat.Invert(theCommands.theGlobalVariableS);
+  theMat.Invert();
   return output.AssignValue(theMat, theCommands);
 }
 

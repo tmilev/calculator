@@ -52,7 +52,7 @@ struct TimerThreadData{
 };
 
 bool TimerThreadData::HandleComputationTimer()
-{ if (onePredefinedCopyOfGlobalVariables.flagComputationStarted)
+{ if (theGlobalVariables.flagComputationStarted)
     if (this->computationStartTime<0)
       this->computationStartTime=GetElapsedTimeInSeconds();
   this->elapsedtime=GetElapsedTimeInSeconds();
@@ -62,7 +62,7 @@ bool TimerThreadData::HandleComputationTimer()
 }
 
 bool TimerThreadData::HandleComputationCompleteStandard()
-{ if (onePredefinedCopyOfGlobalVariables.flagComputationCompletE)
+{ if (theGlobalVariables.flagComputationCompletE)
     theReport1.SetStatus("Starting timer cycle break: computation is complete.");
   return false;
 }
@@ -77,19 +77,19 @@ bool TimerThreadData::HandleTimerSignalToServer()
 }
 
 bool TimerThreadData::HandleMaxComputationTime()
-{ if (onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit<=0)
+{ if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit<=0)
     return false;
   if (elapsedComputationTime<=0)
     return false;
-  if (elapsedComputationTime<=onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit)
+  if (elapsedComputationTime<=theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit)
     return false;
-  if (onePredefinedCopyOfGlobalVariables.flagComputationCompletE)
+  if (theGlobalVariables.flagComputationCompletE)
   { theReport2.SetStatus((std::string)"The allowed clock time has ran out, but it seems the computation is already done. "+
                          (std::string)"Continuing to run (in order to wrap it up)...");
     return false;
   }
   theReport2.SetStatus("Starting timer cycle break: computation time too long.");
-  if (!onePredefinedCopyOfGlobalVariables.flagComputationStarted)
+  if (!theGlobalVariables.flagComputationStarted)
     crash << "Something has gone wrong. Computation has not started, yet " << elapsedtime
     << " seconds have already passed."
     << " This may be an error in the web-server routines of the calculator!" << crash;
@@ -101,9 +101,9 @@ bool TimerThreadData::HandleMaxComputationTime()
   else
     out << " (unknown amount of time)";
   out << ". The allowed run time is "
-  << onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
+  << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
   << " seconds (twice the amount of time allowed for calculator interpretation). "
-  << "<br>The present timeout limit may be extended by modifying onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;"
+  << "<br>The present timeout limit may be extended by modifying theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;"
   << " the restriction can be altogether lifted by modifying source file "
   << __FILE__ << "<br>";
   crash << out.str() << crash;
@@ -111,34 +111,34 @@ bool TimerThreadData::HandleMaxComputationTime()
 }
 
 bool TimerThreadData::HandleComputationTimeout()
-{ if (!onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+{ if (!theGlobalVariables.flagUsingBuiltInWebServer)
     return false;
-  if (onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction<=0)
+  if (theGlobalVariables.MaxComputationTimeBeforeWeTakeAction<=0)
     return false;
   if (elapsedComputationTime<=0)
     return false;
-  if (elapsedComputationTime<=onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction)
+  if (elapsedComputationTime<=theGlobalVariables.MaxComputationTimeBeforeWeTakeAction)
     return false;
 //  std::cout << "GOT TO HERE\n";
-  if (onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection==0)
+  if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection==0)
     return false;
 //  std::cout << "GOT TO HERE pt 2\n";
-  if (onePredefinedCopyOfGlobalVariables.flagOutputTimedOut )
+  if (theGlobalVariables.flagOutputTimedOut )
     return false;
 //  std::cout << "GOT TO HERE pt 3\n";
-  onePredefinedCopyOfGlobalVariables.flagTimeOutExplanationAlreadyDisplayed=true;
+  theGlobalVariables.flagTimeOutExplanationAlreadyDisplayed=true;
   theReport2.SetStatus("Starting timer cycle displaying time out explanation.");
-  onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
+  theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
   theReport2.SetStatus("Starting timer cycle displaying time out indicator done, continuing timer cycle.");
   return false;
 }
 
 bool TimerThreadData::HandlePingServerIamAlive()
-{ if (onePredefinedCopyOfGlobalVariables.flagComputationFinishedAllOutputSentClosing)
+{ if (theGlobalVariables.flagComputationFinishedAllOutputSentClosing)
     return true;
-  if (onePredefinedCopyOfGlobalVariables.WebServerTimerPing==0)
+  if (theGlobalVariables.WebServerTimerPing==0)
     return false;
-  onePredefinedCopyOfGlobalVariables.WebServerTimerPing(this->elapsedtime);
+  theGlobalVariables.WebServerTimerPing(this->elapsedtime);
   return false;
 }
 

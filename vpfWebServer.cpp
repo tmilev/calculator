@@ -1,6 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader6WebServer.h"
+#include "vpfHeader3Calculator0_Interface.h"
 #include <sys/wait.h>//<-waitpid f-n here
 #include <netdb.h> //<-addrinfo and related data structures defined here
 #include <arpa/inet.h> // <- inet_ntop declared here (ntop= network to presentation)
@@ -11,11 +12,6 @@ ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server im
 
 extern void static_html4(std::stringstream& output);
 
-logger theLog( "./../output/LogStandard.html");
-logger logBlock( "./../output/LogBlockingEvents.html");
-logger logIO( "./../output/LogIOErrorsEvents.html");
-
-WebServer theWebServer;
 bool ProgressReportWebServer::flagServerExists=true;
 
 ProgressReportWebServer::ProgressReportWebServer(const std::string& inputStatus)
@@ -38,14 +34,14 @@ ProgressReportWebServer::~ProgressReportWebServer()
 
 void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
 { MacroRegisterFunctionWithName("ProgressReportWebServer::SetStatus");
-  if (onePredefinedCopyOfGlobalVariables.flagComputationFinishedAllOutputSentClosing || !this->flagServerExists)
+  if (theGlobalVariables.flagComputationFinishedAllOutputSentClosing || !this->flagServerExists)
     return;
-  if (!onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+  if (!theGlobalVariables.flagUsingBuiltInWebServer)
     return;
   theWebServer.CheckConsistency();
 //  theLog << logger::endL << logger::red << "SetStatus: outputFunction: "
 //  << (int) stOutput.theOutputFunction << logger::endL;
-  MutexWrapper& safetyFirst=onePredefinedCopyOfGlobalVariables.MutexWebWorkerStaticFiasco;
+  MutexRecursiveWrapper& safetyFirst=theGlobalVariables.MutexWebWorkerStaticFiasco;
 //    std::cout << "Got thus far ProgressReportWebServer::SetStatus 2" << std::endl;
   safetyFirst.LockMe();
 //    std::cout << "Got thus far ProgressReportWebServer::SetStatus 3" << std::endl;
@@ -60,7 +56,7 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
   safetyFirst.UnlockMe();
   // theLog << logger::endL << logger::red << "SetStatus before the issue: outputFunction: "
   // << (int) stOutput.theOutputFunction << logger::endL;
-  if (!onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+  if (!theGlobalVariables.flagUsingBuiltInWebServer)
     return;
   theWebServer.GetActiveWorker().pipeWorkerToServerWorkerStatus.WriteAfterEmptying(toBePiped.str());
 }
@@ -118,7 +114,7 @@ std::string WebWorker::ToStringMessageShort(FormatExpressions* theFormat)const
   out << lineBreak << "Main address: " << this->mainAddress;
   out << lineBreak << "Main argument: " << this->mainArgumentRAW;
   out << lineBreak << "Physical file address referred to by main address: " << this->PhysicalFileName;
-  out << lineBreak << "Display path server base: " << onePredefinedCopyOfGlobalVariables.DisplayPathServerBase;
+  out << lineBreak << "Display path server base: " << theGlobalVariables.DisplayPathServerBase;
   return out.str();
 }
 
@@ -170,15 +166,15 @@ void WebWorker::StandardOutputAfterTimeOut(const std::string& input)
 
 void WebWorker::OutputBeforeComputation()
 { MacroRegisterFunctionWithName("WebServer::OutputBeforeComputation");
-  onePredefinedCopyOfGlobalVariables.flagComputationCompletE=false;
+  theGlobalVariables.flagComputationCompletE=false;
 
   stOutput << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, "
   << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
   << "Root subalgebras, sl(2)-triples\"> <head> <title>calculator version  " << __DATE__ << ", " << __TIME__ << "</title>";
-//  if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+//  if (theGlobalVariables.flagUsingBuiltInWebServer)
   stOutput << CGI::GetLaTeXProcessingJavascript();
 //  else
-//    stOutput << "<script src=\"" << onePredefinedCopyOfGlobalVariables.DisplayPathServerBase << "/jsmath/easy/load.js\">";
+//    stOutput << "<script src=\"" << theGlobalVariables.DisplayPathServerBase << "/jsmath/easy/load.js\">";
   stOutput << "\n</head>\n<body onload=\"checkCookie();\">\n";
   List<std::string> inputStrings, inputStringNames;
   CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
@@ -190,7 +186,7 @@ void WebWorker::OutputBeforeComputation()
 //  civilizedInput="\\int( 1/x dx)";
 //  civilizedInput="\\int (1/(x(1+x^2)^2))dx";
 //  civilizedInput="%LogEvaluation \\int (1/(5+2x+7x^2)^2)dx";
-  onePredefinedCopyOfGlobalVariables.initOutputReportAndCrashFileNames
+  theGlobalVariables.initOutputReportAndCrashFileNames
   (theParser.inputStringRawestOfTheRaw, civilizedInput);
 
   std::stringstream tempStreamXX;
@@ -230,7 +226,7 @@ void WebWorker::OutputResultAfterTimeout()
   out << "<table><tr><td>" << theParser.ToStringOutputAndSpecials() << "</td><td>"
   << theParser.outputCommentsString << "</td></tr></table>";
   std::fstream outputTimeOutFile;
-  FileOperations::OpenFileCreateIfNotPresent(outputTimeOutFile, onePredefinedCopyOfGlobalVariables.PhysicalNameOutpuT, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(outputTimeOutFile, theGlobalVariables.PhysicalNameOutpuT, false, true, false);
   outputTimeOutFile << "<html><body>" << out.str() << "</body></html>";
   outputTimeOutFile.close();
   WebWorker::OutputSendAfterTimeout(out.str());
@@ -245,7 +241,7 @@ void WebWorker::OutputCrashAfterTimeout()
 
 void WebWorker::OutputSendAfterTimeout(const std::string& input)
 { MacroRegisterFunctionWithName("WebWorker::OutputSendAfterTimeout");
-  onePredefinedCopyOfGlobalVariables.flagTimedOutComputationIsDone=true;
+  theGlobalVariables.flagTimedOutComputationIsDone=true;
   theLog << "WebWorker::StandardOutputPart2ComputationTimeout called with worker number "
   << theWebServer.GetActiveWorker().indexInParent+1 << "." << logger::endL;
   //requesting pause which will be cleared by the receiver of pipeWorkerToServerIndicatorData
@@ -333,14 +329,14 @@ void WebWorker::OutputStandardResult()
 void WebWorker::ExtractArgumentFromAddress()
 { MacroRegisterFunctionWithName("WebWorker::ExtractArgumentFromAddress");
 //  theLog << "\nmain address:" << this->mainAddress << "=?="
-//  << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath << "\nmainaddress.size: "
+//  << theGlobalVariables.DisplayNameCalculatorWithPath << "\nmainaddress.size: "
 //  << this->mainAddress.size() << "\nonePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size(): "
-//  << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size();
+//  << theGlobalVariables.DisplayNameCalculatorWithPath.size();
   CGI::CGIStringToNormalString(this->mainAddresSRAW, this->mainAddress);
   this->mainArgumentRAW="";
   std::string calculatorArgumentRawWithQuestionMark, tempS;
   if (!MathRoutines::StringBeginsWith
-      (this->mainAddresSRAW, onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath,
+      (this->mainAddresSRAW, theGlobalVariables.DisplayNameCalculatorWithPath,
        &calculatorArgumentRawWithQuestionMark))
   { CGI::CGIFileNameToFileName(this->mainAddresSRAW, this->mainAddress);
 
@@ -451,7 +447,7 @@ void WebWorker::SendAllBytes()
   reportStream << "Sending " << this->remainingBytesToSend.size << " bytes...";
   theReport.SetStatus(reportStream.str());
   //  theLog << "\r\nIn response to: " << this->theMessage;
-  double startTime=onePredefinedCopyOfGlobalVariables.GetElapsedSeconds();
+  double startTime=theGlobalVariables.GetElapsedSeconds();
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
@@ -464,7 +460,7 @@ void WebWorker::SendAllBytes()
       reportStream2 << "Previous attempt to send bytes resulted in 0 bytes sent; this is attempt number "
       << numTimesRunWithoutSending+1 << ". ";
     theReport2.SetStatus(reportStream2.str());
-    if (onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-startTime>timeOutInSeconds)
+    if (theGlobalVariables.GetElapsedSeconds()-startTime>timeOutInSeconds)
     { theLog << "WebWorker::SendAllBytes failed: more than " << timeOutInSeconds << " seconds have elapsed. "
       << logger::endL;
       std::stringstream reportStream3;
@@ -539,7 +535,7 @@ bool WebWorker::ReceiveAll()
   int numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
 //  std::cout << "Got thus far 11" << std::endl;
   theReport.SetStatus("WebWorker: first bytes received...");
-  double numSecondsAtStart=onePredefinedCopyOfGlobalVariables.GetElapsedSeconds();
+  double numSecondsAtStart=theGlobalVariables.GetElapsedSeconds();
   if (numBytesInBuffer<0 || numBytesInBuffer>(signed)bufferSize)
   { std::stringstream out;
     out << "Socket::ReceiveAll on socket " << this->connectedSocketID << " failed. Error: "
@@ -602,7 +598,7 @@ bool WebWorker::ReceiveAll()
   }
   std::string bufferString;
   while ((signed) this->mainArgumentRAW.size()<this->ContentLength)
-  { if (onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-numSecondsAtStart>180)
+  { if (theGlobalVariables.GetElapsedSeconds()-numSecondsAtStart>180)
     { this->error= "Receiving bytes timed out (180 seconds).";
       theLog << this->error << logger::endL;
       this->displayUserInput=this->error;
@@ -667,12 +663,12 @@ void WebWorker::SanitizeMainAddress()
 
 void WebWorker::ExtractPhysicalAddressFromMainAddress()
 { MacroRegisterFunctionWithName("WebWorker::ExtractPhysicalAddressFromMainAddress");
-  int numBytesToChop=onePredefinedCopyOfGlobalVariables.DisplayPathServerBase.size();
+  int numBytesToChop=theGlobalVariables.DisplayPathServerBase.size();
   std::string displayAddressStart= this->mainAddress.substr(0, numBytesToChop);
-  if (displayAddressStart!=onePredefinedCopyOfGlobalVariables.DisplayPathServerBase)
+  if (displayAddressStart!=theGlobalVariables.DisplayPathServerBase)
     numBytesToChop=0;
   this->SanitizeMainAddress();
-  this->PhysicalFileName=onePredefinedCopyOfGlobalVariables.PhysicalPathServerBase+
+  this->PhysicalFileName=theGlobalVariables.PhysicalPathServerBase+
   this->mainAddress.substr(numBytesToChop, std::string::npos);
 }
 
@@ -704,7 +700,7 @@ int WebWorker::ProcessPauseWorker()
     return 0;
   }
   WebWorker& otherWorker=this->parent->theWorkers[inputWebWorkerIndex];
-//  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+//  if (theGlobalVariables.flagLogInterProcessCommunication)
 //  theLog << "About to read pipeServerToWorker..." << logger::endL;
   if (!otherWorker.PauseWorker.CheckPauseIsRequested())
   { otherWorker.PauseWorker.RequestPausePauseIfLocked();
@@ -772,11 +768,11 @@ int WebWorker::ProcessComputationIndicator()
 
 void WebWorker::WriteProgressReportToFile(const std::string& input)
 { MacroRegisterFunctionWithName("WebWorker::WriteProgressReportToFile");
-  theLog << logger::green << "Progress report written to file: " << onePredefinedCopyOfGlobalVariables.PhysicalNameProgressReport << logger::endL;
+  theLog << logger::green << "Progress report written to file: " << theGlobalVariables.PhysicalNameProgressReport << logger::endL;
   std::fstream theFile;
-  if (!FileOperations::OpenFileCreateIfNotPresent(theFile, onePredefinedCopyOfGlobalVariables.PhysicalNameProgressReport, false, true, false))
+  if (!FileOperations::OpenFileCreateIfNotPresent(theFile, theGlobalVariables.PhysicalNameProgressReport, false, true, false))
     FileOperations::OpenFileCreateIfNotPresent
-    (theFile, onePredefinedCopyOfGlobalVariables.PhysicalPathOutputFolder+"progressReport_failed_to_create_file.html",
+    (theFile, theGlobalVariables.PhysicalPathOutputFolder+"progressReport_failed_to_create_file.html",
      false, true, false);
   theFile << standardOutputStreamAfterTimeout.str() << "<hr>" << input;
   theFile.flush();
@@ -806,11 +802,11 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
   { this->PauseIndicatorPipeInUse.ResumePausedProcessesIfAny();
     return;
   }
-  if (onePredefinedCopyOfGlobalVariables.flagTimedOutComputationIsDone)
+  if (theGlobalVariables.flagTimedOutComputationIsDone)
   { this->PauseIndicatorPipeInUse.ResumePausedProcessesIfAny();
     return;
   }
-//  if (onePredefinedCopyOfGlobalVariables.flagLogInterProcessCommunication)
+//  if (theGlobalVariables.flagLogInterProcessCommunication)
 //  theLog << " data written!";
   theReport.SetStatus("PipeProgressReportToParentProcess: piping computation process...");
   this->pipeWorkerToServerIndicatorData.WriteAfterEmptying(input);
@@ -906,7 +902,7 @@ void WebWorker::SignalIamDoneReleaseEverything()
   theLog << logger::blue << "Notification dispatched." << logger::endL;
   this->SendAllBytes();
   this->Release();
-  onePredefinedCopyOfGlobalVariables.flagComputationFinishedAllOutputSentClosing=true;
+  theGlobalVariables.flagComputationFinishedAllOutputSentClosing=true;
 }
 
 WebWorker::~WebWorker()
@@ -1020,15 +1016,15 @@ int WebWorker::OutputWeb()
   //theParser.inputString="TestCalculatorIndicator 0";
   //theParser.inputString="printSemisimpleSubalgebrasRecompute(B_3)";
   ProgressReportWebServer theReport;
-  if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+  if (theGlobalVariables.flagUsingBuiltInWebServer)
     theReport.SetStatus("OutputWeb: Computing...");
   if (theParser.inputString!="")
     theParser.Evaluate(theParser.inputString);
-  if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
+  if (theGlobalVariables.flagUsingBuiltInWebServer)
     theReport.SetStatus("OutputWeb: Computation complete, preparing output");
-  onePredefinedCopyOfGlobalVariables.flagComputationCompletE=true;
-  if (onePredefinedCopyOfGlobalVariables.flagUsingBuiltInWebServer)
-    if (onePredefinedCopyOfGlobalVariables.flagOutputTimedOut)
+  theGlobalVariables.flagComputationCompletE=true;
+  if (theGlobalVariables.flagUsingBuiltInWebServer)
+    if (theGlobalVariables.flagOutputTimedOut)
     { theReport.SetStatus("OutputWeb: calling OutputResultAfterTimeout.");
       WebWorker::OutputResultAfterTimeout();
       theReport.SetStatus("OutputWeb: called OutputResultAfterTimeout, flushing.");
@@ -1061,7 +1057,7 @@ std::string WebWorker::GetJavaScriptIndicatorFromHD()
 //  out << "  el.contentWindow.location.reload();";
   out << "  timeOutCounter++;\n";
   out << "  var oRequest = new XMLHttpRequest();\n";
-  out << "  var sURL  = \"" << onePredefinedCopyOfGlobalVariables.DisplayNameIndicatorWithPath << "\";\n";
+  out << "  var sURL  = \"" << theGlobalVariables.DisplayNameIndicatorWithPath << "\";\n";
   out << "  oRequest.open(\"GET\",sURL,false);\n";
 //  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
   out << "  oRequest.send(null)\n";
@@ -1103,7 +1099,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex)
   out << "    return;\n";
   out << "  var pauseRequest = new XMLHttpRequest();\n";
   theLog << "Generating indicator address for worker number " << inputIndex+1 << "." << logger::endL;
-  out << "  pauseURL  = \"" << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath
+  out << "  pauseURL  = \"" << theGlobalVariables.DisplayNameCalculatorWithPath
   << "?pauseIndicator" << inputIndex+1 << "\";\n";
   out << "  pauseRequest.open(\"GET\",pauseURL,false);\n";
 //  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
@@ -1141,7 +1137,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex)
     theLog << logger::red << "Worker index in parent is -1!!!" << logger::endL;
   else
     theLog << "Worker index: " << inputIndex << logger::endL;
-  out << "  var sURL  = \"" << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath << "?indicator"
+  out << "  var sURL  = \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?indicator"
   << inputIndex+1 << "\";\n";
   out << "  oRequest.open(\"GET\",sURL,false);\n";
 //  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
@@ -1168,8 +1164,8 @@ int WebWorker::ServeClient()
 { MacroRegisterFunctionWithName("WebServer::ServeClient");
   ProgressReportWebServer theReport;
   theReport.SetStatus("All bytes from client received, processing. Worker process in use ...");
-  onePredefinedCopyOfGlobalVariables.flagComputationStarted=true;
-  onePredefinedCopyOfGlobalVariables.IndicatorStringOutputFunction=WebServer::PipeProgressReportToParentProcess;
+  theGlobalVariables.flagComputationStarted=true;
+  theGlobalVariables.IndicatorStringOutputFunction=WebServer::PipeProgressReportToParentProcess;
   if (this->requestType!=this->requestGetComputationIndicator &&
       this->requestType!=this->requestGetServerStatus &&
       this->requestType!=this->requestTogglePauseCalculator &&
@@ -1225,13 +1221,13 @@ void WebWorker::Release()
 void WebWorker::OutputShowIndicatorOnTimeout()
 { MacroRegisterFunctionWithName("WebServer::OutputShowIndicatorOnTimeout");
   this->PauseIndicatorPipeInUse.RequestPausePauseIfLocked();
-  onePredefinedCopyOfGlobalVariables.flagOutputTimedOut=true;
-  onePredefinedCopyOfGlobalVariables.flagTimedOutComputationIsDone=false;
+  theGlobalVariables.flagOutputTimedOut=true;
+  theGlobalVariables.flagTimedOutComputationIsDone=false;
   ProgressReportWebServer theReport("WebServer::OutputShowIndicatorOnTimeout");
   theLog << logger::blue << "Computation timeout, sending progress indicator instead of output. " << logger::endL;
   stOutput << "</td></tr>";
-  if (onePredefinedCopyOfGlobalVariables.flagTimeOutExplanationAlreadyDisplayed)
-    stOutput << "<tr><td>Your computation is taking more than " << onePredefinedCopyOfGlobalVariables.MaxComputationTimeBeforeWeTakeAction
+  if (theGlobalVariables.flagTimeOutExplanationAlreadyDisplayed)
+    stOutput << "<tr><td>Your computation is taking more than " << theGlobalVariables.MaxComputationTimeBeforeWeTakeAction
     << " seconds.</td></tr>";
   stOutput << "<tr><td>A progress indicator, as reported by your current computation, is displayed below. "
   << "When done, your computation result will be displayed below. </td></tr>";
@@ -1323,10 +1319,10 @@ WebServer::~WebServer()
   ProgressReportWebServer::flagServerExists=false;
   for (int i=0; i<this->theWorkers.size; i++)
     this->theWorkers[i].Release();
-  onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=0;
-  onePredefinedCopyOfGlobalVariables.WebServerTimerPing=0;
-  onePredefinedCopyOfGlobalVariables.IndicatorStringOutputFunction=0;
-  onePredefinedCopyOfGlobalVariables.PauseUponUserRequest=0;
+  theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=0;
+  theGlobalVariables.WebServerTimerPing=0;
+  theGlobalVariables.IndicatorStringOutputFunction=0;
+  theGlobalVariables.PauseUponUserRequest=0;
   this->activeWorker=-1;
   close(this->listeningSocketID);
   this->flagDeallocated=true;
@@ -1393,7 +1389,7 @@ void WebServer::ReleaseActiveWorker()
 void WebServer::WorkerTimerPing(double pingTime)
 {
   if (theWebServer.activeWorker==-1)
-  { if (!onePredefinedCopyOfGlobalVariables.flagComputationFinishedAllOutputSentClosing)
+  { if (!theGlobalVariables.flagComputationFinishedAllOutputSentClosing)
       crash << "WebServer::WorkerTimerPing called when the computation is not entirely complete. " << crash;
     return;
   }
@@ -1446,7 +1442,7 @@ void WebServer::CreateNewActiveWorker()
   this->GetActiveWorker().pipeWorkerToServerWorkerStatus.CreateMe("worker to server worker status");
   this->GetActiveWorker().indexInParent=this->activeWorker;
   this->GetActiveWorker().parent=this;
-  this->GetActiveWorker().timeOfLastPingServerSideOnly=onePredefinedCopyOfGlobalVariables.GetElapsedSeconds();
+  this->GetActiveWorker().timeOfLastPingServerSideOnly=theGlobalVariables.GetElapsedSeconds();
   this->GetActiveWorker().pingMessage="";
 }
 
@@ -1507,7 +1503,7 @@ std::string WebServer::ToStringStatusAll()
 
 void WebServer::CheckExecutableVersionAndRestartIfNeeded()
 { struct stat theFileStat;
-  if (stat(onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat)!=0)
+  if (stat(theGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat)!=0)
     return;
   theLog << "current process spawned from file with time stamp: " << this->timeLastExecutableModification
   << "; latest executable time stamp: " << theFileStat.st_ctime << logger::endL;
@@ -1540,20 +1536,20 @@ void WebServer::Restart()
 //sleep(1);
 //execv("/proc/self/exe", exec_argv);
   std::stringstream theCommand;
-  theCommand << "killall " <<  onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath + " \r\n./";
+  theCommand << "killall " <<  theGlobalVariables.PhysicalNameExecutableNoPath + " \r\n./";
   if (this->flagPort8155)
-    theCommand << onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath << " server8155 nokill "
-    << onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
+    theCommand << theGlobalVariables.PhysicalNameExecutableNoPath << " server8155 nokill "
+    << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   else
-    theCommand << onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableNoPath << " server nokill "
-    << onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
+    theCommand << theGlobalVariables.PhysicalNameExecutableNoPath << " server nokill "
+    << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   system(theCommand.str().c_str()); //kill any other running copies of the calculator.
 }
 
 void WebServer::initDates()
 { this->timeLastExecutableModification=-1;
   struct stat theFileStat;
-  if (stat(onePredefinedCopyOfGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat)!=0)
+  if (stat(theGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat)!=0)
     return;
   this->timeLastExecutableModification=theFileStat.st_ctime;
 }
@@ -1603,18 +1599,18 @@ void WebServer::RecycleChildrenIfPossible()
       { this->theWorkers[i].pingMessage.assign
         (this->theWorkers[i].pipeWorkerToServerTimerPing.lastRead.TheObjects,
          this->theWorkers[i].pipeWorkerToServerTimerPing.lastRead.size);
-        this->theWorkers[i].timeOfLastPingServerSideOnly=onePredefinedCopyOfGlobalVariables.GetElapsedSeconds();
+        this->theWorkers[i].timeOfLastPingServerSideOnly=theGlobalVariables.GetElapsedSeconds();
       } if (this->theWorkers[i].PauseWorker.CheckPauseIsRequested())
       { this->theWorkers[i].pingMessage="worker paused, no pings.";
-        this->theWorkers[i].timeOfLastPingServerSideOnly=onePredefinedCopyOfGlobalVariables.GetElapsedSeconds();
+        this->theWorkers[i].timeOfLastPingServerSideOnly=theGlobalVariables.GetElapsedSeconds();
       } else
-        if (onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0 &&
-            onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly>
-            onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
+        if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0 &&
+            theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly>
+            theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
             )
           { this->theWorkers[i].flagInUse=false;
             std::stringstream pingTimeoutStream;
-            pingTimeoutStream << onePredefinedCopyOfGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
+            pingTimeoutStream << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
             << " seconds have passed since worker " <<  i+1
             << " pinged the server. I am assuming the worker no longer functions, and am marking it as free for reuse. ";
             theLog << logger::red << pingTimeoutStream.str() << logger::endL;
@@ -1738,10 +1734,10 @@ int WebServer::Run()
     if (this->GetActiveWorker().ProcessPID!=0)
     { // this is the child (worker) process
       this->Release(this->listeningSocketID);//worker has no access to socket listener
-      onePredefinedCopyOfGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=
+      theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=
       this->ReturnActiveIndicatorAlthoughComputationIsNotDone;
-      onePredefinedCopyOfGlobalVariables.WebServerTimerPing=this->WorkerTimerPing;
-      onePredefinedCopyOfGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
+      theGlobalVariables.WebServerTimerPing=this->WorkerTimerPing;
+      theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
       crash.CleanUpFunction=WebServer::SignalActiveWorkerDoneReleaseEverything;
       InitializeTimer();
       CreateTimerThread();

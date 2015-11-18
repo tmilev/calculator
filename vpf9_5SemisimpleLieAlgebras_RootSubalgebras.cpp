@@ -646,10 +646,11 @@ int rootSubalgebra::GetIndexKmoduleContainingRoot(const Vector<Rational>& input)
 
 bool rootSubalgebra::ConeConditionHolds
 (GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, Vectors<Rational>& NilradicalRoots, Vectors<Rational>& Ksingular, bool doExtractRelations)
-{ if (Vectors<Rational>::ConesIntersect(NilradicalRoots, Ksingular, 0, 0, &theGlobalVariables))
+{ Matrix<Rational> tempA, tempB;
+  if (Vectors<Rational>::ConesIntersect(NilradicalRoots, Ksingular, 0, 0))
   { if (doExtractRelations)
       this->ExtractRelations
-      (theGlobalVariables.matConeCondition1.GetElement(), theGlobalVariables.matConeCondition3.GetElement(), NilradicalRoots, owner, indexInOwner, theGlobalVariables, Ksingular);
+      (tempA, tempB, NilradicalRoots, owner, indexInOwner, theGlobalVariables, Ksingular);
     return false;
   }
   return true;
@@ -1058,7 +1059,7 @@ bool rootSubalgebra::IsAnIsomorphism(Vectors<Rational>& domain, Vectors<Rational
       matB.elements[i][j]=(domain[i][j]);
     tempRoots[i].MakeZero(theDimension);
   }
-  matB.Invert(&theGlobalVariables);
+  matB.Invert();
   Rational tempRat2;
   for (int k=0; k<theDimension; k++)
     for (int i=0; i<theDimension; i++)
@@ -1253,7 +1254,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
   out2 << this->ToString() << "\n";
   Matrix<Rational>  tempMat;
   this->SimpleBasisK.GetMatrixRootsToRows(tempMat);
-  tempMat.Invert(&theGlobalVariables);
+  tempMat.Invert();
   int counter=0;
   HashedList<Vector<Rational> >& AllRoots= this->GetAmbientWeyl().RootSystem;
   for(int i=0; i<AllRoots.size; i++)
@@ -1307,7 +1308,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(Glo
       tempRoots[l]=(tempRoot);
       Matrix<Rational> tempMat;
       tempRoots.GetMatrixRootsToRows(tempMat);
-      tempMat.Invert(&theGlobalVariables);
+      tempMat.Invert();
       for(int i=0; i<AllRoots.size; i++)
       { Vector<Rational> linComb;
         if (this->AllRootsK.GetIndex(AllRoots.TheObjects[i])==-1)
@@ -1316,7 +1317,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(Glo
             for(int k=0; k<theDimension; k++)
             { Rational tempRat;
               tempRat.Assign(tempMat.elements[k][j]);
-              tempRat.MultiplyBy(AllRoots.TheObjects[i].TheObjects[k]);
+              tempRat.MultiplyBy(AllRoots[i][k]);
               linComb.TheObjects[j]+=(tempRat);
             }
           }
@@ -1485,7 +1486,7 @@ WeylGroup& rootSubalgebra::GetAmbientWeyl()const
 
 void rootSubalgebra::WriteToFileNilradicalGeneration(std::fstream& output, GlobalVariables* theGlobalVariables, rootSubalgebras& owner)
 { output << "Simple_basis_k: ";
-  this->SimpleBasisK.WriteToFile(output, theGlobalVariables);
+  this->SimpleBasisK.WriteToFile(output);
 }
 
 void rootSubalgebra::ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables* theGlobalVariables, rootSubalgebras& inputOwner)
@@ -1493,7 +1494,7 @@ void rootSubalgebra::ReadFromFileNilradicalGeneration(std::fstream& input, Globa
   input >> tempS;
   if(tempS!="Simple_basis_k:")
     crash << crash;
-  this->SimpleBasisK.ReadFromFile(input, theGlobalVariables);
+  this->SimpleBasisK.ReadFromFile(input);
   this->genK=(this->SimpleBasisK);
   this->ownEr=&inputOwner;
   this->ComputeEssentialS();
@@ -1785,7 +1786,7 @@ void rootSubalgebra::KEnumerationsToLinComb(GlobalVariables& theGlobalVariables)
     counter+=this->theKComponentRanks[i];
   }
   //tempMat.ComputeDebugString();
-  if (tempMat.Invert(&theGlobalVariables))
+  if (tempMat.Invert())
   { //tempMat.ComputeDebugString();
     for (int l=0; l<this->TestedRootsAlpha.size; l++)
     { Vector<Rational> linComb;
@@ -2529,7 +2530,10 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
     if (theGlobalVariables!=0)
     { std::stringstream reportStream;
       for (int j=0; j<this->theSubalgebras[i].potentialExtensionDynkinTypes.size; j++)
-        reportStream << this->theSubalgebras[i].potentialExtensionDynkinTypes[j].ToString() << ", ";
+      { reportStream << this->theSubalgebras[i].potentialExtensionDynkinTypes[j].ToString();
+        if (j!= this->theSubalgebras[i].potentialExtensionDynkinTypes.size-1)
+          reportStream << ", ";
+      }
       reportString=reportStream.str();
     }
 //    if (doDebug)
@@ -3432,16 +3436,16 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
 }
 
 void rootSubalgebras::ApplyOneGenerator(List<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables)
-{ Selection& tempSel= theGlobalVariables.selApproveSelAgainstOneGenerator.GetElement();
-  tempSel.initNoMemoryAllocation();
+{ Selection tempSel;
+  tempSel.init(targetSel.MaxSize);
   for (int i=0; i<targetSel.CardinalitySelection; i++)
     tempSel.AddSelectionAppendNewIndex(generator[targetSel.elements[i]]);
   targetSel=(tempSel);
 }
 
 bool rootSubalgebras::ApproveSelAgainstOneGenerator(List<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables)
-{ Selection& tempSel= theGlobalVariables.selApproveSelAgainstOneGenerator.GetElement();
-  tempSel.initNoMemoryAllocation();
+{ Selection tempSel;
+  tempSel.init(targetSel.MaxSize);
   for (int i=0; i<targetSel.CardinalitySelection; i++)
     tempSel.AddSelectionAppendNewIndex(generator[targetSel.elements[i]]);
   for (int i=0; i<tempSel.MaxSize; i++)
@@ -3842,10 +3846,10 @@ bool coneRelation::leftSortedBiggerThanOrEqualToRight(List<int>& left, List<int>
 
 void coneRelation::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
 { this->AlphaCoeffs.WriteToFile(output);
-  this->Alphas.WriteToFile(output, theGlobalVariables);
+  this->Alphas.WriteToFile(output);
   output << this->AlphaKComponents;
   this->BetaCoeffs.WriteToFile(output);
-  this->Betas.WriteToFile(output, theGlobalVariables);
+  this->Betas.WriteToFile(output);
   output << this->BetaKComponents;
   output << "Index_owner_root_SA: " << this->IndexOwnerRootSubalgebra << " ";
 }
@@ -3853,10 +3857,10 @@ void coneRelation::WriteToFile(std::fstream& output, GlobalVariables* theGlobalV
 void coneRelation::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, rootSubalgebras& owner)
 { std::string tempS;
   this->AlphaCoeffs.ReadFromFile(input);
-  this->Alphas.ReadFromFile(input, theGlobalVariables);
+  this->Alphas.ReadFromFile(input);
   input >> this->AlphaKComponents;
   this->BetaCoeffs.ReadFromFile(input);
-  this->Betas.ReadFromFile(input, theGlobalVariables);
+  this->Betas.ReadFromFile(input);
   input >> this->BetaKComponents;
   input >> tempS >> this->IndexOwnerRootSubalgebra;
   if (tempS!="Index_owner_root_SA:")

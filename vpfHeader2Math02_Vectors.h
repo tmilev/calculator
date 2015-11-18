@@ -681,14 +681,12 @@ class Vectors: public List<Vector<coefficient> >
     return this->LinSpanContainsVector(input, buffer, bufferSelection);
   }
   static void SelectABasisInSubspace
-  (const List<Vector<coefficient> >& input, List<Vector<coefficient> >& output, Selection& outputSelectedPivots, GlobalVariables* theGlobalVariables=0);
+  (const List<Vector<coefficient> >& input, List<Vector<coefficient> >& output, Selection& outputSelectedPivots);
   int GetRankOfSpanOfElements(Matrix<coefficient>* buffer=0, Selection* bufferSelection=0)const;
   static bool ConesIntersect
-  (List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone, Vector<Rational>* outputLinearCombo=0, Vector<Rational>* outputSplittingNormal=0,
-   GlobalVariables* theGlobalVariables=0);
+  (List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone, Vector<Rational>* outputLinearCombo=0, Vector<Rational>* outputSplittingNormal=0);
   static bool GetNormalSeparatingCones
-  (List<Vector<coefficient> >& coneStrictlyPositiveCoeffs, List<Vector<coefficient> >& coneNonNegativeCoeffs, Vector<coefficient>& outputNormal,
-   GlobalVariables* theGlobalVariables=0);
+  (List<Vector<coefficient> >& coneStrictlyPositiveCoeffs, List<Vector<coefficient> >& coneNonNegativeCoeffs, Vector<coefficient>& outputNormal);
   void average(Vector<coefficient>& output, int theDimension)
   { this->sum(output, theDimension);
     if (this->size==0)
@@ -808,7 +806,7 @@ class Vectors: public List<Vector<coefficient> >
     if(currentRank!=theDim)
       crash << crash;
   }
-  void ChooseABasis(GlobalVariables& theGlobalVariables)
+  void ChooseABasis()
   { Vectors<Rational> output;
     Matrix<coefficient> tempMat;
     Selection tempSel;
@@ -820,7 +818,7 @@ class Vectors: public List<Vector<coefficient> >
     this->operator=(output);
   }
   static void IntersectTwoLinSpaces
-  (const List<Vector<coefficient> >& firstSpace, const List<Vector<coefficient> >& secondSpace, List<Vector<coefficient> >& output, GlobalVariables* theGlobalVariables=0);
+  (const List<Vector<coefficient> >& firstSpace, const List<Vector<coefficient> >& secondSpace, List<Vector<coefficient> >& output);
   bool IsRegular(Vector<coefficient>& r, Vector<coefficient>& outputFailingNormal, int theDimension);
   void operator=(const List<List<coefficient> >& other)
   { this->SetSize(other.size);

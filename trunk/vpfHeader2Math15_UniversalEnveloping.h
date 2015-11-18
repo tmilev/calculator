@@ -112,21 +112,21 @@ private:
   friend class MonomialUniversalEnveloping<coefficient>;
 public:
   SemisimpleLieAlgebra* owner;
-  bool AdjointRepresentationAction(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output, GlobalVariables* theGlobalVariables=0)const;
+  bool AdjointRepresentationAction(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output)const;
   bool ConvertToRationalCoeff(ElementUniversalEnveloping<Rational>& output);
   bool IsEqualToZero()const
   { return this->size()==0;
   }
   bool HWMTAbilinearForm
-  (const ElementUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
+  (const ElementUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement,
    const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream=0);
   std::string IsInProperSubmodule
-  (const Vector<coefficient>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero);
+  (const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero);
   bool HWTAAbilinearForm
-  (const ElementUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
+  (const ElementUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement,
    const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream=0)const;
   bool HWTAAbilinearForm
-  (const MonomialUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream=0)const
+  (const MonomialUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream=0)const
   { ElementUniversalEnveloping<coefficient> tempElt;
     tempElt.MakeZero(*this->owner);
     tempElt.AddMonomial(right, theRingUnit);

@@ -376,9 +376,9 @@ void SemisimpleLieAlgebra::ComputeOneChevalleyConstant
   this->Computed.elements[indexMinusEpsilon][indexMinusZeta]=true;
 }
 
-bool SemisimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariables)
+bool SemisimpleLieAlgebra::TestForConsistency()
 { //HashedList<Vector<Rational> >& theRoots=this->theWeyl.RootSystem;
-  FormatExpressions& theFormat=theGlobalVariables.theDefaultFormat;
+  FormatExpressions& theFormat=theGlobalVariables.theDefaultFormat.GetElement();
   ElementSemisimpleLieAlgebra<Rational> g1, g2, g3, g23, g31, g12, g123, g231, g312, temp;
   //this->ComputeDebugString(false, false, theGlobalVariables);
   for (int i=0; i<this->GetNumGenerators(); i++)

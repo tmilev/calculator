@@ -168,7 +168,7 @@ bool Calculator::innerAnimateLittelmannPaths(Calculator& theCommands, const Expr
   theCommands << "<br>Function innerAnimateLittelmannPaths: your input in simple coords: " << theWeightInSimpleCoords.ToString();
   LittelmannPath thePath;
   thePath.MakeFromWeightInSimpleCoords(theWeightInSimpleCoords, theSSowner->theWeyl);
-  return output.AssignValue(thePath.GenerateOrbitAndAnimate(*theCommands.theGlobalVariableS), theCommands);
+  return output.AssignValue(thePath.GenerateOrbitAndAnimate(theGlobalVariables), theCommands);
 }
 
 bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, Expression& output)
@@ -177,11 +177,11 @@ bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, 
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input, theSSalg))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& theSSowner=*theSSalg;
-  if (theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit<50)
-    theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=50;
+  if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit<50)
+    theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=50;
   ElementUniversalEnveloping<RationalFunctionOld> theCasimir;
   theCasimir.MakeCasimir(theSSowner);
-//  theCasimir.Simplify(*theCommands.theGlobalVariableS);
+//  theCasimir.Simplify(theGlobalVariables);
   theCommands << "Context Lie algebra: " << ". The coefficient: " << theSSowner.theWeyl.GetKillingDivTraceRatio().ToString()
   <<  ". The Casimir element of the ambient Lie algebra. ";
   Expression contextE;
@@ -201,10 +201,10 @@ bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& inp
 
   ElementUniversalEnveloping<RationalFunctionOld> argument=output.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
   ElementUniversalEnveloping<RationalFunctionOld> outputUE;
-  if(!theHmm.ApplyHomomorphism(argument, outputUE, *theCommands.theGlobalVariableS))
+  if(!theHmm.ApplyHomomorphism(argument, outputUE, theGlobalVariables))
     return output.MakeError("Failed to apply homomorphism for unspecified reason", theCommands);
-//  stOutput << theHmm.ToString(*theCommands.theGlobalVariableS);
-  outputUE.Simplify(theCommands.theGlobalVariableS);
+//  stOutput << theHmm.ToString(theGlobalVariables);
+  outputUE.Simplify(&theGlobalVariables);
   Expression contextE;
   contextE.MakeContextSSLieAlg(theCommands, theHmm.theRange());
   return output.AssignValueWithContext(outputUE, contextE, theCommands);
@@ -317,7 +317,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate(GlobalVariables& theGlobalVa
 
 template<class coefficient>
 void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
-(HomomorphismSemisimpleLieAlgebra& theHmm, Selection& LeviInSmall, GlobalVariables& theGlobalVariables, List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors,
+(HomomorphismSemisimpleLieAlgebra& theHmm, Selection& LeviInSmall, List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors,
  Vectors<coefficient>* outputWeightsFundCoords, Vectors<coefficient>* outputEigenSpace, std::stringstream* comments, const coefficient& theRingUnit, const coefficient& theRingZero)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg");
   if (this->theChaR.size()!=1)
@@ -432,7 +432,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
       outputEigenVectors->AddOnTop(currentElt);
     if (outputWeightsFundCoords!=0)
       outputWeightsFundCoords->AddOnTop(currentWeight);
-    out << currentElt.ToString(&theGlobalVariables.theDefaultFormat);
+    out << currentElt.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
     if (currentElt.size()>1)
       out << ")";
     out << " v_\\lambda";
@@ -458,8 +458,8 @@ void Calculator::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
   output.domainAlg=&this->theObjectContainer.theLieAlgebras.GetElement(this->theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempg2alg));
   output.rangeAlg =&this->theObjectContainer.theLieAlgebras.GetElement(this->theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempb3alg));
 
-  output.theRange().ComputeChevalleyConstants(this->theGlobalVariableS);
-  output.theDomain().ComputeChevalleyConstants(this->theGlobalVariableS);
+  output.theRange().ComputeChevalleyConstants(&theGlobalVariables);
+  output.theDomain().ComputeChevalleyConstants(&theGlobalVariables);
   ElementSemisimpleLieAlgebra<Rational> g_2, g_1plusg_3, g_m2, g_m1plusg_m3, tempElt;
   g_2.MakeGenerator         (13, output.theRange());
   g_m2.MakeGenerator        (7,  output.theRange());
@@ -478,8 +478,8 @@ void Calculator::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
   output.imagesSimpleChevalleyGenerators[1]=g_2;
   output.imagesSimpleChevalleyGenerators[3]=g_m2;
   output.imagesSimpleChevalleyGenerators[2]=g_m1plusg_m3;
-  output.ComputeHomomorphismFromImagesSimpleChevalleyGenerators(*this->theGlobalVariableS);
-  output.GetRestrictionAmbientRootSystemToTheSmallerCartanSA(output.RestrictedRootSystem, *this->theGlobalVariableS);
+  output.ComputeHomomorphismFromImagesSimpleChevalleyGenerators(theGlobalVariables);
+  output.GetRestrictionAmbientRootSystemToTheSmallerCartanSA(output.RestrictedRootSystem, theGlobalVariables);
 }
 
 bool Calculator::innerPrintB3G2branchingIntermediate(Calculator& theCommands, const Expression& input, Expression& output, Vectors<RationalFunctionOld>& theHWs, branchingData& theG2B3Data, Expression& theContext)
@@ -523,8 +523,8 @@ bool Calculator::innerPrintB3G2branchingIntermediate(Calculator& theCommands, co
   theG2B3Data.theFormat.NumAmpersandsPerNewLineForLaTeX=0;
   Expression tempExpression;
   RationalFunctionOld rfZero, rfOne;
-  rfZero.MakeZero(theCommands.theGlobalVariableS);
-  rfOne.MakeOne(theCommands.theGlobalVariableS);
+  rfZero.MakeZero(&theGlobalVariables);
+  rfOne.MakeOne(&theGlobalVariables);
   latexTable2 << "\\begin{longtable}{|rll|}\\caption"
   << "{Values of $x_1$ for each $v_{\\lambda,i}$}\\label{tableCriticalValuesvlambda}"
   << "\\endhead";
@@ -721,7 +721,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
   { theCharacter.MakeFromWeight
     (theg2b3data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(theHWs[k]),
      &theg2b3data.theHmm.theRange());
-    theCharacter.SplitCharOverRedSubalg(0, outputChar, theg2b3data, *theCommands.theGlobalVariableS);
+    theCharacter.SplitCharOverRedSubalg(0, outputChar, theg2b3data, theGlobalVariables);
     theg2b3data.theFormat.fundamentalWeightLetter= "\\omega";
     out << "<tr><td> " << theCharacter.ToString(&theg2b3data.theFormat) << "</td> ";
     out << "<td>" << theg2b3data.WeylFD.WeylDimFormulaSimpleCoords(theg2b3data.WeylFD.AmbientWeyl.GetSimpleCoordinatesFromFundamental(theCharacter[0].weightFundamentalCoordS)).ToString() << "</td>";
@@ -747,8 +747,8 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
         if ((rightWeightSimple-leftWeightSimple).IsPositive())
         { resultChar=theCasimir;
           theCentralCharacter=theCasimir;
-          resultChar.ModOutVermaRelations(theCommands.theGlobalVariableS, &rightWeightDual);
-          theCentralCharacter.ModOutVermaRelations(theCommands.theGlobalVariableS, &leftWeightDual);
+          resultChar.ModOutVermaRelations(&theGlobalVariables, &rightWeightDual);
+          theCentralCharacter.ModOutVermaRelations(&theGlobalVariables, &leftWeightDual);
           resultChar-=theCentralCharacter;
           resultChar.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
           resultChar*=-1;
@@ -816,10 +816,10 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
 //  std::stringstream out;
 //  stOutput << "Highest weight: " << theWeightFundCoords.ToString() << "; Parabolic selection: " << selInducing.ToString();
   ModuleSSalgebra<RationalFunctionOld> theModCopy;
-  theModCopy.MakeFromHW(theG2B3Data.theHmm.theRange(), theG2B3Data.theWeightFundCoords, theG2B3Data.selInducing, *theCommands.theGlobalVariableS, 1, 0, 0, false);
+  theModCopy.MakeFromHW(theG2B3Data.theHmm.theRange(), theG2B3Data.theWeightFundCoords, theG2B3Data.selInducing, theGlobalVariables, 1, 0, 0, false);
   std::string report;
   theG2B3Data.resetOutputData();
-  theG2B3Data.initAssumingParSelAndHmmInitted(*theCommands.theGlobalVariableS);
+  theG2B3Data.initAssumingParSelAndHmmInitted(theGlobalVariables);
   theG2B3Data.SelSplittingParSel=theG2B3Data.selInducing;
   if (theG2B3Data.SelSplittingParSel.selected[0]!=theG2B3Data.SelSplittingParSel.selected[2])
   { theG2B3Data.SelSplittingParSel.AddSelectionAppendNewIndex(0);
@@ -834,12 +834,12 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
   theCommands.theObjectContainer.theCategoryOmodules[theModIndex];
   theMod.GetOwner().flagHasNilradicalOrder=true;
   std::stringstream out;
-  theCommands << "<hr>Time elapsed before making B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
-  double timeAtStart=theCommands.theGlobalVariableS->GetElapsedSeconds();
+  theCommands << "<hr>Time elapsed before making B3 irrep: " << theGlobalVariables.GetElapsedSeconds();
+  double timeAtStart=theGlobalVariables.GetElapsedSeconds();
   theMod.SplitFDpartOverFKLeviRedSubalg
-  (theG2B3Data.theHmm, theG2B3Data.selSmallParSel, *theCommands.theGlobalVariableS, &theG2B3Data.outputEigenWords,
+  (theG2B3Data.theHmm, theG2B3Data.selSmallParSel, &theG2B3Data.outputEigenWords,
    &theG2B3Data.outputWeightsFundCoordS, &theG2B3Data.leviEigenSpace, 0);
-   theCommands << "<br>Time needed to make B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds()-timeAtStart;
+   theCommands << "<br>Time needed to make B3 irrep: " << theGlobalVariables.GetElapsedSeconds()-timeAtStart;
   //out << report;
 //  int numVars=theWeightFundCoords[0].NumVars;
   theG2B3Data.g2Weights.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
@@ -875,22 +875,22 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
 
   theG2B3Data.theChars.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
 //  RationalFunctionOld& baseChar=*theChars.LastObject();
-//  baseChar.MakeZero(numVars, theCommands.theGlobalVariableS);
-//  theG2Casimir.ModOutVermaRelations(theCommands.theGlobalVariableS, &highestWeightG2dualCoords, 1, 0);
+//  baseChar.MakeZero(numVars, &theGlobalVariables);
+//  theG2Casimir.ModOutVermaRelations(&theGlobalVariables, &highestWeightG2dualCoords, 1, 0);
 //  if (!theG2Casimir.IsEqualToZero())
 //    baseChar=theG2Casimir.theCoeffs[0];
 //  out << "<br>Base G_2-character: " << baseChar.ToString() << " corresponding to g2-dual weight " << highestWeightG2dualCoords.ToString();
-  theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=400;
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=400;
   for (int i=0; i< theG2B3Data.outputWeightsSimpleCoords.size; i++)
   { Vector<RationalFunctionOld>& currentG2DualWeight=theG2B3Data.g2DualWeights[i];
     theG2CasimirCopy=theG2Casimir;
-    theG2CasimirCopy.ModOutVermaRelations(theCommands.theGlobalVariableS, &currentG2DualWeight, 1,0);
+    theG2CasimirCopy.ModOutVermaRelations(&theGlobalVariables, &currentG2DualWeight, 1,0);
     if (theG2CasimirCopy.IsEqualToZero())
       theG2B3Data.theChars[i]=0;
     else
       theG2B3Data.theChars[i]=theG2CasimirCopy.theCoeffs[0];
   }
-//  theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000;
+//  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000;
   theG2B3Data.theEigenVectorsLevi.SetSize(theG2B3Data.g2Weights.size);
   theG2B3Data.theEigenVectorS.SetSize(theG2B3Data.g2Weights.size);
   theG2B3Data.additionalMultipliers.SetSize(theG2B3Data.g2Weights.size);
@@ -901,7 +901,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
   theHWV*=-1;
   *theG2B3Data.theEigenVectorS.LastObject()=theHWV;
   Vector<RationalFunctionOld> weightDifference, weightDifferenceDualCoords;
-  theG2B3Data.theHmm.ApplyHomomorphism(theG2Casimir, imageCasimirInB3, *theCommands.theGlobalVariableS);
+  theG2B3Data.theHmm.ApplyHomomorphism(theG2Casimir, imageCasimirInB3, theGlobalVariables);
   theG2Casimir.checkConsistency();
   imageCasimirInB3.checkConsistency();
   RationalFunctionOld charDiff;
@@ -914,7 +914,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
     ElementUniversalEnveloping<RationalFunctionOld>& currentUEelt=theG2B3Data.theUEelts[k];
     currentTensorEltLevi=theHWV;
     //stOutput << "<br>multiplying " << currentTensorElt.ToString() << " by " << theG2B3Data.outputEigenWords[k].ToString();
-    currentTensorEltLevi.MultiplyMeByUEEltOnTheLeft(theG2B3Data.outputEigenWords[k], *theCommands.theGlobalVariableS);
+    currentTensorEltLevi.MultiplyMeByUEEltOnTheLeft(theG2B3Data.outputEigenWords[k]);
     currentTensorEltEigen=currentTensorEltLevi;
     //stOutput << "<br> to obtain " << currentTensorElt.ToString();
     if (theG2B3Data.selInducing.CardinalitySelection>0)
@@ -926,7 +926,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
           theG2CasimirCopy-=tempElt;
           theG2CasimirCopy*=12;
           //stOutput << "<hr>Multiplying " << theG2CasimirCopy.ToString() << " and " << currentTensorElt.ToString();
-          currentTensorEltEigen.MultiplyMeByUEEltOnTheLeft(theG2CasimirCopy, *theCommands.theGlobalVariableS);
+          currentTensorEltEigen.MultiplyMeByUEEltOnTheLeft(theG2CasimirCopy);
           charDiff=theG2B3Data.theChars[j];
           charDiff-=*theG2B3Data.theChars.LastObject();
           theG2B3Data.theCharacterDifferences.AddOnTopNoRepetition(charDiff);
@@ -935,7 +935,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
       }
     theG2B3Data.additionalMultipliers[k]= currentTensorEltEigen.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
     currentTensorEltEigen.ExtractElementUE(currentUEelt, *theMod.owner);
-    currentUEelt.HWTAAbilinearForm(currentUEelt, theG2B3Data.theShapovalovProducts[k], &theMod.theHWDualCoordsBaseFielD, *theCommands.theGlobalVariableS,1,0,0);
+    currentUEelt.HWTAAbilinearForm(currentUEelt, theG2B3Data.theShapovalovProducts[k], &theMod.theHWDualCoordsBaseFielD, 1,0,0);
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -1088,7 +1088,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
   std::stringstream latexReport;
   latexReport << "\\documentclass{article} <br>\\usepackage{longtable}\\begin{document}<br>\n\n\n\n\n";
   latexReport << " \\begin{longtable}{|lllll|} ";
-  ProgressReport theReport(theCommands.theGlobalVariableS);
+  ProgressReport theReport(&theGlobalVariables);
   bool ConjectureBholds=true;
   bool ConjectureCholds=true;
   LittelmannPath hwPath;
@@ -1098,7 +1098,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
   SemisimpleLieAlgebra tempAlg;
   for (int i=0; i<theRanks.size; i++)
   { tempAlg.theWeyl.MakeArbitrarySimple(theWeylLetters[i], theRanks[i]);
-    tempAlg.ComputeChevalleyConstants(theCommands.theGlobalVariableS);
+    tempAlg.ComputeChevalleyConstants(&theGlobalVariables);
     SemisimpleLieAlgebra& currentAlg=theCommands.theObjectContainer.theLieAlgebras.GetElement
     (theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempAlg));
     currentAlg.theWeyl.GetHighestWeightsAllRepsDimLessThanOrEqualTo(theHighestWeights[i], dimBound);
@@ -1120,10 +1120,10 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
 //      +Rational::TotalLargeMultiplications+Rational::TotalSmallMultiplications;
       hwPath.MakeFromWeightInSimpleCoords
       (currentAlg.theWeyl.GetSimpleCoordinatesFromFundamental(currentHW), currentAlg.theWeyl);
-//      double timeBeforeOrbit=theCommands.theGlobalVariableS->GetElapsedSeconds();
+//      double timeBeforeOrbit=theGlobalVariables.GetElapsedSeconds();
       hwPath.GenerateOrbit
-      (tempList, theStrings, *theCommands.theGlobalVariableS, MathRoutines::Minimum(1000, currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW).NumShort), 0);
-      reportStream << "\nPath orbit size = " << theStrings.size << " generated in " << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
+      (tempList, theStrings, theGlobalVariables, MathRoutines::Minimum(1000, currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW).NumShort), 0);
+      reportStream << "\nPath orbit size = " << theStrings.size << " generated in " << theGlobalVariables.GetElapsedSeconds() << " seconds.";
       theReport.Report(reportStream.str());
       for (int k=0; k<theStrings.size; k++)
       { LittelmannPath& currentPath=tempList[k];
@@ -1142,7 +1142,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
 //      goto tmp;
 /*      if (theMod.MakeFromHW
           (theCommands.theObjectContainer.theLieAlgebras, i,
-           currentHW, tempSel, *theCommands.theGlobalVariableS, 1, 0, 0, true))
+           currentHW, tempSel, theGlobalVariables, 1, 0, 0, true))
       { out << "<td>is good</td>";
         if (!theMod.flagConjectureBholds)
         { out << "<td><b>conjecture B fails!</b></td>";
@@ -1666,24 +1666,24 @@ bool Calculator::WriteTestStrings(List<std::string>& inputCommands, List<std::st
 
 bool Calculator::innerAutomatedTestSetKnownGoodCopy(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerAutomatedTestSetKnownGoodCopy");
-  theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
   List<std::string> inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit;
   std::stringstream out;
-  theCommands.theTestFileName=theCommands.theGlobalVariableS->PhysicalPathOutputFolder+"automatedTest.txt";
+  theCommands.theTestFileName=theGlobalVariables.PhysicalPathOutputFolder+"automatedTest.txt";
   if (!FileOperations::OpenFileCreateIfNotPresent(theCommands.theTestFile, theCommands.theTestFileName, false, true, false))
     crash << "This is a programming error or worse: file " << theCommands.theTestFileName << " does not exist but cannot be created. Something is very wrong. " << crash;
-  double startTime=theCommands.theGlobalVariableS->GetElapsedSeconds();
+  double startTime=theGlobalVariables.GetElapsedSeconds();
   theCommands.AutomatedTestRun(inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit);
   theCommands.WriteTestStrings(inputStringsTest, outputStringsTestWithInit);
-  out << "Test run completed in " << theCommands.theGlobalVariableS->GetElapsedSeconds()-startTime << " seconds.";
+  out << "Test run completed in " << theGlobalVariables.GetElapsedSeconds()-startTime << " seconds.";
   return output.AssignValue(out.str(), theCommands);
 }
 
 bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerAutomatedTest");
-  theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
-  double startingTime=theCommands.theGlobalVariableS->GetElapsedSeconds();
-  theCommands.theTestFileName=theCommands.theGlobalVariableS->PhysicalPathOutputFolder+"automatedTest.txt";
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
+  double startingTime=theGlobalVariables.GetElapsedSeconds();
+  theCommands.theTestFileName=theGlobalVariables.PhysicalPathOutputFolder+"automatedTest.txt";
   if (!FileOperations::FileExists(theCommands.theTestFileName))
     return theCommands.innerAutomatedTestSetKnownGoodCopy(theCommands, input, output);
   if (!FileOperations::OpenFileCreateIfNotPresent(theCommands.theTestFile, theCommands.theTestFileName, false, false, false))
@@ -1742,7 +1742,7 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
   if (allWentGreat)
     out << "<span style=\"color:#0000FF\">All " << commandStrings.size << " results coincide with previously recorded values.</span> ";
   out << "<br>The command for updating the test file is " << theCommands.GetCalculatorLink("AutomatedTestSetKnownGoodCopy 0");
-  out << "<br>Total time for the test: " << theCommands.theGlobalVariableS->GetElapsedSeconds()-startingTime;
+  out << "<br>Total time for the test: " << theGlobalVariables.GetElapsedSeconds()-startingTime;
   return output.AssignValue(out.str(), theCommands);
 }
 

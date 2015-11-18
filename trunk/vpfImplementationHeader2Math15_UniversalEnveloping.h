@@ -147,13 +147,13 @@ bool MonomialUniversalEnveloping<coefficient>::AdjointRepresentationAction
 
 template<class coefficient>
 bool ElementUniversalEnveloping<coefficient>::AdjointRepresentationAction
-(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output, GlobalVariables* theGlobalVariables)const
+(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output)const
 { if (&input==&output)
     crash << crash;
   output.MakeZero(*this->owner);
   ElementUniversalEnveloping<coefficient> summand;
   for (int i=0; i<this->size(); i++)
-  { if(!(*this)[i].AdjointRepresentationAction(input, summand, theGlobalVariables))
+  { if(!(*this)[i].AdjointRepresentationAction(input, summand, &theGlobalVariables))
       return false;
     summand*=this->theCoeffs[i];
     output+=summand;
@@ -410,7 +410,7 @@ bool ElementUniversalEnveloping<coefficient>::ApplyTransposeAntiAutoOnMe()
 template <class coefficient>
 bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm
 (const ElementUniversalEnveloping<coefficient>& right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement,
- GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream)const
+  const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream)const
 { output=theRingZero;
   coefficient tempCF;
   ElementUniversalEnveloping<coefficient> TAleft;
@@ -436,16 +436,16 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm
  // << "," << right.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat) << ")";
 
   if (logStream!=0)
-  { *logStream << "left eltement transposed: " << TAleft.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
-    *logStream << "right element: " << right.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
+  { *logStream << "left eltement transposed: " << TAleft.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
+    *logStream << "right element: " << right.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
   }
   startingElt=right;
   startingElt.Simplify(&theGlobalVariables, theRingUnit, theRingZero);
   if (logStream!=0)
-    *logStream << "right element after simplification: " << startingElt.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
+    *logStream << "right element after simplification: " << startingElt.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
   startingElt.ModOutVermaRelations(&theGlobalVariables, subHiGoesToIthElement, theRingUnit, theRingZero);
   if (logStream!=0)
-    *logStream << "right element after Verma rels: " << startingElt.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
+    *logStream << "right element after Verma rels: " << startingElt.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
   coefficient leftMonCoeff;
   for (int j=0; j<TAleft.size(); j++)
   { intermediateAccum=startingElt;
@@ -459,17 +459,17 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm
           MathRoutines::swap(tempElt, intermediateAccum);
           if (logStream!=0)
           { //*logStream << "tempElt before mult: " << tempElt.ToString(theGlobalVariables, tempFormat) << "<br>";
-            *logStream << "intermediate before mult: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
+            *logStream << "intermediate before mult: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
           }
           intermediateAccum*=(tempElt);
           if (logStream!=0)
-            *logStream << "intermediate before simplification: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
+            *logStream << "intermediate before simplification: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
           intermediateAccum.Simplify(&theGlobalVariables, theRingUnit, theRingZero);
           if (logStream!=0)
-            *logStream << "intermediate after simplification: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
+            *logStream << "intermediate after simplification: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
           intermediateAccum.ModOutVermaRelations(&theGlobalVariables, subHiGoesToIthElement, theRingUnit, theRingZero);
           if (logStream!=0)
-            *logStream << "intermediate after Verma rels: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
+            *logStream << "intermediate after Verma rels: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
         }
       else
       { this->GetOwner().UEGeneratorOrderIncludingCartanElts=oldOrder;
@@ -482,7 +482,7 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm
       output+=intermediateAccum.theCoeffs[theIndex];
   }
   if (logStream!=0)
-    *logStream << "final UE element: " << Accum.ToString(&theGlobalVariables.theDefaultFormat);
+    *logStream << "final UE element: " << Accum.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
   this->GetOwner().UEGeneratorOrderIncludingCartanElts=oldOrder;
 //  if (logStream!=0)
 //    stOutput << "<hr>" << logStream->str();

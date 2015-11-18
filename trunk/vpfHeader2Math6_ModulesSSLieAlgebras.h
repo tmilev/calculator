@@ -143,7 +143,7 @@ public:
    List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors=0, Vectors<coefficient>* outputWeightsFundCoords=0, Vectors<coefficient>* outputEigenSpace=0,
    charSSAlgMod<coefficient>* outputChar=0);
   void SplitFDpartOverFKLeviRedSubalg
-  (HomomorphismSemisimpleLieAlgebra& theHmm, Selection& LeviInSmall, GlobalVariables& theGlobalVariables,
+  (HomomorphismSemisimpleLieAlgebra& theHmm, Selection& LeviInSmall,
    List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors=0, Vectors<coefficient>* outputWeightsFundCoords=0,
    Vectors<coefficient>* outputEigenSpace=0, std::stringstream* comments=0, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
   template<class ResultType>

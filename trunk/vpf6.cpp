@@ -10,14 +10,13 @@
 ProjectInformationInstance ProjectInfoVpf6cpp(__FILE__, "Calculator parser, implementation. ");
 
 Calculator::Calculator()
-{ this->theGlobalVariableS=0;
-  this->numOutputFileS=0;
+{ this->numOutputFileS=0;
   this->flagHideLHS=false;
   this->flagUseHtml=true;
 }
 
 std::string Calculator::GetCalculatorLink(const std::string& input)
-{ return CGI::GetCalculatorLink(this->theGlobalVariableS->DisplayNameCalculatorWithPath, input);
+{ return CGI::GetCalculatorLink(theGlobalVariables.DisplayNameCalculatorWithPath, input);
 }
 
 std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
@@ -27,12 +26,12 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
   std::stringstream systemCommand1, systemCommand2, systemCommand3;
   unsigned int fileIdentifier=MathRoutines::hashString(fileContent);
 
-  fileName << this->theGlobalVariableS->PhysicalNameExtraOutputWithPath << fileIdentifier;
+  fileName << theGlobalVariables.PhysicalNameExtraOutputWithPath << fileIdentifier;
   FileOperations::OpenFileCreateIfNotPresent(theFile, fileName.str()+".tex", false, true, false);
   theFile << fileContent;
   theFile.flush();
   theFile.close();
-  systemCommand1 << " latex -output-directory=" << this->theGlobalVariableS->PhysicalPathOutputFolder << " " << fileName.str()+".tex";
+  systemCommand1 << " latex -output-directory=" << theGlobalVariables.PhysicalPathOutputFolder << " " << fileName.str()+".tex";
   //stOutput << "<br>system command:<br>" << systemCommand1.str();
   this->SystemCommands.AddOnTop(systemCommand1.str());
   if (useLatexDviPSpsTopdf)
@@ -44,9 +43,9 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
     this->SystemCommands.AddOnTop(systemCommand3.str());
   }
   std::stringstream out;
-  out << "<img src=\"" << this->theGlobalVariableS->DisplayNameExtraOutputWithPath
-  << fileIdentifier << ".png\"></img><a href=\"" << this->theGlobalVariableS->DisplayNameExtraOutputWithPath
-  << fileIdentifier << ".png\">" << this->theGlobalVariableS->DisplayNameExtraOutputWithPath
+  out << "<img src=\"" << theGlobalVariables.DisplayNameExtraOutputWithPath
+  << fileIdentifier << ".png\"></img><a href=\"" << theGlobalVariables.DisplayNameExtraOutputWithPath
+  << fileIdentifier << ".png\">" << theGlobalVariables.DisplayNameExtraOutputWithPath
   << fileIdentifier << ".png</a>";
   this->numOutputFileS++;
   return out.str();
@@ -583,14 +582,14 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
   for (int i=0; i<theHws.size; i++)
   { ModuleSSalgebra<RationalFunctionOld>& theMod=theMods[i];
     tempV=theHws[i];
-    if (!theMod.MakeFromHW(theSSalgebra, tempV, selInducing, *theCommands.theGlobalVariableS, 1, 0, 0, true))
+    if (!theMod.MakeFromHW(theSSalgebra, tempV, selInducing, theGlobalVariables, 1, 0, 0, true))
       return output.MakeError("Failed to create module.", theCommands);
     if (i==0)
     { theMod.GetElementsNilradical(elementsNegativeNilrad, true,0, useNilWeight, ascending);
       Polynomial<Rational> Pone, Pzero;
       Pone.MakeOne(elementsNegativeNilrad.size+theMod.GetMinNumVars());
       Pzero.MakeZero();
-      theMod.GetGenericUnMinusElt(true, genericElt, *theCommands.theGlobalVariableS, useNilWeight, ascending);
+      theMod.GetGenericUnMinusElt(true, genericElt, theGlobalVariables, useNilWeight, ascending);
       //stOutput << "<br>highest weight: " << tempV.ToString();
       //stOutput << "<br>generic elt: " <<  genericElt.ToString();
 
@@ -638,7 +637,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
       { actionOnGenericElt.AssignElementLieAlgebra(theGeneratorsItry[j], theSSalgebra, Pone, Pzero);
         actionOnGenericElt*=(genericElt);
         theSSalgebra.OrderNilradical(theMod.parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
-        actionOnGenericElt.Simplify(theCommands.theGlobalVariableS);
+        actionOnGenericElt.Simplify(&theGlobalVariables);
         theUEformat.NumAmpersandsPerNewLineForLaTeX=2;
         out << "<td>" << CGI::GetMathMouseHover("\\begin{array}{rcl}&&" +actionOnGenericElt.ToString(&theUEformat)+"\\end{array}") << "</td>";
         theUEformat.NumAmpersandsPerNewLineForLaTeX=0;
@@ -658,13 +657,13 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
     //stOutput << "<br>generic element: " << genericElt.ToString();
     for (int j=0; j<theGeneratorsItry.size; j++)
     { theGenerator=theGeneratorsItry[j];
-      currentTime= theCommands.theGlobalVariableS->GetElapsedSeconds();
+      currentTime= theGlobalVariables.GetElapsedSeconds();
       currentAdditions=Rational::TotalAdditions();
       currentMultiplications=Rational::TotalMultiplications();
-      theMod.GetActionGenVermaModuleAsDiffOperator(theGenerator, theQDOs[j], *theCommands.theGlobalVariableS, useNilWeight, ascending);
+      theMod.GetActionGenVermaModuleAsDiffOperator(theGenerator, theQDOs[j], theGlobalVariables, useNilWeight, ascending);
       totalAdditions+=Rational::TotalAdditions()-currentAdditions;
       totalMultiplications+=Rational::TotalMultiplications()-currentMultiplications;
-      totalTime+=theCommands.theGlobalVariableS->GetElapsedSeconds()-currentTime;
+      totalTime+=theGlobalVariables.GetElapsedSeconds()-currentTime;
       theWeylFormat.CustomCoeffMonSeparator="\\otimes ";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX=2;
       out << "<td>" << CGI::GetMathMouseHover("\\begin{array}{|r|c|l|}&&"+theQDOs[j].ToString(&theWeylFormat)+"\\end{array}")
@@ -713,7 +712,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
       reportCalculatorCommands << ");";
       reportCalculatorCommands << "<hr>";
     }
-//    theQDOs[0].GenerateBasisLieAlgebra(theQDOs, &theWeylFormat, theCommands.theGlobalVariableS);
+//    theQDOs[0].GenerateBasisLieAlgebra(theQDOs, &theWeylFormat, &theGlobalVariables);
 //    stOutput << "<br><b>Dimension generated Lie algebra: " << theQDOs.size << "</b>";
 //    stOutput << "<br>The qdos: ";
 //    for (int j=0; j<theQDOs.size; j++)
@@ -775,7 +774,7 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
       { aGen.MakeSimpleReflection(theWeyl.RootsOfBorel.size-1 -currentListInt[j].generatorsIndices[k]);
         tempWelt.generatorsLastAppliedFirst[k]=aGen;
       }
-      out << "<tr><td>m_{ " << wordCounter << "} </td><td>" << currentList[j].ToString(&theGlobalVariables.theDefaultFormat)
+      out << "<tr><td>m_{ " << wordCounter << "} </td><td>" << currentList[j].ToString(&theGlobalVariables.theDefaultFormat.GetElement())
       << "  v_\\lambda</td><td>" << tempWelt.ToString() << "</td> </tr>";
     }
   }
@@ -818,9 +817,9 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
     List<MonomialUniversalEnveloping<coefficient> >& currentList=this->theGeneratingWordsGrouppedByWeight[k];
     for (int i=0; i<currentList.size; i++)
     { MonomialUniversalEnveloping<coefficient>& currentElt=currentList[i];
-      out << "<br>monomial " << i+1 << ": " << currentElt.ToString(&theGlobalVariables.theDefaultFormat);
+      out << "<br>monomial " << i+1 << ": " << currentElt.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
     }
-    out << "; Matrix of Shapovalov form associated to current weight level: <br> " << theBF.ToString(&theGlobalVariables.theDefaultFormat);
+    out << "; Matrix of Shapovalov form associated to current weight level: <br> " << theBF.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
 /*    if (!theBF.IsPositiveDefinite())
     { monomialDetailStream << "<b>Is not positive definite!</b>";
       this->flagConjectureCholds=false;
@@ -833,7 +832,7 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
       out << " (positive entries only )";
     out << " corresonding inverted matrix:<br>";
     if (theBFinverted.NumRows>0)
-      out << theBFinverted.ToString(&theGlobalVariables.theDefaultFormat);
+      out << theBFinverted.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
     else
     { out << "<b>The matrix of the bilinear form is not invertible!</b>";
       isBad=true;
@@ -855,8 +854,8 @@ bool Calculator::innerHWVCommon
   //  stOutput << "<br>highest weight in fundamental coords: " << highestWeightFundCoords.ToString() << "<br>";
 //  stOutput << "<br>parabolic selection: " << parabolicSel.ToString();
   RationalFunctionOld RFOne, RFZero;
-  RFOne.MakeOne(theCommands.theGlobalVariableS);
-  RFZero.MakeZero(theCommands.theGlobalVariableS);
+  RFOne.MakeOne(&theGlobalVariables);
+  RFZero.MakeZero(&theGlobalVariables);
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFunctionOld> theElt;
   //=theElementData.theElementTensorGenVermas.GetElement();
@@ -877,7 +876,7 @@ bool Calculator::innerHWVCommon
   }
   ModuleSSalgebra<RationalFunctionOld>& theMod=theMods[indexOfModule];
   if (!theMod.flagIsInitialized)
-  { bool isGood=theMod.MakeFromHW(*owner, highestWeightFundCoords, selectionParSel, *theCommands.theGlobalVariableS, RFOne, RFZero, &report);
+  { bool isGood=theMod.MakeFromHW(*owner, highestWeightFundCoords, selectionParSel, theGlobalVariables, RFOne, RFZero, &report);
     if (Verbose)
       theCommands << theMod.ToString();
     if (!isGood)
@@ -1053,7 +1052,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   tempStream << "printSemisimpleLieAlgebra{}(" << theWeyl.theDynkinType << ")";
   out << theCommands.GetCalculatorLink(tempStream.str()) << "<br>";
   if (Verbose)
-  { out << " The resulting Lie bracket pairing table follows. <hr> " << theSSalgebra.ToString(&theCommands.theGlobalVariableS->theDefaultFormat);
+  { out << " The resulting Lie bracket pairing table follows. <hr> " << theSSalgebra.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
     out << "Ready for LaTeX consumption version of the first three columns: ";
     out << "<br>%Add to preamble: <br>\\usepackage{longtable} <br>%Add to body: <br>"
     << " \\begin{longtable}{ccc}generator & root simple coord. & root $\\varepsilon$-notation \\\\\\hline<br>\n";
@@ -1144,7 +1143,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   if (Verbose)
   { out << theWeyl.ToStringRootsAndRootReflections();
     DrawingVariables theDV;
-    theWeyl.DrawRootSystem(theDV, true, *theCommands.theGlobalVariableS, true, 0, true, 0);
+    theWeyl.DrawRootSystem(theDV, true, theGlobalVariables, true, 0, true, 0);
     out << "<hr>Below a drawing of the root system in its corresponding Coxeter plane (computed as explained on John Stembridge's website). "
     << "<br>The darker red dots can be dragged with the mouse to rotate the picture.<br>The grey lines are the edges of the Weyl chamber.<br>"
     << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
@@ -1993,7 +1992,7 @@ std::string Function::ToStringFull()
       out << " <br> " << this->theExample << "&nbsp&nbsp&nbsp";
     out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());
     if (this->theExample!="")
-      out2 << "<a href=\"" << this->owner->theGlobalVariableS->DisplayNameExecutableWithPath
+      out2 << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath
       << "? textType=Calculator&textDim=1&textInput="
       << CGI::UnCivilizeStringCGI(this->theExample) << "\"> " << " Example" << "</a>" ;
   } else
@@ -2048,7 +2047,7 @@ std::string Calculator::ToString()
   std::string openTag3="<span style=\"color:#00FF00\">";
   std::string closeTag3="</span>";
   out2 << " Total number of pattern matches performed: " << this->TotalNumPatternMatchedPerformed << "";
-  double elapsedSecs=this->theGlobalVariableS->GetElapsedSeconds();
+  double elapsedSecs=theGlobalVariables.GetElapsedSeconds();
   out2 << "<br>Computation time: " << elapsedSecs << " seconds (" << elapsedSecs*1000 << " milliseconds).<br>";
   std::stringstream tempStreamTime;
   tempStreamTime << " Of them " << this->StartTimeEvaluationInSecondS << " seconds (" << this->StartTimeEvaluationInSecondS*1000
@@ -2056,7 +2055,7 @@ std::string Calculator::ToString()
   << " milliseconds) user computation.<br>Boot time is measured from start of main() until evaluation start and excludes static initializations "
   << "+ executable load. Computation time excludes the time needed to compute the strings that follow below (which might take a while).";
   out2 << CGI::GetHtmlSpanHidableStartsHiddeN(tempStreamTime.str());
-  out2 << "<br>Maximum computation time: " << this->theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2 << " seconds. ";
+  out2 << "<br>Maximum computation time: " << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit/2 << " seconds. ";
   if (this->DepthRecursionReached>0)
     out2 << "<br>Maximum recursion depth reached: " << this->DepthRecursionReached << ".";
   #ifdef MacroIncrementCounter
@@ -2413,7 +2412,7 @@ bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression&
   hwSimple=theSSalg->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
   startingChar.MakeFromWeight(hwSimple, theSSalg);
   std::string reportString;
-  if (!startingChar.FreudenthalEvalMeFullCharacter(resultChar, 10000, &reportString, theCommands.theGlobalVariableS))
+  if (!startingChar.FreudenthalEvalMeFullCharacter(resultChar, 10000, &reportString, &theGlobalVariables))
     return output.MakeError(reportString, theCommands);
   std::stringstream out;
   out << resultChar.ToString();
@@ -2435,7 +2434,7 @@ bool Calculator::innerFreudenthalEval(Calculator& theCommands, const Expression&
   hwSimple=theSSalg->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
   startingChar.MakeFromWeight(hwSimple, theSSalg);
   std::string reportString;
-  if (!startingChar.FreudenthalEvalMeDominantWeightsOnly(resultChar, 10000, &reportString, theCommands.theGlobalVariableS))
+  if (!startingChar.FreudenthalEvalMeDominantWeightsOnly(resultChar, 10000, &reportString, &theGlobalVariables))
     return output.MakeError(reportString, theCommands);
   return output.AssignValue(resultChar, theCommands);
 }

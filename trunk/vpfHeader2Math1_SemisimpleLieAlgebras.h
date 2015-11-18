@@ -190,7 +190,7 @@ public:
   }
   //returns true if returning constant, false if returning element of h
   bool GetConstantOrHElement(const Vector<Rational> & root1, const Vector<Rational>& root2, Rational& outputRat, Vector<Rational>& outputH);
-  bool TestForConsistency(GlobalVariables& theGlobalVariables);
+  bool TestForConsistency();
   bool AttempTFindingHEF
   (ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputH, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputE,
    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputF, std::stringstream* logStream=0, GlobalVariables* theGlobalVariables=0);

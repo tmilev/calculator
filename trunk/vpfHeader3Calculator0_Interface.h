@@ -825,7 +825,6 @@ public:
   std::string outputString;
   std::string outputCommentsString;
   std::string parsingLog;
-  GlobalVariables* theGlobalVariableS;
   ObjectContainer theObjectContainer;
   double StartTimeEvaluationInSecondS;
 
@@ -1645,7 +1644,7 @@ public:
    const std::string& opDescription, const std::string& opExample, bool visible=true, bool experimental=false, const std::string& inputAdditionalIdentifier="")
   { this->AddOperationHandler(theOpName, outerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription, opExample, false, visible, experimental, inputAdditionalIdentifier);
   }
-  void init(GlobalVariables& inputGlobalVariables);
+  void init();
   void reset();
   void initAtomsThatFreezeArguments();
   void initAtomsThatAllowCommutingOfArguments();

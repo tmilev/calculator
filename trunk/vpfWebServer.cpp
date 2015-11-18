@@ -1,7 +1,6 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader6WebServer.h"
-#include "vpfHeader1General4_Logging.h"
 #include "vpfHeader3Calculator0_Interface.h"
 #include <sys/wait.h>//<-waitpid f-n here
 #include <netdb.h> //<-addrinfo and related data structures defined here
@@ -193,13 +192,13 @@ void WebWorker::OutputBeforeComputation()
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
 
-//stOutput << "Folders: " << theParser.theGlobalVariableS->ToStringFolderInfo();
+//stOutput << "Folders: " << theGlobalVariables.ToStringFolderInfo();
 
   stOutput << tempStreamXX.str();
   stOutput << "<table>\n <tr valign=\"top\">\n ";
   stOutput << "<td>"; //<td> tag will be closed later in WebWorker::OutputStandardResult
   stOutput << "\n<FORM method=\"POST\" id=\"formCalculator\" name=\"formCalculator\" action=\""
-  << theParser.theGlobalVariableS->DisplayNameCalculatorWithPath << "\">\n" ;
+  << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n" ;
   std::string civilizedInputSafish;
   if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, civilizedInputSafish))
     stOutput << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are "
@@ -213,7 +212,7 @@ void WebWorker::OutputBeforeComputation()
   stOutput << "</textarea>\n<br>\n";
   stOutput << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" > ";
   if (civilizedInput!="")
-    stOutput << "<a href=\"" << theParser.theGlobalVariableS->DisplayNameCalculatorWithPath << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
+    stOutput << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
   stOutput << "\n</FORM>";
   //  stOutput << "<br>Number of lists created before evaluation: " << NumListsCreated;
 }
@@ -315,7 +314,7 @@ void WebWorker::OutputStandardResult()
   stOutput << "</script>\n";
   stOutput << "</body></html>";
   stOutput << "<!--";
-  ProgressReport theReport(theParser.theGlobalVariableS);
+  ProgressReport theReport(&theGlobalVariables);
   for(int i=0; i<theParser.SystemCommands.size; i++)
   { std::stringstream out;
     out << "\n\ncommand: " << theParser.SystemCommands[i] << "\n" ;

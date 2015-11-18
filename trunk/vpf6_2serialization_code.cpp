@@ -158,12 +158,12 @@ bool CalculatorConversions::innerSSLieAlgebra(Calculator& theCommands, const Exp
   output.AssignValue(theSSalgebra, theCommands);
   if (feelsLikeTheVeryFirstTime)
   { //crash << theSSalgebra.theWeyl.theDynkinType.ToString() << crash;
-    theSSalgebra.ComputeChevalleyConstants(theCommands.theGlobalVariableS);
+    theSSalgebra.ComputeChevalleyConstants(&theGlobalVariables);
     Expression tempE;
     theCommands.innerPrintSSLieAlgebra(theCommands, output, tempE, false);
     theCommands << tempE.GetValue<std::string>();
   }
-  //theSSalgebra.TestForConsistency(*theCommands.theGlobalVariableS);
+  //theSSalgebra.TestForConsistency(theGlobalVariables);
   return true;
 }
 
@@ -401,7 +401,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
 bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theCommands, const Expression& inpuT, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorConversions::innerLoadSemisimpleSubalgebras");
   Expression input=inpuT;
-  theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=-1;
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=-1;
   Expression theAmbientTypeE, numExploredHsE, numExploredTypesE, theSAsE, currentChainE;
   if (!CalculatorConversions::innerLoadKey(theCommands, input, "AmbientDynkinType", theAmbientTypeE))
     return theCommands << "<hr>Failed to load Dynkin type from: " << input.ToString();
@@ -429,7 +429,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
 //  stOutput << "<br>numExploredTypes: " << numExploredTypes;
   SemisimpleLieAlgebra* ownerSS=0;
   Expression tempE;
-  ProgressReport theReport(theCommands.theGlobalVariableS);
+  ProgressReport theReport(&theGlobalVariables);
   std::stringstream reportStream;
   reportStream << "Extracting semisimple Lie algebra ... ";
   theReport.Report(reportStream.str());
@@ -451,7 +451,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
 
   theSAs.initHookUpPointers
   (*ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
-   &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
+   &theCommands.theObjectContainer.theSltwoSAs, &theGlobalVariables);
   reportStream << " done. Fetching subalgebra list ... ";
   theReport.Report(reportStream.str());
   //stOutput << "Owner ss is here:  " << ownerSS->ToString();
@@ -463,8 +463,8 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
   theSAs.flagComputeModuleDecomposition=true;
   theSAs.flagComputePairingTable=false;
   theSAs.flagComputeNilradicals=false;
-  theSAs.theGlobalVariables=theCommands.theGlobalVariableS;
-  theSAs.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
+  theSAs.theGlobalVariables=&theGlobalVariables;
+  theSAs.timeComputationStartInSeconds=theGlobalVariables.GetElapsedSeconds();
   reportStream << " done. <br>Total subalgebras: " << theSAsE.children.size-1 << ". ";
   theReport.Report(reportStream.str());
 
@@ -492,8 +492,8 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
   reportStream << "Subalgebra loading done, total  " << theSAs.theSubalgebras.size << " subalgebras loaded. ";
   theReport.Report(reportStream.str());
   theSAs.ToStringExpressionString=CalculatorConversions::innerStringFromSemisimpleSubalgebras;
-//  if (theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection!=0)
-//    theCommands.theGlobalVariableS->WebServerReturnDisplayIndicatorCloseConnection();
+//  if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection!=0)
+//    theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
   if (!theSAs.LoadState(currentChainInt, numExploredTypes, numExploredHs, theCommands.Comments))
     return false;
 //  reportStream << "<br> Computation state loaded: <br>" << theSAs.ToStringState();
@@ -510,7 +510,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
   //stOutput << "<hr>And the pointer is ....: " << &theSAs << "<br>";
   //stOutput << "<hr>And the other pointer is: " << &theCommands.theObjectContainer.theSSsubalgebras[0];
   //stOutput << theCommands.theObjectContainer.ToString();
-  theSAs.timeComputationEndInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
+  theSAs.timeComputationEndInSeconds=theGlobalVariables.GetElapsedSeconds();
   return output.AssignValue(theSAs, theCommands);
 }
 
@@ -520,7 +520,7 @@ std::string CalculatorConversions::innerStringFromSemisimpleSubalgebras(Semisimp
   static bool staticFirstRun=true; //<-this needs a rewrite
   if (staticFirstRun)
   { staticFirstRun=false;
-    tempCalculator.init(*input.theGlobalVariables);
+    tempCalculator.init();
   }
   Expression tempE;
   FormatExpressions theFormat;
@@ -929,7 +929,7 @@ bool CalculatorConversions::innerRationalFunction(Calculator& theCommands, const
   //if (input.IsBuiltInType(&tempS))
   //  stOutput << ", input is of type: " << tempS;
   RationalFunctionOld theRF;
-  theRF.MakeOneLetterMoN(0, 1, theCommands.theGlobalVariableS);
+  theRF.MakeOneLetterMoN(0, 1, &theGlobalVariables);
   return output.AssignValueWithContext(theRF, theContext, theCommands);
 }
 

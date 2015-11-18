@@ -649,13 +649,13 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize
   Vector<Rational> theWeightRat;
   Expression theContextE;
   if (theCommands.GetTypeWeight<Rational>(theCommands, input, theWeightRat, theContextE, theSSalgebra,0))
-  { Rational result=theSSalgebra->theWeyl.GetOrbitSize(theWeightRat, theCommands.theGlobalVariableS);
+  { Rational result=theSSalgebra->theWeyl.GetOrbitSize(theWeightRat, &theGlobalVariables);
     return output.AssignValue(result, theCommands);
   }
   Vector<Polynomial<Rational> > theWeightPoly;
   if (theCommands.GetTypeWeight<Polynomial<Rational> >
       (theCommands, input, theWeightPoly, theContextE, theSSalgebra,CalculatorConversions::innerPolynomial<Rational>))
-  { Rational result=theSSalgebra->theWeyl.GetOrbitSize(theWeightPoly, theCommands.theGlobalVariableS);
+  { Rational result=theSSalgebra->theWeyl.GetOrbitSize(theWeightPoly, &theGlobalVariables);
     return output.AssignValue(result, theCommands);
   }
   return false;
@@ -807,7 +807,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable(Calculat
     return false;
   }
   std::stringstream reportStream;
-  theGroup.ComputeOrLoadCharacterTable(theCommands.theGlobalVariableS, &reportStream);
+  theGroup.ComputeOrLoadCharacterTable(&theGlobalVariables, &reportStream);
   theCommands << reportStream.str();
   return output.AssignValue(theGroup, theCommands);
 }
@@ -825,7 +825,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS(Calculator& th
     return false;
   }
   std::stringstream out;
-  theGroup.ComputeOrLoadConjugacyClasses(theCommands.theGlobalVariableS, &out);
+  theGroup.ComputeOrLoadConjugacyClasses(&theGlobalVariables, &out);
   theCommands << out.str();
   return output.AssignValue(theGroup, theCommands);
 }
@@ -840,10 +840,10 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements
     << "not to compute when the rank is larger than 7. ";
     return false;
   }
-  double timeStart1=theCommands.theGlobalVariableS->GetElapsedSeconds();
-  theGroup.ComputeCCfromAllElements(theCommands.theGlobalVariableS);
+  double timeStart1=theGlobalVariables.GetElapsedSeconds();
+  theGroup.ComputeCCfromAllElements(&theGlobalVariables);
   //std::stringstream out;
-  theCommands << "<hr> Computed conjugacy classes of " << theGroup.ToString() << " in " << theCommands.theGlobalVariableS->GetElapsedSeconds()-timeStart1
+  theCommands << "<hr> Computed conjugacy classes of " << theGroup.ToString() << " in " << theGlobalVariables.GetElapsedSeconds()-timeStart1
   << " second(s). ";
   return output.AssignValue(theGroup, theCommands);
 }
@@ -855,18 +855,16 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives
   WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
   theGroup.CheckConsistency();
   if (theGroup.GetDim()>8)
-  { theCommands << "<hr>Loaded Dynkin type " << theGroup.theDynkinType.ToString() << " of rank " << theGroup.GetDim() << " but I've been told "
+    return theCommands << "<hr>Loaded Dynkin type " << theGroup.theDynkinType.ToString() << " of rank " << theGroup.GetDim() << " but I've been told "
     << "not to compute when the rank is larger than 8. ";
-    return false;
-  }
   theGroup.CheckConsistency();
-  double timeStart1=theCommands.theGlobalVariableS->GetElapsedSeconds();
+  double timeStart1=theGlobalVariables.GetElapsedSeconds();
   theGroup.CheckConsistency();
-//  theGroup.ComputeCCRepresentatives(theCommands.theGlobalVariableS);
-  theGroup.ComputeCCSizesAndRepresentatives(theCommands.theGlobalVariableS);
+//  theGroup.ComputeCCRepresentatives(&theGlobalVariables);
+  theGroup.ComputeCCSizesAndRepresentatives(&theGlobalVariables);
   //std::stringstream out;
   theCommands << "<hr> Computed conjugacy classes representatives of "
-  << theGroup.theDynkinType.ToString() << " in " << theCommands.theGlobalVariableS->GetElapsedSeconds()-timeStart1
+  << theGroup.theDynkinType.ToString() << " in " << theGlobalVariables.GetElapsedSeconds()-timeStart1
   << " second(s). ";
   return output.AssignValue(theGroup, theCommands);
 }
@@ -879,7 +877,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromSc
     return true;
   WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
 //  stOutput << "And the group is: " << theGroup.ToString();
-  theGroup.ComputeIrreducibleRepresentationsTodorsVersion(theCommands.theGlobalVariableS);
+  theGroup.ComputeIrreducibleRepresentationsTodorsVersion(&theGlobalVariables);
   FormatExpressions tempFormat;
   tempFormat.flagUseLatex=true;
   tempFormat.flagUseHTML=false;
@@ -1247,10 +1245,10 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(Calculator& 
   }
   std::stringstream out;
   List<SubgroupRootReflections> parabolicSubgroupS, extendedParabolicSubgroups, allRootSubgroups, finalSubGroups;
-  if (!theWeyl.LoadSignSignatures(finalSubGroups, theCommands.theGlobalVariableS))
-  { theWeyl.GetSignSignatureParabolics(parabolicSubgroupS, theCommands.theGlobalVariableS);
-    theWeyl.GetSignSignatureExtendedParabolics(extendedParabolicSubgroups, theCommands.theGlobalVariableS);
-    theWeyl.GetSignSignatureAllRootSubsystems(allRootSubgroups, theCommands.theGlobalVariableS);
+  if (!theWeyl.LoadSignSignatures(finalSubGroups, &theGlobalVariables))
+  { theWeyl.GetSignSignatureParabolics(parabolicSubgroupS, &theGlobalVariables);
+    theWeyl.GetSignSignatureExtendedParabolics(extendedParabolicSubgroups, &theGlobalVariables);
+    theWeyl.GetSignSignatureAllRootSubsystems(allRootSubgroups, &theGlobalVariables);
     List<Pair<std::string, List<Rational>, MathRoutines::hashString> > tauSigPairs;
     finalSubGroups.Reserve(allRootSubgroups.size);
     Pair<std::string, List<Rational>, MathRoutines::hashString> currentTauSig;
@@ -1283,7 +1281,7 @@ bool CalculatorFunctionsWeylGroup::innerDecomposeWeylRep(Calculator& theCommands
 //  theRep.Decomposition(theCFs, outputReps);
   WeylGroupRepresentation<Rational>& inputRep =input.GetValueNonConst<WeylGroupRepresentation<Rational> >();
   WeylGroupVirtualRepresentation<Rational> outputRep;
-  inputRep.DecomposeTodorsVersion(outputRep, theCommands.theGlobalVariableS);
+  inputRep.DecomposeTodorsVersion(outputRep, &theGlobalVariables);
   return output.AssignValue(outputRep, theCommands);
 }
 
@@ -1321,7 +1319,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupNaturalRep(Calculator& theComma
     return false;
 //  stOutput << "not implemented!";
   WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
-  theGroup.ComputeIrreducibleRepresentationsTodorsVersion(theCommands.theGlobalVariableS);
+  theGroup.ComputeIrreducibleRepresentationsTodorsVersion(&theGlobalVariables);
 //  stOutput << theGroup.ToString();
   WeylGroupRepresentation<Rational> tempRep;
   theGroup.GetStandardRepresentation(tempRep);
@@ -1585,7 +1583,7 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(Calculator& theCommands,
   int numGenerators=theSet.size;
   Expression theProduct, evaluatedProduct;
   //stOutput << "<br>" << theSet[0].ToString() << "->" << theSet[0].ToStringFull() << " is with hash " << theSet[0].HashFunction();
-  ProgressReport theReport(theCommands.theGlobalVariableS);
+  ProgressReport theReport(&theGlobalVariables);
   for (int i=0; i<theSet.size; i++)
     for (int j=0; j<numGenerators; j++)
     { theProduct.MakeProducT(theCommands, theSet[j], theSet[i]);
@@ -1655,7 +1653,7 @@ bool CalculatorFunctionsWeylGroup::innerMakeVirtualWeylRep(Calculator& theComman
     return false;
   WeylGroupRepresentation<Rational>& inputRep=input.GetValueNonConst<WeylGroupRepresentation<Rational> >();
   if (inputRep.ownerGroup->irreps.size<inputRep.ownerGroup->ConjugacyClassCount())
-    inputRep.ownerGroup->ComputeIrreducibleRepresentationsTodorsVersion(theCommands.theGlobalVariableS);
+    inputRep.ownerGroup->ComputeIrreducibleRepresentationsTodorsVersion(&theGlobalVariables);
   WeylGroupVirtualRepresentation<Rational> outputRep;
   outputRep.AssignWeylGroupRep(inputRep);
   return output.AssignValue(outputRep, theCommands);

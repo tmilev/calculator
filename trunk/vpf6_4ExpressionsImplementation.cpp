@@ -755,14 +755,14 @@ bool Expression::ConvertToType<RationalFunctionOld>(Expression& output)const
   this->CheckInitialization();
   if (this->IsOfType<Rational>())
   { RationalFunctionOld resultRF;
-    resultRF.MakeConst(this->GetValue<Rational>(), this->owner->theGlobalVariableS);
+    resultRF.MakeConst(this->GetValue<Rational>(), &theGlobalVariables);
 //    stOutput << "<hr>Converting to type: " << this->ToString();
 //    stOutput << "<br>My context is: " << this->GetContext().ToString();
     return output.AssignValueWithContext(resultRF, this->GetContext(), *this->owner);
   }
   if (this->IsOfType<Polynomial<Rational> >())
   { RationalFunctionOld resultRF;
-    resultRF.context=this->owner->theGlobalVariableS;
+    resultRF.context=&theGlobalVariables;
     resultRF=this->GetValue<Polynomial<Rational> >();
     return output.AssignValueWithContext(resultRF, this->GetContext(), *this->owner);
   }

@@ -5,7 +5,7 @@
 
 #include "vpfHeader2Math0_General.h" // Matrix
 #include "vpfHeader2Math01_LargeIntArithmetic.h" // Rational
-static ProjectInformationInstance vpfJson(__FILE__, "Implementation of JSON, work in progress.");
+static ProjectInformationInstance vpfJson(__FILE__, "Implementation of JSON, work in progress, Thomas.");
 
 
 /*The best kind of misleading documentation is aspirational

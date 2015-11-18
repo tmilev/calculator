@@ -1,7 +1,6 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader6WebServerInterprocessLogistics.h"
-#include "vpfHeader1General4_Logging.h"
 #include <fcntl.h> //<- setting of flags for pipes and the like (example: making a pipe non-blocking).
 #include <unistd.h>
 #include <netdb.h> //<-addrinfo and related data structures defined here

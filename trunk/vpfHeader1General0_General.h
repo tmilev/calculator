@@ -112,6 +112,10 @@ class Polynomial;
 template <class coefficient>
 class PolynomialSubstitution;
 
+//algebraic geometry computation class:
+template <class coefficient>
+class GroebnerBasisComputation;
+
 //combinatorial classes
 class Selection;
 class SubsetWithMultiplicities;

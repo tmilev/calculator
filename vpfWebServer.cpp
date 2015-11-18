@@ -1,6 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader6WebServer.h"
+#include "vpfHeader1General4_Logging.h"
 #include "vpfHeader3Calculator0_Interface.h"
 #include <sys/wait.h>//<-waitpid f-n here
 #include <netdb.h> //<-addrinfo and related data structures defined here
@@ -246,11 +247,11 @@ void WebWorker::OutputSendAfterTimeout(const std::string& input)
   << theWebServer.GetActiveWorker().indexInParent+1 << "." << logger::endL;
   //requesting pause which will be cleared by the receiver of pipeWorkerToServerIndicatorData
   theWebServer.GetActiveWorker().PauseComputationReportReceived.RequestPausePauseIfLocked();
-  theLog << logger::red << "Sending result through indicator pipe." << logger::endL;
+  theLog << logger::blue << "Sending result through indicator pipe." << logger::endL;
   ProgressReportWebServer theReport("Sending result through indicator pipe.");
 
   theWebServer.GetActiveWorker().pipeWorkerToServerIndicatorData.WriteAfterEmptying(input);
-  logBlock << logger::red << "Final output written to indicator, blocking until data "
+  logBlock << logger::blue << "Final output written to indicator, blocking until data "
   << "is received on the other end." << logger::endL;
   theReport.SetStatus("Blocking until result data is received.");
   if(!theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequestedWithTimeOut())
@@ -1011,6 +1012,7 @@ int WebWorker::ProcessUnknown()
 int WebWorker::OutputWeb()
 { MacroRegisterFunctionWithName("WebServer::OutputWeb");
   WebWorker::OutputBeforeComputation();
+  stOutput << "Thread data follows.<br> " << ThreadData::ToStringAllThreads();
   theWebServer.CheckExecutableVersionAndRestartIfNeeded();
   stOutput << theParser.javaScriptDisplayingIndicator;
   //theParser.inputString="TestCalculatorIndicator 0";

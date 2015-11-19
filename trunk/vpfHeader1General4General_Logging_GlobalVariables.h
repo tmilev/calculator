@@ -16,7 +16,7 @@ public:
   int index;
   std::string name;
   std::string ToString()const;
-  static int getCurrentThreadId();
+  static int getCurrentThreadId(const std::string& inputName="");
   static void RegisterCurrentThread(const std::string& inputName="");
   static void CreateThread(void (*InputFunction)());
   static std::string ToStringAllThreads();

@@ -168,7 +168,7 @@ GlobalVariables::~GlobalVariables()
 }
 
 void ThreadData::RegisterCurrentThread(const std::string& inputName)
-{ int threadID=ThreadData::getCurrentThreadId();
+{ int threadID=ThreadData::getCurrentThreadId(inputName);
   ListReferences<ThreadData>& theThreads=theGlobalVariables.theThreadData;
   for (int i=0; i<theThreads.size; i++)
     if (threadID==theThreads[i].index)
@@ -187,7 +187,7 @@ void ThreadData::CreateThread(void (*InputFunction)())
   theGlobalVariables.theThreads.LastObject().swap(newThread);
 }
 
-int ThreadData::getCurrentThreadId()
+int ThreadData::getCurrentThreadId(const std::string& inputName)
 { std::thread::id currentId= std::this_thread::get_id();
   int result=-1;
   for (int i=0; i<theGlobalVariables.theThreadData.size; i++)
@@ -199,6 +199,7 @@ int ThreadData::getCurrentThreadId()
   { MutexLockGuard theLock(theGlobalVariables.MutexRegisterNewThread);
     result=theGlobalVariables.theThreadData.size;
     ThreadData newThreadData;
+    newThreadData.name=inputName;
     newThreadData.index=result;
     newThreadData.theId=currentId;
     theGlobalVariables.theThreadData.AddOnTop(newThreadData);

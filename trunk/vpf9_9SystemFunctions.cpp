@@ -142,7 +142,8 @@ bool TimerThreadData::HandlePingServerIamAlive()
 }
 
 void TimerThreadData::Run()
-{ this->elapsedtime=-1;
+{ MacroRegisterFunctionWithName("TimerThreadData::Run");
+  this->elapsedtime=-1;
   this->elapsedComputationTime=-1;
   this->computationStartTime=-1;
   this->counter=0;
@@ -163,7 +164,7 @@ void TimerThreadData::Run()
 }
 
 void RunTimerThread()
-{ ThreadData::RegisterCurrentThread("timer thread");
+{ ThreadData::RegisterCurrentThread("timer");
   MacroRegisterFunctionWithName("RunTimerThread");
 //  std::cout << "Got thus far RunTimerVoidPtr" << std::endl;
   TimerThreadData theThread;

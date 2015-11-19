@@ -4,7 +4,6 @@
 #include "vpfHeader1General4General_Logging_GlobalVariables.h"
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
 #include <assert.h>
-#include <thread>
 #include <mutex>
 
 ProjectInformationInstance vpfGeneral2Mutexes(__FILE__, "Multitasking implementation.");
@@ -154,16 +153,18 @@ bool Controller::IsPausedWhileRunning()const
 
 ThreadData::ThreadData()
 { this->index=0;
-  this->threadPointer=0;
 }
 
 ThreadData::~ThreadData()
-{ //this may be use after free depending on whether GetThreads is destroyed first
-  logBlock << "joining threads ...";
-  for (int i=1; i<theThreads.size; i++)
-    theThreads[i].join();
+{
+}
 
-  logBlock << "joining threads done.";
+GlobalVariables::~GlobalVariables()
+{ double startTime=this->GetElapsedSeconds();
+  logBlock << logger::yellow << "joining threads ..." << logger::endL;
+  for (int i=1; i<this->theThreads.size; i++)
+    this->theThreads[i].join();
+  logBlock << logger::yellow << " done in " << logger::green << this->GetElapsedSeconds()-startTime << " seconds. " << logger::endL;
 }
 
 void ThreadData::RegisterCurrentThread(const std::string& inputName)
@@ -181,22 +182,26 @@ void ThreadData::RegisterCurrentThread(const std::string& inputName)
 
 void ThreadData::CreateThread(void (*InputFunction)())
 { MutexLockGuard(theGlobalVariables.MutexRegisterNewThread);
-  theThreads.SetSize(theThreadIds.size+1);
-  theThreads.LastObject()=std::thread(InputFunction);
+  std::thread newThread(InputFunction);
+  theGlobalVariables.theThreads.SetSize(theGlobalVariables.theThreads.size+1);
+  theGlobalVariables.theThreads.LastObject().swap(newThread);
 }
 
 int ThreadData::getCurrentThreadId()
 { std::thread::id currentId= std::this_thread::get_id();
   int result=-1;
-  for (int i=0; i<theThreadIds.size; i++)
-    if (currentId==theThreadIds[i])
+  for (int i=0; i<theGlobalVariables.theThreadData.size; i++)
+    if (currentId== theGlobalVariables.theThreadData[i].theId)
     { result=i;
       break;
     }
   if (result==-1)
   { MutexLockGuard theLock(theGlobalVariables.MutexRegisterNewThread);
-    result=theThreadIds.size;
-    theThreadIds.AddOnTop(currentId);
+    result=theGlobalVariables.theThreadData.size;
+    ThreadData newThreadData;
+    newThreadData.index=result;
+    newThreadData.theId=currentId;
+    theGlobalVariables.theThreadData.AddOnTop(newThreadData);
   }
   return result;
 }
@@ -208,12 +213,13 @@ std::string ThreadData::ToString()const
     out << "(thread name not set)";
   else
     out << this->name;
-  out << ". Index: " << this->index << ", id: " << theThreadIds[this->index] << ".";
+  out << ". Index: " << this->index << ", id: " <<  this->theId << ".";
   return out.str();
 }
 
 std::string ThreadData::ToStringAllThreads()
 { std::stringstream out;
+  out << theGlobalVariables.theThreadData.size << " threads registered. <br> " << theGlobalVariables.theThreads.size << " total threads.<br>";
   for (int i=0; i<theGlobalVariables.theThreadData.size; i++)
     out << theGlobalVariables.theThreadData[i].ToString() << "<br>";
   return out.str();

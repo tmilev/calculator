@@ -74,21 +74,6 @@ public:
   }
 };
 
-class ThreadData
-{
-public:
-  int index;
-  std::string name;
-  void* threadPointer;
-  std::string ToString()const;
-  static int getCurrentThreadId();
-  static void RegisterCurrentThread(const std::string& inputName="");
-  static void CreateThread(void (*InputFunction)());
-  static std::string ToStringAllThreads();
-  ThreadData();
-  ~ThreadData();
-};
-
 class Controller
 {
   private:

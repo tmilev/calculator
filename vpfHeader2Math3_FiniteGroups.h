@@ -1458,7 +1458,6 @@ public:
   (const ElementWeylGroup<WeylGroup>& theElement, const Vectors<coefficient>& input, Vectors<coefficient>& output)const;
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
-  void operator=(const SubgroupWeylGroupOLD& other);
 };
 
 template <typename coefficient>

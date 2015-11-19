@@ -68,15 +68,14 @@ class ProjectInformationInstance
   public:
   ProjectInformationInstance(const char* fileName, const std::string& fileDescription);
 };
+class GlobalVariables;
+extern GlobalVariables theGlobalVariables;
 
 static ProjectInformationInstance vpfMacrosHprojectInstance(__FILE__, "Header, External includes + macros. Macro/build configuration.");
 
-class GlobalVariables;
 class Crasher
 {
   public:
-  GlobalVariables* theGlobalVariables;
-
   std::stringstream theCrashReport;
   void (*CleanUpFunction)();
   bool flagFirstRun; //<-we crash only once, and we do not resume execution after a crash

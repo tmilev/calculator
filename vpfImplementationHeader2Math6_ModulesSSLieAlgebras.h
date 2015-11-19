@@ -86,7 +86,7 @@ Rational ModuleSSalgebra<coefficient>::hwTrace
   }
   if (theProgressReport!=0 && this->cachedPairs.size<500000)
   { std::stringstream tempStream;
-    tempStream << "Number of cached pairs: " << this->cachedPairs.size << " at recursion depth " << ProjectInformation::GetMainProjectInfo().CustomStackTrace.size;
+    tempStream << "Number of cached pairs: " << this->cachedPairs.size << " at recursion depth " << theGlobalVariables.CustomStackTrace.size;
     theProgressReport->Report(tempStream.str());
   }
 

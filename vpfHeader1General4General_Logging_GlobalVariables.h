@@ -37,6 +37,7 @@ public:
 //  bool flagLogInterProcessCommunication;
   bool flagUsingBuiltInWebServer;
   bool flagAllowUseOfThreadsAndMutexes;
+  bool flagNotAllocated;
 
   MemorySaving<FormatExpressions> theDefaultFormat;
   MemorySaving<FormatExpressions> thePolyFormat;
@@ -55,6 +56,8 @@ public:
   bool flagReportProductsMonomialAlgebras;
 
   int progressReportStringsRegistered;
+  List<stackInfo> CustomStackTrace;
+  MutexRecursiveWrapper infoIsInitialized;
   ListReferences<ThreadData> theThreadData;
   List<std::string> ProgressReportStringS;
   Controller theLocalPauseController;
@@ -110,6 +113,7 @@ public:
   MemorySaving<GroebnerBasisComputation<Rational> > theGroebnerBasisComputation;
 
   GlobalVariables();
+  static HashedList<FileInformation>& theSourceCodeFiles();
   void SetTimerFunction(double (*timerFunction)())
   { this->getElapsedTimePrivate=timerFunction;
   }
@@ -146,6 +150,7 @@ public:
   { if (this->callChDir!=0)
       this->callChDir(systemCommand);
   }
+  std::string ToStringSourceCodeInfo();
   std::string ToStringFolderInfo()const;
   inline void MakeReport(const std::string& input)
   { if (this->IndicatorStringOutputFunction!=0)
@@ -154,7 +159,7 @@ public:
   void MakeReport();
   /// @endcond
 };
-extern GlobalVariables theGlobalVariables;
+//extern GlobalVariables theGlobalVariables;
 
 class logger
 {

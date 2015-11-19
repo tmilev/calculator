@@ -3794,7 +3794,7 @@ bool List<Object>::ReadFromFile(std::fstream& input, int UpperLimitForDebugPurpo
         report << "Reading object number " << i+1 << " out of " << ActualListSize;
         if (CappedListSize<ActualListSize)
           report << " capped at " << CappedListSize;
-        ProgressReport tempReport(&theGlobalVariables, report.str());
+        ProgressReport tempReport(report.str());
       }
       theGlobalVariables.theLocalPauseController.SafePointDontCallMeFromDestructors();
     }

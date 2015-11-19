@@ -299,8 +299,8 @@ void WebWorker::OutputStandardResult()
     stOutput << "</td>";
   }
   stOutput << "<td valign=\"top\">";
-  ProjectInformation::GetMainProjectInfo().theFiles.QuickSortAscending();
-  stOutput << ProjectInformation::GetMainProjectInfo().ToString();
+  theGlobalVariables.theSourceCodeFiles().QuickSortAscending();
+  stOutput << theGlobalVariables.ToStringSourceCodeInfo();
   stOutput << "<hr><b>Calculator status. </b><br>";
   stOutput << theParser.ToString();
 

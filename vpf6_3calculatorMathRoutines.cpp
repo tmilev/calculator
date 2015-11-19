@@ -1344,10 +1344,9 @@ bool CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly(Calculator& theComma
 
 bool CalculatorFunctionsGeneral::innerMakeMakeFile(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMakeMakeFile");
-  ProjectInformation& theProjectInfo=ProjectInformation::GetMainProjectInfo();
   List<std::string> cppFilesNoExtension;
-  for (int i=0; i<theProjectInfo.theFiles.size; i++)
-  { std::string theFileNameWithPath=theProjectInfo.theFiles[i].FileName;
+  for (int i=0; i<theGlobalVariables.theSourceCodeFiles().size; i++)
+  { std::string theFileNameWithPath=theGlobalVariables.theSourceCodeFiles()[i].FileName;
     if (theFileNameWithPath[theFileNameWithPath.size()-1]=='h')
       continue;
     theFileNameWithPath.resize(theFileNameWithPath.size()-4);

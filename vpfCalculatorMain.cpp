@@ -19,7 +19,7 @@ int main(int argc, char **argv)
   MacroRegisterFunctionWithName("main");
   try {
   InitializeGlobalObjects();
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=500000;
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=5000000;
   theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=5;
   theGlobalVariables.flagReportEverything=true;
   //	stOutput <<  "<br>" << (int) &theGlobalVariables.callSystem ;

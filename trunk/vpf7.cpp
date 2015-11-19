@@ -674,12 +674,6 @@ bool ElementUniversalEnveloping<coefficient>::ConvertToRationalCoeff(ElementUniv
   return true;
 }
 
-void ProjectInformation::AddProjectInfo(const std::string& fileName, const std::string& fileDescription)
-{ FileInformation theInfo;
-  theInfo.FileName=fileName;
-  theInfo.FileDescription=fileDescription;
-  this->theFiles.AddOnTopNoRepetition(theInfo);
-}
 
 std::string CGI::GetHtmlLinkFromProjectFileName(const std::string& fileName, const std::string& fileDesc, int line)
 { std::stringstream out;
@@ -691,45 +685,6 @@ std::string CGI::GetHtmlLinkFromProjectFileName(const std::string& fileName, con
   if (fileDesc!="")
     out << " (" << fileDesc << ")";
   out << "</a>\n";
-  return out.str();
-}
-
-std::string ProjectInformation::ToString()
-{ std::stringstream out;
-  out << "<button " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator " << "(expand/collapse)</button>";
-  out << "<div id=\"sourceDetails\" style=\"display: none\">";
-  out << "<br>The calculator is a standalone application that can either be used "
-  << " as a web server (similarly to SAGE) or "
-  << " via an <a href=\"http://httpd.apache.org/\">Apache web server</a>. "
-  << "The standard way of running the calculator is as a stand-alone linux webserver. "
-  << "If you want to run the calculator through Apache, best is to contact the authors for instructions."
-  << "\nTo get the calculator as a stand-alone linux webserver do the following. "
-  << "\n "
-  << "\n<br>\n0) You need a Linux machine. Tested only on Ubuntu and OpenSUSE."
-  << " If you are interested in making the system run on Windows please write us an email. "
-  << "\n<br>\n1) Install subversion. On Ubuntu the command is as follows.  <br>sudo apt-get install subversion"
-  << "\n<br>\n2) Install g++ (the minimum for compiling c++ programs). "
-  << "On Ubuntu the command is the following.  <br>sudo apt-get install g++"
-  << "\n<br>\n3) Checkout the calculator project. The command is as follows.<br>"
-  << "svn checkout svn://svn.code.sf.net/p/vectorpartition/code/trunk vectorpartition-code"
-  << "<br> The command fetches the latest source code from sourceforge."
-  << "\n<br>\n4) Navigate to the newly created vectorpartition-code folder.  "
-  << "\n<br>\n5) Type the following command. <br>make <br>Wait until the command is completed (takes about 4 minutes on my machine). "
-  << "The installation is now complete. To run the calculator, see the next two points."
-  << "\n<br>\n6) Through the command-line, navigate to the following directory. <br>vectorpartition-code/Debug/ "
-  << "\n<br>\n7) Type the following command. Make sure to include the dot.  <br>./calculator server"
-  << "\n<br>\n8) The calculator will display a message saying on which port it got bound. "
-  << "The default port is 8080. Type the address:  <br>localhost:8080/vectorpartition/cgi-bin/calculator<br>"
-  << " in your web browser to get to the calculator. If the calculator doesn't succeed in binding to port 8080"
-  << " (say, the port is already taken) it may bind to ports 8081 or 8082. In that case replace "
-  << " the 8080 in the address above with the port number reported by the calculator. ";
-  out << "<hr>" << this->theFiles.size << " files total. ";
-  out << "<br>svn checkout command:<br>svn checkout svn://svn.code.sf.net/p/vectorpartition/code/trunk vectorpartition-code";
-  for (int i=0; i<this->theFiles.size; i++)
-  { out << " <br>\n";
-    out << CGI::GetHtmlLinkFromProjectFileName(this->theFiles[i].FileName, this->theFiles[i].FileDescription);
-  }
-  out << "</div>";
   return out.str();
 }
 

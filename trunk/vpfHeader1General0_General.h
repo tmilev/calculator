@@ -1657,41 +1657,24 @@ class FileInformation
   static unsigned int HashFunction(const FileInformation& input)
   { return MathRoutines::hashString(input.FileName);
   }
-};
-
-class ProjectInformation
-{
-  public:
-  List<stackInfo> CustomStackTrace;
-  MutexRecursiveWrapper infoIsInitialized;
-  HashedList<FileInformation> theFiles;
-  static ProjectInformation& GetMainProjectInfo()
-  { //This is required to avoid the static initialization order fiasco.
-    //For more information, google "static initialization order fiasco"
-    //and go to the first link. The solution used here was proposed inside that link.
-    static ProjectInformation MainProjectInfo;
-    MainProjectInfo.CustomStackTrace.Reserve(30);
-    MainProjectInfo.theFiles.SetExpectedSize(100);
-    MainProjectInfo.infoIsInitialized.mutexName="projectnfo";
-    return MainProjectInfo;
-  }
-  std::string ToString();
-  void AddProjectInfo(const std::string& fileName, const std::string& fileDescription);
+  static void AddProjectInfo(const std::string& fileName, const std::string& fileDescription);
 };
 
 class ProgressReport
 {
 public:
-  GlobalVariables* pointerGV;
   int currentLevel;
   bool flagProgReportStringsExpanded;
   void Report(const std::string& theReport);
-  void initFromGV(GlobalVariables* theGlobalVariables);
-  ProgressReport(GlobalVariables* theGlobalVariables)
-  { this->initFromGV(theGlobalVariables);
+  void init();
+  ProgressReport()
+  { this->init();
   }
-  ProgressReport(GlobalVariables* theGlobalVariables, const std::string& theReport)
-  { this->initFromGV(theGlobalVariables);
+  ProgressReport(GlobalVariables* dummyArgumentComesFromOldVersionOfCodeNeedsToBeRefactored)
+  { this->init();
+  }
+  ProgressReport(const std::string& theReport)
+  { this->init();
     this->Report(theReport);
   }
   ~ProgressReport();

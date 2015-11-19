@@ -70,7 +70,8 @@ unsigned long long int Rational::TotalSmallGCDcalls=0;
 unsigned long long int Rational::TotalSmallMultiplications=0;
 
 GlobalVariables::GlobalVariables()
-{ this->IndicatorStringOutputFunction=0;
+{ this->flagNotAllocated=false;
+  this->IndicatorStringOutputFunction=0;
   this->WebServerReturnDisplayIndicatorCloseConnection=0;
   this->WebServerTimerPing=0;
   this->MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000000;
@@ -92,47 +93,45 @@ GlobalVariables::GlobalVariables()
   this->flagComputationCompletE=false;
   this->flagComputationFinishedAllOutputSentClosing=false;
   this->progressReportStringsRegistered=0;
+  this->CustomStackTrace.Reserve(30);
   //  this->flagLogInterProcessCommunication=true;
   //  stOutput << "Global variables created!";
 }
 
+HashedList<FileInformation>& GlobalVariables::theSourceCodeFiles()
+{ static HashedList<FileInformation> avoidingTheStaticInitializationOrderFiasco;
+  avoidingTheStaticInitializationOrderFiasco.SetExpectedSize(200);
+  return avoidingTheStaticInitializationOrderFiasco;
+}
+
 void ProgressReport::Report(const std::string& theReport)
-{ if (this->pointerGV==0)
-    return;
-  MutexLockGuard theLock(this->pointerGV->MutexProgressReporting);
-  if (this->pointerGV->ProgressReportStringS.size>this->currentLevel)
-  { this->pointerGV->ProgressReportStringS[this->currentLevel]=theReport;
-    this->pointerGV->MakeReport();
+{ MutexLockGuard theLock(theGlobalVariables.MutexProgressReporting);
+  if (theGlobalVariables.ProgressReportStringS.size>this->currentLevel)
+  { theGlobalVariables.ProgressReportStringS[this->currentLevel]=theReport;
+    theGlobalVariables.MakeReport();
   }
 }
 
-void ProgressReport::initFromGV(GlobalVariables* theGlobalVariables)
-{ this->pointerGV=theGlobalVariables;
-  this->flagProgReportStringsExpanded=true;
-  if (this->pointerGV==0)
-    this->currentLevel=-1;
-  else
-  { MutexLockGuard theLock(this->pointerGV->MutexProgressReporting);
-    this->pointerGV->progressReportStringsRegistered++;
-    this->currentLevel=this->pointerGV->ProgressReportStringS.size;
-    this->pointerGV->ProgressReportStringS.AddOnTop("");
-  }
+void ProgressReport::init()
+{ this->flagProgReportStringsExpanded=true;
+  MutexLockGuard theLock(theGlobalVariables.MutexProgressReporting);
+  theGlobalVariables.progressReportStringsRegistered++;
+  this->currentLevel=theGlobalVariables.ProgressReportStringS.size;
+  theGlobalVariables.ProgressReportStringS.AddOnTop("");
 }
 
 ProgressReport::~ProgressReport()
-{ if (this->pointerGV==0)
-    return;
-  this->pointerGV->progressReportStringsRegistered--;
-  this->pointerGV->ProgressReportStringS.size--;
+{ theGlobalVariables.progressReportStringsRegistered--;
+  theGlobalVariables.ProgressReportStringS.size--;
 }
 
 ProjectInformationInstance::ProjectInformationInstance(const char* fileName, const std::string& fileDescription)
-{ ProjectInformation::GetMainProjectInfo().AddProjectInfo(fileName, fileDescription);
+{ FileInformation::AddProjectInfo(fileName, fileDescription);
 }
 
 RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const std::string& functionName)
 { MutexLockGuard theLock(theGlobalVariables.MutexRegisterFunctionStaticFiasco);
-  List<stackInfo>& theStack=ProjectInformation::GetMainProjectInfo().CustomStackTrace;
+  List<stackInfo>& theStack=theGlobalVariables.CustomStackTrace;
   theStack.SetSize(theStack.size+1);
   stackInfo& stackTop=*theStack.LastObject();
   stackTop.fileName=fileName;
@@ -142,8 +141,7 @@ RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const
 
 RegisterFunctionCall::~RegisterFunctionCall()
 { MutexLockGuard theLock(theGlobalVariables.MutexRegisterFunctionStaticFiasco);
-  List<stackInfo>& theStack=ProjectInformation::GetMainProjectInfo().CustomStackTrace;
-  theStack.size--;
+  theGlobalVariables.CustomStackTrace.size--;
 }
 
 int DrawingVariables::GetColorFromChamberIndex(int index, std::fstream* LaTexOutput)

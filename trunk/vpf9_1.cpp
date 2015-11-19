@@ -9,8 +9,7 @@
 ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Math routines implementation. ");
 
 Crasher::Crasher()
-{ this->theGlobalVariables=0;
-  this->flagFirstRun=true;
+{ this->flagFirstRun=true;
   this->CleanUpFunction=0;
 }
 
@@ -31,34 +30,33 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
   }
   ThisCodeHasntRunYet=false;
   this->theCrashReport << "<hr>This is a program crash";
-  if (this->theGlobalVariables!=0)
-    this->theCrashReport << " " << this->theGlobalVariables->GetElapsedSeconds() << " second(s) from the start. ";
-  else
-    this->theCrashReport << ". ";
-  if (this->theGlobalVariables!=0)
-    if (this->theGlobalVariables->userInputStringIfAvailable!="")
+  if (!theGlobalVariables.flagNotAllocated)
+    this->theCrashReport << " " << theGlobalVariables.GetElapsedSeconds() << " second(s) from the start";
+  this->theCrashReport << ". ";
+  if (!theGlobalVariables.flagNotAllocated)
+    if (theGlobalVariables.userInputStringIfAvailable!="")
       this->theCrashReport << " The user input that caused the crash was: <hr> "
-      << this->theGlobalVariables->userInputStringIfAvailable << "<hr>";
+      << theGlobalVariables.userInputStringIfAvailable << "<hr>";
   this->theCrashReport << Crasher::GetStackTraceEtcErrorMessage();
-  if (this->theGlobalVariables!=0)
-    if (this->theGlobalVariables->ProgressReportStringS.size>0)
+  if (!theGlobalVariables.flagNotAllocated)
+    if (theGlobalVariables.ProgressReportStringS.size>0)
     { this->theCrashReport << "<hr>In addition, I have an account of the computation progress report strings, attached below.<hr>";
-      for (int i=this->theGlobalVariables->ProgressReportStringS.size-1; i>=0; i--)
-        this->theCrashReport << this->theGlobalVariables->ProgressReportStringS[i] << "<br>";
+      for (int i=theGlobalVariables.ProgressReportStringS.size-1; i>=0; i--)
+        this->theCrashReport << theGlobalVariables.ProgressReportStringS[i] << "<br>";
     }
   if (stOutput.theOutputFunction!=0)
     std::cout << this->theCrashReport.str() << std::endl;
   stOutput << this->theCrashReport.str();
   stOutput.Flush();
-  if (this->theGlobalVariables!=0)
+  if (!theGlobalVariables.flagNotAllocated)
   { std::fstream theFile;
     bool succeededToOpen=FileOperations::OpenFileCreateIfNotPresent
-    (theFile, this->theGlobalVariables->PhysicalNameCrashLog, false, true, false);
+    (theFile, theGlobalVariables.PhysicalNameCrashLog, false, true, false);
     if (succeededToOpen)
-      stOutput << "<hr>Crash dumped in file " << this->theGlobalVariables->PhysicalNameCrashLog;
+      stOutput << "<hr>Crash dumped in file " << theGlobalVariables.PhysicalNameCrashLog;
     else
       stOutput << "<hr>Failed to create a crash report: check if folder exists and the "
-      << "executable has file permissions for file " << this->theGlobalVariables->PhysicalNameCrashLog << ".";
+      << "executable has file permissions for file " << theGlobalVariables.PhysicalNameCrashLog << ".";
     theFile << this->theCrashReport.str();
     theFile.close();
   }
@@ -74,13 +72,12 @@ std::string Crasher::GetStackTraceEtcErrorMessage()
 { std::stringstream out;
   out << "A partial stack trace follows (function calls not explicitly logged not included).";
   out << "<table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr>";
-  ProjectInformation& theInfo=ProjectInformation::GetMainProjectInfo();
-  for (int i=theInfo.CustomStackTrace.size-1; i>=0; i--)
+  for (int i=theGlobalVariables.CustomStackTrace.size-1; i>=0; i--)
   { out << "<tr><td>" << CGI::GetHtmlLinkFromProjectFileName
-    (theInfo.CustomStackTrace[i].fileName, "", theInfo.CustomStackTrace[i].line)
-    << "</td><td>" << theInfo.CustomStackTrace[i].line << "</td>";
-    if (theInfo.CustomStackTrace[i].functionName!="")
-      out << "<td>" << theInfo.CustomStackTrace[i].functionName << "</td>";
+    (theGlobalVariables.CustomStackTrace[i].fileName, "", theGlobalVariables.CustomStackTrace[i].line)
+    << "</td><td>" << theGlobalVariables.CustomStackTrace[i].line << "</td>";
+    if (theGlobalVariables.CustomStackTrace[i].functionName!="")
+      out << "<td>" << theGlobalVariables.CustomStackTrace[i].functionName << "</td>";
     out << "</tr>";
   }
   out << "</table>";
@@ -89,9 +86,8 @@ std::string Crasher::GetStackTraceEtcErrorMessage()
 
 std::string Crasher::GetStackTraceShort()
 { std::stringstream out;
-  ProjectInformation& theInfo=ProjectInformation::GetMainProjectInfo();
-  for (int i=theInfo.CustomStackTrace.size-1; i>=0; i--)
-    out << theInfo.CustomStackTrace[i].functionName << "\r\n";
+  for (int i=theGlobalVariables.CustomStackTrace.size-1; i>=0; i--)
+    out << theGlobalVariables.CustomStackTrace[i].functionName << "\r\n";
   return out.str();
 }
 
@@ -169,6 +165,56 @@ void GlobalVariables::initOutputReportAndCrashFileNames
   this->PhysicalNameCrashLog="../output/crash_"+ inputAbbreviated+".html";
   this->PhysicalNameProgressReport="../output/progressReport_"+ inputAbbreviated+".html";
   this->PhysicalNameOutpuT="../output/output_"+ inputAbbreviated+".html";
+}
+
+void FileInformation::AddProjectInfo(const std::string& fileName, const std::string& fileDescription)
+{ FileInformation theInfo;
+  theInfo.FileName=fileName;
+  theInfo.FileDescription=fileDescription;
+  if (theGlobalVariables.flagNotAllocated)
+  { std::cout << "The global variables are not allocated: this is the static initialization order fiasco at work! ";
+    assert(false);//cannot crash with mechanisms: nothing works yet!
+  }
+  theGlobalVariables.theSourceCodeFiles().AddOnTopNoRepetition(theInfo);
+}
+
+std::string GlobalVariables::ToStringSourceCodeInfo()
+{ std::stringstream out;
+  out << "<button " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator " << "(expand/collapse)</button>";
+  out << "<div id=\"sourceDetails\" style=\"display: none\">";
+  out << "<br>The calculator is a standalone application that can either be used "
+  << " as a web server (similarly to SAGE) or "
+  << " via an <a href=\"http://httpd.apache.org/\">Apache web server</a>. "
+  << "The standard way of running the calculator is as a stand-alone linux webserver. "
+  << "If you want to run the calculator through Apache, best is to contact the authors for instructions."
+  << "\nTo get the calculator as a stand-alone linux webserver do the following. "
+  << "\n "
+  << "\n<br>\n0) You need a Linux machine. Tested only on Ubuntu and OpenSUSE."
+  << " If you are interested in making the system run on Windows please write us an email. "
+  << "\n<br>\n1) Install subversion. On Ubuntu the command is as follows.  <br>sudo apt-get install subversion"
+  << "\n<br>\n2) Install g++ (the minimum for compiling c++ programs). "
+  << "On Ubuntu the command is the following.  <br>sudo apt-get install g++"
+  << "\n<br>\n3) Checkout the calculator project. The command is as follows.<br>"
+  << "svn checkout svn://svn.code.sf.net/p/vectorpartition/code/trunk vectorpartition-code"
+  << "<br> The command fetches the latest source code from sourceforge."
+  << "\n<br>\n4) Navigate to the newly created vectorpartition-code folder.  "
+  << "\n<br>\n5) Type the following command. <br>make <br>Wait until the command is completed (takes about 4 minutes on my machine). "
+  << "The installation is now complete. To run the calculator, see the next two points."
+  << "\n<br>\n6) Through the command-line, navigate to the following directory. <br>vectorpartition-code/Debug/ "
+  << "\n<br>\n7) Type the following command. Make sure to include the dot.  <br>./calculator server"
+  << "\n<br>\n8) The calculator will display a message saying on which port it got bound. "
+  << "The default port is 8080. Type the address:  <br>localhost:8080/vectorpartition/cgi-bin/calculator<br>"
+  << " in your web browser to get to the calculator. If the calculator doesn't succeed in binding to port 8080"
+  << " (say, the port is already taken) it may bind to ports 8081 or 8082. In that case replace "
+  << " the 8080 in the address above with the port number reported by the calculator. ";
+  out << "<hr>" << this->theSourceCodeFiles().size << " files total. ";
+  out << "<br>svn checkout command:<br>svn checkout svn://svn.code.sf.net/p/vectorpartition/code/trunk vectorpartition-code";
+  for (int i=0; i<this->theSourceCodeFiles().size; i++)
+  { out << " <br>\n";
+    out << CGI::GetHtmlLinkFromProjectFileName(this->theSourceCodeFiles()[i].FileName, this->theSourceCodeFiles()[i].FileDescription);
+  }
+  out << "</div>";
+  return out.str();
 }
 
 template<>

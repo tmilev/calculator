@@ -30,7 +30,6 @@ void InitializeGlobalObjects()
   theGlobalVariables.SetCallSystem(&CallSystemWrapper);
   theGlobalVariables.SetCallChDir(&CallChDirWrapper);
 
-  crash.theGlobalVariables=&theGlobalVariables;
   //stOutput << "address of get elapsed seconds: " << (int) &GetElapsedTimeInSeconds;
   //Change the below line to modify the computation time of the calculator.
   consoleFormat.flagUseHTML = false;

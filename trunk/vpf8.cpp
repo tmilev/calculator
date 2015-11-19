@@ -408,8 +408,7 @@ void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& o
   unsigned long long totalCycles=0;
   if (doProgressReporT)
   { totalCycles=((unsigned long long) this->theDigits.size)* ((unsigned long long) x.theDigits.size);
-    if (totalCycles>2000)
-      doProgressReporT=true;
+    doProgressReporT=totalCycles>2000;
   }
   if (doProgressReporT)
   { std::stringstream reportStream;

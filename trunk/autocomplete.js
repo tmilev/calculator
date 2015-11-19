@@ -99,8 +99,7 @@ function getLastWord()
     else
       theLastWord+=theText.value[i];
   DebugCounter++;
-  autocompleteDebugWindow.innerHTML=theLastWord+ "<br>cursorPosition="+ cursorPosition
-+ "<br>theText.selectionEnd=" +theText.selectionEnd+  "theText.selectionStart="+theText.selectionStart+ "<br>DebugCounter="+DebugCounter;
+//  autocompleteDebugWindow.innerHTML=theLastWord+ "<br>cursorPosition="+ cursorPosition+ "<br>theText.selectionEnd=" +theText.selectionEnd+  "theText.selectionStart="+theText.selectionStart+ "<br>DebugCounter="+DebugCounter;
 }
 
 function clearAutocompleteTab()

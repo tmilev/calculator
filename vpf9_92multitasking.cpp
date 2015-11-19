@@ -168,16 +168,7 @@ GlobalVariables::~GlobalVariables()
 }
 
 void ThreadData::RegisterCurrentThread(const std::string& inputName)
-{ int threadID=ThreadData::getCurrentThreadId(inputName);
-  ListReferences<ThreadData>& theThreads=theGlobalVariables.theThreadData;
-  for (int i=0; i<theThreads.size; i++)
-    if (threadID==theThreads[i].index)
-      return;
-  MutexLockGuard theLock(theGlobalVariables.MutexRegisterNewThread);
-  theThreads.SetSize(theThreads.size+1);
-  ThreadData& currentThread=theThreads.LastObject();
-  currentThread.index=threadID;
-  currentThread.name=inputName;
+{ ThreadData::getCurrentThreadId(inputName);
 }
 
 void ThreadData::CreateThread(void (*InputFunction)())
@@ -190,24 +181,42 @@ void ThreadData::CreateThread(void (*InputFunction)())
 int ThreadData::getCurrentThreadId(const std::string& inputName)
 { std::thread::id currentId= std::this_thread::get_id();
   int result=-1;
-  for (int i=0; i<theGlobalVariables.theThreadData.size; i++)
-    if (currentId== theGlobalVariables.theThreadData[i].theId)
+  ListReferences<ThreadData>& theThreadData=theGlobalVariables.theThreadData;
+  for (int i=0; i<theThreadData.size; i++)
+    if (currentId== theThreadData[i].theId)
     { result=i;
       break;
     }
   if (result==-1)
   { MutexLockGuard theLock(theGlobalVariables.MutexRegisterNewThread);
-    result=theGlobalVariables.theThreadData.size;
+    result=theThreadData.size;
     ThreadData newThreadData;
     newThreadData.name=inputName;
     newThreadData.index=result;
     newThreadData.theId=currentId;
-    theGlobalVariables.theThreadData.AddOnTop(newThreadData);
+    theThreadData.AddOnTop(newThreadData);
+    theGlobalVariables.CustomStackTrace.Reserve(2);
+    theGlobalVariables.ProgressReportStringS.Reserve(2);
+    theGlobalVariables.CustomStackTrace.SetSize(theThreadData.size);
+    theGlobalVariables.ProgressReportStringS.SetSize(theThreadData.size);
+    theGlobalVariables.CustomStackTrace.LastObject().Reserve(30);
+    theGlobalVariables.ProgressReportStringS.LastObject().Reserve(30);
   }
   return result;
 }
 
-std::string ThreadData::ToString()const
+std::string ThreadData::ToStringHtml()const
+{ std::stringstream out;
+  out << "Thread <span style=\"color:#FF0000\">";
+  if (this->name=="")
+    out << "(thread name not set)";
+  else
+    out << this->name;
+  out << "</span>. Index: " << this->index << ", id: " <<  this->theId << ".";
+  return out.str();
+}
+
+std::string ThreadData::ToStringConsole()const
 { std::stringstream out;
   out << "Thread ";
   if (this->name=="")
@@ -218,10 +227,19 @@ std::string ThreadData::ToString()const
   return out.str();
 }
 
-std::string ThreadData::ToStringAllThreads()
+std::string ThreadData::ToStringAllThreadsHtml()
 { std::stringstream out;
   out << theGlobalVariables.theThreadData.size << " threads registered. <br> " << theGlobalVariables.theThreads.size << " total threads.<br>";
   for (int i=0; i<theGlobalVariables.theThreadData.size; i++)
-    out << theGlobalVariables.theThreadData[i].ToString() << "<br>";
+    out << theGlobalVariables.theThreadData[i].ToStringHtml() << "<br>";
+  return out.str();
+}
+
+std::string ThreadData::ToStringAllThreadsConsole()
+{ std::stringstream out;
+  out << theGlobalVariables.theThreadData.size << " threads registered. "
+  << theGlobalVariables.theThreads.size << " total threads.\n";
+  for (int i=0; i<theGlobalVariables.theThreadData.size; i++)
+    out << theGlobalVariables.theThreadData[i].ToStringConsole() << "\n";
   return out.str();
 }

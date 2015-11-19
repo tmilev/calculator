@@ -15,11 +15,13 @@ public:
   std::thread::id theId;
   int index;
   std::string name;
-  std::string ToString()const;
+  std::string ToStringHtml()const;
+  std::string ToStringConsole()const;
   static int getCurrentThreadId(const std::string& inputName="");
   static void RegisterCurrentThread(const std::string& inputName="");
   static void CreateThread(void (*InputFunction)());
-  static std::string ToStringAllThreads();
+  static std::string ToStringAllThreadsHtml();
+  static std::string ToStringAllThreadsConsole();
   ThreadData();
   ~ThreadData();
 };
@@ -83,12 +85,11 @@ public:
   bool flagReportGaussianElimination;
   bool flagReportProductsMonomialAlgebras;
 
-  int progressReportStringsRegistered;
-  List<stackInfo> CustomStackTrace;
   MutexRecursiveWrapper infoIsInitialized;
   ListReferences<std::thread>theThreads;
   ListReferences<ThreadData> theThreadData;
-  List<std::string> ProgressReportStringS;
+  ListReferences<List<stackInfo> > CustomStackTrace;
+  ListReferences<List<std::string> > ProgressReportStringS;
   Controller theLocalPauseController;
 
   static const std::string hopefullyPermanentWebAdressOfServerExecutable;
@@ -179,11 +180,20 @@ public:
   }
   std::string ToStringSourceCodeInfo();
   std::string ToStringFolderInfo()const;
+  std::string ToStringProgressReportHtml();
+  std::string ToStringProgressReportConsole();
   inline void MakeReport(const std::string& input)
   { if (this->IndicatorStringOutputFunction!=0)
       this->IndicatorStringOutputFunction(input);
   }
-  void MakeReport();
+  void MakeReport()
+  { if (this->IndicatorStringOutputFunction!=0)
+      this->MakeReport(this->ToStringProgressReportHtml());
+  }
+  void MakeReportConsole()
+  { if (this->IndicatorStringOutputFunction!=0)
+      this->MakeReport(this->ToStringProgressReportConsole());
+  }
   /// @endcond
 };
 //extern GlobalVariables theGlobalVariables;

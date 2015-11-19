@@ -92,8 +92,6 @@ GlobalVariables::GlobalVariables()
   this->flagAllowUseOfThreadsAndMutexes=false;
   this->flagComputationCompletE=false;
   this->flagComputationFinishedAllOutputSentClosing=false;
-  this->progressReportStringsRegistered=0;
-  this->CustomStackTrace.Reserve(30);
   //  this->flagLogInterProcessCommunication=true;
   //  stOutput << "Global variables created!";
 }
@@ -105,24 +103,20 @@ HashedList<FileInformation>& GlobalVariables::theSourceCodeFiles()
 }
 
 void ProgressReport::Report(const std::string& theReport)
-{ MutexLockGuard theLock(theGlobalVariables.MutexProgressReporting);
-  if (theGlobalVariables.ProgressReportStringS.size>this->currentLevel)
-  { theGlobalVariables.ProgressReportStringS[this->currentLevel]=theReport;
+{ if (theGlobalVariables.ProgressReportStringS.size>this->currentLevel)
+  { theGlobalVariables.ProgressReportStringS[this->threadIndex][this->currentLevel]=theReport;
     theGlobalVariables.MakeReport();
   }
 }
 
 void ProgressReport::init()
-{ this->flagProgReportStringsExpanded=true;
-  MutexLockGuard theLock(theGlobalVariables.MutexProgressReporting);
-  theGlobalVariables.progressReportStringsRegistered++;
-  this->currentLevel=theGlobalVariables.ProgressReportStringS.size;
-  theGlobalVariables.ProgressReportStringS.AddOnTop("");
+{ this->threadIndex=ThreadData::getCurrentThreadId();
+  this->currentLevel=theGlobalVariables.ProgressReportStringS[this->threadIndex].size;
+  theGlobalVariables.ProgressReportStringS[this->threadIndex].AddOnTop((std::string)"");
 }
 
 ProgressReport::~ProgressReport()
-{ theGlobalVariables.progressReportStringsRegistered--;
-  theGlobalVariables.ProgressReportStringS.size--;
+{ theGlobalVariables.ProgressReportStringS[this->threadIndex].size--;
 }
 
 ProjectInformationInstance::ProjectInformationInstance(const char* fileName, const std::string& fileDescription)
@@ -130,8 +124,9 @@ ProjectInformationInstance::ProjectInformationInstance(const char* fileName, con
 }
 
 RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const std::string& functionName)
-{ MutexLockGuard theLock(theGlobalVariables.MutexRegisterFunctionStaticFiasco);
-  List<stackInfo>& theStack=theGlobalVariables.CustomStackTrace;
+{ this->threadIndex= ThreadData::getCurrentThreadId();
+
+  List<stackInfo>& theStack=theGlobalVariables.CustomStackTrace[this->threadIndex];
   theStack.SetSize(theStack.size+1);
   stackInfo& stackTop=*theStack.LastObject();
   stackTop.fileName=fileName;
@@ -140,8 +135,7 @@ RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const
 }
 
 RegisterFunctionCall::~RegisterFunctionCall()
-{ MutexLockGuard theLock(theGlobalVariables.MutexRegisterFunctionStaticFiasco);
-  theGlobalVariables.CustomStackTrace.size--;
+{ theGlobalVariables.CustomStackTrace[this->threadIndex].size--;
 }
 
 int DrawingVariables::GetColorFromChamberIndex(int index, std::fstream* LaTexOutput)

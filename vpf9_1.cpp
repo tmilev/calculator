@@ -40,9 +40,8 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
   this->theCrashReport << Crasher::GetStackTraceEtcErrorMessage();
   if (!theGlobalVariables.flagNotAllocated)
     if (theGlobalVariables.ProgressReportStringS.size>0)
-    { this->theCrashReport << "<hr>In addition, I have an account of the computation progress report strings, attached below.<hr>";
-      for (int i=theGlobalVariables.ProgressReportStringS.size-1; i>=0; i--)
-        this->theCrashReport << theGlobalVariables.ProgressReportStringS[i] << "<br>";
+    { this->theCrashReport << "<hr>In addition, I have an account of the computation progress report strings, attached below.<hr>"
+      << theGlobalVariables.ToStringProgressReportHtml();
     }
   if (stOutput.theOutputFunction!=0)
     std::cout << this->theCrashReport.str() << std::endl;
@@ -71,23 +70,48 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
 std::string Crasher::GetStackTraceEtcErrorMessage()
 { std::stringstream out;
   out << "A partial stack trace follows (function calls not explicitly logged not included).";
-  out << "<table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr>";
-  for (int i=theGlobalVariables.CustomStackTrace.size-1; i>=0; i--)
-  { out << "<tr><td>" << CGI::GetHtmlLinkFromProjectFileName
-    (theGlobalVariables.CustomStackTrace[i].fileName, "", theGlobalVariables.CustomStackTrace[i].line)
-    << "</td><td>" << theGlobalVariables.CustomStackTrace[i].line << "</td>";
-    if (theGlobalVariables.CustomStackTrace[i].functionName!="")
-      out << "<td>" << theGlobalVariables.CustomStackTrace[i].functionName << "</td>";
-    out << "</tr>";
+  out << "<table><tr>";
+  for (int threadCounter=0; threadCounter<theGlobalVariables.CustomStackTrace.size; threadCounter++)
+  { if (threadCounter>= theGlobalVariables.theThreadData.size)
+    { out << "<td><b>WARNING: the stack trace reports " << theGlobalVariables.CustomStackTrace.size
+      <<  " threads but the thread data array has record of only " << theGlobalVariables.theThreadData.size
+      << " threads. " << "</b></td>";
+      break;
+    }
+    out << "<td>" << theGlobalVariables.theThreadData[threadCounter].ToStringHtml() << "</td>";
   }
-  out << "</table>";
+  out << "</tr> <tr>";
+  for (int threadCounter=0; threadCounter<theGlobalVariables.CustomStackTrace.size; threadCounter++)
+  { if (threadCounter>= theGlobalVariables.theThreadData.size)
+      break;
+    List<stackInfo>& currentInfo=theGlobalVariables.CustomStackTrace[threadCounter];
+    out << "<td> <table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr>";
+    for (int i=currentInfo.size-1; i>=0; i--)
+    { out << "<tr><td>" << CGI::GetHtmlLinkFromProjectFileName(currentInfo[i].fileName, "", currentInfo[i].line)
+      << "</td><td>" << currentInfo[i].line << "</td>";
+      if (currentInfo[i].functionName!="")
+        out << "<td>" << currentInfo[i].functionName << "</td>";
+      out << "</tr>";
+    }
+    out << "</table></td>";
+  }
+  out << "</tr></table>";
   return out.str();
 }
 
 std::string Crasher::GetStackTraceShort()
 { std::stringstream out;
-  for (int i=theGlobalVariables.CustomStackTrace.size-1; i>=0; i--)
-    out << theGlobalVariables.CustomStackTrace[i].functionName << "\r\n";
+  for (int threadCounter=0; threadCounter<theGlobalVariables.CustomStackTrace.size; threadCounter++)
+  { if (threadCounter>= theGlobalVariables.theThreadData.size)
+    { out << "WARNING: stack trace reports " << theGlobalVariables.CustomStackTrace.size << " threads "
+      << "while I have only " << theGlobalVariables.theThreadData.size << " registered threads. ";
+      break;
+    }
+    out << "********************\r\nThread index " << threadCounter << ": \r\n";
+    List<stackInfo>& currentInfo=theGlobalVariables.CustomStackTrace[threadCounter];
+    for (int i=currentInfo.size-1; i>=0; i--)
+      out << currentInfo[i].functionName << "\r\n";
+  }
   return out.str();
 }
 
@@ -103,14 +127,27 @@ std::string GlobalVariables::ToStringFolderInfo()const
   return out.str();
 }
 
-void GlobalVariables::MakeReport()
-{ MacroRegisterFunctionWithName("GlobalVariables::MakeReport");
-  if (this->IndicatorStringOutputFunction==0)
-    return;
+std::string GlobalVariables::ToStringProgressReportHtml()
+{ MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportHtml");
   std::stringstream reportStream;
-  for (int i=0; i<this->ProgressReportStringS.size; i++)
-    reportStream << "\n<div id=\"divProgressReport" << i << "\">" << this->ProgressReportStringS[i] << "\n</div>";
-  this->IndicatorStringOutputFunction(reportStream.str());
+  for (int threadIndex=0; threadIndex<this->ProgressReportStringS.size; threadIndex++)
+  { reportStream << "<b>" << this->theThreadData[threadIndex].ToStringHtml() << "</b><br>";
+    for (int i=0; i<this->ProgressReportStringS[threadIndex].size; i++)
+      reportStream << "\n<div id=\"divProgressReport" << i << "\">"
+      << this->ProgressReportStringS[threadIndex][i] << "\n</div>";
+  }
+  return reportStream.str();
+}
+
+std::string GlobalVariables::ToStringProgressReportConsole()
+{ MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportConsole");
+  std::stringstream reportStream;
+  for (int threadIndex=0; threadIndex<this->ProgressReportStringS.size; threadIndex++)
+  { reportStream << this->theThreadData[threadIndex].ToStringConsole();
+    for (int i=0; i<this->ProgressReportStringS[threadIndex].size; i++)
+      reportStream << this->ProgressReportStringS[threadIndex][i];
+  }
+  return reportStream.str();
 }
 
 void GlobalVariables::initDefaultFolderAndFileNames

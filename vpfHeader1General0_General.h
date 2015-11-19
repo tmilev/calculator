@@ -137,6 +137,7 @@ class Expression;
 //stack trace log.
 class RegisterFunctionCall
 { public:
+  int threadIndex;
   RegisterFunctionCall(const char* fileName, int line, const std::string& functionName="");
   ~RegisterFunctionCall();
 };
@@ -1664,7 +1665,7 @@ class ProgressReport
 {
 public:
   int currentLevel;
-  bool flagProgReportStringsExpanded;
+  int threadIndex;
   void Report(const std::string& theReport);
   void init();
   ProgressReport()

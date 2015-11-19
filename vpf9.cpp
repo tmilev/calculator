@@ -103,7 +103,7 @@ HashedList<FileInformation>& GlobalVariables::theSourceCodeFiles()
 }
 
 void ProgressReport::Report(const std::string& theReport)
-{ if (theGlobalVariables.ProgressReportStringS.size>this->currentLevel)
+{ if (theGlobalVariables.ProgressReportStringS[this->threadIndex].size>this->currentLevel)
   { theGlobalVariables.ProgressReportStringS[this->threadIndex][this->currentLevel]=theReport;
     theGlobalVariables.MakeReport();
   }

@@ -2073,6 +2073,7 @@ std::string Calculator::ToString()
     out2 << "<br>Number large integer multiplications: " << Rational::TotalLargeMultiplications << " (# calls LargeIntUnsigned::MultiplyBy)";
   if (Rational::TotalLargeGCDcalls>0)
     out2 << "<br>Number large number gcd calls: " << Rational::TotalLargeGCDcalls << " (# calls LargeIntUnsigned::gcd)";
+  out2 << ThreadData::ToStringAllThreads();
   #endif
   if (this->RuleStack.children.size>0)
   { out2 << "<hr><b>Predefined rules.</b><br>";

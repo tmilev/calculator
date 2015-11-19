@@ -1011,9 +1011,9 @@ int WebWorker::ProcessUnknown()
 int WebWorker::OutputWeb()
 { MacroRegisterFunctionWithName("WebServer::OutputWeb");
   WebWorker::OutputBeforeComputation();
-  stOutput << "Thread data follows.<br> " << ThreadData::ToStringAllThreads();
+  //stOutput << "Thread data follows.<br> " << ThreadData::ToStringAllThreads();
   theWebServer.CheckExecutableVersionAndRestartIfNeeded();
-  stOutput << theParser.javaScriptDisplayingIndicator;
+  //stOutput << theParser.javaScriptDisplayingIndicator;
   //theParser.inputString="TestCalculatorIndicator 0";
   //theParser.inputString="printSemisimpleSubalgebrasRecompute(B_3)";
   ProgressReportWebServer theReport;

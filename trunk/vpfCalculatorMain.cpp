@@ -13,6 +13,7 @@ int main_command_input(int argc, char **argv);
 int main(int argc, char **argv)
 { //theGlobalVariables.InitializeThreadData();
   ThreadData::RegisterCurrentThread("main thread");
+  theGlobalVariables.theThreads.SetSize(1);
   //for (int i=0; i<argc; i++)
   //  std::cout << "argument " << i << ": " << argv[i] << "\n";
   MacroRegisterFunctionWithName("main");

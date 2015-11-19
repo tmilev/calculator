@@ -3066,18 +3066,20 @@ void rootSubalgebras::MakeProgressReportAutomorphisms(SubgroupWeylGroupOLD& theS
 void rootSubalgebras::GenerateActionKintersectBIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
 { Selection emptySel;
   emptySel.init(theRootSA.SimpleBasisCentralizerRoots.size);
-  this->ComputeNormalizerOfCentralizerIntersectNilradical(theGlobalVariables.subGroupActionNormalizerCentralizer.GetElement(), emptySel, theRootSA, theGlobalVariables);
+  SubgroupWeylGroupOLD tempGroup;
+  this->ComputeNormalizerOfCentralizerIntersectNilradical(tempGroup, emptySel, theRootSA, theGlobalVariables);
 }
 
 void rootSubalgebras::GenerateKintersectBOuterIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
 { Selection fullSel;
   fullSel.init(theRootSA.SimpleBasisCentralizerRoots.size);
   fullSel.incrementSelectionFixedCardinality(theRootSA.SimpleBasisCentralizerRoots.size);
-  this->ComputeNormalizerOfCentralizerIntersectNilradical(theGlobalVariables.subGroupActionNormalizerCentralizer.GetElement(), fullSel, theRootSA, theGlobalVariables);
+  SubgroupWeylGroupOLD tempGroup;
+  this->ComputeNormalizerOfCentralizerIntersectNilradical(tempGroup, fullSel, theRootSA, theGlobalVariables);
 }
 
 void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
-{ SubgroupWeylGroupOLD& theSubgroup=theGlobalVariables.subGroupActionNormalizerCentralizer.GetElement();
+{ SubgroupWeylGroupOLD theSubgroup;
   this->ComputeNormalizerOfCentralizerIntersectNilradical(theSubgroup, SelectedBasisRoots, theRootSA, theGlobalVariables);
   this->ActionsNormalizerCentralizerNilradical.SetSize(theSubgroup.size-1);
   Vector<Rational> tempRoot;

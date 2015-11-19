@@ -5,11 +5,8 @@
 #include "vpfHeader6WebServer.h"
 #include "vpfHeader3Calculator0_Interface.h"
 #include "vpfHeader1General4General_Logging_GlobalVariables.h"
-#include <thread>
 ProjectInformationInstance projectInfoInstanceCalculatorGlobal(__FILE__, "Global objects");
 
-ListReferences<std::thread> theThreads; //<-must be declared before global variables, d-tor of global vars uses it.
-ListReferences<std::thread::id> theThreadIds; //<-must be declared before global variables, d-tor of global vars uses it.
 GlobalVariables theGlobalVariables;
 logger theLog( "./../output/LogStandard.html");
 logger logBlock( "./../output/LogBlockingEvents.html");

@@ -5089,15 +5089,6 @@ void WeylGroup::ComputeRho(bool Recompute)
   this->flagFundamentalToSimpleMatricesAreComputed=false;
 }
 
-void SubgroupWeylGroupOLD::operator=(const SubgroupWeylGroupOLD& other)
-{ this->::HashedList<ElementWeylGroup<WeylGroup>>::operator=(other);
-  this->simpleGenerators=(other.simpleGenerators);
-  this->ExternalAutomorphisms=(other.ExternalAutomorphisms);
-  this->AmbientWeyl=(other.AmbientWeyl);
-  this->RootSubsystem=other.RootSubsystem;
-  this->RootsOfBorel=other.RootsOfBorel;
-}
-
 std::string SubgroupWeylGroupOLD::ElementToStringFromLayersAndArrows(List<List<List<int> > >& arrows, List<List<int> >& Layers, int GraphWidth, bool useAmbientIndices)
 { std::stringstream out;
 //  stOutput << this->simpleGenerators.ToString();

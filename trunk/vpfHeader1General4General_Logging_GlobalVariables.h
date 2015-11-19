@@ -4,14 +4,42 @@
 #define vpfHeaderLoggingGlobalVars_already_defined
 #include "vpfHeader1General0_General.h"
 #include "vpfHeader1General1_ListReferences.h"
-
+#include <thread>
 
 static ProjectInformationInstance projectInfoHeaderLoggingRoutines
 (__FILE__, "Logging routines, global variables. ");
 
+class ThreadData
+{
+public:
+  std::thread::id theId;
+  int index;
+  std::string name;
+  std::string ToString()const;
+  static int getCurrentThreadId();
+  static void RegisterCurrentThread(const std::string& inputName="");
+  static void CreateThread(void (*InputFunction)());
+  static std::string ToStringAllThreads();
+  ThreadData();
+  ~ThreadData();
+};
+
 class GlobalVariables
 {
-  //I love doxygen!
+  //Warning: please pay attention to the static initialization order fiasco.
+  //The fiasco states that global objects (allocated before main)
+  //may be allocated in an unexpected order.
+  //In particular an object allocated before main cannot assume that the constructor of theGlobalVariables
+  //object has already been called.
+  //In particular one should avoid declaring objects at global scope as
+  //the constructors of those may rely on the theGlobalVariables object.
+  //A possible "horror" scenario: the programmer decides to register a stack trace
+  //in the constructor of an object. That runs just fine. One year later, the programmer decides to
+  //declare a global object of that type, and again everything runs just fine as theGlobalVariables
+  //happens to be initialized before that object.
+  //Finally, two years later, the same programmer decides to declare a global object of the same type in
+  //a file being compiled before the declaration of theGlobalVariables. This causes a nasty and difficult to catch
+  //crash before main.
   /// @cond
 private:
   double (*getElapsedTimePrivate)();
@@ -58,6 +86,7 @@ public:
   int progressReportStringsRegistered;
   List<stackInfo> CustomStackTrace;
   MutexRecursiveWrapper infoIsInitialized;
+  ListReferences<std::thread>theThreads;
   ListReferences<ThreadData> theThreadData;
   List<std::string> ProgressReportStringS;
   Controller theLocalPauseController;
@@ -107,12 +136,10 @@ public:
 
 
   MemorySaving<DynkinDiagramRootSubalgebra > dynGetEpsCoords;
-
-  MemorySaving<SubgroupWeylGroupOLD> subGroupActionNormalizerCentralizer;
-
   MemorySaving<GroebnerBasisComputation<Rational> > theGroebnerBasisComputation;
 
   GlobalVariables();
+  ~GlobalVariables();
   static HashedList<FileInformation>& theSourceCodeFiles();
   void SetTimerFunction(double (*timerFunction)())
   { this->getElapsedTimePrivate=timerFunction;

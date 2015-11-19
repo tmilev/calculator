@@ -403,11 +403,10 @@ void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& o
   for(int i=0; i<output.theDigits.size; i++)
     output.theDigits[i]=0;
   unsigned long long numCycles=0;
-  bool doProgressReporT=false;
-  ProgressReport theReport1(&theGlobalVariables);
-  ProgressReport theReport2(&theGlobalVariables);
+  bool doProgressReporT=theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportLargeIntArithmetic;
+  ProgressReport theReport1, theReport2;
   unsigned long long totalCycles=0;
-  if (theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportLargeIntArithmetic)
+  if (doProgressReporT)
   { totalCycles=((unsigned long long) this->theDigits.size)* ((unsigned long long) x.theDigits.size);
     if (totalCycles>2000)
       doProgressReporT=true;
@@ -426,7 +425,7 @@ void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& o
     }
     reportStream << "<br>Large integer multiplication: product of integers:<br>" << thisString
     << "<br>" << otherString;
-    theReport2.Report(reportStream.str());
+    theReport1.Report(reportStream.str());
   }
   for (int i=0; i<this->theDigits.size; i++)
     for(int j=0; j<x.theDigits.size; j++)
@@ -448,7 +447,7 @@ void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& o
             out << "<br>Crunching " << numCycles << " out of " << totalCycles
             << " pairs of digits = " << this->theDigits.size << " x " << x.theDigits.size
             << " digits (base " << LargeIntUnsigned::CarryOverBound << ").";
-          theReport1.Report(out.str());
+          theReport2.Report(out.str());
         }
       }
     }

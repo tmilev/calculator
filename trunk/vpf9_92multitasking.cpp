@@ -160,11 +160,11 @@ ThreadData::~ThreadData()
 }
 
 GlobalVariables::~GlobalVariables()
-{ double startTime=this->GetElapsedSeconds();
-  logBlock << logger::yellow << "joining threads ..." << logger::endL;
+{ //double startTime=this->GetElapsedSeconds();
+//  logBlock << logger::yellow << "joining threads ..." << logger::endL;
   for (int i=1; i<this->theThreads.size; i++)
     this->theThreads[i].join();
-  logBlock << logger::yellow << " done in " << logger::green << this->GetElapsedSeconds()-startTime << " seconds. " << logger::endL;
+//  logBlock << logger::yellow << " done in " << logger::green << this->GetElapsedSeconds()-startTime << " seconds. " << logger::endL;
 }
 
 void ThreadData::RegisterCurrentThread(const std::string& inputName)

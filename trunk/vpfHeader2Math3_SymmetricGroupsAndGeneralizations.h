@@ -205,6 +205,9 @@ public:
   // after i find out why it was put last this time
   static void Conjugate(const PermutationR2& conjugateMe, const PermutationR2& conjugateBy, PermutationR2& out);
 
+  // Should this be operator*(), operator()(), or just ActOn()?
+  // I vote operator()() for an action, but I chose operator*() for some reason
+  // and thanks to the nature of operator overloading, it's too late to change
   PermutationR2 operator*(const PermutationR2& right) const;
 
   static bool AreConjugate(const PermutationR2& x, const PermutationR2& y);
@@ -219,9 +222,29 @@ public:
 
   void GetWordjjPlus1(List<int>& word) const;
 
+  template <typename coefficient>
+  void GetCharacteristicPolyStandardRepresentation(Polynomial<coefficient>& out)
+  { Matrix<coefficient> M;
+    int n = this->BiggestOccurringNumber()+1;
+    M.MakeZeroMatrix(n);
+    for(int i=0; i<n; i++)
+      M(i,(*this)*i) = 1;
+    out.AssignCharPoly(M);
+  }
+
+  bool HasDifferentConjugacyInvariantsFrom(PermutationR2& other)
+  { List<int> a,b;
+    this->GetCycleStructure(a);
+    other.GetCycleStructure(b);
+    return !(a==b);
+  }
+
+  // this is strictly for sorting purposes, of course
+  bool operator>(const PermutationR2& other) const { return this->cycles > other.cycles;}
+
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
-  std::string ToString() const;
+  std::string ToString(FormatExpressions* unused=0) const;
   friend std::ostream& operator<<(std::ostream& out, const PermutationR2& data)
   { return data.IntoStream(out);
   }
@@ -248,6 +271,8 @@ class ElementHyperoctahedralGroup
 
   void MakeFromPermutation(const PermutationR2& in);
   void MakeFromBits(const List<bool>& in);
+  void AddTransposition(int i, int j);
+  void ToggleBit(int i);
   void MakeFromMul(const ElementHyperoctahedralGroup& left, const ElementHyperoctahedralGroup& right);
   // for compatibility with element classes that need a prototype to be able to
   // turn themselves into the identity element
@@ -712,8 +737,9 @@ class ElementFiniteGroup
 // for being an element than FiniteGroup
 // the reason so few methods are const is that there should ideally be very few SimpleFiniteGroup's and they
 // should constantly be updating their state with calculations
+/*
 template <typename elementSomeGroup>
-class SimpleFiniteGroup
+class FiniteGroup
 { public:
   List<elementSomeGroup> generators;
   HashedList<elementSomeGroup> theElements;
@@ -728,9 +754,9 @@ class SimpleFiniteGroup
   List<List<int> > theWords;
   bool haveWords;
 
-  List<GroupRepresentation<SimpleFiniteGroup<elementSomeGroup>, Rational> > irreps;
+  List<GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational> > irreps;
 
-  SimpleFiniteGroup()
+  FiniteGroup()
   { this->AreConjugateByFormula=0;
     this->ComputeCCSizesAndRepresentativesByFormula=0;
     this->GetWordByFormula=0;
@@ -767,12 +793,13 @@ class SimpleFiniteGroup
   somestream& IntoStream(somestream& out) const;
   std::string ToString() const;
 };
+*/
 
-class PermutationGroup: public SimpleFiniteGroup<PermutationR2>
+class PermutationGroup: public FiniteGroup<PermutationR2>
 { public:
-  bool isSymmetricGroup ;
-  bool hasGenerators1j ;
-  bool hasGeneratorsjjPlus1 ;
+  bool flagIsSymmetricGroup ;
+  bool flagHasGenerators1j ;
+  bool flagHasGeneratorsjjPlus1 ;
 
   void MakeSymmetricGroup(int n);
   void MakeSymmetricGroupGeneratorsjjPlus1(int n);
@@ -784,12 +811,12 @@ class PermutationGroup: public SimpleFiniteGroup<PermutationR2>
   static void GetWordjjPlus1Implementation(void* G, const PermutationR2& g, List<int>& word);
 
   PermutationGroup()
-  { this->isSymmetricGroup=false;
-    this->hasGenerators1j=false;
-    this->hasGeneratorsjjPlus1=false;
+  { this->flagIsSymmetricGroup=false;
+    this->flagHasGenerators1j=false;
+    this->flagHasGeneratorsjjPlus1=false;
   }
   template <typename coefficient>
-  void SpechtModuleOfPartition(const Partition& p, GroupRepresentation<SimpleFiniteGroup<PermutationR2>, coefficient>& rep);
+  void SpechtModuleOfPartition(const Partition& p, GroupRepresentation<FiniteGroup<PermutationR2>, coefficient>& rep);
   template <typename somestream>
   somestream& IntoStream(somestream& out);
   std::string ToString();
@@ -799,7 +826,7 @@ class PermutationGroup: public SimpleFiniteGroup<PermutationR2>
 };
 
 // the int N field may or may not be meaningful
-class HyperoctahedralGroup: public SimpleFiniteGroup<ElementHyperoctahedralGroup>
+class HyperoctahedralGroup: public FiniteGroup<ElementHyperoctahedralGroup>
 { public:
   bool isEntireHyperoctahedralGroup;
   bool isEntireDn ;
@@ -811,6 +838,7 @@ class HyperoctahedralGroup: public SimpleFiniteGroup<ElementHyperoctahedralGroup
     this->N=-1;
   }
   void MakeHyperoctahedralGroup(int n);
+  void MakeBn(int n);
 
   static void ComputeCCSizesAndRepresentativesByFormulaImplementation(void* G);
   static void GetWordByFormulaImplementation(void* G, const ElementHyperoctahedralGroup& element, List<int>& word);
@@ -822,8 +850,10 @@ class HyperoctahedralGroup: public SimpleFiniteGroup<ElementHyperoctahedralGroup
 
   void AllSpechtModules();
   void SpechtModuleOfPartititons(const Partition& positive, const Partition& negative,
-                                 GroupRepresentation<SimpleFiniteGroup<ElementHyperoctahedralGroup>, Rational> &out,
-                                 PermutationGroup* subsn = NULL);
+                               GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroup>, Rational> &out);
+  void SomeModuleOfPartititons(const Partition& positive, const Partition& negative,
+                               GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroup>, Rational> &out,
+                               Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>* subsn);
 
 
   template <typename somestream>
@@ -993,12 +1023,12 @@ void PermutationR2::ActOnTensor(ElementMonomialAlgebra<MonomialTensor<int,MathRo
 }
 
 template <typename elementSomeGroup>
-bool SimpleFiniteGroup<elementSomeGroup>::PossiblyConjugate(const elementSomeGroup& x, const elementSomeGroup& y)
+bool FiniteGroup<elementSomeGroup>::PossiblyConjugate(const elementSomeGroup& x, const elementSomeGroup& y)
 { return true;
 }
 
 template <typename elementSomeGroup>
-bool SimpleFiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& x, const elementSomeGroup& y)
+bool FiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& x, const elementSomeGroup& y)
 { if(this->AreConjugateByFormula)
     return this->AreConjugateByFormula(x,y);
   if(!this->flagCCsComputed)
@@ -1006,15 +1036,16 @@ bool SimpleFiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& x
   int xi = this->theElements.GetIndex(x);
   int yi = this->theElements.GetIndex(y);
   for(int i=0; i<this->conjugacyClasseS.size; i++)
-    if(this->conjugacyClasseS[i].theElements.BSContains(xi))
-      if(this->conjugacyClasseS[i].theElements.BSContains(yi))
+    if(this->conjugacyClasseS[i].indicesEltsInOwner.BSContains(xi))
+      if(this->conjugacyClasseS[i].indicesEltsInOwner.BSContains(yi))
         return true;
   return false;
 }
 
+/*
 template <typename elementSomeGroup>
 template <typename coefficient>
-coefficient SimpleFiniteGroup<elementSomeGroup>::GetHermitianProduct(const Vector<coefficient>& X1, const Vector<coefficient>& X2)
+coefficient FiniteGroup<elementSomeGroup>::GetHermitianProduct(const Vector<coefficient>& X1, const Vector<coefficient>& X2)
 { if(!this->flagCCsComputed)
     this->ComputeCCSizesAndRepresentatives(NULL);
   coefficient acc = 0;
@@ -1022,17 +1053,18 @@ coefficient SimpleFiniteGroup<elementSomeGroup>::GetHermitianProduct(const Vecto
     acc += MathRoutines::ComplexConjugate(X1[i]) * X2[i] * this->conjugacyClasseS[i].size;
   return  acc / this->GetSize();
 }
+*/
 
 template <typename elementSomeGroup>
-void SimpleFiniteGroup<elementSomeGroup>::MakeID(elementSomeGroup& e)
+void FiniteGroup<elementSomeGroup>::MakeID(elementSomeGroup& e)
 { if(this->generators.size != 0)
     e.MakeID(this->generators[0]);
 }
 
 template <typename elementSomeGroup>
-void SimpleFiniteGroup<elementSomeGroup>::ComputeAllElements(bool andWords)
-{ if(this->haveElements)
-  { if(!(andWords && !haveWords))
+void FiniteGroup<elementSomeGroup>::ComputeAllElementsWordsConjugacyIfObvious(bool andWords)
+{ if(this->flagAllElementsAreComputed)
+  { if(!(andWords && !flagWordsComputed))
       if(!(!this->flagCCsComputed && AreConjugateByFormula))
         return; // no reason to recompute.  skipping
     stOutput << "Recomputing elements of some group, for God only knows why.  Check frames above " << __FILE__ << ':' << __LINE__ << '\n';
@@ -1055,7 +1087,7 @@ void SimpleFiniteGroup<elementSomeGroup>::ComputeAllElements(bool andWords)
     if(andWords)
     { if(!GetWordByFormula)
         this->conjugacyClasseS[0].representativeIndex = 0;
-      this->conjugacyClasseS[0].haveRepresentativeWord = true;
+      this->conjugacyClasseS[0].flagRepresentativeWordComputed = true;
     }
   }
   while(recentadds.size > 0)
@@ -1093,26 +1125,27 @@ void SimpleFiniteGroup<elementSomeGroup>::ComputeAllElements(bool andWords)
             if(andWords && !GetWordByFormula)
             { this->conjugacyClasseS[ncc].representativeIndex = pindex;
               this->conjugacyClasseS[ncc].representativeWord = recentwords[recentwords.size-1];
-              this->conjugacyClasseS[ncc].haveRepresentativeWord = true;
+              this->conjugacyClasseS[ncc].flagRepresentativeWordComputed = true;
             }
             if(GetWordByFormula)
             { this->GetWord(this->conjugacyClasseS[ncc].representative, this->conjugacyClasseS[ncc].representativeWord);
-              this->conjugacyClasseS[ncc].haveRepresentativeWord = true;
+              this->conjugacyClasseS[ncc].flagRepresentativeWordComputed = true;
             }
           }
         }
       }
     }
   }
-  this->haveElements = true;
+  this->flagAllElementsAreComputed = true;
   if(AreConjugateByFormula && (ComputeCCSizesAndRepresentativesByFormula == NULL))
     this->flagCCsComputed = true;
   if(andWords)
-    this->haveWords = true;
+    this->flagWordsComputed = true;
 }
 
+/*
 template <typename elementSomeGroup>
-void SimpleFiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives(void* unused)
+void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives(void* unused)
 { if(this->flagCCsComputed)
     return;
   if(this->ComputeCCSizesAndRepresentativesByFormula)
@@ -1148,31 +1181,35 @@ void SimpleFiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives(void*
       GetWord(conjugacyClasseS[i].representative, conjugacyClasseS[i].representativeWord);
   }
   this->flagCCsComputed = true;
-}
+}*/
 
+/*
 template <typename elementSomeGroup>
-void SimpleFiniteGroup<elementSomeGroup>::ComputeElementsAndCCs(void* unused)
+void FiniteGroup<elementSomeGroup>::ComputeElementsAndCCs(void* unused)
 { this->ComputeCCSizesAndRepresentatives();
 }
+*/
 
+/*
 template <typename elementSomeGroup>
-int SimpleFiniteGroup<elementSomeGroup>::GetSize()
+int FiniteGroup<elementSomeGroup>::GetSize()
 { if(!this->haveElements)
     this->ComputeAllElements();
   return this->theElements.size;
 }
+*/
 
 template <typename elementSomeGroup>
-void SimpleFiniteGroup<elementSomeGroup>::GetWord(const elementSomeGroup& g, List<int>& word)
+void FiniteGroup<elementSomeGroup>::GetWord(const elementSomeGroup& g, List<int>& word)
 { if(GetWordByFormula)
     return this->GetWordByFormula(this,g,word);
-  if(!this->haveWords)
-    this->ComputeAllElements(true);
+  if(!this->flagWordsComputed)
+    this->ComputeAllElementsWordsConjugacyIfObvious(true);
   word = this->theWords[this->theElements.GetIndex(g)];
 }
 
 template <typename elementSomeGroup>
-bool SimpleFiniteGroup<elementSomeGroup>::IsID(const elementSomeGroup& g)
+bool FiniteGroup<elementSomeGroup>::IsID(elementSomeGroup& g)
 { return g.IsID();
 }
 
@@ -1184,7 +1221,7 @@ bool SimpleFiniteGroup<Matrix<coefficient> >::IsID(const Matrix<coefficient>& g)
 */
 
 template <typename elementSomeGroup>
-void SimpleFiniteGroup<elementSomeGroup>::ComputeGeneratorCommutationRelations()
+void FiniteGroup<elementSomeGroup>::ComputeGeneratorCommutationRelations()
 { if(this->generatorCommutationRelations.NumRows == this->generators.size)
     return;
   this->generatorCommutationRelations.init(this->generators.size, this-> generators.size);
@@ -1196,14 +1233,14 @@ void SimpleFiniteGroup<elementSomeGroup>::ComputeGeneratorCommutationRelations()
       do
       { gi = gi * g;
         cr++;
-      } while(!gi.IsID());
+      } while(!this->IsID(g));
       this->generatorCommutationRelations(i,j) = cr;
       this->generatorCommutationRelations(j,i) = cr;
     }
 }
 
 template <typename elementSomeGroup>
-std::string SimpleFiniteGroup<elementSomeGroup>::PrettyPrintGeneratorsCommutationRelations()
+std::string FiniteGroup<elementSomeGroup>::PrettyPrintGeneratorCommutationRelations()
 { this->ComputeGeneratorCommutationRelations();
   std::string crs = this->generatorCommutationRelations.ToStringPlainText();
   List<char*> rows;
@@ -1220,7 +1257,7 @@ std::string SimpleFiniteGroup<elementSomeGroup>::PrettyPrintGeneratorsCommutatio
 }
 
 template <typename elementSomeGroup>
-std::string SimpleFiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable()
+std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable()
 { std::stringstream out;
   out << *this;
   out << this->GetSize() << "elements.  Representatives and sizes are ";
@@ -1295,7 +1332,7 @@ std::string SimpleFiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable()
 }
 
 template <typename elementSomeGroup>
-JSData SimpleFiniteGroup<elementSomeGroup>::RepresentationDataIntoJS()
+JSData FiniteGroup<elementSomeGroup>::RepresentationDataIntoJS()
 { JSData out;
   for(int i=0; i<irreps.size; i++)
     out[i] = irreps[i].JSOut();
@@ -1303,12 +1340,12 @@ JSData SimpleFiniteGroup<elementSomeGroup>::RepresentationDataIntoJS()
 }
 
 template <typename elementSomeGroup>
-void SimpleFiniteGroup<elementSomeGroup>::VerifyCCSizesAndRepresentativesFormula()
-{ this->ComputeCCSizesAndRepresentatives();
-  SimpleFiniteGroup<elementSomeGroup> GG;
+void FiniteGroup<elementSomeGroup>::VerifyCCSizesAndRepresentativesFormula()
+{ this->ComputeCCSizesAndRepresentatives(0);
+  FiniteGroup<elementSomeGroup> GG;
   GG.generators = this->generators;
   //GG.AreConjugateByFormula = this->AreConjugateByFormula;
-  GG.ComputeCCSizesAndRepresentatives();
+  GG.ComputeCCSizesAndRepresentatives(0);
   stOutput << "Conjugacy class sizes by formula: ";
   for(int i=0; i<this->conjugacyClasseS.size; i++)
     stOutput << this->conjugacyClasseS[i].size << ", ";
@@ -1339,7 +1376,7 @@ void SimpleFiniteGroup<elementSomeGroup>::VerifyCCSizesAndRepresentativesFormula
     } else
     { int cri = GG.theElements.GetIndex(this->conjugacyClasseS[i].representative);
       for(int gci=0; gci<GG.conjugacyClasseS.size; gci++)
-        if(GG.conjugacyClasseS[gci].theElements.BSContains(cri))
+        if(GG.conjugacyClasseS[gci].indicesEltsInOwner.BSContains(cri))
         { gcc = gci;
           break;
         }
@@ -1352,9 +1389,9 @@ void SimpleFiniteGroup<elementSomeGroup>::VerifyCCSizesAndRepresentativesFormula
 }
 
 template <typename elementSomeGroup>
-void SimpleFiniteGroup<elementSomeGroup>::VerifyWords()
-{ if(!this->haveElements)
-    this->ComputeAllElements(true);
+void FiniteGroup<elementSomeGroup>::VerifyWords()
+{ if(!this->flagAllElementsAreComputed)
+    this->ComputeAllElementsWordsConjugacyIfObvious(true);
   for(int i=0; i<this->theElements.size; i++)
   { List<int> word;
     GetWord(this->theElements[i], word);
@@ -1367,9 +1404,10 @@ void SimpleFiniteGroup<elementSomeGroup>::VerifyWords()
   }
 }
 
+/*
 template <typename elementSomeGroup>
 template <typename somestream>
-somestream& SimpleFiniteGroup<elementSomeGroup>::IntoStream(somestream& out) const
+somestream& FiniteGroup<elementSomeGroup>::IntoStream(somestream& out) const
 { out << "Finite Group with " << this->generators.size << " generators";
   if(this->haveElements)
     out << ", " << this->theElements.size << " elements";
@@ -1383,10 +1421,11 @@ somestream& SimpleFiniteGroup<elementSomeGroup>::IntoStream(somestream& out) con
   }
   return out;
 }
+*/
 
 template <typename somestream>
 somestream& PermutationGroup::IntoStream(somestream& out)
-{ if(!this->isSymmetricGroup)
+{ if(!this->flagIsSymmetricGroup)
   { out << "Permutation Group with " << this->theElements.size << " elements, generated by: ";
     for(int i=0; i<this->generators.size; i++)
     { out << this->generators[i];
@@ -1395,32 +1434,36 @@ somestream& PermutationGroup::IntoStream(somestream& out)
     }
   }
   out << "Symmetric Group on " << this->generators.size + 1 << " letters (";
-  if(this->hasGenerators1j)
+  if(this->flagHasGenerators1j)
     out << "generators are (1 j))";
-  if(this->hasGeneratorsjjPlus1)
+  if(this->flagHasGeneratorsjjPlus1)
     out << "generators are (j j+1))";
   out << " thus having " << this->GetSize() << " elements.";
   return out;
 }
 
+/*
 template <typename elementSomeGroup>
-std::string SimpleFiniteGroup<elementSomeGroup>::ToString() const
+std::string FiniteGroup<elementSomeGroup>::ToString() const
 { std::stringstream out;
   this->IntoStream(out);
   return out.str();
 }
+*/
 
 template <typename coefficient>
 void PermutationGroup::SpechtModuleOfPartition
-(const Partition& p, GroupRepresentation<SimpleFiniteGroup<PermutationR2>, coefficient>& rep)
+(const Partition& p, GroupRepresentation<FiniteGroup<PermutationR2>, coefficient>& rep)
 { p.SpechtModuleMatricesOfPermutations(rep.generatorS, this->generators);
   rep.ownerGroup = this;
 }
 
+/*
 template <typename elementSomeGroup>
-std::ostream& operator<<(std::ostream& out, const SimpleFiniteGroup<elementSomeGroup>& data)
+std::ostream& operator<<(std::ostream& out, const FiniteGroup<elementSomeGroup>& data)
 { return data.IntoStream(out);
 }
+*/
 
 template <typename somestream>
 somestream& ElementHyperoctahedralGroup::IntoStream(somestream& out) const
@@ -1489,12 +1532,13 @@ bool GroupRepresentation<someGroup, coefficient>::VerifyRepresentation()
         }
       }
   if(badrep)
-  { SimpleFiniteGroup<Matrix<Rational> > RG;
+  { FiniteGroup<Matrix<Rational> > RG;
     RG.generators = this->generatorS;
-    int GS = this->ownerGroup->GetSize();
-    int RGS = RG.GetSize();
+    LargeInt GS = this->ownerGroup->GetSize();
+    LargeInt RGS = RG.GetSize();
     if((GS % RGS) != 0)
       crash << "Violation of Lagrange's theorem (" << RGS << "∤" << GS << " " << __FILE__ << ":" << __LINE__ << crash;
+    //crash << "Not a representation, crashing as soon as possible" << crash;
   }
   if(!badrep)
     stOutput << "VerifyRepresentation: this has the proper commutation relations\n";

@@ -4361,7 +4361,7 @@ std::string WeylGroup::ToStringCppCharTable(FormatExpressions* theFormat)
   FormatExpressions theFormatNoDynkinTypePlusesExponents;
   theFormatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent=true;
   out << "bool LoadCharTable" << this->theDynkinType.ToString(&theFormatNoDynkinTypePlusesExponents) << "(WeylGroup& output)\n<br>{ ";
-  out << " output.characterTable.SetExpectedSize(" << this->size().ToString() << "); output.characterTable.SetSize(0);";
+  out << " output.characterTable.SetExpectedSize(" << this->GetSize().ToString() << "); output.characterTable.SetSize(0);";
   out << "\n<br>&nbsp;&nbsp;ClassFunction&lt;FiniteGroup&lt;ElementWeylGroup&lt;WeylGroup&gt; &gt;, Rational&gt; currentCF;";
   out << "\n<br>&nbsp;&nbsp;currentCF.G=&output;";
   for (int i=0; i<this->characterTable.size; i++)

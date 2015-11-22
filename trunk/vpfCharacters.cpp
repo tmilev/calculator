@@ -909,7 +909,7 @@ Matrix<Rational> MatrixInBasis(const ClassFunction<WeylGroup::WeylGroupBase, Rat
   }
   for(int i1 =0; i1<X.G->ConjugacyClassCount(); i1++)
     for(int i2=0; i2<X.G->conjugacyClasseS[i1].size; i2++)
-      for(int j=0; j<X.G->size(); j++)
+      for(int j=0; j<X.G->GetSize(); j++)
         for(int k=0; k<B.size; k++)
         { int l =X.G->theElements.GetIndex
           (X.G->conjugacyClasseS[i1].theElements[i2]*X.G->theElements[j]);
@@ -1009,7 +1009,7 @@ void SubgroupRootReflections::ComputeCCSizesRepresentativesPreimages(GlobalVaria
       this->conjugacyClasseS[i].size=this->parent->conjugacyClasseS[i].size;
       this->conjugacyClasseS[i].flagElementsComputed=false;
     }
-    this->sizePrivate=this->parent->size();
+    this->sizePrivate=this->parent->GetSize();
     this->ccRepresentativesPreimages.SetSize(this->parent->conjugacyClasseS.size);
     for (int i=0; i<this->ccRepresentativesPreimages.size; i++)
       this->ccRepresentativesPreimages[i]=i;

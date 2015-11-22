@@ -1377,8 +1377,13 @@ public:
     }
     if (theFun==0)
       return false;
+    // Todor: "Cannot convert 'std::basic_ostream<char>' to 'bool' in return. this stanza was
+    // return this->Comments << "<hr>Conversion function failed on " << input.ToString() << ". ";
+    // I assume that the intention was to return false
     if (!theFun(*this, input, output))
-      return this->Comments << "<hr>Conversion function failed on " << input.ToString() << ". ";
+    { this->Comments << "<hr>Conversion function failed on " << input.ToString() << ". ";
+      return false;
+    }
     return output.IsOfType<theType>();
   }
   template <class theType>

@@ -61,7 +61,7 @@ class DirectProductElement: SemidirectProductElement<helt, kelt, TrivialOuterAut
 {};
 
 template <typename hg, typename kg, typename helt, typename kelt, typename oa>
-class SemidirectProductGroup: public SimpleFiniteGroup<SemidirectProductElement<helt, kelt, oa> >
+class SemidirectProductGroup: public FiniteGroup<SemidirectProductElement<helt, kelt, oa> >
 { public:
   hg* H;
   kg* K;
@@ -2385,7 +2385,7 @@ void TestSpechtModules(int N = 7)
   PermutationGroup G;
   G.MakeSymmetricGroupGeneratorsjjPlus1(N);
   G.irreps.SetSize(parts.size);
-  stOutput << G.PrettyPrintGeneratorsCommutationRelations();
+  stOutput << G.PrettyPrintGeneratorCommutationRelations();
   stOutput << "Testing Specht modules for S_" << N << '\n';
   //#pragma omp parallel for
   for(int pi=0; pi<parts.size; pi++)
@@ -3174,14 +3174,14 @@ void LegacyTest()
 
   HyperoctahedralGroup G;
   G.MakeHyperoctahedralGroup(5);
-  stOutput << G.PrettyPrintGeneratorsCommutationRelations();
+  stOutput << G.PrettyPrintGeneratorCommutationRelations();
   G.VerifyWords();
   G.AllSpechtModules();
 
   WeylGroup W;
   W.MakeArbitrarySimple('A', 7);
   W.ComputeCCSizesAndRepresentatives(NULL);
-  stOutput << W.theDynkinType << " :" << W.size() << " elements, in " << W.conjugacyClasseS.size << " conjugacy classes\n";
+  stOutput << W.theDynkinType << " :" << W.GetSize() << " elements, in " << W.conjugacyClasseS.size << " conjugacy classes\n";
   W.ComputeIrreducibleRepresentationsUsingSpechtModules();
 }
 

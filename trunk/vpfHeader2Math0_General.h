@@ -721,6 +721,7 @@ public:
             return false;
      return true;
   }
+  bool IsID() const { return IsIdMatrix(); } // for FiniteGroup compat
   void GetVectorFromColumn(int colIndex, Vector<coefficient>& output)const;
   void GetVectorFromRow(int rowIndex, Vector<coefficient>& output)const;
   int FindPivot(int columnIndex, int RowStartIndex);
@@ -994,6 +995,24 @@ public:
     for (int i=0; i<this->NumRows; i++)
       for (int j=0; j<this->NumCols; j++)
         (*this)(i,j)=other(i,j);
+  }
+  // The following are for compatibility with the FiniteGroup class
+  void GetCharacteristicPolyStandardRepresentation(Polynomial<coefficient>& out)
+  { out.AssignCharPoly(*this); }
+  bool HasDifferentConjugacyInvariantsFrom(Matrix<coefficient>& other)
+  { Polynomial<coefficient> p,q;
+    this->GetCharacteristicPolyStandardRepresentation(p);
+    other.GetCharacteristicPolyStandardRepresentation(q);
+    return !(p==q);
+  }
+  bool operator>(const Matrix<coefficient>& right) const
+  { if(this->NumRows != right.NumRows || this->NumCols != right.NumCols)
+      crash << "Not that this operation makes any sense anyway, but an attempt was just made to compare two matrices of different dimensions; presumably this means something is very wrong in some FiniteGroup, see the frames above " << __FILE__ << ":" << __LINE__ << crash;
+    for(int i=0; i<this->NumRows; i++)
+      for(int j=0; j<this->NumCols; j++)
+        if(!(this->elements[i][j] > right.elements[i][j]))
+          return false;
+    return true;
   }
 };
 

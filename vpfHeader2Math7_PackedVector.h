@@ -416,7 +416,7 @@ List<ClassFunction<WeylGroup::WeylGroupBase, Rational> > ComputeCharacterTable(s
     G.ComputeCCfromAllElements(0);
   List<int> classmap;
   int sizeOfG=-1;
-  G.size().IsIntegerFittingInInt(&sizeOfG);
+  G.GetSize().IsIntegerFittingInInt(&sizeOfG);
   classmap.SetSize(sizeOfG);
 //  classmap.SetSize(G.theElements.size);
   for(int i=0; i<G.ConjugacyClassCount(); i++)

@@ -86,6 +86,9 @@ public:
   }
 };
 
+template <typename someGroup, typename coefficient>
+class GroupRepresentation;
+
 // To make a FiniteGroup, define an element class with the following methods
 // elementSomeGroup operator*(const elementSomeGroup& right) const;
 // static void Conjugate(const elementSomeGroup& middle,
@@ -163,10 +166,13 @@ public:
     }
     LargeInt size;
     List<int> indicesEltsInOwner;
+    int representativeIndex;
     List<elementSomeGroup> theElements;
     elementSomeGroup representative;
     bool flagRepresentativeComputed;
     bool flagElementsComputed;
+    bool flagRepresentativeWordComputed;
+    List<int> representativeWord;
     std::string ToString(FormatExpressions* theFormat=0)const
     { std::stringstream out;
       out << "Conj. class size: " << this->size.ToString();
@@ -180,6 +186,12 @@ public:
   HashedList<Polynomial<Rational> > CCsStandardRepCharPolys;
   List<ClassFunction<FiniteGroup<elementSomeGroup>, Rational> > characterTable;
 
+  Matrix<int> generatorCommutationRelations;
+
+  List<GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational> > irreps;
+
+  List<List<int> > theWords;
+
   //<-The character polynomials in the ``standard representation''.
   //The ``standard representation'' is specified by the elementSomeGroup class.
   //It is up to the user of the FiniteGroup template to define which representation is
@@ -189,6 +201,7 @@ public:
   bool flagAllElementsAreComputed;
   bool flagCharPolysAreComputed;
   bool flagGeneratorsConjugacyClassesComputed;
+  bool flagWordsComputed;
 
   bool flagDeallocated;
   FiniteGroup(): flagDeallocated(false)
@@ -215,13 +228,22 @@ public:
   std::string ToStringElements(FormatExpressions* theFormat=0)const;
   std::string ToStringConjugacyClasses(FormatExpressions* theFormat=0)const;
   int ConjugacyClassCount()const;
-  LargeInt size()const;
+  LargeInt GetSize()const;
   virtual LargeInt GetGroupSizeByFormula()const
   { return -1;
   } //non-positive result means no formula is known.
+
+  bool (*AreConjugateByFormula)(const elementSomeGroup& x, const elementSomeGroup& y);
+  void (*ComputeCCSizesAndRepresentativesByFormula)(void* G);
+  int (*GetSizeByFormula)(void* G);
   bool AreConjugate(const elementSomeGroup& left, const elementSomeGroup& right);
 
   bool ComputeAllElements(int MaxElements=-1, GlobalVariables* theGlobalVariables=0);
+
+  // Historical note: this was from Thomas' second finite group class, and is
+  // as of 2015-11 the only way to generate the words and conjugacy information
+  void ComputeAllElementsWordsConjugacyIfObvious(bool andWords);
+
   void ComputeCCfromAllElements(GlobalVariables* theGlobalVariables);
   void ComputeCCfromCCindicesInAllElements(const List<List<int> >& ccIndices);
 
@@ -238,12 +260,32 @@ public:
   (GlobalVariables* theGlobalVariables)
   ;
   void ComputeCCSizesAndRepresentatives(GlobalVariables* theGlobalVariables);
-  bool HasElement(elementSomeGroup& g);
-  void GetWord(elementSomeGroup& g, List<int>& out);
-  void (*GetWordByFormula)(void* G, elementSomeGroup& g, List<int>& out);
+  bool HasElement(const elementSomeGroup& g);
+  void GetWord(const elementSomeGroup& g, List<int>& out);
+  void (*GetWordByFormula)(void* G, const elementSomeGroup& g, List<int>& out);
   void GetSignCharacter(Vector<Rational>& outputCharacter);
   template <typename coefficient>
   coefficient GetHermitianProduct(const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter)const;
+
+  bool PossiblyConjugate(const elementSomeGroup& x, const elementSomeGroup& y);
+  void MakeID(elementSomeGroup& x);
+  bool IsID(elementSomeGroup& x);
+  void ComputeGeneratorCommutationRelations();
+  void VerifyCCSizesAndRepresentativesFormula();
+  void VerifyWords();
+  std::string PrettyPrintGeneratorCommutationRelations();
+  std::string PrettyPrintCharacterTable();
+  JSData RepresentationDataIntoJS();
+
+  // This is a problem, not everything can have a ToString, but things need ToString(globalVariables) called
+  // Personally, I think the output class should have scalars special cased and all MilevObject types have
+  // their own ToString, which is exclusively called from the output class's operator<<, and the formatting
+  // parts of globalVariables are carried by the object of the output class that is surreptitiously passed
+  // around.  I mean, not that left shifting some random object by a string is a good design anyway
+  friend std::ostream& operator<< (std::ostream& out, FiniteGroup<elementSomeGroup>& data)
+  { out << data.ToString(0);
+    return out;
+  }
 };
 
 struct simpleReflectionOrOuterAuto
@@ -1137,8 +1179,8 @@ class Subgroup : public FiniteGroup<elementSomeGroup>
 public:
   somegroup *parent;
   // one for each supergroup generator.  for word translation.
-  List<List<int> > superGeneratorWords;
-  List<bool> superGeneratorWordExists;
+  List<List<int> > superGeneratorSubWords;
+  List<bool> superGeneratorSubWordExists;
   List<int> ccRepresentativesPreimages;
   List<int> generatorPreimages;
   List<Coset<elementSomeGroup> > cosets;
@@ -1149,6 +1191,7 @@ public:
   { return -1;
   }
   void initFromGroupAndGenerators(somegroup& inputGroup, const List<elementSomeGroup>& inputGenerators);
+  void MakeTranslatableWordsSubgroup(somegroup& inputGroup, const List<elementSomeGroup>& subGenerators);
   void ComputeCCRepresentativesPreimages(GlobalVariables* theGlobalVariables);
   void ComputeCCSizesRepresentativesPreimages(GlobalVariables* theGlobalVariables)
   { this->ComputeCCSizesAndRepresentatives(theGlobalVariables);
@@ -1175,7 +1218,25 @@ public:
   bool (*SameCosetAsByFormula)(void* H, elementSomeGroup& g1, elementSomeGroup& g2) = NULL;
 };
 
-
+template <typename someGroup, typename elementSomeGroup>
+void TranslatableWordsSubgroupElementGetWord(void* Hp, const elementSomeGroup& g, List<int>& out)
+{ Subgroup<someGroup, elementSomeGroup> *H = (Subgroup<someGroup, elementSomeGroup>*) Hp;
+  List<int> superword;
+  H->parent->GetWord(g, superword);
+  out.SetSize(0);
+  for(int i=0; i<superword.size; i++)
+  { if(!H->superGeneratorSubWordExists[superword[i]])
+    { if(!H->HasElement(g))
+        stOutput << "element " << g << " isn't even a member of " << H << '\n';
+      crash << "element " << g << " is assigned parent word " << superword.ToStringCommaDelimited()
+            << " containing generator not found in subgroup " << superword[i]
+            << " so if this does belong to the subgroup, we need a better algorithm at "  << __FILE__ << ":" << __LINE__ << crash;
+    }
+    out.AddListOnTop(H->superGeneratorSubWords[superword[i]]);
+  }
+  stOutput << "MissingGeneratorsSubgroupElementGetWord: " << g << " is assigned word " << out.ToStringCommaDelimited()
+           << " translated from parent group's word " << superword.ToStringCommaDelimited() << '\n';
+}
 
 template <typename somegroup, typename elementSomeGroup>
 int Subgroup<somegroup, elementSomeGroup>::QIDMul(int i, int j)
@@ -1340,7 +1401,19 @@ void Subgroup<somegroup, elementSomeGroup>::InduceRepresentation
   for(int i=0; i<out.generatorS.size; i++)
     stOutput << parent->generators[i] << ' ' << out.generatorS[i].GetTrace() << '\n' << out.generatorS[i].ToStringPlainText() << '\n';
   if(!out.VerifyRepresentation())
+  { if(!in.VerifyRepresentation())
+    { stOutput << "Well, we weren't given a proper representation either.  Its actual generator commutation relations are\n";
+      FiniteGroup<Matrix<Rational> > ingroup;
+      ingroup.generators = in.generatorS;
+      stOutput << "Generator commutation relations for input 'representation':\n" << ingroup.PrettyPrintGeneratorCommutationRelations();
+      stOutput << "It was supposed to be a quotient group of\n" << this->PrettyPrintGeneratorCommutationRelations();
+    }
+    FiniteGroup<Matrix<Rational> > outgroup;
+    outgroup.generators = out.generatorS;
+    stOutput << "Generator commutation relations for 'representation':\n" <<outgroup.PrettyPrintGeneratorCommutationRelations();
+    stOutput << "It was supposed to be a quotient group of\n" << parent->PrettyPrintGeneratorCommutationRelations();
     crash << crash;
+  }
 }
 
 

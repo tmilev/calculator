@@ -353,6 +353,35 @@ void Subgroup<somegroup, elementSomeGroup>::initFromGroupAndGenerators(somegroup
   //(there shouldn't be any, but knowing I am one of the programmers...)
 }
 
+
+// A well chosen generating set for G can have the property that for interesting subgroups H,
+// the usual choice of word in G for h∈H will be translatable into letters of H.
+// This is the case for, in particular, the parabolic subgroups of the complete hyperoctahedral
+// groups in the generating set that tacks on to the symmetric groups a complete set of ℤ₂ generators
+template <typename somegroup, class elementSomeGroup>
+void Subgroup<somegroup, elementSomeGroup>::MakeTranslatableWordsSubgroup(somegroup &inputGroup,
+                                                                          const List<elementSomeGroup>& subGenerators)
+{ MacroRegisterFunctionWithName("Subgroup::MakeTranslatableWordsSubgroup");
+  this->parent = &inputGroup;
+  this->generators = subGenerators;
+  this->superGeneratorSubWords.SetSize(parent->generators.size);
+  this->superGeneratorSubWordExists.SetSize(parent->generators.size);
+  for(int i=0; i<superGeneratorSubWordExists.size; i++)
+    superGeneratorSubWordExists[i] = false;
+  // done initializing things.  Now for actual code.
+  // not the most comprehensive algorithm, is it?
+  // I mean, not that I care to prove it incomplete at this point.
+  // and so much work for this silly little speed optimization, too
+  for(int i=0; i<parent->generators.size; i++)
+  { int si = this->generators.GetIndex(parent->generators[i]);
+    if(si != -1)
+    { this->superGeneratorSubWords[i].AddOnTop(si);
+      this->superGeneratorSubWordExists[i] = true;
+    }
+  }
+  this->GetWordByFormula = TranslatableWordsSubgroupElementGetWord<somegroup, elementSomeGroup>;
+}
+
 template <typename somegroup, class elementSomeGroup>
 bool Subgroup<somegroup, elementSomeGroup>::CheckInitialization()
 { if (this->parent==0)
@@ -361,17 +390,10 @@ bool Subgroup<somegroup, elementSomeGroup>::CheckInitialization()
 }
 
 template <typename elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::HasElement(elementSomeGroup& g)
+bool FiniteGroup<elementSomeGroup>::HasElement(const elementSomeGroup& g)
 { if(!this->flagAllElementsAreComputed)
     this->ComputeAllElements();
   return this->theElements.Contains(g);
-}
-
-template <typename elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::GetWord(elementSomeGroup& g, List<int>& out)
-{ if(GetWordByFormula)
-    return GetWordByFormula(this, g, out);
-  crash << "Words for generic FiniteGroup instances are not (yet?) implemented, see " << __FILE__ << ':' << __LINE__ << crash;
 }
 
 template <class elementSomeGroup>
@@ -406,11 +428,11 @@ coefficient FiniteGroup<elementSomeGroup>::GetHermitianProduct
     if (this->conjugacyClasseS[i].size==0)
       crash << "Error: conjugacy class size is zero." << crash;
   }
-  return acc / this->size();
+  return acc / this->GetSize();
 }
 
 template <class elementSomeGroup>
-LargeInt FiniteGroup<elementSomeGroup>::size()const
+LargeInt FiniteGroup<elementSomeGroup>::GetSize()const
 { if (this->sizePrivate<=0)
     crash << "Requesting size of group whose size is not computed. " << crash;
   return this->sizePrivate;
@@ -465,7 +487,7 @@ template <class elementSomeGroup>
 std::string FiniteGroup<elementSomeGroup>::ToStringConjugacyClasses(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("Subgroup::ToStringConjugacyClasses");
   std::stringstream out;
-  out << "<br>Size: " << this->size().ToString() << "\n";
+  out << "<br>Size: " << this->GetSize().ToString() << "\n";
   FormatExpressions charPolyFormat;
   charPolyFormat.polyAlphabeT.SetSize(1);
   charPolyFormat.polyAlphabeT[0]="q";

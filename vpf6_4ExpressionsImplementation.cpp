@@ -820,8 +820,10 @@ bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >
 //  stOutput << "<hr>Getting ue from: " << this->ToString();
   SemisimpleLieAlgebra* theOwner=this->GetAmbientSSAlgebraNonConstUseWithCaution();
   if (theOwner==0)
-    return this->owner->Comments << "<hr>Failed to convert " << this->ToString() << " (Lispified: " << this->ToStringFull()
+  { this->owner->Comments << "<hr>Failed to convert " << this->ToString() << " (Lispified: " << this->ToStringFull()
     << ") to element of universal enveloping -  failed to extract ambient Lie algebra. ";
+    return false;
+  }
   ElementUniversalEnveloping<RationalFunctionOld> outputUE;
   if (this->IsOfType<Rational>())
   { outputUE.MakeConst(this->GetValue<Rational>(), *theOwner);

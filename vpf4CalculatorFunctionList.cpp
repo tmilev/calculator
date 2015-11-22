@@ -642,6 +642,11 @@ void Calculator::initPredefinedInnerFunctions()
    ambient Cartan algebra. ",
    "AttemptExtendingEtoHEFwithHinCartan{}(F_4, g_1+2g_2+3g_3+4g_4)")
    ;
+  this->AddOperationInnerHandler
+  ("IsPrimeMillerRabin", &CalculatorFunctionsGeneral::innerIsPrimeMillerRabin, "",
+   "Checks if the number is prime by the Miller-Rabin test.",
+   "A=100!+1; IsPrimeMillerRabin(A)")
+   ;
 
   this->AddOperationInnerHandler
   ("gcdPoly", &this->innerGCD, "",

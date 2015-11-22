@@ -3188,57 +3188,56 @@ void ElementZmodP ::operator*=(const ElementZmodP& other)
 }
 
 bool LargeIntUnsigned::IsPossiblyPrimeMillerRabinOnce
-(unsigned int theBase, const LargeIntUnsigned& thePowerTwoFactorOfNminusOne,
+(unsigned int theBase, int theExponentOfThePowerTwoFactorOfNminusOne,
  const LargeIntUnsigned& theOddFactorOfNminusOne)
 { MacroRegisterFunctionWithName("LargeIntUnsigned::IsPossiblyPrimeMillerRabin");
-  ElementZmodP startNum, thePower, theOne;
-  startNum.theModulo=*this;
-  startNum.theValue=theBase;
+  ElementZmodP thePower, theOne;
+  thePower.theModulo=*this;
+  thePower.theValue=theBase;
   theOne.theModulo=*this;
   theOne.theValue=1;
-  thePower=startNum;
   std::cout << "got to here 4\n";
   MathRoutines::RaiseToPower(thePower, theOddFactorOfNminusOne, theOne);
   std::cout << "got to here 5\n thePower: " << thePower.ToString() << "\n";
   std::cout.flush();
-  thePower==1;
-  std::cout << "got to here 5.2" ;
-  std::cout.flush();
-  if (thePower==1)
+  if (thePower==1 )
     return true;
   std::cout << "got to here 5.5\n ";
   std::cout.flush();
-  ElementZmodP theEvenPower;
-  theEvenPower=startNum;
-  std::cout << "got to here 6\n";
-  std::cout.flush();
-  MathRoutines::RaiseToPower(theEvenPower, thePowerTwoFactorOfNminusOne, theOne);
-  std::cout << "got to here 7\n";
-  std::cout.flush();
-  thePower*=theEvenPower;
-  return thePower==-1;
+  for (int i=0; i<theExponentOfThePowerTwoFactorOfNminusOne; i++)
+  { if (thePower==-1)
+      return true;
+    if (i==theExponentOfThePowerTwoFactorOfNminusOne-1)
+      return false;
+    thePower*=thePower;
+  }
+  return false;
 }
 
 bool LargeIntUnsigned::IsPossiblyPrimeMillerRabin(int numTimesToRun)
 { MacroRegisterFunctionWithName("LargeIntUnsigned::IsPossiblyPrimeMillerRabin");
+  if (this->IsEven())
+    return false;
   List<unsigned int> aFewPrimes;
   std::cout << "got to here 1 \n";
   std::cout.flush();
   LargeIntUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(100000, aFewPrimes);
   if (numTimesToRun>aFewPrimes.size)
     numTimesToRun=aFewPrimes.size;
-  LargeIntUnsigned theOddFactorOfNminusOne=*this, thePowerTwoFactorOfNminusOne=1;
+  LargeIntUnsigned theOddFactorOfNminusOne=*this;
+  int theExponentOfThePowerTwoFactorOfNminusOne=0;
   theOddFactorOfNminusOne--;
   std::cout << "got to here 2 \n";
   std::cout.flush();
   while (theOddFactorOfNminusOne.IsEven())
   { theOddFactorOfNminusOne/=2;
-    thePowerTwoFactorOfNminusOne*=2;
+    theExponentOfThePowerTwoFactorOfNminusOne++;
   }
   std::cout << "got to here 3\n";
   std::cout.flush();
-  for (int i=0; i<aFewPrimes.size; i++)
-    if (!this->IsPossiblyPrimeMillerRabinOnce(aFewPrimes[i], thePowerTwoFactorOfNminusOne, theOddFactorOfNminusOne))
+  for (int i=0; i<numTimesToRun; i++)
+    if (!this->IsPossiblyPrimeMillerRabinOnce
+        (aFewPrimes[i], theExponentOfThePowerTwoFactorOfNminusOne, theOddFactorOfNminusOne))
       return false;
   return true;
 }
@@ -3248,7 +3247,7 @@ bool CalculatorFunctionsGeneral::innerIsPrimeMillerRabin(Calculator& theCommands
   LargeInt theInt;
   if (!input.IsInteger(&theInt))
     return false;
-  bool resultBool=theInt.value.IsPossiblyPrimeMillerRabin(100);
+  bool resultBool=theInt.value.IsPossiblyPrimeMillerRabin(10);
   std::cout << "got to here";
   std::cout.flush();
   Rational result=1;

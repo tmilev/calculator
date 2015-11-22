@@ -52,7 +52,7 @@ public:
   bool IsPositive()const;
   bool IsPossiblyPrimeMillerRabin(int numTimesToRun=1);
   bool IsPossiblyPrimeMillerRabinOnce
-  (unsigned int theBase, const LargeIntUnsigned& thePowerTwoFactorOfNminusOne,
+  (unsigned int theBase, int theExponentOfThePowerTwoFactorOfNminusOne,
  const LargeIntUnsigned& theOddFactorOfNminusOne)
   ;
   bool IsEqualToOne()const;

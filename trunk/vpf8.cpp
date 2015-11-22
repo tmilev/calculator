@@ -129,6 +129,8 @@ bool LargeIntUnsigned::IsGEQ(const LargeIntUnsigned& x)const
 bool LargeIntUnsigned::IsEven()const
 { //stOutput << "<br>remainder by 2 is " << ((*this)%2).ToString()
   //<< " and ((*this)%2)==0 is " << (((*this)%2)==0);
+  if (LargeIntUnsigned::CarryOverBound%2==0)
+    return (* this->theDigits.LastObject())%2==0;
   return ((*this)%2)==0;
 }
 

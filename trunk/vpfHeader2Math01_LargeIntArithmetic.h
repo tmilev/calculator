@@ -28,6 +28,9 @@ public:
   //It is used for quick multiplication of Rational-s.
   static const int SquareRootOfCarryOverBound=31000; //31000*31000=961000000<1000000000
 //  static const int SquareRootOfCarryOverBound=32768; //=2^15
+  friend bool operator <(int left, const LargeIntUnsigned& right)
+  { return right>left;
+  }
   void SubtractSmallerPositive(const LargeIntUnsigned& x);
   void ToString(std::string& output)const;
   void ElementToStringLargeElementDecimal(std::string& output)const;
@@ -47,6 +50,11 @@ public:
   bool IsEqualToZero()const;
   bool IsEven()const;
   bool IsPositive()const;
+  bool IsPossiblyPrimeMillerRabin(int numTimesToRun=1);
+  bool IsPossiblyPrimeMillerRabinOnce
+  (unsigned int theBase, const LargeIntUnsigned& thePowerTwoFactorOfNminusOne,
+ const LargeIntUnsigned& theOddFactorOfNminusOne)
+  ;
   bool IsEqualToOne()const;
   bool IsGEQ(const LargeIntUnsigned& x)const;
   static void GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(unsigned int n, List<unsigned int>& output)
@@ -129,6 +137,15 @@ public:
     LargeIntUnsigned temp1;
     copyMe.DivPositive(other, temp1, *this);
   }
+  inline void operator/=(const LargeIntUnsigned& other)
+  { if (&other==this)
+    { this->MakeOne();
+      return;
+    }
+    LargeIntUnsigned copyMe=*this;
+    LargeIntUnsigned temp1;
+    copyMe.DivPositive(other, *this, temp1);
+  }
   LargeIntUnsigned operator/(unsigned int x)const;
   LargeIntUnsigned operator/(const LargeIntUnsigned& x)const;
   LargeIntUnsigned operator*(const LargeIntUnsigned& x)const
@@ -145,6 +162,20 @@ public:
   { LargeIntUnsigned tempI;
     tempI.MakeOne();
     return tempI;
+  }
+  inline bool operator<(int other)const
+  { if (other<0)
+      return false;
+    LargeIntUnsigned tempUI;
+    tempUI= (unsigned) other;
+    return *this<tempUI;
+  }
+  inline bool operator>(int other)const
+  { if (other<0)
+      return true;
+    LargeIntUnsigned tempUI;
+    tempUI= (unsigned) other;
+    return *this>tempUI;
   }
   inline bool operator<(const LargeIntUnsigned& other)const
   { return !this->IsGEQ(other);

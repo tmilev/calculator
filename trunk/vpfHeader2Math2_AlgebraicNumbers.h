@@ -213,6 +213,7 @@ class ElementZmodP
 public:
   LargeIntUnsigned theModulo;
   LargeIntUnsigned theValue;
+  bool flagDeallocated;
   unsigned int HashFunction()const
   { if (this->theValue.IsEqualToZero())
       return 0;
@@ -221,11 +222,14 @@ public:
   static unsigned int HashFunction(const ElementZmodP& input)
   { return input.HashFunction();
   }
-  ElementZmodP(){}
-  ElementZmodP(const ElementZmodP& other){this->operator=(other);}
-  void CheckIamInitialized()
+  ElementZmodP(){this->flagDeallocated=false;}
+  ElementZmodP(const ElementZmodP& other){this->flagDeallocated=false; this->operator=(other);}
+  ~ElementZmodP(){this->flagDeallocated=true;}
+  void CheckIamInitialized()const
   { if (this->theModulo.IsEqualToZero())
       crash << "This is a programming error: computing with non-initialized element the ring Z mod p (the number p has not been initialized!)." << crash;
+    if (this->flagDeallocated)
+      crash << "This is a programming error: use after free of element z mod p. " << crash;
   }
   std::string ToString(FormatExpressions* theFormat=0)const;
   bool IsEqualToZero()const
@@ -250,25 +254,9 @@ public:
       crash << "This is a programming error: attempting to make an operation with two elemetns of Z mod P with different moduli, "
       << this->theModulo.ToString() << " and " << other.theModulo.ToString() << ". " << crash;
   }
-  bool operator==(int other)const
-  { ElementZmodP tempElt;
-    tempElt.theModulo=this->theModulo;
-    tempElt=(LargeInt) other;
-    return *this==other;
-  }
-  bool operator==(const ElementZmodP& other)const
-  { return this->theModulo==other.theModulo && this->theValue==other.theValue;
-  }
-  void operator*=(const ElementZmodP& other)
-  { if (this==&other)
-    { ElementZmodP other=*this;
-      *this*=other;
-      return;
-    }
-    this->CheckEqualModuli(other);
-    this->theValue*=other.theValue;
-    this->theValue%=this->theModulo;
-  }
+  bool operator==(int other)const;
+  bool operator==(const ElementZmodP& other)const;
+  void operator*=(const ElementZmodP& other);
   void operator*=(const LargeInt& other)
   { this->theValue*=other.value;
     if (other.IsNegative())

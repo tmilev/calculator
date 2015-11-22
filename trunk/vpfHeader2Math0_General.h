@@ -3531,29 +3531,32 @@ public:
   }
 };
 
-template <class coefficient>
-void MathRoutines::RaiseToPower(coefficient& theElement, int thePower, const coefficient& theRingUnit)
-{ if (thePower<0)
+template <class coefficient, typename theIntegerType>
+void MathRoutines::RaiseToPower
+(coefficient& theElement, const theIntegerType& thePower, const coefficient& theRingUnit)
+{ theIntegerType thePowerCopy;
+  thePowerCopy=thePower;
+  if (thePowerCopy<0)
     return;
-  if (thePower==1)
+  if (thePowerCopy==1)
     return;
-  if (thePower==0)
+  if (thePowerCopy==0)
   { theElement=theRingUnit;
     return;
   }
   coefficient squares;
 	squares=theElement;
-	if (thePower<4)
-  { for (int i=1; i<thePower; i++)
+	if (thePowerCopy<4)
+  { for (int i=1; i<thePowerCopy; i++)
       theElement*=squares;
     return;
   }
   theElement=theRingUnit;
-	while (thePower>0)
-	{	if (thePower%2==1)
+	while (thePowerCopy>0)
+	{	if (thePowerCopy%2==1)
 			theElement*=squares;
 		squares*=squares;
-		thePower/=2;
+		thePowerCopy/=2;
 	}
 }
 

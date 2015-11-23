@@ -748,8 +748,16 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives(GlobalVaria
 
   elementSomeGroup currentElt;
   currentElt.MakeID(this->generators[0]);
+  static int recursionCount =0;
+  recursionCount++;
+  if (recursionCount>100)
+    crash << "Oh no something is very wrong " << crash;
+  std::cout << "got to here!\n";
   this->RegisterCCclass(currentElt, false, theGlobalVariables);
+  std::cout << "got to here2!\n";
   this->ComputeCCRepresentatives(theGlobalVariables);
+  recursionCount--;
+  std::cout << "got to here3!\n";
   this->flagCCRepresentativesComputed=true;
 }
 

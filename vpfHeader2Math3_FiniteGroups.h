@@ -1114,6 +1114,7 @@ public:
     this->indexCurrentElement=-1;
   }
   const elementRepresentation& GetCurrentElement();
+  bool IncrementReturnFalseIfPastLastFALSE();
   bool IncrementReturnFalseIfPastLast();
   void init
   (const List<elementGroup>& inputGenerators, const elementRepresentation& inputElement, OrbitIterator::GroupAction inputGroupAction);

@@ -27,10 +27,9 @@ int main(int argc, char **argv)
 
   if (argc>=1)
   { std::string firstArg;
-    std::cout << "argc: " << argc << " argv[0]: " << argv[0] << "\n";
+    //std::cout << "argc: " << argc << " argv[0]: " << argv[0] << "\n";
     firstArg=argv[0];
     theGlobalVariables.initDefaultFolderAndFileNames(firstArg, "");
-
   }
   theGlobalVariables.flagUsingBuiltInWebServer=false;
   if (argc>=2)

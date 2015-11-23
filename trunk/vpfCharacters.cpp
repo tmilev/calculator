@@ -1101,7 +1101,7 @@ bool FiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& left, c
     //  stOutput << "<br>" << theIterator.GetCurrentElement().ToString() << "=?=" << right.ToString();
     if (theIterator.GetCurrentElement()==right)
       return true;
-  } while (theIterator.IncrementReturnFalseIfPastLastFALSE());
+  } while (theIterator.IncrementReturnFalseIfPastLast());
   return false;
 }
 

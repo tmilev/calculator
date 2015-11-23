@@ -3165,10 +3165,17 @@ void TestSpechtModules(int N = 7)
 //  lie_bracket_relations(relations, 3);
 void LegacyTest()
 {
+  WeylGroup PW;
+  PW.MakeArbitrarySimple('A',5);
+  PW.ComputeCCSizesAndRepresentatives(NULL);
+  stOutput << PW.theDynkinType << " :" << PW.GetSize() << " elements, in " << PW.conjugacyClasseS.size << " conjugacy classes\n";
   PermutationGroup PG;
   PG.MakeSymmetricGroupGeneratorsjjPlus1(5);
+  PG.ComputeCCSizesAndRepresentatives(NULL);
+  stOutput <<  PG.GetSize() << " elements, in " << PG.conjugacyClasseS.size << " conjugacy classes\n";
   PG.VerifyCCSizesAndRepresentativesFormula();
-
+  stOutput << "finished verifying formulas\n";
+std::cout.flush();
   TestSpechtModules(5);
   TestHyperoctahedralStuff();
 

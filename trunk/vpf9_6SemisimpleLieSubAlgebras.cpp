@@ -976,8 +976,8 @@ bool OrbitFDRepIteratorWeylGroup::IncrementReturnFalseIfPastLast()
   }
   this->currentIndexInBuffer++;
   if (this->flagOrbitEnumeratedOnce)
-    return this->theIterator.IncrementReturnFalseIfPastLast();
-  if (!this->theIterator.IncrementReturnFalseIfPastLast())
+    return this->theIterator.IncrementReturnFalseIfPastLastFALSE();
+  if (!this->theIterator.IncrementReturnFalseIfPastLastFALSE())
   { this->orbitSize=this->currentIndexInBuffer;
     if (this->computedSize!=-1)
       if (this->computedSize!=this->orbitSize)

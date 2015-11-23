@@ -308,6 +308,25 @@ bool OrbitIterator<elementGroup, elementRepresentation>::IncrementReturnFalseIfP
   { this->theGroupAction
     (this->theGroupGeneratingElements[i], (*this->currentLayer)[this->indexCurrentElement],
      this->bufferRepresentationElement);
+    if (!this->currentLayer->Contains(this->bufferRepresentationElement))
+      this->currentLayer->AddOnTopNoRepetition(this->bufferRepresentationElement);
+  }
+  this->indexCurrentElement++;
+  if (this->indexCurrentElement<this->currentLayer->size)
+    return true;
+  this->indexCurrentElement=0;
+  return false;
+}
+
+template <class elementGroup, class elementRepresentation>
+bool OrbitIterator<elementGroup, elementRepresentation>::IncrementReturnFalseIfPastLastFALSE()
+{ MacroRegisterFunctionWithName("OrbitIterator::IncrementReturnFalseIfPastLast");
+  if (this->theGroupGeneratingElements.size==0)
+    return false;
+  for (int i=0; i<this->theGroupGeneratingElements.size; i++)
+  { this->theGroupAction
+    (this->theGroupGeneratingElements[i], (*this->currentLayer)[this->indexCurrentElement],
+     this->bufferRepresentationElement);
     if (!this->previousLayer->Contains(this->bufferRepresentationElement) &&
         !this->currentLayer->Contains(this->bufferRepresentationElement))
       this->nextLayer->AddOnTopNoRepetition(this->bufferRepresentationElement);
@@ -337,6 +356,10 @@ void FiniteGroup<elementSomeGroup>::init()
   this->flagCharPolysAreComputed=false;
   this->flagGeneratorsConjugacyClassesComputed=false;
   this->sizePrivate=0;
+  this->AreConjugateByFormula=0;
+  this->ComputeCCSizesAndRepresentativesByFormula=0;
+  this->GetSizeByFormula=0;
+  this->GetWordByFormula=0;
 }
 
 template <typename somegroup, class elementSomeGroup>
@@ -433,7 +456,9 @@ coefficient FiniteGroup<elementSomeGroup>::GetHermitianProduct
 
 template <class elementSomeGroup>
 LargeInt FiniteGroup<elementSomeGroup>::GetSize()const
-{ if (this->sizePrivate<=0)
+{ //if(GetSizeByFormula)
+  //  return GetSizeByFormula(this);
+  if (this->sizePrivate<=0)
     crash << "Requesting size of group whose size is not computed. " << crash;
   return this->sizePrivate;
 }

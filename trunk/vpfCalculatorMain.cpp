@@ -24,8 +24,14 @@ int main(int argc, char **argv)
   theGlobalVariables.flagReportEverything=true;
   //	stOutput <<  "<br>" << (int) &theGlobalVariables.callSystem ;
   ParallelComputing::cgiLimitRAMuseNumPointersInList=4000000000;
+
   if (argc>=1)
-    theGlobalVariables.initDefaultFolderAndFileNames(argv[0], "");
+  { std::string firstArg;
+    std::cout << "argc: " << argc << " argv[0]: " << argv[0] << "\n";
+    firstArg=argv[0];
+    theGlobalVariables.initDefaultFolderAndFileNames(firstArg, "");
+
+  }
   theGlobalVariables.flagUsingBuiltInWebServer=false;
   if (argc>=2)
   { std::string tempArgument=argv[1];

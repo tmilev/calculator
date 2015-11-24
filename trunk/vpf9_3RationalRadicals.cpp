@@ -734,6 +734,11 @@ bool AlgebraicNumber::CheckConsistency()const
 
 void AlgebraicNumber::operator*=(const AlgebraicNumber& other)
 { MacroRegisterFunctionWithName("AlgebraicNumber::operator*=");
+  if (this==& other)
+  { AlgebraicNumber otherCopy=other;
+    *this*=other;
+    return;
+  }
   this->CheckConsistency();
   if (other.owner==0)
   { if (other.IsEqualToZero())
@@ -752,18 +757,18 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other)
     return;
   }
   this->CheckCommonOwner(other);
-  AlgebraicNumber otherCopy=other;
+//  AlgebraicNumber otherCopy=other;
 //  stOutput << "Converting <hr>" << CGI::GetMathSpanPure(this->ToString()) << " and <br><br>\n\n\n\n<br><br>"
 //  << CGI::GetMathSpanPure(otherCopy.ToString());
 //  stOutput << " <br><br>To get: " << CGI::GetMathSpanPure(this->ToString()) << "<br>\n\n and  <br><br>\n\n\n\n<br><br> \n"
 //  << CGI::GetMathSpanPure(otherCopy.ToString()) ;
   //stOutput << " <hr>multiplying " << this->theElt.ToString() << " by " << other.theElt.ToString() << " ";
   MatrixTensor<Rational> leftMat, rightMat;
-  FormatExpressions tempformat;
-  tempformat.flagUseLatex=true;
-  tempformat.flagUseHTML=false;
+//  FormatExpressions tempformat;
+//  tempformat.flagUseLatex=true;
+//  tempformat.flagUseHTML=false;
   this->owner->GetMultiplicationBy(*this, leftMat);
-  this->owner->GetMultiplicationBy(otherCopy,rightMat);
+  this->owner->GetMultiplicationBy(other, rightMat);
 //  stOutput << "<br><br>\n\n\n\n<br><br> in matrix form: " << CGI::GetMathSpanPure(leftMat.ToStringMatForm(&tempformat)) << " by "
 //  << CGI::GetMathSpanPure(rightMat.ToStringMatForm(&tempformat));
   leftMat*=rightMat;

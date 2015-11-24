@@ -3217,7 +3217,7 @@ bool LargeIntUnsigned::IsPossiblyPrimeMillerRabinOnce
 bool LargeIntUnsigned::IsPossiblyPrimeMillerRabin(int numTimesToRun)
 { MacroRegisterFunctionWithName("LargeIntUnsigned::IsPossiblyPrimeMillerRabin");
   if (this->IsEven())
-    return false;
+    return *this==2;
   List<unsigned int> aFewPrimes;
   std::cout << "got to here 1 \n";
   std::cout.flush();

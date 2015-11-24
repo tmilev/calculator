@@ -548,11 +548,14 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("BuildFreecalc", CalculatorFunctionsGeneral::innerBuildFreecalc, "",
    "Builds the freecalc lecture pdfs. \
-   Takes as argument the lecuture file.",
-   "BuildFreecalc(\"/home/todor/math/freecalc/lectures/UMB-M141-2015-Fall/Lecture_2015_Fall_Calculus_II_Math_141.tex\");\
-   \nBuildFreecalc(\"/home/todor/math/freecalc/lectures/UMB-M140-2015-Fall/Lecture_2015_Fall_Calculus_I_Math_140.tex\");\
-   \nBuildFreecalc(\"/home/todor/math/freecalc/homework/UMB-M141-2015-Fall/Homework_2015_Fall_Calculus_II_Math_141.tex\");\
-   \nBuildFreecalc(\"/home/todor/math/freecalc/homework/UMB-M140-2015-Fall/Homework_2015_Fall_Calculus_I_Math_140.tex\");\
+   Takes as arguments the lecture folder (within the freecalc project) and the file name. \
+   The function assumes the freecalc project is installed in a folder called freecalc, \
+   parallel to the calculator project folder (i.e, we have folders /vectorpartition and /freecalc next to one another).\
+   The folders are given relative to the /freecalc base.",
+   "BuildFreecalc (\"/lectures/UMB-M141-2015-Fall/Lecture_2015_Fall_Calculus_II_Math_141.tex\");\
+   \nBuildFreecalc(\"/lectures/UMB-M140-2015-Fall/Lecture_2015_Fall_Calculus_I_Math_140.tex\");\
+   \nBuildFreecalc(\"/homework/UMB-M141-2015-Fall/Homework_2015_Fall_Calculus_II_Math_141.tex\");\
+   \nBuildFreecalc(\"/homework/UMB-M140-2015-Fall/Homework_2015_Fall_Calculus_I_Math_140.tex\");\
    ", false, false
    , "CalculatorFunctionsGeneral::innerBuildFreecalc")
    ;
@@ -645,7 +648,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("IsPrimeMillerRabin", &CalculatorFunctionsGeneral::innerIsPrimeMillerRabin, "",
    "Checks if the number is prime by the Miller-Rabin test.",
-   "A=100!+1; IsPrimeMillerRabin(A)")
+   "A=100!+1; IsPrimeMillerRabin(A); IsPrimeMillerRabin( 4256233);IsPrimeMillerRabin(49979687);IsPrimeMillerRabin( 4256233*49979687)")
    ;
 
   this->AddOperationInnerHandler

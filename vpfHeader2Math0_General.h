@@ -595,7 +595,7 @@ public:
       return;
     }
     if (this->NumCols!=input.size)
-    { crash << "This is a programming error: attempting to multply a matrix with " << this->NumCols << " columns with a vector(column) of "
+    { crash << "This is a programming error: attempting to multiply a matrix with " << this->NumCols << " columns with a vector(column) of "
       << " dimension " << input.size << ". " << crash;
     }
     output.MakeZero(this->NumRows);
@@ -6414,8 +6414,8 @@ public:
       for (int j=0; j<inputOutput.size(); j++)
         if((*this)[i].dualIndex==inputOutput[j].theIndex)
         { tempVM.theIndex=(*this)[i].vIndex;
-          tempElt=inputOutput.theCoeffs[j];
-          tempElt*=this->theCoeffs[i];
+          tempElt=this->theCoeffs[i];
+          tempElt*=inputOutput.theCoeffs[j];
           output.AddMonomial(tempVM, tempElt);
         }
     inputOutput=output;

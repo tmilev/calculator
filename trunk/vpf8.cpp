@@ -1342,3 +1342,11 @@ void Rational::AssignString(const std::string& input)
   *this/=readerDen;
   *this*=sign;
 }
+
+// haha, qtcreator doesn't understand this cxx11 code.  guess it wasn't such
+// a good idea to use it.  anyway "3/5"_R is now a rational literal.
+Rational operator""_R(const char* in, size_t insize)
+{ Rational x;
+  x.AssignString(in);
+  return x;
+}

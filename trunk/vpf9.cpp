@@ -4110,6 +4110,10 @@ void WeylGroup::init()
   this->flagCharTableIsComputed=false;
   this->MatrixSendsSimpleVectorsToEpsilonVectors.FreeMemory();
   this->::FiniteGroup<ElementWeylGroup<WeylGroup> >::init();
+  this->GetWordByFormula = this->GetWordByFormulaImplementation;
+  this->GetSizeByFormula = this->GetSizeByFormulaImplementation;
+  this->ComputeCCSizesAndRepresentativesByFormula = 0;
+  this->AreConjugateByFormula = 0;
 }
 
 void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho)
@@ -4120,6 +4124,15 @@ void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<
 //    output.affinePoint.ComputeDebugString();
     this->SimpleReflectionDualSpace
     (this->theElements[index].generatorsLastAppliedFirst[numGens-i-1].index, output.normal);
+  }
+}
+
+void WeylGroup::GetWordByFormulaImplementation(void *G, const ElementWeylGroup<WeylGroup> &g, List<int> &out)
+{ out.SetSize(g.generatorsLastAppliedFirst.size);
+  for(int i=0; i<g.generatorsLastAppliedFirst.size; i++)
+  { if(g.generatorsLastAppliedFirst[i].flagIsOuter)
+      crash << "wait, what?  is this okay to pass through or what should happen now?  see " << __FILE__ << ":" << __LINE__ << crash;
+    out[i] = g.generatorsLastAppliedFirst[i].index;
   }
 }
 
@@ -4972,7 +4985,7 @@ void WeylGroup::DrawRootSystem
 std::string WeylGroup::GenerateWeightSupportMethoD1
 (Vector<Rational>& highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords, int upperBoundWeights, GlobalVariables& theGlobalVariables)
 { HashedList<Vector<Rational> > theDominantWeights;
-  double upperBoundDouble=100000/((Rational)this->GetGroupSizeByFormula()).GetDoubleValue();
+  double upperBoundDouble=100000/((Rational)this->GetSize()).GetDoubleValue();
   int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 10000);
   //int upperBoundInt = 10000;
   Vector<Rational> highestWeightTrue=highestWeightSimpleCoords;
@@ -4992,7 +5005,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
   Vectors<Rational> tempRoots;
   HashedList<Vector<Rational> > finalWeights;
   int estimatedNumWeights=(int)
-  ( ((Rational)this->GetGroupSizeByFormula()).GetDoubleValue()*theDominantWeights.size);
+  ( ((Rational)this->GetSize()).GetDoubleValue()*theDominantWeights.size);
   estimatedNumWeights= MathRoutines::Minimum(10000, estimatedNumWeights);
   finalWeights.Reserve(estimatedNumWeights);
   finalWeights.SetHashSizE(estimatedNumWeights);

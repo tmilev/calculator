@@ -456,12 +456,14 @@ void PermutationR2::Invert()
   //stOutput<< " inverts to " << *this << '\n';
 }
 
-void PermutationR2::Conjugate(const PermutationR2& conjugateMe, const PermutationR2& conjugateBy, PermutationR2& out)
-{ PermutationR2 conjugateInverse = conjugateBy;
-  conjugateInverse.Invert();
-  PermutationR2 tmp;
-  tmp.MakeFromMul(conjugateMe,conjugateBy);
-  out.MakeFromMul(conjugateInverse,tmp);
+PermutationR2 PermutationR2::operator^(const PermutationR2& right) const
+{ PermutationR2 tmp = right;
+  tmp.Invert();
+  return right * (*this) *  tmp;
+}
+
+void PermutationR2::ConjugationAction(const PermutationR2 &conjugateWith, const PermutationR2 &conjugateOn, PermutationR2 &out)
+{ out = conjugateOn ^ conjugateWith;
 }
 
 bool PermutationR2::AreConjugate(const PermutationR2& x, const PermutationR2& y)
@@ -703,7 +705,7 @@ void PermutationGroup::MakeSymmetricGroupGeneratorsjjPlus1(int n)
   return this->SimpleFiniteGroup<PermutationR2>::AreConjugate(x,y);
 }*/
 
-int PermutationGroup::GetSizeByFormulaImplementation(void* GG)
+LargeInt PermutationGroup::GetSizeByFormulaImplementation(void* GG)
 { PermutationGroup* G = (PermutationGroup*) GG;
   if(G->flagIsSymmetricGroup)
     return MathRoutines::Factorial(G->generators.size + 1);
@@ -717,6 +719,7 @@ void PermutationGroup::ComputeCCSizesAndRepresentativesByFormulaImplementation(v
   if(!G->flagIsSymmetricGroup)
     return G->ComputeCCSizesAndRepresentatives(0);
   G->flagCCsComputed = true;
+  G->flagCCRepresentativesComputed = true;
   int N = G->generators.size + 1;
   List<Partition> parts;
   Partition::GetPartitions(parts, N);
@@ -884,15 +887,16 @@ void ElementHyperoctahedralGroup::Invert()
 { this->p.Invert();
 }
 
-void ElementHyperoctahedralGroup::Conjugate(const ElementHyperoctahedralGroup& element, const ElementHyperoctahedralGroup& conjugateBy, ElementHyperoctahedralGroup& out)
-{ ElementHyperoctahedralGroup conjugateInverse;
-  conjugateInverse.p = conjugateBy.p;
-  conjugateInverse.p.Invert();
-  conjugateInverse.s = conjugateBy.s;
-  ElementHyperoctahedralGroup tmp;
-  tmp.MakeFromMul(element,conjugateBy);
-  out.MakeFromMul(conjugateInverse,tmp);
-  //stOutput << element << "^" << conjugateBy << "=" << out << "  ";
+void ElementHyperoctahedralGroup::ConjugationAction(const ElementHyperoctahedralGroup& conjugateWith, const ElementHyperoctahedralGroup& conjugateOn, ElementHyperoctahedralGroup& out)
+{ out = conjugateOn^conjugateWith;
+}
+
+ElementHyperoctahedralGroup ElementHyperoctahedralGroup::operator^(const ElementHyperoctahedralGroup& right) const
+{ ElementHyperoctahedralGroup rightInverse;
+  rightInverse.p = right.p;
+  rightInverse.p.Invert();
+  rightInverse.s = right.s;
+  return right * (*this) * rightInverse;
 }
 
 int ElementHyperoctahedralGroup::CountSetBits() const
@@ -1205,7 +1209,7 @@ int HyperoctahedralGroup::GetN()
   return this->N;
 }
 
-int HyperoctahedralGroup::GetSizeByFormulaImplementation(void* GG)
+LargeInt HyperoctahedralGroup::GetSizeByFormulaImplementation(void* GG)
 { HyperoctahedralGroup* G = (HyperoctahedralGroup*) GG;
   stOutput << "HyperoctahedralGroup::GetSize() called.  N=" << G->N << '\n';
   if(G->isEntireHyperoctahedralGroup)
@@ -1264,6 +1268,7 @@ void HyperoctahedralGroup::ComputeCCSizesAndRepresentativesByFormulaImplementati
     }
   }
   G->flagCCsComputed = true;
+  G->flagCCRepresentativesComputed = true;
   /* VerifyFormulaCCRepresentatives
   if(this->easyConjugacyDetermination)
     for(int i=0; i<this->conjugacyClasseS.size; i++)

@@ -1026,4 +1026,5 @@ ParallelComputing::GlobalPointerCounter++;
     return tempRat.IsGreaterThan(*this);
   }
 };
+Rational operator""_R(const char *in, size_t insize);
 #endif

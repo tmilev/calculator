@@ -1015,9 +1015,9 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   std::stringstream out;
   WeylGroup& theWeyl=theSSalgebra->theWeyl;
-  if (theWeyl.GetGroupSizeByFormula()>192)
+  if (theWeyl.GetSize()>192)
   { out << "I have been instructed to run only for Weyl groups that have at most 192 elements (i.e. no larger than D_4). "
-    << theSSalgebra->GetLieAlgebraName() << " has " << theWeyl.GetGroupSizeByFormula().ToString() << ".";
+    << theSSalgebra->GetLieAlgebraName() << " has " << theWeyl.GetSize().ToString() << ".";
     return output.AssignValue(out.str(), theCommands);
   }
   FormatExpressions theFormat;
@@ -1047,7 +1047,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
 //      theFormat.chevalleyHgeneratorLetter="\\bar{h}";
 //      theFormat.chevalleyGgeneratorLetter="\\bar{g}";
   out << "<hr>Lie algebra type: " << theWeyl.theDynkinType << ". ";
-  out << "<br>Weyl group size: " << theWeyl.GetGroupSizeByFormula().ToString() << "." << "<br>To get extra details: ";
+  out << "<br>Weyl group size: " << theWeyl.GetSize().ToString() << "." << "<br>To get extra details: ";
   std::stringstream tempStream;
   tempStream << "printSemisimpleLieAlgebra{}(" << theWeyl.theDynkinType << ")";
   out << theCommands.GetCalculatorLink(tempStream.str()) << "<br>";

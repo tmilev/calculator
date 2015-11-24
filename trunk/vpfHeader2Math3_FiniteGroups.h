@@ -203,6 +203,8 @@ public:
   bool flagGeneratorsConjugacyClassesComputed;
   bool flagWordsComputed;
 
+  bool flagCanComputeCCsWithOrbitIterator;
+
   bool flagDeallocated;
   FiniteGroup(): flagDeallocated(false)
   { this->init();
@@ -224,18 +226,20 @@ public:
   { this->sizePrivate=inputSize;
   }
   void init();
-  std::string ToString(FormatExpressions* theFormat=0)const;
+  std::string ToString(FormatExpressions* theFormat=0);
   std::string ToStringElements(FormatExpressions* theFormat=0)const;
-  std::string ToStringConjugacyClasses(FormatExpressions* theFormat=0)const;
+  std::string ToStringConjugacyClasses(FormatExpressions* theFormat=0);
   int ConjugacyClassCount()const;
-  LargeInt GetSize()const;
-  virtual LargeInt GetGroupSizeByFormula()const
-  { return -1;
+  LargeInt GetSize();
+  LargeInt GetGroupSizeByFormula()
+  { if(GetSizeByFormula)
+      return GetSizeByFormula(this);
+    return -1;
   } //non-positive result means no formula is known.
 
   bool (*AreConjugateByFormula)(const elementSomeGroup& x, const elementSomeGroup& y);
   void (*ComputeCCSizesAndRepresentativesByFormula)(void* G);
-  int (*GetSizeByFormula)(void* G);
+  LargeInt (*GetSizeByFormula)(void* G);
   bool AreConjugate(const elementSomeGroup& left, const elementSomeGroup& right);
 
   bool ComputeAllElements(int MaxElements=-1, GlobalVariables* theGlobalVariables=0);
@@ -260,12 +264,14 @@ public:
   (GlobalVariables* theGlobalVariables)
   ;
   void ComputeCCSizesAndRepresentatives(GlobalVariables* theGlobalVariables);
+  void ComputeCCSizesAndRepresentativesWithOrbitIterator(GlobalVariables* theGlobalVariables);
+  void ComputeCCSizesAndRepresentativesSimpleAlgorithm(GlobalVariables *theGlobalVariables);
   bool HasElement(const elementSomeGroup& g);
   void GetWord(const elementSomeGroup& g, List<int>& out);
   void (*GetWordByFormula)(void* G, const elementSomeGroup& g, List<int>& out);
   void GetSignCharacter(Vector<Rational>& outputCharacter);
   template <typename coefficient>
-  coefficient GetHermitianProduct(const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter)const;
+  coefficient GetHermitianProduct(const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter);
 
   bool PossiblyConjugate(const elementSomeGroup& x, const elementSomeGroup& y);
   void MakeID(elementSomeGroup& x);
@@ -379,7 +385,9 @@ public:
     theGen.flagIsOuter=true;
     this->generatorsLastAppliedFirst.AddOnTop(theGen);
   }
-  static void Conjugate(const ElementWeylGroup& elementWeConjugateBy, const ElementWeylGroup& inputToBeConjugated, ElementWeylGroup& output);
+//  static void Conjugate(const ElementWeylGroup& conjugateMe, const ElementWeylGroup& conjugateBy, ElementWeylGroup& output);
+  static void ConjugationAction(const ElementWeylGroup& conjugateWith, const ElementWeylGroup& conjugateOn, ElementWeylGroup& output);
+  ElementWeylGroup operator^(const ElementWeylGroup& right) const;
   void MakeFromRhoImage(const Vector<Rational>& inputRhoImage, WeylGroup& inputWeyl);
   void MakeOuterAuto(int outerAutoIndex, WeylGroup& inputWeyl);
   void MakeSimpleReflection(int simpleRootIndex, WeylGroup& inputWeyl);
@@ -534,6 +542,7 @@ public:
   bool CheckConsistency()const;
   bool CheckInitializationFDrepComputation()const;
   bool CheckInitializationConjugacyClasses()const;
+  static void GetWordByFormulaImplementation(void* G, const ElementWeylGroup<WeylGroup>& g, List<int>& out);
   void GetSignCharacter(Vector<Rational>& out);
   void GetStandardRepresentation(WeylGroupRepresentation<Rational>& output);
   void GetSignRepresentation(WeylGroupRepresentation<Rational>& output);
@@ -675,8 +684,9 @@ public:
   }
   void ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output);
   void ComputeRootsOfBorel(Vectors<Rational>& output);
-  LargeInt GetGroupSizeByFormula()const
-  { return this->theDynkinType.GetWeylGroupSizeByFormula();
+  static LargeInt GetSizeByFormulaImplementation(void* GP)
+  { WeylGroup* G = (WeylGroup*) GP;
+    return G->theDynkinType.GetWeylGroupSizeByFormula();
   }
   static LargeInt GetGroupSizeByFormula(char weylLetter, int theDim);
   bool IsARoot(const Vector<Rational>& input)const
@@ -1890,7 +1900,7 @@ std::ostream& operator<<(std::ostream& out, const UDPolynomial<coefficient>& p)
 }
 
 template <class elementSomeGroup>
-std::string FiniteGroup<elementSomeGroup>::ToString(FormatExpressions* theFormat)const
+std::string FiniteGroup<elementSomeGroup>::ToString(FormatExpressions* theFormat)
 { std::stringstream out;
   out << this->ToStringElements(theFormat);
   out << this->ToStringConjugacyClasses(theFormat);

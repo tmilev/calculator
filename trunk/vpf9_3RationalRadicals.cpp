@@ -707,6 +707,11 @@ void AlgebraicNumber::operator-=(const AlgebraicNumber& other)
 void AlgebraicNumber::operator+=(const AlgebraicNumber& other)
 { MacroRegisterFunctionWithName("AlgebraicNumber::operator+=");
   //stOutput << "Adding " << this->ToString() << " to " << other.ToString();
+  if (this==& other)
+  { AlgebraicNumber otherCopy=other;
+    *this+=other;
+    return;
+  }
   this->CheckCommonOwner(other);
   if (this->basisIndex==other.basisIndex)
   { this->theElT+=other.theElT;

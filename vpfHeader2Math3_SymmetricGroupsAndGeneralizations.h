@@ -203,7 +203,8 @@ public:
   void Invert();
   // some day i'm going to move the out to the first parameter everywhere
   // after i find out why it was put last this time
-  static void Conjugate(const PermutationR2& conjugateMe, const PermutationR2& conjugateBy, PermutationR2& out);
+  PermutationR2 operator^(const PermutationR2& right) const;
+  static void ConjugationAction(const PermutationR2& conjugateWith, const PermutationR2& conjugateOn, PermutationR2& out);
 
   // Should this be operator*(), operator()(), or just ActOn()?
   // I vote operator()() for an action, but I chose operator*() for some reason
@@ -284,7 +285,8 @@ class ElementHyperoctahedralGroup
 
   int SmallestN() const;
   int CountSetBits() const;
-  static void Conjugate(const ElementHyperoctahedralGroup& element, const ElementHyperoctahedralGroup& conjugateBy, ElementHyperoctahedralGroup& out);
+  ElementHyperoctahedralGroup operator^(const ElementHyperoctahedralGroup& right) const;
+  static void ConjugationAction(const ElementHyperoctahedralGroup& conjugateWith, const ElementHyperoctahedralGroup& conjugateOn, ElementHyperoctahedralGroup& out);
   bool HasDifferentConjugacyInvariantsFrom(const ElementHyperoctahedralGroup& other) const;
   static bool AreConjugate(const ElementHyperoctahedralGroup& x, const ElementHyperoctahedralGroup& y);
   void GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& out) const;
@@ -807,7 +809,7 @@ class PermutationGroup: public FiniteGroup<PermutationR2>
   //bool AreConjugate(const PermutationR2& x, const PermutationR2& y);
 
   static void ComputeCCSizesAndRepresentativesByFormulaImplementation(void* G);
-  static int GetSizeByFormulaImplementation(void* G);
+  static LargeInt GetSizeByFormulaImplementation(void* G);
   static void GetWordjjPlus1Implementation(void* G, const PermutationR2& g, List<int>& word);
 
   PermutationGroup()
@@ -842,7 +844,7 @@ class HyperoctahedralGroup: public FiniteGroup<ElementHyperoctahedralGroup>
 
   static void ComputeCCSizesAndRepresentativesByFormulaImplementation(void* G);
   static void GetWordByFormulaImplementation(void* G, const ElementHyperoctahedralGroup& element, List<int>& word);
-  static int GetSizeByFormulaImplementation(void* G);
+  static LargeInt GetSizeByFormulaImplementation(void* G);
 
 
   int GetN();
@@ -1138,14 +1140,17 @@ void FiniteGroup<elementSomeGroup>::ComputeAllElementsWordsConjugacyIfObvious(bo
   }
   this->flagAllElementsAreComputed = true;
   if(AreConjugateByFormula && (ComputeCCSizesAndRepresentativesByFormula == NULL))
-    this->flagCCsComputed = true;
+  { this->flagCCsComputed = true;
+    this->flagCCRepresentativesComputed = true;
+  }
   if(andWords)
     this->flagWordsComputed = true;
+  this->sizePrivate = this->theElements.size;
 }
 
-/*
+
 template <typename elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives(void* unused)
+void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentativesSimpleAlgorithm(GlobalVariables* unused)
 { if(this->flagCCsComputed)
     return;
   if(this->ComputeCCSizesAndRepresentativesByFormula)
@@ -1156,16 +1161,15 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives(void* unuse
   { this->ComputeAllElements();
     return;
   }
-  if(!this->haveWords)
+  if(!this->flagWordsComputed)
     this->ComputeAllElements(true);
-  if(!this->haveElements)
+  if(!this->flagAllElementsAreComputed)
     this->ComputeAllElements();
   GraphOLD conjugacygraph = GraphOLD(this->theElements.size, this->generators.size);
   for(int i=0; i<this->theElements.size; i++)
     for(int j=0; j<this->generators.size; j++)
-    { elementSomeGroup x;
-      // crazy api lol
-      elementSomeGroup::Conjugate(this->theElements[i], this->generators[j], x);
+    { elementSomeGroup x = this->theElements[i] ^ this->generators[j];
+      stOutput << "I think that " << this->theElements[i] << "^" << this->generators[j] << " = " << x << '\n';
       int xi = this->theElements.GetIndex(x);
       conjugacygraph.AddEdge(i,xi);
     }
@@ -1175,27 +1179,19 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives(void* unuse
   for(int i=0; i<components.size; i++)
   { this->conjugacyClasseS[i].representative = this->theElements[components[i][0]];
     this->conjugacyClasseS[i].size = components[i].size;
-    this->conjugacyClasseS[i].theElements = components[i];
+    this->conjugacyClasseS[i].indicesEltsInOwner = components[i];
     this->conjugacyClasseS[i].representativeIndex = components[i][0];
-    if(this->haveWords)
+    if(this->flagWordsComputed)
       GetWord(conjugacyClasseS[i].representative, conjugacyClasseS[i].representativeWord);
   }
   this->flagCCsComputed = true;
-}*/
+  this->flagCCRepresentativesComputed = true;
+}
 
 /*
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::ComputeElementsAndCCs(void* unused)
 { this->ComputeCCSizesAndRepresentatives();
-}
-*/
-
-/*
-template <typename elementSomeGroup>
-int FiniteGroup<elementSomeGroup>::GetSize()
-{ if(!this->haveElements)
-    this->ComputeAllElements();
-  return this->theElements.size;
 }
 */
 
@@ -1230,10 +1226,10 @@ void FiniteGroup<elementSomeGroup>::ComputeGeneratorCommutationRelations()
     { elementSomeGroup g = this->generators[i] * this->generators[j];
       elementSomeGroup gi = g;
       int cr = 1;
-      do
+      while(!this->IsID(gi))
       { gi = gi * g;
         cr++;
-      } while(!this->IsID(g));
+      }
       this->generatorCommutationRelations(i,j) = cr;
       this->generatorCommutationRelations(j,i) = cr;
     }

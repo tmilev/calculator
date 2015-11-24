@@ -25,7 +25,7 @@ void GraphOLD::AddDiEdge(int v1, int v2){
             return;
         }
     }
-    stOutput << "attempting to add an edge beyond max_edges" << "\n";
+    crash << "attempting to add an edge beyond max_edges" << crash;
 }
 
 // methods that can only be called once can have long names

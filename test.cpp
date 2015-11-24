@@ -432,7 +432,7 @@ void ComputeIrreps(WeylGroup& G)
   stOutput << "need reps for chars" << charactersWithoutIrreps << "\n";
   Matrix<Rational> M;
   M.init(G.characterTable.size, G.characterTable.size);
-  Rational SizeG=G.GetGroupSizeByFormula();
+  Rational SizeG=G.GetSize();
   for(int i=0; i<G.characterTable.size; i++)
     for(int j=0; j<G.characterTable.size; j++)
       M(j,i) = G.characterTable[j][i]*G.conjugacyClasseS[i].size/SizeG;
@@ -1474,7 +1474,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation(WeylGroup& W, con
   List<Vector<Rational> > monomial;
   List<List<Vector<Rational> > > monomials;
   Matrix<Rational> m;
-  for(int i=0; (Rational)i<W.GetGroupSizeByFormula(); i++)
+  for(int i=0; (Rational)i<W.GetSize(); i++)
   { W.GetStandardRepresentationMatrix(i,m);
     monomial.SetSize(roots.size);
     for(int j=0; j<roots.size; j++)
@@ -2361,11 +2361,11 @@ void TestHyperoctahedralStuff()
   stOutput << "Q1*Q2=" << q1*q2 << " Q2*Q1*Q2=" << q2*q1*q2;
   q4 = q2;
   q4.Invert();
-  ElementHyperoctahedralGroup::Conjugate(q1,q2,q3);
-  stOutput << " Q1^Q2=" << q3 << " Q2*Q1*Q4=" << q2*q1*q4;
+  stOutput << " Q1^Q2=" << (q1^q2) << " Q2*Q1*Q4=" << q2*q1*q4;
 
   for(int bni=1; bni<6;bni++)
   { HyperoctahedralGroup Bn;
+    Bn.init();
     Bn.MakeHyperoctahedralGroup(bni);
     Bn.ComputeAllElements();
     Bn.ComputeCCSizesAndRepresentatives(NULL);
@@ -3163,8 +3163,10 @@ void TestSpechtModules(int N = 7)
 //  stOutput << p << " " << q << " " << p+q << " " << '\n';
 //  Vector<Polynomial<Rational> > relations;
 //  lie_bracket_relations(relations, 3);
+
 void LegacyTest()
-{
+{ Rational x = "3/5"_R;
+  stOutput << x << " " << x*x << '\n';
   WeylGroup PW;
   PW.MakeArbitrarySimple('A',5);
   PW.ComputeCCSizesAndRepresentatives(NULL);

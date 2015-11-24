@@ -63,24 +63,46 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElements(int MaxElements, GlobalVa
   return true;
 }
 
-template <class templateWeylGroup>
+/*template <class templateWeylGroup>
 void ElementWeylGroup<templateWeylGroup>::Conjugate
-(const ElementWeylGroup& elementWeConjugateBy, const ElementWeylGroup& inputToBeConjugated, ElementWeylGroup& output)
-{ if (elementWeConjugateBy.owner!=inputToBeConjugated.owner)
+(const ElementWeylGroup& conjugateMe, const ElementWeylGroup& conjugateBy, ElementWeylGroup& output)
+{ if (conjugateMe.owner!=conjugateBy.owner)
     crash << "Attempting to multiply elements belonging to different Weyl groups." << crash;
-  if (&elementWeConjugateBy==&output || &inputToBeConjugated==&output)
-  { ElementWeylGroup copyActingElt=elementWeConjugateBy;
-    ElementWeylGroup copyToBeConjugated=inputToBeConjugated;
-    ElementWeylGroup<templateWeylGroup>::Conjugate(copyActingElt, copyToBeConjugated, output);
+  if (&conjugateMe==&output || &conjugateBy==&output)
+  { ElementWeylGroup copyActingElement=conjugateBy;
+    ElementWeylGroup copyToBeConjugated=conjugateMe;
+    ElementWeylGroup<templateWeylGroup>::Conjugate(copyToBeConjugated, copyActingElement, output);
     return;
   }
-  output.owner=elementWeConjugateBy.owner;
-  output.generatorsLastAppliedFirst.Reserve(elementWeConjugateBy.generatorsLastAppliedFirst.size*2+inputToBeConjugated.generatorsLastAppliedFirst.size);
-  output.generatorsLastAppliedFirst=elementWeConjugateBy.generatorsLastAppliedFirst;
-  output.generatorsLastAppliedFirst.AddListOnTop(inputToBeConjugated.generatorsLastAppliedFirst);
-  for (int i=elementWeConjugateBy.generatorsLastAppliedFirst.size-1; i>=0; i--)
-    output.generatorsLastAppliedFirst.AddOnTop(elementWeConjugateBy.generatorsLastAppliedFirst[i]);
+  output.owner=conjugateMe.owner;
+  output.generatorsLastAppliedFirst.Reserve(conjugateBy.generatorsLastAppliedFirst.size*2+conjugateMe.generatorsLastAppliedFirst.size);
+  output.generatorsLastAppliedFirst=conjugateBy.generatorsLastAppliedFirst;
+  output.generatorsLastAppliedFirst.AddListOnTop(conjugateMe.generatorsLastAppliedFirst);
+  for (int i=conjugateMe.generatorsLastAppliedFirst.size-1; i>=0; i--)
+    output.generatorsLastAppliedFirst.AddOnTop(conjugateBy.generatorsLastAppliedFirst[i]);
   output.MakeCanonical();
+}*/
+
+template <class templateWeylGroup>
+ElementWeylGroup<templateWeylGroup> ElementWeylGroup<templateWeylGroup>::operator^(const ElementWeylGroup<templateWeylGroup>& right) const
+{ if(this->owner != right.owner)
+    crash << "Not allowed to conjugate elements of different Weyl groups.  If you did this intentionally, try changing "
+          << __FILE__ << ":" << __LINE__ << crash;
+  ElementWeylGroup<templateWeylGroup> out;
+  out.owner = this->owner;
+  out.generatorsLastAppliedFirst = right.generatorsLastAppliedFirst;
+  out.generatorsLastAppliedFirst.AddListOnTop(this->generatorsLastAppliedFirst);
+  for (int i=right.generatorsLastAppliedFirst.size-1; i>=0; i--)
+    out.generatorsLastAppliedFirst.AddOnTop(right.generatorsLastAppliedFirst[i]);
+  out.MakeCanonical();
+  return out;
+}
+
+template <class templateWeylGroup>
+void ElementWeylGroup<templateWeylGroup>::ConjugationAction(const ElementWeylGroup<templateWeylGroup>& ConjugateWith,
+                                                            const ElementWeylGroup<templateWeylGroup>& ConjugateOn,
+                                                            ElementWeylGroup<templateWeylGroup>& out)
+{ out = ConjugateOn^ConjugateWith;
 }
 
 template <class templateWeylGroup>
@@ -355,6 +377,7 @@ void FiniteGroup<elementSomeGroup>::init()
   this->flagCCRepresentativesComputed=false;
   this->flagCharPolysAreComputed=false;
   this->flagGeneratorsConjugacyClassesComputed=false;
+  this->flagWordsComputed=false;
   this->sizePrivate=0;
   this->AreConjugateByFormula=0;
   this->ComputeCCSizesAndRepresentativesByFormula=0;
@@ -444,7 +467,7 @@ Subgroup<somegroup, elementSomeGroup>::Subgroup()
 template <class elementSomeGroup>
 template <typename coefficient>
 coefficient FiniteGroup<elementSomeGroup>::GetHermitianProduct
-(const Vector<coefficient>& X1, const Vector<coefficient>& X2) const
+(const Vector<coefficient>& X1, const Vector<coefficient>& X2)
 { coefficient acc = 0;
   for(int i=0; i<X1.size; i++)
   { acc += MathRoutines::ComplexConjugate(X1[i]) * X2[i] * this->conjugacyClasseS[i].size;
@@ -455,11 +478,16 @@ coefficient FiniteGroup<elementSomeGroup>::GetHermitianProduct
 }
 
 template <class elementSomeGroup>
-LargeInt FiniteGroup<elementSomeGroup>::GetSize()const
-{ //if(GetSizeByFormula)
-  //  return GetSizeByFormula(this);
-  if (this->sizePrivate<=0)
-    crash << "Requesting size of group whose size is not computed. " << crash;
+LargeInt FiniteGroup<elementSomeGroup>::GetSize()
+{ if(this->sizePrivate > 0)
+    return sizePrivate;
+  if(GetSizeByFormula)
+  { this->sizePrivate = GetSizeByFormula(this);
+    return sizePrivate;
+  }
+  crash << "Requesting size of group whose size is not computed.  If you want"
+        << "to compute it as a side effect, change the stuff near "
+        << __FILE__ << ":" << __LINE__ << crash;
   return this->sizePrivate;
 }
 
@@ -509,7 +537,7 @@ std::string FiniteGroup<elementSomeGroup>::ToStringElements(FormatExpressions* t
 }
 
 template <class elementSomeGroup>
-std::string FiniteGroup<elementSomeGroup>::ToStringConjugacyClasses(FormatExpressions* theFormat)const
+std::string FiniteGroup<elementSomeGroup>::ToStringConjugacyClasses(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("Subgroup::ToStringConjugacyClasses");
   std::stringstream out;
   out << "<br>Size: " << this->GetSize().ToString() << "\n";
@@ -585,7 +613,7 @@ void FiniteGroup<elementSomeGroup>::ComputeGeneratorsConjugacyClasses
   elementSomeGroup currentElt;
   for (int i=0; i<this->unionGeneratorsCC.size; i++)
     for (int j=0; j<this->generators.size; j++)
-    { elementSomeGroup::Conjugate(this->generators[j], this->unionGeneratorsCC[i], currentElt);
+    { elementSomeGroup::ConjugationAction(this->generators[j], this->unionGeneratorsCC[i], currentElt);
       this->unionGeneratorsCC.AddOnTopNoRepetition(currentElt);
     }
   this->flagGeneratorsConjugacyClassesComputed=true;
@@ -596,7 +624,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizeOrCCFromRepresentative
 (ConjugacyClass& inputOutputClass, bool storeCC, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("FiniteGroup::ComputeCCSizesFromCCRepresentatives");
   OrbitIterator<elementSomeGroup, elementSomeGroup> theOrbitIterator;
-  theOrbitIterator.init(this->generators, inputOutputClass.representative, elementSomeGroup::Conjugate);
+  theOrbitIterator.init(this->generators, inputOutputClass.representative, elementSomeGroup::ConjugationAction);
   inputOutputClass.size=1;
   if (storeCC)
   { inputOutputClass.theElements.SetSize(0);
@@ -736,10 +764,25 @@ bool FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives
 }
 
 template <class elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives(GlobalVariables* theGlobalVariables)
+void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives(GlobalVariables *theGlobalVariables)
+{ if(this->GetSizeByFormula)
+  { LargeInt theSize = this->GetSizeByFormula(this);
+    // extended digit separators only appear in cxx14
+    if(theSize > 100000000)
+      if(this->flagCanComputeCCsWithOrbitIterator)
+      { this->ComputeCCSizesAndRepresentativesWithOrbitIterator(theGlobalVariables);
+        return;
+      }
+  }
+  this->ComputeCCSizesAndRepresentativesSimpleAlgorithm(theGlobalVariables);
+}
+
+template <class elementSomeGroup>
+void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentativesWithOrbitIterator(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("FiniteGroup::ComputeCCSizesAndRepresentatives");
   if (this->flagCCRepresentativesComputed)
     return;
+
   this->InitGenerators();
   this->CheckInitialization();
   this->CCsStandardRepCharPolys.Clear();
@@ -939,7 +982,7 @@ bool WeylGroup::GenerateOrbit
   Vector<coefficient> currentRoot;
   ElementWeylGroup<WeylGroup> currentElt;
   if (expectedOrbitSize<=0)
-    if (!this->GetGroupSizeByFormula().IsIntegerFittingInInt(&expectedOrbitSize))
+    if (!this->GetSize().IsIntegerFittingInInt(&expectedOrbitSize))
       expectedOrbitSize=-1;
   if (UpperLimitNumElements>0 && expectedOrbitSize>UpperLimitNumElements)
     expectedOrbitSize=UpperLimitNumElements;

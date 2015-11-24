@@ -1093,7 +1093,7 @@ bool FiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& left, c
     return false;
 //  stOutput << "<br>Invariants are the same, computing orbit.";
   OrbitIteratorWeylGroup theIterator;
-  theIterator.init(this->generators, left, ElementWeylGroup<WeylGroup>::Conjugate);
+  theIterator.init(this->generators, left, ElementWeylGroup<WeylGroup>::ConjugationAction);
   if (this->generators.size==0)
     crash << "generators not allowed to be 0. " << crash;
   do

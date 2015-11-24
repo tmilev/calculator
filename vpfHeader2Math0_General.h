@@ -782,7 +782,8 @@ public:
 //  bool ExpressColumnAsALinearCombinationOfColumnsModifyMyself
 //    (Matrix<coefficient>& inputColumn, Matrix<coefficient>* outputTheGaussianTransformations Matrix<coefficient>& outputColumn);
   bool Invert();
-  static void Conjugate(const Matrix<coefficient>& conjugateMe, const Matrix<coefficient>& conjugateBy, Matrix<coefficient>& out);
+  Matrix<coefficient> operator^(const Matrix<coefficient>& right) const;
+  static void ConjugationAction(const Matrix<coefficient>& conjugateMe, const Matrix<coefficient>& conjugateBy, Matrix<coefficient>& out);
   void MakeZero(const coefficient& theRingZero=0);
   void MakeID(const Matrix<coefficient>& prototype, const coefficient& theRingZero=0, const coefficient& theRingOne=1);
   //if m1 corresponds to a linear operator from V1 to V2 and
@@ -1203,13 +1204,20 @@ bool Matrix<coefficient>::Invert()
 }
 
 template <typename coefficient>
-void Matrix<coefficient>::Conjugate(const Matrix<coefficient>& conjugateMe, const Matrix<coefficient>& conjugateBy, Matrix<coefficient>& out)
-{ Matrix<coefficient> conjugateInverse = conjugateBy;
+Matrix<coefficient> Matrix<coefficient>::operator^(const Matrix<coefficient>& right) const
+{ Matrix<coefficient> conjugateInverse = right;
   conjugateInverse.Invert();
   Matrix<coefficient> tmp;
-  conjugateMe.MultiplyOnTheLeft(conjugateInverse,tmp);
-  conjugateBy.MultiplyOnTheLeft(tmp, out);
+  this->MultiplyOnTheLeft(conjugateInverse,tmp);
+  Matrix<coefficient> out;
+  right.MultiplyOnTheLeft(tmp, out);
+  return out;
 }
+
+template <typename coefficient>
+void Matrix<coefficient>::ConjugationAction(const Matrix<coefficient> &conjugateWith, const Matrix<coefficient> &conjugateOn, Matrix<coefficient> &out)
+{ out = conjugateOn ^ conjugateWith; };
+
 
 template <typename coefficient>
 void Matrix<coefficient>::MultiplyOnTheLeft(const Matrix<coefficient>& standsOnTheLeft, const coefficient& theRingZero)

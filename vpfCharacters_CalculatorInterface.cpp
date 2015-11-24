@@ -625,7 +625,7 @@ LargeInt WeylGroup::GetOrbitSize(Vector<coefficient>& theWeight, GlobalVariables
   stOutput << "<br>The stabilizer subsystem is: " << theStabilizerSubsystem.ToString();
   DynkinType theStabilizerDynkinType;
   theStabilizerSubsystem.GetDynkinType(theStabilizerDynkinType);
-  Rational resultRat=this->GetGroupSizeByFormula();
+  Rational resultRat=this->GetSize();
   resultRat/=theStabilizerDynkinType.GetWeylGroupSizeByFormula();
   LargeInt result;
   if (!resultRat.IsInteger(&result))

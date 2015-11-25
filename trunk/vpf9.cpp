@@ -10044,7 +10044,7 @@ void RationalFunctionOld::GetRelations(List<Polynomial<Rational> >& theGenerator
   }
   GroebnerBasisComputation<Rational> theComputation;
   theComputation.thePolynomialOrder.theMonOrder=MonomialP::LeftIsGEQLexicographicLastVariableWeakest;
-  theComputation.TransformToReducedGroebnerBasis(theGroebnerBasis, &theGlobalVariables);
+  theComputation.TransformToReducedGroebnerBasis(theGroebnerBasis);
 //  stOutput << "<br>the ending generators:<br> ";
 //  for (int i=0; i<theGroebnerBasis.size; i++)
 //  { stOutput << theGroebnerBasis.TheObjects[i].ToString(false, tempFormat) << "<br>";
@@ -10052,7 +10052,7 @@ void RationalFunctionOld::GetRelations(List<Polynomial<Rational> >& theGenerator
   theGenerators.Reserve(theGroebnerBasis.size);
   theGenerators.size=0;
   for (int i=0; i<theGroebnerBasis.size; i++)
-  { Polynomial<Rational> & currentPoly= theGroebnerBasis.TheObjects[i];
+  { Polynomial<Rational>& currentPoly= theGroebnerBasis.TheObjects[i];
     bool bad=false;
     for (int j=0; j<numStartingVariables; j++)
       if(currentPoly.GetMaxPowerOfVariableIndex(j)>0)

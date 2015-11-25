@@ -2679,16 +2679,14 @@ class GroebnerBasisComputation
   std::string GetDivisionStringHtml();
   std::string GetDivisionStringLaTeX();
   int SelectPolyIndexToAddNext();
-  bool AddPolysAndReduceBasis(GlobalVariables* theGlobalVariables);
+  bool AddPolysAndReduceBasis();
   bool TransformToReducedBasis
-  (List<Polynomial<coefficient> >& inputOutpuT, int upperLimitPolyComputations,
-   GlobalVariables* theGlobalVariables);
+  (List<Polynomial<coefficient> >& inputOutpuT, int upperLimitPolyComputations);
 
-  bool TransformToReducedGroebnerBasis(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables=0);
-  bool TransformToReducedGroebnerBasisImprovedAlgorithm(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables=0, int upperComputationBound=-1);
+  bool TransformToReducedGroebnerBasis(List<Polynomial<coefficient> >& inputOutpuT);
+  bool TransformToReducedGroebnerBasisImprovedAlgorithm(List<Polynomial<coefficient> >& inputOutpuT, int upperComputationBound=-1);
   void TrySettingValueToVariable
-(List<Polynomial<coefficient> >& inputSystem, const Rational& aValueToTryOnPreferredVariable,
- GlobalVariables* theGlobalVariables)
+(List<Polynomial<coefficient> >& inputSystem, const Rational& aValueToTryOnPreferredVariable)
 ;
   bool WrapUpGroebnerOnExceedingComputationLimit(List<Polynomial<coefficient> >& inputOutpuT);
   bool WrapUpOnGroebnerBasisSuccess(List<Polynomial<coefficient> >& inputOutpuT);
@@ -2703,32 +2701,31 @@ class GroebnerBasisComputation
   static void GetVarsToSolveFor(const List<Polynomial<coefficient> >& input, Selection& output);
   static bool IsContradictoryReducedSystem(const List<Polynomial<coefficient> >& input);
   void RemainderDivisionWithRespectToBasis
-  (Polynomial<coefficient>& inputOutput, Polynomial<coefficient>* outputRemainder=0, GlobalVariables* theGlobalVariables=0, int basisIndexToIgnore=-1);
+  (Polynomial<coefficient>& inputOutput, Polynomial<coefficient>* outputRemainder=0, int basisIndexToIgnore=-1);
   std::string ToStringCalculatorInputFromSystem(const List<Polynomial<coefficient> >& inputSystem);
-  void SolveSerreLikeSystem(List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables=0);
+  void SolveSerreLikeSystem(List<Polynomial<coefficient> >& inputSystem);
   bool HasImpliedSubstitutions
-  (List<Polynomial<coefficient> >& inputSystem, PolynomialSubstitution<coefficient>& outputSub, GlobalVariables* theGlobalVariables)
+  (List<Polynomial<coefficient> >& inputSystem, PolynomialSubstitution<coefficient>& outputSub)
   ;
   bool HasSingleMonomialEquation(const List<Polynomial<coefficient> >& inputSystem, MonomialP& outputMon);
   void SetUpRecursiveComputation(GroebnerBasisComputation& toBeModified);
-  void ProcessSolvedSubcaseIfSolvedOrProvenToHaveSolution
-  (GroebnerBasisComputation& potentiallySolvedCase, GlobalVariables* theGlobalVariables);
-  void SolveWhenSystemHasSingleMonomial(List<Polynomial<coefficient> >& inputSystem, const MonomialP& theMon, GlobalVariables* theGlobalVariables);
+  void ProcessSolvedSubcaseIfSolvedOrProvenToHaveSolution(GroebnerBasisComputation& potentiallySolvedCase);
+  void SolveWhenSystemHasSingleMonomial(List<Polynomial<coefficient> >& inputSystem, const MonomialP& theMon);
   int GetPreferredSerreSystemSubIndex(List<Polynomial<coefficient> >& inputSystem);
-  void SolveSerreLikeSystemRecursively(List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables);
-  void PolySystemSolutionSimplificationPhase(List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables);
-  void BackSubstituteIntoPolySystem(List<PolynomialSubstitution<coefficient> >& theImpliedSubs, GlobalVariables* theGlobalVariables);
-  void BackSubstituteIntoSinglePoly(Polynomial<coefficient>& thePoly, int theIndex, PolynomialSubstitution<coefficient>& theFinalSub, GlobalVariables* theGlobalVariables);
-  bool AddRemainderToBasis(GlobalVariables* theGlobalVariables);
-  bool GetOneVarPolySolution(const Polynomial<coefficient>& thePoly, coefficient& outputSolution, GlobalVariables* theGlobalVariables=0);
+  void SolveSerreLikeSystemRecursively(List<Polynomial<coefficient> >& inputSystem);
+  void PolySystemSolutionSimplificationPhase(List<Polynomial<coefficient> >& inputSystem);
+  void BackSubstituteIntoPolySystem(List<PolynomialSubstitution<coefficient> >& theImpliedSubs);
+  void BackSubstituteIntoSinglePoly(Polynomial<coefficient>& thePoly, int theIndex, PolynomialSubstitution<coefficient>& theFinalSub);
+  bool AddRemainderToBasis();
+  bool GetOneVarPolySolution(const Polynomial<coefficient>& thePoly, coefficient& outputSolution);
    //Criterion from Cox, Little, O'Shea:
   static bool CriterionCLOsh
   (HashedListSpecialized<Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> >& thePairs,
    List<MonomialP>& theLeadingMons, MonomialP& leadingTermLCM);
   void CheckConsistency();
   void initForSystemSolution();
-  void initForGroebnerComputation(int expectedNumInputPolys, GlobalVariables* theGlobalVariables);
-  void initForDivisionAlone(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables);
+  void initForGroebnerComputation(int expectedNumInputPolys);
+  void initForDivisionAlone(List<Polynomial<coefficient> >& inputOutpuT);
 };
 
 class RationalFunctionOld

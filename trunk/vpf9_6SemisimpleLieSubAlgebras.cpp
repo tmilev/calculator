@@ -77,7 +77,7 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF
   theComputation.MaxNumGBComputations=2001;
   theComputation.thePolynomialOrder.theMonOrder=
   MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
-  theComputation.SolveSerreLikeSystem(theSystem, theGlobalVariables);
+  theComputation.SolveSerreLikeSystem(theSystem);
   if (!theComputation.flagSystemSolvedOverBaseField)
   { if (logStream!=0)
     { if (theComputation.flagSystemProvenToHaveNoSolution)
@@ -3478,7 +3478,7 @@ bool CandidateSSSubalgebra::AttemptToSolveSystem()
   { theComputation.MaxNumGBComputations=i;
     theComputation.MaxNumSerreSystemComputationsPreferred=i;
     theComputation.theAlgebraicClosurE=this->owner->ownerField;
-    theComputation.SolveSerreLikeSystem(this->transformedSystem, this->owner->theGlobalVariables);
+    theComputation.SolveSerreLikeSystem(this->transformedSystem);
     if (theComputation.flagSystemProvenToHaveNoSolution || theComputation.flagSystemProvenToHaveSolution)
       break;
   }

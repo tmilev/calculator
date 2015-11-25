@@ -468,9 +468,9 @@ bool AlgebraicNumber::CheckNonZeroOwner()const
   return true;
 }
 
-bool AlgebraicNumber::ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner, GlobalVariables* theGlobalVariables)
+bool AlgebraicNumber::ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner)
 { MacroRegisterFunctionWithName("AlgebraicNumber::ConstructFromMinPoly");
-  return inputOwner.AdjoinRootMinPoly(thePoly, *this, theGlobalVariables);
+  return inputOwner.AdjoinRootMinPoly(thePoly, *this, &theGlobalVariables);
 }
 
 void AlgebraicClosureRationals::reset()
@@ -866,7 +866,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, Alge
   { Polynomial<AlgebraicNumber> minPoly;
     minPoly.MakeMonomiaL(0,2);
     minPoly-=inpuT;
-    return this->ConstructFromMinPoly(minPoly, inputOwner, inputOwner.theGlobalVariables);
+    return this->ConstructFromMinPoly(minPoly, inputOwner);
   }
   List<LargeInt> theFactors;
   Rational absoluteInput=inpuT;

@@ -301,12 +301,13 @@ bool Calculator::EvaluateExpression
     if (!output.IsFrozen())
       for (int i=0; i<output.children.size && !theCommands.flagAbortComputationASAP; i++)
       { if (i>0 && output.StartsWith(theCommands.opEndStatement()))
-        { // std::stringstream reportStream;
-//           for (int j=1; j<i; j++)
-//             if (output[j].StartsWith(theCommands.opDefine()) || output[j].StartsWith(theCommands.opDefineConditional()))
-//               reportStream << "<br>" << output[j].ToString();
- //          reportStream << "<br><b>" << output[i].ToString() << "</b>";
- //          theReport.Report(reportStream.str());
+        {  std::stringstream reportStream;
+           reportStream << "Substitution rules so far:";
+           for (int j=1; j<i; j++)
+             if (output[j].StartsWith(theCommands.opDefine()) || output[j].StartsWith(theCommands.opDefineConditional()))
+               reportStream << "<br>" << MathRoutines::StringShortenInsertDots(output[j].ToString(), 100);
+          reportStream << "<br>Evaluating:<br><b>" << MathRoutines::StringShortenInsertDots(output[i].ToString(), 100) << "</b>";
+          theReport.Report(reportStream.str());
         }
         if (theCommands.EvaluateExpression(theCommands, output[i], transformationE))
           output.SetChilD(i, transformationE);

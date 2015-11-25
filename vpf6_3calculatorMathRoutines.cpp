@@ -521,7 +521,7 @@ bool CalculatorFunctionsGeneral::innerSolveSerreLikeSystem
 //  stOutput << "<br>the alphabet:" << theComputation.theFormat.polyAlphabeT;
 //  stOutput << "<br>The context vars:<br>" << theContext.ToString();
   theComputation.flagUseTheMonomialBranchingOptimization=true;
-  theComputation.SolveSerreLikeSystem(thePolysAlgebraic, &theGlobalVariables);
+  theComputation.SolveSerreLikeSystem(thePolysAlgebraic);
 //  stOutput << "<br>Got to ere";
   std::stringstream out;
   out << "<br>The context vars:<br>" << theContext.ToString();
@@ -551,7 +551,7 @@ bool CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly(Calculator& 
   if (polyE.GetNumContextVariables()!=1)
     return theCommands << "<hr>After conversion, I got the polynomial " << polyE.ToString() << ", which is not in one variable.";
   AlgebraicNumber theAN;
-  if (!theAN.ConstructFromMinPoly(thePoly, theCommands.theObjectContainer.theAlgebraicClosure, &theGlobalVariables))
+  if (!theAN.ConstructFromMinPoly(thePoly, theCommands.theObjectContainer.theAlgebraicClosure))
     return false;
   return output.AssignValue(theAN, theCommands);
 }
@@ -1148,9 +1148,9 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
     theGB.theFormat=this->currentFormaT;
     //  Polynomial<Rational> outputRemainder;
     theGB.thePolynomialOrder.theMonOrder=MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
-    theGB.initForDivisionAlone(theGB.theBasiS, &theGlobalVariables);
+    theGB.initForDivisionAlone(theGB.theBasiS);
     Polynomial<Rational> theNumCopy=this->theNum;
-    theGB.RemainderDivisionWithRespectToBasis(theNumCopy, &theGB.remainderDivision, &theGlobalVariables, -1);
+    theGB.RemainderDivisionWithRespectToBasis(theNumCopy, &theGB.remainderDivision, -1);
     this->printoutPFsLatex << "Here is a detailed long polynomial division. ";
     this->printoutPFsLatex << theGB.GetDivisionStringLaTeX();
     this->printoutPFsHtml << "<br>Here is a detailed long polynomial division:<br> ";

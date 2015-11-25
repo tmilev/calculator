@@ -1285,7 +1285,7 @@ void RationalFunctionOld::lcm(const Polynomial<Rational>& left, const Polynomial
   bufComp.GetElement(): theGlobalVariables->theGroebnerBasisComputation.GetElement();
   theComp.thePolynomialOrder.theMonOrder=MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
   theComp.MaxNumGBComputations=-1;
-  if (!theComp.TransformToReducedGroebnerBasis(theBasis, theGlobalVariables))
+  if (!theComp.TransformToReducedGroebnerBasis(theBasis))
     crash << "Transformation to reduced Groebner basis is not allowed to fail in this function. " << crash;
 
 //  stOutput << "<br><br> ... and the basis is: <br>";
@@ -2565,6 +2565,17 @@ bool Cone::IsInCone(const Vector<Rational>& point) const
       return false;
   }
   return true;
+}
+
+std::string MathRoutines::StringShortenInsertDots(const std::string& inputString, int maxNumChars)
+{ if (inputString.size()<=(unsigned) maxNumChars)
+    return inputString;
+  std::stringstream out;
+  int numCharsBeginEnd=maxNumChars/2-2;
+  int numCharsOmitted=inputString.size()-numCharsBeginEnd*2;
+  out << inputString.substr(0, numCharsBeginEnd) << "... (" << numCharsOmitted << " characters omitted)..."
+  << inputString.substr(inputString.size()-numCharsBeginEnd);
+  return out.str();
 }
 
 void MathRoutines::SplitStringInTwo(const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond)

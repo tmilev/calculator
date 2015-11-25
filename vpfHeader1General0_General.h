@@ -282,6 +282,7 @@ public:
     else
       return -1;
   }
+  static std::string StringShortenInsertDots(const std::string& inputString, int maxNumChars);
   static int BinomialCoefficientMultivariate(int N, List<int>& theChoices);
   static bool IsPrime(int theInt);
   template <class coefficient, typename theIntegerType>

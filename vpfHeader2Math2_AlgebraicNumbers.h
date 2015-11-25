@@ -85,11 +85,11 @@ class AlgebraicNumber
   void operator=(int other)
   { *this=(Rational) other;
   }
-  bool ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner, GlobalVariables* theGlobalVariables);
-  bool ConstructFromMinPoly(const Polynomial<Rational>& thePoly, AlgebraicClosureRationals& inputOwner, GlobalVariables* theGlobalVariables)
+  bool ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner);
+  bool ConstructFromMinPoly(const Polynomial<Rational>& thePoly, AlgebraicClosureRationals& inputOwner)
   { Polynomial<AlgebraicNumber> polyConverted;
     polyConverted=thePoly;
-    return this->ConstructFromMinPoly(polyConverted, inputOwner, theGlobalVariables);
+    return this->ConstructFromMinPoly(polyConverted, inputOwner);
   }
   bool AssignRationalQuadraticRadical(const Rational& inpuT, AlgebraicClosureRationals& inputOwner);
   void AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner);

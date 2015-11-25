@@ -282,8 +282,8 @@ bool Calculator::innerPolynomialDivisionRemainder(Calculator& theCommands, const
 //  stOutput << "<hr>The polys: " << thePolys.ToString() << "<br>The gb basis: "
 //  << theGB.theBasiS.ToString() << "<hr>";
   Polynomial<Rational> outputRemainder;
-  theGB.initForDivisionAlone(theGB.theBasiS, &theGlobalVariables);
-  theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &outputRemainder, &theGlobalVariables, -1);
+  theGB.initForDivisionAlone(theGB.theBasiS);
+  theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &outputRemainder, -1);
   return output.AssignValueWithContext(outputRemainder, theContext, theCommands);
 }
 
@@ -318,9 +318,9 @@ bool Calculator::innerPolynomialDivisionVerbose(Calculator& theCommands, const E
     theGB.theBasiS[i-1]=thePolys[i];
   }
 //  Polynomial<Rational> outputRemainder;
-  theGB.initForDivisionAlone(theGB.theBasiS, &theGlobalVariables);
+  theGB.initForDivisionAlone(theGB.theBasiS);
   theGB.thePolynomialOrder.theMonOrder= theMonOrder;
-  theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &theGB.remainderDivision, &theGlobalVariables, -1);
+  theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &theGB.remainderDivision, -1);
   theContext.ContextGetFormatExpressions(theGB.theFormat);
 //  stOutput << "context vars: " << theFormat.polyAlphabeT;
   theGB.theFormat.flagUseLatex=true;
@@ -674,7 +674,7 @@ bool Calculator::innerGroebner
   theGroebnerComputation.MaxNumGBComputations=upperBoundComputations;
 
 
-  bool success=theGroebnerComputation.TransformToReducedGroebnerBasis(outputGroebner, &theGlobalVariables);
+  bool success=theGroebnerComputation.TransformToReducedGroebnerBasis(outputGroebner);
   std::stringstream out;
   out << theGroebnerComputation.ToStringLetterOrder(false);
   out << "Letter/expression order: ";

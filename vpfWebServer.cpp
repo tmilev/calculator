@@ -1524,7 +1524,8 @@ void WebServer::CheckExecutableVersionAndRestartIfNeeded()
 }
 
 void WebServer::Restart()
-{ theLog << "Killing all copies of the calculator and restarting..." << logger::endL;
+{ //theLog << "Killing all copies of the calculator and restarting..." << logger::endL;
+  //theLog << "Time limit after restart: " << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit << logger::endL;
   this->Release(this->listeningSocketID);
 //  char arg1[7]="server";
 //  char arg2[7]="nokill";
@@ -1537,13 +1538,14 @@ void WebServer::Restart()
 //sleep(1);
 //execv("/proc/self/exe", exec_argv);
   std::stringstream theCommand;
+  int timeInteger=(int) theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   theCommand << "killall " <<  theGlobalVariables.PhysicalNameExecutableNoPath + " \r\n./";
   if (this->flagPort8155)
-    theCommand << theGlobalVariables.PhysicalNameExecutableNoPath << " server8155 nokill "
-    << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
+    theCommand << timeInteger << " server8155 nokill "
+    << timeInteger;
   else
     theCommand << theGlobalVariables.PhysicalNameExecutableNoPath << " server nokill "
-    << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
+    << timeInteger;
   system(theCommand.str().c_str()); //kill any other running copies of the calculator.
 }
 
@@ -1712,6 +1714,7 @@ int WebServer::Run()
     theLog << "sigaction returned -1" << logger::endL;
   theLog << logger::purple <<  "server: waiting for connections...\r\n" << logger::endL;
   unsigned int connectionsSoFar=0;
+//  theLog << "time limit in seconds:  " << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit << logger::endL;
   while(true)
   { // main accept() loop
     sin_size = sizeof their_addr;

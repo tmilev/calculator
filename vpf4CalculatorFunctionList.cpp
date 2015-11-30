@@ -49,14 +49,15 @@ void Calculator::initPredefinedInnerFunctions()
   ("LispifyFull", CalculatorFunctionsGeneral::innerLispifyFull, "",
    "Shows the complete internal tree structure of an expression (replacing the expression with a string).",
    "LispifyFull( e^x)");
+
   this->AddOperationInnerHandler
   ("ToString", CalculatorFunctionsGeneral::innerQuoteToString, "",
    "Transforms an arbitrary expression to its string representation.",
    "ToString( e^x); \n \"e^x\";\"The quick brown fox jumps over the lazy dog.\"");
-  this->AddOperationInnerHandler
-  ("\"", CalculatorFunctionsGeneral::innerQuoteToString, "",
-   "Same as ToString function, but cannot be executed directly because of the special quotes syntax.",
-   "ToString( e^x); \n \"e^x\";\"The quick brown fox jumps over the lazy dog.\"");
+//  this->AddOperationInnerHandler
+//  ("\"", CalculatorFunctionsGeneral::innerQuoteToString, "",
+//   "Same as ToString function, but cannot be executed directly because of the special quotes syntax.",
+//   "ToString( e^x); \n \"e^x\";\"The quick brown fox jumps over the lazy dog.\"");
   this->AddOperationInnerHandler
   ("TestBase64", CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test, "",
    "Test function: converts a base64 string to bitstream and back to base64. Output must be identical to input. ",
@@ -733,6 +734,10 @@ void Calculator::initPredefinedInnerFunctions()
     fifth and sixth argument = left and right endpoints.\
    ",
    "DFQEuler(x^2 + y^2 - 1, 0, 0, 1000, -2.5, 2.5)")
+   ;
+  this->AddOperationInnerHandler ("googleLogin", CalculatorFunctionsGeneral::innerGoogleLogin, "",
+   "Attempts to log you in google.",
+   "googleLogin 0", false, true, "CalculatorFunctionsGeneral::innerGoogleLogin")
    ;
   this->AddOperationInnerHandler ("drawPolar", CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta, "",
    "<b>Calculus teaching function.</b> Draws polar curve given in polar coordinates in the form \

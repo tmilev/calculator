@@ -1035,13 +1035,13 @@ inline void Matrix<Element>::Resize(int r, int c, bool PReserveValues, const Ele
   int newActualNumRows= MathRoutines::Maximum(this->ActualNumRows, r);
   if (r>this->ActualNumRows || c>this->ActualNumCols)
   { newElements  = new Element*[newActualNumRows];
-#ifdef CGIversionLimitRAMuse
+#ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter+=newActualNumRows;
   ParallelComputing::CheckPointerCounters();
 #endif
     for (int i=0; i<newActualNumRows; i++)
     { newElements[i]= new Element[newActualNumCols];
-#ifdef CGIversionLimitRAMuse
+#ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter+=newActualNumCols;
   ParallelComputing::CheckPointerCounters();
 #endif
@@ -1138,7 +1138,7 @@ inline void Matrix<Element>::ReleaseMemory()
 { for (int i=0; i<this->ActualNumRows; i++)
     delete [] this->elements[i];
   delete [] this->elements;
-#ifdef CGIversionLimitRAMuse
+#ifdef AllocationLimitsSafeguard
 ParallelComputing::GlobalPointerCounter-=this->ActualNumRows*this->ActualNumCols+this->ActualNumRows;
   ParallelComputing::CheckPointerCounters();
 #endif
@@ -4008,7 +4008,7 @@ template <class Object>
 void MemorySaving<Object>::FreeMemory()
 { delete this->theValue;
   this->theValue=0;
-#ifdef CGIversionLimitRAMuse
+#ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter--;
   ParallelComputing::CheckPointerCounters();
 #endif
@@ -4018,7 +4018,7 @@ template <class Object>
 Object& MemorySaving<Object>::GetElement()
 { if (this->theValue==0)
   { this->theValue= new Object;
-#ifdef CGIversionLimitRAMuse
+#ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter++;
   ParallelComputing::CheckPointerCounters();
 #endif

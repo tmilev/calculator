@@ -20,6 +20,7 @@
 FEATUREFLAGS=--std=c++11 -pthread -fopenmp
 CFLAGS=-Wall -Wno-address $(FEATUREFLAGS) -c
 LDFLAGS=$(FEATUREFLAGS)
+LIBFLAGS=
 
 ifeq ($(hsa), 1)
 	CXX=/home/user/gcc/bin/g++
@@ -41,6 +42,11 @@ ifeq ($(AllocationStatistics), 1)
 	LDFLAGS += -rdynamic
 endif
 
+ifeq ($(ssl),1)
+	LDFLAGS+= -DMACRO_use_open_ssl
+	LIBFLAGS+= -lssl -lcrypto
+endif
+
 #if this is missing something, add it, or, ls | grep cpp | xargs echo
 SOURCES=test.cpp vpf2Math3_SymmetricGroupsAndGeneralizations.cpp vpf4CalculatorFunctionList.cpp vpf5_1CalculatorCode.cpp vpf5_2javascript_graphics.cpp vpf5.cpp vpf6_05evaluationroutines.cpp vpf6_0parsingRoutines.cpp vpf6_1innerTypedFunctions.cpp vpf6_2serialization_code.cpp vpf6_3calculatorMathRoutines.cpp vpf6_4ExpressionsImplementation.cpp vpf6.cpp vpf7.cpp vpf8.cpp vpf9_1.cpp vpf9_2.cpp vpf9_3RationalRadicals.cpp vpf9_4SemisimpleLieAlgebras.cpp vpf9_5SemisimpleLieAlgebras_RootSubalgebras.cpp vpf9_6SemisimpleLieSubAlgebras.cpp vpf9_7floating_point_routines.cpp vpf9_8GlobalObjects.cpp vpf9_91html_routines_calculator.cpp vpf9_92multitasking.cpp vpf99_HardcodedData.cpp vpf9_9SystemFunctions.cpp vpf9.cpp vpfCalculatorMain.cpp vpfCharacters_CalculatorInterface.cpp vpfCharacters.cpp vpfCrypto.cpp vpfFiniteFields.cpp vpfGraph.cpp vpfJson.cpp vpfWebServer.cpp vpfWebServerInterProcessLogistics.cpp vpf6_5calculator_web_routines.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
@@ -51,8 +57,10 @@ directories: Debug
 Debug:
 	mkdir ./Debug
 
+ssl: 
+
 Debug/calculator: $(OBJECTS)
-	$(CXX) $(LDFLAGS) $(OBJECTS) -o ./Debug/calculator
+	$(CXX) $(LDFLAGS) $(OBJECTS) -o  $(LIBFLAGS) ./Debug/calculator
 
 testrun: Debug/calculator
 	time ./Debug/calculator test

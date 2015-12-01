@@ -581,7 +581,7 @@ inline void ListLight<Object>::SetSize(int theSize)
     theSize=0;
   if (theSize==0)
   {
-#ifdef CGIversionLimitRAMuse
+#ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter-=this->size;
   ParallelComputing::CheckPointerCounters();
 #endif
@@ -591,7 +591,7 @@ inline void ListLight<Object>::SetSize(int theSize)
     return;
   }
   Object* newArray= new Object[theSize];
-#ifdef CGIversionLimitRAMuse
+#ifdef AllocationLimitsSafeguard
 ParallelComputing::GlobalPointerCounter+=theSize;
   ParallelComputing::CheckPointerCounters();
 #endif
@@ -601,7 +601,7 @@ ParallelComputing::GlobalPointerCounter+=theSize;
   for (int i=0; i<CopyUpTo; i++)
     newArray[i]=this->TheObjects[i];
   delete [] this->TheObjects;
-#ifdef CGIversionLimitRAMuse
+#ifdef AllocationLimitsSafeguard
 ParallelComputing::GlobalPointerCounter-=this->size;
   ParallelComputing::CheckPointerCounters();
 #endif
@@ -618,7 +618,7 @@ ListLight<Object>::ListLight()
 template <class Object>
 ListLight<Object>::~ListLight()
 { delete [] this->TheObjects;
-#ifdef CGIversionLimitRAMuse
+#ifdef AllocationLimitsSafeguard
 ParallelComputing::GlobalPointerCounter-=this->size;
   ParallelComputing::CheckPointerCounters();
 #endif
@@ -2083,7 +2083,7 @@ void List<Object>::ReleaseMemory()
 { delete [] this->TheObjects;
   this->size=0;
   this->TheObjects=0;
-#ifdef CGIversionLimitRAMuse
+#ifdef AllocationLimitsSafeguard
 ParallelComputing::GlobalPointerCounter-=this->ActualSize;
   ParallelComputing::CheckPointerCounters();
 #endif
@@ -2093,7 +2093,7 @@ ParallelComputing::GlobalPointerCounter-=this->ActualSize;
 template <class Object>
 List<Object>::~List()
 { delete [] this->TheObjects;
-#ifdef CGIversionLimitRAMuse
+#ifdef AllocationLimitsSafeguard
 ParallelComputing::GlobalPointerCounter-=this->ActualSize;
   ParallelComputing::CheckPointerCounters();
 #endif
@@ -2170,14 +2170,14 @@ void List<Object>::ExpandArrayOnTop(int increase)
   catch(std::bad_alloc& theBA)
   { crash << "Memory allocation failure: failed to allocate " << this->ActualSize+increase << " objects. " << crash;
   }
-#ifdef CGIversionLimitRAMuse
+#ifdef AllocationLimitsSafeguard
 ParallelComputing::GlobalPointerCounter+=this->ActualSize+increase;
   ParallelComputing::CheckPointerCounters();
 #endif
   for (int i=0; i<this->size; i++)
     newArray[i]=this->TheObjects[i];
   delete [] this->TheObjects;
-#ifdef CGIversionLimitRAMuse
+#ifdef AllocationLimitsSafeguard
 ParallelComputing::GlobalPointerCounter-=this->ActualSize;
   ParallelComputing::CheckPointerCounters();
 #endif

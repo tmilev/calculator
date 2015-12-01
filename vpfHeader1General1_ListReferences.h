@@ -117,7 +117,7 @@ void ListReferences<Object>::AllocateElements(int newSize)
   for (int i=oldReferencesSize; i<newSize; i++)
     this->theReferences[i]= (new Object);
   //std::cout << "Elements allocated!" << std::endl;
-#ifdef CGIversionLimitRAMuse
+#ifdef AllocationLimitsSafeguard
 ParallelComputing::GlobalPointerCounter+=newSize-oldReferencesSize;
   ParallelComputing::CheckPointerCounters();
 #endif
@@ -127,7 +127,7 @@ template<class Object>
 void ListReferences<Object>::KillAllElements()
 { for (int i =0; i<this->theReferences.size; i++)
   { delete this->theReferences[i];
-#ifdef CGIversionLimitRAMuse
+#ifdef AllocationLimitsSafeguard
     ParallelComputing::GlobalPointerCounter--;
     ParallelComputing::CheckPointerCounters();
 #endif

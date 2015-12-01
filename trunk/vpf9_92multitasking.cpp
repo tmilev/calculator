@@ -48,7 +48,7 @@ void MutexRecursiveWrapper::initConstructorCallOnly()
   this->flagInitialized=false;
   this->flagUnsafeFlagForDebuggingIsLocked=false;
   this->theMutexImplementation=0;
-#ifdef CGIversionLimitRAMuse
+#ifdef AllocationLimitsSafeguard
 ParallelComputing::GlobalPointerCounter++;
 #endif
 }

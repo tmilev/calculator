@@ -524,7 +524,7 @@ private:
   { if (this->Extended!=0)
       return;
     this->Extended= new LargeRationalExtended;
-#ifdef CGIversionLimitRAMuse
+#ifdef AllocationLimitsSafeguard
 ParallelComputing::GlobalPointerCounter++;
   ParallelComputing::CheckPointerCounters();
 #endif
@@ -533,7 +533,7 @@ ParallelComputing::GlobalPointerCounter++;
   { if (this->Extended!=0)
       return false;
     this->Extended= new LargeRationalExtended;
-#ifdef CGIversionLimitRAMuse
+#ifdef AllocationLimitsSafeguard
 ParallelComputing::GlobalPointerCounter++;
   ParallelComputing::CheckPointerCounters();
 #endif
@@ -545,7 +545,7 @@ ParallelComputing::GlobalPointerCounter++;
   { if (this->Extended==0)
       return;
     delete this->Extended; this->Extended=0;
-#ifdef CGIversionLimitRAMuse
+#ifdef AllocationLimitsSafeguard
 ParallelComputing::GlobalPointerCounter++;
   ParallelComputing::CheckPointerCounters();
 #endif
@@ -638,7 +638,7 @@ public:
   void AssignLargeInteger(const LargeInt& other)
   { if (this->Extended==0)
     { this->Extended= new LargeRationalExtended;
-#ifdef CGIversionLimitRAMuse
+#ifdef AllocationLimitsSafeguard
 ParallelComputing::GlobalPointerCounter++;
   ParallelComputing::CheckPointerCounters();
 #endif

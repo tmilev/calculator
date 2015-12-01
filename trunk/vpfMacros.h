@@ -27,8 +27,8 @@
 //ParallelComputing::CheckPointerCounters. The project should compile and link just fine with
 //the following 3 lines commented out.
 //If not, it's a bug.
-#ifndef CGIversionLimitRAMuse
-#define CGIversionLimitRAMuse
+#ifndef AllocationLimitsSafeguard
+#define AllocationLimitsSafeguard
 #endif
 
 

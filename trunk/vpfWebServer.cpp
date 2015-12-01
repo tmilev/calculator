@@ -8,6 +8,14 @@
 #include <unistd.h>
 #include <sys/stat.h>//<-for file statistics
 
+#ifdef MACRO_use_open_ssl
+//installation of these headers in ubuntu:
+//sudo apt-get install libssl-dev
+#include "openssl/bio.h"
+#include "openssl/ssl.h"
+#include "openssl/err.h"
+#endif // MACRO_use_open_ssl
+
 ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 
 extern void static_html4(std::stringstream& output);
@@ -186,8 +194,7 @@ void WebWorker::OutputBeforeComputation()
 //  civilizedInput="\\int( 1/x dx)";
 //  civilizedInput="\\int (1/(x(1+x^2)^2))dx";
 //  civilizedInput="%LogEvaluation \\int (1/(5+2x+7x^2)^2)dx";
-  theGlobalVariables.initOutputReportAndCrashFileNames
-  (theParser.inputStringRawestOfTheRaw, civilizedInput);
+  theGlobalVariables.initOutputReportAndCrashFileNames(theParser.inputStringRawestOfTheRaw, civilizedInput);
 
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
@@ -306,8 +313,7 @@ void WebWorker::OutputStandardResult()
 
   stOutput << "</td></tr></table>";
   std::stringstream tempStream3;
-  stOutput << "\n\n<script language=\"javascript\">\n"
-  << "  var theAutocompleteDictionary = new Array;\n  ";
+  stOutput << "\n\n<script language=\"javascript\">\n" << "  var theAutocompleteDictionary = new Array;\n  ";
   for (int i=0; i<theParser.theAtoms.size; i++)
     if (theParser.theAtoms[i].size()>2)
       stOutput << "  theAutocompleteDictionary.push(\"" << theParser.theAtoms[i] << "\");\n";
@@ -1541,11 +1547,9 @@ void WebServer::Restart()
   int timeInteger=(int) theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   theCommand << "killall " <<  theGlobalVariables.PhysicalNameExecutableNoPath + " \r\n./";
   if (this->flagPort8155)
-    theCommand << timeInteger << " server8155 nokill "
-    << timeInteger;
+    theCommand << timeInteger << " server8155 nokill " << timeInteger;
   else
-    theCommand << theGlobalVariables.PhysicalNameExecutableNoPath << " server nokill "
-    << timeInteger;
+    theCommand << theGlobalVariables.PhysicalNameExecutableNoPath << " server nokill " << timeInteger;
   system(theCommand.str().c_str()); //kill any other running copies of the calculator.
 }
 
@@ -1614,10 +1618,10 @@ void WebServer::RecycleChildrenIfPossible()
           { this->theWorkers[i].flagInUse=false;
             std::stringstream pingTimeoutStream;
             pingTimeoutStream << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
-            << " seconds have passed since worker " <<  i+1
+            << " seconds have passed since worker " << i+1
             << " pinged the server. I am assuming the worker no longer functions, and am marking it as free for reuse. ";
             theLog << logger::red << pingTimeoutStream.str() << logger::endL;
-            this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>"+ pingTimeoutStream.str()+"</b></span>";
+            this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>" + pingTimeoutStream.str()+"</b></span>";
           }
     }
 }
@@ -1715,6 +1719,13 @@ int WebServer::Run()
   theLog << logger::purple <<  "server: waiting for connections...\r\n" << logger::endL;
   unsigned int connectionsSoFar=0;
 //  theLog << "time limit in seconds:  " << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit << logger::endL;
+#ifdef MACRO_use_open_ssl
+  SSL_load_error_strings();
+  ERR_load_BIO_strings();
+  OpenSSL_add_all_algorithms();
+  theLog << logger::green << "openssl initialized." << logger::endL;
+#endif
+
   while(true)
   { // main accept() loop
     sin_size = sizeof their_addr;

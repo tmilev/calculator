@@ -11,6 +11,7 @@
 #ifdef MACRO_use_open_ssl
 //installation of these headers in ubuntu:
 //sudo apt-get install libssl-dev
+//openssl tutorial: http://www.ibm.com/developerworks/library/l-openssl/
 #include "openssl/bio.h"
 #include "openssl/ssl.h"
 #include "openssl/err.h"
@@ -1720,10 +1721,23 @@ int WebServer::Run()
   unsigned int connectionsSoFar=0;
 //  theLog << "time limit in seconds:  " << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit << logger::endL;
 #ifdef MACRO_use_open_ssl
-  SSL_load_error_strings();
-  ERR_load_BIO_strings();
-  OpenSSL_add_all_algorithms();
-  theLog << logger::green << "openssl initialized." << logger::endL;
+  bool flagUseSSl=true;
+  if (flagUseSSl)
+  { SSL_load_error_strings();
+    ERR_load_BIO_strings();
+    OpenSSL_add_all_algorithms();
+    theLog << logger::green << "openssl initialized." << logger::endL;
+    BIO* theBio;
+    theBio = BIO_new_connect("hostname:port");
+    if(theBio == NULL)
+    { crash << "Failed to connecte" << crash;
+    }
+
+//  if(BIO_do_connect(bio) <= 0)
+//  {
+      /* Handle failed connection */
+//  }
+  }
 #endif
 
   while(true)

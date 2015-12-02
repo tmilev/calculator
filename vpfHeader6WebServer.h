@@ -34,6 +34,7 @@ public:
   int ContentLength;
   int requestType;
   int connectedSocketID;
+  int sslSocketID;
   int connectedSocketIDLastValueBeforeRelease;
   int connectionID;
   List<char> remainingBytesToSend;
@@ -111,6 +112,7 @@ class WebServer
 public:
   int listeningSocketID;
   bool flagTryToKillOlderProcesses;
+  bool flagUseSSL;
   ListReferences<WebWorker> theWorkers;
 
   int activeWorker;
@@ -138,6 +140,10 @@ public:
   static void Signal_SIGINT_handler(int s);
   static void Signal_SIGCHLD_handler(int s);
   static std::string ToStringActiveWorker();
+  void SSLinit();
+  void SSLshutdownEverything();
+  void SSLclose();
+  bool SSLestablishTunnel();
   void RecycleChildrenIfPossible();
   void Restart();
   void CheckExecutableVersionAndRestartIfNeeded();

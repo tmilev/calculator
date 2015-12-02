@@ -173,8 +173,8 @@ void ThreadData::RegisterCurrentThread(const std::string& inputName)
 
 void ThreadData::CreateThread(void (*InputFunction)())
 { MutexLockGuard(theGlobalVariables.MutexRegisterNewThread);
-  std::thread newThread(InputFunction);
   theGlobalVariables.theThreads.SetSize(theGlobalVariables.theThreads.size+1);
+  std::thread newThread(InputFunction);
   theGlobalVariables.theThreads.LastObject().swap(newThread);
 }
 

@@ -15,7 +15,71 @@
 #include "openssl/bio.h"
 #include "openssl/ssl.h"
 #include "openssl/err.h"
+
+struct sslData{
+public:
+  SSL_CTX *theSSL_ctx;
+  SSL *theSSL;
+  sslData()
+  { this->theSSL_ctx=0;
+    this->theSSL=0;
+  }
+};
+sslData theSSLData;
+
+
+#endif // MACRO_use_open_ssl#endif // MACRO_use_open_ssl
+
+
+
+void WebServer::SSLshutdownEverything()
+{
+#ifdef MACRO_use_open_ssl
+  ERR_free_strings();
+  EVP_cleanup();
 #endif // MACRO_use_open_ssl
+}
+
+void WebServer::SSLclose()
+{
+#ifdef MACRO_use_open_ssl
+  SSL_shutdown(theSSLData.theSSL);
+  SSL_free(theSSLData.theSSL);
+#endif // MACRO_use_open_ssl
+}
+
+void WebServer::SSLinit()
+{ this->flagUseSSL=false;
+#ifdef MACRO_use_open_ssl
+  SSL_load_error_strings();
+  SSL_library_init();
+  OpenSSL_add_all_algorithms();
+  this->flagUseSSL=true;
+#endif // MACRO_use_open_ssl
+}
+
+bool WebServer::SSLestablishTunnel()
+{ if (!this->flagUseSSL)
+    return true;
+  return true;
+  #ifdef MACRO_use_open_ssl
+  theSSLData.theSSL_ctx= SSL_CTX_new( SSLv23_server_method());
+  SSL_CTX_set_options(theSSLData.theSSL_ctx, SSL_OP_SINGLE_DH_USE);
+  std::string keyName=theGlobalVariables.PhysicalPathServerBase+ "../server.key";
+  int use_cert = SSL_CTX_use_certificate_file(theSSLData.theSSL_ctx, keyName.c_str(), SSL_FILETYPE_PEM);
+  //int use_prv = SSL_CTX_use_PrivateKey_file(theSSLData.theSSL_ctx, keyName.c_str(), SSL_FILETYPE_PEM);
+  //theSSLData.theSSL = SSL_new(theSSLData.sslctx);
+  //SSL_set_fd(theSSLData.theSSL, newsockfd );
+//Here is the SSL Accept portion.  Now all reads and writes must use SSL
+//ssl_err = SSL_accept(cSSL);
+//if(ssl_err <= 0)
+//{
+    //Error occurred, log and close down ssl
+//    ShutdownSSL();
+//}
+#endif // MACRO_use_open_ssl
+}
+
 
 ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 
@@ -1360,6 +1424,7 @@ WebServer::WebServer()
 { this->flagDeallocated=false;
   this->flagTryToKillOlderProcesses=true;
   this->flagPort8155=false;
+  this->flagUseSSL=false;
   this->activeWorker=-1;
   this->timeLastExecutableModification=-1;
 }
@@ -1720,26 +1785,7 @@ int WebServer::Run()
   theLog << logger::purple <<  "server: waiting for connections...\r\n" << logger::endL;
   unsigned int connectionsSoFar=0;
 //  theLog << "time limit in seconds:  " << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit << logger::endL;
-#ifdef MACRO_use_open_ssl
-  bool flagUseSSl=true;
-  if (flagUseSSl)
-  { SSL_load_error_strings();
-    ERR_load_BIO_strings();
-    OpenSSL_add_all_algorithms();
-    theLog << logger::green << "openssl initialized." << logger::endL;
-    BIO* theBio;
-    theBio = BIO_new_connect("hostname:port");
-    if(theBio == NULL)
-    { crash << "Failed to connecte" << crash;
-    }
-
-//  if(BIO_do_connect(bio) <= 0)
-//  {
-      /* Handle failed connection */
-//  }
-  }
-#endif
-
+  this->SSLinit();
   while(true)
   { // main accept() loop
     sin_size = sizeof their_addr;
@@ -1762,6 +1808,19 @@ int WebServer::Run()
     //theLog << "\r\nChildPID: " << this->childPID;
     if (this->GetActiveWorker().ProcessPID!=0)
     { // this is the child (worker) process
+      if (!this->SSLestablishTunnel())
+      { stOutput << "HTTP/1.1 495 Certificate Error\r\nContent-type: text/html\r\n\r\n"
+        << "<html><body><b>HTTP error 495 (certificate error). </b>"
+        << " There was an error with ssl (encryption) during your request. "
+        << "<br>The error message returned was:<br>"
+        << this->GetActiveWorker().error
+        << " <hr><hr>The message (part) that was received is: "
+        << this->GetActiveWorker().ToStringMessageFull()
+        << "</body></html>";
+        stOutput.Flush();
+        this->GetActiveWorker().SendAllBytes();
+        return -1;
+      }
       this->Release(this->listeningSocketID);//worker has no access to socket listener
       theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=
       this->ReturnActiveIndicatorAlthoughComputationIsNotDone;

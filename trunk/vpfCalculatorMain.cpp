@@ -35,9 +35,11 @@ int main(int argc, char **argv)
   if (argc>=2)
   { std::string tempArgument=argv[1];
     theGlobalVariables.flagUsingBuiltInWebServer=
-    (tempArgument=="server" || tempArgument=="server8155");
+    (tempArgument=="server" || tempArgument=="server8155" || tempArgument=="serverSSL");
     if (tempArgument=="server8155")
       theWebServer.flagPort8155=true;
+    if (tempArgument=="serverSSL")
+      theWebServer.flagUseSSL=true;
     if (tempArgument=="test")
     { List<std::string> remainingArguments;
       remainingArguments.SetSize(argc-2);
@@ -61,7 +63,11 @@ int main(int argc, char **argv)
         theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=timeLimitInt;
     }
     if (theGlobalVariables.flagUsingBuiltInWebServer)
-    { int result=theWebServer.Run();
+    { int result=-1;
+      if (!theWebServer.flagUseSSL)
+        result=theWebServer.Run();
+      else
+        result=theWebServer.RunSSL();
       if (result==0)
       { stOutput << "Server exit normal. ";
         return 0;

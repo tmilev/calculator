@@ -2,29 +2,20 @@
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader3Calculator2_InnerFunctions.h"
 #include "vpfHeader6WebServer.h"
-#include <netdb.h> //<-addrinfo and related data structures defined here
-#include <arpa/inet.h> // <- inet_ntop declared here (ntop= network to presentation)
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-
 
 ProjectInformationInstance ProjectInfoVpf6_5calculatorWebRoutines(__FILE__, "Calculator web routines. ");
 
+
+/*
 bool CalculatorFunctionsGeneral::innerGoogleLogin(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGoogleLogin");
-/*  int sockfd, portno, n;
+  int sockfd, portno, n;
   struct sockaddr_in serv_addr;
   struct hostent *server;
   portno = 80;
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0)
-    return output.MakeError("Couldn't open socket.", theCommands);*/
+    return output.MakeError("Couldn't open socket.", theCommands);
   std::stringstream reportStream;
   int status;
   struct addrinfo hints;
@@ -60,7 +51,7 @@ bool CalculatorFunctionsGeneral::innerGoogleLogin(Calculator& theCommands, const
     inet_ntop(p->ai_family, addr, ipstr, sizeof ipstr);
 //    std::string ipString()
     reportStream << theAddress << ": " << ipstr << "<br>";
-    /*this->listeningSocketID= socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+    this->listeningSocketID= socket(p->ai_family, p->ai_socktype, p->ai_protocol);
       if (this->listeningSocketID == -1)
       { theLog << "Error: socket failed.\n";
         continue;
@@ -72,7 +63,7 @@ bool CalculatorFunctionsGeneral::innerGoogleLogin(Calculator& theCommands, const
         theLog << "Error: bind failed. " << this->ToStringLastErrorDescription() << logger::endL;
         continue;
       }
-      break;*/
+      break;
     }
   if (servinfo==0)
   { reportStream << "Servinfo is zero";
@@ -98,7 +89,7 @@ bool CalculatorFunctionsGeneral::innerGoogleLogin(Calculator& theCommands, const
 
   freeaddrinfo(servinfo); // free the linked-list
 
-/*
+
   server = gethostbyname(argv[1]);
     if (server == NULL) {
         fprintf(stderr,"ERROR, no such host\n");
@@ -124,6 +115,10 @@ bool CalculatorFunctionsGeneral::innerGoogleLogin(Calculator& theCommands, const
          error("ERROR reading from socket");
     printf("%s\n",buffer);
     close(sockfd);
-    return 0;*/
+    return 0;
   return output.AssignValue(reportStream.str(), theCommands);
-}
+}*/
+
+
+
+

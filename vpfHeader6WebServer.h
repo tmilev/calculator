@@ -34,7 +34,6 @@ public:
   int ContentLength;
   int requestType;
   int connectedSocketID;
-  int sslSocketID;
   int connectedSocketIDLastValueBeforeRelease;
   int connectionID;
   List<char> remainingBytesToSend;
@@ -110,9 +109,11 @@ public:
 class WebServer
 {
 public:
+  static const int maxNumPendingConnections;     // how many pending connections queue will hold
   int listeningSocketID;
   bool flagTryToKillOlderProcesses;
   bool flagUseSSL;
+  List<std::string> PortsITry;
   ListReferences<WebWorker> theWorkers;
 
   int activeWorker;
@@ -129,6 +130,7 @@ public:
   void CreateNewActiveWorker();
   bool CheckConsistency();
   int Run();
+  int RunSSL();
   WebWorker& GetActiveWorker();
   static void WorkerTimerPing(double pingTime);
   static void Release(int& theDescriptor);
@@ -140,10 +142,10 @@ public:
   static void Signal_SIGINT_handler(int s);
   static void Signal_SIGCHLD_handler(int s);
   static std::string ToStringActiveWorker();
-  void SSLinit();
-  void SSLshutdownEverything();
-  void SSLclose();
-  bool SSLestablishTunnel();
+  bool initPrepareWebServerALL();
+  void initPrepareSignals();
+  bool initBindToPorts();
+  void initPortsITry();
   void RecycleChildrenIfPossible();
   void Restart();
   void CheckExecutableVersionAndRestartIfNeeded();

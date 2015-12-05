@@ -7,85 +7,12 @@
 #include <arpa/inet.h> // <- inet_ntop declared here (ntop= network to presentation)
 #include <unistd.h>
 #include <sys/stat.h>//<-for file statistics
-
-#ifdef MACRO_use_open_ssl
-//installation of these headers in ubuntu:
-//sudo apt-get install libssl-dev
-//openssl tutorial: http://www.ibm.com/developerworks/library/l-openssl/
-#include "openssl/bio.h"
-#include "openssl/ssl.h"
-#include "openssl/err.h"
-
-struct sslData{
-public:
-  SSL_CTX *theSSL_ctx;
-  SSL *theSSL;
-  sslData()
-  { this->theSSL_ctx=0;
-    this->theSSL=0;
-  }
-};
-sslData theSSLData;
-
-
-#endif // MACRO_use_open_ssl#endif // MACRO_use_open_ssl
-
-
-
-void WebServer::SSLshutdownEverything()
-{
-#ifdef MACRO_use_open_ssl
-  ERR_free_strings();
-  EVP_cleanup();
-#endif // MACRO_use_open_ssl
-}
-
-void WebServer::SSLclose()
-{
-#ifdef MACRO_use_open_ssl
-  SSL_shutdown(theSSLData.theSSL);
-  SSL_free(theSSLData.theSSL);
-#endif // MACRO_use_open_ssl
-}
-
-void WebServer::SSLinit()
-{ this->flagUseSSL=false;
-#ifdef MACRO_use_open_ssl
-  SSL_load_error_strings();
-  SSL_library_init();
-  OpenSSL_add_all_algorithms();
-  this->flagUseSSL=true;
-#endif // MACRO_use_open_ssl
-}
-
-bool WebServer::SSLestablishTunnel()
-{ if (!this->flagUseSSL)
-    return true;
-  return true;
-  #ifdef MACRO_use_open_ssl
-  theSSLData.theSSL_ctx= SSL_CTX_new( SSLv23_server_method());
-  SSL_CTX_set_options(theSSLData.theSSL_ctx, SSL_OP_SINGLE_DH_USE);
-  std::string keyName=theGlobalVariables.PhysicalPathServerBase+ "../server.key";
-  int use_cert = SSL_CTX_use_certificate_file(theSSLData.theSSL_ctx, keyName.c_str(), SSL_FILETYPE_PEM);
-  //int use_prv = SSL_CTX_use_PrivateKey_file(theSSLData.theSSL_ctx, keyName.c_str(), SSL_FILETYPE_PEM);
-  //theSSLData.theSSL = SSL_new(theSSLData.sslctx);
-  //SSL_set_fd(theSSLData.theSSL, newsockfd );
-//Here is the SSL Accept portion.  Now all reads and writes must use SSL
-//ssl_err = SSL_accept(cSSL);
-//if(ssl_err <= 0)
-//{
-    //Error occurred, log and close down ssl
-//    ShutdownSSL();
-//}
-#endif // MACRO_use_open_ssl
-}
-
-
 ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 
 extern void static_html4(std::stringstream& output);
 
 bool ProgressReportWebServer::flagServerExists=true;
+const int WebServer::maxNumPendingConnections=10;
 
 ProgressReportWebServer::ProgressReportWebServer(const std::string& inputStatus)
 { this->flagDeallocated=false;
@@ -1612,11 +1539,23 @@ void WebServer::Restart()
   std::stringstream theCommand;
   int timeInteger=(int) theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   theCommand << "killall " <<  theGlobalVariables.PhysicalNameExecutableNoPath + " \r\n./";
+  theCommand << theGlobalVariables.PhysicalNameExecutableNoPath;
+  if (this->flagUseSSL)
+    theCommand << " serverSSL nokill " << timeInteger;
   if (this->flagPort8155)
-    theCommand << timeInteger << " server8155 nokill " << timeInteger;
+    theCommand << " server8155 nokill " << timeInteger;
   else
-    theCommand << theGlobalVariables.PhysicalNameExecutableNoPath << " server nokill " << timeInteger;
+    theCommand << " server nokill " << timeInteger;
   system(theCommand.str().c_str()); //kill any other running copies of the calculator.
+}
+
+void WebServer::initPortsITry()
+{ if (this->flagPort8155)
+    this->PortsITry.AddOnTop("8155");
+  this->PortsITry.AddOnTop("8080");
+  this->PortsITry.AddOnTop("8081");
+  this->PortsITry.AddOnTop("8082");
+  this->PortsITry.AddOnTop("8155");
 }
 
 void WebServer::initDates()
@@ -1634,8 +1573,6 @@ void WebServer::ReleaseWorkerSideResources()
   this->activeWorker=-1; //<-The active worker is needed only in the child process.
 }
 
-//const char* PORT ="8080";  // the port users will be connecting to
-const int BACKLOG =10;     // how many pending connections queue will hold
 
 
 void segfault_sigaction(int signal, siginfo_t *si, void *arg)
@@ -1692,37 +1629,35 @@ void WebServer::RecycleChildrenIfPossible()
     }
 }
 
-int WebServer::Run()
-{ MacroRegisterFunctionWithName("WebServer::Run");
-  List<std::string> thePorts;
-  if (this->flagPort8155)
-    thePorts.AddOnTop("8155");
-  thePorts.AddOnTop("8080");
-  thePorts.AddOnTop("8081");
-  thePorts.AddOnTop("8082");
-  thePorts.AddOnTop("8155");
-
+bool WebServer::initPrepareWebServerALL()
+{ MacroRegisterFunctionWithName("WebServer::initPrepareWebServerALL");
+  this->initPortsITry();
   if (this->flagTryToKillOlderProcesses)
     this->Restart();
   usleep(10000);
   this->initDates();
+  if (!this->initBindToPorts())
+    return false;
+  this->initPrepareSignals();
+  return true;
+}
+
+bool WebServer::initBindToPorts()
+{ MacroRegisterFunctionWithName("WebServer::initBindToPorts");
   addrinfo hints;
   addrinfo *servinfo=0;
   addrinfo *p=0;
-  sockaddr_storage their_addr; // connector's address information
-  socklen_t sin_size;
   int yes=1;
-  char userAddressBuffer[INET6_ADDRSTRLEN];
   int rv;
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE; // use my IP
   // loop through all the results and bind to the first we can
-  for (int i=0; i<thePorts.size; i++)
-  { if ((rv = getaddrinfo(NULL, thePorts[i].c_str(), &hints, &servinfo)) != 0)
+  for (int i=0; i<this->PortsITry.size; i++)
+  { if ((rv = getaddrinfo(NULL, this->PortsITry[i].c_str(), &hints, &servinfo)) != 0)
     { theLog << "getaddrinfo: " << gai_strerror(rv) << logger::endL;
-      return 1;
+      return false;
     }
     for(p = servinfo; p != NULL; p = p->ai_next)
     { this->listeningSocketID= socket(p->ai_family, p->ai_socktype, p->ai_protocol);
@@ -1740,23 +1675,18 @@ int WebServer::Run()
       break;
     }
     if (p!=NULL)
-    { theLog << logger::yellow << "Successfully bounded to port " << thePorts[i] << logger::endL;
+    { theLog << logger::yellow << "Successfully bounded to port " << this->PortsITry[i] << logger::endL;
       break;
     }
+    freeaddrinfo(servinfo); // all done with this structure
   }
   if (p == NULL)
-    crash << "Failed to bind to any of the ports " << thePorts.ToStringCommaDelimited() << "\n" << crash;
-  freeaddrinfo(servinfo); // all done with this structure
-  if (listen(this->listeningSocketID, BACKLOG) == -1)
-    crash << "Listen function failed." << crash;
+    crash << "Failed to bind to any of the ports " << this->PortsITry.ToStringCommaDelimited() << "\n" << crash;
+  return true;
+}
 
-//  struct sigaction sa;
-//  memset(&sa, 0, sizeof(sigaction));
-//  sigemptyset(&sa.sa_mask);
-//  sa.sa_sigaction = segfault_sigaction;
-//  sa.sa_flags   = SA_SIGINFO;
-//  sigaction(SIGSEGV, &sa, NULL);
-  //catch segfaults:
+void WebServer::initPrepareSignals()
+{ MacroRegisterFunctionWithName("WebServer::initPrepareSignals");
   struct sigaction sa;
   sa.sa_sigaction = &segfault_sigaction;
   sigemptyset(&sa.sa_mask);
@@ -1782,10 +1712,19 @@ int WebServer::Run()
   sa.sa_flags = SA_RESTART;
   if (sigaction(SIGCHLD, &sa, NULL) == -1)
     theLog << "sigaction returned -1" << logger::endL;
+}
+
+int WebServer::Run()
+{ MacroRegisterFunctionWithName("WebServer::Run");
+  if (!this->initPrepareWebServerALL())
+    return 1;
+  if (listen(this->listeningSocketID, WebServer::maxNumPendingConnections) == -1)
+    crash << "Listen function failed." << crash;
   theLog << logger::purple <<  "server: waiting for connections...\r\n" << logger::endL;
   unsigned int connectionsSoFar=0;
-//  theLog << "time limit in seconds:  " << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit << logger::endL;
-  this->SSLinit();
+  sockaddr_storage their_addr; // connector's address information
+  socklen_t sin_size;
+  char userAddressBuffer[INET6_ADDRSTRLEN];
   while(true)
   { // main accept() loop
     sin_size = sizeof their_addr;
@@ -1808,19 +1747,6 @@ int WebServer::Run()
     //theLog << "\r\nChildPID: " << this->childPID;
     if (this->GetActiveWorker().ProcessPID!=0)
     { // this is the child (worker) process
-      if (!this->SSLestablishTunnel())
-      { stOutput << "HTTP/1.1 495 Certificate Error\r\nContent-type: text/html\r\n\r\n"
-        << "<html><body><b>HTTP error 495 (certificate error). </b>"
-        << " There was an error with ssl (encryption) during your request. "
-        << "<br>The error message returned was:<br>"
-        << this->GetActiveWorker().error
-        << " <hr><hr>The message (part) that was received is: "
-        << this->GetActiveWorker().ToStringMessageFull()
-        << "</body></html>";
-        stOutput.Flush();
-        this->GetActiveWorker().SendAllBytes();
-        return -1;
-      }
       this->Release(this->listeningSocketID);//worker has no access to socket listener
       theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=
       this->ReturnActiveIndicatorAlthoughComputationIsNotDone;

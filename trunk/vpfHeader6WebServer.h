@@ -83,6 +83,8 @@ public:
   void Release();
   void ReleaseKeepInUseFlag();
   void SendAllBytes();
+  void SendAllBytesHttp();
+  void SendAllBytesHttpSSL();
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
   static std::string GetJavaScriptIndicatorFromHD();
   std::string GetJavaScriptIndicatorBuiltInServer(int inputIndex);
@@ -92,6 +94,8 @@ public:
   bool IamActive();
   bool ReceiveOnce();
   bool ReceiveAll();
+  bool ReceiveAllHttp();
+  bool ReceiveAllHttpSSL();
   void SendDisplayUserInputToServer();
   enum requestTypes {requestUnknown, requestGetCalculator, requestTogglePauseCalculator,
   requestPostCalculator, requestGetNotCalculator, requestGetServerStatus,

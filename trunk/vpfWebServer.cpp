@@ -141,6 +141,205 @@ void WebServer::SSLServerSideHandShake()
 #endif // MACRO_use_open_ssl
 }
 
+bool WebWorker::ReceiveAllHttpSSL()
+{ MacroRegisterFunctionWithName("WebWorker::ReceiveAllHttpSSL");
+  if (!this->parent->flagUseSSL)
+    crash << "Calling WebWorker::ReceiveAllHttpSSL not allowed if flagUseSSL has not been set to true. " << crash;
+#ifdef MACRO_use_open_ssl
+  unsigned const int bufferSize=60000;
+  char buffer[bufferSize];
+//  std::cout << "Got thus far 9" << std::endl;
+
+  if (this->connectedSocketID==-1)
+    crash << "Attempting to receive on a socket with ID equal to -1. " << crash;
+//  std::cout << "Got thus far 10" << std::endl;
+  struct timeval tv; //<- code involving tv taken from stackexchange
+  tv.tv_sec = 30;  // 30 Secs Timeout
+  tv.tv_usec = 0;  // Not init'ing this can cause strange errors
+  setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO,(void*)(&tv), sizeof(timeval));
+  ProgressReportWebServer theReport;
+  theReport.SetStatus("WebWorker: receiving bytes...");
+  int numBytesInBuffer= SSL_read(theSSLdata.ssl, &buffer, bufferSize-1);
+//  std::cout << "Got thus far 11" << std::endl;
+  theReport.SetStatus("WebWorker: first bytes received...");
+  double numSecondsAtStart=theGlobalVariables.GetElapsedSeconds();
+  if (numBytesInBuffer<0 || numBytesInBuffer>(signed)bufferSize)
+  { std::stringstream out;
+    out << "Socket::ReceiveAllHttpSSL on socket " << this->connectedSocketID << " failed. ";
+    ERR_print_errors_fp(stderr);
+    this->displayUserInput=out.str();
+    theLog << out.str() << logger::endL;
+    return false;
+  }
+  this->theMessage.assign(buffer, numBytesInBuffer);
+//  theLog << this->parent->ToStringStatusActive() << ": received " << numBytesInBuffer << " bytes. " << logger::endL;
+  this->ParseMessage();
+//    std::cout << "Got thus far 12" << std::endl;
+
+//  theLog << "Content length computed to be: " << this->ContentLength;
+  if (this->requestType==WebWorker::requestTypes::requestPostCalculator)
+    this->displayUserInput="POST " + this->mainArgumentRAW;
+  else
+    this->displayUserInput="GET " + this->mainAddresSRAW;
+  if (this->ContentLength<=0)
+    return true;
+  if (this->mainArgumentRAW.size()==(unsigned) this->ContentLength)
+    return true;
+//  theLog << "Content-length parsed to be: " << this->ContentLength
+//  << "However the size of mainArgumentRAW is: " << this->mainArgumentRAW.size();
+  std::stringstream reportStream;
+  reportStream << "WebWorker: received first message of "
+  << this->ContentLength << " bytes. ";
+  theReport.SetStatus(reportStream.str());
+  if (this->ContentLength>10000000)
+  { this->CheckConsistency();
+    error="Content-length parsed to be more than 10 million bytes, aborting.";
+    theLog << this->error << logger::endL;
+    this->displayUserInput=this->error;
+    return false;
+  }
+//  std::cout << "Debug code here!!!";
+/*  if (this->mainArgumentRAW!="")
+  { std::stringstream errorstream;
+    errorstream << "Content-length equals: " << this->ContentLength
+    << " and does not coincide with the size of the message-body (total " << this->mainArgumentRAW.size()
+    << "bytes), yet the message-body is non-empty. ";
+    this->error=errorstream.str();
+    theLog << this->error << logger::endL;
+    theLog << logger::red << "The messaged received was: " << logger::endL;
+    theLog << this->mainArgumentRAW;
+    this->displayUserInput=this->error;
+    return false;
+  }*/
+  reportStream << "Sending continue message ...";
+  theReport.SetStatus(reportStream.str());
+  this->remainingBytesToSend=(std::string) "HTTP/1.1 100 Continue\r\n";
+  this->SendAllBytes();
+  this->remainingBytesToSend.SetSize(0);
+  reportStream << " done. ";
+  theReport.SetStatus(reportStream.str());
+  if ((signed) this->mainArgumentRAW.size()<this->ContentLength)
+  { reportStream << " Only " << this->mainArgumentRAW.size() << " out of "
+    << this->ContentLength << " bytes received, proceeding to receive the rest. ";
+    theReport.SetStatus(reportStream.str());
+  }
+  std::string bufferString;
+  while ((signed) this->mainArgumentRAW.size()<this->ContentLength)
+  { if (theGlobalVariables.GetElapsedSeconds()-numSecondsAtStart>180)
+    { this->error= "Receiving bytes timed out (180 seconds).";
+      theLog << this->error << logger::endL;
+      this->displayUserInput=this->error;
+      return false;
+    }
+    numBytesInBuffer= SSL_read(theSSLdata.ssl, &buffer, bufferSize-1);
+    if (numBytesInBuffer==0)
+    { this->error= "While trying to fetch message-body, received 0 bytes. " +
+      this->parent->ToStringLastErrorDescription();
+      this->displayUserInput=this->error;
+      return false;
+    }
+    if (numBytesInBuffer<0)
+    { this->error= "Error fetching message body: " + this->parent->ToStringLastErrorDescription();
+      ERR_print_errors_fp(stderr);
+      theLog << this->error << logger::endL;
+      this->displayUserInput=this->error;
+      return false;
+    }
+    bufferString.assign(buffer, numBytesInBuffer);
+    this->mainArgumentRAW+=bufferString;
+  }
+  if ((signed) this->mainArgumentRAW.size()!=this->ContentLength)
+  { std::stringstream out;
+    out << "The message-body received by me had length " << this->mainArgumentRAW.size()
+    << " yet I expected a message of length " << this->ContentLength << ".";
+    this->error=out.str();
+    this->displayUserInput=this->error;
+    theLog << this->error << logger::endL;
+    theReport.SetStatus(out.str());
+    return false;
+  }
+  theReport.SetStatus("Webworker: received everything, processing. ");
+  return true;
+#endif // MACRO_use_open_ssl
+}
+
+void WebWorker::SendAllBytesHttpSSL()
+{ if (this->remainingBytesToSend.size==0)
+    return;
+  MacroRegisterFunctionWithName("WebWorker::SendAllBytesHttpSSL");
+  this->CheckConsistency();
+  if (!this->parent->flagUseSSL)
+    crash << "Error: WebWorker::SendAllBytesHttpSSL called while flagUseSSL is set to false. " << crash;
+#ifdef MACRO_use_open_ssl
+  ProgressReportWebServer theReport;
+  theReport.SetStatus("WebWorker::SendAllBytesHttps: starting ...");
+  if (this->connectedSocketID==-1)
+  { theLog << logger::red << "Socket::SendAllBytes failed: connectedSocketID=-1." << logger::endL;
+    theReport.SetStatus("Socket::SendAllBytes failed: connectedSocketID=-1. WebWorker::SendAllBytes - finished.");
+    return;
+  }
+  theLog << "Sending " << this->remainingBytesToSend.size << " bytes in chunks of: " << logger::endL;
+  std::stringstream reportStream;
+  ProgressReportWebServer theReport2;
+  reportStream << "Sending " << this->remainingBytesToSend.size << " bytes...";
+  theReport.SetStatus(reportStream.str());
+  //  theLog << "\r\nIn response to: " << this->theMessage;
+  double startTime=theGlobalVariables.GetElapsedSeconds();
+  struct timeval tv; //<- code involving tv taken from stackexchange
+  tv.tv_sec = 5;  // 5 Secs Timeout
+  tv.tv_usec = 0;  // Not init'ing this can cause strange errors
+  int numTimesRunWithoutSending=0;
+  int timeOutInSeconds =20;
+  setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO,(void*)(&tv), sizeof(timeval));
+  while (this->remainingBytesToSend.size>0)
+  { std::stringstream reportStream2;
+    reportStream2 << this->remainingBytesToSend.size << " bytes remaining to send. ";
+    if (numTimesRunWithoutSending>0)
+      reportStream2 << "Previous attempt to send bytes resulted in 0 bytes sent; this is attempt number "
+      << numTimesRunWithoutSending+1 << ". ";
+    theReport2.SetStatus(reportStream2.str());
+    if (theGlobalVariables.GetElapsedSeconds()-startTime>timeOutInSeconds)
+    { theLog << "WebWorker::SendAllBytes failed: more than " << timeOutInSeconds << " seconds have elapsed. "
+      << logger::endL;
+      std::stringstream reportStream3;
+      reportStream3 << "WebWorker::SendAllBytes failed: more than "
+      << timeOutInSeconds << " seconds have elapsed. Continuing ...";
+      theReport.SetStatus(reportStream3.str());
+      return;
+    }
+    int numBytesSent =  SSL_write (theSSLdata.ssl, this->remainingBytesToSend.TheObjects, this->remainingBytesToSend.size);
+    if (numBytesSent<0)
+    { ERR_print_errors_fp(stderr);
+      theLog << "WebWorker::SendAllBytes failed: SSL_write error. " << logger::endL;
+      theReport.SetStatus
+      ("WebWorker::SendAllBytes failed. Error: " + this->parent->ToStringLastErrorDescription()
+       + "WebWorker::SendAllBytes - continue ...");
+      return;
+    }
+    if (numBytesSent==0)
+      numTimesRunWithoutSending++;
+    else
+      numTimesRunWithoutSending=0;
+    theLog << numBytesSent;
+    this->remainingBytesToSend.Slice(numBytesSent, this->remainingBytesToSend.size-numBytesSent);
+    if (this->remainingBytesToSend.size>0)
+      theLog << ", ";
+    if (numTimesRunWithoutSending>3)
+    { theLog << "WebWorker::SendAllBytes failed: send function went through 3 cycles without "
+      << " sending any bytes. "
+      << logger::endL;
+      theReport.SetStatus
+      ("WebWorker::SendAllBytes failed: send function went through 3 cycles without sending any bytes. ");
+      return;
+    }
+    theLog << logger::endL;
+  }
+  reportStream << " done. ";
+  theReport2.SetStatus(reportStream.str());
+  theReport.SetStatus("WebWorker::SendAllBytes - finished.");
+#endif // MACRO_use_open_ssl
+}
+
 extern void static_html4(std::stringstream& output);
 
 bool ProgressReportWebServer::flagServerExists=true;
@@ -560,9 +759,18 @@ void WebWorker::QueueStringForSending(const std::string& stringToSend, bool Must
 }
 
 void WebWorker::SendAllBytes()
+{ MacroRegisterFunctionWithName("WebWorker::SendAllBytes");
+  if (this->parent->flagUseSSL)
+  { this->SendAllBytesHttpSSL();
+    return;
+  }
+  this->SendAllBytesHttp();
+}
+
+void WebWorker::SendAllBytesHttp()
 { if (this->remainingBytesToSend.size==0)
     return;
-  MacroRegisterFunctionWithName("WebWorker::SendAllBytes");
+  MacroRegisterFunctionWithName("WebWorker::SendAllBytesHttp");
   this->CheckConsistency();
   ProgressReportWebServer theReport;
   theReport.SetStatus("WebWorker::SendAllBytes: starting ...");
@@ -583,6 +791,7 @@ void WebWorker::SendAllBytes()
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   int numTimesRunWithoutSending=0;
   int timeOutInSeconds =20;
+  setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO,(void*)(&tv), sizeof(timeval));
   while (this->remainingBytesToSend.size>0)
   { std::stringstream reportStream2;
     reportStream2 << this->remainingBytesToSend.size << " bytes remaining to send. ";
@@ -599,7 +808,6 @@ void WebWorker::SendAllBytes()
       theReport.SetStatus(reportStream3.str());
       return;
     }
-    setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO,(void*)(&tv), sizeof(timeval));
     int numBytesSent=send
     (this->connectedSocketID, &this->remainingBytesToSend[0], this->remainingBytesToSend.size,0);
     if (numBytesSent<0)
@@ -649,6 +857,13 @@ bool WebWorker::CheckConsistency()
 
 bool WebWorker::ReceiveAll()
 { MacroRegisterFunctionWithName("WebWorker::ReceiveAll");
+  if (this->parent->flagUseSSL)
+    return this->ReceiveAllHttpSSL();
+  return this->ReceiveAllHttp();
+}
+
+bool WebWorker::ReceiveAllHttp()
+{ MacroRegisterFunctionWithName("WebWorker::ReceiveAllHttp");
   unsigned const int bufferSize=60000;
   char buffer[bufferSize];
 //  std::cout << "Got thus far 9" << std::endl;
@@ -1455,6 +1670,7 @@ bool WebServer::CheckConsistency()
 WebServer::~WebServer()
 { if (this->activeWorker!=-1)
     this->GetActiveWorker().SendAllBytes();
+  this->SSLfreeResources();
   ProgressReportWebServer::flagServerExists=false;
   for (int i=0; i<this->theWorkers.size; i++)
     this->theWorkers[i].Release();
@@ -1904,46 +2120,36 @@ int WebServer::Run()
 //      theLog << this->ToStringStatusActive() << logger::endL;
       this->GetActiveWorker().CheckConsistency();
 //      std::cout << "Got thus far 7" << std::endl;
-      if (!this->flagUseSSL)
-      { if (!this->GetActiveWorker().ReceiveAll())
-        { stOutput << "HTTP/1.1 400 Bad request\r\nContent-type: text/html\r\n\r\n"
-          << "<html><body><b>HTTP error 400 (bad request). </b> There was an error with the request. "
-          << "One possibility is that the input was too large. "
-          << "<br>The error message returned was:<br>"
-          << this->GetActiveWorker().error
-          << " <hr><hr>The message (part) that was received is: "
-          << this->GetActiveWorker().ToStringMessageFull()
-          << "</body></html>";
-          stOutput.Flush();
-          this->GetActiveWorker().SendAllBytes();
-          this->SSLfreeResources();
-          return -1;
-        }
-      } else
+
+      //if (!this->flagUseSSL)
+      //{
+      if (!this->GetActiveWorker().ReceiveAll())
+      { stOutput << "HTTP/1.1 400 Bad request\r\nContent-type: text/html\r\n\r\n"
+        << "<html><body><b>HTTP error 400 (bad request). </b> There was an error with the request. "
+        << "One possibility is that the input was too large. "
+        << "<br>The error message returned was:<br>"
+        << this->GetActiveWorker().error
+        << " <hr><hr>The message (part) that was received is: "
+        << this->GetActiveWorker().ToStringMessageFull()
+        << "</body></html>";
+        stOutput.Flush();
+        this->GetActiveWorker().SendAllBytes();
+        return -1;
+      }
+/*      if (this->flagUseSSL)
       {
 #ifdef MACRO_use_open_ssl
-        char buf[4096];
-        int numBytesReceived=-1;
-        numBytesReceived = SSL_read (theSSLdata.ssl, buf, sizeof(buf) - 1);
-        if (numBytesReceived==-1)
-        { logIO << "Error reading from ssl,  " << logger::endL;
-          ERR_print_errors_fp(stderr);
-        } else
-        { std::string receivedMessage(buf, numBytesReceived);
-          std::string outputString=
-          "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n <html><body>I received the message:<br> "
-          + receivedMessage + "</body></html>";
-          SSL_write_Wrapper(theSSLdata.ssl, outputString);
-        /* Clean up. */
-        }
-        close (newConnectedSocket);
-        SSL_free (theSSLdata.ssl);
+        std::string outputString=
+        "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n <html><body>I received the message:<br> "
+        + this->GetActiveWorker().ToStringMessageFull() + "</body></html>";
+        SSL_write_Wrapper(theSSLdata.ssl, outputString);
+
+        // Clean up.
 #endif // MACRO_use_open_ssl
-      }
-//      std::cout << "Got thus far 8" << std::endl;
+
+      }*/
       this->GetActiveWorker().SendDisplayUserInputToServer();
      // std::cout << "Got thus far 9" << std::endl;
-      this->SSLfreeResources();
       return 1;
     }
     this->ReleaseWorkerSideResources();

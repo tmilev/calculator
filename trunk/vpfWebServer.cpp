@@ -2,12 +2,144 @@
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader6WebServer.h"
 #include "vpfHeader3Calculator0_Interface.h"
+
+ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
+
 #include <sys/wait.h>//<-waitpid f-n here
 #include <netdb.h> //<-addrinfo and related data structures defined here
 #include <arpa/inet.h> // <- inet_ntop declared here (ntop= network to presentation)
 #include <unistd.h>
 #include <sys/stat.h>//<-for file statistics
-ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
+
+#ifdef MACRO_use_open_ssl
+//installation of these headers in ubuntu:
+//sudo apt-get install libssl-dev
+//Instructions: look at the examples folder in the openssl.
+//openssl tutorial (couldn't make it work myself):
+//http://www.ibm.com/developerworks/library/l-openssl/
+#include <openssl/rsa.h>
+#include <openssl/crypto.h>
+#include <openssl/x509.h>
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
+struct SSLdata{
+public:
+  int errorCode;
+  SSL* ssl;
+  X509* client_cert;
+  SSL_CTX* ctx;
+  std::string otherCertificateIssuerName, otherCertificateSubjectName;
+};
+
+SSLdata theSSLdata;
+
+void SSL_write_Wrapper(SSL* inputSSL, const std::string& theString)
+{ MacroRegisterFunctionWithName("SSL_write_Wrapper");
+  int err =  SSL_write (inputSSL, theString.c_str(), theString.size());
+  if ((err)==-1)
+  { ERR_print_errors_fp(stderr);
+    crash << "Errors while calling SSL_write. " << crash;
+  }
+}
+
+#endif // MACRO_use_open_ssl
+//http://stackoverflow.com/questions/10175812/how-to-create-a-self-signed-certificate-with-openssl
+//openssl req -x509 -newkey rsa:2048 -keyout -nodes key.pem -out cert.pem -days 1001
+const std::string fileCertificate= "/home/todor/math/cert.pem";
+const std::string fileKey= "/home/todor/math/key.pem";
+
+void WebServer::initSSL()
+{ if (!this->flagUseSSL)
+    return;
+  MacroRegisterFunctionWithName("WebServer::initSSL");
+#ifdef MACRO_use_open_ssl
+
+  const SSL_METHOD *meth;
+  SSL_load_error_strings();
+  OpenSSL_add_ssl_algorithms();
+  meth = TLSv1_2_server_method();
+  theSSLdata.ctx = SSL_CTX_new (meth);
+  if (!theSSLdata.ctx)
+  { ERR_print_errors_fp(stderr);
+    crash << "openssl error: failed to create CTX object." << crash;
+  }
+  if (SSL_CTX_use_certificate_file(theSSLdata.ctx, fileCertificate.c_str(), SSL_FILETYPE_PEM) <= 0)
+  { ERR_print_errors_fp(stderr);
+    exit(3);
+  }
+  if (SSL_CTX_use_PrivateKey_file(theSSLdata.ctx, fileKey.c_str(), SSL_FILETYPE_PEM) <= 0)
+  { ERR_print_errors_fp(stderr);
+    exit(4);
+  }
+  if (!SSL_CTX_check_private_key(theSSLdata.ctx))
+  { fprintf(stderr,"Private key does not match the certificate public key\n");
+    exit(5);
+  }
+#endif // MACRO_use_open_ssl
+}
+
+void WebServer::SSLfreeResources()
+{
+  SSL_free (theSSLdata.ssl);
+}
+
+void WebServer::SSLfreeEverythingShutdownSSL()
+{ if (!this->flagUseSSL)
+    return;
+#ifdef MACRO_use_open_ssl
+  SSL_CTX_free (theSSLdata.ctx);
+#endif // MACRO_use_open_ssl
+}
+
+void WebServer::SSLServerSideHandShake()
+{ if (!this->flagUseSSL)
+    return;
+#ifdef MACRO_use_open_ssl
+  MacroRegisterFunctionWithName("WebServer::SSLServerSideHandShake");
+  theLog << "Got to here 1" << logger::endL;
+  theSSLdata.ssl = SSL_new(theSSLdata.ctx);
+  theLog << "Got to here 1.05" << logger::endL;
+  if(theSSLdata.ssl==0)
+  { theLog << "Failed to allocate ssl" << logger::endL;
+    crash << "Failed to allocate ssl: not supposed to happen" << crash;
+  }
+  theLog << "Got to here 1.1" << logger::endL;
+  SSL_set_fd (theSSLdata.ssl, this->GetActiveWorker().connectedSocketID);
+  theLog << "Got to here 1.2" << logger::endL;
+  theSSLdata.errorCode = SSL_accept (theSSLdata.ssl);
+  theLog << "Got to here 1.3" << logger::endL;
+//    CHK_SSL(err);
+  theLog << "Got to here 2" << logger::endL;
+  /* Get the cipher - opt */
+  printf ("SSL connection using %s\n", SSL_get_cipher (theSSLdata.ssl));
+  /* Get client's certificate (note: beware of dynamic allocation) - opt */
+  theSSLdata.client_cert = SSL_get_peer_certificate (theSSLdata.ssl);
+  if (theSSLdata.client_cert != NULL)
+  { char* tempCharPtr=0;
+    tempCharPtr = X509_NAME_oneline (X509_get_subject_name (theSSLdata.client_cert), 0, 0);
+    if (tempCharPtr==0)
+    { logIO << "X509_NAME_oneline return null; this is not supposed to happen. " << logger::endL;
+      crash << "X509_NAME_oneline return null; this is not supposed to happen. " << crash;
+    }
+    theSSLdata.otherCertificateSubjectName=tempCharPtr;
+    OPENSSL_free(tempCharPtr);
+    logIO << "Client certificate:" << logger::endL
+    << "Subject: " << theSSLdata.otherCertificateSubjectName << logger::endL;
+    tempCharPtr = X509_NAME_oneline (X509_get_issuer_name  (theSSLdata.client_cert), 0, 0);
+    if (tempCharPtr==0)
+    { logIO << "X509_NAME_oneline return null; this is not supposed to happen. " << logger::endL;
+      crash << "X509_NAME_oneline return null; this is not supposed to happen. " << crash;
+    }
+    theSSLdata.otherCertificateIssuerName=tempCharPtr;
+    OPENSSL_free(tempCharPtr);
+    logIO << "Issuer name: " << theSSLdata.otherCertificateIssuerName << logger::endL;
+    X509_free (theSSLdata.client_cert);
+  } else
+    theLog << "Client does not have certificate.\n" << logger::endL;
+#endif // MACRO_use_open_ssl
+}
 
 extern void static_html4(std::stringstream& output);
 
@@ -965,12 +1097,20 @@ int WebWorker::ProcessNonCalculator()
   }
   theFile.seekp(0, std::ifstream::end);
   unsigned int fileSize=theFile.tellp();
+  std::stringstream theHeader;
+  if (fileSize>50000000)
+  { theHeader << "HTTP/1.1 413 Payload Too Large\r\n"
+    << "<html><body><b>Error: user requested file: " << this->PhysicalFileName
+    << " but it is too large, namely, " << fileSize << " bytes.</b></body></html>";
+    this->QueueBytesForSending(theHeader.str());
+    this->SendAllBytes();
+    return 0;
+  }
   std::stringstream reportStream;
   reportStream << "<br>Serving file " << this->PhysicalFileName << " ...";
   ProgressReportWebServer theProgressReport2;
   theProgressReport2.SetStatus(reportStream.str());
 
-  std::stringstream theHeader;
   theHeader << "HTTP/1.1 200 OK\r\n" << this->GetMIMEtypeFromFileExtension(fileExtension)
   << "Content-length: " << fileSize << "\r\n\r\n";
   this->QueueStringForSending(theHeader.str());
@@ -1725,6 +1865,7 @@ int WebServer::Run()
   sockaddr_storage their_addr; // connector's address information
   socklen_t sin_size;
   char userAddressBuffer[INET6_ADDRSTRLEN];
+  this->initSSL();
   while(true)
   { // main accept() loop
     sin_size = sizeof their_addr;
@@ -1747,6 +1888,8 @@ int WebServer::Run()
     //theLog << "\r\nChildPID: " << this->childPID;
     if (this->GetActiveWorker().ProcessPID!=0)
     { // this is the child (worker) process
+      this->SSLServerSideHandShake();
+
       this->Release(this->listeningSocketID);//worker has no access to socket listener
       theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=
       this->ReturnActiveIndicatorAlthoughComputationIsNotDone;
@@ -1761,26 +1904,51 @@ int WebServer::Run()
 //      theLog << this->ToStringStatusActive() << logger::endL;
       this->GetActiveWorker().CheckConsistency();
 //      std::cout << "Got thus far 7" << std::endl;
-      if (!this->GetActiveWorker().ReceiveAll())
-      { stOutput << "HTTP/1.1 400 Bad request\r\nContent-type: text/html\r\n\r\n"
-        << "<html><body><b>HTTP error 400 (bad request). </b> There was an error with the request. "
-        << "One possibility is that the input was too large. "
-        << "<br>The error message returned was:<br>"
-        << this->GetActiveWorker().error
-        << " <hr><hr>The message (part) that was received is: "
-        << this->GetActiveWorker().ToStringMessageFull()
-        << "</body></html>";
-        stOutput.Flush();
-        this->GetActiveWorker().SendAllBytes();
-        return -1;
+      if (!this->flagUseSSL)
+      { if (!this->GetActiveWorker().ReceiveAll())
+        { stOutput << "HTTP/1.1 400 Bad request\r\nContent-type: text/html\r\n\r\n"
+          << "<html><body><b>HTTP error 400 (bad request). </b> There was an error with the request. "
+          << "One possibility is that the input was too large. "
+          << "<br>The error message returned was:<br>"
+          << this->GetActiveWorker().error
+          << " <hr><hr>The message (part) that was received is: "
+          << this->GetActiveWorker().ToStringMessageFull()
+          << "</body></html>";
+          stOutput.Flush();
+          this->GetActiveWorker().SendAllBytes();
+          this->SSLfreeResources();
+          return -1;
+        }
+      } else
+      {
+#ifdef MACRO_use_open_ssl
+        char buf[4096];
+        int numBytesReceived=-1;
+        numBytesReceived = SSL_read (theSSLdata.ssl, buf, sizeof(buf) - 1);
+        if (numBytesReceived==-1)
+        { logIO << "Error reading from ssl,  " << logger::endL;
+          ERR_print_errors_fp(stderr);
+        } else
+        { std::string receivedMessage(buf, numBytesReceived);
+          std::string outputString=
+          "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n <html><body>I received the message:<br> "
+          + receivedMessage + "</body></html>";
+          SSL_write_Wrapper(theSSLdata.ssl, outputString);
+        /* Clean up. */
+        }
+        close (newConnectedSocket);
+        SSL_free (theSSLdata.ssl);
+#endif // MACRO_use_open_ssl
       }
 //      std::cout << "Got thus far 8" << std::endl;
       this->GetActiveWorker().SendDisplayUserInputToServer();
      // std::cout << "Got thus far 9" << std::endl;
+      this->SSLfreeResources();
       return 1;
     }
     this->ReleaseWorkerSideResources();
   }
+  this->SSLfreeEverythingShutdownSSL();
   return 0;
 }
 

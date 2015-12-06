@@ -110,7 +110,6 @@
 		<Unit filename="vpfMacros.h" />
 		<Unit filename="vpfWebServer.cpp" />
 		<Unit filename="vpfWebServerInterProcessLogistics.cpp" />
-		<Unit filename="vpfWebServerSSL.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

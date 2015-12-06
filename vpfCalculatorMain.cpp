@@ -64,10 +64,7 @@ int main(int argc, char **argv)
     }
     if (theGlobalVariables.flagUsingBuiltInWebServer)
     { int result=-1;
-      if (!theWebServer.flagUseSSL)
-        result=theWebServer.Run();
-      else
-        result=theWebServer.RunSSL();
+      result=theWebServer.Run();
       if (result==0)
       { stOutput << "Server exit normal. ";
         return 0;

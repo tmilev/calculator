@@ -130,7 +130,6 @@ public:
   void CreateNewActiveWorker();
   bool CheckConsistency();
   int Run();
-  int RunSSL();
   WebWorker& GetActiveWorker();
   static void WorkerTimerPing(double pingTime);
   static void Release(int& theDescriptor);
@@ -146,6 +145,10 @@ public:
   void initPrepareSignals();
   bool initBindToPorts();
   void initPortsITry();
+  void initSSL();
+  void SSLfreeResources();
+  void SSLServerSideHandShake();
+  void SSLfreeEverythingShutdownSSL();
   void RecycleChildrenIfPossible();
   void Restart();
   void CheckExecutableVersionAndRestartIfNeeded();

@@ -1979,6 +1979,7 @@ void WebServer::RecycleChildrenIfPossible()
             pingTimeoutStream << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
             << " seconds have passed since worker " << i+1
             << " pinged the server. I am assuming the worker no longer functions, and am marking it as free for reuse. ";
+            kill(this->theWorkers[i].ProcessPID, SIGKILL);
             theLog << logger::red << pingTimeoutStream.str() << logger::endL;
             this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>" + pingTimeoutStream.str()+"</b></span>";
           }

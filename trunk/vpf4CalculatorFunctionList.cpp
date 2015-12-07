@@ -245,20 +245,20 @@ void Calculator::initPredefinedInnerFunctions()
    "Differentiate(x, f+g )", true, false, "CalculatorFunctionsGeneral::innerDifferentiateAplusB");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateConstant, "",
-   "Differeniation - constant rule. ",
+   "Differentiation - constant rule. ",
    "Differentiate(x, 5 ); d/dx \\sqrt{5}", true, false, "CalculatorFunctionsGeneral::innerDifferentiateConstant");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateX, "",
-   "Differeniation - d/dx x= 1.",
+   "Differentiation - d/dx x= 1.",
    "Differentiate(x, x ); d/dx x", true, false, "CalculatorFunctionsGeneral::innerDifferentiateX");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateConstPower, "",
-   "Differeniation - d/dx x^n= n x^{n-1}.",
+   "Differentiation - d/dx x^n= n x^{n-1}.",
    "Differentiate(x, x^2 ); d/dx x^-1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}", true, false,
    "CalculatorFunctionsGeneral::innerDifferentiateConstPower");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateAPowerB, "",
-   "Differeniation - d/dx a^b= d/dx(e^{b\\log a}) = a^b d/dx(b\\log a) .",
+   "Differentiation - d/dx a^b= d/dx(e^{b\\log a}) = a^b d/dx(b\\log a) .",
    "Differentiate(x, x^2 ); d/dx x^-1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}", true, false, "CalculatorFunctionsGeneral::innerDifferentiateAPowerB");
 
   this->AddOperationInnerHandler
@@ -296,7 +296,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("MakeMatrixRFs", CalculatorConversions::innerMatrixRationalFunction,"",
    "Creates an internal c++ matrix structure from double list of polynomial functions. \
-   ", "s_1=MatrixRFs{}((1-t, 2), (3, 2-t))", true, false, "CalculatorConversions::innerMatrixRationalFunction");
+   ", "s_1=MakeMatrixRFs{}((1-t, 2), (3, 2-t))", true, false, "CalculatorConversions::innerMatrixRationalFunction");
   this->AddOperationInnerHandler
   ("FourierTransformDO", CalculatorFunctionsGeneral::innerFourierTransformEWA, "",
    "Fourier-transforms an element of a weyl algebra. Multiplies each monomial term of odd total degree by -1 \

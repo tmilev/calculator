@@ -14,6 +14,7 @@ class WebWorker
 public:
   WebServer* parent;
   bool flagInUse;
+  bool flagUsingSSLinCurrentConnection;
   int indexInParent;
   int ProcessPID;
   std::string displayUserInput;
@@ -114,10 +115,12 @@ class WebServer
 {
 public:
   static const int maxNumPendingConnections;     // how many pending connections queue will hold
-  int listeningSocketID;
+  int listeningSocketHTTP;
+  int listeningSocketHttpSSL;
   bool flagTryToKillOlderProcesses;
-  bool flagUseSSL;
-  List<std::string> PortsITry;
+  bool flagUsESSL;
+  List<std::string> PortsITryHttp;
+  List<std::string> PortsITryHttpSSL;
   ListReferences<WebWorker> theWorkers;
 
   int activeWorker;

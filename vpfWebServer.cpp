@@ -31,6 +31,12 @@ public:
   X509* client_cert;
   SSL_CTX* ctx;
   std::string otherCertificateIssuerName, otherCertificateSubjectName;
+  SSLdata()
+  { this->errorCode=-1;
+    this->ssl=0;
+    this->client_cert=0;
+    this->ctx=0;
+  }
 };
 
 SSLdata theSSLdata;
@@ -46,12 +52,12 @@ void SSL_write_Wrapper(SSL* inputSSL, const std::string& theString)
 
 #endif // MACRO_use_open_ssl
 //http://stackoverflow.com/questions/10175812/how-to-create-a-self-signed-certificate-with-openssl
-//openssl req -x509 -newkey rsa:2048 -keyout -nodes key.pem -out cert.pem -days 1001
-const std::string fileCertificate= "/home/todor/math/cert.pem";
-const std::string fileKey= "/home/todor/math/key.pem";
+//openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 1001
+const std::string fileCertificate= "../../cert.pem";
+const std::string fileKey= "../../key.pem";
 
 void WebServer::initSSL()
-{ if (!this->flagUseSSL)
+{ if (!this->flagUsESSL)
     return;
   MacroRegisterFunctionWithName("WebServer::initSSL");
 #ifdef MACRO_use_open_ssl
@@ -81,12 +87,13 @@ void WebServer::initSSL()
 }
 
 void WebServer::SSLfreeResources()
-{
+{ if (!this->GetActiveWorker().flagUsingSSLinCurrentConnection)
+    return;
   SSL_free (theSSLdata.ssl);
 }
 
 void WebServer::SSLfreeEverythingShutdownSSL()
-{ if (!this->flagUseSSL)
+{ if (!this->flagUsESSL)
     return;
 #ifdef MACRO_use_open_ssl
   SSL_CTX_free (theSSLdata.ctx);
@@ -94,7 +101,9 @@ void WebServer::SSLfreeEverythingShutdownSSL()
 }
 
 void WebServer::SSLServerSideHandShake()
-{ if (!this->flagUseSSL)
+{ if (!this->flagUsESSL)
+    return;
+  if (!this->GetActiveWorker().flagUsingSSLinCurrentConnection)
     return;
 #ifdef MACRO_use_open_ssl
   MacroRegisterFunctionWithName("WebServer::SSLServerSideHandShake");
@@ -143,8 +152,8 @@ void WebServer::SSLServerSideHandShake()
 
 bool WebWorker::ReceiveAllHttpSSL()
 { MacroRegisterFunctionWithName("WebWorker::ReceiveAllHttpSSL");
-  if (!this->parent->flagUseSSL)
-    crash << "Calling WebWorker::ReceiveAllHttpSSL not allowed if flagUseSSL has not been set to true. " << crash;
+  if (!this->flagUsingSSLinCurrentConnection)
+    return true;
 #ifdef MACRO_use_open_ssl
   unsigned const int bufferSize=60000;
   char buffer[bufferSize];
@@ -268,8 +277,8 @@ void WebWorker::SendAllBytesHttpSSL()
     return;
   MacroRegisterFunctionWithName("WebWorker::SendAllBytesHttpSSL");
   this->CheckConsistency();
-  if (!this->parent->flagUseSSL)
-    crash << "Error: WebWorker::SendAllBytesHttpSSL called while flagUseSSL is set to false. " << crash;
+  if (!this->flagUsingSSLinCurrentConnection)
+    crash << "Error: WebWorker::SendAllBytesHttpSSL called while flagUsingSSLinCurrentConnection is set to false. " << crash;
 #ifdef MACRO_use_open_ssl
   ProgressReportWebServer theReport;
   theReport.SetStatus("WebWorker::SendAllBytesHttps: starting ...");
@@ -760,7 +769,7 @@ void WebWorker::QueueStringForSending(const std::string& stringToSend, bool Must
 
 void WebWorker::SendAllBytes()
 { MacroRegisterFunctionWithName("WebWorker::SendAllBytes");
-  if (this->parent->flagUseSSL)
+  if (this->flagUsingSSLinCurrentConnection)
   { this->SendAllBytesHttpSSL();
     return;
   }
@@ -857,7 +866,7 @@ bool WebWorker::CheckConsistency()
 
 bool WebWorker::ReceiveAll()
 { MacroRegisterFunctionWithName("WebWorker::ReceiveAll");
-  if (this->parent->flagUseSSL)
+  if (this->flagUsingSSLinCurrentConnection)
     return this->ReceiveAllHttpSSL();
   return this->ReceiveAllHttp();
 }
@@ -1214,6 +1223,7 @@ void WebWorker::reset()
   this->requestType=this->requestUnknown;
   this->flagMainAddressSanitized=false;
   this->timeOfLastPingServerSideOnly=-1;
+  this->flagUsingSSLinCurrentConnection=false;
   this->Release();
 }
 
@@ -1679,7 +1689,10 @@ WebServer::~WebServer()
   theGlobalVariables.IndicatorStringOutputFunction=0;
   theGlobalVariables.PauseUponUserRequest=0;
   this->activeWorker=-1;
-  close(this->listeningSocketID);
+  if (this->listeningSocketHTTP!=-1)
+    close(this->listeningSocketHTTP);
+  if (this->listeningSocketHttpSSL!=-1)
+    close(this->listeningSocketHttpSSL);
   this->flagDeallocated=true;
 }
 
@@ -1707,9 +1720,11 @@ WebServer::WebServer()
 { this->flagDeallocated=false;
   this->flagTryToKillOlderProcesses=true;
   this->flagPort8155=false;
-  this->flagUseSSL=false;
+  this->flagUsESSL=false;
   this->activeWorker=-1;
   this->timeLastExecutableModification=-1;
+  this->listeningSocketHTTP=-1;
+  this->listeningSocketHttpSSL=-1;
 }
 
 WebWorker& WebServer::GetActiveWorker()
@@ -1881,7 +1896,10 @@ void WebServer::CheckExecutableVersionAndRestartIfNeeded()
 void WebServer::Restart()
 { //theLog << "Killing all copies of the calculator and restarting..." << logger::endL;
   //theLog << "Time limit after restart: " << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit << logger::endL;
-  this->Release(this->listeningSocketID);
+  if (this->listeningSocketHTTP!=-1)
+    this->Release(this->listeningSocketHTTP);
+  if (this->listeningSocketHttpSSL!=-1)
+    this->Release(this->listeningSocketHttpSSL);
 //  char arg1[7]="server";
 //  char arg2[7]="nokill";
 //  char* args[2];
@@ -1896,7 +1914,7 @@ void WebServer::Restart()
   int timeInteger=(int) theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   theCommand << "killall " <<  theGlobalVariables.PhysicalNameExecutableNoPath + " \r\n./";
   theCommand << theGlobalVariables.PhysicalNameExecutableNoPath;
-  if (this->flagUseSSL)
+  if (this->flagUsESSL)
     theCommand << " serverSSL nokill " << timeInteger;
   if (this->flagPort8155)
     theCommand << " server8155 nokill " << timeInteger;
@@ -1907,11 +1925,16 @@ void WebServer::Restart()
 
 void WebServer::initPortsITry()
 { if (this->flagPort8155)
-    this->PortsITry.AddOnTop("8155");
-  this->PortsITry.AddOnTop("8080");
-  this->PortsITry.AddOnTop("8081");
-  this->PortsITry.AddOnTop("8082");
-  this->PortsITry.AddOnTop("8155");
+    this->PortsITryHttp.AddOnTop("8155");
+  this->PortsITryHttp.AddOnTop("8080");
+  this->PortsITryHttp.AddOnTop("8081");
+  this->PortsITryHttp.AddOnTop("8082");
+  this->PortsITryHttp.AddOnTop("8155");
+  if (!this->flagUsESSL)
+    return;
+  this->PortsITryHttpSSL.AddOnTop("8083");
+  this->PortsITryHttpSSL.AddOnTop("8084");
+  this->PortsITryHttpSSL.AddOnTop("8085");
 }
 
 void WebServer::initDates()
@@ -2011,34 +2034,38 @@ bool WebServer::initBindToPorts()
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE; // use my IP
   // loop through all the results and bind to the first we can
-  for (int i=0; i<this->PortsITry.size; i++)
-  { if ((rv = getaddrinfo(NULL, this->PortsITry[i].c_str(), &hints, &servinfo)) != 0)
-    { theLog << "getaddrinfo: " << gai_strerror(rv) << logger::endL;
-      return false;
-    }
-    for(p = servinfo; p != NULL; p = p->ai_next)
-    { this->listeningSocketID= socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-      if (this->listeningSocketID == -1)
-      { theLog << "Error: socket failed.\n";
-        continue;
+  List<std::string>* thePorts=&this->PortsITryHttp;
+  int* theListeningSocket=& this->listeningSocketHTTP;
+  for (int j=0; j<2; j++, thePorts=& this->PortsITryHttpSSL, theListeningSocket=& this->listeningSocketHttpSSL)
+    for (int i=0; i<(*thePorts).size; i++)
+    { if ((rv = getaddrinfo(NULL, (*thePorts)[i].c_str(), &hints, &servinfo)) != 0)
+      { theLog << "getaddrinfo: " << gai_strerror(rv) << logger::endL;
+        return false;
       }
-      if (setsockopt(this->listeningSocketID, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
-        crash << "Error: setsockopt failed.\n" << crash;
-      if (bind(this->listeningSocketID, p->ai_addr, p->ai_addrlen) == -1)
-      { close(this->listeningSocketID);
-        theLog << "Error: bind failed. " << this->ToStringLastErrorDescription() << logger::endL;
-        continue;
+      for(p = servinfo; p != NULL; p = p->ai_next)
+      { *theListeningSocket= socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+        if (*theListeningSocket == -1)
+        { theLog << "Error: socket failed.\n";
+          continue;
+        }
+        if (setsockopt(*theListeningSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
+          crash << "Error: setsockopt failed.\n" << crash;
+        if (bind(*theListeningSocket, p->ai_addr, p->ai_addrlen) == -1)
+        { close(*theListeningSocket);
+          *theListeningSocket=-1;
+          theLog << "Error: bind failed. " << this->ToStringLastErrorDescription() << logger::endL;
+          continue;
+        }
+        break;
       }
-      break;
+      if (p!=NULL)
+      { theLog << logger::yellow << "Successfully bounded to port " << (*thePorts)[i] << logger::endL;
+        break;
+      }
+      freeaddrinfo(servinfo); // all done with this structure
     }
-    if (p!=NULL)
-    { theLog << logger::yellow << "Successfully bounded to port " << this->PortsITry[i] << logger::endL;
-      break;
-    }
-    freeaddrinfo(servinfo); // all done with this structure
-  }
-  if (p == NULL)
-    crash << "Failed to bind to any of the ports " << this->PortsITry.ToStringCommaDelimited() << "\n" << crash;
+  if (this->listeningSocketHTTP == -1)
+    crash << "Failed to bind to any of the ports " << this->PortsITryHttp.ToStringCommaDelimited() << "\n" << crash;
   return true;
 }
 
@@ -2075,8 +2102,25 @@ int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
   if (!this->initPrepareWebServerALL())
     return 1;
-  if (listen(this->listeningSocketID, WebServer::maxNumPendingConnections) == -1)
-    crash << "Listen function failed." << crash;
+  List<int> theSockets;
+  int highestSockNum=-1;
+  fd_set FDListenSockets;
+  FD_ZERO(&FDListenSockets);
+  if (this->listeningSocketHTTP!=-1)
+  { theSockets.AddOnTop(this->listeningSocketHTTP);
+    highestSockNum=MathRoutines::Maximum(this->listeningSocketHTTP, highestSockNum);
+    FD_SET(this->listeningSocketHTTP, &FDListenSockets);
+  }
+  if (this->listeningSocketHttpSSL!=-1)
+  { theSockets.AddOnTop(this->listeningSocketHttpSSL);
+    highestSockNum=MathRoutines::Maximum(this->listeningSocketHttpSSL, highestSockNum);
+    FD_SET(this->listeningSocketHTTP, &FDListenSockets);
+  }
+  if (listen(this->listeningSocketHTTP, WebServer::maxNumPendingConnections) == -1)
+    crash << "Listen function failed on http port." << crash;
+  if (this->flagUsESSL)
+    if (listen(this->listeningSocketHttpSSL, WebServer::maxNumPendingConnections) == -1)
+      crash << "Listen function failed on https port." << crash;
   theLog << logger::purple <<  "server: waiting for connections...\r\n" << logger::endL;
   unsigned int connectionsSoFar=0;
   sockaddr_storage their_addr; // connector's address information
@@ -2086,13 +2130,26 @@ int WebServer::Run()
   while(true)
   { // main accept() loop
     sin_size = sizeof their_addr;
-    int newConnectedSocket = accept(this->listeningSocketID, (struct sockaddr *)&their_addr, &sin_size);
+    select(highestSockNum+1, & FDListenSockets, 0, 0, 0);
+    int theListeningSocket=-1;
+    for (int i=0; i< theSockets.size; i++)
+      if (FD_ISSET(theSockets[i], &FDListenSockets))
+      { theListeningSocket=theSockets[i];
+        break;
+      }
+
+    int newConnectedSocket = accept(theListeningSocket, (struct sockaddr *)&their_addr, &sin_size);
     if (newConnectedSocket <0)
     { theLog << "Accept failed. Error: " << this->ToStringLastErrorDescription() << logger::endL;
       continue;
     }
     this->RecycleChildrenIfPossible();
     this->CreateNewActiveWorker();
+    this->GetActiveWorker().flagUsingSSLinCurrentConnection=false;
+    if (theListeningSocket==this->listeningSocketHttpSSL)
+    { this->GetActiveWorker().flagUsingSSLinCurrentConnection=true;
+      std::cout << "\noutput ssl:\n";
+    }
     this->GetActiveWorker().connectedSocketID=newConnectedSocket;
     this->GetActiveWorker().connectedSocketIDLastValueBeforeRelease=newConnectedSocket;
     connectionsSoFar++;
@@ -2107,7 +2164,7 @@ int WebServer::Run()
     { // this is the child (worker) process
       this->SSLServerSideHandShake();
 
-      this->Release(this->listeningSocketID);//worker has no access to socket listener
+      this->Release(theListeningSocket);//worker has no access to socket listener
       theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=
       this->ReturnActiveIndicatorAlthoughComputationIsNotDone;
       theGlobalVariables.WebServerTimerPing=this->WorkerTimerPing;

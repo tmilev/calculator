@@ -39,7 +39,7 @@ int main(int argc, char **argv)
     if (tempArgument=="server8155")
       theWebServer.flagPort8155=true;
     if (tempArgument=="serverSSL")
-      theWebServer.flagUseSSL=true;
+      theWebServer.flagUsESSL=true;
     if (tempArgument=="test")
     { List<std::string> remainingArguments;
       remainingArguments.SetSize(argc-2);

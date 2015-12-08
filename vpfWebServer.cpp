@@ -109,22 +109,22 @@ void WebServer::SSLServerSideHandShake()
     return;
 #ifdef MACRO_use_open_ssl
   MacroRegisterFunctionWithName("WebServer::SSLServerSideHandShake");
-  theLog << "Got to here 1" << logger::endL;
+//  theLog << "Got to here 1" << logger::endL;
   theSSLdata.ssl = SSL_new(theSSLdata.ctx);
-  theLog << "Got to here 1.05" << logger::endL;
+//  theLog << "Got to here 1.05" << logger::endL;
   if(theSSLdata.ssl==0)
   { theLog << "Failed to allocate ssl" << logger::endL;
     crash << "Failed to allocate ssl: not supposed to happen" << crash;
   }
-  theLog << "Got to here 1.1" << logger::endL;
+//  theLog << "Got to here 1.1" << logger::endL;
   SSL_set_fd (theSSLdata.ssl, this->GetActiveWorker().connectedSocketID);
-  theLog << "Got to here 1.2" << logger::endL;
+//  theLog << "Got to here 1.2" << logger::endL;
   theSSLdata.errorCode = SSL_accept (theSSLdata.ssl);
-  theLog << "Got to here 1.3" << logger::endL;
+//  theLog << "Got to here 1.3" << logger::endL;
 //    CHK_SSL(err);
-  theLog << "Got to here 2" << logger::endL;
+//  theLog << "Got to here 2" << logger::endL;
   /* Get the cipher - opt */
-  printf ("SSL connection using %s\n", SSL_get_cipher (theSSLdata.ssl));
+  logIO << "SSL connection using: " << SSL_get_cipher (theSSLdata.ssl);
   /* Get client's certificate (note: beware of dynamic allocation) - opt */
   theSSLdata.client_cert = SSL_get_peer_certificate (theSSLdata.ssl);
   if (theSSLdata.client_cert != NULL)
@@ -2070,6 +2070,9 @@ bool WebServer::initBindToPorts()
     }
   if (this->listeningSocketHTTP == -1)
     crash << "Failed to bind to any of the ports " << this->PortsITryHttp.ToStringCommaDelimited() << "\n" << crash;
+  if (this->flagUsESSL)
+    if (this->listeningSocketHttpSSL==-1)
+      crash << "Failed to bind to any of the ports " << this->PortsITryHttpSSL.ToStringCommaDelimited() << "\n" << crash;
   return true;
 }
 
@@ -2108,23 +2111,12 @@ int WebServer::Run()
     return 1;
   List<int> theSockets;
   int highestSockNum=-1;
-  fd_set FDListenSockets;
-  FD_ZERO(&FDListenSockets);
-  if (this->listeningSocketHTTP!=-1)
-  { theSockets.AddOnTop(this->listeningSocketHTTP);
-    highestSockNum=MathRoutines::Maximum(this->listeningSocketHTTP, highestSockNum);
-    FD_SET(this->listeningSocketHTTP, &FDListenSockets);
-  }
-  if (this->listeningSocketHttpSSL!=-1)
-  { theSockets.AddOnTop(this->listeningSocketHttpSSL);
-    highestSockNum=MathRoutines::Maximum(this->listeningSocketHttpSSL, highestSockNum);
-    FD_SET(this->listeningSocketHTTP, &FDListenSockets);
-  }
   if (listen(this->listeningSocketHTTP, WebServer::maxNumPendingConnections) == -1)
     crash << "Listen function failed on http port." << crash;
   if (this->flagUsESSL)
     if (listen(this->listeningSocketHttpSSL, WebServer::maxNumPendingConnections) == -1)
       crash << "Listen function failed on https port." << crash;
+
   theLog << logger::purple <<  "server: waiting for connections...\r\n" << logger::endL;
   unsigned int connectionsSoFar=0;
   sockaddr_storage their_addr; // connector's address information
@@ -2134,19 +2126,36 @@ int WebServer::Run()
   while(true)
   { // main accept() loop
     sin_size = sizeof their_addr;
-    select(highestSockNum+1, & FDListenSockets, 0, 0, 0);
+    theLog << logger::red << "select returned!" << logger::endL;
     int theListeningSocket=-1;
+    fd_set FDListenSockets;
+    FD_ZERO(&FDListenSockets);
+    if (this->listeningSocketHTTP!=-1)
+    { theSockets.AddOnTop(this->listeningSocketHTTP);
+      highestSockNum=MathRoutines::Maximum(this->listeningSocketHTTP, highestSockNum);
+      FD_SET(this->listeningSocketHTTP, &FDListenSockets);
+    }
+  //  this->listeningSocketHttpSSL=-1;
+    if (this->listeningSocketHttpSSL!=-1)
+    { theSockets.AddOnTop(this->listeningSocketHttpSSL);
+      highestSockNum=MathRoutines::Maximum(this->listeningSocketHttpSSL, highestSockNum);
+      FD_SET(this->listeningSocketHttpSSL, &FDListenSockets);
+    }
+    select(highestSockNum+1, & FDListenSockets, 0, 0, 0);
     for (int i=0; i< theSockets.size; i++)
       if (FD_ISSET(theSockets[i], &FDListenSockets))
       { theListeningSocket=theSockets[i];
         break;
       }
-
+    if (theListeningSocket==-1)
+      crash << "something bad happened ... " << crash;
     int newConnectedSocket = accept(theListeningSocket, (struct sockaddr *)&their_addr, &sin_size);
     if (newConnectedSocket <0)
     { theLog << "Accept failed. Error: " << this->ToStringLastErrorDescription() << logger::endL;
       continue;
     }
+    theLog << logger::purple << "NewconnectedSocket: " << newConnectedSocket << ", listeningSocket: "
+    << theListeningSocket << logger::endL;
     this->RecycleChildrenIfPossible();
     this->CreateNewActiveWorker();
     this->GetActiveWorker().flagUsingSSLinCurrentConnection=false;

@@ -89,7 +89,9 @@ void WebServer::initSSL()
 void WebServer::SSLfreeResources()
 { if (!this->GetActiveWorker().flagUsingSSLinCurrentConnection)
     return;
+#ifdef MACRO_use_open_ssl
   SSL_free (theSSLdata.ssl);
+#endif // MACRO_use_open_ssl
 }
 
 void WebServer::SSLfreeEverythingShutdownSSL()
@@ -268,6 +270,8 @@ bool WebWorker::ReceiveAllHttpSSL()
     return false;
   }
   theReport.SetStatus("Webworker: received everything, processing. ");
+  return true;
+#else
   return true;
 #endif // MACRO_use_open_ssl
 }

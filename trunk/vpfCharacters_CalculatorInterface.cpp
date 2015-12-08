@@ -1534,6 +1534,31 @@ bool CalculatorFunctionsWeylGroup::innerTestSpechtModules(Calculator& theCommand
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules");
+  int theRank=0;
+  if (!input.IsSmallInteger(&theRank))
+    return false;
+  if (theRank<1|| theRank >7)
+    return theCommands << "Input of hyperoctahedral print function has to be between 1 and 10";
+  HyperoctahedralGroup G;
+  G.MakeHyperoctahedralGroup(theRank);
+  G.AllSpechtModules();
+  return output.AssignValue(G.PrettyPrintCharacterTable(), theCommands);
+}
+
+bool CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations");
+  int theRank=0;
+  if (!input.IsSmallInteger(&theRank))
+    return false;
+  if (theRank<1|| theRank >10)
+    return theCommands << "Input of hyperoctahedral print function has to be between 1 and 10";
+  HyperoctahedralGroup G;
+  G.MakeHyperoctahedralGroup(theRank);
+  return output.AssignValue(G.PrettyPrintGeneratorCommutationRelations(), theCommands);
+}
+
 bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupElement");
   //if (!input.IsSequenceNElementS(2))

@@ -2365,7 +2365,6 @@ void TestHyperoctahedralStuff()
 
   for(int bni=1; bni<6;bni++)
   { HyperoctahedralGroup Bn;
-    Bn.init();
     Bn.MakeHyperoctahedralGroup(bni);
     Bn.ComputeAllElements();
     Bn.ComputeCCSizesAndRepresentatives(NULL);
@@ -3182,16 +3181,16 @@ std::cout.flush();
   TestHyperoctahedralStuff();
 
   HyperoctahedralGroup G;
-  G.MakeHyperoctahedralGroup(5);
+  G.MakeHyperoctahedralGroup(2);
   stOutput << G.PrettyPrintGeneratorCommutationRelations();
   G.VerifyWords();
   G.AllSpechtModules();
 
-  WeylGroup W;
-  W.MakeArbitrarySimple('A', 7);
-  W.ComputeCCSizesAndRepresentatives(NULL);
-  stOutput << W.theDynkinType << " :" << W.GetSize() << " elements, in " << W.conjugacyClasseS.size << " conjugacy classes\n";
-  W.ComputeIrreducibleRepresentationsUsingSpechtModules();
+  //WeylGroup W;
+  //W.MakeArbitrarySimple('A', 7);
+  //W.ComputeCCSizesAndRepresentatives(NULL);
+  //stOutput << W.theDynkinType << " :" << W.GetSize() << " elements, in " << W.conjugacyClasseS.size << " conjugacy classes\n";
+  //W.ComputeIrreducibleRepresentationsUsingSpechtModules();
 }
 
 void TestFiniteFields()

@@ -231,7 +231,7 @@ public:
   std::string ToStringConjugacyClasses(FormatExpressions* theFormat=0);
   int ConjugacyClassCount()const;
   LargeInt GetSize();
-  LargeInt GetGroupSizeByFormula()
+  LargeInt SizeByFormulaOrNeg1()
   { if(GetSizeByFormula)
       return GetSizeByFormula(this);
     return -1;
@@ -242,11 +242,15 @@ public:
   LargeInt (*GetSizeByFormula)(void* G);
   bool AreConjugate(const elementSomeGroup& left, const elementSomeGroup& right);
 
+
   bool ComputeAllElements(int MaxElements=-1, GlobalVariables* theGlobalVariables=0);
+
+  // Timing indicates that for small groups this code is slow
+  bool ComputeAllElementsLargeGroup(int MaxElements=-1, GlobalVariables* theGlobalVariables=0);
 
   // Historical note: this was from Thomas' second finite group class, and is
   // as of 2015-11 the only way to generate the words and conjugacy information
-  void ComputeAllElementsWordsConjugacyIfObvious(bool andWords);
+  void ComputeAllElementsWordsConjugacyIfObvious(bool andWords=false);
 
   void ComputeCCfromAllElements(GlobalVariables* theGlobalVariables);
   void ComputeCCfromCCindicesInAllElements(const List<List<int> >& ccIndices);
@@ -265,7 +269,7 @@ public:
   ;
   void ComputeCCSizesAndRepresentatives(GlobalVariables* theGlobalVariables);
   void ComputeCCSizesAndRepresentativesWithOrbitIterator(GlobalVariables* theGlobalVariables);
-  void ComputeCCSizesAndRepresentativesSimpleAlgorithm(GlobalVariables *theGlobalVariables);
+  void ComputeCCSizesRepresentativesWords(GlobalVariables *theGlobalVariables);
   bool HasElement(const elementSomeGroup& g);
   void GetWord(const elementSomeGroup& g, List<int>& out);
   void (*GetWordByFormula)(void* G, const elementSomeGroup& g, List<int>& out);
@@ -688,7 +692,7 @@ public:
   { WeylGroup* G = (WeylGroup*) GP;
     return G->theDynkinType.GetWeylGroupSizeByFormula();
   }
-  static LargeInt GetGroupSizeByFormula(char weylLetter, int theDim);
+  static LargeInt SizeByFormulaOrNeg1(char weylLetter, int theDim);
   bool IsARoot(const Vector<Rational>& input)const
   { return this->RootSystem.Contains(input);
   }
@@ -934,13 +938,24 @@ void GroupRepresentation<someGroup, coefficient>::ComputeCharacter()
   this->haveCharacter = true;
 }
 
+// this is not mathematical but collating order
+// the intention is to sort in reverse order within dimensions, according to
+// the usual way character tables are displayed
 template <typename someGroup, typename coefficient>
 bool GroupRepresentation<someGroup, coefficient>::operator>(GroupRepresentation<someGroup, coefficient>& right)
 { if(!this->haveCharacter)
     this->ComputeCharacter();
   if(!right.haveCharacter)
     right.ComputeCharacter();
-  return this->theCharacteR > right.theCharacteR;
+  if(this->theCharacteR.data[0] > right.theCharacteR.data[0])
+    return true;
+  if(right.theCharacteR.data[0] > this->theCharacteR.data[0])
+    return false;
+  if(this->theCharacteR.data > right.theCharacteR.data)
+    return false;
+  if(right.theCharacteR.data > this->theCharacteR.data)
+    return true;
+  return false;
 }
 
 template <typename someGroup, typename coefficient>
@@ -1198,7 +1213,7 @@ public:
   Subgroup();
   bool CheckInitialization();
   void init();
-  LargeInt GetGroupSizeByFormula()const
+  LargeInt SizeByFormulaOrNeg1()const
   { return -1;
   }
   void initFromGroupAndGenerators(somegroup& inputGroup, const List<elementSomeGroup>& inputGenerators);
@@ -1423,7 +1438,7 @@ void Subgroup<somegroup, elementSomeGroup>::InduceRepresentation
     outgroup.generators = out.generatorS;
     stOutput << "Generator commutation relations for 'representation':\n" <<outgroup.PrettyPrintGeneratorCommutationRelations();
     stOutput << "It was supposed to be a quotient group of\n" << parent->PrettyPrintGeneratorCommutationRelations();
-    crash << crash;
+    //crash << "crashing at " << __FILE__ << ":" << __LINE__ << crash;
   }
 }
 
@@ -1448,7 +1463,7 @@ public:
   void InitGenerators();
   void MakeParabolicSubgroup(WeylGroup& G, const Selection& inputGeneratingSimpleRoots);
   void MakeFromRoots(WeylGroup& G, const Vectors<Rational>& inputRootReflections);
-  LargeInt GetGroupSizeByFormula()const
+  LargeInt SizeByFormulaOrNeg1()const
   { return this->theDynkinType.GetWeylGroupSizeByFormula();
   }
   void MakeFromHardCodedStrings

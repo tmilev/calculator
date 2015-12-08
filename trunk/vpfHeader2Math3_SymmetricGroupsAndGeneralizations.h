@@ -1148,28 +1148,31 @@ void FiniteGroup<elementSomeGroup>::ComputeAllElementsWordsConjugacyIfObvious(bo
   this->sizePrivate = this->theElements.size;
 }
 
-
+// this needs some better design
+// the intention here is to do representation theory.  so we need the sizes,
+// representatives, and words.
 template <typename elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentativesSimpleAlgorithm(GlobalVariables* unused)
-{ if(this->flagCCsComputed)
+void FiniteGroup<elementSomeGroup>::ComputeCCSizesRepresentativesWords(GlobalVariables* unused)
+{ if(this->GetWordByFormula)
+    this->flagWordsComputed = true;
+  if(this->flagCCsComputed && this->flagWordsComputed)
     return;
   if(this->ComputeCCSizesAndRepresentativesByFormula)
   { this->ComputeCCSizesAndRepresentativesByFormula(this);
     return;
   }
   if(this->AreConjugateByFormula)
-  { this->ComputeAllElements();
+  { this->ComputeAllElementsWordsConjugacyIfObvious(true);
     return;
   }
   if(!this->flagWordsComputed)
-    this->ComputeAllElements(true);
+    this->ComputeAllElementsWordsConjugacyIfObvious(true);
   if(!this->flagAllElementsAreComputed)
-    this->ComputeAllElements();
+    this->ComputeAllElementsWordsConjugacyIfObvious(true);
   GraphOLD conjugacygraph = GraphOLD(this->theElements.size, this->generators.size);
   for(int i=0; i<this->theElements.size; i++)
     for(int j=0; j<this->generators.size; j++)
     { elementSomeGroup x = this->theElements[i] ^ this->generators[j];
-      stOutput << "I think that " << this->theElements[i] << "^" << this->generators[j] << " = " << x << '\n';
       int xi = this->theElements.GetIndex(x);
       conjugacygraph.AddEdge(i,xi);
     }
@@ -1223,7 +1226,11 @@ void FiniteGroup<elementSomeGroup>::ComputeGeneratorCommutationRelations()
   this->generatorCommutationRelations.init(this->generators.size, this-> generators.size);
   for(int i=0; i<this->generators.size; i++)
     for(int j=i; j<this->generators.size; j++)
-    { elementSomeGroup g = this->generators[i] * this->generators[j];
+    { elementSomeGroup g;
+      if(i==j)
+        g = this->generators[i];
+      else
+        g = this->generators[i] * this->generators[j];
       elementSomeGroup gi = g;
       int cr = 1;
       while(!this->IsID(gi))
@@ -1246,9 +1253,40 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintGeneratorCommutationRelati
   { crs[i] = 0;
     rows.AddOnTop(&crs[i+1]);
   }
+  bool generatorStringsTooLarge = false;
+  bool generatorStringsHaveNewline = false;
+  List<std::string> genstrings;
+  genstrings.SetSize(this->generators.size);
+  for(int i=0; i<this->generators.size; i++)
+  { std::stringstream geni;
+    geni << this->generators[i];
+    genstrings[i] = geni.str();
+    if(genstrings[i].length() > 50)
+      generatorStringsTooLarge = true;
+    // does cxx not have a 'get index of, or, if not found, return -1' method
+    // in std::string?
+    //if(genstrings[i].find('\n') != -1)
+    //{ generatorStringsHaveNewline = true;
+    //  generatorStringsTooLarge = true;
+    //}
+  }
+  if(!generatorStringsTooLarge)
+  { std::stringstream out;
+    for(int i=0; i<this->generators.size; i++)
+      out << i << " " << genstrings[i] << '\n';
+  }
   std::stringstream out;
   for(int i=0; i<this->generators.size; i++)
-    out << rows[i] << " " << this->generators[i] << '\n';
+    // nota bene: the left shift operator binds tighter than ?: operator, even
+    // when it is used as some weird string processing doohickey.  This is also
+    // why it is dangerous to use the bitwise xor operator for
+    // arithmetic exponentiation
+    // furthermore, did you know that operands to ?: are not permitted to have
+    // different types, even when they are about to be fed to an operator that
+    // can take both types?
+    out << i << (generatorStringsHaveNewline?"\n":" ") << genstrings[i] << '\n';
+  for(int i=0; i<this->generators.size; i++)
+    out << i << " " << rows[i] << '\n';
   return out.str().c_str();
 }
 

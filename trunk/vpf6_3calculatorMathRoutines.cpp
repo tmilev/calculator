@@ -4153,7 +4153,7 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
   FormatExpressions theFormat;
   hwContext.ContextGetFormatExpressions(theFormat);
   if (theSubgroup.size>498)
-  { if (theSubgroup.AmbientWeyl.GetGroupSizeByFormula('E', 6) <= theSubgroup.AmbientWeyl.GetSize())
+  { if (theSubgroup.AmbientWeyl.SizeByFormulaOrNeg1('E', 6) <= theSubgroup.AmbientWeyl.GetSize())
       out << "Even I can't handle the truth, when it is so large<br>";
     else
       out << "LaTeX can't handle handle the truth, when it is so large. <br>";

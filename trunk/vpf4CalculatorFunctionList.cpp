@@ -109,6 +109,14 @@ void Calculator::initPredefinedInnerFunctions()
    "5!");
 
   this->AddOperationInnerHandler
+  ("HyperOctahedralIrreps", CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules, "",
+   "Prints all modules induced from Specht modules. ",
+   "HyperOctahedralIrreps(3)", true, false, "CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules");
+  this->AddOperationInnerHandler
+  ("HyperOctahedralGeneratorPrint", CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations, "",
+   "Prints the generator commutation relations of a hyperoctahedral group.  ",
+   "HyperOctahedralGeneratorPrint(3)", true, false, "CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations");
+  this->AddOperationInnerHandler
   ("printMacdonaldPolys", CalculatorFunctionsWeylGroup::innerMacdonaldPolys, "",
    "Prints macdonald polynomials from a semisimple type. ",
    "printMacdonaldPolys{}(B_3)", true);

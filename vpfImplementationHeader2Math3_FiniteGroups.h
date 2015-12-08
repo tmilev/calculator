@@ -22,8 +22,28 @@ std::string FinitelyGeneratedMatrixMonoid<coefficient>::ToString(FormatExpressio
   return out.str();
 }
 
+// if the user expects more than a milion elements, or if the formula expects
+// more than a million elements, or if there are more than 7 generators, use
+// the slow method that won't use up all the memory and swap and then crash
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::ComputeAllElements(int MaxElements, GlobalVariables* theGlobalVariables)
+{ if(MaxElements > 1000000)
+    return ComputeAllElementsLargeGroup(MaxElements, theGlobalVariables);
+  this->sizePrivate = this->SizeByFormulaOrNeg1();
+  if(sizePrivate > 1000000)
+    return ComputeAllElementsLargeGroup(MaxElements, theGlobalVariables);
+  if(sizePrivate > 0)
+  { ComputeAllElementsWordsConjugacyIfObvious();
+    return true;
+  }
+  if(this->generators.size > 7)
+    return ComputeAllElementsLargeGroup(MaxElements, theGlobalVariables);
+  ComputeAllElementsWordsConjugacyIfObvious();
+  return true;
+}
+
+template <typename elementSomeGroup>
+bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(int MaxElements, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("Subgroup::ComputeAllElements");
   this->InitGenerators();
   if (this->generators.size==0)
@@ -42,7 +62,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElements(int MaxElements, GlobalVa
       if (theGlobalVariables!=0)
         if (this->theElements.size%100==0)
         { std::stringstream reportStream;
-          LargeInt sizeByFla=this->GetGroupSizeByFormula();
+          LargeInt sizeByFla=this->SizeByFormulaOrNeg1();
           reportStream << "So far, generated " << this->theElements.size << " elements";
           if (sizeByFla>0)
             reportStream << " out of " << sizeByFla.ToString();
@@ -485,9 +505,10 @@ LargeInt FiniteGroup<elementSomeGroup>::GetSize()
   { this->sizePrivate = GetSizeByFormula(this);
     return sizePrivate;
   }
-  crash << "Requesting size of group whose size is not computed.  If you want"
-        << "to compute it as a side effect, change the stuff near "
-        << __FILE__ << ":" << __LINE__ << crash;
+  //crash << "Requesting size of group whose size is not computed.  If you want"
+  //      << "to compute it as a side effect, change the stuff near "
+  //      << __FILE__ << ":" << __LINE__ << crash;
+  this->ComputeAllElements();
   return this->sizePrivate;
 }
 
@@ -677,10 +698,10 @@ bool FiniteGroup<elementSomeGroup>::CheckConjugacyClassRepsMatchCCsizes(GlobalVa
   if (computedSize!=this->sizePrivate)
     crash << "Computed size " << computedSize.ToString() << " is different from recorded size "
     << sizePrivate.ToString() << crash;
-  if (this->GetGroupSizeByFormula()>0)
-    if (computedSize!=this->GetGroupSizeByFormula())
+  if (this->SizeByFormulaOrNeg1()>0)
+    if (computedSize!=this->SizeByFormulaOrNeg1())
       crash << "Computed size is different from size dicated by formula which is: "
-      << this->GetGroupSizeByFormula().ToString() << crash;
+      << this->SizeByFormulaOrNeg1().ToString() << crash;
   return true;
 }
 
@@ -738,7 +759,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives
 
   ProgressReport theReport(theGlobalVariables);
   elementSomeGroup currentElement;
-  LargeInt groupSizeByFla=this->GetGroupSizeByFormula();
+  LargeInt groupSizeByFla=this->SizeByFormulaOrNeg1();
   this->flagCharPolysAreComputed=true;
   for (int phase=0; phase<2; phase++)//In phase 0 we try to add a new conjugacy class only if
     //the class has a new character polynomial. In phase 1 we try every single conjugacy class,
@@ -774,7 +795,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives(GlobalVaria
         return;
       }
   }
-  this->ComputeCCSizesAndRepresentativesSimpleAlgorithm(theGlobalVariables);
+  this->ComputeCCSizesRepresentativesWords(theGlobalVariables);
 }
 
 template <class elementSomeGroup>

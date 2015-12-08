@@ -3395,7 +3395,7 @@ LargeInt DynkinType::GetWeylGroupSizeByFormula()const
 { LargeInt result=1;
   LargeInt tempLI;
   for (int i=0; i<this->size(); i++)
-  { tempLI=WeylGroup::GetGroupSizeByFormula((*this)[i].theLetter, (*this)[i].theRank);
+  { tempLI=WeylGroup::SizeByFormulaOrNeg1((*this)[i].theLetter, (*this)[i].theRank);
     tempLI.RaiseToPower(this->GetMult(i));
     result*=tempLI;
   }
@@ -4249,7 +4249,7 @@ bool WeylGroup::IsRegular(Vector<Rational>& input, int* indexFirstPerpendicularR
   return true;
 }
 
-LargeInt WeylGroup::GetGroupSizeByFormula(char weylLetter, int theDim)
+LargeInt WeylGroup::SizeByFormulaOrNeg1(char weylLetter, int theDim)
 { //Humphreys, Introduction to Lie algebras and representation theory(1980), page 66, Table 1
   LargeInt theOutput=1;
   if (weylLetter=='A')

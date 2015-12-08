@@ -1089,11 +1089,14 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
   pxmr.generatorS.AddListOnTop(negm);
   int cur = pxmr.generatorS.size;
   pxmr.generatorS.SetSize(PxM.generators.size);
+  int repRank = pxmr.generatorS[0].NumRows;
+  if(repRank == 0)
+    repRank = 1;
   for(int i=0; i<this->N; i++)
     if(i < positive.n)
-      pxmr.generatorS[cur+i].MakeID(pxmr.generatorS[0]);
+      pxmr.generatorS[cur+i].MakeIdMatrix(repRank);
     else
-    { pxmr.generatorS[cur+i].MakeID(pxmr.generatorS[0]);
+    { pxmr.generatorS[cur+i].MakeIdMatrix(repRank);
       pxmr.generatorS[cur+i] *= -1;
     }
   GroupRepresentation<HyperoctahedralGroup, Rational> outreboxme;

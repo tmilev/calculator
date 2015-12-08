@@ -550,7 +550,7 @@ bool DynkinDiagramRootSubalgebra::IsGreaterThan(DynkinDiagramRootSubalgebra& rig
 Rational DynkinDiagramRootSubalgebra::GetSizeCorrespondingWeylGroupByFormula()
 { Rational output=1;
   for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
-    output*=WeylGroup::GetGroupSizeByFormula(this->SimpleComponentTypes[i].theLetter, this->SimpleComponentTypes[i].theRank);
+    output*=WeylGroup::SizeByFormulaOrNeg1(this->SimpleComponentTypes[i].theLetter, this->SimpleComponentTypes[i].theRank);
   return output;
 }
 

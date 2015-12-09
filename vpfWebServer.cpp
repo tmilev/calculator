@@ -1824,8 +1824,6 @@ void WebServer::CreateNewActiveWorker()
   this->GetActiveWorker().pingMessage="";
 }
 
-
-
 std::string WebServer::ToStringLastErrorDescription()
 { std::stringstream out;
   out << logger::red << "Process " << this->ToStringActiveWorker() << ": " << strerror(errno) << ". ";
@@ -1959,8 +1957,6 @@ void WebServer::ReleaseWorkerSideResources()
   this->activeWorker=-1; //<-The active worker is needed only in the child process.
 }
 
-
-
 void segfault_sigaction(int signal, siginfo_t *si, void *arg)
 {
   crash << "Caught segfault at address: " << si->si_addr << crash;
@@ -2004,15 +2000,15 @@ void WebServer::RecycleChildrenIfPossible()
             theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly>
             theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
             )
-          { this->theWorkers[i].flagInUse=false;
-            std::stringstream pingTimeoutStream;
-            pingTimeoutStream << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
-            << " seconds have passed since worker " << i+1
-            << " pinged the server. I am assuming the worker no longer functions, and am marking it as free for reuse. ";
-            kill(this->theWorkers[i].ProcessPID, SIGKILL);
-            theLog << logger::red << pingTimeoutStream.str() << logger::endL;
-            this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>" + pingTimeoutStream.str()+"</b></span>";
-          }
+        { this->theWorkers[i].flagInUse=false;
+          std::stringstream pingTimeoutStream;
+          pingTimeoutStream << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
+          << " seconds have passed since worker " << i+1
+          << " pinged the server. I am assuming the worker no longer functions, and am marking it as free for reuse. ";
+          kill(this->theWorkers[i].ProcessPID, SIGKILL);
+          theLog << logger::red << pingTimeoutStream.str() << logger::endL;
+          this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>" + pingTimeoutStream.str()+"</b></span>";
+        }
     }
 }
 
@@ -2120,7 +2116,7 @@ int WebServer::Run()
     if (listen(this->listeningSocketHttpSSL, WebServer::maxNumPendingConnections) == -1)
       crash << "Listen function failed on https port." << crash;
 
-  theLog << logger::purple <<  "server: waiting for connections...\r\n" << logger::endL;
+  theLog << logger::purple << "server: waiting for connections...\r\n" << logger::endL;
   unsigned int connectionsSoFar=0;
   sockaddr_storage their_addr; // connector's address information
   socklen_t sin_size;
@@ -2228,7 +2224,7 @@ void WebServer::Release(int& theDescriptor)
 }
 
 int WebServer::main_command_input()
-{ MacroRegisterFunctionWithName("main_command_input");
+{ MacroRegisterFunctionWithName("WebServer::main_command_input");
   theGlobalVariables.IndicatorStringOutputFunction=CGI::MakeStdCoutReport;
   //  stOutput << "\n\n\n" << theParser.DisplayPathServerBase << "\n\n";
   //  return 0;
@@ -2245,7 +2241,7 @@ int WebServer::main_command_input()
 }
 
 int WebServer::main_apache_client()
-{ MacroRegisterFunctionWithName("main_apache_client");
+{ MacroRegisterFunctionWithName("WebServer::main_apache_client");
   theParser.init();
   stOutput << "Content-Type: text/html\n\n";
   theGlobalVariables.IndicatorStringOutputFunction=CGI::MakeReportIndicatorFile;

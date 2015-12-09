@@ -313,6 +313,13 @@ logger& logger::operator << (const loggerSpecialSymbols& input)
       this->theFile << this->closeTagHtml();
       this->theFile << this->openTagHtml();
       return *this;
+    case logger::normalColor:
+      if (theGlobalVariables.flagUsingBuiltInWebServer)
+        std::cout << this->closeTagConsole();
+      if (this->flagStopWritingToFile)
+        return *this;
+      theFile << this->closeTagHtml();
+      return *this;
     default:
       return *this;
   }

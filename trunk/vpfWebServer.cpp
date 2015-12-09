@@ -124,11 +124,11 @@ void WebServer::SSLServerSideHandShake()
 //    CHK_SSL(err);
 //  theLog << "Got to here 2" << logger::endL;
   /* Get the cipher - opt */
-  logIO << "SSL connection using: " << SSL_get_cipher (theSSLdata.ssl);
   /* Get client's certificate (note: beware of dynamic allocation) - opt */
   theSSLdata.client_cert = SSL_get_peer_certificate (theSSLdata.ssl);
   if (theSSLdata.client_cert != NULL)
   { char* tempCharPtr=0;
+    logIO << logger::purple << "SSL connection using: " << SSL_get_cipher (theSSLdata.ssl) << logger::endL;
     tempCharPtr = X509_NAME_oneline (X509_get_subject_name (theSSLdata.client_cert), 0, 0);
     if (tempCharPtr==0)
     { logIO << "X509_NAME_oneline return null; this is not supposed to happen. " << logger::endL;
@@ -148,7 +148,8 @@ void WebServer::SSLServerSideHandShake()
     logIO << "Issuer name: " << theSSLdata.otherCertificateIssuerName << logger::endL;
     X509_free (theSSLdata.client_cert);
   } else
-    theLog << "Client does not have certificate.\n" << logger::endL;
+    logIO << logger::purple << "SSL connection using: " << SSL_get_cipher (theSSLdata.ssl) << ". "
+    << logger::normalColor << "No client certificate." << logger::endL;
 #endif // MACRO_use_open_ssl
 }
 
@@ -2126,7 +2127,7 @@ int WebServer::Run()
   while(true)
   { // main accept() loop
     sin_size = sizeof their_addr;
-    theLog << logger::red << "select returned!" << logger::endL;
+//    theLog << logger::red << "select returned!" << logger::endL;
     int theListeningSocket=-1;
     fd_set FDListenSockets;
     FD_ZERO(&FDListenSockets);
@@ -2148,20 +2149,20 @@ int WebServer::Run()
         break;
       }
     if (theListeningSocket==-1)
-      crash << "something bad happened ... " << crash;
+      crash << "Error with listening socket: not supposed to happen... " << crash;
     int newConnectedSocket = accept(theListeningSocket, (struct sockaddr *)&their_addr, &sin_size);
     if (newConnectedSocket <0)
-    { theLog << "Accept failed. Error: " << this->ToStringLastErrorDescription() << logger::endL;
+    { logIO << logger::red << "Accept failed. Error: " << this->ToStringLastErrorDescription() << logger::endL;
       continue;
     }
-    theLog << logger::purple << "NewconnectedSocket: " << newConnectedSocket << ", listeningSocket: "
-    << theListeningSocket << logger::endL;
+//    theLog << logger::purple << "NewconnectedSocket: " << newConnectedSocket << ", listeningSocket: "
+//    << theListeningSocket << logger::endL;
     this->RecycleChildrenIfPossible();
     this->CreateNewActiveWorker();
     this->GetActiveWorker().flagUsingSSLinCurrentConnection=false;
     if (theListeningSocket==this->listeningSocketHttpSSL)
     { this->GetActiveWorker().flagUsingSSLinCurrentConnection=true;
-      std::cout << "\noutput ssl:\n";
+      //std::cout << "\noutput ssl:\n";
     }
     this->GetActiveWorker().connectedSocketID=newConnectedSocket;
     this->GetActiveWorker().connectedSocketIDLastValueBeforeRelease=newConnectedSocket;

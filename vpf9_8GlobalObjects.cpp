@@ -22,7 +22,6 @@ void InitializeGlobalObjects()
   InitializeTimer();
   theGlobalVariables.IndicatorStringOutputFunction=&CGI::MakeReportIndicatorFile;
   theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=-1;
   theGlobalVariables.sleepFunction=SleepFunction;
   theGlobalVariables.SetCallSystem(&CallSystemWrapper);
   theGlobalVariables.SetCallChDir(&CallChDirWrapper);

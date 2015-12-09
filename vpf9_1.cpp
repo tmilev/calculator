@@ -147,12 +147,18 @@ std::string GlobalVariables::ToStringProgressReportConsole()
     for (int i=0; i<this->ProgressReportStringS[threadIndex].size; i++)
       reportStream << this->ProgressReportStringS[threadIndex][i];
   }
+  reportStream << "\n";
   return reportStream.str();
 }
 
+void GlobalVariables::InitThreadsExecutableStart()
+{ //<-Stack trace forbidden this is running before anything has been initialized!
+  ThreadData::RegisterCurrentThread("main");
+  theGlobalVariables.theThreads.SetSize(1); //<- the main thread has an empty thread object.
+}
+
 void GlobalVariables::initDefaultFolderAndFileNames
-(const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow,
- const std::string& scrambledIP)
+(const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow)
 { this->PhysicalNameFolderBelowExecutable="";
   this->PhysicalNameExecutableNoPath="";
   this->PhysicalPathServerBase="";
@@ -175,7 +181,7 @@ void GlobalVariables::initDefaultFolderAndFileNames
   this->PhysicalPathOutputFolder = this->PhysicalPathServerBase + "output/";
   this->DisplayPathOutputFolder = this->DisplayPathServerBase + "output/";
 
-  this->defaultUserLabel=scrambledIP;
+  this->defaultUserLabel="";
   this->PhysicalNameExtraOutputNoPatH="default" + this->defaultUserLabel + "output";
   this->PhysicalNameExtraOutputWithPath = this->PhysicalPathOutputFolder + this->PhysicalNameExtraOutputNoPatH ;
   this->DisplayNameExtraOutputNoPath = "default" + this->defaultUserLabel + "output";
@@ -185,6 +191,15 @@ void GlobalVariables::initDefaultFolderAndFileNames
   this->DisplayNameIndicatorWithPath = this->DisplayPathOutputFolder + "indicator" + this->defaultUserLabel + ".html" ;
   this->DisplayNameCalculatorWithPath = this->DisplayPathServerBase + "cgi-bin/calculator";
   this->initOutputReportAndCrashFileNames("", "");
+}
+
+void GlobalVariables::MakeReport()
+{ if (this->IndicatorStringOutputFunction==0)
+    return;
+  if (this->flagRunningCommandLine || this->flagRunningConsoleTest)
+    this->MakeReport(this->ToStringProgressReportConsole());
+  else
+    this->MakeReport(this->ToStringProgressReportHtml());
 }
 
 void GlobalVariables::initOutputReportAndCrashFileNames

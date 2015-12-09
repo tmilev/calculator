@@ -130,6 +130,11 @@ public:
   bool flagPort8155;
   WebServer();
   ~WebServer();
+  static int main(int argc, char **argv);
+  static int main_apache_client();
+  static int main_command_input();
+  static void AnalyzeMainArguments(int argC, char **argv);
+  static void InitializeGlobalVariables();
   void ReleaseWorkerSideResources();
   void ReleaseActiveWorker();
   void ReleaseSocketsNonActiveWorkers();

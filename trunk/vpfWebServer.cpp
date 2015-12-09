@@ -2232,3 +2232,132 @@ int WebServer::Run()
 void WebServer::Release(int& theDescriptor)
 { PauseController::Release(theDescriptor);
 }
+
+int WebServer::main_command_input()
+{ MacroRegisterFunctionWithName("main_command_input");
+  theGlobalVariables.IndicatorStringOutputFunction=CGI::MakeStdCoutReport;
+  //  stOutput << "\n\n\n" << theParser.DisplayPathServerBase << "\n\n";
+  //  return 0;
+  theParser.init();
+  theParser.inputStringRawestOfTheRaw =theGlobalVariables.programArguments[0];
+  theParser.flagUseHtml=false;
+  theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
+  std::fstream outputFile;
+  FileOperations::OpenFileCreateIfNotPresent(outputFile, "./outputFileCommandLine.html", false, true, false);
+  stOutput << theParser.outputString;
+  outputFile << theParser.outputString;
+  stOutput << "\nTotal running time: " << GetElapsedTimeInSeconds() << " seconds. \nOutput written in file ./outputFileCommandLine.html\n";
+  return 0;
+}
+
+int WebServer::main_apache_client()
+{ MacroRegisterFunctionWithName("main_apache_client");
+  theParser.init();
+  stOutput << "Content-Type: text/html\n\n";
+  theGlobalVariables.IndicatorStringOutputFunction=CGI::MakeReportIndicatorFile;
+  std::cin >> theParser.inputStringRawestOfTheRaw;
+
+	if (theParser.inputStringRawestOfTheRaw=="")
+	{ theParser.inputStringRawestOfTheRaw=getenv("QUERY_STRING");
+    std::string& IPAdressCaller=theGlobalVariables.IPAdressCaller;
+    IPAdressCaller=getenv("REMOTE_ADDR");
+    for (int i=0; i<MathRoutines::Minimum((int)IPAdressCaller.size(), SomeRandomPrimesSize); i++)
+      IPAdressCaller[i]='A'+(IPAdressCaller[i]*SomeRandomPrimes[i])%26;
+	}
+	theParser.javaScriptDisplayingIndicator=WebWorker::GetJavaScriptIndicatorFromHD();
+  return WebWorker::OutputWeb();
+}
+
+extern int mainTest(List<std::string>& remainingArgs);
+
+void WebServer::AnalyzeMainArguments(int argC, char **argv)
+{ MacroRegisterFunctionWithName("WebServer::AnalyzeMainArguments");
+  if (argC<0)
+    argC=0;
+  theGlobalVariables.programArguments.SetSize(argC);
+  for (int i=0; i<argC; i++)
+    theGlobalVariables.programArguments[i]=argv[i];
+  std::cout << "\nProgram arguments: " << theGlobalVariables.programArguments.ToStringCommaDelimited() << "\n";
+
+  theGlobalVariables.flagUsingBuiltInWebServer=false;
+  theGlobalVariables.flagRunningCommandLine=false;
+  theGlobalVariables.flagRunningConsoleTest=false;
+  theGlobalVariables.flagUsingApacheWebServer=false;
+  if (argC>=1)
+  { if (theGlobalVariables.programArguments[0]!="test")
+      theGlobalVariables.initDefaultFolderAndFileNames(theGlobalVariables.programArguments[0]);
+    else
+    { theGlobalVariables.flagRunningConsoleTest=true;
+      theGlobalVariables.programArguments.PopIndexShiftDown(0);
+      return;
+    }
+  }
+  if (argC<2)
+  { theGlobalVariables.flagUsingApacheWebServer=true;
+    return;
+  }
+  std::string& secondArgument=theGlobalVariables.programArguments[1];
+  if (secondArgument=="test")
+  { theGlobalVariables.programArguments.PopIndexShiftDown(0);
+    theGlobalVariables.programArguments.PopIndexShiftDown(0);
+    return;
+  }
+  theGlobalVariables.flagUsingBuiltInWebServer= (secondArgument=="server" || secondArgument=="server8155" || secondArgument=="serverSSL");
+  theGlobalVariables.flagRunningCommandLine=!theGlobalVariables.flagUsingBuiltInWebServer;
+  if (theGlobalVariables.flagRunningCommandLine)
+  { theGlobalVariables.programArguments.PopIndexShiftDown(0);
+    for (int i=1; i<theGlobalVariables.programArguments.size; i++)
+      theGlobalVariables.programArguments[0]+="\n"+ theGlobalVariables.programArguments[i];
+    theGlobalVariables.programArguments.SetSize(1);
+    return;
+  }
+  if (secondArgument=="server8155")
+    theWebServer.flagPort8155=true;
+  if (secondArgument=="serverSSL")
+    theWebServer.flagUsESSL=true;
+  if (argC<3)
+    return;
+  std::string& thirdArgument=theGlobalVariables.programArguments[2];
+  theWebServer.flagTryToKillOlderProcesses=!(thirdArgument=="nokill");
+  std::string timeLimitString="100";
+  if (thirdArgument=="nokill")
+    if (argC>3)
+      timeLimitString=theGlobalVariables.programArguments[3];
+  Rational timeLimit;
+  timeLimit.AssignString(timeLimitString);
+  int timeLimitInt=0;
+  if (timeLimit.IsIntegerFittingInInt(&timeLimitInt))
+    theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=timeLimitInt;
+}
+
+void WebServer::InitializeGlobalVariables()
+{ theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=5000000;
+  theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=5;
+  theGlobalVariables.flagReportEverything=true;
+  ParallelComputing::cgiLimitRAMuseNumPointersInList=4000000000;
+}
+
+int WebServer::main(int argc, char **argv)
+{ theGlobalVariables.InitThreadsExecutableStart();
+  //for (int i=0; i<argc; i++)
+  //  std::cout << "argument " << i << ": " << argv[i] << "\n";
+  MacroRegisterFunctionWithName("main");
+  try {
+  InitializeGlobalObjects();
+  theWebServer.InitializeGlobalVariables();
+  theWebServer.AnalyzeMainArguments(argc, argv);
+  if (theGlobalVariables.flagRunningConsoleTest)
+    return mainTest(theGlobalVariables.programArguments);
+  if (theGlobalVariables.flagUsingApacheWebServer)
+    return WebServer::main_apache_client();
+  if (theGlobalVariables.flagUsingBuiltInWebServer)
+    return theWebServer.Run();
+  if (theGlobalVariables.flagRunningCommandLine)
+    return WebServer::main_command_input();
+  }
+  catch (...)
+  { crash << "Something very wrong has happened. " << crash;
+  }
+  std::cout << "This point of code is not supposed to be reached";
+  return -1;
+}

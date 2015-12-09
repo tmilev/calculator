@@ -65,6 +65,9 @@ public:
   double MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   double MaxComputationTimeBeforeWeTakeAction;
 //  bool flagLogInterProcessCommunication;
+  bool flagRunningCommandLine;
+  bool flagRunningConsoleTest;
+  bool flagUsingApacheWebServer;
   bool flagUsingBuiltInWebServer;
   bool flagAllowUseOfThreadsAndMutexes;
   bool flagNotAllocated;
@@ -90,6 +93,7 @@ public:
   ListReferences<ThreadData> theThreadData;
   ListReferences<List<stackInfo> > CustomStackTrace;
   ListReferences<List<std::string> > ProgressReportStringS;
+  List<std::string> programArguments;
   Controller theLocalPauseController;
 
   static const std::string hopefullyPermanentWebAdressOfServerExecutable;
@@ -150,9 +154,9 @@ public:
       return this->getElapsedTimePrivate();
     return -1;
   }
+  static void InitThreadsExecutableStart();
   void initDefaultFolderAndFileNames
-(const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow,
- const std::string& scrambledIP);
+(const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow);
   void initOutputReportAndCrashFileNames
 (const std::string& inputUserStringRAW,
  const std::string& inputUserStringCivilized);
@@ -186,14 +190,7 @@ public:
   { if (this->IndicatorStringOutputFunction!=0)
       this->IndicatorStringOutputFunction(input);
   }
-  void MakeReport()
-  { if (this->IndicatorStringOutputFunction!=0)
-      this->MakeReport(this->ToStringProgressReportHtml());
-  }
-  void MakeReportConsole()
-  { if (this->IndicatorStringOutputFunction!=0)
-      this->MakeReport(this->ToStringProgressReportConsole());
-  }
+  void MakeReport();
   /// @endcond
 };
 //extern GlobalVariables theGlobalVariables;

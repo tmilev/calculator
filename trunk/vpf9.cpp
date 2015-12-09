@@ -79,7 +79,6 @@ GlobalVariables::GlobalVariables()
 //  this->MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit=5;
   this->callSystem=0;
   this->sleepFunction=0;
-  this->flagUsingBuiltInWebServer=false;
   this->flagReportEverything=false;
   this->flagReportGaussianElimination=false;
   this->flagReportLargeIntArithmetic=false;
@@ -92,6 +91,10 @@ GlobalVariables::GlobalVariables()
   this->flagAllowUseOfThreadsAndMutexes=false;
   this->flagComputationCompletE=false;
   this->flagComputationFinishedAllOutputSentClosing=false;
+  this->flagRunningConsoleTest=false;
+  this->flagRunningCommandLine=false;
+  this->flagUsingApacheWebServer=false;
+  this->flagUsingBuiltInWebServer=false;
   //  this->flagLogInterProcessCommunication=true;
   //  stOutput << "Global variables created!";
 }

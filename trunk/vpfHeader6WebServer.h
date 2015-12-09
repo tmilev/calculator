@@ -139,6 +139,7 @@ public:
   void ReleaseActiveWorker();
   void ReleaseSocketsNonActiveWorkers();
   void ReleaseNonActiveWorkers();
+  void ReleaseEverything();
   void CreateNewActiveWorker();
   bool CheckConsistency();
   int Run();

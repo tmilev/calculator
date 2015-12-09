@@ -1266,8 +1266,7 @@ void WebWorker::SignalIamDoneReleaseEverything()
 }
 
 WebWorker::~WebWorker()
-{ MacroRegisterFunctionWithName("WebWorker::~WebWorker");
-  //Workers are not allowed to release resources in the destructor:
+{ //Workers are not allowed to release resources in the destructor:
   //a Worker's destructor is called when expanding List<WebWorker>.
   this->flagDeallocated=true;
 }
@@ -1682,10 +1681,8 @@ bool WebServer::CheckConsistency()
   return true;
 }
 
-WebServer::~WebServer()
-{ if (this->activeWorker!=-1)
-    this->GetActiveWorker().SendAllBytes();
-  this->SSLfreeResources();
+void WebServer::ReleaseEverything()
+{ this->SSLfreeResources();
   ProgressReportWebServer::flagServerExists=false;
   for (int i=0; i<this->theWorkers.size; i++)
     this->theWorkers[i].Release();
@@ -1696,9 +1693,14 @@ WebServer::~WebServer()
   this->activeWorker=-1;
   if (this->listeningSocketHTTP!=-1)
     close(this->listeningSocketHTTP);
+  this->listeningSocketHTTP=-1;
   if (this->listeningSocketHttpSSL!=-1)
     close(this->listeningSocketHttpSSL);
-  this->flagDeallocated=true;
+  this->listeningSocketHttpSSL=-1;
+}
+
+WebServer::~WebServer()
+{ this->flagDeallocated=true;
 }
 
 void WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone()
@@ -2210,10 +2212,13 @@ int WebServer::Run()
       }
       this->GetActiveWorker().SendDisplayUserInputToServer();
      // std::cout << "Got thus far 9" << std::endl;
-      return this->GetActiveWorker().ServeClient();
+      int result= this->GetActiveWorker().ServeClient();
+      this->ReleaseEverything();
+      return result;
     }
     this->ReleaseWorkerSideResources();
   }
+  this->ReleaseEverything();
   this->SSLfreeEverythingShutdownSSL();
   return 0;
 }

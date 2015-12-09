@@ -1920,7 +1920,7 @@ void WebServer::Restart()
   theCommand << theGlobalVariables.PhysicalNameExecutableNoPath;
   if (this->flagUsESSL)
     theCommand << " serverSSL nokill " << timeInteger;
-  if (this->flagPort8155)
+  else if (this->flagPort8155)
     theCommand << " server8155 nokill " << timeInteger;
   else
     theCommand << " server nokill " << timeInteger;
@@ -2207,21 +2207,9 @@ int WebServer::Run()
         this->GetActiveWorker().SendAllBytes();
         return -1;
       }
-/*      if (this->flagUseSSL)
-      {
-#ifdef MACRO_use_open_ssl
-        std::string outputString=
-        "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n <html><body>I received the message:<br> "
-        + this->GetActiveWorker().ToStringMessageFull() + "</body></html>";
-        SSL_write_Wrapper(theSSLdata.ssl, outputString);
-
-        // Clean up.
-#endif // MACRO_use_open_ssl
-
-      }*/
       this->GetActiveWorker().SendDisplayUserInputToServer();
      // std::cout << "Got thus far 9" << std::endl;
-      return 1;
+      return this->GetActiveWorker().ServeClient();
     }
     this->ReleaseWorkerSideResources();
   }

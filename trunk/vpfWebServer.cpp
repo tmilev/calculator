@@ -679,12 +679,12 @@ void WebWorker::ExtractArgumentFromAddress()
   this->mainArgumentRAW="";
   std::string calculatorArgumentRawWithQuestionMark, tempS;
   if (!MathRoutines::StringBeginsWith
-      (this->mainAddresSRAW, theGlobalVariables.DisplayNameCalculatorWithPath,
-       &calculatorArgumentRawWithQuestionMark))
-  { CGI::CGIFileNameToFileName(this->mainAddresSRAW, this->mainAddress);
-
-    return;
-  }
+      (this->mainAddresSRAW, theGlobalVariables.DisplayNameCalculatorWithPath, &calculatorArgumentRawWithQuestionMark))
+    if (!MathRoutines::StringBeginsWith
+        (this->mainAddresSRAW, "/vectorpartition/cgi-bin/calculator", &calculatorArgumentRawWithQuestionMark))
+    { CGI::CGIFileNameToFileName(this->mainAddresSRAW, this->mainAddress);
+      return;
+    }
   this->requestType=this->requestGetCalculator;
   MathRoutines::SplitStringInTwo(calculatorArgumentRawWithQuestionMark, 1, tempS, this->mainArgumentRAW);
   theLog << logger::yellow << "this->mainArgumentRAW=" << this->mainArgumentRAW << logger::endL;

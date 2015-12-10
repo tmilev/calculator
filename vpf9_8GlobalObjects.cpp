@@ -40,7 +40,8 @@ void CGI::MakeReportIndicatorFile(const std::string& input)
   //    return;
   //std::cout << "Making report " << counter << " in file " << theGlobalVariables.PhysicalNameIndicatorWithPath << "<br>";
   std::fstream theFile;
-  FileOperations::OpenFileCreateIfNotPresent(theFile, theGlobalVariables.PhysicalNameIndicatorWithPath, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
+  (theFile, theGlobalVariables.RelativePhysicalNameProgressReport, false, true, false);
   std::stringstream outStream;
   theFile << " Elapsed calculator time: " << GetElapsedTimeInSeconds() << " second(s).";
   theFile << input;

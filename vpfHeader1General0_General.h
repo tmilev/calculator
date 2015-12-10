@@ -1095,17 +1095,22 @@ struct FileOperations
 {
 public:
   static bool IsFileNameWithoutDotsAndSlashes(const std::string& fileName);
-  static std::string RemovePathFromFileName(const std::string& fileName);
+  static std::string GetPathFromFileNameWithPath(const std::string& fileName);
+  static bool IsOKforFileNameOnTopOfOutputFolder(const std::string& fileName);
   static std::string GetPathFromFileName(const std::string& fileName);
   static std::string GetFileExtensionWithDot(const std::string& theFileName);
-  static bool FileExists(const std::string& theFileName);
+  static bool FileExistsUnsecure(const std::string& theFileName);
+  static bool FileExistsOnTopOfOutputFolder(const std::string& theFileName);
   static bool IsFolder(const std::string& theFolderName);
+  static bool IsFolderOnTopOfOutputFolder(const std::string& relativeFolderName);
   static bool GetFolderFileNames
   (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
    List<std::string>* outputFileTypes=0)
    ;
-  static bool OpenFileCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
-  static bool OpenFile(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
+  static bool OpenFileCreateIfNotPresentUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
+  static bool OpenFileCreateIfNotPresentOnTopOfOutputFolder(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
+  static bool OpenFileOnTopOfOutputFolder(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
+  static bool OpenFileUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
 };
 
 struct CGI

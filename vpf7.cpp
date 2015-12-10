@@ -678,10 +678,10 @@ bool ElementUniversalEnveloping<coefficient>::ConvertToRationalCoeff(ElementUniv
 std::string CGI::GetHtmlLinkFromProjectFileName(const std::string& fileName, const std::string& fileDesc, int line)
 { std::stringstream out;
   out << " <a href=\"https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/"
-  << FileOperations::RemovePathFromFileName(fileName);
+  << FileOperations::GetPathFromFileNameWithPath(fileName);
   if (line>0)
     out << "#l" << line;
-  out << "\">" << FileOperations::RemovePathFromFileName(fileName);
+  out << "\">" << FileOperations::GetPathFromFileNameWithPath(fileName);
   if (fileDesc!="")
     out << " (" << fileDesc << ")";
   out << "</a>\n";

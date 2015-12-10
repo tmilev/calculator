@@ -1089,12 +1089,12 @@ bool rootSubalgebra::IsAnIsomorphism(Vectors<Rational>& domain, Vectors<Rational
 
 void rootSubalgebra::ToHTML(int index, FormatExpressions* theFormat, SltwoSubalgebras* sl2s, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("rootSubalgebra::ToHTML");
+  this->CheckInitialization();
   std::fstream output;
   std::stringstream myPath;
-  if (theFormat!=0)
-    myPath << theFormat->PathPhysicalCurrentOutputFolder;
+  myPath << this->ownEr->owner->RelativePhysicalNameSSAlgOutputFolder;
   myPath << "rootSubalgebra_" << index+1 << ".html";
-  FileOperations::OpenFileCreateIfNotPresent(output, myPath.str(), false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(output, myPath.str(), false, true, false);
   output << "<html><title>" << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName() << " root subalgebra of type "
   << this->theDynkinDiagram.ToString() << "</title>";
   output << "<meta name=\"keywords\" content=\"" << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName()
@@ -2670,11 +2670,11 @@ void rootSubalgebras::SortDescendingOrderBySSRank()
 
 void rootSubalgebras::ToHTML(FormatExpressions* theFormat, SltwoSubalgebras* Sl2s)
 { MacroRegisterFunctionWithName("rootSubalgebras::ToHTML");
-  std::string physicalPathSAs= theFormat==0 ? "": theFormat->PathPhysicalCurrentOutputFolder;
-  std::string MyPathPhysical=physicalPathSAs+"rootSubalgebras.html";
+  this->CheckInitialization();
+  std::string MyPathPhysical=this->owner->RelativePhysicalNameSSAlgOutputFolder+"rootSubalgebras.html";
   std::fstream output;
-  FileOperations::OpenFileCreateIfNotPresent(output, MyPathPhysical, false, true, false);
-  if (!FileOperations::FileExists(MyPathPhysical))
+  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(output, MyPathPhysical, false, true, false);
+  if (!FileOperations::FileExistsOnTopOfOutputFolder(MyPathPhysical))
   { crash << "This may or may not be a programming error. Failed to create file " << MyPathPhysical
     << ". Possible explanations. 1. File permissions - can I write in that folder? 2. Programming error (less likely). "
     << crash;
@@ -2704,7 +2704,7 @@ std::string rootSubalgebras::ToString(FormatExpressions* theFormat, SltwoSubalge
 
 bool rootSubalgebras::ReadFromDefaultFileNilradicalGeneration(GlobalVariables* theGlobalVariables)
 { std::fstream theFile;
-  if (FileOperations::OpenFileCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, false, false))
+  if (FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(theFile, "theNilradicalsGenerator.txt", false, false, false))
   { theFile.seekg(0);
     this->ReadFromFileNilradicalGeneration(theFile, theGlobalVariables);
     return true;
@@ -2714,7 +2714,7 @@ bool rootSubalgebras::ReadFromDefaultFileNilradicalGeneration(GlobalVariables* t
 
 void rootSubalgebras::WriteToDefaultFileNilradicalGeneration(GlobalVariables* theGlobalVariables)
 { std::fstream theFile;
-  FileOperations::OpenFileCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(theFile, "theNilradicalsGenerator.txt", false, true, false);
   this->WriteToFileNilradicalGeneration(theFile, theGlobalVariables);
 }
 

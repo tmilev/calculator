@@ -6,6 +6,7 @@
 #include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 #include "vpfHeader2Math9DrawingVariables.h"
+#include <dirent.h>
 ProjectInformationInstance ProjectInfoVpf9cpp(__FILE__, "Math routines implementation. ");
 
 //the below gives upper limit to the amount of pointers that are allowed to be allocated by the program. Can be changed dynamically.
@@ -293,9 +294,9 @@ void CGI::ElementToStringTooltip(const std::string& input, const std::string& in
 
 void CGI::FormatCPPSourceCode(const std::string& FileName)
 { std::fstream fileIn, fileOut;
-  FileOperations::OpenFileCreateIfNotPresent(fileIn, FileName, false, false, false);
+  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(fileIn, FileName, false, false, false);
   if(!fileIn.is_open())
-    crash << crash;
+    crash << "Can't open file for code formatting: something is wrong." << crash;
   fileIn.clear(std::ios::goodbit);
   fileIn.seekg(0, std::ios_base::end);
   int theSize= fileIn.tellg();
@@ -304,7 +305,7 @@ void CGI::FormatCPPSourceCode(const std::string& FileName)
   fileIn.read(buffer, theSize*2);
   std::string nameFileOut= FileName;
   nameFileOut.append(".new");
-  ::FileOperations::OpenFileCreateIfNotPresent(fileOut, nameFileOut, false, true, false);
+  ::FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(fileOut, nameFileOut, false, true, false);
   for (int i=0; i<theSize; i++)
   { char lookAhead= (i< theSize-1)? buffer[i+1] : ' ';
     switch(buffer[i])
@@ -325,9 +326,20 @@ void CGI::FormatCPPSourceCode(const std::string& FileName)
   delete [] buffer;
 }
 
-#include <dirent.h>
 bool FileOperations::IsFolder(const std::string& theFolderName)
 { MacroRegisterFunctionWithName("FileOperations::IsFolder");
+  DIR *pDir;
+  pDir = opendir(theFolderName.c_str());
+  if (pDir != NULL)
+  { closedir(pDir);
+    return true;
+  }
+  return false;
+}
+
+bool FileOperations::IsFolderOnTopOfOutputFolder(const std::string& relativeFolderName)
+{ MacroRegisterFunctionWithName("FileOperations::IsFolder");
+  std::string theFolderName=theGlobalVariables.PhysicalPathOutputFolder+relativeFolderName;
   DIR *pDir;
   pDir = opendir(theFolderName.c_str());
   if (pDir != NULL)
@@ -346,6 +358,20 @@ std::string FileOperations::GetFileExtensionWithDot(const std::string& theFileNa
   return "";
 }
 
+bool FileOperations::IsOKforFileNameOnTopOfOutputFolder(const std::string& theFileName)
+{ MacroRegisterFunctionWithName("FileOperations::IsOKforFileNameOnTopOfOutputFolder");
+  std::string theFileNameNoPath=FileOperations::GetPathFromFileNameWithPath(theFileName);
+  std::string theFilePath=FileOperations::GetPathFromFileName(theFileName);
+  for (unsigned i=0; i<theFileName.size(); i++)
+    if (theFilePath[i]=='.')
+      return false;
+  if (theFileNameNoPath=="")
+    return false;
+  if (theFileNameNoPath[0]=='.')
+    return false;
+  return true;
+}
+
 bool FileOperations::IsFileNameWithoutDotsAndSlashes(const std::string& theFileName)
 { MacroRegisterFunctionWithName("FileOperations::IsFileNameWithoutDotsAndSlashes");
   for (unsigned i=0; i<theFileName.size(); i++)
@@ -354,7 +380,7 @@ bool FileOperations::IsFileNameWithoutDotsAndSlashes(const std::string& theFileN
   return true;
 }
 
-std::string FileOperations::RemovePathFromFileName(const std::string& fileName)
+std::string FileOperations::GetPathFromFileNameWithPath(const std::string& fileName)
 { unsigned startNameWithoutFolderInfo=0;
   for (unsigned i=0; i<fileName.size(); i++)
     if (fileName[i]=='/' || fileName[i]=='\\')
@@ -400,7 +426,13 @@ bool FileOperations::GetFolderFileNames
   return true;
 }
 
-bool FileOperations::FileExists(const std::string& theFileName)
+bool FileOperations::FileExistsOnTopOfOutputFolder(const std::string& theFileName)
+{ if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
+    return false;
+  return FileOperations::FileExistsUnsecure(theGlobalVariables.PhysicalPathOutputFolder+theFileName);
+}
+
+bool FileOperations::FileExistsUnsecure(const std::string& theFileName)
 { std::fstream theFile;
   theFile.open(theFileName.c_str(), std::fstream::in);
   if(theFile.is_open())
@@ -409,7 +441,13 @@ bool FileOperations::FileExists(const std::string& theFileName)
     return false;
 }
 
-bool FileOperations::OpenFile(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
+bool FileOperations::OpenFileOnTopOfOutputFolder(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
+{ if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
+    return false;
+  return FileOperations::OpenFileUnsecure(theFile, theGlobalVariables.PhysicalPathOutputFolder+ theFileName, OpenInAppendMode, truncate, openAsBinary);
+}
+
+bool FileOperations::OpenFileUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
 { if (OpenInAppendMode)
   { if (openAsBinary)
       theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app| std::fstream::binary);
@@ -428,7 +466,15 @@ bool FileOperations::OpenFile(std::fstream& theFile, const std::string& theFileN
   return theFile.is_open();
 }
 
-bool FileOperations::OpenFileCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
+bool FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
+(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
+{ if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
+    return false;
+  return FileOperations::OpenFileCreateIfNotPresentUnsecure
+  (theFile, theGlobalVariables.PhysicalPathOutputFolder+ theFileName, OpenInAppendMode, truncate, openAsBinary);
+}
+
+bool FileOperations::OpenFileCreateIfNotPresentUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
 { if (OpenInAppendMode)
   { if (openAsBinary)
       theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app| std::fstream::binary);

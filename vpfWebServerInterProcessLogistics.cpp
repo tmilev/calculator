@@ -231,7 +231,7 @@ void Pipe::Read()
 }
 
 logger::logger(const std::string& logFileName )
-{ FileOperations::OpenFileCreateIfNotPresent(theFile,logFileName, false, true, false);
+{ FileOperations::OpenFileCreateIfNotPresentUnsecure(theFile, logFileName, false, true, false);
   this->currentColor=logger::normalColor;
   this->flagStopWritingToFile=false;
 }

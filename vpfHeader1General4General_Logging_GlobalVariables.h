@@ -102,31 +102,28 @@ public:
   std::string userInputStringRAWIfAvailable;
   std::string userInputStringIfAvailable;
 
-  std::string PhysicalNameProgressReport;
-  std::string PhysicalNameCrashLog;
-  std::string PhysicalNameOutpuT;
+  std::string RelativePhysicalNameProgressReport;
+  std::string RelativePhysicalNameCrashLog;
+  std::string RelativePhysicalNameOutpuT;
 
-  std::string PhysicalPathServerBase;
+  std::string PhysicalPathProjectBase;
+  std::string PhysicalPathServerBasE;
   std::string PhysicalPathOutputFolder;
-  std::string PhysicalNameIndicatorWithPath;
   std::string PhysicalNameExtraOutputNoPatH;
-  std::string PhysicalNameExtraOutputWithPath;
+  std::string RelativePhysicalNameExtraOutputWithPath;
   std::string PhysicalNameFolderBelowExecutable;
   std::string PhysicalNameExecutableNoPath;
   std::string PhysicalNameExecutableWithPath;
 
-  std::string DisplayPathServerBase;
   std::string DisplayPathExecutable;
   std::string DisplayPathOutputFolder;
   std::string DisplayNameExtraOutputNoPath;
   std::string DisplayNameExtraOutputWithPath;
   std::string DisplayNameExecutableWithPath;
-  std::string DisplayNameIndicatorWithPath;
   std::string DisplayNameCalculatorWithPath;
-
+  std::string DisplayNameProgressReport;
 
   std::string IPAdressCaller;
-  std::string defaultUserLabel;
 
   MutexRecursiveWrapper MutexWebWorkerPipeWriteLock;
   MutexRecursiveWrapper MutexWebWorkerPipeReadLock;

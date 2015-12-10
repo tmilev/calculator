@@ -88,10 +88,10 @@ void SemisimpleLieAlgebra::ComputeFolderNames(GlobalVariables& theGlobalVariable
   this->CheckConsistency();
   DynkinType& theType=this->theWeyl.theDynkinType;
   outMainPath << theGlobalVariables.PhysicalPathOutputFolder << CGI::CleanUpForFileNameUse(theType.ToString()) << "/";
-  this->PhysicalNameMainOutputFolder =outMainPath.str();
+  this->RelativePhysicalNameSSAlgOutputFolder =outMainPath.str();
   outMainDisplayPath << theGlobalVariables.DisplayPathOutputFolder
   << CGI::CleanUpForFileNameUse(theType.ToString()) << "/";
-  this->DisplayNameMainOutputFolder=outMainDisplayPath.str();
+  this->DisplayNameSSalgOutputFolder=outMainDisplayPath.str();
 }
 
 void SemisimpleLieAlgebra::ComputeChevalleyConstants(GlobalVariables* theGlobalVariables)

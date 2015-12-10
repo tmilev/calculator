@@ -348,8 +348,8 @@ public:
   std::string DisplayNameMainFile1WithPath;
   std::string DisplayNameMainFile2FastLoadWithPath;
 
-  std::string PhysicalNameMainFile1;
-  std::string PhysicalNameMainFile2FastLoad;
+  std::string RelativePhysicalNameRelativeMainFile1;
+  std::string RelativePhysicalNameRelativeMainFile2FastLoad;
 
   std::string (*ToStringExpressionString)(SemisimpleSubalgebras& input);
   bool LoadState
@@ -365,10 +365,10 @@ public:
   void CheckFileWritePermissions();
   void WriteReportToFiles();
   std::string ToStringAlgebraLink(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
-  std::string GetPhysicalFileNameSubalgebra(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
+  std::string GetRelativePhysicalFileNameSubalgebra(int ActualIndexSubalgebra)const;
   std::string GetDisplayFileNameSubalgebraRelative(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
   std::string GetDisplayFileNameSubalgebraAbsolute(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
-  std::string GetPhysicalFileNameFKFTNilradicals(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
+  std::string GetRelativePhysicalFileNameFKFTNilradicals(int ActualIndexSubalgebra)const;
   std::string GetDisplayFileNameFKFTNilradicals(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
   const CandidateSSSubalgebra& baseSubalgebra();
   bool operator==(const SemisimpleSubalgebras& other)

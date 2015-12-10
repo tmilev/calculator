@@ -1472,10 +1472,6 @@ public:
   std::string CustomCoeffMonSeparator;
   std::string FDrepLetter;
   std::string simpleRootLetter;
-  std::string PathDisplayNameCalculator;
-  std::string PathDisplayServerBaseFolder;
-  std::string PathPhysicalCurrentOutputFolder;
-  std::string PathDisplayCurrentOutputFolder;
   List<std::string> polyAlphabeT;
   List<std::string> weylAlgebraLetters;
   List<std::string> vectorSpaceEiBasisNames;

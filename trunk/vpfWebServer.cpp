@@ -458,8 +458,7 @@ std::string WebWorker::ToStringMessageShort(FormatExpressions* theFormat)const
   out << "<hr>Main address raw: " << this->mainAddresSRAW;
   out << lineBreak << "Main address: " << this->mainAddress;
   out << lineBreak << "Main argument: " << this->mainArgumentRAW;
-  out << lineBreak << "Physical file address referred to by main address: " << this->PhysicalFileName;
-  out << lineBreak << "Display path server base: " << theGlobalVariables.DisplayPathServerBase;
+  out << lineBreak << "Relative physical file address referred to by main address: " << this->RelativePhysicalFileName;
   return out.str();
 }
 
@@ -495,7 +494,7 @@ void WebWorker::resetMessageComponentsExceptRawMessage()
 { this->mainArgumentRAW="";
   this->mainAddress="";
   this->mainAddresSRAW="";
-  this->PhysicalFileName="";
+  this->RelativePhysicalFileName="";
   this->displayUserInput="";
   this->theStrings.SetSize(0);
   this->requestType=this->requestUnknown;
@@ -570,7 +569,8 @@ void WebWorker::OutputResultAfterTimeout()
   out << "<table><tr><td>" << theParser.ToStringOutputAndSpecials() << "</td><td>"
   << theParser.outputCommentsString << "</td></tr></table>";
   std::fstream outputTimeOutFile;
-  FileOperations::OpenFileCreateIfNotPresent(outputTimeOutFile, theGlobalVariables.PhysicalNameOutpuT, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
+  (outputTimeOutFile, theGlobalVariables.RelativePhysicalNameOutpuT, false, true, false);
   outputTimeOutFile << "<html><body>" << out.str() << "</body></html>";
   outputTimeOutFile.close();
   WebWorker::OutputSendAfterTimeout(out.str());
@@ -1022,13 +1022,13 @@ void WebWorker::SanitizeMainAddress()
 
 void WebWorker::ExtractPhysicalAddressFromMainAddress()
 { MacroRegisterFunctionWithName("WebWorker::ExtractPhysicalAddressFromMainAddress");
-  int numBytesToChop=theGlobalVariables.DisplayPathServerBase.size();
-  std::string displayAddressStart= this->mainAddress.substr(0, numBytesToChop);
-  if (displayAddressStart!=theGlobalVariables.DisplayPathServerBase)
-    numBytesToChop=0;
+//  int numBytesToChop=0;//theGlobalVariables.DisplayPathServerBase.size();
+//  std::string displayAddressStart= this->mainAddress.substr(0, numBytesToChop);
+//  if (displayAddressStart!=theGlobalVariables.DisplayPathServerBase)
+//    numBytesToChop=0;
   this->SanitizeMainAddress();
-  this->PhysicalFileName=theGlobalVariables.PhysicalPathServerBase+
-  this->mainAddress.substr(numBytesToChop, std::string::npos);
+  this->RelativePhysicalFileName= this->mainAddress;//.substr(numBytesToChop, std::string::npos);
+//  this->RelativePhysicalFileName= this->mainAddress.substr(numBytesToChop, std::string::npos);
 }
 
 int WebWorker::ProcessServerStatus()
@@ -1127,11 +1127,11 @@ int WebWorker::ProcessComputationIndicator()
 
 void WebWorker::WriteProgressReportToFile(const std::string& input)
 { MacroRegisterFunctionWithName("WebWorker::WriteProgressReportToFile");
-  theLog << logger::green << "Progress report written to file: " << theGlobalVariables.PhysicalNameProgressReport << logger::endL;
+  theLog << logger::green << "Progress report written to file: " << theGlobalVariables.RelativePhysicalNameProgressReport << logger::endL;
   std::fstream theFile;
-  if (!FileOperations::OpenFileCreateIfNotPresent(theFile, theGlobalVariables.PhysicalNameProgressReport, false, true, false))
-    FileOperations::OpenFileCreateIfNotPresent
-    (theFile, theGlobalVariables.PhysicalPathOutputFolder+"progressReport_failed_to_create_file.html",
+  if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(theFile, theGlobalVariables.RelativePhysicalNameProgressReport, false, true, false))
+    FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
+    (theFile, "progressReport_failed_to_create_file.html",
      false, true, false);
   theFile << standardOutputStreamAfterTimeout.str() << "<hr>" << input;
   theFile.flush();
@@ -1185,12 +1185,12 @@ int WebWorker::ProcessFolder()
     << " Therefore I have sanitized the main address to: " << this->mainAddress;
   }
   List<std::string> theFileNames, theFileTypes;
-  if (!FileOperations::GetFolderFileNames(this->PhysicalFileName, theFileNames, &theFileTypes))
-  { out << "<b>Failed to open directory with physical address " << this->PhysicalFileName << " </b></body></html>";
+  if (!FileOperations::GetFolderFileNames(this->RelativePhysicalFileName, theFileNames, &theFileTypes))
+  { out << "<b>Failed to open directory with physical address " << this->RelativePhysicalFileName << " </b></body></html>";
     stOutput << out.str();
     return 0;
   }
-  out << "Browsing folder: " << this->mainAddress << "<br>Physical address: " << this->PhysicalFileName << "<hr>";
+  out << "Browsing folder: " << this->mainAddress << "<br>Physical address: " << this->RelativePhysicalFileName << "<hr>";
   List<std::string> theFolderNamesHtml, theFileNamesHtml;
   for (int i=0; i<theFileNames.size; i++)
   { std::stringstream currentStream;
@@ -1292,9 +1292,9 @@ int WebWorker::ProcessNonCalculator()
   ProgressReportWebServer theProgressReport;
   theProgressReport.SetStatus("<br>Processing non-computational web-server request.");
   //theLog << this->ToStringShort() << "\r\n";
-  if (FileOperations::IsFolder(this->PhysicalFileName))
+  if (FileOperations::IsFolder(this->RelativePhysicalFileName))
     return this->ProcessFolder();
-  if (!FileOperations::FileExists(this->PhysicalFileName))
+  if (!FileOperations::FileExistsOnTopOfOutputFolder(this->RelativePhysicalFileName))
   { stOutput << "HTTP/1.1 404 Object not found\r\nContent-Type: text/html\r\n\r\n";
     stOutput << "<html><body><b>File does not exist.</b>";
     if (this->flagMainAddressSanitized)
@@ -1303,15 +1303,15 @@ int WebWorker::ProcessNonCalculator()
       << " Therefore I have sanitized the main address to: " << this->mainAddress;
     }
     stOutput << "<br><b> File display name:</b> "
-    << this->mainAddress << "<br><b>File physical name:</b> " << this->PhysicalFileName;
+    << this->mainAddress << "<br><b>File physical name:</b> " << this->RelativePhysicalFileName;
     stOutput << "<hr><hr><hr>Message details:<br>" <<  this->ToStringMessage();
     stOutput << "</body></html>";
     return 0;
   }
-  std::string fileExtension=FileOperations::GetFileExtensionWithDot(this->PhysicalFileName);
+  std::string fileExtension=FileOperations::GetFileExtensionWithDot(this->RelativePhysicalFileName);
   bool isBinary=this->IsFileExtensionOfBinaryFile(fileExtension);
   std::fstream theFile;
-  if (!FileOperations::OpenFile(theFile, this->PhysicalFileName, false, false, !isBinary))
+  if (!FileOperations::OpenFileOnTopOfOutputFolder(theFile, this->RelativePhysicalFileName, false, false, !isBinary))
   { stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
     stOutput << "<html><body><b>Error: file appears to exist but I could not open it.</b> ";
     if (this->flagMainAddressSanitized)
@@ -1321,7 +1321,7 @@ int WebWorker::ProcessNonCalculator()
     }
     stOutput << "<br><b> File display name: </b>"
     << this->mainAddress << "<br><b>File physical name: </b>"
-    << this->PhysicalFileName << "</body></html>";
+    << this->RelativePhysicalFileName << "</body></html>";
     return 0;
   }
   theFile.seekp(0, std::ifstream::end);
@@ -1329,14 +1329,14 @@ int WebWorker::ProcessNonCalculator()
   std::stringstream theHeader;
   if (fileSize>50000000)
   { theHeader << "HTTP/1.1 413 Payload Too Large\r\n"
-    << "<html><body><b>Error: user requested file: " << this->PhysicalFileName
+    << "<html><body><b>Error: user requested file: " << this->RelativePhysicalFileName
     << " but it is too large, namely, " << fileSize << " bytes.</b></body></html>";
     this->QueueBytesForSending(theHeader.str());
     this->SendAllBytes();
     return 0;
   }
   std::stringstream reportStream;
-  reportStream << "<br>Serving file " << this->PhysicalFileName << " ...";
+  reportStream << "<br>Serving file " << this->RelativePhysicalFileName << " ...";
   ProgressReportWebServer theProgressReport2;
   theProgressReport2.SetStatus(reportStream.str());
 
@@ -1350,7 +1350,7 @@ int WebWorker::ProcessNonCalculator()
   int numBytesRead=theFile.gcount();
   ///////////////////
 //  theLog << "*****Message summary begin\r\n" << theHeader.str();
-//  theLog << "Sending file  " << this->PhysicalFileName; << " with file extension " << fileExtension
+//  theLog << "Sending file  " << this->RelativePhysicalFileName; << " with file extension " << fileExtension
 //  << ", file size: " << fileSize;
 //  theLog << "\r\n*****Message summary end\r\n";
   ///////////////////
@@ -1383,6 +1383,7 @@ int WebWorker::OutputWeb()
   //stOutput << theParser.javaScriptDisplayingIndicator;
   //theParser.inputString="TestCalculatorIndicator 0";
   //theParser.inputString="printSemisimpleSubalgebrasRecompute(B_3)";
+  theParser.init();
   ProgressReportWebServer theReport;
   if (theGlobalVariables.flagUsingBuiltInWebServer)
     theReport.SetStatus("OutputWeb: Computing...");
@@ -1425,7 +1426,7 @@ std::string WebWorker::GetJavaScriptIndicatorFromHD()
 //  out << "  el.contentWindow.location.reload();";
   out << "  timeOutCounter++;\n";
   out << "  var oRequest = new XMLHttpRequest();\n";
-  out << "  var sURL  = \"" << theGlobalVariables.DisplayNameIndicatorWithPath << "\";\n";
+  out << "  var sURL  = \"" << theGlobalVariables.DisplayNameProgressReport << "\";\n";
   out << "  oRequest.open(\"GET\",sURL,false);\n";
 //  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
   out << "  oRequest.send(null)\n";
@@ -1824,6 +1825,8 @@ void WebServer::CreateNewActiveWorker()
   this->GetActiveWorker().pingMessage="";
 }
 
+
+
 std::string WebServer::ToStringLastErrorDescription()
 { std::stringstream out;
   out << logger::red << "Process " << this->ToStringActiveWorker() << ": " << strerror(errno) << ". ";
@@ -1957,6 +1960,8 @@ void WebServer::ReleaseWorkerSideResources()
   this->activeWorker=-1; //<-The active worker is needed only in the child process.
 }
 
+
+
 void segfault_sigaction(int signal, siginfo_t *si, void *arg)
 {
   crash << "Caught segfault at address: " << si->si_addr << crash;
@@ -2000,15 +2005,15 @@ void WebServer::RecycleChildrenIfPossible()
             theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly>
             theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
             )
-        { this->theWorkers[i].flagInUse=false;
-          std::stringstream pingTimeoutStream;
-          pingTimeoutStream << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
-          << " seconds have passed since worker " << i+1
-          << " pinged the server. I am assuming the worker no longer functions, and am marking it as free for reuse. ";
-          kill(this->theWorkers[i].ProcessPID, SIGKILL);
-          theLog << logger::red << pingTimeoutStream.str() << logger::endL;
-          this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>" + pingTimeoutStream.str()+"</b></span>";
-        }
+          { this->theWorkers[i].flagInUse=false;
+            std::stringstream pingTimeoutStream;
+            pingTimeoutStream << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
+            << " seconds have passed since worker " << i+1
+            << " pinged the server. I am assuming the worker no longer functions, and am marking it as free for reuse. ";
+            kill(this->theWorkers[i].ProcessPID, SIGKILL);
+            theLog << logger::red << pingTimeoutStream.str() << logger::endL;
+            this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>" + pingTimeoutStream.str()+"</b></span>";
+          }
     }
 }
 
@@ -2116,7 +2121,7 @@ int WebServer::Run()
     if (listen(this->listeningSocketHttpSSL, WebServer::maxNumPendingConnections) == -1)
       crash << "Listen function failed on https port." << crash;
 
-  theLog << logger::purple << "server: waiting for connections...\r\n" << logger::endL;
+  theLog << logger::purple <<  "server: waiting for connections...\r\n" << logger::endL;
   unsigned int connectionsSoFar=0;
   sockaddr_storage their_addr; // connector's address information
   socklen_t sin_size;
@@ -2224,7 +2229,7 @@ void WebServer::Release(int& theDescriptor)
 }
 
 int WebServer::main_command_input()
-{ MacroRegisterFunctionWithName("WebServer::main_command_input");
+{ MacroRegisterFunctionWithName("main_command_input");
   theGlobalVariables.IndicatorStringOutputFunction=CGI::MakeStdCoutReport;
   //  stOutput << "\n\n\n" << theParser.DisplayPathServerBase << "\n\n";
   //  return 0;
@@ -2233,7 +2238,8 @@ int WebServer::main_command_input()
   theParser.flagUseHtml=false;
   theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
   std::fstream outputFile;
-  FileOperations::OpenFileCreateIfNotPresent(outputFile, "./outputFileCommandLine.html", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
+  (outputFile, "outputFileCommandLine.html", false, true, false);
   stOutput << theParser.outputString;
   outputFile << theParser.outputString;
   stOutput << "\nTotal running time: " << GetElapsedTimeInSeconds() << " seconds. \nOutput written in file ./outputFileCommandLine.html\n";
@@ -2241,8 +2247,7 @@ int WebServer::main_command_input()
 }
 
 int WebServer::main_apache_client()
-{ MacroRegisterFunctionWithName("WebServer::main_apache_client");
-  theParser.init();
+{ MacroRegisterFunctionWithName("main_apache_client");
   stOutput << "Content-Type: text/html\n\n";
   theGlobalVariables.IndicatorStringOutputFunction=CGI::MakeReportIndicatorFile;
   std::cin >> theParser.inputStringRawestOfTheRaw;

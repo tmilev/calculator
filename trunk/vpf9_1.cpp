@@ -49,13 +49,13 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
   stOutput.Flush();
   if (!theGlobalVariables.flagNotAllocated)
   { std::fstream theFile;
-    bool succeededToOpen=FileOperations::OpenFileCreateIfNotPresent
-    (theFile, theGlobalVariables.PhysicalNameCrashLog, false, true, false);
+    bool succeededToOpen=FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
+    (theFile, theGlobalVariables.RelativePhysicalNameCrashLog, false, true, false);
     if (succeededToOpen)
-      stOutput << "<hr>Crash dumped in file " << theGlobalVariables.PhysicalNameCrashLog;
+      stOutput << "<hr>Crash dumped in file " << theGlobalVariables.RelativePhysicalNameCrashLog << " located inside the output folder.";
     else
       stOutput << "<hr>Failed to create a crash report: check if folder exists and the "
-      << "executable has file permissions for file " << theGlobalVariables.PhysicalNameCrashLog << ".";
+      << "executable has file permissions for file " << theGlobalVariables.RelativePhysicalNameCrashLog << " located inside the output folder.";
     theFile << this->theCrashReport.str();
     theFile.close();
   }
@@ -117,10 +117,10 @@ std::string Crasher::GetStackTraceShort()
 
 std::string GlobalVariables::ToStringFolderInfo()const
 { std::stringstream out;
-  out << "<br>Physical path server base: " << this->PhysicalPathServerBase;
+  out << "<br>Physical path server base: " << this->PhysicalPathServerBasE;
   out << "<br>Display name calculator with path: " << this->DisplayNameCalculatorWithPath;
   out << "<br>Physical name folder below executable: " << this->PhysicalNameFolderBelowExecutable;
-  out << "<br>Display path server base: " << this->DisplayPathServerBase;
+//  out << "<br>Display path server base: " << this->DisplayPathServerBasE;
   out << "<br>Display name calculator with path: " << this->DisplayNameExecutableWithPath;
   out << "<br>Physical path output folder: " << this->PhysicalPathOutputFolder;
   out << "<br>Display path output folder: " << this->DisplayPathOutputFolder;
@@ -161,35 +161,29 @@ void GlobalVariables::initDefaultFolderAndFileNames
 (const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow)
 { this->PhysicalNameFolderBelowExecutable="";
   this->PhysicalNameExecutableNoPath="";
-  this->PhysicalPathServerBase="";
-  this->DisplayPathServerBase="";
+  this->PhysicalPathProjectBase="";
   for (unsigned i=0; i<inputPhysicalExecutableWithPathServerBaseIsFolderBelow.size(); i++)
   { this->PhysicalNameExecutableNoPath.push_back(inputPhysicalExecutableWithPathServerBaseIsFolderBelow[i]);
     if (inputPhysicalExecutableWithPathServerBaseIsFolderBelow[i]=='/')
-    { this->PhysicalPathServerBase+=this->PhysicalNameFolderBelowExecutable;
-      this->DisplayPathServerBase=this->PhysicalNameFolderBelowExecutable;
+    { this->PhysicalPathProjectBase+=this->PhysicalNameFolderBelowExecutable;
+      //this->DisplayPathServerBasE=this->PhysicalNameFolderBelowExecutable;
       this->PhysicalNameFolderBelowExecutable=this->PhysicalNameExecutableNoPath;
       this->PhysicalNameExecutableNoPath="";
     }
   }
   this->PhysicalNameExecutableWithPath=this->PhysicalNameFolderBelowExecutable+this->PhysicalNameExecutableNoPath;
-  if (this->PhysicalPathServerBase=="")
-  { this->PhysicalPathServerBase="./../";
-    this->DisplayPathServerBase="vectorpartition/";
-  }
-  this->DisplayPathServerBase="/"+this->DisplayPathServerBase;
-  this->PhysicalPathOutputFolder = this->PhysicalPathServerBase + "output/";
-  this->DisplayPathOutputFolder = this->DisplayPathServerBase + "output/";
+  if (this->PhysicalPathProjectBase=="")
+    this->PhysicalPathProjectBase="./../";
+  this->PhysicalPathOutputFolder = this->PhysicalPathProjectBase + "output/";
+  this->PhysicalPathServerBasE=this->PhysicalPathOutputFolder;
+  this->DisplayPathOutputFolder ="/";
 
-  this->defaultUserLabel="";
-  this->PhysicalNameExtraOutputNoPatH="default" + this->defaultUserLabel + "output";
-  this->PhysicalNameExtraOutputWithPath = this->PhysicalPathOutputFolder + this->PhysicalNameExtraOutputNoPatH ;
-  this->DisplayNameExtraOutputNoPath = "default" + this->defaultUserLabel + "output";
+  this->PhysicalNameExtraOutputNoPatH="defaultoutput";
+  this->RelativePhysicalNameExtraOutputWithPath = this->PhysicalNameExtraOutputNoPatH;
+  this->DisplayNameExtraOutputNoPath = "defaultoutput";
   this->DisplayNameExtraOutputWithPath = this->DisplayPathOutputFolder + this->DisplayNameExtraOutputNoPath;
 
-  this->PhysicalNameIndicatorWithPath = this->PhysicalPathOutputFolder + "indicator" + this->defaultUserLabel + ".html" ;
-  this->DisplayNameIndicatorWithPath = this->DisplayPathOutputFolder + "indicator" + this->defaultUserLabel + ".html" ;
-  this->DisplayNameCalculatorWithPath = this->DisplayPathServerBase + "cgi-bin/calculator";
+  this->DisplayNameCalculatorWithPath = "calculator";
   this->initOutputReportAndCrashFileNames("", "");
 }
 
@@ -203,8 +197,7 @@ void GlobalVariables::MakeReport()
 }
 
 void GlobalVariables::initOutputReportAndCrashFileNames
-(const std::string& inputUserStringRAW,
- const std::string& inputUserStringCivilized)
+(const std::string& inputUserStringRAW, const std::string& inputUserStringCivilized)
 { this->userInputStringRAWIfAvailable=inputUserStringRAW;
   this->userInputStringIfAvailable=inputUserStringCivilized;
   std::string inputAbbreviated=this->userInputStringRAWIfAvailable;
@@ -214,9 +207,9 @@ void GlobalVariables::initOutputReportAndCrashFileNames
     << " _abbreviated_input_" << inputAbbreviated.substr(0, 220);
     inputAbbreviated=inputAbbreviatedStream.str();
   }
-  this->PhysicalNameCrashLog="../output/crash_"+ inputAbbreviated+".html";
-  this->PhysicalNameProgressReport="../output/progressReport_"+ inputAbbreviated+".html";
-  this->PhysicalNameOutpuT="../output/output_"+ inputAbbreviated+".html";
+  this->RelativePhysicalNameCrashLog="crash_"+ inputAbbreviated+".html";
+  this->RelativePhysicalNameProgressReport="progressReport_"+ inputAbbreviated+".html";
+  this->RelativePhysicalNameOutpuT="output_"+ inputAbbreviated+".html";
 }
 
 void FileInformation::AddProjectInfo(const std::string& fileName, const std::string& fileDescription)
@@ -877,7 +870,8 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex(GlobalVariab
 { std::stringstream out;
   FormatExpressions theFormat;
   Vector<Rational> tempRoot;
-  FileOperations::OpenFileCreateIfNotPresent(this->theMultiplicitiesMaxOutputReport2, "/home/todor/math/vectorpartition/ExtremaPolys.txt", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
+  (this->theMultiplicitiesMaxOutputReport2, "ExtremaPolys.txt", false, true, false);
   this->thePfs.initFromRoots(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
   this->thePfs.ComputeDebugString(theGlobalVariables);
   out << this->thePfs.DebugString;
@@ -886,7 +880,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex(GlobalVariab
   out << "=" << this->thePfs.DebugString;
 //  int totalDim=this->theTranslationS[0].size+this->theTranslationsProjecteD[0].size;
   this->theQPsSubstituted.SetSize(this->projectivizedChambeR.size);
-  crash << crash;
+  crash << "not implemented fully, crashing to let you know. " << crash;
 //  this->thePfs.theChambersOld.init();
 //  this->thePfs.theChambersOld.theDirections=this->GmodKNegWeightsBasisChanged;
 //  this->thePfs.theChambersOld.SliceTheEuclideanSpace(theGlobalVariables, false);
@@ -964,10 +958,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   this->TransformToWeylProjectiveStep2(theGlobalVariables);
   Vector<Rational> highestWeightLargerAlgSimpleCoords;
   highestWeightLargerAlgSimpleCoords=LargerWeyl.GetSimpleCoordinatesFromFundamental(highestWeightLargerAlgebraFundamentalCoords);
-
-  Matrix<Rational>  tempMat;
-
-
+  Matrix<Rational> tempMat;
   Vector<Rational> tempRoot, ZeroRoot;
   DrawingVariables drawOps;
   int theSmallDim=SmallerWeyl.CartanSymmetric.NumRows;
@@ -1695,18 +1686,18 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase(std::fstre
 
 void GeneralizedVermaModuleCharacters::ReadFromDefaultFile(GlobalVariables* theGlobalVariables)
 { std::fstream input;
-  if (!FileOperations::FileExists( "/home/todor/math/vectorpartition/GenVermaComputation.txt"))
+  if (!FileOperations::FileExistsOnTopOfOutputFolder( "GenVermaComputation.txt"))
   { this->computationPhase=0;
     return;
   }
-  FileOperations::OpenFileCreateIfNotPresent(input, "/home/todor/math/vectorpartition/GenVermaComputation.txt", false, false, false);
+  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(input, "GenVermaComputation.txt", false, false, false);
   this->ReadFromFile(input, theGlobalVariables);
   input.close();
 }
 
 void GeneralizedVermaModuleCharacters::WriteToDefaultFile(GlobalVariables* theGlobalVariables)
 { std::fstream output;
-  FileOperations::OpenFileCreateIfNotPresent(output, "/home/todor/math/vectorpartition/GenVermaComputation.txt", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(output, "GenVermaComputation.txt", false, true, false);
   this->WriteToFile(output, theGlobalVariables);
 }
 
@@ -1742,7 +1733,7 @@ void GeneralizedVermaModuleCharacters::GetSubFromNonParamArray
   for (int l=0; l<numNonParams; l++)
   { for (int k=0; k<numParams-1; k++)
       output.elements[l][k]= NonParams[l][k];
-    outputTranslation.TheObjects[l]=*NonParams.TheObjects[l].LastObject();
+    outputTranslation[l]=*NonParams[l].LastObject();
   }
   for (int l=0; l<numParams-1; l++)
     output.elements[l+numNonParams][l]= 1;
@@ -1763,7 +1754,7 @@ void GeneralizedVermaModuleCharacters::GetProjection(int indexOperator, const Ve
 
 void GeneralizedVermaModuleCharacters::GetSubFromIndex
 (PolynomialSubstitution<Rational>& outputSub, Matrix<LargeInt>& outputMat, LargeIntUnsigned& outputDen, int theIndex)
-{ Matrix<Rational> & theOperator=this->theLinearOperators.TheObjects[theIndex];
+{ Matrix<Rational>& theOperator=this->theLinearOperators[theIndex];
   int dimLargerAlgebra=theOperator.NumCols;
   int dimSmallerAlgebra=theOperator.NumRows;
   Vector<Rational>& theTranslation=this->theTranslationS[theIndex];
@@ -1774,7 +1765,7 @@ void GeneralizedVermaModuleCharacters::GetSubFromIndex
   { tempMat.elements[j][j]=1;
     for (int i=0; i<dimLargerAlgebra; i++)
       tempMat.elements[i][j]-=theOperator.elements[j][i];
-    tempMat.elements[dimLargerAlgebra+dimSmallerAlgebra][j]=-theTranslation.TheObjects[j];
+    tempMat.elements[dimLargerAlgebra+dimSmallerAlgebra][j]=-theTranslation[j];
   }
   tempMat.GetMatrixIntWithDen(outputMat, outputDen);
   outputSub.MakeSubFromMatrixIntAndDen(outputMat, outputDen);

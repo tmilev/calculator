@@ -24,7 +24,7 @@ public:
   std::string mainArgumentRAW;
   std::string mainAddresSRAW;
   std::string mainAddress;
-  std::string PhysicalFileName;
+  std::string RelativePhysicalFileName;
   std::string status;
   std::string pingMessage;
   double timeOfLastPingServerSideOnly;

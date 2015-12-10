@@ -144,10 +144,9 @@ bool CalculatorFunctionsGeneral::innerX509certificateCrunch(Calculator& theComma
     return false;
   if (!FileOperations::IsFileNameWithoutDotsAndSlashes(theCertificateFileNameNoFolder))
     return theCommands << "The file name contains forbidden characters, computation aborted. ";
-  std::string theCertificateFileName=
-  theGlobalVariables.PhysicalPathServerBase+theCertificateFileNameNoFolder;
+  std::string theCertificateFileName=theCertificateFileNameNoFolder;
   std::fstream theCertFile;
-  if (!FileOperations::OpenFile(theCertFile, theCertificateFileName, false, false, false))
+  if (!FileOperations::OpenFileOnTopOfOutputFolder(theCertFile, theCertificateFileName, false, false, false))
     return theCommands << "Failed to open file " << theCertificateFileName;
   theCertFile.seekg(0);
   List<std::string> theCerts, theShas, certsAndShas;
@@ -1361,7 +1360,7 @@ bool CalculatorFunctionsGeneral::innerMakeMakeFile(Calculator& theCommands, cons
     cppFilesNoExtension.AddOnTop(theFileNameNoPathNoExtension);
   }
   std::fstream theFileStream;
-  FileOperations::OpenFileCreateIfNotPresent(theFileStream, theGlobalVariables.PhysicalPathOutputFolder+"makefile", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(theFileStream, "makefile", false, true, false);
   std::stringstream outHtml;
   theFileStream << "all: directories calculator\n\n";
   theFileStream << "directories: Debug\n";
@@ -3892,13 +3891,13 @@ bool CalculatorFunctionsGeneral::innerComputePairingTablesAndFKFTsubalgebras(Cal
   output=input;
   std::fstream theFile;
   std::string theFileName;
-  theFileName=theGlobalVariables.PhysicalPathOutputFolder + "FKFTcomputation.html";
+  theFileName="FKFTcomputation.html";
   FormatExpressions tempFormat;
   tempFormat.flagUseHTML=true;
   tempFormat.flagUseLatex=true;
   tempFormat.flagUseHTML=true;
   tempFormat.flagCandidateSubalgebraShortReportOnly=false;
-  FileOperations::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(theFile, theFileName, false, true, false);
   theFile << theSAs.ToString(&tempFormat);
   std::stringstream out;
   out << "<a href=\"" << theGlobalVariables.DisplayPathOutputFolder << "FKFTcomputation.html\">FKFTcomputation.html</a>";
@@ -4136,20 +4135,15 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
   WeylGroup& theAmbientWeyl=theSSalgebra.theWeyl;
   SubgroupWeylGroupOLD theSubgroup;
   std::stringstream out;
-  std::fstream outputFile, outputFile2;
-  std::string fileName, filename2;
-  fileName=theGlobalVariables.PhysicalNameExtraOutputWithPath+"1";
-  filename2=theGlobalVariables.PhysicalNameExtraOutputWithPath+"2";
-  FileOperations::OpenFileCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
-  FileOperations::OpenFileCreateIfNotPresent(outputFile2, filename2+".tex", false, true, false);
+  std::stringstream outputFileContent, outputFileContent2;
   if (!theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl, parabolicSel, theGlobalVariables, 500))
     return output.MakeError("<br><br>Failed to generate Weyl subgroup, 500 elements is the limit", theCommands);
   theSubgroup.FindQuotientRepresentatives(2000);
   out << "<br>Number elements of the coset: " << theSubgroup.RepresentativesQuotientAmbientOrder.size;
   out << "<br>Number of elements of the Weyl group of the Levi part: " << theSubgroup.size;
   out << "<br>Number of elements of the ambient Weyl: " << theSubgroup.AmbientWeyl.theElements.size;
-  outputFile << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
-  outputFile2 << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
+  outputFileContent << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
+  outputFileContent2 << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
   FormatExpressions theFormat;
   hwContext.ContextGetFormatExpressions(theFormat);
   if (theSubgroup.size>498)
@@ -4159,10 +4153,10 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
       out << "LaTeX can't handle handle the truth, when it is so large. <br>";
   } else
   { bool useJavascript=theSubgroup.size<100;
-    outputFile << "\\[" << theSubgroup.ElementToStringBruhatGraph() << "\\]";
-    outputFile << "\n\\end{document}";
-    outputFile2 << "\\[" << theSubgroup.ElementToStringCosetGraph() << "\\]";
-    outputFile2 << "\n\\end{document}";
+    outputFileContent << "\\[" << theSubgroup.ElementToStringBruhatGraph() << "\\]";
+    outputFileContent << "\n\\end{document}";
+    outputFileContent2 << "\\[" << theSubgroup.ElementToStringCosetGraph() << "\\]";
+    outputFileContent2 << "\n\\end{document}";
     out << "<hr>"
     << " The Hasse graph of the Weyl group of the Levi part follows. <a href=\""
     << theGlobalVariables.DisplayNameExtraOutputNoPath << "1.tex\"> "
@@ -4207,22 +4201,8 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
     out << "</table><hr>";
     out << theSubgroup.ToString();
   }
-  outputFile.close();
-  outputFile2.close();
-  stOutput << "<!--";
-  std::string command1="latex  -output-directory=" + theGlobalVariables.PhysicalPathOutputFolder + " " + fileName + ".tex";
-  std::string command2="dvipng " + fileName + ".dvi -o " + fileName + ".png -T tight";
-  std::string command3="latex  -output-directory=" + theGlobalVariables.PhysicalPathOutputFolder + " " + filename2 + ".tex";
-  std::string command4="dvipng " + filename2 + ".dvi -o " + filename2 + ".png -T tight";
-//  stOutput << "<br>" << command1;
-//  stOutput << "<br>" << command2;
-//  stOutput << "<br>" << command3;
-//  stOutput << "<br>" << command4;
-  theGlobalVariables.System(command1);
-  theGlobalVariables.System(command2);
-  theGlobalVariables.System(command3);
-  theGlobalVariables.System(command4);
-  stOutput << "-->";
+  out << theCommands.WriteDefaultLatexFileReturnHtmlLink(outputFileContent.str(), true);
+  out << theCommands.WriteDefaultLatexFileReturnHtmlLink(outputFileContent2.str(), true);
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -5134,30 +5114,28 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
   theFormat.flagUseHTML=true;
   theFormat.flagUseLatex=false;
   theFormat.flagUsePNG=true;
-  theFormat.PathPhysicalCurrentOutputFolder=ownerSS->PhysicalNameMainOutputFolder;
-  theFormat.PathDisplayCurrentOutputFolder=ownerSS->DisplayNameMainOutputFolder;
-
-  theFormat.PathDisplayNameCalculator=theGlobalVariables.DisplayNameCalculatorWithPath;
-  theFormat.PathDisplayServerBaseFolder=theGlobalVariables.DisplayPathServerBase;
 
   std::stringstream outSltwoPath, outSltwoDisplayPath;
   std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile, outSltwoFileDisplayName;
-  outSltwoPath << theFormat.PathPhysicalCurrentOutputFolder << "sl2s/";
-  outSltwoDisplayPath << ownerSS->DisplayNameMainOutputFolder << "sl2s/";
+  outSltwoPath << ownerSS->RelativePhysicalNameSSAlgOutputFolder << "sl2s/";
+  outSltwoDisplayPath << ownerSS->DisplayNameSSalgOutputFolder << "sl2s/";
   outSltwoMainFile << outSltwoPath.str() << "sl2s.html";
   outSltwoFileDisplayName << outSltwoDisplayPath.str() << "sl2s.html";
-  outRootHtmlFileName << ownerSS->PhysicalNameMainOutputFolder << "rootSubalgebras.html";
-  outRootHtmlDisplayName << ownerSS->DisplayNameMainOutputFolder << "rootSubalgebras.html";
-  bool NeedToCreateFolders=!FileOperations::FileExists(outSltwoMainFile.str());
+  outRootHtmlFileName << ownerSS->RelativePhysicalNameSSAlgOutputFolder << "rootSubalgebras.html";
+  outRootHtmlDisplayName << ownerSS->DisplayNameSSalgOutputFolder << "rootSubalgebras.html";
+  bool NeedToCreateFolders=!FileOperations::FileExistsOnTopOfOutputFolder(outSltwoMainFile.str());
   if (NeedToCreateFolders)
   { std::stringstream outMkDirCommand1, outMkDirCommand2;
-    outMkDirCommand1 << "mkdir " << ownerSS->PhysicalNameMainOutputFolder;
-    outMkDirCommand2 << "mkdir " << outSltwoPath.str();
+    outMkDirCommand1 << "mkdir " << theGlobalVariables.PhysicalPathOutputFolder
+    << ownerSS->RelativePhysicalNameSSAlgOutputFolder;
+    outMkDirCommand2 << "mkdir " << theGlobalVariables.PhysicalPathOutputFolder
+    << outSltwoPath.str();
     theGlobalVariables.System(outMkDirCommand1.str());
     theGlobalVariables.System(outMkDirCommand2.str());
   }
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit =1000;
-  if (!FileOperations::FileExists(outSltwoMainFile.str()) || !FileOperations::FileExists(outRootHtmlFileName.str()))
+  if (!FileOperations::FileExistsOnTopOfOutputFolder(outSltwoMainFile.str()) ||
+      !FileOperations::FileExistsOnTopOfOutputFolder(outRootHtmlFileName.str()))
     MustRecompute=true;
   std::stringstream out;
   if (MustRecompute)
@@ -5213,10 +5191,12 @@ class LaTeXcrawler
 
 void LaTeXcrawler::BuildFreecalc()
 { MacroRegisterFunctionWithName("LaTeXcrawler::BuildFreecalc");
+  this->displayResult << "This function needs a rewrite to make file operations secure. ";
+  return;
   this->baseFolderStartFile=FileOperations::GetPathFromFileName(this->theFileToCrawl);
   MathRoutines::StringBeginsWith(this->theFileToCrawl, this->baseFolderStartFile, & this->theFileToCrawlNoPath);
   std::fstream inputFile;
-  if (!FileOperations::OpenFileCreateIfNotPresent(inputFile, this->theFileToCrawl, false, false, false))
+  if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(inputFile, this->theFileToCrawl, false, false, false))
   { this->displayResult << "Failed to open input file: " << this->theFileToCrawl << ", aborting.";
     return;
   }
@@ -5347,7 +5327,7 @@ void LaTeXcrawler::BuildFreecalc()
     resultTable << "<td>" << theLectureNumbers[i] << "</td>";
     resultTable << "<td>" << theLectureDesiredNames[i] << "</td>";
     std::fstream workingFile;
-    if (!FileOperations::OpenFileCreateIfNotPresent(workingFile, this->theFileWorkingCopy, false, true, false))
+    if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(workingFile, this->theFileWorkingCopy, false, true, false))
     { resultTable << "<td>-</td><td>-</td><td>Failed to open working file: "
       << this->theFileWorkingCopy << ", aborting.</td> </tr>";
       break;
@@ -5388,7 +5368,7 @@ void LaTeXcrawler::BuildFreecalc()
       resultTable << "</tr>";
       continue;
     }
-    if (!FileOperations::OpenFileCreateIfNotPresent(workingFile, this->theFileWorkingCopy, false, true, false))
+    if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(workingFile, this->theFileWorkingCopy, false, true, false))
     { resultTable << "<td>-</td><td>-</td><td>Failed to open working file: "
       << this->theFileWorkingCopy << ", aborting.</td> </tr>";
       break;
@@ -5420,12 +5400,14 @@ void LaTeXcrawler::BuildFreecalc()
 
 void LaTeXcrawler::Crawl()
 { MacroRegisterFunctionWithName("LaTeXcrawler::Crawl");
+  this->displayResult << "Need to rewrite to make sure file operations are secure" ;
+  return;
   this->recursionDepth=0;
   this->baseFolderStartFile=FileOperations::GetPathFromFileName(this->theFileToCrawl);
   this->CrawlRecursive(this->theFileToCrawl);
   std::fstream outputFile;
-  std::string outputFileName=  theGlobalVariables.PhysicalPathOutputFolder + "latexOutput.tex";
-  if (!FileOperations::OpenFileCreateIfNotPresent(outputFile, outputFileName, false, true, false))
+  std::string outputFileName = theGlobalVariables.PhysicalPathOutputFolder + "latexOutput.tex";
+  if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(outputFile, outputFileName, false, true, false))
   { this->displayResult << "Failed to open output file: " << outputFileName << ", check write permissions. ";
     return;
   }
@@ -5446,7 +5428,7 @@ void LaTeXcrawler::CrawlRecursive(const std::string& currentFileName)
   if (this->errorStream.str()!="")
     return;
   std::fstream theFile;
-  if (!FileOperations::OpenFile(theFile, currentFileName, false, false, false))
+  if (!FileOperations::OpenFileOnTopOfOutputFolder(theFile, currentFileName, false, false, false))
   { this->errorStream << "Failed to open file " << currentFileName << ", aborting.";
     return;
   }

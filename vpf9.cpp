@@ -343,7 +343,7 @@ bool FileOperations::IsFolderOnTopOfOutputFolder(const std::string& relativeFold
   { //stOutput << "Name " << relativeFolderName << " not ok for folder on top of output folder<br>\n";
     return false;
   }
-  return FileOperations::IsFolderOnTopOfOutputFolder(theGlobalVariables.PhysicalPathOutputFolder+relativeFolderName);
+  return FileOperations::IsFolderUnsecure(theGlobalVariables.PhysicalPathOutputFolder+relativeFolderName);
 }
 
 std::string FileOperations::GetFileExtensionWithDot(const std::string& theFileName)
@@ -400,7 +400,7 @@ std::string FileOperations::GetPathFromFileName(const std::string& fileName)
 bool FileOperations::GetFolderFileNamesOnTopOfOutputFolder
 (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath, List<std::string>* outputFileTypes)
 { MacroRegisterFunctionWithName("FileOperations::GetFolderFileNamesOnTopOfOutputFolder");
-  if (FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFolderName))
+  if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFolderName))
     return false;
   return FileOperations::GetFolderFileNamesUnsecure(theGlobalVariables.PhysicalPathOutputFolder+theFolderName, outputFileNamesNoPath, outputFileTypes);
 }

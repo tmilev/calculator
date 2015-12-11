@@ -53,8 +53,8 @@ void SSL_write_Wrapper(SSL* inputSSL, const std::string& theString)
 #endif // MACRO_use_open_ssl
 //http://stackoverflow.com/questions/10175812/how-to-create-a-self-signed-certificate-with-openssl
 //openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 1001
-const std::string fileCertificate= "../../cert.pem";
-const std::string fileKey= "../../key.pem";
+const std::string fileCertificate= "../cert.pem";
+const std::string fileKey= "../key.pem";
 
 void WebServer::initSSL()
 { if (!this->flagUsESSL)
@@ -631,7 +631,7 @@ void WebWorker::OutputStandardResult()
   << "<td id=\"idAutocompleteDebug\"></td>"
   << "</tr>"
   << "</table>";
-  stOutput << "<script type=\"text/javascript\" src=\"../autocomplete.js\"></script>\n";
+  stOutput << "<script type=\"text/javascript\" src=\"/autocomplete.js\"></script>\n";
   stOutput << "</td>";
 //  bool displayClientMessage=theWebServer.flagUsingBuiltInServer && theWebServer.activeWorker!=-1;
   //displayClientMessage=false;

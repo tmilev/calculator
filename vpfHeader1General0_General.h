@@ -1101,9 +1101,13 @@ public:
   static std::string GetFileExtensionWithDot(const std::string& theFileName);
   static bool FileExistsUnsecure(const std::string& theFileName);
   static bool FileExistsOnTopOfOutputFolder(const std::string& theFileName);
-  static bool IsFolder(const std::string& theFolderName);
+  static bool IsFolderUnsecure(const std::string& theFolderName);
   static bool IsFolderOnTopOfOutputFolder(const std::string& relativeFolderName);
-  static bool GetFolderFileNames
+  static bool GetFolderFileNamesOnTopOfOutputFolder
+  (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
+   List<std::string>* outputFileTypes=0)
+   ;
+  static bool GetFolderFileNamesUnsecure
   (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
    List<std::string>* outputFileTypes=0)
    ;

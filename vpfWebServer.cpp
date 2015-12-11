@@ -459,6 +459,10 @@ std::string WebWorker::ToStringMessageShort(FormatExpressions* theFormat)const
   out << lineBreak << "Main address: " << this->mainAddress;
   out << lineBreak << "Main argument: " << this->mainArgumentRAW;
   out << lineBreak << "Relative physical file address referred to by main address: " << this->RelativePhysicalFileName;
+  out << lineBreak << "Calculator address: " << theGlobalVariables.DisplayNameCalculatorWithPath;
+  out << lineBreak << "Physical adress project base: " << theGlobalVariables.PhysicalPathProjectBase;
+  out << lineBreak << "Physical address server base: " << theGlobalVariables.PhysicalPathServerBasE;
+  out << lineBreak << "Physical address output folder: " << theGlobalVariables.PhysicalPathOutputFolder;
   return out.str();
 }
 
@@ -1185,7 +1189,7 @@ int WebWorker::ProcessFolder()
     << " Therefore I have sanitized the main address to: " << this->mainAddress;
   }
   List<std::string> theFileNames, theFileTypes;
-  if (!FileOperations::GetFolderFileNames(this->RelativePhysicalFileName, theFileNames, &theFileTypes))
+  if (!FileOperations::GetFolderFileNamesOnTopOfOutputFolder(this->RelativePhysicalFileName, theFileNames, &theFileTypes))
   { out << "<b>Failed to open directory with physical address " << this->RelativePhysicalFileName << " </b></body></html>";
     stOutput << out.str();
     return 0;
@@ -1292,7 +1296,7 @@ int WebWorker::ProcessNonCalculator()
   ProgressReportWebServer theProgressReport;
   theProgressReport.SetStatus("<br>Processing non-computational web-server request.");
   //theLog << this->ToStringShort() << "\r\n";
-  if (FileOperations::IsFolder(this->RelativePhysicalFileName))
+  if (FileOperations::IsFolderOnTopOfOutputFolder(this->RelativePhysicalFileName))
     return this->ProcessFolder();
   if (!FileOperations::FileExistsOnTopOfOutputFolder(this->RelativePhysicalFileName))
   { stOutput << "HTTP/1.1 404 Object not found\r\nContent-Type: text/html\r\n\r\n";
@@ -1303,7 +1307,7 @@ int WebWorker::ProcessNonCalculator()
       << " Therefore I have sanitized the main address to: " << this->mainAddress;
     }
     stOutput << "<br><b> File display name:</b> "
-    << this->mainAddress << "<br><b>File physical name:</b> " << this->RelativePhysicalFileName;
+    << this->mainAddress << "<br><b>Relative physical name of file:</b> " << this->RelativePhysicalFileName;
     stOutput << "<hr><hr><hr>Message details:<br>" <<  this->ToStringMessage();
     stOutput << "</body></html>";
     return 0;
@@ -1544,7 +1548,7 @@ int WebWorker::ServeClient()
   if (this->requestType==this->requestGetCalculator || this->requestType==this->requestPostCalculator)
   { stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
     theParser.inputStringRawestOfTheRaw=this->mainArgumentRAW;
-//    theParser.javaScriptDisplayingIndicator=this->GetJavaScriptIndicatorBuiltInServer(true);
+    //theParser.javaScriptDisplayingIndicator=this->GetJavaScriptIndicatorBuiltInServer(true);
     theParser.javaScriptDisplayingIndicator="";
     this->OutputWeb();
   } else if (this->requestType==this->requestGetNotCalculator)
@@ -1809,7 +1813,6 @@ void WebServer::CreateNewActiveWorker()
   }
   this->GetActiveWorker().Release();
   this->theWorkers[this->activeWorker].flagInUse=true;
-
   this->GetActiveWorker().PauseComputationReportReceived.CreateMe("server to worker computation report received");
   this->GetActiveWorker().PauseWorker.CreateMe("server to worker pause");
   this->GetActiveWorker().PauseIndicatorPipeInUse.CreateMe("server to worker indicator pipe in use");
@@ -2005,15 +2008,15 @@ void WebServer::RecycleChildrenIfPossible()
             theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly>
             theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
             )
-          { this->theWorkers[i].flagInUse=false;
-            std::stringstream pingTimeoutStream;
-            pingTimeoutStream << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
-            << " seconds have passed since worker " << i+1
-            << " pinged the server. I am assuming the worker no longer functions, and am marking it as free for reuse. ";
-            kill(this->theWorkers[i].ProcessPID, SIGKILL);
-            theLog << logger::red << pingTimeoutStream.str() << logger::endL;
-            this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>" + pingTimeoutStream.str()+"</b></span>";
-          }
+        { this->theWorkers[i].flagInUse=false;
+          std::stringstream pingTimeoutStream;
+          pingTimeoutStream << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
+          << " seconds have passed since worker " << i+1
+          << " pinged the server. I am assuming the worker no longer functions, and am marking it as free for reuse. ";
+          kill(this->theWorkers[i].ProcessPID, SIGKILL);
+          theLog << logger::red << pingTimeoutStream.str() << logger::endL;
+          this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>" + pingTimeoutStream.str()+"</b></span>";
+        }
     }
 }
 

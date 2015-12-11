@@ -183,7 +183,7 @@ void GlobalVariables::initDefaultFolderAndFileNames
   this->DisplayNameExtraOutputNoPath = "defaultoutput";
   this->DisplayNameExtraOutputWithPath = this->DisplayPathOutputFolder + this->DisplayNameExtraOutputNoPath;
 
-  this->DisplayNameCalculatorWithPath = "calculator";
+  this->DisplayNameCalculatorWithPath = "/calculator";
   this->initOutputReportAndCrashFileNames("", "");
 }
 

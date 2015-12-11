@@ -1194,7 +1194,7 @@ int WebWorker::ProcessFolder()
     stOutput << out.str();
     return 0;
   }
-  out << "Browsing folder: " << this->mainAddress << "<br>Physical address: " << this->RelativePhysicalFileName << "<hr>";
+  out << "Browsing folder: " << this->mainAddress << "<br>Relative physical address: " << this->RelativePhysicalFileName << "<hr>";
   List<std::string> theFolderNamesHtml, theFileNamesHtml;
   for (int i=0; i<theFileNames.size; i++)
   { std::stringstream currentStream;
@@ -1296,8 +1296,10 @@ int WebWorker::ProcessNonCalculator()
   ProgressReportWebServer theProgressReport;
   theProgressReport.SetStatus("<br>Processing non-computational web-server request.");
   //theLog << this->ToStringShort() << "\r\n";
+  std::cout << " ere be i at this moment10\n";
   if (FileOperations::IsFolderOnTopOfOutputFolder(this->RelativePhysicalFileName))
     return this->ProcessFolder();
+  std::cout << " ere be i at this moment\n";
   if (!FileOperations::FileExistsOnTopOfOutputFolder(this->RelativePhysicalFileName))
   { stOutput << "HTTP/1.1 404 Object not found\r\nContent-Type: text/html\r\n\r\n";
     stOutput << "<html><body><b>File does not exist.</b>";

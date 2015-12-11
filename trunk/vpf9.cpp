@@ -359,7 +359,9 @@ bool FileOperations::IsOKforFileNameOnTopOfOutputFolder(const std::string& theFi
 { MacroRegisterFunctionWithName("FileOperations::IsOKforFileNameOnTopOfOutputFolder");
   std::string theFileNameNoPath=FileOperations::GetPathFromFileNameWithPath(theFileName);
   std::string theFilePath=FileOperations::GetPathFromFileName(theFileName);
-  for (unsigned i=0; i<theFileName.size(); i++)
+//  std::cout << "Calling IsOKforFileNameOnTopOfOutputFolder, theFilePath: "
+//  << theFilePath << "\ntheFileNameNoPath: " << theFileNameNoPath << "\n";
+  for (unsigned i=0; i<theFilePath.size(); i++)
     if (theFilePath[i]=='.')
       return false;
   if (theFileNameNoPath[0]=='.')
@@ -432,11 +434,14 @@ bool FileOperations::GetFolderFileNamesUnsecure
 bool FileOperations::FileExistsOnTopOfOutputFolder(const std::string& theFileName)
 { if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
     return false;
+//  std::cout << "got to here\nchecking unsecure file existence: "
+//  << theGlobalVariables.PhysicalPathOutputFolder << theFileName << "\n";
   return FileOperations::FileExistsUnsecure(theGlobalVariables.PhysicalPathOutputFolder+theFileName);
 }
 
 bool FileOperations::FileExistsUnsecure(const std::string& theFileName)
 { std::fstream theFile;
+//  std::cout << "file exists unsecure called on: " << theFileName << "\n";
   theFile.open(theFileName.c_str(), std::fstream::in);
   if(theFile.is_open())
     return true;

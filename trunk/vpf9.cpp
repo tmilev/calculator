@@ -326,8 +326,8 @@ void CGI::FormatCPPSourceCode(const std::string& FileName)
   delete [] buffer;
 }
 
-bool FileOperations::IsFolder(const std::string& theFolderName)
-{ MacroRegisterFunctionWithName("FileOperations::IsFolder");
+bool FileOperations::IsFolderUnsecure(const std::string& theFolderName)
+{ MacroRegisterFunctionWithName("FileOperations::IsFolderUnsecure");
   DIR *pDir;
   pDir = opendir(theFolderName.c_str());
   if (pDir != NULL)
@@ -338,15 +338,12 @@ bool FileOperations::IsFolder(const std::string& theFolderName)
 }
 
 bool FileOperations::IsFolderOnTopOfOutputFolder(const std::string& relativeFolderName)
-{ MacroRegisterFunctionWithName("FileOperations::IsFolder");
-  std::string theFolderName=theGlobalVariables.PhysicalPathOutputFolder+relativeFolderName;
-  DIR *pDir;
-  pDir = opendir(theFolderName.c_str());
-  if (pDir != NULL)
-  { closedir(pDir);
-    return true;
+{ MacroRegisterFunctionWithName("FileOperations::IsFolderOnTopOfOutputFolder");
+  if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(relativeFolderName))
+  { //stOutput << "Name " << relativeFolderName << " not ok for folder on top of output folder<br>\n";
+    return false;
   }
-  return false;
+  return FileOperations::IsFolderOnTopOfOutputFolder(theGlobalVariables.PhysicalPathOutputFolder+relativeFolderName);
 }
 
 std::string FileOperations::GetFileExtensionWithDot(const std::string& theFileName)
@@ -365,8 +362,6 @@ bool FileOperations::IsOKforFileNameOnTopOfOutputFolder(const std::string& theFi
   for (unsigned i=0; i<theFileName.size(); i++)
     if (theFilePath[i]=='.')
       return false;
-  if (theFileNameNoPath=="")
-    return false;
   if (theFileNameNoPath[0]=='.')
     return false;
   return true;
@@ -402,9 +397,17 @@ std::string FileOperations::GetPathFromFileName(const std::string& fileName)
   return folderName.str();
 }
 
-bool FileOperations::GetFolderFileNames
+bool FileOperations::GetFolderFileNamesOnTopOfOutputFolder
 (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath, List<std::string>* outputFileTypes)
-{ MacroRegisterFunctionWithName("FileOperations::GetFolderFileNames");
+{ MacroRegisterFunctionWithName("FileOperations::GetFolderFileNamesOnTopOfOutputFolder");
+  if (FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFolderName))
+    return false;
+  return FileOperations::GetFolderFileNamesUnsecure(theGlobalVariables.PhysicalPathOutputFolder+theFolderName, outputFileNamesNoPath, outputFileTypes);
+}
+
+bool FileOperations::GetFolderFileNamesUnsecure
+(const std::string& theFolderName, List<std::string>& outputFileNamesNoPath, List<std::string>* outputFileTypes)
+{ MacroRegisterFunctionWithName("FileOperations::GetFolderFileNamesUnsecure");
   DIR *theDirectory = opendir(theFolderName.c_str());
   if (theDirectory==NULL)
     return false;
@@ -416,7 +419,7 @@ bool FileOperations::GetFolderFileNames
   { outputFileNamesNoPath.AddOnTop(fileOrFolder->d_name);
     if (outputFileTypes!=0)
     { fullName=theFolderName + fileOrFolder->d_name;
-      if (FileOperations::IsFolder(fullName))
+      if (FileOperations::IsFolderUnsecure(fullName))
         outputFileTypes->AddOnTop(".d");
       else
         outputFileTypes->AddOnTop("");
@@ -450,15 +453,15 @@ bool FileOperations::OpenFileOnTopOfOutputFolder(std::fstream& theFile, const st
 bool FileOperations::OpenFileUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
 { if (OpenInAppendMode)
   { if (openAsBinary)
-      theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app| std::fstream::binary);
+      theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app|std::fstream::binary);
     else
       theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app);
   } else
   { if (openAsBinary)
-      theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out| std::fstream::binary);
+      theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::binary);
     else
     { if (truncate)
-        theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out| std::fstream::trunc);
+        theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::trunc);
       else
         theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out);
     }
@@ -477,15 +480,15 @@ bool FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
 bool FileOperations::OpenFileCreateIfNotPresentUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
 { if (OpenInAppendMode)
   { if (openAsBinary)
-      theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app| std::fstream::binary);
+      theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app|std::fstream::binary);
     else
       theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app);
   } else
   { if (openAsBinary)
-      theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out| std::fstream::binary);
+      theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::binary);
     else
     { if (truncate)
-        theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out| std::fstream::trunc);
+        theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::trunc);
       else
         theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out);
     }
@@ -503,7 +506,7 @@ bool FileOperations::OpenFileCreateIfNotPresentUnsecure(std::fstream& theFile, c
     }
   }
   theFile.close();
-  theFile.open(theFileName.c_str(), std::fstream::out | std::fstream::in | std::fstream::trunc);
+  theFile.open(theFileName.c_str(), std::fstream::out|std::fstream::in|std::fstream::trunc);
   theFile.clear();
   return theFile.is_open();
 }

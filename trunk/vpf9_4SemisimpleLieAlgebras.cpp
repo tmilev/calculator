@@ -84,11 +84,10 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
 
 void SemisimpleLieAlgebra::ComputeFolderNames(GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeFolderNames");
-  std::stringstream outMainPath, outMainDisplayPath;
+  std::stringstream outMainDisplayPath;
   this->CheckConsistency();
   DynkinType& theType=this->theWeyl.theDynkinType;
-  outMainPath << theGlobalVariables.PhysicalPathOutputFolder << CGI::CleanUpForFileNameUse(theType.ToString()) << "/";
-  this->RelativePhysicalNameSSAlgOutputFolder =outMainPath.str();
+  this->RelativePhysicalNameSSAlgOutputFolder= CGI::CleanUpForFileNameUse(theType.ToString()) + "/";
   outMainDisplayPath << theGlobalVariables.DisplayPathOutputFolder
   << CGI::CleanUpForFileNameUse(theType.ToString()) << "/";
   this->DisplayNameSSalgOutputFolder=outMainDisplayPath.str();

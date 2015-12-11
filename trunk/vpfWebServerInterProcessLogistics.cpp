@@ -5,8 +5,6 @@
 #include <unistd.h>
 #include <netdb.h> //<-addrinfo and related data structures defined here
 
-
-
 ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogisticsImplementation
 (__FILE__, "Web server interprocess communication implementation.");
 

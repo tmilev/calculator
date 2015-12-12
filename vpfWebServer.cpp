@@ -11,6 +11,8 @@ ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server im
 #include <unistd.h>
 #include <sys/stat.h>//<-for file statistics
 
+
+
 #ifdef MACRO_use_open_ssl
 //installation of these headers in ubuntu:
 //sudo apt-get install libssl-dev
@@ -1296,10 +1298,10 @@ int WebWorker::ProcessNonCalculator()
   ProgressReportWebServer theProgressReport;
   theProgressReport.SetStatus("<br>Processing non-computational web-server request.");
   //theLog << this->ToStringShort() << "\r\n";
-  std::cout << " ere be i at this moment10\n";
+//  std::cout << " ere be i at this moment10\n";
   if (FileOperations::IsFolderOnTopOfOutputFolder(this->RelativePhysicalFileName))
     return this->ProcessFolder();
-  std::cout << " ere be i at this moment\n";
+//  std::cout << " ere be i at this moment\n";
   if (!FileOperations::FileExistsOnTopOfOutputFolder(this->RelativePhysicalFileName))
   { stOutput << "HTTP/1.1 404 Object not found\r\nContent-Type: text/html\r\n\r\n";
     stOutput << "<html><body><b>File does not exist.</b>";
@@ -2356,8 +2358,8 @@ int WebServer::main(int argc, char **argv)
     return WebServer::main_command_input();
   }
   catch (...)
-  { crash << "Something very wrong has happened. " << crash;
+  { crash << "Exception caught: something very wrong has happened. " << crash;
   }
-  std::cout << "This point of code is not supposed to be reached";
+  crash << "This point of code is not supposed to be reachable. " << crash;
   return -1;
 }

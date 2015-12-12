@@ -5,11 +5,20 @@
 #include "vpfHeader3Calculator1_InnerTypedFunctions.h"
 #include "vpfHeader3Calculator2_InnerFunctions.h"
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h" //undefined reference to Polynomial<AlgebraicNumber>::MakeOne(int)
+#include "vpfHeader7DatabaseInterface_MySQL.h"
 ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator functions. ");
 //This file lists calculator functions and various hard-coded rules. Please do not use for any other purposes.
 
 void Calculator::initPredefinedInnerFunctions()
-{ this->AddOperationInnerHandler
+{
+#ifdef MACRO_use_MySQL
+  this->AddOperationInnerHandler
+  ("TestDatabase", DatabaseRoutines::innerTestDatabase, "",
+   "Tests the database. ",
+   "TestDatabase(0)", false, true, "DatabaseRoutines::innerTestDatabase");
+   ;
+#endif // MACRO_use_MySQL
+  this->AddOperationInnerHandler
   ("TestCalculatorIndicator", CalculatorFunctionsGeneral::innerTestIndicator, "",
    "(This is not a mathematical function). Tests the calculator indicator mechanism.",
    "TestCalculatorIndicator(1000)", true, false)

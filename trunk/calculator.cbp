@@ -24,6 +24,7 @@
 			<Add option="-g" />
 			<Add option="-pthread" />
 			<Add option="-DMACRO_use_open_ssl" />
+			<Add option="-DMACRO_use_MySQL" />
 		</Compiler>
 		<Linker>
 			<Add library="libpthread" />

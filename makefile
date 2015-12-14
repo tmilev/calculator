@@ -49,7 +49,7 @@ endif
 
 ifeq ($(MySQL),1)
 	LDFLAGS+= -DMACRO_use_MySQL
-	LIBFLAGS+= lmysqlclient
+	LIBFLAGS+= -lmysqlclient
 endif
 
 #if this is missing something, add it, or, ls | grep cpp | xargs echo

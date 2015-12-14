@@ -47,27 +47,26 @@ int& Partition::operator[](int i) const
 }
 
 void Partition::FromListInt(const List<int> &in, int lastElement)
-{ int n = 0;
+{ this->n = 0;
+  this->p.SetSize(0);
   int l = -1;
   int i=0;
   if(lastElement == -1)
     lastElement = in.size;
+  bool needsSorting;
   for(; i<lastElement; i++)
   { if(in[i] < 0)
       crash << "Partitions should not have negative numbers in them";
-    if(l == -1)
-      l = in[i];
-    else
-      if(in[i] > l)
-        crash << "Partitions should be sorted in descending order";
+    if((in[i] > l) && (l != -1))
+      needsSorting = true;
+    l = in[i];
     if(in[i] == 0)
-      break;
-    n += in[i];
+      continue;
+    this->n += in[i];
+    this->p.AddOnTop(i);
   }
-  this->p.SetSize(i);
-  this->n = n;
-  for(int j=0; j<i; j++)
-    p[j] = in[j];
+  if(needsSorting)
+    p.QuickSortDescending();
 }
 
 void Partition::GetPartitions(List<Partition>& out, int n)

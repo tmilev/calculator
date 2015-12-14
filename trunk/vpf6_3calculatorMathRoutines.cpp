@@ -4715,7 +4715,8 @@ bool CalculatorFunctionsGeneral::innerHWTAABF(Calculator& theCommands, const Exp
   Expression leftMerged=input[1];
   Expression rightMerged=input[2];
   if (!Expression::MergeContexts(leftMerged, rightMerged))
-    return output.MakeError("Failed to merge the contexts of the two UE elements ", theCommands);
+    return theCommands << "Could not get elements of universal enveloping algebra from inputs: " << input[1].ToString()
+    << " and " << input[2].ToString();
   Expression finalContext=rightMerged.GetContext();
   int algebraIndex=finalContext.ContextGetIndexAmbientSSalg();
   if (algebraIndex==-1)

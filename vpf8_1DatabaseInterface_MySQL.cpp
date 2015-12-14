@@ -41,7 +41,6 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   this->flagQuerySucceeded=false;
   this->flagQueryReturnedResult=false;
   this->theQueryResult=0;
-
   if (this->parent->connection==0)
     if (!this->parent->startMySQLDatabase())
       return;

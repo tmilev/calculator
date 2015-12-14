@@ -1102,7 +1102,10 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
 }
 
 bool Expression::MergeContexts(Expression& leftE, Expression& rightE)
-{ Expression leftC=leftE.GetContext();
+{ MacroRegisterFunctionWithName("Expression::MergeContexts");
+  if (!leftE.HasContext() || !rightE.HasContext())
+    return false;
+  Expression leftC=leftE.GetContext();
   Expression rightC=rightE.GetContext();
   Expression outputC;
   if (!leftC.ContextMergeContexts(leftC, rightC, outputC))

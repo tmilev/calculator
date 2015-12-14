@@ -30,6 +30,7 @@
 			<Add library="libpthread" />
 			<Add library="ssl" />
 			<Add library="crypto" />
+			<Add library="libmysqlclient" />
 		</Linker>
 		<Unit filename="test.cpp" />
 		<Unit filename="vpf.h" />
@@ -48,6 +49,7 @@
 		<Unit filename="vpf6_5calculator_web_routines.cpp" />
 		<Unit filename="vpf7.cpp" />
 		<Unit filename="vpf8.cpp" />
+		<Unit filename="vpf8_1DatabaseInterface_MySQL.cpp" />
 		<Unit filename="vpf9.cpp" />
 		<Unit filename="vpf99_HardcodedData.cpp" />
 		<Unit filename="vpf9_1.cpp" />
@@ -98,6 +100,7 @@
 		<Unit filename="vpfHeader5Crypto.h" />
 		<Unit filename="vpfHeader6WebServer.h" />
 		<Unit filename="vpfHeader6WebServerInterprocessLogistics.h" />
+		<Unit filename="vpfHeader7DatabaseInterface_MySQL.h" />
 		<Unit filename="vpfImplementationHeader2Math051_PolynomialComputations_Basic.h" />
 		<Unit filename="vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h" />
 		<Unit filename="vpfImplementationHeader2Math15_UniversalEnveloping.h" />

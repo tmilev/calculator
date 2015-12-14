@@ -2311,6 +2311,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   if (secondArgument=="test")
   { theGlobalVariables.programArguments.PopIndexShiftDown(0);
     theGlobalVariables.programArguments.PopIndexShiftDown(0);
+    theGlobalVariables.flagRunningConsoleTest=true;
     return;
   }
   theGlobalVariables.flagUsingBuiltInWebServer= (secondArgument=="server" || secondArgument=="server8155" || secondArgument=="serverSSL");

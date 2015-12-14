@@ -24,11 +24,43 @@ public:
   operator bool()const
   { return false;
   }
-  bool Query(const std::string& inputQuery);
   bool startMySQLDatabase();
   std::string ToString();
+  bool TryToLogIn();
+  std::string GetUserInfo();
   static bool innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTestLogin(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerGetUserInfo(Calculator& theCommands, const Expression& input, Expression& output);
   DatabaseRoutines();
+  ~DatabaseRoutines();
+};
+
+struct DatabaseQuery
+{
+private:
+  DatabaseQuery(const DatabaseQuery& other)
+  { crash << crash;
+  }
+  DatabaseQuery(const DatabaseQuery&& other)
+  { crash << crash;
+  }
+  DatabaseQuery& operator=(const DatabaseQuery& other)
+  { crash << crash;
+    return *this;
+  }
+  DatabaseQuery()
+  { crash << crash;
+  }
+public:
+  DatabaseRoutines* parent;
+  MYSQL_RES* theQueryResult;
+  MYSQL_ROW currentRow;
+  std::string theQueryString;
+  std::string theQueryResultString;
+  bool flagQuerySucceeded;
+  bool flagQueryReturnedResult;
+  DatabaseQuery(DatabaseRoutines& inputParent, const std::string& inputQuery);
+  ~DatabaseQuery();
 };
 
 #endif // MACRO_use_MySQL

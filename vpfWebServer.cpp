@@ -528,6 +528,15 @@ void WebWorker::OutputBeforeComputation()
   stOutput << "\n</head>\n<body onload=\"checkCookie();\">\n";
   List<std::string> inputStrings, inputStringNames;
   CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
+  std::string user;
+  std::string password;
+  if (inputStringNames.Contains("user"))
+    user=inputStrings[inputStringNames.GetIndex("user")];
+  if (inputStringNames.Contains("password"))
+    password=inputStrings[inputStringNames.GetIndex("password")];
+//  #ifdef MACRO_use_MySQL
+//  DatabaseRoutines theSQL;
+//  #endif // MACRO_use_MySQL
   std::string& civilizedInput=theParser.inputString;
   if (inputStringNames.Contains("textInput"))
     civilizedInput= inputStrings[inputStringNames.GetIndex("textInput")];

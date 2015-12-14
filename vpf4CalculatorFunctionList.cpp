@@ -13,6 +13,17 @@ void Calculator::initPredefinedInnerFunctions()
 {
 #ifdef MACRO_use_MySQL
   this->AddOperationInnerHandler
+  ("TestLogin", DatabaseRoutines::innerTestLogin, "",
+   "Tests the login function from username (first argument) and password (second argument). \
+   Should only be used through an https connection. ",
+   "TestLogin(\"testUser\", \"password\")", false, true, "DatabaseRoutines::innerTestLogin");
+   ;
+  this->AddOperationInnerHandler
+  ("GetUserInfo", DatabaseRoutines::innerGetUserInfo, "",
+   "Gets info about a user with given username.",
+   "GetUserInfo(\"testUser\")", false, true, "DatabaseRoutines::innerGetUser");
+   ;
+  this->AddOperationInnerHandler
   ("TestDatabase", DatabaseRoutines::innerTestDatabase, "",
    "Tests the database. ",
    "TestDatabase(0)", false, true, "DatabaseRoutines::innerTestDatabase");
@@ -63,10 +74,10 @@ void Calculator::initPredefinedInnerFunctions()
   ("ToString", CalculatorFunctionsGeneral::innerQuoteToString, "",
    "Transforms an arbitrary expression to its string representation.",
    "ToString( e^x); \n \"e^x\";\"The quick brown fox jumps over the lazy dog.\"");
-//  this->AddOperationInnerHandler
-//  ("\"", CalculatorFunctionsGeneral::innerQuoteToString, "",
-//   "Same as ToString function, but cannot be executed directly because of the special quotes syntax.",
-//   "ToString( e^x); \n \"e^x\";\"The quick brown fox jumps over the lazy dog.\"");
+  this->AddOperationInnerHandler
+  ("\"", CalculatorFunctionsGeneral::innerQuoteToString, "",
+   "Creates a string.",
+   "\"The quick brown fox jumps over the lazy dog.\"");
   this->AddOperationInnerHandler
   ("TestBase64", CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test, "",
    "Test function: converts a base64 string to bitstream and back to base64. Output must be identical to input. ",

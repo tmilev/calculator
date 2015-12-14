@@ -5,6 +5,8 @@
 #ifdef MACRO_use_MySQL
 #include "vpfHeader3Calculator0_Interface.h"
 #include <mysql/mysql.h>
+//Command for installation of mysql on Ubuntu:
+//sudo apt-get install libmysqlclient-dev
 static ProjectInformationInstance ProjectInfoVpf8_1HeaderDatabaseInterface_MySQLx(__FILE__, "MySQL interface header. ");
 
 class DatabaseRoutines
@@ -37,20 +39,6 @@ public:
 
 struct DatabaseQuery
 {
-private:
-  DatabaseQuery(const DatabaseQuery& other)
-  { crash << crash;
-  }
-  DatabaseQuery(const DatabaseQuery&& other)
-  { crash << crash;
-  }
-  DatabaseQuery& operator=(const DatabaseQuery& other)
-  { crash << crash;
-    return *this;
-  }
-  DatabaseQuery()
-  { crash << crash;
-  }
 public:
   DatabaseRoutines* parent;
   MYSQL_RES* theQueryResult;

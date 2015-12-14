@@ -1534,6 +1534,41 @@ bool CalculatorFunctionsWeylGroup::innerTestSpechtModules(Calculator& theCommand
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation");
+  Vector<Rational> inputLeftRat, inputRightRat;
+  if (input.children.size!=3)
+    return theCommands << "CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation needs two arguments";
+//  stOutput << "<br>nput 1 and 2: " << input[1].ToString() << input[2].ToString();
+  if (!theCommands.GetVectoR(input[1], inputLeftRat)|| !theCommands.GetVectoR(input[2], inputRightRat))
+    return false;
+//  stOutput << "<br>extracted vectors: " << inputLeftRat.ToString() << inputRightRat.ToString();
+  if (inputLeftRat.size<1 || inputRightRat.size<1)
+    return false;
+  const int maxPartitionSize=1000;
+  Vector<int> inputLeft, inputRight;
+  Vector<int>* currentInput=& inputLeft;
+  Vector<Rational>* currentInputRat=& inputLeftRat;
+  for ( int inputCounter=0; inputCounter<2; inputCounter++, currentInput=&inputRight, currentInputRat= &inputRightRat)
+  { currentInput->SetSize(currentInputRat->size);
+    for (int i=0; i<currentInputRat->size; i++)
+      if (!(*currentInputRat)[i].IsIntegerFittingInInt(&(*currentInput)[i]))
+        return theCommands << "Failed to convert input: " << input.ToString() << " to a list of small integers.";
+    for (int i=0; i<currentInput->size; i++)
+      if ((*currentInput)[i]<1 || (*currentInput)[i]> maxPartitionSize )
+        return theCommands <<  "Entry: " << (*currentInput)[i] << " of " << (*currentInput) << " is outside of the allowed input range.";
+    if (currentInput->SumCoords()>maxPartitionSize)
+      return theCommands << "The coordinates of vector " << (*currentInput) << " have sum that is too large. ";
+  }
+  Partition partitionLeft, partitionRight;
+  partitionLeft.FromListInt(inputLeft);
+  partitionRight.FromListInt(inputRight);
+  std::stringstream out;
+  out << "Left partition is: " << partitionLeft.ToString() << ", created from: " << inputLeft;
+  out << "Right partition is: " << partitionRight.ToString() << ", created from: " << inputRight;
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules");
   int theRank=0;

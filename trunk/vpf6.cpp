@@ -47,9 +47,9 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
   }
   std::stringstream out;
   out << "<img src=\"" << theGlobalVariables.DisplayPathOutputFolder
-  << fileNameRelative << ".png\"></img><a href=\"" << theGlobalVariables.DisplayPathOutputFolder
-  << fileNameRelative << ".tex\">" << theGlobalVariables.DisplayPathOutputFolder
-  << fileNameRelative << ".tex</a>";
+  << fileNameRelative.str() << ".png\"></img><a href=\"" << theGlobalVariables.DisplayPathOutputFolder
+  << fileNameRelative.str() << ".tex\">" << theGlobalVariables.DisplayPathOutputFolder
+  << fileNameRelative.str() << ".tex</a>";
   this->numOutputFileS++;
   return out.str();
 }

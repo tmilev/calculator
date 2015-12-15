@@ -16,6 +16,8 @@ std::string DatabaseRoutines::ToString()
 DatabaseRoutines::DatabaseRoutines()
 { for (unsigned i=0; i<this->password.size(); i++)
     this->password[i]=' ';
+  for (unsigned i=0; i<this->usernamePlusPassWord.size(); i++)
+    this->usernamePlusPassWord[i]=' ';
   this->connection=0;
 }
 

@@ -63,7 +63,7 @@ void Partition::FromListInt(const List<int> &in, int lastElement)
     if(in[i] == 0)
       continue;
     this->n += in[i];
-    this->p.AddOnTop(i);
+    this->p.AddOnTop(in[i]);
   }
   if(needsSorting)
     p.QuickSortDescending();
@@ -1098,6 +1098,8 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
     { pxmr.generatorS[cur+i].MakeIdMatrix(repRank);
       pxmr.generatorS[cur+i] *= -1;
     }
+  if(!pxmr.VerifyRepresentation())
+    crash << "lol" << crash;
   GroupRepresentation<HyperoctahedralGroup, Rational> outreboxme;
   PxM.InduceRepresentation(pxmr, outreboxme);
   out.ownerGroup = this;

@@ -1566,6 +1566,42 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(Calc
   std::stringstream out;
   out << "Left partition is: " << partitionLeft.ToString() << ", created from: " << inputLeft;
   out << "Right partition is: " << partitionRight.ToString() << ", created from: " << inputRight;
+  HyperoctahedralGroup G;
+  G.MakeHyperoctahedralGroup(partitionLeft.n + partitionRight.n);
+  GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroup>, Rational> R;
+  G.SpechtModuleOfPartititons(partitionLeft,partitionRight, R);
+  out << R;
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool CalculatorFunctionsWeylGroup::innerSpechtModule(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerSpechtModule");
+  Vector<Rational> inputRat;
+  if (input.children.size!=3)
+    return theCommands << "CalculatorFunctionsWeylGroup::innerSpechtModule needs one argument, however, since SpechtModule((3,2,1)) is interpreted as SpechtModule(3,2,1), insert a dummy second argument of some sort.";
+  if (!theCommands.GetVectoR(input[1], inputRat))
+    return false;
+  if (inputRat.size<1)
+    return false;
+  const int maxPartitionSize=1000;
+  Vector<int> inputInt;
+  inputInt.SetSize(inputRat.size);
+  for (int i=0; i<inputRat.size; i++)
+    if (!(inputRat[i].IsIntegerFittingInInt(&inputInt[i])))
+      return theCommands << "Failed to convert input: " << input.ToString() << " to a list of small integers.";
+  for (int i=0; i<inputInt.size; i++)
+    if ((inputInt[i]<1) || (inputInt[i]> maxPartitionSize))
+      return theCommands <<  "Entry: " << inputInt[i] << " of " << inputInt << " is outside of the allowed input range.";
+  if (inputInt.SumCoords()>maxPartitionSize)
+    return theCommands << "The coordinates of vector " << inputInt << " have sum that is too large. ";
+  Partition p;
+  p.FromListInt(inputInt);
+  std::stringstream out;
+  out << "Partition is " << p.ToString();
+  List<Matrix<Rational> > gens;
+  p.SpechtModuleMatricesOfTranspositionsjjplusone(gens);
+  for(int i=0; i<gens.size; i++)
+    out << i << "\n" << gens[i].ToStringPlainText() << "\n";
   return output.AssignValue(out.str(), theCommands);
 }
 

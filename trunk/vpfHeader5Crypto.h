@@ -21,5 +21,6 @@ public:
   static void convertUint64toBigendianStringAppendResult(uint64_t& input, std::string& outputAppend);
   static uint32_t leftRotateAsIfBigEndian(uint32_t input, int numBitsToRotate);
   static void computeSha1(const std::string& inputString, List<uint32_t>& output);
+  static std::string computeSha1outputBase64(const std::string& inputString);
 };
 #endif // header_crypto_was_already_defined

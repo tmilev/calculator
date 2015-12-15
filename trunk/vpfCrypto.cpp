@@ -206,6 +206,16 @@ void Crypto::ConvertStringToBitStream(const std::string& input, List<unsigned ch
     output[i]=input[i];
 }
 
+std::string Crypto::computeSha1outputBase64(const std::string& inputString)
+{ MacroRegisterFunctionWithName("Crypto::computeSha1outputBase64");
+  List<uint32_t> theSha1Uint;
+  List<unsigned char> theSha1Uchar;
+  Crypto::computeSha1(inputString, theSha1Uint);
+  Crypto::ConvertUint32ToUcharBigendian(theSha1Uint, theSha1Uchar);
+  return Crypto::CharsToBase64String(theSha1Uchar);
+}
+
+
 std::string Crypto::CharsToBase64String(const List<unsigned char>& input)
 { MacroRegisterFunctionWithName("Crypto::CharsToBase64String");
   uint32_t theStack=0;

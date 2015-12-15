@@ -138,6 +138,10 @@ void Calculator::initPredefinedInnerFunctions()
    "Prints all modules induced from Specht modules. ",
    "HyperOctahedralIrreps(3)", true, false, "CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules");
   this->AddOperationInnerHandler
+  ("SpechtModule", CalculatorFunctionsWeylGroup::innerSpechtModule, "",
+   "Gets the Specht module of the partition. ",
+   "SpechtModule((3,2,1))", true, false, "CalculatorFunctionsWeylGroup::innerSpechtModule");
+  this->AddOperationInnerHandler
   ("HyperOctahedralRepresentation", CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation, "",
    "Gets one hyperoctahedral representation from two partitions. ",
    "HyperOctahedralRepresentation((1,1), (1))", true, false, "CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules");

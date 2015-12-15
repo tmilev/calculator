@@ -1236,6 +1236,17 @@ void FiniteGroup<elementSomeGroup>::ComputeGeneratorCommutationRelations()
       while(!this->IsID(gi))
       { gi = gi * g;
         cr++;
+        if(cr>1009){
+          stOutput << "Error: in computing commutation relations, generator";
+          if(i==j)
+            stOutput << " " << i << " is found to have gₙ";
+          else
+            stOutput << "s " << i << "," << j << " are found to have (gₘgₙ)";
+          stOutput << "ᵗ≠e for all t<1009.  This usually happens if the specified things don't even generate a group, let alone a finite group, but, if this was intentional, lift the limit near " << __FILE__ << ":" << __LINE__ << "\n";
+          stOutput << "I am recording the exponent as 1009 as an unexpected value\n";
+          cr = 1009;
+          break;
+        }
       }
       this->generatorCommutationRelations(i,j) = cr;
       this->generatorCommutationRelations(j,i) = cr;
@@ -1571,8 +1582,11 @@ bool GroupRepresentation<someGroup, coefficient>::VerifyRepresentation()
     LargeInt GS = this->ownerGroup->GetSize();
     LargeInt RGS = RG.GetSize();
     if((GS % RGS) != 0)
-      crash << "Violation of Lagrange's theorem (" << RGS << "∤" << GS << " " << __FILE__ << ":" << __LINE__ << crash;
-    //crash << "Not a representation, crashing as soon as possible" << crash;
+      stOutput << "Violation of Lagrange's theorem (" << RGS << "∤" << GS << ")\n";
+    stOutput << "Group and \"representation\" generator commutation relations follow" << "\n";
+    stOutput << this->ownerGroup->PrettyPrintGeneratorCommutationRelations() << "\n";
+    stOutput << RG.PrettyPrintGeneratorCommutationRelations() << "\n";
+    crash << "Not a representation, crashing as soon as possible" << crash;
   }
   if(!badrep)
     stOutput << "VerifyRepresentation: this has the proper commutation relations\n";

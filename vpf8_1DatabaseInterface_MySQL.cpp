@@ -14,7 +14,9 @@ std::string DatabaseRoutines::ToString()
 }
 
 DatabaseRoutines::DatabaseRoutines()
-{ this->connection=0;
+{ for (unsigned i=0; i<this->password.size(); i++)
+    this->password[i]=' ';
+  this->connection=0;
 }
 
 DatabaseRoutines::~DatabaseRoutines()
@@ -30,7 +32,6 @@ bool DatabaseRoutines::TryToLogIn()
   DatabaseQuery theQuery(*this, "SELECT " +this->username + " FROM users LIMIT 1");
   if (!theQuery.flagQueryReturnedResult)
     return false;
-
   return false;
 }
 
@@ -44,8 +45,10 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   if (this->parent->connection==0)
     if (!this->parent->startMySQLDatabase())
       return;
-  if (mysql_query(this->parent->connection, this->theQueryString.c_str())!=0)
-  { this->parent->comments << "Query " << this->theQueryString << " failed. ";
+  int queryError=mysql_query(this->parent->connection, this->theQueryString.c_str());
+  if (queryError!=0)
+  { this->parent->comments << "Query<br>" << this->theQueryString << "<br>failed. ";
+    this->parent->comments << mysql_error(this->parent->connection);
     return;
   }
   this->flagQuerySucceeded=true;
@@ -62,35 +65,46 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   }
   this->parent->comments << "Query " << this->theQueryString << " returned rows.";
   this->flagQueryReturnedResult=true;
-  stOutput << "<br>the flag: " << this->flagQueryReturnedResult;
+//  stOutput << "<br>the flag: " << this->flagQueryReturnedResult;
   std::stringstream theDataCivilizer;
-  stOutput << "<br>the flag: " << this->flagQueryReturnedResult;
-  theDataCivilizer << this->currentRow;
-  stOutput << "<br>the flag: " << this->flagQueryReturnedResult;
+//  stOutput << "<br>the flag: " << this->flagQueryReturnedResult;
+  theDataCivilizer << *this->currentRow;
+//  stOutput << "<br>the flag: " << this->flagQueryReturnedResult;
   this->theQueryResultString=theDataCivilizer.str();
-  stOutput << "<br>the flag: " << this->flagQueryReturnedResult;
+//  stOutput << "<br>the flag: " << this->flagQueryReturnedResult;
 }
 
 DatabaseQuery::~DatabaseQuery()
-{ stOutput << "<br>DESTRUCTOR";
+{ //stOutput << "<br>DESTRUCTOR";
   if (this->theQueryResult!=0)
     mysql_free_result(this->theQueryResult);
   this->theQueryResult=0;
 }
 
-std::string DatabaseRoutines::GetUserInfo()
-{ MacroRegisterFunctionWithName("DatabaseRoutines::GetUserInfo");
-  stOutput << "Whats going on here<br>";
-  DatabaseQuery theDBQuery(*this, "SELECT password FROM users WHERE email='" + this->username + "';");
+std::string DatabaseRoutines::GetUserPassword()
+{ MacroRegisterFunctionWithName("DatabaseRoutines::GetUserPassword");
+  //stOutput << "Whats going on here<br>";
+  DatabaseQuery theDBQuery(*this, "SELECT password FROM calculatorUsers.users WHERE email=\"" + this->username + "\"");
   if (!theDBQuery.flagQueryReturnedResult)
-  { stOutput << "<br>smth is wrong!";
     return this->comments.str();
-  }
-  stOutput << "GOT to here2";
   std::stringstream out;
-  out << "password(sha-1): " << theDBQuery.theQueryResultString;
-  stOutput << "GOT to here3";
+  out << "password(sha-1): " << theDBQuery.theQueryResultString << "<br>comments: " << this->comments.str();
   return out.str();
+}
+
+bool DatabaseRoutines::SetUserPassword()
+{ MacroRegisterFunctionWithName("DatabaseRoutines::SetUserPassword");
+  //stOutput << "Whats going on here<br>";
+  this->usernamePlusPassWord=this->username;
+  this->usernamePlusPassWord+=this->password;
+  std::string theShaOnedString= Crypto::computeSha1outputBase64(this->usernamePlusPassWord);
+
+  DatabaseQuery theDBQuery(*this, "UPDATE calculatorUsers.users SET password='" + theShaOnedString +
+                           "' WHERE email='" + this->username + "'");
+  if (!theDBQuery.flagQuerySucceeded)
+    return false;
+  this->comments << "<br>Query: <br>"  << theDBQuery.theQueryString << "<br> password(sha-1):<br> " << theShaOnedString;
+  return true;
 }
 
 bool DatabaseRoutines::startMySQLDatabase()
@@ -108,14 +122,19 @@ bool DatabaseRoutines::startMySQLDatabase()
    this->theDatabaseName.c_str(), 0, 0, 0);
   if(this->connection==0)
     return *this << "Connection failed on: " << this->ToString();
-  stOutput << "Connection succeeded.\n";
-  *this << "Connection succeeded.\n";
+  stOutput << "Database connection succeeded.\n";
+  *this << "Database connection succeeded.\n";
   if (mysql_select_db(this->connection, this->theDatabaseName.c_str())!=0)//Note: here zero return value = success.
     return *this << "Failed to select database: " << this->theDatabaseName << ". ";
   //CANT use DatabaseQuery object as its constructor calls this method!!!!!
   if (mysql_query(this->connection, "SELECT 1 FROM users")!=0)
-    if (mysql_query(this->connection, "CREATE TABLE users(email VARCHAR(50) NOT NULL PRIMARY KEY, password VARCHAR(10) NOT NULL)")!=0)
-      return *this << "Command:<br>CREATE TABLE users(email VARCHAR(50) NOT NULL PRIMARY KEY, password VARCHAR(10) NOT NULL)<br>failed";
+  { if (mysql_query(this->connection, "CREATE TABLE users(email VARCHAR(50) NOT NULL PRIMARY KEY, password VARCHAR(30) NOT NULL)")!=0)
+    { mysql_free_result( mysql_use_result(this->connection));
+      return *this << "Command:<br>CREATE TABLE users(email VARCHAR(50) NOT NULL PRIMARY KEY, password VARCHAR(30) NOT NULL)<br>failed";
+    }
+    mysql_free_result( mysql_use_result(this->connection));
+  }
+  mysql_free_result( mysql_use_result(this->connection));
   return true;
 }
 
@@ -137,14 +156,27 @@ bool DatabaseRoutines::innerTestLogin(Calculator& theCommands, const Expression&
   return output.AssignValue(theRoutines.comments.str(), theCommands);
 }
 
-bool DatabaseRoutines::innerGetUserInfo(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::innerTestLogin");
+bool DatabaseRoutines::innerGetUserPassword(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::innerGetUserPassword");
   DatabaseRoutines theRoutines;
   if (!input.IsOfType<std::string>(&theRoutines.username))
     return theCommands << "Argument " << input.ToString() << " is supposed to be a string.";
   std::stringstream out;
-  out << theRoutines.GetUserInfo();
+  out << theRoutines.GetUserPassword();
   return output.AssignValue(out.str(), theCommands);
+}
+
+bool DatabaseRoutines::innerSetUserPassword(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::innerSetUserPassword");
+  if (input.children.size!=3)
+    return theCommands << "SetUserPassword takes as input 2 arguments (user name and password). ";
+  DatabaseRoutines theRoutines;
+  if (!input[1].IsOfType<std::string>(&theRoutines.username))
+    return theCommands << "Argument " << input[1].ToString() << " is supposed to be a string.";
+  if (!input[2].IsOfType<std::string>(&theRoutines.password))
+    return theCommands << "Argument " << input[2].ToString() << " is supposed to be a string.";
+  theRoutines.SetUserPassword();
+  return output.AssignValue(theRoutines.comments.str(), theCommands);
 }
 
 bool DatabaseRoutines::innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output)

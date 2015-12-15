@@ -17,6 +17,7 @@ class DatabaseRoutines
     return output;
   }
 public:
+  std::string usernamePlusPassWord;
   std::string username;
   std::string password;
   std::string theDatabaseName;
@@ -29,10 +30,12 @@ public:
   bool startMySQLDatabase();
   std::string ToString();
   bool TryToLogIn();
-  std::string GetUserInfo();
+  std::string GetUserPassword();
+  bool SetUserPassword();
   static bool innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestLogin(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerGetUserInfo(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerGetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
   DatabaseRoutines();
   ~DatabaseRoutines();
 };

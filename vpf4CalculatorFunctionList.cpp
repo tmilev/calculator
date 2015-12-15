@@ -19,9 +19,14 @@ void Calculator::initPredefinedInnerFunctions()
    "TestLogin(\"testUser\", \"password\")", false, true, "DatabaseRoutines::innerTestLogin");
    ;
   this->AddOperationInnerHandler
-  ("GetUserInfo", DatabaseRoutines::innerGetUserInfo, "",
+  ("GetUserPassword", DatabaseRoutines::innerGetUserPassword, "",
    "Gets info about a user with given username.",
-   "GetUserInfo(\"testUser\")", false, true, "DatabaseRoutines::innerGetUser");
+   "GetUserPassword(\"testUser\"); ", false, true, "DatabaseRoutines::innerGetUserPassword");
+   ;
+  this->AddOperationInnerHandler
+  ("SetUserPassword", DatabaseRoutines::innerSetUserPassword, "",
+   "Sets user's password (first argument: user, second: desired password).",
+   "SetUserPassword(\"testUser\", \"password\"); GetUserPassword(\"testUser\");", false, true, "DatabaseRoutines::innerSetUserPassword");
    ;
   this->AddOperationInnerHandler
   ("TestDatabase", DatabaseRoutines::innerTestDatabase, "",

@@ -9,6 +9,21 @@
 //sudo apt-get install libmysqlclient-dev
 static ProjectInformationInstance ProjectInfoVpf8_1HeaderDatabaseInterface_MySQLx(__FILE__, "MySQL interface header. ");
 
+class EmailRoutines
+{
+public:
+  std::string subject;
+  std::string ccEmail;
+  std::string fromEmail;
+  std::string fromEmailAuth;
+  std::string toEmail;
+  std::string emailContent;
+  std::string smtpWithPort;
+
+  EmailRoutines();
+  std::string GetCommandToSendEmailWithMailX();
+};
+
 class DatabaseRoutines
 {
   template<typename anyType>
@@ -22,6 +37,7 @@ public:
   std::string password;
   std::string theDatabaseName;
   std::string hostname;
+  std::string authentication;
   std::stringstream comments;
   MYSQL *connection; // Create a pointer to the MySQL instance
   operator bool()const
@@ -32,10 +48,13 @@ public:
   bool TryToLogIn();
   std::string GetUserPassword();
   bool SetUserPassword();
+  bool ComputeAuthenticationToken();
+  bool Authenticate();
   static bool innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestLogin(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerGetAuthentication(Calculator& theCommands, const Expression& input, Expression& output);
   DatabaseRoutines();
   ~DatabaseRoutines();
 };

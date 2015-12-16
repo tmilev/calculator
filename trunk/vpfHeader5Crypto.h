@@ -7,6 +7,7 @@ class Crypto
 {
 public:
   static std::string CharsToBase64String(const List<unsigned char>& input);
+  static std::string CharsToBase64String(const std::string& input);
   static uint32_t GetUInt32FromCharBigendian(const List<unsigned char>& input);
   static void GetUInt32FromCharBigendianPadLastIntWithZeroes
   (const List<unsigned char>& input, List<uint32_t>& output);

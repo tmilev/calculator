@@ -14,15 +14,17 @@ std::string DatabaseRoutines::ToString()
 }
 
 DatabaseRoutines::DatabaseRoutines()
+{ this->connection=0;
+}
+
+DatabaseRoutines::~DatabaseRoutines()
 { for (unsigned i=0; i<this->password.size(); i++)
     this->password[i]=' ';
   for (unsigned i=0; i<this->usernamePlusPassWord.size(); i++)
     this->usernamePlusPassWord[i]=' ';
-  this->connection=0;
-}
-
-DatabaseRoutines::~DatabaseRoutines()
-{ if (this->connection!=0)
+  for (unsigned i=0; i<this->authentication.size(); i++)
+    this->authentication[i]=' ';
+  if (this->connection!=0)
     mysql_close(this->connection);   // Close and shutdown
   this->connection=0;
 }
@@ -81,6 +83,29 @@ DatabaseQuery::~DatabaseQuery()
   if (this->theQueryResult!=0)
     mysql_free_result(this->theQueryResult);
   this->theQueryResult=0;
+}
+
+bool DatabaseRoutines::Authenticate()
+{ MacroRegisterFunctionWithName("DatabaseRoutines::Authenticate");
+  this->usernamePlusPassWord=this->username;
+  this->usernamePlusPassWord+=this->password;
+  //<-careful copying those around. We don't want to leave
+  //any passwords in non-zeroed memory, even if properly freed.
+  //Note the destructor of DatabaseRoutines zeroes some of the strings.
+  DatabaseQuery theDBQuery(*this, "SELECT password FROM calculatorUsers.users WHERE email=\"" + this->username + "\"");
+  if (!theDBQuery.flagQueryReturnedResult)
+    return false;
+  if (theDBQuery.theQueryResultString!=Crypto::computeSha1outputBase64(this->usernamePlusPassWord))
+    return *this << "Database pass does not match your input which converts to: " << Crypto::computeSha1outputBase64(this->usernamePlusPassWord);
+  return true;
+}
+
+bool DatabaseRoutines::ComputeAuthenticationToken()
+{ MacroRegisterFunctionWithName("DatabaseRoutines::ComputeAuthenticationToken");
+  if (!this->Authenticate())
+    return false;
+  this->authentication="authenticated";
+  return true;
 }
 
 std::string DatabaseRoutines::GetUserPassword()
@@ -161,8 +186,10 @@ bool DatabaseRoutines::innerTestLogin(Calculator& theCommands, const Expression&
 bool DatabaseRoutines::innerGetUserPassword(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerGetUserPassword");
   DatabaseRoutines theRoutines;
-  if (!input.IsOfType<std::string>(&theRoutines.username))
-    return theCommands << "Argument " << input.ToString() << " is supposed to be a string.";
+  if (!input[1].IsOfType<std::string>(&theRoutines.username))
+    theCommands << "<hr>Argument " << input[1].ToString() << " is supposed to be a string.";
+  else
+    theRoutines.username=input[1].ToString();
   std::stringstream out;
   out << theRoutines.GetUserPassword();
   return output.AssignValue(out.str(), theCommands);
@@ -174,11 +201,35 @@ bool DatabaseRoutines::innerSetUserPassword(Calculator& theCommands, const Expre
     return theCommands << "SetUserPassword takes as input 2 arguments (user name and password). ";
   DatabaseRoutines theRoutines;
   if (!input[1].IsOfType<std::string>(&theRoutines.username))
-    return theCommands << "Argument " << input[1].ToString() << " is supposed to be a string.";
+    theCommands << "<hr>Argument " << input[1].ToString() << " is supposed to be a string.";
+  else
+    theRoutines.username=input[1].ToString();
   if (!input[2].IsOfType<std::string>(&theRoutines.password))
-    return theCommands << "Argument " << input[2].ToString() << " is supposed to be a string.";
+    theCommands << "<hr>Argument " << input[2].ToString() << " is supposed to be a string.";
+  else
+    theRoutines.password=input[2].ToString();
   theRoutines.SetUserPassword();
   return output.AssignValue(theRoutines.comments.str(), theCommands);
+}
+
+bool DatabaseRoutines::innerGetAuthentication(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::innerGetAuthentication");
+  if (input.children.size!=3)
+    return theCommands << "innerGetAuthentication takes as input 2 arguments (user name and password). ";
+  DatabaseRoutines theRoutines;
+  if (!input[1].IsOfType<std::string>(&theRoutines.username))
+    theCommands << "<hr>Argument " << input[1].ToString() << " is supposed to be a string.";
+  else
+    theRoutines.username=input[1].ToString();
+  if (!input[2].IsOfType<std::string>(&theRoutines.password))
+    theCommands << "<hr>Argument " << input[2].ToString() << " is supposed to be a string.";
+  else
+    theRoutines.password=input[2].ToString();
+  bool result=theRoutines.ComputeAuthenticationToken();
+  theCommands << theRoutines.comments.str();
+  if (!result)
+    return output.MakeError("Failed to authenticate. ", theCommands);
+  return output.AssignValue(theRoutines.authentication, theCommands);
 }
 
 bool DatabaseRoutines::innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output)
@@ -189,6 +240,39 @@ bool DatabaseRoutines::innerTestDatabase(Calculator& theCommands, const Expressi
   theRoutines.startMySQLDatabase();
   out << theRoutines.comments.str();
   return output.AssignValue(out.str(), theCommands);
+}
+
+std::string EmailRoutines::GetCommandToSendEmailWithMailX()
+{ MacroRegisterFunctionWithName("EmailRoutines::GetCommandToSendEmailWithMailX");
+  std::stringstream out;
+  out << "echo "
+  << "\""
+  << this->subject
+  << "\" "
+  << "| mailx -v -s "
+  << "\""
+  << this->emailContent
+  << "\" "
+  << " -c \""
+  << this->ccEmail
+  << "\" "
+  << "-S smtp=\""
+  << this->smtpWithPort
+  << "\" "
+  << "-S smtp-use-starttls -S smtp-auth=login -S smtp-auth-user=\""
+  << this->fromEmail
+  << "\" -S smtp-auth-password=\""
+  << this->fromEmailAuth
+  << "\" -S ssl-verify=ignore "
+  << this->toEmail;
+  return out.str();
+}
+
+EmailRoutines::EmailRoutines()
+{ this->fromEmail="calculator.todor.milev@gmail.com";
+  this->ccEmail="todor.milev@gmail.com";
+  this->smtpWithPort= "smtp.gmail.com:587";
+  this->fromEmailAuth=Crypto::CharsToBase64String("A good day to use a computer algebra system");
 }
 #endif // MACRO_use_MySQL
 

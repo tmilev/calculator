@@ -530,10 +530,19 @@ void WebWorker::OutputBeforeComputation()
   CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
   std::string user;
   std::string password;
+  std::string authentication;
   if (inputStringNames.Contains("user"))
-    user=inputStrings[inputStringNames.GetIndex("user")];
+  { user=inputStrings[inputStringNames.GetIndex("user")];
+    stOutput << "<b>user: </b>" << user << "<br>";
+  }
   if (inputStringNames.Contains("password"))
-    password=inputStrings[inputStringNames.GetIndex("password")];
+  { password=inputStrings[inputStringNames.GetIndex("password")];
+    stOutput << "<b>password: </b><br>" << password;
+  }
+  if (inputStringNames.Contains("authentication"))
+  { authentication=inputStrings[inputStringNames.GetIndex("authentication")];
+    stOutput << "<b>authentication: </b><br>" << authentication;
+  }
 //  #ifdef MACRO_use_MySQL
 //  DatabaseRoutines theSQL;
 //  #endif // MACRO_use_MySQL

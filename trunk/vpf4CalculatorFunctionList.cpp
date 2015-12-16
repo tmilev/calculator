@@ -20,8 +20,13 @@ void Calculator::initPredefinedInnerFunctions()
    ;
   this->AddOperationInnerHandler
   ("GetUserPassword", DatabaseRoutines::innerGetUserPassword, "",
-   "Gets info about a user with given username.",
+   "Gets info about a user with given username. Put quotes around the username and the password.",
    "GetUserPassword(\"testUser\"); ", false, true, "DatabaseRoutines::innerGetUserPassword");
+   ;
+  this->AddOperationInnerHandler
+  ("GetAuthentication", DatabaseRoutines::innerGetAuthentication, "",
+   "Gets authentication token from user and password. Put quotes around the username and the password.",
+   "GetAuthentication(\"testUser, password\"); ", false, true, "DatabaseRoutines::innerGetAuthentication");
    ;
   this->AddOperationInnerHandler
   ("SetUserPassword", DatabaseRoutines::innerSetUserPassword, "",

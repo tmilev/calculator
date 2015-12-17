@@ -219,7 +219,7 @@ std::string Crypto::computeSha1outputBase64(const std::string& inputString)
 std::string Crypto::CharsToBase64String(const std::string& input)
 { List<unsigned char> inputChar;
   inputChar.SetSize(input.size());
-  for (int i=0; i<input.size(); i++)
+  for (unsigned i=0; i<input.size(); i++)
     inputChar[i]=input[i];
   return Crypto::CharsToBase64String(inputChar);
 }

@@ -27,6 +27,10 @@ void Calculator::initPredefinedInnerFunctions()
   ("GetAuthentication", DatabaseRoutines::innerGetAuthentication, "",
    "Gets authentication token from user and password. Put quotes around the username and the password.",
    "GetAuthentication(\"testUser, password\"); ", false, true, "DatabaseRoutines::innerGetAuthentication");
+  this->AddOperationInnerHandler
+  ("GetAuthenticationTokenCreationTime", DatabaseRoutines::innerGetAuthenticationTokenCreationTime, "",
+   "Gets authentication token from user and password. Put quotes around the username and the password.",
+   "GetAuthenticationTokenCreationTime(\"testUser, password\"); ", false, true, "DatabaseRoutines::innerGetAuthenticationTokenCreationTime");
    ;
   this->AddOperationInnerHandler
   ("SetUserPassword", DatabaseRoutines::innerSetUserPassword, "",

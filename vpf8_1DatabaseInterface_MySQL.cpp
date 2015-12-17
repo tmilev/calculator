@@ -3,6 +3,8 @@
 #ifdef MACRO_use_MySQL
 #include "vpfHeader7DatabaseInterface_MySQL.h"
 #include "vpfHeader5Crypto.h"
+#include <time.h>
+#include <ctime>
 ProjectInformationInstance ProjectInfoVpf8_1MySQLcpp(__FILE__, "MySQL interface. ");
 
 std::string DatabaseRoutines::ToString()
@@ -22,8 +24,8 @@ DatabaseRoutines::~DatabaseRoutines()
     this->password[i]=' ';
   for (unsigned i=0; i<this->usernamePlusPassWord.size(); i++)
     this->usernamePlusPassWord[i]=' ';
-  for (unsigned i=0; i<this->authentication.size(); i++)
-    this->authentication[i]=' ';
+  for (unsigned i=0; i<this->authenticationToken.size(); i++)
+    this->authenticationToken[i]=' ';
   if (this->connection!=0)
     mysql_close(this->connection);   // Close and shutdown
   this->connection=0;
@@ -85,7 +87,18 @@ DatabaseQuery::~DatabaseQuery()
   this->theQueryResult=0;
 }
 
+bool DatabaseRoutines::FetchAuthenticationTokenCreationTime()
+{ MacroRegisterFunctionWithName("DatabaseRoutines::FetchAuthenticationTokenCreationTime");
+
+  return true;
+}
+
 bool DatabaseRoutines::Authenticate()
+{ MacroRegisterFunctionWithName("DatabaseRoutines::Authenticate");
+  return true;
+}
+
+bool DatabaseRoutines::AuthenticateWithUserNameAndPass()
 { MacroRegisterFunctionWithName("DatabaseRoutines::Authenticate");
   this->usernamePlusPassWord=this->username;
   this->usernamePlusPassWord+=this->password;
@@ -102,9 +115,11 @@ bool DatabaseRoutines::Authenticate()
 
 bool DatabaseRoutines::ComputeAuthenticationToken()
 { MacroRegisterFunctionWithName("DatabaseRoutines::ComputeAuthenticationToken");
-  if (!this->Authenticate())
+  if (!this->AuthenticateWithUserNameAndPass())
     return false;
-  this->authentication="authenticated";
+  //DatabaseQuery theQuery(*this, "SELECT authenticationTokenCreationTime FROM calculatorUsers.users WHERE user=\""+this->username + "\"");
+  //if (theQuery.flagQueryReturnedResult)
+  //  this->authentication="authenticationTokenCreationTime: "
   return true;
 }
 
@@ -155,9 +170,15 @@ bool DatabaseRoutines::startMySQLDatabase()
     return *this << "Failed to select database: " << this->theDatabaseName << ". ";
   //CANT use DatabaseQuery object as its constructor calls this method!!!!!
   if (mysql_query(this->connection, "SELECT 1 FROM users")!=0)
-  { if (mysql_query(this->connection, "CREATE TABLE users(email VARCHAR(50) NOT NULL PRIMARY KEY, password VARCHAR(30) NOT NULL)")!=0)
+  { std::string createTable=
+    "CREATE TABLE users(\
+    user VARCHAR(50) NOT NULL PRIMARY KEY, email VARCHAR(50) NOT NULL, \
+    password VARCHAR(30) NOT NULL, authenticationTokenCreationTime DATETIME, \
+    authenticationToken VARCHAR(30)\
+    )";
+    if (mysql_query(this->connection, createTable.c_str())!=0)
     { mysql_free_result( mysql_use_result(this->connection));
-      return *this << "Command:<br>CREATE TABLE users(email VARCHAR(50) NOT NULL PRIMARY KEY, password VARCHAR(30) NOT NULL)<br>failed";
+      return *this << "Command:<br>" << createTable << "<br>failed";
     }
     mysql_free_result( mysql_use_result(this->connection));
   }
@@ -186,10 +207,8 @@ bool DatabaseRoutines::innerTestLogin(Calculator& theCommands, const Expression&
 bool DatabaseRoutines::innerGetUserPassword(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerGetUserPassword");
   DatabaseRoutines theRoutines;
-  if (!input[1].IsOfType<std::string>(&theRoutines.username))
-    theCommands << "<hr>Argument " << input[1].ToString() << " is supposed to be a string.";
-  else
-    theRoutines.username=input[1].ToString();
+  if (!theRoutines.getUser(theCommands, input))
+    return false;
   std::stringstream out;
   out << theRoutines.GetUserPassword();
   return output.AssignValue(out.str(), theCommands);
@@ -197,39 +216,69 @@ bool DatabaseRoutines::innerGetUserPassword(Calculator& theCommands, const Expre
 
 bool DatabaseRoutines::innerSetUserPassword(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerSetUserPassword");
-  if (input.children.size!=3)
-    return theCommands << "SetUserPassword takes as input 2 arguments (user name and password). ";
   DatabaseRoutines theRoutines;
-  if (!input[1].IsOfType<std::string>(&theRoutines.username))
-    theCommands << "<hr>Argument " << input[1].ToString() << " is supposed to be a string.";
-  else
-    theRoutines.username=input[1].ToString();
-  if (!input[2].IsOfType<std::string>(&theRoutines.password))
-    theCommands << "<hr>Argument " << input[2].ToString() << " is supposed to be a string.";
-  else
-    theRoutines.password=input[2].ToString();
+  if (!theRoutines.getUserAndPass(theCommands, input))
+    return false;
   theRoutines.SetUserPassword();
   return output.AssignValue(theRoutines.comments.str(), theCommands);
 }
 
+bool DatabaseRoutines::getUser(Calculator& theCommands, const Expression& input)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::getUser");
+  if (!input.IsOfType<std::string>(&this->username))
+  { theCommands << "<hr>Argument " << input.ToString() << " is supposed to be a string.";
+    this->username=input.ToString();
+  }
+  return true;
+}
+
+bool DatabaseRoutines::getUserAndPass(Calculator& theCommands, const Expression& input)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::getUserAndPass");
+  if (input.children.size!=3)
+    return theCommands << "DatabaseRoutines::getUserAndPass takes as input 2 arguments (user name and password). ";
+  if (!input[1].IsOfType<std::string>(&this->username))
+  { theCommands << "<hr>Argument " << input[1].ToString() << " is supposed to be a string.";
+    this->username=input[1].ToString();
+  }
+  if (!input[2].IsOfType<std::string>(&this->password))
+  { theCommands << "<hr>Argument " << input[2].ToString() << " is supposed to be a string.";
+    this->password=input[2].ToString();
+  }
+  return true;
+}
+
+bool DatabaseRoutines::innerGetAuthenticationTokenCreationTime(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::innerGetAuthenticationTokenCreationTime");
+  DatabaseRoutines theRoutines;
+  if (!theRoutines.getUserAndPass(theCommands, input))
+    return false;
+  if (!theRoutines.Authenticate())
+    return theCommands << theRoutines.comments.str();
+  if (!theRoutines.FetchAuthenticationTokenCreationTime())
+    return theCommands << theRoutines.comments.str();
+  std::stringstream out;
+  std::time_t rawtime;
+  time(&rawtime);
+  theRoutines.authenticationTokenCreationTime=*std::localtime(&rawtime);
+  std::string theTimeString=asctime(&theRoutines.authenticationTokenCreationTime);
+  out << "<br>time initial: " << theTimeString;
+  tm tempTM;
+  strptime(theTimeString.c_str(), "%x %X", & tempTM);
+  std::time_t tempTime=mktime(& tempTM);
+  out << "<br>time transformed back and forth: " << std::asctime(std::localtime(&tempTime));
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool DatabaseRoutines::innerGetAuthentication(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerGetAuthentication");
-  if (input.children.size!=3)
-    return theCommands << "innerGetAuthentication takes as input 2 arguments (user name and password). ";
   DatabaseRoutines theRoutines;
-  if (!input[1].IsOfType<std::string>(&theRoutines.username))
-    theCommands << "<hr>Argument " << input[1].ToString() << " is supposed to be a string.";
-  else
-    theRoutines.username=input[1].ToString();
-  if (!input[2].IsOfType<std::string>(&theRoutines.password))
-    theCommands << "<hr>Argument " << input[2].ToString() << " is supposed to be a string.";
-  else
-    theRoutines.password=input[2].ToString();
+  if (!theRoutines.getUserAndPass(theCommands, input))
+    return false;
   bool result=theRoutines.ComputeAuthenticationToken();
   theCommands << theRoutines.comments.str();
   if (!result)
     return output.MakeError("Failed to authenticate. ", theCommands);
-  return output.AssignValue(theRoutines.authentication, theCommands);
+  return output.AssignValue(theRoutines.authenticationToken, theCommands);
 }
 
 bool DatabaseRoutines::innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output)

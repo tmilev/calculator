@@ -5,6 +5,8 @@
 #ifdef MACRO_use_MySQL
 #include "vpfHeader3Calculator0_Interface.h"
 #include <mysql/mysql.h>
+#include <ctime>
+
 //Command for installation of mysql on Ubuntu:
 //sudo apt-get install libmysqlclient-dev
 static ProjectInformationInstance ProjectInfoVpf8_1HeaderDatabaseInterface_MySQLx(__FILE__, "MySQL interface header. ");
@@ -37,7 +39,8 @@ public:
   std::string password;
   std::string theDatabaseName;
   std::string hostname;
-  std::string authentication;
+  std::string authenticationToken;
+  tm authenticationTokenCreationTime;
   std::stringstream comments;
   MYSQL *connection; // Create a pointer to the MySQL instance
   operator bool()const
@@ -49,12 +52,18 @@ public:
   std::string GetUserPassword();
   bool SetUserPassword();
   bool ComputeAuthenticationToken();
+  bool FetchAuthenticationTokenCreationTime();
+  bool AuthenticateWithUserNameAndPass();
+  bool AuthenticateWithToken();
   bool Authenticate();
   static bool innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestLogin(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetAuthentication(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerGetAuthenticationTokenCreationTime(Calculator& theCommands, const Expression& input, Expression& output);
+  bool getUserAndPass(Calculator& theCommands, const Expression& input);
+  bool getUser(Calculator& theCommands, const Expression& input);
   DatabaseRoutines();
   ~DatabaseRoutines();
 };

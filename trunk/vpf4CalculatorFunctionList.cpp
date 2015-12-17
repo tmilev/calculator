@@ -38,6 +38,11 @@ void Calculator::initPredefinedInnerFunctions()
    "SetUserPassword(\"testUser\", \"password\"); GetUserPassword(\"testUser\");", false, true, "DatabaseRoutines::innerSetUserPassword");
    ;
   this->AddOperationInnerHandler
+  ("AddUser", DatabaseRoutines::innerAddUser, "",
+   "Adds a new user (first argument: user, second argument: password, third argument: email).",
+   "AddUser(testUser, \"todor.milev@gmail.com\", password); GetUserPassword(\"testUser\");", false, true, "DatabaseRoutines::innerSetUserPassword");
+   ;
+  this->AddOperationInnerHandler
   ("TestDatabase", DatabaseRoutines::innerTestDatabase, "",
    "Tests the database. ",
    "TestDatabase(0)", false, true, "DatabaseRoutines::innerTestDatabase");

@@ -2323,7 +2323,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
                   || (*this)[i].IsOfType<WeylGroupRepresentation<Rational> >()) && isFinal)
           out << (*this)[i].ToString(theFormat);
         else
-          out << CGI::GetMathSpanBeginArrayL((*this)[i].ToString(theFormat));
+          out << CGI::GetMathSpanBeginArrayL((*this)[i].ToString(theFormat), 1700);
         if (i!=this->children.size-1)
           out << ";";
         out << "</td></tr>";
@@ -2380,15 +2380,16 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
 //    << "Many thanks to the <a href=\"http://www.math.union.edu/~dpvc/jsmath/\">jsmath</a> project!</td></tr>";
     outTrue << "<tr><th>Input</th><th>Result</th></tr>";
     // stOutput << this->Lispify();
+
     if (this->IsListStartingWithAtom(this->owner->opEndStatement()))
       outTrue << out.str();
     else
-    { outTrue << "<tr><td>" << CGI::GetMathSpanBeginArrayL(startingExpression->ToString(theFormat));
+    { outTrue << "<tr><td>" << CGI::GetMathSpanBeginArrayL(startingExpression->ToString(theFormat), 1700);
       if ((this->IsOfType<std::string>() || this->IsOfType<Plot>() ||
            this->IsOfType<SemisimpleSubalgebras>() || this->IsOfType<WeylGroup>()) && isFinal)
         outTrue << "</td><td>" << out.str() << "</td></tr>";
       else
-        outTrue << "</td><td>" << CGI::GetMathSpanBeginArrayL(out.str()) << "</td></tr>";
+        outTrue << "</td><td>" << CGI::GetMathSpanBeginArrayL(out.str(), 1700) << "</td></tr>";
     }
     outTrue << "</table>";
     return outTrue.str();

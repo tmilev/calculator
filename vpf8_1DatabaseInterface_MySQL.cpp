@@ -89,7 +89,12 @@ DatabaseQuery::~DatabaseQuery()
 
 bool DatabaseRoutines::FetchAuthenticationTokenCreationTime()
 { MacroRegisterFunctionWithName("DatabaseRoutines::FetchAuthenticationTokenCreationTime");
-
+  DatabaseQuery theQuery
+  (*this, "SELECT authenticationTokenCreationTime FROM calculatorUsers.users WHERE user=\""+
+   this->username+"\"");
+  if (!theQuery.flagQueryReturnedResult)
+    return false;
+  this->authenticationTokenCreationTime=theQuery.theQueryResultString;
   return true;
 }
 
@@ -134,15 +139,34 @@ std::string DatabaseRoutines::GetUserPassword()
   return out.str();
 }
 
+bool DatabaseRoutines::FoundUser()
+{ MacroRegisterFunctionWithName("DatabaseRoutines::FoundUser");
+  DatabaseQuery theQuery(*this,
+  "SELECT user FROM calculatorUsers.users where user='" + this->username + "' "
+  );
+  return theQuery.flagQueryReturnedResult;
+}
+
+bool DatabaseRoutines::AddUserIfUserDoesNotExistAlready()
+{ MacroRegisterFunctionWithName("DatabaseRoutines::AddUser");
+  if (DatabaseRoutines::FoundUser())
+    return true;
+  DatabaseQuery theQuery(*this,
+  "INSERT INTO calculatorUsers.users (user, email) values('" + this->username + "', '"
+  + this->email + "')"
+  );
+  return this->SetUserPassword();
+}
+
 bool DatabaseRoutines::SetUserPassword()
 { MacroRegisterFunctionWithName("DatabaseRoutines::SetUserPassword");
   //stOutput << "Whats going on here<br>";
   this->usernamePlusPassWord=this->username;
   this->usernamePlusPassWord+=this->password;
   std::string theShaOnedString= Crypto::computeSha1outputBase64(this->usernamePlusPassWord);
-
-  DatabaseQuery theDBQuery(*this, "UPDATE calculatorUsers.users SET password='" + theShaOnedString +
-                           "' WHERE email='" + this->username + "'");
+  DatabaseQuery theDBQuery(*this,
+  "UPDATE calculatorUsers.users SET password='" + theShaOnedString +
+  "' WHERE user='" + this->username + "'");
   if (!theDBQuery.flagQuerySucceeded)
     return false;
   this->comments << "<br>Query: <br>"  << theDBQuery.theQueryString << "<br> password(sha-1):<br> " << theShaOnedString;
@@ -173,7 +197,7 @@ bool DatabaseRoutines::startMySQLDatabase()
   { std::string createTable=
     "CREATE TABLE users(\
     user VARCHAR(50) NOT NULL PRIMARY KEY, email VARCHAR(50) NOT NULL, \
-    password VARCHAR(30) NOT NULL, authenticationTokenCreationTime DATETIME, \
+    password VARCHAR(30) NOT NULL, authenticationTokenCreationTime VARCHAR(30), \
     authenticationToken VARCHAR(30)\
     )";
     if (mysql_query(this->connection, createTable.c_str())!=0)
@@ -214,6 +238,17 @@ bool DatabaseRoutines::innerGetUserPassword(Calculator& theCommands, const Expre
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool DatabaseRoutines::innerAddUser(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::innerAddUser");
+  DatabaseRoutines theRoutines;
+  if (!theRoutines.getUserPassAndEmail(theCommands, input))
+    return false;
+  theRoutines.AddUserIfUserDoesNotExistAlready();
+  return output.AssignValue(theRoutines.comments.str(), theCommands);
+
+
+}
+
 bool DatabaseRoutines::innerSetUserPassword(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerSetUserPassword");
   DatabaseRoutines theRoutines;
@@ -247,6 +282,64 @@ bool DatabaseRoutines::getUserAndPass(Calculator& theCommands, const Expression&
   return true;
 }
 
+bool DatabaseRoutines::getUserPassAndEmail(Calculator& theCommands, const Expression& input)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::getUserPassAndEmail");
+  if (input.children.size!=4)
+    return theCommands << "DatabaseRoutines::getUserPassAndEmail takes as input 3 arguments (user name and password). ";
+  if (!input[1].IsOfType<std::string>(&this->username))
+  { theCommands << "<hr>Argument " << input[1].ToString() << " is supposed to be a string.";
+    this->username=input[1].ToString();
+  }
+  if (!input[2].IsOfType<std::string>(&this->password))
+  { theCommands << "<hr>Argument " << input[2].ToString() << " is supposed to be a string.";
+    this->password=input[2].ToString();
+  }
+  if (!input[3].IsOfType<std::string>(&this->email))
+  { theCommands << "<hr>Argument " << input[3].ToString() << " is supposed to be a string.";
+    this->email=input[3].ToString();
+  }
+  return true;
+}
+
+TimeWrapper::TimeWrapper()
+{
+}
+
+void TimeWrapper::ComputeTimeString()
+{ std::stringstream out;
+  out << this->theTime.tm_year << " " << this->theTime.tm_mon << " "
+  << this->theTime.tm_mday
+  << " " << this->theTime.tm_hour << " "
+  << this->theTime.tm_min
+  << " "
+  << this->theTime.tm_sec;
+  this->timeString=out.str();
+}
+
+void TimeWrapper::AssignLocalTime()
+{ std::time_t rawtime;
+  time(&rawtime);
+  this->theTime=*std::gmtime(&rawtime);
+  this->ComputeTimeString();
+}
+
+std::string TimeWrapper::ToStringHumanReadable()
+{ return std::asctime(&this->theTime);
+}
+
+void TimeWrapper::operator=(const std::string& input)
+{ std::stringstream inputStream;
+  inputStream << input;
+  inputStream.seekg(0);
+  inputStream >> this->theTime.tm_year;
+  inputStream >> this->theTime.tm_mon;
+  inputStream >> this->theTime.tm_mday;
+  inputStream >> this->theTime.tm_hour;
+  inputStream >> this->theTime.tm_min;
+  inputStream >> this->theTime.tm_sec;
+  this->ComputeTimeString();
+}
+
 bool DatabaseRoutines::innerGetAuthenticationTokenCreationTime(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerGetAuthenticationTokenCreationTime");
   DatabaseRoutines theRoutines;
@@ -257,15 +350,7 @@ bool DatabaseRoutines::innerGetAuthenticationTokenCreationTime(Calculator& theCo
   if (!theRoutines.FetchAuthenticationTokenCreationTime())
     return theCommands << theRoutines.comments.str();
   std::stringstream out;
-  std::time_t rawtime;
-  time(&rawtime);
-  theRoutines.authenticationTokenCreationTime=*std::localtime(&rawtime);
-  std::string theTimeString=asctime(&theRoutines.authenticationTokenCreationTime);
-  out << "<br>time initial: " << theTimeString;
-  tm tempTM;
-  strptime(theTimeString.c_str(), "%x %X", & tempTM);
-  std::time_t tempTime=mktime(& tempTM);
-  out << "<br>time transformed back and forth: " << std::asctime(std::localtime(&tempTime));
+  out << theRoutines.authenticationTokenCreationTime.ToStringHumanReadable();
   return output.AssignValue(out.str(), theCommands);
 }
 

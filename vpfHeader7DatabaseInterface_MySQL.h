@@ -26,6 +26,18 @@ public:
   std::string GetCommandToSendEmailWithMailX();
 };
 
+struct TimeWrapper
+{
+public:
+  tm theTime;
+  std::string timeString;
+  void AssignLocalTime();
+  void ComputeTimeString();
+  std::string ToStringHumanReadable();
+  void operator=(const std::string& inputTime);
+  TimeWrapper();
+};
+
 class DatabaseRoutines
 {
   template<typename anyType>
@@ -37,10 +49,11 @@ public:
   std::string usernamePlusPassWord;
   std::string username;
   std::string password;
+  std::string email;
   std::string theDatabaseName;
   std::string hostname;
   std::string authenticationToken;
-  tm authenticationTokenCreationTime;
+  TimeWrapper authenticationTokenCreationTime;
   std::stringstream comments;
   MYSQL *connection; // Create a pointer to the MySQL instance
   operator bool()const
@@ -50,6 +63,8 @@ public:
   std::string ToString();
   bool TryToLogIn();
   std::string GetUserPassword();
+  bool FoundUser();
+  bool AddUserIfUserDoesNotExistAlready();
   bool SetUserPassword();
   bool ComputeAuthenticationToken();
   bool FetchAuthenticationTokenCreationTime();
@@ -59,9 +74,11 @@ public:
   static bool innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestLogin(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddUser(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetAuthentication(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetAuthenticationTokenCreationTime(Calculator& theCommands, const Expression& input, Expression& output);
+  bool getUserPassAndEmail(Calculator& theCommands, const Expression& input);
   bool getUserAndPass(Calculator& theCommands, const Expression& input);
   bool getUser(Calculator& theCommands, const Expression& input);
   DatabaseRoutines();
@@ -81,6 +98,7 @@ public:
   DatabaseQuery(DatabaseRoutines& inputParent, const std::string& inputQuery);
   ~DatabaseQuery();
 };
+
 
 #endif // MACRO_use_MySQL
 #endif // vpfHeader7_databaseMySQL_already_included

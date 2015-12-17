@@ -3567,7 +3567,7 @@ void MathRoutines::RaiseToPower
   coefficient squares;
 	squares=theElement;
 	if (thePowerCopy<4)
-  { for (int i=1; i<thePowerCopy; i++)
+  { for (unsigned i=1; i<thePowerCopy; i++)
       theElement*=squares;
     return;
   }

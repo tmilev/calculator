@@ -96,6 +96,7 @@ GlobalVariables::GlobalVariables()
   this->flagRunningCommandLine=false;
   this->flagUsingApacheWebServer=false;
   this->flagUsingBuiltInWebServer=false;
+  this->flagUsingHttpSSL=false;
   //  this->flagLogInterProcessCommunication=true;
   //  stOutput << "Global variables created!";
 }

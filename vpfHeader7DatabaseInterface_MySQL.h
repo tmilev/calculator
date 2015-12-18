@@ -2,14 +2,15 @@
 //For additional information refer to the file "vpf.h".
 #ifndef vpfHeader7_databaseMySQL_already_included
 #define vpfHeader7_databaseMySQL_already_included
-#ifdef MACRO_use_MySQL
 #include "vpfHeader3Calculator0_Interface.h"
+static ProjectInformationInstance ProjectInfoVpf8_1HeaderDatabaseInterface_MySQLx(__FILE__, "MySQL interface header. ");
+
+#ifdef MACRO_use_MySQL
 #include <mysql/mysql.h>
 #include <ctime>
 
 //Command for installation of mysql on Ubuntu:
 //sudo apt-get install libmysqlclient-dev
-static ProjectInformationInstance ProjectInfoVpf8_1HeaderDatabaseInterface_MySQLx(__FILE__, "MySQL interface header. ");
 
 class EmailRoutines
 {
@@ -91,6 +92,7 @@ public:
   std::string databasePassword;
   std::string databaseUser;
   std::string theDatabaseName;
+  std::string admin;
   std::string hostname;
   std::stringstream comments;
   MYSQL *connection; // Create a pointer to the MySQL instance
@@ -99,6 +101,7 @@ public:
   }
   bool startMySQLDatabase();
   std::string ToString();
+  std::string ToStringAllUsersHTMLFormat();
   static bool innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestLogin(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
@@ -107,6 +110,7 @@ public:
   static bool innerSetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetAuthentication(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserDBEntry(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerGetUserDetails(Calculator& theCommands, const Expression& input, Expression& output);
   DatabaseRoutines();
   ~DatabaseRoutines();
 };
@@ -119,7 +123,8 @@ public:
   MYSQL_ROW currentRow;
   std::stringstream* failurecomments;
   std::string theQueryString;
-  std::string theQueryResultString;
+  std::string firstResultString;
+  List<List<std::string> > allQueryResultStrings;
   bool flagQuerySucceeded;
   bool flagQueryReturnedResult;
   DatabaseQuery(DatabaseRoutines& inputParent, const std::string& inputQuery, std::stringstream* outputFailureComments=0);

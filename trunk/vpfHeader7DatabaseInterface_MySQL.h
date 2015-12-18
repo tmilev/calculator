@@ -35,6 +35,7 @@ public:
   void ComputeTimeStringNonReadable();
   std::string ToStringHumanReadable();
   void operator=(const std::string& inputTime);
+  double SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(const TimeWrapper& other);
   TimeWrapper();
 };
 
@@ -44,21 +45,25 @@ class UserCalculator
   public:
   std::string usernamePlusPassWord;
   std::string username;
-  std::string password;
+  std::string enteredPassword;
+  std::string actualShaonedSaltedPassword;
+  std::string enteredShaonedSaltedPassword;
   std::string email;
   List<std::string> selectedColumns;
   List<std::string> selectedColumnValues;
-  List<std::string> selectedColumnValuesAvailable;
-  std::string authenticationToken;
+  List<std::string> selectedColumnsRetrievalFailureRemarks;
+  std::string enteredAuthenticationToken;
+  std::string actualAuthenticationToken;
   TimeWrapper authenticationTokenCreationTime;
-  bool FetchOneColumn(std::string& columnName, std::string& output, DatabaseRoutines& theRoutines);
+  bool flagNewAuthenticationTokenComputedUserNeedsIt;
+  bool FetchOneColumn(const std::string& columnName, std::string& output, DatabaseRoutines& theRoutines, std::string* failureComments=0);
   void FetchColumns(DatabaseRoutines& theRoutines);
-  bool FetchAuthenticationTokenCreationTime(DatabaseRoutines& theRoutines);
   bool AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutines);
   bool AuthenticateWithToken(DatabaseRoutines& theRoutines);
   bool Authenticate(DatabaseRoutines& theRoutines);
-  bool ComputeAuthenticationToken(DatabaseRoutines& theRoutines);
+  bool ResetAuthenticationToken(DatabaseRoutines& theRoutines);
   std::string GetPassword(DatabaseRoutines& theRoutines);
+  bool SetColumnEntry(const std::string& columnName, const std::string& theValue, DatabaseRoutines& theRoutines, std::stringstream* failureComments=0);
   bool SetPassword(DatabaseRoutines& theRoutines);
   bool TryToLogIn(DatabaseRoutines& theRoutines);
   bool DeleteMe(DatabaseRoutines& theRoutines);
@@ -68,8 +73,10 @@ class UserCalculator
   bool getUserAndPass(Calculator& theCommands, const Expression& input);
   bool getUser(Calculator& theCommands, const Expression& input);
   bool getUserPassAndSelectedColumns(Calculator& theCommands, const Expression& input);
+  void ComputeShaonedSaltedPassword();
   std::string ToString();
   std::string ToStringSelectedColumns();
+  UserCalculator();
   ~UserCalculator();
 };
 
@@ -110,11 +117,12 @@ public:
   DatabaseRoutines* parent;
   MYSQL_RES* theQueryResult;
   MYSQL_ROW currentRow;
+  std::stringstream* failurecomments;
   std::string theQueryString;
   std::string theQueryResultString;
   bool flagQuerySucceeded;
   bool flagQueryReturnedResult;
-  DatabaseQuery(DatabaseRoutines& inputParent, const std::string& inputQuery);
+  DatabaseQuery(DatabaseRoutines& inputParent, const std::string& inputQuery, std::stringstream* outputFailureComments=0);
   ~DatabaseQuery();
 };
 

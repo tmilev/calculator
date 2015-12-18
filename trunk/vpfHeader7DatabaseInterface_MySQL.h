@@ -30,12 +30,47 @@ struct TimeWrapper
 {
 public:
   tm theTime;
-  std::string timeString;
+  std::string theTimeStringNonReadable;
   void AssignLocalTime();
-  void ComputeTimeString();
+  void ComputeTimeStringNonReadable();
   std::string ToStringHumanReadable();
   void operator=(const std::string& inputTime);
   TimeWrapper();
+};
+
+class DatabaseRoutines;
+class UserCalculator
+{
+  public:
+  std::string usernamePlusPassWord;
+  std::string username;
+  std::string password;
+  std::string email;
+  List<std::string> selectedColumns;
+  List<std::string> selectedColumnValues;
+  List<std::string> selectedColumnValuesAvailable;
+  std::string authenticationToken;
+  TimeWrapper authenticationTokenCreationTime;
+  bool FetchOneColumn(std::string& columnName, std::string& output, DatabaseRoutines& theRoutines);
+  void FetchColumns(DatabaseRoutines& theRoutines);
+  bool FetchAuthenticationTokenCreationTime(DatabaseRoutines& theRoutines);
+  bool AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutines);
+  bool AuthenticateWithToken(DatabaseRoutines& theRoutines);
+  bool Authenticate(DatabaseRoutines& theRoutines);
+  bool ComputeAuthenticationToken(DatabaseRoutines& theRoutines);
+  std::string GetPassword(DatabaseRoutines& theRoutines);
+  bool SetPassword(DatabaseRoutines& theRoutines);
+  bool TryToLogIn(DatabaseRoutines& theRoutines);
+  bool DeleteMe(DatabaseRoutines& theRoutines);
+  bool Iexist(DatabaseRoutines& theRoutines);
+  bool CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines);
+  bool getUserPassAndEmail(Calculator& theCommands, const Expression& input);
+  bool getUserAndPass(Calculator& theCommands, const Expression& input);
+  bool getUser(Calculator& theCommands, const Expression& input);
+  bool getUserPassAndSelectedColumns(Calculator& theCommands, const Expression& input);
+  std::string ToString();
+  std::string ToStringSelectedColumns();
+  ~UserCalculator();
 };
 
 class DatabaseRoutines
@@ -46,14 +81,10 @@ class DatabaseRoutines
     return output;
   }
 public:
-  std::string usernamePlusPassWord;
-  std::string username;
-  std::string password;
-  std::string email;
+  std::string databasePassword;
+  std::string databaseUser;
   std::string theDatabaseName;
   std::string hostname;
-  std::string authenticationToken;
-  TimeWrapper authenticationTokenCreationTime;
   std::stringstream comments;
   MYSQL *connection; // Create a pointer to the MySQL instance
   operator bool()const
@@ -61,26 +92,14 @@ public:
   }
   bool startMySQLDatabase();
   std::string ToString();
-  bool TryToLogIn();
-  std::string GetUserPassword();
-  bool FoundUser();
-  bool AddUserIfUserDoesNotExistAlready();
-  bool SetUserPassword();
-  bool ComputeAuthenticationToken();
-  bool FetchAuthenticationTokenCreationTime();
-  bool AuthenticateWithUserNameAndPass();
-  bool AuthenticateWithToken();
-  bool Authenticate();
   static bool innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestLogin(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddUser(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDeleteUser(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetAuthentication(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerGetAuthenticationTokenCreationTime(Calculator& theCommands, const Expression& input, Expression& output);
-  bool getUserPassAndEmail(Calculator& theCommands, const Expression& input);
-  bool getUserAndPass(Calculator& theCommands, const Expression& input);
-  bool getUser(Calculator& theCommands, const Expression& input);
+  static bool innerGetUserDBEntry(Calculator& theCommands, const Expression& input, Expression& output);
   DatabaseRoutines();
   ~DatabaseRoutines();
 };

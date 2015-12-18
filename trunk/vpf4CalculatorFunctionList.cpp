@@ -28,9 +28,13 @@ void Calculator::initPredefinedInnerFunctions()
    "Gets authentication token from user and password. Put quotes around the username and the password.",
    "GetAuthentication(\"testUser, password\"); ", false, true, "DatabaseRoutines::innerGetAuthentication");
   this->AddOperationInnerHandler
-  ("GetAuthenticationTokenCreationTime", DatabaseRoutines::innerGetAuthenticationTokenCreationTime, "",
-   "Gets authentication token from user and password. Put quotes around the username and the password.",
-   "GetAuthenticationTokenCreationTime(\"testUser, password\"); ", false, true, "DatabaseRoutines::innerGetAuthenticationTokenCreationTime");
+  ("GetUserDBEntry", DatabaseRoutines::innerGetUserDBEntry, "",
+   "Gets a user database entry. First argument: username (in quotes), \
+   second argument: password (in quotes), \
+   third argument: desired database entry (in quotes).",
+   "GetUserDBEntry(\"testUser\", \"password\", \"authenticationTokenCreationTime\"); \
+    GetUserDBEntry(\"testUser\", \"password\", \"authenticationToken\");\
+    GetUserDBEntry(\"testUser\", \"password\", \"email\")", false, true, "DatabaseRoutines::innerGetUserDBEntry");
    ;
   this->AddOperationInnerHandler
   ("SetUserPassword", DatabaseRoutines::innerSetUserPassword, "",
@@ -40,7 +44,12 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("AddUser", DatabaseRoutines::innerAddUser, "",
    "Adds a new user (first argument: user, second argument: password, third argument: email).",
-   "AddUser(testUser, \"todor.milev@gmail.com\", password); GetUserPassword(\"testUser\");", false, true, "DatabaseRoutines::innerSetUserPassword");
+   "AddUser(testUser, password, \"todor.milev@gmail.com\"); GetUserPassword(\"testUser\");", false, true, "DatabaseRoutines::innerSetUserPassword");
+   ;
+  this->AddOperationInnerHandler
+  ("DeleteUser", DatabaseRoutines::innerDeleteUser, "",
+   "Deletes a user (first argument: user, second argument: admin password).",
+   "DeleteUser(testUser, password);", false, true, "DatabaseRoutines::innerDeleteUser");
    ;
   this->AddOperationInnerHandler
   ("TestDatabase", DatabaseRoutines::innerTestDatabase, "",

@@ -30,6 +30,7 @@ public:
   double timeOfLastPingServerSideOnly;
   bool flagDeallocated;
   bool flagMainAddressSanitized;
+  bool flagLoggedIn;
   std::string mainAddressNonSanitized;
   List<std::string> theStrings;
   int ContentLength;
@@ -68,6 +69,7 @@ public:
   static void StandardOutputAfterTimeOut(const std::string& input);
 
   static int OutputWeb();
+  void ProcessRawArguments();
   static void OutputBeforeComputation();
   static void OutputStandardResult();
   static void OutputSendAfterTimeout(const std::string& input);
@@ -89,6 +91,8 @@ public:
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
   static std::string GetJavaScriptIndicatorFromHD();
   std::string GetJavaScriptIndicatorBuiltInServer(int inputIndex);
+  static std::string GetLoginScreen();
+  static std::string GetLoginHTMLelement();
   bool IsFileExtensionOfBinaryFile(const std::string& fileExtension);
   WebWorker();
   ~WebWorker();

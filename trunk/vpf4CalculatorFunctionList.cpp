@@ -28,6 +28,12 @@ void Calculator::initPredefinedInnerFunctions()
    "Gets authentication token from user and password. Put quotes around the username and the password.",
    "GetAuthentication(\"testUser, password\"); ", false, true, "DatabaseRoutines::innerGetAuthentication");
   this->AddOperationInnerHandler
+  ("GetUserDetails", DatabaseRoutines::innerGetUserDetails, "",
+   "Generates a list of database users visible to the given user. First argument: username (in quotes), \
+   second argument: password (in quotes). This function will list all non-archived \
+   users if invoked with the admin account.",
+   "GetUserDetails(\"admin\", \"password\")", false, true, "DatabaseRoutines::innerGetUserDetails");
+  this->AddOperationInnerHandler
   ("GetUserDBEntry", DatabaseRoutines::innerGetUserDBEntry, "",
    "Gets a user database entry. First argument: username (in quotes), \
    second argument: password (in quotes), \

@@ -69,6 +69,7 @@ public:
   bool flagRunningConsoleTest;
   bool flagUsingApacheWebServer;
   bool flagUsingBuiltInWebServer;
+  bool flagUsingHttpSSL;
   bool flagAllowUseOfThreadsAndMutexes;
   bool flagNotAllocated;
 

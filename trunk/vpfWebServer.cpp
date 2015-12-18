@@ -462,7 +462,7 @@ std::string WebWorker::ToStringMessageShort(FormatExpressions* theFormat)const
   out << lineBreak << "Main argument: " << this->mainArgumentRAW;
   out << lineBreak << "Relative physical file address referred to by main address: " << this->RelativePhysicalFileName;
   out << lineBreak << "Calculator address: " << theGlobalVariables.DisplayNameCalculatorWithPath;
-  out << lineBreak << "Physical adress project base: " << theGlobalVariables.PhysicalPathProjectBase;
+  out << lineBreak << "Physical address project base: " << theGlobalVariables.PhysicalPathProjectBase;
   out << lineBreak << "Physical address server base: " << theGlobalVariables.PhysicalPathServerBasE;
   out << lineBreak << "Physical address output folder: " << theGlobalVariables.PhysicalPathOutputFolder;
   return out.str();
@@ -514,10 +514,38 @@ void WebWorker::StandardOutputAfterTimeOut(const std::string& input)
 //  << logger::endL;
 }
 
+extern bool LoginViaDatabase
+(const std::string& inputUsername, const std::string& inputPassword,
+ const std::string& inputAuthenticationToken);
+
+void WebWorker::ProcessRawArguments()
+{ MacroRegisterFunctionWithName("WebServer::ProcessRawArguments");
+  List<std::string> inputStrings, inputStringNames;
+  CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
+  std::string user;
+  std::string authentication;
+  std::string password;
+  if (inputStringNames.Contains("user"))
+  { user=inputStrings[inputStringNames.GetIndex("user")];
+    stOutput << "<b>user: </b>" << user << "<br>";
+  }
+  if (inputStringNames.Contains("authentication"))
+  { authentication=inputStrings[inputStringNames.GetIndex("authentication")];
+    stOutput << "<b>authentication: </b><br>" << authentication;
+  }
+  if (inputStringNames.Contains("password"))
+  { password=inputStrings[inputStringNames.GetIndex("password")];
+    stOutput << "<b>password: </b><br>" << password;
+  }
+  if (theGlobalVariables.flagUsingHttpSSL)
+    this->flagLoggedIn=LoginViaDatabase(user, password, authentication);
+  if (inputStringNames.Contains("textInput"))
+    theParser.inputString= inputStrings[inputStringNames.GetIndex("textInput")];
+}
+
 void WebWorker::OutputBeforeComputation()
 { MacroRegisterFunctionWithName("WebServer::OutputBeforeComputation");
   theGlobalVariables.flagComputationCompletE=false;
-
   stOutput << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, "
   << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
   << "Root subalgebras, sl(2)-triples\"> <head> <title>calculator version  " << __DATE__ << ", " << __TIME__ << "</title>";
@@ -526,35 +554,13 @@ void WebWorker::OutputBeforeComputation()
 //  else
 //    stOutput << "<script src=\"" << theGlobalVariables.DisplayPathServerBase << "/jsmath/easy/load.js\">";
   stOutput << "\n</head>\n<body onload=\"checkCookie();\">\n";
-  List<std::string> inputStrings, inputStringNames;
-  CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
-  std::string user;
-  std::string password;
-  std::string authentication;
-  if (inputStringNames.Contains("user"))
-  { user=inputStrings[inputStringNames.GetIndex("user")];
-    stOutput << "<b>user: </b>" << user << "<br>";
-  }
-  if (inputStringNames.Contains("password"))
-  { password=inputStrings[inputStringNames.GetIndex("password")];
-    stOutput << "<b>password: </b><br>" << password;
-  }
-  if (inputStringNames.Contains("authentication"))
-  { authentication=inputStrings[inputStringNames.GetIndex("authentication")];
-    stOutput << "<b>authentication: </b><br>" << authentication;
-  }
-//  #ifdef MACRO_use_MySQL
-//  DatabaseRoutines theSQL;
-//  #endif // MACRO_use_MySQL
-  std::string& civilizedInput=theParser.inputString;
-  if (inputStringNames.Contains("textInput"))
-    civilizedInput= inputStrings[inputStringNames.GetIndex("textInput")];
-  CGI::CGIStringToNormalString(civilizedInput, civilizedInput);
 
 //  civilizedInput="\\int( 1/x dx)";
 //  civilizedInput="\\int (1/(x(1+x^2)^2))dx";
 //  civilizedInput="%LogEvaluation \\int (1/(5+2x+7x^2)^2)dx";
-  theGlobalVariables.initOutputReportAndCrashFileNames(theParser.inputStringRawestOfTheRaw, civilizedInput);
+  CGI::CGIStringToNormalString(theParser.inputString, theParser.inputString);
+  theGlobalVariables.initOutputReportAndCrashFileNames
+  (theParser.inputStringRawestOfTheRaw, theParser.inputString);
 
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
@@ -567,7 +573,7 @@ void WebWorker::OutputBeforeComputation()
   stOutput << "\n<FORM method=\"POST\" id=\"formCalculator\" name=\"formCalculator\" action=\""
   << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n" ;
   std::string civilizedInputSafish;
-  if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, civilizedInputSafish))
+  if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(theParser.inputString, civilizedInputSafish))
     stOutput << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are "
     << " modified due to a javascript hijack issue. <br>";
   stOutput << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\", style=\"white-space:normal\" "
@@ -578,7 +584,7 @@ void WebWorker::OutputBeforeComputation()
   stOutput << civilizedInputSafish;
   stOutput << "</textarea>\n<br>\n";
   stOutput << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" > ";
-  if (civilizedInput!="")
+  if (theParser.inputString!="")
     stOutput << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
   stOutput << "\n</FORM>";
   //  stOutput << "<br>Number of lists created before evaluation: " << NumListsCreated;
@@ -1253,6 +1259,7 @@ void WebWorker::reset()
   this->flagMainAddressSanitized=false;
   this->timeOfLastPingServerSideOnly=-1;
   this->flagUsingSSLinCurrentConnection=false;
+  this->flagLoggedIn=false;
   this->Release();
 }
 
@@ -1403,14 +1410,24 @@ int WebWorker::ProcessUnknown()
 
 int WebWorker::OutputWeb()
 { MacroRegisterFunctionWithName("WebServer::OutputWeb");
+  ProgressReportWebServer theReport;
+  theWebServer.GetActiveWorker().ProcessRawArguments();
+  if (theGlobalVariables.flagUsingHttpSSL)
+    if (!theWebServer.GetActiveWorker().flagLoggedIn)
+    { stOutput << theWebServer.GetActiveWorker().GetLoginScreen();
+      theReport.SetStatus("Serving login screen. ");
+      theReport.SetStatus("Login screen served, exiting. ");
+      theGlobalVariables.flagComputationCompletE=true;
+      stOutput.Flush();
+      return 0;
+    }
   WebWorker::OutputBeforeComputation();
-  //stOutput << "Thread data follows.<br> " << ThreadData::ToStringAllThreads();
   theWebServer.CheckExecutableVersionAndRestartIfNeeded();
+
   //stOutput << theParser.javaScriptDisplayingIndicator;
   //theParser.inputString="TestCalculatorIndicator 0";
   //theParser.inputString="printSemisimpleSubalgebrasRecompute(B_3)";
   theParser.init();
-  ProgressReportWebServer theReport;
   if (theGlobalVariables.flagUsingBuiltInWebServer)
     theReport.SetStatus("OutputWeb: Computing...");
   if (theParser.inputString!="")
@@ -1471,6 +1488,30 @@ std::string WebWorker::GetJavaScriptIndicatorFromHD()
   out << " </div>\n";
   out << " \n";
   out << " \n";
+  return out.str();
+}
+
+std::string WebWorker::GetLoginHTMLelement()
+{ MacroRegisterFunctionWithName("WebWorker::GetLoginHTMLelement");
+  std::stringstream out;
+  out << "<form name=\"login\" action=\"calculator\" method=\"get\" accept-charset=\"utf-8\">"
+  <<  "User name or email: "
+  << "<input type=\"text\" name=\"user\" placeholder=\"user\" required>"
+  << "<br>Password: "
+  << "<input type=\"password\" name=\"password\" placeholder=\"password\">"
+  << "<br>Authentication token: <input type=\"password\" name=\"authentication\" placeholder=\"authenticationToken\">"
+  << "<br><input type=\"submit\" value=\"Login\">"
+  << "</form>";
+  out << "<b>Login screen not implemented yet.</b>";
+  return out.str();
+}
+
+std::string WebWorker::GetLoginScreen()
+{ MacroRegisterFunctionWithName("WebWorker::GetLoginScreen");
+  std::stringstream out;
+  out << "<html><body>"
+  << WebWorker::GetLoginHTMLelement()
+  << "</body></html>";
   return out.str();
 }
 
@@ -2034,9 +2075,11 @@ void WebServer::RecycleChildrenIfPossible()
           std::stringstream pingTimeoutStream;
           pingTimeoutStream << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
           << " seconds have passed since worker " << i+1
-          << " pinged the server. I am assuming the worker no longer functions, and am marking it as free for reuse. ";
+          << " pinged the server. I am assuming the worker no longer functions, and am marking it as free for reuse. "
+          << "In addition, I am killing the worker's last executable pid: "
+          << this->theWorkers[i].ProcessPID << ". ";
           kill(this->theWorkers[i].ProcessPID, SIGKILL);
-          theLog << logger::red << pingTimeoutStream.str() << logger::endL;
+          logIO << logger::red << pingTimeoutStream.str() << logger::endL;
           this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>" + pingTimeoutStream.str()+"</b></span>";
         }
     }
@@ -2204,8 +2247,8 @@ int WebServer::Run()
     //theLog << "\r\nChildPID: " << this->childPID;
     if (this->GetActiveWorker().ProcessPID!=0)
     { // this is the child (worker) process
+      theGlobalVariables.flagUsingHttpSSL=this->GetActiveWorker().flagUsingSSLinCurrentConnection;
       this->SSLServerSideHandShake();
-
       this->Release(theListeningSocket);//worker has no access to socket listener
       theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=
       this->ReturnActiveIndicatorAlthoughComputationIsNotDone;

@@ -1,11 +1,29 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#ifdef MACRO_use_MySQL
 #include "vpfHeader7DatabaseInterface_MySQL.h"
+ProjectInformationInstance ProjectInfoVpf8_1MySQLcpp(__FILE__, "MySQL interface. ");
+
+bool LoginViaDatabase
+(const std::string& inputUsername, const std::string& inputPassword,
+ const std::string& inputAuthenticationToken)
+{
+#ifdef MACRO_use_MySQL
+  MacroRegisterFunctionWithName("LoginViaDatabase");
+  DatabaseRoutines theRoutines;
+  UserCalculator theUser;
+  theUser.username=inputUsername;
+  theUser.enteredPassword=inputPassword;
+  theUser.enteredAuthenticationToken=inputAuthenticationToken;
+  return theUser.Authenticate(theRoutines);
+#else
+  return true;
+#endif
+}
+
+#ifdef MACRO_use_MySQL
 #include "vpfHeader5Crypto.h"
 #include <time.h>
 #include <ctime>
-ProjectInformationInstance ProjectInfoVpf8_1MySQLcpp(__FILE__, "MySQL interface. ");
 
 std::string UserCalculator::ToStringSelectedColumns()
 { MacroRegisterFunctionWithName("DatabaseRoutines::ToStringSelectedColumns");
@@ -54,6 +72,7 @@ UserCalculator::~UserCalculator()
 
 DatabaseRoutines::DatabaseRoutines()
 { this->connection=0;
+  this->admin="admin";
 }
 
 DatabaseRoutines::~DatabaseRoutines()
@@ -82,7 +101,9 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   this->theQueryResult=0;
   if (this->parent->connection==0)
     if (!this->parent->startMySQLDatabase())
+    { stOutput << "Failed to start database. Comments generated during the failure: " << inputParent.comments.str();
       return;
+    }
   int queryError=mysql_query(this->parent->connection, this->theQueryString.c_str());
   if (queryError!=0)
   { if (this->failurecomments!=0)
@@ -98,19 +119,30 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
       *this->failurecomments << "Query succeeded, mysql_store_result returned non-zero. ";
     return;
   }
-  this->currentRow=mysql_fetch_row(this->theQueryResult);
-  if (this->currentRow==0)
-  { if (this->failurecomments!=0)
-      *this->failurecomments << "No rows returned by the query. ";
+  this->allQueryResultStrings.SetSize(mysql_num_rows(this->theQueryResult));
+  int numFields=mysql_num_fields(this->theQueryResult);
+  if (numFields<1)
     return;
+  for (int i=0; i<this->allQueryResultStrings.size; i++)
+  { this->currentRow=mysql_fetch_row(this->theQueryResult);
+    if (this->currentRow==0)
+    { if (this->failurecomments!=0)
+        *this->failurecomments << "Query result row " << i+1 << " did not return properly. " ;
+      this->allQueryResultStrings[i].SetSize(0);
+      continue;
+    }
+    this->allQueryResultStrings[i].SetSize(numFields);
+    for (int fieldCounter=0; fieldCounter<numFields; fieldCounter++)
+    { std::stringstream theDataCivilizer;
+      theDataCivilizer << this->currentRow[fieldCounter];
+      this->allQueryResultStrings[i][fieldCounter]=theDataCivilizer.str();
+      if (i==0 && fieldCounter==0)
+      { this->flagQueryReturnedResult=true;
+        this->firstResultString=theDataCivilizer.str();
+      }
+    }
   }
-  this->flagQueryReturnedResult=true;
-//  stOutput << "<br>the flag: " << this->flagQueryReturnedResult;
-  std::stringstream theDataCivilizer;
-//  stOutput << "<br>the flag: " << this->flagQueryReturnedResult;
-  theDataCivilizer << *this->currentRow;
-//  stOutput << "<br>the flag: " << this->flagQueryReturnedResult;
-  this->theQueryResultString=theDataCivilizer.str();
+
 //  stOutput << "<br>the flag: " << this->flagQueryReturnedResult;
 }
 
@@ -140,7 +172,7 @@ bool UserCalculator::FetchOneColumn(const std::string& columnName, std::string& 
       *failureComments= "<b> Query did not return a result - column may not exist.</b>";
     return false;
   }
-  output= theQuery.theQueryResultString;
+  output= theQuery.firstResultString;
   return true;
 }
 
@@ -166,8 +198,10 @@ bool UserCalculator::AuthenticateWithToken(DatabaseRoutines& theRoutines)
 bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines)
 { MacroRegisterFunctionWithName("UserCalculator::Authenticate");
   if (!this->Iexist(theRoutines))
+  { if (this->username!="")
+      stOutput << "user: '" << this->username << "' does not exist";
     return theRoutines << "User " << this->username << " does not exist. ";
-  this->enteredAuthenticationToken=this->enteredPassword;
+  }
   if (this->AuthenticateWithToken(theRoutines))
     return true;
   bool result= this->AuthenticateWithUserNameAndPass(theRoutines);
@@ -181,7 +215,12 @@ bool UserCalculator::AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutin
   std::string failureRemarks;
   bool result=this->FetchOneColumn("password", this->actualShaonedSaltedPassword, theRoutines, &failureRemarks);
   if (!result)
+  { //stOutput << "fail remarks: " << failureRemarks;
+    //stOutput << "pass doesnt match!";
     return false;
+  }
+//  stOutput << "this->enteredShaonedSaltedPassword: " << this->enteredShaonedSaltedPassword
+//  << ", this->actualShaonedSaltedPassword: " << this->actualShaonedSaltedPassword;
   return this->enteredShaonedSaltedPassword==this->actualShaonedSaltedPassword;
 }
 
@@ -210,7 +249,7 @@ std::string UserCalculator::GetPassword(DatabaseRoutines& theRoutines)
   if (!theDBQuery.flagQueryReturnedResult)
     return theRoutines.comments.str();
   std::stringstream out;
-  out << "password(sha-1): " << theDBQuery.theQueryResultString << "<br>comments: " << theRoutines.comments.str();
+  out << "password(sha-1): " << theDBQuery.firstResultString << "<br>comments: " << theRoutines.comments.str();
   return out.str();
 }
 
@@ -290,6 +329,9 @@ bool UserCalculator::SetPassword(DatabaseRoutines& theRoutines)
 
 bool DatabaseRoutines::startMySQLDatabase()
 { MacroRegisterFunctionWithName("DatabaseRoutines::startMySQLDatabase");
+  if (theGlobalVariables.flagUsingBuiltInWebServer)
+    if (!theGlobalVariables.flagUsingHttpSSL)
+      return *this << "Database operations forbidden for connections not carried over ssl. ";
   this->databasePassword="";
   this->databaseUser="calculator";
   this->hostname="localhost";
@@ -311,10 +353,15 @@ bool DatabaseRoutines::startMySQLDatabase()
   if (mysql_query(this->connection, "SELECT 1 FROM users")!=0)
   { std::string createTable=
     "CREATE TABLE users(\
-    user VARCHAR(50) NOT NULL PRIMARY KEY, email VARCHAR(50) NOT NULL, \
-    password VARCHAR(30) NOT NULL, authenticationTokenCreationTime VARCHAR(30), \
-    authenticationToken VARCHAR(30), numberUnsuccessfulLoginAttempts VARCHAR(10), \
-    numberUnsuccessfulLoginAttemptsLast24Hours VARCHAR(10)\
+    user VARCHAR(50) NOT NULL PRIMARY KEY,  \
+    password VARCHAR(30) NOT NULL, \
+    email VARCHAR(50) NOT NULL,\
+    authenticationTokenCreationTime VARCHAR(30), \
+    authenticationToken VARCHAR(30), \
+    numberUnsuccessfulLoginAttempts VARCHAR(10), \
+    numberSuccessfulLoginAttempts VARCHAR(10), \
+    numberUnsuccessfulLoginAttemptsLast24Hours VARCHAR(10),\
+    numberSuccessfulLoginAttemptsLast24Hours VARCHAR(10)\
     )";
     if (mysql_query(this->connection, createTable.c_str())!=0)
     { mysql_free_result( mysql_use_result(this->connection));
@@ -374,8 +421,8 @@ bool DatabaseRoutines::innerDeleteUser(Calculator& theCommands, const Expression
   if (!theAdmin.getUserAndPass(theCommands, input))
     return false;
   theUser.username=theAdmin.username;
-  theAdmin.username="admin";
   DatabaseRoutines theRoutines;
+  theAdmin.username=theRoutines.admin;
   if (!theAdmin.Authenticate(theRoutines))
     return output.MakeError("Admin authentication failed. ", theCommands);
   theUser.DeleteMe(theRoutines);
@@ -406,12 +453,13 @@ bool UserCalculator::getUserAndPass(Calculator& theCommands, const Expression& i
   if (input.children.size!=3)
     return theCommands << "UserCalculator::getUserAndPass takes as input 2 arguments (user name and password). ";
   if (!input[1].IsOfType<std::string>(&this->username))
-  { theCommands << "<hr>Argument " << input[1].ToString() << " is supposed to be a string.";
+  { theCommands << "<hr>Argument " << input[1].ToString() << " is supposed to be a string. ";
     this->username=input[1].ToString();
   }
   if (!input[2].IsOfType<std::string>(&this->enteredPassword))
-  { theCommands << "<hr>Argument " << input[2].ToString() << " is supposed to be a string.";
+  { theCommands << "<hr>Argument " << input[2].ToString() << " is supposed to be a string. ";
     this->enteredPassword=input[2].ToString();
+    this->enteredAuthenticationToken=this->enteredPassword;
   }
   return true;
 }
@@ -450,6 +498,7 @@ bool UserCalculator::getUserPassAndEmail(Calculator& theCommands, const Expressi
   if (!input[2].IsOfType<std::string>(&this->enteredPassword))
   { theCommands << "<hr>Argument " << input[2].ToString() << " is supposed to be a string.";
     this->enteredPassword=input[2].ToString();
+    this->enteredAuthenticationToken=this->enteredPassword;
   }
   if (!input[3].IsOfType<std::string>(&this->email))
   { theCommands << "<hr>Argument " << input[3].ToString() << " is supposed to be a string.";
@@ -517,6 +566,51 @@ void UserCalculator::FetchColumns(DatabaseRoutines& theRoutines)
 { MacroRegisterFunctionWithName("UserCalculator::FetchColumns");
   for (int i=0; i<this->selectedColumns.size; i++)
     this->FetchOneColumn(this->selectedColumns[i], this->selectedColumnValues[i], theRoutines, &this->selectedColumnsRetrievalFailureRemarks[i]);
+}
+
+std::string DatabaseRoutines::ToStringAllUsersHTMLFormat()
+{ MacroRegisterFunctionWithName("DatabaseRoutines::ToStringAllUsersHTMLFormat");
+  DatabaseQuery theQuery
+  (*this, "SELECT * FROM calculatorUsers.users;", &this->comments);
+  if (!theQuery.flagQueryReturnedResult)
+    return  "Query failed or returned no result. Comments: " + this->comments.str();
+  std::stringstream out;
+  out << "Table users has " << theQuery.allQueryResultStrings.size << " entries. ";
+  out << "<table border=\"1\"><tr>";
+  out
+  << " <td>user</td>"
+  << "<td>salted shaoned password</td>"
+  << "<td>email</td>"
+  << "<td>Authentication token time stamp</td>"
+  << "<td>Authentication token</td>"
+  << "<td>Number unsuccessful logins</td>"
+  << "<td>Number successful logins</td>"
+  << "<td>Number unsuccessful logins, last 24 hours</td>"
+  << "<td>Number successful logins, last 24 hours </td>"
+  ;
+  out << "</tr>";
+  for (int i=0; i<theQuery.allQueryResultStrings.size; i++)
+  { out << "<tr>";
+    for (int j=0; j<theQuery.allQueryResultStrings[i].size; j++)
+      out << "<td>" << theQuery.allQueryResultStrings[i][j] << "</td>";
+    out << "</tr>";
+  }
+  out << "</table>";
+  return out.str();
+}
+
+bool DatabaseRoutines::innerGetUserDetails(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::innerGetUserDetails");
+  UserCalculator theUser;
+  if (!theUser.getUserAndPass(theCommands, input))
+    return false;
+  DatabaseRoutines theRoutines;
+  if (theUser.username!=theRoutines.admin)
+    return output.AssignValue
+    ((std::string)"At the moment, the GetUserDetails function is implemented only for the admin user. ", theCommands);
+  if (!theUser.Authenticate(theRoutines))
+    return theCommands << "Authentication failed. " << theRoutines.comments.str();
+  return output.AssignValue(theRoutines.ToStringAllUsersHTMLFormat(), theCommands);
 }
 
 bool DatabaseRoutines::innerGetUserDBEntry(Calculator& theCommands, const Expression& input, Expression& output)

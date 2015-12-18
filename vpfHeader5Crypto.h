@@ -5,6 +5,7 @@ static ProjectInformationInstance projectInfoCryptoHeader(__FILE__, "Crypto clas
 
 class Crypto
 {
+  //To do: make sure all crypto functions zero their buffers.
 public:
   static std::string CharsToBase64String(const List<unsigned char>& input);
   static std::string CharsToBase64String(const std::string& input);

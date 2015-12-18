@@ -12,10 +12,9 @@ std::string UserCalculator::ToStringSelectedColumns()
   std::stringstream out;
   out << this->selectedColumns.size << " columns selected. ";
   for (int i=0; i<this->selectedColumns.size; i++)
-    out << "<br>" << this->selectedColumns[i] << ": " << this->selectedColumnValues[i] << this->selectedColumnValuesAvailable[i];
+    out << "<br>" << this->selectedColumns[i] << ": " << this->selectedColumnValues[i] << this->selectedColumnsRetrievalFailureRemarks[i];
   return out.str();
 }
-
 
 std::string DatabaseRoutines::ToString()
 { MacroRegisterFunctionWithName("DatabaseRoutines::ToString");
@@ -32,13 +31,25 @@ std::string UserCalculator::ToString()
   return out.str();
 }
 
+UserCalculator::UserCalculator()
+{ this->flagNewAuthenticationTokenComputedUserNeedsIt=false;
+}
+
 UserCalculator::~UserCalculator()
-{ for (unsigned i=0; i<this->password.size(); i++)
-    this->password[i]=' ';
+{ for (unsigned i=0; i<this->enteredPassword.size(); i++)
+    this->enteredPassword[i]=' ';
+  for (unsigned i=0; i<this->username.size(); i++)
+    this->username[i]=' ';
   for (unsigned i=0; i<this->usernamePlusPassWord.size(); i++)
     this->usernamePlusPassWord[i]=' ';
-  for (unsigned i=0; i<this->authenticationToken.size(); i++)
-    this->authenticationToken[i]=' ';
+  for (unsigned i=0; i<this->actualAuthenticationToken.size(); i++)
+    this->actualAuthenticationToken[i]=' ';
+  for (unsigned i=0; i<this->enteredAuthenticationToken.size(); i++)
+    this->enteredAuthenticationToken[i]=' ';
+  for (unsigned i=0; i<this->enteredShaonedSaltedPassword.size(); i++)
+    this->enteredShaonedSaltedPassword[i]=' ';
+  for (unsigned i=0; i<this->actualShaonedSaltedPassword.size(); i++)
+    this->actualShaonedSaltedPassword[i]=' ';
 }
 
 DatabaseRoutines::DatabaseRoutines()
@@ -61,8 +72,9 @@ bool UserCalculator::TryToLogIn(DatabaseRoutines& theRoutines)
   return false;
 }
 
-DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& inputQuery)
+DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& inputQuery, std::stringstream* outputFailureComments)
 { MacroRegisterFunctionWithName("DatabaseQuery::DatabaseQuery");
+  this->failurecomments=outputFailureComments;
   this->theQueryString=inputQuery;
   this->parent=&inputParent;
   this->flagQuerySucceeded=false;
@@ -73,23 +85,25 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
       return;
   int queryError=mysql_query(this->parent->connection, this->theQueryString.c_str());
   if (queryError!=0)
-  { this->parent->comments << "Query<br>" << this->theQueryString << "<br>failed. ";
-    this->parent->comments << mysql_error(this->parent->connection);
+  { if (this->failurecomments!=0)
+    { *this->failurecomments << "Query<br>" << this->theQueryString << "<br>failed. ";
+      *this->failurecomments << mysql_error(this->parent->connection);
+    }
     return;
   }
   this->flagQuerySucceeded=true;
-  this->parent->comments << "Query succeeded. ";
   this->theQueryResult= mysql_store_result(this->parent->connection);
   if (this->theQueryResult==0)
-  { this->parent->comments << "mysql_store_result failed. ";
+  { if (this->failurecomments!=0)
+      *this->failurecomments << "Query succeeded, mysql_store_result returned non-zero. ";
     return;
   }
   this->currentRow=mysql_fetch_row(this->theQueryResult);
   if (this->currentRow==0)
-  { this->parent->comments << "No rows returned by the query. ";
+  { if (this->failurecomments!=0)
+      *this->failurecomments << "No rows returned by the query. ";
     return;
   }
-  this->parent->comments << "Query " << this->theQueryString << " returned rows. ";
   this->flagQueryReturnedResult=true;
 //  stOutput << "<br>the flag: " << this->flagQueryReturnedResult;
   std::stringstream theDataCivilizer;
@@ -107,42 +121,82 @@ DatabaseQuery::~DatabaseQuery()
   this->theQueryResult=0;
 }
 
-bool UserCalculator::FetchAuthenticationTokenCreationTime(DatabaseRoutines& theRoutines)
-{ MacroRegisterFunctionWithName("UserCalculator::FetchAuthenticationTokenCreationTime");
-  DatabaseQuery theQuery
-  (theRoutines, "SELECT authenticationTokenCreationTime FROM calculatorUsers.users WHERE user=\""+
-   this->username+"\"");
-  if (!theQuery.flagQueryReturnedResult)
+bool UserCalculator::FetchOneColumn(const std::string& columnName, std::string& output, DatabaseRoutines& theRoutines, std::string* failureComments)
+{ MacroRegisterFunctionWithName("UserCalculator::FetchOneColumn");
+  DatabaseQuery theQuery(theRoutines,
+  "SELECT "+
+  columnName
+  + " FROM calculatorUsers.users WHERE user='"+
+  this->username
+  +"'");
+  output="";
+  if (!theQuery.flagQuerySucceeded)
+  { if (failureComments!=0)
+      *failureComments ="<b>Query failed - column may not exist (or some other error occurred).</b>";
     return false;
-  this->authenticationTokenCreationTime=theQuery.theQueryResultString;
+  }
+  if (!theQuery.flagQueryReturnedResult)
+  { if (failureComments!=0)
+      *failureComments= "<b> Query did not return a result - column may not exist.</b>";
+    return false;
+  }
+  output= theQuery.theQueryResultString;
   return true;
+}
+
+bool UserCalculator::AuthenticateWithToken(DatabaseRoutines& theRoutines)
+{ MacroRegisterFunctionWithName("UserCalculator::AuthenticateWithToken");
+  if (this->enteredAuthenticationToken=="")
+    return false;
+  std::string authenticationTokenCreationTimeSTRING;
+  std::string authenticationFailureRemarks;
+  if (!this->FetchOneColumn("authenticationTokenCreationTime", authenticationTokenCreationTimeSTRING, theRoutines, &authenticationFailureRemarks))
+    return theRoutines << authenticationFailureRemarks;
+  this->authenticationTokenCreationTime=authenticationTokenCreationTimeSTRING;
+  TimeWrapper now;
+  now.AssignLocalTime();
+  double hoursSinceTokenWasIssued=now.SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(this->authenticationTokenCreationTime);
+  if (hoursSinceTokenWasIssued>3600) //3600 hours = 150 days, a bit more than the length of a semester
+    return false;
+  if (!this->FetchOneColumn("authenticationToken", this->actualAuthenticationToken, theRoutines, &authenticationFailureRemarks))
+    return theRoutines << authenticationFailureRemarks;
+  return this->enteredAuthenticationToken==this->actualAuthenticationToken;
 }
 
 bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines)
 { MacroRegisterFunctionWithName("UserCalculator::Authenticate");
-  return true;
+  if (!this->Iexist(theRoutines))
+    return theRoutines << "User " << this->username << " does not exist. ";
+  this->enteredAuthenticationToken=this->enteredPassword;
+  if (this->AuthenticateWithToken(theRoutines))
+    return true;
+  bool result= this->AuthenticateWithUserNameAndPass(theRoutines);
+  this->ResetAuthenticationToken(theRoutines);
+  return result;
 }
 
 bool UserCalculator::AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutines)
 { MacroRegisterFunctionWithName("UserCalculator::Authenticate");
-  this->usernamePlusPassWord=this->username;
-  this->usernamePlusPassWord+=this->password;
-  //<-careful copying those around. We don't want to leave
-  //any passwords in non-zeroed memory, even if properly freed.
-  //Note the destructor of DatabaseRoutines zeroes some of the strings.
-  DatabaseQuery theDBQuery(theRoutines, "SELECT password FROM calculatorUsers.users WHERE email=\"" + this->username + "\"");
-  if (!theDBQuery.flagQueryReturnedResult)
+  this->ComputeShaonedSaltedPassword();
+  std::string failureRemarks;
+  bool result=this->FetchOneColumn("password", this->actualShaonedSaltedPassword, theRoutines, &failureRemarks);
+  if (!result)
     return false;
-  if (theDBQuery.theQueryResultString!=Crypto::computeSha1outputBase64(this->usernamePlusPassWord))
-    return theRoutines << "Database pass does not match your input which converts to: "
-    << Crypto::computeSha1outputBase64(this->usernamePlusPassWord);
-  return true;
+  return this->enteredShaonedSaltedPassword==this->actualShaonedSaltedPassword;
 }
 
-bool UserCalculator::ComputeAuthenticationToken(DatabaseRoutines& theRoutines)
+bool UserCalculator::ResetAuthenticationToken(DatabaseRoutines& theRoutines)
 { MacroRegisterFunctionWithName("UserCalculator::ComputeAuthenticationToken");
-  if (!this->AuthenticateWithUserNameAndPass(theRoutines))
+  TimeWrapper now;
+  now.AssignLocalTime();
+  std::stringstream out;
+  out << now.theTimeStringNonReadable << rand();
+  this->actualAuthenticationToken=Crypto::computeSha1outputBase64(out.str());
+  if (!this->SetColumnEntry("authenticationToken", this->actualAuthenticationToken, theRoutines))
     return false;
+  if (!this->SetColumnEntry("authenticationTokenCreationTime", now.theTimeStringNonReadable, theRoutines))
+    return false;
+  this->flagNewAuthenticationTokenComputedUserNeedsIt=true;
   //DatabaseQuery theQuery(*this, "SELECT authenticationTokenCreationTime FROM calculatorUsers.users WHERE user=\""+this->username + "\"");
   //if (theQuery.flagQueryReturnedResult)
   //  this->authentication="authenticationTokenCreationTime: "
@@ -177,7 +231,7 @@ bool UserCalculator::DeleteMe(DatabaseRoutines& theRoutines)
   TimeWrapper currentTime;
   currentTime.AssignLocalTime();
   currentTime.ComputeTimeStringNonReadable();
-  std::string userArchiveName="deleted" + currentTime.theTimeStringNonReadable+ this->username;
+  std::string userArchiveName="deleted||" + currentTime.theTimeStringNonReadable+ this->username;
   DatabaseQuery renamingQuery(theRoutines,
   "UPDATE users SET user='" + userArchiveName + "'"+
   "WHERE user='" + this->username +"'"
@@ -189,6 +243,9 @@ bool UserCalculator::CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines)
 { MacroRegisterFunctionWithName("UserCalculator::CreateMeIfUsernameUnique");
   if (this->Iexist(theRoutines))
     return theRoutines << "User " << this->username << " already exists. ";
+  if (MathRoutines::StringBeginsWith(this->username, "deleted"))
+    return theRoutines << "You requested creation of user: " << this->username
+    << " however user names starting with 'deleted' are not allowed. ";
   DatabaseQuery theQuery(theRoutines,
   "INSERT INTO calculatorUsers.users(user, email) VALUES('" + this->username + "', '"
   + this->email + "')"
@@ -196,18 +253,38 @@ bool UserCalculator::CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines)
   return this->SetPassword(theRoutines);
 }
 
+void UserCalculator::ComputeShaonedSaltedPassword()
+{ MacroRegisterFunctionWithName("UserCalculator::ComputeShaonedSaltedPassword");
+  this->usernamePlusPassWord=this->username;
+  this->usernamePlusPassWord+=this->enteredPassword;
+  this->enteredShaonedSaltedPassword=Crypto::computeSha1outputBase64(this->usernamePlusPassWord);
+  //<-careful copying those around. We don't want to leave
+  //any passwords in non-zeroed memory, even if properly freed.
+  //Note the destructor of DatabaseRoutines zeroes some of the strings.
+  //To do: make sure all crypto functions zero their buffers.
+}
+
+bool UserCalculator::SetColumnEntry
+(const std::string& columnName, const std::string& theValue, DatabaseRoutines& theRoutines, std::stringstream* failureComments)
+{ MacroRegisterFunctionWithName("UserCalculator::SetColumnEntry");
+  DatabaseQuery theDBQuery(theRoutines,
+  "UPDATE calculatorUsers.users SET " +
+  columnName +
+  "='" + theValue +
+  "' WHERE user='" + this->username + "'");
+  if (!theDBQuery.flagQuerySucceeded)
+  { if (failureComments!=0)
+      *failureComments << "Failed to set value to column: " << columnName << ". ";
+    return false;
+  }
+  return true;
+}
+
 bool UserCalculator::SetPassword(DatabaseRoutines& theRoutines)
 { MacroRegisterFunctionWithName("UserCalculator::SetPassword");
   //stOutput << "Whats going on here<br>";
-  this->usernamePlusPassWord=this->username;
-  this->usernamePlusPassWord+=this->password;
-  std::string theShaOnedString= Crypto::computeSha1outputBase64(this->usernamePlusPassWord);
-  DatabaseQuery theDBQuery(theRoutines,
-  "UPDATE calculatorUsers.users SET password='" + theShaOnedString +
-  "' WHERE user='" + this->username + "'");
-  if (!theDBQuery.flagQuerySucceeded)
-    return false;
-  theRoutines.comments << "<br>Query: <br>"  << theDBQuery.theQueryString << "<br> password(sha-1):<br> " << theShaOnedString;
+  this->ComputeShaonedSaltedPassword();
+  this->SetColumnEntry("password", this->enteredShaonedSaltedPassword, theRoutines);
   return true;
 }
 
@@ -226,7 +303,7 @@ bool DatabaseRoutines::startMySQLDatabase()
    this->theDatabaseName.c_str(), 0, 0, 0);
   if(this->connection==0)
     return *this << "Connection failed on: " << this->ToString();
-  stOutput << "Database connection succeeded.\n";
+  //stOutput << "Database connection succeeded.\n";
   *this << "Database connection succeeded.\n";
   if (mysql_select_db(this->connection, this->theDatabaseName.c_str())!=0)//Note: here zero return value = success.
     return *this << "Failed to select database: " << this->theDatabaseName << ". ";
@@ -236,7 +313,8 @@ bool DatabaseRoutines::startMySQLDatabase()
     "CREATE TABLE users(\
     user VARCHAR(50) NOT NULL PRIMARY KEY, email VARCHAR(50) NOT NULL, \
     password VARCHAR(30) NOT NULL, authenticationTokenCreationTime VARCHAR(30), \
-    authenticationToken VARCHAR(30)\
+    authenticationToken VARCHAR(30), numberUnsuccessfulLoginAttempts VARCHAR(10), \
+    numberUnsuccessfulLoginAttemptsLast24Hours VARCHAR(10)\
     )";
     if (mysql_query(this->connection, createTable.c_str())!=0)
     { mysql_free_result( mysql_use_result(this->connection));
@@ -258,11 +336,11 @@ bool DatabaseRoutines::innerTestLogin(Calculator& theCommands, const Expression&
   UserCalculator theUser;
   if (!userE.IsOfType<std::string>(&theUser.username))
     return theCommands << "First argument of login function is not a string";
-  if (!passE.IsOfType<std::string>(&theUser.password))
+  if (!passE.IsOfType<std::string>(&theUser.enteredPassword))
     return theCommands << "Second argument of login function is not a string";
   if (!theUser.TryToLogIn(theRoutines))
     return output.MakeError
-    ( "Failed to login, username: " + theUser.username+ " password: " + theUser.password+
+    ( "Failed to login, username: " + theUser.username+ " password: " + theUser.enteredPassword +
      "<hr>Comments: " + theRoutines.comments.str(), theCommands);
   return output.AssignValue(theRoutines.comments.str(), theCommands);
 }
@@ -331,9 +409,9 @@ bool UserCalculator::getUserAndPass(Calculator& theCommands, const Expression& i
   { theCommands << "<hr>Argument " << input[1].ToString() << " is supposed to be a string.";
     this->username=input[1].ToString();
   }
-  if (!input[2].IsOfType<std::string>(&this->password))
+  if (!input[2].IsOfType<std::string>(&this->enteredPassword))
   { theCommands << "<hr>Argument " << input[2].ToString() << " is supposed to be a string.";
-    this->password=input[2].ToString();
+    this->enteredPassword=input[2].ToString();
   }
   return true;
 }
@@ -346,9 +424,9 @@ bool UserCalculator::getUserPassAndSelectedColumns(Calculator& theCommands, cons
   { theCommands << "<hr>Argument " << input[1].ToString() << " is supposed to be a string.";
     this->username=input[1].ToString();
   }
-  if (!input[2].IsOfType<std::string>(&this->password))
+  if (!input[2].IsOfType<std::string>(&this->enteredPassword))
   { theCommands << "<hr>Argument " << input[2].ToString() << " is supposed to be a string.";
-    this->password=input[2].ToString();
+    this->enteredPassword=input[2].ToString();
   }
   this->selectedColumns.SetSize(input.children.size-3);
   for (int i=3; i<input.children.size; i++ )
@@ -357,7 +435,7 @@ bool UserCalculator::getUserPassAndSelectedColumns(Calculator& theCommands, cons
       this->selectedColumns[i-3]=input[i].ToString();
     }
   this->selectedColumnValues.initFillInObject(this->selectedColumns.size, "");
-  this->selectedColumnValuesAvailable.initFillInObject(this->selectedColumns.size, "");
+  this->selectedColumnsRetrievalFailureRemarks.initFillInObject(this->selectedColumns.size, "");
   return true;
 }
 
@@ -369,9 +447,9 @@ bool UserCalculator::getUserPassAndEmail(Calculator& theCommands, const Expressi
   { theCommands << "<hr>Argument " << input[1].ToString() << " is supposed to be a string.";
     this->username=input[1].ToString();
   }
-  if (!input[2].IsOfType<std::string>(&this->password))
+  if (!input[2].IsOfType<std::string>(&this->enteredPassword))
   { theCommands << "<hr>Argument " << input[2].ToString() << " is supposed to be a string.";
-    this->password=input[2].ToString();
+    this->enteredPassword=input[2].ToString();
   }
   if (!input[3].IsOfType<std::string>(&this->email))
   { theCommands << "<hr>Argument " << input[3].ToString() << " is supposed to be a string.";
@@ -402,6 +480,22 @@ void TimeWrapper::AssignLocalTime()
   this->ComputeTimeStringNonReadable();
 }
 
+double TimeWrapper::SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(const TimeWrapper& other)
+{ //This is a simple function aimed at computing expiration of authentication tokens and
+  //does not need to be precise.
+  //To make matters simple, the function approximates:
+  //every year by 365 days
+  //every month by 30.4 days
+  double result=0;
+  result+=(this->theTime.tm_year - other.theTime.tm_year)*365*24;
+  result+=(this->theTime.tm_mon  - other.theTime.tm_mon )*30.4*24;
+  result+=(this->theTime.tm_mday - other.theTime.tm_mday)*30.4*24;
+  result+=(this->theTime.tm_hour - other.theTime.tm_hour);
+  result+=(this->theTime.tm_min  - other.theTime.tm_min);
+  //seconds are ignored
+  return result;
+}
+
 std::string TimeWrapper::ToStringHumanReadable()
 { return std::asctime(&this->theTime);
 }
@@ -422,18 +516,7 @@ void TimeWrapper::operator=(const std::string& input)
 void UserCalculator::FetchColumns(DatabaseRoutines& theRoutines)
 { MacroRegisterFunctionWithName("UserCalculator::FetchColumns");
   for (int i=0; i<this->selectedColumns.size; i++)
-  { DatabaseQuery theQuery(theRoutines,
-    "SELECT "+this->selectedColumns[i] + " FROM calculatorUsers.users WHERE user='"+
-    this->username
-    +"'"
-    );
-    if (!theQuery.flagQuerySucceeded)
-      this->selectedColumnValuesAvailable[i] ="<b>Query failed - column may not exist (or some other error occurred).</b>";
-    else if (!theQuery.flagQueryReturnedResult)
-      this->selectedColumnValuesAvailable[i]= "<b> Query did not return a result - column may not exist.</b>";
-    else
-      this->selectedColumnValues[i]= theQuery.theQueryResultString;
-  }
+    this->FetchOneColumn(this->selectedColumns[i], this->selectedColumnValues[i], theRoutines, &this->selectedColumnsRetrievalFailureRemarks[i]);
 }
 
 bool DatabaseRoutines::innerGetUserDBEntry(Calculator& theCommands, const Expression& input, Expression& output)
@@ -454,11 +537,9 @@ bool DatabaseRoutines::innerGetAuthentication(Calculator& theCommands, const Exp
   if (!theUser.getUserAndPass(theCommands, input))
     return false;
   DatabaseRoutines theRoutines;
-  bool result=theUser.ComputeAuthenticationToken(theRoutines);
-  theCommands << theRoutines.comments.str();
-  if (!result)
+  if (!theUser.Authenticate(theRoutines))
     return output.MakeError("Failed to authenticate. ", theCommands);
-  return output.AssignValue(theUser.authenticationToken, theCommands);
+  return output.AssignValue(theUser.actualAuthenticationToken, theCommands);
 }
 
 bool DatabaseRoutines::innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output)

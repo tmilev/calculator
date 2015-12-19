@@ -27,10 +27,13 @@ public:
   std::string RelativePhysicalFileName;
   std::string status;
   std::string pingMessage;
+  std::string user;
+  std::string authenticationToken;
   double timeOfLastPingServerSideOnly;
   bool flagDeallocated;
   bool flagMainAddressSanitized;
   bool flagLoggedIn;
+  bool flagAuthenticationTokenWasSubmitted;
   std::string mainAddressNonSanitized;
   List<std::string> theStrings;
   int ContentLength;
@@ -70,7 +73,7 @@ public:
 
   static int OutputWeb();
   void ProcessRawArguments();
-  static void OutputBeforeComputation();
+  void OutputBeforeComputation();
   static void OutputStandardResult();
   static void OutputSendAfterTimeout(const std::string& input);
   static void OutputResultAfterTimeout();
@@ -89,10 +92,13 @@ public:
   void SendAllBytesHttp();
   void SendAllBytesHttpSSL();
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
-  static std::string GetJavaScriptIndicatorFromHD();
   std::string GetJavaScriptIndicatorBuiltInServer(int inputIndex);
-  static std::string GetLoginScreen();
+  std::string GetLoginScreen();
+  std::string GetJavascriptCookieForTheCalculator();
+  static std::string GetJavaScriptIndicatorFromHD();
   static std::string GetLoginHTMLelement();
+  static std::string GetJavascriptHideHtml();
+  static std::string GetJavascriptCookieBasics();
   bool IsFileExtensionOfBinaryFile(const std::string& fileExtension);
   WebWorker();
   ~WebWorker();

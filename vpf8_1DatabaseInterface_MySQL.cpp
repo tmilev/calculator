@@ -5,7 +5,7 @@ ProjectInformationInstance ProjectInfoVpf8_1MySQLcpp(__FILE__, "MySQL interface.
 
 bool LoginViaDatabase
 (const std::string& inputUsername, const std::string& inputPassword,
- const std::string& inputAuthenticationToken)
+ std::string& inputOutputAuthenticationToken)
 {
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("LoginViaDatabase");
@@ -13,8 +13,17 @@ bool LoginViaDatabase
   UserCalculator theUser;
   theUser.username=inputUsername;
   theUser.enteredPassword=inputPassword;
-  theUser.enteredAuthenticationToken=inputAuthenticationToken;
-  return theUser.Authenticate(theRoutines);
+  theUser.enteredAuthenticationToken=inputOutputAuthenticationToken;
+  stOutput << "Attempting to login with user: " << inputUsername
+  << " pass: " << inputPassword
+  << " token: " << inputOutputAuthenticationToken;
+  if (theUser.Authenticate(theRoutines))
+  { inputOutputAuthenticationToken=theUser.actualAuthenticationToken;
+    stOutput << " SUCCESS";
+    return true;
+  }
+    stOutput << " FAIL";
+  return false;
 #else
   return true;
 #endif

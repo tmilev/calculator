@@ -2289,8 +2289,11 @@ void CGI::ChopCGIInputStringToMultipleStrings(const std::string& input, List<std
   outputData[0]="";
   outputFieldNames[0]="";
   for (int i=0; i<inputLength; i++)
-  { if (input[i]=='=')
-      readingData=!readingData;
+  { bool ignoreThisChar=false;
+    if (!readingData && input[i]=='=')
+    { readingData=true;
+      ignoreThisChar=true;
+    }
     if (input[i]=='&')
     { outputData.SetSize(outputData.size+1);
       outputFieldNames.SetSize(outputData.size);
@@ -2299,8 +2302,9 @@ void CGI::ChopCGIInputStringToMultipleStrings(const std::string& input, List<std
       *outputFieldNames.LastObject()="";
       *outputData.LastObject()="";
       readingData=false;
+      ignoreThisChar=true;
     }
-    if (input[i]!='=' && input[i]!='&')
+    if (!ignoreThisChar)
     { if (readingData)
         outputData.LastObject()->push_back(input[i]);
       else

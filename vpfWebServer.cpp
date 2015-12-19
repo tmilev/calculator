@@ -356,8 +356,6 @@ void WebWorker::SendAllBytesHttpSSL()
 #endif // MACRO_use_open_ssl
 }
 
-extern void static_html4(std::stringstream& output);
-
 bool ProgressReportWebServer::flagServerExists=true;
 const int WebServer::maxNumPendingConnections=10;
 
@@ -516,29 +514,34 @@ void WebWorker::StandardOutputAfterTimeOut(const std::string& input)
 
 extern bool LoginViaDatabase
 (const std::string& inputUsername, const std::string& inputPassword,
- const std::string& inputAuthenticationToken);
+ std::string& inputOutputAuthenticationToken);
 
 void WebWorker::ProcessRawArguments()
 { MacroRegisterFunctionWithName("WebServer::ProcessRawArguments");
   List<std::string> inputStrings, inputStringNames;
   CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
-  std::string user;
-  std::string authentication;
   std::string password;
+  this->user="";
   if (inputStringNames.Contains("user"))
-  { user=inputStrings[inputStringNames.GetIndex("user")];
+  { this->user=inputStrings[inputStringNames.GetIndex("user")];
     stOutput << "<b>user: </b>" << user << "<br>";
   }
-  if (inputStringNames.Contains("authentication"))
-  { authentication=inputStrings[inputStringNames.GetIndex("authentication")];
-    stOutput << "<b>authentication: </b><br>" << authentication;
+  if (inputStringNames.Contains("authenticationToken"))
+  { authenticationToken=inputStrings[inputStringNames.GetIndex("authenticationToken")];
+    stOutput << "<b>authenticationToken: </b><br>" << this->authenticationToken;
+    this->flagAuthenticationTokenWasSubmitted=true;
   }
   if (inputStringNames.Contains("password"))
   { password=inputStrings[inputStringNames.GetIndex("password")];
-    stOutput << "<b>password: </b><br>" << password;
   }
-  if (theGlobalVariables.flagUsingHttpSSL)
-    this->flagLoggedIn=LoginViaDatabase(user, password, authentication);
+  this->flagLoggedIn=false;
+  if (this->user!="" && theGlobalVariables.flagUsingHttpSSL)
+  { stOutput << "<br>LoginViaDatabase called: "
+    << "user: " << this->user;
+    this->flagLoggedIn=LoginViaDatabase(this->user, password, this->authenticationToken);
+  }
+  for (unsigned i=0; i<password.size(); i++)
+    password[i]=' ';
   if (inputStringNames.Contains("textInput"))
     theParser.inputString= inputStrings[inputStringNames.GetIndex("textInput")];
 }
@@ -562,12 +565,9 @@ void WebWorker::OutputBeforeComputation()
   theGlobalVariables.initOutputReportAndCrashFileNames
   (theParser.inputStringRawestOfTheRaw, theParser.inputString);
 
-  std::stringstream tempStreamXX;
-  static_html4(tempStreamXX);
-
-//stOutput << "Folders: " << theGlobalVariables.ToStringFolderInfo();
-
-  stOutput << tempStreamXX.str();
+  stOutput << WebWorker::GetJavascriptHideHtml();
+  stOutput << WebWorker::GetJavascriptCookieBasics();
+  stOutput << this->GetJavascriptCookieForTheCalculator();
   stOutput << "<table>\n <tr valign=\"top\">\n ";
   stOutput << "<td>"; //<td> tag will be closed later in WebWorker::OutputStandardResult
   stOutput << "\n<FORM method=\"POST\" id=\"formCalculator\" name=\"formCalculator\" action=\""
@@ -1260,6 +1260,11 @@ void WebWorker::reset()
   this->timeOfLastPingServerSideOnly=-1;
   this->flagUsingSSLinCurrentConnection=false;
   this->flagLoggedIn=false;
+  this->flagAuthenticationTokenWasSubmitted=false;
+  for (unsigned i=0; i<this->user.size(); i++)
+    this->user[i]=' ';
+  for (unsigned i=0; i<this->authenticationToken.size(); i++)
+    this->authenticationToken[i]=' ';
   this->Release();
 }
 
@@ -1421,7 +1426,7 @@ int WebWorker::OutputWeb()
       stOutput.Flush();
       return 0;
     }
-  WebWorker::OutputBeforeComputation();
+  theWebServer.GetActiveWorker().OutputBeforeComputation();
   theWebServer.CheckExecutableVersionAndRestartIfNeeded();
 
   //stOutput << theParser.javaScriptDisplayingIndicator;
@@ -1494,12 +1499,21 @@ std::string WebWorker::GetJavaScriptIndicatorFromHD()
 std::string WebWorker::GetLoginHTMLelement()
 { MacroRegisterFunctionWithName("WebWorker::GetLoginHTMLelement");
   std::stringstream out;
+  out << "<script type=\"text/javascript\">\n"
+  << "function checkCookie(){\n"
+  << "  authenticationToken=getCookie(\"authenticationToken\");\n"
+  << "  user=getCookie(\"user\");\n"
+  << "  if (authenticationToken!=\"\")\n"
+  << "    window.location=\"/calculator?user=\"+user+\"&authenticationToken=\"+authenticationToken;\n "
+  << "}\n"
+  << "</script>\n"
+  ;
   out << "<form name=\"login\" action=\"calculator\" method=\"get\" accept-charset=\"utf-8\">"
   <<  "User name or email: "
   << "<input type=\"text\" name=\"user\" placeholder=\"user\" required>"
   << "<br>Password: "
   << "<input type=\"password\" name=\"password\" placeholder=\"password\">"
-  << "<br>Authentication token: <input type=\"password\" name=\"authentication\" placeholder=\"authenticationToken\">"
+  << "<br>Authentication token: <input type=\"password\" name=\"authenticationToken\" placeholder=\"authenticationToken\">"
   << "<br><input type=\"submit\" value=\"Login\">"
   << "</form>";
   out << "<b>Login screen not implemented yet.</b>";
@@ -1509,10 +1523,93 @@ std::string WebWorker::GetLoginHTMLelement()
 std::string WebWorker::GetLoginScreen()
 { MacroRegisterFunctionWithName("WebWorker::GetLoginScreen");
   std::stringstream out;
-  out << "<html><body>"
+  out << "<html>"
+  << WebWorker::GetJavascriptCookieBasics()
+  << "<body ";
+  if (!this->flagAuthenticationTokenWasSubmitted)
+    out << "onload=\"checkCookie();\"";
+  out << ">\n"
   << WebWorker::GetLoginHTMLelement()
   << "</body></html>";
   return out.str();
+}
+
+std::string WebWorker::GetJavascriptHideHtml()
+{ std::stringstream output;
+  output << " <!>\n";
+  output << " <script type=\"text/javascript\"> \n";
+  output << " function switchMenu(obj)\n";
+  output << " { var el = document.getElementById(obj);	\n";
+  output << "   if ( el.style.display != \"none\" ) \n";
+  output << "     el.style.display = 'none';\n";
+  output << "   else \n";
+  output << "     el.style.display = '';\n";
+  output << " }\n";
+  output << " function hideItem(obj)\n";
+  output << " { document.getElementById(obj).style.display=\"none\";\n";
+  output << " }\n";
+  output << " function showItem(obj)\n";
+  output << " { document.getElementById(obj).style.display=\"\";\n";
+  output << " }\n";
+  output << " </script>\n";
+  return output.str();
+}
+
+std::string WebWorker::GetJavascriptCookieBasics()
+{ std::stringstream output;
+  output << " <script type=\"text/javascript\"> \n";
+  output << " function getCookie(c_name)\n";
+  output << " { VPFcookie=document.cookie.split(\";\");\n";
+  output << "   for (i=0;i<VPFcookie.length;i++)\n";
+  output << "   { x=VPFcookie[i].substr(0,VPFcookie[i].indexOf(\"=\"));\n";
+  output << "   	y=VPFcookie[i].substr(VPFcookie[i].indexOf(\"=\")+1);\n";
+  output << "     x=x.replace(/^\\s+|\\s+$/g,\"\");\n";
+  output << "     if (x==c_name)\n";
+  output << "       return unescape(y);\n";
+  output << "   }\n";
+  output << "   return \"\";\n";
+  output << " }\n";
+  output << " \n";
+  output << " function addCookie(theName, theValue, exdays)\n";
+  output << " { exdate= new Date();\n";
+  output << "   exdate.setDate(exdate.getDate() + exdays);\n";
+  output << "   c_value=escape(theValue) + ((exdays==null) ? \"\" : \"; expires=\"+exdate.toUTCString());\n";
+  output << "   document.cookie=theName + \"=\" + c_value;\n";
+  output << " }\n";
+  output << "</script>\n";
+  return output.str();
+
+}
+
+std::string WebWorker::GetJavascriptCookieForTheCalculator()
+{ std::stringstream output;
+  output << WebWorker::GetJavascriptCookieBasics();
+  output << " <script type=\"text/javascript\"> \n";
+  output << " function storeSettings()\n";
+  output << " { theCalculatorForm=document.getElementById(\"textInputID\");  \n";
+  output << "   //alert(theCalculatorForm.style.width);\n";
+  output << "   addCookie(\"widthCalculatorText\", theCalculatorForm.style.width, 100);  \n";
+  output << "   addCookie(\"heightCalculatorText\", theCalculatorForm.style.height, 100);\n";
+  output << "   //alert(document.cookie);\n";
+  output << " }\n";
+  output << " \n";
+  output << " function checkCookie()\n";
+  output << " { theCalculatorForm=document.getElementById(\"textInputID\");  \n";
+  output << "   theOldWidth=getCookie(\"widthCalculatorText\");\n";
+  output << "   theOldHeight=getCookie(\"heightCalculatorText\");\n";
+  output << "   //alert(\"height: \" + theOldHeight +\" width: \" + theOldWidth);\n";
+  output << "   //theCalculatorForm.setStyle(\"width:\"+ theOldWidth);\n";
+  output << " //  theCalculatorForm.style.height=theOldHeight;\n";
+  output << "   theCalculatorForm.style.width  = theOldWidth;\n";
+  output << "   theCalculatorForm.style.height = theOldHeight;\n";
+  if (this->flagUsingSSLinCurrentConnection && this->flagLoggedIn)
+    output << "   addCookie(\"authenticationToken\", \"" << this->authenticationToken << "\", 150);"
+    << "//150 days is a little longer than a semester\n"
+    << "   addCookie(\"user\", \"" << this->user << "\", 150);\n"
+    ;
+  output << " }\n";
+  output << " </script>\n";
+  return output.str();
 }
 
 std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex)

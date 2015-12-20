@@ -85,7 +85,6 @@ UserCalculator::~UserCalculator()
 
 DatabaseRoutines::DatabaseRoutines()
 { this->connection=0;
-  this->admin="admin";
 }
 
 DatabaseRoutines::~DatabaseRoutines()
@@ -346,7 +345,7 @@ bool UserCalculator::SetPassword(DatabaseRoutines& theRoutines)
 bool DatabaseRoutines::startMySQLDatabase()
 { MacroRegisterFunctionWithName("DatabaseRoutines::startMySQLDatabase");
   if (theGlobalVariables.flagUsingBuiltInWebServer)
-    if (!theGlobalVariables.flagUsingHttpSSL)
+    if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
       return *this << "Database operations forbidden for connections not carried over ssl. ";
   this->databasePassword="";
   this->databaseUser="calculator";
@@ -437,8 +436,8 @@ bool DatabaseRoutines::innerDeleteUser(Calculator& theCommands, const Expression
   if (!theAdmin.getUserAndPass(theCommands, input))
     return false;
   theUser.username=theAdmin.username;
+  theAdmin.username=theGlobalVariables.userCalculatorAdmin;
   DatabaseRoutines theRoutines;
-  theAdmin.username=theRoutines.admin;
   if (!theAdmin.Authenticate(theRoutines))
     return output.MakeError("Admin authentication failed. ", theCommands);
   theUser.DeleteMe(theRoutines);
@@ -621,7 +620,7 @@ bool DatabaseRoutines::innerGetUserDetails(Calculator& theCommands, const Expres
   if (!theUser.getUserAndPass(theCommands, input))
     return false;
   DatabaseRoutines theRoutines;
-  if (theUser.username!=theRoutines.admin)
+  if (theUser.username!=theGlobalVariables.userCalculatorAdmin)
     return output.AssignValue
     ((std::string)"At the moment, the GetUserDetails function is implemented only for the admin user. ", theCommands);
   if (!theUser.Authenticate(theRoutines))

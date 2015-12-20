@@ -59,11 +59,13 @@ const std::string fileCertificate= "../cert.pem";
 const std::string fileKey= "../key.pem";
 
 void WebServer::initSSL()
-{ if (!this->flagUsESSL)
+{ MacroRegisterFunctionWithName("WebServer::initSSL");
+  if (!theGlobalVariables.flagSSLisAvailable)
+  { theLog << logger::red << "SSL is NOT available." << logger::endL;
     return;
-  MacroRegisterFunctionWithName("WebServer::initSSL");
+  }
 #ifdef MACRO_use_open_ssl
-
+  theLog << logger::green << "SSL is available." << logger::endL;
   const SSL_METHOD *meth;
   SSL_load_error_strings();
   OpenSSL_add_ssl_algorithms();
@@ -89,7 +91,7 @@ void WebServer::initSSL()
 }
 
 void WebServer::SSLfreeResources()
-{ if (!this->GetActiveWorker().flagUsingSSLinCurrentConnection)
+{ if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
     return;
 #ifdef MACRO_use_open_ssl
   SSL_free (theSSLdata.ssl);
@@ -97,7 +99,7 @@ void WebServer::SSLfreeResources()
 }
 
 void WebServer::SSLfreeEverythingShutdownSSL()
-{ if (!this->flagUsESSL)
+{ if (!theGlobalVariables.flagSSLisAvailable)
     return;
 #ifdef MACRO_use_open_ssl
   SSL_CTX_free (theSSLdata.ctx);
@@ -105,9 +107,9 @@ void WebServer::SSLfreeEverythingShutdownSSL()
 }
 
 void WebServer::SSLServerSideHandShake()
-{ if (!this->flagUsESSL)
+{ if (!theGlobalVariables.flagSSLisAvailable)
     return;
-  if (!this->GetActiveWorker().flagUsingSSLinCurrentConnection)
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
     return;
 #ifdef MACRO_use_open_ssl
   MacroRegisterFunctionWithName("WebServer::SSLServerSideHandShake");
@@ -157,7 +159,7 @@ void WebServer::SSLServerSideHandShake()
 
 bool WebWorker::ReceiveAllHttpSSL()
 { MacroRegisterFunctionWithName("WebWorker::ReceiveAllHttpSSL");
-  if (!this->flagUsingSSLinCurrentConnection)
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
     return true;
 #ifdef MACRO_use_open_ssl
   unsigned const int bufferSize=60000;
@@ -275,6 +277,7 @@ bool WebWorker::ReceiveAllHttpSSL()
   theReport.SetStatus("Webworker: received everything, processing. ");
   return true;
 #else
+  crash << "This piece of code should never be reached. " << crash;
   return true;
 #endif // MACRO_use_open_ssl
 }
@@ -284,7 +287,7 @@ void WebWorker::SendAllBytesHttpSSL()
     return;
   MacroRegisterFunctionWithName("WebWorker::SendAllBytesHttpSSL");
   this->CheckConsistency();
-  if (!this->flagUsingSSLinCurrentConnection)
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
     crash << "Error: WebWorker::SendAllBytesHttpSSL called while flagUsingSSLinCurrentConnection is set to false. " << crash;
 #ifdef MACRO_use_open_ssl
   ProgressReportWebServer theReport;
@@ -521,10 +524,10 @@ void WebWorker::ProcessRawArguments()
   List<std::string> inputStrings, inputStringNames;
   CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
   std::string password;
-  this->user="";
+  theGlobalVariables.userDefault="";
   if (inputStringNames.Contains("user"))
-  { this->user=inputStrings[inputStringNames.GetIndex("user")];
-    CGI::URLStringToNormal(this->user, this->user);
+  { theGlobalVariables.userDefault=inputStrings[inputStringNames.GetIndex("user")];
+    CGI::URLStringToNormal(theGlobalVariables.userDefault, theGlobalVariables.userDefault);
     //stOutput << "message: " << theParser.inputStringRawestOfTheRaw;
     //stOutput << "<hr><b>user: </b>" << user << "<br>";
   }
@@ -538,11 +541,11 @@ void WebWorker::ProcessRawArguments()
   { password=inputStrings[inputStringNames.GetIndex("password")];
     CGI::URLStringToNormal(password, password);
   }
-  this->flagLoggedIn=false;
-  if (this->user!="" && theGlobalVariables.flagUsingHttpSSL)
+  theGlobalVariables.flagLoggedIn=false;
+  if (theGlobalVariables.userDefault!="" && theGlobalVariables.flagUsingSSLinCurrentConnection)
   { //stOutput << "<br>LoginViaDatabase called: "
     //<< "user: " << this->user;
-    this->flagLoggedIn=LoginViaDatabase(this->user, password, this->authenticationToken);
+    theGlobalVariables.flagLoggedIn=LoginViaDatabase(theGlobalVariables.userDefault, password, this->authenticationToken);
   }
   for (unsigned i=0; i<password.size(); i++)
     password[i]=' ';
@@ -587,10 +590,10 @@ void WebWorker::OutputBeforeComputation()
   << ">";
   stOutput << civilizedInputSafish;
   stOutput << "</textarea>\n<br>\n";
-  if (this->flagLoggedIn && this->flagUsingSSLinCurrentConnection)
+  if (theGlobalVariables.flagLoggedIn && theGlobalVariables.flagUsingSSLinCurrentConnection)
     stOutput << "<input type=\"hidden\" name=authenticationToken value=\"" <<  this->authenticationToken << "\">"
     << "<input type=\"hidden\" name=\"user\" value=\""
-    << this->user << "\">";
+    << theGlobalVariables.userDefault << "\">";
   stOutput << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" "
   << "name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" ";
   stOutput << "action=\"calculator\"> ";
@@ -814,7 +817,7 @@ void WebWorker::QueueStringForSending(const std::string& stringToSend, bool Must
 
 void WebWorker::SendAllBytes()
 { MacroRegisterFunctionWithName("WebWorker::SendAllBytes");
-  if (this->flagUsingSSLinCurrentConnection)
+  if (theGlobalVariables.flagUsingSSLinCurrentConnection)
   { this->SendAllBytesHttpSSL();
     return;
   }
@@ -911,7 +914,7 @@ bool WebWorker::CheckConsistency()
 
 bool WebWorker::ReceiveAll()
 { MacroRegisterFunctionWithName("WebWorker::ReceiveAll");
-  if (this->flagUsingSSLinCurrentConnection)
+  if (theGlobalVariables.flagUsingSSLinCurrentConnection)
     return this->ReceiveAllHttpSSL();
   return this->ReceiveAllHttp();
 }
@@ -1268,13 +1271,15 @@ void WebWorker::reset()
   this->requestType=this->requestUnknown;
   this->flagMainAddressSanitized=false;
   this->timeOfLastPingServerSideOnly=-1;
-  this->flagUsingSSLinCurrentConnection=false;
-  this->flagLoggedIn=false;
   this->flagAuthenticationTokenWasSubmitted=false;
-  for (unsigned i=0; i<this->user.size(); i++)
-    this->user[i]=' ';
+  theGlobalVariables.flagUsingSSLinCurrentConnection=false;
+  theGlobalVariables.flagLoggedIn=false;
+  for (unsigned i=0; i<theGlobalVariables.userDefault.size(); i++)
+    theGlobalVariables.userDefault[i]=' ';
+  theGlobalVariables.userDefault="";
   for (unsigned i=0; i<this->authenticationToken.size(); i++)
     this->authenticationToken[i]=' ';
+  this->authenticationToken="";
   this->Release();
 }
 
@@ -1427,15 +1432,15 @@ int WebWorker::OutputWeb()
 { MacroRegisterFunctionWithName("WebServer::OutputWeb");
   ProgressReportWebServer theReport;
   theWebServer.GetActiveWorker().ProcessRawArguments();
-  if (theGlobalVariables.flagUsingHttpSSL)
-    if (!theWebServer.GetActiveWorker().flagLoggedIn)
-    { stOutput << theWebServer.GetActiveWorker().GetLoginScreen();
-      theReport.SetStatus("Serving login screen. ");
-      theReport.SetStatus("Login screen served, exiting. ");
-      theGlobalVariables.flagComputationCompletE=true;
-      stOutput.Flush();
-      return 0;
-    }
+  if ( theGlobalVariables.flagUsingSSLinCurrentConnection &&
+      !theGlobalVariables.flagLoggedIn)
+  { stOutput << theWebServer.GetActiveWorker().GetLoginScreen();
+    theReport.SetStatus("Serving login screen. ");
+    theReport.SetStatus("Login screen served, exiting. ");
+    theGlobalVariables.flagComputationCompletE=true;
+    stOutput.Flush();
+    return 0;
+  }
   theWebServer.GetActiveWorker().OutputBeforeComputation();
   theWebServer.CheckExecutableVersionAndRestartIfNeeded();
 
@@ -1612,10 +1617,10 @@ std::string WebWorker::GetJavascriptCookieForTheCalculator()
   output << " //  theCalculatorForm.style.height=theOldHeight;\n";
   output << "   theCalculatorForm.style.width  = theOldWidth;\n";
   output << "   theCalculatorForm.style.height = theOldHeight;\n";
-  if (this->flagUsingSSLinCurrentConnection && this->flagLoggedIn)
+  if (theGlobalVariables.flagUsingSSLinCurrentConnection&& theGlobalVariables.flagLoggedIn)
     output << "   addCookie(\"authenticationToken\", \"" << this->authenticationToken << "\", 150);"
     << "//150 days is a little longer than a semester\n"
-    << "   addCookie(\"user\", \"" << this->user << "\", 150);\n"
+    << "   addCookie(\"user\", \"" << theGlobalVariables.userDefault << "\", 150);\n"
     ;
   output << " }\n";
   output << " </script>\n";
@@ -1902,7 +1907,6 @@ WebServer::WebServer()
 { this->flagDeallocated=false;
   this->flagTryToKillOlderProcesses=true;
   this->flagPort8155=false;
-  this->flagUsESSL=false;
   this->activeWorker=-1;
   this->timeLastExecutableModification=-1;
   this->listeningSocketHTTP=-1;
@@ -2095,7 +2099,7 @@ void WebServer::Restart()
   int timeInteger=(int) theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   theCommand << "killall " <<  theGlobalVariables.PhysicalNameExecutableNoPath + " \r\n./";
   theCommand << theGlobalVariables.PhysicalNameExecutableNoPath;
-  if (this->flagUsESSL)
+  if (theGlobalVariables.flagSSLisAvailable)
     theCommand << " serverSSL nokill " << timeInteger;
   else if (this->flagPort8155)
     theCommand << " server8155 nokill " << timeInteger;
@@ -2111,7 +2115,7 @@ void WebServer::initPortsITry()
   this->PortsITryHttp.AddOnTop("8081");
   this->PortsITryHttp.AddOnTop("8082");
   this->PortsITryHttp.AddOnTop("8155");
-  if (!this->flagUsESSL)
+  if (!theGlobalVariables.flagSSLisAvailable)
     return;
   this->PortsITryHttpSSL.AddOnTop("8083");
   this->PortsITryHttpSSL.AddOnTop("8084");
@@ -2249,9 +2253,8 @@ bool WebServer::initBindToPorts()
     }
   if (this->listeningSocketHTTP == -1)
     crash << "Failed to bind to any of the ports " << this->PortsITryHttp.ToStringCommaDelimited() << "\n" << crash;
-  if (this->flagUsESSL)
-    if (this->listeningSocketHttpSSL==-1)
-      crash << "Failed to bind to any of the ports " << this->PortsITryHttpSSL.ToStringCommaDelimited() << "\n" << crash;
+  if (theGlobalVariables.flagSSLisAvailable && this->listeningSocketHttpSSL==-1)
+    crash << "Failed to bind to any of the ports " << this->PortsITryHttpSSL.ToStringCommaDelimited() << "\n" << crash;
   return true;
 }
 
@@ -2292,10 +2295,9 @@ int WebServer::Run()
   int highestSockNum=-1;
   if (listen(this->listeningSocketHTTP, WebServer::maxNumPendingConnections) == -1)
     crash << "Listen function failed on http port." << crash;
-  if (this->flagUsESSL)
+  if (theGlobalVariables.flagSSLisAvailable)
     if (listen(this->listeningSocketHttpSSL, WebServer::maxNumPendingConnections) == -1)
       crash << "Listen function failed on https port." << crash;
-
   theLog << logger::purple <<  "server: waiting for connections...\r\n" << logger::endL;
   unsigned int connectionsSoFar=0;
   sockaddr_storage their_addr; // connector's address information
@@ -2337,9 +2339,9 @@ int WebServer::Run()
 //    << theListeningSocket << logger::endL;
     this->RecycleChildrenIfPossible();
     this->CreateNewActiveWorker();
-    this->GetActiveWorker().flagUsingSSLinCurrentConnection=false;
+    theGlobalVariables.flagUsingSSLinCurrentConnection=false;
     if (theListeningSocket==this->listeningSocketHttpSSL)
-    { this->GetActiveWorker().flagUsingSSLinCurrentConnection=true;
+    { theGlobalVariables.flagUsingSSLinCurrentConnection=true;
       //std::cout << "\noutput ssl:\n";
     }
     this->GetActiveWorker().connectedSocketID=newConnectedSocket;
@@ -2354,7 +2356,6 @@ int WebServer::Run()
     //theLog << "\r\nChildPID: " << this->childPID;
     if (this->GetActiveWorker().ProcessPID!=0)
     { // this is the child (worker) process
-      theGlobalVariables.flagUsingHttpSSL=this->GetActiveWorker().flagUsingSSLinCurrentConnection;
       this->SSLServerSideHandShake();
       this->Release(theListeningSocket);//worker has no access to socket listener
       theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=
@@ -2384,12 +2385,15 @@ int WebServer::Run()
         << "</body></html>";
         stOutput.Flush();
         this->GetActiveWorker().SendAllBytes();
+        this->ReleaseEverything();
+//        this->SSLfreeEverythingShutdownSSL();
         return -1;
       }
       this->GetActiveWorker().SendDisplayUserInputToServer();
      // std::cout << "Got thus far 9" << std::endl;
       int result= this->GetActiveWorker().ServeClient();
       this->ReleaseEverything();
+//      this->SSLfreeEverythingShutdownSSL();
       return result;
     }
     this->ReleaseWorkerSideResources();
@@ -2485,7 +2489,11 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   if (secondArgument=="server8155")
     theWebServer.flagPort8155=true;
   if (secondArgument=="serverSSL")
-    theWebServer.flagUsESSL=true;
+  {
+#ifdef MACRO_use_open_ssl
+    theGlobalVariables.flagSSLisAvailable=true;
+#endif // MACRO_use_open_ssl
+  }
   if (argC<3)
     return;
   std::string& thirdArgument=theGlobalVariables.programArguments[2];

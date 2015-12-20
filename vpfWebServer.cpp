@@ -525,16 +525,13 @@ void WebWorker::ProcessRawArguments()
   if (inputStringNames.Contains("user"))
   { this->user=inputStrings[inputStringNames.GetIndex("user")];
     CGI::URLStringToNormal(this->user, this->user);
-    stOutput << "message: " << theParser.inputStringRawestOfTheRaw;
-    stOutput << "<hr><b>user: </b>" << user << "<br>";
+    //stOutput << "message: " << theParser.inputStringRawestOfTheRaw;
+    //stOutput << "<hr><b>user: </b>" << user << "<br>";
   }
   if (inputStringNames.Contains("authenticationToken"))
   { this->authenticationToken=inputStrings[inputStringNames.GetIndex("authenticationToken")];
-    if (this->authenticationToken.size()>0)
-      if (this->authenticationToken[this->authenticationToken.size()-1]!='=')
-        this->authenticationToken.push_back('=');
     CGI::URLStringToNormal(this->authenticationToken, this->authenticationToken);
-    stOutput << "<b>authenticationToken: </b><br>" << this->authenticationToken;
+    //stOutput << "<b>authenticationToken: </b><br>" << this->authenticationToken;
     this->flagAuthenticationTokenWasSubmitted=true;
   }
   if (inputStringNames.Contains("password"))
@@ -543,8 +540,8 @@ void WebWorker::ProcessRawArguments()
   }
   this->flagLoggedIn=false;
   if (this->user!="" && theGlobalVariables.flagUsingHttpSSL)
-  { stOutput << "<br>LoginViaDatabase called: "
-    << "user: " << this->user;
+  { //stOutput << "<br>LoginViaDatabase called: "
+    //<< "user: " << this->user;
     this->flagLoggedIn=LoginViaDatabase(this->user, password, this->authenticationToken);
   }
   for (unsigned i=0; i<password.size(); i++)
@@ -591,7 +588,7 @@ void WebWorker::OutputBeforeComputation()
   stOutput << civilizedInputSafish;
   stOutput << "</textarea>\n<br>\n";
   if (this->flagLoggedIn && this->flagUsingSSLinCurrentConnection)
-    stOutput << "<input type=\"hidden\" name=authenticationToken value=\"" << this->authenticationToken << "\">"
+    stOutput << "<input type=\"hidden\" name=authenticationToken value=\"" <<  this->authenticationToken << "\">"
     << "<input type=\"hidden\" name=\"user\" value=\""
     << this->user << "\">";
   stOutput << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" "

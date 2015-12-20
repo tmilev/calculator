@@ -14,18 +14,18 @@ bool LoginViaDatabase
   theUser.username=inputUsername;
   theUser.enteredPassword=inputPassword;
   theUser.enteredAuthenticationToken=inputOutputAuthenticationToken;
-  stOutput << "Attempting to login with user: " << inputUsername
-  << " pass: " << inputPassword
-  << " token: " << inputOutputAuthenticationToken;
+  //stOutput << "Attempting to login with user: " << inputUsername
+  //<< " pass: " << inputPassword
+  //<< " token: " << inputOutputAuthenticationToken;
   if (theUser.Authenticate(theRoutines))
   { inputOutputAuthenticationToken=theUser.actualAuthenticationToken;
-    stOutput << " SUCCESS. ";
-    stOutput << "<br>The actual authenticationToken is now: " << theUser.actualAuthenticationToken;
+    //stOutput << " SUCCESS. ";
+    //stOutput << "<br>The actual authenticationToken is now: " << theUser.actualAuthenticationToken;
     return true;
   }
   inputOutputAuthenticationToken=theUser.actualAuthenticationToken;
-  stOutput << " FAIL";
-  stOutput << "<br>The actual authenticationToken is now: " << theUser.actualAuthenticationToken;
+  //stOutput << " FAIL";
+  //stOutput << "<br>The actual authenticationToken is now: " << theUser.actualAuthenticationToken;
   return false;
 #else
   return true;

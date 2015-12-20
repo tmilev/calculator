@@ -4911,13 +4911,6 @@ void Matrix<coefficient>::GaussianEliminationByRows
   }
 }
 
-unsigned int MathRoutines::ListIntsHash(const List<int>& input)
-{ unsigned int result=0;
-  for (int i =0; i<input.size; i++)
-    result+=SomeRandomPrimes[i]*input[i];
-  return result;
-}
-
 class Lattice
 {
   void TestGaussianEliminationEuclideanDomainRationals(Matrix<Rational> & output);
@@ -5451,9 +5444,9 @@ public:
   void initFromCones
   (List<Cone>& NormalsOfCones, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables);
   bool SplitChamber
-  (int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, Vector<Rational>& killerNormal, GlobalVariables& theGlobalVariables);
+  (int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, const Vector<Rational>& killerNormal, GlobalVariables& theGlobalVariables);
   void GetNewVerticesAppend
-  (Cone& myDyingCone, Vector<Rational>& killerNormal, HashedList<Vector<Rational> >& outputVertices, GlobalVariables& theGlobalVariables);
+  (Cone& myDyingCone, const Vector<Rational>& killerNormal, HashedList<Vector<Rational> >& outputVertices, GlobalVariables& theGlobalVariables);
   void init()
   { this->splittingNormals.Clear();
     this->slicingDirections.size=0;

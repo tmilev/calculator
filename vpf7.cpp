@@ -742,7 +742,7 @@ std::string CGI::GetMathSpanBeginArrayL(const std::string& input, int upperNumCh
 
 std::string CGI::GetCalculatorLink(const std::string& DisplayNameCalculator, const std::string& input)
 { std::stringstream out;
-  out << "<a href=\"" << DisplayNameCalculator << "?textInput=" << CGI::UnCivilizeStringCGI(input) << "\"> " << input << "</a>";
+  out << "<a href=\"" << DisplayNameCalculator << "?textInput=" << CGI::StringToURLString(input) << "\"> " << input << "</a>";
   return out.str();
 }
 

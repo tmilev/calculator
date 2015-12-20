@@ -44,6 +44,7 @@ class DatabaseRoutines;
 class UserCalculator
 {
   public:
+  double approximateHoursSinceLastTokenWasIssued;
   std::string usernamePlusPassWord;
   std::string username;
   std::string enteredPassword;

@@ -2175,7 +2175,7 @@ void RationalFunctionOld::AddHonestRF(const RationalFunctionOld& other)
     crash << crash;
 }
 
-void CGI::CGIStringToNormalString(std::string& input, std::string& output)
+void CGI::URLStringToNormal(std::string& input, std::string& output)
 { std::string readAhead;
   std::stringstream out;
   int inputSize=(signed) input.size();
@@ -2184,7 +2184,7 @@ void CGI::CGIStringToNormalString(std::string& input, std::string& output)
     for (int j=0; j<6; j++)
     { if (i+j<inputSize)
         readAhead.push_back(input[i+j]);
-      if (CGI::CGIStringToNormalStringOneStep(readAhead, out))
+      if (CGI::URLStringToNormalOneStep(readAhead, out))
       { i+=j;
         break;
       }
@@ -2193,7 +2193,7 @@ void CGI::CGIStringToNormalString(std::string& input, std::string& output)
   output=out.str();
 }
 
-void CGI::CGIFileNameToFileName(std::string& input, std::string& output)
+void CGI::URLFileNameToFileName(std::string& input, std::string& output)
 { std::string readAhead;
   std::stringstream out;
   int inputSize=(signed) input.size();
@@ -2206,7 +2206,7 @@ void CGI::CGIFileNameToFileName(std::string& input, std::string& output)
       { out << "+";
         break;
       }
-      if (CGI::CGIStringToNormalStringOneStep(readAhead, out))
+      if (CGI::URLStringToNormalOneStep(readAhead, out))
       { i+=j;
         break;
       }
@@ -2313,7 +2313,7 @@ void CGI::ChopCGIInputStringToMultipleStrings(const std::string& input, List<std
   }
 }
 
-bool CGI::CGIStringToNormalStringOneStep(std::string& readAhead, std::stringstream& out)
+bool CGI::URLStringToNormalOneStep(std::string& readAhead, std::stringstream& out)
 { if (readAhead[0]!='%' && readAhead[0]!='&' && readAhead[0]!='+')
   { out << readAhead[0];
     return true;
@@ -2326,110 +2326,13 @@ bool CGI::CGIStringToNormalStringOneStep(std::string& readAhead, std::stringstre
   { out << " ";
     return true;
   }
-  if (readAhead=="%2B")
-  { out << "+";
-    return true;
-  }
-  if (readAhead=="%28")
-  { out << "(";
-    return true;
-  }
-  if (readAhead=="%29")
-  { out << ")";
-    return true;
-  }
-  if (readAhead=="%5B")
-  { out << "[";
-    return true;
-  }
-  if (readAhead=="%5D")
-  { out << "]";
-    return true;
-  }
-  if (readAhead=="%2C")
-  { out << ",";
-    return true;
-  }
-  if (readAhead=="%7B")
-  { out << "{";
-    return true;
-  }
-  if (readAhead=="%27")
-  { out << "'";
-    return true;
-  }
-  if (readAhead=="%3B")
-  { out << ";";
-    return true;
-  }
-  if (readAhead=="%3C")
-  { out << "<";
-    return true;
-  }
-  if (readAhead=="%3E")
-  { out << ">";
-    return true;
-  }
-  if (readAhead=="%2F")
-  { out << "/";
-    return true;
-  }
-  if (readAhead=="%3A")
-  { out << ":";
-    return true;
-  }
-  if (readAhead=="%5E")
-  { out << "^";
-    return true;
-  }
-  if (readAhead=="%5C")
-  { out << "\\";
-    return true;
-  }
-  if (readAhead=="%26")
-  { out << "&";
-    return true;
-  }
-  if (readAhead=="%3D")
-  { out << "=";
-    return true;
-  }
-  if (readAhead=="%7D")
-  { out << "}";
-    return true;
-  }
-  if (readAhead=="%0D%0A")
-  { out << "\n";
-    return true;
-  }
-  if (readAhead=="%25")
-  { out << "%";
-    return true;
-  }
-  if (readAhead=="%40")
-  { out << "@";
-    return true;
-  }
-  if (readAhead=="%7E")
-  { out << "~";
-    return true;
-  }
-  if (readAhead=="%22")
-  { out << "\"";
-    return true;
-  }
-  if (readAhead=="%21")
-  { out << "!";
-    return true;
-  }
-  if (readAhead=="%09")//code for tab character, replaced by space
-  { out << " ";
-    return true;
-  }
-  if (readAhead=="%A0")//code for &nbsp;, replaced by space
-  { out << " ";
-    return true;
-  }
+  if (readAhead.size()==3)
+    if (readAhead[0]=='%' && MathRoutines::IsAHexDigit(readAhead[1])
+        && MathRoutines::IsAHexDigit(readAhead[2]))
+    { out << (char)(MathRoutines::ConvertHumanReadableHexToCharValue(readAhead[1])*16+
+      MathRoutines::ConvertHumanReadableHexToCharValue(readAhead[2]));
+      return true;
+    }
   return false;
 }
 
@@ -2569,43 +2472,6 @@ bool Cone::IsInCone(const Vector<Rational>& point) const
       return false;
   }
   return true;
-}
-
-std::string MathRoutines::StringShortenInsertDots(const std::string& inputString, int maxNumChars)
-{ if (inputString.size()<=(unsigned) maxNumChars)
-    return inputString;
-  std::stringstream out;
-  int numCharsBeginEnd=maxNumChars/2-2;
-  int numCharsOmitted=inputString.size()-numCharsBeginEnd*2;
-  out << inputString.substr(0, numCharsBeginEnd) << "... (" << numCharsOmitted << " characters omitted)..."
-  << inputString.substr(inputString.size()-numCharsBeginEnd);
-  return out.str();
-}
-
-void MathRoutines::SplitStringInTwo(const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond)
-{ if (&outputFirst==&inputString || &outputSecond==&inputString)
-  { std::string inputCopy=inputString;
-    MathRoutines::SplitStringInTwo(inputCopy, firstStringSize, outputFirst, outputSecond);
-    return;
-  }
-  if (firstStringSize<0)
-    firstStringSize=0;
-  if (firstStringSize>(signed) inputString.size())
-    firstStringSize=inputString.size();
-  outputFirst="";
-  outputFirst=inputString.substr(0, firstStringSize);
-  outputSecond="";
-  int secondStringSize=inputString.size()-firstStringSize;
-  if (secondStringSize>0)
-    outputSecond= inputString.substr(firstStringSize, secondStringSize);
-}
-
-void MathRoutines::NChooseK(int n, int k, LargeInt& result)
-{ result=1;
-  for (int i=0; i<k; i++)
-  { result*=(n-i);
-    result/=(i+1);
-  }
 }
 
 std::string MonomialP::ToString(FormatExpressions* theFormat)const

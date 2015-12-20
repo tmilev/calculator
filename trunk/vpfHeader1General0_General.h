@@ -217,18 +217,10 @@ public:
     return result;
   }
   static int TwoToTheNth(int n);
-  static bool isADigit(const std::string& input, int* whichDigit=0)
-  { if (input.size()!=1)
-      return false;
-    return MathRoutines::isADigit(input[0], whichDigit);
-  }
-  static inline bool isADigit(char theChar, int* whichDigit=0)
-  { int theDigit=theChar-'0';
-    bool result=(theDigit<10 && theDigit>=0);
-    if (result && whichDigit!=0)
-      *whichDigit=theDigit;
-    return result;
-  }
+  static bool isALatinLetter(char input);
+  static bool isADigit(const std::string& input, int* whichDigit=0);
+  static bool IsAHexDigit(char digitCandidate);
+  static bool isADigit(char theChar, int* whichDigit=0);
   template <class theType>
   static bool GenerateVectorSpaceClosedWRTLieBracket(List<theType>& inputOutputElts, int upperDimensionBound)
   { return MathRoutines::GenerateVectorSpaceClosedWRTOperation(inputOutputElts, upperDimensionBound, theType::LieBracket);
@@ -237,35 +229,12 @@ public:
   static bool GenerateVectorSpaceClosedWRTOperation
   (List<theType>& inputOutputElts, int upperDimensionBound, void (*theBinaryOperation)(const theType& left, const theType& right, theType& output));
 //  static void NChooseK(int n, int k, LargeInt& output);//
-  static bool StringBeginsWith(const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd=0)
-  { std::string actualBeginning, tempS;
-    if (outputStringEnd==0)
-      outputStringEnd=&tempS;
-    MathRoutines::SplitStringInTwo(theString, desiredBeginning.size(), actualBeginning, *outputStringEnd);
-    return actualBeginning==desiredBeginning;
-  }
+  static bool StringBeginsWith(const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd=0);
+  static char ConvertHumanReadableHexToCharValue(char input);
   static void SplitStringInTwo(const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond);
   static void NChooseK(int n, int k, LargeInt& result);
-  static int NChooseK(int n, int k)
-  { int result=1;
-    for (int i =0; i<k; i++)
-    { result*=(n-i);
-      if (result <0)
-        return -1;
-      result/=(i+1);
-      if (result <0)
-        return -1;
-    }
-    return result;
-  }
-  static int Factorial(int n)
-  { if(n<1)
-      crash << "What exactly is Factorial(" << n << ") supposed to mean?  If you have an interpretation, implement it at " << __FILE__ << ":" << __LINE__ << crash;
-    int fac = 1;
-    for(int i=1; i<=n; i++)
-      fac *= i;
-    return fac;
-  }
+  static int NChooseK(int n, int k);
+  static int Factorial(int n);
   static inline double E()
   { return 2.718281828459;
   }
@@ -276,12 +245,7 @@ public:
 //  static const double Pi=(double)3.141592653589793238462643383279;
   static int KToTheNth(int k, int n);
   static void KToTheNth(int k, int n, LargeInt& output);
-  inline static int parity(int n)
-  { if (n%2==0)
-      return 1;
-    else
-      return -1;
-  }
+  inline static int parity(int n);
   static std::string StringShortenInsertDots(const std::string& inputString, int maxNumChars);
   static int BinomialCoefficientMultivariate(int N, List<int>& theChoices);
   static bool IsPrime(int theInt);
@@ -331,19 +295,14 @@ public:
     result.append(")");
     return result;
   }
-  static double ReducePrecision(double x)
-  { if (x<0.00001 && x>-0.00001)
-      return 0;
-    return x;
-  }
+  static double ReducePrecision(double x);
   inline static unsigned int HashDouble(const double& input)
   { return (unsigned) (input*10000);
   }
   inline static unsigned int IntUnsignIdentity(const int& input)
   { return (unsigned) input;
   }
-  inline static unsigned int ListIntsHash(const List<int>& input)
-  ;
+  inline static unsigned int ListIntsHash(const List<int>& input);
   static unsigned int hashString(const std::string& x);
   template <class Element>
   static void LieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output);
@@ -1133,47 +1092,27 @@ public:
   static int scale;
   static void outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter);
   static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
-  static void CGIStringToNormalString(std::string& input, std::string& output);
-  static bool CGIStringToNormalStringOneStep(std::string& readAhead, std::stringstream& out);
-
-  static void CGIFileNameToFileName(std::string& input, std::string& output);
-
-  static std::string UnCivilizeStringCGI(const std::string& input);
+  static void URLStringToNormal(std::string& input, std::string& output);
+  static bool URLStringToNormalOneStep(std::string& readAhead, std::stringstream& out);
+  static void URLFileNameToFileName(std::string& input, std::string& output);
+  static std::string StringToURLString(const std::string& input);
   static void ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput);
   static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);
   static std::string GetCalculatorLink(const std::string& DisplayNameCalculator, const std::string& input);
   static std::string GetSliderSpanStartsHidden(const std::string& content, const std::string& label="Expand/collapse", const std::string& desiredID="");
   static std::string GetHtmlLinkFromProjectFileName
   (const std::string& fileName, const std::string& fileDesc="", int line=-1);
-  static std::string GetHtmlSwitchMenuDoNotEncloseInTags(const std::string& serverBase)
-  { std::stringstream output;
-    output << " <script type=\"text/javascript\"> \n";
-    output << " function switchMenu(obj)\n";
-    output << " { var el = document.getElementById(obj);	\n";
-    output << "   if ( el.style.display != \"none\" ) \n";
-    output << "     el.style.display = 'none';\n";
-    output << "   else \n";
-    output << "     el.style.display = '';\n";
-    output << " }\n";
-    output << "</script>";
-    return output.str();
-  }
+  static std::string GetHtmlSwitchMenuDoNotEncloseInTags(const std::string& serverBase);
   static std::string GetLatexEmbeddableLinkFromCalculatorInput(const std::string& address, const std::string& display);
   static bool GetHtmlStringSafeishReturnFalseIfIdentical(const std::string& input, std::string& output);
-  static void TransormStringToHtmlSafeish(std::string& theString)
-  { std::string tempS;
-    CGI::GetHtmlStringSafeishReturnFalseIfIdentical(theString, tempS);
-    theString=tempS;
-  }
+  static void TransormStringToHtmlSafeish(std::string& theString);
   static std::string GetLaTeXProcessingJavascript();
   static std::string DoubleBackslashes(const std::string& input);
   static std::string GetMathSpanPure(const std::string& input, int upperNumChars=10000);
   static std::string GetMathSpanBeginArrayL(const std::string& input, int upperNumChars=10000);
   static std::string GetMathMouseHover(const std::string& input, int upperNumChars=10000);
   static std::string GetMathMouseHoverBeginArrayL(const std::string& input, int upperNumChars=10000);
-  static std::string GetStyleButtonLikeHtml()
-  { return " style=\"background:none; border:0; text-decoration:underline; color:blue; cursor:pointer\" ";
-  }
+  static std::string GetStyleButtonLikeHtml();
   static std::string GetHtmlButton(const std::string& buttonID, const std::string& theScript, const std::string& buttonText);
   static std::string GetHtmlSpanHidableStartsHiddeN(const std::string& input);
   static std::string clearNewLines(const std::string& theString);
@@ -1181,18 +1120,14 @@ public:
   static std::string clearSlashes(const std::string& theString);
   static std::string CleanUpForFileNameUse(const std::string& inputString);
   static std::string CleanUpForLaTeXLabelUse(const std::string& inputString);
+  static bool IsRepresentedByItselfInURLs(char input);
   static void clearDollarSigns(std::string& theString, std::string& output);
   static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
   static void ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& outputData, List<std::string>& outputFieldNames);
   static void ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml);
   static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml){ std::string result; CGI::ElementToStringTooltip(input, inputTooltip, result, useHtml); return result; };
   static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip){ return CGI::ElementToStringTooltip(input, inputTooltip, true); };
-  static inline uint32_t RedGreenBlue(unsigned int r, unsigned int g, unsigned int b)
-  { r=r%256;
-    g=g%256;
-    b=b%256;
-    return r*65536+g*256+b;
-  }
+  static uint32_t RedGreenBlue(unsigned int r, unsigned int g, unsigned int b);
   static void MakeStdCoutReport(const std::string& input);
   static void MakeReportIndicatorFile(const std::string& input);
   static void FormatCPPSourceCode(const std::string& FileName);

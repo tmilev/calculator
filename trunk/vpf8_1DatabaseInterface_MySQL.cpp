@@ -19,10 +19,13 @@ bool LoginViaDatabase
   << " token: " << inputOutputAuthenticationToken;
   if (theUser.Authenticate(theRoutines))
   { inputOutputAuthenticationToken=theUser.actualAuthenticationToken;
-    stOutput << " SUCCESS";
+    stOutput << " SUCCESS. ";
+    stOutput << "<br>The actual authenticationToken is now: " << theUser.actualAuthenticationToken;
     return true;
   }
-    stOutput << " FAIL";
+  inputOutputAuthenticationToken=theUser.actualAuthenticationToken;
+  stOutput << " FAIL";
+  stOutput << "<br>The actual authenticationToken is now: " << theUser.actualAuthenticationToken;
   return false;
 #else
   return true;
@@ -60,6 +63,7 @@ std::string UserCalculator::ToString()
 
 UserCalculator::UserCalculator()
 { this->flagNewAuthenticationTokenComputedUserNeedsIt=false;
+  this->approximateHoursSinceLastTokenWasIssued=0;
 }
 
 UserCalculator::~UserCalculator()
@@ -196,8 +200,8 @@ bool UserCalculator::AuthenticateWithToken(DatabaseRoutines& theRoutines)
   this->authenticationTokenCreationTime=authenticationTokenCreationTimeSTRING;
   TimeWrapper now;
   now.AssignLocalTime();
-  double hoursSinceTokenWasIssued=now.SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(this->authenticationTokenCreationTime);
-  if (hoursSinceTokenWasIssued>3600) //3600 hours = 150 days, a bit more than the length of a semester
+  this->approximateHoursSinceLastTokenWasIssued=now.SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(this->authenticationTokenCreationTime);
+  if (this->approximateHoursSinceLastTokenWasIssued>3600) //3600 hours = 150 days, a bit more than the length of a semester
     return false;
   if (!this->FetchOneColumn("authenticationToken", this->actualAuthenticationToken, theRoutines, &authenticationFailureRemarks))
     return theRoutines << authenticationFailureRemarks;
@@ -214,7 +218,10 @@ bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines)
   if (this->AuthenticateWithToken(theRoutines))
     return true;
   bool result= this->AuthenticateWithUserNameAndPass(theRoutines);
-  this->ResetAuthenticationToken(theRoutines);
+  if (this->approximateHoursSinceLastTokenWasIssued>1)
+    this->ResetAuthenticationToken(theRoutines);
+  else if (result)
+    this->FetchOneColumn("authenticationToken", this->actualAuthenticationToken, theRoutines);
   return result;
 }
 
@@ -242,9 +249,9 @@ bool UserCalculator::ResetAuthenticationToken(DatabaseRoutines& theRoutines)
   this->actualAuthenticationToken=Crypto::computeSha1outputBase64(out.str());
   if (!this->SetColumnEntry("authenticationToken", this->actualAuthenticationToken, theRoutines))
     return false;
+  this->flagNewAuthenticationTokenComputedUserNeedsIt=true;
   if (!this->SetColumnEntry("authenticationTokenCreationTime", now.theTimeStringNonReadable, theRoutines))
     return false;
-  this->flagNewAuthenticationTokenComputedUserNeedsIt=true;
   //DatabaseQuery theQuery(*this, "SELECT authenticationTokenCreationTime FROM calculatorUsers.users WHERE user=\""+this->username + "\"");
   //if (theQuery.flagQueryReturnedResult)
   //  this->authentication="authenticationTokenCreationTime: "

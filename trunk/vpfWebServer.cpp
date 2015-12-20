@@ -524,15 +524,22 @@ void WebWorker::ProcessRawArguments()
   this->user="";
   if (inputStringNames.Contains("user"))
   { this->user=inputStrings[inputStringNames.GetIndex("user")];
-    stOutput << "<b>user: </b>" << user << "<br>";
+    CGI::URLStringToNormal(this->user, this->user);
+    stOutput << "message: " << theParser.inputStringRawestOfTheRaw;
+    stOutput << "<hr><b>user: </b>" << user << "<br>";
   }
   if (inputStringNames.Contains("authenticationToken"))
-  { authenticationToken=inputStrings[inputStringNames.GetIndex("authenticationToken")];
+  { this->authenticationToken=inputStrings[inputStringNames.GetIndex("authenticationToken")];
+    if (this->authenticationToken.size()>0)
+      if (this->authenticationToken[this->authenticationToken.size()-1]!='=')
+        this->authenticationToken.push_back('=');
+    CGI::URLStringToNormal(this->authenticationToken, this->authenticationToken);
     stOutput << "<b>authenticationToken: </b><br>" << this->authenticationToken;
     this->flagAuthenticationTokenWasSubmitted=true;
   }
   if (inputStringNames.Contains("password"))
   { password=inputStrings[inputStringNames.GetIndex("password")];
+    CGI::URLStringToNormal(password, password);
   }
   this->flagLoggedIn=false;
   if (this->user!="" && theGlobalVariables.flagUsingHttpSSL)
@@ -561,7 +568,7 @@ void WebWorker::OutputBeforeComputation()
 //  civilizedInput="\\int( 1/x dx)";
 //  civilizedInput="\\int (1/(x(1+x^2)^2))dx";
 //  civilizedInput="%LogEvaluation \\int (1/(5+2x+7x^2)^2)dx";
-  CGI::CGIStringToNormalString(theParser.inputString, theParser.inputString);
+  CGI::URLStringToNormal(theParser.inputString, theParser.inputString);
   theGlobalVariables.initOutputReportAndCrashFileNames
   (theParser.inputStringRawestOfTheRaw, theParser.inputString);
 
@@ -583,7 +590,13 @@ void WebWorker::OutputBeforeComputation()
   << ">";
   stOutput << civilizedInputSafish;
   stOutput << "</textarea>\n<br>\n";
-  stOutput << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" > ";
+  if (this->flagLoggedIn && this->flagUsingSSLinCurrentConnection)
+    stOutput << "<input type=\"hidden\" name=authenticationToken value=\"" << this->authenticationToken << "\">"
+    << "<input type=\"hidden\" name=\"user\" value=\""
+    << this->user << "\">";
+  stOutput << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" "
+  << "name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" ";
+  stOutput << "action=\"calculator\"> ";
   if (theParser.inputString!="")
     stOutput << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
   stOutput << "\n</FORM>";
@@ -705,14 +718,14 @@ void WebWorker::ExtractArgumentFromAddress()
 //  << theGlobalVariables.DisplayNameCalculatorWithPath << "\nmainaddress.size: "
 //  << this->mainAddress.size() << "\nonePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size(): "
 //  << theGlobalVariables.DisplayNameCalculatorWithPath.size();
-  CGI::CGIStringToNormalString(this->mainAddresSRAW, this->mainAddress);
+  CGI::URLStringToNormal(this->mainAddresSRAW, this->mainAddress);
   this->mainArgumentRAW="";
   std::string calculatorArgumentRawWithQuestionMark, tempS;
   if (!MathRoutines::StringBeginsWith
       (this->mainAddresSRAW, theGlobalVariables.DisplayNameCalculatorWithPath, &calculatorArgumentRawWithQuestionMark))
     if (!MathRoutines::StringBeginsWith
         (this->mainAddresSRAW, "/vectorpartition/cgi-bin/calculator", &calculatorArgumentRawWithQuestionMark))
-    { CGI::CGIFileNameToFileName(this->mainAddresSRAW, this->mainAddress);
+    { CGI::URLFileNameToFileName(this->mainAddresSRAW, this->mainAddress);
       return;
     }
   this->requestType=this->requestGetCalculator;

@@ -1,7 +1,7 @@
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 
-ProjectInformationInstance ProjectInfoVpf2Math3_SymmetricGroupsAndGeneralizations(__FILE__, "Symmetric groups and generalizations, work in progress. ");
+ProjectInformationInstance ProjectInfoVpf2Math3_SymmetricGroupsAndGeneralizations(__FILE__, "Symmetric groups and generalizations, work in progress by Thomas. ");
 
 // conjugacy classes of type P are of size |Sn|/P.Fulton61z()
 int Partition::Fulton61z() const

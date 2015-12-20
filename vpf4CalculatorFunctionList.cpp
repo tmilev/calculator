@@ -9,7 +9,7 @@
 ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator functions. ");
 //This file lists calculator functions and various hard-coded rules. Please do not use for any other purposes.
 
-void Calculator::initPredefinedInnerFunctions()
+void Calculator::initAdminFunctions()
 {
 #ifdef MACRO_use_MySQL
   this->AddOperationInnerHandler
@@ -63,7 +63,10 @@ void Calculator::initPredefinedInnerFunctions()
    "TestDatabase(0)", false, true, "DatabaseRoutines::innerTestDatabase");
    ;
 #endif // MACRO_use_MySQL
-  this->AddOperationInnerHandler
+}
+
+void Calculator::initPredefinedInnerFunctions()
+{ this->AddOperationInnerHandler
   ("TestCalculatorIndicator", CalculatorFunctionsGeneral::innerTestIndicator, "",
    "(This is not a mathematical function). Tests the calculator indicator mechanism.",
    "TestCalculatorIndicator(1000)", true, false)

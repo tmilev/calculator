@@ -61,15 +61,21 @@ public:
   { if (this->sleepFunction!=0)
       this->sleepFunction(microseconds);
   }
+
 //  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
   double MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   double MaxComputationTimeBeforeWeTakeAction;
 //  bool flagLogInterProcessCommunication;
+//flags: what mode are we running in?
   bool flagRunningCommandLine;
   bool flagRunningConsoleTest;
   bool flagUsingApacheWebServer;
   bool flagUsingBuiltInWebServer;
-  bool flagUsingHttpSSL;
+//webserver flags
+  bool flagLoggedIn;
+  bool flagUsingSSLinCurrentConnection;
+  bool flagSSLisAvailable;
+
   bool flagAllowUseOfThreadsAndMutexes;
   bool flagNotAllocated;
 
@@ -99,6 +105,9 @@ public:
 
   static const std::string hopefullyPermanentWebAdressOfServerExecutable;
   static const std::string hopefullyPermanentWebAdressOfServerOutputFolder;
+
+  std::string userCalculatorAdmin;
+  std::string userDefault;
 
   std::string userInputStringRAWIfAvailable;
   std::string userInputStringIfAvailable;

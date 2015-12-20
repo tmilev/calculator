@@ -250,6 +250,12 @@ void Calculator::init()
   this->TotalNumPatternMatchedPerformed=0;
   this->initPredefinedStandardOperations();
   this->initPredefinedInnerFunctions();
+  if (theGlobalVariables.flagUsingSSLinCurrentConnection &&
+      theGlobalVariables.flagSSLisAvailable &&
+      theGlobalVariables.userDefault==theGlobalVariables.userCalculatorAdmin &&
+      theGlobalVariables.flagLoggedIn
+      )
+    this->initAdminFunctions();
   this->initPredefinedOperationsComposite();
   this->initAtomsThatAllowCommutingOfArguments();
   this->initAtomsThatFreezeArguments();

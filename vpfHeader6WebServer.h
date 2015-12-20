@@ -14,7 +14,6 @@ class WebWorker
 public:
   WebServer* parent;
   bool flagInUse;
-  bool flagUsingSSLinCurrentConnection;
   int indexInParent;
   int ProcessPID;
   std::string displayUserInput;
@@ -27,12 +26,10 @@ public:
   std::string RelativePhysicalFileName;
   std::string status;
   std::string pingMessage;
-  std::string user;
   std::string authenticationToken;
   double timeOfLastPingServerSideOnly;
   bool flagDeallocated;
   bool flagMainAddressSanitized;
-  bool flagLoggedIn;
   bool flagAuthenticationTokenWasSubmitted;
   std::string mainAddressNonSanitized;
   List<std::string> theStrings;
@@ -128,7 +125,6 @@ public:
   int listeningSocketHTTP;
   int listeningSocketHttpSSL;
   bool flagTryToKillOlderProcesses;
-  bool flagUsESSL;
   List<std::string> PortsITryHttp;
   List<std::string> PortsITryHttpSSL;
   ListReferences<WebWorker> theWorkers;

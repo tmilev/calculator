@@ -1661,6 +1661,7 @@ public:
   void initPredefinedStandardOperations();
   void initPredefinedStandardOperationsWithoutHandler();
   void initPredefinedInnerFunctions();
+  void initAdminFunctions();
   void initPredefinedOperationsComposite();
   bool ExtractExpressions(Expression& outputExpression, std::string* outputErrors);
   void EvaluateCommands();

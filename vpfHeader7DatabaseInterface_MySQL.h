@@ -93,7 +93,6 @@ public:
   std::string databasePassword;
   std::string databaseUser;
   std::string theDatabaseName;
-  std::string admin;
   std::string hostname;
   std::stringstream comments;
   MYSQL *connection; // Create a pointer to the MySQL instance

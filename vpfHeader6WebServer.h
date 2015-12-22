@@ -146,7 +146,7 @@ public:
   void ReleaseSocketsNonActiveWorkers();
   void ReleaseNonActiveWorkers();
   void ReleaseEverything();
-  void CreateNewActiveWorker();
+  bool CreateNewActiveWorker();
   bool CheckConsistency();
   int Run();
   WebWorker& GetActiveWorker();

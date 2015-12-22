@@ -1966,11 +1966,11 @@ void WebServer::ReleaseSocketsNonActiveWorkers()
       this->Release(this->theWorkers[i].connectedSocketID);
 }
 
-void WebServer::CreateNewActiveWorker()
+bool WebServer::CreateNewActiveWorker()
 { MacroRegisterFunctionWithName("WebServer::CreateNewActiveWorker");
   if (this->activeWorker!=-1)
   { crash << "Calling CreateNewActiveWorker requres the active worker index to be -1." << crash;
-    return;
+    return false;
   }
   for (int i=0; i<this->theWorkers.size; i++)
     if (!this->theWorkers[i].flagInUse)
@@ -1983,23 +1983,49 @@ void WebServer::CreateNewActiveWorker()
     this->theWorkers.SetSize(this->theWorkers.size+1);
   }
   this->GetActiveWorker().Release();
-  this->theWorkers[this->activeWorker].flagInUse=true;
-  this->GetActiveWorker().PauseComputationReportReceived.CreateMe("server to worker computation report received");
-  this->GetActiveWorker().PauseWorker.CreateMe("server to worker pause");
-  this->GetActiveWorker().PauseIndicatorPipeInUse.CreateMe("server to worker indicator pipe in use");
-  this->GetActiveWorker().pipeServerToWorkerRequestIndicator.CreateMe("server to worker request indicator");
-  this->GetActiveWorker().pipeWorkerToServerTimerPing.CreateMe("worker to server timer ping");
-  this->GetActiveWorker().pipeWorkerToServerControls.CreateMe("worker to server controls");
-  this->GetActiveWorker().pipeWorkerToServerIndicatorData.CreateMe("worker to server indicator data");
-  this->GetActiveWorker().pipeWorkerToServerUserInput.CreateMe("worker to server user input");
-  this->GetActiveWorker().pipeWorkerToServerWorkerStatus.CreateMe("worker to server worker status");
+  if (!this->GetActiveWorker().PauseComputationReportReceived.CreateMe("server to worker computation report received"))
+  { this->GetActiveWorker().Release();
+    return false;
+  }
+  if (! this->GetActiveWorker().PauseWorker.CreateMe("server to worker pause"))
+  { this->GetActiveWorker().Release();
+    return false;
+  }
+  if (! this->GetActiveWorker().PauseIndicatorPipeInUse.CreateMe("server to worker indicator pipe in use"))
+  { this->GetActiveWorker().Release();
+    return false;
+  }
+  if (! this->GetActiveWorker().pipeServerToWorkerRequestIndicator.CreateMe("server to worker request indicator"))
+  { this->GetActiveWorker().Release();
+    return false;
+  }
+  if (! this->GetActiveWorker().pipeWorkerToServerTimerPing.CreateMe("worker to server timer ping"))
+  { this->GetActiveWorker().Release();
+    return false;
+  }
+  if (! this->GetActiveWorker().pipeWorkerToServerControls.CreateMe("worker to server controls"))
+  { this->GetActiveWorker().Release();
+    return false;
+  }
+  if (! this->GetActiveWorker().pipeWorkerToServerIndicatorData.CreateMe("worker to server indicator data"))
+  { this->GetActiveWorker().Release();
+    return false;
+  }
+  if (! this->GetActiveWorker().pipeWorkerToServerUserInput.CreateMe("worker to server user input"))
+  { this->GetActiveWorker().Release();
+    return false;
+  }
+  if (! this->GetActiveWorker().pipeWorkerToServerWorkerStatus.CreateMe("worker to server worker status"))
+  { this->GetActiveWorker().Release();
+    return false;
+  }
   this->GetActiveWorker().indexInParent=this->activeWorker;
   this->GetActiveWorker().parent=this;
   this->GetActiveWorker().timeOfLastPingServerSideOnly=theGlobalVariables.GetElapsedSeconds();
   this->GetActiveWorker().pingMessage="";
+  this->theWorkers[this->activeWorker].flagInUse=true;
+  return true;
 }
-
-
 
 std::string WebServer::ToStringLastErrorDescription()
 { std::stringstream out;
@@ -2286,6 +2312,7 @@ void WebServer::initPrepareSignals()
 
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
+  theGlobalVariables.RelativePhysicalNameCrashLog="crash_WebServerRun";
   if (!this->initPrepareWebServerALL())
     return 1;
   List<int> theSockets;
@@ -2335,7 +2362,13 @@ int WebServer::Run()
 //    theLog << logger::purple << "NewconnectedSocket: " << newConnectedSocket << ", listeningSocket: "
 //    << theListeningSocket << logger::endL;
     this->RecycleChildrenIfPossible();
-    this->CreateNewActiveWorker();
+    if (!this->CreateNewActiveWorker())
+    { logBlock << logger::purple << "Failed to create an active worker. System error string: "
+      << strerror(errno) << logger::endL;
+      logIO << logger::red << "Failed to create active worker: closing connection. " << logger::endL;
+      close (newConnectedSocket);
+      continue;
+    }
     theGlobalVariables.flagUsingSSLinCurrentConnection=false;
     if (theListeningSocket==this->listeningSocketHttpSSL)
     { theGlobalVariables.flagUsingSSLinCurrentConnection=true;

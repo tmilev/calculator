@@ -22,7 +22,7 @@ public:
   MemorySaving<MutexRecursiveWrapper> mutexForProcessBlocking; //<- to avoid two threads from the same process blocking the process.
   std::string ToString()const;
   void Release();
-  void CreateMe(const std::string& inputName);
+  bool CreateMe(const std::string& inputName);
 
   bool CheckPauseIsRequested();
   void PauseIfRequested();
@@ -55,7 +55,7 @@ public:
 
   std::string ToString()const;
   void Release();
-  void CreateMe(const std::string& inputPipeName);
+  bool CreateMe(const std::string& inputPipeName);
   ~Pipe();
   Pipe()
   { this->thePipe.initFillInObject(2,-1);

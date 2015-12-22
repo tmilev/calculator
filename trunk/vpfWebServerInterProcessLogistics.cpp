@@ -25,17 +25,27 @@ PauseController::PauseController()
   this->mutexPipe.initFillInObject(2, -1);
 }
 
-void PauseController::CreateMe(const std::string& inputName)
+bool PauseController::CreateMe(const std::string& inputName)
 { this->Release();
   this->name=inputName;
   this->buffer.SetSize(200);
   if (pipe(this->thePausePipe.TheObjects)<0)
-    crash << "Failed to open pipe from parent to child. " << crash;
+  { logBlock <<  logger::purple << "FAILED to open pipe from parent to child. " << logger::endL;
+    return false;
+  }
   if (pipe(this->mutexPipe.TheObjects)<0)
-    crash << "Failed to open pipe from parent to child. " << crash;
-  fcntl(this->thePausePipe[1], F_SETFL, O_NONBLOCK);
+  { logBlock << logger::purple << "FAILED to open pipe from parent to child. " << logger::endL;
+    this->Release();
+    return false;
+  }
+  if (fcntl(this->thePausePipe[1], F_SETFL, O_NONBLOCK)<0)
+  { logBlock << logger::purple << "FAILED to fcntl the pausepipe from parent to child. " << logger::endL;
+    this->Release();
+    return false;
+  }
   write (this->thePausePipe[1], "!", 1);
   write (this->mutexPipe[1], "!", 1);
+  return true;
 }
 
 void PauseController::PauseIfRequested()
@@ -151,14 +161,27 @@ std::string Pipe::ToString()const
   return out.str();
 }
 
-void Pipe::CreateMe(const std::string& inputPipeName)
+bool Pipe::CreateMe(const std::string& inputPipeName)
 { this->Release();
   if (pipe(this->thePipe.TheObjects)<0)
-    crash << "Failed to open pipe from parent to child. " << crash;
-  fcntl(this->thePipe[1], F_SETFL, O_NONBLOCK);
-  fcntl(this->thePipe[0], F_SETFL, O_NONBLOCK);
+  { logBlock << logger::purple << "Failed to open pipe from parent to child. " << logger::endL;
+    this->Release();
+    return false;
+  }
+  if (fcntl(this->thePipe[1], F_SETFL, O_NONBLOCK)<0)
+  { logBlock << logger::purple << "Failed to fcntl pipe from parent to child. " << logger::endL;
+    this->Release();
+    return false;
+  }
+  if (fcntl(this->thePipe[0], F_SETFL, O_NONBLOCK)<0)
+  { logBlock << logger::purple << "Failed to fcntl pipe from parent to child. " << logger::endL;
+    this->Release();
+    return false;
+  }
   this->name=inputPipeName;
-  this->pipeAvailable.CreateMe("pause controller for pipe: "+ inputPipeName);
+  if (! this->pipeAvailable.CreateMe("pause controller for pipe: "+ inputPipeName))
+    return false;
+  return true;
 }
 
 Pipe::~Pipe()

@@ -715,7 +715,6 @@ void WebWorker::ExtractArgumentFromAddress()
 //  << theGlobalVariables.DisplayNameCalculatorWithPath << "\nmainaddress.size: "
 //  << this->mainAddress.size() << "\nonePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size(): "
 //  << theGlobalVariables.DisplayNameCalculatorWithPath.size();
-  CGI::URLStringToNormal(this->mainAddresSRAW, this->mainAddress);
   this->mainArgumentRAW="";
   std::string calculatorArgumentRawWithQuestionMark, tempS;
   if (!MathRoutines::StringBeginsWith
@@ -725,6 +724,7 @@ void WebWorker::ExtractArgumentFromAddress()
     { CGI::URLFileNameToFileName(this->mainAddresSRAW, this->mainAddress);
       return;
     }
+  CGI::URLStringToNormal(this->mainAddresSRAW, this->mainAddress);
   this->requestType=this->requestGetCalculator;
   MathRoutines::SplitStringInTwo(calculatorArgumentRawWithQuestionMark, 1, tempS, this->mainArgumentRAW);
   theLog << logger::yellow << "this->mainArgumentRAW=" << this->mainArgumentRAW << logger::endL;
@@ -1219,6 +1219,13 @@ int WebWorker::ProcessFolder()
   std::stringstream out;
   out << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" << "<html><body>";
 //  out << this->ToString();
+  if (this->RelativePhysicalFileName.size()>0)
+    if (this->RelativePhysicalFileName[this->RelativePhysicalFileName.size()-1]!='/')
+      this->RelativePhysicalFileName.push_back('/');
+  if (this->mainAddress.size()>0)
+    if (this->mainAddress[this->mainAddress.size()-1]!='/')
+      this->mainAddress.push_back('/');
+
   if (this->flagMainAddressSanitized)
   { out << "<hr>The original main address I extracted was: " << this->mainAddressNonSanitized
     << "<br>However, I do not allow addresses that contain dots (to avoid access to folders below the server). "
@@ -1234,10 +1241,13 @@ int WebWorker::ProcessFolder()
   List<std::string> theFolderNamesHtml, theFileNamesHtml;
   for (int i=0; i<theFileNames.size; i++)
   { std::stringstream currentStream;
-    bool isDir= theFileTypes[i]==".d";
-    currentStream << "<a href=\"" << this->mainAddress << theFileNames[i];
+    bool isDir= (theFileTypes[i]==".d");
+    theLog << logger::red << "Current file name: " << CGI::StringToURLString(theFileNames[i]) << logger::endL;
+    currentStream << "<a href=\"" << this->mainAddress << CGI::StringToURLString(theFileNames[i]);
     if (isDir)
       currentStream << "/";
+//    else
+//      theLog <<
     currentStream << "\">" << theFileNames[i];
     if (isDir)
       currentStream << "/";
@@ -2166,6 +2176,7 @@ void WebServer::RecycleChildrenIfPossible()
 { //Listen for children who have exited properly.
   //This might need to be rewritten: I wasn't able to make this work with any
   //mechanism other than pipes.
+  MacroRegisterFunctionWithName("WebServer::RecycleChildrenIfPossible");
   for (int i=0; i<this->theWorkers.size; i++)
     if (this->theWorkers[i].flagInUse)
     { this->theWorkers[i].pipeWorkerToServerControls.Read();

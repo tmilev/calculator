@@ -1969,6 +1969,7 @@ void WebServer::ReleaseSocketsNonActiveWorkers()
 bool WebServer::EmergencyRemoval_LastCreatedWorker()
 { this->GetActiveWorker().Release();
   this->activeWorker=-1;
+  this->theWorkers.SetSize(this->theWorkers.size-1);
   return false;
 }
 
@@ -1988,6 +1989,7 @@ bool WebServer::CreateNewActiveWorker()
   { this->activeWorker=this->theWorkers.size;
     this->theWorkers.SetSize(this->theWorkers.size+1);
   }
+  this->GetActiveWorker().indexInParent=this->activeWorker;
   this->GetActiveWorker().Release();
   this->GetActiveWorker().parent=this;
   this->GetActiveWorker().timeOfLastPingServerSideOnly=theGlobalVariables.GetElapsedSeconds();

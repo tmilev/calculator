@@ -5,6 +5,12 @@
 #include "vpfHeader3Calculator0_Interface.h"
 static ProjectInformationInstance ProjectInfoVpf8_1HeaderDatabaseInterface_MySQLx(__FILE__, "MySQL interface header. ");
 
+class DatabaseRoutinesGlobalFunctions
+{
+public:
+  static bool LoginViaDatabase(const std::string& inputUsername, const std::string& inputPassword, std::string& inputOutputAuthenticationToken);
+};
+
 #ifdef MACRO_use_MySQL
 #include <mysql/mysql.h>
 #include <ctime>
@@ -75,6 +81,7 @@ class UserCalculator
   bool getUserAndPass(Calculator& theCommands, const Expression& input);
   bool getUser(Calculator& theCommands, const Expression& input);
   bool getUserPassAndSelectedColumns(Calculator& theCommands, const Expression& input);
+  bool getUserPassAndExtraData(Calculator& theCommands, const Expression& input, List<std::string>& outputData);
   void ComputeShaonedSaltedPassword();
   std::string ToString();
   std::string ToStringSelectedColumns();
@@ -111,6 +118,9 @@ public:
   static bool innerGetAuthentication(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserDBEntry(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserDetails(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddTeachingClass(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddStudentToClass(Calculator& theCommands, const Expression& input, Expression& output);
+
   DatabaseRoutines();
   ~DatabaseRoutines();
 };

@@ -255,7 +255,7 @@ void Calculator::init()
       theGlobalVariables.userDefault==theGlobalVariables.userCalculatorAdmin &&
       theGlobalVariables.flagLoggedIn
       )
-    this->initAdminFunctions();
+    this->initCalculusTestingFunctions();
   this->initPredefinedOperationsComposite();
   this->initAtomsThatAllowCommutingOfArguments();
   this->initAtomsThatFreezeArguments();

@@ -65,6 +65,27 @@ void Calculator::initAdminFunctions()
 #endif // MACRO_use_MySQL
 }
 
+void Calculator::initCalculusAdministrationFunctions()
+{
+  #ifdef MACRO_use_MySQL
+  this->AddOperationInnerHandler
+  ("AddTeachingClass", DatabaseRoutines::innerAddTeachingClass, "",
+   "Adds a class for an instructor. First argument: instructor username. \
+   Second argument: instructor password/authentication token. \
+   Third argument: class name.",
+   "AddTeachingClass(\"admin\", \"password\", \"testUser\")", false, true, "DatabaseRoutines::innerAddTeachingClass");
+
+  #endif // MACRO_use_MySQL
+}
+
+void Calculator::initCalculusTestingFunctions()
+{
+#ifdef MACRO_use_MySQL
+  this->initAdminFunctions();
+  this->initCalculusAdministrationFunctions();
+#endif // MACRO_use_MySQL
+}
+
 void Calculator::initPredefinedInnerFunctions()
 { this->AddOperationInnerHandler
   ("TestCalculatorIndicator", CalculatorFunctionsGeneral::innerTestIndicator, "",

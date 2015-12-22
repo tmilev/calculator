@@ -2,6 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader6WebServer.h"
 #include "vpfHeader3Calculator0_Interface.h"
+#include "vpfHeader7DatabaseInterface_MySQL.h"
 
 ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 
@@ -515,10 +516,6 @@ void WebWorker::StandardOutputAfterTimeOut(const std::string& input)
 //  << logger::endL;
 }
 
-extern bool LoginViaDatabase
-(const std::string& inputUsername, const std::string& inputPassword,
- std::string& inputOutputAuthenticationToken);
-
 void WebWorker::ProcessRawArguments()
 { MacroRegisterFunctionWithName("WebServer::ProcessRawArguments");
   List<std::string> inputStrings, inputStringNames;
@@ -545,7 +542,7 @@ void WebWorker::ProcessRawArguments()
   if (theGlobalVariables.userDefault!="" && theGlobalVariables.flagUsingSSLinCurrentConnection)
   { //stOutput << "<br>LoginViaDatabase called: "
     //<< "user: " << this->user;
-    theGlobalVariables.flagLoggedIn=LoginViaDatabase(theGlobalVariables.userDefault, password, this->authenticationToken);
+    theGlobalVariables.flagLoggedIn=DatabaseRoutinesGlobalFunctions::LoginViaDatabase(theGlobalVariables.userDefault, password, this->authenticationToken);
   }
   for (unsigned i=0; i<password.size(); i++)
     password[i]=' ';

@@ -3,9 +3,8 @@
 #include "vpfHeader7DatabaseInterface_MySQL.h"
 ProjectInformationInstance ProjectInfoVpf8_1MySQLcpp(__FILE__, "MySQL interface. ");
 
-bool LoginViaDatabase
-(const std::string& inputUsername, const std::string& inputPassword,
- std::string& inputOutputAuthenticationToken)
+bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
+(const std::string& inputUsername, const std::string& inputPassword, std::string& inputOutputAuthenticationToken)
 {
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("LoginViaDatabase");
@@ -483,6 +482,16 @@ bool UserCalculator::getUserPassAndSelectedColumns(Calculator& theCommands, cons
 { MacroRegisterFunctionWithName("UserCalculator::getUserPassAndSelectedColumns");
   if (input.children.size<3)
     return theCommands << "UserCalculator::getUserPassAndSelectedColumns takes as input at least 2 arguments (user name and password). ";
+  bool result = this->getUserPassAndExtraData(theCommands, input, this->selectedColumns);
+  this->selectedColumnValues.initFillInObject(this->selectedColumns.size, "");
+  this->selectedColumnsRetrievalFailureRemarks.initFillInObject(this->selectedColumns.size, "");
+  return result;
+}
+
+bool UserCalculator::getUserPassAndExtraData(Calculator& theCommands, const Expression& input, List<std::string>& outputData)
+{ MacroRegisterFunctionWithName("UserCalculator::getUserPassAndExtraData");
+  if (input.children.size<4)
+    return theCommands << "UserCalculator::getUserPassAndExtraData takes as input at least 2 arguments (user name and password). ";
   if (!input[1].IsOfType<std::string>(&this->username))
   { theCommands << "<hr>Argument " << input[1].ToString() << " is supposed to be a string.";
     this->username=input[1].ToString();
@@ -491,14 +500,12 @@ bool UserCalculator::getUserPassAndSelectedColumns(Calculator& theCommands, cons
   { theCommands << "<hr>Argument " << input[2].ToString() << " is supposed to be a string.";
     this->enteredPassword=input[2].ToString();
   }
-  this->selectedColumns.SetSize(input.children.size-3);
+  outputData.SetSize(input.children.size-3);
   for (int i=3; i<input.children.size; i++ )
     if (!input[i].IsOfType<std::string>(& this->selectedColumns[i-3]))
     { theCommands << "<hr>Argument " << input[i].ToString() << " is supposed to be a string";
-      this->selectedColumns[i-3]=input[i].ToString();
+      outputData[i-3]=input[i].ToString();
     }
-  this->selectedColumnValues.initFillInObject(this->selectedColumns.size, "");
-  this->selectedColumnsRetrievalFailureRemarks.initFillInObject(this->selectedColumns.size, "");
   return true;
 }
 
@@ -648,6 +655,20 @@ bool DatabaseRoutines::innerGetAuthentication(Calculator& theCommands, const Exp
   DatabaseRoutines theRoutines;
   if (!theUser.Authenticate(theRoutines))
     return output.MakeError("Failed to authenticate. ", theCommands);
+  return output.AssignValue(theUser.actualAuthenticationToken, theCommands);
+}
+
+bool DatabaseRoutines::innerAddTeachingClass(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::innerAddTeachingClass");
+  UserCalculator theUser;
+  List<std::string> className;
+  if (!theUser.getUserPassAndExtraData(theCommands, input, className))
+    return false;
+  DatabaseRoutines theRoutines;
+  if (!theUser.Authenticate(theRoutines))
+    return output.MakeError("Failed to authenticate. ", theCommands);
+  DatabaseQuery theQuery
+  (theRoutines, "");
   return output.AssignValue(theUser.actualAuthenticationToken, theCommands);
 }
 

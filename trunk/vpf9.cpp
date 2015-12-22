@@ -884,9 +884,9 @@ bool MathRoutines::StringBeginsWith(const std::string& theString, const std::str
 }
 
 bool MathRoutines::isALatinLetter(char input)
-{ if (input>='a' || input<='z')
+{ if (input>='a' && input<='z')
     return true;
-  if (input>='A' || input<='Z')
+  if (input>='A' && input<='Z')
     return true;
   return false;
 }
@@ -7609,7 +7609,7 @@ bool CGI::IsRepresentedByItselfInURLs(char input)
     return true;
   if (MathRoutines::isALatinLetter(input))
     return true;
-  return false;
+  return input=='.';
 }
 
 std::string CGI::StringToURLString(const std::string& input)
@@ -7619,10 +7619,9 @@ std::string CGI::StringToURLString(const std::string& input)
       out << input[i];
     else if (input[i]==' ')
       out << '+';
-    else if (input[i]=='\n')
-      out << "%0D%0A";
     else
-      out << std::hex << input[i];
+      out << "%" << std::hex << (int) input[i]; //<-Not sure if this works correctly!
+
   return out.str();
 }
 

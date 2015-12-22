@@ -1969,6 +1969,7 @@ void WebServer::ReleaseSocketsNonActiveWorkers()
 bool WebServer::EmergencyRemoval_LastCreatedWorker()
 { this->GetActiveWorker().Release();
   this->activeWorker=-1;
+  return false;
 }
 
 bool WebServer::CreateNewActiveWorker()
@@ -1988,6 +1989,10 @@ bool WebServer::CreateNewActiveWorker()
     this->theWorkers.SetSize(this->theWorkers.size+1);
   }
   this->GetActiveWorker().Release();
+  this->GetActiveWorker().parent=this;
+  this->GetActiveWorker().timeOfLastPingServerSideOnly=theGlobalVariables.GetElapsedSeconds();
+  this->GetActiveWorker().pingMessage="";
+  this->theWorkers[this->activeWorker].flagInUse=false; //<-until everything is initialized, we cannot be in use.
   if (!this->GetActiveWorker().PauseComputationReportReceived.CreateMe("server to worker computation report received"))
     return this->EmergencyRemoval_LastCreatedWorker();
   if (! this->GetActiveWorker().PauseWorker.CreateMe("server to worker pause"))
@@ -2006,9 +2011,6 @@ bool WebServer::CreateNewActiveWorker()
     return this->EmergencyRemoval_LastCreatedWorker();
   if (! this->GetActiveWorker().pipeWorkerToServerWorkerStatus.CreateMe("worker to server worker status"))
     return this->EmergencyRemoval_LastCreatedWorker();
-  this->GetActiveWorker().parent=this;
-  this->GetActiveWorker().timeOfLastPingServerSideOnly=theGlobalVariables.GetElapsedSeconds();
-  this->GetActiveWorker().pingMessage="";
   this->theWorkers[this->activeWorker].flagInUse=true;
   return true;
 }

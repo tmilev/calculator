@@ -147,6 +147,7 @@ public:
   void ReleaseNonActiveWorkers();
   void ReleaseEverything();
   bool CreateNewActiveWorker();
+  bool EmergencyRemoval_LastCreatedWorker();
   bool CheckConsistency();
   int Run();
   WebWorker& GetActiveWorker();

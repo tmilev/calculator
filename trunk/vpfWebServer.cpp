@@ -1966,10 +1966,15 @@ void WebServer::ReleaseSocketsNonActiveWorkers()
       this->Release(this->theWorkers[i].connectedSocketID);
 }
 
+bool WebServer::EmergencyRemoval_LastCreatedWorker()
+{ this->GetActiveWorker().Release();
+  this->activeWorker=-1;
+}
+
 bool WebServer::CreateNewActiveWorker()
 { MacroRegisterFunctionWithName("WebServer::CreateNewActiveWorker");
   if (this->activeWorker!=-1)
-  { crash << "Calling CreateNewActiveWorker requres the active worker index to be -1." << crash;
+  { crash << "Calling CreateNewActiveWorker requires the active worker index to be -1." << crash;
     return false;
   }
   for (int i=0; i<this->theWorkers.size; i++)
@@ -1984,42 +1989,23 @@ bool WebServer::CreateNewActiveWorker()
   }
   this->GetActiveWorker().Release();
   if (!this->GetActiveWorker().PauseComputationReportReceived.CreateMe("server to worker computation report received"))
-  { this->GetActiveWorker().Release();
-    return false;
-  }
+    return this->EmergencyRemoval_LastCreatedWorker();
   if (! this->GetActiveWorker().PauseWorker.CreateMe("server to worker pause"))
-  { this->GetActiveWorker().Release();
-    return false;
-  }
+    return this->EmergencyRemoval_LastCreatedWorker();
   if (! this->GetActiveWorker().PauseIndicatorPipeInUse.CreateMe("server to worker indicator pipe in use"))
-  { this->GetActiveWorker().Release();
-    return false;
-  }
+    return this->EmergencyRemoval_LastCreatedWorker();
   if (! this->GetActiveWorker().pipeServerToWorkerRequestIndicator.CreateMe("server to worker request indicator"))
-  { this->GetActiveWorker().Release();
-    return false;
-  }
+    return this->EmergencyRemoval_LastCreatedWorker();
   if (! this->GetActiveWorker().pipeWorkerToServerTimerPing.CreateMe("worker to server timer ping"))
-  { this->GetActiveWorker().Release();
-    return false;
-  }
+    return this->EmergencyRemoval_LastCreatedWorker();
   if (! this->GetActiveWorker().pipeWorkerToServerControls.CreateMe("worker to server controls"))
-  { this->GetActiveWorker().Release();
-    return false;
-  }
+    return this->EmergencyRemoval_LastCreatedWorker();
   if (! this->GetActiveWorker().pipeWorkerToServerIndicatorData.CreateMe("worker to server indicator data"))
-  { this->GetActiveWorker().Release();
-    return false;
-  }
+    return this->EmergencyRemoval_LastCreatedWorker();
   if (! this->GetActiveWorker().pipeWorkerToServerUserInput.CreateMe("worker to server user input"))
-  { this->GetActiveWorker().Release();
-    return false;
-  }
+    return this->EmergencyRemoval_LastCreatedWorker();
   if (! this->GetActiveWorker().pipeWorkerToServerWorkerStatus.CreateMe("worker to server worker status"))
-  { this->GetActiveWorker().Release();
-    return false;
-  }
-  this->GetActiveWorker().indexInParent=this->activeWorker;
+    return this->EmergencyRemoval_LastCreatedWorker();
   this->GetActiveWorker().parent=this;
   this->GetActiveWorker().timeOfLastPingServerSideOnly=theGlobalVariables.GetElapsedSeconds();
   this->GetActiveWorker().pingMessage="";
@@ -2159,8 +2145,6 @@ void WebServer::ReleaseWorkerSideResources()
   //<-release socket- communication is handled by the worker.
   this->activeWorker=-1; //<-The active worker is needed only in the child process.
 }
-
-
 
 void segfault_sigaction(int signal, siginfo_t *si, void *arg)
 {

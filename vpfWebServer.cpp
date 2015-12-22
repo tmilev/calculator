@@ -2300,7 +2300,7 @@ void WebServer::initPrepareSignals()
 
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
-  theGlobalVariables.RelativePhysicalNameCrashLog="crash_WebServerRun";
+  theGlobalVariables.RelativePhysicalNameCrashLog="crash_WebServerRun.html";
   if (!this->initPrepareWebServerALL())
     return 1;
   List<int> theSockets;

@@ -298,7 +298,7 @@ void WebWorker::SendAllBytesHttpSSL()
     theReport.SetStatus("Socket::SendAllBytes failed: connectedSocketID=-1. WebWorker::SendAllBytes - finished.");
     return;
   }
-  theLog << "Sending " << this->remainingBytesToSend.size << " bytes in chunks of: " << logger::endL;
+  theLog << "Sending " << this->remainingBytesToSend.size << " bytes in chunks of: ";
   std::stringstream reportStream;
   ProgressReportWebServer theReport2;
   reportStream << "Sending " << this->remainingBytesToSend.size << " bytes...";
@@ -352,7 +352,8 @@ void WebWorker::SendAllBytesHttpSSL()
       ("WebWorker::SendAllBytes failed: send function went through 3 cycles without sending any bytes. ");
       return;
     }
-    theLog << logger::endL;
+    theLog.flush();
+//    theLog << logger::endL;
   }
   reportStream << " done. ";
   theReport2.SetStatus(reportStream.str());
@@ -422,14 +423,15 @@ void WebServer::Signal_SIGINT_handler(int s)
 }
 
 void WebServer::Signal_SIGCHLD_handler(int s)
-{ theLog << "Signal child handler called with input: " << s << "." << logger::endL;
-  int waitResult=0;
+{ int waitResult=0;
   do
   { waitResult= waitpid(-1, NULL, WNOHANG| WEXITED);
     if (waitResult>0)
       for (int i=0; i<theWebServer.theWorkers.size; i++)
         if (theWebServer.theWorkers[i].ProcessPID==waitResult)
-          theWebServer.theWorkers[i].pipeWorkerToServerControls.WriteAfterEmptying("close");
+        { theWebServer.theWorkers[i].pipeWorkerToServerControls.WriteAfterEmptying("close");
+          theLog << logger::green << "Child with pid " << waitResult << " successfully reaped. " << logger::endL;
+        }
   }while (waitResult>0);
 }
 
@@ -833,7 +835,8 @@ void WebWorker::SendAllBytesHttp()
     theReport.SetStatus("Socket::SendAllBytes failed: connectedSocketID=-1. WebWorker::SendAllBytes - finished.");
     return;
   }
-  theLog << "Sending " << this->remainingBytesToSend.size << " bytes in chunks of: " << logger::endL;
+  theLog << "Sending " << this->remainingBytesToSend.size << " bytes in chunks of: ";
+  theLog.flush();
   std::stringstream reportStream;
   ProgressReportWebServer theReport2;
   reportStream << "Sending " << this->remainingBytesToSend.size << " bytes...";
@@ -1315,10 +1318,9 @@ void WebWorker::SignalIamDoneReleaseEverything()
   { theLog << logger::red << "Signal done called on non-active worker" << logger::endL;
     return;
   }
-  theLog << logger::blue << "worker " << this->indexInParent+1 << " is done with the work. " << logger::endL;
 //  std::cout << "got thus far xxxxxxx" << std:SignalIamDoneReleaseEverything:endl;
   this->pipeWorkerToServerControls.WriteAfterEmptying("close");
-  theLog << logger::blue << "Notification dispatched." << logger::endL;
+  theLog << logger::blue << "Worker " << this->indexInParent+1 << " finished computing. " << logger::endL;
   this->SendAllBytes();
   this->Release();
   theGlobalVariables.flagComputationFinishedAllOutputSentClosing=true;
@@ -2085,8 +2087,6 @@ void WebServer::CheckExecutableVersionAndRestartIfNeeded()
 { struct stat theFileStat;
   if (stat(theGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat)!=0)
     return;
-  theLog << "current process spawned from file with time stamp: " << this->timeLastExecutableModification
-  << "; latest executable time stamp: " << theFileStat.st_ctime << logger::endL;
   if (this->timeLastExecutableModification!=-1)
     if (this->timeLastExecutableModification!=theFileStat.st_ctime)
     { stOutput << "<b>The server executable was updated, but the server has not been restarted yet. "
@@ -2097,7 +2097,10 @@ void WebServer::CheckExecutableVersionAndRestartIfNeeded()
       { this->GetActiveWorker().SendAllBytes();
         this->ReleaseActiveWorker();
       }
-      theLog << logger::red << "Time stamps are different, RESTARTING." << logger::endL;
+      theLog << "Current process spawned from file with time stamp: "
+      << this->timeLastExecutableModification
+      << "; latest executable has different time stamp: " << theFileStat.st_ctime
+      << ". " << logger::red << "RESTARTING." << logger::endL;
       this->Restart();
     }
 }
@@ -2208,15 +2211,13 @@ void WebServer::RecycleChildrenIfPossible()
             theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
             )
         { this->theWorkers[i].flagInUse=false;
+          kill(this->theWorkers[i].ProcessPID, SIGKILL);
           std::stringstream pingTimeoutStream;
           pingTimeoutStream << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
-          << " seconds have passed since worker " << i+1
-          << " pinged the server. I am assuming the worker no longer functions, and am marking it as free for reuse. "
-          << "In addition, I sending kill signal to the worker's last executable pid: "
+          << " seconds passed since worker " << i+1
+          << " last pinged the server; killing pid: "
           << this->theWorkers[i].ProcessPID << ". ";
           logIO << logger::red << pingTimeoutStream.str() << logger::endL;
-          kill(this->theWorkers[i].ProcessPID, SIGKILL);
-          logIO << logger::red << "Kill signal sent. " << logger::endL;
           this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>" + pingTimeoutStream.str()+"</b></span>";
         }
     }

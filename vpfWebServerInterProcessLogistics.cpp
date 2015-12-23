@@ -286,14 +286,14 @@ void Pipe::ReadWithoutEmptying()
 void Pipe::Read()
 { MacroRegisterFunctionWithName("Pipe::Read");
   this->CheckConsistency();
-  logIO << "Reading from pipe: " << this->ToString() << logger::endL;
+//  logIO << "Reading from pipe: " << this->ToString() << logger::endL;
   MutexRecursiveWrapper& safetyFirst=theGlobalVariables.MutexWebWorkerPipeReadLock;
   safetyFirst.LockMe(); //preventing threads from locking one another
-  logIO << "Passed mutex safety: " << this->ToString() << logger::endL;
+//  logIO << "Passed mutex safety: " << this->ToString() << logger::endL;
   this->pipeAvailable.RequestPausePauseIfLocked();
-  logIO << "Passed pause controller safety, ready to read pipe: " << this->ToString() << logger::endL;
+//  logIO << "Passed pause controller safety, ready to read pipe: " << this->ToString() << logger::endL;
   this->ReadNoLocks();
-  logIO << "Read no locks successful? " << this->ToString() << logger::endL;
+//  logIO << "Read no locks successful? " << this->ToString() << logger::endL;
   this->pipeAvailable.ResumePausedProcessesIfAny();
   safetyFirst.UnlockMe(); //preventing threads from locking one another
 }
@@ -308,6 +308,12 @@ void logger::CheckLogSize()
 { theFile.seekg(0, std::ios::end);
   if (theFile.tellg()>500000)
     this->flagStopWritingToFile=true;
+}
+
+void logger::flush()
+{
+  std::cout.flush();
+  theFile.flush();
 }
 
 std::string logger::closeTagConsole()

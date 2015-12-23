@@ -216,6 +216,7 @@ class logger
   std::string openTagConsole();
   std::string openTagHtml();
   logger& operator << (const loggerSpecialSymbols& input);
+  void flush();
   template <typename theType>
   logger& operator << (const theType& toBePrinted)
   { if (theGlobalVariables.flagUsingBuiltInWebServer)

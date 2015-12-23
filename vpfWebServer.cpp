@@ -2119,8 +2119,10 @@ void WebServer::Restart()
 //sleep(1);
 //execv("/proc/self/exe", exec_argv);
   std::stringstream theCommand;
+  theLog << logger::red << " restarting with theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit= "
+  << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit << logger::endL;
   int timeInteger=(int) theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
-  theCommand << "killall " <<  theGlobalVariables.PhysicalNameExecutableNoPath + " \r\n./";
+  theCommand << "killall " << theGlobalVariables.PhysicalNameExecutableNoPath + " \r\n./";
   theCommand << theGlobalVariables.PhysicalNameExecutableNoPath;
   if (theGlobalVariables.flagSSLisAvailable)
     theCommand << " serverSSL nokill " << timeInteger;
@@ -2528,9 +2530,11 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   std::string& thirdArgument=theGlobalVariables.programArguments[2];
   theWebServer.flagTryToKillOlderProcesses=!(thirdArgument=="nokill");
   std::string timeLimitString="100";
-  if (thirdArgument=="nokill")
-    if (argC>3)
+  if (thirdArgument!="nokill")
+    timeLimitString=thirdArgument;
+  else if (argC>3)
       timeLimitString=theGlobalVariables.programArguments[3];
+//  std::cout << "<br>timelimitstring: " << timeLimitString;
   Rational timeLimit;
   timeLimit.AssignString(timeLimitString);
   int timeLimitInt=0;
@@ -2554,6 +2558,9 @@ int WebServer::main(int argc, char **argv)
   InitializeGlobalObjects();
   theWebServer.InitializeGlobalVariables();
   theWebServer.AnalyzeMainArguments(argc, argv);
+  //theLog << logger::red << " At ze moment theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit= "
+  //<< theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit << logger::endL;
+
   if (theGlobalVariables.flagRunningConsoleTest)
     return mainTest(theGlobalVariables.programArguments);
   if (theGlobalVariables.flagUsingApacheWebServer)

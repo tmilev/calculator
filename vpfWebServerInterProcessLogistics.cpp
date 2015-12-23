@@ -27,10 +27,18 @@ PauseController::PauseController()
 
 bool PauseController::CreateMe(const std::string& inputName)
 { this->Release();
+
   this->name=inputName;
   this->buffer.SetSize(200);
+//  static int temporaryDebugCounter=0;
+//  temporaryDebugCounter++;
+//  if (temporaryDebugCounter%200==0)
+//  { logBlock << logger::red << "FAILING pipe operation for debugging purposes. " << logger::endL;
+//    return false;
+
+//  }
   if (pipe(this->thePausePipe.TheObjects)<0)
-  { logBlock <<  logger::purple << "FAILED to open pipe from parent to child. " << logger::endL;
+  { logBlock << logger::purple << "FAILED to open pipe from parent to child. " << logger::endL;
     return false;
   }
   if (pipe(this->mutexPipe.TheObjects)<0)
@@ -180,7 +188,9 @@ bool Pipe::CreateMe(const std::string& inputPipeName)
   }
   this->name=inputPipeName;
   if (! this->pipeAvailable.CreateMe("pause controller for pipe: "+ inputPipeName))
+  { this->Release();
     return false;
+  }
   return true;
 }
 

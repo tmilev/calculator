@@ -20,9 +20,20 @@ void PauseController::Release()
   PauseController::Release(this->thePausePipe[1]);
 }
 
+bool PauseController::CheckConsistency()
+{ if (this->flagDeallocated)
+    crash << "Use after free of " << this->ToString() << crash;
+  return true;
+}
+
 PauseController::PauseController()
-{ this->thePausePipe.initFillInObject(2,-1);
+{ this->thePausePipe.initFillInObject(2, -1);
   this->mutexPipe.initFillInObject(2, -1);
+  this->flagDeallocated=false;
+}
+
+PauseController::~PauseController()
+{ this->flagDeallocated=true;
 }
 
 bool PauseController::CreateMe(const std::string& inputName)
@@ -57,7 +68,8 @@ bool PauseController::CreateMe(const std::string& inputName)
 }
 
 void PauseController::PauseIfRequested()
-{ if (this->CheckPauseIsRequested())
+{ this->CheckConsistency();
+  if (this->CheckPauseIsRequested())
     logBlock << logger::blue << "Blocking on " << this->ToString() << logger::endL;
   bool pauseWasRequested= !((read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size))>0);
   if (!pauseWasRequested)
@@ -65,7 +77,8 @@ void PauseController::PauseIfRequested()
 }
 
 bool PauseController::PauseIfRequestedWithTimeOut()
-{ fd_set read_fds, write_fds, except_fds;
+{ this->CheckConsistency();
+  fd_set read_fds, write_fds, except_fds;
   FD_ZERO(&read_fds);
   FD_ZERO(&write_fds);
   FD_ZERO(&except_fds);
@@ -88,7 +101,8 @@ bool PauseController::PauseIfRequestedWithTimeOut()
 }
 
 void PauseController::RequestPausePauseIfLocked()
-{ this->mutexForProcessBlocking.GetElement().LockMe();//<- make sure the pause controller is not locking itself
+{ this->CheckConsistency();
+  this->mutexForProcessBlocking.GetElement().LockMe();//<- make sure the pause controller is not locking itself
   //through competing threads
   if (this->CheckPauseIsRequested())
     logBlock << logger::blue << "Blocking on " << this->ToString() << logger::endL;
@@ -97,7 +111,8 @@ void PauseController::RequestPausePauseIfLocked()
 }
 
 bool PauseController::CheckPauseIsRequested()
-{ read (this->mutexPipe[0], this->buffer.TheObjects, this->buffer.size);
+{ this->CheckConsistency();
+  read (this->mutexPipe[0], this->buffer.TheObjects, this->buffer.size);
   fcntl(this->thePausePipe[0], F_SETFL, O_NONBLOCK);
   bool result = !(read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size)>0);
   if (!result)
@@ -154,7 +169,7 @@ void Pipe::WriteNoLocks(const std::string& toBeSent)
     break;
   }
   if (numBytesWritten<0)
-    logIO << logger::red << "Error in " << this->ToString() << ". The error is: " << strerror(errno) << ". ";
+    logIO << logger::red << "Error in " << this->ToString() << ". The error is: " << strerror(errno) << ". " << logger::endL;
 }
 
 std::string Pipe::ToString()const
@@ -170,7 +185,8 @@ std::string Pipe::ToString()const
 }
 
 bool Pipe::CreateMe(const std::string& inputPipeName)
-{ this->Release();
+{ this->CheckConsistency();
+  this->Release();
   if (pipe(this->thePipe.TheObjects)<0)
   { logBlock << logger::purple << "Failed to open pipe from parent to child. " << logger::endL;
     this->Release();
@@ -194,13 +210,28 @@ bool Pipe::CreateMe(const std::string& inputPipeName)
   return true;
 }
 
+bool Pipe::CheckConsistency()
+{ MacroRegisterFunctionWithName("Pipe::CheckConsistency");
+  if (this->flagDeallocated)
+    crash << "This is a programming error: use after free of pipe. " << crash;
+  return true;
+}
+
 Pipe::~Pipe()
 { //Pipes are not allowed to release resources in the destructor:
   //a pipe's destructor is called when expanding List<Pipe>.
+  this->flagDeallocated=true;
 }
 
+Pipe::Pipe()
+{ this->thePipe.initFillInObject(2,-1);
+  this->flagDeallocated=false;
+}
+
+
 void Pipe::Release()
-{ PauseController::Release(this->thePipe[0]);
+{ this->CheckConsistency();
+  PauseController::Release(this->thePipe[0]);
   PauseController::Release(this->thePipe[1]);
   this->pipeAvailable.Release();
   this->lastRead.SetSize(0);
@@ -208,11 +239,12 @@ void Pipe::Release()
 
 void Pipe::ReadNoLocks()
 { MacroRegisterFunctionWithName("Pipe::ReadFileDescriptor");
+  this->CheckConsistency();
   this->lastRead.SetSize(0);
   if (this->thePipe[0]==-1)
     return;
   int counter=0;
-  const unsigned int bufferSize=20000000;
+  const unsigned int bufferSize=200000;
   this->pipeBuffer.SetSize(bufferSize); // <-once the buffer is resized, this operation does no memory allocation and is fast.
   int numReadBytes=0;
   for (;;)
@@ -253,10 +285,15 @@ void Pipe::ReadWithoutEmptying()
 
 void Pipe::Read()
 { MacroRegisterFunctionWithName("Pipe::Read");
+  this->CheckConsistency();
+  logIO << "Reading from pipe: " << this->ToString() << logger::endL;
   MutexRecursiveWrapper& safetyFirst=theGlobalVariables.MutexWebWorkerPipeReadLock;
   safetyFirst.LockMe(); //preventing threads from locking one another
+  logIO << "Passed mutex safety: " << this->ToString() << logger::endL;
   this->pipeAvailable.RequestPausePauseIfLocked();
+  logIO << "Passed pause controller safety, ready to read pipe: " << this->ToString() << logger::endL;
   this->ReadNoLocks();
+  logIO << "Read no locks successful? " << this->ToString() << logger::endL;
   this->pipeAvailable.ResumePausedProcessesIfAny();
   safetyFirst.UnlockMe(); //preventing threads from locking one another
 }

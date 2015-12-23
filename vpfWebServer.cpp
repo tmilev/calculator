@@ -1270,6 +1270,7 @@ int WebWorker::ProcessFolder()
 
 void WebWorker::reset()
 { this->connectedSocketID=-1;
+  this->ProcessPID=-1;
   this->connectedSocketIDLastValueBeforeRelease=-1;
   this->connectionID=-1;
   this->indexInParent=-1;
@@ -2211,10 +2212,11 @@ void WebServer::RecycleChildrenIfPossible()
           pingTimeoutStream << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
           << " seconds have passed since worker " << i+1
           << " pinged the server. I am assuming the worker no longer functions, and am marking it as free for reuse. "
-          << "In addition, I am killing the worker's last executable pid: "
+          << "In addition, I sending kill signal to the worker's last executable pid: "
           << this->theWorkers[i].ProcessPID << ". ";
-          kill(this->theWorkers[i].ProcessPID, SIGKILL);
           logIO << logger::red << pingTimeoutStream.str() << logger::endL;
+          kill(this->theWorkers[i].ProcessPID, SIGKILL);
+          logIO << logger::red << "Kill signal sent. " << logger::endL;
           this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>" + pingTimeoutStream.str()+"</b></span>";
         }
     }
@@ -2385,7 +2387,9 @@ int WebServer::Run()
     this->GetActiveWorker().ProcessPID=fork(); //creates an almost identical copy of this process.
     //The original process is the parent, the almost identical copy is the child.
     //theLog << "\r\nChildPID: " << this->childPID;
-    if (this->GetActiveWorker().ProcessPID!=0)
+    if (this->GetActiveWorker().ProcessPID==-1)
+      logIO << logger::red << "FAILED to spawn a child process. " << logger::endL;
+    if (this->GetActiveWorker().ProcessPID==0)
     { // this is the child (worker) process
       this->SSLServerSideHandShake();
       this->Release(theListeningSocket);//worker has no access to socket listener

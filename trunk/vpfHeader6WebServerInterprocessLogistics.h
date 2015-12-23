@@ -20,10 +20,12 @@ public:
   List<char> buffer;
   std::string name;
   MemorySaving<MutexRecursiveWrapper> mutexForProcessBlocking; //<- to avoid two threads from the same process blocking the process.
+  bool flagDeallocated;
   std::string ToString()const;
   void Release();
   bool CreateMe(const std::string& inputName);
 
+  bool CheckConsistency();
   bool CheckPauseIsRequested();
   void PauseIfRequested();
   bool PauseIfRequestedWithTimeOut();
@@ -35,6 +37,7 @@ public:
   void UnloCkMe();
   static void Release(int& theDescriptor);
   PauseController();
+  ~PauseController();
 };
 
 class Pipe
@@ -47,6 +50,7 @@ public:
   PauseController pipeAvailable;
   List<char> lastRead;
   List<char> pipeBuffer;
+  bool flagDeallocated;
   std::string name;
 
   void Read();
@@ -55,11 +59,10 @@ public:
 
   std::string ToString()const;
   void Release();
+  bool CheckConsistency();
   bool CreateMe(const std::string& inputPipeName);
   ~Pipe();
-  Pipe()
-  { this->thePipe.initFillInObject(2,-1);
-  }
+  Pipe();
 };
 #endif
 

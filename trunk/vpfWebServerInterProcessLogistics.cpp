@@ -368,6 +368,7 @@ logger& logger::operator << (const loggerSpecialSymbols& input)
   { case logger::endL:
       if (theGlobalVariables.flagUsingBuiltInWebServer)
         std::cout << this->closeTagConsole() << std::endl;
+        std::cout.flush();
       if (this->flagStopWritingToFile)
         return *this;
       theFile << this->closeTagHtml() << "\n<br>\n";

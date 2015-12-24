@@ -164,8 +164,12 @@ DatabaseQuery::~DatabaseQuery()
   this->theQueryResult=0;
 }
 
-bool UserCalculator::FetchOneColumn(const std::string& columnName, std::string& output, DatabaseRoutines& theRoutines, std::string* failureComments)
+bool UserCalculator::FetchOneColumn
+(const std::string& columnName, std::string& output, DatabaseRoutines& theRoutines, std::stringstream* failureComments)
 { MacroRegisterFunctionWithName("UserCalculator::FetchOneColumn");
+  if (!this->IsAcceptableObjectName(columnName, failureComments) ||
+      !this->IsAcceptableObjectName(this->username, failureComments))
+    return false;
   DatabaseQuery theQuery(theRoutines,
   "SELECT "+
   columnName
@@ -175,12 +179,12 @@ bool UserCalculator::FetchOneColumn(const std::string& columnName, std::string& 
   output="";
   if (!theQuery.flagQuerySucceeded)
   { if (failureComments!=0)
-      *failureComments ="<b>Query failed - column may not exist (or some other error occurred).</b>";
+      *failureComments << "<b>Query failed - column may not exist (or some other error occurred).</b>";
     return false;
   }
   if (!theQuery.flagQueryReturnedResult)
   { if (failureComments!=0)
-      *failureComments= "<b> Query did not return a result - column may not exist.</b>";
+      *failureComments << "<b> Query did not return a result - column may not exist.</b>";
     return false;
   }
   output= theQuery.firstResultString;
@@ -192,7 +196,7 @@ bool UserCalculator::AuthenticateWithToken(DatabaseRoutines& theRoutines)
   if (this->enteredAuthenticationToken=="")
     return false;
   std::string authenticationTokenCreationTimeSTRING;
-  std::string authenticationFailureRemarks;
+  std::stringstream authenticationFailureRemarks;
   if (!this->FetchOneColumn("authenticationTokenCreationTime", authenticationTokenCreationTimeSTRING, theRoutines, &authenticationFailureRemarks))
     return theRoutines << authenticationFailureRemarks;
   this->authenticationTokenCreationTime=authenticationTokenCreationTimeSTRING;
@@ -226,7 +230,7 @@ bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines)
 bool UserCalculator::AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutines)
 { MacroRegisterFunctionWithName("UserCalculator::Authenticate");
   this->ComputeShaonedSaltedPassword();
-  std::string failureRemarks;
+  std::stringstream failureRemarks;
   bool result=this->FetchOneColumn("password", this->actualShaonedSaltedPassword, theRoutines, &failureRemarks);
   if (!result)
   { //stOutput << "fail remarks: " << failureRemarks;
@@ -320,6 +324,9 @@ void UserCalculator::ComputeShaonedSaltedPassword()
 bool UserCalculator::SetColumnEntry
 (const std::string& columnName, const std::string& theValue, DatabaseRoutines& theRoutines, std::stringstream* failureComments)
 { MacroRegisterFunctionWithName("UserCalculator::SetColumnEntry");
+  if (!this->IsAcceptableObjectName(theValue, failureComments) || !this->IsAcceptableObjectName(columnName, failureComments)
+      || !this->IsAcceptableObjectName(this->username, failureComments))
+    return false;
   DatabaseQuery theDBQuery(theRoutines,
   "UPDATE calculatorUsers.users SET " +
   columnName +
@@ -364,9 +371,7 @@ bool DatabaseRoutines::startMySQLDatabase()
   if (mysql_select_db(this->connection, this->theDatabaseName.c_str())!=0)//Note: here zero return value = success.
     return *this << "Failed to select database: " << this->theDatabaseName << ". ";
   //CANT use DatabaseQuery object as its constructor calls this method!!!!!
-  if (mysql_query(this->connection, "SELECT 1 FROM users")!=0)
-  { std::string createTable=
-    "CREATE TABLE users(\
+  return this->CreateTable("users", "\
     user VARCHAR(50) NOT NULL PRIMARY KEY,  \
     password VARCHAR(30) NOT NULL, \
     email VARCHAR(50) NOT NULL,\
@@ -375,16 +380,62 @@ bool DatabaseRoutines::startMySQLDatabase()
     numberUnsuccessfulLoginAttempts VARCHAR(10), \
     numberSuccessfulLoginAttempts VARCHAR(10), \
     numberUnsuccessfulLoginAttemptsLast24Hours VARCHAR(10),\
-    numberSuccessfulLoginAttemptsLast24Hours VARCHAR(10)\
-    )";
-    if (mysql_query(this->connection, createTable.c_str())!=0)
-    { mysql_free_result( mysql_use_result(this->connection));
-      return *this << "Command:<br>" << createTable << "<br>failed";
-    }
-    mysql_free_result( mysql_use_result(this->connection));
-  }
+    numberSuccessfulLoginAttemptsLast24Hours VARCHAR(10)");
+}
+
+bool DatabaseRoutines::CreateTable
+(const std::string& tableName, const std::string& desiredTableContent)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::CreateTable");
+  if (tableName=="" || ! UserCalculator::IsAcceptableObjectName(tableName, &this->comments))
+    return false;
+  if (this->TableExists(tableName))
+    return true;
+  std::string tableContent=desiredTableContent;
+  if (tableContent=="")
+    tableContent="user VARCHAR(50) NOT NULL PRIMARY KEY";
+  tableContent="CREATE TABLE " + tableName+"(" + tableContent + ")";
+  //CANNOT use object DatabaseQuery as that object invokes startMySQLDatabase
+  //which in turn invokes the present function.
+  bool result= (mysql_query(this->connection, tableContent.c_str())!=0);
+  if (!result)
+    return *this << "Command:<br>" << tableContent << "<br>failed";
   mysql_free_result( mysql_use_result(this->connection));
+  return result;
+}
+
+bool UserCalculator::UserEntriesAreValidObjectNames(std::stringstream* comments)
+{ MacroRegisterFunctionWithName("IsAcceptableObjectName::IsAcceptableObjectName");
+  if (!this->IsAcceptableObjectName(this->username, comments))
+    return false;
+  if (!this->IsAcceptableObjectName(this->enteredAuthenticationToken, comments))
+    return false;
+  if (!this->IsAcceptableObjectName(this->email, comments))
+    return false;
+  for (int i=0; i<this->selectedColumns.size; i++)
+    if (!this->IsAcceptableObjectName(this->selectedColumns[i], comments))
+      return false;
   return true;
+}
+
+bool UserCalculator::IsAcceptableObjectName(const std::string& input, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("IsAcceptableObjectName::IsAcceptableObjectName");
+  for (unsigned i=0; i<input.size(); i++)
+    if (!MathRoutines::isADigit(input[i]) && !MathRoutines::isALatinLetter(input[i])
+        && !input[i]=='.' && !input[i]=='@')
+    { if (comments!=0)
+        *comments << "Input: " << input << " is not a valid object name. ";
+      return false;
+    }
+  return true;
+}
+
+bool DatabaseRoutines::TableExists(const std::string& tableName)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::TableExists");
+  if (!UserCalculator::IsAcceptableObjectName(tableName, &this->comments))
+    return false;
+  bool result=mysql_query(this->connection, ("SELECT 1 FROM "+tableName).c_str());
+  mysql_free_result( mysql_use_result(this->connection));
+  return result;
 }
 
 bool DatabaseRoutines::innerTestLogin(Calculator& theCommands, const Expression& input, Expression& output)
@@ -459,7 +510,7 @@ bool UserCalculator::getUser(Calculator& theCommands, const Expression& input)
   { theCommands << "<hr>Argument " << input.ToString() << " is supposed to be a string.";
     this->username=input.ToString();
   }
-  return true;
+  return this->UserEntriesAreValidObjectNames(&theCommands.Comments);
 }
 
 bool UserCalculator::getUserAndPass(Calculator& theCommands, const Expression& input)
@@ -475,7 +526,7 @@ bool UserCalculator::getUserAndPass(Calculator& theCommands, const Expression& i
     this->enteredPassword=input[2].ToString();
     this->enteredAuthenticationToken=this->enteredPassword;
   }
-  return true;
+  return this->UserEntriesAreValidObjectNames(&theCommands.Comments);
 }
 
 bool UserCalculator::getUserPassAndSelectedColumns(Calculator& theCommands, const Expression& input)
@@ -506,7 +557,7 @@ bool UserCalculator::getUserPassAndExtraData(Calculator& theCommands, const Expr
     { theCommands << "<hr>Argument " << input[i].ToString() << " is supposed to be a string";
       outputData[i-3]=input[i].ToString();
     }
-  return true;
+  return this->UserEntriesAreValidObjectNames(&theCommands.Comments);
 }
 
 bool UserCalculator::getUserPassAndEmail(Calculator& theCommands, const Expression& input)
@@ -526,7 +577,7 @@ bool UserCalculator::getUserPassAndEmail(Calculator& theCommands, const Expressi
   { theCommands << "<hr>Argument " << input[3].ToString() << " is supposed to be a string.";
     this->email=input[3].ToString();
   }
-  return true;
+  return this->UserEntriesAreValidObjectNames(&theCommands.Comments);
 }
 
 TimeWrapper::TimeWrapper()
@@ -587,7 +638,11 @@ void TimeWrapper::operator=(const std::string& input)
 void UserCalculator::FetchColumns(DatabaseRoutines& theRoutines)
 { MacroRegisterFunctionWithName("UserCalculator::FetchColumns");
   for (int i=0; i<this->selectedColumns.size; i++)
-    this->FetchOneColumn(this->selectedColumns[i], this->selectedColumnValues[i], theRoutines, &this->selectedColumnsRetrievalFailureRemarks[i]);
+  { std::stringstream tempStream;
+    this->FetchOneColumn
+    (this->selectedColumns[i], this->selectedColumnValues[i], theRoutines, &tempStream);
+    this->selectedColumnsRetrievalFailureRemarks[i]=tempStream.str();
+  }
 }
 
 std::string DatabaseRoutines::ToStringAllUsersHTMLFormat()

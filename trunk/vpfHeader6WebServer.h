@@ -124,9 +124,11 @@ public:
   static const int maxNumPendingConnections;     // how many pending connections queue will hold
   int listeningSocketHTTP;
   int listeningSocketHttpSSL;
+  int highestSocketNumber;
   bool flagTryToKillOlderProcesses;
   List<std::string> PortsITryHttp;
   List<std::string> PortsITryHttpSSL;
+  List<int> theListeningSockets;
   ListReferences<WebWorker> theWorkers;
 
   int activeWorker;
@@ -165,6 +167,7 @@ public:
   void initPrepareSignals();
   bool initBindToPorts();
   void initPortsITry();
+  void initListeningSockets();
   void initSSL();
   void SSLfreeResources();
   void SSLServerSideHandShake();

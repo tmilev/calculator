@@ -20,6 +20,7 @@
 FEATUREFLAGS=--std=c++11 -pthread -fopenmp
 CFLAGS=-Wall -Wno-address $(FEATUREFLAGS) -c
 LDFLAGS=$(FEATUREFLAGS)
+LIBRARYINCLUDESEND=
 
 ifeq ($(hsa), 1)
 	CXX=/home/user/gcc/bin/g++
@@ -43,12 +44,12 @@ endif
 
 ifeq ($(ssl),1)
 	CFLAGS+= -DMACRO_use_open_ssl
-	LDFLAGS+= -lssl -lcrypto
+	LIBRARYINCLUDESEND+= -lssl -lcrypto #WARNING believe it or not, the libraries must come AFTER the executable name
 endif
 
 ifeq ($(MySQL),1)
 	CFLAGS+= -DMACRO_use_MySQL
-	LDFLAGS+= -lmysqlclient
+	LIBRARYINCLUDESEND+= -lmysqlclient  #WARNING believe it or not, the libraries must come AFTER the executable name
 endif
 
 #if this is missing something, add it, or, ls | grep cpp | xargs echo
@@ -62,7 +63,7 @@ Debug:
 	mkdir ./Debug
 
 Debug_calculator: $(OBJECTS)
-	$(CXX) $(LDFLAGS) $(OBJECTS) -o ./Debug/calculator
+	$(CXX) $(LDFLAGS) $(OBJECTS) -o  ./Debug/calculator $(LIBRARYINCLUDESEND)
 
 testrun: Debug/calculator
 	time ./Debug/calculator test

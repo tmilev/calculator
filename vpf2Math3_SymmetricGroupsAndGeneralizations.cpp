@@ -820,7 +820,9 @@ void ElementHyperoctahedralGroup::MakeFromMul(const ElementHyperoctahedralGroup&
   // don't understand why the right wants to act on the left in this way
   // the following three lines are the mathematical part of this function,
   // the rest is to ensure the element looks good or whatever
-  right.p.ActOnList(this->s);
+  auto pp = right.p;
+  pp.Invert();
+  pp.ActOnList(this->s);
   for(int i=0; i<right.s.size; i++)
     this->s[i] ^= right.s[i];
 
@@ -1059,6 +1061,43 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
     this->SpechtModuleOfPartitionsBnGenerators(positive, negative, out, subsn);
 }*/
 
+/*void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, const Partition &negative,
+                                                     GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroup>, Rational> &out)
+{ List<Matrix<Rational> > pozm, negm;
+  stOutput << "HyperoctahedralGroup::SpectModuleOfPartitions(" << positive << ", " << negative << ")\n";
+  // the next two things should be done in parallel.  How can I make that happen?
+  positive.SpechtModuleMatricesOfTranspositionsjjplusone(pozm);
+  negative.SpechtModuleMatricesOfTranspositionsjjplusone(negm);
+
+  Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup> Sn;
+  auto Sngens = this->generators;
+  Sngens.SetSize(this->N-1);
+  Sn.MakeTranslatableWordsSubgroup(*this,Sngens);
+
+  Subgroup<Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>, ElementHyperoctahedralGroup> PxM;
+  auto PxMgens = Sn.generators;
+  if((positive.n > 0) && (negative.n > 0))
+    PxMgens.RemoveIndexShiftDown(positive.n);
+  PxM.MakeTranslatableWordsSubgroup(Sn,PxMgens);
+
+  GroupRepresentation<Subgroup<Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>, ElementHyperoctahedralGroup>, Rational> pxmr;
+  pxmr.ownerGroup = &PxM;
+  pxmr.generatorS = pozm;
+  pxmr.generatorS.AddListOnTop(negm);
+  GroupRepresentation<Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>, Rational> snr;
+  PxM.InduceRepresentation(pxmr,snr);
+  GroupRepresentation<HyperoctahedralGroup, Rational> outreboxme;
+  Sn.InduceRepresentation(snr,outreboxme);
+
+  out.ownerGroup = this;
+  out.generatorS = outreboxme.generatorS;
+  std::stringstream ids;
+  ids << negative << ", " << positive;
+  out.identifyingString = ids.str();
+  if(!out.VerifyRepresentation())
+    crash << crash;
+}*/
+
 void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, const Partition &negative,
                                                      GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroup>, Rational> &out)
 { List<Matrix<Rational> > pozm, negm;
@@ -1100,8 +1139,48 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
     }
   if(!pxmr.VerifyRepresentation())
     crash << "lol" << crash;
-  GroupRepresentation<HyperoctahedralGroup, Rational> outreboxme;
-  PxM.InduceRepresentation(pxmr, outreboxme);
+  auto outreboxme = PxM.InduceRepresentation(pxmr);
+  out.ownerGroup = this;
+  out.generatorS = outreboxme.generatorS;
+  std::stringstream ids;
+  ids << negative << ", " << positive;
+  out.identifyingString = ids.str();
+  if(!out.VerifyRepresentation())
+    crash << crash;
+}
+
+void HyperoctahedralGroupR2::SpechtModuleOfPartititons(const Partition &positive, const Partition &negative,
+                                                     GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> &out)
+{ List<Matrix<Rational> > pozm, negm;
+  stOutput << "HyperoctahedralGroupR2::SpectModuleOfPartitions(" << positive << ", " << negative << ")\n";
+  // the next two things should be done in parallel.  How can I make that happen?
+  positive.SpechtModuleMatricesOfTranspositionsjjplusone(pozm);
+  negative.SpechtModuleMatricesOfTranspositionsjjplusone(negm);
+  List<int> subgenids;
+  for(int i=0; i<this->generators.size; i++)
+    subgenids.AddOnTop(i);
+  if((positive.n > 0) && (negative.n > 0))
+    subgenids.RemoveIndexShiftDown(positive.n-1);
+  auto PxM = this->ParabolicKindaSubgroupGeneratorSubset(subgenids);
+  auto pxmr = PxM.GetEmptyRationalRepresentationSubgroup();
+  pxmr.generatorS.SetExpectedSize(PxM.generators.size);
+  pxmr.generatorS.AddListOnTop(pozm);
+  pxmr.generatorS.AddListOnTop(negm);
+  int cur = pxmr.generatorS.size;
+  pxmr.generatorS.SetSize(PxM.generators.size);
+  int repRank = pxmr.generatorS[0].NumRows;
+  if(repRank == 0)
+    repRank = 1;
+  for(int i=0; i<this->N; i++)
+    if(i < positive.n)
+      pxmr.generatorS[cur+i].MakeIdMatrix(repRank);
+    else
+    { pxmr.generatorS[cur+i].MakeIdMatrix(repRank);
+      pxmr.generatorS[cur+i] *= -1;
+    }
+  if(!pxmr.VerifyRepresentation())
+    crash << "lol" << crash;
+  auto outreboxme = PxM.InduceRepresentation(pxmr);
   out.ownerGroup = this;
   out.generatorS = outreboxme.generatorS;
   std::stringstream ids;
@@ -1188,6 +1267,28 @@ void HyperoctahedralGroup::AllSpechtModules()
       Partition::GetPartitions(pps,N-p);
       for(int ppi=0; ppi<pps.size; ppi++)
       { GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroup>, Rational> sm;
+        stOutput << "Computing representation {" << nps[npi] << "}, {" << pps[ppi] << "}\n";
+        this->SpechtModuleOfPartititons(pps[ppi],nps[npi],sm);
+        sm.VerifyRepresentation();
+        stOutput << sm << '\n';
+        this->irreps.AddOnTop(sm);
+      }
+    }
+  }
+  this->irreps.QuickSortAscending();
+  stOutput << this->PrettyPrintCharacterTable() << '\n';
+  RepresentationDataIntoJS().writefile("representations_hyperoctahedral_group");
+}
+
+void HyperoctahedralGroupR2::AllSpechtModules()
+{ for(int p=0; p<=this->N; p++)
+  { List<Partition> nps;
+    Partition::GetPartitions(nps,p);
+    for(int npi=0; npi<nps.size; npi++)
+    { List<Partition> pps;
+      Partition::GetPartitions(pps,this->N-p);
+      for(int ppi=0; ppi<pps.size; ppi++)
+      { GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> sm;
         stOutput << "Computing representation {" << nps[npi] << "}, {" << pps[ppi] << "}\n";
         this->SpechtModuleOfPartititons(pps[ppi],nps[npi],sm);
         sm.VerifyRepresentation();

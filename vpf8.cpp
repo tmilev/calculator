@@ -1147,6 +1147,10 @@ bool Rational::IsInteger(LargeInt* whichInteger)const
   return result;
 }
 
+bool MathRoutines::IsInteger(Rational x)
+{ return x.IsInteger();
+}
+
 double Rational::GetDoubleValue()const
 { if (this->Extended==0)
     return (double)this->NumShort/(double)this->DenShort;

@@ -19,84 +19,7 @@
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 #include "vpfHeader1General3_Test.h"
 
-template <typename helt, typename kelt>
-class TrivialOuterAutomorphism
-{ // operator overloading is gr8 <3 <3 <3
-  kelt operator()(helt& x, kelt& y)
-  { kelt z = y;
-    return z;
-  }
 
-  template <typename somestream>
-  somestream& IntoStream(somestream& out)
-  { out << "Identity function";
-  }
-  std::string ToString(FormatExpressions* theFormat=0) const
-  { std::stringstream ss;
-    ss << *this;
-    return ss.str();
-  }
-  friend std::ostream& operator<<(std::ostream& out, const TrivialOuterAutomorphism<helt,kelt>& data)
-  { out << data.ToString();
-    return out;
-  }
-};
-
-template <typename helt, typename kelt, typename oa>
-class SemidirectProductElement
-{ public:
-  helt h;
-  kelt k;
-
-  SemidirectProductElement<helt, kelt, oa> operator*(const SemidirectProductElement<helt, kelt, oa>& right) const
-  { SemidirectProductElement<helt, kelt, oa> out;
-    out.h = this->h * right.h;
-    out.k = oa(right.h,this->k) * right.k;
-    return out;
-  }
-};
-
-template <typename helt, typename kelt>
-class DirectProductElement: SemidirectProductElement<helt, kelt, TrivialOuterAutomorphism<helt, kelt> >
-{};
-
-template <typename hg, typename kg, typename helt, typename kelt, typename oa>
-class SemidirectProductGroup: public FiniteGroup<SemidirectProductElement<helt, kelt, oa> >
-{ public:
-  hg* H;
-  kg* K;
-
-  void init(hg* inH, kg* inK);
-  void GetWord(SemidirectProductElement<helt, kelt, oa>& g, List<int>& out);
-};
-
-template <typename hg, typename kg, typename helt, typename kelt, typename oa>
-void SemidirectProductGroup<hg, kg, helt, kelt, oa>::init(hg* inH, kg* inK)
-{ this->H = inH;
-  this->K = inK;
-  this->generators.SetSize(inH->generators.size + inK->generators.size);
-  int i=0;
-  for(; i<this->H.generators.size; i++)
-  { this->generators[i].h = this->H.generators[i];
-    this->generators[i].k = this->K.MakeID();
-  }
-  for(; i<this->H.generators.size+this->K.generators.size; i++)
-  { this->generators[i].h = this->H.MakeID();
-    this->generators[i].k = this->K.generators[i-this->H.generators.size];
-  }
-}
-
-template <typename hg, typename kg, typename helt, typename kelt, typename oa>
-void SemidirectProductGroup<hg, kg, helt, kelt, oa>::GetWord(SemidirectProductElement<helt, kelt, oa>& g, List<int>& out)
-{ this->H.GetWord(g.h, out);
-  List<int> kword;
-  this->K.GetWord(g.k, kword);
-  out.AddListOnTop(kword);
-}
-
-template <typename hg, typename kg, typename helt, typename kelt>
-class DirectProductGroup: public SemidirectProductGroup<hg, kg, helt, kelt, TrivialOuterAutomorphism<helt, kelt> >
-{};
 
 
 
@@ -2344,7 +2267,7 @@ void TestPartitionsTableaux()
     stOutput << Ms[i].ToStringPlainText() << "\n\n";
 }
 
-void TestHyperoctahedralStuff()
+/*void TestHyperoctahedralStuff()
 { ElementHyperoctahedralGroup q1,q2;
   q1.p.AddTransposition(0,2);
   q1.p.AddTransposition(1,3);
@@ -2357,6 +2280,34 @@ void TestHyperoctahedralStuff()
   q2.s[2] = true;
   q2.s[3] = false;
   ElementHyperoctahedralGroup q3,q4;
+  stOutput << "Q1=" << q1 << ", Q2=" << q2 << "\n";
+  stOutput << "Q1*Q2=" << q1*q2 << " Q2*Q1*Q2=" << q2*q1*q2;
+  q4 = q2;
+  q4.Invert();
+  stOutput << " Q1^Q2=" << (q1^q2) << " Q2*Q1*Q4=" << q2*q1*q4;
+
+  for(int bni=1; bni<6;bni++)
+  { HyperoctahedralGroup Bn;
+    Bn.MakeHyperoctahedralGroup(bni);
+    Bn.ComputeAllElements();
+    Bn.ComputeCCSizesAndRepresentatives(NULL);
+    stOutput << Bn << '\n';
+    stOutput << Bn.conjugacyClasseS.size << " conjugacy classes\n";
+    for(int i=0; i<Bn.conjugacyClasseS.size; i++)
+      stOutput << Bn.conjugacyClasseS[i] << ", ";
+    stOutput << '\n';
+    Bn.VerifyCCSizesAndRepresentativesFormula();
+    stOutput << "\n\n";
+  }
+}*/
+
+void TestHyperoctahedralStuff()
+{ ElementHyperoctahedralGroupR2 q1,q2;
+  q1.h.AddTransposition(0,2);
+  q1.h.AddTransposition(1,3);
+  q2.k.ToggleBit(1);
+  q2.k.ToggleBit(2);
+  ElementHyperoctahedralGroupR2 q3,q4;
   stOutput << "Q1=" << q1 << ", Q2=" << q2 << "\n";
   stOutput << "Q1*Q2=" << q1*q2 << " Q2*Q1*Q2=" << q2*q1*q2;
   q4 = q2;
@@ -3180,8 +3131,8 @@ std::cout.flush();
   TestSpechtModules(5);
   TestHyperoctahedralStuff();
 
-  HyperoctahedralGroup G;
-  G.MakeHyperoctahedralGroup(2);
+  HyperoctahedralGroupR2 G;
+  G.MakeHyperoctahedralGroup(3);
   stOutput << G.PrettyPrintGeneratorCommutationRelations();
   G.VerifyWords();
   G.AllSpechtModules();

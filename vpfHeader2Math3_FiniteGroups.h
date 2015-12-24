@@ -89,11 +89,19 @@ public:
 template <typename someGroup, typename coefficient>
 class GroupRepresentation;
 
+template <typename someGroup, typename elementSomeGroup>
+class Subgroup;
+
+// There's no documentation like misleading, obsolete documentation written by
+// someone who never actually understood the code.
+//
 // To make a FiniteGroup, define an element class with the following methods
 // elementSomeGroup operator*(const elementSomeGroup& right) const;
-// static void Conjugate(const elementSomeGroup& middle,
-//                       const elementSomeGroup& conjugateBy,
-//                       elementSomeGroup& out);
+// void Invert();
+// elementSomeGroup operator^(const elementSomeGroup& conjugateBy) const;
+// static void ConjugationAction(const elementSomeGroup& conjugator,
+//                               const elementSomeGroup& conjugated,
+//                                     elementSomeGroup& out);
 // bool HasDifferentConjugacyInvariantsFrom(const elementSomeGroup& other) const;
 // //the purpose of this is to test if it is possible for two elements to be conjugate
 // //return true if there is an easy way to tell if they are not conjugate
@@ -101,48 +109,29 @@ class GroupRepresentation;
 // void GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& out) const;
 // bool operator==(const elementSomeGroup& right) const;
 // bool operator>(const elementSomeGroup& right) const;
-// the choice of operator> vs operator< is arbitrary.
 // //group elements are not in general comparable, but do something consistent
 // //and reasonable for collating and printing purposes
 // unsigned int HashFunction() const;
 //
-// In addition we require an overload:
-// template <>
-// bool FiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& x, const elementSomeGroup& y)
-// In general we need to know what the group is to tell if two elements are conjugate.
-// However, this does not actually permit access to anything but the contents of
-// FiniteGroup and elementSomeGroup
-//
+// To make certain operations go faster, it might be nice to put smarter algorithms
+// in the function pointers in the FiniteGroup class
 //
 //assumptions on the FiniteGroup:
 //1. The finite group has a small number of conjugacy classes. Z/10000000Z is not OK
-
-// ok new FiniteGroup design
-// * z.MakeFromMul(x,y)
-// * z.MakeFromInverse(x)
-// * z.MakeFromConjugating(x,y)
-// * z.GetCharacteristicPolyStandardRepresentation(p)
-// * x == y
-// * x > y (for sorting)
-// * x.HashFunction()
-// * Elements can print themselves
-// The following methods are desirable and need to work with the cxx
-// object model.  They need to somehow take the subclassed G, and
-// the elemnts x and y.
-// * PossiblyConjugate
-// * AreConjugate
-//
 //
 // An uninitialized element is expected to be the identity element to the full
 // extent allowed by law.  Two uninitialized elements can be expected to multiply,
 // an an uninitialized element can multiply by an initialized element and where
 // needed thereby discover what group it belongs to.  Equality and sorting operators
-// and the HashFunction need to be aware that there is more than one representation
-// of the identity.  The identity must hash to 0 and sort first.
+// and the HashFunction need to know what the identity is representation
+// It should hash to 0 and sort first.
 //
 // Elements generally know of a faithful representation, which may by reducible,
 // especially over a group that isn't their entire group they want to belong to.
 // That is the representation they give the characteristic polynomial for.
+// At present, however, ElementZ2N gives the charpoly for one of its one-dimensional
+// representations
+// also that particual API is kinda dumb and likely shouldn't exist.
 
 template <typename elementSomeGroup>
 class FiniteGroup
@@ -286,6 +275,17 @@ public:
   std::string PrettyPrintGeneratorCommutationRelations();
   std::string PrettyPrintCharacterTable();
   JSData RepresentationDataIntoJS();
+
+  // A parabolic kinda subgroup H = <hᵢ> is a subgroup of G = <gᵢ> in which for h∈H,
+  // there is a canonical word in gᵢ..gₖ for h in G, with the property that the gᵢ's
+  // in h are actually hᵢ's.  Where this happens, it makes it much easier to come up
+  // with words in H, to be used for representation theory
+  // The intended use for this API call is
+  // auto H = G.ParabolicKindaSubgroupGeneratorSubset(subgenids);
+  Subgroup<FiniteGroup<elementSomeGroup>, elementSomeGroup> ParabolicKindaSubgroupGeneratorSubset(const List<int>& subgens);
+
+  // auto M = G.GetEmptyRationalRepresentation()
+  GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational> GetEmptyRationalRepresentation();
 
   // This is a problem, not everything can have a ToString, but things need ToString(globalVariables) called
   // Personally, I think the output class should have scalars special cased and all MilevObject types have
@@ -907,7 +907,7 @@ void GroupRepresentation<someGroup, coefficient>::GetMatrixOfElement(elementSome
   this->ownerGroup->GetWord(g, word);
   for(int i=0; i<word.size; i++)
     out *= this->generatorS[word[i]];
-  stOutput << "GroupRepresentation::GetMatrixOfElement: Assembled for element " << g << " having word " << word.ToStringCommaDelimited() << " the matrix\n" << out.ToStringPlainText() << '\n';
+  //stOutput << "GroupRepresentation::GetMatrixOfElement: Assembled for element " << g << " having word " << word.ToStringCommaDelimited() << " the matrix\n" << out.ToStringPlainText() << '\n';
 }
 
 template <typename someGroup, typename coefficient>
@@ -1235,14 +1235,20 @@ public:
   template <typename coefficient>
   void QuotientGroupPermutationRepresentation(GroupRepresentation<somegroup, coefficient>& out);
   template <typename coefficient>
-  void InduceRepresentation(GroupRepresentation<Subgroup<somegroup, elementSomeGroup>, coefficient>& in,
-                            GroupRepresentation<somegroup, coefficient>& out);
+  GroupRepresentation<somegroup, coefficient> InduceRepresentation(GroupRepresentation<Subgroup<somegroup, elementSomeGroup>, coefficient>& in);
   template <typename coefficient>
-  void InduceRepresentationNormalSubgroup(GroupRepresentation<Subgroup<somegroup, elementSomeGroup>, coefficient>& in,
-                            GroupRepresentation<somegroup, coefficient>& out);
+  GroupRepresentation<somegroup, coefficient> InduceRepresentationNormalSubgroup(GroupRepresentation<Subgroup<somegroup, elementSomeGroup>, coefficient>& in);
   void (*CosetRepresentativeEnumerator)(void* H) = NULL;
   bool (*SameCosetAsByFormula)(void* H, elementSomeGroup& g1, elementSomeGroup& g2) = NULL;
+  GroupRepresentation<Subgroup<somegroup,elementSomeGroup>, Rational> GetEmptyRationalRepresentationSubgroup();
 };
+
+template <typename somegroup, typename elementSomeGroup>
+GroupRepresentation<Subgroup<somegroup,elementSomeGroup>, Rational> Subgroup<somegroup, elementSomeGroup>::GetEmptyRationalRepresentationSubgroup()
+{ GroupRepresentation<Subgroup<somegroup,elementSomeGroup>, Rational> out;
+  out.ownerGroup = this;
+  return out;
+}
 
 template <typename someGroup, typename elementSomeGroup>
 void TranslatableWordsSubgroupElementGetWord(void* Hp, const elementSomeGroup& g, List<int>& out)
@@ -1260,8 +1266,8 @@ void TranslatableWordsSubgroupElementGetWord(void* Hp, const elementSomeGroup& g
     }
     out.AddListOnTop(H->superGeneratorSubWords[superword[i]]);
   }
-  stOutput << "MissingGeneratorsSubgroupElementGetWord: " << g << " is assigned word " << out.ToStringCommaDelimited()
-           << " translated from parent group's word " << superword.ToStringCommaDelimited() << '\n';
+  //stOutput << "TranslatableWordsSubgroupElementGetWord: " << g << " is assigned word " << out.ToStringCommaDelimited()
+  //         << " translated from parent group's word " << superword.ToStringCommaDelimited() << '\n';
 }
 
 template <typename somegroup, typename elementSomeGroup>
@@ -1352,9 +1358,8 @@ void Subgroup<somegroup, elementSomeGroup>::QuotientGroupPermutationRepresentati
 //
 template <typename somegroup, typename elementSomeGroup>
 template <typename coefficient>
-void Subgroup<somegroup, elementSomeGroup>::InduceRepresentationNormalSubgroup
-    (GroupRepresentation<Subgroup<somegroup, elementSomeGroup>, coefficient>& in,
-     GroupRepresentation<somegroup, coefficient>& out)
+GroupRepresentation<somegroup, coefficient> Subgroup<somegroup, elementSomeGroup>::InduceRepresentationNormalSubgroup
+    (GroupRepresentation<Subgroup<somegroup, elementSomeGroup>, coefficient>& in)
 { GroupRepresentation<somegroup, coefficient> qr;
   this->QuotientGroupPermutationRepresentation(qr);
   GroupRepresentation<somegroup, coefficient> sr;
@@ -1378,6 +1383,7 @@ void Subgroup<somegroup, elementSomeGroup>::InduceRepresentationNormalSubgroup
     in.GetMatrixOfElement(g,sr.generatorS[i]);
     stOutput << " which is assigned matrix\n" << sr.generatorS[i].ToStringPlainText() << '\n';
   }
+  GroupRepresentation<somegroup, coefficient> out;
   out.MakeTensorRepresentation(qr,sr);
   stOutput << "Subgroup representation: " << sr.ToString() << "\n";
   for(int i=0; i<parent->generators.size; i++)
@@ -1388,14 +1394,15 @@ void Subgroup<somegroup, elementSomeGroup>::InduceRepresentationNormalSubgroup
   stOutput << "Induced representation: " << out.ToString() << '\n';
   for(int i=0; i<out.generatorS.size; i++)
     stOutput << parent->generators[i] << ' ' << out.generatorS[i].GetTrace() << '\n' << out.generatorS[i].ToStringPlainText() << '\n';
+  return out;
 }
 
 template <typename somegroup, typename elementSomeGroup>
 template <typename coefficient>
-void Subgroup<somegroup, elementSomeGroup>::InduceRepresentation
-    (GroupRepresentation<Subgroup<somegroup, elementSomeGroup>, coefficient>& in,
-     GroupRepresentation<somegroup, coefficient>& out)
-{ out.generatorS.SetSize(parent->generators.size);
+GroupRepresentation<somegroup, coefficient> Subgroup<somegroup, elementSomeGroup>::InduceRepresentation
+    (GroupRepresentation<Subgroup<somegroup, elementSomeGroup>, coefficient>& in)
+{ GroupRepresentation<somegroup, coefficient> out;
+  out.generatorS.SetSize(parent->generators.size);
   for(int i=0; i<parent->generators.size; i++)
   { this->ComputeCosets();
     // parent->generators[i] = cg * h
@@ -1412,7 +1419,6 @@ void Subgroup<somegroup, elementSomeGroup>::InduceRepresentation
       elementSomeGroup ck = cosets[kcsi].representative;
       elementSomeGroup cki = ck;
       cki.Invert();
-      stOutput << "Inverting: " << ck << " inverse is " << cki << '\n';
       elementSomeGroup hk = cki * k;
       stOutput << "Multiplying cosets: " << ci << " represented by " << cosets[ci].representative
                << " multiplied on the left by " << g << " returns " << k << "which belongs to coset "
@@ -1438,8 +1444,9 @@ void Subgroup<somegroup, elementSomeGroup>::InduceRepresentation
     outgroup.generators = out.generatorS;
     stOutput << "Generator commutation relations for 'representation':\n" <<outgroup.PrettyPrintGeneratorCommutationRelations();
     stOutput << "It was supposed to be a quotient group of\n" << parent->PrettyPrintGeneratorCommutationRelations();
-    //crash << "crashing at " << __FILE__ << ":" << __LINE__ << crash;
+    crash << "crashing at " << __FILE__ << ":" << __LINE__ << crash;
   }
+  return out;
 }
 
 

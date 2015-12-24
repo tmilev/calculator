@@ -251,6 +251,303 @@ public:
   }
 };
 
+template <typename helt, typename kelt>
+class TrivialOuterAutomorphism
+{ kelt oa(helt& x, kelt& y)
+  { kelt z = y;
+    return z;
+  }
+
+  template <typename somestream>
+  somestream& IntoStream(somestream& out)
+  { out << "Identity function";
+  }
+  std::string ToString(FormatExpressions* theFormat=0) const
+  { std::stringstream ss;
+    ss << *this;
+    return ss.str();
+  }
+  friend std::ostream& operator<<(std::ostream& out, const TrivialOuterAutomorphism<helt,kelt>& data)
+  { out << data.ToString();
+    return out;
+  }
+};
+
+template <typename helt, typename kelt, typename oa>
+class SemidirectProductElement
+{ public:
+  helt h;
+  kelt k;
+
+  SemidirectProductElement<helt, kelt, oa> operator*(const SemidirectProductElement<helt, kelt, oa>& right) const
+  { SemidirectProductElement<helt, kelt, oa> out;
+    out.h = this->h * right.h;
+    out.k = oa::oa(right.h,this->k) * right.k;
+    return out;
+  }
+
+  void Invert()
+  { this->h.Invert();
+    this->k.Invert();
+  }
+
+  SemidirectProductElement<helt,kelt,oa> operator^(const SemidirectProductElement<helt, kelt, oa>& right) const
+  { auto inv = right;
+    inv.Invert();
+    return right**this*inv;
+  }
+
+  static void ConjugationAction(const SemidirectProductElement<helt,kelt,oa>& conjugateWith, const SemidirectProductElement<helt,kelt,oa>& conjugateOn, SemidirectProductElement<helt,kelt,oa>& out)
+  { out = conjugateOn^conjugateWith;
+  }
+
+  bool operator==(const SemidirectProductElement<helt,kelt,oa> right) const
+  { return (this->h == right.h) && (this->k == right.k);
+  }
+
+  bool operator>(const SemidirectProductElement<helt,kelt,oa> right) const
+  { if(this->h > right.h)
+      return true;
+    if(right.h > this->h)
+      return false;
+    if(this->k > right.k)
+      return true;
+    if(right.k > this->k)
+      return false;
+    return false;
+  }
+
+  void MakeID(const SemidirectProductElement<helt,kelt,oa>& prototype)
+  { this->k.MakeID(prototype.k);
+    this->h.MakeID(prototype.h);
+  }
+
+  bool IsID() const
+  { return this->k.IsID() && this->h.IsID();
+  }
+
+  std::string ToString(FormatExpressions* format = 0) const
+  { std::stringstream out;
+    out << '[';
+    out << h;
+    out << ',';
+    out << k;
+    out << ']';
+    return out.str();
+  }
+
+  friend std::ostream& operator<<(std::ostream& s, const SemidirectProductElement<helt, kelt, oa>& in)
+  { return s << in.ToString();
+  }
+
+  unsigned int HashFunction() const {return 2*this->h.HashFunction() + 3*this->k.HashFunction();}
+  static unsigned int HashFunction(const SemidirectProductElement<helt, kelt, oa>& in) {return in.HashFunction();}
+
+  bool HasDifferentConjugacyInvariantsFrom(const SemidirectProductElement& other) const
+  {return false;}
+  template <typename coefficient>
+  void GetCharacteristicPolyStandardRepresentation(Polynomial<coefficient>& theCharPoly)
+  { Polynomial<Rational> p;
+    this->h.GetCharacteristicPolyStandardRepresentation(theCharPoly);
+    this->k.GetCharacteristicPolyStandardRepresentation(p);
+    theCharPoly *= p;
+  }
+};
+
+template <typename helt, typename kelt>
+class DirectProductElement: SemidirectProductElement<helt, kelt, TrivialOuterAutomorphism<helt, kelt> >
+{};
+
+template <typename hg, typename kg, typename helt, typename kelt, typename oa>
+class SemidirectProductGroup: public FiniteGroup<SemidirectProductElement<helt, kelt, oa> >
+{ public:
+  hg* H;
+  kg* K;
+
+  void init(hg* inH, kg* inK);
+  void GetWord(SemidirectProductElement<helt, kelt, oa>& g, List<int>& out);
+};
+
+template <typename hg, typename kg, typename helt, typename kelt, typename oa>
+void SemidirectProductGroup<hg, kg, helt, kelt, oa>::init(hg* inH, kg* inK)
+{ this->H = inH;
+  this->K = inK;
+  this->generators.SetSize(inH->generators.size + inK->generators.size);
+  int i=0;
+  for(; i<this->H.generators.size; i++)
+  { this->generators[i].h = this->H.generators[i];
+    this->generators[i].k = this->K.MakeID();
+  }
+  for(; i<this->H.generators.size+this->K.generators.size; i++)
+  { this->generators[i].h = this->H.MakeID();
+    this->generators[i].k = this->K.generators[i-this->H.generators.size];
+  }
+}
+
+template <typename hg, typename kg, typename helt, typename kelt, typename oa>
+void SemidirectProductGroup<hg, kg, helt, kelt, oa>::GetWord(SemidirectProductElement<helt, kelt, oa>& g, List<int>& out)
+{ this->H.GetWord(g.h, out);
+  List<int> kword;
+  this->K.GetWord(g.k, kword);
+  out.AddListOnTop(kword);
+}
+
+template <typename hg, typename kg, typename helt, typename kelt>
+class DirectProductGroup: public SemidirectProductGroup<hg, kg, helt, kelt, TrivialOuterAutomorphism<helt, kelt> >
+{};
+
+class ElementZ2N
+{ public:
+  List<bool> bits;
+
+  ElementZ2N operator*(const ElementZ2N right) const
+  { ElementZ2N out;
+    if(this->bits.size < right.bits.size)
+      return right**this;
+    out.bits = this->bits;
+    for(int i=0; i<right.bits.size; i++)
+      if(right.bits[i])
+        out.bits[i] = !out.bits[i];
+    return out;
+  }
+
+  void ToggleBit(int i)
+  { if(i < this->bits.size)
+      this->bits[i] = !this->bits[i];
+    else
+    { int os = this->bits.size;
+      this->bits.SetSize(i+1);
+      for(int ii=os; ii<i; ii++)
+        this->bits[ii] = false;
+      this->bits[i] = true;
+    }
+  }
+
+  // an ElementZ2N is its own inverse.  When it comes time to template ElementZmN
+  // with class ElementZ2N: public ElementZmN<2>, this will need to be replaced with
+  // x → m-x
+  void Invert(){}
+
+  bool operator==(const ElementZ2N& right) const
+  { stOutput << "ElementZ2N::operator==: " << this->ToString() << "?=" << right.ToString();
+    if(this->bits.size < right.bits.size)
+      return right == *this;
+    int i=0;
+    for(; i<right.bits.size; i++)
+    { // a bool is an unsigned char
+      // so if bools x,y have different nonzero values, x != y
+      // x != y is not a logical xor, but !x != !y is
+      // ok, scratch that
+      if(this->bits[i])
+        if(!right.bits[i])
+        { stOutput << " Bit " << i << " is different (" << this->bits[i] << "," << right.bits[i] << ")\n";
+          return false;
+        }
+      if(!this->bits[i])
+        if(right.bits[i])
+        { stOutput << " Bit " << i << " is different (" << this->bits[i] << "," << right.bits[i] << ")\n";
+          return false;
+        }
+    }
+    for(; i<this->bits.size; i++)
+      if(this->bits[i])
+      { stOutput << " Bit " << i << " is set in left argument and unset in right argument\n";
+        return false;
+      }
+    stOutput << "☑\n";
+    return true;
+  }
+
+  void MakeID(const ElementZ2N& unused)
+  { this->bits.SetSize(0);
+  }
+
+  bool IsID() const
+  { for(int i=0; i<this->bits.size; i++)
+      if(this->bits[i])
+        return false;
+    return true;
+  }
+
+  bool operator>(const ElementZ2N other) const
+  { int i;
+    int m = MathRoutines::Minimum(this->bits.size, other.bits.size);
+    for(i=0; i<m; i++)
+    { if(this->bits[i] && !other.bits[i])
+        return true;
+      if(!this->bits[i] && other.bits[i])
+        return false;
+    }
+    for(;i<this->bits.size; i++)
+      if(this->bits[i])
+        return true;
+    return false;
+  }
+
+  std::string ToString() const
+  { std::stringstream out;
+    for(int i=0; i<this->bits.size; i++)
+      // parentheses are needed because << binds like a bitwise operator
+      out << (this->bits[i]?'1':'0');
+    return out.str();
+  }
+
+  friend std::ostream& operator<<(std::ostream& s, const ElementZ2N& in)
+  { return s << in.ToString();
+  }
+
+  unsigned int HashFunction() const {return ElementZ2N::HashFunction(*this);}
+  static unsigned int HashFunction(const ElementZ2N& in) { return in.bits.HashFunction();}
+  template <typename coefficient>
+  void GetCharacteristicPolyStandardRepresentation(Polynomial<coefficient>& p)
+  { int m = 1;
+    for(int i=0; i<this->bits.size; i++)
+      if(this->bits[i])
+        m *= -1;
+    MonomialP x;
+    x.MakeEi(0);
+    p.AddMonomial(x,1);
+    p.AddConstant(-m);
+  }
+};
+
+class HyperoctahedralBitsAutomorphism
+{ public:
+  static ElementZ2N oa(const PermutationR2& h, const ElementZ2N& k)
+  { ElementZ2N out = k;
+    int bon = h.BiggestOccurringNumber();
+    if(out.bits.size <= bon)
+      out.bits.SetSize(bon+1);
+    h.ActOnList(out.bits);
+    return out;
+  }
+};
+
+typedef SemidirectProductElement<PermutationR2,ElementZ2N,HyperoctahedralBitsAutomorphism> ElementHyperoctahedralGroupR2;
+//class HyperoctahedralElementR2: public SemidirectProductElement<PermutationR2,ElementZ2N,HyperoctahedralBitsAutomorphism>
+//{
+//  unsigned int HashFunction() const {return SemidirectProductElement<PermutationR2,ElementZ2N,HyperoctahedralBitsAutomorphism>::HashFunction();}
+//  static unsigned int HashFunction(const HyperoctahedralElementR2& in) {return in.HashFunction();}
+//};
+
+class HyperoctahedralGroupR2: public FiniteGroup<ElementHyperoctahedralGroupR2>
+{ public:
+  int N;
+
+  void MakeHyperoctahedralGroup(int n)
+  { this->N = n;
+    this->generators.SetSize(n-1+n);
+    for(int i=0; i<n-1; i++)
+      this->generators[i].h.AddTransposition(i,i+1);
+    for(int i=0; i<n; i++)
+      this->generators[n-1+i].k.ToggleBit(i);
+  }
+  void AllSpechtModules();
+  void SpechtModuleOfPartititons(const Partition& positive, const Partition& negative,
+                               GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> &out);
+
+};
+
 // a hyperoctahedral group is a semidirect product of a symmetric group and
 // a group of bits.  is there a better name for the group of bits than s?
 // false and true are 0 and 1 by convention, which is kinda backwards lol
@@ -1562,7 +1859,11 @@ bool GroupRepresentation<someGroup, coefficient>::VerifyRepresentation()
     this->ownerGroup->ComputeGeneratorCommutationRelations();
     for(int i=0; i<this->generatorS.size; i++)
       for(int j=i; j<this->generatorS.size; j++)
-      { Matrix<Rational> M1 = this->generatorS[i] * this->generatorS[j];
+      { Matrix<Rational> M1;
+        if(i!=j)
+          M1 = this->generatorS[i] * this->generatorS[j];
+        else
+          M1 = this->generatorS[i];
         Matrix<Rational> Mi = M1;
         for(int n=1; n<this->ownerGroup->generatorCommutationRelations(i,j); n++)
           Mi *= M1;
@@ -1586,7 +1887,6 @@ bool GroupRepresentation<someGroup, coefficient>::VerifyRepresentation()
     stOutput << "Group and \"representation\" generator commutation relations follow" << "\n";
     stOutput << this->ownerGroup->PrettyPrintGeneratorCommutationRelations() << "\n";
     stOutput << RG.PrettyPrintGeneratorCommutationRelations() << "\n";
-    crash << "Not a representation, crashing as soon as possible" << crash;
   }
   if(!badrep)
     stOutput << "VerifyRepresentation: this has the proper commutation relations\n";

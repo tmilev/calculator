@@ -313,6 +313,10 @@ public:
   {return x;}
   static double ComplexConjugate(double x)
   {return x;}
+  static bool IsInteger(Rational x);
+  template <typename hashobject>
+  static unsigned int HashFunction(const hashobject& in){return in.HashFunction();}
+  static unsigned int HashFunction(bool in){if(in){return 1;}else{return 0;}}
 };
 
 class XML
@@ -972,7 +976,7 @@ public:
   { int numCycles=MathRoutines::Minimum(SomeRandomPrimesSize, this->size);
     int result=0;
     for (int i=0; i<numCycles; i++)
-      result+=SomeRandomPrimes[i]*this->TheObjects[i].HashFunction();
+      result+=SomeRandomPrimes[i]*MathRoutines::HashFunction(TheObjects[i]);
     return result;
   }
   static inline unsigned int HashFunction(const List<Object>& input)

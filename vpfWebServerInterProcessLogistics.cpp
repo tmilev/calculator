@@ -89,7 +89,7 @@ bool PauseController::PauseIfRequestedWithTimeOut()
   if (this->CheckPauseIsRequested())
     logBlock << logger::blue << "Blocking on " << this->ToString() << logger::endL;
   bool pauseWasRequested=false;
-  if (!select(this->thePausePipe[0]+1, &read_fds, &write_fds, &except_fds, &timeout) == 1)
+  if (!(select(this->thePausePipe[0]+1, &read_fds, &write_fds, &except_fds, &timeout) == 1))
   { logBlock << logger::green << "Blocking on " << this->ToString() << logger::green
     << " timed out. " << logger::endL;
     return false;

@@ -129,6 +129,7 @@ public:
   List<std::string> PortsITryHttp;
   List<std::string> PortsITryHttpSSL;
   List<int> theListeningSockets;
+//  List<int> theListeningSocketsReadyToAccept;
   ListReferences<WebWorker> theWorkers;
 
   int activeWorker;

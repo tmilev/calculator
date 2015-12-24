@@ -299,7 +299,7 @@ bool CalculatorFunctionsGeneral::innerLog(Calculator& theCommands, const Express
 }
 
 bool CalculatorFunctionsGeneral::innerFactorial(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSin");
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFactorial");
   int inputInt;
   if (!input.IsSmallInteger(&inputInt))
     return false;

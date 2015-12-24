@@ -69,11 +69,11 @@ void Calculator::initCalculusAdministrationFunctions()
 {
   #ifdef MACRO_use_MySQL
   this->AddOperationInnerHandler
-  ("AddTeachingClass", DatabaseRoutines::innerAddTeachingClass, "",
+  ("CreateTeachingClass", DatabaseRoutines::innerAddTeachingClass, "",
    "Adds a class for an instructor. First argument: instructor username. \
    Second argument: instructor password/authentication token. \
    Third argument: class name.",
-   "AddTeachingClass(\"admin\", \"password\", \"testUser\")", false, true, "DatabaseRoutines::innerAddTeachingClass");
+   "CreateTeachingClass(\"admin\", \"password\", \"testUser\")", false, true, "DatabaseRoutines::innerAddTeachingClass");
 
   #endif // MACRO_use_MySQL
 }
@@ -637,7 +637,7 @@ void Calculator::initPredefinedInnerFunctions()
    "Crawls a latex file collecting all local style files and all \\input commands to produce a single latex file. \
    The function was originally designed for the purposes of the freecalc project as not been tested on any other projects,\
    please use only for freecalc.",
-   "Crawl(\"/home/todor/math/freecalc/homework/UMB-All-Problems-By-Course/Calc-I-MasterProblemSheet.tex\")", true, false
+   "Crawl(\"/homework/UMB-All-Problems-By-Course/Calc-I-MasterProblemSheet.tex\")", true, false
    , "CalculatorFunctionsGeneral::innerCrawlTexFile")
    ;
   this->AddOperationInnerHandler

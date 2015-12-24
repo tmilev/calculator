@@ -64,7 +64,8 @@ class UserCalculator
   std::string actualAuthenticationToken;
   TimeWrapper authenticationTokenCreationTime;
   bool flagNewAuthenticationTokenComputedUserNeedsIt;
-  bool FetchOneColumn(const std::string& columnName, std::string& output, DatabaseRoutines& theRoutines, std::string* failureComments=0);
+  bool FetchOneColumn
+  (const std::string& columnName, std::string& output, DatabaseRoutines& theRoutines, std::stringstream* failureComments=0);
   void FetchColumns(DatabaseRoutines& theRoutines);
   bool AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutines);
   bool AuthenticateWithToken(DatabaseRoutines& theRoutines);
@@ -77,6 +78,8 @@ class UserCalculator
   bool DeleteMe(DatabaseRoutines& theRoutines);
   bool Iexist(DatabaseRoutines& theRoutines);
   bool CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines);
+  bool UserEntriesAreValidObjectNames(std::stringstream* comments);
+  static bool IsAcceptableObjectName(const std::string& input, std::stringstream* comments);
   bool getUserPassAndEmail(Calculator& theCommands, const Expression& input);
   bool getUserAndPass(Calculator& theCommands, const Expression& input);
   bool getUser(Calculator& theCommands, const Expression& input);
@@ -107,8 +110,12 @@ public:
   { return false;
   }
   bool startMySQLDatabase();
+  bool TableExists(const std::string& tableName);
   std::string ToString();
   std::string ToStringAllUsersHTMLFormat();
+  bool CreateTable
+(const std::string& tableName, const std::string& desiredTableContent);
+
   static bool innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestLogin(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);

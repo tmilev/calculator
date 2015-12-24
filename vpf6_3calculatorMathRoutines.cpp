@@ -5176,11 +5176,13 @@ class LaTeXcrawler
 {
   public:
   int recursionDepth;
-  std::string theFileToCrawl;
-  std::string baseFolderStartFile;
-  std::string theFileToCrawlNoPath;
+  std::string theFileToCrawlPhysical;
+  std::string theFileToCrawlRelative;
+  std::string baseFolderStartFilePhysical;
+  std::string theFileToCrawlNoPathPhysical;
   std::string theFileWorkingCopy;
   Calculator* owner;
+  bool ExtractFileNamesFromRelativeFileName();
   void Crawl();
   void BuildFreecalc();
   void CrawlRecursive(const std::string& currentFileName);
@@ -5190,15 +5192,26 @@ class LaTeXcrawler
   std::string ToString();
 };
 
+bool LaTeXcrawler::ExtractFileNamesFromRelativeFileName()
+{ MacroRegisterFunctionWithName("LaTeXcrawler::ExtractFileNamesFromRelativeFileName");
+  if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(this->theFileToCrawlRelative))
+  { this->displayResult << "The folders below the file name contain dots. This is not allowed. ";
+    return false;
+  }
+  this->theFileToCrawlPhysical=theGlobalVariables.PhysicalPathProjectBase+ "../freecalc/"+this->theFileToCrawlRelative;
+  this->baseFolderStartFilePhysical=FileOperations::GetPathFromFileName(this->theFileToCrawlPhysical);
+  MathRoutines::StringBeginsWith
+  (this->theFileToCrawlPhysical, this->baseFolderStartFilePhysical, &this->theFileToCrawlNoPathPhysical);
+  return true;
+}
+
 void LaTeXcrawler::BuildFreecalc()
 { MacroRegisterFunctionWithName("LaTeXcrawler::BuildFreecalc");
-  this->displayResult << "This function needs a rewrite to make file operations secure. ";
-  return;
-  this->baseFolderStartFile=FileOperations::GetPathFromFileName(this->theFileToCrawl);
-  MathRoutines::StringBeginsWith(this->theFileToCrawl, this->baseFolderStartFile, & this->theFileToCrawlNoPath);
+  if (!this->ExtractFileNamesFromRelativeFileName())
+    return;
   std::fstream inputFile;
-  if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(inputFile, this->theFileToCrawl, false, false, false))
-  { this->displayResult << "Failed to open input file: " << this->theFileToCrawl << ", aborting.";
+  if (!FileOperations::OpenFileUnsecure(inputFile, this->theFileToCrawlPhysical, false, false, false))
+  { this->displayResult << "Failed to open input file: " << this->theFileToCrawlPhysical << ", aborting.";
     return;
   }
   List<std::string> theLectureNumbers, theLectureDesiredNames;
@@ -5305,21 +5318,21 @@ void LaTeXcrawler::BuildFreecalc()
   else
     this->displayResult << "<table><tr><td>Homework number</td><td>Homework name</td><td>Homework pdf</td>"
     << "<td>Homework handout pdf</td><td>Comments</td></tr>";
-  this->theFileWorkingCopy=this->baseFolderStartFile+ "working_file_"+ this->theFileToCrawlNoPath;
-  std::string theFileWorkingCopyPDF=this->baseFolderStartFile+ "working_file_"
-  +this->theFileToCrawlNoPath.substr(0, this->theFileToCrawlNoPath.size()-3)+"pdf";
+  this->theFileWorkingCopy=this->baseFolderStartFilePhysical+ "working_file_"+ this->theFileToCrawlNoPathPhysical;
+  std::string theFileWorkingCopyPDF=this->baseFolderStartFilePhysical+ "working_file_"
+  +this->theFileToCrawlNoPathPhysical.substr(0, this->theFileToCrawlNoPathPhysical.size()-3)+"pdf";
   std::string lectureFileNameEnd;
-  if (!MathRoutines::StringBeginsWith(this->theFileToCrawlNoPath, "Lecture_", &lectureFileNameEnd))
-    if (!MathRoutines::StringBeginsWith(this->theFileToCrawlNoPath, "Homework_", &lectureFileNameEnd))
+  if (!MathRoutines::StringBeginsWith(this->theFileToCrawlNoPathPhysical, "Lecture_", &lectureFileNameEnd))
+    if (!MathRoutines::StringBeginsWith(this->theFileToCrawlNoPathPhysical, "Homework_", &lectureFileNameEnd))
       lectureFileNameEnd="";
   if (lectureFileNameEnd.size()>4)
     lectureFileNameEnd=lectureFileNameEnd.substr(0, lectureFileNameEnd.size()-4);
   std::stringstream executedCommands, resultTable;
   executedCommands << "Commands executed: ";
-  std::string currentSysCommand="ch " + this->baseFolderStartFile+"\n\n\n\n";
+  std::string currentSysCommand="ch " + this->baseFolderStartFilePhysical+"\n\n\n\n";
   executedCommands << "<br>" << currentSysCommand;
   reportStream << "<br>Directory changed: " << currentSysCommand;
-  theGlobalVariables.ChDir(this->baseFolderStartFile );
+  theGlobalVariables.ChDir(this->baseFolderStartFilePhysical );
   for (int i=0; i<
   theLectureNumbers.size
   ; i++)
@@ -5328,7 +5341,7 @@ void LaTeXcrawler::BuildFreecalc()
     resultTable << "<td>" << theLectureNumbers[i] << "</td>";
     resultTable << "<td>" << theLectureDesiredNames[i] << "</td>";
     std::fstream workingFile;
-    if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(workingFile, this->theFileWorkingCopy, false, true, false))
+    if (!FileOperations::OpenFileCreateIfNotPresentUnsecure(workingFile, this->theFileWorkingCopy, false, true, false))
     { resultTable << "<td>-</td><td>-</td><td>Failed to open working file: "
       << this->theFileWorkingCopy << ", aborting.</td> </tr>";
       break;
@@ -5369,7 +5382,7 @@ void LaTeXcrawler::BuildFreecalc()
       resultTable << "</tr>";
       continue;
     }
-    if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(workingFile, this->theFileWorkingCopy, false, true, false))
+    if (!FileOperations::OpenFileUnsecure(workingFile, this->theFileWorkingCopy, false, true, false))
     { resultTable << "<td>-</td><td>-</td><td>Failed to open working file: "
       << this->theFileWorkingCopy << ", aborting.</td> </tr>";
       break;
@@ -5401,15 +5414,16 @@ void LaTeXcrawler::BuildFreecalc()
 
 void LaTeXcrawler::Crawl()
 { MacroRegisterFunctionWithName("LaTeXcrawler::Crawl");
-  this->displayResult << "Need to rewrite to make sure file operations are secure" ;
-  return;
+  if (!this->ExtractFileNamesFromRelativeFileName())
+    return;
   this->recursionDepth=0;
-  this->baseFolderStartFile=FileOperations::GetPathFromFileName(this->theFileToCrawl);
-  this->CrawlRecursive(this->theFileToCrawl);
+  this->CrawlRecursive(this->theFileToCrawlPhysical);
   std::fstream outputFile;
-  std::string outputFileName = theGlobalVariables.PhysicalPathOutputFolder + "latexOutput.tex";
+  std::string outputFileName = "latexOutput.tex";
   if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(outputFile, outputFileName, false, true, false))
   { this->displayResult << "Failed to open output file: " << outputFileName << ", check write permissions. ";
+    //this->displayResult << "The crawling appears to have been successful, below is the crawled file.<hr>"
+    //<< this->crawlingResult.str();
     return;
   }
   outputFile << this->crawlingResult.str();
@@ -5429,7 +5443,7 @@ void LaTeXcrawler::CrawlRecursive(const std::string& currentFileName)
   if (this->errorStream.str()!="")
     return;
   std::fstream theFile;
-  if (!FileOperations::OpenFileOnTopOfOutputFolder(theFile, currentFileName, false, false, false))
+  if (!FileOperations::OpenFileUnsecure(theFile, currentFileName, false, false, false))
   { this->errorStream << "Failed to open file " << currentFileName << ", aborting.";
     return;
   }
@@ -5437,8 +5451,11 @@ void LaTeXcrawler::CrawlRecursive(const std::string& currentFileName)
   while (!theFile.eof())
   { std::getline(theFile, buffer);
     std::stringstream newFileName;
-    if (MathRoutines::StringBeginsWith(buffer, "\\input"))
-    { newFileName << this->baseFolderStartFile;
+    int foundInput= buffer.find("\\input");
+    if (((unsigned) foundInput)<buffer.size() )
+    { this->crawlingResult << buffer.substr(0, foundInput);
+      buffer=buffer.substr(foundInput);
+      newFileName << this->baseFolderStartFilePhysical;
       unsigned i=0;
       for (i=7; buffer[i]!='}' && i< buffer.size();i++)
         newFileName << buffer[i];
@@ -5462,7 +5479,7 @@ bool CalculatorFunctionsGeneral::innerCrawlTexFile(Calculator& theCommands, cons
     return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
   LaTeXcrawler theCrawler;
   theCrawler.owner=&theCommands;
-  theCrawler.theFileToCrawl=input.GetValue<std::string>();
+  theCrawler.theFileToCrawlRelative=input.GetValue<std::string>();
   theCrawler.Crawl();
   return output.AssignValue(theCrawler.displayResult.str(), theCommands);
 }
@@ -5473,7 +5490,7 @@ bool CalculatorFunctionsGeneral::innerBuildFreecalc(Calculator& theCommands, con
     return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
   LaTeXcrawler theCrawler;
   theCrawler.owner=&theCommands;
-  theCrawler.theFileToCrawl=input.GetValue<std::string>();
+  theCrawler.theFileToCrawlRelative=input.GetValue<std::string>();
   theCrawler.BuildFreecalc();
   return output.AssignValue(theCrawler.displayResult.str(), theCommands);
 }

@@ -695,27 +695,6 @@ Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap
   return out;
 }
 
-
-
-template <typename somegroup>
-class Subgroup
-{
-public:
-  somegroup *parent;
-  HashedList<int, MathRoutines::IntUnsignIdentity> theElements;
-  List<int> lengths; // sure why not
-  // this used to have a maximum value.  but then after a while examining a crash
-  // I realized that it's a subgroup of a finite group that was already in memory.
-  bool MakeFrom(somegroup &G, const List<int>& generators, int MaxElements=-1);
-
-  List<int> generators;
-  List<List<int> > conjugacyClasses;
-  void ComputeConjugacyClasses();
-  void GetSignCharacter(Vector<Rational>& out);
-  Rational GetHermitianProduct(const Vector<Rational>& X1, const Vector<Rational>& X2) const;
-};
-
-
 template <typename somegroup>
 bool Subgroup<somegroup>::MakeFrom(somegroup &G, const List<int>& generators, int MaxElements)
 { // bookkeeping...

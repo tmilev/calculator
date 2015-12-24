@@ -446,6 +446,12 @@ void Subgroup<somegroup, elementSomeGroup>::MakeTranslatableWordsSubgroup(somegr
     }
   }
   this->GetWordByFormula = TranslatableWordsSubgroupElementGetWord<somegroup, elementSomeGroup>;
+  stOutput << "Subgroup::MakeTranslatableWordsSubgroup:\n";
+  for(int i=0; i<this->generators.size; i++)
+    stOutput << i << " " << this->generators[i] << " "
+             << this->superGeneratorSubWords[i].ToStringCommaDelimited() << '\n';
+  for(int i=0; i<this->generators.size; i++)
+    stOutput << i << " " << this->generators[i] << '\n';
 }
 
 template <typename somegroup, class elementSomeGroup>
@@ -483,6 +489,26 @@ template <typename somegroup, class elementSomeGroup>
 Subgroup<somegroup, elementSomeGroup>::Subgroup()
 { this->init();
 }
+
+template <typename elementSomeGroup>
+Subgroup<FiniteGroup<elementSomeGroup>, elementSomeGroup> FiniteGroup<elementSomeGroup>::ParabolicKindaSubgroupGeneratorSubset(const List<int>& subgenids)
+{ Subgroup<FiniteGroup<elementSomeGroup>, elementSomeGroup> out;
+  List<elementSomeGroup> subgens;
+  subgens.SetSize(subgenids.size);
+  for(int i=0; i<subgenids.size; i++)
+    subgens[i] = this->generators[subgenids[i]];
+  out.MakeTranslatableWordsSubgroup(*this,subgens);
+  return out;
+}
+
+template <typename elementSomeGroup>
+GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational> FiniteGroup<elementSomeGroup>::GetEmptyRationalRepresentation()
+{ GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational> out;
+  out.ownerGroup = this;
+  return out;
+}
+
+
 
 template <class elementSomeGroup>
 template <typename coefficient>
@@ -2048,7 +2074,9 @@ bool Subgroup<somegroup, elementSomeGroup>::VerifyCosets()
       { auto g2 = parent->theElements[this->cosets[cs].supergroupIndices[i]];
         auto g3 = g * g2;
         if(!this->HasElement(g3))
-          crash << g << " * " << g2 << " = " << g3 << crash;
+          crash << "Error: coset " << cs << " has representative " << this->cosets[cs].representative
+                << "; a putative coset element has " << g << " * " << g2 << " = " << g3
+                << " which is not in the subgroup" << crash;
       }
     }
   return true;

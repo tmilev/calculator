@@ -20,7 +20,6 @@
 FEATUREFLAGS=--std=c++11 -pthread -fopenmp
 CFLAGS=-Wall -Wno-address $(FEATUREFLAGS) -c
 LDFLAGS=$(FEATUREFLAGS)
-LIBFLAGS=
 
 ifeq ($(hsa), 1)
 	CXX=/home/user/gcc/bin/g++
@@ -43,13 +42,13 @@ ifeq ($(AllocationStatistics), 1)
 endif
 
 ifeq ($(ssl),1)
-	LDFLAGS+= -DMACRO_use_open_ssl
-	LIBFLAGS+= -lssl -lcrypto
+	CFLAGS+= -DMACRO_use_open_ssl
+	LDFLAGS+= -lssl -lcrypto
 endif
 
 ifeq ($(MySQL),1)
-	LDFLAGS+= -DMACRO_use_MySQL
-	LIBFLAGS+= -lmysqlclient
+	CFLAGS+= -DMACRO_use_MySQL
+	LDFLAGS+= -lmysqlclient
 endif
 
 #if this is missing something, add it, or, ls | grep cpp | xargs echo
@@ -57,15 +56,13 @@ SOURCES=test.cpp vpf2Math3_SymmetricGroupsAndGeneralizations.cpp vpf4CalculatorF
 OBJECTS=$(SOURCES:.cpp=.o)
 DEPS=$(SOURCES:.cpp=.d)
 
-all: directories Debug/calculator 
+all: directories Debug_calculator 
 directories: Debug
 Debug:
 	mkdir ./Debug
 
-ssl: 
-
-Debug/calculator: $(OBJECTS)
-	$(CXX) $(LDFLAGS) $(OBJECTS) -o  $(LIBFLAGS) ./Debug/calculator
+Debug_calculator: $(OBJECTS)
+	$(CXX) $(LDFLAGS) $(OBJECTS) -o ./Debug/calculator
 
 testrun: Debug/calculator
 	time ./Debug/calculator test

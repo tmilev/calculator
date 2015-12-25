@@ -163,6 +163,7 @@ public:
   static void PipeProgressReportToParentProcess(const std::string& input);
   static void Signal_SIGINT_handler(int s);
   static void Signal_SIGCHLD_handler(int s);
+  void ReapChildren();
   static std::string ToStringActiveWorker();
   bool initPrepareWebServerALL();
   void initPrepareSignals();

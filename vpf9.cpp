@@ -382,9 +382,11 @@ bool FileOperations::IsFolderOnTopOfOutputFolder(const std::string& relativeFold
 }
 
 std::string FileOperations::GetFileExtensionWithDot(const std::string& theFileName)
-{ if (theFileName=="")
+{ MacroRegisterFunctionWithName("FileOperations::GetFileExtensionWithDot");
+  if (theFileName=="" || theFileName.size()<=0)
     return "";
-  for (unsigned i=theFileName.size()-1; i>=0; i--)
+//  std::cout << "file name size: " << theFileName.size() ;
+  for (int i=(signed) theFileName.size()-1; i>=0; i--)
     if (theFileName[i]=='.')
       return theFileName.substr(i, std::string::npos);
   return "";

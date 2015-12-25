@@ -18,6 +18,8 @@ ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server im
 #ifdef MACRO_use_open_ssl
 //installation of these headers in ubuntu:
 //sudo apt-get install libssl-dev
+//on opensuse:
+//sudo yast -i libopenssl-devel
 //Instructions: look at the examples folder in the openssl.
 //openssl tutorial (couldn't make it work myself):
 //http://www.ibm.com/developerworks/library/l-openssl/
@@ -1444,7 +1446,7 @@ int WebWorker::ProcessNonCalculator()
   { this->bufferFileIO.SetSize(numBytesRead);
     this->QueueBytesForSending(this->bufferFileIO);
     this->bufferFileIO.SetSize(bufferSize);
-    theFile.read(&this->bufferFileIO[0], this->bufferFileIO.size);
+    theFile.read(this->bufferFileIO.TheObjects, this->bufferFileIO.size);
     numBytesRead=theFile.gcount();
   }
   this->SendAllBytes();
@@ -1774,6 +1776,9 @@ int WebWorker::ServeClient()
     this->parent->ReleaseNonActiveWorkers();
   } else if (this->requestType==this->requestUnknown)
     this->ProcessUnknown();
+  if (theGlobalVariables.theThreads.size==1)
+  { crash << "Number of threads must be at least 2 in this point of code..." << crash;
+  }
   theReport.SetStatus("Reply to client prepared, proceeding to send and release all resources...");
   this->SignalIamDoneReleaseEverything();
   return 0;

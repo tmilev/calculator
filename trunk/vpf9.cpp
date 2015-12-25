@@ -100,6 +100,7 @@ GlobalVariables::GlobalVariables()
   this->flagUsingSSLinCurrentConnection=false;
   this->flagSSLisAvailable=false;
   this->userCalculatorAdmin="admin";
+  this->MaxTimeNoPingBeforeChildIsPresumedDead=100;
   //  this->flagLogInterProcessCommunication=true;
   //  stOutput << "Global variables created!";
 }

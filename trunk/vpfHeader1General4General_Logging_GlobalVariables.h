@@ -64,6 +64,7 @@ public:
 
 //  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
   double MaxComputationTimeSecondsNonPositiveMeansNoLimit;
+  double MaxTimeNoPingBeforeChildIsPresumedDead;
   double MaxComputationTimeBeforeWeTakeAction;
 //  bool flagLogInterProcessCommunication;
 //flags: what mode are we running in?

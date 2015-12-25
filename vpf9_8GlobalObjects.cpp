@@ -23,8 +23,9 @@ void InitializeGlobalObjects()
   theGlobalVariables.IndicatorStringOutputFunction=&CGI::MakeReportIndicatorFile;
   theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
   theGlobalVariables.sleepFunction=SleepFunction;
-  theGlobalVariables.SetCallSystem(&CallSystemWrapper);
-  theGlobalVariables.SetCallChDir(&CallChDirWrapper);
+  theGlobalVariables.pointerCallSystemNoOutput=&CallSystemWrapperNoOutput;
+  theGlobalVariables.pointerCallSystemWithOutput=&CallSystemWrapperReturnStandardOutput;
+  theGlobalVariables.pointerCallChDir=&CallChDirWrapper;
 
   //stOutput << "address of get elapsed seconds: " << (int) &GetElapsedTimeInSeconds;
   //Change the below line to modify the computation time of the calculator.

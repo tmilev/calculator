@@ -45,9 +45,10 @@ class GlobalVariables
   /// @cond
 private:
   double (*getElapsedTimePrivate)();
-  void (*callSystem)(const std::string& theSystemCommand);
-  void (*callChDir)(const std::string& theDirectoryName);
 public:
+  void (*pointerCallSystemNoOutput)(const std::string& theSystemCommand);
+  std::string (*pointerCallSystemWithOutput)(const std::string& theSystemCommand);
+  void (*pointerCallChDir)(const std::string& theDirectoryName);
   void (*IndicatorStringOutputFunction)(const std::string& input);
   void (*sleepFunction)(int microseconds);
   void (*WebServerReturnDisplayIndicatorCloseConnection)();
@@ -176,20 +177,10 @@ public:
 //  inline void DrawBufferNoIniT()
 //  { this->theDrawingVariables.drawBufferNoIniT();
 //  }
-  void SetCallSystem(void (*theSystemCall)(const std::string&))
-  { this->callSystem=theSystemCall;
-  }
-  void SetCallChDir(void (*theChDir)(const std::string&))
-  { this->callChDir=theChDir;
-  }
-  void System(const std::string& systemCommand)
-  { if (this->callSystem!=0)
-      this->callSystem(systemCommand);
-  }
-  void ChDir(const std::string& systemCommand)
-  { if (this->callChDir!=0)
-      this->callChDir(systemCommand);
-  }
+  void CallSystemNoOutput(const std::string& systemCommand);
+  std::string CallSystemWithOutput(const std::string& systemCommand);
+  void ChDir(const std::string& systemCommand);
+  std::string ToStringHTMLTopCommandLinuxSystem();
   std::string ToStringSourceCodeInfo();
   std::string ToStringFolderInfo()const;
   std::string ToStringProgressReportHtml();

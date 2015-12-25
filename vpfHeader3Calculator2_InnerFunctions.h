@@ -198,6 +198,7 @@ public:
   static bool innerIsConstant(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGaussianEliminationMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitToPartialFractionsOverAlgebraicReals(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTestTopCommand(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestIndicator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestStandardOutput(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRootSAsAndSltwos(Calculator& theCommands, const Expression& input, Expression& output, bool showSLtwos, bool MustRecompute);

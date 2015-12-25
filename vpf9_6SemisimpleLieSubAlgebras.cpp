@@ -281,7 +281,7 @@ void SemisimpleSubalgebras::CheckFileWritePermissions()
   std::fstream testFile;
   std::string testFileNameRelative=
   this->owner->RelativePhysicalNameSSAlgOutputFolder+ "testFileWritePermissionsSSsas.txt";
-  this->theGlobalVariables->System
+  this->theGlobalVariables->CallSystemNoOutput
   ("mkdir " +theGlobalVariables->PhysicalPathOutputFolder+ this->owner->RelativePhysicalNameSSAlgOutputFolder);
 
   if(!FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(testFile, testFileNameRelative, false, true, false))

@@ -93,6 +93,11 @@ void Calculator::initPredefinedInnerFunctions()
    "TestCalculatorIndicator(1000)", true, false)
    ;
   this->AddOperationInnerHandler
+  ("TestTopCommand", CalculatorFunctionsGeneral::innerTestTopCommand, "",
+   "(This is not a mathematical function). Tests the top linux command. ",
+   "TestTopOperation(1000)", false, true, "CalculatorFunctionsGeneral::innerTestTopCommand")
+   ;
+  this->AddOperationInnerHandler
   ("TestStandardOutput", CalculatorFunctionsGeneral::innerTestStandardOutput, "",
    "(This is not a mathematical function). Tests the calculator standard output.",
    "TestStandardOutput(\"The quick brown fox jumps over the lazy dog\")", true, false)

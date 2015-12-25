@@ -115,6 +115,27 @@ std::string Crasher::GetStackTraceShort()
   return out.str();
 }
 
+std::string GlobalVariables::ToStringHTMLTopCommandLinuxSystem()
+{ MacroRegisterFunctionWithName("GlobalVariables::ToStringHTMLTopCommandLinuxSystem");
+  std::string topString= this->CallSystemWithOutput("top -b -n 1 -s");
+  std::stringstream out;
+  std::string lineString, wordString;
+  std::stringstream topStream(topString);
+  for (int i=0; i<4; i++)
+  { std::getline(topStream, lineString);
+    out << lineString;
+  }
+  out << "<table>";
+  for (; std::getline(topStream, lineString);)
+  { out << "<tr>";
+    for (std::stringstream nextLineStream(lineString); nextLineStream >> wordString; )
+      out << "<td>" << wordString << "</td>";
+    out << "</tr>";
+  }
+  out << "</table>";
+  return out.str();
+}
+
 std::string GlobalVariables::ToStringFolderInfo()const
 { std::stringstream out;
   out << "<br>Physical path server base: " << this->PhysicalPathServerBasE;

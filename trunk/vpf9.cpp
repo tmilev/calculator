@@ -70,6 +70,23 @@ unsigned long long int Rational::TotalSmallAdditions=0;
 unsigned long long int Rational::TotalSmallGCDcalls=0;
 unsigned long long int Rational::TotalSmallMultiplications=0;
 
+
+void GlobalVariables::CallSystemNoOutput(const std::string& systemCommand)
+{ if (this->pointerCallSystemNoOutput!=0)
+    this->pointerCallSystemNoOutput(systemCommand);
+}
+
+std::string GlobalVariables::CallSystemWithOutput(const std::string& systemCommand)
+{ if (this->pointerCallSystemWithOutput==0)
+    return "Error";
+  return this->pointerCallSystemWithOutput(systemCommand);
+}
+
+void GlobalVariables::ChDir(const std::string& systemCommand)
+{ if (this->pointerCallChDir!=0)
+    this->pointerCallChDir(systemCommand);
+}
+
 GlobalVariables::GlobalVariables()
 { this->flagNotAllocated=false;
   this->IndicatorStringOutputFunction=0;
@@ -78,7 +95,9 @@ GlobalVariables::GlobalVariables()
   this->MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000000;
   this->MaxComputationTimeBeforeWeTakeAction=0;
 //  this->MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit=5;
-  this->callSystem=0;
+  this->pointerCallSystemWithOutput=0;
+  this->pointerCallSystemNoOutput=0;
+  this->pointerCallChDir=0;
   this->sleepFunction=0;
   this->flagReportEverything=false;
   this->flagReportGaussianElimination=false;

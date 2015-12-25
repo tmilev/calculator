@@ -5071,6 +5071,12 @@ bool CalculatorFunctionsGeneral::innerTestStandardOutput(Calculator& theCommands
   return output.AssignValue((std::string) "Standard output tested, verify your input is displayed correctly. ", theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerTestTopCommand
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestTopCommand");
+  return output.AssignValue(theGlobalVariables.ToStringHTMLTopCommandLinuxSystem(), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestIndicator");
 //  stOutput << "Report html return!";
@@ -5131,8 +5137,8 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
     << ownerSS->RelativePhysicalNameSSAlgOutputFolder;
     outMkDirCommand2 << "mkdir " << theGlobalVariables.PhysicalPathOutputFolder
     << outSltwoPath.str();
-    theGlobalVariables.System(outMkDirCommand1.str());
-    theGlobalVariables.System(outMkDirCommand2.str());
+    theGlobalVariables.CallSystemNoOutput(outMkDirCommand1.str());
+    theGlobalVariables.CallSystemNoOutput(outMkDirCommand2.str());
   }
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit =1000;
   if (!FileOperations::FileExistsOnTopOfOutputFolder(outSltwoMainFile.str()) ||
@@ -5357,10 +5363,10 @@ void LaTeXcrawler::BuildFreecalc()
     executedCommands << "<br>" << currentSysCommand;
     reportStream << currentSysCommand;
     theReport.Report(reportStream.str());
-    theGlobalVariables.System(currentSysCommand);
+    theGlobalVariables.CallSystemNoOutput(currentSysCommand);
     reportStream << "<b>[x2]</b>";
     theReport.Report(reportStream.str());
-    theGlobalVariables.System(currentSysCommand);
+    theGlobalVariables.CallSystemNoOutput(currentSysCommand);
     std::stringstream thePdfFileNameHandout;
     if (isLecturE)
       thePdfFileNameHandout << "Lecture" << theLectureNumbers[i] << "Handout_" << theLectureDesiredNames[i] << "_"
@@ -5372,7 +5378,7 @@ void LaTeXcrawler::BuildFreecalc()
     executedCommands << "<br>" << currentSysCommand;
     reportStream << "<br>Lecture/Homework " << i+1 << " handout compiled, renaming file ... ";
     theReport.Report(reportStream.str());
-    theGlobalVariables.System(currentSysCommand);
+    theGlobalVariables.CallSystemNoOutput(currentSysCommand);
     reportStream << " done.";
     theReport.Report(reportStream.str());
     workingFile.close();
@@ -5394,7 +5400,7 @@ void LaTeXcrawler::BuildFreecalc()
     executedCommands << "<br>" << currentSysCommand;
     reportStream << currentSysCommand;
     theReport.Report(reportStream.str());
-    theGlobalVariables.System(currentSysCommand);
+    theGlobalVariables.CallSystemNoOutput(currentSysCommand);
     std::stringstream thePdfFileNameNormal;
     thePdfFileNameNormal << "Lecture" << theLectureNumbers[i] << "_" << theLectureDesiredNames[i] << "_"
     << lectureFileNameEnd << ".pdf";
@@ -5402,7 +5408,7 @@ void LaTeXcrawler::BuildFreecalc()
     executedCommands << "<br>" << currentSysCommand;
     reportStream << "<br>Lecture " << i+1 << " regular slides compiled, renaming file ... ";
     theReport.Report(reportStream.str());
-    theGlobalVariables.System(currentSysCommand);
+    theGlobalVariables.CallSystemNoOutput(currentSysCommand);
     reportStream << " done.";
     theReport.Report(reportStream.str());
     resultTable << "<td>" << thePdfFileNameNormal.str() << "</td>" << "<td>" << thePdfFileNameHandout.str() << "</td>";

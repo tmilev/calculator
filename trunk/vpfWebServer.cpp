@@ -736,7 +736,7 @@ void WebWorker::OutputStandardResult()
   { std::stringstream out;
     out << "\n\ncommand: " << theParser.SystemCommands[i] << "\n" ;
     theReport.Report(out.str());
-    system(theParser.SystemCommands[i].c_str());
+    theGlobalVariables.CallSystemNoOutput(theParser.SystemCommands[i]);
   }
   stOutput << "-->";
 
@@ -1109,7 +1109,11 @@ void WebWorker::ExtractPhysicalAddressFromMainAddress()
 int WebWorker::ProcessServerStatus()
 { MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestServerStatus");
   stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-  stOutput << "<html><body> " << this->parent->ToStringStatusAll() << "</body></html>";
+  stOutput << "<html><body>"
+  << " <table><tr><td style=\"vertical-align:top\">" << this->parent->ToStringStatusAll() << "</td><td>"
+  << theGlobalVariables.ToStringHTMLTopCommandLinuxSystem()
+  << "</td></tr></table>"
+  << "</body></html>";
   return 0;
 }
 
@@ -2170,7 +2174,7 @@ void WebServer::Restart()
     theCommand << " server8155 nokill " << timeInteger;
   else
     theCommand << " server nokill " << timeInteger;
-  system(theCommand.str().c_str()); //kill any other running copies of the calculator.
+  theGlobalVariables.CallSystemNoOutput(theCommand.str()); //kill any other running copies of the calculator.
 }
 
 void WebServer::initPortsITry()

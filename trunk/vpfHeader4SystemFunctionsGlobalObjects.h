@@ -26,7 +26,8 @@ extern Calculator theParser;
 extern WebServer theWebServer;
 
 extern double GetElapsedTimeInSeconds();
-extern void CallSystemWrapper(const std::string& theCommand);
+extern void CallSystemWrapperNoOutput(const std::string& theCommand);
+extern std::string CallSystemWrapperReturnStandardOutput(const std::string& theCommand);
 extern void CallChDirWrapper(const std::string& theCommand);
 extern void ignoreUserAbortSignal();
 

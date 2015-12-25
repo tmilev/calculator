@@ -176,8 +176,21 @@ void CreateTimerThread()
   ThreadData::CreateThread(RunTimerThread);
 }
 
-void CallSystemWrapper(const std::string& theCommand)
+void CallSystemWrapperNoOutput(const std::string& theCommand)
 { system(theCommand.c_str());
+}
+
+std::string CallSystemWrapperReturnStandardOutput(const std::string& inputCommand)
+{ std::shared_ptr<FILE> pipe(popen(inputCommand.c_str(), "r"), pclose);
+  if (!pipe)
+    return "ERROR";
+  const int bufferSize=20000;
+  char buffer[ bufferSize];
+  std::string result = "";
+  while (!feof(pipe.get()))
+    if (fgets(buffer, bufferSize, pipe.get()) != NULL)
+      result += buffer;
+  return result;
 }
 
 void CallChDirWrapper(const std::string& theDir)

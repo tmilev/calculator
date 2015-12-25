@@ -449,13 +449,19 @@ void WebServer::Signal_SIGINT_handler(int s)
 
 void WebServer::Signal_SIGCHLD_handler(int s)
 { theLog << "Received SIGCHLD signal." << logger::endL;
+  theWebServer.ReapChildren();
+}
+
+void WebServer::ReapChildren()
+{ MacroRegisterFunctionWithName("WebServer::ReapChildren");
   int waitResult=0;
   do
   { waitResult= waitpid(-1, NULL, WNOHANG| WEXITED);
+//    theLog << "waitresult is: " << waitResult << logger::endL;
     if (waitResult>0)
-      for (int i=0; i<theWebServer.theWorkers.size; i++)
-        if (theWebServer.theWorkers[i].ProcessPID==waitResult)
-        { theWebServer.theWorkers[i].pipeWorkerToServerControls.WriteAfterEmptying("close");
+      for (int i=0; i<this->theWorkers.size; i++)
+        if (this->theWorkers[i].ProcessPID==waitResult)
+        { this->theWorkers[i].pipeWorkerToServerControls.WriteAfterEmptying("close");
           theLog << logger::green << "Child with pid " << waitResult << " successfully reaped. " << logger::endL;
         }
   }while (waitResult>0);
@@ -2232,6 +2238,7 @@ void WebServer::RecycleChildrenIfPossible()
   //This might need to be rewritten: I wasn't able to make this work with any
   //mechanism other than pipes.
   MacroRegisterFunctionWithName("WebServer::RecycleChildrenIfPossible");
+  this->ReapChildren();
   for (int i=0; i<this->theWorkers.size; i++)
     if (this->theWorkers[i].flagInUse)
     { this->theWorkers[i].pipeWorkerToServerControls.Read();

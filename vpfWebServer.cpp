@@ -2259,24 +2259,22 @@ void WebServer::RecycleChildrenIfPossible()
         (this->theWorkers[i].pipeWorkerToServerTimerPing.lastRead.TheObjects,
          this->theWorkers[i].pipeWorkerToServerTimerPing.lastRead.size);
         this->theWorkers[i].timeOfLastPingServerSideOnly=theGlobalVariables.GetElapsedSeconds();
-      } if (this->theWorkers[i].PauseWorker.CheckPauseIsRequested())
+      } else if (this->theWorkers[i].PauseWorker.CheckPauseIsRequested())
       { this->theWorkers[i].pingMessage="worker paused, no pings.";
         this->theWorkers[i].timeOfLastPingServerSideOnly=theGlobalVariables.GetElapsedSeconds();
-      } else
-        if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0 &&
-            theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly>
-            theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit*2
-            )
-        { this->theWorkers[i].flagInUse=false;
-          kill(this->theWorkers[i].ProcessPID, SIGKILL);
-          std::stringstream pingTimeoutStream;
-          pingTimeoutStream << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
-          << " seconds passed since worker " << i+1
-          << " last pinged the server; killing pid: "
-          << this->theWorkers[i].ProcessPID << ". ";
-          logIO << logger::red << pingTimeoutStream.str() << logger::endL;
-          this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>" + pingTimeoutStream.str()+"</b></span>";
-        }
+      } else if ( theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead>0 &&
+                  theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly>
+                  theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead)
+      { this->theWorkers[i].flagInUse=false;
+        kill(this->theWorkers[i].ProcessPID, SIGKILL);
+        std::stringstream pingTimeoutStream;
+        pingTimeoutStream << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
+        << " seconds passed since worker " << i+1
+        << " last pinged the server; killing pid: "
+        << this->theWorkers[i].ProcessPID << ". ";
+        logIO << logger::red << pingTimeoutStream.str() << logger::endL;
+        this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>" + pingTimeoutStream.str()+"</b></span>";
+      }
     }
 }
 

@@ -2264,7 +2264,7 @@ void WebServer::RecycleChildrenIfPossible()
       } else
         if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0 &&
             theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly>
-            theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
+            theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit*2
             )
         { this->theWorkers[i].flagInUse=false;
           kill(this->theWorkers[i].ProcessPID, SIGKILL);

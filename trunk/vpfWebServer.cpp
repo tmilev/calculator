@@ -449,7 +449,7 @@ void WebServer::Signal_SIGINT_handler(int s)
 
 void WebServer::Signal_SIGCHLD_handler(int s)
 { theLog << "Received SIGCHLD signal." << logger::endL;
-  theWebServer.ReapChildren();
+//  theWebServer.ReapChildren();
 }
 
 void WebServer::ReapChildren()
@@ -2238,7 +2238,7 @@ void WebServer::RecycleChildrenIfPossible()
   //This might need to be rewritten: I wasn't able to make this work with any
   //mechanism other than pipes.
   MacroRegisterFunctionWithName("WebServer::RecycleChildrenIfPossible");
-  this->ReapChildren();
+//  this->ReapChildren();
   for (int i=0; i<this->theWorkers.size; i++)
     if (this->theWorkers[i].flagInUse)
     { this->theWorkers[i].pipeWorkerToServerControls.Read();
@@ -2367,7 +2367,7 @@ void WebServer::initPrepareSignals()
   sa.sa_handler=&WebServer::Signal_SIGINT_handler;
   if (sigaction(SIGINT, &sa, NULL) == -1)
     theLog << "sigaction returned -1" << logger::endL;
-  sa.sa_handler = &WebServer::Signal_SIGCHLD_handler; // reap all dead processes
+  sa.sa_handler = 0;// &WebServer::Signal_SIGCHLD_handler; // reap all dead processes
   sigemptyset(&sa.sa_mask);
   sa.sa_flags = SA_NOCLDWAIT;
   if (sigaction(SIGCHLD, &sa, NULL) == -1)

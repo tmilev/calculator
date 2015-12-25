@@ -2245,6 +2245,7 @@ void WebServer::RecycleChildrenIfPossible()
       if (this->theWorkers[i].pipeWorkerToServerControls.lastRead.size>0)
       { this->theWorkers[i].flagInUse=false;
         theLog << logger::green << "Worker " << i+1 << " done, marking for reuse." << logger::endL;
+//        waitpid(this->theWorkers[i].ProcessPID, 0, )
       } else
         theLog << logger::yellow << "Worker " << i+1 << " not done yet." << logger::endL;
       this->theWorkers[i].pipeWorkerToServerUserInput.Read();
@@ -2368,9 +2369,11 @@ void WebServer::initPrepareSignals()
     theLog << "sigaction returned -1" << logger::endL;
   sa.sa_handler = &WebServer::Signal_SIGCHLD_handler; // reap all dead processes
   sigemptyset(&sa.sa_mask);
-  sa.sa_flags = SA_RESTART;
+  sa.sa_flags = SA_NOCLDWAIT;
   if (sigaction(SIGCHLD, &sa, NULL) == -1)
-    theLog << "sigaction returned -1" << logger::endL;
+  { theLog << "sigaction returned -1" << logger::endL;
+    crash << "sigaction returned -1" << crash;
+  }
 //  sigemptyset(&sa.sa_mask);
 //  sa.sa_flags = SA_RESTART;
 //  if (sigaction(SIGCHLD, &sa, NULL) == -1)

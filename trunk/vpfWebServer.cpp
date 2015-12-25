@@ -448,7 +448,8 @@ void WebServer::Signal_SIGINT_handler(int s)
 }
 
 void WebServer::Signal_SIGCHLD_handler(int s)
-{ int waitResult=0;
+{ theLog << "Received SIGCHLD signal." << logger::endL;
+  int waitResult=0;
   do
   { waitResult= waitpid(-1, NULL, WNOHANG| WEXITED);
     if (waitResult>0)

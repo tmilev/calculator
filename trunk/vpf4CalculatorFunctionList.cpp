@@ -13,20 +13,30 @@ void Calculator::initAdminFunctions()
 {
 #ifdef MACRO_use_MySQL
   this->AddOperationInnerHandler
+  ("AddUser", DatabaseRoutines::innerAddUser, "",
+   "Adds a new user (first argument: new username, second argument: new user's password, third argument: email).",
+   "AddUser(testUser, password, \"todor.milev@gmail.com\"); GetUserPassword(\"testUser\");", false, true, "DatabaseRoutines::innerSetUserPassword");
+   ;
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
+    return;
+  this->AddOperationInnerHandler
   ("TestLogin", DatabaseRoutines::innerTestLogin, "",
-   "Tests the login function from username (first argument) and password (second argument). \
+   "DO NOT USE, function is FOR DEBUGGING PURPOSES ONLY.\
+   This function is completely insecure and WILL expose your username and password to the whole\
+   Internet (even if used through https) if I made a programming mistake and the function crashes.\
+   Tests the login function from username (first argument) and password (second argument). \
    Should only be used through an https connection. ",
    "TestLogin(\"testUser\", \"password\")", false, true, "DatabaseRoutines::innerTestLogin");
    ;
   this->AddOperationInnerHandler
   ("GetUserPassword", DatabaseRoutines::innerGetUserPassword, "",
-   "Gets info about a user with given username. Put quotes around the username and the password.",
+   "Gets a user's password.",
    "GetUserPassword(\"testUser\"); ", false, true, "DatabaseRoutines::innerGetUserPassword");
    ;
   this->AddOperationInnerHandler
-  ("GetAuthentication", DatabaseRoutines::innerGetAuthentication, "",
-   "Gets authentication token from user and password. Put quotes around the username and the password.",
-   "GetAuthentication(\"testUser, password\"); ", false, true, "DatabaseRoutines::innerGetAuthentication");
+  ("GetAuthenticationToken", DatabaseRoutines::innerGetAuthentication, "",
+   "Gets the authentication token of a given user.",
+   "GetAuthentication(\"testUser\"); ", false, true, "DatabaseRoutines::innerGetAuthentication");
   this->AddOperationInnerHandler
   ("GetUserDetails", DatabaseRoutines::innerGetUserDetails, "",
    "Generates a list of database users visible to the given user. First argument: username (in quotes), \
@@ -35,12 +45,10 @@ void Calculator::initAdminFunctions()
    "GetUserDetails(\"admin\", \"password\")", false, true, "DatabaseRoutines::innerGetUserDetails");
   this->AddOperationInnerHandler
   ("GetUserDBEntry", DatabaseRoutines::innerGetUserDBEntry, "",
-   "Gets a user database entry. First argument: username (in quotes), \
-   second argument: password (in quotes), \
-   third argument: desired database entry (in quotes).",
-   "GetUserDBEntry(\"testUser\", \"password\", \"authenticationTokenCreationTime\"); \
-    GetUserDBEntry(\"testUser\", \"password\", \"authenticationToken\");\
-    GetUserDBEntry(\"testUser\", \"password\", \"email\")", false, true, "DatabaseRoutines::innerGetUserDBEntry");
+   "Gets a user database entry. Argument: desired database entry (in quotes).",
+   "GetUserDBEntry(\"authenticationTokenCreationTime\"); \
+    GetUserDBEntry(\"authenticationToken\");\
+    GetUserDBEntry(\"email\")", false, true, "DatabaseRoutines::innerGetUserDBEntry");
    ;
   this->AddOperationInnerHandler
   ("SetUserPassword", DatabaseRoutines::innerSetUserPassword, "",
@@ -48,25 +56,21 @@ void Calculator::initAdminFunctions()
    "SetUserPassword(\"testUser\", \"password\"); GetUserPassword(\"testUser\");", false, true, "DatabaseRoutines::innerSetUserPassword");
    ;
   this->AddOperationInnerHandler
-  ("AddUser", DatabaseRoutines::innerAddUser, "",
-   "Adds a new user (first argument: user, second argument: password, third argument: email).",
-   "AddUser(testUser, password, \"todor.milev@gmail.com\"); GetUserPassword(\"testUser\");", false, true, "DatabaseRoutines::innerSetUserPassword");
-   ;
-  this->AddOperationInnerHandler
   ("DeleteUser", DatabaseRoutines::innerDeleteUser, "",
    "Deletes a user (first argument: user, second argument: admin password).",
-   "DeleteUser(testUser, password);", false, true, "DatabaseRoutines::innerDeleteUser");
+   "DeleteUser(testUser);", false, true, "DatabaseRoutines::innerDeleteUser");
    ;
   this->AddOperationInnerHandler
   ("TestDatabase", DatabaseRoutines::innerTestDatabase, "",
-   "Tests the database. ",
+   "Tests the connection to/existence of the database. ",
    "TestDatabase(0)", false, true, "DatabaseRoutines::innerTestDatabase");
    ;
 #endif // MACRO_use_MySQL
 }
 
 void Calculator::initCalculusAdministrationFunctions()
-{
+{ if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
+    return;
   #ifdef MACRO_use_MySQL
   this->AddOperationInnerHandler
   ("CreateTeachingClass", DatabaseRoutines::innerCreateTeachingClass, "",

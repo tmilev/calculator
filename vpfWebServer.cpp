@@ -474,8 +474,10 @@ void *get_in_addr(struct sockaddr *sa)
   return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-std::string WebWorker::ToStringMessageShort(FormatExpressions* theFormat)const
-{ std::stringstream out;
+std::string WebWorker::ToStringMessageShortUnsafe(FormatExpressions* theFormat)const
+{ if (theGlobalVariables.flagUsingSSLinCurrentConnection)
+    return "Message cannot be viewed when using SSL";
+  std::stringstream out;
   bool useHtml=theFormat==0 ? false: theFormat->flagUseHTML;
   std::string lineBreak= useHtml ? "<br>\n" : "\r\n";
   out << lineBreak;
@@ -504,9 +506,11 @@ std::string WebWorker::ToStringMessageShort(FormatExpressions* theFormat)const
   return out.str();
 }
 
-std::string WebWorker::ToStringMessageFull()const
-{ std::stringstream out;
-  out << this->ToStringMessage();
+std::string WebWorker::ToStringMessageFullUnsafe()const
+{ if (theGlobalVariables.flagUsingSSLinCurrentConnection)
+    return "Message cannot be viewed when using SSL";
+  std::stringstream out;
+  out << this->ToStringMessageUnsafe();
   if (this->theStrings.size>0)
   { out << "<hr>\nStrings extracted from message: ";
     for (int i =0; i<this->theStrings.size; i++)
@@ -515,12 +519,13 @@ std::string WebWorker::ToStringMessageFull()const
   return out.str();
 }
 
-std::string WebWorker::ToStringMessage()const
-{ std::stringstream out;
+std::string WebWorker::ToStringMessageUnsafe()const
+{ if (theGlobalVariables.flagUsingSSLinCurrentConnection)
+    return "Message cannot be viewed when using SSL";
+  std::stringstream out;
   FormatExpressions tempFormat;
   tempFormat.flagUseHTML=true;
-  out << this->ToStringMessageShort(&tempFormat);
-
+  out << this->ToStringMessageShortUnsafe(&tempFormat);
   out << "<hr>";
   out << "Main address RAW: " << this->mainAddresSRAW << "<br>";
   if (this->requestType==this->requestGetCalculator || this->requestType==this->requestGetNotCalculator ||
@@ -1464,7 +1469,7 @@ int WebWorker::ProcessNonCalculator()
     }
     stOutput << "<br><b> File display name:</b> "
     << this->mainAddress << "<br><b>Relative physical name of file:</b> " << this->RelativePhysicalFileName;
-    stOutput << "<hr><hr><hr>Message details:<br>" <<  this->ToStringMessage();
+    stOutput << "<hr><hr><hr>Message details:<br>" << this->ToStringMessageUnsafe();
     stOutput << "</body></html>";
     return 0;
   }
@@ -1531,7 +1536,7 @@ int WebWorker::ProcessUnknown()
 { MacroRegisterFunctionWithName("WebWorker::ProcessUnknown");
   stOutput << "HTTP/1.1 501 Method Not Implemented\r\nContent-Type: text/html\r\n\r\n";
   stOutput << "<b>Requested method is not implemented. </b> <hr>The original message received from the server follows."
-  << "<hr>\n" << this->ToStringMessage();
+  << "<hr>\n" << this->ToStringMessageUnsafe();
   return 0;
 }
 
@@ -1831,6 +1836,7 @@ int WebWorker::ServeClient()
   if (this->requestType==this->requestGetCalculator || this->requestType==this->requestPostCalculator)
   { stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
     theParser.inputStringRawestOfTheRaw=this->mainArgumentRAW;
+    this->mainArgumentRAW="";
     //theParser.javaScriptDisplayingIndicator=this->GetJavaScriptIndicatorBuiltInServer(true);
     theParser.javaScriptDisplayingIndicator="";
     this->OutputWeb();
@@ -2538,7 +2544,7 @@ int WebServer::Run()
         << "<br>The error message returned was:<br>"
         << this->GetActiveWorker().error
         << " <hr><hr>The message (part) that was received is: "
-        << this->GetActiveWorker().ToStringMessageFull()
+        << this->GetActiveWorker().ToStringMessageFullUnsafe()
         << "</body></html>";
         stOutput.Flush();
         this->GetActiveWorker().SendAllBytes();

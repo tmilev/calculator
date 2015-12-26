@@ -14,8 +14,8 @@ Crasher::Crasher()
 }
 
 void Crasher::FirstRun()
-{ if (this->flagFirstRun)
-    this->theCrashReport << "\n<hr>\n\n";
+{ if (this->flagFirstRun && theGlobalVariables.flagUsingBuiltInWebServer)
+    this->theCrashReport << "\n<tr><td>";
   this->flagFirstRun=false;
 }
 
@@ -43,6 +43,8 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
     { this->theCrashReport << "<hr>In addition, I have an account of the computation progress report strings, attached below.<hr>"
       << theGlobalVariables.ToStringProgressReportHtml();
     }
+  if (theGlobalVariables.flagUsingBuiltInWebServer)
+    this->theCrashReport << "</td></tr></table></td></table>";
   if (stOutput.theOutputFunction!=0)
     std::cout << this->theCrashReport.str() << std::endl;
   stOutput << this->theCrashReport.str();
@@ -219,9 +221,15 @@ void GlobalVariables::MakeReport()
 
 void GlobalVariables::initOutputReportAndCrashFileNames
 (const std::string& inputUserStringRAW, const std::string& inputUserStringCivilized)
-{ this->userInputStringRAWIfAvailable=inputUserStringRAW;
+{ std::string inputAbbreviated;
   this->userInputStringIfAvailable=inputUserStringCivilized;
-  std::string inputAbbreviated=this->userInputStringRAWIfAvailable;
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
+  { this->userInputStringRAWIfAvailable=inputUserStringRAW;
+    inputAbbreviated=this->userInputStringRAWIfAvailable;
+  } else
+  { this->userInputStringRAWIfAvailable="Raw user input string not available in SSL mode. ";
+    inputAbbreviated=this->userInputStringIfAvailable;
+  }
   if (inputAbbreviated.size()>220)
   { std::stringstream inputAbbreviatedStream;
     inputAbbreviatedStream << "hash_" << MathRoutines::hashString(inputAbbreviated)

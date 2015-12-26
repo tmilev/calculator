@@ -560,10 +560,11 @@ void WebWorker::ProcessRawArguments()
   List<std::string> inputStrings, inputStringNames;
   CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
   std::string password;
-  theGlobalVariables.userDefault="";
+  std::string desiredUser;
+  desiredUser="";
   if (inputStringNames.Contains("user"))
-  { theGlobalVariables.userDefault=inputStrings[inputStringNames.GetIndex("user")];
-    CGI::URLStringToNormal(theGlobalVariables.userDefault, theGlobalVariables.userDefault);
+  { desiredUser=inputStrings[inputStringNames.GetIndex("user")];
+    CGI::URLStringToNormal(desiredUser, desiredUser);
     //stOutput << "message: " << theParser.inputStringRawestOfTheRaw;
     //stOutput << "<hr><b>user: </b>" << user << "<br>";
   }
@@ -578,10 +579,15 @@ void WebWorker::ProcessRawArguments()
     CGI::URLStringToNormal(password, password);
   }
   theGlobalVariables.flagLoggedIn=false;
-  if (theGlobalVariables.userDefault!="" && theGlobalVariables.flagUsingSSLinCurrentConnection)
+  if (desiredUser!="" && theGlobalVariables.flagUsingSSLinCurrentConnection)
   { //stOutput << "<br>LoginViaDatabase called: "
     //<< "user: " << this->user;
-    theGlobalVariables.flagLoggedIn=DatabaseRoutinesGlobalFunctions::LoginViaDatabase(theGlobalVariables.userDefault, password, this->authenticationToken);
+    theGlobalVariables.flagLoggedIn=DatabaseRoutinesGlobalFunctions::LoginViaDatabase
+    (desiredUser, password, this->authenticationToken);
+    if (theGlobalVariables.flagLoggedIn)
+      theGlobalVariables.userDefault=desiredUser;
+    else
+      theGlobalVariables.userDefault="";
   }
   for (unsigned i=0; i<password.size(); i++)
     password[i]=' ';

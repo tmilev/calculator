@@ -384,9 +384,9 @@ bool DatabaseRoutines::startMySQLDatabase()
 }
 
 bool DatabaseRoutines::CreateTable
-(const std::string& tableName, const std::string& desiredTableContent)
+(const std::string& tableName, const std::string& desiredTableContent, std::stringstream* commentsOnCreation)
 { MacroRegisterFunctionWithName("DatabaseRoutines::CreateTable");
-  if (tableName=="" || ! UserCalculator::IsAcceptableObjectName(tableName, &this->comments))
+  if (tableName=="" || ! UserCalculator::IsAcceptableObjectName(tableName, commentsOnCreation))
     return false;
   if (this->TableExists(tableName))
     return true;
@@ -396,9 +396,11 @@ bool DatabaseRoutines::CreateTable
   tableContent="CREATE TABLE " + tableName+"(" + tableContent + ")";
   //CANNOT use object DatabaseQuery as that object invokes startMySQLDatabase
   //which in turn invokes the present function.
-  bool result= (mysql_query(this->connection, tableContent.c_str())!=0);
+  if (commentsOnCreation!=0)
+    *commentsOnCreation << "Proceeding to create table: " << tableName << ". ";
+  bool result= (mysql_query(this->connection, tableContent.c_str())==0);
   if (!result)
-    return *this << "Command:<br>" << tableContent << "<br>failed";
+    return *this << "Command:<br>" << tableContent << "<br>failed. ";
   mysql_free_result( mysql_use_result(this->connection));
   return result;
 }
@@ -433,7 +435,9 @@ bool DatabaseRoutines::TableExists(const std::string& tableName)
 { MacroRegisterFunctionWithName("DatabaseRoutines::TableExists");
   if (!UserCalculator::IsAcceptableObjectName(tableName, &this->comments))
     return false;
-  bool result=mysql_query(this->connection, ("SELECT 1 FROM "+tableName).c_str());
+  std::string theQuery="SELECT 1 FROM "+ this->theDatabaseName+"."+ tableName;
+  bool result=(mysql_query(this->connection, theQuery.c_str())==0);
+  *this << "Fired up create table query: " << theQuery << ". ";
   mysql_free_result( mysql_use_result(this->connection));
   return result;
 }
@@ -553,7 +557,7 @@ bool UserCalculator::getUserPassAndExtraData(Calculator& theCommands, const Expr
   }
   outputData.SetSize(input.children.size-3);
   for (int i=3; i<input.children.size; i++ )
-    if (!input[i].IsOfType<std::string>(& this->selectedColumns[i-3]))
+    if (!input[i].IsOfType<std::string>(& outputData[i-3]))
     { theCommands << "<hr>Argument " << input[i].ToString() << " is supposed to be a string";
       outputData[i-3]=input[i].ToString();
     }
@@ -713,8 +717,8 @@ bool DatabaseRoutines::innerGetAuthentication(Calculator& theCommands, const Exp
   return output.AssignValue(theUser.actualAuthenticationToken, theCommands);
 }
 
-bool DatabaseRoutines::innerAddTeachingClass(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::innerAddTeachingClass");
+bool DatabaseRoutines::innerCreateTeachingClass(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::innerCreateTeachingClass");
   UserCalculator theUser;
   List<std::string> className;
   if (!theUser.getUserPassAndExtraData(theCommands, input, className))
@@ -722,9 +726,11 @@ bool DatabaseRoutines::innerAddTeachingClass(Calculator& theCommands, const Expr
   DatabaseRoutines theRoutines;
   if (!theUser.Authenticate(theRoutines))
     return output.MakeError("Failed to authenticate. ", theCommands);
-  DatabaseQuery theQuery
-  (theRoutines, "");
-  return output.AssignValue(theUser.actualAuthenticationToken, theCommands);
+  if (!theRoutines.CreateTable(className[0],
+  "user VARCHAR(50) NOT NULL PRIMARY KEY, \
+  performance VARCHAR(50) NOT NULL", &theCommands.Comments))
+    return output.AssignValue(theRoutines.comments.str(), theCommands);
+  return output.AssignValue(theRoutines.comments.str(), theCommands);
 }
 
 bool DatabaseRoutines::innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output)

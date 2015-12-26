@@ -69,11 +69,11 @@ void Calculator::initCalculusAdministrationFunctions()
 {
   #ifdef MACRO_use_MySQL
   this->AddOperationInnerHandler
-  ("CreateTeachingClass", DatabaseRoutines::innerAddTeachingClass, "",
+  ("CreateTeachingClass", DatabaseRoutines::innerCreateTeachingClass, "",
    "Adds a class for an instructor. First argument: instructor username. \
    Second argument: instructor password/authentication token. \
    Third argument: class name.",
-   "CreateTeachingClass(\"admin\", \"password\", \"testUser\")", false, true, "DatabaseRoutines::innerAddTeachingClass");
+   "CreateTeachingClass(\"admin\", \"password\", \"testUser\")", false, true, "DatabaseRoutines::innerCreateTeachingClass");
 
   #endif // MACRO_use_MySQL
 }

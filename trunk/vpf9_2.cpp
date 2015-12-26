@@ -2203,7 +2203,7 @@ void CGI::URLFileNameToFileName(std::string& input, std::string& output)
     { if (i+j<inputSize)
         readAhead.push_back(input[i+j]);
       if (readAhead=="+")
-      { out << "+";
+      { out << " ";
         break;
       }
       if (CGI::URLStringToNormalOneStep(readAhead, out))

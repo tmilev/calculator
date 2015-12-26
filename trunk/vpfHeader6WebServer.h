@@ -113,9 +113,9 @@ public:
   requestPostCalculator, requestGetNotCalculator, requestGetServerStatus,
   requestGetComputationIndicator, requestGetMonitor};
   std::string ToStringStatus()const;
-  std::string ToStringMessage()const;
-  std::string ToStringMessageShort(FormatExpressions* theFormat=0)const;
-  std::string ToStringMessageFull()const;
+  std::string ToStringMessageUnsafe()const;
+  std::string ToStringMessageShortUnsafe(FormatExpressions* theFormat=0)const;
+  std::string ToStringMessageFullUnsafe()const;
   void ParseMessage();
   void ExtractArgumentFromAddress();
   void SanitizeMainAddress();

@@ -486,14 +486,12 @@ bool DatabaseRoutines::innerAddUser(Calculator& theCommands, const Expression& i
 
 bool DatabaseRoutines::innerDeleteUser(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerDeleteUser");
-  UserCalculator theUser, theAdmin;
-  if (!theAdmin.getUserAndPass(theCommands, input))
+  if (theGlobalVariables.userCalculatorAdmin!=theGlobalVariables.userDefault)
+    return output.MakeError("Deleting users allowed only as logged-in admin. ", theCommands);
+  UserCalculator theUser;
+  if (!theUser.getUser(theCommands, input))
     return false;
-  theUser.username=theAdmin.username;
-  theAdmin.username=theGlobalVariables.userCalculatorAdmin;
   DatabaseRoutines theRoutines;
-  if (!theAdmin.Authenticate(theRoutines))
-    return output.MakeError("Admin authentication failed. ", theCommands);
   theUser.DeleteMe(theRoutines);
   return output.AssignValue(theRoutines.comments.str(), theCommands);
 }
@@ -503,6 +501,14 @@ bool DatabaseRoutines::innerSetUserPassword(Calculator& theCommands, const Expre
   UserCalculator theUser;
   if (!theUser.getUserAndPass(theCommands, input))
     return false;
+  bool authorized=false;
+  if (theUser.username==theGlobalVariables.userDefault)
+    authorized=true;
+  else if (theGlobalVariables.userDefault==theGlobalVariables.userCalculatorAdmin)
+  { authorized=true;
+    theCommands << "Password change: invoking admin powers...";
+  }
+  if (theUser.username!=theGlobalVariables)
   DatabaseRoutines theRoutines;
   theUser.SetPassword(theRoutines);
   return output.AssignValue(theRoutines.comments.str(), theCommands);

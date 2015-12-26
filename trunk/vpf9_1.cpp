@@ -123,7 +123,7 @@ std::string GlobalVariables::ToStringHTMLTopCommandLinuxSystem()
   std::stringstream topStream(topString);
   for (int i=0; i<4; i++)
   { std::getline(topStream, lineString);
-    out << lineString;
+    out << lineString << "<br>\n ";
   }
   out << "<table>";
   for (; std::getline(topStream, lineString);)

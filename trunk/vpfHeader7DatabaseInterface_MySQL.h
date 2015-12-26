@@ -114,7 +114,7 @@ public:
   std::string ToString();
   std::string ToStringAllUsersHTMLFormat();
   bool CreateTable
-(const std::string& tableName, const std::string& desiredTableContent);
+(const std::string& tableName, const std::string& desiredTableContent, std::stringstream* commentsOnCreation=0);
 
   static bool innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestLogin(Calculator& theCommands, const Expression& input, Expression& output);
@@ -125,7 +125,7 @@ public:
   static bool innerGetAuthentication(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserDBEntry(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserDetails(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddTeachingClass(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerCreateTeachingClass(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddStudentToClass(Calculator& theCommands, const Expression& input, Expression& output);
 
   DatabaseRoutines();

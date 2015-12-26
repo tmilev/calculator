@@ -38,6 +38,7 @@ public:
   int connectedSocketID;
   int connectedSocketIDLastValueBeforeRelease;
   int connectionID;
+  int indentationLevelHTML;
   List<char> remainingBytesToSend;
   List<char> bufferFileIO;
   PauseController PauseComputationReportReceived;
@@ -52,6 +53,8 @@ public:
 
   std::string error;
 
+  std::string openIndentTag(const std::string& theTag);
+  std::string closeIndentTag(const std::string& theTag);
   int ProcessServerStatus();
   int ProcessComputationIndicator();
   int ProcessNonCalculator();
@@ -68,12 +71,13 @@ public:
 
   static void StandardOutputAfterTimeOut(const std::string& input);
 
-  static int OutputWeb();
+  int OutputWeb();
   void ProcessRawArguments();
   void OutputBeforeComputation();
-  static void OutputStandardResult();
+  void OutputBeforeComputationUserInputAndAutoComplete();
+  void OutputStandardResult();
   static void OutputSendAfterTimeout(const std::string& input);
-  static void OutputResultAfterTimeout();
+  void OutputResultAfterTimeout();
   static void OutputCrashAfterTimeout();
   void OutputShowIndicatorOnTimeout();
 

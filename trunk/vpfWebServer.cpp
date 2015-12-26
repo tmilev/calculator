@@ -350,9 +350,9 @@ void WebWorker::SendAllBytesHttpSSL()
       theReport.SetStatus(reportStream3.str());
       return;
     }
-    theLog << "before ssl write: " << logger::endL;
+//    theLog << "before ssl write: " << logger::endL;
     int numBytesSent =  SSL_write (theSSLdata.ssl, this->remainingBytesToSend.TheObjects, this->remainingBytesToSend.size);
-    theLog << "after ssl write: " << logger::endL;
+//    theLog << "after ssl write: " << logger::endL;
     if (numBytesSent<0)
     { ERR_print_errors_fp(stderr);
       theLog << "WebWorker::SendAllBytes failed: SSL_write error. " << logger::endL;
@@ -584,30 +584,14 @@ void WebWorker::ProcessRawArguments()
     theParser.inputString= inputStrings[inputStringNames.GetIndex("textInput")];
 }
 
-void WebWorker::OutputBeforeComputation()
-{ MacroRegisterFunctionWithName("WebServer::OutputBeforeComputation");
-  theGlobalVariables.flagComputationCompletE=false;
-  stOutput << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, "
-  << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
-  << "Root subalgebras, sl(2)-triples\"> <head> <title>calculator version  " << __DATE__ << ", " << __TIME__ << "</title>";
-//  if (theGlobalVariables.flagUsingBuiltInWebServer)
-  stOutput << CGI::GetLaTeXProcessingJavascript();
-//  else
-//    stOutput << "<script src=\"" << theGlobalVariables.DisplayPathServerBase << "/jsmath/easy/load.js\">";
-  stOutput << "\n</head>\n<body onload=\"checkCookie();\">\n";
-
-//  civilizedInput="\\int( 1/x dx)";
-//  civilizedInput="\\int (1/(x(1+x^2)^2))dx";
-//  civilizedInput="%LogEvaluation \\int (1/(5+2x+7x^2)^2)dx";
-  CGI::URLStringToNormal(theParser.inputString, theParser.inputString);
-  theGlobalVariables.initOutputReportAndCrashFileNames
-  (theParser.inputStringRawestOfTheRaw, theParser.inputString);
-
-  stOutput << WebWorker::GetJavascriptHideHtml();
-  stOutput << WebWorker::GetJavascriptCookieBasics();
-  stOutput << this->GetJavascriptCookieForTheCalculator();
-  stOutput << "<table>\n <tr valign=\"top\">\n ";
-  stOutput << "<td>"; //<td> tag will be closed later in WebWorker::OutputStandardResult
+void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
+{ MacroRegisterFunctionWithName("WebWorker::OutputBeforeComputationUserInputAndAutoComplete");
+  int startingIndent=this->indentationLevelHTML;
+  stOutput << this->openIndentTag("<tr style=\"vertical-align:top\">");
+  stOutput << this->openIndentTag("<td><!-- cell with input, autocomplete space and output-->");
+  stOutput << this->openIndentTag("<table><!--table with input, autocomplete space and output-->");
+  stOutput << this->openIndentTag("<tr>");
+  stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!-- input form here -->");
   stOutput << "\n<FORM method=\"POST\" id=\"formCalculator\" name=\"formCalculator\" action=\""
   << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n" ;
   std::string civilizedInputSafish;
@@ -630,7 +614,62 @@ void WebWorker::OutputBeforeComputation()
   stOutput << "action=\"calculator\"> ";
   if (theParser.inputString!="")
     stOutput << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
-  stOutput << "\n</FORM>";
+  stOutput << "\n</FORM>\n";
+  stOutput << this->closeIndentTag("</td>");
+  stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!--Autocomplete space here -->");
+  stOutput << this->openIndentTag("<table><!-- Autocomplete table 2 cells (2 rows 1 column)-->");
+  stOutput << this->openIndentTag("<tr>");
+  stOutput << this->openIndentTag("<td nowrap>");
+  stOutput << "<span \"style:nowrap\" id=\"idAutocompleteHints\">Ctrl+space autocompletes, ctrl+arrow selects word</span>";
+  stOutput << this->closeIndentTag("</td>");
+  stOutput << this->closeIndentTag("</tr>");
+  stOutput << this->openIndentTag("<tr>");
+  stOutput << this->openIndentTag("<td id=\"idAutocompleteSpan\">");
+  stOutput << this->closeIndentTag("</td>");
+  stOutput << this->closeIndentTag("</tr>");
+  stOutput << this->openIndentTag("<tr>");
+  stOutput << this->openIndentTag("<td id=\"idAutocompleteDebug\">");
+  stOutput << this->closeIndentTag("</td>");
+  stOutput << this->closeIndentTag("</tr>");
+  stOutput << this->closeIndentTag("</table><!--Autocomplete table end-->");
+  stOutput << this->closeIndentTag("</td>");
+  stOutput << "<script type=\"text/javascript\" src=\"/autocomplete.js\"></script>\n";
+  stOutput << this->closeIndentTag("</tr>");
+  stOutput << this->closeIndentTag("</table>");
+  stOutput << this->closeIndentTag("</td>");
+  stOutput << this->closeIndentTag("</tr>");
+  if (startingIndent!=this->indentationLevelHTML)
+    crash << "Non-balanced html tags." << crash;
+}
+
+
+void WebWorker::OutputBeforeComputation()
+{ MacroRegisterFunctionWithName("WebServer::OutputBeforeComputation");
+  theGlobalVariables.flagComputationCompletE=false;
+  stOutput << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, "
+  << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
+  << "Root subalgebras, sl(2)-triples\"> <head> <title>calculator version  " << __DATE__ << ", " << __TIME__ << "</title>";
+//  if (theGlobalVariables.flagUsingBuiltInWebServer)
+  stOutput << CGI::GetLaTeXProcessingJavascript();
+//  else
+//    stOutput << "<script src=\"" << theGlobalVariables.DisplayPathServerBase << "/jsmath/easy/load.js\">";
+  stOutput << "\n</head>\n<body onload=\"checkCookie();\">\n";
+
+//  civilizedInput="\\int( 1/x dx)";
+//  civilizedInput="\\int (1/(x(1+x^2)^2))dx";
+//  civilizedInput="%LogEvaluation \\int (1/(5+2x+7x^2)^2)dx";
+  CGI::URLStringToNormal(theParser.inputString, theParser.inputString);
+  theGlobalVariables.initOutputReportAndCrashFileNames
+  (theParser.inputStringRawestOfTheRaw, theParser.inputString);
+
+  stOutput << WebWorker::GetJavascriptHideHtml();
+  stOutput << WebWorker::GetJavascriptCookieBasics();
+  stOutput << this->GetJavascriptCookieForTheCalculator();
+  stOutput << this->openIndentTag("<table><!-- Outermost table, 3 cells (3 columns 1 row)-->");
+  stOutput << this->openIndentTag("<tr style=\"vertical-align:top\">");
+  stOutput << this->openIndentTag("<td><!-- Cell containing the output table-->");
+  stOutput << this->openIndentTag("<table><!-- Output table, 2 cells (1 column 2 rows) -->");
+  this->OutputBeforeComputationUserInputAndAutoComplete();
   //  stOutput << "<br>Number of lists created before evaluation: " << NumListsCreated;
 }
 
@@ -638,10 +677,21 @@ void WebWorker::OutputResultAfterTimeout()
 { MacroRegisterFunctionWithName("WebWorker::OutputResultAfterTimeout");
   std::stringstream out;
 //  out << theParser.ToStringOutputSpecials();
+  out << this->openIndentTag("<tr>");
+  out << this->openIndentTag("<td>");
   if (standardOutputStreamAfterTimeout.str().size()!=0)
     out << standardOutputStreamAfterTimeout.str() << "<hr>";
-  out << "<table><tr><td>" << theParser.ToStringOutputAndSpecials() << "</td><td>"
-  << theParser.outputCommentsString << "</td></tr></table>";
+  out << theParser.ToStringOutputAndSpecials();
+  out << this->closeIndentTag("</td>");
+  out << this->closeIndentTag("</tr>");
+  out << this->closeIndentTag("</table>");
+  out << this->closeIndentTag("</td>");
+
+  out << this->openIndentTag("<td>");
+  out << theParser.outputCommentsString;
+  out << this->closeIndentTag("</td>");
+  out << this->closeIndentTag("</tr>");
+  out << this->closeIndentTag("</table>");
   std::fstream outputTimeOutFile;
   FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
   (outputTimeOutFile, theGlobalVariables.RelativePhysicalNameOutpuT, false, true, false);
@@ -687,22 +737,14 @@ void WebWorker::OutputSendAfterTimeout(const std::string& input)
 
 void WebWorker::OutputStandardResult()
 { MacroRegisterFunctionWithName("WebServer::OutputStandardResult");
+  stOutput << this->openIndentTag("<tr>");
+  stOutput << this->openIndentTag("<td>");
   stOutput << theParser.ToStringOutputAndSpecials();
-  stOutput << "\n\n</td>\n\n";
-  stOutput << "<td>";
-  stOutput << "<table>"
-  << "<tr><td nowrap>"
-  << "<span \"style:nowrap\" id=\"idAutocompleteHints\">Ctrl+space autocompletes, ctrl+arrow selects word</span>"
-  << "</td></tr>"
-  << "<tr>"
-  << "<td id=\"idAutocompleteSpan\"></td>"
-  << "</tr>"
-  << "<tr>"
-  << "<td id=\"idAutocompleteDebug\"></td>"
-  << "</tr>"
-  << "</table>";
-  stOutput << "<script type=\"text/javascript\" src=\"/autocomplete.js\"></script>\n";
-  stOutput << "</td>";
+  stOutput << this->closeIndentTag("</td>");
+  stOutput << this->closeIndentTag("</tr>");
+  stOutput << this->closeIndentTag("</table><!--table with input, autocomplete space and output-->");
+  stOutput << this->closeIndentTag("</td>");
+
 //  bool displayClientMessage=theWebServer.flagUsingBuiltInServer && theWebServer.activeWorker!=-1;
   //displayClientMessage=false;
   if (theParser.outputCommentsString!="")
@@ -1095,6 +1137,24 @@ void WebWorker::SanitizeMainAddress()
     this->mainAddress.push_back(resultAddress[i]);
 }
 
+std::string WebWorker::openIndentTag(const std::string& theTag)
+{ std::stringstream out;
+  for (int i=0; i<this->indentationLevelHTML; i++)
+    out << "  ";
+  out << theTag << "\n";
+  this->indentationLevelHTML++;
+  return out.str();
+}
+
+std::string WebWorker::closeIndentTag(const std::string& theTag)
+{ std::stringstream out;
+  this->indentationLevelHTML--;
+  for (int i=0; i<this->indentationLevelHTML; i++)
+    out << "  ";
+  out << theTag << "\n";
+  return out.str();
+}
+
 void WebWorker::ExtractPhysicalAddressFromMainAddress()
 { MacroRegisterFunctionWithName("WebWorker::ExtractPhysicalAddressFromMainAddress");
 //  int numBytesToChop=0;//theGlobalVariables.DisplayPathServerBase.size();
@@ -1314,6 +1374,7 @@ void WebWorker::reset()
   this->connectionID=-1;
   this->indexInParent=-1;
   this->parent=0;
+  this->indentationLevelHTML=0;
   this->displayUserInput="";
   this->requestType=this->requestUnknown;
   this->flagMainAddressSanitized=false;
@@ -1504,7 +1565,7 @@ int WebWorker::OutputWeb()
   if (theGlobalVariables.flagUsingBuiltInWebServer)
     if (theGlobalVariables.flagOutputTimedOut)
     { theReport.SetStatus("OutputWeb: calling OutputResultAfterTimeout.");
-      WebWorker::OutputResultAfterTimeout();
+      this->OutputResultAfterTimeout();
       theReport.SetStatus("OutputWeb: called OutputResultAfterTimeout, flushing.");
       stOutput.Flush();
       theReport.SetStatus("OutputWeb: called OutputResultAfterTimeout, exiting.");
@@ -1664,7 +1725,8 @@ std::string WebWorker::GetJavascriptCookieForTheCalculator()
   output << "   theCalculatorForm.style.width  = theOldWidth;\n";
   output << "   theCalculatorForm.style.height = theOldHeight;\n";
   if (theGlobalVariables.flagUsingSSLinCurrentConnection&& theGlobalVariables.flagLoggedIn)
-    output << "   addCookie(\"authenticationToken\", \"" << this->authenticationToken << "\", 150);"
+    output << "   addCookie(\"authenticationToken\", \""
+    << CGI::StringToURLString( this->authenticationToken) << "\", 150);"
     << "//150 days is a little longer than a semester\n"
     << "   addCookie(\"user\", \"" << theGlobalVariables.userDefault << "\", 150);\n"
     ;
@@ -2534,7 +2596,8 @@ int WebServer::main_apache_client()
       IPAdressCaller[i]='A'+(IPAdressCaller[i]*SomeRandomPrimes[i])%26;
 	}
 	theParser.javaScriptDisplayingIndicator=WebWorker::GetJavaScriptIndicatorFromHD();
-  return WebWorker::OutputWeb();
+	WebWorker theWorker;
+  return theWorker.OutputWeb();
 }
 
 extern int mainTest(List<std::string>& remainingArgs);

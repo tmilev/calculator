@@ -658,7 +658,7 @@ void WebWorker::OutputBeforeComputation()
   stOutput << CGI::GetLaTeXProcessingJavascript();
 //  else
 //    stOutput << "<script src=\"" << theGlobalVariables.DisplayPathServerBase << "/jsmath/easy/load.js\">";
-  stOutput << "\n</head>\n<body onload=\"checkCookie();\">\n";
+  stOutput << "\n</head>\n<body onload=\"checkCookie(); storeSettings();\">\n";
 
 //  civilizedInput="\\int( 1/x dx)";
 //  civilizedInput="\\int (1/(x(1+x^2)^2))dx";
@@ -1718,7 +1718,14 @@ std::string WebWorker::GetJavascriptCookieForTheCalculator()
   output << "   addCookie(\"widthCalculatorText\", theCalculatorForm.style.width, 100);  \n";
   output << "   addCookie(\"heightCalculatorText\", theCalculatorForm.style.height, 100);\n";
   output << "   //alert(document.cookie);\n";
-  output << " }\n";
+//  stOutput << " adding cookie: " << this->authenticationToken << " url encoded: "
+//  <<  CGI::StringToURLString( this->authenticationToken);
+  if (theGlobalVariables.flagUsingSSLinCurrentConnection&& theGlobalVariables.flagLoggedIn)
+    output << "   addCookie(\"authenticationToken\", \""
+    << CGI::StringToURLString( this->authenticationToken) << "\", 150);"
+    << "//150 days is a little longer than a semester\n"
+    << "   addCookie(\"user\", \"" << theGlobalVariables.userDefault << "\", 150);\n"
+    ;  output << " }\n";
   output << " \n";
   output << " function checkCookie()\n";
   output << " { theCalculatorForm=document.getElementById(\"textInputID\");  \n";
@@ -1729,12 +1736,7 @@ std::string WebWorker::GetJavascriptCookieForTheCalculator()
   output << " //  theCalculatorForm.style.height=theOldHeight;\n";
   output << "   theCalculatorForm.style.width  = theOldWidth;\n";
   output << "   theCalculatorForm.style.height = theOldHeight;\n";
-  if (theGlobalVariables.flagUsingSSLinCurrentConnection&& theGlobalVariables.flagLoggedIn)
-    output << "   addCookie(\"authenticationToken\", \""
-    << CGI::StringToURLString( this->authenticationToken) << "\", 150);"
-    << "//150 days is a little longer than a semester\n"
-    << "   addCookie(\"user\", \"" << theGlobalVariables.userDefault << "\", 150);\n"
-    ;
+
   output << " }\n";
   output << " </script>\n";
   return output.str();

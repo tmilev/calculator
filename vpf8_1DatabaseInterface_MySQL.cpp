@@ -23,6 +23,9 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     return true;
   }
   inputOutputAuthenticationToken=theUser.actualAuthenticationToken;
+  theUser.username=theGlobalVariables.userCalculatorAdmin;
+  if (!theUser.Iexist(theRoutines))
+    return true;
   //stOutput << " FAIL";
   //stOutput << "<br>The actual authenticationToken is now: " << theUser.actualAuthenticationToken;
   return false;
@@ -112,7 +115,7 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   this->theQueryResult=0;
   if (this->parent->connection==0)
     if (!this->parent->startMySQLDatabase())
-    { stOutput << "Failed to start database. Comments generated during the failure: " << inputParent.comments.str();
+    { //stOutput << "Failed to start database. Comments generated during the failure: " << inputParent.comments.str();
       return;
     }
   int queryError=mysql_query(this->parent->connection, this->theQueryString.c_str());
@@ -213,8 +216,8 @@ bool UserCalculator::AuthenticateWithToken(DatabaseRoutines& theRoutines)
 bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines)
 { MacroRegisterFunctionWithName("UserCalculator::Authenticate");
   if (!this->Iexist(theRoutines))
-  { if (this->username!="")
-      stOutput << "user: '" << this->username << "' does not exist";
+  { //if (this->username!="")
+    //  stOutput << "user: '" << this->username << "' does not exist";
     return theRoutines << "User " << this->username << " does not exist. ";
   }
   if (this->AuthenticateWithToken(theRoutines))
@@ -376,11 +379,8 @@ bool DatabaseRoutines::startMySQLDatabase()
     password VARCHAR(30) NOT NULL, \
     email VARCHAR(50) NOT NULL,\
     authenticationTokenCreationTime VARCHAR(30), \
-    authenticationToken VARCHAR(30), \
-    numberUnsuccessfulLoginAttempts VARCHAR(10), \
-    numberSuccessfulLoginAttempts VARCHAR(10), \
-    numberUnsuccessfulLoginAttemptsLast24Hours VARCHAR(10),\
-    numberSuccessfulLoginAttemptsLast24Hours VARCHAR(10)");
+    authenticationToken VARCHAR(30) \
+    ");
 }
 
 bool DatabaseRoutines::CreateTable
@@ -444,16 +444,10 @@ bool DatabaseRoutines::TableExists(const std::string& tableName)
 
 bool DatabaseRoutines::innerTestLogin(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerTestLogin");
-  if (!input.IsSequenceNElementS(3))
-    return false;
-  const Expression& userE=input[1];
-  const Expression& passE=input[2];
-  DatabaseRoutines theRoutines;
   UserCalculator theUser;
-  if (!userE.IsOfType<std::string>(&theUser.username))
-    return theCommands << "First argument of login function is not a string";
-  if (!passE.IsOfType<std::string>(&theUser.enteredPassword))
-    return theCommands << "Second argument of login function is not a string";
+  if (!theUser.getUserAndPass(theCommands, input))
+    return false;
+  DatabaseRoutines theRoutines;
   if (!theUser.TryToLogIn(theRoutines))
     return output.MakeError
     ( "Failed to login, username: " + theUser.username+ " password: " + theUser.enteredPassword +
@@ -480,6 +474,12 @@ bool DatabaseRoutines::innerAddUser(Calculator& theCommands, const Expression& i
   if (MathRoutines::StringBeginsWith(theUser.username, "deleted"))
     return output.MakeError("User names starting with 'deleted' are not allowed.", theCommands);
   DatabaseRoutines theRoutines;
+  if (theGlobalVariables.userDefault!=theGlobalVariables.userCalculatorAdmin)
+  { UserCalculator adminUser;
+    adminUser.username=theGlobalVariables.userCalculatorAdmin;
+    if (adminUser.Iexist(theRoutines))
+      return output.MakeError("Only calculator admin is allowed to add users", theCommands);
+  }
   theUser.CreateMeIfUsernameUnique(theRoutines);
   return output.AssignValue(theRoutines.comments.str(), theCommands);
 }

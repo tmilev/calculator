@@ -26,7 +26,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
   theUser.username=theGlobalVariables.userCalculatorAdmin;
   if (!theUser.Iexist(theRoutines))
     return true;
-  //stOutput << " FAIL";
+  stOutput << " <b>login failed, desired user:" + theUser.username +"</b>";
   //stOutput << "<br>The actual authenticationToken is now: " << theUser.actualAuthenticationToken;
   return false;
 #else
@@ -498,6 +498,9 @@ bool DatabaseRoutines::innerDeleteUser(Calculator& theCommands, const Expression
 
 bool DatabaseRoutines::innerSetUserPassword(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerSetUserPassword");
+  if (!theGlobalVariables.flagLoggedIn)
+    return output.MakeError
+    ("Function innerSetUserPassword can be invoked only for logged in users. ", theCommands);
   UserCalculator theUser;
   if (!theUser.getUserAndPass(theCommands, input))
     return false;
@@ -508,7 +511,9 @@ bool DatabaseRoutines::innerSetUserPassword(Calculator& theCommands, const Expre
   { authorized=true;
     theCommands << "Password change: invoking admin powers...";
   }
-  if (theUser.username!=theGlobalVariables)
+  if (!authorized)
+    return theCommands << "Password change failed for user " << theUser.username
+    << ": not enough privileges. ";
   DatabaseRoutines theRoutines;
   theUser.SetPassword(theRoutines);
   return output.AssignValue(theRoutines.comments.str(), theCommands);

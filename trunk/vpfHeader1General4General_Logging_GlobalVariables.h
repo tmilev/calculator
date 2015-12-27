@@ -75,6 +75,7 @@ public:
   bool flagUsingBuiltInWebServer;
 //webserver flags
   bool flagLoggedIn;
+  bool flagTestingSystemIsRunning;
   bool flagUsingSSLinCurrentConnection;
   bool flagSSLisAvailable;
 

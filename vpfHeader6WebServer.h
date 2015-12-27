@@ -95,11 +95,11 @@ public:
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
   std::string GetJavaScriptIndicatorBuiltInServer(int inputIndex);
   std::string GetLoginScreen();
-  std::string GetJavascriptCookieForTheCalculator();
+  std::string GetTestingScreen();
   static std::string GetJavaScriptIndicatorFromHD();
   static std::string GetLoginHTMLelement();
   static std::string GetJavascriptHideHtml();
-  static std::string GetJavascriptCookieBasics();
+  std::string GetJavascriptStandardCookies();
   bool IsFileExtensionOfBinaryFile(const std::string& fileExtension);
   WebWorker();
   ~WebWorker();

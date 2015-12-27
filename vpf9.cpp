@@ -116,6 +116,7 @@ GlobalVariables::GlobalVariables()
   this->flagUsingApacheWebServer=false;
   this->flagUsingBuiltInWebServer=false;
   this->flagLoggedIn=false;
+  this->flagTestingSystemIsRunning=false;
   this->flagUsingSSLinCurrentConnection=false;
   this->flagSSLisAvailable=false;
   this->userCalculatorAdmin="admin";

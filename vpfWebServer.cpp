@@ -1663,17 +1663,6 @@ std::string WebWorker::GetLoginHTMLelement()
   return out.str();
 }
 
-std::string WebWorker::GetTestingScreen()
-{ MacroRegisterFunctionWithName("WebWorker::GetTestingScreen");
-  std::stringstream out;
-  out << "<html>"
-  << WebWorker::GetJavascriptStandardCookies()
-  << "<body onload=\"loadSettings();\">\n";
-  out << "Select homework.";
-  out << "</body></html>";
-  return out.str();
-}
-
 std::string WebWorker::GetLoginScreen()
 { MacroRegisterFunctionWithName("WebWorker::GetLoginScreen");
   std::stringstream out;

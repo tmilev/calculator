@@ -1064,20 +1064,28 @@ public:
   static std::string GetFileExtensionWithDot(const std::string& theFileName);
   static bool FileExistsUnsecure(const std::string& theFileName);
   static bool FileExistsOnTopOfOutputFolder(const std::string& theFileName);
+  static bool FileExistsOnTopOfProjectBase(const std::string& theFileName);
   static bool IsFolderUnsecure(const std::string& theFolderName);
   static bool IsFolderOnTopOfOutputFolder(const std::string& relativeFolderName);
+  static bool IsFolderOnTopOfProjectBase(const std::string& relativeFolderName);
+  static bool GetFolderFileNamesUnsecure
+  (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
+   List<std::string>* outputFileTypes=0)
+   ;
   static bool GetFolderFileNamesOnTopOfOutputFolder
   (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
    List<std::string>* outputFileTypes=0)
    ;
-  static bool GetFolderFileNamesUnsecure
+  static bool GetFolderFileNamesOnTopOfProjectBase
   (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
    List<std::string>* outputFileTypes=0)
    ;
   static bool OpenFileCreateIfNotPresentUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
   static bool OpenFileCreateIfNotPresentOnTopOfOutputFolder(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
-  static bool OpenFileOnTopOfOutputFolder(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
+  static bool OpenFileCreateIfNotPresentOnTopOfProjectBase(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
   static bool OpenFileUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
+  static bool OpenFileOnTopOfOutputFolder(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
+  static bool OpenFileOnTopOfProjectBase(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
 };
 
 struct CGI

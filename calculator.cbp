@@ -113,6 +113,7 @@
 		<Unit filename="vpfJson.h" />
 		<Unit filename="vpfMacros.h" />
 		<Unit filename="vpfWebServer.cpp" />
+		<Unit filename="vpfWebServerExamAndTeachingRoutines.cpp" />
 		<Unit filename="vpfWebServerInterProcessLogistics.cpp" />
 		<Extensions>
 			<code_completion />

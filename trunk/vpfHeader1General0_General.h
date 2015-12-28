@@ -2124,12 +2124,17 @@ ParallelComputing::GlobalPointerCounter+=this->ActualSize+increase;
 #endif
   for (int i=0; i<this->size; i++)
     newArray[i]=this->TheObjects[i];
-  delete [] this->TheObjects;
+  Object* oldPointer=this->TheObjects; //<-store the old memory block
+  this->TheObjects= newArray;//<-replace TheObjects with newArray
+  delete [] oldPointer;//<-only then we delete the non-used memory.
+  //The above looks complicated but is safe:
+  //if another thread jumps and requests operator[]
+  //on our list exactly between the two instructions above
+  //we are safe with this implementation.
 #ifdef AllocationLimitsSafeguard
 ParallelComputing::GlobalPointerCounter-=this->ActualSize;
   ParallelComputing::CheckPointerCounters();
 #endif
-  this->TheObjects= newArray;
   this->ActualSize+=increase;
 
 // This doesn't actually work too well; valgrind --tool=massif is better

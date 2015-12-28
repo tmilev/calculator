@@ -97,7 +97,7 @@ public:
   std::string GetLoginScreen();
   std::string GetTestingScreen();
   static std::string GetJavaScriptIndicatorFromHD();
-  static std::string GetLoginHTMLelement();
+  std::string GetLoginHTMLelement();
   static std::string GetJavascriptHideHtml();
   std::string GetHtmlHiddenInputs();
   std::string GetJavascriptStandardCookies();

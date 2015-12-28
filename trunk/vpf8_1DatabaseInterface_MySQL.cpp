@@ -13,21 +13,21 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
   theUser.username=inputUsername;
   theUser.enteredPassword=inputPassword;
   theUser.enteredAuthenticationToken=inputOutputAuthenticationToken;
-  //stOutput << "Attempting to login with user: " << inputUsername
-  //<< " pass: " << inputPassword
-  //<< " token: " << inputOutputAuthenticationToken;
+//  stOutput << "Attempting to login with user: " << inputUsername
+//  << " pass: " << inputPassword
+//  << " token: " << inputOutputAuthenticationToken;
   if (theUser.Authenticate(theRoutines))
   { inputOutputAuthenticationToken=theUser.actualAuthenticationToken;
-    //stOutput << " SUCCESS. ";
-    //stOutput << "<br>The actual authenticationToken is now: " << theUser.actualAuthenticationToken;
+//    stOutput << " SUCCESS. ";
+//    stOutput << "<br>The actual authenticationToken is now: " << theUser.actualAuthenticationToken;
     return true;
   }
   inputOutputAuthenticationToken=theUser.actualAuthenticationToken;
   theUser.username=theGlobalVariables.userCalculatorAdmin;
   if (!theUser.Iexist(theRoutines))
     return true;
-  stOutput << " <b>login failed, desired user:" + theUser.username +"</b>";
-  //stOutput << "<br>The actual authenticationToken is now: " << theUser.actualAuthenticationToken;
+//  stOutput << " <b>login failed, desired user:" + theUser.username +"</b>";
+//  stOutput << "<br>The actual authenticationToken is now: " << theUser.actualAuthenticationToken;
   return false;
 #else
   return true;

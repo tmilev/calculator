@@ -1673,8 +1673,8 @@ public:
   void Evaluate(const std::string& theInput);
   bool ParseAndExtractExpressions
   (const std::string& theInputString, Expression& outputExp, List<SyntacticElement>& outputSynSoup, List<SyntacticElement>& outputSynStack, std::string* outputSynErrors);
-  bool isLeftSeparator(char c);
-  bool isRightSeparator(char c);
+  bool isLeftSeparator(unsigned char c);
+  bool isRightSeparator(unsigned char c);
   void ParseFillDictionary(const std::string& input);
 };
 

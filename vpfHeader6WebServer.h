@@ -99,6 +99,7 @@ public:
   static std::string GetJavaScriptIndicatorFromHD();
   static std::string GetLoginHTMLelement();
   static std::string GetJavascriptHideHtml();
+  std::string GetHtmlHiddenInputs();
   std::string GetJavascriptStandardCookies();
   bool IsFileExtensionOfBinaryFile(const std::string& fileExtension);
   WebWorker();

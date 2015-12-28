@@ -560,14 +560,14 @@ void WebWorker::ProcessRawArguments()
   List<std::string> inputStrings, inputStringNames;
   CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
   std::string password;
-  std::string desiredUser;
-  desiredUser="";
+  std::string desiredUser="";
   if (inputStringNames.Contains("user"))
-  { desiredUser=inputStrings[inputStringNames.GetIndex("user")];
+    desiredUser=inputStrings[inputStringNames.GetIndex("user")];
+  if (desiredUser=="")
+    if (inputStringNames.Contains("userHidden"))
+      desiredUser=inputStrings[inputStringNames.GetIndex("userHidden")];
+  if (desiredUser!="")
     CGI::URLStringToNormal(desiredUser, desiredUser);
-    //stOutput << "message: " << theParser.inputStringRawestOfTheRaw;
-    //stOutput << "<hr><b>user: </b>" << user << "<br>";
-  }
   if (inputStringNames.Contains("authenticationToken"))
   { this->authenticationToken=inputStrings[inputStringNames.GetIndex("authenticationToken")];
     CGI::URLStringToNormal(this->authenticationToken, this->authenticationToken);
@@ -602,11 +602,14 @@ void WebWorker::ProcessRawArguments()
 
 std::string WebWorker::GetHtmlHiddenInputs()
 { MacroRegisterFunctionWithName("WebWorker::GetHtmlHiddenInputs");
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
+    return "";
   std::stringstream out;
-  if (theGlobalVariables.flagLoggedIn && theGlobalVariables.flagUsingSSLinCurrentConnection)
-    out << "<input type=\"hidden\" name=authenticationToken value=\"" <<  this->authenticationToken << "\">"
-    << "<input type=\"hidden\" name=\"user\" value=\""
-    << theGlobalVariables.userDefault << "\">";
+  //the values of the hidden inputs will be filled in via javascript
+  out
+  << "<input type=\"hidden\" id=\"authenticationToken\" name=\"authenticationToken\">\n"
+  << "<input type=\"hidden\" id=\"userHidden\" name=\"userHidden\">"
+  << "<input type=\"hidden\" id=\"exam\" name=\"exam\">";
   return out.str();
 }
 
@@ -1648,14 +1651,13 @@ std::string WebWorker::GetJavaScriptIndicatorFromHD()
 std::string WebWorker::GetLoginHTMLelement()
 { MacroRegisterFunctionWithName("WebWorker::GetLoginHTMLelement");
   std::stringstream out;
-  out << "<form name=\"login\" action=\"calculator\" method=\"get\" accept-charset=\"utf-8\">"
+  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"get\" accept-charset=\"utf-8\">"
   <<  "User name or email: "
   << "<input type=\"text\" name=\"user\" placeholder=\"user\" required>"
   << "<br>Password: "
   << "<input type=\"password\" name=\"password\" placeholder=\"password\">"
-  << "<br>Authentication token: <input type=\"password\" name=\"authenticationToken\" placeholder=\"authenticationToken\">"
-  << "<input type=\"hidden\" name=\"exam\" placeholder=\"exam\" value=\"continue\">"
-  << "<br><input type=\"submit\" value=\"Login\">"
+  << this->GetHtmlHiddenInputs()
+  << "<input type=\"submit\" value=\"Login\">"
   << "</form>";
   out << "<b>Login screen not implemented yet.</b>";
   return out.str();
@@ -1678,11 +1680,13 @@ std::string WebWorker::GetLoginScreen()
   out << "<html>"
   << WebWorker::GetJavascriptStandardCookies()
   << "<body ";
+  out << "onload=\"loadSettings();  ";
   if (!this->flagAuthenticationTokenWasSubmitted)
-    out << "onload=\"loadSettings();  "
-    << "if (GlobalAuthenticationToken!='')"
-    << "  window.location='calculator?user='+GlobalUser+'&authenticationToken='+GlobalAuthenticationToken;\"";
-  out << ">\n"
+    out
+    << "if (document.getElementById('authenticationToken') !=null)"
+    << "  document.getElementById('login').submit();";
+//    << "  window.location='calculator?user='+GlobalUser+'&authenticationToken='+GlobalAuthenticationToken;";
+  out << "\">\n"
   << WebWorker::GetLoginHTMLelement()
   << "</body></html>";
   return out.str();
@@ -1739,22 +1743,27 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "  if (theCalculatorForm!=null){\n"
   << "    addCookie(\"widthCalculatorText\", theCalculatorForm.style.width, 100);  \n"
   << "    addCookie(\"heightCalculatorText\", theCalculatorForm.style.height, 100);\n"
-  << "  }";
-  out << "}\n";
+  << "  }\n"
+//  << " storeSettingsProgress();\n"
+  << "}\n";
   out
-  << "function storeSettingsProgress(){\n"
-  << "  addCookie(\"exam\", ";
-  if (theGlobalVariables.flagTestingSystemIsRunning)
-    out << "\"continue\"";
-  else
-    out << "\"none\"";
-  out << ", 100);\n";
-  out << "}\n";
+  << "function storeSettingsProgress(){\n";
+  if (theGlobalVariables.flagLoggedIn)
+  { out << "  addCookie(\"exam\", ";
+    if (theGlobalVariables.flagTestingSystemIsRunning)
+      out << "\"continue\"";
+    else
+      out << "\"none\"";
+    out << ", 100);\n";
+  }
+  out
+  << "}\n";
   out
   << "function storeSettingsSecurity(){\n";
   if (theGlobalVariables.flagUsingSSLinCurrentConnection&& theGlobalVariables.flagLoggedIn)
     out << "   addCookie(\"authenticationToken\", \""
-    << CGI::StringToURLString( this->authenticationToken) << "\", 150);"
+    << //CGI::StringToURLString
+    this->authenticationToken << "\", 150);"
     << "//150 days is a little longer than a semester\n"
     << "  addCookie(\"user\", \"" << theGlobalVariables.userDefault << "\", 150);\n";
   out
@@ -1762,6 +1771,7 @@ std::string WebWorker::GetJavascriptStandardCookies()
   out
   << "function loadSettings(){\n"
   << "  storeSettingsSecurity();\n"
+  << "  storeSettingsProgress();\n"
   << "  theCalculatorForm=document.getElementById(\"textInputID\");  \n"
   << "  if (theCalculatorForm!=null){\n"
   << "    theOldWidth=getCookie(\"widthCalculatorText\");\n"
@@ -1769,8 +1779,14 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "    theCalculatorForm.style.width  = theOldWidth;\n"
   << "    theCalculatorForm.style.height = theOldHeight;\n"
   << "  }\n"
+  << "  if (document.getElementById(\"exam\")!=null)\n "
+  << "    document.getElementById(\"exam\").value=getCookie(\"exam\");\n"
   << "  GlobalAuthenticationToken=getCookie(\"authenticationToken\");\n"
+  << "  if (document.getElementById(\"authenticationToken\")!=null)\n"
+  << "    document.getElementById(\"authenticationToken\").value=GlobalAuthenticationToken;\n "
   << "  GlobalUser=getCookie(\"user\");\n"
+  << "  if (document.getElementById(\"userHidden\")!=null)\n"
+  << "    document.getElementById(\"userHidden\").value=GlobalUser;\n "
   << "}\n";
   out << " </script>\n";
   return out.str();

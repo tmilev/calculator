@@ -444,9 +444,10 @@ bool Calculator::ReplaceEOByE(int formatOptions)
   return true;
 }
 
-bool Calculator::isRightSeparator(char c)
+bool Calculator::isRightSeparator(unsigned char c)
 { switch(c)
   { case ' ':
+    case 160: //&nbsp character
     case '\n':
     case '>':
     case '<':
@@ -481,9 +482,10 @@ bool Calculator::isRightSeparator(char c)
   }
 }
 
-bool Calculator::isLeftSeparator(char c)
+bool Calculator::isLeftSeparator(unsigned char c)
 { switch(c)
   { case ' ':
+    case 160: //&nbsp character
     case '\n':
     case '>':
     case '<':
@@ -544,7 +546,7 @@ void Calculator::ParseFillDictionary(const std::string& input)
       if (inQuotes)
         LookAheadChar='"';
     }
-    if (!inQuotes)
+    if (!inQuotes && current.size()==1)
     { if (current=="\n")
         current=" ";
       if (current=="~")
@@ -552,6 +554,9 @@ void Calculator::ParseFillDictionary(const std::string& input)
       if (current=="\r")
         current=" ";
       if (current=="\t")
+        current=" ";
+//      stOutput << "<br>Character read: " << ((int) ((unsigned char) current[0]));
+      if (((unsigned char) current[0])==160)
         current=" ";
     }
     bool shouldSplit= (this->isLeftSeparator(current[0]) || this->isRightSeparator(LookAheadChar) || current==" ");

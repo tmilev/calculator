@@ -600,6 +600,16 @@ void WebWorker::ProcessRawArguments()
     theParser.inputString= inputStrings[inputStringNames.GetIndex("textInput")];
 }
 
+std::string WebWorker::GetHtmlHiddenInputs()
+{ MacroRegisterFunctionWithName("WebWorker::GetHtmlHiddenInputs");
+  std::stringstream out;
+  if (theGlobalVariables.flagLoggedIn && theGlobalVariables.flagUsingSSLinCurrentConnection)
+    out << "<input type=\"hidden\" name=authenticationToken value=\"" <<  this->authenticationToken << "\">"
+    << "<input type=\"hidden\" name=\"user\" value=\""
+    << theGlobalVariables.userDefault << "\">";
+  return out.str();
+}
+
 void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
 { MacroRegisterFunctionWithName("WebWorker::OutputBeforeComputationUserInputAndAutoComplete");
   int startingIndent=this->indentationLevelHTML;
@@ -621,13 +631,10 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
   << ">";
   stOutput << civilizedInputSafish;
   stOutput << "</textarea>\n<br>\n";
-  if (theGlobalVariables.flagLoggedIn && theGlobalVariables.flagUsingSSLinCurrentConnection)
-    stOutput << "<input type=\"hidden\" name=authenticationToken value=\"" <<  this->authenticationToken << "\">"
-    << "<input type=\"hidden\" name=\"user\" value=\""
-    << theGlobalVariables.userDefault << "\">";
+  stOutput << this->GetHtmlHiddenInputs();
   stOutput << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" "
   << "name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" ";
-  stOutput << "action=\"calculator\"> ";
+  stOutput << "> ";
   if (theParser.inputString!="")
     stOutput << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
   stOutput << "\n</FORM>\n";

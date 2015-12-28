@@ -466,6 +466,15 @@ bool FileOperations::GetFolderFileNamesOnTopOfOutputFolder
   return FileOperations::GetFolderFileNamesUnsecure(theGlobalVariables.PhysicalPathOutputFolder+theFolderName, outputFileNamesNoPath, outputFileTypes);
 }
 
+bool FileOperations::GetFolderFileNamesOnTopOfProjectBase
+(const std::string& theFolderName, List<std::string>& outputFileNamesNoPath, List<std::string>* outputFileTypes)
+{ MacroRegisterFunctionWithName("FileOperations::GetFolderFileNamesOnTopOfProjectBase");
+  if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFolderName))
+    return false;
+  return FileOperations::GetFolderFileNamesUnsecure
+  (theGlobalVariables.PhysicalPathProjectBase+theFolderName, outputFileNamesNoPath, outputFileTypes);
+}
+
 bool FileOperations::GetFolderFileNamesUnsecure
 (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath, List<std::string>* outputFileTypes)
 { MacroRegisterFunctionWithName("FileOperations::GetFolderFileNamesUnsecure");

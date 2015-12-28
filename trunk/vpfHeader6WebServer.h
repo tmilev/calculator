@@ -139,7 +139,7 @@ public:
 
   int activeWorker;
   int timeLastExecutableModification;
-  List<std::string> theProgressReports;
+  ListReferences<std::string> theProgressReports;
   bool flagDeallocated;
   bool flagPort8155;
   WebServer();

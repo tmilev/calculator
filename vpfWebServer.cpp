@@ -555,6 +555,27 @@ void WebWorker::StandardOutputAfterTimeOut(const std::string& input)
 //  << logger::endL;
 }
 
+std::string WebWorker::ToStringCalculatorArguments()const
+{ MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArguments");
+  std::stringstream out;
+  out << "<hr>";
+  out << "Calculator arguments details follow. ";
+  if (theGlobalVariables.userDefault!="")
+    out << "<br>User: " << theGlobalVariables.userDefault;
+  if (this->authenticationToken!="")
+    out << "<br>Authentication token: " << this->authenticationToken;
+  if (theGlobalVariables.flagLoggedIn)
+    out << "<br>Logged in.";
+  if (theGlobalVariables.userExamStatus!="")
+    out << "<br>Exam status: " << theGlobalVariables.userExamStatus;
+  if (theGlobalVariables.userCurrentProblemCollection!="")
+    out << "<br>Current problem collection: " << theGlobalVariables.userCurrentProblemCollection;
+  if (theGlobalVariables.userCurrentProblem!="")
+    out << "<br>Current problem: " << theGlobalVariables.userCurrentProblem;
+  out << "<hr>";
+  return out.str();
+}
+
 void WebWorker::ProcessRawArguments()
 { MacroRegisterFunctionWithName("WebServer::ProcessRawArguments");
   List<std::string> inputStrings, inputStringNames;
@@ -578,7 +599,9 @@ void WebWorker::ProcessRawArguments()
   { password=inputStrings[inputStringNames.GetIndex("password")];
     CGI::URLStringToNormal(password, password);
   }
-  theGlobalVariables.flagLoggedIn=false;
+  theGlobalVariables.userExamStatus="";
+  theGlobalVariables.userCurrentProblemCollection="";
+  theGlobalVariables.userCurrentProblem="";
   if (desiredUser!="" && theGlobalVariables.flagUsingSSLinCurrentConnection)
   { //stOutput << "<br>LoginViaDatabase called: "
     //<< "user: " << this->user;
@@ -590,10 +613,15 @@ void WebWorker::ProcessRawArguments()
       theGlobalVariables.userDefault="";
   }
   if (theGlobalVariables.flagLoggedIn)
-    if (inputStringNames.Contains("exam"))
-      if (inputStrings[inputStringNames.GetIndex("exam")]=="continue")
-      { theGlobalVariables.flagTestingSystemIsRunning=true;
-      }
+  { if (inputStringNames.Contains("examStatus"))
+      theGlobalVariables.userExamStatus= inputStrings[inputStringNames.GetIndex("examStatus")];
+    if (inputStringNames.Contains("currentProblemCollection"))
+      theGlobalVariables.userCurrentProblemCollection=
+      inputStrings[inputStringNames.GetIndex("currentProblemCollection")];
+    if (inputStringNames.Contains("currentProblem"))
+      theGlobalVariables.userCurrentProblem=
+      inputStrings[inputStringNames.GetIndex("currentProblem")];
+  }
   for (unsigned i=0; i<password.size(); i++)
     password[i]=' ';
   if (inputStringNames.Contains("textInput"))
@@ -609,7 +637,7 @@ std::string WebWorker::GetHtmlHiddenInputs()
   out
   << "<input type=\"hidden\" id=\"authenticationToken\" name=\"authenticationToken\">\n"
   << "<input type=\"hidden\" id=\"userHidden\" name=\"userHidden\">"
-  << "<input type=\"hidden\" id=\"exam\" name=\"exam\">";
+  << "<input type=\"hidden\" id=\"examStatus\" name=\"examStatus\">";
   return out.str();
 }
 
@@ -1571,7 +1599,7 @@ int WebWorker::OutputWeb()
     stOutput.Flush();
     return 0;
   }
-  if (theGlobalVariables.flagTestingSystemIsRunning && theGlobalVariables.flagLoggedIn &&
+  if (theGlobalVariables.userExamStatus!="" && theGlobalVariables.flagLoggedIn &&
       theGlobalVariables.flagUsingSSLinCurrentConnection)
   { stOutput << this->GetTestingScreen();
     theReport.SetStatus("Testing screen served, exiting.");
@@ -1706,8 +1734,6 @@ std::string WebWorker::GetJavascriptStandardCookies()
 { std::stringstream out;
   out
   <<"<script type=\"text/javascript\"> \n"
-  << "var GlobalAuthenticationToken;\n"
-  << "var GlobalUser;\n"
   << "function getCookie(c_name)\n"
   << "{ VPFcookie=document.cookie.split(\";\");\n"
   << "  for (i=0;i<VPFcookie.length;i++)\n"
@@ -1738,12 +1764,14 @@ std::string WebWorker::GetJavascriptStandardCookies()
   out
   << "function storeSettingsProgress(){\n";
   if (theGlobalVariables.flagLoggedIn)
-  { out << "  addCookie(\"exam\", ";
-    if (theGlobalVariables.flagTestingSystemIsRunning)
-      out << "\"continue\"";
-    else
-      out << "\"none\"";
-    out << ", 100);\n";
+  { if (theGlobalVariables.userExamStatus!="")
+      out << "  addCookie(\"examStatus\", \"" << theGlobalVariables.userExamStatus << "\", 100);\n";
+    if (theGlobalVariables.userCurrentProblemCollection!="")
+      out << "  addCookie(\"currentProblemCollection\", \""
+      << theGlobalVariables.userCurrentProblemCollection << "\", 100);\n";
+    if (theGlobalVariables.userCurrentProblem!="")
+      out << "  addCookie(\"currentProblem\", \""
+      << theGlobalVariables.userCurrentProblem << "\", 100);\n";
   }
   out
   << "}\n";
@@ -1768,14 +1796,16 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "    theCalculatorForm.style.width  = theOldWidth;\n"
   << "    theCalculatorForm.style.height = theOldHeight;\n"
   << "  }\n"
-  << "  if (document.getElementById(\"exam\")!=null)\n "
-  << "    document.getElementById(\"exam\").value=getCookie(\"exam\");\n"
-  << "  GlobalAuthenticationToken=getCookie(\"authenticationToken\");\n"
+  << "  if (document.getElementById(\"examStatus\")!=null)\n "
+  << "    document.getElementById(\"examStatus\").value=getCookie(\"examStatus\");\n"
+  << "  if (document.getElementById(\"currentProblemCollection\")!=null)\n "
+  << "    document.getElementById(\"currentProblemCollection\").value=getCookie(\"currentProblemCollection\");\n"
+  << "  if (document.getElementById(\"currentProblem\")!=null)\n "
+  << "    document.getElementById(\"currentProblem\").value=getCookie(\"currentProblem\");\n"
   << "  if (document.getElementById(\"authenticationToken\")!=null)\n"
-  << "    document.getElementById(\"authenticationToken\").value=GlobalAuthenticationToken;\n "
-  << "  GlobalUser=getCookie(\"user\");\n"
+  << "    document.getElementById(\"authenticationToken\").value=getCookie(\"authenticationToken\");\n "
   << "  if (document.getElementById(\"userHidden\")!=null)\n"
-  << "    document.getElementById(\"userHidden\").value=GlobalUser;\n "
+  << "    document.getElementById(\"userHidden\").value=getCookie(\"user\");\n "
   << "}\n";
   out << " </script>\n";
   return out.str();

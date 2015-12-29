@@ -75,7 +75,6 @@ public:
   bool flagUsingBuiltInWebServer;
 //webserver flags
   bool flagLoggedIn;
-  bool flagTestingSystemIsRunning;
   bool flagUsingSSLinCurrentConnection;
   bool flagSSLisAvailable;
 
@@ -111,6 +110,9 @@ public:
 
   std::string userCalculatorAdmin;
   std::string userDefault;
+  std::string userExamStatus;
+  std::string userCurrentProblemCollection;
+  std::string userCurrentProblem;
 
   std::string userInputStringRAWIfAvailable;
   std::string userInputStringIfAvailable;

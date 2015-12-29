@@ -7,64 +7,131 @@
 ProjectInformationInstance projectInfoInstanceWebServerExamAndTeachingRoutines
 (__FILE__, "Routines for calculus teaching: calculator exam mode.");
 
-class ExerciseCollection{
-
+class Problem
+{
 public:
   std::string fileName;
-  List<std::string> problemFileNames;
-  static unsigned int HashFunction(const ExerciseCollection& input)
+  std::string RelativePhysicalFileNameWithFolder;
+  std::string content;
+  static unsigned int HashFunction(const Problem& input)
   { return input.HashFunction();
   }
   unsigned int HashFunction()const
   { return MathRoutines::hashString(this->fileName);
   }
-  bool operator==(const ExerciseCollection& other)const
+  bool operator==(const Problem& other)const
   { return this->fileName==other.fileName;
   }
   bool LoadMe(std::stringstream& comments);
+  std::string ToStringStartProblem();
+};
+
+class ProblemCollection
+{
+public:
+  std::string fileName;
+  std::string RelativePhysicalFileNameWithFolder;
+  HashedList<Problem> theProblems;
+
+  static unsigned int HashFunction(const ProblemCollection& input)
+  { return input.HashFunction();
+  }
+  unsigned int HashFunction()const
+  { return MathRoutines::hashString(this->fileName);
+  }
+  bool operator==(const ProblemCollection& other)const
+  { return this->fileName==other.fileName;
+  }
+  bool HasProblem(const std::string& desiredProblem);
+  int GetProblemIndex(const std::string& desiredProblem);
+  bool LoadMe(std::stringstream& comments);
   std::string ToStringProblemLinks();
+  std::string ToStringSelectMeForm()const;
 };
 
 class TeachingRoutines
 {
 public:
-  std::string RelativePhysicalNameExercisesBaseFoler;
-  HashedList<ExerciseCollection> theExercises;
+  static const std::string RelativePhysicalFolderProblemCollections;
+  static const std::string RelativePhysicalFolderProblems;
+  HashedList<ProblemCollection> theExercises;
   bool HasExercise(const std::string& desiredExercise);
   int GetExerciseIndex(const std::string& desiredExercise);
   std::stringstream comments;
   bool LoadExercises();
-  std::string GetOneExerciseScreen();
-  std::string GetAllExercisesScreen();
+  std::string GetCurrentProblemItem();
   std::string ToStringExerciseSelection();
   TeachingRoutines();
 };
 
+const std::string TeachingRoutines::RelativePhysicalFolderProblemCollections="ProblemCollections/";
+const std::string TeachingRoutines::RelativePhysicalFolderProblems="Problems/";
+
 TeachingRoutines::TeachingRoutines()
-{ this->RelativePhysicalNameExercisesBaseFoler="exercises/";
+{
 }
 
 bool TeachingRoutines::LoadExercises()
 { MacroRegisterFunctionWithName("TeachingRoutines::LoadExercises");
   List<std::string> theExerciseFileNames, theExerciseFileNameExtensions;
   if (!FileOperations::GetFolderFileNamesOnTopOfProjectBase
-      (this->RelativePhysicalNameExercisesBaseFoler, theExerciseFileNames, &theExerciseFileNameExtensions))
+      (this->RelativePhysicalFolderProblemCollections, theExerciseFileNames, &theExerciseFileNameExtensions))
   { this->comments << "Failed to open folder with relative file name: "
-    << this->RelativePhysicalNameExercisesBaseFoler;
+    << this->RelativePhysicalFolderProblemCollections;
     return false;
   }
   this->theExercises.SetExpectedSize(theExerciseFileNames.size);
   this->theExercises.Clear();
-  ExerciseCollection newExercise;
+  ProblemCollection newExercise;
   for (int i=0; i<theExerciseFileNames.size; i++)
   { if (theExerciseFileNameExtensions[i]!=".txt")
       continue;
     newExercise.fileName=theExerciseFileNames[i];
+    newExercise.RelativePhysicalFileNameWithFolder=
+    this->RelativePhysicalFolderProblemCollections+newExercise.fileName;
     this->theExercises.AddOnTop(newExercise);
   }
 //  stOutput << "ExerciseFileNames: " << theExerciseFileNames.ToStringCommaDelimited() << " with extensions: "
 //  << theExerciseFileNameExtensions.ToStringCommaDelimited();
   return true;
+}
+
+std::string ProblemCollection::ToStringSelectMeForm()const
+{ std::stringstream out;
+  out << this->fileName
+  << "<button type=\"submit\" name=\"currentProblemCollection\" value=\""
+  << this->fileName
+  << "\"> Start</button>";
+  return out.str();
+}
+
+std::string Problem::ToStringStartProblem()
+{ MacroRegisterFunctionWithName("ProblemCollection::ToStringStartProblem");
+  std::stringstream out;
+  out << "\n<FORM method=\"POST\" id=\"formProblemCollection\" name=\"formProblemCollection\" action=\""
+  << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n" ;
+  out << theWebServer.GetActiveWorker().GetHtmlHiddenInputs();
+  out << this->content;
+  out << "\n</FORM>\n";
+  return out.str();
+}
+
+std::string ProblemCollection::ToStringProblemLinks()
+{ MacroRegisterFunctionWithName("ProblemCollection::ToStringProblemLinks");
+  std::stringstream out;
+  out << this->theProblems.size << " problem(s).";
+  out << "\n<FORM method=\"POST\" id=\"formProblemCollection\" name=\"formProblemCollection\" action=\""
+  << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n" ;
+  out << theWebServer.GetActiveWorker().GetHtmlHiddenInputs();
+  for (int i=0; i<this->theProblems.size; i++)
+  { out << this->theProblems[i].fileName
+    << "<button type=\"submit\" name=\"currentProblem\" title=\"Start\" value=\""
+    << this->theProblems[i].fileName
+    << "\"> Start</button>";
+    out << "<br>";
+  }
+  out << "\n</FORM>\n";
+  return out.str();
 }
 
 std::string TeachingRoutines::ToStringExerciseSelection()
@@ -75,12 +142,7 @@ std::string TeachingRoutines::ToStringExerciseSelection()
   << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n" ;
   out << theWebServer.GetActiveWorker().GetHtmlHiddenInputs();
   for (int i=0; i<this->theExercises.size; i++)
-  { out << this->theExercises[i].fileName
-    << "<button type=\"submit\" name=\"currentProblemCollection\" value=\""
-    << this->theExercises[i].fileName
-    << "\"> Start</button>";
-    out << "<br>";
-  }
+    out << this->theExercises[i].ToStringSelectMeForm() << "<br>";
   out << "\n</FORM>\n";
   return out.str();
 }
@@ -90,70 +152,99 @@ bool TeachingRoutines::HasExercise(const std::string& desiredExercise)
 }
 
 int TeachingRoutines::GetExerciseIndex(const std::string& desiredExercise)
-{ ExerciseCollection tempExercise;
+{ ProblemCollection tempExercise;
   tempExercise.fileName=desiredExercise;
   return this->theExercises.GetIndex(tempExercise);
 }
 
-std::string ExerciseCollection::ToStringProblemLinks()
-{ MacroRegisterFunctionWithName("ExerciseCollection::ToStringProblemLinks");
-  std::stringstream out;
-  out << this->problemFileNames.size << " problem(s).";
-  out << "\n<FORM method=\"POST\" id=\"formProblemCollection\" name=\"formProblemCollection\" action=\""
-  << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n" ;
-  out << theWebServer.GetActiveWorker().GetHtmlHiddenInputs();
-  for (int i=0; i<this->problemFileNames.size; i++)
-  { out << this->problemFileNames[i]
-    << "<button type=\"submit\" name=\"currentProblemCollection\" title=\"Start\" value=\""
-    << this->problemFileNames[i]
-    << "\"> Start</button>";
-    out << "<br>";
-  }
-  out << "\n</FORM>\n";
-  return out.str();
+bool ProblemCollection::HasProblem(const std::string& desiredExercise)
+{ return this->GetProblemIndex(desiredExercise)!=-1;
 }
 
-bool ExerciseCollection::LoadMe(std::stringstream& comments)
-{ MacroRegisterFunctionWithName("ExerciseCollection::LoadMe");
+int ProblemCollection::GetProblemIndex(const std::string& desiredExercise)
+{ Problem tempExercise;
+  tempExercise.fileName=desiredExercise;
+  return this->theProblems.GetIndex(tempExercise);
+}
+
+bool Problem::LoadMe(std::stringstream& comments)
+{ MacroRegisterFunctionWithName("Problem::LoadMe");
+  this->RelativePhysicalFileNameWithFolder=
+  TeachingRoutines::RelativePhysicalFolderProblemCollections+
+  TeachingRoutines::RelativePhysicalFolderProblems+
+  this->fileName
+  ;
   std::fstream theFile;
-  if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfProjectBase(theFile, this->fileName, false, false, false))
-  { comments << "<b>Failed to open file " << this->fileName << "</b>";
+  if (!FileOperations::OpenFileOnTopOfProjectBase(theFile, this->RelativePhysicalFileNameWithFolder, false, false, false))
+  { comments << "<b>Failed to open file " << this->RelativePhysicalFileNameWithFolder << "</b>";
     return false;
   } else
-  { this->problemFileNames.SetSize(0);
-    std::string currentProblemFileName;
-    while (std::getline(theFile, currentProblemFileName))
-      this->problemFileNames.AddOnTop(currentProblemFileName);
+  { std::stringstream contentStream;
+    contentStream << theFile.rdbuf();
+    this->content=contentStream.str();
+  }
+  return true;
+
+}
+
+bool ProblemCollection::LoadMe(std::stringstream& comments)
+{ MacroRegisterFunctionWithName("ProblemCollection::LoadMe");
+  std::fstream theFile;
+  if (!FileOperations::OpenFileOnTopOfProjectBase(theFile, this->RelativePhysicalFileNameWithFolder, false, false, false))
+  { comments << "<b>Failed to open file " << this->RelativePhysicalFileNameWithFolder << "</b>";
+    return false;
+  } else
+  { this->theProblems.SetSize(0);
+    Problem currentProblem;
+    theFile >> currentProblem.fileName;
+    //stOutput << "Exercise file name: " << this->RelativePhysicalFileNameWithFolder << " Current file name: " << currentProblemFileName;
+    theFile.seekg(0);
+    while (std::getline(theFile, currentProblem.fileName))
+      this->theProblems.AddOnTop(currentProblem);
   }
   return true;
 }
 
-std::string TeachingRoutines::GetOneExerciseScreen()
-{ MacroRegisterFunctionWithName("TeachingRoutines::GetOneExerciseScreen");
-  if (theGlobalVariables.userCurrentProblemCollection=="")
-    return this->GetAllExercisesScreen();
+std::string TeachingRoutines::GetCurrentProblemItem()
+{ MacroRegisterFunctionWithName("TeachingRoutines::GetCurrentProblemItem");
   std::stringstream out;
-  if (!this->HasExercise(theGlobalVariables.userCurrentProblemCollection))
-  { out << "<b>Could not find exercise: " << theGlobalVariables.userCurrentProblemCollection << "</b>";
-    out << this->GetAllExercisesScreen();
+  if (!this->LoadExercises())
+  { out << "<hr><b>Loading exercises failed.</b><br> "
+    << this->comments.str() << "<hr>";
     return out.str();
   }
-  ExerciseCollection& currentExercise=
+  if (theGlobalVariables.userCurrentProblemCollection=="")
+    return this->ToStringExerciseSelection();
+  if (!this->HasExercise(theGlobalVariables.userCurrentProblemCollection))
+  { out << "<hr><b>Could not find problem collection: " << theGlobalVariables.userCurrentProblemCollection << "</b><hr>";
+    out << this->ToStringExerciseSelection();
+    return out.str();
+  }
+  ProblemCollection& currentCollection=
   this->theExercises.GetElement(this->GetExerciseIndex(theGlobalVariables.userCurrentProblemCollection));
-  out << "Exercise " << currentExercise.fileName << ". <hr>";
-  std::stringstream failureComments;
-  if (!currentExercise.LoadMe(failureComments))
-    out << "Failed to load: " << failureComments.str();
-  else
-    out << currentExercise.ToStringProblemLinks();
-  return out.str();
-}
-
-std::string TeachingRoutines::GetAllExercisesScreen()
-{ MacroRegisterFunctionWithName("WebWorker::GetAllExercisesScreen");
-  std::stringstream out;
-  out << this->ToStringExerciseSelection();
-  return out.str();
+  if (!currentCollection.LoadMe(this->comments))
+  { out << "<hr><b>Failed to load problem collection: " << currentCollection.fileName << ".</b> "
+    << this->comments.str() << "<hr>"
+    << this->ToStringExerciseSelection();
+    return out.str();
+  }
+  if (theGlobalVariables.userCurrentProblem=="")
+    return currentCollection.ToStringProblemLinks();
+  if (!currentCollection.HasProblem(theGlobalVariables.userCurrentProblem))
+  { out << "<hr><b>Could not find problem: " << theGlobalVariables.userCurrentProblem << ".</b></hr>"
+    << currentCollection.ToStringProblemLinks();
+    return out.str();
+  }
+  Problem& currentProblem=
+  currentCollection.theProblems.GetElement
+  (currentCollection.GetProblemIndex(theGlobalVariables.userCurrentProblem));
+  if (!currentProblem.LoadMe(this->comments))
+  { out << "<hr><b>Failed to load problem: " << currentProblem.fileName << ".</b>"
+    << this->comments.str() << "<hr>"
+    << currentCollection.ToStringProblemLinks();
+    return out.str();
+  }
+  return currentProblem.ToStringStartProblem();
 }
 
 std::string WebWorker::GetTestingScreen()
@@ -162,14 +253,9 @@ std::string WebWorker::GetTestingScreen()
   std::stringstream out;
   out << "<html>" << WebWorker::GetJavascriptStandardCookies()
   << "<body onload=\"loadSettings();\">\n";
+  out << "<hr>Message follows.<br>" << this->theMessage << "<hr>";
   out << this->ToStringCalculatorArguments();
-  if (!theRoutines.LoadExercises())
-  { out << "Loading exercises failed, comments (which hopefully explain what happened) follow. "
-    << "<hr>" << theRoutines.comments.str()
-    << "</body></html>";
-    return out.str();
-  }
-  out << theRoutines.GetOneExerciseScreen();
+  out << theRoutines.GetCurrentProblemItem();
   out << "</body></html>";
   return out.str();
 }

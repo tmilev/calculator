@@ -31,6 +31,7 @@ public:
   bool flagDeallocated;
   bool flagMainAddressSanitized;
   bool flagAuthenticationTokenWasSubmitted;
+  bool flagFoundMalformedFormInput;
   std::string mainAddressNonSanitized;
   List<std::string> theStrings;
   int ContentLength;

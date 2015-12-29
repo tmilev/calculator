@@ -116,7 +116,6 @@ GlobalVariables::GlobalVariables()
   this->flagUsingApacheWebServer=false;
   this->flagUsingBuiltInWebServer=false;
   this->flagLoggedIn=false;
-  this->flagTestingSystemIsRunning=false;
   this->flagUsingSSLinCurrentConnection=false;
   this->flagSSLisAvailable=false;
   this->userCalculatorAdmin="admin";
@@ -484,15 +483,20 @@ bool FileOperations::GetFolderFileNamesUnsecure
   outputFileNamesNoPath.Reserve(1000);
   if (outputFileTypes!=0)
     outputFileTypes->Reserve(1000);
-  std::string fullName;
+  std::string fileNameNoPath, fullName, theExtension;
   for (dirent *fileOrFolder=readdir(theDirectory); fileOrFolder!=0; fileOrFolder= readdir (theDirectory))
   { outputFileNamesNoPath.AddOnTop(fileOrFolder->d_name);
     if (outputFileTypes!=0)
-    { fullName=theFolderName + fileOrFolder->d_name;
+    { fileNameNoPath=fileOrFolder->d_name;
+      fullName=theFolderName + fileNameNoPath;
       if (FileOperations::IsFolderUnsecure(fullName))
         outputFileTypes->AddOnTop(".d");
       else
-        outputFileTypes->AddOnTop("");
+      { theExtension=FileOperations::GetFileExtensionWithDot(fileNameNoPath);
+        if (theExtension==".d")
+          theExtension="";
+        outputFileTypes->AddOnTop(theExtension);
+      }
     }
   }
   closedir (theDirectory);
@@ -548,6 +552,14 @@ bool FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
     return false;
   return FileOperations::OpenFileCreateIfNotPresentUnsecure
   (theFile, theGlobalVariables.PhysicalPathOutputFolder+ theFileName, OpenInAppendMode, truncate, openAsBinary);
+}
+
+bool FileOperations::OpenFileCreateIfNotPresentOnTopOfProjectBase
+(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
+{ if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
+    return false;
+  return FileOperations::OpenFileCreateIfNotPresentUnsecure
+  (theFile, theGlobalVariables.PhysicalPathProjectBase+ theFileName, OpenInAppendMode, truncate, openAsBinary);
 }
 
 bool FileOperations::OpenFileCreateIfNotPresentUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)

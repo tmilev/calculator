@@ -113,6 +113,7 @@ public:
   enum requestTypes {requestUnknown, requestGetCalculator, requestTogglePauseCalculator,
   requestPostCalculator, requestGetNotCalculator, requestGetServerStatus,
   requestGetComputationIndicator, requestGetMonitor};
+  std::string ToStringCalculatorArguments()const;
   std::string ToStringStatus()const;
   std::string ToStringMessageUnsafe()const;
   std::string ToStringMessageShortUnsafe(FormatExpressions* theFormat=0)const;

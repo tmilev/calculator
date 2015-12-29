@@ -612,16 +612,24 @@ void WebWorker::ProcessRawArguments()
     else
       theGlobalVariables.userDefault="";
   }
+  this->flagFoundMalformedFormInput=false;
   if (theGlobalVariables.flagLoggedIn)
-  { if (inputStringNames.Contains("examStatus"))
-      theGlobalVariables.userExamStatus= inputStrings[inputStringNames.GetIndex("examStatus")];
-    if (inputStringNames.Contains("currentProblemCollection"))
-      theGlobalVariables.userCurrentProblemCollection=
-      inputStrings[inputStringNames.GetIndex("currentProblemCollection")];
-    if (inputStringNames.Contains("currentProblem"))
-      theGlobalVariables.userCurrentProblem=
-      inputStrings[inputStringNames.GetIndex("currentProblem")];
-  }
+    for (int i=0; i<inputStringNames.size; i++)
+    { if (inputStringNames[i]=="currentProblem")
+        if (inputStrings[i]!="")
+        { if (theGlobalVariables.userCurrentProblem!="")
+            this->flagFoundMalformedFormInput=true;
+          theGlobalVariables.userCurrentProblem= CGI::URLStringToNormal( inputStrings[i]);
+        }
+      if (inputStringNames[i]=="currentProblemCollection")
+        if (inputStrings[i]!="")
+        { if (theGlobalVariables.userCurrentProblemCollection!="")
+            this->flagFoundMalformedFormInput=true;
+          theGlobalVariables.userCurrentProblemCollection=inputStrings[i];
+        }
+      if (inputStringNames[i]=="examStatus")
+        theGlobalVariables.userExamStatus= inputStrings[i];
+    }
   for (unsigned i=0; i<password.size(); i++)
     password[i]=' ';
   if (inputStringNames.Contains("textInput"))
@@ -634,10 +642,14 @@ std::string WebWorker::GetHtmlHiddenInputs()
     return "";
   std::stringstream out;
   //the values of the hidden inputs will be filled in via javascript
+  if (this->flagFoundMalformedFormInput)
+    out << "<b>Your input formed had malformed entries.</b>";
   out
   << "<input type=\"hidden\" id=\"authenticationToken\" name=\"authenticationToken\">\n"
-  << "<input type=\"hidden\" id=\"userHidden\" name=\"userHidden\">"
-  << "<input type=\"hidden\" id=\"examStatus\" name=\"examStatus\">";
+  << "<input type=\"hidden\" id=\"userHidden\" name=\"userHidden\">\n"
+  << "<input type=\"hidden\" id=\"examStatus\" name=\"examStatus\">\n"
+  << "<input type=\"hidden\" id=\"currentProblemCollection\" name=\"currentProblemCollection\">\n"
+  << "<input type=\"hidden\" id=\"currentProblem\" name=\"currentProblem\">\n";
   return out.str();
 }
 
@@ -849,7 +861,7 @@ void WebWorker::ExtractArgumentFromAddress()
       (this->mainAddresSRAW, theGlobalVariables.DisplayNameCalculatorWithPath, &calculatorArgumentRawWithQuestionMark))
     if (!MathRoutines::StringBeginsWith
         (this->mainAddresSRAW, "/vectorpartition/cgi-bin/calculator", &calculatorArgumentRawWithQuestionMark))
-    { CGI::URLFileNameToFileName(this->mainAddresSRAW, this->mainAddress);
+    { CGI::URLStringToNormal(this->mainAddresSRAW, this->mainAddress);
       return;
     }
   CGI::URLStringToNormal(this->mainAddresSRAW, this->mainAddress);
@@ -1432,6 +1444,7 @@ void WebWorker::reset()
   this->flagMainAddressSanitized=false;
   this->timeOfLastPingServerSideOnly=-1;
   this->flagAuthenticationTokenWasSubmitted=false;
+  this->flagFoundMalformedFormInput=false;
   theGlobalVariables.flagUsingSSLinCurrentConnection=false;
   theGlobalVariables.flagLoggedIn=false;
   for (unsigned i=0; i<theGlobalVariables.userDefault.size(); i++)
@@ -1763,15 +1776,12 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "}\n";
   out
   << "function storeSettingsProgress(){\n";
-  if (theGlobalVariables.flagLoggedIn)
-  { if (theGlobalVariables.userExamStatus!="")
-      out << "  addCookie(\"examStatus\", \"" << theGlobalVariables.userExamStatus << "\", 100);\n";
-    if (theGlobalVariables.userCurrentProblemCollection!="")
-      out << "  addCookie(\"currentProblemCollection\", \""
-      << theGlobalVariables.userCurrentProblemCollection << "\", 100);\n";
-    if (theGlobalVariables.userCurrentProblem!="")
-      out << "  addCookie(\"currentProblem\", \""
-      << theGlobalVariables.userCurrentProblem << "\", 100);\n";
+  if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userExamStatus!="")
+  { out << "  addCookie(\"examStatus\", \"" << theGlobalVariables.userExamStatus << "\", 100);\n";
+    out << "  addCookie(\"currentProblemCollection\", \""
+    << theGlobalVariables.userCurrentProblemCollection << "\", 100);\n";
+    out << "  addCookie(\"currentProblem\", \""
+    << theGlobalVariables.userCurrentProblem << "\", 100);\n";
   }
   out
   << "}\n";

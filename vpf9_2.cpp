@@ -2175,25 +2175,7 @@ void RationalFunctionOld::AddHonestRF(const RationalFunctionOld& other)
     crash << crash;
 }
 
-void CGI::URLStringToNormal(std::string& input, std::string& output)
-{ std::string readAhead;
-  std::stringstream out;
-  int inputSize=(signed) input.size();
-  for (int i=0; i<inputSize; i++)
-  { readAhead="";
-    for (int j=0; j<6; j++)
-    { if (i+j<inputSize)
-        readAhead.push_back(input[i+j]);
-      if (CGI::URLStringToNormalOneStep(readAhead, out))
-      { i+=j;
-        break;
-      }
-    }
-  }
-  output=out.str();
-}
-
-void CGI::URLFileNameToFileName(std::string& input, std::string& output)
+void CGI::URLStringToNormal(const std::string& input, std::string& output)
 { std::string readAhead;
   std::stringstream out;
   int inputSize=(signed) input.size();

@@ -527,6 +527,12 @@ bool FileOperations::OpenFileOnTopOfOutputFolder(std::fstream& theFile, const st
   return FileOperations::OpenFileUnsecure(theFile, theGlobalVariables.PhysicalPathOutputFolder+ theFileName, OpenInAppendMode, truncate, openAsBinary);
 }
 
+bool FileOperations::OpenFileOnTopOfProjectBase(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
+{ if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
+    return false;
+  return FileOperations::OpenFileUnsecure(theFile, theGlobalVariables.PhysicalPathProjectBase+ theFileName, OpenInAppendMode, truncate, openAsBinary);
+}
+
 bool FileOperations::OpenFileUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
 { if (OpenInAppendMode)
   { if (openAsBinary)
@@ -7664,7 +7670,7 @@ std::string CGI::StringToURLString(const std::string& input)
     else if (input[i]==' ')
       out << '+';
     else
-      out << "%" << std::hex << (int) input[i]; //<-Not sure if this works correctly!
+      out << "%" << std::hex << (int) input[i] << std::dec; //<-Not sure if this works correctly!
 
   return out.str();
 }

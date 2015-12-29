@@ -1104,9 +1104,13 @@ public:
   static int scale;
   static void outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter);
   static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
-  static void URLStringToNormal(std::string& input, std::string& output);
+  static void URLStringToNormal(const std::string& input, std::string& output);
+  static std::string URLStringToNormal(const std::string& input)
+  { std::string output;
+    CGI::URLStringToNormal(input, output);
+    return output;
+  }
   static bool URLStringToNormalOneStep(std::string& readAhead, std::stringstream& out);
-  static void URLFileNameToFileName(std::string& input, std::string& output);
   static std::string StringToURLString(const std::string& input);
   static void ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput);
   static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);

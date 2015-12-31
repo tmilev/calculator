@@ -24,6 +24,7 @@ public:
   std::string mainAddresSRAW;
   std::string mainAddress;
   std::string RelativePhysicalFileName;
+  std::string PhysicalFileName_COMPUTED_DO_NOT_CHANGE;
   std::string status;
   std::string pingMessage;
   std::string authenticationToken;

@@ -1382,9 +1382,9 @@ int WebWorker::ProcessFolder()
   std::stringstream out;
   out << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" << "<html><body>";
 //  out << this->ToString();
-  if (this->RelativePhysicalFileName.size()>0)
-    if (this->RelativePhysicalFileName[this->RelativePhysicalFileName.size()-1]!='/')
-      this->RelativePhysicalFileName.push_back('/');
+  if (this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE.size()>0)
+    if (this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE[this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE.size()-1]!='/')
+      this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE.push_back('/');
   if (this->mainAddress.size()>0)
     if (this->mainAddress[this->mainAddress.size()-1]!='/')
       this->mainAddress.push_back('/');
@@ -1395,12 +1395,14 @@ int WebWorker::ProcessFolder()
     << " Therefore I have sanitized the main address to: " << this->mainAddress;
   }
   List<std::string> theFileNames, theFileTypes;
-  if (!FileOperations::GetFolderFileNamesOnTopOfOutputFolder(this->RelativePhysicalFileName, theFileNames, &theFileTypes))
-  { out << "<b>Failed to open directory with physical address " << this->RelativePhysicalFileName << " </b></body></html>";
+  if (!FileOperations::GetFolderFileNamesUnsecure(this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE, theFileNames, &theFileTypes))
+  { out << "<b>Failed to open directory with physical address "
+    << this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE << " </b></body></html>";
     stOutput << out.str();
     return 0;
   }
-  out << "Browsing folder: " << this->mainAddress << "<br>Relative physical address: " << this->RelativePhysicalFileName << "<hr>";
+  out << "Browsing folder: " << this->mainAddress << "<br>Relative physical address: "
+  << this->RelativePhysicalFileName << "<hr>";
   List<std::string> theFolderNamesHtml, theFileNamesHtml;
   for (int i=0; i<theFileNames.size; i++)
   { std::stringstream currentStream;
@@ -1453,6 +1455,7 @@ void WebWorker::reset()
   for (unsigned i=0; i<this->authenticationToken.size(); i++)
     this->authenticationToken[i]=' ';
   this->authenticationToken="";
+  this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE="";
   this->Release();
 }
 
@@ -1516,10 +1519,20 @@ int WebWorker::ProcessNonCalculator()
   theProgressReport.SetStatus("<br>Processing non-computational web-server request.");
   //theLog << this->ToStringShort() << "\r\n";
 //  std::cout << " ere be i at this moment10\n";
-  if (FileOperations::IsFolderOnTopOfOutputFolder(this->RelativePhysicalFileName))
+  if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(this->RelativePhysicalFileName))
+  { stOutput << "HTTP/1.1 404 Object not found\r\nContent-Type: text/html\r\n\r\n";
+    stOutput << "<html><body><b>File name deemed unsafe. "
+    << "Folder names not allowed to contain dots and file names not allowed to start with dots.</b></body></html>";
+    return 0;
+  }
+  if (MathRoutines::StringBeginsWith(this->RelativePhysicalFileName, "/ProblemCollections/"))
+    this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE=theGlobalVariables.PhysicalPathProjectBase+this->RelativePhysicalFileName;
+  else
+    this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE=theGlobalVariables.PhysicalPathOutputFolder+this->RelativePhysicalFileName;
+  if (FileOperations::IsFolderUnsecure(this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE))
     return this->ProcessFolder();
 //  std::cout << " ere be i at this moment\n";
-  if (!FileOperations::FileExistsOnTopOfOutputFolder(this->RelativePhysicalFileName))
+  if (!FileOperations::FileExistsUnsecure(this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE))
   { stOutput << "HTTP/1.1 404 Object not found\r\nContent-Type: text/html\r\n\r\n";
     stOutput << "<html><body><b>File does not exist.</b>";
     if (this->flagMainAddressSanitized)
@@ -1533,10 +1546,10 @@ int WebWorker::ProcessNonCalculator()
     stOutput << "</body></html>";
     return 0;
   }
-  std::string fileExtension=FileOperations::GetFileExtensionWithDot(this->RelativePhysicalFileName);
+  std::string fileExtension=FileOperations::GetFileExtensionWithDot(this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE);
   bool isBinary=this->IsFileExtensionOfBinaryFile(fileExtension);
   std::fstream theFile;
-  if (!FileOperations::OpenFileOnTopOfOutputFolder(theFile, this->RelativePhysicalFileName, false, false, !isBinary))
+  if (!FileOperations::OpenFileUnsecure(theFile, this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE, false, false, !isBinary))
   { stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
     stOutput << "<html><body><b>Error: file appears to exist but I could not open it.</b> ";
     if (this->flagMainAddressSanitized)
@@ -1545,7 +1558,7 @@ int WebWorker::ProcessNonCalculator()
       << " Therefore I have sanitized the main address to: " << this->mainAddress;
     }
     stOutput << "<br><b> File display name: </b>"
-    << this->mainAddress << "<br><b>File physical name: </b>"
+    << this->mainAddress << "<br><b>Relative physical file name: </b>"
     << this->RelativePhysicalFileName << "</body></html>";
     return 0;
   }

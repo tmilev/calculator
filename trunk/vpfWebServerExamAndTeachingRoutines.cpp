@@ -108,6 +108,7 @@ std::string ProblemCollection::ToStringSelectMeForm()const
 std::string Problem::ToStringStartProblem()
 { MacroRegisterFunctionWithName("ProblemCollection::ToStringStartProblem");
   std::stringstream out;
+  out << CGI::GetLaTeXProcessingJavascript();
   out << "\n<FORM method=\"POST\" id=\"formProblemCollection\" name=\"formProblemCollection\" action=\""
   << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n" ;
   out << theWebServer.GetActiveWorker().GetHtmlHiddenInputs();
@@ -251,9 +252,13 @@ std::string WebWorker::GetTestingScreen()
 { MacroRegisterFunctionWithName("WebWorker::GetTestingScreen");
   TeachingRoutines theRoutines;
   std::stringstream out;
-  out << "<html>" << WebWorker::GetJavascriptStandardCookies()
+  out << "<html>"
+  << "<header>"
+  << WebWorker::GetJavascriptStandardCookies()
+  << "<link rel=\"stylesheet\" type=\"text/css\" href=\"/ProblemCollections/calculator.css\">"
+  << "</header>"
   << "<body onload=\"loadSettings();\">\n";
-  out << "<hr>Message follows.<br>" << this->theMessage << "<hr>";
+  //out << "<hr>Message follows.<br>" << this->theMessage << "<hr>";
   out << this->ToStringCalculatorArguments();
   out << theRoutines.GetCurrentProblemItem();
   out << "</body></html>";

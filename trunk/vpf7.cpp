@@ -674,6 +674,16 @@ bool ElementUniversalEnveloping<coefficient>::ConvertToRationalCoeff(ElementUniv
   return true;
 }
 
+bool CGI::GetPhysicalFileNameFromRelativeInput(const std::string& inputFileName, std::string& output)
+{ MacroRegisterFunctionWithName("CGI::GetPhysicalFileNameFromRelativeInput");
+  if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(inputFileName))
+    return false;
+  if (MathRoutines::StringBeginsWith(inputFileName, "/ProblemCollections/"))
+    output=theGlobalVariables.PhysicalPathProjectBase+inputFileName;
+  else
+    output=theGlobalVariables.PhysicalPathOutputFolder+inputFileName;
+  return true;
+}
 
 std::string CGI::GetHtmlLinkFromProjectFileName(const std::string& fileName, const std::string& fileDesc, int line)
 { std::stringstream out;

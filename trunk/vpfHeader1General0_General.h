@@ -1111,6 +1111,7 @@ public:
     return output;
   }
   static bool URLStringToNormalOneStep(std::string& readAhead, std::stringstream& out);
+  static bool GetPhysicalFileNameFromRelativeInput(const std::string& inputFileName, std::string& output);
   static std::string StringToURLString(const std::string& input);
   static void ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput);
   static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);

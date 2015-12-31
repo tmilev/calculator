@@ -1706,6 +1706,7 @@ public:
   static bool innerMatrixRational(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMatrixRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMatrixRationalTensorForm(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerLoadFileIntoString(Calculator& theCommands, const Expression& input, Expression& output);
 
   ////////////////////Conversion to expression tree/////////////////////////////////////
   //converstion from type to expression tree.
@@ -1716,6 +1717,7 @@ public:
   static bool innerExpressionFromRF
   (Calculator& theCommands, const RationalFunctionOld& input, Expression& output,
    Expression* inputContext=0);
+
   static bool innerLoadKey(Calculator& theCommands, const Expression& inputStatementList, const std::string& inputKey, Expression& output);
   static bool innerStoreSemisimpleSubalgebras
   (Calculator& theCommands, const SemisimpleSubalgebras& input, Expression& output);

@@ -6144,3 +6144,42 @@ bool CalculatorFunctionsGeneral::innerDrawWeightSupport(Calculator& theCommands,
   out << theChar.ToStringFullCharacterWeightsTable();
   return output.AssignValue(out.str(), theCommands);
 }
+
+bool CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml");
+  std::string theHtml;
+  if (!input.IsOfType<std::string>(&theHtml))
+    return theCommands << "Extracting calculator expressions from html takes as input strings. ";
+  std::stringstream theReader(theHtml);
+  theReader.seekg(0);
+  std::string reader;
+  bool spanTagStarted=false;
+  bool readingSpanContent=false;
+  List<std::string> supportedSpanTypes;
+  List<std::string> calculatorSpanTypes;
+  List<std::string> calculatorSpanContents;
+  supportedSpanTypes.AddOnTop("calculator");
+  supportedSpanTypes.AddOnTop("calculatorHidden");
+  supportedSpanTypes.AddOnTop("calculatorAnswer");
+  int currentSpanType=-1;
+
+  while (theReader >> reader)
+  { if (reader =="<span")
+    { spanTagStarted=true;
+      currentSpanType=-1;
+      continue;
+    }
+    if (spanTagStarted)
+    { for (int i=0; i<supportedSpanTypes.size; i++)
+        if (reader.find(supportedSpanTypes[i]) < supportedSpanTypes[i].size())
+        { currentSpanType=i;
+          break;
+
+        }
+    }
+  }
+
+
+  return false;
+}

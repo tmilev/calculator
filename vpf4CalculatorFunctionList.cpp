@@ -92,6 +92,21 @@ void Calculator::initCalculusTestingFunctions()
 
 void Calculator::initPredefinedInnerFunctions()
 { this->AddOperationInnerHandler
+  ("LoadFileIntoString", CalculatorConversions::innerLoadFileIntoString, "",
+   "Loads a file into a string. The file must be given its relative file name displayed when browsing \
+   the web server. ",
+   "LoadFileIntoString(\"/ProblemCollections/Problems/functions-composing-fractional-linear-1.html\")",
+   true, false, "CalculatorConversions::innerLoadFileIntoString");
+  this->AddOperationInnerHandler
+  ("ExtractCalculatorExpressionFromHtml", CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml, "",
+   "Reads html and extracts embedded calculator commands. All content is ignored, except for content enclosed in\
+   spans with appropriate class names. At the moment of writing, the planned span class names are:\
+   \"calculator\", \"calculatorHidden\", \"calculatorAnswer\".",
+   "ExtractCalculatorExpressionFromHtml(LoadFileIntoString(\
+   \"/ProblemCollections/Problems/functions-composing-fractional-linear-1.html\"))", true, false,
+   "CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml");
+   ;
+  this->AddOperationInnerHandler
   ("TestCalculatorIndicator", CalculatorFunctionsGeneral::innerTestIndicator, "",
    "(This is not a mathematical function). Tests the calculator indicator mechanism.",
    "TestCalculatorIndicator(1000)", true, false)

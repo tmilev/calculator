@@ -990,3 +990,25 @@ bool CalculatorConversions::innerMatrixRationalFunction(Calculator& theCommands,
 //  stOutput << "<hr>And the context is: " << ContextE.ToString();
   return output.AssignValueWithContext(outputMat, ContextE, theCommands);
 }
+
+bool CalculatorConversions::innerLoadFileIntoString(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorConversions::innerLoadFileIntoString");
+  std::string theRelativeFileName;
+  if (!input.IsOfType<std::string>(&theRelativeFileName))
+  { theCommands << "Input of load file string command is supposed to be a string. Converting your expression to a string and using that instead. ";
+    theRelativeFileName=input.ToString();
+  }
+  std::string thePhysicalFileName;
+  if (!CGI::GetPhysicalFileNameFromRelativeInput(theRelativeFileName, thePhysicalFileName))
+    return theCommands << "File name invalid: " << theRelativeFileName << ".";
+  if (!FileOperations::FileExistsUnsecure(thePhysicalFileName))
+    return theCommands << "The requested file " << theRelativeFileName
+    << " appears not to exist. ";
+  std::fstream theFile;
+  if(!FileOperations::OpenFileUnsecure(theFile, thePhysicalFileName, false, false, false))
+    return theCommands << "The requested file " << theRelativeFileName
+    << " exists but I failed to open it in text mode (perhaps not a valid ASCII/UTF8 file). ";
+  std::stringstream contentStream;
+  contentStream << theFile.rdbuf();
+  return output.AssignValue(contentStream.str(), theCommands);
+}

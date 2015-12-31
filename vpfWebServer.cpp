@@ -1388,7 +1388,6 @@ int WebWorker::ProcessFolder()
   if (this->mainAddress.size()>0)
     if (this->mainAddress[this->mainAddress.size()-1]!='/')
       this->mainAddress.push_back('/');
-
   if (this->flagMainAddressSanitized)
   { out << "<hr>The original main address I extracted was: " << this->mainAddressNonSanitized
     << "<br>However, I do not allow addresses that contain dots (to avoid access to folders below the server). "
@@ -1519,16 +1518,14 @@ int WebWorker::ProcessNonCalculator()
   theProgressReport.SetStatus("<br>Processing non-computational web-server request.");
   //theLog << this->ToStringShort() << "\r\n";
 //  std::cout << " ere be i at this moment10\n";
-  if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(this->RelativePhysicalFileName))
+  if (!CGI::GetPhysicalFileNameFromRelativeInput(this->RelativePhysicalFileName, this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE))
   { stOutput << "HTTP/1.1 404 Object not found\r\nContent-Type: text/html\r\n\r\n";
     stOutput << "<html><body><b>File name deemed unsafe. "
-    << "Folder names not allowed to contain dots and file names not allowed to start with dots.</b></body></html>";
+    << "Please note that folder names are not allowed to contain dots and file names "
+    << "are not allowed to start with dots.</b> There may be additional restrictions "
+    << "on file names added for security reasons.</body></html>";
     return 0;
   }
-  if (MathRoutines::StringBeginsWith(this->RelativePhysicalFileName, "/ProblemCollections/"))
-    this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE=theGlobalVariables.PhysicalPathProjectBase+this->RelativePhysicalFileName;
-  else
-    this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE=theGlobalVariables.PhysicalPathOutputFolder+this->RelativePhysicalFileName;
   if (FileOperations::IsFolderUnsecure(this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE))
     return this->ProcessFolder();
 //  std::cout << " ere be i at this moment\n";

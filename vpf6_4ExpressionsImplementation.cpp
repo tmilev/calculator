@@ -2578,6 +2578,23 @@ bool Expression::HasNonEmptyContext()const
   return !this->GetContext().StartsWith(this->owner->opContexT(), 1);
 }
 
+bool Expression::IsCacheableExpression()const
+{ MacroRegisterFunctionWithName("Expression::IsCacheableExpression");
+  if (this->owner==0)
+    return true;
+  if (this->IsBuiltInType())
+    return true;
+  for (int i=0; i<this->children.size; i++)
+    if (!(*this)[i].IsCacheableExpression())
+      return false;
+  if (this->children.size>0)
+    return true;
+  Calculator& theBoss=*this->owner;
+  if (this->theData<0 || this->theData>= theBoss.theAtoms.size)
+    crash << "This is a programming error: corrupted atom in Expression::IsCacheableExpression. " << crash;
+  return theBoss.atomsThatMustNotBeCached.Contains(theBoss.theAtoms[this->theData]);
+}
+
 bool Expression::IsBuiltInScalar()const
 { return this->IsOfType<Rational>() || this->IsOfType<Polynomial<Rational> >()
   || this->IsOfType<RationalFunctionOld>() || this->IsOfType<double>() || this->IsOfType<AlgebraicNumber>();

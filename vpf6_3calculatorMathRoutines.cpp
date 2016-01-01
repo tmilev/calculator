@@ -6145,6 +6145,59 @@ bool CalculatorFunctionsGeneral::innerDrawWeightSupport(Calculator& theCommands,
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerRandomInteger
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRandomInteger");
+  Matrix<Expression> theMat;
+  if (!theCommands.GetMatrixExpressionsFromArguments(input, theMat, -1, 2))
+    return theCommands << "<hr>Failed to extract a Nx2 matrix giving the integer intervals";
+  if (theMat.NumRows==0)
+    return theCommands << "<hr>Failed to extract a Nx2 matrix giving the integer intervals";
+  List<List<int> > theIntervals;
+  theIntervals.SetSize(theMat.NumRows);
+  for (int i=0; i<theMat.NumRows; i++)
+  { theIntervals[i].SetSize(theMat.NumCols);
+    for (int j=0; j<theMat.NumCols; j++)
+      if (!theMat(i,j).IsIntegerFittingInInt(& theIntervals[i][j]))
+        return theCommands << "<hr>Failed to convert " << theMat(i,j).ToString() << " to an integer. ";
+  }
+  int accum=0;
+  for (int i=0; i<theIntervals.size; i++)
+  { int currentContribution= theIntervals[i][1]-theIntervals[i][0];
+    if (currentContribution<0)
+      currentContribution*=-1;
+    accum+=currentContribution+1;
+  }
+  if (accum==0)
+    crash << "This shouldn't happen: accum should not be zero at this point. " << crash;
+  int generatedRandomInt = rand()%accum;
+  int resultRandomValue=theIntervals[0][0];
+  bool found=false;
+  //stOutput << "<br>The intervals: " << theIntervals.ToStringCommaDelimited()
+  //<< "<br>The intervals size: " << theIntervals.size
+  //<< "<br>accum: " << accum << " generatedRandomInt: " << generatedRandomInt;
+  accum=0;
+  for (int i=0; i<theIntervals.size; i++)
+  { int currentContribution= theIntervals[i][1]-theIntervals[i][0];
+    int sign=1;
+    if (currentContribution<0)
+    { currentContribution*=-1;
+      sign=-1;
+    }
+    currentContribution++;
+    int nextAccum=accum+currentContribution;
+    if (accum <= generatedRandomInt && generatedRandomInt <nextAccum)
+    { resultRandomValue= theIntervals[i][0]+sign*(generatedRandomInt-accum);
+      found=true;
+    }
+    accum=nextAccum;
+  }
+  if (!found)
+    return theCommands << "<hr>Failed to generate a random number: this shouldn't happen - perhaps the requested "
+    << " interval was too large. ";
+  return output.AssignValue(resultRandomValue, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml");
@@ -6153,33 +6206,78 @@ bool CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
   std::stringstream theReader(theHtml);
   theReader.seekg(0);
-  std::string reader;
-  bool spanTagStarted=false;
-  bool readingSpanContent=false;
-  List<std::string> supportedSpanTypes;
-  List<std::string> calculatorSpanTypes;
-  List<std::string> calculatorSpanContents;
-  supportedSpanTypes.AddOnTop("calculator");
-  supportedSpanTypes.AddOnTop("calculatorHidden");
-  supportedSpanTypes.AddOnTop("calculatorAnswer");
-  int currentSpanType=-1;
-
-  while (theReader >> reader)
-  { if (reader =="<span")
-    { spanTagStarted=true;
-      currentSpanType=-1;
-      continue;
+  List<std::string> calculatorSpanClasses;
+  calculatorSpanClasses.AddOnTop("calculator");
+  calculatorSpanClasses.AddOnTop("calculatorHidden");
+  calculatorSpanClasses.AddOnTop("calculatorAnswer");
+  List<std::string> splitStrings;
+  List<char> splittingChars;
+  splittingChars.AddOnTop('<');
+  splittingChars.AddOnTop('\"');
+  splittingChars.AddOnTop('>');
+  splittingChars.AddOnTop('=');
+  std::string word, readChars;
+  splitStrings.SetExpectedSize(theReader.str().size()/4);
+  while (theReader >> readChars)
+  { word="";
+    for (unsigned i=0; i< readChars.size(); i++)
+    { if (splittingChars.Contains(readChars[i]))
+      { if (word!="")
+          splitStrings.AddOnTop(word);
+        std::string charToString;
+        charToString.push_back(readChars[i]);
+        splitStrings.AddOnTop(charToString);
+        word="";
+      } else
+        word.push_back(readChars[i]);
     }
-    if (spanTagStarted)
-    { for (int i=0; i<supportedSpanTypes.size; i++)
-        if (reader.find(supportedSpanTypes[i]) < supportedSpanTypes[i].size())
-        { currentSpanType=i;
-          break;
-
-        }
-    }
+    if (word!="")
+      splitStrings.AddOnTop(word);
   }
 
-
-  return false;
+  std::string nextString;
+  bool buildingSpanStartTag=false;
+  bool buildingSpanFinishTag=false;
+  int currentSpanType=-1;
+  List<std::string> resultingCommands;
+  List<std::string> resultingCommandTypes;
+  for (int i=0; i<splitStrings.size; i++)
+  { const std::string currentString=splitStrings[i];
+    if (i<splitStrings.size-1)
+      nextString=splitStrings[i+1];
+    else
+      nextString="";
+    if (currentString=="<")
+    { if (nextString=="span")
+        buildingSpanStartTag=true;
+      if (nextString=="/span")
+        buildingSpanFinishTag=true;
+    }
+    if (buildingSpanStartTag)
+      if (calculatorSpanClasses.Contains(currentString))
+      { currentSpanType=calculatorSpanClasses.GetIndex(currentString);
+        resultingCommands.AddOnTop("");
+        resultingCommandTypes.AddOnTop(currentString);
+      }
+    if (!buildingSpanFinishTag && !buildingSpanStartTag && currentSpanType!=-1)
+      *resultingCommands.LastObject()+= currentString +" ";
+    if (currentString==">")
+    { buildingSpanStartTag=false;
+      if (buildingSpanFinishTag)
+      { currentSpanType=-1;
+      }
+      buildingSpanFinishTag=false;
+    }
+  }
+  std::stringstream out;
+  theReader.seekg(0);
+  out << "<b>The html read follows.</b><br><hr> " << theReader.str();
+//  out << "<hr><b>The split strings follow. </b><hr>" << splitStrings.ToStringCommaDelimited();
+  out << "<hr><b>The extracted commands follow.</b><hr>";
+  out << "<table><tr><td>Command(s)</td><td>Command type</td></tr>";
+  for (int i=0; i<resultingCommands.size; i++)
+    out << "<tr>" << "<td>" << resultingCommands[i] << "</td><td>"
+    << resultingCommandTypes[i] << "</td></tr>";
+  out << "</table>";
+  return output.AssignValue(out.str(), theCommands);
 }

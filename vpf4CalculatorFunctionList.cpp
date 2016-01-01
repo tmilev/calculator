@@ -92,6 +92,14 @@ void Calculator::initCalculusTestingFunctions()
 
 void Calculator::initPredefinedInnerFunctions()
 { this->AddOperationInnerHandler
+  ("randomInteger", CalculatorFunctionsGeneral::innerRandomInteger, "",
+   "Generates a random integer. The random integer lives in intervals given by pairs of integers. The example code\
+    generates a random number in the union of the intervals [-2, -1], [2,5]. If the input intervals overlap\
+    the overlapped integers will be generated with higher probability. \
+    For non-overlapping intervals, the random number distribution should be approximately uniform.",
+   "randomInteger((-2,-1), (2,5));",
+   true, false, "CalculatorConversions::innerRandomInteger");
+  this->AddOperationInnerHandler
   ("LoadFileIntoString", CalculatorConversions::innerLoadFileIntoString, "",
    "Loads a file into a string. The file must be given its relative file name displayed when browsing \
    the web server. ",
@@ -2670,6 +2678,12 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler()
   this->AddOperationNoRepetitionAllowed("e");
   this->AddOperationNoRepetitionAllowed("\\arctan");
   this->AddOperationNoRepetitionAllowed("\\diff");
+}
+
+void Calculator::initAtomsNonCacheable()
+{ MacroRegisterFunctionWithName("Calculator::initAtomsNonCacheable");
+  this->atomsThatMustNotBeCached.SetExpectedSize(30);
+  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("randomInteger");
 }
 
 void Calculator::initAtomsNotGoodForChainRule()

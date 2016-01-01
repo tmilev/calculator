@@ -219,6 +219,7 @@ class Expression
   bool IsDifferentialOneFormOneVariable(Expression* outputDifferentialOfWhat=0, Expression* outputCoeffInFrontOfDifferential=0)const;
   bool IsKnownFunctionWithComplexRange(std::string* outputWhichOperation=0)const;
   bool IsArithmeticOperation(std::string* outputWhichOperation=0)const;
+  bool IsCacheableExpression()const;
   bool IsBuiltInScalar()const;
   bool IsBuiltInType(std::string* outputWhichOperation=0)const;
   bool IsBuiltInType(int* outputWhichType)const;
@@ -696,6 +697,7 @@ public:
   HashedList<std::string, MathRoutines::hashString> atomsThatFreezeArguments;
   HashedList<std::string, MathRoutines::hashString> atomsWhoseExponentsAreInterprettedAsFunctions;
   HashedList<std::string, MathRoutines::hashString> atomsNotInterprettedAsFunctions;
+  HashedList<std::string, MathRoutines::hashString> atomsThatMustNotBeCached;
   HashedList<std::string, MathRoutines::hashString> operationsComposite;
   List<List<Function> > FunctionHandlers;
   List<List<Function> > operationsCompositeHandlers;
@@ -773,6 +775,7 @@ public:
   bool flagMaxRecursionErrorEncountered;
   bool flagMaxTransformationsErrorEncountered;
   bool flagNewContextNeeded;
+  bool flagCurrentExpressionIsNonCacheable;
 
   bool flagLogSyntaxRules;
   bool flagLogEvaluatioN;
@@ -1652,6 +1655,7 @@ public:
   void init();
   void reset();
   void initAtomsThatFreezeArguments();
+  void initAtomsNonCacheable();
   void initAtomsThatAllowCommutingOfArguments();
   void initOperationsWhoseDomainsAreTheConstants();
   void initArithmeticOperations();

@@ -266,10 +266,31 @@ bool Calculator::EvaluateExpression
   int counterNumTransformations=0;
   Expression transformationE(theCommands);
   Expression beforePatternMatch;
+  std::string inputIfAtom;
+  bool currentExpressionIsNonCacheable=false;
+  theCommands.flagCurrentExpressionIsNonCacheable=false;
   while (ReductionOcurred && !theCommands.flagAbortComputationASAP)
   { StackMaintainerRules theRuleStackMaintainer(&theCommands);
     ReductionOcurred=false;
     counterNumTransformations++;
+    if (output.IsAtom(&inputIfAtom))
+      if (theCommands.atomsThatMustNotBeCached.Contains(inputIfAtom))
+        currentExpressionIsNonCacheable=true;
+    theCommands.flagCurrentExpressionIsNonCacheable=currentExpressionIsNonCacheable;
+    //The following code enclosed in the if clause is too complicated/obfuscated for my taste
+    //and perhaps needs a rewrite. However, at the moment of writing, I see
+    //no better way of doing this, so here we go.
+    if (currentExpressionIsNonCacheable)
+    { if (indexInCache!=-1)
+      { //We "undo" the caching process by
+        //replacing the cached value with the minusOneExpression,
+        //which, having no context, will never match another expression.
+        Expression minusOneE(theCommands);
+        minusOneE=-1;
+        theCommands.cachedExpressions.SetObjectAtIndex(indexInCache, minusOneE);
+      }
+      indexInCache=-1;
+    }
     if (indexInCache!=-1)
       theCommands.imagesCachedExpressions[indexInCache]=output;
     //////------Handling naughty expressions------
@@ -295,22 +316,25 @@ bool Calculator::EvaluateExpression
       break;
     }
     //////------End of handling naughty expressions------
-    /////-------Evaluating children if the expression is not of built-in type-------
     //bool foundError=false;
+    /////-------Children evaluation-------
     ProgressReport theReport(&theGlobalVariables);
     if (!output.IsFrozen())
       for (int i=0; i<output.children.size && !theCommands.flagAbortComputationASAP; i++)
       { if (i>0 && output.StartsWith(theCommands.opEndStatement()))
-        {  std::stringstream reportStream;
-           reportStream << "Substitution rules so far:";
-           for (int j=1; j<i; j++)
-             if (output[j].StartsWith(theCommands.opDefine()) || output[j].StartsWith(theCommands.opDefineConditional()))
-               reportStream << "<br>" << MathRoutines::StringShortenInsertDots(output[j].ToString(), 100);
+        { std::stringstream reportStream;
+          reportStream << "Substitution rules so far:";
+          for (int j=1; j<i; j++)
+            if (output[j].StartsWith(theCommands.opDefine()) || output[j].StartsWith(theCommands.opDefineConditional()))
+              reportStream << "<br>" << MathRoutines::StringShortenInsertDots(output[j].ToString(), 100);
           reportStream << "<br>Evaluating:<br><b>" << MathRoutines::StringShortenInsertDots(output[i].ToString(), 100) << "</b>";
           theReport.Report(reportStream.str());
         }
         if (theCommands.EvaluateExpression(theCommands, output[i], transformationE))
           output.SetChilD(i, transformationE);
+        //important: here we check if the child is non-cache-able.
+        if (theCommands.flagCurrentExpressionIsNonCacheable)
+          currentExpressionIsNonCacheable=theCommands.flagCurrentExpressionIsNonCacheable;
         if (output[i].IsError())
         { theCommands.flagAbortComputationASAP=true;
           break;
@@ -319,9 +343,10 @@ bool Calculator::EvaluateExpression
           if (output[i].StartsWith(theCommands.opDefine()) || output[i].StartsWith(theCommands.opDefineConditional()))
             theRuleStackMaintainer.AddRule(output[i]);
       }
+    /////-------Children evaluation end-------
     if (theCommands.flagAbortComputationASAP)
       break;
-    /////-------Default operation handling-------
+    /////-------Built-in evaluation-------
     if (theCommands.outerStandardFunction(theCommands, output, transformationE))
     { ReductionOcurred=true;
       if (theCommands.flagLogEvaluatioN)
@@ -337,8 +362,7 @@ bool Calculator::EvaluateExpression
       output=transformationE;
       continue;
     }
-    /////-------Default operation handling end-------
-    /////-------Evaluating children end-------
+    /////-------Built-in evaluation end-------
     /////-------User-defined pattern matching------
     for (int i=0; i<theCommands.RuleStack.children.size && !theCommands.flagAbortComputationASAP; i++)
     { const Expression& currentPattern=theCommands.RuleStack[i];

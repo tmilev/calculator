@@ -16,6 +16,9 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output);
 
 
+  static bool innerRandomInteger
+  (Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerExtractCalculatorExpressionFromHtml
   (Calculator& theCommands, const Expression& input, Expression& output);
 

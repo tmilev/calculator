@@ -53,6 +53,7 @@ void Calculator::reset()
   this->flagDontDistribute=false;
   this->flagForkingProcessAllowed=true;
   this->flagNoApproximations=false;
+  this->flagCurrentExpressionIsNonCacheable=false;
   this->MaxLatexChars=2000;
   this->numEmptyTokensStart=9;
   this->theObjectContainer.reset();
@@ -96,6 +97,8 @@ void Calculator::reset()
   this->cachedRuleStacks.Clear();
   //The expression container must be cleared last!
   this->theExpressionContainer.Clear();
+  //Setting up a random seed.
+  srand (time(NULL));
 }
 
 void Calculator::init()
@@ -258,6 +261,7 @@ void Calculator::init()
   this->initBuiltInAtomsNotInterprettedAsFunctions();
   this->initBuiltInAtomsWhosePowersAreInterprettedAsFunctions();
   this->initOperationsWhoseDomainsAreTheConstants();
+  this->initAtomsNonCacheable();
   this->initArithmeticOperations();
 
   Expression theSSLieAlgrule;

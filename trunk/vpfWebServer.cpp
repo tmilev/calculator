@@ -559,29 +559,24 @@ std::string WebWorker::ToStringCalculatorArguments()const
 { MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArguments");
   std::stringstream out;
   out << "<hr>";
-  out << "Calculator arguments details follow. ";
-  if (theGlobalVariables.userDefault!="")
-    out << "<br>User: " << theGlobalVariables.userDefault;
-  if (this->authenticationToken!="")
-    out << "<br>Authentication token: " << this->authenticationToken;
   if (theGlobalVariables.flagLoggedIn)
-    out << "<br>Logged in.";
-  if (theGlobalVariables.userExamStatus!="")
-    out << "<br>Exam status: " << theGlobalVariables.userExamStatus;
-  if (theGlobalVariables.userCurrentProblemCollection!="")
-    out << "<br>Current problem collection: " << theGlobalVariables.userCurrentProblemCollection;
-  if (theGlobalVariables.userCurrentProblem!="")
-    out << "<br>Current problem: " << theGlobalVariables.userCurrentProblem;
+    out << "Logged in.";
+  for (int i=0; i<theGlobalVariables.webFormArguments.size; i++)
+  { out << "<br>"
+    << theGlobalVariables.webFormArgumentNames[i] << ": " << theGlobalVariables.webFormArguments[i];
+  }
   out << "<hr>";
   return out.str();
 }
 
 void WebWorker::ProcessRawArguments()
 { MacroRegisterFunctionWithName("WebServer::ProcessRawArguments");
-  List<std::string> inputStrings, inputStringNames;
+  List<std::string>& inputStringNames=theGlobalVariables.webFormArgumentNames;
+  List<std::string>& inputStrings=theGlobalVariables.webFormArguments;
   CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
   std::string password;
   std::string desiredUser="";
+
   if (inputStringNames.Contains("user"))
     desiredUser=inputStrings[inputStringNames.GetIndex("user")];
   if (desiredUser=="")
@@ -597,6 +592,7 @@ void WebWorker::ProcessRawArguments()
   }
   if (inputStringNames.Contains("password"))
   { password=inputStrings[inputStringNames.GetIndex("password")];
+    inputStrings[inputStringNames.GetIndex("password")]="********************************************";
     CGI::URLStringToNormal(password, password);
   }
   theGlobalVariables.userExamStatus="";
@@ -630,8 +626,7 @@ void WebWorker::ProcessRawArguments()
       if (inputStringNames[i]=="examStatus")
         theGlobalVariables.userExamStatus= inputStrings[i];
     }
-  for (unsigned i=0; i<password.size(); i++)
-    password[i]=' ';
+  password="********************************************";
   if (inputStringNames.Contains("textInput"))
     theParser.inputString= inputStrings[inputStringNames.GetIndex("textInput")];
 }
@@ -1508,6 +1503,8 @@ std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExten
     return "Content-Type: text/javascript\r\n";
   if (fileExtension==".ico")
     return "Content-Type: image/x-icon\r\n";
+  if (fileExtension==".css")
+    return "Content-Type: text/css\r\n";
   return "Content-Type: application/octet-stream\r\n";
 }
 

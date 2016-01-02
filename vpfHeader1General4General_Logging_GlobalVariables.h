@@ -103,6 +103,8 @@ public:
   ListReferences<List<stackInfo> > CustomStackTrace;
   ListReferences<List<std::string> > ProgressReportStringS;
   List<std::string> programArguments;
+  List<std::string> webFormArguments;
+  List<std::string> webFormArgumentNames;
   Controller theLocalPauseController;
 
   static const std::string hopefullyPermanentWebAdressOfServerExecutable;

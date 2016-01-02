@@ -12,8 +12,10 @@ class Problem
 public:
   std::string fileName;
   std::string RelativePhysicalFileNameWithFolder;
-  std::string contentHtml;
-  List<std::string> calculatorCommands;
+  std::string inputHtml;
+  std::string outputHtml;
+  List<std::string> betweenTheCommands;
+  List<std::string> commands;
   List<std::string> commandTypes;
   List<std::string> calculatorSpanClasses;
   List<char> splittingChars;
@@ -27,6 +29,8 @@ public:
   { return this->fileName==other.fileName;
   }
   bool LoadMe(std::stringstream& comments);
+  bool ExecuteCommands(Calculator& theInterpretter, std::stringstream& comments);
+  bool InterpretHtml(std::stringstream& comments);
   bool ExtractExpressionsFromHtml(std::stringstream& comments);
   std::string CleanUpCommandString(const std::string& inputCommand);
   std::string ToStringStartProblem();
@@ -127,11 +131,11 @@ std::string Problem::ToStringStartProblem()
 { MacroRegisterFunctionWithName("ProblemCollection::ToStringStartProblem");
   std::stringstream out;
   out << CGI::GetLaTeXProcessingJavascript();
-  out << "\n<FORM method=\"POST\" id=\"formProblemCollection\" name=\"formProblemCollection\" action=\""
+  out << "\n<form class=\"problemForm\" method=\"POST\" id=\"formProblemCollection\" name=\"formProblemCollection\" action=\""
   << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n" ;
   out << theWebServer.GetActiveWorker().GetHtmlHiddenInputs();
-  out << this->contentHtml;
-  out << "\n</FORM>\n";
+  out << this->inputHtml;
+  out << "\n</form>\n";
   return out.str();
 }
 
@@ -139,7 +143,7 @@ std::string ProblemCollection::ToStringProblemLinks()
 { MacroRegisterFunctionWithName("ProblemCollection::ToStringProblemLinks");
   std::stringstream out;
   out << this->theProblems.size << " problem(s).";
-  out << "\n<FORM method=\"POST\" id=\"formProblemCollection\" name=\"formProblemCollection\" action=\""
+  out << "\n<form method=\"POST\" id=\"formProblemCollection\" name=\"formProblemCollection\" action=\""
   << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n" ;
   out << theWebServer.GetActiveWorker().GetHtmlHiddenInputs();
   for (int i=0; i<this->theProblems.size; i++)
@@ -149,7 +153,7 @@ std::string ProblemCollection::ToStringProblemLinks()
     << "\"> Start</button>";
     out << "<br>";
   }
-  out << "\n</FORM>\n";
+  out << "\n</form>\n";
   return out.str();
 }
 
@@ -200,7 +204,7 @@ bool Problem::LoadMe(std::stringstream& comments)
   } else
   { std::stringstream contentStream;
     contentStream << theFile.rdbuf();
-    this->contentHtml=contentStream.str();
+    this->inputHtml=contentStream.str();
   }
   return true;
 }
@@ -285,37 +289,71 @@ bool CalculatorFunctionsGeneral::innerInterpretHtml
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInterpretHtml");
   Problem theProblem;
-  if (!input.IsOfType<std::string>(&theProblem.contentHtml))
+  if (!input.IsOfType<std::string>(&theProblem.inputHtml))
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
-  if (!theProblem.ExtractExpressionsFromHtml(theCommands.Comments))
-    return false;
-  Calculator theInterpretter;
-  theInterpretter.init();
-  std::stringstream inputCommands;
-  for (int i=0; i<theProblem.calculatorCommands.size; i++)
-    inputCommands << theProblem.calculatorCommands[i];
-//  stOutput << "nput cmds: " << inputCommands.str();
-  theInterpretter.Evaluate(inputCommands.str());
-  return output.AssignValue(theInterpretter.outputString, theCommands);
+  theProblem.InterpretHtml(theCommands.Comments);
+  return output.AssignValue(theProblem.outputHtml, theCommands);
 }
 
 std::string Problem::ToStringExtractedCommands()
 { MacroRegisterFunctionWithName("Problem::ToStringExtractedCommands");
   std::stringstream out;
-  out << "<b>The html read follows.</b><br><hr> " << this->contentHtml;
+  out << "<b>The html read follows.</b><br><hr> " << this->inputHtml;
 //  out << "<hr><b>The split strings follow. </b><hr>" << splitStrings.ToStringCommaDelimited();
   out << "<hr><b>The extracted commands follow.</b><hr>";
   out << "<table><tr><td>Command(s)</td><td>Command type</td></tr>";
-  for (int i=0; i<this->calculatorCommands.size; i++)
-    out << "<tr>" << "<td>" << this->calculatorCommands[i] << "</td><td>"
+  for (int i=0; i<this->commands.size; i++)
+    out << "<tr>" << "<td>" << this->commands[i] << "</td><td>"
     << this->commandTypes[i] << "</td></tr>";
   out << "</table>";
   return out.str();
 }
 
+bool Problem::ExecuteCommands(Calculator& theInterpretter, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("Problem::ExecuteCommands");
+  theInterpretter.init();
+  std::stringstream calculatorCommands;
+  for (int i=0; i<this->commands.size; i++)
+    calculatorCommands << "SeparatorBetweenSpans;" << this->commands[i];
+  calculatorCommands << "SeparatorBetweenSpans;";
+//  stOutput << "nput cmds: " << inputCommands.str();
+  theInterpretter.Evaluate(calculatorCommands.str());
+  return true;
+}
+
+bool Problem::InterpretHtml(std::stringstream& comments)
+{ MacroRegisterFunctionWithName("Problem::InterpretHtml");
+  if (!this->ExtractExpressionsFromHtml(comments))
+    return false;
+  Calculator theInterpretter;
+  if (!this->ExecuteCommands(theInterpretter, comments))
+    return false;
+  std::stringstream out;
+  int spanCounter=0;
+  bool moreThanOneCommand=false;
+  for (int i=1; i<theInterpretter.theProgramExpression.children.size; i++)
+  { if (theInterpretter.theProgramExpression[i].ToString()!="SeparatorBetweenSpans")
+    { if (moreThanOneCommand)
+        out << "; ";
+      out << theInterpretter.theProgramExpression[i].ToString();
+      moreThanOneCommand=true;
+      continue;
+    }
+    if (i!=1)
+      out << " \\) </span>";
+    out << this->betweenTheCommands[spanCounter];
+    if (i!=theInterpretter.theProgramExpression.children.size-1)
+    { out << "<span class=\"" << this->commandTypes[spanCounter] << "\"> \\( ";
+      moreThanOneCommand=false;
+    }
+  }
+  this->outputHtml=out.str();
+  return true;
+}
+
 bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
 { MacroRegisterFunctionWithName("Problem::ExtractExpressionsFromHtml");
-  std::stringstream theReader(this->contentHtml);
+  std::stringstream theReader(this->inputHtml);
   theReader.seekg(0);
   List<std::string> splitStrings;
   std::string word, readChars;
@@ -335,7 +373,7 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
     if (word!="")
       splitStrings.AddOnTop(word);
   }
-  std::string nextString;
+  std::string nextString, outsideOfCalculatorSpan;
   bool buildingSpanStartTag=false;
   bool buildingSpanFinishTag=false;
   int currentSpanType=-1;
@@ -347,18 +385,24 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
       nextString="";
     if (currentString=="<")
     { if (nextString=="span")
-        buildingSpanStartTag=true;
+      { buildingSpanStartTag=true;
+        this->betweenTheCommands.AddOnTop(outsideOfCalculatorSpan);
+        outsideOfCalculatorSpan="";
+      }
       if (nextString=="/span")
         buildingSpanFinishTag=true;
     }
     if (buildingSpanStartTag)
       if (calculatorSpanClasses.Contains(currentString))
       { currentSpanType=calculatorSpanClasses.GetIndex(currentString);
-        this->calculatorCommands.AddOnTop("");
+        this->commands.AddOnTop("");
         this->commandTypes.AddOnTop(currentString);
       }
     if (!buildingSpanFinishTag && !buildingSpanStartTag && currentSpanType!=-1)
-      *this->calculatorCommands.LastObject()+= currentString +" ";
+      *this->commands.LastObject()+= currentString +" ";
+    else
+      outsideOfCalculatorSpan+=currentString+" ";
+
     if (currentString==">")
     { buildingSpanStartTag=false;
       if (buildingSpanFinishTag)
@@ -366,8 +410,15 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
       buildingSpanFinishTag=false;
     }
   }
-  for (int i=0; i<this->calculatorCommands.size; i++)
-    this->calculatorCommands[i]=this->CleanUpCommandString(this->calculatorCommands[i]);
+  this->betweenTheCommands.AddOnTop(outsideOfCalculatorSpan);
+  if (this->betweenTheCommands.size!=this->commands.size+1)
+  { crash << "I have that this->betweenTheCommands.size!=this->commands.size+1: "
+    << "this shouldn't happen - or at least it appears so to me as I program this right now. "
+    << "Crashing to let you know. "
+    << crash;
+  }
+  for (int i=0; i<this->commands.size; i++)
+    this->commands[i]=this->CleanUpCommandString(this->commands[i]);
   return true;
 }
 
@@ -413,7 +464,7 @@ bool CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml");
   Problem theProblem;
-  if (!input.IsOfType<std::string>(&theProblem.contentHtml))
+  if (!input.IsOfType<std::string>(&theProblem.inputHtml))
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
   if (!theProblem.ExtractExpressionsFromHtml(theCommands.Comments))
     return false;

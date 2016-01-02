@@ -1,3 +1,16 @@
 .calculatorHidden{
 display:none;
 }
+.problemForm{
+}
+.submitButton{
+}
+.submitButton:hover {
+	background-color:#878787;
+}
+.submitButton:active {
+	position:relative;
+	top:1px;
+}
+
+

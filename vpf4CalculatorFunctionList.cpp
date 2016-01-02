@@ -106,9 +106,17 @@ void Calculator::initPredefinedInnerFunctions()
    "LoadFileIntoString(\"/ProblemCollections/Problems/functions-composing-fractional-linear-1.html\")",
    true, false, "CalculatorConversions::innerLoadFileIntoString");
   this->AddOperationInnerHandler
+  ("InterpretHtml", CalculatorFunctionsGeneral::innerInterpretHtml, "",
+   "Does as ExtractCalculatorExpressionFromHtml but in addition interprets the calculator commands.",
+   "InterpretHtml(LoadFileIntoString(\
+   \"/ProblemCollections/Problems/functions-composing-fractional-linear-1.html\"))", true, false,
+   "CalculatorFunctionsGeneral::innerInterpretHtml");
+  this->AddOperationInnerHandler
   ("ExtractCalculatorExpressionFromHtml", CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml, "",
-   "Reads html and extracts embedded calculator commands. All content is ignored, except for content enclosed in\
-   spans with appropriate class names. At the moment of writing, the planned span class names are:\
+   "Reads html and extracts embedded calculator commands. \
+   Content enclosed in \
+   spans with appropriate class names is interpreted; all other content is copied without any change.\
+    At the moment of writing, the planned span class names are:\
    \"calculator\", \"calculatorHidden\", \"calculatorAnswer\".",
    "ExtractCalculatorExpressionFromHtml(LoadFileIntoString(\
    \"/ProblemCollections/Problems/functions-composing-fractional-linear-1.html\"))", true, false,

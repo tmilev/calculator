@@ -1,7 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader6WebServer.h"
-#include "vpfHeader3Calculator0_Interface.h"
+#include "vpfHeader3Calculator2_InnerFunctions.h"
 #include "vpfHeader7DatabaseInterface_MySQL.h"
 
 ProjectInformationInstance projectInfoInstanceWebServerExamAndTeachingRoutines
@@ -12,7 +12,11 @@ class Problem
 public:
   std::string fileName;
   std::string RelativePhysicalFileNameWithFolder;
-  std::string content;
+  std::string contentHtml;
+  List<std::string> calculatorCommands;
+  List<std::string> commandTypes;
+  List<std::string> calculatorSpanClasses;
+  List<char> splittingChars;
   static unsigned int HashFunction(const Problem& input)
   { return input.HashFunction();
   }
@@ -23,8 +27,21 @@ public:
   { return this->fileName==other.fileName;
   }
   bool LoadMe(std::stringstream& comments);
+  bool ExtractExpressionsFromHtml(std::stringstream& comments);
   std::string ToStringStartProblem();
+  std::string ToStringExtractedCommands();
+  Problem();
 };
+
+Problem::Problem()
+{ this->calculatorSpanClasses.AddOnTop("calculator");
+  this->calculatorSpanClasses.AddOnTop("calculatorHidden");
+  this->calculatorSpanClasses.AddOnTop("calculatorAnswer");
+  this->splittingChars.AddOnTop('<');
+  this->splittingChars.AddOnTop('\"');
+  this->splittingChars.AddOnTop('>');
+  this->splittingChars.AddOnTop('=');
+}
 
 class ProblemCollection
 {
@@ -112,7 +129,7 @@ std::string Problem::ToStringStartProblem()
   out << "\n<FORM method=\"POST\" id=\"formProblemCollection\" name=\"formProblemCollection\" action=\""
   << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n" ;
   out << theWebServer.GetActiveWorker().GetHtmlHiddenInputs();
-  out << this->content;
+  out << this->contentHtml;
   out << "\n</FORM>\n";
   return out.str();
 }
@@ -182,7 +199,7 @@ bool Problem::LoadMe(std::stringstream& comments)
   } else
   { std::stringstream contentStream;
     contentStream << theFile.rdbuf();
-    this->content=contentStream.str();
+    this->contentHtml=contentStream.str();
   }
   return true;
 
@@ -263,4 +280,100 @@ std::string WebWorker::GetTestingScreen()
   out << theRoutines.GetCurrentProblemItem();
   out << "</body></html>";
   return out.str();
+}
+
+bool CalculatorFunctionsGeneral::innerInterpretHtml
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInterpretHtml");
+  Problem theProblem;
+  if (!input.IsOfType<std::string>(&theProblem.contentHtml))
+    return theCommands << "Extracting calculator expressions from html takes as input strings. ";
+  if (!theProblem.ExtractExpressionsFromHtml(theCommands.Comments))
+    return false;
+  return false;
+}
+
+std::string Problem::ToStringExtractedCommands()
+{ MacroRegisterFunctionWithName("Problem::ToStringExtractedCommands");
+  std::stringstream out;
+  out << "<b>The html read follows.</b><br><hr> " << this->contentHtml;
+//  out << "<hr><b>The split strings follow. </b><hr>" << splitStrings.ToStringCommaDelimited();
+  out << "<hr><b>The extracted commands follow.</b><hr>";
+  out << "<table><tr><td>Command(s)</td><td>Command type</td></tr>";
+  for (int i=0; i<this->calculatorCommands.size; i++)
+    out << "<tr>" << "<td>" << this->calculatorCommands[i] << "</td><td>"
+    << this->commandTypes[i] << "</td></tr>";
+  out << "</table>";
+  return out.str();
+}
+
+bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
+{ MacroRegisterFunctionWithName("Problem::ExtractExpressionsFromHtml");
+  std::stringstream theReader(this->contentHtml);
+  theReader.seekg(0);
+  List<std::string> splitStrings;
+  std::string word, readChars;
+  splitStrings.SetExpectedSize(theReader.str().size()/4);
+  while (theReader >> readChars)
+  { word="";
+    for (unsigned i=0; i< readChars.size(); i++)
+    { if (splittingChars.Contains(readChars[i]))
+      { if (word!="")
+          splitStrings.AddOnTop(word);
+        std::string charToString;
+        charToString.push_back(readChars[i]);
+        splitStrings.AddOnTop(charToString);
+        word="";
+      } else
+        word.push_back(readChars[i]);
+    }
+    if (word!="")
+      splitStrings.AddOnTop(word);
+  }
+
+  std::string nextString;
+  bool buildingSpanStartTag=false;
+  bool buildingSpanFinishTag=false;
+  int currentSpanType=-1;
+  for (int i=0; i<splitStrings.size; i++)
+  { const std::string currentString=splitStrings[i];
+    if (i<splitStrings.size-1)
+      nextString=splitStrings[i+1];
+    else
+      nextString="";
+    if (currentString=="<")
+    { if (nextString=="span")
+        buildingSpanStartTag=true;
+      if (nextString=="/span")
+        buildingSpanFinishTag=true;
+    }
+    if (buildingSpanStartTag)
+      if (calculatorSpanClasses.Contains(currentString))
+      { currentSpanType=calculatorSpanClasses.GetIndex(currentString);
+        this->calculatorCommands.AddOnTop("");
+        this->commandTypes.AddOnTop(currentString);
+      }
+    if (!buildingSpanFinishTag && !buildingSpanStartTag && currentSpanType!=-1)
+      *this->calculatorCommands.LastObject()+= currentString +" ";
+    if (currentString==">")
+    { buildingSpanStartTag=false;
+      if (buildingSpanFinishTag)
+      { currentSpanType=-1;
+      }
+      buildingSpanFinishTag=false;
+    }
+  }
+  return true;
+}
+
+bool CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml");
+  Problem theProblem;
+  if (!input.IsOfType<std::string>(&theProblem.contentHtml))
+    return theCommands << "Extracting calculator expressions from html takes as input strings. ";
+  if (!theProblem.ExtractExpressionsFromHtml(theCommands.Comments))
+    return false;
+
+  return output.AssignValue(theProblem.ToStringExtractedCommands(), theCommands);
 }

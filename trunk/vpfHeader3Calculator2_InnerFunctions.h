@@ -21,6 +21,8 @@ public:
 
   static bool innerExtractCalculatorExpressionFromHtml
   (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerInterpretHtml
+  (Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerQuoteToString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerBase64ToCharToBase64Test(Calculator& theCommands, const Expression& input, Expression& output);

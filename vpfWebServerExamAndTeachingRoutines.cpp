@@ -28,6 +28,7 @@ public:
   }
   bool LoadMe(std::stringstream& comments);
   bool ExtractExpressionsFromHtml(std::stringstream& comments);
+  std::string CleanUpCommandString(const std::string& inputCommand);
   std::string ToStringStartProblem();
   std::string ToStringExtractedCommands();
   Problem();
@@ -202,7 +203,6 @@ bool Problem::LoadMe(std::stringstream& comments)
     this->contentHtml=contentStream.str();
   }
   return true;
-
 }
 
 bool ProblemCollection::LoadMe(std::stringstream& comments)
@@ -258,8 +258,7 @@ std::string TeachingRoutines::GetCurrentProblemItem()
   (currentCollection.GetProblemIndex(theGlobalVariables.userCurrentProblem));
   if (!currentProblem.LoadMe(this->comments))
   { out << "<hr><b>Failed to load problem: " << currentProblem.fileName << ".</b>"
-    << this->comments.str() << "<hr>"
-    << currentCollection.ToStringProblemLinks();
+    << this->comments.str() << "<hr>" << currentCollection.ToStringProblemLinks();
     return out.str();
   }
   return currentProblem.ToStringStartProblem();
@@ -290,7 +289,14 @@ bool CalculatorFunctionsGeneral::innerInterpretHtml
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
   if (!theProblem.ExtractExpressionsFromHtml(theCommands.Comments))
     return false;
-  return false;
+  Calculator theInterpretter;
+  theInterpretter.init();
+  std::stringstream inputCommands;
+  for (int i=0; i<theProblem.calculatorCommands.size; i++)
+    inputCommands << theProblem.calculatorCommands[i];
+//  stOutput << "nput cmds: " << inputCommands.str();
+  theInterpretter.Evaluate(inputCommands.str());
+  return output.AssignValue(theInterpretter.outputString, theCommands);
 }
 
 std::string Problem::ToStringExtractedCommands()
@@ -317,7 +323,7 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
   while (theReader >> readChars)
   { word="";
     for (unsigned i=0; i< readChars.size(); i++)
-    { if (splittingChars.Contains(readChars[i]))
+      if (splittingChars.Contains(readChars[i]))
       { if (word!="")
           splitStrings.AddOnTop(word);
         std::string charToString;
@@ -326,11 +332,9 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
         word="";
       } else
         word.push_back(readChars[i]);
-    }
     if (word!="")
       splitStrings.AddOnTop(word);
   }
-
   std::string nextString;
   bool buildingSpanStartTag=false;
   bool buildingSpanFinishTag=false;
@@ -358,12 +362,51 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
     if (currentString==">")
     { buildingSpanStartTag=false;
       if (buildingSpanFinishTag)
-      { currentSpanType=-1;
-      }
+        currentSpanType=-1;
       buildingSpanFinishTag=false;
     }
   }
+  for (int i=0; i<this->calculatorCommands.size; i++)
+    this->calculatorCommands[i]=this->CleanUpCommandString(this->calculatorCommands[i]);
   return true;
+}
+
+std::string Problem::CleanUpCommandString(const std::string& inputCommand)
+{ MacroRegisterFunctionWithName("Problem::CleanUpCommandString");
+  if (inputCommand=="")
+    return "";
+  int realStart=0;
+  int realEnd=inputCommand.size()-1;
+  for (; realStart< (signed) inputCommand.size(); realStart++)
+  { if (inputCommand[realStart]==' ')
+      continue;
+    if (inputCommand[realStart]=='\\')
+      if (realStart+1<(signed) inputCommand.size())
+        if (inputCommand[realStart+1]=='(')
+          realStart+=2;
+    break;
+  }
+  for (;realEnd >=0; realEnd--)
+  { if (inputCommand[realEnd]==' ')
+      continue;
+    if (inputCommand[realEnd]==')')
+      if (realEnd>0)
+        if (inputCommand[realEnd-1]=='\\')
+          realEnd-=2;
+    break;
+  }
+  if (realEnd<realStart)
+    realEnd=realStart-1;
+  std::string result=inputCommand.substr(realStart, realEnd-realStart+1);
+  for (int i=(signed)result.size()-1; i>=0; i--)
+  { if (result[i]==' ')
+      continue;
+    if (result[i]==';')
+      return result;
+    break;
+  }
+  result.push_back(';');
+  return result;
 }
 
 bool CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml

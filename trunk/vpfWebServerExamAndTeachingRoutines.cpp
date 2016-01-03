@@ -33,7 +33,7 @@ public:
   bool InterpretHtml(std::stringstream& comments);
   bool ExtractExpressionsFromHtml(std::stringstream& comments);
   std::string CleanUpCommandString(const std::string& inputCommand);
-  std::string ToStringStartProblem();
+  std::string ToStringExam();
   std::string ToStringExtractedCommands();
   Problem();
 };
@@ -127,14 +127,16 @@ std::string ProblemCollection::ToStringSelectMeForm()const
   return out.str();
 }
 
-std::string Problem::ToStringStartProblem()
-{ MacroRegisterFunctionWithName("ProblemCollection::ToStringStartProblem");
+std::string Problem::ToStringExam()
+{ MacroRegisterFunctionWithName("ProblemCollection::ToStringExam");
   std::stringstream out;
   out << CGI::GetLaTeXProcessingJavascript();
   out << "\n<form class=\"problemForm\" method=\"POST\" id=\"formProblemCollection\" name=\"formProblemCollection\" action=\""
   << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n" ;
   out << theWebServer.GetActiveWorker().GetHtmlHiddenInputs();
-  out << this->inputHtml;
+  std::stringstream failure;
+  this->InterpretHtml(failure);
+  out << this->outputHtml;
   out << "\n</form>\n";
   return out.str();
 }
@@ -265,7 +267,7 @@ std::string TeachingRoutines::GetCurrentProblemItem()
     << this->comments.str() << "<hr>" << currentCollection.ToStringProblemLinks();
     return out.str();
   }
-  return currentProblem.ToStringStartProblem();
+  return currentProblem.ToStringExam();
 }
 
 std::string WebWorker::GetTestingScreen()
@@ -318,36 +320,55 @@ bool Problem::ExecuteCommands(Calculator& theInterpretter, std::stringstream& co
   calculatorCommands << "SeparatorBetweenSpans;";
 //  stOutput << "nput cmds: " << inputCommands.str();
   theInterpretter.Evaluate(calculatorCommands.str());
-  return true;
+  return !theInterpretter.flagAbortComputationASAP;
 }
 
 bool Problem::InterpretHtml(std::stringstream& comments)
 { MacroRegisterFunctionWithName("Problem::InterpretHtml");
   if (!this->ExtractExpressionsFromHtml(comments))
     return false;
-  Calculator theInterpretter;
-  if (!this->ExecuteCommands(theInterpretter, comments))
-    return false;
-  std::stringstream out;
-  int spanCounter=0;
-  bool moreThanOneCommand=false;
-  for (int i=1; i<theInterpretter.theProgramExpression.children.size; i++)
-  { if (theInterpretter.theProgramExpression[i].ToString()!="SeparatorBetweenSpans")
-    { if (moreThanOneCommand)
-        out << "; ";
-      out << theInterpretter.theProgramExpression[i].ToString();
-      moreThanOneCommand=true;
+  int numAttempts=0;
+  const int MaxNumAttempts=1;
+  while (numAttempts<MaxNumAttempts)
+  { numAttempts++;
+    Calculator theInterpretter;
+    std::stringstream out;
+    if (!this->ExecuteCommands(theInterpretter, comments))
+    { if (numAttempts>=MaxNumAttempts)
+      { out << "Failed to evaluate the commands: " << MaxNumAttempts
+        << " attempts made. Calculator evaluation details follow.<hr> "
+        << theInterpretter.outputString << "<hr><b>Comments</b><br>"
+        << theInterpretter.Comments.str();
+        this->outputHtml=out.str();
+      }
       continue;
     }
-    if (i!=1)
-      out << " \\) </span>";
-    out << this->betweenTheCommands[spanCounter];
-    if (i!=theInterpretter.theProgramExpression.children.size-1)
-    { out << "<span class=\"" << this->commandTypes[spanCounter] << "\"> \\( ";
-      moreThanOneCommand=false;
+    int spanCounter=0;
+    bool moreThanOneCommand=false;
+    for (int i=1; i<theInterpretter.theProgramExpression.children.size; i++)
+    { if (theInterpretter.theProgramExpression[i].ToString()!="SeparatorBetweenSpans")
+      { if (this->commandTypes[spanCounter]=="calculatorAnswer")
+          continue;
+        if (moreThanOneCommand)
+          out << "; ";
+        out << theInterpretter.theProgramExpression[i].ToString();
+        moreThanOneCommand=true;
+        continue;
+      }
+      if (i!=1)
+      { out << " \\) </span>";
+        spanCounter++;
+      }
+      out << this->betweenTheCommands[spanCounter];
+      if (i!=theInterpretter.theProgramExpression.children.size-1)
+      { out << "<span class=\"" << this->commandTypes[spanCounter] << "\"> \\( ";
+        moreThanOneCommand=false;
+      }
     }
+  //  out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();
+    this->outputHtml=out.str();
+    break;
   }
-  this->outputHtml=out.str();
   return true;
 }
 
@@ -373,7 +394,7 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
     if (word!="")
       splitStrings.AddOnTop(word);
   }
-  std::string nextString, outsideOfCalculatorSpan;
+  std::string nextString, outsideOfCalculatorSpan, tagString;
   bool buildingSpanStartTag=false;
   bool buildingSpanFinishTag=false;
   int currentSpanType=-1;
@@ -384,11 +405,9 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
     else
       nextString="";
     if (currentString=="<")
-    { if (nextString=="span")
-      { buildingSpanStartTag=true;
-        this->betweenTheCommands.AddOnTop(outsideOfCalculatorSpan);
-        outsideOfCalculatorSpan="";
-      }
+    { tagString="<";
+      if (nextString=="span")
+        buildingSpanStartTag=true;
       if (nextString=="/span")
         buildingSpanFinishTag=true;
     }
@@ -397,14 +416,31 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
       { currentSpanType=calculatorSpanClasses.GetIndex(currentString);
         this->commands.AddOnTop("");
         this->commandTypes.AddOnTop(currentString);
+        this->betweenTheCommands.AddOnTop(outsideOfCalculatorSpan);
+        outsideOfCalculatorSpan="";
       }
     if (!buildingSpanFinishTag && !buildingSpanStartTag && currentSpanType!=-1)
       *this->commands.LastObject()+= currentString +" ";
-    else
+    if (tagString=="" )
       outsideOfCalculatorSpan+=currentString+" ";
-
+    if (tagString!="" && currentString!="<")
+    { tagString+=currentString;
+      bool needsSpace=true;
+      if (currentString.size()==1)
+        if (this->splittingChars.Contains(currentString[0]))
+          needsSpace=false;
+      if (nextString.size()==1)
+        if (this->splittingChars.Contains(nextString[0]))
+          needsSpace=false;
+      if (needsSpace)
+        tagString+=" ";
+    }
     if (currentString==">")
     { buildingSpanStartTag=false;
+      if (currentSpanType==-1)
+      { outsideOfCalculatorSpan+=tagString;
+        tagString="";
+      }
       if (buildingSpanFinishTag)
         currentSpanType=-1;
       buildingSpanFinishTag=false;

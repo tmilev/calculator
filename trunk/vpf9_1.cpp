@@ -210,6 +210,14 @@ void GlobalVariables::initDefaultFolderAndFileNames
   this->initOutputReportAndCrashFileNames("", "");
 }
 
+std::string GlobalVariables::GetWebInput(const std::string& inputName)
+{ MacroRegisterFunctionWithName("GlobalVariables::GetWebInput");
+  int theIndex=this->webFormArgumentNames.GetIndex(inputName);
+  if (theIndex==-1)
+    return "";
+  return this->webFormArguments[theIndex];
+}
+
 void GlobalVariables::MakeReport()
 { if (this->IndicatorStringOutputFunction==0)
     return;

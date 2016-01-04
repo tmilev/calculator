@@ -2261,37 +2261,38 @@ std::string CGI::GetLaTeXProcessingJavascript()
 //   return "<script src=\"../../jsmath/easy/load.js\"></script>";
 }
 
-void CGI::ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& outputData, List<std::string>& outputFieldNames)
+void CGI::ChopCGIInputStringToMultipleStrings
+(const std::string& input, List<std::string>& outputData,
+ HashedList<std::string, MathRoutines::hashString>& outputFieldNames)
 { int inputLength= (signed) input.size();
   bool readingData=false;
-  outputData.Reserve(10);
-  outputFieldNames.Reserve(10);
-  outputData.SetSize(1);
-  outputFieldNames.SetSize(1);
-  outputData[0]="";
-  outputFieldNames[0]="";
+  outputData.SetExpectedSize(15);
+  outputFieldNames.SetExpectedSize(15);
+  std::string currentFieldName="";
+  std::string currentFieldValue="";
+  currentFieldName.reserve(input.size());
+  currentFieldValue.reserve(input.size());
   for (int i=0; i<inputLength; i++)
-  { bool ignoreThisChar=false;
-    if (!readingData && input[i]=='=')
+  { if (!readingData && input[i]=='=')
     { readingData=true;
-      ignoreThisChar=true;
+      continue;
     }
     if (input[i]=='&')
-    { outputData.SetSize(outputData.size+1);
-      outputFieldNames.SetSize(outputData.size);
-      outputData.LastObject()->reserve(1000);
-      outputFieldNames.LastObject()->reserve(20);
-      *outputFieldNames.LastObject()="";
-      *outputData.LastObject()="";
+    { if (currentFieldName!="")
+      { outputFieldNames.AddOnTop(currentFieldName);
+        outputData.AddOnTop(currentFieldValue);
+      }
       readingData=false;
-      ignoreThisChar=true;
+      continue;
     }
-    if (!ignoreThisChar)
-    { if (readingData)
-        outputData.LastObject()->push_back(input[i]);
-      else
-        outputFieldNames.LastObject()->push_back(input[i]);
-    }
+    if (readingData)
+      currentFieldName.push_back(input[i]);
+    else
+      currentFieldValue.push_back(input[i]);
+  }
+  if (currentFieldName!="")
+  { outputFieldNames.AddOnTop(currentFieldName);
+    outputData.AddOnTop(currentFieldValue);
   }
 }
 

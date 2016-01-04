@@ -487,12 +487,6 @@ std::string WebWorker::ToStringMessageShortUnsafe(FormatExpressions* theFormat)c
     out << "POST " << "(from calculator)";
   else if (this->requestType==this->requestGetNotCalculator)
     out << "GET " << "(NOT from calculator)";
-  else if (this->requestType==this->requestTogglePauseCalculator)
-    out << "GET " << "(pause computation)";
-  else if (this->requestType==this->requestGetServerStatus)
-    out << "GET (server status)";
-  else if (this->requestType==this->requestGetComputationIndicator)
-    out << "GET (computation indicator)";
   else
     out << "Request type undefined.";
   out << "<hr>Main address raw: " << this->mainAddresSRAW;
@@ -528,8 +522,7 @@ std::string WebWorker::ToStringMessageUnsafe()const
   out << this->ToStringMessageShortUnsafe(&tempFormat);
   out << "<hr>";
   out << "Main address RAW: " << this->mainAddresSRAW << "<br>";
-  if (this->requestType==this->requestGetCalculator || this->requestType==this->requestGetNotCalculator ||
-      this->requestType==this->requestGetServerStatus || this->requestType==this->requestGetComputationIndicator)
+  if (this->requestType==this->requestGetCalculator || this->requestType==this->requestGetNotCalculator)
     out << "GET " << this->mainAddresSRAW;
   if (requestType==this->requestPostCalculator)
     out << "POST " << this->mainAddresSRAW;
@@ -571,64 +564,31 @@ std::string WebWorker::ToStringCalculatorArguments()const
 
 void WebWorker::ProcessRawArguments()
 { MacroRegisterFunctionWithName("WebServer::ProcessRawArguments");
-  List<std::string>& inputStringNames=theGlobalVariables.webFormArgumentNames;
+  HashedList<std::string, MathRoutines::hashString>& inputStringNames=theGlobalVariables.webFormArgumentNames;
   List<std::string>& inputStrings=theGlobalVariables.webFormArguments;
   CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
   std::string password;
-  std::string desiredUser="";
-
-  if (inputStringNames.Contains("user"))
-    desiredUser=inputStrings[inputStringNames.GetIndex("user")];
+  std::string desiredUser=theGlobalVariables.GetWebInput("user");
   if (desiredUser=="")
-    if (inputStringNames.Contains("userHidden"))
-      desiredUser=inputStrings[inputStringNames.GetIndex("userHidden")];
+    desiredUser=theGlobalVariables.GetWebInput("userHidden");
   if (desiredUser!="")
     CGI::URLStringToNormal(desiredUser, desiredUser);
-  if (inputStringNames.Contains("authenticationToken"))
-  { this->authenticationToken=inputStrings[inputStringNames.GetIndex("authenticationToken")];
-    CGI::URLStringToNormal(this->authenticationToken, this->authenticationToken);
-    //stOutput << "<b>authenticationToken: </b><br>" << this->authenticationToken;
+  this->authenticationToken=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("authenticationToken"));
+  if (this->authenticationToken!="")
     this->flagAuthenticationTokenWasSubmitted=true;
-  }
   if (inputStringNames.Contains("password"))
-  { password=inputStrings[inputStringNames.GetIndex("password")];
+  { password=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("password"));
     inputStrings[inputStringNames.GetIndex("password")]="********************************************";
-    CGI::URLStringToNormal(password, password);
   }
-  theGlobalVariables.userExamStatus="";
-  theGlobalVariables.userCurrentProblemCollection="";
-  theGlobalVariables.userCurrentProblem="";
   if (desiredUser!="" && theGlobalVariables.flagUsingSSLinCurrentConnection)
-  { //stOutput << "<br>LoginViaDatabase called: "
-    //<< "user: " << this->user;
-    theGlobalVariables.flagLoggedIn=DatabaseRoutinesGlobalFunctions::LoginViaDatabase
+  { theGlobalVariables.flagLoggedIn=DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     (desiredUser, password, this->authenticationToken);
     if (theGlobalVariables.flagLoggedIn)
       theGlobalVariables.userDefault=desiredUser;
     else
       theGlobalVariables.userDefault="";
   }
-  this->flagFoundMalformedFormInput=false;
-  if (theGlobalVariables.flagLoggedIn)
-    for (int i=0; i<inputStringNames.size; i++)
-    { if (inputStringNames[i]=="currentProblem")
-        if (inputStrings[i]!="")
-        { if (theGlobalVariables.userCurrentProblem!="")
-            this->flagFoundMalformedFormInput=true;
-          theGlobalVariables.userCurrentProblem= CGI::URLStringToNormal( inputStrings[i]);
-        }
-      if (inputStringNames[i]=="currentProblemCollection")
-        if (inputStrings[i]!="")
-        { if (theGlobalVariables.userCurrentProblemCollection!="")
-            this->flagFoundMalformedFormInput=true;
-          theGlobalVariables.userCurrentProblemCollection=inputStrings[i];
-        }
-      if (inputStringNames[i]=="examStatus")
-        theGlobalVariables.userExamStatus= inputStrings[i];
-    }
   password="********************************************";
-  if (inputStringNames.Contains("textInput"))
-    theParser.inputString= inputStrings[inputStringNames.GetIndex("textInput")];
 }
 
 std::string WebWorker::GetHtmlHiddenInputs()
@@ -662,7 +622,7 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
   if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(theParser.inputString, civilizedInputSafish))
     stOutput << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are "
     << " modified due to a javascript hijack issue. <br>";
-  stOutput << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\", style=\"white-space:normal\" "
+  stOutput << "<textarea rows=\"3\" cols=\"30\" name=\"mainInput\" id=\"mainInputID\", style=\"white-space:normal\" "
   << "onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {storeSettings(); "
   << " this.form.submit(); return false;}\" "
   << "onkeyup=\"suggestWord();\", onkeydown=\"suggestWord(); arrowAction(event);\", onmouseup=\"suggestWord();\", oninput=\"suggestWord();\""
@@ -863,14 +823,6 @@ void WebWorker::ExtractArgumentFromAddress()
   this->requestType=this->requestGetCalculator;
   MathRoutines::SplitStringInTwo(calculatorArgumentRawWithQuestionMark, 1, tempS, this->mainArgumentRAW);
   theLog << logger::yellow << "this->mainArgumentRAW=" << this->mainArgumentRAW << logger::endL;
-  if (MathRoutines::StringBeginsWith(this->mainArgumentRAW, "monitor"))
-    this->requestType=this->requestGetMonitor;
-  if (MathRoutines::StringBeginsWith(this->mainArgumentRAW, "indicator"))
-    this->requestType=this->requestGetComputationIndicator;
-  if (MathRoutines::StringBeginsWith(this->mainArgumentRAW, "status"))
-    this->requestType=this->requestGetServerStatus;
-  if (MathRoutines::StringBeginsWith(this->mainArgumentRAW, "pauseIndicator"))
-    this->requestType=this->requestTogglePauseCalculator;
 }
 
 void WebWorker::ParseMessage()
@@ -1240,15 +1192,16 @@ int WebWorker::ProcessPauseWorker()
 { MacroRegisterFunctionWithName("WebWorker::ProcessPauseWorker");
   theLog << "Proceeding to toggle worker pause." << logger::endL;
   stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-  if (this->mainArgumentRAW.size()<=14)
-  { stOutput << "<b>Indicator takes as argument the id of the child process that is running the computation.</b>";
+  std::string theMainInput=theGlobalVariables.GetWebInput("mainInput");
+  if (theMainInput=="")
+  { stOutput << "<b>To pause a worker please provide the worker number in the mainInput field.</b>";
     return 0;
   }
-  int inputWebWorkerNumber= atoi(this->mainArgumentRAW.substr(14, std::string::npos).c_str());
+  int inputWebWorkerNumber= atoi(theMainInput.c_str());
   int inputWebWorkerIndex= inputWebWorkerNumber-1;
   if (inputWebWorkerIndex<0 || inputWebWorkerIndex>=this->parent->theWorkers.size)
-  { stOutput << "<b>User requested " << this->mainArgumentRAW << " (worker number " << inputWebWorkerNumber
-    << " out of " << this->parent->theWorkers.size << ") but the worker number is out of range. </b>";
+  { stOutput << "<b>User requested worker number " << inputWebWorkerNumber
+    << " out of " << this->parent->theWorkers.size << " which is out of range. </b>";
     return 0;
   }
   if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUse)
@@ -1273,11 +1226,12 @@ int WebWorker::ProcessMonitor()
 { MacroRegisterFunctionWithName("WebWorker::ProcessMonitor");
   theLog << "Processing get monitor." << logger::endL;
   stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-  if (this->mainArgumentRAW.size()<=7)
-  { stOutput << "<b>Monitor takes as argument the id of the child process that is running the computation.</b>";
+  std::string theMainInput=theGlobalVariables.GetWebInput("mainInput");
+  if (theMainInput=="")
+  { stOutput << "<b>Monitor takes as argument the number of the child process that is running the computation.</b>";
     return 0;
   }
-  int inputWebWorkerNumber= atoi(this->mainArgumentRAW.substr(7, std::string::npos).c_str());
+  int inputWebWorkerNumber= atoi(theMainInput.c_str());
   stOutput << "<html><body>" << this->GetJavaScriptIndicatorBuiltInServer(inputWebWorkerNumber-1)
   << "</body></html>";
   return 0;
@@ -1288,19 +1242,22 @@ int WebWorker::ProcessComputationIndicator()
   theLog << "Processing get request indicator." << logger::endL;
   stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
   ProgressReportWebServer theReport("Preparing indicator report");
-  if (this->mainArgumentRAW.size()<=9)
-  { stOutput << "<b>Indicator takes as argument the id of the child process that is running the computation.</b>";
+  std::string theMainInput=theGlobalVariables.GetWebInput("mainInput");
+  if (theMainInput=="")
+  { stOutput << "<b>To get a computation indicator you need to supply the number "
+    << "of the child process in the mainInput field.</b>";
     return 0;
   }
-  int inputWebWorkerNumber= atoi(this->mainArgumentRAW.substr(9, std::string::npos).c_str());
+  int inputWebWorkerNumber= atoi(theMainInput.c_str());
   int inputWebWorkerIndex= inputWebWorkerNumber-1;
   if (inputWebWorkerIndex<0 || inputWebWorkerIndex>=this->parent->theWorkers.size)
-  { stOutput << "<b>Indicator requested " << this->mainArgumentRAW << " (extracted worker number "
-    << inputWebWorkerNumber << " out of " << this->parent->theWorkers.size << ") but the id is out of range. </b>";
+  { stOutput << "<b>Indicator error. Worker number "
+    << inputWebWorkerNumber << "is out of range: there are " << this->parent->theWorkers.size
+    << "workers. </b>";
     return 0;
   }
   if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUse)
-  { stOutput << "<b>Requested worker number " << inputWebWorkerNumber << " is not in use. "
+  { stOutput << "<b>Indicator error. Worker number " << inputWebWorkerNumber << " is not in use. "
     << "Total number of workers: " << this->parent->theWorkers.size << ". </b>";
     return 0;
   }
@@ -1607,31 +1564,38 @@ int WebWorker::ProcessUnknown()
   return 0;
 }
 
-int WebWorker::OutputWeb()
-{ MacroRegisterFunctionWithName("WebServer::OutputWeb");
+int WebWorker::ProcessCalculator()
+{ MacroRegisterFunctionWithName("WebServer::ProcessCalculator");
   ProgressReportWebServer theReport;
   this->ProcessRawArguments();
-  if ( theGlobalVariables.flagUsingSSLinCurrentConnection &&
-      !theGlobalVariables.flagLoggedIn)
-  { stOutput << this->GetLoginScreen();
+  if (theGlobalVariables.userCalculatorRequestType=="pause")
+    return this->ProcessPauseWorker();
+  if (theGlobalVariables.userCalculatorRequestType=="status")
+    return this->ProcessServerStatus();
+  if (theGlobalVariables.userCalculatorRequestType=="indicator")
+    return this->ProcessComputationIndicator();
+  if (theGlobalVariables.userCalculatorRequestType=="monitor")
+    return this->ProcessMonitor();
+  //unless the worker is an indicator, it has no access to communication channels of the other workers
+  this->parent->ReleaseNonActiveWorkers();
+  if ((theGlobalVariables.flagUsingSSLinCurrentConnection && !theGlobalVariables.flagLoggedIn)||
+      theGlobalVariables.userCalculatorRequestType=="login")
+  { stOutput << this->GetLoginPage();
     theReport.SetStatus("Login screen served, exiting. ");
     theGlobalVariables.flagComputationCompletE=true;
     stOutput.Flush();
     return 0;
   }
-  if (theGlobalVariables.userExamStatus!="" && theGlobalVariables.flagLoggedIn &&
+  if (theGlobalVariables.userCalculatorRequestType=="exercises" && theGlobalVariables.flagLoggedIn &&
       theGlobalVariables.flagUsingSSLinCurrentConnection)
-  { stOutput << this->GetTestingScreen();
-    theReport.SetStatus("Testing screen served, exiting.");
+  { stOutput << this->GetExamPage();
+    theReport.SetStatus("Exam page served, exiting.");
     stOutput.Flush();
     return 0;
   }
+  theParser.inputString=theGlobalVariables.GetWebInput("mainInput");
   this->OutputBeforeComputation();
   theWebServer.CheckExecutableVersionAndRestartIfNeeded();
-
-  //stOutput << theParser.javaScriptDisplayingIndicator;
-  //theParser.inputString="TestCalculatorIndicator 0";
-  //theParser.inputString="printSemisimpleSubalgebrasRecompute(B_3)";
   theParser.init();
   if (theGlobalVariables.flagUsingBuiltInWebServer)
     theReport.SetStatus("OutputWeb: Computing...");
@@ -1696,10 +1660,14 @@ std::string WebWorker::GetJavaScriptIndicatorFromHD()
   return out.str();
 }
 
-std::string WebWorker::GetLoginHTMLelement()
-{ MacroRegisterFunctionWithName("WebWorker::GetLoginHTMLelement");
+std::string WebWorker::GetLoginHTMLinternal()
+{ MacroRegisterFunctionWithName("WebWorker::GetLoginHTMLinternal");
   std::stringstream out;
-  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"get\" accept-charset=\"utf-8\">"
+  out << "<hr>message main: "
+  << this->theMessage
+  << "<hr> main argument: "
+  << this->mainArgumentRAW;
+  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"POST\" accept-charset=\"utf-8\">"
   <<  "User name or email: "
   << "<input type=\"text\" name=\"user\" placeholder=\"user\" required>"
   << "<br>Password: "
@@ -1711,8 +1679,8 @@ std::string WebWorker::GetLoginHTMLelement()
   return out.str();
 }
 
-std::string WebWorker::GetLoginScreen()
-{ MacroRegisterFunctionWithName("WebWorker::GetLoginScreen");
+std::string WebWorker::GetLoginPage()
+{ MacroRegisterFunctionWithName("WebWorker::GetLoginPage");
   std::stringstream out;
   out << "<html>"
   << WebWorker::GetJavascriptStandardCookies()
@@ -1724,7 +1692,7 @@ std::string WebWorker::GetLoginScreen()
     << "  document.getElementById('login').submit();";
 //    << "  window.location='calculator?user='+GlobalUser+'&authenticationToken='+GlobalAuthenticationToken;";
   out << "\">\n"
-  << WebWorker::GetLoginHTMLelement()
+  << WebWorker::GetLoginHTMLinternal()
   << "</body></html>";
   return out.str();
 }
@@ -1753,7 +1721,7 @@ std::string WebWorker::GetJavascriptHideHtml()
 std::string WebWorker::GetJavascriptStandardCookies()
 { std::stringstream out;
   out
-  <<"<script type=\"text/javascript\"> \n"
+  << "<script type=\"text/javascript\"> \n"
   << "function getCookie(c_name)\n"
   << "{ VPFcookie=document.cookie.split(\";\");\n"
   << "  for (i=0;i<VPFcookie.length;i++)\n"
@@ -1773,7 +1741,7 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "  document.cookie=theName + \"=\" + c_value;\n"
   << "}\n"
   << "function storeSettings()\n"
-  << "{ theCalculatorForm=document.getElementById(\"textInputID\");  \n"
+  << "{ theCalculatorForm=document.getElementById(\"mainInputID\");  \n"
   << "  //alert(theCalculatorForm.style.width);\n"
   << "  if (theCalculatorForm!=null){\n"
   << "    addCookie(\"widthCalculatorText\", theCalculatorForm.style.width, 100);  \n"
@@ -1783,12 +1751,13 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "}\n";
   out
   << "function storeSettingsProgress(){\n";
-  if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userExamStatus!="")
-  { out << "  addCookie(\"examStatus\", \"" << theGlobalVariables.userExamStatus << "\", 100);\n";
+  if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType!="" &&
+      theGlobalVariables.userCalculatorRequestType!="compute")
+  { out << "  addCookie(\"request\", \"" << theGlobalVariables.userCalculatorRequestType << "\", 100);\n";
     out << "  addCookie(\"currentProblemCollection\", \""
-    << theGlobalVariables.userCurrentProblemCollection << "\", 100);\n";
+    << theGlobalVariables.GetWebInput("currentProblemCollection") << "\", 100);\n";
     out << "  addCookie(\"currentProblem\", \""
-    << theGlobalVariables.userCurrentProblem << "\", 100);\n";
+    << theGlobalVariables.GetWebInput("currentProblem") << "\", 100);\n";
   }
   out
   << "}\n";
@@ -1803,10 +1772,18 @@ std::string WebWorker::GetJavascriptStandardCookies()
   out
   << "}\n";
   out
+  << "function getCalculatorCGIsettings(){\n"
+  << "  result =\"examStatus=\"+getCookie(\"examStatus\");\n"
+  << "  result+=\"&user=\"+getCookie(\"user\");\n"
+  << "  result+=\"&authenticationToken=\"+getCookie(\"authenticationToken\");\n"
+  << "  result+=\"&currentProblem=\"+getCookie(\"currentProblem\");\n"
+  << "  result+=\"&currentProblemCollection=\"+getCookie(\"currentProblemCollection\");\n"
+  << "  return result;\n"
+  << "}\n"
   << "function loadSettings(){\n"
   << "  storeSettingsSecurity();\n"
   << "  storeSettingsProgress();\n"
-  << "  theCalculatorForm=document.getElementById(\"textInputID\");  \n"
+  << "  theCalculatorForm=document.getElementById(\"mainInputID\");  \n"
   << "  if (theCalculatorForm!=null){\n"
   << "    theOldWidth=getCookie(\"widthCalculatorText\");\n"
   << "    theOldHeight=getCookie(\"heightCalculatorText\");\n"
@@ -1849,7 +1826,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex)
   out << "  var pauseRequest = new XMLHttpRequest();\n";
   theLog << "Generating indicator address for worker number " << inputIndex+1 << "." << logger::endL;
   out << "  pauseURL  = \"" << theGlobalVariables.DisplayNameCalculatorWithPath
-  << "?pauseIndicator" << inputIndex+1 << "\";\n";
+  << "?request=pause&mainInput=" << inputIndex+1 << "\";\n";
   out << "  pauseRequest.open(\"GET\",pauseURL,false);\n";
 //  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
   out << "  pauseRequest.send(null)\n";
@@ -1915,37 +1892,22 @@ int WebWorker::ServeClient()
   theReport.SetStatus("All bytes from client received, processing. Worker process in use ...");
   theGlobalVariables.flagComputationStarted=true;
   theGlobalVariables.IndicatorStringOutputFunction=WebServer::PipeProgressReportToParentProcess;
-  if (this->requestType!=this->requestGetComputationIndicator &&
-      this->requestType!=this->requestGetServerStatus &&
-      this->requestType!=this->requestTogglePauseCalculator &&
-      this->requestType!=this->requestGetMonitor)
-    this->parent->ReleaseNonActiveWorkers();
-    //unless the worker is an indicator, it has no access to communication channels of the other workers
   if (this->requestType==this->requestGetCalculator || this->requestType==this->requestPostCalculator)
   { stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
     theParser.inputStringRawestOfTheRaw=this->mainArgumentRAW;
     this->mainArgumentRAW="";
     //theParser.javaScriptDisplayingIndicator=this->GetJavaScriptIndicatorBuiltInServer(true);
     theParser.javaScriptDisplayingIndicator="";
-    this->OutputWeb();
+    this->ProcessCalculator();
   } else if (this->requestType==this->requestGetNotCalculator)
     this->ProcessNonCalculator();
-  else if (this->requestType==this->requestTogglePauseCalculator)
-    this->ProcessPauseWorker();
-  else if (this->requestType==this->requestGetServerStatus)
-  { this->ProcessServerStatus();
-    this->parent->ReleaseNonActiveWorkers();
-  } else if (this->requestType==this->requestGetComputationIndicator)
-  { this->ProcessComputationIndicator();
-    this->parent->ReleaseNonActiveWorkers();
-  } else if (this->requestType==this->requestGetMonitor)
-  { this->ProcessMonitor();
-    this->parent->ReleaseNonActiveWorkers();
-  } else if (this->requestType==this->requestUnknown)
+  else if (this->requestType==this->requestUnknown)
     this->ProcessUnknown();
+  else
+    crash << "Request type not parsed properly. " << crash;
   if (theGlobalVariables.theThreads.size==1)
-  { crash << "Number of threads must be at least 2 in this point of code..." << crash;
-  }
+    crash << "Number of threads must be at least 2 in this point of code..." << crash;
+  this->parent->ReleaseNonActiveWorkers();
   theReport.SetStatus("Reply to client prepared, proceeding to send and release all resources...");
   this->SignalIamDoneReleaseEverything();
   return 0;
@@ -2024,7 +1986,7 @@ std::string WebWorker::ToStringStatus()const
       out << ", <span style=\"color:green\"><b>current process</b></span>";
     else
       out << ", <b>in use</b>";
-    out << ", <a href=\"calculator?monitor" << this->indexInParent +1 << "\">monitor process "
+    out << ", <a href=\"calculator?request=monitor&mainInput=" << this->indexInParent +1 << "\">monitor process "
     << this->indexInParent +1 << "</a>";
   } else
     out << ", not in use";
@@ -2691,7 +2653,7 @@ int WebServer::main_apache_client()
 	}
 	theParser.javaScriptDisplayingIndicator=WebWorker::GetJavaScriptIndicatorFromHD();
 	WebWorker theWorker;
-  return theWorker.OutputWeb();
+  return theWorker.ProcessCalculator();
 }
 
 extern int mainTest(List<std::string>& remainingArgs);

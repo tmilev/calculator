@@ -73,7 +73,7 @@ public:
 
   static void StandardOutputAfterTimeOut(const std::string& input);
 
-  int OutputWeb();
+  int ProcessCalculator();
   void ProcessRawArguments();
   void OutputBeforeComputation();
   void OutputBeforeComputationUserInputAndAutoComplete();
@@ -96,10 +96,10 @@ public:
   void SendAllBytesHttpSSL();
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
   std::string GetJavaScriptIndicatorBuiltInServer(int inputIndex);
-  std::string GetLoginScreen();
-  std::string GetTestingScreen();
+  std::string GetLoginPage();
+  std::string GetLoginHTMLinternal();
+  std::string GetExamPage();
   static std::string GetJavaScriptIndicatorFromHD();
-  std::string GetLoginHTMLelement();
   static std::string GetJavascriptHideHtml();
   std::string GetHtmlHiddenInputs();
   std::string GetJavascriptStandardCookies();
@@ -112,9 +112,8 @@ public:
   bool ReceiveAllHttp();
   bool ReceiveAllHttpSSL();
   void SendDisplayUserInputToServer();
-  enum requestTypes {requestUnknown, requestGetCalculator, requestTogglePauseCalculator,
-  requestPostCalculator, requestGetNotCalculator, requestGetServerStatus,
-  requestGetComputationIndicator, requestGetMonitor};
+  enum requestTypes {requestUnknown, requestGetCalculator, requestPostCalculator,
+  requestGetNotCalculator};
   std::string ToStringCalculatorArguments()const;
   std::string ToStringStatus()const;
   std::string ToStringMessageUnsafe()const;

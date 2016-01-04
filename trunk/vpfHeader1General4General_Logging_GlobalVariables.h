@@ -103,18 +103,17 @@ public:
   ListReferences<List<stackInfo> > CustomStackTrace;
   ListReferences<List<std::string> > ProgressReportStringS;
   List<std::string> programArguments;
+
   List<std::string> webFormArguments;
-  List<std::string> webFormArgumentNames;
+  HashedList<std::string, MathRoutines::hashString> webFormArgumentNames;
+  std::string userCalculatorAdmin;
+  std::string userDefault;
+  std::string userCalculatorRequestType;
+
   Controller theLocalPauseController;
 
   static const std::string hopefullyPermanentWebAdressOfServerExecutable;
   static const std::string hopefullyPermanentWebAdressOfServerOutputFolder;
-
-  std::string userCalculatorAdmin;
-  std::string userDefault;
-  std::string userExamStatus;
-  std::string userCurrentProblemCollection;
-  std::string userCurrentProblem;
 
   std::string userInputStringRAWIfAvailable;
   std::string userInputStringIfAvailable;
@@ -169,6 +168,7 @@ public:
     return -1;
   }
   static void InitThreadsExecutableStart();
+  std::string GetWebInput(const std::string& inputName);
   void initDefaultFolderAndFileNames
 (const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow);
   void initOutputReportAndCrashFileNames

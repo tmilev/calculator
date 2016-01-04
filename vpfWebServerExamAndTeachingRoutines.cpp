@@ -34,6 +34,7 @@ public:
   bool ExtractExpressionsFromHtml(std::stringstream& comments);
   std::string CleanUpCommandString(const std::string& inputCommand);
   std::string ToStringExam();
+  std::string GetSubmitAnswersJavascript();
   std::string ToStringExtractedCommands();
   Problem();
 };
@@ -81,6 +82,7 @@ public:
   int GetExerciseIndex(const std::string& desiredExercise);
   std::stringstream comments;
   bool LoadExercises();
+  std::string GetSubmitAnswersJavascript();
   std::string GetCurrentProblemItem();
   std::string ToStringExerciseSelection();
   TeachingRoutines();
@@ -130,14 +132,15 @@ std::string ProblemCollection::ToStringSelectMeForm()const
 std::string Problem::ToStringExam()
 { MacroRegisterFunctionWithName("ProblemCollection::ToStringExam");
   std::stringstream out;
+  out << this->GetSubmitAnswersJavascript();
   out << CGI::GetLaTeXProcessingJavascript();
   out << "\n<form class=\"problemForm\" method=\"POST\" id=\"formProblemCollection\" name=\"formProblemCollection\" action=\""
   << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n" ;
   out << theWebServer.GetActiveWorker().GetHtmlHiddenInputs();
+  out << "\n</form>\n";
   std::stringstream failure;
   this->InterpretHtml(failure);
   out << this->outputHtml;
-  out << "\n</form>\n";
   return out.str();
 }
 
@@ -237,31 +240,30 @@ std::string TeachingRoutines::GetCurrentProblemItem()
     << this->comments.str() << "<hr>";
     return out.str();
   }
-  if (theGlobalVariables.userCurrentProblemCollection=="")
+  std::string currentCollectionName=theGlobalVariables.GetWebInput("currentProblemCollection");
+  std::string currentProblemName=theGlobalVariables.GetWebInput("currentProblem");
+  if (currentCollectionName=="")
     return this->ToStringExerciseSelection();
-  if (!this->HasExercise(theGlobalVariables.userCurrentProblemCollection))
-  { out << "<hr><b>Could not find problem collection: " << theGlobalVariables.userCurrentProblemCollection << "</b><hr>";
+  if (!this->HasExercise(currentCollectionName))
+  { out << "<hr><b>Could not find problem collection: " << currentCollectionName << "</b><hr>";
     out << this->ToStringExerciseSelection();
     return out.str();
   }
-  ProblemCollection& currentCollection=
-  this->theExercises.GetElement(this->GetExerciseIndex(theGlobalVariables.userCurrentProblemCollection));
+  ProblemCollection& currentCollection= this->theExercises.GetElement(this->GetExerciseIndex(currentProblemName));
   if (!currentCollection.LoadMe(this->comments))
   { out << "<hr><b>Failed to load problem collection: " << currentCollection.fileName << ".</b> "
     << this->comments.str() << "<hr>"
     << this->ToStringExerciseSelection();
     return out.str();
   }
-  if (theGlobalVariables.userCurrentProblem=="")
+  if (currentProblemName=="")
     return currentCollection.ToStringProblemLinks();
-  if (!currentCollection.HasProblem(theGlobalVariables.userCurrentProblem))
-  { out << "<hr><b>Could not find problem: " << theGlobalVariables.userCurrentProblem << ".</b></hr>"
+  if (!currentCollection.HasProblem(currentProblemName))
+  { out << "<hr><b>Could not find problem: " << currentProblemName << ".</b></hr>"
     << currentCollection.ToStringProblemLinks();
     return out.str();
   }
-  Problem& currentProblem=
-  currentCollection.theProblems.GetElement
-  (currentCollection.GetProblemIndex(theGlobalVariables.userCurrentProblem));
+  Problem& currentProblem=currentCollection.theProblems.GetElement(currentCollection.GetProblemIndex(currentProblemName));
   if (!currentProblem.LoadMe(this->comments))
   { out << "<hr><b>Failed to load problem: " << currentProblem.fileName << ".</b>"
     << this->comments.str() << "<hr>" << currentCollection.ToStringProblemLinks();
@@ -270,8 +272,28 @@ std::string TeachingRoutines::GetCurrentProblemItem()
   return currentProblem.ToStringExam();
 }
 
-std::string WebWorker::GetTestingScreen()
-{ MacroRegisterFunctionWithName("WebWorker::GetTestingScreen");
+std::string Problem::GetSubmitAnswersJavascript()
+{ std::stringstream out;
+  out
+  << "<script type=\"text/javascript\"> \n"
+  << "function submitAnswers(){\n"
+  << "  var https = new XMLHttpRequest();\n"
+  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
+  << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
+  << "  var params = getCalculatorCGIsettings();\n"
+  << "  https.send(params);\n"
+  << "  https.onload = function() {\n"
+  << "  span = document.createElement('span');\n"
+  << "  span.innerHTML=https.responseText;\n"
+  << "  document.body.appendChild(span);\n"
+  << "}\n"
+  << "}\n"
+  << "</script>";
+  return out.str();
+}
+
+std::string WebWorker::GetExamPage()
+{ MacroRegisterFunctionWithName("WebWorker::GetExamPage");
   TeachingRoutines theRoutines;
   std::stringstream out;
   out << "<html>"
@@ -328,7 +350,7 @@ bool Problem::InterpretHtml(std::stringstream& comments)
   if (!this->ExtractExpressionsFromHtml(comments))
     return false;
   int numAttempts=0;
-  const int MaxNumAttempts=1;
+  const int MaxNumAttempts=10;
   while (numAttempts<MaxNumAttempts)
   { numAttempts++;
     Calculator theInterpretter;
@@ -345,18 +367,25 @@ bool Problem::InterpretHtml(std::stringstream& comments)
     }
     int spanCounter=0;
     bool moreThanOneCommand=false;
+    std::string lastCommands;
     for (int i=1; i<theInterpretter.theProgramExpression.children.size; i++)
     { if (theInterpretter.theProgramExpression[i].ToString()!="SeparatorBetweenSpans")
       { if (this->commandTypes[spanCounter]=="calculatorAnswer")
           continue;
         if (moreThanOneCommand)
-          out << "; ";
+        { out << "; ";
+          lastCommands+="; ";
+        }
         out << theInterpretter.theProgramExpression[i].ToString();
+        lastCommands+=theInterpretter.theProgramExpression[i].ToString();
         moreThanOneCommand=true;
         continue;
       }
       if (i!=1)
       { out << " \\) </span>";
+        out << "<input type=\"hidden\" name=\"problemCommands\" value=\""
+        << CGI::StringToURLString(lastCommands) << "\">";
+        lastCommands="";
         spanCounter++;
       }
       out << this->betweenTheCommands[spanCounter];

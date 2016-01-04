@@ -1988,7 +1988,7 @@ std::string Function::ToStringFull()
     out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());
     if (this->theExample!="")
       out2 << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath
-      << "? textType=Calculator&textDim=1&textInput="
+      << "?request=compute&mainInput="
       << CGI::StringToURLString(this->theExample) << "\"> " << " Example" << "</a>" ;
   } else
     out2 << "<b>Experimental, please don't use.</b>";

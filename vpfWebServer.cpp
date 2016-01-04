@@ -567,6 +567,7 @@ void WebWorker::ProcessRawArguments()
   HashedList<std::string, MathRoutines::hashString>& inputStringNames=theGlobalVariables.webFormArgumentNames;
   List<std::string>& inputStrings=theGlobalVariables.webFormArguments;
   CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
+  theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
   std::string password;
   std::string desiredUser=theGlobalVariables.GetWebInput("user");
   if (desiredUser=="")
@@ -1181,7 +1182,6 @@ void WebWorker::ExtractPhysicalAddressFromMainAddress()
 
 int WebWorker::ProcessServerStatus()
 { MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestServerStatus");
-  stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
   stOutput << "<html><body>"
   << " <table><tr><td style=\"vertical-align:top\">" << this->parent->ToStringStatusAll() << "</td><td>"
   << theGlobalVariables.ToStringHTMLTopCommandLinuxSystem()
@@ -1193,7 +1193,6 @@ int WebWorker::ProcessServerStatus()
 int WebWorker::ProcessPauseWorker()
 { MacroRegisterFunctionWithName("WebWorker::ProcessPauseWorker");
   theLog << "Proceeding to toggle worker pause." << logger::endL;
-  stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
   std::string theMainInput=theGlobalVariables.GetWebInput("mainInput");
   if (theMainInput=="")
   { stOutput << "<b>To pause a worker please provide the worker number in the mainInput field.</b>";
@@ -1227,7 +1226,6 @@ int WebWorker::ProcessPauseWorker()
 int WebWorker::ProcessMonitor()
 { MacroRegisterFunctionWithName("WebWorker::ProcessMonitor");
   theLog << "Processing get monitor." << logger::endL;
-  stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
   std::string theMainInput=theGlobalVariables.GetWebInput("mainInput");
   if (theMainInput=="")
   { stOutput << "<b>Monitor takes as argument the number of the child process that is running the computation.</b>";
@@ -1242,7 +1240,6 @@ int WebWorker::ProcessMonitor()
 int WebWorker::ProcessComputationIndicator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessComputationIndicator");
   theLog << "Processing get request indicator." << logger::endL;
-  stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
   ProgressReportWebServer theReport("Preparing indicator report");
   std::string theMainInput=theGlobalVariables.GetWebInput("mainInput");
   if (theMainInput=="")
@@ -1261,6 +1258,11 @@ int WebWorker::ProcessComputationIndicator()
   if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUse)
   { stOutput << "<b>Indicator error. Worker number " << inputWebWorkerNumber << " is not in use. "
     << "Total number of workers: " << this->parent->theWorkers.size << ". </b>";
+    return 0;
+  }
+  if (inputWebWorkerIndex==this->indexInParent)
+  { stOutput << "<b>Indicator error. Worker number " << inputWebWorkerNumber << " requested to monitor itself. "
+    << " This is not allowed.</b>";
     return 0;
   }
   WebWorker& otherWorker=this->parent->theWorkers[inputWebWorkerIndex];
@@ -1569,6 +1571,7 @@ int WebWorker::ProcessUnknown()
 int WebWorker::ProcessCalculator()
 { MacroRegisterFunctionWithName("WebServer::ProcessCalculator");
   ProgressReportWebServer theReport;
+  stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
   this->ProcessRawArguments();
   if (theGlobalVariables.userCalculatorRequestType=="pause")
     return this->ProcessPauseWorker();
@@ -1865,7 +1868,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex)
     theLog << logger::red << "Worker index in parent is -1!!!" << logger::endL;
   else
     theLog << "Worker index: " << inputIndex << logger::endL;
-  out << "  var sURL  = \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?indicator"
+  out << "  var sURL  = \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=indicator&mainInput="
   << inputIndex+1 << "\";\n";
   out << "  oRequest.open(\"GET\",sURL,false);\n";
 //  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
@@ -1895,8 +1898,7 @@ int WebWorker::ServeClient()
   theGlobalVariables.flagComputationStarted=true;
   theGlobalVariables.IndicatorStringOutputFunction=WebServer::PipeProgressReportToParentProcess;
   if (this->requestType==this->requestGetCalculator || this->requestType==this->requestPostCalculator)
-  { stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-    theParser.inputStringRawestOfTheRaw=this->mainArgumentRAW;
+  { theParser.inputStringRawestOfTheRaw=this->mainArgumentRAW;
     this->mainArgumentRAW="";
     //theParser.javaScriptDisplayingIndicator=this->GetJavaScriptIndicatorBuiltInServer(true);
     theParser.javaScriptDisplayingIndicator="";

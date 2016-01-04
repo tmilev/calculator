@@ -2282,13 +2282,15 @@ void CGI::ChopCGIInputStringToMultipleStrings
       { outputFieldNames.AddOnTop(currentFieldName);
         outputData.AddOnTop(currentFieldValue);
       }
+      currentFieldName="";
+      currentFieldValue="";
       readingData=false;
       continue;
     }
     if (readingData)
-      currentFieldName.push_back(input[i]);
-    else
       currentFieldValue.push_back(input[i]);
+    else
+      currentFieldName.push_back(input[i]);
   }
   if (currentFieldName!="")
   { outputFieldNames.AddOnTop(currentFieldName);

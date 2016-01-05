@@ -1140,7 +1140,14 @@ public:
   static bool IsRepresentedByItselfInURLs(char input);
   static void clearDollarSigns(std::string& theString, std::string& output);
   static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
-  static void ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& outputData, HashedList<std::string, MathRoutines::hashString>& outputFieldNames);
+  static bool AccountOneInputCGIString
+  (const std::string& fieldName, const std::string& fieldValue, List<std::string>& outputData,
+   HashedList<std::string, MathRoutines::hashString>& outputFieldNames, std::stringstream& commentsOnFailure)
+  ;
+  static bool ChopCGIInputStringToMultipleStrings
+  (const std::string& input, List<std::string>& outputData,
+   HashedList<std::string, MathRoutines::hashString>& outputFieldNames, std::stringstream& commentsOnFailure)
+  ;
   static void ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml);
   static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml){ std::string result; CGI::ElementToStringTooltip(input, inputTooltip, result, useHtml); return result; };
   static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip){ return CGI::ElementToStringTooltip(input, inputTooltip, true); };

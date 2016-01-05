@@ -576,11 +576,12 @@ std::string WebWorker::ToStringCalculatorArgumentsCGIinputExcludeRequestType()
   return out.str();
 }
 
-void WebWorker::ProcessRawArguments()
+bool WebWorker::ProcessRawArguments(std::stringstream& argumentProcessingFailureComments)
 { MacroRegisterFunctionWithName("WebServer::ProcessRawArguments");
   HashedList<std::string, MathRoutines::hashString>& inputStringNames=theGlobalVariables.webFormArgumentNames;
   List<std::string>& inputStrings=theGlobalVariables.webFormArguments;
-  CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
+  if (!CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames, argumentProcessingFailureComments))
+    return false;
   theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
   std::string password;
   std::string desiredUser=theGlobalVariables.GetWebInput("user");
@@ -604,6 +605,7 @@ void WebWorker::ProcessRawArguments()
       theGlobalVariables.userDefault="";
   }
   password="********************************************";
+  return true;
 }
 
 std::string WebWorker::GetHtmlHiddenInputs()
@@ -1586,7 +1588,13 @@ int WebWorker::ProcessCalculator()
 { MacroRegisterFunctionWithName("WebServer::ProcessCalculator");
   ProgressReportWebServer theReport;
   stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-  this->ProcessRawArguments();
+  std::stringstream argumentProcessingFailureComments;
+  if (!this->ProcessRawArguments(argumentProcessingFailureComments))
+  { stOutput << "<html><body>" << "Failed to process the calculator arguments. <b>"
+    << argumentProcessingFailureComments.str() << "</b></body></html>";
+    stOutput.Flush();
+    return 0;
+  }
   if (theGlobalVariables.userCalculatorRequestType=="pause")
     return this->ProcessPauseWorker();
   if (theGlobalVariables.userCalculatorRequestType=="status")
@@ -1685,10 +1693,11 @@ std::string WebWorker::GetJavaScriptIndicatorFromHD()
 std::string WebWorker::GetLoginHTMLinternal()
 { MacroRegisterFunctionWithName("WebWorker::GetLoginHTMLinternal");
   std::stringstream out;
-  out << "<hr>message main: "
-  << this->theMessage
-  << "<hr> main argument: "
-  << this->mainArgumentRAW;
+//  out << "<hr>message main: "
+//  << this->theMessage
+//  << "<hr> main argument: "
+//  << this->mainArgumentRAW;
+  out << this->ToStringCalculatorArgumentsHumanReadable();
   out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"POST\" accept-charset=\"utf-8\">"
   <<  "User name or email: "
   << "<input type=\"text\" name=\"user\" placeholder=\"user\" required>"
@@ -1720,7 +1729,8 @@ std::string WebWorker::GetLoginPage()
   if (!this->flagAuthenticationTokenWasSubmitted)
     out
     << "if (document.getElementById('authenticationToken') !=null)"
-    << "  document.getElementById('login').submit();";
+    << "  if (document.getElementById('authenticationToken').value!='')"
+    << "    document.getElementById('login').submit();";
 //    << "  window.location='calculator?user='+GlobalUser+'&authenticationToken='+GlobalAuthenticationToken;";
   out << "\">\n"
   << WebWorker::GetLoginHTMLinternal()
@@ -1803,14 +1813,14 @@ std::string WebWorker::GetJavascriptStandardCookies()
   out
   << "}\n";
   out
-  << "function getCalculatorCGIsettings(){\n"
-  << "  result =\"examStatus=\"+getCookie(\"examStatus\");\n"
-  << "  result+=\"&user=\"+getCookie(\"user\");\n"
-  << "  result+=\"&authenticationToken=\"+getCookie(\"authenticationToken\");\n"
-  << "  result+=\"&currentProblem=\"+getCookie(\"currentProblem\");\n"
-  << "  result+=\"&currentProblemCollection=\"+getCookie(\"currentProblemCollection\");\n"
-  << "  return result;\n"
-  << "}\n"
+//  << "function getCalculatorCGIsettings(){\n"
+//  << "  result =\"examStatus=\"+getCookie(\"examStatus\");\n"
+//  << "  result+=\"&user=\"+getCookie(\"user\");\n"
+//  << "  result+=\"&authenticationToken=\"+getCookie(\"authenticationToken\");\n"
+//  << "  result+=\"&currentProblem=\"+getCookie(\"currentProblem\");\n"
+//  << "  result+=\"&currentProblemCollection=\"+getCookie(\"currentProblemCollection\");\n"
+//  << "  return result;\n"
+//  << "}\n"
   << "function loadSettings(){\n"
   << "  storeSettingsSecurity();\n"
   << "  storeSettingsProgress();\n"
@@ -1822,15 +1832,20 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "    theCalculatorForm.style.height = theOldHeight;\n"
   << "  }\n"
   << "  if (document.getElementById(\"examStatus\")!=null)\n "
-  << "    document.getElementById(\"examStatus\").value=getCookie(\"examStatus\");\n"
+  << "    if(getCookie(\"examStatus\")!='');\n"
+  << "      document.getElementById(\"examStatus\").value=getCookie(\"examStatus\");\n"
   << "  if (document.getElementById(\"currentProblemCollection\")!=null)\n "
-  << "    document.getElementById(\"currentProblemCollection\").value=getCookie(\"currentProblemCollection\");\n"
+  << "    if(getCookie(\"currentProblemCollection\")!='');\n"
+  << "      document.getElementById(\"currentProblemCollection\").value=getCookie(\"currentProblemCollection\");\n"
   << "  if (document.getElementById(\"currentProblem\")!=null)\n "
-  << "    document.getElementById(\"currentProblem\").value=getCookie(\"currentProblem\");\n"
+  << "    if(getCookie(\"currentProblem\")!='');\n"
+  << "      document.getElementById(\"currentProblem\").value=getCookie(\"currentProblem\");\n"
   << "  if (document.getElementById(\"authenticationToken\")!=null)\n"
-  << "    document.getElementById(\"authenticationToken\").value=getCookie(\"authenticationToken\");\n "
+  << "    if(getCookie(\"authenticationToken\")!='');\n"
+  << "      document.getElementById(\"authenticationToken\").value=getCookie(\"authenticationToken\");\n "
   << "  if (document.getElementById(\"userHidden\")!=null)\n"
-  << "    document.getElementById(\"userHidden\").value=getCookie(\"user\");\n "
+  << "    if(getCookie(\"user\")!='');\n"
+  << "      document.getElementById(\"userHidden\").value=getCookie(\"user\");\n "
   << "}\n";
   out << " </script>\n";
   return out.str();

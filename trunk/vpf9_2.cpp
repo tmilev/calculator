@@ -2262,9 +2262,33 @@ std::string CGI::GetLaTeXProcessingJavascript()
 //   return "<script src=\"../../jsmath/easy/load.js\"></script>";
 }
 
-void CGI::ChopCGIInputStringToMultipleStrings
+
+bool CGI::AccountOneInputCGIString
+(const std::string& fieldName, const std::string& fieldValue, List<std::string>& outputData,
+ HashedList<std::string, MathRoutines::hashString>& outputFieldNames, std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("CGI::AccountOneInputCGIString");
+  if (fieldName=="")
+    return true;
+  int theIndex=outputFieldNames.GetIndex(fieldName);
+  if (theIndex==-1)
+  { outputFieldNames.AddOnTop(fieldName);
+    outputData.AddOnTop(fieldValue);
+    return true;
+  }
+  if (fieldValue=="")
+    return true;
+  if (outputData[theIndex]!="")
+  { commentsOnFailure << "More than one value specified for input field " << fieldName << ": "
+    << fieldValue << " and " << outputData[theIndex];
+    return false;
+  }
+  outputData[theIndex]=fieldValue;
+  return true;
+}
+
+bool CGI::ChopCGIInputStringToMultipleStrings
 (const std::string& input, List<std::string>& outputData,
- HashedList<std::string, MathRoutines::hashString>& outputFieldNames)
+ HashedList<std::string, MathRoutines::hashString>& outputFieldNames, std::stringstream& commentsOnFailure)
 { int inputLength= (signed) input.size();
   bool readingData=false;
   outputData.SetExpectedSize(15);
@@ -2278,25 +2302,20 @@ void CGI::ChopCGIInputStringToMultipleStrings
     { readingData=true;
       continue;
     }
-    if (input[i]=='&')
-    { if (currentFieldName!="")
-      { outputFieldNames.AddOnTop(currentFieldName);
-        outputData.AddOnTop(currentFieldValue);
-      }
-      currentFieldName="";
-      currentFieldValue="";
-      readingData=false;
+    if (input[i]!='&')
+    { if (readingData)
+        currentFieldValue.push_back(input[i]);
+      else
+        currentFieldName.push_back(input[i]);
       continue;
     }
-    if (readingData)
-      currentFieldValue.push_back(input[i]);
-    else
-      currentFieldName.push_back(input[i]);
+    if (!CGI::AccountOneInputCGIString(currentFieldName, currentFieldValue, outputData, outputFieldNames, commentsOnFailure))
+      return false;
+    currentFieldName="";
+    currentFieldValue="";
+    readingData=false;
   }
-  if (currentFieldName!="")
-  { outputFieldNames.AddOnTop(currentFieldName);
-    outputData.AddOnTop(currentFieldValue);
-  }
+  return CGI::AccountOneInputCGIString(currentFieldName, currentFieldValue, outputData, outputFieldNames, commentsOnFailure);
 }
 
 bool CGI::URLStringToNormalOneStep(std::string& readAhead, std::stringstream& out)

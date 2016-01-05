@@ -624,7 +624,7 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
   if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(theParser.inputString, civilizedInputSafish))
     stOutput << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are "
     << " modified due to a javascript hijack issue. <br>";
-  stOutput << "<input type=\"hidden\" name=\"request\" value=\"compute\">\n";
+  stOutput << this->GetHtmlHiddenInputComputation();
   stOutput << "<textarea rows=\"3\" cols=\"30\" name=\"mainInput\" id=\"mainInputID\", style=\"white-space:normal\" "
   << "onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {storeSettings(); "
   << " this.form.submit(); return false;}\" "
@@ -1677,11 +1677,20 @@ std::string WebWorker::GetLoginHTMLinternal()
   << "<input type=\"text\" name=\"user\" placeholder=\"user\" required>"
   << "<br>Password: "
   << "<input type=\"password\" name=\"password\" placeholder=\"password\">"
+  << this->GetHtmlHiddenInputExercise()
   << this->GetHtmlHiddenInputs()
   << "<input type=\"submit\" value=\"Login\">"
   << "</form>";
   out << "<b>Login screen not implemented yet.</b>";
   return out.str();
+}
+
+std::string WebWorker::GetHtmlHiddenInputComputation()
+{ return "<input type=\"hidden\" name=\"request\" value=\"compute\">\n";
+}
+
+std::string WebWorker::GetHtmlHiddenInputExercise()
+{ return "<input type=\"hidden\" name=\"request\" value=\"exercises\">";
 }
 
 std::string WebWorker::GetLoginPage()

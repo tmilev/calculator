@@ -249,11 +249,10 @@ std::string TeachingRoutines::GetCurrentProblemItem()
     out << this->ToStringExerciseSelection();
     return out.str();
   }
-  ProblemCollection& currentCollection= this->theExercises.GetElement(this->GetExerciseIndex(currentProblemName));
+  ProblemCollection& currentCollection= this->theExercises.GetElement(this->GetExerciseIndex(currentCollectionName));
   if (!currentCollection.LoadMe(this->comments))
   { out << "<hr><b>Failed to load problem collection: " << currentCollection.fileName << ".</b> "
-    << this->comments.str() << "<hr>"
-    << this->ToStringExerciseSelection();
+    << this->comments.str() << "<hr>" << this->ToStringExerciseSelection();
     return out.str();
   }
   if (currentProblemName=="")
@@ -280,7 +279,7 @@ std::string Problem::GetSubmitAnswersJavascript()
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
-  << "  var params = getCalculatorCGIsettings();\n"
+  << "  var params = \"request=submitProblem&\"+getCalculatorCGIsettings();\n"
   << "  https.send(params);\n"
   << "  https.onload = function() {\n"
   << "  span = document.createElement('span');\n"

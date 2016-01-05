@@ -61,6 +61,7 @@ public:
   int ProcessComputationIndicator();
   int ProcessNonCalculator();
   int ProcessFolder();
+  int ProcessSubmitProblem();
   int ProcessPauseWorker();
   int ProcessMonitor();
   int ProcessUnknown();
@@ -116,7 +117,8 @@ public:
   void SendDisplayUserInputToServer();
   enum requestTypes {requestUnknown, requestGetCalculator, requestPostCalculator,
   requestGetNotCalculator};
-  std::string ToStringCalculatorArguments()const;
+  static std::string ToStringCalculatorArgumentsCGIinputExcludeRequestType();
+  static std::string ToStringCalculatorArgumentsHumanReadable();
   std::string ToStringStatus()const;
   std::string ToStringMessageUnsafe()const;
   std::string ToStringMessageShortUnsafe(FormatExpressions* theFormat=0)const;

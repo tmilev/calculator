@@ -17,7 +17,10 @@ public:
   List<std::string> betweenTheCommands;
   List<std::string> commands;
   List<std::string> commandTypes;
-  List<std::string> calculatorSpanClasses;
+  List<std::string> tagTypes;
+  List<std::string> calculatorClasses;
+  std::string finalCommandsPoseProblem;
+  std::string finalCommandsPoseAndAnswerProblem;
   List<char> splittingChars;
   static unsigned int HashFunction(const Problem& input)
   { return input.HashFunction();
@@ -40,9 +43,10 @@ public:
 };
 
 Problem::Problem()
-{ this->calculatorSpanClasses.AddOnTop("calculator");
-  this->calculatorSpanClasses.AddOnTop("calculatorHidden");
-  this->calculatorSpanClasses.AddOnTop("calculatorAnswer");
+{ this->calculatorClasses.AddOnTop("calculator");
+  this->calculatorClasses.AddOnTop("calculatorHidden");
+  this->calculatorClasses.AddOnTop("calculatorAnswerVerification");
+  this->calculatorClasses.AddOnTop("calculatorStudentAnswer");
   this->splittingChars.AddOnTop('<');
   this->splittingChars.AddOnTop('\"');
   this->splittingChars.AddOnTop('>');
@@ -132,14 +136,15 @@ std::string ProblemCollection::ToStringSelectMeForm()const
 std::string Problem::ToStringExam()
 { MacroRegisterFunctionWithName("ProblemCollection::ToStringExam");
   std::stringstream out;
+  std::stringstream failure;
+  this->InterpretHtml(failure);
+
   out << this->GetSubmitAnswersJavascript();
   out << CGI::GetLaTeXProcessingJavascript();
   out << "\n<form class=\"problemForm\" method=\"POST\" id=\"formProblemCollection\" name=\"formProblemCollection\" action=\""
   << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n" ;
   out << theWebServer.GetActiveWorker().GetHtmlHiddenInputs();
   out << "\n</form>\n";
-  std::stringstream failure;
-  this->InterpretHtml(failure);
   out << this->outputHtml;
   return out.str();
 }
@@ -278,8 +283,12 @@ std::string Problem::GetSubmitAnswersJavascript()
   << "function submitAnswers(){\n"
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
-  << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
-  << "  var params = \"request=submitProblem&\"+getCalculatorCGIsettings();\n"
+  << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n";
+  std::stringstream requestStream;
+  requestStream << "request=submitProblem&" << WebWorker::ToStringCalculatorArgumentsCGIinputExcludeRequestType()
+  << "problemStatement=" << CGI::StringToURLString(this->finalCommandsPoseProblem);
+  out << "var params=\"" << requestStream.str() << "\";\n";
+  out
   << "  https.send(params);\n"
   << "  https.onload = function() {\n"
   << "  span = document.createElement('span');\n"
@@ -289,6 +298,16 @@ std::string Problem::GetSubmitAnswersJavascript()
   << "}\n"
   << "</script>";
   return out.str();
+}
+
+int WebWorker::ProcessSubmitProblem()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessSubmitProblem");
+  stOutput << "<html><body>" << this->ToStringCalculatorArgumentsHumanReadable() << "<hr><hr><hr><hr><hr><hr>"
+  << "</body></html>";
+  //Calculator answerInterpretter;
+  //answerInterpretter.theProgramExpression=theGlobalVariables.GetWebInput("mainInput");
+  //answerInterpretter.init();
+  return 0;
 }
 
 std::string WebWorker::GetExamPage()
@@ -302,7 +321,7 @@ std::string WebWorker::GetExamPage()
   << "</header>"
   << "<body onload=\"loadSettings();\">\n";
   //out << "<hr>Message follows.<br>" << this->theMessage << "<hr>";
-  out << this->ToStringCalculatorArguments();
+  out << this->ToStringCalculatorArgumentsHumanReadable() << "<hr><hr><hr><hr><hr><hr><hr><hr>";
   out << theRoutines.GetCurrentProblemItem();
   out << "</body></html>";
   return out.str();
@@ -367,9 +386,10 @@ bool Problem::InterpretHtml(std::stringstream& comments)
     int spanCounter=0;
     bool moreThanOneCommand=false;
     std::string lastCommands;
+    this->finalCommandsPoseProblem="";
     for (int i=1; i<theInterpretter.theProgramExpression.children.size; i++)
     { if (theInterpretter.theProgramExpression[i].ToString()!="SeparatorBetweenSpans")
-      { if (this->commandTypes[spanCounter]=="calculatorAnswer")
+      { if (this->commandTypes[spanCounter]=="calculatorAnswerVerification")
           continue;
         if (moreThanOneCommand)
         { out << "; ";
@@ -381,22 +401,24 @@ bool Problem::InterpretHtml(std::stringstream& comments)
         continue;
       }
       if (i!=1)
-      { out << " \\) </span>";
-        out << "<input type=\"hidden\" name=\"problemCommands\" value=\""
-        << CGI::StringToURLString(lastCommands) << "\">";
+      { out << " \\) </" << this->tagTypes[spanCounter] << ">";
+        this->finalCommandsPoseProblem+=lastCommands;
         lastCommands="";
         spanCounter++;
       }
       out << this->betweenTheCommands[spanCounter];
       if (i!=theInterpretter.theProgramExpression.children.size-1)
-      { out << "<span class=\"" << this->commandTypes[spanCounter] << "\"> \\( ";
+      { out << "<" << this->tagTypes[spanCounter] << " class=\"" << this->commandTypes[spanCounter] << "\"> \\( ";
         moreThanOneCommand=false;
       }
     }
+    out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>Final calculator commands:<br>" << this->finalCommandsPoseProblem << "<hr>";
+    out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
   //  out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();
     this->outputHtml=out.str();
     break;
   }
+
   return true;
 }
 
@@ -425,6 +447,8 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
   std::string nextString, outsideOfCalculatorSpan, tagString;
   bool buildingSpanStartTag=false;
   bool buildingSpanFinishTag=false;
+  bool buildingTextAreaStartTag=false;
+  bool buildingTextAreaFinishTag=false;
   int currentSpanType=-1;
   for (int i=0; i<splitStrings.size; i++)
   { const std::string currentString=splitStrings[i];
@@ -438,16 +462,32 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
         buildingSpanStartTag=true;
       if (nextString=="/span")
         buildingSpanFinishTag=true;
+      if (nextString=="textarea")
+        buildingTextAreaStartTag=true;
+      if (nextString=="/textarea")
+        buildingTextAreaFinishTag=true;
     }
     if (buildingSpanStartTag)
-      if (calculatorSpanClasses.Contains(currentString))
-      { currentSpanType=calculatorSpanClasses.GetIndex(currentString);
+      if (this->calculatorClasses.Contains(currentString))
+      { currentSpanType=this->calculatorClasses.GetIndex(currentString);
         this->commands.AddOnTop("");
         this->commandTypes.AddOnTop(currentString);
+        this->tagTypes.AddOnTop("span");
         this->betweenTheCommands.AddOnTop(outsideOfCalculatorSpan);
         outsideOfCalculatorSpan="";
       }
-    if (!buildingSpanFinishTag && !buildingSpanStartTag && currentSpanType!=-1)
+    if (buildingTextAreaStartTag)
+      if (this->calculatorClasses.Contains(currentString))
+      { currentSpanType=this->calculatorClasses.GetIndex(currentString);
+        this->commands.AddOnTop("");
+        this->commandTypes.AddOnTop(currentString);
+        this->tagTypes.AddOnTop("textarea");
+        this->betweenTheCommands.AddOnTop(outsideOfCalculatorSpan);
+        outsideOfCalculatorSpan="";
+      }
+    if (!buildingSpanFinishTag    && !buildingSpanStartTag &&
+        !buildingTextAreaStartTag && !buildingTextAreaFinishTag &&
+        currentSpanType!=-1)
       *this->commands.LastObject()+= currentString +" ";
     if (tagString=="" )
       outsideOfCalculatorSpan+=currentString+" ";
@@ -465,13 +505,15 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
     }
     if (currentString==">")
     { buildingSpanStartTag=false;
+      buildingTextAreaStartTag=false;
       if (currentSpanType==-1)
       { outsideOfCalculatorSpan+=tagString;
         tagString="";
       }
-      if (buildingSpanFinishTag)
+      if (buildingSpanFinishTag || buildingTextAreaFinishTag)
         currentSpanType=-1;
       buildingSpanFinishTag=false;
+      buildingTextAreaFinishTag=false;
     }
   }
   this->betweenTheCommands.AddOnTop(outsideOfCalculatorSpan);

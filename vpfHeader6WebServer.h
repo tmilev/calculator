@@ -75,7 +75,7 @@ public:
   static void StandardOutputAfterTimeOut(const std::string& input);
 
   int ProcessCalculator();
-  void ProcessRawArguments();
+  bool ProcessRawArguments(std::stringstream& argumentProcessingFailureComments);
   void OutputBeforeComputation();
   void OutputBeforeComputationUserInputAndAutoComplete();
   void OutputStandardResult();

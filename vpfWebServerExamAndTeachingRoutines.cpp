@@ -141,9 +141,10 @@ std::string Problem::ToStringExam()
 
   out << this->GetSubmitAnswersJavascript();
   out << CGI::GetLaTeXProcessingJavascript();
-  out << "\n<form class=\"problemForm\" method=\"POST\" id=\"formProblemCollection\" name=\"formProblemCollection\" action=\""
+  out << "\n<form class=\"problemForm\" method=\"GET\" id=\"formProblemCollection\" name=\"formProblemCollection\" action=\""
   << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n" ;
   out << theWebServer.GetActiveWorker().GetHtmlHiddenInputs();
+  out << theWebServer.GetActiveWorker().GetHtmlHiddenInputExercise();
   out << "\n</form>\n";
   out << this->outputHtml;
   return out.str();
@@ -153,9 +154,10 @@ std::string ProblemCollection::ToStringProblemLinks()
 { MacroRegisterFunctionWithName("ProblemCollection::ToStringProblemLinks");
   std::stringstream out;
   out << this->theProblems.size << " problem(s).";
-  out << "\n<form method=\"POST\" id=\"formProblemCollection\" name=\"formProblemCollection\" action=\""
+  out << "\n<form method=\"GET\" id=\"formProblemCollection\" name=\"formProblemCollection\" action=\""
   << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n" ;
   out << theWebServer.GetActiveWorker().GetHtmlHiddenInputs();
+  out << theWebServer.GetActiveWorker().GetHtmlHiddenInputExercise();
   for (int i=0; i<this->theProblems.size; i++)
   { out << this->theProblems[i].fileName
     << "<button type=\"submit\" name=\"currentProblem\" title=\"Start\" value=\""
@@ -171,9 +173,10 @@ std::string TeachingRoutines::ToStringExerciseSelection()
 { MacroRegisterFunctionWithName("TeachingRoutines::ToStringExerciseSelection");
   std::stringstream out;
   out << this->theExercises.size << " homework(s).";
-  out << "\n<FORM method=\"POST\" id=\"formExercises\" name=\"formExercises\" action=\""
+  out << "\n<FORM method=\"GET\" id=\"formExercises\" name=\"formExercises\" action=\""
   << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n" ;
   out << theWebServer.GetActiveWorker().GetHtmlHiddenInputs();
+  out << theWebServer.GetActiveWorker().GetHtmlHiddenInputExercise();
   for (int i=0; i<this->theExercises.size; i++)
     out << this->theExercises[i].ToStringSelectMeForm() << "<br>";
   out << "\n</FORM>\n";

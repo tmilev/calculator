@@ -2208,6 +2208,7 @@ std::string CGI::GetLaTeXProcessingJavascript()
 << "    tex2jax: {\n"
 << "      inlineMath: [ ['\\\\(','\\\\)'] ],\n"
 << "      displayMath: [ ['\\\\[','\\\\]'] ],\n"
+<< "      processClass: \"calculator|calculatorStudentAnswer|calculatorAnswer\",\n"
 << "      processEscapes: true\n"
 << "    },\n"
 << "    \"HTML-CSS\": { availableFonts: [\"TeX\"] },\n"

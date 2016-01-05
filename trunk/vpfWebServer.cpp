@@ -548,8 +548,8 @@ void WebWorker::StandardOutputAfterTimeOut(const std::string& input)
 //  << logger::endL;
 }
 
-std::string WebWorker::ToStringCalculatorArguments()const
-{ MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArguments");
+std::string WebWorker::ToStringCalculatorArgumentsHumanReadable()
+{ MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsHumanReadable");
   std::stringstream out;
   out << "<hr>";
   if (theGlobalVariables.flagLoggedIn)
@@ -559,6 +559,20 @@ std::string WebWorker::ToStringCalculatorArguments()const
     << theGlobalVariables.webFormArgumentNames[i] << ": " << theGlobalVariables.webFormArguments[i];
   }
   out << "<hr>";
+  return out.str();
+}
+
+std::string WebWorker::ToStringCalculatorArgumentsCGIinputExcludeRequestType()
+{ MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsCGIinputExcludeRequestType");
+  if (!theGlobalVariables.flagLoggedIn)
+    return "";
+  std::stringstream out;
+  for (int i =0; i<theGlobalVariables.webFormArgumentNames.size; i++)
+  { if (theGlobalVariables.webFormArgumentNames[i]=="request")
+      continue;
+    out << theGlobalVariables.webFormArgumentNames[i] << "=" << theGlobalVariables.webFormArguments[i]
+    << "&";
+  }
   return out.str();
 }
 
@@ -617,7 +631,7 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
   stOutput << this->openIndentTag("<table><!--table with input, autocomplete space and output-->");
   stOutput << this->openIndentTag("<tr>");
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!-- input form here -->");
-  stOutput << this->ToStringCalculatorArguments();
+  stOutput << this->ToStringCalculatorArgumentsHumanReadable();
   stOutput << "\n<FORM method=\"GET\" id=\"formCalculator\" name=\"formCalculator\" action=\""
   << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n";
   std::string civilizedInputSafish;
@@ -1591,6 +1605,9 @@ int WebWorker::ProcessCalculator()
     stOutput.Flush();
     return 0;
   }
+  if (theGlobalVariables.userCalculatorRequestType=="submitProblem" &&
+      theGlobalVariables.flagLoggedIn)
+    return this->ProcessSubmitProblem();
   if (theGlobalVariables.userCalculatorRequestType=="exercises" && theGlobalVariables.flagLoggedIn &&
       theGlobalVariables.flagUsingSSLinCurrentConnection)
   { stOutput << this->GetExamPage();

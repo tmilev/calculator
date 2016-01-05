@@ -101,6 +101,8 @@ public:
   std::string GetExamPage();
   static std::string GetJavaScriptIndicatorFromHD();
   static std::string GetJavascriptHideHtml();
+  std::string GetHtmlHiddenInputExercise();
+  std::string GetHtmlHiddenInputComputation();
   std::string GetHtmlHiddenInputs();
   std::string GetJavascriptStandardCookies();
   bool IsFileExtensionOfBinaryFile(const std::string& fileExtension);

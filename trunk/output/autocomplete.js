@@ -25,7 +25,7 @@ function initializeAutocomplete()
   AutocompleteIsInitialized=true;
   theAutocompleteDictionaryLowerCase= new Array;
   theAutocompleteDictionaryByKey= new Array;
-  theText= document.getElementById('textInputID');
+  theText= document.getElementById('mainInputID');
   theSuggestions= new Array;
   theSuggestionsHighlighted= new Array;
   theAutoComplete=document.getElementById('idAutocompleteSpan');

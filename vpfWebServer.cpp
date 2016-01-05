@@ -619,7 +619,6 @@ std::string WebWorker::GetHtmlHiddenInputs()
   out
   << "<input type=\"hidden\" id=\"authenticationToken\" name=\"authenticationToken\">\n"
   << "<input type=\"hidden\" id=\"userHidden\" name=\"userHidden\">\n"
-  << "<input type=\"hidden\" id=\"examStatus\" name=\"examStatus\">\n"
   << "<input type=\"hidden\" id=\"currentProblemCollection\" name=\"currentProblemCollection\">\n"
   << "<input type=\"hidden\" id=\"currentProblem\" name=\"currentProblem\">\n";
   return out.str();
@@ -1831,9 +1830,9 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "    theCalculatorForm.style.width  = theOldWidth;\n"
   << "    theCalculatorForm.style.height = theOldHeight;\n"
   << "  }\n"
-  << "  if (document.getElementById(\"examStatus\")!=null)\n "
-  << "    if(getCookie(\"examStatus\")!='');\n"
-  << "      document.getElementById(\"examStatus\").value=getCookie(\"examStatus\");\n"
+//  << "  if (document.getElementById(\"examStatus\")!=null)\n "
+//  << "    if(getCookie(\"examStatus\")!='');\n"
+//  << "      document.getElementById(\"examStatus\").value=getCookie(\"examStatus\");\n"
   << "  if (document.getElementById(\"currentProblemCollection\")!=null)\n "
   << "    if(getCookie(\"currentProblemCollection\")!='');\n"
   << "      document.getElementById(\"currentProblemCollection\").value=getCookie(\"currentProblemCollection\");\n"

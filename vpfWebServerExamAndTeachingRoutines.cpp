@@ -370,15 +370,13 @@ std::string Problem::ToStringExtractedCommands()
   out << "<b>The html read follows.</b><br><hr> " << this->inputHtml;
 //  out << "<hr><b>The split strings follow. </b><hr>" << splitStrings.ToStringCommaDelimited();
   out << "<hr><b>The extracted commands follow.</b><hr>";
-  out << "<table><tr><td>Command syntactic role</td><td>tag</td><td>content</td></tr>";
+  out << "<table>";
   for (int i=0; i<this->theContent.size; i++)
     if (this->theContent[i].syntacticRole!="")
-      out << "<tr>" << "<td>" << this->theContent[i].syntacticRole << "</td>"
-      << "<td>" << this->theContent[i].ToStringOpenTag() << "</td>"
-      << "<td>" << this->theContent[i].content << "</td>"
+      out << "<tr>" << "<td>" << this->theContent[i].ToStringDebug() << "</td>"
       << "</tr>";
     else
-      out << "<tr><td></td><td>n/a</td><td>n/a</td><td>n/a</td>";
+      out << "<tr><td></td></tr>";
   out << "</table>";
   return out.str();
 }
@@ -407,7 +405,7 @@ std::string SyntacticElementHTML::ToStringOpenTag()
   std::stringstream out;
   out << "<" << this->tag;
   for (int i=0; i<this->tagKeys.size; i++)
-    out << " " << this->tagKeys << "=\"" << this->tagValues << "\"";
+    out << " " << this->tagKeys[i] << "=\"" << this->tagValues[i] << "\"";
   out << ">";
   return out.str();
 }
@@ -428,30 +426,34 @@ std::string SyntacticElementHTML::ToStringTagAndContent()
 std::string SyntacticElementHTML::ToStringDebug()
 { MacroRegisterFunctionWithName("SyntacticElementHTML::ToString");
   if (this->syntacticRole=="")
-    return this->ToStringTagAndContent();
+    return CGI::StringToHtmlStrinG( this->ToStringTagAndContent());
   std::stringstream out;
   out << "<span style=\"color:green\">";
   out << CGI::StringToHtmlStrinG(this->syntacticRole);
   out << "</span>";
-  out << "[" << this->ToStringTagAndContent() << "]";
+  out << "[" << CGI::StringToHtmlStrinG(this->ToStringTagAndContent() ) << "]";
   return out.str();
 }
 
 std::string SyntacticElementHTML::GetKeyValue(const std::string& theKey)
-{ int theIndex=this->tagKeys.GetIndex(theKey);
+{ MacroRegisterFunctionWithName("SyntacticElementHTML::GetKeyValue");
+  int theIndex=this->tagKeys.GetIndex(theKey);
   if (theIndex==-1)
     return "";
   return this->tagKeys[theIndex];
 }
 
 void SyntacticElementHTML::SetKeyValue(const std::string& theKey, const std::string& theValue)
-{ int theIndex=this->tagKeys.GetIndex(theKey);
+{ MacroRegisterFunctionWithName("SyntacticElementHTML::SetKeyValue");
+  if (this->tagKeys.size!=this->tagValues.size)
+    crash << "Programming error: number of keys different from number of values" << crash;
+  int theIndex=this->tagKeys.GetIndex(theKey);
   if (theIndex==-1)
-  { theIndex=this->tagKeys.size-1;
+  { theIndex=this->tagKeys.size;
     this->tagKeys.AddOnTop(theKey);
     this->tagValues.SetSize(this->tagKeys.size);
   }
-  this->tagKeys[theIndex]=theValue;
+  this->tagValues[theIndex]=theValue;
 }
 
 std::string SyntacticElementHTML::ToStringInterpretted()

@@ -62,8 +62,8 @@ public:
   { return this->fileName==other.fileName;
   }
   bool LoadMe(std::stringstream& comments);
-  bool ExecuteCommandsPrepare(Calculator& theInterpretter, std::stringstream& comments);
-  bool ExecuteCommandsTestStudent(Calculator& theInterpretter, std::stringstream& comments);
+  bool ExecuteCommandsPrepare(Calculator& theInterpreter, std::stringstream& comments);
+  bool ExecuteCommandsTestStudent(Calculator& theInterpreter, std::stringstream& comments);
   bool InterpretHtml(std::stringstream& comments);
   bool ExtractExpressionsFromHtml(std::stringstream& comments);
   std::string ToStringParsingStack(List<SyntacticElementHTML>& theStack);
@@ -469,25 +469,26 @@ std::string SyntacticElementHTML::ToStringInterpretted()
 }
 
 bool SyntacticElementHTML::IsInterpretedDuringPreparation()
-{ return this->syntacticRole!="" &&
+{ return this->syntacticRole=="command" &&
          this->GetKeyValue("class")!="calculatorAnswerVerification" &&
          this->GetKeyValue("class")!="calculatorStudentAnswer";
 }
 
-bool Problem::ExecuteCommandsPrepare(Calculator& theInterpretter, std::stringstream& comments)
+bool Problem::ExecuteCommandsPrepare(Calculator& theInterpreter, std::stringstream& comments)
 { MacroRegisterFunctionWithName("Problem::ExecuteCommandsPrepare");
-  theInterpretter.init();
+  theInterpreter.init();
   std::stringstream calculatorCommands;
   for (int i=0; i<this->theContent.size; i++)
   { if (!this->theContent[i].IsInterpretedDuringPreparation())
-    { calculatorCommands << "SeparatorBetweenSpans;";
+    { calculatorCommands << "SeparatorBetweenSpans; ";
       continue;
     }
-    calculatorCommands << this->theContent[i].content;
+    calculatorCommands << this->CleanUpCommandString( this->theContent[i].content);
   }
-//  stOutput << "nput cmds: " << inputCommands.str();
-  theInterpretter.Evaluate(calculatorCommands.str());
-  return !theInterpretter.flagAbortComputationASAP;
+//  stOutput << "nput cmds: " << calculatorCommands.str();
+  theInterpreter.Evaluate(calculatorCommands.str());
+//  stOutput << "<hr>Fter eval: " << theInterpreter.outputString;
+  return !theInterpreter.flagAbortComputationASAP;
 }
 
 bool Problem::InterpretHtml(std::stringstream& comments)
@@ -500,14 +501,14 @@ bool Problem::InterpretHtml(std::stringstream& comments)
   const int MaxNumAttempts=10;
   while (numAttempts<MaxNumAttempts)
   { numAttempts++;
-    Calculator theInterpretter;
+    Calculator theInterpreter;
     std::stringstream out;
-    if (!this->ExecuteCommandsPrepare(theInterpretter, comments))
+    if (!this->ExecuteCommandsPrepare(theInterpreter, comments))
     { if (numAttempts>=MaxNumAttempts)
       { out << "Failed to evaluate the commands: " << MaxNumAttempts
         << " attempts made. Calculator evaluation details follow.<hr> "
-        << theInterpretter.outputString << "<hr><b>Comments</b><br>"
-        << theInterpretter.Comments.str();
+        << theInterpreter.outputString << "<hr><b>Comments</b><br>"
+        << theInterpreter.Comments.str();
         this->outputHtml=out.str();
       }
       continue;
@@ -516,9 +517,9 @@ bool Problem::InterpretHtml(std::stringstream& comments)
     std::string lastCommands;
     this->finalCommandsPoseProblem="";
     int commandCounter=1;
-    for (int spanCounter=0;spanCounter <this->theContent.size; spanCounter++)
+    for (int spanCounter=0; spanCounter <this->theContent.size; spanCounter++)
     { if (!this->theContent[spanCounter].IsInterpretedDuringPreparation())
-      { if (theInterpretter.theProgramExpression[commandCounter].ToString()!="SeparatorBetweenSpans")
+      { if (theInterpreter.theProgramExpression[commandCounter].ToString()!="SeparatorBetweenSpans")
         { out << "<b>Error: calculator commands don't match the tags.</g>";
           this->outputHtml=out.str();
           return false;
@@ -527,19 +528,20 @@ bool Problem::InterpretHtml(std::stringstream& comments)
         continue;
       }
       moreThanOneCommand=false;
-      for (; commandCounter<theInterpretter.theProgramExpression.children.size; commandCounter++ )
-      { if (theInterpretter.theProgramExpression[commandCounter].ToString()=="SeparatorBetweenSpans")
+      this->theContent[spanCounter].interpretedCommand="";
+      for (; commandCounter<theInterpreter.theProgramExpression.children.size; commandCounter++ )
+      { if (theInterpreter.theProgramExpression[commandCounter].ToString()=="SeparatorBetweenSpans")
           break;
-        this->theContent[spanCounter].interpretedCommand+=theInterpretter.theProgramExpression[commandCounter].ToString();
+        this->theContent[spanCounter].interpretedCommand+=theInterpreter.theProgramExpression[commandCounter].ToString();
         if (moreThanOneCommand)
-          this->theContent[spanCounter].interpretedCommand+=" ";
+          this->theContent[spanCounter].interpretedCommand+="; ";
         moreThanOneCommand=true;
       }
     }
     for (int i=0; i<this->theContent.size; i++)
       out << this->theContent[i].ToStringInterpretted();
 
-    out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>Final calculator commands:<br>" << this->finalCommandsPoseProblem << "<hr>";
+    out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
     out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
   //  out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();
     this->outputHtml=out.str();
@@ -716,7 +718,13 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
       if (!this->IsSplittingChar(eltsStack[i].content))
         this->theContent.LastObject()->content+=" ";
     } else
+    { if (this->theContent.size>0)
+        if (this->theContent.LastObject()->IsInterpretedDuringPreparation() && eltsStack[i].IsInterpretedDuringPreparation())
+        { SyntacticElementHTML emptyElt;
+          this->theContent.AddOnTop(emptyElt);
+        }
       this->theContent.AddOnTop(eltsStack[i]);
+    }
   }
   return result;
 }

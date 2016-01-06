@@ -1121,8 +1121,8 @@ public:
   (const std::string& fileName, const std::string& fileDesc="", int line=-1);
   static std::string GetHtmlSwitchMenuDoNotEncloseInTags(const std::string& serverBase);
   static std::string GetLatexEmbeddableLinkFromCalculatorInput(const std::string& address, const std::string& display);
-  static bool GetHtmlStringSafeishReturnFalseIfIdentical(const std::string& input, std::string& output);
-  static void TransormStringToHtmlSafeish(std::string& theString);
+  static bool StringToHtmlString(const std::string& input, std::string& output);
+  static std::string StringToHtmlStrinG(const std::string& theString);
   static std::string GetLaTeXProcessingJavascript();
   static std::string DoubleBackslashes(const std::string& input);
   static std::string GetMathSpanPure(const std::string& input, int upperNumChars=10000);

@@ -320,10 +320,10 @@ std::string CGI::GetStyleButtonLikeHtml()
 { return " style=\"background:none; border:0; text-decoration:underline; color:blue; cursor:pointer\" ";
 }
 
-void CGI::TransormStringToHtmlSafeish(std::string& theString)
-{ std::string tempS;
-  CGI::GetHtmlStringSafeishReturnFalseIfIdentical(theString, tempS);
-  theString=tempS;
+std::string CGI::StringToHtmlStrinG(const std::string& theString)
+{ std::string result;
+  CGI::StringToHtmlString(theString, result);
+  return result;
 }
 
 uint32_t CGI::RedGreenBlue(unsigned int r, unsigned int g, unsigned int b)
@@ -7637,7 +7637,7 @@ bool Cone::SolveLQuasiPolyEqualsZeroIAmProjective
   return result;
 }
 
-bool CGI::GetHtmlStringSafeishReturnFalseIfIdentical(const std::string& input, std::string& output)
+bool CGI::StringToHtmlString(const std::string& input, std::string& output)
 { std::stringstream out;
   bool result=false;
   for (unsigned int i=0; i<input.size(); i++)

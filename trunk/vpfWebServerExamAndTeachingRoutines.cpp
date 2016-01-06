@@ -12,12 +12,19 @@ public:
   std::string syntacticRole;
   std::string content;
   std::string tag;
-  std::string tagAdditional;
-  std::string tagClass;
-  std::string tagIdIfPresent;
+  List<std::string> tagKeys;
+  List<std::string> tagValues;
   std::string interpretedCommand;
+  static int ParsingNumDummyElements;
   bool IsInterpretedDuringPreparation();
+  std::string GetKeyValue(const std::string& theKey);
+  void SetKeyValue(const std::string& theKey, const std::string& theValue);
+  void resetAllExceptContent();
   std::string ToStringInterpretted();
+  std::string ToStringTagAndContent();
+  std::string ToStringOpenTag();
+  std::string ToStringCloseTag();
+  std::string ToStringDebug();
   SyntacticElementHTML(){}
   SyntacticElementHTML(const std::string& inputContent)
   { this->content=inputContent;
@@ -59,6 +66,7 @@ public:
   bool ExecuteCommandsTestStudent(Calculator& theInterpretter, std::stringstream& comments);
   bool InterpretHtml(std::stringstream& comments);
   bool ExtractExpressionsFromHtml(std::stringstream& comments);
+  std::string ToStringParsingStack(List<SyntacticElementHTML>& theStack);
   std::string CleanUpCommandString(const std::string& inputCommand);
   std::string ToStringExam();
   std::string GetSubmitAnswersJavascript();
@@ -153,7 +161,8 @@ std::string Problem::ToStringExam()
   this->InterpretHtml(failure);
 
   out << this->GetSubmitAnswersJavascript();
-  out << CGI::GetLaTeXProcessingJavascript();
+  out << "Latex javascript off!!!";
+//  out << CGI::GetLaTeXProcessingJavascript();
   out << "\n<form class=\"problemForm\" method=\"GET\" id=\"formProblemCollection\" name=\"formProblemCollection\" action=\""
   << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n" ;
   out << theWebServer.GetActiveWorker().GetHtmlHiddenInputs();
@@ -361,13 +370,12 @@ std::string Problem::ToStringExtractedCommands()
   out << "<b>The html read follows.</b><br><hr> " << this->inputHtml;
 //  out << "<hr><b>The split strings follow. </b><hr>" << splitStrings.ToStringCommaDelimited();
   out << "<hr><b>The extracted commands follow.</b><hr>";
-  out << "<table><tr><td>Command(s)</td><td>class</td><td>id</td><td>tag</td></tr>";
+  out << "<table><tr><td>Command syntactic role</td><td>tag</td><td>content</td></tr>";
   for (int i=0; i<this->theContent.size; i++)
     if (this->theContent[i].syntacticRole!="")
-      out << "<tr>" << "<td>" << this->theContent[i].content << "</td>"
-      << "<td>" << this->theContent[i].tagClass << "</td>"
-      << "<td>" << this->theContent[i].tagIdIfPresent << "</td>"
-      << "<td>" << this->theContent[i].tag << "</td>"
+      out << "<tr>" << "<td>" << this->theContent[i].syntacticRole << "</td>"
+      << "<td>" << this->theContent[i].ToStringOpenTag() << "</td>"
+      << "<td>" << this->theContent[i].content << "</td>"
       << "</tr>";
     else
       out << "<tr><td></td><td>n/a</td><td>n/a</td><td>n/a</td>";
@@ -381,38 +389,87 @@ std::string Problem::ToStringContent()
   out << "<b>The html read follows.</b><br><hr> " << this->inputHtml;
 //  out << "<hr><b>The split strings follow. </b><hr>" << splitStrings.ToStringCommaDelimited();
   out << "<hr><b>The extracted commands follow.</b><hr>";
-  out << "<table><tr><td>Syntactic role</td><td>Command(s)</td><td>class</td><td>id</td><td>tag</td></tr>";
   for (int i=0; i<this->theContent.size; i++)
-    out << "<tr>"
-    << "<td>" << this->theContent[i].syntacticRole << "</td>"
-    << "<td>" << this->theContent[i].content << "</td>"
-    << "<td>" << this->theContent[i].tagClass << "</td>"
-    << "<td>" << this->theContent[i].tagIdIfPresent << "</td>"
-    << "<td>" << this->theContent[i].tag << "</td>"
-    << "</tr>";
-  out << "</table>";
+    out << this->theContent[i].ToStringTagAndContent();
   return out.str();
+}
+
+void SyntacticElementHTML::resetAllExceptContent()
+{ this->tag="";
+  this->tagKeys.SetSize(0);
+  this->tagValues.SetSize(0);
+  this->syntacticRole="";
+}
+
+std::string SyntacticElementHTML::ToStringOpenTag()
+{ if (this->tag=="")
+    return "";
+  std::stringstream out;
+  out << "<" << this->tag;
+  for (int i=0; i<this->tagKeys.size; i++)
+    out << " " << this->tagKeys << "=\"" << this->tagValues << "\"";
+  out << ">";
+  return out.str();
+}
+
+std::string SyntacticElementHTML::ToStringCloseTag()
+{ if (this->tag=="")
+    return "";
+  return  "</" + this->tag + ">";
+}
+
+std::string SyntacticElementHTML::ToStringTagAndContent()
+{ MacroRegisterFunctionWithName("SyntacticElementHTML::ToStringTagAndContent");
+  if (this->syntacticRole=="")
+    return this->content;
+  return this->ToStringOpenTag() + this->content + this->ToStringCloseTag();
+}
+
+std::string SyntacticElementHTML::ToStringDebug()
+{ MacroRegisterFunctionWithName("SyntacticElementHTML::ToString");
+  if (this->syntacticRole=="")
+    return this->ToStringTagAndContent();
+  std::stringstream out;
+  out << "<span style=\"color:green\">";
+  out << CGI::StringToHtmlStrinG(this->syntacticRole);
+  out << "</span>";
+  out << "[" << this->ToStringTagAndContent() << "]";
+  return out.str();
+}
+
+std::string SyntacticElementHTML::GetKeyValue(const std::string& theKey)
+{ int theIndex=this->tagKeys.GetIndex(theKey);
+  if (theIndex==-1)
+    return "";
+  return this->tagKeys[theIndex];
+}
+
+void SyntacticElementHTML::SetKeyValue(const std::string& theKey, const std::string& theValue)
+{ int theIndex=this->tagKeys.GetIndex(theKey);
+  if (theIndex==-1)
+  { theIndex=this->tagKeys.size-1;
+    this->tagKeys.AddOnTop(theKey);
+    this->tagValues.SetSize(this->tagKeys.size);
+  }
+  this->tagKeys[theIndex]=theValue;
 }
 
 std::string SyntacticElementHTML::ToStringInterpretted()
 { if (this->syntacticRole=="")
     return this->content;
-  if (this->tagClass=="calculatorAnswerVerification")
+  if (this->GetKeyValue("class")=="calculatorAnswerVerification")
     return "";
   std::stringstream out;
-  out << "<" << this->tag << " class=\"" << this->tagClass << "\"";
-  if (this->tagIdIfPresent!="")
-    out << "id=\"" << this->tagIdIfPresent << "\"";
-  out << ">";
+  out << this->ToStringOpenTag();
   out << this->interpretedCommand;
-  out << "</" << this->tag << ">";
+  out << this->ToStringCloseTag();
   return out.str();
 }
 
 bool SyntacticElementHTML::IsInterpretedDuringPreparation()
 { return this->syntacticRole!="" &&
-         this->tagClass!="calculatorAnswerVerification" &&
-         this->tagClass!="calculatorStudentAnswer";
+         this->GetKeyValue("class")!="calculatorAnswerVerification" &&
+         this->GetKeyValue("class")!="calculatorStudentAnswer";
 }
 
 bool Problem::ExecuteCommandsPrepare(Calculator& theInterpretter, std::stringstream& comments)
@@ -496,6 +553,15 @@ bool Problem::IsSplittingChar(const std::string& input)
   return this->splittingChars.Contains(input[0]);
 }
 
+int SyntacticElementHTML::ParsingNumDummyElements=8;
+std::string Problem::ToStringParsingStack(List<SyntacticElementHTML>& theStack)
+{ MacroRegisterFunctionWithName("Problem::ToStringParsingStack");
+  std::stringstream out;
+  for (int i=SyntacticElementHTML::ParsingNumDummyElements; i<theStack.size; i++)
+    out << theStack[i].ToStringDebug();
+  return out.str();
+}
+
 bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
 { MacroRegisterFunctionWithName("Problem::ExtractExpressionsFromHtml");
   std::stringstream theReader(this->inputHtml);
@@ -533,8 +599,8 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
     this->calculatorCloseTags.AddOnTop("</"+this->calculatorClasses[i]+">");
   }
   List<SyntacticElementHTML> eltsStack;
-  int numDummyElements=8;
-  for (int i=0; i<numDummyElements; i++)
+  eltsStack.SetExpectedSize(theElements.size+SyntacticElementHTML::ParsingNumDummyElements);
+  for (int i=0; i<SyntacticElementHTML::ParsingNumDummyElements; i++)
     eltsStack.AddOnTop( (std::string) "<>");
   int indexInElts=-1;
   bool reduced=false;
@@ -544,6 +610,7 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
       if (indexInElts<theElements.size)
         eltsStack.AddOnTop(theElements[indexInElts]);
     }
+    stOutput << "<br>" << this->ToStringParsingStack(eltsStack);
     reduced=true;
     SyntacticElementHTML& last = eltsStack[eltsStack.size-1];
     SyntacticElementHTML& secondToLast = eltsStack[eltsStack.size-2];
@@ -558,8 +625,8 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
       continue;
     }
     if (last.syntacticRole=="<closeTag>")
-    { last.content="</" +last.tag + ">";
-      last.syntacticRole="";
+    { last.content=last.ToStringCloseTag();
+      last.resetAllExceptContent();
       continue;
     }
     if (thirdToLast.syntacticRole=="<openTagCalc>" && secondToLast=="<" && last=="/")
@@ -573,6 +640,7 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
         thirdToLast.content+=" ";
       secondToLast=last;
       eltsStack.SetSize(eltsStack.size-1);
+      continue;
     }
     if (secondToLast.syntacticRole!="<openTagCalc>" && last=="<")
     { last.content="";
@@ -584,58 +652,48 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
       last.syntacticRole=">";
       continue;
     }
-    if (secondToLast.syntacticRole=="<" && last!="/" && this->calculatorClasses.Contains(last.content))
+    if (secondToLast.syntacticRole=="<" && last!="/")
     { secondToLast.syntacticRole="<openTag";
       secondToLast.tag=last.content;
       secondToLast.content="";
-      eltsStack.SetSize(eltsStack.size-1);
+      eltsStack.RemoveLastObject();
       continue;
     }
-    if (secondToLast.syntacticRole=="</" && this->calculatorClasses.Contains(last.content))
+    if (secondToLast.syntacticRole=="</" )
     { secondToLast.syntacticRole="</closeTag";
       secondToLast.tag=last.content;
       secondToLast.content="";
-      eltsStack.SetSize(eltsStack.size-1);
+      eltsStack.RemoveLastObject();
       continue;
     }
     if (secondToLast.syntacticRole=="</closeTag" && last.syntacticRole==">")
     { secondToLast.syntacticRole="</closeTag>";
-      eltsStack.SetSize(eltsStack.size-1);
+      eltsStack.RemoveLastObject();
       continue;
     }
-    if (sixthToLast.syntacticRole=="<openTag" && fifthToLast=="class" && fourthToLast=="=" && thirdToLast=="\""
+    if (sixthToLast.syntacticRole=="<openTag" && fourthToLast=="=" && thirdToLast=="\""
         && last=="\"" )
-    { if (this->calculatorClasses.Contains(secondToLast.content))
-      { sixthToLast.syntacticRole="<openTagCalc";
-        sixthToLast.tag=secondToLast.content;
-        eltsStack.SetSize(eltsStack.size-5);
-      } else
-      { sixthToLast.syntacticRole="";
-        sixthToLast.content="<"+sixthToLast.tag+" ";
-        if (sixthToLast.tagIdIfPresent!="")
-          sixthToLast.content+="id=\""+sixthToLast.tagIdIfPresent+"\"";
-        sixthToLast.content+=">";
-      }
-      continue;
-    }
-    if (sixthToLast.syntacticRole=="<openTagCalc" && fifthToLast=="id" && fourthToLast=="=" && thirdToLast=="\""
-        && last=="\"" )
-    { sixthToLast.tagIdIfPresent=secondToLast.content;
+    { sixthToLast.SetKeyValue(fifthToLast.content, secondToLast.content);
       eltsStack.SetSize(eltsStack.size-5);
       continue;
     }
-    if (secondToLast.syntacticRole=="<calcOpenTag" && last.syntacticRole==">")
-    { secondToLast.syntacticRole="<calcOpenTag>";
-      eltsStack.SetSize(eltsStack.size-1);
+    if (secondToLast.syntacticRole=="<openTag" && last.syntacticRole==">")
+    { if (this->calculatorClasses.Contains(secondToLast.GetKeyValue("class")))
+        secondToLast.syntacticRole="<openTagCalc>";
+      else
+      { secondToLast.content=secondToLast.ToStringOpenTag();
+        secondToLast.resetAllExceptContent();
+      }
+      eltsStack.RemoveLastObject();
       continue;
     }
     reduced=false;
-  } while (!reduced && indexInElts<theElements.size);
+  } while (reduced || indexInElts<theElements.size);
   this->theContent.SetSize(0);
   bool result=true;
-  for (int i=numDummyElements; i<eltsStack.size; i++)
+  for (int i=SyntacticElementHTML::ParsingNumDummyElements; i<eltsStack.size; i++)
   { bool needNewTag=false;
-    if (i==numDummyElements)
+    if (i==SyntacticElementHTML::ParsingNumDummyElements)
       needNewTag=true;
     else if (this->theContent.LastObject()->syntacticRole!="")
       needNewTag=true;

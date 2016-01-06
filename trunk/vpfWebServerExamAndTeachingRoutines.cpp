@@ -7,6 +7,29 @@
 ProjectInformationInstance projectInfoInstanceWebServerExamAndTeachingRoutines
 (__FILE__, "Routines for calculus teaching: calculator exam mode.");
 
+class SyntacticElementHTML{
+public:
+  std::string syntacticRole;
+  std::string content;
+  std::string tag;
+  std::string tagAdditional;
+  std::string tagClass;
+  std::string tagIdIfPresent;
+  std::string interpretedCommand;
+  bool IsInterpretedDuringPreparation();
+  std::string ToStringInterpretted();
+  SyntacticElementHTML(){}
+  SyntacticElementHTML(const std::string& inputContent)
+  { this->content=inputContent;
+  }
+  bool operator==(const std::string& other)
+  { return this->content==other;
+  }
+  bool operator!=(const std::string& other)
+  { return this->content!=other;
+  }
+};
+
 class Problem
 {
 public:
@@ -14,14 +37,14 @@ public:
   std::string RelativePhysicalFileNameWithFolder;
   std::string inputHtml;
   std::string outputHtml;
-  List<std::string> betweenTheCommands;
-  List<std::string> commands;
-  List<std::string> commandTypes;
-  List<std::string> tagTypes;
-  List<std::string> calculatorClasses;
+  List<SyntacticElementHTML> theContent;
   std::string finalCommandsPoseProblem;
   std::string finalCommandsPoseAndAnswerProblem;
+  List<std::string> calculatorClasses;
+  List<std::string> calculatorOpenTags;
+  List<std::string> calculatorCloseTags;
   List<char> splittingChars;
+  bool IsSplittingChar(const std::string& input);
   static unsigned int HashFunction(const Problem& input)
   { return input.HashFunction();
   }
@@ -32,26 +55,16 @@ public:
   { return this->fileName==other.fileName;
   }
   bool LoadMe(std::stringstream& comments);
-  bool ExecuteCommands(Calculator& theInterpretter, std::stringstream& comments);
+  bool ExecuteCommandsPrepare(Calculator& theInterpretter, std::stringstream& comments);
+  bool ExecuteCommandsTestStudent(Calculator& theInterpretter, std::stringstream& comments);
   bool InterpretHtml(std::stringstream& comments);
   bool ExtractExpressionsFromHtml(std::stringstream& comments);
   std::string CleanUpCommandString(const std::string& inputCommand);
   std::string ToStringExam();
   std::string GetSubmitAnswersJavascript();
+  std::string ToStringContent();
   std::string ToStringExtractedCommands();
-  Problem();
 };
-
-Problem::Problem()
-{ this->calculatorClasses.AddOnTop("calculator");
-  this->calculatorClasses.AddOnTop("calculatorHidden");
-  this->calculatorClasses.AddOnTop("calculatorAnswerVerification");
-  this->calculatorClasses.AddOnTop("calculatorStudentAnswer");
-  this->splittingChars.AddOnTop('<');
-  this->splittingChars.AddOnTop('\"');
-  this->splittingChars.AddOnTop('>');
-  this->splittingChars.AddOnTop('=');
-}
 
 class ProblemCollection
 {
@@ -291,6 +304,8 @@ std::string Problem::GetSubmitAnswersJavascript()
   requestStream << "request=submitProblem&" << WebWorker::ToStringCalculatorArgumentsCGIinputExcludeRequestType()
   << "problemStatement=" << CGI::StringToURLString(this->finalCommandsPoseProblem);
   out << "var params=\"" << requestStream.str() << "\";\n";
+
+  //  out << "params+=" <<  << ";";
   out
   << "  https.send(params);\n"
   << "  https.onload = function() {\n"
@@ -346,21 +361,71 @@ std::string Problem::ToStringExtractedCommands()
   out << "<b>The html read follows.</b><br><hr> " << this->inputHtml;
 //  out << "<hr><b>The split strings follow. </b><hr>" << splitStrings.ToStringCommaDelimited();
   out << "<hr><b>The extracted commands follow.</b><hr>";
-  out << "<table><tr><td>Command(s)</td><td>Command type</td></tr>";
-  for (int i=0; i<this->commands.size; i++)
-    out << "<tr>" << "<td>" << this->commands[i] << "</td><td>"
-    << this->commandTypes[i] << "</td></tr>";
+  out << "<table><tr><td>Command(s)</td><td>class</td><td>id</td><td>tag</td></tr>";
+  for (int i=0; i<this->theContent.size; i++)
+    if (this->theContent[i].syntacticRole!="")
+      out << "<tr>" << "<td>" << this->theContent[i].content << "</td>"
+      << "<td>" << this->theContent[i].tagClass << "</td>"
+      << "<td>" << this->theContent[i].tagIdIfPresent << "</td>"
+      << "<td>" << this->theContent[i].tag << "</td>"
+      << "</tr>";
+    else
+      out << "<tr><td></td><td>n/a</td><td>n/a</td><td>n/a</td>";
   out << "</table>";
   return out.str();
 }
 
-bool Problem::ExecuteCommands(Calculator& theInterpretter, std::stringstream& comments)
-{ MacroRegisterFunctionWithName("Problem::ExecuteCommands");
+std::string Problem::ToStringContent()
+{ MacroRegisterFunctionWithName("Problem::ToStringContent");
+  std::stringstream out;
+  out << "<b>The html read follows.</b><br><hr> " << this->inputHtml;
+//  out << "<hr><b>The split strings follow. </b><hr>" << splitStrings.ToStringCommaDelimited();
+  out << "<hr><b>The extracted commands follow.</b><hr>";
+  out << "<table><tr><td>Syntactic role</td><td>Command(s)</td><td>class</td><td>id</td><td>tag</td></tr>";
+  for (int i=0; i<this->theContent.size; i++)
+    out << "<tr>"
+    << "<td>" << this->theContent[i].syntacticRole << "</td>"
+    << "<td>" << this->theContent[i].content << "</td>"
+    << "<td>" << this->theContent[i].tagClass << "</td>"
+    << "<td>" << this->theContent[i].tagIdIfPresent << "</td>"
+    << "<td>" << this->theContent[i].tag << "</td>"
+    << "</tr>";
+  out << "</table>";
+  return out.str();
+}
+
+std::string SyntacticElementHTML::ToStringInterpretted()
+{ if (this->syntacticRole=="")
+    return this->content;
+  if (this->tagClass=="calculatorAnswerVerification")
+    return "";
+  std::stringstream out;
+  out << "<" << this->tag << " class=\"" << this->tagClass << "\"";
+  if (this->tagIdIfPresent!="")
+    out << "id=\"" << this->tagIdIfPresent << "\"";
+  out << ">";
+  out << this->interpretedCommand;
+  out << "</" << this->tag << ">";
+  return out.str();
+}
+
+bool SyntacticElementHTML::IsInterpretedDuringPreparation()
+{ return this->syntacticRole!="" &&
+         this->tagClass!="calculatorAnswerVerification" &&
+         this->tagClass!="calculatorStudentAnswer";
+}
+
+bool Problem::ExecuteCommandsPrepare(Calculator& theInterpretter, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("Problem::ExecuteCommandsPrepare");
   theInterpretter.init();
   std::stringstream calculatorCommands;
-  for (int i=0; i<this->commands.size; i++)
-    calculatorCommands << "SeparatorBetweenSpans;" << this->commands[i];
-  calculatorCommands << "SeparatorBetweenSpans;";
+  for (int i=0; i<this->theContent.size; i++)
+  { if (!this->theContent[i].IsInterpretedDuringPreparation())
+    { calculatorCommands << "SeparatorBetweenSpans;";
+      continue;
+    }
+    calculatorCommands << this->theContent[i].content;
+  }
 //  stOutput << "nput cmds: " << inputCommands.str();
   theInterpretter.Evaluate(calculatorCommands.str());
   return !theInterpretter.flagAbortComputationASAP;
@@ -369,14 +434,16 @@ bool Problem::ExecuteCommands(Calculator& theInterpretter, std::stringstream& co
 bool Problem::InterpretHtml(std::stringstream& comments)
 { MacroRegisterFunctionWithName("Problem::InterpretHtml");
   if (!this->ExtractExpressionsFromHtml(comments))
+  { this->outputHtml="<b>Failed to interpret html input.</b><br>" +this->ToStringContent();
     return false;
+  }
   int numAttempts=0;
   const int MaxNumAttempts=10;
   while (numAttempts<MaxNumAttempts)
   { numAttempts++;
     Calculator theInterpretter;
     std::stringstream out;
-    if (!this->ExecuteCommands(theInterpretter, comments))
+    if (!this->ExecuteCommandsPrepare(theInterpretter, comments))
     { if (numAttempts>=MaxNumAttempts)
       { out << "Failed to evaluate the commands: " << MaxNumAttempts
         << " attempts made. Calculator evaluation details follow.<hr> "
@@ -386,35 +453,33 @@ bool Problem::InterpretHtml(std::stringstream& comments)
       }
       continue;
     }
-    int spanCounter=0;
     bool moreThanOneCommand=false;
     std::string lastCommands;
     this->finalCommandsPoseProblem="";
-    for (int i=1; i<theInterpretter.theProgramExpression.children.size; i++)
-    { if (theInterpretter.theProgramExpression[i].ToString()!="SeparatorBetweenSpans")
-      { if (this->commandTypes[spanCounter]=="calculatorAnswerVerification")
-          continue;
-        if (moreThanOneCommand)
-        { out << "; ";
-          lastCommands+="; ";
+    int commandCounter=1;
+    for (int spanCounter=0;spanCounter <this->theContent.size; spanCounter++)
+    { if (!this->theContent[spanCounter].IsInterpretedDuringPreparation())
+      { if (theInterpretter.theProgramExpression[commandCounter].ToString()!="SeparatorBetweenSpans")
+        { out << "<b>Error: calculator commands don't match the tags.</g>";
+          this->outputHtml=out.str();
+          return false;
         }
-        out << theInterpretter.theProgramExpression[i].ToString();
-        lastCommands+=theInterpretter.theProgramExpression[i].ToString();
-        moreThanOneCommand=true;
+        commandCounter++;
         continue;
       }
-      if (i!=1)
-      { out << " \\) </" << this->tagTypes[spanCounter] << ">";
-        this->finalCommandsPoseProblem+=lastCommands;
-        lastCommands="";
-        spanCounter++;
-      }
-      out << this->betweenTheCommands[spanCounter];
-      if (i!=theInterpretter.theProgramExpression.children.size-1)
-      { out << "<" << this->tagTypes[spanCounter] << " class=\"" << this->commandTypes[spanCounter] << "\"> \\( ";
-        moreThanOneCommand=false;
+      moreThanOneCommand=false;
+      for (; commandCounter<theInterpretter.theProgramExpression.children.size; commandCounter++ )
+      { if (theInterpretter.theProgramExpression[commandCounter].ToString()=="SeparatorBetweenSpans")
+          break;
+        this->theContent[spanCounter].interpretedCommand+=theInterpretter.theProgramExpression[commandCounter].ToString();
+        if (moreThanOneCommand)
+          this->theContent[spanCounter].interpretedCommand+=" ";
+        moreThanOneCommand=true;
       }
     }
+    for (int i=0; i<this->theContent.size; i++)
+      out << this->theContent[i].ToStringInterpretted();
+
     out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>Final calculator commands:<br>" << this->finalCommandsPoseProblem << "<hr>";
     out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
   //  out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();
@@ -425,110 +490,167 @@ bool Problem::InterpretHtml(std::stringstream& comments)
   return true;
 }
 
+bool Problem::IsSplittingChar(const std::string& input)
+{ if (input.size()!=1)
+    return false;
+  return this->splittingChars.Contains(input[0]);
+}
+
 bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
 { MacroRegisterFunctionWithName("Problem::ExtractExpressionsFromHtml");
   std::stringstream theReader(this->inputHtml);
   theReader.seekg(0);
-  List<std::string> splitStrings;
   std::string word, readChars;
-  splitStrings.SetExpectedSize(theReader.str().size()/4);
+  List<SyntacticElementHTML> theElements;
+  theElements.SetSize(0);
+  theElements.SetExpectedSize(theReader.str().size()/4);
+  this->splittingChars.AddOnTop('<');
+  this->splittingChars.AddOnTop('\"');
+  this->splittingChars.AddOnTop('>');
+  this->splittingChars.AddOnTop('=');
+  this->splittingChars.AddOnTop('/');
   while (theReader >> readChars)
   { word="";
     for (unsigned i=0; i< readChars.size(); i++)
       if (splittingChars.Contains(readChars[i]))
       { if (word!="")
-          splitStrings.AddOnTop(word);
+          theElements.AddOnTop(word);
         std::string charToString;
         charToString.push_back(readChars[i]);
-        splitStrings.AddOnTop(charToString);
+        theElements.AddOnTop(charToString);
         word="";
       } else
         word.push_back(readChars[i]);
     if (word!="")
-      splitStrings.AddOnTop(word);
+      theElements.AddOnTop(word);
   }
-  std::string nextString, outsideOfCalculatorSpan, tagString;
-  bool buildingSpanStartTag=false;
-  bool buildingSpanFinishTag=false;
-  bool buildingTextAreaStartTag=false;
-  bool buildingTextAreaFinishTag=false;
-  int currentSpanType=-1;
-  for (int i=0; i<splitStrings.size; i++)
-  { const std::string currentString=splitStrings[i];
-    if (i<splitStrings.size-1)
-      nextString=splitStrings[i+1];
-    else
-      nextString="";
-    if (currentString=="<")
-    { tagString="<";
-      if (nextString=="span")
-        buildingSpanStartTag=true;
-      if (nextString=="/span")
-        buildingSpanFinishTag=true;
-      if (nextString=="textarea")
-        buildingTextAreaStartTag=true;
-      if (nextString=="/textarea")
-        buildingTextAreaFinishTag=true;
-    }
-    if (buildingSpanStartTag)
-      if (this->calculatorClasses.Contains(currentString))
-      { currentSpanType=this->calculatorClasses.GetIndex(currentString);
-        this->commands.AddOnTop("");
-        this->commandTypes.AddOnTop(currentString);
-        this->tagTypes.AddOnTop("span");
-        this->betweenTheCommands.AddOnTop(outsideOfCalculatorSpan);
-        outsideOfCalculatorSpan="";
-      }
-    if (buildingTextAreaStartTag)
-      if (this->calculatorClasses.Contains(currentString))
-      { currentSpanType=this->calculatorClasses.GetIndex(currentString);
-        this->commands.AddOnTop("");
-        this->commandTypes.AddOnTop(currentString);
-        this->tagTypes.AddOnTop("textarea");
-        this->betweenTheCommands.AddOnTop(outsideOfCalculatorSpan);
-        outsideOfCalculatorSpan="";
-      }
-    if (!buildingSpanFinishTag    && !buildingSpanStartTag &&
-        !buildingTextAreaStartTag && !buildingTextAreaFinishTag &&
-        currentSpanType!=-1)
-      *this->commands.LastObject()+= currentString +" ";
-    if (tagString=="" )
-      outsideOfCalculatorSpan+=currentString+" ";
-    if (tagString!="" && currentString!="<")
-    { tagString+=currentString;
-      bool needsSpace=true;
-      if (currentString.size()==1)
-        if (this->splittingChars.Contains(currentString[0]))
-          needsSpace=false;
-      if (nextString.size()==1)
-        if (this->splittingChars.Contains(nextString[0]))
-          needsSpace=false;
-      if (needsSpace)
-        tagString+=" ";
-    }
-    if (currentString==">")
-    { buildingSpanStartTag=false;
-      buildingTextAreaStartTag=false;
-      if (currentSpanType==-1)
-      { outsideOfCalculatorSpan+=tagString;
-        tagString="";
-      }
-      if (buildingSpanFinishTag || buildingTextAreaFinishTag)
-        currentSpanType=-1;
-      buildingSpanFinishTag=false;
-      buildingTextAreaFinishTag=false;
-    }
+  this->calculatorClasses.AddOnTop("calculator");
+  this->calculatorClasses.AddOnTop("calculatorHidden");
+  this->calculatorClasses.AddOnTop("calculatorAnswerVerification");
+  this->calculatorClasses.AddOnTop("calculatorStudentAnswer");
+  for (int i=0; i<this->calculatorClasses.size; i++)
+  { this->calculatorOpenTags.AddOnTop("<"+this->calculatorClasses[i]+">");
+    this->calculatorCloseTags.AddOnTop("</"+this->calculatorClasses[i]+">");
   }
-  this->betweenTheCommands.AddOnTop(outsideOfCalculatorSpan);
-  if (this->betweenTheCommands.size!=this->commands.size+1)
-  { crash << "I have that this->betweenTheCommands.size!=this->commands.size+1: "
-    << "this shouldn't happen - or at least it appears so to me as I program this right now. "
-    << "Crashing to let you know. "
-    << crash;
+  List<SyntacticElementHTML> eltsStack;
+  int numDummyElements=8;
+  for (int i=0; i<numDummyElements; i++)
+    eltsStack.AddOnTop( (std::string) "<>");
+  int indexInElts=-1;
+  bool reduced=false;
+  do
+  { if (!reduced)
+    { indexInElts++;
+      if (indexInElts<theElements.size)
+        eltsStack.AddOnTop(theElements[indexInElts]);
+    }
+    reduced=true;
+    SyntacticElementHTML& last = eltsStack[eltsStack.size-1];
+    SyntacticElementHTML& secondToLast = eltsStack[eltsStack.size-2];
+    SyntacticElementHTML& thirdToLast = eltsStack[eltsStack.size-3];
+    SyntacticElementHTML& fourthToLast = eltsStack[eltsStack.size-4];
+    SyntacticElementHTML& fifthToLast = eltsStack[eltsStack.size-5];
+    SyntacticElementHTML& sixthToLast = eltsStack[eltsStack.size-6];
+//    SyntacticElementHTML& seventhToLast = eltsStack[eltsStack.size-7];
+    if (secondToLast.syntacticRole=="<openTagCalc>" && last.syntacticRole=="<closeTag>" && secondToLast.tag==last.tag)
+    { secondToLast.syntacticRole="command";
+      eltsStack.RemoveLastObject();
+      continue;
+    }
+    if (last.syntacticRole=="<closeTag>")
+    { last.content="</" +last.tag + ">";
+      last.syntacticRole="";
+      continue;
+    }
+    if (thirdToLast.syntacticRole=="<openTagCalc>" && secondToLast=="<" && last=="/")
+    { secondToLast.syntacticRole="</";
+      eltsStack.RemoveLastObject();
+      continue;
+    }
+    if (thirdToLast.syntacticRole=="<openTagCalc>" && secondToLast.syntacticRole=="")
+    { thirdToLast.content+=secondToLast.content;
+      if (!this->IsSplittingChar(secondToLast.content))
+        thirdToLast.content+=" ";
+      secondToLast=last;
+      eltsStack.SetSize(eltsStack.size-1);
+    }
+    if (secondToLast.syntacticRole!="<openTagCalc>" && last=="<")
+    { last.content="";
+      last.syntacticRole="<";
+      continue;
+    }
+    if (secondToLast.syntacticRole!="<openTagCalc>" && last==">")
+    { last.content="";
+      last.syntacticRole=">";
+      continue;
+    }
+    if (secondToLast.syntacticRole=="<" && last!="/" && this->calculatorClasses.Contains(last.content))
+    { secondToLast.syntacticRole="<openTag";
+      secondToLast.tag=last.content;
+      secondToLast.content="";
+      eltsStack.SetSize(eltsStack.size-1);
+      continue;
+    }
+    if (secondToLast.syntacticRole=="</" && this->calculatorClasses.Contains(last.content))
+    { secondToLast.syntacticRole="</closeTag";
+      secondToLast.tag=last.content;
+      secondToLast.content="";
+      eltsStack.SetSize(eltsStack.size-1);
+      continue;
+    }
+    if (secondToLast.syntacticRole=="</closeTag" && last.syntacticRole==">")
+    { secondToLast.syntacticRole="</closeTag>";
+      eltsStack.SetSize(eltsStack.size-1);
+      continue;
+    }
+    if (sixthToLast.syntacticRole=="<openTag" && fifthToLast=="class" && fourthToLast=="=" && thirdToLast=="\""
+        && last=="\"" )
+    { if (this->calculatorClasses.Contains(secondToLast.content))
+      { sixthToLast.syntacticRole="<openTagCalc";
+        sixthToLast.tag=secondToLast.content;
+        eltsStack.SetSize(eltsStack.size-5);
+      } else
+      { sixthToLast.syntacticRole="";
+        sixthToLast.content="<"+sixthToLast.tag+" ";
+        if (sixthToLast.tagIdIfPresent!="")
+          sixthToLast.content+="id=\""+sixthToLast.tagIdIfPresent+"\"";
+        sixthToLast.content+=">";
+      }
+      continue;
+    }
+    if (sixthToLast.syntacticRole=="<openTagCalc" && fifthToLast=="id" && fourthToLast=="=" && thirdToLast=="\""
+        && last=="\"" )
+    { sixthToLast.tagIdIfPresent=secondToLast.content;
+      eltsStack.SetSize(eltsStack.size-5);
+      continue;
+    }
+    if (secondToLast.syntacticRole=="<calcOpenTag" && last.syntacticRole==">")
+    { secondToLast.syntacticRole="<calcOpenTag>";
+      eltsStack.SetSize(eltsStack.size-1);
+      continue;
+    }
+    reduced=false;
+  } while (!reduced && indexInElts<theElements.size);
+  this->theContent.SetSize(0);
+  bool result=true;
+  for (int i=numDummyElements; i<eltsStack.size; i++)
+  { bool needNewTag=false;
+    if (i==numDummyElements)
+      needNewTag=true;
+    else if (this->theContent.LastObject()->syntacticRole!="")
+      needNewTag=true;
+    if (eltsStack[i].syntacticRole!="")
+      needNewTag=true;
+    if (eltsStack[i].syntacticRole!="command" && eltsStack[i].syntacticRole!="" )
+      result=false;
+    if (!needNewTag)
+    { this->theContent.LastObject()->content+=eltsStack[i].content;
+      if (!this->IsSplittingChar(eltsStack[i].content))
+        this->theContent.LastObject()->content+=" ";
+    } else
+      this->theContent.AddOnTop(eltsStack[i]);
   }
-  for (int i=0; i<this->commands.size; i++)
-    this->commands[i]=this->CleanUpCommandString(this->commands[i]);
-  return true;
+  return result;
 }
 
 std::string Problem::CleanUpCommandString(const std::string& inputCommand)

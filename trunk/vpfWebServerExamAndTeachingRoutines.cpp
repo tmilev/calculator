@@ -440,7 +440,7 @@ std::string SyntacticElementHTML::GetKeyValue(const std::string& theKey)
   int theIndex=this->tagKeys.GetIndex(theKey);
   if (theIndex==-1)
     return "";
-  return this->tagKeys[theIndex];
+  return this->tagValues[theIndex];
 }
 
 void SyntacticElementHTML::SetKeyValue(const std::string& theKey, const std::string& theValue)
@@ -612,7 +612,7 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
       if (indexInElts<theElements.size)
         eltsStack.AddOnTop(theElements[indexInElts]);
     }
-    stOutput << "<br>" << this->ToStringParsingStack(eltsStack);
+    //stOutput << "<br>" << this->ToStringParsingStack(eltsStack);
     reduced=true;
     SyntacticElementHTML& last = eltsStack[eltsStack.size-1];
     SyntacticElementHTML& secondToLast = eltsStack[eltsStack.size-2];
@@ -621,12 +621,12 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
     SyntacticElementHTML& fifthToLast = eltsStack[eltsStack.size-5];
     SyntacticElementHTML& sixthToLast = eltsStack[eltsStack.size-6];
 //    SyntacticElementHTML& seventhToLast = eltsStack[eltsStack.size-7];
-    if (secondToLast.syntacticRole=="<openTagCalc>" && last.syntacticRole=="<closeTag>" && secondToLast.tag==last.tag)
+    if (secondToLast.syntacticRole=="<openTagCalc>" && last.syntacticRole=="</closeTag>" && secondToLast.tag==last.tag)
     { secondToLast.syntacticRole="command";
       eltsStack.RemoveLastObject();
       continue;
     }
-    if (last.syntacticRole=="<closeTag>")
+    if (last.syntacticRole=="</closeTag>")
     { last.content=last.ToStringCloseTag();
       last.resetAllExceptContent();
       continue;
@@ -661,6 +661,13 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
       eltsStack.RemoveLastObject();
       continue;
     }
+    if (secondToLast.syntacticRole=="<" && last=="/")
+    { secondToLast.syntacticRole="</";
+      secondToLast.tag="";
+      secondToLast.content="";
+      eltsStack.RemoveLastObject();
+      continue;
+    }
     if (secondToLast.syntacticRole=="</" )
     { secondToLast.syntacticRole="</closeTag";
       secondToLast.tag=last.content;
@@ -680,7 +687,8 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
       continue;
     }
     if (secondToLast.syntacticRole=="<openTag" && last.syntacticRole==">")
-    { if (this->calculatorClasses.Contains(secondToLast.GetKeyValue("class")))
+    { //stOutput << secondToLast.ToStringDebug() << " class key value: " << secondToLast.GetKeyValue("class");
+      if (this->calculatorClasses.Contains(secondToLast.GetKeyValue("class")))
         secondToLast.syntacticRole="<openTagCalc>";
       else
       { secondToLast.content=secondToLast.ToStringOpenTag();

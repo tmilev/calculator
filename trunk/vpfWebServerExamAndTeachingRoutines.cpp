@@ -161,8 +161,8 @@ std::string Problem::ToStringExam()
   this->InterpretHtml(failure);
 
   out << this->GetSubmitAnswersJavascript();
-  out << "Latex javascript off!!!";
-//  out << CGI::GetLaTeXProcessingJavascript();
+//  out << "Latex javascript off!!!";
+  out << CGI::GetLaTeXProcessingJavascript();
   out << "\n<form class=\"problemForm\" method=\"GET\" id=\"formProblemCollection\" name=\"formProblemCollection\" action=\""
   << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n" ;
   out << theWebServer.GetActiveWorker().GetHtmlHiddenInputs();
@@ -463,7 +463,8 @@ std::string SyntacticElementHTML::ToStringInterpretted()
     return "";
   std::stringstream out;
   out << this->ToStringOpenTag();
-  out << this->interpretedCommand;
+  if (this->interpretedCommand!="")
+    out << "\\( " << this->interpretedCommand << " \\)";
   out << this->ToStringCloseTag();
   return out.str();
 }
@@ -532,17 +533,18 @@ bool Problem::InterpretHtml(std::stringstream& comments)
       for (; commandCounter<theInterpreter.theProgramExpression.children.size; commandCounter++ )
       { if (theInterpreter.theProgramExpression[commandCounter].ToString()=="SeparatorBetweenSpans")
           break;
-        this->theContent[spanCounter].interpretedCommand+=theInterpreter.theProgramExpression[commandCounter].ToString();
         if (moreThanOneCommand)
           this->theContent[spanCounter].interpretedCommand+="; ";
+        this->theContent[spanCounter].interpretedCommand+=theInterpreter.theProgramExpression[commandCounter].ToString();
         moreThanOneCommand=true;
       }
+      this->finalCommandsPoseProblem+=this->theContent[spanCounter].interpretedCommand+";";
     }
     for (int i=0; i<this->theContent.size; i++)
       out << this->theContent[i].ToStringInterpretted();
 
-    out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
-    out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
+//    out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
+//    out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
   //  out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();
     this->outputHtml=out.str();
     break;

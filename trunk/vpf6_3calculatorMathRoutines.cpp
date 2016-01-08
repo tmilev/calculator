@@ -6145,6 +6145,18 @@ bool CalculatorFunctionsGeneral::innerDrawWeightSupport(Calculator& theCommands,
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerSetRandomSeed
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRandomInteger");
+  int theInt=-1;
+  if (!input.IsIntegerFittingInInt(& theInt))
+    return theCommands << "Failed to extract small integer";
+  std::stringstream out;
+  srand((unsigned) theInt);
+  out << "Successfully set random seed to: " << (unsigned) theInt;
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerRandomInteger
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRandomInteger");

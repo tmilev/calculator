@@ -2100,7 +2100,7 @@ std::string Calculator::ToString()
   int numExpressionsToDisplay=this->theExpressionContainer.size;
   if (this->theExpressionContainer.size>1000)
   { numExpressionsToDisplay=1000;
-    out << " <b>Diplaying first " << numExpressionsToDisplay << " only </b><br>";
+    out << " <b>Displaying first " << numExpressionsToDisplay << " only </b><br>";
   }
   for (int i=0; i< numExpressionsToDisplay; i++)
     out << this->theExpressionContainer[i].ToString() << ", ";

@@ -92,6 +92,11 @@ void Calculator::initCalculusTestingFunctions()
 
 void Calculator::initPredefinedInnerFunctions()
 { this->AddOperationInnerHandler
+  ("setRandomSeed", CalculatorFunctionsGeneral::innerSetRandomSeed, "",
+   "Sets the random seed of the calculator to the given integer value",
+   "setRandomSeed(123); randomInteger(-100,100); randomInteger(-100,100)",
+   true, false, "CalculatorConversions::innerSetRandomSeed");
+  this->AddOperationInnerHandler
   ("randomInteger", CalculatorFunctionsGeneral::innerRandomInteger, "",
    "Generates a random integer. The random integer lives in intervals given by pairs of integers. The example code\
     generates a random number in the union of the intervals [-2, -1], [2,5]. If the input intervals overlap\

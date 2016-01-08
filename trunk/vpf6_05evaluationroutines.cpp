@@ -505,7 +505,7 @@ void Calculator::Evaluate(const std::string& theInput)
 { MacroRegisterFunctionWithName("Calculator::Evaluate");
   this->StartTimeEvaluationInSecondS=theGlobalVariables.GetElapsedSeconds();
   this->inputString=theInput;
-  this->ParseAndExtractExpressions(theInput, this->theProgramExpression, this->syntacticSouP, this->syntacticStacK, & this->syntaxErrors);
+  this->ParseAndExtractExpressions(theInput, this->theProgramExpression, this->syntacticSouP, this->syntacticStacK, &this->syntaxErrors);
   this->EvaluateCommands();
 }
 

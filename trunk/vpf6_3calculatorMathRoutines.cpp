@@ -591,7 +591,7 @@ bool CalculatorFunctionsGeneral::outerCombineFractionsCommutative(Calculator& th
   if (!leftE.StartsWith(theCommands.opDivide(), 3) ||
       !rightE.StartsWith(theCommands.opDivide(), 3))
     return false;
-  stOutput << "<br><b>To do: make this function work really well</b>";
+  theCommands << "<br><b>To do: make function outerCombineFractionsCommutative work much better.</b>";
   if (leftE[2]==rightE[2])
   { output=(leftE[1]+rightE[1])/leftE[2];
     return true;

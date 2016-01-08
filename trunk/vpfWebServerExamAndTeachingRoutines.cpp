@@ -17,6 +17,8 @@ public:
   std::string interpretedCommand;
   static int ParsingNumDummyElements;
   bool IsInterpretedDuringPreparation();
+  bool IsAnswerVerification();
+  bool IsStudentAnswer();
   std::string GetKeyValue(const std::string& theKey);
   void SetKeyValue(const std::string& theKey, const std::string& theValue);
   void resetAllExceptContent();
@@ -47,9 +49,9 @@ public:
   int randomSeed;
   bool flagRandomSeedGiven;
   List<SyntacticElementHTML> theContent;
-  std::string finalCommandsWithInbetweens;
-  std::string finalCommandsPoseProblem;
-  std::string finalCommandsPoseAndAnswerProblem;
+  std::string commandsWithInbetweens;
+  std::string commandsNoVerification;
+  std::string commandsVerification;
   List<std::string> calculatorClasses;
   List<std::string> calculatorOpenTags;
   List<std::string> calculatorCloseTags;
@@ -131,6 +133,7 @@ public:
   std::string GetCurrentProblemItem();
   void LoadCurrentProblemItem();
   std::string ToStringExerciseSelection();
+  Problem& GetCurrentProblem();
   TeachingRoutines();
 };
 
@@ -142,6 +145,14 @@ TeachingRoutines::TeachingRoutines()
   this->flagLoadedProblem=false;
   this->currentProblemIndex=-1;
   this->currentCollectionIndex=-1;
+}
+
+Problem& TeachingRoutines::GetCurrentProblem()
+{ MacroRegisterFunctionWithName("TeachingRoutines::GetCurrentProblem");
+  if (!this->flagLoadedProblem || this->currentCollectionIndex==-1 || this->currentProblemIndex==-1)
+    crash << "Error: requesting current problem while that wasn't properly loaded/initialized." << crash;
+  return this->theExercises.GetElement(this->currentCollectionIndex)
+  .theProblems.GetElement(this->currentCollectionIndex);
 }
 
 bool TeachingRoutines::LoadExercises()
@@ -382,29 +393,71 @@ int WebWorker::ProcessSubmitProblem()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSubmitProblem");
   TeachingRoutines theRoutines;
   theRoutines.LoadCurrentProblemItem();
+  std::stringstream comments;
   if (!theRoutines.flagLoadedProblem)
   { stOutput << "Failed to load problem. " << theRoutines.comments.str();
     stOutput.Flush();
     return 0;
   }
+  if (!theRoutines.GetCurrentProblem().ExtractExpressionsFromHtml(comments))
+  { stOutput << "<b>Failed to interpret html input.</b><br>" << comments.str();
+    return 0;
+  }
+  Calculator theInterpreter;
+  if (!theRoutines.GetCurrentProblem().PrepareCommands(theInterpreter, comments))
+  { stOutput << "<b>Failed to prepare commands.</b>" << comments.str();
+    return 0;
+  }
   std::string problemStatement=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("problemStatement"));
-  std::stringstream studentAnswerStream;
+  std::stringstream studentAnswerStream, completedProblemStream;
+  completedProblemStream << theRoutines.GetCurrentProblem().commandsNoVerification;
   std::string studentAnswerNameReader;
+  List<std::string> studentAnswersUnadulterated;
   for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
     if (MathRoutines::StringBeginsWith(theGlobalVariables.webFormArgumentNames[i], "calculatorStudentAnswer", &studentAnswerNameReader))
-      studentAnswerStream << studentAnswerNameReader << "= ("
-      << theGlobalVariables.webFormArguments[i] << ");";
+    { studentAnswerStream << studentAnswerNameReader << "= ("
+      << CGI::URLStringToNormal( theGlobalVariables.webFormArguments[i]) << ");";
+      studentAnswersUnadulterated.AddOnTop(CGI::URLStringToNormal( theGlobalVariables.webFormArguments[i]));
+    }
+  completedProblemStream << studentAnswerStream.str();
+  completedProblemStream << "SeparatorBetweenSpans; ";
+  completedProblemStream << theRoutines.GetCurrentProblem().commandsVerification ;
+//  stOutput << "input to the calculator: " << completedProblemStream.str() << "<hr>";
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
-  Calculator theInterpreter;
   theInterpreter.init();
-  theInterpreter.Evaluate(studentAnswerStream.str());
-  if (theInterpreter.flagAbortComputationASAP)
-    stOutput << "Failed to evaluate your answer";
+  theInterpreter.Evaluate(completedProblemStream.str());
+  if (theInterpreter.flagAbortComputationASAP || theInterpreter.syntaxErrors!="")
+  { stOutput << "<b>Error while processing your answer(s).</b> Here's what I understood. ";
+    for (int i=0; i<studentAnswersUnadulterated.size; i++)
+    { Calculator isolatedInterpreter;
+      isolatedInterpreter.init();
+      theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
+      isolatedInterpreter.Evaluate(studentAnswersUnadulterated[i]);
+      if (isolatedInterpreter.syntaxErrors!="")
+        stOutput << isolatedInterpreter.ToStringSyntacticStackHumanReadable(false);
+      else
+        stOutput << isolatedInterpreter.outputString;
+    }
+    return 0;
+  }
+  bool isCorrect=false;
+  for (int i=theInterpreter.theProgramExpression.children.size-1; i>=0; i--)
+  { if (theInterpreter.theProgramExpression[i].ToString()== "SeparatorBetweenSpans")
+      break;
+    int mustbeOne=-1;
+    if (!theInterpreter.theProgramExpression[i].IsSmallInteger(&mustbeOne))
+      isCorrect=false;
+    else
+      isCorrect=(mustbeOne==1);
+    if (!isCorrect)
+      break;
+  }
+  if (!isCorrect)
+    stOutput << "<b>Your answer appears to be incorrect.</b>";
+  else
+    stOutput << "<b>Correct!</b>";
   stOutput << "<hr>" << theInterpreter.outputString << "<hr><hr><hr><hr><hr><hr>";
   stOutput << this->ToStringCalculatorArgumentsHumanReadable();
-  stOutput << "<hr>" << "Problem link: "
-  << theRoutines.theExercises[theRoutines.currentCollectionIndex].
-  theProblems[theRoutines.currentProblemIndex].ToStringGetProblemLink();
   //Calculator answerInterpretter;
   //answerInterpretter.theProgramExpression=theGlobalVariables.GetWebInput("mainInput");
   //answerInterpretter.init();
@@ -549,22 +602,44 @@ bool SyntacticElementHTML::IsInterpretedDuringPreparation()
          this->GetKeyValue("class")!="calculatorStudentAnswer";
 }
 
+bool SyntacticElementHTML::IsAnswerVerification()
+{ return this->syntacticRole=="command" &&
+         this->GetKeyValue("class")=="calculatorAnswerVerification";
+}
+
+bool SyntacticElementHTML::IsStudentAnswer()
+{ return this->syntacticRole=="command" &&
+         this->GetKeyValue("class")=="calculatorStudentAnswer";
+}
+
 bool Problem::PrepareCommands(Calculator& theInterpreter, std::stringstream& comments)
 { MacroRegisterFunctionWithName("Problem::PrepareCommands");
-  std::stringstream calculatorCommands;
   if (this->theContent.size==0)
     crash << "Empty content not allowed. " << crash;
   if (this->theContent[0].syntacticRole!="")
     crash << "First command must be empty to allow for command for setting of random seed. " << crash;
-  calculatorCommands << "setRandomSeed{}(" << this->randomSeed << ");";
+  std::stringstream streamWithInbetween, streamNoVerification, streamVerification;
+  streamWithInbetween << "setRandomSeed{}(" << this->randomSeed << ");";
+  streamNoVerification << streamWithInbetween.str();
   for (int i=1; i<this->theContent.size; i++)
   { if (!this->theContent[i].IsInterpretedDuringPreparation())
-    { calculatorCommands << "SeparatorBetweenSpans; ";
+    { streamWithInbetween << "SeparatorBetweenSpans; ";
       continue;
     }
-    calculatorCommands << this->CleanUpCommandString( this->theContent[i].content);
+    streamWithInbetween << this->CleanUpCommandString( this->theContent[i].content);
   }
-  this->finalCommandsWithInbetweens=calculatorCommands.str();
+  for (int i=1; i<this->theContent.size; i++)
+  { if (this->theContent[i].syntacticRole!="command")
+      continue;
+    if (this->theContent[i].IsAnswerVerification())
+    { streamVerification << this->CleanUpCommandString(this->theContent[i].content);
+      continue;
+    }
+    streamNoVerification << this->CleanUpCommandString( this->theContent[i].content);
+  }
+  this->commandsWithInbetweens=streamWithInbetween.str();
+  this->commandsNoVerification=streamNoVerification.str();
+  this->commandsVerification =streamVerification.str();
   return true;
 }
 
@@ -573,7 +648,7 @@ bool Problem::PrepareAndExecuteCommands(Calculator& theInterpreter, std::strings
   this->PrepareCommands(theInterpreter, comments);
   theInterpreter.init();
   //stOutput << "nput cmds: " << calculatorCommands.str();
-  theInterpreter.Evaluate(this->finalCommandsWithInbetweens);
+  theInterpreter.Evaluate(this->commandsWithInbetweens);
 //  stOutput << "<hr>Fter eval: " << theInterpreter.outputString;
   return !theInterpreter.flagAbortComputationASAP;
 }
@@ -629,7 +704,6 @@ bool Problem::InterpretHtml(std::stringstream& comments)
     }
     bool moreThanOneCommand=false;
     std::string lastCommands;
-    this->finalCommandsPoseProblem="";
     int commandCounter=2;
     //first command and first syntactic element are the random seed and are ignored.
     for (int spanCounter=1; spanCounter <this->theContent.size; spanCounter++)
@@ -652,7 +726,6 @@ bool Problem::InterpretHtml(std::stringstream& comments)
         this->theContent[spanCounter].interpretedCommand+=theInterpreter.theProgramExpression[commandCounter].ToString();
         moreThanOneCommand=true;
       }
-      this->finalCommandsPoseProblem+=this->theContent[spanCounter].interpretedCommand+";";
     }
     for (int i=0; i<this->theContent.size; i++)
       out << this->theContent[i].ToStringInterpretted();
@@ -719,9 +792,12 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
     this->calculatorCloseTags.AddOnTop("</"+this->calculatorClasses[i]+">");
   }
   List<SyntacticElementHTML> eltsStack;
+  SyntacticElementHTML dummyElt;
+  dummyElt.content="<>";
+  dummyElt.syntacticRole="filler";
   eltsStack.SetExpectedSize(theElements.size+SyntacticElementHTML::ParsingNumDummyElements);
   for (int i=0; i<SyntacticElementHTML::ParsingNumDummyElements; i++)
-    eltsStack.AddOnTop( (std::string) "<>");
+    eltsStack.AddOnTop( dummyElt);
   int indexInElts=-1;
   bool reduced=false;
   do
@@ -730,7 +806,7 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
       if (indexInElts<theElements.size)
         eltsStack.AddOnTop(theElements[indexInElts]);
     }
-    //stOutput << "<br>" << this->ToStringParsingStack(eltsStack);
+//    stOutput << "<br>" << this->ToStringParsingStack(eltsStack);
     reduced=true;
     SyntacticElementHTML& last = eltsStack[eltsStack.size-1];
     SyntacticElementHTML& secondToLast = eltsStack[eltsStack.size-2];
@@ -795,6 +871,12 @@ bool Problem::ExtractExpressionsFromHtml(std::stringstream& comments)
     }
     if (secondToLast.syntacticRole=="</closeTag" && last.syntacticRole==">")
     { secondToLast.syntacticRole="</closeTag>";
+      eltsStack.RemoveLastObject();
+      continue;
+    }
+    if (! this->IsSplittingChar(last.content) && last.syntacticRole=="" && !this->IsSplittingChar(secondToLast.content) &&
+        secondToLast.syntacticRole=="")
+    { secondToLast.content+=" "+last.content;
       eltsStack.RemoveLastObject();
       continue;
     }

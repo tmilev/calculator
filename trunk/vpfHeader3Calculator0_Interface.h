@@ -560,7 +560,7 @@ class SyntacticElement
 //    this->IndexFirstChar=other.IndexFirstChar;
 //    this->IndexLastCharPlusOne=other.IndexLastCharPlusOne;
   }
-  std::string ToString(Calculator& theBoss)const;
+  std::string ToStringHumanReadable(Calculator& theBoss, bool includeLispifiedExpressions)const;
   SyntacticElement()
   { this->controlIndex=0;//controlIndex=0 *MUST* point to the empty control sequence.
     this->errorString="";
@@ -896,8 +896,8 @@ public:
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-decrease);
     return true;
   }
-  std::string ElementToStringSyntacticStack();
-  std::string ElementToStringSyntactic(bool usePolishForm=false);
+  std::string ToStringSyntacticStackHTMLTable();
+  std::string ToStringSyntacticStackHumanReadable(bool includeLispifiedExpressions);
   std::string WriteDefaultLatexFileReturnHtmlLink(const std::string& fileContent, bool useLatexDviPSpsToPNG=false);
   std::string GetCalculatorLink(const std::string& input);
   bool isSeparatorFromTheLeftGeneral(const std::string& input);

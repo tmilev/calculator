@@ -10,24 +10,24 @@ SyntacticElement Calculator::GetEmptySyntacticElement()
   return result;
 }
 
-std::string SyntacticElement::ToString(Calculator& theBoss)const
-{ std::stringstream out;
-  bool makeTable=this->controlIndex==theBoss.conExpression() || this->controlIndex==theBoss.conError() || this->controlIndex==theBoss.conSequence();
-  if (makeTable)
-    out << "<table border=\"1\"><tr><td>";
+std::string SyntacticElement::ToStringHumanReadable(Calculator& theBoss, bool includeLispifiedExpressions)const
+{ std::string controlString;
   if (this->controlIndex<0)
-    out << "Error: control index is not initialized! This is likely a programming error.";
+    controlString= "Error: control index is not initialized! This is likely a programming error.";
   else
-    out << theBoss.controlSequences[this->controlIndex] << " ";
-  if (makeTable)
-  { out << "</td></tr><tr><td>";
-    out << this->theData.ToString(0);
-    out << "</td></tr><tr><td>" << this->theData.ToStringFull();
-    if (this->errorString!="")
-      out << "</td></tr><tr><td>" << this->errorString;
-    out << "</td></tr></table>";
-  } else
-    out << this->theData.ToString(0);
+    controlString=theBoss.controlSequences[this->controlIndex];
+  bool makeTable=this->controlIndex==theBoss.conExpression() || this->controlIndex==theBoss.conError() || this->controlIndex==theBoss.conSequence();
+  if (!makeTable)
+    return controlString;
+  std::stringstream out;
+  out << "<table style=\"vertical-align:top;border-spacing=0px 0px\">";
+  out << "<tr><td style=\"text-align:center\">" << this->theData.ToString(0) << "</td></tr>";
+  out << "<tr><td style=\"color:#AAAAAA\">" << controlString << "</td></tr>";
+  if (includeLispifiedExpressions)
+    out <<  "<tr><td style=\"color:#AAAAAA\">" << this->theData.ToStringFull() << "</td></tr>";
+  if (this->errorString!="")
+    out << "<tr><td>" << this->errorString << "</td></tr>";
+  out << "</table>";
   return out.str();
 }
 
@@ -1015,11 +1015,11 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
       errorLog << "Syntax error with message: " << result.errorString;
     else
     { errorLog << "Syntax error: your command simplifies to a single syntactic element but it is not an expression. <br>";
-      errorLog << "It simplifies to:<br> " << this->ElementToStringSyntacticStack();
+      errorLog << "It simplifies to:<br> " << this->ToStringSyntacticStackHTMLTable();
     }
   } else
   { errorLog << "Syntax error: your command does not simplify to a single syntactic element. <br>";
-    errorLog << "Instead it simplifies to:<br> " << this->ElementToStringSyntacticStack();
+    errorLog << "Instead it simplifies to:<br> " << this->ToStringSyntacticStackHTMLTable();
   }
   if (outputErrors!=0)
     *outputErrors=errorLog.str();
@@ -1052,9 +1052,9 @@ bool Calculator::ApplyOneRule()
 //  const SyntacticElement& ninthToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-9];
 //  const std::string& ninthToLastS=this->theBoss->controlSequences[ninthToLastE.controlIndex];
   if (this->flagLogSyntaxRules)
-    this->parsingLog+= "<hr>" + this->ElementToStringSyntacticStack();
+    this->parsingLog+= "<hr>" + this->ToStringSyntacticStackHTMLTable();
   if (secondToLastS=="%" && lastS=="LogParsing")
-  { this->parsingLog+= "<hr>" + this->ElementToStringSyntacticStack();
+  { this->parsingLog+= "<hr>" + this->ToStringSyntacticStackHTMLTable();
     this->flagLogSyntaxRules=true;
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
@@ -1130,7 +1130,7 @@ bool Calculator::ApplyOneRule()
 
 /*  if (lastE.theData.IndexBoundVars==-1)
   { crash << "<hr>The last expression, " << lastE.ToString(*this) << ", while reducing "
-    << this->ElementToStringSyntacticStack()
+    << this->ElementToStringSyntacticStackHTMLTable()
     << " does not have properly initialized context. "
     << crash;
   }*/

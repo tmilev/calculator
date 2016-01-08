@@ -2212,28 +2212,32 @@ bool Calculator::ReplaceEXEXByEX(int formatOptions)
   return true;
 }
 
-std::string Calculator::ElementToStringSyntacticStack()
-{ std::stringstream out;
+std::string Calculator::ToStringSyntacticStackHumanReadable(bool includeLispifiedExpressions)
+{ MacroRegisterFunctionWithName("Calculator::ToStringSyntacticStackHumanReadable");
+  std::stringstream out;
   if ((*this->CurrentSyntacticStacK).size<this->numEmptyTokensStart)
     return "Error: this is a programming error: not enough empty tokens in the start of the syntactic stack.";
-  bool HasMoreThanOneSignificantEntriesOrIsNotExpression=((*this->CurrentSyntacticStacK).size>this->numEmptyTokensStart+1);
+  bool isBad=((*this->CurrentSyntacticStacK).size>this->numEmptyTokensStart+1);
   SyntacticElement& lastSyntacticElt=* (*this->CurrentSyntacticStacK).LastObject();
   if ((*this->CurrentSyntacticStacK).size==this->numEmptyTokensStart+1)
     if (lastSyntacticElt.controlIndex!=this->conExpression())
-      HasMoreThanOneSignificantEntriesOrIsNotExpression=true;
-  if (HasMoreThanOneSignificantEntriesOrIsNotExpression)
-    out << "<table border=\"1\"><tr><td>";
-  for (int i=this->numEmptyTokensStart; i<(*this->CurrentSyntacticStacK).size; i++)
-  { out << (*this->CurrentSyntacticStacK)[i].ToString(*this);
-    if (HasMoreThanOneSignificantEntriesOrIsNotExpression)
-    { out << "</td>";
-      if (i!=(*this->CurrentSyntacticStacK).size-1)
-        out << "<td>";
-    }
+      isBad=true;
+  if (!isBad)
+  { out << this->CurrentSyntacticStacK->LastObject()->ToStringHumanReadable(*this, includeLispifiedExpressions);
+    return out.str();
   }
-  if (HasMoreThanOneSignificantEntriesOrIsNotExpression)
-    out << "</td></tr></table>";
+  out << "<table style=\"vertical-align:top;border-spacing:0px 0px;\"><tr>";
+  for (int i=this->numEmptyTokensStart; i<(*this->CurrentSyntacticStacK).size; i++)
+    out
+    << "<td style=\"vertical-align:top;background-color:" << ((i%2==0) ?"#FAFAFA" : "#F0F0F0" ) << "\">"
+    << (*this->CurrentSyntacticStacK)[i].ToStringHumanReadable(*this, includeLispifiedExpressions)
+    << "</td>";
+  out << "</tr></table>";
   return out.str();
+}
+
+std::string Calculator::ToStringSyntacticStackHTMLTable()
+{ return this->ToStringSyntacticStackHumanReadable(true);
 }
 
 bool Calculator::ReplaceXXXByCon(int theCon)

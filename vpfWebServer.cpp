@@ -562,13 +562,15 @@ std::string WebWorker::ToStringCalculatorArgumentsHumanReadable()
   return out.str();
 }
 
-std::string WebWorker::ToStringCalculatorArgumentsCGIinputExcludeRequestType()
+std::string WebWorker::ToStringCalculatorArgumentsCGIinputExcludeRequestTypeAndPassword()
 { MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsCGIinputExcludeRequestType");
   if (!theGlobalVariables.flagLoggedIn)
     return "";
   std::stringstream out;
   for (int i =0; i<theGlobalVariables.webFormArgumentNames.size; i++)
   { if (theGlobalVariables.webFormArgumentNames[i]=="request")
+      continue;
+    if (theGlobalVariables.webFormArgumentNames[i]=="password")
       continue;
     out << theGlobalVariables.webFormArgumentNames[i] << "=" << theGlobalVariables.webFormArguments[i]
     << "&";
@@ -633,7 +635,7 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
   stOutput << this->openIndentTag("<tr>");
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!-- input form here -->");
   stOutput << this->ToStringCalculatorArgumentsHumanReadable();
-  stOutput << "\n<FORM method=\"GET\" id=\"formCalculator\" name=\"formCalculator\" action=\""
+  stOutput << "\n<FORM method=\"POST\" id=\"formCalculator\" name=\"formCalculator\" action=\""
   << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n";
   std::string civilizedInputSafish;
   if (CGI::StringToHtmlString(theParser.inputString, civilizedInputSafish))
@@ -1834,16 +1836,16 @@ std::string WebWorker::GetJavascriptStandardCookies()
 //  << "    if(getCookie(\"examStatus\")!='');\n"
 //  << "      document.getElementById(\"examStatus\").value=getCookie(\"examStatus\");\n"
   << "  if (document.getElementById(\"currentProblemCollection\")!=null)\n "
-  << "    if(getCookie(\"currentProblemCollection\")!='');\n"
+  << "    if(getCookie(\"currentProblemCollection\")!='')\n"
   << "      document.getElementById(\"currentProblemCollection\").value=getCookie(\"currentProblemCollection\");\n"
   << "  if (document.getElementById(\"currentProblem\")!=null)\n "
-  << "    if(getCookie(\"currentProblem\")!='');\n"
+  << "    if(getCookie(\"currentProblem\")!='')\n"
   << "      document.getElementById(\"currentProblem\").value=getCookie(\"currentProblem\");\n"
   << "  if (document.getElementById(\"authenticationToken\")!=null)\n"
-  << "    if(getCookie(\"authenticationToken\")!='');\n"
+  << "    if(getCookie(\"authenticationToken\")!='')\n"
   << "      document.getElementById(\"authenticationToken\").value=getCookie(\"authenticationToken\");\n "
   << "  if (document.getElementById(\"userHidden\")!=null)\n"
-  << "    if(getCookie(\"user\")!='');\n"
+  << "    if(getCookie(\"user\")!='')\n"
   << "      document.getElementById(\"userHidden\").value=getCookie(\"user\");\n "
   << "}\n";
   out << " </script>\n";

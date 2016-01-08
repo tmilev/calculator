@@ -18,6 +18,8 @@ public:
 
   static bool innerRandomInteger
   (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSetRandomSeed
+  (Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerExtractCalculatorExpressionFromHtml
   (Calculator& theCommands, const Expression& input, Expression& output);

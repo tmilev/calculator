@@ -421,6 +421,10 @@ int WebWorker::ProcessSubmitProblem()
     { studentAnswerStream << studentAnswerNameReader << "= ("
       << CGI::URLStringToNormal( theGlobalVariables.webFormArguments[i]) << ");";
       studentAnswersUnadulterated.AddOnTop(CGI::URLStringToNormal( theGlobalVariables.webFormArguments[i]));
+      if (*studentAnswersUnadulterated.LastObject()=="")
+      { stOutput << "<b>You appear to have submitted at least one empty answer. Please resubmit. </b>";
+        return 0;
+      }
     }
   completedProblemStream << studentAnswerStream.str();
   completedProblemStream << "SeparatorBetweenSpans; ";
@@ -458,9 +462,13 @@ int WebWorker::ProcessSubmitProblem()
       break;
   }
   if (!isCorrect)
-    stOutput << "<b>Your answer appears to be incorrect.</b>";
+    stOutput << "<span style=\"color:red\"><b>Your answer appears to be incorrect.</b></span>";
   else
-    stOutput << "<b>Correct!</b>";
+    stOutput << "<span style=\"color:green\"><b>Correct!</b></span>";
+  if (!theGlobalVariables.flagLoggedIn)
+  { stOutput << "<br><b>Submitting problem solutions allowed only for logged-in users. </b>";
+    return 0;
+  }
 //  stOutput << "<hr>" << theInterpreter.outputString << "<hr><hr><hr><hr><hr><hr>";
 //  stOutput << this->ToStringCalculatorArgumentsHumanReadable();
   //Calculator answerInterpretter;
@@ -624,6 +632,7 @@ bool Problem::PrepareCommands(Calculator& theInterpreter, std::stringstream& com
   if (this->theContent[0].syntacticRole!="")
     crash << "First command must be empty to allow for command for setting of random seed. " << crash;
   std::stringstream streamWithInbetween, streamNoVerification, streamVerification;
+  stOutput << " The big bad random seed: " << this->randomSeed ;
   streamWithInbetween << "setRandomSeed{}(" << this->randomSeed << ");";
   streamNoVerification << streamWithInbetween.str();
   for (int i=1; i<this->theContent.size; i++)
@@ -687,14 +696,17 @@ bool Problem::InterpretHtml(std::stringstream& comments)
   int MaxNumAttempts=10;
   if (this->flagRandomSeedGiven)
     MaxNumAttempts=1;
+  srand (time(NULL));
+  List<int> theRandomSeeds;
+  theRandomSeeds.SetSize(MaxNumAttempts);
+  for (int i=0; i<theRandomSeeds.size; i++)
+    theRandomSeeds[i]=rand()%100000000;
   while (numAttempts<MaxNumAttempts)
   { numAttempts++;
     Calculator theInterpreter;
     std::stringstream out;
     if (!this->flagRandomSeedGiven)
-    { srand (time(NULL));
-      this->randomSeed=rand()%100000000;
-    }
+      this->randomSeed=theRandomSeeds[numAttempts-1];
     out << "Link to the problem: " << this->ToStringGetProblemLink() << "<br>";
     if (!this->PrepareAndExecuteCommands(theInterpreter, comments))
     { if (numAttempts>=MaxNumAttempts)

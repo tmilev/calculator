@@ -1846,7 +1846,7 @@ bool Expression::MakeSum(Calculator& theCommands, const MonomialCollection<Expre
   }
   if (summandsWithCoeff.size>=2)
     if (summandsWithCoeff[0]>summandsWithCoeff[1] && summandsWithCoeff[1]>summandsWithCoeff[0])
-      crash << "This is a pgoramming error: bad comparison! " << crash;
+      crash << "This is a programming error: bad comparison! " << crash;
   return this->MakeOXdotsX(theCommands, theCommands.opPlus(), summandsWithCoeff);
 }
 

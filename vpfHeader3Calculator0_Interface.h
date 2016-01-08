@@ -918,6 +918,8 @@ public:
   bool RecursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo="");
 
   bool LookAheadAllowsApplyFunction(const std::string& lookAhead);
+  bool AllowsOrInPreceding(const std::string& lookAhead);
+  bool AllowsAndInPreceding(const std::string& lookAhead);
   bool AllowsPlusInPreceding(const std::string& lookAhead);
   bool AllowsTimesInPreceding(const std::string& lookAhead);
   bool AllowsTensorInPreceding(const std::string& lookAhead);

@@ -380,9 +380,12 @@ std::string Problem::GetSubmitAnswersJavascript()
   out
   << "  https.send(params);\n"
   << "  https.onload = function() {\n"
-  << "  span = document.createElement('span');\n"
+  << "  span = document.getElementById('calculatorEvaluation');\n"
+  << "  if (span==null){\n"
+  << "    span = document.createElement('span');\n"
+  << "    document.body.appendChild(span);\n"
+  << "  }\n"
   << "  span.innerHTML=https.responseText;\n"
-  << "  document.body.appendChild(span);\n"
   << "}\n"
   << "}\n"
   << "</script>";
@@ -432,12 +435,14 @@ int WebWorker::ProcessSubmitProblem()
     { Calculator isolatedInterpreter;
       isolatedInterpreter.init();
       theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
-      isolatedInterpreter.Evaluate(studentAnswersUnadulterated[i]);
+      isolatedInterpreter.Evaluate("("+studentAnswersUnadulterated[i]+")");
       if (isolatedInterpreter.syntaxErrors!="")
         stOutput << isolatedInterpreter.ToStringSyntacticStackHumanReadable(false);
       else
         stOutput << isolatedInterpreter.outputString;
     }
+//    stOutput << "yer input: " << completedProblemStream.str();
+//    stOutput << theInterpreter.outputString;
     return 0;
   }
   bool isCorrect=false;
@@ -456,8 +461,8 @@ int WebWorker::ProcessSubmitProblem()
     stOutput << "<b>Your answer appears to be incorrect.</b>";
   else
     stOutput << "<b>Correct!</b>";
-  stOutput << "<hr>" << theInterpreter.outputString << "<hr><hr><hr><hr><hr><hr>";
-  stOutput << this->ToStringCalculatorArgumentsHumanReadable();
+//  stOutput << "<hr>" << theInterpreter.outputString << "<hr><hr><hr><hr><hr><hr>";
+//  stOutput << this->ToStringCalculatorArgumentsHumanReadable();
   //Calculator answerInterpretter;
   //answerInterpretter.theProgramExpression=theGlobalVariables.GetWebInput("mainInput");
   //answerInterpretter.init();

@@ -105,6 +105,16 @@ void Calculator::initPredefinedInnerFunctions()
    "randomInteger((-2,-1), (2,5));",
    true, false, "CalculatorConversions::innerRandomInteger");
   this->AddOperationInnerHandler
+  ("or", CalculatorFunctionsGeneral::innerOr, "",
+   "Logical or.",
+   "0 or 0; 0 or 1; 1 or 0; 1 or 1; a or 1; a or 0;",
+   true, false, "CalculatorConversions::innerOr");
+  this->AddOperationInnerHandler
+  ("and", CalculatorFunctionsGeneral::innerAnd, "",
+   "Logical and.",
+   "0 and 0; 0 and 1; 1 and 0; 1 and 1; a and 1; a and 0;",
+   true, false, "CalculatorConversions::innerAnd");
+  this->AddOperationInnerHandler
   ("LoadFileIntoString", CalculatorConversions::innerLoadFileIntoString, "",
    "Loads a file into a string. The file must be given its relative file name displayed when browsing \
    the web server. ",

@@ -1655,6 +1655,7 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
     return false;
   MonomialCollection<Expression, Rational> theSum;
   theCommands.CollectSummands(theCommands, input, theSum);
+//  stOutput << "<br>Collected summands: " << theSum.ToString();
   output.MakeSum(theCommands, theSum);
   return true;
 }

@@ -1705,19 +1705,25 @@ bool Expression::GreaterThanNoCoeff(const Expression& other)const
     return false;
   if (!this->IsBuiltInType() && other.IsBuiltInType())
     return true;
+//  stOutput << "<br>Comparing: " << this->ToString() << " with " << other.ToString();
   int thisExpressionTreeSize=this->GetExpressionTreeSize();
   int otherExpressionTreeSize=other.GetExpressionTreeSize();
   if (thisExpressionTreeSize>otherExpressionTreeSize)
+  { //stOutput << "we have that thisExpressionTreeSize>otherExpressionTreeSize";
     return true;
+  }
   if (otherExpressionTreeSize>thisExpressionTreeSize)
+  { //stOutput << "we have that otherExpressionTreeSize>thisExpressionTreeSize";
     return false;
-  if (this->children.size==0)
+  }
+  if (this->children.size==0 && other.children.size==0)
   { std::string leftS, rightS;
     if (this->IsAtom(&leftS))
       if (other.IsAtom(&rightS))
         return leftS>rightS;
     return this->theData>other.theData;
   }
+//  stOutput << "<br>Got to here";
   if (this->children.size>other.children.size)
     return true;
   if (this->children.size<other.children.size)

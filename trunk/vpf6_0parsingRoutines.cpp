@@ -129,6 +129,8 @@ void Calculator::init()
   this->AddOperationNoRepetitionAllowed("*");
   this->AddOperationNoRepetitionAllowed("!");
   this->AddOperationNoRepetitionAllowed("mod");
+  this->AddOperationNoRepetitionAllowed("and");
+  this->AddOperationNoRepetitionAllowed("or");
   this->AddOperationNoRepetitionAllowed("\\times");
   this->AddOperationNoRepetitionAllowed("\\otimes");
   this->AddOperationNoRepetitionAllowed("\\choose");
@@ -959,6 +961,26 @@ bool Calculator::AllowsTimesInPreceding(const std::string& lookAhead)
   ;
 }
 
+bool Calculator::AllowsAndInPreceding(const std::string& lookAhead)
+{ return lookAhead=="and" || lookAhead=="or" ||
+  lookAhead=="(" || lookAhead=="[" ||
+  lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||
+  lookAhead=="," || lookAhead==";" ||
+  lookAhead==":" || lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\" ||
+  lookAhead=="EndProgram"
+  ;
+}
+
+bool Calculator::AllowsOrInPreceding(const std::string& lookAhead)
+{ return lookAhead=="and" || lookAhead=="or" ||
+  lookAhead=="(" || lookAhead=="[" ||
+  lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||
+  lookAhead=="," || lookAhead==";" ||
+  lookAhead==":" || lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\" ||
+  lookAhead=="EndProgram"
+  ;
+}
+
 bool Calculator::AllowsPlusInPreceding(const std::string& lookAhead)
 { return lookAhead=="+" || lookAhead=="-" || lookAhead=="," || lookAhead=="=" || lookAhead==")" || lookAhead==";" || lookAhead=="]" || lookAhead=="}" ||
   lookAhead==":" || lookAhead=="," || lookAhead=="\\choose" || lookAhead=="EndProgram" || lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\";
@@ -1185,6 +1207,10 @@ bool Calculator::ApplyOneRule()
   if (secondToLastS=="Expression" && lastS=="!")
     return this->ReplaceEOByE();
   if (secondToLastS=="Expression" && thirdToLastS=="^" && fourthToLastS=="Expression" && this->LookAheadAllowsThePower(lastS) )
+    return this->ReplaceEOEXByEX();
+  if (secondToLastS=="Expression" && thirdToLastS=="or" && fourthToLastS=="Expression" && this->AllowsOrInPreceding(lastS) )
+    return this->ReplaceEOEXByEX();
+  if (secondToLastS=="Expression" && thirdToLastS=="and" && fourthToLastS=="Expression" && this->AllowsAndInPreceding(lastS) )
     return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="+" && fourthToLastS=="Expression" && this->AllowsPlusInPreceding(lastS) )
     return this->ReplaceEOEXByEX();

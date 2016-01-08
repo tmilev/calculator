@@ -6157,6 +6157,34 @@ bool CalculatorFunctionsGeneral::innerSetRandomSeed
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerAnd
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerAnd");
+  if (input.children.size!=3)
+    return false;
+  if (input[1].IsEqualToZero())
+    return output.AssignValue(0, theCommands);
+  if (input[2].IsEqualToZero())
+    return output.AssignValue(0, theCommands);
+  if (input[1].IsEqualToOne() && input[2].IsEqualToOne())
+    return output.AssignValue(1, theCommands);
+  return false;
+}
+
+bool CalculatorFunctionsGeneral::innerOr
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerOr");
+  if (input.children.size!=3)
+    return false;
+  if (input[1].IsEqualToOne())
+    return output.AssignValue(1, theCommands);
+  if (input[2].IsEqualToOne())
+    return output.AssignValue(1, theCommands);
+  if (input[1].IsEqualToZero() && input[2].IsEqualToZero())
+    return output.AssignValue(0, theCommands);
+  return false;
+}
+
 bool CalculatorFunctionsGeneral::innerRandomInteger
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRandomInteger");

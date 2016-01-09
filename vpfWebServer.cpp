@@ -621,8 +621,7 @@ std::string WebWorker::GetHtmlHiddenInputs()
   out
   << "<input type=\"hidden\" id=\"authenticationToken\" name=\"authenticationToken\">\n"
   << "<input type=\"hidden\" id=\"userHidden\" name=\"userHidden\">\n"
-  << "<input type=\"hidden\" id=\"currentProblemCollection\" name=\"currentProblemCollection\">\n"
-  << "<input type=\"hidden\" id=\"currentProblem\" name=\"currentProblem\">\n";
+  << "<input type=\"hidden\" id=\"currentExamFile\" name=\"currentExamFile\">\n";
   return out.str();
 }
 
@@ -1796,10 +1795,8 @@ std::string WebWorker::GetJavascriptStandardCookies()
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType!="" &&
       theGlobalVariables.userCalculatorRequestType!="compute")
   { out << "  addCookie(\"request\", \"" << theGlobalVariables.userCalculatorRequestType << "\", 100);\n";
-    out << "  addCookie(\"currentProblemCollection\", \""
-    << theGlobalVariables.GetWebInput("currentProblemCollection") << "\", 100);\n";
-    out << "  addCookie(\"currentProblem\", \""
-    << theGlobalVariables.GetWebInput("currentProblem") << "\", 100);\n";
+    out << "  addCookie(\"currentExamFile\", \""
+    << theGlobalVariables.GetWebInput("currentExamFile") << "\", 100);\n";
   }
   out
   << "}\n";
@@ -1818,8 +1815,7 @@ std::string WebWorker::GetJavascriptStandardCookies()
 //  << "  result =\"examStatus=\"+getCookie(\"examStatus\");\n"
 //  << "  result+=\"&user=\"+getCookie(\"user\");\n"
 //  << "  result+=\"&authenticationToken=\"+getCookie(\"authenticationToken\");\n"
-//  << "  result+=\"&currentProblem=\"+getCookie(\"currentProblem\");\n"
-//  << "  result+=\"&currentProblemCollection=\"+getCookie(\"currentProblemCollection\");\n"
+//  << "  result+=\"&currentExamFile=\"+getCookie(\"currentExamFile\");\n"
 //  << "  return result;\n"
 //  << "}\n"
   << "function loadSettings(){\n"
@@ -1835,12 +1831,9 @@ std::string WebWorker::GetJavascriptStandardCookies()
 //  << "  if (document.getElementById(\"examStatus\")!=null)\n "
 //  << "    if(getCookie(\"examStatus\")!='');\n"
 //  << "      document.getElementById(\"examStatus\").value=getCookie(\"examStatus\");\n"
-  << "  if (document.getElementById(\"currentProblemCollection\")!=null)\n "
-  << "    if(getCookie(\"currentProblemCollection\")!='')\n"
-  << "      document.getElementById(\"currentProblemCollection\").value=getCookie(\"currentProblemCollection\");\n"
-  << "  if (document.getElementById(\"currentProblem\")!=null)\n "
-  << "    if(getCookie(\"currentProblem\")!='')\n"
-  << "      document.getElementById(\"currentProblem\").value=getCookie(\"currentProblem\");\n"
+  << "  if (document.getElementById(\"currentExamFile\")!=null)\n "
+  << "    if(getCookie(\"currentExamFile\")!='')\n"
+  << "      document.getElementById(\"currentExamFile\").value=getCookie(\"currentExamFile\");\n"
   << "  if (document.getElementById(\"authenticationToken\")!=null)\n"
   << "    if(getCookie(\"authenticationToken\")!='')\n"
   << "      document.getElementById(\"authenticationToken\").value=getCookie(\"authenticationToken\");\n "

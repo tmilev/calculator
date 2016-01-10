@@ -562,15 +562,14 @@ std::string WebWorker::ToStringCalculatorArgumentsHumanReadable()
   return out.str();
 }
 
-std::string WebWorker::ToStringCalculatorArgumentsCGIinputExcludeRequestTypeAndPassword()
+std::string WebWorker::ToStringCalculatorArgumentsExcludeRequestTypePassAndCurrentExamFile()
 { MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsCGIinputExcludeRequestType");
   if (!theGlobalVariables.flagLoggedIn)
     return "";
   std::stringstream out;
   for (int i =0; i<theGlobalVariables.webFormArgumentNames.size; i++)
-  { if (theGlobalVariables.webFormArgumentNames[i]=="request")
-      continue;
-    if (theGlobalVariables.webFormArgumentNames[i]=="password")
+  { const std::string& currentName=theGlobalVariables.webFormArgumentNames[i];
+    if (currentName =="request"|| currentName=="password" || currentName=="currentExamFile")
       continue;
     out << theGlobalVariables.webFormArgumentNames[i] << "=" << theGlobalVariables.webFormArguments[i]
     << "&";

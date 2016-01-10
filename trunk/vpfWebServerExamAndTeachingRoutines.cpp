@@ -16,7 +16,8 @@ public:
   List<std::string> tagValues;
   std::string interpretedCommand;
   static int ParsingNumDummyElements;
-  bool IsInterpretedDuringPreparation();
+  bool IsInterpretedByCalculatorDuringPreparation();
+  bool IsInterpretedNotByCalculator();
   bool IsAnswerVerification();
   bool IsStudentAnswer();
   std::string GetKeyValue(const std::string& theKey);
@@ -42,7 +43,10 @@ public:
 class CalculatorHTML
 {
 public:
+  int NumAttemptsToInterpret;
+  int MaxInterpretationAttempts;
   int randomSeed;
+  List<int> randomSeedsIfInterpretationFails;
   bool flagRandomSeedGiven;
   std::string problemCommandsWithInbetweens;
   std::string problemCommandsNoVerification;
@@ -56,15 +60,23 @@ public:
   List<std::string> calculatorClasses;
   List<char> splittingChars;
   List<SyntacticElementHTML> theContent;
+  bool flagLoadedSuccessfully;
+  static const std::string RelativePhysicalFolderProblemCollections;
+  std::stringstream comments;
   bool LoadMe(std::stringstream& comments);
   bool ParseHTML(std::stringstream& comments);
   bool IsSplittingChar(const std::string& input);
   bool IsStudentAnswer(SyntacticElementHTML& inputElt);
   bool InterpretHtml(std::stringstream& comments);
+  bool InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments);
   bool PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream& comments);
   bool PrepareCommands(Calculator& theInterpreter, std::stringstream& comments);
   std::string CleanUpCommandString(const std::string& inputCommand);
-
+  void InterpretProblemStartButton(SyntacticElementHTML& inputOutput);
+  std::string GetSubmitAnswersJavascript();
+  void LoadCurrentProblemItem();
+  std::string LoadAndInterpretCurrentProblemItem();
+  bool FindExamItem();
   static unsigned int HashFunction(const CalculatorHTML& input)
   { return input.HashFunction();
   }
@@ -74,10 +86,8 @@ public:
   bool operator==(const CalculatorHTML& other)const
   { return this->fileName==other.fileName;
   }
-  std::string GetSubmitAnswersJavascript();
   std::string ToStringCalculatorArgumentsForProblem(const std::string& requestType)const;
   std::string ToStringGetProblemLink()const;
-  std::string ToStringExam();
   std::string ToStringExtractedCommands();
   std::string ToStringContent();
   CalculatorHTML();
@@ -96,52 +106,17 @@ public:
 CalculatorHTML::CalculatorHTML()
 { this->randomSeed=0;
   this->flagRandomSeedGiven=false;
+  this->NumAttemptsToInterpret=0;
+  this->MaxInterpretationAttempts=10;
+  this->flagLoadedSuccessfully=false;
 }
 
-class TeachingRoutines
-{
-public:
-  CalculatorHTML currentExamFile;
-  bool flagLoadedSuccessfully;
-  static const std::string RelativePhysicalFolderProblemCollections;
-  std::stringstream comments;
-  std::string GetSubmitAnswersJavascript();
-  void LoadCurrentProblemItem();
-  std::string LoadAndInterpretCurrentProblemItem();
-  bool FindExamItem();
-
-  TeachingRoutines();
-};
-
-const std::string TeachingRoutines::RelativePhysicalFolderProblemCollections="ProblemCollections/";
-
-TeachingRoutines::TeachingRoutines()
-{ this->flagLoadedSuccessfully=false;
-}
-
-std::string CalculatorHTML::ToStringExam()
-{ MacroRegisterFunctionWithName("ProblemCollection::CalculatorHTML");
-  std::stringstream out;
-  std::stringstream failure;
-/*  this->InterpretHtml(failure);
-
-  out << this->GetSubmitAnswersJavascript();
-//  out << "Latex javascript off!!!";
-  out << CGI::GetLaTeXProcessingJavascript();
-  out << "\n<form class=\"problemForm\" method=\"GET\" id=\"formProblemCollection\" name=\"formProblemCollection\" action=\""
-  << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n" ;
-  out << theWebServer.GetActiveWorker().GetHtmlHiddenInputs();
-  out << theWebServer.GetActiveWorker().GetHtmlHiddenInputExercise();
-  out << "\n</form>\n";*/
-crash << "not implemented" <<crash;
-//  out << this->outputHtml;
-  return out.str();
-}
+const std::string CalculatorHTML::RelativePhysicalFolderProblemCollections="ProblemCollections/";
 
 bool CalculatorHTML::LoadMe(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadMe");
   this->RelativePhysicalFileNameWithFolder=
-  TeachingRoutines::RelativePhysicalFolderProblemCollections+
+  this->RelativePhysicalFolderProblemCollections+
   this->fileName
   ;
   std::fstream theFile;
@@ -162,8 +137,8 @@ bool CalculatorHTML::LoadMe(std::stringstream& comments)
   return true;
 }
 
-bool TeachingRoutines::FindExamItem()
-{ MacroRegisterFunctionWithName("TeachingRoutines::FindExamItem");
+bool CalculatorHTML::FindExamItem()
+{ MacroRegisterFunctionWithName("CalculatorHTML::FindExamItem");
   List<std::string> theExerciseFileNames, theExerciseFileNameExtensions;
   if (!FileOperations::GetFolderFileNamesOnTopOfProjectBase
       (this->RelativePhysicalFolderProblemCollections, theExerciseFileNames, &theExerciseFileNameExtensions))
@@ -174,37 +149,37 @@ bool TeachingRoutines::FindExamItem()
   for (int i=0; i<theExerciseFileNames.size; i++)
   { if (theExerciseFileNameExtensions[i]!=".html")
       continue;
-    this->currentExamFile.fileName=theExerciseFileNames[i];
+    this->fileName=theExerciseFileNames[i];
     return true;
   }
   return false;
 }
 
-std::string TeachingRoutines::LoadAndInterpretCurrentProblemItem()
-{ MacroRegisterFunctionWithName("TeachingRoutines::GetCurrentExamItem");
+std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
+{ MacroRegisterFunctionWithName("CalculatorHTML::GetCurrentExamItem");
   this->LoadCurrentProblemItem();
   if (!this->flagLoadedSuccessfully)
     return this->comments.str();
   std::stringstream out;
-  if (!this->currentExamFile.InterpretHtml(this->comments))
-  { out << "<b>Failed to interpret file: " << this->currentExamFile.fileName << "</b>. Comments: " << this->comments.str();
+  if (!this->InterpretHtml(this->comments))
+  { out << "<b>Failed to interpret file: " << this->fileName << "</b>. Comments: " << this->comments.str();
     return out.str();
   }
-  return this->currentExamFile.outputHtml;
+  return this->outputHtml;
 }
 
-void TeachingRoutines::LoadCurrentProblemItem()
-{ MacroRegisterFunctionWithName("TeachingRoutines::LoadCurrentProblemItem");
-  this->currentExamFile.fileName= theGlobalVariables.GetWebInput("currentExamFile");
+void CalculatorHTML::LoadCurrentProblemItem()
+{ MacroRegisterFunctionWithName("CalculatorHTML::LoadCurrentProblemItem");
+  this->fileName= theGlobalVariables.GetWebInput("currentExamFile");
   this->flagLoadedSuccessfully=false;
-  if (this->currentExamFile.fileName=="")
+  if (this->fileName=="")
     if (!this->FindExamItem())
     { this->comments << "<b>No problems/exams to serve: found no html content in folder: "
       << this->RelativePhysicalFolderProblemCollections << ".</b>";
       return;
     }
-  if (!this->currentExamFile.LoadMe(this->comments))
-  { this->comments << "<b>Failed to load exam file: " << this->currentExamFile.fileName << ".</b>";
+  if (!this->LoadMe(this->comments))
+  { this->comments << "<b>Failed to load exam file: " << this->fileName << ".</b>";
     return;
   }
   this->flagLoadedSuccessfully=true;
@@ -248,26 +223,26 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
 
 int WebWorker::ProcessSubmitProblem()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSubmitProblem");
-  TeachingRoutines theRoutines;
-  theRoutines.LoadCurrentProblemItem();
+  CalculatorHTML theProblem;
+  theProblem.LoadCurrentProblemItem();
   std::stringstream comments;
-  if (!theRoutines.flagLoadedSuccessfully)
-  { stOutput << "Failed to load problem. " << theRoutines.comments.str();
+  if (!theProblem.flagLoadedSuccessfully)
+  { stOutput << "Failed to load problem. " << theProblem.comments.str();
     stOutput.Flush();
     return 0;
   }
-  if (!theRoutines.currentExamFile.ParseHTML(comments))
+  if (!theProblem.ParseHTML(comments))
   { stOutput << "<b>Failed to interpret html input.</b><br>" << comments.str();
     return 0;
   }
   Calculator theInterpreter;
-  if (!theRoutines.currentExamFile.PrepareCommands(theInterpreter, comments))
+  if (!theProblem.PrepareCommands(theInterpreter, comments))
   { stOutput << "<b>Failed to prepare commands.</b>" << comments.str();
     return 0;
   }
   std::string problemStatement=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("problemStatement"));
   std::stringstream studentAnswerStream, completedProblemStream;
-  completedProblemStream << theRoutines.currentExamFile.problemCommandsNoVerification;
+  completedProblemStream << theProblem.problemCommandsNoVerification;
   std::string studentAnswerNameReader;
   List<std::string> studentAnswersUnadulterated;
   for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
@@ -282,7 +257,7 @@ int WebWorker::ProcessSubmitProblem()
     }
   completedProblemStream << studentAnswerStream.str();
   completedProblemStream << "SeparatorBetweenSpans; ";
-  completedProblemStream << theRoutines.currentExamFile.problemCommandsVerification;
+  completedProblemStream << theProblem.problemCommandsVerification;
 //  stOutput << "input to the calculator: " << completedProblemStream.str() << "<hr>";
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
   theInterpreter.init();
@@ -333,7 +308,7 @@ int WebWorker::ProcessSubmitProblem()
 
 std::string WebWorker::GetExamPage()
 { MacroRegisterFunctionWithName("WebWorker::GetExamPage");
-  TeachingRoutines theRoutines;
+  CalculatorHTML theFile;
   std::stringstream out;
   out << "<html>"
   << "<header>"
@@ -341,7 +316,7 @@ std::string WebWorker::GetExamPage()
   << "<link rel=\"stylesheet\" type=\"text/css\" href=\"/ProblemCollections/calculator.css\">"
   << "</header>"
   << "<body onload=\"loadSettings();\">\n";
-  out << theRoutines.LoadAndInterpretCurrentProblemItem();
+  out << theFile.LoadAndInterpretCurrentProblemItem();
   out <<"<hr><hr><hr><hr><hr><hr><hr><hr>" << this->ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
@@ -351,7 +326,6 @@ bool CalculatorFunctionsGeneral::innerInterpretHtml
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInterpretHtml");
   CalculatorHTML theProblem;
-
   if (!input.IsOfType<std::string>(&theProblem.inputHtml))
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
   theProblem.InterpretHtml(theCommands.Comments);
@@ -455,6 +429,8 @@ std::string SyntacticElementHTML::ToStringInterpretted()
     return this->content;
   if (this->GetKeyValue("class")=="calculatorAnswerVerification")
     return "";
+  if (this->GetKeyValue("class")=="calculatorStartProblem")
+    return this->interpretedCommand;
   std::stringstream out;
   out << this->ToStringOpenTag();
   if (this->interpretedCommand!="")
@@ -463,20 +439,30 @@ std::string SyntacticElementHTML::ToStringInterpretted()
   return out.str();
 }
 
-bool SyntacticElementHTML::IsInterpretedDuringPreparation()
-{ return this->syntacticRole=="command" &&
-         this->GetKeyValue("class")!="calculatorAnswerVerification" &&
-         this->GetKeyValue("class")!="calculatorStudentAnswer";
+bool SyntacticElementHTML::IsInterpretedNotByCalculator()
+{ MacroRegisterFunctionWithName("SyntacticElementHTML::IsInterpretedNotByCalculator");
+  if (this->syntacticRole!="command")
+    return false;
+  return this->GetKeyValue("class")=="calculatorStartProblem";
+}
+
+bool SyntacticElementHTML::IsInterpretedByCalculatorDuringPreparation()
+{ if (this->syntacticRole!="command")
+    return false;
+  std::string tagClass=this->GetKeyValue("class");
+  return tagClass=="calculatorAnswerVerification" || tagClass=="calculatorStudentAnswer";
 }
 
 bool SyntacticElementHTML::IsAnswerVerification()
-{ return this->syntacticRole=="command" &&
-         this->GetKeyValue("class")=="calculatorAnswerVerification";
+{ if (this->syntacticRole!="command")
+    return false;
+  return this->GetKeyValue("class")=="calculatorAnswerVerification";
 }
 
 bool SyntacticElementHTML::IsStudentAnswer()
-{ return this->syntacticRole=="command" &&
-         this->GetKeyValue("class")=="calculatorStudentAnswer";
+{ if (this->syntacticRole!="command")
+    return false;
+  return this->GetKeyValue("class")=="calculatorStudentAnswer";
 }
 
 bool CalculatorHTML::PrepareCommands(Calculator& theInterpreter, std::stringstream& comments)
@@ -490,7 +476,7 @@ bool CalculatorHTML::PrepareCommands(Calculator& theInterpreter, std::stringstre
   streamWithInbetween << "setRandomSeed{}(" << this->randomSeed << ");";
   streamNoVerification << streamWithInbetween.str();
   for (int i=1; i<this->theContent.size; i++)
-  { if (!this->theContent[i].IsInterpretedDuringPreparation())
+  { if (!this->theContent[i].IsInterpretedByCalculatorDuringPreparation())
     { streamWithInbetween << "SeparatorBetweenSpans; ";
       continue;
     }
@@ -505,6 +491,7 @@ bool CalculatorHTML::PrepareCommands(Calculator& theInterpreter, std::stringstre
     }
     streamNoVerification << this->CleanUpCommandString( this->theContent[i].content);
   }
+  streamWithInbetween << "SeparatorBetweenSpans; " << streamVerification.str();
   this->problemCommandsWithInbetweens=streamWithInbetween.str();
   this->problemCommandsNoVerification=streamNoVerification.str();
   this->problemCommandsVerification=streamVerification.str();
@@ -518,7 +505,11 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
   //stOutput << "nput cmds: " << calculatorCommands.str();
   theInterpreter.Evaluate(this->problemCommandsWithInbetweens);
 //  stOutput << "<hr>Fter eval: " << theInterpreter.outputString;
-  return !theInterpreter.flagAbortComputationASAP;
+  bool result=!theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors=="";
+  if (!result)
+    comments << "Failed to interpret your file. The result of the interpretation (attempt(s)) are: "
+    << theInterpreter.outputString;
+  return result;
 }
 
 std::string CalculatorHTML::ToStringGetProblemLink()const
@@ -540,73 +531,84 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem(const std::str
   return out.str();
 }
 
+void CalculatorHTML::InterpretProblemStartButton(SyntacticElementHTML& inputOutput)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretProblemStartButton");
+
+
+}
+
+bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretHtmlOneAttempt");
+  std::stringstream out;
+  if (!this->flagRandomSeedGiven)
+    this->randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
+  out << "Link to the problem: " << this->ToStringGetProblemLink() << "<br>";
+  if (!this->PrepareAndExecuteCommands(theInterpreter, comments))
+    return false;
+  bool moreThanOneCommand=false;
+  std::string lastCommands;
+  int commandCounter=2;
+  //first command and first syntactic element are the random seed and are ignored.
+  for (int spanCounter=1; spanCounter <this->theContent.size; spanCounter++)
+  { if (!this->theContent[spanCounter].IsInterpretedByCalculatorDuringPreparation())
+    { if (theInterpreter.theProgramExpression[commandCounter].ToString()!="SeparatorBetweenSpans")
+      { out << "<b>Error: calculator commands don't match the tags.</g>";
+        this->outputHtml=out.str();
+        return false;
+      }
+      commandCounter++;
+      continue;
+    }
+    moreThanOneCommand=false;
+    this->theContent[spanCounter].interpretedCommand="";
+    for (; commandCounter<theInterpreter.theProgramExpression.children.size; commandCounter++ )
+    { if (theInterpreter.theProgramExpression[commandCounter].ToString()=="SeparatorBetweenSpans")
+        break;
+      if (moreThanOneCommand)
+        this->theContent[spanCounter].interpretedCommand+="; ";
+      this->theContent[spanCounter].interpretedCommand+=theInterpreter.theProgramExpression[commandCounter].ToString();
+      moreThanOneCommand=true;
+    }
+  }
+  for (int i=0; i<this->theContent.size; i++)
+    if (this->theContent[i].IsInterpretedNotByCalculator())
+      this->InterpretProblemStartButton( this->theContent[i]);
+  for (int i=0; i<this->theContent.size; i++)
+    out << this->theContent[i].ToStringInterpretted();
+//   out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
+//   out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
+  //  out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();
+  this->outputHtml=out.str();
+  return true;
+}
+
 bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretHtml");
-
   if (!this->ParseHTML(comments))
   { this->outputHtml="<b>Failed to interpret html input.</b><br>" +this->ToStringContent();
     return false;
   }
-  int numAttempts=0;
-  int MaxNumAttempts=10;
+  this->NumAttemptsToInterpret=0;
   if (this->flagRandomSeedGiven)
-    MaxNumAttempts=1;
+    this->MaxInterpretationAttempts=1;
   srand (time(NULL));
-  List<int> theRandomSeeds;
-  theRandomSeeds.SetSize(MaxNumAttempts);
-  for (int i=0; i<theRandomSeeds.size; i++)
-    theRandomSeeds[i]=rand()%100000000;
-  while (numAttempts<MaxNumAttempts)
-  { numAttempts++;
-    Calculator theInterpreter;
-    std::stringstream out;
-    if (!this->flagRandomSeedGiven)
-      this->randomSeed=theRandomSeeds[numAttempts-1];
-    out << "Link to the problem: " << this->ToStringGetProblemLink() << "<br>";
-    if (!this->PrepareAndExecuteCommands(theInterpreter, comments))
-    { if (numAttempts>=MaxNumAttempts)
-      { out << "Failed to evaluate the commands: " << numAttempts
-        << " attempts made. Calculator evaluation details follow.<hr> "
-        << theInterpreter.outputString << "<hr><b>Comments</b><br>"
-        << theInterpreter.Comments.str();
-        this->outputHtml=out.str();
-        return false;
-      }
-      continue;
+  this->randomSeedsIfInterpretationFails.SetSize(this->MaxInterpretationAttempts);
+  for (int i=0; i<this->randomSeedsIfInterpretationFails.size; i++)
+    this->randomSeedsIfInterpretationFails[i]=rand()%100000000;
+  while (this->NumAttemptsToInterpret<this->MaxInterpretationAttempts)
+  { Calculator theInterpreter;
+    this->NumAttemptsToInterpret++;
+    if (this->InterpretHtmlOneAttempt(theInterpreter, comments))
+      return true;
+    if (this->NumAttemptsToInterpret>=this->MaxInterpretationAttempts)
+    { std::stringstream out;
+      out << "Failed to evaluate the commands: " << this->NumAttemptsToInterpret
+      << " attempts made. Calculator evaluation details follow.<hr> "
+      << theInterpreter.outputString << "<hr><b>Comments</b><br>"
+      << theInterpreter.Comments.str();
+      this->outputHtml=out.str();
+      return false;
     }
-    bool moreThanOneCommand=false;
-    std::string lastCommands;
-    int commandCounter=2;
-    //first command and first syntactic element are the random seed and are ignored.
-    for (int spanCounter=1; spanCounter <this->theContent.size; spanCounter++)
-    { if (!this->theContent[spanCounter].IsInterpretedDuringPreparation())
-      { if (theInterpreter.theProgramExpression[commandCounter].ToString()!="SeparatorBetweenSpans")
-        { out << "<b>Error: calculator commands don't match the tags.</g>";
-          this->outputHtml=out.str();
-          return false;
-        }
-        commandCounter++;
-        continue;
-      }
-      moreThanOneCommand=false;
-      this->theContent[spanCounter].interpretedCommand="";
-      for (; commandCounter<theInterpreter.theProgramExpression.children.size; commandCounter++ )
-      { if (theInterpreter.theProgramExpression[commandCounter].ToString()=="SeparatorBetweenSpans")
-          break;
-        if (moreThanOneCommand)
-          this->theContent[spanCounter].interpretedCommand+="; ";
-        this->theContent[spanCounter].interpretedCommand+=theInterpreter.theProgramExpression[commandCounter].ToString();
-        moreThanOneCommand=true;
-      }
-    }
-    for (int i=0; i<this->theContent.size; i++)
-      out << this->theContent[i].ToStringInterpretted();
-
-//    out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
-//    out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
-  //  out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();
-    this->outputHtml=out.str();
-    break;
   }
   return true;
 }
@@ -658,6 +660,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   this->calculatorClasses.AddOnTop("calculatorHidden");
   this->calculatorClasses.AddOnTop("calculatorAnswerVerification");
   this->calculatorClasses.AddOnTop("calculatorStudentAnswer");
+  this->calculatorClasses.AddOnTop("calculatorStartProblem");
   List<SyntacticElementHTML> eltsStack;
   SyntacticElementHTML dummyElt;
   dummyElt.content="<>";
@@ -786,7 +789,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
         this->theContent.LastObject()->content+=" ";
     } else
     { if (this->theContent.size>0)
-        if (this->theContent.LastObject()->IsInterpretedDuringPreparation() && eltsStack[i].IsInterpretedDuringPreparation())
+        if (this->theContent.LastObject()->IsInterpretedByCalculatorDuringPreparation() && eltsStack[i].IsInterpretedByCalculatorDuringPreparation())
         { SyntacticElementHTML emptyElt;
           this->theContent.AddOnTop(emptyElt);
         }
@@ -837,11 +840,10 @@ std::string CalculatorHTML::CleanUpCommandString(const std::string& inputCommand
 bool CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml");
-  TeachingRoutines theRoutines;
-  if (!input.IsOfType<std::string>(&theRoutines.currentExamFile.inputHtml))
+  CalculatorHTML theFile;
+  if (!input.IsOfType<std::string>(&theFile.inputHtml))
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
-  if (!theRoutines.currentExamFile.ParseHTML(theCommands.Comments))
+  if (!theFile.ParseHTML(theCommands.Comments))
     return false;
-
-  return output.AssignValue(theRoutines.currentExamFile.ToStringExtractedCommands(), theCommands);
+  return output.AssignValue(theFile.ToStringExtractedCommands(), theCommands);
 }

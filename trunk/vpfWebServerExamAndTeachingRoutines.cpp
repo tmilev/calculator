@@ -51,18 +51,18 @@ public:
   std::string problemCommandsWithInbetweens;
   std::string problemCommandsNoVerification;
   std::string problemCommandsVerification;
-
-
   std::string fileName;
   std::string RelativePhysicalFileNameWithFolder;
   std::string inputHtml;
   std::string outputHtml;
   List<std::string> calculatorClasses;
   List<char> splittingChars;
+  List<SyntacticElementHTML> eltsStack;
   List<SyntacticElementHTML> theContent;
   bool flagLoadedSuccessfully;
   static const std::string RelativePhysicalFolderProblemCollections;
   std::stringstream comments;
+  bool CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
   bool LoadMe(std::stringstream& comments);
   bool ParseHTML(std::stringstream& comments);
   bool IsSplittingChar(const std::string& input);
@@ -90,17 +90,8 @@ public:
   std::string ToStringGetProblemLink()const;
   std::string ToStringExtractedCommands();
   std::string ToStringContent();
-  CalculatorHTML();
-};
-
-class Problem
-{
-public:
-  bool ExecuteCommands(Calculator& theInterpreter, std::stringstream& comments);
-  bool ExecuteCommandsTestStudent(Calculator& theInterpreter, std::stringstream& comments);
   std::string ToStringParsingStack(List<SyntacticElementHTML>& theStack);
-
-  //Problem();
+  CalculatorHTML();
 };
 
 CalculatorHTML::CalculatorHTML()
@@ -170,17 +161,20 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
 
 void CalculatorHTML::LoadCurrentProblemItem()
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadCurrentProblemItem");
-  this->fileName= theGlobalVariables.GetWebInput("currentExamFile");
+  this->fileName= CGI::URLStringToNormal( theGlobalVariables.GetWebInput("currentExamFile"));
   this->flagLoadedSuccessfully=false;
-  if (this->fileName=="")
-    if (!this->FindExamItem())
+  bool needToFindDefault=(this->fileName=="");
+  if (!needToFindDefault)
+    needToFindDefault=!this->LoadMe(this->comments);
+  if (needToFindDefault)
+  { if (!this->FindExamItem())
     { this->comments << "<b>No problems/exams to serve: found no html content in folder: "
       << this->RelativePhysicalFolderProblemCollections << ".</b>";
       return;
     }
-  if (!this->LoadMe(this->comments))
-  { this->comments << "<b>Failed to load exam file: " << this->fileName << ".</b>";
-    return;
+    if (!this->LoadMe(this->comments))
+      return;
+    this->inputHtml=this->comments.str()+this->inputHtml;
   }
   this->flagLoadedSuccessfully=true;
 }
@@ -345,7 +339,7 @@ std::string CalculatorHTML::ToStringExtractedCommands()
       out << "<tr><td></td></tr>";
   out << "</table>";
   out << "<hr><b>The HTML from which the commands were extracted follows.</b><br>" << this->inputHtml
-  << "<hr>";
+  << "<hr><b>The parsing stack follows.</b>" << this->ToStringParsingStack(this->eltsStack) << "<hr>";
   return out.str();
 }
 
@@ -450,7 +444,7 @@ bool SyntacticElementHTML::IsInterpretedByCalculatorDuringPreparation()
 { if (this->syntacticRole!="command")
     return false;
   std::string tagClass=this->GetKeyValue("class");
-  return tagClass=="calculatorAnswerVerification" || tagClass=="calculatorStudentAnswer";
+  return tagClass=="calculator" || tagClass=="calculatorHidden";
 }
 
 bool SyntacticElementHTML::IsAnswerVerification()
@@ -475,12 +469,16 @@ bool CalculatorHTML::PrepareCommands(Calculator& theInterpreter, std::stringstre
   //stOutput << " The big bad random seed: " << this->randomSeed ;
   streamWithInbetween << "setRandomSeed{}(" << this->randomSeed << ");";
   streamNoVerification << streamWithInbetween.str();
-  for (int i=1; i<this->theContent.size; i++)
+  for (int i=1; i<this->theContent.size; i++) // the first element of the content is fake (used for the random seed)
   { if (!this->theContent[i].IsInterpretedByCalculatorDuringPreparation())
     { streamWithInbetween << "SeparatorBetweenSpans; ";
       continue;
     }
-    streamWithInbetween << this->CleanUpCommandString( this->theContent[i].content);
+    std::string cleanedupCommand=this->CleanUpCommandString( this->theContent[i].content);
+    if (cleanedupCommand!="")
+      streamWithInbetween << cleanedupCommand;
+    else
+      streamWithInbetween << "SeparatorBetweenSpans; ";
   }
   for (int i=1; i<this->theContent.size; i++)
   { if (this->theContent[i].syntacticRole!="command")
@@ -489,7 +487,10 @@ bool CalculatorHTML::PrepareCommands(Calculator& theInterpreter, std::stringstre
     { streamVerification << this->CleanUpCommandString(this->theContent[i].content);
       continue;
     }
-    streamNoVerification << this->CleanUpCommandString( this->theContent[i].content);
+    if (this->theContent[i].IsInterpretedByCalculatorDuringPreparation())
+    { streamNoVerification << this->CleanUpCommandString( this->theContent[i].content);
+      continue;
+    }
   }
   streamWithInbetween << "SeparatorBetweenSpans; " << streamVerification.str();
   this->problemCommandsWithInbetweens=streamWithInbetween.str();
@@ -507,7 +508,9 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
 //  stOutput << "<hr>Fter eval: " << theInterpreter.outputString;
   bool result=!theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors=="";
   if (!result)
-    comments << "Failed to interpret your file. The result of the interpretation (attempt(s)) are: "
+    comments << "Failed to interpret your file. The interpretation input was:<br> "
+    << this->problemCommandsWithInbetweens << "<br>"
+    << "The result of the interpretation attempt is:<br>"
     << theInterpreter.outputString;
   return result;
 }
@@ -525,16 +528,22 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem(const std::str
   if (!theGlobalVariables.flagLoggedIn)
     return "";
   std::stringstream out;
-   out << "request=" << requestType << "&" << WebWorker::ToStringCalculatorArgumentsCGIinputExcludeRequestTypeAndPassword();
+  out << "request=" << requestType << "&" << WebWorker::ToStringCalculatorArgumentsExcludeRequestTypePassAndCurrentExamFile()
+  << "currentExamFile=" << CGI::StringToURLString(this->fileName) << "&";
   if (theGlobalVariables.GetWebInput("randomSeed")=="")
     out << "randomSeed=" << this->randomSeed << "&";
+//  out << "currentExamFile=" << CGI::StringToURLString(this->fileName) << "&";
   return out.str();
 }
 
 void CalculatorHTML::InterpretProblemStartButton(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretProblemStartButton");
-
-
+  std::stringstream out;
+  out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
+  << WebWorker::ToStringCalculatorArgumentsExcludeRequestTypePassAndCurrentExamFile()
+  << "currentExamFile=" << inputOutput.content << "\">"
+  << inputOutput.content << "</a>";
+  inputOutput.interpretedCommand=out.str();
 }
 
 bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments)
@@ -620,19 +629,33 @@ bool CalculatorHTML::IsSplittingChar(const std::string& input)
 }
 
 int SyntacticElementHTML::ParsingNumDummyElements=8;
-std::string Problem::ToStringParsingStack(List<SyntacticElementHTML>& theStack)
-{ MacroRegisterFunctionWithName("Problem::ToStringParsingStack");
+std::string CalculatorHTML::ToStringParsingStack(List<SyntacticElementHTML>& theStack)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringParsingStack");
   std::stringstream out;
+  out << "#Non-dummy elts: " << theStack.size-SyntacticElementHTML::ParsingNumDummyElements << ". ";
   for (int i=SyntacticElementHTML::ParsingNumDummyElements; i<theStack.size; i++)
-    out << theStack[i].ToStringDebug();
+    out << "<span style=\"color:" << ((i%2==0) ? "orange":"blue") << "\">"
+    << theStack[i].ToStringDebug() << "</span>";
   return out.str();
+}
+
+bool CalculatorHTML::CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right)
+{ MacroRegisterFunctionWithName("SyntacticElementHTML::CanBeMerged");
+  if (left.syntacticRole!="" || right.syntacticRole!="")
+    return false;
+  if (this->IsSplittingChar(left.content) && left.content!=" ")
+    return false;
+  if (this->IsSplittingChar(right.content) && right.content!=" ")
+    return false;
+  return true;
 }
 
 bool CalculatorHTML::ParseHTML(std::stringstream& comments)
 { MacroRegisterFunctionWithName("Problem::ParseHTML");
   std::stringstream theReader(this->inputHtml);
   theReader.seekg(0);
-  std::string word, readChars;
+  std::string word;
+  char currentChar;
   List<SyntacticElementHTML> theElements;
   theElements.SetSize(0);
   theElements.SetExpectedSize(theReader.str().size()/4);
@@ -641,27 +664,26 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   this->splittingChars.AddOnTop('>');
   this->splittingChars.AddOnTop('=');
   this->splittingChars.AddOnTop('/');
-  while (theReader >> readChars)
-  { word="";
-    for (unsigned i=0; i< readChars.size(); i++)
-      if (splittingChars.Contains(readChars[i]))
-      { if (word!="")
-          theElements.AddOnTop(word);
-        std::string charToString;
-        charToString.push_back(readChars[i]);
-        theElements.AddOnTop(charToString);
-        word="";
-      } else
-        word.push_back(readChars[i]);
-    if (word!="")
-      theElements.AddOnTop(word);
+  this->splittingChars.AddOnTop(' ');
+  while (theReader.get(currentChar))
+  { if (splittingChars.Contains(currentChar))
+    { if (word!="")
+        theElements.AddOnTop(word);
+      std::string charToString;
+      charToString.push_back(currentChar);
+      theElements.AddOnTop(charToString);
+      word="";
+    } else
+      word.push_back(currentChar);
   }
+  if (word!="")
+    theElements.AddOnTop(word);
   this->calculatorClasses.AddOnTop("calculator");
   this->calculatorClasses.AddOnTop("calculatorHidden");
   this->calculatorClasses.AddOnTop("calculatorAnswerVerification");
   this->calculatorClasses.AddOnTop("calculatorStudentAnswer");
   this->calculatorClasses.AddOnTop("calculatorStartProblem");
-  List<SyntacticElementHTML> eltsStack;
+  this->eltsStack.SetSize(0);
   SyntacticElementHTML dummyElt;
   dummyElt.content="<>";
   dummyElt.syntacticRole="filler";
@@ -702,8 +724,6 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     }
     if (thirdToLast.syntacticRole=="<openTagCalc>" && secondToLast.syntacticRole=="")
     { thirdToLast.content+=secondToLast.content;
-      if (!this->IsSplittingChar(secondToLast.content))
-        thirdToLast.content+=" ";
       secondToLast=last;
       eltsStack.SetSize(eltsStack.size-1);
       continue;
@@ -722,6 +742,11 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     { secondToLast.syntacticRole="<openTag";
       secondToLast.tag=last.content;
       secondToLast.content="";
+      eltsStack.RemoveLastObject();
+      continue;
+    }
+    if (secondToLast.syntacticRole=="" && last=="/")
+    { secondToLast.content+=last.content;
       eltsStack.RemoveLastObject();
       continue;
     }
@@ -744,10 +769,15 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       eltsStack.RemoveLastObject();
       continue;
     }
-    if (! this->IsSplittingChar(last.content) && last.syntacticRole=="" && !this->IsSplittingChar(secondToLast.content) &&
-        secondToLast.syntacticRole=="")
-    { secondToLast.content+=" "+last.content;
+    if (this->CanBeMerged(secondToLast, last))
+    { secondToLast.content+=last.content;
       eltsStack.RemoveLastObject();
+      continue;
+    }
+    if (last==" " &&
+        (secondToLast.syntacticRole=="<openTag" || thirdToLast=="<openTag" || fourthToLast=="<openTag")
+        )
+    { eltsStack.RemoveLastObject();
       continue;
     }
     if (sixthToLast.syntacticRole=="<openTag" && fourthToLast=="=" && thirdToLast=="\""
@@ -784,10 +814,8 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     if (eltsStack[i].syntacticRole!="command" && eltsStack[i].syntacticRole!="" )
       result=false;
     if (!needNewTag)
-    { this->theContent.LastObject()->content+=eltsStack[i].content;
-      if (!this->IsSplittingChar(eltsStack[i].content))
-        this->theContent.LastObject()->content+=" ";
-    } else
+      this->theContent.LastObject()->content+=eltsStack[i].content;
+    else
     { if (this->theContent.size>0)
         if (this->theContent.LastObject()->IsInterpretedByCalculatorDuringPreparation() && eltsStack[i].IsInterpretedByCalculatorDuringPreparation())
         { SyntacticElementHTML emptyElt;
@@ -803,37 +831,47 @@ std::string CalculatorHTML::CleanUpCommandString(const std::string& inputCommand
 { MacroRegisterFunctionWithName("CalculatorHTML::CleanUpCommandString");
   if (inputCommand=="")
     return "";
+//  stOutput << "Cleaning up: " << inputCommand;
   int realStart=0;
   int realEnd=inputCommand.size()-1;
   for (; realStart< (signed) inputCommand.size(); realStart++)
-  { if (inputCommand[realStart]==' ')
+  { if (inputCommand[realStart]==' ' || inputCommand[realStart]=='\n')
       continue;
     if (inputCommand[realStart]=='\\')
       if (realStart+1<(signed) inputCommand.size())
         if (inputCommand[realStart+1]=='(')
-          realStart+=2;
+        { realStart++;
+          continue;
+        }
     break;
   }
   for (;realEnd >=0; realEnd--)
-  { if (inputCommand[realEnd]==' ')
+  { if (inputCommand[realEnd]==' ' || inputCommand[realEnd]=='\n')
       continue;
     if (inputCommand[realEnd]==')')
       if (realEnd>0)
         if (inputCommand[realEnd-1]=='\\')
-          realEnd-=2;
+        { realEnd--;
+          continue;
+        }
     break;
   }
   if (realEnd<realStart)
     realEnd=realStart-1;
   std::string result=inputCommand.substr(realStart, realEnd-realStart+1);
   for (int i=(signed)result.size()-1; i>=0; i--)
-  { if (result[i]==' ')
+  { if (result[i]==' ' || result[i]=='\n')
       continue;
     if (result[i]==';')
+    { //stOutput << "to get: " << result;
       return result;
+    }
     break;
   }
+  if (result=="")
+    return "";
   result.push_back(';');
+  //stOutput << " to get: " << result << "<br>";
   return result;
 }
 

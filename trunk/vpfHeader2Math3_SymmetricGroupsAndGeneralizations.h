@@ -336,6 +336,10 @@ class SemidirectProductElement
     return out.str();
   }
 
+  void MakeFromString(const std::string& in)
+  { crash << "not implemented yet";
+  }
+
   friend std::ostream& operator<<(std::ostream& s, const SemidirectProductElement<helt, kelt, oa>& in)
   { return s << in.ToString();
   }
@@ -533,6 +537,14 @@ class HyperoctahedralBitsAutomorphism
 };
 
 typedef SemidirectProductElement<PermutationR2,ElementZ2N,HyperoctahedralBitsAutomorphism> ElementHyperoctahedralGroupR2;
+
+template <>
+void ElementHyperoctahedralGroupR2::MakeFromString(const std::string& in);
+
+
+ElementHyperoctahedralGroupR2 operator"" _EHOG(const char *in, size_t insize);
+
+
 //class HyperoctahedralElementR2: public SemidirectProductElement<PermutationR2,ElementZ2N,HyperoctahedralBitsAutomorphism>
 //{
 //  unsigned int HashFunction() const {return SemidirectProductElement<PermutationR2,ElementZ2N,HyperoctahedralBitsAutomorphism>::HashFunction();}

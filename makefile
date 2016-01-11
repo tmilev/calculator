@@ -29,6 +29,12 @@ else
 	CXX=g++
 endif
 
+ifeq ($(llvm), 1)
+	CXX=clang-3.8
+else
+	CXX=g++
+endif
+
 ifeq ($(debug), 1)
 	CFLAGS += -g
 	LDFLAGS +=

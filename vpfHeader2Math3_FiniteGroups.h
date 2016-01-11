@@ -889,6 +889,8 @@ class GroupRepresentation
 
   bool VerifyRepresentation();
 
+  std::string DescribeAsDirectSum();
+
   JSData JSOut();
 
   template <typename somestream>
@@ -919,7 +921,9 @@ bool GroupRepresentation<someGroup, coefficient>::CheckInitialization()
 
 template <typename someGroup, typename coefficient>
 void GroupRepresentation<someGroup, coefficient>::ComputeCharacter()
-{ this->CheckInitialization();
+{ if(this->haveCharacter)
+    return;
+  this->CheckInitialization();
   if(!this->ownerGroup->flagCCsComputed)
     this->ownerGroup->ComputeCCSizesAndRepresentatives(NULL);
   this->theCharacteR.G = ownerGroup;
@@ -1200,7 +1204,7 @@ std::string Coset<elementSomeGroup>::ToString() const
 }
 
 template <typename somegroup, class elementSomeGroup>
-class Subgroup : public FiniteGroup<elementSomeGroup>
+class Subgroup : public somegroup
 {
 public:
   somegroup *parent;
@@ -1925,7 +1929,8 @@ template <class elementSomeGroup>
 std::string FiniteGroup<elementSomeGroup>::ToString(FormatExpressions* theFormat)
 { std::stringstream out;
   out << this->ToStringElements(theFormat);
-  out << this->ToStringConjugacyClasses(theFormat);
+  if(this->flagCCRepresentativesComputed)
+    out << this->ToStringConjugacyClasses(theFormat);
   return out.str();
 }
 

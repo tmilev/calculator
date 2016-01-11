@@ -185,9 +185,10 @@ public:
   // properly.
   void AddTransposition(int i, int j);
   void AddCycle(const List<int>& cycle);
-  void MakeFromListOfCycles(const List<List<int> >& cycle);
+  void MakeFromListOfCycles(const List<List<int> >& inCycles);
   // A jumbled up list of integers 0-n
   void MakeFromActionDescription(const List<int>& actionDescription);
+  void MakeFromString(const std::string& in);
   // Cycle structure as a histogram of cycle lengths
   void GetCycleStructure(List<int>& out) const;
   // Cycle structure as the related partition
@@ -496,6 +497,13 @@ class ElementZ2N
       // parentheses are needed because << binds like a bitwise operator
       out << (this->bits[i]?'1':'0');
     return out.str();
+  }
+
+  void MakeFromString(const std::string& in)
+  { this->bits.SetSize(0);
+    for(int i=0; i<in.size(); i++)
+      if(in[i] == '1')
+        this->ToggleBit(i);
   }
 
   friend std::ostream& operator<<(std::ostream& s, const ElementZ2N& in)

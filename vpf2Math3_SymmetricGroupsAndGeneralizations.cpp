@@ -1410,3 +1410,17 @@ template <>
 bool FiniteGroup<ElementHyperoctahedralGroup>::AreConjugate
 (const ElementHyperoctahedralGroup& x, const ElementHyperoctahedralGroup& y)
 {return ElementHyperoctahedralGroup::AreConjugate(x,y);}
+
+template <>
+void ElementHyperoctahedralGroupR2::MakeFromString(const std::string& in)
+{ crash << "ElementHyperoctahedralGroupR2::MakeFromString: not implemented" << crash;
+}
+
+ElementHyperoctahedralGroupR2 operator"" _EHOG(const char *in, size_t insize)
+{ ElementHyperoctahedralGroupR2 out;
+  std::string cooked_in = in;
+  out.MakeFromString(cooked_in);
+  return out;
+}
+
+//"(),0,0,1"_EHOG

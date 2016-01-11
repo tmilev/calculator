@@ -542,6 +542,38 @@ void PermutationR2::MakeFromActionDescription(const List<int>& actionDescription
   }
 }
 
+void PermutationR2::MakeFromString(const std::string& cppin)
+{ const char* in = cppin.c_str();
+  int insize = cppin.length();
+  List<List<int> > cycles;
+  int curintstart;
+  for(int i=0; i<insize; i++)
+  { switch(in[i])
+    {
+    case '(':
+    { cycles.SetSize(cycles.size+1);
+      curintstart = i+1;
+      continue;
+    }
+    case ')':
+    { if(curintstart != i)
+      { std::string ss = cppin.substr(curintstart, i);
+        cycles.LastObject()->AddOnTop(atoi(ss.c_str()));
+      } else
+        cycles.SetSize(cycles.size-1);
+      continue;
+    }
+    case ',':
+    { std::string ss = cppin.substr(curintstart, i);
+      cycles.LastObject()->AddOnTop(atoi(ss.c_str()));
+      curintstart = i+1;
+      continue;
+    }
+    }
+  }
+  this->MakeFromListOfCycles(cycles);
+}
+
 void PermutationR2::GetCycleStructure(List<int>& out) const
 { int N = 0;
   for(int i=0; i<this->cycles.size; i++)
@@ -1413,7 +1445,11 @@ bool FiniteGroup<ElementHyperoctahedralGroup>::AreConjugate
 
 template <>
 void ElementHyperoctahedralGroupR2::MakeFromString(const std::string& in)
-{ crash << "ElementHyperoctahedralGroupR2::MakeFromString: not implemented" << crash;
+{ int sep = in.find_last_of(',');
+  stOutput << in.substr(1,sep) << '\n';
+  stOutput << in.substr(sep,in.size()-1) << '\n';
+  this->h.MakeFromString(in.substr(1,sep));
+  this->k.MakeFromString(in.substr(sep,in.size()-1));
 }
 
 ElementHyperoctahedralGroupR2 operator"" _EHOG(const char *in, size_t insize)

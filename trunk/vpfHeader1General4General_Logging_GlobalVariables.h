@@ -168,6 +168,7 @@ public:
     return -1;
   }
   static void InitThreadsExecutableStart();
+  void SetWebInput(const std::string& inputName, const std::string& inputValue);
   std::string GetWebInput(const std::string& inputName);
   void initDefaultFolderAndFileNames
 (const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow);

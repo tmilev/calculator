@@ -562,14 +562,15 @@ std::string WebWorker::ToStringCalculatorArgumentsHumanReadable()
   return out.str();
 }
 
-std::string WebWorker::ToStringCalculatorArgumentsExcludeRequestTypePassAndCurrentExamFile()
+std::string WebWorker::ToStringCalcArgsExcludeRequestPasswordExamDetails()
 { MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsCGIinputExcludeRequestType");
   if (!theGlobalVariables.flagLoggedIn)
     return "";
   std::stringstream out;
   for (int i =0; i<theGlobalVariables.webFormArgumentNames.size; i++)
   { const std::string& currentName=theGlobalVariables.webFormArgumentNames[i];
-    if (currentName =="request"|| currentName=="password" || currentName=="currentExamFile")
+    if (currentName =="request"|| currentName=="password" || currentName=="currentExamFile" ||
+        currentName=="currentExamHome" || currentName=="currentExamIntermediate")
       continue;
     out << theGlobalVariables.webFormArgumentNames[i] << "=" << theGlobalVariables.webFormArguments[i]
     << "&";
@@ -620,6 +621,8 @@ std::string WebWorker::GetHtmlHiddenInputs()
   out
   << "<input type=\"hidden\" id=\"authenticationToken\" name=\"authenticationToken\">\n"
   << "<input type=\"hidden\" id=\"userHidden\" name=\"userHidden\">\n"
+  << "<input type=\"hidden\" id=\"currentExamHome\" name=\"currentExamHome\">\n"
+  << "<input type=\"hidden\" id=\"currentExamIntermediate\" name=\"currentExamIntermediate\">\n"
   << "<input type=\"hidden\" id=\"currentExamFile\" name=\"currentExamFile\">\n";
   return out.str();
 }
@@ -1697,7 +1700,7 @@ std::string WebWorker::GetLoginHTMLinternal()
 //  << "<hr> main argument: "
 //  << this->mainArgumentRAW;
   out << this->ToStringCalculatorArgumentsHumanReadable();
-  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"POST\" accept-charset=\"utf-8\">"
+  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"GET\" accept-charset=\"utf-8\">"
   <<  "User name or email: "
   << "<input type=\"text\" name=\"user\" placeholder=\"user\" required>"
   << "<br>Password: "
@@ -1795,7 +1798,11 @@ std::string WebWorker::GetJavascriptStandardCookies()
       theGlobalVariables.userCalculatorRequestType!="compute")
   { out << "  addCookie(\"request\", \"" << theGlobalVariables.userCalculatorRequestType << "\", 100);\n";
     out << "  addCookie(\"currentExamFile\", \""
-    << theGlobalVariables.GetWebInput("currentExamFile") << "\", 100);\n";
+    << CGI::URLStringToNormal( theGlobalVariables.GetWebInput("currentExamFile")) << "\", 100);\n";
+    out << "  addCookie(\"currentExamHome\", \""
+    << CGI::URLStringToNormal( theGlobalVariables.GetWebInput("currentExamHome")) << "\", 100);\n";
+    out << "  addCookie(\"currentExamIntermediate\", \""
+    << CGI::URLStringToNormal( theGlobalVariables.GetWebInput("currentExamIntermediate")) << "\", 100);\n";
   }
   out
   << "}\n";
@@ -1833,6 +1840,12 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "  if (document.getElementById(\"currentExamFile\")!=null)\n "
   << "    if(getCookie(\"currentExamFile\")!='')\n"
   << "      document.getElementById(\"currentExamFile\").value=getCookie(\"currentExamFile\");\n"
+  << "  if (document.getElementById(\"currentExamHome\")!=null)\n "
+  << "    if(getCookie(\"currentExamHome\")!='')\n"
+  << "      document.getElementById(\"currentExamHome\").value=getCookie(\"currentExamHome\");\n"
+  << "  if (document.getElementById(\"currentExamIntermediate\")!=null)\n "
+  << "    if(getCookie(\"currentExamIntermediate\")!='')\n"
+  << "      document.getElementById(\"currentExamIntermediate\").value=getCookie(\"currentExamIntermediate\");\n"
   << "  if (document.getElementById(\"authenticationToken\")!=null)\n"
   << "    if(getCookie(\"authenticationToken\")!='')\n"
   << "      document.getElementById(\"authenticationToken\").value=getCookie(\"authenticationToken\");\n "

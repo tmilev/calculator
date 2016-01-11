@@ -117,7 +117,7 @@ public:
   void SendDisplayUserInputToServer();
   enum requestTypes {requestUnknown, requestGetCalculator, requestPostCalculator,
   requestGetNotCalculator};
-  static std::string ToStringCalculatorArgumentsExcludeRequestTypePassAndCurrentExamFile();
+  static std::string ToStringCalcArgsExcludeRequestPasswordExamDetails();
   static std::string ToStringCalculatorArgumentsHumanReadable();
   std::string ToStringStatus()const;
   std::string ToStringMessageUnsafe()const;

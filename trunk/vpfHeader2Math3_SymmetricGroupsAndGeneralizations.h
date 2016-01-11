@@ -400,14 +400,23 @@ class ElementZ2N
 { public:
   List<bool> bits;
 
+  void Validate() const
+  { for(int i=0; i<bits.size; i++)
+      if((bits[i] != true) && (bits[i] != false))
+        crash << "invalid bit " << bits[i] << crash;
+  }
+
   ElementZ2N operator*(const ElementZ2N right) const
   { ElementZ2N out;
-    if(this->bits.size < right.bits.size)
-      return right**this;
-    out.bits = this->bits;
-    for(int i=0; i<right.bits.size; i++)
-      if(right.bits[i])
-        out.bits[i] = !out.bits[i];
+    out.bits.SetSize(MathRoutines::Maximum(this->bits.size,right.bits.size));
+    int i=0;
+    for(; i<MathRoutines::Minimum(this->bits.size,right.bits.size); i++)
+      out.bits[i] = this->bits[i] != right.bits[i];
+    for(; i<this->bits.size; i++)
+      out.bits[i] = this->bits[i];
+    for(; i<right.bits.size; i++)
+      out.bits[i] = right.bits[i];
+    out.Validate();
     return out;
   }
 
@@ -421,6 +430,7 @@ class ElementZ2N
         this->bits[ii] = false;
       this->bits[i] = true;
     }
+    this->Validate();
   }
 
   // an ElementZ2N is its own inverse.  When it comes time to template ElementZmN
@@ -429,32 +439,24 @@ class ElementZ2N
   void Invert(){}
 
   bool operator==(const ElementZ2N& right) const
-  { stOutput << "ElementZ2N::operator==: " << this->ToString() << "?=" << right.ToString();
-    if(this->bits.size < right.bits.size)
-      return right == *this;
+  { //stOutput << "ElementZ2N::operator==: " << this->ToString() << "?=" << right.ToString();
     int i=0;
-    for(; i<right.bits.size; i++)
-    { // a bool is an unsigned char
-      // so if bools x,y have different nonzero values, x != y
-      // x != y is not a logical xor, but !x != !y is
-      // ok, scratch that
-      if(this->bits[i])
-        if(!right.bits[i])
-        { stOutput << " Bit " << i << " is different (" << this->bits[i] << "," << right.bits[i] << ")\n";
-          return false;
-        }
-      if(!this->bits[i])
-        if(right.bits[i])
-        { stOutput << " Bit " << i << " is different (" << this->bits[i] << "," << right.bits[i] << ")\n";
-          return false;
-        }
-    }
-    for(; i<this->bits.size; i++)
-      if(this->bits[i])
-      { stOutput << " Bit " << i << " is set in left argument and unset in right argument\n";
+    for(; i<MathRoutines::Minimum(this->bits.size, right.bits.size); i++)
+      if(this->bits[i] != right.bits[i])
+      { //stOutput << " Bit " << i << " is different (" << this->bits[i] << "," << right.bits[i] << ")\n";
         return false;
       }
-    stOutput << "☑\n";
+    for(; i<this->bits.size; i++)
+      if(this->bits[i])
+      { //stOutput << " Bit " << i << " (" << this->bits[i] << ") is set in left argument and unset in right argument\n";
+        return false;
+      }
+    for(; i<right.bits.size; i++)
+      if(right.bits[i])
+      { //stOutput << " Bit " << i << " (" << right.bits[i] << ") is set in left argument and unset in right argument\n";
+        return false;
+      }
+    //stOutput << "☑\n";
     return true;
   }
 
@@ -516,9 +518,16 @@ class HyperoctahedralBitsAutomorphism
   static ElementZ2N oa(const PermutationR2& h, const ElementZ2N& k)
   { ElementZ2N out = k;
     int bon = h.BiggestOccurringNumber();
-    if(out.bits.size <= bon)
-      out.bits.SetSize(bon+1);
-    h.ActOnList(out.bits);
+    int os = out.bits.size;
+    if(os <= bon)
+    { out.bits.SetSize(bon+1);
+      for(int i=os; i<bon+1; i++)
+        out.bits[i] = false;
+    }
+    PermutationR2 hinv = h;
+    hinv.Invert();
+    hinv.ActOnList(out.bits);
+    out.Validate();
     return out;
   }
 };
@@ -533,6 +542,7 @@ typedef SemidirectProductElement<PermutationR2,ElementZ2N,HyperoctahedralBitsAut
 class HyperoctahedralGroupR2: public FiniteGroup<ElementHyperoctahedralGroupR2>
 { public:
   int N;
+  bool flagIsEntireHyperoctahedralGroup;
 
   void MakeHyperoctahedralGroup(int n)
   { this->N = n;
@@ -541,7 +551,11 @@ class HyperoctahedralGroupR2: public FiniteGroup<ElementHyperoctahedralGroupR2>
       this->generators[i].h.AddTransposition(i,i+1);
     for(int i=0; i<n; i++)
       this->generators[n-1+i].k.ToggleBit(i);
+    this->flagIsEntireHyperoctahedralGroup = true;
+    this->GetWordByFormula = this->GetWordByFormulaImplementation;
   }
+
+  static void GetWordByFormulaImplementation(void* G, const ElementHyperoctahedralGroupR2& g, List<int>& out);
   void AllSpechtModules();
   void SpechtModuleOfPartititons(const Partition& positive, const Partition& negative,
                                GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> &out);
@@ -1116,6 +1130,7 @@ class PermutationGroup: public FiniteGroup<PermutationR2>
   }
   template <typename coefficient>
   void SpechtModuleOfPartition(const Partition& p, GroupRepresentation<FiniteGroup<PermutationR2>, coefficient>& rep);
+  void ComputeSpechtModules();
   template <typename somestream>
   somestream& IntoStream(somestream& out);
   std::string ToString();
@@ -1600,7 +1615,9 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintGeneratorCommutationRelati
 
 template <typename elementSomeGroup>
 std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable()
-{ std::stringstream out;
+{ for(int i=0; i<this->irreps.size; i++)
+    this->irreps[i].ComputeCharacter();
+  std::stringstream out;
   out << *this;
   out << this->GetSize() << "elements.  Representatives and sizes are ";
   for(int i=0; i<this->conjugacyClasseS.size; i++)
@@ -1800,6 +1817,8 @@ void PermutationGroup::SpechtModuleOfPartition
   rep.ownerGroup = this;
 }
 
+
+
 /*
 template <typename elementSomeGroup>
 std::ostream& operator<<(std::ostream& out, const FiniteGroup<elementSomeGroup>& data)
@@ -1893,5 +1912,24 @@ bool GroupRepresentation<someGroup, coefficient>::VerifyRepresentation()
   return !badrep;
 }
 
+template <typename somegroup, typename coefficient>
+std::string GroupRepresentation<somegroup, coefficient>::DescribeAsDirectSum()
+{ this->ComputeCharacter();
+  std::stringstream out;
+  bool firstone = true;
+  for(int i=0; i<this->ownerGroup->irreps.size; i++)
+  { this->ownerGroup->irreps[i].ComputeCharacter();
+    coefficient x;
+    x = this->theCharacteR.InnerProduct(this->ownerGroup->irreps[i].theCharacteR);
+    if(x != 0)
+    { if(firstone)
+        firstone = false;
+      else
+        out << " ⊕ ";
+      out << x << "×χ" << i;
+    }
+  }
+  return out.str();
+}
 
 #endif

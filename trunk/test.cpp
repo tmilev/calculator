@@ -2351,6 +2351,42 @@ void TestSpechtModules(int N = 7)
   stOutput << G.PrettyPrintCharacterTable() << '\n';
 }
 
+void TestInduction(int n=4, int m=3)
+{ PermutationGroup G;
+  G.MakeSymmetricGroupGeneratorsjjPlus1(n);
+  G.ComputeSpechtModules();
+  List<int> l;
+  for(int i=0; i<m-1; i++)
+    l.AddOnTop(i);
+  auto H = G.ParabolicKindaSubgroupGeneratorSubset(l);
+  // ParabolicKindaSubgroup gives a Subgroup which is also a FiniteGroup<element type>
+  // only PermutationGroup's have access to ComputeSpechtModules();
+  // I think I'll switch to functions and use parametric dispatch
+  // instead of classes.  I believe this is how Julia works
+  PermutationGroup H1;
+  H1.MakeSymmetricGroupGeneratorsjjPlus1(m);
+  H1.ComputeSpechtModules();
+  H.irreps.SetSize(H1.irreps.size);
+  // InduceRepresentation requires the right type for the representation
+  List<GroupRepresentation<Subgroup<FiniteGroup<PermutationR2>, PermutationR2 >, Rational> > inducethese;
+  inducethese.SetSize(H1.irreps.size);
+  for(int i=0; i<H1.irreps.size; i++)
+  { H.irreps[i].ownerGroup = &H;
+    H.irreps[i].generatorS = H1.irreps[i].generatorS;
+    inducethese[i].ownerGroup = &H;
+    inducethese[i].generatorS = H1.irreps[i].generatorS;
+  }
+  // can't use auto here ;_; could in Python with [induce(R) for R in G]
+  List<GroupRepresentation<FiniteGroup<PermutationR2>, Rational> > indreps;
+  indreps.SetSize(H.irreps.size);
+  for(int i=0; i<H.irreps.size; i++)
+    indreps[i] = H.InduceRepresentation(inducethese[i]);
+  stOutput << G.PrettyPrintCharacterTable();
+  stOutput << H.PrettyPrintCharacterTable();
+  for(int i=0; i<H.irreps.size; i++)
+    stOutput << indreps[i].DescribeAsDirectSum() << '\n';
+}
+
 
   /*
       Rational zero = Rational(0,1);
@@ -3172,6 +3208,14 @@ int mainTest(List<std::string>& inputArguments)
       else
         N = 10;
       TestCountPermutations(N);
+    }
+    if(inputArguments[0] == "test_induction")
+    { if(inputArguments.size == 3)
+      { int n = atoi(inputArguments[1].c_str());
+        int m = atoi(inputArguments[2].c_str());
+        TestInduction(n,m);
+      } else
+        TestInduction();
     }
   }
 

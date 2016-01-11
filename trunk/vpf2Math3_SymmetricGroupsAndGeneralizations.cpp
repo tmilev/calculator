@@ -139,10 +139,6 @@ void Partition::FillTableauOrdered(Tableau& in) const
 
 void Partition::GetAllStandardTableaux(List<Tableau>& out) const
 { //stOutput << "Debugging Partition::GetAllStandardTableaux with partition " << *this << "\n";
-  PermutationGroup sn;
-  sn.MakeSymmetricGroup(this->n);
-  sn.ComputeAllElements();
-  //stOutput << sn << '\n';
   GeneratorPermutationsOfList<int> perms;
   for(perms.Initialize(this->n); !perms.DoneIterating(); ++perms)
   { Tableau theTableau;
@@ -750,7 +746,14 @@ std::string PermutationGroup::ToString()
   return out.str();
 }
 
-
+void PermutationGroup::ComputeSpechtModules()
+{ List<Partition> ps;
+  Partition::GetPartitions(ps,this->generators.size+1);
+  this->irreps.SetSize(ps.size);
+  for(int i=0; i<ps.size; i++)
+    this->SpechtModuleOfPartition(ps[i], this->irreps[i]);
+  this->irreps.QuickSortAscending();
+}
 
 void ElementHyperoctahedralGroup::MakeFromPermutation(const PermutationR2& in)
 { this->p = in;
@@ -1332,6 +1335,18 @@ void HyperoctahedralGroup::GetWordByFormulaImplementation(void* GG, const Elemen
   { g.p.GetWordjjPlus1(word);
     for(int i=0; i<g.s.size; i++)
       if(g.s[i])
+        word.AddOnTop(G->N-1+i);
+    return;
+  }
+  crash << "This method should not have been called " << __FILE__ << ":" << __LINE__ << crash;
+}
+
+void HyperoctahedralGroupR2::GetWordByFormulaImplementation(void* GG, const ElementHyperoctahedralGroupR2& g, List<int>& word)
+{ HyperoctahedralGroupR2* G = (HyperoctahedralGroupR2*) GG;
+  if(G->flagIsEntireHyperoctahedralGroup)
+  { g.h.GetWordjjPlus1(word);
+    for(int i=0; i<g.k.bits.size; i++)
+      if(g.k.bits[i])
         word.AddOnTop(G->N-1+i);
     return;
   }

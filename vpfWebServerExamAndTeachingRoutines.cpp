@@ -48,6 +48,9 @@ public:
   int randomSeed;
   List<int> randomSeedsIfInterpretationFails;
   bool flagRandomSeedGiven;
+  bool flagIsExamHome;
+  bool flagIsExamIntermediate;
+  bool flagIsExamProblem;
   std::string problemCommandsWithInbetweens;
   std::string problemCommandsNoVerification;
   std::string problemCommandsVerification;
@@ -67,12 +70,13 @@ public:
   bool ParseHTML(std::stringstream& comments);
   bool IsSplittingChar(const std::string& input);
   bool IsStudentAnswer(SyntacticElementHTML& inputElt);
+  bool IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt);
   bool InterpretHtml(std::stringstream& comments);
   bool InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments);
   bool PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream& comments);
   bool PrepareCommands(Calculator& theInterpreter, std::stringstream& comments);
   std::string CleanUpCommandString(const std::string& inputCommand);
-  void InterpretProblemStartButton(SyntacticElementHTML& inputOutput);
+  void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
   std::string GetSubmitAnswersJavascript();
   void LoadCurrentProblemItem();
   std::string LoadAndInterpretCurrentProblemItem();
@@ -87,7 +91,7 @@ public:
   { return this->fileName==other.fileName;
   }
   std::string ToStringCalculatorArgumentsForProblem(const std::string& requestType)const;
-  std::string ToStringGetProblemLink()const;
+  std::string ToStringProblemNavigation()const;
   std::string ToStringExtractedCommands();
   std::string ToStringContent();
   std::string ToStringParsingStack(List<SyntacticElementHTML>& theStack);
@@ -100,6 +104,9 @@ CalculatorHTML::CalculatorHTML()
   this->NumAttemptsToInterpret=0;
   this->MaxInterpretationAttempts=10;
   this->flagLoadedSuccessfully=false;
+  this->flagIsExamHome=false;
+  this->flagIsExamIntermediate=false;
+  this->flagIsExamProblem=false;
 }
 
 const std::string CalculatorHTML::RelativePhysicalFolderProblemCollections="ProblemCollections/";
@@ -166,6 +173,8 @@ void CalculatorHTML::LoadCurrentProblemItem()
   bool needToFindDefault=(this->fileName=="");
   if (!needToFindDefault)
     needToFindDefault=!this->LoadMe(this->comments);
+  else
+    this->comments << "<b>Selecting default course homework file.</b><br>";
   if (needToFindDefault)
   { if (!this->FindExamItem())
     { this->comments << "<b>No problems/exams to serve: found no html content in folder: "
@@ -177,6 +186,34 @@ void CalculatorHTML::LoadCurrentProblemItem()
     this->inputHtml=this->comments.str()+this->inputHtml;
   }
   this->flagLoadedSuccessfully=true;
+}
+
+bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt)
+{ MacroRegisterFunctionWithName("CalculatorHTML::IsStateModifierApplyIfYes");
+  if (inputElt.syntacticRole!="command")
+    return false;
+  std::string tagClass=inputElt.GetKeyValue("class");
+  if (tagClass=="setCalculatorExamHome")
+  { this->flagIsExamHome=true;
+    this->flagIsExamProblem=false;
+    this->flagIsExamIntermediate=false;
+    theGlobalVariables.SetWebInput("currentExamHome", CGI::StringToURLString(this->fileName));
+    theGlobalVariables.SetWebInput("currentExamIntermediate", "");
+  }
+  if (tagClass=="setCalculatorExamIntermediate")
+  { this->flagIsExamHome=false;
+    this->flagIsExamIntermediate=true;
+    this->flagIsExamProblem=false;
+    theGlobalVariables.SetWebInput("currentExamIntermediate", CGI::StringToURLString(this->fileName));
+    return true;
+  }
+  if (tagClass=="setCalculatorExamProblem")
+  { this->flagIsExamHome=false;
+    this->flagIsExamIntermediate=false;
+    this->flagIsExamProblem=true;
+    return true;
+  }
+  return false;
 }
 
 bool CalculatorHTML::IsStudentAnswer(SyntacticElementHTML& inputElt)
@@ -307,6 +344,7 @@ std::string WebWorker::GetExamPage()
   out << "<html>"
   << "<header>"
   << WebWorker::GetJavascriptStandardCookies()
+  << CGI::GetLaTeXProcessingJavascript()
   << "<link rel=\"stylesheet\" type=\"text/css\" href=\"/ProblemCollections/calculator.css\">"
   << "</header>"
   << "<body onload=\"loadSettings();\">\n";
@@ -421,9 +459,10 @@ void SyntacticElementHTML::SetKeyValue(const std::string& theKey, const std::str
 std::string SyntacticElementHTML::ToStringInterpretted()
 { if (this->syntacticRole=="")
     return this->content;
-  if (this->GetKeyValue("class")=="calculatorAnswerVerification")
+  std::string tagClass=this->GetKeyValue("class");
+  if (tagClass=="calculatorAnswerVerification")
     return "";
-  if (this->GetKeyValue("class")=="calculatorStartProblem")
+  if (tagClass=="calculatorExamFile" || tagClass=="calculatorExamIntermediate")
     return this->interpretedCommand;
   std::stringstream out;
   out << this->ToStringOpenTag();
@@ -437,7 +476,8 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator()
 { MacroRegisterFunctionWithName("SyntacticElementHTML::IsInterpretedNotByCalculator");
   if (this->syntacticRole!="command")
     return false;
-  return this->GetKeyValue("class")=="calculatorStartProblem";
+  std::string tagClass=this->GetKeyValue("class");
+  return tagClass=="calculatorExamFile" || tagClass== "calculatorExamIntermediate";
 }
 
 bool SyntacticElementHTML::IsInterpretedByCalculatorDuringPreparation()
@@ -515,11 +555,29 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
   return result;
 }
 
-std::string CalculatorHTML::ToStringGetProblemLink()const
-{ std::stringstream out;
-  out << "<a href=\""
-  << theGlobalVariables.DisplayNameCalculatorWithPath << "?" << this->ToStringCalculatorArgumentsForProblem("exercises")
-  << "\">Link to this problem.</a>";
+std::string CalculatorHTML::ToStringProblemNavigation()const
+{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemNavigation");
+  if (this->flagIsExamHome)
+    return "";
+  std::stringstream out;
+  std::string currentExamFile= theGlobalVariables.GetWebInput("currentExamFile");
+  std::string currentExamHome= theGlobalVariables.GetWebInput("currentExamHome");
+  std::string currentExamIntermediate=theGlobalVariables.GetWebInput("currentExamIntermediate");
+  out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
+  << WebWorker::ToStringCalcArgsExcludeRequestPasswordExamDetails()
+  << "currentExamHome=&"
+  << "currentExamIntermediate=&"
+  << "currentExamFile=" << currentExamHome << "&\"> Course homework home. </a><br>";
+  if (this->flagIsExamProblem && currentExamIntermediate!="")
+    out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
+    << WebWorker::ToStringCalcArgsExcludeRequestPasswordExamDetails()
+    << "currentExamHome=" << currentExamHome << "&"
+    << "currentExamIntermediate=&"
+    << "currentExamFile=" << currentExamIntermediate << "&\"> Current homework. </a><br>";
+  if (this->flagIsExamProblem)
+    out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
+    << this->ToStringCalculatorArgumentsForProblem("exercises")
+    << "\">Link to this problem.</a>";
   return out.str();
 }
 
@@ -528,7 +586,9 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem(const std::str
   if (!theGlobalVariables.flagLoggedIn)
     return "";
   std::stringstream out;
-  out << "request=" << requestType << "&" << WebWorker::ToStringCalculatorArgumentsExcludeRequestTypePassAndCurrentExamFile()
+  out << "request=" << requestType << "&" << WebWorker::ToStringCalcArgsExcludeRequestPasswordExamDetails()
+  << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&"
+  << "currentExamIntermediate=" << theGlobalVariables.GetWebInput("currentExamIntermediate") << "&"
   << "currentExamFile=" << CGI::StringToURLString(this->fileName) << "&";
   if (theGlobalVariables.GetWebInput("randomSeed")=="")
     out << "randomSeed=" << this->randomSeed << "&";
@@ -536,13 +596,24 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem(const std::str
   return out.str();
 }
 
-void CalculatorHTML::InterpretProblemStartButton(SyntacticElementHTML& inputOutput)
-{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretProblemStartButton");
-  std::stringstream out;
-  out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
-  << WebWorker::ToStringCalculatorArgumentsExcludeRequestTypePassAndCurrentExamFile()
-  << "currentExamFile=" << inputOutput.content << "\">"
-  << inputOutput.content << "</a>";
+void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateLink");
+  std::string cleaneduplink;
+  cleaneduplink.reserve(inputOutput.content.size());
+  for (unsigned i=0; i<inputOutput.content.size(); i++)
+    if (inputOutput.content[i]!='\n' && inputOutput.content[i]!='\r')
+      cleaneduplink.push_back(inputOutput.content[i]);
+  std::stringstream out, refStream;
+//  out << "cleaned up link: " << cleaneduplink;
+//  out << "<br>urled link: " <<  CGI::StringToURLString(cleaneduplink);
+  refStream << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
+  << WebWorker::ToStringCalcArgsExcludeRequestPasswordExamDetails()
+  << "currentExamFile=" << CGI::StringToURLString(cleaneduplink) << "&";
+  if (this->flagIsExamHome || this->flagIsExamIntermediate)
+    refStream << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome")<< "&";
+  if (this->flagIsExamIntermediate)
+    refStream << "currentExamIntermediate=" << theGlobalVariables.GetWebInput("currentExamIntermediate") << "&";
+  out << "<a href=\"" << refStream.str() << "\">" << inputOutput.content << "</a>";
   inputOutput.interpretedCommand=out.str();
 }
 
@@ -551,7 +622,9 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   std::stringstream out;
   if (!this->flagRandomSeedGiven)
     this->randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
-  out << "Link to the problem: " << this->ToStringGetProblemLink() << "<br>";
+  std::string navigationLinks=this->ToStringProblemNavigation();
+  if (navigationLinks!="")
+    out << "Links.<br>" << navigationLinks<< "<br>";
   if (!this->PrepareAndExecuteCommands(theInterpreter, comments))
     return false;
   bool moreThanOneCommand=false;
@@ -581,7 +654,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   }
   for (int i=0; i<this->theContent.size; i++)
     if (this->theContent[i].IsInterpretedNotByCalculator())
-      this->InterpretProblemStartButton( this->theContent[i]);
+      this->InterpretGenerateLink( this->theContent[i]);
   for (int i=0; i<this->theContent.size; i++)
     out << this->theContent[i].ToStringInterpretted();
 //   out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
@@ -682,7 +755,11 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   this->calculatorClasses.AddOnTop("calculatorHidden");
   this->calculatorClasses.AddOnTop("calculatorAnswerVerification");
   this->calculatorClasses.AddOnTop("calculatorStudentAnswer");
-  this->calculatorClasses.AddOnTop("calculatorStartProblem");
+  this->calculatorClasses.AddOnTop("calculatorExamIntermediate");
+  this->calculatorClasses.AddOnTop("calculatorExamFile");
+  this->calculatorClasses.AddOnTop("setCalculatorExamFile");
+  this->calculatorClasses.AddOnTop("setCalculatorExamIntermediate");
+  this->calculatorClasses.AddOnTop("setCalculatorExamHome");
   this->eltsStack.SetSize(0);
   SyntacticElementHTML dummyElt;
   dummyElt.content="<>";
@@ -692,6 +769,9 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     eltsStack.AddOnTop( dummyElt);
   int indexInElts=-1;
   bool reduced=false;
+  this->flagIsExamProblem=true;
+  this->flagIsExamHome=false;
+  this->flagIsExamIntermediate=false;
   do
   { if (!reduced)
     { indexInElts++;
@@ -710,6 +790,8 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     if (secondToLast.syntacticRole=="<openTagCalc>" && last.syntacticRole=="</closeTag>" && secondToLast.tag==last.tag)
     { secondToLast.syntacticRole="command";
       eltsStack.RemoveLastObject();
+      if (this->IsStateModifierApplyIfYes(secondToLast))
+        eltsStack.RemoveLastObject();
       continue;
     }
     if (last.syntacticRole=="</closeTag>")

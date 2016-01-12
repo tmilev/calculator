@@ -260,8 +260,8 @@ public:
   void ComputeCCSizesAndRepresentativesWithOrbitIterator(GlobalVariables* theGlobalVariables);
   void ComputeCCSizesRepresentativesWords(GlobalVariables *theGlobalVariables);
   bool HasElement(const elementSomeGroup& g);
-  void GetWord(const elementSomeGroup& g, List<int>& out);
-  void (*GetWordByFormula)(void* G, const elementSomeGroup& g, List<int>& out);
+  bool GetWord(const elementSomeGroup& g, List<int>& out);
+  bool (*GetWordByFormula)(void* G, const elementSomeGroup& g, List<int>& out);
   void GetSignCharacter(Vector<Rational>& outputCharacter);
   template <typename coefficient>
   coefficient GetHermitianProduct(const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter);
@@ -546,7 +546,7 @@ public:
   bool CheckConsistency()const;
   bool CheckInitializationFDrepComputation()const;
   bool CheckInitializationConjugacyClasses()const;
-  static void GetWordByFormulaImplementation(void* G, const ElementWeylGroup<WeylGroup>& g, List<int>& out);
+  static bool GetWordByFormulaImplementation(void* G, const ElementWeylGroup<WeylGroup>& g, List<int>& out);
   void GetSignCharacter(Vector<Rational>& out);
   void GetStandardRepresentation(WeylGroupRepresentation<Rational>& output);
   void GetSignRepresentation(WeylGroupRepresentation<Rational>& output);
@@ -879,7 +879,7 @@ class GroupRepresentation
   bool CheckInitialization();
 
   template <typename elementSomeGroup>
-  void GetMatrixOfElement(elementSomeGroup& g, Matrix<coefficient>& out);
+  bool GetMatrixOfElement(elementSomeGroup& g, Matrix<coefficient>& out);
 
   void ComputeCharacter();
 
@@ -894,21 +894,36 @@ class GroupRepresentation
   JSData JSOut();
 
   template <typename somestream>
-  somestream& IntoStream(somestream& out);
-  std::string ToString();
+  somestream& IntoStream(somestream& out)const;
+  std::string ToString()const;
   friend std::ostream& operator<< (std::ostream& out, GroupRepresentation<someGroup, coefficient>& data)
   { return data.IntoStream(out);
+  }
+  bool operator==(const GroupRepresentation<someGroup, coefficient>& right)const
+  { if (this->ownerGroup!=right.ownerGroup)
+      return false;
+    if (this->generatorS!=right.generatorS)
+      return false;
+    return true;
+    // if it ever becomes useful to compare element matrices...
+    /*for(int i=0; i<this->ownerGroup.)
+    right.GetMatrixOfElement(this->ownerGroup.generators[i], M)
+    if(M != this->generatorS[i])
+      return false;*/
+
   }
 };
 
 template <typename someGroup, typename coefficient>
 template <typename elementSomeGroup>
-void GroupRepresentation<someGroup, coefficient>::GetMatrixOfElement(elementSomeGroup& g, Matrix<coefficient>& out)
+bool GroupRepresentation<someGroup, coefficient>::GetMatrixOfElement(elementSomeGroup& g, Matrix<coefficient>& out)
 { out.MakeID(this->generatorS[0]);
   List<int> word;
-  this->ownerGroup->GetWord(g, word);
+  if(!this->ownerGroup->GetWord(g, word))
+    return false;
   for(int i=0; i<word.size; i++)
     out *= this->generatorS[word[i]];
+  return true;
   //stOutput << "GroupRepresentation::GetMatrixOfElement: Assembled for element " << g << " having word " << word.ToStringCommaDelimited() << " the matrix\n" << out.ToStringPlainText() << '\n';
 }
 
@@ -980,9 +995,12 @@ void GroupRepresentation<someGroup, coefficient>::SetElementImage(int i, Matrix<
 
 template <typename someGroup, typename coefficient>
 template <typename somestream>
-somestream& GroupRepresentation<someGroup, coefficient>::IntoStream(somestream& out)
+somestream& GroupRepresentation<someGroup, coefficient>::IntoStream(somestream& out)const
 { if(!this->haveCharacter)
-    this->ComputeCharacter();
+  { //this->ComputeCharacter();
+    out << "Representation of the character not computed yet.";
+    return out;
+  }
 // WeylGroup needs to be printable
 // WeylGroup really needs to be printable lol
   out << "Representation of group " << ownerGroup->ToString();
@@ -993,7 +1011,7 @@ somestream& GroupRepresentation<someGroup, coefficient>::IntoStream(somestream& 
 }
 
 template <typename someGroup, typename coefficient>
-std::string GroupRepresentation<someGroup, coefficient>::ToString()
+std::string GroupRepresentation<someGroup, coefficient>::ToString()const
 { std::stringstream out;
   this->IntoStream(out);
   return out.str();
@@ -1255,7 +1273,7 @@ GroupRepresentation<Subgroup<somegroup,elementSomeGroup>, Rational> Subgroup<som
 }
 
 template <typename someGroup, typename elementSomeGroup>
-void TranslatableWordsSubgroupElementGetWord(void* Hp, const elementSomeGroup& g, List<int>& out)
+bool TranslatableWordsSubgroupElementGetWord(void* Hp, const elementSomeGroup& g, List<int>& out)
 { Subgroup<someGroup, elementSomeGroup> *H = (Subgroup<someGroup, elementSomeGroup>*) Hp;
   List<int> superword;
   H->parent->GetWord(g, superword);
@@ -1270,6 +1288,7 @@ void TranslatableWordsSubgroupElementGetWord(void* Hp, const elementSomeGroup& g
     }
     out.AddListOnTop(H->superGeneratorSubWords[superword[i]]);
   }
+  return true;
   //stOutput << "TranslatableWordsSubgroupElementGetWord: " << g << " is assigned word " << out.ToStringCommaDelimited()
   //         << " translated from parent group's word " << superword.ToStringCommaDelimited() << '\n';
 }

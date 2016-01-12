@@ -4425,13 +4425,14 @@ void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<
   }
 }
 
-void WeylGroup::GetWordByFormulaImplementation(void *G, const ElementWeylGroup<WeylGroup> &g, List<int> &out)
+bool WeylGroup::GetWordByFormulaImplementation(void *G, const ElementWeylGroup<WeylGroup> &g, List<int> &out)
 { out.SetSize(g.generatorsLastAppliedFirst.size);
   for(int i=0; i<g.generatorsLastAppliedFirst.size; i++)
   { if(g.generatorsLastAppliedFirst[i].flagIsOuter)
       crash << "wait, what?  is this okay to pass through or what should happen now?  see " << __FILE__ << ":" << __LINE__ << crash;
     out[i] = g.generatorsLastAppliedFirst[i].index;
   }
+  return true;
 }
 
 void WeylGroup::GetSignCharacter(Vector<Rational>& out)

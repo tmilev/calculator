@@ -12,6 +12,7 @@
 #include "vpfHeader2Math1_3SemisimpleLieSubalgebras.h"
 #include "vpfHeader2Math15_UniversalEnveloping.h"
 #include "vpfHeader2Math6_ModulesSSLieAlgebras.h"
+#include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file, calculator declaration. ");
 
@@ -648,9 +649,12 @@ public:
   HashedListReferences<ElementZmodP> theEltsModP;
   HashedListReferences<Weight<Rational> > theWeights;
   HashedListReferences<Weight<Polynomial<Rational> > > theWeightsPoly;
+  ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational > > theHyperoctahedralReps;
   ListReferences<Plot> thePlots;
   AlgebraicClosureRationals theAlgebraicClosure;
   HashedList<AlgebraicNumber> theAlgebraicNumbers;
+  HashedListReferences<ElementHyperoctahedralGroupR2> theElementsHyperOctGroup;
+  ListReferences<HyperoctahedralGroupR2> theHyperOctahedralGroups;
 //  HashedList<DifferentialForm<Rational> > theDiffForm;
   HashedListReferences<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
   void reset();
@@ -1183,6 +1187,9 @@ public:
   int opRational()
   { return this->theAtoms.GetIndexIMustContainTheObject("Rational");
   }
+  int opElementHyperOctahedral()
+  { return this->theAtoms.GetIndexIMustContainTheObject("ElementHyperoctahedral");
+  }
   int opDouble()
   { return this->theAtoms.GetIndexIMustContainTheObject("Double");
   }
@@ -1233,6 +1240,9 @@ public:
   }
   int opElementUEoverRF()
   { return this->theAtoms.GetIndexIMustContainTheObject("ElementUEoverRF");
+  }
+  int opHyperoctahedralGroupRep()
+  { return this->theAtoms.GetIndexIMustContainTheObject("HyperoctahedralGroupRepresentation");
   }
   int opWeylGroupVirtualRep()
   { return this->theAtoms.GetIndexIMustContainTheObject("WeylGroupVirtualRep");
@@ -1714,6 +1724,7 @@ public:
   static bool innerMatrixRationalTensorForm(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLoadFileIntoString(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerMakeElementHyperOctahedral(Calculator& theCommands, const Expression& input, Expression& output);
   ////////////////////Conversion to expression tree/////////////////////////////////////
   //converstion from type to expression tree.
   template <class coefficient>

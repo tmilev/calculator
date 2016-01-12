@@ -62,6 +62,24 @@ int Expression::GetTypeOperation<Rational>()const
 }
 
 template < >
+int Expression::GetTypeOperation<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroup>, Rational> >()const
+{ this->CheckInitialization();
+  return this->owner->opHyperoctahedralGroupRep();
+}
+
+template < >
+int Expression::GetTypeOperation<ElementHyperoctahedralGroupR2>()const
+{ this->CheckInitialization();
+  return this->owner->opElementHyperOctahedral();
+}
+
+template < >
+int Expression::GetTypeOperation<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >()const
+{ this->CheckInitialization();
+  return this->owner->opHyperoctahedralGroupRep();
+}
+
+template < >
 int Expression::GetTypeOperation<std::string>()const
 { this->CheckInitialization();
   return this->owner->opString();
@@ -257,10 +275,28 @@ SemisimpleSubalgebras
 
 template < >
 int Expression::AddObjectReturnIndex(const
+ElementHyperoctahedralGroupR2
+& inputValue)const
+{ this->CheckInitialization();
+  return this->owner->theObjectContainer.theElementsHyperOctGroup
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
 std::string
 & inputValue)const
 { this->CheckInitialization();
   return this->owner->theObjectContainer.theStrings
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
+GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>
+& inputValue)const
+{ this->CheckInitialization();
+  return this->owner->theObjectContainer.theHyperoctahedralReps
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -523,6 +559,20 @@ Rational& Expression::GetValueNonConst()const
 { if (!this->IsOfType<Rational>())
     crash << "This is a programming error: expression not of required type Rational. The expression equals " << this->ToString() << "." << crash;
   return this->owner->theObjectContainer.theRationals.GetElement(this->GetLastChild().theData);
+}
+
+template < >
+ElementHyperoctahedralGroupR2& Expression::GetValueNonConst()const
+{ if (!this->IsOfType<ElementHyperoctahedralGroupR2>())
+    crash << "This is a programming error: expression not of required type Rational. The expression equals " << this->ToString() << "." << crash;
+  return this->owner->theObjectContainer.theElementsHyperOctGroup.GetElement(this->GetLastChild().theData);
+}
+
+template < >
+GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> & Expression::GetValueNonConst()const
+{ if (!this->IsOfType<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >())
+    crash << "This is a programming error: expression not of required type Rational. The expression equals " << this->ToString() << "." << crash;
+  return this->owner->theObjectContainer.theHyperoctahedralReps[this->GetLastChild().theData];
 }
 
 template < >
@@ -1769,6 +1819,13 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     result=true;
   } else if (this->IsOfType<ElementZmodP>())
   { out << this->GetValue<ElementZmodP>().ToString();
+    result=true;
+  } else if (this->IsOfType<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >())
+  { out << this->GetValue<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >().ToString();
+    result=true;
+  } else if (this->IsOfType<ElementHyperoctahedralGroupR2>())
+  { //stOutput << "got here!!!!";
+    out << this->GetValue<ElementHyperoctahedralGroupR2>().ToString(&contextFormat.GetElement());
     result=true;
   } else if (this->IsOfType<Polynomial<Rational> >())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());

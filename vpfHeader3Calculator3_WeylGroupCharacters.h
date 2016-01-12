@@ -28,6 +28,9 @@ public:
   static bool innerWeylGroupConjugacyClassesRepresentatives(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerSpechtModule(Calculator& theCommands, const Expression& input, Expression& out);
+
+  static bool innerRepresentElementHyperOctahedral(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerHyperOctahedralAllModulesInducedFromSpechtModules(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerHyperOctahedralGetOneRepresentation(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerHyperOctahedralPrintGeneratorCommutationRelations(Calculator& theCommands, const Expression& input, Expression& output);

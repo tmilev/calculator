@@ -2,6 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader2Math0_General.h"
 #include "vpfHeader2Math1_LieTheoryExtras.h"
+#include "vpfImplementationHeader2Math3_FiniteGroups.h"
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 #include "vpfHeader2Math9DrawingVariables.h"
 #include <assert.h>

@@ -603,17 +603,20 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   for (unsigned i=0; i<inputOutput.content.size(); i++)
     if (inputOutput.content[i]!='\n' && inputOutput.content[i]!='\r')
       cleaneduplink.push_back(inputOutput.content[i]);
-  std::stringstream out, refStream;
+  std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
 //  out << "cleaned up link: " << cleaneduplink;
 //  out << "<br>urled link: " <<  CGI::StringToURLString(cleaneduplink);
-  refStream << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
-  << WebWorker::ToStringCalcArgsExcludeRequestPasswordExamDetails()
+  refStreamNoRequest << WebWorker::ToStringCalcArgsExcludeRequestPasswordExamDetails()
   << "currentExamFile=" << CGI::StringToURLString(cleaneduplink) << "&";
   if (this->flagIsExamHome || this->flagIsExamIntermediate)
-    refStream << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome")<< "&";
+    refStreamNoRequest << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome")<< "&";
   if (this->flagIsExamIntermediate)
-    refStream << "currentExamIntermediate=" << theGlobalVariables.GetWebInput("currentExamIntermediate") << "&";
-  out << "<a href=\"" << refStream.str() << "\">" << inputOutput.content << "</a>";
+    refStreamNoRequest << "currentExamIntermediate=" << theGlobalVariables.GetWebInput("currentExamIntermediate") << "&";
+  refStreamExercise << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&" << refStreamNoRequest.str();
+  refStreamForReal << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=examForReal&" << refStreamNoRequest.str();
+  out << inputOutput.content;
+  out << " <a href=\"" << refStreamForReal.str() << "\">Start (for credit)</a>";
+  out << " <a href=\"" << refStreamExercise.str() << "\">Exercise (no credit, unlimited tries)</a>";
   inputOutput.interpretedCommand=out.str();
 }
 
@@ -670,6 +673,12 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
   { this->outputHtml="<b>Failed to interpret html input.</b><br>" +this->ToStringContent();
     return false;
   }
+  if (theGlobalVariables.userCalculatorRequestType=="examForReal")
+  {//we need to store the random seed.
+
+  }
+
+
   this->NumAttemptsToInterpret=0;
   if (this->flagRandomSeedGiven)
     this->MaxInterpretationAttempts=1;

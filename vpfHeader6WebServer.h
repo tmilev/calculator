@@ -187,7 +187,7 @@ public:
   void SSLfreeEverythingShutdownSSL();
   void RecycleChildrenIfPossible();
   void Restart();
-  void CheckExecutableVersionAndRestartIfNeeded();
+  void CheckExecutableVersionAndRestartIfNeeded(bool callReload);
   void initDates();
   std::string ToStringLastErrorDescription();
   std::string ToStringStatusActive();

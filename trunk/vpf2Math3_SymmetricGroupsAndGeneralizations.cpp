@@ -626,8 +626,22 @@ unsigned int PermutationR2::HashFunction() const
 }
 
 
-std::string PermutationR2::ToString(FormatExpressions* unused) const
+std::string PermutationR2::ToString(FormatExpressions* format) const
 { std::stringstream out;
+  if (format!=0)
+  { out << "(";
+    for(int i=0; i<this->cycles.size; i++)
+    { out << "(";
+      for(int j=0; j<this->cycles[i].size; j++)
+      { out << this->cycles[i][j]+1;
+        if(j!=this->cycles[i].size-1)
+          out << ", ";
+      }
+      out << ")";
+    }
+    out << ")";
+    return out.str();
+  }
   this->IntoStream(out);
   return out.str();
 }
@@ -768,8 +782,9 @@ void PermutationGroup::ComputeCCSizesAndRepresentativesByFormulaImplementation(v
   crash << "Maybe try implementing PermutationR2::GetWord1j or for whatever generator set you have " << __FILE__ << ":" << __LINE__ << crash;
 }*/
 
-void PermutationGroup::GetWordjjPlus1Implementation(void* G, const PermutationR2& g, List<int>& word)
+bool PermutationGroup::GetWordjjPlus1Implementation(void* G, const PermutationR2& g, List<int>& word)
 { g.GetWordjjPlus1(word);
+  return true;
 }
 
 std::string PermutationGroup::ToString()
@@ -1361,28 +1376,30 @@ LargeInt HyperoctahedralGroup::GetSizeByFormulaImplementation(void* GG)
   return -1;
 }
 
-void HyperoctahedralGroup::GetWordByFormulaImplementation(void* GG, const ElementHyperoctahedralGroup& g, List<int>& word)
+bool HyperoctahedralGroup::GetWordByFormulaImplementation(void* GG, const ElementHyperoctahedralGroup& g, List<int>& word)
 { HyperoctahedralGroup* G = (HyperoctahedralGroup*) GG;
   if(G->isEntireHyperoctahedralGroup)
   { g.p.GetWordjjPlus1(word);
     for(int i=0; i<g.s.size; i++)
       if(g.s[i])
         word.AddOnTop(G->N-1+i);
-    return;
+    return true;
   }
   crash << "This method should not have been called " << __FILE__ << ":" << __LINE__ << crash;
+  return true;
 }
 
-void HyperoctahedralGroupR2::GetWordByFormulaImplementation(void* GG, const ElementHyperoctahedralGroupR2& g, List<int>& word)
+bool HyperoctahedralGroupR2::GetWordByFormulaImplementation(void* GG, const ElementHyperoctahedralGroupR2& g, List<int>& word)
 { HyperoctahedralGroupR2* G = (HyperoctahedralGroupR2*) GG;
   if(G->flagIsEntireHyperoctahedralGroup)
   { g.h.GetWordjjPlus1(word);
     for(int i=0; i<g.k.bits.size; i++)
       if(g.k.bits[i])
         word.AddOnTop(G->N-1+i);
-    return;
+    return true;
   }
   crash << "This method should not have been called " << __FILE__ << ":" << __LINE__ << crash;
+  return true;
 }
 
 // number of conjugacy classes: partitions * #[0,N]

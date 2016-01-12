@@ -1012,3 +1012,33 @@ bool CalculatorConversions::innerLoadFileIntoString(Calculator& theCommands, con
   contentStream << theFile.rdbuf();
   return output.AssignValue(contentStream.str(), theCommands);
 }
+
+bool CalculatorConversions::innerMakeElementHyperOctahedral(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorConversions::innerMakeElementHyperOctahedral");
+  std::string inputStringFormat;
+  ElementHyperoctahedralGroupR2 theElement;
+  if (input.IsOfType<std::string>(&inputStringFormat))
+  { theElement.MakeFromString(inputStringFormat);
+    return output.AssignValue(theElement, theCommands);
+  }
+  if (input.children.size<3)
+    return theCommands << "To make elements of hyperoctahedral group we need at least 3 inputs";
+  List<int> oneCycle;
+  if (!theCommands.GetVectoRInt(input[1], oneCycle))
+    return theCommands << "Failed to extract a cycle structure from the first argument of input: " << input.ToString();
+  for (int i=0; i<oneCycle.size; i++)
+  { if (oneCycle[i]<1)
+      return theCommands << "Your input: " << input[1].ToString() << " had integers that were too small.";
+    oneCycle[i]--;
+    if (oneCycle[i]>1000)
+      return theCommands << "Your input: " << input[1].ToString() << " had integers that were too large.";
+  }
+  theElement.h.AddCycle(oneCycle);
+  for (int i=2; i<input.children.size; i++)
+  { if (input[i].IsEqualToOne())
+      theElement.k.ToggleBit(i-2);
+    else if (!input[i].IsEqualToZero())
+      return theCommands << "Your input: " << input.ToString() << " had bit values that were not ones and zeroes.";
+  }
+  return output.AssignValue(theElement, theCommands);
+}

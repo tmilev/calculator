@@ -1490,6 +1490,22 @@ bool CalculatorFunctionsWeylGroup::innerTestSpechtModules(Calculator& theCommand
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral");
+  if (input.children.size!=3)
+    return theCommands << "Representating takes 2 arguments: element and rep.";
+  ElementHyperoctahedralGroupR2 theElt;
+  GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> theRep;
+  if (!input[1].IsOfType(&theElt))
+    return theCommands << "Failed to extract element of hyperoctahedral group from " << input[1].ToString();
+  if (!input[2].IsOfType(&theRep))
+    return theCommands << "Failed to extract representation from " << input[2].ToString();
+  Matrix<Rational> result;
+  if (!theRep.GetMatrixOfElement(theElt, result))
+    return theCommands << "Failed to get matrix of element " << theElt.ToString() << " from representation: " << theRep.ToString();
+  return output.AssignMatrix(result, theCommands);
+}
+
 bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation");
   Vector<Rational> inputLeftRat, inputRightRat;
@@ -1519,15 +1535,23 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(Calc
   Partition partitionLeft, partitionRight;
   partitionLeft.FromListInt(inputLeft);
   partitionRight.FromListInt(inputRight);
-  std::stringstream out;
-  out << "Left partition is: " << partitionLeft.ToString() << ", created from: " << inputLeft;
-  out << "Right partition is: " << partitionRight.ToString() << ", created from: " << inputRight;
-  HyperoctahedralGroup G;
-  G.MakeHyperoctahedralGroup(partitionLeft.n + partitionRight.n);
-  GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroup>, Rational> R;
+  //std::stringstream out;
+  //out << "Left partition is: " << partitionLeft.ToString() << ", created from: " << inputLeft;
+  //out << "Right partition is: " << partitionRight.ToString() << ", created from: " << inputRight;
+  int index=0;
+  for(; index<theCommands.theObjectContainer.theHyperOctahedralGroups.size; index++)
+    if(theCommands.theObjectContainer.theHyperOctahedralGroups[index].flagIsEntireHyperoctahedralGroup && theCommands.theObjectContainer.theHyperOctahedralGroups[index].N == partitionLeft.n + partitionRight.n)
+      break;
+  if(index == theCommands.theObjectContainer.theHyperOctahedralGroups.size)
+  { theCommands.theObjectContainer.theHyperOctahedralGroups.SetSize(theCommands.theObjectContainer.theHyperOctahedralGroups.size+1);
+    theCommands.theObjectContainer.theHyperOctahedralGroups[index].MakeHyperoctahedralGroup(partitionLeft.n+partitionRight.n);
+  }
+  //<-may be broken if copying of groups doesn't work!!!!!!!!
+  HyperoctahedralGroupR2& G=theCommands.theObjectContainer.theHyperOctahedralGroups[index];
+  GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> R;
   G.SpechtModuleOfPartititons(partitionLeft,partitionRight, R);
-  out << R;
-  return output.AssignValue(out.str(), theCommands);
+  //out << R;
+  return output.AssignValue(R, theCommands);
 }
 
 bool CalculatorFunctionsWeylGroup::innerSpechtModule(Calculator& theCommands, const Expression& input, Expression& output)

@@ -246,7 +246,7 @@ public:
 
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
-  std::string ToString(FormatExpressions* unused=0) const;
+  std::string ToString(FormatExpressions* format=0) const;
   friend std::ostream& operator<<(std::ostream& out, const PermutationR2& data)
   { return data.IntoStream(out);
   }
@@ -329,11 +329,17 @@ class SemidirectProductElement
 
   std::string ToString(FormatExpressions* format = 0) const
   { std::stringstream out;
-    out << '[';
-    out << h;
+    char leftDelimiter='[';
+    char rightDelimiter=']';
+    if (format!=0)
+    { leftDelimiter='(';
+      rightDelimiter=')';
+    }
+    out << leftDelimiter;
+    out << h.ToString(format);
     out << ',';
-    out << k;
-    out << ']';
+    out << k.ToString(format);
+    out << rightDelimiter;
     return out.str();
   }
 
@@ -491,17 +497,26 @@ class ElementZ2N
     return false;
   }
 
-  std::string ToString() const
+  std::string ToString(FormatExpressions* format=0) const
   { std::stringstream out;
-    for(int i=0; i<this->bits.size; i++)
+    if (format==0)
+      for(int i=0; i<this->bits.size; i++)
       // parentheses are needed because << binds like a bitwise operator
-      out << (this->bits[i]?'1':'0');
+        out << (this->bits[i]?'1':'0');
+    else
+      for(int i=0; i<this->bits.size; i++)
+      { out << (this->bits[i]?'1':'0');
+        // parentheses are needed because << binds like a bitwise operator
+        if (i!=this->bits.size-1)
+          out << ",";
+      }
+
     return out.str();
   }
 
   void MakeFromString(const std::string& in)
   { this->bits.SetSize(0);
-    for(int i=0; i<in.size(); i++)
+    for(unsigned i=0; i<in.size(); i++)
       if(in[i] == '1')
         this->ToggleBit(i);
   }
@@ -575,11 +590,15 @@ class HyperoctahedralGroupR2: public FiniteGroup<ElementHyperoctahedralGroupR2>
     this->GetWordByFormula = this->GetWordByFormulaImplementation;
   }
 
-  static void GetWordByFormulaImplementation(void* G, const ElementHyperoctahedralGroupR2& g, List<int>& out);
+  static bool GetWordByFormulaImplementation(void* G, const ElementHyperoctahedralGroupR2& g, List<int>& out);
   void AllSpechtModules();
   void SpechtModuleOfPartititons(const Partition& positive, const Partition& negative,
                                GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> &out);
-
+  bool operator==(const HyperoctahedralGroupR2& other)const
+  { if (!this->flagIsEntireHyperoctahedralGroup || !other.flagIsEntireHyperoctahedralGroup)
+      return false;
+    return this->N==other.N;
+  }
 };
 
 // a hyperoctahedral group is a semidirect product of a symmetric group and
@@ -1141,7 +1160,7 @@ class PermutationGroup: public FiniteGroup<PermutationR2>
 
   static void ComputeCCSizesAndRepresentativesByFormulaImplementation(void* G);
   static LargeInt GetSizeByFormulaImplementation(void* G);
-  static void GetWordjjPlus1Implementation(void* G, const PermutationR2& g, List<int>& word);
+  static bool GetWordjjPlus1Implementation(void* G, const PermutationR2& g, List<int>& word);
 
   PermutationGroup()
   { this->flagIsSymmetricGroup=false;
@@ -1175,7 +1194,7 @@ class HyperoctahedralGroup: public FiniteGroup<ElementHyperoctahedralGroup>
   void MakeBn(int n);
 
   static void ComputeCCSizesAndRepresentativesByFormulaImplementation(void* G);
-  static void GetWordByFormulaImplementation(void* G, const ElementHyperoctahedralGroup& element, List<int>& word);
+  static bool GetWordByFormulaImplementation(void* G, const ElementHyperoctahedralGroup& element, List<int>& word);
   static LargeInt GetSizeByFormulaImplementation(void* G);
 
 
@@ -1531,12 +1550,16 @@ void FiniteGroup<elementSomeGroup>::ComputeElementsAndCCs(void* unused)
 */
 
 template <typename elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::GetWord(const elementSomeGroup& g, List<int>& word)
+bool FiniteGroup<elementSomeGroup>::GetWord(const elementSomeGroup& g, List<int>& word)
 { if(GetWordByFormula)
     return this->GetWordByFormula(this,g,word);
   if(!this->flagWordsComputed)
     this->ComputeAllElementsWordsConjugacyIfObvious(true);
-  word = this->theWords[this->theElements.GetIndex(g)];
+  int index=this->theElements.GetIndex(g);
+  if (index==-1)
+    return false;
+  word = this->theWords[index];
+  return true;
 }
 
 template <typename elementSomeGroup>

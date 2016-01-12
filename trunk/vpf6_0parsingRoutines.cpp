@@ -175,6 +175,8 @@ void Calculator::init()
   this->AddOperationBuiltInType("CandidateSSsubalgebra");
   this->AddOperationBuiltInType("WeylGroup");
   this->AddOperationBuiltInType("ElementWeylGroup");
+  this->AddOperationBuiltInType("HyperoctahedralGroupRepresentation");
+  this->AddOperationBuiltInType("ElementHyperoctahedral");
   this->AddOperationBuiltInType("WeylGroupRep");
   this->AddOperationBuiltInType("WeylGroupVirtualRep");
   this->AddOperationBuiltInType("ElementWeylAlgebra");

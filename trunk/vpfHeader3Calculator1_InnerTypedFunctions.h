@@ -30,6 +30,9 @@ public:
   static bool innerAddEltZmodPorRatToEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddAlgebraicNumberToAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddWeightToWeight(Calculator& theCommands, const Expression& input, Expression& output);
+
+  static bool innerMultiplyEltHypOctByEltHypOct(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyNumberOrPolyByNumberOrPoly(Calculator& theCommands, const Expression& input, Expression& output);

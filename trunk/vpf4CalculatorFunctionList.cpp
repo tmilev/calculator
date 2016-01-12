@@ -242,6 +242,13 @@ void Calculator::initPredefinedInnerFunctions()
    "5!");
 
   this->AddOperationInnerHandler
+  ("RepresentElementHyperoctahedral", CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral, "",
+   "Represents element of hyperoctahedral into a representation. ",
+   "V= HyperOctahedralRepresentation((1,1),1);\
+   s= MakeElementHyperOctahedral{}((1,2),1,0,0); \
+   RepresentElementHyperoctahedral(s, V)\
+   ", true, false, "CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral");
+  this->AddOperationInnerHandler
   ("HyperOctahedralIrreps", CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules, "",
    "Prints all modules induced from Specht modules. ",
    "HyperOctahedralIrreps(3)", true, false, "CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules");
@@ -489,6 +496,14 @@ void Calculator::initPredefinedInnerFunctions()
    "Needs a group name and a list of generators",
    "s_{{i}}=MakeElementWeylGroup{}(A_2, i);\n(s_1+s_2)(2s_1+s_2)(3s_1+s_2)", true, false)
    ;
+  this->AddOperationInnerHandler
+  ("MakeElementHyperOctahedral", CalculatorConversions::innerMakeElementHyperOctahedral, "",
+   "Needs a group name and a list of generators",
+   "s= MakeElementHyperOctahedral{}((1,2),1,0,0); \
+    t= MakeElementHyperOctahedral{}((1,3),0,0,0); \
+    s*t*s*t", true, false, "CalculatorConversions::innerMakeElementHyperOctahedral")
+   ;
+
 
   this->AddOperationInnerHandler
   ("WeylGroupTauSignatures", CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems, "",
@@ -1927,6 +1942,12 @@ void Calculator::initPredefinedStandardOperations()
   ("*", CalculatorFunctionsGeneral::outerDifferentiateWRTxTimesAny, "",
    "Replaces Differentiate{}(x)*a by  Differentiate{}(x,a).",
    "d/dx (1/x) ", true, false, "CalculatorFunctionsGeneral::outerDifferentiateWRTxTimesAny");
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyEltHypOctByEltHypOct, this->opElementHyperOctahedral(), this->opElementHyperOctahedral(),
+   "Multiplies two elements of hyperoctahedral groups. ",
+   "s= MakeElementHyperOctahedral{}((1,2),1,0,0); \
+    t= MakeElementHyperOctahedral{}((1,3),0,0,0); \
+    s*t*s*t", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyEltHypOctByEltHypOct");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat, this->opRational(), this->opEltZmodP(),
    "Multiplies elements of Z_p. ",

@@ -199,6 +199,17 @@ bool CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNum
   return true;
 }
 
+bool CalculatorFunctionsBinaryOps::innerMultiplyEltHypOctByEltHypOct(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyEltHypOctByEltHypOct");
+  if (!input.IsListNElements(3))
+    return false;
+  ElementHyperoctahedralGroupR2 outElt, left, right;
+  if (!input[1].IsOfType<ElementHyperoctahedralGroupR2>(& left) || !input[2].IsOfType<ElementHyperoctahedralGroupR2>(&right))
+    return false;
+  outElt=left*right;
+  return output.AssignValue(outElt, theCommands);
+}
+
 bool CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber");
   if (!input.IsListNElements(3))

@@ -904,6 +904,7 @@ public:
   std::string ToStringSyntacticStackHumanReadable(bool includeLispifiedExpressions);
   std::string WriteDefaultLatexFileReturnHtmlLink(const std::string& fileContent, bool useLatexDviPSpsToPNG=false);
   std::string GetCalculatorLink(const std::string& input);
+  bool isInterprettedAsEmptySpace(const std::string& input);
   bool isSeparatorFromTheLeftGeneral(const std::string& input);
   bool isSeparatorFromTheLeftForDefinition(const std::string& input);
   bool isSeparatorFromTheLeftForList(const std::string& input);

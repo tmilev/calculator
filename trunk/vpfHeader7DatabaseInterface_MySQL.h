@@ -91,6 +91,7 @@ class UserCalculator
   bool getUserPassAndSelectedColumns(Calculator& theCommands, const Expression& input);
   bool getUserPassAndExtraData(Calculator& theCommands, const Expression& input, List<std::string>& outputData);
   void ComputeShaonedSaltedPassword();
+  void URLifyStrings();
   std::string ToString();
   std::string ToStringSelectedColumns();
   UserCalculator();

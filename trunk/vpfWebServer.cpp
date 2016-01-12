@@ -13,8 +13,6 @@ ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server im
 #include <sys/stat.h>//<-for file statistics
 #include<fcntl.h>//<-setting flags of file descriptors
 
-
-
 #ifdef MACRO_use_open_ssl
 //installation of these headers in ubuntu:
 //sudo apt-get install libssl-dev
@@ -598,6 +596,10 @@ bool WebWorker::ProcessRawArguments(std::stringstream& argumentProcessingFailure
   { password=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("password"));
     inputStrings[inputStringNames.GetIndex("password")]="********************************************";
   }
+  if (inputStringNames.Contains("textInput") &&! inputStringNames.Contains("mainInput"))
+  { stOutput << "Received calculator link in an old format, interpreting 'textInput' as 'mainInput'";
+    inputStringNames.SetObjectAtIndex(inputStringNames.GetIndex("textInput"), "mainInput");
+  }
   if (desiredUser!="" && theGlobalVariables.flagUsingSSLinCurrentConnection)
   { theGlobalVariables.flagLoggedIn=DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     (desiredUser, password, this->authenticationToken);
@@ -635,7 +637,7 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
   stOutput << this->openIndentTag("<table><!--table with input, autocomplete space and output-->");
   stOutput << this->openIndentTag("<tr>");
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!-- input form here -->");
-  stOutput << this->ToStringCalculatorArgumentsHumanReadable();
+  //stOutput << this->ToStringCalculatorArgumentsHumanReadable();
   stOutput << "\n<FORM method=\"POST\" id=\"formCalculator\" name=\"formCalculator\" action=\""
   << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n";
   std::string civilizedInputSafish;
@@ -835,11 +837,18 @@ void WebWorker::ExtractArgumentFromAddress()
   std::string calculatorArgumentRawWithQuestionMark, tempS;
   if (!MathRoutines::StringBeginsWith
       (this->mainAddresSRAW, theGlobalVariables.DisplayNameCalculatorWithPath, &calculatorArgumentRawWithQuestionMark))
-    if (!MathRoutines::StringBeginsWith
-        (this->mainAddresSRAW, "/vectorpartition/cgi-bin/calculator", &calculatorArgumentRawWithQuestionMark))
+  { bool isDeprecatedAddress=//used to capture old links to the calculator
+    MathRoutines::StringBeginsWith
+    (this->mainAddresSRAW, "/vectorpartition/cgi-bin/calculator", &calculatorArgumentRawWithQuestionMark) ||
+    MathRoutines::StringBeginsWith
+    (this->mainAddresSRAW, "/vpf/cgi-bin/calculator", &calculatorArgumentRawWithQuestionMark) ||
+    MathRoutines::StringBeginsWith
+    (this->mainAddresSRAW, "/cgi-bin/calculator", &calculatorArgumentRawWithQuestionMark);
+    if (!isDeprecatedAddress)
     { CGI::URLStringToNormal(this->mainAddresSRAW, this->mainAddress);
       return;
     }
+  }
   CGI::URLStringToNormal(this->mainAddresSRAW, this->mainAddress);
   this->requestType=this->requestGetCalculator;
   MathRoutines::SplitStringInTwo(calculatorArgumentRawWithQuestionMark, 1, tempS, this->mainArgumentRAW);

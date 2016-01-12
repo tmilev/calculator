@@ -491,6 +491,15 @@ bool DatabaseRoutines::CreateTable
   return result;
 }
 
+void UserCalculator::URLifyStrings()
+{ MacroRegisterFunctionWithName("UserCalculator::URLifyStrings");
+  this->username=CGI::StringToURLString(this->username);
+  this->email=CGI::StringToURLString(this->email);
+  for (int i=0; i<this->selectedColumns.size; i++)
+    this->selectedColumns[i]=CGI::StringToURLString(this->selectedColumns[i]);
+}
+
+
 bool UserCalculator::UserEntriesAreValidObjectNames(std::stringstream* comments)
 { MacroRegisterFunctionWithName("IsAcceptableDatabaseInput::IsAcceptableDatabaseInput");
   if (!this->IsAcceptableDatabaseInput(this->username, comments))
@@ -630,6 +639,7 @@ bool UserCalculator::getUser(Calculator& theCommands, const Expression& input)
   { theCommands << "<hr>Argument " << input.ToString() << " is supposed to be a string.";
     this->username=input.ToString();
   }
+  this->URLifyStrings();
   return this->UserEntriesAreValidObjectNames(&theCommands.Comments);
 }
 
@@ -646,6 +656,7 @@ bool UserCalculator::getUserAndPass(Calculator& theCommands, const Expression& i
     this->enteredPassword=input[2].ToString();
     this->enteredAuthenticationToken=this->enteredPassword;
   }
+  this->URLifyStrings();
   return this->UserEntriesAreValidObjectNames(&theCommands.Comments);
 }
 
@@ -677,6 +688,7 @@ bool UserCalculator::getUserPassAndExtraData(Calculator& theCommands, const Expr
     { theCommands << "<hr>Argument " << input[i].ToString() << " is supposed to be a string";
       outputData[i-3]=input[i].ToString();
     }
+  this->URLifyStrings();
   return this->UserEntriesAreValidObjectNames(&theCommands.Comments);
 }
 
@@ -697,6 +709,7 @@ bool UserCalculator::getUserPassAndEmail(Calculator& theCommands, const Expressi
   { theCommands << "<hr>Argument " << input[3].ToString() << " is supposed to be a string.";
     this->email=input[3].ToString();
   }
+  this->URLifyStrings();
   return this->UserEntriesAreValidObjectNames(&theCommands.Comments);
 }
 

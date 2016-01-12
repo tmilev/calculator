@@ -16,7 +16,9 @@ std::string SyntacticElement::ToStringHumanReadable(Calculator& theBoss, bool in
     controlString= "Error: control index is not initialized! This is likely a programming error.";
   else
     controlString=theBoss.controlSequences[this->controlIndex];
-  bool makeTable=this->controlIndex==theBoss.conExpression() || this->controlIndex==theBoss.conError() || this->controlIndex==theBoss.conSequence();
+  bool makeTable=this->controlIndex==theBoss.conExpression() ||
+  this->controlIndex==theBoss.conError() || this->controlIndex==theBoss.conSequence() ||
+  this->controlIndex==theBoss.conSequenceStatements();
   if (!makeTable)
     return controlString;
   std::stringstream out;
@@ -456,6 +458,7 @@ bool Calculator::isRightSeparator(unsigned char c)
 { switch(c)
   { case ' ':
     case 160: //&nbsp character
+    case '\r':
     case '\n':
     case '>':
     case '<':
@@ -494,6 +497,7 @@ bool Calculator::isLeftSeparator(unsigned char c)
 { switch(c)
   { case ' ':
     case 160: //&nbsp character
+    case '\r':
     case '\n':
     case '>':
     case '<':
@@ -537,6 +541,21 @@ bool Calculator::isLeftSeparator(unsigned char c)
   }
 }
 
+bool Calculator::isInterprettedAsEmptySpace(const std::string& input)
+{ if (input.size()!=1)
+    return false;
+  switch ((unsigned) input[0])
+  {
+  case '\n': //numerical value: 10
+  case '~':
+  case '\r': //numerical value: 13
+  case '\t':
+  case 160: //&nbsp
+    return true;
+  default: return false;
+  }
+}
+
 void Calculator::ParseFillDictionary(const std::string& input)
 { std::string current;
   (*this->CurrrentSyntacticSouP).Reserve(input.size());
@@ -554,19 +573,9 @@ void Calculator::ParseFillDictionary(const std::string& input)
       if (inQuotes)
         LookAheadChar='"';
     }
-    if (!inQuotes && current.size()==1)
-    { if (current=="\n")
+    if (!inQuotes )
+      if (this->isInterprettedAsEmptySpace(current))
         current=" ";
-      if (current=="~")
-        current=" ";
-      if (current=="\r")
-        current=" ";
-      if (current=="\t")
-        current=" ";
-//      stOutput << "<br>Character read: " << ((int) ((unsigned char) current[0]));
-      if (((unsigned char) current[0])==160)
-        current=" ";
-    }
     bool shouldSplit= (this->isLeftSeparator(current[0]) || this->isRightSeparator(LookAheadChar) || current==" ");
     if (MathRoutines::isADigit(LookAheadChar))
       if (current[current.size()-1]=='\\')

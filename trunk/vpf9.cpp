@@ -5,6 +5,7 @@
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 #include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
+#include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 #include "vpfHeader2Math9DrawingVariables.h"
 #include <dirent.h>
 ProjectInformationInstance ProjectInfoVpf9cpp(__FILE__, "Math routines implementation. ");

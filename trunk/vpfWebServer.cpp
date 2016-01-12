@@ -589,8 +589,8 @@ bool WebWorker::ProcessRawArguments(std::stringstream& argumentProcessingFailure
   std::string desiredUser=theGlobalVariables.GetWebInput("user");
   if (desiredUser=="")
     desiredUser=theGlobalVariables.GetWebInput("userHidden");
-  if (desiredUser!="")
-    CGI::URLStringToNormal(desiredUser, desiredUser);
+//  if (desiredUser!="")
+//    CGI::URLStringToNormal(desiredUser, desiredUser);
   this->authenticationToken=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("authenticationToken"));
   if (this->authenticationToken!="")
     this->flagAuthenticationTokenWasSubmitted=true;
@@ -1618,7 +1618,9 @@ int WebWorker::ProcessCalculator()
   if (theGlobalVariables.userCalculatorRequestType=="submitProblem" &&
       theGlobalVariables.flagLoggedIn)
     return this->ProcessSubmitProblem();
-  if (theGlobalVariables.userCalculatorRequestType=="exercises" && theGlobalVariables.flagLoggedIn &&
+  if (( theGlobalVariables.userCalculatorRequestType=="examForReal" ||
+        theGlobalVariables.userCalculatorRequestType=="exercises") &&
+      theGlobalVariables.flagLoggedIn &&
       theGlobalVariables.flagUsingSSLinCurrentConnection)
   { stOutput << this->GetExamPage();
     theReport.SetStatus("Exam page served, exiting.");
@@ -1627,7 +1629,7 @@ int WebWorker::ProcessCalculator()
   }
   theParser.inputString=theGlobalVariables.GetWebInput("mainInput");
   this->OutputBeforeComputation();
-  theWebServer.CheckExecutableVersionAndRestartIfNeeded();
+  theWebServer.CheckExecutableVersionAndRestartIfNeeded(false);
   theParser.init();
   if (theGlobalVariables.flagUsingBuiltInWebServer)
     theReport.SetStatus("OutputWeb: Computing...");
@@ -1734,8 +1736,9 @@ std::string WebWorker::GetLoginPage()
     << "  if (document.getElementById('authenticationToken').value!='')"
     << "    document.getElementById('login').submit();";
 //    << "  window.location='calculator?user='+GlobalUser+'&authenticationToken='+GlobalAuthenticationToken;";
-  out << "\">\n"
-  << WebWorker::GetLoginHTMLinternal()
+  out << "\">\n";
+  theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
+  out << WebWorker::GetLoginHTMLinternal()
   << "</body></html>";
   return out.str();
 }
@@ -2292,7 +2295,7 @@ std::string WebServer::ToStringStatusAll()
   return out.str();
 }
 
-void WebServer::CheckExecutableVersionAndRestartIfNeeded()
+void WebServer::CheckExecutableVersionAndRestartIfNeeded(bool callReload)
 { struct stat theFileStat;
   if (stat(theGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat)!=0)
     return;
@@ -2300,8 +2303,12 @@ void WebServer::CheckExecutableVersionAndRestartIfNeeded()
     if (this->timeLastExecutableModification!=theFileStat.st_ctime)
     { stOutput << "<b>The server executable was updated, but the server has not been restarted yet. "
       << "Restarting in 0.5 seconds...</b>";
-      stOutput << "<script language=\"javascript\">setTimeout(resubmit, 500); "
-      << " function resubmit() { document.getElementById('formCalculator').submit();}</script>";
+      if (callReload)
+        stOutput << "<script language=\"javascript\">setTimeout(resubmit, 500); "
+        << " function resubmit() { document.reload(true);}</script>";
+      else
+        stOutput << "<script language=\"javascript\">setTimeout(resubmit, 500); "
+        << " function resubmit() { document.getElementById('formCalculator').submit();}</script>";
       if (this->activeWorker!=-1)
       { this->GetActiveWorker().SendAllBytes();
         this->ReleaseActiveWorker();

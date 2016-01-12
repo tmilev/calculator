@@ -1,4 +1,5 @@
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
+#include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 #include "vpfJson.h"
 
 static ProjectInformationInstance ProjectInfoVpfHardCodedLoader(__FILE__, "Hard-coded data loading");

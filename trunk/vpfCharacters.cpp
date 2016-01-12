@@ -3,6 +3,7 @@
 #include "vpfHeader2Math0_General.h"
 #include "vpfHeader2Math1_2SemisimpleLieAlgebras_RootSubalgebras.h" // WeylGroup::GetSignSignatureAllRootSubsystems
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
+#include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 #include "vpfHeader2Math4_Graph.h"
 static ProjectInformationInstance ProjectInfoVpfCharacters(__FILE__, "Finite group characters sandbox. Work in progress by Thomas. ");
 
@@ -1085,8 +1086,8 @@ void SubgroupRootReflections::MakeFromRoots
 }
 
 template <class elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& left, const elementSomeGroup& right)
-{ MacroRegisterFunctionWithName("WeylGroup::AreConjugate");
+bool FiniteGroup<elementSomeGroup>::AreConjugate_OLD_Deprecated_Version_By_Todor(const elementSomeGroup& left, const elementSomeGroup& right)
+{ MacroRegisterFunctionWithName("WeylGroup::AreConjugate_OLD_Deprecated_Version_By_Todor");
 //  stOutput << "<hr><hr>Computing whether " << left.ToString() << " is conjugate to "
 //  << right.ToString();
   if (left.HasDifferentConjugacyInvariantsFrom(right))

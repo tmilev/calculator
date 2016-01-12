@@ -230,6 +230,7 @@ public:
   void (*ComputeCCSizesAndRepresentativesByFormula)(void* G);
   LargeInt (*GetSizeByFormula)(void* G);
   bool AreConjugate(const elementSomeGroup& left, const elementSomeGroup& right);
+  bool AreConjugate_OLD_Deprecated_Version_By_Todor(const elementSomeGroup& left, const elementSomeGroup& right);
 
 
   bool ComputeAllElements(int MaxElements=-1, GlobalVariables* theGlobalVariables=0);

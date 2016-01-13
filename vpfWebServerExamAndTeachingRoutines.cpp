@@ -27,6 +27,7 @@ public:
   std::string ToStringTagAndContent();
   std::string ToStringOpenTag();
   std::string ToStringCloseTag();
+  std::string GetTagClass();
   std::string ToStringDebug();
   SyntacticElementHTML(){}
   SyntacticElementHTML(const std::string& inputContent)
@@ -155,6 +156,7 @@ bool CalculatorHTML::FindExamItem()
 
 std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
 { MacroRegisterFunctionWithName("CalculatorHTML::GetCurrentExamItem");
+  double startTime=theGlobalVariables.GetElapsedSeconds();
   this->LoadCurrentProblemItem();
   if (!this->flagLoadedSuccessfully)
     return this->comments.str();
@@ -163,7 +165,10 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
   { out << "<b>Failed to interpret file: " << this->fileName << "</b>. Comments: " << this->comments.str();
     return out.str();
   }
-  return this->outputHtml;
+  out << "Generated in "
+  << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds()-startTime)
+  << " second(s). " << this->outputHtml;
+  return out.str();
 }
 
 void CalculatorHTML::LoadCurrentProblemItem()
@@ -596,6 +601,10 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem(const std::str
   return out.str();
 }
 
+std::string SyntacticElementHTML::GetTagClass()
+{ return this->GetKeyValue("class");
+}
+
 void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateLink");
   std::string cleaneduplink;
@@ -615,8 +624,11 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   refStreamExercise << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&" << refStreamNoRequest.str();
   refStreamForReal << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=examForReal&" << refStreamNoRequest.str();
   out << inputOutput.content;
-  out << " <a href=\"" << refStreamForReal.str() << "\">Start (for credit)</a>";
-  out << " <a href=\"" << refStreamExercise.str() << "\">Exercise (no credit, unlimited tries)</a>";
+  if (inputOutput.GetTagClass()=="calculatorExamProblem")
+  { out << " <a href=\"" << refStreamForReal.str() << "\">Start (for credit).</a>";
+    out << " <a href=\"" << refStreamExercise.str() << "\">Exercise (no credit, unlimited tries).</a>";
+  } else
+    out << " <a href=\"" << refStreamExercise.str() << "\">Start.</a>";
   inputOutput.interpretedCommand=out.str();
 }
 

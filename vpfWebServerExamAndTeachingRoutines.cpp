@@ -467,7 +467,7 @@ std::string SyntacticElementHTML::ToStringInterpretted()
   std::string tagClass=this->GetKeyValue("class");
   if (tagClass=="calculatorAnswerVerification")
     return "";
-  if (tagClass=="calculatorExamFile" || tagClass=="calculatorExamIntermediate")
+  if (tagClass=="calculatorExamProblem" || tagClass=="calculatorExamIntermediate")
     return this->interpretedCommand;
   std::stringstream out;
   out << this->ToStringOpenTag();
@@ -482,7 +482,7 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator()
   if (this->syntacticRole!="command")
     return false;
   std::string tagClass=this->GetKeyValue("class");
-  return tagClass=="calculatorExamFile" || tagClass== "calculatorExamIntermediate";
+  return tagClass=="calculatorExamProblem" || tagClass== "calculatorExamIntermediate";
 }
 
 bool SyntacticElementHTML::IsInterpretedByCalculatorDuringPreparation()
@@ -635,6 +635,10 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretHtmlOneAttempt");
   std::stringstream out;
+  if (theGlobalVariables.userCalculatorRequestType=="examForReal")
+  {//we need to store the random seed.
+
+  }
   if (!this->flagRandomSeedGiven)
     this->randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
   std::string navigationLinks=this->ToStringProblemNavigation();
@@ -685,12 +689,6 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
   { this->outputHtml="<b>Failed to interpret html input.</b><br>" +this->ToStringContent();
     return false;
   }
-  if (theGlobalVariables.userCalculatorRequestType=="examForReal")
-  {//we need to store the random seed.
-
-  }
-
-
   this->NumAttemptsToInterpret=0;
   if (this->flagRandomSeedGiven)
     this->MaxInterpretationAttempts=1;
@@ -777,8 +775,8 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   this->calculatorClasses.AddOnTop("calculatorAnswerVerification");
   this->calculatorClasses.AddOnTop("calculatorStudentAnswer");
   this->calculatorClasses.AddOnTop("calculatorExamIntermediate");
-  this->calculatorClasses.AddOnTop("calculatorExamFile");
-  this->calculatorClasses.AddOnTop("setCalculatorExamFile");
+  this->calculatorClasses.AddOnTop("calculatorExamProblem");
+  this->calculatorClasses.AddOnTop("setcalculatorExamProblem");
   this->calculatorClasses.AddOnTop("setCalculatorExamIntermediate");
   this->calculatorClasses.AddOnTop("setCalculatorExamHome");
   this->eltsStack.SetSize(0);

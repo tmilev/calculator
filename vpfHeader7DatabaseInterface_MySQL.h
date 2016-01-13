@@ -52,46 +52,57 @@ public:
 class DatabaseRoutines;
 class UserCalculator
 {
-  public:
+// Unsafe entries may contain arbitrary strings.
+// Safe entries, when enclosed with "" in ANSI mode are guaranteed to be valid safe Database identifiers.
+// In other words, safe entries are guaranteed to not allow bobby-tables-exploits-of-a-mom (https://xkcd.com/327/).
+private:
+  std::string usernameSafe;
+  std::string emailSafe;
+  std::string currentTableSafe;
+  std::string currentTableUnsafe;
+  std::string enteredAuthenticationTokenSafe;
+public:
   double approximateHoursSinceLastTokenWasIssued;
   std::string usernamePlusPassWord;
-  std::string username;
+  std::string usernameUnsafe;
   std::string enteredPassword;
   std::string actualShaonedSaltedPassword;
   std::string enteredShaonedSaltedPassword;
-  std::string email;
-  List<std::string> selectedColumns;
-  List<std::string> selectedColumnValues;
+  std::string emailUnsafe;
+  List<std::string> selectedColumnsUnsafe;
+  List<std::string> selectedColumnValuesUnsafe;
   List<std::string> selectedColumnsRetrievalFailureRemarks;
-  std::string enteredAuthenticationToken;
-  std::string actualAuthenticationToken;
+  std::string enteredAuthenticationTokenUnsafe;
+  std::string actualAuthenticationTokenSafe; //<- no need for unsafe version of this one, we will only be reading it from the database.
   TimeWrapper authenticationTokenCreationTime;
   bool flagNewAuthenticationTokenComputedUserNeedsIt;
+  bool SetCurrentTable(const std::string& inputTableNameUnsafe);
   bool FetchOneColumn
-  (const std::string& columnName, std::string& output, const std::string& tableName,
-   DatabaseRoutines& theRoutines, std::stringstream* failureComments=0);
-  void FetchColumns(DatabaseRoutines& theRoutines);
-  bool AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutines);
-  bool AuthenticateWithToken(DatabaseRoutines& theRoutines);
-  bool Authenticate(DatabaseRoutines& theRoutines);
-  bool ResetAuthenticationToken(DatabaseRoutines& theRoutines);
+  (const std::string& columnNameUnsafe, std::string& output,
+   DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream* failureComments=0);
+  void FetchColumns(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
+  bool AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
+  bool AuthenticateWithToken(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
+  bool Authenticate(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
+  bool ResetAuthenticationToken(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
   std::string GetPassword(DatabaseRoutines& theRoutines);
-  bool SetColumnEntry(const std::string& columnName, const std::string& theValue, DatabaseRoutines& theRoutines, std::stringstream* failureComments=0);
-  bool SetPassword(DatabaseRoutines& theRoutines);
+  bool SetColumnEntry
+  (const std::string& columnNameUnsafe, const std::string& theValueUnsafe,
+   DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream* failureComments=0);
+  bool SetPassword(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
   bool TryToLogIn(DatabaseRoutines& theRoutines);
-  bool DeleteMe(DatabaseRoutines& theRoutines);
-  bool Iexist(DatabaseRoutines& theRoutines);
-  bool CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines);
-  bool UserEntriesAreValidObjectNames(std::stringstream* comments);
-  static bool IsAcceptableDatabaseInput(const std::string& input, std::stringstream* comments);
-  static bool IsAcceptableCharDatabaseInput(char theChar);
+  bool DeleteMe(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
+  bool Iexist(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
+  bool CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
+  bool ComputeSafeObjectNames();
+  static bool IsAcceptableDatabaseInpuT(const std::string& input, std::stringstream* comments);
+  static bool IsAcceptableCharDatabaseInpuT(char theChar);
   bool getUserPassAndEmail(Calculator& theCommands, const Expression& input);
   bool getUserAndPass(Calculator& theCommands, const Expression& input);
   bool getUser(Calculator& theCommands, const Expression& input);
   bool getUserPassAndSelectedColumns(Calculator& theCommands, const Expression& input);
   bool getUserPassAndExtraData(Calculator& theCommands, const Expression& input, List<std::string>& outputData);
-  void ComputeShaonedSaltedPassword();
-  void URLifyStrings();
+  void ComputeShaonedSaltedPassword(bool recomputeSafeEntries);
   std::string ToString();
   std::string ToStringSelectedColumns();
   UserCalculator();
@@ -116,11 +127,11 @@ public:
   { return false;
   }
   bool startMySQLDatabase();
-  bool TableExists(const std::string& tableName);
+  bool TableExists(const std::string& tableNameUnsafe);
   std::string ToString();
   std::string ToStringAllUsersHTMLFormat();
   bool CreateTable
-(const std::string& tableName, const std::string& desiredTableContent, std::stringstream* commentsOnCreation=0);
+(const std::string& tableNameUnsafe, const std::string& desiredTableContent, std::stringstream* commentsOnCreation=0);
 
   static bool innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestLogin(Calculator& theCommands, const Expression& input, Expression& output);

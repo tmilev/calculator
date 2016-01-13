@@ -266,7 +266,7 @@ bool UserCalculator::AuthenticateWithToken(DatabaseRoutines& theRoutines)
   now.AssignLocalTime();
   this->approximateHoursSinceLastTokenWasIssued=now.SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours
   (this->authenticationTokenCreationTime);
-  stOutput << "approx hours since token issued: " << this->approximateHoursSinceLastTokenWasIssued;
+//  stOutput << "approx hours since token issued: " << this->approximateHoursSinceLastTokenWasIssued;
   if (this->approximateHoursSinceLastTokenWasIssued>3600 || this->approximateHoursSinceLastTokenWasIssued<=0) //3600 hours = 150 days, a bit more than the length of a semester
     return false;
   if (!this->FetchOneColumn("authenticationToken", this->actualAuthenticationToken, "users",

@@ -7672,8 +7672,10 @@ std::string CGI::StringToURLString(const std::string& input)
     else if (input[i]==' ')
       out << '+';
     else
-      out << "%" << std::hex << (int) input[i] << std::dec; //<-Not sure if this works correctly!
-
+    { out << "%";
+      int x = (unsigned char) input[i];
+      out << std::hex << ((x/16)%16) << (x%16) << std::dec;
+    }
   return out.str();
 }
 

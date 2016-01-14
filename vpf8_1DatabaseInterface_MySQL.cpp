@@ -16,13 +16,16 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
 //  stOutput << "Attempting to login with user: " << inputUsername
 //  << " pass: " << inputPassword
 //  << " token: " << inputOutputAuthenticationToken;
+
   if (theUser.Authenticate(theRoutines, true))
-  { inputOutputAuthenticationToken=theUser.actualAuthenticationTokenSafe;
+  { inputOutputAuthenticationToken=theUser.actualAuthenticationTokeNUnsafe;
 //    stOutput << " SUCCESS. ";
 //    stOutput << "<br>The actual authenticationToken is now: " << theUser.actualAuthenticationToken;
     return true;
   }
-  inputOutputAuthenticationToken=theUser.actualAuthenticationTokenSafe;
+  if (inputOutputAuthenticationToken!="")
+    stOutput << "<b> Authentication with token " << inputOutputAuthenticationToken << " failed.</b>";
+  inputOutputAuthenticationToken=theUser.actualAuthenticationTokeNUnsafe;
   theUser.usernameUnsafe=theGlobalVariables.userCalculatorAdmin;
   if (!theUser.Iexist(theRoutines, true))
   { if (theUser.enteredPassword!="")
@@ -194,7 +197,7 @@ DatabaseQuery::~DatabaseQuery()
 }
 
 bool UserCalculator::FetchOneColumn
-(const std::string& columnNameUnsafe, std::string& output,
+(const std::string& columnNameUnsafe, std::string& outputUnsafe,
  DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream* failureComments)
 { MacroRegisterFunctionWithName("UserCalculator::FetchOneColumn");
   if (recomputeSafeEntries)
@@ -204,7 +207,7 @@ bool UserCalculator::FetchOneColumn
   << " FROM calculatorUsers.\"" << this->currentTableSafe << "\" WHERE user='"
   << this->usernameSafe<< "'";
   DatabaseQuery theQuery(theRoutines, queryStream.str());
-  output="";
+  outputUnsafe="";
   if (!theQuery.flagQuerySucceeded)
   { if (failureComments!=0)
       *failureComments << "<b>Query failed - column may not exist (or some other error occurred).</b>";
@@ -215,14 +218,15 @@ bool UserCalculator::FetchOneColumn
       *failureComments << "<b> Query did not return a result - column may not exist.</b>";
     return false;
   }
-  output= theQuery.firstResultString;
+  outputUnsafe= CGI::URLStringToNormal(theQuery.firstResultString);
+  stOutput << "Input entry as fetched from the system: " <<  theQuery.firstResultString
+  << "<br>When made unsafe: " << outputUnsafe << "<br>";
   return true;
 }
 
 bool UserCalculator::AuthenticateWithToken(DatabaseRoutines& theRoutines, bool recomputeSafeEntries)
 { MacroRegisterFunctionWithName("UserCalculator::AuthenticateWithToken");
-  this->currentTableUnsafe="users";
-  this->currentTableSafe="users";
+  this->SetCurrentTable("users");
   if (recomputeSafeEntries)
     this->ComputeSafeObjectNames();
   if (this->enteredAuthenticationTokenUnsafe=="")
@@ -243,10 +247,10 @@ bool UserCalculator::AuthenticateWithToken(DatabaseRoutines& theRoutines, bool r
 //  stOutput << "approx hours since token issued: " << this->approximateHoursSinceLastTokenWasIssued;
   if (this->approximateHoursSinceLastTokenWasIssued>3600 || this->approximateHoursSinceLastTokenWasIssued<=0) //3600 hours = 150 days, a bit more than the length of a semester
     return false;
-  if (!this->FetchOneColumn("authenticationToken", this->actualAuthenticationTokenSafe,
+  if (!this->FetchOneColumn("authenticationToken", this->actualAuthenticationTokeNUnsafe,
                             theRoutines, false, &authenticationFailureRemarks))
     return theRoutines << authenticationFailureRemarks;
-  return this->enteredAuthenticationTokenSafe==this->actualAuthenticationTokenSafe;
+  return this->enteredAuthenticationTokenUnsafe==this->actualAuthenticationTokeNUnsafe;
 }
 
 bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, bool recomputeSafeEntries)
@@ -266,7 +270,7 @@ bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, bool recomputeS
   if (this->approximateHoursSinceLastTokenWasIssued>1 || this->approximateHoursSinceLastTokenWasIssued<=0)
     this->ResetAuthenticationToken(theRoutines, false);
   else if (result)
-    this->FetchOneColumn("authenticationToken", this->actualAuthenticationTokenSafe, theRoutines, false, 0);
+    this->FetchOneColumn("authenticationToken", this->actualAuthenticationTokeNUnsafe, theRoutines, false, 0);
   return result;
 }
 
@@ -296,15 +300,15 @@ bool UserCalculator::ResetAuthenticationToken(DatabaseRoutines& theRoutines, boo
   now.AssignLocalTime();
   std::stringstream out;
   out << now.theTimeStringNonReadable << rand();
-  this->actualAuthenticationTokenSafe=Crypto::computeSha1outputBase64(out.str());
+  this->actualAuthenticationTokeNUnsafe=Crypto::computeSha1outputBase64(out.str());
   std::stringstream failure;
-  if (!this->SetColumnEntry("authenticationToken", this->actualAuthenticationTokenSafe, theRoutines, false, &failure))
+  if (!this->SetColumnEntry("authenticationToken", this->actualAuthenticationTokeNUnsafe, theRoutines, false, &failure))
   { stOutput << "Couldn't set column entry for token." << failure.str();
     return false;
   }
   this->flagNewAuthenticationTokenComputedUserNeedsIt=true;
   if (!this->SetColumnEntry("authenticationTokenCreationTime", now.theTimeStringNonReadable, theRoutines, false, &failure))
-  { stOutput << "Couldn't set column entry for creation time."<< failure.str();
+  { stOutput << "Couldn't set column entry for creation time." << failure.str();
     return false;
   }
   //DatabaseQuery theQuery(*this, "SELECT authenticationTokenCreationTime FROM calculatorUsers.users WHERE user=\""+this->username + "\"");
@@ -408,7 +412,6 @@ bool UserCalculator::ComputeSafeObjectNames()
   this->usernameSafe= CGI::StringToURLString(this->usernameUnsafe);
   this->currentTableSafe= CGI::StringToURLString(this->currentTableSafe);
   this->emailSafe= CGI::StringToURLString(this->emailUnsafe);
-  this->enteredAuthenticationTokenSafe= CGI::StringToURLString(this->enteredAuthenticationTokenUnsafe);
   return true;
 }
 
@@ -457,7 +460,7 @@ bool DatabaseRoutines::startMySQLDatabase()
     password VARCHAR(30) NOT NULL, \
     email VARCHAR(50) NOT NULL,\
     authenticationTokenCreationTime VARCHAR(30), \
-    authenticationToken VARCHAR(30) \
+    authenticationToken VARCHAR(40) \
     ");
 }
 
@@ -819,7 +822,7 @@ bool DatabaseRoutines::innerGetAuthentication(Calculator& theCommands, const Exp
   DatabaseRoutines theRoutines;
   if (!theUser.Authenticate(theRoutines, true))
     return output.MakeError("Failed to authenticate. ", theCommands);
-  return output.AssignValue(theUser.actualAuthenticationTokenSafe, theCommands);
+  return output.AssignValue(theUser.actualAuthenticationTokeNUnsafe, theCommands);
 }
 
 bool DatabaseRoutines::innerCreateTeachingClass(Calculator& theCommands, const Expression& input, Expression& output)

@@ -55,12 +55,15 @@ class UserCalculator
 // Unsafe entries may contain arbitrary strings.
 // Safe entries, when enclosed with "" in ANSI mode are guaranteed to be valid safe Database identifiers.
 // In other words, safe entries are guaranteed to not allow bobby-tables-exploits-of-a-mom (https://xkcd.com/327/).
+// Users of this code should not touch any safe entries directly.
+// Instead users should only modify the unsafe entries.
+// Those are internally (and automatically) converted to safe entries (stored in the private variables below), and only then stored in
+// the database.
 private:
   std::string usernameSafe;
   std::string emailSafe;
   std::string currentTableSafe;
   std::string currentTableUnsafe;
-  std::string enteredAuthenticationTokenSafe;
 public:
   double approximateHoursSinceLastTokenWasIssued;
   std::string usernamePlusPassWord;
@@ -73,12 +76,12 @@ public:
   List<std::string> selectedColumnValuesUnsafe;
   List<std::string> selectedColumnsRetrievalFailureRemarks;
   std::string enteredAuthenticationTokenUnsafe;
-  std::string actualAuthenticationTokenSafe; //<- no need for unsafe version of this one, we will only be reading it from the database.
+  std::string actualAuthenticationTokeNUnsafe;
   TimeWrapper authenticationTokenCreationTime;
   bool flagNewAuthenticationTokenComputedUserNeedsIt;
   bool SetCurrentTable(const std::string& inputTableNameUnsafe);
   bool FetchOneColumn
-  (const std::string& columnNameUnsafe, std::string& output,
+  (const std::string& columnNameUnsafe, std::string& outputUnsafe,
    DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream* failureComments=0);
   void FetchColumns(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
   bool AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);

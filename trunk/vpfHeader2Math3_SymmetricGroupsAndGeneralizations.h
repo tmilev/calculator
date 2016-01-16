@@ -574,22 +574,26 @@ ElementHyperoctahedralGroupR2 operator"" _EHOG(const char *in, size_t insize);
 //  static unsigned int HashFunction(const HyperoctahedralElementR2& in) {return in.HashFunction();}
 //};
 
-class HyperoctahedralGroupR2: public FiniteGroup<ElementHyperoctahedralGroupR2>
+class HyperoctahedralGroupData
 { public:
   int N;
   bool flagIsEntireHyperoctahedralGroup;
   bool flagIsEntireDn;
+  FiniteGroup<ElementHyperoctahedralGroupR2>* theGroup;
+  FiniteGroup<ElementHyperoctahedralGroupR2> theGroupMayBeHereNameIsLongToDiscourageUse;
 
   void MakeHyperoctahedralGroup(int n)
-  { this->N = n;
-    this->generators.SetSize(n-1+n);
+  { this->theGroup = &theGroupMayBeHereNameIsLongToDiscourageUse;
+    this->theGroup->specificDataPointer = this;
+    this->N = n;
+    this->theGroup->generators.SetSize(n-1+n);
     for(int i=0; i<n-1; i++)
-      this->generators[i].h.AddTransposition(i,i+1);
+      this->theGroup->generators[i].h.AddTransposition(i,i+1);
     for(int i=0; i<n; i++)
-      this->generators[n-1+i].k.ToggleBit(i);
+      this->theGroup->generators[n-1+i].k.ToggleBit(i);
     this->flagIsEntireHyperoctahedralGroup = true;
-    this->GetWordByFormula = this->GetWordByFormulaImplementation;
-    this->GetSizeByFormula = this->GetSizeByFormulaImplementation;
+    this->theGroup->GetWordByFormula = this->GetWordByFormulaImplementation;
+    this->theGroup->GetSizeByFormula = this->GetSizeByFormulaImplementation;
   }
 
   static bool GetWordByFormulaImplementation(void* G, const ElementHyperoctahedralGroupR2& g, List<int>& out);
@@ -597,12 +601,18 @@ class HyperoctahedralGroupR2: public FiniteGroup<ElementHyperoctahedralGroupR2>
   void AllSpechtModules();
   void SpechtModuleOfPartititons(const Partition& positive, const Partition& negative,
                                GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> &out);
-  bool operator==(const HyperoctahedralGroupR2& other)const
+  bool operator==(const HyperoctahedralGroupData& other)const
   { if (!this->flagIsEntireHyperoctahedralGroup || !other.flagIsEntireHyperoctahedralGroup)
       return false;
     return this->N==other.N;
   }
+
+  std::string ToString(GlobalVariables* unused) const;
+  template <typename somestream>
+  somestream& IntoStream(somestream& outstream) const;
 };
+std::ostream& operator<<(std::ostream& out, const HyperoctahedralGroupData& data);
+
 
 // a hyperoctahedral group is a semidirect product of a symmetric group and
 // a group of bits.  is there a better name for the group of bits than s?
@@ -1983,5 +1993,18 @@ std::string GroupRepresentation<somegroup, coefficient>::DescribeAsDirectSum()
   }
   return out.str();
 }
+
+template <typename somestream>
+somestream& HyperoctahedralGroupData::IntoStream(somestream& out) const
+{ if(this->flagIsEntireHyperoctahedralGroup)
+    out << "Hyperoctahedral group with " << this->theGroup->GetSizeByFormula(this->theGroup) << " elements";
+  else if(this->flagIsEntireDn)
+    out << "Half hyperoctahedral group with " << this->theGroup->GetSizeByFormula(this->theGroup) << " elemets";
+  else
+    out << this->theGroup;
+  return out;
+}
+
+
 
 #endif

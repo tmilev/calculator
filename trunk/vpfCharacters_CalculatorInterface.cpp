@@ -1547,9 +1547,9 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(Calc
     theCommands.theObjectContainer.theHyperOctahedralGroups[index].MakeHyperoctahedralGroup(partitionLeft.n+partitionRight.n);
   }
   //<-may be broken if copying of groups doesn't work!!!!!!!!
-  HyperoctahedralGroupR2& G=theCommands.theObjectContainer.theHyperOctahedralGroups[index];
+  HyperoctahedralGroupData& HD=theCommands.theObjectContainer.theHyperOctahedralGroups[index];
   GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> R;
-  G.SpechtModuleOfPartititons(partitionLeft,partitionRight, R);
+  HD.SpechtModuleOfPartititons(partitionLeft,partitionRight, R);
   //out << R;
   return output.AssignValue(R, theCommands);
 }
@@ -1592,10 +1592,10 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpec
     return false;
   if (theRank<1|| theRank >7)
     return theCommands << "Input of hyperoctahedral print function has to be between 1 and 10";
-  HyperoctahedralGroupR2 G;
+  HyperoctahedralGroupData G;
   G.MakeHyperoctahedralGroup(theRank);
   G.AllSpechtModules();
-  return output.AssignValue(G.PrettyPrintCharacterTable(), theCommands);
+  return output.AssignValue(G.theGroup->PrettyPrintCharacterTable(), theCommands);
 }
 
 bool CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1605,9 +1605,9 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutation
     return false;
   if (theRank<1|| theRank >10)
     return theCommands << "Input of hyperoctahedral print function has to be between 1 and 10";
-  HyperoctahedralGroupR2 G;
+  HyperoctahedralGroupData G;
   G.MakeHyperoctahedralGroup(theRank);
-  return output.AssignValue(G.PrettyPrintGeneratorCommutationRelations(), theCommands);
+  return output.AssignValue(G.theGroup->PrettyPrintGeneratorCommutationRelations(), theCommands);
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(Calculator& theCommands, const Expression& input, Expression& output)

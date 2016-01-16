@@ -654,7 +654,7 @@ public:
   AlgebraicClosureRationals theAlgebraicClosure;
   HashedList<AlgebraicNumber> theAlgebraicNumbers;
   HashedListReferences<ElementHyperoctahedralGroupR2> theElementsHyperOctGroup;
-  ListReferences<HyperoctahedralGroupR2> theHyperOctahedralGroups;
+  ListReferences<HyperoctahedralGroupData> theHyperOctahedralGroups;
 //  HashedList<DifferentialForm<Rational> > theDiffForm;
   HashedListReferences<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
   void reset();

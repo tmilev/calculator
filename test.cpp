@@ -2318,16 +2318,16 @@ void TestHyperoctahedralStuff()
   stOutput << " Q1^Q2=" << (q1^q2) << " Q2*Q1*Q4=" << q2*q1*q4;
 
   for(int bni=1; bni<6;bni++)
-  { HyperoctahedralGroupR2 Bn;
+  { HyperoctahedralGroupData Bn;
     Bn.MakeHyperoctahedralGroup(bni);
-    Bn.ComputeAllElements();
-    Bn.ComputeCCSizesAndRepresentatives(NULL);
+    Bn.theGroup->ComputeAllElements();
+    Bn.theGroup->ComputeCCSizesAndRepresentatives(NULL);
     stOutput << Bn << '\n';
-    stOutput << Bn.conjugacyClasseS.size << " conjugacy classes\n";
-    for(int i=0; i<Bn.conjugacyClasseS.size; i++)
-      stOutput << Bn.conjugacyClasseS[i] << ", ";
+    stOutput << Bn.theGroup->conjugacyClasseS.size << " conjugacy classes\n";
+    for(int i=0; i<Bn.theGroup->conjugacyClasseS.size; i++)
+      stOutput << Bn.theGroup->conjugacyClasseS[i] << ", ";
     stOutput << '\n';
-    Bn.VerifyCCSizesAndRepresentativesFormula();
+    Bn.theGroup->VerifyCCSizesAndRepresentativesFormula();
     stOutput << "\n\n";
   }
 }
@@ -3199,10 +3199,10 @@ std::cout.flush();
   TestSpechtModules(5);
   TestHyperoctahedralStuff();
 
-  HyperoctahedralGroupR2 G;
+  HyperoctahedralGroupData G;
   G.MakeHyperoctahedralGroup(3);
-  stOutput << G.PrettyPrintGeneratorCommutationRelations();
-  G.VerifyWords();
+  stOutput << G.theGroup->PrettyPrintGeneratorCommutationRelations();
+  G.theGroup->VerifyWords();
   G.AllSpechtModules();
 
   //WeylGroup W;

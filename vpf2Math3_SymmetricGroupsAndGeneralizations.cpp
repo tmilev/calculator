@@ -1205,7 +1205,7 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
     crash << crash;
 }*/
 
-void HyperoctahedralGroupR2::SpechtModuleOfPartititons(const Partition &positive, const Partition &negative,
+void HyperoctahedralGroupData::SpechtModuleOfPartititons(const Partition &positive, const Partition &negative,
                                                      GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> &out)
 { List<Matrix<Rational> > pozm, negm;
   stOutput << "HyperoctahedralGroupR2::SpectModuleOfPartitions(" << positive << ", " << negative << ")\n";
@@ -1213,11 +1213,11 @@ void HyperoctahedralGroupR2::SpechtModuleOfPartititons(const Partition &positive
   positive.SpechtModuleMatricesOfTranspositionsjjplusone(pozm);
   negative.SpechtModuleMatricesOfTranspositionsjjplusone(negm);
   List<int> subgenids;
-  for(int i=0; i<this->generators.size; i++)
+  for(int i=0; i<this->theGroup->generators.size; i++)
     subgenids.AddOnTop(i);
   if((positive.n > 0) && (negative.n > 0))
     subgenids.RemoveIndexShiftDown(positive.n-1);
-  auto PxM = this->ParabolicKindaSubgroupGeneratorSubset(subgenids);
+  auto PxM = this->theGroup->ParabolicKindaSubgroupGeneratorSubset(subgenids);
   auto pxmr = PxM.theSubgroup->GetEmptyRationalRepresentation();
   pxmr.generatorS.SetExpectedSize(PxM.theSubgroup->generators.size);
   pxmr.generatorS.AddListOnTop(pozm);
@@ -1236,9 +1236,8 @@ void HyperoctahedralGroupR2::SpechtModuleOfPartititons(const Partition &positive
     }
   if(!pxmr.VerifyRepresentation())
     crash << "lol" << crash;
-  auto outreboxme = PxM.InduceRepresentation(pxmr);
-  out.ownerGroup = this;
-  out.generatorS = outreboxme.generatorS;
+  out = PxM.InduceRepresentation(pxmr);
+  out.ownerGroup = this->theGroup;
   std::stringstream ids;
   ids << negative << ", " << positive;
   out.identifyingString = ids.str();
@@ -1336,7 +1335,7 @@ void HyperoctahedralGroup::AllSpechtModules()
   RepresentationDataIntoJS().writefile("representations_hyperoctahedral_group");
 }*/
 
-void HyperoctahedralGroupR2::AllSpechtModules()
+void HyperoctahedralGroupData::AllSpechtModules()
 { for(int p=0; p<=this->N; p++)
   { List<Partition> nps;
     Partition::GetPartitions(nps,p);
@@ -1349,13 +1348,13 @@ void HyperoctahedralGroupR2::AllSpechtModules()
         this->SpechtModuleOfPartititons(pps[ppi],nps[npi],sm);
         sm.VerifyRepresentation();
         stOutput << sm << '\n';
-        this->irreps.AddOnTop(sm);
+        this->theGroup->irreps.AddOnTop(sm);
       }
     }
   }
-  this->irreps.QuickSortAscending();
-  stOutput << this->PrettyPrintCharacterTable() << '\n';
-  RepresentationDataIntoJS().writefile("representations_hyperoctahedral_group");
+  this->theGroup->irreps.QuickSortAscending();
+  stOutput << this->theGroup->PrettyPrintCharacterTable() << '\n';
+  this->theGroup->RepresentationDataIntoJS().writefile("representations_hyperoctahedral_group");
 }
 
 /*
@@ -1372,13 +1371,14 @@ int HyperoctahedralGroup::GetN()
 }
 */
 
-LargeInt HyperoctahedralGroupR2::GetSizeByFormulaImplementation(void* GG)
-{ HyperoctahedralGroupR2* G = (HyperoctahedralGroupR2*) GG;
-  stOutput << "HyperoctahedralGroup::GetSize() called.  N=" << G->N << '\n';
-  if(G->flagIsEntireHyperoctahedralGroup)
-    return MathRoutines::Factorial(G->N) * (1<<G->N);
-  if(G->flagIsEntireDn)
-    return MathRoutines::Factorial(G->N) * (1<<G->N) / 2;
+LargeInt HyperoctahedralGroupData::GetSizeByFormulaImplementation(void* GG)
+{ FiniteGroup<ElementHyperoctahedralGroupR2>* G = (FiniteGroup<ElementHyperoctahedralGroupR2>*) GG;
+  HyperoctahedralGroupData* HD = (HyperoctahedralGroupData*) G->specificDataPointer;
+  stOutput << "HyperoctahedralGroup::GetSize() called.  N=" << HD->N << '\n';
+  if(HD->flagIsEntireHyperoctahedralGroup)
+    return MathRoutines::Factorial(HD->N) * (1<<HD->N);
+  if(HD->flagIsEntireDn)
+    return MathRoutines::Factorial(HD->N) * (1<<HD->N) / 2;
   crash << "This method should not have been called " << __FILE__ << ":" << __LINE__ << crash;
   // control reaches end of non-void function
   return -1;
@@ -1398,13 +1398,14 @@ bool HyperoctahedralGroup::GetWordByFormulaImplementation(void* GG, const Elemen
   return true;
 }*/
 
-bool HyperoctahedralGroupR2::GetWordByFormulaImplementation(void* GG, const ElementHyperoctahedralGroupR2& g, List<int>& word)
-{ HyperoctahedralGroupR2* G = (HyperoctahedralGroupR2*) GG;
-  if(G->flagIsEntireHyperoctahedralGroup)
+bool HyperoctahedralGroupData::GetWordByFormulaImplementation(void* GG, const ElementHyperoctahedralGroupR2& g, List<int>& word)
+{ FiniteGroup<ElementHyperoctahedralGroupR2>* G = (FiniteGroup<ElementHyperoctahedralGroupR2>*) GG;
+  HyperoctahedralGroupData* HD = (HyperoctahedralGroupData*) G->specificDataPointer;
+  if(HD->flagIsEntireHyperoctahedralGroup)
   { g.h.GetWordjjPlus1(word);
     for(int i=0; i<g.k.bits.size; i++)
       if(g.k.bits[i])
-        word.AddOnTop(G->N-1+i);
+        word.AddOnTop(HD->N-1+i);
     return true;
   }
   crash << "This method should not have been called " << __FILE__ << ":" << __LINE__ << crash;
@@ -1490,3 +1491,13 @@ ElementHyperoctahedralGroupR2 operator"" _EHOG(const char *in, size_t insize)
 }
 
 //"(),0,0,1"_EHOG
+
+std::string HyperoctahedralGroupData::ToString(GlobalVariables* unused) const
+{ std::stringstream out;
+  this->IntoStream(out);
+  return out.str();
+}
+
+std::ostream& operator<<(std::ostream& out, const HyperoctahedralGroupData& data)
+{ return data.IntoStream(out);
+}

@@ -405,58 +405,61 @@ void FiniteGroup<elementSomeGroup>::init()
   this->GetWordByFormula=0;
 }
 
-template <typename somegroup, class elementSomeGroup>
-void Subgroup<somegroup, elementSomeGroup>::initFromGroupAndGenerators(somegroup& inputGroup, const List<elementSomeGroup>& inputGenerators)
+template <class someGroup, class elementSomeGroup>
+void SubgroupData<someGroup, elementSomeGroup>::initFromGroupAndGenerators(someGroup& inputGroup,
+                                                                const List<elementSomeGroup>& inputGenerators)
 { MacroRegisterFunctionWithName("Subgroup::initFromGroupAndGenerators");
-  if (&inputGenerators==&this->generators)//<-handle naughty programmers
+  if (&inputGenerators==&this->theSubgroup->generators)//<-handle naughty programmers
   { List<elementSomeGroup> inputGeneratorsCopy=inputGenerators;
     this->initFromGroupAndGenerators(inputGroup, inputGeneratorsCopy);
     return;
   }
-  this->parent = &inputGroup;
-  this->generators.SetSize(0);
-  this->generators.AddOnTopNoRepetition(inputGenerators);//<- we have eliminated all repeating generators
+  this->theGroup = &inputGroup;
+  this->theSubgroup = &this->theSubgroupMayBeHere;
+  this->theSubgroup->generators.SetSize(0);
+  this->theSubgroup->generators.AddOnTopNoRepetition(inputGenerators);//<- we have eliminated all repeating generators
   //(there shouldn't be any, but knowing I am one of the programmers...)
 }
-
 
 // A well chosen generating set for G can have the property that for interesting subgroups H,
 // the usual choice of word in G for h∈H will be translatable into letters of H.
 // This is the case for, in particular, the parabolic subgroups of the complete hyperoctahedral
 // groups in the generating set that tacks on to the symmetric groups a complete set of ℤ₂ generators
-template <typename somegroup, class elementSomeGroup>
-void Subgroup<somegroup, elementSomeGroup>::MakeTranslatableWordsSubgroup(somegroup &inputGroup,
-                                                                          const List<elementSomeGroup>& subGenerators)
+template <class someGroup, class elementSomeGroup>
+void SubgroupData<someGroup, elementSomeGroup>::MakeTranslatableWordsSubgroup(someGroup &inputGroup,
+                                                                   const List<elementSomeGroup>& subGenerators)
 { MacroRegisterFunctionWithName("Subgroup::MakeTranslatableWordsSubgroup");
-  this->parent = &inputGroup;
-  this->generators = subGenerators;
-  this->superGeneratorSubWords.SetSize(parent->generators.size);
-  this->superGeneratorSubWordExists.SetSize(parent->generators.size);
+  this->theGroup = &inputGroup;
+  this->theSubgroup = &this->theSubgroupMayBeHere;
+  this->theSubgroup->generators = subGenerators;
+  this->superGeneratorSubWords.SetSize(this->theGroup->generators.size);
+  this->superGeneratorSubWordExists.SetSize(this->theGroup->generators.size);
   for(int i=0; i<superGeneratorSubWordExists.size; i++)
     superGeneratorSubWordExists[i] = false;
   // done initializing things.  Now for actual code.
   // not the most comprehensive algorithm, is it?
   // I mean, not that I care to prove it incomplete at this point.
   // and so much work for this silly little speed optimization, too
-  for(int i=0; i<parent->generators.size; i++)
-  { int si = this->generators.GetIndex(parent->generators[i]);
+  for(int i=0; i<this->theGroup->generators.size; i++)
+  { int si = this->theSubgroup->generators.GetIndex(this->theGroup->generators[i]);
     if(si != -1)
     { this->superGeneratorSubWords[i].AddOnTop(si);
       this->superGeneratorSubWordExists[i] = true;
     }
   }
-  this->GetWordByFormula = TranslatableWordsSubgroupElementGetWord<somegroup, elementSomeGroup>;
-  stOutput << "Subgroup::MakeTranslatableWordsSubgroup:\n";
-  for(int i=0; i<this->generators.size; i++)
-    stOutput << i << " " << this->generators[i] << " "
+  this->theSubgroup->GetWordByFormula = TranslatableWordsSubgroupElementGetWord<elementSomeGroup>;
+  this->theSubgroup->parentRelationship = this;
+  stOutput << "SubgroupData::MakeTranslatableWordsSubgroup:\n";
+  for(int i=0; i<this->theSubgroup->generators.size; i++)
+    stOutput << i << " " << this->theSubgroup->generators[i] << " "
              << this->superGeneratorSubWords[i].ToStringCommaDelimited() << '\n';
-  for(int i=0; i<this->generators.size; i++)
-    stOutput << i << " " << this->generators[i] << '\n';
+  for(int i=0; i<this->theSubgroup->generators.size; i++)
+    stOutput << i << " " << this->theSubgroup->generators[i] << '\n';
 }
 
-template <typename somegroup, class elementSomeGroup>
-bool Subgroup<somegroup, elementSomeGroup>::CheckInitialization()
-{ if (this->parent==0)
+template <class someGroup, class elementSomeGroup>
+bool SubgroupData<someGroup, elementSomeGroup>::CheckInitialization()
+{ if (this->theGroup==0 || this->theSubgroup == 0)
     crash << "This is a programming error: subgroup not initialized when it should be";
   return true;
 }
@@ -477,22 +480,23 @@ void FiniteGroup<elementSomeGroup>::GetSignCharacter(Vector<Rational>& outputCha
     outputCharacter[i]=this->conjugacyClasseS[i].representative.Sign();
 }
 
-template <typename somegroup, class elementSomeGroup>
-void Subgroup<somegroup, elementSomeGroup>::init()
-{ this->parent=0;
+template <class someGroup, class elementSomeGroup>
+void SubgroupData<someGroup, elementSomeGroup>::init()
+{ this->theGroup=0;
+  this->theSubgroup=0;
+  this->theSubgroupMayBeHere.init();
   this->ccRepresentativesPreimages.SetSize(0);
   this->generatorPreimages.SetSize(0);
-  this->::FiniteGroup<elementSomeGroup>::init();
 }
 
-template <typename somegroup, class elementSomeGroup>
-Subgroup<somegroup, elementSomeGroup>::Subgroup()
+template <class someGroup, class elementSomeGroup>
+SubgroupData<someGroup, elementSomeGroup>::SubgroupData()
 { this->init();
 }
 
 template <typename elementSomeGroup>
-Subgroup<FiniteGroup<elementSomeGroup>, elementSomeGroup> FiniteGroup<elementSomeGroup>::ParabolicKindaSubgroupGeneratorSubset(const List<int>& subgenids)
-{ Subgroup<FiniteGroup<elementSomeGroup>, elementSomeGroup> out;
+SubgroupData<FiniteGroup<elementSomeGroup>, elementSomeGroup> FiniteGroup<elementSomeGroup>::ParabolicKindaSubgroupGeneratorSubset(const List<int>& subgenids)
+{ SubgroupData<FiniteGroup<elementSomeGroup>, elementSomeGroup> out;
   List<elementSomeGroup> subgens;
   subgens.SetSize(subgenids.size);
   for(int i=0; i<subgenids.size; i++)
@@ -545,19 +549,19 @@ int FiniteGroup<elementSomeGroup>::ConjugacyClassCount()const
   return this->conjugacyClasseS.size;
 }
 
-template <typename somegroup, class elementSomeGroup>
-void Subgroup<somegroup, elementSomeGroup>::ComputeCCRepresentativesPreimages(GlobalVariables* theGlobalVariables)
+template <class someGroup, class elementSomeGroup>
+void SubgroupData<someGroup, elementSomeGroup>::ComputeCCRepresentativesPreimages(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("Subgroup::ComputeCCRepresentativesPreimages");
-  this->ccRepresentativesPreimages.SetSize(this->ConjugacyClassCount());
-  if (this->generators.size==0)
+  this->ccRepresentativesPreimages.SetSize(this->theSubgroup->ConjugacyClassCount());
+  if (this->theSubgroup->generators.size==0)
     crash << "At this computation the group must have initialized generators. " << crash;
-  if (this->parent->generators.size==0)
+  if (this->theGroup->generators.size==0)
     crash << "Parent group must have initialized generators. " << crash;
-  for(int i=0; i<this->ConjugacyClassCount(); i++)
+  for(int i=0; i<this->theSubgroup->ConjugacyClassCount(); i++)
   { bool notFound=true;
-    elementSomeGroup& g=this->conjugacyClasseS[i].representative;
-    for(int ci=0; notFound && ci<this->parent->ConjugacyClassCount(); ci++)
-      if(this->parent->AreConjugate(g, this->parent->conjugacyClasseS[ci].representative))
+    elementSomeGroup& g=this->theSubgroup->conjugacyClasseS[i].representative;
+    for(int ci=0; notFound && ci<this->theGroup->ConjugacyClassCount(); ci++)
+      if(this->theGroup->AreConjugate(g, this->theGroup->conjugacyClasseS[ci].representative))
       { this->ccRepresentativesPreimages[i] = ci;
         notFound=false;
       } //else
@@ -2024,26 +2028,26 @@ bool ClassFunction<someFiniteGroup, coefficient>::operator>(const ClassFunction<
 }
 
 // Interal API of Subgroup class can go here
-template <typename somegroup, typename elementSomeGroup>
-void Subgroup<somegroup, elementSomeGroup>::ComputeCosets()
+template <typename someGroup, typename elementSomeGroup>
+void SubgroupData<someGroup, elementSomeGroup>::ComputeCosets()
 { if(flagCosetSetsComputed)
     return;
   if(this->CosetRepresentativeEnumerator && this->SameCosetAsByFormula)
     return this->CosetRepresentativeEnumerator(this);
-  this->ComputeAllElements();
-  parent->ComputeAllElements();
-  GraphOLD orbitg = GraphOLD(parent->theElements.size, this->generators.size);
-  for(int i=0; i<parent->theElements.size; i++)
-    for(int j=0; j<this->generators.size; j++)
-      orbitg.AddEdge(parent->theElements.GetIndex(parent->theElements[i]*this->generators[j]), i);
+  this->theSubgroup->ComputeAllElements();
+  this->theGroup->ComputeAllElements();
+  GraphOLD orbitg = GraphOLD(this->theGroup->theElements.size, this->theSubgroup->generators.size);
+  for(int i=0; i<this->theGroup->theElements.size; i++)
+    for(int j=0; j<this->theSubgroup->generators.size; j++)
+      orbitg.AddEdge(this->theGroup->theElements.GetIndex(this->theGroup->theElements[i]*this->theSubgroup->generators[j]), i);
   List<List<int> > orbits;
   orbits = orbitg.DestructivelyGetConnectedComponents();
   this->cosets.SetSize(orbits.size);
   for(int i=0; i<orbits.size; i++)
   { cosets[i].supergroupIndices = orbits[i];
     //stOutput << cosets[i].supergroupIndices;
-    cosets[i].representative = parent->theElements[orbits[i][0]];
-    parent->GetWord(parent->theElements[orbits[i][0]], cosets[i].representativeWord);
+    cosets[i].representative = this->theGroup->theElements[orbits[i][0]];
+    this->theGroup->GetWord(this->theGroup->theElements[orbits[i][0]], cosets[i].representativeWord);
   }
   this->flagCosetSetsComputed = true;
   this->flagCosetRepresentativesComputed = true;
@@ -2054,16 +2058,16 @@ void Subgroup<somegroup, elementSomeGroup>::ComputeCosets()
   this->VerifyCosets();
 }
 
-template <typename somegroup, typename elementSomeGroup>
-bool Subgroup<somegroup, elementSomeGroup>::VerifyCosets()
+template <typename someGroup, typename elementSomeGroup>
+bool SubgroupData<someGroup, elementSomeGroup>::VerifyCosets()
 { // this returns true or crashes because if the cosets aren't cosets something is seriously wrong
   ComputeCosets();
-  for(int i=0; i<this->generators.size; i++)
+  for(int i=0; i<this->theSubgroup->generators.size; i++)
     for(int cs=0; cs<this->cosets.size; cs++)
-    { auto g = cosets[cs].representative * this->generators[i];
+    { auto g = cosets[cs].representative * this->theSubgroup->generators[i];
       if(this->GetCosetId(g) != cs)
         crash << "Error: element " << g << " not found in coset " << cs
-              << " despite being product of subgroup generator " << this->generators[i] << " by coset representative "
+              << " despite being product of subgroup generator " << this->theSubgroup->generators[i] << " by coset representative "
               << cosets[cs].representative << crash;
     }
   if(this->flagCosetSetsComputed)
@@ -2071,9 +2075,9 @@ bool Subgroup<somegroup, elementSomeGroup>::VerifyCosets()
     { auto g = this->cosets[cs].representative;
       g.Invert();
       for(int i=0; i<this->cosets[cs].supergroupIndices.size; i++)
-      { auto g2 = parent->theElements[this->cosets[cs].supergroupIndices[i]];
+      { auto g2 = this->theGroup->theElements[this->cosets[cs].supergroupIndices[i]];
         auto g3 = g * g2;
-        if(!this->HasElement(g3))
+        if(!this->theSubgroup->HasElement(g3))
           crash << "Error: coset " << cs << " has representative " << this->cosets[cs].representative
                 << "; a putative coset element has " << g << " * " << g2 << " = " << g3
                 << " which is not in the subgroup" << crash;

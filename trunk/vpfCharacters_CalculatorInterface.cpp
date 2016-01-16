@@ -955,7 +955,7 @@ std::string WeylGroup::ToStringIrrepLabel(int indexIrrep)
   return out.str();
 }
 
-std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRootReflections>& inputSubgroups)
+std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupDataRootReflections>& inputSubgroups)
 { MacroRegisterFunctionWithName("WeylGroup::ToStringSignSignatureRootSubsystem");
   if (inputSubgroups.size==0)
     return "";
@@ -968,7 +968,7 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
   std::stringstream mainTableStream;
   int numParabolicClasses=0, numNonParabolicPseudoParabolic=0, numNonPseudoParabolic=0;
   for (int i=0; i<inputSubgroups.size; i++)
-  { SubgroupRootReflections& currentSG=inputSubgroups[i];
+  { SubgroupDataRootReflections& currentSG=inputSubgroups[i];
     if (!currentSG.flagIsParabolic && !currentSG.flagIsExtendedParabolic)
     { numNonPseudoParabolic++;
       continue;
@@ -1091,7 +1091,7 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
     << numNonPseudoParabolic << " non-pseudo-parabolic subgroup classes. \n<br>\n"
     << "}\\\\ ";
     for (int i=startIndex; i<startIndexNextCol; i++)
-    { SubgroupRootReflections& currentSG=inputSubgroups[i];
+    { SubgroupDataRootReflections& currentSG=inputSubgroups[i];
       if (!currentSG.flagIsParabolic && !currentSG.flagIsExtendedParabolic)
       { mainTableStream << "&-";
         continue;
@@ -1200,7 +1200,7 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(Calculator& 
     return false;
   }
   std::stringstream out;
-  List<SubgroupRootReflections> parabolicSubgroupS, extendedParabolicSubgroups, allRootSubgroups, finalSubGroups;
+  List<SubgroupDataRootReflections> parabolicSubgroupS, extendedParabolicSubgroups, allRootSubgroups, finalSubGroups;
   if (!theWeyl.LoadSignSignatures(finalSubGroups, &theGlobalVariables))
   { theWeyl.GetSignSignatureParabolics(parabolicSubgroupS, &theGlobalVariables);
     theWeyl.GetSignSignatureExtendedParabolics(extendedParabolicSubgroups, &theGlobalVariables);
@@ -1209,7 +1209,7 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(Calculator& 
     finalSubGroups.Reserve(allRootSubgroups.size);
     Pair<std::string, List<Rational>, MathRoutines::hashString> currentTauSig;
     for (int j=0; j<3; j++)
-    { List<SubgroupRootReflections>* currentSGs=0;
+    { List<SubgroupDataRootReflections>* currentSGs=0;
       if (j==0)
         currentSGs=&parabolicSubgroupS;
       if (j==1)
@@ -1592,7 +1592,7 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpec
     return false;
   if (theRank<1|| theRank >7)
     return theCommands << "Input of hyperoctahedral print function has to be between 1 and 10";
-  HyperoctahedralGroup G;
+  HyperoctahedralGroupR2 G;
   G.MakeHyperoctahedralGroup(theRank);
   G.AllSpechtModules();
   return output.AssignValue(G.PrettyPrintCharacterTable(), theCommands);
@@ -1605,7 +1605,7 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutation
     return false;
   if (theRank<1|| theRank >10)
     return theCommands << "Input of hyperoctahedral print function has to be between 1 and 10";
-  HyperoctahedralGroup G;
+  HyperoctahedralGroupR2 G;
   G.MakeHyperoctahedralGroup(theRank);
   return output.AssignValue(G.PrettyPrintGeneratorCommutationRelations(), theCommands);
 }

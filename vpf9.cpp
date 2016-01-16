@@ -4444,13 +4444,13 @@ void WeylGroup::GetSignCharacter(Vector<Rational>& out)
     out[i]= this->conjugacyClasseS[i].representative.Sign();
 }
 
-void SubgroupWeylGroup::GetSignCharacter(Vector<Rational>& out)
+void SubgroupDataWeylGroup::GetSignCharacter(Vector<Rational>& out)
 { MacroRegisterFunctionWithName("SubgroupRootReflections::GetSignCharacter");
-  if(!this->flagCCRepresentativesComputed)
-    this->ComputeCCSizesAndRepresentatives(0);
-  out.SetSize(ConjugacyClassCount());
-  for(int i=0; i<this->ConjugacyClassCount(); i++)
-    out[i] = this->conjugacyClasseS[i].representative.Sign();
+  if(!this->theSubgroup->flagCCRepresentativesComputed)
+    this->theSubgroup->ComputeCCSizesAndRepresentatives(0);
+  out.SetSize(this->theSubgroup->ConjugacyClassCount());
+  for(int i=0; i<this->theSubgroup->ConjugacyClassCount(); i++)
+    out[i] = this->theSubgroup->conjugacyClasseS[i].representative.Sign();
 //  stOutput << "<br>Sign character is: " << out.ToString();
 }
 

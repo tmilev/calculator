@@ -365,6 +365,7 @@ void ComputeIrreps(WeylGroup& G)
     }
 }
 
+/*
 // this is incorrect.  Do not use it.
 void PseudoParabolicSubgroupNope(WeylGroup* G, const Selection& sel, SubgroupRootReflections& out)
 { out.init();
@@ -393,6 +394,7 @@ void PseudoParabolicSubgroupNope(WeylGroup* G, const Selection& sel, SubgroupRoo
   out.SubCartanSymmetric.elements[d-1][d-1] = hr.ScalarProduct(hr,G->CartanSymmetric);
   out.generatorPreimages[d-1] = G->theElements.GetIndex(G->GetRootReflection(G->RootSystem.size-1));
 }
+*/
 
 template <typename weylgroup>
 void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
@@ -2218,17 +2220,18 @@ void TestCountPermutations(int N)
 }
 
 void TestPermutationWords()
-{ PermutationGroup G;
-  G.MakeSymmetricGroupGeneratorsjjPlus1(5);
-  G.ComputeAllElements();
-  for(int i=0; i<G.theElements.size; i++)
+{ PermutationGroupData PG;
+  PG.MakeSymmetricGroupGeneratorsjjPlus1(5);
+  FiniteGroup<PermutationR2>* G = PG.theGroup;
+  G->ComputeAllElements();
+  for(int i=0; i<G->theElements.size; i++)
   { List<int> word;
-    G.GetWord(G.theElements[i],word);
+    G->GetWord(G->theElements[i],word);
     PermutationR2 p;
     for(int wi=0; wi<word.size; wi++)
-      p = p*G.generators[word[wi]];
-    stOutput << ((p == G.theElements[i]) ? "☑ ":"☒ ");
-    stOutput << G.theElements[i] << " has word (" << word.ToStringCommaDelimited() << ") which multiplies out to " << p << "\n";
+      p = p*G->generators[word[wi]];
+    stOutput << ((p == G->theElements[i]) ? "☑ ":"☒ ");
+    stOutput << G->theElements[i] << " has word (" << word.ToStringCommaDelimited() << ") which multiplies out to " << p << "\n";
   }
 }
 
@@ -2315,7 +2318,7 @@ void TestHyperoctahedralStuff()
   stOutput << " Q1^Q2=" << (q1^q2) << " Q2*Q1*Q4=" << q2*q1*q4;
 
   for(int bni=1; bni<6;bni++)
-  { HyperoctahedralGroup Bn;
+  { HyperoctahedralGroupR2 Bn;
     Bn.MakeHyperoctahedralGroup(bni);
     Bn.ComputeAllElements();
     Bn.ComputeCCSizesAndRepresentatives(NULL);
@@ -2332,14 +2335,15 @@ void TestHyperoctahedralStuff()
 void TestSpechtModules(int N = 7)
 { List<Partition> parts;
   Partition::GetPartitions(parts, N);
-  PermutationGroup G;
-  G.MakeSymmetricGroupGeneratorsjjPlus1(N);
+  PermutationGroupData PD;
+  PD.MakeSymmetricGroupGeneratorsjjPlus1(N);
+  FiniteGroup<PermutationR2>& G = *PD.theGroup;
   G.irreps.SetSize(parts.size);
   stOutput << G.PrettyPrintGeneratorCommutationRelations();
   stOutput << "Testing Specht modules for S_" << N << '\n';
   //#pragma omp parallel for
   for(int pi=0; pi<parts.size; pi++)
-  { G.SpechtModuleOfPartition(parts[pi], G.irreps[pi]);
+  { PD.SpechtModuleOfPartition(parts[pi], G.irreps[pi]);
     for(int i=0; i<G.irreps[pi].generatorS.size; i++)
       stOutput << G.irreps[pi].generatorS[i].ToStringPlainText() << ",\n\n";
     stOutput << "\n";
@@ -2351,6 +2355,7 @@ void TestSpechtModules(int N = 7)
   stOutput << G.PrettyPrintCharacterTable() << '\n';
 }
 
+/* Keeping this around as a warning to future programmers about inheritance
 void TestInduction(int n=4, int m=3)
 { PermutationGroup G;
   G.MakeSymmetricGroupGeneratorsjjPlus1(n);
@@ -2384,6 +2389,33 @@ void TestInduction(int n=4, int m=3)
   stOutput << G.PrettyPrintCharacterTable();
   stOutput << H.PrettyPrintCharacterTable();
   for(int i=0; i<H.irreps.size; i++)
+    stOutput << indreps[i].DescribeAsDirectSum() << '\n';
+}
+*/
+
+void TestInduction(int n=4, int m=3)
+{ PermutationGroupData PD;
+  PD.MakeSymmetricGroupGeneratorsjjPlus1(n);
+  stOutput << "1\n";
+  PD.ComputeSpechtModules();
+  stOutput << "2\n";
+  List<int> l;
+  for(int i=0; i<m-1; i++)
+    l.AddOnTop(i);
+  SubgroupData<FiniteGroup<PermutationR2>, PermutationR2> HD = PD.theGroup->ParabolicKindaSubgroupGeneratorSubset(l);
+  stOutput << "3\n";
+  PermutationGroupData HPD;
+  HPD.theGroup = HD.theSubgroup;
+  HPD.ComputeSpechtModules();
+  stOutput << "4\n";
+  List<GroupRepresentation<FiniteGroup<PermutationR2>, Rational> > indreps;
+  indreps.SetSize(HD.theSubgroup->irreps.size);
+  for(int i=0; i<HD.theSubgroup->irreps.size; i++)
+    indreps[i] = HD.InduceRepresentation(HD.theSubgroup->irreps[i]);
+  stOutput << "5\n";
+  stOutput << HD.theGroup->PrettyPrintCharacterTable();
+  stOutput << HD.theSubgroup->PrettyPrintCharacterTable();
+  for(int i=0; i<indreps.size; i++)
     stOutput << indreps[i].DescribeAsDirectSum() << '\n';
 }
 
@@ -3157,11 +3189,11 @@ void LegacyTest()
   PW.MakeArbitrarySimple('A',5);
   PW.ComputeCCSizesAndRepresentatives(NULL);
   stOutput << PW.theDynkinType << " :" << PW.GetSize() << " elements, in " << PW.conjugacyClasseS.size << " conjugacy classes\n";
-  PermutationGroup PG;
-  PG.MakeSymmetricGroupGeneratorsjjPlus1(5);
-  PG.ComputeCCSizesAndRepresentatives(NULL);
-  stOutput <<  PG.GetSize() << " elements, in " << PG.conjugacyClasseS.size << " conjugacy classes\n";
-  PG.VerifyCCSizesAndRepresentativesFormula();
+  PermutationGroupData PD;
+  PD.MakeSymmetricGroupGeneratorsjjPlus1(5);
+  PD.theGroup->ComputeCCSizesAndRepresentatives(NULL);
+  stOutput <<  PD.theGroup->GetSize() << " elements, in " << PD.theGroup->conjugacyClasseS.size << " conjugacy classes\n";
+  PD.theGroup->VerifyCCSizesAndRepresentativesFormula();
   stOutput << "finished verifying formulas\n";
 std::cout.flush();
   TestSpechtModules(5);

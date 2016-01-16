@@ -547,8 +547,9 @@ void GetTauSignaturesFromSubgroup(templateWeylGroup& G, const List<ElementWeylGr
   Vector<Rational> HXs;
   H.GetSignCharacter(HXs);*/
 
-  Subgroup<templateWeylGroup, ElementWeylGroup<templateWeylGroup> > H;
-  H.initFromGroupAndGenerators(G, gens);
+  SubgroupData<WeylGroup, ElementWeylGroup<templateWeylGroup> > HD;
+  HD.initFromGroupAndGenerators(G, gens);
+  WeylGroup& H = *HD.theSubgroup;
   H.ComputeAllElements();
   Vector<Rational> HXs;
   H.GetSignCharacter(HXs);

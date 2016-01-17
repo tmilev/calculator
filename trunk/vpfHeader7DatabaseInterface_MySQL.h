@@ -12,6 +12,18 @@ public:
   static bool SetEntry
   (const std::string& inputUsername, const std::string& tableName, const std::string& keyName,
    const std::string& value, std::stringstream& comments);
+  static bool FetchEntry
+  (const std::string& inputUsername, const std::string& tableName, const std::string& keyName,
+   std::string& output, std::stringstream& comments);
+  static bool TableExists
+  (const std::string& tableName, std::stringstream& comments);
+  static bool CreateTable
+  (const std::string& tableName, std::stringstream& comments);
+  static bool ColumnExists
+  (const std::string& columnNameUnsafe, const std::string& tableNameUnsafe, std::stringstream& commentsStream);
+  static bool CreateColumn
+  (const std::string& columnNameUnsafe, const std::string& tableNameUnsafe,
+   std::stringstream& commentsOnCreation);
 };
 
 #ifdef MACRO_use_MySQL
@@ -129,12 +141,19 @@ public:
   operator bool()const
   { return false;
   }
+  bool startMySQLDatabaseIfNotAlreadyStarted();
   bool startMySQLDatabase();
+
+  bool ColumnExists(const std::string& columnNameUnsafe, const std::string& tableNameUnsafe);
+  bool CreateColumn(const std::string& columnNameNameUnsafe, const std::string& tableNameUnsafe,
+                    std::stringstream& commentsOnCreation);
   bool TableExists(const std::string& tableNameUnsafe);
   std::string ToString();
   std::string ToStringAllUsersHTMLFormat();
+
   bool CreateTable
-(const std::string& tableNameUnsafe, const std::string& desiredTableContent, std::stringstream* commentsOnCreation=0);
+  (const std::string& tableNameUnsafe, const std::string& desiredTableContent,
+   std::stringstream* commentsOnCreation=0);
 
   static bool innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestLogin(Calculator& theCommands, const Expression& input, Expression& output);

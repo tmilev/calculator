@@ -190,7 +190,6 @@ bool Crypto::StringBase64ToBitStream(const std::string& input, List<unsigned cha
   return true;
 }
 
-
 void Crypto::ConvertBitStreamToString(const List<unsigned char>& input, std::string& output)
 { MacroRegisterFunctionWithName("Crypto::ConvertBitStreamToString");
   output.clear();

@@ -583,6 +583,7 @@ bool WebWorker::ProcessRawArguments(std::stringstream& argumentProcessingFailure
   if (!CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames, argumentProcessingFailureComments))
     return false;
   theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
+//  stOutput << "userCalculatorRequest type is: " << theGlobalVariables.userCalculatorRequestType;
   std::string password;
   std::string desiredUser=theGlobalVariables.GetWebInput("user");
   if (desiredUser=="")
@@ -1725,11 +1726,11 @@ std::string WebWorker::GetLoginHTMLinternal()
 }
 
 std::string WebWorker::GetHtmlHiddenInputComputation()
-{ return "<input type=\"hidden\" name=\"request\" value=\"compute\">\n";
+{ return "<input type=\"hidden\" name=\"request\" id=\"request\" value=\"compute\">\n";
 }
 
 std::string WebWorker::GetHtmlHiddenInputExercise()
-{ return "<input type=\"hidden\" name=\"request\" value=\"exercises\">";
+{ return "<input type=\"hidden\" name=\"request\" id=\"request\" value=\"exercises\">";
 }
 
 std::string WebWorker::GetLoginPage()
@@ -1846,9 +1847,9 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "    theCalculatorForm.style.width  = theOldWidth;\n"
   << "    theCalculatorForm.style.height = theOldHeight;\n"
   << "  }\n"
-//  << "  if (document.getElementById(\"examStatus\")!=null)\n "
-//  << "    if(getCookie(\"examStatus\")!='');\n"
-//  << "      document.getElementById(\"examStatus\").value=getCookie(\"examStatus\");\n"
+  << "  if (document.getElementById(\"request\")!=null)\n "
+  << "    if(getCookie(\"request\")!='')\n"
+  << "      document.getElementById(\"request\").value=getCookie(\"request\");\n"
   << "  if (document.getElementById(\"currentExamFile\")!=null)\n "
   << "    if(getCookie(\"currentExamFile\")!='')\n"
   << "      document.getElementById(\"currentExamFile\").value=getCookie(\"currentExamFile\");\n"

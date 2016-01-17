@@ -52,8 +52,110 @@ bool DatabaseRoutinesGlobalFunctions::SetEntry
     return false;
   DatabaseRoutines theRoutines;
   UserCalculator theUser;
+  theUser.usernameUnsafe=inputUsername;
+//  stOutput << "setting table name to: " << tableName << "<br>";
   theUser.SetCurrentTable(tableName);
-  return theUser.SetColumnEntry(keyName, value, theRoutines, &comments);
+
+  return theUser.SetColumnEntry(keyName, value, theRoutines, true, &comments);
+#else
+  return false;
+#endif
+}
+
+bool DatabaseRoutinesGlobalFunctions::CreateTable
+(const std::string& tableName, std::stringstream& comments)
+{
+#ifdef MACRO_use_MySQL
+  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::CreateTable");
+  if (!theGlobalVariables.flagLoggedIn)
+    return false;
+  DatabaseRoutines theRoutines;
+  theRoutines.startMySQLDatabaseIfNotAlreadyStarted();
+  return theRoutines.CreateTable(tableName,  "user VARCHAR(50) NOT NULL PRIMARY KEY  ", &comments);
+#else
+  return false;
+#endif
+}
+
+bool DatabaseRoutinesGlobalFunctions::ColumnExists
+(const std::string& columnNameUnsafe, const std::string& tableNameUnsafe, std::stringstream& commentsStream)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::ColumnExists");
+#ifdef MACRO_use_MySQL
+  DatabaseRoutines theRoutines;
+  theRoutines.startMySQLDatabaseIfNotAlreadyStarted();
+  if (!DatabaseRoutinesGlobalFunctions::TableExists(tableNameUnsafe, commentsStream))
+    return false;
+  std::string columnNameSafe=CGI::StringToURLString(columnNameUnsafe);
+  std::string tableNameSafe=CGI::StringToURLString(tableNameSafe);
+  std::stringstream columnExistsStream;
+  columnExistsStream << "SELECT * FROM " << "information_schema.COLUMNS WHERE "
+  << "TABLE_SCHEMA='calculatorUsers' "
+  << "AND TABLE_NAME='" << tableNameSafe << "' "
+  << "AND COLUMN_NAME='" << columnNameSafe << "' ";
+  DatabaseQuery theQuery(theRoutines, commentsStream.str());
+  return theQuery.flagQuerySucceeded;
+#else
+  return false;
+#endif
+}
+
+bool DatabaseRoutinesGlobalFunctions::CreateColumn
+(const std::string& columnNameUnsafe, const std::string& tableNameUnsafe,
+ std::stringstream& commentsOnCreation)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::CreateColumn");
+#ifdef MACRO_use_MySQL
+  DatabaseRoutines theRoutines;
+//  stOutput << "Creating column pt 1.";
+  theRoutines.startMySQLDatabaseIfNotAlreadyStarted();
+  if (!DatabaseRoutinesGlobalFunctions::TableExists(tableNameUnsafe, commentsOnCreation))
+    return false;
+//  stOutput << "Creating column pt 2.";
+  std::string columnNameSafe=CGI::StringToURLString(columnNameUnsafe);
+  std::string tableNameSafe=CGI::StringToURLString(tableNameUnsafe);
+//  stOutput << "<hr>BEFORE alter command";
+  std::stringstream commandStream;
+  commandStream << "ALTER TABLE \"" << tableNameSafe << "\""
+  << " ADD \"" << columnNameSafe << "\" "
+  << "VARCHAR(50)";
+//  stOutput << "<br>got to here<br>hrbr<br>";
+  DatabaseQuery theQuery(theRoutines, commandStream.str());
+//  stOutput << "<br>AFTER alter command: " << theRoutines.comments.str() << "<hr>";
+  return theQuery.flagQuerySucceeded;
+#else
+  return false;
+#endif
+
+}
+
+bool DatabaseRoutinesGlobalFunctions::TableExists
+(const std::string& tableName, std::stringstream& comments)
+{
+#ifdef MACRO_use_MySQL
+  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::TableExists");
+  if (!theGlobalVariables.flagLoggedIn)
+    return false;
+  DatabaseRoutines theRoutines;
+  if (! theRoutines.startMySQLDatabaseIfNotAlreadyStarted())
+    crash << "Failed to start database. " << crash;
+  return theRoutines.TableExists(tableName);
+#else
+  return true;
+#endif
+}
+
+bool DatabaseRoutinesGlobalFunctions::FetchEntry
+(const std::string& inputUsername, const std::string& tableName, const std::string& keyName,
+ std::string& output, std::stringstream& comments)
+{
+#ifdef MACRO_use_MySQL
+  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::FetchEntry");
+  if (!theGlobalVariables.flagLoggedIn)
+    return false;
+  DatabaseRoutines theRoutines;
+  UserCalculator theUser;
+  theUser.usernameUnsafe=inputUsername;
+  theUser.SetCurrentTable(tableName);
+  return theUser.FetchOneColumn(keyName, output, theRoutines, true, &comments);
 #else
   return true;
 #endif
@@ -144,9 +246,10 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
 //  stOutput << "<hr> querying: " << inputQuery;
   if (this->parent->connection==0)
     if (!this->parent->startMySQLDatabase())
-    { //stOutput << "Failed to start database. Comments generated during the failure: " << inputParent.comments.str();
+    { stOutput << "Failed to start database. Comments generated during the failure: " << inputParent.comments.str();
       return;
     }
+//  stOutput << "got to here in the queery query part -1";
   int queryError=mysql_query(this->parent->connection, this->theQueryString.c_str());
   if (queryError!=0)
   { if (this->failurecomments!=0)
@@ -156,7 +259,9 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
     return;
   }
   this->flagQuerySucceeded=true;
+  //stOutput << "got to here in the queery query";
   this->theQueryResult= mysql_store_result(this->parent->connection);
+  //stOutput << "and even to here";
   if (this->theQueryResult==0)
   { if (this->failurecomments!=0)
       *this->failurecomments << "Query succeeded, mysql_store_result returned non-zero. ";
@@ -166,6 +271,7 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   int numFields=mysql_num_fields(this->theQueryResult);
   if (numFields<1)
     return;
+//  stOutput << "here i'm now...";
   for (int i=0; i<this->allQueryResultStrings.size; i++)
   { this->currentRow=mysql_fetch_row(this->theQueryResult);
     if (this->currentRow==0)
@@ -203,8 +309,8 @@ bool UserCalculator::FetchOneColumn
   if (recomputeSafeEntries)
     this->ComputeSafeObjectNames();
   std::stringstream queryStream;
-  queryStream << "SELECT " << CGI::StringToURLString(columnNameUnsafe)
-  << " FROM calculatorUsers.\"" << this->currentTableSafe << "\" WHERE user='"
+  queryStream << "SELECT \"" << CGI::StringToURLString(columnNameUnsafe)
+  << "\" FROM calculatorUsers.\"" << this->currentTableSafe << "\" WHERE user='"
   << this->usernameSafe<< "'";
   DatabaseQuery theQuery(theRoutines, queryStream.str());
   outputUnsafe="";
@@ -219,8 +325,8 @@ bool UserCalculator::FetchOneColumn
     return false;
   }
   outputUnsafe= CGI::URLStringToNormal(theQuery.firstResultString);
-  stOutput << "Input entry as fetched from the system: " <<  theQuery.firstResultString
-  << "<br>When made unsafe: " << outputUnsafe << "<br>";
+//  stOutput << "Input entry as fetched from the system: " <<  theQuery.firstResultString
+//  << "<br>When made unsafe: " << outputUnsafe << "<br>";
   return true;
 }
 
@@ -391,18 +497,33 @@ bool UserCalculator::SetColumnEntry
 { MacroRegisterFunctionWithName("UserCalculator::SetColumnEntry");
   if (recomputeSafeEntries)
     this->ComputeSafeObjectNames();
+  std::string unused;
   std::string columnNameSafe = CGI::StringToURLString(columnNameUnsafe);
   std::string valueSafe= CGI::StringToURLString(theValueUnsafe);
-  std::stringstream queryStream;
-  queryStream << "UPDATE calculatorUsers.users SET \"" << columnNameSafe << "\"='" << valueSafe
-  << "' WHERE user='" << this->usernameSafe << "'";
-//  stOutput << "Got to here: " << columnName << ". ";
-  DatabaseQuery theDBQuery(theRoutines, queryStream.str(), failureComments);
-  if (!theDBQuery.flagQuerySucceeded)
-  { if (failureComments!=0)
-      *failureComments << "Failed to set value to column: " << columnNameUnsafe << ". ";
-    stOutput << "Failed to set value to column: " << columnNameUnsafe << ". ";
-    return false;
+  if (this->FetchOneColumn(columnNameUnsafe, unused, theRoutines, false, 0))
+  { std::stringstream queryStream;
+    queryStream << "UPDATE calculatorUsers.\"" << this->currentTableSafe << "\" SET \"" << columnNameSafe << "\"='"
+    << valueSafe << "' WHERE user='" << this->usernameSafe << "'";
+    //  stOutput << "Got to here: " << columnName << ". ";
+    DatabaseQuery theDBQuery(theRoutines, queryStream.str(), failureComments);
+    if (!theDBQuery.flagQuerySucceeded)
+    { if (failureComments!=0)
+        *failureComments << "Failed update an already existing entry in column: " << columnNameUnsafe << ". ";
+      stOutput << "Failed update an already existing entry in column: " << columnNameUnsafe << ". ";
+      return false;
+    }
+  } else
+  { std::stringstream queryStream;
+    queryStream << "INSERT INTO calculatorUsers.\"" << this->currentTableSafe
+    << "\"(user, \"" << columnNameSafe << "\") VALUES('" << this->usernameSafe << "', '"
+    << valueSafe << "')";
+    DatabaseQuery theDBQuery(theRoutines, queryStream.str());
+    if (!theDBQuery.flagQuerySucceeded)
+    { if (failureComments!=0)
+        *failureComments << "Failed to insert entry in table: " << this->currentTableUnsafe << ". ";
+      stOutput << "Failed to insert entry in table: " << this->currentTableUnsafe << ". ";
+      return false;
+    }
   }
   return true;
 }
@@ -410,7 +531,7 @@ bool UserCalculator::SetColumnEntry
 bool UserCalculator::ComputeSafeObjectNames()
 { MacroRegisterFunctionWithName("UserCalculator::ComputeSafeObjectNames");
   this->usernameSafe= CGI::StringToURLString(this->usernameUnsafe);
-  this->currentTableSafe= CGI::StringToURLString(this->currentTableSafe);
+  this->currentTableSafe= CGI::StringToURLString(this->currentTableUnsafe);
   this->emailSafe= CGI::StringToURLString(this->emailUnsafe);
   return true;
 }
@@ -425,6 +546,13 @@ bool UserCalculator::SetPassword(DatabaseRoutines& theRoutines, bool recomputeSa
   this->SetColumnEntry("password", this->enteredShaonedSaltedPassword, theRoutines, false, &mustdeleteme);
   //stOutput << mustdeleteme.str();
   return true;
+}
+
+bool DatabaseRoutines::startMySQLDatabaseIfNotAlreadyStarted()
+{ MacroRegisterFunctionWithName("DatabaseRoutines::startMySQLDatabaseIfNotAlreadyStarted");
+  if (this->connection!=0)
+    return true;
+  return this->startMySQLDatabase();
 }
 
 bool DatabaseRoutines::startMySQLDatabase()
@@ -525,7 +653,7 @@ bool DatabaseRoutines::TableExists(const std::string& tableNameUnsafe)
 { MacroRegisterFunctionWithName("DatabaseRoutines::TableExists");
   std::string tableNameSafe=CGI::StringToURLString(tableNameUnsafe);
   std::stringstream queryStream;
-  queryStream << "SELECT 1 FROM " << this->theDatabaseName << "." << tableNameSafe;
+  queryStream << "SELECT 1 FROM " << this->theDatabaseName << ".\"" << tableNameSafe << "\"";
   bool result=(mysql_query(this->connection, queryStream.str().c_str())==0);
   *this << "Fired up create table query: " << queryStream.str() << ". ";
   mysql_free_result( mysql_use_result(this->connection));

@@ -77,8 +77,11 @@ public:
   bool PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream& comments);
   bool PrepareCommands(Calculator& theInterpreter, std::stringstream& comments);
   std::string CleanUpCommandString(const std::string& inputCommand);
+  void InterpretNotByCalculator(SyntacticElementHTML& inputOutput);
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
+  void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
   std::string GetSubmitAnswersJavascript();
+  std::string GetTableName();
   void LoadCurrentProblemItem();
   std::string LoadAndInterpretCurrentProblemItem();
   bool FindExamItem();
@@ -225,31 +228,37 @@ bool CalculatorHTML::IsStudentAnswer(SyntacticElementHTML& inputElt)
 { if (inputElt.syntacticRole!="command")
     return false;
   std::string tagClass=inputElt.GetKeyValue("class");
-  return tagClass=="calculatorStudentAnswer";
+  return tagClass=="calculatorStudentAnswerWithButton";
 }
 
 std::string CalculatorHTML::GetSubmitAnswersJavascript()
 { std::stringstream out;
   out
   << "<script type=\"text/javascript\"> \n"
-  << "function submitAnswers(){\n"
+  << "function submitAnswers(idAnswer, idVerification){\n"
+  << "  span = document.getElementById(idVerification);\n"
+  << "  if (span==null){\n"
+  << "    span = document.createElement('span');\n"
+  << "    document.body.appendChild(span);\n"
+  << "    span.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idVerificatino + \"MISSING! </span>\";\n"
+  << "  }\n"
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n";
   out
   << "  var params=\"" << this->ToStringCalculatorArgumentsForProblem("submitProblem") << "\";\n";
-  for (int i=0; i<this->theContent.size; i++)
-    if (this->IsStudentAnswer(this->theContent[i]))
-      out << "  params+=\"&calculatorStudentAnswer" << this->theContent[i].GetKeyValue("id") << "=\"+encodeURIComponent("
-      << "document.getElementById('" << this->theContent[i].GetKeyValue("id") << "').value);\n";
+//Old code, submits all answers. May need to be used as an alternative
+//submission option.
+//  for (int i=0; i<this->theContent.size; i++)
+//    if (this->IsStudentAnswer(this->theContent[i]))
+//      out << "  params+=\"&calculatorStudentAnswerWithButton" << this->theContent[i].GetKeyValue("id") << "=\"+encodeURIComponent("
+//      << "document.getElementById('" << this->theContent[i].GetKeyValue("id") << "').value);\n";
+  out
+  << "  params+=\"&calculatorStudentAnswerWithButton\" + idAnswer\n"
+  << "          + \"=\"+encodeURIComponent(document.getElementById(idAnswer)).value;\n";
   out
   << "  https.send(params);\n"
   << "  https.onload = function() {\n"
-  << "  span = document.getElementById('calculatorEvaluation');\n"
-  << "  if (span==null){\n"
-  << "    span = document.createElement('span');\n"
-  << "    document.body.appendChild(span);\n"
-  << "  }\n"
   << "  span.innerHTML=https.responseText;\n"
   << "}\n"
   << "}\n"
@@ -280,20 +289,40 @@ int WebWorker::ProcessSubmitProblem()
   std::stringstream studentAnswerStream, completedProblemStream;
   completedProblemStream << theProblem.problemCommandsNoVerification;
   std::string studentAnswerNameReader;
+  List<std::string> studentTagsAnswered;
   List<std::string> studentAnswersUnadulterated;
+  bool found=false;
   for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
-    if (MathRoutines::StringBeginsWith(theGlobalVariables.webFormArgumentNames[i], "calculatorStudentAnswer", &studentAnswerNameReader))
-    { studentAnswerStream << studentAnswerNameReader << "= ("
+    if (MathRoutines::StringBeginsWith(theGlobalVariables.webFormArgumentNames[i], "calculatorStudentAnswerWithButton", &studentAnswerNameReader))
+    { found=true;
+      studentAnswerStream << studentAnswerNameReader << "= ("
       << CGI::URLStringToNormal( theGlobalVariables.webFormArguments[i]) << ");";
       studentAnswersUnadulterated.AddOnTop(CGI::URLStringToNormal( theGlobalVariables.webFormArguments[i]));
+      studentTagsAnswered.AddOnTop(studentAnswerNameReader);
       if (*studentAnswersUnadulterated.LastObject()=="")
       { stOutput << "<b>You appear to have submitted at least one empty answer. Please resubmit. </b>";
         return 0;
       }
     }
+  if (!found)
+  { stOutput << "<b>Something is wrong: I found no submitted answers.</b>";
+    return 0;
+  }
   completedProblemStream << studentAnswerStream.str();
   completedProblemStream << "SeparatorBetweenSpans; ";
-  completedProblemStream << theProblem.problemCommandsVerification;
+  found=false;
+  for (int i=0; i<theProblem.theContent.size; i++)
+    if (theProblem.theContent[i].IsAnswerVerification())
+      if (studentTagsAnswered.Contains(theProblem.theContent[i].GetTagClass()))
+      { completedProblemStream << theProblem.CleanUpCommandString(theProblem.theContent[i].content);
+        found=true;
+      }
+  if (!found)
+  { stOutput << "<b>Something is wrong: I found the following answers to the following tags: "
+    << studentTagsAnswered.ToStringCommaDelimited()
+    << " but I was not able to find the tags in the problem template.</b>";
+    return 0;
+  }
 //  stOutput << "input to the calculator: " << completedProblemStream.str() << "<hr>";
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
   theInterpreter.init();
@@ -467,7 +496,7 @@ std::string SyntacticElementHTML::ToStringInterpretted()
   std::string tagClass=this->GetKeyValue("class");
   if (tagClass=="calculatorAnswerVerification")
     return "";
-  if (tagClass=="calculatorExamProblem" || tagClass=="calculatorExamIntermediate")
+  if (this->IsInterpretedNotByCalculator())
     return this->interpretedCommand;
   std::stringstream out;
   out << this->ToStringOpenTag();
@@ -482,7 +511,8 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator()
   if (this->syntacticRole!="command")
     return false;
   std::string tagClass=this->GetKeyValue("class");
-  return tagClass=="calculatorExamProblem" || tagClass== "calculatorExamIntermediate";
+  return tagClass=="calculatorExamProblem" || tagClass== "calculatorExamIntermediate"
+  || tagClass=="calculatorStudentAnswerWithButton";
 }
 
 bool SyntacticElementHTML::IsInterpretedByCalculatorDuringPreparation()
@@ -501,7 +531,7 @@ bool SyntacticElementHTML::IsAnswerVerification()
 bool SyntacticElementHTML::IsStudentAnswer()
 { if (this->syntacticRole!="command")
     return false;
-  return this->GetKeyValue("class")=="calculatorStudentAnswer";
+  return this->GetKeyValue("class")=="calculatorStudentAnswerWithButton";
 }
 
 bool CalculatorHTML::PrepareCommands(Calculator& theInterpreter, std::stringstream& comments)
@@ -579,7 +609,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     << "currentExamHome=" << currentExamHome << "&"
     << "currentExamIntermediate=&"
     << "currentExamFile=" << currentExamIntermediate << "&\"> Current homework. </a><br>";
-  if (this->flagIsExamProblem)
+  if (this->flagIsExamProblem && theGlobalVariables.userCalculatorRequestType!="examForReal")
     out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
     << this->ToStringCalculatorArgumentsForProblem("exercises")
     << "\">Link to this problem.</a>";
@@ -603,6 +633,32 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem(const std::str
 
 std::string SyntacticElementHTML::GetTagClass()
 { return this->GetKeyValue("class");
+}
+
+void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateStudentAnswerButton");
+  std::stringstream out;
+  out << inputOutput.ToStringOpenTag() << inputOutput.ToStringCloseTag();
+  std::string answerId = inputOutput.GetKeyValue("id");
+  if (answerId=="")
+  { out << "<b>Error: could not generate submit button: the answer area does not have a valid id</b>";
+    inputOutput.interpretedCommand=out.str();
+    return;
+  }
+  std::string answerEvaluationId=answerId+"Verification";
+  out << "<button class=\"submitButton\" onclick=\"submitAnswers('"
+  << answerId << "', '" << answerEvaluationId << "')\"> Submit </button>";
+  out << "<span id=\"" << answerEvaluationId << "\"> <b><span style=\"color:brown\">No answer submitted.</span></b></span>";
+  inputOutput.interpretedCommand=out.str();
+}
+
+void CalculatorHTML::InterpretNotByCalculator(SyntacticElementHTML& inputOutput)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretNotByCalculator");
+  std::string tagClass=inputOutput.GetTagClass();
+  if (tagClass=="calculatorExamProblem" || tagClass=="calculatorExamIntermediate")
+    this->InterpretGenerateLink(inputOutput);
+  else if (tagClass=="calculatorStudentAnswerWithButton")
+    this->InterpretGenerateStudentAnswerButton(inputOutput);
 }
 
 void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
@@ -635,15 +691,12 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretHtmlOneAttempt");
   std::stringstream out;
-  if (theGlobalVariables.userCalculatorRequestType=="examForReal")
-  {//we need to store the random seed.
-
-  }
   if (!this->flagRandomSeedGiven)
     this->randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
   std::string navigationLinks=this->ToStringProblemNavigation();
+  out << this->GetSubmitAnswersJavascript();
   if (navigationLinks!="")
-    out << "Links.<br>" << navigationLinks<< "<br>";
+    out << "Links.<br>" << navigationLinks << "<br>";
   if (!this->PrepareAndExecuteCommands(theInterpreter, comments))
     return false;
   bool moreThanOneCommand=false;
@@ -673,14 +726,31 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   }
   for (int i=0; i<this->theContent.size; i++)
     if (this->theContent[i].IsInterpretedNotByCalculator())
-      this->InterpretGenerateLink( this->theContent[i]);
+      this->InterpretNotByCalculator(this->theContent[i]);
   for (int i=0; i<this->theContent.size; i++)
     out << this->theContent[i].ToStringInterpretted();
 //   out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
 //   out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
   //  out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();
+  if (theGlobalVariables.flagLoggedIn)
+    if (theGlobalVariables.userCalculatorRequestType=="examForReal")
+    { //store the random seed.
+//      stOutput << "Storing random seed...";
+      std::stringstream convertSeedToString;
+      convertSeedToString << this->randomSeed;
+      DatabaseRoutinesGlobalFunctions::CreateColumn(this->fileName, this->GetTableName(), comments);
+      DatabaseRoutinesGlobalFunctions::SetEntry
+      (theGlobalVariables.userDefault, this->GetTableName(), this->fileName, convertSeedToString.str(), comments);
+      out << "<hr>Database comments: " << comments.str();
+    }
   this->outputHtml=out.str();
   return true;
+}
+
+std::string CalculatorHTML::GetTableName()
+{ std::string result="grades"+ CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
+//  stOutput << "GetTableName result: " << result << "<br>";
+  return result;
 }
 
 bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
@@ -690,6 +760,23 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
     return false;
   }
   this->NumAttemptsToInterpret=0;
+  if (theGlobalVariables.flagLoggedIn)
+    if (theGlobalVariables.userCalculatorRequestType=="examForReal")
+    { //load the random seed.
+      if (!DatabaseRoutinesGlobalFunctions::TableExists(this->GetTableName(),comments))
+        if (!DatabaseRoutinesGlobalFunctions::CreateTable(this->GetTableName(), comments))
+        { this->outputHtml ="<b>Failed to create table for storing exam results. </b>" +comments.str();
+          return false;
+        }
+      std::string storedRand;
+      if (DatabaseRoutinesGlobalFunctions::FetchEntry
+          (theGlobalVariables.userDefault, this->GetTableName(), this->fileName, storedRand, comments))
+      { this->flagRandomSeedGiven=true;
+        std::stringstream intReader(storedRand);
+        intReader >> this->randomSeed;
+      } //else
+        //out << "Failed to load random seed <br>";
+    }
   if (this->flagRandomSeedGiven)
     this->MaxInterpretationAttempts=1;
   srand (time(NULL));
@@ -725,9 +812,16 @@ std::string CalculatorHTML::ToStringParsingStack(List<SyntacticElementHTML>& the
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringParsingStack");
   std::stringstream out;
   out << "#Non-dummy elts: " << theStack.size-SyntacticElementHTML::ParsingNumDummyElements << ". ";
+
   for (int i=SyntacticElementHTML::ParsingNumDummyElements; i<theStack.size; i++)
-    out << "<span style=\"color:" << ((i%2==0) ? "orange":"blue") << "\">"
-    << theStack[i].ToStringDebug() << "</span>";
+  { out << "<span style=\"color:" << ((i%2==0) ? "orange":"blue") << "\">";
+    std::string theContent=theStack[i].ToStringDebug();
+    if (theContent.size()==0)
+      theContent= "<b>empty</b>";
+    else if (theContent==" ")
+      theContent="_";
+    out << theContent << "</span>";
+  }
   return out.str();
 }
 
@@ -773,10 +867,10 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   this->calculatorClasses.AddOnTop("calculator");
   this->calculatorClasses.AddOnTop("calculatorHidden");
   this->calculatorClasses.AddOnTop("calculatorAnswerVerification");
-  this->calculatorClasses.AddOnTop("calculatorStudentAnswer");
+  this->calculatorClasses.AddOnTop("calculatorStudentAnswerWithButton");
   this->calculatorClasses.AddOnTop("calculatorExamIntermediate");
   this->calculatorClasses.AddOnTop("calculatorExamProblem");
-  this->calculatorClasses.AddOnTop("setcalculatorExamProblem");
+  this->calculatorClasses.AddOnTop("setCalculatorExamProblem");
   this->calculatorClasses.AddOnTop("setCalculatorExamIntermediate");
   this->calculatorClasses.AddOnTop("setCalculatorExamHome");
   this->eltsStack.SetSize(0);
@@ -870,15 +964,16 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       eltsStack.RemoveLastObject();
       continue;
     }
+    if (last==" " &&
+        (secondToLast.syntacticRole=="<openTag" || thirdToLast.syntacticRole=="<openTag"
+         || fourthToLast.syntacticRole=="<openTag")
+        )
+    { eltsStack.RemoveLastObject();
+      continue;
+    }
     if (this->CanBeMerged(secondToLast, last))
     { secondToLast.content+=last.content;
       eltsStack.RemoveLastObject();
-      continue;
-    }
-    if (last==" " &&
-        (secondToLast.syntacticRole=="<openTag" || thirdToLast=="<openTag" || fourthToLast=="<openTag")
-        )
-    { eltsStack.RemoveLastObject();
       continue;
     }
     if (sixthToLast.syntacticRole=="<openTag" && fourthToLast=="=" && thirdToLast=="\""
@@ -913,7 +1008,10 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     if (eltsStack[i].syntacticRole!="")
       needNewTag=true;
     if (eltsStack[i].syntacticRole!="command" && eltsStack[i].syntacticRole!="" )
-      result=false;
+    { result=false;
+      comments << "<br>Syntactic element: " << eltsStack[i].ToStringDebug()
+      << " is not a command but has non-empty syntactic role.";
+    }
     if (!needNewTag)
       this->theContent.LastObject()->content+=eltsStack[i].content;
     else

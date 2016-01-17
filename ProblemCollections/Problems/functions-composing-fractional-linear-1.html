@@ -34,34 +34,34 @@ g{}({{x}})= \frac{ag x +bg}{cg x +dg};
 Answer: 
 
 \(f(g(x))=\)
-<textarea class="calculatorStudentAnswer" id="answerAlgebra" >
+<textarea class="calculatorStudentAnswerWithButton" id="AlgebraAnswer" >
 
 </textarea>
+
+<span class="calculatorAnswerVerification" id="verificationAlgebraAnswer">
+\(
+AlgebraAnswer-f{}(g{}(x))==0;
+\)
+</span>
 <br>
 The domain of \(f\circ g\) is:
 
 \(x\neq\)
-<textarea class="calculatorStudentAnswer" id="answerDomain" >
+<textarea class="calculatorStudentAnswerWithButton" id="DomainAnswer" >
 
-</textarea>. If there is more than value outside of the domain, separate the values by commas. 
-
-
-
-<span class="calculatorAnswerVerification">
+</textarea>
+<br> 
+If there is more than value outside of the domain, separate the values by commas. 
+<span class="calculatorAnswerVerification" id = "verificationDomainAnswer">
 \(
-answerAlgebra-f{}(g{}(x))==0;
-\)
-</span>
-<span class="calculatorAnswerVerification">
-\(
-(answerDomain==(
+(DomainAnswer==(
 Sequence{}(-dg/cg) \sqcup Sequence{}(-(df dg+cf bg)/(df cg 
-+cf ag)))) or ((answerDomain== (Sequence{}(-(df dg+cf bg)/(df cg 
++cf ag)))) or ((DomainAnswer== (Sequence{}(-(df dg+cf bg)/(df cg 
 +cf ag)) \sqcup Sequence{}(-dg/cg))));
 \)
 </span>
 <br>
-<button class="submitButton" onclick="submitAnswers()"> Submit </button>
-<span id ="calculatorEvaluation"></span>
+
+
 
 

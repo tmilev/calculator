@@ -274,6 +274,8 @@ class TrivialOuterAutomorphism
   }
 };
 
+
+// see operator* for how this is supposed to work
 template <typename helt, typename kelt, typename oa>
 class SemidirectProductElement
 { public:
@@ -289,6 +291,7 @@ class SemidirectProductElement
 
   void Invert()
   { this->h.Invert();
+    this->k = oa::oa(this->h,this->k);
     this->k.Invert();
   }
 

@@ -287,6 +287,7 @@ public:
   void ComputeGeneratorCommutationRelations();
   void VerifyCCSizesAndRepresentativesFormula();
   void VerifyWords();
+  void VerifyArithmetic();
   std::string PrettyPrintGeneratorCommutationRelations();
   std::string PrettyPrintCharacterTable();
   JSData RepresentationDataIntoJS();
@@ -894,7 +895,7 @@ class GroupRepresentation
   bool CheckInitialization();
 
   template <typename elementSomeGroup>
-  bool GetMatrixOfElement(elementSomeGroup& g, Matrix<coefficient>& out);
+  bool GetMatrixOfElement(const elementSomeGroup& g, Matrix<coefficient>& out);
 
   void ComputeCharacter();
 
@@ -904,6 +905,18 @@ class GroupRepresentation
 
   bool VerifyRepresentation();
 
+  bool VerifyRepresentationExpensive()
+  { List<Matrix<coefficient> > repms;
+    repms.SetSize(this->ownerGroup->theElements.size);
+    for(int i=0; i < this->ownerGroup->theElements.size; i++)
+      this->GetMatrixOfElement(this->ownerGroup->theElements[i], repms[i]);
+    for(int i = 0; i < this->ownerGroup->theElements.size; i++)
+      for(int j = 0; j < this->ownerGroup->theElements.size; j++)
+        if(repms[i]*repms[j] != repms[this->ownerGroup->theElements.GetIndex(this->ownerGroup->theElements[i]*this->ownerGroup->theElements[j])])
+          crash << "bad rep" << crash;
+    stOutput << "Expensive verification complete, this is indeed a representation\n";
+    return true;
+  }
   std::string DescribeAsDirectSum();
 
   JSData JSOut();
@@ -931,7 +944,7 @@ class GroupRepresentation
 
 template <typename someGroup, typename coefficient>
 template <typename elementSomeGroup>
-bool GroupRepresentation<someGroup, coefficient>::GetMatrixOfElement(elementSomeGroup& g, Matrix<coefficient>& out)
+bool GroupRepresentation<someGroup, coefficient>::GetMatrixOfElement(const elementSomeGroup& g, Matrix<coefficient>& out)
 { out.MakeID(this->generatorS[0]);
   List<int> word;
   if(!this->ownerGroup->GetWord(g, word))
@@ -1466,7 +1479,7 @@ GroupRepresentation<someGroup, coefficient> SubgroupData<someGroup, elementSomeG
       stOutput << "Multiplying cosets: " << ci << " represented by " << cosets[ci].representative
                << " multiplied on the left by " << g << " returns " << k << "which belongs to coset "
                << kcsi << " and is designated (" << ck << ", " << hk << ")\n";
-      Matrix<Rational> ikblock;
+      Matrix<coefficient> ikblock;
       in.GetMatrixOfElement(hk,ikblock);
       out.generatorS[i].AssignBlock(ikblock, kcsi*ikblock.NumRows, ci*ikblock.NumCols);
     }
@@ -1476,14 +1489,13 @@ GroupRepresentation<someGroup, coefficient> SubgroupData<someGroup, elementSomeG
   for(int i=0; i<out.generatorS.size; i++)
     stOutput << this->theGroup->generators[i] << ' ' << out.generatorS[i].GetTrace() << '\n' << out.generatorS[i].ToStringPlainText() << '\n';
   if(!out.VerifyRepresentation())
-  { if(!in.VerifyRepresentation())
-    { stOutput << "Well, we weren't given a proper representation either.  Its actual generator commutation relations are\n";
-      FiniteGroup<Matrix<Rational> > ingroup;
-      ingroup.generators = in.generatorS;
-      stOutput << "Generator commutation relations for input 'representation':\n" << ingroup.PrettyPrintGeneratorCommutationRelations();
-      stOutput << "It was supposed to be a quotient group of\n" << this->theGroup->PrettyPrintGeneratorCommutationRelations();
-    }
-    FiniteGroup<Matrix<Rational> > outgroup;
+  { if(!in.VerifyRepresentationExpensive())
+      stOutput << "Well, we weren't given a proper representation either.";
+    FiniteGroup<Matrix<coefficient> > ingroup;
+    ingroup.generators = in.generatorS;
+    stOutput << "Generator commutation relations for input representation:\n" << ingroup.PrettyPrintGeneratorCommutationRelations();
+    stOutput << "a quotient group of\n" << this->theSubgroup->PrettyPrintGeneratorCommutationRelations();
+    FiniteGroup<Matrix<coefficient> > outgroup;
     outgroup.generators = out.generatorS;
     stOutput << "Generator commutation relations for 'representation':\n" <<outgroup.PrettyPrintGeneratorCommutationRelations();
     stOutput << "It was supposed to be a quotient group of\n" << this->theGroup->PrettyPrintGeneratorCommutationRelations();

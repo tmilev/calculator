@@ -29,6 +29,10 @@ public:
   std::string ToStringCloseTag();
   std::string GetTagClass();
   std::string ToStringDebug();
+  std::string GetMyVerificationTag()
+  { return this->GetVerificationTag(this->GetKeyValue("id"));
+  }
+  static std::string GetVerificationTag(const std::string& idTagToBeVerified);
   SyntacticElementHTML(){}
   SyntacticElementHTML(const std::string& inputContent)
   { this->content=inputContent;
@@ -66,6 +70,7 @@ public:
   bool flagLoadedSuccessfully;
   static const std::string RelativePhysicalFolderProblemCollections;
   std::stringstream comments;
+  bool CheckContent(std::stringstream& comments);
   bool CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
   bool LoadMe(std::stringstream& comments);
   bool ParseHTML(std::stringstream& comments);
@@ -236,17 +241,20 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   out
   << "<script type=\"text/javascript\"> \n"
   << "function submitAnswers(idAnswer, idVerification){\n"
-  << "  span = document.getElementById(idVerification);\n"
-  << "  if (span==null){\n"
-  << "    span = document.createElement('span');\n"
-  << "    document.body.appendChild(span);\n"
-  << "    span.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idVerificatino + \"MISSING! </span>\";\n"
+  << "  spanVerification = document.getElementById(idVerification);\n"
+  << "  if (spanVerification==null){\n"
+  << "    spanVerification = document.createElement('span');\n"
+  << "    document.body.appendChild(spanVerification);\n"
+  << "    spanVerification.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idVerification + \"MISSING! </span>\";\n"
   << "  }\n"
+  << "  spanStudentAnswer = document.getElementById(idAnswer);\n"
+  << "  var params=\"" << this->ToStringCalculatorArgumentsForProblem("submitProblem") << "\";\n"
+  << "  params+=\"&calculatorStudentAnswerWithButton\" + idAnswer\n"
+  << "          + \"=\"+encodeURIComponent(spanStudentAnswer.value);\n"
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
-  << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n";
-  out
-  << "  var params=\"" << this->ToStringCalculatorArgumentsForProblem("submitProblem") << "\";\n";
+  << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
+;
 //Old code, submits all answers. May need to be used as an alternative
 //submission option.
 //  for (int i=0; i<this->theContent.size; i++)
@@ -254,13 +262,10 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
 //      out << "  params+=\"&calculatorStudentAnswerWithButton" << this->theContent[i].GetKeyValue("id") << "=\"+encodeURIComponent("
 //      << "document.getElementById('" << this->theContent[i].GetKeyValue("id") << "').value);\n";
   out
-  << "  params+=\"&calculatorStudentAnswerWithButton\" + idAnswer\n"
-  << "          + \"=\"+encodeURIComponent(document.getElementById(idAnswer)).value;\n";
-  out
-  << "  https.send(params);\n"
   << "  https.onload = function() {\n"
-  << "  span.innerHTML=https.responseText;\n"
-  << "}\n"
+  << "    spanVerification.innerHTML=https.responseText;\n"
+  << "  }\n"
+  << "  https.send(params);\n"
   << "}\n"
   << "</script>";
   return out.str();
@@ -290,6 +295,7 @@ int WebWorker::ProcessSubmitProblem()
   completedProblemStream << theProblem.problemCommandsNoVerification;
   std::string studentAnswerNameReader;
   List<std::string> studentTagsAnswered;
+  List<std::string> studentTagVerifications;
   List<std::string> studentAnswersUnadulterated;
   bool found=false;
   for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
@@ -299,6 +305,7 @@ int WebWorker::ProcessSubmitProblem()
       << CGI::URLStringToNormal( theGlobalVariables.webFormArguments[i]) << ");";
       studentAnswersUnadulterated.AddOnTop(CGI::URLStringToNormal( theGlobalVariables.webFormArguments[i]));
       studentTagsAnswered.AddOnTop(studentAnswerNameReader);
+      studentTagVerifications.AddOnTop(SyntacticElementHTML::GetVerificationTag(studentAnswerNameReader));
       if (*studentAnswersUnadulterated.LastObject()=="")
       { stOutput << "<b>You appear to have submitted at least one empty answer. Please resubmit. </b>";
         return 0;
@@ -308,19 +315,24 @@ int WebWorker::ProcessSubmitProblem()
   { stOutput << "<b>Something is wrong: I found no submitted answers.</b>";
     return 0;
   }
+  stOutput << "Your answer: " << studentAnswerStream.str();
   completedProblemStream << studentAnswerStream.str();
   completedProblemStream << "SeparatorBetweenSpans; ";
   found=false;
   for (int i=0; i<theProblem.theContent.size; i++)
-    if (theProblem.theContent[i].IsAnswerVerification())
-      if (studentTagsAnswered.Contains(theProblem.theContent[i].GetTagClass()))
-      { completedProblemStream << theProblem.CleanUpCommandString(theProblem.theContent[i].content);
-        found=true;
-      }
+  { if (!theProblem.theContent[i].IsAnswerVerification())
+      continue;
+    if (!studentTagVerifications.Contains(theProblem.theContent[i].GetKeyValue("id")))
+      continue;
+    completedProblemStream << theProblem.CleanUpCommandString(theProblem.theContent[i].content);
+    found=true;
+  }
   if (!found)
-  { stOutput << "<b>Something is wrong: I found the following answers to the following tags: "
+  { stOutput << "<b>Something is wrong:</b> I found the answers:<br>"
+    << studentAnswerStream.str()
+    << " to the tags:<br>"
     << studentTagsAnswered.ToStringCommaDelimited()
-    << " but I was not able to find the tags in the problem template.</b>";
+    << " but I was not able to find the tags in the problem template.";
     return 0;
   }
 //  stOutput << "input to the calculator: " << completedProblemStream.str() << "<hr>";
@@ -469,6 +481,10 @@ std::string SyntacticElementHTML::ToStringDebug()
   return out.str();
 }
 
+std::string SyntacticElementHTML::GetVerificationTag(const std::string& idTagToBeVerified)
+{ return "verification_"+idTagToBeVerified;
+}
+
 std::string SyntacticElementHTML::GetKeyValue(const std::string& theKey)
 { MacroRegisterFunctionWithName("SyntacticElementHTML::GetKeyValue");
   int theIndex=this->tagKeys.GetIndex(theKey);
@@ -600,8 +616,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   std::string currentExamIntermediate=theGlobalVariables.GetWebInput("currentExamIntermediate");
   out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
   << WebWorker::ToStringCalcArgsExcludeRequestPasswordExamDetails()
-  << "currentExamHome=&"
-  << "currentExamIntermediate=&"
+  << "currentExamHome=&" << "currentExamIntermediate=&"
   << "currentExamFile=" << currentExamHome << "&\"> Course homework home. </a><br>";
   if (this->flagIsExamProblem && currentExamIntermediate!="")
     out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
@@ -645,7 +660,7 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     inputOutput.interpretedCommand=out.str();
     return;
   }
-  std::string answerEvaluationId=answerId+"Verification";
+  std::string answerEvaluationId=inputOutput.GetMyVerificationTag();
   out << "<button class=\"submitButton\" onclick=\"submitAnswers('"
   << answerId << "', '" << answerEvaluationId << "')\"> Submit </button>";
   out << "<span id=\"" << answerEvaluationId << "\"> <b><span style=\"color:brown\">No answer submitted.</span></b></span>";
@@ -812,7 +827,6 @@ std::string CalculatorHTML::ToStringParsingStack(List<SyntacticElementHTML>& the
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringParsingStack");
   std::stringstream out;
   out << "#Non-dummy elts: " << theStack.size-SyntacticElementHTML::ParsingNumDummyElements << ". ";
-
   for (int i=SyntacticElementHTML::ParsingNumDummyElements; i<theStack.size; i++)
   { out << "<span style=\"color:" << ((i%2==0) ? "orange":"blue") << "\">";
     std::string theContent=theStack[i].ToStringDebug();
@@ -1021,6 +1035,22 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
           this->theContent.AddOnTop(emptyElt);
         }
       this->theContent.AddOnTop(eltsStack[i]);
+    }
+  }
+  if (result)
+    result=this->CheckContent(comments);
+  return result;
+}
+
+bool CalculatorHTML::CheckContent(std::stringstream& comments)
+{ MacroRegisterFunctionWithName("CalculatorHTML::CheckContent");
+  bool result=true;
+  for (int i=0; i<this->theContent.size; i++)
+  { SyntacticElementHTML& currentElt=this->theContent[i];
+    if (currentElt.syntacticRole=="command" && currentElt.IsStudentAnswer() &&
+        currentElt.GetKeyValue("id").find('=')!=std::string::npos)
+    { result=false;
+      comments << "Error: the id of tag " << currentElt.ToStringDebug() << " contains the equality sign which is not allowed. ";
     }
   }
   return result;

@@ -56,6 +56,7 @@ public:
   bool flagIsExamHome;
   bool flagIsExamIntermediate;
   bool flagIsExamProblem;
+  std::string databaseInfo;
   std::string problemCommandsWithInbetweens;
   std::string problemCommandsNoVerification;
   std::string problemCommandsVerification;
@@ -73,6 +74,8 @@ public:
   bool CheckContent(std::stringstream& comments);
   bool CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
   bool LoadMe(std::stringstream& comments);
+  bool ParseAndInterpretDatabaseInfo(std::stringstream& comments);
+  void GenerateDatabaseInfo();
   bool ParseHTML(std::stringstream& comments);
   bool IsSplittingChar(const std::string& input);
   bool IsStudentAnswer(SyntacticElementHTML& inputElt);
@@ -86,7 +89,7 @@ public:
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
   void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
   std::string GetSubmitAnswersJavascript();
-  std::string GetTableName();
+  std::string GetDatabaseTableName();
   void LoadCurrentProblemItem();
   std::string LoadAndInterpretCurrentProblemItem();
   bool FindExamItem();
@@ -315,7 +318,6 @@ int WebWorker::ProcessSubmitProblem()
   { stOutput << "<b>Something is wrong: I found no submitted answers.</b>";
     return 0;
   }
-  stOutput << "Your answer: " << studentAnswerStream.str();
   completedProblemStream << studentAnswerStream.str();
   completedProblemStream << "SeparatorBetweenSpans; ";
   found=false;
@@ -367,14 +369,23 @@ int WebWorker::ProcessSubmitProblem()
     if (!isCorrect)
       break;
   }
+  stOutput << "<table width=\"300\"><tr><td>";
   if (!isCorrect)
     stOutput << "<span style=\"color:red\"><b>Your answer appears to be incorrect.</b></span>";
   else
     stOutput << "<span style=\"color:green\"><b>Correct!</b></span>";
+  stOutput << "</td></tr>";
+  if (!isCorrect)
+  {
+  }
+
+  stOutput << "<tr><td>Your answer was: " << studentAnswerStream.str() << "</td></tr>";
   if (!theGlobalVariables.flagLoggedIn)
   { stOutput << "<br><b>Submitting problem solutions allowed only for logged-in users. </b>";
     return 0;
   }
+
+  stOutput << "</table>";
 //  stOutput << "<hr>" << theInterpreter.outputString << "<hr><hr><hr><hr><hr><hr>";
 //  stOutput << this->ToStringCalculatorArgumentsHumanReadable();
   //Calculator answerInterpretter;
@@ -653,17 +664,20 @@ std::string SyntacticElementHTML::GetTagClass()
 void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateStudentAnswerButton");
   std::stringstream out;
-  out << inputOutput.ToStringOpenTag() << inputOutput.ToStringCloseTag();
+  out << "<table><tr>";
+  out << "<td>" << inputOutput.ToStringOpenTag() << inputOutput.ToStringCloseTag() << "</td>";
   std::string answerId = inputOutput.GetKeyValue("id");
   if (answerId=="")
-  { out << "<b>Error: could not generate submit button: the answer area does not have a valid id</b>";
-    inputOutput.interpretedCommand=out.str();
-    return;
+    out << "<td><b>Error: could not generate submit button: the answer area does not have a valid id</b></td>";
+  else
+  { std::string answerEvaluationId=inputOutput.GetMyVerificationTag();
+    out << "<td><button class=\"submitButton\" onclick=\"submitAnswers('"
+    << answerId << "', '" << answerEvaluationId << "')\"> Submit </button></td>"
+    << "<td>";
+    out << "<span id=\"" << answerEvaluationId << "\"> <b><span style=\"color:brown\">No answer submitted.</span></b></span></td>";
   }
-  std::string answerEvaluationId=inputOutput.GetMyVerificationTag();
-  out << "<button class=\"submitButton\" onclick=\"submitAnswers('"
-  << answerId << "', '" << answerEvaluationId << "')\"> Submit </button>";
-  out << "<span id=\"" << answerEvaluationId << "\"> <b><span style=\"color:brown\">No answer submitted.</span></b></span>";
+  out << "</tr></table>";
+
   inputOutput.interpretedCommand=out.str();
 }
 
@@ -751,21 +765,40 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     if (theGlobalVariables.userCalculatorRequestType=="examForReal")
     { //store the random seed.
 //      stOutput << "Storing random seed...";
-      std::stringstream convertSeedToString;
-      convertSeedToString << this->randomSeed;
-      DatabaseRoutinesGlobalFunctions::CreateColumn(this->fileName, this->GetTableName(), comments);
+      this->GenerateDatabaseInfo();
+      DatabaseRoutinesGlobalFunctions::CreateColumn(this->fileName, this->GetDatabaseTableName(), comments);
       DatabaseRoutinesGlobalFunctions::SetEntry
-      (theGlobalVariables.userDefault, this->GetTableName(), this->fileName, convertSeedToString.str(), comments);
+      (theGlobalVariables.userDefault, this->GetDatabaseTableName(), this->fileName, this->databaseInfo, comments);
       out << "<hr>Database comments: " << comments.str();
     }
   this->outputHtml=out.str();
   return true;
 }
 
-std::string CalculatorHTML::GetTableName()
+std::string CalculatorHTML::GetDatabaseTableName()
 { std::string result="grades"+ CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
-//  stOutput << "GetTableName result: " << result << "<br>";
+//  stOutput << "GetDatabaseTableName result: " << result << "<br>";
   return result;
+}
+
+bool CalculatorHTML::ParseAndInterpretDatabaseInfo(std::stringstream& comments)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ParseAndInterpretDatabaseInfo");
+  HashedList<std::string, MathRoutines::hashString> theKeys;
+  List<std::string> theValues;
+  CGI::ChopCGIInputStringToMultipleStrings(this->databaseInfo, theValues, theKeys, this->comments);
+  if (theKeys.Contains("randomSeed"))
+  { std::stringstream reader(theValues[theKeys.GetIndex("randomSeed")]);
+    reader >> this->randomSeed;
+    this->flagRandomSeedGiven=true;
+  }
+  return true;
+}
+
+void CalculatorHTML::GenerateDatabaseInfo()
+{ MacroRegisterFunctionWithName("CalculatorHTML::GenerateDatabaseInfo");
+  std::stringstream out;
+  out << "randomSeed=" << this->randomSeed << "&";
+  this->databaseInfo=out.str();
 }
 
 bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
@@ -778,19 +811,17 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
   if (theGlobalVariables.flagLoggedIn)
     if (theGlobalVariables.userCalculatorRequestType=="examForReal")
     { //load the random seed.
-      if (!DatabaseRoutinesGlobalFunctions::TableExists(this->GetTableName(),comments))
-        if (!DatabaseRoutinesGlobalFunctions::CreateTable(this->GetTableName(), comments))
+      if (!DatabaseRoutinesGlobalFunctions::TableExists(this->GetDatabaseTableName(),comments))
+        if (!DatabaseRoutinesGlobalFunctions::CreateTable(this->GetDatabaseTableName(), comments))
         { this->outputHtml ="<b>Failed to create table for storing exam results. </b>" +comments.str();
           return false;
         }
-      std::string storedRand;
       if (DatabaseRoutinesGlobalFunctions::FetchEntry
-          (theGlobalVariables.userDefault, this->GetTableName(), this->fileName, storedRand, comments))
-      { this->flagRandomSeedGiven=true;
-        std::stringstream intReader(storedRand);
-        intReader >> this->randomSeed;
-      } //else
-        //out << "Failed to load random seed <br>";
+          (theGlobalVariables.userDefault, this->GetDatabaseTableName(), this->fileName, this->databaseInfo, comments))
+        if (!this->ParseAndInterpretDatabaseInfo(comments))
+        { this->outputHtml = "<b>Something wrong has happened: failed to parse the information stored in the database. Please let your instructor know.</b>";
+          return false;
+        }
     }
   if (this->flagRandomSeedGiven)
     this->MaxInterpretationAttempts=1;

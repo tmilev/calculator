@@ -1551,6 +1551,7 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(Calc
   GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> R;
   HD.SpechtModuleOfPartititons(partitionLeft,partitionRight, R);
   //out << R;
+  R.ComputeCharacter();
   return output.AssignValue(R, theCommands);
 }
 

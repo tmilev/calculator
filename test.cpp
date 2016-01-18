@@ -3241,6 +3241,14 @@ int mainTest(List<std::string>& inputArguments)
         N = 10;
       TestCountPermutations(N);
     }
+    if(inputArguments[0] == "specht_modules")
+    { int N;
+      if(inputArguments.size == 2)
+        N = atoi(inputArguments[1].c_str());
+      else
+        N = 6;
+      TestSpechtModules(N);
+    }
     if(inputArguments[0] == "test_induction")
     { if(inputArguments.size == 3)
       { int n = atoi(inputArguments[1].c_str());

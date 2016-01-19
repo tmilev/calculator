@@ -506,6 +506,7 @@ bool UserCalculator::SetColumnEntry
     << valueSafe << "' WHERE user='" << this->usernameSafe << "'";
     //  stOutput << "Got to here: " << columnName << ". ";
     DatabaseQuery theDBQuery(theRoutines, queryStream.str(), failureComments);
+//    stOutput << "<hr>Fired up query: " << queryStream.str();
     if (!theDBQuery.flagQuerySucceeded)
     { if (failureComments!=0)
         *failureComments << "Failed update an already existing entry in column: " << columnNameUnsafe << ". ";
@@ -518,6 +519,7 @@ bool UserCalculator::SetColumnEntry
     << "\"(user, \"" << columnNameSafe << "\") VALUES('" << this->usernameSafe << "', '"
     << valueSafe << "')";
     DatabaseQuery theDBQuery(theRoutines, queryStream.str());
+//    stOutput << "<hr>Fired up query: " << queryStream.str();
     if (!theDBQuery.flagQuerySucceeded)
     { if (failureComments!=0)
         *failureComments << "Failed to insert entry in table: " << this->currentTableUnsafe << ". ";
@@ -538,13 +540,14 @@ bool UserCalculator::ComputeSafeObjectNames()
 
 bool UserCalculator::SetPassword(DatabaseRoutines& theRoutines, bool recomputeSafeEntries)
 { MacroRegisterFunctionWithName("UserCalculator::SetPassword");
+  this->SetCurrentTable("users");
   if (recomputeSafeEntries)
     this->ComputeSafeObjectNames();
-//  stOutput << "Whats going on here<br>";
+  stOutput << "Whats going on here<br>";
   this->ComputeShaonedSaltedPassword(false);
   std::stringstream mustdeleteme;
   this->SetColumnEntry("password", this->enteredShaonedSaltedPassword, theRoutines, false, &mustdeleteme);
-  //stOutput << mustdeleteme.str();
+  stOutput << mustdeleteme.str();
   return true;
 }
 

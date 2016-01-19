@@ -232,6 +232,14 @@ bool CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test(Calculator& theCo
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerUrlStringToNormalString(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerUrlStringToNormalString");
+  std::string theString;
+  if (!input.IsOfType<std::string>(&theString))
+    return false;
+  return output.AssignValue(CGI::URLStringToNormal(theString), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerQuoteToString(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerQuoteToString");
   return output.AssignValue(input.ToString(), theCommands);

@@ -18,8 +18,7 @@ public:
   static int ParsingNumDummyElements;
   bool IsInterpretedByCalculatorDuringPreparation();
   bool IsInterpretedNotByCalculator();
-  bool IsAnswerVerification();
-  bool IsStudentAnswer();
+  bool IsAnswer();
   std::string GetKeyValue(const std::string& theKey);
   void SetKeyValue(const std::string& theKey, const std::string& theValue);
   void resetAllExceptContent();
@@ -29,10 +28,6 @@ public:
   std::string ToStringCloseTag();
   std::string GetTagClass();
   std::string ToStringDebug();
-  std::string GetMyVerificationTag()
-  { return this->GetVerificationTag(this->GetKeyValue("id"));
-  }
-  static std::string GetVerificationTag(const std::string& idTagToBeVerified);
   SyntacticElementHTML(){}
   SyntacticElementHTML(const std::string& inputContent)
   { this->content=inputContent;
@@ -68,6 +63,12 @@ public:
   List<char> splittingChars;
   List<SyntacticElementHTML> eltsStack;
   List<SyntacticElementHTML> theContent;
+  List<std::string> answerIds;
+  List<std::string> answerVerificationCommand;
+  List<int> answerNumSubmissions;
+  List<int> answerNumCorrectSubmissions;
+  Selection studentTagsAnswered;
+  List<std::string> studentAnswersUnadulterated;
   bool flagLoadedSuccessfully;
   static const std::string RelativePhysicalFolderProblemCollections;
   std::stringstream comments;
@@ -76,10 +77,11 @@ public:
   bool LoadMe(std::stringstream& comments);
   bool ParseAndInterpretDatabaseInfo(std::stringstream& comments);
   void GenerateDatabaseInfo();
+  bool GenerateAndStoreDatabaseInfo(std::stringstream& comments);
   bool ParseHTML(std::stringstream& comments);
   bool IsSplittingChar(const std::string& input);
-  bool IsStudentAnswer(SyntacticElementHTML& inputElt);
   bool IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt);
+  bool ExtractAnswerIds(std::stringstream& comments);
   bool InterpretHtml(std::stringstream& comments);
   bool InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments);
   bool PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream& comments);
@@ -184,7 +186,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
 
 void CalculatorHTML::LoadCurrentProblemItem()
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadCurrentProblemItem");
-  this->fileName= CGI::URLStringToNormal( theGlobalVariables.GetWebInput("currentExamFile"));
+  this->fileName= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile"));
   this->flagLoadedSuccessfully=false;
   bool needToFindDefault=(this->fileName=="");
   if (!needToFindDefault)
@@ -232,13 +234,6 @@ bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt)
   return false;
 }
 
-bool CalculatorHTML::IsStudentAnswer(SyntacticElementHTML& inputElt)
-{ if (inputElt.syntacticRole!="command")
-    return false;
-  std::string tagClass=inputElt.GetKeyValue("class");
-  return tagClass=="calculatorStudentAnswerWithButton";
-}
-
 std::string CalculatorHTML::GetSubmitAnswersJavascript()
 { std::stringstream out;
   out
@@ -252,7 +247,7 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   << "  }\n"
   << "  spanStudentAnswer = document.getElementById(idAnswer);\n"
   << "  var params=\"" << this->ToStringCalculatorArgumentsForProblem("submitProblem") << "\";\n"
-  << "  params+=\"&calculatorStudentAnswerWithButton\" + idAnswer\n"
+  << "  params+=\"&calculatorAnswer\" + idAnswer\n"
   << "          + \"=\"+encodeURIComponent(spanStudentAnswer.value);\n"
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
@@ -262,7 +257,7 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
 //submission option.
 //  for (int i=0; i<this->theContent.size; i++)
 //    if (this->IsStudentAnswer(this->theContent[i]))
-//      out << "  params+=\"&calculatorStudentAnswerWithButton" << this->theContent[i].GetKeyValue("id") << "=\"+encodeURIComponent("
+//      out << "  params+=\"&calculatorAnswer" << this->theContent[i].GetKeyValue("id") << "=\"+encodeURIComponent("
 //      << "document.getElementById('" << this->theContent[i].GetKeyValue("id") << "').value);\n";
   out
   << "  https.onload = function() {\n"
@@ -297,57 +292,47 @@ int WebWorker::ProcessSubmitProblem()
   std::stringstream studentAnswerStream, completedProblemStream;
   completedProblemStream << theProblem.problemCommandsNoVerification;
   std::string studentAnswerNameReader;
-  List<std::string> studentTagsAnswered;
-  List<std::string> studentTagVerifications;
-  List<std::string> studentAnswersUnadulterated;
-  bool found=false;
+  theProblem.studentAnswersUnadulterated.SetSize(theProblem.answerIds.size);
+  theProblem.studentTagsAnswered.init(theProblem.answerIds.size);
   for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
-    if (MathRoutines::StringBeginsWith(theGlobalVariables.webFormArgumentNames[i], "calculatorStudentAnswerWithButton", &studentAnswerNameReader))
-    { found=true;
-      studentAnswerStream << studentAnswerNameReader << "= ("
-      << CGI::URLStringToNormal( theGlobalVariables.webFormArguments[i]) << ");";
-      studentAnswersUnadulterated.AddOnTop(CGI::URLStringToNormal( theGlobalVariables.webFormArguments[i]));
-      studentTagsAnswered.AddOnTop(studentAnswerNameReader);
-      studentTagVerifications.AddOnTop(SyntacticElementHTML::GetVerificationTag(studentAnswerNameReader));
-      if (*studentAnswersUnadulterated.LastObject()=="")
-      { stOutput << "<b>You appear to have submitted at least one empty answer. Please resubmit. </b>";
+    if (MathRoutines::StringBeginsWith(theGlobalVariables.webFormArgumentNames[i], "calculatorAnswer", &studentAnswerNameReader))
+    { int answerIdIndex=theProblem.answerIds.GetIndex(studentAnswerNameReader);
+      if (answerIdIndex==-1)
+      { stOutput << "<b> You submitted an answer to tag with id " << studentAnswerNameReader << " which is not on my list of "
+        << "answerable tags. </b>";
         return 0;
       }
+      std::string theAnswer= CGI::URLStringToNormal( theGlobalVariables.webFormArguments[i]);
+      if (theAnswer=="")
+      { stOutput << "<b> Your answer to tag with id " << studentAnswerNameReader
+        << " appears to be empty, please resubmit. </b>";
+        return 0;
+      }
+      theProblem.studentAnswersUnadulterated[answerIdIndex]=theAnswer;
+      theProblem.studentTagsAnswered.AddSelectionAppendNewIndex(answerIdIndex);
+      studentAnswerStream << studentAnswerNameReader << "= ("
+      << CGI::URLStringToNormal(theGlobalVariables.webFormArguments[i]) << ");";
     }
-  if (!found)
+  if (theProblem.studentTagsAnswered.CardinalitySelection==0)
   { stOutput << "<b>Something is wrong: I found no submitted answers.</b>";
     return 0;
   }
   completedProblemStream << studentAnswerStream.str();
   completedProblemStream << "SeparatorBetweenSpans; ";
-  found=false;
-  for (int i=0; i<theProblem.theContent.size; i++)
-  { if (!theProblem.theContent[i].IsAnswerVerification())
-      continue;
-    if (!studentTagVerifications.Contains(theProblem.theContent[i].GetKeyValue("id")))
-      continue;
-    completedProblemStream << theProblem.CleanUpCommandString(theProblem.theContent[i].content);
-    found=true;
-  }
-  if (!found)
-  { stOutput << "<b>Something is wrong:</b> I found the answers:<br>"
-    << studentAnswerStream.str()
-    << " to the tags:<br>"
-    << studentTagsAnswered.ToStringCommaDelimited()
-    << " but I was not able to find the tags in the problem template.";
-    return 0;
-  }
+  for (int i=0; i<theProblem.studentTagsAnswered.CardinalitySelection; i++)
+    completedProblemStream << theProblem.CleanUpCommandString(
+    theProblem.answerVerificationCommand[theProblem.studentTagsAnswered.elements[i]]);
 //  stOutput << "input to the calculator: " << completedProblemStream.str() << "<hr>";
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
   theInterpreter.init();
   theInterpreter.Evaluate(completedProblemStream.str());
   if (theInterpreter.flagAbortComputationASAP || theInterpreter.syntaxErrors!="")
   { stOutput << "<b>Error while processing your answer(s).</b> Here's what I understood. ";
-    for (int i=0; i<studentAnswersUnadulterated.size; i++)
+    for (int i=0; i<theProblem.studentAnswersUnadulterated.size; i++)
     { Calculator isolatedInterpreter;
       isolatedInterpreter.init();
       theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
-      isolatedInterpreter.Evaluate("("+studentAnswersUnadulterated[i]+")");
+      isolatedInterpreter.Evaluate("("+theProblem.studentAnswersUnadulterated[i]+")");
       if (isolatedInterpreter.syntaxErrors!="")
         stOutput << isolatedInterpreter.ToStringSyntacticStackHumanReadable(false);
       else
@@ -369,21 +354,35 @@ int WebWorker::ProcessSubmitProblem()
     if (!isCorrect)
       break;
   }
+  int correctSubmissionsRelevant=0;
+  int totalSubmissionsRelevant=0;
+  for (int i=0; i<theProblem.studentTagsAnswered.CardinalitySelection; i++)
+  { int theIndex=theProblem.studentTagsAnswered.elements[i];
+    theProblem.answerNumSubmissions[theIndex]++;
+    totalSubmissionsRelevant+=theProblem.answerNumSubmissions[theIndex];
+    if (isCorrect)
+    { theProblem.answerNumCorrectSubmissions[theIndex]++;
+      correctSubmissionsRelevant+=theProblem.answerNumCorrectSubmissions[theIndex];
+    }
+  }
   stOutput << "<table width=\"300\"><tr><td>";
   if (!isCorrect)
     stOutput << "<span style=\"color:red\"><b>Your answer appears to be incorrect.</b></span>";
   else
     stOutput << "<span style=\"color:green\"><b>Correct!</b></span>";
   stOutput << "</td></tr>";
-  if (!isCorrect)
-  {
-  }
+  if (theGlobalVariables.flagLoggedIn)
+  { std::stringstream comments;
+    if (!theProblem.GenerateAndStoreDatabaseInfo(comments))
+      stOutput << "<tr><td><b>This shouldn't happen and may be a bug: failed to store your answer in the database. "
+      << "You may want to take a screen shot and copy the link and email your instructors with these.</b></td></tr>";
+    else
+      stOutput << "<tr><td>So far " << correctSubmissionsRelevant << " correct and "
+      << totalSubmissionsRelevant-correctSubmissionsRelevant << " incorrect submissions.</td></tr>";
+  } else
+    stOutput << "<tr><td><b>Submitting problem solutions allowed only for logged-in users. </b></td></tr>";
 
   stOutput << "<tr><td>Your answer was: " << studentAnswerStream.str() << "</td></tr>";
-  if (!theGlobalVariables.flagLoggedIn)
-  { stOutput << "<br><b>Submitting problem solutions allowed only for logged-in users. </b>";
-    return 0;
-  }
 
   stOutput << "</table>";
 //  stOutput << "<hr>" << theInterpreter.outputString << "<hr><hr><hr><hr><hr><hr>";
@@ -492,10 +491,6 @@ std::string SyntacticElementHTML::ToStringDebug()
   return out.str();
 }
 
-std::string SyntacticElementHTML::GetVerificationTag(const std::string& idTagToBeVerified)
-{ return "verification_"+idTagToBeVerified;
-}
-
 std::string SyntacticElementHTML::GetKeyValue(const std::string& theKey)
 { MacroRegisterFunctionWithName("SyntacticElementHTML::GetKeyValue");
   int theIndex=this->tagKeys.GetIndex(theKey);
@@ -520,9 +515,6 @@ void SyntacticElementHTML::SetKeyValue(const std::string& theKey, const std::str
 std::string SyntacticElementHTML::ToStringInterpretted()
 { if (this->syntacticRole=="")
     return this->content;
-  std::string tagClass=this->GetKeyValue("class");
-  if (tagClass=="calculatorAnswerVerification")
-    return "";
   if (this->IsInterpretedNotByCalculator())
     return this->interpretedCommand;
   std::stringstream out;
@@ -539,7 +531,7 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator()
     return false;
   std::string tagClass=this->GetKeyValue("class");
   return tagClass=="calculatorExamProblem" || tagClass== "calculatorExamIntermediate"
-  || tagClass=="calculatorStudentAnswerWithButton";
+  || tagClass=="calculatorAnswer";
 }
 
 bool SyntacticElementHTML::IsInterpretedByCalculatorDuringPreparation()
@@ -549,16 +541,10 @@ bool SyntacticElementHTML::IsInterpretedByCalculatorDuringPreparation()
   return tagClass=="calculator" || tagClass=="calculatorHidden";
 }
 
-bool SyntacticElementHTML::IsAnswerVerification()
+bool SyntacticElementHTML::IsAnswer()
 { if (this->syntacticRole!="command")
     return false;
-  return this->GetKeyValue("class")=="calculatorAnswerVerification";
-}
-
-bool SyntacticElementHTML::IsStudentAnswer()
-{ if (this->syntacticRole!="command")
-    return false;
-  return this->GetKeyValue("class")=="calculatorStudentAnswerWithButton";
+  return this->GetKeyValue("class")=="calculatorAnswer";
 }
 
 bool CalculatorHTML::PrepareCommands(Calculator& theInterpreter, std::stringstream& comments)
@@ -585,7 +571,7 @@ bool CalculatorHTML::PrepareCommands(Calculator& theInterpreter, std::stringstre
   for (int i=1; i<this->theContent.size; i++)
   { if (this->theContent[i].syntacticRole!="command")
       continue;
-    if (this->theContent[i].IsAnswerVerification())
+    if (this->theContent[i].IsAnswer())
     { streamVerification << this->CleanUpCommandString(this->theContent[i].content);
       continue;
     }
@@ -670,14 +656,13 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
   if (answerId=="")
     out << "<td><b>Error: could not generate submit button: the answer area does not have a valid id</b></td>";
   else
-  { std::string answerEvaluationId=inputOutput.GetMyVerificationTag();
+  { std::string answerEvaluationId="verification"+inputOutput.GetKeyValue("id");
     out << "<td><button class=\"submitButton\" onclick=\"submitAnswers('"
     << answerId << "', '" << answerEvaluationId << "')\"> Submit </button></td>"
     << "<td>";
     out << "<span id=\"" << answerEvaluationId << "\"> <b><span style=\"color:brown\">No answer submitted.</span></b></span></td>";
   }
   out << "</tr></table>";
-
   inputOutput.interpretedCommand=out.str();
 }
 
@@ -686,7 +671,7 @@ void CalculatorHTML::InterpretNotByCalculator(SyntacticElementHTML& inputOutput)
   std::string tagClass=inputOutput.GetTagClass();
   if (tagClass=="calculatorExamProblem" || tagClass=="calculatorExamIntermediate")
     this->InterpretGenerateLink(inputOutput);
-  else if (tagClass=="calculatorStudentAnswerWithButton")
+  else if (tagClass=="calculatorAnswer")
     this->InterpretGenerateStudentAnswerButton(inputOutput);
 }
 
@@ -765,11 +750,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     if (theGlobalVariables.userCalculatorRequestType=="examForReal")
     { //store the random seed.
 //      stOutput << "Storing random seed...";
-      this->GenerateDatabaseInfo();
-      DatabaseRoutinesGlobalFunctions::CreateColumn(this->fileName, this->GetDatabaseTableName(), comments);
-      DatabaseRoutinesGlobalFunctions::SetEntry
-      (theGlobalVariables.userDefault, this->GetDatabaseTableName(), this->fileName, this->databaseInfo, comments);
-      out << "<hr>Database comments: " << comments.str();
+      if (!this->GenerateAndStoreDatabaseInfo(comments))
+        out << "<b>Error: failed to store problem in database. </b>" << comments.str();
     }
   this->outputHtml=out.str();
   return true;
@@ -791,6 +773,18 @@ bool CalculatorHTML::ParseAndInterpretDatabaseInfo(std::stringstream& comments)
     reader >> this->randomSeed;
     this->flagRandomSeedGiven=true;
   }
+  for (int i=0; i<this->answerIds.size; i++)
+  { int indexNumSubmissions=theKeys.GetIndex("submissions"+this->answerIds[i]);
+    if (indexNumSubmissions!=-1)
+    { std::stringstream reader(theValues[indexNumSubmissions]);
+      reader >> this->answerNumSubmissions[i];
+    }
+    int indexNumCorrectSubmissions=theKeys.GetIndex("submissionsCorrect"+this->answerIds[i]);
+    if (indexNumCorrectSubmissions!=-1)
+    { std::stringstream reader(theValues[indexNumCorrectSubmissions]);
+      reader >> this->answerNumCorrectSubmissions[i];
+    }
+  }
   return true;
 }
 
@@ -798,7 +792,18 @@ void CalculatorHTML::GenerateDatabaseInfo()
 { MacroRegisterFunctionWithName("CalculatorHTML::GenerateDatabaseInfo");
   std::stringstream out;
   out << "randomSeed=" << this->randomSeed << "&";
+  for (int i=0; i<this->answerIds.size; i++)
+    out << "submissions" << this->answerIds[i] << "=" << this->answerNumSubmissions[i] << "&"
+    << "submissionsCorrect" << this->answerIds[i] << "=" << this->answerNumCorrectSubmissions << "&";
   this->databaseInfo=out.str();
+}
+
+bool CalculatorHTML::GenerateAndStoreDatabaseInfo(std::stringstream& comments)
+{ MacroRegisterFunctionWithName("CalculatorHTML::GenerateAndStoreDatabaseInfo");
+  this->GenerateDatabaseInfo();
+  DatabaseRoutinesGlobalFunctions::CreateColumn(this->fileName, this->GetDatabaseTableName(), comments);
+  return DatabaseRoutinesGlobalFunctions::SetEntry
+  (theGlobalVariables.userDefault, this->GetDatabaseTableName(), this->fileName, this->databaseInfo, comments);
 }
 
 bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
@@ -911,8 +916,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     theElements.AddOnTop(word);
   this->calculatorClasses.AddOnTop("calculator");
   this->calculatorClasses.AddOnTop("calculatorHidden");
-  this->calculatorClasses.AddOnTop("calculatorAnswerVerification");
-  this->calculatorClasses.AddOnTop("calculatorStudentAnswerWithButton");
+  this->calculatorClasses.AddOnTop("calculatorAnswer");
   this->calculatorClasses.AddOnTop("calculatorExamIntermediate");
   this->calculatorClasses.AddOnTop("calculatorExamProblem");
   this->calculatorClasses.AddOnTop("setCalculatorExamProblem");
@@ -1069,8 +1073,35 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     }
   }
   if (result)
+    result=this->ExtractAnswerIds(comments);
+  if (result)
     result=this->CheckContent(comments);
   return result;
+}
+
+bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ExtractAnswerIds");
+  this->answerIds.SetSize(0);
+  this->answerVerificationCommand.SetSize(0);
+  for (int i=0; i<this->theContent.size; i++)
+  { if (!this->theContent[i].IsAnswer())
+      continue;
+    std::string newId=this->theContent[i].GetKeyValue("id");
+    if (newId=="")
+    { comments << "<b>Error: student answer tag has no id</b>";
+      return false;
+    }
+    if (this->answerIds.Contains(newId))
+    { comments << "<b>Error parsing the problem:</b> student answer tag id: "
+      << newId << " appears more than once.";
+      return false;
+    }
+    this->answerIds.AddOnTop(newId);
+    this->answerVerificationCommand.AddOnTop(this->theContent[i].content);
+  }
+  this->answerNumCorrectSubmissions.initFillInObject(this->answerIds.size, 0);
+  this->answerNumSubmissions.initFillInObject(this->answerIds.size, 0);
+  return true;
 }
 
 bool CalculatorHTML::CheckContent(std::stringstream& comments)
@@ -1078,7 +1109,7 @@ bool CalculatorHTML::CheckContent(std::stringstream& comments)
   bool result=true;
   for (int i=0; i<this->theContent.size; i++)
   { SyntacticElementHTML& currentElt=this->theContent[i];
-    if (currentElt.syntacticRole=="command" && currentElt.IsStudentAnswer() &&
+    if (currentElt.syntacticRole=="command" && currentElt.IsAnswer() &&
         currentElt.GetKeyValue("id").find('=')!=std::string::npos)
     { result=false;
       comments << "Error: the id of tag " << currentElt.ToStringDebug() << " contains the equality sign which is not allowed. ";

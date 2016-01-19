@@ -627,8 +627,6 @@ std::string WebWorker::GetHtmlHiddenInputs()
   << "<input type=\"hidden\" id=\"currentExamHome\" name=\"currentExamHome\">\n"
   << "<input type=\"hidden\" id=\"currentExamIntermediate\" name=\"currentExamIntermediate\">\n"
   << "<input type=\"hidden\" id=\"currentExamFile\" name=\"currentExamFile\">\n"
-  << "<input type=\"hidden\" id=\"nextExamFile\" name=\"nextExamFile\">\n"
-  << "<input type=\"hidden\" id=\"previousExamFile\" name=\"previousExamFile\">\n"
   ;
   return out.str();
 }
@@ -1819,10 +1817,6 @@ std::string WebWorker::GetJavascriptStandardCookies()
     << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome")) << "\", 100);\n";
     out << "  addCookie(\"currentExamIntermediate\", \""
     << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate")) << "\", 100);\n";
-    out << "  addCookie(\"previousExamFile\", \""
-    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("previousExamFile")) << "\", 100);\n";
-    out << "  addCookie(\"nextExamFile\", \""
-    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("nextExamFile")) << "\", 100);\n";
   }
   out
   << "}\n";
@@ -1860,12 +1854,6 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "  if (document.getElementById(\"currentExamFile\")!=null)\n "
   << "    if(getCookie(\"currentExamFile\")!='')\n"
   << "      document.getElementById(\"currentExamFile\").value=getCookie(\"currentExamFile\");\n"
-  << "  if (document.getElementById(\"nextExamFile\")!=null)\n "
-  << "    if(getCookie(\"nextExamFile\")!='')\n"
-  << "      document.getElementById(\"nextExamFile\").value=getCookie(\"nextExamFile\");\n"
-  << "  if (document.getElementById(\"previousExamFile\")!=null)\n "
-  << "    if(getCookie(\"previousExamFile\")!='')\n"
-  << "      document.getElementById(\"previousExamFile\").value=getCookie(\"previousExamFile\");\n"
   << "  if (document.getElementById(\"currentExamHome\")!=null)\n "
   << "    if(getCookie(\"currentExamHome\")!='')\n"
   << "      document.getElementById(\"currentExamHome\").value=getCookie(\"currentExamHome\");\n"

@@ -51,6 +51,7 @@ public:
   bool flagIsExamHome;
   bool flagIsExamIntermediate;
   bool flagIsExamProblem;
+  bool flagParentInvestigated;
   std::string databaseInfo;
   std::string problemCommandsWithInbetweens;
   std::string problemCommandsNoVerification;
@@ -59,6 +60,8 @@ public:
   std::string RelativePhysicalFileNameWithFolder;
   std::string inputHtml;
   std::string outputHtml;
+  std::string currentExamHome;
+  std::string currentExamIntermediate;
   List<std::string> calculatorClasses;
   List<char> splittingChars;
   List<SyntacticElementHTML> eltsStack;
@@ -69,8 +72,8 @@ public:
   List<int> answerNumCorrectSubmissions;
   Selection studentTagsAnswered;
   List<std::string> studentAnswersUnadulterated;
-  int currentlyProcessedProblem;
   List<std::string> problemList;
+  List<std::string> problemListOfParent;
   bool flagLoadedSuccessfully;
   static const std::string RelativePhysicalFolderProblemCollections;
   std::stringstream comments;
@@ -79,6 +82,7 @@ public:
   bool LoadMe(std::stringstream& comments);
   bool ParseAndInterpretDatabaseInfo(std::stringstream& comments);
   void GenerateDatabaseInfo();
+  std::string CleanUpLink(const std::string& inputLink);
   bool GenerateAndStoreDatabaseInfo(std::stringstream& comments);
   bool ParseHTML(std::stringstream& comments);
   bool IsSplittingChar(const std::string& input);
@@ -95,6 +99,7 @@ public:
   std::string GetSubmitAnswersJavascript();
   std::string GetDatabaseTableName();
   void LoadCurrentProblemItem();
+  void FigureOutCurrentProblemList(std::stringstream& comments);
   std::string LoadAndInterpretCurrentProblemItem();
   bool FindExamItem();
   static unsigned int HashFunction(const CalculatorHTML& input)
@@ -123,7 +128,7 @@ CalculatorHTML::CalculatorHTML()
   this->flagIsExamHome=false;
   this->flagIsExamIntermediate=false;
   this->flagIsExamProblem=false;
-  this->currentlyProcessedProblem=-1;
+  this->flagParentInvestigated=false;
 }
 
 const std::string CalculatorHTML::RelativePhysicalFolderProblemCollections="ProblemCollections/";
@@ -611,19 +616,37 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   if (this->flagIsExamHome)
     return "";
   std::stringstream out;
-  std::string currentExamFile= theGlobalVariables.GetWebInput("currentExamFile");
-  std::string currentExamHome= theGlobalVariables.GetWebInput("currentExamHome");
-  std::string currentExamIntermediate=theGlobalVariables.GetWebInput("currentExamIntermediate");
+  std::string calcArgsNoPassExamDetails=WebWorker::ToStringCalcArgsExcludeRequestPasswordExamDetails();
   out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
-  << WebWorker::ToStringCalcArgsExcludeRequestPasswordExamDetails()
+  << calcArgsNoPassExamDetails
   << "currentExamHome=&" << "currentExamIntermediate=&"
   << "currentExamFile=" << currentExamHome << "&\"> Course homework home. </a><br>";
   if (this->flagIsExamProblem && currentExamIntermediate!="")
     out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
-    << WebWorker::ToStringCalcArgsExcludeRequestPasswordExamDetails()
-    << "currentExamHome=" << currentExamHome << "&"
-    << "currentExamIntermediate=&"
+    << calcArgsNoPassExamDetails
+    << "currentExamHome=" << currentExamHome << "&" << "currentExamIntermediate=&"
     << "currentExamFile=" << currentExamIntermediate << "&\"> Current homework. </a><br>";
+  if (this->flagIsExamProblem && this->flagParentInvestigated)
+  { int indexInParent=this->problemListOfParent.GetIndex(this->fileName);
+    if (indexInParent==-1)
+      out << "<b>Could not find the problem collection that contains this problem.</b><br>";
+    else
+    { if (indexInParent>0)
+        out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
+        << theGlobalVariables.userCalculatorRequestType << "&"
+        << calcArgsNoPassExamDetails
+        << "currentExamHome=" << currentExamHome << "&" << "currentExamIntermediate=&"
+        << "currentExamFile=" << CGI::StringToURLString(this->problemListOfParent[indexInParent-1] )
+        << "&\"> <-Previous </a><br>";
+      if (indexInParent<this->problemListOfParent.size-1)
+        out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
+        << theGlobalVariables.userCalculatorRequestType << "&"
+        << calcArgsNoPassExamDetails
+        << "currentExamHome=" << currentExamHome << "&" << "currentExamIntermediate=&"
+        << "currentExamFile=" << CGI::StringToURLString(this->problemListOfParent[indexInParent+1] )
+        << "&\"> Next-> </a><br>";
+    }
+  }
   if (this->flagIsExamProblem && theGlobalVariables.userCalculatorRequestType!="examForReal")
     out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
     << this->ToStringCalculatorArgumentsForProblem("exercises")
@@ -678,14 +701,18 @@ void CalculatorHTML::InterpretNotByCalculator(SyntacticElementHTML& inputOutput)
     this->InterpretGenerateStudentAnswerButton(inputOutput);
 }
 
+std::string CalculatorHTML::CleanUpLink(const std::string& inputLink)
+{ std::string result;
+  result.reserve(inputLink.size());
+  for (unsigned i=0; i<inputLink.size(); i++)
+    if (inputLink[i]!='\n' && inputLink[i]!='\r' && inputLink[i]!='\t' && inputLink[i]!=' ')
+      result.push_back(inputLink[i]);
+  return result;
+}
+
 void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateLink");
-  this->currentlyProcessedProblem++;
-  std::string cleaneduplink;
-  cleaneduplink.reserve(inputOutput.content.size());
-  for (unsigned i=0; i<inputOutput.content.size(); i++)
-    if (inputOutput.content[i]!='\n' && inputOutput.content[i]!='\r')
-      cleaneduplink.push_back(inputOutput.content[i]);
+  std::string cleaneduplink = this->CleanUpLink(inputOutput.content);
   std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
 //  out << "cleaned up link: " << cleaneduplink;
 //  out << "<br>urled link: " <<  CGI::StringToURLString(cleaneduplink);
@@ -694,14 +721,7 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   if (this->flagIsExamHome || this->flagIsExamIntermediate)
     refStreamNoRequest << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&";
   if (this->flagIsExamIntermediate)
-  { refStreamNoRequest << "currentExamIntermediate=" << theGlobalVariables.GetWebInput("currentExamIntermediate") << "&";
-    if (this->currentlyProcessedProblem>0)
-      refStreamNoRequest << "previousExamFile="
-      << CGI::StringToURLString(this->problemList[this->currentlyProcessedProblem-1]) << "&";
-    if (this->currentlyProcessedProblem<this->problemList.size-1)
-      refStreamNoRequest << "nextExamFile="
-      << CGI::StringToURLString(this->problemList[this->currentlyProcessedProblem+1]) << "&";
-  }
+    refStreamNoRequest << "currentExamIntermediate=" << theGlobalVariables.GetWebInput("currentExamIntermediate") << "&";
   refStreamExercise << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&" << refStreamNoRequest.str();
   refStreamForReal << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=examForReal&" << refStreamNoRequest.str();
   out << inputOutput.content;
@@ -718,6 +738,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   std::stringstream out;
   if (!this->flagRandomSeedGiven)
     this->randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
+  this->FigureOutCurrentProblemList(comments);
   std::string navigationLinks=this->ToStringProblemNavigation();
   out << this->GetSubmitAnswersJavascript();
   if (navigationLinks!="")
@@ -749,12 +770,6 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       moreThanOneCommand=true;
     }
   }
-  this->problemList.SetSize(0);
-  this->currentlyProcessedProblem=-1;
-  for (int i=0; i<this->theContent.size; i++)
-    if (this->theContent[i].GetTagClass()=="calculatorExamProblem" ||
-        this->theContent[i].GetTagClass()== "calculatorExamIntermediate")
-      this->problemList.AddOnTop(this->theContent[i].content);
   for (int i=0; i<this->theContent.size; i++)
     if (this->theContent[i].IsInterpretedNotByCalculator())
       this->InterpretNotByCalculator(this->theContent[i]);
@@ -772,6 +787,29 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     }
   this->outputHtml=out.str();
   return true;
+}
+
+void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments)
+{ MacroRegisterFunctionWithName("CalculatorHTML::FigureOutCurrentProblemList");
+  if (this->flagParentInvestigated)
+    return;
+  this->flagParentInvestigated=true;
+  this->currentExamHome= theGlobalVariables.GetWebInput("currentExamHome");
+  this->currentExamIntermediate=theGlobalVariables.GetWebInput("currentExamIntermediate");
+  if (!this->flagIsExamProblem)
+    return;
+  CalculatorHTML parserOfParent;
+  parserOfParent.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate"));
+  std::stringstream commentsOfparent;
+  if (!parserOfParent.LoadMe(commentsOfparent))
+  { comments << "Failed to load parent problem collection. Comments: " << commentsOfparent.str();
+    return;
+  }
+  if (!parserOfParent.ParseHTML(commentsOfparent))
+  { comments << "Failed to parse parent problem collection. Comments: " << commentsOfparent.str();
+    return;
+  }
+  this->problemListOfParent=parserOfParent.problemList;
 }
 
 std::string CalculatorHTML::GetDatabaseTableName()
@@ -1089,6 +1127,10 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       this->theContent.AddOnTop(eltsStack[i]);
     }
   }
+  this->problemList.SetSize(0);
+  for (int i=0; i<this->theContent.size; i++)
+    if (this->theContent[i].GetTagClass()=="calculatorExamProblem")
+      this->problemList.AddOnTop(this->CleanUpLink(this->theContent[i].content));
   if (result)
     result=this->ExtractAnswerIds(comments);
   if (result)

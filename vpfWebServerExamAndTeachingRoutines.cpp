@@ -69,6 +69,8 @@ public:
   List<int> answerNumCorrectSubmissions;
   Selection studentTagsAnswered;
   List<std::string> studentAnswersUnadulterated;
+  int currentlyProcessedProblem;
+  List<std::string> problemList;
   bool flagLoadedSuccessfully;
   static const std::string RelativePhysicalFolderProblemCollections;
   std::stringstream comments;
@@ -121,6 +123,7 @@ CalculatorHTML::CalculatorHTML()
   this->flagIsExamHome=false;
   this->flagIsExamIntermediate=false;
   this->flagIsExamProblem=false;
+  this->currentlyProcessedProblem=-1;
 }
 
 const std::string CalculatorHTML::RelativePhysicalFolderProblemCollections="ProblemCollections/";
@@ -677,6 +680,7 @@ void CalculatorHTML::InterpretNotByCalculator(SyntacticElementHTML& inputOutput)
 
 void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateLink");
+  this->currentlyProcessedProblem++;
   std::string cleaneduplink;
   cleaneduplink.reserve(inputOutput.content.size());
   for (unsigned i=0; i<inputOutput.content.size(); i++)
@@ -688,9 +692,16 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   refStreamNoRequest << WebWorker::ToStringCalcArgsExcludeRequestPasswordExamDetails()
   << "currentExamFile=" << CGI::StringToURLString(cleaneduplink) << "&";
   if (this->flagIsExamHome || this->flagIsExamIntermediate)
-    refStreamNoRequest << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome")<< "&";
+    refStreamNoRequest << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&";
   if (this->flagIsExamIntermediate)
-    refStreamNoRequest << "currentExamIntermediate=" << theGlobalVariables.GetWebInput("currentExamIntermediate") << "&";
+  { refStreamNoRequest << "currentExamIntermediate=" << theGlobalVariables.GetWebInput("currentExamIntermediate") << "&";
+    if (this->currentlyProcessedProblem>0)
+      refStreamNoRequest << "previousExamFile="
+      << CGI::StringToURLString(this->problemList[this->currentlyProcessedProblem-1]) << "&";
+    if (this->currentlyProcessedProblem<this->problemList.size-1)
+      refStreamNoRequest << "nextExamFile="
+      << CGI::StringToURLString(this->problemList[this->currentlyProcessedProblem+1]) << "&";
+  }
   refStreamExercise << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&" << refStreamNoRequest.str();
   refStreamForReal << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=examForReal&" << refStreamNoRequest.str();
   out << inputOutput.content;
@@ -738,6 +749,12 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       moreThanOneCommand=true;
     }
   }
+  this->problemList.SetSize(0);
+  this->currentlyProcessedProblem=-1;
+  for (int i=0; i<this->theContent.size; i++)
+    if (this->theContent[i].GetTagClass()=="calculatorExamProblem" ||
+        this->theContent[i].GetTagClass()== "calculatorExamIntermediate")
+      this->problemList.AddOnTop(this->theContent[i].content);
   for (int i=0; i<this->theContent.size; i++)
     if (this->theContent[i].IsInterpretedNotByCalculator())
       this->InterpretNotByCalculator(this->theContent[i]);

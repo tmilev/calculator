@@ -115,6 +115,11 @@ void Calculator::initPredefinedInnerFunctions()
    "0 and 0; 0 and 1; 1 and 0; 1 and 1; a and 1; a and 0;",
    true, false, "CalculatorConversions::innerAnd");
   this->AddOperationInnerHandler
+  ("URLStringToNormalString", CalculatorFunctionsGeneral::innerUrlStringToNormalString, "",
+   "Converts an url-encoded string to a normal string.",
+   "URLStringToNormalString(\"randomSeed%3d92742048%26submissionsAlgebraAnswer%3\")",
+   true, false, "CalculatorConversions::innerUrlStringToNormalString");
+  this->AddOperationInnerHandler
   ("LoadFileIntoString", CalculatorConversions::innerLoadFileIntoString, "",
    "Loads a file into a string. The file must be given its relative file name displayed when browsing \
    the web server. ",

@@ -506,7 +506,7 @@ bool UserCalculator::SetColumnEntry
     << valueSafe << "' WHERE user='" << this->usernameSafe << "'";
     //  stOutput << "Got to here: " << columnName << ". ";
     DatabaseQuery theDBQuery(theRoutines, queryStream.str(), failureComments);
-//    stOutput << "<hr>Fired up query: " << queryStream.str();
+    stOutput << "<hr>Fired up query: " << queryStream.str();
     if (!theDBQuery.flagQuerySucceeded)
     { if (failureComments!=0)
         *failureComments << "Failed update an already existing entry in column: " << columnNameUnsafe << ". ";
@@ -515,11 +515,10 @@ bool UserCalculator::SetColumnEntry
     }
   } else
   { std::stringstream queryStream;
-    queryStream << "INSERT INTO calculatorUsers.\"" << this->currentTableSafe
-    << "\"(user, \"" << columnNameSafe << "\") VALUES('" << this->usernameSafe << "', '"
-    << valueSafe << "')";
+    queryStream << "INSERT INTO calculatorUsers.\"" << this->currentTableSafe << "\"(user, \"" << columnNameSafe
+    << "\") VALUES('" << this->usernameSafe << "', '" << valueSafe << "')";
     DatabaseQuery theDBQuery(theRoutines, queryStream.str());
-//    stOutput << "<hr>Fired up query: " << queryStream.str();
+    stOutput << "<hr>Fired up query: " << queryStream.str();
     if (!theDBQuery.flagQuerySucceeded)
     { if (failureComments!=0)
         *failureComments << "Failed to insert entry in table: " << this->currentTableUnsafe << ". ";
@@ -658,7 +657,8 @@ bool DatabaseRoutines::TableExists(const std::string& tableNameUnsafe)
   std::stringstream queryStream;
   queryStream << "SELECT 1 FROM " << this->theDatabaseName << ".\"" << tableNameSafe << "\"";
   bool result=(mysql_query(this->connection, queryStream.str().c_str())==0);
-  *this << "Fired up create table query: " << queryStream.str() << ". ";
+  *this << "Executed query to check table existence: " << queryStream.str() << ". ";
+  stOutput << "Executed query: " << queryStream.str() << "<br>";
   mysql_free_result( mysql_use_result(this->connection));
   return result;
 }

@@ -62,6 +62,7 @@ public:
   std::string outputHtml;
   std::string currentExamHome;
   std::string currentExamIntermediate;
+  static const std::string BugsGenericMessage;
   List<std::string> calculatorClasses;
   List<char> splittingChars;
   List<SyntacticElementHTML> eltsStack;
@@ -277,6 +278,10 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   return out.str();
 }
 
+const std::string CalculatorHTML::BugsGenericMessage=
+"Please take a screenshot, copy the link address and send those along \
+with a short explanation to the following UMass instructor: Todor Milev (todor.milev@gmail.com)";
+
 int WebWorker::ProcessSubmitProblem()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSubmitProblem");
   CalculatorHTML theProblem;
@@ -296,6 +301,23 @@ int WebWorker::ProcessSubmitProblem()
   { stOutput << "<b>Failed to prepare commands.</b>" << comments.str();
     return 0;
   }
+  if (!theProblem.ParseAndInterpretDatabaseInfo(comments))
+  { stOutput << "<b>Failed to load the database entry for the present problem. " << theProblem.BugsGenericMessage << " </b>"
+    << comments.str();
+    return 0;
+  }
+  theProblem.GenerateDatabaseInfo();
+  stOutput << "<hr>read the database entry: " << theProblem.databaseInfo << "<br>";
+
+  theProblem.currentExamHome=        CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
+  theProblem.currentExamIntermediate=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate"));
+  if (theProblem.currentExamHome=="")
+  { stOutput << "<b>Could not find the problem collection to which this problem belongs. "
+    << "If you think this is a bug, do the following. " << theProblem.BugsGenericMessage << "</b>";
+    return 0;
+  }
+  if (theProblem.fileName=="")
+    crash << "This shouldn't happen: empty file name: theProblem.fileName." << crash;
   std::string problemStatement=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("problemStatement"));
   std::stringstream studentAnswerStream, completedProblemStream;
   completedProblemStream << theProblem.problemCommandsNoVerification;
@@ -596,7 +618,7 @@ bool CalculatorHTML::PrepareCommands(Calculator& theInterpreter, std::stringstre
 }
 
 bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream& comments)
-{ MacroRegisterFunctionWithName("Problem::ExecuteCommandsPrepare");
+{ MacroRegisterFunctionWithName("Problem::PrepareAndExecuteCommands");
   this->PrepareCommands(theInterpreter, comments);
   theInterpreter.init();
   //stOutput << "nput cmds: " << calculatorCommands.str();
@@ -655,7 +677,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
 }
 
 std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem(const std::string& requestType)const
-{ MacroRegisterFunctionWithName("WebWorker::ToStringGetLink");
+{ MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsForProblem");
   if (!theGlobalVariables.flagLoggedIn)
     return "";
   std::stringstream out;
@@ -823,8 +845,9 @@ bool CalculatorHTML::ParseAndInterpretDatabaseInfo(std::stringstream& comments)
   HashedList<std::string, MathRoutines::hashString> theKeys;
   List<std::string> theValues;
   CGI::ChopCGIInputStringToMultipleStrings(this->databaseInfo, theValues, theKeys, this->comments);
-  if (theKeys.Contains("randomSeed"))
-  { std::stringstream reader(theValues[theKeys.GetIndex("randomSeed")]);
+  stOutput << "Database info keys: " << theKeys.ToStringCommaDelimited() << "<br>Values: " << theValues.ToStringCommaDelimited();
+  if (theKeys.Contains("rand"))
+  { std::stringstream reader(theValues[theKeys.GetIndex("rand")]);
     reader >> this->randomSeed;
     this->flagRandomSeedGiven=true;
   }
@@ -846,16 +869,19 @@ bool CalculatorHTML::ParseAndInterpretDatabaseInfo(std::stringstream& comments)
 void CalculatorHTML::GenerateDatabaseInfo()
 { MacroRegisterFunctionWithName("CalculatorHTML::GenerateDatabaseInfo");
   std::stringstream out;
-  out << "randomSeed=" << this->randomSeed << "&";
+  out << "rand=" << this->randomSeed << "&";
   for (int i=0; i<this->answerIds.size; i++)
     out << "submissions" << this->answerIds[i] << "=" << this->answerNumSubmissions[i] << "&"
-    << "submissionsCorrect" << this->answerIds[i] << "=" << this->answerNumCorrectSubmissions << "&";
+    << "submissionsCorrect" << this->answerIds[i] << "=" << this->answerNumCorrectSubmissions[i] << "&";
   this->databaseInfo=out.str();
 }
 
 bool CalculatorHTML::GenerateAndStoreDatabaseInfo(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::GenerateAndStoreDatabaseInfo");
   this->GenerateDatabaseInfo();
+  stOutput << " database info generated: " << this->databaseInfo << "<br>";
+  if (!DatabaseRoutinesGlobalFunctions::TableExists(this->GetDatabaseTableName(), comments))
+    stOutput << "Ze table dont exist, name: " << this->GetDatabaseTableName() << "<br>";
   DatabaseRoutinesGlobalFunctions::CreateColumn(this->fileName, this->GetDatabaseTableName(), comments);
   return DatabaseRoutinesGlobalFunctions::SetEntry
   (theGlobalVariables.userDefault, this->GetDatabaseTableName(), this->fileName, this->databaseInfo, comments);

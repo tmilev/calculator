@@ -229,30 +229,29 @@ bool GlobalVariables::UserDefaultHasAdminRights()
 std::string GlobalVariables::ToStringNavigation()
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringNavigation");
   std::stringstream out;
-  out << "<table>";
+  //out << "<table>";
   if (theGlobalVariables.userCalculatorRequestType!="calculate")
-    out << "<tr><td><a href=\"" << this->DisplayNameCalculatorWithPath << "?request=calculate&"
-    << this->ToStringCalcArgsNoNavigation() << " \">calculator</a></td></tr>";
+    out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=calculate&"
+    << this->ToStringCalcArgsNoNavigation() << " \">Calculator</a><br>";
   else
-    out << "<tr><td><b>calculator</b></td></tr>";
+    out << "<b>Calculator</b><br>";
   if (this->UserDefaultHasAdminRights())
   { if (theGlobalVariables.userCalculatorRequestType!="status")
-      out << "<tr><td><a href=\"" << this->DisplayNameCalculatorWithPath << "?request=status&" << this->ToStringCalcArgsNoNavigation()
-      << "\">server status</a></td></tr>";
+      out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=status&" << this->ToStringCalcArgsNoNavigation()
+      << "\">Server status</a><br>";
     else
-      out << "<tr><td><b>server status</b></td></tr>";
+      out << "<b>Server status</b><br>";
     if (theGlobalVariables.userCalculatorRequestType!="browseDatabase")
-      out << "<tr><td><a href=\"" << this->DisplayNameCalculatorWithPath << "?request=browseDatabase&" << this->ToStringCalcArgsNoNavigation()
-      << "\">database</a></td></tr>";
+      out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=browseDatabase&" << this->ToStringCalcArgsNoNavigation()
+      << "\">Database</a><br>";
     else
-      out << "<tr><td><b>database</b></td></tr>";
+      out << "<b>Database</b><br>";
   }
   if (theGlobalVariables.userCalculatorRequestType!="exercises" && theGlobalVariables.userCalculatorRequestType!="examForReal" )
-    out << "<tr><td><a href=\"" << this->DisplayNameCalculatorWithPath << "?request=exercises&" << this->ToStringCalcArgsNoNavigation()
-    << "\">exercises</a></td></tr>";
+    out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=exercises&" << this->ToStringCalcArgsNoNavigation()
+    << "\">Exercises</a><hr>";
   else
-    out << "<tr><td><b>exercises</b></td></tr>";
-  out << "</table>";
+    out << "<b>Exercises</b><hr>";
   return out.str();
 }
 

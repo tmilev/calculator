@@ -359,7 +359,7 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   this->flagOutputWasTruncated=false;
   this->MaxNumRowsToRead=inputMaxNumRowsToRead;
   this->numRowsRead=0;
-  stOutput << "<hr> querying: " << inputQuery;
+//  stOutput << "<hr> querying: " << inputQuery;
   if (this->parent->connection==0)
     if (!this->parent->startMySQLDatabase())
     { stOutput << "Failed to start database. Comments generated during the failure: " << inputParent.comments.str();

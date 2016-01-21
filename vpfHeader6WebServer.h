@@ -62,6 +62,7 @@ public:
   int ProcessNonCalculator();
   int ProcessFolder();
   int ProcessSubmitProblem();
+  int ProcessSubmitProblemPreview();
   int ProcessPauseWorker();
   int ProcessMonitor();
   int ProcessUnknown();

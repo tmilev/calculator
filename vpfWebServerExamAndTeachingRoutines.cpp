@@ -14,6 +14,9 @@ public:
   std::string tag;
   List<std::string> tagKeys;
   List<std::string> tagValues;
+  List<std::string> defaultKeysIfMissing;
+  List<std::string> defaultValuesIfMissing;
+  bool flagUseDisplaystyleInMathMode;
   std::string interpretedCommand;
   static int ParsingNumDummyElements;
   bool IsInterpretedByCalculatorDuringPreparation();
@@ -28,9 +31,10 @@ public:
   std::string ToStringCloseTag();
   std::string GetTagClass();
   std::string ToStringDebug();
-  SyntacticElementHTML(){}
+  SyntacticElementHTML(){this->flagUseDisplaystyleInMathMode=false;}
   SyntacticElementHTML(const std::string& inputContent)
-  { this->content=inputContent;
+  { this->flagUseDisplaystyleInMathMode=false;
+    this->content=inputContent;
   }
   bool operator==(const std::string& other)
   { return this->content==other;
@@ -59,7 +63,8 @@ public:
   std::string fileName;
   std::string RelativePhysicalFileNameWithFolder;
   std::string inputHtml;
-  std::string outputHtml;
+  std::string outputHtmlMain;
+  std::string outputHtmlNavigation;
   std::string currentExamHome;
   std::string currentExamIntermediate;
   static const std::string BugsGenericMessage;
@@ -189,9 +194,11 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
   { out << "<b>Failed to interpret file: " << this->fileName << "</b>. Comments: " << this->comments.str();
     return out.str();
   }
-  out << "Generated in "
+  out << "<nav>Generated in "
   << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds()-startTime)
-  << " second(s). " << this->outputHtml;
+  << " second(s).<br>"
+  << this->outputHtmlNavigation
+  << "</nav> " << "<section>" << this->outputHtmlMain << "</section>";
   return out.str();
 }
 
@@ -249,7 +256,18 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
 { std::stringstream out;
   out
   << "<script type=\"text/javascript\"> \n"
+  << "function previewAnswers(idAnswer, idVerification){\n"
+  << "  clearTimeout();\n"
+  << "  setTimeout(function(){\n"
+  << "    params=\"" << this->ToStringCalculatorArgumentsForProblem("submitProblemPreview") << "\";\n"
+  << "    submitOrPreviewAnswers(idAnswer, idVerification, params);\n"
+  << "  }, 1700);"
+  << "}\n"
   << "function submitAnswers(idAnswer, idVerification){\n"
+  << "  params=\"" << this->ToStringCalculatorArgumentsForProblem("submitProblem") << "\";\n"
+  << "  submitOrPreviewAnswers(idAnswer, idVerification, params);\n"
+  << "}\n"
+  << "function submitOrPreviewAnswers(idAnswer, idVerification, inputParams){\n"
   << "  spanVerification = document.getElementById(idVerification);\n"
   << "  if (spanVerification==null){\n"
   << "    spanVerification = document.createElement('span');\n"
@@ -257,8 +275,7 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   << "    spanVerification.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idVerification + \"MISSING! </span>\";\n"
   << "  }\n"
   << "  spanStudentAnswer = document.getElementById(idAnswer);\n"
-  << "  var params=\"" << this->ToStringCalculatorArgumentsForProblem("submitProblem") << "\";\n"
-  << "  params+=\"&calculatorAnswer\" + idAnswer\n"
+  << "  inputParams+=\"&calculatorAnswer\" + idAnswer\n"
   << "          + \"=\"+encodeURIComponent(spanStudentAnswer.value);\n"
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
@@ -268,13 +285,13 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
 //submission option.
 //  for (int i=0; i<this->theContent.size; i++)
 //    if (this->IsStudentAnswer(this->theContent[i]))
-//      out << "  params+=\"&calculatorAnswer" << this->theContent[i].GetKeyValue("id") << "=\"+encodeURIComponent("
+//      out << "  inputParams+=\"&calculatorAnswer" << this->theContent[i].GetKeyValue("id") << "=\"+encodeURIComponent("
 //      << "document.getElementById('" << this->theContent[i].GetKeyValue("id") << "').value);\n";
   out
   << "  https.onload = function() {\n"
   << "    spanVerification.innerHTML=https.responseText;\n"
   << "  }\n"
-  << "  https.send(params);\n"
+  << "  https.send(inputParams);\n"
   << "}\n"
   << "</script>";
   return out.str();
@@ -283,6 +300,29 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
 const std::string CalculatorHTML::BugsGenericMessage=
 "Please take a screenshot, copy the link address and send those along \
 with a short explanation to the following UMass instructor: Todor Milev (todor.milev@gmail.com)";
+
+int WebWorker::ProcessSubmitProblemPreview()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessSubmitProblemPreview");
+  std::stringstream studentInterpretation;
+  for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
+    if (MathRoutines::StringBeginsWith(theGlobalVariables.webFormArgumentNames[i], "calculatorAnswer", 0))
+    { std::string theAnswer= CGI::URLStringToNormal( theGlobalVariables.webFormArguments[i]);
+      studentInterpretation << "(" << theAnswer << ");";
+    }
+  Calculator theInterpreter;
+  theInterpreter.init();
+  theInterpreter.Evaluate(studentInterpretation.str());
+  if (!theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors=="")
+    stOutput << "<span style=\"color:magenta\"><b>Interpreting your answer as:</b></span><br>"
+    << theInterpreter.theProgramExpression.ToString();
+  else if (theInterpreter.syntaxErrors!="")
+    stOutput << "<span style=\"color:red\"><b>Failed to parse your answer, got:</b></span><br>"
+    << theInterpreter.ToStringSyntacticStackHumanReadable(false);
+  else if (theInterpreter.flagAbortComputationASAP)
+    stOutput << "<span style=\"color:red\"><b>Failed to evaluate your answer, got:</b></span><br>"
+    << theInterpreter.outputString;
+  return 0;
+}
 
 int WebWorker::ProcessSubmitProblem()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSubmitProblem");
@@ -389,9 +429,10 @@ int WebWorker::ProcessSubmitProblem()
   { int theIndex=theProblem.studentTagsAnswered.elements[i];
     theProblem.answerNumSubmissions[theIndex]++;
     totalSubmissionsRelevant+=theProblem.answerNumSubmissions[theIndex];
+    correctSubmissionsRelevant+=theProblem.answerNumCorrectSubmissions[theIndex];
     if (isCorrect)
     { theProblem.answerNumCorrectSubmissions[theIndex]++;
-      correctSubmissionsRelevant+=theProblem.answerNumCorrectSubmissions[theIndex];
+      correctSubmissionsRelevant++;
       theProblem.answerFirstCorrectSubmission[theIndex]=theProblem.studentAnswersUnadulterated[theIndex];
     }
   }
@@ -412,7 +453,13 @@ int WebWorker::ProcessSubmitProblem()
   } else
     stOutput << "<tr><td><b>Submitting problem solutions allowed only for logged-in users. </b></td></tr>";
 
-  stOutput << "<tr><td>Your answer was: " << studentAnswerStream.str() << "</td></tr>";
+  stOutput << "<tr><td>Your answer was: ";
+  for (int i=0; i< theProblem.studentAnswersUnadulterated.size; i++ )
+  { stOutput << theProblem.studentAnswersUnadulterated[i];
+    if (i<theProblem.studentAnswersUnadulterated.size-1)
+      stOutput << "<br>";
+  }
+  stOutput << "</td></tr>";
 
   stOutput << "</table>";
 //  stOutput << "<hr>" << theInterpreter.outputString << "<hr><hr><hr><hr><hr><hr>";
@@ -467,7 +514,7 @@ bool CalculatorFunctionsGeneral::innerInterpretHtml
   if (!input.IsOfType<std::string>(&theProblem.inputHtml))
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
   theProblem.InterpretHtml(theCommands.Comments);
-  return output.AssignValue(theProblem.outputHtml, theCommands);
+  return output.AssignValue(theProblem.outputHtmlMain, theCommands);
 }
 
 std::string CalculatorHTML::ToStringExtractedCommands()
@@ -503,6 +550,7 @@ void SyntacticElementHTML::resetAllExceptContent()
   this->tagKeys.SetSize(0);
   this->tagValues.SetSize(0);
   this->syntacticRole="";
+  this->flagUseDisplaystyleInMathMode=false;
 }
 
 std::string SyntacticElementHTML::ToStringOpenTag()
@@ -512,6 +560,9 @@ std::string SyntacticElementHTML::ToStringOpenTag()
   out << "<" << this->tag;
   for (int i=0; i<this->tagKeys.size; i++)
     out << " " << this->tagKeys[i] << "=\"" << this->tagValues[i] << "\"";
+  for (int i=0; i<this->defaultKeysIfMissing.size; i++)
+    if (!this->tagKeys.Contains(this->defaultKeysIfMissing[i]))
+      out << " " << this->defaultKeysIfMissing[i] << "=\"" << this->defaultValuesIfMissing[i] << "\"";
   out << ">";
   return out.str();
 }
@@ -570,7 +621,11 @@ std::string SyntacticElementHTML::ToStringInterpretted()
   std::stringstream out;
   out << this->ToStringOpenTag();
   if (this->interpretedCommand!="")
-    out << "\\( " << this->interpretedCommand << " \\)";
+  { out << "\\( ";
+    if (this->flagUseDisplaystyleInMathMode)
+      out << "\\displaystyle ";
+    out << this->interpretedCommand << " \\)";
+  }
   out << this->ToStringCloseTag();
   return out.str();
 }
@@ -613,6 +668,8 @@ bool CalculatorHTML::PrepareCommands(Calculator& theInterpreter, std::stringstre
       continue;
     }
     std::string cleanedupCommand=this->CleanUpCommandString( this->theContent[i].content);
+    if (cleanedupCommand.find("\\displaystyle")!=std::string::npos)
+      this->theContent[i].flagUseDisplaystyleInMathMode=true;
     if (cleanedupCommand!="")
       streamWithInbetween << cleanedupCommand;
     else
@@ -655,20 +712,35 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
 
 std::string CalculatorHTML::ToStringProblemNavigation()const
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemNavigation");
-  if (this->flagIsExamHome)
-    return "";
   std::stringstream out;
   out << theGlobalVariables.ToStringNavigation();
   std::string calcArgsNoPassExamDetails=theGlobalVariables.ToStringCalcArgsNoNavigation();
-  out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
-  << calcArgsNoPassExamDetails
-  << "currentExamHome=&" << "currentExamIntermediate=&"
-  << "currentExamFile=" << currentExamHome << "&\"> Course homework home. </a><br>";
+  if (!this->flagIsExamHome)
+    out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
+    << calcArgsNoPassExamDetails
+    << "currentExamHome=&" << "currentExamIntermediate=&"
+    << "currentExamFile=" << currentExamHome << "&\"> Course homework home </a><br>";
+  else
+    out << "<b>Course homework home</b>";
   if (this->flagIsExamProblem && currentExamIntermediate!="")
     out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
     << calcArgsNoPassExamDetails
     << "currentExamHome=" << currentExamHome << "&" << "currentExamIntermediate=&"
-    << "currentExamFile=" << currentExamIntermediate << "&\"> Current homework. </a><br>";
+    << "currentExamFile=" << currentExamIntermediate << "&\">&nbspCurrent homework. </a><br>";
+  else if (this->flagIsExamIntermediate)
+    out << "<b>&nbspCurrent homework</b><br>";
+  if (this->flagIsExamProblem)
+  { if (theGlobalVariables.userCalculatorRequestType=="exercises")
+    { out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
+      << this->ToStringCalculatorArgumentsForProblem("exercises")
+      << "\">&nbsp&nbspLink to this problem</a><br>";
+      out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
+      << this->ToStringCalculatorArgumentsForProblem("examForReal")
+      << "\">&nbsp&nbspStart exam for real</a>";
+    }
+    else
+      out << "<b>&nbsp&nbspCurrent problem</b><br>";
+  }
   if (this->flagIsExamProblem && this->flagParentInvestigated)
   { int indexInParent=this->problemListOfParent.GetIndex(this->fileName);
     if (indexInParent==-1)
@@ -690,10 +762,6 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         << "&\"> Next-> </a><br>";
     }
   }
-  if (this->flagIsExamProblem && theGlobalVariables.userCalculatorRequestType!="examForReal")
-    out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
-    << this->ToStringCalculatorArgumentsForProblem("exercises")
-    << "\">Link to this problem.</a>";
   return out.str();
 }
 
@@ -720,12 +788,18 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateStudentAnswerButton");
   std::stringstream out;
   out << "<table><tr>";
-  out << "<td>" << inputOutput.ToStringOpenTag() << inputOutput.ToStringCloseTag() << "</td>";
   std::string answerId = inputOutput.GetKeyValue("id");
   if (answerId=="")
     out << "<td><b>Error: could not generate submit button: the answer area does not have a valid id</b></td>";
   else
   { std::string answerEvaluationId="verification"+inputOutput.GetKeyValue("id");
+    std::stringstream previewAnswerStream;
+    previewAnswerStream << "previewAnswers('" << answerId << "', '" << answerEvaluationId << "')";
+    inputOutput.defaultKeysIfMissing.AddOnTop("onkeypress");
+    inputOutput.defaultValuesIfMissing.AddOnTop(previewAnswerStream.str());
+    inputOutput.defaultKeysIfMissing.AddOnTop("style");
+    inputOutput.defaultValuesIfMissing.AddOnTop("height:70px");
+    out << "<td>" << inputOutput.ToStringOpenTag() << inputOutput.ToStringCloseTag() << "</td>";
     out << "<td><button class=\"submitButton\" onclick=\"submitAnswers('"
     << answerId << "', '" << answerEvaluationId << "')\"> Submit </button></td>"
     << "<td>";
@@ -741,11 +815,14 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     { out << "<b><span style=\"color:green\">Correctly answered: "
       << this->answerFirstCorrectSubmission[theIndex] << "</span></b> ";
       if (numSubmissions>0)
-        out << "Used: " << numSubmissions << " attempt(s).";
+        out << "<br>Used: " << numSubmissions << " attempt(s).";
     } else
-    { out << " <b><span style=\"color:brown\">Need to submit answer. </span></b>";
-      if (numSubmissions>0)
-        out << numSubmissions << " attempt(s) so far. ";
+    { if (theGlobalVariables.userCalculatorRequestType=="examForReal")
+      { out << " <b><span style=\"color:brown\">Need to submit answer. </span></b>";
+        if (numSubmissions>0)
+          out << numSubmissions << " attempt(s) so far. ";
+      } else
+        out << " <b><span style=\"color:brown\">Submit (no credit, unlimited tries)</span></b>";
     }
     out << "</span></td>";
   }
@@ -800,10 +877,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   if (!this->flagRandomSeedGiven)
     this->randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
   this->FigureOutCurrentProblemList(comments);
-  std::string navigationLinks=this->ToStringProblemNavigation();
+  this->outputHtmlNavigation=this->ToStringProblemNavigation();
   out << this->GetSubmitAnswersJavascript();
-  if (navigationLinks!="")
-    out << "Links.<br>" << navigationLinks << "<br>";
   if (!this->PrepareAndExecuteCommands(theInterpreter, comments))
     return false;
   bool moreThanOneCommand=false;
@@ -811,10 +886,11 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   int commandCounter=2;
   //first command and first syntactic element are the random seed and are ignored.
   for (int spanCounter=1; spanCounter <this->theContent.size; spanCounter++)
-  { if (!this->theContent[spanCounter].IsInterpretedByCalculatorDuringPreparation())
+  { SyntacticElementHTML& currentElt=this->theContent[spanCounter];
+    if (!currentElt.IsInterpretedByCalculatorDuringPreparation())
     { if (theInterpreter.theProgramExpression[commandCounter].ToString()!="SeparatorBetweenSpans")
       { out << "<b>Error: calculator commands don't match the tags.</g>";
-        this->outputHtml=out.str();
+        this->outputHtmlMain=out.str();
         return false;
       }
       commandCounter++;
@@ -846,7 +922,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       if (!this->GenerateAndStoreDatabaseInfo(comments))
         out << "<b>Error: failed to store problem in database. </b>" << comments.str();
     }
-  this->outputHtml=out.str();
+  this->outputHtmlMain=out.str();
   return true;
 }
 
@@ -917,11 +993,11 @@ bool CalculatorHTML::ParseAndInterpretDatabaseInfo(std::stringstream& comments)
       this->answerFirstCorrectSubmission[i]=CGI::URLStringToNormal(urledAnswer);
     }
   }
-  stOutput << "Database loaded:<br>"
-  << this->databaseInfo;
-  stOutput << "<br> database info xtracted back: <br>";
-  this->GenerateDatabaseInfo();
-  stOutput << this->databaseInfo;
+//  stOutput << "Database loaded:<br>"
+//  << this->databaseInfo;
+//  stOutput << "<br> database info xtracted back: <br>";
+//  this->GenerateDatabaseInfo();
+//  stOutput << this->databaseInfo;
   return true;
 }
 
@@ -952,7 +1028,7 @@ bool CalculatorHTML::GenerateAndStoreDatabaseInfo(std::stringstream& comments)
 bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretHtml");
   if (!this->ParseHTML(comments))
-  { this->outputHtml="<b>Failed to interpret html input.</b><br>" +this->ToStringContent();
+  { this->outputHtmlMain="<b>Failed to interpret html input.</b><br>" +this->ToStringContent();
     return false;
   }
   this->NumAttemptsToInterpret=0;
@@ -961,11 +1037,11 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
     { //load the random seed.
       if (!DatabaseRoutinesGlobalFunctions::TableExists(this->GetDatabaseTableName(),comments))
         if (!DatabaseRoutinesGlobalFunctions::CreateTable(this->GetDatabaseTableName(), comments))
-        { this->outputHtml ="<b>Failed to create table for storing exam results. </b>" +comments.str();
+        { this->outputHtmlMain ="<b>Failed to create table for storing exam results. </b>" +comments.str();
           return false;
         }
       if (!this->LoadAndInterpretDatabaseInfo(comments))
-      { this->outputHtml = "<b>Something wrong has happened: failed to parse the information stored in the database. Please let your instructor know.</b>";
+      { this->outputHtmlMain = "<b>Something wrong has happened: failed to parse the information stored in the database. Please let your instructor know.</b>";
         return false;
       }
     }
@@ -986,7 +1062,7 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
       << " attempts made. Calculator evaluation details follow.<hr> "
       << theInterpreter.outputString << "<hr><b>Comments</b><br>"
       << theInterpreter.Comments.str();
-      this->outputHtml=out.str();
+      this->outputHtmlMain=out.str();
       return false;
     }
   }

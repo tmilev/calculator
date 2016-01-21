@@ -237,6 +237,7 @@ void Calculator::init()
   this->controlSequences.AddOnTop("\\end");
   this->controlSequences.AddOnTop("\\\\");
   this->controlSequences.AddOnTop("\\");
+  this->controlSequences.AddOnTop("\\displaystyle");
   this->controlSequences.AddOnTop("&");
   this->controlSequences.AddOnTop("%");
   this->controlSequences.AddOnTop("NoFrac");
@@ -1343,6 +1344,8 @@ bool Calculator::ApplyOneRule()
     else
       return this->PopTopSyntacticStack();
   }
+  if (lastS=="\\displaystyle")
+    return this->PopTopSyntacticStack();
   if (fourthToLastS=="SequenceMatrixRows" && thirdToLastS=="MatrixRowSeparator" && secondToLastS=="Expression" && this->isSeparatorFromTheRightForListMatrixRow(lastS))
     return this->ReplaceYXdotsXBySequenceYXdotsX(this->conMatrixRow(), Expression::formatMatrixRow, 1);
   if (fourthToLastS=="SequenceMatrixRows" && thirdToLastS=="MatrixRowSeparator" && secondToLastS=="MatrixRow" && this->isSeparatorFromTheRightForListMatrixRow(lastS))

@@ -1620,6 +1620,9 @@ int WebWorker::ProcessCalculator()
   if (theGlobalVariables.userCalculatorRequestType=="submitProblem" &&
       theGlobalVariables.flagLoggedIn)
     return this->ProcessSubmitProblem();
+  if (theGlobalVariables.userCalculatorRequestType=="submitProblemPreview" &&
+      theGlobalVariables.flagLoggedIn)
+    return this->ProcessSubmitProblemPreview();
   if (( theGlobalVariables.userCalculatorRequestType=="examForReal" ||
         theGlobalVariables.userCalculatorRequestType=="exercises") &&
       theGlobalVariables.flagLoggedIn &&
@@ -2318,7 +2321,7 @@ void WebServer::CheckExecutableVersionAndRestartIfNeeded(bool callReload)
       << "Restarting in 0.5 seconds...</b>";
       if (callReload)
         stOutput << "<script language=\"javascript\">setTimeout(resubmit, 500); "
-        << " function resubmit() { document.reload(true);}</script>";
+        << " function resubmit() { location.reload(true);}</script>";
       else
         stOutput << "<script language=\"javascript\">setTimeout(resubmit, 500); "
         << " function resubmit() { document.getElementById('formCalculator').submit();}</script>";

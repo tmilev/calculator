@@ -212,8 +212,121 @@ UserCalculator::~UserCalculator()
     this->actualShaonedSaltedPassword[i]=' ';
 }
 
+std::string DatabaseRoutines::ToStringTable(const std::string& inputTableName)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::ToStringTable");
+  std::stringstream out, comments;
+
+  List<List<std::string> > theTable;
+  List<std::string> columnLabels;
+  bool wasTruncated=false;
+  int actualNumEntries=-1;
+  if (!this->FetchTable(theTable, columnLabels, wasTruncated, actualNumEntries, inputTableName, comments))
+  { out << "<b>Failed to fetch table: " << inputTableName << ".</b> Comments: " << comments.str();
+    return out.str();
+  }
+  out << "Table has " << actualNumEntries << " entries. ";
+  if (wasTruncated)
+    out << "<b>The number of entries was truncated to " << theTable.size << ". <b>";
+  out << "<table><tr>";
+  for (int i=0; i<columnLabels.size; i++)
+    out << "<td>" << columnLabels[i] << "</td>";
+  out << "</tr>";
+  for (int i=0; i<theTable.size; i++)
+  { out << "<tr>";
+    for (int j=0; j<theTable[i].size; j++)
+      out << "<td>" << theTable[i][j] << "</td>";
+    out << "</tr>";
+  }
+  out << "</table>";
+  return out.str();
+}
+
+std::string DatabaseRoutines::ToStringAllTables()
+{ MacroRegisterFunctionWithName("DatabaseRoutines::ToStringAllTables");
+  std::stringstream out;
+  List<std::string> tableNames;
+  if (!this->FetchTableNames(tableNames, out))
+  { out << " Failed to fetch table names. ";
+    return out.str();
+  }
+  out << "<table>";
+  for (int i=0; i<tableNames.size; i++)
+  { std::stringstream linkStream;
+    linkStream << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=browseDatabase&currentDatabaseTable="
+    << tableNames[i] << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation();
+    out << "<tr><td><a href=\"" << linkStream.str() << "\">" << tableNames[i] << "</a></td></tr>";
+  }
+  out << "</table>";
+  return out.str();
+}
+
+bool DatabaseRoutines::FetchTableNames(List<std::string>& output, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::FetchTableNames");
+  std::stringstream queryStream;
+  queryStream << "SHOW TABLES";
+  DatabaseQuery theQuery(*this, queryStream.str(), &comments);
+  if (!theQuery.flagQuerySucceeded)
+    return false;
+  output.SetSize(theQuery.allQueryResultStrings.size);
+  stOutput << "show tables: " << theQuery.allQueryResultStrings.ToStringCommaDelimited();
+  for (int i=0; i<theQuery.allQueryResultStrings.size; i++)
+    if (theQuery.allQueryResultStrings[i].size>0)
+      output[i]=theQuery.allQueryResultStrings[i][0];
+  return true;
+}
+
+std::string DatabaseRoutines::ToStringCurrentTableHTML()
+{ MacroRegisterFunctionWithName("DatabaseRoutines::ToStringCurrentTableHTML");
+  std::string currentTable=CGI::URLStringToNormal( theGlobalVariables.GetWebInput("currentDatabaseTable"));
+  if (currentTable=="")
+    return this->ToStringAllTables();
+  return this->ToStringTable(currentTable);
+}
+
+bool DatabaseRoutines::FetchTable
+(List<List<std::string> >& output,
+ List<std::string>& outputColumnLabels,
+ bool& outputWasTruncated, int& actualNumRowsIfTruncated,
+ const std::string& tableNameUnsafe, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::FetchTable");
+  std::string tableNameSafe=CGI::StringToURLString(tableNameUnsafe);
+  std::stringstream queryStream;
+  queryStream << "SELECT * FROM calculatorUsers.\"" << tableNameSafe << "\"";
+  DatabaseQuery theQuery(*this, queryStream.str(), &comments, this->MaxNumRowsToFetch);
+  if (!theQuery.flagQuerySucceeded)
+  { comments << "Query: " << queryStream.str() << " failed. ";
+    return false;
+  }
+  output=theQuery.allQueryResultStrings;
+  outputWasTruncated=theQuery.flagOutputWasTruncated;
+  if (outputWasTruncated)
+    actualNumRowsIfTruncated=theQuery.numRowsRead;
+  else
+    actualNumRowsIfTruncated=output.size;
+  if (!theQuery.flagQueryReturnedResult)
+    comments << "The table appears to be empty: query: " << queryStream.str() << " succeeded but returned no result. ";
+  theQuery.close();
+  std::stringstream queryStreamFields;
+  queryStreamFields
+  << "SELECT \"COLUMN_NAME\" FROM information_schema.COLUMNS WHERE "
+  << "TABLE_SCHEMA='calculatorUsers' "
+  << "AND TABLE_NAME='" << tableNameSafe << "' ";
+  DatabaseQuery theFieldQuery(*this, queryStreamFields.str(), &comments);
+  if (!theFieldQuery.flagQuerySucceeded)
+  { comments << "Query: " << queryStreamFields.str() << " failed. ";
+    return false;
+  }
+  stOutput << "field query: " << theFieldQuery.allQueryResultStrings.ToStringCommaDelimited();
+  outputColumnLabels.SetSize(theFieldQuery.allQueryResultStrings.size);
+  for (int i=0; i<theFieldQuery.allQueryResultStrings.size; i++)
+    if (theFieldQuery.allQueryResultStrings[i].size>0 )
+      outputColumnLabels[i]=theFieldQuery.allQueryResultStrings[i][0];
+  return true;
+}
+
 DatabaseRoutines::DatabaseRoutines()
 { this->connection=0;
+  this->MaxNumRowsToFetch=1000;
 }
 
 DatabaseRoutines::~DatabaseRoutines()
@@ -235,7 +348,7 @@ bool UserCalculator::TryToLogIn(DatabaseRoutines& theRoutines)
   return false;
 }
 
-DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& inputQuery, std::stringstream* outputFailureComments)
+DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& inputQuery, std::stringstream* outputFailureComments, int inputMaxNumRowsToRead)
 { MacroRegisterFunctionWithName("DatabaseQuery::DatabaseQuery");
   this->failurecomments=outputFailureComments;
   this->theQueryString=inputQuery;
@@ -243,6 +356,9 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   this->flagQuerySucceeded=false;
   this->flagQueryReturnedResult=false;
   this->theQueryResult=0;
+  this->flagOutputWasTruncated=false;
+  this->MaxNumRowsToRead=inputMaxNumRowsToRead;
+  this->numRowsRead=0;
 //  stOutput << "<hr> querying: " << inputQuery;
   if (this->parent->connection==0)
     if (!this->parent->startMySQLDatabase())
@@ -267,7 +383,13 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
       *this->failurecomments << "Query succeeded, mysql_store_result returned non-zero. ";
     return;
   }
-  this->allQueryResultStrings.SetSize(mysql_num_rows(this->theQueryResult));
+  this->numRowsRead=mysql_num_rows(this->theQueryResult);
+  int numRowsToFetch=this->numRowsRead;
+  if (numRowsToFetch>this->MaxNumRowsToRead)
+  { this->flagOutputWasTruncated=true;
+    numRowsToFetch=this->MaxNumRowsToRead;
+  }
+  this->allQueryResultStrings.SetSize(numRowsToFetch);
   int numFields=mysql_num_fields(this->theQueryResult);
   if (numFields<1)
     return;
@@ -295,11 +417,15 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
 //  stOutput << "<br>the flag: " << this->flagQueryReturnedResult;
 }
 
-DatabaseQuery::~DatabaseQuery()
-{ //stOutput << "<br>DESTRUCTOR";
-  if (this->theQueryResult!=0)
+void DatabaseQuery::close()
+{ if (this->theQueryResult!=0)
     mysql_free_result(this->theQueryResult);
   this->theQueryResult=0;
+}
+
+DatabaseQuery::~DatabaseQuery()
+{ //stOutput << "<br>DESTRUCTOR";
+  this->close();
 }
 
 bool UserCalculator::FetchOneColumn
@@ -506,7 +632,7 @@ bool UserCalculator::SetColumnEntry
     << valueSafe << "' WHERE user='" << this->usernameSafe << "'";
     //  stOutput << "Got to here: " << columnName << ". ";
     DatabaseQuery theDBQuery(theRoutines, queryStream.str(), failureComments);
-    stOutput << "<hr>Fired up query:<br>" << queryStream.str();
+//    stOutput << "<hr>Fired up query:<br>" << queryStream.str();
     if (!theDBQuery.flagQuerySucceeded)
     { if (failureComments!=0)
         *failureComments << "Failed update an already existing entry in column: " << columnNameUnsafe << ". ";
@@ -518,7 +644,7 @@ bool UserCalculator::SetColumnEntry
     queryStream << "INSERT INTO calculatorUsers.\"" << this->currentTableSafe << "\"(user, \"" << columnNameSafe
     << "\") VALUES('" << this->usernameSafe << "', '" << valueSafe << "')";
     DatabaseQuery theDBQuery(theRoutines, queryStream.str());
-    stOutput << "<hr>Fired up query:<br>" << queryStream.str();
+    //stOutput << "<hr>Fired up query:<br>" << queryStream.str();
     if (!theDBQuery.flagQuerySucceeded)
     { if (failureComments!=0)
         *failureComments << "Failed to insert entry in table: " << this->currentTableUnsafe << ". ";
@@ -658,7 +784,7 @@ bool DatabaseRoutines::TableExists(const std::string& tableNameUnsafe)
   queryStream << "SELECT 1 FROM " << this->theDatabaseName << ".\"" << tableNameSafe << "\"";
   bool result=(mysql_query(this->connection, queryStream.str().c_str())==0);
   *this << "Executed query to check table existence: " << queryStream.str() << ". ";
-  stOutput << "Executed query: " << queryStream.str() << "<br>";
+//  stOutput << "Executed query: " << queryStream.str() << "<br>";
   mysql_free_result( mysql_use_result(this->connection));
   return result;
 }
@@ -931,6 +1057,33 @@ bool DatabaseRoutines::innerGetUserDetails(Calculator& theCommands, const Expres
   if (!theUser.Authenticate(theRoutines, true))
     return theCommands << "Authentication failed. " << theRoutines.comments.str();
   return output.AssignValue(theRoutines.ToStringAllUsersHTMLFormat(), theCommands);
+}
+
+bool DatabaseRoutines::innerDisplayTables(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::innerDisplayTables");
+  std::stringstream out;
+  DatabaseRoutines theRoutines;
+  List<std::string> theTables;
+  if (!theRoutines.FetchTableNames(theTables, theCommands.Comments))
+    return false;
+  out << "<table>";
+  for (int i=0; i<theTables.size; i++)
+    out << "<tr><td>" << theTables[i] << "</td></tr>";
+  out << "</table>";
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool DatabaseRoutines::innerDisplayDatabaseTable(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::innerDisplayDatabaseTable");
+  if (!theGlobalVariables.flagLoggedIn || theGlobalVariables.userDefault!=theGlobalVariables.userCalculatorAdmin)
+    return theCommands << "Displaying database tables allowed only for logged-in admins. ";
+  std::string desiredTableName;
+  if (!input.IsOfType<std::string>(&desiredTableName))
+  { theCommands << "<hr>Argument " << input.ToString() << " is supposed to be a string. ";
+    desiredTableName=input.ToString();
+  }
+  DatabaseRoutines theRoutines;
+  return output.AssignValue(theRoutines.ToStringTable(desiredTableName), theCommands);
 }
 
 bool DatabaseRoutines::innerGetUserDBEntry(Calculator& theCommands, const Expression& input, Expression& output)

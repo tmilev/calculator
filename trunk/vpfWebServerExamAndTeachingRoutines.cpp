@@ -69,6 +69,7 @@ public:
   List<SyntacticElementHTML> theContent;
   List<std::string> answerIds;
   List<std::string> answerVerificationCommand;
+  List<std::string> answerFirstCorrectSubmission;
   List<int> answerNumSubmissions;
   List<int> answerNumCorrectSubmissions;
   Selection studentTagsAnswered;
@@ -391,6 +392,7 @@ int WebWorker::ProcessSubmitProblem()
     if (isCorrect)
     { theProblem.answerNumCorrectSubmissions[theIndex]++;
       correctSubmissionsRelevant+=theProblem.answerNumCorrectSubmissions[theIndex];
+      theProblem.answerFirstCorrectSubmission[theIndex]=theProblem.studentAnswersUnadulterated[theIndex];
     }
   }
   stOutput << "<table width=\"300\"><tr><td>";
@@ -419,6 +421,24 @@ int WebWorker::ProcessSubmitProblem()
   //answerInterpretter.theProgramExpression=theGlobalVariables.GetWebInput("mainInput");
   //answerInterpretter.init();
   return 0;
+}
+
+std::string WebWorker::GetDatabasePage()
+{ MacroRegisterFunctionWithName("WebWorker::GetDatabasePage");
+  std::stringstream out;
+  DatabaseRoutines theRoutines;
+  out << "<html>"
+  << "<header>"
+  << WebWorker::GetJavascriptStandardCookies()
+  << "</header>"
+  << "<body onload=\"loadSettings();\">\n";
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    out << "Browsing database allowed only for logged-in admins.";
+  else
+    out << theRoutines.ToStringCurrentTableHTML();
+  out <<"<hr><hr><hr><hr><hr><hr><hr><hr>" << this->ToStringCalculatorArgumentsHumanReadable();
+  out << "</body></html>";
+  return out.str();
 }
 
 std::string WebWorker::GetExamPage()
@@ -636,7 +656,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   if (this->flagIsExamHome)
     return "";
   std::stringstream out;
-  std::string calcArgsNoPassExamDetails=WebWorker::ToStringCalcArgsExcludeRequestPasswordExamDetails();
+  std::string calcArgsNoPassExamDetails=theGlobalVariables.ToStringCalcArgsNoNavigation();
   out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
   << calcArgsNoPassExamDetails
   << "currentExamHome=&" << "currentExamIntermediate=&"
@@ -679,7 +699,7 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem(const std::str
   if (!theGlobalVariables.flagLoggedIn)
     return "";
   std::stringstream out;
-  out << "request=" << requestType << "&" << WebWorker::ToStringCalcArgsExcludeRequestPasswordExamDetails()
+  out << "request=" << requestType << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation()
   << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&"
   << "currentExamIntermediate=" << theGlobalVariables.GetWebInput("currentExamIntermediate") << "&"
   << "currentExamFile=" << CGI::StringToURLString(this->fileName) << "&";
@@ -706,7 +726,25 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     out << "<td><button class=\"submitButton\" onclick=\"submitAnswers('"
     << answerId << "', '" << answerEvaluationId << "')\"> Submit </button></td>"
     << "<td>";
-    out << "<span id=\"" << answerEvaluationId << "\"> <b><span style=\"color:brown\">No answer submitted.</span></b></span></td>";
+    out << "<span id=\"" << answerEvaluationId << "\">";
+    int theIndex=this->answerIds.GetIndex(answerId);
+    int numCorrectSubmissions=0;
+    int numSubmissions= 0;
+    if (theIndex!=-1)
+    { numCorrectSubmissions= this->answerNumCorrectSubmissions[theIndex];
+      numSubmissions= this->answerNumSubmissions[theIndex];
+    }
+    if (numCorrectSubmissions >0)
+    { out << "<b><span style=\"color:green\">Correctly answered: "
+      << this->answerFirstCorrectSubmission[theIndex] << "</span></b> ";
+      if (numSubmissions>0)
+        out << "Used: " << numSubmissions << " attempt(s).";
+    } else
+    { out << " <b><span style=\"color:brown\">Need to submit answer. </span></b>";
+      if (numSubmissions>0)
+        out << numSubmissions << " attempt(s) so far. ";
+    }
+    out << "</span></td>";
   }
   out << "</tr></table>";
   inputOutput.interpretedCommand=out.str();
@@ -736,7 +774,7 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
 //  out << "cleaned up link: " << cleaneduplink;
 //  out << "<br>urled link: " <<  CGI::StringToURLString(cleaneduplink);
-  refStreamNoRequest << WebWorker::ToStringCalcArgsExcludeRequestPasswordExamDetails()
+  refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation()
   << "currentExamFile=" << CGI::StringToURLString(cleaneduplink) << "&";
   if (this->flagIsExamHome || this->flagIsExamIntermediate)
     refStreamNoRequest << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&";
@@ -849,9 +887,9 @@ bool CalculatorHTML::ParseAndInterpretDatabaseInfo(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::ParseAndInterpretDatabaseInfo");
   HashedList<std::string, MathRoutines::hashString> theKeys;
   List<std::string> theValues;
-  stOutput << "<br>Parsing and interpreting  database info: <br>" << this->databaseInfo;
+//  stOutput << "<br>Parsing and interpreting  database info: <br>" << this->databaseInfo;
   CGI::ChopCGIInputStringToMultipleStrings(this->databaseInfo, theValues, theKeys, this->comments);
-  stOutput << "<br>Database info keys: " << theKeys.ToStringCommaDelimited() << "<br>Values: " << theValues.ToStringCommaDelimited();
+//  stOutput << "<br>Database info keys: " << theKeys.ToStringCommaDelimited() << "<br>Values: " << theValues.ToStringCommaDelimited();
   if (theKeys.Contains("rand"))
   { std::stringstream reader(theValues[theKeys.GetIndex("rand")]);
     reader >> this->randomSeed;
@@ -868,10 +906,19 @@ bool CalculatorHTML::ParseAndInterpretDatabaseInfo(std::stringstream& comments)
     { std::stringstream reader(theValues[indexNumCorrectSubmissions]);
       reader >> this->answerNumCorrectSubmissions[i];
     }
+    int indexFirstCorrectAnswer=theKeys.GetIndex("firstCorrectAnswer"+this->answerIds[i]);
+    if (indexFirstCorrectAnswer!=-1)
+    { std::stringstream reader(theValues[indexFirstCorrectAnswer]);
+      std::string urledAnswer;
+      reader >> urledAnswer;
+      this->answerFirstCorrectSubmission[i]=CGI::URLStringToNormal(urledAnswer);
+    }
   }
-//  stOutput << "<br> database info xtracted back: <br>";
-//  this->GenerateDatabaseInfo();
-//  stOutput << this->databaseInfo;
+  stOutput << "Database loaded:<br>"
+  << this->databaseInfo;
+  stOutput << "<br> database info xtracted back: <br>";
+  this->GenerateDatabaseInfo();
+  stOutput << this->databaseInfo;
   return true;
 }
 
@@ -881,17 +928,19 @@ void CalculatorHTML::GenerateDatabaseInfo()
   out << "rand=" << this->randomSeed << "&";
   for (int i=0; i<this->answerIds.size; i++)
     out << "submissions" << this->answerIds[i] << "=" << this->answerNumSubmissions[i] << "&"
-    << "submissionsCorrect" << this->answerIds[i] << "=" << this->answerNumCorrectSubmissions[i] << "&";
+    << "submissionsCorrect" << this->answerIds[i] << "=" << this->answerNumCorrectSubmissions[i] << "&"
+    << "firstCorrectAnswer" << this->answerIds[i] << "=" << CGI::StringToURLString( this->answerFirstCorrectSubmission[i])
+    << "&";
   this->databaseInfo=out.str();
 }
 
 bool CalculatorHTML::GenerateAndStoreDatabaseInfo(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::GenerateAndStoreDatabaseInfo");
-  stOutput << "<br>About to generate and store database info ... ";
+//  stOutput << "<br>About to generate and store database info ... ";
   this->GenerateDatabaseInfo();
-  stOutput << "<br>database info generated, proceeding to store it:<br>" << this->databaseInfo << "<br>";
-  if (!DatabaseRoutinesGlobalFunctions::TableExists(this->GetDatabaseTableName(), comments))
-    stOutput << "Ze table dont exist, name: " << this->GetDatabaseTableName() << "<br>";
+//  stOutput << "<br>database info generated, proceeding to store it:<br>" << this->databaseInfo << "<br>";
+//  if (!DatabaseRoutinesGlobalFunctions::TableExists(this->GetDatabaseTableName(), comments))
+//    stOutput << "Ze table dont exist, name: " << this->GetDatabaseTableName() << "<br>";
   DatabaseRoutinesGlobalFunctions::CreateColumn(this->fileName, this->GetDatabaseTableName(), comments);
   return DatabaseRoutinesGlobalFunctions::SetEntry
   (theGlobalVariables.userDefault, this->GetDatabaseTableName(), this->fileName, this->databaseInfo, comments);
@@ -1194,6 +1243,7 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
   }
   this->answerNumCorrectSubmissions.initFillInObject(this->answerIds.size, 0);
   this->answerNumSubmissions.initFillInObject(this->answerIds.size, 0);
+  this->answerFirstCorrectSubmission.initFillInObject(this->answerIds.size, "");
   return true;
 }
 

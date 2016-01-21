@@ -137,6 +137,7 @@ public:
   std::string theDatabaseName;
   std::string hostname;
   std::stringstream comments;
+  int MaxNumRowsToFetch;
   MYSQL *connection; // Create a pointer to the MySQL instance
   operator bool()const
   { return false;
@@ -148,8 +149,22 @@ public:
   bool CreateColumn(const std::string& columnNameNameUnsafe, const std::string& tableNameUnsafe,
                     std::stringstream& commentsOnCreation);
   bool TableExists(const std::string& tableNameUnsafe);
+  bool FetchTableNames
+(List<std::string>& output, std::stringstream& comments)
+;
+  bool FetchTable
+(List<List<std::string> >& output,
+ List<std::string>& outputColumnLabels,
+ bool& outputWasTruncated, int& actualNumRowsIfTruncated,
+ const std::string& tableNameUnsafe, std::stringstream& comments)
+
+  ;
+
   std::string ToString();
   std::string ToStringAllUsersHTMLFormat();
+  std::string ToStringCurrentTableHTML();
+  std::string ToStringAllTables();
+  std::string ToStringTable(const std::string& inputTableNameUnsafe);
 
   bool CreateTable
   (const std::string& tableNameUnsafe, const std::string& desiredTableContent,
@@ -162,6 +177,8 @@ public:
   static bool innerDeleteUser(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetAuthentication(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDisplayTables(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDisplayDatabaseTable(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserDBEntry(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserDetails(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCreateTeachingClass(Calculator& theCommands, const Expression& input, Expression& output);
@@ -177,13 +194,17 @@ public:
   DatabaseRoutines* parent;
   MYSQL_RES* theQueryResult;
   MYSQL_ROW currentRow;
+  int MaxNumRowsToRead;
+  int numRowsRead;
+  bool flagOutputWasTruncated;
   std::stringstream* failurecomments;
   std::string theQueryString;
   std::string firstResultString;
   List<List<std::string> > allQueryResultStrings;
   bool flagQuerySucceeded;
   bool flagQueryReturnedResult;
-  DatabaseQuery(DatabaseRoutines& inputParent, const std::string& inputQuery, std::stringstream* outputFailureComments=0);
+  void close();
+  DatabaseQuery(DatabaseRoutines& inputParent, const std::string& inputQuery, std::stringstream* outputFailureComments=0, int inputMaxNumRowsToRead=1000);
   ~DatabaseQuery();
 };
 

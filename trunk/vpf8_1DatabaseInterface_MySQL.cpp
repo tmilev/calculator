@@ -506,7 +506,7 @@ bool UserCalculator::SetColumnEntry
     << valueSafe << "' WHERE user='" << this->usernameSafe << "'";
     //  stOutput << "Got to here: " << columnName << ". ";
     DatabaseQuery theDBQuery(theRoutines, queryStream.str(), failureComments);
-    stOutput << "<hr>Fired up query: " << queryStream.str();
+    stOutput << "<hr>Fired up query:<br>" << queryStream.str();
     if (!theDBQuery.flagQuerySucceeded)
     { if (failureComments!=0)
         *failureComments << "Failed update an already existing entry in column: " << columnNameUnsafe << ". ";
@@ -518,7 +518,7 @@ bool UserCalculator::SetColumnEntry
     queryStream << "INSERT INTO calculatorUsers.\"" << this->currentTableSafe << "\"(user, \"" << columnNameSafe
     << "\") VALUES('" << this->usernameSafe << "', '" << valueSafe << "')";
     DatabaseQuery theDBQuery(theRoutines, queryStream.str());
-    stOutput << "<hr>Fired up query: " << queryStream.str();
+    stOutput << "<hr>Fired up query:<br>" << queryStream.str();
     if (!theDBQuery.flagQuerySucceeded)
     { if (failureComments!=0)
         *failureComments << "Failed to insert entry in table: " << this->currentTableUnsafe << ". ";

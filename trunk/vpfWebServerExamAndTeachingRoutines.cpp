@@ -81,6 +81,7 @@ public:
   bool CheckContent(std::stringstream& comments);
   bool CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
   bool LoadMe(std::stringstream& comments);
+  bool LoadAndInterpretDatabaseInfo(std::stringstream& comments);
   bool ParseAndInterpretDatabaseInfo(std::stringstream& comments);
   void GenerateDatabaseInfo();
   std::string CleanUpLink(const std::string& inputLink);
@@ -301,14 +302,11 @@ int WebWorker::ProcessSubmitProblem()
   { stOutput << "<b>Failed to prepare commands.</b>" << comments.str();
     return 0;
   }
-  if (!theProblem.ParseAndInterpretDatabaseInfo(comments))
+  if (!theProblem.LoadAndInterpretDatabaseInfo(comments))
   { stOutput << "<b>Failed to load the database entry for the present problem. " << theProblem.BugsGenericMessage << " </b>"
     << comments.str();
     return 0;
   }
-  theProblem.GenerateDatabaseInfo();
-  stOutput << "<hr>read the database entry: " << theProblem.databaseInfo << "<br>";
-
   theProblem.currentExamHome=        CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
   theProblem.currentExamIntermediate=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate"));
   if (theProblem.currentExamHome=="")
@@ -840,12 +838,20 @@ std::string CalculatorHTML::GetDatabaseTableName()
   return result;
 }
 
+bool CalculatorHTML::LoadAndInterpretDatabaseInfo(std::stringstream& comments)
+{ MacroRegisterFunctionWithName("CalculatorHTML::LoadAndInterpretDatabaseInfo");
+  DatabaseRoutinesGlobalFunctions::FetchEntry
+  (theGlobalVariables.userDefault, this->GetDatabaseTableName(), this->fileName, this->databaseInfo, comments);
+  return this->ParseAndInterpretDatabaseInfo(comments);
+}
+
 bool CalculatorHTML::ParseAndInterpretDatabaseInfo(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::ParseAndInterpretDatabaseInfo");
   HashedList<std::string, MathRoutines::hashString> theKeys;
   List<std::string> theValues;
+  stOutput << "<br>Parsing and interpreting  database info: <br>" << this->databaseInfo;
   CGI::ChopCGIInputStringToMultipleStrings(this->databaseInfo, theValues, theKeys, this->comments);
-  stOutput << "Database info keys: " << theKeys.ToStringCommaDelimited() << "<br>Values: " << theValues.ToStringCommaDelimited();
+  stOutput << "<br>Database info keys: " << theKeys.ToStringCommaDelimited() << "<br>Values: " << theValues.ToStringCommaDelimited();
   if (theKeys.Contains("rand"))
   { std::stringstream reader(theValues[theKeys.GetIndex("rand")]);
     reader >> this->randomSeed;
@@ -863,6 +869,9 @@ bool CalculatorHTML::ParseAndInterpretDatabaseInfo(std::stringstream& comments)
       reader >> this->answerNumCorrectSubmissions[i];
     }
   }
+//  stOutput << "<br> database info xtracted back: <br>";
+//  this->GenerateDatabaseInfo();
+//  stOutput << this->databaseInfo;
   return true;
 }
 
@@ -878,8 +887,9 @@ void CalculatorHTML::GenerateDatabaseInfo()
 
 bool CalculatorHTML::GenerateAndStoreDatabaseInfo(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::GenerateAndStoreDatabaseInfo");
+  stOutput << "<br>About to generate and store database info ... ";
   this->GenerateDatabaseInfo();
-  stOutput << " database info generated: " << this->databaseInfo << "<br>";
+  stOutput << "<br>database info generated, proceeding to store it:<br>" << this->databaseInfo << "<br>";
   if (!DatabaseRoutinesGlobalFunctions::TableExists(this->GetDatabaseTableName(), comments))
     stOutput << "Ze table dont exist, name: " << this->GetDatabaseTableName() << "<br>";
   DatabaseRoutinesGlobalFunctions::CreateColumn(this->fileName, this->GetDatabaseTableName(), comments);
@@ -902,12 +912,10 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
         { this->outputHtml ="<b>Failed to create table for storing exam results. </b>" +comments.str();
           return false;
         }
-      if (DatabaseRoutinesGlobalFunctions::FetchEntry
-          (theGlobalVariables.userDefault, this->GetDatabaseTableName(), this->fileName, this->databaseInfo, comments))
-        if (!this->ParseAndInterpretDatabaseInfo(comments))
-        { this->outputHtml = "<b>Something wrong has happened: failed to parse the information stored in the database. Please let your instructor know.</b>";
-          return false;
-        }
+      if (!this->LoadAndInterpretDatabaseInfo(comments))
+      { this->outputHtml = "<b>Something wrong has happened: failed to parse the information stored in the database. Please let your instructor know.</b>";
+        return false;
+      }
     }
   if (this->flagRandomSeedGiven)
     this->MaxInterpretationAttempts=1;

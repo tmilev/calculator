@@ -170,6 +170,7 @@ public:
   static void InitThreadsExecutableStart();
   bool UserDefaultHasAdminRights();
 
+  std::string ToStringNavigation();
   std::string ToStringCalcArgsNoNavigation();
 
   void SetWebInput(const std::string& inputName, const std::string& inputValue);

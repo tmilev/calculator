@@ -116,7 +116,7 @@ bool DatabaseRoutinesGlobalFunctions::CreateColumn
   std::stringstream commandStream;
   commandStream << "ALTER TABLE \"" << tableNameSafe << "\""
   << " ADD \"" << columnNameSafe << "\" "
-  << "VARCHAR(50)";
+  << "LONGTEXT";
 //  stOutput << "<br>got to here<br>hrbr<br>";
   DatabaseQuery theQuery(theRoutines, commandStream.str());
 //  stOutput << "<br>AFTER alter command: " << theRoutines.comments.str() << "<hr>";
@@ -229,12 +229,12 @@ std::string DatabaseRoutines::ToStringTable(const std::string& inputTableName)
     out << "<b>The number of entries was truncated to " << theTable.size << ". <b>";
   out << "<table><tr>";
   for (int i=0; i<columnLabels.size; i++)
-    out << "<td>" << columnLabels[i] << "</td>";
+    out << "<td>" << CGI::URLStringToNormal(columnLabels[i]) << "</td>";
   out << "</tr>";
   for (int i=0; i<theTable.size; i++)
   { out << "<tr>";
     for (int j=0; j<theTable[i].size; j++)
-      out << "<td>" << theTable[i][j] << "</td>";
+      out << "<td>" << CGI::URLStringToNormal( theTable[i][j]) << "</td>";
     out << "</tr>";
   }
   out << "</table>";
@@ -254,7 +254,7 @@ std::string DatabaseRoutines::ToStringAllTables()
   { std::stringstream linkStream;
     linkStream << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=browseDatabase&currentDatabaseTable="
     << tableNames[i] << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation();
-    out << "<tr><td><a href=\"" << linkStream.str() << "\">" << tableNames[i] << "</a></td></tr>";
+    out << "<tr><td><a href=\"" << linkStream.str() << "\">" << CGI::URLStringToNormal(tableNames[i]) << "</a></td></tr>";
   }
   out << "</table>";
   return out.str();
@@ -268,7 +268,7 @@ bool DatabaseRoutines::FetchTableNames(List<std::string>& output, std::stringstr
   if (!theQuery.flagQuerySucceeded)
     return false;
   output.SetSize(theQuery.allQueryResultStrings.size);
-  stOutput << "show tables: " << theQuery.allQueryResultStrings.ToStringCommaDelimited();
+//  stOutput << "show tables: " << theQuery.allQueryResultStrings.ToStringCommaDelimited();
   for (int i=0; i<theQuery.allQueryResultStrings.size; i++)
     if (theQuery.allQueryResultStrings[i].size>0)
       output[i]=theQuery.allQueryResultStrings[i][0];
@@ -316,7 +316,7 @@ bool DatabaseRoutines::FetchTable
   { comments << "Query: " << queryStreamFields.str() << " failed. ";
     return false;
   }
-  stOutput << "field query: " << theFieldQuery.allQueryResultStrings.ToStringCommaDelimited();
+//  stOutput << "field query: " << theFieldQuery.allQueryResultStrings.ToStringCommaDelimited();
   outputColumnLabels.SetSize(theFieldQuery.allQueryResultStrings.size);
   for (int i=0; i<theFieldQuery.allQueryResultStrings.size; i++)
     if (theFieldQuery.allQueryResultStrings[i].size>0 )
@@ -359,7 +359,7 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   this->flagOutputWasTruncated=false;
   this->MaxNumRowsToRead=inputMaxNumRowsToRead;
   this->numRowsRead=0;
-//  stOutput << "<hr> querying: " << inputQuery;
+  stOutput << "<hr> querying: " << inputQuery;
   if (this->parent->connection==0)
     if (!this->parent->startMySQLDatabase())
     { stOutput << "Failed to start database. Comments generated during the failure: " << inputParent.comments.str();
@@ -1120,7 +1120,7 @@ bool DatabaseRoutines::innerCreateTeachingClass(Calculator& theCommands, const E
     return output.MakeError("Failed to authenticate. ", theCommands);
   if (!theRoutines.CreateTable(className[0],
   "user VARCHAR(50) NOT NULL PRIMARY KEY, \
-  performance VARCHAR(50) NOT NULL", &theCommands.Comments))
+  VARCHAR(50) NOT NULL", &theCommands.Comments))
     return output.AssignValue(theRoutines.comments.str(), theCommands);
   return output.AssignValue(theRoutines.comments.str(), theCommands);
 }

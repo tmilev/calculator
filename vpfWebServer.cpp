@@ -552,6 +552,8 @@ std::string WebWorker::ToStringCalculatorArgumentsHumanReadable()
   out << "<hr>";
   if (theGlobalVariables.flagLoggedIn)
     out << "Logged in.";
+  if (theGlobalVariables.UserDefaultHasAdminRights())
+    out << "<br><b>User has admin rights</b>";
   for (int i=0; i<theGlobalVariables.webFormArguments.size; i++)
   { out << "<br>"
     << theGlobalVariables.webFormArgumentNames[i] << ": " << theGlobalVariables.webFormArguments[i];
@@ -788,6 +790,7 @@ void WebWorker::OutputStandardResult()
   }
   stOutput << "<td valign=\"top\">";
   theGlobalVariables.theSourceCodeFiles().QuickSortAscending();
+  stOutput << theGlobalVariables.ToStringNavigation();
   stOutput << theGlobalVariables.ToStringSourceCodeInfo();
   stOutput << "<hr><b>Calculator status. </b><br>";
   stOutput << theParser.ToString();
@@ -1195,11 +1198,15 @@ void WebWorker::ExtractPhysicalAddressFromMainAddress()
 
 int WebWorker::ProcessServerStatus()
 { MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestServerStatus");
-  stOutput << "<html><body>"
-  << " <table><tr><td style=\"vertical-align:top\">" << this->parent->ToStringStatusAll() << "</td><td>"
-  << theGlobalVariables.ToStringHTMLTopCommandLinuxSystem()
-  << "</td></tr></table>"
-  << "</body></html>";
+  stOutput << "<html><body>";
+  if (theGlobalVariables.UserDefaultHasAdminRights())
+    stOutput<< " <table><tr><td style=\"vertical-align:top\">" << this->parent->ToStringStatusAll() << "</td><td>"
+    << theGlobalVariables.ToStringNavigation()
+    << theGlobalVariables.ToStringHTMLTopCommandLinuxSystem()
+    << "</td></tr></table>";
+  else
+    stOutput << "<b>Viewing server status available only to logged-in admins.</b>";
+  stOutput << "</body></html>";
   return 0;
 }
 
@@ -1622,11 +1629,9 @@ int WebWorker::ProcessCalculator()
     stOutput.Flush();
     return 0;
   }
-  stOutput << "main request is: " << theGlobalVariables.userCalculatorRequestType
-  << "<br>web keys: " << theGlobalVariables.webFormArgumentNames.ToStringCommaDelimited()
-  << "<br>web entries: " << theGlobalVariables.webFormArguments.ToStringCommaDelimited();
-
-
+//  stOutput << "main request is: " << theGlobalVariables.userCalculatorRequestType
+//  << "<br>web keys: " << theGlobalVariables.webFormArgumentNames.ToStringCommaDelimited()
+//  << "<br>web entries: " << theGlobalVariables.webFormArguments.ToStringCommaDelimited();
   if (theGlobalVariables.userCalculatorRequestType=="browseDatabase" &&
       theGlobalVariables.flagLoggedIn &&
       theGlobalVariables.flagUsingSSLinCurrentConnection)

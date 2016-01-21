@@ -560,22 +560,6 @@ std::string WebWorker::ToStringCalculatorArgumentsHumanReadable()
   return out.str();
 }
 
-std::string WebWorker::ToStringCalcArgsExcludeRequestPasswordExamDetails()
-{ MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsCGIinputExcludeRequestType");
-  if (!theGlobalVariables.flagLoggedIn)
-    return "";
-  std::stringstream out;
-  for (int i =0; i<theGlobalVariables.webFormArgumentNames.size; i++)
-  { const std::string& currentName=theGlobalVariables.webFormArgumentNames[i];
-    if (currentName =="request"|| currentName=="password" || currentName=="currentExamFile" ||
-        currentName=="currentExamHome" || currentName=="currentExamIntermediate")
-      continue;
-    out << theGlobalVariables.webFormArgumentNames[i] << "=" << theGlobalVariables.webFormArguments[i]
-    << "&";
-  }
-  return out.str();
-}
-
 bool WebWorker::ProcessRawArguments(std::stringstream& argumentProcessingFailureComments)
 { MacroRegisterFunctionWithName("WebServer::ProcessRawArguments");
   HashedList<std::string, MathRoutines::hashString>& inputStringNames=theGlobalVariables.webFormArgumentNames;
@@ -1635,6 +1619,19 @@ int WebWorker::ProcessCalculator()
       theGlobalVariables.flagUsingSSLinCurrentConnection)
   { stOutput << this->GetExamPage();
     theReport.SetStatus("Exam page served, exiting.");
+    stOutput.Flush();
+    return 0;
+  }
+  stOutput << "main request is: " << theGlobalVariables.userCalculatorRequestType
+  << "<br>web keys: " << theGlobalVariables.webFormArgumentNames.ToStringCommaDelimited()
+  << "<br>web entries: " << theGlobalVariables.webFormArguments.ToStringCommaDelimited();
+
+
+  if (theGlobalVariables.userCalculatorRequestType=="browseDatabase" &&
+      theGlobalVariables.flagLoggedIn &&
+      theGlobalVariables.flagUsingSSLinCurrentConnection)
+  { stOutput << this->GetDatabasePage();
+    theReport.SetStatus("Database page served, exiting.");
     stOutput.Flush();
     return 0;
   }

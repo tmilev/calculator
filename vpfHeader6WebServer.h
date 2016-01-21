@@ -100,6 +100,7 @@ public:
   std::string GetLoginPage();
   std::string GetLoginHTMLinternal();
   std::string GetExamPage();
+  std::string GetDatabasePage();
   static std::string GetJavaScriptIndicatorFromHD();
   static std::string GetJavascriptHideHtml();
   std::string GetHtmlHiddenInputExercise();
@@ -117,7 +118,6 @@ public:
   void SendDisplayUserInputToServer();
   enum requestTypes {requestUnknown, requestGetCalculator, requestPostCalculator,
   requestGetNotCalculator};
-  static std::string ToStringCalcArgsExcludeRequestPasswordExamDetails();
   static std::string ToStringCalculatorArgumentsHumanReadable();
   std::string ToStringStatus()const;
   std::string ToStringMessageUnsafe()const;

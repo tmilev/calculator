@@ -222,6 +222,26 @@ void GlobalVariables::SetWebInput(const std::string& inputName, const std::strin
   this->webFormArguments[theIndex]=inputValue;
 }
 
+bool GlobalVariables::UserDefaultHasAdminRights()
+{ return this->flagLoggedIn && (this->userCalculatorAdmin==this->userDefault);
+}
+
+std::string GlobalVariables::ToStringCalcArgsNoNavigation()
+{ MacroRegisterFunctionWithName("GlobalVariables::ToStringCalcArgsNoNavigation");
+  if (!this->flagLoggedIn)
+    return "";
+  std::stringstream out;
+  for (int i =0; i<this->webFormArgumentNames.size; i++)
+  { const std::string& currentName=this->webFormArgumentNames[i];
+    if (currentName =="request"|| currentName=="password" || currentName=="currentExamFile" ||
+        currentName=="currentExamHome" || currentName=="currentExamIntermediate" || currentName=="currentDatabaseTable")
+      continue;
+    out << theGlobalVariables.webFormArgumentNames[i] << "=" << theGlobalVariables.webFormArguments[i]
+    << "&";
+  }
+  return out.str();
+}
+
 std::string GlobalVariables::GetWebInput(const std::string& inputName)
 { MacroRegisterFunctionWithName("GlobalVariables::GetWebInput");
   int theIndex=this->webFormArgumentNames.GetIndex(inputName);

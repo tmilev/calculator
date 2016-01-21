@@ -34,6 +34,14 @@ void Calculator::initAdminFunctions()
    "GetUserPassword(\"testUser\"); ", false, true, "DatabaseRoutines::innerGetUserPassword");
    ;
   this->AddOperationInnerHandler
+  ("DisplayTables", DatabaseRoutines::innerDisplayTables, "",
+   "Displays all database tables. Only available for admins.",
+   "DisplayTables(0)", false, true, "DatabaseRoutines::innerDisplayTables");
+  this->AddOperationInnerHandler
+  ("DisplayDatabaseTable", DatabaseRoutines::innerDisplayDatabaseTable, "",
+   "Displays a database table. Only available for admins.",
+   "DisplayDatabaseTable(\"gradesCourse_Homework_UMB_Spring_2016_Milev.html\"); ", false, true, "DatabaseRoutines::innerDisplayDatabaseTable");
+  this->AddOperationInnerHandler
   ("GetAuthenticationToken", DatabaseRoutines::innerGetAuthentication, "",
    "Gets the authentication token of a given user.",
    "GetAuthentication(\"testUser\"); ", false, true, "DatabaseRoutines::innerGetAuthentication");

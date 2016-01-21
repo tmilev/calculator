@@ -226,6 +226,36 @@ bool GlobalVariables::UserDefaultHasAdminRights()
 { return this->flagLoggedIn && (this->userCalculatorAdmin==this->userDefault);
 }
 
+std::string GlobalVariables::ToStringNavigation()
+{ MacroRegisterFunctionWithName("GlobalVariables::ToStringNavigation");
+  std::stringstream out;
+  out << "<table>";
+  if (theGlobalVariables.userCalculatorRequestType!="calculate")
+    out << "<tr><td><a href=\"" << this->DisplayNameCalculatorWithPath << "?request=calculate&"
+    << this->ToStringCalcArgsNoNavigation() << " \">calculator</a></td></tr>";
+  else
+    out << "<tr><td><b>calculator</b></td></tr>";
+  if (this->UserDefaultHasAdminRights())
+  { if (theGlobalVariables.userCalculatorRequestType!="status")
+      out << "<tr><td><a href=\"" << this->DisplayNameCalculatorWithPath << "?request=status&" << this->ToStringCalcArgsNoNavigation()
+      << "\">server status</a></td></tr>";
+    else
+      out << "<tr><td><b>server status</b></td></tr>";
+    if (theGlobalVariables.userCalculatorRequestType!="browseDatabase")
+      out << "<tr><td><a href=\"" << this->DisplayNameCalculatorWithPath << "?request=browseDatabase&" << this->ToStringCalcArgsNoNavigation()
+      << "\">database</a></td></tr>";
+    else
+      out << "<tr><td><b>database</b></td></tr>";
+  }
+  if (theGlobalVariables.userCalculatorRequestType!="exercises" && theGlobalVariables.userCalculatorRequestType!="examForReal" )
+    out << "<tr><td><a href=\"" << this->DisplayNameCalculatorWithPath << "?request=exercises&" << this->ToStringCalcArgsNoNavigation()
+    << "\">exercises</a></td></tr>";
+  else
+    out << "<tr><td><b>exercises</b></td></tr>";
+  out << "</table>";
+  return out.str();
+}
+
 std::string GlobalVariables::ToStringCalcArgsNoNavigation()
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringCalcArgsNoNavigation");
   if (!this->flagLoggedIn)

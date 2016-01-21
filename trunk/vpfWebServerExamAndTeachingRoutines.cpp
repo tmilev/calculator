@@ -435,7 +435,9 @@ std::string WebWorker::GetDatabasePage()
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     out << "Browsing database allowed only for logged-in admins.";
   else
-    out << theRoutines.ToStringCurrentTableHTML();
+    out << "<table><td>" << theRoutines.ToStringCurrentTableHTML() << "</td><td>"
+    << theGlobalVariables.ToStringNavigation()
+    << "</td></tr></table>";
   out <<"<hr><hr><hr><hr><hr><hr><hr><hr>" << this->ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
@@ -656,6 +658,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   if (this->flagIsExamHome)
     return "";
   std::stringstream out;
+  out << theGlobalVariables.ToStringNavigation();
   std::string calcArgsNoPassExamDetails=theGlobalVariables.ToStringCalcArgsNoNavigation();
   out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
   << calcArgsNoPassExamDetails

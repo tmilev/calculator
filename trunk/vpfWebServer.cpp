@@ -2799,7 +2799,8 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
     theGlobalVariables.flagRunningConsoleTest=true;
     return;
   }
-  theGlobalVariables.flagUsingBuiltInWebServer= (secondArgument=="server" || secondArgument=="server8155" || secondArgument=="serverSSL");
+  theGlobalVariables.flagUsingBuiltInWebServer=
+  (secondArgument=="server" || secondArgument=="server8155" || secondArgument=="serverSSL");
   theGlobalVariables.flagRunningCommandLine=!theGlobalVariables.flagUsingBuiltInWebServer;
   if (theGlobalVariables.flagRunningCommandLine)
   { theGlobalVariables.programArguments.PopIndexShiftDown(0);

@@ -1719,7 +1719,7 @@ std::string WebWorker::GetLoginHTMLinternal()
 //  << this->mainArgumentRAW;
   out << this->ToStringCalculatorArgumentsHumanReadable();
   out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"GET\" accept-charset=\"utf-8\">"
-  <<  "User name or email: "
+  <<  "User name: "
   << "<input type=\"text\" name=\"user\" placeholder=\"user\" required>"
   << "<br>Password: "
   << "<input type=\"password\" name=\"password\" placeholder=\"password\">"
@@ -1737,6 +1737,39 @@ std::string WebWorker::GetHtmlHiddenInputComputation()
 
 std::string WebWorker::GetHtmlHiddenInputExercise()
 { return "<input type=\"hidden\" name=\"request\" id=\"request\" value=\"exercises\">";
+}
+
+std::string WebWorker::GetChangePasswordPage()
+{ MacroRegisterFunctionWithName("WebWorker::GetChangePasswordPage");
+  std::stringstream out;
+  out << "<html>"
+  << WebWorker::GetJavascriptStandardCookies()
+  << "<body ";
+  out << "onload=\"loadSettings();  ";
+  if (!this->flagAuthenticationTokenWasSubmitted)
+    out
+    << "if (document.getElementById('authenticationToken') !=null)"
+    << "  if (document.getElementById('authenticationToken').value!='')"
+    << "    document.getElementById('login').submit();";
+//    << "  window.location='calculator?user='+GlobalUser+'&authenticationToken='+GlobalAuthenticationToken;";
+  out << "\">\n";
+  theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
+  out << this->ToStringCalculatorArgumentsHumanReadable();
+  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"GET\" accept-charset=\"utf-8\">"
+  <<  "User name or email: "
+  << "<input type=\"text\" name=\"user\" placeholder=\"user\" required>"
+  << "<br>Password: "
+  << "<input type=\"password\" name=\"password\" placeholder=\"password\">"
+  << "<br>New password: "
+  << "<input type=\"password\" name=\"newPassword\" placeholder=\"password\">"
+  << "<br>Re-enter new password: "
+  << "<input type=\"password\" name=\"reenteredNewPassword\" placeholder=\"password\">"
+  << this->GetHtmlHiddenInputExercise()
+  << this->GetHtmlHiddenInputs()
+  << "<input type=\"submit\" name=\"request\" value=\"ChangePassword\">"
+  << "</form>";
+  out << "</body></html>";
+  return out.str();
 }
 
 std::string WebWorker::GetLoginPage()
@@ -2381,6 +2414,7 @@ void WebServer::initPortsITry()
   this->PortsITryHttpSSL.AddOnTop("8083");
   this->PortsITryHttpSSL.AddOnTop("8084");
   this->PortsITryHttpSSL.AddOnTop("8085");
+  this->PortsITryHttpSSL.AddOnTop("8156");
 }
 
 void WebServer::initListeningSockets()

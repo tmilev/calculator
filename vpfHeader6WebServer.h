@@ -98,6 +98,7 @@ public:
   void SendAllBytesHttpSSL();
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
   std::string GetJavaScriptIndicatorBuiltInServer(int inputIndex);
+  std::string GetChangePasswordPage();
   std::string GetLoginPage();
   std::string GetLoginHTMLinternal();
   std::string GetExamPage();

@@ -62,6 +62,23 @@ bool DatabaseRoutinesGlobalFunctions::SetEntry
 #endif
 }
 
+bool DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights()
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights");
+  if (theGlobalVariables.UserDefaultHasAdminRights())
+    return true;
+#ifdef MACRO_use_MySQL
+  if (!theGlobalVariables.flagLoggedIn)
+    return false;
+  std::stringstream comments;
+  if (!DatabaseRoutinesGlobalFunctions::TableExists("instructors", comments))
+    DatabaseRoutinesGlobalFunctions::CreateTable("instructors", comments);
+  std::string notUsed;
+  return DatabaseRoutinesGlobalFunctions::FetchEntry(theGlobalVariables.userDefault, "instructors", "users", notUsed, comments);
+#else
+  return false;
+#endif
+}
+
 bool DatabaseRoutinesGlobalFunctions::CreateTable
 (const std::string& tableName, std::stringstream& comments)
 {
@@ -180,7 +197,6 @@ std::string DatabaseRoutines::ToString()
   std::stringstream out;
   out << "Database name: " << this->theDatabaseName;
   return out.str();
-
 }
 
 bool UserCalculator::SetCurrentTable(const std::string& inputTableNameUnsafe)
@@ -215,7 +231,6 @@ UserCalculator::~UserCalculator()
 std::string DatabaseRoutines::ToStringTable(const std::string& inputTableName)
 { MacroRegisterFunctionWithName("DatabaseRoutines::ToStringTable");
   std::stringstream out, comments;
-
   List<List<std::string> > theTable;
   List<std::string> columnLabels;
   bool wasTruncated=false;
@@ -413,7 +428,6 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
       }
     }
   }
-
 //  stOutput << "<br>the flag: " << this->flagQueryReturnedResult;
 }
 

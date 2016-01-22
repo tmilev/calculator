@@ -2393,10 +2393,10 @@ void WebServer::Restart()
   int timeInteger=(int) theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   theCommand << "killall " << theGlobalVariables.PhysicalNameExecutableNoPath + " \r\n./";
   theCommand << theGlobalVariables.PhysicalNameExecutableNoPath;
-  if (theGlobalVariables.flagSSLisAvailable)
-    theCommand << " serverSSL nokill " << timeInteger;
-  else if (this->flagPort8155)
+  if (this->flagPort8155)
     theCommand << " server8155 nokill " << timeInteger;
+  else if (theGlobalVariables.flagSSLisAvailable)
+    theCommand << " serverSSL nokill " << timeInteger;
   else
     theCommand << " server nokill " << timeInteger;
   theGlobalVariables.CallSystemNoOutput(theCommand.str()); //kill any other running copies of the calculator.
@@ -2411,10 +2411,10 @@ void WebServer::initPortsITry()
   this->PortsITryHttp.AddOnTop("8155");
   if (!theGlobalVariables.flagSSLisAvailable)
     return;
+  this->PortsITryHttpSSL.AddOnTop("8166");
   this->PortsITryHttpSSL.AddOnTop("8083");
   this->PortsITryHttpSSL.AddOnTop("8084");
   this->PortsITryHttpSSL.AddOnTop("8085");
-  this->PortsITryHttpSSL.AddOnTop("8156");
 }
 
 void WebServer::initListeningSockets()
@@ -2810,7 +2810,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   }
   if (secondArgument=="server8155")
     theWebServer.flagPort8155=true;
-  if (secondArgument=="serverSSL")
+  if (secondArgument=="serverSSL" || secondArgument=="server8155")
   {
 #ifdef MACRO_use_open_ssl
     theGlobalVariables.flagSSLisAvailable=true;

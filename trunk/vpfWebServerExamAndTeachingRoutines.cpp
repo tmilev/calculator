@@ -104,6 +104,7 @@ public:
   void InterpretNotByCalculator(SyntacticElementHTML& inputOutput);
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
   void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
+  void InterpretManageClass(SyntacticElementHTML& inputOutput);
   std::string GetSubmitAnswersJavascript();
   std::string GetDatabaseTableName();
   void LoadCurrentProblemItem();
@@ -737,8 +738,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
       out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
       << this->ToStringCalculatorArgumentsForProblem("examForReal")
       << "\">&nbsp&nbspStart exam for real</a>";
-    }
-    else
+    } else
       out << "<b>&nbsp&nbspCurrent problem</b><br>";
   }
   if (this->flagIsExamProblem && this->flagParentInvestigated)
@@ -782,6 +782,13 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem(const std::str
 
 std::string SyntacticElementHTML::GetTagClass()
 { return this->GetKeyValue("class");
+}
+
+void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
+{
+
+  crash <<  "should write this to work" << crash;
+
 }
 
 void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput)
@@ -837,6 +844,8 @@ void CalculatorHTML::InterpretNotByCalculator(SyntacticElementHTML& inputOutput)
     this->InterpretGenerateLink(inputOutput);
   else if (tagClass=="calculatorAnswer")
     this->InterpretGenerateStudentAnswerButton(inputOutput);
+  else if (tagClass=="calculatorManageClass")
+    this->InterpretManageClass(inputOutput);
 }
 
 std::string CalculatorHTML::CleanUpLink(const std::string& inputLink)
@@ -1136,6 +1145,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   this->calculatorClasses.AddOnTop("calculatorAnswer");
   this->calculatorClasses.AddOnTop("calculatorExamIntermediate");
   this->calculatorClasses.AddOnTop("calculatorExamProblem");
+  this->calculatorClasses.AddOnTop("calculatorManageClass");
   this->calculatorClasses.AddOnTop("setCalculatorExamProblem");
   this->calculatorClasses.AddOnTop("setCalculatorExamIntermediate");
   this->calculatorClasses.AddOnTop("setCalculatorExamHome");

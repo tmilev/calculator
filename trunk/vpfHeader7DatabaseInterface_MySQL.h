@@ -24,6 +24,7 @@ public:
   static bool CreateColumn
   (const std::string& columnNameUnsafe, const std::string& tableNameUnsafe,
    std::stringstream& commentsOnCreation);
+   static bool UserDefaultHasInstructorRights();
 };
 
 #ifdef MACRO_use_MySQL

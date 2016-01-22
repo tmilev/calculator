@@ -60,7 +60,7 @@ endif
 
 ifeq ($(mysqlcentos),1)
 	CFLAGS+= -DMACRO_use_MySQL
-	LIBRARYINCLUDESEND+= -lmysqlclient  #WARNING believe it or not, the libraries must come AFTER the executable name
+	LIBRARYINCLUDESEND+= -L/usr/local/lib/mysql -lmysqlclient  #WARNING believe it or not, the libraries must come AFTER the executable name
 endif
 
 #if this is missing something, add it, or, ls | grep cpp | xargs echo

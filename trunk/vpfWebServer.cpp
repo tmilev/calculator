@@ -579,21 +579,25 @@ bool WebWorker::ProcessRawArguments(std::stringstream& argumentProcessingFailure
   this->authenticationToken=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("authenticationToken"));
   if (this->authenticationToken!="")
     this->flagAuthenticationTokenWasSubmitted=true;
-  if (inputStringNames.Contains("password"))
+  this->flagPasswordWasSubmitted=(theGlobalVariables.GetWebInput("password")!="");
+  if (this->flagPasswordWasSubmitted)
   { password=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("password"));
     inputStrings[inputStringNames.GetIndex("password")]="********************************************";
   }
   if (inputStringNames.Contains("textInput") &&! inputStringNames.Contains("mainInput"))
-  { stOutput << "Received calculator link in an old format, interpreting 'textInput' as 'mainInput'";
+  { argumentProcessingFailureComments << "Received calculator link in an old format, interpreting 'textInput' as 'mainInput'";
     inputStringNames.SetObjectAtIndex(inputStringNames.GetIndex("textInput"), "mainInput");
   }
   if (desiredUser!="" && theGlobalVariables.flagUsingSSLinCurrentConnection)
   { theGlobalVariables.flagLoggedIn=DatabaseRoutinesGlobalFunctions::LoginViaDatabase
-    (desiredUser, password, this->authenticationToken);
+    (desiredUser, password, this->authenticationToken, &argumentProcessingFailureComments);
     if (theGlobalVariables.flagLoggedIn)
-      theGlobalVariables.userDefault=desiredUser;
-    else
-      theGlobalVariables.userDefault="";
+    { theGlobalVariables.userDefault=desiredUser;
+      theGlobalVariables.SetWebInput("authenticationToken", CGI::StringToURLString( this->authenticationToken));
+    } else
+    { theGlobalVariables.userDefault="";
+      theGlobalVariables.SetWebInput("error", CGI::StringToURLString("<b>Invalid user or password</b>"));
+    }
   }
   password="********************************************";
   return true;
@@ -676,7 +680,6 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
 
 void WebWorker::OutputBeforeComputation()
 { MacroRegisterFunctionWithName("WebServer::OutputBeforeComputation");
-  theGlobalVariables.flagComputationCompletE=false;
   stOutput << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, "
   << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
   << "Root subalgebras, sl(2)-triples\"> <head> <title>calculator version  " << __DATE__ << ", " << __TIME__ << "</title>";
@@ -1422,6 +1425,7 @@ void WebWorker::reset()
   this->timeOfLastPingServerSideOnly=-1;
   this->flagAuthenticationTokenWasSubmitted=false;
   this->flagFoundMalformedFormInput=false;
+  this->flagPasswordWasSubmitted=false;
   theGlobalVariables.flagUsingSSLinCurrentConnection=false;
   theGlobalVariables.flagLoggedIn=false;
   for (unsigned i=0; i<theGlobalVariables.userDefault.size(); i++)
@@ -1463,6 +1467,7 @@ void WebWorker::SignalIamDoneReleaseEverything()
   theLog << logger::blue << "Worker " << this->indexInParent+1 << " finished, sending result. " << logger::endL;
   this->SendAllBytes();
   this->Release();
+  theGlobalVariables.flagComputationCompletE=true;
   theGlobalVariables.flagComputationFinishedAllOutputSentClosing=true;
 }
 
@@ -1591,14 +1596,33 @@ int WebWorker::ProcessUnknown()
 int WebWorker::ProcessCalculator()
 { MacroRegisterFunctionWithName("WebServer::ProcessCalculator");
   ProgressReportWebServer theReport;
-  stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
   std::stringstream argumentProcessingFailureComments;
   if (!this->ProcessRawArguments(argumentProcessingFailureComments))
-  { stOutput << "<html><body>" << "Failed to process the calculator arguments. <b>"
+  { stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
+    << "<html><body>" << "Failed to process the calculator arguments. <b>"
     << argumentProcessingFailureComments.str() << "</b></body></html>";
     stOutput.Flush();
     return 0;
   }
+  if (this->flagPasswordWasSubmitted)
+  { std::stringstream redirectedAddress;
+    redirectedAddress << theGlobalVariables.DisplayNameCalculatorWithPath << "?";
+    for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
+      if (theGlobalVariables.webFormArgumentNames[i]!="password")
+        redirectedAddress << theGlobalVariables.webFormArgumentNames[i] << "=" << theGlobalVariables.webFormArguments[i] << "&";
+    stOutput << "HTTP/1.1 303 See other\r\nLocation: ";
+    stOutput << redirectedAddress.str();
+    stOutput << "\r\n\r\n";
+//    stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
+//    stOutput << redirectedAddress.str();
+//    stOutput << "\r\n";
+    stOutput.Flush();
+    return 0;
+  }
+  stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
+  stOutput << argumentProcessingFailureComments.str();
+  if (theGlobalVariables.GetWebInput("error")!="")
+    stOutput << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("error"));
   if (theGlobalVariables.userCalculatorRequestType=="pause")
     return this->ProcessPauseWorker();
   if (theGlobalVariables.userCalculatorRequestType=="status")
@@ -1611,12 +1635,12 @@ int WebWorker::ProcessCalculator()
   this->parent->ReleaseNonActiveWorkers();
   if ((theGlobalVariables.flagUsingSSLinCurrentConnection && !theGlobalVariables.flagLoggedIn)||
       theGlobalVariables.userCalculatorRequestType=="login")
-  { stOutput << this->GetLoginPage();
-    theReport.SetStatus("Login screen served, exiting. ");
-    theGlobalVariables.flagComputationCompletE=true;
-    stOutput.Flush();
-    return 0;
-  }
+    return this->ProcessLoginPage();
+  if (theGlobalVariables.userCalculatorRequestType=="changePassword")
+    return this->ProcessChangePassword();
+  if (theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagLoggedIn &&
+      theGlobalVariables.userCalculatorRequestType=="logout")
+    return this->ProcessLogout();
   if (theGlobalVariables.userCalculatorRequestType=="submitProblem" &&
       theGlobalVariables.flagLoggedIn)
     return this->ProcessSubmitProblem();
@@ -1627,22 +1651,14 @@ int WebWorker::ProcessCalculator()
         theGlobalVariables.userCalculatorRequestType=="exercises") &&
       theGlobalVariables.flagLoggedIn &&
       theGlobalVariables.flagUsingSSLinCurrentConnection)
-  { stOutput << this->GetExamPage();
-    theReport.SetStatus("Exam page served, exiting.");
-    stOutput.Flush();
-    return 0;
-  }
+    return this->ProcessExamPage();
 //  stOutput << "main request is: " << theGlobalVariables.userCalculatorRequestType
 //  << "<br>web keys: " << theGlobalVariables.webFormArgumentNames.ToStringCommaDelimited()
 //  << "<br>web entries: " << theGlobalVariables.webFormArguments.ToStringCommaDelimited();
   if (theGlobalVariables.userCalculatorRequestType=="browseDatabase" &&
       theGlobalVariables.flagLoggedIn &&
       theGlobalVariables.flagUsingSSLinCurrentConnection)
-  { stOutput << this->GetDatabasePage();
-    theReport.SetStatus("Database page served, exiting.");
-    stOutput.Flush();
-    return 0;
-  }
+    return this->ProcessDatabase();
   theParser.inputString=theGlobalVariables.GetWebInput("mainInput");
   this->OutputBeforeComputation();
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(false);
@@ -1717,7 +1733,6 @@ std::string WebWorker::GetLoginHTMLinternal()
 //  << this->theMessage
 //  << "<hr> main argument: "
 //  << this->mainArgumentRAW;
-  out << this->ToStringCalculatorArgumentsHumanReadable();
   out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"GET\" accept-charset=\"utf-8\">"
   <<  "User name: "
   << "<input type=\"text\" name=\"user\" placeholder=\"user\" required>"
@@ -1727,7 +1742,7 @@ std::string WebWorker::GetLoginHTMLinternal()
   << this->GetHtmlHiddenInputs()
   << "<input type=\"submit\" value=\"Login\">"
   << "</form>";
-  out << "<b>Login screen not implemented yet.</b>";
+  out << "<hr><hr><hr>" << this->ToStringCalculatorArgumentsHumanReadable();
   return out.str();
 }
 
@@ -1772,6 +1787,41 @@ std::string WebWorker::GetChangePasswordPage()
   return out.str();
 }
 
+int WebWorker::ProcessChangePassword()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessChangePassword");
+  stOutput << this->GetChangePasswordPage();
+  return 0;
+}
+
+int WebWorker::ProcessLogout()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessLogout");
+  DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
+  this->authenticationToken="";
+  stOutput << this->GetLoginPage();
+  return 0;
+}
+
+int WebWorker::ProcessExamPage()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessExamPage");
+  stOutput << this->GetExamPage();
+  stOutput.Flush();
+  return 0;
+}
+
+int WebWorker::ProcessLoginPage()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessLoginPage");
+  stOutput << this->GetLoginPage();
+  stOutput.Flush();
+  return 0;
+}
+
+int WebWorker::ProcessDatabase()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessDatabase");
+  stOutput << this->GetDatabasePage();
+  stOutput.Flush();
+  return 0;
+}
+
 std::string WebWorker::GetLoginPage()
 { MacroRegisterFunctionWithName("WebWorker::GetLoginPage");
   std::stringstream out;
@@ -1813,6 +1863,10 @@ std::string WebWorker::GetJavascriptHideHtml()
   return output.str();
 }
 
+bool WebWorker::IsAllowedAsRequestCookie(const std::string& input)
+{ return input!="login" && input!="logout";
+}
+
 std::string WebWorker::GetJavascriptStandardCookies()
 { std::stringstream out;
   out
@@ -1848,7 +1902,8 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "function storeSettingsProgress(){\n";
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType!="" &&
       theGlobalVariables.userCalculatorRequestType!="compute")
-  { out << "  addCookie(\"request\", \"" << theGlobalVariables.userCalculatorRequestType << "\", 100);\n";
+  { if (this->IsAllowedAsRequestCookie(theGlobalVariables.userCalculatorRequestType))
+      out << "  addCookie(\"request\", \"" << theGlobalVariables.userCalculatorRequestType << "\", 100);\n";
     out << "  addCookie(\"currentExamFile\", \""
     << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile")) << "\", 100);\n";
     out << "  addCookie(\"currentExamHome\", \""
@@ -2271,21 +2326,21 @@ bool WebServer::CreateNewActiveWorker()
   this->theWorkers[this->activeWorker].flagInUse=false; //<-until everything is initialized, we cannot be in use.
   if (!this->GetActiveWorker().PauseComputationReportReceived.CreateMe("server to worker computation report received"))
     return this->EmergencyRemoval_LastCreatedWorker();
-  if (! this->GetActiveWorker().PauseWorker.CreateMe("server to worker pause"))
+  if (!this->GetActiveWorker().PauseWorker.CreateMe("server to worker pause"))
     return this->EmergencyRemoval_LastCreatedWorker();
-  if (! this->GetActiveWorker().PauseIndicatorPipeInUse.CreateMe("server to worker indicator pipe in use"))
+  if (!this->GetActiveWorker().PauseIndicatorPipeInUse.CreateMe("server to worker indicator pipe in use"))
     return this->EmergencyRemoval_LastCreatedWorker();
-  if (! this->GetActiveWorker().pipeServerToWorkerRequestIndicator.CreateMe("server to worker request indicator"))
+  if (!this->GetActiveWorker().pipeServerToWorkerRequestIndicator.CreateMe("server to worker request indicator"))
     return this->EmergencyRemoval_LastCreatedWorker();
-  if (! this->GetActiveWorker().pipeWorkerToServerTimerPing.CreateMe("worker to server timer ping"))
+  if (!this->GetActiveWorker().pipeWorkerToServerTimerPing.CreateMe("worker to server timer ping"))
     return this->EmergencyRemoval_LastCreatedWorker();
-  if (! this->GetActiveWorker().pipeWorkerToServerControls.CreateMe("worker to server controls"))
+  if (!this->GetActiveWorker().pipeWorkerToServerControls.CreateMe("worker to server controls"))
     return this->EmergencyRemoval_LastCreatedWorker();
-  if (! this->GetActiveWorker().pipeWorkerToServerIndicatorData.CreateMe("worker to server indicator data"))
+  if (!this->GetActiveWorker().pipeWorkerToServerIndicatorData.CreateMe("worker to server indicator data"))
     return this->EmergencyRemoval_LastCreatedWorker();
-  if (! this->GetActiveWorker().pipeWorkerToServerUserInput.CreateMe("worker to server user input"))
+  if (!this->GetActiveWorker().pipeWorkerToServerUserInput.CreateMe("worker to server user input"))
     return this->EmergencyRemoval_LastCreatedWorker();
-  if (! this->GetActiveWorker().pipeWorkerToServerWorkerStatus.CreateMe("worker to server worker status"))
+  if (!this->GetActiveWorker().pipeWorkerToServerWorkerStatus.CreateMe("worker to server worker status"))
     return this->EmergencyRemoval_LastCreatedWorker();
   this->theWorkers[this->activeWorker].flagInUse=true;
   return true;
@@ -2419,7 +2474,6 @@ void WebServer::initPortsITry()
 
 void WebServer::initListeningSockets()
 { MacroRegisterFunctionWithName("WebServer::initListeningSockets");
-
   if (listen(this->listeningSocketHTTP, WebServer::maxNumPendingConnections) == -1)
     crash << "Listen function failed on http port." << crash;
   if (theGlobalVariables.flagSSLisAvailable)
@@ -2452,14 +2506,12 @@ void WebServer::ReleaseWorkerSideResources()
 }
 
 void segfault_sigaction(int signal, siginfo_t *si, void *arg)
-{
-  crash << "Caught segfault at address: " << si->si_addr << crash;
+{ crash << "Caught segfault at address: " << si->si_addr << crash;
   exit(0);
 }
 
 void fperror_sigaction(int signal)
-{
-  crash << "Fatal arithmetic error. " << crash;
+{ crash << "Fatal arithmetic error. " << crash;
   exit(0);
 }
 
@@ -2561,7 +2613,7 @@ bool WebServer::initBindToPorts()
         break;
       }
       if (p!=NULL)
-      { theLog << logger::yellow << "Successfully bounded to port " << (*thePorts)[i] << logger::endL;
+      { theLog << logger::yellow << "Successfully bound to port " << (*thePorts)[i] << logger::endL;
         break;
       }
       freeaddrinfo(servinfo); // all done with this structure

@@ -8,7 +8,8 @@ static ProjectInformationInstance ProjectInfoVpf8_1HeaderDatabaseInterface_MySQL
 class DatabaseRoutinesGlobalFunctions
 {
 public:
-  static bool LoginViaDatabase(const std::string& inputUsername, const std::string& inputPassword, std::string& inputOutputAuthenticationToken);
+  static bool LogoutViaDatabase();
+  static bool LoginViaDatabase(const std::string& inputUsername, const std::string& inputPassword, std::string& inputOutputAuthenticationToken, std::stringstream* comments);
   static bool SetEntry
   (const std::string& inputUsername, const std::string& tableName, const std::string& keyName,
    const std::string& value, std::stringstream& comments);
@@ -105,7 +106,7 @@ public:
   bool SetColumnEntry
   (const std::string& columnNameUnsafe, const std::string& theValueUnsafe,
    DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream* failureComments=0);
-  bool SetPassword(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
+  bool SetPassword(DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream& commentsOnFailure);
   bool TryToLogIn(DatabaseRoutines& theRoutines);
   bool DeleteMe(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
   bool Iexist(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);

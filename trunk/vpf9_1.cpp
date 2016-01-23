@@ -230,16 +230,6 @@ std::string GlobalVariables::ToStringNavigation()
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringNavigation");
   std::stringstream out;
   //out << "<table>";
-  if (theGlobalVariables.flagLoggedIn)
-  { out << "Logged in as " << this->userDefault << "<br>";
-    out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=logout&"
-    << this->ToStringCalcArgsNoNavigation() << " \">Log out</a><br>";
-  }
-  if (theGlobalVariables.userCalculatorRequestType!="calculate")
-    out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=calculate&"
-    << this->ToStringCalcArgsNoNavigation() << " \">Calculator</a><br>";
-  else
-    out << "<b>Calculator</b><br>";
   if (this->UserDefaultHasAdminRights())
   { if (theGlobalVariables.userCalculatorRequestType!="status")
       out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=status&" << this->ToStringCalcArgsNoNavigation()
@@ -252,6 +242,21 @@ std::string GlobalVariables::ToStringNavigation()
     else
       out << "<b>Database</b><br>";
   }
+  if (theGlobalVariables.flagLoggedIn)
+  { out << "User";
+    if (theGlobalVariables.UserDefaultHasAdminRights())
+      out << " <b>(admin)</b>";
+    out << ": " << this->userDefault << "<br>";
+    out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=logout&"
+    << this->ToStringCalcArgsNoNavigation() << " \">Log out</a><br>";
+    out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=changePassword&"
+    << this->ToStringCalcArgsNoNavigation() << " \">Change password</a><hr>";
+  }
+  if (theGlobalVariables.userCalculatorRequestType!="calculate")
+    out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=calculate&"
+    << this->ToStringCalcArgsNoNavigation() << " \">Calculator</a><br>";
+  else
+    out << "<b>Calculator</b><br>";
   if (theGlobalVariables.userCalculatorRequestType!="exercises" && theGlobalVariables.userCalculatorRequestType!="examForReal" )
     out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=exercises&" << this->ToStringCalcArgsNoNavigation()
     << "\">Exercises</a><hr>";

@@ -32,6 +32,7 @@ public:
   bool flagDeallocated;
   bool flagMainAddressSanitized;
   bool flagAuthenticationTokenWasSubmitted;
+  bool flagPasswordWasSubmitted;
   bool flagFoundMalformedFormInput;
   std::string mainAddressNonSanitized;
   List<std::string> theStrings;
@@ -61,12 +62,16 @@ public:
   int ProcessComputationIndicator();
   int ProcessNonCalculator();
   int ProcessFolder();
+  int ProcessChangePassword();
+  int ProcessDatabase();
+  int ProcessExamPage();
+  int ProcessLoginPage();
+  int ProcessLogout();
   int ProcessSubmitProblem();
   int ProcessSubmitProblemPreview();
   int ProcessPauseWorker();
   int ProcessMonitor();
   int ProcessUnknown();
-
   int ServeClient();
   void QueueStringForSending(const std::string& stringToSend, bool MustSendAll=false);
   bool CheckConsistency();
@@ -75,6 +80,7 @@ public:
 
   static void StandardOutputAfterTimeOut(const std::string& input);
 
+  bool IsAllowedAsRequestCookie(const std::string& input);
   int ProcessCalculator();
   bool ProcessRawArguments(std::stringstream& argumentProcessingFailureComments);
   void OutputBeforeComputation();

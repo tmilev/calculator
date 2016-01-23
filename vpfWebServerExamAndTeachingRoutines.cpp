@@ -733,13 +733,15 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   if (this->flagIsExamProblem)
   { if (theGlobalVariables.userCalculatorRequestType=="exercises")
     { out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
+      << this->ToStringCalculatorArgumentsForProblem("examForReal")
+      << "\">&nbsp&nbspStart exam for real</a><br>";
+      out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
       << this->ToStringCalculatorArgumentsForProblem("exercises")
       << "\">&nbsp&nbspLink to this problem</a><br>";
-      out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
-      << this->ToStringCalculatorArgumentsForProblem("examForReal")
-      << "\">&nbsp&nbspStart exam for real</a>";
     } else
-      out << "<b>&nbsp&nbspCurrent problem</b><br>";
+      out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
+      << this->ToStringCalculatorArgumentsForProblem("exercises")
+      << "\">&nbsp&nbspExercise this problem type</a><br>";
   }
   if (this->flagIsExamProblem && this->flagParentInvestigated)
   { int indexInParent=this->problemListOfParent.GetIndex(this->fileName);
@@ -774,7 +776,7 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem(const std::str
   << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&"
   << "currentExamIntermediate=" << theGlobalVariables.GetWebInput("currentExamIntermediate") << "&"
   << "currentExamFile=" << CGI::StringToURLString(this->fileName) << "&";
-  if (theGlobalVariables.GetWebInput("randomSeed")=="")
+  if (theGlobalVariables.GetWebInput("randomSeed")=="" && theGlobalVariables.userCalculatorRequestType!="examForReal")
     out << "randomSeed=" << this->randomSeed << "&";
 //  out << "currentExamFile=" << CGI::StringToURLString(this->fileName) << "&";
   return out.str();

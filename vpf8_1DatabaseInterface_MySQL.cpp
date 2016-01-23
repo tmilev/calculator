@@ -4,7 +4,7 @@
 ProjectInformationInstance ProjectInfoVpf8_1MySQLcpp(__FILE__, "MySQL interface. ");
 
 bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
-(const std::string& inputUsername, const std::string& inputPassword, std::string& inputOutputAuthenticationToken)
+(const std::string& inputUsername, const std::string& inputPassword, std::string& inputOutputAuthenticationToken, std::stringstream* comments)
 {
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
@@ -23,8 +23,11 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
 //    stOutput << "<br>The actual authenticationToken is now: " << theUser.actualAuthenticationToken;
     return true;
   }
-  if (inputOutputAuthenticationToken!="")
-    stOutput << "<b> Authentication with token " << inputOutputAuthenticationToken << " failed.</b>";
+  if (inputOutputAuthenticationToken!="" && comments!=0)
+  { *comments << "<b> Authentication with token " << inputOutputAuthenticationToken << " failed.</b>";
+    //*comments << "the actual token is: " << theUser.actualAuthenticationTokeNUnsafe;
+  }
+
   inputOutputAuthenticationToken=theUser.actualAuthenticationTokeNUnsafe;
   theUser.usernameUnsafe=theGlobalVariables.userCalculatorAdmin;
   if (!theUser.Iexist(theRoutines, true))
@@ -37,6 +40,24 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
 //  stOutput << " <b>login failed, desired user:" + theUser.username +"</b>";
 //  stOutput << "<br>The actual authenticationToken is now: " << theUser.actualAuthenticationToken;
   return false;
+#else
+  return true;
+#endif
+}
+
+bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
+{
+#ifdef MACRO_use_MySQL
+  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LogoutViaDatabase");
+  if (!theGlobalVariables.flagLoggedIn)
+    return true;
+  DatabaseRoutines theRoutines;
+  UserCalculator theUser;
+  theUser.usernameUnsafe=theGlobalVariables.userDefault;
+  theUser.SetCurrentTable("users");
+  theUser.ResetAuthenticationToken(theRoutines, true);
+  theGlobalVariables.SetWebInput("authenticationToken", "");
+  return true;
 #else
   return true;
 #endif
@@ -451,7 +472,7 @@ bool UserCalculator::FetchOneColumn
   std::stringstream queryStream;
   queryStream << "SELECT \"" << CGI::StringToURLString(columnNameUnsafe)
   << "\" FROM calculatorUsers.\"" << this->currentTableSafe << "\" WHERE user='"
-  << this->usernameSafe<< "'";
+  << this->usernameSafe << "'";
   DatabaseQuery theQuery(theRoutines, queryStream.str());
   outputUnsafe="";
   if (!theQuery.flagQuerySucceeded)
@@ -479,10 +500,9 @@ bool UserCalculator::AuthenticateWithToken(DatabaseRoutines& theRoutines, bool r
     return false;
   std::string authenticationTokenCreationTimeSTRING;
   std::stringstream authenticationFailureRemarks;
-
   if (!this->FetchOneColumn("authenticationTokenCreationTime", authenticationTokenCreationTimeSTRING,
                             theRoutines, false, &authenticationFailureRemarks))
-  { stOutput << "failed to fetch auth token creation time: " << authenticationFailureRemarks.str();
+  { stOutput << "Failed to fetch authentication token creation time: " << authenticationFailureRemarks.str();
     return theRoutines << authenticationFailureRemarks;
   }
   this->authenticationTokenCreationTime=authenticationTokenCreationTimeSTRING;
@@ -491,8 +511,8 @@ bool UserCalculator::AuthenticateWithToken(DatabaseRoutines& theRoutines, bool r
   this->approximateHoursSinceLastTokenWasIssued=now.SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours
   (this->authenticationTokenCreationTime);
 //  stOutput << "approx hours since token issued: " << this->approximateHoursSinceLastTokenWasIssued;
-  if (this->approximateHoursSinceLastTokenWasIssued>3600 || this->approximateHoursSinceLastTokenWasIssued<=0) //3600 hours = 150 days, a bit more than the length of a semester
-    return false;
+//  if (this->approximateHoursSinceLastTokenWasIssued>3600 || this->approximateHoursSinceLastTokenWasIssued<=0) //3600 hours = 150 days, a bit more than the length of a semester
+//    return false;
   if (!this->FetchOneColumn("authenticationToken", this->actualAuthenticationTokeNUnsafe,
                             theRoutines, false, &authenticationFailureRemarks))
     return theRoutines << authenticationFailureRemarks;
@@ -511,12 +531,12 @@ bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, bool recomputeS
   if (this->AuthenticateWithToken(theRoutines, false))
     return true;
   bool result= this->AuthenticateWithUserNameAndPass(theRoutines, false);
-  stOutput << "Approximate hours since last token issued: " << this->approximateHoursSinceLastTokenWasIssued;
+//  stOutput << "Approximate hours since last token issued: " << this->approximateHoursSinceLastTokenWasIssued << ". ";
   this->SetCurrentTable("users");
-  if (this->approximateHoursSinceLastTokenWasIssued>1 || this->approximateHoursSinceLastTokenWasIssued<=0)
-    this->ResetAuthenticationToken(theRoutines, false);
-  else if (result)
-    this->FetchOneColumn("authenticationToken", this->actualAuthenticationTokeNUnsafe, theRoutines, false, 0);
+//  if (this->approximateHoursSinceLastTokenWasIssued>1 || this->approximateHoursSinceLastTokenWasIssued<=0)
+  this->ResetAuthenticationToken(theRoutines, false);
+//  else if (result)
+//    this->FetchOneColumn("authenticationToken", this->actualAuthenticationTokeNUnsafe, theRoutines, false, 0);
   return result;
 }
 
@@ -542,7 +562,7 @@ bool UserCalculator::ResetAuthenticationToken(DatabaseRoutines& theRoutines, boo
   if (recomputeSafeEntries)
     this->ComputeSafeObjectNames();
   TimeWrapper now;
-  stOutput << "Resetting authentication token. ";
+//  stOutput << "Resetting authentication token. ";
   now.AssignLocalTime();
   std::stringstream out;
   out << now.theTimeStringNonReadable << rand();
@@ -615,7 +635,7 @@ bool UserCalculator::CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, boo
   queryStream << "INSERT INTO calculatorUsers.users(user, email) VALUES('" << this->usernameSafe << "', '"
   << this->emailSafe << "')";
   DatabaseQuery theQuery(theRoutines, queryStream.str());
-  return this->SetPassword(theRoutines, false);
+  return this->SetPassword(theRoutines, false, theRoutines.comments);
 }
 
 void UserCalculator::ComputeShaonedSaltedPassword(bool recomputeSafeEntries)
@@ -637,6 +657,8 @@ bool UserCalculator::SetColumnEntry
 { MacroRegisterFunctionWithName("UserCalculator::SetColumnEntry");
   if (recomputeSafeEntries)
     this->ComputeSafeObjectNames();
+  if (this->currentTableSafe=="")
+    crash << "Programming error: attempting to change column " << columnNameUnsafe << " without specifying a table. " << crash;
   std::string unused;
   std::string columnNameSafe = CGI::StringToURLString(columnNameUnsafe);
   std::string valueSafe= CGI::StringToURLString(theValueUnsafe);
@@ -677,17 +699,20 @@ bool UserCalculator::ComputeSafeObjectNames()
   return true;
 }
 
-bool UserCalculator::SetPassword(DatabaseRoutines& theRoutines, bool recomputeSafeEntries)
+bool UserCalculator::SetPassword(DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::SetPassword");
   this->SetCurrentTable("users");
   if (recomputeSafeEntries)
     this->ComputeSafeObjectNames();
-  stOutput << "Whats going on here<br>";
+  if (this->enteredPassword=="")
+  { commentsOnFailure << "Empty password not allowed";
+    return false;
+  }
+//  stOutput << "Whats going on here<br>";
   this->ComputeShaonedSaltedPassword(false);
-  std::stringstream mustdeleteme;
-  this->SetColumnEntry("password", this->enteredShaonedSaltedPassword, theRoutines, false, &mustdeleteme);
-  stOutput << mustdeleteme.str();
-  return true;
+//  std::stringstream mustdeleteme;
+  return this->SetColumnEntry("password", this->enteredShaonedSaltedPassword, theRoutines, false, &commentsOnFailure);
+//  stOutput << mustdeleteme.str();
 }
 
 bool DatabaseRoutines::startMySQLDatabaseIfNotAlreadyStarted()
@@ -729,8 +754,8 @@ bool DatabaseRoutines::startMySQLDatabase()
     user VARCHAR(50) NOT NULL PRIMARY KEY,  \
     password VARCHAR(30) NOT NULL, \
     email VARCHAR(50) NOT NULL,\
-    authenticationTokenCreationTime VARCHAR(30), \
-    authenticationToken VARCHAR(40) \
+    authenticationTokenCreationTime VARCHAR(50), \
+    authenticationToken VARCHAR(50) \
     ");
 }
 
@@ -877,7 +902,7 @@ bool DatabaseRoutines::innerSetUserPassword(Calculator& theCommands, const Expre
     return theCommands << "Password change failed for user " << theUser.usernameUnsafe
     << ": not enough privileges. ";
   DatabaseRoutines theRoutines;
-  theUser.SetPassword(theRoutines, true);
+  theUser.SetPassword(theRoutines, true, theCommands.Comments);
   return output.AssignValue(theRoutines.comments.str(), theCommands);
 }
 

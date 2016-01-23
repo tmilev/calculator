@@ -24,7 +24,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     return true;
   }
   if (inputOutputAuthenticationToken!="" && comments!=0)
-  { *comments << "<b> Authentication with token " << inputOutputAuthenticationToken << " failed.</b>";
+  { *comments << "<b> Authentication with token " << inputOutputAuthenticationToken << " failed. </b>";
     //*comments << "the actual token is: " << theUser.actualAuthenticationTokeNUnsafe;
   }
 
@@ -61,6 +61,26 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
 #else
   return true;
 #endif
+}
+
+bool DatabaseRoutinesGlobalFunctions::SetPassword
+(const std::string& inputUsername, const std::string& inputNewPassword,
+ std::stringstream& comments)
+{
+#ifdef MACRO_use_MySQL
+  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::SetPassword");
+  if(!theGlobalVariables.flagLoggedIn)
+  { comments << "Changing passwords allowed for logged-in users only. ";
+    return false;
+  }
+  DatabaseRoutines theRoutines;
+  UserCalculator theUser;
+  theUser.usernameUnsafe=inputUsername;
+  theUser.enteredPassword=inputNewPassword;
+  return theUser.SetPassword(theRoutines, true, comments);
+#else
+  return false;
+#endif // MACRO_use_MySQL
 }
 
 bool DatabaseRoutinesGlobalFunctions::SetEntry
@@ -705,7 +725,7 @@ bool UserCalculator::SetPassword(DatabaseRoutines& theRoutines, bool recomputeSa
   if (recomputeSafeEntries)
     this->ComputeSafeObjectNames();
   if (this->enteredPassword=="")
-  { commentsOnFailure << "Empty password not allowed";
+  { commentsOnFailure << "Empty password not allowed. ";
     return false;
   }
 //  stOutput << "Whats going on here<br>";

@@ -63,6 +63,7 @@ public:
   int ProcessNonCalculator();
   int ProcessFolder();
   int ProcessChangePassword();
+  int ProcessChangePasswordPage();
   int ProcessDatabase();
   int ProcessExamPage();
   int ProcessLoginPage();

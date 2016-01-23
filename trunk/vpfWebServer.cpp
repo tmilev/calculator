@@ -589,7 +589,9 @@ bool WebWorker::ProcessRawArguments(std::stringstream& argumentProcessingFailure
     inputStringNames.SetObjectAtIndex(inputStringNames.GetIndex("textInput"), "mainInput");
   }
   if (desiredUser!="" && theGlobalVariables.flagUsingSSLinCurrentConnection)
-  { theGlobalVariables.flagLoggedIn=DatabaseRoutinesGlobalFunctions::LoginViaDatabase
+  { if (theGlobalVariables.userCalculatorRequestType=="changePassword")
+      this->authenticationToken="";
+    theGlobalVariables.flagLoggedIn=DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     (desiredUser, password, this->authenticationToken, &argumentProcessingFailureComments);
     if (theGlobalVariables.flagLoggedIn)
     { theGlobalVariables.userDefault=desiredUser;
@@ -687,7 +689,10 @@ void WebWorker::OutputBeforeComputation()
   stOutput << CGI::GetLaTeXProcessingJavascript();
 //  else
 //    stOutput << "<script src=\"" << theGlobalVariables.DisplayPathServerBase << "/jsmath/easy/load.js\">";
+  stOutput << "<link rel=\"stylesheet\" type=\"text/css\" href=\"/styleCalculator.css\">";
   stOutput << "\n</head>\n<body onload=\"loadSettings();\">\n";
+  if (theGlobalVariables.flagLoggedIn)
+    stOutput << "<nav>" << theGlobalVariables.ToStringNavigation() << "</nav>";
 
 //  civilizedInput="\\int( 1/x dx)";
 //  civilizedInput="\\int (1/(x(1+x^2)^2))dx";
@@ -793,7 +798,6 @@ void WebWorker::OutputStandardResult()
   }
   stOutput << "<td valign=\"top\">";
   theGlobalVariables.theSourceCodeFiles().QuickSortAscending();
-  stOutput << theGlobalVariables.ToStringNavigation();
   stOutput << theGlobalVariables.ToStringSourceCodeInfo();
   stOutput << "<hr><b>Calculator status. </b><br>";
   stOutput << theParser.ToString();
@@ -1201,14 +1205,22 @@ void WebWorker::ExtractPhysicalAddressFromMainAddress()
 
 int WebWorker::ProcessServerStatus()
 { MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestServerStatus");
-  stOutput << "<html><body>";
+  stOutput << "<html>"
+  << "<header>"
+  << "<link rel=\"stylesheet\" type=\"text/css\" href=\"/styleCalculator.css\">"
+  << "</header>"
+  << "<body>";
+  if (theGlobalVariables.flagLoggedIn)
+    stOutput << "<nav>" << theGlobalVariables.ToStringNavigation() << "</nav>";
+  stOutput << "<section>";
   if (theGlobalVariables.UserDefaultHasAdminRights())
-    stOutput<< " <table><tr><td style=\"vertical-align:top\">" << this->parent->ToStringStatusAll() << "</td><td>"
-    << theGlobalVariables.ToStringNavigation()
+    stOutput << " <table><tr><td style=\"vertical-align:top\">"
+    << this->parent->ToStringStatusAll() << "</td><td>"
     << theGlobalVariables.ToStringHTMLTopCommandLinuxSystem()
     << "</td></tr></table>";
   else
     stOutput << "<b>Viewing server status available only to logged-in admins.</b>";
+  stOutput << "</section>";
   stOutput << "</body></html>";
   return 0;
 }
@@ -1604,7 +1616,7 @@ int WebWorker::ProcessCalculator()
     stOutput.Flush();
     return 0;
   }
-  if (this->flagPasswordWasSubmitted)
+  if (this->flagPasswordWasSubmitted && theGlobalVariables.userCalculatorRequestType!="changePassword")
   { std::stringstream redirectedAddress;
     redirectedAddress << theGlobalVariables.DisplayNameCalculatorWithPath << "?";
     for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
@@ -1621,6 +1633,7 @@ int WebWorker::ProcessCalculator()
   }
   stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
   stOutput << argumentProcessingFailureComments.str();
+  stOutput << "<br>got to this point";
   if (theGlobalVariables.GetWebInput("error")!="")
     stOutput << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("error"));
   if (theGlobalVariables.userCalculatorRequestType=="pause")
@@ -1633,11 +1646,13 @@ int WebWorker::ProcessCalculator()
     return this->ProcessMonitor();
   //unless the worker is an indicator, it has no access to communication channels of the other workers
   this->parent->ReleaseNonActiveWorkers();
+  if (theGlobalVariables.userCalculatorRequestType=="changePassword")
+    return this->ProcessChangePassword();
+  if (theGlobalVariables.userCalculatorRequestType=="changePasswordPage")
+    return this->ProcessChangePasswordPage();
   if ((theGlobalVariables.flagUsingSSLinCurrentConnection && !theGlobalVariables.flagLoggedIn)||
       theGlobalVariables.userCalculatorRequestType=="login")
     return this->ProcessLoginPage();
-  if (theGlobalVariables.userCalculatorRequestType=="changePassword")
-    return this->ProcessChangePassword();
   if (theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagLoggedIn &&
       theGlobalVariables.userCalculatorRequestType=="logout")
     return this->ProcessLogout();
@@ -1757,38 +1772,96 @@ std::string WebWorker::GetHtmlHiddenInputExercise()
 std::string WebWorker::GetChangePasswordPage()
 { MacroRegisterFunctionWithName("WebWorker::GetChangePasswordPage");
   std::stringstream out;
-  out << "<html>"
-  << WebWorker::GetJavascriptStandardCookies()
-  << "<body ";
-  out << "onload=\"loadSettings();  ";
-  if (!this->flagAuthenticationTokenWasSubmitted)
-    out
-    << "if (document.getElementById('authenticationToken') !=null)"
-    << "  if (document.getElementById('authenticationToken').value!='')"
-    << "    document.getElementById('login').submit();";
+  out << "<html>";
+  out << "<header>";
+
+  out
+  << "<script type=\"text/javascript\"> \n"
+  << "function submitChangePassRequest(){\n"
+  << "  spanVerification = document.getElementById(\"passwordChangeResult\");\n"
+  << "  inputUser= document.getElementById(\"user\");\n"
+  << "  inputPassword= document.getElementById(\"password\");\n"
+  << "  inputNewPassword= document.getElementById(\"newPassword\");\n"
+  << "  inputReenteredPassword= document.getElementById(\"reenteredPassword\");\n"
+  << "  params=\"request=changePassword\"\n"
+  << "          + \"&user=\" + encodeURIComponent(inputUser.value) \n"
+  << "          + \"&password=\"+encodeURIComponent(inputPassword.value)\n"
+  << "          + \"&newPassword=\"+encodeURIComponent(inputNewPassword.value)\n"
+  << "          + \"&reenteredPassword=\"+encodeURIComponent(inputReenteredPassword.value)\n"
+  << "  ;\n"
+  << "  var https = new XMLHttpRequest();\n"
+  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
+  << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
+;
+//Old code, submits all answers. May need to be used as an alternative
+//submission option.
+//  for (int i=0; i<this->theContent.size; i++)
+//    if (this->IsStudentAnswer(this->theContent[i]))
+//      out << "  inputParams+=\"&calculatorAnswer" << this->theContent[i].GetKeyValue("id") << "=\"+encodeURIComponent("
+//      << "document.getElementById('" << this->theContent[i].GetKeyValue("id") << "').value);\n";
+  out
+  << "  https.onload = function() {\n"
+  << "    spanVerification.innerHTML=https.responseText;\n"
+  << "  }\n"
+  << "  https.send(params);\n"
+  << "}\n"
+  << "</script>";
+  out << "</header>";
+  out << "<body> ";
 //    << "  window.location='calculator?user='+GlobalUser+'&authenticationToken='+GlobalAuthenticationToken;";
-  out << "\">\n";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
-  out << this->ToStringCalculatorArgumentsHumanReadable();
-  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"GET\" accept-charset=\"utf-8\">"
+//  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"GET\" accept-charset=\"utf-8\">";
+  out
   <<  "User name or email: "
-  << "<input type=\"text\" name=\"user\" placeholder=\"user\" required>"
+  << "<input type=\"text\" id=\"user\" placeholder=\"user\" ";
+  if (theGlobalVariables.flagLoggedIn)
+    out << "value=\"" << theGlobalVariables.userDefault << "\" ";
+  out
+  << "required>"
   << "<br>Password: "
-  << "<input type=\"password\" name=\"password\" placeholder=\"password\">"
-  << "<br>New password: "
-  << "<input type=\"password\" name=\"newPassword\" placeholder=\"password\">"
-  << "<br>Re-enter new password: "
-  << "<input type=\"password\" name=\"reenteredNewPassword\" placeholder=\"password\">"
-  << this->GetHtmlHiddenInputExercise()
-  << this->GetHtmlHiddenInputs()
-  << "<input type=\"submit\" name=\"request\" value=\"ChangePassword\">"
-  << "</form>";
+  << "<input type=\"password\" id=\"password\" placeholder=\"password\">\n"
+  << "<br>New password: \n"
+  << "<input type=\"password\" id=\"newPassword\" placeholder=\"password\">\n"
+  << "<br>Re-enter new password: \n"
+  << "<input type=\"password\"  id=\"reenteredPassword\" placeholder=\"password\">\n"
+  << "<button  onclick=\"submitChangePassRequest() \"> Submit</button>\n"
+  << "<span id=\"passwordChangeResult\"> </span>\n"
+//  << "</form>"
+  ;
+  out << "<hr><hr><hr>" << this->ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
 }
 
 int WebWorker::ProcessChangePassword()
 { MacroRegisterFunctionWithName("WebWorker::ProcessChangePassword");
+  stOutput << " ere i am";
+  this->authenticationToken="";
+  if (!theGlobalVariables.flagLoggedIn)
+  { stOutput << "<span style=\"color:red\"><b> Password change available only to logged in users.</b></span>";
+    stOutput.Flush();
+    return 0;
+  }
+  std::string newPassword=theGlobalVariables.GetWebInput("newPassword");
+  std::string reenteredPassword=theGlobalVariables.GetWebInput("reenteredPassword");
+  if (newPassword!=reenteredPassword)
+  { stOutput << "<span style=\"color:red\"><b> Passwords don't match.</b></span>";
+    return 0;
+  }
+  std::stringstream commentsOnFailure;
+  if (!DatabaseRoutinesGlobalFunctions::SetPassword(theGlobalVariables.userDefault, newPassword, commentsOnFailure))
+  { stOutput << "<span style=\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
+    return 0;
+  }
+  stOutput << "<span style=\"color:green\"> <b>Password change successful. </b></span>";
+  stOutput << "<meta http-equiv=\"refresh\" content=\"0; url="
+  << theGlobalVariables.DisplayNameCalculatorWithPath  << "?request=login\" />";
+  stOutput.Flush();
+  return 0;
+}
+
+int WebWorker::ProcessChangePasswordPage()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessChangePasswordPage");
   stOutput << this->GetChangePasswordPage();
   return 0;
 }
@@ -1864,7 +1937,9 @@ std::string WebWorker::GetJavascriptHideHtml()
 }
 
 bool WebWorker::IsAllowedAsRequestCookie(const std::string& input)
-{ return input!="login" && input!="logout";
+{ return input!="login" && input!="logout"
+  && input!="changePassword"
+  && input!="changePasswordPage";
 }
 
 std::string WebWorker::GetJavascriptStandardCookies()

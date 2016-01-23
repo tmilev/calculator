@@ -10,6 +10,9 @@ class DatabaseRoutinesGlobalFunctions
 public:
   static bool LogoutViaDatabase();
   static bool LoginViaDatabase(const std::string& inputUsername, const std::string& inputPassword, std::string& inputOutputAuthenticationToken, std::stringstream* comments);
+  static bool SetPassword
+  (const std::string& inputUsername, const std::string& inputNewPassword,
+   std::stringstream& comments);
   static bool SetEntry
   (const std::string& inputUsername, const std::string& tableName, const std::string& keyName,
    const std::string& value, std::stringstream& comments);

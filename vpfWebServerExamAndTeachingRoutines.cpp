@@ -195,11 +195,11 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
   { out << "<b>Failed to interpret file: " << this->fileName << "</b>. Comments: " << this->comments.str();
     return out.str();
   }
-  out << "<nav>Generated in "
-  << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds()-startTime)
-  << " second(s).<br>"
+  out << "<nav>"
   << this->outputHtmlNavigation
-  << "</nav> " << "<section>" << this->outputHtmlMain << "</section>";
+  << "<hr><small>Generated in "
+  << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds()-startTime)
+  << " second(s).</small>" << "</nav> " << "<section>" << this->outputHtmlMain << "</section>";
   return out.str();
 }
 
@@ -477,15 +477,15 @@ std::string WebWorker::GetDatabasePage()
   DatabaseRoutines theRoutines;
   out << "<html>"
   << "<header>"
+  << "<link rel=\"stylesheet\" type=\"text/css\" href=\"/styleCalculator.css\">"
   << WebWorker::GetJavascriptStandardCookies()
   << "</header>"
   << "<body onload=\"loadSettings();\">\n";
+  out << "<nav>" << theGlobalVariables.ToStringNavigation() << "</nav>";
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     out << "Browsing database allowed only for logged-in admins.";
   else
-    out << "<table><td>" << theRoutines.ToStringCurrentTableHTML() << "</td><td>"
-    << theGlobalVariables.ToStringNavigation()
-    << "</td></tr></table>";
+    out << "<sectino>" << theRoutines.ToStringCurrentTableHTML() << "</section>";
   out <<"<hr><hr><hr><hr><hr><hr><hr><hr>" << this->ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
@@ -499,7 +499,7 @@ std::string WebWorker::GetExamPage()
   << "<header>"
   << WebWorker::GetJavascriptStandardCookies()
   << CGI::GetLaTeXProcessingJavascript()
-  << "<link rel=\"stylesheet\" type=\"text/css\" href=\"/ProblemCollections/calculator.css\">"
+  << "<link rel=\"stylesheet\" type=\"text/css\" href=\"/styleCalculator.css\">"
   << "</header>"
   << "<body onload=\"loadSettings();\">\n";
   out << theFile.LoadAndInterpretCurrentProblemItem();

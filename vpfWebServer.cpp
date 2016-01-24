@@ -1633,7 +1633,7 @@ int WebWorker::ProcessCalculator()
   }
   stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
   stOutput << argumentProcessingFailureComments.str();
-  stOutput << "<br>got to this point";
+//  stOutput << "<br>got to this point";
   if (theGlobalVariables.GetWebInput("error")!="")
     stOutput << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("error"));
   if (theGlobalVariables.userCalculatorRequestType=="pause")

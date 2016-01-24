@@ -5212,7 +5212,8 @@ bool LaTeXcrawler::ExtractFileNamesFromRelativeFileName()
   { this->displayResult << "The folders below the file name contain dots. This is not allowed. ";
     return false;
   }
-  this->theFileToCrawlPhysical=theGlobalVariables.PhysicalPathProjectBase+ "../freecalc/"+this->theFileToCrawlRelative;
+  this->theFileToCrawlPhysical=theGlobalVariables.PhysicalPathProjectBase+ "../freecalc/" +
+  this->theFileToCrawlRelative;
   this->baseFolderStartFilePhysical=FileOperations::GetPathFromFileName(this->theFileToCrawlPhysical);
   MathRoutines::StringBeginsWith
   (this->theFileToCrawlPhysical, this->baseFolderStartFilePhysical, &this->theFileToCrawlNoPathPhysical);
@@ -5332,9 +5333,6 @@ void LaTeXcrawler::BuildFreecalc()
   else
     this->displayResult << "<table><tr><td>Homework number</td><td>Homework name</td><td>Homework pdf</td>"
     << "<td>Homework handout pdf</td><td>Comments</td></tr>";
-  this->theFileWorkingCopy=this->baseFolderStartFilePhysical+ "working_file_"+ this->theFileToCrawlNoPathPhysical;
-  std::string theFileWorkingCopyPDF=this->baseFolderStartFilePhysical+ "working_file_"
-  +this->theFileToCrawlNoPathPhysical.substr(0, this->theFileToCrawlNoPathPhysical.size()-3)+"pdf";
   std::string lectureFileNameEnd;
   if (!MathRoutines::StringBeginsWith(this->theFileToCrawlNoPathPhysical, "Lecture_", &lectureFileNameEnd))
     if (!MathRoutines::StringBeginsWith(this->theFileToCrawlNoPathPhysical, "Homework_", &lectureFileNameEnd))
@@ -5347,8 +5345,16 @@ void LaTeXcrawler::BuildFreecalc()
   executedCommands << "<br>" << currentSysCommand;
   reportStream << "<br>Directory changed: " << currentSysCommand;
   theGlobalVariables.ChDir(this->baseFolderStartFilePhysical );
+
+  //this->theFileWorkingCopy=this->baseFolderStartFilePhysical+ "working_file_"+ this->theFileToCrawlNoPathPhysical;
+  //std::string theFileWorkingCopyPDF=this->baseFolderStartFilePhysical+ "working_file_"
+  //+this->theFileToCrawlNoPathPhysical.substr(0, this->theFileToCrawlNoPathPhysical.size()-3)+"pdf";
+  this->theFileWorkingCopy= "working_file_"+ this->theFileToCrawlNoPathPhysical;
+  std::string theFileWorkingCopyPDF= "working_file_"
+  +this->theFileToCrawlNoPathPhysical.substr(0, this->theFileToCrawlNoPathPhysical.size()-3)+"pdf";
   for (int i=0; i<
-  theLectureNumbers.size
+  2
+//  theLectureNumbers.size
   ; i++)
   { reportStream << "<br>Processing lecture " << i+1 << " out of " << theLectureNumbers.size << ". ";
     resultTable << "<tr>";

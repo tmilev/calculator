@@ -730,11 +730,11 @@ void Calculator::initPredefinedInnerFunctions()
    The function assumes the freecalc project is installed in a folder called freecalc, \
    parallel to the calculator project folder (i.e, we have folders /vectorpartition and /freecalc next to one another).\
    The folders are given relative to the /freecalc base.",
-   "BuildFreecalc (\"/lectures/UMB-M141-2015-Fall/Lecture_2015_Fall_Calculus_II_Math_141.tex\");\
-   \nBuildFreecalc(\"/lectures/UMB-M140-2015-Fall/Lecture_2015_Fall_Calculus_I_Math_140.tex\");\
-   \nBuildFreecalc(\"/homework/UMB-M141-2015-Fall/Homework_2015_Fall_Calculus_II_Math_141.tex\");\
-   \nBuildFreecalc(\"/homework/UMB-M140-2015-Fall/Homework_2015_Fall_Calculus_I_Math_140.tex\");\
-   ", false, false
+   "BuildFreecalc (\"lectures/UMB-M141-2016-Spring/Lecture_2016_Spring_Calculus_II_Math_141.tex\");\
+   \nBuildFreecalc(\"lectures/UMB-M140-2016-Spring/Lecture_2016_Spring_Calculus_I_Math_140.tex\");\
+   \nBuildFreecalc(\"homework/UMB-M141-2016-Spring/Homework_2016_Spring_Calculus_II_Math_141.tex\");\
+   \nBuildFreecalc(\"homework/UMB-M140-2016-Spring/Homework_2016_Spring_Calculus_I_Math_140.tex\");\
+   ", true, false
    , "CalculatorFunctionsGeneral::innerBuildFreecalc")
    ;
   this->AddOperationInnerHandler

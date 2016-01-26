@@ -164,6 +164,7 @@ public:
  const std::string& tableNameUnsafe, std::stringstream& comments)
 
   ;
+  bool AddUsersFromEmails(const std::string& input, std::stringstream& comments);
 
   std::string ToString();
   std::string ToStringAllUsersHTMLFormat();
@@ -179,6 +180,7 @@ public:
   static bool innerTestLogin(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddUser(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddUsersFromEmailList(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDeleteUser(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetAuthentication(Calculator& theCommands, const Expression& input, Expression& output);

@@ -865,6 +865,30 @@ std::string MathRoutines::StringShortenInsertDots(const std::string& inputString
   return out.str();
 }
 
+void MathRoutines::StringSplitExcludeDelimiter
+(const std::string& inputString, char delimiter, List<std::string>& output)
+{ List<char> tempList;
+  tempList.AddOnTop(delimiter);
+  MathRoutines::StringSplitExcludeDelimiters(inputString, tempList, output);
+}
+
+void MathRoutines::StringSplitExcludeDelimiters
+(const std::string& inputString, const List<char>& delimiters, List<std::string>& output)
+{ MacroRegisterFunctionWithName("MathRoutines::StringSplit");
+  output.SetSize(0);
+  std::string reader;
+  for (unsigned i=0; i<inputString.size(); i++)
+    if (delimiters.Contains(inputString[i]))
+    { if (reader!="")
+      { output.AddOnTop(reader);
+        reader="";
+      }
+    } else
+      reader.push_back(inputString[i]);
+  if (reader!="")
+    output.AddOnTop(reader);
+}
+
 void MathRoutines::SplitStringInTwo(const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond)
 { if (&outputFirst==&inputString || &outputSecond==&inputString)
   { std::string inputCopy=inputString;

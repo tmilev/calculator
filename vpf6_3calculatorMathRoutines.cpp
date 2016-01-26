@@ -5353,8 +5353,8 @@ void LaTeXcrawler::BuildFreecalc()
   std::string theFileWorkingCopyPDF= "working_file_"
   +this->theFileToCrawlNoPathPhysical.substr(0, this->theFileToCrawlNoPathPhysical.size()-3)+"pdf";
   for (int i=0; i<
-  2
-//  theLectureNumbers.size
+//2
+  theLectureNumbers.size
   ; i++)
   { reportStream << "<br>Processing lecture " << i+1 << " out of " << theLectureNumbers.size << ". ";
     resultTable << "<tr>";

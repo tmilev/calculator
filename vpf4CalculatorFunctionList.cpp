@@ -12,13 +12,18 @@ ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator func
 void Calculator::initAdminFunctions()
 {
 #ifdef MACRO_use_MySQL
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return;
   this->AddOperationInnerHandler
   ("AddUser", DatabaseRoutines::innerAddUser, "",
    "Adds a new user (first argument: new username, second argument: new user's password, third argument: email).",
-   "AddUser(testUser, password, \"todor.milev@gmail.com\"); GetUserPassword(\"testUser\");", false, true, "DatabaseRoutines::innerSetUserPassword");
+   "AddUser(testUser, password, \"todor.milev@gmail.com\"); GetUserPassword(\"testUser\");", false, true, "DatabaseRoutines::innerAddUser");
    ;
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
-    return;
+  this->AddOperationInnerHandler
+  ("AddUsersFromEmailList", DatabaseRoutines::innerAddUsersFromEmailList, "",
+   "Adds new users by email list.",
+   "AddUser(\"todor.milev@gmail.com, fakeemail@fakeserver.com, fake.email001@fakeServer.com\"); ", false, true, "DatabaseRoutines::innerAddUsers");
+   ;
   this->AddOperationInnerHandler
   ("TestLogin", DatabaseRoutines::innerTestLogin, "",
    "DO NOT USE, function is FOR DEBUGGING PURPOSES ONLY.\
@@ -77,7 +82,7 @@ void Calculator::initAdminFunctions()
 }
 
 void Calculator::initCalculusAdministrationFunctions()
-{ if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
+{ if (!theGlobalVariables.UserDefaultHasAdminRights())
     return;
   #ifdef MACRO_use_MySQL
   this->AddOperationInnerHandler

@@ -3,6 +3,7 @@ nav {
     background-color:#eeeeee;
     width:auto;
     float:right;
+    overflow: auto;
     padding:5px;	      
 }
 .calculatorHidden{

@@ -11,7 +11,7 @@ ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server im
 #include <arpa/inet.h> // <- inet_ntop declared here (ntop= network to presentation)
 #include <unistd.h>
 #include <sys/stat.h>//<-for file statistics
-#include<fcntl.h>//<-setting flags of file descriptors
+#include <fcntl.h>//<-setting flags of file descriptors
 
 #ifdef MACRO_use_open_ssl
 //installation of these headers in ubuntu:
@@ -692,7 +692,7 @@ void WebWorker::OutputBeforeComputation()
   stOutput << "<link rel=\"stylesheet\" type=\"text/css\" href=\"/styleCalculator.css\">";
   stOutput << "\n</head>\n<body onload=\"loadSettings();\">\n";
   if (theGlobalVariables.flagLoggedIn)
-    stOutput << "<nav>" << theGlobalVariables.ToStringNavigation() << "</nav>";
+    stOutput << "<nav>" << theGlobalVariables.ToStringNavigation() << "</nav>" << "<section>";
 
 //  civilizedInput="\\int( 1/x dx)";
 //  civilizedInput="\\int (1/(x(1+x^2)^2))dx";
@@ -803,6 +803,8 @@ void WebWorker::OutputStandardResult()
   stOutput << theParser.ToString();
 
   stOutput << "</td></tr></table>";
+  if (theGlobalVariables.flagLoggedIn)
+    stOutput << "</section>";
   std::stringstream tempStream3;
   stOutput << "\n\n<script language=\"javascript\">\n" << "  var theAutocompleteDictionary = new Array;\n  ";
   for (int i=0; i<theParser.theAtoms.size; i++)

@@ -872,6 +872,41 @@ bool DatabaseRoutines::innerGetUserPassword(Calculator& theCommands, const Expre
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool DatabaseRoutines::AddUsersFromEmails(const std::string& inputString, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
+  List<char> delimiters;
+  delimiters.AddOnTop(' ');
+  delimiters.AddOnTop('\r');
+  delimiters.AddOnTop('\n');
+  delimiters.AddOnTop('\t');
+  delimiters.AddOnTop(',');
+  delimiters.AddOnTop(';');
+  List<std::string> theEmails;
+  MathRoutines::StringSplitExcludeDelimiters(inputString, delimiters, theEmails);
+  List<std::string> currentEmailSplit;
+  List<std::string> desiredUserNames;
+  for (int i=0; i<theEmails.size; i++)
+  { MathRoutines::StringSplitExcludeDelimiter(theEmails[i], '@', currentEmailSplit);
+    if (currentEmailSplit.size>0)
+      desiredUserNames.AddOnTop(currentEmailSplit[0]);
+  }
+
+
+}
+
+bool DatabaseRoutines::innerAddUsersFromEmailList(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::innerAddUsersFromEmailList");
+  std::string inputString;
+  if (!input.IsOfType(&inputString))
+    return theCommands << "Input of addUsers must be a string. ";
+  DatabaseRoutines theRoutines;
+  if (!theRoutines.AddUsersFromEmails(inputString, theCommands.Comments))
+    return false;
+  std::stringstream out;
+  out << "Successfully added students.";
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool DatabaseRoutines::innerAddUser(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerAddUser");
   UserCalculator theUser;

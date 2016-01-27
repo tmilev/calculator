@@ -22,7 +22,8 @@ void Calculator::initAdminFunctions()
   this->AddOperationInnerHandler
   ("AddUsersFromEmailList", DatabaseRoutines::innerAddUsersFromEmailList, "",
    "Adds new users by email list.",
-   "AddUser(\"todor.milev@gmail.com, fakeemail@fakeserver.com, fake.email001@fakeServer.com\"); ", false, true, "DatabaseRoutines::innerAddUsers");
+   "AddUser(\"todor.milev@gmail.com, Todor.Milev@umb.edu\", \"Course_Homework_UMB_Spring_2016_Milev.html\"); ",
+   false, true, "DatabaseRoutines::innerAddUsersFromEmailList");
    ;
   this->AddOperationInnerHandler
   ("TestLogin", DatabaseRoutines::innerTestLogin, "",

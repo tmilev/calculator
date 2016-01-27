@@ -1676,7 +1676,7 @@ int WebWorker::ProcessCalculator()
       theGlobalVariables.flagLoggedIn &&
       theGlobalVariables.flagUsingSSLinCurrentConnection)
     return this->ProcessDatabase();
-  theParser.inputString=theGlobalVariables.GetWebInput("mainInput");
+  theParser.inputString=CGI::URLStringToNormal( theGlobalVariables.GetWebInput("mainInput"));
   this->OutputBeforeComputation();
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(false);
   theParser.init();

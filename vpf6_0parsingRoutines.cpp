@@ -461,6 +461,7 @@ bool Calculator::isRightSeparator(unsigned char c)
     case 160: //&nbsp character
     case '\r':
     case '\n':
+    case '\t':
     case '>':
     case '<':
     case ':':
@@ -500,6 +501,7 @@ bool Calculator::isLeftSeparator(unsigned char c)
     case 160: //&nbsp character
     case '\r':
     case '\n':
+    case '\t':
     case '>':
     case '<':
     case ':':

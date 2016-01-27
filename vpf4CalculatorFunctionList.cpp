@@ -20,10 +20,16 @@ void Calculator::initAdminFunctions()
    "AddUser(testUser, password, \"todor.milev@gmail.com\"); GetUserPassword(\"testUser\");", false, true, "DatabaseRoutines::innerAddUser");
    ;
   this->AddOperationInnerHandler
+  ("SendActivationEmailUsers", DatabaseRoutines::innerSendActivationEmailUsers, "",
+   "Sends activation emails to a comma-separated list of users. ",
+   "SendActivationEmailUsers(\"todor.milev@gmail.com, Todor.Milev@umb.edu \"); ",
+   true, false, "DatabaseRoutines::innerSendActivationEmailUsers");
+   ;
+  this->AddOperationInnerHandler
   ("AddUsersFromEmailList", DatabaseRoutines::innerAddUsersFromEmailList, "",
    "Adds new users by email list.",
-   "AddUser(\"todor.milev@gmail.com, Todor.Milev@umb.edu\", \"Course_Homework_UMB_Spring_2016_Milev.html\"); ",
-   false, true, "DatabaseRoutines::innerAddUsersFromEmailList");
+   "AddUsersFromEmailList(\"todor.milev@gmail.com, Todor.Milev@umb.edu \"); ",
+   true, false, "DatabaseRoutines::innerAddUsersFromEmailList");
    ;
   this->AddOperationInnerHandler
   ("TestLogin", DatabaseRoutines::innerTestLogin, "",

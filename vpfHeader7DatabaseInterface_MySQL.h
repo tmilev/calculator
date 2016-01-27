@@ -159,7 +159,7 @@ public:
   bool startMySQLDatabaseIfNotAlreadyStarted();
   bool startMySQLDatabase();
 
-  bool ColumnExists(const std::string& columnNameUnsafe, const std::string& tableNameUnsafe);
+  bool ColumnExists(const std::string& columnNameUnsafe, const std::string& tableNameUnsafe, std::stringstream& commentsStream);
   bool CreateColumn(const std::string& columnNameNameUnsafe, const std::string& tableNameUnsafe,
                     std::stringstream& commentsOnCreation);
   bool TableExists(const std::string& tableNameUnsafe);
@@ -175,6 +175,9 @@ public:
   ;
   bool AddUsersFromEmailsAndCourseName(const std::string& emailList, const std::string& ExamHomeFile, std::stringstream& comments);
   bool AddUsersFromEmails(const std::string& emailList, std::stringstream& comments);
+  bool SendActivationEmail(const std::string& emailList, std::stringstream& comments);
+  bool SendActivationEmail(const List<std::string>& theEmails, bool forceResend, std::stringstream& comments);
+  bool ExtractEmailList(const std::string& emailList, List<std::string>& outputList, std::stringstream& comments);
 
   std::string ToString();
   std::string ToStringAllUsersHTMLFormat();
@@ -191,6 +194,7 @@ public:
   static bool innerGetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddUser(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddUsersFromEmailList(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSendActivationEmailUsers(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddUsersFromEmailListAndCourseName(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDeleteUser(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);

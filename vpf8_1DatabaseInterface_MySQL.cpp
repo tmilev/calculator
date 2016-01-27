@@ -137,21 +137,12 @@ bool DatabaseRoutinesGlobalFunctions::CreateTable
 
 bool DatabaseRoutinesGlobalFunctions::ColumnExists
 (const std::string& columnNameUnsafe, const std::string& tableNameUnsafe, std::stringstream& commentsStream)
-{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::ColumnExists");
+{
 #ifdef MACRO_use_MySQL
+  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::ColumnExists");
   DatabaseRoutines theRoutines;
-  theRoutines.startMySQLDatabaseIfNotAlreadyStarted();
-  if (!DatabaseRoutinesGlobalFunctions::TableExists(tableNameUnsafe, commentsStream))
-    return false;
-  std::string columnNameSafe=CGI::StringToURLString(columnNameUnsafe);
-  std::string tableNameSafe=CGI::StringToURLString(tableNameSafe);
-  std::stringstream columnExistsStream;
-  columnExistsStream << "SELECT * FROM " << "information_schema.COLUMNS WHERE "
-  << "TABLE_SCHEMA='calculatorUsers' "
-  << "AND TABLE_NAME='" << tableNameSafe << "' "
-  << "AND COLUMN_NAME='" << columnNameSafe << "' ";
-  DatabaseQuery theQuery(theRoutines, commentsStream.str());
-  return theQuery.flagQuerySucceeded;
+  return theRoutines.ColumnExists(columnNameUnsafe, tableNameUnsafe, commentsStream);
+
 #else
   return false;
 #endif
@@ -160,25 +151,11 @@ bool DatabaseRoutinesGlobalFunctions::ColumnExists
 bool DatabaseRoutinesGlobalFunctions::CreateColumn
 (const std::string& columnNameUnsafe, const std::string& tableNameUnsafe,
  std::stringstream& commentsOnCreation)
-{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::CreateColumn");
+{
 #ifdef MACRO_use_MySQL
+  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::CreateColumn");
   DatabaseRoutines theRoutines;
-//  stOutput << "Creating column pt 1.";
-  theRoutines.startMySQLDatabaseIfNotAlreadyStarted();
-  if (!DatabaseRoutinesGlobalFunctions::TableExists(tableNameUnsafe, commentsOnCreation))
-    return false;
-//  stOutput << "Creating column pt 2.";
-  std::string columnNameSafe=CGI::StringToURLString(columnNameUnsafe);
-  std::string tableNameSafe=CGI::StringToURLString(tableNameUnsafe);
-//  stOutput << "<hr>BEFORE alter command";
-  std::stringstream commandStream;
-  commandStream << "ALTER TABLE \"" << tableNameSafe << "\""
-  << " ADD \"" << columnNameSafe << "\" "
-  << "LONGTEXT";
-//  stOutput << "<br>got to here<br>hrbr<br>";
-  DatabaseQuery theQuery(theRoutines, commandStream.str());
-//  stOutput << "<br>AFTER alter command: " << theRoutines.comments.str() << "<hr>";
-  return theQuery.flagQuerySucceeded;
+  return theRoutines.CreateColumn(columnNameUnsafe, tableNameUnsafe, commentsOnCreation);
 #else
   return false;
 #endif
@@ -223,6 +200,46 @@ bool DatabaseRoutinesGlobalFunctions::FetchEntry
 #include "vpfHeader5Crypto.h"
 #include <time.h>
 #include <ctime>
+
+bool DatabaseRoutines::ColumnExists(const std::string& columnNameUnsafe, const std::string& tableNameUnsafe, std::stringstream& commentsStream)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::ColumnExists");
+  this->startMySQLDatabaseIfNotAlreadyStarted();
+  if (!DatabaseRoutinesGlobalFunctions::TableExists(tableNameUnsafe, commentsStream))
+    return false;
+  std::string columnNameSafe=CGI::StringToURLString(columnNameUnsafe);
+  std::string tableNameSafe=CGI::StringToURLString(tableNameSafe);
+  std::stringstream columnExistsStream;
+  columnExistsStream << "SELECT * FROM " << "information_schema.COLUMNS WHERE "
+  << "TABLE_SCHEMA='calculatorUsers' "
+  << "AND TABLE_NAME='" << tableNameSafe << "' "
+  << "AND COLUMN_NAME='" << columnNameSafe << "' ";
+  DatabaseQuery theQuery(*this, columnExistsStream.str());
+  return theQuery.flagQuerySucceeded;
+
+}
+
+bool DatabaseRoutines::CreateColumn
+(const std::string& columnNameUnsafe, const std::string& tableNameUnsafe,
+ std::stringstream& commentsOnCreation)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::CreateColumn");
+//  stOutput << "Creating column pt 1.";
+  this->startMySQLDatabaseIfNotAlreadyStarted();
+  if (!this->TableExists(tableNameUnsafe))
+    return false;
+//  stOutput << "Creating column pt 2.";
+  std::string columnNameSafe=CGI::StringToURLString(columnNameUnsafe);
+  std::string tableNameSafe=CGI::StringToURLString(tableNameUnsafe);
+//  stOutput << "<hr>BEFORE alter command";
+  std::stringstream commandStream;
+  commandStream << "ALTER TABLE \"" << tableNameSafe << "\""
+  << " ADD \"" << columnNameSafe << "\" "
+  << "LONGTEXT";
+//  stOutput << "<br>got to here<br>hrbr<br>";
+  DatabaseQuery theQuery(*this, commandStream.str());
+//  stOutput << "<br>AFTER alter command: " << theRoutines.comments.str() << "<hr>";
+  return theQuery.flagQuerySucceeded;
+
+}
 
 std::string UserCalculator::ToStringSelectedColumns()
 { MacroRegisterFunctionWithName("DatabaseRoutines::ToStringSelectedColumns");
@@ -926,9 +943,8 @@ std::string UserCalculator::GetSelectedRowEntry(const std::string& theKey)
   return this->selectedColumnValuesUnsafe[theIndex];
 }
 
-bool DatabaseRoutines::AddUsersFromEmails
-(const std::string& emailList, std::stringstream& comments)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
+bool DatabaseRoutines::ExtractEmailList(const std::string& emailList, List<std::string>& outputList, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::ExtractEmailList");
   List<char> delimiters;
   delimiters.AddOnTop(' ');
   delimiters.AddOnTop('\r');
@@ -936,29 +952,66 @@ bool DatabaseRoutines::AddUsersFromEmails
   delimiters.AddOnTop('\t');
   delimiters.AddOnTop(',');
   delimiters.AddOnTop(';');
+  MathRoutines::StringSplitExcludeDelimiters(emailList, delimiters, outputList);
+  return true;
+}
+
+bool DatabaseRoutines::SendActivationEmail(const std::string& emailList, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
   List<std::string> theEmails;
-  MathRoutines::StringSplitExcludeDelimiters(emailList, delimiters, theEmails);
+  this->ExtractEmailList(emailList, theEmails, comments);
+  return this->SendActivationEmail(theEmails, true, comments);
+}
+
+bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, bool forceResend, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
+  if (!this->ColumnExists("activationToken", "users", comments))
+    if (!this->CreateColumn("activationToken", "users", comments))
+      return false;
   UserCalculator currentUser;
+  bool result;
+  for (int i=0; i<theEmails.size; i++)
+  { currentUser.usernameUnsafe=theEmails[i];
+    currentUser.emailUnsafe=theEmails[i];
+    TimeWrapper now;
+    //stOutput << "Resetting authentication token. ";
+    now.AssignLocalTime();
+    std::stringstream activationTokenStream;
+    activationTokenStream << now.theTimeStringNonReadable << rand();
+    std::string activationToken =Crypto::computeSha1outputBase64(activationTokenStream.str());
+    if (!currentUser.SetColumnEntry("activationToken", activationToken, *this, true, & comments))
+      return comments << "Setting activation token failed.";
+    if (!currentUser.SendActivationEmail(*this, comments))
+    { comments << "Failed to send activation email to: " << currentUser.usernameUnsafe;
+      result=false;
+      continue;
+    }
+  }
+  return result;
+}
+
+bool DatabaseRoutines::AddUsersFromEmails
+(const std::string& emailList, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
+  List<std::string> theEmails;
+  this->ExtractEmailList(emailList, theEmails, comments);
+  UserCalculator currentUser;
+  bool result=true;
   for (int i=0; i<theEmails.size; i++)
   { currentUser.usernameUnsafe=theEmails[i];
     currentUser.emailUnsafe=theEmails[i];
     if (!currentUser.Iexist(*this, true))
-    { if (!currentUser.CreateMeIfUsernameUnique(*this, false))
+      if (!currentUser.CreateMeIfUsernameUnique(*this, false))
       { comments << "Failed to create user: " << currentUser.usernameUnsafe;
-        return false;
+        result=false;
+        continue;
       }
-      TimeWrapper now;
-    //  stOutput << "Resetting authentication token. ";
-      now.AssignLocalTime();
-      std::stringstream activationTokenStream;
-      activationTokenStream << now.theTimeStringNonReadable << rand();
-      std::string activationToken =Crypto::computeSha1outputBase64(activationTokenStream.str());
-      if (!currentUser.SetColumnEntry("activationToken", activationToken, *this, true, & comments))
-        return comments << "Setting activation token failed.";
-      currentUser.SendActivationEmail(*this, comments);
-    }
   }
-
+  if (!result )
+  { comments << "<br>Failed to create all users. Additional comments: " << this->comments.str();
+    return result;
+  }
+  return this->SendActivationEmail(theEmails, false, comments);
 }
 
 bool UserCalculator::SendActivationEmail(DatabaseRoutines& theRoutines, std::stringstream& comments)
@@ -975,7 +1028,20 @@ bool UserCalculator::SendActivationEmail(DatabaseRoutines& theRoutines, std::str
   { comments << "Account already activated";
     return false;
   }
-
+  EmailRoutines theEmailRoutines;
+  theEmailRoutines.toEmail=this->emailUnsafe;
+  theEmailRoutines.subject="NO REPLY: Activation of a Math homework account. ";
+  std::stringstream emailStream;
+  emailStream << "Dear student,\nthis is an automated email sent with an activation token for your "
+  << " math homework account. To activate your account and set up your password, please follow the link below. "
+  << " If you have any technical problems or have questions, please DO NOT HIT the REPLY BUTTON; "
+  << " instead, post your quesiton on piazza.com or email your question to "
+  << " todor.milev@gmail.com\n\n";
+  emailStream << this->activationTokenUnsafe << "\n\nGood luck with our course, \n Your calculus instructors.";
+  std::string emailLog=theGlobalVariables.CallSystemWithOutput(theEmailRoutines.GetCommandToSendEmailWithMailX());
+  comments << "\nEmail sending log:\n"
+  << emailLog;
+  return true;
 }
 
 bool DatabaseRoutines::innerAddUsersFromEmailListAndCourseName(Calculator& theCommands, const Expression& input, Expression& output)
@@ -998,6 +1064,21 @@ bool DatabaseRoutines::innerAddUsersFromEmailListAndCourseName(Calculator& theCo
   return output.AssignValue(out.str(), theCommands);*/
 }
 
+bool DatabaseRoutines::innerSendActivationEmailUsers(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::innerAddUsersFromEmailList");
+  std::string inputEmailList;
+  if (!input.IsOfType(&inputEmailList))
+    return theCommands << "Argument " << input.ToString() << " is not a string. ";
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return theCommands << "Adding users requires admin rights. ";
+  DatabaseRoutines theRoutines;
+  if (!theRoutines.SendActivationEmail(inputEmailList, theCommands.Comments))
+    return false;
+  std::stringstream out;
+  out << "Successfully added students. " ;
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool DatabaseRoutines::innerAddUsersFromEmailList(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerAddUsersFromEmailList");
   std::string inputEmailList;
@@ -1009,7 +1090,7 @@ bool DatabaseRoutines::innerAddUsersFromEmailList(Calculator& theCommands, const
   if (!theRoutines.AddUsersFromEmails(inputEmailList, theCommands.Comments))
     return false;
   std::stringstream out;
-  out << "Successfully added students.";
+  out << "Successfully added students. " ;
   return output.AssignValue(out.str(), theCommands);
 }
 

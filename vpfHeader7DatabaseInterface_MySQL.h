@@ -81,6 +81,7 @@ private:
   std::string emailSafe;
   std::string currentTableSafe;
   std::string currentTableUnsafe;
+  std::string activationTokenSafe;
 public:
   double approximateHoursSinceLastTokenWasIssued;
   std::string usernamePlusPassWord;
@@ -89,14 +90,21 @@ public:
   std::string actualShaonedSaltedPassword;
   std::string enteredShaonedSaltedPassword;
   std::string emailUnsafe;
+  std::string activationTokenUnsafe;
   List<std::string> selectedColumnsUnsafe;
   List<std::string> selectedColumnValuesUnsafe;
   List<std::string> selectedColumnsRetrievalFailureRemarks;
+
+  List<std::string> selectedRowFieldsUnsafe;
+  List<std::string> selectedRowFieldNamesUnsafe;
   std::string enteredAuthenticationTokenUnsafe;
   std::string actualAuthenticationTokeNUnsafe;
   TimeWrapper authenticationTokenCreationTime;
   bool flagNewAuthenticationTokenComputedUserNeedsIt;
   bool SetCurrentTable(const std::string& inputTableNameUnsafe);
+  std::string GetSelectedRowEntry(const std::string& theKey);
+  bool FetchOneUserRow
+  (DatabaseRoutines& theRoutines, std::stringstream& failureStream);
   bool FetchOneColumn
   (const std::string& columnNameUnsafe, std::string& outputUnsafe,
    DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream* failureComments=0);
@@ -123,6 +131,7 @@ public:
   bool getUserPassAndSelectedColumns(Calculator& theCommands, const Expression& input);
   bool getUserPassAndExtraData(Calculator& theCommands, const Expression& input, List<std::string>& outputData);
   void ComputeShaonedSaltedPassword(bool recomputeSafeEntries);
+  bool SendActivationEmail(DatabaseRoutines& theRoutines, std::stringstream& comments);
   std::string ToString();
   std::string ToStringSelectedColumns();
   UserCalculator();
@@ -164,7 +173,8 @@ public:
  const std::string& tableNameUnsafe, std::stringstream& comments)
 
   ;
-  bool AddUsersFromEmails(const std::string& input, std::stringstream& comments);
+  bool AddUsersFromEmailsAndCourseName(const std::string& emailList, const std::string& ExamHomeFile, std::stringstream& comments);
+  bool AddUsersFromEmails(const std::string& emailList, std::stringstream& comments);
 
   std::string ToString();
   std::string ToStringAllUsersHTMLFormat();
@@ -181,6 +191,7 @@ public:
   static bool innerGetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddUser(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddUsersFromEmailList(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddUsersFromEmailListAndCourseName(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDeleteUser(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetAuthentication(Calculator& theCommands, const Expression& input, Expression& output);

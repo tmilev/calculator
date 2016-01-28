@@ -170,7 +170,7 @@ bool DatabaseRoutinesGlobalFunctions::TableExists
   if (!theGlobalVariables.flagLoggedIn)
     return false;
   DatabaseRoutines theRoutines;
-  if (! theRoutines.startMySQLDatabaseIfNotAlreadyStarted())
+  if (!theRoutines.startMySQLDatabaseIfNotAlreadyStarted())
     crash << "Failed to start database. " << crash;
   return theRoutines.TableExists(tableName);
 #else
@@ -201,21 +201,22 @@ bool DatabaseRoutinesGlobalFunctions::FetchEntry
 #include <time.h>
 #include <ctime>
 
-bool DatabaseRoutines::ColumnExists(const std::string& columnNameUnsafe, const std::string& tableNameUnsafe, std::stringstream& commentsStream)
+bool DatabaseRoutines::ColumnExists
+(const std::string& columnNameUnsafe, const std::string& tableNameUnsafe, std::stringstream& commentsStream)
 { MacroRegisterFunctionWithName("DatabaseRoutines::ColumnExists");
   this->startMySQLDatabaseIfNotAlreadyStarted();
   if (!DatabaseRoutinesGlobalFunctions::TableExists(tableNameUnsafe, commentsStream))
     return false;
   std::string columnNameSafe=CGI::StringToURLString(columnNameUnsafe);
-  std::string tableNameSafe=CGI::StringToURLString(tableNameSafe);
+  std::string tableNameSafe=CGI::StringToURLString(tableNameUnsafe);
   std::stringstream columnExistsStream;
   columnExistsStream << "SELECT * FROM " << "information_schema.COLUMNS WHERE "
   << "TABLE_SCHEMA='calculatorUsers' "
   << "AND TABLE_NAME='" << tableNameSafe << "' "
   << "AND COLUMN_NAME='" << columnNameSafe << "' ";
+  stOutput << "firing query: " << columnExistsStream.str();
   DatabaseQuery theQuery(*this, columnExistsStream.str());
-  return theQuery.flagQuerySucceeded;
-
+  return theQuery.flagQuerySucceeded && theQuery.flagQueryReturnedResult;
 }
 
 bool DatabaseRoutines::CreateColumn
@@ -448,7 +449,6 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
     return;
   }
   this->flagQuerySucceeded=true;
-  //stOutput << "got to here in the queery query";
   this->theQueryResult= mysql_store_result(this->parent->connection);
   //stOutput << "and even to here";
   if (this->theQueryResult==0)
@@ -736,7 +736,9 @@ bool UserCalculator::FetchOneUserRow
     crash << "Calling UserCalculator::FetchOneUserRow with an empty table is forbidden. " << crash;
 
   std::stringstream queryStream;
-  queryStream << "SELECT \"" << this->usernameSafe << "\" FROM calculatorUsers.\"" << this->currentTableSafe << "\"";
+  queryStream << "SELECT * FROM calculatorUsers.\"" << this->currentTableSafe << "\" WHERE "
+  << "user='" << this->usernameSafe << "'";
+//  stOutput << "quering: " << queryStream.str();
   DatabaseQuery theQuery(theRoutines, queryStream.str(), &failureStream, 5);
   if (!theQuery.flagQuerySucceeded)
   { failureStream << "Query: " << queryStream.str() << " failed. ";
@@ -751,7 +753,7 @@ bool UserCalculator::FetchOneUserRow
     return false;
   }
   this->selectedRowFieldsUnsafe.SetSize(theQuery.allQueryResultStrings[0].size);
-  for (int i=0; i<this->selectedColumnsUnsafe.size; i++)
+  for (int i=0; i<this->selectedRowFieldsUnsafe.size; i++)
     this->selectedRowFieldsUnsafe[i]=CGI::URLStringToNormal(theQuery.allQueryResultStrings[0][i]);
   theQuery.close();
   std::stringstream queryStreamFields;
@@ -764,11 +766,18 @@ bool UserCalculator::FetchOneUserRow
   { failureStream << "Query: " << queryStreamFields.str() << " failed. ";
     return false;
   }
+//  stOutput << " theFieldQuery.allQueryResultStrings.size equals: " << theFieldQuery.allQueryResultStrings.size;
+//  stOutput << " theQuery.allQueryResultStrings[0].size equals: " << theQuery.allQueryResultStrings[0].size;
 //  stOutput << "field query: " << theFieldQuery.allQueryResultStrings.ToStringCommaDelimited();
   this->selectedRowFieldNamesUnsafe.SetSize(theFieldQuery.allQueryResultStrings.size);
   for (int i=0; i<theFieldQuery.allQueryResultStrings.size; i++)
     if (theFieldQuery.allQueryResultStrings[i].size>0 )
       this->selectedRowFieldNamesUnsafe[i]=CGI::URLStringToNormal(theFieldQuery.allQueryResultStrings[i][0]);
+  stOutput << "Fetched field names: " << this->selectedRowFieldNamesUnsafe.ToStringCommaDelimited()
+  << " from: " << theFieldQuery.allQueryResultStrings.ToStringCommaDelimited()
+  << ". All of those have values: "
+  << this->selectedRowFieldsUnsafe.ToStringCommaDelimited()
+  << " xtracted from " << theQuery.allQueryResultStrings.ToStringCommaDelimited();
   return true;
 }
 
@@ -940,7 +949,7 @@ std::string UserCalculator::GetSelectedRowEntry(const std::string& theKey)
   int theIndex= this->selectedRowFieldNamesUnsafe.GetIndex(theKey);
   if (theIndex==-1)
     return "";
-  return this->selectedColumnValuesUnsafe[theIndex];
+  return this->selectedRowFieldsUnsafe[theIndex];
 }
 
 bool DatabaseRoutines::ExtractEmailList(const std::string& emailList, List<std::string>& outputList, std::stringstream& comments)
@@ -963,24 +972,32 @@ bool DatabaseRoutines::SendActivationEmail(const std::string& emailList, std::st
   return this->SendActivationEmail(theEmails, true, comments);
 }
 
+void UserCalculator::ComputeActivationToken()
+{ MacroRegisterFunctionWithName("UserCalculator::ComputeActivationToken");
+  TimeWrapper now;
+  //stOutput << "Resetting authentication token. ";
+  now.AssignLocalTime();
+  std::stringstream activationTokenStream;
+  activationTokenStream << now.theTimeStringNonReadable << rand();
+  this->activationTokenUnsafe=Crypto::computeSha1outputBase64(activationTokenStream.str());
+}
+
 bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, bool forceResend, std::stringstream& comments)
 { MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
   if (!this->ColumnExists("activationToken", "users", comments))
     if (!this->CreateColumn("activationToken", "users", comments))
       return false;
   UserCalculator currentUser;
+  currentUser.SetCurrentTable("users");
   bool result;
   for (int i=0; i<theEmails.size; i++)
   { currentUser.usernameUnsafe=theEmails[i];
     currentUser.emailUnsafe=theEmails[i];
-    TimeWrapper now;
-    //stOutput << "Resetting authentication token. ";
-    now.AssignLocalTime();
-    std::stringstream activationTokenStream;
-    activationTokenStream << now.theTimeStringNonReadable << rand();
-    std::string activationToken =Crypto::computeSha1outputBase64(activationTokenStream.str());
-    if (!currentUser.SetColumnEntry("activationToken", activationToken, *this, true, & comments))
-      return comments << "Setting activation token failed.";
+    currentUser.ComputeActivationToken();
+    if (!currentUser.SetColumnEntry("activationToken", currentUser.activationTokenUnsafe, *this, true, &comments))
+    { comments << "Setting activation token failed.";
+      return false;
+    }
     if (!currentUser.SendActivationEmail(*this, comments))
     { comments << "Failed to send activation email to: " << currentUser.usernameUnsafe;
       result=false;
@@ -995,17 +1012,21 @@ bool DatabaseRoutines::AddUsersFromEmails
 { MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
   List<std::string> theEmails;
   this->ExtractEmailList(emailList, theEmails, comments);
+  stOutput << " <br>creating users: " << theEmails.ToStringCommaDelimited()
+  << "<br>";
   UserCalculator currentUser;
   bool result=true;
   for (int i=0; i<theEmails.size; i++)
   { currentUser.usernameUnsafe=theEmails[i];
     currentUser.emailUnsafe=theEmails[i];
     if (!currentUser.Iexist(*this, true))
-      if (!currentUser.CreateMeIfUsernameUnique(*this, false))
+    { if (!currentUser.CreateMeIfUsernameUnique(*this, false))
       { comments << "Failed to create user: " << currentUser.usernameUnsafe;
         result=false;
         continue;
       }
+      currentUser.SetColumnEntry("email", theEmails[i], *this, false, &comments);
+    }
   }
   if (!result )
   { comments << "<br>Failed to create all users. Additional comments: " << this->comments.str();
@@ -1018,6 +1039,8 @@ bool UserCalculator::SendActivationEmail(DatabaseRoutines& theRoutines, std::str
 { MacroRegisterFunctionWithName("UserCalculator::SendActivationEmail");
   if (!this->FetchOneUserRow(theRoutines, comments))
     return false;
+  stOutput << "<hr> all result strings: " << this->selectedRowFieldNamesUnsafe.ToStringCommaDelimited();
+  stOutput << "<br> all result string names: " << this->selectedRowFieldsUnsafe.ToStringCommaDelimited();
   this->activationTokenUnsafe= this->GetSelectedRowEntry("activationToken");
   this->emailUnsafe=this->GetSelectedRowEntry("email");
   if (this->activationTokenUnsafe=="")

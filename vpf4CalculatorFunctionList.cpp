@@ -19,12 +19,12 @@ void Calculator::initAdminFunctions()
    "Adds a new user (first argument: new username, second argument: new user's password, third argument: email).",
    "AddUser(testUser, password, \"todor.milev@gmail.com\"); GetUserPassword(\"testUser\");", false, true, "DatabaseRoutines::innerAddUser");
    ;
-  this->AddOperationInnerHandler
-  ("SendActivationEmailUsers", DatabaseRoutines::innerSendActivationEmailUsers, "",
-   "Sends activation emails to a comma-separated list of users. ",
-   "SendActivationEmailUsers(\"todor.milev@gmail.com, Todor.Milev@umb.edu \"); ",
-   true, false, "DatabaseRoutines::innerSendActivationEmailUsers");
-   ;
+ // this->AddOperationInnerHandler
+//  ("SendActivationEmailUsers", DatabaseRoutines::innerSendActivationEmailUsers, "",
+//   "Sends activation emails to a comma-separated list of users. ",
+//   "SendActivationEmailUsers(\"todor.milev@gmail.com, Todor.Milev@umb.edu \"); ",
+//   true, false, "DatabaseRoutines::innerSendActivationEmailUsers");
+//   ;
   this->AddOperationInnerHandler
   ("AddUsersFromEmailList", DatabaseRoutines::innerAddUsersFromEmailList, "",
    "Adds new users by email list.",

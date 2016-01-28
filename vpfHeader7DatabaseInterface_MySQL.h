@@ -130,6 +130,7 @@ public:
   bool getUser(Calculator& theCommands, const Expression& input);
   bool getUserPassAndSelectedColumns(Calculator& theCommands, const Expression& input);
   bool getUserPassAndExtraData(Calculator& theCommands, const Expression& input, List<std::string>& outputData);
+  void ComputeActivationToken();
   void ComputeShaonedSaltedPassword(bool recomputeSafeEntries);
   bool SendActivationEmail(DatabaseRoutines& theRoutines, std::stringstream& comments);
   std::string ToString();

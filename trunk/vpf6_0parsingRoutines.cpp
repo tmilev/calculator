@@ -547,7 +547,8 @@ bool Calculator::isLeftSeparator(unsigned char c)
 bool Calculator::isInterprettedAsEmptySpace(const std::string& input)
 { if (input.size()!=1)
     return false;
-  switch ((unsigned) input[0])
+  unsigned char x= (unsigned) input[0];//<-Optimization DANGER
+  switch (x)
   {
   case '\n': //numerical value: 10
   case '~':

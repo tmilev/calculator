@@ -697,7 +697,6 @@ void WebWorker::OutputBeforeComputation()
 //  civilizedInput="\\int( 1/x dx)";
 //  civilizedInput="\\int (1/(x(1+x^2)^2))dx";
 //  civilizedInput="%LogEvaluation \\int (1/(5+2x+7x^2)^2)dx";
-  CGI::URLStringToNormal(theParser.inputString, theParser.inputString);
   theGlobalVariables.initOutputReportAndCrashFileNames
   (theParser.inputStringRawestOfTheRaw, theParser.inputString);
 
@@ -1676,7 +1675,7 @@ int WebWorker::ProcessCalculator()
       theGlobalVariables.flagLoggedIn &&
       theGlobalVariables.flagUsingSSLinCurrentConnection)
     return this->ProcessDatabase();
-  theParser.inputString=CGI::URLStringToNormal( theGlobalVariables.GetWebInput("mainInput"));
+  theParser.inputString=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
   this->OutputBeforeComputation();
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(false);
   theParser.init();

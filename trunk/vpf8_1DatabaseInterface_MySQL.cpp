@@ -1062,10 +1062,9 @@ bool UserCalculator::SendActivationEmail(DatabaseRoutines& theRoutines, std::str
   << " todor.milev@gmail.com\n\n";
   emailStream << this->activationTokenUnsafe << "\n\nGood luck with our course, \n Your calculus instructors.";
   std::string emailLog=theGlobalVariables.CallSystemWithOutput(theEmailRoutines.GetCommandToSendEmailWithMailX());
-  stOutput << "Calling system with " << theEmailRoutines.GetCommandToSendEmailWithMailX()
-  << " to get output: \n" << emailLog;
-  comments << "\nEmail sending log:\n"
-  << emailLog;
+  stOutput << "Calling system with:<br>" << theEmailRoutines.GetCommandToSendEmailWithMailX()
+  << "<br>\n to get output: \n<br>" << emailLog;
+  comments << "\nEmail sending log:\n" << emailLog;
   return true;
 }
 

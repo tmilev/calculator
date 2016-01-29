@@ -181,14 +181,16 @@ void CallSystemWrapperNoOutput(const std::string& theCommand)
 }
 
 std::string CallSystemWrapperReturnStandardOutput(const std::string& inputCommand)
-{ std::shared_ptr<FILE> pipe(popen(inputCommand.c_str(), "r"), pclose);
+{ std::string inputCommandWithRedirection=inputCommand+" 2>&1";
+
+  std::shared_ptr<FILE> pipe(popen(inputCommandWithRedirection.c_str(), "r"), pclose);
   if (!pipe)
     return "ERROR";
   const int bufferSize=20000;
-  char buffer[ bufferSize];
+  char buffer[bufferSize];
   std::string result = "";
   while (!feof(pipe.get()))
-    if (fgets(buffer, bufferSize, pipe.get()) != NULL)
+    if (fgets(buffer, bufferSize, pipe.get()) != 0)
       result += buffer;
   return result;
 }

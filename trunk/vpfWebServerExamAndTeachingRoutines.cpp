@@ -271,6 +271,7 @@ std::string CalculatorHTML::GetSubmitEmailsJavascript()
   << "  }\n"
   << "  spanEmailList = document.getElementById(idEmailList);\n"
   << "  inputParams='requestType=addEmails';\n"
+  << "  inputParams+='" << theGlobalVariables.ToStringCalcArgsNoNavigation() << "';\n"
   << "  inputParams+=\"&mainInput=\" + encodeURIComponent(spanEmailList.value);\n"
   << "  inputParams+=\"&currentExamHome=\" + problemCollectionName;\n"
   << "  var https = new XMLHttpRequest();\n"
@@ -541,7 +542,6 @@ int WebWorker::ProcessSubmitProblem()
 std::string WebWorker::GetDatabasePage()
 { MacroRegisterFunctionWithName("WebWorker::GetDatabasePage");
   std::stringstream out;
-  DatabaseRoutines theRoutines;
   out << "<html>"
   << "<header>"
   << "<link rel=\"stylesheet\" type=\"text/css\" href=\"/styleCalculator.css\">"
@@ -549,10 +549,17 @@ std::string WebWorker::GetDatabasePage()
   << "</header>"
   << "<body onload=\"loadSettings();\">\n";
   out << "<nav>" << theGlobalVariables.ToStringNavigation() << "</nav>";
+#ifdef MACRO_use_MySQL
+
+  DatabaseRoutines theRoutines;
+
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     out << "Browsing database allowed only for logged-in admins.";
   else
-    out << "<sectino>" << theRoutines.ToStringCurrentTableHTML() << "</section>";
+    out << "<section>" << theRoutines.ToStringCurrentTableHTML() << "</section>";
+#else
+out << "<b>Database not available. </b>";
+#endif // MACRO_use_MySQL
   out <<"<hr><hr><hr><hr><hr><hr><hr><hr>" << this->ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
@@ -880,7 +887,8 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
   std::stringstream failureComments;
   if (!DatabaseRoutinesGlobalFunctions::FetchTable
       (userTable, labelsUserTable, tableTruncated, numRows, "users", failureComments))
-  { out << "<span style=\"color:red\"><b>Failed to fetch email addresses</b></span>";
+  { out << "<span style=\"color:red\"><b>Failed to fetch email addresses: "
+    << failureComments.str() << "</b></span>";
     inputOutput.interpretedCommand=out.str();
     return;
   }

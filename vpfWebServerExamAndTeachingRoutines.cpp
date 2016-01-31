@@ -377,6 +377,7 @@ std::string WebWorker::GetAddUserEmails()
   { out << "<b>No emails to add</b>";
     return out.str();
   }
+#ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
   std::stringstream comments;
   bool result=theRoutines.AddUsersFromEmails(inputEmails, comments);
@@ -385,6 +386,9 @@ std::string WebWorker::GetAddUserEmails()
   else
     out << "<span style=\"color:red\">Failed to add email. </span>";
   return out.str();
+#else
+  return "<b>no database present.</b>";
+#endif // MACRO_use_MySQL
 }
 
 

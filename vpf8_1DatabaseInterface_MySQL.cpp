@@ -695,6 +695,8 @@ bool UserCalculator::CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, boo
   queryStream << "INSERT INTO calculatorUsers.users(user, email) VALUES('" << this->usernameSafe << "', '"
   << this->emailSafe << "')";
   DatabaseQuery theQuery(theRoutines, queryStream.str());
+  if (this->enteredPassword=="")
+    return true;
   return this->SetPassword(theRoutines, false, theRoutines.comments);
 }
 
@@ -1009,10 +1011,17 @@ bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, b
 { MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
   if (!this->ColumnExists("activationToken", "users", comments))
     if (!this->CreateColumn("activationToken", "users", comments))
+    { comments << "Failed to create activationToken column. ";
       return false;
+    }
+/*  if (!this->ColumnExists("activationEmailSent", "users", comments))
+    if (!this->CreateColumn("activationEmailSent", "users", comments))
+    { comments << "Failed to create activationEmailSent column. ";
+      return false;
+    }*/
   UserCalculator currentUser;
   currentUser.SetCurrentTable("users");
-  bool result;
+  bool result=true;
   for (int i=0; i<theEmails.size; i++)
   { currentUser.usernameUnsafe=theEmails[i];
     currentUser.emailUnsafe=theEmails[i];
@@ -1022,7 +1031,8 @@ bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, b
       return false;
     }
     if (!currentUser.SendActivationEmail(*this, comments))
-    { comments << "Failed to send activation email to: " << currentUser.usernameUnsafe;
+    { comments << "<span style=\"color:red\"><b>Failed to send activation email to:</b></span> "
+      << currentUser.usernameUnsafe;
       result=false;
       continue;
     }
@@ -1038,6 +1048,7 @@ bool DatabaseRoutines::AddUsersFromEmails
   stOutput << " <br>creating users: " << theEmails.ToStringCommaDelimited()
   << "<br>";
   UserCalculator currentUser;
+  currentUser.SetCurrentTable("users");
   bool result=true;
   for (int i=0; i<theEmails.size; i++)
   { currentUser.usernameUnsafe=theEmails[i];

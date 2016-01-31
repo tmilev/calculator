@@ -143,7 +143,6 @@ bool DatabaseRoutinesGlobalFunctions::ColumnExists
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::ColumnExists");
   DatabaseRoutines theRoutines;
   return theRoutines.ColumnExists(columnNameUnsafe, tableNameUnsafe, commentsStream);
-
 #else
   return false;
 #endif
@@ -191,6 +190,7 @@ bool DatabaseRoutinesGlobalFunctions::FetchTable
   (output, outputColumnLabels, outputWasTruncated, actualNumRowsIfTruncated,
    tableNameUnsafe, comments);
 #else
+  comments << "Database not available.";
   return false;
 #endif // MACRO_use_MySQL
 }

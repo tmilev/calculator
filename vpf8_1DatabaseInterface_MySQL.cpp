@@ -179,6 +179,23 @@ bool DatabaseRoutinesGlobalFunctions::TableExists
 #endif
 }
 
+bool DatabaseRoutinesGlobalFunctions::FetchTable
+(List<List<std::string> >& output,
+ List<std::string>& outputColumnLabels,
+ bool& outputWasTruncated, int& actualNumRowsIfTruncated,
+ const std::string& tableNameUnsafe, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::FetchTable");
+#ifdef MACRO_use_MySQL
+  DatabaseRoutines theRoutines;
+  return theRoutines.FetchTable
+  (output, outputColumnLabels, outputWasTruncated, actualNumRowsIfTruncated,
+   tableNameUnsafe, comments);
+#else
+  return false;
+#endif // MACRO_use_MySQL
+}
+
+
 bool DatabaseRoutinesGlobalFunctions::FetchEntry
 (const std::string& inputUsername, const std::string& tableName, const std::string& keyName,
  std::string& output, std::stringstream& comments)

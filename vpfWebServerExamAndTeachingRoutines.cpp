@@ -869,13 +869,13 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
   << "', '" << idOutput
   << "')\"> Add student emails</button>";
   out << "<br><span id=\"" << idOutput << "\"></span>\n<br>\n";
-  DatabaseRoutines theRoutines;
   List<List<std::string> > userTable;
   List<std::string> labelsUserTable;
   bool tableTruncated=false;
   int numRows=-1;
   std::stringstream failureComments;
-  if (!theRoutines.FetchTable(userTable, labelsUserTable, tableTruncated, numRows, "users", failureComments))
+  if (!DatabaseRoutinesGlobalFunctions::FetchTable
+      (userTable, labelsUserTable, tableTruncated, numRows, "users", failureComments))
   { out << "<span style=\"color:red\"><b>Failed to fetch email addresses</b></span>";
     inputOutput.interpretedCommand=out.str();
     return;

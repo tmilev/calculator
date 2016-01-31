@@ -105,6 +105,7 @@ public:
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
   void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
   void InterpretManageClass(SyntacticElementHTML& inputOutput);
+  std::string GetSubmitEmailsJavascript();
   std::string GetSubmitAnswersJavascript();
   std::string GetDatabaseTableName();
   void LoadCurrentProblemItem();
@@ -199,7 +200,11 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
   << this->outputHtmlNavigation
   << "<hr><small>Generated in "
   << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds()-startTime)
-  << " second(s).</small>" << "</nav> " << "<section>" << this->outputHtmlMain << "</section>";
+  << " second(s).</small>" << "</nav> "
+  //<< "<section>"
+  << this->outputHtmlMain
+  //<< "</section>"
+  ;
   return out.str();
 }
 
@@ -251,6 +256,33 @@ bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt)
     return true;
   }
   return false;
+}
+
+std::string CalculatorHTML::GetSubmitEmailsJavascript()
+{ std::stringstream out;
+  out
+  << "<script type=\"text/javascript\"> \n"
+  << "function submitEmails(idEmailList, problemCollectionName, idOutput){\n"
+  << "  spanOutput = document.getElementById(idOutput);\n"
+  << "  if (spanOutput==null){\n"
+  << "    spanOutput = document.createElement('span');\n"
+  << "    document.body.appendChild(spanOutput);\n"
+  << "    spanOutput.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idEmailList + \"MISSING! </span>\";\n"
+  << "  }\n"
+  << "  spanEmailList = document.getElementById(idEmailList);\n"
+  << "  inputParams='requestType=addEmails';\n"
+  << "  inputParams+=\"&mainInput=\" + encodeURIComponent(spanEmailList.value);\n"
+  << "  inputParams+=\"&currentExamHome=\" + problemCollectionName;\n"
+  << "  var https = new XMLHttpRequest();\n"
+  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
+  << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
+  << "  https.onload = function() {\n"
+  << "    spanOutput.innerHTML=https.responseText;\n"
+  << "  }\n"
+  << "  https.send(inputParams);\n"
+  << "}\n"
+  << "</script>";
+  return out.str();
 }
 
 std::string CalculatorHTML::GetSubmitAnswersJavascript()
@@ -324,6 +356,37 @@ int WebWorker::ProcessSubmitProblemPreview()
     << theInterpreter.outputString;
   return 0;
 }
+
+int WebWorker::ProcessAddUserEmails()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessAddUserEmails");
+  stOutput << this->GetAddUserEmails();
+  stOutput.Flush();
+  return 0;
+}
+
+std::string WebWorker::GetAddUserEmails()
+{ MacroRegisterFunctionWithName("WebWorker::GetAddUserEmails");
+  std::stringstream out;
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { out << "<b>Only admins may add students.</b>";
+    return out.str();
+  }
+  std::string inputEmails;
+  inputEmails=theGlobalVariables.GetWebInput("mainInput");
+  if (inputEmails=="")
+  { out << "<b>No emails to add</b>";
+    return out.str();
+  }
+  DatabaseRoutines theRoutines;
+  std::stringstream comments;
+  bool result=theRoutines.AddUsersFromEmails(inputEmails, comments);
+  if (result)
+    out << "<span style=\"color:green\"> Emails added to the system. </span>";
+  else
+    out << "<span style=\"color:red\">Failed to add email. </span>";
+  return out.str();
+}
+
 
 int WebWorker::ProcessSubmitProblem()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSubmitProblem");
@@ -637,7 +700,7 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator()
     return false;
   std::string tagClass=this->GetKeyValue("class");
   return tagClass=="calculatorExamProblem" || tagClass== "calculatorExamIntermediate"
-  || tagClass=="calculatorAnswer";
+  || tagClass=="calculatorAnswer" || tagClass=="calculatorManageClass";
 }
 
 bool SyntacticElementHTML::IsInterpretedByCalculatorDuringPreparation()
@@ -787,10 +850,74 @@ std::string SyntacticElementHTML::GetTagClass()
 }
 
 void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
-{
-
-  crash <<  "should write this to work" << crash;
-
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretManageClass");
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return;
+  std::stringstream out;
+  out << "Add students.<br><textarea ";
+  std::string idAddressTextarea;
+  if (inputOutput.GetKeyValue("id")!="")
+    idAddressTextarea=inputOutput.GetKeyValue("id") ;
+  else
+    idAddressTextarea= this->fileName + "manageClass";
+  std::string idOutput="output" + CGI::StringToURLString(this->fileName);
+  out << "id=\"" << idAddressTextarea << "\"";
+  out << ">";
+  out << "</textarea>";
+  out << "<button class=\"submitButton\" onclick=\"submitEmails('"
+  << idAddressTextarea << "', '" << CGI::StringToURLString(this->fileName)
+  << "', '" << idOutput
+  << "')\"> Add student emails</button>";
+  out << "<br><span id=\"" << idOutput << "\"></span>\n<br>\n";
+  DatabaseRoutines theRoutines;
+  List<List<std::string> > userTable;
+  List<std::string> labelsUserTable;
+  bool tableTruncated=false;
+  int numRows=-1;
+  std::stringstream failureComments;
+  if (!theRoutines.FetchTable(userTable, labelsUserTable, tableTruncated, numRows, "users", failureComments))
+  { out << "<span style=\"color:red\"><b>Failed to fetch email addresses</b></span>";
+    inputOutput.interpretedCommand=out.str();
+    return;
+  }
+  if (tableTruncated)
+    out << "<span style=\"color:red\"><b>This shouldn't happen: email list truncated. "
+    << "This is likely a software bug.</b></span>";
+  int indexUser=-1, indexEmail=-1, indexActivationToken=-1;
+  for (int i=0; i<labelsUserTable.size; i++)
+  { if (labelsUserTable[i]=="user")
+      indexUser=i;
+    if (labelsUserTable[i]=="email")
+      indexEmail=i;
+    if (labelsUserTable[i]=="activationToken")
+      indexActivationToken=i;
+  }
+  if (indexUser==-1 || indexEmail==-1 || indexActivationToken==-1)
+  { out << "<span style=\"color:red\"><b>This shouldn't happen: failed to find necessary "
+    << "column entries in the database. "
+    << "This is likely a software bug.</b></span>"
+    << "IndexUser, indexEmail, indexActivationToken: "
+    << indexUser << ", "
+    << indexEmail << ", "
+    << indexActivationToken << ". ";
+    inputOutput.interpretedCommand=out.str();
+    return;
+  }
+  out << "\n" << userTable.size << " users. ";
+  out << "<table><tr><th>user</th><th>email</th><th>Activated?</th></tr>";
+  for (int i=0; i<userTable.size; i++)
+  { out << "<tr>"
+    << "<td>" << userTable[i][indexUser] << "</td>"
+    << "<td>" << userTable[i][indexEmail] << "</td>"
+    ;
+    if (userTable[i][indexActivationToken]!="activated")
+      out << "<td><span style=\"color:red\">not activated</span></td>";
+    else
+      out << "<td><span style=\"color:green\">activated</span></td>";
+    out << "</tr>";
+  }
+  out << "</table>";
+  inputOutput.interpretedCommand=out.str();
 }
 
 void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput)
@@ -889,7 +1016,10 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     this->randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
   this->FigureOutCurrentProblemList(comments);
   this->outputHtmlNavigation=this->ToStringProblemNavigation();
-  out << this->GetSubmitAnswersJavascript();
+  if (this->flagIsExamProblem)
+    out << this->GetSubmitAnswersJavascript();
+  else if (this->flagIsExamHome)
+    out << this->GetSubmitEmailsJavascript();
   if (!this->PrepareAndExecuteCommands(theInterpreter, comments))
     return false;
   bool moreThanOneCommand=false;
@@ -1171,12 +1301,12 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     }
 //    stOutput << "<br>" << this->ToStringParsingStack(eltsStack);
     reduced=true;
-    SyntacticElementHTML& last = eltsStack[eltsStack.size-1];
+    SyntacticElementHTML& last         = eltsStack[eltsStack.size-1];
     SyntacticElementHTML& secondToLast = eltsStack[eltsStack.size-2];
-    SyntacticElementHTML& thirdToLast = eltsStack[eltsStack.size-3];
+    SyntacticElementHTML& thirdToLast  = eltsStack[eltsStack.size-3];
     SyntacticElementHTML& fourthToLast = eltsStack[eltsStack.size-4];
-    SyntacticElementHTML& fifthToLast = eltsStack[eltsStack.size-5];
-    SyntacticElementHTML& sixthToLast = eltsStack[eltsStack.size-6];
+    SyntacticElementHTML& fifthToLast  = eltsStack[eltsStack.size-5];
+    SyntacticElementHTML& sixthToLast  = eltsStack[eltsStack.size-6];
 //    SyntacticElementHTML& seventhToLast = eltsStack[eltsStack.size-7];
     if (secondToLast.syntacticRole=="<openTagCalc>" && last.syntacticRole=="</closeTag>" && secondToLast.tag==last.tag)
     { secondToLast.syntacticRole="command";

@@ -262,7 +262,7 @@ std::string CalculatorHTML::GetSubmitEmailsJavascript()
 { std::stringstream out;
   out
   << "<script type=\"text/javascript\"> \n"
-  << "function submitEmails(idEmailList, problemCollectionName, idOutput){\n"
+  << "function addEmails(idEmailList, problemCollectionName, idOutput){\n"
   << "  spanOutput = document.getElementById(idOutput);\n"
   << "  if (spanOutput==null){\n"
   << "    spanOutput = document.createElement('span');\n"
@@ -270,8 +270,8 @@ std::string CalculatorHTML::GetSubmitEmailsJavascript()
   << "    spanOutput.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idEmailList + \"MISSING! </span>\";\n"
   << "  }\n"
   << "  spanEmailList = document.getElementById(idEmailList);\n"
-  << "  inputParams='requestType=addEmails';\n"
-  << "  inputParams+='" << theGlobalVariables.ToStringCalcArgsNoNavigation() << "';\n"
+  << "  inputParams='request=addEmails';\n"
+  << "  inputParams+='&" << theGlobalVariables.ToStringCalcArgsNoNavigation() << "';\n"
   << "  inputParams+=\"&mainInput=\" + encodeURIComponent(spanEmailList.value);\n"
   << "  inputParams+=\"&currentExamHome=\" + problemCollectionName;\n"
   << "  var https = new XMLHttpRequest();\n"
@@ -373,7 +373,7 @@ std::string WebWorker::GetAddUserEmails()
     return out.str();
   }
   std::string inputEmails;
-  inputEmails=theGlobalVariables.GetWebInput("mainInput");
+  inputEmails=CGI::URLStringToNormal( theGlobalVariables.GetWebInput("mainInput"));
   if (inputEmails=="")
   { out << "<b>No emails to add</b>";
     return out.str();
@@ -383,9 +383,9 @@ std::string WebWorker::GetAddUserEmails()
   std::stringstream comments;
   bool result=theRoutines.AddUsersFromEmails(inputEmails, comments);
   if (result)
-    out << "<span style=\"color:green\"> Emails added to the system. </span>";
+    out << "<span style=\"color:green\"> Users added to the system. </span>" << comments.str();
   else
-    out << "<span style=\"color:red\">Failed to add email. </span>";
+    out << "<span style=\"color:red\">Failed to add users to the system. Comments: </span>" << comments.str();
   return out.str();
 #else
   return "<b>no database present.</b>";
@@ -875,7 +875,7 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
   out << "id=\"" << idAddressTextarea << "\"";
   out << ">";
   out << "</textarea>";
-  out << "<button class=\"submitButton\" onclick=\"submitEmails('"
+  out << "<button class=\"submitButton\" onclick=\"addEmails('"
   << idAddressTextarea << "', '" << CGI::StringToURLString(this->fileName)
   << "', '" << idOutput
   << "')\"> Add student emails</button>";

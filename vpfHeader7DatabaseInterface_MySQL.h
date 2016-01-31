@@ -9,7 +9,7 @@ class DatabaseRoutinesGlobalFunctions
 {
 public:
   static bool LogoutViaDatabase();
-  static bool LoginViaDatabase(const std::string& inputUsername, const std::string& inputPassword, std::string& inputOutputAuthenticationToken, std::stringstream* comments);
+  static bool LoginViaDatabase(const std::string& inputUsernameUnsafe, const std::string& inputPassword, std::string& inputOutputAuthenticationToken, std::stringstream* comments);
   static bool SetPassword
   (const std::string& inputUsername, const std::string& inputNewPassword,
    std::stringstream& comments);
@@ -138,6 +138,12 @@ public:
   bool getUserPassAndExtraData(Calculator& theCommands, const Expression& input, List<std::string>& outputData);
   void ComputeActivationToken();
   void ComputeShaonedSaltedPassword(bool recomputeSafeEntries);
+  bool GetActivationLink
+  (std::string& output, DatabaseRoutines& theRoutines, std::stringstream& comments)
+  ;
+  static std::string GetActivationLinkFromActivationToken
+  (const std::string& theActivationToken, const std::string& inputUserNameUnsafe)
+  ;
   bool SendActivationEmail(DatabaseRoutines& theRoutines, std::stringstream& comments);
   std::string ToString();
   std::string ToStringSelectedColumns();

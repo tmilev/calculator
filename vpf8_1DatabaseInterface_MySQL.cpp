@@ -4,13 +4,14 @@
 ProjectInformationInstance ProjectInfoVpf8_1MySQLcpp(__FILE__, "MySQL interface. ");
 
 bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
-(const std::string& inputUsername, const std::string& inputPassword, std::string& inputOutputAuthenticationToken, std::stringstream* comments)
+(const std::string& inputUsernameUnsafe, const std::string& inputPassword,
+ std::string& inputOutputAuthenticationToken, std::stringstream* comments)
 {
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
   DatabaseRoutines theRoutines;
   UserCalculator theUser;
-  theUser.usernameUnsafe=inputUsername;
+  theUser.usernameUnsafe=inputUsernameUnsafe;
   theUser.enteredPassword=inputPassword;
   theUser.enteredAuthenticationTokenUnsafe=inputOutputAuthenticationToken;
 //  stOutput << "Attempting to login with user: " << inputUsername
@@ -27,7 +28,17 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
   { *comments << "<b> Authentication with token " << inputOutputAuthenticationToken << " failed. </b>";
     //*comments << "the actual token is: " << theUser.actualAuthenticationTokeNUnsafe;
   }
-
+  std::string activationTokenUnsafe;
+  if (theGlobalVariables.userCalculatorRequestType=="changePassword")
+  { if (!theUser.FetchOneColumn("activationToken", activationTokenUnsafe, theRoutines, false, comments))
+      *comments << "Failed to fetch activationToken column.";
+    else
+      if (activationTokenUnsafe!="" && activationTokenUnsafe!="activated" &&
+          inputPassword==activationTokenUnsafe)
+      { inputOutputAuthenticationToken="";
+        return true;
+      }
+  }
   inputOutputAuthenticationToken=theUser.actualAuthenticationTokeNUnsafe;
   theUser.usernameUnsafe=theGlobalVariables.userCalculatorAdmin;
   if (!theUser.Iexist(theRoutines, true))
@@ -38,6 +49,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     }
     return true;
   }
+
 //  stOutput << " <b>login failed, desired user:" + theUser.username +"</b>";
 //  stOutput << "<br>The actual authenticationToken is now: " << theUser.actualAuthenticationToken;
   return false;
@@ -537,7 +549,7 @@ bool UserCalculator::FetchOneColumn
   outputUnsafe="";
   if (!theQuery.flagQuerySucceeded)
   { if (failureComments!=0)
-      *failureComments << "<b>Query failed - column may not exist (or some other error occurred).</b>";
+      *failureComments << "<b>Query failed - column may not exist (or some other error occurred). </b>";
     return false;
   }
   if (!theQuery.flagQueryReturnedResult)
@@ -677,7 +689,7 @@ bool UserCalculator::DeleteMe(DatabaseRoutines& theRoutines, bool recomputeSafeE
   std::stringstream queryStream;
   queryStream << "UPDATE users SET user="
   << "'deleted" + CGI::StringToURLString(currentTime.theTimeStringNonReadable) << this->usernameSafe << "'"
-  <<" WHERE user='" << this->usernameSafe << "'";
+  << " WHERE user='" << this->usernameSafe << "'";
   DatabaseQuery renamingQuery(theRoutines, queryStream.str());
   return renamingQuery.flagQuerySucceeded;
 }
@@ -707,8 +719,8 @@ void UserCalculator::ComputeShaonedSaltedPassword(bool recomputeSafeEntries)
   this->usernamePlusPassWord=this->usernameSafe;
   this->usernamePlusPassWord+=this->enteredPassword;
   this->enteredShaonedSaltedPassword=Crypto::computeSha1outputBase64(this->usernamePlusPassWord);
-  //<-careful copying those around. We don't want to leave
-  //any passwords in non-zeroed memory, even if properly freed.
+  //<-careful copying those around. We want to avoid leaving
+  //passwords in non-zeroed memory, even if properly freed (to the extent possible and practical).
   //Note the destructor of DatabaseRoutines zeroes some of the strings.
   //To do: make sure all crypto functions zero their buffers.
 }
@@ -798,11 +810,11 @@ bool UserCalculator::FetchOneUserRow
   for (int i=0; i<theFieldQuery.allQueryResultStrings.size; i++)
     if (theFieldQuery.allQueryResultStrings[i].size>0 )
       this->selectedRowFieldNamesUnsafe[i]=CGI::URLStringToNormal(theFieldQuery.allQueryResultStrings[i][0]);
-  stOutput << "Fetched field names: " << this->selectedRowFieldNamesUnsafe.ToStringCommaDelimited()
+  /*stOutput << "Fetched field names: " << this->selectedRowFieldNamesUnsafe.ToStringCommaDelimited()
   << " from: " << theFieldQuery.allQueryResultStrings.ToStringCommaDelimited()
   << ". All of those have values: "
   << this->selectedRowFieldsUnsafe.ToStringCommaDelimited()
-  << " xtracted from " << theQuery.allQueryResultStrings.ToStringCommaDelimited();
+  << " xtracted from " << theQuery.allQueryResultStrings.ToStringCommaDelimited();*/
   return true;
 }
 
@@ -1069,14 +1081,24 @@ bool DatabaseRoutines::AddUsersFromEmails
   return this->SendActivationEmail(theEmails, false, comments);
 }
 
-bool UserCalculator::SendActivationEmail(DatabaseRoutines& theRoutines, std::stringstream& comments)
-{ MacroRegisterFunctionWithName("UserCalculator::SendActivationEmail");
+std::string UserCalculator::GetActivationLinkFromActivationToken
+  (const std::string& theActivationToken, const std::string& inputUserNameUnsafe)
+{ MacroRegisterFunctionWithName("UserCalculator::GetActivationLinkFromActivationToken");
+  std::stringstream out;
+  out << "<a href=\""
+  << theGlobalVariables.DisplayNameCalculatorWithPath
+  << "?request=activateAccount&userHidden=" << CGI::StringToURLString(inputUserNameUnsafe)
+  << "&activationToken=" << CGI::StringToURLString(theActivationToken)
+  << "\">Activate account and set password</a>";
+  return out.str();
+}
+
+bool UserCalculator::GetActivationLink
+  (std::string& output, DatabaseRoutines& theRoutines, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("UserCalculator::GetActivationLink");
   if (!this->FetchOneUserRow(theRoutines, comments))
     return false;
-  stOutput << "<hr> all result strings: " << this->selectedRowFieldNamesUnsafe.ToStringCommaDelimited();
-  stOutput << "<br> all result string names: " << this->selectedRowFieldsUnsafe.ToStringCommaDelimited();
   this->activationTokenUnsafe= this->GetSelectedRowEntry("activationToken");
-  this->emailUnsafe=this->GetSelectedRowEntry("email");
   if (this->activationTokenUnsafe=="")
   { comments << "Failed to fetch activation token";
     return false;
@@ -1085,16 +1107,29 @@ bool UserCalculator::SendActivationEmail(DatabaseRoutines& theRoutines, std::str
   { comments << "Account already activated";
     return false;
   }
+  output= this->GetActivationLinkFromActivationToken(this->activationTokenUnsafe, this->usernameUnsafe);
+  return true;
+}
+
+bool UserCalculator::SendActivationEmail(DatabaseRoutines& theRoutines, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("UserCalculator::SendActivationEmail");
+  std::string activationLink;
+  if (!this->GetActivationLink(activationLink, theRoutines, comments))
+    return false;
+//  stOutput << "<hr> all result strings: " << this->selectedRowFieldNamesUnsafe.ToStringCommaDelimited();
+//  stOutput << "<br> all result string names: " << this->selectedRowFieldsUnsafe.ToStringCommaDelimited();
+  this->emailUnsafe=this->GetSelectedRowEntry("email");
   EmailRoutines theEmailRoutines;
   theEmailRoutines.toEmail=this->emailUnsafe;
   theEmailRoutines.subject="NO REPLY: Activation of a Math homework account. ";
-  std::stringstream emailStream;
-  emailStream << "Dear student,\nthis is an automated email sent with an activation token for your "
-  << " math homework account. To activate your account and set up your password, please follow the link below. "
-  << " If you have any technical problems or have questions, please DO NOT HIT the REPLY BUTTON; "
-  << " instead, post your quesiton on piazza.com or email your question to "
-  << " todor.milev@gmail.com\n\n";
-  emailStream << this->activationTokenUnsafe << "\n\nGood luck with our course, \n Your calculus instructors.";
+  theEmailRoutines.emailContent="Activation link: " + activationLink;
+//  std::stringstream emailStream;
+//  emailStream << "Dear student,\nthis is an automated email sent with an activation token for your "
+//  << " math homework account. To activate your account and set up your password, please follow the link below. "
+//  << " If you have any technical problems or have questions, please DO NOT HIT the REPLY BUTTON; "
+//  << " instead, post your quesiton on piazza.com or email your question to "
+//  << " todor.milev@gmail.com\n\n";
+//  emailStream << this->activationTokenUnsafe << "\n\nGood luck with our course, \n Your calculus instructors.";
   std::string emailLog=theGlobalVariables.CallSystemWithOutput(theEmailRoutines.GetCommandToSendEmailWithMailX());
   stOutput << "Calling system with:<br>" << theEmailRoutines.GetCommandToSendEmailWithMailX()
   << "<br>\n to get output: \n<br>" << emailLog;
@@ -1478,11 +1513,11 @@ std::string EmailRoutines::GetCommandToSendEmailWithMailX()
   std::stringstream out;
   out << "echo "
   << "\""
-  << this->subject
+  << this->emailContent
   << "\" "
   << "| mailx -v -s "
   << "\""
-  << this->emailContent
+  << this->subject
   << "\" "
   << " -c \""
   << this->ccEmail
@@ -1501,7 +1536,7 @@ std::string EmailRoutines::GetCommandToSendEmailWithMailX()
 
 EmailRoutines::EmailRoutines()
 { this->fromEmail="calculator.todor.milev@gmail.com";
-  this->ccEmail="todor.milev@gmail.com";
+  //this->ccEmail="todor.milev@gmail.com";
   this->smtpWithPort= "smtp.gmail.com:587";
   this->fromEmailAuth=Crypto::CharsToBase64String("A good day to use a computer algebra system");
 }

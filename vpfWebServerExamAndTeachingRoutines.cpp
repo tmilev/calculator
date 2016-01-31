@@ -383,7 +383,7 @@ std::string WebWorker::GetAddUserEmails()
   std::stringstream comments;
   bool result=theRoutines.AddUsersFromEmails(inputEmails, comments);
   if (result)
-    out << "<span style=\"color:green\"> Users added to the system. </span>" << comments.str();
+    out << "<span style=\"color:green\"> Emails successfully registered. </span>" << comments.str();
   else
     out << "<span style=\"color:red\">Failed to add users to the system. Comments: </span>" << comments.str();
   return out.str();
@@ -916,15 +916,20 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
     return;
   }
   out << "\n" << userTable.size << " users. ";
-  out << "<table><tr><th>user</th><th>email</th><th>Activated?</th></tr>";
+  out << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th></tr>";
   for (int i=0; i<userTable.size; i++)
   { out << "<tr>"
     << "<td>" << userTable[i][indexUser] << "</td>"
     << "<td>" << userTable[i][indexEmail] << "</td>"
     ;
-    if (userTable[i][indexActivationToken]!="activated")
-      out << "<td><span style=\"color:red\">not activated</span></td>";
-    else
+    std::string activationToken=userTable[i][indexActivationToken];
+    if (activationToken!="activated")
+    { out << "<td><span style=\"color:red\">not activated</span></td>";
+      if (activationToken!="")
+        out << "<td>" << UserCalculator::GetActivationLinkFromActivationToken
+        (activationToken, userTable[i][indexUser])
+        << "</td>";
+    } else
       out << "<td><span style=\"color:green\">activated</span></td>";
     out << "</tr>";
   }

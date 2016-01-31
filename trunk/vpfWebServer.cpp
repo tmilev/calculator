@@ -1657,6 +1657,9 @@ int WebWorker::ProcessCalculator()
   if (theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagLoggedIn &&
       theGlobalVariables.userCalculatorRequestType=="logout")
     return this->ProcessLogout();
+  if (theGlobalVariables.userCalculatorRequestType=="addEmails" &&
+      theGlobalVariables.flagLoggedIn)
+    return this->ProcessAddUserEmails();
   if (theGlobalVariables.userCalculatorRequestType=="submitProblem" &&
       theGlobalVariables.flagLoggedIn)
     return this->ProcessSubmitProblem();

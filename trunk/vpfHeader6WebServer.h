@@ -58,6 +58,7 @@ public:
 
   std::string openIndentTag(const std::string& theTag);
   std::string closeIndentTag(const std::string& theTag);
+  int ProcessAddUserEmails();
   int ProcessServerStatus();
   int ProcessComputationIndicator();
   int ProcessNonCalculator();
@@ -110,6 +111,7 @@ public:
   std::string GetLoginHTMLinternal();
   std::string GetExamPage();
   std::string GetDatabasePage();
+  std::string GetAddUserEmails();
   static std::string GetJavaScriptIndicatorFromHD();
   static std::string GetJavascriptHideHtml();
   std::string GetHtmlHiddenInputExercise();

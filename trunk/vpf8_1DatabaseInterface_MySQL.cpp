@@ -32,7 +32,8 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
   theUser.usernameUnsafe=theGlobalVariables.userCalculatorAdmin;
   if (!theUser.Iexist(theRoutines, true))
   { if (theUser.enteredPassword!="")
-    { stOutput << "<b>First login! Setting first password as the calculator admin pass.</b>";
+    { if (comments!=0)
+        *comments << "<b>First login! Setting first password as the calculator admin pass.</b>";
       theUser.CreateMeIfUsernameUnique(theRoutines, false);
     }
     return true;
@@ -303,12 +304,12 @@ std::string DatabaseRoutines::ToStringTable(const std::string& inputTableName)
     out << "<b>The number of entries was truncated to " << theTable.size << ". <b>";
   out << "<table><tr>";
   for (int i=0; i<columnLabels.size; i++)
-    out << "<td>" << CGI::URLStringToNormal(columnLabels[i]) << "</td>";
+    out << "<td>" << columnLabels[i] << "</td>";
   out << "</tr>";
   for (int i=0; i<theTable.size; i++)
   { out << "<tr>";
     for (int j=0; j<theTable[i].size; j++)
-      out << "<td>" << CGI::URLStringToNormal( theTable[i][j]) << "</td>";
+      out << "<td>" << theTable[i][j] << "</td>";
     out << "</tr>";
   }
   out << "</table>";
@@ -371,7 +372,12 @@ bool DatabaseRoutines::FetchTable
   { comments << "Query: " << queryStream.str() << " failed. ";
     return false;
   }
-  output=theQuery.allQueryResultStrings;
+  output.SetSize(theQuery.allQueryResultStrings.size);
+  for (int i=0; i<theQuery.allQueryResultStrings.size; i++)
+  { output[i].SetSize(theQuery.allQueryResultStrings[i].size);
+    for (int j=0; j<theQuery.allQueryResultStrings[i].size; j++)
+      output[i][j]=CGI::URLStringToNormal(theQuery.allQueryResultStrings[i][j]);
+  }
   outputWasTruncated=theQuery.flagOutputWasTruncated;
   if (outputWasTruncated)
     actualNumRowsIfTruncated=theQuery.numRowsRead;
@@ -394,7 +400,7 @@ bool DatabaseRoutines::FetchTable
   outputColumnLabels.SetSize(theFieldQuery.allQueryResultStrings.size);
   for (int i=0; i<theFieldQuery.allQueryResultStrings.size; i++)
     if (theFieldQuery.allQueryResultStrings[i].size>0 )
-      outputColumnLabels[i]=theFieldQuery.allQueryResultStrings[i][0];
+      outputColumnLabels[i]= CGI::URLStringToNormal(theFieldQuery.allQueryResultStrings[i][0]);
   return true;
 }
 
@@ -1072,7 +1078,6 @@ bool DatabaseRoutines::innerAddUsersFromEmailListAndCourseName(Calculator& theCo
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerAddUsersFromEmailListAndCourseName");
   if (input.children.size!=3)
     return theCommands << "addUsers takes as input two arguments.";
-
   std::string inputEmailList, inputClassHome;
   if (!input[1].IsOfType(&inputEmailList))
     return theCommands << "First argument of " << input.ToString() << " is not a string. ";

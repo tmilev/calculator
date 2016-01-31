@@ -16,6 +16,12 @@ public:
   static bool SetEntry
   (const std::string& inputUsername, const std::string& tableName, const std::string& keyName,
    const std::string& value, std::stringstream& comments);
+  static bool FetchTable
+(List<List<std::string> >& output,
+ List<std::string>& outputColumnLabels,
+ bool& outputWasTruncated, int& actualNumRowsIfTruncated,
+ const std::string& tableNameUnsafe, std::stringstream& comments)
+;
   static bool FetchEntry
   (const std::string& inputUsername, const std::string& tableName, const std::string& keyName,
    std::string& output, std::stringstream& comments);

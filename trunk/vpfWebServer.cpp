@@ -574,8 +574,8 @@ bool WebWorker::ProcessRawArguments(std::stringstream& argumentProcessingFailure
   std::string desiredUser=theGlobalVariables.GetWebInput("user");
   if (desiredUser=="")
     desiredUser=theGlobalVariables.GetWebInput("userHidden");
-//  if (desiredUser!="")
-//    CGI::URLStringToNormal(desiredUser, desiredUser);
+  if (desiredUser!="")
+    CGI::URLStringToNormal(desiredUser, desiredUser);
   this->authenticationToken=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("authenticationToken"));
   if (this->authenticationToken!="")
     this->flagAuthenticationTokenWasSubmitted=true;
@@ -589,14 +589,18 @@ bool WebWorker::ProcessRawArguments(std::stringstream& argumentProcessingFailure
     inputStringNames.SetObjectAtIndex(inputStringNames.GetIndex("textInput"), "mainInput");
   }
   if (desiredUser!="" && theGlobalVariables.flagUsingSSLinCurrentConnection)
-  { if (theGlobalVariables.userCalculatorRequestType=="changePassword")
+  { bool changingPass=theGlobalVariables.userCalculatorRequestType=="changePassword" ||
+    theGlobalVariables.userCalculatorRequestType=="activateAccount";
+    if (changingPass)
       this->authenticationToken="";
     theGlobalVariables.flagLoggedIn=DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     (desiredUser, password, this->authenticationToken, &argumentProcessingFailureComments);
     if (theGlobalVariables.flagLoggedIn)
     { theGlobalVariables.userDefault=desiredUser;
       theGlobalVariables.SetWebInput("authenticationToken", CGI::StringToURLString( this->authenticationToken));
-    } else
+    } else if (changingPass)
+      theGlobalVariables.userDefault=desiredUser;
+    else
     { theGlobalVariables.userDefault="";
       theGlobalVariables.SetWebInput("error", CGI::StringToURLString("<b>Invalid user or password</b>"));
     }
@@ -1617,7 +1621,9 @@ int WebWorker::ProcessCalculator()
     stOutput.Flush();
     return 0;
   }
-  if (this->flagPasswordWasSubmitted && theGlobalVariables.userCalculatorRequestType!="changePassword")
+  if (this->flagPasswordWasSubmitted && theGlobalVariables.userCalculatorRequestType!="changePassword" &&
+      theGlobalVariables.userCalculatorRequestType!="activateAccount"
+      )
   { std::stringstream redirectedAddress;
     redirectedAddress << theGlobalVariables.DisplayNameCalculatorWithPath << "?";
     for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
@@ -1649,7 +1655,8 @@ int WebWorker::ProcessCalculator()
   this->parent->ReleaseNonActiveWorkers();
   if (theGlobalVariables.userCalculatorRequestType=="changePassword")
     return this->ProcessChangePassword();
-  if (theGlobalVariables.userCalculatorRequestType=="changePasswordPage")
+  if (theGlobalVariables.userCalculatorRequestType=="changePasswordPage" ||
+      theGlobalVariables.userCalculatorRequestType=="activateAccount")
     return this->ProcessChangePasswordPage();
   if ((theGlobalVariables.flagUsingSSLinCurrentConnection && !theGlobalVariables.flagLoggedIn)||
       theGlobalVariables.userCalculatorRequestType=="login")
@@ -1778,7 +1785,6 @@ std::string WebWorker::GetChangePasswordPage()
   std::stringstream out;
   out << "<html>";
   out << "<header>";
-
   out
   << "<script type=\"text/javascript\"> \n"
   << "function submitChangePassRequest(){\n"
@@ -1815,16 +1821,28 @@ std::string WebWorker::GetChangePasswordPage()
 //    << "  window.location='calculator?user='+GlobalUser+'&authenticationToken='+GlobalAuthenticationToken;";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
 //  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"GET\" accept-charset=\"utf-8\">";
-  out
-  <<  "User name or email: "
-  << "<input type=\"text\" id=\"user\" placeholder=\"user\" ";
-  if (theGlobalVariables.flagLoggedIn)
-    out << "value=\"" << theGlobalVariables.userDefault << "\" ";
-  out
-  << "required>"
-  << "<br>Password: "
-  << "<input type=\"password\" id=\"password\" placeholder=\"password\">\n"
-  << "<br>New password: \n"
+  if (!theGlobalVariables.flagLoggedIn &&
+      theGlobalVariables.userCalculatorRequestType!="activateAccount")
+    out
+    <<  "User name or email: "
+    << "<input type=\"text\" id=\"user\" placeholder=\"user\" "
+    << "value=\"" << CGI::StringToURLString( theGlobalVariables.userDefault ) << "\" "
+    << "required>";
+  else
+    out
+    <<  "User: " << theGlobalVariables.userDefault
+    << "<input type=\"hidden\" id=\"user\" placeholder=\"user\" "
+    << "value=\"" << CGI::StringToURLString( theGlobalVariables.userDefault) << "\" "
+    << "required>";
+
+  if (theGlobalVariables.userCalculatorRequestType=="activateAccount")
+    out << "<input type=\"hidden\" id=\"password\" value=\""
+    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("activationToken")) << "\">";
+  else
+    out << "<br>Password: "
+    << "<input type=\"password\" id=\"password\" placeholder=\"password\">\n";
+
+  out << "<br>New password: \n"
   << "<input type=\"password\" id=\"newPassword\" placeholder=\"password\">\n"
   << "<br>Re-enter new password: \n"
   << "<input type=\"password\"  id=\"reenteredPassword\" placeholder=\"password\">\n"
@@ -1839,7 +1857,7 @@ std::string WebWorker::GetChangePasswordPage()
 
 int WebWorker::ProcessChangePassword()
 { MacroRegisterFunctionWithName("WebWorker::ProcessChangePassword");
-  stOutput << " ere i am";
+  //stOutput << " ere i am";
   this->authenticationToken="";
   if (!theGlobalVariables.flagLoggedIn)
   { stOutput << "<span style=\"color:red\"><b> Password change available only to logged in users.</b></span>";
@@ -1857,6 +1875,11 @@ int WebWorker::ProcessChangePassword()
   { stOutput << "<span style=\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
     return 0;
   }
+  if (!DatabaseRoutinesGlobalFunctions::SetEntry
+      (theGlobalVariables.userDefault, "users", "activationToken", "activated", commentsOnFailure))
+    stOutput << "<span style=\"color:red\"><b>Failed to set activationToken: "
+    << commentsOnFailure.str() << "</b></span>";
+
   stOutput << "<span style=\"color:green\"> <b>Password change successful. </b></span>";
   stOutput << "<meta http-equiv=\"refresh\" content=\"0; url="
   << theGlobalVariables.DisplayNameCalculatorWithPath  << "?request=login\" />";

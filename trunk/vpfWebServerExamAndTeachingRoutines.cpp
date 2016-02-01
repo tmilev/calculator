@@ -290,18 +290,21 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
 { std::stringstream out;
   out
   << "<script type=\"text/javascript\"> \n"
+  << "var timerForPreviewAnswers;\n"
   << "function previewAnswers(idAnswer, idVerification){\n"
-  << "  clearTimeout();\n"
-  << "  setTimeout(function(){\n"
+  << "  clearTimeout(timerForPreviewAnswers);\n"
+  << "  timerForPreviewAnswers=setTimeout(function(){\n"
   << "    params=\"" << this->ToStringCalculatorArgumentsForProblem("submitProblemPreview") << "\";\n"
   << "    submitOrPreviewAnswers(idAnswer, idVerification, params);\n"
   << "  }, 1700);"
   << "}\n"
   << "function submitAnswers(idAnswer, idVerification){\n"
+  << "  clearTimeout(timerForPreviewAnswers);\n"
   << "  params=\"" << this->ToStringCalculatorArgumentsForProblem("submitProblem") << "\";\n"
   << "  submitOrPreviewAnswers(idAnswer, idVerification, params);\n"
   << "}\n"
   << "function submitOrPreviewAnswers(idAnswer, idVerification, inputParams){\n"
+  << "  clearTimeout(timerForPreviewAnswers);\n"
   << "  spanVerification = document.getElementById(idVerification);\n"
   << "  if (spanVerification==null){\n"
   << "    spanVerification = document.createElement('span');\n"
@@ -408,15 +411,17 @@ int WebWorker::ProcessSubmitProblem()
     return 0;
   }
   Calculator theInterpreter;
-  if (!theProblem.PrepareCommands(theInterpreter, comments))
-  { stOutput << "<b>Failed to prepare commands.</b>" << comments.str();
-    return 0;
-  }
   if (!theProblem.LoadAndInterpretDatabaseInfo(comments))
   { stOutput << "<b>Failed to load the database entry for the present problem. " << theProblem.BugsGenericMessage << " </b>"
     << comments.str();
     return 0;
   }
+  if (!theProblem.PrepareCommands(theInterpreter, comments))
+  { stOutput << "<b>Failed to prepare commands.</b>" << comments.str();
+    return 0;
+  }
+  if (!theProblem.flagRandomSeedGiven)
+    stOutput << "<b>Random seed not given!!!!</b>";
   theProblem.currentExamHome=        CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
   theProblem.currentExamIntermediate=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate"));
   if (theProblem.currentExamHome=="")
@@ -507,8 +512,9 @@ int WebWorker::ProcessSubmitProblem()
   }
   stOutput << "<table width=\"300\"><tr><td>";
   if (!isCorrect)
-    stOutput << "<span style=\"color:red\"><b>Your answer appears to be incorrect.</b></span>";
-  else
+  { stOutput << "<span style=\"color:red\"><b>Your answer appears to be incorrect.</b></span>";
+    //stOutput << "The calculator output: " << theInterpreter.outputString;
+  } else
     stOutput << "<span style=\"color:green\"><b>Correct!</b></span>";
   stOutput << "</td></tr>";
   if (theGlobalVariables.flagLoggedIn)
@@ -1151,6 +1157,9 @@ bool CalculatorHTML::ParseAndInterpretDatabaseInfo(std::stringstream& comments)
       this->answerFirstCorrectSubmission[i]=CGI::URLStringToNormal(urledAnswer);
     }
   }
+  if (!this->flagRandomSeedGiven)
+    stOutput << "randomSeed not found";
+
 //  stOutput << "Database loaded:<br>"
 //  << this->databaseInfo;
 //  stOutput << "<br> database info xtracted back: <br>";

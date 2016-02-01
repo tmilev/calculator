@@ -550,8 +550,9 @@ std::string WebWorker::ToStringCalculatorArgumentsHumanReadable()
 { MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsHumanReadable");
   std::stringstream out;
   out << "<hr>";
+  out << "Default user: " << theGlobalVariables.userDefault;
   if (theGlobalVariables.flagLoggedIn)
-    out << "Logged in.";
+    out << "<br>Logged in. ";
   if (theGlobalVariables.UserDefaultHasAdminRights())
     out << "<br><b>User has admin rights</b>";
   for (int i=0; i<theGlobalVariables.webFormArguments.size; i++)
@@ -593,6 +594,7 @@ bool WebWorker::ProcessRawArguments(std::stringstream& argumentProcessingFailure
     theGlobalVariables.userCalculatorRequestType=="activateAccount";
     if (changingPass)
       this->authenticationToken="";
+//    argumentProcessingFailureComments << "Logging in as: " << desiredUser << "<br>";
     theGlobalVariables.flagLoggedIn=DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     (desiredUser, password, this->authenticationToken, &argumentProcessingFailureComments);
     if (theGlobalVariables.flagLoggedIn)
@@ -1621,7 +1623,7 @@ int WebWorker::ProcessCalculator()
     stOutput.Flush();
     return 0;
   }
-  if (this->flagPasswordWasSubmitted && theGlobalVariables.userCalculatorRequestType!="changePassword" &&
+/*  if (this->flagPasswordWasSubmitted && theGlobalVariables.userCalculatorRequestType!="changePassword" &&
       theGlobalVariables.userCalculatorRequestType!="activateAccount"
       )
   { std::stringstream redirectedAddress;
@@ -1637,7 +1639,7 @@ int WebWorker::ProcessCalculator()
 //    stOutput << "\r\n";
     stOutput.Flush();
     return 0;
-  }
+  }*/
   stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
   stOutput << argumentProcessingFailureComments.str();
 //  stOutput << "<br>got to this point, requesttype: " << theGlobalVariables.userCalculatorRequestType;
@@ -1826,13 +1828,13 @@ std::string WebWorker::GetChangePasswordPage()
     out
     <<  "User name or email: "
     << "<input type=\"text\" id=\"user\" placeholder=\"user\" "
-    << "value=\"" << CGI::StringToURLString( theGlobalVariables.userDefault ) << "\" "
+    << "value=\"" << theGlobalVariables.userDefault << "\" "
     << "required>";
   else
     out
     <<  "User: " << theGlobalVariables.userDefault
     << "<input type=\"hidden\" id=\"user\" placeholder=\"user\" "
-    << "value=\"" << CGI::StringToURLString( theGlobalVariables.userDefault) << "\" "
+    << "value=\"" << theGlobalVariables.userDefault << "\" "
     << "required>";
 
   if (theGlobalVariables.userCalculatorRequestType=="activateAccount")
@@ -1937,8 +1939,7 @@ std::string WebWorker::GetLoginPage()
 //    << "  window.location='calculator?user='+GlobalUser+'&authenticationToken='+GlobalAuthenticationToken;";
   out << "\">\n";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
-  out << WebWorker::GetLoginHTMLinternal()
-  << "</body></html>";
+  out << WebWorker::GetLoginHTMLinternal() << "</body></html>";
   return out.str();
 }
 

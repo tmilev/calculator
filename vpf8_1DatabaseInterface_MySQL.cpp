@@ -14,9 +14,10 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
   theUser.usernameUnsafe=inputUsernameUnsafe;
   theUser.enteredPassword=inputPassword;
   theUser.enteredAuthenticationTokenUnsafe=inputOutputAuthenticationToken;
-//  stOutput << "Attempting to login with user: " << inputUsername
-//  << " pass: " << inputPassword
-//  << " token: " << inputOutputAuthenticationToken;
+//  if (comments!=0)
+//    *comments << "<b>Debugging info, please disable when done. </b> Attempting to login with user: " << inputUsernameUnsafe
+//    << "<br>pass: " << inputPassword
+//    << "<br>token: " << inputOutputAuthenticationToken << "<br>";
 
   if (theUser.Authenticate(theRoutines, true))
   { inputOutputAuthenticationToken=theUser.actualAuthenticationTokeNUnsafe;
@@ -46,6 +47,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     { if (comments!=0)
         *comments << "<b>First login! Setting first password as the calculator admin pass.</b>";
       theUser.CreateMeIfUsernameUnique(theRoutines, false);
+      theUser.SetColumnEntry("activationToken", "activated", theRoutines, true, comments);
     }
     return true;
   }
@@ -617,6 +619,8 @@ bool UserCalculator::AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutin
   if (recomputeSafeEntries)
     this->ComputeSafeObjectNames();
   this->ComputeShaonedSaltedPassword(false);
+//  stOutput <<  "computed shaoned saltes pass from pass "
+//  << this->enteredPassword << " to get: " << this->enteredShaonedSaltedPassword;
   std::stringstream failureRemarks;
   bool result=this->FetchOneColumn("password", this->actualShaonedSaltedPassword, theRoutines, false, &failureRemarks);
   if (!result)
@@ -879,12 +883,12 @@ bool DatabaseRoutines::startMySQLDatabase()
     return *this << "Command: <b>" << selectAnsiQuotes << "</b> failed. ";
   mysql_free_result( mysql_use_result(this->connection));
   return this->CreateTable("users", "\
-    user VARCHAR(50) NOT NULL PRIMARY KEY,  \
-    password VARCHAR(30) NOT NULL, \
-    email VARCHAR(50) NOT NULL,\
-    authenticationTokenCreationTime VARCHAR(50), \
-    authenticationToken VARCHAR(50) , \
-    activationToken VARCHAR(50)\
+    user LONGTEXT NOT NULL PRIMARY KEY,  \
+    password LONGTEXT NOT NULL, \
+    email LONGTEXT NOT NULL,\
+    authenticationTokenCreationTime LONGTEXT, \
+    authenticationToken LONGTEXT , \
+    activationToken LONGTEXT\
     ");
 }
 
@@ -901,7 +905,7 @@ bool DatabaseRoutines::CreateTable
   std::string tableNameSafe=CGI::StringToURLString(tableNameUnsafe);
   std::string tableContent=desiredTableContent;
   if (tableContent=="")
-    tableContent="user VARCHAR(50) NOT NULL PRIMARY KEY";
+    tableContent="user LONGTEXT NOT NULL PRIMARY KEY";
   tableContent="CREATE TABLE \"" + tableNameSafe+"\" (" + tableContent + ")";
   //CANNOT use object DatabaseQuery as that object invokes startMySQLDatabase
   //which in turn invokes the present function.
@@ -1492,8 +1496,8 @@ bool DatabaseRoutines::innerCreateTeachingClass(Calculator& theCommands, const E
   if (!theUser.Authenticate(theRoutines, true))
     return output.MakeError("Failed to authenticate. ", theCommands);
   if (!theRoutines.CreateTable(className[0],
-  "user VARCHAR(50) NOT NULL PRIMARY KEY, \
-  VARCHAR(50) NOT NULL", &theCommands.Comments))
+  "user LONGTEXT NOT NULL PRIMARY KEY, \
+  LONGTEXT NOT NULL", &theCommands.Comments))
     return output.AssignValue(theRoutines.comments.str(), theCommands);
   return output.AssignValue(theRoutines.comments.str(), theCommands);
 }

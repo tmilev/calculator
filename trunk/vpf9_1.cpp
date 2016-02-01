@@ -223,7 +223,7 @@ void GlobalVariables::SetWebInput(const std::string& inputName, const std::strin
 }
 
 bool GlobalVariables::UserDefaultHasAdminRights()
-{ return this->flagLoggedIn && (this->userCalculatorAdmin==this->userDefault);
+{ return this->flagLoggedIn && (this->userRole=="admin");
 }
 
 std::string GlobalVariables::ToStringNavigation()

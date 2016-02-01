@@ -106,7 +106,7 @@ public:
 
   List<std::string> webFormArguments;
   HashedList<std::string, MathRoutines::hashString> webFormArgumentNames;
-  std::string userCalculatorAdmin;
+  std::string userRole;
   std::string userDefault;
   std::string userCalculatorRequestType;
 

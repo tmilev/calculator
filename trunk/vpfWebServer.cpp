@@ -596,7 +596,7 @@ bool WebWorker::ProcessRawArguments(std::stringstream& argumentProcessingFailure
       this->authenticationToken="";
 //    argumentProcessingFailureComments << "Logging in as: " << desiredUser << "<br>";
     theGlobalVariables.flagLoggedIn=DatabaseRoutinesGlobalFunctions::LoginViaDatabase
-    (desiredUser, password, this->authenticationToken, &argumentProcessingFailureComments);
+    (desiredUser, password, this->authenticationToken, theGlobalVariables.userRole, &argumentProcessingFailureComments);
     if (theGlobalVariables.flagLoggedIn)
     { theGlobalVariables.userDefault=desiredUser;
       theGlobalVariables.SetWebInput("authenticationToken", CGI::StringToURLString( this->authenticationToken));

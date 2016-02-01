@@ -5,7 +5,7 @@ ProjectInformationInstance ProjectInfoVpf8_1MySQLcpp(__FILE__, "MySQL interface.
 
 bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
 (const std::string& inputUsernameUnsafe, const std::string& inputPassword,
- std::string& inputOutputAuthenticationToken, std::stringstream* comments)
+ std::string& inputOutputAuthenticationToken, std::string& outputUserRole, std::stringstream* comments)
 {
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
@@ -37,17 +37,20 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
       if (activationTokenUnsafe!="" && activationTokenUnsafe!="activated" &&
           inputPassword==activationTokenUnsafe)
       { inputOutputAuthenticationToken="";
+        outputUserRole=theUser.userRole;
         return true;
       }
   }
   inputOutputAuthenticationToken=theUser.actualAuthenticationTokeNUnsafe;
-  theUser.usernameUnsafe=theGlobalVariables.userCalculatorAdmin;
+  theUser.usernameUnsafe="admin";
   if (!theUser.Iexist(theRoutines, true))
   { if (theUser.enteredPassword!="")
     { if (comments!=0)
         *comments << "<b>First login! Setting first password as the calculator admin pass.</b>";
       theUser.CreateMeIfUsernameUnique(theRoutines, false);
       theUser.SetColumnEntry("activationToken", "activated", theRoutines, true, comments);
+      theUser.SetColumnEntry("userRole", "admin", theRoutines, false, comments);
+      outputUserRole="admin";
     }
     return true;
   }
@@ -144,7 +147,7 @@ bool DatabaseRoutinesGlobalFunctions::CreateTable
     return false;
   DatabaseRoutines theRoutines;
   theRoutines.startMySQLDatabaseIfNotAlreadyStarted();
-  return theRoutines.CreateTable(tableName,  "user VARCHAR(50) NOT NULL PRIMARY KEY  ", &comments);
+  return theRoutines.CreateTable(tableName,  "user LONGTEXT NOT NULL PRIMARY KEY  ", &comments);
 #else
   return false;
 #endif
@@ -603,8 +606,12 @@ bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, bool recomputeS
     return theRoutines << "User " << this->usernameUnsafe << " does not exist. ";
   }
   if (this->AuthenticateWithToken(theRoutines, false))
+  { this->FetchOneColumn("userRole", this->userRole, theRoutines, false,  0);
     return true;
+  }
   bool result= this->AuthenticateWithUserNameAndPass(theRoutines, false);
+  if (result)
+    this->FetchOneColumn("userRole", this->userRole, theRoutines, false,  0);
 //  stOutput << "Approximate hours since last token issued: " << this->approximateHoursSinceLastTokenWasIssued << ". ";
   this->SetCurrentTable("users");
 //  if (this->approximateHoursSinceLastTokenWasIssued>1 || this->approximateHoursSinceLastTokenWasIssued<=0)
@@ -1198,9 +1205,9 @@ bool DatabaseRoutines::innerAddUser(Calculator& theCommands, const Expression& i
   if (MathRoutines::StringBeginsWith(theUser.usernameUnsafe, "deleted"))
     return output.MakeError("User names starting with 'deleted' are not allowed.", theCommands);
   DatabaseRoutines theRoutines;
-  if (theGlobalVariables.userDefault!=theGlobalVariables.userCalculatorAdmin)
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
   { UserCalculator adminUser;
-    adminUser.usernameUnsafe=theGlobalVariables.userCalculatorAdmin;
+    adminUser.usernameUnsafe="admin";
     if (adminUser.Iexist(theRoutines, true))
       return output.MakeError("Only calculator admin is allowed to add users", theCommands);
   }
@@ -1211,7 +1218,7 @@ bool DatabaseRoutines::innerAddUser(Calculator& theCommands, const Expression& i
 
 bool DatabaseRoutines::innerDeleteUser(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerDeleteUser");
-  if (theGlobalVariables.userCalculatorAdmin!=theGlobalVariables.userDefault)
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
     return output.MakeError("Deleting users allowed only as logged-in admin. ", theCommands);
   UserCalculator theUser;
   if (!theUser.getUser(theCommands, input))
@@ -1232,7 +1239,7 @@ bool DatabaseRoutines::innerSetUserPassword(Calculator& theCommands, const Expre
   bool authorized=false;
   if (theUser.usernameUnsafe==theGlobalVariables.userDefault)
     authorized=true;
-  else if (theGlobalVariables.userDefault==theGlobalVariables.userCalculatorAdmin)
+  else if (theGlobalVariables.UserDefaultHasAdminRights())
   { authorized=true;
     theCommands << "Password change: invoking admin powers...";
   }
@@ -1428,9 +1435,9 @@ bool DatabaseRoutines::innerGetUserDetails(Calculator& theCommands, const Expres
   if (!theUser.getUserAndPass(theCommands, input))
     return false;
   DatabaseRoutines theRoutines;
-  if (theUser.usernameUnsafe!=theGlobalVariables.userCalculatorAdmin)
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
     return output.AssignValue
-    ((std::string)"At the moment, the GetUserDetails function is implemented only for the admin user. ", theCommands);
+    ((std::string)"At the moment, the GetUserDetails function is implemented only for admin user(s). ", theCommands);
   if (!theUser.Authenticate(theRoutines, true))
     return theCommands << "Authentication failed. " << theRoutines.comments.str();
   return output.AssignValue(theRoutines.ToStringAllUsersHTMLFormat(), theCommands);
@@ -1450,9 +1457,10 @@ bool DatabaseRoutines::innerDisplayTables(Calculator& theCommands, const Express
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool DatabaseRoutines::innerDisplayDatabaseTable(Calculator& theCommands, const Expression& input, Expression& output)
+bool DatabaseRoutines::innerDisplayDatabaseTable
+(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerDisplayDatabaseTable");
-  if (!theGlobalVariables.flagLoggedIn || theGlobalVariables.userDefault!=theGlobalVariables.userCalculatorAdmin)
+  if (theGlobalVariables.UserDefaultHasAdminRights())
     return theCommands << "Displaying database tables allowed only for logged-in admins. ";
   std::string desiredTableName;
   if (!input.IsOfType<std::string>(&desiredTableName))

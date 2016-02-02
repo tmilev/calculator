@@ -871,7 +871,7 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return;
   std::stringstream out;
-  out << "Add students.<br><textarea ";
+  out << "Add students. <b>To do: implement remove students button (until then email todor for studnet removal).</b><br><textarea ";
   std::string idAddressTextarea;
   if (inputOutput.GetKeyValue("id")!="")
     idAddressTextarea=inputOutput.GetKeyValue("id") ;

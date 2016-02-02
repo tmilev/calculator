@@ -15,8 +15,9 @@ public:
 
   ;
   static bool SetPassword
-  (const std::string& inputUsername, const std::string& inputNewPassword,
-   std::stringstream& comments);
+(const std::string& inputUsername, const std::string& inputNewPassword, std::string& outputAuthenticationToken,
+ std::stringstream& comments)
+;
   static bool SetEntry
   (const std::string& inputUsername, const std::string& tableName, const std::string& keyName,
    const std::string& value, std::stringstream& comments);
@@ -48,6 +49,12 @@ public:
 //Command for installation of mysql on Ubuntu:
 //sudo apt-get install libmysqlclient-dev
 
+
+//Command for installing mailx:
+//Ubuntu:
+//sudo apt-get install heirloom-mailx
+//CentOS:
+//sudo yum install mailx
 class EmailRoutines
 {
 public:
@@ -143,10 +150,10 @@ public:
   bool getUserPassAndExtraData(Calculator& theCommands, const Expression& input, List<std::string>& outputData);
   void ComputeActivationToken();
   void ComputeShaonedSaltedPassword(bool recomputeSafeEntries);
-  bool GetActivationLink
+  bool GetActivationAddress
   (std::string& output, DatabaseRoutines& theRoutines, std::stringstream& comments)
   ;
-  static std::string GetActivationLinkFromActivationToken
+  static std::string GetActivationAddressFromActivationToken
   (const std::string& theActivationToken, const std::string& inputUserNameUnsafe)
   ;
   bool SendActivationEmail(DatabaseRoutines& theRoutines, std::stringstream& comments);

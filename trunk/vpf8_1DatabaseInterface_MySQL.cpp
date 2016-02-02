@@ -83,7 +83,7 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
 }
 
 bool DatabaseRoutinesGlobalFunctions::SetPassword
-(const std::string& inputUsername, const std::string& inputNewPassword,
+(const std::string& inputUsername, const std::string& inputNewPassword, std::string& outputAuthenticationToken,
  std::stringstream& comments)
 {
 #ifdef MACRO_use_MySQL
@@ -96,7 +96,10 @@ bool DatabaseRoutinesGlobalFunctions::SetPassword
   UserCalculator theUser;
   theUser.usernameUnsafe=inputUsername;
   theUser.enteredPassword=inputNewPassword;
-  return theUser.SetPassword(theRoutines, true, comments);
+  bool result= theUser.SetPassword(theRoutines, true, comments);
+  theUser.ResetAuthenticationToken(theRoutines, false);
+  outputAuthenticationToken= theUser.actualAuthenticationTokeNUnsafe;
+  return result;
 #else
   return false;
 #endif // MACRO_use_MySQL
@@ -716,8 +719,7 @@ bool UserCalculator::CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, boo
     return theRoutines << "You requested creation of user: " << this->usernameUnsafe
     << " however user names starting with 'deleted' are not allowed. ";
   std::stringstream queryStream;
-  queryStream << "INSERT INTO calculatorUsers.users(user, email) VALUES('" << this->usernameSafe << "', '"
-  << this->emailSafe << "')";
+  queryStream << "INSERT INTO calculatorUsers.users(user) VALUES('" << this->usernameSafe << "')";
   DatabaseQuery theQuery(theRoutines, queryStream.str());
   if (this->enteredPassword=="")
     return true;
@@ -1085,7 +1087,8 @@ bool DatabaseRoutines::AddUsersFromEmails
         result=false;
         continue;
       }
-      currentUser.SetColumnEntry("email", theEmails[i], *this, false, &comments);
+      if (theEmails[i].find('@')!=std::string::npos)
+        currentUser.SetColumnEntry("email", theEmails[i], *this, false, &comments);
     }
     currentUser.SetColumnEntry("userRole", userRole, *this, true, &comments);
   }
@@ -1096,19 +1099,20 @@ bool DatabaseRoutines::AddUsersFromEmails
   return this->SendActivationEmail(theEmails, false, comments);
 }
 
-std::string UserCalculator::GetActivationLinkFromActivationToken
+std::string UserCalculator::GetActivationAddressFromActivationToken
   (const std::string& theActivationToken, const std::string& inputUserNameUnsafe)
 { MacroRegisterFunctionWithName("UserCalculator::GetActivationLinkFromActivationToken");
   std::stringstream out;
-  out << "<a href=\""
+  out //<< "<a href=\""
   << theGlobalVariables.DisplayNameCalculatorWithPath
   << "?request=activateAccount&userHidden=" << CGI::StringToURLString(inputUserNameUnsafe)
   << "&activationToken=" << CGI::StringToURLString(theActivationToken)
-  << "\">Activate account and set password</a>";
+  //<< "\">Activate account and set password</a>"
+  ;
   return out.str();
 }
 
-bool UserCalculator::GetActivationLink
+bool UserCalculator::GetActivationAddress
   (std::string& output, DatabaseRoutines& theRoutines, std::stringstream& comments)
 { MacroRegisterFunctionWithName("UserCalculator::GetActivationLink");
   if (!this->FetchOneUserRow(theRoutines, comments))
@@ -1122,14 +1126,14 @@ bool UserCalculator::GetActivationLink
   { comments << "Account already activated";
     return false;
   }
-  output= this->GetActivationLinkFromActivationToken(this->activationTokenUnsafe, this->usernameUnsafe);
+  output= this->GetActivationAddressFromActivationToken(this->activationTokenUnsafe, this->usernameUnsafe);
   return true;
 }
 
 bool UserCalculator::SendActivationEmail(DatabaseRoutines& theRoutines, std::stringstream& comments)
 { MacroRegisterFunctionWithName("UserCalculator::SendActivationEmail");
-  std::string activationLink;
-  if (!this->GetActivationLink(activationLink, theRoutines, comments))
+  std::string activationAddress;
+  if (!this->GetActivationAddress(activationAddress, theRoutines, comments))
     return false;
 //  stOutput << "<hr> all result strings: " << this->selectedRowFieldNamesUnsafe.ToStringCommaDelimited();
 //  stOutput << "<br> all result string names: " << this->selectedRowFieldsUnsafe.ToStringCommaDelimited();
@@ -1139,7 +1143,7 @@ bool UserCalculator::SendActivationEmail(DatabaseRoutines& theRoutines, std::str
   EmailRoutines theEmailRoutines;
   theEmailRoutines.toEmail=this->emailUnsafe;
   theEmailRoutines.subject="NO REPLY: Activation of a Math homework account. ";
-  theEmailRoutines.emailContent="Activation link: " + activationLink;
+  theEmailRoutines.emailContent="Activation link: " + activationAddress;
 //  std::stringstream emailStream;
 //  emailStream << "Dear student,\nthis is an automated email sent with an activation token for your "
 //  << " math homework account. To activate your account and set up your password, please follow the link below. "

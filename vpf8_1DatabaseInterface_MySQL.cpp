@@ -21,6 +21,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
 
   if (theUser.Authenticate(theRoutines, true))
   { inputOutputAuthenticationToken=theUser.actualAuthenticationTokeNUnsafe;
+    outputUserRole=theUser.userRole;
 //    stOutput << " SUCCESS. ";
 //    stOutput << "<br>The actual authenticationToken is now: " << theUser.actualAuthenticationToken;
     return true;
@@ -1067,12 +1068,11 @@ bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, b
 }
 
 bool DatabaseRoutines::AddUsersFromEmails
-(const std::string& emailList, std::stringstream& comments)
+(const std::string& emailList, std::stringstream& comments, const std::string& userRole)
 { MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
   List<std::string> theEmails;
   this->ExtractEmailList(emailList, theEmails, comments);
-  stOutput << " <br>creating users: " << theEmails.ToStringCommaDelimited()
-  << "<br>";
+  stOutput << " <br>creating users: " << theEmails.ToStringCommaDelimited() << "<br>";
   UserCalculator currentUser;
   currentUser.SetCurrentTable("users");
   bool result=true;
@@ -1087,8 +1087,9 @@ bool DatabaseRoutines::AddUsersFromEmails
       }
       currentUser.SetColumnEntry("email", theEmails[i], *this, false, &comments);
     }
+    currentUser.SetColumnEntry("userRole", userRole, *this, true, &comments);
   }
-  if (!result )
+  if (!result)
   { comments << "<br>Failed to create all users. Additional comments: " << this->comments.str();
     return result;
   }
@@ -1133,6 +1134,8 @@ bool UserCalculator::SendActivationEmail(DatabaseRoutines& theRoutines, std::str
 //  stOutput << "<hr> all result strings: " << this->selectedRowFieldNamesUnsafe.ToStringCommaDelimited();
 //  stOutput << "<br> all result string names: " << this->selectedRowFieldsUnsafe.ToStringCommaDelimited();
   this->emailUnsafe=this->GetSelectedRowEntry("email");
+  if (this->emailUnsafe=="")
+    return false;
   EmailRoutines theEmailRoutines;
   theEmailRoutines.toEmail=this->emailUnsafe;
   theEmailRoutines.subject="NO REPLY: Activation of a Math homework account. ";
@@ -1193,7 +1196,7 @@ bool DatabaseRoutines::innerAddUsersFromEmailList(Calculator& theCommands, const
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return theCommands << "Adding users requires admin rights. ";
   DatabaseRoutines theRoutines;
-  if (!theRoutines.AddUsersFromEmails(inputEmailList, theCommands.Comments))
+  if (!theRoutines.AddUsersFromEmails(inputEmailList, theCommands.Comments, "student"))
     return false;
   std::stringstream out;
   out << "Successfully added students. " ;

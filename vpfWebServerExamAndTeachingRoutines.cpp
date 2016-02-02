@@ -22,7 +22,7 @@ public:
   bool IsInterpretedByCalculatorDuringPreparation();
   bool IsInterpretedNotByCalculator();
   bool IsAnswer();
-  std::string GetKeyValue(const std::string& theKey);
+  std::string GetKeyValue(const std::string& theKey)const;
   void SetKeyValue(const std::string& theKey, const std::string& theValue);
   void resetAllExceptContent();
   std::string ToStringInterpretted();
@@ -105,6 +105,13 @@ public:
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
   void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
   void InterpretManageClass(SyntacticElementHTML& inputOutput);
+  std::string ToStringUserEmailActivationRole
+( const List<List<std::string> >& userTable,
+  const List<std::string>& labelsUserTable,
+  bool adminsOnly,
+  const SyntacticElementHTML& inputElement
+)
+  ;
   std::string GetSubmitEmailsJavascript();
   std::string GetSubmitAnswersJavascript();
   std::string GetDatabaseTableName();
@@ -262,7 +269,7 @@ std::string CalculatorHTML::GetSubmitEmailsJavascript()
 { std::stringstream out;
   out
   << "<script type=\"text/javascript\"> \n"
-  << "function addEmails(idEmailList, problemCollectionName, idOutput){\n"
+  << "function addEmails(idEmailList, problemCollectionName, idOutput, userRole){\n"
   << "  spanOutput = document.getElementById(idOutput);\n"
   << "  if (spanOutput==null){\n"
   << "    spanOutput = document.createElement('span');\n"
@@ -271,9 +278,10 @@ std::string CalculatorHTML::GetSubmitEmailsJavascript()
   << "  }\n"
   << "  spanEmailList = document.getElementById(idEmailList);\n"
   << "  inputParams='request=addEmails';\n"
+  << "  inputParams+='&userRole='+userRole;\n"
   << "  inputParams+='&" << theGlobalVariables.ToStringCalcArgsNoNavigation() << "';\n"
-  << "  inputParams+=\"&mainInput=\" + encodeURIComponent(spanEmailList.value);\n"
-  << "  inputParams+=\"&currentExamHome=\" + problemCollectionName;\n"
+  << "  inputParams+='&mainInput=' + encodeURIComponent(spanEmailList.value);\n"
+  << "  inputParams+='&currentExamHome=' + problemCollectionName;\n"
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
@@ -372,11 +380,11 @@ std::string WebWorker::GetAddUserEmails()
 { MacroRegisterFunctionWithName("WebWorker::GetAddUserEmails");
   std::stringstream out;
   if (!theGlobalVariables.UserDefaultHasAdminRights())
-  { out << "<b>Only admins may add students.</b>";
+  { out << "<b>Only admins may add users.</b>";
     return out.str();
   }
   std::string inputEmails;
-  inputEmails=CGI::URLStringToNormal( theGlobalVariables.GetWebInput("mainInput"));
+  inputEmails=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
   if (inputEmails=="")
   { out << "<b>No emails to add</b>";
     return out.str();
@@ -384,7 +392,8 @@ std::string WebWorker::GetAddUserEmails()
 #ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
   std::stringstream comments;
-  bool result=theRoutines.AddUsersFromEmails(inputEmails, comments);
+  std::string userRole=theGlobalVariables.GetWebInput("userRole");
+  bool result=theRoutines.AddUsersFromEmails(inputEmails, comments, userRole);
   if (result)
     out << "<span style=\"color:green\"> Emails successfully registered. </span>" << comments.str();
   else
@@ -394,7 +403,6 @@ std::string WebWorker::GetAddUserEmails()
   return "<b>no database present.</b>";
 #endif // MACRO_use_MySQL
 }
-
 
 int WebWorker::ProcessSubmitProblem()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSubmitProblem");
@@ -527,7 +535,6 @@ int WebWorker::ProcessSubmitProblem()
       << totalSubmissionsRelevant-correctSubmissionsRelevant << " incorrect submissions.</td></tr>";
   } else
     stOutput << "<tr><td><b>Submitting problem solutions allowed only for logged-in users. </b></td></tr>";
-
   stOutput << "<tr><td>Your answer was: ";
   for (int i=0; i< theProblem.studentAnswersUnadulterated.size; i++ )
   { stOutput << theProblem.studentAnswersUnadulterated[i];
@@ -556,9 +563,7 @@ std::string WebWorker::GetDatabasePage()
   << "<body onload=\"loadSettings();\">\n";
   out << "<nav>" << theGlobalVariables.ToStringNavigation() << "</nav>";
 #ifdef MACRO_use_MySQL
-
   DatabaseRoutines theRoutines;
-
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     out << "Browsing database allowed only for logged-in admins.";
   else
@@ -673,7 +678,7 @@ std::string SyntacticElementHTML::ToStringDebug()
   return out.str();
 }
 
-std::string SyntacticElementHTML::GetKeyValue(const std::string& theKey)
+std::string SyntacticElementHTML::GetKeyValue(const std::string& theKey)const
 { MacroRegisterFunctionWithName("SyntacticElementHTML::GetKeyValue");
   int theIndex=this->tagKeys.GetIndex(theKey);
   if (theIndex==-1)
@@ -866,41 +871,35 @@ std::string SyntacticElementHTML::GetTagClass()
 { return this->GetKeyValue("class");
 }
 
-void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
-{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretManageClass");
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
-    return;
+std::string CalculatorHTML::ToStringUserEmailActivationRole
+( const List<List<std::string> >& userTable,
+  const List<std::string>& labelsUserTable,
+  bool adminsOnly,
+  const SyntacticElementHTML& inputElement
+)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringUserEmailActivationRole");
   std::stringstream out;
-  out << "Add students. <b>To do: implement remove students button (until then email todor for studnet removal).</b><br><textarea ";
-  std::string idAddressTextarea;
-  if (inputOutput.GetKeyValue("id")!="")
-    idAddressTextarea=inputOutput.GetKeyValue("id") ;
+  std::string idOutput="outputAdd";
+  if (adminsOnly)
+    idOutput+="Admins";
   else
-    idAddressTextarea= this->fileName + "manageClass";
-  std::string idOutput="output" + CGI::StringToURLString(this->fileName);
+    idOutput+="Students";
+  idOutput+= CGI::StringToURLString(this->fileName);
+  std::string userRole = adminsOnly ? "admin" : "student";
+  std::string idAddressTextarea= adminsOnly ? "inputAddAdmins" : "inputAddStudents";
+  if (inputElement.GetKeyValue("id")!="")
+    idAddressTextarea+= inputElement.GetKeyValue("id");
+  else
+    idAddressTextarea+=this->fileName;
+  out << "Add students. <b>To do: implement remove students button (until then email todor for studnet removal).</b><br><textarea ";
   out << "id=\"" << idAddressTextarea << "\"";
   out << ">";
   out << "</textarea>";
   out << "<button class=\"submitButton\" onclick=\"addEmails('"
   << idAddressTextarea << "', '" << CGI::StringToURLString(this->fileName)
   << "', '" << idOutput
-  << "')\"> Add student emails</button>";
+  << "', '" << userRole << "')\"> Add student emails</button>";
   out << "<br><span id=\"" << idOutput << "\"></span>\n<br>\n";
-  List<List<std::string> > userTable;
-  List<std::string> labelsUserTable;
-  bool tableTruncated=false;
-  int numRows=-1;
-  std::stringstream failureComments;
-  if (!DatabaseRoutinesGlobalFunctions::FetchTable
-      (userTable, labelsUserTable, tableTruncated, numRows, "users", failureComments))
-  { out << "<span style=\"color:red\"><b>Failed to fetch email addresses: "
-    << failureComments.str() << "</b></span>";
-    inputOutput.interpretedCommand=out.str();
-    return;
-  }
-  if (tableTruncated)
-    out << "<span style=\"color:red\"><b>This shouldn't happen: email list truncated. "
-    << "This is likely a software bug.</b></span>";
   int indexUser=-1, indexEmail=-1, indexActivationToken=-1;
   for (int i=0; i<labelsUserTable.size; i++)
   { if (labelsUserTable[i]=="user")
@@ -918,8 +917,7 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
     << indexUser << ", "
     << indexEmail << ", "
     << indexActivationToken << ". ";
-    inputOutput.interpretedCommand=out.str();
-    return;
+    return out.str();
   }
   out << "\n" << userTable.size << " users. ";
   out << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th></tr>";
@@ -940,6 +938,31 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
     out << "</tr>";
   }
   out << "</table>";
+
+  return out.str();
+}
+
+void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretManageClass");
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return;
+  std::stringstream out;
+  List<List<std::string> > userTable;
+  List<std::string> labelsUserTable;
+  bool tableTruncated=false;
+  int numRows=-1;
+  std::stringstream failureComments;
+  if (!DatabaseRoutinesGlobalFunctions::FetchTable
+      (userTable, labelsUserTable, tableTruncated, numRows, "users", failureComments))
+  { out << "<span style=\"color:red\"><b>Failed to fetch email addresses: "
+    << failureComments.str() << "</b></span>";
+    inputOutput.interpretedCommand=out.str();
+    return;
+  }
+  if (tableTruncated)
+    out << "<span style=\"color:red\"><b>This shouldn't happen: email list truncated. "
+    << "This is likely a software bug.</b></span>";
+  out << this->ToStringUserEmailActivationRole(userTable, labelsUserTable, false, inputOutput);
   inputOutput.interpretedCommand=out.str();
 }
 

@@ -46,7 +46,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
   if (!theUser.Iexist(theRoutines, true))
   { if (theUser.enteredPassword!="")
     { if (comments!=0)
-        *comments << "<b>First login! Setting first password as the calculator admin pass.</b>";
+        *comments << "<b>First login! Setting first password as the calculator admin pass. </b>";
       theUser.CreateMeIfUsernameUnique(theRoutines, false);
       theUser.SetColumnEntry("activationToken", "activated", theRoutines, true, comments);
       theUser.SetColumnEntry("userRole", "admin", theRoutines, false, comments);
@@ -267,8 +267,8 @@ bool DatabaseRoutines::CreateColumn
   std::string tableNameSafe=CGI::StringToURLString(tableNameUnsafe);
 //  stOutput << "<hr>BEFORE alter command";
   std::stringstream commandStream;
-  commandStream << "ALTER TABLE \"" << tableNameSafe << "\""
-  << " ADD \"" << columnNameSafe << "\" "
+  commandStream << "ALTER TABLE `" << tableNameSafe << "`"
+  << " ADD `" << columnNameSafe << "` "
   << "LONGTEXT";
 //  stOutput << "<br>got to here<br>hrbr<br>";
   DatabaseQuery theQuery(*this, commandStream.str());
@@ -400,7 +400,7 @@ bool DatabaseRoutines::FetchTable
 { MacroRegisterFunctionWithName("DatabaseRoutines::FetchTable");
   std::string tableNameSafe=CGI::StringToURLString(tableNameUnsafe);
   std::stringstream queryStream;
-  queryStream << "SELECT * FROM calculatorUsers.\"" << tableNameSafe << "\"";
+  queryStream << "SELECT * FROM calculatorUsers.`" << tableNameSafe << "`";
   DatabaseQuery theQuery(*this, queryStream.str(), &comments, this->MaxNumRowsToFetch);
   if (!theQuery.flagQuerySucceeded)
   { comments << "Query: " << queryStream.str() << " failed. ";
@@ -422,7 +422,7 @@ bool DatabaseRoutines::FetchTable
   theQuery.close();
   std::stringstream queryStreamFields;
   queryStreamFields
-  << "SELECT \"COLUMN_NAME\" FROM information_schema.COLUMNS WHERE "
+  << "SELECT `COLUMN_NAME` FROM information_schema.COLUMNS WHERE "
   << "TABLE_SCHEMA='calculatorUsers' "
   << "AND TABLE_NAME='" << tableNameSafe << "' ";
   DatabaseQuery theFieldQuery(*this, queryStreamFields.str(), &comments);
@@ -492,8 +492,8 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   this->theQueryResult= mysql_store_result(this->parent->connection);
   //stOutput << "and even to here";
   if (this->theQueryResult==0)
-  { if (this->failurecomments!=0)
-      *this->failurecomments << "Query succeeded, mysql_store_result returned non-zero. ";
+  { //if (this->failurecomments!=0)
+    //  *this->failurecomments << "Query succeeded. ";
     return;
   }
   this->numRowsRead=mysql_num_rows(this->theQueryResult);
@@ -547,8 +547,8 @@ bool UserCalculator::FetchOneColumn
   if (recomputeSafeEntries)
     this->ComputeSafeObjectNames();
   std::stringstream queryStream;
-  queryStream << "SELECT \"" << CGI::StringToURLString(columnNameUnsafe)
-  << "\" FROM calculatorUsers.\"" << this->currentTableSafe << "\" WHERE user='"
+  queryStream << "SELECT `" << CGI::StringToURLString(columnNameUnsafe)
+  << "` FROM calculatorUsers.`" << this->currentTableSafe << "` WHERE user='"
   << this->usernameSafe << "'";
   DatabaseQuery theQuery(theRoutines, queryStream.str());
   outputUnsafe="";
@@ -749,7 +749,7 @@ bool UserCalculator::SetColumnEntry
   std::string valueSafe= CGI::StringToURLString(theValueUnsafe);
   if (this->FetchOneColumn(columnNameUnsafe, unused, theRoutines, false, 0))
   { std::stringstream queryStream;
-    queryStream << "UPDATE calculatorUsers.\"" << this->currentTableSafe << "\" SET \"" << columnNameSafe << "\"='"
+    queryStream << "UPDATE calculatorUsers.`" << this->currentTableSafe << "` SET `" << columnNameSafe << "`='"
     << valueSafe << "' WHERE user='" << this->usernameSafe << "'";
     //  stOutput << "Got to here: " << columnName << ". ";
     DatabaseQuery theDBQuery(theRoutines, queryStream.str(), failureComments);
@@ -762,14 +762,16 @@ bool UserCalculator::SetColumnEntry
     }
   } else
   { std::stringstream queryStream;
-    queryStream << "INSERT INTO calculatorUsers.\"" << this->currentTableSafe << "\"(user, \"" << columnNameSafe
-    << "\") VALUES('" << this->usernameSafe << "', '" << valueSafe << "')";
+    queryStream << "INSERT INTO calculatorUsers.`" << this->currentTableSafe << "`(user, `" << columnNameSafe
+    << "`) VALUES('" << this->usernameSafe << "', '" << valueSafe << "')";
     DatabaseQuery theDBQuery(theRoutines, queryStream.str());
     //stOutput << "<hr>Fired up query:<br>" << queryStream.str();
     if (!theDBQuery.flagQuerySucceeded)
     { if (failureComments!=0)
-        *failureComments << "Failed to insert entry in table: " << this->currentTableUnsafe << ". ";
-      stOutput << "Failed to insert entry in table: " << this->currentTableUnsafe << ". ";
+        *failureComments << "Failed to insert entry: " << theValueUnsafe << " in column: "
+        << columnNameUnsafe
+        << " in table: " << this->currentTableUnsafe << ". ";
+//      stOutput << "Failed to insert entry in table: " << this->currentTableUnsafe << ". ";
       return false;
     }
   }
@@ -784,7 +786,7 @@ bool UserCalculator::FetchOneUserRow
     crash << "Calling UserCalculator::FetchOneUserRow with an empty table is forbidden. " << crash;
 
   std::stringstream queryStream;
-  queryStream << "SELECT * FROM calculatorUsers.\"" << this->currentTableSafe << "\" WHERE "
+  queryStream << "SELECT * FROM calculatorUsers.`" << this->currentTableSafe << "` WHERE "
   << "user='" << this->usernameSafe << "'";
 //  stOutput << "quering: " << queryStream.str();
   DatabaseQuery theQuery(theRoutines, queryStream.str(), &failureStream, 5);
@@ -806,7 +808,7 @@ bool UserCalculator::FetchOneUserRow
   theQuery.close();
   std::stringstream queryStreamFields;
   queryStreamFields
-  << "SELECT \"COLUMN_NAME\" FROM information_schema.COLUMNS WHERE "
+  << "SELECT `COLUMN_NAME` FROM information_schema.COLUMNS WHERE "
   << "TABLE_SCHEMA='calculatorUsers' "
   << "AND TABLE_NAME='" << this->currentTableUnsafe << "' ";
   DatabaseQuery theFieldQuery(theRoutines, queryStreamFields.str(), &failureStream);
@@ -884,18 +886,19 @@ bool DatabaseRoutines::startMySQLDatabase()
   if (mysql_select_db(this->connection, this->theDatabaseName.c_str())!=0)//Note: here zero return value = success.
     return *this << "Failed to select database: " << this->theDatabaseName << ". ";
   //CANT use DatabaseQuery object as its constructor calls this method!!!!!
-  std::string selectAnsiQuotes="SET sql_mode='ANSI_QUOTES'";
-  bool result= (mysql_query(this->connection, selectAnsiQuotes.c_str())==0);
-  if (!result)
-    return *this << "Command: <b>" << selectAnsiQuotes << "</b> failed. ";
+//  std::string selectAnsiQuotes="SET sql_mode='ANSI_QUOTES'";
+//  bool result= (mysql_query(this->connection, selectAnsiQuotes.c_str())==0);
+//  if (!result)
+//    return *this << "Command: <b>" << selectAnsiQuotes << "</b> failed. ";
   mysql_free_result( mysql_use_result(this->connection));
   return this->CreateTable("users", "\
-    user LONGTEXT NOT NULL PRIMARY KEY,  \
+    user VARCHAR(255) NOT NULL PRIMARY KEY,  \
     password LONGTEXT NOT NULL, \
     email LONGTEXT NOT NULL,\
     authenticationTokenCreationTime LONGTEXT, \
     authenticationToken LONGTEXT , \
-    activationToken LONGTEXT\
+    activationToken LONGTEXT,\
+    userRole LONGTEXT\
     ");
 }
 
@@ -913,7 +916,7 @@ bool DatabaseRoutines::CreateTable
   std::string tableContent=desiredTableContent;
   if (tableContent=="")
     tableContent="user LONGTEXT NOT NULL PRIMARY KEY";
-  tableContent="CREATE TABLE \"" + tableNameSafe+"\" (" + tableContent + ")";
+  tableContent="CREATE TABLE `" + tableNameSafe+"` (" + tableContent + ")";
   //CANNOT use object DatabaseQuery as that object invokes startMySQLDatabase
   //which in turn invokes the present function.
   if (commentsOnCreation!=0)
@@ -960,7 +963,7 @@ bool DatabaseRoutines::TableExists(const std::string& tableNameUnsafe)
 { MacroRegisterFunctionWithName("DatabaseRoutines::TableExists");
   std::string tableNameSafe=CGI::StringToURLString(tableNameUnsafe);
   std::stringstream queryStream;
-  queryStream << "SELECT 1 FROM " << this->theDatabaseName << ".\"" << tableNameSafe << "\"";
+  queryStream << "SELECT 1 FROM " << this->theDatabaseName << ".`" << tableNameSafe << "`";
   bool result=(mysql_query(this->connection, queryStream.str().c_str())==0);
   *this << "Executed query to check table existence: " << queryStream.str() << ". ";
 //  stOutput << "Executed query: " << queryStream.str() << "<br>";

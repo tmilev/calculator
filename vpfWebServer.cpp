@@ -548,6 +548,8 @@ void WebWorker::StandardOutputAfterTimeOut(const std::string& input)
 
 std::string WebWorker::ToStringCalculatorArgumentsHumanReadable()
 { MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsHumanReadable");
+  if (theGlobalVariables.GetWebInput("debugFlag")!="true")
+    return "";
   std::stringstream out;
   out << "<hr>";
   out << "Default user: " << theGlobalVariables.userDefault;
@@ -555,9 +557,11 @@ std::string WebWorker::ToStringCalculatorArgumentsHumanReadable()
     out << "<br>Logged in. ";
   if (theGlobalVariables.UserDefaultHasAdminRights())
     out << "<br><b>User has admin rights</b>";
+  out << "<hr>";
   for (int i=0; i<theGlobalVariables.webFormArguments.size; i++)
-  { out << "<br>"
-    << theGlobalVariables.webFormArgumentNames[i] << ": " << theGlobalVariables.webFormArguments[i];
+  { out << theGlobalVariables.webFormArgumentNames[i] << ": " << theGlobalVariables.webFormArguments[i];
+    if (i!=theGlobalVariables.webFormArgumentNames.size-1)
+      out << "<br>";
   }
   out << "<hr>";
   return out.str();
@@ -620,6 +624,7 @@ std::string WebWorker::GetHtmlHiddenInputs()
   if (this->flagFoundMalformedFormInput)
     out << "<b>Your input formed had malformed entries.</b>";
   out
+  << "<input type=\"hidden\" id=\"debugFlag\" name=\"debugFlag\">\n"
   << "<input type=\"hidden\" id=\"authenticationToken\" name=\"authenticationToken\">\n"
   << "<input type=\"hidden\" id=\"userHidden\" name=\"userHidden\">\n"
   << "<input type=\"hidden\" id=\"currentExamHome\" name=\"currentExamHome\">\n"
@@ -1770,7 +1775,7 @@ std::string WebWorker::GetLoginHTMLinternal()
   << this->GetHtmlHiddenInputs()
   << "<input type=\"submit\" value=\"Login\">"
   << "</form>";
-  out << "<hr><hr><hr>" << this->ToStringCalculatorArgumentsHumanReadable();
+  out << this->ToStringCalculatorArgumentsHumanReadable();
   return out.str();
 }
 
@@ -1852,7 +1857,7 @@ std::string WebWorker::GetChangePasswordPage()
   << "<span id=\"passwordChangeResult\"> </span>\n"
 //  << "</form>"
   ;
-  out << "<hr><hr><hr>" << this->ToStringCalculatorArgumentsHumanReadable();
+  out << this->ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
 }
@@ -1873,7 +1878,8 @@ int WebWorker::ProcessChangePassword()
     return 0;
   }
   std::stringstream commentsOnFailure;
-  if (!DatabaseRoutinesGlobalFunctions::SetPassword(theGlobalVariables.userDefault, newPassword, commentsOnFailure))
+  std::string newAuthenticationToken;
+  if (!DatabaseRoutinesGlobalFunctions::SetPassword(theGlobalVariables.userDefault, newPassword, newAuthenticationToken, commentsOnFailure))
   { stOutput << "<span style=\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
     return 0;
   }
@@ -1883,8 +1889,18 @@ int WebWorker::ProcessChangePassword()
     << commentsOnFailure.str() << "</b></span>";
 
   stOutput << "<span style=\"color:green\"> <b>Password change successful. </b></span>";
-  stOutput << "<meta http-equiv=\"refresh\" content=\"0; url="
-  << theGlobalVariables.DisplayNameCalculatorWithPath  << "?request=login\" />";
+  stOutput
+  << "<meta http-equiv=\"refresh\" content=\"0; url="
+  << theGlobalVariables.DisplayNameCalculatorWithPath  << "?request=login"
+  << "&user="
+  << CGI::StringToURLString(theGlobalVariables.userDefault)
+  << "&authenticationToken=" << CGI::StringToURLString(newAuthenticationToken)
+  << "&currentExamIntermediate="
+  << theGlobalVariables.GetWebInput("currentExamIntermediate")
+  << "&currentExamFile="
+  << theGlobalVariables.GetWebInput("currentExamFile")
+  << "\" />"
+  ;
   stOutput.Flush();
   return 0;
 }
@@ -2003,6 +2019,8 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "}\n";
   out
   << "function storeSettingsProgress(){\n";
+  if (theGlobalVariables.GetWebInput("debugFlag")!="")
+    out << "  addCookie(\"debugFlag\", \"" << theGlobalVariables.GetWebInput("debugFlag") << "\", 100);  \n";
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType!="" &&
       theGlobalVariables.userCalculatorRequestType!="compute")
   { if (this->IsAllowedAsRequestCookie(theGlobalVariables.userCalculatorRequestType))
@@ -2044,6 +2062,9 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "    theCalculatorForm.style.width  = theOldWidth;\n"
   << "    theCalculatorForm.style.height = theOldHeight;\n"
   << "  }\n"
+  << "  if (document.getElementById(\"debugFlag\")!=null)\n "
+  << "    if(getCookie(\"debugFlag\")!='')\n"
+  << "      document.getElementById(\"debugFlag\").value=getCookie(\"debugFlag\");\n"
   << "  if (document.getElementById(\"request\")!=null)\n "
   << "    if(getCookie(\"request\")!='')\n"
   << "      document.getElementById(\"request\").value=getCookie(\"request\");\n"

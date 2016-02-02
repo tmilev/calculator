@@ -571,7 +571,7 @@ std::string WebWorker::GetDatabasePage()
 #else
 out << "<b>Database not available. </b>";
 #endif // MACRO_use_MySQL
-  out <<"<hr><hr><hr><hr><hr><hr><hr><hr>" << this->ToStringCalculatorArgumentsHumanReadable();
+  out << this->ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
 }
@@ -588,7 +588,7 @@ std::string WebWorker::GetExamPage()
   << "</header>"
   << "<body onload=\"loadSettings();\">\n";
   out << theFile.LoadAndInterpretCurrentProblemItem();
-  out <<"<hr><hr><hr><hr><hr><hr><hr><hr>" << this->ToStringCalculatorArgumentsHumanReadable();
+  out << this->ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
 }
@@ -891,14 +891,16 @@ std::string CalculatorHTML::ToStringUserEmailActivationRole
     idAddressTextarea+= inputElement.GetKeyValue("id");
   else
     idAddressTextarea+=this->fileName;
-  out << "Add students. <b>To do: implement remove students button (until then email todor for studnet removal).</b><br><textarea ";
+  out << "Add <b>" << userRole << "</b> users.<br> ";
+  out << "<b>Warning: there's no remove button yet.</b><br>";
+  out <<"<textarea ";
   out << "id=\"" << idAddressTextarea << "\"";
   out << ">";
   out << "</textarea>";
   out << "<button class=\"submitButton\" onclick=\"addEmails('"
   << idAddressTextarea << "', '" << CGI::StringToURLString(this->fileName)
   << "', '" << idOutput
-  << "', '" << userRole << "')\"> Add student emails</button>";
+  << "', '" << userRole << "')\"> Add emails</button>";
   out << "<br><span id=\"" << idOutput << "\"></span>\n<br>\n";
   int indexUser=-1, indexEmail=-1, indexActivationToken=-1, indexUserRole=-1;
   for (int i=0; i<labelsUserTable.size; i++)
@@ -923,30 +925,41 @@ std::string CalculatorHTML::ToStringUserEmailActivationRole
     ;
     return out.str();
   }
-  out << "\n" << userTable.size << " users. ";
-  out << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th></tr>";
+  int numUsers=0;;
+  std::stringstream tableStream;
+  tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th></tr>";
   for (int i=0; i<userTable.size; i++)
   { if (adminsOnly)
     { if (userTable[i][indexUserRole]!="admin")
         continue;
     } else if (userTable[i][indexUserRole]!="student")
         continue;
-    out << "<tr>"
+    numUsers++;
+    tableStream << "<tr>"
     << "<td>" << userTable[i][indexUser] << "</td>"
     << "<td>" << userTable[i][indexEmail] << "</td>"
     ;
     std::string activationToken=userTable[i][indexActivationToken];
     if (activationToken!="activated")
-    { out << "<td><span style=\"color:red\">not activated</span></td>";
+    { tableStream << "<td><span style=\"color:red\">not activated</span></td>";
       if (activationToken!="")
-        out << "<td>" << UserCalculator::GetActivationLinkFromActivationToken
-        (activationToken, userTable[i][indexUser])
+        tableStream << "<td>"
+        << "<a href=\""
+        << UserCalculator::GetActivationAddressFromActivationToken(activationToken, userTable[i][indexUser])
+        << "\"> Activate account and change password</a>"
         << "</td>";
     } else
-      out << "<td><span style=\"color:green\">activated</span></td>";
-    out << "</tr>";
+    { tableStream << "<td><span style=\"color:green\">activated</span></td>";
+      tableStream << "<td><span style=\"color:red\">"
+      << "<a href=\""
+      << UserCalculator::GetActivationAddressFromActivationToken(activationToken, userTable[i][indexUser])
+      << "\"> Activate account and change password</a>"
+      << "</span></td>";
+    }
+    tableStream << "</tr>";
   }
-  out << "</table>";
+  tableStream << "</table>";
+  out << "\n" << numUsers << " users. " << tableStream.str();
 
   return out.str();
 }
@@ -971,7 +984,9 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
   if (tableTruncated)
     out << "<span style=\"color:red\"><b>This shouldn't happen: email list truncated. "
     << "This is likely a software bug.</b></span>";
+  out << "<hr>";
   out << this->ToStringUserEmailActivationRole(userTable, labelsUserTable, false, inputOutput);
+  out << "<hr>";
   out << this->ToStringUserEmailActivationRole(userTable, labelsUserTable, true, inputOutput);
 
   inputOutput.interpretedCommand=out.str();

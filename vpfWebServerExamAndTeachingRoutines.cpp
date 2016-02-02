@@ -900,7 +900,7 @@ std::string CalculatorHTML::ToStringUserEmailActivationRole
   << "', '" << idOutput
   << "', '" << userRole << "')\"> Add student emails</button>";
   out << "<br><span id=\"" << idOutput << "\"></span>\n<br>\n";
-  int indexUser=-1, indexEmail=-1, indexActivationToken=-1;
+  int indexUser=-1, indexEmail=-1, indexActivationToken=-1, indexUserRole=-1;
   for (int i=0; i<labelsUserTable.size; i++)
   { if (labelsUserTable[i]=="user")
       indexUser=i;
@@ -908,21 +908,30 @@ std::string CalculatorHTML::ToStringUserEmailActivationRole
       indexEmail=i;
     if (labelsUserTable[i]=="activationToken")
       indexActivationToken=i;
+    if (labelsUserTable[i]=="userRole")
+      indexUserRole=i;
   }
-  if (indexUser==-1 || indexEmail==-1 || indexActivationToken==-1)
+  if (indexUser==-1 || indexEmail==-1 || indexActivationToken==-1 || indexUserRole==-1)
   { out << "<span style=\"color:red\"><b>This shouldn't happen: failed to find necessary "
     << "column entries in the database. "
     << "This is likely a software bug.</b></span>"
-    << "IndexUser, indexEmail, indexActivationToken: "
+    << "IndexUser, indexEmail, indexActivationToken, indexUserRole: "
     << indexUser << ", "
     << indexEmail << ", "
-    << indexActivationToken << ". ";
+    << indexActivationToken << ", "
+    << indexUserRole << ". "
+    ;
     return out.str();
   }
   out << "\n" << userTable.size << " users. ";
   out << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th></tr>";
   for (int i=0; i<userTable.size; i++)
-  { out << "<tr>"
+  { if (adminsOnly)
+    { if (userTable[i][indexUserRole]!="admin")
+        continue;
+    } else if (userTable[i][indexUserRole]!="student")
+        continue;
+    out << "<tr>"
     << "<td>" << userTable[i][indexUser] << "</td>"
     << "<td>" << userTable[i][indexEmail] << "</td>"
     ;
@@ -963,6 +972,8 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
     out << "<span style=\"color:red\"><b>This shouldn't happen: email list truncated. "
     << "This is likely a software bug.</b></span>";
   out << this->ToStringUserEmailActivationRole(userTable, labelsUserTable, false, inputOutput);
+  out << this->ToStringUserEmailActivationRole(userTable, labelsUserTable, true, inputOutput);
+
   inputOutput.interpretedCommand=out.str();
 }
 

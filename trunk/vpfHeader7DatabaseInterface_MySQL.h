@@ -192,7 +192,8 @@ public:
 
   ;
   bool AddUsersFromEmailsAndCourseName(const std::string& emailList, const std::string& ExamHomeFile, std::stringstream& comments);
-  bool AddUsersFromEmails(const std::string& emailList, std::stringstream& comments);
+  bool AddUsersFromEmails
+  (const std::string& emailList, std::stringstream& comments, const std::string& userRole);
   bool SendActivationEmail(const std::string& emailList, std::stringstream& comments);
   bool SendActivationEmail(const List<std::string>& theEmails, bool forceResend, std::stringstream& comments);
   bool ExtractEmailList(const std::string& emailList, List<std::string>& outputList, std::stringstream& comments);

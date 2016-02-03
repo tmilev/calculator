@@ -152,6 +152,7 @@ void Calculator::init()
   this->AddOperationNoRepetitionAllowed("\"");
   this->AddOperationNoRepetitionAllowed("PolyVars");
   this->AddOperationNoRepetitionAllowed("DiffOpVars");
+  this->AddOperationNoRepetitionAllowed("\\to");
 
 
   this->AddOperationBuiltInType("Rational");
@@ -207,7 +208,6 @@ void Calculator::init()
   this->controlSequences.AddOnTop("{");
   this->controlSequences.AddOnTop("}");
   this->controlSequences.AddOnTop(":");
-  this->controlSequences.AddOnTop("\"");
   this->controlSequences.AddOnTop("pi");
   this->controlSequences.AddOnTop("ln");
   this->controlSequences.AddOnTop("\\ln");
@@ -741,7 +741,7 @@ bool Calculator::ReplaceAXbyEX()
   return true;
 }
 
-bool Calculator::LookAheadAllowsApplyFunction(const std::string& lookAhead)
+bool Calculator::AllowsApplyFunctionInPreceding(const std::string& lookAhead)
 { return lookAhead!="{" && lookAhead!="_" && lookAhead!="\\circ" && lookAhead!="{}" &&  lookAhead!="$";
 }
 
@@ -976,6 +976,16 @@ bool Calculator::AllowsTimesInPreceding(const std::string& lookAhead)
   ;
 }
 
+bool Calculator::AllowsLimitProcessInPreceding(const std::string& lookAhead)
+{ return lookAhead=="and" || lookAhead=="or" ||
+  lookAhead=="(" || lookAhead=="[" ||
+  lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||
+  lookAhead=="," || lookAhead==";" ||
+  lookAhead==":" || lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\" ||
+  lookAhead=="EndProgram"
+  ;
+}
+
 bool Calculator::AllowsAndInPreceding(const std::string& lookAhead)
 { return lookAhead=="and" || lookAhead=="or" ||
   lookAhead=="(" || lookAhead=="[" ||
@@ -1002,7 +1012,7 @@ bool Calculator::AllowsPlusInPreceding(const std::string& lookAhead)
   ;
 }
 
-bool Calculator::LookAheadAllowsDivide(const std::string& lookAhead)
+bool Calculator::AllowsDivideInPreceding(const std::string& lookAhead)
 { return this->AllowsTimesInPreceding(lookAhead);
 }
 
@@ -1210,9 +1220,9 @@ bool Calculator::ApplyOneRule()
   //In our implementation, we choose x{}y{}z= x{} (y{}z). Although this is slightly harder to implement,
   //it appears to be the more natural choice.
 //  if (fourthToLastS=="Expression" && thirdToLastS=="{}" && secondToLastS=="Expression"
-//      && this->LookAheadAllowsApplyFunction(lastS) )
+//      && this->AllowsApplyFunctionInPreceding(lastS) )
 //    return this->ReplaceEOEXByEX(secondToLastE.theData.format);
-  if (fourthToLastS=="Expression" && thirdToLastS=="{}" && secondToLastS=="Expression" && this->LookAheadAllowsApplyFunction(lastS))
+  if (fourthToLastS=="Expression" && thirdToLastS=="{}" && secondToLastS=="Expression" && this->AllowsApplyFunctionInPreceding(lastS))
     return this->ReplaceEXEXByEX(Expression::formatDefault);
   if (fourthToLastS=="Expression" && thirdToLastS=="_" && secondToLastS=="Expression" && lastS!="_")
     return this->ReplaceEXEXByEX(Expression::formatFunctionUseUnderscore);
@@ -1221,7 +1231,7 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceXYYXByYY();
   if (secondToLastS=="Expression" && lastS=="!")
     return this->ReplaceEOByE();
-  if (secondToLastS=="Expression" && thirdToLastS=="^" && fourthToLastS=="Expression" && this->LookAheadAllowsThePower(lastS) )
+  if (secondToLastS=="Expression" && thirdToLastS=="^" && fourthToLastS=="Expression" && this->AllowsPowerInPreceding(lastS) )
     return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="or" && fourthToLastS=="Expression" && this->AllowsOrInPreceding(lastS) )
     return this->ReplaceEOEXByEX();
@@ -1245,7 +1255,10 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="*" && fourthToLastS=="Expression" && this->AllowsTimesInPreceding(lastS) )
     return this->ReplaceEOEXByEX(Expression::formatTimesDenotedByStar);
-  if (secondToLastS=="Expression" && thirdToLastS=="/" && fourthToLastS=="Expression" && this->LookAheadAllowsDivide(lastS) )
+  if (secondToLastS=="Expression" && thirdToLastS=="/" && fourthToLastS=="Expression" && this->AllowsDivideInPreceding(lastS) )
+    return this->ReplaceEOEXByEX();
+  if (secondToLastS=="Expression" && thirdToLastS=="\\to" && fourthToLastS=="Expression" &&
+      this->AllowsLimitProcessInPreceding(lastS) )
     return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="Expression" && this->AllowsTimesInPreceding(lastS) )
     return this->ReplaceEEXByEXusingO(this->conTimes());

@@ -2297,6 +2297,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << (*this)[1].ToString(theFormat) << "==" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opGreaterThan()))
     out << (*this)[1].ToString(theFormat) << ">" << (*this)[2].ToString(theFormat);
+  else if (this->IsListStartingWithAtom(this->owner->opLimitProcess()))
+    out << (*this)[1].ToString(theFormat) << " \\to " << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opLessThan()))
     out << (*this)[1].ToString(theFormat) << "<" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opSequence()))

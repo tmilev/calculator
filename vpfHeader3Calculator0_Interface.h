@@ -917,18 +917,19 @@ public:
   bool isSeparatorFromTheRightForListMatrixRow(const std::string& input);
   bool isSeparatorFromTheRightForMatrixRow(const std::string& input);
   Expression::FunctionAddress GetInnerFunctionFromOp(int theOp, const Expression& left, const Expression& right);
-  bool LookAheadAllowsThePower(const std::string& lookAhead)
+  bool AllowsPowerInPreceding(const std::string& lookAhead)
   { return lookAhead!="{}";
   }
   bool RecursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo="");
 
-  bool LookAheadAllowsApplyFunction(const std::string& lookAhead);
+  bool AllowsLimitProcessInPreceding(const std::string& lookAhead);
+  bool AllowsApplyFunctionInPreceding(const std::string& lookAhead);
   bool AllowsOrInPreceding(const std::string& lookAhead);
   bool AllowsAndInPreceding(const std::string& lookAhead);
   bool AllowsPlusInPreceding(const std::string& lookAhead);
   bool AllowsTimesInPreceding(const std::string& lookAhead);
   bool AllowsTensorInPreceding(const std::string& lookAhead);
-  bool LookAheadAllowsDivide(const std::string& lookAhead);
+  bool AllowsDivideInPreceding(const std::string& lookAhead);
   bool PopTopSyntacticStack()
   { (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-1);
     return true;
@@ -1277,6 +1278,9 @@ public:
   }
   int opFactorial()
   { return this->theAtoms.GetIndexIMustContainTheObject("!");
+  }
+  int opLimitProcess()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\to");
   }
   int opCos()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\cos");

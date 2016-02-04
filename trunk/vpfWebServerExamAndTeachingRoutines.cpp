@@ -985,7 +985,16 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretManageClass");
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return;
+  DatabaseRoutines theRoutines;
+  theRoutines.startMySQLDatabaseIfNotAlreadyStarted();
   std::stringstream out;
+  if (!theRoutines.TableExists(DatabaseRoutines::GetTableUnsafeNameUsersOfFile(this->fileName)))
+    if (!theRoutines.CreateTable
+        (DatabaseRoutines::GetTableUnsafeNameUsersOfFile(this->fileName), "user VARCHAR(255) NOT NULL PRIMARY KEY, \
+        extraInfo LONGTEXT ", &out))
+    { inputOutput.interpretedCommand=out.str();
+      return;
+    }
   List<List<std::string> > userTable;
   List<std::string> labelsUserTable;
   bool tableTruncated=false;

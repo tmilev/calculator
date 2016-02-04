@@ -936,7 +936,10 @@ bool DatabaseRoutines::CreateTable
     *commentsOnCreation << "Proceeding to create table: " << tableNameUnsafe << ". ";
   bool result= (mysql_query(this->connection, tableContent.c_str())==0);
   if (!result)
-    return *this << "Command:<br>" << tableContent << "<br>failed. ";
+  { if (commentsOnCreation!=0)
+      *commentsOnCreation << "Command:<br>" << tableContent << "<br>failed. ";
+    return false;
+  }
   mysql_free_result( mysql_use_result(this->connection));
   return result;
 }
@@ -1156,8 +1159,8 @@ bool DatabaseRoutines::AddUsersFromEmails
   UserCalculator currentUser;
   bool result=true;
   if (!this->TableExists(currentFileUsersTableName))
-    if (!this->CreateTable(currentFileUsersTableName, "user LONGTEXT NOT NULL PRIMARY KEY, \
-        LONGTEXT extraInfo"))
+    if (!this->CreateTable(currentFileUsersTableName, "user VARCHAR(255) NOT NULL PRIMARY KEY, \
+        extraInfo LONGTEXT "))
       result=false;
   if (result)
   { for (int i=0; i<theEmails.size; i++)

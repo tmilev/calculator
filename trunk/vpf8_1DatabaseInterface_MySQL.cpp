@@ -15,7 +15,10 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
   theUser.enteredPassword=inputPassword;
   theUser.enteredAuthenticationTokenUnsafe=inputOutputAuthenticationToken;
   if (!theRoutines.startMySQLDatabaseIfNotAlreadyStarted(comments))
+  { if (comments!=0)
+      *comments << "Failed to start database. ";
     return false;
+  }
   if (!theRoutines.TableExists("users", comments))
   { if (theUser.enteredPassword!="" && theUser.usernameUnsafe!="")
     { if (comments!=0)
@@ -25,6 +28,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
       theUser.SetColumnEntry("userRole", "admin", theRoutines, false, comments);
       outputUserRole="admin";
     }
+
     return true;
   }
 //  if (comments!=0)
@@ -56,11 +60,17 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
       }
   }
   inputOutputAuthenticationToken=theUser.actualAuthenticationTokeNUnsafe;
-  theUser.usernameUnsafe="admin";
-
-
-//  stOutput << " <b>login failed, desired user:" + theUser.username +"</b>";
-//  stOutput << "<br>The actual authenticationToken is now: " << theUser.actualAuthenticationToken;
+  if (theUser.usernameUnsafe=="admin")
+  { if (!theUser.Iexist(theRoutines, false))
+    { if (comments!=0)
+        *comments << "<b>First login of user admin: setting admin pass. </b>";
+      theUser.CreateMeIfUsernameUnique(theRoutines, false, comments);
+      theUser.SetColumnEntry("activationToken", "activated", theRoutines, true, comments);
+      theUser.SetColumnEntry("userRole", "admin", theRoutines, false, comments);
+      outputUserRole="admin";
+    }
+    return true;
+  }
   return false;
 #else
   return true;
@@ -218,7 +228,6 @@ bool DatabaseRoutinesGlobalFunctions::FetchTable
   return false;
 #endif // MACRO_use_MySQL
 }
-
 
 bool DatabaseRoutinesGlobalFunctions::FetchEntry
 (const std::string& inputUsername, const std::string& tableName, const std::string& keyName,
@@ -942,8 +951,8 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure)
     authenticationToken LONGTEXT , \
     activationToken LONGTEXT,\
     userRole LONGTEXT,\
-    userInfo LONGTEXT,\
-    ");
+    userInfo LONGTEXT\
+    ", commentsOnFailure);
 }
 
 std::string DatabaseRoutines::GetTableUnsafeNameUsersOfFile(const std::string& inputFileName)
@@ -969,14 +978,13 @@ bool DatabaseRoutines::CreateTable
   //which in turn invokes the present function.
 //  if (commentsOnCreation!=0)
 //    *commentsOnCreation << "Proceeding to create table: " << tableNameUnsafe << ". ";
-  bool result= (mysql_query(this->connection, tableContent.c_str())==0);
-  if (!result)
+  if (mysql_query(this->connection, tableContent.c_str())!=0)
   { if (commentsOnCreation!=0)
       *commentsOnCreation << "Command:<br>" << tableContent << "<br>failed. ";
     return false;
   }
   mysql_free_result( mysql_use_result(this->connection));
-  return result;
+  return true;
 }
 
 bool UserCalculator::IsAcceptableCharDatabaseInpuT(char theChar)
@@ -1016,8 +1024,9 @@ bool DatabaseRoutines::TableExists(const std::string& tableNameUnsafe, std::stri
   std::stringstream queryStream;
   queryStream << "SELECT 1 FROM " << this->theDatabaseName << ".`" << tableNameSafe << "`";
   bool result=(mysql_query(this->connection, queryStream.str().c_str())==0);
-  if (commentsOnFailure!=0)
-    *commentsOnFailure << "Executed query to check table existence: " << queryStream.str() << ". ";
+//  if (!result)
+//    if (commentsOnFailure!=0)
+//      *commentsOnFailure << "Executed query to check table existence: " << queryStream.str() << ". ";
 //  stOutput << "Executed query: " << queryStream.str() << "<br>";
   mysql_free_result( mysql_use_result(this->connection));
   return result;
@@ -1197,7 +1206,7 @@ bool DatabaseRoutines::AddUsersFromEmails
   bool result=true;
   if (!this->TableExists(currentFileUsersTableName, &comments))
     if (!this->CreateTable(currentFileUsersTableName, "user VARCHAR(255) NOT NULL PRIMARY KEY, \
-        extraInfo LONGTEXT "))
+        extraInfo LONGTEXT ", &comments))
       result=false;
   if (result)
   { for (int i=0; i<theEmails.size; i++)

@@ -49,6 +49,7 @@ class CalculatorHTML
 public:
   int NumAttemptsToInterpret;
   int MaxInterpretationAttempts;
+  int NumProblemsFound;
   int randomSeed;
   List<int> randomSeedsIfInterpretationFails;
   bool flagRandomSeedGiven;
@@ -146,6 +147,7 @@ CalculatorHTML::CalculatorHTML()
   this->flagIsExamIntermediate=false;
   this->flagIsExamProblem=false;
   this->flagParentInvestigated=false;
+  this->NumProblemsFound=0;
 }
 
 const std::string CalculatorHTML::RelativePhysicalFolderProblemCollections="ProblemCollections/";
@@ -887,17 +889,25 @@ std::string CalculatorHTML::ToStringUserEmailActivationRole
   idOutput+= CGI::StringToURLString(this->fileName);
   std::string userRole = adminsOnly ? "admin" : "student";
   std::string idAddressTextarea= adminsOnly ? "inputAddAdmins" : "inputAddStudents";
+  std::string idExtraTextarea= adminsOnly ? "inputAddAdminsExtraInfo" : "inputAddStudentsExtraInfo";
   if (inputElement.GetKeyValue("id")!="")
-    idAddressTextarea+= inputElement.GetKeyValue("id");
-  else
-    idAddressTextarea+=this->fileName;
+  { idAddressTextarea+= inputElement.GetKeyValue("id");
+    idExtraTextarea+=inputElement.GetKeyValue("id");
+  } else
+  { idAddressTextarea+=this->fileName;
+    idExtraTextarea+=this->fileName;
+  }
   out << "Add <b>" << userRole << "</b> users.<br> ";
   out << "<b>Warning: there's no remove button yet.</b><br>";
-  out <<"<textarea ";
+  out << "<textarea width=\"500px\" ";
   out << "id=\"" << idAddressTextarea << "\"";
-  out << ">";
+  out << "placeholder=\"email or user list, comma, space or ; separated\">";
   out << "</textarea>";
-  out << "<button class=\"submitButton\" onclick=\"addEmails('"
+  out << "<textarea width=\"500px\" ";
+  out << "id=\"" << idExtraTextarea << "\"";
+  out << " placeholder=\"optional, for sorting users in groups; for example section #\">";
+  out << "</textarea>";
+  out << "<br><button class=\"submitButton\" onclick=\"addEmails('"
   << idAddressTextarea << "', '" << CGI::StringToURLString(this->fileName)
   << "', '" << idOutput
   << "', '" << userRole << "')\"> Add emails</button>";
@@ -959,7 +969,7 @@ std::string CalculatorHTML::ToStringUserEmailActivationRole
     tableStream << "</tr>";
   }
   tableStream << "</table>";
-  out << "\n" << numUsers << " users. " << tableStream.str();
+  out << "\n" << numUsers << " user(s). " << tableStream.str();
 
   return out.str();
 }
@@ -1060,6 +1070,7 @@ std::string CalculatorHTML::CleanUpLink(const std::string& inputLink)
 
 void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateLink");
+  this->NumProblemsFound++;
   std::string cleaneduplink = this->CleanUpLink(inputOutput.content);
   std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
 //  out << "cleaned up link: " << cleaneduplink;
@@ -1072,12 +1083,13 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
     refStreamNoRequest << "currentExamIntermediate=" << theGlobalVariables.GetWebInput("currentExamIntermediate") << "&";
   refStreamExercise << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&" << refStreamNoRequest.str();
   refStreamForReal << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=examForReal&" << refStreamNoRequest.str();
-  out << inputOutput.content;
   if (inputOutput.GetTagClass()=="calculatorExamProblem")
   { out << " <a href=\"" << refStreamForReal.str() << "\">Start (for credit).</a>";
     out << " <a href=\"" << refStreamExercise.str() << "\">Exercise (no credit, unlimited tries).</a>";
   } else
     out << " <a href=\"" << refStreamExercise.str() << "\">Start.</a>";
+  std::string stringToDisplay=  FileOperations::GetFileNameFromFileNameWithPath(inputOutput.content);
+  out << " " << this->NumProblemsFound << ". " << stringToDisplay;
   inputOutput.interpretedCommand=out.str();
 }
 

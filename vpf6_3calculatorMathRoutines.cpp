@@ -5214,7 +5214,7 @@ bool LaTeXcrawler::ExtractFileNamesFromRelativeFileName()
   }
   this->theFileToCrawlPhysical=theGlobalVariables.PhysicalPathProjectBase+ "../freecalc/" +
   this->theFileToCrawlRelative;
-  this->baseFolderStartFilePhysical=FileOperations::GetPathFromFileName(this->theFileToCrawlPhysical);
+  this->baseFolderStartFilePhysical=FileOperations::GetPathFromFileNameWithPath(this->theFileToCrawlPhysical);
   MathRoutines::StringBeginsWith
   (this->theFileToCrawlPhysical, this->baseFolderStartFilePhysical, &this->theFileToCrawlNoPathPhysical);
   return true;

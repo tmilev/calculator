@@ -1809,13 +1809,13 @@ std::string WebWorker::GetChangePasswordPage()
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
-;
-//Old code, submits all answers. May need to be used as an alternative
-//submission option.
-//  for (int i=0; i<this->theContent.size; i++)
-//    if (this->IsStudentAnswer(this->theContent[i]))
-//      out << "  inputParams+=\"&calculatorAnswer" << this->theContent[i].GetKeyValue("id") << "=\"+encodeURIComponent("
-//      << "document.getElementById('" << this->theContent[i].GetKeyValue("id") << "').value);\n";
+  ;
+  //Old code, submits all answers. May need to be used as an alternative
+  //submission option.
+  //  for (int i=0; i<this->theContent.size; i++)
+  //    if (this->IsStudentAnswer(this->theContent[i]))
+  //      out << "  inputParams+=\"&calculatorAnswer" << this->theContent[i].GetKeyValue("id") << "=\"+encodeURIComponent("
+  //      << "document.getElementById('" << this->theContent[i].GetKeyValue("id") << "').value);\n";
   out
   << "  https.onload = function() {\n"
   << "    spanVerification.innerHTML=https.responseText;\n"
@@ -1848,7 +1848,6 @@ std::string WebWorker::GetChangePasswordPage()
   else
     out << "<br>Password: "
     << "<input type=\"password\" id=\"password\" placeholder=\"password\">\n";
-
   out << "<br>New password: \n"
   << "<input type=\"password\" id=\"newPassword\" placeholder=\"password\">\n"
   << "<br>Re-enter new password: \n"

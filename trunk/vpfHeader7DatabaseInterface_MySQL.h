@@ -134,19 +134,19 @@ public:
   (const std::string& columnNameUnsafe, std::string& outputUnsafe,
    DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream* failureComments=0);
   void FetchColumns(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
-  bool AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
-  bool AuthenticateWithToken(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
-  bool Authenticate(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
+  bool AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream* commentsOnFailure);
+  bool AuthenticateWithToken(DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream* commentsOnFailure);
+  bool Authenticate(DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream* commentsOnFailure);
   bool ResetAuthenticationToken(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
   std::string GetPassword(DatabaseRoutines& theRoutines);
   bool SetColumnEntry
   (const std::string& columnNameUnsafe, const std::string& theValueUnsafe,
    DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream* failureComments=0);
-  bool SetPassword(DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream& commentsOnFailure);
-  bool TryToLogIn(DatabaseRoutines& theRoutines);
-  bool DeleteMe(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
+  bool SetPassword(DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream* commentsOnFailure);
+  bool TryToLogIn(DatabaseRoutines& theRoutines, std::stringstream& comments);
+  bool DeleteMe(DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream& commentsOnFailure);
   bool Iexist(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
-  bool CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
+  bool CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream* commentsOnFailure);
   bool ComputeSafeObjectNames();
   static bool IsAcceptableDatabaseInpuT(const std::string& input, std::stringstream* comments);
   static bool IsAcceptableCharDatabaseInpuT(char theChar);
@@ -172,25 +172,19 @@ public:
 
 class DatabaseRoutines
 {
-  template<typename anyType>
-  friend DatabaseRoutines& operator << (DatabaseRoutines& output, const anyType& any)
-  { output.comments << any;
-    return output;
-  }
 public:
   std::string databasePassword;
   std::string databaseUser;
   std::string theDatabaseName;
   std::string hostname;
-  std::stringstream comments;
   int MaxNumRowsToFetch;
   MYSQL *connection; // Create a pointer to the MySQL instance
   operator bool()const
   { return false;
   }
   static std::string GetTableUnsafeNameUsersOfFile(const std::string& inputFileName);
-  bool startMySQLDatabaseIfNotAlreadyStarted();
-  bool startMySQLDatabase();
+  bool startMySQLDatabaseIfNotAlreadyStarted(std::stringstream* commentsOnFailure);
+  bool startMySQLDatabase(std::stringstream* commentsOnFailure);
   bool InsertRow
   (const std::string& primaryKeyUnsafe, const std::string& primaryValueUnsafe,
    const std::string& tableNameUnsafe, std::stringstream& commentsOnFailure)
@@ -198,7 +192,7 @@ public:
   bool ColumnExists(const std::string& columnNameUnsafe, const std::string& tableNameUnsafe, std::stringstream& commentsStream);
   bool CreateColumn(const std::string& columnNameNameUnsafe, const std::string& tableNameUnsafe,
                     std::stringstream& commentsOnCreation);
-  bool TableExists(const std::string& tableNameUnsafe);
+  bool TableExists(const std::string& tableNameUnsafe, std::stringstream* commentsOnFailure);
   bool FetchTableNames
 (List<std::string>& output, std::stringstream& comments)
 ;
@@ -254,7 +248,6 @@ public:
   int MaxNumRowsToRead;
   int numRowsRead;
   bool flagOutputWasTruncated;
-  std::stringstream* failurecomments;
   std::string theQueryString;
   std::string firstResultString;
   List<List<std::string> > allQueryResultStrings;

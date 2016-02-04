@@ -1060,9 +1060,9 @@ struct FileOperations
 {
 public:
   static bool IsFileNameWithoutDotsAndSlashes(const std::string& fileName);
-  static std::string GetPathFromFileNameWithPath(const std::string& fileName);
+  static std::string GetFileNameFromFileNameWithPath(const std::string& fileName);
   static bool IsOKforFileNameOnTopOfOutputFolder(const std::string& fileName);
-  static std::string GetPathFromFileName(const std::string& fileName);
+  static std::string GetPathFromFileNameWithPath(const std::string& fileName);
   static std::string GetFileExtensionWithDot(const std::string& theFileName);
   static bool FileExistsUnsecure(const std::string& theFileName);
   static bool FileExistsOnTopOfOutputFolder(const std::string& theFileName);

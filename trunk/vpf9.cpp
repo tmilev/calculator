@@ -414,8 +414,8 @@ std::string FileOperations::GetFileExtensionWithDot(const std::string& theFileNa
 
 bool FileOperations::IsOKforFileNameOnTopOfOutputFolder(const std::string& theFileName)
 { MacroRegisterFunctionWithName("FileOperations::IsOKforFileNameOnTopOfOutputFolder");
-  std::string theFileNameNoPath=FileOperations::GetPathFromFileNameWithPath(theFileName);
-  std::string theFilePath=FileOperations::GetPathFromFileName(theFileName);
+  std::string theFileNameNoPath=FileOperations::GetFileNameFromFileNameWithPath(theFileName);
+  std::string theFilePath=FileOperations::GetPathFromFileNameWithPath(theFileName);
 //  std::cout << "Calling IsOKforFileNameOnTopOfOutputFolder, theFilePath: "
 //  << theFilePath << "\ntheFileNameNoPath: " << theFileNameNoPath << "\n";
   for (unsigned i=0; i<theFilePath.size(); i++)
@@ -435,7 +435,7 @@ bool FileOperations::IsFileNameWithoutDotsAndSlashes(const std::string& theFileN
   return true;
 }
 
-std::string FileOperations::GetPathFromFileNameWithPath(const std::string& fileName)
+std::string FileOperations::GetFileNameFromFileNameWithPath(const std::string& fileName)
 { unsigned startNameWithoutFolderInfo=0;
   for (unsigned i=0; i<fileName.size(); i++)
     if (fileName[i]=='/' || fileName[i]=='\\')
@@ -446,7 +446,7 @@ std::string FileOperations::GetPathFromFileNameWithPath(const std::string& fileN
   return nameWithoutFolderInfo.str();
 }
 
-std::string FileOperations::GetPathFromFileName(const std::string& fileName)
+std::string FileOperations::GetPathFromFileNameWithPath(const std::string& fileName)
 { unsigned startNameWithoutFolderInfo=0;
   for (unsigned i=0; i<fileName.size(); i++)
     if (fileName[i]=='/' || fileName[i]=='\\')

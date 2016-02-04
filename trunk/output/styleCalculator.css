@@ -6,6 +6,10 @@ nav {
     overflow: auto;
     padding:5px;	      
 }
+textarea {
+  width: 30%;
+  resize: both;
+}
 .calculatorHidden{
 display:none;
 }

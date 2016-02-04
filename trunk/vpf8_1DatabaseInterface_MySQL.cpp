@@ -901,7 +901,8 @@ bool DatabaseRoutines::startMySQLDatabase()
     authenticationTokenCreationTime LONGTEXT, \
     authenticationToken LONGTEXT , \
     activationToken LONGTEXT,\
-    userRole LONGTEXT\
+    userRole LONGTEXT,\
+    userInfo LONGTEXT\
     ");
 }
 

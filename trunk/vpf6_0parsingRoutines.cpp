@@ -153,6 +153,7 @@ void Calculator::init()
   this->AddOperationNoRepetitionAllowed("PolyVars");
   this->AddOperationNoRepetitionAllowed("DiffOpVars");
   this->AddOperationNoRepetitionAllowed("\\to");
+  this->AddOperationNoRepetitionAllowed("\\lim");
 
 
   this->AddOperationBuiltInType("Rational");
@@ -369,6 +370,20 @@ bool Calculator::ReplaceOXEXEXByEX(int formatOptions)
   opElt.theData=newExpr;
   opElt.controlIndex=this->conExpression();
   return this->DecreaseStackExceptLast(4);
+}
+
+bool Calculator::ReplaceOXEEXByEX(int formatOptions)
+{ SyntacticElement& opElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5];
+  SyntacticElement& leftE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+  SyntacticElement& rightE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  Expression newExpr(*this);
+  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(opElt.controlIndex));
+  newExpr.format=formatOptions;
+  newExpr.AddChildOnTop(leftE.theData);
+  newExpr.AddChildOnTop(rightE.theData);
+  opElt.theData=newExpr;
+  opElt.controlIndex=this->conExpression();
+  return this->DecreaseStackExceptLast(3);
 }
 
 bool Calculator::ReplaceOXXEXEXEXByE(int formatOptions)
@@ -1224,6 +1239,8 @@ bool Calculator::ApplyOneRule()
 //    return this->ReplaceEOEXByEX(secondToLastE.theData.format);
   if (fourthToLastS=="Expression" && thirdToLastS=="{}" && secondToLastS=="Expression" && this->AllowsApplyFunctionInPreceding(lastS))
     return this->ReplaceEXEXByEX(Expression::formatDefault);
+  if (fifthToLastS=="\\lim" && fourthToLastS=="_" && thirdToLastS=="Expression" &&  secondToLastS=="Expression" && this->AllowsLimitProcessInPreceding(lastS))
+    return this->ReplaceOXEEXByEX(Expression::formatDefault);
   if (fourthToLastS=="Expression" && thirdToLastS=="_" && secondToLastS=="Expression" && lastS!="_")
     return this->ReplaceEXEXByEX(Expression::formatFunctionUseUnderscore);
   //end of ambiguity.
@@ -1260,7 +1277,8 @@ bool Calculator::ApplyOneRule()
   if (secondToLastS=="Expression" && thirdToLastS=="\\to" && fourthToLastS=="Expression" &&
       this->AllowsLimitProcessInPreceding(lastS) )
     return this->ReplaceEOEXByEX();
-  if (secondToLastS=="Expression" && thirdToLastS=="Expression" && this->AllowsTimesInPreceding(lastS) )
+  if (fourthToLastS!="{}" && thirdToLastS=="Expression" && secondToLastS=="Expression" &&
+      this->AllowsTimesInPreceding(lastS) )
     return this->ReplaceEEXByEXusingO(this->conTimes());
   if (thirdToLastS=="(" && secondToLastS=="Expression" && lastS==")")
     return this->ReplaceXEXByE(secondToLastE.theData.format);

@@ -1674,8 +1674,10 @@ Expression Expression::GetContext()const
 { this->CheckInitialization();
   if (this->IsBuiltInType())
     return (*this)[1];
-  crash << "This is a programming error: GetContext called on an Expression that is not a built-in data type.  "
-  << " I can't display the expression as this may cause ``infinite'' recursion if the error is caused by the ToString method. Here is however the lisp form "
+  crash << "This is a programming error: GetContext called on an Expression"
+  << " that is not a built-in data type. "
+  << " I can't display the expression as this may cause ``infinite'' "
+  << "recursion if the error is caused by the ToString method. Here is however the lisp form "
   << this->ToStringFull() << " of the expression. " << "Here's  a stack trace. " << crash;
   Expression output;
   output.MakeEmptyContext(*this->owner);
@@ -2297,6 +2299,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << (*this)[1].ToString(theFormat) << "==" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opGreaterThan()))
     out << (*this)[1].ToString(theFormat) << ">" << (*this)[2].ToString(theFormat);
+  else if (this->IsListStartingWithAtom(this->owner->opLimit()))
+    out << "\\lim_{" << (*this)[1].ToString(theFormat) << "}" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opLimitProcess()))
     out << (*this)[1].ToString(theFormat) << " \\to " << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opLessThan()))

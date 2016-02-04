@@ -951,6 +951,7 @@ public:
   bool ReplaceEOByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOEByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEByE(int formatOptions=Expression::formatDefault);
+  bool ReplaceOXEEXByEX(int formatOptions=Expression::formatDefault);
   bool ReplaceOXXEXEXEXByE(int formatOptions=Expression::formatDefault);
   bool ReplaceSqrtEXByEX(int formatOptions=Expression::formatDefault);
   bool ReplaceSqrtXEXByEX(int formatOptions=Expression::formatDefault);
@@ -1281,6 +1282,9 @@ public:
   }
   int opLimitProcess()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\to");
+  }
+  int opLimit()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\lim");
   }
   int opCos()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\cos");

@@ -26,12 +26,6 @@ void Calculator::initAdminFunctions()
 //   true, false, "DatabaseRoutines::innerSendActivationEmailUsers");
 //   ;
   this->AddOperationInnerHandler
-  ("AddUsersFromEmailList", DatabaseRoutines::innerAddUsersFromEmailList, "",
-   "Adds new users by email list.",
-   "AddUsersFromEmailList(\"todor.milev@gmail.com, Todor.Milev@umb.edu \"); ",
-   true, false, "DatabaseRoutines::innerAddUsersFromEmailList");
-   ;
-  this->AddOperationInnerHandler
   ("TestLogin", DatabaseRoutines::innerTestLogin, "",
    "DO NOT USE, function is FOR DEBUGGING PURPOSES ONLY.\
    This function is completely insecure and WILL expose your username and password to the whole\
@@ -88,25 +82,10 @@ void Calculator::initAdminFunctions()
 #endif // MACRO_use_MySQL
 }
 
-void Calculator::initCalculusAdministrationFunctions()
-{ if (!theGlobalVariables.UserDefaultHasAdminRights())
-    return;
-  #ifdef MACRO_use_MySQL
-  this->AddOperationInnerHandler
-  ("CreateTeachingClass", DatabaseRoutines::innerCreateTeachingClass, "",
-   "Adds a class for an instructor. First argument: instructor username. \
-   Second argument: instructor password/authentication token. \
-   Third argument: class name.",
-   "CreateTeachingClass(\"admin\", \"password\", \"testUser\")", false, true, "DatabaseRoutines::innerCreateTeachingClass");
-
-  #endif // MACRO_use_MySQL
-}
-
 void Calculator::initCalculusTestingFunctions()
 {
 #ifdef MACRO_use_MySQL
   this->initAdminFunctions();
-  this->initCalculusAdministrationFunctions();
 #endif // MACRO_use_MySQL
 }
 

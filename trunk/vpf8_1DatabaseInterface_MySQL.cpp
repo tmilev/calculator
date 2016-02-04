@@ -826,6 +826,11 @@ bool UserCalculator::FetchOneUserRow
   for (int i=0; i<theFieldQuery.allQueryResultStrings.size; i++)
     if (theFieldQuery.allQueryResultStrings[i].size>0 )
       this->selectedRowFieldNamesUnsafe[i]=CGI::URLStringToNormal(theFieldQuery.allQueryResultStrings[i][0]);
+  if (this->currentTableUnsafe=="users")
+  { this->activationTokenUnsafe= this->GetKeyValue("activationToken");
+    this->emailUnsafe= this->GetKeyValue("email");
+    this->userRole= this->GetKeyValue("userRole");
+  }
   /*stOutput << "Fetched field names: " << this->selectedRowFieldNamesUnsafe.ToStringCommaDelimited()
   << " from: " << theFieldQuery.allQueryResultStrings.ToStringCommaDelimited()
   << ". All of those have values: "
@@ -902,8 +907,12 @@ bool DatabaseRoutines::startMySQLDatabase()
     authenticationToken LONGTEXT , \
     activationToken LONGTEXT,\
     userRole LONGTEXT,\
-    userInfo LONGTEXT\
+    userInfo LONGTEXT,\
     ");
+}
+
+std::string DatabaseRoutines::GetTableUnsafeNameUsersOfFile(const std::string& inputFileName)
+{ return "users"+ inputFileName;
 }
 
 bool DatabaseRoutines::CreateTable
@@ -1070,15 +1079,92 @@ bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, b
   return result;
 }
 
+std::string UserCalculator::GetKeyValue(const std::string& key)
+{ int theIndex=this->extraKeys.GetIndex(key);
+  if (theIndex==-1)
+    return "";
+  return this->extraValues[theIndex];
+}
+
+void UserCalculator::SetKeyValue(const std::string& key, const std::string& inputValue)
+{ int theIndex=this->extraKeys.GetIndex(key);
+  if (theIndex==-1)
+  { this->extraKeys.AddOnTop(key);
+    this->extraValues.AddOnTop("");
+  }
+  this->extraValues[theIndex]=inputValue;
+}
+
+bool UserCalculator::LoadAndInterpretDatabaseInfo(const std::string& theInfo, std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("UserCalculator::LoadAndInterpretDatabaseInfo");
+  HashedList<std::string, MathRoutines::hashString> keys;
+  List<std::string> values;
+  if (!CGI::ChopCGIInputStringToMultipleStrings(theInfo, values, keys, commentsOnFailure))
+    return false;
+  this->extraKeys.Clear();
+  this->extraValues.SetSize(0);
+  for (int i=0; i<keys.size; i++)
+  { this->extraKeys.AddOnTop(CGI::URLStringToNormal(keys[i]));
+    this->extraValues.AddOnTop(CGI::URLStringToNormal(values[i]));
+  }
+  return true;
+}
+
+bool UserCalculator::LoadAndInterpretDatabaseInfo(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("UserCalculator::LoadAndInterpretDatabaseInfo");
+  this->SetCurrentTable("users");
+  std::string userInfo;
+  if (!this->FetchOneColumn("userInfo", userInfo, theRoutines, true, &commentsOnFailure))
+    return false;
+  return this->LoadAndInterpretDatabaseInfo(userInfo, commentsOnFailure);
+}
+
+bool UserCalculator::StoreDatabaseInfo(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("UserCalculator::StoreDatabaseInfo");
+  std::stringstream extraInfoStream;
+  for (int i=0; i<this->extraKeys.size; i++)
+    extraInfoStream << CGI::StringToURLString(this->extraKeys[i]) << "="
+    << CGI::StringToURLString( this->extraValues[i]) << "&";
+  this->SetCurrentTable("users");
+  return this->SetColumnEntry("userInfo", extraInfoStream.str(), theRoutines, true, &commentsOnFailure);
+}
+
+bool DatabaseRoutines::InsertRow
+(const std::string& primaryKeyUnsafe, const std::string& primaryValueUnsafe,
+ const std::string& tableNameUnsafe, std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::InsertRow");
+  std::string primaryKeySafe=CGI::StringToURLString(primaryKeyUnsafe);
+  std::string primaryValueSafe=CGI::StringToURLString(primaryValueUnsafe);
+  std::string tableNameSafe=CGI::StringToURLString(tableNameUnsafe);
+  std::stringstream queryStream;
+  queryStream << "INSERT INTO calculatorUsers.`"
+  << tableNameSafe << "`(`" << primaryKeySafe << "`) VALUES('" << primaryValueSafe << "')";
+  DatabaseQuery theQuery(*this, queryStream.str(), &commentsOnFailure);
+  return theQuery.flagQuerySucceeded;
+}
+
 bool DatabaseRoutines::AddUsersFromEmails
-(const std::string& emailList, std::stringstream& comments, const std::string& userRole)
+(const std::string& emailList, std::stringstream& comments)
 { MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
+  std::string userRole=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("userRole"));
+  std::string extraUserInfo=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("extraInfo"));
+  std::string currentExamHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
+  std::string currentFileUsersTableName=this->GetTableUnsafeNameUsersOfFile(currentExamHome);
   List<std::string> theEmails;
   this->ExtractEmailList(emailList, theEmails, comments);
   stOutput << " <br>creating users: " << theEmails.ToStringCommaDelimited() << "<br>";
   UserCalculator currentUser;
-  currentUser.SetCurrentTable("users");
   bool result=true;
+  if (!this->TableExists(currentFileUsersTableName))
+    if (!this->CreateTable(currentFileUsersTableName, "user LONGTEXT NOT NULL PRIMARY KEY, \
+        LONGTEXT extraInfo"))
+      result=false;
+  if (result)
+  { for (int i=0; i<theEmails.size; i++)
+      if (!this->InsertRow("user", theEmails[i], currentFileUsersTableName, comments))
+        result=false;
+  }
+  currentUser.SetCurrentTable("users");
   for (int i=0; i<theEmails.size; i++)
   { currentUser.usernameUnsafe=theEmails[i];
     currentUser.emailUnsafe=theEmails[i];
@@ -1090,7 +1176,8 @@ bool DatabaseRoutines::AddUsersFromEmails
       }
       if (theEmails[i].find('@')!=std::string::npos)
         currentUser.SetColumnEntry("email", theEmails[i], *this, false, &comments);
-    }
+    } else
+      currentUser.LoadAndInterpretDatabaseInfo(*this, comments);
     currentUser.SetColumnEntry("userRole", userRole, *this, true, &comments);
   }
   if (!result)
@@ -1187,21 +1274,6 @@ bool DatabaseRoutines::innerSendActivationEmailUsers(Calculator& theCommands, co
     return theCommands << "Adding users requires admin rights. ";
   DatabaseRoutines theRoutines;
   if (!theRoutines.SendActivationEmail(inputEmailList, theCommands.Comments))
-    return false;
-  std::stringstream out;
-  out << "Successfully added students. " ;
-  return output.AssignValue(out.str(), theCommands);
-}
-
-bool DatabaseRoutines::innerAddUsersFromEmailList(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::innerAddUsersFromEmailList");
-  std::string inputEmailList;
-  if (!input.IsOfType(&inputEmailList))
-    return theCommands << "Argument " << input.ToString() << " is not a string. ";
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
-    return theCommands << "Adding users requires admin rights. ";
-  DatabaseRoutines theRoutines;
-  if (!theRoutines.AddUsersFromEmails(inputEmailList, theCommands.Comments, "student"))
     return false;
   std::stringstream out;
   out << "Successfully added students. " ;
@@ -1503,22 +1575,6 @@ bool DatabaseRoutines::innerGetAuthentication(Calculator& theCommands, const Exp
   if (!theUser.Authenticate(theRoutines, true))
     return output.MakeError("Failed to authenticate. ", theCommands);
   return output.AssignValue(theUser.actualAuthenticationTokeNUnsafe, theCommands);
-}
-
-bool DatabaseRoutines::innerCreateTeachingClass(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::innerCreateTeachingClass");
-  UserCalculator theUser;
-  List<std::string> className;
-  if (!theUser.getUserPassAndExtraData(theCommands, input, className))
-    return false;
-  DatabaseRoutines theRoutines;
-  if (!theUser.Authenticate(theRoutines, true))
-    return output.MakeError("Failed to authenticate. ", theCommands);
-  if (!theRoutines.CreateTable(className[0],
-  "user LONGTEXT NOT NULL PRIMARY KEY, \
-  LONGTEXT NOT NULL", &theCommands.Comments))
-    return output.AssignValue(theRoutines.comments.str(), theCommands);
-  return output.AssignValue(theRoutines.comments.str(), theCommands);
 }
 
 bool DatabaseRoutines::innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output)

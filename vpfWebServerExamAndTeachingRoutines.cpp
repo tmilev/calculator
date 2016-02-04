@@ -992,7 +992,8 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
     if (!theRoutines.CreateTable
         (DatabaseRoutines::GetTableUnsafeNameUsersOfFile(this->fileName), "user VARCHAR(255) NOT NULL PRIMARY KEY, \
         extraInfo LONGTEXT ", &out))
-    { inputOutput.interpretedCommand=out.str();
+    { out << comments.str();
+      inputOutput.interpretedCommand=out.str();
       return;
     }
   List<List<std::string> > userTable;
@@ -1015,7 +1016,6 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
   out << this->ToStringUserEmailActivationRole(userTable, labelsUserTable, false, inputOutput);
   out << "<hr><hr>";
   out << this->ToStringUserEmailActivationRole(userTable, labelsUserTable, true, inputOutput);
-
   inputOutput.interpretedCommand=out.str();
 }
 

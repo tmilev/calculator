@@ -608,7 +608,8 @@ bool WebWorker::ProcessRawArguments(std::stringstream& argumentProcessingFailure
       theGlobalVariables.userDefault=desiredUser;
     else
     { theGlobalVariables.userDefault="";
-      theGlobalVariables.SetWebInput("error", CGI::StringToURLString("<b>Invalid user or password</b>"));
+      theGlobalVariables.SetWebInput
+      ("error", CGI::StringToURLString("<b>Invalid user or password.</b> Comments follow. "+argumentProcessingFailureComments.str()));
     }
   }
   password="********************************************";

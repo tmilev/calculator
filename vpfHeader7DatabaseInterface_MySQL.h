@@ -218,7 +218,7 @@ public:
 
   bool CreateTable
   (const std::string& tableNameUnsafe, const std::string& desiredTableContent,
-   std::stringstream* commentsOnCreation=0);
+   std::stringstream* commentsOnCreation);
 
   static bool innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestLogin(Calculator& theCommands, const Expression& input, Expression& output);

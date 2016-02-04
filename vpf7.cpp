@@ -688,10 +688,10 @@ bool CGI::GetPhysicalFileNameFromRelativeInput(const std::string& inputFileName,
 std::string CGI::GetHtmlLinkFromProjectFileName(const std::string& fileName, const std::string& fileDesc, int line)
 { std::stringstream out;
   out << " <a href=\"https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/"
-  << FileOperations::GetPathFromFileNameWithPath(fileName);
+  << FileOperations::GetFileNameFromFileNameWithPath(fileName);
   if (line>0)
     out << "#l" << line;
-  out << "\">" << FileOperations::GetPathFromFileNameWithPath(fileName);
+  out << "\">" << FileOperations::GetFileNameFromFileNameWithPath(fileName);
   if (fileDesc!="")
     out << " (" << fileDesc << ")";
   out << "</a>\n";

@@ -1020,6 +1020,8 @@ bool UserCalculator::IsAcceptableDatabaseInpuT(const std::string& input, std::st
 
 bool DatabaseRoutines::TableExists(const std::string& tableNameUnsafe, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::TableExists");
+  if (this->connection==0)
+    crash << "this->connection equals 0 at a place where this shouldn't happen. " << crash;
   std::string tableNameSafe=CGI::StringToURLString(tableNameUnsafe);
   std::stringstream queryStream;
   queryStream << "SELECT 1 FROM " << this->theDatabaseName << ".`" << tableNameSafe << "`";

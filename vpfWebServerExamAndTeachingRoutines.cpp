@@ -987,13 +987,16 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
     return;
   DatabaseRoutines theRoutines;
   std::stringstream out;
-  std::stringstream comments;
-  if (!theRoutines.TableExists(DatabaseRoutines::GetTableUnsafeNameUsersOfFile(this->fileName), &comments))
+  if (!theRoutines.startMySQLDatabaseIfNotAlreadyStarted(&out))
+  { out << "<b>Failed to start database</b>";
+    inputOutput.interpretedCommand=out.str();
+    return;
+  }
+  if (!theRoutines.TableExists(DatabaseRoutines::GetTableUnsafeNameUsersOfFile(this->fileName), &out))
     if (!theRoutines.CreateTable
         (DatabaseRoutines::GetTableUnsafeNameUsersOfFile(this->fileName), "user VARCHAR(255) NOT NULL PRIMARY KEY, \
         extraInfo LONGTEXT ", &out))
-    { out << comments.str();
-      inputOutput.interpretedCommand=out.str();
+    { inputOutput.interpretedCommand=out.str();
       return;
     }
   List<List<std::string> > userTable;

@@ -986,9 +986,9 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return;
   DatabaseRoutines theRoutines;
-  theRoutines.startMySQLDatabaseIfNotAlreadyStarted();
   std::stringstream out;
-  if (!theRoutines.TableExists(DatabaseRoutines::GetTableUnsafeNameUsersOfFile(this->fileName)))
+  std::stringstream comments;
+  if (!theRoutines.TableExists(DatabaseRoutines::GetTableUnsafeNameUsersOfFile(this->fileName), &comments))
     if (!theRoutines.CreateTable
         (DatabaseRoutines::GetTableUnsafeNameUsersOfFile(this->fileName), "user VARCHAR(255) NOT NULL PRIMARY KEY, \
         extraInfo LONGTEXT ", &out))
@@ -1236,7 +1236,7 @@ bool CalculatorHTML::ParseAndInterpretDatabaseInfo(std::stringstream& comments)
     }
   }
   if (!this->flagRandomSeedGiven)
-    stOutput << "randomSeed not found";
+    comments << "randomSeed not found. ";
 
 //  stOutput << "Database loaded:<br>"
 //  << this->databaseInfo;

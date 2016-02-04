@@ -1206,6 +1206,8 @@ bool DatabaseRoutines::AddUsersFromEmails
   stOutput << " <br>creating users: " << theEmails.ToStringCommaDelimited() << "<br>";
   UserCalculator currentUser;
   bool result=true;
+  if (!this->startMySQLDatabaseIfNotAlreadyStarted(&comments))
+    return false;
   if (!this->TableExists(currentFileUsersTableName, &comments))
     if (!this->CreateTable(currentFileUsersTableName, "user VARCHAR(255) NOT NULL PRIMARY KEY, \
         extraInfo LONGTEXT ", &comments))

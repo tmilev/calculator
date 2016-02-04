@@ -1687,7 +1687,6 @@ public:
   void initPredefinedStandardOperationsWithoutHandler();
   void initPredefinedInnerFunctions();
   void initCalculusTestingFunctions();
-  void initCalculusAdministrationFunctions();
   void initAdminFunctions();
   void initPredefinedOperationsComposite();
   bool ExtractExpressions(Expression& outputExpression, std::string* outputErrors);

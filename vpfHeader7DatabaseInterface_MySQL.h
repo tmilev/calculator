@@ -117,8 +117,15 @@ public:
   List<std::string> selectedRowFieldNamesUnsafe;
   std::string enteredAuthenticationTokenUnsafe;
   std::string actualAuthenticationTokeNUnsafe;
+  HashedList<std::string, MathRoutines::hashString> extraKeys;
+  List<std::string> extraValues;
   TimeWrapper authenticationTokenCreationTime;
+  std::string GetKeyValue(const std::string& key);
+  void SetKeyValue(const std::string& key, const std::string& inputValue);
   bool flagNewAuthenticationTokenComputedUserNeedsIt;
+  bool LoadAndInterpretDatabaseInfo(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure);
+  bool LoadAndInterpretDatabaseInfo(const std::string& theInfo, std::stringstream& commentsOnFailure);
+  bool StoreDatabaseInfo(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure);
   bool SetCurrentTable(const std::string& inputTableNameUnsafe);
   std::string GetSelectedRowEntry(const std::string& theKey);
   bool FetchOneUserRow
@@ -181,9 +188,13 @@ public:
   operator bool()const
   { return false;
   }
+  static std::string GetTableUnsafeNameUsersOfFile(const std::string& inputFileName);
   bool startMySQLDatabaseIfNotAlreadyStarted();
   bool startMySQLDatabase();
-
+  bool InsertRow
+  (const std::string& primaryKeyUnsafe, const std::string& primaryValueUnsafe,
+   const std::string& tableNameUnsafe, std::stringstream& commentsOnFailure)
+  ;
   bool ColumnExists(const std::string& columnNameUnsafe, const std::string& tableNameUnsafe, std::stringstream& commentsStream);
   bool CreateColumn(const std::string& columnNameNameUnsafe, const std::string& tableNameUnsafe,
                     std::stringstream& commentsOnCreation);
@@ -200,7 +211,7 @@ public:
   ;
   bool AddUsersFromEmailsAndCourseName(const std::string& emailList, const std::string& ExamHomeFile, std::stringstream& comments);
   bool AddUsersFromEmails
-  (const std::string& emailList, std::stringstream& comments, const std::string& userRole);
+  (const std::string& emailList, std::stringstream& comments);
   bool SendActivationEmail(const std::string& emailList, std::stringstream& comments);
   bool SendActivationEmail(const List<std::string>& theEmails, bool forceResend, std::stringstream& comments);
   bool ExtractEmailList(const std::string& emailList, List<std::string>& outputList, std::stringstream& comments);
@@ -219,7 +230,6 @@ public:
   static bool innerTestLogin(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddUser(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerAddUsersFromEmailList(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSendActivationEmailUsers(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddUsersFromEmailListAndCourseName(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDeleteUser(Calculator& theCommands, const Expression& input, Expression& output);
@@ -229,7 +239,6 @@ public:
   static bool innerDisplayDatabaseTable(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserDBEntry(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserDetails(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerCreateTeachingClass(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddStudentToClass(Calculator& theCommands, const Expression& input, Expression& output);
 
   DatabaseRoutines();

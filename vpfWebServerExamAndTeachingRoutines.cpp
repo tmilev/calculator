@@ -271,7 +271,7 @@ std::string CalculatorHTML::GetSubmitEmailsJavascript()
 { std::stringstream out;
   out
   << "<script type=\"text/javascript\"> \n"
-  << "function addEmails(idEmailList, problemCollectionName, idOutput, userRole){\n"
+  << "function addEmails(idEmailList, problemCollectionName, idOutput, userRole, idExtraInfo){\n"
   << "  spanOutput = document.getElementById(idOutput);\n"
   << "  if (spanOutput==null){\n"
   << "    spanOutput = document.createElement('span');\n"
@@ -279,11 +279,14 @@ std::string CalculatorHTML::GetSubmitEmailsJavascript()
   << "    spanOutput.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idEmailList + \"MISSING! </span>\";\n"
   << "  }\n"
   << "  spanEmailList = document.getElementById(idEmailList);\n"
+  << "  spanExtraInfo = document.getElementById(idExtraInfo);\n"
   << "  inputParams='request=addEmails';\n"
   << "  inputParams+='&userRole='+userRole;\n"
   << "  inputParams+='&" << theGlobalVariables.ToStringCalcArgsNoNavigation() << "';\n"
   << "  inputParams+='&mainInput=' + encodeURIComponent(spanEmailList.value);\n"
-  << "  inputParams+='&currentExamHome=' + problemCollectionName;\n"
+  << "  inputParams+='extraInfo=' + encodeURIComponent(spanExtraInfo.value);\n"
+//  << "  inputParams+='&currentExamHome=' + problemCollectionName;\n"
+  << "  inputParams+='&currentExamHome=" << CGI::StringToURLString(this->fileName) << "';\n"
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
@@ -394,8 +397,7 @@ std::string WebWorker::GetAddUserEmails()
 #ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
   std::stringstream comments;
-  std::string userRole=theGlobalVariables.GetWebInput("userRole");
-  bool result=theRoutines.AddUsersFromEmails(inputEmails, comments, userRole);
+  bool result=theRoutines.AddUsersFromEmails(inputEmails, comments);
   if (result)
     out << "<span style=\"color:green\"> Emails successfully registered. </span>" << comments.str();
   else
@@ -897,8 +899,8 @@ std::string CalculatorHTML::ToStringUserEmailActivationRole
   { idAddressTextarea+=this->fileName;
     idExtraTextarea+=this->fileName;
   }
-  out << "Add <b>" << userRole << "</b> users.<br> ";
-  out << "<b>Warning: there's no remove button yet.</b><br>";
+  out << "Add <b>" << userRole << "(s)</b>.<br> ";
+//  out << "<b>Warning: there's no remove button yet.</b><br>";
   out << "<textarea width=\"500px\" ";
   out << "id=\"" << idAddressTextarea << "\"";
   out << "placeholder=\"email or user list, comma, space or ; separated\">";
@@ -907,63 +909,68 @@ std::string CalculatorHTML::ToStringUserEmailActivationRole
   out << "id=\"" << idExtraTextarea << "\"";
   out << " placeholder=\"optional, for sorting users in groups; for example section #\">";
   out << "</textarea>";
-  out << "<br><button class=\"submitButton\" onclick=\"addEmails('"
-  << idAddressTextarea << "', '" << CGI::StringToURLString(this->fileName)
+  out << "<br><button class=\"submitButton\" onclick=\"addEmails("
+  << "'"    << idAddressTextarea
+  << "', '" << CGI::StringToURLString(this->fileName)
   << "', '" << idOutput
-  << "', '" << userRole << "')\"> Add emails</button>";
+  << "', '" << userRole
+  << "', '" << idExtraTextarea
+  << "')\"> Add emails</button>";
   out << "<br><span id=\"" << idOutput << "\"></span>\n<br>\n";
-  int indexUser=-1, indexEmail=-1, indexActivationToken=-1, indexUserRole=-1;
+  int indexUser=-1, indexExtraInfo=-1;
   for (int i=0; i<labelsUserTable.size; i++)
   { if (labelsUserTable[i]=="user")
       indexUser=i;
-    if (labelsUserTable[i]=="email")
-      indexEmail=i;
-    if (labelsUserTable[i]=="activationToken")
-      indexActivationToken=i;
-    if (labelsUserTable[i]=="userRole")
-      indexUserRole=i;
+    if (labelsUserTable[i]=="extraInfo")
+      indexExtraInfo=i;
   }
-  if (indexUser==-1 || indexEmail==-1 || indexActivationToken==-1 || indexUserRole==-1)
+  if (indexUser==-1 || indexExtraInfo==-1)
   { out << "<span style=\"color:red\"><b>This shouldn't happen: failed to find necessary "
     << "column entries in the database. "
     << "This is likely a software bug.</b></span>"
-    << "IndexUser, indexEmail, indexActivationToken, indexUserRole: "
+    << "indexUser, indexExtraInfo: "
     << indexUser << ", "
-    << indexEmail << ", "
-    << indexActivationToken << ", "
-    << indexUserRole << ". "
+    << indexExtraInfo << ", "
     ;
     return out.str();
   }
   int numUsers=0;;
   std::stringstream tableStream;
   tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th></tr>";
+  UserCalculator currentUser;
+  currentUser.SetCurrentTable("users");
+  DatabaseRoutines theRoutines;
   for (int i=0; i<userTable.size; i++)
-  { if (adminsOnly)
-    { if (userTable[i][indexUserRole]!="admin")
-        continue;
-    } else if (userTable[i][indexUserRole]!="student")
+  { std::stringstream failureStream;
+    if (!currentUser.FetchOneUserRow(theRoutines, failureStream ))
+    { currentUser.emailUnsafe=failureStream.str();
+      currentUser.activationTokenUnsafe="error";
+      currentUser.userRole="error";
+    }
+    if (adminsOnly)
+      if (currentUser.userRole!="admin")
         continue;
     numUsers++;
     tableStream << "<tr>"
     << "<td>" << userTable[i][indexUser] << "</td>"
-    << "<td>" << userTable[i][indexEmail] << "</td>"
+    << "<td>" << currentUser.emailUnsafe << "</td>"
     ;
-    std::string activationToken=userTable[i][indexActivationToken];
-    if (activationToken!="activated")
+    if (currentUser.activationTokenUnsafe!="activated" && currentUser.activationTokenUnsafe!="error")
     { tableStream << "<td><span style=\"color:red\">not activated</span></td>";
-      if (activationToken!="")
+      if (currentUser.activationTokenUnsafe!="")
         tableStream << "<td>"
         << "<a href=\""
-        << UserCalculator::GetActivationAddressFromActivationToken(activationToken, userTable[i][indexUser])
-        << "\"> Activate account and change password</a>"
+        << UserCalculator::GetActivationAddressFromActivationToken(currentUser.activationTokenUnsafe, userTable[i][indexUser])
+        << "\"> (Re)activate account and change password</a>"
         << "</td>";
+    } else if (currentUser.activationTokenUnsafe=="error")
+    { tableStream << "<td>error</td>";
     } else
     { tableStream << "<td><span style=\"color:green\">activated</span></td>";
       tableStream << "<td><span style=\"color:red\">"
       << "<a href=\""
-      << UserCalculator::GetActivationAddressFromActivationToken(activationToken, userTable[i][indexUser])
-      << "\"> Activate account and change password</a>"
+      << UserCalculator::GetActivationAddressFromActivationToken(currentUser.activationTokenUnsafe, userTable[i][indexUser])
+      << "\"> (Re)activate account and change password</a>"
       << "</span></td>";
     }
     tableStream << "</tr>";
@@ -985,7 +992,8 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
   int numRows=-1;
   std::stringstream failureComments;
   if (!DatabaseRoutinesGlobalFunctions::FetchTable
-      (userTable, labelsUserTable, tableTruncated, numRows, "users", failureComments))
+      (userTable, labelsUserTable, tableTruncated, numRows,
+       DatabaseRoutines::GetTableUnsafeNameUsersOfFile(this->fileName), failureComments))
   { out << "<span style=\"color:red\"><b>Failed to fetch email addresses: "
     << failureComments.str() << "</b></span>";
     inputOutput.interpretedCommand=out.str();
@@ -994,9 +1002,9 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
   if (tableTruncated)
     out << "<span style=\"color:red\"><b>This shouldn't happen: email list truncated. "
     << "This is likely a software bug.</b></span>";
-  out << "<hr>";
+  out << "<hr><hr>";
   out << this->ToStringUserEmailActivationRole(userTable, labelsUserTable, false, inputOutput);
-  out << "<hr>";
+  out << "<hr><hr>";
   out << this->ToStringUserEmailActivationRole(userTable, labelsUserTable, true, inputOutput);
 
   inputOutput.interpretedCommand=out.str();

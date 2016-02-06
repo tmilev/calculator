@@ -1026,7 +1026,7 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
   bool tableTruncated=false;
   int numRows=-1;
   std::stringstream failureComments;
-  if (!DatabaseRoutinesGlobalFunctions::FetchTable
+  if (!DatabaseRoutinesGlobalFunctions::FetchTablE
       (userTable, labelsUserTable, tableTruncated, numRows,
        DatabaseRoutines::GetTableUnsafeNameUsersOfFile(this->fileName), failureComments))
   { out << "<span style=\"color:red\"><b>Failed to fetch email addresses: "
@@ -1227,8 +1227,19 @@ std::string CalculatorHTML::GetDatabaseTableName()
 bool CalculatorHTML::LoadAndInterpretDatabaseInfo(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadAndInterpretDatabaseInfo");
   //stOutput << "ere be i";
+  if (!DatabaseRoutinesGlobalFunctions::TableExists(this->GetDatabaseTableName(), comments))
+    if (!DatabaseRoutinesGlobalFunctions::CreateTable(this->GetDatabaseTableName(), comments))
+    { comments << "<b>Failed to create table for storing exam results. </b>";
+      return false;
+    }
+  if (!DatabaseRoutinesGlobalFunctions::ColumnExists
+      (this->fileName, this->GetDatabaseTableName(), comments))
+    if (!DatabaseRoutinesGlobalFunctions::CreateColumn(this->fileName, this->GetDatabaseTableName(), comments))
+    { comments << "Failed to create column: " << this->fileName << " in table: " << this->GetDatabaseTableName();
+      return false;
+    }
   if (!DatabaseRoutinesGlobalFunctions::FetchEntry
-    (theGlobalVariables.userDefault, this->GetDatabaseTableName(), this->fileName, this->databaseInfo, comments))
+      (theGlobalVariables.userDefault, this->GetDatabaseTableName(), this->fileName, this->databaseInfo, comments))
   { comments << "Error! Failed to fetch database info on the problem. ";
     return false;
   }
@@ -1316,13 +1327,10 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
   if (theGlobalVariables.flagLoggedIn)
     if (theGlobalVariables.userCalculatorRequestType=="examForReal")
     { //load the random seed.
-      if (!DatabaseRoutinesGlobalFunctions::TableExists(this->GetDatabaseTableName(), comments))
-        if (!DatabaseRoutinesGlobalFunctions::CreateTable(this->GetDatabaseTableName(), comments))
-        { this->outputHtmlMain ="<b>Failed to create table for storing exam results. </b>" +comments.str();
-          return false;
-        }
       if (!this->LoadAndInterpretDatabaseInfo(comments))
-      { this->outputHtmlMain = "<b>Something wrong has happened: failed to parse the information stored in the database. Please let your instructor know.</b>";
+      { this->outputHtmlMain =
+        "<b>Something wrong has happened: failed to parse the information stored in the database.\
+         Please let your instructor know.</b>";
         return false;
       }
     }

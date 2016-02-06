@@ -22,11 +22,17 @@ public:
   (const std::string& inputUsername, const std::string& tableNameUnsafe, const std::string& keyNameUnsafe,
    const std::string& valueUnsafe, std::stringstream& comments)
    ;
-  static bool FetchTable
+  static bool FetchTablE
 (List<List<std::string> >& output,
  List<std::string>& outputColumnLabels,
  bool& outputWasTruncated, int& actualNumRowsIfTruncated,
- const std::string& tableNameUnsafe, std::stringstream& comments)
+ const std::string& tableName, std::stringstream& comments)
+;
+  static bool FetchTableFromDatabaseIdentifier
+(List<List<std::string> >& output,
+ List<std::string>& outputColumnLabels,
+ bool& outputWasTruncated, int& actualNumRowsIfTruncated,
+ const std::string& tableIdentifier, std::stringstream& comments)
 ;
   static bool FetchEntry
   (const std::string& inputUsername, const std::string& tableName, const std::string& keyName,
@@ -112,9 +118,9 @@ public:
   void operator=(const std::string& other)
   { this->value=other;
   }
-  std::string GetDatA();
-  std::string GetIdentifierNoQuotes();
-  std::string GetIdentifieR();
+  std::string GetDatA()const;
+  std::string GetIdentifierNoQuotes()const;
+  std::string GetIdentifieR()const;
 };
 
 class DatabaseRoutines;
@@ -222,13 +228,20 @@ public:
   bool FetchTableNames
 (List<std::string>& output, std::stringstream& comments)
 ;
-  bool FetchTable
+  bool FetchTableFromDatabaseIdentifier
 (List<List<std::string> >& output,
  List<std::string>& outputColumnLabels,
  bool& outputWasTruncated, int& actualNumRowsIfTruncated,
- const std::string& tableNameUnsafe, std::stringstream& comments)
+ const std::string& tableIdentifier, std::stringstream& comments)
+;
 
+  bool FetchTablE
+(List<List<std::string> >& output,
+ List<std::string>& outputColumnLabels,
+ bool& outputWasTruncated, int& actualNumRowsIfTruncated,
+ const MySQLdata& inputTable, std::stringstream& comments)
   ;
+
   std::string GetStringThatDoesNotTriggerMySQLRetartedInsaneDesignErrors(std::string& input);
   bool AddUsersFromEmailsAndCourseName(const std::string& emailList, const std::string& ExamHomeFile, std::stringstream& comments);
   bool AddUsersFromEmails
@@ -241,7 +254,8 @@ public:
   std::string ToStringAllUsersHTMLFormat();
   std::string ToStringCurrentTableHTML();
   std::string ToStringAllTables();
-  std::string ToStringTable(const std::string& inputTableNameUnsafe);
+  std::string ToStringTablE(const MySQLdata& inputTable);
+  std::string ToStringTableFromTableIdentifier(const std::string& tableIdentifier);
 
   bool CreateTable
   (const std::string& tableNameUnsafe, const std::string& desiredTableContent,

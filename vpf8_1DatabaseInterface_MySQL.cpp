@@ -211,17 +211,34 @@ bool DatabaseRoutinesGlobalFunctions::TableExists
 #endif
 }
 
-bool DatabaseRoutinesGlobalFunctions::FetchTable
+bool DatabaseRoutinesGlobalFunctions::FetchTablE
 (List<List<std::string> >& output,
  List<std::string>& outputColumnLabels,
  bool& outputWasTruncated, int& actualNumRowsIfTruncated,
- const std::string& tableNameUnsafe, std::stringstream& comments)
+ const std::string& tableName, std::stringstream& comments)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::FetchTable");
 #ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
-  return theRoutines.FetchTable
+  return theRoutines.FetchTablE
   (output, outputColumnLabels, outputWasTruncated, actualNumRowsIfTruncated,
-   tableNameUnsafe, comments);
+   tableName, comments);
+#else
+  comments << "Database not available.";
+  return false;
+#endif // MACRO_use_MySQL
+}
+
+bool DatabaseRoutinesGlobalFunctions::FetchTableFromDatabaseIdentifier
+(List<List<std::string> >& output,
+ List<std::string>& outputColumnLabels,
+ bool& outputWasTruncated, int& actualNumRowsIfTruncated,
+ const std::string& tableIdentifier, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::FetchTable");
+#ifdef MACRO_use_MySQL
+  DatabaseRoutines theRoutines;
+  return theRoutines.FetchTableFromDatabaseIdentifier
+  (output, outputColumnLabels, outputWasTruncated, actualNumRowsIfTruncated,
+   tableIdentifier, comments);
 #else
   comments << "Database not available.";
   return false;
@@ -251,18 +268,18 @@ bool DatabaseRoutinesGlobalFunctions::FetchEntry
 #include <time.h>
 #include <ctime>
 
-std::string MySQLdata::GetDatA()
+std::string MySQLdata::GetDatA()const
 { return "'" + CGI::StringToURLString(this->value) + "'";
 }
 
-std::string MySQLdata::GetIdentifierNoQuotes()
+std::string MySQLdata::GetIdentifierNoQuotes()const
 { std::string result=CGI::StringToURLString(this->value);
   if (result.size()<=30)
     return result;
   return result.substr(0,30)+ Crypto::computeSha1outputBase64(this->value);
 }
 
-std::string MySQLdata::GetIdentifieR()
+std::string MySQLdata::GetIdentifieR()const
 { MacroRegisterFunctionWithName("MySQLdata::GetIdentifieR");
   return "`"+ this->GetIdentifierNoQuotes()+"`";
 }
@@ -347,15 +364,21 @@ UserCalculator::~UserCalculator()
     this->actualShaonedSaltedPassword[i]=' ';
 }
 
-std::string DatabaseRoutines::ToStringTable(const std::string& inputTableName)
+std::string DatabaseRoutines::ToStringTablE(const MySQLdata& inputTable)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::ToStringTablE");
+  return this->ToStringTablE(inputTable.GetIdentifierNoQuotes());
+}
+
+std::string DatabaseRoutines::ToStringTableFromTableIdentifier(const std::string& tableIdentifier)
 { MacroRegisterFunctionWithName("DatabaseRoutines::ToStringTable");
   std::stringstream out, comments;
   List<List<std::string> > theTable;
   List<std::string> columnLabels;
   bool wasTruncated=false;
   int actualNumEntries=-1;
-  if (!this->FetchTable(theTable, columnLabels, wasTruncated, actualNumEntries, inputTableName, comments))
-  { out << "<b>Failed to fetch table: " << inputTableName << ".</b> Comments: " << comments.str();
+  if (!this->FetchTableFromDatabaseIdentifier
+      (theTable, columnLabels, wasTruncated, actualNumEntries, tableIdentifier, comments))
+  { out << "<b>Failed to fetch table: " << tableIdentifier << ".</b> Comments: " << comments.str();
     return out.str();
   }
   out << "Table has " << actualNumEntries << " entries. ";
@@ -386,9 +409,11 @@ std::string DatabaseRoutines::ToStringAllTables()
   out << "<table>";
   for (int i=0; i<tableNames.size; i++)
   { std::stringstream linkStream;
-    linkStream << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=browseDatabase&currentDatabaseTable="
-    << tableNames[i] << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation();
-    out << "<tr><td><a href=\"" << linkStream.str() << "\">" << CGI::URLStringToNormal(tableNames[i]) << "</a></td></tr>";
+    linkStream << theGlobalVariables.DisplayNameCalculatorWithPath
+    << "?request=browseDatabase&currentDatabaseTable="
+    << CGI::StringToURLString(tableNames[i]) << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation();
+    out << "<tr><td><a href=\"" << linkStream.str() << "\">" << CGI::URLStringToNormal(tableNames[i])
+    << "</a></td></tr>";
   }
   out << "</table>";
   return out.str();
@@ -412,20 +437,40 @@ bool DatabaseRoutines::FetchTableNames(List<std::string>& output, std::stringstr
 std::string DatabaseRoutines::ToStringCurrentTableHTML()
 { MacroRegisterFunctionWithName("DatabaseRoutines::ToStringCurrentTableHTML");
   std::string currentTable=CGI::URLStringToNormal( theGlobalVariables.GetWebInput("currentDatabaseTable"));
+  if (currentTable.find("`")!=std::string::npos)
+  { std::stringstream out;
+    out << "<b>The table identifier: " << currentTable << " contains the ` character and is invalid. </b>";
+    return out.str();
+  }
   if (currentTable=="")
     return this->ToStringAllTables();
-  return this->ToStringTable(currentTable);
+  if (currentTable.size()>=64)
+  { std::stringstream out;
+    out << "<b>The table identifier: " << currentTable << " is longer than 64 characters and is invalid. </b>";
+    return out.str();
+  }
+  return this->ToStringTableFromTableIdentifier(currentTable);
 }
 
-bool DatabaseRoutines::FetchTable
+bool DatabaseRoutines::FetchTablE
 (List<List<std::string> >& output,
  List<std::string>& outputColumnLabels,
  bool& outputWasTruncated, int& actualNumRowsIfTruncated,
- const std::string& tableNameUnsafe, std::stringstream& comments)
+ const MySQLdata& inputTable, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::FetchTablE");
+  return this->FetchTableFromDatabaseIdentifier
+  (output, outputColumnLabels, outputWasTruncated, actualNumRowsIfTruncated,
+   inputTable.GetIdentifierNoQuotes(), comments);
+}
+
+bool DatabaseRoutines::FetchTableFromDatabaseIdentifier
+(List<List<std::string> >& output,
+ List<std::string>& outputColumnLabels,
+ bool& outputWasTruncated, int& actualNumRowsIfTruncated,
+ const std::string& tableIdentifier, std::stringstream& comments)
 { MacroRegisterFunctionWithName("DatabaseRoutines::FetchTable");
-  MySQLdata tableName=tableNameUnsafe;
   std::stringstream queryStream;
-  queryStream << "SELECT * FROM calculatorUsers." << tableName.GetIdentifieR();
+  queryStream << "SELECT * FROM calculatorUsers.`" << tableIdentifier << "`";
   DatabaseQuery theQuery(*this, queryStream.str(), &comments, this->MaxNumRowsToFetch);
   if (!theQuery.flagQuerySucceeded)
   { comments << "Query: " << queryStream.str() << " failed. ";
@@ -449,7 +494,7 @@ bool DatabaseRoutines::FetchTable
   queryStreamFields
   << "SELECT `COLUMN_NAME` FROM information_schema.COLUMNS WHERE "
   << "TABLE_SCHEMA='calculatorUsers' "
-  << "AND TABLE_NAME='" << tableName.GetIdentifierNoQuotes() << "' ";
+  << "AND TABLE_NAME='" << tableIdentifier << "' ";
   DatabaseQuery theFieldQuery(*this, queryStreamFields.str(), &comments);
   if (!theFieldQuery.flagQuerySucceeded)
   { comments << "Query: " << queryStreamFields.str() << " failed. ";
@@ -1557,7 +1602,7 @@ bool DatabaseRoutines::innerDisplayDatabaseTable
     desiredTableName=input.ToString();
   }
   DatabaseRoutines theRoutines;
-  return output.AssignValue(theRoutines.ToStringTable(desiredTableName), theCommands);
+  return output.AssignValue(theRoutines.ToStringTablE(desiredTableName), theCommands);
 }
 
 bool DatabaseRoutines::innerGetUserDBEntry(Calculator& theCommands, const Expression& input, Expression& output)

@@ -301,6 +301,8 @@ std::string CalculatorHTML::GetSubmitEmailsJavascript()
 
 std::string CalculatorHTML::GetSubmitAnswersJavascript()
 { std::stringstream out;
+  std::string requestType= theGlobalVariables.userCalculatorRequestType=="examForReal" ? "submitProblem" :
+  "submitExercise";
   out
   << "<script type=\"text/javascript\"> \n"
   << "var timerForPreviewAnswers;\n"
@@ -313,7 +315,7 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   << "}\n"
   << "function submitAnswers(idAnswer, idVerification){\n"
   << "  clearTimeout(timerForPreviewAnswers);\n"
-  << "  params=\"" << this->ToStringCalculatorArgumentsForProblem("submitProblem") << "\";\n"
+  << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestType) << "\";\n"
   << "  submitOrPreviewAnswers(idAnswer, idVerification, params);\n"
   << "}\n"
   << "function submitOrPreviewAnswers(idAnswer, idVerification, inputParams){\n"
@@ -425,12 +427,15 @@ int WebWorker::ProcessSubmitProblem()
   { stOutput << "<b>Failed to interpret html input.</b><br>" << comments.str();
     return 0;
   }
-  if (theGlobalVariables.userCalculatorRequestType=="examForReal")
-    if (!theProblem.LoadAndInterpretDatabaseInfo(comments))
+//  stOutput << "ere be i";
+  if (theGlobalVariables.userCalculatorRequestType=="submitProblem")
+  { if (!theProblem.LoadAndInterpretDatabaseInfo(comments))
     { stOutput << "<b>Failed to load the database entry for the present problem. " << theProblem.BugsGenericMessage << " </b>"
       << comments.str();
       return 0;
     }
+  } //else
+    //stOutput << "request type: " << theGlobalVariables.userCalculatorRequestType;
   Calculator theInterpreter;
   if (!theProblem.PrepareCommands(theInterpreter, comments))
   { stOutput << "<b>Failed to prepare commands.</b>" << comments.str();
@@ -533,7 +538,7 @@ int WebWorker::ProcessSubmitProblem()
   } else
     stOutput << "<span style=\"color:green\"><b>Correct!</b></span>";
   stOutput << "</td></tr>";
-  if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType=="examForReal")
+  if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType=="submitProblem")
   { std::stringstream comments;
     if (!theProblem.GenerateAndStoreDatabaseInfo(comments))
       stOutput << "<tr><td><b>This shouldn't happen and may be a bug: failed to store your answer in the database. "
@@ -1221,8 +1226,13 @@ std::string CalculatorHTML::GetDatabaseTableName()
 
 bool CalculatorHTML::LoadAndInterpretDatabaseInfo(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadAndInterpretDatabaseInfo");
-  DatabaseRoutinesGlobalFunctions::FetchEntry
-  (theGlobalVariables.userDefault, this->GetDatabaseTableName(), this->fileName, this->databaseInfo, comments);
+  //stOutput << "ere be i";
+  if (!DatabaseRoutinesGlobalFunctions::FetchEntry
+    (theGlobalVariables.userDefault, this->GetDatabaseTableName(), this->fileName, this->databaseInfo, comments))
+  { comments << "Error! Failed to fetch database info on the problem. ";
+    return false;
+  }
+  //stOutput << "got to even ere";
   return this->ParseAndInterpretDatabaseInfo(comments);
 }
 
@@ -1232,7 +1242,7 @@ bool CalculatorHTML::ParseAndInterpretDatabaseInfo(std::stringstream& comments)
   List<std::string> theValues;
 //  stOutput << "<br>Parsing and interpreting  database info: <br>" << this->databaseInfo;
   CGI::ChopCGIInputStringToMultipleStrings(this->databaseInfo, theValues, theKeys, this->comments);
-//  stOutput << "<br>Database info keys: " << theKeys.ToStringCommaDelimited() << "<br>Values: " << theValues.ToStringCommaDelimited();
+  //stOutput << "<br>Database info keys: " << theKeys.ToStringCommaDelimited() << "<br>Values: " << theValues.ToStringCommaDelimited();
   if (theKeys.Contains("rand"))
   { std::stringstream reader(theValues[theKeys.GetIndex("rand")]);
     reader >> this->randomSeed;
@@ -1287,10 +1297,11 @@ bool CalculatorHTML::GenerateAndStoreDatabaseInfo(std::stringstream& comments)
 //  stOutput << "<br>database info generated, proceeding to store it:<br>" << this->databaseInfo << "<br>";
 //  if (!DatabaseRoutinesGlobalFunctions::TableExists(this->GetDatabaseTableName(), comments))
 //    stOutput << "Ze table dont exist, name: " << this->GetDatabaseTableName() << "<br>";
-  if (!DatabaseRoutinesGlobalFunctions::CreateColumn(this->fileName, this->GetDatabaseTableName(), comments))
-  { comments << "This shouldn't happen: failed to store database info. ";
-    return false;
-  }
+  if (!DatabaseRoutinesGlobalFunctions::ColumnExists(this->fileName, this->GetDatabaseTableName(), comments))
+    if (!DatabaseRoutinesGlobalFunctions::CreateColumn(this->fileName, this->GetDatabaseTableName(), comments))
+    { comments << "This shouldn't happen: failed to store database info. ";
+      return false;
+    }
   return DatabaseRoutinesGlobalFunctions::SetEntry
   (theGlobalVariables.userDefault, this->GetDatabaseTableName(), this->fileName, this->databaseInfo, comments);
 }
@@ -1305,7 +1316,7 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
   if (theGlobalVariables.flagLoggedIn)
     if (theGlobalVariables.userCalculatorRequestType=="examForReal")
     { //load the random seed.
-      if (!DatabaseRoutinesGlobalFunctions::TableExists(this->GetDatabaseTableName(),comments))
+      if (!DatabaseRoutinesGlobalFunctions::TableExists(this->GetDatabaseTableName(), comments))
         if (!DatabaseRoutinesGlobalFunctions::CreateTable(this->GetDatabaseTableName(), comments))
         { this->outputHtmlMain ="<b>Failed to create table for storing exam results. </b>" +comments.str();
           return false;

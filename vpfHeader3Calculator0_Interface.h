@@ -1265,6 +1265,9 @@ public:
   int opCandidateSSsubalgebra()
   { return this->theAtoms.GetIndexIMustContainTheObject("CandidateSSsubalgebra");
   }
+  int opInfinity()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\infty");
+  }
   int opPi()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\pi");
   }

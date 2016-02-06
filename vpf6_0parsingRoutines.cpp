@@ -210,6 +210,8 @@ void Calculator::init()
   this->controlSequences.AddOnTop("}");
   this->controlSequences.AddOnTop(":");
   this->controlSequences.AddOnTop("pi");
+  this->controlSequences.AddOnTop("infty");
+  this->controlSequences.AddOnTop("infinity");
   this->controlSequences.AddOnTop("ln");
   this->controlSequences.AddOnTop("\\ln");
   this->controlSequences.AddOnTop("log");
@@ -1308,14 +1310,15 @@ bool Calculator::ApplyOneRule()
   //  stOutput << "lastS is sequence but lastE is |" << lastE.theData.ToString() << "|";
   if (thirdToLastS=="\\sqrt" && secondToLastS=="Expression")
     return this->ReplaceSqrtEXByEX();
-  if (fourthToLastS=="\\sqrt"  && thirdToLastS == "{}" && secondToLastS=="Expression")
+  if (fourthToLastS=="\\sqrt" && thirdToLastS == "{}" && secondToLastS=="Expression")
     return this->ReplaceSqrtXEXByEX();
-
   if (sixthToLastS=="\\sqrt" && fifthToLastS=="[" && fourthToLastS=="Expression" && thirdToLastS=="]" && secondToLastS=="Expression")
     return this->ReplaceOXEXEXByEX();
   //Some synonyms:
   if (lastS=="ln" || lastS=="log" || lastS=="\\ln")
     return this->ReplaceXByEusingO(this->opLog());
+  if (lastS=="infinity" || lastS=="infty")
+    return this->ReplaceXByEusingO(this->opInfinity());
   if (lastS=="pi")
     return this->ReplaceXByEusingO(this->opPi());
   if (lastS=="arcsin")

@@ -915,7 +915,7 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure)
   this->databaseUser="calculator";
   this->hostname="localhost";
   this->theDatabaseName="calculatorUsers";
-  this->connection=mysql_init(0); // Initialise the instance
+  this->connection=mysql_init(0); // Initialize the instance
   if(this->connection==0)
   { if (commentsOnFailure!=0)
       *commentsOnFailure << "MySQL initialization failed.";
@@ -938,10 +938,6 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure)
     return false;
   }
   //CANT use DatabaseQuery object as its constructor calls this method!!!!!
-//  std::string selectAnsiQuotes="SET sql_mode='ANSI_QUOTES'";
-//  bool result= (mysql_query(this->connection, selectAnsiQuotes.c_str())==0);
-//  if (!result)
-//    return *this << "Command: <b>" << selectAnsiQuotes << "</b> failed. ";
   mysql_free_result( mysql_use_result(this->connection));
   return this->CreateTable("users", "\
     user VARCHAR(255) NOT NULL PRIMARY KEY,  \

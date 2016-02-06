@@ -567,12 +567,24 @@ std::string WebWorker::ToStringCalculatorArgumentsHumanReadable()
   return out.str();
 }
 
-bool WebWorker::ProcessRawArguments(std::stringstream& argumentProcessingFailureComments)
+bool WebWorker::ProcessRawArguments
+(const std::string& urlEncodedInputString, std::stringstream& argumentProcessingFailureComments, int recursionDepth)
 { MacroRegisterFunctionWithName("WebServer::ProcessRawArguments");
+  if (recursionDepth>1)
+  { argumentProcessingFailureComments << "Error: input string encoded too many times";
+    return false;
+  }
   HashedList<std::string, MathRoutines::hashString>& inputStringNames=theGlobalVariables.webFormArgumentNames;
   List<std::string>& inputStrings=theGlobalVariables.webFormArguments;
-  if (!CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames, argumentProcessingFailureComments))
+  if (!CGI::ChopCGIInputStringToMultipleStrings
+      (urlEncodedInputString, inputStrings, inputStringNames, argumentProcessingFailureComments))
     return false;
+  if (inputStringNames.Contains("doubleURLencodedInput"))
+  { std::string newInput=theGlobalVariables.GetWebInput("doubleURLencodedInput");
+    inputStringNames.Clear();
+    inputStrings.SetSize(0);
+    return this->ProcessRawArguments(newInput, argumentProcessingFailureComments, recursionDepth+1);
+  }
   theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
 //  stOutput << "userCalculatorRequest type is: " << theGlobalVariables.userCalculatorRequestType;
   std::string password;
@@ -1622,7 +1634,7 @@ int WebWorker::ProcessCalculator()
 { MacroRegisterFunctionWithName("WebServer::ProcessCalculator");
   ProgressReportWebServer theReport;
   std::stringstream argumentProcessingFailureComments;
-  if (!this->ProcessRawArguments(argumentProcessingFailureComments))
+  if (!this->ProcessRawArguments(theParser.inputStringRawestOfTheRaw, argumentProcessingFailureComments))
   { stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
     << "<html><body>" << "Failed to process the calculator arguments. <b>"
     << argumentProcessingFailureComments.str() << "</b></body></html>";

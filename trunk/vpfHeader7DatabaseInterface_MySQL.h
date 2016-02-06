@@ -19,8 +19,9 @@ public:
  std::stringstream& comments)
 ;
   static bool SetEntry
-  (const std::string& inputUsername, const std::string& tableName, const std::string& keyName,
-   const std::string& value, std::stringstream& comments);
+  (const std::string& inputUsername, const std::string& tableNameUnsafe, const std::string& keyNameUnsafe,
+   const std::string& valueUnsafe, std::stringstream& comments)
+   ;
   static bool FetchTable
 (List<List<std::string> >& output,
  List<std::string>& outputColumnLabels,
@@ -83,6 +84,39 @@ public:
   TimeWrapper();
 };
 
+class MySQLdata{
+//This class is needed to attempt to deal with mySQL's
+//numerous design errors, to the extent possible.
+//Documenting those errors for the interested reader.
+//1. Mysql identifiers have max length of 64 characters.
+//   Workaround this MySQL bug: when used as identifiers, strings are
+//   trimmed. We use the first 50 characters
+//   + we append SHA-1 of the entire string.
+//   Motivation: we don't loose human-readability for small strings.
+//2. Mysql identifiers cannot have ` characters in them.
+//   Workaround this MySQL bug: we url-encode any data stored in
+//   the database.
+//   Motivation: we retain limited human-readability.
+public:
+  std::string value;
+  MySQLdata(const std::string& other)
+  { this->value=other;
+  }
+  MySQLdata(){}
+  bool operator==(const std::string& other)
+  { return this->value==other;
+  }
+  bool operator!=(const std::string& other)
+  { return !(*this==other);
+  }
+  void operator=(const std::string& other)
+  { this->value=other;
+  }
+  std::string GetDatA();
+  std::string GetIdentifierNoQuotes();
+  std::string GetIdentifieR();
+};
+
 class DatabaseRoutines;
 class UserCalculator
 {
@@ -93,21 +127,18 @@ class UserCalculator
 // Instead users should only modify the unsafe entries.
 // Those are internally (and automatically) converted to safe entries (stored in the private variables below), and only then stored in
 // the database.
-private:
-  std::string usernameSafe;
-  std::string emailSafe;
-  std::string currentTableSafe;
-  std::string currentTableUnsafe;
-  std::string activationTokenSafe;
 public:
   double approximateHoursSinceLastTokenWasIssued;
   std::string usernamePlusPassWord;
-  std::string usernameUnsafe;
+  MySQLdata username;
+  MySQLdata email;
+  MySQLdata currentTable;
+  MySQLdata activationToken;
+  MySQLdata enteredAuthenticationToken;
+  MySQLdata actualAuthenticationToken;
   std::string enteredPassword;
   std::string actualShaonedSaltedPassword;
   std::string enteredShaonedSaltedPassword;
-  std::string emailUnsafe;
-  std::string activationTokenUnsafe;
   std::string userRole;
   List<std::string> selectedColumnsUnsafe;
   List<std::string> selectedColumnValuesUnsafe;
@@ -115,8 +146,6 @@ public:
 
   List<std::string> selectedRowFieldsUnsafe;
   List<std::string> selectedRowFieldNamesUnsafe;
-  std::string enteredAuthenticationTokenUnsafe;
-  std::string actualAuthenticationTokeNUnsafe;
   HashedList<std::string, MathRoutines::hashString> extraKeys;
   List<std::string> extraValues;
   TimeWrapper authenticationTokenCreationTime;
@@ -126,28 +155,25 @@ public:
   bool LoadAndInterpretDatabaseInfo(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure);
   bool LoadAndInterpretDatabaseInfo(const std::string& theInfo, std::stringstream& commentsOnFailure);
   bool StoreDatabaseInfo(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure);
-  bool SetCurrentTable(const std::string& inputTableNameUnsafe);
   std::string GetSelectedRowEntry(const std::string& theKey);
   bool FetchOneUserRow
   (DatabaseRoutines& theRoutines, std::stringstream& failureStream);
   bool FetchOneColumn
   (const std::string& columnNameUnsafe, std::string& outputUnsafe,
-   DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream* failureComments=0);
-  void FetchColumns(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
-  bool AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream* commentsOnFailure);
-  bool AuthenticateWithToken(DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream* commentsOnFailure);
-  bool Authenticate(DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream* commentsOnFailure);
-  bool ResetAuthenticationToken(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
+   DatabaseRoutines& theRoutines, std::stringstream* failureComments=0);
+  void FetchColumns(DatabaseRoutines& theRoutines);
+  bool AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure);
+  bool AuthenticateWithToken(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure);
+  bool Authenticate(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure);
+  bool ResetAuthenticationToken(DatabaseRoutines& theRoutines);
   std::string GetPassword(DatabaseRoutines& theRoutines);
   bool SetColumnEntry
   (const std::string& columnNameUnsafe, const std::string& theValueUnsafe,
-   DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream* failureComments=0);
-  bool SetPassword(DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream* commentsOnFailure);
-  bool TryToLogIn(DatabaseRoutines& theRoutines, std::stringstream& comments);
-  bool DeleteMe(DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream& commentsOnFailure);
-  bool Iexist(DatabaseRoutines& theRoutines, bool recomputeSafeEntries);
-  bool CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, bool recomputeSafeEntries, std::stringstream* commentsOnFailure);
-  bool ComputeSafeObjectNames();
+   DatabaseRoutines& theRoutines, std::stringstream* failureComments=0);
+  bool SetPassword(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure);
+  bool DeleteMe(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure);
+  bool Iexist(DatabaseRoutines& theRoutines);
+  bool CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure);
   static bool IsAcceptableDatabaseInpuT(const std::string& input, std::stringstream* comments);
   static bool IsAcceptableCharDatabaseInpuT(char theChar);
   bool getUserPassAndEmail(Calculator& theCommands, const Expression& input);
@@ -203,6 +229,7 @@ public:
  const std::string& tableNameUnsafe, std::stringstream& comments)
 
   ;
+  std::string GetStringThatDoesNotTriggerMySQLRetartedInsaneDesignErrors(std::string& input);
   bool AddUsersFromEmailsAndCourseName(const std::string& emailList, const std::string& ExamHomeFile, std::stringstream& comments);
   bool AddUsersFromEmails
   (const std::string& emailList, std::stringstream& comments);
@@ -221,7 +248,6 @@ public:
    std::stringstream* commentsOnCreation);
 
   static bool innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerTestLogin(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddUser(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSendActivationEmailUsers(Calculator& theCommands, const Expression& input, Expression& output);

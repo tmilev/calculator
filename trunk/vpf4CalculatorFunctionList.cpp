@@ -26,15 +26,6 @@ void Calculator::initAdminFunctions()
 //   true, false, "DatabaseRoutines::innerSendActivationEmailUsers");
 //   ;
   this->AddOperationInnerHandler
-  ("TestLogin", DatabaseRoutines::innerTestLogin, "",
-   "DO NOT USE, function is FOR DEBUGGING PURPOSES ONLY.\
-   This function is completely insecure and WILL expose your username and password to the whole\
-   Internet (even if used through https) if I made a programming mistake and the function crashes.\
-   Tests the login function from username (first argument) and password (second argument). \
-   Should only be used through an https connection. ",
-   "TestLogin(\"testUser\", \"password\")", false, true, "DatabaseRoutines::innerTestLogin");
-   ;
-  this->AddOperationInnerHandler
   ("GetUserPassword", DatabaseRoutines::innerGetUserPassword, "",
    "Gets a user's password.",
    "GetUserPassword(\"testUser\"); ", false, true, "DatabaseRoutines::innerGetUserPassword");

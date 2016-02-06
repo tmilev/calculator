@@ -955,13 +955,13 @@ std::string CalculatorHTML::ToStringUserEmailActivationRole
   std::stringstream tableStream;
   tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th></tr>";
   UserCalculator currentUser;
-  currentUser.SetCurrentTable("users");
+  currentUser.currentTable="users";
   DatabaseRoutines theRoutines;
   for (int i=0; i<userTable.size; i++)
   { std::stringstream failureStream;
     if (!currentUser.FetchOneUserRow(theRoutines, failureStream ))
-    { currentUser.emailUnsafe=failureStream.str();
-      currentUser.activationTokenUnsafe="error";
+    { currentUser.email=failureStream.str();
+      currentUser.activationToken="error";
       currentUser.userRole="error";
     }
     if (adminsOnly)
@@ -970,23 +970,23 @@ std::string CalculatorHTML::ToStringUserEmailActivationRole
     numUsers++;
     tableStream << "<tr>"
     << "<td>" << userTable[i][indexUser] << "</td>"
-    << "<td>" << currentUser.emailUnsafe << "</td>"
+    << "<td>" << currentUser.email.value << "</td>"
     ;
-    if (currentUser.activationTokenUnsafe!="activated" && currentUser.activationTokenUnsafe!="error")
+    if (currentUser.activationToken!="activated" && currentUser.activationToken!="error")
     { tableStream << "<td><span style=\"color:red\">not activated</span></td>";
-      if (currentUser.activationTokenUnsafe!="")
+      if (currentUser.activationToken!="")
         tableStream << "<td>"
         << "<a href=\""
-        << UserCalculator::GetActivationAddressFromActivationToken(currentUser.activationTokenUnsafe, userTable[i][indexUser])
+        << UserCalculator::GetActivationAddressFromActivationToken(currentUser.activationToken.value, userTable[i][indexUser])
         << "\"> (Re)activate account and change password</a>"
         << "</td>";
-    } else if (currentUser.activationTokenUnsafe=="error")
-    { tableStream << "<td>error</td>";
-    } else
+    } else if (currentUser.activationToken=="error")
+      tableStream << "<td>error</td>";
+    else
     { tableStream << "<td><span style=\"color:green\">activated</span></td>";
       tableStream << "<td><span style=\"color:red\">"
       << "<a href=\""
-      << UserCalculator::GetActivationAddressFromActivationToken(currentUser.activationTokenUnsafe, userTable[i][indexUser])
+      << UserCalculator::GetActivationAddressFromActivationToken(currentUser.activationToken.value, userTable[i][indexUser])
       << "\"> (Re)activate account and change password</a>"
       << "</span></td>";
     }
@@ -1121,10 +1121,10 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   refStreamExercise << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&" << refStreamNoRequest.str();
   refStreamForReal << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=examForReal&" << refStreamNoRequest.str();
   if (inputOutput.GetTagClass()=="calculatorExamProblem")
-  { out << " <a href=\"" << refStreamForReal.str() << "\">Start (for credit).</a>";
-    out << " <a href=\"" << refStreamExercise.str() << "\">Exercise (no credit, unlimited tries).</a>";
+  { out << " <a href=\"" << refStreamForReal.str() << "\">Start (for credit)</a> ";
+    out << " <a href=\"" << refStreamExercise.str() << "\">Exercise (no credit, unlimited tries)</a> ";
   } else
-    out << " <a href=\"" << refStreamExercise.str() << "\">Start.</a>";
+    out << " <a href=\"" << refStreamExercise.str() << "\">Start</a> ";
   std::string stringToDisplay=  FileOperations::GetFileNameFromFileNameWithPath(inputOutput.content);
   //out << " " << this->NumProblemsFound << ". "
   out << stringToDisplay;
@@ -1287,7 +1287,10 @@ bool CalculatorHTML::GenerateAndStoreDatabaseInfo(std::stringstream& comments)
 //  stOutput << "<br>database info generated, proceeding to store it:<br>" << this->databaseInfo << "<br>";
 //  if (!DatabaseRoutinesGlobalFunctions::TableExists(this->GetDatabaseTableName(), comments))
 //    stOutput << "Ze table dont exist, name: " << this->GetDatabaseTableName() << "<br>";
-  DatabaseRoutinesGlobalFunctions::CreateColumn(this->fileName, this->GetDatabaseTableName(), comments);
+  if (!DatabaseRoutinesGlobalFunctions::CreateColumn(this->fileName, this->GetDatabaseTableName(), comments))
+  { comments << "This shouldn't happen: failed to store database info. ";
+    return false;
+  }
   return DatabaseRoutinesGlobalFunctions::SetEntry
   (theGlobalVariables.userDefault, this->GetDatabaseTableName(), this->fileName, this->databaseInfo, comments);
 }

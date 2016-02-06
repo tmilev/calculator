@@ -90,7 +90,7 @@ class MySQLdata{
 //Documenting those errors for the interested reader.
 //1. Mysql identifiers have max length of 64 characters.
 //   Workaround this MySQL bug: when used as identifiers, strings are
-//   trimmed. We use the first 50 characters
+//   trimmed. We use the first 30 characters
 //   + we append SHA-1 of the entire string.
 //   Motivation: we don't loose human-readability for small strings.
 //2. Mysql identifiers cannot have ` characters in them.
@@ -148,7 +148,7 @@ public:
   List<std::string> selectedRowFieldNamesUnsafe;
   HashedList<std::string, MathRoutines::hashString> extraKeys;
   List<std::string> extraValues;
-  TimeWrapper authenticationTokenCreationTime;
+  TimeWrapper authenticationCreationTime;
   std::string GetKeyValue(const std::string& key);
   void SetKeyValue(const std::string& key, const std::string& inputValue);
   bool flagNewAuthenticationTokenComputedUserNeedsIt;
@@ -165,7 +165,7 @@ public:
   bool AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure);
   bool AuthenticateWithToken(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure);
   bool Authenticate(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure);
-  bool ResetAuthenticationToken(DatabaseRoutines& theRoutines);
+  bool ResetAuthenticationToken(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure);
   std::string GetPassword(DatabaseRoutines& theRoutines);
   bool SetColumnEntry
   (const std::string& columnNameUnsafe, const std::string& theValueUnsafe,

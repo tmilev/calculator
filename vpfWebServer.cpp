@@ -1687,7 +1687,8 @@ int WebWorker::ProcessCalculator()
   if (theGlobalVariables.userCalculatorRequestType=="addEmails" &&
       theGlobalVariables.flagLoggedIn)
     return this->ProcessAddUserEmails();
-  if (theGlobalVariables.userCalculatorRequestType=="submitProblem" &&
+  if ((theGlobalVariables.userCalculatorRequestType=="submitProblem" ||
+       theGlobalVariables.userCalculatorRequestType=="submitExercise")&&
       theGlobalVariables.flagLoggedIn)
     return this->ProcessSubmitProblem();
   if (theGlobalVariables.userCalculatorRequestType=="submitProblemPreview" &&

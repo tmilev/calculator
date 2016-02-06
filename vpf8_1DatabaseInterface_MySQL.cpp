@@ -87,7 +87,7 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
   UserCalculator theUser;
   theUser.username=theGlobalVariables.userDefault;
   theUser.currentTable="users";
-  theUser.ResetAuthenticationToken(theRoutines);
+  theUser.ResetAuthenticationToken(theRoutines, 0);
   theGlobalVariables.SetWebInput("authenticationToken", "");
   return true;
 #else
@@ -110,7 +110,7 @@ bool DatabaseRoutinesGlobalFunctions::SetPassword
   theUser.username=inputUsername;
   theUser.enteredPassword=inputNewPassword;
   bool result= theUser.SetPassword(theRoutines, &comments);
-  theUser.ResetAuthenticationToken(theRoutines);
+  theUser.ResetAuthenticationToken(theRoutines, &comments);
   outputAuthenticationToken= theUser.actualAuthenticationToken.value;
   return result;
 #else
@@ -257,9 +257,9 @@ std::string MySQLdata::GetDatA()
 
 std::string MySQLdata::GetIdentifierNoQuotes()
 { std::string result=CGI::StringToURLString(this->value);
-  if (result.size()<=50)
+  if (result.size()<=30)
     return result;
-  return result.substr(0,50)+ Crypto::computeSha1outputBase64(this->value);
+  return result.substr(0,30)+ Crypto::computeSha1outputBase64(this->value);
 }
 
 std::string MySQLdata::GetIdentifieR()
@@ -273,15 +273,14 @@ bool DatabaseRoutines::ColumnExists
   this->startMySQLDatabaseIfNotAlreadyStarted(&commentsStream);
   if (!DatabaseRoutinesGlobalFunctions::TableExists(tableNameUnsafe, commentsStream))
     return false;
-  std::string columnNameSafe=CGI::StringToURLString(columnNameUnsafe);
-  std::string tableNameSafe=CGI::StringToURLString(tableNameUnsafe);
+  MySQLdata columnName=columnNameUnsafe;
+  MySQLdata tableName=tableNameUnsafe;
   std::stringstream columnExistsStream;
   columnExistsStream << "SELECT * FROM " << "information_schema.COLUMNS WHERE "
   << "TABLE_SCHEMA='calculatorUsers' "
-  << "AND TABLE_NAME='" << tableNameSafe << "' "
-  << "AND COLUMN_NAME='" << columnNameSafe << "' ";
-  stOutput << "firing query: " << columnExistsStream.str();
-  DatabaseQuery theQuery(*this, columnExistsStream.str());
+  << "AND TABLE_NAME='" << tableName.GetIdentifierNoQuotes() << "' "
+  << "AND COLUMN_NAME='" << columnName.GetIdentifierNoQuotes() << "' ";
+  DatabaseQuery theQuery(*this, columnExistsStream.str(), &commentsStream);
   return theQuery.flagQuerySucceeded && theQuery.flagQueryReturnedResult;
 }
 
@@ -424,9 +423,9 @@ bool DatabaseRoutines::FetchTable
  bool& outputWasTruncated, int& actualNumRowsIfTruncated,
  const std::string& tableNameUnsafe, std::stringstream& comments)
 { MacroRegisterFunctionWithName("DatabaseRoutines::FetchTable");
-  std::string tableNameSafe=CGI::StringToURLString(tableNameUnsafe);
+  MySQLdata tableName=tableNameUnsafe;
   std::stringstream queryStream;
-  queryStream << "SELECT * FROM calculatorUsers.`" << tableNameSafe << "`";
+  queryStream << "SELECT * FROM calculatorUsers." << tableName.GetIdentifieR();
   DatabaseQuery theQuery(*this, queryStream.str(), &comments, this->MaxNumRowsToFetch);
   if (!theQuery.flagQuerySucceeded)
   { comments << "Query: " << queryStream.str() << " failed. ";
@@ -450,7 +449,7 @@ bool DatabaseRoutines::FetchTable
   queryStreamFields
   << "SELECT `COLUMN_NAME` FROM information_schema.COLUMNS WHERE "
   << "TABLE_SCHEMA='calculatorUsers' "
-  << "AND TABLE_NAME='" << tableNameSafe << "' ";
+  << "AND TABLE_NAME='" << tableName.GetIdentifierNoQuotes() << "' ";
   DatabaseQuery theFieldQuery(*this, queryStreamFields.str(), &comments);
   if (!theFieldQuery.flagQuerySucceeded)
   { comments << "Query: " << queryStreamFields.str() << " failed. ";
@@ -562,7 +561,7 @@ bool UserCalculator::FetchOneColumn
   queryStream << "SELECT " << columnName.GetIdentifieR()
   << " FROM calculatorUsers." << this->currentTable.GetIdentifieR() << " WHERE user="
   << this->username.GetDatA() ;
-  DatabaseQuery theQuery(theRoutines, queryStream.str());
+  DatabaseQuery theQuery(theRoutines, queryStream.str(), failureComments);
   outputUnsafe="";
   if (!theQuery.flagQuerySucceeded)
   { if (failureComments!=0)
@@ -585,31 +584,27 @@ bool UserCalculator::AuthenticateWithToken(DatabaseRoutines& theRoutines, std::s
   this->currentTable="users";
   if (this->enteredAuthenticationToken=="")
     return false;
-  std::string authenticationTokenCreationTimeSTRING;
-  std::stringstream authenticationFailureRemarks;
+  std::string authenticationCreationTimeSTRING;
   if (!this->FetchOneColumn
-      ("authenticationTokenCreationTime", authenticationTokenCreationTimeSTRING,
-       theRoutines, &authenticationFailureRemarks))
+      ("authenticationCreationTime", authenticationCreationTimeSTRING,
+       theRoutines, commentsOnFailure))
   { if (commentsOnFailure!=0)
-      *commentsOnFailure << "Failed to fetch authentication token creation time: " << authenticationFailureRemarks.str()
-      << authenticationFailureRemarks;
+      *commentsOnFailure << "Failed to fetch authentication token creation time: "
+      << commentsOnFailure;
     return false;
   }
-  this->authenticationTokenCreationTime=authenticationTokenCreationTimeSTRING;
+  this->authenticationCreationTime=authenticationCreationTimeSTRING;
   TimeWrapper now;
   now.AssignLocalTime();
   this->approximateHoursSinceLastTokenWasIssued=now.SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours
-  (this->authenticationTokenCreationTime);
+  (this->authenticationCreationTime);
 //  stOutput << "approx hours since token issued: " << this->approximateHoursSinceLastTokenWasIssued;
 //  if (this->approximateHoursSinceLastTokenWasIssued>3600 || this->approximateHoursSinceLastTokenWasIssued<=0) //3600 hours = 150 days, a bit more than the length of a semester
 //    return false;
   if (!this->FetchOneColumn
       ("authenticationToken", this->actualAuthenticationToken.value,
-      theRoutines, &authenticationFailureRemarks))
-  { if (commentsOnFailure!=0)
-      *commentsOnFailure << authenticationFailureRemarks.str();
+      theRoutines, commentsOnFailure))
     return false;
-  }
   return this->enteredAuthenticationToken.value==this->actualAuthenticationToken.value;
 }
 
@@ -628,11 +623,11 @@ bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstre
   }
   bool result= this->AuthenticateWithUserNameAndPass(theRoutines, commentsOnFailure);
   if (result)
-    this->FetchOneColumn("userRole", this->userRole, theRoutines, 0);
+    this->FetchOneColumn("userRole", this->userRole, theRoutines, commentsOnFailure);
 //  stOutput << "Approximate hours since last token issued: " << this->approximateHoursSinceLastTokenWasIssued << ". ";
   this->currentTable="users";
 //  if (this->approximateHoursSinceLastTokenWasIssued>1 || this->approximateHoursSinceLastTokenWasIssued<=0)
-  this->ResetAuthenticationToken(theRoutines);
+  this->ResetAuthenticationToken(theRoutines, commentsOnFailure);
 //  else if (result)
 //    this->FetchOneColumn("authenticationToken", this->actualAuthenticationTokeNUnsafe, theRoutines, false, 0);
   return result;
@@ -654,8 +649,8 @@ bool UserCalculator::AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutin
   return this->enteredShaonedSaltedPassword==this->actualShaonedSaltedPassword;
 }
 
-bool UserCalculator::ResetAuthenticationToken(DatabaseRoutines& theRoutines)
-{ MacroRegisterFunctionWithName("UserCalculator::ComputeAuthenticationToken");
+bool UserCalculator::ResetAuthenticationToken(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("UserCalculator::ResetAuthenticationToken");
   TimeWrapper now;
 //  stOutput << "Resetting authentication token. ";
   now.AssignLocalTime();
@@ -664,17 +659,19 @@ bool UserCalculator::ResetAuthenticationToken(DatabaseRoutines& theRoutines)
   this->actualAuthenticationToken=Crypto::computeSha1outputBase64(out.str());
   std::stringstream failure;
   if (!this->SetColumnEntry("authenticationToken", this->actualAuthenticationToken.value, theRoutines, &failure))
-  { stOutput << "Couldn't set column entry for token." << failure.str();
+  { if (*commentsOnFailure!=0)
+      *commentsOnFailure << "Couldn't set column entry for token." << failure.str();
     return false;
   }
   this->flagNewAuthenticationTokenComputedUserNeedsIt=true;
-  if (!this->SetColumnEntry("authenticationTokenCreationTime", now.theTimeStringNonReadable, theRoutines, &failure))
-  { stOutput << "Couldn't set column entry for creation time. " << failure.str();
+  if (!this->SetColumnEntry("authenticationCreationTime", now.theTimeStringNonReadable, theRoutines, &failure))
+  { if (*commentsOnFailure!=0)
+      *commentsOnFailure << "Couldn't set column entry for creation time. " << failure.str();
     return false;
   }
-  //DatabaseQuery theQuery(*this, "SELECT authenticationTokenCreationTime FROM calculatorUsers.users WHERE user=\""+this->username + "\"");
+  //DatabaseQuery theQuery(*this, "SELECT authenticationCreationTime FROM calculatorUsers.users WHERE user=\""+this->username + "\"");
   //if (theQuery.flagQueryReturnedResult)
-  //  this->authentication="authenticationTokenCreationTime: "
+  //  this->authentication="authenticationCreationTime: "
   return true;
 }
 
@@ -911,7 +908,7 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure)
     user VARCHAR(255) NOT NULL PRIMARY KEY,  \
     password LONGTEXT NOT NULL, \
     email LONGTEXT NOT NULL,\
-    authenticationTokenCreationTime LONGTEXT, \
+    authenticationCreationTime LONGTEXT, \
     authenticationToken LONGTEXT , \
     activationToken LONGTEXT,\
     userRole LONGTEXT,\
@@ -933,18 +930,21 @@ bool DatabaseRoutines::CreateTable
   }
   if (this->TableExists(tableNameUnsafe, commentsOnCreation))
     return true;
-  std::string tableNameSafe=CGI::StringToURLString(tableNameUnsafe);
-  std::string tableContent=desiredTableContent;
-  if (tableContent=="")
-    tableContent="user VARCHAR(255) NOT NULL PRIMARY KEY";
-  tableContent="CREATE TABLE `" + tableNameSafe+"` (" + tableContent + ")";
+  MySQLdata tableName=tableNameUnsafe;
+  std::stringstream theQuery;
+  theQuery << "CREATE TABLE " << tableName.GetIdentifieR();
+  if (desiredTableContent=="")
+    theQuery << "(user VARCHAR(255) NOT NULL PRIMARY KEY)";
+  else
+    theQuery << "(" << desiredTableContent << ")";
   //CANNOT use object DatabaseQuery as that object invokes startMySQLDatabase
   //which in turn invokes the present function.
 //  if (commentsOnCreation!=0)
 //    *commentsOnCreation << "Proceeding to create table: " << tableNameUnsafe << ". ";
-  if (mysql_query(this->connection, tableContent.c_str())!=0)
+  if (mysql_query(this->connection, theQuery.str().c_str())!=0)
   { if (commentsOnCreation!=0)
-      *commentsOnCreation << "Command:<br>" << tableContent << "<br>failed. ";
+      *commentsOnCreation << "Command: " << theQuery.str() << " failed. Comments: "
+      << mysql_error(this->connection);
     return false;
   }
   mysql_free_result( mysql_use_result(this->connection));
@@ -986,9 +986,9 @@ bool DatabaseRoutines::TableExists(const std::string& tableNameUnsafe, std::stri
 { MacroRegisterFunctionWithName("DatabaseRoutines::TableExists");
   if (this->connection==0)
     crash << "this->connection equals 0 at a place where this shouldn't happen. " << crash;
-  std::string tableNameSafe=CGI::StringToURLString(tableNameUnsafe);
+  MySQLdata tableName=tableNameUnsafe;
   std::stringstream queryStream;
-  queryStream << "SELECT 1 FROM " << this->theDatabaseName << ".`" << tableNameSafe << "`";
+  queryStream << "SELECT 1 FROM " << this->theDatabaseName << "." << tableName.GetIdentifieR();
   bool result=(mysql_query(this->connection, queryStream.str().c_str())==0);
 //  if (!result)
 //    if (commentsOnFailure!=0)
@@ -1134,12 +1134,12 @@ bool DatabaseRoutines::InsertRow
 (const std::string& primaryKeyUnsafe, const std::string& primaryValueUnsafe,
  const std::string& tableNameUnsafe, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::InsertRow");
-  std::string primaryKeySafe=CGI::StringToURLString(primaryKeyUnsafe);
-  std::string primaryValueSafe=CGI::StringToURLString(primaryValueUnsafe);
-  std::string tableNameSafe=CGI::StringToURLString(tableNameUnsafe);
+  MySQLdata primaryKey   = primaryKeyUnsafe;
+  MySQLdata primaryValue = primaryValueUnsafe;
+  MySQLdata tableName    = tableNameUnsafe;
   std::stringstream queryStream;
-  queryStream << "INSERT INTO calculatorUsers.`"
-  << tableNameSafe << "`(`" << primaryKeySafe << "`) VALUES('" << primaryValueSafe << "')";
+  queryStream << "INSERT INTO calculatorUsers."
+  << tableName.GetIdentifieR() << "(" << primaryKey.GetIdentifieR() << ") VALUES(" << primaryValue.GetDatA() << ")";
   DatabaseQuery theQuery(*this, queryStream.str(), &commentsOnFailure);
   return theQuery.flagQuerySucceeded;
 }
@@ -1561,7 +1561,7 @@ bool DatabaseRoutines::innerDisplayDatabaseTable
 }
 
 bool DatabaseRoutines::innerGetUserDBEntry(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::innerGetAuthenticationTokenCreationTime");
+{ MacroRegisterFunctionWithName("DatabaseRoutines::innerGetauthenticationCreationTime");
   UserCalculator theUser;
   if (!theUser.getUserPassAndSelectedColumns(theCommands, input))
     return false;

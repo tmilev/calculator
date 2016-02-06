@@ -51,7 +51,7 @@ void Calculator::initAdminFunctions()
   this->AddOperationInnerHandler
   ("GetUserDBEntry", DatabaseRoutines::innerGetUserDBEntry, "",
    "Gets a user database entry. Argument: desired database entry (in quotes).",
-   "GetUserDBEntry(\"authenticationTokenCreationTime\"); \
+   "GetUserDBEntry(\"authenticationCreationTime\"); \
     GetUserDBEntry(\"authenticationToken\");\
     GetUserDBEntry(\"email\")", false, true, "DatabaseRoutines::innerGetUserDBEntry");
    ;

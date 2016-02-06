@@ -2716,6 +2716,7 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler()
   //additional operations treated like function names but otherwise not parsed as syntactic elements.
 
   this->AddOperationNoRepetitionAllowed("Freeze");
+  this->AddOperationNoRepetitionAllowed("\\infty");
   this->AddOperationNoRepetitionAllowed("MonomialCollection");
   this->AddOperationNoRepetitionAllowed("MonomialPoly");
   this->AddOperationNoRepetitionAllowed("Melt");

@@ -756,6 +756,24 @@ std::string CGI::GetCalculatorLink(const std::string& DisplayNameCalculator, con
   return out.str();
 }
 
+std::string CGI::GetCalculatorLinkUnclosedPostArguments(const std::string& input)
+{ return CGI::GetCalculatorLinkUnclosedPostArguments(theGlobalVariables.DisplayNameCalculatorWithPath, input);
+}
+
+std::string CGI::GetCalculatorLinkUnclosedPostArguments(const std::string& DisplayNameCalculator, const std::string& input)
+{ std::stringstream out;
+  static int globalLinkCounter=0;
+  int linkCounter=++ globalLinkCounter; //<-Using linkCounter should be thread safer than using globalLinkCounter.
+  //No need to make it really thread safe as this function is not critical and it is unlikely it will ever get
+  //used by more than one thread.
+  out << "<form id=\"submissionForm" << linkCounter << "\" method=\"POST\" action=\"" << DisplayNameCalculator << "\">";
+  out << "<input type=\"hidden\" name=\"doubleURLencodedInput\" value=\""
+  << CGI::StringToURLString(input) << "\">";
+  out << "</form>";
+  out << "<a href=\"document.getElementById('submissionForm" << linkCounter << "').submit();\"> ";
+  return out.str();
+}
+
 std::string CGI::GetMathSpanPure(const std::string& input, int upperNumChars)
 { std::stringstream out;
 //  int dirtylittleHAckHEre;

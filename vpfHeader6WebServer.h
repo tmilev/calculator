@@ -84,7 +84,9 @@ public:
 
   bool IsAllowedAsRequestCookie(const std::string& input);
   int ProcessCalculator();
-  bool ProcessRawArguments(std::stringstream& argumentProcessingFailureComments);
+  bool ProcessRawArguments
+  (const std::string& urlEncodedInputString, std::stringstream& argumentProcessingFailureComments, int recursionDepth=0)
+  ;
   void OutputBeforeComputation();
   void OutputBeforeComputationUserInputAndAutoComplete();
   void OutputStandardResult();

@@ -66,8 +66,8 @@ public:
   std::string inputHtml;
   std::string outputHtmlMain;
   std::string outputHtmlNavigation;
-  std::string currentExamHome;
-  std::string currentExamIntermediate;
+  std::string currentExamHomE;
+  std::string currentExamIntermediatE;
   static const std::string BugsGenericMessage;
   List<std::string> calculatorClasses;
   List<char> splittingChars;
@@ -340,6 +340,7 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   out
   << "  https.onload = function() {\n"
   << "    spanVerification.innerHTML=https.responseText;\n"
+  << "    MathJax.Hub.Queue(['Typeset', MathJax.Hub, spanVerification]);"
   << "  }\n"
   << "  https.send(inputParams);\n"
   << "}\n"
@@ -362,9 +363,11 @@ int WebWorker::ProcessSubmitProblemPreview()
   Calculator theInterpreter;
   theInterpreter.init();
   theInterpreter.Evaluate(studentInterpretation.str());
+//  TimeWrapper now;
+//  std::string yourInputSpanId = "idAnswer"+ Crypto::CharsToBase64String(now.ToStringHumanReadable()) ;
   if (!theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors=="")
     stOutput << "<span style=\"color:magenta\"><b>Interpreting your answer as:</b></span><br>"
-    << theInterpreter.theProgramExpression.ToString();
+    << "\\(" << theInterpreter.theProgramExpression.ToString() << "\\)";
   else if (theInterpreter.syntaxErrors!="")
     stOutput << "<span style=\"color:red\"><b>Failed to parse your answer, got:</b></span><br>"
     << theInterpreter.ToStringSyntacticStackHumanReadable(false);
@@ -422,21 +425,22 @@ int WebWorker::ProcessSubmitProblem()
   { stOutput << "<b>Failed to interpret html input.</b><br>" << comments.str();
     return 0;
   }
+  if (theGlobalVariables.userCalculatorRequestType=="examForReal")
+    if (!theProblem.LoadAndInterpretDatabaseInfo(comments))
+    { stOutput << "<b>Failed to load the database entry for the present problem. " << theProblem.BugsGenericMessage << " </b>"
+      << comments.str();
+      return 0;
+    }
   Calculator theInterpreter;
-  if (!theProblem.LoadAndInterpretDatabaseInfo(comments))
-  { stOutput << "<b>Failed to load the database entry for the present problem. " << theProblem.BugsGenericMessage << " </b>"
-    << comments.str();
-    return 0;
-  }
   if (!theProblem.PrepareCommands(theInterpreter, comments))
   { stOutput << "<b>Failed to prepare commands.</b>" << comments.str();
     return 0;
   }
   if (!theProblem.flagRandomSeedGiven)
     stOutput << "<b>Random seed not given!!!!</b>";
-  theProblem.currentExamHome=        CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
-  theProblem.currentExamIntermediate=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate"));
-  if (theProblem.currentExamHome=="")
+  theProblem.currentExamHomE=        CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
+  theProblem.currentExamIntermediatE=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate"));
+  if (theProblem.currentExamHomE=="")
   { stOutput << "<b>Could not find the problem collection to which this problem belongs. "
     << "If you think this is a bug, do the following. " << theProblem.BugsGenericMessage << "</b>";
     return 0;
@@ -529,7 +533,7 @@ int WebWorker::ProcessSubmitProblem()
   } else
     stOutput << "<span style=\"color:green\"><b>Correct!</b></span>";
   stOutput << "</td></tr>";
-  if (theGlobalVariables.flagLoggedIn)
+  if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType=="examForReal")
   { std::stringstream comments;
     if (!theProblem.GenerateAndStoreDatabaseInfo(comments))
       stOutput << "<tr><td><b>This shouldn't happen and may be a bug: failed to store your answer in the database. "
@@ -537,8 +541,8 @@ int WebWorker::ProcessSubmitProblem()
     else
       stOutput << "<tr><td>So far " << correctSubmissionsRelevant << " correct and "
       << totalSubmissionsRelevant-correctSubmissionsRelevant << " incorrect submissions.</td></tr>";
-  } else
-    stOutput << "<tr><td><b>Submitting problem solutions allowed only for logged-in users. </b></td></tr>";
+  } //else
+    //stOutput << "<tr><td><b>Submitting problem solutions allowed only for logged-in users. </b></td></tr>";
   stOutput << "<tr><td>Your answer was: ";
   for (int i=0; i< theProblem.studentAnswersUnadulterated.size; i++ )
   { stOutput << theProblem.studentAnswersUnadulterated[i];
@@ -809,14 +813,14 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
     << calcArgsNoPassExamDetails
     << "currentExamHome=&" << "currentExamIntermediate=&"
-    << "currentExamFile=" << currentExamHome << "&\"> Course homework home </a><br>";
+    << "currentExamFile=" << CGI::StringToURLString(this->currentExamHomE) << "&\"> Course homework home </a><br>";
   else
     out << "<b>Course homework home</b>";
-  if (this->flagIsExamProblem && currentExamIntermediate!="")
+  if (this->flagIsExamProblem && this->currentExamIntermediatE!="")
     out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
     << calcArgsNoPassExamDetails
-    << "currentExamHome=" << currentExamHome << "&" << "currentExamIntermediate=&"
-    << "currentExamFile=" << currentExamIntermediate << "&\">&nbspCurrent homework. </a><br>";
+    << "currentExamHome=" << CGI::StringToURLString(this->currentExamHomE) << "&" << "currentExamIntermediate=&"
+    << "currentExamFile=" << CGI::StringToURLString(this->currentExamIntermediatE) << "&\">&nbspCurrent homework. </a><br>";
   else if (this->flagIsExamIntermediate)
     out << "<b>&nbspCurrent homework</b><br>";
   if (this->flagIsExamProblem)
@@ -835,22 +839,35 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   if (this->flagIsExamProblem && this->flagParentInvestigated)
   { int indexInParent=this->problemListOfParent.GetIndex(this->fileName);
     if (indexInParent==-1)
-      out << "<b>Could not find the problem collection that contains this problem.</b><br>";
-    else
+    { out << "<b>Could not find the problem collection that contains this problem.</b><br>";
+      out << "<b>This is either a faulty link or a programming error. </b> "
+      << "this->filename is: " << this->fileName << " and the problem list of the parent is: "
+      << this->problemListOfParent.ToStringCommaDelimited();
+    } else
     { if (indexInParent>0)
         out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
-        << theGlobalVariables.userCalculatorRequestType << "&"
-        << calcArgsNoPassExamDetails
-        << "currentExamHome=" << currentExamHome << "&" << "currentExamIntermediate=&"
-        << "currentExamFile=" << CGI::StringToURLString(this->problemListOfParent[indexInParent-1] )
+        << theGlobalVariables.userCalculatorRequestType
+        << "&" << calcArgsNoPassExamDetails
+        << "&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE)
+        << "&currentExamIntermediate=" << CGI::StringToURLString(this->currentExamIntermediatE)
+        << "&currentExamFile=" << CGI::StringToURLString(this->problemListOfParent[indexInParent-1] )
         << "&\"> <-Previous </a><br>";
       if (indexInParent<this->problemListOfParent.size-1)
         out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
-        << theGlobalVariables.userCalculatorRequestType << "&"
-        << calcArgsNoPassExamDetails
-        << "currentExamHome=" << currentExamHome << "&" << "currentExamIntermediate=&"
-        << "currentExamFile=" << CGI::StringToURLString(this->problemListOfParent[indexInParent+1] )
-        << "&\"> Next-> </a><br>";
+        << theGlobalVariables.userCalculatorRequestType
+        << "&" << calcArgsNoPassExamDetails
+        << "&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE)
+        << "&currentExamIntermediate=" << CGI::StringToURLString(this->currentExamIntermediatE)
+        << "&currentExamFile=" << CGI::StringToURLString(this->problemListOfParent[indexInParent+1] )
+        << "\"> Next-> </a><br>";
+      else
+        out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
+        << theGlobalVariables.userCalculatorRequestType
+        << "&" << calcArgsNoPassExamDetails
+        << "&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE)
+        << "&currentExamIntermediate="
+        << "&currentExamFile=" << CGI::StringToURLString(this->currentExamHomE)
+        << "&\">Last problem, return to course page.</a><br>";
     }
   }
   return out.str();
@@ -1109,7 +1126,8 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   } else
     out << " <a href=\"" << refStreamExercise.str() << "\">Start.</a>";
   std::string stringToDisplay=  FileOperations::GetFileNameFromFileNameWithPath(inputOutput.content);
-  out << " " << this->NumProblemsFound << ". " << stringToDisplay;
+  //out << " " << this->NumProblemsFound << ". "
+  out << stringToDisplay;
   inputOutput.interpretedCommand=out.str();
 }
 
@@ -1129,6 +1147,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   bool moreThanOneCommand=false;
   std::string lastCommands;
   int commandCounter=2;
+//  out << "DEBUG nfo, remove when done. randseed: " << this->randomSeed;
   //first command and first syntactic element are the random seed and are ignored.
   for (int spanCounter=1; spanCounter <this->theContent.size; spanCounter++)
   { SyntacticElementHTML& currentElt=this->theContent[spanCounter];
@@ -1176,8 +1195,8 @@ void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments)
   if (this->flagParentInvestigated)
     return;
   this->flagParentInvestigated=true;
-  this->currentExamHome= theGlobalVariables.GetWebInput("currentExamHome");
-  this->currentExamIntermediate=theGlobalVariables.GetWebInput("currentExamIntermediate");
+  this->currentExamHomE=  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
+  this->currentExamIntermediatE=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate"));
   if (!this->flagIsExamProblem)
     return;
   CalculatorHTML parserOfParent;

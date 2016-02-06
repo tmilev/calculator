@@ -118,6 +118,20 @@ bool DatabaseRoutinesGlobalFunctions::SetPassword
 #endif // MACRO_use_MySQL
 }
 
+bool DatabaseRoutinesGlobalFunctions::RowExists
+  (const std::string& inputUsername, const std::string& tableName, std::stringstream& comments)
+{
+#ifdef MACRO_use_MySQL
+  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::RowExists");
+  if (!theGlobalVariables.flagLoggedIn)
+    return false;
+  DatabaseRoutines theRoutines;
+  return theRoutines.RowExists(inputUsername, tableName, comments);
+#else
+  return false;
+#endif // MACRO_use_MySQL
+}
+
 bool DatabaseRoutinesGlobalFunctions::SetEntry
   (const std::string& inputUsername, const std::string& tableNameUnsafe, const std::string& keyNameUnsafe,
    const std::string& valueUnsafe, std::stringstream& comments)
@@ -283,6 +297,19 @@ std::string MySQLdata::GetIdentifieR()const
 { MacroRegisterFunctionWithName("MySQLdata::GetIdentifieR");
   return "`"+ this->GetIdentifierNoQuotes()+"`";
 }
+
+bool DatabaseRoutines::RowExists
+  (const MySQLdata& inputUsername, const MySQLdata& tableName, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::RowExists");
+  if (!this->startMySQLDatabaseIfNotAlreadyStarted(&comments))
+    return false;
+  std::stringstream theQueryStream;
+  theQueryStream << "SELECT * FROM calculatorUsers." << tableName.GetIdentifieR()
+  << " WHERE user=" << inputUsername.GetDatA();
+  DatabaseQuery theQuery(*this, theQueryStream.str(), &comments);
+  return theQuery.flagQuerySucceeded && theQuery.flagQueryReturnedResult;
+}
+
 
 bool DatabaseRoutines::ColumnExists
 (const std::string& columnNameUnsafe, const std::string& tableNameUnsafe, std::stringstream& commentsStream)
@@ -615,7 +642,7 @@ bool UserCalculator::FetchOneColumn
   }
   if (!theQuery.flagQueryReturnedResult)
   { if (failureComments!=0)
-      *failureComments << "<b> Query did not return a result - column may not exist.</b>";
+      *failureComments << "<b>Query did not return a result - column may not exist. </b>";
     return false;
   }
   outputUnsafe= CGI::URLStringToNormal(theQuery.firstResultString);

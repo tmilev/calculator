@@ -284,7 +284,7 @@ std::string CalculatorHTML::GetSubmitEmailsJavascript()
   << "  inputParams+='&userRole='+userRole;\n"
   << "  inputParams+='&" << theGlobalVariables.ToStringCalcArgsNoNavigation() << "';\n"
   << "  inputParams+='&mainInput=' + encodeURIComponent(spanEmailList.value);\n"
-  << "  inputParams+='extraInfo=' + encodeURIComponent(spanExtraInfo.value);\n"
+  << "  inputParams+='&extraInfo=' + encodeURIComponent(spanExtraInfo.value);\n"
 //  << "  inputParams+='&currentExamHome=' + problemCollectionName;\n"
   << "  inputParams+='&currentExamHome=" << CGI::StringToURLString(this->fileName) << "';\n"
   << "  var https = new XMLHttpRequest();\n"
@@ -1235,12 +1235,21 @@ bool CalculatorHTML::LoadAndInterpretDatabaseInfo(std::stringstream& comments)
   if (!DatabaseRoutinesGlobalFunctions::ColumnExists
       (this->fileName, this->GetDatabaseTableName(), comments))
     if (!DatabaseRoutinesGlobalFunctions::CreateColumn(this->fileName, this->GetDatabaseTableName(), comments))
-    { comments << "Failed to create column: " << this->fileName << " in table: " << this->GetDatabaseTableName();
+    { comments << "Failed to create column: " << this->fileName << " in table: " << this->GetDatabaseTableName()
+      << ". ";
+      return false;
+    }
+  if (!DatabaseRoutinesGlobalFunctions::RowExists
+      (theGlobalVariables.userDefault, this->GetDatabaseTableName(), comments))
+    if (!DatabaseRoutinesGlobalFunctions::SetEntry
+        (theGlobalVariables.userDefault, this->GetDatabaseTableName(), this->fileName, "", comments))
+    { comments << "Failed to create an empty column for user: " << theGlobalVariables.userDefault
+      << " table: " << this->GetDatabaseTableName() << " column: " << this->fileName;
       return false;
     }
   if (!DatabaseRoutinesGlobalFunctions::FetchEntry
       (theGlobalVariables.userDefault, this->GetDatabaseTableName(), this->fileName, this->databaseInfo, comments))
-  { comments << "Error! Failed to fetch database info on the problem. ";
+  { comments << "Error: failed to fetch database info on the problem. ";
     return false;
   }
   //stOutput << "got to even ere";
@@ -1320,7 +1329,7 @@ bool CalculatorHTML::GenerateAndStoreDatabaseInfo(std::stringstream& comments)
 bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretHtml");
   if (!this->ParseHTML(comments))
-  { this->outputHtmlMain="<b>Failed to interpret html input.</b><br>" +this->ToStringContent();
+  { this->outputHtmlMain="<b>Failed to interpret html input. </b><br>" +this->ToStringContent();
     return false;
   }
   this->NumAttemptsToInterpret=0;

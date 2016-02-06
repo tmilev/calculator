@@ -34,6 +34,9 @@ public:
  bool& outputWasTruncated, int& actualNumRowsIfTruncated,
  const std::string& tableIdentifier, std::stringstream& comments)
 ;
+  static bool RowExists
+  (const std::string& inputUsername, const std::string& tableName, std::stringstream& comments)
+   ;
   static bool FetchEntry
   (const std::string& inputUsername, const std::string& tableName, const std::string& keyName,
    std::string& output, std::stringstream& comments);
@@ -225,6 +228,9 @@ public:
   bool CreateColumn(const std::string& columnNameNameUnsafe, const std::string& tableNameUnsafe,
                     std::stringstream& commentsOnCreation);
   bool TableExists(const std::string& tableNameUnsafe, std::stringstream* commentsOnFailure);
+  bool RowExists
+  (const MySQLdata& inputUsername, const MySQLdata& tableName, std::stringstream& comments)
+   ;
   bool FetchTableNames
 (List<std::string>& output, std::stringstream& comments)
 ;

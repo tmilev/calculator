@@ -588,9 +588,9 @@ bool WebWorker::ProcessRawArguments
   theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
 //  stOutput << "userCalculatorRequest type is: " << theGlobalVariables.userCalculatorRequestType;
   std::string password;
-  std::string desiredUser=theGlobalVariables.GetWebInput("user");
+  std::string desiredUser=theGlobalVariables.GetWebInput("username");
   if (desiredUser=="")
-    desiredUser=theGlobalVariables.GetWebInput("userHidden");
+    desiredUser=theGlobalVariables.GetWebInput("usernameHidden");
   if (desiredUser!="")
     CGI::URLStringToNormal(desiredUser, desiredUser);
   this->authenticationToken=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("authenticationToken"));
@@ -639,7 +639,7 @@ std::string WebWorker::GetHtmlHiddenInputs()
   out
   << "<input type=\"hidden\" id=\"debugFlag\" name=\"debugFlag\">\n"
   << "<input type=\"hidden\" id=\"authenticationToken\" name=\"authenticationToken\">\n"
-  << "<input type=\"hidden\" id=\"userHidden\" name=\"userHidden\">\n"
+  << "<input type=\"hidden\" id=\"usernameHidden\" name=\"usernameHidden\">\n"
   << "<input type=\"hidden\" id=\"currentExamHome\" name=\"currentExamHome\">\n"
   << "<input type=\"hidden\" id=\"currentExamIntermediate\" name=\"currentExamIntermediate\">\n"
   << "<input type=\"hidden\" id=\"currentExamFile\" name=\"currentExamFile\">\n"
@@ -1782,9 +1782,9 @@ std::string WebWorker::GetLoginHTMLinternal()
 //  << this->mainArgumentRAW;
   out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"GET\" accept-charset=\"utf-8\">"
   <<  "User name: "
-  << "<input type=\"text\" name=\"user\" placeholder=\"user\" required>"
+  << "<input type=\"text\" name=\"username\" placeholder=\"username\" required>"
   << "<br>Password: "
-  << "<input type=\"password\" name=\"password\" placeholder=\"password\">"
+  << "<input type=\"password\" name=\"password\" placeholder=\"password\" autocomplete=\"on\">"
   << this->GetHtmlHiddenInputExercise()
   << this->GetHtmlHiddenInputs()
   << "<input type=\"submit\" value=\"Login\">"
@@ -1810,12 +1810,12 @@ std::string WebWorker::GetChangePasswordPage()
   << "<script type=\"text/javascript\"> \n"
   << "function submitChangePassRequest(){\n"
   << "  spanVerification = document.getElementById(\"passwordChangeResult\");\n"
-  << "  inputUser= document.getElementById(\"user\");\n"
+  << "  inputUser= document.getElementById(\"username\");\n"
   << "  inputPassword= document.getElementById(\"password\");\n"
   << "  inputNewPassword= document.getElementById(\"newPassword\");\n"
   << "  inputReenteredPassword= document.getElementById(\"reenteredPassword\");\n"
   << "  params=\"request=changePassword\"\n"
-  << "          + \"&user=\" + encodeURIComponent(inputUser.value) \n"
+  << "          + \"&username=\" + encodeURIComponent(inputUser.value) \n"
   << "          + \"&password=\"+encodeURIComponent(inputPassword.value)\n"
   << "          + \"&newPassword=\"+encodeURIComponent(inputNewPassword.value)\n"
   << "          + \"&reenteredPassword=\"+encodeURIComponent(inputReenteredPassword.value)\n"
@@ -1839,20 +1839,20 @@ std::string WebWorker::GetChangePasswordPage()
   << "</script>";
   out << "</header>";
   out << "<body> ";
-//    << "  window.location='calculator?user='+GlobalUser+'&authenticationToken='+GlobalAuthenticationToken;";
+//    << "  window.location='calculator?username='+GlobalUser+'&authenticationToken='+GlobalAuthenticationToken;";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
 //  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"GET\" accept-charset=\"utf-8\">";
   if (!theGlobalVariables.flagLoggedIn &&
       theGlobalVariables.userCalculatorRequestType!="activateAccount")
     out
     <<  "User name or email: "
-    << "<input type=\"text\" id=\"user\" placeholder=\"user\" "
+    << "<input type=\"text\" id=\"username\" placeholder=\"username\" "
     << "value=\"" << theGlobalVariables.userDefault << "\" "
     << "required>";
   else
     out
     <<  "User: " << theGlobalVariables.userDefault
-    << "<input type=\"hidden\" id=\"user\" placeholder=\"user\" "
+    << "<input type=\"hidden\" id=\"username\" placeholder=\"username\" "
     << "value=\"" << theGlobalVariables.userDefault << "\" "
     << "required>";
 
@@ -1905,7 +1905,7 @@ int WebWorker::ProcessChangePassword()
   stOutput
   << "<meta http-equiv=\"refresh\" content=\"0; url="
   << theGlobalVariables.DisplayNameCalculatorWithPath  << "?request=login"
-  << "&user="
+  << "&username="
   << CGI::StringToURLString(theGlobalVariables.userDefault)
   << "&authenticationToken=" << CGI::StringToURLString(newAuthenticationToken)
   << "&currentExamIntermediate="
@@ -1965,7 +1965,7 @@ std::string WebWorker::GetLoginPage()
     << "if (document.getElementById('authenticationToken') !=null)"
     << "  if (document.getElementById('authenticationToken').value!='')"
     << "    document.getElementById('login').submit();";
-//    << "  window.location='calculator?user='+GlobalUser+'&authenticationToken='+GlobalAuthenticationToken;";
+//    << "  window.location='calculator?username='+GlobalUser+'&authenticationToken='+GlobalAuthenticationToken;";
   out << "\">\n";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
   out << WebWorker::GetLoginHTMLinternal() << "</body></html>";
@@ -2054,13 +2054,13 @@ std::string WebWorker::GetJavascriptStandardCookies()
     << //CGI::StringToURLString
     this->authenticationToken << "\", 150);"
     << "//150 days is a little longer than a semester\n"
-    << "  addCookie(\"user\", \"" << theGlobalVariables.userDefault << "\", 150);\n";
+    << "  addCookie(\"username\", \"" << theGlobalVariables.userDefault << "\", 150);\n";
   out
   << "}\n";
   out
 //  << "function getCalculatorCGIsettings(){\n"
 //  << "  result =\"examStatus=\"+getCookie(\"examStatus\");\n"
-//  << "  result+=\"&user=\"+getCookie(\"user\");\n"
+//  << "  result+=\"&username=\"+getCookie(\"username\");\n"
 //  << "  result+=\"&authenticationToken=\"+getCookie(\"authenticationToken\");\n"
 //  << "  result+=\"&currentExamFile=\"+getCookie(\"currentExamFile\");\n"
 //  << "  return result;\n"
@@ -2093,9 +2093,9 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "  if (document.getElementById(\"authenticationToken\")!=null)\n"
   << "    if(getCookie(\"authenticationToken\")!='')\n"
   << "      document.getElementById(\"authenticationToken\").value=getCookie(\"authenticationToken\");\n "
-  << "  if (document.getElementById(\"userHidden\")!=null)\n"
-  << "    if(getCookie(\"user\")!='')\n"
-  << "      document.getElementById(\"userHidden\").value=getCookie(\"user\");\n "
+  << "  if (document.getElementById(\"usernameHidden\")!=null)\n"
+  << "    if(getCookie(\"username\")!='')\n"
+  << "      document.getElementById(\"usernameHidden\").value=getCookie(\"username\");\n "
   << "}\n";
   out << " </script>\n";
   return out.str();

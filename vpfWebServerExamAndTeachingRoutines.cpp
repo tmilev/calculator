@@ -550,7 +550,7 @@ int WebWorker::ProcessSubmitProblem()
     //stOutput << "<tr><td><b>Submitting problem solutions allowed only for logged-in users. </b></td></tr>";
   stOutput << "<tr><td>Your answer was: ";
   for (int i=0; i< theProblem.studentAnswersUnadulterated.size; i++ )
-  { stOutput << theProblem.studentAnswersUnadulterated[i];
+  { stOutput << "\\(" << theProblem.studentAnswersUnadulterated[i] << "\\)";
     if (i<theProblem.studentAnswersUnadulterated.size-1)
       stOutput << "<br>";
   }
@@ -941,7 +941,7 @@ std::string CalculatorHTML::ToStringUserEmailActivationRole
   out << "<br><span id=\"" << idOutput << "\"></span>\n<br>\n";
   int indexUser=-1, indexExtraInfo=-1;
   for (int i=0; i<labelsUserTable.size; i++)
-  { if (labelsUserTable[i]=="user")
+  { if (labelsUserTable[i]=="username")
       indexUser=i;
     if (labelsUserTable[i]=="extraInfo")
       indexExtraInfo=i;
@@ -964,14 +964,14 @@ std::string CalculatorHTML::ToStringUserEmailActivationRole
   DatabaseRoutines theRoutines;
   for (int i=0; i<userTable.size; i++)
   { std::stringstream failureStream;
+    currentUser.username=userTable[i][indexUser];
     if (!currentUser.FetchOneUserRow(theRoutines, failureStream ))
     { currentUser.email=failureStream.str();
       currentUser.activationToken="error";
       currentUser.userRole="error";
     }
-    if (adminsOnly)
-      if (currentUser.userRole!="admin")
-        continue;
+    if (adminsOnly xor (currentUser.userRole=="admin"))
+      continue;
     numUsers++;
     tableStream << "<tr>"
     << "<td>" << userTable[i][indexUser] << "</td>"
@@ -985,6 +985,8 @@ std::string CalculatorHTML::ToStringUserEmailActivationRole
         << UserCalculator::GetActivationAddressFromActivationToken(currentUser.activationToken.value, userTable[i][indexUser])
         << "\"> (Re)activate account and change password</a>"
         << "</td>";
+      else
+        tableStream << "<td>Activation token: " << currentUser.activationToken.value << "</td>";
     } else if (currentUser.activationToken=="error")
       tableStream << "<td>error</td>";
     else
@@ -995,6 +997,8 @@ std::string CalculatorHTML::ToStringUserEmailActivationRole
       << "\"> (Re)activate account and change password</a>"
       << "</span></td>";
     }
+    if (adminsOnly)
+      continue;
     tableStream << "</tr>";
   }
   tableStream << "</table>";
@@ -1014,9 +1018,10 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
     inputOutput.interpretedCommand=out.str();
     return;
   }
-  if (!theRoutines.TableExists(DatabaseRoutines::GetTableUnsafeNameUsersOfFile(this->fileName), &out))
+  std::string classTableName=DatabaseRoutines::GetTableUnsafeNameUsersOfFile(this->fileName);
+  if (!theRoutines.TableExists(classTableName, &out))
     if (!theRoutines.CreateTable
-        (DatabaseRoutines::GetTableUnsafeNameUsersOfFile(this->fileName), "user VARCHAR(255) NOT NULL PRIMARY KEY, \
+        (classTableName, "username VARCHAR(255) NOT NULL PRIMARY KEY, \
         extraInfo LONGTEXT ", &out))
     { inputOutput.interpretedCommand=out.str();
       return;
@@ -1028,8 +1033,9 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
   std::stringstream failureComments;
   if (!DatabaseRoutinesGlobalFunctions::FetchTablE
       (userTable, labelsUserTable, tableTruncated, numRows,
-       DatabaseRoutines::GetTableUnsafeNameUsersOfFile(this->fileName), failureComments))
-  { out << "<span style=\"color:red\"><b>Failed to fetch email addresses: "
+       classTableName, failureComments))
+  { out << "<span style=\"color:red\"><b>Failed to fetch table: "
+    << classTableName
     << failureComments.str() << "</b></span>";
     inputOutput.interpretedCommand=out.str();
     return;
@@ -1072,8 +1078,8 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
       numSubmissions= this->answerNumSubmissions[theIndex];
     }
     if (numCorrectSubmissions >0)
-    { out << "<b><span style=\"color:green\">Correctly answered: "
-      << this->answerFirstCorrectSubmission[theIndex] << "</span></b> ";
+    { out << "<b><span style=\"color:green\">Correctly answered: \\("
+      << this->answerFirstCorrectSubmission[theIndex] << "\\) </span></b> ";
       if (numSubmissions>0)
         out << "<br>Used: " << numSubmissions << " attempt(s).";
     } else

@@ -12,6 +12,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
   DatabaseRoutines theRoutines;
   UserCalculator theUser;
   theUser.username.value=inputUsernameUnsafe;
+  theUser.currentTable="users";
   theUser.enteredPassword=inputPassword;
   theUser.enteredAuthenticationToken=inputOutputAuthenticationToken;
   if (!theRoutines.startMySQLDatabaseIfNotAlreadyStarted(comments))
@@ -177,7 +178,7 @@ bool DatabaseRoutinesGlobalFunctions::CreateTable
     return false;
   DatabaseRoutines theRoutines;
   theRoutines.startMySQLDatabaseIfNotAlreadyStarted(&comments);
-  return theRoutines.CreateTable(tableName,  "user VARCHAR(255) NOT NULL PRIMARY KEY  ", &comments);
+  return theRoutines.CreateTable(tableName,  "username VARCHAR(255) NOT NULL PRIMARY KEY  ", &comments);
 #else
   return false;
 #endif
@@ -305,7 +306,7 @@ bool DatabaseRoutines::RowExists
     return false;
   std::stringstream theQueryStream;
   theQueryStream << "SELECT * FROM calculatorUsers." << tableName.GetIdentifieR()
-  << " WHERE user=" << inputUsername.GetDatA();
+  << " WHERE username=" << inputUsername.GetDatA();
   DatabaseQuery theQuery(*this, theQueryStream.str(), &comments);
   return theQuery.flagQuerySucceeded && theQuery.flagQueryReturnedResult;
 }
@@ -631,7 +632,7 @@ bool UserCalculator::FetchOneColumn
   std::stringstream queryStream;
   MySQLdata columnName=columnNameUnsafe;
   queryStream << "SELECT " << columnName.GetIdentifieR()
-  << " FROM calculatorUsers." << this->currentTable.GetIdentifieR() << " WHERE user="
+  << " FROM calculatorUsers." << this->currentTable.GetIdentifieR() << " WHERE username="
   << this->username.GetDatA() ;
   DatabaseQuery theQuery(theRoutines, queryStream.str(), failureComments);
   outputUnsafe="";
@@ -741,7 +742,7 @@ bool UserCalculator::ResetAuthenticationToken(DatabaseRoutines& theRoutines, std
       *commentsOnFailure << "Couldn't set column entry for creation time. " << failure.str();
     return false;
   }
-  //DatabaseQuery theQuery(*this, "SELECT authenticationCreationTime FROM calculatorUsers.users WHERE user=\""+this->username + "\"");
+  //DatabaseQuery theQuery(*this, "SELECT authenticationCreationTime FROM calculatorUsers.users WHERE username=\""+this->username + "\"");
   //if (theQuery.flagQueryReturnedResult)
   //  this->authentication="authenticationCreationTime: "
   return true;
@@ -761,7 +762,7 @@ std::string UserCalculator::GetPassword(DatabaseRoutines& theRoutines)
 bool UserCalculator::Iexist(DatabaseRoutines& theRoutines)
 { MacroRegisterFunctionWithName("UserCalculator::Iexist");
   DatabaseQuery theQuery(theRoutines,
-  "SELECT user FROM calculatorUsers.users where user=" + this->username.GetDatA()
+  "SELECT username FROM calculatorUsers.users where username=" + this->username.GetDatA()
   );
   return theQuery.flagQueryReturnedResult;
 }
@@ -782,8 +783,8 @@ bool UserCalculator::DeleteMe(DatabaseRoutines& theRoutines, std::stringstream& 
   currentTime.ComputeTimeStringNonReadable();
   std::stringstream queryStream;
   MySQLdata deletedUserName="deleted"+currentTime.theTimeStringNonReadable+this->username.value;
-  queryStream << "UPDATE users SET user=" << deletedUserName.GetDatA()
-  << " WHERE user=" << this->username.GetDatA();
+  queryStream << "UPDATE users SET username=" << deletedUserName.GetDatA()
+  << " WHERE username=" << this->username.GetDatA();
   DatabaseQuery renamingQuery(theRoutines, queryStream.str());
   return renamingQuery.flagQuerySucceeded;
 }
@@ -802,7 +803,7 @@ bool UserCalculator::CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, std
     return false;
   }
   std::stringstream queryStream;
-  queryStream << "INSERT INTO calculatorUsers.users(user) VALUES(" << this->username.GetDatA() << ")";
+  queryStream << "INSERT INTO calculatorUsers.users(username) VALUES(" << this->username.GetDatA() << ")";
   DatabaseQuery theQuery(theRoutines, queryStream.str());
   if (this->enteredPassword=="")
     return true;
@@ -833,7 +834,7 @@ bool UserCalculator::SetColumnEntry
   { std::stringstream queryStream;
     queryStream << "UPDATE calculatorUsers." << this->currentTable.GetIdentifieR()
     << " SET " << columnName.GetIdentifieR() << "="
-    << value.GetDatA() << " WHERE user=" << this->username.GetDatA();
+    << value.GetDatA() << " WHERE username=" << this->username.GetDatA();
     //  stOutput << "Got to here: " << columnName << ". ";
     DatabaseQuery theDBQuery(theRoutines, queryStream.str(), failureComments);
 //    stOutput << "<hr>Fired up query:<br>" << queryStream.str();
@@ -846,7 +847,7 @@ bool UserCalculator::SetColumnEntry
   } else
   { std::stringstream queryStream;
     queryStream << "INSERT INTO calculatorUsers." << this->currentTable.GetIdentifieR()
-    << "(user, " << columnName.GetIdentifieR()
+    << "(username, " << columnName.GetIdentifieR()
     << ") VALUES(" << this->username.GetDatA() << ", " << value.GetDatA() << ")";
     DatabaseQuery theDBQuery(theRoutines, queryStream.str());
     //stOutput << "<hr>Fired up query:<br>" << queryStream.str();
@@ -869,7 +870,7 @@ bool UserCalculator::FetchOneUserRow
     crash << "Calling UserCalculator::FetchOneUserRow with an empty table is forbidden. " << crash;
   std::stringstream queryStream;
   queryStream << "SELECT * FROM calculatorUsers." << this->currentTable.GetIdentifieR() << " WHERE "
-  << "user=" << this->username.GetDatA();
+  << "username=" << this->username.GetDatA();
 //  stOutput << "quering: " << queryStream.str();
   DatabaseQuery theQuery(theRoutines, queryStream.str(), &failureStream, 5);
   if (!theQuery.flagQuerySucceeded)
@@ -877,7 +878,8 @@ bool UserCalculator::FetchOneUserRow
     return false;
   }
   if (!theQuery.flagQueryReturnedResult)
-  { failureStream << "The table appears to be empty: query: " << queryStream.str() << " succeeded but returned no result. ";
+  { failureStream << "The table appears to be empty: query: " << queryStream.str()
+    << " succeeded but returned no result. ";
     return false;
   }
   if (theQuery.allQueryResultStrings.size!=1)
@@ -905,10 +907,19 @@ bool UserCalculator::FetchOneUserRow
   for (int i=0; i<theFieldQuery.allQueryResultStrings.size; i++)
     if (theFieldQuery.allQueryResultStrings[i].size>0 )
       this->selectedRowFieldNamesUnsafe[i]=CGI::URLStringToNormal(theFieldQuery.allQueryResultStrings[i][0]);
+//  stOutput << "Got to here. this->currentTable.value is: " << this->currentTable.value
+//  << ". Keys: " << this->selectedRowFieldNamesUnsafe.ToStringCommaDelimited()
+//  << " vals: " << this->selectedRowFieldsUnsafe.ToStringCommaDelimited();
   if (this->currentTable=="users")
-  { this->activationToken= this->GetKeyValue("activationToken");
-    this->email= this->GetKeyValue("email");
-    this->userRole= this->GetKeyValue("userRole");
+  { this->activationToken= this->GetSelectedRowEntry("activationToken");
+    this->email= this->GetSelectedRowEntry("email");
+    this->userRole= this->GetSelectedRowEntry("userRole");
+/*    stOutput << "Got to here. Keys: " << this->selectedRowFieldNamesUnsafe.ToString()
+    << " values: " << this->selectedRowFieldsUnsafe.ToString()
+    << " user role: "
+    << this->userRole
+    << " email: " << this->email.value
+    << "  act token: " << this->activationToken.value;*/
   }
   /*stOutput << "Fetched field names: " << this->selectedRowFieldNamesUnsafe.ToStringCommaDelimited()
   << " from: " << theFieldQuery.allQueryResultStrings.ToStringCommaDelimited()
@@ -977,7 +988,7 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure)
   //CANT use DatabaseQuery object as its constructor calls this method!!!!!
   mysql_free_result( mysql_use_result(this->connection));
   return this->CreateTable("users", "\
-    user VARCHAR(255) NOT NULL PRIMARY KEY,  \
+    username VARCHAR(255) NOT NULL PRIMARY KEY,  \
     password LONGTEXT NOT NULL, \
     email LONGTEXT NOT NULL,\
     authenticationCreationTime LONGTEXT, \
@@ -1006,7 +1017,7 @@ bool DatabaseRoutines::CreateTable
   std::stringstream theQuery;
   theQuery << "CREATE TABLE " << tableName.GetIdentifieR();
   if (desiredTableContent=="")
-    theQuery << "(user VARCHAR(255) NOT NULL PRIMARY KEY)";
+    theQuery << "(username VARCHAR(255) NOT NULL PRIMARY KEY)";
   else
     theQuery << "(" << desiredTableContent << ")";
   //CANNOT use object DatabaseQuery as that object invokes startMySQLDatabase
@@ -1231,12 +1242,12 @@ bool DatabaseRoutines::AddUsersFromEmails
   if (!this->startMySQLDatabaseIfNotAlreadyStarted(&comments))
     return false;
   if (!this->TableExists(currentFileUsersTableName, &comments))
-    if (!this->CreateTable(currentFileUsersTableName, "user VARCHAR(255) NOT NULL PRIMARY KEY, \
+    if (!this->CreateTable(currentFileUsersTableName, "username VARCHAR(255) NOT NULL PRIMARY KEY, \
         extraInfo LONGTEXT ", &comments))
       result=false;
   if (result)
   { for (int i=0; i<theEmails.size; i++)
-      if (!this->InsertRow("user", theEmails[i], currentFileUsersTableName, comments))
+      if (!this->InsertRow("username", theEmails[i], currentFileUsersTableName, comments))
         result=false;
   }
   currentUser.currentTable="users";
@@ -1268,7 +1279,7 @@ std::string UserCalculator::GetActivationAddressFromActivationToken
   std::stringstream out;
   out //<< "<a href=\""
   << theGlobalVariables.DisplayNameCalculatorWithPath
-  << "?request=activateAccount&userHidden=" << CGI::StringToURLString(inputUserNameUnsafe)
+  << "?request=activateAccount&usernameHidden=" << CGI::StringToURLString(inputUserNameUnsafe)
   << "&activationToken=" << CGI::StringToURLString(theActivationToken)
   //<< "\">Activate account and set password</a>"
   ;

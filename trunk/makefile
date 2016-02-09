@@ -22,6 +22,8 @@ CFLAGS=-Wall -Wno-address $(FEATUREFLAGS) -c
 LDFLAGS=$(FEATUREFLAGS)
 LIBRARYINCLUDESEND=
 
+LD_LIBRARY_PATH=LD_LIBRARY_PATH:
+
 ifeq ($(hsa), 1)
 	CXX=/home/user/gcc/bin/g++
 	LDFLAGS+=-L/home/user/gcc/lib64 -Wl,-rpath,/home/user/gcc/lib64 -L/opt/hsa/lib -lhsa-runtime64 -lhsakmt
@@ -54,11 +56,6 @@ ifeq ($(ssl),1)
 endif
 
 ifeq ($(mysql),1)
-	CFLAGS+= -DMACRO_use_MySQL
-	LIBRARYINCLUDESEND+= -lmysqlclient  #WARNING believe it or not, the libraries must come AFTER the executable name
-endif
-
-ifeq ($(mysqlcentos),1)
 	CFLAGS+= -DMACRO_use_MySQL
 	LIBRARYINCLUDESEND+= -L/usr/lib64/mysql -lmysqlclient  #WARNING believe it or not, the libraries must come AFTER the executable name
 endif

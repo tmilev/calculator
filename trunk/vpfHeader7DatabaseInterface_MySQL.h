@@ -52,6 +52,23 @@ public:
    static bool UserDefaultHasInstructorRights();
 };
 
+struct ProblemData{
+public:
+  bool flagRandomSeedComputed;
+  unsigned int randomSeed;
+  List<int> numSubmissions;
+  List<int> numCorrectSubmissions;
+  List<std::string> firstCorrectAnswer;
+  List<std::string> answerIds;
+  void AddEmptyAnswerIdOnTop(const std::string& inputAnswerId);
+  int GetAnswerIdIndex(const std::string& inputAnswerId);
+//  List<List<std::string> > allAnswers;
+  ProblemData();
+  bool LoadFrom(const std::string& inputData, std::stringstream& commentsOnFailure);
+  std::string Store();
+  std::string ToString();
+};
+
 #ifdef MACRO_use_MySQL
 #include <mysql/mysql.h>
 #include <ctime>
@@ -155,15 +172,18 @@ public:
 
   List<std::string> selectedRowFieldsUnsafe;
   List<std::string> selectedRowFieldNamesUnsafe;
-  HashedList<std::string, MathRoutines::hashString> extraKeys;
-  List<std::string> extraValues;
+
+  HashedList<std::string, MathRoutines::hashString> problemNames;
+  List<ProblemData> problemData;
   TimeWrapper authenticationCreationTime;
-  std::string GetKeyValue(const std::string& key);
-  void SetKeyValue(const std::string& key, const std::string& inputValue);
+
+  ProblemData& HasProblemData(const std::string& problemName);
+  ProblemData& GetProblemDataAddIfNotPresent(const std::string& problemName);
+  void SetProblemData(const std::string& problemName, const ProblemData& inputData);
   bool flagNewAuthenticationTokenComputedUserNeedsIt;
-  bool LoadAndInterpretDatabaseInfo(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure);
-  bool LoadAndInterpretDatabaseInfo(const std::string& theInfo, std::stringstream& commentsOnFailure);
-  bool StoreDatabaseInfo(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure);
+  bool LoadProblemStringFromDatabase(DatabaseRoutines& theRoutines, std::string& output, std::stringstream& commentsOnFailure);
+  bool InterpretDatabaseProblemData(const std::string& theInfo, std::stringstream& commentsOnFailure);
+  bool StoreProblemDataToDatabase(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure);
   std::string GetSelectedRowEntry(const std::string& theKey);
   bool FetchOneUserRow
   (DatabaseRoutines& theRoutines, std::stringstream& failureStream);

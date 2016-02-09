@@ -2304,6 +2304,8 @@ bool CGI::ChopCGIInputStringToMultipleStrings
  HashedList<std::string, MathRoutines::hashString>& outputFieldNames, std::stringstream& commentsOnFailure)
 { int inputLength= (signed) input.size();
   bool readingData=false;
+  outputData.SetSize(0);
+  outputFieldNames.Clear();
   outputData.SetExpectedSize(15);
   outputFieldNames.SetExpectedSize(15);
   std::string currentFieldName="";

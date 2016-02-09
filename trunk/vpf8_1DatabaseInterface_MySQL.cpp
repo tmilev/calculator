@@ -61,7 +61,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
       }
   }
   inputOutputAuthenticationToken=theUser.actualAuthenticationToken.value;
-  if (theUser.username=="admin")
+  if (theUser.username=="admin" && theUser.enteredPassword!="")
   { if (!theUser.Iexist(theRoutines))
     { if (comments!=0)
         *comments << "<b>First login of user admin: setting admin pass. </b>";
@@ -683,6 +683,8 @@ bool UserCalculator::AuthenticateWithToken(DatabaseRoutines& theRoutines, std::s
 
 bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::Authenticate");
+  this->currentTable="users";
+
   if (!this->Iexist(theRoutines))
   { //if (this->username!="")
     //  stOutput << "user: '" << this->username << "' does not exist";
@@ -691,14 +693,24 @@ bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstre
     return false;
   }
   if (this->AuthenticateWithToken(theRoutines, commentsOnFailure))
-  { this->FetchOneColumn("userRole", this->userRole, theRoutines,  0);
+  { if(!this->FetchOneColumn("userRole", this->userRole, theRoutines, commentsOnFailure))
+    { if (commentsOnFailure!=0)
+        *commentsOnFailure << "Failed to fetch user role";
+      return false;
+    }
     return true;
   }
   bool result= this->AuthenticateWithUserNameAndPass(theRoutines, commentsOnFailure);
   if (result)
-    this->FetchOneColumn("userRole", this->userRole, theRoutines, commentsOnFailure);
+    if(!this->FetchOneColumn("userRole", this->userRole, theRoutines, commentsOnFailure))
+    { if (commentsOnFailure!=0)
+        *commentsOnFailure << "Failed to fetch user role";
+      return false;
+    }
+  if (result)
+    if (this->userRole =="")
+      crash << "user role is empty" << crash;
 //  stOutput << "Approximate hours since last token issued: " << this->approximateHoursSinceLastTokenWasIssued << ". ";
-  this->currentTable="users";
 //  if (this->approximateHoursSinceLastTokenWasIssued>1 || this->approximateHoursSinceLastTokenWasIssued<=0)
   this->ResetAuthenticationToken(theRoutines, commentsOnFailure);
 //  else if (result)
@@ -995,7 +1007,8 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure)
     authenticationToken LONGTEXT , \
     activationToken LONGTEXT,\
     userRole LONGTEXT,\
-    userInfo LONGTEXT\
+    userInfo LONGTEXT, \
+    problemData LONGTEXT \
     ", commentsOnFailure);
 }
 
@@ -1163,54 +1176,162 @@ bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, b
   return result;
 }
 
-std::string UserCalculator::GetKeyValue(const std::string& key)
-{ int theIndex=this->extraKeys.GetIndex(key);
+ProblemData& UserCalculator::GetProblemDataAddIfNotPresent(const std::string& problemName)
+{ MacroRegisterFunctionWithName("UserCalculator::GetProblemDataAddIfNotPresent");
+  int theIndex=this->problemNames.GetIndex(problemName);
   if (theIndex==-1)
-    return "";
-  return this->extraValues[theIndex];
-}
-
-void UserCalculator::SetKeyValue(const std::string& key, const std::string& inputValue)
-{ int theIndex=this->extraKeys.GetIndex(key);
-  if (theIndex==-1)
-  { this->extraKeys.AddOnTop(key);
-    this->extraValues.AddOnTop("");
+  { this->problemNames.AddOnTop(problemName);
+    this->problemData.SetSize(this->problemData.size+1);
+    return *this->problemData.LastObject();
   }
-  this->extraValues[theIndex]=inputValue;
+  return this->problemData[theIndex];
 }
 
-bool UserCalculator::LoadAndInterpretDatabaseInfo(const std::string& theInfo, std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("UserCalculator::LoadAndInterpretDatabaseInfo");
+void UserCalculator::SetProblemData(const std::string& problemName, const ProblemData& inputData)
+{ int theIndex=this->problemNames.GetIndex(problemName);
+  if (theIndex==-1)
+  { this->problemNames.AddOnTop(problemName);
+    this->problemData.AddOnTop(inputData);
+  } else
+    this->problemData[theIndex]=inputData;
+}
+
+ProblemData::ProblemData()
+{ this->randomSeed=0;
+  this->flagRandomSeedComputed=false;
+}
+
+void ProblemData::AddEmptyAnswerIdOnTop(const std::string& inputAnswerId)
+{ this->answerIds.AddOnTop(inputAnswerId);
+  this->firstCorrectAnswer.AddOnTop("");
+  this->numCorrectSubmissions.AddOnTop(0);
+  this->numSubmissions.AddOnTop(0);
+}
+
+std::string ProblemData::ToString()
+{ std::stringstream out;
+  out << "Problem data. "
+  << "Random seed: " << this->randomSeed;
+  if (this->flagRandomSeedComputed)
+    out << " (loaded from database)";
+  out << ". ";
+  for (int i=0; i<this->answerIds.size; i++)
+  { out << "AnswerId: " << this->answerIds[i];
+    out << ", numCorrectSubmissions: ";
+    if (i>=this->numCorrectSubmissions.size)
+      out << "missing";
+    else
+      out << this->numCorrectSubmissions[i];
+    out << ", numSubmissions: ";
+    if (i>=this->numSubmissions.size)
+      out << "missing";
+    else
+      out << this->numSubmissions[i];
+    out << ", firstCorrectAnswer: ";
+    if (i>=this->firstCorrectAnswer.size)
+      out << "missing";
+    else
+      out << this->firstCorrectAnswer[i];
+  }
+  return out.str();
+}
+
+bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("ProblemData::LoadFrom");
+  List<std::string> theValues;
+  HashedList<std::string, MathRoutines::hashString> theKeys;
+  if (!CGI::ChopCGIInputStringToMultipleStrings(inputData, theValues, theKeys, commentsOnFailure))
+    return false;
+  stOutput << "<hr>Interpreting: <br>" << inputData << "<hr>";
+  this->flagRandomSeedComputed=false;
+  if (theKeys.Contains("randomSeed"))
+  { this->randomSeed=atoi(theValues[theKeys.GetIndex("randomSeed")].c_str());
+    this->flagRandomSeedComputed=true;
+  }
+  this->numCorrectSubmissions.SetSize(0);
+  this->numSubmissions.SetSize(0);
+  this->firstCorrectAnswer.SetSize(0);
+  this->answerIds.SetSize(0);
+  bool result=true;
+  HashedList<std::string, MathRoutines::hashString> currentQuestionKeys;
+  List<std::string> currentQuestionValues;
+  for (int i=0; i<theKeys.size; i++)
+  { if (theKeys[i]=="randomSeed")
+      continue;
+    this->AddEmptyAnswerIdOnTop(CGI::URLStringToNormal(theKeys[i]));
+    int currentIndex=this->answerIds.size-1;
+    std::string currentQuestion=CGI::URLStringToNormal(theValues[i]);
+    result=CGI::ChopCGIInputStringToMultipleStrings
+    (currentQuestion, currentQuestionValues, currentQuestionKeys, commentsOnFailure);
+    if (!result)
+      continue;
+    if (currentQuestionKeys.Contains("numCorrectSubmissions"))
+      this->numCorrectSubmissions[currentIndex]=
+      atoi(currentQuestionValues[currentQuestionKeys.GetIndex("numCorrectSubmissions")].c_str());
+    if (currentQuestionKeys.Contains("numSubmissions"))
+      this->numSubmissions[currentIndex]=
+      atoi(currentQuestionValues[currentQuestionKeys.GetIndex("numSubmissions")].c_str());
+    if (currentQuestionKeys.Contains("firstCorrectAnswer"))
+      this->firstCorrectAnswer[currentIndex]=CGI::URLStringToNormal
+      (currentQuestionValues[currentQuestionKeys.GetIndex("firstCorrectAnswer")]);
+  }
+  return result;
+}
+
+std::string ProblemData::Store()
+{ MacroRegisterFunctionWithName("ProblemData::Store");
+  std::stringstream out;
+  out
+  << "randomSeed=" << this->randomSeed;
+  for (int i=0; i<this->answerIds.size; i++)
+  { out << "&" << CGI::StringToURLString(this->answerIds[i]) << "=";
+    std::stringstream questionsStream;
+    questionsStream
+    << "numCorrectSubmissions=" << this->numCorrectSubmissions[i]
+    << "&numSubmissions=" << this->numSubmissions[i]
+    << "&firstCorrectAnswer=" << CGI::StringToURLString(this->firstCorrectAnswer[i]);
+    out << CGI::StringToURLString(questionsStream.str());
+  }
+  return out.str();
+}
+
+bool UserCalculator::InterpretDatabaseProblemData
+(const std::string& theInfo, std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("UserCalculator::InterpretDatabaseProblemData");
   HashedList<std::string, MathRoutines::hashString> keys;
   List<std::string> values;
   if (!CGI::ChopCGIInputStringToMultipleStrings(theInfo, values, keys, commentsOnFailure))
     return false;
-  this->extraKeys.Clear();
-  this->extraValues.SetSize(0);
+  this->problemNames.Clear();
+  this->problemData.SetSize(0);
+  this->problemNames.SetExpectedSize(keys.size);
+  this->problemData.SetExpectedSize(keys.size);
+  bool result=true;
   for (int i=0; i<keys.size; i++)
-  { this->extraKeys.AddOnTop(CGI::URLStringToNormal(keys[i]));
-    this->extraValues.AddOnTop(CGI::URLStringToNormal(values[i]));
+  { this->problemNames.AddOnTop(CGI::URLStringToNormal(keys[i]));
+    this->problemData.SetSize(this->problemData.size+1);
+    if (!this->problemData.LastObject()->LoadFrom(CGI::URLStringToNormal(values[i]), commentsOnFailure))
+      result=false;
   }
-  return true;
+  return result;
 }
 
-bool UserCalculator::LoadAndInterpretDatabaseInfo(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("UserCalculator::LoadAndInterpretDatabaseInfo");
+bool UserCalculator::LoadProblemStringFromDatabase
+(DatabaseRoutines& theRoutines, std::string& output, std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("UserCalculator::LoadProblemStringFromDatabase");
   this->currentTable="users";
-  std::string userInfo;
-  if (!this->FetchOneColumn("userInfo", userInfo, theRoutines, &commentsOnFailure))
-    return false;
-  return this->LoadAndInterpretDatabaseInfo(userInfo, commentsOnFailure);
+  return this->FetchOneColumn("problemData", output, theRoutines, &commentsOnFailure);
 }
 
-bool UserCalculator::StoreDatabaseInfo(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure)
+bool UserCalculator::StoreProblemDataToDatabase
+(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::StoreDatabaseInfo");
-  std::stringstream extraInfoStream;
-  for (int i=0; i<this->extraKeys.size; i++)
-    extraInfoStream << CGI::StringToURLString(this->extraKeys[i]) << "="
-    << CGI::StringToURLString( this->extraValues[i]) << "&";
+  std::stringstream problemDataStream;
+  for (int i=0; i<this->problemNames.size; i++)
+    problemDataStream << CGI::StringToURLString(this->problemNames[i]) << "="
+    << CGI::StringToURLString( this->problemData[i].Store()) << "&";
   this->currentTable="users";
-  return this->SetColumnEntry("userInfo", extraInfoStream.str(), theRoutines, &commentsOnFailure);
+  return this->SetColumnEntry("problemData", problemDataStream.str(), theRoutines, &commentsOnFailure);
 }
 
 bool DatabaseRoutines::InsertRow
@@ -1263,7 +1384,8 @@ bool DatabaseRoutines::AddUsersFromEmails
       if (theEmails[i].find('@')!=std::string::npos)
         currentUser.SetColumnEntry("email", theEmails[i], *this, &comments);
     } else
-      currentUser.LoadAndInterpretDatabaseInfo(*this, comments);
+      if (!currentUser.FetchOneUserRow(*this, comments))
+        result=false;
     currentUser.SetColumnEntry("userRole", userRole, *this, &comments);
   }
   if (!result)

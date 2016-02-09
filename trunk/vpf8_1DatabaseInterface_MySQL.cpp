@@ -278,6 +278,46 @@ bool DatabaseRoutinesGlobalFunctions::FetchEntry
 #endif
 }
 
+ProblemData::ProblemData()
+{ this->randomSeed=0;
+  this->flagRandomSeedComputed=false;
+}
+
+void ProblemData::AddEmptyAnswerIdOnTop(const std::string& inputAnswerId)
+{ this->answerIds.AddOnTop(inputAnswerId);
+  this->firstCorrectAnswer.AddOnTop("");
+  this->numCorrectSubmissions.AddOnTop(0);
+  this->numSubmissions.AddOnTop(0);
+}
+
+std::string ProblemData::ToString()
+{ std::stringstream out;
+  out << "Problem data. "
+  << "Random seed: " << this->randomSeed;
+  if (this->flagRandomSeedComputed)
+    out << " (loaded from database)";
+  out << ". ";
+  for (int i=0; i<this->answerIds.size; i++)
+  { out << "AnswerId: " << this->answerIds[i];
+    out << ", numCorrectSubmissions: ";
+    if (i>=this->numCorrectSubmissions.size)
+      out << "missing";
+    else
+      out << this->numCorrectSubmissions[i];
+    out << ", numSubmissions: ";
+    if (i>=this->numSubmissions.size)
+      out << "missing";
+    else
+      out << this->numSubmissions[i];
+    out << ", firstCorrectAnswer: ";
+    if (i>=this->firstCorrectAnswer.size)
+      out << "missing";
+    else
+      out << this->firstCorrectAnswer[i];
+  }
+  return out.str();
+}
+
 #ifdef MACRO_use_MySQL
 #include "vpfHeader5Crypto.h"
 #include <time.h>
@@ -1194,46 +1234,6 @@ void UserCalculator::SetProblemData(const std::string& problemName, const Proble
     this->problemData.AddOnTop(inputData);
   } else
     this->problemData[theIndex]=inputData;
-}
-
-ProblemData::ProblemData()
-{ this->randomSeed=0;
-  this->flagRandomSeedComputed=false;
-}
-
-void ProblemData::AddEmptyAnswerIdOnTop(const std::string& inputAnswerId)
-{ this->answerIds.AddOnTop(inputAnswerId);
-  this->firstCorrectAnswer.AddOnTop("");
-  this->numCorrectSubmissions.AddOnTop(0);
-  this->numSubmissions.AddOnTop(0);
-}
-
-std::string ProblemData::ToString()
-{ std::stringstream out;
-  out << "Problem data. "
-  << "Random seed: " << this->randomSeed;
-  if (this->flagRandomSeedComputed)
-    out << " (loaded from database)";
-  out << ". ";
-  for (int i=0; i<this->answerIds.size; i++)
-  { out << "AnswerId: " << this->answerIds[i];
-    out << ", numCorrectSubmissions: ";
-    if (i>=this->numCorrectSubmissions.size)
-      out << "missing";
-    else
-      out << this->numCorrectSubmissions[i];
-    out << ", numSubmissions: ";
-    if (i>=this->numSubmissions.size)
-      out << "missing";
-    else
-      out << this->numSubmissions[i];
-    out << ", firstCorrectAnswer: ";
-    if (i>=this->firstCorrectAnswer.size)
-      out << "missing";
-    else
-      out << this->firstCorrectAnswer[i];
-  }
-  return out.str();
 }
 
 bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& commentsOnFailure)

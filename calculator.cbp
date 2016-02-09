@@ -6,9 +6,22 @@
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
-			<Target title="Debug">
+			<Target title="Mysql_and_ssl">
 				<Option output="./Debug/calculator" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-std=c++11" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-DMACRO_use_open_ssl" />
+					<Add option="-DMACRO_use_MySQL" />
+				</Compiler>
+			</Target>
+			<Target title="NO_mysql_and_ssl">
+				<Option output="./Debug/calculatorNO_mysql_ssl" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/nomysql_nossl/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -23,8 +36,6 @@
 			<Add option="-Wall" />
 			<Add option="-g" />
 			<Add option="-pthread" />
-			<Add option="-DMACRO_use_open_ssl" />
-			<Add option="-DMACRO_use_MySQL" />
 		</Compiler>
 		<Linker>
 			<Add library="libpthread" />

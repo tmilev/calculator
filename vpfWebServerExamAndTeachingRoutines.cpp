@@ -176,6 +176,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
     (theGlobalVariables.userCalculatorRequestType=="submitProblem" ||
      theGlobalVariables.userCalculatorRequestType=="examForReal"
     );
+#ifdef MACRO_use_MySQL
   if (this->flagIsForReal && doLoadDatabase)
   { UserCalculator theUser;
     theUser.username=theGlobalVariables.userDefault;
@@ -190,6 +191,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
     }
     this->theProblemData=theUser.GetProblemDataAddIfNotPresent(this->fileName);
   }
+#endif // MACRO_use_MySQL
   return true;
 }
 
@@ -545,6 +547,7 @@ int WebWorker::ProcessSubmitProblem()
   } else
     stOutput << "<span style=\"color:green\"><b>Correct!</b></span>";
   stOutput << "</td></tr>";
+#ifdef MACRO_use_MySQL
   if (theProblem.flagIsForReal)
   { std::stringstream comments;
     UserCalculator theUser;
@@ -560,6 +563,7 @@ int WebWorker::ProcessSubmitProblem()
       << totalSubmissionsRelevant-correctSubmissionsRelevant << " incorrect submissions.</td></tr>";
   } //else
     //stOutput << "<tr><td><b>Submitting problem solutions allowed only for logged-in users. </b></td></tr>";
+#endif
   stOutput << "<tr><td>Your answer was: ";
   for (int i=0; i< theProblem.studentAnswersUnadulterated.size; i++ )
   { stOutput << "\\(" << theProblem.studentAnswersUnadulterated[i] << "\\)";
@@ -917,6 +921,7 @@ std::string CalculatorHTML::ToStringUserEmailActivationRole
 )
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringUserEmailActivationRole");
   std::stringstream out;
+#ifdef MACRO_use_MySQL
   std::string idOutput="outputAdd";
   if (adminsOnly)
     idOutput+="Admins";
@@ -1025,6 +1030,9 @@ std::string CalculatorHTML::ToStringUserEmailActivationRole
   }
   tableStream << "</table>";
   out << "\n" << numUsers << " user(s). " << tableStream.str();
+#else
+  out << "<b>Adding emails not available (database not present).</b> ";
+#endif // MACRO_use_MySQL
 
   return out.str();
 }
@@ -1033,6 +1041,7 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretManageClass");
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return;
+#ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
   std::stringstream out;
   if (!theRoutines.startMySQLDatabaseIfNotAlreadyStarted(&out))
@@ -1070,6 +1079,9 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
   out << "<hr><hr>";
   out << this->ToStringUserEmailActivationRole(userTable, labelsUserTable, true, inputOutput);
   inputOutput.interpretedCommand=out.str();
+#else
+  inputOutput.interpretedCommand="<b>Managing class not available (no database).</b>";
+#endif // MACRO_use_MySQL
 }
 
 void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput)
@@ -1217,6 +1229,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
 //   out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
 //   out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
   //  out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();
+#ifdef MACRO_use_MySQL
   if (this->flagIsForReal)
   { this->theProblemData.flagRandomSeedComputed=true;
     UserCalculator theUser;
@@ -1230,6 +1243,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     if (!theUser.StoreProblemDataToDatabase(theRoutines, comments))
         out << "<b>Error: failed to store problem in database. </b>" << comments.str();
   }
+#endif // MACRO_use_MySQL
   this->outputHtmlMain=out.str();
   return true;
 }

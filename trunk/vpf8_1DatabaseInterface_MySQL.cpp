@@ -1217,7 +1217,7 @@ bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, b
       return false;
     }
     if (!currentUser.SendActivationEmail(*this, comments))
-    { comments << "<span style=\"color:red\"><b>Failed to send activation email to:</b></span> "
+    { comments << "<span style=\"color:red\"><b>Failed to send activation email to: </b></span> "
       << currentUser.username.value;
       result=false;
       continue;
@@ -1238,7 +1238,8 @@ ProblemData& UserCalculator::GetProblemDataAddIfNotPresent(const std::string& pr
 }
 
 void UserCalculator::SetProblemData(const std::string& problemName, const ProblemData& inputData)
-{ int theIndex=this->problemNames.GetIndex(problemName);
+{ MacroRegisterFunctionWithName("UserCalculator::SetProblemData");
+  int theIndex=this->problemNames.GetIndex(problemName);
   if (theIndex==-1)
   { this->problemNames.AddOnTop(problemName);
     this->problemData.AddOnTop(inputData);

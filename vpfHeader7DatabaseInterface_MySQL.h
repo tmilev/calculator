@@ -176,7 +176,10 @@ public:
   HashedList<std::string, MathRoutines::hashString> problemNames;
   List<ProblemData> problemData;
   TimeWrapper authenticationCreationTime;
+  Rational pointsEarned;
+  Rational pointsMax;
 
+  void ComputePointsEarned();
   ProblemData& HasProblemData(const std::string& problemName);
   ProblemData& GetProblemDataAddIfNotPresent(const std::string& problemName);
   void SetProblemData(const std::string& problemName, const ProblemData& inputData);

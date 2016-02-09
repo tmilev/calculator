@@ -103,7 +103,7 @@ public:
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
   void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
   void InterpretManageClass(SyntacticElementHTML& inputOutput);
-  std::string ToStringUserEmailActivationRole
+  std::string ToStringClassDetails
 ( const List<List<std::string> >& userTable,
   const List<std::string>& labelsUserTable,
   bool adminsOnly,
@@ -929,13 +929,13 @@ std::string SyntacticElementHTML::GetTagClass()
 { return this->GetKeyValue("class");
 }
 
-std::string CalculatorHTML::ToStringUserEmailActivationRole
+std::string CalculatorHTML::ToStringClassDetails
 ( const List<List<std::string> >& userTable,
   const List<std::string>& labelsUserTable,
   bool adminsOnly,
   const SyntacticElementHTML& inputElement
 )
-{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringUserEmailActivationRole");
+{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringClassDetails");
   std::stringstream out;
 #ifdef MACRO_use_MySQL
   std::string idOutput="outputAdd";
@@ -991,7 +991,7 @@ std::string CalculatorHTML::ToStringUserEmailActivationRole
   }
   int numUsers=0;;
   std::stringstream tableStream;
-  tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th></tr>";
+  tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th><th>Points</th></tr>";
   UserCalculator currentUser;
   currentUser.currentTable="users";
   DatabaseRoutines theRoutines;
@@ -1022,26 +1022,25 @@ std::string CalculatorHTML::ToStringUserEmailActivationRole
       else
         tableStream << "<td>Activation token: " << currentUser.activationToken.value << "</td>";
     } else if (currentUser.activationToken=="error")
-      tableStream << "<td>error</td>";
+      tableStream << "<td>error</td><td></td>";
     else
-    { tableStream << "<td><span style=\"color:green\">activated</span></td>";
+    { tableStream << "<td><span style=\"color:green\">activated</span></td><td></td>";
 /*      tableStream << "<td><span style=\"color:red\">"
       << "<a href=\""
       << UserCalculator::GetActivationAddressFromActivationToken(currentUser.activationToken.value, userTable[i][indexUser])
       << "\"> (Re)activate account and change password</a>"
       << "</span></td>";*/
     }
-    if (adminsOnly)
-    { tableStream << "</tr>";
-      continue;
-    }
-/*    std::stringstream loadFailureStream;
-    if (!currentUser.LoadAndInterpretDatabaseInfo(theRoutines, loadFailureStream))
-    { tableStream << "<td>Failed to load student info: " << loadFailureStream.str() << "</td></tr>";
-      continue;
-    }
-    tableStream << "<td>Extra keys and values: " << currentUser.extraKeys.ToStringCommaDelimited()
-    << currentUser.extraValues.ToStringCommaDelimited() << "</td>";*/
+    int indexProblemData=currentUser.selectedRowFieldNamesUnsafe.GetIndex("problemData");
+    std::stringstream commentsProblemData;
+    if (indexProblemData==-1)
+      tableStream << "<td>No solutions history</td>";
+    else if ( currentUser.InterpretDatabaseProblemData
+              (currentUser.selectedRowFieldsUnsafe[indexProblemData], commentsProblemData))
+    { currentUser.ComputePointsEarned();
+      tableStream << "<td>" << currentUser.pointsEarned << "</td>";
+    } else
+      tableStream << "<td>Failed to load problem data. Comments: " << commentsProblemData.str() << "</td>";
     tableStream << "</tr>";
   }
   tableStream << "</table>";
@@ -1091,9 +1090,9 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
     out << "<span style=\"color:red\"><b>This shouldn't happen: email list truncated. "
     << "This is likely a software bug.</b></span>";
   out << "<hr><hr>";
-  out << this->ToStringUserEmailActivationRole(userTable, labelsUserTable, false, inputOutput);
+  out << this->ToStringClassDetails(userTable, labelsUserTable, false, inputOutput);
   out << "<hr><hr>";
-  out << this->ToStringUserEmailActivationRole(userTable, labelsUserTable, true, inputOutput);
+  out << this->ToStringClassDetails(userTable, labelsUserTable, true, inputOutput);
   inputOutput.interpretedCommand=out.str();
 #else
   inputOutput.interpretedCommand="<b>Managing class not available (no database).</b>";

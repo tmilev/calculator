@@ -1173,6 +1173,16 @@ bool DatabaseRoutines::SendActivationEmail(const std::string& emailList, std::st
   return this->SendActivationEmail(theEmails, true, comments);
 }
 
+void UserCalculator::ComputePointsEarned()
+{ MacroRegisterFunctionWithName("UserCalculator::ComputePointsEarned");
+  int numCorrectAnswers=0;
+  for (int i=0; i<this->problemData.size; i++)
+    for (int j=0; j<this->problemData[i].answerIds.size; j++)
+      if (this->problemData[i].numCorrectSubmissions[j]>0)
+        numCorrectAnswers++;
+  this->pointsEarned=numCorrectAnswers;
+}
+
 void UserCalculator::ComputeActivationToken()
 { MacroRegisterFunctionWithName("UserCalculator::ComputeActivationToken");
   TimeWrapper now;

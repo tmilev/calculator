@@ -76,7 +76,7 @@ public:
   List<SyntacticElementHTML> eltsStack;
   List<SyntacticElementHTML> theContent;
   List<std::string> answerVerificationCommand;
-  List<std::string> answerFirstCorrectSubmission;
+//  List<std::string> answerFirstCorrectSubmission;
   Selection studentTagsAnswered;
   ProblemData theProblemData;
   List<std::string> studentAnswersUnadulterated;
@@ -442,13 +442,18 @@ int WebWorker::ProcessSubmitProblem()
     stOutput.Flush();
     return 0;
   }
+  if (!theProblem.ParseHTML(comments))
+  { stOutput << "<b>Failed to parse problem. </b>Comments: " << comments.str();
+    return 0;
+  }
   Calculator theInterpreter;
   if (!theProblem.PrepareCommands(theInterpreter, comments))
   { stOutput << "<b>Failed to prepare commands.</b>" << comments.str();
     return 0;
   }
-  if (!theProblem.flagRandomSeedGiven)
-    stOutput << "<b>Random seed not given!!!!</b>";
+  if (!theProblem.flagRandomSeedGiven && !theProblem.flagIsForReal)
+    stOutput << "<b>Random seed not given.</b>";
+//  stOutput << "<b>debug remove when done: Random seed: " << theProblem.theProblemData.randomSeed << "</b>";
   theProblem.currentExamHomE=        CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
   theProblem.currentExamIntermediatE=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate"));
   if (theProblem.currentExamHomE=="")
@@ -526,19 +531,29 @@ int WebWorker::ProcessSubmitProblem()
   }
   int correctSubmissionsRelevant=0;
   int totalSubmissionsRelevant=0;
+  UserCalculator theUser;
+  DatabaseRoutines theRoutines;
+  theUser.username=theGlobalVariables.userDefault;
   if (theProblem.flagIsForReal)
-  { for (int i=0; i<theProblem.studentTagsAnswered.CardinalitySelection; i++)
-    { int theIndex=theProblem.studentTagsAnswered.elements[i];
-      theProblem.theProblemData.numSubmissions[theIndex]++;
-      totalSubmissionsRelevant+=theProblem.theProblemData.numSubmissions[theIndex];
-      correctSubmissionsRelevant+=theProblem.theProblemData.numCorrectSubmissions[theIndex];
-      if (isCorrect)
-      { theProblem.theProblemData.numCorrectSubmissions[theIndex]++;
-        correctSubmissionsRelevant++;
-        if (theProblem.theProblemData.firstCorrectAnswer[theIndex]!="")
-          theProblem.theProblemData.firstCorrectAnswer[theIndex]=theProblem.studentAnswersUnadulterated[theIndex];
+  { if (!theUser.InterpretDatabaseProblemData(theProblem.databaseInfo, comments))
+    { stOutput << "<b>Failed to load user information from database. Answer not recorded. "
+      << "This should not happen. " << CalculatorHTML::BugsGenericMessage << "</b>";
+      theProblem.flagIsForReal=false;
+    } else
+      for (int i=0; i<theProblem.studentTagsAnswered.CardinalitySelection; i++)
+      { int theIndex=theProblem.studentTagsAnswered.elements[i];
+        theProblem.theProblemData.numSubmissions[theIndex]++;
+        totalSubmissionsRelevant+=theProblem.theProblemData.numSubmissions[theIndex];
+        correctSubmissionsRelevant+=theProblem.theProblemData.numCorrectSubmissions[theIndex];
+        if (isCorrect)
+        { theProblem.theProblemData.numCorrectSubmissions[theIndex]++;
+          correctSubmissionsRelevant++;
+          if (theProblem.theProblemData.firstCorrectAnswer[theIndex]=="")
+            theProblem.theProblemData.firstCorrectAnswer[theIndex]=theProblem.studentAnswersUnadulterated[theIndex];
+          else
+            stOutput << "[correct answer already submitted: " << theProblem.theProblemData.firstCorrectAnswer[theIndex] << "]";
+        }
       }
-    }
   }
   stOutput << "<table width=\"300\"><tr><td>";
   if (!isCorrect)
@@ -550,10 +565,7 @@ int WebWorker::ProcessSubmitProblem()
 #ifdef MACRO_use_MySQL
   if (theProblem.flagIsForReal)
   { std::stringstream comments;
-    UserCalculator theUser;
-    theUser.username=theGlobalVariables.userDefault;
     theUser.SetProblemData(theProblem.fileName, theProblem.theProblemData);
-    DatabaseRoutines theRoutines;
     if (!theUser.StoreProblemDataToDatabase(theRoutines, comments))
       stOutput << "<tr><td><b>This shouldn't happen and may be a bug: failed to store your answer in the database. "
       << CalculatorHTML::BugsGenericMessage << "</b><br>Comments: "
@@ -770,7 +782,9 @@ bool SyntacticElementHTML::IsAnswer()
 bool CalculatorHTML::PrepareCommands(Calculator& theInterpreter, std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommands");
   if (this->theContent.size==0)
-    crash << "Empty content not allowed. " << crash;
+  { comments << "Empty content not allowed. ";
+    return false;
+  }
   if (this->theContent[0].syntacticRole!="")
     crash << "First command must be empty to allow for command for setting of random seed. " << crash;
   std::stringstream streamWithInbetween, streamNoVerification, streamVerification;
@@ -849,9 +863,6 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     { out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
       << this->ToStringCalculatorArgumentsForProblem("examForReal")
       << "\">&nbsp&nbspStart exam for real</a><br>";
-      out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
-      << this->ToStringCalculatorArgumentsForProblem("exercises")
-      << "\">&nbsp&nbspLink to this problem</a><br>";
     } else
       out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
       << this->ToStringCalculatorArgumentsForProblem("exercises")
@@ -891,6 +902,11 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         << "&\">Last problem, return to course page.</a><br>";
     }
   }
+  if (this->flagIsExamProblem && theGlobalVariables.userCalculatorRequestType=="exercises")
+    out << "<hr><a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
+    << this->ToStringCalculatorArgumentsForProblem("exercises")
+    << "\">Link to this problem</a><br>";
+
   return out.str();
 }
 
@@ -1109,6 +1125,14 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
       crash << "Index of answer id not found: this shouldn't happen. " << crash;
     int numCorrectSubmissions=0;
     int numSubmissions= 0;
+    if (theIndex >=this->theProblemData.numCorrectSubmissions.size ||
+        theIndex >=this->theProblemData.numSubmissions.size ||
+        theIndex >=this->theProblemData.firstCorrectAnswer.size)
+      out << "<b>Error: the problemData index  is " << theIndex << " but "
+      << "  numCorrectSubmissions.size is: " << this->theProblemData.numCorrectSubmissions.size
+      << ", numSubmissions.size is: " << this->theProblemData.numSubmissions.size
+      << ", firstCorrectAnswer.size is: " << this->theProblemData.firstCorrectAnswer.size
+      << ". </b>";
     if (theIndex!=-1)
     { numCorrectSubmissions= this->theProblemData.numCorrectSubmissions[theIndex];
       numSubmissions= this->theProblemData.numSubmissions[theIndex];
@@ -1116,9 +1140,9 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
 //    stOutput << "got to here 2";
     if (numCorrectSubmissions >0)
     { out << "<b><span style=\"color:green\">Correctly answered: \\("
-      << this->answerFirstCorrectSubmission[theIndex] << "\\) </span></b> ";
+      << this->theProblemData.firstCorrectAnswer[theIndex] << "\\) </span></b> ";
       if (numSubmissions>0)
-        out << "<br>Used: " << numSubmissions << " attempt(s).";
+        out << "<br>Used: " << numSubmissions << " attempt(s) (" << numCorrectSubmissions << " correct).";
     } else
     { if (theGlobalVariables.userCalculatorRequestType=="examForReal")
       { out << " <b><span style=\"color:brown\">Need to submit answer. </span></b>";
@@ -1220,7 +1244,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       moreThanOneCommand=true;
     }
   }
-  stOutput << "got to here, this->theProblemData: " << this->theProblemData.ToString();
+//  stOutput << "got to here, this->theProblemData: " << this->theProblemData.ToString();
   for (int i=0; i<this->theContent.size; i++)
     if (this->theContent[i].IsInterpretedNotByCalculator())
       this->InterpretNotByCalculator(this->theContent[i]);
@@ -1235,7 +1259,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     UserCalculator theUser;
     DatabaseRoutines theRoutines;
     theUser.username=theGlobalVariables.userDefault;
-    stOutput << "About to store problem data: " << this->theProblemData.ToString();
+//    stOutput << "About to store problem data: " << this->theProblemData.ToString();
     if (!theUser.InterpretDatabaseProblemData(this->currentUserDatabaseString, comments))
       out << "<b>Error: corrupt database string. </b>";
     else

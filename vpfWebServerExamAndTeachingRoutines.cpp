@@ -50,13 +50,15 @@ public:
   int NumAttemptsToInterpret;
   int MaxInterpretationAttempts;
   int NumProblemsFound;
-  int randomSeed;
   List<int> randomSeedsIfInterpretationFails;
   bool flagRandomSeedGiven;
   bool flagIsExamHome;
   bool flagIsExamIntermediate;
   bool flagIsExamProblem;
   bool flagParentInvestigated;
+  bool flagIsForReal;
+  bool flagLoadedFromDB;
+
   std::string databaseInfo;
   std::string problemCommandsWithInbetweens;
   std::string problemCommandsNoVerification;
@@ -73,26 +75,21 @@ public:
   List<char> splittingChars;
   List<SyntacticElementHTML> eltsStack;
   List<SyntacticElementHTML> theContent;
-  List<std::string> answerIds;
   List<std::string> answerVerificationCommand;
   List<std::string> answerFirstCorrectSubmission;
-  List<int> answerNumSubmissions;
-  List<int> answerNumCorrectSubmissions;
   Selection studentTagsAnswered;
+  ProblemData theProblemData;
   List<std::string> studentAnswersUnadulterated;
   List<std::string> problemList;
   List<std::string> problemListOfParent;
+  std::string currentUserDatabaseString;
   bool flagLoadedSuccessfully;
   static const std::string RelativePhysicalFolderProblemCollections;
   std::stringstream comments;
   bool CheckContent(std::stringstream& comments);
   bool CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
-  bool LoadMe(std::stringstream& comments);
-  bool LoadAndInterpretDatabaseInfo(std::stringstream& comments);
-  bool ParseAndInterpretDatabaseInfo(std::stringstream& comments);
-  void GenerateDatabaseInfo();
+  bool LoadMe(bool doLoadDatabase, std::stringstream& comments);
   std::string CleanUpLink(const std::string& inputLink);
-  bool GenerateAndStoreDatabaseInfo(std::stringstream& comments);
   bool ParseHTML(std::stringstream& comments);
   bool IsSplittingChar(const std::string& input);
   bool IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt);
@@ -138,8 +135,7 @@ public:
 };
 
 CalculatorHTML::CalculatorHTML()
-{ this->randomSeed=0;
-  this->flagRandomSeedGiven=false;
+{ this->flagRandomSeedGiven=false;
   this->NumAttemptsToInterpret=0;
   this->MaxInterpretationAttempts=10;
   this->flagLoadedSuccessfully=false;
@@ -148,11 +144,13 @@ CalculatorHTML::CalculatorHTML()
   this->flagIsExamProblem=false;
   this->flagParentInvestigated=false;
   this->NumProblemsFound=0;
+  this->flagIsForReal=false;
+  this->flagLoadedFromDB=false;
 }
 
 const std::string CalculatorHTML::RelativePhysicalFolderProblemCollections="ProblemCollections/";
 
-bool CalculatorHTML::LoadMe(std::stringstream& comments)
+bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadMe");
   this->RelativePhysicalFileNameWithFolder=
   this->RelativePhysicalFolderProblemCollections+
@@ -162,16 +160,35 @@ bool CalculatorHTML::LoadMe(std::stringstream& comments)
   if (!FileOperations::OpenFileOnTopOfProjectBase(theFile, this->RelativePhysicalFileNameWithFolder, false, false, false))
   { comments << "<b>Failed to open file " << this->RelativePhysicalFileNameWithFolder << "</b>";
     return false;
-  } else
-  { std::stringstream contentStream;
-    contentStream << theFile.rdbuf();
-    this->inputHtml=contentStream.str();
-    std::string randString= theGlobalVariables.GetWebInput("randomSeed");
-    if (randString!="")
-    { std::stringstream randSeedStream(randString);
-      randSeedStream >> this->randomSeed;
-      this->flagRandomSeedGiven=true;
+  }
+  std::stringstream contentStream;
+  contentStream << theFile.rdbuf();
+  this->inputHtml=contentStream.str();
+  std::string randString= theGlobalVariables.GetWebInput("randomSeed");
+  if (randString!="")
+  { std::stringstream randSeedStream(randString);
+    randSeedStream >> this->theProblemData.randomSeed;
+    this->flagRandomSeedGiven=true;
+  }
+  this->flagIsForReal=false;
+  if (theGlobalVariables.flagLoggedIn)
+    this->flagIsForReal=
+    (theGlobalVariables.userCalculatorRequestType=="submitProblem" ||
+     theGlobalVariables.userCalculatorRequestType=="examForReal"
+    );
+  if (this->flagIsForReal && doLoadDatabase)
+  { UserCalculator theUser;
+    theUser.username=theGlobalVariables.userDefault;
+    DatabaseRoutines theRoutines;
+    if (!theUser.LoadProblemStringFromDatabase(theRoutines, this->currentUserDatabaseString, comments))
+    { comments << "Failed to load current users' problem save-file.";
+      return false;
     }
+    if (!theUser.InterpretDatabaseProblemData(this->currentUserDatabaseString, comments))
+    { comments << "Failed to load current users' problem save-file.";
+      return false;
+    }
+    this->theProblemData=theUser.GetProblemDataAddIfNotPresent(this->fileName);
   }
   return true;
 }
@@ -223,7 +240,7 @@ void CalculatorHTML::LoadCurrentProblemItem()
   this->flagLoadedSuccessfully=false;
   bool needToFindDefault=(this->fileName=="");
   if (!needToFindDefault)
-    needToFindDefault=!this->LoadMe(this->comments);
+    needToFindDefault=!this->LoadMe(true, this->comments);
   else
     this->comments << "<b>Selecting default course homework file.</b><br>";
   if (needToFindDefault)
@@ -232,7 +249,7 @@ void CalculatorHTML::LoadCurrentProblemItem()
       << this->RelativePhysicalFolderProblemCollections << ".</b>";
       return;
     }
-    if (!this->LoadMe(this->comments))
+    if (!this->LoadMe(true, this->comments))
       return;
     this->inputHtml=this->comments.str()+this->inputHtml;
   }
@@ -423,19 +440,6 @@ int WebWorker::ProcessSubmitProblem()
     stOutput.Flush();
     return 0;
   }
-  if (!theProblem.ParseHTML(comments))
-  { stOutput << "<b>Failed to interpret html input.</b><br>" << comments.str();
-    return 0;
-  }
-//  stOutput << "ere be i";
-  if (theGlobalVariables.userCalculatorRequestType=="submitProblem")
-  { if (!theProblem.LoadAndInterpretDatabaseInfo(comments))
-    { stOutput << "<b>Failed to load the database entry for the present problem. " << theProblem.BugsGenericMessage << " </b>"
-      << comments.str();
-      return 0;
-    }
-  } //else
-    //stOutput << "request type: " << theGlobalVariables.userCalculatorRequestType;
   Calculator theInterpreter;
   if (!theProblem.PrepareCommands(theInterpreter, comments))
   { stOutput << "<b>Failed to prepare commands.</b>" << comments.str();
@@ -456,11 +460,11 @@ int WebWorker::ProcessSubmitProblem()
   std::stringstream studentAnswerStream, completedProblemStream;
   completedProblemStream << theProblem.problemCommandsNoVerification;
   std::string studentAnswerNameReader;
-  theProblem.studentAnswersUnadulterated.SetSize(theProblem.answerIds.size);
-  theProblem.studentTagsAnswered.init(theProblem.answerIds.size);
+  theProblem.studentAnswersUnadulterated.SetSize(theProblem.theProblemData.answerIds.size);
+  theProblem.studentTagsAnswered.init(theProblem.theProblemData.answerIds.size);
   for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
     if (MathRoutines::StringBeginsWith(theGlobalVariables.webFormArgumentNames[i], "calculatorAnswer", &studentAnswerNameReader))
-    { int answerIdIndex=theProblem.answerIds.GetIndex(studentAnswerNameReader);
+    { int answerIdIndex=theProblem.theProblemData.answerIds.GetIndex(studentAnswerNameReader);
       if (answerIdIndex==-1)
       { stOutput << "<b> You submitted an answer to tag with id " << studentAnswerNameReader << " which is not on my list of "
         << "answerable tags. </b>";
@@ -520,15 +524,18 @@ int WebWorker::ProcessSubmitProblem()
   }
   int correctSubmissionsRelevant=0;
   int totalSubmissionsRelevant=0;
-  for (int i=0; i<theProblem.studentTagsAnswered.CardinalitySelection; i++)
-  { int theIndex=theProblem.studentTagsAnswered.elements[i];
-    theProblem.answerNumSubmissions[theIndex]++;
-    totalSubmissionsRelevant+=theProblem.answerNumSubmissions[theIndex];
-    correctSubmissionsRelevant+=theProblem.answerNumCorrectSubmissions[theIndex];
-    if (isCorrect)
-    { theProblem.answerNumCorrectSubmissions[theIndex]++;
-      correctSubmissionsRelevant++;
-      theProblem.answerFirstCorrectSubmission[theIndex]=theProblem.studentAnswersUnadulterated[theIndex];
+  if (theProblem.flagIsForReal)
+  { for (int i=0; i<theProblem.studentTagsAnswered.CardinalitySelection; i++)
+    { int theIndex=theProblem.studentTagsAnswered.elements[i];
+      theProblem.theProblemData.numSubmissions[theIndex]++;
+      totalSubmissionsRelevant+=theProblem.theProblemData.numSubmissions[theIndex];
+      correctSubmissionsRelevant+=theProblem.theProblemData.numCorrectSubmissions[theIndex];
+      if (isCorrect)
+      { theProblem.theProblemData.numCorrectSubmissions[theIndex]++;
+        correctSubmissionsRelevant++;
+        if (theProblem.theProblemData.firstCorrectAnswer[theIndex]!="")
+          theProblem.theProblemData.firstCorrectAnswer[theIndex]=theProblem.studentAnswersUnadulterated[theIndex];
+      }
     }
   }
   stOutput << "<table width=\"300\"><tr><td>";
@@ -538,11 +545,16 @@ int WebWorker::ProcessSubmitProblem()
   } else
     stOutput << "<span style=\"color:green\"><b>Correct!</b></span>";
   stOutput << "</td></tr>";
-  if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType=="submitProblem")
+  if (theProblem.flagIsForReal)
   { std::stringstream comments;
-    if (!theProblem.GenerateAndStoreDatabaseInfo(comments))
+    UserCalculator theUser;
+    theUser.username=theGlobalVariables.userDefault;
+    theUser.SetProblemData(theProblem.fileName, theProblem.theProblemData);
+    DatabaseRoutines theRoutines;
+    if (!theUser.StoreProblemDataToDatabase(theRoutines, comments))
       stOutput << "<tr><td><b>This shouldn't happen and may be a bug: failed to store your answer in the database. "
-      << "You may want to take a screen shot and copy the link and email your instructors with these.</b></td></tr>";
+      << CalculatorHTML::BugsGenericMessage << "</b><br>Comments: "
+      << comments.str() << "</td></tr>";
     else
       stOutput << "<tr><td>So far " << correctSubmissionsRelevant << " correct and "
       << totalSubmissionsRelevant-correctSubmissionsRelevant << " incorrect submissions.</td></tr>";
@@ -759,7 +771,7 @@ bool CalculatorHTML::PrepareCommands(Calculator& theInterpreter, std::stringstre
     crash << "First command must be empty to allow for command for setting of random seed. " << crash;
   std::stringstream streamWithInbetween, streamNoVerification, streamVerification;
   //stOutput << " The big bad random seed: " << this->randomSeed ;
-  streamWithInbetween << "setRandomSeed{}(" << this->randomSeed << ");";
+  streamWithInbetween << "setRandomSeed{}(" << this->theProblemData.randomSeed << ");";
   streamNoVerification << streamWithInbetween.str();
   for (int i=1; i<this->theContent.size; i++) // the first element of the content is fake (used for the random seed)
   { if (!this->theContent[i].IsInterpretedByCalculatorDuringPreparation())
@@ -888,7 +900,7 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem(const std::str
   << "currentExamIntermediate=" << theGlobalVariables.GetWebInput("currentExamIntermediate") << "&"
   << "currentExamFile=" << CGI::StringToURLString(this->fileName) << "&";
   if (theGlobalVariables.GetWebInput("randomSeed")=="" && theGlobalVariables.userCalculatorRequestType!="examForReal")
-    out << "randomSeed=" << this->randomSeed << "&";
+    out << "randomSeed=" << this->theProblemData.randomSeed << "&";
 //  out << "currentExamFile=" << CGI::StringToURLString(this->fileName) << "&";
   return out.str();
 }
@@ -962,6 +974,7 @@ std::string CalculatorHTML::ToStringUserEmailActivationRole
   UserCalculator currentUser;
   currentUser.currentTable="users";
   DatabaseRoutines theRoutines;
+
   for (int i=0; i<userTable.size; i++)
   { std::stringstream failureStream;
     currentUser.username=userTable[i][indexUser];
@@ -991,14 +1004,23 @@ std::string CalculatorHTML::ToStringUserEmailActivationRole
       tableStream << "<td>error</td>";
     else
     { tableStream << "<td><span style=\"color:green\">activated</span></td>";
-      tableStream << "<td><span style=\"color:red\">"
+/*      tableStream << "<td><span style=\"color:red\">"
       << "<a href=\""
       << UserCalculator::GetActivationAddressFromActivationToken(currentUser.activationToken.value, userTable[i][indexUser])
       << "\"> (Re)activate account and change password</a>"
-      << "</span></td>";
+      << "</span></td>";*/
     }
     if (adminsOnly)
+    { tableStream << "</tr>";
       continue;
+    }
+/*    std::stringstream loadFailureStream;
+    if (!currentUser.LoadAndInterpretDatabaseInfo(theRoutines, loadFailureStream))
+    { tableStream << "<td>Failed to load student info: " << loadFailureStream.str() << "</td></tr>";
+      continue;
+    }
+    tableStream << "<td>Extra keys and values: " << currentUser.extraKeys.ToStringCommaDelimited()
+    << currentUser.extraValues.ToStringCommaDelimited() << "</td>";*/
     tableStream << "</tr>";
   }
   tableStream << "</table>";
@@ -1070,13 +1092,16 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     << answerId << "', '" << answerEvaluationId << "')\"> Submit </button></td>"
     << "<td>";
     out << "<span id=\"" << answerEvaluationId << "\">";
-    int theIndex=this->answerIds.GetIndex(answerId);
+    int theIndex=this->theProblemData.answerIds.GetIndex(answerId);
+    if (theIndex==-1)
+      crash << "Index of answer id not found: this shouldn't happen. " << crash;
     int numCorrectSubmissions=0;
     int numSubmissions= 0;
     if (theIndex!=-1)
-    { numCorrectSubmissions= this->answerNumCorrectSubmissions[theIndex];
-      numSubmissions= this->answerNumSubmissions[theIndex];
+    { numCorrectSubmissions= this->theProblemData.numCorrectSubmissions[theIndex];
+      numSubmissions= this->theProblemData.numSubmissions[theIndex];
     }
+//    stOutput << "got to here 2";
     if (numCorrectSubmissions >0)
     { out << "<b><span style=\"color:green\">Correctly answered: \\("
       << this->answerFirstCorrectSubmission[theIndex] << "\\) </span></b> ";
@@ -1145,8 +1170,9 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretHtmlOneAttempt");
   std::stringstream out;
-  if (!this->flagRandomSeedGiven)
-    this->randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
+  if (!this->flagIsForReal || !this->theProblemData.flagRandomSeedComputed)
+    if (!this->flagRandomSeedGiven)
+      this->theProblemData.randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
   this->FigureOutCurrentProblemList(comments);
   this->outputHtmlNavigation=this->ToStringProblemNavigation();
   if (this->flagIsExamProblem)
@@ -1182,6 +1208,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       moreThanOneCommand=true;
     }
   }
+  stOutput << "got to here, this->theProblemData: " << this->theProblemData.ToString();
   for (int i=0; i<this->theContent.size; i++)
     if (this->theContent[i].IsInterpretedNotByCalculator())
       this->InterpretNotByCalculator(this->theContent[i]);
@@ -1190,13 +1217,19 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
 //   out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
 //   out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
   //  out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();
-  if (theGlobalVariables.flagLoggedIn)
-    if (theGlobalVariables.userCalculatorRequestType=="examForReal")
-    { //store the random seed.
-//      stOutput << "Storing random seed...";
-      if (!this->GenerateAndStoreDatabaseInfo(comments))
+  if (this->flagIsForReal)
+  { this->theProblemData.flagRandomSeedComputed=true;
+    UserCalculator theUser;
+    DatabaseRoutines theRoutines;
+    theUser.username=theGlobalVariables.userDefault;
+    stOutput << "About to store problem data: " << this->theProblemData.ToString();
+    if (!theUser.InterpretDatabaseProblemData(this->currentUserDatabaseString, comments))
+      out << "<b>Error: corrupt database string. </b>";
+    else
+      theUser.SetProblemData(this->fileName, this->theProblemData);
+    if (!theUser.StoreProblemDataToDatabase(theRoutines, comments))
         out << "<b>Error: failed to store problem in database. </b>" << comments.str();
-    }
+  }
   this->outputHtmlMain=out.str();
   return true;
 }
@@ -1213,7 +1246,7 @@ void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments)
   CalculatorHTML parserOfParent;
   parserOfParent.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate"));
   std::stringstream commentsOfparent;
-  if (!parserOfParent.LoadMe(commentsOfparent))
+  if (!parserOfParent.LoadMe(false, commentsOfparent))
   { comments << "Failed to load parent problem collection. Comments: " << commentsOfparent.str();
     return;
   }
@@ -1230,108 +1263,6 @@ std::string CalculatorHTML::GetDatabaseTableName()
   return result;
 }
 
-bool CalculatorHTML::LoadAndInterpretDatabaseInfo(std::stringstream& comments)
-{ MacroRegisterFunctionWithName("CalculatorHTML::LoadAndInterpretDatabaseInfo");
-  //stOutput << "ere be i";
-  if (!DatabaseRoutinesGlobalFunctions::TableExists(this->GetDatabaseTableName(), comments))
-    if (!DatabaseRoutinesGlobalFunctions::CreateTable(this->GetDatabaseTableName(), comments))
-    { comments << "<b>Failed to create table for storing exam results. </b>";
-      return false;
-    }
-  if (!DatabaseRoutinesGlobalFunctions::ColumnExists
-      (this->fileName, this->GetDatabaseTableName(), comments))
-    if (!DatabaseRoutinesGlobalFunctions::CreateColumn(this->fileName, this->GetDatabaseTableName(), comments))
-    { comments << "Failed to create column: " << this->fileName << " in table: " << this->GetDatabaseTableName()
-      << ". ";
-      return false;
-    }
-  if (!DatabaseRoutinesGlobalFunctions::RowExists
-      (theGlobalVariables.userDefault, this->GetDatabaseTableName(), comments))
-    if (!DatabaseRoutinesGlobalFunctions::SetEntry
-        (theGlobalVariables.userDefault, this->GetDatabaseTableName(), this->fileName, "", comments))
-    { comments << "Failed to create an empty column for user: " << theGlobalVariables.userDefault
-      << " table: " << this->GetDatabaseTableName() << " column: " << this->fileName;
-      return false;
-    }
-  if (!DatabaseRoutinesGlobalFunctions::FetchEntry
-      (theGlobalVariables.userDefault, this->GetDatabaseTableName(), this->fileName, this->databaseInfo, comments))
-  { comments << "Error: failed to fetch database info on the problem. ";
-    return false;
-  }
-  //stOutput << "got to even ere";
-  return this->ParseAndInterpretDatabaseInfo(comments);
-}
-
-bool CalculatorHTML::ParseAndInterpretDatabaseInfo(std::stringstream& comments)
-{ MacroRegisterFunctionWithName("CalculatorHTML::ParseAndInterpretDatabaseInfo");
-  HashedList<std::string, MathRoutines::hashString> theKeys;
-  List<std::string> theValues;
-//  stOutput << "<br>Parsing and interpreting  database info: <br>" << this->databaseInfo;
-  CGI::ChopCGIInputStringToMultipleStrings(this->databaseInfo, theValues, theKeys, this->comments);
-  //stOutput << "<br>Database info keys: " << theKeys.ToStringCommaDelimited() << "<br>Values: " << theValues.ToStringCommaDelimited();
-  if (theKeys.Contains("rand"))
-  { std::stringstream reader(theValues[theKeys.GetIndex("rand")]);
-    reader >> this->randomSeed;
-    this->flagRandomSeedGiven=true;
-  }
-  for (int i=0; i<this->answerIds.size; i++)
-  { int indexNumSubmissions=theKeys.GetIndex("submissions"+this->answerIds[i]);
-    if (indexNumSubmissions!=-1)
-    { std::stringstream reader(theValues[indexNumSubmissions]);
-      reader >> this->answerNumSubmissions[i];
-    }
-    int indexNumCorrectSubmissions=theKeys.GetIndex("submissionsCorrect"+this->answerIds[i]);
-    if (indexNumCorrectSubmissions!=-1)
-    { std::stringstream reader(theValues[indexNumCorrectSubmissions]);
-      reader >> this->answerNumCorrectSubmissions[i];
-    }
-    int indexFirstCorrectAnswer=theKeys.GetIndex("firstCorrectAnswer"+this->answerIds[i]);
-    if (indexFirstCorrectAnswer!=-1)
-    { std::stringstream reader(theValues[indexFirstCorrectAnswer]);
-      std::string urledAnswer;
-      reader >> urledAnswer;
-      this->answerFirstCorrectSubmission[i]=CGI::URLStringToNormal(urledAnswer);
-    }
-  }
-  if (!this->flagRandomSeedGiven)
-    comments << "randomSeed not found. ";
-
-//  stOutput << "Database loaded:<br>"
-//  << this->databaseInfo;
-//  stOutput << "<br> database info xtracted back: <br>";
-//  this->GenerateDatabaseInfo();
-//  stOutput << this->databaseInfo;
-  return true;
-}
-
-void CalculatorHTML::GenerateDatabaseInfo()
-{ MacroRegisterFunctionWithName("CalculatorHTML::GenerateDatabaseInfo");
-  std::stringstream out;
-  out << "rand=" << this->randomSeed << "&";
-  for (int i=0; i<this->answerIds.size; i++)
-    out << "submissions" << this->answerIds[i] << "=" << this->answerNumSubmissions[i] << "&"
-    << "submissionsCorrect" << this->answerIds[i] << "=" << this->answerNumCorrectSubmissions[i] << "&"
-    << "firstCorrectAnswer" << this->answerIds[i] << "=" << CGI::StringToURLString( this->answerFirstCorrectSubmission[i])
-    << "&";
-  this->databaseInfo=out.str();
-}
-
-bool CalculatorHTML::GenerateAndStoreDatabaseInfo(std::stringstream& comments)
-{ MacroRegisterFunctionWithName("CalculatorHTML::GenerateAndStoreDatabaseInfo");
-//  stOutput << "<br>About to generate and store database info ... ";
-  this->GenerateDatabaseInfo();
-//  stOutput << "<br>database info generated, proceeding to store it:<br>" << this->databaseInfo << "<br>";
-//  if (!DatabaseRoutinesGlobalFunctions::TableExists(this->GetDatabaseTableName(), comments))
-//    stOutput << "Ze table dont exist, name: " << this->GetDatabaseTableName() << "<br>";
-  if (!DatabaseRoutinesGlobalFunctions::ColumnExists(this->fileName, this->GetDatabaseTableName(), comments))
-    if (!DatabaseRoutinesGlobalFunctions::CreateColumn(this->fileName, this->GetDatabaseTableName(), comments))
-    { comments << "This shouldn't happen: failed to store database info. ";
-      return false;
-    }
-  return DatabaseRoutinesGlobalFunctions::SetEntry
-  (theGlobalVariables.userDefault, this->GetDatabaseTableName(), this->fileName, this->databaseInfo, comments);
-}
-
 bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretHtml");
   if (!this->ParseHTML(comments))
@@ -1339,16 +1270,6 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
     return false;
   }
   this->NumAttemptsToInterpret=0;
-  if (theGlobalVariables.flagLoggedIn)
-    if (theGlobalVariables.userCalculatorRequestType=="examForReal")
-    { //load the random seed.
-      if (!this->LoadAndInterpretDatabaseInfo(comments))
-      { this->outputHtmlMain =
-        "<b>Something wrong has happened: failed to parse the information stored in the database.\
-         Please let your instructor know.</b>";
-        return false;
-      }
-    }
   if (this->flagRandomSeedGiven)
     this->MaxInterpretationAttempts=1;
   srand (time(NULL));
@@ -1607,27 +1528,32 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
 
 bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::ExtractAnswerIds");
-  this->answerIds.SetSize(0);
-  this->answerVerificationCommand.SetSize(0);
+  //we shouldn't touch this->theProblemData.answerIds.SetSize: it may contain
+  //outdated information loaded from the database. We don't want to loose that info
+  //(say we renamed an answerId but students have already stored answers using the old answerId...).
+  this->answerVerificationCommand.SetSize(this->theProblemData.answerIds.size);
+  List<std::string> answerIdsInTheFile;
   for (int i=0; i<this->theContent.size; i++)
   { if (!this->theContent[i].IsAnswer())
       continue;
     std::string newId=this->theContent[i].GetKeyValue("id");
     if (newId=="")
-    { comments << "<b>Error: student answer tag has no id</b>";
+    { comments << "<b>Error: answer tag has no id</b>";
       return false;
     }
-    if (this->answerIds.Contains(newId))
-    { comments << "<b>Error parsing the problem:</b> student answer tag id: "
-      << newId << " appears more than once.";
+    if (answerIdsInTheFile.Contains(newId))
+    { comments << "<b>Error: answer tag id: " << newId << " contained more than once</b>";
       return false;
     }
-    this->answerIds.AddOnTop(newId);
-    this->answerVerificationCommand.AddOnTop(this->theContent[i].content);
+    answerIdsInTheFile.AddOnTop(newId);
+    if (this->theProblemData.answerIds.Contains(newId))
+      this->answerVerificationCommand[this->theProblemData.answerIds.GetIndex(newId)]=
+      this->theContent[i].content;
+    else
+    { this->theProblemData.AddEmptyAnswerIdOnTop(newId);
+      this->answerVerificationCommand.AddOnTop(this->theContent[i].content);
+    }
   }
-  this->answerNumCorrectSubmissions.initFillInObject(this->answerIds.size, 0);
-  this->answerNumSubmissions.initFillInObject(this->answerIds.size, 0);
-  this->answerFirstCorrectSubmission.initFillInObject(this->answerIds.size, "");
   return true;
 }
 

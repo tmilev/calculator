@@ -1833,7 +1833,7 @@ std::string EmailRoutines::GetCommandToSendEmailWithMailX()
   << "\" -S smtp-auth-password=\""
   << this->fromEmailAuth
   << "\" -S ssl-verify=ignore "
-  << "-S nss-config-dir=/etc/ssl/cert "
+  << "-S nss-config-dir=/etc/pki/nssdb/ "
   << this->toEmail;
   return out.str();
 }

@@ -153,6 +153,7 @@ void Calculator::init()
   this->AddOperationNoRepetitionAllowed("PolyVars");
   this->AddOperationNoRepetitionAllowed("DiffOpVars");
   this->AddOperationNoRepetitionAllowed("\\to");
+  this->AddOperationNoRepetitionAllowed("if");
   this->AddOperationNoRepetitionAllowed("\\lim");
 
 
@@ -198,7 +199,6 @@ void Calculator::init()
   this->controlSequences.AddOnTop(",");
   this->controlSequences.AddOnTop(".");
   this->controlSequences.AddOnTop("\"");
-  this->controlSequences.AddOnTop("if");
   this->controlSequences.AddOnTop("\\frac");
   this->controlSequences.AddOnTop("\\cdot");
   this->controlSequences.AddOnTop("_");
@@ -1023,6 +1023,15 @@ bool Calculator::AllowsOrInPreceding(const std::string& lookAhead)
   ;
 }
 
+bool Calculator::AllowsIfInPreceding(const std::string& lookAhead)
+{ return
+  lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||
+  lookAhead=="," || lookAhead==";" ||
+  lookAhead==":" || lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\" ||
+  lookAhead=="EndProgram"
+  ;
+}
+
 bool Calculator::AllowsPlusInPreceding(const std::string& lookAhead)
 { return lookAhead=="+" || lookAhead=="-" || lookAhead=="," || lookAhead=="=" || lookAhead==")" || lookAhead==";" || lookAhead=="]" || lookAhead=="}" ||
   lookAhead==":" || lookAhead=="," || lookAhead=="\\choose" || lookAhead=="EndProgram" || lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\";
@@ -1360,6 +1369,8 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   if (fifthToLastS=="Expression" && fourthToLastS== "{}" && thirdToLastS=="{" && secondToLastS=="Sequence" && lastS=="}")
     return this->ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
+  if (thirdToLastS=="if" && secondToLastS=="Expression" && this->AllowsIfInPreceding(lastS) )
+    return this->ReplaceOEByE();
   if (secondToLastS=="Sequence" &&
       ((thirdToLastS=="(" && lastS==")")||
        (thirdToLastS=="{" && lastS=="}")

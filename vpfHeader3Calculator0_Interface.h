@@ -924,6 +924,7 @@ public:
 
   bool AllowsLimitProcessInPreceding(const std::string& lookAhead);
   bool AllowsApplyFunctionInPreceding(const std::string& lookAhead);
+  bool AllowsIfInPreceding(const std::string& lookAhead);
   bool AllowsOrInPreceding(const std::string& lookAhead);
   bool AllowsAndInPreceding(const std::string& lookAhead);
   bool AllowsPlusInPreceding(const std::string& lookAhead);
@@ -1141,6 +1142,9 @@ public:
   }
   int opSqrt()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\sqrt");
+  }
+  int opIf()
+  { return this->theAtoms.GetIndexIMustContainTheObject("if");
   }
   int opDefineConditional()
   { return this->theAtoms.GetIndexIMustContainTheObject("if=");

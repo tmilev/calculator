@@ -59,7 +59,6 @@ public:
   bool flagIsForReal;
   bool flagLoadedFromDB;
 
-  std::string databaseInfo;
   std::string problemCommandsWithInbetweens;
   std::string problemCommandsNoVerification;
   std::string problemCommandsVerification;
@@ -177,8 +176,10 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
      theGlobalVariables.userCalculatorRequestType=="examForReal"
     );
 #ifdef MACRO_use_MySQL
+//stOutput << "loading: ";
   if (this->flagIsForReal && doLoadDatabase)
   { UserCalculator theUser;
+    //stOutput << " accessing db... ";
     theUser.username=theGlobalVariables.userDefault;
     DatabaseRoutines theRoutines;
     if (!theUser.LoadProblemStringFromDatabase(theRoutines, this->currentUserDatabaseString, comments))
@@ -535,7 +536,8 @@ int WebWorker::ProcessSubmitProblem()
   DatabaseRoutines theRoutines;
   theUser.username=theGlobalVariables.userDefault;
   if (theProblem.flagIsForReal)
-  { if (!theUser.InterpretDatabaseProblemData(theProblem.databaseInfo, comments))
+  { //stOutput << "<hr>problem string: " << theProblem.currentUserDatabaseString << "<hr>";
+    if (!theUser.InterpretDatabaseProblemData(theProblem.currentUserDatabaseString, comments))
     { stOutput << "<b>Failed to load user information from database. Answer not recorded. "
       << "This should not happen. " << CalculatorHTML::BugsGenericMessage << "</b>";
       theProblem.flagIsForReal=false;

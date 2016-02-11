@@ -205,6 +205,7 @@ public:
   bool SetPassword(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure);
   bool DeleteMe(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure);
   bool Iexist(DatabaseRoutines& theRoutines);
+  bool IamPresentInTable(DatabaseRoutines& theRoutines, const std::string& tableNameUnsafe);
   bool CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure);
   static bool IsAcceptableDatabaseInpuT(const std::string& input, std::stringstream* comments);
   static bool IsAcceptableCharDatabaseInpuT(char theChar);

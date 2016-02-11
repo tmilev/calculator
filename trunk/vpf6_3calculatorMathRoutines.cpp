@@ -6199,6 +6199,22 @@ bool CalculatorFunctionsGeneral::innerOr
   return false;
 }
 
+bool CalculatorFunctionsGeneral::innerIf
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerOr");
+  if (input.children.size!=4)
+    return false;
+  if (input[1].IsEqualToOne())
+  { output=input[2];
+    return true;
+  }
+  if (input[1].IsEqualToZero())
+  { output=input[3];
+    return true;
+  }
+  return false;
+}
+
 bool CalculatorFunctionsGeneral::innerRandomInteger
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRandomInteger");

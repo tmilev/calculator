@@ -169,6 +169,7 @@ public:
   { return innerDrawExpressionGraphWithOptions(theCommands, input, output, true);
   }
 
+  static bool innerIf(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerOr(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAnd(Calculator& theCommands, const Expression& input, Expression& output);
 

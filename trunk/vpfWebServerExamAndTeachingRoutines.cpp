@@ -423,9 +423,9 @@ std::string WebWorker::GetAddUserEmails()
   std::stringstream comments;
   bool result=theRoutines.AddUsersFromEmails(inputEmails, comments);
   if (result)
-    out << "<span style=\"color:green\"> Emails successfully registered. </span>" << comments.str();
+    out << "<span style=\"color:green\"> Emails successfully added. Comments: </span>" << comments.str();
   else
-    out << "<span style=\"color:red\">Failed to add users to the system. Comments: </span>" << comments.str();
+    out << "<span style=\"color:red\">Failed to add all users. Comments: </span>" << comments.str();
   return out.str();
 #else
   return "<b>no database present.</b>";

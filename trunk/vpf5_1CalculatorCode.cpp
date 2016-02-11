@@ -354,9 +354,11 @@ bool DynkinSimpleType::HasEasySubalgebras()const
 }
 
 const std::string GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable=
-"http://vector-partition.jacobs-university.de:8080/vectorpartition/cgi-bin/calculator";
+"http://calculator-algebra.org/calculator";
+const std::string GlobalVariables::hopefullyPermanent_HTTPS_WebAdressOfServerExecutable=
+"https://calculator-algebra.org/calculator";
 const std::string GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder=
-"http://vector-partition.jacobs-university.de:8080/vectorpartition/output/";
+"http://calculator-algebra.org/output/";
 
 std::string Calculator::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType& theType, FormatExpressions* theFormat)
 { std::stringstream out;

@@ -987,7 +987,8 @@ bool Calculator::AllowsTimesInPreceding(const std::string& lookAhead)
   lookAhead=="Expression" ||  lookAhead== "Integer" || lookAhead=="\\cup" ||
   lookAhead=="(" || lookAhead=="[" ||
   lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||
-  lookAhead=="=" || lookAhead=="Variable" || lookAhead=="," || lookAhead==";" ||
+  lookAhead=="=" || lookAhead==">" || lookAhead=="<" ||
+  lookAhead=="Variable" || lookAhead=="," || lookAhead==";" ||
   lookAhead==":" || lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\" ||
   lookAhead=="sqrt" || lookAhead=="\\sqrt" || lookAhead=="EndProgram"
   ;
@@ -1033,7 +1034,9 @@ bool Calculator::AllowsIfInPreceding(const std::string& lookAhead)
 }
 
 bool Calculator::AllowsPlusInPreceding(const std::string& lookAhead)
-{ return lookAhead=="+" || lookAhead=="-" || lookAhead=="," || lookAhead=="=" || lookAhead==")" || lookAhead==";" || lookAhead=="]" || lookAhead=="}" ||
+{ return lookAhead=="+" || lookAhead=="-" || lookAhead=="," ||
+  lookAhead=="=" || lookAhead=="<" || lookAhead==">" ||
+  lookAhead==")" || lookAhead==";" || lookAhead=="]" || lookAhead=="}" ||
   lookAhead==":" || lookAhead=="," || lookAhead=="\\choose" || lookAhead=="EndProgram" || lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\";
   ;
 }
@@ -1370,7 +1373,7 @@ bool Calculator::ApplyOneRule()
   if (fifthToLastS=="Expression" && fourthToLastS== "{}" && thirdToLastS=="{" && secondToLastS=="Sequence" && lastS=="}")
     return this->ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   if (thirdToLastS=="if" && secondToLastS=="Expression" && this->AllowsIfInPreceding(lastS) )
-    return this->ReplaceOEByE();
+    return this->ReplaceOEXByEX();
   if (secondToLastS=="Sequence" &&
       ((thirdToLastS=="(" && lastS==")")||
        (thirdToLastS=="{" && lastS=="}")

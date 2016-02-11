@@ -100,6 +100,13 @@ void Calculator::initPredefinedInnerFunctions()
    "0 or 0; 0 or 1; 1 or 0; 1 or 1; a or 1; a or 0;",
    true, false, "CalculatorConversions::innerOr");
   this->AddOperationInnerHandler
+  ("if", CalculatorFunctionsGeneral::innerIf, "",
+   "if function. Takes 3 arguments. If first argument is true (equal to 1)\
+   then returns the second argument. If the first argument is false (equal to 0)\
+   returns the third argument. In any other situation the expression is not reduced.",
+   "if (1, x,y); if (0, x, y); if (2, x,y)",
+   true, false, "CalculatorConversions::innerIf");
+  this->AddOperationInnerHandler
   ("and", CalculatorFunctionsGeneral::innerAnd, "",
    "Logical and.",
    "0 and 0; 0 and 1; 1 and 0; 1 and 1; a and 1; a and 0;",

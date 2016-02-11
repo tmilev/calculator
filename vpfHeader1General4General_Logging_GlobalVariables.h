@@ -113,6 +113,7 @@ public:
   Controller theLocalPauseController;
 
   static const std::string hopefullyPermanentWebAdressOfServerExecutable;
+  static const std::string hopefullyPermanent_HTTPS_WebAdressOfServerExecutable;
   static const std::string hopefullyPermanentWebAdressOfServerOutputFolder;
 
   std::string userInputStringRAWIfAvailable;

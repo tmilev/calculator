@@ -813,8 +813,15 @@ std::string UserCalculator::GetPassword(DatabaseRoutines& theRoutines)
 
 bool UserCalculator::Iexist(DatabaseRoutines& theRoutines)
 { MacroRegisterFunctionWithName("UserCalculator::Iexist");
+  return this->IamPresentInTable(theRoutines, "users");
+}
+
+bool UserCalculator::IamPresentInTable(DatabaseRoutines& theRoutines, const std::string& tableNameUnsafe)
+{ MacroRegisterFunctionWithName("UserCalculator::Iexist");
+  MySQLdata theTable=tableNameUnsafe;
   DatabaseQuery theQuery(theRoutines,
-  "SELECT username FROM calculatorUsers.users where username=" + this->username.GetDatA()
+  "SELECT username FROM calculatorUsers." + theTable.GetIdentifieR() +
+  " where username=" + this->username.GetDatA()
   );
   return theQuery.flagQueryReturnedResult;
 }
@@ -1368,7 +1375,7 @@ bool DatabaseRoutines::AddUsersFromEmails
   std::string currentFileUsersTableName=this->GetTableUnsafeNameUsersOfFile(currentExamHome);
   List<std::string> theEmails;
   this->ExtractEmailList(emailList, theEmails, comments);
-  stOutput << " <br>creating users: " << theEmails.ToStringCommaDelimited() << "<br>";
+//  stOutput << " <br>creating users: " << theEmails.ToStringCommaDelimited() << "<br>";
   UserCalculator currentUser;
   bool result=true;
   if (!this->startMySQLDatabaseIfNotAlreadyStarted(&comments))
@@ -1377,11 +1384,6 @@ bool DatabaseRoutines::AddUsersFromEmails
     if (!this->CreateTable(currentFileUsersTableName, "username VARCHAR(255) NOT NULL PRIMARY KEY, \
         extraInfo LONGTEXT ", &comments))
       result=false;
-  if (result)
-  { for (int i=0; i<theEmails.size; i++)
-      if (!this->InsertRow("username", theEmails[i], currentFileUsersTableName, comments))
-        result=false;
-  }
   currentUser.currentTable="users";
   for (int i=0; i<theEmails.size; i++)
   { currentUser.username=theEmails[i];
@@ -1399,11 +1401,17 @@ bool DatabaseRoutines::AddUsersFromEmails
         result=false;
     currentUser.SetColumnEntry("userRole", userRole, *this, &comments);
   }
-  if (!result)
-  { comments << "<br>Failed to create all users. ";
-    return result;
+  for (int i=0; i<theEmails.size; i++)
+  { currentUser.username=theEmails[i];
+    if (!currentUser.IamPresentInTable(*this, currentFileUsersTableName))
+      if (!this->InsertRow("username", theEmails[i], currentFileUsersTableName, comments))
+        result=false;
   }
-  return this->SendActivationEmail(theEmails, false, comments);
+  if (!result)
+    comments << "<br>Failed to create all users. ";
+  if (! this->SendActivationEmail(theEmails, false, comments))
+    result=false;
+  return result;
 }
 
 std::string UserCalculator::GetActivationAddressFromActivationToken
@@ -1411,7 +1419,7 @@ std::string UserCalculator::GetActivationAddressFromActivationToken
 { MacroRegisterFunctionWithName("UserCalculator::GetActivationLinkFromActivationToken");
   std::stringstream out;
   out //<< "<a href=\""
-  << theGlobalVariables.DisplayNameCalculatorWithPath
+  << theGlobalVariables.hopefullyPermanent_HTTPS_WebAdressOfServerExecutable
   << "?request=activateAccount&usernameHidden=" << CGI::StringToURLString(inputUserNameUnsafe)
   << "&activationToken=" << CGI::StringToURLString(theActivationToken)
   //<< "\">Activate account and set password</a>"
@@ -1426,11 +1434,11 @@ bool UserCalculator::GetActivationAddress
     return false;
   this->activationToken= this->GetSelectedRowEntry("activationToken");
   if (this->activationToken=="")
-  { comments << "Failed to fetch activation token";
+  { comments << "Failed to fetch activation token for user: " << this->username.value;
     return false;
   }
   if (this->activationToken=="activated")
-  { comments << "Account already activated";
+  { comments << "Account of user: " << this->username.value << "already activated";
     return false;
   }
   output= this->GetActivationAddressFromActivationToken(this->activationToken.value, this->username.value);
@@ -1446,7 +1454,9 @@ bool UserCalculator::SendActivationEmail(DatabaseRoutines& theRoutines, std::str
 //  stOutput << "<br> all result string names: " << this->selectedRowFieldsUnsafe.ToStringCommaDelimited();
   this->email=this->GetSelectedRowEntry("email");
   if (this->email=="")
+  { comments << "<br>No email address for user: " << this->username.value << ". ";
     return false;
+  }
   EmailRoutines theEmailRoutines;
   theEmailRoutines.toEmail=this->email.value;
   theEmailRoutines.subject="NO REPLY: Activation of a Math homework account. ";
@@ -1459,10 +1469,19 @@ bool UserCalculator::SendActivationEmail(DatabaseRoutines& theRoutines, std::str
 //  << " todor.milev@gmail.com\n\n";
 //  emailStream << this->activationTokenUnsafe << "\n\nGood luck with our course, \n Your calculus instructors.";
   std::string emailLog=theGlobalVariables.CallSystemWithOutput(theEmailRoutines.GetCommandToSendEmailWithMailX());
-  stOutput << "Calling system with:<br>" << theEmailRoutines.GetCommandToSendEmailWithMailX()
-  << "<br>\n to get output: \n<br>" << emailLog;
-  comments << "\nEmail sending log:\n" << emailLog;
-  return true;
+  unsigned int indexGoAhead= emailLog.find("Go ahead");
+  bool result=true;
+  if (indexGoAhead== std::string::npos)
+    result=false;
+  else
+  { std::string choppedEmailLog=emailLog.substr(indexGoAhead+8);
+    result=(choppedEmailLog.find("OK")!=std::string::npos);
+  }
+  //stOutput << "Calling system with:<br>" << theEmailRoutines.GetCommandToSendEmailWithMailX()
+  //<< "<br>\n to get output: \n<br>" << emailLog;
+  if (!result)
+    comments << "<br>\nFailed to send email to " << this->username.value << ". Details: \n" << emailLog;
+  return result;
 }
 
 bool DatabaseRoutines::innerAddUsersFromEmailListAndCourseName(Calculator& theCommands, const Expression& input, Expression& output)

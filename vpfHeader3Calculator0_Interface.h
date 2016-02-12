@@ -208,9 +208,9 @@ class Expression
   bool HasSameContextArgumentsNoLog()const;
   bool IsFrozen()const;
   bool IsAtomThatFreezesArguments(std::string* outputWhichAtom=0)const;
-  bool IsAtomWhoseExponentsAreInterprettedAsFunction(std::string* outputWhichAtom=0)const;
-  bool IsPowerOfAtomWhoseExponentsAreInterprettedAsFunction()const;
-  bool IsAtomNotInterprettedAsFunction(std::string* outputWhichAtom=0)const;
+  bool IsAtomWhoseExponentsAreInterpretedAsFunction(std::string* outputWhichAtom=0)const;
+  bool IsPowerOfAtomWhoseExponentsAreInterpretedAsFunction()const;
+  bool IsAtomNotInterpretedAsFunction(std::string* outputWhichAtom=0)const;
 
   bool IsAtom(std::string* outputWhichOperation=0)const;
   bool IsAtomGivenData(int desiredDataUseMinusOneForAny=-1)const;
@@ -699,8 +699,8 @@ public:
   HashedList<std::string, MathRoutines::hashString> arithmeticOperations;
   HashedList<std::string, MathRoutines::hashString> knownFunctionsWithComplexRange;
   HashedList<std::string, MathRoutines::hashString> atomsThatFreezeArguments;
-  HashedList<std::string, MathRoutines::hashString> atomsWhoseExponentsAreInterprettedAsFunctions;
-  HashedList<std::string, MathRoutines::hashString> atomsNotInterprettedAsFunctions;
+  HashedList<std::string, MathRoutines::hashString> atomsWhoseExponentsAreInterpretedAsFunctions;
+  HashedList<std::string, MathRoutines::hashString> atomsNotInterpretedAsFunctions;
   HashedList<std::string, MathRoutines::hashString> atomsThatMustNotBeCached;
   HashedList<std::string, MathRoutines::hashString> operationsComposite;
   List<List<Function> > FunctionHandlers;
@@ -904,7 +904,7 @@ public:
   std::string ToStringSyntacticStackHumanReadable(bool includeLispifiedExpressions);
   std::string WriteDefaultLatexFileReturnHtmlLink(const std::string& fileContent, bool useLatexDviPSpsToPNG=false);
   std::string GetCalculatorLink(const std::string& input);
-  bool isInterprettedAsEmptySpace(const std::string& input);
+  bool isInterpretedAsEmptySpace(const std::string& input);
   bool isSeparatorFromTheLeftGeneral(const std::string& input);
   bool isSeparatorFromTheLeftForDefinition(const std::string& input);
   bool isSeparatorFromTheLeftForList(const std::string& input);
@@ -1687,8 +1687,8 @@ public:
   void initAtomsThatAllowCommutingOfArguments();
   void initOperationsWhoseDomainsAreTheConstants();
   void initArithmeticOperations();
-  void initBuiltInAtomsWhosePowersAreInterprettedAsFunctions();
-  void initBuiltInAtomsNotInterprettedAsFunctions();
+  void initBuiltInAtomsWhosePowersAreInterpretedAsFunctions();
+  void initBuiltInAtomsNotInterpretedAsFunctions();
   void initAtomsNotGoodForChainRule();
   void initPredefinedStandardOperations();
   void initPredefinedStandardOperationsWithoutHandler();

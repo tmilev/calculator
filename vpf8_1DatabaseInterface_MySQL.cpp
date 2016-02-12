@@ -1429,7 +1429,7 @@ std::string UserCalculator::GetActivationAddressFromActivationToken
 
 bool UserCalculator::GetActivationAddress
   (std::string& output, DatabaseRoutines& theRoutines, std::stringstream& comments)
-{ MacroRegisterFunctionWithName("UserCalculator::GetActivationLink");
+{ MacroRegisterFunctionWithName("UserCalculator::GetActivationAddress");
   if (!this->FetchOneUserRow(theRoutines, comments))
     return false;
   this->activationToken= this->GetSelectedRowEntry("activationToken");
@@ -1516,26 +1516,6 @@ bool DatabaseRoutines::innerSendActivationEmailUsers(Calculator& theCommands, co
   std::stringstream out;
   out << "Successfully added students. " ;
   return output.AssignValue(out.str(), theCommands);
-}
-
-bool DatabaseRoutines::innerAddUser(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::innerAddUser");
-  UserCalculator theUser;
-  if (!theUser.getUserPassAndEmail(theCommands, input))
-    return false;
-  if (MathRoutines::StringBeginsWith(theUser.username.value, "deleted"))
-    return output.MakeError("User names starting with 'deleted' are not allowed.", theCommands);
-  DatabaseRoutines theRoutines;
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
-  { UserCalculator adminUser;
-    adminUser.username="admin";
-    if (adminUser.Iexist(theRoutines))
-      return output.MakeError("Only calculator admin is allowed to add users", theCommands);
-  }
-  //reaching this piece of code means the calculator has no admin user, so the current user assumes admin powers.
-  std::stringstream comments;
-  theUser.CreateMeIfUsernameUnique(theRoutines, &comments);
-  return output.AssignValue(comments.str(), theCommands);
 }
 
 bool DatabaseRoutines::innerDeleteUser(Calculator& theCommands, const Expression& input, Expression& output)

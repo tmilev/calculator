@@ -2207,11 +2207,11 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   } else if (this->IsListStartingWithAtom(this->owner->opFactorial()))
     out << (*this)[1].ToString(theFormat) << "!";
   else if (this->StartsWith(this->owner->opThePower(),3))
-  { bool involvesExponentsInterprettedAsFunctions=false;
+  { bool involvesExponentsInterpretedAsFunctions=false;
     const Expression& firstE=(*this)[1];
     if (firstE.StartsWith(-1, 2))
-      if (firstE[0].IsAtomWhoseExponentsAreInterprettedAsFunction())
-      { involvesExponentsInterprettedAsFunctions=true;
+      if (firstE[0].IsAtomWhoseExponentsAreInterpretedAsFunction())
+      { involvesExponentsInterpretedAsFunctions=true;
         Expression newE, newFunE;
         newFunE.MakeXOX(*this->owner, this->owner->opThePower(), firstE[0], (*this)[2]);
         newE.reset(*this->owner, 2);
@@ -2223,7 +2223,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         //stOutput << "<br> tostringing a very special case: " << newE.ToString() << " lispified: " << this->ToStringFull();
         out << newE.ToString(theFormat);
       }
-    if (!involvesExponentsInterprettedAsFunctions)
+    if (!involvesExponentsInterpretedAsFunctions)
     { bool isSqrt=false;
       if ((*this)[2].IsOfType<Rational>())
         if ((*this)[2].GetValue<Rational>().IsEqualTo(Rational(1,2)))
@@ -2413,9 +2413,9 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   { out << (*this)[0].ToString(theFormat);
     bool needParenthesis=true;
     if (this->children.size==2)
-    { if ((*this)[0].IsAtomWhoseExponentsAreInterprettedAsFunction())
+    { if ((*this)[0].IsAtomWhoseExponentsAreInterpretedAsFunction())
         needParenthesis=!(*this)[1].IsAtom();
-      if ((*this)[0].IsPowerOfAtomWhoseExponentsAreInterprettedAsFunction())
+      if ((*this)[0].IsPowerOfAtomWhoseExponentsAreInterpretedAsFunction())
         needParenthesis=!(*this)[1].IsAtom();
     }
     if (this->format==this->formatFunctionUseUnderscore)
@@ -2516,15 +2516,15 @@ bool Expression::IsAtomThatFreezesArguments(std::string* outputWhichAtom)const
   return this->owner->atomsThatFreezeArguments.Contains(this->owner->GetOperations()[this->theData]);
 }
 
-bool Expression::IsPowerOfAtomWhoseExponentsAreInterprettedAsFunction()const
+bool Expression::IsPowerOfAtomWhoseExponentsAreInterpretedAsFunction()const
 { if (this->owner==0)
     return false;
   if (!this->StartsWith(this->owner->opThePower(), 3))
     return false;
-  return (*this)[1].IsAtomWhoseExponentsAreInterprettedAsFunction();
+  return (*this)[1].IsAtomWhoseExponentsAreInterpretedAsFunction();
 }
 
-bool Expression::IsAtomWhoseExponentsAreInterprettedAsFunction(std::string* outputWhichAtom)const
+bool Expression::IsAtomWhoseExponentsAreInterpretedAsFunction(std::string* outputWhichAtom)const
 { if (this->owner==0)
     return false;
   if (this->IsLisT())
@@ -2533,10 +2533,10 @@ bool Expression::IsAtomWhoseExponentsAreInterprettedAsFunction(std::string* outp
     return false;
   if (outputWhichAtom!=0)
     *outputWhichAtom=this->owner->GetOperations()[this->theData];
-  return this->owner->atomsWhoseExponentsAreInterprettedAsFunctions.Contains(this->owner->GetOperations()[this->theData]);
+  return this->owner->atomsWhoseExponentsAreInterpretedAsFunctions.Contains(this->owner->GetOperations()[this->theData]);
 }
 
-bool Expression::IsAtomNotInterprettedAsFunction(std::string* outputWhichAtom)const
+bool Expression::IsAtomNotInterpretedAsFunction(std::string* outputWhichAtom)const
 { if (this->owner==0)
     return false;
   if (this->IsLisT())
@@ -2545,7 +2545,7 @@ bool Expression::IsAtomNotInterprettedAsFunction(std::string* outputWhichAtom)co
     return false;
   if (outputWhichAtom!=0)
     *outputWhichAtom=this->owner->GetOperations()[this->theData];
-  return this->owner->atomsNotInterprettedAsFunctions.Contains(this->owner->GetOperations()[this->theData]);
+  return this->owner->atomsNotInterpretedAsFunctions.Contains(this->owner->GetOperations()[this->theData]);
 }
 
 bool Expression::IsAtom(std::string* outputWhichOperation)const

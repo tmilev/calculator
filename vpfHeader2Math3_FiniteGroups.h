@@ -1160,7 +1160,7 @@ public:
 //This class iterates over all elements of the orbit of a single element
 //using the generators of the group.
 //The element can be an element of the group, representation, etc.
-//(note that the group elements can be interpretted as elements of
+//(note that the group elements can be interpreted as elements of
 //the group ring representation).
 template <class elementGroup, class elementRepresentation>
 class OrbitIterator

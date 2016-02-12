@@ -25,7 +25,7 @@ public:
   std::string GetKeyValue(const std::string& theKey)const;
   void SetKeyValue(const std::string& theKey, const std::string& theValue);
   void resetAllExceptContent();
-  std::string ToStringInterpretted();
+  std::string ToStringInterpreted();
   std::string ToStringTagAndContent();
   std::string ToStringOpenTag();
   std::string ToStringCloseTag();
@@ -58,6 +58,7 @@ public:
   bool flagParentInvestigated;
   bool flagIsForReal;
   bool flagLoadedFromDB;
+  bool flagParentIsIntermediateExamFile;
 
   std::string problemCommandsWithInbetweens;
   std::string problemCommandsNoVerification;
@@ -145,9 +146,30 @@ CalculatorHTML::CalculatorHTML()
   this->NumProblemsFound=0;
   this->flagIsForReal=false;
   this->flagLoadedFromDB=false;
+  this->flagParentIsIntermediateExamFile=false;
 }
 
 const std::string CalculatorHTML::RelativePhysicalFolderProblemCollections="ProblemCollections/";
+
+std::string DatabaseRoutines::SetProblemWeights(const std::string& inputString)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::SetProblemWeights");
+  std::stringstream out;
+  HashedList<std::string, MathRoutines::hashString> theKeys;
+  List<std::string> theWeights;
+  if (! CGI::ChopCGIInputStringToMultipleStrings(inputString, theWeights, theKeys, out))
+  { out << "<span style=\"color:red\"><b>Failed to parse your request.</b></span> ";
+    return out.str();
+  }
+  DatabaseRoutines theRoutines;
+  std::string currentKey, currentWeight, currentFileName;
+  for (int i=0; i<theKeys.size; i++)
+  { currentKey=CGI::URLStringToNormal(theKeys[i]);
+    currentWeight=CGI::URLStringToNormal(theWeights[i]);
+    currentFileName=CalculatorHTML::RelativePhysicalFolderProblemCollections+ currentKey;
+  }
+
+  return out.str();
+}
 
 bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadMe");
@@ -399,11 +421,34 @@ int WebWorker::ProcessSubmitProblemPreview()
   return 0;
 }
 
+int WebWorker::ProcessSetProblemWeight()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessSetProblemWeight");
+  stOutput << this->GetSetProblemWeightHtml();
+  return 0;
+}
+
 int WebWorker::ProcessAddUserEmails()
 { MacroRegisterFunctionWithName("WebWorker::ProcessAddUserEmails");
   stOutput << this->GetAddUserEmails();
   stOutput.Flush();
   return 0;
+}
+
+std::string WebWorker::GetSetProblemWeightHtml()
+{ MacroRegisterFunctionWithName("WebWorker::GetSetProblemWeightHtml");
+#ifdef MACRO_use_MySQL
+  std::stringstream out;
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { out << "<b>Only admins may set problem weights.</b>";
+    return out.str();
+  }
+  std::string inputSetProblemWeight=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
+  DatabaseRoutines theRoutines;
+//  theRoutines.Set
+#else
+  out << "Cannot modify problem weights (no database available)";
+#endif // MACRO_use_MySQL
+  return out.str();
 }
 
 std::string WebWorker::GetAddUserEmails()
@@ -742,7 +787,7 @@ void SyntacticElementHTML::SetKeyValue(const std::string& theKey, const std::str
   this->tagValues[theIndex]=theValue;
 }
 
-std::string SyntacticElementHTML::ToStringInterpretted()
+std::string SyntacticElementHTML::ToStringInterpreted()
 { if (this->syntacticRole=="")
     return this->content;
   if (this->IsInterpretedNotByCalculator())
@@ -1250,7 +1295,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     if (this->theContent[i].IsInterpretedNotByCalculator())
       this->InterpretNotByCalculator(this->theContent[i]);
   for (int i=0; i<this->theContent.size; i++)
-    out << this->theContent[i].ToStringInterpretted();
+    out << this->theContent[i].ToStringInterpreted();
 //   out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
 //   out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
   //  out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();
@@ -1284,6 +1329,12 @@ void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments)
     return;
   CalculatorHTML parserOfParent;
   parserOfParent.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate"));
+  if (parserOfParent.fileName!="")
+    this->flagParentIsIntermediateExamFile=true;
+  else
+  { this->flagParentIsIntermediateExamFile=false;
+    parserOfParent.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
+  }
   std::stringstream commentsOfparent;
   if (!parserOfParent.LoadMe(false, commentsOfparent))
   { comments << "Failed to load parent problem collection. Comments: " << commentsOfparent.str();

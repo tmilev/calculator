@@ -67,9 +67,9 @@ void Calculator::reset()
   this->builtInTypes.Clear();
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.Clear();
   this->atomsThatFreezeArguments.Clear();
-  this->atomsNotInterprettedAsFunctions.Clear();
+  this->atomsNotInterpretedAsFunctions.Clear();
   this->atomsNotAllowingChainRule.Clear();
-  this->atomsWhoseExponentsAreInterprettedAsFunctions.Clear();
+  this->atomsWhoseExponentsAreInterpretedAsFunctions.Clear();
   this->arithmeticOperations.Clear();
   this->knownFunctionsWithComplexRange.Clear();
   this->knownDoubleConstants.Clear();
@@ -268,8 +268,8 @@ void Calculator::init()
   this->initAtomsThatAllowCommutingOfArguments();
   this->initAtomsThatFreezeArguments();
   this->initAtomsNotGoodForChainRule();
-  this->initBuiltInAtomsNotInterprettedAsFunctions();
-  this->initBuiltInAtomsWhosePowersAreInterprettedAsFunctions();
+  this->initBuiltInAtomsNotInterpretedAsFunctions();
+  this->initBuiltInAtomsWhosePowersAreInterpretedAsFunctions();
   this->initOperationsWhoseDomainsAreTheConstants();
   this->initAtomsNonCacheable();
   this->initArithmeticOperations();
@@ -561,7 +561,7 @@ bool Calculator::isLeftSeparator(unsigned char c)
   }
 }
 
-bool Calculator::isInterprettedAsEmptySpace(const std::string& input)
+bool Calculator::isInterpretedAsEmptySpace(const std::string& input)
 { if (input.size()!=1)
     return false;
   unsigned char x= (unsigned) input[0];//<-Optimization DANGER
@@ -595,7 +595,7 @@ void Calculator::ParseFillDictionary(const std::string& input)
         LookAheadChar='"';
     }
     if (!inQuotes )
-      if (this->isInterprettedAsEmptySpace(current))
+      if (this->isInterpretedAsEmptySpace(current))
         current=" ";
     bool shouldSplit= (this->isLeftSeparator(current[0]) || this->isRightSeparator(LookAheadChar) || current==" ");
     if (MathRoutines::isADigit(LookAheadChar))

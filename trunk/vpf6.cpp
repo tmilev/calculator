@@ -66,7 +66,7 @@ bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>&
   { if (targetDimNonMandatory>0)
       if (targetDimNonMandatory!=1)
         return *this << "<hr>GetVector failure: target dim is " << targetDimNonMandatory << " but the input " << input.ToString()
-        << " can only be interpretted as a single element";
+        << " can only be interpreted as a single element";
     output.AddOnTop(input);
     return true;
   }
@@ -1415,10 +1415,10 @@ bool Calculator::outerTimesToFunctionApplication(Calculator& theCommands, const 
   if (!firstElt.IsBuiltInAtom())
   { if (!firstElt.StartsWith(theCommands.opThePower(), 3))
       return false;
-    if (!firstElt[1].IsAtomWhoseExponentsAreInterprettedAsFunction())
+    if (!firstElt[1].IsAtomWhoseExponentsAreInterpretedAsFunction())
       return false;
   }
-  if (firstElt.IsAtomNotInterprettedAsFunction())
+  if (firstElt.IsAtomNotInterpretedAsFunction())
     return false;
   const Expression& secondElt=input[2];
   if (secondElt.IsSequenceNElementS())

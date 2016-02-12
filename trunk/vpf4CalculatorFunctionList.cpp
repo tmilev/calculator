@@ -14,11 +14,6 @@ void Calculator::initAdminFunctions()
 #ifdef MACRO_use_MySQL
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return;
-  this->AddOperationInnerHandler
-  ("AddUser", DatabaseRoutines::innerAddUser, "",
-   "Adds a new user (first argument: new username, second argument: new user's password, third argument: email).",
-   "AddUser(testUser, password, \"todor.milev@gmail.com\"); GetUserPassword(\"testUser\");", false, true, "DatabaseRoutines::innerAddUser");
-   ;
  // this->AddOperationInnerHandler
 //  ("SendActivationEmailUsers", DatabaseRoutines::innerSendActivationEmailUsers, "",
 //   "Sends activation emails to a comma-separated list of users. ",
@@ -2774,27 +2769,27 @@ void Calculator::initOperationsWhoseDomainsAreTheConstants()
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\csc");
 }
 
-void Calculator::initBuiltInAtomsWhosePowersAreInterprettedAsFunctions()
-{ MacroRegisterFunctionWithName("Calculator::initBuiltInAtomsWhosePowersAreInterprettedAsFunctions");
-  this->atomsWhoseExponentsAreInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sin");
-  this->atomsWhoseExponentsAreInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cos");
-  this->atomsWhoseExponentsAreInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\tan");
-  this->atomsWhoseExponentsAreInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cot");
-  this->atomsWhoseExponentsAreInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sec");
-  this->atomsWhoseExponentsAreInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\csc");
+void Calculator::initBuiltInAtomsWhosePowersAreInterpretedAsFunctions()
+{ MacroRegisterFunctionWithName("Calculator::initBuiltInAtomsWhosePowersAreInterpretedAsFunctions");
+  this->atomsWhoseExponentsAreInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sin");
+  this->atomsWhoseExponentsAreInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cos");
+  this->atomsWhoseExponentsAreInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\tan");
+  this->atomsWhoseExponentsAreInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cot");
+  this->atomsWhoseExponentsAreInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sec");
+  this->atomsWhoseExponentsAreInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\csc");
 }
 
 void Calculator::AddKnownDoubleConstant(const std::string& theConstantName, double theConstantValue)
-{ this->atomsNotInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot(theConstantName);
+{ this->atomsNotInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot(theConstantName);
   Expression theConstantE;
   theConstantE.MakeAtom(theConstantName, *this);
   this->knownDoubleConstants.AddOnTopNoRepetitionMustBeNewCrashIfNot(theConstantE);
   this->knownDoubleConstantValues.AddOnTop(theConstantValue);
 }
 
-void Calculator::initBuiltInAtomsNotInterprettedAsFunctions()
-{ MacroRegisterFunctionWithName("Calculator::initBuiltInAtomsNotInterprettedAsFunctions");
-  this->atomsNotInterprettedAsFunctions.SetExpectedSize(30);
+void Calculator::initBuiltInAtomsNotInterpretedAsFunctions()
+{ MacroRegisterFunctionWithName("Calculator::initBuiltInAtomsNotInterpretedAsFunctions");
+  this->atomsNotInterpretedAsFunctions.SetExpectedSize(30);
 
   this->AddKnownDoubleConstant("\\pi", MathRoutines::Pi());
   this->AddKnownDoubleConstant("e", MathRoutines::E());

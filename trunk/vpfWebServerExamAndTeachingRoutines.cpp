@@ -59,6 +59,9 @@ public:
   bool flagIsForReal;
   bool flagLoadedFromDB;
   bool flagParentIsIntermediateExamFile;
+#ifdef MACRO_use_MySQL
+  UserCalculator currentUser;
+#endif
 
   std::string problemCommandsWithInbetweens;
   std::string problemCommandsNoVerification;
@@ -157,6 +160,7 @@ CalculatorHTML::CalculatorHTML()
 
 const std::string CalculatorHTML::RelativePhysicalFolderProblemCollections="ProblemCollections/";
 
+#ifdef MACRO_use_MySQL
 bool DatabaseRoutines::ReadProblemInfo
   (const std::string& stringToReadFrom, HashedList<std::string, MathRoutines::hashString>& outputProblemNames,
    List<std::string>& outputWeights,
@@ -344,6 +348,7 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
 //  << " weights: " << theProblemWeights.ToStringCommaDelimited() << "<br>";
   return result;
 }
+#endif // MACRO_use_MySQL
 
 bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadMe");
@@ -799,6 +804,7 @@ int WebWorker::ProcessSubmitProblem()
     if (!isCorrect)
       break;
   }
+#ifdef MACRO_use_MySQL
   int correctSubmissionsRelevant=0;
   int totalSubmissionsRelevant=0;
   UserCalculator theUser;
@@ -826,6 +832,7 @@ int WebWorker::ProcessSubmitProblem()
         }
       }
   }
+#endif // MACRO_use_MySQL
   stOutput << "<table width=\"300\"><tr><td>";
   if (!isCorrect)
   { stOutput << "<span style=\"color:red\"><b>Your answer appears to be incorrect.</b></span>";
@@ -1466,6 +1473,10 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   if (inputOutput.GetTagClass()=="calculatorExamProblem")
   { out << " <a href=\"" << refStreamForReal.str() << "\">Start (for credit)</a> ";
     out << " <a href=\"" << refStreamExercise.str() << "\">Exercise (no credit, unlimited tries)</a> ";
+    std::string pointsString;
+    if (this->currentCollectionProblems.Contains(cleaneduplink))
+      pointsString=this->currentCollectionProblemWeights[this->currentCollectionProblems.GetIndex(cleaneduplink)];
+
     if (theGlobalVariables.UserDefaultHasAdminRights())
     { //stOutput << "<hr>this->currentCollectionProblems is: " << this->currentCollectionProblems.ToStringCommaDelimited();
       //stOutput << "<br>this->currentCollectionProblemWeights is: " << this->currentCollectionProblemWeights.ToStringCommaDelimited();
@@ -1475,7 +1486,7 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
       std::string idPointsModOutput="modifyPointsOutputSpan"+urledProblem;
       out << "Points: <textarea rows=\"1\" cols=\"3\" id=\"" << idPoints << "\">";
       if (this->currentCollectionProblems.Contains(cleaneduplink))
-      { out << this->currentCollectionProblemWeights[this->currentCollectionProblems.GetIndex(cleaneduplink)];
+      { out << pointsString;
         //stOutput << "<br>!Contained!<br>";
       }
       out << "</textarea>";

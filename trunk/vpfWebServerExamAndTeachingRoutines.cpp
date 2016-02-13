@@ -82,7 +82,7 @@ public:
   List<std::string> studentAnswersUnadulterated;
   List<std::string> problemList;
   HashedList<std::string, MathRoutines::hashString> currentCollectionProblems;
-  List<std::string> problemWeights;
+  List<std::string> currentCollectionProblemWeights;
   List<List<std::string> > studentSections;
   List<List<std::string> > deadlinesBySection;
   List<std::string> problemListOfParent;
@@ -233,6 +233,8 @@ bool DatabaseRoutines::ReadProblemDatabaseInfo
 (const std::string& problemHomeName, std::string& outputString,
   std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::ReadProblemDatabaseInfo");
+  if (!this->startMySQLDatabaseIfNotAlreadyStarted(&commentsOnFailure))
+    return false;
   if (!this->TableExists("problemData", &commentsOnFailure))
     if (!this->CreateTable("problemData", "problemCollection VARCHAR(255) NOT NULL PRIMARY KEY, \
         problemInformation LONGTEXT", &commentsOnFailure))
@@ -245,6 +247,7 @@ bool DatabaseRoutines::ReadProblemDatabaseInfo
          (std::string) "problemData", (std::string) "problemInformation",
          (std::string) "", &commentsOnFailure))
       return false;
+//  stOutput << " ... got to here ...";
   return this->FetchEntry
   ((std::string) "problemCollection", problemHomeName, (std::string) "problemData",
    (std::string) "problemInformation", outputString, &commentsOnFailure);
@@ -254,6 +257,8 @@ bool DatabaseRoutines::StoreProblemDatabaseInfo
   (const std::string& problemHomeName, const std::string& inputString,
    std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
+  if (!this->startMySQLDatabaseIfNotAlreadyStarted(&commentsOnFailure))
+    return false;
   if (!this->TableExists("problemData", &commentsOnFailure))
     if (!this->CreateTable("problemData", "problemCollection VARCHAR(255) NOT NULL PRIMARY KEY, \
         problemInformation LONGTEXT", &commentsOnFailure))
@@ -309,7 +314,7 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
       commentsOnFailure << "Could not find problem: " << incomingProblems[i] << ". ";
       continue;
     }
-    int theIndex=theProblems.GetIndex("incomingProblems[i]");
+    int theIndex=theProblems.GetIndex(incomingProblems[i]);
     if (theIndex==-1)
     { theProblems.AddOnTop(incomingProblems[i]);
       theProblemWeights.AddOnTop(incomingWeights[i]);
@@ -323,8 +328,10 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
   }
   std::string stringToStore;
   this->StoreProblemInfo(stringToStore, theProblems, theProblemWeights, theSections, theDeadlines);
-  if (!this->StoreProblemDatabaseInfo( problemHomeName, stringToStore, commentsOnFailure))
+  if (!this->StoreProblemDatabaseInfo(problemHomeName, stringToStore, commentsOnFailure))
     return false;
+//  stOutput << "Problems read: " << theProblems.ToStringCommaDelimited()
+//  << " weights: " << theProblemWeights.ToStringCommaDelimited() << "<br>";
   return result;
 }
 
@@ -356,11 +363,11 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
     );
 #ifdef MACRO_use_MySQL
 //stOutput << "loading: ";
+  DatabaseRoutines theRoutines;
   if (this->flagIsForReal && doLoadDatabase)
   { UserCalculator theUser;
     //stOutput << " accessing db... ";
     theUser.username=theGlobalVariables.userDefault;
-    DatabaseRoutines theRoutines;
     if (!theUser.LoadProblemStringFromDatabase(theRoutines, this->currentUserDatabaseString, comments))
     { comments << "Failed to load current users' problem save-file.";
       return false;
@@ -370,13 +377,19 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
       return false;
     }
     this->theProblemData=theUser.GetProblemDataAddIfNotPresent(this->fileName);
-    this->currentExamHomE=  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
-    if (!theRoutines.ReadProblemDatabaseInfo(this->currentExamHomE, this->currentProblemCollectionDatabaseString, comments))
+  }
+  this->currentExamHomE=  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
+  if (doLoadDatabase && this->currentExamHomE!="")
+  { //stOutput << "loading db, problem collection: " << this->currentExamHomE;
+    if (!theRoutines.ReadProblemDatabaseInfo
+        (this->currentExamHomE, this->currentProblemCollectionDatabaseString, comments))
     { comments << "Failed to load current problem collection's database string. ";
       return false;
     }
+    //stOutput << ", the db string is: " << this->currentProblemCollectionDatabaseString;
     if (!theRoutines.ReadProblemInfo
-        (this->currentProblemCollectionDatabaseString,  this->currentCollectionProblems, this->problemWeights,
+        (this->currentProblemCollectionDatabaseString,  this->currentCollectionProblems,
+         this->currentCollectionProblemWeights,
          this->studentSections, this->deadlinesBySection, comments))
     { comments << "Failed to interpret the database problem string. ";
       return false;
@@ -1094,7 +1107,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   if (!this->flagIsExamHome)
     out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
     << calcArgsNoPassExamDetails
-    << "currentExamHome=&" << "currentExamIntermediate=&"
+    << "currentExamHome=" << CGI::StringToURLString(this->currentExamHomE) << "&" << "currentExamIntermediate=&"
     << "currentExamFile=" << CGI::StringToURLString(this->currentExamHomE) << "&\"> Course homework home </a><br>";
   else
     out << "<b>Course homework home</b>";
@@ -1446,13 +1459,13 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
     { std::string idPoints= "points" + urledProblem;
       std::string idButtonModifyPoints="modifyPoints" + urledProblem;
       std::string idPointsModOutput="modifyPointsOutputSpan"+urledProblem;
-      out << "Points: <textarea id=\"" << idPoints << "\">";
+      out << "Points: <textarea rows=\"1\" cols=\"3\" id=\"" << idPoints << "\">";
       if (this->currentCollectionProblems.Contains(cleaneduplink))
-        out << this->problemWeights[this->currentCollectionProblems.GetIndex(cleaneduplink)];
+        out << this->currentCollectionProblemWeights[this->currentCollectionProblems.GetIndex(cleaneduplink)];
       out << "</textarea>";
       out << "<button id=\"" << idButtonModifyPoints << "\" "
       << "onclick=\"" << "submitStringAsMainInput('" << urledProblem
-      << "='+encodeURIComponent(getElementById('" << idPoints << "').value), '"
+      << "='+encodeURIComponent('weight='+getElementById('" << idPoints << "').value), '"
       << idPointsModOutput << "', 'setProblemData');"
       << "\""
       << ">";
@@ -1533,6 +1546,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     if (!theUser.StoreProblemDataToDatabase(theRoutines, comments))
         out << "<b>Error: failed to store problem in database. </b>" << comments.str();
   }
+  out << "Current collection problems: " << this->currentCollectionProblems.ToStringCommaDelimited()
+  << this->currentCollectionProblemWeights.ToStringCommaDelimited();
 #endif // MACRO_use_MySQL
   this->outputHtmlMain=out.str();
   return true;

@@ -674,6 +674,7 @@ bool DatabaseRoutines::FetchEntry
   << " FROM calculatorUsers." << tableName.GetIdentifieR() << " WHERE "
   << key.GetIdentifieR() << "="
   << valueSearchKey.GetDatA() ;
+//  stOutput << " firing up query: " << queryStream.str();
   DatabaseQuery theQuery(*this, queryStream.str(), failureComments);
   outputUnsafe="";
   if (!theQuery.flagQuerySucceeded)

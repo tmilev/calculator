@@ -182,8 +182,11 @@ bool DatabaseRoutines::ReadProblemInfo
   { if (!CGI::ChopCGIInputStringToMultipleStrings
         (CGI::URLStringToNormal(theProblemData[i]), problemValues, problemKeys, commentsOnFailure))
       return false;
+//    stOutput << "<br>current problem: " << outputProblemNames[i]
+//    << "<br>being read from data: " << theProblemData[i]
+//    << "<br>which is normalized to: " << CGI::URLStringToNormal(theProblemData[i]);
     if (problemKeys.Contains("weight"))
-      outputWeights[problemKeys.GetIndex("weight")]=
+      outputWeights[i]=
       CGI::URLStringToNormal(problemValues[problemKeys.GetIndex("weight")]);
     if (!problemKeys.Contains("deadlines"))
       continue;
@@ -212,19 +215,17 @@ void DatabaseRoutines::StoreProblemInfo
     << "The present function should only be called with sanitized input. " << crash;
   std::stringstream out;
   for (int i=0; i<inputProblemNames.size; i++)
-  { out << CGI::StringToURLString(inputProblemNames[i]) << "=";
-    std::stringstream currentProblemStream, currentDeadlineStream;
+  { std::stringstream currentProblemStream, currentDeadlineStream;
     currentProblemStream << "weight=" << CGI::StringToURLString(inputWeights[i]) << "&";
-    currentProblemStream << "deadlines=";
     for (int j=0; j<inputSections[i].size; j++)
     { if (inputSections[j].size!=inputDeadlines[j].size)
         crash << "Input sections and input deadlines have mismatching sizes. " << crash;
       currentDeadlineStream << CGI::StringToURLString(inputSections[i][j])
       << "=" << CGI::StringToURLString(inputDeadlines[i][j]) << "&";
     }
-    currentProblemStream << CGI::StringToURLString(currentDeadlineStream.str());
-    out << CGI::StringToURLString(currentProblemStream.str());
-    out << "&";
+    currentProblemStream << "deadlines=" << CGI::StringToURLString(currentDeadlineStream.str()) << "&";
+    out << CGI::StringToURLString(inputProblemNames[i]) << "="
+    << CGI::StringToURLString(currentProblemStream.str()) << "&";
   }
   outputString=out.str();
 }
@@ -286,6 +287,7 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
     << problemHomeName;
     return false;
   }
+//  stOutput << "stored db info: <br>" << storedDatabaseInfo;
   HashedList<std::string, MathRoutines::hashString> theProblems;
   List<std::string> theProblemWeights;
   List<List<std::string> > theSections;
@@ -295,6 +297,10 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
   { commentsOnFailure << "Failed to parse stored database info. ";
     return false;
   }
+//  stOutput << "data extracted from stored db nfo:<br>"
+//  << "Problems: " << theProblems.ToStringCommaDelimited() << "<br>"
+//  << "theProblemWeights: " << theProblemWeights.ToStringCommaDelimited() << "<br>";
+
   HashedList<std::string, MathRoutines::hashString> incomingProblems;
   List<std::string> incomingWeights;
   List<List<std::string> > incomingSections;
@@ -327,10 +333,14 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
     theDeadlines[theIndex]=incomingDeadlines[i];
   }
   std::string stringToStore;
+
   this->StoreProblemInfo(stringToStore, theProblems, theProblemWeights, theSections, theDeadlines);
+//  stOutput << "<br>about to store back : <br>" << stringToStore;
   if (!this->StoreProblemDatabaseInfo(problemHomeName, stringToStore, commentsOnFailure))
     return false;
-//  stOutput << "Problems read: " << theProblems.ToStringCommaDelimited()
+//  stOutput << "<br>probs incoming: <br>" << incomingProblems.ToStringCommaDelimited()
+//  << " with weights: " << incomingWeights.ToStringCommaDelimited()
+//  << "Problems final: " << theProblems.ToStringCommaDelimited()
 //  << " weights: " << theProblemWeights.ToStringCommaDelimited() << "<br>";
   return result;
 }
@@ -455,6 +465,7 @@ void CalculatorHTML::LoadCurrentProblemItem()
       << this->RelativePhysicalFolderProblemCollections << ".</b>";
       return;
     }
+    theGlobalVariables.SetWebInput("currentExamHome", CGI::StringToURLString(this->fileName));
     if (!this->LoadMe(true, this->comments))
       return;
     this->inputHtml=this->comments.str()+this->inputHtml;
@@ -1456,12 +1467,17 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   { out << " <a href=\"" << refStreamForReal.str() << "\">Start (for credit)</a> ";
     out << " <a href=\"" << refStreamExercise.str() << "\">Exercise (no credit, unlimited tries)</a> ";
     if (theGlobalVariables.UserDefaultHasAdminRights())
-    { std::string idPoints= "points" + urledProblem;
+    { //stOutput << "<hr>this->currentCollectionProblems is: " << this->currentCollectionProblems.ToStringCommaDelimited();
+      //stOutput << "<br>this->currentCollectionProblemWeights is: " << this->currentCollectionProblemWeights.ToStringCommaDelimited();
+      //stOutput << "<br> cleanedupLink: " << cleaneduplink;
+      std::string idPoints= "points" + urledProblem;
       std::string idButtonModifyPoints="modifyPoints" + urledProblem;
       std::string idPointsModOutput="modifyPointsOutputSpan"+urledProblem;
       out << "Points: <textarea rows=\"1\" cols=\"3\" id=\"" << idPoints << "\">";
       if (this->currentCollectionProblems.Contains(cleaneduplink))
-        out << this->currentCollectionProblemWeights[this->currentCollectionProblems.GetIndex(cleaneduplink)];
+      { out << this->currentCollectionProblemWeights[this->currentCollectionProblems.GetIndex(cleaneduplink)];
+        //stOutput << "<br>!Contained!<br>";
+      }
       out << "</textarea>";
       out << "<button id=\"" << idButtonModifyPoints << "\" "
       << "onclick=\"" << "submitStringAsMainInput('" << urledProblem
@@ -1546,8 +1562,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     if (!theUser.StoreProblemDataToDatabase(theRoutines, comments))
         out << "<b>Error: failed to store problem in database. </b>" << comments.str();
   }
-  out << "Current collection problems: " << this->currentCollectionProblems.ToStringCommaDelimited()
-  << this->currentCollectionProblemWeights.ToStringCommaDelimited();
+//  out << "Current collection problems: " << this->currentCollectionProblems.ToStringCommaDelimited()
+//  << " with weights: " << this->currentCollectionProblemWeights.ToStringCommaDelimited();
 #endif // MACRO_use_MySQL
   this->outputHtmlMain=out.str();
   return true;

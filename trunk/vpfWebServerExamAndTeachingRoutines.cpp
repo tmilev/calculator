@@ -81,8 +81,13 @@ public:
   ProblemData theProblemData;
   List<std::string> studentAnswersUnadulterated;
   List<std::string> problemList;
+  HashedList<std::string, MathRoutines::hashString> currentCollectionProblems;
+  List<std::string> problemWeights;
+  List<List<std::string> > studentSections;
+  List<List<std::string> > deadlinesBySection;
   List<std::string> problemListOfParent;
   std::string currentUserDatabaseString;
+  std::string currentProblemCollectionDatabaseString;
   bool flagLoadedSuccessfully;
   static const std::string RelativePhysicalFolderProblemCollections;
   std::stringstream comments;
@@ -110,6 +115,7 @@ public:
   const SyntacticElementHTML& inputElement
 )
   ;
+  std::string GetSubmitStringAreaAsMainInput();
   std::string GetSubmitEmailsJavascript();
   std::string GetSubmitAnswersJavascript();
   std::string GetDatabaseTableName();
@@ -151,24 +157,175 @@ CalculatorHTML::CalculatorHTML()
 
 const std::string CalculatorHTML::RelativePhysicalFolderProblemCollections="ProblemCollections/";
 
-std::string DatabaseRoutines::SetProblemWeights(const std::string& inputString)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::SetProblemWeights");
-  std::stringstream out;
-  HashedList<std::string, MathRoutines::hashString> theKeys;
-  List<std::string> theWeights;
-  if (! CGI::ChopCGIInputStringToMultipleStrings(inputString, theWeights, theKeys, out))
-  { out << "<span style=\"color:red\"><b>Failed to parse your request.</b></span> ";
-    return out.str();
+bool DatabaseRoutines::ReadProblemInfo
+  (const std::string& stringToReadFrom, HashedList<std::string, MathRoutines::hashString>& outputProblemNames,
+   List<std::string>& outputWeights,
+   List<List<std::string> >& outputSections,
+   List<List<std::string> >& outputDeadlinesPerSection,
+   std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::ReadProblemInfo");
+  HashedList<std::string, MathRoutines::hashString> problemNamesCGIed;
+  List<std::string> theProblemData;
+  if (!CGI::ChopCGIInputStringToMultipleStrings
+      (stringToReadFrom, theProblemData, problemNamesCGIed, commentsOnFailure) )
+    return false;
+  outputProblemNames.Clear();
+  outputProblemNames.SetExpectedSize(problemNamesCGIed.size);
+  for (int i=0; i<problemNamesCGIed.size; i++)
+    outputProblemNames.AddOnTop(CGI::URLStringToNormal(problemNamesCGIed[i]));
+  HashedList<std::string, MathRoutines::hashString> problemKeys, sectionKeys;
+  List<std::string> problemValues, sectionValues;
+  outputWeights.initFillInObject(outputProblemNames.size, "");
+  outputSections.initFillInObject(outputProblemNames.size, problemValues);
+  outputDeadlinesPerSection.initFillInObject(outputProblemNames.size, problemValues);
+  for (int i=0; i<outputProblemNames.size; i++)
+  { if (!CGI::ChopCGIInputStringToMultipleStrings
+        (CGI::URLStringToNormal(theProblemData[i]), problemValues, problemKeys, commentsOnFailure))
+      return false;
+    if (problemKeys.Contains("weight"))
+      outputWeights[problemKeys.GetIndex("weight")]=
+      CGI::URLStringToNormal(problemValues[problemKeys.GetIndex("weight")]);
+    if (!problemKeys.Contains("deadlines"))
+      continue;
+    std::string deadlineString=CGI::URLStringToNormal(problemValues[problemKeys.GetIndex("deadlines")]);
+    if (!CGI::ChopCGIInputStringToMultipleStrings
+        (deadlineString, sectionValues, sectionKeys, commentsOnFailure))
+      return false;
+    for (int j=0; j<sectionKeys.size; j++)
+    { outputSections[i].AddOnTop(CGI::URLStringToNormal(sectionKeys[j]));
+      outputDeadlinesPerSection[i].AddOnTop(CGI::URLStringToNormal(sectionValues[j]));
+    }
   }
-  DatabaseRoutines theRoutines;
-  std::string currentKey, currentWeight, currentFileName;
-  for (int i=0; i<theKeys.size; i++)
-  { currentKey=CGI::URLStringToNormal(theKeys[i]);
-    currentWeight=CGI::URLStringToNormal(theWeights[i]);
-    currentFileName=CalculatorHTML::RelativePhysicalFolderProblemCollections+ currentKey;
-  }
+  return true;
+}
 
-  return out.str();
+void DatabaseRoutines::StoreProblemInfo
+  (std::string& outputString, const HashedList<std::string, MathRoutines::hashString>& inputProblemNames,
+   const List<std::string>& inputWeights, const List<List<std::string> >& inputSections,
+   const List<List<std::string> >& inputDeadlines)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemInfo");
+  if (inputProblemNames.size!=inputWeights.size ||
+      inputProblemNames.size!=inputDeadlines.size ||
+      inputProblemNames.size!=inputSections.size
+      )
+    crash << "This shouldn't happen: non-matching data sizes while storing problem info. "
+    << "The present function should only be called with sanitized input. " << crash;
+  std::stringstream out;
+  for (int i=0; i<inputProblemNames.size; i++)
+  { out << CGI::StringToURLString(inputProblemNames[i]) << "=";
+    std::stringstream currentProblemStream, currentDeadlineStream;
+    currentProblemStream << "weight=" << CGI::StringToURLString(inputWeights[i]) << "&";
+    currentProblemStream << "deadlines=";
+    for (int j=0; j<inputSections[i].size; j++)
+    { if (inputSections[j].size!=inputDeadlines[j].size)
+        crash << "Input sections and input deadlines have mismatching sizes. " << crash;
+      currentDeadlineStream << CGI::StringToURLString(inputSections[i][j])
+      << "=" << CGI::StringToURLString(inputDeadlines[i][j]) << "&";
+    }
+    currentProblemStream << CGI::StringToURLString(currentDeadlineStream.str());
+    out << CGI::StringToURLString(currentProblemStream.str());
+    out << "&";
+  }
+  outputString=out.str();
+}
+
+bool DatabaseRoutines::ReadProblemDatabaseInfo
+(const std::string& problemHomeName, std::string& outputString,
+  std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::ReadProblemDatabaseInfo");
+  if (!this->TableExists("problemData", &commentsOnFailure))
+    if (!this->CreateTable("problemData", "problemCollection VARCHAR(255) NOT NULL PRIMARY KEY, \
+        problemInformation LONGTEXT", &commentsOnFailure))
+      return false;
+  if (!this->RowExists
+      ((std::string) "problemCollection", problemHomeName,
+       (std::string) "problemData", &commentsOnFailure))
+    if (!this->SetEntry
+        ((std::string) "problemCollection", problemHomeName,
+         (std::string) "problemData", (std::string) "problemInformation",
+         (std::string) "", &commentsOnFailure))
+      return false;
+  return this->FetchEntry
+  ((std::string) "problemCollection", problemHomeName, (std::string) "problemData",
+   (std::string) "problemInformation", outputString, &commentsOnFailure);
+}
+
+bool DatabaseRoutines::StoreProblemDatabaseInfo
+  (const std::string& problemHomeName, const std::string& inputString,
+   std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
+  if (!this->TableExists("problemData", &commentsOnFailure))
+    if (!this->CreateTable("problemData", "problemCollection VARCHAR(255) NOT NULL PRIMARY KEY, \
+        problemInformation LONGTEXT", &commentsOnFailure))
+      return false;
+  if (!this->RowExists
+      ((std::string) "problemCollection", problemHomeName,
+       (std::string) "problemData", &commentsOnFailure))
+    if (!this->SetEntry
+        ((std::string) "problemCollection", problemHomeName,
+         (std::string) "problemData", (std::string) "problemInformation",
+         (std::string) "", &commentsOnFailure))
+      return false;
+  return this->SetEntry
+  ((std::string) "problemCollection", problemHomeName, (std::string) "problemData",
+   (std::string) "problemInformation", inputString, &commentsOnFailure);
+}
+
+bool DatabaseRoutines::MergeProblemInfoInDatabase
+(const std::string& problemHomeName, std::string& inputString,
+  std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::MergeProblemInfoInDatabase");
+  std::string storedDatabaseInfo;
+  if (!this->ReadProblemDatabaseInfo(problemHomeName, storedDatabaseInfo, commentsOnFailure))
+  { commentsOnFailure << "Failed to read database for problem collection: "
+    << problemHomeName;
+    return false;
+  }
+  HashedList<std::string, MathRoutines::hashString> theProblems;
+  List<std::string> theProblemWeights;
+  List<List<std::string> > theSections;
+  List<List<std::string> > theDeadlines;
+  if (!this->ReadProblemInfo
+      (storedDatabaseInfo, theProblems, theProblemWeights, theSections, theDeadlines, commentsOnFailure))
+  { commentsOnFailure << "Failed to parse stored database info. ";
+    return false;
+  }
+  HashedList<std::string, MathRoutines::hashString> incomingProblems;
+  List<std::string> incomingWeights;
+  List<List<std::string> > incomingSections;
+  List<List<std::string> > incomingDeadlines;
+  if (!this->ReadProblemInfo
+      (inputString, incomingProblems, incomingWeights, incomingSections, incomingDeadlines, commentsOnFailure))
+  { commentsOnFailure << "Failed to parse your request";
+    return false;
+  }
+  std::string currentFileName;
+  bool result=true;
+  for (int i=0; i<incomingProblems.size; i++)
+  { currentFileName=theGlobalVariables.PhysicalPathProjectBase+
+    CalculatorHTML::RelativePhysicalFolderProblemCollections+ incomingProblems[i];
+    if (!FileOperations::FileExistsUnsecure(currentFileName))
+    { result=false;
+      commentsOnFailure << "Could not find problem: " << incomingProblems[i] << ". ";
+      continue;
+    }
+    int theIndex=theProblems.GetIndex("incomingProblems[i]");
+    if (theIndex==-1)
+    { theProblems.AddOnTop(incomingProblems[i]);
+      theProblemWeights.AddOnTop(incomingWeights[i]);
+      theSections.AddOnTop(incomingSections[i]);
+      theDeadlines.AddOnTop(incomingDeadlines[i]);
+      continue;
+    }
+    theProblemWeights[theIndex]=incomingWeights[i];
+    theSections[theIndex]=incomingSections[i];
+    theDeadlines[theIndex]=incomingDeadlines[i];
+  }
+  std::string stringToStore;
+  this->StoreProblemInfo(stringToStore, theProblems, theProblemWeights, theSections, theDeadlines);
+  if (!this->StoreProblemDatabaseInfo( problemHomeName, stringToStore, commentsOnFailure))
+    return false;
+  return result;
 }
 
 bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
@@ -213,6 +370,17 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
       return false;
     }
     this->theProblemData=theUser.GetProblemDataAddIfNotPresent(this->fileName);
+    this->currentExamHomE=  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
+    if (!theRoutines.ReadProblemDatabaseInfo(this->currentExamHomE, this->currentProblemCollectionDatabaseString, comments))
+    { comments << "Failed to load current problem collection's database string. ";
+      return false;
+    }
+    if (!theRoutines.ReadProblemInfo
+        (this->currentProblemCollectionDatabaseString,  this->currentCollectionProblems, this->problemWeights,
+         this->studentSections, this->deadlinesBySection, comments))
+    { comments << "Failed to interpret the database problem string. ";
+      return false;
+    }
   }
 #endif // MACRO_use_MySQL
   return true;
@@ -307,6 +475,34 @@ bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt)
     return true;
   }
   return false;
+}
+
+std::string CalculatorHTML::GetSubmitStringAreaAsMainInput()
+{ std::stringstream out;
+  out
+  << "<script type=\"text/javascript\"> \n"
+  << "function submitStringAsMainInput(theString, idOutput, requestType){\n"
+  << "  spanOutput = document.getElementById(idOutput);\n"
+  << "  if (spanOutput==null){\n"
+  << "    spanOutput = document.createElement('span');\n"
+  << "    document.body.appendChild(spanOutput);\n"
+  << "    spanOutput.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idEmailList + \"MISSING! </span>\";\n"
+  << "  }\n"
+  << "  inputParams='request='+requestType;\n"
+  << "  inputParams+='&" << theGlobalVariables.ToStringCalcArgsNoNavigation() << "';\n"
+  << "  inputParams+='&currentExamHome=" << CGI::StringToURLString(this->fileName) << "';\n"
+  << "  inputParams+='&mainInput=' + encodeURIComponent(theString);\n"
+//  << "  inputParams+='&currentExamHome=' + problemCollectionName;\n"
+  << "  var https = new XMLHttpRequest();\n"
+  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
+  << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
+  << "  https.onload = function() {\n"
+  << "    spanOutput.innerHTML=https.responseText;\n"
+  << "  }\n"
+  << "  https.send(inputParams);\n"
+  << "}\n"
+  << "</script>";
+  return out.str();
 }
 
 std::string CalculatorHTML::GetSubmitEmailsJavascript()
@@ -421,9 +617,9 @@ int WebWorker::ProcessSubmitProblemPreview()
   return 0;
 }
 
-int WebWorker::ProcessSetProblemWeight()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessSetProblemWeight");
-  stOutput << this->GetSetProblemWeightHtml();
+int WebWorker::ProcessSetProblemDatabaseInfo()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessSetProblemDatabaseInfo");
+  stOutput << this->GetSetProblemDatabaseInfoHtml();
   return 0;
 }
 
@@ -434,21 +630,25 @@ int WebWorker::ProcessAddUserEmails()
   return 0;
 }
 
-std::string WebWorker::GetSetProblemWeightHtml()
-{ MacroRegisterFunctionWithName("WebWorker::GetSetProblemWeightHtml");
+std::string WebWorker::GetSetProblemDatabaseInfoHtml()
+{ MacroRegisterFunctionWithName("WebWorker::GetSetProblemDatabaseInfoHtml");
 #ifdef MACRO_use_MySQL
-  std::stringstream out;
   if (!theGlobalVariables.UserDefaultHasAdminRights())
-  { out << "<b>Only admins may set problem weights.</b>";
-    return out.str();
-  }
-  std::string inputSetProblemWeight=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
+    return "<b>Only admins may set problem weights.</b>";
+  std::string inputProblemInfo=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
+  std::string inputProblemHome= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
   DatabaseRoutines theRoutines;
-//  theRoutines.Set
-#else
-  out << "Cannot modify problem weights (no database available)";
-#endif // MACRO_use_MySQL
+  std::stringstream commentsOnFailure;
+  bool result=theRoutines.MergeProblemInfoInDatabase(inputProblemHome, inputProblemInfo, commentsOnFailure);
+  std::stringstream out;
+  if (result)
+    out << "<span style=\"color:green\"><b>Successfully changed problem data.</b></span>";
+  else
+    out << "<span style=\"color:red\"><b>" <<  commentsOnFailure.str() << "</b></span>";
   return out.str();
+#else
+  return "Cannot modify problem weights (no database available)";
+#endif // MACRO_use_MySQL
 }
 
 std::string WebWorker::GetAddUserEmails()
@@ -1227,11 +1427,12 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateLink");
   this->NumProblemsFound++;
   std::string cleaneduplink = this->CleanUpLink(inputOutput.content);
+  std::string urledProblem=CGI::StringToURLString(cleaneduplink);
   std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
 //  out << "cleaned up link: " << cleaneduplink;
-//  out << "<br>urled link: " <<  CGI::StringToURLString(cleaneduplink);
+//  out << "<br>urled link: " <<  urledProblem;
   refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation()
-  << "currentExamFile=" << CGI::StringToURLString(cleaneduplink) << "&";
+  << "currentExamFile=" << urledProblem << "&";
   if (this->flagIsExamHome || this->flagIsExamIntermediate)
     refStreamNoRequest << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&";
   if (this->flagIsExamIntermediate)
@@ -1241,6 +1442,24 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   if (inputOutput.GetTagClass()=="calculatorExamProblem")
   { out << " <a href=\"" << refStreamForReal.str() << "\">Start (for credit)</a> ";
     out << " <a href=\"" << refStreamExercise.str() << "\">Exercise (no credit, unlimited tries)</a> ";
+    if (theGlobalVariables.UserDefaultHasAdminRights())
+    { std::string idPoints= "points" + urledProblem;
+      std::string idButtonModifyPoints="modifyPoints" + urledProblem;
+      std::string idPointsModOutput="modifyPointsOutputSpan"+urledProblem;
+      out << "Points: <textarea id=\"" << idPoints << "\">";
+      if (this->currentCollectionProblems.Contains(cleaneduplink))
+        out << this->problemWeights[this->currentCollectionProblems.GetIndex(cleaneduplink)];
+      out << "</textarea>";
+      out << "<button id=\"" << idButtonModifyPoints << "\" "
+      << "onclick=\"" << "submitStringAsMainInput('" << urledProblem
+      << "='+encodeURIComponent(getElementById('" << idPoints << "').value), '"
+      << idPointsModOutput << "', 'setProblemData');"
+      << "\""
+      << ">";
+      out << "Modify";
+      out << "</button>";
+      out << "<span id=\"" << idPointsModOutput << "\">" << "</span>";
+    }
   } else
     out << " <a href=\"" << refStreamExercise.str() << "\">Start</a> ";
   std::string stringToDisplay=  FileOperations::GetFileNameFromFileNameWithPath(inputOutput.content);
@@ -1257,6 +1476,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       this->theProblemData.randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
   this->FigureOutCurrentProblemList(comments);
   this->outputHtmlNavigation=this->ToStringProblemNavigation();
+  out << this->GetSubmitStringAreaAsMainInput();
   if (this->flagIsExamProblem)
     out << this->GetSubmitAnswersJavascript();
   else if (this->flagIsExamHome)

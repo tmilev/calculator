@@ -253,7 +253,7 @@ public:
                     std::stringstream& commentsOnCreation);
   bool TableExists(const std::string& tableNameUnsafe, std::stringstream* commentsOnFailure);
   bool RowExists
-  (const MySQLdata& inputUsername, const MySQLdata& tableName, std::stringstream& comments)
+  (const MySQLdata& key, const MySQLdata& value, const MySQLdata& tableName, std::stringstream* comments)
    ;
   bool FetchTableNames
 (List<std::string>& output, std::stringstream& comments)
@@ -264,7 +264,39 @@ public:
  bool& outputWasTruncated, int& actualNumRowsIfTruncated,
  const std::string& tableIdentifier, std::stringstream& comments)
 ;
-  std::string SetProblemWeights(const std::string& inputString);
+  bool ReadProblemDatabaseInfo
+  (const std::string& problemHomeName, std::string& outputString,
+   std::stringstream& commentsOnFailure)
+  ;
+  bool StoreProblemDatabaseInfo
+  (const std::string& problemHomeName, const std::string& inputString,
+   std::stringstream& commentsOnFailure)
+  ;
+  bool MergeProblemInfoInDatabase
+  (const std::string& problemHomeName, std::string& inputString,
+   std::stringstream& commentsOnFailure)
+  ;
+  bool ReadProblemInfo
+  (const std::string& stringToReadFrom, HashedList<std::string, MathRoutines::hashString>& outputProblemNames,
+   List<std::string>& outputWeights, List<List<std::string> >& outputDeadlines,
+   List<List<std::string> >& outputSections, std::stringstream& commentsOnFailure)
+   ;
+  void StoreProblemInfo
+  (std::string& outputString, const HashedList<std::string, MathRoutines::hashString>& inputProblemNames,
+   const List<std::string>& inputWeights, const List<List<std::string> >& inputSections,
+   const List<List<std::string> >& inputDeadlines)
+   ;
+  bool FetchEntry
+  (const MySQLdata& key, const MySQLdata& valueSearchKey, const MySQLdata& tableName,
+   const MySQLdata& desiredColumn, std::string& outputUnsafe, std::stringstream* failureComments)
+  ;
+    bool SetEntry
+  (const MySQLdata& key, const MySQLdata& keyValue, const MySQLdata& table,
+   const MySQLdata& columnToSet, const MySQLdata& valueToSet,
+   std::stringstream* failureComments)
+
+   ;
+
   bool FetchTablE
 (List<List<std::string> >& output,
  List<std::string>& outputColumnLabels,
@@ -272,7 +304,6 @@ public:
  const MySQLdata& inputTable, std::stringstream& comments)
   ;
 
-  std::string GetStringThatDoesNotTriggerMySQLRetartedInsaneDesignErrors(std::string& input);
   bool AddUsersFromEmailsAndCourseName(const std::string& emailList, const std::string& ExamHomeFile, std::stringstream& comments);
   bool AddUsersFromEmails
   (const std::string& emailList, std::stringstream& comments);

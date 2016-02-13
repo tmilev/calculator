@@ -127,7 +127,7 @@ bool DatabaseRoutinesGlobalFunctions::RowExists
   if (!theGlobalVariables.flagLoggedIn)
     return false;
   DatabaseRoutines theRoutines;
-  return theRoutines.RowExists(inputUsername, tableName, comments);
+  return theRoutines.RowExists((std::string) "username", inputUsername, tableName, &comments);
 #else
   return false;
 #endif // MACRO_use_MySQL
@@ -340,14 +340,14 @@ std::string MySQLdata::GetIdentifieR()const
 }
 
 bool DatabaseRoutines::RowExists
-  (const MySQLdata& inputUsername, const MySQLdata& tableName, std::stringstream& comments)
+  (const MySQLdata& key, const MySQLdata& value, const MySQLdata& tableName, std::stringstream* comments)
 { MacroRegisterFunctionWithName("DatabaseRoutines::RowExists");
-  if (!this->startMySQLDatabaseIfNotAlreadyStarted(&comments))
+  if (!this->startMySQLDatabaseIfNotAlreadyStarted(comments))
     return false;
   std::stringstream theQueryStream;
   theQueryStream << "SELECT * FROM calculatorUsers." << tableName.GetIdentifieR()
-  << " WHERE username=" << inputUsername.GetDatA();
-  DatabaseQuery theQuery(*this, theQueryStream.str(), &comments);
+  << " WHERE " << key.GetIdentifieR() << "=" << value.GetDatA();
+  DatabaseQuery theQuery(*this, theQueryStream.str(), comments);
   return theQuery.flagQuerySucceeded && theQuery.flagQueryReturnedResult;
 }
 
@@ -665,16 +665,16 @@ DatabaseQuery::~DatabaseQuery()
   this->close();
 }
 
-bool UserCalculator::FetchOneColumn
-(const std::string& columnNameUnsafe, std::string& outputUnsafe,
- DatabaseRoutines& theRoutines, std::stringstream* failureComments)
-{ MacroRegisterFunctionWithName("UserCalculator::FetchOneColumn");
+bool DatabaseRoutines::FetchEntry
+(const MySQLdata& key, const MySQLdata& valueSearchKey, const MySQLdata& tableName,
+ const MySQLdata& desiredColumn, std::string& outputUnsafe, std::stringstream* failureComments)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::FetchEntry");
   std::stringstream queryStream;
-  MySQLdata columnName=columnNameUnsafe;
-  queryStream << "SELECT " << columnName.GetIdentifieR()
-  << " FROM calculatorUsers." << this->currentTable.GetIdentifieR() << " WHERE username="
-  << this->username.GetDatA() ;
-  DatabaseQuery theQuery(theRoutines, queryStream.str(), failureComments);
+  queryStream << "SELECT " << desiredColumn.GetIdentifieR()
+  << " FROM calculatorUsers." << tableName.GetIdentifieR() << " WHERE "
+  << key.GetIdentifieR() << "="
+  << valueSearchKey.GetDatA() ;
+  DatabaseQuery theQuery(*this, queryStream.str(), failureComments);
   outputUnsafe="";
   if (!theQuery.flagQuerySucceeded)
   { if (failureComments!=0)
@@ -690,6 +690,15 @@ bool UserCalculator::FetchOneColumn
 //  stOutput << "Input entry as fetched from the system: " <<  theQuery.firstResultString
 //  << "<br>When made unsafe: " << outputUnsafe << "<br>";
   return true;
+}
+
+bool UserCalculator::FetchOneColumn
+(const std::string& columnNameUnsafe, std::string& outputUnsafe,
+ DatabaseRoutines& theRoutines, std::stringstream* failureComments)
+{ MacroRegisterFunctionWithName("UserCalculator::FetchOneColumn");
+  return theRoutines.FetchEntry
+  ((std::string) "username", this->username, this->currentTable,
+   columnNameUnsafe, outputUnsafe, failureComments);
 }
 
 bool UserCalculator::AuthenticateWithToken(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
@@ -880,46 +889,50 @@ void UserCalculator::ComputeShaonedSaltedPassword(bool recomputeSafeEntries)
   //To do: make sure all crypto functions zero their buffers.
 }
 
+bool DatabaseRoutines::SetEntry
+  (const MySQLdata& key, const MySQLdata& keyValue, const MySQLdata& table,
+   const MySQLdata& columnToSet, const MySQLdata& valueToSet,
+   std::stringstream* failureComments)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::SetEntry");
+  if (this->RowExists(key, keyValue, table, failureComments))
+  { std::stringstream queryStream;
+    queryStream << "UPDATE calculatorUsers." << table.GetIdentifieR()
+    << " SET " << columnToSet.GetIdentifieR() << "="
+    << valueToSet.GetDatA() << " WHERE " << key.GetIdentifieR() << "=" << keyValue.GetDatA();
+    //  stOutput << "Got to here: " << columnName << ". ";
+    DatabaseQuery theDBQuery(*this, queryStream.str(), failureComments);
+//    stOutput << "<hr>Fired up query:<br>" << queryStream.str();
+    if (!theDBQuery.flagQuerySucceeded)
+    { if (failureComments!=0)
+        *failureComments << "Failed update an already existing entry in column: " << columnToSet.value << ". ";
+      return false;
+    }
+  } else
+  { std::stringstream queryStream;
+    queryStream << "INSERT INTO calculatorUsers." << table.GetIdentifieR()
+    << "(" << key.GetIdentifieR() << ", " << columnToSet.GetIdentifieR()
+    << ") VALUES(" << keyValue.GetDatA() << ", " << valueToSet.GetDatA() << ")";
+    DatabaseQuery theDBQuery(*this, queryStream.str(), failureComments);
+    //stOutput << "<hr>Fired up query:<br>" << queryStream.str();
+    if (!theDBQuery.flagQuerySucceeded)
+    { if (failureComments!=0)
+        *failureComments << "Failed to insert entry: " << valueToSet.GetDatA() << " in column: "
+        << columnToSet.GetIdentifieR()
+        << " in table: " << table.value << ". ";
+//      stOutput << "Failed to insert entry in table: " << this->currentTableUnsafe << ". ";
+      return false;
+    }
+  }
+  return true;
+}
+
 bool UserCalculator::SetColumnEntry
 (const std::string& columnNameUnsafe, const std::string& theValueUnsafe, DatabaseRoutines& theRoutines,
  std::stringstream* failureComments)
 { MacroRegisterFunctionWithName("UserCalculator::SetColumnEntry");
   if (this->currentTable=="")
     crash << "Programming error: attempting to change column " << columnNameUnsafe << " without specifying a table. " << crash;
-  std::string unused;
-  MySQLdata columnName= columnNameUnsafe;
-  MySQLdata value= theValueUnsafe;
-  if (this->FetchOneColumn(columnNameUnsafe, unused, theRoutines, 0))
-  { std::stringstream queryStream;
-    queryStream << "UPDATE calculatorUsers." << this->currentTable.GetIdentifieR()
-    << " SET " << columnName.GetIdentifieR() << "="
-    << value.GetDatA() << " WHERE username=" << this->username.GetDatA();
-    //  stOutput << "Got to here: " << columnName << ". ";
-    DatabaseQuery theDBQuery(theRoutines, queryStream.str(), failureComments);
-//    stOutput << "<hr>Fired up query:<br>" << queryStream.str();
-    if (!theDBQuery.flagQuerySucceeded)
-    { if (failureComments!=0)
-        *failureComments << "Failed update an already existing entry in column: " << columnNameUnsafe << ". ";
-      stOutput << "Failed update an already existing entry in column: " << columnNameUnsafe << ". ";
-      return false;
-    }
-  } else
-  { std::stringstream queryStream;
-    queryStream << "INSERT INTO calculatorUsers." << this->currentTable.GetIdentifieR()
-    << "(username, " << columnName.GetIdentifieR()
-    << ") VALUES(" << this->username.GetDatA() << ", " << value.GetDatA() << ")";
-    DatabaseQuery theDBQuery(theRoutines, queryStream.str());
-    //stOutput << "<hr>Fired up query:<br>" << queryStream.str();
-    if (!theDBQuery.flagQuerySucceeded)
-    { if (failureComments!=0)
-        *failureComments << "Failed to insert entry: " << theValueUnsafe << " in column: "
-        << columnNameUnsafe
-        << " in table: " << this->currentTable.value << ". ";
-//      stOutput << "Failed to insert entry in table: " << this->currentTableUnsafe << ". ";
-      return false;
-    }
-  }
-  return true;
+  return theRoutines.SetEntry((std::string) "username", this->username, this->currentTable, columnNameUnsafe, theValueUnsafe, failureComments);
 }
 
 bool UserCalculator::FetchOneUserRow

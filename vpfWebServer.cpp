@@ -1673,6 +1673,8 @@ int WebWorker::ProcessCalculator()
     return this->ProcessMonitor();
   //unless the worker is an indicator, it has no access to communication channels of the other workers
   this->parent->ReleaseNonActiveWorkers();
+  if (theGlobalVariables.userCalculatorRequestType=="setProblemData")
+    return this->ProcessSetProblemDatabaseInfo();
   if (theGlobalVariables.userCalculatorRequestType=="changePassword")
     return this->ProcessChangePassword();
   if (theGlobalVariables.userCalculatorRequestType=="changePasswordPage" ||

@@ -58,6 +58,13 @@ public:
   unsigned int randomSeed;
   List<int> numSubmissions;
   List<int> numCorrectSubmissions;
+  std::string ProblemWeightUserInput;
+  bool flagProblemWeightIsOK;
+  Rational ProblemWeight;
+  Rational Points;
+  int numCorrectlyAnswered;
+  int totalNumSubmissions;
+//  int numAnswersSought;
   List<std::string> firstCorrectAnswer;
   List<std::string> answerIds;
   void AddEmptyAnswerIdOnTop(const std::string& inputAnswerId);
@@ -179,7 +186,9 @@ public:
   Rational pointsEarned;
   Rational pointsMax;
 
-  void ComputePointsEarned();
+  void ComputePointsEarned
+  (const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
+   const List<std::string>& problemWeights);
   ProblemData& HasProblemData(const std::string& problemName);
   ProblemData& GetProblemDataAddIfNotPresent(const std::string& problemName);
   void SetProblemData(const std::string& problemName, const ProblemData& inputData);

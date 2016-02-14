@@ -1304,10 +1304,10 @@ void Rational::operator=(const AlgebraicNumber& other)
     crash << "This is a programming error: attempting to assign the non-rational algebraic number " << other.ToString() << "to a rational number. " << crash;
 }
 
-void Rational::AssignString(const std::string& input)
+bool Rational::AssignStringFailureAllowed(const std::string& input)
 { this->MakeZero();
   if (input=="0")
-    return;
+    return true;
   int sign=1;
   int ReaderDigit=-1;
   Rational readerDen=1;
@@ -1337,10 +1337,16 @@ void Rational::AssignString(const std::string& input)
     { readerDen*=10;
       readerDen+=ReaderDigit;
     }
-  if (readerDen==0)
-    crash << "Programming error: Rational::AssignString encountered a zero denominator. " << crash;
+  if (readerDen.IsEqualToZero())
+    return false;
   *this/=readerDen;
   *this*=sign;
+  return true;
+}
+
+void Rational::AssignString(const std::string& input)
+{ if (!Rational::AssignStringFailureAllowed(input))
+    crash << "Programming error: Rational::AssignString failed (likely a zero denominator). " << crash;
 }
 
 // haha, qtcreator doesn't understand this cxx11 code.  guess it wasn't such

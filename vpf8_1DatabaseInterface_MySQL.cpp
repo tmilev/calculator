@@ -281,6 +281,9 @@ bool DatabaseRoutinesGlobalFunctions::FetchEntry
 ProblemData::ProblemData()
 { this->randomSeed=0;
   this->flagRandomSeedComputed=false;
+  this->numCorrectlyAnswered=0;
+  this->totalNumSubmissions=0;
+  this->flagProblemWeightIsOK=false;
 }
 
 void ProblemData::AddEmptyAnswerIdOnTop(const std::string& inputAnswerId)
@@ -1194,14 +1197,35 @@ bool DatabaseRoutines::SendActivationEmail(const std::string& emailList, std::st
   return this->SendActivationEmail(theEmails, true, comments);
 }
 
-void UserCalculator::ComputePointsEarned()
+void UserCalculator::ComputePointsEarned
+(const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
+ const List<std::string>& problemWeights)
 { MacroRegisterFunctionWithName("UserCalculator::ComputePointsEarned");
-  int numCorrectAnswers=0;
+  this->pointsEarned=0;
   for (int i=0; i<this->problemData.size; i++)
+  { this->problemData[i].Points=0;
+    this->problemData[i].totalNumSubmissions=0;
+    this->problemData[i].numCorrectlyAnswered=0;
+    if (gradableProblems.Contains(this->problemNames[i]) )
+    { this->problemData[i].ProblemWeightUserInput=
+      problemWeights[gradableProblems.GetIndex(this->problemNames[i])];
+      this->problemData[i].flagProblemWeightIsOK=
+      this->problemData[i].ProblemWeight.AssignStringFailureAllowed
+      (this->problemData[i].ProblemWeightUserInput);
+    }
+//    this->problemData[i].numAnswersSought=this->problemData[i].answerIds.size;
     for (int j=0; j<this->problemData[i].answerIds.size; j++)
-      if (this->problemData[i].numCorrectSubmissions[j]>0)
-        numCorrectAnswers++;
-  this->pointsEarned=numCorrectAnswers;
+    { if (this->problemData[i].numCorrectSubmissions[j]>0)
+        this->problemData[i].numCorrectlyAnswered++;
+      this->problemData[i].totalNumSubmissions+=this->problemData[i].numSubmissions[j];
+    }
+    if (this->problemData[i].flagProblemWeightIsOK && this->problemData[i].answerIds.size>0)
+    { this->problemData[i].Points=
+      (this->problemData[i].ProblemWeight*this->problemData[i].numCorrectlyAnswered)/
+      this->problemData[i].answerIds.size;
+      this->pointsEarned+= this->problemData[i].Points;
+    }
+  }
 }
 
 void UserCalculator::ComputeActivationToken()

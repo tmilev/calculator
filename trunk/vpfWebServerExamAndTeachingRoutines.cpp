@@ -62,7 +62,6 @@ public:
 #ifdef MACRO_use_MySQL
   UserCalculator currentUser;
 #endif
-
   std::string problemCommandsWithInbetweens;
   std::string problemCommandsNoVerification;
   std::string problemCommandsVerification;
@@ -379,19 +378,18 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
 #ifdef MACRO_use_MySQL
 //stOutput << "loading: ";
   DatabaseRoutines theRoutines;
-  if (this->flagIsForReal && doLoadDatabase)
-  { UserCalculator theUser;
-    //stOutput << " accessing db... ";
-    theUser.username=theGlobalVariables.userDefault;
-    if (!theUser.LoadProblemStringFromDatabase(theRoutines, this->currentUserDatabaseString, comments))
+  if (doLoadDatabase)
+  { //stOutput << " accessing db... ";
+    this->currentUser.username=theGlobalVariables.userDefault;
+    if (!this->currentUser.LoadProblemStringFromDatabase(theRoutines, this->currentUserDatabaseString, comments))
     { comments << "Failed to load current users' problem save-file.";
       return false;
     }
-    if (!theUser.InterpretDatabaseProblemData(this->currentUserDatabaseString, comments))
+    if (!this->currentUser.InterpretDatabaseProblemData(this->currentUserDatabaseString, comments))
     { comments << "Failed to load current users' problem save-file.";
       return false;
     }
-    this->theProblemData=theUser.GetProblemDataAddIfNotPresent(this->fileName);
+    this->theProblemData=this->currentUser.GetProblemDataAddIfNotPresent(this->fileName);
   }
   this->currentExamHomE=  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
   if (doLoadDatabase && this->currentExamHomE!="")
@@ -409,6 +407,8 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
     { comments << "Failed to interpret the database problem string. ";
       return false;
     }
+    this->currentUser.ComputePointsEarned
+    (this->currentCollectionProblems, this->currentCollectionProblemWeights);
   }
 #endif // MACRO_use_MySQL
   return true;
@@ -807,12 +807,11 @@ int WebWorker::ProcessSubmitProblem()
 #ifdef MACRO_use_MySQL
   int correctSubmissionsRelevant=0;
   int totalSubmissionsRelevant=0;
-  UserCalculator theUser;
   DatabaseRoutines theRoutines;
-  theUser.username=theGlobalVariables.userDefault;
+  theProblem.currentUser.username=theGlobalVariables.userDefault;
   if (theProblem.flagIsForReal)
   { //stOutput << "<hr>problem string: " << theProblem.currentUserDatabaseString << "<hr>";
-    if (!theUser.InterpretDatabaseProblemData(theProblem.currentUserDatabaseString, comments))
+    if (!theProblem.currentUser.InterpretDatabaseProblemData(theProblem.currentUserDatabaseString, comments))
     { stOutput << "<b>Failed to load user information from database. Answer not recorded. "
       << "This should not happen. " << CalculatorHTML::BugsGenericMessage << "</b>";
       theProblem.flagIsForReal=false;
@@ -843,8 +842,8 @@ int WebWorker::ProcessSubmitProblem()
 #ifdef MACRO_use_MySQL
   if (theProblem.flagIsForReal)
   { std::stringstream comments;
-    theUser.SetProblemData(theProblem.fileName, theProblem.theProblemData);
-    if (!theUser.StoreProblemDataToDatabase(theRoutines, comments))
+    theProblem.currentUser.SetProblemData(theProblem.fileName, theProblem.theProblemData);
+    if (!theProblem.currentUser.StoreProblemDataToDatabase(theRoutines, comments))
       stOutput << "<tr><td><b>This shouldn't happen and may be a bug: failed to store your answer in the database. "
       << CalculatorHTML::BugsGenericMessage << "</b><br>Comments: "
       << comments.str() << "</td></tr>";
@@ -1315,7 +1314,7 @@ std::string CalculatorHTML::ToStringClassDetails
       tableStream << "<td>No solutions history</td>";
     else if ( currentUser.InterpretDatabaseProblemData
               (currentUser.selectedRowFieldsUnsafe[indexProblemData], commentsProblemData))
-    { currentUser.ComputePointsEarned();
+    { currentUser.ComputePointsEarned(this->currentCollectionProblems, this->currentCollectionProblemWeights);
       tableStream << "<td>" << currentUser.pointsEarned << "</td>";
     } else
       tableStream << "<td>Failed to load problem data. Comments: " << commentsProblemData.str() << "</td>";
@@ -1473,10 +1472,31 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   if (inputOutput.GetTagClass()=="calculatorExamProblem")
   { out << " <a href=\"" << refStreamForReal.str() << "\">Start (for credit)</a> ";
     out << " <a href=\"" << refStreamExercise.str() << "\">Exercise (no credit, unlimited tries)</a> ";
-    std::string pointsString;
+    //stOutput << "<hr>CurrentUser.problemNames=" << this->currentUser.problemNames.ToStringCommaDelimited();
+    std::string thePoints="";
     if (this->currentCollectionProblems.Contains(cleaneduplink))
-      pointsString=this->currentCollectionProblemWeights[this->currentCollectionProblems.GetIndex(cleaneduplink)];
-
+      thePoints= this->currentCollectionProblemWeights[this->currentCollectionProblems.GetIndex(cleaneduplink)];
+    bool noSubmissionsYet=false;
+    if (this->currentUser.problemNames.Contains(cleaneduplink))
+    { ProblemData& theProbData=this->currentUser.problemData[this->currentUser.problemNames.GetIndex(cleaneduplink)];
+      if (!theProbData.flagProblemWeightIsOK)
+      { out << "<span style=\"color:orange\">No point weight assigned yet. </span>";
+        if (theProbData.ProblemWeightUserInput!="")
+          out << "<span style=\"color:red\"><b>Failed to interpret weight string: "
+          << theProbData.ProblemWeightUserInput << ". </b></span>";
+      } else if (theProbData.totalNumSubmissions==0)
+        noSubmissionsYet=true;
+      else if (theProbData.numCorrectlyAnswered<theProbData.answerIds.size)
+      { out << "<span style=\"color:red\"><b> "
+        << theProbData.Points << " out of " << theProbData.ProblemWeight << " point(s). </b></span>";
+      } else if (theProbData.numCorrectlyAnswered==theProbData.answerIds.size)
+        out << "<span style=\"color:green\"><b> "
+        << theProbData.Points << " out of " << theProbData.ProblemWeight << " point(s). </b></span>";
+    } else
+      noSubmissionsYet=true;
+    if (thePoints!="" && noSubmissionsYet)
+      out << "<span style=\"color:brown\"><b>No submissions for " << thePoints
+      << " point(s). </b> </span>" ;
     if (theGlobalVariables.UserDefaultHasAdminRights())
     { //stOutput << "<hr>this->currentCollectionProblems is: " << this->currentCollectionProblems.ToStringCommaDelimited();
       //stOutput << "<br>this->currentCollectionProblemWeights is: " << this->currentCollectionProblemWeights.ToStringCommaDelimited();
@@ -1485,10 +1505,7 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
       std::string idButtonModifyPoints="modifyPoints" + urledProblem;
       std::string idPointsModOutput="modifyPointsOutputSpan"+urledProblem;
       out << "Points: <textarea rows=\"1\" cols=\"3\" id=\"" << idPoints << "\">";
-      if (this->currentCollectionProblems.Contains(cleaneduplink))
-      { out << pointsString;
-        //stOutput << "<br>!Contained!<br>";
-      }
+      out << thePoints;
       out << "</textarea>";
       out << "<button id=\"" << idButtonModifyPoints << "\" "
       << "onclick=\"" << "submitStringAsMainInput('" << urledProblem
@@ -1562,15 +1579,14 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
 #ifdef MACRO_use_MySQL
   if (this->flagIsForReal)
   { this->theProblemData.flagRandomSeedComputed=true;
-    UserCalculator theUser;
     DatabaseRoutines theRoutines;
-    theUser.username=theGlobalVariables.userDefault;
+    //this->currentUser.username=theGlobalVariables.userDefault;
 //    stOutput << "About to store problem data: " << this->theProblemData.ToString();
-    if (!theUser.InterpretDatabaseProblemData(this->currentUserDatabaseString, comments))
-      out << "<b>Error: corrupt database string. </b>";
-    else
-      theUser.SetProblemData(this->fileName, this->theProblemData);
-    if (!theUser.StoreProblemDataToDatabase(theRoutines, comments))
+    //if (!this->currentUser.InterpretDatabaseProblemData(this->currentUserDatabaseString, comments))
+      //out << "<b>Error: corrupt database string. </b>";
+    //else
+    this->currentUser.SetProblemData(this->fileName, this->theProblemData);
+    if (!this->currentUser.StoreProblemDataToDatabase(theRoutines, comments))
         out << "<b>Error: failed to store problem in database. </b>" << comments.str();
   }
 //  out << "Current collection problems: " << this->currentCollectionProblems.ToStringCommaDelimited()

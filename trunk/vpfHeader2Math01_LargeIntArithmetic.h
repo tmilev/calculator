@@ -648,6 +648,7 @@ ParallelComputing::GlobalPointerCounter++;
     this->ShrinkExtendedPartIfPossible();
   }
   void AssignString(const std::string& input);
+  bool AssignStringFailureAllowed(const std::string& input);
   Rational GetZero()
   { return 0;
   }

@@ -1252,9 +1252,13 @@ bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, b
     }*/
   UserCalculator currentUser;
   currentUser.currentTable="users";
+  ProgressReport theReport;
   bool result=true;
   for (int i=0; i<theEmails.size; i++)
-  { currentUser.username=theEmails[i];
+  { std::stringstream reportStream;
+    reportStream << "Sending activation email, user " << i+1 << " out of " << theEmails.size;
+    theReport.Report(reportStream.str());
+    currentUser.username=theEmails[i];
     currentUser.email=theEmails[i];
     currentUser.ComputeActivationToken();
     if (!currentUser.SetColumnEntry("activationToken", currentUser.activationToken.value, *this, &comments))
@@ -1405,7 +1409,8 @@ bool DatabaseRoutines::InsertRow
 }
 
 bool DatabaseRoutines::AddUsersFromEmails
-(const std::string& emailList, std::stringstream& comments)
+  (const std::string& emailList, const std::string& extraInfo, bool& outputSentAllEmails,
+   std::stringstream& comments)
 { MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
   std::string userRole=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("userRole"));
   std::string extraUserInfo=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("extraInfo"));
@@ -1439,16 +1444,19 @@ bool DatabaseRoutines::AddUsersFromEmails
         result=false;
     currentUser.SetColumnEntry("userRole", userRole, *this, &comments);
   }
+  currentUser.currentTable=currentFileUsersTableName;
   for (int i=0; i<theEmails.size; i++)
   { currentUser.username=theEmails[i];
     if (!currentUser.IamPresentInTable(*this, currentFileUsersTableName))
       if (!this->InsertRow("username", theEmails[i], currentFileUsersTableName, comments))
         result=false;
+    if (!currentUser.SetColumnEntry("extraInfo", extraInfo, *this, &comments))
+      result=false;
   }
   if (!result)
     comments << "<br>Failed to create all users. ";
   if (! this->SendActivationEmail(theEmails, false, comments))
-    result=false;
+    outputSentAllEmails=false;
   return result;
 }
 
@@ -1491,6 +1499,8 @@ bool UserCalculator::SendActivationEmail(DatabaseRoutines& theRoutines, std::str
 //  stOutput << "<hr> all result strings: " << this->selectedRowFieldNamesUnsafe.ToStringCommaDelimited();
 //  stOutput << "<br> all result string names: " << this->selectedRowFieldsUnsafe.ToStringCommaDelimited();
   this->email=this->GetSelectedRowEntry("email");
+  //theGlobalVariables.FallAsleep(1000000);
+
   if (this->email=="")
   { comments << "<br>No email address for user: " << this->username.value << ". ";
     return false;

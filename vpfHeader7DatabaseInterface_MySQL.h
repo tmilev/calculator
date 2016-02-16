@@ -313,9 +313,14 @@ public:
  const MySQLdata& inputTable, std::stringstream& comments)
   ;
 
-  bool AddUsersFromEmailsAndCourseName(const std::string& emailList, const std::string& ExamHomeFile, std::stringstream& comments);
+  bool AddUsersFromEmailsAndCourseName
+  (const std::string& emailList, const std::string& ExamHomeFile, const std::string& extraInfo,
+   std::stringstream& comments)
+   ;
   bool AddUsersFromEmails
-  (const std::string& emailList, std::stringstream& comments);
+  (const std::string& emailList, const std::string& extraInfo, bool& outputSentAllEmails,
+   std::stringstream& comments)
+  ;
   bool SendActivationEmail(const std::string& emailList, std::stringstream& comments);
   bool SendActivationEmail(const List<std::string>& theEmails, bool forceResend, std::stringstream& comments);
   bool ExtractEmailList(const std::string& emailList, List<std::string>& outputList, std::stringstream& comments);

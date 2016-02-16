@@ -1641,7 +1641,7 @@ int WebWorker::ProcessCalculator()
     stOutput.Flush();
     return 0;
   }
-/*  if (this->flagPasswordWasSubmitted && theGlobalVariables.userCalculatorRequestType!="changePassword" &&
+  if (this->flagPasswordWasSubmitted && theGlobalVariables.userCalculatorRequestType!="changePassword" &&
       theGlobalVariables.userCalculatorRequestType!="activateAccount"
       )
   { std::stringstream redirectedAddress;
@@ -1657,7 +1657,7 @@ int WebWorker::ProcessCalculator()
 //    stOutput << "\r\n";
     stOutput.Flush();
     return 0;
-  }*/
+  }
   stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
   stOutput << argumentProcessingFailureComments.str();
 //  stOutput << "<br>got to this point, requesttype: " << theGlobalVariables.userCalculatorRequestType;
@@ -1782,7 +1782,7 @@ std::string WebWorker::GetLoginHTMLinternal()
 //  << this->theMessage
 //  << "<hr> main argument: "
 //  << this->mainArgumentRAW;
-  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"GET\" accept-charset=\"utf-8\">"
+  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"POST\" accept-charset=\"utf-8\">"
   <<  "User name: "
   << "<input type=\"text\" name=\"username\" placeholder=\"username\" required>"
   << "<br>Password: "

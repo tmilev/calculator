@@ -108,6 +108,10 @@ public:
   std::string CleanUpCommandString(const std::string& inputCommand);
   void InterpretNotByCalculator(SyntacticElementHTML& inputOutput);
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
+  std::string InterpretGenerateProblemManagementLink
+(SyntacticElementHTML& inputOutput, std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
+ const std::string& cleaneduplink, const std::string& urledProblem)
+  ;
   void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
   void InterpretManageClass(SyntacticElementHTML& inputOutput);
   std::string ToStringClassDetails
@@ -119,6 +123,8 @@ public:
   ;
   std::string GetSubmitStringAreaAsMainInput();
   std::string GetSubmitEmailsJavascript();
+  std::string GetDatePickerJavascriptInit();
+  std::string GetDatePickerStart(const std::string& theId);
   std::string GetSubmitAnswersJavascript();
   std::string GetDatabaseTableName();
   void LoadCurrentProblemItem();
@@ -531,6 +537,26 @@ std::string CalculatorHTML::GetSubmitStringAreaAsMainInput()
   << "  https.send(inputParams);\n"
   << "}\n"
   << "</script>";
+  return out.str();
+}
+
+std::string CalculatorHTML::GetDatePickerStart(const std::string& theId)
+{ std::stringstream out;
+  out << "<script type=\"text/javascript\">"
+  << "$(function() {"
+  << "$('#" << theId << "').datepicker();"
+  << "});"
+  << "</script>";
+  return out.str();
+}
+
+std::string CalculatorHTML::GetDatePickerJavascriptInit()
+{ std::stringstream out;
+  out
+  << "<link rel=\"stylesheet\" href=\"//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css\">\n"
+  << "<script src=\"//code.jquery.com/jquery-1.10.2.js\"></script>\n"
+  << "<script src=\"//code.jquery.com/ui/1.11.4/jquery-ui.js\"></script>\n"
+  ;
   return out.str();
 }
 
@@ -1453,6 +1479,69 @@ std::string CalculatorHTML::CleanUpLink(const std::string& inputLink)
   return result;
 }
 
+#include "vpfHeader5Crypto.h"
+std::string CalculatorHTML::InterpretGenerateProblemManagementLink
+(SyntacticElementHTML& inputOutput, std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
+ const std::string& cleaneduplink, const std::string& urledProblem)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateProblemManagementLink");
+  std::stringstream out;
+  out << " <a href=\"" << refStreamForReal.str() << "\">Start (for credit)</a> ";
+  out << " <a href=\"" << refStreamExercise.str() << "\">Exercise (no credit, unlimited tries)</a> ";
+  //stOutput << "<hr>CurrentUser.problemNames=" << this->currentUser.problemNames.ToStringCommaDelimited();
+  std::string thePoints="";
+  if (this->currentCollectionProblems.Contains(cleaneduplink))
+    thePoints= this->currentCollectionProblemWeights[this->currentCollectionProblems.GetIndex(cleaneduplink)];
+  bool noSubmissionsYet=false;
+  if (this->currentUser.problemNames.Contains(cleaneduplink))
+  { ProblemData& theProbData=this->currentUser.problemData[this->currentUser.problemNames.GetIndex(cleaneduplink)];
+    if (!theProbData.flagProblemWeightIsOK)
+    { out << "<span style=\"color:orange\">No point weight assigned yet. </span>";
+      if (theProbData.ProblemWeightUserInput!="")
+        out << "<span style=\"color:red\"><b>Failed to interpret weight string: "
+        << theProbData.ProblemWeightUserInput << ". </b></span>";
+    } else if (theProbData.totalNumSubmissions==0)
+      noSubmissionsYet=true;
+    else if (theProbData.numCorrectlyAnswered<theProbData.answerIds.size)
+    { out << "<span style=\"color:red\"><b> "
+      << theProbData.Points << " out of " << theProbData.ProblemWeight << " point(s). </b></span>";
+    } else if (theProbData.numCorrectlyAnswered==theProbData.answerIds.size)
+      out << "<span style=\"color:green\"><b> "
+      << theProbData.Points << " out of " << theProbData.ProblemWeight << " point(s). </b></span>";
+  } else
+    noSubmissionsYet=true;
+  if (thePoints!="" && noSubmissionsYet)
+    out << "<span style=\"color:brown\"><b>No submissions for " << thePoints
+    << " point(s). </b> </span>" ;
+  if (theGlobalVariables.UserDefaultHasAdminRights())
+  { //stOutput << "<hr>this->currentCollectionProblems is: " << this->currentCollectionProblems.ToStringCommaDelimited();
+    //stOutput << "<br>this->currentCollectionProblemWeights is: " << this->currentCollectionProblemWeights.ToStringCommaDelimited();
+    //stOutput << "<br> cleanedupLink: " << cleaneduplink;
+    std::string idPoints = "points" + urledProblem;
+    std::string idDeadline = "deadline" + Crypto::CharsToBase64String(cleaneduplink);
+    if (idDeadline[idDeadline.size()-1]=='=')
+      idDeadline.resize(idDeadline.size()-1);
+    if (idDeadline[idDeadline.size()-1]=='=')
+      idDeadline.resize(idDeadline.size()-1);
+    std::string idButtonModifyPoints = "modifyPoints" + urledProblem;
+    std::string idPointsModOutput = "modifyPointsOutputSpan" + urledProblem;
+    out << "Points: <textarea rows=\"1\" cols=\"3\" id=\"" << idPoints << "\">";
+    out << thePoints;
+    out << "</textarea>";
+    out << "Submission deadline: <input type=\"text\" id=\"" << idDeadline << "\">";
+    out << this->GetDatePickerStart(idDeadline);
+    out << "<button id=\"" << idButtonModifyPoints << "\" "
+    << "onclick=\"" << "submitStringAsMainInput('" << urledProblem
+    << "='+encodeURIComponent('weight='+getElementById('" << idPoints << "').value), '"
+    << idPointsModOutput << "', 'setProblemData');"
+    << "\""
+    << ">";
+    out << "Modify";
+    out << "</button>";
+    out << "<span id=\"" << idPointsModOutput << "\">" << "</span>";
+  }
+  return out.str();
+}
+
 void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateLink");
   this->NumProblemsFound++;
@@ -1470,56 +1559,11 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   refStreamExercise << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&" << refStreamNoRequest.str();
   refStreamForReal << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=examForReal&" << refStreamNoRequest.str();
   if (inputOutput.GetTagClass()=="calculatorExamProblem")
-  { out << " <a href=\"" << refStreamForReal.str() << "\">Start (for credit)</a> ";
-    out << " <a href=\"" << refStreamExercise.str() << "\">Exercise (no credit, unlimited tries)</a> ";
-    //stOutput << "<hr>CurrentUser.problemNames=" << this->currentUser.problemNames.ToStringCommaDelimited();
-    std::string thePoints="";
-    if (this->currentCollectionProblems.Contains(cleaneduplink))
-      thePoints= this->currentCollectionProblemWeights[this->currentCollectionProblems.GetIndex(cleaneduplink)];
-    bool noSubmissionsYet=false;
-    if (this->currentUser.problemNames.Contains(cleaneduplink))
-    { ProblemData& theProbData=this->currentUser.problemData[this->currentUser.problemNames.GetIndex(cleaneduplink)];
-      if (!theProbData.flagProblemWeightIsOK)
-      { out << "<span style=\"color:orange\">No point weight assigned yet. </span>";
-        if (theProbData.ProblemWeightUserInput!="")
-          out << "<span style=\"color:red\"><b>Failed to interpret weight string: "
-          << theProbData.ProblemWeightUserInput << ". </b></span>";
-      } else if (theProbData.totalNumSubmissions==0)
-        noSubmissionsYet=true;
-      else if (theProbData.numCorrectlyAnswered<theProbData.answerIds.size)
-      { out << "<span style=\"color:red\"><b> "
-        << theProbData.Points << " out of " << theProbData.ProblemWeight << " point(s). </b></span>";
-      } else if (theProbData.numCorrectlyAnswered==theProbData.answerIds.size)
-        out << "<span style=\"color:green\"><b> "
-        << theProbData.Points << " out of " << theProbData.ProblemWeight << " point(s). </b></span>";
-    } else
-      noSubmissionsYet=true;
-    if (thePoints!="" && noSubmissionsYet)
-      out << "<span style=\"color:brown\"><b>No submissions for " << thePoints
-      << " point(s). </b> </span>" ;
-    if (theGlobalVariables.UserDefaultHasAdminRights())
-    { //stOutput << "<hr>this->currentCollectionProblems is: " << this->currentCollectionProblems.ToStringCommaDelimited();
-      //stOutput << "<br>this->currentCollectionProblemWeights is: " << this->currentCollectionProblemWeights.ToStringCommaDelimited();
-      //stOutput << "<br> cleanedupLink: " << cleaneduplink;
-      std::string idPoints= "points" + urledProblem;
-      std::string idButtonModifyPoints="modifyPoints" + urledProblem;
-      std::string idPointsModOutput="modifyPointsOutputSpan"+urledProblem;
-      out << "Points: <textarea rows=\"1\" cols=\"3\" id=\"" << idPoints << "\">";
-      out << thePoints;
-      out << "</textarea>";
-      out << "<button id=\"" << idButtonModifyPoints << "\" "
-      << "onclick=\"" << "submitStringAsMainInput('" << urledProblem
-      << "='+encodeURIComponent('weight='+getElementById('" << idPoints << "').value), '"
-      << idPointsModOutput << "', 'setProblemData');"
-      << "\""
-      << ">";
-      out << "Modify";
-      out << "</button>";
-      out << "<span id=\"" << idPointsModOutput << "\">" << "</span>";
-    }
-  } else
+    out << this->InterpretGenerateProblemManagementLink
+    (inputOutput, refStreamForReal, refStreamExercise, cleaneduplink, urledProblem);
+  else
     out << " <a href=\"" << refStreamExercise.str() << "\">Start</a> ";
-  std::string stringToDisplay=  FileOperations::GetFileNameFromFileNameWithPath(inputOutput.content);
+  std::string stringToDisplay = FileOperations::GetFileNameFromFileNameWithPath(inputOutput.content);
   //out << " " << this->NumProblemsFound << ". "
   out << stringToDisplay;
   inputOutput.interpretedCommand=out.str();
@@ -1538,6 +1582,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     out << this->GetSubmitAnswersJavascript();
   else if (this->flagIsExamHome)
     out << this->GetSubmitEmailsJavascript();
+  if ((this->flagIsExamIntermediate || this->flagIsExamHome)&& theGlobalVariables.UserDefaultHasAdminRights())
+    out << this->GetDatePickerJavascriptInit();
   if (!this->PrepareAndExecuteCommands(theInterpreter, comments))
     return false;
   bool moreThanOneCommand=false;

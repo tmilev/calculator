@@ -345,9 +345,14 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
       theDeadlines.AddOnTop(incomingDeadlines[i]);
       continue;
     }
-    theProblemWeights[theIndex]=incomingWeights[i];
-    theSections[theIndex]=incomingSections[i];
-    theDeadlines[theIndex]=incomingDeadlines[i];
+    if (incomingWeights[i]!="")
+      theProblemWeights[theIndex]=incomingWeights[i];
+    if (incomingSections[i].size!=0)
+      for (int j=0; j<incomingSections.size; j++)
+      { int sectionIndex=theSections[theIndex].GetIndex(incomingSections[i][j]);
+        theSections[theIndex][sectionIndex]=incomingSections[i][j];
+        theDeadlines[theIndex][sectionIndex]=incomingDeadlines[i][j];
+      }
   }
   std::string stringToStore;
 
@@ -1582,7 +1587,7 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
 (SyntacticElementHTML& inputOutput, std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
  const std::string& cleaneduplink, const std::string& urledProblem)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateDeadlineLink");
-  return "Submission deadline: to be announced.";
+//  return "Submission deadline: to be announced. ";
   std::stringstream out;
   if (!theGlobalVariables.UserDefaultHasAdminRights())
   { out << "deadline: tba";
@@ -1590,23 +1595,38 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   }
   out << "<table><tr><td> Deadline: </td>";
   out << "<td><table><tr><th>Grp.</th><th>Deadline</th></tr>";
+  List<std::string> deadlineIds;
+  deadlineIds.SetSize(this->classSections.size);
   for (int i=0; i<this->classSections.size; i++)
-  { std::string idDeadline = "deadline" + Crypto::CharsToBase64String(this->classSections[i]+cleaneduplink);
-    if (idDeadline[idDeadline.size()-1]=='=')
-      idDeadline.resize(idDeadline.size()-1);
-    if (idDeadline[idDeadline.size()-1]=='=')
-      idDeadline.resize(idDeadline.size()-1);
+  { std::string& currentDeadlineId=deadlineIds[i];
+    currentDeadlineId = "deadline" + Crypto::CharsToBase64String(this->classSections[i]+cleaneduplink);
+    if (currentDeadlineId[currentDeadlineId.size()-1]=='=')
+      currentDeadlineId.resize(currentDeadlineId.size()-1);
+    if (currentDeadlineId[currentDeadlineId.size()-1]=='=')
+      currentDeadlineId.resize(currentDeadlineId.size()-1);
     out << "<tr>";
     out << "<td>" << this->classSections[i] << "</td>";
-
-    out << "<td> <input type=\"text\" id=\"" << idDeadline << "\"> " ;
-    out << this->GetDatePickerStart(idDeadline);
+    out << "<td> <input type=\"text\" id=\"" << currentDeadlineId << "\"> " ;
+    out << this->GetDatePickerStart(currentDeadlineId);
     out << "</td>";
     out << "</tr>";
   }
   out << "</table></td>";
-  out << "<td>";
-  out << "";
+  out << "<td>\n";
+  out << "<button onclick=\"";
+  out << "submitStringAsMainInput('" << urledProblem
+  << "='+encodeURIComponent('deadlines='";
+  for (int i=0; i<this->classSections.size; i++)
+  { if (i!=0)
+      out << "+";
+    out << "'" << CGI::StringToURLString(this->classSections[i]) << "='";
+    out << "+ encodeURIComponent(document.getElementById('"
+    << deadlineIds[i] << "').value)+'&'";
+  }
+  out << "));"
+  << "\""
+  << ">\n";
+  out << "  Set deadline(s)</button>";
   out << "</td>";
   out << "</tr></table>";
   return out.str();

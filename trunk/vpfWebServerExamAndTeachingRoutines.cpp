@@ -1491,6 +1491,7 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
   std::string thePoints="";
   if (this->currentCollectionProblems.Contains(cleaneduplink))
     thePoints= this->currentCollectionProblemWeights[this->currentCollectionProblems.GetIndex(cleaneduplink)];
+  #ifdef MACRO_use_MySQL
   bool noSubmissionsYet=false;
   if (this->currentUser.problemNames.Contains(cleaneduplink))
   { ProblemData& theProbData=this->currentUser.problemData[this->currentUser.problemNames.GetIndex(cleaneduplink)];
@@ -1539,6 +1540,7 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
     out << "</button>";
     out << "<span id=\"" << idPointsModOutput << "\">" << "</span>";
   }
+  #endif // MACRO_use_MySQL
   return out.str();
 }
 

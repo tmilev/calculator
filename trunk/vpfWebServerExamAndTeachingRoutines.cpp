@@ -87,10 +87,14 @@ public:
   List<std::string> currentCollectionProblemWeights;
   List<List<std::string> > studentSections;
   List<List<std::string> > deadlinesBySection;
+  List<List<std::string> > userTablE;
+  List<std::string> labelsUserTablE;
   List<std::string> problemListOfParent;
+  List<std::string> classSections;
   std::string currentUserDatabaseString;
   std::string currentProblemCollectionDatabaseString;
   bool flagLoadedSuccessfully;
+  bool flagLoadedClassDataSuccessfully;
   static const std::string RelativePhysicalFolderProblemCollections;
   std::stringstream comments;
   bool CheckContent(std::stringstream& comments);
@@ -107,17 +111,20 @@ public:
   bool PrepareCommands(Calculator& theInterpreter, std::stringstream& comments);
   std::string CleanUpCommandString(const std::string& inputCommand);
   void InterpretNotByCalculator(SyntacticElementHTML& inputOutput);
+  std::string InterpretGenerateDeadlineLink
+(SyntacticElementHTML& inputOutput, std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
+ const std::string& cleaneduplink, const std::string& urledProblem)
+  ;
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
   std::string InterpretGenerateProblemManagementLink
 (SyntacticElementHTML& inputOutput, std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
  const std::string& cleaneduplink, const std::string& urledProblem)
   ;
   void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
+  bool PrepareClassData(std::stringstream& commentsOnFailure);
   void InterpretManageClass(SyntacticElementHTML& inputOutput);
   std::string ToStringClassDetails
-( const List<List<std::string> >& userTable,
-  const List<std::string>& labelsUserTable,
-  bool adminsOnly,
+( bool adminsOnly,
   const SyntacticElementHTML& inputElement
 )
   ;
@@ -161,6 +168,7 @@ CalculatorHTML::CalculatorHTML()
   this->flagIsForReal=false;
   this->flagLoadedFromDB=false;
   this->flagParentIsIntermediateExamFile=false;
+  this->flagLoadedClassDataSuccessfully=false;
 }
 
 const std::string CalculatorHTML::RelativePhysicalFolderProblemCollections="ProblemCollections/";
@@ -563,7 +571,7 @@ std::string CalculatorHTML::GetDatePickerJavascriptInit()
 std::string CalculatorHTML::GetSubmitEmailsJavascript()
 { std::stringstream out;
   out
-  << "<script type=\"text/javascript\"> \n"
+  << "<script type=\"text/javascript\" id=\"scriptSubmitEmails\"> \n"
   << "function addEmails(idEmailList, problemCollectionName, idOutput, userRole, idExtraInfo){\n"
   << "  spanOutput = document.getElementById(idOutput);\n"
   << "  if (spanOutput==null){\n"
@@ -585,6 +593,12 @@ std::string CalculatorHTML::GetSubmitEmailsJavascript()
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
   << "  https.onload = function() {\n"
   << "    spanOutput.innerHTML=https.responseText;\n"
+//  << "    code=document.getElementById('progressReportJavascript').innerHTML;"
+//  << "    eval.call(code);\n"
+  //<< "    p();\n"
+//  << "    eval(spanOutput.innerHTML);\n"
+//  << "    if (typeof progressReport == 'function')\n"
+//  << "      progressReport();\n"
   << "  }\n"
   << "  https.send(inputParams);\n"
   << "}\n"
@@ -713,8 +727,9 @@ std::string WebWorker::GetAddUserEmails()
   { out << "<b>Only admins may add users.</b>";
     return out.str();
   }
-  std::string inputEmails;
+  std::string inputEmails, extraInfo;
   inputEmails=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
+  extraInfo= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("extraInfo"));
   if (inputEmails=="")
   { out << "<b>No emails to add</b>";
     return out.str();
@@ -722,11 +737,18 @@ std::string WebWorker::GetAddUserEmails()
 #ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
   std::stringstream comments;
-  bool result=theRoutines.AddUsersFromEmails(inputEmails, comments);
-  if (result)
-    out << "<span style=\"color:green\"> Emails successfully added. Comments: </span>" << comments.str();
+  bool sentEmails=false;
+  bool createdUsers=theRoutines.AddUsersFromEmails(inputEmails, extraInfo, sentEmails, comments);
+  if (createdUsers)
+    out << "<span style=\"color:green\">Users successfully added. </span>";
   else
-    out << "<span style=\"color:red\">Failed to add all users. Comments: </span>" << comments.str();
+    out << "<span style=\"color:red\">Failed to add all users. </span>";
+  if (sentEmails)
+    out << "<span style=\"color:green\">Activation emails successfully sent. </span>";
+  else
+    out << "<span style=\"color:red\">Failed to sent all activation emails. </span>";
+  if (!createdUsers || !sentEmails)
+    out << "<br>Comments:<br>" << comments.str();
   return out.str();
 #else
   return "<b>no database present.</b>";
@@ -1233,9 +1255,7 @@ std::string SyntacticElementHTML::GetTagClass()
 }
 
 std::string CalculatorHTML::ToStringClassDetails
-( const List<List<std::string> >& userTable,
-  const List<std::string>& labelsUserTable,
-  bool adminsOnly,
+( bool adminsOnly,
   const SyntacticElementHTML& inputElement
 )
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringClassDetails");
@@ -1276,10 +1296,10 @@ std::string CalculatorHTML::ToStringClassDetails
   << "')\"> Add emails</button>";
   out << "<br><span id=\"" << idOutput << "\"></span>\n<br>\n";
   int indexUser=-1, indexExtraInfo=-1;
-  for (int i=0; i<labelsUserTable.size; i++)
-  { if (labelsUserTable[i]=="username")
+  for (int i=0; i<this->labelsUserTablE.size; i++)
+  { if (this->labelsUserTablE[i]=="username")
       indexUser=i;
-    if (labelsUserTable[i]=="extraInfo")
+    if (this->labelsUserTablE[i]=="extraInfo")
       indexExtraInfo=i;
   }
   if (indexUser==-1 || indexExtraInfo==-1)
@@ -1292,16 +1312,16 @@ std::string CalculatorHTML::ToStringClassDetails
     ;
     return out.str();
   }
-  int numUsers=0;;
+  int numUsers=0;
   std::stringstream tableStream;
-  tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th><th>Points</th></tr>";
+  tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th><th>Points</th><th>Section/Group</th></tr>";
   UserCalculator currentUser;
   currentUser.currentTable="users";
   DatabaseRoutines theRoutines;
 
-  for (int i=0; i<userTable.size; i++)
+  for (int i=0; i<this->userTablE.size; i++)
   { std::stringstream failureStream;
-    currentUser.username=userTable[i][indexUser];
+    currentUser.username=this->userTablE[i][indexUser];
     if (!currentUser.FetchOneUserRow(theRoutines, failureStream ))
     { currentUser.email=failureStream.str();
       currentUser.activationToken="error";
@@ -1311,7 +1331,7 @@ std::string CalculatorHTML::ToStringClassDetails
       continue;
     numUsers++;
     tableStream << "<tr>"
-    << "<td>" << userTable[i][indexUser] << "</td>"
+    << "<td>" << this->userTablE[i][indexUser] << "</td>"
     << "<td>" << currentUser.email.value << "</td>"
     ;
     if (currentUser.activationToken!="activated" && currentUser.activationToken!="error")
@@ -1319,7 +1339,8 @@ std::string CalculatorHTML::ToStringClassDetails
       if (currentUser.activationToken!="")
         tableStream << "<td>"
         << "<a href=\""
-        << UserCalculator::GetActivationAddressFromActivationToken(currentUser.activationToken.value, userTable[i][indexUser])
+        << UserCalculator::GetActivationAddressFromActivationToken
+        (currentUser.activationToken.value, this->userTablE[i][indexUser])
         << "\"> (Re)activate account and change password</a>"
         << "</td>";
       else
@@ -1330,7 +1351,7 @@ std::string CalculatorHTML::ToStringClassDetails
     { tableStream << "<td><span style=\"color:green\">activated</span></td><td></td>";
 /*      tableStream << "<td><span style=\"color:red\">"
       << "<a href=\""
-      << UserCalculator::GetActivationAddressFromActivationToken(currentUser.activationToken.value, userTable[i][indexUser])
+      << UserCalculator::GetActivationAddressFromActivationToken(currentUser.activationToken.value, this->userTablE[i][indexUser])
       << "\"> (Re)activate account and change password</a>"
       << "</span></td>";*/
     }
@@ -1338,12 +1359,13 @@ std::string CalculatorHTML::ToStringClassDetails
     std::stringstream commentsProblemData;
     if (indexProblemData==-1)
       tableStream << "<td>No solutions history</td>";
-    else if ( currentUser.InterpretDatabaseProblemData
-              (currentUser.selectedRowFieldsUnsafe[indexProblemData], commentsProblemData))
+    else if (currentUser.InterpretDatabaseProblemData
+             (currentUser.selectedRowFieldsUnsafe[indexProblemData], commentsProblemData))
     { currentUser.ComputePointsEarned(this->currentCollectionProblems, this->currentCollectionProblemWeights);
       tableStream << "<td>" << currentUser.pointsEarned << "</td>";
     } else
       tableStream << "<td>Failed to load problem data. Comments: " << commentsProblemData.str() << "</td>";
+    tableStream << "<td>" << this->userTablE[i][indexExtraInfo] << "</td>";
     tableStream << "</tr>";
   }
   tableStream << "</table>";
@@ -1355,47 +1377,66 @@ std::string CalculatorHTML::ToStringClassDetails
   return out.str();
 }
 
+bool CalculatorHTML::PrepareClassData(std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareClassData");
+  DatabaseRoutines theRoutines;
+  if (!theRoutines.startMySQLDatabaseIfNotAlreadyStarted(&commentsOnFailure))
+  { commentsOnFailure << "<b>Failed to start database</b>";
+    return false;
+  }
+  std::string classTableName=DatabaseRoutines::GetTableUnsafeNameUsersOfFile(this->fileName);
+  if (!theRoutines.TableExists(classTableName, &commentsOnFailure))
+    if (!theRoutines.CreateTable
+        (classTableName, "username VARCHAR(255) NOT NULL PRIMARY KEY, \
+        extraInfo LONGTEXT ", &commentsOnFailure))
+      return false;
+  bool tableTruncated=false;
+  int numRows=-1;
+  std::stringstream failureComments;
+  if (!DatabaseRoutinesGlobalFunctions::FetchTablE
+      (this->userTablE, this->labelsUserTablE, tableTruncated, numRows,
+       classTableName, failureComments))
+  { comments << "<span style=\"color:red\"><b>Failed to fetch table: "
+    << classTableName
+    << failureComments.str() << "</b></span>";
+    return false;
+  }
+  if (tableTruncated)
+  { comments << "<span style=\"color:red\"><b>This shouldn't happen: email list truncated. "
+    << "This is likely a software bug.</b></span>";
+    return false;
+  }
+  int indexExtraInfo=-1;
+  for (int i=0; i<this->labelsUserTablE.size; i++)
+    if (this->labelsUserTablE[i]=="extraInfo")
+      indexExtraInfo=i;
+  if (indexExtraInfo==-1)
+  { comments << "Failed to load section data. ";
+    return false;
+  }
+  HashedList<std::string, MathRoutines::hashString> theSections;
+  for (int i=0; i<this->userTablE.size; i++)
+    theSections.AddOnTopNoRepetition(this->userTablE[i][indexExtraInfo]);
+  this->classSections=theSections;
+  this->classSections.QuickSortAscending();
+  return true;
+}
+
 void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretManageClass");
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return;
 #ifdef MACRO_use_MySQL
-  DatabaseRoutines theRoutines;
   std::stringstream out;
-  if (!theRoutines.startMySQLDatabaseIfNotAlreadyStarted(&out))
-  { out << "<b>Failed to start database</b>";
+  if (!this->flagLoadedClassDataSuccessfully)
+  { out << "<b>Failed to load class data successfully.</b>";
     inputOutput.interpretedCommand=out.str();
     return;
   }
-  std::string classTableName=DatabaseRoutines::GetTableUnsafeNameUsersOfFile(this->fileName);
-  if (!theRoutines.TableExists(classTableName, &out))
-    if (!theRoutines.CreateTable
-        (classTableName, "username VARCHAR(255) NOT NULL PRIMARY KEY, \
-        extraInfo LONGTEXT ", &out))
-    { inputOutput.interpretedCommand=out.str();
-      return;
-    }
-  List<List<std::string> > userTable;
-  List<std::string> labelsUserTable;
-  bool tableTruncated=false;
-  int numRows=-1;
-  std::stringstream failureComments;
-  if (!DatabaseRoutinesGlobalFunctions::FetchTablE
-      (userTable, labelsUserTable, tableTruncated, numRows,
-       classTableName, failureComments))
-  { out << "<span style=\"color:red\"><b>Failed to fetch table: "
-    << classTableName
-    << failureComments.str() << "</b></span>";
-    inputOutput.interpretedCommand=out.str();
-    return;
-  }
-  if (tableTruncated)
-    out << "<span style=\"color:red\"><b>This shouldn't happen: email list truncated. "
-    << "This is likely a software bug.</b></span>";
   out << "<hr><hr>";
-  out << this->ToStringClassDetails(userTable, labelsUserTable, false, inputOutput);
+  out << this->ToStringClassDetails(false, inputOutput);
   out << "<hr><hr>";
-  out << this->ToStringClassDetails(userTable, labelsUserTable, true, inputOutput);
+  out << this->ToStringClassDetails(true, inputOutput);
   inputOutput.interpretedCommand=out.str();
 #else
   inputOutput.interpretedCommand="<b>Managing class not available (no database).</b>";
@@ -1511,25 +1552,18 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
   } else
     noSubmissionsYet=true;
   if (thePoints!="" && noSubmissionsYet)
-    out << "<span style=\"color:brown\"><b>No submissions for " << thePoints
+    out << "<span style=\"color:brown\"><b>No submissions: 0 out of " << thePoints
     << " point(s). </b> </span>" ;
   if (theGlobalVariables.UserDefaultHasAdminRights())
   { //stOutput << "<hr>this->currentCollectionProblems is: " << this->currentCollectionProblems.ToStringCommaDelimited();
     //stOutput << "<br>this->currentCollectionProblemWeights is: " << this->currentCollectionProblemWeights.ToStringCommaDelimited();
     //stOutput << "<br> cleanedupLink: " << cleaneduplink;
     std::string idPoints = "points" + urledProblem;
-    std::string idDeadline = "deadline" + Crypto::CharsToBase64String(cleaneduplink);
-    if (idDeadline[idDeadline.size()-1]=='=')
-      idDeadline.resize(idDeadline.size()-1);
-    if (idDeadline[idDeadline.size()-1]=='=')
-      idDeadline.resize(idDeadline.size()-1);
     std::string idButtonModifyPoints = "modifyPoints" + urledProblem;
     std::string idPointsModOutput = "modifyPointsOutputSpan" + urledProblem;
     out << "Points: <textarea rows=\"1\" cols=\"3\" id=\"" << idPoints << "\">";
     out << thePoints;
     out << "</textarea>";
-    out << "Submission deadline: <input type=\"text\" id=\"" << idDeadline << "\">";
-    out << this->GetDatePickerStart(idDeadline);
     out << "<button id=\"" << idButtonModifyPoints << "\" "
     << "onclick=\"" << "submitStringAsMainInput('" << urledProblem
     << "='+encodeURIComponent('weight='+getElementById('" << idPoints << "').value), '"
@@ -1541,6 +1575,40 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
     out << "<span id=\"" << idPointsModOutput << "\">" << "</span>";
   }
   #endif // MACRO_use_MySQL
+  return out.str();
+}
+
+std::string CalculatorHTML::InterpretGenerateDeadlineLink
+(SyntacticElementHTML& inputOutput, std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
+ const std::string& cleaneduplink, const std::string& urledProblem)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateDeadlineLink");
+  return "Submission deadline: to be announced.";
+  std::stringstream out;
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { out << "deadline: tba";
+    return out.str();
+  }
+  out << "<table><tr><td> Deadline: </td>";
+  out << "<td><table><tr><th>Grp.</th><th>Deadline</th></tr>";
+  for (int i=0; i<this->classSections.size; i++)
+  { std::string idDeadline = "deadline" + Crypto::CharsToBase64String(this->classSections[i]+cleaneduplink);
+    if (idDeadline[idDeadline.size()-1]=='=')
+      idDeadline.resize(idDeadline.size()-1);
+    if (idDeadline[idDeadline.size()-1]=='=')
+      idDeadline.resize(idDeadline.size()-1);
+    out << "<tr>";
+    out << "<td>" << this->classSections[i] << "</td>";
+
+    out << "<td> <input type=\"text\" id=\"" << idDeadline << "\"> " ;
+    out << this->GetDatePickerStart(idDeadline);
+    out << "</td>";
+    out << "</tr>";
+  }
+  out << "</table></td>";
+  out << "<td>";
+  out << "";
+  out << "</td>";
+  out << "</tr></table>";
   return out.str();
 }
 
@@ -1557,7 +1625,8 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   if (this->flagIsExamHome || this->flagIsExamIntermediate)
     refStreamNoRequest << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&";
   if (this->flagIsExamIntermediate)
-    refStreamNoRequest << "currentExamIntermediate=" << theGlobalVariables.GetWebInput("currentExamIntermediate") << "&";
+    refStreamNoRequest << "currentExamIntermediate="
+    << theGlobalVariables.GetWebInput("currentExamIntermediate") << "&";
   refStreamExercise << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&" << refStreamNoRequest.str();
   refStreamForReal << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=examForReal&" << refStreamNoRequest.str();
   if (inputOutput.GetTagClass()=="calculatorExamProblem")
@@ -1565,6 +1634,9 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
     (inputOutput, refStreamForReal, refStreamExercise, cleaneduplink, urledProblem);
   else
     out << " <a href=\"" << refStreamExercise.str() << "\">Start</a> ";
+  if (inputOutput.GetTagClass()=="calculatorExamIntermediate")
+    out << this->InterpretGenerateDeadlineLink
+    (inputOutput, refStreamForReal, refStreamExercise, cleaneduplink, urledProblem);
   std::string stringToDisplay = FileOperations::GetFileNameFromFileNameWithPath(inputOutput.content);
   //out << " " << this->NumProblemsFound << ". "
   out << stringToDisplay;
@@ -1586,6 +1658,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     out << this->GetSubmitEmailsJavascript();
   if ((this->flagIsExamIntermediate || this->flagIsExamHome)&& theGlobalVariables.UserDefaultHasAdminRights())
     out << this->GetDatePickerJavascriptInit();
+//  else
+//    out << " no date picker";
   if (!this->PrepareAndExecuteCommands(theInterpreter, comments))
     return false;
   bool moreThanOneCommand=false;
@@ -1616,6 +1690,12 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     }
   }
 //  stOutput << "got to here, this->theProblemData: " << this->theProblemData.ToString();
+  for (int i=0; i<this->theContent.size; i++)
+    if (this->theContent[i].IsInterpretedNotByCalculator())
+      if (this->theContent[i].GetTagClass()=="calculatorManageClass")
+      { this->flagLoadedClassDataSuccessfully= this->PrepareClassData(comments);
+        break;
+      }
   for (int i=0; i<this->theContent.size; i++)
     if (this->theContent[i].IsInterpretedNotByCalculator())
       this->InterpretNotByCalculator(this->theContent[i]);

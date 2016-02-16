@@ -1292,7 +1292,7 @@ int WebWorker::ProcessMonitor()
     return 0;
   }
   int inputWebWorkerNumber= atoi(theMainInput.c_str());
-  stOutput << "<html><body>" << this->GetJavaScriptIndicatorBuiltInServer(inputWebWorkerNumber-1)
+  stOutput << "<html><body>" << this->GetJavaScriptIndicatorBuiltInServer(inputWebWorkerNumber-1, true)
   << "</body></html>";
   return 0;
 }
@@ -2103,7 +2103,7 @@ std::string WebWorker::GetJavascriptStandardCookies()
   return out.str();
 }
 
-std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex)
+std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex, bool callProgressReport)
 { MacroRegisterFunctionWithName("WebWorker::GetJavaScriptIndicatorBuiltInServer");
   std::stringstream out;
   out << " <!>\n";
@@ -2112,38 +2112,11 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex)
   out << "<span id=\"idPauseToggleServerResponse\"></span>\n";
   out << "<span id=\"idProgressReportTimer\"></span>\n";
   out << "\n<br>\n<div id=\"idProgressReport\"></div>\n";
-  out << "\n<script type=\"text/javascript\"> \n";
+  out << "\n<script type=\"text/javascript\" id=\"progressReportJavascript\"> \n";
   out << "var isPaused=false;\n";
   out << "var isFinished=false;\n";
   out << "var timeIncrementInTenthsOfSecond=4;//measured in tenths of a second\n";
   out << "var timeOutCounter=0;//measured in tenths of a second\n";
-  out << "progressReport();\n";
-  out << "function SendTogglePauseRequest()\n";
-  out << "{ if (isFinished)\n";
-  out << "    return;\n";
-  out << "  var pauseRequest = new XMLHttpRequest();\n";
-  theLog << "Generating indicator address for worker number " << inputIndex+1 << "." << logger::endL;
-  out << "  pauseURL  = \"" << theGlobalVariables.DisplayNameCalculatorWithPath
-  << "?request=pause&mainInput=" << inputIndex+1 << "\";\n";
-  out << "  pauseRequest.open(\"GET\",pauseURL,false);\n";
-//  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
-  out << "  pauseRequest.send(null)\n";
-  out << "  if (pauseRequest.status!=200)\n";
-  out << "    return;\n";
-  out << "  if(pauseRequest.responseText==\"paused\")\n";
-  out << "    isPaused=true;\n";
-  out << "  if(pauseRequest.responseText==\"unpaused\")\n";
-  out << "    isPaused=false;\n";
-  out << "  if (isPaused)\n";
-  out << "    document.getElementById(\"idButtonSendTogglePauseRequest\").innerHTML=\"Continue\";\n";
-  out << "  else\n";
-  out << "    document.getElementById(\"idButtonSendTogglePauseRequest\").innerHTML=\"Pause\";\n";
-  out << "  document.getElementById(\"idPauseToggleServerResponse\").innerHTML=pauseRequest.responseText;\n";
-  out << "  if (!isPaused)\n";
-  out << "    progressReport();\n";
-  out << "}\n";
-//  out << " progressReport();";
-//  out << " var newReportString=\"\";\n";
   out << "\nfunction progressReport()\n";
   out << "{ if (isFinished)\n";
   out << "    return;\n";
@@ -2178,6 +2151,34 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex)
   out << "  }\n";
   out << "   window.setTimeout(\"progressReport()\",timeIncrementInTenthsOfSecond*100);\n";
   out << " }\n";
+  out << "function SendTogglePauseRequest()\n";
+  out << "{ if (isFinished)\n";
+  out << "    return;\n";
+  out << "  var pauseRequest = new XMLHttpRequest();\n";
+  theLog << "Generating indicator address for worker number " << inputIndex+1 << "." << logger::endL;
+  out << "  pauseURL  = \"" << theGlobalVariables.DisplayNameCalculatorWithPath
+  << "?request=pause&mainInput=" << inputIndex+1 << "\";\n";
+  out << "  pauseRequest.open(\"GET\",pauseURL,false);\n";
+//  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
+  out << "  pauseRequest.send(null)\n";
+  out << "  if (pauseRequest.status!=200)\n";
+  out << "    return;\n";
+  out << "  if(pauseRequest.responseText==\"paused\")\n";
+  out << "    isPaused=true;\n";
+  out << "  if(pauseRequest.responseText==\"unpaused\")\n";
+  out << "    isPaused=false;\n";
+  out << "  if (isPaused)\n";
+  out << "    document.getElementById(\"idButtonSendTogglePauseRequest\").innerHTML=\"Continue\";\n";
+  out << "  else\n";
+  out << "    document.getElementById(\"idButtonSendTogglePauseRequest\").innerHTML=\"Pause\";\n";
+  out << "  document.getElementById(\"idPauseToggleServerResponse\").innerHTML=pauseRequest.responseText;\n";
+  out << "  if (!isPaused)\n";
+  out << "    progressReport();\n";
+  out << "}\n";
+//  out << " progressReport();";
+//  out << " var newReportString=\"\";\n";
+  if (callProgressReport)
+    out << "progressReport();\n";
   out << " </script>\n";
   out << " \n";
   out << " \n";
@@ -2237,14 +2238,30 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   theGlobalVariables.flagTimedOutComputationIsDone=false;
   ProgressReportWebServer theReport("WebServer::OutputShowIndicatorOnTimeout");
   theLog << logger::blue << "Computation timeout, sending progress indicator instead of output. " << logger::endL;
-  stOutput << "</td></tr>";
+  bool useTableTags=(theGlobalVariables.userCalculatorRequestType!="addEmails");
+  if (useTableTags)
+    stOutput << "</td></tr>";
+  else
+    stOutput << "Not using table tags, calc request type: " << theGlobalVariables.userCalculatorRequestType;
   if (theGlobalVariables.flagTimeOutExplanationAlreadyDisplayed)
-    stOutput << "<tr><td>Your computation is taking more than " << theGlobalVariables.MaxComputationTimeBeforeWeTakeAction
-    << " seconds.</td></tr>";
-  stOutput << "<tr><td>A progress indicator, as reported by your current computation, is displayed below. "
-  << "When done, your computation result will be displayed below. </td></tr>";
-  stOutput << "<tr><td>" << this->GetJavaScriptIndicatorBuiltInServer(this->indexInParent) << "</td></tr>"
-  << "</table></body></html>";
+  { if (useTableTags)
+      stOutput << "<tr><td>";
+    stOutput << "Your computation is taking more than " << theGlobalVariables.MaxComputationTimeBeforeWeTakeAction
+    << " seconds. ";
+    if (useTableTags)
+      stOutput << "</td></tr>";
+  }
+  if (useTableTags)
+    stOutput << "<tr><td>";
+  stOutput << "A progress indicator, as reported by your current computation, is displayed below. "
+  << "When done, your computation result will be displayed below. ";
+  if (useTableTags)
+    stOutput << "</td></tr>";
+  if (useTableTags)
+    stOutput << "<tr><td>";
+  stOutput << this->GetJavaScriptIndicatorBuiltInServer(this->indexInParent, useTableTags);
+  if (useTableTags)
+    stOutput << "</td></tr>" << "</table></body></html>";
 
 //  theLog << logger::red << "Indicator: sending all bytes" << logger::endL;
   theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: sending all bytes.");

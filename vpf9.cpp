@@ -119,7 +119,7 @@ GlobalVariables::GlobalVariables()
   this->flagLoggedIn=false;
   this->flagUsingSSLinCurrentConnection=false;
   this->flagSSLisAvailable=false;
-  this->MaxTimeNoPingBeforeChildIsPresumedDead=100;
+  this->MaxTimeNoPingBeforeChildIsPresumedDead=300;
   //  this->flagLogInterProcessCommunication=true;
   //  stOutput << "Global variables created!";
 }
@@ -865,14 +865,14 @@ std::string MathRoutines::StringShortenInsertDots(const std::string& inputString
 }
 
 void MathRoutines::StringSplitExcludeDelimiter
-(const std::string& inputString, char delimiter, List<std::string>& output)
-{ List<char> tempList;
+(const std::string& inputString, unsigned char delimiter, List<std::string>& output)
+{ List<unsigned char> tempList;
   tempList.AddOnTop(delimiter);
   MathRoutines::StringSplitExcludeDelimiters(inputString, tempList, output);
 }
 
 void MathRoutines::StringSplitExcludeDelimiters
-(const std::string& inputString, const List<char>& delimiters, List<std::string>& output)
+(const std::string& inputString, const List<unsigned char>& delimiters, List<std::string>& output)
 { MacroRegisterFunctionWithName("MathRoutines::StringSplit");
   output.SetSize(0);
   std::string reader;

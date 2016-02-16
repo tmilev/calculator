@@ -302,11 +302,12 @@ logger::logger(const std::string& logFileName )
 { FileOperations::OpenFileCreateIfNotPresentUnsecure(theFile, logFileName, false, true, false);
   this->currentColor=logger::normalColor;
   this->flagStopWritingToFile=false;
+  this->MaxLogSize=500000;
 }
 
 void logger::CheckLogSize()
 { theFile.seekg(0, std::ios::end);
-  if (theFile.tellg()>500000)
+  if (theFile.tellg()>this->MaxLogSize)
     this->flagStopWritingToFile=true;
 }
 

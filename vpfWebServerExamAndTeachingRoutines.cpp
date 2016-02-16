@@ -82,11 +82,13 @@ public:
   Selection studentTagsAnswered;
   ProblemData theProblemData;
   List<std::string> studentAnswersUnadulterated;
-  List<std::string> problemList;
-  HashedList<std::string, MathRoutines::hashString> currentCollectionProblems;
-  List<std::string> currentCollectionProblemWeights;
-  List<List<std::string> > studentSections;
-  List<List<std::string> > deadlinesBySection;
+  List<std::string> hdProblemList;
+  List<List<std::string> > hdHomeworkGroups;
+  HashedList<std::string, MathRoutines::hashString> databaseProblemList;
+  List<std::string> databaseHomeworkGroups;
+  List<std::string> databaseProblemWeights;
+  List<List<std::string> > databaseStudentSections;
+  List<List<std::string> > databaseDeadlinesBySection;
   List<List<std::string> > userTablE;
   List<std::string> labelsUserTablE;
   List<std::string> problemListOfParent;
@@ -176,10 +178,9 @@ const std::string CalculatorHTML::RelativePhysicalFolderProblemCollections="Prob
 #ifdef MACRO_use_MySQL
 bool DatabaseRoutines::ReadProblemInfo
   (const std::string& stringToReadFrom, HashedList<std::string, MathRoutines::hashString>& outputProblemNames,
-   List<std::string>& outputWeights,
-   List<List<std::string> >& outputSections,
-   List<List<std::string> >& outputDeadlinesPerSection,
-   std::stringstream& commentsOnFailure)
+   List<std::string>& outputHomeworkGroups,
+   List<std::string>& outputWeights, List<List<std::string> >& outputDeadlinesPerSection,
+   List<List<std::string> >& outputSections, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::ReadProblemInfo");
   HashedList<std::string, MathRoutines::hashString> problemNamesCGIed;
   List<std::string> theProblemData;
@@ -192,6 +193,7 @@ bool DatabaseRoutines::ReadProblemInfo
     outputProblemNames.AddOnTop(CGI::URLStringToNormal(problemNamesCGIed[i]));
   HashedList<std::string, MathRoutines::hashString> problemKeys, sectionKeys;
   List<std::string> problemValues, sectionValues;
+  outputHomeworkGroups.initFillInObject(outputProblemNames.size, "");
   outputWeights.initFillInObject(outputProblemNames.size, "");
   outputSections.initFillInObject(outputProblemNames.size, problemValues);
   outputDeadlinesPerSection.initFillInObject(outputProblemNames.size, problemValues);
@@ -221,6 +223,7 @@ bool DatabaseRoutines::ReadProblemInfo
 
 void DatabaseRoutines::StoreProblemInfo
   (std::string& outputString, const HashedList<std::string, MathRoutines::hashString>& inputProblemNames,
+   const List<std::string>& inputHomeworkGroups,
    const List<std::string>& inputWeights, const List<List<std::string> >& inputSections,
    const List<List<std::string> >& inputDeadlines)
 { MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemInfo");
@@ -307,10 +310,12 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
 //  stOutput << "stored db info: <br>" << storedDatabaseInfo;
   HashedList<std::string, MathRoutines::hashString> theProblems;
   List<std::string> theProblemWeights;
+  List<std::string> theProblemGroups;
+  List<std::string> theHomeworkGroups;
   List<List<std::string> > theSections;
   List<List<std::string> > theDeadlines;
   if (!this->ReadProblemInfo
-      (storedDatabaseInfo, theProblems, theProblemWeights, theSections, theDeadlines, commentsOnFailure))
+      (storedDatabaseInfo, theProblems, theHomeworkGroups, theProblemWeights, theSections, theDeadlines, commentsOnFailure))
   { commentsOnFailure << "Failed to parse stored database info. ";
     return false;
   }
@@ -320,10 +325,11 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
 
   HashedList<std::string, MathRoutines::hashString> incomingProblems;
   List<std::string> incomingWeights;
+  List<std::string> incomingHomeworkGroups;
   List<List<std::string> > incomingSections;
   List<List<std::string> > incomingDeadlines;
   if (!this->ReadProblemInfo
-      (inputString, incomingProblems, incomingWeights, incomingSections, incomingDeadlines, commentsOnFailure))
+      (inputString, incomingProblems, incomingHomeworkGroups, incomingWeights, incomingSections, incomingDeadlines, commentsOnFailure))
   { commentsOnFailure << "Failed to parse your request";
     return false;
   }
@@ -343,10 +349,13 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
       theProblemWeights.AddOnTop(incomingWeights[i]);
       theSections.AddOnTop(incomingSections[i]);
       theDeadlines.AddOnTop(incomingDeadlines[i]);
+      theHomeworkGroups.AddOnTop(incomingHomeworkGroups[i]);
       continue;
     }
     if (incomingWeights[i]!="")
       theProblemWeights[theIndex]=incomingWeights[i];
+    if (incomingHomeworkGroups[i]!="")
+      theHomeworkGroups[theIndex]=incomingHomeworkGroups[i];
     if (incomingSections[i].size!=0)
       for (int j=0; j<incomingSections.size; j++)
       { int sectionIndex=theSections[theIndex].GetIndex(incomingSections[i][j]);
@@ -356,7 +365,7 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
   }
   std::string stringToStore;
 
-  this->StoreProblemInfo(stringToStore, theProblems, theProblemWeights, theSections, theDeadlines);
+  this->StoreProblemInfo(stringToStore, theProblems, theHomeworkGroups, theProblemWeights, theSections, theDeadlines);
 //  stOutput << "<br>about to store back : <br>" << stringToStore;
   if (!this->StoreProblemDatabaseInfo(problemHomeName, stringToStore, commentsOnFailure))
     return false;
@@ -420,14 +429,15 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
     }
     //stOutput << ", the db string is: " << this->currentProblemCollectionDatabaseString;
     if (!theRoutines.ReadProblemInfo
-        (this->currentProblemCollectionDatabaseString,  this->currentCollectionProblems,
-         this->currentCollectionProblemWeights,
-         this->studentSections, this->deadlinesBySection, comments))
+        (this->currentProblemCollectionDatabaseString, this->databaseProblemList,
+         this->databaseHomeworkGroups,
+         this->databaseProblemWeights,
+         this->databaseStudentSections, this->databaseDeadlinesBySection, comments))
     { comments << "Failed to interpret the database problem string. ";
       return false;
     }
     this->currentUser.ComputePointsEarned
-    (this->currentCollectionProblems, this->currentCollectionProblemWeights);
+    (this->databaseProblemList, this->databaseProblemWeights);
   }
 #endif // MACRO_use_MySQL
   return true;
@@ -534,7 +544,7 @@ std::string CalculatorHTML::GetSubmitStringAreaAsMainInput()
   << "  if (spanOutput==null){\n"
   << "    spanOutput = document.createElement('span');\n"
   << "    document.body.appendChild(spanOutput);\n"
-  << "    spanOutput.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idEmailList + \"MISSING! </span>\";\n"
+  << "    spanOutput.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idOutput + \"MISSING! </span>\";\n"
   << "  }\n"
   << "  inputParams='request='+requestType;\n"
   << "  inputParams+='&" << theGlobalVariables.ToStringCalcArgsNoNavigation() << "';\n"
@@ -555,11 +565,11 @@ std::string CalculatorHTML::GetSubmitStringAreaAsMainInput()
 
 std::string CalculatorHTML::GetDatePickerStart(const std::string& theId)
 { std::stringstream out;
-  out << "<script type=\"text/javascript\">"
-  << "$(function() {"
-  << "$('#" << theId << "').datepicker();"
-  << "});"
-  << "</script>";
+  out << "\n<script type=\"text/javascript\">\n"
+  << "$(function() {\n"
+  << "$('#" << theId << "').datepicker();\n"
+  << "});\n"
+  << "</script>\n";
   return out.str();
 }
 
@@ -718,7 +728,8 @@ std::string WebWorker::GetSetProblemDatabaseInfoHtml()
   if (result)
     out << "<span style=\"color:green\"><b>Successfully changed problem data.</b></span>";
   else
-    out << "<span style=\"color:red\"><b>" <<  commentsOnFailure.str() << "</b></span>";
+    out << "<span style=\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
+  out << "<br>Debug message:<br>inputProblemInfo: " << inputProblemInfo << "<br>inputProblemHome: " << inputProblemHome;
   return out.str();
 #else
   return "Cannot modify problem weights (no database available)";
@@ -735,6 +746,8 @@ std::string WebWorker::GetAddUserEmails()
   std::string inputEmails, extraInfo;
   inputEmails=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
   extraInfo= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("extraInfo"));
+  if (extraInfo=="")
+    extraInfo="default";
   if (inputEmails=="")
   { out << "<b>No emails to add</b>";
     return out.str();
@@ -1366,7 +1379,7 @@ std::string CalculatorHTML::ToStringClassDetails
       tableStream << "<td>No solutions history</td>";
     else if (currentUser.InterpretDatabaseProblemData
              (currentUser.selectedRowFieldsUnsafe[indexProblemData], commentsProblemData))
-    { currentUser.ComputePointsEarned(this->currentCollectionProblems, this->currentCollectionProblemWeights);
+    { currentUser.ComputePointsEarned(this->databaseProblemList, this->databaseProblemWeights);
       tableStream << "<td>" << currentUser.pointsEarned << "</td>";
     } else
       tableStream << "<td>Failed to load problem data. Comments: " << commentsProblemData.str() << "</td>";
@@ -1535,8 +1548,8 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
   out << " <a href=\"" << refStreamExercise.str() << "\">Exercise (no credit, unlimited tries)</a> ";
   //stOutput << "<hr>CurrentUser.problemNames=" << this->currentUser.problemNames.ToStringCommaDelimited();
   std::string thePoints="";
-  if (this->currentCollectionProblems.Contains(cleaneduplink))
-    thePoints= this->currentCollectionProblemWeights[this->currentCollectionProblems.GetIndex(cleaneduplink)];
+  if (this->databaseProblemList.Contains(cleaneduplink))
+    thePoints= this->databaseProblemWeights[this->databaseProblemList.GetIndex(cleaneduplink)];
   #ifdef MACRO_use_MySQL
   bool noSubmissionsYet=false;
   if (this->currentUser.problemNames.Contains(cleaneduplink))
@@ -1560,8 +1573,8 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
     out << "<span style=\"color:brown\"><b>No submissions: 0 out of " << thePoints
     << " point(s). </b> </span>" ;
   if (theGlobalVariables.UserDefaultHasAdminRights())
-  { //stOutput << "<hr>this->currentCollectionProblems is: " << this->currentCollectionProblems.ToStringCommaDelimited();
-    //stOutput << "<br>this->currentCollectionProblemWeights is: " << this->currentCollectionProblemWeights.ToStringCommaDelimited();
+  { //stOutput << "<hr>this->databaseProblemList is: " << this->databaseProblemList.ToStringCommaDelimited();
+    //stOutput << "<br>this->databaseProblemWeights is: " << this->databaseProblemWeights.ToStringCommaDelimited();
     //stOutput << "<br> cleanedupLink: " << cleaneduplink;
     std::string idPoints = "points" + urledProblem;
     std::string idButtonModifyPoints = "modifyPoints" + urledProblem;
@@ -1589,10 +1602,10 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateDeadlineLink");
 //  return "Submission deadline: to be announced. ";
   std::stringstream out;
+  out << "deadline: To be announced.";
+  return out.str();
   if (!theGlobalVariables.UserDefaultHasAdminRights())
-  { out << "deadline: tba";
     return out.str();
-  }
   out << "<table><tr><td> Deadline: </td>";
   out << "<td><table><tr><th>Grp.</th><th>Deadline</th></tr>";
   List<std::string> deadlineIds;
@@ -1616,17 +1629,22 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   out << "<button onclick=\"";
   out << "submitStringAsMainInput('" << urledProblem
   << "='+encodeURIComponent('deadlines='";
+  std::string deadlineIdReport="deadlineReport"+Crypto::CharsToBase64String(cleaneduplink);
+  if (deadlineIdReport[deadlineIdReport.size()-1]=='=')
+    deadlineIdReport.resize(deadlineIdReport.size()-1);
+  if (deadlineIdReport[deadlineIdReport.size()-1]=='=')
+    deadlineIdReport.resize(deadlineIdReport.size()-1);
   for (int i=0; i<this->classSections.size; i++)
-  { if (i!=0)
-      out << "+";
+  { out << "+";
     out << "'" << CGI::StringToURLString(this->classSections[i]) << "='";
     out << "+ encodeURIComponent(document.getElementById('"
     << deadlineIds[i] << "').value)+'&'";
   }
-  out << "));"
+  out << "), '" << deadlineIdReport << "', 'setProblemData' );"
   << "\""
   << ">\n";
   out << "  Set deadline(s)</button>";
+  out << "<span id=\"" << deadlineIdReport << "\"></span>";
   out << "</td>";
   out << "</tr></table>";
   return out.str();
@@ -1652,8 +1670,8 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   if (inputOutput.GetTagClass()=="calculatorExamProblem")
     out << this->InterpretGenerateProblemManagementLink
     (inputOutput, refStreamForReal, refStreamExercise, cleaneduplink, urledProblem);
-  else
-    out << " <a href=\"" << refStreamExercise.str() << "\">Start</a> ";
+  //else
+  //  out << " <a href=\"" << refStreamExercise.str() << "\">Start</a> ";
   if (inputOutput.GetTagClass()=="calculatorExamIntermediate")
     out << this->InterpretGenerateDeadlineLink
     (inputOutput, refStreamForReal, refStreamExercise, cleaneduplink, urledProblem);
@@ -1711,11 +1729,25 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   }
 //  stOutput << "got to here, this->theProblemData: " << this->theProblemData.ToString();
   for (int i=0; i<this->theContent.size; i++)
-    if (this->theContent[i].IsInterpretedNotByCalculator())
-      if (this->theContent[i].GetTagClass()=="calculatorManageClass")
-      { this->flagLoadedClassDataSuccessfully= this->PrepareClassData(comments);
-        break;
+    if (this->theContent[i].GetTagClass()=="calculatorManageClass")
+    { this->flagLoadedClassDataSuccessfully= this->PrepareClassData(comments);
+      break;
+    }
+  this->hdHomeworkGroups.SetExpectedSize(50);
+  this->hdHomeworkGroups.SetSize(0);
+  for (int i=0; i<this->theContent.size; i++)
+    if (this->theContent[i].GetTagClass()=="calculatorExamIntermediate")
+    { this->hdHomeworkGroups.SetSize(this->hdHomeworkGroups.size+1);
+      this->hdHomeworkGroups.LastObject()->SetSize(0);
+    } else if (this->theContent[i].GetTagClass()=="calculatorExamProblem")
+    { if (this->hdHomeworkGroups.size==0)
+      { out << "<b>Error: found a tag of type calculatorExamProblem before finding the first tag of type calculatorExamIntermediate."
+        << " Please make a tag of type calculatorExamIntermediate before making tags of type calculatorExamProblem.</b>";
+        continue;
       }
+      this->hdHomeworkGroups.LastObject()->AddOnTop(this->theContent[i].content);
+    }
+//  out << "Debug data: homework groups found: " << this->hdHomeworkGroups.ToStringCommaDelimited();
   for (int i=0; i<this->theContent.size; i++)
     if (this->theContent[i].IsInterpretedNotByCalculator())
       this->InterpretNotByCalculator(this->theContent[i]);
@@ -1737,8 +1769,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     if (!this->currentUser.StoreProblemDataToDatabase(theRoutines, comments))
         out << "<b>Error: failed to store problem in database. </b>" << comments.str();
   }
-//  out << "Current collection problems: " << this->currentCollectionProblems.ToStringCommaDelimited()
-//  << " with weights: " << this->currentCollectionProblemWeights.ToStringCommaDelimited();
+//  out << "Current collection problems: " << this->databaseProblemList.ToStringCommaDelimited()
+//  << " with weights: " << this->databaseProblemWeights.ToStringCommaDelimited();
 #endif // MACRO_use_MySQL
   this->outputHtmlMain=out.str();
   return true;
@@ -1770,7 +1802,7 @@ void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments)
   { comments << "Failed to parse parent problem collection. Comments: " << commentsOfparent.str();
     return;
   }
-  this->problemListOfParent=parserOfParent.problemList;
+  this->problemListOfParent=parserOfParent.hdProblemList;
 }
 
 std::string CalculatorHTML::GetDatabaseTableName()
@@ -2031,10 +2063,10 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       this->theContent.AddOnTop(eltsStack[i]);
     }
   }
-  this->problemList.SetSize(0);
+  this->hdProblemList.SetSize(0);
   for (int i=0; i<this->theContent.size; i++)
     if (this->theContent[i].GetTagClass()=="calculatorExamProblem")
-      this->problemList.AddOnTop(this->CleanUpLink(this->theContent[i].content));
+      this->hdProblemList.AddOnTop(this->CleanUpLink(this->theContent[i].content));
   if (result)
     result=this->ExtractAnswerIds(comments);
   if (result)

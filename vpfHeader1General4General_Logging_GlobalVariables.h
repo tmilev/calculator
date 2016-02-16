@@ -210,6 +210,7 @@ class logger
 {
   public:
   int currentColor;
+  int MaxLogSize;
   std::fstream theFile;
   bool flagStopWritingToFile;
   logger(const std::string& logFileName);

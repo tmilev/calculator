@@ -1179,13 +1179,14 @@ std::string UserCalculator::GetSelectedRowEntry(const std::string& theKey)
 
 bool DatabaseRoutines::ExtractEmailList(const std::string& emailList, List<std::string>& outputList, std::stringstream& comments)
 { MacroRegisterFunctionWithName("DatabaseRoutines::ExtractEmailList");
-  List<char> delimiters;
+  List<unsigned char> delimiters;
   delimiters.AddOnTop(' ');
   delimiters.AddOnTop('\r');
   delimiters.AddOnTop('\n');
   delimiters.AddOnTop('\t');
   delimiters.AddOnTop(',');
   delimiters.AddOnTop(';');
+  delimiters.AddOnTop(160);//<-&nbsp
   MathRoutines::StringSplitExcludeDelimiters(emailList, delimiters, outputList);
   return true;
 }
@@ -1254,23 +1255,35 @@ bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, b
   currentUser.currentTable="users";
   ProgressReport theReport;
   bool result=true;
+  TimeWrapper now;
+  now.AssignLocalTime();
+  now.ComputeTimeStringNonReadable();
+  std::string emailActivationLogFileName = "LogFileEmailsDebug"+now.theTimeStringNonReadable + ".html";
+  logger emailActivationLogFile(theGlobalVariables.PhysicalPathOutputFolder+emailActivationLogFileName);
+  emailActivationLogFile.MaxLogSize=10000000;
   for (int i=0; i<theEmails.size; i++)
   { std::stringstream reportStream;
     reportStream << "Sending activation email, user " << i+1 << " out of " << theEmails.size;
+    emailActivationLogFile << "Sending activation email, user " << i+1 << " out of " << theEmails.size << " ... ";
     theReport.Report(reportStream.str());
     currentUser.username=theEmails[i];
     currentUser.email=theEmails[i];
     currentUser.ComputeActivationToken();
     if (!currentUser.SetColumnEntry("activationToken", currentUser.activationToken.value, *this, &comments))
     { comments << "Setting activation token failed.";
+      emailActivationLogFile << "Setting activation token failed, terminating.";
       return false;
     }
-    if (!currentUser.SendActivationEmail(*this, comments))
+    std::stringstream localComments;
+    if (!currentUser.SendActivationEmail(*this, localComments))
     { comments << "<span style=\"color:red\"><b>Failed to send activation email to: </b></span> "
       << currentUser.username.value;
+      comments << localComments.str();
       result=false;
+      emailActivationLogFile << logger::red << localComments.str() << logger::endL;
       continue;
     }
+    emailActivationLogFile << logger::green << " sent." << logger::endL;
   }
   return result;
 }
@@ -1412,6 +1425,8 @@ bool DatabaseRoutines::AddUsersFromEmails
   (const std::string& emailList, const std::string& extraInfo, bool& outputSentAllEmails,
    std::stringstream& comments)
 { MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000;
+  theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=1000;
   std::string userRole=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("userRole"));
   std::string extraUserInfo=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("extraInfo"));
   std::string currentExamHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
@@ -1502,7 +1517,7 @@ bool UserCalculator::SendActivationEmail(DatabaseRoutines& theRoutines, std::str
   //theGlobalVariables.FallAsleep(1000000);
 
   if (this->email=="")
-  { comments << "<br>No email address for user: " << this->username.value << ". ";
+  { comments << "\nNo email address for user: " << this->username.value << ". ";
     return false;
   }
   EmailRoutines theEmailRoutines;
@@ -1528,7 +1543,7 @@ bool UserCalculator::SendActivationEmail(DatabaseRoutines& theRoutines, std::str
   //stOutput << "Calling system with:<br>" << theEmailRoutines.GetCommandToSendEmailWithMailX()
   //<< "<br>\n to get output: \n<br>" << emailLog;
   if (!result)
-    comments << "<br>\nFailed to send email to " << this->username.value << ". Details: \n" << emailLog;
+    comments << "\nFailed to send email to " << this->username.value << ". Details: \n" << emailLog;
   return result;
 }
 
@@ -1686,11 +1701,11 @@ TimeWrapper::TimeWrapper()
 
 void TimeWrapper::ComputeTimeStringNonReadable()
 { std::stringstream out;
-  out << this->theTime.tm_year << " " << this->theTime.tm_mon << " "
+  out << this->theTime.tm_year << "-" << this->theTime.tm_mon << "-"
   << this->theTime.tm_mday
-  << " " << this->theTime.tm_hour << " "
+  << "-" << this->theTime.tm_hour << "-"
   << this->theTime.tm_min
-  << " "
+  << "-"
   << this->theTime.tm_sec;
   this->theTimeStringNonReadable=out.str();
 }
@@ -1723,8 +1738,15 @@ std::string TimeWrapper::ToStringHumanReadable()
 }
 
 void TimeWrapper::operator=(const std::string& input)
-{ std::stringstream inputStream;
-  inputStream << input;
+{ std::string inputNoDashes;
+  inputNoDashes.reserve(input.size());
+  for (unsigned int i=0; i<input.size(); i++)
+    if (input[i]!='-')
+      inputNoDashes.push_back(input[i]);
+    else
+      inputNoDashes.push_back(' ');
+  std::stringstream inputStream;
+  inputStream << inputNoDashes;
   inputStream.seekg(0);
   inputStream >> this->theTime.tm_year;
   inputStream >> this->theTime.tm_mon;

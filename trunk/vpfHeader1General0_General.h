@@ -231,8 +231,8 @@ public:
 //  static void NChooseK(int n, int k, LargeInt& output);//
   static bool StringBeginsWith(const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd=0);
   static char ConvertHumanReadableHexToCharValue(char input);
-  static void StringSplitExcludeDelimiter(const std::string& inputString, char delimiter, List<std::string>& output);
-  static void StringSplitExcludeDelimiters(const std::string& inputString, const List<char>& delimiters, List<std::string>& output);
+  static void StringSplitExcludeDelimiter(const std::string& inputString, unsigned char delimiter, List<std::string>& output);
+  static void StringSplitExcludeDelimiters(const std::string& inputString, const List<unsigned char>& delimiters, List<std::string>& output);
   static void SplitStringInTwo(const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond);
   static void NChooseK(int n, int k, LargeInt& result);
   static int NChooseK(int n, int k);

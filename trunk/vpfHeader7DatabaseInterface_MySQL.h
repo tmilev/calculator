@@ -226,11 +226,16 @@ public:
   bool getUserPassAndExtraData(Calculator& theCommands, const Expression& input, List<std::string>& outputData);
   void ComputeActivationToken();
   void ComputeShaonedSaltedPassword(bool recomputeSafeEntries);
-  bool GetActivationAddress
+  bool GetActivationAbsoluteAddress
   (std::string& output, DatabaseRoutines& theRoutines, std::stringstream& comments)
   ;
+  bool GetActivationAddress
+  (std::string& output, const std::string& calculatorBase, DatabaseRoutines& theRoutines,
+   std::stringstream& comments)
+  ;
   static std::string GetActivationAddressFromActivationToken
-  (const std::string& theActivationToken, const std::string& inputUserNameUnsafe)
+  (const std::string& theActivationToken, const std::string& calculatorBase,
+   const std::string& inputUserNameUnsafe)
   ;
   bool SendActivationEmail(DatabaseRoutines& theRoutines, std::stringstream& comments);
   std::string ToString();

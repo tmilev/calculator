@@ -1106,6 +1106,7 @@ public:
   static int scale;
   static void outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter);
   static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
+  static std::string URLKeyValuePairsToNormalRecursiveHtml(const std::string& input, int recursionDepth=0);
   static void URLStringToNormal(const std::string& input, std::string& output);
   static std::string URLStringToNormal(const std::string& input)
   { std::string output;

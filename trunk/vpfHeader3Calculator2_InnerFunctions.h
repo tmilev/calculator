@@ -27,6 +27,7 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerUrlStringToNormalString(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerURLKeyValuePairsToNormalRecursive(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerQuoteToString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerBase64ToCharToBase64Test(Calculator& theCommands, const Expression& input, Expression& output);
@@ -58,6 +59,9 @@ public:
   static bool innerArccos(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerArctan(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeArithmeticOperationEvaluatedOnArgument(Calculator& theCommands, const Expression& input, Expression& output);
+
+
+  static bool innerPolynomialRelations(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool outerPolynomialize(Calculator& theCommands, const Expression& input, Expression& output);
 

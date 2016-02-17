@@ -10341,6 +10341,7 @@ int RationalFunctionOld::GetMinNumVars()const
 void RationalFunctionOld::GetRelations(List<Polynomial<Rational> >& theGenerators, GlobalVariables& theGlobalVariables)
 { if (theGenerators.size==0)
     return;
+  int toDoMAkeACalculatorInterfaceForThisFunction;
   List<Polynomial<Rational> > theGroebnerBasis;
   theGroebnerBasis=theGenerators;
   int numStartingGenerators=theGenerators.size;

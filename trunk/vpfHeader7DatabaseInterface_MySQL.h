@@ -169,6 +169,7 @@ public:
   MySQLdata activationToken;
   MySQLdata enteredAuthenticationToken;
   MySQLdata actualAuthenticationToken;
+  std::string extraInfoUnsafe;
   std::string enteredPassword;
   std::string actualShaonedSaltedPassword;
   std::string enteredShaonedSaltedPassword;

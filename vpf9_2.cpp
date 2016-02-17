@@ -2175,6 +2175,36 @@ void RationalFunctionOld::AddHonestRF(const RationalFunctionOld& other)
     crash << crash;
 }
 
+std::string CGI::URLKeyValuePairsToNormalRecursiveHtml(const std::string& input, int recursionDepth)
+{ MacroRegisterFunctionWithName("CGI::URLKeyValuePairsToNormalRecursiveHtml");
+//  stOutput << "I'm here<br>";
+  if (recursionDepth>50)
+    return input;
+  HashedList<std::string, MathRoutines::hashString> theKeys;
+  List<std::string> theValues;
+  std::stringstream notUsed;
+  if (!CGI::ChopCGIInputStringToMultipleStrings(input, theValues, theKeys, notUsed))
+  { //stOutput << "oh no: " << notUsed.str();
+    return input;
+  }
+  std::stringstream out;
+  out << "<table border=\"1px solid black;\">";
+  for (int i=0; i<theValues.size; i++)
+  { out << "<tr>";
+    out << "<td>"
+    << CGI::URLStringToNormal(theKeys[i]) << " </td>";
+    if (theValues[i]!="")
+    { out << "<td>=</td><td>";
+      if (theValues[i]!="")
+        out << CGI::URLKeyValuePairsToNormalRecursiveHtml(CGI::URLStringToNormal(theValues[i]), recursionDepth+1);
+      out << "</td>";
+    }
+    out << "</tr>";
+  }
+  out << "</table>";
+  return out.str();
+}
+
 void CGI::URLStringToNormal(const std::string& input, std::string& output)
 { std::string readAhead;
   std::stringstream out;

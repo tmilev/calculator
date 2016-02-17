@@ -462,7 +462,7 @@ std::string DatabaseRoutines::ToStringTableFromTableIdentifier(const std::string
   for (int i=0; i<theTable.size; i++)
   { out << "<tr>";
     for (int j=0; j<theTable[i].size; j++)
-      out << "<td>" << theTable[i][j] << "</td>";
+      out << "<td>" << CGI::URLKeyValuePairsToNormalRecursiveHtml( theTable[i][j]) << "</td>";
     out << "</tr>";
   }
   out << "</table>";
@@ -1476,11 +1476,12 @@ bool DatabaseRoutines::AddUsersFromEmails
 }
 
 std::string UserCalculator::GetActivationAddressFromActivationToken
-  (const std::string& theActivationToken, const std::string& inputUserNameUnsafe)
+  (const std::string& theActivationToken, const std::string& calculatorBase,
+   const std::string& inputUserNameUnsafe)
 { MacroRegisterFunctionWithName("UserCalculator::GetActivationLinkFromActivationToken");
   std::stringstream out;
   out //<< "<a href=\""
-  << theGlobalVariables.hopefullyPermanent_HTTPS_WebAdressOfServerExecutable
+  << calculatorBase
   << "?request=activateAccount&usernameHidden=" << CGI::StringToURLString(inputUserNameUnsafe)
   << "&activationToken=" << CGI::StringToURLString(theActivationToken)
   //<< "\">Activate account and set password</a>"
@@ -1488,9 +1489,17 @@ std::string UserCalculator::GetActivationAddressFromActivationToken
   return out.str();
 }
 
+bool UserCalculator::GetActivationAbsoluteAddress
+  (std::string& output, DatabaseRoutines& theRoutines,
+   std::stringstream& comments)
+{ MacroRegisterFunctionWithName("UserCalculator::GetActivationAbsoluteAddress");
+  return this->GetActivationAddress
+  (output, theGlobalVariables.hopefullyPermanent_HTTPS_WebAdressOfServerExecutable, theRoutines, comments);
+}
 bool UserCalculator::GetActivationAddress
-  (std::string& output, DatabaseRoutines& theRoutines, std::stringstream& comments)
-{ MacroRegisterFunctionWithName("UserCalculator::GetActivationAddress");
+  (std::string& output, const std::string& calculatorBase, DatabaseRoutines& theRoutines,
+   std::stringstream& comments)
+{ MacroRegisterFunctionWithName("UserCalculator::GetActivationAbsoluteAddress");
   if (!this->FetchOneUserRow(theRoutines, comments))
     return false;
   this->activationToken= this->GetSelectedRowEntry("activationToken");
@@ -1502,14 +1511,15 @@ bool UserCalculator::GetActivationAddress
   { comments << "Account of user: " << this->username.value << "already activated";
     return false;
   }
-  output= this->GetActivationAddressFromActivationToken(this->activationToken.value, this->username.value);
+  output= this->GetActivationAddressFromActivationToken
+  (this->activationToken.value, calculatorBase, this->username.value);
   return true;
 }
 
 bool UserCalculator::SendActivationEmail(DatabaseRoutines& theRoutines, std::stringstream& comments)
 { MacroRegisterFunctionWithName("UserCalculator::SendActivationEmail");
   std::string activationAddress;
-  if (!this->GetActivationAddress(activationAddress, theRoutines, comments))
+  if (!this->GetActivationAbsoluteAddress(activationAddress, theRoutines, comments))
     return false;
 //  stOutput << "<hr> all result strings: " << this->selectedRowFieldNamesUnsafe.ToStringCommaDelimited();
 //  stOutput << "<br> all result string names: " << this->selectedRowFieldsUnsafe.ToStringCommaDelimited();

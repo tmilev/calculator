@@ -232,6 +232,14 @@ bool CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test(Calculator& theCo
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerURLKeyValuePairsToNormalRecursive(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerURLKeyValuePairsToNormalRecursive");
+  std::string theString;
+  if (!input.IsOfType<std::string>(&theString))
+    return false;
+  return output.AssignValue(CGI::URLKeyValuePairsToNormalRecursiveHtml(theString), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerUrlStringToNormalString(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerUrlStringToNormalString");
   std::string theString;

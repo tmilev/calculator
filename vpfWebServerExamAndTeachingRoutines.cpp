@@ -767,8 +767,8 @@ std::string WebWorker::GetAddUserEmails()
   std::string inputEmails, extraInfo;
   inputEmails=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
   extraInfo= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("extraInfo"));
-  if (extraInfo=="")
-    extraInfo="default";
+//  if (extraInfo=="")
+//    extraInfo="default";
   if (inputEmails=="")
   { out << "<b>No emails to add</b>";
     return out.str();
@@ -1379,7 +1379,8 @@ std::string CalculatorHTML::ToStringClassDetails
         tableStream << "<td>"
         << "<a href=\""
         << UserCalculator::GetActivationAddressFromActivationToken
-        (currentUser.activationToken.value, this->userTablE[i][indexUser])
+        (currentUser.activationToken.value, theGlobalVariables.DisplayNameCalculatorWithPath,
+         this->userTablE[i][indexUser])
         << "\"> (Re)activate account and change password</a>"
         << "</td>";
       else
@@ -1390,7 +1391,7 @@ std::string CalculatorHTML::ToStringClassDetails
     { tableStream << "<td><span style=\"color:green\">activated</span></td><td></td>";
 /*      tableStream << "<td><span style=\"color:red\">"
       << "<a href=\""
-      << UserCalculator::GetActivationAddressFromActivationToken(currentUser.activationToken.value, this->userTablE[i][indexUser])
+      << UserCalculator::GetActivationAbsoluteAddressFromActivationToken(currentUser.activationToken.value, this->userTablE[i][indexUser])
       << "\"> (Re)activate account and change password</a>"
       << "</span></td>";*/
     }
@@ -1618,10 +1619,10 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
 }
 
 std::string CalculatorHTML::GetDeadlineFromIndexInDatabase(int indexInDatabase)
-{
-  if (indexInDatabase==-1)
+{ if (indexInDatabase==-1)
     return "";
   int indexSection= this->databaseStudentSections[indexInDatabase].GetIndex(this->currentUser.extraInfoUnsafe);
+  stOutput << "indexSection: " << indexSection << " xtrainfounsafe: " << this->currentUser.extraInfoUnsafe;
   if (indexSection==-1)
     return "";
   return this->databaseDeadlinesBySection[indexInDatabase][indexSection];
@@ -1635,8 +1636,11 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   std::stringstream out;
   int indexInDatabase=this->databaseSpanList.GetIndex(cleaneduplink);
   std::string currentDeadline = this->GetDeadlineFromIndexInDatabase(indexInDatabase);
+  out << "Debug: cleanedupLink: " << cleaneduplink
+  << ". indexInDatabase: " << indexInDatabase;
   if (currentDeadline=="")
   { int indexInProblemList=this->hdProblemList.GetIndex(cleaneduplink);
+    out << " current deadline is empty. Index in prob list from hd: " << indexInProblemList;
     if (indexInProblemList!=-1)
     { int indexHomeworkGroupInDatabase=this->databaseSpanList.GetIndex
       (this->hdHomeworkGroupCorrespondingToEachProblem[indexInProblemList]);

@@ -359,6 +359,11 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
     if (incomingSections[i].size!=0)
       for (int j=0; j<incomingSections.size; j++)
       { int sectionIndex=theSections[theIndex].GetIndex(incomingSections[i][j]);
+        if (sectionIndex==-1)
+        { theSections[theIndex].AddOnTop(incomingSections[i][j]);
+          theDeadlines[theIndex].AddOnTop(incomingDeadlines[i][j]);
+          continue;
+        }
         theSections[theIndex][sectionIndex]=incomingSections[i][j];
         theDeadlines[theIndex][sectionIndex]=incomingDeadlines[i][j];
       }
@@ -1603,7 +1608,6 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
 //  return "Submission deadline: to be announced. ";
   std::stringstream out;
   out << "deadline: To be announced.";
-  return out.str();
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return out.str();
   out << "<table><tr><td> Deadline: </td>";

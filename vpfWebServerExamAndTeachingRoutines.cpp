@@ -82,10 +82,13 @@ public:
   Selection studentTagsAnswered;
   ProblemData theProblemData;
   List<std::string> studentAnswersUnadulterated;
-  List<std::string> hdProblemList;
+  HashedList<std::string, MathRoutines::hashString> hdProblemList;
+  List<std::string> hdHomeworkGroupCorrespondingToEachProblem;
   List<List<std::string> > hdHomeworkGroups;
-  HashedList<std::string, MathRoutines::hashString> databaseProblemList;
-  List<std::string> databaseHomeworkGroups;
+  HashedList<std::string, MathRoutines::hashString> databaseSpanList;
+  List<std::string> databaseHomeworkGroupCorrespondingToEachProblem;
+  List<List<std::string> > databaseHomeworkGroupDeadlinesPerSection;
+  List<List<std::string> > databaseHomeworkGroupMaxNumTriesPerSection;
   List<std::string> databaseProblemWeights;
   List<List<std::string> > databaseStudentSections;
   List<List<std::string> > databaseDeadlinesBySection;
@@ -102,7 +105,7 @@ public:
   bool CheckContent(std::stringstream& comments);
   bool CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
   bool LoadMe(bool doLoadDatabase, std::stringstream& comments);
-  std::string CleanUpLink(const std::string& inputLink);
+  std::string CleanUpFileName(const std::string& inputLink);
   bool ParseHTML(std::stringstream& comments);
   bool IsSplittingChar(const std::string& input);
   bool IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt);
@@ -113,6 +116,7 @@ public:
   bool PrepareCommands(Calculator& theInterpreter, std::stringstream& comments);
   std::string CleanUpCommandString(const std::string& inputCommand);
   void InterpretNotByCalculator(SyntacticElementHTML& inputOutput);
+  std::string GetDeadlineFromIndexInDatabase(int indexInDatabase);
   std::string InterpretGenerateDeadlineLink
 (SyntacticElementHTML& inputOutput, std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
  const std::string& cleaneduplink, const std::string& urledProblem)
@@ -135,7 +139,7 @@ public:
   std::string GetDatePickerJavascriptInit();
   std::string GetDatePickerStart(const std::string& theId);
   std::string GetSubmitAnswersJavascript();
-  std::string GetDatabaseTableName();
+  std::string GetCurrentGradesTable();
   void LoadCurrentProblemItem();
   void FigureOutCurrentProblemList(std::stringstream& comments);
   std::string LoadAndInterpretCurrentProblemItem();
@@ -204,6 +208,9 @@ bool DatabaseRoutines::ReadProblemInfo
 //    stOutput << "<br>current problem: " << outputProblemNames[i]
 //    << "<br>being read from data: " << theProblemData[i]
 //    << "<br>which is normalized to: " << CGI::URLStringToNormal(theProblemData[i]);
+    if (problemKeys.Contains("homeworkGroup"))
+      outputHomeworkGroups[i]=
+      CGI::URLStringToNormal(problemValues[problemKeys.GetIndex("homeworkGroup")]);
     if (problemKeys.Contains("weight"))
       outputWeights[i]=
       CGI::URLStringToNormal(problemValues[problemKeys.GetIndex("weight")]);
@@ -236,7 +243,10 @@ void DatabaseRoutines::StoreProblemInfo
   std::stringstream out;
   for (int i=0; i<inputProblemNames.size; i++)
   { std::stringstream currentProblemStream, currentDeadlineStream;
-    currentProblemStream << "weight=" << CGI::StringToURLString(inputWeights[i]) << "&";
+    if (inputWeights[i]!="")
+      currentProblemStream << "weight=" << CGI::StringToURLString(inputWeights[i]) << "&";
+    if (inputHomeworkGroups[i]!="")
+      currentProblemStream << "homeworkGroup=" << CGI::StringToURLString(inputHomeworkGroups[i]) << "&";
     for (int j=0; j<inputSections[i].size; j++)
     { if (inputSections[j].size!=inputDeadlines[j].size)
         crash << "Input sections and input deadlines have mismatching sizes. " << crash;
@@ -424,9 +434,15 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
     }
     this->theProblemData=this->currentUser.GetProblemDataAddIfNotPresent(this->fileName);
   }
-  this->currentExamHomE=  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
+  this->currentExamHomE=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
   if (doLoadDatabase && this->currentExamHomE!="")
   { //stOutput << "loading db, problem collection: " << this->currentExamHomE;
+    this->currentUser.currentTable=this->GetCurrentGradesTable();
+    std::stringstream unusedForNow;
+    this->currentUser.FetchOneColumn("extraInfo", this->currentUser.extraInfoUnsafe, theRoutines, &unusedForNow);
+//    { comments << "Failed to load the section/group of the current user";
+//      return false;
+//    }
     if (!theRoutines.ReadProblemDatabaseInfo
         (this->currentExamHomE, this->currentProblemCollectionDatabaseString, comments))
     { comments << "Failed to load current problem collection's database string. ";
@@ -434,15 +450,15 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
     }
     //stOutput << ", the db string is: " << this->currentProblemCollectionDatabaseString;
     if (!theRoutines.ReadProblemInfo
-        (this->currentProblemCollectionDatabaseString, this->databaseProblemList,
-         this->databaseHomeworkGroups,
+        (this->currentProblemCollectionDatabaseString, this->databaseSpanList,
+         this->databaseHomeworkGroupCorrespondingToEachProblem,
          this->databaseProblemWeights,
          this->databaseStudentSections, this->databaseDeadlinesBySection, comments))
     { comments << "Failed to interpret the database problem string. ";
       return false;
     }
     this->currentUser.ComputePointsEarned
-    (this->databaseProblemList, this->databaseProblemWeights);
+    (this->databaseSpanList, this->databaseProblemWeights);
   }
 #endif // MACRO_use_MySQL
   return true;
@@ -1384,7 +1400,7 @@ std::string CalculatorHTML::ToStringClassDetails
       tableStream << "<td>No solutions history</td>";
     else if (currentUser.InterpretDatabaseProblemData
              (currentUser.selectedRowFieldsUnsafe[indexProblemData], commentsProblemData))
-    { currentUser.ComputePointsEarned(this->databaseProblemList, this->databaseProblemWeights);
+    { currentUser.ComputePointsEarned(this->databaseSpanList, this->databaseProblemWeights);
       tableStream << "<td>" << currentUser.pointsEarned << "</td>";
     } else
       tableStream << "<td>Failed to load problem data. Comments: " << commentsProblemData.str() << "</td>";
@@ -1534,7 +1550,7 @@ void CalculatorHTML::InterpretNotByCalculator(SyntacticElementHTML& inputOutput)
     this->InterpretManageClass(inputOutput);
 }
 
-std::string CalculatorHTML::CleanUpLink(const std::string& inputLink)
+std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink)
 { std::string result;
   result.reserve(inputLink.size());
   for (unsigned i=0; i<inputLink.size(); i++)
@@ -1553,8 +1569,8 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
   out << " <a href=\"" << refStreamExercise.str() << "\">Exercise (no credit, unlimited tries)</a> ";
   //stOutput << "<hr>CurrentUser.problemNames=" << this->currentUser.problemNames.ToStringCommaDelimited();
   std::string thePoints="";
-  if (this->databaseProblemList.Contains(cleaneduplink))
-    thePoints= this->databaseProblemWeights[this->databaseProblemList.GetIndex(cleaneduplink)];
+  if (this->databaseSpanList.Contains(cleaneduplink))
+    thePoints= this->databaseProblemWeights[this->databaseSpanList.GetIndex(cleaneduplink)];
   #ifdef MACRO_use_MySQL
   bool noSubmissionsYet=false;
   if (this->currentUser.problemNames.Contains(cleaneduplink))
@@ -1601,13 +1617,37 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
   return out.str();
 }
 
+std::string CalculatorHTML::GetDeadlineFromIndexInDatabase(int indexInDatabase)
+{
+  if (indexInDatabase==-1)
+    return "";
+  int indexSection= this->databaseStudentSections[indexInDatabase].GetIndex(this->currentUser.extraInfoUnsafe);
+  if (indexSection==-1)
+    return "";
+  return this->databaseDeadlinesBySection[indexInDatabase][indexSection];
+}
+
 std::string CalculatorHTML::InterpretGenerateDeadlineLink
 (SyntacticElementHTML& inputOutput, std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
  const std::string& cleaneduplink, const std::string& urledProblem)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateDeadlineLink");
 //  return "Submission deadline: to be announced. ";
   std::stringstream out;
-  out << "deadline: To be announced.";
+  int indexInDatabase=this->databaseSpanList.GetIndex(cleaneduplink);
+  std::string currentDeadline = this->GetDeadlineFromIndexInDatabase(indexInDatabase);
+  if (currentDeadline=="")
+  { int indexInProblemList=this->hdProblemList.GetIndex(cleaneduplink);
+    if (indexInProblemList!=-1)
+    { int indexHomeworkGroupInDatabase=this->databaseSpanList.GetIndex
+      (this->hdHomeworkGroupCorrespondingToEachProblem[indexInProblemList]);
+      currentDeadline=this->GetDeadlineFromIndexInDatabase(indexHomeworkGroupInDatabase);
+    }
+  }
+  if (currentDeadline=="")
+    if (inputOutput.GetTagClass()=="calculatorExamProblem")
+      out << "<span style=\"color:orange\">No deadline yet. </span>";
+  if (currentDeadline!="")
+    out << "Deadline: " << currentDeadline << ". ";
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return out.str();
   out << "<table><tr><td> Deadline: </td>";
@@ -1657,7 +1697,7 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
 void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateLink");
   this->NumProblemsFound++;
-  std::string cleaneduplink = this->CleanUpLink(inputOutput.content);
+  std::string cleaneduplink = this->CleanUpFileName(inputOutput.content);
   std::string urledProblem=CGI::StringToURLString(cleaneduplink);
   std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
 //  out << "cleaned up link: " << cleaneduplink;
@@ -1676,9 +1716,9 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
     (inputOutput, refStreamForReal, refStreamExercise, cleaneduplink, urledProblem);
   //else
   //  out << " <a href=\"" << refStreamExercise.str() << "\">Start</a> ";
-  if (inputOutput.GetTagClass()=="calculatorExamIntermediate")
-    out << this->InterpretGenerateDeadlineLink
-    (inputOutput, refStreamForReal, refStreamExercise, cleaneduplink, urledProblem);
+  //if (inputOutput.GetTagClass()=="calculatorExamIntermediate")
+  out << this->InterpretGenerateDeadlineLink
+  (inputOutput, refStreamForReal, refStreamExercise, cleaneduplink, urledProblem);
   std::string stringToDisplay = FileOperations::GetFileNameFromFileNameWithPath(inputOutput.content);
   //out << " " << this->NumProblemsFound << ". "
   out << stringToDisplay;
@@ -1737,19 +1777,24 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     { this->flagLoadedClassDataSuccessfully= this->PrepareClassData(comments);
       break;
     }
-  this->hdHomeworkGroups.SetExpectedSize(50);
   this->hdHomeworkGroups.SetSize(0);
+  this->hdHomeworkGroups.SetExpectedSize(50);
+  this->hdHomeworkGroupCorrespondingToEachProblem.SetSize(0);
+  this->hdHomeworkGroupCorrespondingToEachProblem.SetExpectedSize(50);
+  std::string currentHomeworkGroup;
   for (int i=0; i<this->theContent.size; i++)
     if (this->theContent[i].GetTagClass()=="calculatorExamIntermediate")
     { this->hdHomeworkGroups.SetSize(this->hdHomeworkGroups.size+1);
       this->hdHomeworkGroups.LastObject()->SetSize(0);
+      currentHomeworkGroup=this->CleanUpFileName(this->theContent[i].content);
     } else if (this->theContent[i].GetTagClass()=="calculatorExamProblem")
     { if (this->hdHomeworkGroups.size==0)
       { out << "<b>Error: found a tag of type calculatorExamProblem before finding the first tag of type calculatorExamIntermediate."
         << " Please make a tag of type calculatorExamIntermediate before making tags of type calculatorExamProblem.</b>";
         continue;
       }
-      this->hdHomeworkGroups.LastObject()->AddOnTop(this->theContent[i].content);
+      this->hdHomeworkGroups.LastObject()->AddOnTop(this->CleanUpFileName(this->theContent[i].content));
+      this->hdHomeworkGroupCorrespondingToEachProblem.AddOnTop(currentHomeworkGroup);
     }
 //  out << "Debug data: homework groups found: " << this->hdHomeworkGroups.ToStringCommaDelimited();
   for (int i=0; i<this->theContent.size; i++)
@@ -1809,9 +1854,9 @@ void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments)
   this->problemListOfParent=parserOfParent.hdProblemList;
 }
 
-std::string CalculatorHTML::GetDatabaseTableName()
+std::string CalculatorHTML::GetCurrentGradesTable()
 { std::string result="grades"+ CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
-//  stOutput << "GetDatabaseTableName result: " << result << "<br>";
+//  stOutput << "GetCurrentGradesTable result: " << result << "<br>";
   return result;
 }
 
@@ -2067,10 +2112,10 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       this->theContent.AddOnTop(eltsStack[i]);
     }
   }
-  this->hdProblemList.SetSize(0);
+  this->hdProblemList.Clear();
   for (int i=0; i<this->theContent.size; i++)
     if (this->theContent[i].GetTagClass()=="calculatorExamProblem")
-      this->hdProblemList.AddOnTop(this->CleanUpLink(this->theContent[i].content));
+      this->hdProblemList.AddOnTop(this->CleanUpFileName(this->theContent[i].content));
   if (result)
     result=this->ExtractAnswerIds(comments);
   if (result)

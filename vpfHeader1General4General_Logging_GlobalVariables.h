@@ -170,6 +170,7 @@ public:
   }
   static void InitThreadsExecutableStart();
   bool UserDefaultHasAdminRights();
+  bool UserRequestRequiresLoadingRealExamData();
 
   std::string ToStringNavigation();
   std::string ToStringCalcArgsNoNavigation();

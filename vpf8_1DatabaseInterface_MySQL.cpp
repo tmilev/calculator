@@ -1317,10 +1317,11 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
     return false;
 //  stOutput << "<hr>Interpreting: <br>" << inputData << "<hr>";
   this->flagRandomSeedComputed=false;
-  if (theKeys.Contains("randomSeed"))
-  { this->randomSeed=atoi(theValues[theKeys.GetIndex("randomSeed")].c_str());
-    this->flagRandomSeedComputed=true;
-  }
+  if (theGlobalVariables.UserRequestRequiresLoadingRealExamData() )
+    if (theKeys.Contains("randomSeed"))
+    { this->randomSeed=atoi(theValues[theKeys.GetIndex("randomSeed")].c_str());
+      this->flagRandomSeedComputed=true;
+    }
   this->numCorrectSubmissions.SetSize(0);
   this->numSubmissions.SetSize(0);
   this->firstCorrectAnswer.SetSize(0);

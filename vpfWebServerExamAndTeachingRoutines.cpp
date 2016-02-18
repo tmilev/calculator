@@ -204,8 +204,7 @@ bool DatabaseRoutines::ReadProblemInfo
   for (int i=0; i<outputProblemNames.size; i++)
   { if (!CGI::ChopCGIInputStringToMultipleStrings
         (CGI::URLStringToNormal(theProblemData[i]), problemValues, problemKeys, commentsOnFailure))
-    { return false;
-    }
+      return false;
 //    stOutput << "<br>current problem: " << outputProblemNames[i]
 //    << "<br>being read from data: " << theProblemData[i]
 //    << "<br>which is normalized to: " << CGI::URLStringToNormal(theProblemData[i]);
@@ -413,18 +412,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
   std::stringstream contentStream;
   contentStream << theFile.rdbuf();
   this->inputHtml=contentStream.str();
-  std::string randString= theGlobalVariables.GetWebInput("randomSeed");
-  if (randString!="")
-  { std::stringstream randSeedStream(randString);
-    randSeedStream >> this->theProblemData.randomSeed;
-    this->flagRandomSeedGiven=true;
-  }
-  this->flagIsForReal=false;
-  if (theGlobalVariables.flagLoggedIn)
-    this->flagIsForReal=
-    (theGlobalVariables.userCalculatorRequestType=="submitProblem" ||
-     theGlobalVariables.userCalculatorRequestType=="examForReal"
-    );
+  this->flagIsForReal=theGlobalVariables.UserRequestRequiresLoadingRealExamData();
 #ifdef MACRO_use_MySQL
 //stOutput << "loading: ";
   DatabaseRoutines theRoutines;
@@ -468,6 +456,17 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
     (this->databaseSpanList, this->databaseProblemWeights);
   }
 #endif // MACRO_use_MySQL
+  if (!this->flagIsForReal)
+  { std::string randString= theGlobalVariables.GetWebInput("randomSeed");
+    if (randString!="")
+    { std::stringstream randSeedStream(randString);
+      stOutput << "radSeedStream: " << randString;
+      randSeedStream >> this->theProblemData.randomSeed;
+      stOutput << ", interpreted as: " << this->theProblemData.randomSeed;
+      this->flagRandomSeedGiven=true;
+    }
+  }
+//  stOutput << "debug info: rand seed after all's been said and done: " << this->theProblemData.randomSeed;
   return true;
 }
 
@@ -825,7 +824,7 @@ int WebWorker::ProcessSubmitProblem()
   }
   if (!theProblem.flagRandomSeedGiven && !theProblem.flagIsForReal)
     stOutput << "<b>Random seed not given.</b>";
-//  stOutput << "<b>debug remove when done: Random seed: " << theProblem.theProblemData.randomSeed << "</b>";
+  stOutput << "<b>debug remove when done: Random seed: " << theProblem.theProblemData.randomSeed << "</b>";
   theProblem.currentExamHomE=        CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
   theProblem.currentExamIntermediatE=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate"));
   if (theProblem.currentExamHomE=="")
@@ -907,7 +906,7 @@ int WebWorker::ProcessSubmitProblem()
   DatabaseRoutines theRoutines;
   theProblem.currentUser.username=theGlobalVariables.userDefault;
   if (theProblem.flagIsForReal)
-  { //stOutput << "<hr>problem string: " << theProblem.currentUserDatabaseString << "<hr>";
+  { stOutput << "<hr>problem string: " << theProblem.currentUserDatabaseString << "<hr>";
     if (!theProblem.currentUser.InterpretDatabaseProblemData(theProblem.currentUserDatabaseString, comments))
     { stOutput << "<b>Failed to load user information from database. Answer not recorded. "
       << "This should not happen. " << CalculatorHTML::BugsGenericMessage << "</b>";
@@ -1513,6 +1512,7 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     << answerId << "', '" << answerEvaluationId << "')\"> Submit </button></td>"
     << "<td>";
     out << "<span id=\"" << answerEvaluationId << "\">";
+
     int theIndex=this->theProblemData.answerIds.GetIndex(answerId);
     if (theIndex==-1)
       crash << "Index of answer id not found: this shouldn't happen. " << crash;
@@ -1531,19 +1531,19 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
       numSubmissions= this->theProblemData.numSubmissions[theIndex];
     }
 //    stOutput << "got to here 2";
-    if (numCorrectSubmissions >0)
-    { out << "<b><span style=\"color:green\">Correctly answered: \\("
-      << this->theProblemData.firstCorrectAnswer[theIndex] << "\\) </span></b> ";
-      if (numSubmissions>0)
-        out << "<br>Used: " << numSubmissions << " attempt(s) (" << numCorrectSubmissions << " correct).";
-    } else
-    { if (theGlobalVariables.userCalculatorRequestType=="examForReal")
+    if (theGlobalVariables.userCalculatorRequestType=="examForReal")
+    { if (numCorrectSubmissions >0)
+      { out << "<b><span style=\"color:green\">Correctly answered: \\("
+        << this->theProblemData.firstCorrectAnswer[theIndex] << "\\) </span></b> ";
+        if (numSubmissions>0)
+          out << "<br>Used: " << numSubmissions << " attempt(s) (" << numCorrectSubmissions << " correct).";
+      } else
       { out << " <b><span style=\"color:brown\">Need to submit answer. </span></b>";
         if (numSubmissions>0)
           out << numSubmissions << " attempt(s) so far. ";
-      } else
-        out << " <b><span style=\"color:brown\">Submit (no credit, unlimited tries)</span></b>";
-    }
+      }
+    } else
+      out << " <b><span style=\"color:brown\">Submit (no credit, unlimited tries)</span></b>";
     out << "</span></td>";
   }
   out << "</tr></table>";
@@ -1675,6 +1675,11 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
     out << "Deadline: " << currentDeadline << ". ";
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return out.str();
+  std::string idSpanDeadlinePackage="deadline"+Crypto::CharsToBase64String(this->fileName);
+  out << "<a href=\"javascript:;\" onmusedown=\"document.getElementById('"
+  << idSpanDeadlinePackage << "').slideToggle('slow');\">Set deadline</a>";
+  out << "<span id=\"" << idSpanDeadlinePackage << "\" style=\"display:none\">";
+
   out << "<table><tr><td> Deadline: </td>";
   out << "<td><table><tr><th>Grp.</th><th>Deadline</th></tr>";
   List<std::string> deadlineIds;
@@ -1723,6 +1728,7 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   out << "<span id=\"" << deadlineIdReport << "\"></span>";
   out << "</td>";
   out << "</tr></table>";
+  out << "</span>";
   return out.str();
 }
 
@@ -1779,7 +1785,10 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   bool moreThanOneCommand=false;
   std::string lastCommands;
   int commandCounter=2;
-//  out << "DEBUG nfo, remove when done. randseed: " << this->randomSeed;
+//  out << "DEBUG nfo, remove when done. <br>randseed: " << this->theProblemData.randomSeed
+//  << "<br> forReal: " << this->flagIsForReal << " seed computed: " << this->theProblemData.flagRandomSeedComputed
+//  << " flagRandomSeedGiven: " << this->flagRandomSeedGiven
+//  << this->ToStringCalculatorArgumentsForProblem("exercise");
   //first command and first syntactic element are the random seed and are ignored.
   for (int spanCounter=1; spanCounter <this->theContent.size; spanCounter++)
   { SyntacticElementHTML& currentElt=this->theContent[spanCounter];
@@ -1839,7 +1848,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   //  out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();
 #ifdef MACRO_use_MySQL
   if (this->flagIsForReal)
-  { this->theProblemData.flagRandomSeedComputed=true;
+  { //stOutput << "This is for real!<br>";
+    this->theProblemData.flagRandomSeedComputed=true;
     DatabaseRoutines theRoutines;
     //this->currentUser.username=theGlobalVariables.userDefault;
 //    stOutput << "About to store problem data: " << this->theProblemData.ToString();

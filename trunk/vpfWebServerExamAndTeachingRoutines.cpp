@@ -139,7 +139,6 @@ public:
   std::string GetDatePickerJavascriptInit();
   std::string GetDatePickerStart(const std::string& theId);
   std::string GetSubmitAnswersJavascript();
-  std::string GetCurrentGradesTable();
   void LoadCurrentProblemItem();
   void FigureOutCurrentProblemList(std::stringstream& comments);
   std::string LoadAndInterpretCurrentProblemItem();
@@ -183,8 +182,9 @@ const std::string CalculatorHTML::RelativePhysicalFolderProblemCollections="Prob
 bool DatabaseRoutines::ReadProblemInfo
   (const std::string& stringToReadFrom, HashedList<std::string, MathRoutines::hashString>& outputProblemNames,
    List<std::string>& outputHomeworkGroups,
-   List<std::string>& outputWeights, List<List<std::string> >& outputDeadlinesPerSection,
-   List<List<std::string> >& outputSections, std::stringstream& commentsOnFailure)
+   List<std::string>& outputWeights,
+   List<List<std::string> >& outputSections, List<List<std::string> >& outputDeadlinesPerSection,
+   std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::ReadProblemInfo");
   HashedList<std::string, MathRoutines::hashString> problemNamesCGIed;
   List<std::string> theProblemData;
@@ -204,7 +204,8 @@ bool DatabaseRoutines::ReadProblemInfo
   for (int i=0; i<outputProblemNames.size; i++)
   { if (!CGI::ChopCGIInputStringToMultipleStrings
         (CGI::URLStringToNormal(theProblemData[i]), problemValues, problemKeys, commentsOnFailure))
-      return false;
+    { return false;
+    }
 //    stOutput << "<br>current problem: " << outputProblemNames[i]
 //    << "<br>being read from data: " << theProblemData[i]
 //    << "<br>which is normalized to: " << CGI::URLStringToNormal(theProblemData[i]);
@@ -225,6 +226,7 @@ bool DatabaseRoutines::ReadProblemInfo
       outputDeadlinesPerSection[i].AddOnTop(CGI::URLStringToNormal(sectionValues[j]));
     }
   }
+//  stOutput << "reading from: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(stringToReadFrom);
   return true;
 }
 
@@ -236,7 +238,8 @@ void DatabaseRoutines::StoreProblemInfo
 { MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemInfo");
   if (inputProblemNames.size!=inputWeights.size ||
       inputProblemNames.size!=inputDeadlines.size ||
-      inputProblemNames.size!=inputSections.size
+      inputProblemNames.size!=inputSections.size ||
+      inputProblemNames.size!=inputHomeworkGroups.size
       )
     crash << "This shouldn't happen: non-matching data sizes while storing problem info. "
     << "The present function should only be called with sanitized input. " << crash;
@@ -247,16 +250,18 @@ void DatabaseRoutines::StoreProblemInfo
       currentProblemStream << "weight=" << CGI::StringToURLString(inputWeights[i]) << "&";
     if (inputHomeworkGroups[i]!="")
       currentProblemStream << "homeworkGroup=" << CGI::StringToURLString(inputHomeworkGroups[i]) << "&";
+    if (inputSections[i].size!=inputDeadlines[i].size)
+      crash << "Input sections and input deadlines have mismatching sizes. " << crash;
     for (int j=0; j<inputSections[i].size; j++)
-    { if (inputSections[j].size!=inputDeadlines[j].size)
-        crash << "Input sections and input deadlines have mismatching sizes. " << crash;
       currentDeadlineStream << CGI::StringToURLString(inputSections[i][j])
       << "=" << CGI::StringToURLString(inputDeadlines[i][j]) << "&";
-    }
     currentProblemStream << "deadlines=" << CGI::StringToURLString(currentDeadlineStream.str()) << "&";
     out << CGI::StringToURLString(inputProblemNames[i]) << "="
     << CGI::StringToURLString(currentProblemStream.str()) << "&";
   }
+
+  stOutput << "Storing prob string: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(out.str())
+  << "<br>from:<br>";
   outputString=out.str();
 }
 
@@ -339,7 +344,8 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
   List<List<std::string> > incomingSections;
   List<List<std::string> > incomingDeadlines;
   if (!this->ReadProblemInfo
-      (inputString, incomingProblems, incomingHomeworkGroups, incomingWeights, incomingSections, incomingDeadlines, commentsOnFailure))
+      (inputString, incomingProblems, incomingHomeworkGroups, incomingWeights,
+       incomingSections, incomingDeadlines, commentsOnFailure))
   { commentsOnFailure << "Failed to parse your request";
     return false;
   }
@@ -380,7 +386,8 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
   }
   std::string stringToStore;
 
-  this->StoreProblemInfo(stringToStore, theProblems, theHomeworkGroups, theProblemWeights, theSections, theDeadlines);
+  this->StoreProblemInfo
+  (stringToStore, theProblems, theHomeworkGroups, theProblemWeights, theSections, theDeadlines);
 //  stOutput << "<br>about to store back : <br>" << stringToStore;
   if (!this->StoreProblemDatabaseInfo(problemHomeName, stringToStore, commentsOnFailure))
     return false;
@@ -437,12 +444,12 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
   this->currentExamHomE=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
   if (doLoadDatabase && this->currentExamHomE!="")
   { //stOutput << "loading db, problem collection: " << this->currentExamHomE;
-    this->currentUser.currentTable=this->GetCurrentGradesTable();
-    std::stringstream unusedForNow;
-    this->currentUser.FetchOneColumn("extraInfo", this->currentUser.extraInfoUnsafe, theRoutines, &unusedForNow);
-//    { comments << "Failed to load the section/group of the current user";
-//      return false;
-//    }
+    this->currentUser.currentTable=theRoutines.GetTableUnsafeNameUsersOfFile(this->currentExamHomE);
+    //stOutput << "loading extra info ... " << this->currentExamHomE;
+    if(!this->currentUser.FetchOneColumn("extraInfo", this->currentUser.extraInfoUnsafe, theRoutines, &comments))
+    { comments << "Failed to load the section/group of the current user. ";
+      return false;
+    }
     if (!theRoutines.ReadProblemDatabaseInfo
         (this->currentExamHomE, this->currentProblemCollectionDatabaseString, comments))
     { comments << "Failed to load current problem collection's database string. ";
@@ -747,8 +754,9 @@ std::string WebWorker::GetSetProblemDatabaseInfoHtml()
   bool result=theRoutines.MergeProblemInfoInDatabase(inputProblemHome, inputProblemInfo, commentsOnFailure);
   std::stringstream out;
   if (result)
-    out << "<span style=\"color:green\"><b>Successfully changed problem data.</b></span>";
-  else
+  { out << "<span style=\"color:green\"><b>Successfully changed problem data.</b></span>";
+//    out << "<meta http-equiv=\"refresh\" content=\"0;\">";
+  } else
     out << "<span style=\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
   out << "<br>Debug message:<br>inputProblemInfo raw: " << inputProblemInfo << "<br>Processed: "
   << CGI::URLKeyValuePairsToNormalRecursiveHtml(inputProblemInfo)
@@ -1624,7 +1632,7 @@ std::string CalculatorHTML::GetDeadlineFromIndexInDatabase(int indexInDatabase)
 { if (indexInDatabase==-1)
     return "";
   int indexSection= this->databaseStudentSections[indexInDatabase].GetIndex(this->currentUser.extraInfoUnsafe);
-  stOutput << "indexSection: " << indexSection << " xtrainfounsafe: " << this->currentUser.extraInfoUnsafe;
+//  stOutput << "indexSection: " << indexSection << " xtrainfounsafe: " << this->currentUser.extraInfoUnsafe;
   if (indexSection==-1)
     return "";
   return this->databaseDeadlinesBySection[indexInDatabase][indexSection];
@@ -1634,12 +1642,23 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
 (SyntacticElementHTML& inputOutput, std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
  const std::string& cleaneduplink, const std::string& urledProblem)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateDeadlineLink");
-//  return "Submission deadline: to be announced. ";
+  //  return "Submission deadline: to be announced. ";
   std::stringstream out;
   int indexInDatabase=this->databaseSpanList.GetIndex(cleaneduplink);
   std::string currentDeadline = this->GetDeadlineFromIndexInDatabase(indexInDatabase);
-  out << "Debug: cleanedupLink: " << cleaneduplink
-  << ". indexInDatabase: " << indexInDatabase;
+  //out << "Debug: cleanedupLink: " << cleaneduplink
+  //<< ". indexInDatabase: " << indexInDatabase;
+/*  out << "USer section: " << this->currentUser.extraInfoUnsafe << "<br>";
+  if (indexInDatabase!=-1)
+  { int indexSection= this->databaseStudentSections[indexInDatabase].GetIndex(this->currentUser.extraInfoUnsafe);
+    if (indexSection==-1)
+      out << "No section. ";
+    else
+    { out << this->databaseDeadlinesBySection[indexInDatabase][indexSection];
+      out << "databaseSections: " << this->databaseStudentSections.ToStringCommaDelimited();
+    }
+  }
+*/
   if (currentDeadline=="")
   { int indexInProblemList=this->hdProblemList.GetIndex(cleaneduplink);
     out << " current deadline is empty. Index in prob list from hd: " << indexInProblemList;
@@ -1678,23 +1697,26 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   }
   out << "</table></td>";
   out << "<td>\n";
-  out << "<button onclick=\"";
-  out << "submitStringAsMainInput('" << urledProblem
-  << "='+encodeURIComponent('deadlines='";
   std::string deadlineIdReport="deadlineReport"+Crypto::CharsToBase64String(cleaneduplink);
   if (deadlineIdReport[deadlineIdReport.size()-1]=='=')
     deadlineIdReport.resize(deadlineIdReport.size()-1);
   if (deadlineIdReport[deadlineIdReport.size()-1]=='=')
     deadlineIdReport.resize(deadlineIdReport.size()-1);
+  out << "<button onclick=\"";
+  out << "submitStringAsMainInput('" << urledProblem
+  << "='+encodeURIComponent('deadlines='+encodeURIComponent(";
+  bool isFirst=true;
   for (int i=0; i<this->classSections.size; i++)
   { if (this->classSections[i]=="")
       continue;
-    out << "+";
+    if (!isFirst)
+      out << "+";
+    isFirst=false;
     out << "'" << CGI::StringToURLString(this->classSections[i]) << "='";
     out << "+ encodeURIComponent(document.getElementById('"
     << deadlineIds[i] << "').value)+'&'";
   }
-  out << "), '" << deadlineIdReport << "', 'setProblemData' );"
+  out << ")), '" << deadlineIdReport << "', 'setProblemData' );"
   << "\""
   << ">\n";
   out << "  Set deadline(s)</button>";
@@ -1862,12 +1884,6 @@ void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments)
     return;
   }
   this->problemListOfParent=parserOfParent.hdProblemList;
-}
-
-std::string CalculatorHTML::GetCurrentGradesTable()
-{ std::string result="grades"+ CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
-//  stOutput << "GetCurrentGradesTable result: " << result << "<br>";
-  return result;
 }
 
 bool CalculatorHTML::InterpretHtml(std::stringstream& comments)

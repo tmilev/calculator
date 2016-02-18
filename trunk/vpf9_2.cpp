@@ -2305,7 +2305,6 @@ std::string CGI::GetLaTeXProcessingJavascript()
 //   return "<script src=\"../../jsmath/easy/load.js\"></script>";
 }
 
-
 bool CGI::AccountOneInputCGIString
 (const std::string& fieldName, const std::string& fieldValue, List<std::string>& outputData,
  HashedList<std::string, MathRoutines::hashString>& outputFieldNames, std::stringstream& commentsOnFailure)

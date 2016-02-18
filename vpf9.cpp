@@ -10338,35 +10338,43 @@ int RationalFunctionOld::GetMinNumVars()const
   }
 }
 
-void RationalFunctionOld::GetRelations(List<Polynomial<Rational> >& theGenerators, GlobalVariables& theGlobalVariables)
-{ if (theGenerators.size==0)
-    return;
-  int toDoMAkeACalculatorInterfaceForThisFunction;
+bool RationalFunctionOld::GetRelations
+(const List<Polynomial<Rational> >& inputElements,
+ List<Polynomial<Rational> >& outputGeneratorLabels, List<Polynomial<Rational> >& outputRelations,
+ std::stringstream& comments)
+{ MacroRegisterFunctionWithName("RationalFunctionOld::GetRelationsGetRelations");
+  outputGeneratorLabels.SetSize(inputElements.size);
+  outputRelations.SetSize(0);
+  if (inputElements.size==0)
+    return true;
   List<Polynomial<Rational> > theGroebnerBasis;
-  theGroebnerBasis=theGenerators;
-  int numStartingGenerators=theGenerators.size;
-
+  theGroebnerBasis=inputElements;
+  int numStartingGenerators=inputElements.size;
   int numStartingVariables=0;
-  for (int i=0; i<theGenerators.size; i++)
-    numStartingVariables=MathRoutines::Maximum(numStartingVariables, theGenerators[0].GetMinNumVars());
-  Polynomial<Rational> tempP;
+  for (int i=0; i<inputElements.size; i++)
+    numStartingVariables=MathRoutines::Maximum(numStartingVariables, inputElements[0].GetMinNumVars());
+  Polynomial<Rational> currentGenerator;
   FormatExpressions tempFormat;
   for (int i=0; i<numStartingGenerators; i++)
   { Polynomial<Rational>& currentPoly=theGroebnerBasis[i];
     currentPoly.SetNumVariablesSubDeletedVarsByOne(numStartingVariables+numStartingGenerators);
-    tempP.MakeDegreeOne(numStartingVariables+numStartingGenerators, i+numStartingVariables, (Rational) -1);
-    currentPoly+=tempP;
+    currentGenerator.MakeDegreeOne(numStartingVariables+numStartingGenerators, i+numStartingVariables, 1);
+    outputGeneratorLabels[i]=currentGenerator;
+    currentPoly-=currentGenerator;
 //  stOutput << currentPoly.ToString(false, tempFormat) << "<br>";
   }
   GroebnerBasisComputation<Rational> theComputation;
   theComputation.thePolynomialOrder.theMonOrder=MonomialP::LeftIsGEQLexicographicLastVariableWeakest;
-  theComputation.TransformToReducedGroebnerBasis(theGroebnerBasis);
+  if (!theComputation.TransformToReducedGroebnerBasis(theGroebnerBasis))
+  { comments << "Failed to find Groebner basis";
+    return false;
+  }
 //  stOutput << "<br>the ending generators:<br> ";
 //  for (int i=0; i<theGroebnerBasis.size; i++)
 //  { stOutput << theGroebnerBasis[i].ToString(false, tempFormat) << "<br>";
 //  }
-  theGenerators.Reserve(theGroebnerBasis.size);
-  theGenerators.size=0;
+  outputRelations.Reserve(theGroebnerBasis.size);
+  outputRelations.SetSize(0);
   for (int i=0; i<theGroebnerBasis.size; i++)
   { Polynomial<Rational>& currentPoly= theGroebnerBasis[i];
     bool bad=false;
@@ -10376,8 +10384,9 @@ void RationalFunctionOld::GetRelations(List<Polynomial<Rational> >& theGenerator
         break;
       }
     if (!bad)
-     theGenerators.AddOnTop(currentPoly);
+     outputRelations.AddOnTop(currentPoly);
   }
+  return true;
 }
 
 bool ConeComplex::findMaxLFOverConeProjective

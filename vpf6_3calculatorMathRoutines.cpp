@@ -2221,6 +2221,62 @@ bool Calculator::innerInvertMatrixVerbose(Calculator& theCommands, const Express
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerPolynomialRelations
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerGroebner");
+ /* if (input.IsSequenceNElementS())
+  { output=input;
+    if (!useGr && !useRevLex)
+      return output.SetChildAtomValue(0, "GroebnerLexUpperLimit");
+    if (!useGr && useRevLex)
+      return output.SetChildAtomValue(0, "GroebnerRevLexUpperLimit");
+    if (useGr)
+      return output.SetChildAtomValue(0, "GroebnerGrLexUpperLimit");
+  }*/
+  Vector<Polynomial<Rational> > inputVector;
+  Expression theContext;
+  if (input.children.size<3)
+    return output.MakeError("Function takes at least two arguments. ", theCommands);
+  const Expression& numComputationsE=input[1];
+  Rational upperBound=0;
+  if (!numComputationsE.IsOfType(&upperBound))
+    return output.MakeError("Failed to convert the first argument of the expression to rational number.", theCommands);
+  if (upperBound>1000000)
+    return output.MakeError
+    ("Error: your upper limit of polynomial operations exceeds 1000000, which is too large.\
+     You may use negative or zero number give no computation bound, but please don't. ", theCommands);
+//  int upperBoundComputations=(int) upperBound.GetDoubleValue();
+  output.reset(theCommands);
+  for (int i=1; i<input.children.size; i++)
+    output.children.AddOnTop(input.children[i]);
+  if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >
+      (output, inputVector, &theContext, -1, CalculatorConversions::innerPolynomial<Rational>))
+    return output.MakeError("Failed to extract polynomial expressions", theCommands);
+  Vector<Polynomial<Rational> > theRels, theGens;
+  FormatExpressions theFormat;
+  theContext.ContextGetFormatExpressions(theFormat);
+  for (char i=0; i<26; i++)
+  { char currentLetter='a'+i;
+    std::string currentStr;
+    currentStr= currentLetter;
+    if (!theFormat.polyAlphabeT.Contains(currentStr))
+      theFormat.polyAlphabeT.AddOnTop(currentStr);
+  }
+  if (!RationalFunctionOld::GetRelations(inputVector, theGens, theRels, theCommands.Comments))
+    return theCommands << "Failed to extract relations. ";
+  std::stringstream out;
+  out << "Polynomials:";
+  for (int i=0; i<theGens.size; i++)
+    out << "<br>" << theGens[i].ToString(&theFormat) << "=" << inputVector[i].ToString(&theFormat);
+
+  out << "<br>Relations: ";
+  for (int i=0; i<theRels.size; i++)
+  { theRels[i].ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+    out << "<br>" << theRels[i].ToString(&theFormat);
+  }
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::outerPolynomialize(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPolynomialize");
   Expression thePolyE;

@@ -3023,7 +3023,11 @@ public:
     crash << crash;
     return false;
   }
-  static void GetRelations(List<Polynomial<Rational> >& theGenerators, GlobalVariables& theGlobalVariables);
+  static bool GetRelations
+  (const List<Polynomial<Rational> >& inputElements,
+   List<Polynomial<Rational> >& outputGeneratorLabels, List<Polynomial<Rational> >& outputRelations,
+   std::stringstream& comments)
+   ;
   static bool gcdQuicK(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output);
   static void ScaleClearDenominator(List<RationalFunctionOld>& input, Vector<Polynomial<Rational> >& output);
   static void gcd(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output, GlobalVariables* theGlobalVariables=0);

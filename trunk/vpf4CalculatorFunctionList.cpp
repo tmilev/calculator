@@ -1467,6 +1467,7 @@ void Calculator::initPredefinedInnerFunctions()
     ",
    "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit{}( 10000, \
     x^2+1, y x z -1, z^2 x+y-1, w u)", true, false, "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraicUpperLimit");
+
   this->AddOperationInnerHandler
   ("GroebnerLexUpperLimit", this->innerGroebnerLex, "",
    "Transforms to a reduced Groebner basis using the  \
@@ -1523,6 +1524,10 @@ void Calculator::initPredefinedInnerFunctions()
    ",
    "GroebnerLexUpperLimit{}(10000, s^2+c^2+1, a-s^4, b-c^4 );\
    \nGroebnerLexUpperLimit{}(5, s^2+c^2+1, a-s^4, b-c^4 );");
+    this->AddOperationInnerHandler
+  ("PolynomialRelationsUpperLimit", CalculatorFunctionsGeneral::innerPolynomialRelations, "",
+   "Finds the relations between the polynomials.",
+   "PolynomialRelationsUpperLimit{}(10000, s^2+c^2+1, s^4, c^4 );");
     this->AddOperationInnerHandler
   ("GroebnerRevLexUpperLimit", this->innerGroebnerRevLex, "",
    "Same as GroebnerLexUpperLimit but uses reverse order on the variables (z<x).",

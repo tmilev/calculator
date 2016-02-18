@@ -750,7 +750,9 @@ std::string WebWorker::GetSetProblemDatabaseInfoHtml()
     out << "<span style=\"color:green\"><b>Successfully changed problem data.</b></span>";
   else
     out << "<span style=\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
-  out << "<br>Debug message:<br>inputProblemInfo: " << inputProblemInfo << "<br>inputProblemHome: " << inputProblemHome;
+  out << "<br>Debug message:<br>inputProblemInfo raw: " << inputProblemInfo << "<br>Processed: "
+  << CGI::URLKeyValuePairsToNormalRecursiveHtml(inputProblemInfo)
+  << "<br>inputProblemHome: " << inputProblemHome;
   return out.str();
 #else
   return "Cannot modify problem weights (no database available)";
@@ -1660,6 +1662,8 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   deadlineIds.SetSize(this->classSections.size);
   for (int i=0; i<this->classSections.size; i++)
   { std::string& currentDeadlineId=deadlineIds[i];
+    if (this->classSections[i]=="")
+      continue;
     currentDeadlineId = "deadline" + Crypto::CharsToBase64String(this->classSections[i]+cleaneduplink);
     if (currentDeadlineId[currentDeadlineId.size()-1]=='=')
       currentDeadlineId.resize(currentDeadlineId.size()-1);
@@ -1683,7 +1687,9 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   if (deadlineIdReport[deadlineIdReport.size()-1]=='=')
     deadlineIdReport.resize(deadlineIdReport.size()-1);
   for (int i=0; i<this->classSections.size; i++)
-  { out << "+";
+  { if (this->classSections[i]=="")
+      continue;
+    out << "+";
     out << "'" << CGI::StringToURLString(this->classSections[i]) << "='";
     out << "+ encodeURIComponent(document.getElementById('"
     << deadlineIds[i] << "').value)+'&'";

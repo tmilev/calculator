@@ -226,6 +226,11 @@ bool GlobalVariables::UserDefaultHasAdminRights()
 { return this->flagLoggedIn && (this->userRole=="admin");
 }
 
+bool GlobalVariables::UserRequestRequiresLoadingRealExamData()
+{ return this->flagLoggedIn &&
+  (this->userCalculatorRequestType=="examForReal" || this->userCalculatorRequestType=="submitProblem");
+}
+
 std::string GlobalVariables::ToStringNavigation()
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringNavigation");
   std::stringstream out;
@@ -257,8 +262,10 @@ std::string GlobalVariables::ToStringNavigation()
     << this->ToStringCalcArgsNoNavigation() << " \">Calculator</a><br>";
   else
     out << "<b>Calculator</b><br>";
-  if (theGlobalVariables.userCalculatorRequestType!="exercises" && theGlobalVariables.userCalculatorRequestType!="examForReal" )
-    out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=exercises&" << this->ToStringCalcArgsNoNavigation()
+  if (theGlobalVariables.userCalculatorRequestType!="exercises" &&
+      theGlobalVariables.userCalculatorRequestType!="examForReal" )
+    out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=exercises&"
+    << this->ToStringCalcArgsNoNavigation()
     << "\">Exercises</a><hr>";
   else
     out << "<b>Exercises</b><hr>";

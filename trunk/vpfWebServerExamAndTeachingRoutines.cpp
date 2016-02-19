@@ -259,8 +259,8 @@ void DatabaseRoutines::StoreProblemInfo
     << CGI::StringToURLString(currentProblemStream.str()) << "&";
   }
 
-  stOutput << "Storing prob string: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(out.str())
-  << "<br>from:<br>";
+//  stOutput << "Storing prob string: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(out.str())
+//  << "<br>from:<br>";
   outputString=out.str();
 }
 
@@ -460,9 +460,9 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
   { std::string randString= theGlobalVariables.GetWebInput("randomSeed");
     if (randString!="")
     { std::stringstream randSeedStream(randString);
-      stOutput << "radSeedStream: " << randString;
+      //stOutput << "radSeedStream: " << randString;
       randSeedStream >> this->theProblemData.randomSeed;
-      stOutput << ", interpreted as: " << this->theProblemData.randomSeed;
+      //stOutput << ", interpreted as: " << this->theProblemData.randomSeed;
       this->flagRandomSeedGiven=true;
     }
   }
@@ -757,9 +757,9 @@ std::string WebWorker::GetSetProblemDatabaseInfoHtml()
 //    out << "<meta http-equiv=\"refresh\" content=\"0;\">";
   } else
     out << "<span style=\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
-  out << "<br>Debug message:<br>inputProblemInfo raw: " << inputProblemInfo << "<br>Processed: "
-  << CGI::URLKeyValuePairsToNormalRecursiveHtml(inputProblemInfo)
-  << "<br>inputProblemHome: " << inputProblemHome;
+//  out << "<br>Debug message:<br>inputProblemInfo raw: " << inputProblemInfo << "<br>Processed: "
+//  << CGI::URLKeyValuePairsToNormalRecursiveHtml(inputProblemInfo)
+//  << "<br>inputProblemHome: " << inputProblemHome;
   return out.str();
 #else
   return "Cannot modify problem weights (no database available)";
@@ -824,7 +824,7 @@ int WebWorker::ProcessSubmitProblem()
   }
   if (!theProblem.flagRandomSeedGiven && !theProblem.flagIsForReal)
     stOutput << "<b>Random seed not given.</b>";
-  stOutput << "<b>debug remove when done: Random seed: " << theProblem.theProblemData.randomSeed << "</b>";
+//  stOutput << "<b>debug remove when done: Random seed: " << theProblem.theProblemData.randomSeed << "</b>";
   theProblem.currentExamHomE=        CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
   theProblem.currentExamIntermediatE=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate"));
   if (theProblem.currentExamHomE=="")
@@ -906,7 +906,7 @@ int WebWorker::ProcessSubmitProblem()
   DatabaseRoutines theRoutines;
   theProblem.currentUser.username=theGlobalVariables.userDefault;
   if (theProblem.flagIsForReal)
-  { stOutput << "<hr>problem string: " << theProblem.currentUserDatabaseString << "<hr>";
+  { //stOutput << "<hr>problem string: " << theProblem.currentUserDatabaseString << "<hr>";
     if (!theProblem.currentUser.InterpretDatabaseProblemData(theProblem.currentUserDatabaseString, comments))
     { stOutput << "<b>Failed to load user information from database. Answer not recorded. "
       << "This should not happen. " << CalculatorHTML::BugsGenericMessage << "</b>";
@@ -1661,7 +1661,7 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
 */
   if (currentDeadline=="")
   { int indexInProblemList=this->hdProblemList.GetIndex(cleaneduplink);
-    out << " current deadline is empty. Index in prob list from hd: " << indexInProblemList;
+    //out << " current deadline is empty. Index in prob list from hd: " << indexInProblemList;
     if (indexInProblemList!=-1)
     { int indexHomeworkGroupInDatabase=this->databaseSpanList.GetIndex
       (this->hdHomeworkGroupCorrespondingToEachProblem[indexInProblemList]);
@@ -1675,13 +1675,9 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
     out << "Deadline: " << currentDeadline << ". ";
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return out.str();
-  std::string idSpanDeadlinePackage="deadline"+Crypto::CharsToBase64String(this->fileName);
-  out << "<a href=\"javascript:;\" onmusedown=\"document.getElementById('"
-  << idSpanDeadlinePackage << "').slideToggle('slow');\">Set deadline</a>";
-  out << "<span id=\"" << idSpanDeadlinePackage << "\" style=\"display:none\">";
-
-  out << "<table><tr><td> Deadline: </td>";
-  out << "<td><table><tr><th>Grp.</th><th>Deadline</th></tr>";
+  std::stringstream deadlineStream;
+  deadlineStream << "<table><tr><td> Deadline: </td>";
+  deadlineStream << "<td><table><tr><th>Grp.</th><th>Deadline</th></tr>";
   List<std::string> deadlineIds;
   deadlineIds.SetSize(this->classSections.size);
   for (int i=0; i<this->classSections.size; i++)
@@ -1693,42 +1689,43 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
       currentDeadlineId.resize(currentDeadlineId.size()-1);
     if (currentDeadlineId[currentDeadlineId.size()-1]=='=')
       currentDeadlineId.resize(currentDeadlineId.size()-1);
-    out << "<tr>";
-    out << "<td>" << this->classSections[i] << "</td>";
-    out << "<td> <input type=\"text\" id=\"" << currentDeadlineId << "\"> " ;
-    out << this->GetDatePickerStart(currentDeadlineId);
-    out << "</td>";
-    out << "</tr>";
+    deadlineStream << "<tr>";
+    deadlineStream << "<td>" << this->classSections[i] << "</td>";
+    deadlineStream << "<td> <input type=\"text\" id=\"" << currentDeadlineId << "\"> " ;
+    deadlineStream << this->GetDatePickerStart(currentDeadlineId);
+    deadlineStream << "</td>";
+    deadlineStream << "</tr>";
   }
-  out << "</table></td>";
-  out << "<td>\n";
+  deadlineStream << "</table></td>";
+  deadlineStream << "<td>\n";
   std::string deadlineIdReport="deadlineReport"+Crypto::CharsToBase64String(cleaneduplink);
   if (deadlineIdReport[deadlineIdReport.size()-1]=='=')
     deadlineIdReport.resize(deadlineIdReport.size()-1);
   if (deadlineIdReport[deadlineIdReport.size()-1]=='=')
     deadlineIdReport.resize(deadlineIdReport.size()-1);
-  out << "<button onclick=\"";
-  out << "submitStringAsMainInput('" << urledProblem
+  deadlineStream << "<button onclick=\"";
+  deadlineStream << "submitStringAsMainInput('" << urledProblem
   << "='+encodeURIComponent('deadlines='+encodeURIComponent(";
   bool isFirst=true;
   for (int i=0; i<this->classSections.size; i++)
   { if (this->classSections[i]=="")
       continue;
     if (!isFirst)
-      out << "+";
+      deadlineStream << "+";
     isFirst=false;
-    out << "'" << CGI::StringToURLString(this->classSections[i]) << "='";
-    out << "+ encodeURIComponent(document.getElementById('"
+    deadlineStream << "'" << CGI::StringToURLString(this->classSections[i]) << "='";
+    deadlineStream << "+ encodeURIComponent(document.getElementById('"
     << deadlineIds[i] << "').value)+'&'";
   }
-  out << ")), '" << deadlineIdReport << "', 'setProblemData' );"
+  deadlineStream << ")), '" << deadlineIdReport << "', 'setProblemData' );"
   << "\""
   << ">\n";
-  out << "  Set deadline(s)</button>";
-  out << "<span id=\"" << deadlineIdReport << "\"></span>";
-  out << "</td>";
-  out << "</tr></table>";
-  out << "</span>";
+  deadlineStream << "  Set deadline(s)</button>";
+  deadlineStream << "<span id=\"" << deadlineIdReport << "\"></span>";
+  deadlineStream << "</td>";
+  deadlineStream << "</tr></table>";
+
+  out << CGI::GetHtmlSpanHidableStartsHiddeN(deadlineStream.str());
   return out.str();
 }
 
@@ -1777,7 +1774,9 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   else if (this->flagIsExamHome)
     out << this->GetSubmitEmailsJavascript();
   if ((this->flagIsExamIntermediate || this->flagIsExamHome)&& theGlobalVariables.UserDefaultHasAdminRights())
+  { out << WebWorker::GetJavascriptHideHtml();
     out << this->GetDatePickerJavascriptInit();
+  }
 //  else
 //    out << " no date picker";
   if (!this->PrepareAndExecuteCommands(theInterpreter, comments))

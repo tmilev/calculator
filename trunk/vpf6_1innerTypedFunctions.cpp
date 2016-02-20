@@ -643,10 +643,13 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger(Calculator& theCo
   if(!input[2].IsSmallInteger(&thePower))
     return false;
   if (input[1].IsOfType<Matrix<Rational> >())
-  { Matrix<Rational> base;
-    input[1].GetValue<Matrix<Rational> >();
+  { Matrix<Rational> base=input[1].GetValue<Matrix<Rational> >();
     if (!base.IsSquare() || base.NumCols==0)
-      return output.MakeError("Exponentiating non-square matrices or matrices with zero rows is not allowed.", theCommands);
+    { std::stringstream errorStream;
+      errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
+      << "Your matrix, " << base.ToString() << " is not square. ";
+      return output.MakeError(errorStream.str(), theCommands);
+    }
     if (thePower<=0)
       if (base.GetDeterminant()==0 )
         return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);

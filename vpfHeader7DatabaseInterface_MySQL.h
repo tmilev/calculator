@@ -312,22 +312,31 @@ public:
   (const MySQLdata& key, const MySQLdata& keyValue, const MySQLdata& table,
    const MySQLdata& columnToSet, const MySQLdata& valueToSet,
    std::stringstream* failureComments)
-
    ;
-
+bool PrepareClassData
+(const std::string& classFileName, List<List<std::string> >& outputUserTable,
+ List<std::string>& outputLabelsUserTable,
+  std::stringstream& commentsOnFailure)
+  ;
+  std::string ToStringClassDetails
+(bool adminsOnly, List<List<std::string> >& userTable, List<std::string>& userLabels,
+ const std::string& classFileName,
+ HashedList<std::string, MathRoutines::hashString>& databaseSpanList,
+ List<std::string>& databaseProblemWeights
+ )
+  ;
   bool FetchTablE
 (List<List<std::string> >& output,
  List<std::string>& outputColumnLabels,
  bool& outputWasTruncated, int& actualNumRowsIfTruncated,
  const MySQLdata& inputTable, std::stringstream& comments)
   ;
-
   bool AddUsersFromEmailsAndCourseName
   (const std::string& emailList, const std::string& ExamHomeFile, const std::string& extraInfo,
    std::stringstream& comments)
    ;
   bool AddUsersFromEmails
-  (const std::string& emailList, const std::string& extraInfo, bool& outputSentAllEmails,
+  (bool doSendEmails, const std::string& emailList, const std::string& extraInfo, bool& outputSentAllEmails,
    std::stringstream& comments)
   ;
   bool SendActivationEmail(const std::string& emailList, std::stringstream& comments);

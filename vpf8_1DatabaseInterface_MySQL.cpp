@@ -1423,7 +1423,7 @@ bool DatabaseRoutines::InsertRow
 }
 
 bool DatabaseRoutines::AddUsersFromEmails
-  (const std::string& emailList, const std::string& extraInfo, bool& outputSentAllEmails,
+  (bool doSendEmails, const std::string& emailList, const std::string& extraInfo, bool& outputSentAllEmails,
    std::stringstream& comments)
 { MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000;
@@ -1471,8 +1471,10 @@ bool DatabaseRoutines::AddUsersFromEmails
   }
   if (!result)
     comments << "<br>Failed to create all users. ";
-  if (! this->SendActivationEmail(theEmails, false, comments))
-    outputSentAllEmails=false;
+  outputSentAllEmails=true;
+  if (doSendEmails)
+    if (! this->SendActivationEmail(theEmails, false, comments))
+      outputSentAllEmails=false;
   return result;
 }
 

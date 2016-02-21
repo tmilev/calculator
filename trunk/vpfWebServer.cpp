@@ -159,10 +159,39 @@ void WebServer::SSLServerSideHandShake()
     {
     case SSL_ERROR_NONE:
       logIO << logger::red << "No error reported, this shouldn't happen. " << logger::endL;
+      break;
     case SSL_ERROR_ZERO_RETURN:
       logIO << logger::red << "The TLS/SSL connection has been closed (possibly cleanly). " << logger::endL;
+      break;
+    case SSL_ERROR_WANT_READ:
+    case SSL_ERROR_WANT_WRITE:
+      logIO << logger::red << " During regular I/O: repeat needed (not implemented). " << logger::endL;
+      break;
+    case SSL_ERROR_WANT_CONNECT:
+    case SSL_ERROR_WANT_ACCEPT:
+      logIO << logger::red << " During handshake negotiations: repeat needed (not implemented). "
+      << logger::endL;
+      break;
+    case SSL_ERROR_WANT_X509_LOOKUP:
+      logIO << logger::red << " Application callback set by SSL_CTX_set_client_cert_cb(): "
+      << "repeat needed (not implemented). "
+      << logger::endL;
+      break;
+//    case SSL_ERROR_WANT_ASYNC:
+//      logIO << logger::red << "Asynchronous engine is still processing data. "
+//      << logger::endL;
+//      break;
+    case SSL_ERROR_SYSCALL:
+      logIO << logger::red << "Error: some I/O error occurred. "
+      << logger::endL;
+      break;
+    case SSL_ERROR_SSL:
+      logIO << logger::red << "A failure in the SSL library occurred. "
+      << logger::endL;
+      break;
     default:
       logIO << logger::red << "Unknown error. " << logger::endL;
+      break;
     }
     return;
   } else

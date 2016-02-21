@@ -152,6 +152,7 @@ public:
   int listeningSocketHttpSSL;
   int highestSocketNumber;
   bool flagTryToKillOlderProcesses;
+  bool flagSSLHandshakeSuccessful;
   List<std::string> PortsITryHttp;
   List<std::string> PortsITryHttpSSL;
   List<int> theListeningSockets;

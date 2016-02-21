@@ -151,7 +151,10 @@ void WebServer::SSLServerSideHandShake()
   theSSLdata.errorCode = SSL_accept (theSSLdata.ssl);
   if (theSSLdata.errorCode!=1)
   { logIO << logger::red << "SSL error code: " << SSL_get_error(theSSLdata.ssl, theSSLdata.errorCode);
-  }
+    this->flagSSLHandshakeSuccessful=false;
+    return;
+  } else
+    this->flagSSLHandshakeSuccessful=true;
 //  theLog << "Got to here 1.3" << logger::endL;
 //    CHK_SSL(err);
 //  theLog << "Got to here 2" << logger::endL;
@@ -222,14 +225,13 @@ bool WebWorker::ReceiveAllHttpSSL()
 //  theLog << this->parent->ToStringStatusActive() << ": received " << numBytesInBuffer << " bytes. " << logger::endL;
   this->ParseMessage();
 //    std::cout << "Got thus far 12" << std::endl;
-
-  theLog << "Content length computed to be: " << this->ContentLength << logger::endL;
+//  theLog << "Content length computed to be: " << this->ContentLength << logger::endL;
   if (this->requestType==WebWorker::requestTypes::requestPostCalculator)
     this->displayUserInput="POST " + this->mainArgumentRAW;
   else
     this->displayUserInput="GET " + this->mainAddresSRAW;
   if (this->ContentLength<=0)
-  { logIO << " exiting successfully" << logger::endL;
+  { //logIO << " exiting successfully" << logger::endL;
     return true;
   }
   if (this->mainArgumentRAW.size()==(unsigned) this->ContentLength)
@@ -2410,6 +2412,7 @@ WebServer::WebServer()
   this->listeningSocketHTTP=-1;
   this->listeningSocketHttpSSL=-1;
   this->highestSocketNumber=-1;
+  this->flagSSLHandshakeSuccessful=false;
 }
 
 WebWorker& WebServer::GetActiveWorker()
@@ -2903,6 +2906,12 @@ int WebServer::Run()
     if (this->GetActiveWorker().ProcessPID==0)
     { // this is the child (worker) process
       this->SSLServerSideHandShake();
+      if (theGlobalVariables.flagSSLisAvailable &&
+          theGlobalVariables.flagUsingSSLinCurrentConnection &&
+          !this->flagSSLHandshakeSuccessful)
+      { this->ReleaseEverything();
+        return -1;
+      }
 //      this->Release(theListeningSocket);//worker has no access to socket listener
       theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=
       this->ReturnActiveIndicatorAlthoughComputationIsNotDone;
@@ -2931,7 +2940,7 @@ int WebServer::Run()
         << "</body></html>";
         stOutput.Flush();
         this->GetActiveWorker().SendAllBytes();
-//        this->ReleaseEverything();
+        this->ReleaseEverything();
 //        this->SSLfreeEverythingShutdownSSL();
         return -1;
       }

@@ -82,6 +82,7 @@ void WebServer::initSSL()
   { ERR_print_errors_fp(stderr);
     crash << "openssl error: failed to create CTX object." << crash;
   }
+  //////////Safari web browser: no further user of foul language necessary
   if (!SSL_CTX_set_cipher_list(theSSLdata.ctx,
   "ALL:!ECDHE-ECDSA-AES256-SHA:!ECDHE-ECDSA-AES128-SHA:!ECDHE-ECDSA-RC4-SHA:!ECDHE-ECDSA-DES-CBC3-SHA"
   ))
@@ -89,6 +90,7 @@ void WebServer::initSSL()
     crash << "openssl error: failed to set cipher list." << crash;
   } else
     theLog << logger::orange << "Restricted ciphers to workaround Safari's bugs. " << logger::endL;
+  //////////////////////////////////////////////////////////////////////////
   if (SSL_CTX_use_certificate_file(theSSLdata.ctx, fileCertificate.c_str(), SSL_FILETYPE_PEM) <= 0)
   { ERR_print_errors_fp(stderr);
     exit(3);
@@ -102,7 +104,7 @@ void WebServer::initSSL()
     exit(5);
   }
 ////////Safari web browser: no further user of foul language necessary.
-  SSL_CTX_set_options(theSSLdata.ctx, SSL_OP_SAFARI_ECDHE_ECDSA_BUG);
+//  SSL_CTX_set_options(theSSLdata.ctx, SSL_OP_SAFARI_ECDHE_ECDSA_BUG);
 ////////
 #endif // MACRO_use_open_ssl
 }

@@ -341,6 +341,8 @@ std::string logger::openTagConsole()
       return "\e[1;35m";
     case logger::cyan:
       return "\e[1;36m";
+    case logger::orange:
+      return "\e[0;33m";
     default:
       return "";
   }
@@ -356,6 +358,8 @@ std::string logger::openTagHtml()
       return "<span style=\"color:blue\">";
     case logger::yellow:
       return "<span style=\"color:yellow\">";
+    case logger::orange:
+      return "<span style=\"color:orange\">";
     case logger::purple:
       return "<span style=\"color:purple\">";
     default:
@@ -380,6 +384,7 @@ logger& logger::operator << (const loggerSpecialSymbols& input)
     case logger::yellow:
     case logger::green:
     case logger::purple:
+    case logger::orange:
     case logger::cyan:
       this->currentColor=input;
       if (theGlobalVariables.flagUsingBuiltInWebServer)

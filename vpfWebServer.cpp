@@ -82,6 +82,13 @@ void WebServer::initSSL()
   { ERR_print_errors_fp(stderr);
     crash << "openssl error: failed to create CTX object." << crash;
   }
+  if (!SSL_CTX_set_cipher_list(theSSLdata.ctx,
+  "ALL:!ECDHE-ECDSA-AES256-SHA:!ECDHE-ECDSA-AES128-SHA:!ECDHE-ECDSA-RC4-SHA:!ECDHE-ECDSA-DES-CBC3-SHA"
+  ))
+  { ERR_print_errors_fp(stderr);
+    crash << "openssl error: failed to set cipher list." << crash;
+  } else
+    theLog << logger::orange << "Restricted ciphers to workaround Safari's bugs. " << logger::endL;
   if (SSL_CTX_use_certificate_file(theSSLdata.ctx, fileCertificate.c_str(), SSL_FILETYPE_PEM) <= 0)
   { ERR_print_errors_fp(stderr);
     exit(3);

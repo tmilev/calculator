@@ -94,6 +94,9 @@ void WebServer::initSSL()
   { fprintf(stderr,"Private key does not match the certificate public key\n");
     exit(5);
   }
+////////Safari web browser: no further user of foul language necessary.
+  SSL_CTX_set_options(theSSLdata.ctx, SSL_OP_SAFARI_ECDHE_ECDSA_BUG);
+////////
 #endif // MACRO_use_open_ssl
 }
 

@@ -149,9 +149,21 @@ void WebServer::SSLServerSideHandShake()
   SSL_set_fd (theSSLdata.ssl, this->GetActiveWorker().connectedSocketID);
 //  theLog << "Got to here 1.2" << logger::endL;
   theSSLdata.errorCode = SSL_accept (theSSLdata.ssl);
+  this->flagSSLHandshakeSuccessful=false;
   if (theSSLdata.errorCode!=1)
-  { logIO << logger::red << "SSL error code: " << SSL_get_error(theSSLdata.ssl, theSSLdata.errorCode);
-    this->flagSSLHandshakeSuccessful=false;
+  { if (theSSLdata.errorCode==0)
+      logIO << "Handshake not successful in a controlled manner. ";
+    else
+      logIO << "Handshake not successful with a fatal error. ";
+    switch(SSL_get_error(theSSLdata.ssl, theSSLdata.errorCode))
+    {
+    case SSL_ERROR_NONE:
+      logIO << logger::red << "No error reported, this shouldn't happen. " << logger::endL;
+    case SSL_ERROR_ZERO_RETURN:
+      logIO << logger::red << "The TLS/SSL connection has been closed (possibly cleanly). " << logger::endL;
+    default:
+      logIO << logger::red << "Unknown error. " << logger::endL;
+    }
     return;
   } else
     this->flagSSLHandshakeSuccessful=true;

@@ -216,7 +216,7 @@ class logger
   bool flagStopWritingToFile;
   logger(const std::string& logFileName);
   void CheckLogSize();
-  enum loggerSpecialSymbols{ endL, red, blue, yellow, green, purple, cyan, normalColor};
+  enum loggerSpecialSymbols{ endL, red, blue, yellow, green, purple, cyan, normalColor, orange};
   std::string closeTagConsole();
   std::string closeTagHtml();
   std::string openTagConsole();

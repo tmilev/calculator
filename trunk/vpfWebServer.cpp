@@ -83,13 +83,14 @@ void WebServer::initSSL()
     crash << "openssl error: failed to create CTX object." << crash;
   }
   //////////Safari web browser: no further user of foul language necessary
-  if (!SSL_CTX_set_cipher_list(theSSLdata.ctx,
+/*  if (!SSL_CTX_set_cipher_list(theSSLdata.ctx,
   "ALL:!ECDHE-ECDSA-AES256-SHA:!ECDHE-ECDSA-AES128-SHA:!ECDHE-ECDSA-RC4-SHA:!ECDHE-ECDSA-DES-CBC3-SHA"
   ))
   { ERR_print_errors_fp(stderr);
     crash << "openssl error: failed to set cipher list." << crash;
   } else
     theLog << logger::orange << "Restricted ciphers to workaround Safari's bugs. " << logger::endL;
+*/
   //////////////////////////////////////////////////////////////////////////
   if (SSL_CTX_use_certificate_file(theSSLdata.ctx, fileCertificate.c_str(), SSL_FILETYPE_PEM) <= 0)
   { ERR_print_errors_fp(stderr);
@@ -130,8 +131,7 @@ void WebServer::SSLfreeEverythingShutdownSSL()
 }
 
 void WebServer::SSLServerSideHandShake()
-{
-  if (!theGlobalVariables.flagSSLisAvailable)
+{ if (!theGlobalVariables.flagSSLisAvailable)
     return;
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
     return;
@@ -149,6 +149,9 @@ void WebServer::SSLServerSideHandShake()
   SSL_set_fd (theSSLdata.ssl, this->GetActiveWorker().connectedSocketID);
 //  theLog << "Got to here 1.2" << logger::endL;
   theSSLdata.errorCode = SSL_accept (theSSLdata.ssl);
+  if (theSSLdata.errorCode!=1)
+  { logIO << logger::red << "SSL error code: " << SSL_get_error(theSSLdata.ssl, theSSLdata.errorCode);
+  }
 //  theLog << "Got to here 1.3" << logger::endL;
 //    CHK_SSL(err);
 //  theLog << "Got to here 2" << logger::endL;
@@ -397,7 +400,7 @@ void WebWorker::SendAllBytesHttpSSL()
 }
 
 bool ProgressReportWebServer::flagServerExists=true;
-const int WebServer::maxNumPendingConnections=10;
+const int WebServer::maxNumPendingConnections=200;
 
 ProgressReportWebServer::ProgressReportWebServer(const std::string& inputStatus)
 { this->flagDeallocated=false;

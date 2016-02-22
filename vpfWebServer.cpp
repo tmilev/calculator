@@ -903,6 +903,7 @@ void WebWorker::OutputStandardResult()
   for (int i=0; i<theParser.theAtoms.size; i++)
     if (theParser.theAtoms[i].size()>2)
       stOutput << "  theAutocompleteDictionary.push(\"" << theParser.theAtoms[i] << "\");\n";
+
   stOutput << "</script>\n";
   stOutput << "</body></html>";
   stOutput << "<!--";

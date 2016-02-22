@@ -1703,19 +1703,6 @@ bool Calculator::outerLessThan(Calculator& theCommands, const Expression& input,
   return output.AssignValue(0, theCommands);
 }
 
-bool Calculator::outerEqualEqual(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElements(3))
-    return false;
-  const Expression& left=input[1];
-  const Expression& right=input[2];
-  if (left.HasBoundVariables() || right.HasBoundVariables())
-    return false;
-  if (left==right)
-    return output.AssignValue(1, theCommands);
-  else
-    return output.AssignValue(0, theCommands);
-}
-
 bool Calculator::outerMinus(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!(input.StartsWith(theCommands.opMinus(), 3) || input.StartsWith(theCommands.opMinus(), 2)) )
     return false;
@@ -1750,6 +1737,29 @@ void Expression::operator+=(const Expression& other)
     crash << "Error: adding expressions with different owners. " << crash;
   Expression resultE;
   resultE.MakeXOX(*this->owner, this->owner->opPlus(), *this, other);
+  *this=resultE;
+}
+
+void Expression::operator-=(const Expression& other)
+{ MacroRegisterFunctionWithName("Expression::operator+=");
+  if (this->owner==0 && other.owner==0)
+  { this->theData+=other.theData;
+    if (this->theData!=1 && this->theData!=0)
+      crash << "Attempting to subtract non-initialized expressions" << crash;
+    return;
+  }
+  if (other.owner==0)
+  { Expression otherCopy;
+    otherCopy.AssignValue(other.theData, *this->owner);
+    (*this)+=otherCopy;
+    return;
+  }
+  if (this->owner==0)
+    this->AssignValue(this->theData, *other.owner);
+  if (this->owner!=other.owner)
+    crash << "Error: adding expressions with different owners. " << crash;
+  Expression resultE;
+  resultE.MakeXOX(*this->owner, this->owner->opMinus(), *this, other);
   *this=resultE;
 }
 

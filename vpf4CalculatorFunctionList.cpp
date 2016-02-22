@@ -2613,11 +2613,11 @@ void Calculator::initPredefinedStandardOperations()
    "x_{{i}}*x_{{j}}*{{a}}:if i>j=x_j*x_i*a;\n x_{{i}}*x_{{j}}:if i>j=x_j*x_i; (x_2*x_1- x_1*x_3)(x_1x_5+x_5x_4x_2); x_5x_4x_3x_2x_1", true);
 
   this->AddOperationOuterHandler
-  ("==", this->outerEqualEqual, "",
+  ("==", CalculatorFunctionsGeneral::outerEqualEqual, "",
    "If either the left or the right argument contains a bound variable does nothing. \
     Else evaluates to 1 if the left argument equals the right argument.",
-   "x==y;\nx==1;\nIsEqualToX{} {{a}}=a==x;\nIsEqualToX{}y;\nIsEqualToX{}x;\
-   \nIsEqualToX{}1;\nx=1;\nIsEqualToX{}1", true);
+   "%NumberColors\n x==y;\nx==1;\nIsEqualToX{} {{a}}=a==x;\nIsEqualToX{}y;\nIsEqualToX{}x;\
+   \nIsEqualToX{}1;\nx=1;\nIsEqualToX{}1; z= \\sqrt{}1; z==1", true);
   this->AddOperationOuterHandler
   ("last", CalculatorFunctionsGeneral::innerLastElement, "",
    "Returns the last element of the expression, provided the argument has no bound variables. If the expression has bound variables does nothing.",

@@ -1660,6 +1660,24 @@ bool CalculatorFunctionsGeneral::outerDivideByNumber
   return true;
 }
 
+bool CalculatorFunctionsGeneral::outerEqualEqual(Calculator& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListNElements(3))
+    return false;
+  const Expression& left=input[1];
+  const Expression& right=input[2];
+  if (left.HasBoundVariables() || right.HasBoundVariables())
+    return false;
+  Expression differenceE = left;
+  differenceE-=right;
+  Expression differenceEsimplified;
+  if (!theCommands.EvaluateExpression(theCommands, differenceE, differenceEsimplified))
+    return false;
+  if (differenceEsimplified.IsEqualToZero())
+    return output.AssignValue(1, theCommands);
+  else
+    return output.AssignValue(0, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::outerAssociateAdivBdivCpowerD(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerAssociateAdivBdivCpowerD");
   if (!input.StartsWith(theCommands.opDivide(), 3))

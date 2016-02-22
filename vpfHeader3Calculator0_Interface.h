@@ -439,6 +439,7 @@ bool EvaluatesToDoubleUnderSubstitutions
   }
   void operator/=(const Expression& other);
   void operator+=(const Expression& other);
+  void operator-=(const Expression& other);
   void operator*=(const Expression& other);
 //  Rational GetConstantTerm() const;
   bool operator==(int other)const;
@@ -1475,7 +1476,6 @@ public:
   static bool outerTensor(Calculator& theCommands, const Expression& input, Expression& output);
   static bool StandardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerMinus(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool outerEqualEqual(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerGreaterThan(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerLessThan(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerCombineFractions(Calculator& theCommands, const Expression& input, Expression& output);

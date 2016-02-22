@@ -124,6 +124,8 @@ public:
   static bool outerDivCancellations(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerAssociateDivisionDivision(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerAssociateAdivBdivCpowerD(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool outerEqualEqual(Calculator& theCommands, const Expression& input, Expression& output);
+
 
   static bool outerCommuteAtimesBifUnivariate(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerCommuteAtimesBtimesCifUnivariate(Calculator& theCommands, const Expression& input, Expression& output);

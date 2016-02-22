@@ -222,8 +222,13 @@ void GlobalVariables::SetWebInput(const std::string& inputName, const std::strin
   this->webFormArguments[theIndex]=inputValue;
 }
 
+bool GlobalVariables::UserSecureNonAdminOperationsAllowed()
+{ return this->flagLoggedIn &&
+  (this->flagUsingSSLinCurrentConnection || this->flagIgnoreSecurityToWorkaroundSafarisBugs);
+}
+
 bool GlobalVariables::UserDefaultHasAdminRights()
-{ return this->flagLoggedIn && (this->userRole=="admin");
+{ return this->flagLoggedIn && (this->userRole=="admin") && !this->flagIgnoreSecurityToWorkaroundSafarisBugs;
 }
 
 bool GlobalVariables::UserRequestRequiresLoadingRealExamData()
@@ -242,8 +247,11 @@ std::string GlobalVariables::ToStringNavigation()
     out << ": " << this->userDefault << "<br>";
     out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=logout&"
     << this->ToStringCalcArgsNoNavigation() << " \">Log out</a><br>";
-    out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=changePasswordPage&"
-    << this->ToStringCalcArgsNoNavigation() << " \">Change password</a><hr>";
+    if (theGlobalVariables.flagUsingSSLinCurrentConnection)
+      out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=changePasswordPage&"
+      << this->ToStringCalcArgsNoNavigation() << " \">Change password</a><hr>";
+    else
+      out << "<b>Password change: <br>secure connection<br>only</b><br>";
   }
   if (this->UserDefaultHasAdminRights())
   { if (theGlobalVariables.userCalculatorRequestType!="status")

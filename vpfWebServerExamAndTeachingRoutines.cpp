@@ -436,7 +436,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
     //stOutput << "loading extra info ... " << this->currentExamHomE;
     if(!this->currentUser.FetchOneColumn("extraInfo", this->currentUser.extraInfoUnsafe, theRoutines, &comments))
     { comments << "Failed to load the section/group of the current user. ";
-      return false;
+//      return false;
     }
     if (!theRoutines.ReadProblemDatabaseInfo
         (this->currentExamHomE, this->currentProblemCollectionDatabaseString, comments))

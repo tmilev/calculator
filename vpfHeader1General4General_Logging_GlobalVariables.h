@@ -76,6 +76,7 @@ public:
 //webserver flags
   bool flagLoggedIn;
   bool flagUsingSSLinCurrentConnection;
+  bool flagIgnoreSecurityToWorkaroundSafarisBugs;
   bool flagSSLisAvailable;
 
   bool flagAllowUseOfThreadsAndMutexes;
@@ -182,7 +183,7 @@ public:
   void initOutputReportAndCrashFileNames
 (const std::string& inputUserStringRAW,
  const std::string& inputUserStringCivilized);
-
+  bool UserSecureNonAdminOperationsAllowed();
 //  void operator=(const GlobalVariables& other)
 //  { this->IndicatorStringOutputFunction=other.IndicatorStringOutputFunction;
 //    this->theDrawingVariables=other.theDrawingVariables;

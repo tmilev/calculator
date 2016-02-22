@@ -95,7 +95,7 @@ public:
   void OutputResultAfterTimeout();
   static void OutputCrashAfterTimeout();
   void OutputShowIndicatorOnTimeout();
-
+  static std::string GetInsecureConnectionAngryMessage();
   void QueueBytesForSending
   (const List<char>& bytesToSend, bool MustSendAll=false)
   ;

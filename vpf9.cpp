@@ -120,6 +120,7 @@ GlobalVariables::GlobalVariables()
   this->flagUsingSSLinCurrentConnection=false;
   this->flagSSLisAvailable=false;
   this->MaxTimeNoPingBeforeChildIsPresumedDead=300;
+  this->flagIgnoreSecurityToWorkaroundSafarisBugs=false;
   //  this->flagLogInterProcessCommunication=true;
   //  stOutput << "Global variables created!";
 }

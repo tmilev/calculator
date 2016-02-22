@@ -40,13 +40,12 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
   if (theUser.Authenticate(theRoutines, comments))
   { inputOutputAuthenticationToken=theUser.actualAuthenticationToken.value;
     outputUserRole=theUser.userRole;
-//    stOutput << " SUCCESS. ";
-//    stOutput << "<br>The actual authenticationToken is now: " << theUser.actualAuthenticationToken;
+//    *comments << "SUCCESS <br>DEBUG The actual authenticationToken is now: " << theUser.actualAuthenticationToken.value;
     return true;
   }
   if (inputOutputAuthenticationToken!="" && comments!=0)
   { *comments << "<b> Authentication with token " << inputOutputAuthenticationToken << " failed. </b>";
-    //*comments << "the actual token is: " << theUser.actualAuthenticationTokeNUnsafe;
+//    *comments << "DEBUG the actual token is: " << theUser.actualAuthenticationToken.value;
   }
   std::string activationTokenUnsafe;
   if (theGlobalVariables.userCalculatorRequestType=="changePassword")
@@ -353,7 +352,6 @@ bool DatabaseRoutines::RowExists
   DatabaseQuery theQuery(*this, theQueryStream.str(), comments);
   return theQuery.flagQuerySucceeded && theQuery.flagQueryReturnedResult;
 }
-
 
 bool DatabaseRoutines::ColumnExists
 (const std::string& columnNameUnsafe, const std::string& tableNameUnsafe, std::stringstream& commentsStream)
@@ -737,13 +735,17 @@ bool UserCalculator::AuthenticateWithToken(DatabaseRoutines& theRoutines, std::s
 bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::Authenticate");
   this->currentTable="users";
-
   if (!this->Iexist(theRoutines))
   { //if (this->username!="")
     //  stOutput << "user: '" << this->username << "' does not exist";
     if (commentsOnFailure!=0)
       *commentsOnFailure << "User " << this->username.value << " does not exist. ";
     return false;
+  } else
+  { std::string userNameAsStoredInDB;
+    if (!this->FetchOneColumn("username", userNameAsStoredInDB, theRoutines, commentsOnFailure))
+      return false;
+    this->username=userNameAsStoredInDB;
   }
   if (this->AuthenticateWithToken(theRoutines, commentsOnFailure))
   { if(!this->FetchOneColumn("userRole", this->userRole, theRoutines, commentsOnFailure))
@@ -773,7 +775,10 @@ bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstre
 
 bool UserCalculator::AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::Authenticate");
-  this->ComputeShaonedSaltedPassword(false);
+  if (!theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
+    this->ComputeShaonedSaltedPassword(false);
+  else
+    this->enteredShaonedSaltedPassword=this->enteredPassword;
 //  stOutput <<  "computed shaoned saltes pass from pass "
 //  << this->enteredPassword << " to get: " << this->enteredShaonedSaltedPassword;
   bool result=this->FetchOneColumn("password", this->actualShaonedSaltedPassword, theRoutines, commentsOnFailure);
@@ -782,7 +787,7 @@ bool UserCalculator::AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutin
     //stOutput << "pass doesnt match!";
     return false;
   }
-//  stOutput << "this->enteredShaonedSaltedPassword: " << this->enteredShaonedSaltedPassword
+//  *commentsOnFailure << "DEBUG INFO: this->enteredShaonedSaltedPassword: " << this->enteredShaonedSaltedPassword
 //  << ", this->actualShaonedSaltedPassword: " << this->actualShaonedSaltedPassword;
   return this->enteredShaonedSaltedPassword==this->actualShaonedSaltedPassword;
 }
@@ -1030,7 +1035,8 @@ bool DatabaseRoutines::startMySQLDatabaseIfNotAlreadyStarted(std::stringstream* 
 bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::startMySQLDatabase");
   if (theGlobalVariables.flagUsingBuiltInWebServer)
-    if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
+    if (!theGlobalVariables.flagUsingSSLinCurrentConnection &&
+        !theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
     { if (commentsOnFailure!=0)
         *commentsOnFailure << "Database operations forbidden for connections not carried over ssl. ";
       return false;

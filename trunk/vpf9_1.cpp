@@ -245,8 +245,11 @@ std::string GlobalVariables::ToStringNavigation()
     if (theGlobalVariables.UserDefaultHasAdminRights())
       out << " <b>(admin)</b>";
     out << ": " << this->userDefault << "<br>";
-    out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=logout&"
-    << this->ToStringCalcArgsNoNavigation() << " \">Log out</a><br>";
+    out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=logout&";
+//    if (theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs &&
+//        !theGlobalVariables.flagUsingSSLinCurrentConnection)
+//      out << "ignoreSecurity=true&";
+    out << this->ToStringCalcArgsNoNavigation() << " \">Log out</a><br>";
     if (theGlobalVariables.flagUsingSSLinCurrentConnection)
       out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=changePasswordPage&"
       << this->ToStringCalcArgsNoNavigation() << " \">Change password</a><hr>";

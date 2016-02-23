@@ -1372,8 +1372,8 @@ std::string DatabaseRoutines::ToStringClassDetails
          userTable[i][indexUser])
         << "\"> (Re)activate account and change password</a>"
         << "</td>";
-      else
-        tableStream << "<td>Activation token: " << currentUser.activationToken.value << "</td>";
+//      else
+//        tableStream << "<td>Activation token: " << currentUser.activationToken.value << "</td>";
     } else if (currentUser.activationToken=="error")
       tableStream << "<td>error</td><td></td>";
     else

@@ -3,6 +3,35 @@
 #include "vpfHeader7DatabaseInterface_MySQL.h"
 ProjectInformationInstance ProjectInfoVpf8_1MySQLcpp(__FILE__, "MySQL interface. ");
 
+#ifdef MACRO_use_MySQL
+std::string ToStringSuggestionsReasonsForFailure
+(const std::string& inputUsernameUnsafe, DatabaseRoutines& theRoutines, UserCalculator& theUser)
+{ MacroRegisterFunctionWithName("ToStringSuggestionsReasonsForFailure");
+  std::stringstream out;
+  bool userFound=false;
+  if (theUser.Iexist(theRoutines))
+    userFound=true;
+  else if (theUser.username.value.find('@')==std::string::npos)
+    { theUser.username.value+="@umb.edu";
+      if (theUser.Iexist(theRoutines))
+        userFound=true;
+    }
+  if (userFound)
+  { std::string recommendedNewName;
+    if (!theUser.FetchOneColumn("username", recommendedNewName, theRoutines, &out))
+      return out.str();
+    theUser.username.value=recommendedNewName;
+  }
+  if (theUser.username.value!=inputUsernameUnsafe)
+  { out << "<br>Username is case sensitive and consists of the full email address: perhaps you meant: <br>"
+    << theUser.username.value << "<br>";
+    //out << "<hr>" << Crasher::GetStackTraceEtcErrorMessage() << "<hr>";
+  }
+  return out.str();
+}
+#endif // MACRO_use_MySQL
+
+
 bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
 (const std::string& inputUsernameUnsafe, const std::string& inputPassword,
  std::string& inputOutputAuthenticationToken, std::string& outputUserRole, std::stringstream* comments)
@@ -71,6 +100,8 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     }
     return true;
   }
+  if (comments!=0)
+    *comments << ToStringSuggestionsReasonsForFailure(inputUsernameUnsafe, theRoutines, theUser);
   return false;
 #else
   return true;
@@ -1274,11 +1305,10 @@ bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, b
     theReport.Report(reportStream.str());
     currentUser.username=theEmails[i];
     currentUser.email=theEmails[i];
-    currentUser.ComputeActivationToken();
-    if (!currentUser.SetColumnEntry("activationToken", currentUser.activationToken.value, *this, &comments))
-    { comments << "Setting activation token failed.";
-      emailActivationLogFile << "Setting activation token failed, terminating.";
-      return false;
+    if (currentUser.activationToken=="" || currentUser.activationToken=="error")
+    { comments << "<span style=\"color:red\">Failed to get an activation token for user: "
+      << currentUser.username.value << "</span>";
+      continue;
     }
     std::stringstream localComments;
     if (!currentUser.SendActivationEmail(*this, localComments))
@@ -1465,6 +1495,12 @@ bool DatabaseRoutines::AddUsersFromEmails
       if (!currentUser.FetchOneUserRow(*this, comments))
         result=false;
     currentUser.SetColumnEntry("userRole", userRole, *this, &comments);
+    currentUser.ComputeActivationToken();
+    if (!currentUser.SetColumnEntry("activationToken", currentUser.activationToken.value, *this, &comments))
+    { comments << "Setting activation token failed.";
+      result=false;
+      currentUser.activationToken="";
+    }
   }
   currentUser.currentTable=currentFileUsersTableName;
   for (int i=0; i<theEmails.size; i++)
@@ -1505,6 +1541,7 @@ bool UserCalculator::GetActivationAbsoluteAddress
   return this->GetActivationAddress
   (output, theGlobalVariables.hopefullyPermanent_HTTPS_WebAdressOfServerExecutable, theRoutines, comments);
 }
+
 bool UserCalculator::GetActivationAddress
   (std::string& output, const std::string& calculatorBase, DatabaseRoutines& theRoutines,
    std::stringstream& comments)

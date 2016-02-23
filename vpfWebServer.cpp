@@ -627,7 +627,7 @@ std::string WebWorker::ToStringCalculatorArgumentsHumanReadable()
 
 bool WebWorker::ProcessRawArguments
 (const std::string& urlEncodedInputString, std::stringstream& argumentProcessingFailureComments, int recursionDepth)
-{ MacroRegisterFunctionWithName("WebServer::ProcessRawArguments");
+{ MacroRegisterFunctionWithName("WebWorker::ProcessRawArguments");
   if (recursionDepth>1)
   { argumentProcessingFailureComments << "Error: input string encoded too many times";
     return false;
@@ -659,7 +659,7 @@ bool WebWorker::ProcessRawArguments
   { password=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("password"));
     inputStrings[inputStringNames.GetIndex("password")]="********************************************";
   }
-  if (inputStringNames.Contains("textInput") &&! inputStringNames.Contains("mainInput"))
+  if (inputStringNames.Contains("textInput") && !inputStringNames.Contains("mainInput"))
   { argumentProcessingFailureComments << "Received calculator link in an old format, interpreting 'textInput' as 'mainInput'";
     inputStringNames.SetObjectAtIndex(inputStringNames.GetIndex("textInput"), "mainInput");
   }
@@ -1702,7 +1702,7 @@ int WebWorker::ProcessUnknown()
 }
 
 int WebWorker::ProcessCalculator()
-{ MacroRegisterFunctionWithName("WebServer::ProcessCalculator");
+{ MacroRegisterFunctionWithName("WebWorker::ProcessCalculator");
   ProgressReportWebServer theReport;
   std::stringstream argumentProcessingFailureComments;
   if (!this->ProcessRawArguments(theParser.inputStringRawestOfTheRaw, argumentProcessingFailureComments))
@@ -1735,7 +1735,7 @@ int WebWorker::ProcessCalculator()
 //  if (theGlobalVariables.flagLoggedIn)
 //    stOutput << "LOGGED in canyabelieveit?";
 //  stOutput << "<br>got to this point, requesttype: " << theGlobalVariables.userCalculatorRequestType;
-  if (theGlobalVariables.GetWebInput("error")!="")
+  if (theGlobalVariables.GetWebInput("error")!="" && argumentProcessingFailureComments.str()=="")
     stOutput << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("error"));
   if (theGlobalVariables.userCalculatorRequestType=="pause")
     return this->ProcessPauseWorker();
@@ -1757,7 +1757,7 @@ int WebWorker::ProcessCalculator()
   if ((theGlobalVariables.flagUsingSSLinCurrentConnection && !theGlobalVariables.flagLoggedIn)||
       theGlobalVariables.userCalculatorRequestType=="login")
     return this->ProcessLoginPage();
-  if (theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagLoggedIn &&
+  if (theGlobalVariables.UserSecureNonAdminOperationsAllowed() &&
       theGlobalVariables.userCalculatorRequestType=="logout")
     return this->ProcessLogout();
   if (( theGlobalVariables.userCalculatorRequestType=="addEmails"||
@@ -2306,7 +2306,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex, bool 
 }
 
 int WebWorker::ServeClient()
-{ MacroRegisterFunctionWithName("WebServer::ServeClient");
+{ MacroRegisterFunctionWithName("WebWorker::ServeClient");
   ProgressReportWebServer theReport;
   theReport.SetStatus("All bytes from client received, processing. Worker process in use ...");
   theGlobalVariables.flagComputationStarted=true;
@@ -2332,7 +2332,7 @@ int WebWorker::ServeClient()
 }
 
 void WebWorker::ReleaseKeepInUseFlag()
-{ MacroRegisterFunctionWithName("WebServer::ReleaseMyPipe");
+{ MacroRegisterFunctionWithName("WebWorker::ReleaseMyPipe");
   this->pipeWorkerToServerTimerPing.Release();
   this->pipeWorkerToServerControls.Release();
   this->pipeServerToWorkerRequestIndicator.Release();
@@ -2352,7 +2352,7 @@ void WebWorker::Release()
 }
 
 void WebWorker::OutputShowIndicatorOnTimeout()
-{ MacroRegisterFunctionWithName("WebServer::OutputShowIndicatorOnTimeout");
+{ MacroRegisterFunctionWithName("WebWorker::OutputShowIndicatorOnTimeout");
   this->PauseIndicatorPipeInUse.RequestPausePauseIfLocked();
   theGlobalVariables.flagOutputTimedOut=true;
   theGlobalVariables.flagTimedOutComputationIsDone=false;

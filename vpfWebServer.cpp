@@ -148,7 +148,7 @@ void WebServer::SSLServerSideHandShake()
 //  theLog << "Got to here 1.1" << logger::endL;
   SSL_set_fd (theSSLdata.ssl, this->GetActiveWorker().connectedSocketID);
 //  theLog << "Got to here 1.2" << logger::endL;
-  int maxNumHandshakeTries=10;
+  int maxNumHandshakeTries=1;
   for (int i=0; i<maxNumHandshakeTries; i++)
   { theSSLdata.errorCode = SSL_accept (theSSLdata.ssl);
     this->flagSSLHandshakeSuccessful=false;

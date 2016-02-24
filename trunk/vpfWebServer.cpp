@@ -148,54 +148,61 @@ void WebServer::SSLServerSideHandShake()
 //  theLog << "Got to here 1.1" << logger::endL;
   SSL_set_fd (theSSLdata.ssl, this->GetActiveWorker().connectedSocketID);
 //  theLog << "Got to here 1.2" << logger::endL;
-  theSSLdata.errorCode = SSL_accept (theSSLdata.ssl);
-  this->flagSSLHandshakeSuccessful=false;
-  if (theSSLdata.errorCode!=1)
-  { if (theSSLdata.errorCode==0)
-      logIO << "Handshake not successful in a controlled manner. ";
-    else
-      logIO << "Handshake not successful with a fatal error. ";
-    switch(SSL_get_error(theSSLdata.ssl, theSSLdata.errorCode))
-    {
-    case SSL_ERROR_NONE:
-      logIO << logger::red << "No error reported, this shouldn't happen. " << logger::endL;
-      break;
-    case SSL_ERROR_ZERO_RETURN:
-      logIO << logger::red << "The TLS/SSL connection has been closed (possibly cleanly). " << logger::endL;
-      break;
-    case SSL_ERROR_WANT_READ:
-    case SSL_ERROR_WANT_WRITE:
-      logIO << logger::red << " During regular I/O: repeat needed (not implemented). " << logger::endL;
-      break;
-    case SSL_ERROR_WANT_CONNECT:
-    case SSL_ERROR_WANT_ACCEPT:
-      logIO << logger::red << " During handshake negotiations: repeat needed (not implemented). "
-      << logger::endL;
-      break;
-    case SSL_ERROR_WANT_X509_LOOKUP:
-      logIO << logger::red << " Application callback set by SSL_CTX_set_client_cert_cb(): "
-      << "repeat needed (not implemented). "
-      << logger::endL;
-      break;
-//    case SSL_ERROR_WANT_ASYNC:
-//      logIO << logger::red << "Asynchronous engine is still processing data. "
-//      << logger::endL;
-//      break;
-    case SSL_ERROR_SYSCALL:
-      logIO << logger::red << "Error: some I/O error occurred. "
-      << logger::endL;
-      break;
-    case SSL_ERROR_SSL:
-      logIO << logger::red << "A failure in the SSL library occurred. "
-      << logger::endL;
-      break;
-    default:
-      logIO << logger::red << "Unknown error. " << logger::endL;
+  int maxNumHandshakeTries=10;
+  for (int i=0; i<maxNumHandshakeTries; i++)
+  { theSSLdata.errorCode = SSL_accept (theSSLdata.ssl);
+    this->flagSSLHandshakeSuccessful=false;
+    if (theSSLdata.errorCode!=1)
+    { if (theSSLdata.errorCode==0)
+        logIO << "Handshake not successful in a controlled manner. ";
+      else
+        logIO << "Handshake not successful with a fatal error. ";
+      logIO << "Attempt " << i+1 << " out of " << maxNumHandshakeTries << " failed. ";
+      switch(SSL_get_error(theSSLdata.ssl, theSSLdata.errorCode))
+      {
+      case SSL_ERROR_NONE:
+        logIO << logger::red << "No error reported, this shouldn't happen. " << logger::endL;
+        break;
+      case SSL_ERROR_ZERO_RETURN:
+        logIO << logger::red << "The TLS/SSL connection has been closed (possibly cleanly). " << logger::endL;
+        break;
+      case SSL_ERROR_WANT_READ:
+      case SSL_ERROR_WANT_WRITE:
+        logIO << logger::red << " During regular I/O: repeat needed (not implemented). " << logger::endL;
+        break;
+      case SSL_ERROR_WANT_CONNECT:
+      case SSL_ERROR_WANT_ACCEPT:
+        logIO << logger::red << " During handshake negotiations: repeat needed (not implemented). "
+        << logger::endL;
+        break;
+      case SSL_ERROR_WANT_X509_LOOKUP:
+        logIO << logger::red << " Application callback set by SSL_CTX_set_client_cert_cb(): "
+        << "repeat needed (not implemented). "
+        << logger::endL;
+        break;
+  //    case SSL_ERROR_WANT_ASYNC:
+  //      logIO << logger::red << "Asynchronous engine is still processing data. "
+  //      << logger::endL;
+  //      break;
+      case SSL_ERROR_SYSCALL:
+        logIO << logger::red << "Error: some I/O error occurred. "
+        << logger::endL;
+        break;
+      case SSL_ERROR_SSL:
+        logIO << logger::red << "A failure in the SSL library occurred. "
+        << logger::endL;
+        break;
+      default:
+        logIO << logger::red << "Unknown error. " << logger::endL;
+        break;
+      }
+      logIO << "Retrying connection in 0.5 seconds...";
+      theGlobalVariables.FallAsleep(500000);
+    } else
+    { this->flagSSLHandshakeSuccessful=true;
       break;
     }
-    return;
-  } else
-    this->flagSSLHandshakeSuccessful=true;
+  }
 //  theLog << "Got to here 1.3" << logger::endL;
 //    CHK_SSL(err);
 //  theLog << "Got to here 2" << logger::endL;
@@ -3006,11 +3013,24 @@ int WebServer::Run()
       logIO << logger::red << "FAILED to spawn a child process. " << logger::endL;
     if (this->GetActiveWorker().ProcessPID==0)
     { // this is the child (worker) process
+/*      int val=fcntl(newConnectedSocket, F_GETFL, 0);
+      if ( val < 0)
+        logIO << "fcntl failed!!!!!" << logger::endL;
+      else
+      { if (!(val & O_NONBLOCK))
+          logIO << "socket blocking" << logger::endL;
+        else
+          logIO << "socket NON-blocking" << logger::endL;
+      }
+      */
       this->SSLServerSideHandShake();
       if (theGlobalVariables.flagSSLisAvailable &&
           theGlobalVariables.flagUsingSSLinCurrentConnection &&
           !this->flagSSLHandshakeSuccessful)
-      { this->ReleaseEverything();
+      { theGlobalVariables.flagUsingSSLinCurrentConnection=false;
+        stOutput << "HTTP/1.1 400 SSL connection failed\r\n<html><meta http-equiv=\"refresh\" content=\"3\">"
+        << "<body>Cryptography error, retrying to connect in 3 seconds.</body></html>";
+        this->ReleaseEverything();
         return -1;
       }
 //      this->Release(theListeningSocket);//worker has no access to socket listener

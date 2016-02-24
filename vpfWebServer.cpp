@@ -149,6 +149,7 @@ void WebServer::SSLServerSideHandShake()
   SSL_set_fd (theSSLdata.ssl, this->GetActiveWorker().connectedSocketID);
 //  theLog << "Got to here 1.2" << logger::endL;
   int maxNumHandshakeTries=1;
+//  int theError=-1;
   for (int i=0; i<maxNumHandshakeTries; i++)
   { theSSLdata.errorCode = SSL_accept (theSSLdata.ssl);
     this->flagSSLHandshakeSuccessful=false;
@@ -162,9 +163,11 @@ void WebServer::SSLServerSideHandShake()
       {
       case SSL_ERROR_NONE:
         logIO << logger::red << "No error reported, this shouldn't happen. " << logger::endL;
+        maxNumHandshakeTries=1;
         break;
       case SSL_ERROR_ZERO_RETURN:
         logIO << logger::red << "The TLS/SSL connection has been closed (possibly cleanly). " << logger::endL;
+        maxNumHandshakeTries=1;
         break;
       case SSL_ERROR_WANT_READ:
       case SSL_ERROR_WANT_WRITE:
@@ -179,6 +182,7 @@ void WebServer::SSLServerSideHandShake()
         logIO << logger::red << " Application callback set by SSL_CTX_set_client_cert_cb(): "
         << "repeat needed (not implemented). "
         << logger::endL;
+        maxNumHandshakeTries=1;
         break;
   //    case SSL_ERROR_WANT_ASYNC:
   //      logIO << logger::red << "Asynchronous engine is still processing data. "
@@ -187,13 +191,18 @@ void WebServer::SSLServerSideHandShake()
       case SSL_ERROR_SYSCALL:
         logIO << logger::red << "Error: some I/O error occurred. "
         << logger::endL;
+        maxNumHandshakeTries=1;
         break;
       case SSL_ERROR_SSL:
         logIO << logger::red << "A failure in the SSL library occurred. "
         << logger::endL;
+//        theError=ERR_get_error(3ssl);
+//        if (theError!=SSL_ERROR_WANT_READ && theError!=SSL_ERROR_WANT_WRITE)
+//          maxNumHandshakeTries=1;
         break;
       default:
         logIO << logger::red << "Unknown error. " << logger::endL;
+        maxNumHandshakeTries=1;
         break;
       }
       logIO << "Retrying connection in 0.5 seconds...";
@@ -208,7 +217,7 @@ void WebServer::SSLServerSideHandShake()
 //  theLog << "Got to here 2" << logger::endL;
   /* Get the cipher - opt */
   /* Get client's certificate (note: beware of dynamic allocation) - opt */
-  theSSLdata.client_cert = SSL_get_peer_certificate (theSSLdata.ssl);
+/*  theSSLdata.client_cert = SSL_get_peer_certificate (theSSLdata.ssl);
   if (theSSLdata.client_cert != NULL)
   { char* tempCharPtr=0;
     logIO << logger::purple << "SSL connection using: " << SSL_get_cipher (theSSLdata.ssl) << logger::endL;
@@ -233,6 +242,7 @@ void WebServer::SSLServerSideHandShake()
   } else
     logIO << logger::purple << "SSL connection using: " << SSL_get_cipher (theSSLdata.ssl) << ". "
     << logger::normalColor << "No client certificate." << logger::endL;
+    */
 #endif // MACRO_use_open_ssl
 }
 
@@ -2972,7 +2982,8 @@ int WebServer::Run()
     theGlobalVariables.flagUsingSSLinCurrentConnection=false;
     for (int i=theListeningSockets.size-1; i>=0; i--)
       if (FD_ISSET(this->theListeningSockets[i], &FDListenSockets))
-      { newConnectedSocket=accept(this->theListeningSockets[i], (struct sockaddr *)&their_addr, &sin_size);
+      { //if (this->theListeningSockets[i]==this->listeningSocketHTTP)
+        newConnectedSocket=accept(this->theListeningSockets[i], (struct sockaddr *)&their_addr, &sin_size);
         if (newConnectedSocket>=0)
         { logIO << logger::green << "Connected via listening socket " << this->theListeningSockets[i]
           << " on socket: " << newConnectedSocket;

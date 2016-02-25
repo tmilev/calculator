@@ -184,7 +184,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     }
     out << "<br>";
   }
-  stOutput << " got to here pt 1";
+//  stOutput << " got to here pt 1";
   out << "<button onclick=\"startProjectionPlaneUser" << timesCalled
   << "();\">Change to basis</button><br>";
   out <<"<button onclick=\"snapShotLaTeX" << timesCalled << "();\">LaTeX snapshot</button>\n"
@@ -280,7 +280,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     << " for graphics with lots of elements. This message is displayed only when the number of drawn elements is more than 500.";
   out << "<hr>";
   }
-  stOutput << " got to here pt 2";
+//  stOutput << " got to here pt 2";
   out << "<script type=\"text/javascript\">\n";
   out << "function " << cloneVector << " (inputVector){\n"
   << "output=new Array(" << theDimension << ");\n"
@@ -316,7 +316,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   out << "var frameCount" << timesCalled << "=0;\n";
   out << "var frameCountGoesUp" << timesCalled << "=true;\n";
   int numFramesUserPlane=100;
-  stOutput << " got to here pt 3";
+//  stOutput << " got to here pt 3";
   if (this->flagIncludeExtraHtmlDescriptions)
   {
   out << "function startProjectionPlaneUser" << timesCalled << "(){\n" << " frameCount" << timesCalled << "=0;\n";
@@ -350,7 +350,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "  " << theDrawFunctionName << "();\n"
   << "  window.setTimeout(\"changeProjectionPlaneUser" << timesCalled << "()\",100);\n"
   << "}";
-    stOutput << " got to here pt 4";
+//    stOutput << " got to here pt 4";
 
   if (this->theBuffer.BasisProjectionPlane.size>2)
   { out << "BasisProjectionPlane" << timesCalled << "=new Array(" << this->theBuffer.BasisProjectionPlane.size << ");\n";
@@ -386,12 +386,12 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     out << theDrawFunctionName << "();\n";
     out << "window.setTimeout(\"changeProjectionPlaneOnTimer" << timesCalled << "()\",100);\n" << "}\n";
   }
-    stOutput << " got to here pt 5";
+//    stOutput << " got to here pt 5";
 
   out << CreateStaticJavaScriptVectorsArrayWithProjection(this->theBuffer.labeledVectors, labeledVectorsVarName, "proj"+labeledVectorsVarName);
   out << CreateStaticJavaScriptTextArray(this->theBuffer.labelsOfLabeledVectors, "labels"+labeledVectorsVarName);
   out << CreateJavaScriptListVectors(this->theBuffer.toBeHighlightedWhenLabeledVectorHovered, "highlight"+labeledVectorsVarName);
-    stOutput << " got to here pt 6";
+//    stOutput << " got to here pt 6";
   out << "var selectedLabels" << timesCalled << "= new Array(" << this->theBuffer.labeledVectors.size << ");\n";
   out << "var " << projName << "= new Array(" << theDimension << ");\n";
   out << "var " << eiBasis << "= new Array(" << theDimension << ");\n";
@@ -424,7 +424,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "var " << Points2ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n"
   << "var " << circArrayName << "=new Array(" << this->theBuffer.theDrawCircleAtVectorOperations.size << ");\n"
   << "var " << txtArrayName << "=new Array(" << this->theBuffer.theDrawTextAtVectorOperations.size << ");\n";
-  stOutput << " got to here pt 7";
+//  stOutput << " got to here pt 7";
 
   for (int i=0; i<this->theBuffer.theDrawLineBetweenTwoRootsOperations.size; i++)
   { Vector<double>& current1=theBuffer.theDrawLineBetweenTwoRootsOperations[i].v1;
@@ -464,7 +464,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     }
     out << "];\n";
   }
-  stOutput << " got to here pt 8";
+//  stOutput << " got to here pt 8";
   out << "var " << shiftX << "=" << this->theBuffer.centerX[0] << ";\n";
   out << "var " <<  shiftY << "=" << this->theBuffer.centerY[0] << ";\n";
   out << "var GraphicsUnitCone" << timesCalled << "=" << this->theBuffer.GraphicsUnit[0] << ";\n";
@@ -495,7 +495,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "ComputeProjections" << timesCalled << "();\n";
   out << theSurfaceName << ".fillStyle=\"#FFFFFF\";\n";
   out << theSurfaceName << ".fillRect(0,0," << this->DefaultHtmlWidth  << " ," << this->DefaultHtmlHeight << ");\n";
-  stOutput << " got to here pt 9";
+//  stOutput << " got to here pt 9";
   for (int i=0; i<this->theBuffer.IndexNthDrawOperation.size; i++)
   { int currentIndex=this->theBuffer.IndexNthDrawOperation[i];
     switch(theBuffer.TypeNthDrawOperation[i])
@@ -537,7 +537,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
       default: break;
     }
   }
-    stOutput << " got to here pt 10C";
+//    stOutput << " got to here pt 10C";
 
   out << "drawHighlights" << timesCalled << "();\n";
   out << "}\n";
@@ -611,7 +611,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "    " << projName << "[i][1]=-GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled
   << "(VectorE2Cone" << timesCalled << ", " << eiBasis << "[i]);\n"
   << "  }\n";
-    stOutput << " got to here pt 11C";
+//    stOutput << " got to here pt 11C";
   if (this->flagIncludeExtraHtmlDescriptions)
   { for (int j=0; j<theDimension; j++)
       out << "  document.getElementById(\"" << textEbasisNamesReadOnly[0][j] << "\").innerHTML="
@@ -718,7 +718,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "    ComputeProjections" << timesCalled << "();\n"
   << "  }\n"
   << "}\n";
-      stOutput << " got to here pt x0";
+//      stOutput << " got to here pt x0";
 
   out << "function processMousePosition" << timesCalled << "(x, y){\n"
   << "  labelString=\"<table><tr>\";\n"
@@ -775,13 +775,13 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
 //  << basisName << "[i][1]*=GraphicsUnitCone" << timesCalled << "/(GraphicsUnitCone" << timesCalled << "-theWheelDelta);\n"
 //  << "}\n"
   << theDrawFunctionName << "();\n}\n";
-        stOutput << " got to here pt x1";
+//        stOutput << " got to here pt x1";
 
 
   out  << theInitFunctionName << "();\n"
   << "</script>\n"
   ;
-        stOutput << " got to here pt x2";
+//        stOutput << " got to here pt x2";
   return out.str();
 }
 

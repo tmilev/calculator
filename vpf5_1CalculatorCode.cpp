@@ -841,9 +841,9 @@ Plot::Plot()
 void Plot::ComputeAxesAndBoundingBox()
 { MacroRegisterFunctionWithName("Plot::ComputeAxesAndBoundingBox");
   this->theLowerBoundAxes=-0.5;
-  this->theUpperBoundAxes=1;
+  this->theUpperBoundAxes=1.1;
   this->lowBoundY=-0.5;
-  this->highBoundY=0.5;
+  this->highBoundY=1.1;
   for (int i=0; i<this->thePlots.size; i++)
   { this->thePlots[i].ComputeYbounds();
     this->theLowerBoundAxes=MathRoutines::Minimum(this->thePlots[i].xLow, theLowerBoundAxes);
@@ -861,8 +861,8 @@ std::string Plot::GetPlotHtml()
   theDVs.DefaultHtmlWidth=600;
   Vector<double> v1;
   Vector<double> v2;
-  double theWidth=this->theUpperBoundAxes-this->theLowerBoundAxes+0.2;
-  double theHeight=this->highBoundY-this->lowBoundY+0.2;
+  double theWidth=(this->theUpperBoundAxes-this->theLowerBoundAxes)*1.2+0.1;
+  double theHeight=(this->highBoundY-this->lowBoundY)*1.2+0.1;
   theDVs.theBuffer.centerX[0]=((-this->theLowerBoundAxes+0.1)/theWidth)*((double) theDVs.DefaultHtmlWidth);
   theDVs.theBuffer.centerY[0]=((this->highBoundY+0.1)/theHeight)*((double) theDVs.DefaultHtmlHeight);
 

@@ -195,6 +195,7 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
   this->flagFillUserDefinedProjection=false;
   this->ColorDashes=CGI::RedGreenBlue(200, 200, 200);
   this->flag2DprojectionDraw=true;
+  this->flagIncludeExtraHtmlDescriptions=true;
   this->ColorChamberIndicator=CGI::RedGreenBlue(220, 220, 0);
   this->ColorWeylChamberWalls=CGI::RedGreenBlue(220, 220, 0);
   this->ColorTextPermanentlyZeroChamber = CGI::RedGreenBlue(250, 220, 220);
@@ -1345,6 +1346,7 @@ FormatExpressions::FormatExpressions()
   this->flagUseFrac=false;
   this->flagSuppressOneIn1overXtimesY=true;
   this->flagFormatMatrixAsLinearSystem=false;
+  this->flagIncludeExtraHtmlDescriptionsInPlots=true;
 }
 
 std::string FormatExpressions::GetPolyLetter(int index)const

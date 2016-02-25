@@ -604,6 +604,7 @@ class Plot
   double theUpperBoundAxes;
   double lowBoundY;
   double highBoundY;
+  bool flagIncludeExtraHtmlDescriptions;
   std::string GetPlotHtml();
   std::string GetPlotStringAddLatexCommands(bool useHtml);
   Plot();
@@ -797,6 +798,8 @@ public:
   bool flagDisplayContext;
   bool flagShowCalculatorInternalStatus;
   bool flagShowCalculatorExamples;
+
+  bool flagWriteLatexPlots;
 
   bool flagDontDistribute;
   bool flagNoApproximations;

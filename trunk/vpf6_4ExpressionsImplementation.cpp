@@ -1912,9 +1912,15 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   } else if (this->IsOfType<Plot>())
   { if (isFinal)
     { Plot& thePlot=this->GetValueNonConst<Plot>();
+      thePlot.flagIncludeExtraHtmlDescriptions=
+      (theFormat==0) ? true : theFormat->flagIncludeExtraHtmlDescriptionsInPlots;
       out << thePlot.GetPlotHtml();
-      out << this->owner->WriteDefaultLatexFileReturnHtmlLink(thePlot.GetPlotStringAddLatexCommands(false), true);
-      out << "<br><b>LaTeX code used to generate the output. </b><br>" << thePlot.GetPlotStringAddLatexCommands(true);
+      if (this->owner->flagWriteLatexPlots)
+      { out << this->owner->WriteDefaultLatexFileReturnHtmlLink
+        (thePlot.GetPlotStringAddLatexCommands(false), true);
+        out << "<br><b>LaTeX code used to generate the output. </b><br>"
+        << thePlot.GetPlotStringAddLatexCommands(true);
+      }
     } else
       out << "(plot not shown)";
     result=true;
@@ -2049,8 +2055,10 @@ std::string Expression::ToStringFull()const
 bool Expression::NeedsParenthesisForBaseOfExponent()const
 { if (this->owner==0)
     return false;
-  if (this->StartsWith())
+  if (this->IsLisT())
     return true;
+  if (this->StartsWith(this->owner->opBind()))
+    return (*this)[1].IsLisT();
 //  if (this->StartsWith(this->owner->opPlus()) || this->StartsWith(this->owner->opMinus()) ||
 //      this->StartsWith(this->owner->opTimes()) || this->StartsWith(this->owner->opDivide()) ||
 //      this->StartsWith(this->owner->opThePower()))
@@ -2206,7 +2214,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       out << "\\sqrt[" << (*this)[1].ToString() << "]{" << (*this)[2].ToString() << "}";
   } else if (this->IsListStartingWithAtom(this->owner->opFactorial()))
     out << (*this)[1].ToString(theFormat) << "!";
-  else if (this->StartsWith(this->owner->opThePower(),3))
+  else if (this->StartsWith(this->owner->opThePower(), 3))
   { bool involvesExponentsInterpretedAsFunctions=false;
     const Expression& firstE=(*this)[1];
     if (firstE.StartsWith(-1, 2))

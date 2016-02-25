@@ -17,6 +17,7 @@ public:
   List<std::string> defaultKeysIfMissing;
   List<std::string> defaultValuesIfMissing;
   bool flagUseDisplaystyleInMathMode;
+  bool flagUseMathMode;
   std::string interpretedCommand;
   static int ParsingNumDummyElements;
   bool IsInterpretedByCalculatorDuringPreparation();
@@ -34,6 +35,7 @@ public:
   SyntacticElementHTML(){this->flagUseDisplaystyleInMathMode=false;}
   SyntacticElementHTML(const std::string& inputContent)
   { this->flagUseDisplaystyleInMathMode=false;
+    this->flagUseMathMode=true;
     this->content=inputContent;
   }
   bool operator==(const std::string& other)
@@ -1134,10 +1136,14 @@ std::string SyntacticElementHTML::ToStringInterpreted()
   std::stringstream out;
   out << this->ToStringOpenTag();
   if (this->interpretedCommand!="")
-  { out << "\\( ";
-    if (this->flagUseDisplaystyleInMathMode)
-      out << "\\displaystyle ";
-    out << this->interpretedCommand << " \\)";
+  { if (this->flagUseMathMode)
+    { out << "\\( ";
+      if (this->flagUseDisplaystyleInMathMode)
+        out << "\\displaystyle ";
+    }
+    out << this->interpretedCommand;
+    if (this->flagUseMathMode)
+      out << " \\)";
   }
   out << this->ToStringCloseTag();
   return out.str();
@@ -1829,6 +1835,10 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   }
 //  else
 //    out << " no date picker";
+  theInterpreter.flagWriteLatexPlots=false;
+  FormatExpressions theFormat;
+  theFormat.flagExpressionIsFinal=true;
+  theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
   if (!this->PrepareAndExecuteCommands(theInterpreter, comments))
     return false;
   bool moreThanOneCommand=false;
@@ -1852,12 +1862,18 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     }
     moreThanOneCommand=false;
     this->theContent[spanCounter].interpretedCommand="";
+    this->theContent[spanCounter].flagUseMathMode=true;
     for (; commandCounter<theInterpreter.theProgramExpression.children.size; commandCounter++ )
     { if (theInterpreter.theProgramExpression[commandCounter].ToString()=="SeparatorBetweenSpans")
         break;
       if (moreThanOneCommand)
         this->theContent[spanCounter].interpretedCommand+="; ";
-      this->theContent[spanCounter].interpretedCommand+=theInterpreter.theProgramExpression[commandCounter].ToString();
+      else if
+      (theInterpreter.theProgramExpression[commandCounter].IsOfType<Plot>() ||
+       theInterpreter.theProgramExpression[commandCounter].IsOfType<std::string>())
+        this->theContent[spanCounter].flagUseMathMode=false;
+      this->theContent[spanCounter].interpretedCommand+=
+      theInterpreter.theProgramExpression[commandCounter].ToString(&theFormat);
       moreThanOneCommand=true;
     }
   }
@@ -1907,7 +1923,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     //else
     this->currentUser.SetProblemData(this->fileName, this->theProblemData);
     if (!this->currentUser.StoreProblemDataToDatabase(theRoutines, comments))
-        out << "<b>Error: failed to store problem in database. </b>" << comments.str();
+      out << "<b>Error: failed to store problem in database. </b>" << comments.str();
   }
 //  out << "Current collection problems: " << this->databaseProblemList.ToStringCommaDelimited()
 //  << " with weights: " << this->databaseProblemWeights.ToStringCommaDelimited();

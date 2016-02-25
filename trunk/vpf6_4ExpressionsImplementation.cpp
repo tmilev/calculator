@@ -1363,6 +1363,30 @@ void Expression::ContextGetFormatExpressions(FormatExpressions& output)const
     output.weylAlgebraLetters[i-1]=theEWAE[i].ToString();
 }
 
+bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVariables, bool excludeNamedConstants)const
+{ MacroRegisterFunctionWithName("Expression::GetFreeVariables");
+  if (this->owner==0)
+    return true;
+  RecursionDepthCounter(&this->owner->RecursionDeptH);
+  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::IsDifferentialOneFormOneVariable:"))
+    return false;
+  if (this->IsBuiltInType()) //<- this may need to be rewritten as some built in types will store free variables in their context.
+    return true;
+  if (this->IsAtom())
+  { bool doAddExpression=!this->IsKnownFunctionWithComplexRange();
+    if (doAddExpression && excludeNamedConstants)
+      if (this->owner->knownDoubleConstants.Contains(*this))
+        doAddExpression=false;
+    if (doAddExpression)
+      outputAccumulateFreeVariables.AddOnTopNoRepetition(*this);
+    return true;
+  }
+  for (int i=0; i<this->children.size; i++)
+    if (!((*this)[i].GetFreeVariables(outputAccumulateFreeVariables, excludeNamedConstants)))
+      return false;
+  return true;
+}
+
 bool Expression::IsDifferentialOneFormOneVariable(Expression* outputDifferentialOfWhat, Expression* outputCoeffInFrontOfDifferential)const
 { MacroRegisterFunctionWithName("Expression::IsDifferentialOneFormOneVariable");
   if (this->owner==0)
@@ -2053,12 +2077,15 @@ std::string Expression::ToStringFull()const
 }
 
 bool Expression::NeedsParenthesisForBaseOfExponent()const
-{ if (this->owner==0)
+{ //stOutput << "calling Expression::NeedsParenthesisForBaseOfExponent onto: " << this->ToStringSemiFull();
+  if (this->owner==0)
     return false;
+  if (this->StartsWith(this->owner->opBind()))
+  { //stOutput << " to get:  " << (*this)[1].IsLisT() << "<hr>";
+    return (*this)[1].IsLisT();
+  }
   if (this->IsLisT())
     return true;
-  if (this->StartsWith(this->owner->opBind()))
-    return (*this)[1].IsLisT();
 //  if (this->StartsWith(this->owner->opPlus()) || this->StartsWith(this->owner->opMinus()) ||
 //      this->StartsWith(this->owner->opTimes()) || this->StartsWith(this->owner->opDivide()) ||
 //      this->StartsWith(this->owner->opThePower()))

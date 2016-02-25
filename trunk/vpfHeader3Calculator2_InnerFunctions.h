@@ -61,6 +61,10 @@ public:
   static bool innerCompositeArithmeticOperationEvaluatedOnArgument(Calculator& theCommands, const Expression& input, Expression& output);
 
 
+  static bool innerGetFreeVariablesIncludeNamedConstants(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerGetFreeVariablesExcludeNamedConstants(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerCompareFunctionsNumerically(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerPolynomialRelations(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool outerPolynomialize(Calculator& theCommands, const Expression& input, Expression& output);

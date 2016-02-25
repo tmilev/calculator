@@ -953,11 +953,27 @@ void Calculator::initPredefinedInnerFunctions()
    ",
    "plotCurve(sin(12t),cos(13t), 0, 2\\pi)")
    ;
-
+  this->AddOperationInnerHandler ("GetVariablesIncludeNamedConstants", CalculatorFunctionsGeneral::innerGetFreeVariablesExcludeNamedConstants, "",
+   "Gets the variables on which the expression depends. Excludes the named constants. Here, the word ``variables'' is to be thought of as \
+   ``free variables'' but the possibility for small distinctions is \
+   reserved (to allow dealing with named constants, reserved keywords, etc.). \
+   ",
+   "GetVariablesIncludeNamedConstants{}(e^x + x+5 +\\arctan x + x *y +x^y+x^{y^z})", true,
+   false, "CalculatorFunctionsGeneral::innerGetFreeVariablesExcludeNamedConstants")
+   ;
+  this->AddOperationInnerHandler ("GetVariablesExcludeNamedConstants", CalculatorFunctionsGeneral::innerGetFreeVariablesIncludeNamedConstants, "",
+   "Gets the variables on which the expression depends. Excludes the named constants. Here, the word ``variables'' is to be thought of as \
+   ``free variables'' but the possibility for small distinctions is \
+   reserved (to allow dealing with named constants, reserved keywords, etc.). \
+   ",
+   "GetVariablesExcludeNamedConstants{}(e^x + x+5 +\\arctan x + x *y +x^y+x^{y^z})", true,
+   false, "CalculatorFunctionsGeneral::innerGetFreeVariablesIncludeNamedConstants")
+   ;
   this->AddOperationInnerHandler ("plot2D", CalculatorFunctionsGeneral::innerPlot2D, "",
    "<b>Calculus teaching function.</b> Makes a 2d plot of a function given in the form \
    y=f(x). The the second and third argument give the upper and \
-   lower bounds of x. Plots may be added together- adding plots superimposes the plots. \
+   lower bounds of x. The fourth and fifth argument are optional, specify the width \
+   and height of the image. Plots may be added together- adding plots superimposes the plots. \
    Trigonometry functions must be entered in the usual calculator format, i.e., in the form \
    sin{}x, cos{}x, etc. or in the form \\sin{}x, \\cos{}x, etc. (both forms are fine).\
    We recall that in the calculator, {}  stands for function application (the symbols {} were\
@@ -974,6 +990,18 @@ void Calculator::initPredefinedInnerFunctions()
    "<b>Calculus teaching function.</b> Plots area locked under curve.",
    "\nA=3/2- ((-3/4+1/4 (x))^{2});\nplotIntegralOf{}(A, 0, 5)")
    ;
+  this->AddOperationInnerHandler ("CompareFunctionsNumerically", CalculatorFunctionsGeneral::innerCompareFunctionsNumerically, "",
+   "<b>Calculus teaching function.</b> Compares two one-variable functions numerically.\
+   First two arguments gives the two functions. Third and fourth arguments give the interval [a,b] over which to compare.\
+   Fifth argument is optional (default: 50) \
+   and gives the number of sampling points. Sixth argument is optional (default: 0.0001) and gives the numerical tolerance eps- if two numbers are \
+   at a distance less than eps they are considered equal .\
+   ",
+   "CompareFunctionsNumerically{}(arctan (x), arcsin(x/\\sqrt{x^2+1}),0, 5,50,0.0001);\n\
+    CompareFunctionsNumerically{}(e^x, 1+x+x^2/2+x^3/3!+x^4/4!+x^5/5!+x^6/6!,0, 5,50,0.0001)\
+   ", true, false, "CalculatorFunctionsGeneral::innerCompareFunctionsNumerically")
+   ;
+
   this->AddOperationInnerHandler
   ("IsInteger", this->innerIsInteger, "",
    " If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. ",
@@ -2765,8 +2793,8 @@ void Calculator::initArithmeticOperations()
   this->arithmeticOperations.AddOnTop("^");
 }
 
-void Calculator::initOperationsWhoseDomainsAreTheConstants()
-{ MacroRegisterFunctionWithName("Calculator::initOperationsWhoseDomainIsTheConstants");
+void Calculator::initOperationsThatAreKnownFunctions()
+{ MacroRegisterFunctionWithName("Calculator::initOperationsThatAreKnownFunctions");
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("+");
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("-");
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("*");
@@ -2778,6 +2806,10 @@ void Calculator::initOperationsWhoseDomainsAreTheConstants()
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cot");
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sec");
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\csc");
+  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arctan");
+  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arcsin");
+  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arccos");
+  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\log");
 }
 
 void Calculator::initBuiltInAtomsWhosePowersAreInterpretedAsFunctions()

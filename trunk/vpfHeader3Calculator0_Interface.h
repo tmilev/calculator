@@ -428,6 +428,7 @@ class Expression
    double* outputYmin=0, double* outputYmax=0, Vectors<double>* outputPoints=0)const
    ;
   bool EvaluatesToDouble(double* whichDouble=0)const;
+  bool GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVariables, bool excludeNamedConstants)const;
 bool EvaluatesToDoubleUnderSubstitutions
 (const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble=0)const
   ;
@@ -604,6 +605,8 @@ class Plot
   double theUpperBoundAxes;
   double lowBoundY;
   double highBoundY;
+  int DesiredHtmlHeightInPixels;
+  int DesiredHtmlWidthInPixels;
   bool flagIncludeExtraHtmlDescriptions;
   std::string GetPlotHtml();
   std::string GetPlotStringAddLatexCommands(bool useHtml);
@@ -1690,7 +1693,7 @@ public:
   void initAtomsThatFreezeArguments();
   void initAtomsNonCacheable();
   void initAtomsThatAllowCommutingOfArguments();
-  void initOperationsWhoseDomainsAreTheConstants();
+  void initOperationsThatAreKnownFunctions();
   void initArithmeticOperations();
   void initBuiltInAtomsWhosePowersAreInterpretedAsFunctions();
   void initBuiltInAtomsNotInterpretedAsFunctions();

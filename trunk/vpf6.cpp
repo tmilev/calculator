@@ -1746,7 +1746,7 @@ void Expression::operator+=(const Expression& other)
 void Expression::operator-=(const Expression& other)
 { MacroRegisterFunctionWithName("Expression::operator+=");
   if (this->owner==0 && other.owner==0)
-  { this->theData+=other.theData;
+  { this->theData-=other.theData;
     if (this->theData!=1 && this->theData!=0)
       crash << "Attempting to subtract non-initialized expressions" << crash;
     return;
@@ -1754,7 +1754,7 @@ void Expression::operator-=(const Expression& other)
   if (other.owner==0)
   { Expression otherCopy;
     otherCopy.AssignValue(other.theData, *this->owner);
-    (*this)+=otherCopy;
+    (*this)-=otherCopy;
     return;
   }
   if (this->owner==0)

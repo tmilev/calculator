@@ -13,6 +13,8 @@ Calculator::Calculator()
 { this->numOutputFileS=0;
   this->flagHideLHS=false;
   this->flagUseHtml=true;
+  this->flagShowCalculatorInternalStatus=false;
+  this->flagShowCalculatorExamples=true;
 }
 
 std::string Calculator::GetCalculatorLink(const std::string& input)
@@ -2045,7 +2047,7 @@ std::string Calculator::ToStringOutputAndSpecials()
 
 std::string Calculator::ToString()
 { MacroRegisterFunctionWithName("Calculator::ToString");
-  std::stringstream out, out2;
+  std::stringstream out2;
   std::string openTag1="<span style=\"color:#0000FF\">";
   std::string closeTag1="</span>";
   std::string openTag2="<span style=\"color:#FF0000\">";
@@ -2089,7 +2091,12 @@ std::string Calculator::ToString()
         out2 << "<br>";
     }
   }
-  out2 << "<hr>" << this->ToStringFunctionHandlers() << "<hr><b>Further calculator details.</b>";
+  if (this->flagShowCalculatorExamples)
+    out2 << "<hr>" << this->ToStringFunctionHandlers();
+  if (!this->flagShowCalculatorInternalStatus)
+    return out2.str();
+  std::stringstream out;
+  out2 << "<hr><b>Further calculator details.</b>";
   out << "<br><b>Object container information</b>.The object container is the data structure storing all c++ built-in data types "
   << " requested by the user<br> " << this->theObjectContainer.ToString();
   out << "<hr>Control sequences (" << this->controlSequences.size << " total):\n<br>\n";

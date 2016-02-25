@@ -1935,6 +1935,67 @@ bool CalculatorFunctionsGeneral::outerCommuteAtimesBtimesCifUnivariate(Calculato
   return output.MakeXOX(theCommands, theCommands.opTimes(), leftMultiplicand, input[2][2]);
 }
 
+bool CalculatorFunctionsGeneral::innerGetFreeVariablesIncludeNamedConstants
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetFreeVariables");
+  HashedList<Expression> outputList;
+  if (!input.GetFreeVariables(outputList, false))
+    return theCommands << "Function GetFreeVariables failed, this shouldn't happen.";
+  return output.MakeSequence(theCommands, &outputList);
+}
+
+bool CalculatorFunctionsGeneral::innerGetFreeVariablesExcludeNamedConstants
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetFreeVariables");
+  HashedList<Expression> outputList;
+  if (!input.GetFreeVariables(outputList, true))
+    return theCommands << "Function GetFreeVariables failed, this shouldn't happen.";
+  return output.MakeSequence(theCommands, &outputList);
+}
+
+bool CalculatorFunctionsGeneral::innerCompareFunctionsNumerically
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompareFunctionsNumerically");
+  if (input.children.size<5)
+    return theCommands << "Comparing functions takes as input at least 4 arguments (two functions to compare and interval to compare over).";
+  Expression theFunE=input[1];
+  theFunE-=input[2];
+  HashedList<Expression> theVars;
+  if (!theFunE.GetFreeVariables(theVars, true))
+    return theCommands << "Was not able to extract the function argument of your function. " ;
+  if (theVars.size<=0)
+  { Expression zeroE;
+    zeroE.AssignValue(1, theCommands);
+    return output.MakeXOX(theCommands, theCommands.opEqualEqual(), theFunE, zeroE);
+  }
+  if (theVars.size>1)
+  { return theCommands << "I cannot compare the functions as they appear to depend on more than one variable, namely, on: "
+    << theVars.ToStringCommaDelimited();
+  }
+//  stOutput << "The vars: " << theVars.ToStringCommaDelimited();
+  double leftBoundary=0;
+  double rightBoundary=0;
+  if (! input[3].EvaluatesToDouble(&leftBoundary))
+    return theCommands << "Failed to extract the left endpoint of the comparison interval. ";
+  if (! input[4].EvaluatesToDouble(&rightBoundary))
+    return theCommands << "Failed to extract the right endpoint of the comparison interval. ";
+  int numPoints=50;
+  if (input.children.size>5)
+    if (!input[5].IsSmallInteger(&numPoints))
+      return theCommands << "Failed to convert argument: " << input[5].ToString() << " to a small integer. ";
+  double minDiff=0, maxDiff=0;
+  if (!theFunE.EvaluatesToDoubleInRange(theVars[0].ToString(), leftBoundary, rightBoundary, numPoints, &minDiff, &maxDiff, 0))
+    return theCommands << "Failed to evaluate your function to a number. The sampling interval may be outside of the domain of the function. ";
+  double tolerance=0.0001;
+  if (input.children.size>6)
+    if (!input[6].EvaluatesToDouble(&tolerance))
+      return theCommands << "Failed to evaluate the argument " << input[6].ToString() << " to a floating point number. ";
+  if (minDiff<- tolerance || maxDiff> tolerance)
+    return output.AssignValue(0, theCommands);
+  return output.AssignValue(1, theCommands);
+//  theFunE.
+}
+
 bool CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument");
@@ -3604,6 +3665,14 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
     return false;
   const Expression& lowerE=input[2];
   const Expression& upperE=input[3];
+  int desiredHtmlHeightPixels=400;
+  int desiredHtmlWidthPixels=600;
+  if (input.children.size>=6)
+  { if (!input[4].IsSmallInteger(&desiredHtmlWidthPixels))
+      desiredHtmlWidthPixels=600;
+    if (!input[5].IsSmallInteger(&desiredHtmlHeightPixels))
+      desiredHtmlHeightPixels=400;
+  }
   Expression functionE;
   double upperBound, lowerBound;
   if (!lowerE.EvaluatesToDouble(&lowerBound) || !upperE.EvaluatesToDouble(&upperBound))
@@ -3620,6 +3689,8 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
   if (!input[1].EvaluatesToDoubleInRange("x", lowerBound, upperBound, 500, &yLow, &yHigh, &thePoints))
     return theCommands << "<hr>I failed to evaluate the input function, something is wrong!";
   Plot thePlot;
+  thePlot.DesiredHtmlHeightInPixels=desiredHtmlHeightPixels;
+  thePlot.DesiredHtmlWidthInPixels=desiredHtmlWidthPixels;
   thePlot.AddFunctionPlotOnTop(input[1], functionE.GetValue<std::string>(), lowerBound, upperBound, yLow, yHigh, &thePoints);
   return output.AssignValue(thePlot, theCommands);
 }
@@ -5038,12 +5109,13 @@ bool Expression::EvaluatesToDouble(double* whichDouble)const
 bool Expression::EvaluatesToDoubleUnderSubstitutions
 (const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble)const
 { MacroRegisterFunctionWithName("Expression::EvaluatesToDoubleUnderSubstitutions");
+//  if (this->owner==0)
+//    stOutput << "<br>Evaluating, but owner is zero!!! " << this->ToString();
   if (this->owner==0)
     return false;
 //  stOutput << "<br>Evaluating to double: " << this->ToString();
   Calculator& theCommands=*this->owner;
   RecursionDepthCounter theRcounter(&this->owner->RecursionDeptH);
-  //stOutput << "<br>evaluatetodouble: " << input.ToString();
   if (this->IsOfType<double>(whichDouble))
     return true;
   if (this->IsOfType<Rational>())
@@ -5056,7 +5128,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
       return true;
   RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
   if (this->owner->RecursionDeptH >this->owner->MaxRecursionDeptH)
-    *(this->owner) << "<hr>Recursion depth exceeded while evaluating innerEvaluateToDouble. This may be a programming error. ";
+    return *(this->owner) << "<hr>Recursion depth exceeded while evaluating innerEvaluateToDouble. This may be a programming error. ";
   if (knownEs.Contains(*this))
   { if (whichDouble!=0)
       *whichDouble=valuesKnownEs[knownEs.GetIndex(*this)];
@@ -5072,6 +5144,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
   bool isArithmeticOperationTwoArguments=
   this->StartsWith(theCommands.opTimes(),3) ||
   this->StartsWith(theCommands.opPlus(),3) ||
+  this->StartsWith(theCommands.opMinus(),3) ||
   this->StartsWith(theCommands.opThePower(),3) ||
   this->StartsWith(theCommands.opDivide(),3) ||
   this->StartsWith(theCommands.opSqrt(),3)
@@ -5092,6 +5165,11 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
     if ((*this).StartsWith(theCommands.opPlus(),3))
     { if (whichDouble!=0)
         *whichDouble=leftD+rightD;
+      return true;
+    }
+    if ((*this).StartsWith(theCommands.opMinus(),3))
+    { if (whichDouble!=0)
+        *whichDouble=leftD-rightD;
       return true;
     }
     if ((*this).StartsWith(theCommands.opThePower(),3))
@@ -5116,11 +5194,13 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
   this->StartsWith(theCommands.opCos(),2) ||
   this->StartsWith(theCommands.opArcTan(),2) ||
   this->StartsWith(theCommands.opArcCos(),2) ||
+  this->StartsWith(theCommands.opArcSin(),2) ||
   this->StartsWith(theCommands.opSqrt(),2)
   ;
 
   if(isKnownFunctionOneArgument)
-  { double argumentD;
+  { //stOutput << "GOT TO HJERE!";
+    double argumentD;
     if (!(*this)[1].EvaluatesToDoubleUnderSubstitutions(knownEs, valuesKnownEs, &argumentD))
       return false;
     if (this->StartsWith(theCommands.opSqrt()))
@@ -5130,10 +5210,16 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
         *whichDouble= FloatingPoint::sqrt(argumentD);
     }
     if (this->StartsWith(theCommands.opArcCos()))
-    { if (argumentD>1 ||argumentD<-1)
+    { if (argumentD>1 || argumentD<-1)
         return false;
       if (whichDouble!=0)
         *whichDouble= FloatingPoint::arccos(argumentD);
+    }
+    if (this->StartsWith(theCommands.opArcSin()))
+    { if (argumentD>1 || argumentD<-1)
+        return false;
+      if (whichDouble!=0)
+        *whichDouble= FloatingPoint::arcsin(argumentD);
     }
     if (this->StartsWith(theCommands.opSin()))
       if (whichDouble!=0)
@@ -5146,10 +5232,10 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
         *whichDouble=FloatingPoint::arctan(argumentD);
     return true;
   }
-//  stOutput << "<br>" << this->ToString() << " aint no double! constants are:";
-//  for (int i=0; i<knownEs.size; i++)
-//    stOutput << "<br>" << knownEs[i].ToString() << " -> " << valuesKnownEs[i];
-
+/*  stOutput << "<br>" << this->ToString() << " aint no double! constants are:";
+  for (int i=0; i<knownEs.size; i++)
+    stOutput << "<br>" << knownEs[i].ToString() << " -> " << valuesKnownEs[i];
+*/
   return false;
 }
 

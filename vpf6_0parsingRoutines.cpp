@@ -190,73 +190,74 @@ void Calculator::init()
 //  this->AddOperationBuiltInType("\\arctan");
 
 
-  this->controlSequences.AddOnTop(" ");//empty token must always come first!!!!
-  this->controlSequences.AddOnTop("{{}}");
-  this->controlSequences.AddOnTop("Variable");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(" ");//empty token must always come first!!!!
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("{{}}");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("Variable");
   this->controlSequences.AddOnTop(this->theAtoms);//all operations defined up to this point are also control sequences
-  this->controlSequences.AddOnTop("Expression");
-  this->controlSequences.AddOnTop("Integer");
-  this->controlSequences.AddOnTop(",");
-  this->controlSequences.AddOnTop(".");
-  this->controlSequences.AddOnTop("\"");
-  this->controlSequences.AddOnTop("\\frac");
-  this->controlSequences.AddOnTop("\\cdot");
-  this->controlSequences.AddOnTop("_");
-  this->controlSequences.AddOnTop("(");
-  this->controlSequences.AddOnTop(")");
-  this->controlSequences.AddOnTop("[");
-  this->controlSequences.AddOnTop("]");
-  this->controlSequences.AddOnTop("{");
-  this->controlSequences.AddOnTop("}");
-  this->controlSequences.AddOnTop(":");
-  this->controlSequences.AddOnTop("pi");
-  this->controlSequences.AddOnTop("infty");
-  this->controlSequences.AddOnTop("infinity");
-  this->controlSequences.AddOnTop("ln");
-  this->controlSequences.AddOnTop("\\ln");
-  this->controlSequences.AddOnTop("log");
-  this->controlSequences.AddOnTop("sin");
-  this->controlSequences.AddOnTop("cos");
-  this->controlSequences.AddOnTop("tan");
-  this->controlSequences.AddOnTop("cot");
-  this->controlSequences.AddOnTop("csc");
-  this->controlSequences.AddOnTop("sec");
-  this->controlSequences.AddOnTop("sqrt");
-  this->controlSequences.AddOnTop("arcsin");
-  this->controlSequences.AddOnTop("arccos");
-  this->controlSequences.AddOnTop("arctan");
-  this->controlSequences.AddOnTop("SequenceStatements");
-  this->controlSequences.AddOnTop("MakeSequence");
-  this->controlSequences.AddOnTop("SequenceMatrixRows");
-  this->controlSequences.AddOnTop("MatrixRow");
-  this->controlSequences.AddOnTop("\\circ");
-  this->controlSequences.AddOnTop("$");
-  this->controlSequences.AddOnTop("MatrixSeparator");
-  this->controlSequences.AddOnTop("MatrixRowSeparator");
-  this->controlSequences.AddOnTop("\\begin");
-  this->controlSequences.AddOnTop("\\left");
-  this->controlSequences.AddOnTop("\\right");
-  this->controlSequences.AddOnTop("array");
-  this->controlSequences.AddOnTop("\\end");
-  this->controlSequences.AddOnTop("\\\\");
-  this->controlSequences.AddOnTop("\\");
-  this->controlSequences.AddOnTop("\\displaystyle");
-  this->controlSequences.AddOnTop("&");
-  this->controlSequences.AddOnTop("%");
-  this->controlSequences.AddOnTop("NoFrac");
-  this->controlSequences.AddOnTop("NoApproximations");
-  this->controlSequences.AddOnTop("ShowContext");
-  this->controlSequences.AddOnTop("LogParsing");
-  this->controlSequences.AddOnTop("LogEvaluation");
-  this->controlSequences.AddOnTop("NumberColors");
-  this->controlSequences.AddOnTop("LogRules");
-  this->controlSequences.AddOnTop("LogCache");
-  this->controlSequences.AddOnTop("LogFull");
-  this->controlSequences.AddOnTop("LatexLink");
-  this->controlSequences.AddOnTop("FullTree");
-  this->controlSequences.AddOnTop("HideLHS");
-  this->controlSequences.AddOnTop("DontDistribute");
-  this->controlSequences.AddOnTop("EndProgram");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("Expression");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("Integer");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(",");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(".");
+//  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\"");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\frac");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cdot");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("_");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("(");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(")");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("[");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("]");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("{");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("}");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(":");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("pi");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("infty");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("infinity");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("ln");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\ln");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("log");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("sin");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("cos");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("tan");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("cot");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("csc");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("sec");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("sqrt");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("arcsin");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("arccos");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("arctan");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("SequenceStatements");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("MakeSequence");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("SequenceMatrixRows");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("MatrixRow");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\circ");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("$");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("MatrixSeparator");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("MatrixRowSeparator");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\begin");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\left");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\right");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("array");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\end");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\\\");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\displaystyle");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("&");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("%");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("NoFrac");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("NoApproximations");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("ShowContext");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogParsing");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogEvaluation");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("NumberColors");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogRules");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogCache");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogFull");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LatexLink");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("CalculatorStatus");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("FullTree");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("HideLHS");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("DontDistribute");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("EndProgram");
 
   this->initPredefinedStandardOperationsWithoutHandler();
 
@@ -270,7 +271,7 @@ void Calculator::init()
   this->initAtomsNotGoodForChainRule();
   this->initBuiltInAtomsNotInterpretedAsFunctions();
   this->initBuiltInAtomsWhosePowersAreInterpretedAsFunctions();
-  this->initOperationsWhoseDomainsAreTheConstants();
+  this->initOperationsThatAreKnownFunctions();
   this->initAtomsNonCacheable();
   this->initArithmeticOperations();
 
@@ -1200,6 +1201,11 @@ bool Calculator::ApplyOneRule()
   }
   if (secondToLastS=="%" && lastS=="NoApproximations")
   { this->flagNoApproximations=true;
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
+  if (secondToLastS=="%" && lastS=="CalculatorStatus")
+  { this->flagShowCalculatorInternalStatus=true;
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }

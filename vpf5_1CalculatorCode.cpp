@@ -836,6 +836,8 @@ Plot::Plot()
   this->lowBoundY=-0.5;
   this->highBoundY=0.5;
   this->flagIncludeExtraHtmlDescriptions=true;
+  this->DesiredHtmlHeightInPixels=400;
+  this->DesiredHtmlWidthInPixels=600;
 }
 
 void Plot::ComputeAxesAndBoundingBox()
@@ -857,8 +859,8 @@ std::string Plot::GetPlotHtml()
 { MacroRegisterFunctionWithName("Plot::GetPlotHtml");
   this->ComputeAxesAndBoundingBox();
   DrawingVariables theDVs;
-  theDVs.DefaultHtmlHeight=400;
-  theDVs.DefaultHtmlWidth=600;
+  theDVs.DefaultHtmlHeight=this->DesiredHtmlHeightInPixels;
+  theDVs.DefaultHtmlWidth=this->DesiredHtmlWidthInPixels;
   Vector<double> v1;
   Vector<double> v2;
   double theWidth=(this->theUpperBoundAxes-this->theLowerBoundAxes)*1.2+0.1;

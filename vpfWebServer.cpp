@@ -522,14 +522,17 @@ void WebServer::Signal_SIGINT_handler(int s)
 
 void WebServer::Signal_SIGCHLD_handler(int s)
 { theLog << "Received SIGCHLD signal." << logger::endL;
-//  theWebServer.ReapChildren();
+  theWebServer.flagReapingChildren=true;
+  theWebServer.ReapChildren();
+  theWebServer.flagReapingChildren=false;
 }
 
 void WebServer::ReapChildren()
 { MacroRegisterFunctionWithName("WebServer::ReapChildren");
   int waitResult=0;
+  int exitFlags= WNOHANG| WEXITED;
   do
-  { waitResult= waitpid(-1, NULL, WNOHANG| WEXITED);
+  { waitResult= waitpid(-1, NULL, exitFlags);
 //    theLog << "waitresult is: " << waitResult << logger::endL;
     if (waitResult>0)
       for (int i=0; i<this->theWorkers.size; i++)
@@ -2531,6 +2534,7 @@ WebServer::WebServer()
   this->listeningSocketHttpSSL=-1;
   this->highestSocketNumber=-1;
   this->flagSSLHandshakeSuccessful=false;
+  this->flagReapingChildren=false;
 }
 
 WebWorker& WebServer::GetActiveWorker()
@@ -2941,7 +2945,8 @@ void WebServer::initPrepareSignals()
   sa.sa_handler=&WebServer::Signal_SIGINT_handler;
   if (sigaction(SIGINT, &sa, NULL) == -1)
     theLog << "sigaction returned -1" << logger::endL;
-  sa.sa_handler = 0;// &WebServer::Signal_SIGCHLD_handler; // reap all dead processes
+  sa.sa_handler =  &WebServer::Signal_SIGCHLD_handler; // reap all dead processes
+//  sa.sa_handler =  0; // reap all dead processes
   sigemptyset(&sa.sa_mask);
   sa.sa_flags = SA_NOCLDWAIT;
   if (sigaction(SIGCHLD, &sa, NULL) == -1)
@@ -2975,8 +2980,12 @@ int WebServer::Run()
     for (int i=0; i<this->theListeningSockets.size; i++)
       FD_SET(this->theListeningSockets[i], &FDListenSockets);
     while (select(this->highestSocketNumber+1, & FDListenSockets, 0, 0, 0)==-1)
-    { logIO << logger::red << "Select failed: this is not supposed to happen. The select error message was: "
-      << strerror(errno) << logger::endL;
+    { if (this->flagReapingChildren)
+        logIO << logger::yellow << "Select interrupted while reaping children. "
+        << logger::endL;
+      else
+        logIO << logger::red << "Select failed: possibly due to reaping children. Error message: "
+        << strerror(errno) << logger::endL;
     }
     int newConnectedSocket =-1;
     theGlobalVariables.flagUsingSSLinCurrentConnection=false;

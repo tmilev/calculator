@@ -153,6 +153,7 @@ public:
   int highestSocketNumber;
   bool flagTryToKillOlderProcesses;
   bool flagSSLHandshakeSuccessful;
+  bool flagReapingChildren;
   List<std::string> PortsITryHttp;
   List<std::string> PortsITryHttpSSL;
   List<int> theListeningSockets;

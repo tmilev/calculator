@@ -835,6 +835,7 @@ Plot::Plot()
   this->theUpperBoundAxes=1;
   this->lowBoundY=-0.5;
   this->highBoundY=0.5;
+  this->flagIncludeExtraHtmlDescriptions=true;
 }
 
 void Plot::ComputeAxesAndBoundingBox()
@@ -900,6 +901,7 @@ std::string Plot::GetPlotHtml()
       (thePlots[i].thePoints[j-1], thePlots[i].thePoints[j], theDVs.PenStyleNormal,
         CGI::RedGreenBlue(255,0,0));
   std::stringstream resultStream;
+  theDVs.flagIncludeExtraHtmlDescriptions=this->flagIncludeExtraHtmlDescriptions;
   resultStream << theDVs.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
   return resultStream.str();
 }

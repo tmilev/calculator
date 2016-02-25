@@ -319,6 +319,7 @@ public:
   bool flagDrawingInvisibles;
   bool flagDrawingLinkToOrigin;
   bool flagFillUserDefinedProjection;
+  bool flagIncludeExtraHtmlDescriptions;
   Vectors<Rational> FillUserDefinedProjection;
   int Selected;
   static int NumHtmlGraphics;

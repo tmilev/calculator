@@ -1499,6 +1499,7 @@ public:
   bool flagExpressionIsFinal;
   bool flagIncludeMutableInformation;
   bool flagExpressionNewLineAllowed;
+  bool flagIncludeExtraHtmlDescriptionsInPlots;
   bool flagIncludeLieAlgebraNonTechnicalNames;
   bool flagIncludeLieAlgebraTypes;
   bool flagUseReflectionNotation;

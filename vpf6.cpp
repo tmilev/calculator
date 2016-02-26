@@ -16,6 +16,7 @@ Calculator::Calculator()
   this->flagShowCalculatorInternalStatus=false;
   this->flagShowCalculatorExamples=true;
   this->flagWriteLatexPlots=true;
+  this->flagUseLnInsteadOfLog=false;
 }
 
 std::string Calculator::GetCalculatorLink(const std::string& input)

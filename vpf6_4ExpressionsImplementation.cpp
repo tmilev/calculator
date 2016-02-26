@@ -1814,13 +1814,17 @@ bool Expression::GreaterThanNoCoeff(const Expression& other)const
 
 bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("Expression::ToStringData");
+  if (this->owner==0)
+    return "(non-initialized)";
   std::stringstream out;
   bool result=false;
   bool isFinal=theFormat==0 ? false : theFormat->flagExpressionIsFinal;
   MemorySaving<FormatExpressions> contextFormat;
-  bool showContext= owner==0 ? false : owner->flagDisplayContext;
+  bool showContext= this->owner==0 ? false : owner->flagDisplayContext;
   if (this->IsAtom())
-  { if (this->theData< this->owner->GetOperations().size && this->theData>=0)
+  { if (this->owner->flagUseLnInsteadOfLog && this->IsAtomGivenData(this->owner->opLog()))
+      out << "\\ln";
+    else if (this->theData< this->owner->GetOperations().size && this->theData>=0)
       out << this->owner->GetOperations()[this->theData];
     else
       out << "(unknown~ atom~ of~ value~ " << this->theData << ")";
@@ -2175,7 +2179,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       if (theFormat!=0)
         theFormat->flagExpressionNewLineAllowed=oldAllowNewLine;
     }
-  } else if (this->StartsWith(this->owner->opTensor(),3) )
+  } else if (this->StartsWith(this->owner->opTensor(), 3) )
     out << (*this)[1].ToString(theFormat) << "\\otimes " << (*this)[2].ToString(theFormat);
   else if (this->StartsWith(this->owner->opChoose(),3) )
     out << (*this)[1].ToString(theFormat) << "\\choose " << (*this)[2].ToString(theFormat);
@@ -2289,7 +2293,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
 //    stOutput << "<br>tostringing: " << out.str() << "   lispified: " << this->ToStringFull();
   } else if (this->IsListStartingWithAtom(this->owner->opPlus() ))
   { if (this->children.size<2)
-      crash << crash;
+      crash << "Plus operation takes at least 2 arguments. " << crash;
     std::string tempS2= (*this)[1].ToString(theFormat);
     tempS=(*this)[2].ToString(theFormat);
     out << tempS2;
@@ -2392,8 +2396,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
           out << "}";
         break;
     }
-  }
-  else if (this->IsListStartingWithAtom(this->owner->opLieBracket()))
+  } else if (this->IsListStartingWithAtom(this->owner->opLieBracket()))
     out << "[" << (*this)[1].ToString(theFormat) << "," << (*this)[2].ToString(theFormat) << "]";
   else if (this->IsListStartingWithAtom(this->owner->opMod()))
     out << (*this)[1].ToString(theFormat) << " mod " << (*this)[2].ToString(theFormat);

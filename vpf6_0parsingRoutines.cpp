@@ -253,6 +253,7 @@ void Calculator::init()
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogCache");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogFull");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LatexLink");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("UseLnInsteadOfLog");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("CalculatorStatus");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("FullTree");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("HideLHS");
@@ -1146,6 +1147,11 @@ bool Calculator::ApplyOneRule()
   }
   if (secondToLastS=="%" && lastS=="LogEvaluation")
   { this->flagLogEvaluatioN=true;
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
+  if (secondToLastS=="%" && lastS=="UseLnInsteadOfLog")
+  { this->flagUseLnInsteadOfLog=true;
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }

@@ -787,6 +787,7 @@ public:
   bool flagCurrentExpressionIsNonCacheable;
 
   bool flagLogSyntaxRules;
+  bool flagUseLnInsteadOfLog;
   bool flagLogEvaluatioN;
   bool flagUseNumberColors;
   bool flagLogRules;

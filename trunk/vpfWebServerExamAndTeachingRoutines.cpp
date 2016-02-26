@@ -840,9 +840,9 @@ int WebWorker::ProcessSubmitProblem()
   if (!theProblem.flagRandomSeedGiven && !theProblem.flagIsForReal)
     stOutput << "<b>Random seed not given.</b>";
 //  stOutput << "<b>debug remove when done: Random seed: " << theProblem.theProblemData.randomSeed << "</b>";
-  theProblem.currentExamHomE=        CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
-  theProblem.currentExamIntermediatE=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate"));
-  if (theProblem.currentExamHomE=="")
+  theProblem.currentExamHomE         = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
+  theProblem.currentExamIntermediatE = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate"));
+  if (theProblem.currentExamHomE == "")
   { stOutput << "<b>Could not find the problem collection to which this problem belongs. "
     << "If you think this is a bug, do the following. " << theProblem.BugsGenericMessage << "</b>";
     return 0;
@@ -946,7 +946,7 @@ int WebWorker::ProcessSubmitProblem()
   stOutput << "<table width=\"300\"><tr><td>";
   if (!isCorrect)
   { stOutput << "<span style=\"color:red\"><b>Your answer appears to be incorrect.</b></span>";
-    //stOutput << "The calculator output: " << theInterpreter.outputString;
+    //stOutput << "DEBUG: The calculator output: " << theInterpreter.outputString;
   } else
     stOutput << "<span style=\"color:green\"><b>Correct!</b></span>";
   stOutput << "</td></tr>";

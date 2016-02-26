@@ -1,0 +1,31 @@
+<span class="setCalculatorExamProblem">
+</span>
+
+Find the inverse function \(f^{-1}\).
+
+<span class="calculatorHidden">
+\(
+%UseLnInsteadOfLog
+af= randomInteger((-5,-1), (1,5));  
+bf= randomInteger((-5,-1), (1,5));  
+cf= randomInteger((-5,-1), (1,5));  
+df= randomInteger((-5,-1), (1,5));  
+\)</span>
+<br>
+<span class="calculator">
+\(
+\displaystyle
+f{}{{x}}=cf \ln{}(af x +bf)+df ;   
+\)
+</span>.
+<br>
+Answer: \(f^{-1}(x)=\)
+<textarea class="calculatorAnswer" id="AlgebraAnswer">
+\(
+CompareFunctionsNumerically( AlgebraAnswer, (e^{\frac{x-df}{cf}}-bf)/af, -5, 5, 50, 0.0001)
+\)
+</textarea>
+
+
+
+

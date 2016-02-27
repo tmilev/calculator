@@ -18,7 +18,7 @@ f{}{{x}}=af x^2 + bf x + cf
 \(
 x > -bf/(2af)
 \)
-</span>
+</span>.
 <br>
 <span class="calculator">
 plot2D(f{}x, -bf/(2af), -bf/(2af)+3/afAbs, 200, 200)
@@ -31,6 +31,13 @@ Answer:
 CompareFunctionsNumerically( AlgebraAnswer, (-bf+theSign*\sqrt{bf^2-4af (cf-x)})/(2af), -bf/(2af), -bf/(2af)+3/afAbs, 50, 0.0001)
 \)
 </textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+plot2D(f{}x, -bf/(2af), -bf/(2af)+3/afAbs, 200, 200, "red")
++
+plot2D(AlgebraAnswer, f{}(-bf/(2af)), f{}(-bf/(2af)+3/afAbs), 200, 200, "blue")
+\)
+</span>
 Write sqrt(a), \sqrt(a), sqrt{a} or \sqrt{a} for the square root of a.
 
 

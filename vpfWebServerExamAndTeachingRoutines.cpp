@@ -23,6 +23,8 @@ public:
   bool IsInterpretedByCalculatorDuringPreparation();
   bool IsInterpretedNotByCalculator();
   bool IsAnswer();
+  bool IsCommentBeforeSubmission();
+  bool IsCommentAfterSubmission();
   std::string GetKeyValue(const std::string& theKey)const;
   void SetKeyValue(const std::string& theKey, const std::string& theValue);
   void resetAllExceptContent();
@@ -656,6 +658,10 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   "submitExercise";
   out
   << "<script type=\"text/javascript\"> \n"
+  << "var JavascriptInsertionAlreadyCalled;\n"
+  << "JavascriptInsertionAlreadyCalled=false;\n"
+  << "var numInsertedJavascriptChildren;\n"
+  << "var numInsertedJavascriptChildren=0;\n"
   << "var timerForPreviewAnswers;\n"
   << "function previewAnswers(idAnswer, idVerification){\n"
   << "  clearTimeout(timerForPreviewAnswers);\n"
@@ -693,7 +699,21 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   out
   << "  https.onload = function() {\n"
   << "    spanVerification.innerHTML=https.responseText;\n"
-  << "    MathJax.Hub.Queue(['Typeset', MathJax.Hub, spanVerification]);"
+  << "    var scripts = spanVerification.getElementsByTagName('script');\n"
+  << "    for (i=0; i<numInsertedJavascriptChildren; i++)"
+  << "    { document.getElementsByTagName( 'head' )[0].removeChild(document.getElementsByTagName( 'head' )[0].lastChild);\n"
+  << "      document.getElementsByTagName( 'head' )[0].appendChild(scriptChild);\n"
+  << "    }\n"
+  << "    numInsertedJavascriptChildren=0;"
+  << "    for (i=0; i<scripts.length; i++){\n"
+  << "      scriptChild= document.createElement('script');\n"
+  << "      scriptChild.innerHTML=scripts[i].innerHTML;\n"
+  << "      scriptChild.type='text/javascript';\n"
+  << "      document.getElementsByTagName( 'head' )[0].appendChild(scriptChild);\n"
+  << "      numInsertedJavascriptChildren++;\n "
+  << "    }\n"
+  << "    JavascriptInsertionAlreadyCalled=true;\n"
+  << "    MathJax.Hub.Queue(['Typeset', MathJax.Hub, spanVerification]);\n"
   << "  }\n"
   << "  https.send(inputParams);\n"
   << "}\n"
@@ -707,26 +727,84 @@ with a short explanation to the following UMass instructor: Todor Milev (todor.m
 
 int WebWorker::ProcessSubmitProblemPreview()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSubmitProblemPreview");
+  double startTime=theGlobalVariables.GetElapsedSeconds();
   std::stringstream studentInterpretation;
+  std::string lastStudentAnswerID;
+  std::string lastAnswer;
   for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
-    if (MathRoutines::StringBeginsWith(theGlobalVariables.webFormArgumentNames[i], "calculatorAnswer", 0))
-    { std::string theAnswer= CGI::URLStringToNormal( theGlobalVariables.webFormArguments[i]);
-      studentInterpretation << "(" << theAnswer << ");";
+    if (MathRoutines::StringBeginsWith(theGlobalVariables.webFormArgumentNames[i], "calculatorAnswer", &lastStudentAnswerID))
+    { lastAnswer= "("+ CGI::URLStringToNormal( theGlobalVariables.webFormArguments[i]) + "); ";
+      studentInterpretation << lastAnswer ;
     }
+//  stOutput << "DEBUG: lastStudentAnswerID: " << lastStudentAnswerID << "<br>";
   Calculator theInterpreter;
   theInterpreter.init();
   theInterpreter.Evaluate(studentInterpretation.str());
 //  TimeWrapper now;
 //  std::string yourInputSpanId = "idAnswer"+ Crypto::CharsToBase64String(now.ToStringHumanReadable()) ;
   if (!theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors=="")
-    stOutput << "<span style=\"color:magenta\"><b>Interpreting your answer as:</b></span><br>"
+  { stOutput << "<span style=\"color:magenta\"><b>Interpreting your answer as:</b></span><br>"
     << "\\(" << theInterpreter.theProgramExpression.ToString() << "\\)";
-  else if (theInterpreter.syntaxErrors!="")
+    CalculatorHTML theProblem;
+    theProblem.LoadCurrentProblemItem();
+    if (!theProblem.flagLoadedSuccessfully)
+      stOutput << "<br><b>Failed to load problem.</b> Comments: " << theProblem.comments.str();
+    std::stringstream comments;
+    if (!theProblem.ParseHTML(comments))
+      stOutput << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
+    int indexLastAnswerId=theProblem.theProblemData.answerIds.GetIndex(lastStudentAnswerID);
+    if (indexLastAnswerId==-1)
+      stOutput << "<br>Student submitted answerID: " << lastStudentAnswerID
+      << " but that is not an ID of an answer tag. ";
+    else if (theProblem.theProblemData.commentsBeforeSubmission[indexLastAnswerId].size!=0)
+    { //stOutput << "DEBIG: comments before submission: "
+      //<< theProblem.theProblemData.commentsBeforeSubmission[indexLastAnswerId].ToStringCommaDelimited();
+      std::stringstream calculatorInputStream;
+      Calculator theInterpreterWithAdvice;
+      theInterpreterWithAdvice.init();
+      theInterpreterWithAdvice.flagWriteLatexPlots=false;
+      if (!theProblem.PrepareCommands(theInterpreterWithAdvice, comments))
+        stOutput << "Something went wrong while interpreting the problem file. ";
+      else
+      { calculatorInputStream << theProblem.problemCommandsNoVerification;
+        calculatorInputStream << theProblem.theProblemData.answerIds[indexLastAnswerId] << " = "
+        << lastAnswer;
+        calculatorInputStream << "SeparatorBetweenSpans; ";
+        for (int i=0; i<theProblem.theProblemData.commentsBeforeSubmission[indexLastAnswerId].size; i++)
+          calculatorInputStream << theProblem.CleanUpCommandString
+          (theProblem.theProblemData.commentsBeforeSubmission[indexLastAnswerId][i]);
+        theInterpreterWithAdvice.Evaluate(calculatorInputStream.str());
+        //stOutput << "DEBUG: Interpreter with advice: " << theInterpreterWithAdvice.theProgramExpression.ToString();
+        if (theInterpreterWithAdvice.syntaxErrors!="")
+          stOutput << "<br><span style=\"color:red\"><b>"
+          << "Something went wrong when parsing your answer in the context of the current problem. "
+          << "</b></span>";
+        else if (theInterpreterWithAdvice.flagAbortComputationASAP )
+          stOutput << "<br><span style=\"color:red\"><b>"
+          << "Something went wrong when interpreting your answer in the context of the current problem. "
+          << "</b></span>";
+        else
+        { FormatExpressions theFormat;
+          for (int j=theInterpreterWithAdvice.theProgramExpression.children.size-1; j>=0; j--)
+          { if (theInterpreterWithAdvice.theProgramExpression[j].ToString()=="SeparatorBetweenSpans")
+              break;
+//            stOutput << "<hr>DEBUG Before final computation: <hr>";
+            theFormat.flagExpressionIsFinal=true;
+            theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
+            stOutput << theInterpreterWithAdvice.theProgramExpression[j].ToString(&theFormat);
+          }
+        }
+      }
+    }
+  } else if (theInterpreter.syntaxErrors!="")
     stOutput << "<span style=\"color:red\"><b>Failed to parse your answer, got:</b></span><br>"
     << theInterpreter.ToStringSyntacticStackHumanReadable(false);
   else if (theInterpreter.flagAbortComputationASAP)
     stOutput << "<span style=\"color:red\"><b>Failed to evaluate your answer, got:</b></span><br>"
     << theInterpreter.outputString;
+
+
+  stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime;
   return 0;
 }
 
@@ -859,7 +937,8 @@ int WebWorker::ProcessSubmitProblem()
     if (MathRoutines::StringBeginsWith(theGlobalVariables.webFormArgumentNames[i], "calculatorAnswer", &studentAnswerNameReader))
     { int answerIdIndex=theProblem.theProblemData.answerIds.GetIndex(studentAnswerNameReader);
       if (answerIdIndex==-1)
-      { stOutput << "<b> You submitted an answer to tag with id " << studentAnswerNameReader << " which is not on my list of "
+      { stOutput << "<b> You submitted an answer to tag with id " << studentAnswerNameReader
+        << " which is not on my list of "
         << "answerable tags. </b>";
         return 0;
       }
@@ -1169,6 +1248,18 @@ bool SyntacticElementHTML::IsAnswer()
 { if (this->syntacticRole!="command")
     return false;
   return this->GetKeyValue("class")=="calculatorAnswer";
+}
+
+bool SyntacticElementHTML::IsCommentBeforeSubmission()
+{ if (this->syntacticRole!="command")
+    return false;
+  return this->GetKeyValue("class")=="calculatorCommentBeforeSubmission";
+}
+
+bool SyntacticElementHTML::IsCommentAfterSubmission()
+{ if (this->syntacticRole!="command")
+    return false;
+  return this->GetKeyValue("class")=="calculatorCommentAfterSubmission";
 }
 
 bool CalculatorHTML::PrepareCommands(Calculator& theInterpreter, std::stringstream& comments)
@@ -1565,8 +1656,9 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     inputOutput.defaultValuesIfMissing.AddOnTop("height:70px");
     out << "<td>" << inputOutput.ToStringOpenTag() << inputOutput.ToStringCloseTag() << "</td>";
     out << "<td><button class=\"submitButton\" onclick=\"submitAnswers('"
-    << answerId << "', '" << answerEvaluationId << "')\"> Submit </button></td>"
-    << "<td>";
+    << answerId << "', '" << answerEvaluationId << "')\"> Submit </button></td>";
+    out << "</tr><tr>";
+    out << "<td>";
     out << "<span id=\"" << answerEvaluationId << "\">";
 
     int theIndex=this->theProblemData.answerIds.GetIndex(answerId);
@@ -2057,6 +2149,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   this->calculatorClasses.AddOnTop("calculator");
   this->calculatorClasses.AddOnTop("calculatorHidden");
   this->calculatorClasses.AddOnTop("calculatorAnswer");
+  this->calculatorClasses.AddOnTop("calculatorCommentBeforeSubmission");
   this->calculatorClasses.AddOnTop("calculatorExamIntermediate");
   this->calculatorClasses.AddOnTop("calculatorExamProblem");
   this->calculatorClasses.AddOnTop("calculatorManageClass");
@@ -2232,7 +2325,22 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
   this->answerVerificationCommand.SetSize(this->theProblemData.answerIds.size);
   List<std::string> answerIdsInTheFile;
   for (int i=0; i<this->theContent.size; i++)
-  { if (!this->theContent[i].IsAnswer())
+  { if (this->theContent[i].IsCommentBeforeSubmission() || this->theContent[i].IsCommentAfterSubmission())
+    { if (answerIdsInTheFile.size<=0)
+      { comments << "<b>Found comment to an answer before finding any answer tag. Each comment applies "
+        << "to the first answer tag above it. </b>";
+        return false;
+      }
+      int theIndex=this->theProblemData.answerIds.GetIndex(*answerIdsInTheFile.LastObject());
+      if (theIndex==-1)
+        crash << "This shouldn't happen: answerId from file not found in problem data. " << crash;
+      if (this->theContent[i].IsCommentAfterSubmission())
+        this->theProblemData.commentsAfterSubmission[theIndex].AddOnTop(this->theContent[i].content);
+      if (this->theContent[i].IsCommentBeforeSubmission())
+        this->theProblemData.commentsBeforeSubmission[theIndex].AddOnTop(this->theContent[i].content);
+      continue;
+    }
+    if (!this->theContent[i].IsAnswer())
       continue;
     std::string newId=this->theContent[i].GetKeyValue("id");
     if (newId=="")
@@ -2245,9 +2353,9 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
     }
     answerIdsInTheFile.AddOnTop(newId);
     if (this->theProblemData.answerIds.Contains(newId))
-      this->answerVerificationCommand[this->theProblemData.answerIds.GetIndex(newId)]=
+    { this->answerVerificationCommand[this->theProblemData.answerIds.GetIndex(newId)]=
       this->theContent[i].content;
-    else
+    } else
     { this->theProblemData.AddEmptyAnswerIdOnTop(newId);
       this->answerVerificationCommand.AddOnTop(this->theContent[i].content);
     }

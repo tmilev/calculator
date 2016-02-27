@@ -782,6 +782,10 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "</script>\n"
   ;
 //        stOutput << " got to here pt x2";
+//  if (this->flagIncludeExtraHtmlDescriptions)
+//    out << "INCLUDING XTRAS";
+//  else
+//    out << "EXCLUDIMG extras";
   return out.str();
 }
 

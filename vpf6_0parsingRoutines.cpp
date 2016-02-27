@@ -41,6 +41,7 @@ void Calculator::reset()
   this->RecursionDeptH=0;
   this->NumErrors=0;
   this->DepthRecursionReached=0;
+  this->flagWriteLatexPlots=false;
   this->flagLogSyntaxRules=false;
   this->flagLogEvaluatioN=false;
   this->flagUseNumberColors=false;

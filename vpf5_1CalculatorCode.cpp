@@ -760,13 +760,17 @@ void Plot::operator+=(const PlotObject& other)
 
 void PlotObject::CreatePlotFunction
 (const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound,
- double inputYmin, double inputYmax, Vectors<double>* inputPoints)
+ double inputYmin, double inputYmax, Vectors<double>* inputPoints, int* inputColorRGB)
 { MacroRegisterFunctionWithName("PlotObject::Create");
   this->xLow=inputLowerBound;
   this->xHigh=inputUpperBound;
   this->yLow=inputYmin;
   this->yHigh=inputYmax;
   this->thePlotElement=(inputE);
+  if (inputColorRGB!=0)
+    this->colorRGB=*inputColorRGB;
+  else
+    this->colorRGB=CGI::RedGreenBlue(0,0,0);
   this->thePlotString=
   GetPlotStringFromFunctionStringAndRanges
   (false, inputPostfixNotation, inputE.ToString(), inputLowerBound, inputUpperBound);
@@ -780,10 +784,10 @@ void PlotObject::CreatePlotFunction
 
 void Plot::AddFunctionPlotOnTop
 (const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound,
- double inputYmin, double inputYmax, Vectors<double>* inputPoints)
+ double inputYmin, double inputYmax, Vectors<double>* inputPoints, int* colorRGB)
 { PlotObject thePlot;
   thePlot.CreatePlotFunction
-  (inputE, inputPostfixNotation, inputLowerBound, inputUpperBound, inputYmin, inputYmax, inputPoints);
+  (inputE, inputPostfixNotation, inputLowerBound, inputUpperBound, inputYmin, inputYmax, inputPoints, colorRGB);
   this->thePlots.AddOnTop(thePlot);
 }
 
@@ -802,6 +806,7 @@ PlotObject::PlotObject()
   this->xHigh=(0);
   this->yLow=(0);
   this->yHigh=(0);
+  this->colorRGB=0;
 }
 
 void PlotObject::ComputeYbounds()
@@ -857,6 +862,10 @@ void Plot::ComputeAxesAndBoundingBox()
 
 std::string Plot::GetPlotHtml()
 { MacroRegisterFunctionWithName("Plot::GetPlotHtml");
+/*  if (this->flagIncludeExtraHtmlDescriptions)
+    stOutput << "including xtra html";
+  else
+    stOutput << "NOT including xtra html";*/
   this->ComputeAxesAndBoundingBox();
   DrawingVariables theDVs;
   theDVs.DefaultHtmlHeight=this->DesiredHtmlHeightInPixels;
@@ -901,7 +910,7 @@ std::string Plot::GetPlotHtml()
     for (int j=1; j<thePlots[i].thePoints.size; j++)
       theDVs.drawLineBetweenTwoVectorsBufferDouble
       (thePlots[i].thePoints[j-1], thePlots[i].thePoints[j], theDVs.PenStyleNormal,
-        CGI::RedGreenBlue(255,0,0));
+       thePlots[i].colorRGB);
   std::stringstream resultStream;
   theDVs.flagIncludeExtraHtmlDescriptions=this->flagIncludeExtraHtmlDescriptions;
   resultStream << theDVs.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);

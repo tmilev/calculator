@@ -321,6 +321,9 @@ void ProblemData::AddEmptyAnswerIdOnTop(const std::string& inputAnswerId)
   this->firstCorrectAnswer.AddOnTop("");
   this->numCorrectSubmissions.AddOnTop(0);
   this->numSubmissions.AddOnTop(0);
+  List<std::string> emptyList;
+  this->commentsAfterSubmission.AddOnTop(emptyList);
+  this->commentsBeforeSubmission.AddOnTop(emptyList);
 }
 
 std::string ProblemData::ToString()

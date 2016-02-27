@@ -584,6 +584,7 @@ public:
   double xHigh;
   double yLow;
   double yHigh;
+  int colorRGB;
   Vectors<double> thePoints;
   Expression thePlotElement;
   std::string thePlotType;
@@ -592,7 +593,7 @@ public:
   (bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat, double lowerBound, double upperBound);
   void CreatePlotFunction
   (const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound,
-   double inputYmin, double inputYmax, Vectors<double>* inputPoints);
+   double inputYmin, double inputYmax, Vectors<double>* inputPoints, int* inputColorRGB=0);
   PlotObject();
   bool operator==(const PlotObject& other)const;
 };
@@ -614,7 +615,7 @@ class Plot
   void ComputeAxesAndBoundingBox();
   void AddFunctionPlotOnTop
   (const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound,
-   double inputUpperBound, double inputYmin, double inputYmax, Vectors<double>* inputPoints);
+   double inputUpperBound, double inputYmin, double inputYmax, Vectors<double>* inputPoints, int* colorRGB=0);
   void operator+=(const Plot& other);
   void operator+=(const PlotObject& other);
   bool operator==(const Plot& other)const

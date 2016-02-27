@@ -1667,6 +1667,8 @@ bool CalculatorFunctionsGeneral::outerEqualEqual(Calculator& theCommands, const 
   const Expression& right=input[2];
   if (left.HasBoundVariables() || right.HasBoundVariables())
     return false;
+  if (left==right)
+    return output.AssignValue(1, theCommands);
   Expression differenceE = left;
   differenceE-=right;
   Expression differenceEsimplified;

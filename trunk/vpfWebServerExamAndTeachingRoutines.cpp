@@ -659,7 +659,7 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   { requestTypeSubmit  = "submitProblem";
     requestTypePreview = "submitProblemPreview";
   } else
-  { requestTypeSubmit = "submitExercise";
+  { requestTypeSubmit  = "submitExercise";
     requestTypePreview = "submitExercisePreview";
   }
   out

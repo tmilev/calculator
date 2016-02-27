@@ -654,8 +654,14 @@ std::string CalculatorHTML::GetSubmitEmailsJavascript()
 
 std::string CalculatorHTML::GetSubmitAnswersJavascript()
 { std::stringstream out;
-  std::string requestType= theGlobalVariables.userCalculatorRequestType=="examForReal" ? "submitProblem" :
-  "submitExercise";
+  std::string requestTypeSubmit, requestTypePreview;
+  if (theGlobalVariables.UserRequestRequiresLoadingRealExamData())
+  { requestTypeSubmit  = "submitProblem";
+    requestTypePreview = "submitProblemPreview";
+  } else
+  { requestTypeSubmit = "submitExercise";
+    requestTypePreview = "submitExercisePreview";
+  }
   out
   << "<script type=\"text/javascript\"> \n"
   << "var JavascriptInsertionAlreadyCalled;\n"
@@ -666,13 +672,13 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   << "function previewAnswers(idAnswer, idVerification){\n"
   << "  clearTimeout(timerForPreviewAnswers);\n"
   << "  timerForPreviewAnswers=setTimeout(function(){\n"
-  << "    params=\"" << this->ToStringCalculatorArgumentsForProblem("submitProblemPreview") << "\";\n"
+  << "    params=\"" << this->ToStringCalculatorArgumentsForProblem(requestTypePreview) << "\";\n"
   << "    submitOrPreviewAnswers(idAnswer, idVerification, params);\n"
   << "  }, 1700);"
   << "}\n"
   << "function submitAnswers(idAnswer, idVerification){\n"
   << "  clearTimeout(timerForPreviewAnswers);\n"
-  << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestType) << "\";\n"
+  << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestTypeSubmit) << "\";\n"
   << "  submitOrPreviewAnswers(idAnswer, idVerification, params);\n"
   << "}\n"
   << "function submitOrPreviewAnswers(idAnswer, idVerification, inputParams){\n"

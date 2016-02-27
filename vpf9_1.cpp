@@ -233,7 +233,8 @@ bool GlobalVariables::UserDefaultHasAdminRights()
 
 bool GlobalVariables::UserRequestRequiresLoadingRealExamData()
 { return this->flagLoggedIn &&
-  (this->userCalculatorRequestType=="examForReal" || this->userCalculatorRequestType=="submitProblem");
+  (this->userCalculatorRequestType=="examForReal" || this->userCalculatorRequestType=="submitProblem" ||
+   this->userCalculatorRequestType=="submitProblemPreview");
 }
 
 std::string GlobalVariables::ToStringNavigation()

@@ -1789,7 +1789,8 @@ int WebWorker::ProcessCalculator()
        theGlobalVariables.userCalculatorRequestType=="submitExercise")&&
       theGlobalVariables.flagLoggedIn)
     return this->ProcessSubmitProblem();
-  if (theGlobalVariables.userCalculatorRequestType=="submitProblemPreview" &&
+  if ((theGlobalVariables.userCalculatorRequestType=="submitProblemPreview" ||
+       theGlobalVariables.userCalculatorRequestType=="submitExercisePreview") &&
       theGlobalVariables.flagLoggedIn)
     return this->ProcessSubmitProblemPreview();
   if (( theGlobalVariables.userCalculatorRequestType=="examForReal" ||

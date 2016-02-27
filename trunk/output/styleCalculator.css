@@ -12,6 +12,9 @@ textarea {
 .calculatorHidden{
 display:none;
 }
+.calculatorCommentBeforeSubmission{
+display:none;
+}
 .problemForm{
 }
 .submitButton{

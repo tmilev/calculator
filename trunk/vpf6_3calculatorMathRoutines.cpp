@@ -3673,6 +3673,11 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
     if (!input[5].IsSmallInteger(&desiredHtmlHeightPixels))
       desiredHtmlHeightPixels=400;
   }
+  std::string colorString;
+  int colorTripleRGB=CGI::RedGreenBlue(255, 0, 0);
+  if (input.children.size>=7)
+    if (input[6].IsOfType<std::string>(&colorString))
+      DrawingVariables::GetColorIntFromColorString(colorString, colorTripleRGB);
   Expression functionE;
   double upperBound, lowerBound;
   if (!lowerE.EvaluatesToDouble(&lowerBound) || !upperE.EvaluatesToDouble(&upperBound))
@@ -3691,7 +3696,8 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
   Plot thePlot;
   thePlot.DesiredHtmlHeightInPixels=desiredHtmlHeightPixels;
   thePlot.DesiredHtmlWidthInPixels=desiredHtmlWidthPixels;
-  thePlot.AddFunctionPlotOnTop(input[1], functionE.GetValue<std::string>(), lowerBound, upperBound, yLow, yHigh, &thePoints);
+  thePlot.AddFunctionPlotOnTop
+  (input[1], functionE.GetValue<std::string>(), lowerBound, upperBound, yLow, yHigh, &thePoints, &colorTripleRGB);
   return output.AssignValue(thePlot, theCommands);
 }
 
@@ -5173,14 +5179,18 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
       return true;
     }
     if ((*this).StartsWith(theCommands.opThePower(),3))
-    { if (whichDouble!=0)
-        *whichDouble=FloatingPoint::power(leftD, rightD);
-      return true;
+    { double tempDouble=0;
+      if (whichDouble==0)
+        whichDouble=&tempDouble;
+      *whichDouble=FloatingPoint::power(leftD, rightD);
+      return (*whichDouble!=NAN);
     }
     if ((*this).StartsWith(theCommands.opSqrt(),3))
-    { if (whichDouble!=0)
-        *whichDouble=FloatingPoint::power(rightD,1/leftD);
-      return true;
+    { double tempDouble=0;
+      if (whichDouble==0)
+        whichDouble=&tempDouble;
+      *whichDouble=FloatingPoint::power(rightD,1/leftD);
+      return (*whichDouble)!=NAN;
     }
     if ((*this).StartsWith(theCommands.opDivide(),3))
     { if (whichDouble!=0)

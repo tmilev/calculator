@@ -67,6 +67,8 @@ public:
 //  int numAnswersSought;
   List<std::string> firstCorrectAnswer;
   List<std::string> answerIds;
+  List<List<std::string> > commentsBeforeSubmission;
+  List<List<std::string> > commentsAfterSubmission;
   void AddEmptyAnswerIdOnTop(const std::string& inputAnswerId);
   int GetAnswerIdIndex(const std::string& inputAnswerId);
 //  List<List<std::string> > allAnswers;

@@ -973,13 +973,14 @@ void Calculator::initPredefinedInnerFunctions()
    "<b>Calculus teaching function.</b> Makes a 2d plot of a function given in the form \
    y=f(x). The the second and third argument give the upper and \
    lower bounds of x. The fourth and fifth argument are optional, specify the width \
-   and height of the image. Plots may be added together- adding plots superimposes the plots. \
+   and height of the image. The sixth argument is optional and specifies color.\
+   Plots may be added together- adding plots superimposes the plots. \
    Trigonometry functions must be entered in the usual calculator format, i.e., in the form \
    sin{}x, cos{}x, etc. or in the form \\sin{}x, \\cos{}x, etc. (both forms are fine).\
    We recall that in the calculator, {}  stands for function application (the symbols {} were\
    chosen as they produce invisible LaTeX output).\
    ",
-   "plot2D{}(\\sin{}x+cos{}x, 0, 5)", true, false, "CalculatorFunctionsGeneral::innerPlot2D")
+   "plot2D{}(\\sin{}x+cos{}x, 0, 5, 200, 200, \"blue\")", true, false, "CalculatorFunctionsGeneral::innerPlot2D")
    ;
   this->AddOperationInnerHandler ("plot2DWithBars", CalculatorFunctionsGeneral::innerPlot2DWithBars, "",
    "<b>Calculus teaching function.</b> Same as plot2D but plots two functions with bars locked between the two functions; \

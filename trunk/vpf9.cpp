@@ -7900,6 +7900,22 @@ std::string DrawingVariables::GetColorPsTricksFromColorIndex(int colorIndex)
   return out.str();
 }
 
+bool DrawingVariables::GetColorIntFromColorString(const std::string& input, int& output)
+{ if (input=="blue")
+  { output= CGI::RedGreenBlue(0,0,255);
+    return true;
+  }
+  if (input=="green")
+  { output= CGI::RedGreenBlue(0,255,0);
+    return true;
+  }
+  if (input=="red")
+  { output= CGI::RedGreenBlue(255,0,0);
+    return true;
+  }
+  return false;
+}
+
 std::string DrawingVariables::GetColorHtmlFromColorIndex(int colorIndex)
 { std::stringstream out;
   int r=(colorIndex/65536)%256;

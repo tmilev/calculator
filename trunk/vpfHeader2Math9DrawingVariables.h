@@ -358,6 +358,7 @@ public:
   static void ProjectOnToHyperPlaneGraphics(Vector<Rational>& input, Vector<Rational>& output, Vectors<Rational>& directions);
   std::string GetColorHtmlFromColorIndex(int colorIndex);
   std::string GetColorPsTricksFromColorIndex(int colorIndex);
+  static bool GetColorIntFromColorString(const std::string& input, int& output);
   DrawOperations theBuffer;
   inline int GetActualPenStyleFromFlagsAnd(int inputPenStyle);
   inline int GetActualTextStyleFromFlagsAnd(int inputTextStyle);

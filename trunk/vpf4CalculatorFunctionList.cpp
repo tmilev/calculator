@@ -2255,7 +2255,9 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationOuterHandler
   ("*", Calculator::outerDistributeTimes, "",
    "Distributive law (left and right).",
-   "(a+b)*c; \n a*(b+c)", true, false, "Calculator::outerDistributeTimes");
+   "(a+b)*c; \n a*(b+c)", true, false,
+   "Calculator::outerDistributeTimes",
+   "DistributeMultiplication");
   this->AddOperationOuterHandler
   ("*", CalculatorFunctionsGeneral::outerDivideReplaceAdivBpowerItimesBpowerJ, "",
    "Rule: (a/x^t)x^s=a x^{s-t}.",

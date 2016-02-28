@@ -748,6 +748,7 @@ int WebWorker::ProcessSubmitProblemPreview()
   theInterpreter.Evaluate(studentInterpretation.str());
 //  TimeWrapper now;
 //  std::string yourInputSpanId = "idAnswer"+ Crypto::CharsToBase64String(now.ToStringHumanReadable()) ;
+  stOutput << "Your answer(s): \\(" << studentInterpretation.str() << "\\)" << "\n<br>\n";
   if (!theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors=="")
   { stOutput << "<span style=\"color:magenta\"><b>Interpreting your answer as:</b></span><br>"
     << "\\(" << theInterpreter.theProgramExpression.ToString() << "\\)";
@@ -1662,8 +1663,9 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     inputOutput.defaultValuesIfMissing.AddOnTop(previewAnswerStream.str());
     inputOutput.defaultKeysIfMissing.AddOnTop("style");
     inputOutput.defaultValuesIfMissing.AddOnTop("height:70px");
-    out << "<td>" << inputOutput.ToStringOpenTag() << inputOutput.ToStringCloseTag() << "</td>";
-    out << "<td><button class=\"submitButton\" onclick=\"submitAnswers('"
+    out << "<td>" << inputOutput.ToStringOpenTag() << inputOutput.ToStringCloseTag() ;// << "</td>";
+    //out << "<td>";
+    out << "<button class=\"submitButton\" onclick=\"submitAnswers('"
     << answerId << "', '" << answerEvaluationId << "')\"> Submit </button></td>";
     out << "</tr><tr>";
     out << "<td>";

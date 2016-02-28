@@ -6,18 +6,15 @@ Compute the derivative of the function.
 \(
 a=randomInteger((-3,-1), (1,3));  
 b= randomInteger((-3,-1), (1,3));  
-c= randomInteger(2,5);  
-g= randomInteger((3,5));  
-h= randomInteger(1,3);  
-TurnOffRules("sqrt", "ConvertShortDenominatorToNegativePower", "CommonDenominatorOneNonFraction");
+c= randomInteger((2,4));  
+g= randomInteger((-5,-2),(2,5));  
+1/(b-a/g);
+TurnOffRules("DistributeMultiplication");
 \)</span>
 <br>
 <span class="calculator">
-\(\displaystyle f{}{{t}}=a x^{1/c}+b \sqrt[g]{x}+1/x^h \) 
+\(f{}{{x}}=x^{c}(g x-a)(x-b)\) 
 </span>.
-<span class="calculatorHidden">
-TurnOnRules("sqrt", "ConvertShortDenominatorToNegativePower", "CommonDenominatorOneNonFraction");
-</span>
 <br>
 Answer: \(f'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswer">
 \(

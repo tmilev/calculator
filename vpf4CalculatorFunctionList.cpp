@@ -786,22 +786,34 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("\\tan", CalculatorFunctionsGeneral::innerTan, "",
    "Tangent function. Substitutes \\tan{}{{x}}=\\sin{}x/\\cos x. ",
-   "\\tan{}(3.1415); \\tan 1.570796327", true, false)
+   "\\tan{}(3.1415); \\tan 1.570796327", true, false,
+   "CalculatorFunctionsGeneral::innerTan",
+   "ExpressTanViaSineCosine"
+   )
    ;
   this->AddOperationInnerHandler
   ("\\cot", CalculatorFunctionsGeneral::innerCot, "",
    "Tangent function. Substitutes \\tan{}{{x}}=\\cos{}x/\\sin x. ",
-   "\\cot{}(3.1415); \\cot 1.570796327", true, false)
+   "\\cot{}(3.1415); \\cot 1.570796327", true, false,
+   "CalculatorFunctionsGeneral::innerCot",
+   "ExpressCotViaSineCosine"
+   )
    ;
   this->AddOperationInnerHandler
   ("\\csc", CalculatorFunctionsGeneral::innerCsc, "",
    "Cosecant function. Substitutes \\csc{}{{x}}=1/\\sin x. ",
-   "\\csc{}(3.1415); \\csc 1.570796327", true, false)
+   "\\csc{}(3.1415); \\csc 1.570796327", true, false,
+   "CalculatorFunctionsGeneral::innerCsc",
+   "ExpressCscViaSine"
+   )
    ;
   this->AddOperationInnerHandler
   ("\\sec", CalculatorFunctionsGeneral::innerSec, "",
    "Secant function. Substitutes \\sec{}{{x}}=1/\\sec x. ",
-   "\\sec{}(3.1415); \\sec 1.570796327", true, false)
+   "\\sec{}(3.1415); \\sec 1.570796327", true, false,
+   "CalculatorFunctionsGeneral::innerSec",
+   "ExpressSecViaCosine"
+   )
    ;
 
   this->AddOperationInnerHandler
@@ -2239,7 +2251,9 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationOuterHandler
   ("*", CalculatorFunctionsGeneral::outerCommuteAtimesBifUnivariate, "",
    "Commutative law: replaces a*b by b*a provided that 1) a and and b depend on exactly one user-defined variable, 2) a is not a constant and 3) a>b as an expression. ",
-   "x(x+1)^{-1}x; x(y+1)^{-1}x", true, false, "CalculatorFunctionsGeneral::outerCommuteAtimesBifUnivariate");
+   "x(x+1)^{-1}x; x(y+1)^{-1}x", true, false,
+   "CalculatorFunctionsGeneral::outerCommuteAtimesBifUnivariate",
+   "CommuteIfUnivariate");
   this->AddOperationOuterHandler
   ("*", Calculator::outerExtractBaseMultiplication, "",
    "Pulls rationals in the front of multiplicative terms.",

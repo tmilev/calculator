@@ -231,6 +231,7 @@ class Expression
   bool IsContext()const;
   bool NeedsParenthesisForBaseOfExponent()const;
   bool NeedsParenthesisForMultiplication()const;
+  bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost()const;
 
   int GetExpressionTreeSize()const;
   template <class theType>

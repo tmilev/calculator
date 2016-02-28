@@ -261,6 +261,9 @@ public:
   static std::string GetTableUnsafeNameUsersOfFile(const std::string& inputFileName);
   bool startMySQLDatabaseIfNotAlreadyStarted(std::stringstream* commentsOnFailure);
   bool startMySQLDatabase(std::stringstream* commentsOnFailure);
+  static std::string ToStringSuggestionsReasonsForFailure
+(const std::string& inputUsernameUnsafe, DatabaseRoutines& theRoutines, UserCalculator& theUser)
+;
   bool InsertRow
   (const std::string& primaryKeyUnsafe, const std::string& primaryValueUnsafe,
    const std::string& tableNameUnsafe, std::stringstream& commentsOnFailure)

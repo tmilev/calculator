@@ -90,6 +90,17 @@ void Calculator::initPredefinedInnerFunctions()
    "randomInteger((-2,-1), (2,5));",
    true, false, "CalculatorConversions::innerRandomInteger");
   this->AddOperationInnerHandler
+  ("TurnOffRules", CalculatorFunctionsGeneral::innerTurnOffRules, "",
+   "Turns off computational rules.",
+   "TurnOffRules(\"\\sqrt\"); a= \\sqrt[4]{t}; TurnOnRules(\"\\sqrt\"); a",
+   true, false, "CalculatorConversions::innerTurnOffRules");
+  this->AddOperationInnerHandler
+  ("TurnOnRules", CalculatorFunctionsGeneral::innerTurnOnRules, "",
+   "Turns on computational rules.",
+   "TurnOffRules(\"\\sqrt\"); a= \\sqrt[4]{t}; TurnOnRules(\"\\sqrt\"); a",
+   true, false, "CalculatorConversions::innerTurnOnRules");
+
+  this->AddOperationInnerHandler
   ("or", CalculatorFunctionsGeneral::innerOr, "",
    "Logical or.",
    "0 or 0; 0 or 1; 1 or 0; 1 or 1; a or 1; a or 0;",

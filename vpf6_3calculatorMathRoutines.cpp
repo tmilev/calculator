@@ -6395,6 +6395,55 @@ bool CalculatorFunctionsGeneral::innerIf
   return false;
 }
 
+bool CalculatorFunctionsGeneral::innerTurnRulesOnOff
+(Calculator& theCommands, const Expression& input, Expression& output, bool turnOff)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTurnRulesOnOff");
+  List<std::string> rulesToTurnOff;
+  std::string currentRule;
+  int turnOffOp=theCommands.theAtoms.GetIndexIMustContainTheObject("TurnOffRules");
+  if (!input.StartsWith(turnOffOp))
+  { if (input.IsOfType<std::string>(&currentRule))
+      rulesToTurnOff.AddOnTop(currentRule);
+    else if (input.IsAtom(&currentRule))
+      rulesToTurnOff.AddOnTop(currentRule);
+    else
+      return theCommands << "Could not extract rule to turn off from " << input.ToString() << ". ";
+  } else
+    for (int i=1; i<input.children.size; i++)
+      if (input[i].IsOfType<std::string>(&currentRule))
+        rulesToTurnOff.AddOnTop(currentRule);
+      else if (input[i].IsAtom(&currentRule))
+        rulesToTurnOff.AddOnTop(currentRule);
+      else
+        return theCommands << "Could not extract rule to turn off from " << input[i].ToString() << ". ";
+  for (int i=0; i<rulesToTurnOff.size; i++)
+    if (!theCommands.theAtoms.Contains(rulesToTurnOff[i]))
+      return theCommands << "Can't find atom for rule: " << rulesToTurnOff[i]
+      << "Turn-off rules command failed. ";
+  for (int i=0; i<rulesToTurnOff.size; i++)
+  { int ruleIndex= theCommands.theAtoms.GetIndex(rulesToTurnOff[i]);
+    for (int j=0; j<theCommands.FunctionHandlers[ruleIndex].size; j++)
+    { theCommands.FunctionHandlers[ruleIndex][j].flagDisabledByUser=turnOff;
+      theCommands.flagDefaultRulesWereTamperedWith=true;
+    }
+  }
+  std::stringstream out;
+  out << "Turned off rules: " << rulesToTurnOff.ToStringCommaDelimited() << ". ";
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerTurnOffRules
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTurnOffRules");
+  return CalculatorFunctionsGeneral::innerTurnRulesOnOff(theCommands, input, output, true);
+}
+
+bool CalculatorFunctionsGeneral::innerTurnOnRules
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTurnOnRules");
+  return CalculatorFunctionsGeneral::innerTurnRulesOnOff(theCommands, input, output, false);
+}
+
 bool CalculatorFunctionsGeneral::innerRandomInteger
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRandomInteger");

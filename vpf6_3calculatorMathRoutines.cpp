@@ -6400,8 +6400,7 @@ bool CalculatorFunctionsGeneral::innerTurnRulesOnOff
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTurnRulesOnOff");
   List<std::string> rulesToTurnOff;
   std::string currentRule;
-  int turnOffOp=theCommands.theAtoms.GetIndexIMustContainTheObject("TurnOffRules");
-  if (!input.StartsWith(turnOffOp))
+  if (!input.StartsWith(theCommands.opTurnOffRules()) && !input.StartsWith(theCommands.opTurnOnRules()))
   { if (input.IsOfType<std::string>(&currentRule))
       rulesToTurnOff.AddOnTop(currentRule);
     else if (input.IsAtom(&currentRule))
@@ -6432,8 +6431,11 @@ bool CalculatorFunctionsGeneral::innerTurnRulesOnOff
     }
   }
   std::stringstream out;
-  out << "Turned " << (turnOff ? "off" : "on") << " rules: " << rulesToTurnOff.ToStringCommaDelimited() << ". ";
-  return output.AssignValue(out.str(), theCommands);
+  out << "\\text{ Turned " << (turnOff ? "off" : "on") << " rule(s): "
+  << rulesToTurnOff.ToStringCommaDelimited() << ". }";
+  Expression reportE;
+  reportE.AssignValue(out.str(), theCommands);
+  return output.MakeOX(theCommands, theCommands.opRulesChanged(), reportE);
 }
 
 bool CalculatorFunctionsGeneral::innerTurnOffRules

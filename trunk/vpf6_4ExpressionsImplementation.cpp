@@ -2097,13 +2097,55 @@ bool Expression::NeedsParenthesisForBaseOfExponent()const
   return false;
 }
 
+bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost()const
+{ if (this->owner==0)
+    return false;
+//  stOutput << "DEBUG: NeedsparenRightMost: " << this->ToString()  << ", Lispified: " << this->ToStringSemiFull() << "<hr>";
+  if (this->StartsWith(this->owner->opPlus()) || this->StartsWith(this->owner->opMinus()))
+    return true;
+  if (this->IsOfType<Rational>())
+    return this->GetValue<Rational>().NeedsParenthesisForMultiplication();
+  if (this->IsOfType<AlgebraicNumber>())
+    return this->GetValue<AlgebraicNumber>().NeedsParenthesisForMultiplication();
+  if (this->IsAtom() || this->children.size==0)
+    return false;
+  if (this->children.size>1)
+  { const Expression& firstE=(*this)[0];
+    //const Expression& secondE=(*this)[1];
+    if (firstE.IsAtomGivenData(this->owner->opTimes()))
+      return false;
+    if (firstE.IsAtomGivenData(this->owner->opThePower()))
+      return false;
+    if (this->StartsWith(this->owner->opBind()))
+      return (*this)[1].NeedsParenthesisForMultiplication();
+    return false;
+  }
+  return false;
+}
+
 bool Expression::NeedsParenthesisForMultiplication()const
 { if (this->owner==0)
     return false;
+//  stOutput << "DEBUG: Needsparen: " << this->ToString()  << ", Lispified: " << this->ToStringSemiFull() << "<hr>";
   if (this->StartsWith(this->owner->opPlus()) || this->StartsWith(this->owner->opMinus()))
     return true;
+  if (this->IsOfType<Rational>())
+    return this->GetValue<Rational>().NeedsParenthesisForMultiplication();
   if (this->IsOfType<AlgebraicNumber>())
     return this->GetValue<AlgebraicNumber>().NeedsParenthesisForMultiplication();
+  if (this->IsAtom() || this->children.size==0)
+    return false;
+  if (this->children.size>1)
+  { const Expression& firstE=(*this)[0];
+    //const Expression& secondE=(*this)[1];
+    if (firstE.IsAtomGivenData(this->owner->opTimes()))
+      return false;
+    if (firstE.IsAtomGivenData(this->owner->opThePower()))
+      return false;
+    if (this->StartsWith(this->owner->opBind()))
+      return (*this)[1].NeedsParenthesisForMultiplication();
+    return true;
+  }
   return false;
 }
 
@@ -2190,7 +2232,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     else
     { std::string firstE= (*this)[1].ToString(theFormat);
       bool firstNeedsBrackets=(*this)[1].NeedsParenthesisForMultiplication();
-      bool secondNeedsBrackets=(*this)[2].NeedsParenthesisForMultiplication();
+      bool secondNeedsBrackets=(*this)[2].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
       if (firstE=="-1" )
       { firstE="-";
         firstNeedsBrackets=false;
@@ -2248,8 +2290,9 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   else if (this->StartsWith(this->owner->opThePower(), 3))
   { bool involvesExponentsInterpretedAsFunctions=false;
     const Expression& firstE=(*this)[1];
+    const Expression& secondE=(*this)[2];
     if (firstE.StartsWith(-1, 2))
-      if (firstE[0].IsAtomWhoseExponentsAreInterpretedAsFunction())
+      if (firstE[0].IsAtomWhoseExponentsAreInterpretedAsFunction() && !secondE.IsEqualToMOne())
       { involvesExponentsInterpretedAsFunctions=true;
         Expression newE, newFunE;
         newFunE.MakeXOX(*this->owner, this->owner->opThePower(), firstE[0], (*this)[2]);

@@ -1030,10 +1030,12 @@ int WebWorker::ProcessSubmitProblem()
 #endif // MACRO_use_MySQL
   stOutput << "<table width=\"300\"><tr><td>";
   if (!isCorrect)
-  { stOutput << "<span style=\"color:red\"><b>Your answer appears to be incorrect.</b></span>";
-    //stOutput << "DEBUG: The calculator output: " << theInterpreter.outputString;
+  { stOutput << "<span style=\"color:red\"><b>Your answer appears to be incorrect. </b></span>";
+    if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
+      stOutput << "For debugging: the calculator output is: " << theInterpreter.outputString
+      << "Comments: " << theInterpreter.Comments.str();
   } else
-    stOutput << "<span style=\"color:green\"><b>Correct!</b></span>";
+    stOutput << "<span style=\"color:green\"><b>Correct! </b></span>";
   stOutput << "</td></tr>";
 #ifdef MACRO_use_MySQL
   if (theProblem.flagIsForReal)

@@ -626,7 +626,7 @@ void WebWorker::StandardOutputAfterTimeOut(const std::string& input)
 
 std::string WebWorker::ToStringCalculatorArgumentsHumanReadable()
 { MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsHumanReadable");
-  if (theGlobalVariables.GetWebInput("debugFlag")!="true")
+  if (!theGlobalVariables.UserDebugFlagOn())
     return "";
   std::stringstream out;
   out << "<hr>";

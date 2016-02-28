@@ -1872,8 +1872,9 @@ void Calculator::AddOperationBinaryInnerHandlerWithTypes
 }
 
 void Calculator::AddOperationHandler
-(const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing,
- const std::string& opDescription, const std::string& opExample, bool isInner, bool visible, bool isExperimental, const std::string& inputAdditionalIdentifier)
+(const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing, const std::string& opDescription,
+ const std::string& opExample, bool isInner, bool visible, bool experimental,
+ const std::string& inputAdditionalIdentifier, const std::string& inputCalculatorIdentifier)
 { int indexOp=this->theAtoms.GetIndex(theOpName);
   if (indexOp==-1)
   { this->theAtoms.AddOnTop(theOpName);
@@ -1883,18 +1884,38 @@ void Calculator::AddOperationHandler
   }
   if (opArgumentListIgnoredForTheTimeBeing!="")
     crash << "This section of code is not implemented yet. Crashing to let you know. " << crash;
-  Function theFun(*this, indexOp, this->FunctionHandlers[indexOp].size, handler, 0, opDescription, opExample, isInner, visible, isExperimental);
+  Function theFun
+  (*this, indexOp, this->FunctionHandlers[indexOp].size, handler, 0, opDescription, opExample,
+   isInner, visible, experimental);
   theFun.additionalIdentifier=inputAdditionalIdentifier;
+  theFun.calculatorIdentifier=inputCalculatorIdentifier;
   if (theOpName=="*" || theOpName=="+" || theOpName=="/" || theOpName=="\\otimes" || theOpName=="^")
     this->FunctionHandlers[indexOp].Reserve(100);
   else
     this->FunctionHandlers[indexOp].Reserve(10);
   this->FunctionHandlers[indexOp].AddOnTop(theFun);
+  if (theFun.calculatorIdentifier!="")
+  { int namedRuleIndex=this->namedRules.GetIndex(theFun.calculatorIdentifier);
+    if (namedRuleIndex==-1)
+    { this->namedRules.AddOnTop(theFun.calculatorIdentifier);
+      this->namedRulesLocations.SetSize(this->namedRulesLocations.size+1);
+      this->namedRulesLocations.LastObject()->SetSize(0);
+      namedRuleIndex=this->namedRules.size-1;
+    }
+    List<int> triple;
+    triple.SetSize(3);
+    triple[0]=0;
+    triple[1]=indexOp;
+    triple[2]=this->FunctionHandlers[indexOp].size-1;
+    this->namedRulesLocations[namedRuleIndex].AddOnTop(triple);
+  }
 }
 
 void Calculator::AddOperationComposite
-(const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing,
- const std::string& opDescription, const std::string& opExample, bool isInner, bool visible, bool isExperimental, const std::string& inputAdditionalIdentifier)
+  (const std::string& theOpName, Expression::FunctionAddress handler,
+   const std::string& opArgumentListIgnoredForTheTimeBeing, const std::string& opDescription,
+   const std::string& opExample, bool isInner, bool visible, bool experimental,
+   const std::string& inputAdditionalIdentifier, const std::string& inputCalculatorIdentifier)
 { MacroRegisterFunctionWithName("Calculator::AddOperationComposite");
   int theIndex=this->operationsComposite.GetIndex(theOpName);
   if (opArgumentListIgnoredForTheTimeBeing!="")
@@ -1905,10 +1926,28 @@ void Calculator::AddOperationComposite
     this->operationsCompositeHandlers.SetSize(this->operationsCompositeHandlers.size+1);
     this->operationsCompositeHandlers.LastObject()->SetSize(0);
   }
-  Function theFun(*this, theIndex, this->operationsCompositeHandlers[theIndex].size, handler, 0, opDescription, opExample, isInner, visible, isExperimental);
+  Function theFun
+  (*this, theIndex, this->operationsCompositeHandlers[theIndex].size, handler, 0, opDescription,
+   opExample, isInner, visible, experimental);
   theFun.additionalIdentifier=inputAdditionalIdentifier;
+  theFun.calculatorIdentifier=inputCalculatorIdentifier;
   theFun.flagIsCompositeHandler=true;
   this->operationsCompositeHandlers[theIndex].AddOnTop(theFun);
+  if (theFun.calculatorIdentifier!="")
+  { int namedRuleIndex=this->namedRules.GetIndex(theFun.calculatorIdentifier);
+    if (namedRuleIndex==-1)
+    { this->namedRules.AddOnTop(theFun.calculatorIdentifier);
+      this->namedRulesLocations.SetSize(this->namedRulesLocations.size+1);
+      this->namedRulesLocations.LastObject()->SetSize(0);
+      namedRuleIndex=this->namedRules.size-1;
+    }
+    List<int> triple;
+    triple.SetSize(3);
+    triple[0]=1;
+    triple[1]=theIndex;
+    triple[2]=this->operationsCompositeHandlers[theIndex].size-1;
+    this->namedRulesLocations[namedRuleIndex].AddOnTop(triple);
+  }
 }
 
 std::string Calculator::ElementToStringNonBoundVars()
@@ -1993,6 +2032,8 @@ std::string Function::ToStringFull()
 //    out << " \nFunction memory address: " << std::hex << (int) this->theFunction << ". ";
     // use of unsigned long is correct on i386 and amd64
     // uintptr_t is only available in c++0x
+    if (this->calculatorIdentifier!="")
+      out << "Rule name: " << this->calculatorIdentifier << ". ";
     if (this->additionalIdentifier!="")
       out << "Handler: " << this->additionalIdentifier << ". ";
     out << "Function memory address: " << std::hex << (unsigned long) this->theFunction << ". ";

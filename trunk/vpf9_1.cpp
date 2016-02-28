@@ -227,6 +227,10 @@ bool GlobalVariables::UserSecureNonAdminOperationsAllowed()
   (this->flagUsingSSLinCurrentConnection || this->flagIgnoreSecurityToWorkaroundSafarisBugs);
 }
 
+bool GlobalVariables::UserDebugFlagOn()
+{ return theGlobalVariables.GetWebInput("debugFlag")=="true";
+}
+
 bool GlobalVariables::UserDefaultHasAdminRights()
 { return this->flagLoggedIn && (this->userRole=="admin") && !this->flagIgnoreSecurityToWorkaroundSafarisBugs;
 }

@@ -6417,18 +6417,22 @@ bool CalculatorFunctionsGeneral::innerTurnRulesOnOff
       else
         return theCommands << "Could not extract rule to turn off from " << input[i].ToString() << ". ";
   for (int i=0; i<rulesToTurnOff.size; i++)
-    if (!theCommands.theAtoms.Contains(rulesToTurnOff[i]))
-      return theCommands << "Can't find atom for rule: " << rulesToTurnOff[i]
+    if (!theCommands.namedRules.Contains(rulesToTurnOff[i]))
+      return theCommands << "Can't find named rule: " << rulesToTurnOff[i]
       << "Turn-off rules command failed. ";
   for (int i=0; i<rulesToTurnOff.size; i++)
-  { int ruleIndex= theCommands.theAtoms.GetIndex(rulesToTurnOff[i]);
-    for (int j=0; j<theCommands.FunctionHandlers[ruleIndex].size; j++)
-    { theCommands.FunctionHandlers[ruleIndex][j].flagDisabledByUser=turnOff;
+  { int namedRuleIndex= theCommands.namedRules.GetIndex(rulesToTurnOff[i]);
+    for (int j=0; j<theCommands.namedRulesLocations[namedRuleIndex].size; j++)
+    { List<int>& currentTriple=theCommands.namedRulesLocations[namedRuleIndex][j];
       theCommands.flagDefaultRulesWereTamperedWith=true;
+      if (currentTriple[0]==0)
+        theCommands.FunctionHandlers[currentTriple[1]][currentTriple[2]].flagDisabledByUser=turnOff;
+      if (currentTriple[0]==1)
+        theCommands.operationsCompositeHandlers[currentTriple[1]][currentTriple[2]].flagDisabledByUser=turnOff;
     }
   }
   std::stringstream out;
-  out << "Turned off rules: " << rulesToTurnOff.ToStringCommaDelimited() << ". ";
+  out << "Turned " << (turnOff ? "off" : "on") << " rules: " << rulesToTurnOff.ToStringCommaDelimited() << ". ";
   return output.AssignValue(out.str(), theCommands);
 }
 

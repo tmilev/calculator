@@ -3,35 +3,6 @@
 #include "vpfHeader7DatabaseInterface_MySQL.h"
 ProjectInformationInstance ProjectInfoVpf8_1MySQLcpp(__FILE__, "MySQL interface. ");
 
-#ifdef MACRO_use_MySQL
-std::string ToStringSuggestionsReasonsForFailure
-(const std::string& inputUsernameUnsafe, DatabaseRoutines& theRoutines, UserCalculator& theUser)
-{ MacroRegisterFunctionWithName("ToStringSuggestionsReasonsForFailure");
-  std::stringstream out;
-  bool userFound=false;
-  if (theUser.Iexist(theRoutines))
-    userFound=true;
-  else if (theUser.username.value.find('@')==std::string::npos)
-    { theUser.username.value+="@umb.edu";
-      if (theUser.Iexist(theRoutines))
-        userFound=true;
-    }
-  if (userFound)
-  { std::string recommendedNewName;
-    if (!theUser.FetchOneColumn("username", recommendedNewName, theRoutines, &out))
-      return out.str();
-    theUser.username.value=recommendedNewName;
-  }
-  if (theUser.username.value!=inputUsernameUnsafe)
-  { out << "<br>Username is case sensitive and consists of the full email address: perhaps you meant: <br>"
-    << theUser.username.value << "<br>";
-    //out << "<hr>" << Crasher::GetStackTraceEtcErrorMessage() << "<hr>";
-  }
-  return out.str();
-}
-#endif // MACRO_use_MySQL
-
-
 bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
 (const std::string& inputUsernameUnsafe, const std::string& inputPassword,
  std::string& inputOutputAuthenticationToken, std::string& outputUserRole, std::stringstream* comments)
@@ -101,7 +72,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     return true;
   }
   if (comments!=0)
-    *comments << ToStringSuggestionsReasonsForFailure(inputUsernameUnsafe, theRoutines, theUser);
+    *comments << DatabaseRoutines::ToStringSuggestionsReasonsForFailure(inputUsernameUnsafe, theRoutines, theUser);
   return false;
 #else
   return true;
@@ -1972,6 +1943,34 @@ EmailRoutines::EmailRoutines()
   //this->ccEmail="todor.milev@gmail.com";
   this->smtpWithPort= "smtp.gmail.com:587";
   this->fromEmailAuth=Crypto::CharsToBase64String("A good day to use a computer algebra system");
+}
+#endif // MACRO_use_MySQL
+
+#ifdef MACRO_use_MySQL
+std::string DatabaseRoutines::ToStringSuggestionsReasonsForFailure
+(const std::string& inputUsernameUnsafe, DatabaseRoutines& theRoutines, UserCalculator& theUser)
+{ MacroRegisterFunctionWithName("ToStringSuggestionsReasonsForFailure");
+  std::stringstream out;
+  bool userFound=false;
+  if (theUser.Iexist(theRoutines))
+    userFound=true;
+  else if (theUser.username.value.find('@')==std::string::npos)
+    { theUser.username.value+="@umb.edu";
+      if (theUser.Iexist(theRoutines))
+        userFound=true;
+    }
+  if (userFound)
+  { std::string recommendedNewName;
+    if (!theUser.FetchOneColumn("username", recommendedNewName, theRoutines, &out))
+      return out.str();
+    theUser.username.value=recommendedNewName;
+  }
+  if (theUser.username.value!=inputUsernameUnsafe)
+  { out << "<br>Username is case sensitive and consists of the full email address: perhaps you meant: <br>"
+    << theUser.username.value << "<br>";
+    //out << "<hr>" << Crasher::GetStackTraceEtcErrorMessage() << "<hr>";
+  }
+  return out.str();
 }
 #endif // MACRO_use_MySQL
 

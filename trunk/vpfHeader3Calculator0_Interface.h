@@ -474,6 +474,7 @@ class Function
   bool flagMayActOnBoundVars;
   bool flagIamVisible;
   bool flagIsExperimental;
+  bool flagDisabledByUser;
   Expression::FunctionAddress theFunction;
 
   std::string ToStringShort();
@@ -510,6 +511,7 @@ class Function
     this->indexOperation=-1;
     this->owner=0;
     this->flagIsCompositeHandler=false;
+    this->flagDisabledByUser=false;
   }
   Function
   (Calculator& inputOwner, int inputIndexOperation, int inputIndexAmongOperationHandlers, const Expression::FunctionAddress& functionPointer, Expression* inputArgTypes, const std::string& description, const std::string& inputExample,
@@ -803,6 +805,7 @@ public:
   bool flagDisplayContext;
   bool flagShowCalculatorInternalStatus;
   bool flagShowCalculatorExamples;
+  bool flagDefaultRulesWereTamperedWith;
 
   bool flagWriteLatexPlots;
 

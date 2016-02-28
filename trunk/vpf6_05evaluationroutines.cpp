@@ -63,7 +63,8 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
       for (int i=0; i<theHandlers->size; i++)
         if ((*theHandlers)[i].theFunction(theCommands, input, output))
         { if (theCommands.flagLogEvaluatioN)
-            theCommands << "<hr>Built-in substitution: " << (*theHandlers)[i].ToStringSummary() << "<br>Rule stack id: "
+            theCommands << "<hr>Built-in substitution: " << (*theHandlers)[i].ToStringSummary()
+            << "<br>Rule stack id: "
             << theCommands.RuleStackCacheIndex;
           return true;
         }
@@ -74,6 +75,8 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
   for (int i=0; i<theCommands.FunctionHandlers[functionNameNode.theData].size; i++)
     if (!theCommands.FunctionHandlers[functionNameNode.theData][i].flagIsInner)
     { Function& outerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
+      if (outerFun.flagDisabledByUser)
+        continue;
       if (outerFun.theFunction(theCommands, input, output))
         if(output!=input)
         { output.CheckConsistency();
@@ -84,6 +87,8 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
         }
     } else
     { Function& innerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
+      if (innerFun.flagDisabledByUser)
+        continue;
       if (input.children.size>2)
       { //stOutput << "more than 2 children: " << input.Lispify();
         if (innerFun.inputFitsMyInnerType(input))
@@ -94,8 +99,7 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
               << theCommands.RuleStackCacheIndex;
             return true;
           }
-      } else
-      if (input.children.size==2)
+      } else if (input.children.size==2)
         if (innerFun.inputFitsMyInnerType(input[1]))
           if (innerFun.theFunction(theCommands, input[1], output))
           { output.CheckConsistency();

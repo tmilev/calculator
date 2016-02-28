@@ -15,6 +15,13 @@ public:
   static bool innerCrashByVectorOutOfBounds
   (Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerTurnRulesOnOff
+  (Calculator& theCommands, const Expression& input, Expression& output, bool turnOff);
+
+  static bool innerTurnOffRules
+  (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTurnOnRules
+  (Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerRandomInteger
   (Calculator& theCommands, const Expression& input, Expression& output);

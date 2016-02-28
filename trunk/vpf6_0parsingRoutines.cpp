@@ -57,6 +57,7 @@ void Calculator::reset()
   this->flagForkingProcessAllowed=true;
   this->flagNoApproximations=false;
   this->flagCurrentExpressionIsNonCacheable=false;
+  this->flagDefaultRulesWereTamperedWith=false;
   this->MaxLatexChars=2000;
   this->numEmptyTokensStart=9;
   this->theObjectContainer.reset();
@@ -600,7 +601,8 @@ void Calculator::ParseFillDictionary(const std::string& input)
     if (!inQuotes )
       if (this->isInterpretedAsEmptySpace(current))
         current=" ";
-    bool shouldSplit= (this->isLeftSeparator(current[0]) || this->isRightSeparator(LookAheadChar) || current==" ");
+    bool shouldSplit=
+    (this->isLeftSeparator(current[0]) || this->isRightSeparator(LookAheadChar) || current==" ");
     if (MathRoutines::isADigit(LookAheadChar))
       if (current[current.size()-1]=='\\')
         shouldSplit=true;
@@ -614,11 +616,14 @@ void Calculator::ParseFillDictionary(const std::string& input)
 
     if (!shouldSplit)
       continue;
-    if (this->controlSequences.Contains(current))
+    bool mustInterpretAsVariable=false;
+    if (inQuotes && current!="\"")
+      mustInterpretAsVariable=true;
+    if (this->controlSequences.Contains(current) && !mustInterpretAsVariable)
     { currentElement.controlIndex=this->controlSequences.GetIndex(current);
       currentElement.theData.reset(*this);
       (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
-    } else if (MathRoutines::isADigit(current, &currentDigit))
+    } else if (MathRoutines::isADigit(current, &currentDigit) && !mustInterpretAsVariable)
     { currentElement.theData.AssignValue<Rational>(currentDigit, *this);
       currentElement.controlIndex=this->conInteger();
       (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);

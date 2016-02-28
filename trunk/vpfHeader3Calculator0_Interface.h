@@ -172,6 +172,7 @@ class Expression
   template<class coefficient>
   bool AssignMatrix(const Matrix<coefficient>& input, Calculator& owner);
   bool DivisionByMeShouldBeWrittenInExponentForm()const;
+  bool IsCalculatorStatusChanger()const;
   bool AssignMeMyChild(int childIndex)
   { Expression tempExp=(*this)[childIndex];
     this->operator=(tempExp);
@@ -1163,6 +1164,15 @@ public:
   }
   int opDefine()
   { return this->theAtoms.GetIndexIMustContainTheObject("=");
+  }
+  int opRulesChanged()
+  { return this->theAtoms.GetIndexIMustContainTheObject("RulesChanged");
+  }
+  int opTurnOnRules()
+  { return this->theAtoms.GetIndexIMustContainTheObject("TurnOnRules");
+  }
+  int opTurnOffRules()
+  { return this->theAtoms.GetIndexIMustContainTheObject("TurnOffRules");
   }
   int opSqrt()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\sqrt");

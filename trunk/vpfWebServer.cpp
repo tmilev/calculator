@@ -920,10 +920,30 @@ void WebWorker::OutputStandardResult()
     stOutput << "</section>";
   std::stringstream tempStream3;
   stOutput << "\n\n<script language=\"javascript\">\n" << "  var theAutocompleteDictionary = new Array;\n  ";
+  HashedList<std::string, MathRoutines::hashString> autocompleteKeyWords;
+  autocompleteKeyWords.SetExpectedSize(theParser.theAtoms.size*2);
   for (int i=0; i<theParser.theAtoms.size; i++)
-    if (theParser.theAtoms[i].size()>2)
-      stOutput << "  theAutocompleteDictionary.push(\"" << theParser.theAtoms[i] << "\");\n";
-
+    autocompleteKeyWords.AddOnTopNoRepetition(theParser.theAtoms[i]);
+  for (int i=0; i<theParser.namedRules.size; i++)
+    autocompleteKeyWords.AddOnTopNoRepetition(theParser.namedRules[i]);
+  autocompleteKeyWords.AddOnTopNoRepetition("NoFrac");
+  autocompleteKeyWords.AddOnTopNoRepetition("NoApproximations");
+  autocompleteKeyWords.AddOnTopNoRepetition("ShowContext");
+  autocompleteKeyWords.AddOnTopNoRepetition("LogParsing");
+  autocompleteKeyWords.AddOnTopNoRepetition("LogEvaluation");
+  autocompleteKeyWords.AddOnTopNoRepetition("NumberColors");
+  autocompleteKeyWords.AddOnTopNoRepetition("LogRules");
+  autocompleteKeyWords.AddOnTopNoRepetition("LogCache");
+  autocompleteKeyWords.AddOnTopNoRepetition("LogFull");
+  autocompleteKeyWords.AddOnTopNoRepetition("LatexLink");
+  autocompleteKeyWords.AddOnTopNoRepetition("UseLnInsteadOfLog");
+  autocompleteKeyWords.AddOnTopNoRepetition("CalculatorStatus");
+  autocompleteKeyWords.AddOnTopNoRepetition("FullTree");
+  autocompleteKeyWords.AddOnTopNoRepetition("HideLHS");
+  autocompleteKeyWords.AddOnTopNoRepetition("DontDistribute");
+  for (int i=0; i<autocompleteKeyWords.size; i++)
+    if (autocompleteKeyWords[i].size()>2)
+      stOutput << "  theAutocompleteDictionary.push(\"" << autocompleteKeyWords[i] << "\");\n";
   stOutput << "</script>\n";
   stOutput << "</body></html>";
   stOutput << "<!--";

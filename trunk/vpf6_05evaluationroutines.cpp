@@ -344,7 +344,7 @@ bool Calculator::EvaluateExpression
           break;
         }
         if (output.StartsWith(theCommands.opEndStatement()))
-          if (output[i].StartsWith(theCommands.opDefine()) || output[i].StartsWith(theCommands.opDefineConditional()))
+          if (output[i].IsCalculatorStatusChanger())
             theRuleStackMaintainer.AddRule(output[i]);
       }
     /////-------Children evaluation end-------

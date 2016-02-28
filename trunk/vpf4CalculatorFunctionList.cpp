@@ -1806,12 +1806,16 @@ void Calculator::initPredefinedStandardOperations()
    "Combines fractions on condition that all participants commute. \
    Equivalent to {{a}}/{{b}}+{{c}}/{{d}}=(a *d+c*b)/(d*b); \
    Please note that this transformation is not correct if b and d do not commute. ",
-   "a/b+c/d", true, false, "CalculatorFunctionsGeneral::outerCombineFractionsCommutative");
+   "a/b+c/d", true, false,
+   "CalculatorFunctionsGeneral::outerCombineFractionsCommutative",
+   "CommonDenominator");
 
   this->AddOperationOuterHandler
   ("+", this->outerCombineFractions, "",
    "Combines fractions. Equivalent to {{a}}/{{b}}+{{c}}=(a+c*b)/b; ",
-   "f{}{{x}}=(2x+3)/(2x+1);\ng{}{{y}}=(y-2)/(y+3);\ng{}f{}z;\nf{}g{}z", true);
+   "f{}{{x}}=(2x+3)/(2x+1);\ng{}{{y}}=(y-2)/(y+3);\ng{}f{}z;\nf{}g{}z", true, false,
+   "Calculator::outerCombineFractions",
+   "CommonDenominatorOneNonFraction");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor, this->opElementTensorGVM(), this->opElementTensorGVM(),
    "Adds two elements of tensor products of generalized Verma modules. ",
@@ -2788,6 +2792,7 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler()
 { MacroRegisterFunctionWithName("Calculator::initPredefinedStandardOperationsWithoutHandler");
   //additional operations treated like function names but otherwise not parsed as syntactic elements.
 
+  this->AddOperationNoRepetitionAllowed("RulesChanged");
   this->AddOperationNoRepetitionAllowed("Freeze");
   this->AddOperationNoRepetitionAllowed("\\infty");
   this->AddOperationNoRepetitionAllowed("MonomialCollection");

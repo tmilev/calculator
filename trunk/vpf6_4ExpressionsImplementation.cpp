@@ -2622,6 +2622,16 @@ bool Expression::IsKnownFunctionWithComplexRange(std::string* outputWhichOperati
   return this->owner->knownFunctionsWithComplexRange.Contains(operationName);
 }
 
+bool Expression::IsCalculatorStatusChanger()const
+{ if (this->owner==0)
+    return false;
+//  stOutput << "DEBUG: Calling IsCalculatorStatusChanger for: " << this->ToString();
+  return
+  this->StartsWith(this->owner->opDefine()) ||
+  this->StartsWith(this->owner->opDefineConditional()) ||
+  this->StartsWith(this->owner->opRulesChanged());
+}
+
 bool Expression::IsArithmeticOperation(std::string* outputWhichOperation)const
 { if (this->owner==0)
     return false;

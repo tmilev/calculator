@@ -1,0 +1,30 @@
+<span class="setCalculatorExamProblem">
+</span>
+Compute the derivative of the function. 
+
+<span class="calculatorHidden">
+\(
+a=randomInteger((-1,-1), (1,1));  
+b=randomInteger((-1,-1), (1,1));  
+c=randomInteger((-1,-1), (1,1));  
+g=randomInteger((-1,-1), (1,1));  
+h= randomInteger(2,5);  
+k= randomInteger(2,5);
+l= randomInteger(2,5);  
+m= randomInteger(2,5); 
+TurnOffRules("sqrt", "ConvertShortDenominatorToNegativePower", "CommonDenominatorOneNonFraction", "DistributeMultiplication");
+\)</span>
+<br>
+<span class="calculator">
+\(\displaystyle f{}{{x}}=(a x^{1/h}+b x^{-1/k}) (c x^{-1/l}+ g x^{1/m})\) 
+</span>.
+<br>
+Answer: \(f'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswer">
+\(
+CompareFunctionsNumerically(d/dx(f{}x), AlgebraAnswer, 1, 5, 50, 0.0001);
+\)
+</textarea>
+
+
+
+

@@ -1579,6 +1579,8 @@ bool Calculator::GetMatrixExpressions(const Expression& input, Matrix<Expression
     output(0,0)=input;
     return true;
   }
+  if (input.children.size<2)
+    return false;
   if (!input[1].IsSequenceNElementS())
   { if (desiredNumRows>0)
       if (desiredNumRows!=1)

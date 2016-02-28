@@ -465,6 +465,7 @@ class Function
   Expression theArgumentTypes;
   std::string theDescription;
   std::string theExample;
+  std::string calculatorIdentifier;
   std::string additionalIdentifier;
   int indexOperation;
   int indexAmongOperationHandlers;
@@ -489,6 +490,7 @@ class Function
     this->flagMayActOnBoundVars=other.flagMayActOnBoundVars;
     this->flagIamVisible=other.flagIamVisible;
     this->flagIsExperimental=other.flagIsExperimental;
+    this->calculatorIdentifier=other.calculatorIdentifier;
     this->additionalIdentifier=other.additionalIdentifier;
     this->indexOperation=other.indexOperation;
     this->indexAmongOperationHandlers=other.indexAmongOperationHandlers;
@@ -515,7 +517,8 @@ class Function
   }
   Function
   (Calculator& inputOwner, int inputIndexOperation, int inputIndexAmongOperationHandlers, const Expression::FunctionAddress& functionPointer, Expression* inputArgTypes, const std::string& description, const std::string& inputExample,
-   bool inputflagIsInner, bool inputIsVisible=true, bool inputIsExperimental=false, bool inputflagMayActOnBoundVars=false)
+   bool inputflagIsInner, bool inputIsVisible=true, bool inputIsExperimental=false,
+   bool inputflagMayActOnBoundVars=false)
   { this->owner=&inputOwner;
     this->indexOperation=inputIndexOperation;
     this->indexAmongOperationHandlers=inputIndexAmongOperationHandlers;
@@ -713,6 +716,13 @@ public:
   HashedList<std::string, MathRoutines::hashString> operationsComposite;
   List<List<Function> > FunctionHandlers;
   List<List<Function> > operationsCompositeHandlers;
+  HashedList<std::string, MathRoutines::hashString> namedRules;
+  List<List<List<int> > > namedRulesLocations;//for each named rule we store a list of triple of ints.
+  //If first int is 0 then the named rule is a function handler.
+  //If first int is 1 then the named rule is a composite operation handler.
+  //Second int gives the index of the atom handled by the named rule.
+  //Third int gives the index of the rule within the list of handlers for that atom.
+
   HashedList<Expression> cachedRuleStacks;
 
 //Calculator functions have as arguments two expressions passed by reference,
@@ -1675,23 +1685,38 @@ public:
   void AddOperationBuiltInType(const std::string& theOpName);
   void AddKnownDoubleConstant(const std::string& theConstantName, double theValue);
   void AddOperationComposite
-  (const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing, const std::string& opDescription,
-   const std::string& opExample, bool isInner, bool visible, bool experimental, const std::string& inputAdditionalIdentifier);
+  (const std::string& theOpName, Expression::FunctionAddress handler,
+   const std::string& opArgumentListIgnoredForTheTimeBeing, const std::string& opDescription,
+   const std::string& opExample, bool isInner, bool visible, bool experimental,
+   const std::string& inputAdditionalIdentifier, const std::string& inputCalculatorIdentifier)
+   ;
   void AddOperationBinaryInnerHandlerWithTypes
   (const std::string& theOpName, Expression::FunctionAddress innerHandler, int leftType, int rightType, const std::string& opDescription,
    const std::string& opExample, bool visible=true, bool experimental=false, const std::string& inputAdditionalIdentifier="");
   void AddOperationHandler
   (const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing, const std::string& opDescription,
-   const std::string& opExample, bool isInner, bool visible, bool experimental, const std::string& inputAdditionalIdentifier);
+   const std::string& opExample, bool isInner, bool visible, bool experimental,
+   const std::string& inputAdditionalIdentifier, const std::string& inputCalculatorIdentifier)
+   ;
   void AddOperationInnerHandler
   (const std::string& theOpName, Expression::FunctionAddress innerHandler, const std::string& opArgumentListIgnoredForTheTimeBeing,
-   const std::string& opDescription, const std::string& opExample, bool visible=true, bool experimental=false, const std::string& inputAdditionalIdentifier="")
-  { this->AddOperationHandler(theOpName, innerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription, opExample, true, visible, experimental, inputAdditionalIdentifier);
+   const std::string& opDescription, const std::string& opExample, bool visible=true, bool experimental=false,
+   const std::string& inputAdditionalIdentifier="",
+   const std::string& inputCalculatorIdentifier=""
+  )
+  { this->AddOperationHandler
+    (theOpName, innerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription, opExample, true,
+     visible, experimental, inputAdditionalIdentifier, inputCalculatorIdentifier);
   }
   void AddOperationOuterHandler
   (const std::string& theOpName, Expression::FunctionAddress outerHandler, const std::string& opArgumentListIgnoredForTheTimeBeing,
-   const std::string& opDescription, const std::string& opExample, bool visible=true, bool experimental=false, const std::string& inputAdditionalIdentifier="")
-  { this->AddOperationHandler(theOpName, outerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription, opExample, false, visible, experimental, inputAdditionalIdentifier);
+   const std::string& opDescription, const std::string& opExample, bool visible=true, bool experimental=false,
+   const std::string& inputAdditionalIdentifier="",
+   const std::string& inputCalculatorIdentifier=""
+   )
+  { this->AddOperationHandler
+    (theOpName, outerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription, opExample, false,
+     visible, experimental, inputAdditionalIdentifier, inputCalculatorIdentifier);
   }
   void init();
   void reset();

@@ -109,8 +109,9 @@ void Calculator::init()
 { MacroRegisterFunctionWithName("Calculator::init");
   this->reset();
 
-  this->theAtoms.SetExpectedSize(300);
-  this->FunctionHandlers.SetExpectedSize(300);
+  this->theAtoms.SetExpectedSize(1000);
+  this->FunctionHandlers.SetExpectedSize(1000);
+  this->namedRules.SetExpectedSize(500);
   this->builtInTypes.SetExpectedSize(50);
   this->operationsComposite.SetExpectedSize(50);
   this->operationsCompositeHandlers.SetExpectedSize(50);

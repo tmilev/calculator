@@ -92,12 +92,14 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("TurnOffRules", CalculatorFunctionsGeneral::innerTurnOffRules, "",
    "Turns off computational rules.",
-   "TurnOffRules(\"\\sqrt\"); a= \\sqrt[4]{t}; TurnOnRules(\"\\sqrt\"); a",
+   "TurnOffRules(\"sqrt\"); \na= \\sqrt[4]{t}; \nTurnOnRules(\"sqrt\"); \na; \
+   \nTurnOffRules(\"ConvertShortDenominatorToNegativePower\"); \
+   \nb=1/t^3; TurnOnRules(\"ConvertShortDenominatorToNegativePower\"); b",
    true, false, "CalculatorConversions::innerTurnOffRules");
   this->AddOperationInnerHandler
   ("TurnOnRules", CalculatorFunctionsGeneral::innerTurnOnRules, "",
    "Turns on computational rules.",
-   "TurnOffRules(\"\\sqrt\"); a= \\sqrt[4]{t}; TurnOnRules(\"\\sqrt\"); a",
+   "TurnOffRules(\"sqrt\"); a= \\sqrt[4]{t}; TurnOnRules(\"sqrt\"); a",
    true, false, "CalculatorConversions::innerTurnOnRules");
 
   this->AddOperationInnerHandler
@@ -1669,7 +1671,8 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("\\sqrt", this->innerSqrt, "",
    "Square root of a rational, implemented as algebraic extension of the rationals. ",
-   "\\sqrt 2+\\sqrt 3;(\\sqrt{}2+\\sqrt{}3+\\sqrt{}6)^2", true);
+   "\\sqrt 2+\\sqrt 3;(\\sqrt{}2+\\sqrt{}3+\\sqrt{}6)^2", true, false, "Calculator::innerSqrt",
+   "sqrt");
 
   this->AddOperationInnerHandler
   ("FactorOneVarPolyOverRationals", this->innerFactorPoly, "",
@@ -2211,11 +2214,14 @@ void Calculator::initPredefinedStandardOperations()
   ("*", CalculatorFunctionsGeneral::outerCommuteConstants, "",
    "Rule that commutes constants to the left-most positions.  \
     Provided that a is a constant number (built in) and b is not, replaces b*a by a*b. ",
-   "x 6^{1/3}; (x 10^{1/2})^{1/3}", true, true, false,  "CalculatorFunctionsGeneral::outerCommuteConstants");
+   "x 6^{1/3}; (x 10^{1/2})^{1/3}", true, true, false,  "CalculatorFunctionsGeneral::outerCommuteConstants",
+   "CommuteConstants");
   this->AddOperationHandler
   ("*", CalculatorFunctionsGeneral::outerMergeConstantRadicals, "",
    "If a and b are constants, replaces a^{c}b^c by (a b)^c.",
-   "\\sqrt{}2 \\sqrt{}3", true, true, false, "CalculatorFunctionsGeneral::outerMergeConstantRadicals");
+   "\\sqrt{}2 \\sqrt{}3", true, true, false,
+   "CalculatorFunctionsGeneral::outerMergeConstantRadicals",
+   "MergeConstantRadicals");
 
 
   this->AddOperationOuterHandler
@@ -2410,7 +2416,9 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationOuterHandler
   ("/", CalculatorFunctionsGeneral::outerAtimesBpowerJplusEtcDivBpowerI, "",
    "Rule: (a_0 + a_1 x^{c_1}+ ... + a_n x^{c_n}) /x^t=a_0 x^{-t}+ a_1 x^{c_1-t}+...+a_n x^{c_n-t} ",
-   " (a x^{1/2} + b x )/x; (a x^{1/2} + b x )/x^2;", true, false, "CalculatorFunctionsGeneral::outerAtimesBpowerJplusEtcDivBpowerI");
+   " (a x^{1/2} + b x )/x; (a x^{1/2} + b x )/x^2;", true, false,
+   "CalculatorFunctionsGeneral::outerAtimesBpowerJplusEtcDivBpowerI",
+   "ConvertShortDenominatorToNegativePower");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CalculatorFunctionsBinaryOps::innerDivideRatByRat, this->opRational(), this->opRational(),
    "Divides two rational numbers. ",
@@ -2470,7 +2478,8 @@ void Calculator::initPredefinedStandardOperations()
   ("^", CalculatorFunctionsGeneral::innerPowerAnyToZero, "",
    "Replaces p^0 by 1 if p is non-zero, and by an error message if p is zero.",
    "A=x^0; x=0; A; B=x^0; 0^0; ",
-   true, true, false, "CalculatorFunctionsGeneral::innerPowerAnyToZero");
+   true, true, false, "CalculatorFunctionsGeneral::innerPowerAnyToZero",
+   "PowerAnytoZero");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger, this->opPoly(), this->opRational(),
    "Raises poly to small integer power. ",
@@ -2693,27 +2702,38 @@ void Calculator::initPredefinedOperationsComposite()
   this->AddOperationComposite
   ("Rational", CalculatorFunctionsGeneral::innerConstantFunction, "",
    "If x is a constant, replaces x{}({{anything}})=x; ",
-   "0{}3;2{}y;(\\sqrt{}2){}x;", true, true, false, "CalculatorFunctionsGeneral::innerConstantFunction");
+   "0{}3;2{}y;(\\sqrt{}2){}x;", true, true, false,
+   "CalculatorFunctionsGeneral::innerConstantFunction", "ConstantFunction");
   this->AddOperationComposite
   ("RationalFunction", CalculatorFunctionsGeneral::innerRationalFunctionSubstitution, "",
    "If x is a constant, replaces x{}({{anything}})=x; ",
-   "0{}3;2{}y;(\\sqrt{}2){}x;", true, true, false, "CalculatorFunctionsGeneral::innerRationalFunctionSubstitution");
+   "0{}3;2{}y;(\\sqrt{}2){}x;", true, true, false,
+   "CalculatorFunctionsGeneral::innerRationalFunctionSubstitution",
+   "RationalFunctionSubstitution");
   this->AddOperationComposite
   ("+", CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument, "",
    "Equivalent to (a+b){}x=(a{}x)+(b{}x) ",
-   "(a+b){}x;", true, true, false, "CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument");
+   "(a+b){}x;", true, true, false,
+   "CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument",
+   "CompositeArithmeticOperationEvaluatedOnArgument");
   this->AddOperationComposite
   ("*", CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument, "",
    "Equivalent to (a*b){}x=(a{}x)*(b{}x) ",
-   "(a*b){}x;", true, true, false, "CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument");
+   "(a*b){}x;", true, true, false,
+   "CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument",
+   "CompositeArithmeticOperationEvaluatedOnArgument");
   this->AddOperationComposite
   ("/", CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument, "",
    "Equivalent to (a/b){}x=(a{}x)/(b{}x) ",
-   "(a/b){}x;", true, true, false, "CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument");
+   "(a/b){}x;", true, true, false,
+   "CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument",
+   "CompositeArithmeticOperationEvaluatedOnArgument");
   this->AddOperationComposite
   ("AlgebraicNumber", CalculatorFunctionsGeneral::innerConstantFunction, "",
    "If x is a constant, replaces x{}({{anything}})=x; ",
-   "0{}3;2{}y;(\\sqrt{}2){}x;", true, true, false, "CalculatorFunctionsGeneral::innerConstantFunction");
+   "0{}3;2{}y;(\\sqrt{}2){}x;", true, true, false,
+   "CalculatorFunctionsGeneral::innerConstantFunction",
+   "ConstantFunction");
   this->AddOperationComposite
   ("Sequence", CalculatorFunctionsGeneral::innerDereferenceOperator, "",
    "Dereferences a sequence. The syntax is as illustrated by the example. ",
@@ -2724,30 +2744,39 @@ void Calculator::initPredefinedOperationsComposite()
     \np(0,{{x}})=0;\
     \np({{a}},{{x}} )=p(a-1,x)+ p(a, x-Denominations_a);\
     \np(11,100)\
-  ", true, true, false, "CalculatorFunctionsGeneral::innerDereferenceOperator");
+  ", true, true, false, "CalculatorFunctionsGeneral::innerDereferenceOperator",
+  "Dereference");
   this->AddOperationComposite
   (";", CalculatorFunctionsGeneral::innerDereferenceOperator, "",
    "Dereferences a sequence of rules. The syntax is as illustrated by the example. ",
-   "A=d/dx( \\sqrt(x+y)-4x^2y^2); (d/dx(y)=0; A)_2;  ", true, true, false, "CalculatorFunctionsGeneral::innerDereferenceOperator");
+   "A=d/dx( \\sqrt(x+y)-4x^2y^2); (d/dx(y)=0; A)_2;  ", true, true, false,
+   "CalculatorFunctionsGeneral::innerDereferenceOperator",
+   "Dereference");
   this->AddOperationComposite
   ("ElementWeylAlgebra", CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly, "",
    "Differential operation acting on a polynomial. ",
-   "x=ElementWeylAlgebraPoly{}(\\partial, x);\\partial=ElementWeylAlgebraDO{}(\\partial, x);\n \\partial{}(x); \\partial^{2}{}(x^3+x^2); x{}(x^2)",
-   true, true, false, "CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly");
+   "x=ElementWeylAlgebraPoly{}(\\partial, x);\\partial=ElementWeylAlgebraDO{}(\\partial, x);\
+   \n \\partial{}(x); \\partial^{2}{}(x^3+x^2); x{}(x^2)",
+   true, true, false, "CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly",
+   "EWAactOnPoly");
   this->AddOperationComposite
   ("*", CalculatorFunctionsGeneral::innerCompositeConstTimesAnyActOn, "",
    "Rule (a*f){}x= a*(f{}x), provided a is a constant. ",
-   "(2\\sin){}x-2(\\sin x) ", true, true, false, "CalculatorFunctionsGeneral::innerCompositeConstTimesAnyActOn");
+   "(2\\sin){}x-2(\\sin x) ", true, true, false,
+   "CalculatorFunctionsGeneral::innerCompositeConstTimesAnyActOn",
+   "ConstTimesAnyAction");
   this->AddOperationComposite
   ("^", CalculatorFunctionsGeneral::innerCompositeApowerBevaluatedAtC, "",
    "Provided that n is not equal to -1, use the rule ({{f}}^{{n}}){}{{x}}=(f{}x)^n.",
    "\\tan^2 x; (f^-2) {}x ; (f^-1){}x ",
-   true, true, false, "CalculatorFunctionsGeneral::innerCompositeApowerBevaluatedAtC");
+   true, true, false, "CalculatorFunctionsGeneral::innerCompositeApowerBevaluatedAtC",
+   "ApowerBevaluatedAtC");
   this->AddOperationComposite
   ("Differentiate", CalculatorFunctionsGeneral::innerCompositeDifferentiateLog, "",
    "Differentiates log.",
    "d/dx (\\log x)",
-   true, true, false, "CalculatorFunctionsGeneral::innerCompositeDifferentiateLog");
+   true, true, false, "CalculatorFunctionsGeneral::innerCompositeDifferentiateLog",
+   "DifferentiateLog");
 
   //this->AddOperationComposite
   //("Differentiate", CalculatorFunctionsGeneral::innerDdivDxToDifferentiation, "",

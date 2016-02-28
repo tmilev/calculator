@@ -184,6 +184,7 @@ public:
 (const std::string& inputUserStringRAW,
  const std::string& inputUserStringCivilized);
   bool UserSecureNonAdminOperationsAllowed();
+  bool UserDebugFlagOn();
 //  void operator=(const GlobalVariables& other)
 //  { this->IndicatorStringOutputFunction=other.IndicatorStringOutputFunction;
 //    this->theDrawingVariables=other.theDrawingVariables;

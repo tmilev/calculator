@@ -298,14 +298,12 @@ public:
   ;
   bool ReadProblemInfo
   (const std::string& stringToReadFrom, HashedList<std::string, MathRoutines::hashString>& outputProblemNames,
-   List<std::string>& outputHomeworkGroups,
    List<std::string>& outputWeights,
    List<List<std::string> >& outputSections, List<List<std::string> >& outputDeadlinesPerSection,
    std::stringstream& commentsOnFailure)
       ;
   void StoreProblemInfo
   (std::string& outputString, const HashedList<std::string, MathRoutines::hashString>& inputProblemNames,
-   const List<std::string>& inputHomeworkGroups,
    const List<std::string>& inputWeights, const List<List<std::string> >& inputSections,
    const List<List<std::string> >& inputDeadlines)
    ;

@@ -89,8 +89,9 @@ public:
   HashedList<std::string, MathRoutines::hashString> hdProblemList;
   List<std::string> hdHomeworkGroupCorrespondingToEachProblem;
   List<List<std::string> > hdHomeworkGroups;
-  HashedList<std::string, MathRoutines::hashString> databaseSpanList;
-  List<std::string> databaseHomeworkGroupCorrespondingToEachProblem;
+  HashedList<std::string, MathRoutines::hashString> hdHomeworkGroupNames;
+  HashedList<std::string, MathRoutines::hashString> databaseProblemAndHomeworkGroupList;
+//  List<std::string> databaseHomeworkGroupCorrespondingToEachProblem;
   List<List<std::string> > databaseHomeworkGroupDeadlinesPerSection;
   List<List<std::string> > databaseHomeworkGroupMaxNumTriesPerSection;
   List<std::string> databaseProblemWeights;
@@ -110,6 +111,7 @@ public:
   bool CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
   bool LoadMe(bool doLoadDatabase, std::stringstream& comments);
   std::string CleanUpFileName(const std::string& inputLink);
+  bool ParseHTMLComputeChildFiles(std::stringstream& comments);
   bool ParseHTML(std::stringstream& comments);
   bool IsSplittingChar(const std::string& input);
   bool IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt);
@@ -185,7 +187,7 @@ const std::string CalculatorHTML::RelativePhysicalFolderProblemCollections="Prob
 #ifdef MACRO_use_MySQL
 bool DatabaseRoutines::ReadProblemInfo
   (const std::string& stringToReadFrom, HashedList<std::string, MathRoutines::hashString>& outputProblemNames,
-   List<std::string>& outputHomeworkGroups,
+//   List<std::string>& outputHomeworkGroups,
    List<std::string>& outputWeights,
    List<List<std::string> >& outputSections, List<List<std::string> >& outputDeadlinesPerSection,
    std::stringstream& commentsOnFailure)
@@ -201,7 +203,7 @@ bool DatabaseRoutines::ReadProblemInfo
     outputProblemNames.AddOnTop(CGI::URLStringToNormal(problemNamesCGIed[i]));
   HashedList<std::string, MathRoutines::hashString> problemKeys, sectionKeys;
   List<std::string> problemValues, sectionValues;
-  outputHomeworkGroups.initFillInObject(outputProblemNames.size, "");
+//  outputHomeworkGroups.initFillInObject(outputProblemNames.size, "");
   outputWeights.initFillInObject(outputProblemNames.size, "");
   outputSections.initFillInObject(outputProblemNames.size, problemValues);
   outputDeadlinesPerSection.initFillInObject(outputProblemNames.size, problemValues);
@@ -212,9 +214,9 @@ bool DatabaseRoutines::ReadProblemInfo
 //    stOutput << "<br>current problem: " << outputProblemNames[i]
 //    << "<br>being read from data: " << theProblemData[i]
 //    << "<br>which is normalized to: " << CGI::URLStringToNormal(theProblemData[i]);
-    if (problemKeys.Contains("homeworkGroup"))
-      outputHomeworkGroups[i]=
-      CGI::URLStringToNormal(problemValues[problemKeys.GetIndex("homeworkGroup")]);
+//    if (problemKeys.Contains("homeworkGroup"))
+//      outputHomeworkGroups[i]=
+//      CGI::URLStringToNormal(problemValues[problemKeys.GetIndex("homeworkGroup")]);
     if (problemKeys.Contains("weight"))
       outputWeights[i]=
       CGI::URLStringToNormal(problemValues[problemKeys.GetIndex("weight")]);
@@ -235,14 +237,12 @@ bool DatabaseRoutines::ReadProblemInfo
 
 void DatabaseRoutines::StoreProblemInfo
   (std::string& outputString, const HashedList<std::string, MathRoutines::hashString>& inputProblemNames,
-   const List<std::string>& inputHomeworkGroups,
    const List<std::string>& inputWeights, const List<List<std::string> >& inputSections,
    const List<List<std::string> >& inputDeadlines)
 { MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemInfo");
   if (inputProblemNames.size!=inputWeights.size ||
       inputProblemNames.size!=inputDeadlines.size ||
-      inputProblemNames.size!=inputSections.size ||
-      inputProblemNames.size!=inputHomeworkGroups.size
+      inputProblemNames.size!=inputSections.size
       )
     crash << "This shouldn't happen: non-matching data sizes while storing problem info. "
     << "The present function should only be called with sanitized input. " << crash;
@@ -251,8 +251,6 @@ void DatabaseRoutines::StoreProblemInfo
   { std::stringstream currentProblemStream, currentDeadlineStream;
     if (inputWeights[i]!="")
       currentProblemStream << "weight=" << CGI::StringToURLString(inputWeights[i]) << "&";
-    if (inputHomeworkGroups[i]!="")
-      currentProblemStream << "homeworkGroup=" << CGI::StringToURLString(inputHomeworkGroups[i]) << "&";
     if (inputSections[i].size!=inputDeadlines[i].size)
       crash << "Input sections and input deadlines have mismatching sizes. " << crash;
     for (int j=0; j<inputSections[i].size; j++)
@@ -319,35 +317,18 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
 (const std::string& problemHomeName, std::string& inputString,
   std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::MergeProblemInfoInDatabase");
-  std::string storedDatabaseInfo;
-  if (!this->ReadProblemDatabaseInfo(problemHomeName, storedDatabaseInfo, commentsOnFailure))
-  { commentsOnFailure << "Failed to read database for problem collection: "
-    << problemHomeName;
+  CalculatorHTML problemHome;
+  problemHome.fileName=problemHomeName;
+  if (!problemHome.LoadMe(true, commentsOnFailure))
     return false;
-  }
-//  stOutput << "stored db info: <br>" << storedDatabaseInfo;
-  HashedList<std::string, MathRoutines::hashString> theProblems;
-  List<std::string> theProblemWeights;
-  List<std::string> theProblemGroups;
-  List<std::string> theHomeworkGroups;
-  List<List<std::string> > theSections;
-  List<List<std::string> > theDeadlines;
-  if (!this->ReadProblemInfo
-      (storedDatabaseInfo, theProblems, theHomeworkGroups, theProblemWeights, theSections, theDeadlines, commentsOnFailure))
-  { commentsOnFailure << "Failed to parse stored database info. ";
+  if (!problemHome.ParseHTML(commentsOnFailure))
     return false;
-  }
-//  stOutput << "data extracted from stored db nfo:<br>"
-//  << "Problems: " << theProblems.ToStringCommaDelimited() << "<br>"
-//  << "theProblemWeights: " << theProblemWeights.ToStringCommaDelimited() << "<br>";
-
   HashedList<std::string, MathRoutines::hashString> incomingProblems;
   List<std::string> incomingWeights;
-  List<std::string> incomingHomeworkGroups;
   List<List<std::string> > incomingSections;
   List<List<std::string> > incomingDeadlines;
   if (!this->ReadProblemInfo
-      (inputString, incomingProblems, incomingHomeworkGroups, incomingWeights,
+      (inputString, incomingProblems, incomingWeights,
        incomingSections, incomingDeadlines, commentsOnFailure))
   { commentsOnFailure << "Failed to parse your request";
     return false;
@@ -355,42 +336,40 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
   std::string currentFileName;
   bool result=true;
   for (int i=0; i<incomingProblems.size; i++)
-  { currentFileName=theGlobalVariables.PhysicalPathProjectBase+
-    CalculatorHTML::RelativePhysicalFolderProblemCollections+ incomingProblems[i];
-    if (!FileOperations::FileExistsUnsecure(currentFileName))
-    { result=false;
-      commentsOnFailure << "Could not find problem: " << incomingProblems[i] << ". ";
+  { if (!problemHome.hdProblemList.Contains(incomingProblems[i]) &&
+        !problemHome.hdHomeworkGroupNames.Contains(incomingProblems[i]))
+    { commentsOnFailure << "Did not find " << incomingProblems[i]
+      << " among the list of problems and homework groups. ";
+      result=false;
       continue;
     }
-    int theIndex=theProblems.GetIndex(incomingProblems[i]);
+    int theIndex=problemHome.databaseProblemAndHomeworkGroupList.GetIndex(incomingProblems[i]);
     if (theIndex==-1)
-    { theProblems.AddOnTop(incomingProblems[i]);
-      theProblemWeights.AddOnTop(incomingWeights[i]);
-      theSections.AddOnTop(incomingSections[i]);
-      theDeadlines.AddOnTop(incomingDeadlines[i]);
-      theHomeworkGroups.AddOnTop(incomingHomeworkGroups[i]);
+    { problemHome.databaseProblemAndHomeworkGroupList.AddOnTop(incomingProblems[i]);
+      problemHome.databaseProblemWeights.AddOnTop(incomingWeights[i]);
+      problemHome.databaseStudentSections.AddOnTop(incomingSections[i]);
+      problemHome.databaseDeadlinesBySection.AddOnTop(incomingDeadlines[i]);
       continue;
     }
     if (incomingWeights[i]!="")
-      theProblemWeights[theIndex]=incomingWeights[i];
-    if (incomingHomeworkGroups[i]!="")
-      theHomeworkGroups[theIndex]=incomingHomeworkGroups[i];
+      problemHome.databaseProblemWeights[theIndex]=incomingWeights[i];
     if (incomingSections[i].size!=0)
       for (int j=0; j<incomingSections.size; j++)
-      { int sectionIndex=theSections[theIndex].GetIndex(incomingSections[i][j]);
+      { int sectionIndex=problemHome.databaseStudentSections[theIndex].GetIndex(incomingSections[i][j]);
         if (sectionIndex==-1)
-        { theSections[theIndex].AddOnTop(incomingSections[i][j]);
-          theDeadlines[theIndex].AddOnTop(incomingDeadlines[i][j]);
+        { problemHome.databaseStudentSections[theIndex].AddOnTop(incomingSections[i][j]);
+          problemHome.databaseDeadlinesBySection[theIndex].AddOnTop(incomingDeadlines[i][j]);
           continue;
         }
-        theSections[theIndex][sectionIndex]=incomingSections[i][j];
-        theDeadlines[theIndex][sectionIndex]=incomingDeadlines[i][j];
+        problemHome.databaseStudentSections[theIndex][sectionIndex]=incomingSections[i][j];
+        problemHome.databaseDeadlinesBySection[theIndex][sectionIndex]=incomingDeadlines[i][j];
       }
   }
   std::string stringToStore;
 
   this->StoreProblemInfo
-  (stringToStore, theProblems, theHomeworkGroups, theProblemWeights, theSections, theDeadlines);
+  (stringToStore, problemHome.databaseProblemAndHomeworkGroupList, problemHome.databaseProblemWeights,
+   problemHome.databaseStudentSections, problemHome.databaseDeadlinesBySection);
 //  stOutput << "<br>about to store back : <br>" << stringToStore;
   if (!this->StoreProblemDatabaseInfo(problemHomeName, stringToStore, commentsOnFailure))
     return false;
@@ -449,15 +428,14 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
     }
     //stOutput << ", the db string is: " << this->currentProblemCollectionDatabaseString;
     if (!theRoutines.ReadProblemInfo
-        (this->currentProblemCollectionDatabaseString, this->databaseSpanList,
-         this->databaseHomeworkGroupCorrespondingToEachProblem,
+        (this->currentProblemCollectionDatabaseString, this->databaseProblemAndHomeworkGroupList,
          this->databaseProblemWeights,
          this->databaseStudentSections, this->databaseDeadlinesBySection, comments))
     { comments << "Failed to interpret the database problem string. ";
       return false;
     }
     this->currentUser.ComputePointsEarned
-    (this->databaseSpanList, this->databaseProblemWeights);
+    (this->databaseProblemAndHomeworkGroupList, this->databaseProblemWeights);
   }
 #endif // MACRO_use_MySQL
   if (!this->flagIsForReal)
@@ -840,7 +818,7 @@ std::string WebWorker::GetSetProblemDatabaseInfoHtml()
   bool result=theRoutines.MergeProblemInfoInDatabase(inputProblemHome, inputProblemInfo, commentsOnFailure);
   std::stringstream out;
   if (result)
-  { out << "<span style=\"color:green\"><b>Successfully changed problem data.</b></span>";
+  { out << "<span style=\"color:green\"><b>Successfully modified problem data. </b></span>";
 //    out << "<meta http-equiv=\"refresh\" content=\"0;\">";
   } else
     out << "<span style=\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
@@ -894,7 +872,7 @@ std::string WebWorker::GetAddUserEmails()
   (currentExamHome, theCollection.userTablE, theCollection.labelsUserTablE, comments);
   out << theRoutines.ToStringClassDetails
   (usersAreAdmins, theCollection.userTablE, theCollection.labelsUserTablE,
-   currentExamHome, theCollection.databaseSpanList, theCollection.databaseProblemWeights);
+   currentExamHome, theCollection.databaseProblemAndHomeworkGroupList, theCollection.databaseProblemWeights);
   if (!createdUsers || !sentEmails)
     out << "<br>Comments:<br>" << comments.str();
   return out.str();
@@ -1564,7 +1542,7 @@ std::string CalculatorHTML::ToStringClassDetails
   DatabaseRoutines theRoutines;
   out << theRoutines.ToStringClassDetails
   (adminsOnly, this->userTablE, this->labelsUserTablE, this->fileName,
-   this->databaseSpanList, this->databaseProblemWeights);
+   this->databaseProblemAndHomeworkGroupList, this->databaseProblemWeights);
   out << "</span>";
 #else
   out << "<b>Adding emails not available (database not present).</b> ";
@@ -1720,12 +1698,23 @@ void CalculatorHTML::InterpretNotByCalculator(SyntacticElementHTML& inputOutput)
 }
 
 std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink)
-{ std::string result;
-  result.reserve(inputLink.size());
-  for (unsigned i=0; i<inputLink.size(); i++)
-    if (inputLink[i]!='\n' && inputLink[i]!='\r' && inputLink[i]!='\t' && inputLink[i]!=' ')
-      result.push_back(inputLink[i]);
-  return result;
+{ unsigned firstMeaningfulChar=0;
+  for (; firstMeaningfulChar<inputLink.size(); firstMeaningfulChar++)
+    if (inputLink[firstMeaningfulChar]!='\n' &&
+        inputLink[firstMeaningfulChar]!='\r' &&
+        inputLink[firstMeaningfulChar]!='\t' &&
+        inputLink[firstMeaningfulChar]!=' ')
+      break;
+  unsigned lastMeaningfulChar=inputLink.size()-1;
+  for (;lastMeaningfulChar>firstMeaningfulChar; lastMeaningfulChar--)
+    if (inputLink[lastMeaningfulChar]!='\n' &&
+        inputLink[lastMeaningfulChar]!='\r' &&
+        inputLink[lastMeaningfulChar]!='\t' &&
+        inputLink[lastMeaningfulChar]!=' ')
+      break;
+  if (firstMeaningfulChar>=inputLink.size())
+    return "";
+  return inputLink.substr(firstMeaningfulChar, lastMeaningfulChar-firstMeaningfulChar+1);
 }
 
 #include "vpfHeader5Crypto.h"
@@ -1738,8 +1727,8 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
   out << " <a href=\"" << refStreamExercise.str() << "\">Exercise (no credit, unlimited tries)</a> ";
   //stOutput << "<hr>CurrentUser.problemNames=" << this->currentUser.problemNames.ToStringCommaDelimited();
   std::string thePoints="";
-  if (this->databaseSpanList.Contains(cleaneduplink))
-    thePoints= this->databaseProblemWeights[this->databaseSpanList.GetIndex(cleaneduplink)];
+  if (this->databaseProblemAndHomeworkGroupList.Contains(cleaneduplink))
+    thePoints= this->databaseProblemWeights[this->databaseProblemAndHomeworkGroupList.GetIndex(cleaneduplink)];
   #ifdef MACRO_use_MySQL
   bool noSubmissionsYet=false;
   if (this->currentUser.problemNames.Contains(cleaneduplink))
@@ -1802,7 +1791,7 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateDeadlineLink");
   //  return "Submission deadline: to be announced. ";
   std::stringstream out;
-  int indexInDatabase=this->databaseSpanList.GetIndex(cleaneduplink);
+  int indexInDatabase=this->databaseProblemAndHomeworkGroupList.GetIndex(cleaneduplink);
   std::string currentDeadline = this->GetDeadlineFromIndexInDatabase(indexInDatabase);
   //out << "Debug: cleanedupLink: " << cleaneduplink
   //<< ". indexInDatabase: " << indexInDatabase;
@@ -1821,7 +1810,7 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   { int indexInProblemList=this->hdProblemList.GetIndex(cleaneduplink);
     //out << " current deadline is empty. Index in prob list from hd: " << indexInProblemList;
     if (indexInProblemList!=-1)
-    { int indexHomeworkGroupInDatabase=this->databaseSpanList.GetIndex
+    { int indexHomeworkGroupInDatabase=this->databaseProblemAndHomeworkGroupList.GetIndex
       (this->hdHomeworkGroupCorrespondingToEachProblem[indexInProblemList]);
       currentDeadline=this->GetDeadlineFromIndexInDatabase(indexHomeworkGroupInDatabase);
     }
@@ -1883,7 +1872,7 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   deadlineStream << "</td>";
   deadlineStream << "</tr></table>";
 
-  out << CGI::GetHtmlSpanHidableStartsHiddeN(deadlineStream.str());
+  out << CGI::GetHtmlSpanHidableStartsHiddeN(deadlineStream.str(), "Set deadline. ");
   return out.str();
 }
 
@@ -1985,25 +1974,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     { this->flagLoadedClassDataSuccessfully= this->PrepareClassData(comments);
       break;
     }
-  this->hdHomeworkGroups.SetSize(0);
-  this->hdHomeworkGroups.SetExpectedSize(50);
-  this->hdHomeworkGroupCorrespondingToEachProblem.SetSize(0);
-  this->hdHomeworkGroupCorrespondingToEachProblem.SetExpectedSize(50);
-  std::string currentHomeworkGroup;
-  for (int i=0; i<this->theContent.size; i++)
-    if (this->theContent[i].GetTagClass()=="calculatorExamIntermediate")
-    { this->hdHomeworkGroups.SetSize(this->hdHomeworkGroups.size+1);
-      this->hdHomeworkGroups.LastObject()->SetSize(0);
-      currentHomeworkGroup=this->CleanUpFileName(this->theContent[i].content);
-    } else if (this->theContent[i].GetTagClass()=="calculatorExamProblem")
-    { if (this->hdHomeworkGroups.size==0)
-      { out << "<b>Error: found a tag of type calculatorExamProblem before finding the first tag of type calculatorExamIntermediate."
-        << " Please make a tag of type calculatorExamIntermediate before making tags of type calculatorExamProblem.</b>";
-        continue;
-      }
-      this->hdHomeworkGroups.LastObject()->AddOnTop(this->CleanUpFileName(this->theContent[i].content));
-      this->hdHomeworkGroupCorrespondingToEachProblem.AddOnTop(currentHomeworkGroup);
-    }
+
 //  out << "Debug data: homework groups found: " << this->hdHomeworkGroups.ToStringCommaDelimited();
   for (int i=0; i<this->theContent.size; i++)
     if (this->theContent[i].IsInterpretedNotByCalculator())
@@ -2126,6 +2097,36 @@ bool CalculatorHTML::CanBeMerged(const SyntacticElementHTML& left, const Syntact
   if (this->IsSplittingChar(right.content) && right.content!=" ")
     return false;
   return true;
+}
+
+bool CalculatorHTML::ParseHTMLComputeChildFiles(std::stringstream& comments)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ParseHTMLComputeChildFiles");
+  bool result=true;
+  this->hdProblemList.Clear();
+  for (int i=0; i<this->theContent.size; i++)
+    if (this->theContent[i].GetTagClass()=="calculatorExamProblem")
+      this->hdProblemList.AddOnTop(this->CleanUpFileName(this->theContent[i].content));
+  this->hdHomeworkGroups.SetSize(0);
+  this->hdHomeworkGroups.SetExpectedSize(50);
+  this->hdHomeworkGroupCorrespondingToEachProblem.SetSize(0);
+  this->hdHomeworkGroupCorrespondingToEachProblem.SetExpectedSize(50);
+  std::string currentHomeworkGroup;
+  for (int i=0; i<this->theContent.size; i++)
+    if (this->theContent[i].GetTagClass()=="calculatorExamIntermediate")
+    { this->hdHomeworkGroups.SetSize(this->hdHomeworkGroups.size+1);
+      this->hdHomeworkGroups.LastObject()->SetSize(0);
+      currentHomeworkGroup=this->CleanUpFileName(this->theContent[i].content);
+    } else if (this->theContent[i].GetTagClass()=="calculatorExamProblem")
+    { if (this->hdHomeworkGroups.size==0)
+      { comments << "<b>Error: found a tag of type calculatorExamProblem before finding the first tag of type calculatorExamIntermediate."
+        << " Please make a tag of type calculatorExamIntermediate before making tags of type calculatorExamProblem.</b>";
+        result=false;
+        continue;
+      }
+      this->hdHomeworkGroups.LastObject()->AddOnTop(this->CleanUpFileName(this->theContent[i].content));
+      this->hdHomeworkGroupCorrespondingToEachProblem.AddOnTop(currentHomeworkGroup);
+    }
+  return result;
 }
 
 bool CalculatorHTML::ParseHTML(std::stringstream& comments)
@@ -2316,10 +2317,8 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       this->theContent.AddOnTop(eltsStack[i]);
     }
   }
-  this->hdProblemList.Clear();
-  for (int i=0; i<this->theContent.size; i++)
-    if (this->theContent[i].GetTagClass()=="calculatorExamProblem")
-      this->hdProblemList.AddOnTop(this->CleanUpFileName(this->theContent[i].content));
+  if (!this->ParseHTMLComputeChildFiles(comments))
+    result=false;
   if (result)
     result=this->ExtractAnswerIds(comments);
   if (result)

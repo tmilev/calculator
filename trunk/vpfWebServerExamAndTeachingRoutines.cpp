@@ -95,12 +95,12 @@ public:
   List<List<std::string> > databaseHomeworkGroupDeadlinesPerSection;
   List<List<std::string> > databaseHomeworkGroupMaxNumTriesPerSection;
   List<std::string> databaseProblemWeights;
-  List<List<std::string> > databaseStudentSections;
+  List<List<std::string> > databaseStudentSectionsPerProblem;
   List<List<std::string> > databaseDeadlinesBySection;
+  List<std::string> databaseStudentSectionS;
   List<List<std::string> > userTablE;
   List<std::string> labelsUserTablE;
   List<std::string> problemListOfParent;
-  List<std::string> classSections;
   std::string currentUserDatabaseString;
   std::string currentProblemCollectionDatabaseString;
   bool flagLoadedSuccessfully;
@@ -122,7 +122,13 @@ public:
   bool PrepareCommands(Calculator& theInterpreter, std::stringstream& comments);
   std::string CleanUpCommandString(const std::string& inputCommand);
   void InterpretNotByCalculator(SyntacticElementHTML& inputOutput);
-  std::string GetDeadlineFromIndexInDatabase(int indexInDatabase);
+  std::string GetDeadline
+  (
+   const std::string& problemName
+   //int indexInDatabase
+   ,
+   const std::string& sectionNumber
+   , bool inheritFromGroup, bool& outputIsInherited);
   std::string InterpretGenerateDeadlineLink
 (SyntacticElementHTML& inputOutput, std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
  const std::string& cleaneduplink, const std::string& urledProblem)
@@ -158,6 +164,9 @@ public:
   bool operator==(const CalculatorHTML& other)const
   { return this->fileName==other.fileName;
   }
+  std::string ToStringOneDeadlineFormatted
+  (const std::string& cleanedUpLink, const std::string& sectionNumber, bool isActualProblem)
+  ;
   std::string ToStringCalculatorArgumentsForProblem(const std::string& requestType)const;
   std::string ToStringProblemNavigation()const;
   std::string ToStringExtractedCommands();
@@ -340,6 +349,9 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
         !problemHome.hdHomeworkGroupNames.Contains(incomingProblems[i]))
     { commentsOnFailure << "Did not find " << incomingProblems[i]
       << " among the list of problems and homework groups. ";
+//      << " The problem list consists of: "
+//      << problemHome.hdProblemList.ToStringCommaDelimited() << ". The homework group names are: "
+//      << problemHome.hdHomeworkGroupNames.ToStringCommaDelimited();
       result=false;
       continue;
     }
@@ -347,7 +359,7 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
     if (theIndex==-1)
     { problemHome.databaseProblemAndHomeworkGroupList.AddOnTop(incomingProblems[i]);
       problemHome.databaseProblemWeights.AddOnTop(incomingWeights[i]);
-      problemHome.databaseStudentSections.AddOnTop(incomingSections[i]);
+      problemHome.databaseStudentSectionsPerProblem.AddOnTop(incomingSections[i]);
       problemHome.databaseDeadlinesBySection.AddOnTop(incomingDeadlines[i]);
       continue;
     }
@@ -355,13 +367,13 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
       problemHome.databaseProblemWeights[theIndex]=incomingWeights[i];
     if (incomingSections[i].size!=0)
       for (int j=0; j<incomingSections.size; j++)
-      { int sectionIndex=problemHome.databaseStudentSections[theIndex].GetIndex(incomingSections[i][j]);
+      { int sectionIndex=problemHome.databaseStudentSectionsPerProblem[theIndex].GetIndex(incomingSections[i][j]);
         if (sectionIndex==-1)
-        { problemHome.databaseStudentSections[theIndex].AddOnTop(incomingSections[i][j]);
+        { problemHome.databaseStudentSectionsPerProblem[theIndex].AddOnTop(incomingSections[i][j]);
           problemHome.databaseDeadlinesBySection[theIndex].AddOnTop(incomingDeadlines[i][j]);
           continue;
         }
-        problemHome.databaseStudentSections[theIndex][sectionIndex]=incomingSections[i][j];
+        problemHome.databaseStudentSectionsPerProblem[theIndex][sectionIndex]=incomingSections[i][j];
         problemHome.databaseDeadlinesBySection[theIndex][sectionIndex]=incomingDeadlines[i][j];
       }
   }
@@ -369,7 +381,7 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
 
   this->StoreProblemInfo
   (stringToStore, problemHome.databaseProblemAndHomeworkGroupList, problemHome.databaseProblemWeights,
-   problemHome.databaseStudentSections, problemHome.databaseDeadlinesBySection);
+   problemHome.databaseStudentSectionsPerProblem, problemHome.databaseDeadlinesBySection);
 //  stOutput << "<br>about to store back : <br>" << stringToStore;
   if (!this->StoreProblemDatabaseInfo(problemHomeName, stringToStore, commentsOnFailure))
     return false;
@@ -430,7 +442,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
     if (!theRoutines.ReadProblemInfo
         (this->currentProblemCollectionDatabaseString, this->databaseProblemAndHomeworkGroupList,
          this->databaseProblemWeights,
-         this->databaseStudentSections, this->databaseDeadlinesBySection, comments))
+         this->databaseStudentSectionsPerProblem, this->databaseDeadlinesBySection, comments))
     { comments << "Failed to interpret the database problem string. ";
       return false;
     }
@@ -819,7 +831,7 @@ std::string WebWorker::GetSetProblemDatabaseInfoHtml()
   std::stringstream out;
   if (result)
   { out << "<span style=\"color:green\"><b>Successfully modified problem data. </b></span>";
-//    out << "<meta http-equiv=\"refresh\" content=\"0;\">";
+    out << "<meta http-equiv=\"refresh\" content=\"0;\">";
   } else
     out << "<span style=\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
 //  out << "<br>Debug message:<br>inputProblemInfo raw: " << inputProblemInfo << "<br>Processed: "
@@ -1600,8 +1612,8 @@ bool CalculatorHTML::PrepareClassData(std::stringstream& commentsOnFailure)
   HashedList<std::string, MathRoutines::hashString> theSections;
   for (int i=0; i<this->userTablE.size; i++)
     theSections.AddOnTopNoRepetition(this->userTablE[i][indexExtraInfo]);
-  this->classSections=theSections;
-  this->classSections.QuickSortAscending();
+  this->databaseStudentSectionS=theSections;
+  this->databaseStudentSectionS.QuickSortAscending();
   return true;
 }
 
@@ -1775,14 +1787,56 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
   return out.str();
 }
 
-std::string CalculatorHTML::GetDeadlineFromIndexInDatabase(int indexInDatabase)
-{ if (indexInDatabase==-1)
+std::string CalculatorHTML::GetDeadline
+(const std::string& problemName, const std::string& sectionNumber, bool inheritFromGroup, bool& outputIsInherited)
+{ MacroRegisterFunctionWithName("CalculatorHTML::GetDeadline");
+  outputIsInherited=false;
+  std::string result;
+  int indexInDatabase=this->databaseProblemAndHomeworkGroupList.GetIndex(problemName);
+  if (indexInDatabase!=-1)
+  { int indexSection=  this->databaseStudentSectionsPerProblem[indexInDatabase].GetIndex(sectionNumber);
+    if (indexSection!=-1)
+      result=this->databaseDeadlinesBySection[indexInDatabase][indexSection];
+  }
+  if (result!="" || !inheritFromGroup)
+    return result;
+  int indexInHDproblemList=this->hdProblemList.GetIndex(problemName);
+  if (indexInHDproblemList==-1)
     return "";
-  int indexSection= this->databaseStudentSections[indexInDatabase].GetIndex(this->currentUser.extraInfoUnsafe);
-//  stOutput << "indexSection: " << indexSection << " xtrainfounsafe: " << this->currentUser.extraInfoUnsafe;
-  if (indexSection==-1)
-    return "";
-  return this->databaseDeadlinesBySection[indexInDatabase][indexSection];
+  const std::string& hwGroup=this->hdHomeworkGroupCorrespondingToEachProblem[indexInHDproblemList];
+  indexInDatabase=this->databaseProblemAndHomeworkGroupList.GetIndex(hwGroup);
+  if (indexInDatabase!=-1)
+  { int indexSection=  this->databaseStudentSectionsPerProblem[indexInDatabase].GetIndex(sectionNumber);
+    if (indexSection!=-1)
+    { result=this->databaseDeadlinesBySection[indexInDatabase][indexSection];
+      outputIsInherited=true;
+    }
+  }
+  return result;
+}
+
+std::string CalculatorHTML::ToStringOneDeadlineFormatted
+  (const std::string& cleanedUpLink, const std::string& sectionNumber, bool isActualProblem)
+{ bool deadlineInherited=false;
+  std::stringstream out;
+  std::string currentDeadline = this->GetDeadline(cleanedUpLink, sectionNumber, true, deadlineInherited);
+  if (currentDeadline=="")
+  { if (isActualProblem || theGlobalVariables.UserDefaultHasAdminRights())
+      out << "<span style=\"color:orange\">No deadline yet. </span>";
+    return out.str();
+  }
+  if (isActualProblem)
+  { out << "Deadline: ";
+    if (deadlineInherited)
+      out << "<span style=\"color:blue\">" << currentDeadline << " (default)</span>. ";
+    else
+      out << "<span style=\"color:brown\">" << currentDeadline << " (individual deadline)</span>. ";
+    return out.str();
+  }
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return out.str();
+  out << "<span style=\"color:blue\">" << currentDeadline << "</span>. ";
+  return out.str();
 }
 
 std::string CalculatorHTML::InterpretGenerateDeadlineLink
@@ -1791,54 +1845,31 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateDeadlineLink");
   //  return "Submission deadline: to be announced. ";
   std::stringstream out;
-  int indexInDatabase=this->databaseProblemAndHomeworkGroupList.GetIndex(cleaneduplink);
-  std::string currentDeadline = this->GetDeadlineFromIndexInDatabase(indexInDatabase);
-  //out << "Debug: cleanedupLink: " << cleaneduplink
-  //<< ". indexInDatabase: " << indexInDatabase;
-/*  out << "USer section: " << this->currentUser.extraInfoUnsafe << "<br>";
-  if (indexInDatabase!=-1)
-  { int indexSection= this->databaseStudentSections[indexInDatabase].GetIndex(this->currentUser.extraInfoUnsafe);
-    if (indexSection==-1)
-      out << "No section. ";
-    else
-    { out << this->databaseDeadlinesBySection[indexInDatabase][indexSection];
-      out << "databaseSections: " << this->databaseStudentSections.ToStringCommaDelimited();
-    }
-  }
-*/
-  if (currentDeadline=="")
-  { int indexInProblemList=this->hdProblemList.GetIndex(cleaneduplink);
-    //out << " current deadline is empty. Index in prob list from hd: " << indexInProblemList;
-    if (indexInProblemList!=-1)
-    { int indexHomeworkGroupInDatabase=this->databaseProblemAndHomeworkGroupList.GetIndex
-      (this->hdHomeworkGroupCorrespondingToEachProblem[indexInProblemList]);
-      currentDeadline=this->GetDeadlineFromIndexInDatabase(indexHomeworkGroupInDatabase);
-    }
-  }
-  if (currentDeadline=="")
-    if (inputOutput.GetTagClass()=="calculatorExamProblem")
-      out << "<span style=\"color:orange\">No deadline yet. </span>";
-  if (currentDeadline!="")
-    out << "Deadline: " << currentDeadline << ". ";
+  bool deadlineInherited=false;
+  bool isActualProblem=(inputOutput.GetTagClass()=="calculatorExamProblem");
+  if (isActualProblem)
+    out << this->ToStringOneDeadlineFormatted(cleaneduplink, this->currentUser.extraInfoUnsafe, isActualProblem);
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return out.str();
   std::stringstream deadlineStream;
   deadlineStream << "<table><tr><td> Deadline: </td>";
   deadlineStream << "<td><table><tr><th>Grp.</th><th>Deadline</th></tr>";
   List<std::string> deadlineIds;
-  deadlineIds.SetSize(this->classSections.size);
-  for (int i=0; i<this->classSections.size; i++)
+  deadlineIds.SetSize(this->databaseStudentSectionS.size);
+  for (int i=0; i<this->databaseStudentSectionS.size; i++)
   { std::string& currentDeadlineId=deadlineIds[i];
-    if (this->classSections[i]=="")
+    if (this->databaseStudentSectionS[i]=="")
       continue;
-    currentDeadlineId = "deadline" + Crypto::CharsToBase64String(this->classSections[i]+cleaneduplink);
+    currentDeadlineId = "deadline" + Crypto::CharsToBase64String(this->databaseStudentSectionS[i]+cleaneduplink);
     if (currentDeadlineId[currentDeadlineId.size()-1]=='=')
       currentDeadlineId.resize(currentDeadlineId.size()-1);
     if (currentDeadlineId[currentDeadlineId.size()-1]=='=')
       currentDeadlineId.resize(currentDeadlineId.size()-1);
     deadlineStream << "<tr>";
-    deadlineStream << "<td>" << this->classSections[i] << "</td>";
-    deadlineStream << "<td> <input type=\"text\" id=\"" << currentDeadlineId << "\"> " ;
+    deadlineStream << "<td>" << this->databaseStudentSectionS[i] << "</td>";
+    deadlineStream << "<td> <input type=\"text\" id=\"" << currentDeadlineId << "\" value=\""
+    << this->GetDeadline(cleaneduplink, this->databaseStudentSectionS[i], false, deadlineInherited)
+    << "\"> " ;
     deadlineStream << this->GetDatePickerStart(currentDeadlineId);
     deadlineStream << "</td>";
     deadlineStream << "</tr>";
@@ -1854,13 +1885,13 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   deadlineStream << "submitStringAsMainInput('" << urledProblem
   << "='+encodeURIComponent('deadlines='+encodeURIComponent(";
   bool isFirst=true;
-  for (int i=0; i<this->classSections.size; i++)
-  { if (this->classSections[i]=="")
+  for (int i=0; i<this->databaseStudentSectionS.size; i++)
+  { if (this->databaseStudentSectionS[i]=="")
       continue;
     if (!isFirst)
       deadlineStream << "+";
     isFirst=false;
-    deadlineStream << "'" << CGI::StringToURLString(this->classSections[i]) << "='";
+    deadlineStream << "'" << CGI::StringToURLString(this->databaseStudentSectionS[i]) << "='";
     deadlineStream << "+ encodeURIComponent(document.getElementById('"
     << deadlineIds[i] << "').value)+'&'";
   }
@@ -1871,8 +1902,12 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   deadlineStream << "<span id=\"" << deadlineIdReport << "\"></span>";
   deadlineStream << "</td>";
   deadlineStream << "</tr></table>";
-
+//  out << deadlineStream.str();
   out << CGI::GetHtmlSpanHidableStartsHiddeN(deadlineStream.str(), "Set deadline. ");
+  if (isActualProblem)
+    out << "(overrides default). ";
+  else
+    out << "(overridden by individual deadlines). ";
   return out.str();
 }
 
@@ -2116,6 +2151,7 @@ bool CalculatorHTML::ParseHTMLComputeChildFiles(std::stringstream& comments)
     { this->hdHomeworkGroups.SetSize(this->hdHomeworkGroups.size+1);
       this->hdHomeworkGroups.LastObject()->SetSize(0);
       currentHomeworkGroup=this->CleanUpFileName(this->theContent[i].content);
+      this->hdHomeworkGroupNames.AddOnTop(currentHomeworkGroup);
     } else if (this->theContent[i].GetTagClass()=="calculatorExamProblem")
     { if (this->hdHomeworkGroups.size==0)
       { comments << "<b>Error: found a tag of type calculatorExamProblem before finding the first tag of type calculatorExamIntermediate."

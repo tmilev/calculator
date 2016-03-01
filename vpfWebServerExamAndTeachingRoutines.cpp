@@ -1422,7 +1422,9 @@ std::string DatabaseRoutines::ToStringClassDetails
   std::string userRole = adminsOnly ? "admin" : "student";
   int numUsers=0;
   std::stringstream tableStream;
-  tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th><th>Points</th><th>Section/Group</th></tr>";
+  tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th>"
+  << "<th>Activation manual email</th>"
+  << "<th>Points</th><th>Section/Group</th></tr>";
   UserCalculator currentUser;
   currentUser.currentTable="users";
 
@@ -1442,7 +1444,15 @@ std::string DatabaseRoutines::ToStringClassDetails
     << indexExtraInfo << ", "
     ;
   }
-
+  HashedList<std::string, MathRoutines::hashString> sectionNames;
+  List<List<std::string> > activatedAccountBucketsBySection;
+  List<List<std::string> > nonActivatedAccountBucketsBySection;
+  for (int i=0; i<userTable.size; i++)
+    sectionNames.AddOnTopNoRepetition(userTable[i][indexExtraInfo]);
+  sectionNames.QuickSortAscending();
+  activatedAccountBucketsBySection.SetSize(sectionNames.size);
+  nonActivatedAccountBucketsBySection.SetSize(sectionNames.size);
+  int numActivatedUsers=0;
   for (int i=0; i<userTable.size; i++)
   { std::stringstream failureStream;
     currentUser.username=userTable[i][indexUser];
@@ -1454,27 +1464,60 @@ std::string DatabaseRoutines::ToStringClassDetails
     if (adminsOnly xor (currentUser.userRole=="admin"))
       continue;
     numUsers++;
-    tableStream << "<tr>"
+    std::stringstream oneTableLineStream;
+    oneTableLineStream << "<tr>"
     << "<td>" << userTable[i][indexUser] << "</td>"
     << "<td>" << currentUser.email.value << "</td>"
     ;
+    bool isActivated=true;
     if (currentUser.activationToken!="activated" && currentUser.activationToken!="error")
-    { tableStream << "<td><span style=\"color:red\">not activated</span></td>";
+    { isActivated=false;
+      numActivatedUsers++;
+      oneTableLineStream << "<td><span style=\"color:red\">not activated</span></td>";
       if (currentUser.activationToken!="")
-        tableStream << "<td>"
+        oneTableLineStream << "<td>"
         << "<a href=\""
         << UserCalculator::GetActivationAddressFromActivationToken
         (currentUser.activationToken.value, theGlobalVariables.DisplayNameCalculatorWithPath,
          userTable[i][indexUser])
         << "\"> (Re)activate account and change password</a>"
         << "</td>";
-//      else
-//        tableStream << "<td>Activation token: " << currentUser.activationToken.value << "</td>";
+      oneTableLineStream << "<td>";
+      oneTableLineStream
+      << "<a href=\"mailto:" << currentUser.email.value
+      << "?subject=Math 140 Homework account activation&";
+
+      oneTableLineStream << "body=";
+      std::stringstream emailBody;
+      emailBody << "Dear student,\n you have not activated your homework server account yet. \n"
+      << "To activate your account and set your password please use the link: "
+      << CGI::StringToURLString("\n\n")
+      << CGI::StringToURLString( UserCalculator::GetActivationAddressFromActivationToken
+        (currentUser.activationToken.value, theGlobalVariables.hopefullyPermanent_HTTPS_WebAdressOfServerExecutable,
+         userTable[i][indexUser]) )
+      << CGI::StringToURLString("\n\n")
+      << "The link does not work with apple safari; if you use safari, please contact us by email"
+      << " and we will activate your account manually. "
+      << " Once you activate your account, you can log in safely here: \n"
+      << CGI::StringToURLString("\n\n")
+      << theGlobalVariables.hopefullyPermanent_HTTPS_WebAdressOfServerExecutable
+      << CGI::StringToURLString("\n\n")
+      << "\n\nIf using the Safari browser/apple, you can use this (a little less safe link): "
+      << CGI::StringToURLString("\n\n")
+      << CGI::StringToURLString(theGlobalVariables.hopefullyPermanentWebAdressOfServerExecutable + "?request=login&ignoreSecurity=true")
+      << CGI::StringToURLString("\n\n")
+      << "Best regards, \n your Math 140 instructors."
+      ;
+      oneTableLineStream << emailBody.str() << "\">Send email manually.</a> "
+      ;
+      oneTableLineStream << "</td>";
+      //      else
+//        oneTableLineStream << "<td>Activation token: " << currentUser.activationToken.value << "</td>";
     } else if (currentUser.activationToken=="error")
-      tableStream << "<td>error</td><td></td>";
+      oneTableLineStream << "<td>error</td><td></td>";
     else
-    { tableStream << "<td><span style=\"color:green\">activated</span></td><td></td>";
-/*      tableStream << "<td><span style=\"color:red\">"
+    { oneTableLineStream << "<td><span style=\"color:green\">activated</span></td><td></td>";
+/*      oneTableLineStream << "<td><span style=\"color:red\">"
       << "<a href=\""
       << UserCalculator::GetActivationAbsoluteAddressFromActivationToken(currentUser.activationToken.value, userTable[i][indexUser])
       << "\"> (Re)activate account and change password</a>"
@@ -1483,18 +1526,36 @@ std::string DatabaseRoutines::ToStringClassDetails
     int indexProblemData=currentUser.selectedRowFieldNamesUnsafe.GetIndex("problemData");
     std::stringstream commentsProblemData;
     if (indexProblemData==-1)
-      tableStream << "<td>No solutions history</td>";
+      oneTableLineStream << "<td>No solutions history</td>";
     else if (currentUser.InterpretDatabaseProblemData
              (currentUser.selectedRowFieldsUnsafe[indexProblemData], commentsProblemData))
     { currentUser.ComputePointsEarned(databaseSpanList, databaseProblemWeights);
-      tableStream << "<td>" << currentUser.pointsEarned << "</td>";
+      oneTableLineStream << "<td>" << currentUser.pointsEarned << "</td>";
     } else
-      tableStream << "<td>Failed to load problem data. Comments: " << commentsProblemData.str() << "</td>";
-    tableStream << "<td>" << userTable[i][indexExtraInfo] << "</td>";
-    tableStream << "</tr>";
+      oneTableLineStream << "<td>Failed to load problem data. Comments: " << commentsProblemData.str() << "</td>";
+    oneTableLineStream << "<td>" << userTable[i][indexExtraInfo] << "</td>";
+    oneTableLineStream << "</tr>";
+    if (isActivated)
+      activatedAccountBucketsBySection[sectionNames.GetIndex(userTable[i][indexExtraInfo])].AddOnTop(oneTableLineStream.str());
+    else
+      nonActivatedAccountBucketsBySection[sectionNames.GetIndex(userTable[i][indexExtraInfo])].AddOnTop(oneTableLineStream.str());
   }
+  for (int i=0; i<nonActivatedAccountBucketsBySection.size; i++)
+    nonActivatedAccountBucketsBySection[i].QuickSortAscending();
+  for (int i=0; i<activatedAccountBucketsBySection.size; i++)
+    activatedAccountBucketsBySection[i].QuickSortAscending();
+  for (int i=0; i<nonActivatedAccountBucketsBySection.size; i++)
+    for (int j=0; j<nonActivatedAccountBucketsBySection[i].size; j++)
+      tableStream << nonActivatedAccountBucketsBySection[i][j];
+  for (int i=0; i<activatedAccountBucketsBySection.size; i++)
+    for (int j=0; j<activatedAccountBucketsBySection[i].size; j++)
+      tableStream << activatedAccountBucketsBySection[i][j];
   tableStream << "</table>";
-  out << "\n" << numUsers << " user(s). " << tableStream.str();
+  out << "\n" << numUsers << " user(s)";
+  if (numActivatedUsers>0)
+    out << ", <span style=\"color:red\">" << numActivatedUsers << " have not activated their accounts";
+  out << ".";
+  out << tableStream.str();
   return out.str();
 }
 
@@ -1549,7 +1610,7 @@ std::string CalculatorHTML::ToStringClassDetails
   << "', '" << userRole
   << "', '" << idExtraTextarea
   << "', 'addUsers'"
-  << " )\"> Add users </button> (without sending emails). ";
+  << " )\"> Add users (no email sending)</button> ";
   out << "<br><span id=\"" << idOutput << "\">\n";
   DatabaseRoutines theRoutines;
   out << theRoutines.ToStringClassDetails

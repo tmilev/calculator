@@ -1895,7 +1895,7 @@ std::string WebWorker::GetInsecureConnectionAngryMessage()
 { MacroRegisterFunctionWithName("WebWorker::GetInsecureConnectionAngryMessage");
   std::stringstream out;
   out
-  << "<span style=\"color:red\"><b>CONNECTION UNSECURE.</b></span><br>"
+  << "<b>This is a reduced security connection.</b><br>"
   << "For secure connection: close safari & open in another browser: "
   << "<a href=\"https://calculator-algebra.org/calculator\">https://calculator-algebra.org/calculator</a>."
 ;
@@ -1912,7 +1912,7 @@ std::string WebWorker::GetLoginHTMLinternal()
   if (theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
   { out
     << WebWorker::GetInsecureConnectionAngryMessage()
-    << "<br>DO NOT USE A PASSWORD YOU USE IN OTHER SITES HERE.</b>";
+    << "<br>Please do not use a password you use in other sites here.</b>";
     out << "<script type=\"text/javascript\" src=\"/sha1.js\"></script>\n";
     out << "<script type=\"text/javascript\">\n";
     out
@@ -1940,8 +1940,8 @@ std::string WebWorker::GetLoginHTMLinternal()
   else
     out << "</form><button onclick=\"submitAuthentication();\">Login</button>";
   if (theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
-  { out << "<br>Ignoring ssl encryption as a workaround for Safari's bugs. "
-    << " Only a thin javascript layer of encryption is protecting your password. "
+  { out << "<br>Ignoring ssl encryption as a workaround. "
+    << " Only a thin javascript layer of in-browser encryption is protecting your password. "
     << " Javascript encryption is courtesy of Brian Turek "
     << "(<a href=\"http://caligatio.github.com/jsSHA/\">http://caligatio.github.com/jsSHA/</a>). "
     ;

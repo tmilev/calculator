@@ -1911,7 +1911,7 @@ std::string CalculatorHTML::ToStringOneDeadlineFormatted
 //  << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
   double secondsTillDeadline= deadline.SubtractAnotherTimeFromMeInSeconds(now)+7*3600;
   std::stringstream hoursTillDeadlineStream;
-  if (secondsTillDeadline<24*3600)
+  if (secondsTillDeadline<24*3600 && !problemAlreadySolved)
     hoursTillDeadlineStream << "<span style=\"color:red\">"
     << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false) << " left. </span>";
   else
@@ -2033,6 +2033,7 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   { ProblemData& theProbData=this->currentUser.problemData[this->currentUser.problemNames.GetIndex(cleaneduplink)];
     if (theProbData.numCorrectlyAnswered>=theProbData.answerIds.size)
       problemAlreadySolved=true;
+//    out << " probdata crct: " << theProbData.numCorrectlyAnswered << " # answ id: " << theProbData.answerIds.size;
   }
   out << this->InterpretGenerateDeadlineLink
   (inputOutput, refStreamForReal, refStreamExercise, cleaneduplink, urledProblem, problemAlreadySolved);

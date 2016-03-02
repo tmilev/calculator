@@ -115,7 +115,10 @@ public:
   void ComputeTimeStringNonReadable();
   std::string ToStringHumanReadable();
   void operator=(const std::string& inputTime);
-  double SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(const TimeWrapper& other);
+  double SubtractAnotherTimeFromMeInSeconds(TimeWrapper& other);
+  double SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(TimeWrapper& other);
+  bool AssignMonthDayYear(const std::string& input, std::stringstream& commentsOnFailure);
+  static std::string ToStringSecondsToDaysHoursSecondsString(double input, bool includeSeconds);
   TimeWrapper();
 };
 

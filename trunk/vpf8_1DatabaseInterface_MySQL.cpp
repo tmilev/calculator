@@ -1726,7 +1726,42 @@ bool UserCalculator::getUserPassAndEmail(Calculator& theCommands, const Expressi
 }
 
 TimeWrapper::TimeWrapper()
-{
+{ this->theTime.tm_gmtoff=0;
+  this->theTime.tm_hour=0;
+  this->theTime.tm_isdst=0;
+  this->theTime.tm_mday=0;
+  this->theTime.tm_min=0;
+  this->theTime.tm_mon=0;
+  this->theTime.tm_sec=0;
+  this->theTime.tm_wday=0;
+  this->theTime.tm_yday=0;
+  this->theTime.tm_year=0;
+  this->theTime.tm_zone=0;
+}
+
+bool TimeWrapper::AssignMonthDayYear(const std::string& input, std::stringstream& commentsOnFailure)
+{ this->AssignLocalTime(); //<-hopefully this initialized things properly ...
+  List<unsigned char> theDelimiters;
+  theDelimiters.AddOnTop('/');
+  theDelimiters.AddOnTop('-');
+  theDelimiters.AddOnTop('.');
+  List<std::string> output;
+  MathRoutines::StringSplitExcludeDelimiters(input, theDelimiters, output);
+  if (output.size<3)
+  { commentsOnFailure << "Failed to extract a M/D/Y date from: " << input;
+    return false;
+  }
+  int month= atoi(output[0].c_str());
+  int day= atoi(output[1].c_str());
+  int year= atoi(output[2].c_str());
+  this->theTime.tm_sec=59;
+  this->theTime.tm_min=59;
+  this->theTime.tm_hour=23;
+  this->theTime.tm_mday=day;
+  this->theTime.tm_mon=month-1;
+  this->theTime.tm_year=year-1900;
+  mktime(&this->theTime);
+  return true;
 }
 
 void TimeWrapper::ComputeTimeStringNonReadable()
@@ -1744,23 +1779,36 @@ void TimeWrapper::AssignLocalTime()
 { std::time_t rawtime;
   time(&rawtime);
   this->theTime=*std::gmtime(&rawtime);
+  mktime(&this->theTime);
   this->ComputeTimeStringNonReadable();
 }
 
-double TimeWrapper::SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(const TimeWrapper& other)
-{ //This is a simple function aimed at computing expiration of authentication tokens and
-  //does not need to be precise.
-  //To make matters simple, the function approximates:
-  //every year by 365 days
-  //every month by 30.4 days
-  double result=0;
-  result+=(this->theTime.tm_year - other.theTime.tm_year)*365*24;
-  result+=(this->theTime.tm_mon  - other.theTime.tm_mon )*30.4*24;
-  result+=(this->theTime.tm_mday - other.theTime.tm_mday)*30.4*24;
-  result+=(this->theTime.tm_hour - other.theTime.tm_hour);
-  result+=(this->theTime.tm_min  - other.theTime.tm_min);
-  //seconds are ignored
-  return result;
+std::string TimeWrapper::ToStringSecondsToDaysHoursSecondsString(double input, bool includeSeconds)
+{ std::stringstream out;
+  bool isPositive=(input>0);
+  if (!isPositive)
+    input*=-1;
+  int days= (int ) FloatingPoint::floor( input/(24*3600));
+  input-=days*24*3600;
+  if (!isPositive)
+    out << "-(";
+  out << "~";
+  if (days>0)
+    out << days << " day(s) ";
+  out.precision(1);
+  if (input>0)
+    out << std::fixed << input/3600 << " hour(s)";
+  if (!isPositive)
+    out << ")";
+  return out.str();
+}
+
+double TimeWrapper::SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(TimeWrapper& other)
+{ return this->SubtractAnotherTimeFromMeInSeconds(other)/3600;
+}
+
+double TimeWrapper::SubtractAnotherTimeFromMeInSeconds(TimeWrapper& other)
+{ return difftime(mktime(&this->theTime), mktime(&other.theTime));
 }
 
 std::string TimeWrapper::ToStringHumanReadable()

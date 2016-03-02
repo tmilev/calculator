@@ -131,7 +131,7 @@ public:
    , bool inheritFromGroup, bool& outputIsInherited);
   std::string InterpretGenerateDeadlineLink
 (SyntacticElementHTML& inputOutput, std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
- const std::string& cleaneduplink, const std::string& urledProblem)
+ const std::string& cleaneduplink, const std::string& urledProblem, bool problemAlreadySolved)
   ;
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
   std::string InterpretGenerateProblemManagementLink
@@ -165,7 +165,7 @@ public:
   { return this->fileName==other.fileName;
   }
   std::string ToStringOneDeadlineFormatted
-  (const std::string& cleanedUpLink, const std::string& sectionNumber, bool isActualProblem)
+  (const std::string& cleanedUpLink, const std::string& sectionNumber, bool isActualProblem, bool problemAlreadySolved)
   ;
   std::string ToStringCalculatorArgumentsForProblem(const std::string& requestType)const;
   std::string ToStringProblemNavigation()const;
@@ -271,7 +271,7 @@ void DatabaseRoutines::StoreProblemInfo
   }
 
 //  stOutput << "Storing prob string: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(out.str())
-//  << "<br>from:<br>";
+//  << "<br>nput sections: " << inputSections << "<br>";
   outputString=out.str();
 }
 
@@ -342,6 +342,9 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
   { commentsOnFailure << "Failed to parse your request";
     return false;
   }
+//  stOutput << "<hr>incoming sections: " << incomingSections << "<hr>";
+ // stOutput << "incoming deadlines: " << incomingDeadlines << "<hr>";
+
   std::string currentFileName;
   bool result=true;
   for (int i=0; i<incomingProblems.size; i++)
@@ -831,7 +834,7 @@ std::string WebWorker::GetSetProblemDatabaseInfoHtml()
   std::stringstream out;
   if (result)
   { out << "<span style=\"color:green\"><b>Successfully modified problem data. </b></span>";
-    out << "<meta http-equiv=\"refresh\" content=\"0;\">";
+    //out << "<meta http-equiv=\"refresh\" content=\"0;\">";
   } else
     out << "<span style=\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
 //  out << "<br>Debug message:<br>inputProblemInfo raw: " << inputProblemInfo << "<br>Processed: "
@@ -1516,7 +1519,7 @@ std::string DatabaseRoutines::ToStringClassDetails
     } else if (currentUser.activationToken=="error")
       oneTableLineStream << "<td>error</td><td></td>";
     else
-    { oneTableLineStream << "<td><span style=\"color:green\">activated</span></td><td></td>";
+    { oneTableLineStream << "<td><span style=\"color:green\">activated</span></td><td></td><td></td>";
 /*      oneTableLineStream << "<td><span style=\"color:red\">"
       << "<a href=\""
       << UserCalculator::GetActivationAbsoluteAddressFromActivationToken(currentUser.activationToken.value, userTable[i][indexUser])
@@ -1804,6 +1807,7 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
     thePoints= this->databaseProblemWeights[this->databaseProblemAndHomeworkGroupList.GetIndex(cleaneduplink)];
   #ifdef MACRO_use_MySQL
   bool noSubmissionsYet=false;
+  bool weightPrinted=false;
   if (this->currentUser.problemNames.Contains(cleaneduplink))
   { ProblemData& theProbData=this->currentUser.problemData[this->currentUser.problemNames.GetIndex(cleaneduplink)];
     if (!theProbData.flagProblemWeightIsOK)
@@ -1811,19 +1815,29 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
       if (theProbData.ProblemWeightUserInput!="")
         out << "<span style=\"color:red\"><b>Failed to interpret weight string: "
         << theProbData.ProblemWeightUserInput << ". </b></span>";
+      if (theProbData.numSubmissions!=0)
+        out << theProbData.totalNumSubmissions << " submissions, " << theProbData.numCorrectlyAnswered << " correct answers. ";
+      weightPrinted=true;
     } else if (theProbData.totalNumSubmissions==0)
       noSubmissionsYet=true;
     else if (theProbData.numCorrectlyAnswered<theProbData.answerIds.size)
     { out << "<span style=\"color:red\"><b> "
       << theProbData.Points << " out of " << theProbData.ProblemWeight << " point(s). </b></span>";
+      weightPrinted=true;
     } else if (theProbData.numCorrectlyAnswered==theProbData.answerIds.size)
-      out << "<span style=\"color:green\"><b> "
+    { out << "<span style=\"color:green\"><b> "
       << theProbData.Points << " out of " << theProbData.ProblemWeight << " point(s). </b></span>";
+      weightPrinted=true;
+    }
   } else
     noSubmissionsYet=true;
   if (thePoints!="" && noSubmissionsYet)
-    out << "<span style=\"color:brown\"><b>No submissions: 0 out of " << thePoints
+  { out << "<span style=\"color:brown\"><b>No submissions: 0 out of " << thePoints
     << " point(s). </b> </span>" ;
+    weightPrinted=true;
+  }
+  if (!weightPrinted)
+    out << "<span style=\"color:orange\">No point weight assigned yet. </span>";
   if (theGlobalVariables.UserDefaultHasAdminRights())
   { //stOutput << "<hr>this->databaseProblemList is: " << this->databaseProblemList.ToStringCommaDelimited();
     //stOutput << "<br>this->databaseProblemWeights is: " << this->databaseProblemWeights.ToStringCommaDelimited();
@@ -1877,7 +1891,7 @@ std::string CalculatorHTML::GetDeadline
 }
 
 std::string CalculatorHTML::ToStringOneDeadlineFormatted
-  (const std::string& cleanedUpLink, const std::string& sectionNumber, bool isActualProblem)
+  (const std::string& cleanedUpLink, const std::string& sectionNumber, bool isActualProblem, bool problemAlreadySolved)
 { bool deadlineInherited=false;
   std::stringstream out;
   std::string currentDeadline = this->GetDeadline(cleanedUpLink, sectionNumber, true, deadlineInherited);
@@ -1886,30 +1900,49 @@ std::string CalculatorHTML::ToStringOneDeadlineFormatted
       out << "<span style=\"color:orange\">No deadline yet. </span>";
     return out.str();
   }
+  TimeWrapper now, deadline; //<-needs a fix for different time formats.
+  //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
+  std::stringstream badDateStream;
+  if (!deadline.AssignMonthDayYear(currentDeadline, badDateStream))
+    out << "<span style=\"color:red\">" << badDateStream.str() << "</span>";
+//  out << "deadline.date: " << deadline.theTime.tm_mday;
+  now.AssignLocalTime();
+//  out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
+//  << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
+  double secondsTillDeadline= deadline.SubtractAnotherTimeFromMeInSeconds(now)+7*3600;
+  std::stringstream hoursTillDeadlineStream;
+  if (secondsTillDeadline<24*3600)
+    hoursTillDeadlineStream << "<span style=\"color:red\">"
+    << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false) << " left. </span>";
+  else
+    hoursTillDeadlineStream << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false)
+    << " left. ";
   if (isActualProblem)
   { out << "Deadline: ";
     if (deadlineInherited)
       out << "<span style=\"color:blue\">" << currentDeadline << " (default)</span>. ";
     else
       out << "<span style=\"color:brown\">" << currentDeadline << " (individual deadline)</span>. ";
+    out << hoursTillDeadlineStream.str();
     return out.str();
   }
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return out.str();
   out << "<span style=\"color:blue\">" << currentDeadline << "</span>. ";
+  out << hoursTillDeadlineStream.str();
   return out.str();
 }
 
 std::string CalculatorHTML::InterpretGenerateDeadlineLink
 (SyntacticElementHTML& inputOutput, std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
- const std::string& cleaneduplink, const std::string& urledProblem)
+ const std::string& cleaneduplink, const std::string& urledProblem, bool problemAlreadySolved)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateDeadlineLink");
   //  return "Submission deadline: to be announced. ";
   std::stringstream out;
   bool deadlineInherited=false;
   bool isActualProblem=(inputOutput.GetTagClass()=="calculatorExamProblem");
   if (isActualProblem)
-    out << this->ToStringOneDeadlineFormatted(cleaneduplink, this->currentUser.extraInfoUnsafe, isActualProblem);
+    out << this->ToStringOneDeadlineFormatted(cleaneduplink, this->currentUser.extraInfoUnsafe, isActualProblem, problemAlreadySolved);
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return out.str();
   std::stringstream deadlineStream;
@@ -1964,7 +1997,7 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   deadlineStream << "</td>";
   deadlineStream << "</tr></table>";
 //  out << deadlineStream.str();
-  out << CGI::GetHtmlSpanHidableStartsHiddeN(deadlineStream.str(), "Set deadline. ");
+  out << CGI::GetHtmlSpanHidableStartsHiddeN(deadlineStream.str(), "Set deadline (show/hide). ");
   if (isActualProblem)
     out << "(overrides default). ";
   else
@@ -1995,8 +2028,14 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   //else
   //  out << " <a href=\"" << refStreamExercise.str() << "\">Start</a> ";
   //if (inputOutput.GetTagClass()=="calculatorExamIntermediate")
+  bool problemAlreadySolved=false;
+  if (this->currentUser.problemNames.Contains(cleaneduplink))
+  { ProblemData& theProbData=this->currentUser.problemData[this->currentUser.problemNames.GetIndex(cleaneduplink)];
+    if (theProbData.numCorrectlyAnswered>=theProbData.answerIds.size)
+      problemAlreadySolved=true;
+  }
   out << this->InterpretGenerateDeadlineLink
-  (inputOutput, refStreamForReal, refStreamExercise, cleaneduplink, urledProblem);
+  (inputOutput, refStreamForReal, refStreamExercise, cleaneduplink, urledProblem, problemAlreadySolved);
   std::string stringToDisplay = FileOperations::GetFileNameFromFileNameWithPath(inputOutput.content);
   //out << " " << this->NumProblemsFound << ". "
   out << stringToDisplay;

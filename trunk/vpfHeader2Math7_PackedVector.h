@@ -411,7 +411,7 @@ List<VectorSpace<coefficient> > GetEigenspaces(const Matrix<coefficient> &M)
 // As in Schneider, 1990
 // well, so far not using any of his improvements
 template <typename somegroup>
-List<ClassFunction<WeylGroup::WeylGroupBase, Rational> > ComputeCharacterTable(somegroup &G)
+List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G)
 { if(G.ConjugacyClassCount() == 0)
     G.ComputeCCfromAllElements(0);
   List<int> classmap;
@@ -431,9 +431,9 @@ List<ClassFunction<WeylGroup::WeylGroupBase, Rational> > ComputeCharacterTable(s
   { VectorSpace<Rational> allchars;
     for(int i=0; i<G.characterTable.size; i++)
     { VectorSpace<Rational> xspi;
-      xspi.AddVector(G.characterTable[i].data);
+      xspi.AddVector(G.characterTable[i]->data);
       spaces.AddOnTop(xspi);
-      allchars.AddVector(G.characterTable[i].data);
+      allchars.AddVector(G.characterTable[i]->data);
     }
     spaces.AddOnTop(allchars.OrthogonalComplement(0,&form));
   } else {
@@ -476,7 +476,7 @@ List<ClassFunction<WeylGroup::WeylGroupBase, Rational> > ComputeCharacterTable(s
         nchars += 1;
     stOutput << "Have " << nchars << " chars" << "\n";
   }
-  List<ClassFunction<WeylGroup::WeylGroupBase, Rational> > chars;
+  List<ClassFunction<somegroup, Rational> > chars;
   chars.SetSize(spaces.size);
   for(int i=0; i<spaces.size; i++)
   { chars[i].data = spaces[i].GetCanonicalBasisVector(0);
@@ -499,7 +499,10 @@ List<ClassFunction<WeylGroup::WeylGroupBase, Rational> > ComputeCharacterTable(s
         stOutput << "error: " << i << j << "\n";
   for(int i=0; i<chars.size; i++)
     stOutput << chars[i] << "\n";
-  G.characterTable = chars;
+  G.orphanCharacters = chars;
+  G.characterTable.SetSize(G.orphanCharacters.size);
+  for(int i=0; i<G.characterTable.size; i++)
+    G.characterTable[i] = &G.orphanCharacters[i];
   for(int i=0; i<G.characterTable.size; i++)
     stOutput << G.characterTable[i] << "\n";
   return chars;
@@ -536,8 +539,7 @@ Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap
   return out;
 }
 
-template <typename templateWeylGroup>
-void GetTauSignaturesFromSubgroup(templateWeylGroup& G, const List<ElementWeylGroup<templateWeylGroup> >& gens, List<bool>& out)
+void GetTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup<WeylGroupData> >& gens, List<bool>& out)
 { /*List<ElementWeylGroup<WeylGroup>> genes;
   genes.SetSize(gens.size);
   for(int i=0; i<gens.size; i++)
@@ -547,9 +549,9 @@ void GetTauSignaturesFromSubgroup(templateWeylGroup& G, const List<ElementWeylGr
   Vector<Rational> HXs;
   H.GetSignCharacter(HXs);*/
 
-  SubgroupData<WeylGroup, ElementWeylGroup<templateWeylGroup> > HD;
-  HD.initFromGroupAndGenerators(G, gens);
-  WeylGroup& H = *HD.theSubgroup;
+  SubgroupData<FiniteGroup<ElementWeylGroup<WeylGroupData> >, ElementWeylGroup<WeylGroupData> > HD;
+  HD.initFromGroupAndGenerators(G.theGroup, gens);
+  FiniteGroup<ElementWeylGroup<WeylGroupData> >& H = *HD.theSubgroup;
   H.ComputeAllElements();
   Vector<Rational> HXs;
   H.GetSignCharacter(HXs);
@@ -558,20 +560,20 @@ void GetTauSignaturesFromSubgroup(templateWeylGroup& G, const List<ElementWeylGr
   ccPreimages.SetSize(H.ConjugacyClassCount());
   for(int i=0; i<H.ConjugacyClassCount(); i++)
   { bool notFound=true;
-    for(int ci=0; notFound && ci<G.ConjugacyClassCount(); ci++)
-      for(int cj=0; notFound && cj<G.conjugacyClasseS[ci].size; cj++)
-        if(G.conjugacyClasseS[ci].theElements[cj] == H.conjugacyClasseS[i].representative)
+    for(int ci=0; notFound && ci<G.theGroup.ConjugacyClassCount(); ci++)
+      for(int cj=0; notFound && cj<G.theGroup.conjugacyClasseS[ci].size; cj++)
+        if(G.theGroup.conjugacyClasseS[ci].theElements[cj] == H.conjugacyClasseS[i].representative)
         { ccPreimages[i] = ci;
           notFound=false;
         }
     if (notFound)
       crash << "Something went very wrong: couldn't find preimage of conjugacy class of subgroup.";
   }
-  out.SetSize(G.characterTable.size);
+  out.SetSize(G.theGroup.characterTable.size);
   Vector<Rational> HXi;
   HXi.SetSize(H.ConjugacyClassCount());
-  for(int i=0; i<G.characterTable.size; i++)
-  { Vector<Rational> GXi = G.characterTable[i].data;
+  for(int i=0; i<G.theGroup.characterTable.size; i++)
+  { Vector<Rational> GXi = G.theGroup.characterTable[i]->data;
     for(int j=0; j<HXi.size; j++)
       HXi[j] = GXi[ccPreimages[j]];
     if(H.GetHermitianProduct(HXs,HXi) == 0)
@@ -581,17 +583,16 @@ void GetTauSignaturesFromSubgroup(templateWeylGroup& G, const List<ElementWeylGr
   }
 }
 
-template <typename templateWeylGroup>
-void ComputeTauSignatures(templateWeylGroup* G, List<List<bool> >& tauSignatures, bool pseudo=false)
+void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bool pseudo=false)
 { Selection sel;
   sel.init(G->CartanSymmetric.NumCols);
   int numCycles=MathRoutines::TwoToTheNth(sel.MaxSize);
   List<List<bool> > tss;
   tss.SetSize(numCycles);
-  List<ElementWeylGroup<templateWeylGroup> > theGenerators;
+  List<ElementWeylGroup<WeylGroupData> > theGenerators;
   for(int i=0; i<numCycles-2; i++)
   { sel.incrementSelection();
-    ElementWeylGroup<templateWeylGroup> currentElt;
+    ElementWeylGroup<WeylGroupData> currentElt;
     theGenerators.SetSize(sel.CardinalitySelection);
     for(int j=0; j<sel.CardinalitySelection; j++)
       theGenerators[j].MakeSimpleReflection(sel.elements[j], *G);
@@ -600,14 +601,14 @@ void ComputeTauSignatures(templateWeylGroup* G, List<List<bool> >& tauSignatures
   Vector<Rational> Xs;
   G->GetSignCharacter(Xs);
   List<bool> tsg;
-  tsg.SetSize(G->characterTable.size);
-  for(int i=0; i<G->characterTable.size; i++)
-    tsg[i] =  G->characterTable[i].data == Xs;
+  tsg.SetSize(G->theGroup.characterTable.size);
+  for(int i=0; i<G->theGroup.characterTable.size; i++)
+    tsg[i] =  G->theGroup.characterTable[i]->data == Xs;
   tss.AddOnTop(tsg);
 
   if(pseudo)
   { stOutput << "pseudo-parabolics" << "\n";
-    ElementWeylGroup<templateWeylGroup> hr = G->GetRootReflection(G->RootSystem.size-1);
+    ElementWeylGroup<WeylGroupData> hr = G->GetRootReflection(G->RootSystem.size-1);
     sel.init(G->CartanSymmetric.NumCols);
     for(int i=0; i<numCycles-1; i++)
     { theGenerators.SetSize(sel.CardinalitySelection);
@@ -624,24 +625,24 @@ void ComputeTauSignatures(templateWeylGroup* G, List<List<bool> >& tauSignatures
   // we will need the sign character for the group
 
 
-  tauSignatures.SetSize(G->characterTable.size);
-  for(int i=0; i<G->characterTable.size; i++)
+  tauSignatures.SetSize(G->theGroup.characterTable.size);
+  for(int i=0; i<G->theGroup.characterTable.size; i++)
   { tauSignatures[i].SetSize(tss.size+1);
     tauSignatures[i][0] = 1;
     for(int j=1; j<tss.size+1; j++)
       tauSignatures[i][j] = tss[j-1][i];
   }
 
-  for(int i=0; i<G->characterTable.size; i++)
-  { stOutput << G->characterTable[i] << "\n";
+  for(int i=0; i<G->theGroup.characterTable.size; i++)
+  { stOutput << G->theGroup.characterTable[i] << "\n";
     for(int j=0; j<tauSignatures[i].size; j++)
       stOutput << tauSignatures[i][j] << ' ';
     stOutput << "\n";
   }
 }
 
-template <typename somegroup>
-void ExportCharTable(const somegroup& G, JSData &data)
+template <typename elementSomeGroup>
+void ExportCharTable(FiniteGroup<elementSomeGroup>& G, JSData &data)
 { data.type = JSOBJ;
   data.obj.SetSize(3);
   data.obj[0].key = "representatives";
@@ -652,7 +653,7 @@ void ExportCharTable(const somegroup& G, JSData &data)
   data.obj[0].value.list.SetSize(G.ConjugacyClassCount());
   for(int i=0; i<G.ConjugacyClassCount(); i++)
   { List<int> reprefs;
-    G.GetWord(G.conjugacyClasseS[i].indicesEltsInOwner[0],reprefs);
+    G.GetWord(G.conjugacyClasseS[i].representative,reprefs);
     data.obj[0].value.list[i].type = JSLIST;
     data.obj[0].value.list[i].list.SetSize(reprefs.size);
     for(int j=0; j<reprefs.size; j++)
@@ -671,15 +672,14 @@ void ExportCharTable(const somegroup& G, JSData &data)
   data.obj[2].value.type = JSLIST;
   data.obj[2].value.list.SetSize(G.characterTable.size);
   for(int i=0; i<G.characterTable.size; i++)
-  { for(int j=0; j<G.characterTable[i].data.size; j++)
-    { data["characters"][i][j] = G.characterTable[i][j].GetDoubleValue();
+  { for(int j=0; j<G.characterTable[i]->data.size; j++)
+    { data["characters"][i][j] = (*(G.characterTable[i]))[j].GetDoubleValue();
     }
   }
 }
 
-template <typename somegroup>
-void ExportTauSignatures(const somegroup& G, const List<List<bool> > ts, JSData &data)
-{ ExportCharTable(G, data["chartable"]);
+void ExportTauSignatures(WeylGroupData& G, const List<List<bool> > ts, JSData &data)
+{ ExportCharTable(G.theGroup, data["chartable"]);
   for(int i=0; i<ts.size; i++)
     for(int j=0; j<ts[i].size; j++)
       data["tausigs"][i][j] = ts[i][j];
@@ -691,9 +691,9 @@ void LoadAndPrintTauSignatures(char letter, int number)
   JSData data;
   data.readfile(s.str().c_str());
   if(data.type == JSNULL)
-  { WeylGroup G;
+  { WeylGroupData G;
     G.MakeArbitrarySimple(letter, number);
-    ComputeCharacterTable(G);
+    ComputeCharacterTable(G.theGroup);
     List<List<bool> > ts;
     ComputeTauSignatures(&G,ts,true);
     ExportTauSignatures(G,ts,data);

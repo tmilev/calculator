@@ -266,7 +266,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt(Calculato
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt");
   if (!input.IsListNElements(3))
     return false;
-  ElementWeylGroup<WeylGroup> leftR, rightR;
+  ElementWeylGroup<WeylGroupData> leftR, rightR;
   if (!input[1].IsOfType(&leftR) || !input[2].IsOfType(&rightR))
     return false;
   //stOutput << "<br>leftR= " << leftR.ToString();
@@ -378,9 +378,9 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(Calcula
   Weight<Polynomial<Rational> > theWeight;
   if (!inputConverted[2].IsOfType<Weight<Polynomial<Rational> > >(&theWeight))
     return false;
-  if (!inputConverted[1].IsOfType<ElementWeylGroup<WeylGroup> >())
+  if (!inputConverted[1].IsOfType<ElementWeylGroup<WeylGroupData> >())
     return false;
-  ElementWeylGroup<WeylGroup> theElt=inputConverted[1].GetValue<ElementWeylGroup<WeylGroup> >();
+  ElementWeylGroup<WeylGroupData> theElt=inputConverted[1].GetValue<ElementWeylGroup<WeylGroupData> >();
   if (theElt.owner!=&theWeight.owner->theWeyl)
     return theCommands << "<hr>Possible user input error: attempting to apply Weyl group element to weight corresponding to different Weyl group.";
   Vector<Polynomial<Rational> > theWeightSimpleCoords=theElt.owner->GetSimpleCoordinatesFromFundamental(theWeight.weightFundamentalCoordS);
@@ -555,7 +555,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLSPath(Calculator& theComma
   if (!output.IsOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >() || !rightCopy.IsOfType<LittelmannPath>())
     return false;
   LittelmannPath result=rightCopy.GetValue<LittelmannPath>();
-  WeylGroup& theWeyl=*result.owner;
+  WeylGroupData& theWeyl=*result.owner;
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> theLRO=
   output.GetValue<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
   for (int i=theLRO.generatorsIndices.size-1; i>=0; i--)

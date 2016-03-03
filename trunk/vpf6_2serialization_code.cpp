@@ -36,7 +36,7 @@ bool CalculatorConversions::innerLoadWeylGroup(Calculator& theCommands, const Ex
   DynkinType theType;
   if (!CalculatorConversions::innerDynkinType(theCommands, input, theType))
     return false;
-  WeylGroup theWeyl;
+  WeylGroupData theWeyl;
   theWeyl.MakeFromDynkinType(theType);
 //  stOutput << "got ere2!";
   return output.AssignValue(theWeyl, theCommands);

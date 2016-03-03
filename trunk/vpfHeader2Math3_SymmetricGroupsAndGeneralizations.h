@@ -617,6 +617,7 @@ class HyperoctahedralGroupData
 std::ostream& operator<<(std::ostream& out, const HyperoctahedralGroupData& data);
 
 
+// superseded by SemidirectProductGroup<PermutationR2, ElementZ2N, HyperoctahedralBitsAutomorphism>
 // a hyperoctahedral group is a semidirect product of a symmetric group and
 // a group of bits.  is there a better name for the group of bits than s?
 // false and true are 0 and 1 by convention, which is kinda backwards lol
@@ -631,7 +632,7 @@ std::ostream& operator<<(std::ostream& out, const HyperoctahedralGroupData& data
 // hyperoctahedral group, but rather of the direct limit of the hyperoctahedral
 // groups.  It is the responsibility of the caller, of course, to ensure that
 // all requested operations are defined.
-class ElementHyperoctahedralGroup
+/*class ElementHyperoctahedralGroup
 { public:
   PermutationR2 p;
   List<bool> s;
@@ -670,14 +671,17 @@ class ElementHyperoctahedralGroup
   friend std::ostream& operator<<(std::ostream& out, const ElementHyperoctahedralGroup& data)
   { return data.IntoStream(out);
   }
-};
+};*/
 
 template <typename elementSomeGroup>
 class ConjugacyClassR2
 { public:
   elementSomeGroup representative;
   int size;
-  bool haveRepresentativeWord;
+  // why is there a flagRepresentativeComputed, how is it meaningful to have a
+  // conjugacy class without a representative?
+  bool flagRepresentativeComputed;
+  bool flagHaveRepresentativeWord;
   List<int> representativeWord;
   // the other members are not necessarily meaningful
   int representativeIndex;
@@ -687,7 +691,7 @@ class ConjugacyClassR2
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
   std::string ToString() const;
-  ConjugacyClassR2(){this->haveRepresentativeWord=false;}
+  ConjugacyClassR2(){this->flagRepresentativeComputed=false; this->flagHaveRepresentativeWord=false;}
 };
 
 template <typename object>
@@ -1062,14 +1066,26 @@ class GeneratorElementsSnxSnOnIndicesAndIndices
   }
 };
 
+template<typename groupElement>
+class GroupConjugacyImplementation
+{ GroupConjugacyImplementation<groupElement> operator^(const GroupConjugacyImplementation<groupElement>& right) const
+  { auto inv = right;
+    inv.Invert();
+    return right**this*inv;
+  }
+  
+  static void ConjugationAction(const GroupConjugacyImplementation<groupElement>& conjugateWith, const GroupConjugacyImplementation<groupElement>& conjugateOn, GroupConjugacyImplementation<groupElement>& out)
+  { out = conjugateOn^conjugateWith;
+  }
+};
+
 // sample element class.  Functional, verifiable documentation
 // give it a multiplication function, feed it to SimpleFiniteGroup, and...
-class ElementFiniteGroup
+class ElementFiniteGroup: public GroupConjugacyImplementation<ElementFiniteGroup>
 { void* data;
 
   void* (*mul)(void*, void*);
-  // the rest is optional
-  void* (*inv)(void*) ;
+  void* (*inv)(void*);
 
   ElementFiniteGroup()
   { this->data=0;
@@ -1098,6 +1114,8 @@ class ElementFiniteGroup
     return out;
   }
 };
+
+
 
 // this is here until I figure out how to use FiniteGroup
 // that, and I guess it might be useful for some Tableau stuff
@@ -1629,7 +1647,7 @@ void FiniteGroup<elementSomeGroup>::ComputeGeneratorCommutationRelations()
 }
 
 template <typename elementSomeGroup>
-std::string FiniteGroup<elementSomeGroup>::PrettyPrintGeneratorCommutationRelations()
+std::string FiniteGroup<elementSomeGroup>::PrettyPrintGeneratorCommutationRelations(GlobalVariables* theGlobalVariables)
 { this->ComputeGeneratorCommutationRelations();
   std::string crs = this->generatorCommutationRelations.ToStringPlainText();
   List<char*> rows;
@@ -1677,7 +1695,7 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintGeneratorCommutationRelati
 }
 
 template <typename elementSomeGroup>
-std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable()
+std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable(GlobalVariables* theGlobalVariables)
 { for(int i=0; i<this->irreps.size; i++)
     this->irreps[i].ComputeCharacter();
   std::stringstream out;
@@ -1889,7 +1907,7 @@ std::ostream& operator<<(std::ostream& out, const FiniteGroup<elementSomeGroup>&
 }
 */
 
-template <typename somestream>
+/*template <typename somestream>
 somestream& ElementHyperoctahedralGroup::IntoStream(somestream& out) const
 { out << '[' << this->p << ',';
   for(int i=0; i<this->s.size; i++)
@@ -1899,7 +1917,7 @@ somestream& ElementHyperoctahedralGroup::IntoStream(somestream& out) const
       out << '0';
   out << ']';
   return out;
-}
+}*/
 
 /*
 template <typename somestream>

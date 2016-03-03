@@ -36,7 +36,7 @@ Rational ModuleSSalgebra<coefficient>::hwTrace
   Vector<Rational> RemainingWeight;
   Rational result=0;
   Rational summand;
-  WeylGroup& theWeyl=this->GetOwner().theWeyl;
+  WeylGroupData& theWeyl=this->GetOwner().theWeyl;
 //  std::stringstream tempStr;
 //  tempStr << thePair.Object2;
 //  if (tempStr.str()=="g_{1}^{1}g_{2}^{1}")
@@ -286,7 +286,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
   Weight<coefficient> tempMon, localHighest;
   List<coefficient> tempMults;
   HashedList<Vector<coefficient> > tempHashedRoots;
-  WeylGroup& theWeyL=this->GetOwner()->theWeyl;
+  WeylGroupData& theWeyL=this->GetOwner()->theWeyl;
   charAmbientFDWeyl.MakeZero();
   coefficient bufferCoeff, highestCoeff;
   out << "Starting character: " << this->ToString();
@@ -574,7 +574,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
     crash << "This is a programming error. I am asked to create a generalized Verma module with a semisimple Lie algebra of rank "
     << theRank << " but the input highest weight, " << HWFundCoords.ToString() << ", has " << HWFundCoords.size << " coordinates and "
     << " the parabolic section indicates rank of " << selNonSelectedAreElementsLevi.MaxSize << ". " << crash;
-  WeylGroup& theWeyl=theAlgebrA.theWeyl;
+  WeylGroupData& theWeyl=theAlgebrA.theWeyl;
   this->cachedPairs.Clear();
   this->cachedTraces.SetSize(0);
 
@@ -677,7 +677,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
   this->theGeneratingWordsNonReduced.size=0;
   this->theGeneratingWordsWeightsPlusWeightFDpart.SetSize(0);
   this->theGeneratingWordsWeightsPlusWeightFDpart.Reserve(this->thePaths.size);
-  HashedList<ElementWeylGroup<WeylGroup>> theWeylElts;
+  HashedList<ElementWeylGroup<WeylGroupData>> theWeylElts;
 //  int wordCounter=-1;
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
   { List<MonomialUniversalEnveloping<coefficient> >& currentList=this->theGeneratingWordsGrouppedByWeight[i];
@@ -901,7 +901,7 @@ void ModuleSSalgebra<coefficient>::GetFDchar(charSSAlgMod<coefficient>& output)
     return;
   Weight<coefficient> tempMon;
   tempMon.owner=&this->GetOwner();
-  WeylGroup& theWeyl=this->GetOwner().theWeyl;
+  WeylGroupData& theWeyl=this->GetOwner().theWeyl;
   for (int i =0; i<this->theModuleWeightsSimpleCoords.size; i++)
   { tempMon.weightFundamentalCoordS=theWeyl.GetFundamentalCoordinatesFromSimple(this->theModuleWeightsSimpleCoords[i]);
     output.AddMonomial(tempMon, this->theGeneratingWordsGrouppedByWeight[i].size);

@@ -6,6 +6,7 @@
 #include "vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h"
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
+#include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 ProjectInformationInstance ProjectInfoVpf6_4ExpressionsImplementationcpp(__FILE__, "Calculator expression implementation. ");
 
 Expression operator*(const Expression& left, const Expression& right)
@@ -59,12 +60,6 @@ template < >
 int Expression::GetTypeOperation<Rational>()const
 { this->CheckInitialization();
   return this->owner->opRational();
-}
-
-template < >
-int Expression::GetTypeOperation<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroup>, Rational> >()const
-{ this->CheckInitialization();
-  return this->owner->opHyperoctahedralGroupRep();
 }
 
 template < >
@@ -218,25 +213,25 @@ int Expression::GetTypeOperation<SemisimpleSubalgebras>()const
 }
 
 template < >
-int Expression::GetTypeOperation<WeylGroup>()const
+int Expression::GetTypeOperation<WeylGroupData>()const
 { this->CheckInitialization();
   return this->owner->opWeylGroup();
 }
 
 template < >
-int Expression::GetTypeOperation<WeylGroupRepresentation<Rational> >()const
+int Expression::GetTypeOperation<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >()const
 { this->CheckInitialization();
   return this->owner->opWeylGroupRep();
 }
 
 template < >
-int Expression::GetTypeOperation<ElementWeylGroup<WeylGroup> >()const
+int Expression::GetTypeOperation<ElementWeylGroup<WeylGroupData> >()const
 { this->CheckInitialization();
   return this->owner->opWeylGroupElement();
 }
 
 template < >
-int Expression::GetTypeOperation<WeylGroupVirtualRepresentation<Rational> >()const
+int Expression::GetTypeOperation<VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >()const
 { this->CheckInitialization();
   return this->owner->opWeylGroupVirtualRep();
 }
@@ -512,7 +507,7 @@ PlotObject
 
 template < >
 int Expression::AddObjectReturnIndex(const
-WeylGroup
+WeylGroupData
 & inputValue)const
 { this->CheckInitialization();
   for (int i=0; i<this->owner->theObjectContainer.theLieAlgebras.size; i++)
@@ -526,7 +521,7 @@ WeylGroup
 
 template < >
 int Expression::AddObjectReturnIndex(const
-WeylGroupRepresentation<Rational>
+GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>
 & inputValue)const
 { this->CheckInitialization();
   return this->owner->theObjectContainer.theWeylGroupReps
@@ -535,7 +530,7 @@ WeylGroupRepresentation<Rational>
 
 template < >
 int Expression::AddObjectReturnIndex(const
-WeylGroupVirtualRepresentation<Rational>
+VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>
 & inputValue)const
 { this->CheckInitialization();
   return this->owner->theObjectContainer.theWeylGroupVirtualReps
@@ -544,7 +539,7 @@ WeylGroupVirtualRepresentation<Rational>
 
 template < >
 int Expression::AddObjectReturnIndex(const
-ElementWeylGroup<WeylGroup>
+ElementWeylGroup<WeylGroupData>
 & inputValue)const
 { this->CheckInitialization();
   return this->owner->theObjectContainer.theWeylGroupElements
@@ -724,29 +719,29 @@ Plot& Expression::GetValueNonConst()const
 }
 
 template < >
-WeylGroup& Expression::GetValueNonConst()const
-{ if (!this->IsOfType<WeylGroup>())
+WeylGroupData& Expression::GetValueNonConst()const
+{ if (!this->IsOfType<WeylGroupData>())
     crash << "This is a programming error: expression not of required type WeylGroup. The expression equals " << this->ToString() << "." << crash;
   return this->owner->theObjectContainer.theLieAlgebras.GetElement(this->GetLastChild().theData).theWeyl;
 }
 
 template < >
-WeylGroupRepresentation<Rational>& Expression::GetValueNonConst()const
-{ if (!this->IsOfType<WeylGroupRepresentation<Rational> >())
+GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& Expression::GetValueNonConst()const
+{ if (!this->IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >())
     crash << "This is a programming error: expression not of required type WeylGroupRepresentation_Rational. The expression equals " << this->ToString() << "." << crash;
   return this->owner->theObjectContainer.theWeylGroupReps.GetElement(this->GetLastChild().theData);
 }
 
 template < >
-ElementWeylGroup<WeylGroup>& Expression::GetValueNonConst()const
-{ if (!this->IsOfType<ElementWeylGroup<WeylGroup> >())
+ElementWeylGroup<WeylGroupData>& Expression::GetValueNonConst()const
+{ if (!this->IsOfType<ElementWeylGroup<WeylGroupData> >())
     crash << "This is a programming error: expression not of required type ElementWeylGroup. The expression equals " << this->ToString() << "." << crash;
   return this->owner->theObjectContainer.theWeylGroupElements.GetElement(this->GetLastChild().theData);
 }
 
 template < >
-WeylGroupVirtualRepresentation<Rational>& Expression::GetValueNonConst()const
-{ if (!this->IsOfType<WeylGroupVirtualRepresentation<Rational> >())
+VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& Expression::GetValueNonConst()const
+{ if (!this->IsOfType<VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >())
     crash << "This is a programming error: expression not of required type WeylGroupVirtualRepresentation. The expression equals " << this->ToString() << "." << crash;
   return this->owner->theObjectContainer.theWeylGroupVirtualReps.GetElement(this->GetLastChild().theData);
 }
@@ -1066,8 +1061,8 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
 //    stOutput << "<hr>Context of rational set; rational is: " << this->ToString();
     return true;
   }
-  if (this->IsOfType<ElementWeylGroup<WeylGroup> >())
-    return this->AssignValueWithContext(this->GetValue<ElementWeylGroup<WeylGroup> >(), inputOutputMinContext, *this->owner);
+  if (this->IsOfType<ElementWeylGroup<WeylGroupData> >())
+    return this->AssignValueWithContext(this->GetValue<ElementWeylGroup<WeylGroupData> >(), inputOutputMinContext, *this->owner);
   if (this->IsOfType<AlgebraicNumber>())
     return this->SetChilD(1, inputOutputMinContext);
   if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> > ())
@@ -1952,29 +1947,30 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     } else
       out << "(plot not shown)";
     result=true;
-  } else if (this->IsOfType<WeylGroup>())
-  { WeylGroup& theGroup=this->GetValueNonConst<WeylGroup>();
+  } else if (this->IsOfType<WeylGroupData>())
+  { WeylGroupData& theGroup=this->GetValueNonConst<WeylGroupData>();
     contextFormat.GetElement().flagUseLatex=true;
     contextFormat.GetElement().flagUseHTML=false;
     contextFormat.GetElement().flagUseReflectionNotation=true;
     out << theGroup.ToString(&contextFormat.GetElement());
     result=true;
-  } else if (this->IsOfType<ElementWeylGroup<WeylGroup> >())
-  { const ElementWeylGroup<WeylGroup>& theElt=this->GetValue<ElementWeylGroup<WeylGroup> >();
+  } else if (this->IsOfType<ElementWeylGroup<WeylGroupData> >())
+  { const ElementWeylGroup<WeylGroupData>& theElt=this->GetValue<ElementWeylGroup<WeylGroupData> >();
     contextFormat.GetElement().flagUseLatex=true;
     contextFormat.GetElement().flagUseHTML=false;
     contextFormat.GetElement().flagUseReflectionNotation=true;
     out << theElt.ToString(&contextFormat.GetElement());
     result=true;
-  } else if (this->IsOfType<WeylGroupRepresentation<Rational> >())
-  { const WeylGroupRepresentation<Rational>& theElt=this->GetValue<WeylGroupRepresentation<Rational> >();
+  } else if (this->IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >())
+  { const GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& theElt=
+        this->GetValue<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >();
     contextFormat.GetElement().flagUseLatex=true;
     contextFormat.GetElement().flagUseHTML=false;
     contextFormat.GetElement().flagUseReflectionNotation=true;
     out << theElt.ToString(&contextFormat.GetElement());
     result=true;
-  } else if (this->IsOfType<WeylGroupVirtualRepresentation<Rational> >())
-  { const WeylGroupVirtualRepresentation<Rational>& theElt=this->GetValue<WeylGroupVirtualRepresentation<Rational> >();
+  } else if (this->IsOfType<VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >())
+  { const VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& theElt=this->GetValue<VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >();
     contextFormat.GetElement().flagUseLatex=true;
     contextFormat.GetElement().flagUseHTML=false;
     contextFormat.GetElement().flagUseReflectionNotation=true;
@@ -2469,8 +2465,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         out << "</td><td valign=\"top\"><hr>";
         if ((*this)[i].IsOfType<std::string>() && isFinal)
           out << (*this)[i].GetValue<std::string>();
-        else if (((*this)[i].IsOfType<Plot> () || (*this)[i].IsOfType<SemisimpleSubalgebras>() || (*this)[i].IsOfType<WeylGroup>()
-                  || (*this)[i].IsOfType<WeylGroupRepresentation<Rational> >()) && isFinal)
+        else if (((*this)[i].IsOfType<Plot> () || (*this)[i].IsOfType<SemisimpleSubalgebras>() || (*this)[i].IsOfType<WeylGroupData>()
+                  || (*this)[i].IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >()) && isFinal)
           out << (*this)[i].ToString(theFormat);
         else
           out << CGI::GetMathSpanBeginArrayL((*this)[i].ToString(theFormat), 1700);
@@ -2536,7 +2532,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     else
     { outTrue << "<tr><td>" << CGI::GetMathSpanBeginArrayL(startingExpression->ToString(theFormat), 1700);
       if ((this->IsOfType<std::string>() || this->IsOfType<Plot>() ||
-           this->IsOfType<SemisimpleSubalgebras>() || this->IsOfType<WeylGroup>()) && isFinal)
+           this->IsOfType<SemisimpleSubalgebras>() || this->IsOfType<WeylGroupData>()) && isFinal)
         outTrue << "</td><td>" << out.str() << "</td></tr>";
       else
         outTrue << "</td><td>" << CGI::GetMathSpanBeginArrayL(out.str(), 1700) << "</td></tr>";

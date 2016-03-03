@@ -1240,7 +1240,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
   int theRank=theSSlieAlg->GetRank();
   Vector<Rational> currentRoot;
   Vectors<Rational> outputRoots;
-  WeylGroup& theWeyl=theSSlieAlg->theWeyl;
+  WeylGroupData& theWeyl=theSSlieAlg->theWeyl;
   if (!theWeyl.theDynkinType.IsSimple())
     return theCommands << "<hr>Function root subsystem works for simple ambient types only.";
   for (int i=2; i<input.children.size; i++)

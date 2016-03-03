@@ -19,11 +19,341 @@
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 #include "vpfHeader1General3_Test.h"
 
+/*
+// The Plan:
+// * HomoSemidirectElement class takes a GroupHomomorphism pointer, a bool, and a group element
+// * That group element is permitted to be of any type, including GenericElement
+
+class GlobalVariablesStdoutClass: public StdoutClass
+{ GlobalVariables* theGlobalVariables;
+};
+
+template <typename theType>
+class MilevObject
+{ public:
+  GlobalVariablesStdoutClass IntoStream(GlobalVariablesStdoutClass& out)
+  { return this->IntoStream(out, out.theGlobalVariables); }
+  std::string ToString(GlobalVariables* theGlobalVariables=0)
+  { std::stringstream ss;
+    this->IntoStream(ss, theGlobalVariables);
+    return ss.str();
+  }
+};
+
+class GlobalAtomicStringVoidPointerTableClass;
+
+class AtomicString: public MilevObject<AtomicString>
+{ public:
+  const char *theString;
+  mutable int vpti;
+
+  AtomicString()
+  { this->theString = NULL;
+    this->vpti = -1;
+  }
+
+  // its 2016 and this is just like in K&R
+  // in 2016, memory access patterns are the most important thing
+  // both of these short strings are cached
+  AtomicString operator+(const char* right) const
+  { AtomicString out;
+    int l=0;
+    int i=0;
+    while(this->theString[i] != 0)
+    { i++;
+      l++;
+    }
+    i=0;
+    while(right[i] != 0)
+    { i++;
+      l++;
+    }
+    char* outs = (char*) malloc(l-1);
+    l=0;
+    i=0;
+    while(this->theString[i] != 0)
+    { outs[l] = this->theString[i];
+      i++;
+      l++;
+    }
+    i=0;
+    while(right[i] != 0)
+    { outs[l] = right[i];
+      i++;
+      l++;
+    }
+    l++;
+    outs[l] = 0;
+    out.theString = outs;
+    return out;
+  }
+
+  unsigned int HashFunction() const
+  { unsigned int acc = 0;
+    for(int i=0; i<SomeRandomPrimesSize; i++)
+    { if(theString[i] == 0)
+        break;
+      acc += theString[i] * SomeRandomPrimes[i];
+    }
+    return acc;
+  }
+  static unsigned int HashFunction(const AtomicString& o) {return o.HashFunction();}
 
 
+  template <typename somestream>
+  somestream IntoStream(somestream& out, GlobalVariables* unused=0);
+};
+
+class GlobalAtomicStringVoidPointerTableClass
+{ public:
+  HashedList<AtomicString> theStrings;
+  List<void*> theVoidPointers;
+
+  void SetPointer(const char* s, void* p, int ssz=-1)
+  { AtomicString as;
+    if(ssz == -1)
+    { ssz = 0;
+      for(; ; ssz++)
+        if(s[ssz] == 0)
+          break;
+    }
+    // const is a stupid attempt at using the type system to enforce a contract
+    // that doesn't actually matter for optimization purposes.  restrict solves
+    // a real problem, which is why it isn't in c++
+    // in the future, there will be two programming languages, c and javascript
+    char* aString = (char*) malloc(ssz);
+    for(int i=0; i<ssz; i++)
+      aString[i] = s[i];
+    as.theString = aString;
+    this->theStrings.AddOnTop(as);
+    this->theVoidPointers.AddOnTop(p);
+  }
+
+  void SetPointer(std::string s, void* p)
+  { SetPointer(s.c_str(), p, s.size());
+  }
+
+  void* GetPointer(const AtomicString& as)
+  { int i=this->theStrings.GetIndex(as);
+    if(i==-1)
+      return 0;
+    return this->theVoidPointers[i];
+  }
+
+  void* GetPointer(const std::string& s)
+  { AtomicString as;
+    as.theString = s.c_str();
+    return this->GetPointer(as);
+  }
+};
+
+GlobalAtomicStringVoidPointerTableClass VPT;
+
+template <typename somestream>
+somestream AtomicString::IntoStream(somestream& out, GlobalVariables* unused)
+{ if(this->vpti == -1)
+    this->vpti = VPT.theStrings.GetIndex(*this);
+  out << "AtomicString[" << this->vpti << "]: " << this->theString;
+  return out;
+}
+
+// Java and Python have put a lot more effort into making this fast
+class GenericElement: public MilevObject<GenericElement>, public GroupConjugacyImplementation<GenericElement>
+{ AtomicString* type;
+  void* data;
+  bool ownsData;
+
+  GenericElement(){type=0; data=0; ownsData = false;}
+  ~GenericElement(){if(ownsData) delete data;}
+  GenericElement operator*(const GenericElement& right) const
+  { static AtomicString* typecache;
+    static void* opcache;
+    if(typecache != type)
+    { typecache = type;
+      AtomicString fps = *type+"::operator*";
+      opcache = VPT.GetPointer(fps);
+    }
+    *((void*)(void*,void*)) op = (*((void*)(void*,void*))) opcache;
+    GenericElement out;
+    out.data = op(this->data, right.data);
+    out.ownsData = true;
+    out.type = this->type;
+    return out;
+  }
+  GenericElement Invert()
+  { static AtomicString* typecache;
+    static void* opcache;
+    if(typecache != type)
+    { typecache = type;
+      AtomicString fps = *type+"::Invert";
+      opcache = VPT.GetPointer(fps);
+    }
+    (void)(void*) op = ((void)(void*)) opcache;
+    op(this->data);
+  }
+  unsigned int HashFunction()
+  { static AtomicString* typecache;
+    static void* opcache;
+    if(typecache != type)
+    { typecache = type;
+      AtomicString fps = *type+"::HashFunction";
+      opcache = VPT.GetPointer(fps);
+    }
+    (unsigned int)(void*) op = ((unsigned int)(void*)) opcache;
+    return ((unsigned int) type) + op(this->data);
+  }
+  GlobalVariablesStdoutClass& IntoStream(GlobalVariablesStdoutClass &out)
+  { out << "GenericElement wrapping ";
+    static AtomicString* typecache;
+    static void* opcache;
+    if(typecache != type)
+    { typecache = type;
+      AtomicString fps = *type+"::IntoStream";
+      opcache = VPT.GetPointer(fps);
+    }
+    (GlobalVariablesStdoutClass&)(void*,GlobalVariablesStdoutClass&) op =
+        ((GlobalVariablesStdoutClass&)(void*,GlobalVariablesStdoutClass&)) opcache;
+    return op(this->data, out);
+  }
+};
+*/
+
+//TODO: Semidirect product groups have a product of elements, whereas we only need a product of pointers and a sum of
+// elements in memory.  Fortunately HomoSemidirectElements only carry twice as much elements.
+template <typename kelt>
+class HomoSemidirectElement: public GroupConjugacyImplementation<HomoSemidirectElement<kelt> >
+{ bool h;
+  kelt k;
+  GroupHomomorphism<kelt, kelt>* oa;
+
+  HomoSemidirectElement operator*(const HomoSemidirectElement& right) const
+  { HomoSemidirectElement out;
+    out.h = this->h ^ right.h;
+    kelt tmp = this->h ? this->oa(this->k) : this->k;
+    out.k = tmp * right.k;
+    return out;
+  }
+
+  void Invert()
+  { this->h.Invert();
+    this->k = this->oa(this->h,this->k);
+    this->k.Invert();
+  }
+
+  void MakeID(const HomoSemidirectElement& prototype)
+  { this->h = false;
+    this->k.MakeID(prototype.k);
+  }
+
+  void operator=(const kelt& theKelt)
+  { this->h = false;
+    this->k = theKelt;
+  }
+
+  void operator==(const HomoSemidirectElement& right) const
+  { if(!(this->h == right.h))
+      return false;
+    if(!(this->k == right.k))
+      return false;
+    return true;
+  }
+
+  void operator>(const HomoSemidirectElement& right) const
+  { if(!this->h && right.h)
+      return false;
+    if(this->h && !right.h)
+      return true;
+    return this->k > right.k;
+  }
+};
+
+template <typename kelt>
+class HomoSemidrectGroupData
+{ GroupHomomorphism<kelt, kelt>* oa;
+  FiniteGroup<kelt>* theSubgroup;
+  FiniteGroup<HomoSemidirectElement<kelt> >* theGroup;
+  FiniteGroup<HomoSemidirectElement<kelt> > theGroupMayBeHereNameIsLongToDiscourageUse;
+
+  void MakeHomoSemidirectGroupData(FiniteGroup<kelt>* subgroup, GroupHomomorphism<kelt, kelt>* outer)
+  { this->theSubgroup = subgroup;
+    this->oa = outer;
+    this->theGroup = &theGroupMayBeHereNameIsLongToDiscourageUse;
+    this->theGroup->generators = this->theSubgroup->generators;
+    this->theGroup->generators.SetSize(this->theGroup->generators.size+1);
+    this->theGroup->generators.LastObject()->MakeID(this->theGroup->generators[0]);
+    this->theGroup->generators.LastObject()->h = true;
+  }
+};
 
 
+/*class GeneralizedElement: public GroupConjugacyImplementation
+{ char specifictype;
+  union data
+  { ElementZ2N b;
+    ElementZmodP c;
+    ElementFiniteGroup f;
+    Matrix<Rational> m;
+    ElementHyperoctahedralGroupR2 o;
+    PermutationR2 p;
+    UserSemidirectElement u;
+    ElementWeylGroup w;
+  };
 
+  GeneralizedElement operator*(const GeneralizedElement right) const
+  { if(this->specifictype != right.specifictype)
+      crash << "Illegal operation " << __FILE__ << ":" << __LINE__ << crash;
+    GeneralizedElement out;
+    out.specifictype = this->specifictype;
+    switch(this->specifictype)
+    { case 'b':
+        out.data.b = data.b * right.data.b;
+        return out;
+      case 'c':
+        out.data.c = data.c * right.data.c;
+        return out;
+      case 'f':
+        out.data.f = data.f * right.data.f;
+        return out;
+      case 'm':
+        out.data.m = data.m * right.data.m;
+        return out;
+      case 'o':
+        out.data.o = data.o * right.data.o;
+        return out;
+      case 'p':
+        out.data.p = data.p * right.data.p;
+        return out;
+      case 'u':
+        out.data.u = data.u * right.data.u;
+        return out;
+      case 'w':
+        out.data.w = data.w * right.data.w;
+        return out;
+    }
+  }
+
+  void Invert()
+  { switch(this->specifictype)
+    { case 'b':
+        return data.b.Invert();
+      case 'c':
+        return data.c.Invert();
+      case 'f':
+        return data.f.Invert();
+      case 'm':
+        return data.m.Invert();
+      case 'o':
+        return data.o.Invert();
+      case 'p':
+        return data.p.Invert();
+      case 'u':
+        return data.u.Invert();
+      case 'w':
+        return data.w.Invert();
+    }
+  }
+
+};*/
 
 class CharacterTable
 {
@@ -194,7 +524,7 @@ void SubListListInt::SetSize(int newsz)
   }
 }
 
-void WeylElementPermutesRootSystem(const ElementWeylGroup<WeylGroup>& g, PermutationR2& p)
+void WeylElementPermutesRootSystem(const ElementWeylGroup<WeylGroupData>& g, PermutationR2& p)
 { int rss = g.owner->RootSystem.size;
   List<bool> accountedFor;
   accountedFor.SetSize(rss);
@@ -341,7 +671,8 @@ List<int> FindConjugacyClassRepresentatives(weylgroup &G, int ncc)
 
 //template <typename somegroup>
 //template <typename grouprep>
-void ComputeIrreps(WeylGroup& G)
+template <typename elementSomeGroup>
+void ComputeIrreps(FiniteGroup<elementSomeGroup>& G)
 { List<int> charactersWithIrreps;
   List<int> charactersWithoutIrreps;
   for(int i=0; i<G.irreps.size; i++)
@@ -1035,11 +1366,11 @@ Vector<coefficient> PutInBasis(const Vector<coefficient> &v, const List<Vector<c
   return v2;
 }
 
-template <typename coefficient>
-Vector<coefficient> ActOnGroupRing(const WeylGroup& G, int g, const Vector<coefficient> &v)
+template <typename elementSomeGroup, typename coefficient>
+Vector<coefficient> ActOnGroupRing(const FiniteGroup<elementSomeGroup>& G, int g, const Vector<coefficient> &v)
 { Vector<coefficient> out;
   out.MakeZero(G.theElements.size);
-  ElementWeylGroup<WeylGroup> theProduct;
+  elementSomeGroup theProduct;
   for(int i=0; i<G.theElements.size; i++)
     if(v[i] != 0)
       out[G.MultiplyElements(g,i)]=v[i];
@@ -1047,8 +1378,8 @@ Vector<coefficient> ActOnGroupRing(const WeylGroup& G, int g, const Vector<coeff
 }
 
 // this function name is a lie
-template <typename coefficient>
-bool is_isotypic_component(WeylGroup &G, const List<Vector<coefficient> > &V)
+template <typename elementSomeGroup, typename coefficient>
+bool is_isotypic_component(FiniteGroup<elementSomeGroup> &G, const List<Vector<coefficient> > &V)
 { // pre-initial test: V isn't empty
   if(V.size == 0)
     return false;
@@ -1057,7 +1388,7 @@ bool is_isotypic_component(WeylGroup &G, const List<Vector<coefficient> > &V)
   if(n*n != V.size)
     return false;
   // more expensive test: character of V has unit norm
-  ClassFunction<WeylGroup, coefficient> X;
+  ClassFunction<FiniteGroup<elementSomeGroup>, coefficient> X;
   X.G = &G;
   X.data.SetSize(G.conjugacyClasseS.size);
   for(int i=0; i<G.conjugacyClasseS.size; i++)
@@ -1086,9 +1417,8 @@ bool is_isotypic_component(WeylGroup &G, const List<Vector<coefficient> > &V)
 }
 
 
-
-template <typename coefficient>
-Matrix<coefficient> GetMatrix(const ClassFunction<WeylGroup, coefficient>& X)
+template <typename elementSomeGroup, typename coefficient>
+Matrix<coefficient> GetMatrix(const ClassFunction<FiniteGroup<elementSomeGroup>, coefficient>& X)
 { Matrix<coefficient> M;
   M.MakeZeroMatrix(X.G->N);
   for(int i1=0; i1<X.G->ccCount; i1++)
@@ -1226,7 +1556,7 @@ int chartable[10][10] =
 
 
 
-void make_macdonald_polynomial(const WeylGroup& G, const List<Vector<Rational> > roots, Polynomial<Rational>& macdonaldPoly)
+void make_macdonald_polynomial(const WeylGroupData& G, const List<Vector<Rational> > roots, Polynomial<Rational>& macdonaldPoly)
 { List<MonomialP> vars;
   vars.SetSize(G.GetDim());
   for(int i=0; i<G.GetDim(); i++)
@@ -1394,12 +1724,13 @@ class lennum
   }
 };
 
-WeylGroupRepresentation<Rational> get_macdonald_representation(WeylGroup& W, const List<Vector<Rational> >& roots)
+GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>
+get_macdonald_representation(WeylGroupData& W, const List<Vector<Rational> >& roots)
 { stOutput << "starting with roots " << roots << "\n";
   List<Vector<Rational> > monomial;
   List<List<Vector<Rational> > > monomials;
   Matrix<Rational> m;
-  for(int i=0; (Rational)i<W.GetSize(); i++)
+  for(int i=0; (Rational)i<W.theGroup.GetSize(); i++)
   { W.GetStandardRepresentationMatrix(i,m);
     monomial.SetSize(roots.size);
     for(int j=0; j<roots.size; j++)
@@ -1448,8 +1779,8 @@ WeylGroupRepresentation<Rational> get_macdonald_representation(WeylGroup& W, con
 
   stOutput << "module rank is " << monomials_used.size << "\n";
 
-  WeylGroupRepresentation<Rational> rep;
-  rep.init(W);
+  GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> rep;
+  rep.init(W.theGroup);
   for(int i=1; i<W.GetDim()+1; i++)
   { Matrix<Rational> m;
     W.GetStandardRepresentationMatrix(i,m);
@@ -3182,34 +3513,16 @@ void TestInduction(int n=4, int m=3)
 //  Vector<Polynomial<Rational> > relations;
 //  lie_bracket_relations(relations, 3);
 
+void TestWeylIrreps(char letter, int number)
+{ WeylGroupData W;
+  W.MakeArbitrarySimple(letter, number);
+  W.theGroup.ComputeIrreducibleRepresentations();
+}
+
 void LegacyTest()
-{ Rational x = "3/5"_R;
-  stOutput << x << " " << x*x << '\n';
-  WeylGroup PW;
-  PW.MakeArbitrarySimple('A',5);
-  PW.ComputeCCSizesAndRepresentatives(NULL);
-  stOutput << PW.theDynkinType << " :" << PW.GetSize() << " elements, in " << PW.conjugacyClasseS.size << " conjugacy classes\n";
-  PermutationGroupData PD;
-  PD.MakeSymmetricGroupGeneratorsjjPlus1(5);
-  PD.theGroup->ComputeCCSizesAndRepresentatives(NULL);
-  stOutput <<  PD.theGroup->GetSize() << " elements, in " << PD.theGroup->conjugacyClasseS.size << " conjugacy classes\n";
-  PD.theGroup->VerifyCCSizesAndRepresentativesFormula();
-  stOutput << "finished verifying formulas\n";
-std::cout.flush();
-  TestSpechtModules(5);
-  TestHyperoctahedralStuff();
-
-  HyperoctahedralGroupData G;
-  G.MakeHyperoctahedralGroup(3);
-  stOutput << G.theGroup->PrettyPrintGeneratorCommutationRelations();
-  G.theGroup->VerifyWords();
-  G.AllSpechtModules();
-
-  //WeylGroup W;
-  //W.MakeArbitrarySimple('A', 7);
-  //W.ComputeCCSizesAndRepresentatives(NULL);
-  //stOutput << W.theDynkinType << " :" << W.GetSize() << " elements, in " << W.conjugacyClasseS.size << " conjugacy classes\n";
-  //W.ComputeIrreducibleRepresentationsUsingSpechtModules();
+{ TestWeylIrreps('A',4);
+  TestWeylIrreps('B',4);
+  TestWeylIrreps('D',4);
 }
 
 void TestFiniteFields()

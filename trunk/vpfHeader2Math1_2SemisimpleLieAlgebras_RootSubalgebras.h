@@ -174,7 +174,7 @@ public:
   ~rootSubalgebra()
   { this->flagDeallocated=true;
   }
-  WeylGroup& GetAmbientWeyl()const;
+  WeylGroupData& GetAmbientWeyl()const;
   SemisimpleLieAlgebra& GetOwnerSSalg()const;
   //returns -1 if the weight/root  is not in g/k
   bool CheckInitialization()const;
@@ -311,7 +311,7 @@ public:
   bool flagPrintGAPinput;
   bool flagPrintParabolicPseudoParabolicInfo;
   SemisimpleLieAlgebra& GetOwnerSSalgebra()const;
-  WeylGroup& GetOwnerWeyl()const;
+  WeylGroupData& GetOwnerWeyl()const;
   bool CheckInitialization()const;
   bool GrowDynkinType(const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputPermutationSimpleRoots)const;
   void ComputeKmodMultTables(GlobalVariables* theGlobalVariables);
@@ -407,7 +407,7 @@ public:
       crash << "This is a programming error: attempting to access the container list of a non-initialized sl(2)-subalgebra. " << crash;
     return *this->container;
   }
-  WeylGroup& GetOwnerWeyl();
+  WeylGroupData& GetOwnerWeyl();
   SemisimpleLieAlgebra& GetOwnerSSAlgebra()
   { if (this->owner==0)
       crash << "This is a programming error: attempting to access the ambient Lie algebra of a non-initialized sl(2)-subalgebra. " << crash;
@@ -442,7 +442,7 @@ public:
    const charSSAlgMod<Rational>& moduleDecompoRight);
   void MakeReportPrecomputations(GlobalVariables* theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra);
   //the below is outdated, must be deleted as soon as equivalent code is written.
-  void ComputeDynkinsEpsilon(WeylGroup& theWeyl);
+  void ComputeDynkinsEpsilon(WeylGroupData& theWeyl);
   void ToHTML(std::string& filePath);
   bool operator==(const slTwoSubalgebra& right)const;
   bool operator>(const slTwoSubalgebra& right)const;
@@ -487,7 +487,7 @@ public:
   { if (this->owner==0)
       crash << "<br>This is a programming error. Object SltwoSubalgebras is not initialized, although it is supposed to be. " << crash;
   }
-  WeylGroup& GetOwnerWeyl()const
+  WeylGroupData& GetOwnerWeyl()const
   { return this->GetOwner().theWeyl;
   }
   SemisimpleLieAlgebra& GetOwner()const

@@ -97,7 +97,7 @@ void LittelmannPath::ActByEalpha(int indexAlpha)
   int minIndex=-1;
   if (this->owner==0)
     crash << crash;
-  WeylGroup& theWeyl=*this->owner;
+  WeylGroupData& theWeyl=*this->owner;
   theWeyl.ComputeRho(true);
   Vector<Rational>& alpha=theWeyl.RootsOfBorel[indexAlpha];
   Rational LengthAlpha=theWeyl.RootScalarCartanRoot(alpha, alpha);
@@ -173,7 +173,7 @@ void LittelmannPath::ActByFalpha(int indexAlpha)
     crash << " This is a programming error: index of Littelmann root operator out of range. " << crash;
   Rational theMin=0;
   int minIndex=-1;
-  WeylGroup& theWeyl=*this->owner;
+  WeylGroupData& theWeyl=*this->owner;
   Vector<Rational>& alpha=theWeyl.RootsOfBorel[indexAlpha];
   Rational LengthAlpha=this->owner->RootScalarCartanRoot(alpha, alpha);
   Vector<Rational> alphaScaled=alpha*2/LengthAlpha;
@@ -268,7 +268,7 @@ bool LittelmannPath::MinimaAreIntegral()
 { if (this->Waypoints.size==0)
     return true;
   List<Rational> theMinima;
-  WeylGroup& theWeyl= *this->owner;
+  WeylGroupData& theWeyl= *this->owner;
   int theDim=theWeyl.GetDim();
   theMinima.SetSize(theDim);
   for (int i=0; i<theDim; i++)
@@ -286,7 +286,7 @@ bool LittelmannPath::MinimaAreIntegral()
   return true;
 }
 
-void LittelmannPath::MakeFromWeightInSimpleCoords(const Vector<Rational>& weightInSimpleCoords, WeylGroup& theOwner)
+void LittelmannPath::MakeFromWeightInSimpleCoords(const Vector<Rational>& weightInSimpleCoords, WeylGroupData& theOwner)
 { this->owner=& theOwner;
   this->Waypoints.SetSize(2);
   this->Waypoints[0].MakeZero(theOwner.GetDim());
@@ -390,7 +390,7 @@ std::string LittelmannPath:: ElementToStringOperatorSequenceStartingOnMe(List<in
 template <class coefficient>
 bool MonomialUniversalEnvelopingOrdered<coefficient>::ModOutFDRelationsExperimental
 (GlobalVariables* theContext, const Vector<Rational>& theHWsimpleCoords, const coefficient& theRingUnit, const coefficient& theRingZero)
-{ WeylGroup& theWeyl=this->owner->theOwner.theWeyl;
+{ WeylGroupData& theWeyl=this->owner->theOwner.theWeyl;
   Vector<Rational> theHWsimpleCoordsTrue=theHWsimpleCoords;
   theWeyl.RaiseToDominantWeight(theHWsimpleCoordsTrue);
   Vector<Rational> theHWdualCoords=theWeyl.GetDualCoordinatesFromFundamental
@@ -833,8 +833,8 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariab
   this->indicesNilradicalLarge.SetSize(0);
   this->indicesNilradicalSmall.SetSize(0);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
-  WeylGroup& theLargeWeyl=this->theHmm.theRange().theWeyl;
-  WeylGroup& theSmallWeyl=this->theHmm.theDomain().theWeyl;
+  WeylGroupData& theLargeWeyl=this->theHmm.theRange().theWeyl;
+  WeylGroupData& theSmallWeyl=this->theHmm.theDomain().theWeyl;
   int numB3NegGenerators=this->theHmm.theRange().GetNumPosRoots();
   int numG2NegGenerators=this->theHmm.theDomain().GetNumPosRoots();
   for (int i=0; i<numB3NegGenerators; i++)
@@ -960,14 +960,14 @@ bool LittelmannPath::IsAdaptedString(MonomialTensor<int, MathRoutines::IntUnsign
   return true;
 }
 
-void SubgroupWeylGroupOLD::GetGroupElementsIndexedAsAmbientGroup(List<ElementWeylGroup<WeylGroup> >& output)
+void SubgroupWeylGroupOLD::GetGroupElementsIndexedAsAmbientGroup(List<ElementWeylGroup<WeylGroupData> >& output)
 { MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::GetGroupElementsIndexedAsAmbientGroup");
   if (this->ExternalAutomorphisms.size>0)
     crash << "This is  a programming error: a function meant for subgroups that are Weyl groups of Levi parts of parabolics is called on a subgroup that is not of that type. "
     << crash;
   output.Reserve(this->size);
   output.SetSize(0);
-  ElementWeylGroup<WeylGroup> tempElt;
+  ElementWeylGroup<WeylGroupData> tempElt;
   Vector<int> indexShifts;
   indexShifts.SetSize(this->simpleGenerators.size);
   for (int i=0; i<this->simpleGenerators.size; i++)

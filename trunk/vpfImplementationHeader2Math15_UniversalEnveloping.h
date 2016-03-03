@@ -593,7 +593,7 @@ template <class coefficient>
 void ElementUniversalEnveloping<coefficient>::MakeCasimir(SemisimpleLieAlgebra& theOwner)
 { //std::stringstream out;
   this->MakeZero(theOwner);
-  WeylGroup& theWeyl= this->GetOwner().theWeyl;
+  WeylGroupData& theWeyl= this->GetOwner().theWeyl;
   int theDimension=theWeyl.CartanSymmetric.NumRows;
   Vector<Rational> tempRoot1, tempRoot2;
 //  Matrix<Rational> killingForm;

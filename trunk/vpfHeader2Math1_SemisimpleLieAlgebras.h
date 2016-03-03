@@ -10,7 +10,7 @@ class SemisimpleLieAlgebra
 {
 public:
   bool flagAnErrorHasOccurredTimeToPanic;
-  WeylGroup theWeyl;
+  WeylGroupData theWeyl;
   //format:
   //the Chevalley constants are listed in the same order as the root system of the Weyl group
   // i.e. if \alpha is the root at the i^th position in this->theWyl.RootSystem and \beta -
@@ -311,7 +311,7 @@ GetPosNstringSuchThatWeightMinusNalphaIsWeight
   bool DrawMeWithMults(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars, int upperBoundWeights)
   { return this->DrawMe(outputDetails, theGlobalVariables, theDrawingVars, upperBoundWeights, true);
   }
-  void DrawMeAssumeCharIsOverCartan(WeylGroup& actualAmbientWeyl, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars)const;
+  void DrawMeAssumeCharIsOverCartan(WeylGroupData& actualAmbientWeyl, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars)const;
   SemisimpleLieAlgebra* GetOwner()const
   { if (this->size()==0)
       crash << "This is a programming error: requesting owner semisimple Lie algebra of zero character. " << crash;
@@ -321,7 +321,7 @@ GetPosNstringSuchThatWeightMinusNalphaIsWeight
   bool SplitOverLeviMonsEncodeHIGHESTWeight
   (std::string* Report, charSSAlgMod& output, const Selection& splittingParSel, const Selection& ParSelFDInducingPart,
    SubgroupWeylGroupOLD& outputWeylSub, GlobalVariables& theGlobalVariables);
-  int GetIndexExtremeWeightRelativeToWeyl(WeylGroup& theWeyl)const;
+  int GetIndexExtremeWeightRelativeToWeyl(WeylGroupData& theWeyl)const;
   void MakeTrivial(SemisimpleLieAlgebra& inputOwner);
   std::string MultiplyBy(const charSSAlgMod& other, GlobalVariables& theGlobalVariables);
   std::string operator*=(const charSSAlgMod& other);

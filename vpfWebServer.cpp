@@ -690,7 +690,9 @@ bool WebWorker::ProcessRawArguments
       )
     if (theGlobalVariables.GetWebInput("ignoreSecurity")=="true" &&
         !theGlobalVariables.flagUsingSSLinCurrentConnection)
-      theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs=true;
+    { theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs=true;
+      password= theGlobalVariables.GetWebInput("authenticationInsecure");
+    }
   if (desiredUser!="" &&
       (theGlobalVariables.flagUsingSSLinCurrentConnection ||
        theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs))
@@ -1924,9 +1926,9 @@ std::string WebWorker::GetLoginHTMLinternal()
     << "function submitAuthentication(){\n"
     << " shaObj = new jsSHA('SHA-1','TEXT');\n"
 //    << " alert(document.getElementById('password').value);\n"
-    << " shaObj.update(document.getElementById('username').value+document.getElementById('password').value);\n"
+    << " shaObj.update(document.getElementById('username').value+document.getElementById('authenticationInsecure').value);\n"
     << " var hash = shaObj.getHash('B64');\n"
-    << " document.getElementById('password').value=hash;\n"
+    << " document.getElementById('authenticationInsecure').value=hash;\n"
 //    << " document.getElementById('authenticationToken').value= encodeURIComponent(hash);\n"
     //<< " alert(hash);\n"
     << " document.getElementById('login').submit();"
@@ -1937,8 +1939,13 @@ std::string WebWorker::GetLoginHTMLinternal()
   out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"POST\" accept-charset=\"utf-8\">"
   <<  "User name: "
   << "<input type=\"text\" id=\"username\" name=\"username\" placeholder=\"username\" required>"
-  << "<br>Password: "
-  << "<input type=\"password\" id=\"password\" name=\"password\" placeholder=\"password\" autocomplete=\"on\">";
+  << "<br>Password: ";
+  if (!theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
+    out << "<input type=\"password\" id=\"password\" name=\"password\" placeholder=\"password\" autocomplete=\"on\">";
+  else
+    out << "<input type=\"password\" id=\"authenticationInsecure\" "
+    << "name=\"authenticationInsecure\" placeholder=\"password\" autocomplete=\"off\">";
+
   out << this->GetHtmlHiddenInputExercise() << this->GetHtmlHiddenInputs();
   if (!theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
     out << "<input type=\"submit\" value=\"Login\"></form>";

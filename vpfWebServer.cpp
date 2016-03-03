@@ -1806,21 +1806,23 @@ int WebWorker::ProcessCalculator()
       theGlobalVariables.flagLoggedIn)
     return this->ProcessAddUserEmails();
   if ((theGlobalVariables.userCalculatorRequestType=="submitProblem" ||
-       theGlobalVariables.userCalculatorRequestType=="submitExercise"))
-  { if (theGlobalVariables.flagLoggedIn)
-      return this->ProcessSubmitProblem();
-    else
-      return this->ProcessLoginPage();
-  }
+       theGlobalVariables.userCalculatorRequestType=="submitExercise")
+      && theGlobalVariables.flagLoggedIn
+      )
+    return this->ProcessSubmitProblem();
+
   if ((theGlobalVariables.userCalculatorRequestType=="submitProblemPreview" ||
        theGlobalVariables.userCalculatorRequestType=="submitExercisePreview") &&
       theGlobalVariables.flagLoggedIn)
     return this->ProcessSubmitProblemPreview();
   if (( theGlobalVariables.userCalculatorRequestType=="examForReal" ||
-        theGlobalVariables.userCalculatorRequestType=="exercises") &&
-      theGlobalVariables.UserSecureNonAdminOperationsAllowed())
-    return this->ProcessExamPage();
-//  stOutput << "main request is: " << theGlobalVariables.userCalculatorRequestType
+        theGlobalVariables.userCalculatorRequestType=="exercises"))
+  { if (theGlobalVariables.UserSecureNonAdminOperationsAllowed())
+      return this->ProcessExamPage();
+    else
+      return this->ProcessLoginPage();
+  }
+    //  stOutput << "main request is: " << theGlobalVariables.userCalculatorRequestType
 //  << "<br>web keys: " << theGlobalVariables.webFormArgumentNames.ToStringCommaDelimited()
 //  << "<br>web entries: " << theGlobalVariables.webFormArguments.ToStringCommaDelimited();
   if (theGlobalVariables.userCalculatorRequestType=="browseDatabase" &&

@@ -1761,7 +1761,8 @@ int WebWorker::ProcessCalculator()
   { std::stringstream redirectedAddress;
     redirectedAddress << theGlobalVariables.DisplayNameCalculatorWithPath << "?";
     for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
-      if (theGlobalVariables.webFormArgumentNames[i]!="password")
+      if (theGlobalVariables.webFormArgumentNames[i]!="password" &&
+          theGlobalVariables.webFormArgumentNames[i]!="authenticationInsecure")
         redirectedAddress << theGlobalVariables.webFormArgumentNames[i] << "=" << theGlobalVariables.webFormArguments[i] << "&";
     stOutput << "HTTP/1.1 303 See other\r\nLocation: ";
     stOutput << redirectedAddress.str();

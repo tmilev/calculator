@@ -1414,6 +1414,8 @@ std::string SyntacticElementHTML::GetTagClass()
 { return this->GetKeyValue("class");
 }
 
+#ifdef MACRO_use_MySQL
+
 std::string DatabaseRoutines::ToStringClassDetails
 (bool adminsOnly, List<List<std::string> >& userTable, List<std::string>& userLabels,
  const std::string& classFileName,
@@ -1561,6 +1563,7 @@ std::string DatabaseRoutines::ToStringClassDetails
   out << tableStream.str();
   return out.str();
 }
+#endif // MACRO_use_MySQL
 
 std::string CalculatorHTML::ToStringClassDetails
 ( bool adminsOnly,
@@ -1627,6 +1630,7 @@ std::string CalculatorHTML::ToStringClassDetails
   return out.str();
 }
 
+#ifdef MACRO_use_MySQL
 bool DatabaseRoutines::PrepareClassData
 (const std::string& classFileName, List<List<std::string> >& outputUserTable,
  List<std::string>& outputLabelsUserTable,
@@ -1659,9 +1663,11 @@ bool DatabaseRoutines::PrepareClassData
   }
   return true;
 }
+#endif // MACRO_use_MySQL
 
 bool CalculatorHTML::PrepareClassData(std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareClassData");
+#ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
   if (!theRoutines.PrepareClassData(this->fileName, this->userTablE, this->labelsUserTablE, commentsOnFailure))
     return false;
@@ -1679,6 +1685,11 @@ bool CalculatorHTML::PrepareClassData(std::stringstream& commentsOnFailure)
   this->databaseStudentSectionS=theSections;
   this->databaseStudentSectionS.QuickSortAscending();
   return true;
+#else
+  commentsOnFailure << "Error: database not running. ";
+  return false;
+#endif // MACRO_use_MySQL
+
 }
 
 void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
@@ -1903,6 +1914,7 @@ std::string CalculatorHTML::ToStringOneDeadlineFormatted
       out << "<span style=\"color:orange\">No deadline yet. </span>";
     return out.str();
   }
+#ifdef MACRO_use_MySQL
   TimeWrapper now, deadline; //<-needs a fix for different time formats.
   //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
   std::stringstream badDateStream;
@@ -1913,6 +1925,7 @@ std::string CalculatorHTML::ToStringOneDeadlineFormatted
 //  out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
 //  << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
   double secondsTillDeadline= deadline.SubtractAnotherTimeFromMeInSeconds(now)+7*3600;
+
   std::stringstream hoursTillDeadlineStream;
   if (secondsTillDeadline<24*3600 && !problemAlreadySolved)
     hoursTillDeadlineStream << "<span style=\"color:red\">"
@@ -1933,6 +1946,9 @@ std::string CalculatorHTML::ToStringOneDeadlineFormatted
     return out.str();
   out << "<span style=\"color:blue\">" << currentDeadline << "</span>. ";
   out << hoursTillDeadlineStream.str();
+#else
+  out  << "Database not running: no deadlines";
+#endif // MACRO_use_MySQL
   return out.str();
 }
 
@@ -1944,8 +1960,10 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   std::stringstream out;
   bool deadlineInherited=false;
   bool isActualProblem=(inputOutput.GetTagClass()=="calculatorExamProblem");
+#ifdef MACRO_use_MySQL
   if (isActualProblem)
     out << this->ToStringOneDeadlineFormatted(cleaneduplink, this->currentUser.extraInfoUnsafe, isActualProblem, problemAlreadySolved);
+#endif // MACRO_use_MySQL
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return out.str();
   std::stringstream deadlineStream;
@@ -2031,6 +2049,7 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   //else
   //  out << " <a href=\"" << refStreamExercise.str() << "\">Start</a> ";
   //if (inputOutput.GetTagClass()=="calculatorExamIntermediate")
+#ifdef MACRO_use_MySQL
   bool problemAlreadySolved=false;
   if (this->currentUser.problemNames.Contains(cleaneduplink))
   { ProblemData& theProbData=this->currentUser.problemData[this->currentUser.problemNames.GetIndex(cleaneduplink)];
@@ -2040,6 +2059,7 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   }
   out << this->InterpretGenerateDeadlineLink
   (inputOutput, refStreamForReal, refStreamExercise, cleaneduplink, urledProblem, problemAlreadySolved);
+#endif // MACRO_use_MySQL
   std::string stringToDisplay = FileOperations::GetFileNameFromFileNameWithPath(inputOutput.content);
   //out << " " << this->NumProblemsFound << ". "
   out << stringToDisplay;

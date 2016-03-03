@@ -1806,9 +1806,12 @@ int WebWorker::ProcessCalculator()
       theGlobalVariables.flagLoggedIn)
     return this->ProcessAddUserEmails();
   if ((theGlobalVariables.userCalculatorRequestType=="submitProblem" ||
-       theGlobalVariables.userCalculatorRequestType=="submitExercise")&&
-      theGlobalVariables.flagLoggedIn)
-    return this->ProcessSubmitProblem();
+       theGlobalVariables.userCalculatorRequestType=="submitExercise"))
+  { if (theGlobalVariables.flagLoggedIn)
+      return this->ProcessSubmitProblem();
+    else
+      return this->ProcessLoginPage();
+  }
   if ((theGlobalVariables.userCalculatorRequestType=="submitProblemPreview" ||
        theGlobalVariables.userCalculatorRequestType=="submitExercisePreview") &&
       theGlobalVariables.flagLoggedIn)

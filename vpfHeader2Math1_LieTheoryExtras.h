@@ -140,8 +140,8 @@ public:
   ConeComplex smallerAlgebraChamber;
   ConeComplex projectivizedChambeR;
   std::stringstream log;
-  WeylGroup WeylSmaller;
-  WeylGroup WeylLarger;
+  WeylGroupData WeylSmaller;
+  WeylGroupData WeylLarger;
   int computationPhase;
   int NumProcessedConesParam;
   int NumProcessedExtremaEqualOne;

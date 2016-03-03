@@ -739,7 +739,7 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   if (this->owner==0)
     return "(Error: module not initialized)";
   SemisimpleLieAlgebra& theAlgebrA=*this->owner;
-  WeylGroup theWeyl;
+  WeylGroupData theWeyl;
   theWeyl=theAlgebrA.theWeyl;
   std::stringstream out;
   GlobalVariables theGlobalVariables;
@@ -760,7 +760,7 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   out << "<br>Dimensionn of the finite dimensional part of the module: " << this->GetDim();
   out << "<br>A module basis follows.";
   out << "<table><tr><td>Monomial label</td><td>Definition</td><td>Littelmann path string</td></tr>";
-  ElementWeylGroup<WeylGroup> tempWelt;
+  ElementWeylGroup<WeylGroupData> tempWelt;
   int wordCounter=0;
   simpleReflectionOrOuterAuto aGen;
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
@@ -1013,10 +1013,10 @@ bool Calculator::innerKLcoeffs(Calculator& theCommands, const Expression& input,
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input, theSSalgebra))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   std::stringstream out;
-  WeylGroup& theWeyl=theSSalgebra->theWeyl;
-  if (theWeyl.GetSize()>192)
+  WeylGroupData& theWeyl=theSSalgebra->theWeyl;
+  if (theWeyl.theGroup.GetSize()>192)
   { out << "I have been instructed to run only for Weyl groups that have at most 192 elements (i.e. no larger than D_4). "
-    << theSSalgebra->GetLieAlgebraName() << " has " << theWeyl.GetSize().ToString() << ".";
+    << theSSalgebra->GetLieAlgebraName() << " has " << theWeyl.theGroup.GetSize().ToString() << ".";
     return output.AssignValue(out.str(), theCommands);
   }
   FormatExpressions theFormat;
@@ -1038,7 +1038,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input, tempSSpointer))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& theSSalgebra=*tempSSpointer;
-  WeylGroup& theWeyl=theSSalgebra.theWeyl;
+  WeylGroupData& theWeyl=theSSalgebra.theWeyl;
   std::stringstream out;
   FormatExpressions theFormat, latexFormat;
   latexFormat.flagUseLatex=true;
@@ -1046,7 +1046,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
 //      theFormat.chevalleyHgeneratorLetter="\\bar{h}";
 //      theFormat.chevalleyGgeneratorLetter="\\bar{g}";
   out << "<hr>Lie algebra type: " << theWeyl.theDynkinType << ". ";
-  out << "<br>Weyl group size: " << theWeyl.GetSize().ToString() << "." << "<br>To get extra details: ";
+  out << "<br>Weyl group size: " << theWeyl.theGroup.GetSize().ToString() << "." << "<br>To get extra details: ";
   std::stringstream tempStream;
   tempStream << "printSemisimpleLieAlgebra{}(" << theWeyl.theDynkinType << ")";
   out << theCommands.GetCalculatorLink(tempStream.str()) << "<br>";

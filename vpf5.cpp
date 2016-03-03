@@ -41,7 +41,7 @@ bool SubgroupWeylGroupOLD::IsDominantWRTgenerator<Rational>(const Vector<Rationa
 }
 
 template <>
-bool WeylGroup::IsDominantWRTgenerator<RationalFunctionOld>(const Vector<RationalFunctionOld>& theWeight, int generatorIndex)
+bool WeylGroupData::IsDominantWRTgenerator<RationalFunctionOld>(const Vector<RationalFunctionOld>& theWeight, int generatorIndex)
 { Vector<Rational> tempVect;
   RationalFunctionOld tempRF;
   tempVect.MakeEi(this->GetDim(), generatorIndex);
@@ -63,12 +63,12 @@ bool WeylGroup::IsDominantWRTgenerator<RationalFunctionOld>(const Vector<Rationa
 }
 
 template <>
-bool WeylGroup::IsDominantWRTgenerator<Rational>(const Vector<Rational>& theWeight, int generatorIndex)
+bool WeylGroupData::IsDominantWRTgenerator<Rational>(const Vector<Rational>& theWeight, int generatorIndex)
 { return !this->GetScalarProdSimpleRoot(theWeight, generatorIndex).IsNegative();
 }
 
 void SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots
-(WeylGroup& inputWeyl, const Vector<Rational> & ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
+(WeylGroupData& inputWeyl, const Vector<Rational> & ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
 { Selection tempSel;
   tempSel=ZeroesMeanSimpleRootSpaceIsInParabolic;
   this->MakeParabolicFromSelectionSimpleRoots(inputWeyl, tempSel, theGlobalVariables, UpperLimitNumElements);
@@ -715,7 +715,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
   ElementUniversalEnveloping<RationalFunctionOld> theCasimir, theCentralCharacter, resultChar;
   HashedList<ElementUniversalEnveloping<RationalFunctionOld> > theCentralChars;
   theCasimir.MakeCasimir(theg2b3data.theHmm.theDomain());
-  WeylGroup& smallWeyl=theg2b3data.theHmm.theDomain().theWeyl;
+  WeylGroupData& smallWeyl=theg2b3data.theHmm.theDomain().theWeyl;
 //  WeylGroup& largeWeyl=theg2b3data.theHmm.theRange().theWeyl;
   for (int k=0; k<theHWs.size; k++)
   { theCharacter.MakeFromWeight
@@ -1014,7 +1014,7 @@ bool Calculator::innerPrintAllPartitions(Calculator& theCommands, const Expressi
   return output.AssignValue(out.str(), theCommands);
 }
 
-void WeylGroup::GetHighestWeightsAllRepsDimLessThanOrEqualTo(List<Vector<Rational> >& outputHighestWeightsFundCoords, int inputDimBound)
+void WeylGroupData::GetHighestWeightsAllRepsDimLessThanOrEqualTo(List<Vector<Rational> >& outputHighestWeightsFundCoords, int inputDimBound)
 { if (inputDimBound<1)
   { outputHighestWeightsFundCoords.SetSize(0);
     return;

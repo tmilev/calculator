@@ -27,7 +27,7 @@ public:
   static std::string DoubleToString(double input);
 };
 
-class WeylGroup;
+class WeylGroupData;
 class AlgebraicClosureRationals;
 template <class coefficient>
 class MatrixTensor;
@@ -5834,7 +5834,7 @@ public:
   //The procedure calls a
   //transformation to simple basis on the simpleBasisInput, so your input will get changed if it wasn't
   //simple as required!
-  void ComputeDiagramTypeModifyInput(Vectors<Rational>& inputRoots, WeylGroup& theWeyl);
+  void ComputeDiagramTypeModifyInput(Vectors<Rational>& inputRoots, WeylGroupData& theWeyl);
   //the below function is just as the above but doesn't modify simpleBasisInput
   void ComputeDiagramInputIsSimple
   (const Vectors<Rational>& simpleBasisInput);
@@ -5940,10 +5940,10 @@ public:
 class LittelmannPath
 {
 public:
-  WeylGroup* owner;
+  WeylGroupData* owner;
   Vectors<Rational> Waypoints;
-  void MakeFromWeightInSimpleCoords(const Vector<Rational>& weightInSimpleCoords, WeylGroup& theOwner);
-  void MakeFromWaypoints(Vectors<Rational>& weightsInSimpleCoords, WeylGroup& theOwner)
+  void MakeFromWeightInSimpleCoords(const Vector<Rational>& weightInSimpleCoords, WeylGroupData& theOwner);
+  void MakeFromWaypoints(Vectors<Rational>& weightsInSimpleCoords, WeylGroupData& theOwner)
   { this->owner=&theOwner;
     this->Waypoints=weightsInSimpleCoords;
     this->Simplify();
@@ -6742,7 +6742,7 @@ void Matrix<coefficient>::GetVectorFromColumn(int colIndex, Vector<coefficient>&
 class KLpolys: public HashedList<Vector<Rational> >
 {
 public:
-  WeylGroup* TheWeylGroup;
+  WeylGroupData* TheWeylGroup;
   List<int> TheMultiplicities;
   List<bool> Explored;
   int NextToExplore;
@@ -6774,7 +6774,7 @@ public:
   void ComputeKLcoefficients();
   int ChamberIndicatorToIndex(Vector<Rational>& ChamberIndicator);
   std::string RPolysToString(FormatExpressions* theFormat=0);
-  bool ComputeKLPolys(WeylGroup* theWeylGroup);
+  bool ComputeKLPolys(WeylGroupData* theWeylGroup);
   void ComputeRPolys();
   int ComputeProductfromSimpleReflectionsActionList(int x, int y);
   void WriteKLCoeffsToFile(std::fstream& output, List<int>& KLcoeff, int TopIndex);
@@ -6784,7 +6784,7 @@ public:
   void GeneratePartialBruhatOrder();
   void ExtendOrder();
   void ComputeFullBruhatOrder();
-  void initFromWeyl(WeylGroup* theWeylGroup);
+  void initFromWeyl(WeylGroupData* theWeylGroup);
 };
 
 template <class coefficient>

@@ -46,7 +46,7 @@ Vector<Rational> SubgroupWeylGroupOLD::GetRho()
   return result;
 }
 
-void SubgroupWeylGroupOLD::GetMatrixOfElement(const ElementWeylGroup<WeylGroup>& input, Matrix<Rational>& outputMatrix)const
+void SubgroupWeylGroupOLD::GetMatrixOfElement(const ElementWeylGroup<WeylGroupData>& input, Matrix<Rational>& outputMatrix)const
 { Vectors<Rational> startBasis, imageBasis ;
   startBasis.MakeEiBasis(this->AmbientWeyl.GetDim());
   this->ActByElement(input, startBasis, imageBasis);
@@ -79,7 +79,7 @@ bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
     this->ExternalAutomorphisms=*inputExternalAutos;
   this->AmbientWeyl.TransformToSimpleBasisGenerators(this->simpleGenerators, this->AmbientWeyl.RootSystem);
   this->ComputeRootSubsystem();
-  ElementWeylGroup<WeylGroup> tempEW;
+  ElementWeylGroup<WeylGroupData> tempEW;
   tempEW.generatorsLastAppliedFirst.size=0;
   Vector<Rational> tempRoot;
   tempRoot=(this->AmbientWeyl.rho);
@@ -330,7 +330,7 @@ void DrawingVariables::drawString(DrawElementInputOutput& theDrawData, const std
   }
 }
 
-void WeylGroup::WriteToFile(std::fstream& output)
+void WeylGroupData::WriteToFile(std::fstream& output)
 { output << "Weyl_group: ";
   stOutput << "This code is not implemented yet (due to a regression).";
   crash << crash;
@@ -341,7 +341,7 @@ void WeylGroup::WriteToFile(std::fstream& output)
   this->CartanSymmetric.WriteToFile(output);
 }
 
-void WeylGroup::ReadFromFile(std::fstream& input)
+void WeylGroupData::ReadFromFile(std::fstream& input)
 { std::string tempS;
 //  int tempI;
   input >> tempS;

@@ -691,7 +691,7 @@ bool DynkinDiagramRootSubalgebra::IsGreaterThan(DynkinDiagramRootSubalgebra& rig
 Rational DynkinDiagramRootSubalgebra::GetSizeCorrespondingWeylGroupByFormula()
 { Rational output=1;
   for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
-    output*=WeylGroup::SizeByFormulaOrNeg1(this->SimpleComponentTypes[i].theLetter, this->SimpleComponentTypes[i].theRank);
+    output*=WeylGroupData::SizeByFormulaOrNeg1(this->SimpleComponentTypes[i].theLetter, this->SimpleComponentTypes[i].theRank);
   return output;
 }
 
@@ -708,7 +708,7 @@ void DynkinDiagramRootSubalgebra::GetMapFromPermutation(Vectors<Rational>& domai
     }
 }
 
-void DynkinDiagramRootSubalgebra::ComputeDiagramTypeModifyInput(Vectors<Rational>& inputRoots, WeylGroup& theWeyl)
+void DynkinDiagramRootSubalgebra::ComputeDiagramTypeModifyInput(Vectors<Rational>& inputRoots, WeylGroupData& theWeyl)
 { MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDiagramTypeModifyInput");
   this->AmbientRootSystem=theWeyl.RootSystem;
   this->AmbientBilinearForm=theWeyl.CartanSymmetric;
@@ -721,7 +721,7 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramTypeModifyInputRelative
 { MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDiagramTypeModifyInputRelative");
   this->AmbientRootSystem=weightSystem;
   this->AmbientBilinearForm=theBilinearForm;
-  WeylGroup::TransformToSimpleBasisGeneratorsArbitraryCoords(inputOutputSimpleWeightSystem, weightSystem);
+  WeylGroupData::TransformToSimpleBasisGeneratorsArbitraryCoords(inputOutputSimpleWeightSystem, weightSystem);
   this->ComputeDiagramInputIsSimple(inputOutputSimpleWeightSystem);
 }
 
@@ -945,7 +945,7 @@ void permutation::GetPermutationLthElementIsTheImageofLthIndex(List<int>& output
     MathRoutines::swap(output[i], output[i+this->Multiplicities[i]]);
 }
 
-bool WeylGroup::AreMaximallyDominant(List<Vector<Rational> >& theWeights, bool useOuterAutos)
+bool WeylGroupData::AreMaximallyDominant(List<Vector<Rational> >& theWeights, bool useOuterAutos)
 { MacroRegisterFunctionWithName("WeylGroup::AreMaximallyDominant");
   MemorySaving<Vectors<Rational> > theWeightsCopy;
   Vector<Rational> zeroWeight;
@@ -986,7 +986,7 @@ bool WeylGroup::AreMaximallyDominant(List<Vector<Rational> >& theWeights, bool u
   return true;
 }
 
-void WeylGroup::GenerateRootSubsystem(Vectors<Rational>& theRoots)
+void WeylGroupData::GenerateRootSubsystem(Vectors<Rational>& theRoots)
 { Vector<Rational> tempRoot;
   int oldsize=theRoots.size;
   for (int i=0; i<oldsize; i++)
@@ -1082,8 +1082,8 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex(GlobalVariab
 std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWeight
 (Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords, Vector<Rational>& parabolicSel, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
-  WeylGroup& LargerWeyl=this->theHmm.theRange().theWeyl;
-  WeylGroup& SmallerWeyl=this->theHmm.theDomain().theWeyl;
+  WeylGroupData& LargerWeyl=this->theHmm.theRange().theWeyl;
+  WeylGroupData& SmallerWeyl=this->theHmm.theDomain().theWeyl;
   if (!LargerWeyl.IsOfSimpleType('B', 3))
     return "Error: algebra is not so(7).";
   this->initFromHomomorphism(parabolicSel, this->theHmm, theGlobalVariables);
@@ -1098,7 +1098,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
 //  drawOps.theBuffer.initDimensions(theSmallDim, 1);
   Vectors<double> theDraggableBasis;
   theDraggableBasis.MakeEiBasis(theSmallDim, 1, 0);
-  WeylGroup tmpWeyl;
+  WeylGroupData tmpWeyl;
   tmpWeyl.MakeArbitrarySimple('A',2);
   drawOps.theBuffer.initDimensions(tmpWeyl.CartanSymmetric, theDraggableBasis, theDraggableBasis, 1);
   FormatExpressions theFormat;
@@ -1384,10 +1384,10 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
 { Vectors<Rational> tempRoots;
   this->WeylLarger=input.theRange().theWeyl;
   this->WeylSmaller=input.theDomain().theWeyl;
-  WeylGroup& theWeYl=input.theRange().theWeyl;
+  WeylGroupData& theWeYl=input.theRange().theWeyl;
 //  input.ProjectOntoSmallCartan(theWeyl.RootsOfBorel, tempRoots, theGlobalVariables);
   this->log << "projections: " << tempRoots.ToString();
-  theWeYl.ComputeAllElements();
+  theWeYl.theGroup.ComputeAllElements();
   this->NonIntegralOriginModificationBasisChanged="(1/2,1/2)";
   Matrix<Rational>  theProjectionBasisChanged;
   Vector<Rational> startingWeight, projectedWeight;

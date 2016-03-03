@@ -97,8 +97,8 @@ class CandidateSSSubalgebra
   }
 
 public:
-  WeylGroup theWeylNonEmbeddeD;
-  WeylGroup theWeylNonEmbeddeDdefaultScale;
+  WeylGroupData theWeylNonEmbeddeD;
+  WeylGroupData theWeylNonEmbeddeDdefaultScale;
   DynkinDiagramRootSubalgebra theCentralizerSubDiagram;
   DynkinType theCentralizerType;
 
@@ -253,11 +253,11 @@ public:
   int GetNumModules()const;
   void ComputePairKweightElementAndModule(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& leftKweightElt, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables);
   bool IsWeightSystemSpaceIndex(int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);
-  void AddHincomplete(const Vector<Rational>& theH, const ElementWeylGroup<WeylGroup>& theWE, int indexOfOrbit);
+  void AddHincomplete(const Vector<Rational>& theH, const ElementWeylGroup<WeylGroupData>& theWE, int indexOfOrbit);
   bool CheckInitialization()const;
   bool CheckModuleDimensions()const;
   SemisimpleLieAlgebra& GetAmbientSS()const;
-  WeylGroup& GetAmbientWeyl()const;
+  WeylGroupData& GetAmbientWeyl()const;
   void ComputeCartanOfCentralizer(GlobalVariables* theGlobalVariables);
   void ComputePrimalModuleDecomposition(GlobalVariables* theGlobalVariables);
   void ComputePrimalModuleDecompositionHWsHWVsOnly(GlobalVariables* theGlobalVariables);

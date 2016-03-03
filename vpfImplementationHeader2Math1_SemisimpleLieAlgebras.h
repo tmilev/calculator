@@ -52,7 +52,7 @@ void Weight<coefficient>::AccountSingleWeight
   this->CheckNonZeroOwner();
   Vector<Rational> dominant=currentWeightSimpleCoords;
   dominant+=otherHighestWeightSimpleCoords;
-  WeylGroup& theWeyl = this->owner->theWeyl;
+  WeylGroupData& theWeyl = this->owner->theWeyl;
   dominant+=theWeyl.rho;
   int sign;
   // a weight has no stabilizer if and only if it is not stabilized by all root reflections.
@@ -87,7 +87,7 @@ std::string Weight<coefficient>::TensorAndDecompose
   std::stringstream errorLog;
   std::string tempS;
   output.MakeZero();
-  WeylGroup& theWeyl=this->owner->theWeyl;
+  WeylGroupData& theWeyl=this->owner->theWeyl;
   Vector<Rational> leftHWFundCoords;
   leftHWFundCoords=this->weightFundamentalCoordS;
   Vector<Rational> rightHWFundCoords;
@@ -391,7 +391,7 @@ bool charSSAlgMod<coefficient>::DrawMe
   bool result= this->FreudenthalEvalMeDominantWeightsOnly(CharCartan, upperBoundWeights, &outputDetails, &theGlobalVariables);
   std::stringstream out;
   Vectors<Rational> currentOrbit;
-  WeylGroup& theWeyl=this->GetOwner()->theWeyl;
+  WeylGroupData& theWeyl=this->GetOwner()->theWeyl;
   theWeyl.DrawRootSystem(theDrawingVars, false, theGlobalVariables, true);
   int totalNumWeights=0;
   Vectors<coefficient> dominantWeightsNonHashed;
@@ -426,7 +426,7 @@ bool charSSAlgMod<coefficient>::DrawMe
 }
 
 template <class coefficient>
-void charSSAlgMod<coefficient>::DrawMeAssumeCharIsOverCartan(WeylGroup& actualAmbientWeyl, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars)const
+void charSSAlgMod<coefficient>::DrawMeAssumeCharIsOverCartan(WeylGroupData& actualAmbientWeyl, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars)const
 { if (actualAmbientWeyl.GetDim()<2)
     return;
   Vector<coefficient> actualWeight;
@@ -486,7 +486,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
 { if (this->IsEqualToZero())
     return false;
   this->CheckNonZeroOwner();
-  WeylGroup& theWeyL=this->GetOwner()->theWeyl;
+  WeylGroupData& theWeyL=this->GetOwner()->theWeyl;
   std::stringstream out;
   std::string tempS;
   inputData.initAssumingParSelAndHmmInitted(theGlobalVariables);
@@ -631,7 +631,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
     std::string tempS;
     output.DrawMeNoMults(tempS, theGlobalVariables, theDV1, 10000);
     Vector<Rational> tempRoot, tempRoot2;
-    WeylFDSmall.AmbientWeyl.ComputeAllElements(20);
+    WeylFDSmall.AmbientWeyl.theGroup.ComputeAllElements(20);
     out << "<hr>";//In the following weight visualization, a yellow line is drawn if the corresponding weights are "
     //<< " simple reflections of one another, with respect to a simple Vector<Rational> of the Levi part of the parabolic subalgebra. ";
     for (int i=0; i<output.size(); i++)
@@ -641,7 +641,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
       std::stringstream tempStream;
       tempStream << output.theCoeffs[i].ToString();
       theDV1.drawTextAtVectorBuffer(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal, 0);
-      for (int j=1; j<WeylFDSmall.AmbientWeyl.theElements.size; j++)
+      for (int j=1; j<WeylFDSmall.AmbientWeyl.theGroup.theElements.size; j++)
       { tempRoot2=tempRoot;
         WeylFDSmall.AmbientWeyl.ActOnRhoModified(j, tempRoot2);
         theDV1.drawCircleAtVectorBuffer(tempRoot2, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(200,0,0));

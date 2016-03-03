@@ -4234,7 +4234,7 @@ bool CalculatorFunctionsGeneral::innerDecomposeFDPartGeneralizedVermaModuleOverL
   Vector<RationalFunctionOld> theWeightFundCoords;
   Vector<Rational> inducingParSel, splittingParSel;
   SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
-  WeylGroup& theWeyl=ownerSS.theWeyl;
+  WeylGroupData& theWeyl=ownerSS.theWeyl;
   int theDim=ownerSS.GetRank();
   Expression finalContext;
   if (!theCommands.GetVectoR<RationalFunctionOld>(weightNode, theWeightFundCoords, &finalContext, theDim, CalculatorConversions::innerRationalFunction))
@@ -4301,7 +4301,7 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
       return true;
   SemisimpleLieAlgebra& theSSalgebra=*theSSalgPointer;
 
-  WeylGroup& theAmbientWeyl=theSSalgebra.theWeyl;
+  WeylGroupData& theAmbientWeyl=theSSalgebra.theWeyl;
   SubgroupWeylGroupOLD theSubgroup;
   std::stringstream out;
   std::stringstream outputFileContent, outputFileContent2;
@@ -4310,13 +4310,13 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
   theSubgroup.FindQuotientRepresentatives(2000);
   out << "<br>Number elements of the coset: " << theSubgroup.RepresentativesQuotientAmbientOrder.size;
   out << "<br>Number of elements of the Weyl group of the Levi part: " << theSubgroup.size;
-  out << "<br>Number of elements of the ambient Weyl: " << theSubgroup.AmbientWeyl.theElements.size;
+  out << "<br>Number of elements of the ambient Weyl: " << theSubgroup.AmbientWeyl.theGroup.theElements.size;
   outputFileContent << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
   outputFileContent2 << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
   FormatExpressions theFormat;
   hwContext.ContextGetFormatExpressions(theFormat);
   if (theSubgroup.size>498)
-  { if (theSubgroup.AmbientWeyl.SizeByFormulaOrNeg1('E', 6) <= theSubgroup.AmbientWeyl.GetSize())
+  { if (theSubgroup.AmbientWeyl.SizeByFormulaOrNeg1('E', 6) <= theSubgroup.AmbientWeyl.theGroup.GetSize())
       out << "Even I can't handle the truth, when it is so large<br>";
     else
       out << "LaTeX can't handle handle the truth, when it is so large. <br>";
@@ -4348,7 +4348,7 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
     out << "<table><tr><td>Element</td><td>weight simple coords</td><td>weight fund. coords</td></tr>";
     theFormat.fundamentalWeightLetter="\\omega";
     for (int i=0; i<theSubgroup.RepresentativesQuotientAmbientOrder.size; i++)
-    { ElementWeylGroup<WeylGroup>& current=theSubgroup.RepresentativesQuotientAmbientOrder[i];
+    { ElementWeylGroup<WeylGroupData>& current=theSubgroup.RepresentativesQuotientAmbientOrder[i];
       out << "<tr><td>"
       << (useJavascript ? CGI::GetMathSpanPure(current.ToString()) : current.ToString())
       << "</td>";
@@ -4477,7 +4477,7 @@ bool CalculatorFunctionsGeneral::innerDecomposeCharGenVerma(Calculator& theComma
   for (int i=0; i<parSel.CardinalitySelection; i++)
     theHWFundCoordsFDPart[parSel.elements[i]]=0;
   KLpolys theKLpolys;
-  WeylGroup theWeyl;
+  WeylGroupData theWeyl;
   theWeyl=theSSlieAlg->theWeyl;
   if (!theKLpolys.ComputeKLPolys(&theWeyl))
     return output.MakeError("failed to generate Kazhdan-Lusztig polynomials (output too large?)", theCommands);
@@ -4495,11 +4495,11 @@ bool CalculatorFunctionsGeneral::innerDecomposeCharGenVerma(Calculator& theComma
   if (!theSub.MakeParabolicFromSelectionSimpleRoots(theWeyl, parSel, theGlobalVariables, 1000))
     return output.MakeError("Failed to generate Weyl subgroup of Levi part (possibly too large? element limit is 1000).", theCommands);
   theHWsimpCoords=theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords);
-  List<ElementWeylGroup<WeylGroup> > theWeylElements;
+  List<ElementWeylGroup<WeylGroupData> > theWeylElements;
   theSub.GetGroupElementsIndexedAsAmbientGroup(theWeylElements);
   Vector<RationalFunctionOld> currentHW;
   out << "<br>Orbit modified with small rho: <table><tr><td>Simple coords</td><td>Fund coords</td></tr>";
-  for (int i=0; i<theWeyl.theElements.size; i++)
+  for (int i=0; i<theWeyl.theGroup.theElements.size; i++)
   { currentHW=theHWsimpCoords;
     currentHW+=theSub.GetRho();
     theWeyl.ActOn(i, currentHW);
@@ -4520,9 +4520,9 @@ bool CalculatorFunctionsGeneral::innerDecomposeCharGenVerma(Calculator& theComma
   formatChars.fundamentalWeightLetter="\\omega";
   formatChars.flagUseLatex=true;
   for (int i=0; i<theWeylElements.size; i++)
-  { ElementWeylGroup<WeylGroup>& currentElt=theWeylElements[i];
+  { ElementWeylGroup<WeylGroupData>& currentElt=theWeylElements[i];
     out << "<tr><td>" << currentElt.ToString() << "</td>";
-    int indexInWeyl=theKLpolys.TheWeylGroup->theElements.GetIndex(currentElt);
+    int indexInWeyl=theKLpolys.TheWeylGroup->theGroup.theElements.GetIndex(currentElt);
     if (indexInWeyl==-1)
       crash << "This is a programming error. Something is wrong: I am getting that an element of the Weyl group of the Levi part of "
       << "the parabolic does not lie in the ambient Weyl group, which is impossible. There is a bug somewhere; crashing in accordance. " << crash;
@@ -4535,7 +4535,7 @@ bool CalculatorFunctionsGeneral::innerDecomposeCharGenVerma(Calculator& theComma
         theWeyl.ActOnRhoModified(j, currentHW);
         //currentHW-=theSub.GetRho();
         theMon.weightFundamentalCoordS=theWeyl.GetFundamentalCoordinatesFromSimple(currentHW);
-        int sign= (currentElt.generatorsLastAppliedFirst.size- theWeyl.theElements[j].generatorsLastAppliedFirst.size)%2==0 ? 1 :-1;
+        int sign= (currentElt.generatorsLastAppliedFirst.size- theWeyl.theGroup.theElements[j].generatorsLastAppliedFirst.size)%2==0 ? 1 :-1;
         currentChar.AddMonomial(theMon, theKLpolys.theKLcoeffs[indexInWeyl][j]*sign);
       }
     currentHW=theHWsimpCoords;
@@ -4906,7 +4906,7 @@ bool CalculatorFunctionsGeneral::innerHWTAABF(Calculator& theCommands, const Exp
   const ElementUniversalEnveloping<RationalFunctionOld>& rightUE=rightConverted.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
   SemisimpleLieAlgebra theSSalgebra;
   theSSalgebra=*constSSalg;
-  WeylGroup& theWeyl=theSSalgebra.theWeyl;
+  WeylGroupData& theWeyl=theSSalgebra.theWeyl;
   std::stringstream out;
   Vector<RationalFunctionOld> hwDualCoords;
   theSSalgebra.OrderSSalgebraForHWbfComputation();
@@ -5968,7 +5968,7 @@ bool CalculatorFunctionsGeneral::innerDrawWeightSupportWithMults(Calculator& the
   if (!theCommands.GetVectoR<Rational>  (hwNode, highestWeightFundCoords, &theContext, theSSalgpointer->GetRank(), 0))
     return output.MakeError("Failed to extract highest weight vector", theCommands);
   Vector<Rational> highestWeightSimpleCoords;
-  WeylGroup& theWeyl=theSSalgpointer->theWeyl;
+  WeylGroupData& theWeyl=theSSalgpointer->theWeyl;
   highestWeightSimpleCoords= theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
   //Vectors<Rational> theWeightsToBeDrawn;
   std::stringstream out;
@@ -5989,7 +5989,7 @@ bool CalculatorFunctionsGeneral::innerDrawRootSystem(Calculator& theCommands, co
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, typeNode, theAlgPointer))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& theAlg=*theAlgPointer;
-  WeylGroup& theWeyl=theAlg.theWeyl;
+  WeylGroupData& theWeyl=theAlg.theWeyl;
   Vectors<Rational> preferredProjectionPlane;
   if (hasPreferredProjectionPlane)
   { preferredProjectionPlane.SetSize(2);
@@ -6324,7 +6324,7 @@ bool CalculatorFunctionsGeneral::innerDrawWeightSupport(Calculator& theCommands,
   if (!theCommands.GetVectoR<Rational>(hwNode, highestWeightFundCoords, &tempContext, theAlg.GetRank(), 0))
     return false;
   Vector<Rational> highestWeightSimpleCoords;
-  WeylGroup& theWeyl=theAlg.theWeyl;
+  WeylGroupData& theWeyl=theAlg.theWeyl;
   highestWeightSimpleCoords= theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
   //Vectors<Rational> theWeightsToBeDrawn;
   std::stringstream out;

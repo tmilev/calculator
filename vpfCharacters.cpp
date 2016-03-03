@@ -10,11 +10,11 @@ static ProjectInformationInstance ProjectInfoVpfCharacters(__FILE__, "Finite gro
 extern FormatExpressions consoleFormat;
 
 template<>
-List<ElementWeylGroup<WeylGroup> >::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<ElementWeylGroup<WeylGroup> >()
+List<ElementWeylGroup<WeylGroupData> >::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<ElementWeylGroup<WeylGroupData> >()
 { return 0;
 }
 
-Vector<Rational> WeylGroup::ApplyReflectionList(const List<int>& rightReflectionsActFirst, const Vector<Rational>& vv)const
+Vector<Rational> WeylGroupData::ApplyReflectionList(const List<int>& rightReflectionsActFirst, const Vector<Rational>& vv)const
 { Vector<Rational> v = vv;
   for(int i = rightReflectionsActFirst.size-1; i>=0; i--)
   { Rational x=0;
@@ -27,7 +27,7 @@ Vector<Rational> WeylGroup::ApplyReflectionList(const List<int>& rightReflection
   return v;
 }
 
-void WeylGroup::GetSimpleReflectionMatrix(int indexSimpleRoot, Matrix<Rational>& output) const
+void WeylGroupData::GetSimpleReflectionMatrix(int indexSimpleRoot, Matrix<Rational>& output) const
 { MacroRegisterFunctionWithName("WeylGroup::GetSimpleReflectionMatrix");
   int rank=this->GetDim();
   output.MakeIdMatrix(rank);
@@ -35,65 +35,47 @@ void WeylGroup::GetSimpleReflectionMatrix(int indexSimpleRoot, Matrix<Rational>&
     output(indexSimpleRoot,j)-=(this->CartanSymmetric(indexSimpleRoot,j) / CartanSymmetric(indexSimpleRoot, indexSimpleRoot) )*2;
 }
 
-Matrix<Rational> WeylGroup::SimpleReflectionMatrix(int i) const
+Matrix<Rational> WeylGroupData::SimpleReflectionMatrix(int i) const
 { Matrix<Rational> result;
   this->GetSimpleReflectionMatrix(i, result);
   return result;
 }
 
-ElementWeylGroup<WeylGroup> WeylGroup::SimpleConjugation(int i, const ElementWeylGroup<WeylGroup>& vv)
-{ ElementWeylGroup<WeylGroup> eltSimpleReflection;
+ElementWeylGroup<WeylGroupData> WeylGroupData::SimpleConjugation(int i, const ElementWeylGroup<WeylGroupData>& vv)
+{ ElementWeylGroup<WeylGroupData> eltSimpleReflection;
   eltSimpleReflection.MakeSimpleReflection(i, *this);
-  return eltSimpleReflection*this->theElements[i]*eltSimpleReflection;
+  return eltSimpleReflection*this->theGroup.theElements[i]*eltSimpleReflection;
 }
 
-int WeylGroup::MultiplyElements(int indexLeft, int indexRight) const
-{ return this->theElements.GetIndex(this->theElements[indexLeft]*this->theElements[indexRight]);
-}
-
-int WeylGroup::operator()(int i, int j) const
-{ return MultiplyElements(i,j);
-}
-
-void WeylGroup::ComputeConjugacyClassesThomasVersion()
-{//From Todor: Thomas, you need to explain how this code works.
-  if(rhoOrbit.size == 0)
-    this->ComputeAllElements();
-  GraphOLD G = GraphOLD(this->theElements.size,this->GetDim());
-  for(int i=0;i<this->theElements.size;i++)
-    for(int j=0;j<this->GetDim();j++)
-      G.AddEdge(i, this->theElements.GetIndex(this->SimpleConjugation(j, this->theElements[i])));
-  this->ComputeCCfromCCindicesInAllElements(G.DestructivelyGetConnectedComponents());
-}
-
-void WeylGroup::ComputeSquares(GlobalVariables* theGlobalVariables)
+template <typename elementSomeGroup>
+void FiniteGroup<elementSomeGroup>::ComputeSquaresCCReps(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::ComputeSquares");
   if(!this->flagCCsComputed)
     this->ComputeCCfromAllElements(theGlobalVariables);
-  this->squaresFirstConjugacyClassRep.SetExpectedSize(this->ConjugacyClassCount());
-  this->squaresFirstConjugacyClassRep.SetSize(this->ConjugacyClassCount());
-  ElementWeylGroup<WeylGroup> currentSquare;
+  this->squaresCCReps.SetExpectedSize(this->ConjugacyClassCount());
+  this->squaresCCReps.SetSize(this->ConjugacyClassCount());
+  elementSomeGroup currentSquare;
   for(int i=0;i<this->ConjugacyClassCount();i++)
-    this->squaresFirstConjugacyClassRep[i]=this->conjugacyClasseS[i].representative*this->conjugacyClasseS[i].representative;
+    this->squaresCCReps[i]=this->conjugacyClasseS[i].representative*this->conjugacyClasseS[i].representative;
 }
 
-void WeylGroup::ComputeInitialIrreps(GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("WeylGroup::ComputeInitialCharacters");
-  if (!this->flagCCsComputed)
-    this->ComputeCCfromAllElements(theGlobalVariables);
-  if(this->squaresFirstConjugacyClassRep.size == 0)
-    this->ComputeSquares(theGlobalVariables);
+void WeylGroupData::ComputeInitialIrreps(GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("WeylGroup::ComputeInitialIrreps");
+  if (!this->theGroup.flagCCsComputed)
+    this->theGroup.ComputeCCfromAllElements(theGlobalVariables);
+  if(this->theGroup.squaresCCReps.size == 0)
+    this->theGroup.ComputeSquaresCCReps(theGlobalVariables);
   this->irreps.SetSize(0);
-  this->characterTable.SetSize(0);
-  this->characterTable.SetExpectedSize(this->ConjugacyClassCount());
-  this->irreps.SetExpectedSize(this->ConjugacyClassCount());
-  WeylGroupRepresentation<Rational> trivialRep, signRep, standardRep;
+  this->theGroup.characterTable.SetSize(0);
+  this->theGroup.characterTable.SetExpectedSize(this->theGroup.ConjugacyClassCount());
+  this->irreps.SetExpectedSize(this->theGroup.ConjugacyClassCount());
+  GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> trivialRep, signRep, standardRep;
   this->GetTrivialRepresentation(trivialRep);
   this->GetSignRepresentation(signRep);
   this->GetStandardRepresentation(standardRep);
-  this->AddIrreducibleRepresentation(trivialRep);
-  this->AddIrreducibleRepresentation(signRep);
-  this->AddIrreducibleRepresentation(standardRep);
+  this->theGroup.AddIrreducibleRepresentation(trivialRep);
+  this->theGroup.AddIrreducibleRepresentation(signRep);
+  this->theGroup.AddIrreducibleRepresentation(standardRep);
 }
 
 // This is dumb, but i couldnt figure out what else to do
@@ -198,12 +180,12 @@ void SpaceTree<coefficient>::DisplayTree() const
    stOutput << ']';
 }
 
-template <typename coefficient>
-void WeylGroupRepresentation<coefficient>::MultiplyBy
-(const WeylGroupRepresentation<coefficient>& other, WeylGroupRepresentation<coefficient>& output) const
+template <typename somegroup, typename coefficient>
+void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::MultiplyBy
+(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other, GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& output) const
 { //lazy programmers handling://////
   if (&output==this || &output==&other)
-  { WeylGroupRepresentation<coefficient> thisCopy, otherCopy;
+  { GroupRepresentationCarriesAllMatrices<somegroup, coefficient> thisCopy, otherCopy;
     thisCopy=*this;
     otherCopy=other;
     thisCopy.MultiplyBy(otherCopy, output);
@@ -239,8 +221,9 @@ void WeylGroupRepresentation<coefficient>::MultiplyBy
   output.ownerGroup = this->ownerGroup;
 }
 
-template <typename coefficient>
-WeylGroupRepresentation<coefficient> WeylGroupRepresentation<coefficient>::Reduced() const
+template <typename somegroup, typename coefficient>
+GroupRepresentationCarriesAllMatrices<somegroup, coefficient>
+  GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Reduced() const
 { int d = basis.size;
 
   Matrix<coefficient> GM;
@@ -249,7 +232,7 @@ WeylGroupRepresentation<coefficient> WeylGroupRepresentation<coefficient>::Reduc
     for(int j=0; j<d; j++)
       GM.elements[i][j] = this->basis[i].ScalarEuclidean(this->basis[j]);
   GM.Invert();
-  WeylGroupRepresentation<coefficient> out;
+  GroupRepresentationCarriesAllMatrices<somegroup, coefficient> out;
   out.generatorS.SetSize(this->generatorS.size);
   for(int i=0; i<this->generatorS.size; i++)
 //     MatrixInBasisFast(out.generatorS[i], this->generatorS[i], BM);
@@ -272,8 +255,8 @@ WeylGroupRepresentation<coefficient> WeylGroupRepresentation<coefficient>::Reduc
    return out;
 }
 
-template <typename coefficient>
-VectorSpace<coefficient> WeylGroupRepresentation<coefficient>::FindDecentBasis() const
+template <typename somegroup, typename coefficient>
+VectorSpace<coefficient> GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::FindDecentBasis() const
 { VectorSpace<coefficient> V;
   int d = this->generators[0].NumCols;
   for(int geni=0; geni<this->generators.size; geni++)
@@ -295,11 +278,13 @@ VectorSpace<coefficient> WeylGroupRepresentation<coefficient>::FindDecentBasis()
   // if it gets here, it deserves to crash
 }
 
-template <typename coefficient>
-List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>::DecomposeThomasVersion()
+
+template <typename somegroup, typename coefficient>
+List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >
+  GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeThomasVersion()
 { MacroRegisterFunctionWithName("WeylGroupRepresentation::DecomposeThomasVersion");
   Matrix<coefficient> splittingOperatorMatrix;
-  List<WeylGroupRepresentation<coefficient> > out;
+  List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> > out;
   List<Vector<Rational> > splittingMatrixKernel;
   if(GetNumberOfComponents() == 1)
   { if(this->ownerGroup->characterTable.GetIndex(this->theCharacteR) == -1)
@@ -321,7 +306,7 @@ List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>
     }
   if((Vb.size < this->basis.size) && (Vb.size > 0))
   { stOutput << "calculating remaining subrep... ";
-    WeylGroupRepresentation<coefficient> V;
+    GroupRepresentationCarriesAllMatrices<somegroup, coefficient> V;
     V.ownerGroup = this->ownerGroup;
     V.generatorS = this->generatorS;
     V.basis = Vb;
@@ -362,7 +347,7 @@ List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>
 */
   List<List<Vector<coefficient> > > es;
   for(int cfi=this->ownerGroup->ConjugacyClassCount()-1; cfi>=0; cfi--)
-  { ClassFunction<WeylGroup::WeylGroupBase, coefficient> cf;
+  { ClassFunction<somegroup, coefficient> cf;
     cf.MakeZero(*this->ownerGroup);
     cf[cfi] = 1;
     stOutput << "getting matrix " << cf << "\n";
@@ -379,7 +364,7 @@ List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>
   }
 
   for(int i=0; i<es.size; i++)
-  { WeylGroupRepresentation<coefficient> outeme;
+  { GroupRepresentationCarriesAllMatrices<somegroup, coefficient> outeme;
     outeme.ownerGroup =this->ownerGroup;
     outeme.generatorS = this->generatorS;
     outeme.basis = es[i];
@@ -388,99 +373,6 @@ List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>
   return out;
 }
 
-template <typename coefficient>
-const ClassFunction<WeylGroup::WeylGroupBase, coefficient>& WeylGroupRepresentation<coefficient>::GetCharacter()
-{ if(this->flagCharacterIsComputed)
-    return this->theCharacteR;
-  this->theCharacteR.G = this->ownerGroup;
-  this->theCharacteR.data.SetSize(this->ownerGroup->ConjugacyClassCount());
-  for(int cci=0; cci < this->ownerGroup->ConjugacyClassCount(); cci++)
-    this->theCharacteR.data[cci] = this->GetMatrixElement(this->ownerGroup->conjugacyClasseS[cci].representative).GetTrace();
-  this->flagCharacterIsComputed=true;
-  return this->theCharacteR;
-}
-
-template <typename coefficient>
-coefficient WeylGroupRepresentation<coefficient>::GetNumberOfComponents()
-{ ClassFunction<WeylGroup::WeylGroupBase, coefficient> X;
-  X = GetCharacter();
-  return X.Norm();
-}
-
-void WeylGroup::ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("WeylGroup::ComputeIrreducibleRepresentationsThomasVersion");
-  if(this->squaresFirstConjugacyClassRep.size == 0)
-    this->ComputeSquares(theGlobalVariables);
-  this->characterTable.SetSize(0);
-  this->irreps.SetSize(0);
-  WeylGroupRepresentation<Rational> sr;
-  this->GetStandardRepresentation(sr);//<-this function adds the standard representation to the list of irreps.
-  stOutput << "<hr>Character standard module: " << sr.GetCharacter() << "\n";
-  List<WeylGroupRepresentation<Rational> > newspaces;
-  newspaces.AddOnTop(sr);
-  List<WeylGroupRepresentation<Rational> > incompletely_digested;
-  while((newspaces.size > 0) || (incompletely_digested.size > 0))
-  { WeylGroupRepresentation<Rational> nspace;
-    if(newspaces.size > 0)
-      nspace = newspaces.PopLastObject();
-    else
-    { nspace = incompletely_digested[0];
-      incompletely_digested.RemoveIndexShiftDown(0);
-    }
-    WeylGroupRepresentation<Rational> tspace = sr * nspace;
-    tspace.flagCharacterIsComputed=false;
-    stOutput << "<hr>Decomposing " << tspace.GetCharacter();
-    stOutput << " = " << sr.GetCharacter().ToString() << "*" << nspace.ToString() << "\n";
-    List<WeylGroupRepresentation<Rational> > spaces = tspace.DecomposeThomasVersion();
-    stOutput << "<hr><hr> to get: " << spaces.ToString() << "<hr><hr>";
-//      tspace = nspace * sr;
-//      tspace.character.data.size = 0;
-//      stOutput << "Decomposing (right tensor)" << tspace.GetCharacter() << "\n";
-//      spaces.AddListOnTop(tspace.Decomposition());
-    for(int spi = 0; spi < spaces.size; spi++)
-      if(spaces[spi].GetNumberOfComponents() == 1)
-      { if(!characterTable.Contains(spaces[spi].GetCharacter()))
-        { characterTable.AddOnTop(spaces[spi].GetCharacter());
-          irreps.AddOnTop(spaces[spi]);
-          newspaces.AddOnTop(spaces[spi]);
-          stOutput << "we have " << irreps.size << " irreps" << "\n";
-        }
-      } else
-        incompletely_digested.AddOnTop(spaces[spi]);
-    if(irreps.size == this->ConjugacyClassCount())
-      break;
-    for(int spi=0; spi<incompletely_digested.size; spi++)
-      for(int ci=0; ci<characterTable.size; ci++)
-        if(incompletely_digested[spi].GetCharacter().InnerProduct(characterTable[ci]) != 0)
-        { stOutput << "incompletely digested " << incompletely_digested[spi].GetCharacter() << " will now be further decomposed " << "\n";
-          List<WeylGroupRepresentation<Rational> > shards = incompletely_digested[spi].DecomposeThomasVersion();
-          incompletely_digested.RemoveIndexShiftDown(spi);
-          for(int shi=0; shi<shards.size; shi++)
-            if(shards[shi].GetNumberOfComponents() == 1)
-            { if(!characterTable.Contains(shards[shi].GetCharacter()))
-              { characterTable.AddOnTop(shards[shi].GetCharacter());
-                irreps.AddOnTop(spaces[spi]);
-                newspaces.AddOnTop(spaces[spi]);
-                stOutput << "we have " << irreps.size << " irreps (got from shards)" << "\n";
-              }
-            } else
-              incompletely_digested.AddOnTop(shards[shi]);
-          break;
-        }
-  }
-  this->irreps.QuickSortAscending(0, &this->characterTable);
-  this->flagCharTableIsComputed=true;
-  this->flagIrrepsAreComputed=true;
-  for(int i=0; i<this->characterTable.size; i++)
-  { stOutput << this->characterTable[i] << '\n';
-    for(int j=0; j<this->irreps[i].generatorS.size; j++)
-      stOutput << this->irreps[i].generatorS[j].ToString() << '\n';
-  }
-  for(int i=0; i<this->characterTable.size; i++)
-  { stOutput << this->characterTable[i] << '\n';
-  }
-  stOutput << this->characterTable.size << "\n";
-}
 
 // trial division is pretty good.  the factors of 2 were cleared earlier
 // by masking. dividing by 3 a few times earlier and only checking
@@ -854,7 +746,7 @@ Vector<coefficient> PutInBasis(const Vector<coefficient> &v, const List<Vector<c
 }
 
 template <typename coefficient>
-ElementWeylGroupRing<coefficient> ActOnGroupRing(ElementWeylGroup<WeylGroup>& theElement, const ElementWeylGroupRing<coefficient>& v)
+ElementWeylGroupRing<coefficient> ActOnGroupRing(ElementWeylGroup<WeylGroupData>& theElement, const ElementWeylGroupRing<coefficient>& v)
 { ElementWeylGroupRing<coefficient> out;
   out.MakeZero();
   for(int i=0; i<v.size(); i++)
@@ -864,7 +756,7 @@ ElementWeylGroupRing<coefficient> ActOnGroupRing(ElementWeylGroup<WeylGroup>& th
 
 // this function name is a lie
 template <typename coefficient>
-bool is_isotypic_component(WeylGroup& G, const List<Vector<coefficient> >& V)
+bool is_isotypic_component(WeylGroupData& G, const List<Vector<coefficient> >& V)
 { // pre-initial test: V isn't empty
   if(V.size == 0)
     return false;
@@ -873,11 +765,11 @@ bool is_isotypic_component(WeylGroup& G, const List<Vector<coefficient> >& V)
   if(n*n != V.size)
     return false;
   // more expensive test: character of V has unit Norm
-  ClassFunction<WeylGroup::WeylGroupBase, coefficient> X;
-  X.G = &G;
-  X.data.SetSize(G.ConjugacyClassCount());
-  for(int i=0; i<G.ConjugacyClassCount(); i++)
-  { ElementWeylGroup<WeylGroup>& g = G.conjugacyClasseS[i].representative;
+  ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, coefficient> X;
+  X.G = &G.theGroup;
+  X.data.SetSize(G.theGroup.ConjugacyClassCount());
+  for(int i=0; i<G.theGroup.ConjugacyClassCount(); i++)
+  { ElementWeylGroup<WeylGroupData>& g = G.theGroup.conjugacyClasseS[i].representative;
     coefficient tr = 0;
     for(int j=0; j<V.size; j++)
     { Vector<coefficient> v = ActOnGroupRing(g,V[j]);
@@ -901,7 +793,7 @@ bool is_isotypic_component(WeylGroup& G, const List<Vector<coefficient> >& V)
   return true;
 }
 
-Matrix<Rational> MatrixInBasis(const ClassFunction<WeylGroup::WeylGroupBase, Rational>& X, const List<Vector<Rational> >& B)
+Matrix<Rational> MatrixInBasis(const ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& X, const List<Vector<Rational> >& B)
 { List<Vector<Rational> > rows;
   for(int i=0; i<B.size; i++)
   { Vector<Rational> v;
@@ -926,8 +818,8 @@ Matrix<Rational> MatrixInBasis(const ClassFunction<WeylGroup::WeylGroupBase, Rat
   return M;
 }
 
-ElementMonomialAlgebra<ElementWeylGroup<WeylGroup>, Rational> FromClassFunction(const ClassFunction<WeylGroup::WeylGroupBase, Rational>& X)
-{ ElementMonomialAlgebra<ElementWeylGroup<WeylGroup>, Rational> out;
+ElementMonomialAlgebra<ElementWeylGroup<WeylGroupData>, Rational> FromClassFunction(const ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& X)
+{ ElementMonomialAlgebra<ElementWeylGroup<WeylGroupData>, Rational> out;
   for(int i=0; i<X.G->ConjugacyClassCount(); i++)
     for(int j=0; j<X.G->conjugacyClasseS[i].size; j++)
       out.AddMonomial(X.G->conjugacyClasseS[i].theElements[j],X.data[i]);
@@ -935,7 +827,7 @@ ElementMonomialAlgebra<ElementWeylGroup<WeylGroup>, Rational> FromClassFunction(
 }
 
 template <typename coefficient>
-Matrix<coefficient> GetMatrix(const ClassFunction<WeylGroup::WeylGroupBase, coefficient>& X)
+Matrix<coefficient> GetMatrix(const ClassFunction<WeylGroupData::WeylGroupBase, coefficient>& X)
 { Matrix<coefficient> M;
   M.MakeZeroMatrix(X.G->N);
   for(int i1=0; i1<X.G->ccCount; i1++)
@@ -948,7 +840,7 @@ Matrix<coefficient> GetMatrix(const ClassFunction<WeylGroup::WeylGroupBase, coef
 }
 
 void SubgroupDataRootReflections::ComputeDynkinType()
-{ WeylGroup tempGroup;
+{ WeylGroupData tempGroup;
   tempGroup.CartanSymmetric=this->SubCartanSymmetric;
   tempGroup.MakeMeFromMyCartanSymmetric();
   this->theDynkinType=tempGroup.theDynkinType;
@@ -959,40 +851,40 @@ bool FiniteGroup<elementSomeGroup>::CheckOrthogonalityCharTable(GlobalVariables*
 { MacroRegisterFunctionWithName("FiniteGroup::CheckOrthogonalityCharTable");
   for (int i=0; i<this->characterTable.size; i++)
     for (int j=i; j<this->characterTable.size; j++)
-    { ClassFunction<FiniteGroup, Rational>& leftChar= this->characterTable[i];
-      ClassFunction<FiniteGroup, Rational>& rightChar= this->characterTable[j];
+    { ClassFunction<FiniteGroup, Rational>& leftChar= *(this->characterTable[i]);
+      ClassFunction<FiniteGroup, Rational>& rightChar= *(this->characterTable[j]);
       Rational theScalarProd= this->GetHermitianProduct(leftChar.data, rightChar.data);
       if (j!=i)
         if (theScalarProd!=0)
           crash << "Error: the character table is not orthonormal: char number " << i+1 << " = " << leftChar.ToString() << " is not orthogonal to char number "
           << j+1 << " = " << rightChar.ToString() << ". <br>The entire char table is: "
-          << this->characterTable.ToString() << crash;
+          << this->PrettyPrintCharacterTable(theGlobalVariables) << crash;
       if (j==i)
         if (theScalarProd!=1)
           crash << "Error: the character table is not orthonormal: char number " << i+1 << " = " << leftChar.ToString() << " is not of norm 1. "
-          << "<br>The entire char table is: " << this->characterTable.ToString() << crash;
+          << "<br>The entire char table is: " << this->PrettyPrintCharacterTable(theGlobalVariables) << crash;
     }
   return true;
 }
 
 void SubgroupDataWeylGroup::ComputeTauSignature(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SubgroupWeylGroup::ComputeTauSignature");
-  if(!this->theSubgroup->flagCCRepresentativesComputed)
-  { this->theSubgroup->ComputeCCSizesAndRepresentatives(theGlobalVariables);
-    this->ComputeCCRepresentativesPreimages(theGlobalVariables);
+  if(!this->theSubgroupData->theGroup->flagCCRepresentativesComputed)
+  { this->theSubgroupData->theGroup->ComputeCCSizesAndRepresentatives(theGlobalVariables);
+    this->theSubgroupData->ComputeCCRepresentativesPreimages(theGlobalVariables);
   }
-  this->theSubgroup->CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
+  this->theSubgroupData->theGroup->CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
 //  this->theGroup->CheckOrthogonalityCharTable(theGlobalVariables);
   Vector<Rational> Xs, Xi;
-  this->GetSignCharacter(Xs);
-  Xi.SetSize(this->theSubgroup->ConjugacyClassCount());
+  this->theSubgroupData->theSubgroup->GetSignCharacter(Xs);
+  Xi.SetSize(this->theSubgroupData->theSubgroup->ConjugacyClassCount());
 //  stOutput << "<hr>Computing in group with " << this->size().ToString() << " elements. ";
-  this->tauSignature.SetSize(this->theGroup->ConjugacyClassCount());
-  for(int i=0; i<this->theGroup->ConjugacyClassCount(); i++)
-  { ClassFunction<WeylGroup::WeylGroupBase, Rational> Xip = this->theGroup->characterTable[i];
+  this->tauSignature.SetSize(this->theSubgroupData->theGroup->ConjugacyClassCount());
+  for(int i=0; i<this->theSubgroupData->theGroup->ConjugacyClassCount(); i++)
+  { ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& Xip = *(this->theWeylData->theGroup.characterTable[i]);
     for(int j=0; j<Xi.size; j++)
-      Xi[j] = Xip[this->ccRepresentativesPreimages[j]];
-    this->tauSignature[i]= this->theSubgroup->GetHermitianProduct(Xs,Xi);
+      Xi[j] = Xip[this->theSubgroupData->ccRepresentativesPreimages[j]];
+    this->tauSignature[i]= this->theSubgroupData->theSubgroup->GetHermitianProduct(Xs,Xi);
 //    stOutput << "<br>Hermitian product of " << Xs.ToString() << " and "
 //    << Xi.ToString() << " = " << this->GetHermitianProduct(Xs, Xi);
     if (!this->tauSignature[i].IsSmallInteger())
@@ -1002,51 +894,51 @@ void SubgroupDataWeylGroup::ComputeTauSignature(GlobalVariables* theGlobalVariab
 
 void SubgroupDataRootReflections::ComputeCCSizesRepresentativesPreimages(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SubgroupRootReflections::ComputeCCSizesRepresentativesPreimages");
-  if (this->theDynkinType==this->theGroup->theDynkinType && this->theGroup->flagCCRepresentativesComputed)
-  { this->theSubgroup->conjugacyClasseS.SetSize(this->theGroup->conjugacyClasseS.size);
-    for (int i=0; i<this->theSubgroup->conjugacyClasseS.size; i++)
-    { this->theSubgroup->conjugacyClasseS[i].flagRepresentativeComputed=true;
-      this->theSubgroup->conjugacyClasseS[i].representative=this->theGroup->conjugacyClasseS[i].representative;
-      this->theSubgroup->conjugacyClasseS[i].size=this->theGroup->conjugacyClasseS[i].size;
-      this->theSubgroup->conjugacyClasseS[i].flagElementsComputed=false;
+  if (this->theDynkinType==this->theWeylData->theDynkinType && this->theWeylData->theGroup.flagCCRepresentativesComputed)
+  { this->theSubgroupData->theSubgroup->conjugacyClasseS.SetSize(this->theSubgroupData->theGroup->conjugacyClasseS.size);
+    for (int i=0; i<this->theSubgroupData->theSubgroup->conjugacyClasseS.size; i++)
+    { this->theSubgroupData->theSubgroup->conjugacyClasseS[i].flagRepresentativeComputed=true;
+      this->theSubgroupData->theSubgroup->conjugacyClasseS[i].representative=this->theSubgroupData->theGroup->conjugacyClasseS[i].representative;
+      this->theSubgroupData->theSubgroup->conjugacyClasseS[i].size=this->theSubgroupData->theGroup->conjugacyClasseS[i].size;
+      this->theSubgroupData->theSubgroup->conjugacyClasseS[i].flagElementsComputed=false;
     }
-//    this->theSubgroup->sizePrivate=this->theSubgroup->GetSize();
-    this->ccRepresentativesPreimages.SetSize(this->theGroup->conjugacyClasseS.size);
-    for (int i=0; i<this->ccRepresentativesPreimages.size; i++)
-      this->ccRepresentativesPreimages[i]=i;
-    this->theSubgroup->flagCCRepresentativesComputed=true;
+    this->theSubgroupData->ccRepresentativesPreimages.SetSize(this->theSubgroupData->theGroup->conjugacyClasseS.size);
+    for (int i=0; i<this->theSubgroupData->ccRepresentativesPreimages.size; i++)
+      this->theSubgroupData->ccRepresentativesPreimages[i]=i;
+    this->theSubgroupData->theSubgroup->flagCCRepresentativesComputed=true;
   } else
   { if (this->theDynkinType.GetRank()<=6)
-      this->theSubgroup->ComputeCCfromAllElements(theGlobalVariables);
+      this->theSubgroupData->theSubgroup->ComputeCCfromAllElements(theGlobalVariables);
     else
-      this->theSubgroup->ComputeCCSizesAndRepresentatives(theGlobalVariables);
+      this->theSubgroupData->theSubgroup->ComputeCCSizesAndRepresentatives(theGlobalVariables);
 
-    this->ComputeCCRepresentativesPreimages(theGlobalVariables);
+    this->theSubgroupData->ComputeCCRepresentativesPreimages(theGlobalVariables);
   }
 }
 
 void SubgroupDataRootReflections::InitGenerators()
 { MacroRegisterFunctionWithName("SubgroupRootReflections::InitGenerators");
   if (this->theDynkinType.GetRank()==0)
-  { this->theSubgroup->generators.SetSize(1);
-    this->theSubgroup->generators[0].MakeID(*this->theGroup);
+  { this->theSubgroupData->theSubgroup->generators.SetSize(1);
+    this->theSubgroupData->theSubgroup->generators[0].MakeID(*this->theSubgroupData->theGroup);
     return;
   }
   int d=this->SubCartanSymmetric.NumRows;
-  this->generatorPreimages.SetSize(d);
-  this->theSubgroup->generators.SetSize(d);
-  ElementWeylGroup<WeylGroup> currentReflection;
+  this->theSubgroupData->generatorPreimages.SetSize(d);
+  this->theSubgroupData->theSubgroup->generators.SetSize(d);
+  ElementWeylGroup<WeylGroupData> currentReflection;
   for(int i=0; i<d; i++)
-  { currentReflection.MakeRootReflection(this->generatingSimpleRoots[i], *this->theGroup);
-    this->generatorPreimages[i]=this->theGroup->theElements.GetIndex(currentReflection);
-    this->theSubgroup->generators[i]=currentReflection;
+  { currentReflection.MakeRootReflection(this->generatingSimpleRoots[i], *this->theWeylData);
+    this->theSubgroupData->generatorPreimages[i]=this->theSubgroupData->theGroup->theElements.GetIndex(currentReflection);
+    this->theSubgroupData->theSubgroup->generators[i]=currentReflection;
   }
 }
 
-void SubgroupDataRootReflections::MakeParabolicSubgroup(WeylGroup& G, const Selection& inputGeneratingSimpleRoots)
+void SubgroupDataRootReflections::MakeParabolicSubgroup(WeylGroupData& G, const Selection& inputGeneratingSimpleRoots)
 { MacroRegisterFunctionWithName("SubgroupRootReflections::MakeParabolicSubgroup");
-  this->init();
-  this->theGroup = &G;
+  this->theSubgroupData->init();
+  this->theSubgroupData->theGroup = &(G.theGroup);
+  this->theWeylData = &G;
   this->flagIsParabolic=true;
   this->simpleRootsInLeviParabolic=inputGeneratingSimpleRoots;
   Vectors<Rational> EiBasis;
@@ -1063,10 +955,11 @@ void SubgroupDataRootReflections::MakeParabolicSubgroup(WeylGroup& G, const Sele
 }
 
 void SubgroupDataRootReflections::MakeFromRoots
-(WeylGroup& G, const Vectors<Rational>& inputRootReflections)
+(WeylGroupData& G, const Vectors<Rational>& inputRootReflections)
 { MacroRegisterFunctionWithName("SubgroupRootReflections::MakeFromRoots");
-  this->init();
-  this->theGroup = &G;
+  this->theSubgroupData->init();
+  this->theSubgroupData->theGroup = &(G.theGroup);
+  this->theWeylData = &G;
   this->generatingSimpleRoots=inputRootReflections;
   DynkinDiagramRootSubalgebra theDiagram;
   theDiagram.ComputeDiagramTypeModifyInput
@@ -1094,7 +987,7 @@ bool FiniteGroup<elementSomeGroup>::AreConjugate_OLD_Deprecated_Version_By_Todor
     return false;
 //  stOutput << "<br>Invariants are the same, computing orbit.";
   OrbitIteratorWeylGroup theIterator;
-  theIterator.init(this->generators, left, ElementWeylGroup<WeylGroup>::ConjugationAction);
+  theIterator.init(this->generators, left, ElementWeylGroup<WeylGroupData>::ConjugationAction);
   if (this->generators.size==0)
     crash << "generators not allowed to be 0. " << crash;
   do
@@ -1106,7 +999,7 @@ bool FiniteGroup<elementSomeGroup>::AreConjugate_OLD_Deprecated_Version_By_Todor
   return false;
 }
 
-void WeylGroup::GetSignSignatureAllRootSubsystems(List<SubgroupDataRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables)
+void WeylGroupData::GetSignSignatureAllRootSubsystems(List<SubgroupDataRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::GetSignSignatureAllRootSubsystems");
   rootSubalgebras theRootSAs;
   SemisimpleLieAlgebra theSSlieAlg;
@@ -1123,18 +1016,18 @@ void WeylGroup::GetSignSignatureAllRootSubsystems(List<SubgroupDataRootReflectio
   this->GetSignSignatureRootSubgroups(outputSubgroups, theRootSAsBases, theGlobalVariables);
 }
 
-void WeylGroup::GetSignSignatureParabolics(List<SubgroupDataRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables)
+void WeylGroupData::GetSignSignatureParabolics(List<SubgroupDataRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::GetSignSignatureParabolics");
 //  this->ComputeIrreducibleRepresentationsThomasVersion();
   this->ComputeOrLoadCharacterTable(theGlobalVariables);
-  ClassFunction<WeylGroup::WeylGroupBase, Rational> signRep;
-  signRep.G = this;
+  ClassFunction<WeylGroupData::WeylGroupBase, Rational> signRep;
+  signRep.G = &(this->theGroup);
   this->GetSignCharacter(signRep.data);
   Selection sel;
   sel.init(this->GetDim());
   int numCycles=MathRoutines::TwoToTheNth(sel.MaxSize);
   outputSubgroups.SetSize(numCycles);
-  ElementWeylGroup<WeylGroup> g;
+  ElementWeylGroup<WeylGroupData> g;
   g.owner = this;
 //  stOutput << "<hr>Meself is: " << this->ToString();
   for (int i=0; i<outputSubgroups.size; i++, sel.incrementSelection())
@@ -1146,18 +1039,18 @@ void WeylGroup::GetSignSignatureParabolics(List<SubgroupDataRootReflections>& ou
     // as characterTable[1]
     //stOutput << "<hr>before compute initial irreps";
   }
-  this->CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
+  this->theGroup.CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
   for(int j=0; j<outputSubgroups.size; j++)
   { outputSubgroups[j].ComputeTauSignature(theGlobalVariables);
   }
 }
 
-void WeylGroup::GetSignSignatureExtendedParabolics(List<SubgroupDataRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables)
+void WeylGroupData::GetSignSignatureExtendedParabolics(List<SubgroupDataRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::GetSignSignatureExtendedParabolics");
 //  this->ComputeIrreducibleRepresentationsThomasVersion();
   this->ComputeOrLoadCharacterTable(theGlobalVariables);
-  ClassFunction<WeylGroup::WeylGroupBase, Rational> signRep;
-  signRep.G = this;
+  ClassFunction<WeylGroupData::WeylGroupBase, Rational> signRep;
+  signRep.G = &(this->theGroup);
   this->GetSignCharacter(signRep.data);
   Selection parSelrootsAreInLevi;
   parSelrootsAreInLevi.init(this->GetDim()+1);
@@ -1178,22 +1071,22 @@ void WeylGroup::GetSignSignatureExtendedParabolics(List<SubgroupDataRootReflecti
   } while (parSelrootsAreInLevi.IncrementReturnFalseIfPastLast());
   for (int i=0; i<outputSubgroups.size; i++)
     outputSubgroups[i].ComputeCCSizesRepresentativesPreimages(theGlobalVariables);
-  this->CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
+  this->theGroup.CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
   for(int j=0; j<outputSubgroups.size; j++)
     outputSubgroups[j].ComputeTauSignature(theGlobalVariables);
 }
 
-void WeylGroup::GetSignSignatureRootSubgroups
+void WeylGroupData::GetSignSignatureRootSubgroups
   (List<SubgroupDataRootReflections>& outputSubgroups,
    const List<Vectors<Rational> >& rootsGeneratingReflections,
    GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::GetSignSignatureRootSubgroups");
   this->ComputeOrLoadCharacterTable(theGlobalVariables);
-  ClassFunction<WeylGroup::WeylGroupBase, Rational> signRep;
-  signRep.G = this;
+  ClassFunction<WeylGroupData::WeylGroupBase, Rational> signRep;
+  signRep.G = &(this->theGroup);
   this->GetSignCharacter(signRep.data);
   outputSubgroups.SetSize(rootsGeneratingReflections.size);
-  ElementWeylGroup<WeylGroup> g;
+  ElementWeylGroup<WeylGroupData> g;
   g.owner = this;
 //  stOutput << "<hr>Meself is: " << this->ToString();
   for (int i=0; i<outputSubgroups.size; i++)
@@ -1205,8 +1098,8 @@ void WeylGroup::GetSignSignatureRootSubgroups
     // as characterTable[1]
     //stOutput << "<hr>before compute initial irreps";
   }
-  this->CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
-  this->CheckOrthogonalityCharTable(theGlobalVariables);
+  this->theGroup.CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
+  this->theGroup.CheckOrthogonalityCharTable(theGlobalVariables);
   for(int j=0; j<outputSubgroups.size; j++)
   { outputSubgroups[j].ComputeTauSignature(theGlobalVariables);
   }

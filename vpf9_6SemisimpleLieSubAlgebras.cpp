@@ -205,9 +205,9 @@ void SubalgebraSemisimpleLieAlgebra::ComputeCartanSA()
 
 }
 
-void WeylGroup::operator+=(const WeylGroup& other)
+void WeylGroupData::operator+=(const WeylGroupData& other)
 { if (this==&other)
-  { WeylGroup tempW;
+  { WeylGroupData tempW;
     tempW=*this;
     *this+=tempW;
     return;
@@ -618,9 +618,9 @@ void SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand()
   this->theOrbitHelementLengths.SetExpectedSize(this->theSl2s.size);
   this->theOrbitDynkinIndices.SetExpectedSize(this->theSl2s.size);
   this->theOrbiTs.SetSize(this->theSl2s.size);
-  List<ElementWeylGroup<WeylGroup> > theGens;
-  ElementWeylGroup<WeylGroup> theElt;
-  WeylGroup& theWeyl=this->owner->theWeyl;
+  List<ElementWeylGroup<WeylGroupData> > theGens;
+  ElementWeylGroup<WeylGroupData> theElt;
+  WeylGroupData& theWeyl=this->owner->theWeyl;
   theWeyl.ComputeOuterAutoGenerators();
   for (int i=0; i<this->owner->GetRank(); i++)
   { theElt.MakeSimpleReflection(i, theWeyl);
@@ -811,7 +811,7 @@ Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromImag
     return result;
   }
   Vector<Rational> newSimpleRoot, highestRootInSimpleRootModuleSimpleCoords;
-  WeylGroup& theWeyl=theSSSubalgebraToBeModified.theWeylNonEmbeddeD;
+  WeylGroupData& theWeyl=theSSSubalgebraToBeModified.theWeylNonEmbeddeD;
   theWeyl.MakeFromDynkinType(input);
   theWeyl.ComputeRho(true);
   int newIndex=*imagesOldSimpleRootsAndNewRoot.LastObject();
@@ -1017,7 +1017,7 @@ void OrbitFDRepIteratorWeylGroup::init()
   this->theIterator.init
   (this->theIterator.theGroupGeneratingElements, this->orbitDefiningElement, this->theIterator.theGroupAction);
   if(this->theIterator.theGroupGeneratingElements.size>0)
-  { WeylGroup& ownerGroup=*this->theIterator.theGroupGeneratingElements[0].owner;
+  { WeylGroupData& ownerGroup=*this->theIterator.theGroupGeneratingElements[0].owner;
     this->computedSize=ownerGroup.GetOrbitSize(this->orbitDefiningElement);
     if (this->computedSize>this->maxOrbitBufferSize)
     { this->maxOrbitBufferSize=0;
@@ -1027,8 +1027,8 @@ void OrbitFDRepIteratorWeylGroup::init()
 }
 
 void OrbitFDRepIteratorWeylGroup::init
-(const List<ElementWeylGroup<WeylGroup> >& inputGenerators, const Vector<Rational>& inputElement,
-   OrbitIterator<ElementWeylGroup<WeylGroup>, Vector<Rational> >::GroupAction inputGroupAction)
+(const List<ElementWeylGroup<WeylGroupData> >& inputGenerators, const Vector<Rational>& inputElement,
+   OrbitIterator<ElementWeylGroup<WeylGroupData>, Vector<Rational> >::GroupAction inputGroupAction)
 { MacroRegisterFunctionWithName("OrbitFDRepIteratorWeylGroup::init");
   if (this->theIterator.theGroupAction==inputGroupAction &&
       this->orbitDefiningElement==inputElement )
@@ -1833,7 +1833,7 @@ bool CandidateSSSubalgebra::CheckInitialization()const
   return true;
 }
 
-WeylGroup& CandidateSSSubalgebra::GetAmbientWeyl()const
+WeylGroupData& CandidateSSSubalgebra::GetAmbientWeyl()const
 { this->CheckInitialization();
   return this->owner->GetSSowner().theWeyl;
 }
@@ -1843,7 +1843,7 @@ SemisimpleLieAlgebra& CandidateSSSubalgebra::GetAmbientSS()const
   return this->owner->GetSSowner();
 }
 
-void CandidateSSSubalgebra::AddHincomplete(const Vector<Rational>& theH, const ElementWeylGroup<WeylGroup>& theWE, int indexOfOrbit)
+void CandidateSSSubalgebra::AddHincomplete(const Vector<Rational>& theH, const ElementWeylGroup<WeylGroupData>& theWE, int indexOfOrbit)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::AddHincomplete");
   this->CheckInitialization();
   if (this->CartanSAsByComponentScaledToActByTwo.size==1)
@@ -1904,7 +1904,7 @@ bool CandidateSSSubalgebra::IsGoodHnewActingByTwo(const Vector<Rational>& HNewAc
 }
 
 template <class coefficient>
-int charSSAlgMod<coefficient>::GetIndexExtremeWeightRelativeToWeyl(WeylGroup& theWeyl)const
+int charSSAlgMod<coefficient>::GetIndexExtremeWeightRelativeToWeyl(WeylGroupData& theWeyl)const
 { HashedList<Vector<coefficient> > weightsSimpleCoords;
   weightsSimpleCoords.SetExpectedSize(this->size());
   for (int i=0; i<this->size(); i++)
@@ -2689,7 +2689,7 @@ Vector<Rational> NilradicalCandidate::GetNilradicalLinearCombi()const
 void NilradicalCandidate::ComputeParabolicACextendsToParabolicAC(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("NilradicalCandidate::ComputeParabolicACextendsToParabolicAC");
   Vector<Rational> projectionRoot;
-  WeylGroup& theWeyl=this->owner->owner->owner->theWeyl;
+  WeylGroupData& theWeyl=this->owner->owner->owner->theWeyl;
   this->leviRootsAmbienT.Reserve(theWeyl.RootSystem.size);
   this->leviRootsSmallPrimalFundCoords.Reserve(theWeyl.RootSystem.size);
 //  stOutput << "<hr>this->ConeSeparatingNormal: " << this->ConeSeparatingNormal.ToString();
@@ -3711,7 +3711,7 @@ void slTwoSubalgebra::ElementToStringModuleDecompositionMinimalContainingRegular
   output=out.str();
 }
 
-WeylGroup& slTwoSubalgebra::GetOwnerWeyl()
+WeylGroupData& slTwoSubalgebra::GetOwnerWeyl()
 { return this->GetOwnerSSAlgebra().theWeyl;
 }
 
@@ -3838,7 +3838,7 @@ bool slTwoSubalgebra::CheckConsistency()const
   return true;
 }
 
-void slTwoSubalgebra::ComputeDynkinsEpsilon(WeylGroup& theWeyl)
+void slTwoSubalgebra::ComputeDynkinsEpsilon(WeylGroupData& theWeyl)
 {//outdates, must be erased as soon as I implement an equivalent
   this->DynkinsEpsilon = this->DiagramM.NumRootsGeneratedByDiagram()+this->DiagramM.RankTotal();
   int r=0;
@@ -5788,7 +5788,7 @@ void CandidateSSSubalgebra::GetHsScaledToActByTwoByType(List<List<Vectors<Ration
 }
 
 template <class coefficient>
-void WeylGroup::RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeights, bool useOuterAutos)
+void WeylGroupData::RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeights, bool useOuterAutos)
 { bool found;
   MemorySaving<Vectors<coefficient> > theWeightsCopy;
   if (useOuterAutos)
@@ -5845,7 +5845,7 @@ bool CandidateSSSubalgebra::HasHsScaledByTwoConjugateTo(List<Vector<Rational> >&
   List<Vector<Rational> > myVectors=this->theHsScaledToActByTwo;
 //  if (doDebug)
 //    stOutput << "<br>Comparing simultaneously: " << raisedInput.ToString() << " with " << myVectors.ToString();
-  WeylGroup& ambientWeyl=this->GetAmbientWeyl();
+  WeylGroupData& ambientWeyl=this->GetAmbientWeyl();
   ambientWeyl.RaiseToMaximallyDominant(raisedInput, true);
   ambientWeyl.RaiseToMaximallyDominant(myVectors, true);
 //  if (doDebug)

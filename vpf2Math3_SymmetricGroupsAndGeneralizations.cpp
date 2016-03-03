@@ -808,6 +808,7 @@ void PermutationGroupData::ComputeSpechtModules()
   this->theGroup->irreps.QuickSortAscending();
 }
 
+/*
 void ElementHyperoctahedralGroup::MakeFromPermutation(const PermutationR2& in)
 { this->p = in;
 }
@@ -887,25 +888,6 @@ void ElementHyperoctahedralGroup::MakeFromMul(const ElementHyperoctahedralGroup&
     if(this->s[i])
       lastset = i;
   this->s.SetSize(lastset+1);
-
-/*  if(NeedRankAdjustment(left, right))
-  { ElementHyperoctahedralGroup newLeft=left;
-    ElementHyperoctahedralGroup newRight=right;
-    EnsureSameRank(newLeft, newRight);
-    this->MakeFromMul(newLeft, newRight);
-    return;
-  }
-  if(right.s.size != 0)
-  { this->s = left.s;
-    right.p.ActOnList(this->s);
-    for(int i=0; i<this->s.size; i++)
-      this->s[i] ^= right.s[i];
-  }
-  if(left.s.size != 0)
-  { this->s = left.s;
-    right.p.ActOnList(this->s);
-  }*/
-
   //stOutput << left << "*" << right << "=" << *this << "   ";
 }
 
@@ -995,22 +977,7 @@ void ElementHyperoctahedralGroup::GetCharacteristicPolyStandardRepresentation(Po
 
 
 bool ElementHyperoctahedralGroup::operator==(const ElementHyperoctahedralGroup& right) const
-{ /*if(this->s.size > 0)
-    if(right.s.size > 0)
-      for(int i=0; i<this->s.size; i++)
-        if(this->s[i] != right.s[i])
-          return false;
-  if(this->s.size > 0)
-    if(right.s.size == 0)
-      for(int i=0; i<this->s.size; i++)
-        if(this->s[i] != false)
-          return false;
-  if(this->s.size == 0)
-    if(right.s.size > 0)
-      for(int i=0; i<right.s.size; i++)
-        if(right.s[i] != false)
-          return false;*/
-  int sharedsize = std::min(this->s.size, right.s.size);
+{ int sharedsize = std::min(this->s.size, right.s.size);
   for(int i=0; i<sharedsize; i++)
     if(this->s[i] != right.s[i])
       return false;
@@ -1069,7 +1036,7 @@ std::string ElementHyperoctahedralGroup::ToString(FormatExpressions* unused) con
 { std::stringstream out;
   this->IntoStream(out);
   return out.str();
-}
+}*/
 
 /*void HyperoctahedralGroup::MakeHyperoctahedralGroup(int n)
 { this->isEntireHyperoctahedralGroup = true;

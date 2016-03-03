@@ -1480,7 +1480,7 @@ std::string rootSubalgebra::ToStringMultTable(bool useLaTeX, bool useHtml, rootS
   return out.str();
 }
 
-WeylGroup& rootSubalgebra::GetAmbientWeyl()const
+WeylGroupData& rootSubalgebra::GetAmbientWeyl()const
 { return this->GetOwnerSSalg().theWeyl;
 }
 
@@ -2284,7 +2284,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
   Vectors<Rational> rootsScalarProduct2HnonRaised;
   Vectors<Rational> reflectedSimpleBasisK;
   rootsScalarProduct2HnonRaised.Reserve(this->PositiveRootsK.size);
-  ElementWeylGroup<WeylGroup> raisingElt;
+  ElementWeylGroup<WeylGroupData> raisingElt;
   selectionRootsWithZeroCharacteristic.init(theRelativeDimension);
   Matrix<Rational> InvertedRelativeKillingForm;
   InvertedRelativeKillingForm.init(theRelativeDimension, theRelativeDimension);
@@ -2614,7 +2614,7 @@ void rootSubalgebras::ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGloba
   }
 }
 
-WeylGroup& rootSubalgebras::GetOwnerWeyl()const
+WeylGroupData& rootSubalgebras::GetOwnerWeyl()const
 { return this->GetOwnerSSalgebra().theWeyl;
 }
 

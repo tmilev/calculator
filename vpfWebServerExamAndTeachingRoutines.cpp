@@ -1843,6 +1843,7 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
     //stOutput << "<br>this->databaseProblemWeights is: " << this->databaseProblemWeights.ToStringCommaDelimited();
     //stOutput << "<br> cleanedupLink: " << cleaneduplink;
     std::string idPoints = "points" + urledProblem;
+    std::string idNumTries= "numTries"+urledProblem;
     std::string idButtonModifyPoints = "modifyPoints" + urledProblem;
     std::string idPointsModOutput = "modifyPointsOutputSpan" + urledProblem;
     out << "Points: <textarea rows=\"1\" cols=\"3\" id=\"" << idPoints << "\">";
@@ -1850,7 +1851,9 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
     out << "</textarea>";
     out << "<button id=\"" << idButtonModifyPoints << "\" "
     << "onclick=\"" << "submitStringAsMainInput('" << urledProblem
-    << "='+encodeURIComponent('weight='+getElementById('" << idPoints << "').value), '"
+    << "='+encodeURIComponent('weight='+  getElementById('" << idPoints << "').value)"
+//    << "  +encodeURIComponent('numTries='+getElementById('"
+    << ", '"
     << idPointsModOutput << "', 'setProblemData');"
     << "\""
     << ">";

@@ -32,11 +32,11 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
 
     return true;
   }
-//  if (comments!=0)
-//    *comments << "<b>Debugging info, please disable when done. </b> Attempting to login with user: " << inputUsernameUnsafe
-//    << "<br>pass: " << inputPassword
-//    << "<br>token: " << inputOutputAuthenticationToken << "<br>";
-
+/*  if (comments!=0)
+    *comments << "<b>Debugging info, please disable when done. </b> Attempting to login with user: " << inputUsernameUnsafe
+    << "<br>pass: " << inputPassword
+    << "<br>token: " << inputOutputAuthenticationToken << "<br>";
+*/
   if (theUser.Authenticate(theRoutines, comments))
   { inputOutputAuthenticationToken=theUser.actualAuthenticationToken.value;
     outputUserRole=theUser.userRole;

@@ -340,7 +340,7 @@ bool WebWorker::ReceiveAllHttpSSL()
       this->displayUserInput=this->error;
       return false;
     }
-    logIO << logger::blue << "about to read ..." << logger::endL;
+//    logIO << logger::blue << "about to read ..." << logger::endL;
     numBytesInBuffer= SSL_read(theSSLdata.ssl, &buffer, bufferSize-1);
     if (numBytesInBuffer==0)
     { this->error= "While trying to fetch message-body, received 0 bytes. " +
@@ -691,7 +691,7 @@ bool WebWorker::ProcessRawArguments
     if (theGlobalVariables.GetWebInput("ignoreSecurity")=="true" &&
         !theGlobalVariables.flagUsingSSLinCurrentConnection)
     { theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs=true;
-      password= theGlobalVariables.GetWebInput("authenticationInsecure");
+      password= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("authenticationInsecure"));
     }
   if (desiredUser!="" &&
       (theGlobalVariables.flagUsingSSLinCurrentConnection ||
@@ -705,7 +705,7 @@ bool WebWorker::ProcessRawArguments
     (desiredUser, password, this->authenticationToken, theGlobalVariables.userRole, &argumentProcessingFailureComments);
     if (theGlobalVariables.flagLoggedIn)
     { theGlobalVariables.userDefault=desiredUser;
-      theGlobalVariables.SetWebInput("authenticationToken", CGI::StringToURLString( this->authenticationToken));
+      theGlobalVariables.SetWebInput("authenticationToken", CGI::StringToURLString(this->authenticationToken));
     } else if (changingPass)
       theGlobalVariables.userDefault=desiredUser;
     else
@@ -1117,7 +1117,7 @@ void WebWorker::SendAllBytesHttp()
     int numBytesSent=send
     (this->connectedSocketID, &this->remainingBytesToSend[0], this->remainingBytesToSend.size,0);
     if (numBytesSent<0)
-    { theLog << "WebWorker::SendAllBytes failed. Error: "
+    { logIO << "WebWorker::SendAllBytes failed. Error: "
       << this->parent->ToStringLastErrorDescription() << logger::endL;
       theReport.SetStatus
       ("WebWorker::SendAllBytes failed. Error: " + this->parent->ToStringLastErrorDescription()
@@ -1251,7 +1251,7 @@ bool WebWorker::ReceiveAllHttp()
   while ((signed) this->mainArgumentRAW.size()<this->ContentLength)
   { if (theGlobalVariables.GetElapsedSeconds()-numSecondsAtStart>180)
     { this->error= "Receiving bytes timed out (180 seconds).";
-      theLog << this->error << logger::endL;
+      logIO << this->error << logger::endL;
       this->displayUserInput=this->error;
       return false;
     }
@@ -1264,7 +1264,7 @@ bool WebWorker::ReceiveAllHttp()
     }
     if (numBytesInBuffer<0)
     { this->error= "Error fetching message body: " + this->parent->ToStringLastErrorDescription();
-      theLog << this->error << logger::endL;
+      logIO << logger::red << this->error << logger::endL;
       this->displayUserInput=this->error;
       return false;
     }
@@ -1768,7 +1768,7 @@ int WebWorker::ProcessCalculator()
     stOutput << redirectedAddress.str();
     stOutput << "\r\n\r\n";
 //    stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-//    stOutput << redirectedAddress.str();
+//    stOutput << "DEBUG " << "\r\n" << redirectedAddress.str();
 //    stOutput << "\r\n";
     stOutput.Flush();
     return 0;
@@ -1797,8 +1797,9 @@ int WebWorker::ProcessCalculator()
   if (theGlobalVariables.userCalculatorRequestType=="changePasswordPage" ||
       theGlobalVariables.userCalculatorRequestType=="activateAccount")
     return this->ProcessChangePasswordPage();
-  if ((theGlobalVariables.flagUsingSSLinCurrentConnection && !theGlobalVariables.flagLoggedIn)||
-      theGlobalVariables.userCalculatorRequestType=="login")
+  if ((theGlobalVariables.flagUsingSSLinCurrentConnection && !theGlobalVariables.flagLoggedIn &&
+       theGlobalVariables.userCalculatorRequestType!="compute")||
+      theGlobalVariables.userCalculatorRequestType=="login" )
     return this->ProcessLoginPage();
   if (theGlobalVariables.UserSecureNonAdminOperationsAllowed() &&
       theGlobalVariables.userCalculatorRequestType=="logout")
@@ -1874,7 +1875,6 @@ std::string WebWorker::GetJavaScriptIndicatorFromHD()
   out << "    return;";
   out << "  }\n";
   out << "  el.style.display = '';\n";
-//  out << "  el.contentWindow.location.reload();";
   out << "  timeOutCounter++;\n";
   out << "  var oRequest = new XMLHttpRequest();\n";
   out << "  var sURL  = \"" << theGlobalVariables.DisplayNameProgressReport << "\";\n";
@@ -1917,6 +1917,10 @@ std::string WebWorker::GetLoginHTMLinternal()
 //  << this->theMessage
 //  << "<hr> main argument: "
 //  << this->mainArgumentRAW;
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
+    theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs=true;
+  else
+    theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs=false;
   if (theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
   { out
     << WebWorker::GetInsecureConnectionAngryMessage()
@@ -1937,7 +1941,7 @@ std::string WebWorker::GetLoginHTMLinternal()
     ;
     out << "</script>\n";
   }
-  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"POST\" accept-charset=\"utf-8\">"
+  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"GET\" accept-charset=\"utf-8\">"
   <<  "User name: "
   << "<input type=\"text\" id=\"username\" name=\"username\" placeholder=\"username\" required>"
   << "<br>Password: ";
@@ -2134,7 +2138,9 @@ std::string WebWorker::GetLoginPage()
     out
     << "if (document.getElementById('authenticationToken') !=null)"
     << "  if (document.getElementById('authenticationToken').value!='')"
-    << "    document.getElementById('login').submit();";
+    << "    document.getElementById('login').submit();"
+//    << "alert('was about to submit');"
+    ;
 //    << "  window.location='calculator?username='+GlobalUser+'&authenticationToken='+GlobalAuthenticationToken;";
   out << "\">\n";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
@@ -2204,11 +2210,11 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "function storeSettingsProgress(){\n";
   if (theGlobalVariables.GetWebInput("debugFlag")!="")
     out << "  addCookie(\"debugFlag\", \"" << theGlobalVariables.GetWebInput("debugFlag") << "\", 100);  \n";
+  if (this->IsAllowedAsRequestCookie(theGlobalVariables.userCalculatorRequestType))
+    out << "  addCookie(\"request\", \"" << theGlobalVariables.userCalculatorRequestType << "\", 100);\n";
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType!="" &&
       theGlobalVariables.userCalculatorRequestType!="compute")
-  { if (this->IsAllowedAsRequestCookie(theGlobalVariables.userCalculatorRequestType))
-      out << "  addCookie(\"request\", \"" << theGlobalVariables.userCalculatorRequestType << "\", 100);\n";
-    out << "  addCookie(\"currentExamFile\", \""
+  { out << "  addCookie(\"currentExamFile\", \""
     << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile")) << "\", 100);\n";
     out << "  addCookie(\"currentExamHome\", \""
     << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome")) << "\", 100);\n";
@@ -2221,13 +2227,18 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "function storeSettingsSecurity(){\n";
   if ( (theGlobalVariables.flagUsingSSLinCurrentConnection&& theGlobalVariables.flagLoggedIn)||
       theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
-    out << "   addCookie(\"authenticationToken\", \""
+  { out << "   addCookie(\"authenticationToken\", \""
     << this->authenticationToken << "\", 150);"
     << "//150 days is a little longer than a semester\n"
     << "  addCookie(\"username\", \"" << theGlobalVariables.userDefault << "\", 150);\n"
-    << "  addCookie(\"ignoreSecurity\", \"" << theGlobalVariables.GetWebInput("ignoreSecurity")
-    << "\", 150);\n"
+    << "  addCookie(\"ignoreSecurity\", \"";
+    if (theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
+      out << "true";
+    else
+      out << "false";
+    out << "\", 150);\n"
     ;
+  }
   out
   << "}\n";
   out
@@ -2301,7 +2312,6 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex, bool 
   out << "  progReportTimer.innerHTML =\"<hr>Refreshing every \"+timeIncrementInTenthsOfSecond/10+\" second(s). Client time: ~\"+ Math.floor(timeOutCounter/10)+\" second(s)<br>\";\n";
   out << "  progReportTimer.style.display = '';\n";
   out << "  progReport.style.display = '';\n";
-//  out << "  el.contentWindow.location.reload();";
   out << "  timeOutCounter+=timeIncrementInTenthsOfSecond;\n";
   out << "  var oRequest = new XMLHttpRequest();\n";
   if (inputIndex==-1)

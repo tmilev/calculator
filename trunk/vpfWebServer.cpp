@@ -1746,6 +1746,9 @@ int WebWorker::ProcessUnknown()
 bool WebWorker::ShouldDisplayLoginPage()
 { if (theGlobalVariables.userCalculatorRequestType=="login")
     return true;
+  if (theGlobalVariables.flagUsingSSLinCurrentConnection && !theGlobalVariables.flagLoggedIn &&
+      theGlobalVariables.userCalculatorRequestType!="compute")
+    return true;
   if (theGlobalVariables.UserRequestMustBePromptedToLogInIfNotLoggedIn() && !theGlobalVariables.flagLoggedIn)
     return true;
   return false;
@@ -2233,10 +2236,8 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "}\n";
   out
   << "function storeSettingsSecurity(){\n";
-  if ( theGlobalVariables.flagLoggedIn &&
-      (theGlobalVariables.flagUsingSSLinCurrentConnection ||
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection ||
       theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
-      )
   { out << "   addCookie(\"authenticationToken\", \""
     << this->authenticationToken << "\", 150);"
     << "//150 days is a little longer than a semester\n"

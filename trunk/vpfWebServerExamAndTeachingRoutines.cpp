@@ -1826,8 +1826,17 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
       if (theProbData.ProblemWeightUserInput!="")
         out << "<span style=\"color:red\"><b>Failed to interpret weight string: "
         << theProbData.ProblemWeightUserInput << ". </b></span>";
+
       if (theProbData.numSubmissions!=0)
-        out << theProbData.totalNumSubmissions << " submissions, " << theProbData.numCorrectlyAnswered << " correct answers. ";
+      { if (theProbData.answerIds.size==1)
+        { if (theProbData.numCorrectlyAnswered==1)
+            out << theProbData.totalNumSubmissions << " submission(s), problem correctly answered. ";
+          else
+            out << theProbData.totalNumSubmissions << " submission(s), problem not correctly answered yet. ";
+        } else if (theProbData.answerIds.size>1)
+          out << theProbData.totalNumSubmissions << " submission(s), " << theProbData.numCorrectlyAnswered
+          << " out of "<< theProbData.answerIds.size << " subproblems correctly answered. ";
+      }
       weightPrinted=true;
     } else if (theProbData.totalNumSubmissions==0)
       noSubmissionsYet=true;
@@ -1927,12 +1936,16 @@ std::string CalculatorHTML::ToStringOneDeadlineFormatted
   double secondsTillDeadline= deadline.SubtractAnotherTimeFromMeInSeconds(now)+7*3600;
 
   std::stringstream hoursTillDeadlineStream;
-  if (secondsTillDeadline<24*3600 && !problemAlreadySolved)
-    hoursTillDeadlineStream << "<span style=\"color:red\">"
-    << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false) << " left. </span>";
-  else
-    hoursTillDeadlineStream << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false)
-    << " left. ";
+  if (secondsTillDeadline>0)
+  { if (secondsTillDeadline<24*3600 && !problemAlreadySolved)
+      hoursTillDeadlineStream << "<span style=\"color:red\">"
+      << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false) << "</span>";
+    else
+      hoursTillDeadlineStream << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false)
+      << " left. ";
+  } else
+  { hoursTillDeadlineStream << "Deadline has passed. ";
+  }
   if (isActualProblem)
   { out << "Deadline: ";
     if (deadlineInherited)

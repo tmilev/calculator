@@ -703,6 +703,8 @@ bool WebWorker::ProcessRawArguments
 //    argumentProcessingFailureComments << "Logging in as: " << desiredUser << "<br>";
     theGlobalVariables.flagLoggedIn=DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     (desiredUser, password, this->authenticationToken, theGlobalVariables.userRole, &argumentProcessingFailureComments);
+    if (!theGlobalVariables.flagLoggedIn)
+      this->authenticationToken="";
     if (theGlobalVariables.flagLoggedIn)
     { theGlobalVariables.userDefault=desiredUser;
       theGlobalVariables.SetWebInput("authenticationToken", CGI::StringToURLString(this->authenticationToken));

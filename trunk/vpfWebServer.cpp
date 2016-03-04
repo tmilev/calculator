@@ -538,6 +538,7 @@ void WebServer::ReapChildren()
       for (int i=0; i<this->theWorkers.size; i++)
         if (this->theWorkers[i].ProcessPID==waitResult)
         { this->theWorkers[i].pipeWorkerToServerControls.WriteAfterEmptying("close");
+          this->theWorkers[i].flagInUse=false;
           theLog << logger::green << "Child with pid " << waitResult << " successfully reaped. " << logger::endL;
         }
   }while (waitResult>0);
@@ -704,7 +705,9 @@ bool WebWorker::ProcessRawArguments
     theGlobalVariables.flagLoggedIn=DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     (desiredUser, password, this->authenticationToken, theGlobalVariables.userRole, &argumentProcessingFailureComments);
     if (!theGlobalVariables.flagLoggedIn)
-      this->authenticationToken="";
+    { this->authenticationToken="";
+//      argumentProcessingFailureComments << "<b>DBG: Auth token set to empty</b>";
+    }
     if (theGlobalVariables.flagLoggedIn)
     { theGlobalVariables.userDefault=desiredUser;
       theGlobalVariables.SetWebInput("authenticationToken", CGI::StringToURLString(this->authenticationToken));
@@ -1953,7 +1956,7 @@ std::string WebWorker::GetLoginHTMLinternal()
     ;
     out << "</script>\n";
   }
-  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"GET\" accept-charset=\"utf-8\">"
+  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"POST\" accept-charset=\"utf-8\">"
   <<  "User name: "
   << "<input type=\"text\" id=\"username\" name=\"username\" placeholder=\"username\" required>"
   << "<br>Password: ";
@@ -2238,13 +2241,15 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "}\n";
   out
   << "function storeSettingsSecurity(){\n";
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection ||
-      theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
+  if (theGlobalVariables.flagLoggedIn)
   { out << "   addCookie(\"authenticationToken\", \""
     << this->authenticationToken << "\", 150);"
     << "//150 days is a little longer than a semester\n"
-    << "  addCookie(\"username\", \"" << theGlobalVariables.userDefault << "\", 150);\n"
-    << "  addCookie(\"ignoreSecurity\", \"";
+    << "  addCookie(\"username\", \"" << theGlobalVariables.userDefault << "\", 150);\n";
+  }
+  if (theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs ||
+      theGlobalVariables.flagUsingSSLinCurrentConnection)
+  { out << "  addCookie(\"ignoreSecurity\", \"";
     if (theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
       out << "true";
     else
@@ -2881,10 +2886,10 @@ void WebServer::RecycleChildrenIfPossible()
     { this->theWorkers[i].pipeWorkerToServerControls.Read();
       if (this->theWorkers[i].pipeWorkerToServerControls.lastRead.size>0)
       { this->theWorkers[i].flagInUse=false;
-        theLog << logger::green << "Worker " << i+1 << " done, marking for reuse." << logger::endL;
+        theLog << logger::green << "Worker " << i+1 << " done, marking for reuse. " << logger::endL;
 //        waitpid(this->theWorkers[i].ProcessPID, 0, )
       } else
-        theLog << logger::yellow << "Worker " << i+1 << " not done yet." << logger::endL;
+        theLog << logger::yellow << "Worker " << i+1 << " not done yet. " << logger::endL;
       this->theWorkers[i].pipeWorkerToServerUserInput.Read();
       if (this->theWorkers[i].pipeWorkerToServerUserInput.lastRead.size>0)
         this->theWorkers[i].displayUserInput.assign

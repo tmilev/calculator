@@ -273,8 +273,8 @@ std::string GlobalVariables::ToStringNavigation()
     else
       out << "<b>Database</b><br>";
   }
-  if (theGlobalVariables.userCalculatorRequestType!="calculate")
-    out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=calculate&"
+  if (theGlobalVariables.userCalculatorRequestType!="compute")
+    out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=compute&"
     << this->ToStringCalcArgsNoNavigation() << " \">Calculator</a><br>";
   else
     out << "<b>Calculator</b><br>";

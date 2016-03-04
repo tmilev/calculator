@@ -1755,8 +1755,8 @@ int WebWorker::ProcessCalculator()
     return 0;
   }
   if (this->flagPasswordWasSubmitted && theGlobalVariables.userCalculatorRequestType!="changePassword" &&
-      theGlobalVariables.userCalculatorRequestType!="activateAccount" &&
-      !theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs
+      theGlobalVariables.userCalculatorRequestType!="activateAccount" //&&
+//      !theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs
       )
   { std::stringstream redirectedAddress;
     redirectedAddress << theGlobalVariables.DisplayNameCalculatorWithPath << "?";
@@ -1941,7 +1941,7 @@ std::string WebWorker::GetLoginHTMLinternal()
     ;
     out << "</script>\n";
   }
-  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"GET\" accept-charset=\"utf-8\">"
+  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"POST\" accept-charset=\"utf-8\">"
   <<  "User name: "
   << "<input type=\"text\" id=\"username\" name=\"username\" placeholder=\"username\" required>"
   << "<br>Password: ";
@@ -2225,8 +2225,10 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "}\n";
   out
   << "function storeSettingsSecurity(){\n";
-  if ( (theGlobalVariables.flagUsingSSLinCurrentConnection&& theGlobalVariables.flagLoggedIn)||
+  if ( theGlobalVariables.flagLoggedIn &&
+      (theGlobalVariables.flagUsingSSLinCurrentConnection ||
       theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
+      )
   { out << "   addCookie(\"authenticationToken\", \""
     << this->authenticationToken << "\", 150);"
     << "//150 days is a little longer than a semester\n"

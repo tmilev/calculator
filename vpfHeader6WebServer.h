@@ -99,6 +99,7 @@ public:
   void QueueBytesForSending
   (const List<char>& bytesToSend, bool MustSendAll=false)
   ;
+  bool ShouldDisplayLoginPage();
   void SignalIamDoneReleaseEverything();
   void reset();
   void resetMessageComponentsExceptRawMessage();

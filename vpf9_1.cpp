@@ -241,6 +241,13 @@ bool GlobalVariables::UserRequestRequiresLoadingRealExamData()
    this->userCalculatorRequestType=="submitProblemPreview");
 }
 
+bool GlobalVariables::UserRequestMustBePromptedToLogInIfNotLoggedIn()
+{ return
+  this->userCalculatorRequestType=="examForReal" ||
+  this->userCalculatorRequestType=="exercises"
+  ;
+}
+
 std::string GlobalVariables::ToStringNavigation()
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringNavigation");
   std::stringstream out;

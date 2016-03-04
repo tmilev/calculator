@@ -172,6 +172,7 @@ public:
   static void InitThreadsExecutableStart();
   bool UserDefaultHasAdminRights();
   bool UserRequestRequiresLoadingRealExamData();
+  bool UserRequestMustBePromptedToLogInIfNotLoggedIn();
 
   std::string ToStringNavigation();
   std::string ToStringCalcArgsNoNavigation();

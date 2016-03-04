@@ -1743,6 +1743,14 @@ int WebWorker::ProcessUnknown()
   return 0;
 }
 
+bool WebWorker::ShouldDisplayLoginPage()
+{ if (theGlobalVariables.userCalculatorRequestType=="login")
+    return true;
+  if (theGlobalVariables.UserRequestMustBePromptedToLogInIfNotLoggedIn() && !theGlobalVariables.flagLoggedIn)
+    return true;
+  return false;
+}
+
 int WebWorker::ProcessCalculator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCalculator");
   ProgressReportWebServer theReport;
@@ -1763,7 +1771,8 @@ int WebWorker::ProcessCalculator()
     for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
       if (theGlobalVariables.webFormArgumentNames[i]!="password" &&
           theGlobalVariables.webFormArgumentNames[i]!="authenticationInsecure")
-        redirectedAddress << theGlobalVariables.webFormArgumentNames[i] << "=" << theGlobalVariables.webFormArguments[i] << "&";
+        redirectedAddress << theGlobalVariables.webFormArgumentNames[i] << "="
+        << theGlobalVariables.webFormArguments[i] << "&";
     stOutput << "HTTP/1.1 303 See other\r\nLocation: ";
     stOutput << redirectedAddress.str();
     stOutput << "\r\n\r\n";
@@ -1797,9 +1806,7 @@ int WebWorker::ProcessCalculator()
   if (theGlobalVariables.userCalculatorRequestType=="changePasswordPage" ||
       theGlobalVariables.userCalculatorRequestType=="activateAccount")
     return this->ProcessChangePasswordPage();
-  if ((theGlobalVariables.flagUsingSSLinCurrentConnection && !theGlobalVariables.flagLoggedIn &&
-       theGlobalVariables.userCalculatorRequestType!="compute")||
-      theGlobalVariables.userCalculatorRequestType=="login" )
+  if (this->ShouldDisplayLoginPage())
     return this->ProcessLoginPage();
   if (theGlobalVariables.UserSecureNonAdminOperationsAllowed() &&
       theGlobalVariables.userCalculatorRequestType=="logout")
@@ -1941,7 +1948,7 @@ std::string WebWorker::GetLoginHTMLinternal()
     ;
     out << "</script>\n";
   }
-  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"POST\" accept-charset=\"utf-8\">"
+  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"GET\" accept-charset=\"utf-8\">"
   <<  "User name: "
   << "<input type=\"text\" id=\"username\" name=\"username\" placeholder=\"username\" required>"
   << "<br>Password: ";
@@ -2134,7 +2141,8 @@ std::string WebWorker::GetLoginPage()
   << WebWorker::GetJavascriptStandardCookies()
   << "<body ";
   out << "onload=\"loadSettings();  ";
-  if (!this->flagAuthenticationTokenWasSubmitted)
+  if (!this->flagAuthenticationTokenWasSubmitted && !theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs
+      && theGlobalVariables.flagUsingSSLinCurrentConnection)
     out
     << "if (document.getElementById('authenticationToken') !=null)"
     << "  if (document.getElementById('authenticationToken').value!='')"

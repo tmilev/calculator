@@ -336,7 +336,7 @@ bool WebWorker::ReceiveAllHttpSSL()
   while ((signed) this->mainArgumentRAW.size()<this->ContentLength)
   { if (theGlobalVariables.GetElapsedSeconds()-numSecondsAtStart>180)
     { this->error= "Receiving bytes timed out (180 seconds).";
-      theLog << this->error << logger::endL;
+      logIO << this->error << logger::endL;
       this->displayUserInput=this->error;
       return false;
     }
@@ -349,9 +349,12 @@ bool WebWorker::ReceiveAllHttpSSL()
       return false;
     }
     if (numBytesInBuffer<0)
-    { this->error= "Error fetching message body: " + this->parent->ToStringLastErrorDescription();
+    { if (errno==EAGAIN || errno == EWOULDBLOCK || errno == EINTR || errno==EIO || errno==ENOBUFS
+          || errno==ENOMEM)
+        continue;
+      this->error= "Error fetching message body: " + this->parent->ToStringLastErrorDescription();
       ERR_print_errors_fp(stderr);
-      theLog << this->error << logger::endL;
+      logIO << this->error << logger::endL;
       this->displayUserInput=this->error;
       return false;
     }
@@ -1122,7 +1125,8 @@ void WebWorker::SendAllBytesHttp()
     int numBytesSent=send
     (this->connectedSocketID, &this->remainingBytesToSend[0], this->remainingBytesToSend.size,0);
     if (numBytesSent<0)
-    { logIO << "WebWorker::SendAllBytes failed. Error: "
+    { if (errno==EAGAIN || errno ==EWOULDBLOCK || errno== EINTR || errno==EIO )
+      logIO << "WebWorker::SendAllBytes failed. Error: "
       << this->parent->ToStringLastErrorDescription() << logger::endL;
       theReport.SetStatus
       ("WebWorker::SendAllBytes failed. Error: " + this->parent->ToStringLastErrorDescription()
@@ -1197,7 +1201,7 @@ bool WebWorker::ReceiveAllHttp()
     out << "Socket::ReceiveAll on socket " << this->connectedSocketID << " failed. Error: "
     << this->parent->ToStringLastErrorDescription();
     this->displayUserInput=out.str();
-    theLog << out.str() << logger::endL;
+    logIO << out.str() << logger::endL;
     return false;
   }
   this->theMessage.assign(buffer, numBytesInBuffer);
@@ -1268,7 +1272,10 @@ bool WebWorker::ReceiveAllHttp()
       return false;
     }
     if (numBytesInBuffer<0)
-    { this->error= "Error fetching message body: " + this->parent->ToStringLastErrorDescription();
+    { if (errno==EAGAIN || errno == EWOULDBLOCK || errno == EINTR || errno==EIO //|| errno==ENOBUFS
+          || errno==ENOMEM)
+        continue;
+      this->error= "Error fetching message body: " + this->parent->ToStringLastErrorDescription();
       logIO << logger::red << this->error << logger::endL;
       this->displayUserInput=this->error;
       return false;

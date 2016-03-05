@@ -52,7 +52,7 @@ public:
   List<char> pipeBuffer;
   bool flagDeallocated;
   std::string name;
-
+  static int WriteNoInterrupts(int theFD, const std::string& input);
   void Read();
   void ReadWithoutEmptying();
   void WriteAfterEmptying(const std::string& toBeSent);

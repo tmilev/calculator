@@ -998,7 +998,7 @@ void WebWorker::ExtractArgumentFromAddress()
   CGI::URLStringToNormal(this->mainAddresSRAW, this->mainAddress);
   this->requestType=this->requestGetCalculator;
   MathRoutines::SplitStringInTwo(calculatorArgumentRawWithQuestionMark, 1, tempS, this->mainArgumentRAW);
-  theLog << logger::yellow << "this->mainArgumentRAW=" << this->mainArgumentRAW << logger::endL;
+//  theLog << logger::yellow << "this->mainArgumentRAW=" << this->mainArgumentRAW << logger::endL;
 }
 
 void WebWorker::ParseMessage()
@@ -3119,8 +3119,8 @@ int WebServer::Run()
      userAddressBuffer, sizeof userAddressBuffer);
     this->GetActiveWorker().userAddress.theObject=userAddressBuffer;
     if (this->currentlyConnectedAddresses.GetMonomialCoefficient(this->GetActiveWorker().userAddress)>7)
-    { logConnections << "Max 8 connections per ip address: refusing connection to: "
-      << this->GetActiveWorker().userAddress.theObject << ". ";
+    { logConnections << logger::red << "Max 8 connections per ip address: refusing connection to: "
+      << this->GetActiveWorker().userAddress.theObject << ". " << logger::endL;
       this->GetActiveWorker().flagInUse=false;
       this->activeWorker=-1;
       close(newConnectedSocket);

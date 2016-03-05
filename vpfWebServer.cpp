@@ -2519,7 +2519,9 @@ void WebWorker::OutputShowIndicatorOnTimeout()
 
 std::string WebWorker::ToStringStatus()const
 { std::stringstream out;
-  out << "Worker " << this->indexInParent+1;
+  out << "Connections: " << theWebServer.currentlyConnectedAddresses.ToString();
+//  if (theWebServer.currentlyConnectedAddresses.GetCoefficientsSum()!=theWebServer.
+  out << "<br>Worker " << this->indexInParent+1;
   if (this->flagInUse)
   { if (this->parent->activeWorker==this->indexInParent)
       out << ", <span style=\"color:green\"><b>current process</b></span>";

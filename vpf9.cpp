@@ -1303,6 +1303,13 @@ unsigned int Selection::HashFunction() const
 }
 
 //Format expression monomial orders (for the ToString() function follow.
+
+template<>
+List<MonomialWrapper<std::string, MathRoutines::hashString> >::OrderLeftGreaterThanRight
+FormatExpressions::GetMonOrder<MonomialWrapper<std::string, MathRoutines::hashString> >()
+{ return 0;
+}
+
 template<>
 List<MonomialP>::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<MonomialP>()
 { return this->thePolyMonOrder;

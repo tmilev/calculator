@@ -62,6 +62,7 @@ bool PauseController::CreateMe(const std::string& inputName)
     this->Release();
     return false;
   }
+//  Pipe::WriteNoInterrupts()
   write (this->thePausePipe[1], "!", 1);
   write (this->mutexPipe[1], "!", 1);
   return true;
@@ -137,6 +138,19 @@ std::string PauseController::ToString()const
     return "(not in use)";
   out << "pause-controller pipe " << this->thePausePipe[0] << "<-" << this->thePausePipe[1];
   return out.str();
+}
+
+int Pipe::WriteNoInterrupts(int theFD, const std::string& input)
+{ for (;;)
+  { int result=write(theFD, input.c_str(), input.size());
+    if (result>=0)
+      return result;
+    if (result<0)
+      if (errno==EINTR)
+        continue;
+    return result;
+  }
+  return -1;
 }
 
 void Pipe::WriteAfterEmptying(const std::string& toBeSent)

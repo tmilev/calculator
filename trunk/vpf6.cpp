@@ -2044,7 +2044,7 @@ std::string Function::ToStringFull()
     out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());
     if (this->theExample!="")
       out2 << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath
-      << "?request=compute&mainInput="
+      << "?request=compute&showExamples=true&mainInput="
       << CGI::StringToURLString(this->theExample) << "\"> " << " Example" << "</a>" ;
   } else
     out2 << "<b>Experimental, please don't use.</b>";
@@ -2136,6 +2136,13 @@ std::string Calculator::ToString()
   }
   if (this->flagShowCalculatorExamples)
     out2 << "<hr>" << this->ToStringFunctionHandlers();
+  else
+  { std::stringstream theExampleInjector;
+    theExampleInjector << "InjectCalculatorResponse("
+    << "'calculatorExamples', '', 'calculatorExamples');";
+    out2 << "<hr>" << CGI::GetHtmlButton("ShowCalculatorExamplesButton", theExampleInjector.str(), "Show calculator examples.");
+    out2 << "<span id=\"calculatorExamples\"></span>";
+  }
   if (!this->flagShowCalculatorInternalStatus)
     return out2.str();
   std::stringstream out;

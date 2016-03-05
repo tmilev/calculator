@@ -70,6 +70,7 @@ public:
   int ProcessExamPage();
   int ProcessLoginPage();
   int ProcessLogout();
+  int ProcessCalculatorExamples();
   int ProcessSubmitProblem();
   int ProcessSubmitProblemPreview();
   int ProcessPauseWorker();

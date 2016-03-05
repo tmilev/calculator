@@ -349,6 +349,40 @@ std::string CGI::GetHtmlSwitchMenuDoNotEncloseInTags(const std::string& serverBa
   return output.str();
 }
 
+std::string CGI::GetJavascriptInjectCalculatorResponseInNode
+()
+{ MacroRegisterFunctionWithName("CGI::GetJavascriptInjectCalculatorResponseInNode");
+  std::stringstream out;
+  out
+  << "<script type=\"text/javascript\"> \n"
+  << "function InjectCalculatorResponse(requestType, mainInput, idOutput){\n"
+  << "  spanOutput = document.getElementById(idOutput);\n"
+  << "  if (spanOutput==null){\n"
+  << "    spanOutput = document.createElement('span');\n"
+  << "    document.body.appendChild(spanOutput);\n"
+  << "    spanOutput.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idEmailList + \"MISSING! </span>\";\n"
+  << "  }\n"
+  << "  inputParams='request='+requestType;\n"
+  << "  inputParams+='&mainInput=' + encodeURIComponent(mainInput);\n"
+//  << "  inputParams+='&currentExamHome=' + problemCollectionName;\n"
+  << "  var https = new XMLHttpRequest();\n"
+  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
+  << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
+  << "  https.onload = function() {\n"
+  << "    spanOutput.innerHTML=https.responseText;\n"
+//  << "    code=document.getElementById('progressReportJavascript').innerHTML;"
+//  << "    eval.call(code);\n"
+  //<< "    p();\n"
+//  << "    eval(spanOutput.innerHTML);\n"
+//  << "    if (typeof progressReport == 'function')\n"
+//  << "      progressReport();\n"
+  << "  }\n"
+  << "  https.send(inputParams);\n"
+  << "}\n"
+  << "</script>";
+  return out.str();
+}
+
 void CGI::FormatCPPSourceCode(const std::string& FileName)
 { std::fstream fileIn, fileOut;
   FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(fileIn, FileName, false, false, false);
@@ -358,29 +392,29 @@ void CGI::FormatCPPSourceCode(const std::string& FileName)
   fileIn.seekg(0, std::ios_base::end);
   int theSize= fileIn.tellg();
   fileIn.seekg(0);
-  char* buffer= new char[theSize*2+1];
-  fileIn.read(buffer, theSize*2);
+  List<char> theBuffer;
+  theBuffer.SetSize(theSize*2+1);
+  fileIn.read(theBuffer.TheObjects, theSize*2);
   std::string nameFileOut= FileName;
   nameFileOut.append(".new");
   ::FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(fileOut, nameFileOut, false, true, false);
   for (int i=0; i<theSize; i++)
-  { char lookAhead= (i< theSize-1)? buffer[i+1] : ' ';
-    switch(buffer[i])
-    { case'\t':  fileOut << "  "; break;
+  { char lookAhead= (i< theSize-1)? theBuffer[i+1] : ' ';
+    switch(theBuffer[i])
+    { case'\t': fileOut << "  "; break;
       case ',':
-        fileOut << buffer[i];
+        fileOut << theBuffer[i];
         if (lookAhead!=' ' && lookAhead!='\n' && lookAhead!='\'')
           fileOut << " ";
         break;
       case ';':
-        fileOut << buffer[i];
+        fileOut << theBuffer[i];
         if (lookAhead!=' ' && lookAhead!='\n' && lookAhead!='\'')
           fileOut << " ";
         break;
-      default:  fileOut << buffer[i]; break;
+      default:  fileOut << theBuffer[i]; break;
     }
   }
-  delete [] buffer;
 }
 
 bool FileOperations::IsFolderUnsecure(const std::string& theFolderName)

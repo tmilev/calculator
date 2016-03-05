@@ -539,6 +539,35 @@ bool FileOperations::GetFolderFileNamesUnsecure
   return true;
 }
 
+bool FileOperations::LoadFileToStringOnTopOfOutputFolder
+(const std::string& theFileName, std::string& output, std::stringstream& commentsOnFailure)
+{ if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
+  { commentsOnFailure << "File name not secure, refusing to read. ";
+    return false;
+  }
+  return FileOperations::LoadFileToStringUnsecure
+  (theGlobalVariables.PhysicalPathOutputFolder+ theFileName, output, commentsOnFailure);
+}
+
+bool FileOperations::LoadFileToStringUnsecure
+(const std::string& fileNameUnsecure, std::string& output, std::stringstream& commentsOnFailure)
+{ if (!FileOperations::FileExistsUnsecure(fileNameUnsecure))
+  { commentsOnFailure << "The requested file " << fileNameUnsecure
+    << " appears not to exist. ";
+    return false;
+  }
+  std::fstream theFile;
+  if(!FileOperations::OpenFileUnsecure(theFile, fileNameUnsecure, false, false, false))
+  { commentsOnFailure << "The requested file " << fileNameUnsecure
+    << " exists but I failed to open it in text mode (perhaps not a valid ASCII/UTF8 file). ";
+    return false;
+  }
+  std::stringstream contentStream;
+  contentStream << theFile.rdbuf();
+  output=contentStream.str();
+  return true;
+}
+
 bool FileOperations::FileExistsOnTopOfOutputFolder(const std::string& theFileName)
 { if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
     return false;

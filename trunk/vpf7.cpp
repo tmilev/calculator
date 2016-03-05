@@ -750,6 +750,39 @@ std::string CGI::GetMathSpanBeginArrayL(const std::string& input, int upperNumCh
     return CGI::GetMathSpanPure(input, upperNumChars);
 }
 
+std::string CGI::StyleSheetCalculatorWithTags;
+std::string CGI::JavascriptAutoCompleteWithTags;
+
+void CGI::LoadStrings()
+{
+  CGI::GetCalculatorStyleSheetWithTags();
+  CGI::GetJavascriptAutocompleteWithTags();
+}
+
+std::string& CGI::GetCalculatorStyleSheetWithTags()
+{ if (CGI::StyleSheetCalculatorWithTags!="")
+    return CGI::StyleSheetCalculatorWithTags;
+  std::stringstream out;
+  std::string theStyleInside;
+  if (!FileOperations::LoadFileToStringOnTopOfOutputFolder("styleCalculator.css", theStyleInside, out))
+    CGI::StyleSheetCalculatorWithTags=out.str();
+  else
+    CGI::StyleSheetCalculatorWithTags="<style>"+ theStyleInside+"</style>";
+  return CGI::StyleSheetCalculatorWithTags;
+}
+
+std::string& CGI::GetJavascriptAutocompleteWithTags()
+{ if (CGI::JavascriptAutoCompleteWithTags!="")
+    return CGI::JavascriptAutoCompleteWithTags;
+  std::stringstream out;
+  std::string theJS;
+  if (!FileOperations::LoadFileToStringOnTopOfOutputFolder("autocomplete.js", theJS, out))
+    CGI::JavascriptAutoCompleteWithTags=out.str();
+  else
+    CGI::JavascriptAutoCompleteWithTags= "<script type=\"text/javascript\">" + theJS + "</script>\n";
+  return CGI::JavascriptAutoCompleteWithTags;
+}
+
 std::string CGI::GetCalculatorLink(const std::string& DisplayNameCalculator, const std::string& input)
 { std::stringstream out;
   out << "<a href=\"" << DisplayNameCalculator << "?request=compute&mainInput=" << CGI::StringToURLString(input) << "\"> " << input << "</a>";

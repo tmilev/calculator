@@ -1001,16 +1001,10 @@ bool CalculatorConversions::innerLoadFileIntoString(Calculator& theCommands, con
   std::string thePhysicalFileName;
   if (!CGI::GetPhysicalFileNameFromRelativeInput(theRelativeFileName, thePhysicalFileName))
     return theCommands << "File name invalid: " << theRelativeFileName << ".";
-  if (!FileOperations::FileExistsUnsecure(thePhysicalFileName))
-    return theCommands << "The requested file " << theRelativeFileName
-    << " appears not to exist. ";
-  std::fstream theFile;
-  if(!FileOperations::OpenFileUnsecure(theFile, thePhysicalFileName, false, false, false))
-    return theCommands << "The requested file " << theRelativeFileName
-    << " exists but I failed to open it in text mode (perhaps not a valid ASCII/UTF8 file). ";
-  std::stringstream contentStream;
-  contentStream << theFile.rdbuf();
-  return output.AssignValue(contentStream.str(), theCommands);
+  std::string outputString;
+  if (!FileOperations::LoadFileToStringUnsecure(thePhysicalFileName, outputString, theCommands.Comments))
+    return false;
+  return output.AssignValue(outputString, theCommands);
 }
 
 bool CalculatorConversions::innerMakeElementHyperOctahedral(Calculator& theCommands, const Expression& input, Expression& output)

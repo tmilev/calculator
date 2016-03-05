@@ -797,7 +797,7 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
   stOutput << this->closeIndentTag("</tr>");
   stOutput << this->closeIndentTag("</table><!--Autocomplete table end-->");
   stOutput << this->closeIndentTag("</td>");
-  stOutput << "<script type=\"text/javascript\" src=\"/autocomplete.js\"></script>\n";
+  stOutput << CGI::GetJavascriptAutocompleteWithTags();
   stOutput << this->closeIndentTag("</tr>");
   stOutput << this->closeIndentTag("</table>");
   stOutput << this->closeIndentTag("</td>");
@@ -816,7 +816,8 @@ void WebWorker::OutputBeforeComputation()
   stOutput << CGI::GetJavascriptInjectCalculatorResponseInNode();
 //  else
 //    stOutput << "<script src=\"" << theGlobalVariables.DisplayPathServerBase << "/jsmath/easy/load.js\">";
-  stOutput << "<link rel=\"stylesheet\" type=\"text/css\" href=\"/styleCalculator.css\">";
+
+  stOutput << CGI::GetCalculatorStyleSheetWithTags();
   stOutput << "\n</head>\n<body onload=\"loadSettings();\">\n";
   if (theGlobalVariables.flagLoggedIn)
     stOutput << "<nav>" << theGlobalVariables.ToStringNavigation() << "</nav>" << "<section>";
@@ -1366,7 +1367,7 @@ int WebWorker::ProcessServerStatus()
 { MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestServerStatus");
   stOutput << "<html>"
   << "<header>"
-  << "<link rel=\"stylesheet\" type=\"text/css\" href=\"/styleCalculator.css\">"
+  << CGI::GetCalculatorStyleSheetWithTags()
   << "</header>"
   << "<body>";
   if (theGlobalVariables.flagLoggedIn)
@@ -3050,6 +3051,7 @@ int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
   theGlobalVariables.RelativePhysicalNameCrashLog="crash_WebServerRun.html";
   theParser.init();
+  CGI::LoadStrings();
   theParser.flagShowCalculatorExamples=false;
   if (!this->initPrepareWebServerALL())
     return 1;

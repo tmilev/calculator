@@ -215,6 +215,14 @@ class MonomialWrapper
   MonomialWrapper(const theType& input)
   { this->theObject=input;
   }
+  std::string ToString(FormatExpressions* theFormat=0)const
+  { std::stringstream out;
+    out << "(" << this->theObject << ")";
+    return out.str();
+  }
+  bool operator>(const MonomialWrapper& other)const
+  { return this->theObject>other.theObject;
+  }
   friend std::ostream& operator << (std::ostream& output, const MonomialWrapper& theMon)
   { output << theMon.theObject;
     return output;
@@ -1482,7 +1490,6 @@ template <typename Element>
 void Matrix<Element>::init(int r, int c)
 { this->Resize(r, c, false);
 }
-
 
 struct FormatExpressions
 {

@@ -542,6 +542,7 @@ void WebServer::ReapChildren()
         if (this->theWorkers[i].ProcessPID==waitResult)
         { this->theWorkers[i].pipeWorkerToServerControls.WriteAfterEmptying("close");
           this->theWorkers[i].flagInUse=false;
+          this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
           theLog << logger::green << "Child with pid " << waitResult << " successfully reaped. " << logger::endL;
         }
   }while (waitResult>0);
@@ -2893,6 +2894,7 @@ void WebServer::RecycleChildrenIfPossible()
     { this->theWorkers[i].pipeWorkerToServerControls.Read();
       if (this->theWorkers[i].pipeWorkerToServerControls.lastRead.size>0)
       { this->theWorkers[i].flagInUse=false;
+        this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress,1);
         theLog << logger::green << "Worker " << i+1 << " done, marking for reuse. " << logger::endL;
 //        waitpid(this->theWorkers[i].ProcessPID, 0, )
       } else
@@ -2911,10 +2913,12 @@ void WebServer::RecycleChildrenIfPossible()
       } else if (this->theWorkers[i].PauseWorker.CheckPauseIsRequested())
       { this->theWorkers[i].pingMessage="worker paused, no pings.";
         this->theWorkers[i].timeOfLastPingServerSideOnly=theGlobalVariables.GetElapsedSeconds();
-      } else if ( theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead>0 &&
-                  theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly>
-                  theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead)
+      } else if (theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead>0 &&
+                 theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly>
+                 theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead &&
+                 this->theWorkers[i].flagInUse)
       { this->theWorkers[i].flagInUse=false;
+        this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress,1);
         kill(this->theWorkers[i].ProcessPID, SIGKILL);
         std::stringstream pingTimeoutStream;
         pingTimeoutStream << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
@@ -3092,8 +3096,19 @@ int WebServer::Run()
     this->GetActiveWorker().connectedSocketIDLastValueBeforeRelease=newConnectedSocket;
     connectionsSoFar++;
     this->GetActiveWorker().connectionID=connectionsSoFar;
-    inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), userAddressBuffer, sizeof userAddressBuffer);
-    this->GetActiveWorker().userAddress=userAddressBuffer;
+    inet_ntop
+    (their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr),
+     userAddressBuffer, sizeof userAddressBuffer);
+    this->GetActiveWorker().userAddress.theObject=userAddressBuffer;
+    if (this->currentlyConnectedAddresses.GetMonomialCoefficient(this->GetActiveWorker().userAddress)>7)
+    { logConnections << "Max 8 connections per ip address: refusing connection to: "
+      << this->GetActiveWorker().userAddress.theObject << ". ";
+      this->GetActiveWorker().flagInUse=false;
+      this->activeWorker=-1;
+      close(newConnectedSocket);
+      continue;
+    }
+    this->currentlyConnectedAddresses.AddMonomial(this->GetActiveWorker().userAddress, 1 );
 //    theLog << this->ToStringStatus();
     this->GetActiveWorker().ProcessPID=fork(); //creates an almost identical copy of this process.
     //The original process is the parent, the almost identical copy is the child.

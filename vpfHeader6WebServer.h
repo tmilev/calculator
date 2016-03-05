@@ -18,7 +18,7 @@ public:
   int ProcessPID;
   std::string displayUserInput;
 
-  std::string userAddress;
+  MonomialWrapper<std::string, MathRoutines::hashString> userAddress;
   std::string theMessage;
   std::string mainArgumentRAW;
   std::string mainAddresSRAW;
@@ -154,6 +154,7 @@ public:
   bool flagTryToKillOlderProcesses;
   bool flagSSLHandshakeSuccessful;
   bool flagReapingChildren;
+  MonomialCollection<MonomialWrapper<std::string, MathRoutines::hashString>, LargeInt> currentlyConnectedAddresses;
   List<std::string> PortsITryHttp;
   List<std::string> PortsITryHttpSSL;
   List<int> theListeningSockets;

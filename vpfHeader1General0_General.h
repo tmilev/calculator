@@ -1399,7 +1399,7 @@ public:
     { int j=this->TheHashedArrays[hashIndex].TheObjects[i];
       if (j>=this->size)
         crash << "This is a programming error: corrupt hash table: at hashindex= " << hashIndex << " I get instructed to look up index " << j
-        << " but I have only " << this->size << "elements. " << crash;
+        << " but I have only " << this->size << " elements. " << crash;
       if((*this)[j]==o)
         return j;
     }

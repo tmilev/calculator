@@ -206,6 +206,31 @@ public:
   }
 };
 
+template<typename theType, unsigned int hashFunction(const theType&)=theType::HashFunction>
+class MonomialWrapper
+{
+  public:
+  theType theObject;
+  MonomialWrapper(){}
+  MonomialWrapper(const theType& input)
+  { this->theObject=input;
+  }
+  friend std::ostream& operator << (std::ostream& output, const MonomialWrapper& theMon)
+  { output << theMon.theObject;
+    return output;
+  }
+  static unsigned int HashFunction(const MonomialWrapper& input)
+  { return hashFunction(input.theObject);
+  }
+  bool IsMonEqualToZero()const
+  { return false;
+  }
+  bool operator==(const MonomialWrapper& other)const
+  { return this->theObject==other.theObject;
+  }
+
+};
+
 class MonomialP
 {
 private:

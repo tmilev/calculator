@@ -322,7 +322,7 @@ bool WebWorker::ReceiveAllHttpSSL()
   }*/
   reportStream << "Sending continue message ...";
   theReport.SetStatus(reportStream.str());
-  this->remainingBytesToSend=(std::string) "HTTP/1.1 100 Continue\r\n";
+  this->remainingBytesToSend=(std::string) "HTTP/1.0 100 Continue\r\n";
   this->SendAllBytes();
   this->remainingBytesToSend.SetSize(0);
   reportStream << " done. ";
@@ -556,8 +556,8 @@ void *get_in_addr(struct sockaddr *sa)
 }
 
 std::string WebWorker::ToStringMessageShortUnsafe(FormatExpressions* theFormat)const
-{ if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-    return "Message cannot be viewed when using SSL";
+{ //if (theGlobalVariables.flagUsingSSLinCurrentConnection)
+  //  return "Message cannot be viewed when using SSL";
   std::stringstream out;
   bool useHtml=theFormat==0 ? false: theFormat->flagUseHTML;
   std::string lineBreak= useHtml ? "<br>\n" : "\r\n";
@@ -582,8 +582,8 @@ std::string WebWorker::ToStringMessageShortUnsafe(FormatExpressions* theFormat)c
 }
 
 std::string WebWorker::ToStringMessageFullUnsafe()const
-{ if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-    return "Message cannot be viewed when using SSL";
+{ //if (theGlobalVariables.flagUsingSSLinCurrentConnection)
+  //  return "Message cannot be viewed when using SSL";
   std::stringstream out;
   out << this->ToStringMessageUnsafe();
   if (this->theStrings.size>0)
@@ -595,8 +595,8 @@ std::string WebWorker::ToStringMessageFullUnsafe()const
 }
 
 std::string WebWorker::ToStringMessageUnsafe()const
-{ if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-    return "Message cannot be viewed when using SSL";
+{ //if (theGlobalVariables.flagUsingSSLinCurrentConnection)
+  //  return "Message cannot be viewed when using SSL";
   std::stringstream out;
   FormatExpressions tempFormat;
   tempFormat.flagUseHTML=true;
@@ -647,6 +647,7 @@ std::string WebWorker::ToStringCalculatorArgumentsHumanReadable()
       out << "<br>";
   }
   out << "<hr>";
+  out << theWebServer.GetActiveWorker().ToStringMessageUnsafe();
   return out.str();
 }
 
@@ -812,6 +813,7 @@ void WebWorker::OutputBeforeComputation()
   << "Root subalgebras, sl(2)-triples\"> <head> <title>calculator version  " << __DATE__ << ", " << __TIME__ << "</title>";
 //  if (theGlobalVariables.flagUsingBuiltInWebServer)
   stOutput << CGI::GetLaTeXProcessingJavascript();
+  stOutput << CGI::GetJavascriptInjectCalculatorResponseInNode();
 //  else
 //    stOutput << "<script src=\"" << theGlobalVariables.DisplayPathServerBase << "/jsmath/easy/load.js\">";
   stOutput << "<link rel=\"stylesheet\" type=\"text/css\" href=\"/styleCalculator.css\">";
@@ -1247,7 +1249,7 @@ bool WebWorker::ReceiveAllHttp()
   }*/
   reportStream << "Sending continue message ...";
   theReport.SetStatus(reportStream.str());
-  this->remainingBytesToSend=(std::string) "HTTP/1.1 100 Continue\r\n";
+  this->remainingBytesToSend=(std::string) "HTTP/1.0 100 Continue\r\n";
   this->SendAllBytes();
   this->remainingBytesToSend.SetSize(0);
   reportStream << " done. ";
@@ -1352,6 +1354,12 @@ void WebWorker::ExtractPhysicalAddressFromMainAddress()
   this->SanitizeMainAddress();
   this->RelativePhysicalFileName= this->mainAddress;//.substr(numBytesToChop, std::string::npos);
 //  this->RelativePhysicalFileName= this->mainAddress.substr(numBytesToChop, std::string::npos);
+}
+
+int WebWorker::ProcessCalculatorExamples()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessCalculatorExamples");
+  stOutput << theParser.ToStringFunctionHandlers();
+  return 0;
 }
 
 int WebWorker::ProcessServerStatus()
@@ -1522,7 +1530,7 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
 int WebWorker::ProcessFolder()
 { MacroRegisterFunctionWithName("WebWorker::ProcessFolder");
   std::stringstream out;
-  out << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" << "<html><body>";
+  out << "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n" << "<html><body>";
 //  out << this->ToString();
   if (this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE.size()>0)
     if (this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE[this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE.size()-1]!='/')
@@ -1665,7 +1673,7 @@ int WebWorker::ProcessNonCalculator()
   //theLog << this->ToStringShort() << "\r\n";
 //  std::cout << " ere be i at this moment10\n";
   if (!CGI::GetPhysicalFileNameFromRelativeInput(this->RelativePhysicalFileName, this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE))
-  { stOutput << "HTTP/1.1 404 Object not found\r\nContent-Type: text/html\r\n\r\n";
+  { stOutput << "HTTP/1.0 404 Object not found\r\nContent-Type: text/html\r\n\r\n";
     stOutput << "<html><body><b>File name deemed unsafe. "
     << "Please note that folder names are not allowed to contain dots and file names "
     << "are not allowed to start with dots.</b> There may be additional restrictions "
@@ -1676,7 +1684,7 @@ int WebWorker::ProcessNonCalculator()
     return this->ProcessFolder();
 //  std::cout << " ere be i at this moment\n";
   if (!FileOperations::FileExistsUnsecure(this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE))
-  { stOutput << "HTTP/1.1 404 Object not found\r\nContent-Type: text/html\r\n\r\n";
+  { stOutput << "HTTP/1.0 404 Object not found\r\nContent-Type: text/html\r\n\r\n";
     stOutput << "<html><body><b>File does not exist.</b>";
     if (this->flagMainAddressSanitized)
     { stOutput << "<hr>The original main address I extracted was: " << this->mainAddressNonSanitized
@@ -1693,7 +1701,7 @@ int WebWorker::ProcessNonCalculator()
   bool isBinary=this->IsFileExtensionOfBinaryFile(fileExtension);
   std::fstream theFile;
   if (!FileOperations::OpenFileUnsecure(theFile, this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE, false, false, !isBinary))
-  { stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
+  { stOutput << "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n";
     stOutput << "<html><body><b>Error: file appears to exist but I could not open it.</b> ";
     if (this->flagMainAddressSanitized)
     { stOutput << "<hr>The original main address I extracted was: " << this->mainAddressNonSanitized
@@ -1709,7 +1717,7 @@ int WebWorker::ProcessNonCalculator()
   unsigned int fileSize=theFile.tellp();
   std::stringstream theHeader;
   if (fileSize>50000000)
-  { theHeader << "HTTP/1.1 413 Payload Too Large\r\n"
+  { theHeader << "HTTP/1.0 413 Payload Too Large\r\n"
     << "<html><body><b>Error: user requested file: " << this->RelativePhysicalFileName
     << " but it is too large, namely, " << fileSize << " bytes.</b></body></html>";
     this->QueueBytesForSending(theHeader.str());
@@ -1721,7 +1729,7 @@ int WebWorker::ProcessNonCalculator()
   ProgressReportWebServer theProgressReport2;
   theProgressReport2.SetStatus(reportStream.str());
 
-  theHeader << "HTTP/1.1 200 OK\r\n" << this->GetMIMEtypeFromFileExtension(fileExtension)
+  theHeader << "HTTP/1.0 200 OK\r\n" << this->GetMIMEtypeFromFileExtension(fileExtension)
   << "Content-length: " << fileSize << "\r\n\r\n";
   this->QueueStringForSending(theHeader.str());
   const int bufferSize=64*1024;
@@ -1750,7 +1758,7 @@ int WebWorker::ProcessNonCalculator()
 
 int WebWorker::ProcessUnknown()
 { MacroRegisterFunctionWithName("WebWorker::ProcessUnknown");
-  stOutput << "HTTP/1.1 501 Method Not Implemented\r\nContent-Type: text/html\r\n\r\n";
+  stOutput << "HTTP/1.0 501 Method Not Implemented\r\nContent-Type: text/html\r\n\r\n";
   stOutput << "<b>Requested method is not implemented. </b> <hr>The original message received from the server follows."
   << "<hr>\n" << this->ToStringMessageUnsafe();
   return 0;
@@ -1772,7 +1780,7 @@ int WebWorker::ProcessCalculator()
   ProgressReportWebServer theReport;
   std::stringstream argumentProcessingFailureComments;
   if (!this->ProcessRawArguments(theParser.inputStringRawestOfTheRaw, argumentProcessingFailureComments))
-  { stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
+  { stOutput << "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n"
     << "<html><body>" << "Failed to process the calculator arguments. <b>"
     << argumentProcessingFailureComments.str() << "</b></body></html>";
     stOutput.Flush();
@@ -1789,20 +1797,22 @@ int WebWorker::ProcessCalculator()
           theGlobalVariables.webFormArgumentNames[i]!="authenticationInsecure")
         redirectedAddress << theGlobalVariables.webFormArgumentNames[i] << "="
         << theGlobalVariables.webFormArguments[i] << "&";
-    stOutput << "HTTP/1.1 303 See other\r\nLocation: ";
+    stOutput << "HTTP/1.0 303 See other\r\nLocation: ";
     stOutput << redirectedAddress.str();
     stOutput << "\r\n\r\n";
-//    stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
+//    stOutput << "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n";
 //    stOutput << "DEBUG " << "\r\n" << redirectedAddress.str();
 //    stOutput << "\r\n";
     stOutput.Flush();
     return 0;
   }
-  stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
+  stOutput << "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n";
   stOutput << argumentProcessingFailureComments.str();
 //  if (theGlobalVariables.flagLoggedIn)
 //    stOutput << "LOGGED in canyabelieveit?";
 //  stOutput << "<br>got to this point, requesttype: " << theGlobalVariables.userCalculatorRequestType;
+  if (theGlobalVariables.userCalculatorRequestType=="calculatorExamples")
+    return this->ProcessCalculatorExamples();
   if (theGlobalVariables.GetWebInput("error")!="" && argumentProcessingFailureComments.str()=="")
     stOutput << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("error"));
   if (theGlobalVariables.userCalculatorRequestType=="pause")
@@ -1857,9 +1867,13 @@ int WebWorker::ProcessCalculator()
       theGlobalVariables.flagUsingSSLinCurrentConnection)
     return this->ProcessDatabase();
   theParser.inputString=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
+  theParser.flagShowCalculatorExamples=(theGlobalVariables.GetWebInput("showExamples")=="true");
   this->OutputBeforeComputation();
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(false);
-  theParser.init();
+////////////////////////////////////////////////
+//  the initialization below moved to the start of the web server!
+//  theParser.init();
+////////////////////////////////////////////////
   if (theGlobalVariables.flagUsingBuiltInWebServer)
     theReport.SetStatus("OutputWeb: Computing...");
   if (theParser.inputString!="")
@@ -3035,6 +3049,8 @@ void WebServer::initPrepareSignals()
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
   theGlobalVariables.RelativePhysicalNameCrashLog="crash_WebServerRun.html";
+  theParser.init();
+  theParser.flagShowCalculatorExamples=false;
   if (!this->initPrepareWebServerALL())
     return 1;
   theLog << logger::purple <<  "server: waiting for connections...\r\n" << logger::endL;
@@ -3132,7 +3148,7 @@ int WebServer::Run()
           theGlobalVariables.flagUsingSSLinCurrentConnection &&
           !this->flagSSLHandshakeSuccessful)
       { theGlobalVariables.flagUsingSSLinCurrentConnection=false;
-        stOutput << "HTTP/1.1 400 SSL connection failed\r\n<html><meta http-equiv=\"refresh\" content=\"3\">"
+        stOutput << "HTTP/1.0 400 SSL connection failed\r\n<html><meta http-equiv=\"refresh\" content=\"3\">"
         << "<body>Cryptography error, retrying to connect in 3 seconds.</body></html>";
         this->ReleaseEverything();
         return -1;
@@ -3155,7 +3171,7 @@ int WebServer::Run()
       //if (!this->flagUseSSL)
       //{
       if (!this->GetActiveWorker().ReceiveAll())
-      { stOutput << "HTTP/1.1 400 Bad request\r\nContent-type: text/html\r\n\r\n"
+      { stOutput << "HTTP/1.0 400 Bad request\r\nContent-type: text/html\r\n\r\n"
         << "<html><body><b>HTTP error 400 (bad request). </b> There was an error with the request. "
         << "One possibility is that the input was too large. "
         << "<br>The error message returned was:<br>"

@@ -127,7 +127,6 @@ public:
   WebWorker();
   ~WebWorker();
   bool IamActive();
-  bool ReceiveOnce();
   bool ReceiveAll();
   bool ReceiveAllHttp();
   bool ReceiveAllHttpSSL();

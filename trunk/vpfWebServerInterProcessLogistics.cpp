@@ -164,12 +164,14 @@ void Pipe::WriteNoLocks(const std::string& toBeSent)
   for (;;)
   { numBytesWritten=write(this->thePipe[1], toBeSent.c_str(), toBeSent.size());
     if (numBytesWritten<0)
-      if (errno==EAI_AGAIN)
+      if (errno==EAI_AGAIN || errno==EWOULDBLOCK ||
+          errno == EINTR || errno ==EIO)
         continue;
     break;
   }
   if (numBytesWritten<0)
-    logIO << logger::red << "Error in " << this->ToString() << ". The error is: " << strerror(errno) << ". " << logger::endL;
+    logIO << logger::red << "Error in " << this->ToString() << ". The error is: "
+    << strerror(errno) << ". " << logger::endL;
 }
 
 std::string Pipe::ToString()const
@@ -251,17 +253,18 @@ void Pipe::ReadNoLocks()
   { //theLog << logger::blue << theWebServer.ToStringActiveWorker() << " pipe, " << this->ToString() << " calling read." << logger::endL;
     numReadBytes =read(this->thePipe[0], this->pipeBuffer.TheObjects, bufferSize);
     if (numReadBytes<0)
-      if (errno==EAI_AGAIN || errno==EWOULDBLOCK)
+      if (errno==EAI_AGAIN || errno==EWOULDBLOCK || errno==EINTR || errno == EIO)
         numReadBytes=0;
     if (numReadBytes>=0)
       break;
     counter++;
     if (counter>100)
       logIO << logger::red << this->ToString()
-      << ". This is not supposed to happen: more than 100 iterations of read from pipe." << logger::endL;
+      << ". This is not supposed to happen: more than 100 iterations of read from pipe. " << logger::endL;
   }
   if (numReadBytes>150000)
-    logIO << logger::red << this->ToString() << "This is not supposed to happen: pipe read more than 150000 bytes." << logger::endL;
+    logIO << logger::red << this->ToString()
+    << "This is not supposed to happen: pipe read more than 150000 bytes. " << logger::endL;
   if (numReadBytes>0)
   { this->pipeBuffer.SetSize(numReadBytes);
     this->lastRead=this->pipeBuffer;
@@ -302,7 +305,7 @@ logger::logger(const std::string& logFileName )
 { FileOperations::OpenFileCreateIfNotPresentUnsecure(theFile, logFileName, false, true, false);
   this->currentColor=logger::normalColor;
   this->flagStopWritingToFile=false;
-  this->MaxLogSize=500000;
+  this->MaxLogSize=50000000;
 }
 
 void logger::CheckLogSize()

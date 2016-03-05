@@ -62,9 +62,10 @@ bool PauseController::CreateMe(const std::string& inputName)
     this->Release();
     return false;
   }
-//  Pipe::WriteNoInterrupts()
-  write (this->thePausePipe[1], "!", 1);
-  write (this->mutexPipe[1], "!", 1);
+//  write (this->thePausePipe[1], "!", 1);
+//  write (this->mutexPipe[1], "!", 1);
+  Pipe::WriteNoInterrupts(this->thePausePipe[1], "!");
+  Pipe::WriteNoInterrupts(this->mutexPipe[1], "!");
   return true;
 }
 
@@ -147,7 +148,9 @@ int Pipe::WriteNoInterrupts(int theFD, const std::string& input)
       return result;
     if (result<0)
       if (errno==EINTR)
+      { logBlock << logger::red << "Write operation interrupted, repeating. " << logger::endL;
         continue;
+      }
     return result;
   }
   return -1;

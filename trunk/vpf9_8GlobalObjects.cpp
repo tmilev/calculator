@@ -11,6 +11,7 @@ GlobalVariables theGlobalVariables;
 logger theLog( "./../output/LogStandard.html");
 logger logBlock( "./../output/LogBlockingEvents.html");
 logger logIO( "./../output/LogIOErrorsEvents.html");
+logger logConnections( "./../output/LogConnections.html");
 WebServer theWebServer;
 Calculator theParser;
 FormatExpressions consoleFormat;

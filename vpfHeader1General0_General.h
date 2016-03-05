@@ -1059,6 +1059,10 @@ public:
 struct FileOperations
 {
 public:
+  static bool LoadFileToStringUnsecure
+  (const std::string& theFileName, std::string& output, std::stringstream& commentsOnFailure);
+  static bool LoadFileToStringOnTopOfOutputFolder
+  (const std::string& fileNameUnsecure, std::string& output, std::stringstream& commentsOnFailure);
   static bool IsFileNameWithoutDotsAndSlashes(const std::string& fileName);
   static std::string GetFileNameFromFileNameWithPath(const std::string& fileName);
   static bool IsOKforFileNameOnTopOfOutputFolder(const std::string& fileName);
@@ -1093,6 +1097,8 @@ public:
 struct CGI
 {
 public:
+  static std::string StyleSheetCalculatorWithTags;
+  static std::string JavascriptAutoCompleteWithTags;
   static std::stringstream outputStream;
   static int GlobalMathSpanID;
   static int GlobalCanvasID;
@@ -1104,6 +1110,7 @@ public:
   static int shiftX;
   static int shiftY;
   static int scale;
+  static void LoadStrings();
   static void outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter);
   static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
   static std::string URLKeyValuePairsToNormalRecursiveHtml(const std::string& input, int recursionDepth=0);
@@ -1128,6 +1135,9 @@ public:
   static std::string StringToHtmlStrinG(const std::string& theString);
   static std::string GetLaTeXProcessingJavascript();
   static std::string DoubleBackslashes(const std::string& input);
+  static std::string& GetCalculatorStyleSheetWithTags();
+  static std::string& GetJavascriptAutocompleteWithTags();
+
   static std::string GetMathSpanPure(const std::string& input, int upperNumChars=10000);
   static std::string GetMathSpanBeginArrayL(const std::string& input, int upperNumChars=10000);
   static std::string GetMathMouseHover(const std::string& input, int upperNumChars=10000);

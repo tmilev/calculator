@@ -1067,7 +1067,7 @@ std::string WebWorker::GetDatabasePage()
   std::stringstream out;
   out << "<html>"
   << "<header>"
-  << "<link rel=\"stylesheet\" type=\"text/css\" href=\"/styleCalculator.css\">"
+  << CGI::GetCalculatorStyleSheetWithTags()
   << WebWorker::GetJavascriptStandardCookies()
   << "</header>"
   << "<body onload=\"loadSettings();\">\n";
@@ -1094,7 +1094,7 @@ std::string WebWorker::GetExamPage()
   << "<header>"
   << WebWorker::GetJavascriptStandardCookies()
   << CGI::GetLaTeXProcessingJavascript()
-  << "<link rel=\"stylesheet\" type=\"text/css\" href=\"/styleCalculator.css\">"
+  << CGI::GetCalculatorStyleSheetWithTags()
   << "</header>"
   << "<body onload=\"loadSettings();\">\n";
   out << theFile.LoadAndInterpretCurrentProblemItem();

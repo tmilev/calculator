@@ -146,7 +146,7 @@ public:
   const SyntacticElementHTML& inputElement
 )
   ;
-  std::string GetEditPageHtml();
+  std::string GetEditPageButton();
   std::string GetJavascriptSubmitMainInputIncludeCurrentFile();
   std::string GetSubmitEmailsJavascript();
   std::string GetDatePickerJavascriptInit();
@@ -560,9 +560,8 @@ bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt)
   return false;
 }
 
-std::string CalculatorHTML::GetEditPageHtml()
-{ MacroRegisterFunctionWithName("CalculatorHTML::GetEditPageHtml");
-  return "";
+std::string CalculatorHTML::GetEditPageButton()
+{ MacroRegisterFunctionWithName("CalculatorHTML::GetEditPageButton");
   std::stringstream out;
   out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath
   << "?request=editPage&";
@@ -1099,6 +1098,28 @@ std::string WebWorker::GetDatabasePage()
 #else
 out << "<b>Database not available. </b>";
 #endif // MACRO_use_MySQL
+  out << this->ToStringCalculatorArgumentsHumanReadable();
+  out << "</body></html>";
+  return out.str();
+}
+
+std::string WebWorker::GetEditPageHTML()
+{ MacroRegisterFunctionWithName("WebWorker::GetEditPageHTML");
+  std::stringstream out;
+  if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights())
+    return "<b>Only logged-in admins are allowed to edit pages. </b>";
+  CalculatorHTML theFile;
+  out << "<html>"
+  << "<header>"
+  << WebWorker::GetJavascriptStandardCookies()
+  << CGI::GetLaTeXProcessingJavascript()
+  << CGI::GetCalculatorStyleSheetWithTags()
+  << "</header>"
+  << "<body onload=\"loadSettings();\">\n";
+  std::stringstream failureStream;
+  if (!theFile.LoadMe(false, failureStream))
+    out << "<b>Failed to load file: " << theFile.fileName << ", perhaps the file does not exist. </b>";
+  out << theFile.LoadAndInterpretCurrentProblemItem();
   out << this->ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
@@ -2115,7 +2136,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     out << this->GetDatePickerJavascriptInit();
   }
   if (theGlobalVariables.UserDefaultHasAdminRights())
-    out << this->GetEditPageHtml();
+    out << this->GetEditPageButton();
 //  else
 //    out << " no date picker";
   theInterpreter.flagWriteLatexPlots=false;

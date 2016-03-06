@@ -62,6 +62,7 @@ public:
   int ProcessAddUserEmails();
   int ProcessServerStatus();
   int ProcessComputationIndicator();
+  int ProcessEditPage();
   int ProcessNonCalculator();
   int ProcessFolder();
   int ProcessChangePassword();
@@ -114,6 +115,7 @@ public:
   std::string GetChangePasswordPage();
   std::string GetLoginPage();
   std::string GetLoginHTMLinternal();
+  std::string GetEditPageHTML();
   std::string GetExamPage();
   std::string GetDatabasePage();
   std::string GetAddUserEmails();

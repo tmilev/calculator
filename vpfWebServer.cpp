@@ -933,7 +933,6 @@ void WebWorker::OutputStandardResult()
   if (theGlobalVariables.flagLoggedIn)
     stOutput << "</section>";
   std::stringstream tempStream3;
-  stOutput << "\n\n<script language=\"javascript\">\n" << "  var theAutocompleteDictionary = new Array;\n  ";
   HashedList<std::string, MathRoutines::hashString> autocompleteKeyWords;
   autocompleteKeyWords.SetExpectedSize(theParser.theAtoms.size*2);
   for (int i=0; i<theParser.theAtoms.size; i++)
@@ -955,9 +954,14 @@ void WebWorker::OutputStandardResult()
   autocompleteKeyWords.AddOnTopNoRepetition("FullTree");
   autocompleteKeyWords.AddOnTopNoRepetition("HideLHS");
   autocompleteKeyWords.AddOnTopNoRepetition("DontDistribute");
+  stOutput << "\n\n<script language=\"javascript\">\n" << "  var theAutocompleteDictionary = [\n  ";
   for (int i=0; i<autocompleteKeyWords.size; i++)
     if (autocompleteKeyWords[i].size()>2)
-      stOutput << "  theAutocompleteDictionary.push(\"" << autocompleteKeyWords[i] << "\");\n";
+    { stOutput << "\"" << autocompleteKeyWords[i] << "\"";
+      if (i!=autocompleteKeyWords.size-1)
+        stOutput << ", ";
+    }
+  stOutput << "];\n";
   stOutput << "</script>\n";
   stOutput << "</body></html>";
   stOutput << "<!--";
@@ -1870,6 +1874,8 @@ int WebWorker::ProcessCalculator()
     else
       return this->ProcessLoginPage();
   }
+  if (theGlobalVariables.userCalculatorRequestType=="editPage")
+    return this->ProcessEditPage();
     //  stOutput << "main request is: " << theGlobalVariables.userCalculatorRequestType
 //  << "<br>web keys: " << theGlobalVariables.webFormArgumentNames.ToStringCommaDelimited()
 //  << "<br>web entries: " << theGlobalVariables.webFormArguments.ToStringCommaDelimited();
@@ -2171,6 +2177,13 @@ int WebWorker::ProcessLoginPage()
 int WebWorker::ProcessDatabase()
 { MacroRegisterFunctionWithName("WebWorker::ProcessDatabase");
   stOutput << this->GetDatabasePage();
+  stOutput.Flush();
+  return 0;
+}
+
+int WebWorker::ProcessEditPage()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessEditPage");
+  stOutput << this->GetEditPageHTML();
   stOutput.Flush();
   return 0;
 }

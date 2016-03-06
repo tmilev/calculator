@@ -1,0 +1,38 @@
+<span class="setCalculatorExamProblem">
+</span>
+Compute the derivatives of the two functions. 
+
+<span class="calculatorHidden">
+\(
+a=randomInteger((2,6));  
+TurnOffRules("sqrt", "ConvertShortDenominatorToNegativePower", "CommonDenominatorOneNonFraction", "CommuteIfUnivariate");
+\)</span>
+<br>
+<span class="calculator">
+\(\displaystyle f{}{{x}}=\sin (x^a)  \) 
+</span>.
+<span class="calculatorHidden">
+TurnOnRules("sqrt", "ConvertShortDenominatorToNegativePower", "CommonDenominatorOneNonFraction", "CommuteIfUnivariate");
+</span>
+<br>
+Answer: \(f'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswer">
+\(
+CompareFunctionsNumerically(d/dx(f{}x), AlgebraAnswer, 0, 5, 50, 0.0001);
+\)
+</textarea>
+
+<span class="calculator">
+\(\displaystyle g{}{{x}}=\sin^a x  \) 
+</span>.
+<span class="calculatorHidden">
+TurnOnRules("sqrt", "ConvertShortDenominatorToNegativePower", "CommonDenominatorOneNonFraction", "CommuteIfUnivariate");
+</span>
+<br>
+Answer: \(g'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswerTwo">
+\(
+CompareFunctionsNumerically(d/dx(g{}x), AlgebraAnswerTwo, 0, 5, 50, 0.0001);
+\)
+</textarea>
+
+
+

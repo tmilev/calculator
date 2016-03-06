@@ -124,7 +124,7 @@ void LittelmannPath::ActByEalpha(int indexAlpha)
   Rational s2= this->owner->RootScalarCartanRoot(this->Waypoints[precedingIndex], alphaScaled);
 //  stOutput << "<hr>Starting path: " << this->ToString();
   if (!this->MinimaAreIntegral())
-    stOutput << "<br>WTF, starting path is BAD!";
+    stOutput << "<br>Something is bad: starting path is BAD!";
 //  stOutput << "<br>Min waypoint:" << this->Waypoints[minIndex].ToString();
 //  stOutput << " with minimum: " << theMin.ToString();
   if (s2>theMin+1)

@@ -66,6 +66,7 @@ function isSeparator(theChar)
     case ',':
     case '(':
     case ')':
+    case '%':
     case '\n':
     case '\r':
     case '\"':

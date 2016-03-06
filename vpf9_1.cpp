@@ -302,7 +302,7 @@ std::string GlobalVariables::ToStringCalcArgsNoNavigation()
   std::stringstream out;
   for (int i =0; i<this->webFormArgumentNames.size; i++)
   { const std::string& currentName=this->webFormArgumentNames[i];
-    if (currentName =="request" ||
+    if (currentName=="request" ||
         currentName=="authenticationInsecure" || currentName=="password" || currentName=="currentExamFile" ||
         currentName=="currentExamHome" || currentName=="currentExamIntermediate" ||
         currentName=="currentDatabaseTable")

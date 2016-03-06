@@ -1963,7 +1963,7 @@ std::string WebWorker::GetLoginHTMLinternal()
   { out
     << WebWorker::GetInsecureConnectionAngryMessage()
     << "<br>Please do not use a password you use in other sites here.</b>";
-    out << "<script type=\"text/javascript\" src=\"/sha1.js\"></script>\n";
+    out << CGI::GetJavascriptSha1();
     out << "<script type=\"text/javascript\">\n";
     out
     << "function submitAuthentication(){\n"

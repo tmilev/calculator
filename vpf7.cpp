@@ -294,7 +294,7 @@ void LittelmannPath::MakeFromWeightInSimpleCoords(const Vector<Rational>& weight
   this->Simplify();
 }
 
-std::string LittelmannPath::ElementToStringIndicesToCalculatorOutput(LittelmannPath& inputStartingPath, List<int> & input)
+std::string LittelmannPath::ElementToStringIndicesToCalculatorOutput(LittelmannPath& inputStartingPath, List<int>& input)
 { std::stringstream out;
   for (int i=input.size-1; i>=0; i--)
   { int displayIndex= input[i];
@@ -752,9 +752,10 @@ std::string CGI::GetMathSpanBeginArrayL(const std::string& input, int upperNumCh
 
 std::string CGI::StyleSheetCalculatorWithTags;
 std::string CGI::JavascriptAutoCompleteWithTags;
+std::string CGI::JavascriptSha1;
 
 void CGI::LoadStrings()
-{
+{ CGI::GetJavascriptSha1();
   CGI::GetCalculatorStyleSheetWithTags();
   CGI::GetJavascriptAutocompleteWithTags();
 }
@@ -781,6 +782,18 @@ std::string& CGI::GetJavascriptAutocompleteWithTags()
   else
     CGI::JavascriptAutoCompleteWithTags= "<script type=\"text/javascript\">" + theJS + "</script>\n";
   return CGI::JavascriptAutoCompleteWithTags;
+}
+
+std::string& CGI::GetJavascriptSha1()
+{ if (CGI::JavascriptSha1!="")
+    return CGI::JavascriptSha1;
+  std::stringstream out;
+  std::string theJS;
+  if (!FileOperations::LoadFileToStringOnTopOfOutputFolder("sha1.js", theJS, out))
+    CGI::JavascriptSha1=out.str();
+  else
+    CGI::JavascriptSha1= "<script type=\"text/javascript\">" + theJS + "</script>\n";
+  return CGI::JavascriptSha1;
 }
 
 std::string CGI::GetCalculatorLink(const std::string& DisplayNameCalculator, const std::string& input)

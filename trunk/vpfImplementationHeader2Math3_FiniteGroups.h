@@ -2118,12 +2118,7 @@ bool SubgroupData<someGroup, elementSomeGroup>::VerifyCosets()
 
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::AddIrreducibleRepresentation(GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational>& p)
-{ //stOutput << "Checking if " << p.theCharacteR.ToString() << " belongs to ";
-  //for (int i=0; i<this->irreps.size; i++)
-  //  stOutput << this->irreps[i].theCharacteR.ToString();
-  // depending on List.Contains() is a bad idea, but I'm not going to fix it now
-
-  this->irreps_grcam.BSInsertDontDup(p);
+{ this->irreps_grcam.BSInsertDontDup(p);
   auto p_gr = p.MakeOtherGroupRepresentationClass();
   this->AddIrreducibleRepresentation(p_gr);
 }
@@ -2131,24 +2126,16 @@ void FiniteGroup<elementSomeGroup>::AddIrreducibleRepresentation(GroupRepresenta
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::AddIrreducibleRepresentation(GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational>& p)
 { this->irreps.BSInsertDontDup(p);
-  if(this->characterTable.size == 0)
-  { this->characterTable.AddOnTop(&(p.theCharacteR));
-    return;
-  }
-  int i=0;
-  for(; i<this->characterTable.size; i++)
-    if(!(*(this->characterTable[i]) > p.theCharacteR))
-      break;
-  if(*(this->characterTable[i]) == p.theCharacteR)
-    return;
-  this->characterTable.InsertAtIndexShiftElementsUp(&(p.theCharacteR), i);
+  this->characterTable.BSInsertDontDup(p.theCharacteR);
 }
 
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::AddCharacter(const ClassFunction<FiniteGroup<elementSomeGroup>, Rational>& X)
-{ // haha no
-  //this->characterTable.BSInsertDontDup(X);
-  ClassFunction<FiniteGroup<elementSomeGroup>, Rational>* place = 0;
+{ this->characterTable.BSInsertDontDup(X);
+  // the following is the reason the characterTable is not a list of pointers
+  // this method is kept because (1) it will be inlined anyway
+  //                             (2) to remind the user not to use a list of pointers
+  /*  ClassFunction<FiniteGroup<elementSomeGroup>, Rational>* place = 0;
   for(int i=0; i<this->irreps.size; i++)
     if(this->irreps[i].theCharacteR == X)
       place = &(this->irreps[i].theCharacteR);
@@ -2163,7 +2150,7 @@ void FiniteGroup<elementSomeGroup>::AddCharacter(const ClassFunction<FiniteGroup
   for(int i=0; i<characterTable.size; i++)
     if(characterTable[i] == place)
       return;
-  characterTable.AddOnTop(place);
+  characterTable.AddOnTop(place);*/
 }
 
 template <typename elementSomeGroup>
@@ -2255,15 +2242,16 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
   this->ownerGroup->CheckInitializationFDrepComputation();
   coefficient SumOfNumComponentsSquared=this->GetNumberOfComponents();
   if (SumOfNumComponentsSquared==0)
-    crash << "This is a programming error: a module has character " << this->theCharacteR.ToString() << " of zero length, which is impossible. "
-    << "Here is a printout of the module. " << this->ToString() << crash;
+    crash << "This is a programming error: a module has character " << this->theCharacteR.ToString()
+          << " of zero length, which is impossible. "<< "Here is a printout of the module. "
+          << this->ToString() << crash;
   if(SumOfNumComponentsSquared== 1)
-  { int indexMe=this->ownerGroup->irreps.GetIndex(*this);
+  { int indexMe=this->ownerGroup->irreps_grcam.GetIndex(*this);
     if(indexMe== -1)
     { this->ownerGroup->AddIrreducibleRepresentation(*this);
-      indexMe=this->ownerGroup->irreps.GetIndex(*this);
+      indexMe=this->ownerGroup->irreps_grcam.GetIndex(*this);
     }
-    outputIrrepMults.AddMonomial(*(this->ownerGroup->characterTable[indexMe]), 1);
+    outputIrrepMults.AddMonomial(this->ownerGroup->irreps_grcam[indexMe].GetCharacter(), 1);
     return true;
   }
   Matrix<coefficient> splittingOperatorMatrix;
@@ -2282,7 +2270,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
   }
   //chop off already known pieces:
   for(int i=0; i<this->ownerGroup->irreps.size; i++)
-  { coefficient NumIrrepsOfType=this->theCharacteR.InnerProduct(*(this->ownerGroup->characterTable[i]));
+  { coefficient NumIrrepsOfType=this->theCharacteR.InnerProduct(this->ownerGroup->characterTable[i]);
     if(NumIrrepsOfType!=0)
     { this->ownerGroup->CheckInitializationFDrepComputation();
       if (theGlobalVariables!=0)
@@ -2301,7 +2289,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
       splittingOperatorMatrix.GetZeroEigenSpaceModifyMe(splittingMatrixKernel);
 
       remainingVectorSpace.IntersectTwoLinSpaces(splittingMatrixKernel, remainingVectorSpace, tempSpace);
-      outputIrrepMults.AddMonomial(*(this->ownerGroup->characterTable[i]),NumIrrepsOfType);
+      outputIrrepMults.AddMonomial(this->ownerGroup->characterTable[i],NumIrrepsOfType);
       remainingCharacter-=this->ownerGroup->irreps[i].theCharacteR*NumIrrepsOfType;
       if (theGlobalVariables!=0)
       { std::stringstream reportStream;

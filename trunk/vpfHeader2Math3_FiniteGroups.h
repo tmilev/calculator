@@ -191,16 +191,14 @@ public:
   List<ConjugacyClass> conjugacyClasseS;
   HashedList<Polynomial<Rational> > CCsStandardRepCharPolys;
 
-  // The way this is supposed to work is
-  // * everything in characterTable should point to irreps if possible, orphanCharacters if not
-  // * things in characterTable should not point to irreps_grcam
-  // * irreps should not be deleted.  GroupRepresentation's don't really use much memory
-  // * everything in irreps_grcam should be shadowed in irreps
-  // * irreps_grcam should be deleted once all the irreps are gathered
+  // All of these lists will be expected to be sorted at all times, so please
+  // insert using .BSInsertDontDup() if you for some reason can't use the friendly
+  // insertion methods provided
+  // The reason to use the provided methods is that they ensure that the characterTable and irreps
+  // are up to date if you insert a GRCAM.  That's pretty much it.
   List<GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational> > irreps;
   List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > irreps_grcam;
-  List<ClassFunction<FiniteGroup<elementSomeGroup>, Rational>*> characterTable;
-  List<ClassFunction<FiniteGroup<elementSomeGroup>, Rational> > orphanCharacters;
+  List<ClassFunction<FiniteGroup<elementSomeGroup>, Rational> > characterTable;
 
   void AddIrreducibleRepresentation(GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational>& r);
   void AddIrreducibleRepresentation(GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational>& r);
@@ -566,10 +564,6 @@ public:
   MemorySaving<FinitelyGeneratedMatrixMonoid<Rational> > theOuterAutos;
   List<std::string> ccCarterLabels;
   List<std::string> irrepsCarterLabels;
-  // This irreps member is here like this for historical reasons, and because
-  // I don't know where else to put it
-  // maybe change it to irrepsAllMatrixVersion and put a GroupRepresentation<FiniteGroup
-  List<GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> > irreps;
 //  void MakeFromParSel(Vector<Rational> & parSel, WeylGroup& input);
   bool flagDeallocated;
 

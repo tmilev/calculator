@@ -431,9 +431,9 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G)
   { VectorSpace<Rational> allchars;
     for(int i=0; i<G.characterTable.size; i++)
     { VectorSpace<Rational> xspi;
-      xspi.AddVector(G.characterTable[i]->data);
+      xspi.AddVector(G.characterTable[i].data);
       spaces.AddOnTop(xspi);
-      allchars.AddVector(G.characterTable[i]->data);
+      allchars.AddVector(G.characterTable[i].data);
     }
     spaces.AddOnTop(allchars.OrthogonalComplement(0,&form));
   } else {
@@ -499,10 +499,7 @@ List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G)
         stOutput << "error: " << i << j << "\n";
   for(int i=0; i<chars.size; i++)
     stOutput << chars[i] << "\n";
-  G.orphanCharacters = chars;
-  G.characterTable.SetSize(G.orphanCharacters.size);
-  for(int i=0; i<G.characterTable.size; i++)
-    G.characterTable[i] = &G.orphanCharacters[i];
+  G.characterTable = chars;
   for(int i=0; i<G.characterTable.size; i++)
     stOutput << G.characterTable[i] << "\n";
   return chars;
@@ -573,7 +570,7 @@ void GetTauSignaturesFromSubgroup(WeylGroupData& G, const List<ElementWeylGroup<
   Vector<Rational> HXi;
   HXi.SetSize(H.ConjugacyClassCount());
   for(int i=0; i<G.theGroup.characterTable.size; i++)
-  { Vector<Rational> GXi = G.theGroup.characterTable[i]->data;
+  { Vector<Rational> GXi = G.theGroup.characterTable[i].data;
     for(int j=0; j<HXi.size; j++)
       HXi[j] = GXi[ccPreimages[j]];
     if(H.GetHermitianProduct(HXs,HXi) == 0)
@@ -603,7 +600,7 @@ void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
   List<bool> tsg;
   tsg.SetSize(G->theGroup.characterTable.size);
   for(int i=0; i<G->theGroup.characterTable.size; i++)
-    tsg[i] =  G->theGroup.characterTable[i]->data == Xs;
+    tsg[i] =  G->theGroup.characterTable[i].data == Xs;
   tss.AddOnTop(tsg);
 
   if(pseudo)
@@ -672,8 +669,8 @@ void ExportCharTable(FiniteGroup<elementSomeGroup>& G, JSData &data)
   data.obj[2].value.type = JSLIST;
   data.obj[2].value.list.SetSize(G.characterTable.size);
   for(int i=0; i<G.characterTable.size; i++)
-  { for(int j=0; j<G.characterTable[i]->data.size; j++)
-    { data["characters"][i][j] = (*(G.characterTable[i]))[j].GetDoubleValue();
+  { for(int j=0; j<G.characterTable[i].data.size; j++)
+    { data["characters"][i][j] = G.characterTable[i][j].GetDoubleValue();
     }
   }
 }

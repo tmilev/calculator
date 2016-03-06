@@ -65,10 +65,12 @@ void WeylGroupData::ComputeInitialIrreps(GlobalVariables* theGlobalVariables)
     this->theGroup.ComputeCCfromAllElements(theGlobalVariables);
   if(this->theGroup.squaresCCReps.size == 0)
     this->theGroup.ComputeSquaresCCReps(theGlobalVariables);
-  this->irreps.SetSize(0);
+  this->theGroup.irreps.SetSize(0);
   this->theGroup.characterTable.SetSize(0);
+  this->theGroup.irreps_grcam.SetSize(0);
   this->theGroup.characterTable.SetExpectedSize(this->theGroup.ConjugacyClassCount());
-  this->irreps.SetExpectedSize(this->theGroup.ConjugacyClassCount());
+  this->theGroup.irreps.SetExpectedSize(this->theGroup.ConjugacyClassCount());
+  this->theGroup.irreps_grcam.SetExpectedSize(this->theGroup.ConjugacyClassCount());
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> trivialRep, signRep, standardRep;
   this->GetTrivialRepresentation(trivialRep);
   this->GetSignRepresentation(signRep);
@@ -851,8 +853,8 @@ bool FiniteGroup<elementSomeGroup>::CheckOrthogonalityCharTable(GlobalVariables*
 { MacroRegisterFunctionWithName("FiniteGroup::CheckOrthogonalityCharTable");
   for (int i=0; i<this->characterTable.size; i++)
     for (int j=i; j<this->characterTable.size; j++)
-    { ClassFunction<FiniteGroup, Rational>& leftChar= *(this->characterTable[i]);
-      ClassFunction<FiniteGroup, Rational>& rightChar= *(this->characterTable[j]);
+    { ClassFunction<FiniteGroup, Rational>& leftChar= this->characterTable[i];
+      ClassFunction<FiniteGroup, Rational>& rightChar= this->characterTable[j];
       Rational theScalarProd= this->GetHermitianProduct(leftChar.data, rightChar.data);
       if (j!=i)
         if (theScalarProd!=0)
@@ -881,7 +883,7 @@ void SubgroupDataWeylGroup::ComputeTauSignature(GlobalVariables* theGlobalVariab
 //  stOutput << "<hr>Computing in group with " << this->size().ToString() << " elements. ";
   this->tauSignature.SetSize(this->theSubgroupData->theGroup->ConjugacyClassCount());
   for(int i=0; i<this->theSubgroupData->theGroup->ConjugacyClassCount(); i++)
-  { ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& Xip = *(this->theWeylData->theGroup.characterTable[i]);
+  { ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& Xip = this->theWeylData->theGroup.characterTable[i];
     for(int j=0; j<Xi.size; j++)
       Xi[j] = Xip[this->theSubgroupData->ccRepresentativesPreimages[j]];
     this->tauSignature[i]= this->theSubgroupData->theSubgroup->GetHermitianProduct(Xs,Xi);

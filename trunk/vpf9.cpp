@@ -4511,7 +4511,6 @@ void WeylGroupData::init()
   this->theGroup.ComputeCCSizesAndRepresentativesByFormula = 0;
   this->theGroup.AreConjugateByFormula = 0;
   this->theGroup.ComputeIrreducibleRepresentationsWithFormulas = this->ComputeIrreducibleRepresentationsWithFormulasImplementation;
-  this->InitGenerators();
 }
 
 void WeylGroupData::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho)
@@ -4781,12 +4780,12 @@ std::string WeylGroupData::ToStringCppCharTable(FormatExpressions* theFormat)
   { out << "\n<br>&nbsp;&nbsp;currentCF.data.AssignString(\"";
     out << "(";
     //Print vector ensuring every number is at least 3 characters wide. (3 should suffice for E8... or does it?)
-    for (int j=0; j<this->theGroup.characterTable[i]->data.size; j++)
-    { std::string theNumber= this->theGroup.characterTable[i]->data[j].ToString();
+    for (int j=0; j<this->theGroup.characterTable[i].data.size; j++)
+    { std::string theNumber= this->theGroup.characterTable[i].data[j].ToString();
       out << theNumber;
       for (int k=theNumber.size(); k<3; k++)
         out << "&nbsp;";
-      if (j!=(*(this->theGroup.characterTable[i])).data.size-1)
+      if (j!=this->theGroup.characterTable[i].data.size-1)
         out << ", ";
     }
     out << ")";
@@ -4877,11 +4876,12 @@ std::string WeylGroupData::ToString(FormatExpressions* theFormat)
   out << "<br>Symmetric cartan: " << this->CartanSymmetric.ToString();
   if (this->flagCharTableIsComputed)
   { out << "<br>Character table: ";
-    Matrix<Rational> charTableMatForm;
-    charTableMatForm.init(this->irreps.size, this->theGroup.ConjugacyClassCount());
-    for (int i=0; i<this->irreps.size; i++)
-      charTableMatForm.AssignVectorToRowKeepOtherRowsIntactNoInit(i, this->irreps[i].theCharacteR.data);
-    out << charTableMatForm.ToString();
+    out << this->theGroup.PrettyPrintCharacterTable(&theGlobalVariables);
+   // Matrix<Rational> charTableMatForm;
+   // charTableMatForm.init(this->theGroup.irreps.size, this->theGroup.ConjugacyClassCount());
+   // for (int i=0; i<this->theGroup.irreps.size; i++)
+   //   charTableMatForm.AssignVectorToRowKeepOtherRowsIntactNoInit(i, this->theGroup.irreps[i].theCharacteR.data);
+   // out << charTableMatForm.ToString();
   }
   out << this->theGroup.ToStringConjugacyClasses(theFormat);
   out << this->theGroup.ToStringElements(theFormat);
@@ -4962,6 +4962,7 @@ void WeylGroupData::MakeFromDynkinType(const DynkinType& inputType)
   this->theDynkinType.GetCartanSymmetric(this->CartanSymmetric);
   this->theDynkinType.GetCoCartanSymmetric(this->CoCartanSymmetric);
   this->MakeFinalSteps();
+  this->InitGenerators();
 }
 
 void WeylGroupData::MakeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType)

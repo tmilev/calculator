@@ -1446,18 +1446,28 @@ int WebWorker::ProcessComputationIndicator()
   int inputWebWorkerIndex= inputWebWorkerNumber-1;
   if (inputWebWorkerIndex<0 || inputWebWorkerIndex>=this->parent->theWorkers.size)
   { stOutput << "<b>Indicator error. Worker number "
-    << inputWebWorkerNumber << "is out of range: there are " << this->parent->theWorkers.size
-    << "workers. </b>";
+    << inputWebWorkerNumber << " is out of range: there are " << this->parent->theWorkers.size
+    << " workers. </b>";
     return 0;
   }
+  std::stringstream theErrorMessageStream;
+  theErrorMessageStream
+  << "<span style=\"color:red\">Your computation may have terminated unexpectedly. The maximum number of "
+  << " connections/computations you can run is: " << theWebServer.MaxNumWorkersPerIPAdress << ". </span>"
+  << "At the time of writing, you use up 1 connection per computation, "
+  << "1 - 4 connections for each web browser request (depending on the browser) "
+  << "and 1 per computation window request. The "
+  << "most recent error message reported by the worker you want to monitor is: "
+  << this->parent->theWorkers[inputWebWorkerIndex].pingMessage;
   if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUse)
   { stOutput << "<b>Indicator error. Worker number " << inputWebWorkerNumber << " is not in use. "
-    << "Total number of workers: " << this->parent->theWorkers.size << ". </b>";
+    << theErrorMessageStream.str()
+    << " Total number of workers: " << this->parent->theWorkers.size << ". </b>";
     return 0;
   }
   if (inputWebWorkerIndex==this->indexInParent)
   { stOutput << "<b>Indicator error. Worker number " << inputWebWorkerNumber << " requested to monitor itself. "
-    << " This is not allowed.</b>";
+    << " This is not allowed. " << theErrorMessageStream.str() << "</b>";
     return 0;
   }
   WebWorker& otherWorker=this->parent->theWorkers[inputWebWorkerIndex];
@@ -2622,6 +2632,7 @@ WebServer::WebServer()
   this->highestSocketNumber=-1;
   this->flagSSLHandshakeSuccessful=false;
   this->flagReapingChildren=false;
+  this->MaxNumWorkersPerIPAdress=8;
 }
 
 WebWorker& WebServer::GetActiveWorker()
@@ -2900,18 +2911,25 @@ void fperror_sigaction(int signal)
   exit(0);
 }
 
-void WebServer::RecycleChildrenIfPossible()
+void WebServer::TerminateChildSystemCall(int i)
+{ this->theWorkers[i].flagInUse=false;
+  this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
+  kill(this->theWorkers[i].ProcessPID, SIGKILL);
+}
+
+void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress)
 { //Listen for children who have exited properly.
   //This might need to be rewritten: I wasn't able to make this work with any
   //mechanism other than pipes.
   MacroRegisterFunctionWithName("WebServer::RecycleChildrenIfPossible");
 //  this->ReapChildren();
+  MonomialWrapper<std::string, MathRoutines::hashString> incomingAddress(incomingUserAddress);
   for (int i=0; i<this->theWorkers.size; i++)
     if (this->theWorkers[i].flagInUse)
     { this->theWorkers[i].pipeWorkerToServerControls.Read();
       if (this->theWorkers[i].pipeWorkerToServerControls.lastRead.size>0)
       { this->theWorkers[i].flagInUse=false;
-        this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress,1);
+        this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
         theLog << logger::green << "Worker " << i+1 << " done, marking for reuse. " << logger::endL;
 //        waitpid(this->theWorkers[i].ProcessPID, 0, )
       } else
@@ -2922,6 +2940,19 @@ void WebServer::RecycleChildrenIfPossible()
         (this->theWorkers[i].pipeWorkerToServerUserInput.lastRead.TheObjects,
           this->theWorkers[i].pipeWorkerToServerUserInput.lastRead.size);
       this->theWorkers[i].pipeWorkerToServerTimerPing.Read();
+      if (this->theWorkers[i].userAddress==incomingAddress)
+        if (this->currentlyConnectedAddresses.GetMonomialCoefficient(incomingAddress)>this->MaxNumWorkersPerIPAdress)
+        { this->TerminateChildSystemCall(i);
+          std::stringstream errorStream;
+          errorStream
+          << "Terminating child " << i+1 << " with PID "
+          << this->theWorkers[i].ProcessPID
+          << ": more than " << this->MaxNumWorkersPerIPAdress << " connections from IP address: "
+          << incomingUserAddress;
+          this->theWorkers[i].pingMessage=errorStream.str();
+          logConnections << logger::red  << errorStream.str() << logger::endL;
+          continue;
+        }
       if (this->theWorkers[i].pipeWorkerToServerTimerPing.lastRead.size>0)
       { this->theWorkers[i].pingMessage.assign
         (this->theWorkers[i].pipeWorkerToServerTimerPing.lastRead.TheObjects,
@@ -2934,9 +2965,7 @@ void WebServer::RecycleChildrenIfPossible()
                  theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly>
                  theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead &&
                  this->theWorkers[i].flagInUse)
-      { this->theWorkers[i].flagInUse=false;
-        this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress,1);
-        kill(this->theWorkers[i].ProcessPID, SIGKILL);
+      { this->TerminateChildSystemCall(i);
         std::stringstream pingTimeoutStream;
         pingTimeoutStream << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
         << " seconds passed since worker " << i+1
@@ -3104,7 +3133,10 @@ int WebServer::Run()
     }
 //    theLog << logger::purple << "NewconnectedSocket: " << newConnectedSocket << ", listeningSocket: "
 //    << theListeningSocket << logger::endL;
-    this->RecycleChildrenIfPossible();
+    inet_ntop
+    (their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr),
+     userAddressBuffer, sizeof userAddressBuffer);
+    this->RecycleChildrenIfPossible(userAddressBuffer);
     if (!this->CreateNewActiveWorker())
     { logBlock << logger::purple << "Failed to create an active worker. System error string: "
       << strerror(errno) << logger::endL;
@@ -3116,18 +3148,7 @@ int WebServer::Run()
     this->GetActiveWorker().connectedSocketIDLastValueBeforeRelease=newConnectedSocket;
     connectionsSoFar++;
     this->GetActiveWorker().connectionID=connectionsSoFar;
-    inet_ntop
-    (their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr),
-     userAddressBuffer, sizeof userAddressBuffer);
     this->GetActiveWorker().userAddress.theObject=userAddressBuffer;
-    if (this->currentlyConnectedAddresses.GetMonomialCoefficient(this->GetActiveWorker().userAddress)>7)
-    { logConnections << logger::red << "Max 8 connections per ip address: refusing connection to: "
-      << this->GetActiveWorker().userAddress.theObject << ". " << logger::endL;
-      this->GetActiveWorker().flagInUse=false;
-      this->activeWorker=-1;
-      close(newConnectedSocket);
-      continue;
-    }
     this->currentlyConnectedAddresses.AddMonomial(this->GetActiveWorker().userAddress, 1 );
 //    theLog << this->ToStringStatus();
     this->GetActiveWorker().ProcessPID=fork(); //creates an almost identical copy of this process.

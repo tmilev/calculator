@@ -146,7 +146,8 @@ public:
   const SyntacticElementHTML& inputElement
 )
   ;
-  std::string GetSubmitStringAreaAsMainInput();
+  std::string GetEditPageHtml();
+  std::string GetJavascriptSubmitMainInputIncludeCurrentFile();
   std::string GetSubmitEmailsJavascript();
   std::string GetDatePickerJavascriptInit();
   std::string GetDatePickerStart(const std::string& theId);
@@ -559,7 +560,24 @@ bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt)
   return false;
 }
 
-std::string CalculatorHTML::GetSubmitStringAreaAsMainInput()
+std::string CalculatorHTML::GetEditPageHtml()
+{ MacroRegisterFunctionWithName("CalculatorHTML::GetEditPageHtml");
+  return "";
+  std::stringstream out;
+  out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath
+  << "?request=editPage&";
+  std::string urledProblem=CGI::StringToURLString(this->fileName);
+  std::stringstream refStreamNoRequest;
+//  out << "cleaned up link: " << cleaneduplink;
+//  out << "<br>urled link: " <<  urledProblem;
+  refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation()
+  << "currentExamFile=" << urledProblem << "&"
+  << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&";
+  out << refStreamNoRequest.str() << "\">" << "Edit problem/page" << "</a>";
+  return out.str();
+}
+
+std::string CalculatorHTML::GetJavascriptSubmitMainInputIncludeCurrentFile()
 { std::stringstream out;
   out
   << "<script type=\"text/javascript\"> \n"
@@ -2087,7 +2105,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       this->theProblemData.randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
   this->FigureOutCurrentProblemList(comments);
   this->outputHtmlNavigation=this->ToStringProblemNavigation();
-  out << this->GetSubmitStringAreaAsMainInput();
+  out << this->GetJavascriptSubmitMainInputIncludeCurrentFile();
   if (this->flagIsExamProblem)
     out << this->GetSubmitAnswersJavascript();
   else if (this->flagIsExamHome)
@@ -2096,6 +2114,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   { out << WebWorker::GetJavascriptHideHtml();
     out << this->GetDatePickerJavascriptInit();
   }
+  if (theGlobalVariables.UserDefaultHasAdminRights())
+    out << this->GetEditPageHtml();
 //  else
 //    out << " no date picker";
   theInterpreter.flagWriteLatexPlots=false;

@@ -152,6 +152,7 @@ public:
   int listeningSocketHTTP;
   int listeningSocketHttpSSL;
   int highestSocketNumber;
+  int MaxNumWorkersPerIPAdress;
   bool flagTryToKillOlderProcesses;
   bool flagSSLHandshakeSuccessful;
   bool flagReapingChildren;
@@ -204,7 +205,8 @@ public:
   void SSLfreeResources();
   void SSLServerSideHandShake();
   void SSLfreeEverythingShutdownSSL();
-  void RecycleChildrenIfPossible();
+  void TerminateChildSystemCall(int i);
+  void RecycleChildrenIfPossible(const std::string& incomingUserAddress);
   void Restart();
   void CheckExecutableVersionAndRestartIfNeeded(bool callReload);
   void initDates();

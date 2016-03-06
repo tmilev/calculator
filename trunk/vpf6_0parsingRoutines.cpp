@@ -159,7 +159,6 @@ void Calculator::init()
   this->AddOperationNoRepetitionAllowed("if");
   this->AddOperationNoRepetitionAllowed("\\lim");
 
-
   this->AddOperationBuiltInType("Rational");
   this->AddOperationBuiltInType("EltZmodP");
   this->AddOperationBuiltInType("Double");
@@ -191,7 +190,6 @@ void Calculator::init()
   this->AddOperationBuiltInType("weightLieAlg");
   this->AddOperationBuiltInType("weightLieAlgPoly");
 //  this->AddOperationBuiltInType("\\arctan");
-
 
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(" ");//empty token must always come first!!!!
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("{{}}");
@@ -297,8 +295,6 @@ void Calculator::init()
   this->theProgramExpression[2][1][1].SetChildAtomValue(0, this->opSSLieAlg(), *this);
   this->RuleStack.AddOnTop(this->theProgramExpression);
 */
-
-
 //  stOutput << "<br>Num lists created at command list initialization exit: " << NumListsCreated;
 }
 
@@ -785,7 +781,7 @@ bool Calculator::ReplaceSequenceUXEYBySequenceZY(int theControlIndex, int inputF
 }
 
 bool Calculator::ReplaceSequenceXEBySequence(int theControlIndex, int inputFormat)
-{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+{ SyntacticElement& left =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   left.theData.AddChildOnTop(right.theData);
   left.theData.format=inputFormat;
@@ -808,7 +804,7 @@ bool Calculator::ReplaceYXdotsXBySequenceYXdotsX(int theControlIndex, int inputF
 }
 
 bool Calculator::ReplaceEXEBySequence(int theControlIndex, int inputFormat)
-{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+{ SyntacticElement& left =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   Expression newExpr;
   newExpr.reset(*this, 3);
@@ -824,7 +820,7 @@ bool Calculator::ReplaceEXEBySequence(int theControlIndex, int inputFormat)
 }
 
 bool Calculator::ReplaceEEByEusingO(int theControlIndex)
-{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+{ SyntacticElement& left =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   Expression newExpr;
   newExpr.reset(*this, 3);
@@ -839,7 +835,7 @@ bool Calculator::ReplaceEEByEusingO(int theControlIndex)
 }
 
 bool Calculator::ReplaceEOXbyEX()
-{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+{ SyntacticElement& left =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& opElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   int theOp=this->GetOperationIndexFromControlIndex(opElt.controlIndex);
   Expression newExpr;
@@ -853,7 +849,7 @@ bool Calculator::ReplaceEOXbyEX()
 }
 
 bool Calculator::ReplaceEEXByEXusingO(int theControlIndex)
-{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+{ SyntacticElement& left =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   Expression newExpr;
   newExpr.reset(*this, 3);
@@ -919,9 +915,9 @@ bool Calculator::ReplaceEOEXByEX(int formatOptions)
 
 bool Calculator::ReplaceXEEXByEXusingO(int inputOperation, int formatOptions)
 { //stOutput << "<b>Here iam!</b>";
-  SyntacticElement& middle=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
-  SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
-  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  SyntacticElement& middle = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+  SyntacticElement& left  =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
+  SyntacticElement& right =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   Expression newExpr;
   newExpr.reset(*this, 3);
   newExpr.AddChildAtomOnTop(inputOperation);
@@ -939,44 +935,45 @@ bool Calculator::ReplaceXEEXByEXusingO(int inputOperation, int formatOptions)
 
 
 bool Calculator::isSeparatorFromTheLeftGeneral(const std::string& input)
-{ return input=="{" || input=="(" || input=="[" || input=="," || input==":" || input==";" || input==" "
-  || input=="MatrixSeparator" || input == "MatrixRowSeparator" || input=="&";
+{ return input=="{" || input=="(" || input=="[" || input=="," || input==":" || input==";" ||
+  input==" " || input=="MatrixSeparator" || input == "MatrixRowSeparator" || input=="&";
 }
 
 bool Calculator::isSeparatorFromTheRightGeneral(const std::string& input)
-{ return input=="}" || input==")" || input=="]" || input=="," || input==":" || input==";"
-  || input=="MatrixSeparator" || input=="="
-  || input=="MatrixRowSeparator" || input=="\\\\" || input=="\\end" || input=="&" || input=="EndProgram";
+{ return input=="}" || input==")" || input=="]" || input=="," || input==":" || input==";" ||
+  input=="MatrixSeparator" || input=="=" || input=="MatrixRowSeparator" || input=="\\\\" ||
+  input=="\\end" || input=="&" || input=="EndProgram";
 }
 
 bool Calculator::isSeparatorFromTheLeftForList(const std::string& input)
-{ return input=="{" || input=="(" || input=="[" || input==":" || input==";" || input==" "
-  || input=="MatrixSeparator" || input == "MatrixRowSeparator" ;
+{ return input=="{" || input=="(" || input=="[" || input==":" || input==";" || input==" " ||
+  input=="MatrixSeparator" || input == "MatrixRowSeparator" ;
 }
 
 bool Calculator::isSeparatorFromTheLeftForListMatrixRow(const std::string& input)
-{ return input=="{" || input=="(" || input=="[" || input==":" || input==";" || input==" "
-  || input=="MatrixSeparator" || input == "MatrixRowSeparator" ;
+{ return input=="{" || input=="(" || input=="[" || input==":" || input==";" || input==" " ||
+  input=="MatrixSeparator" || input == "MatrixRowSeparator" ;
 }
 
 bool Calculator::isSeparatorFromTheLeftForMatrixRow(const std::string& input)
-{ return input=="{" || input=="(" || input=="[" || input==":" || input==";" || input==" "
-  || input=="MatrixSeparator" || input == "MatrixRowSeparator" ;
+{ return input=="{" || input=="(" || input=="[" || input==":" || input==";" || input==" " ||
+  input=="MatrixSeparator" || input == "MatrixRowSeparator" ;
 }
 
 bool Calculator::isSeparatorFromTheRightForList(const std::string& input)
-{ return input=="}" || input==")" || input=="]" || input==":" || input==";" || input=="MatrixSeparator"
-  || input=="MatrixRowSeparator" || input=="\\\\" || input=="\\end";
+{ return input=="}" || input==")" || input=="]" || input==":" || input==";" ||
+  input=="MatrixSeparator" || input=="MatrixRowSeparator" || input=="\\\\" || input=="\\end";
 }
 
 bool Calculator::isSeparatorFromTheRightForListMatrixRow(const std::string& input)
-{ return input=="}" || input==")" || input=="]" || input==":" || input==";" || input=="MatrixSeparator"
-  || input=="MatrixRowSeparator" || input=="\\\\" || input=="\\end";
+{ return input=="}" || input==")" || input=="]" || input==":" || input==";" ||
+  input=="MatrixSeparator" || input=="MatrixRowSeparator" || input=="\\\\" || input=="\\end";
 }
 
 bool Calculator::isSeparatorFromTheRightForMatrixRow(const std::string& input)
-{ return input=="}" || input==")" || input=="]" || input==":" || input==";" || input=="MatrixSeparator" || input=="&"
-  || input=="MatrixRowSeparator" || input=="\\\\" || input=="\\end";
+{ return input=="}" || input==")" || input=="]" || input==":" || input==";" ||
+  input=="MatrixSeparator" || input=="&" || input=="MatrixRowSeparator" || input=="\\\\" ||
+  input=="\\end";
 }
 
 bool Calculator::isSeparatorFromTheLeftForDefinition(const std::string& input)

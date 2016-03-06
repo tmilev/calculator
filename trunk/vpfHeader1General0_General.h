@@ -1099,6 +1099,7 @@ struct CGI
 public:
   static std::string StyleSheetCalculatorWithTags;
   static std::string JavascriptAutoCompleteWithTags;
+  static std::string JavascriptSha1;
   static std::stringstream outputStream;
   static int GlobalMathSpanID;
   static int GlobalCanvasID;
@@ -1137,6 +1138,7 @@ public:
   static std::string DoubleBackslashes(const std::string& input);
   static std::string& GetCalculatorStyleSheetWithTags();
   static std::string& GetJavascriptAutocompleteWithTags();
+  static std::string& GetJavascriptSha1();
 
   static std::string GetMathSpanPure(const std::string& input, int upperNumChars=10000);
   static std::string GetMathSpanBeginArrayL(const std::string& input, int upperNumChars=10000);

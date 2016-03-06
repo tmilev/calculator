@@ -993,6 +993,7 @@ bool Calculator::AllowsTensorInPreceding(const std::string& lookAhead)
 
 bool Calculator::AllowsTimesInPreceding(const std::string& lookAhead)
 { return lookAhead=="+" || lookAhead=="-" || lookAhead=="*" || lookAhead=="/" ||
+  lookAhead=="\\frac" ||
   lookAhead=="Expression" ||  lookAhead== "Integer" || lookAhead=="\\cup" ||
   lookAhead=="(" || lookAhead=="[" ||
   lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||

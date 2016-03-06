@@ -704,16 +704,17 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromSc
   tempFormat.flagUseHTML=false;
   std::stringstream out;
   out << "Character table: ";
-  Matrix<Rational> charMat;
-  charMat.init(theGroupData.theGroup.ConjugacyClassCount(), theGroupData.theGroup.ConjugacyClassCount());
-  for (int i=0; i<theGroupData.irreps.size; i++)
-  { //out << "<br>" << theGroup.irreps[i].theCharacteR.ToString();
-    charMat.AssignVectorToRowKeepOtherRowsIntactNoInit(i, theGroupData.irreps[i].GetCharacter().data);
-  }
-  out << CGI::GetMathSpanPure(charMat.ToString(&tempFormat));
+  out << theGroupData.theGroup.PrettyPrintCharacterTable(&theGlobalVariables);
+  //Matrix<Rational> charMat;
+  //charMat.init(theGroupData.theGroup.ConjugacyClassCount(), theGroupData.theGroup.ConjugacyClassCount());
+  //for (int i=0; i<theGroupData.theGroup.irreps.size; i++)
+  //{ //out << "<br>" << theGroup.irreps[i].theCharacteR.ToString();
+  //  charMat.AssignVectorToRowKeepOtherRowsIntactNoInit(i, theGroupData.irreps[i].GetCharacter().data);
+  //}
+  //out << CGI::GetMathSpanPure(charMat.ToString(&tempFormat));
   out << "<br>Explicit realizations of each representation follow.";
-  for (int i=0; i<theGroupData.irreps.size; i++)
-    out << "<hr>" << theGroupData.irreps[i].ToString(&tempFormat);
+  for (int i=0; i<theGroupData.theGroup.irreps.size; i++)
+    out << "<hr>" << theGroupData.theGroup.irreps[i].ToString(&tempFormat);
   out << theGroupData.ToString(&tempFormat);
   return output.AssignValue(out.str(), theCommands);
 }
@@ -1011,7 +1012,7 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
         out << "<td>" << this->irrepsCarterLabels[i] << "</td>";
       else
         out << "<td></td>";
-      out << "<td>" << this->theGroup.characterTable[i]->ToString() << "</td>";
+      out << "<td>" << this->theGroup.characterTable[i].ToString() << "</td>";
       if (s==0)
         for (int j=0; j<inputSubgroups.size; j++)
           out << "<td>" << inputSubgroups[j].tauSignature[i].ToString() << "</td>";
@@ -1034,7 +1035,7 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
   out << "\\begin{longtable}{rl}\\caption{\\label{tableIrrepChars" << this->theDynkinType.ToString()
   << "}\\\\ Irreducible representations and their characters}\\\\ \n<br>\n Irrep label & Character\\\\\n<br>\n";
   for (int i=0; i<this->theGroup.characterTable.size; i++)
-    out << "$" << this->ToStringIrrepLabel(i) << "$&$" << this->theGroup.characterTable[i]->ToString() << "$\\\\\n<br>\n";
+    out << "$" << this->ToStringIrrepLabel(i) << "$&$" << this->theGroup.characterTable[i].ToString() << "$\\\\\n<br>\n";
   out << "\\end{longtable}\n<br>\n";
   out << "\\begin{longtable}{rcl}"<< "\\caption{\\label{tableConjugacyClassTable"
   << CGI::CleanUpForLaTeXLabelUse(this->theDynkinType.ToString()) << "}}\\\\ ";

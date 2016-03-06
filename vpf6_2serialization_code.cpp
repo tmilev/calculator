@@ -36,10 +36,29 @@ bool CalculatorConversions::innerLoadWeylGroup(Calculator& theCommands, const Ex
   DynkinType theType;
   if (!CalculatorConversions::innerDynkinType(theCommands, input, theType))
     return false;
-  WeylGroupData theWeyl;
-  theWeyl.MakeFromDynkinType(theType);
+  auto& las = theCommands.theObjectContainer.theLieAlgebras;
+  const SemisimpleLieAlgebra* la = NULL;
+  for(int i=0; i<las.size; i++)
+  { if(las[i].theWeyl.theDynkinType == theType)
+    { la = &(las[i]);
+      break;
+    }
+  }
+  if(la == NULL)
+  { // (1) In order to put a SemisimpleLieAlgebra in the ObjectContainer, it is necessary to be able to hash it
+    // (2) To hash a SemisimpleLieAlgebra, we must initialize it, at least, initialize .theWeyl.CartanSymmetric
+    // (3) It is necessary to reinitialize everything so the pointers from the elements will point to the WeylData
+    //     safely in the ObjectContainer on the heap
+    // (4) In case SemisimpleLieAlgebra::HashFunction is ever changed, we initialize theWeyl twice
+    // (5) I've spent more type typing this out than this code will ever waste
+    SemisimpleLieAlgebra nla;
+    nla.theWeyl.MakeFromDynkinType(theType);
+    las.AddOnTop(nla);
+    las.LastObject().theWeyl.MakeFromDynkinType(theType);
+    la = &(las.LastObject());
+  }
 //  stOutput << "got ere2!";
-  return output.AssignValue(theWeyl, theCommands);
+  return output.AssignValue(la->theWeyl, theCommands);
 }
 
 bool CalculatorConversions::innerDynkinSimpleType(Calculator& theCommands, const Expression& input, DynkinSimpleType& outputMon)

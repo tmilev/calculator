@@ -721,7 +721,7 @@ Plot& Expression::GetValueNonConst()const
 template < >
 WeylGroupData& Expression::GetValueNonConst()const
 { if (!this->IsOfType<WeylGroupData>())
-    crash << "This is a programming error: expression not of required type WeylGroup. The expression equals " << this->ToString() << "." << crash;
+    crash << "This is a programming error: expression not of required type WeylGroupData. The expression equals " << this->ToString() << "." << crash;
   return this->owner->theObjectContainer.theLieAlgebras.GetElement(this->GetLastChild().theData).theWeyl;
 }
 

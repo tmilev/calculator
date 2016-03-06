@@ -1,0 +1,28 @@
+<span class="setCalculatorExamProblem">
+</span>
+Compute the derivative of the function. 
+
+<span class="calculatorHidden">
+\(
+a=randomInteger((2,6));  
+b=randomInteger((-5,-1), (1,5));  
+c=randomInteger( (1,5));  
+TurnOffRules("sqrt", "ConvertShortDenominatorToNegativePower", "CommonDenominatorOneNonFraction", "CommuteIfUnivariate");
+\)</span>
+<br>
+<span class="calculator">
+\(\displaystyle f{}{{x}}=\sqrt[a]{b\sin x + c}  \) 
+</span>.
+<span class="calculatorHidden">
+TurnOnRules("sqrt", "ConvertShortDenominatorToNegativePower", "CommonDenominatorOneNonFraction", "CommuteIfUnivariate");
+</span>
+<br>
+Answer: \(f'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswer">
+\(
+CompareFunctionsNumerically(d/dx(f{}x), AlgebraAnswer, 0, -c/(2b), 50, 0.0001);
+\)
+</textarea>
+
+
+
+

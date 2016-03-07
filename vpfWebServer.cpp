@@ -1878,6 +1878,8 @@ int WebWorker::ProcessCalculator()
     return this->ProcessEditPage();
   if (theGlobalVariables.userCalculatorRequestType=="modifyPage")
     return this->ProcessModifyPage();
+  if (theGlobalVariables.userCalculatorRequestType=="clonePage")
+    return this->ProcessClonePage();
     //  stOutput << "main request is: " << theGlobalVariables.userCalculatorRequestType
 //  << "<br>web keys: " << theGlobalVariables.webFormArgumentNames.ToStringCommaDelimited()
 //  << "<br>web entries: " << theGlobalVariables.webFormArguments.ToStringCommaDelimited();

@@ -7781,12 +7781,12 @@ bool CGI::IsRepresentedByItselfInURLs(char input)
   return input=='.';
 }
 
-std::string CGI::StringToURLString(const std::string& input)
+std::string CGI::StringToURLString(const std::string& input, bool usePlusesForSpacebars)
 { std::stringstream out;
   for (unsigned int i=0; i<input.size(); i++)
     if (CGI::IsRepresentedByItselfInURLs(input[i]))
       out << input[i];
-    else if (input[i]==' ')
+    else if (input[i]==' ' && usePlusesForSpacebars)
       out << '+';
     else
     { out << "%";

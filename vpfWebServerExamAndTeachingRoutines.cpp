@@ -114,6 +114,7 @@ public:
   bool ParseHTMLComputeChildFiles(std::stringstream& comments);
   bool ParseHTML(std::stringstream& comments);
   bool IsSplittingChar(const std::string& input);
+  void LoadFileNames();
   bool IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt);
   bool ExtractAnswerIds(std::stringstream& comments);
   bool InterpretHtml(std::stringstream& comments);
@@ -509,9 +510,13 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
   return out.str();
 }
 
+void CalculatorHTML::LoadFileNames()
+{ this->fileName= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile"));
+}
+
 void CalculatorHTML::LoadCurrentProblemItem()
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadCurrentProblemItem");
-  this->fileName= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile"));
+  this->LoadFileNames();
   this->flagLoadedSuccessfully=false;
   bool needToFindDefault=(this->fileName=="");
   if (!needToFindDefault)
@@ -1139,6 +1144,7 @@ std::string WebWorker::GetEditPageHTML()
   if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights())
     return "<b>Only logged-in admins are allowed to edit pages. </b>";
   CalculatorHTML theFile;
+  theFile.LoadFileNames();
   out << "<html>"
   << "<head>"
   << WebWorker::GetJavascriptStandardCookies()
@@ -1148,7 +1154,6 @@ std::string WebWorker::GetEditPageHTML()
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
   std::stringstream failureStream;
-  theFile.fileName=  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile"));
   if (!theFile.LoadMe(false, failureStream))
   { out << "<b>Failed to load file: " << theFile.fileName << ", perhaps the file does not exist. </b>";
     out << "</body></html>";

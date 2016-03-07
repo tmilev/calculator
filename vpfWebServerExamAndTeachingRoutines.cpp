@@ -907,7 +907,7 @@ std::string CalculatorHTML::ToStringCalculatorProblemSourceFromFileName(const st
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringCalculatorProblemSourceFromFileName");
   std::stringstream out;
   out << "<span class=\"calculatorExamProblem\">\n"
-  << "Problems/Derivative-sin-x-power-a-and-sin-power-a-x.html\n"
+  << theFileName
   << "</span>";
   return out.str();
 }

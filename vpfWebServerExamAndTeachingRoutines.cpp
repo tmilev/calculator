@@ -872,6 +872,10 @@ std::string WebWorker::GetSetProblemDatabaseInfoHtml()
 
 std::string WebWorker::GetModifyProblemReport()
 { MacroRegisterFunctionWithName("WebWorker::GetModifyProblemReport");
+  if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights() ||
+      !theGlobalVariables.flagUsingSSLinCurrentConnection)
+  { return "<b>Modifying problems allowed only for logged-in admins under ssl connection. </b>";
+  }
   std::string mainInput=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
   std::string fileName= CalculatorHTML::RelativePhysicalFolderProblemCollections+
   CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile"));

@@ -1063,6 +1063,8 @@ public:
   (const std::string& theFileName, std::string& output, std::stringstream& commentsOnFailure);
   static bool LoadFileToStringOnTopOfOutputFolder
   (const std::string& fileNameUnsecure, std::string& output, std::stringstream& commentsOnFailure);
+  static bool LoadFileToStringOnTopOfProjectBase
+  (const std::string& theFileName, std::string& output, std::stringstream& commentsOnFailure);
   static bool IsFileNameWithoutDotsAndSlashes(const std::string& fileName);
   static std::string GetFileNameFromFileNameWithPath(const std::string& fileName);
   static bool IsOKforFileNameOnTopOfOutputFolder(const std::string& fileName);

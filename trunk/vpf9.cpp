@@ -539,6 +539,16 @@ bool FileOperations::GetFolderFileNamesUnsecure
   return true;
 }
 
+bool FileOperations::LoadFileToStringOnTopOfProjectBase
+(const std::string& theFileName, std::string& output, std::stringstream& commentsOnFailure)
+{ if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
+  { commentsOnFailure << "File name not secure, refusing to read. ";
+    return false;
+  }
+  return FileOperations::LoadFileToStringUnsecure
+  (theGlobalVariables.PhysicalPathProjectBase+ theFileName, output, commentsOnFailure);
+}
+
 bool FileOperations::LoadFileToStringOnTopOfOutputFolder
 (const std::string& theFileName, std::string& output, std::stringstream& commentsOnFailure)
 { if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
@@ -574,6 +584,15 @@ bool FileOperations::FileExistsOnTopOfOutputFolder(const std::string& theFileNam
 //  std::cout << "got to here\nchecking unsecure file existence: "
 //  << theGlobalVariables.PhysicalPathOutputFolder << theFileName << "\n";
   return FileOperations::FileExistsUnsecure(theGlobalVariables.PhysicalPathOutputFolder+theFileName);
+}
+
+bool FileOperations::FileExistsOnTopOfProjectBase(const std::string& theFileName)
+{ if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
+    return false;
+//  std::cout << "got to here\nchecking unsecure file existence: "
+//  << theGlobalVariables.PhysicalPathOutputFolder << theFileName << "\n";
+  return FileOperations::FileExistsUnsecure
+  (theGlobalVariables.PhysicalPathProjectBase+theFileName);
 }
 
 bool FileOperations::FileExistsUnsecure(const std::string& theFileName)

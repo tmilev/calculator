@@ -2190,6 +2190,13 @@ int WebWorker::ProcessEditPage()
   return 0;
 }
 
+int WebWorker::ProcessClonePage()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessClonePage");
+  stOutput << this->GetClonePageResult();
+  stOutput.Flush();
+  return 0;
+}
+
 std::string WebWorker::GetLoginPage()
 { MacroRegisterFunctionWithName("WebWorker::GetLoginPage");
   std::stringstream out;

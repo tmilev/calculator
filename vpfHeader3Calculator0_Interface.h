@@ -1868,10 +1868,10 @@ bool Calculator::GetMatrix
 (const Expression& input, Matrix<theType>& outputMat, Expression* inputOutputStartingContext, int targetNumColsNonMandatory, Expression::FunctionAddress conversionFunction)
 { MacroRegisterFunctionWithName("Calculator::GetMatrix");
   Matrix<Expression> nonConvertedEs;
+  //stOutput << " Getting matrix from: " << input.ToString();
   if (!this->GetMatrixExpressions(input, nonConvertedEs, -1, targetNumColsNonMandatory))
-  { this->Comments << "Failed to extract matrix of expressions from " << input.ToString();
-    return false;
-  }
+    return *this << "Failed to extract matrix of expressions from " << input.ToString();
+  //stOutput << " extracted matrix expressions: " << nonConvertedEs.ToString();
   Matrix<Expression> convertedEs;
   convertedEs.init(nonConvertedEs.NumRows, nonConvertedEs.NumCols);
   Expression theContext;

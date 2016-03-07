@@ -578,6 +578,9 @@ std::string CalculatorHTML::GetEditPageButton()
   << "currentExamFile=" << urledProblem << "&"
   << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&";
   out << refStreamNoRequest.str() << "\">" << "Edit problem/page" << "</a>";
+  out << "<textarea id=\"clonePageAreaID\" rows=\"1\" cols=\"40\">" << this->fileName << "</textarea><button onlick=\""
+  << "submitStringAsMainInput(document.getElementById('clonePageAreaID').value, 'spanCloningAttemptResultID', 'clonePage');"
+  << "\" >Clone page</button> <span id=\"spanCloningAttemptResultID\"></span>";
   return out.str();
 }
 
@@ -880,8 +883,7 @@ std::string WebWorker::GetModifyProblemReport()
 { MacroRegisterFunctionWithName("WebWorker::GetModifyProblemReport");
   if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights() ||
       !theGlobalVariables.flagUsingSSLinCurrentConnection)
-  { return "<b>Modifying problems allowed only for logged-in admins under ssl connection. </b>";
-  }
+    return "<b>Modifying problems allowed only for logged-in admins under ssl connection. </b>";
   std::string mainInput=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
   std::string fileName= CalculatorHTML::RelativePhysicalFolderProblemCollections+
   CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile"));
@@ -895,6 +897,43 @@ std::string WebWorker::GetModifyProblemReport()
   theFile.close();
   out << "<b><span style=\"color:green\">Written content to file: "
   << fileName << ". </span></b>";
+  return out.str();
+}
+
+std::string WebWorker::GetClonePageResult()
+{ MacroRegisterFunctionWithName("WebWorker::GetClonePageResult");
+  if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights() ||
+      !theGlobalVariables.flagUsingSSLinCurrentConnection)
+    return "<b>Cloning problems allowed only for logged-in admins under ssl connection. </b>";
+  std::string fileNameResult=
+  CalculatorHTML::RelativePhysicalFolderProblemCollections+
+  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
+  std::string fileNameToBeCloned= CalculatorHTML::RelativePhysicalFolderProblemCollections+
+  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile"));
+  std::stringstream out;
+  std::string startingFileString;
+  if (!FileOperations::LoadFileToStringOnTopOfOutputFolder(fileNameToBeCloned, startingFileString, out))
+  { out << "Could not find file: " << fileNameToBeCloned;
+    return out.str();
+  }
+  std::fstream theFile;
+  if (FileOperations::FileExistsOnTopOfProjectBase(fileNameResult))
+  { out << "<b>File: " << fileNameToBeCloned << " already exists. </b>";
+    return out.str();
+  }
+  if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfProjectBase(theFile, fileNameResult, false, false, false))
+  { out << "<b><span style=\"color:red\">Failed to open output file: " << fileNameResult << ". </span></b>";
+    return out.str();
+  }
+  theFile << startingFileString;
+  theFile.close();
+  out << "<b><span style=\"color:green\">Written content to file: "
+  << fileNameResult << ". </span></b>";
+  SyntacticElementHTML theElt;
+  theElt.content=fileNameResult;
+  CalculatorHTML linkInterpreter;
+  linkInterpreter.InterpretGenerateLink(theElt);
+  out << theElt.interpretedCommand;
   return out.str();
 }
 
@@ -1158,11 +1197,11 @@ std::string WebWorker::GetEditPageHTML()
   { out << "<b>Failed to load file: " << theFile.fileName << ", perhaps the file does not exist. </b>";
     out << "</body></html>";
   }
-  std::stringstream buttonStream;
+  std::stringstream buttonStream, submitModPageJS;
+  submitModPageJS << "submitStringAsMainInput(document.getElementById('mainInput').value, 'spanSubmitReport', 'modifyPage');";
   buttonStream
   << "<button "
-  << "onclick=\"submitStringAsMainInput"
-  << "(document.getElementById('mainInput').value, 'spanSubmitReport', 'modifyPage');\" >Save changes</button>";
+  << "onclick=\"" << submitModPageJS.str() << "\" >Save changes</button>";
 //  out << "<form>";
 //  out << "<input type=\"submit\" value=\"Save changes\"> ";
   out << buttonStream.str();

@@ -4412,23 +4412,37 @@ bool CalculatorFunctionsGeneral::innerAllPartitions(Calculator& theCommands, con
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerDeterminant(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorFunctionsGeneral::innerDeterminant
+(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDeterminant");
   Matrix<Rational> matRat;
   Expression theContext;
-  if (theCommands.GetMatriXFromArguments(input, matRat, 0, 0, 0))
+  bool isMatRat=input.IsOfType(&matRat);
+  if (!isMatRat)
+   isMatRat= theCommands.GetMatriXFromArguments(input, matRat, 0, 0, 0);
+  if (isMatRat)
   { if (matRat.NumRows==matRat.NumCols)
     { if (matRat.NumRows>100)
-        return theCommands << "<hr>I have been instructed not to compute determinants of rational matrices larger than 100 x 100 "
-        << ", and your matrix had " << matRat.NumRows << " rows. " << "To lift the restriction "
+        return theCommands << "<hr>I have been instructed not to compute "
+        << "determinants of rational matrices larger than 100 x 100 "
+        << ", and your matrix had " << matRat.NumRows << " rows. "
+        << "To lift the restriction "
         << "edit function located in file " << __FILE__ << ", line " << __LINE__ << ". ";
       //stOutput << " <br> ... and the matRat is: " << matRat.ToString();
       return output.AssignValue(matRat.GetDeterminant(), theCommands);
     } else
-      return output.MakeError("Requesting to compute determinant of non-square matrix. ", theCommands);
+    { theCommands << "Requesting to compute determinant of the non-square "
+      << matRat.NumRows << " by "
+      << matRat.NumCols << " matrix: " << input.ToString();
+      return output.MakeError
+      ("Requesting to compute determinant of non-square matrix. ", theCommands);
+    }
   }
   Matrix<AlgebraicNumber> matAlg;
-  if (theCommands.GetMatriXFromArguments(input, matAlg, 0,0,0))
+  bool isMatAlg=input.IsOfType(&matAlg);
+  if (!isMatAlg)
+    isMatAlg=theCommands.GetMatriXFromArguments(input, matAlg, 0,0,0);
+  if (isMatAlg)
   { if (matAlg.NumRows==matAlg.NumCols)
     { if (matAlg.NumRows>100)
         return theCommands << "<hr>I have been instructed not to compute determinants of algebraic number matrices larger than 100 x 100 "
@@ -4437,15 +4451,19 @@ bool CalculatorFunctionsGeneral::innerDeterminant(Calculator& theCommands, const
       //stOutput << " <br> ... and the matRat is: " << matRat.ToString();
       return output.AssignValue(matAlg.GetDeterminant(), theCommands);
     } else
+    { theCommands << "Requesting to compute determinant of the non-square "
+      << matRat.NumRows << " by "
+      << matRat.NumCols << " matrix: " << input.ToString();
       return output.MakeError("Requesting to compute determinant of non-square matrix. ", theCommands);
+    }
   }
-
   Matrix<RationalFunctionOld> matRF;
-  if (!theCommands.GetMatriXFromArguments(input, matRF, &theContext, -1, CalculatorConversions::innerRationalFunction))
-    return theCommands << "<hr>I have been instructed to only compute determinants of matrices whose entries are "
-    << " rational functions or rationals, and I failed to convert your matrix to either type. "
-    << " If this is not how you expect this function to act, correct it: the code is located in  "
-    << " file " << __FILE__ << ", line " << __LINE__ << ". ";
+  if (!input.IsOfType(&matRF))
+    if (!theCommands.GetMatriXFromArguments(input, matRF, &theContext, -1, CalculatorConversions::innerRationalFunction))
+      return theCommands << "<hr>I have been instructed to only compute determinants of matrices whose entries are "
+      << " rational functions or rationals, and I failed to convert your matrix to either type. "
+      << " If this is not how you expect this function to act, correct it: the code is located in  "
+      << " file " << __FILE__ << ", line " << __LINE__ << ". ";
   if (matRF.NumRows==matRF.NumCols)
   { if (matRF.NumRows>50)
       return theCommands << "I have been instructed not to compute determinants of matrices of rational functions larger than "
@@ -4453,7 +4471,11 @@ bool CalculatorFunctionsGeneral::innerDeterminant(Calculator& theCommands, const
       << __FILE__ << ", line " << __LINE__ << ". ";
     return output.AssignValueWithContext(matRF.GetDeterminant(), theContext, theCommands);
   } else
+  { theCommands << "Requesting to compute determinant of the non-square "
+    << matRat.NumRows << " by "
+    << matRat.NumCols << " matrix: " << input.ToString();
     return output.MakeError("Requesting to compute determinant of non-square matrix given by:  "+input.ToString(), theCommands);
+  }
 }
 
 bool CalculatorFunctionsGeneral::innerDecomposeCharGenVerma(Calculator& theCommands, const Expression& input, Expression& output)

@@ -838,13 +838,20 @@ int WebWorker::ProcessAddUserEmails()
   return 0;
 }
 
+int WebWorker::ProcessModifyPage()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessModifyPage");
+  stOutput << this->GetModifyProblemReport();
+  stOutput.Flush();
+  return 0;
+}
+
 std::string WebWorker::GetSetProblemDatabaseInfoHtml()
 { MacroRegisterFunctionWithName("WebWorker::GetSetProblemDatabaseInfoHtml");
 #ifdef MACRO_use_MySQL
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "<b>Only admins may set problem weights.</b>";
   std::string inputProblemInfo=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
-  std::string inputProblemHome= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
+  std::string inputProblemHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
   DatabaseRoutines theRoutines;
   std::stringstream commentsOnFailure;
   bool result=theRoutines.MergeProblemInfoInDatabase(inputProblemHome, inputProblemInfo, commentsOnFailure);
@@ -861,6 +868,24 @@ std::string WebWorker::GetSetProblemDatabaseInfoHtml()
 #else
   return "Cannot modify problem weights (no database available)";
 #endif // MACRO_use_MySQL
+}
+
+std::string WebWorker::GetModifyProblemReport()
+{ MacroRegisterFunctionWithName("WebWorker::GetModifyProblemReport");
+  std::string mainInput=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
+  std::string fileName= CalculatorHTML::RelativePhysicalFolderProblemCollections+
+  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile"));
+  std::fstream theFile;
+  std::stringstream out;
+  if (!FileOperations::OpenFileOnTopOfProjectBase(theFile, fileName, false, true, false))
+  { out << "<b><span style=\"color:red\">Failed to open file: " << fileName << ". </span></b>";
+    return out.str();
+  }
+  theFile << mainInput;
+  theFile.close();
+  out << "<b><span style=\"color:green\">Written content to file: "
+  << fileName << ". </span></b>";
+  return out.str();
 }
 
 std::string WebWorker::GetAddUserEmails()
@@ -1083,10 +1108,10 @@ std::string WebWorker::GetDatabasePage()
 { MacroRegisterFunctionWithName("WebWorker::GetDatabasePage");
   std::stringstream out;
   out << "<html>"
-  << "<header>"
+  << "<head>"
   << CGI::GetCalculatorStyleSheetWithTags()
   << WebWorker::GetJavascriptStandardCookies()
-  << "</header>"
+  << "</head>"
   << "<body onload=\"loadSettings();\">\n";
   out << "<nav>" << theGlobalVariables.ToStringNavigation() << "</nav>";
 #ifdef MACRO_use_MySQL
@@ -1110,17 +1135,36 @@ std::string WebWorker::GetEditPageHTML()
     return "<b>Only logged-in admins are allowed to edit pages. </b>";
   CalculatorHTML theFile;
   out << "<html>"
-  << "<header>"
+  << "<head>"
   << WebWorker::GetJavascriptStandardCookies()
   << CGI::GetLaTeXProcessingJavascript()
   << CGI::GetCalculatorStyleSheetWithTags()
-  << "</header>"
+  << theFile.GetJavascriptSubmitMainInputIncludeCurrentFile()
+  << "</head>"
   << "<body onload=\"loadSettings();\">\n";
   std::stringstream failureStream;
+  theFile.fileName=  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile"));
   if (!theFile.LoadMe(false, failureStream))
-    out << "<b>Failed to load file: " << theFile.fileName << ", perhaps the file does not exist. </b>";
-  out << theFile.LoadAndInterpretCurrentProblemItem();
-  out << this->ToStringCalculatorArgumentsHumanReadable();
+  { out << "<b>Failed to load file: " << theFile.fileName << ", perhaps the file does not exist. </b>";
+    out << "</body></html>";
+  }
+  std::stringstream buttonStream;
+  buttonStream
+  << "<button "
+  << "onclick=\"submitStringAsMainInput"
+  << "(document.getElementById('mainInput').value, 'spanSubmitReport', 'modifyPage');\" >Save changes</button>";
+//  out << "<form>";
+//  out << "<input type=\"submit\" value=\"Save changes\"> ";
+  out << buttonStream.str();
+  out << "Edit bravely, all files are backed-up/stored in a svn history tree."
+  << " You only risk losing your own changes.<br>\n";
+  out << "<textarea cols=\"150\", rows=\"30\" id=\"mainInput\" name=\"mainInput\">";
+  out << theFile.inputHtml;
+  out << "</textarea>\n<br>\n";
+  out << buttonStream.str();
+  out << "<span id=\"spanSubmitReport\"></span>";
+//  out << "<input type=\"submit\" value=\"Save changes\">";
+//  out << "</form>";
   out << "</body></html>";
   return out.str();
 }
@@ -1130,11 +1174,11 @@ std::string WebWorker::GetExamPage()
   CalculatorHTML theFile;
   std::stringstream out;
   out << "<html>"
-  << "<header>"
+  << "<head>"
   << WebWorker::GetJavascriptStandardCookies()
   << CGI::GetLaTeXProcessingJavascript()
   << CGI::GetCalculatorStyleSheetWithTags()
-  << "</header>"
+  << "</head>"
   << "<body onload=\"loadSettings();\">\n";
   out << theFile.LoadAndInterpretCurrentProblemItem();
   out << this->ToStringCalculatorArgumentsHumanReadable();

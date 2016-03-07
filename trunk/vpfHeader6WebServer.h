@@ -59,6 +59,7 @@ public:
   std::string openIndentTag(const std::string& theTag);
   std::string closeIndentTag(const std::string& theTag);
   int ProcessSetProblemDatabaseInfo();
+  int ProcessModifyPage();
   int ProcessAddUserEmails();
   int ProcessServerStatus();
   int ProcessComputationIndicator();
@@ -113,6 +114,7 @@ public:
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
   std::string GetJavaScriptIndicatorBuiltInServer(int inputIndex, bool callProgressReport);
   std::string GetChangePasswordPage();
+  std::string GetModifyProblemReport();
   std::string GetLoginPage();
   std::string GetLoginHTMLinternal();
   std::string GetEditPageHTML();

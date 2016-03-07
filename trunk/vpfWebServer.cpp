@@ -1370,9 +1370,9 @@ int WebWorker::ProcessCalculatorExamples()
 int WebWorker::ProcessServerStatus()
 { MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestServerStatus");
   stOutput << "<html>"
-  << "<header>"
+  << "<head>"
   << CGI::GetCalculatorStyleSheetWithTags()
-  << "</header>"
+  << "</head>"
   << "<body>";
   if (theGlobalVariables.flagLoggedIn)
     stOutput << "<nav>" << theGlobalVariables.ToStringNavigation() << "</nav>";
@@ -2033,7 +2033,7 @@ std::string WebWorker::GetChangePasswordPage()
 { MacroRegisterFunctionWithName("WebWorker::GetChangePasswordPage");
   std::stringstream out;
   out << "<html>";
-  out << "<header>";
+  out << "<head>";
   out
   << "<script type=\"text/javascript\"> \n"
   << "function submitChangePassRequest(){\n"
@@ -2065,7 +2065,7 @@ std::string WebWorker::GetChangePasswordPage()
   << "  https.send(params);\n"
   << "}\n"
   << "</script>";
-  out << "</header>";
+  out << "</head>";
   out << "<body> ";
 //    << "  window.location='calculator?username='+GlobalUser+'&authenticationToken='+GlobalAuthenticationToken;";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);

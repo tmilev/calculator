@@ -134,6 +134,8 @@ public:
 (SyntacticElementHTML& inputOutput, std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
  const std::string& cleaneduplink, const std::string& urledProblem, bool problemAlreadySolved)
   ;
+  std::string ToStringLinkFromFileName(const std::string& theFileName);
+  std::string ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName);
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
   std::string InterpretGenerateProblemManagementLink
 (SyntacticElementHTML& inputOutput, std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
@@ -581,7 +583,7 @@ std::string CalculatorHTML::GetEditPageButton()
   out << "<textarea id=\"clonePageAreaID\" rows=\"1\" cols=\"70\">" << this->fileName << "</textarea>\n"
   << "<button class=\"submitButton\" onclick=\""
   << "submitStringAsMainInput(document.getElementById('clonePageAreaID').value, 'spanCloningAttemptResultID', 'clonePage');"
-  << "\" >Clone page</button> <span id=\"spanCloningAttemptResultID\"></span>";
+  << "\" >Clone page</button> <span id=\"spanCloningAttemptResultID\"></span><br>";
   return out.str();
 }
 
@@ -901,40 +903,55 @@ std::string WebWorker::GetModifyProblemReport()
   return out.str();
 }
 
+std::string CalculatorHTML::ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringCalculatorProblemSourceFromFileName");
+  std::stringstream out;
+  out << "<span class=\"calculatorExamProblem\">\n"
+  << "Problems/Derivative-sin-x-power-a-and-sin-power-a-x.html\n"
+  << "</span>";
+  return out.str();
+}
+
+std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileName)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringLinkFromFileName");
+  SyntacticElementHTML theElt;
+  theElt.content=theFileName;
+  theElt.tagKeys.AddOnTop("class");
+  theElt.tagValues.AddOnTop("calculatorExamProblem");
+  this->InterpretGenerateLink(theElt);
+  return  theElt.interpretedCommand;
+}
+
 std::string WebWorker::GetClonePageResult()
 { MacroRegisterFunctionWithName("WebWorker::GetClonePageResult");
   if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights() ||
       !theGlobalVariables.flagUsingSSLinCurrentConnection)
     return "<b>Cloning problems allowed only for logged-in admins under ssl connection. </b>";
-  std::string fileNameResult=
-  CalculatorHTML::RelativePhysicalFolderProblemCollections+
-  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
+  std::string fileNameResulT=  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
+  std::string fileNameResultRelative=CalculatorHTML::RelativePhysicalFolderProblemCollections+fileNameResulT;
   std::string fileNameToBeCloned= CalculatorHTML::RelativePhysicalFolderProblemCollections+
   CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile"));
   std::stringstream out;
   std::string startingFileString;
-  if (!FileOperations::LoadFileToStringOnTopOfOutputFolder(fileNameToBeCloned, startingFileString, out))
+  if (!FileOperations::LoadFileToStringOnTopOfProjectBase(fileNameToBeCloned, startingFileString, out))
   { out << "Could not find file: " << fileNameToBeCloned;
     return out.str();
   }
   std::fstream theFile;
-  if (FileOperations::FileExistsOnTopOfProjectBase(fileNameResult))
+  if (FileOperations::FileExistsOnTopOfProjectBase(fileNameResultRelative))
   { out << "<b>File: " << fileNameToBeCloned << " already exists. </b>";
     return out.str();
   }
-  if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfProjectBase(theFile, fileNameResult, false, false, false))
-  { out << "<b><span style=\"color:red\">Failed to open output file: " << fileNameResult << ". </span></b>";
+  if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfProjectBase(theFile, fileNameResultRelative, false, false, false))
+  { out << "<b><span style=\"color:red\">Failed to open output file: " << fileNameResultRelative << ". </span></b>";
     return out.str();
   }
   theFile << startingFileString;
   theFile.close();
   out << "<b><span style=\"color:green\">Written content to file: "
-  << fileNameResult << ". </span></b>";
-  SyntacticElementHTML theElt;
-  theElt.content=fileNameResult;
+  << fileNameResulT << ". </span></b>";
   CalculatorHTML linkInterpreter;
-  linkInterpreter.InterpretGenerateLink(theElt);
-  out << theElt.interpretedCommand;
+  out << linkInterpreter.ToStringLinkFromFileName(fileNameResulT);
   return out.str();
 }
 
@@ -1206,13 +1223,34 @@ std::string WebWorker::GetEditPageHTML()
 //  out << "<form>";
 //  out << "<input type=\"submit\" value=\"Save changes\"> ";
   out << buttonStream.str();
+  out << "To include the problem in your problem home page, add the following source code. <br>"
+  << "<textarea cols=\"70\", rows=\"3\">"
+  << theFile.ToStringCalculatorProblemSourceFromFileName(theFile.fileName) << "</textarea>";
+  out << "<br>\n";
   out << "Edit bravely, all files are backed-up/stored in a svn history tree."
-  << " You only risk losing your own changes.<br>\n";
-  out << "<textarea cols=\"150\", rows=\"30\" id=\"mainInput\" name=\"mainInput\">";
-  out << theFile.inputHtml;
+  << " You only risk losing your own changes.";
+  out << "<br>\n";
+  out << "<textarea cols=\"150\", rows=\"30\" id=\"mainInput\" name=\"mainInput\" onkeydown=\"ctrlSPress(event);\">";
   out << "</textarea>\n<br>\n";
+  out << "<script type=\"text/javascript\"> \n"
+  << "function ctrlSPress(event){\n"
+  << "   if (event.ctrlKey!=true)\n"
+  << "     return;\n"
+  << "   if (event.keyCode!=83)\n"
+  << "     return;\n"
+  << "   event.preventDefault();"
+  << submitModPageJS.str() << "\n"
+  << "}\n"
+  << "</script>\n";
+  out << "<script type=\"text/javascript\"> \n"
+  << " document.getElementById('mainInput').value=decodeURIComponent(\""
+  << CGI::StringToURLString(theFile.inputHtml, false)
+  << "\");\n"
+  << "</script>\n";
   out << buttonStream.str();
-  out << "<span id=\"spanSubmitReport\"></span>";
+  out << "<span id=\"spanSubmitReport\"></span><br>";
+
+  out << theFile.ToStringLinkFromFileName(theFile.fileName);
 //  out << "<input type=\"submit\" value=\"Save changes\">";
 //  out << "</form>";
   out << "</body></html>";
@@ -1490,9 +1528,9 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   { int indexInParent=this->problemListOfParent.GetIndex(this->fileName);
     if (indexInParent==-1)
     { out << "<b>Could not find the problem collection that contains this problem.</b><br>";
-      out << "<b>This is either a faulty link or a programming error. </b> "
-      << "this->filename is: " << this->fileName << " and the problem list of the parent is: "
-      << this->problemListOfParent.ToStringCommaDelimited();
+//      out << "<b>This is either a faulty link or a programming error. </b> "
+      //out << "this->filename is: " << this->fileName << " and the problem list of the parent is: "
+      //<< this->problemListOfParent.ToStringCommaDelimited();
     } else
     { if (indexInParent>0)
         out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="

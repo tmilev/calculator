@@ -2084,13 +2084,19 @@ bool Expression::NeedsParenthesisForBaseOfExponent()const
   { //stOutput << " to get:  " << (*this)[1].IsLisT() << "<hr>";
     return (*this)[1].IsLisT();
   }
-  if (this->IsLisT())
+  if (this->StartsWith(this->owner->opPlus()) || this->StartsWith(this->owner->opMinus()))
     return true;
-//  if (this->StartsWith(this->owner->opPlus()) || this->StartsWith(this->owner->opMinus()) ||
-//      this->StartsWith(this->owner->opTimes()) || this->StartsWith(this->owner->opDivide()) ||
-//      this->StartsWith(this->owner->opThePower()))
-//    return true;
-  return false;
+  if (this->IsOfType<Rational>())
+    return this->GetValue<Rational>()<0 || !this->GetValue<Rational>().IsInteger();
+  if (this->IsOfType<AlgebraicNumber>())
+  { LargeInt tempI;
+    if (!this->GetValue<AlgebraicNumber>().IsInteger(&tempI))
+      return true;
+    return tempI>0;
+  }
+  if (this->IsAtom() || this->children.size==0)
+    return false;
+  return true;
 }
 
 bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost()const

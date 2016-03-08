@@ -710,6 +710,7 @@ public:
   HashedList<std::string, MathRoutines::hashString> atomsNotAllowingChainRule;
   HashedList<std::string, MathRoutines::hashString> builtInTypes;
   HashedList<std::string, MathRoutines::hashString> arithmeticOperations;
+  HashedList<std::string, MathRoutines::hashString> knownOperationsInterpretedAsFunctionsMultiplicatively;
   HashedList<std::string, MathRoutines::hashString> knownFunctionsWithComplexRange;
   HashedList<std::string, MathRoutines::hashString> atomsThatFreezeArguments;
   HashedList<std::string, MathRoutines::hashString> atomsWhoseExponentsAreInterpretedAsFunctions;
@@ -978,6 +979,7 @@ public:
   bool ReplaceEOByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOEByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEByE(int formatOptions=Expression::formatDefault);
+  bool ReplaceOXEXByEX(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEEXByEX(int formatOptions=Expression::formatDefault);
   bool ReplaceOXXEXEXEXByE(int formatOptions=Expression::formatDefault);
   bool ReplaceSqrtEXByEX(int formatOptions=Expression::formatDefault);
@@ -992,7 +994,7 @@ public:
   bool ReplaceYXBySequenceX(int theControlIndex, int inputFormat=Expression::formatDefault)
   { return this->ReplaceYXdotsXBySequenceYXdotsX(theControlIndex, inputFormat, 1);
   }
-  bool ReplaceXOXbyEusingO(int theControlIndex, int inputFormat=Expression::formatDefault);
+  bool ReplaceXXXbyE(int inputFormat=Expression::formatDefault);
   bool ReplaceYBySequenceY(int theControlIndex, int inputFormat=Expression::formatDefault)
   { return this->ReplaceYXdotsXBySequenceYXdotsX(theControlIndex, inputFormat, 0);
   }
@@ -1062,12 +1064,12 @@ public:
   bool ReplaceXEXByE(int inputFormat=Expression::formatDefault);
   bool ReplaceAXbyEX();
   bool ReplaceXXByEEmptySequence();
-  bool ReplaceOXbyEX(int inputFormat=Expression::formatDefault);
-  bool ReplaceOXbyEXusingO(int theControlIndex, int inputFormat=Expression::formatDefault);
+  bool ReplaCeOXbyEX(int inputFormat=Expression::formatDefault);
+  bool ReplaceXXbyEX(int inputFormat=Expression::formatDefault);
   bool ReplaceXEXByEcontainingOE(int inputOpIndex, int inputFormat=Expression::formatDefault);
   bool ReplaceXXByEmptyString();
   bool ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence(int inputFormat=Expression::formatDefault);
-  bool ReplaceOXbyE(int inputFormat=Expression::formatDefault);
+  bool ReplaceXXbyE(int inputFormat=Expression::formatDefault);
   bool ReplaceIntIntBy10IntPlusInt();
   bool GetMatrixExpressions(const Expression& input, Matrix<Expression>& output, int desiredNumRows=-1, int desiredNumCols=-1);
   bool GetMatrixExpressionsFromArguments(const Expression& input, Matrix<Expression>& output, int desiredNumRows=-1, int desiredNumCols=-1);
@@ -1734,6 +1736,7 @@ public:
   void initAtomsThatFreezeArguments();
   void initAtomsNonCacheable();
   void initAtomsThatAllowCommutingOfArguments();
+  void initOperationsInterpretedAsFunctionsMultiplicatively();
   void initOperationsThatAreKnownFunctions();
   void initArithmeticOperations();
   void initBuiltInAtomsWhosePowersAreInterpretedAsFunctions();

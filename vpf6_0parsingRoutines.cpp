@@ -191,6 +191,8 @@ void Calculator::init()
   this->AddOperationBuiltInType("weightLieAlgPoly");
 //  this->AddOperationBuiltInType("\\arctan");
 
+  this->initOperationsInterpretedAsFunctionsMultiplicatively();
+
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(" ");//empty token must always come first!!!!
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("{{}}");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("Variable");
@@ -226,6 +228,8 @@ void Calculator::init()
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("arcsin");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("arccos");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("arctan");
+  this->controlSequences.AddOnTopNoRepetition
+  (this->knownOperationsInterpretedAsFunctionsMultiplicatively);
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("SequenceStatements");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("MakeSequence");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("SequenceMatrixRows");
@@ -406,6 +410,20 @@ bool Calculator::ReplaceOXXEXEXEXByE(int formatOptions)
   this->DecreaseStackSetCharacterRangeS(8);
 //    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
+}
+
+bool Calculator::ReplaceOXEXByEX(int formatOptions)
+{ SyntacticElement& left=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
+  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  Expression newExpr;
+  newExpr.reset(*this, 2);
+  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(left.controlIndex));
+  newExpr.AddChildOnTop(right.theData);
+  newExpr.format= formatOptions;
+  left.theData=newExpr;
+  left.controlIndex=this->conExpression();
+  return this->DecreaseStackExceptLast(2);
+//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
 }
 
 bool Calculator::ReplaceOXEByE(int formatOptions)
@@ -645,20 +663,28 @@ int Calculator::GetExpressionIndex()
 { return this->controlSequences.GetIndex("Expression");
 }
 
-bool Calculator::ReplaceOXbyE(int inputFormat)
-{ this->ReplaceOXbyEX(inputFormat);
+bool Calculator::ReplaceXXbyE(int inputFormat)
+{ this->ReplaceXXbyEX(inputFormat);
   this->DecreaseStackSetCharacterRangeS(1);
   return true;
 }
 
-bool Calculator::ReplaceXOXbyEusingO(int theControlIndex, int inputFormat)
-{ this->ReplaceOXbyEXusingO(theControlIndex, inputFormat);
+bool Calculator::ReplaceXXXbyE(int inputFormat)
+{ this->ReplaceXXbyEX(inputFormat);
   return this->ReplaceXEXByE(inputFormat);
 }
 
-bool Calculator::ReplaceOXbyEX(int inputFormat)
+bool Calculator::ReplaCeOXbyEX(int inputFormat)
 { SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  return this->ReplaceOXbyEXusingO(theElt.controlIndex, inputFormat);
+  theElt.theData.MakeAtom(this->GetOperationIndexFromControlIndex(theElt.controlIndex), *this);
+  return this->ReplaceXXbyEX(inputFormat);
+}
+
+bool Calculator::ReplaceXXbyEX(int inputFormat)
+{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  theElt.theData.format=inputFormat;
+  theElt.controlIndex=this->conExpression();
+  return true;
 }
 
 bool Calculator::ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence(int inputFormat)
@@ -693,13 +719,6 @@ bool Calculator::ReplaceXEXByEcontainingOE(int inputOpIndex, int inputFormat)
   outputElt.theData.format=inputFormat;
   outputElt.controlIndex=this->conExpression();
   return this->DecreaseStackSetCharacterRangeS(2);
-}
-
-bool Calculator::ReplaceOXbyEXusingO(int theControlIndex, int inputFormat)
-{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  theElt.theData.format=inputFormat;
-  theElt.controlIndex=this->conExpression();
-  return true;
 }
 
 bool Calculator::ReplaceXXByEEmptySequence()
@@ -1343,31 +1362,41 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceSqrtXEXByEX();
   if (sixthToLastS=="\\sqrt" && fifthToLastS=="[" && fourthToLastS=="Expression" && thirdToLastS=="]" && secondToLastS=="Expression")
     return this->ReplaceOXEXEXByEX();
+  if (this->knownOperationsInterpretedAsFunctionsMultiplicatively.Contains(thirdToLastS) &&
+      secondToLastS=="Expression" && this->AllowsTimesInPreceding(lastS))
+    return this->ReplaceOEXByEX();
+  if (this->knownOperationsInterpretedAsFunctionsMultiplicatively.Contains(fourthToLastS) &&
+      thirdToLastS=="{}" && secondToLastS=="Expression" && this->AllowsApplyFunctionInPreceding(lastS))
+    return this->ReplaceOXEXByEX();
+  if (this->knownOperationsInterpretedAsFunctionsMultiplicatively.Contains(secondToLastS) &&
+      this->isSeparatorFromTheRightGeneral(lastS))
+    return this->ReplaCeOXbyEX();
+
   //Some synonyms:
   if (lastS=="ln" || lastS=="log" || lastS=="\\ln")
-    return this->ReplaceXByEusingO(this->opLog());
+    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\log"));
   if (lastS=="infinity" || lastS=="infty")
     return this->ReplaceXByEusingO(this->opInfinity());
   if (lastS=="pi")
     return this->ReplaceXByEusingO(this->opPi());
   if (lastS=="arcsin")
-    return this->ReplaceXByEusingO(this->opArcSin());
+    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\arcsin"));
   if (lastS=="arccos")
-    return this->ReplaceXByEusingO(this->opArcCos());
+    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\arccos"));
   if (lastS=="arctan")
-    return this->ReplaceXByEusingO(this->opArcTan());
+    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\arctan"));
   if (lastS=="sin")
-    return this->ReplaceXByEusingO(this->opSin());
+    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\sin"));
   if (lastS=="cos")
-    return this->ReplaceXByEusingO(this->opCos());
+    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\cos"));
   if (lastS=="tan")
-    return this->ReplaceXByEusingO(this->opTan());
+    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\tan"));
   if (lastS=="cot")
-    return this->ReplaceXByEusingO(this->opCot());
+    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\cot"));
   if (lastS=="csc")
-    return this->ReplaceXByEusingO(this->opCsc());
+    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\csc"));
   if (lastS=="sec")
-    return this->ReplaceXByEusingO(this->opSec());
+    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\sec"));
   if (lastS=="sqrt")
     return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\sqrt"));
   //end of some synonyms
@@ -1395,7 +1424,7 @@ bool Calculator::ApplyOneRule()
       ((thirdToLastS=="(" && lastS==")")||
        (thirdToLastS=="{" && lastS=="}")
       ))
-    return this->ReplaceOXbyEX();
+    return this->ReplaceXXbyEX();
   if (fifthToLastS=="\\begin" && fourthToLastS=="{" && thirdToLastS=="array" && secondToLastS=="}" && lastS=="Expression")
   { this->registerNumNonClosedBeginArray++;
     return this->ReplaceXXXXXByCon(this->conMatrixSeparator(), Expression::formatMatrix);
@@ -1418,18 +1447,18 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceYXdotsXBySequenceYXdotsX(this->conMatrixRow(), Expression::formatMatrixRow, 1);
   if (fourthToLastS=="SequenceMatrixRows" && thirdToLastS=="MatrixRowSeparator" && secondToLastS=="MatrixRow" && this->isSeparatorFromTheRightForListMatrixRow(lastS))
     return this->ReplaceSequenceUXEYBySequenceZY(this->conSequenceMatrixRow(), Expression::formatMatrix);
-  if (fourthToLastS=="MatrixRow" && thirdToLastS=="&"  && secondToLastS=="Expression" && this->isSeparatorFromTheRightForMatrixRow(lastS))
+  if (fourthToLastS=="MatrixRow" && thirdToLastS=="&" && secondToLastS=="Expression" && this->isSeparatorFromTheRightForMatrixRow(lastS))
     return this->ReplaceSequenceUXEYBySequenceZY(this->conMatrixRow(), Expression::formatMatrixRow);
-  if (fourthToLastS=="MatrixRow" && thirdToLastS=="&"  && secondToLastS=="Expression" && this->isSeparatorFromTheRightForMatrixRow(lastS))
+  if (fourthToLastS=="MatrixRow" && thirdToLastS=="&" && secondToLastS=="Expression" && this->isSeparatorFromTheRightForMatrixRow(lastS))
     return this->ReplaceSequenceUXEYBySequenceZY(this->conMatrixRow(), Expression::formatMatrixRow);
   if (secondToLastS=="Expression" && lastS=="&")
     return this->ReplaceYXBySequenceX(this->conMatrixRow(), Expression::formatMatrixRow);
   if (secondToLastS=="Expression" && (lastS=="MatrixRowSeparator" || lastS=="MatrixSeparator"))
     return this->ReplaceYXBySequenceX(this->conMatrixRow(), Expression::formatMatrixRow);
-  if (secondToLastS=="MatrixRow" &&  (lastS=="MatrixRowSeparator" || lastS=="MatrixSeparator"))
+  if (secondToLastS=="MatrixRow" && (lastS=="MatrixRowSeparator" || lastS=="MatrixSeparator"))
     return this->ReplaceYXBySequenceX(this->conSequenceMatrixRow(), Expression::formatMatrix);
   if (thirdToLastS=="MatrixSeparator" && secondToLastS=="SequenceMatrixRows" && lastS=="MatrixSeparator")
-    return this->ReplaceXOXbyEusingO(this->conSequence(), Expression::formatMatrix);
+    return this->ReplaceXXXbyE(Expression::formatMatrix);
   if (secondToLastS=="MatrixRowSeparator" && lastS == "MatrixSeparator")
     return this->ReplaceXYByY();
   if (fifthToLastS=="[" && fourthToLastS=="Expression" && thirdToLastS=="," && secondToLastS=="Expression" && lastS=="]")

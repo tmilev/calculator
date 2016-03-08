@@ -774,6 +774,22 @@ bool Calculator::ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs)
   return true;
 }
 
+bool Calculator::ReplaceOOEEXbyEXpowerLike()
+{ SyntacticElement& outerO = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
+  SyntacticElement& innerO = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5];
+  SyntacticElement& innerArg = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  SyntacticElement& outerArg = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+  Expression newInnerE(*this), newFinalE(*this);
+  newInnerE.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(innerO.controlIndex));
+  newInnerE.AddChildOnTop(innerArg.theData);
+  newFinalE.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(outerO.controlIndex));
+  newFinalE.AddChildOnTop(newInnerE);
+  newFinalE.AddChildOnTop(outerArg.theData);
+
+  innerO.theData=newFinalE;
+  return this->DecreaseStackExceptLast(3);
+}
+
 bool Calculator::ReplaceAXbyEX()
 { SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
 //  theElt.theData.IndexBoundVars=this->theExpressionContext.size-1;
@@ -1362,6 +1378,9 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceSqrtXEXByEX();
   if (sixthToLastS=="\\sqrt" && fifthToLastS=="[" && fourthToLastS=="Expression" && thirdToLastS=="]" && secondToLastS=="Expression")
     return this->ReplaceOXEXEXByEX();
+  if (this->atomsWhoseExponentsAreInterpretedAsFunctions.Contains(fifthToLastS) && fourthToLastS=="^" && thirdToLastS=="Expression"
+      && secondToLastS=="Expression" && this->AllowsTimesInPreceding(lastS))
+    return this->ReplaceOOEEXbyEXpowerLike();
   if (this->knownOperationsInterpretedAsFunctionsMultiplicatively.Contains(thirdToLastS) &&
       secondToLastS=="Expression" && this->AllowsTimesInPreceding(lastS))
     return this->ReplaceOEXByEX();

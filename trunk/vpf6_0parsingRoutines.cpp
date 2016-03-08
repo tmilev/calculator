@@ -787,6 +787,7 @@ bool Calculator::ReplaceOOEEXbyEXpowerLike()
   newFinalE.AddChildOnTop(outerArg.theData);
 
   innerO.theData=newFinalE;
+  innerO.controlIndex=this->conExpression();
   return this->DecreaseStackExceptLast(3);
 }
 
@@ -1025,6 +1026,7 @@ bool Calculator::AllowsTensorInPreceding(const std::string& lookAhead)
 
 bool Calculator::AllowsTimesInPreceding(const std::string& lookAhead)
 { return lookAhead=="+" || lookAhead=="-" || lookAhead=="*" || lookAhead=="/" ||
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.Contains(lookAhead) ||
   lookAhead=="\\frac" ||
   lookAhead=="Expression" ||  lookAhead== "Integer" || lookAhead=="\\cup" ||
   lookAhead=="(" || lookAhead=="[" ||
@@ -1343,6 +1345,9 @@ bool Calculator::ApplyOneRule()
   if (secondToLastS=="Expression" && thirdToLastS=="\\to" && fourthToLastS=="Expression" &&
       this->AllowsLimitProcessInPreceding(lastS) )
     return this->ReplaceEOEXByEX();
+  if (this->atomsWhoseExponentsAreInterpretedAsFunctions.Contains(fifthToLastS) && fourthToLastS=="^" && thirdToLastS=="Expression"
+      && secondToLastS=="Expression" && this->AllowsTimesInPreceding(lastS))
+    return this->ReplaceOOEEXbyEXpowerLike();
   if (fourthToLastS!="{}" && thirdToLastS=="Expression" && secondToLastS=="Expression" &&
       this->AllowsTimesInPreceding(lastS) )
     return this->ReplaceEEXByEXusingO(this->conTimes());
@@ -1378,9 +1383,6 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceSqrtXEXByEX();
   if (sixthToLastS=="\\sqrt" && fifthToLastS=="[" && fourthToLastS=="Expression" && thirdToLastS=="]" && secondToLastS=="Expression")
     return this->ReplaceOXEXEXByEX();
-  if (this->atomsWhoseExponentsAreInterpretedAsFunctions.Contains(fifthToLastS) && fourthToLastS=="^" && thirdToLastS=="Expression"
-      && secondToLastS=="Expression" && this->AllowsTimesInPreceding(lastS))
-    return this->ReplaceOOEEXbyEXpowerLike();
   if (this->knownOperationsInterpretedAsFunctionsMultiplicatively.Contains(thirdToLastS) &&
       secondToLastS=="Expression" && this->AllowsTimesInPreceding(lastS))
     return this->ReplaceOEXByEX();

@@ -514,7 +514,8 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
 }
 
 void CalculatorHTML::LoadFileNames()
-{ this->fileName= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile"));
+{ this->fileName = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile"));
+  this->currentExamHomE = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
 }
 
 void CalculatorHTML::LoadCurrentProblemItem()
@@ -959,6 +960,10 @@ std::string CalculatorHTML::ToStringCalculatorProblemSourceFromFileName(const st
 
 std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileName)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringLinkFromFileName");
+  std::stringstream notUsed;
+//  stOutput << "Figuring out current prob list ...";
+  this->FigureOutCurrentProblemList(notUsed);
+//  stOutput << "current home: " << this->currentExamHomE;
   SyntacticElementHTML theElt;
   theElt.content=theFileName;
   theElt.tagKeys.AddOnTop("class");
@@ -1259,6 +1264,12 @@ std::string WebWorker::GetEditPageHTML()
   if (!theFile.LoadMe(false, failureStream))
   { out << "<b>Failed to load file: " << theFile.fileName << ", perhaps the file does not exist. </b>";
     out << "</body></html>";
+    return out.str();
+  }
+  if (!theFile.ParseHTML(failureStream))
+  { out << "<b>Failed to parse file: " << theFile.fileName << ". Details:<br>" << failureStream.str();
+    out << "</body></html>";
+    return out.str();
   }
   std::stringstream buttonStream, submitModPageJS;
   submitModPageJS << "submitStringAsMainInput(document.getElementById('mainInput').value, 'spanSubmitReport', 'modifyPage');";
@@ -1294,7 +1305,6 @@ std::string WebWorker::GetEditPageHTML()
   << "</script>\n";
   out << buttonStream.str();
   out << "<span id=\"spanSubmitReport\"></span><br>";
-
   out << theFile.ToStringLinkFromFileName(theFile.fileName);
 //  out << "<input type=\"submit\" value=\"Save changes\">";
 //  out << "</form>";
@@ -2278,8 +2288,8 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 //  out << "<br>urled link: " <<  urledProblem;
   refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation()
   << "currentExamFile=" << urledProblem << "&";
-  if (this->flagIsExamHome || this->flagIsExamIntermediate)
-    refStreamNoRequest << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&";
+  if (this->currentExamHomE!="")
+    refStreamNoRequest << "currentExamHome=" << this->currentExamHomE << "&";
   if (this->flagIsExamIntermediate)
     refStreamNoRequest << "currentExamIntermediate="
     << theGlobalVariables.GetWebInput("currentExamIntermediate") << "&";
@@ -2416,8 +2426,13 @@ void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments)
   this->flagParentInvestigated=true;
   this->currentExamHomE=  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
   this->currentExamIntermediatE=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate"));
+  //stOutput << "Is this an exam problem? ";
   if (!this->flagIsExamProblem)
+  { //stOutput << "NONONO! -Emily";
     return;
+  }
+  //stOutput << "yesyesyes! -Emily";
+
   CalculatorHTML parserOfParent;
   parserOfParent.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate"));
   if (parserOfParent.fileName!="")

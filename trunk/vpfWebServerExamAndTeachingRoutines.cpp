@@ -908,7 +908,7 @@ std::string CalculatorHTML::ToStringCalculatorProblemSourceFromFileName(const st
   std::stringstream out;
   out << "<span class=\"calculatorExamProblem\">\n"
   << theFileName
-  << "</span>";
+  << "\n</span>";
   return out.str();
 }
 

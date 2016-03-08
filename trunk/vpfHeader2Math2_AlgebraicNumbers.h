@@ -102,6 +102,12 @@ class AlgebraicNumber
       return false;
     return theRat.IsSmallInteger(whichInteger);
   }
+  bool IsInteger(LargeInt* whichInteger)const
+  { Rational theRat;
+    if (!this->IsRational(&theRat))
+      return false;
+    return theRat.IsInteger(whichInteger);
+  }
   void RadicalMeDefault(int theRad);
   void Invert();
   bool EvaluatesToDouble(double* outputWhichDouble)const;

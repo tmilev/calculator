@@ -1982,7 +1982,7 @@ void Calculator::initPredefinedStandardOperations()
   ("+", CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs,
    this->opMatRF(), this->opMatRF(),
    "Adds two matrices.",
-   " A=MatrixRFs{}((5, 8z), (3, 5)); A*A-A;"
+   " A=MakeMatrixRFs{}((5, 8z), (3, 5)); A*A-A;"
    , true, false, "CalculatorFunctionsBinaryOps::innerAddMatrixRationalToMatrixRational");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor,
@@ -2161,25 +2161,25 @@ void Calculator::initPredefinedStandardOperations()
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF,
    this->opRational(), this->opMatRF(),
    "Multiplies a rational number by matrix of polynomial functions. ",
-   "M=MatrixRFs{}((x,1/x), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false,
+   "M=MakeMatrixRFs{}((x,1/x), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF,
    this->opPoly(), this->opMatRF(),
    "Multiplies matrix of polynomial functions by polynomial. ",
-   "M=MatrixRFs{}((x,1/x), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false,
+   "M=MakeMatrixRFs{}((x,1/x), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF,
    this->opMatRF(), this->opMatRF(),
    "Multiplies matrix of polynomial functions by matrix of polynomial functions. ",
-   "M=MatrixRFs{}((x,1/x), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false,
+   "M=MakeMatrixRFs{}((x,1/x), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF,
    this->opRationalFunction(), this->opMatRF(),
    "Multiplies a polynomial by a matrix of polynomials. ",
-   "M=MatrixRFs{}((x^2,1), (0,1)); (MakeRationalFunction{}(1/x)) M; ", true, false,
+   "M=MakeMatrixRFs{}((x^2,1), (0,1)); (MakeRationalFunction{}(1/x)) M; ", true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor,
@@ -2340,7 +2340,7 @@ void Calculator::initPredefinedStandardOperations()
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence, this->opDouble(), this->opSequence(),
    "Carries out multiplication between a double number on left \
    and sequence on the right. Corresponds to multiplying a vector by a scalar.",
-   "(1 ,2)- DoubleValue{} 1 (2,3)"
+   "%NumberColors\n(1 ,2)- DoubleValue{} 1 (2,3)"
    , true, false, "CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence, this->opAlgNumber(), this->opSequence(),
@@ -2853,6 +2853,20 @@ void Calculator::initArithmeticOperations()
   this->arithmeticOperations.AddOnTop("*");
   this->arithmeticOperations.AddOnTop("/");
   this->arithmeticOperations.AddOnTop("^");
+}
+
+void Calculator::initOperationsInterpretedAsFunctionsMultiplicatively()
+{ MacroRegisterFunctionWithName("Calculator::initOperationsInterpretedAsFunctionsMultiplicatively");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sin");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cos");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\tan");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cot");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sec");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\csc");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arctan");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arcsin");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arccos");
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\log");
 }
 
 void Calculator::initOperationsThatAreKnownFunctions()

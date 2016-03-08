@@ -967,6 +967,7 @@ public:
   bool ReplaceEOXbyEX();
   bool ReplaceEEByEusingO(int theControlIndex);
   bool ReplaceEEXByEXusingO(int theControlIndex);
+  bool ReplaceOOEEXbyEXpowerLike();
   bool ReplaceEEByE();
   bool ReplaceEXEXByEX(int formatOptions);
   bool ReplaceSsSsXdotsXbySsXdotsX(int numDots);

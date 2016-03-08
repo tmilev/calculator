@@ -76,6 +76,7 @@ public:
   int ProcessCalculatorExamples();
   int ProcessSubmitProblem();
   int ProcessSubmitProblemPreview();
+  int ProcessProblemGiveUp();
   int ProcessPauseWorker();
   int ProcessMonitor();
   int ProcessUnknown();

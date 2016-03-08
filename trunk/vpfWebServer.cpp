@@ -1862,6 +1862,9 @@ int WebWorker::ProcessCalculator()
       && theGlobalVariables.flagLoggedIn
       )
     return this->ProcessSubmitProblem();
+  if (theGlobalVariables.userCalculatorRequestType=="problemGiveUp" &&
+      theGlobalVariables.flagLoggedIn)
+    return this->ProcessProblemGiveUp();
 
   if ((theGlobalVariables.userCalculatorRequestType=="submitProblemPreview" ||
        theGlobalVariables.userCalculatorRequestType=="submitExercisePreview") &&

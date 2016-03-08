@@ -25,6 +25,7 @@ public:
   bool IsHidden();
   bool IsAnswer();
   bool IsCommentBeforeSubmission();
+  bool IsAnswerOnGiveUp();
   bool IsCommentAfterSubmission();
   std::string GetKeyValue(const std::string& theKey)const;
   void SetKeyValue(const std::string& theKey, const std::string& theValue);
@@ -705,6 +706,11 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestTypeSubmit) << "\";\n"
   << "  submitOrPreviewAnswers(idAnswer, idVerification, params);\n"
   << "}\n"
+  << "function giveUp(idAnswer, idVerification){\n"
+  << "  clearTimeout(timerForPreviewAnswers);\n"
+  << "  params=\"" << this->ToStringCalculatorArgumentsForProblem("problemGiveUp") << "\";\n"
+  << "  submitOrPreviewAnswers(idAnswer, idVerification, params);\n"
+  << "}\n"
   << "function submitOrPreviewAnswers(idAnswer, idVerification, inputParams){\n"
   << "  clearTimeout(timerForPreviewAnswers);\n"
   << "  spanVerification = document.getElementById(idVerification);\n"
@@ -755,6 +761,88 @@ const std::string CalculatorHTML::BugsGenericMessage=
 "Please take a screenshot, copy the link address and send those along \
 with a short explanation to the following UMass instructor: Todor Milev (todor.milev@gmail.com)";
 
+int WebWorker::ProcessProblemGiveUp()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessProblemGiveUp");
+  double startTime=theGlobalVariables.GetElapsedSeconds();
+  CalculatorHTML theProblem;
+  theProblem.LoadCurrentProblemItem();
+  if (!theProblem.flagLoadedSuccessfully)
+  { stOutput << "Prob name is: " << theProblem.fileName;
+    stOutput << " <b>Could not load problem, this may be a bug. "
+    << CalculatorHTML::BugsGenericMessage << "</b>";
+    if(theProblem.comments.str()!="")
+      stOutput << " Comments: " << theProblem.comments.str();
+    return 0;
+  }
+  if (theProblem.flagIsForReal)
+  { stOutput << " <b>Not allowed to show answer of a problem being tested for real. </b>";
+    return 0;
+  }
+  if(theGlobalVariables.GetWebInput("randomSeed")=="")
+  { stOutput << " <b>I could not figure out the exercise problem (missing random seed). </b>";
+    return 0;
+  }
+  std::stringstream comments;
+  if (!theProblem.ParseHTML(comments))
+  { stOutput << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
+    return 0;
+  }
+  std::string lastStudentAnswerID;
+  for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
+    MathRoutines::StringBeginsWith(theGlobalVariables.webFormArgumentNames[i], "calculatorAnswer", &lastStudentAnswerID);
+  int indexLastAnswerId=theProblem.theProblemData.answerIds.GetIndex(lastStudentAnswerID);
+  if (indexLastAnswerId==-1)
+  { stOutput << "<b>Student submitted answerID: " << lastStudentAnswerID
+    << " but that is not an ID of an answer tag. "
+    << "</b><br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    return 0;
+  }
+  if (theProblem.theProblemData.commandsForGiveUpAnswer[indexLastAnswerId]=="")
+  { stOutput << "<b> Unfortunately there is no answer given for this question (answerID: " << lastStudentAnswerID << ").";
+    return 0;
+  }
+  Calculator theInterpreteR;
+  theInterpreteR.init();
+  if(!theProblem.PrepareCommands(theInterpreteR, comments))
+  { stOutput << "<b>Failed to prepare calculator commands. </b> <br>Comments:<br>" << comments.str();
+    return 0;
+  }
+  std::stringstream answerCommands;
+  answerCommands << theProblem.problemCommandsNoVerification;
+  answerCommands << "SeparatorBetweenSpans; "
+  << theProblem.theProblemData.commandsForGiveUpAnswer[indexLastAnswerId];
+  theInterpreteR.Evaluate(answerCommands.str());
+  if (theInterpreteR.syntaxErrors!="")
+  { stOutput << "<span style=\"color:red\"><b>Failed to evaluate the default answer. "
+    << "Likely there is a bug with the problem. </b></span>"
+    << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
+    << theInterpreteR.ToStringSyntacticStackHumanReadable(false);
+    stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    return 0;
+  } else if (theInterpreteR.flagAbortComputationASAP)
+  { stOutput << "<span style=\"color:red\"><b>Failed to evaluate the default answer. "
+    << "Likely there is a bug with the problem. </b></span>"
+    << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
+    << theInterpreteR.outputString;
+    stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    return 0;
+  }
+  FormatExpressions theFormat;
+  List<std::string> answersReverseOrder;
+  for (int j=theInterpreteR.theProgramExpression.children.size-1; j>=0; j--)
+  { if (theInterpreteR.theProgramExpression[j].ToString()=="SeparatorBetweenSpans")
+      break;
+//        stOutput << "<hr>DEBUG Before final computation: <hr>";
+    theFormat.flagExpressionIsFinal=true;
+    theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
+    answersReverseOrder.AddOnTop(theInterpreteR.theProgramExpression[j].ToString(&theFormat));
+  }
+  for (int i=answersReverseOrder.size-1; i>=0; i--)
+    stOutput << answersReverseOrder[i];
+  stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+  return 0;
+}
+
 int WebWorker::ProcessSubmitProblemPreview()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSubmitProblemPreview");
   double startTime=theGlobalVariables.GetElapsedSeconds();
@@ -764,7 +852,7 @@ int WebWorker::ProcessSubmitProblemPreview()
   for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
     if (MathRoutines::StringBeginsWith(theGlobalVariables.webFormArgumentNames[i], "calculatorAnswer", &lastStudentAnswerID))
     { lastAnswer= "("+ CGI::URLStringToNormal( theGlobalVariables.webFormArguments[i]) + "); ";
-      studentInterpretation << lastAnswer ;
+      studentInterpretation << lastAnswer;
     }
   stOutput << "Your answer(s): \\(" << studentInterpretation.str() << "\\)" << "\n<br>\n";
   CalculatorHTML theProblem;
@@ -868,7 +956,8 @@ int WebWorker::ProcessSubmitProblemPreview()
     << "Something went wrong when interpreting your answer in the context of the current problem. "
     << "</b></span>";
   else
-  { FormatExpressions theFormat;
+  { List<std::string> answersReverseOrder;
+    FormatExpressions theFormat;
 //       stOutput << "DBGDBG<br>";
     for (int j=theInterpreterWithAdvice.theProgramExpression.children.size-1; j>=0; j--)
     { if (theInterpreterWithAdvice.theProgramExpression[j].ToString()=="SeparatorBetweenSpans")
@@ -876,8 +965,10 @@ int WebWorker::ProcessSubmitProblemPreview()
 //         stOutput << "<hr>DEBUG Before final computation: <hr>";
       theFormat.flagExpressionIsFinal=true;
       theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
-      stOutput << theInterpreterWithAdvice.theProgramExpression[j].ToString(&theFormat);
+      answersReverseOrder.AddOnTop(theInterpreterWithAdvice.theProgramExpression[j].ToString(&theFormat));
     }
+    for (int j=answersReverseOrder.size-1; j>=0; j--)
+      stOutput << answersReverseOrder[j];
   }
   stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
   return 0;
@@ -1487,6 +1578,14 @@ bool SyntacticElementHTML::IsHidden()
 ;
 }
 
+bool SyntacticElementHTML::IsAnswerOnGiveUp()
+{ if (this->syntacticRole!="command")
+    return false;
+  std::string tagClass=this->GetKeyValue("class");
+  return tagClass=="calculatorAnswerOnGiveUp"
+;
+}
+
 bool SyntacticElementHTML::IsCommentBeforeSubmission()
 { if (this->syntacticRole!="command")
     return false;
@@ -1970,7 +2069,10 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     out << "<td>" << inputOutput.ToStringOpenTag() << inputOutput.ToStringCloseTag() ;// << "</td>";
     //out << "<td>";
     out << "<button class=\"submitButton\" onclick=\"submitAnswers('"
-    << answerId << "', '" << answerEvaluationId << "')\"> Submit </button></td>";
+    << answerId << "', '" << answerEvaluationId << "')\"> Submit </button>";
+    out << "<button class=\"submitButton\" onclick=\"giveUp('"
+    << answerId << "', '" << answerEvaluationId << "')\"> Show answer </button>";
+    out << "</td>";
     out << "</tr><tr>";
     out << "<td>";
     out << "<span id=\"" << answerEvaluationId << "\">";
@@ -1983,7 +2085,7 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     if (theIndex >=this->theProblemData.numCorrectSubmissions.size ||
         theIndex >=this->theProblemData.numSubmissions.size ||
         theIndex >=this->theProblemData.firstCorrectAnswer.size)
-      out << "<b>Error: the problemData index  is " << theIndex << " but "
+      out << "<b>Error: the problemData index is " << theIndex << " but "
       << "  numCorrectSubmissions.size is: " << this->theProblemData.numCorrectSubmissions.size
       << ", numSubmissions.size is: " << this->theProblemData.numSubmissions.size
       << ", firstCorrectAnswer.size is: " << this->theProblemData.firstCorrectAnswer.size
@@ -2005,7 +2107,8 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
           out << numSubmissions << " attempt(s) so far. ";
       }
     } else
-      out << " <b><span style=\"color:brown\">Submit (no credit, unlimited tries)</span></b>";
+    { out << " <b><span style=\"color:brown\">Submit (no credit, unlimited tries)</span></b>";
+    }
     out << "</span></td>";
   }
   out << "</tr></table>";
@@ -2581,6 +2684,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   this->calculatorClasses.AddOnTop("calculatorHidden");
   this->calculatorClasses.AddOnTop("calculatorHiddenIncludeInCommentsBeforeSubmission");
   this->calculatorClasses.AddOnTop("calculatorAnswer");
+  this->calculatorClasses.AddOnTop("calculatorAnswerOnGiveUp");
   this->calculatorClasses.AddOnTop("calculatorCommentBeforeSubmission");
   this->calculatorClasses.AddOnTop("calculatorExamIntermediate");
   this->calculatorClasses.AddOnTop("calculatorExamProblem");
@@ -2756,7 +2860,8 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
   List<std::string> answerIdsInTheFile;
   List<std::string> absoluteCommandsFoundSoFar;
   for (int i=0; i<this->theContent.size; i++)
-  { if (this->theContent[i].IsCommentBeforeSubmission() || this->theContent[i].IsCommentAfterSubmission())
+  { if (this->theContent[i].IsCommentBeforeSubmission() || this->theContent[i].IsCommentAfterSubmission()||
+        this->theContent[i].IsAnswerOnGiveUp())
     { if (answerIdsInTheFile.size<=0)
       { comments << "<b>Found comment to an answer before finding any answer tag. Each comment applies "
         << "to the first answer tag above it. </b>";
@@ -2765,6 +2870,8 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
       int theIndex=this->theProblemData.answerIds.GetIndex(*answerIdsInTheFile.LastObject());
       if (theIndex==-1)
         crash << "This shouldn't happen: answerId from file not found in problem data. " << crash;
+      if (this->theContent[i].IsAnswerOnGiveUp())
+        this->theProblemData.commandsForGiveUpAnswer[theIndex]=this->theContent[i].content;
       if (this->theContent[i].IsCommentAfterSubmission())
         this->theProblemData.commentsAfterSubmission[theIndex].AddOnTop(this->theContent[i].content);
       if (this->theContent[i].IsCommentBeforeSubmission())

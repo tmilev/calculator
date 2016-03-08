@@ -837,8 +837,10 @@ int WebWorker::ProcessProblemGiveUp()
     theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
     answersReverseOrder.AddOnTop(theInterpreteR.theProgramExpression[j].ToString(&theFormat));
   }
+  stOutput << "\\(";
   for (int i=answersReverseOrder.size-1; i>=0; i--)
     stOutput << answersReverseOrder[i];
+  stOutput << "\\)";
   stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
   return 0;
 }
@@ -2070,8 +2072,18 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     //out << "<td>";
     out << "<button class=\"submitButton\" onclick=\"submitAnswers('"
     << answerId << "', '" << answerEvaluationId << "')\"> Submit </button>";
-    out << "<button class=\"submitButton\" onclick=\"giveUp('"
-    << answerId << "', '" << answerEvaluationId << "')\"> Show answer </button>";
+    if (!this->flagIsForReal)
+    { int theIndex=this->theProblemData.answerIds.GetIndex(answerId);
+      bool hasShowAnswerButton=false;
+      if (theIndex!=-1)
+        if (this->theProblemData.commandsForGiveUpAnswer[theIndex]!="")
+        { out << "<button class=\"submitButton\" onclick=\"giveUp('"
+          << answerId << "', '" << answerEvaluationId << "')\"> Show answer </button>";
+          hasShowAnswerButton=true;
+        }
+      if (!hasShowAnswerButton)
+        out << "No ``give-up'' answer available. ";
+    }
     out << "</td>";
     out << "</tr><tr>";
     out << "<td>";
@@ -2107,8 +2119,7 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
           out << numSubmissions << " attempt(s) so far. ";
       }
     } else
-    { out << " <b><span style=\"color:brown\">Submit (no credit, unlimited tries)</span></b>";
-    }
+      out << " <b><span style=\"color:brown\">Submit (no credit, unlimited tries)</span></b>";
     out << "</span></td>";
   }
   out << "</tr></table>";

@@ -295,6 +295,7 @@ void ProblemData::AddEmptyAnswerIdOnTop(const std::string& inputAnswerId)
   List<std::string> emptyList;
   this->commentsAfterSubmission.AddOnTop(emptyList);
   this->commentsBeforeSubmission.AddOnTop(emptyList);
+  this->commandsForPreview.AddOnTop(emptyList);
 }
 
 std::string ProblemData::ToString()

@@ -5229,7 +5229,8 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
   this->StartsWith(theCommands.opArcTan(),2) ||
   this->StartsWith(theCommands.opArcCos(),2) ||
   this->StartsWith(theCommands.opArcSin(),2) ||
-  this->StartsWith(theCommands.opSqrt(),2)
+  this->StartsWith(theCommands.opSqrt(),2) ||
+  this->StartsWith(theCommands.opLog(),2)
   ;
 
   if(isKnownFunctionOneArgument)
@@ -5264,6 +5265,12 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
     if (this->StartsWith(theCommands.opArcTan()))
       if (whichDouble!=0)
         *whichDouble=FloatingPoint::arctan(argumentD);
+    if (this->StartsWith(theCommands.opLog()))
+    { if (argumentD<=0)
+        return false;
+      if (whichDouble!=0)
+        *whichDouble=FloatingPoint::log(argumentD);
+    }
     return true;
   }
 /*  stOutput << "<br>" << this->ToString() << " aint no double! constants are:";

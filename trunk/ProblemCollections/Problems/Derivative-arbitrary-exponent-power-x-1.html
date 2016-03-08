@@ -5,22 +5,24 @@ Compute the derivative of the function.
 <span class="calculatorHidden">
 \(
 a=randomInteger((2,6));  
-b=randomInteger((-1,-5), (1,5));  
-c=randomInteger((-1,-5), (1,5));  
-g=randomInteger((100,200));  
-TurnOffRules("sqrt", "ConvertShortDenominatorToNegativePower", "CommonDenominatorOneNonFraction", "CommuteIfUnivariate");
+b=randomInteger((-2,-5), (2,5));  
+TurnOffRules("\log", "sqrt", "ConvertShortDenominatorToNegativePower", "CommonDenominatorOneNonFraction", "CommuteIfUnivariate");
 \)</span>
+
 <br>
 <span class="calculator">
-\(\displaystyle f{}{{x}}=(a x^3+b x+c)^g  \) 
+\(\displaystyle f{}{{x}}= a^{x}  \) 
 </span>.
 <span class="calculatorHidden">
 TurnOnRules("sqrt", "ConvertShortDenominatorToNegativePower", "CommonDenominatorOneNonFraction", "CommuteIfUnivariate");
 </span>
 <br>
+<span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
+TurnOffRules("\log");
+</span>
 Answer: \(f'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswer">
 \(
-CompareFunctionsNumerically(d/dx(f{}x), AlgebraAnswer, 0, 1, 100, 0.000000001);
+CompareFunctionsNumerically(d/dx(f{}x), AlgebraAnswer, 0, 3, 50, 0.0001);
 \)
 </textarea>
 

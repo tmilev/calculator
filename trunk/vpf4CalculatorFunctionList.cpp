@@ -756,7 +756,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("\\log", CalculatorFunctionsGeneral::innerLog, "",
    "Logarithm function. Gives a decimal approximation of the natural logarithm provided the input is a double number. ",
-   "\\log{}(e); \\log 10", true, false)
+   "\\log{}(e); \\log 10", true, false, "CalculatorFunctionsGeneral::innerLog", "\\log")
    ;
   this->AddOperationInnerHandler
   ("\\arctan", CalculatorFunctionsGeneral::innerArctan, "",

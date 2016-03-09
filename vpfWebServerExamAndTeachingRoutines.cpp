@@ -835,12 +835,14 @@ int WebWorker::ProcessProblemGiveUp()
 //        stOutput << "<hr>DEBUG Before final computation: <hr>";
     theFormat.flagExpressionIsFinal=true;
     theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
-    answersReverseOrder.AddOnTop(theInterpreteR.theProgramExpression[j].ToString(&theFormat));
+    if (!theInterpreteR.theProgramExpression[j].StartsWith(theInterpreteR.opRulesChanged()))
+      answersReverseOrder.AddOnTop(theInterpreteR.theProgramExpression[j].ToString(&theFormat));
   }
-  stOutput << "\\(";
   for (int i=answersReverseOrder.size-1; i>=0; i--)
-    stOutput << answersReverseOrder[i];
-  stOutput << "\\)";
+  { stOutput << "\\(" << answersReverseOrder[i] << "\\)";
+    if (i!=0)
+      stOutput << "<br>";
+  }
   stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
   return 0;
 }

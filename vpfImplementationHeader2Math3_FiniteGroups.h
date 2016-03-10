@@ -1597,7 +1597,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::GetClassFunc
     }
     for(int j=0; j<outputMat.NumRows; j++)
       for(int k=0; k<outputMat.NumCols; k++)
-        outputMat(j,k)+= this->classFunctionMatrices[cci](j,k) * inputChar[cci].GetComplexConjugate();
+        outputMat(j,k)+= this->classFunctionMatrices[cci](j,k) * MathRoutines::ComplexConjugate(inputChar[cci]);
   }
 }
 
@@ -2236,22 +2236,33 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::GetLargestDe
 }
 
 template <typename somegroup, typename coefficient>
-bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTodorsVersionRecursive(VirtualRepresentation<somegroup, coefficient>& outputIrrepMults, GlobalVariables* theGlobalVariables)
+bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTodorsVersionRecursive(
+    VirtualRepresentation<somegroup, coefficient>& outputIrrepMults,
+    List<GroupRepresentation<somegroup, coefficient>*>& appendOnlyIrrepsList, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroupRepresentation::DecomposeTodorsVersionRecursive");
   this->CheckInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
+  this->GetCharacter();
   coefficient SumOfNumComponentsSquared=this->GetNumberOfComponents();
   if (SumOfNumComponentsSquared==0)
     crash << "This is a programming error: a module has character " << this->theCharacteR.ToString()
           << " of zero length, which is impossible. "<< "Here is a printout of the module. "
           << this->ToString() << crash;
   if(SumOfNumComponentsSquared== 1)
-  { int indexMe=this->ownerGroup->irreps_grcam.GetIndex(*this);
-    if(indexMe== -1)
+  { int i = this->ownerGroup->characterTable.BSGetIndex(this->theCharacteR);
+    if(i == -1)
     { this->ownerGroup->AddIrreducibleRepresentation(*this);
-      indexMe=this->ownerGroup->irreps_grcam.GetIndex(*this);
+      i = this->ownerGroup->characterTable.BSGetIndex(this->theCharacteR);
+      if(i == -1)
+        crash << "Thing just added to list not found in list " << __FILE__ << ":" << __LINE__ << crash;
+      // would prefer to use BSGetIndex :/
+      for(int ii=0; ii<this->ownerGroup->irreps.size; ii++)
+      { // this had better be true at some point
+        if(this->ownerGroup->irreps[ii].GetCharacter() == this->theCharacteR)
+          appendOnlyIrrepsList.AddOnTop(&(this->ownerGroup->irreps[ii]));
+      }
     }
-    outputIrrepMults.AddMonomial(this->ownerGroup->irreps_grcam[indexMe].GetCharacter(), 1);
+    outputIrrepMults.AddMonomial(this->ownerGroup->characterTable[i], 1);
     return true;
   }
   Matrix<coefficient> splittingOperatorMatrix;
@@ -2269,18 +2280,18 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
     Report1.Report(reportStream.str());
   }
   //chop off already known pieces:
-  for(int i=0; i<this->ownerGroup->irreps.size; i++)
-  { coefficient NumIrrepsOfType=this->theCharacteR.InnerProduct(this->ownerGroup->characterTable[i]);
+  for(int i=0; i<appendOnlyIrrepsList.size; i++)
+  { coefficient NumIrrepsOfType=this->theCharacteR.InnerProduct(appendOnlyIrrepsList[i]->GetCharacter());
     if(NumIrrepsOfType!=0)
     { this->ownerGroup->CheckInitializationFDrepComputation();
       if (theGlobalVariables!=0)
       { std::stringstream reportStream;
-        reportStream << "<hr>\ncontains irrep " << this->ownerGroup->irreps[i].theCharacteR.ToString() << " with multiplicity "
+        reportStream << "<hr>\ncontains irrep " << appendOnlyIrrepsList[i]->theCharacteR.ToString() << " with multiplicity "
         << NumIrrepsOfType << "\n";
-        reportStream << "<hr>\nGetting class f-n matrix from character: " << this->ownerGroup->irreps[i].theCharacteR;
+        reportStream << "<hr>\nGetting class f-n matrix from character: " << appendOnlyIrrepsList[i]->theCharacteR;
         Report2.Report(reportStream.str());
       }
-      this->GetClassFunctionMatrix(this->ownerGroup->irreps[i].theCharacteR, splittingOperatorMatrix);
+      this->GetClassFunctionMatrix(appendOnlyIrrepsList[i]->theCharacteR, splittingOperatorMatrix, theGlobalVariables);
       if (theGlobalVariables!=0)
       { std::stringstream reportStream;
         reportStream << "<br>class f-n matrix: " << splittingOperatorMatrix.ToString() << "\n <br>\n" << " computing its zero eigenspace... ";
@@ -2289,8 +2300,14 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
       splittingOperatorMatrix.GetZeroEigenSpaceModifyMe(splittingMatrixKernel);
 
       remainingVectorSpace.IntersectTwoLinSpaces(splittingMatrixKernel, remainingVectorSpace, tempSpace);
-      outputIrrepMults.AddMonomial(this->ownerGroup->characterTable[i],NumIrrepsOfType);
-      remainingCharacter-=this->ownerGroup->irreps[i].theCharacteR*NumIrrepsOfType;
+
+      // I'm not sure how much of a good idea it is to ensure that outputIrrepMults only takes monomials
+      // from ownerGroup->characterTable, it might be better to add the character from irreps pointed to
+      // by the appendOnlyIrrepsList[i]
+      int ci = this->ownerGroup->characterTable.BSGetIndex(appendOnlyIrrepsList[i]->theCharacteR);
+      outputIrrepMults.AddMonomial(this->ownerGroup->characterTable[ci],NumIrrepsOfType);
+
+      remainingCharacter-=appendOnlyIrrepsList[i]->theCharacteR*NumIrrepsOfType;
       if (theGlobalVariables!=0)
       { std::stringstream reportStream;
         reportStream << "<br>Intersecting kernel of class f-n matrix" << splittingMatrixKernel.ToString() << " with "
@@ -2315,7 +2332,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
     this->Restrict(remainingVectorSpace, remainingCharacter, reducedRep, theGlobalVariables);
     //stOutput << "done" << "\n";
     //stOutput << "Decomposing remaining subrep(s) " << reducedRep.GetCharacter() << "\n";
-    return reducedRep.DecomposeTodorsVersionRecursive(outputIrrepMults, theGlobalVariables);
+    return reducedRep.DecomposeTodorsVersionRecursive(outputIrrepMults, appendOnlyIrrepsList, theGlobalVariables);
   }
   if(remainingVectorSpace.size == 0)
     return true;
@@ -2342,7 +2359,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
       { //stOutput << "<br>restricting current rep to basis " << theSubRepsBasis[i].ToString();
         remainingCharacter.MakeZero(*this->ownerGroup);
         this->Restrict(theSubRepsBasis[i], remainingCharacter, newRep);
-        if (!newRep.DecomposeTodorsVersionRecursive(outputIrrepMults, theGlobalVariables))
+        if (!newRep.DecomposeTodorsVersionRecursive(outputIrrepMults, appendOnlyIrrepsList, theGlobalVariables))
           return false;
       }
       return true;
@@ -2358,7 +2375,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
     this->theElementImageS[i].ActOnVectorColumn(startingVector, tempV);
     average+=tempV;
   }
-  stOutput << "<br>Current char: " << this->GetCharacter().ToString();
+  stOutput << "<br>Current char: " << this->theCharacteR.ToString();
   stOutput << "<br>Spreading: " << average.ToString();
 /*  Vectors<coefficient> theSpread;
   this->SpreadVector(average, theSpread);

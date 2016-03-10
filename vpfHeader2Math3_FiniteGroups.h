@@ -1213,7 +1213,7 @@ public:
   (const Vectors<coefficient>& VectorSpaceBasisSubrep, const ClassFunction<somegroup, Rational>& remainingCharacter, GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& output,
    GlobalVariables* theGlobalVariables=0);
   bool DecomposeTodorsVersionRecursive
-  (VirtualRepresentation<somegroup, coefficient>& outputIrrepMults, GlobalVariables* theGlobalVariables=0)
+  (VirtualRepresentation<somegroup, coefficient>& outputIrrepMults, List<GroupRepresentation<somegroup, coefficient>*>& unsortedIrrepList, GlobalVariables* theGlobalVariables=0)
   ;
   bool DecomposeTodorsVersion
   (VirtualRepresentation<somegroup, coefficient>& outputIrrepMults, GlobalVariables* theGlobalVariables=0)

@@ -269,7 +269,10 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
   this->CheckInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
   outputIrrepMults.MakeZero();
-  return this->DecomposeTodorsVersionRecursive(outputIrrepMults, theGlobalVariables);
+  List<GroupRepresentation<somegroup, coefficient>*> appendOnlyIrrepsList;
+  for(int i=0; i<this->ownerGroup->irreps.size; i++)
+    appendOnlyIrrepsList.AddOnTop(&(this->ownerGroup->irreps[i]));
+  return this->DecomposeTodorsVersionRecursive(outputIrrepMults, appendOnlyIrrepsList, theGlobalVariables);
 }
 
 template <class Element>

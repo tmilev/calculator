@@ -2556,7 +2556,6 @@ void WebWorker::OutputShowIndicatorOnTimeout()
 
 std::string WebWorker::ToStringStatus()const
 { std::stringstream out;
-  out << "Connections: " << theWebServer.currentlyConnectedAddresses.ToString();
 //  if (theWebServer.currentlyConnectedAddresses.GetCoefficientsSum()!=theWebServer.
   out << "<br>Worker " << this->indexInParent+1;
   if (this->flagInUse)
@@ -2800,7 +2799,7 @@ std::string WebServer::ToStringStatusAll()
   if (this->activeWorker==-1)
     out << "The process is functioning as a server.";
   else
-  { out << "The process is functioning as a worker. The active worker is number " << this->activeWorker+1 << ".";
+  { out << "The process is functioning as a worker. The active worker is number " << this->activeWorker+1 << ". ";
     out << "<br>" << this->ToStringStatusActive();
   }
   int numInUse=0;
@@ -2816,7 +2815,8 @@ std::string WebServer::ToStringStatusAll()
     (currentWorker.pipeWorkerToServerWorkerStatus.lastRead.TheObjects,
      currentWorker.pipeWorkerToServerWorkerStatus.lastRead.size);
   }
-  out << "<hr><hr>" << numInUse << " workers in use out of total " << this->theWorkers.size << " workers.";
+  out << "<hr><hr>" << numInUse << " workers in use out of total " << this->theWorkers.size << " workers. ";
+  out << "Connections: " << this->currentlyConnectedAddresses.ToString();
   for (int i=0; i<this->theWorkers.size; i++)
     out << "<hr>" << this->theWorkers[i].ToStringStatus();
   return out.str();

@@ -1435,9 +1435,7 @@ bool Calculator::outerTimesToFunctionApplication(Calculator& theCommands, const 
 }
 
 bool Calculator::outerDistribute(Calculator& theCommands, const Expression& input, Expression& output, int AdditiveOp, int multiplicativeOp)
-{ if (theCommands.flagDontDistribute)
-    return false;
-  if (theCommands.outerLeftDistributeBracketIsOnTheLeft(theCommands, input, output, AdditiveOp, multiplicativeOp))
+{ if (theCommands.outerLeftDistributeBracketIsOnTheLeft(theCommands, input, output, AdditiveOp, multiplicativeOp))
     return true;
   return theCommands.outerRightDistributeBracketIsOnTheRight(theCommands, input, output, AdditiveOp, multiplicativeOp);
 }
@@ -1828,6 +1826,15 @@ SemisimpleLieAlgebra* Expression::GetAmbientSSAlgebraNonConstUseWithCaution()con
   return &this->owner->theObjectContainer.theLieAlgebras.GetElement(indexSSalg);
 }
 
+Function& Calculator::GetFunctionHandlerFromNamedRule(const std::string& inputNamedRule)
+{ int theIndex= this->namedRules.GetIndex(inputNamedRule);
+  if (theIndex==-1)
+    crash << "Named rule " << inputNamedRule << " does not exist." << crash;
+  if (this->namedRulesLocations[theIndex][0]==0)
+    return this->FunctionHandlers[this->namedRulesLocations[theIndex][1]][this->namedRulesLocations[theIndex][2]];
+  return this->operationsCompositeHandlers[this->namedRulesLocations[theIndex][1]][this->namedRulesLocations[theIndex][2]];
+}
+
 int Calculator::AddOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName)
 { int result=this->theAtoms.GetIndex(theOpName);
   if (result==-1)
@@ -1907,7 +1914,7 @@ void Calculator::AddOperationHandler
     triple[0]=0;
     triple[1]=indexOp;
     triple[2]=this->FunctionHandlers[indexOp].size-1;
-    this->namedRulesLocations[namedRuleIndex].AddOnTop(triple);
+    this->namedRulesLocations[namedRuleIndex]=(triple);
   }
 }
 
@@ -1946,7 +1953,7 @@ void Calculator::AddOperationComposite
     triple[0]=1;
     triple[1]=theIndex;
     triple[2]=this->operationsCompositeHandlers[theIndex].size-1;
-    this->namedRulesLocations[namedRuleIndex].AddOnTop(triple);
+    this->namedRulesLocations[namedRuleIndex]=triple;
   }
 }
 
@@ -2164,7 +2171,7 @@ std::string Calculator::ToString()
   }
   out << this->ElementToStringNonBoundVars();
   out << "<hr>";
-  out << "Children expressions (" << this->theExpressionContainer.size << " total):<br>";
+  out << "Children expressions (" << this->theExpressionContainer.size << " total): <br>";
   int numExpressionsToDisplay=this->theExpressionContainer.size;
   if (this->theExpressionContainer.size>1000)
   { numExpressionsToDisplay=1000;
@@ -2177,7 +2184,7 @@ std::string Calculator::ToString()
   numExpressionsToDisplay=this->cachedExpressions.size;
   if (numExpressionsToDisplay>1000)
   { numExpressionsToDisplay=1000;
-    out << "<b>Displaying first " << numExpressionsToDisplay << " expressions only.</b><br>";
+    out << "<b>Displaying first " << numExpressionsToDisplay << " expressions only. </b><br>";
   }
   for (int i=0; i<numExpressionsToDisplay; i++)
   { out << this->cachedExpressions[i].ToString() << " -> " << this->imagesCachedExpressions[i].ToString();

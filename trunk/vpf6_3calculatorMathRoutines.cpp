@@ -5951,6 +5951,12 @@ void Calculator::AutomatedTestRun
   }
 }
 
+bool CalculatorFunctionsGeneral::innerPrintRuleStack
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrash");
+  return output.AssignValue(theCommands.RuleStack.ToString(), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerCrash
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrash");
@@ -6427,44 +6433,46 @@ bool CalculatorFunctionsGeneral::innerIf
 bool CalculatorFunctionsGeneral::innerTurnRulesOnOff
 (Calculator& theCommands, const Expression& input, Expression& output, bool turnOff)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTurnRulesOnOff");
-  List<std::string> rulesToTurnOff;
+  List<std::string> rulesToConsider;
   std::string currentRule;
   if (!input.StartsWith(theCommands.opTurnOffRules()) && !input.StartsWith(theCommands.opTurnOnRules()))
   { if (input.IsOfType<std::string>(&currentRule))
-      rulesToTurnOff.AddOnTop(currentRule);
+      rulesToConsider.AddOnTop(currentRule);
     else if (input.IsAtom(&currentRule))
-      rulesToTurnOff.AddOnTop(currentRule);
+      rulesToConsider.AddOnTop(currentRule);
     else
       return theCommands << "Could not extract rule to turn off from " << input.ToString() << ". ";
   } else
     for (int i=1; i<input.children.size; i++)
       if (input[i].IsOfType<std::string>(&currentRule))
-        rulesToTurnOff.AddOnTop(currentRule);
+        rulesToConsider.AddOnTop(currentRule);
       else if (input[i].IsAtom(&currentRule))
-        rulesToTurnOff.AddOnTop(currentRule);
+        rulesToConsider.AddOnTop(currentRule);
       else
         return theCommands << "Could not extract rule to turn off from " << input[i].ToString() << ". ";
-  for (int i=0; i<rulesToTurnOff.size; i++)
-    if (!theCommands.namedRules.Contains(rulesToTurnOff[i]))
-      return theCommands << "Can't find named rule: " << rulesToTurnOff[i]
-      << "Turn-off rules command failed. ";
-  for (int i=0; i<rulesToTurnOff.size; i++)
-  { int namedRuleIndex= theCommands.namedRules.GetIndex(rulesToTurnOff[i]);
-    for (int j=0; j<theCommands.namedRulesLocations[namedRuleIndex].size; j++)
-    { List<int>& currentTriple=theCommands.namedRulesLocations[namedRuleIndex][j];
-      theCommands.flagDefaultRulesWereTamperedWith=true;
-      if (currentTriple[0]==0)
-        theCommands.FunctionHandlers[currentTriple[1]][currentTriple[2]].flagDisabledByUser=turnOff;
-      if (currentTriple[0]==1)
-        theCommands.operationsCompositeHandlers[currentTriple[1]][currentTriple[2]].flagDisabledByUser=turnOff;
-    }
+  HashedList<std::string, MathRoutines::hashString> rulesToSwitch;
+  rulesToSwitch.Reserve(rulesToConsider.size);
+  for (int i=0; i<rulesToConsider.size; i++)
+    if (! theCommands.namedRules.Contains(rulesToConsider[i]))
+      return theCommands << "Can't find named rule: " << rulesToConsider[i]
+      << ". Turn-off rules command failed. "
+//      << theCommands.namedRules.ToStringCommaDelimited()
+      ;
+    else
+      if (theCommands.GetFunctionHandlerFromNamedRule(rulesToConsider[i]).flagDisabledByUser!=turnOff)
+        rulesToSwitch.AddOnTopNoRepetition(rulesToConsider[i]);
+  for (int i=0; i<rulesToSwitch.size; i++)
+  { Function& currentFun=theCommands.GetFunctionHandlerFromNamedRule(rulesToSwitch[i]);
+    currentFun.flagDisabledByUser=!currentFun.flagDisabledByUser;
   }
-  std::stringstream out;
-  out << "\\text{ Turned " << (turnOff ? "off" : "on") << " rule(s): "
-  << rulesToTurnOff.ToStringCommaDelimited() << ". }";
-  Expression reportE;
-  reportE.AssignValue(out.str(), theCommands);
-  return output.MakeOX(theCommands, theCommands.opRulesChanged(), reportE);
+  output.reset(theCommands, rulesToSwitch.size+1);
+  output.AddChildAtomOnTop(theCommands.opRulesChanged());
+  Expression currentRuleE;
+  for (int i=0; i<rulesToSwitch.size; i++)
+  { currentRuleE.AssignValue(rulesToSwitch[i], theCommands);
+    output.AddChildOnTop(currentRuleE);
+  }
+  return true;
 }
 
 bool CalculatorFunctionsGeneral::innerTurnOffRules

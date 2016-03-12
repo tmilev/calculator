@@ -720,13 +720,11 @@ public:
   List<List<Function> > FunctionHandlers;
   List<List<Function> > operationsCompositeHandlers;
   HashedList<std::string, MathRoutines::hashString> namedRules;
-  List<List<List<int> > > namedRulesLocations;//for each named rule we store a list of triple of ints.
+  List<List<int> > namedRulesLocations;//for each named rule we store a list of triple of ints.
   //If first int is 0 then the named rule is a function handler.
   //If first int is 1 then the named rule is a composite operation handler.
   //Second int gives the index of the atom handled by the named rule.
   //Third int gives the index of the rule within the list of handlers for that atom.
-
-  HashedList<Expression> cachedRuleStacks;
 
 //Calculator functions have as arguments two expressions passed by reference,
 //const Expression& input and Expression& output. Calculator functions
@@ -822,7 +820,6 @@ public:
 
   bool flagWriteLatexPlots;
 
-  bool flagDontDistribute;
   bool flagNoApproximations;
 
   bool flagForkingProcessAllowed;
@@ -849,6 +846,7 @@ public:
   List<HashedList<int, MathRoutines::IntUnsignIdentity> > BoundVariablesStack;
 
   Expression RuleStack;
+  HashedList<Expression> cachedRuleStacks;
 
   HashedListReferences<Expression> theExpressionContainer;
 
@@ -886,6 +884,7 @@ public:
   //void GetOutputFolders(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay, FormatExpressions& outputFormat);
   bool IsBoundVarInContext(int inputOp);
   bool IsNonBoundVarInContext(int inputOp);
+  Function& GetFunctionHandlerFromNamedRule(const std::string& inputRuleName);
   bool CheckConsistencyAfterInitializationExpressionStackEmpty();
   //to make operations read only, we make operations private and return const pointer to it.
   inline const HashedList<std::string, MathRoutines::hashString>& GetOperations()

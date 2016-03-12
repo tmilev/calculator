@@ -203,6 +203,14 @@ StackMaintainerRules::StackMaintainerRules(Calculator* inputBoss)
 StackMaintainerRules::~StackMaintainerRules()
 { if (this->owner==0)
     return;
+  Expression& theRuleStack=this->owner->RuleStack;
+  for (int i=theRuleStack.children.size-1; i>this->startingRuleStackIndex; i--)
+    if (theRuleStack[i].StartsWith(this->owner->opRulesChanged()))
+      for (int j=1; j<theRuleStack[i].children.size; j++)
+      { Function& currentFun=
+        this->owner->GetFunctionHandlerFromNamedRule(theRuleStack[i][j].GetValue<std::string>());
+        currentFun.flagDisabledByUser=! currentFun.flagDisabledByUser;
+      }
   this->owner->RuleStackCacheIndex=this->startingRuleStackIndex;
   this->owner->RuleStack.children.SetSize(this->startingRuleStackSize);
   this->owner=0;
@@ -374,7 +382,8 @@ bool Calculator::EvaluateExpression
       if (theCommands.flagLogEvaluatioN)
         beforePatternMatch=output;
       BoundVariablesSubstitution bufferPairs;
-      if(theCommands.ProcessOneExpressionOnePatternOneSub(currentPattern, output, bufferPairs, &theCommands.Comments, theCommands.flagLogPatternMatching))
+      if (theCommands.ProcessOneExpressionOnePatternOneSub
+          (currentPattern, output, bufferPairs, &theCommands.Comments, theCommands.flagLogPatternMatching))
       { ReductionOcurred=true;
         if (theCommands.flagLogEvaluatioN)
         { /*
@@ -383,7 +392,8 @@ bool Calculator::EvaluateExpression
             << theCommands.RuleContextIdentifier << "<br>Rules: " << theCommands.RuleStack.ToString() << "<br>";
           }
           */
-          theCommands << "<hr>Rule cache index: " << theCommands.RuleStackCacheIndex << "<br>Rule: " << currentPattern.ToString()
+          theCommands << "<hr>Rule cache index: " << theCommands.RuleStackCacheIndex
+          << "<br>Rule: " << currentPattern.ToString()
           << "<br>" << CGI::GetMathSpanPure(beforePatternMatch.ToString()) << " -> "
           << CGI::GetMathSpanPure(output.ToString());
         }
@@ -399,7 +409,6 @@ bool Calculator::EvaluateExpression
       theCommands << "&nbsp&nbsp&nbsp&nbsp";
     theCommands << "to get: " << output.Lispify();
   }
-
   return true;
 }
 

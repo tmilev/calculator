@@ -357,7 +357,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateSqrt, "",
    "Differentiation - square root function.  ",
-   "d/dx(sqrt(x));", true, false, "CalculatorFunctionsGeneral::innerDifferentiateSqrt");
+   "d/dx(sqrt(x));", true, false, "CalculatorFunctionsGeneral::innerDifferentiateSqrt", "DifferentiateSqrt");
 
 
   //the function integrating the building blocks must come in the exact order below:
@@ -397,20 +397,25 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig, "",
    "Differentiation - product rule.  ",
-   "Differentiate(x,  (\\sin x) \\cos x )", true, false, "CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig");
+   "Differentiate(x,  (\\sin x) \\cos x )", true, false,
+   "CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig", "DifferentiateTrigAndInverseTrig");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateChainRule, "",
    "Differentiation - chain rule.  ",
-   "Differentiate(x,  \\sin x^2 \\cos (\\sin x))", true, false, "CalculatorFunctionsGeneral::innerDifferentiateChainRule");
+   "Differentiate(x,  \\sin x^2 \\cos (\\sin x))", true, false,
+   "CalculatorFunctionsGeneral::innerDifferentiateChainRule", "DifferentiateChainRule");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateAtimesB, "",
    "Differentiation - product rule.  ",
-   "Differentiate(x, f*g )", true, false, "CalculatorFunctionsGeneral::innerDifferentiateAtimesB");
+   "Differentiate(x, f*g )", true, false, "CalculatorFunctionsGeneral::innerDifferentiateAtimesB",
+   "DifferentiateProductRule");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateAdivideBCommutative, "",
    "Differentiation - division rule, commutative. For the time being differentiation is assumed to be over commutative rings. \
    This might change in the future. The commutative division rule is d/dx (f/g^n)= ((d/dx f) g- n f (d/dx g))/g^{n+1}.  ",
-   "Differentiate(x, f/g ); Differentiate(x, f/g^5 ); Differentiate(x, f/g^n )", true, false, "CalculatorFunctionsGeneral::innerDifferentiateAdivideBCommutative");
+   "Differentiate(x, f/g ); Differentiate(x, f/g^5 ); Differentiate(x, f/g^n )", true, false,
+   "CalculatorFunctionsGeneral::innerDifferentiateAdivideBCommutative",
+   "DifferentiateQuotientRule");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateAplusB, "",
    "Differentiation - sum rule.  ",
@@ -418,20 +423,26 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateConstant, "",
    "Differentiation - constant rule. ",
-   "Differentiate(x, 5 ); d/dx \\sqrt{5}", true, false, "CalculatorFunctionsGeneral::innerDifferentiateConstant");
+   "Differentiate(x, 5 ); d/dx \\sqrt{5}", true, false,
+   "CalculatorFunctionsGeneral::innerDifferentiateConstant",
+   "DifferentiateConstant");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateX, "",
    "Differentiation - d/dx x= 1.",
-   "Differentiate(x, x ); d/dx x", true, false, "CalculatorFunctionsGeneral::innerDifferentiateX");
+   "Differentiate(x, x ); d/dx x", true, false, "CalculatorFunctionsGeneral::innerDifferentiateX",
+   "DifferentiateIdentity");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateConstPower, "",
    "Differentiation - d/dx x^n= n x^{n-1}.",
    "Differentiate(x, x^2 ); d/dx x^-1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}", true, false,
-   "CalculatorFunctionsGeneral::innerDifferentiateConstPower");
+   "CalculatorFunctionsGeneral::innerDifferentiateConstPower",
+   "DifferentiateConstPower");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateAPowerB, "",
    "Differentiation - d/dx a^b= d/dx(e^{b\\log a}) = a^b d/dx(b\\log a) .",
-   "Differentiate(x, x^2 ); d/dx x^-1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}", true, false, "CalculatorFunctionsGeneral::innerDifferentiateAPowerB");
+   "Differentiate(x, x^2 ); d/dx x^-1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}", true, false,
+   "CalculatorFunctionsGeneral::innerDifferentiateAPowerB",
+   "DifferentiateApowerB");
 
   this->AddOperationInnerHandler
   ("\\times", CalculatorFunctionsGeneral::innerCrossProduct, "",
@@ -716,6 +727,12 @@ void Calculator::initPredefinedInnerFunctions()
    the second cone is generated over Z_{&gt;=0} (``non-strict cone'').",
    "v_1=(1, 2, 3 ); v_2=(1, 3, 2); v_3=(3,1,1); v_4=(-2,2, 2);\
    \n ConesIntersection{}((v_1,v_2 ), (v_3,v_4 ));\nConesIntersection{}((v_1,v_2 ), (v_3,-v_4 ));", true, false)
+   ;
+  this->AddOperationInnerHandler
+  ("PrintRuleStack", CalculatorFunctionsGeneral::innerPrintRuleStack, "",
+   "Prints the current rule stack",
+   "a=b; PrintRuleStack{}0; c=d; PrintRuleStack{}0; ", true, false
+   , "CalculatorFunctionsGeneral::innerPrintRuleStack", "PrintRuleStack")
    ;
 
   this->AddOperationInnerHandler
@@ -2827,6 +2844,7 @@ void Calculator::initAtomsNonCacheable()
 { MacroRegisterFunctionWithName("Calculator::initAtomsNonCacheable");
   this->atomsThatMustNotBeCached.SetExpectedSize(30);
   this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("randomInteger");
+//  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("PrintRuleStack");
 }
 
 void Calculator::initAtomsNotGoodForChainRule()

@@ -53,7 +53,6 @@ void Calculator::reset()
   this->flagProduceLatexLink=false;
   this->flagDisplayFullExpressionTree=false;
   this->flagUseFracInRationalLaTeX=true;
-  this->flagDontDistribute=false;
   this->flagForkingProcessAllowed=true;
   this->flagNoApproximations=false;
   this->flagCurrentExpressionIsNonCacheable=false;
@@ -262,7 +261,6 @@ void Calculator::init()
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("CalculatorStatus");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("FullTree");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("HideLHS");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("DontDistribute");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("EndProgram");
 
   this->initPredefinedStandardOperationsWithoutHandler();
@@ -1219,11 +1217,6 @@ bool Calculator::ApplyOneRule()
   }
   if (secondToLastS=="%" && lastS=="ShowContext")
   { this->flagDisplayContext=true;
-    this->PopTopSyntacticStack();
-    return this->PopTopSyntacticStack();
-  }
-  if (secondToLastS=="%" && lastS=="DontDistribute")
-  { this->flagDontDistribute=true;
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }

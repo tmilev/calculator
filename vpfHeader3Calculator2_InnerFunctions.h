@@ -9,6 +9,7 @@ static ProjectInformationInstance ProjectInfoVpf6_2Header(__FILE__, "Heder, calc
 class CalculatorFunctionsGeneral
 {
 public:
+  static bool innerPrintRuleStack(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCrash(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCrashByListOutOfBounds
   (Calculator& theCommands, const Expression& input, Expression& output);

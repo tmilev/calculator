@@ -2554,7 +2554,7 @@ void TestPermutationWords()
 { PermutationGroupData PG;
   PG.MakeSymmetricGroupGeneratorsjjPlus1(5);
   FiniteGroup<PermutationR2>* G = PG.theGroup;
-  G->ComputeAllElements();
+  G->ComputeAllElements(true, -1);
   for(int i=0; i<G->theElements.size; i++)
   { List<int> word;
     G->GetWord(G->theElements[i],word);
@@ -2651,7 +2651,7 @@ void TestHyperoctahedralStuff()
   for(int bni=1; bni<6;bni++)
   { HyperoctahedralGroupData Bn;
     Bn.MakeHyperoctahedralGroup(bni);
-    Bn.theGroup->ComputeAllElements();
+    Bn.theGroup->ComputeAllElements(true, -1);
     Bn.theGroup->ComputeCCSizesAndRepresentatives();
     stOutput << Bn << '\n';
     stOutput << Bn.theGroup->conjugacyClasseS.size << " conjugacy classes\n";

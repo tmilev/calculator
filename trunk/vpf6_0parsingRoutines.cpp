@@ -1333,7 +1333,8 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceXEEXByEXusingO(this->opDivide(), Expression::formatUseFrac);
   if (secondToLastS=="Expression" && thirdToLastS=="\\times" && fourthToLastS=="Expression" && this->AllowsTimesInPreceding(lastS) )
     return this->ReplaceEOEXByEX();
-  if (secondToLastS=="Expression" && thirdToLastS=="*" && fourthToLastS=="Expression" && this->AllowsTimesInPreceding(lastS) )
+  if (secondToLastS=="Expression" && thirdToLastS=="*" && fourthToLastS=="Expression" &&
+      this->AllowsTimesInPreceding(lastS) && !secondToLastE.theData.IsBuiltInAtom())
     return this->ReplaceEOEXByEX(Expression::formatTimesDenotedByStar);
   if (secondToLastS=="Expression" && thirdToLastS=="/" && fourthToLastS=="Expression" && this->AllowsDivideInPreceding(lastS) )
     return this->ReplaceEOEXByEX();
@@ -1347,8 +1348,14 @@ bool Calculator::ApplyOneRule()
       secondToLastS=="Expression" && this->AllowsTimesInPreceding(lastS))
     return this->ReplaceOXEEXByEX();
   if (fourthToLastS!="{}" && thirdToLastS=="Expression" && secondToLastS=="Expression" &&
-      this->AllowsTimesInPreceding(lastS) )
-    return this->ReplaceEEXByEXusingO(this->conTimes());
+      this->AllowsTimesInPreceding(lastS) && !secondToLastE.theData.IsBuiltInAtom())
+  { this->ReplaceEEXByEXusingO(this->conTimes());
+    Expression impliedFunApplication;
+    if (this->outerTimesToFunctionApplication
+        (*this, (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].theData, impliedFunApplication))
+      (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].theData=impliedFunApplication;
+    return true;
+  }
   if (thirdToLastS=="(" && secondToLastS=="Expression" && lastS==")")
     return this->ReplaceXEXByE(secondToLastE.theData.format);
   if (thirdToLastS=="{" && secondToLastS=="Expression" && lastS=="}")

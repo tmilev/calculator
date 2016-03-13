@@ -2026,10 +2026,10 @@ void Calculator::initPredefinedStandardOperations()
    "Transforms a-b to a+(-1)*b and -b to (-1)*b. Equivalent to a rule \
    -{{b}}=MinnusOne*b; {{a}}-{{b}}=a+MinnusOne*b", "-1+(-5)", true);
 
-  this->AddOperationOuterHandler
-  ("*", Calculator::outerTimesToFunctionApplication, "",
-   "On condition that F is a built-int function name or built-in operation, replaces F*x with F{}x.",
-   "plot2D(\\sin{}x+cos{}x, 0, 5) ", true, false, "Calculator::outerTimesToFunctionApplication");
+//  this->AddOperationOuterHandler
+////  ("*", Calculator::outerTimesToFunctionApplication, "",
+//   "On condition that F is a built-int function name or built-in operation, replaces F*x with F{}x.",
+//   "plot2D(\\sin{}x+cos{}x, 0, 5) ", true, false, "Calculator::outerTimesToFunctionApplication");
   this->AddOperationInnerHandler
   ("*", CalculatorFunctionsGeneral::innerCompositeMultiplyIntegralFbyDx, "",
    "Transformation: (\\int{} f) dx= \\int{}(f dx)",

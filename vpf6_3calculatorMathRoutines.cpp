@@ -1598,6 +1598,20 @@ bool CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig(Calculator
     sinE.MakeAtom(theCommands.opSin(), theCommands);
     return output.MakeXOX(theCommands, theCommands.opTimes(), mOneE, sinE);
   }
+  if (theArgument.IsAtomGivenData(theCommands.opTan()))
+  { Expression secE, twoE;
+    secE.MakeAtom(theCommands.opSec(), theCommands);
+    twoE.AssignValue(2, theCommands);
+    return output.MakeXOX(theCommands, theCommands.opThePower(), secE, twoE);
+  }
+  if (theArgument.IsAtomGivenData(theCommands.opCot()))
+  { Expression cscE, twoE, cscSquared, mOneE;
+    cscE.MakeAtom(theCommands.opCsc(), theCommands);
+    twoE.AssignValue(2, theCommands);
+    cscSquared.MakeXOX(theCommands, theCommands.opThePower(), cscE, twoE);
+    mOneE.AssignValue(-1, theCommands);
+    return output.MakeXOX(theCommands, theCommands.opTimes(), mOneE, cscSquared);
+  }
   if (theArgument.IsAtomGivenData(theCommands.opArcTan()))
   { Polynomial<Rational> onePlusXsquared;
     RationalFunctionOld oneOverOnePlusXsquared;
@@ -3652,6 +3666,13 @@ bool CalculatorFunctionsGeneral::innerDFQsEulersMethod(Calculator& theCommands, 
     }
 //  stOutput << "first good index: " << firstGoodXIndex << " last good index: " << lastGoodXIndex;
   PlotObject thePlot;
+  Vector<double> currentPt;
+  currentPt.SetSize(2);
+  for (int i=firstGoodXIndex; i<=lastGoodXIndex; i++)
+  { currentPt[0]=XValues[i];
+    currentPt[1]=YValues[i];
+    thePlot.thePoints.AddOnTop(currentPt);
+  }
   thePlot.xLow=XValues[0];
   thePlot.xHigh=*XValues.LastObject();
   thePlot.yLow=-0.5;

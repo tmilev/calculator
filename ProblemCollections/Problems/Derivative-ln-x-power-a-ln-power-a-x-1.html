@@ -1,0 +1,49 @@
+<span class="setCalculatorExamProblem">
+</span>
+Compute the derivatives. 
+
+<span class="calculatorHidden">
+\(
+%UseLnInsteadOfLog
+a=randomInteger((2,11));
+b=randomInteger((2,11));
+TurnOffRules("ConvertShortDenominatorToNegativePower", "sqrt", "logBase", "ConvertShortDenominatorToNegativePower", "CommonDenominatorOneNonFraction");
+\)</span>
+
+<br>
+<span class="calculator">
+\(\displaystyle f{}{{x}}=  \ln( x^b) 
+\) 
+</span>.
+<span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
+\(%UseLnInsteadOfLog
+TurnOffRules("\log", "logBase");\)
+</span>
+<br>
+Answer: \(f'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswerF">
+\(
+CompareFunctionsNumerically(d/dx(f{}x), AlgebraAnswerF, 2, 3, 50, 0.0001);
+\)
+</textarea>
+
+<span class="calculatorAnswerOnGiveUp">
+MakeExpression(MakeRationalFunction(
+d/dx (f{}x)))
+</span>
+<span class="calculator">
+\(\displaystyle g{}{{x}}=  (\ln( x))^b 
+\) 
+</span>.
+<br>
+Answer: \(g'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswerG">
+\(
+CompareFunctionsNumerically(d/dx(g{}x), AlgebraAnswerG, 2, 3, 50, 0.0001);
+\)
+</textarea>
+<span class="calculatorAnswerOnGiveUp">
+MakeExpression(MakeRationalFunction(
+d/dx (g{}x)))
+</span>
+
+
+To write \(\ln (x)\) you need to enter \ln(x), ln(x) or log(x) or \log(x). Please note that in the calculator log stands for the (complex) natural logarithm, i.e., the logarithm base e. 

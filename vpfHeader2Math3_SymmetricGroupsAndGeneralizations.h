@@ -1420,7 +1420,7 @@ bool FiniteGroup<elementSomeGroup>::PossiblyConjugate(const elementSomeGroup& x,
 
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& x, const elementSomeGroup& y)
-{ if(this->AreConjugateByFormula)
+{ if(this->AreConjugateByFormula!=0)
     return this->AreConjugateByFormula(x,y);
   if(!this->flagCCsComputed)
     this->ComputeCCSizesAndRepresentatives();
@@ -1452,92 +1452,6 @@ void FiniteGroup<elementSomeGroup>::MakeID(elementSomeGroup& e)
     e.MakeID(this->generators[0]);
 }
 
-template <typename elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::ComputeAllElementsWordsConjugacyIfObvious(bool andWords)
-{ MacroRegisterFunctionWithName("FiniteGroup::ComputeAllElementsWordsConjugacyIfObvious");
-  if(this->flagAllElementsAreComputed)
-  { if(!(andWords && !flagWordsComputed))
-      if(!(!this->flagCCsComputed && AreConjugateByFormula))
-        return; // no reason to recompute.  skipping
-    stOutput << "Recomputing elements of some group, for God only knows why.  Check frames above " << __FILE__ << ':' << __LINE__ << '\n';
-    this->theElements.SetSize(0);
-  }
-  elementSomeGroup e;
-  this->MakeID(e);
-  this->theElements.AddOnTop(e);
-  if(andWords && !GetWordByFormula)
-    this->theWords.SetSize(1);
-  List<elementSomeGroup> recentadds;
-  recentadds.AddOnTop(e);
-  List<List<int> > recentwords;
-  if(andWords && !GetWordByFormula)
-    recentwords.SetSize(1);
-  if(AreConjugateByFormula && (ComputeCCSizesAndRepresentativesByFormula == NULL))
-  { this->conjugacyClasseS.SetSize(1);
-    this->conjugacyClasseS[0].size = 1;
-    this->conjugacyClasseS[0].representative = e;
-    if(andWords)
-    { if(!GetWordByFormula)
-        this->conjugacyClasseS[0].representativeIndex = 0;
-      this->conjugacyClasseS[0].flagRepresentativeWordComputed = true;
-    }
-  }
-  while(recentadds.size > 0)
-  { // this is a necessary copy.  I wish I could tell cxx it is a move.
-    elementSomeGroup r = recentadds.PopLastObject();
-    List<int> rword;
-    if(andWords && !GetWordByFormula)
-      rword = recentwords.PopLastObject();
-    for(int i=0; i<this->generators.size; i++)
-    for(int i=0; i<this->generators.size; i++)
-    { elementSomeGroup p = r*generators[i];
-      if(this->theElements.AddOnTopNoRepetition(p))
-      { recentadds.AddOnTop(p);
-        if(andWords && !GetWordByFormula)
-        { recentwords.AddOnTop(rword);
-          recentwords[recentwords.size-1].AddOnTop(i);
-        }
-        if(andWords && !GetWordByFormula)
-          this->theWords.AddOnTop(recentwords[recentwords.size-1]);
-        if(AreConjugateByFormula && (ComputeCCSizesAndRepresentativesByFormula == NULL))
-        { int pindex = this->theElements.GetIndex(p);
-          bool alreadyHaveClass = false;
-          for(int i=0; i<this->conjugacyClasseS.size; i++)
-          { if(this->AreConjugate(this->conjugacyClasseS[i].representative,p))
-            { this->conjugacyClasseS[i].size++;
-              alreadyHaveClass = true;
-              break;
-            }
-          } // if only cxx had for...else
-          if(!alreadyHaveClass)
-          { int ncc = this->conjugacyClasseS.size;
-            this->conjugacyClasseS.SetSize(ncc+1);
-            this->conjugacyClasseS[ncc].representative = p;
-            this->conjugacyClasseS[ncc].size = 1;
-            if(andWords && !GetWordByFormula)
-            { this->conjugacyClasseS[ncc].representativeIndex = pindex;
-              this->conjugacyClasseS[ncc].representativeWord = recentwords[recentwords.size-1];
-              this->conjugacyClasseS[ncc].flagRepresentativeWordComputed = true;
-            }
-            if(GetWordByFormula)
-            { this->GetWord(this->conjugacyClasseS[ncc].representative, this->conjugacyClasseS[ncc].representativeWord);
-              this->conjugacyClasseS[ncc].flagRepresentativeWordComputed = true;
-            }
-          }
-        }
-      }
-    }
-  }
-  this->flagAllElementsAreComputed = true;
-  if(AreConjugateByFormula && (ComputeCCSizesAndRepresentativesByFormula == NULL))
-  { this->flagCCsComputed = true;
-    this->flagCCRepresentativesComputed = true;
-  }
-  if(andWords)
-    this->flagWordsComputed = true;
-  this->sizePrivate = this->theElements.size;
-}
-
 // this needs some better design
 // the intention here is to do representation theory.  so we need the sizes,
 // representatives, and words.
@@ -1547,18 +1461,15 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesRepresentativesWords()
     this->flagWordsComputed = true;
   if(this->flagCCsComputed && this->flagWordsComputed)
     return;
-  if(this->ComputeCCSizesAndRepresentativesByFormula)
+  if(this->ComputeCCSizesAndRepresentativesByFormula!=0)
   { this->ComputeCCSizesAndRepresentativesByFormula(this);
     return;
   }
-  if(this->AreConjugateByFormula)
-  { this->ComputeAllElementsWordsConjugacyIfObvious(true);
-    return;
-  }
-  if(!this->flagWordsComputed)
-    this->ComputeAllElementsWordsConjugacyIfObvious(true);
-  if(!this->flagAllElementsAreComputed)
-    this->ComputeAllElementsWordsConjugacyIfObvious(true);
+
+  if(this->AreConjugateByFormula!=0)
+    stOutput << "This needs a rewrite";
+  if(!this->flagWordsComputed || !this->flagAllElementsAreComputed)
+    this->ComputeAllElements(true, -1);
   GraphOLD conjugacygraph = GraphOLD(this->theElements.size, this->generators.size);
   for(int i=0; i<this->theElements.size; i++)
     for(int j=0; j<this->generators.size; j++)
@@ -1593,7 +1504,7 @@ bool FiniteGroup<elementSomeGroup>::GetWord(const elementSomeGroup& g, List<int>
 { if(GetWordByFormula)
     return this->GetWordByFormula(this,g,word);
   if(!this->flagWordsComputed)
-    this->ComputeAllElementsWordsConjugacyIfObvious(true);
+    this->ComputeAllElementsLargeGroup(true);
   int index=this->theElements.GetIndex(g);
   if (index==-1)
     return false;

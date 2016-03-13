@@ -1391,13 +1391,14 @@ void GeneralizedVermaModuleCharacters::WriteToFile(std::fstream& output, GlobalV
 }
 
 void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
-{ Vectors<Rational> tempRoots;
+{ MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::initFromHomomorphism");
+  Vectors<Rational> tempRoots;
   this->WeylLarger=input.theRange().theWeyl;
   this->WeylSmaller=input.theDomain().theWeyl;
   WeylGroupData& theWeYl=input.theRange().theWeyl;
 //  input.ProjectOntoSmallCartan(theWeyl.RootsOfBorel, tempRoots, theGlobalVariables);
   this->log << "projections: " << tempRoots.ToString();
-  theWeYl.theGroup.ComputeAllElements();
+  theWeYl.theGroup.ComputeAllElements(false);
   this->NonIntegralOriginModificationBasisChanged="(1/2,1/2)";
   Matrix<Rational>  theProjectionBasisChanged;
   Vector<Rational> startingWeight, projectedWeight;

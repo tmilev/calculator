@@ -26,39 +26,21 @@ std::string FinitelyGeneratedMatrixMonoid<coefficient>::ToString(FormatExpressio
 // more than a million elements, or if there are more than 7 generators, use
 // the slow method that won't use up all the memory and swap and then crash
 template <typename elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::ComputeAllElements(int MaxElements)
+bool FiniteGroup<elementSomeGroup>::ComputeAllElements(bool andWords, int MaxElements)
 { MacroRegisterFunctionWithName("FiniteGroup::ComputeAllElements");
-  double startTimeDebug=theGlobalVariables.GetElapsedSeconds();
-  if(MaxElements > 1000000)
-  { bool result=this->ComputeAllElementsLargeGroup(MaxElements);
-    stOutput << "DEBUG: Time needed to compute all elements:  " << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
-    return result;
-  }
+//  double startTimeDebug=theGlobalVariables.GetElapsedSeconds();
   this->sizePrivate = this->SizeByFormulaOrNeg1();
-  if(this->sizePrivate > 1000000)
-  { bool result= this->ComputeAllElementsLargeGroup(MaxElements);
-    stOutput << "DEBUG: Time needed to compute all elements:  " << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
-    return result;
-  }
-  if(this->sizePrivate > 0)
-  { this->ComputeAllElementsWordsConjugacyIfObvious();
-    stOutput << "DEBUG: Time needed to call ComputeAllElementsWordsConjugacyIfObvious:  " << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
-    return true;
-  }
-  if(this->generators.size > 7)
-  { bool result=ComputeAllElementsLargeGroup(MaxElements);
-    stOutput << "DEBUG: Time needed to call ComputeAllElementsLargeGroup:  "
-    << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
-    return result;
-  }
-  this->ComputeAllElementsWordsConjugacyIfObvious();
-  stOutput << "DEBUG: Time needed to compute all words and conjugacy classes:  "
-  << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
+  if (this->sizePrivate>0 && MaxElements>0 && this->sizePrivate>MaxElements)
+    return false;
+  if(!this->ComputeAllElementsLargeGroup(andWords, MaxElements))
+    return false;
+  if (this->sizePrivate<100000)
+    this->ComputeCCSizesAndRepresentatives();
   return true;
 }
 
 template <typename elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(int MaxElements)
+bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, int MaxElements)
 { MacroRegisterFunctionWithName("Subgroup::ComputeAllElements");
   this->InitGenerators();
   if (this->generators.size==0)
@@ -68,12 +50,25 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(int MaxElements
   elementSomeGroup currentElement;
   currentElement.MakeID(this->generators[0]);
   this->theElements.AddOnTop(currentElement);
+  this->theWords.SetSize(0);
+  if (andWords)
+  { this->theWords.SetSize(1);
+    this->theWords.LastObject()->SetSize(0);
+  }
   ProgressReport theReport;
-  //Check the generators have no repetitions:
+  //Warning: not checking whether the generators have repetitions.
   for (int j=0; j<this->theElements.size; j++)
     for(int i=0; i<this->generators.size; i++)
     { currentElement=this->generators[i]*this->theElements[j];
-      this->theElements.AddOnTopNoRepetition(currentElement);
+      if (this->theElements.AddOnTopNoRepetition(currentElement) && andWords)
+      { if (this->GetWordByFormula==0)
+        { this->theWords.AddOnTop(this->theWords[j]);
+          this->theWords.LastObject()->AddOnTop(i);
+        } else
+        { this->theWords.SetSize(this->theWords.size+1);
+          this->GetWordByFormula(this->specificDataPointer, currentElement, *this->theWords.LastObject());
+        }
+      }
       if (theGlobalVariables.flagReportEverything)
         if (this->theElements.size%100==0)
         { std::stringstream reportStream;
@@ -95,6 +90,8 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(int MaxElements
   }
   this->sizePrivate=this->theElements.size;
   this->flagAllElementsAreComputed=true;
+  if (andWords)
+    this->flagWordsComputed=true;
   return true;
 }
 
@@ -498,7 +495,7 @@ bool SubgroupData<someGroup, elementSomeGroup>::CheckInitialization()
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::HasElement(const elementSomeGroup& g)
 { if(!this->flagAllElementsAreComputed)
-    this->ComputeAllElements();
+    this->ComputeAllElements(false);
   return this->theElements.Contains(g);
 }
 
@@ -569,7 +566,7 @@ LargeInt FiniteGroup<elementSomeGroup>::GetSize()
   //crash << "Requesting size of group whose size is not computed.  If you want"
   //      << "to compute it as a side effect, change the stuff near "
   //      << __FILE__ << ":" << __LINE__ << crash;
-  this->ComputeAllElements();
+  this->ComputeAllElements(false);
   return this->sizePrivate;
 }
 
@@ -845,7 +842,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives()
 
 template <class elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives()
-{ if(this->GetSizeByFormula)
+{ if(this->GetSizeByFormula!=0)
   { LargeInt theSize = this->GetSizeByFormula(this);
     // extended digit separators only appear in cxx14
     if(theSize > 100000000)
@@ -2123,8 +2120,8 @@ void SubgroupData<someGroup, elementSomeGroup>::ComputeCosets()
     return;
   if(this->CosetRepresentativeEnumerator && this->SameCosetAsByFormula)
     return this->CosetRepresentativeEnumerator(this);
-  this->theSubgroup->ComputeAllElements();
-  this->theGroup->ComputeAllElements();
+  this->theSubgroup->ComputeAllElements(true);
+  this->theGroup->ComputeAllElements(true);
   GraphOLD orbitg = GraphOLD(this->theGroup->theElements.size, this->theSubgroup->generators.size);
   for(int i=0; i<this->theGroup->theElements.size; i++)
     for(int j=0; j<this->theSubgroup->generators.size; j++)

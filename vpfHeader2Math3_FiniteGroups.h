@@ -209,11 +209,7 @@ public:
 
   Matrix<int> generatorCommutationRelations;
 
-
   List<List<int> > theWords;
-
-
-
 
   //<-The character polynomials in the ``standard representation''.
   //The ``standard representation'' is specified by the elementSomeGroup class.
@@ -270,15 +266,13 @@ public:
   bool AreConjugate_OLD_Deprecated_Version_By_Todor(const elementSomeGroup& left, const elementSomeGroup& right);
 
 
-  bool ComputeAllElements(int MaxElements=-1);
+  bool ComputeAllElements(bool andWords, int MaxElements=-1);
 
   // Timing indicates that for small groups this code is slow
-  bool ComputeAllElementsLargeGroup(int MaxElements=-1);
+  bool ComputeAllElementsLargeGroup(bool andWords, int MaxElements=-1);
 
   // Historical note: this was from Thomas' second finite group class, and is
   // as of 2015-11 the only way to generate the words and conjugacy information
-  void ComputeAllElementsWordsConjugacyIfObvious(bool andWords=false);
-
   void ComputeCCfromAllElements();
   void ComputeCCfromCCindicesInAllElements(const List<List<int> >& ccIndices);
 

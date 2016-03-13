@@ -4763,7 +4763,7 @@ void WeylGroupData::ActOnRootAlgByGroupElement(int index, PolynomialSubstitution
 }
 
 void WeylGroupData::ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output)
-{ this->theGroup.ComputeAllElements();
+{ this->theGroup.ComputeAllElements(false);
   output.size=0;
   output.Reserve(this->RootSystem.size/2);
   for (int i=0; i<this->RootSystem.size; i++)

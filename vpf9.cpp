@@ -3045,19 +3045,16 @@ void oneFracWithMultiplicitiesAndElongations::ComputeOneCheckSum(Rational& outpu
     tempRat2=1;
     for (int j=0; j<theDimension; j++)
     { if (PartFraction::flagAnErrorHasOccurredTimeToPanic)
-      { tempS=theExp.ToString();
-      }
+        tempS=theExp.ToString();
       tempRat3=CheckSumRoot[j];
       if (!tempRat3.IsEqualToZero())
         tempRat3.RaiseToPower((theExp[j]*this->Elongations[i]).NumShort);
       tempRat2*=tempRat3;
       if (PartFraction::flagAnErrorHasOccurredTimeToPanic)
-      { tempS=tempRat2.ToString();
-      }
+        tempS=tempRat2.ToString();
     }
     if (PartFraction::flagAnErrorHasOccurredTimeToPanic)
-    { tempS=tempRat.ToString();
-    }
+      tempS=tempRat.ToString();
     tempRat-=tempRat2;
     tempRat.RaiseToPower(this->Multiplicities[i]);
     if (PartFraction::flagAnErrorHasOccurredTimeToPanic)
@@ -3806,7 +3803,9 @@ int DynkinType::GetCoxeterEdgeWeight(int v, int w)
 }
 
 LargeInt DynkinType::GetWeylGroupSizeByFormula()const
-{ LargeInt result=1;
+{ MacroRegisterFunctionWithName("DynkinType::GetWeylGroupSizeByFormula");
+  stOutput << "DEBUG: Getting Weyl group size by f-la of type: " << this->ToString() << ": ";
+  LargeInt result=1;
   LargeInt tempLI;
   for (int i=0; i<this->size(); i++)
   { tempLI=WeylGroupData::SizeByFormulaOrNeg1((*this)[i].theLetter, (*this)[i].theRank);
@@ -3816,6 +3815,7 @@ LargeInt DynkinType::GetWeylGroupSizeByFormula()const
   if (result<=0)
     crash << "Something has gone very wrong: Weyl group size reported to be " << result.ToString()
     << " which appears to not be a positive integer! " << crash;
+  stOutput << "DEBUG: result: " << result.ToString();
   return result;
 }
 
@@ -4524,6 +4524,7 @@ void WeylGroupData::init()
   this->flagIrrepsAreComputed=false;
   this->flagCharTableIsComputed=false;
   this->MatrixSendsSimpleVectorsToEpsilonVectors.FreeMemory();
+  this->theGroup.specificDataPointer=this;
   this->theGroup.init();
   this->theGroup.GetWordByFormula = this->GetWordByFormulaImplementation;
   this->theGroup.GetSizeByFormula = this->GetSizeByFormulaImplementation;

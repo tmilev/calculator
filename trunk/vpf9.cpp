@@ -3814,7 +3814,7 @@ LargeInt DynkinType::GetWeylGroupSizeByFormula()const
     result*=tempLI;
   }
   if (result<=0)
-    crash << "Something has gone very wrong: weyl group size reported to be " << result.ToString()
+    crash << "Something has gone very wrong: Weyl group size reported to be " << result.ToString()
     << " which appears to not be a positive integer! " << crash;
   return result;
 }
@@ -4673,6 +4673,10 @@ bool WeylGroupData::IsRegular(Vector<Rational>& input, int* indexFirstPerpendicu
 
 LargeInt WeylGroupData::SizeByFormulaOrNeg1(char weylLetter, int theDim)
 { //Humphreys, Introduction to Lie algebras and representation theory(1980), page 66, Table 1
+  if (weylLetter!='A' && weylLetter!='B' && weylLetter!='C' && weylLetter!='D' &&
+      weylLetter!='E' && weylLetter!='F' && weylLetter!='G')
+    crash << "WeylGroupData::SizeByFormulaOrNeg1 called with impossible Weyl type: " << weylLetter << crash;
+  stOutput << "DEBUG: Calling WeylGroupData::SizeByFormulaOrNeg1 with input: " << weylLetter << ", " << theDim;
   LargeInt theOutput=1;
   if (weylLetter=='A')
     theOutput= Rational::Factorial(theDim+1);

@@ -157,6 +157,7 @@ void Calculator::init()
   this->AddOperationNoRepetitionAllowed("\\to");
   this->AddOperationNoRepetitionAllowed("if");
   this->AddOperationNoRepetitionAllowed("\\lim");
+  this->AddOperationNoRepetitionAllowed("logBase");
 
   this->AddOperationBuiltInType("Rational");
   this->AddOperationBuiltInType("EltZmodP");
@@ -1151,10 +1152,14 @@ bool Calculator::ApplyOneRule()
     return false;
   const SyntacticElement& lastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   const std::string& lastS=this->controlSequences[lastE.controlIndex];
-  if (lastS==" ")
-    return  this->PopTopSyntacticStack();
   const SyntacticElement& secondToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   const std::string& secondToLastS=this->controlSequences[secondToLastE.controlIndex];
+  if (secondToLastS=="Integer" && lastS!="Integer" && lastS!=".")
+  { this->registerPositionAfterDecimalPoint=0;
+    return this->ReplaceAXbyEX();
+  }
+  if (lastS==" ")
+    return  this->PopTopSyntacticStack();
   const SyntacticElement& thirdToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   const std::string& thirdToLastS=this->controlSequences[thirdToLastE.controlIndex];
   const SyntacticElement& fourthToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
@@ -1281,10 +1286,6 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceXXByCon(this->conEqualEqual());
   if (lastS=="Integer" && secondToLastS=="Integer")
     return this->ReplaceIntIntBy10IntPlusInt();
-  if (secondToLastS=="Integer" && lastS!="Integer" && lastS!=".")
-  { this->registerPositionAfterDecimalPoint=0;
-    return this->ReplaceAXbyEX();
-  }
   if (secondToLastS=="(" && lastS==")")
     return this->ReplaceXXByEEmptySequence();
   if (thirdToLastS=="Integer" && secondToLastS=="." && lastS=="Integer" && this->registerPositionAfterDecimalPoint==0)
@@ -1341,6 +1342,9 @@ bool Calculator::ApplyOneRule()
   if (this->atomsWhoseExponentsAreInterpretedAsFunctions.Contains(fifthToLastS) && fourthToLastS=="^" && thirdToLastS=="Expression"
       && secondToLastS=="Expression" && this->AllowsTimesInPreceding(lastS))
     return this->ReplaceOOEEXbyEXpowerLike();
+  if (fifthToLastS=="logBase" && fourthToLastS=="_" && thirdToLastS=="Expression" &&
+      secondToLastS=="Expression" && this->AllowsTimesInPreceding(lastS))
+    return this->ReplaceOXEEXByEX();
   if (fourthToLastS!="{}" && thirdToLastS=="Expression" && secondToLastS=="Expression" &&
       this->AllowsTimesInPreceding(lastS) )
     return this->ReplaceEEXByEXusingO(this->conTimes());
@@ -1386,6 +1390,8 @@ bool Calculator::ApplyOneRule()
       this->isSeparatorFromTheRightGeneral(lastS))
     return this->ReplaCeOXbyEX();
 
+  if (fourthToLastS=="\\log" && thirdToLastS=="_" && secondToLastS=="Expression")
+    return this->ReplaceXYYYByConYYY(this->controlSequences.GetIndexIMustContainTheObject("logBase"));
   //Some synonyms:
   if (lastS=="ln" || lastS=="log" || lastS=="\\ln")
     return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\log"));

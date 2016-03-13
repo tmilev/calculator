@@ -1021,6 +1021,14 @@ public:
     (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].theData.format=theFormat;
     return true;
   }
+  bool ReplaceXYYByConYY(int theCon)
+  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3].controlIndex=theCon;
+    return true;
+  }
+  bool ReplaceXYYYByConYYY(int theCon)
+  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4].controlIndex=theCon;
+    return true;
+  }
   bool ReplaceXXByCon(int theCon, int theFormat=Expression::formatDefault)
   { this->ReplaceXYByConY(theCon, theFormat);
     return this->DecreaseStackSetCharacterRangeS(1);
@@ -1314,6 +1322,9 @@ public:
   }
   int opE()
   { return this->theAtoms.GetIndexIMustContainTheObject("e");
+  }
+  int opLogBase()
+  { return this->theAtoms.GetIndexIMustContainTheObject("logBase");
   }
   int opLog()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\log");

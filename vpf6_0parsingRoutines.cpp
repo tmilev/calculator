@@ -18,7 +18,7 @@ std::string SyntacticElement::ToStringHumanReadable(Calculator& theBoss, bool in
     controlString=theBoss.controlSequences[this->controlIndex];
   bool makeTable=this->controlIndex==theBoss.conExpression() ||
   this->controlIndex==theBoss.conError() || this->controlIndex==theBoss.conSequence() ||
-  this->controlIndex==theBoss.conSequenceStatements();
+  this->controlIndex==theBoss.conSequenceStatements()|| this->controlIndex==theBoss.conVariable();
   if (!makeTable)
     return controlString;
   std::stringstream out;
@@ -596,7 +596,8 @@ bool Calculator::isInterpretedAsEmptySpace(const std::string& input)
 }
 
 void Calculator::ParseFillDictionary(const std::string& input)
-{ std::string current;
+{ MacroRegisterFunctionWithName("Calculator::ParseFillDictionary");
+  std::string current;
   (*this->CurrrentSyntacticSouP).Reserve(input.size());
   (*this->CurrrentSyntacticSouP).SetSize(0);
   char LookAheadChar;
@@ -626,13 +627,13 @@ void Calculator::ParseFillDictionary(const std::string& input)
     { inQuotes=!inQuotes;
       shouldSplit=true;
     }
-    //stOutput << "<br>in quotes: "<< inQuotes << " current: " << current << " shouldsplit: " << shouldSplit;
-
+//    stOutput << "<br>in quotes: "<< inQuotes << " current: " << current << " shouldsplit: " << shouldSplit;
     if (!shouldSplit)
       continue;
     bool mustInterpretAsVariable=false;
     if (inQuotes && current!="\"")
       mustInterpretAsVariable=true;
+//    stOutput << "must interpret as var: " << mustInterpretAsVariable;
     if (this->controlSequences.Contains(current) && !mustInterpretAsVariable)
     { currentElement.controlIndex=this->controlSequences.GetIndex(current);
       currentElement.theData.reset(*this);

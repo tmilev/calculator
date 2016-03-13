@@ -2195,8 +2195,11 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << "\\log_{" << (*this)[1].ToString(theFormat) << "}"
     << "\\left(" << (*this)[2].ToString(theFormat) << "\\right)";
   else if (this->StartsWith(this->owner->opQuote(),2))
-    out << "\"" << (*this)[1].ToString(theFormat) << "\"";
-  else if (this->IsListStartingWithAtom(this->owner->opDefineConditional()))
+  { if ((*this)[1].IsAtom(&tempS))
+      out << "\"" <<  tempS << "\"";
+    else
+      out << "(Corrupt string)";
+  } else if (this->IsListStartingWithAtom(this->owner->opDefineConditional()))
     out << (*this)[1].ToString(theFormat) << " :if " << (*this)[2].ToString(theFormat) << "=" << (*this)[3].ToString(theFormat);
   else if (this->StartsWith(this->owner->opDivide(), 3))
   { bool doUseFrac= this->formatUseFrac || this->owner->flagUseFracInRationalLaTeX;

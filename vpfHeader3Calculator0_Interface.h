@@ -1098,6 +1098,9 @@ public:
   int conExpression()
   { return this->controlSequences.GetIndexIMustContainTheObject("Expression");
   }
+  int conVariable()
+  { return this->controlSequences.GetIndexIMustContainTheObject("Variable");
+  }
   int conBindVariable()
   { return this->controlSequences.GetIndexIMustContainTheObject("{{}}");
   }

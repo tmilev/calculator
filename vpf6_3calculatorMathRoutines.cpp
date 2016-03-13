@@ -250,7 +250,13 @@ bool CalculatorFunctionsGeneral::innerUrlStringToNormalString(Calculator& theCom
 
 bool CalculatorFunctionsGeneral::innerQuoteToString(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerQuoteToString");
-  return output.AssignValue(input.ToString(), theCommands);
+  std::string atomString;
+  if (input.IsAtom(&atomString))
+    return output.AssignValue(atomString, theCommands);
+  theCommands << "<b>Warning: this shouldn't happen: quote operation is applied to the non-atomic expression: "
+  << input.ToString() << "."
+  << " This may be a bug with the function Calculator::ParseFillDictionary. </b>";
+  return output.AssignValue(input.ToString() , theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerFourierTransformEWA(Calculator& theCommands, const Expression& input, Expression& output)
@@ -284,6 +290,17 @@ bool CalculatorFunctionsGeneral::innerCasimirWRTlevi(Calculator& theCommands, co
   Expression contextE;
   contextE.MakeContextSSLieAlg(theCommands, *theSSalg);
   return output.AssignValueWithContext(theCasimir, contextE, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerLogBase(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLogBase");
+  //stOutput << "reducing ...." << input.ToStringSemiFull();
+  if (!input.StartsWith(theCommands.opLogBase(), 3))
+    return false;
+  Expression numE, denE;
+  numE.MakeOX(theCommands, theCommands.opLog(), input[2]);
+  denE.MakeOX(theCommands, theCommands.opLog(), input[1]);
+  return output.MakeXOX(theCommands, theCommands.opDivide(), numE, denE);
 }
 
 bool CalculatorFunctionsGeneral::innerLog(Calculator& theCommands, const Expression& input, Expression& output)

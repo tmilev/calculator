@@ -783,6 +783,12 @@ void Calculator::initPredefinedInnerFunctions()
    "\\log{}(e); \\log 10", true, false, "CalculatorFunctionsGeneral::innerLog", "\\log")
    ;
   this->AddOperationInnerHandler
+  ("logBase", CalculatorFunctionsGeneral::innerLogBase, "",
+   "Logarithm function (arbitrary base). Equivalent to \\log_{{a}} {{b}}= (\\log b)/(\\log a). ",
+   "\\log_10 5; \\log _e 10; \\ln 10; \\log_a b", true, false, "CalculatorFunctionsGeneral::innerLogBase",
+   "logBase")
+   ;
+  this->AddOperationInnerHandler
   ("\\arctan", CalculatorFunctionsGeneral::innerArctan, "",
    "Arctan function. Tries to evaluate the arctan function. ",
    "\\arctan(3/4)", true, false)

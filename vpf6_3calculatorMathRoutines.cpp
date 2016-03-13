@@ -1612,6 +1612,20 @@ bool CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig(Calculator
     mOneE.AssignValue(-1, theCommands);
     return output.MakeXOX(theCommands, theCommands.opTimes(), mOneE, cscSquared);
   }
+  if (theArgument.IsAtomGivenData(theCommands.opSec()))
+  { Expression tanE, secE;
+    tanE.MakeAtom(theCommands.opTan(), theCommands);
+    secE.MakeAtom(theCommands.opSec(), theCommands);
+    return output.MakeXOX(theCommands, theCommands.opTimes(), tanE, secE);
+  }
+  if (theArgument.IsAtomGivenData(theCommands.opCsc()))
+  { Expression cotE, cscE, mOneE, cotTimesCscE;
+    cotE.MakeAtom(theCommands.opCot(), theCommands);
+    cscE.MakeAtom(theCommands.opCsc(), theCommands);
+    mOneE.AssignValue(-1, theCommands);
+    cotTimesCscE.MakeXOX(theCommands, theCommands.opTimes(), cotE, cscE);
+    return output.MakeXOX(theCommands, theCommands.opTimes(), mOneE, cotTimesCscE);
+  }
   if (theArgument.IsAtomGivenData(theCommands.opArcTan()))
   { Polynomial<Rational> onePlusXsquared;
     RationalFunctionOld oneOverOnePlusXsquared;

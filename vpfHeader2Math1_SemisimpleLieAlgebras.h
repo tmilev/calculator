@@ -83,7 +83,7 @@ public:
   bool CheckConsistency()const;
   template <class coefficient>
   void GenerateLieSubalgebra(List<ElementSemisimpleLieAlgebra<coefficient> >& inputOutputGenerators, GlobalVariables* theGlobalVariables=0);
-  void ComputeMultTable(GlobalVariables& theGlobalVariables);
+  void ComputeMultTable();
   bool IsOfSimpleType(char desiredType, int desiredRank)const
   { return this->theWeyl.IsOfSimpleType(desiredType, desiredRank);
   }
@@ -160,7 +160,7 @@ public:
     return (this->theWeyl.RootSystem[left]+this->theWeyl.RootSystem[right]).IsEqualToZero();
   }
   void GenerateVermaMonomials(Vector<Rational>& highestWeight, GlobalVariables& theGlobalVariables);
-  void ComputeChevalleyConstants(GlobalVariables* theGlobalVariables);
+  void ComputeChevalleyConstants();
   template<class coefficient>
   coefficient GetKillingForm(const ElementSemisimpleLieAlgebra<coefficient>& left, const ElementSemisimpleLieAlgebra<coefficient>& right);
   template <class coefficient>

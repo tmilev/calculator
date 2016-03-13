@@ -4530,7 +4530,8 @@ void WeylGroupData::init()
   this->theGroup.GetSizeByFormula = this->GetSizeByFormulaImplementation;
   this->theGroup.ComputeCCSizesAndRepresentativesByFormula = 0;
   this->theGroup.AreConjugateByFormula = 0;
-  this->theGroup.ComputeIrreducibleRepresentationsWithFormulas = this->ComputeIrreducibleRepresentationsWithFormulasImplementation;
+  this->theGroup.ComputeIrreducibleRepresentationsWithFormulas =
+  this->ComputeIrreducibleRepresentationsWithFormulasImplementation;
 }
 
 void WeylGroupData::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho)
@@ -4556,7 +4557,7 @@ bool WeylGroupData::GetWordByFormulaImplementation(void *G, const ElementWeylGro
 
 void WeylGroupData::GetSignCharacter(Vector<Rational>& out)
 { if(!this->theGroup.flagCCRepresentativesComputed)
-    this->theGroup.ComputeCCSizesAndRepresentatives(0);
+    this->theGroup.ComputeCCSizesAndRepresentatives();
   out.SetSize(this->theGroup.ConjugacyClassCount());
   for(int i=0; i<this->theGroup.ConjugacyClassCount(); i++)
     out[i]= this->theGroup.conjugacyClasseS[i].representative.Sign();
@@ -4900,7 +4901,7 @@ std::string WeylGroupData::ToString(FormatExpressions* theFormat)
   out << "<br>Symmetric cartan: " << this->CartanSymmetric.ToString();
   if (this->flagCharTableIsComputed)
   { out << "<br>Character table: ";
-    out << this->theGroup.PrettyPrintCharacterTable(&theGlobalVariables);
+    out << this->theGroup.PrettyPrintCharacterTable();
    // Matrix<Rational> charTableMatForm;
    // charTableMatForm.init(this->theGroup.irreps.size, this->theGroup.ConjugacyClassCount());
    // for (int i=0; i<this->theGroup.irreps.size; i++)
@@ -5182,7 +5183,7 @@ void WeylGroupData::GetExtremeElementInOrbit
 
 
 bool WeylGroupData::IsElementWeylGroupOrOuterAuto(const MatrixTensor<Rational>& input)
-{ MacroRegisterFunctionWithName("WeylGroup::IsElementGroup<WeylGroup>OrOuterAuto");
+{ MacroRegisterFunctionWithName("WeylGroup::IsElementGroup(WeylGroup)OrOuterAuto");
   this->ComputeOuterAutos();
 //  stOutput << this->theOuterAutos.GetElement().ToString();
   Vector<Rational> theRhoImage;
@@ -5310,7 +5311,8 @@ void WeylGroupData::DrawRootSystem
   else
     predefinedProjectionPlane->GetVectorsDouble(theTwoPlane);
   if(theTwoPlane.size!=2)
-    crash << crash;
+    crash << "Object theTwoPlane is supposed to be two-dimensional but it is instead of dimension: "
+    << theTwoPlane.size << ". " << crash;
 //  stOutput << "<hr><hr>the eigenspace: " << theEigenSpace.ToString(false, true, false);
 //  std::stringstream tempStream;
 //  tempStream << "<hr>the eigen mat:";
@@ -5684,7 +5686,7 @@ bool SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots
   this->AmbientWeyl=inputWeyl;
   if (this->AmbientWeyl.GetDim()!=ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize)
     crash << "This is a programming error: parabolic selection selects out of " << ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize
-    << " elements while the weyl group is of rank " << this->AmbientWeyl.GetDim() << ". " << crash;
+    << " elements while the Weyl group is of rank " << this->AmbientWeyl.GetDim() << ". " << crash;
   for (int i=0; i<ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize; i++)
     if (!ZeroesMeanSimpleRootSpaceIsInParabolic.selected[i])
     { selectedRoots.SetSize(selectedRoots.size+1);

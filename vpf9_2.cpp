@@ -355,7 +355,7 @@ void WeylGroupData::ReadFromFile(std::fstream& input)
 }
 
 void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVariables, Matrix<Rational>& outputAuto, bool useNegativeRootsFirst)
-{ crash << crash;
+{ crash << "Not implemented yet!!!!!" << crash;
   rootSubalgebra theRootSA;
 //  theRootSA.init(*this);
   int theDimension= this->theWeyl.CartanSymmetric.NumRows;
@@ -380,7 +380,7 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVari
   NonExplored.MakeFullSelection();
   Vector<Rational> domainRoot, rangeRoot;
 
-  this->ComputeChevalleyConstants(&theGlobalVariables);
+  this->ComputeChevalleyConstants();
   List<ElementSemisimpleLieAlgebra<Rational> > Domain, Range;
   Range.SetSize(numRoots+theDimension);
   Domain.SetSize(numRoots+theDimension);
@@ -531,8 +531,9 @@ int SemisimpleLieAlgebra::GetLengthStringAlongAlphaThroughBeta(Vector<Rational>&
 }
 
 bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleChevalleyGenerators(GlobalVariables& theGlobalVariables)
-{ this->theDomain().ComputeChevalleyConstants(&theGlobalVariables);
-  this->theRange().ComputeChevalleyConstants(&theGlobalVariables);
+{ MacroRegisterFunctionWithName("HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleChevalleyGenerators");
+  this->theDomain().ComputeChevalleyConstants();
+  this->theRange().ComputeChevalleyConstants();
   int theDomainDimension= this->theDomain().theWeyl.CartanSymmetric.NumRows;
   Selection NonExplored;
   int numRoots= this->theDomain().theWeyl.RootSystem.size;
@@ -698,7 +699,7 @@ void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId(char theWeylLetter, int th
   int theIndex=ownerOfAlgebras.AddNoRepetitionOrReturnIndexFirst(tempSS);
   this->domainAlg=&ownerOfAlgebras[theIndex];
   this->rangeAlg=&ownerOfAlgebras[theIndex];
-  this->theDomain().ComputeChevalleyConstants(&theGlobalVariables);
+  this->theDomain().ComputeChevalleyConstants();
   int numPosRoots=this->theDomain().theWeyl.RootsOfBorel.size;
   this->imagesAllChevalleyGenerators.SetSize(numPosRoots*2+theWeylDim);
   this->domainAllChevalleyGenerators.SetSize(numPosRoots*2+theWeylDim);

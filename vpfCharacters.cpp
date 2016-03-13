@@ -48,10 +48,10 @@ ElementWeylGroup<WeylGroupData> WeylGroupData::SimpleConjugation(int i, const El
 }
 
 template <typename elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::ComputeSquaresCCReps(GlobalVariables* theGlobalVariables)
+void FiniteGroup<elementSomeGroup>::ComputeSquaresCCReps()
 { MacroRegisterFunctionWithName("WeylGroup::ComputeSquares");
   if(!this->flagCCsComputed)
-    this->ComputeCCfromAllElements(theGlobalVariables);
+    this->ComputeCCfromAllElements();
   this->squaresCCReps.SetExpectedSize(this->ConjugacyClassCount());
   this->squaresCCReps.SetSize(this->ConjugacyClassCount());
   elementSomeGroup currentSquare;
@@ -59,12 +59,12 @@ void FiniteGroup<elementSomeGroup>::ComputeSquaresCCReps(GlobalVariables* theGlo
     this->squaresCCReps[i]=this->conjugacyClasseS[i].representative*this->conjugacyClasseS[i].representative;
 }
 
-void WeylGroupData::ComputeInitialIrreps(GlobalVariables* theGlobalVariables)
+void WeylGroupData::ComputeInitialIrreps()
 { MacroRegisterFunctionWithName("WeylGroup::ComputeInitialIrreps");
   if (!this->theGroup.flagCCsComputed)
-    this->theGroup.ComputeCCfromAllElements(theGlobalVariables);
+    this->theGroup.ComputeCCfromAllElements();
   if(this->theGroup.squaresCCReps.size == 0)
-    this->theGroup.ComputeSquaresCCReps(theGlobalVariables);
+    this->theGroup.ComputeSquaresCCReps();
   this->theGroup.irreps.SetSize(0);
   this->theGroup.characterTable.SetSize(0);
   this->theGroup.irreps_grcam.SetSize(0);
@@ -849,7 +849,7 @@ void SubgroupDataRootReflections::ComputeDynkinType()
 }
 
 template <class elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::CheckOrthogonalityCharTable(GlobalVariables* theGlobalVariables)
+bool FiniteGroup<elementSomeGroup>::CheckOrthogonalityCharTable()
 { MacroRegisterFunctionWithName("FiniteGroup::CheckOrthogonalityCharTable");
   for (int i=0; i<this->characterTable.size; i++)
     for (int j=i; j<this->characterTable.size; j++)
@@ -860,22 +860,22 @@ bool FiniteGroup<elementSomeGroup>::CheckOrthogonalityCharTable(GlobalVariables*
         if (theScalarProd!=0)
           crash << "Error: the character table is not orthonormal: char number " << i+1 << " = " << leftChar.ToString() << " is not orthogonal to char number "
           << j+1 << " = " << rightChar.ToString() << ". <br>The entire char table is: "
-          << this->PrettyPrintCharacterTable(theGlobalVariables) << crash;
+          << this->PrettyPrintCharacterTable() << crash;
       if (j==i)
         if (theScalarProd!=1)
           crash << "Error: the character table is not orthonormal: char number " << i+1 << " = " << leftChar.ToString() << " is not of norm 1. "
-          << "<br>The entire char table is: " << this->PrettyPrintCharacterTable(theGlobalVariables) << crash;
+          << "<br>The entire char table is: " << this->PrettyPrintCharacterTable() << crash;
     }
   return true;
 }
 
-void SubgroupDataWeylGroup::ComputeTauSignature(GlobalVariables* theGlobalVariables)
+void SubgroupDataWeylGroup::ComputeTauSignature()
 { MacroRegisterFunctionWithName("SubgroupWeylGroup::ComputeTauSignature");
   if(!this->theSubgroupData->theGroup->flagCCRepresentativesComputed)
-  { this->theSubgroupData->theGroup->ComputeCCSizesAndRepresentatives(theGlobalVariables);
-    this->theSubgroupData->ComputeCCRepresentativesPreimages(theGlobalVariables);
+  { this->theSubgroupData->theGroup->ComputeCCSizesAndRepresentatives();
+    this->theSubgroupData->ComputeCCRepresentativesPreimages();
   }
-  this->theSubgroupData->theGroup->CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
+  this->theSubgroupData->theGroup->CheckConjugacyClassRepsMatchCCsizes();
 //  this->theGroup->CheckOrthogonalityCharTable(theGlobalVariables);
   Vector<Rational> Xs, Xi;
   this->theSubgroupData->theSubgroup->GetSignCharacter(Xs);
@@ -894,7 +894,7 @@ void SubgroupDataWeylGroup::ComputeTauSignature(GlobalVariables* theGlobalVariab
   }
 }
 
-void SubgroupDataRootReflections::ComputeCCSizesRepresentativesPreimages(GlobalVariables* theGlobalVariables)
+void SubgroupDataRootReflections::ComputeCCSizesRepresentativesPreimages()
 { MacroRegisterFunctionWithName("SubgroupRootReflections::ComputeCCSizesRepresentativesPreimages");
   if (this->theDynkinType==this->theWeylData->theDynkinType && this->theWeylData->theGroup.flagCCRepresentativesComputed)
   { this->theSubgroupData->theSubgroup->conjugacyClasseS.SetSize(this->theSubgroupData->theGroup->conjugacyClasseS.size);
@@ -910,11 +910,11 @@ void SubgroupDataRootReflections::ComputeCCSizesRepresentativesPreimages(GlobalV
     this->theSubgroupData->theSubgroup->flagCCRepresentativesComputed=true;
   } else
   { if (this->theDynkinType.GetRank()<=6)
-      this->theSubgroupData->theSubgroup->ComputeCCfromAllElements(theGlobalVariables);
+      this->theSubgroupData->theSubgroup->ComputeCCfromAllElements();
     else
-      this->theSubgroupData->theSubgroup->ComputeCCSizesAndRepresentatives(theGlobalVariables);
+      this->theSubgroupData->theSubgroup->ComputeCCSizesAndRepresentatives();
 
-    this->theSubgroupData->ComputeCCRepresentativesPreimages(theGlobalVariables);
+    this->theSubgroupData->ComputeCCRepresentativesPreimages();
   }
 }
 
@@ -1001,13 +1001,13 @@ bool FiniteGroup<elementSomeGroup>::AreConjugate_OLD_Deprecated_Version_By_Todor
   return false;
 }
 
-void WeylGroupData::GetSignSignatureAllRootSubsystems(List<SubgroupDataRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables)
+void WeylGroupData::GetSignSignatureAllRootSubsystems(List<SubgroupDataRootReflections>& outputSubgroups)
 { MacroRegisterFunctionWithName("WeylGroup::GetSignSignatureAllRootSubsystems");
   rootSubalgebras theRootSAs;
   SemisimpleLieAlgebra theSSlieAlg;
   theSSlieAlg.theWeyl=*this;
 //  theSSlieAlg.ComputeChevalleyConstants(theGlobalVariables);
-  theRootSAs.theGlobalVariables=theGlobalVariables;
+  theRootSAs.theGlobalVariables=&theGlobalVariables;
   theRootSAs.owner=&theSSlieAlg;
   theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism
   ();
@@ -1015,13 +1015,13 @@ void WeylGroupData::GetSignSignatureAllRootSubsystems(List<SubgroupDataRootRefle
   theRootSAsBases.SetExpectedSize(theRootSAs.theSubalgebras.size);
   for (int i=theRootSAs.theSubalgebras.size-1; i>=0; i--)
     theRootSAsBases.AddOnTop(theRootSAs.theSubalgebras[i].SimpleBasisK);
-  this->GetSignSignatureRootSubgroups(outputSubgroups, theRootSAsBases, theGlobalVariables);
+  this->GetSignSignatureRootSubgroups(outputSubgroups, theRootSAsBases);
 }
 
-void WeylGroupData::GetSignSignatureParabolics(List<SubgroupDataRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables)
+void WeylGroupData::GetSignSignatureParabolics(List<SubgroupDataRootReflections>& outputSubgroups)
 { MacroRegisterFunctionWithName("WeylGroup::GetSignSignatureParabolics");
 //  this->ComputeIrreducibleRepresentationsThomasVersion();
-  this->ComputeOrLoadCharacterTable(theGlobalVariables);
+  this->ComputeOrLoadCharacterTable();
   ClassFunction<WeylGroupData::WeylGroupBase, Rational> signRep;
   signRep.G = &(this->theGroup);
   this->GetSignCharacter(signRep.data);
@@ -1035,22 +1035,22 @@ void WeylGroupData::GetSignSignatureParabolics(List<SubgroupDataRootReflections>
   for (int i=0; i<outputSubgroups.size; i++, sel.incrementSelection())
   { SubgroupDataRootReflections& currentParabolic=outputSubgroups[i];
     currentParabolic.MakeParabolicSubgroup(*this, sel);
-    currentParabolic.ComputeCCSizesRepresentativesPreimages(theGlobalVariables);
+    currentParabolic.ComputeCCSizesRepresentativesPreimages();
 //    stOutput << "<hr>Current parabolic is: " << currentParabolic.ToString();
     // ComputeInitialCharacters gets the character of the sign representation
     // as characterTable[1]
     //stOutput << "<hr>before compute initial irreps";
   }
-  this->theGroup.CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
+  this->theGroup.CheckConjugacyClassRepsMatchCCsizes();
   for(int j=0; j<outputSubgroups.size; j++)
-  { outputSubgroups[j].ComputeTauSignature(theGlobalVariables);
+  { outputSubgroups[j].ComputeTauSignature();
   }
 }
 
-void WeylGroupData::GetSignSignatureExtendedParabolics(List<SubgroupDataRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables)
+void WeylGroupData::GetSignSignatureExtendedParabolics(List<SubgroupDataRootReflections>& outputSubgroups)
 { MacroRegisterFunctionWithName("WeylGroup::GetSignSignatureExtendedParabolics");
 //  this->ComputeIrreducibleRepresentationsThomasVersion();
-  this->ComputeOrLoadCharacterTable(theGlobalVariables);
+  this->ComputeOrLoadCharacterTable();
   ClassFunction<WeylGroupData::WeylGroupBase, Rational> signRep;
   signRep.G = &(this->theGroup);
   this->GetSignCharacter(signRep.data);
@@ -1072,18 +1072,17 @@ void WeylGroupData::GetSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
     }
   } while (parSelrootsAreInLevi.IncrementReturnFalseIfPastLast());
   for (int i=0; i<outputSubgroups.size; i++)
-    outputSubgroups[i].ComputeCCSizesRepresentativesPreimages(theGlobalVariables);
-  this->theGroup.CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
+    outputSubgroups[i].ComputeCCSizesRepresentativesPreimages();
+  this->theGroup.CheckConjugacyClassRepsMatchCCsizes();
   for(int j=0; j<outputSubgroups.size; j++)
-    outputSubgroups[j].ComputeTauSignature(theGlobalVariables);
+    outputSubgroups[j].ComputeTauSignature();
 }
 
 void WeylGroupData::GetSignSignatureRootSubgroups
   (List<SubgroupDataRootReflections>& outputSubgroups,
-   const List<Vectors<Rational> >& rootsGeneratingReflections,
-   GlobalVariables* theGlobalVariables)
+   const List<Vectors<Rational> >& rootsGeneratingReflections)
 { MacroRegisterFunctionWithName("WeylGroup::GetSignSignatureRootSubgroups");
-  this->ComputeOrLoadCharacterTable(theGlobalVariables);
+  this->ComputeOrLoadCharacterTable();
   ClassFunction<WeylGroupData::WeylGroupBase, Rational> signRep;
   signRep.G = &(this->theGroup);
   this->GetSignCharacter(signRep.data);
@@ -1094,15 +1093,15 @@ void WeylGroupData::GetSignSignatureRootSubgroups
   for (int i=0; i<outputSubgroups.size; i++)
   { SubgroupDataRootReflections& currentParabolic=outputSubgroups[i];
     currentParabolic.MakeFromRoots(*this, rootsGeneratingReflections[i]);
-    currentParabolic.ComputeCCSizesRepresentativesPreimages(theGlobalVariables);
+    currentParabolic.ComputeCCSizesRepresentativesPreimages();
 //    stOutput << "<hr>Current parabolic is: " << currentParabolic.ToString();
     // ComputeInitialCharacters gets the character of the sign representation
     // as characterTable[1]
     //stOutput << "<hr>before compute initial irreps";
   }
-  this->theGroup.CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
-  this->theGroup.CheckOrthogonalityCharTable(theGlobalVariables);
+  this->theGroup.CheckConjugacyClassRepsMatchCCsizes();
+  this->theGroup.CheckOrthogonalityCharTable();
   for(int j=0; j<outputSubgroups.size; j++)
-  { outputSubgroups[j].ComputeTauSignature(theGlobalVariables);
+  { outputSubgroups[j].ComputeTauSignature();
   }
 }

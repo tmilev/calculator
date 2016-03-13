@@ -1073,7 +1073,7 @@ class GroupConjugacyImplementation
     inv.Invert();
     return right**this*inv;
   }
-  
+
   static void ConjugationAction(const GroupConjugacyImplementation<groupElement>& conjugateWith, const GroupConjugacyImplementation<groupElement>& conjugateOn, GroupConjugacyImplementation<groupElement>& out)
   { out = conjugateOn^conjugateWith;
   }
@@ -1423,7 +1423,7 @@ bool FiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& x, cons
 { if(this->AreConjugateByFormula)
     return this->AreConjugateByFormula(x,y);
   if(!this->flagCCsComputed)
-    this->ComputeCCSizesAndRepresentatives(NULL);
+    this->ComputeCCSizesAndRepresentatives();
   int xi = this->theElements.GetIndex(x);
   int yi = this->theElements.GetIndex(y);
   for(int i=0; i<this->conjugacyClasseS.size; i++)
@@ -1541,7 +1541,7 @@ void FiniteGroup<elementSomeGroup>::ComputeAllElementsWordsConjugacyIfObvious(bo
 // the intention here is to do representation theory.  so we need the sizes,
 // representatives, and words.
 template <typename elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::ComputeCCSizesRepresentativesWords(GlobalVariables* unused)
+void FiniteGroup<elementSomeGroup>::ComputeCCSizesRepresentativesWords()
 { if(this->GetWordByFormula)
     this->flagWordsComputed = true;
   if(this->flagCCsComputed && this->flagWordsComputed)
@@ -1647,7 +1647,7 @@ void FiniteGroup<elementSomeGroup>::ComputeGeneratorCommutationRelations()
 }
 
 template <typename elementSomeGroup>
-std::string FiniteGroup<elementSomeGroup>::PrettyPrintGeneratorCommutationRelations(GlobalVariables* theGlobalVariables)
+std::string FiniteGroup<elementSomeGroup>::PrettyPrintGeneratorCommutationRelations()
 { this->ComputeGeneratorCommutationRelations();
   std::string crs = this->generatorCommutationRelations.ToStringPlainText();
   List<char*> rows;
@@ -1695,7 +1695,7 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintGeneratorCommutationRelati
 }
 
 template <typename elementSomeGroup>
-std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable(GlobalVariables* theGlobalVariables)
+std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable()
 { for(int i=0; i<this->irreps.size; i++)
     this->irreps[i].ComputeCharacter();
   std::stringstream out;
@@ -1781,11 +1781,11 @@ JSData FiniteGroup<elementSomeGroup>::RepresentationDataIntoJS()
 
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::VerifyCCSizesAndRepresentativesFormula()
-{ this->ComputeCCSizesAndRepresentatives(0);
+{ this->ComputeCCSizesAndRepresentatives();
   FiniteGroup<elementSomeGroup> GG;
   GG.generators = this->generators;
   //GG.AreConjugateByFormula = this->AreConjugateByFormula;
-  GG.ComputeCCSizesAndRepresentatives(0);
+  GG.ComputeCCSizesAndRepresentatives();
   stOutput << "Conjugacy class sizes by formula: ";
   for(int i=0; i<this->conjugacyClasseS.size; i++)
     stOutput << this->conjugacyClasseS[i].size << ", ";

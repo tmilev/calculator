@@ -29,11 +29,11 @@ void ElementWeylGroup<templateWeylGroup>::MakeFromReadableReflections
     this->MakeCanonical();
 }
 
-void WeylGroupData::ComputeOrLoadCharacterTable(GlobalVariables* theGlobalVariables, std::stringstream* reportStream)
+void WeylGroupData::ComputeOrLoadCharacterTable(std::stringstream* reportStream)
 { MacroRegisterFunctionWithName("WeylGroup::ComputeOrLoadCharacterTable");
   if (this->flagCharTableIsComputed)
     return;
-  this->ComputeOrLoadConjugacyClasses(theGlobalVariables, reportStream);
+  this->ComputeOrLoadConjugacyClasses(reportStream);
   if (this->LoadCharTable())
   { if (reportStream!=0)
       *reportStream << "The character table of " << this->theDynkinType.ToString()
@@ -41,12 +41,12 @@ void WeylGroupData::ComputeOrLoadCharacterTable(GlobalVariables* theGlobalVariab
     this->flagCharTableIsComputed=true;
     return;
   }
-  this->ComputeInitialIrreps(theGlobalVariables);
-  this->theGroup.ComputeIrreducibleRepresentationsTodorsVersion(this->theGroup.irreps_grcam, theGlobalVariables);
+  this->ComputeInitialIrreps();
+  this->theGroup.ComputeIrreducibleRepresentationsTodorsVersion(this->theGroup.irreps_grcam);
   this->flagCharTableIsComputed=true;
 }
 
-void WeylGroupData::ComputeOrLoadConjugacyClasses(GlobalVariables* theGlobalVariables, std::stringstream* reportStream)
+void WeylGroupData::ComputeOrLoadConjugacyClasses(std::stringstream* reportStream)
 { MacroRegisterFunctionWithName("WeylGroup::ComputeOrLoadCharacterTable");
   if (this->theGroup.flagCCRepresentativesComputed)
     return;
@@ -57,7 +57,7 @@ void WeylGroupData::ComputeOrLoadConjugacyClasses(GlobalVariables* theGlobalVari
     this->theGroup.flagCCRepresentativesComputed=true;
     return;
   }
-  this->theGroup.ComputeCCfromAllElements(theGlobalVariables);
+  this->theGroup.ComputeCCfromAllElements();
   this->theGroup.flagCCRepresentativesComputed=true;
 }
 
@@ -1459,7 +1459,7 @@ bool WeylGroupData::LoadCharTable()
   if (this->theDynkinType.ToString()=="E^{1}_8")
     result=LoadCharTableE1_8(*this);
   if (result)
-    this->theGroup.CheckOrthogonalityCharTable(0);
+    this->theGroup.CheckOrthogonalityCharTable();
   return result;
 }
 

@@ -295,7 +295,7 @@ std::string GlobalVariables::ToStringNavigation()
   return out.str();
 }
 
-std::string GlobalVariables::ToStringCalcArgsNoNavigation()
+std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude)
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringCalcArgsNoNavigation");
   if (!this->flagLoggedIn)
     return "";
@@ -305,8 +305,11 @@ std::string GlobalVariables::ToStringCalcArgsNoNavigation()
     if (currentName=="request" ||
         currentName=="authenticationInsecure" || currentName=="password" || currentName=="currentExamFile" ||
         currentName=="currentExamHome" || currentName=="currentExamIntermediate" ||
-        currentName=="currentDatabaseTable")
+        currentName=="currentDatabaseTable" || currentName=="mainInput")
       continue;
+    if (tagsToExclude!=0)
+      if (tagsToExclude->Contains(currentName))
+        continue;
     out << theGlobalVariables.webFormArgumentNames[i] << "=" << theGlobalVariables.webFormArguments[i]
     << "&";
   }

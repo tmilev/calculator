@@ -82,13 +82,20 @@ void Calculator::initPredefinedInnerFunctions()
    "setRandomSeed(123); randomInteger(-100,100); randomInteger(-100,100)",
    true, false, "CalculatorConversions::innerSetRandomSeed");
   this->AddOperationInnerHandler
+  ("selectAtRandom", CalculatorFunctionsGeneral::innerSelectAtRandom, "",
+   "Selects at random an object from a sequence.",
+   "f=selectAtRandom(\\sin, \\cos); \
+    g=selectAtRandom(\\tan, \\cot, \\sec, \\csc);\
+    f{}g{}x",
+   true, false, "CalculatorConversions::innerRandomInteger", "selectAtRandom");
+  this->AddOperationInnerHandler
   ("randomInteger", CalculatorFunctionsGeneral::innerRandomInteger, "",
    "Generates a random integer. The random integer lives in intervals given by pairs of integers. The example code\
     generates a random number in the union of the intervals [-2, -1], [2,5]. If the input intervals overlap\
     the overlapped integers will be generated with higher probability. \
     For non-overlapping intervals, the random number distribution should be approximately uniform.",
    "randomInteger((-2,-1), (2,5));",
-   true, false, "CalculatorConversions::innerRandomInteger");
+   true, false, "CalculatorConversions::innerRandomInteger", "randomInteger");
   this->AddOperationInnerHandler
   ("TurnOffRules", CalculatorFunctionsGeneral::innerTurnOffRules, "",
    "Turns off computational rules.",
@@ -2844,6 +2851,7 @@ void Calculator::initAtomsNonCacheable()
 { MacroRegisterFunctionWithName("Calculator::initAtomsNonCacheable");
   this->atomsThatMustNotBeCached.SetExpectedSize(30);
   this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("randomInteger");
+  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("selectAtRandom");
 //  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("PrintRuleStack");
 }
 

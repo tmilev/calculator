@@ -175,7 +175,7 @@ public:
   bool UserRequestMustBePromptedToLogInIfNotLoggedIn();
 
   std::string ToStringNavigation();
-  std::string ToStringCalcArgsNoNavigation();
+  std::string ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude=0);
 
   void SetWebInput(const std::string& inputName, const std::string& inputValue);
   std::string GetWebInput(const std::string& inputName);

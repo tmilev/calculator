@@ -6539,3 +6539,25 @@ bool CalculatorFunctionsGeneral::innerRandomInteger
     << " interval was too large. ";
   return output.AssignValue(resultRandomValue, theCommands);
 }
+
+bool CalculatorFunctionsGeneral::innerSelectAtRandom
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSelectAtRandom");
+  if (!input.StartsWith(theCommands.theAtoms.GetIndex("selectAtRandom")))
+  { output=input; //only one item to select from: returning the item
+    return true;
+  }
+  if (input.children.size<2)
+    return false;
+  if (input.children.size==2)
+  { output=input[1]; //only one item to select from: return that item
+    return true;
+  }
+  int randomIndex= (rand()% (input.children.size-1))+1;
+  if (randomIndex<0 || randomIndex> input.children.size-1)
+    randomIndex=input.children.size-1;
+  //<-the line above should never be executed if the % operator works as it should,
+  //but having an extra check never hurts (may be a life saver if I change the code above).
+  output=input[randomIndex];
+  return true;
+}

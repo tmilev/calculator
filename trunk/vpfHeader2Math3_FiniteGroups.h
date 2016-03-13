@@ -258,8 +258,8 @@ public:
   int ConjugacyClassCount()const;
   LargeInt GetSize();
   LargeInt SizeByFormulaOrNeg1()
-  { if(GetSizeByFormula)
-      return GetSizeByFormula(this);
+  { if(this->GetSizeByFormula!=0 && this->specificDataPointer!=0)
+      return GetSizeByFormula(this->specificDataPointer);
     return -1;
   } //non-positive result means no formula is known.
 

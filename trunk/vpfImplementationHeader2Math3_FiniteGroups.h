@@ -414,6 +414,7 @@ void FiniteGroup<elementSomeGroup>::init()
   this->flagCharTableIsComputed=false;
   this->flagIrrepsAreComputed=false;
   this->sizePrivate=0;
+  this->specificDataPointer=0;
   this->AreConjugateByFormula=0;
   this->ComputeCCSizesAndRepresentativesByFormula=0;
   this->GetSizeByFormula=0;
@@ -546,8 +547,8 @@ template <class elementSomeGroup>
 LargeInt FiniteGroup<elementSomeGroup>::GetSize()
 { if(this->sizePrivate > 0)
     return sizePrivate;
-  if(GetSizeByFormula)
-  { this->sizePrivate = GetSizeByFormula(this);
+  if(this->GetSizeByFormula!=0 && this->specificDataPointer!=0)
+  { this->sizePrivate = GetSizeByFormula(this->specificDataPointer);
     return sizePrivate;
   }
   //crash << "Requesting size of group whose size is not computed.  If you want"

@@ -471,8 +471,9 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize
   SemisimpleLieAlgebra* theSSalgebra=0;
   Vector<Rational> theWeightRat;
   Expression theContextE;
-  if (theCommands.GetTypeWeight<Rational>(theCommands, input, theWeightRat, theContextE, theSSalgebra,0))
-  { Rational result=theSSalgebra->theWeyl.GetOrbitSize(theWeightRat, &theGlobalVariables);
+  if (theCommands.GetTypeWeight<Rational>(theCommands, input, theWeightRat, theContextE, theSSalgebra, 0))
+  { stOutput << "Computing orbit size for: " << theSSalgebra->theWeyl.theDynkinType.ToString();
+    Rational result=theSSalgebra->theWeyl.GetOrbitSize(theWeightRat, &theGlobalVariables);
     return output.AssignValue(result, theCommands);
   }
   Vector<Polynomial<Rational> > theWeightPoly;

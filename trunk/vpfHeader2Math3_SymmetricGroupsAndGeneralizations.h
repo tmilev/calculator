@@ -1454,7 +1454,8 @@ void FiniteGroup<elementSomeGroup>::MakeID(elementSomeGroup& e)
 
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::ComputeAllElementsWordsConjugacyIfObvious(bool andWords)
-{ if(this->flagAllElementsAreComputed)
+{ MacroRegisterFunctionWithName("FiniteGroup::ComputeAllElementsWordsConjugacyIfObvious");
+  if(this->flagAllElementsAreComputed)
   { if(!(andWords && !flagWordsComputed))
       if(!(!this->flagCCsComputed && AreConjugateByFormula))
         return; // no reason to recompute.  skipping

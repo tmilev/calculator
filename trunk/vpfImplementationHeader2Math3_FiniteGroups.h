@@ -27,18 +27,33 @@ std::string FinitelyGeneratedMatrixMonoid<coefficient>::ToString(FormatExpressio
 // the slow method that won't use up all the memory and swap and then crash
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::ComputeAllElements(int MaxElements)
-{ if(MaxElements > 1000000)
-    return ComputeAllElementsLargeGroup(MaxElements);
+{ MacroRegisterFunctionWithName("FiniteGroup::ComputeAllElements");
+  double startTimeDebug=theGlobalVariables.GetElapsedSeconds();
+  if(MaxElements > 1000000)
+  { bool result=this->ComputeAllElementsLargeGroup(MaxElements);
+    stOutput << "DEBUG: Time needed to compute all elements:  " << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
+    return result;
+  }
   this->sizePrivate = this->SizeByFormulaOrNeg1();
-  if(sizePrivate > 1000000)
-    return ComputeAllElementsLargeGroup(MaxElements);
-  if(sizePrivate > 0)
-  { ComputeAllElementsWordsConjugacyIfObvious();
+  if(this->sizePrivate > 1000000)
+  { bool result= this->ComputeAllElementsLargeGroup(MaxElements);
+    stOutput << "DEBUG: Time needed to compute all elements:  " << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
+    return result;
+  }
+  if(this->sizePrivate > 0)
+  { this->ComputeAllElementsWordsConjugacyIfObvious();
+    stOutput << "DEBUG: Time needed to call ComputeAllElementsWordsConjugacyIfObvious:  " << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
     return true;
   }
   if(this->generators.size > 7)
-    return ComputeAllElementsLargeGroup(MaxElements);
-  ComputeAllElementsWordsConjugacyIfObvious();
+  { bool result=ComputeAllElementsLargeGroup(MaxElements);
+    stOutput << "DEBUG: Time needed to call ComputeAllElementsLargeGroup:  "
+    << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
+    return result;
+  }
+  this->ComputeAllElementsWordsConjugacyIfObvious();
+  stOutput << "DEBUG: Time needed to compute all words and conjugacy classes:  "
+  << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
   return true;
 }
 

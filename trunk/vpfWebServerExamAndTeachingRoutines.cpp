@@ -1072,9 +1072,9 @@ std::string WebWorker::GetClonePageResult()
   if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights() ||
       !theGlobalVariables.flagUsingSSLinCurrentConnection)
     return "<b>Cloning problems allowed only for logged-in admins under ssl connection. </b>";
-  std::string fileNameResulT=  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
-  std::string fileNameResultRelative=CalculatorHTML::RelativePhysicalFolderProblemCollections+fileNameResulT;
-  std::string fileNameToBeCloned= CalculatorHTML::RelativePhysicalFolderProblemCollections+
+  std::string fileNameResulT = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
+  std::string fileNameResultRelative = CalculatorHTML::RelativePhysicalFolderProblemCollections+fileNameResulT;
+  std::string fileNameToBeCloned = CalculatorHTML::RelativePhysicalFolderProblemCollections+
   CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile"));
   std::stringstream out;
   std::string startingFileString;
@@ -2351,8 +2351,7 @@ std::string CalculatorHTML::ToStringOneDeadlineFormatted
       hoursTillDeadlineStream << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false)
       << " left. ";
   } else
-  { hoursTillDeadlineStream << "Deadline has passed. ";
-  }
+    hoursTillDeadlineStream << "Deadline has passed. ";
   if (isActualProblem)
   { out << "Deadline: ";
     if (deadlineInherited)

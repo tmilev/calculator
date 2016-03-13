@@ -26,6 +26,8 @@ public:
 
   static bool innerRandomInteger
   (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSelectAtRandom
+  (Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetRandomSeed
   (Calculator& theCommands, const Expression& input, Expression& output);
 

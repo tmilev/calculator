@@ -26,24 +26,24 @@ std::string FinitelyGeneratedMatrixMonoid<coefficient>::ToString(FormatExpressio
 // more than a million elements, or if there are more than 7 generators, use
 // the slow method that won't use up all the memory and swap and then crash
 template <typename elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::ComputeAllElements(int MaxElements, GlobalVariables* theGlobalVariables)
+bool FiniteGroup<elementSomeGroup>::ComputeAllElements(int MaxElements)
 { if(MaxElements > 1000000)
-    return ComputeAllElementsLargeGroup(MaxElements, theGlobalVariables);
+    return ComputeAllElementsLargeGroup(MaxElements);
   this->sizePrivate = this->SizeByFormulaOrNeg1();
   if(sizePrivate > 1000000)
-    return ComputeAllElementsLargeGroup(MaxElements, theGlobalVariables);
+    return ComputeAllElementsLargeGroup(MaxElements);
   if(sizePrivate > 0)
   { ComputeAllElementsWordsConjugacyIfObvious();
     return true;
   }
   if(this->generators.size > 7)
-    return ComputeAllElementsLargeGroup(MaxElements, theGlobalVariables);
+    return ComputeAllElementsLargeGroup(MaxElements);
   ComputeAllElementsWordsConjugacyIfObvious();
   return true;
 }
 
 template <typename elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(int MaxElements, GlobalVariables* theGlobalVariables)
+bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(int MaxElements)
 { MacroRegisterFunctionWithName("Subgroup::ComputeAllElements");
   this->InitGenerators();
   if (this->generators.size==0)
@@ -53,13 +53,13 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(int MaxElements
   elementSomeGroup currentElement;
   currentElement.MakeID(this->generators[0]);
   this->theElements.AddOnTop(currentElement);
-  ProgressReport theReport(theGlobalVariables);
+  ProgressReport theReport;
   //Check the generators have no repetitions:
   for (int j=0; j<this->theElements.size; j++)
     for(int i=0; i<this->generators.size; i++)
     { currentElement=this->generators[i]*this->theElements[j];
       this->theElements.AddOnTopNoRepetition(currentElement);
-      if (theGlobalVariables!=0)
+      if (theGlobalVariables.flagReportEverything)
         if (this->theElements.size%100==0)
         { std::stringstream reportStream;
           LargeInt sizeByFla=this->SizeByFormulaOrNeg1();
@@ -73,7 +73,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(int MaxElements
         if (this->theElements.size>MaxElements)
           return false;
     }
-  if (theGlobalVariables!=0)
+  if (theGlobalVariables.flagReportEverything)
   { std::stringstream reportStream;
     reportStream << "Generated group with a total of " << this->theElements.size << " elements. ";
     theReport.Report(reportStream.str());
@@ -490,7 +490,7 @@ bool FiniteGroup<elementSomeGroup>::HasElement(const elementSomeGroup& g)
 template <class elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::GetSignCharacter(Vector<Rational>& outputCharacter)
 { if(!this->flagCCsComputed)
-    this->ComputeCCSizesAndRepresentatives(0);
+    this->ComputeCCSizesAndRepresentatives();
   outputCharacter.SetSize(this->ConjugacyClassCount());
   for(int i=0; i<this->ConjugacyClassCount(); i++)
     outputCharacter[i]=this->conjugacyClasseS[i].representative.Sign();
@@ -566,7 +566,7 @@ int FiniteGroup<elementSomeGroup>::ConjugacyClassCount()const
 }
 
 template <class someGroup, class elementSomeGroup>
-void SubgroupData<someGroup, elementSomeGroup>::ComputeCCRepresentativesPreimages(GlobalVariables* theGlobalVariables)
+void SubgroupData<someGroup, elementSomeGroup>::ComputeCCRepresentativesPreimages()
 { MacroRegisterFunctionWithName("Subgroup::ComputeCCRepresentativesPreimages");
   this->ccRepresentativesPreimages.SetSize(this->theSubgroup->ConjugacyClassCount());
   if (this->theSubgroup->generators.size==0)
@@ -671,7 +671,7 @@ bool FiniteGroup<elementSomeGroup>::CheckInitialization()const
 
 template <class elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::ComputeGeneratorsConjugacyClasses
-  (GlobalVariables* theGlobalVariables)
+  ()
 { MacroRegisterFunctionWithName("FiniteGroup::ComputeGeneratorsConjugacyClasses");
   if (this->flagGeneratorsConjugacyClassesComputed)
     return;
@@ -688,7 +688,7 @@ void FiniteGroup<elementSomeGroup>::ComputeGeneratorsConjugacyClasses
 
 template <class elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::ComputeCCSizeOrCCFromRepresentative
-(ConjugacyClass& inputOutputClass, bool storeCC, GlobalVariables* theGlobalVariables)
+(ConjugacyClass& inputOutputClass, bool storeCC)
 { MacroRegisterFunctionWithName("FiniteGroup::ComputeCCSizesFromCCRepresentatives");
   OrbitIterator<elementSomeGroup, elementSomeGroup> theOrbitIterator;
   theOrbitIterator.init(this->generators, inputOutputClass.representative, elementSomeGroup::ConjugationAction);
@@ -728,13 +728,12 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizeOrCCFromRepresentative
 }
 
 template <class elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::CheckConjugacyClassRepsMatchCCsizes(GlobalVariables* theGlobalVariables)
+bool FiniteGroup<elementSomeGroup>::CheckConjugacyClassRepsMatchCCsizes()
 { MacroRegisterFunctionWithName("FiniteGroup::CheckConjugacyClassRepsMatchCCsizes");
   LargeInt computedSize=0;
   for (int i=0; i<this->conjugacyClasseS.size; i++)
   { LargeInt oldCCsize=this->conjugacyClasseS[i].size;
-    this->ComputeCCSizeOrCCFromRepresentative
-    (this->conjugacyClasseS[i], true, theGlobalVariables);
+    this->ComputeCCSizeOrCCFromRepresentative(this->conjugacyClasseS[i], true);
     if (oldCCsize!=this->conjugacyClasseS[i].size)
       crash << "The precomputed size " << oldCCsize.ToString() << " of the class represented by " << this->conjugacyClasseS[i].representative.ToString()
       << " doesn't match actual class size which is: " << this->conjugacyClasseS[i].size.ToString()
@@ -753,7 +752,7 @@ bool FiniteGroup<elementSomeGroup>::CheckConjugacyClassRepsMatchCCsizes(GlobalVa
 
 template <class elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::RegisterCCclass
-(const elementSomeGroup& theRepresentative, bool dontAddIfSameInvariants, GlobalVariables* theGlobalVariables)
+(const elementSomeGroup& theRepresentative, bool dontAddIfSameInvariants)
 { MacroRegisterFunctionWithName("FiniteGroup::RegisterCCclass");
   ConjugacyClass theClass;
   theClass.representative=theRepresentative;
@@ -773,7 +772,7 @@ bool FiniteGroup<elementSomeGroup>::RegisterCCclass
     }
   }
   theClass.flagRepresentativeComputed=true;
-  this->ComputeCCSizeOrCCFromRepresentative(theClass, false, theGlobalVariables);
+  this->ComputeCCSizeOrCCFromRepresentative(theClass, false);
   this->conjugacyClasseS.AddOnTop(theClass);
   this->CCsStandardRepCharPolys.AddOnTop(theCharPoly);
   this->sizePrivate+=theClass.size;
@@ -782,8 +781,7 @@ bool FiniteGroup<elementSomeGroup>::RegisterCCclass
 }
 
 template <class elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives
-(GlobalVariables* theGlobalVariables)
+bool FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives()
 { MacroRegisterFunctionWithName("FiniteGroup::ComputeCCRepresentatives");
   //This algorithm is effective if the sum of the sizes of the conjugacy classes
   //of the generators is small.
@@ -801,9 +799,9 @@ bool FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives
   //algorithm will generate a representative of each conjugacy class.
 
   //First we compute the generator's conjugacy classes:
-  this->ComputeGeneratorsConjugacyClasses(theGlobalVariables);
+  this->ComputeGeneratorsConjugacyClasses();
 
-  ProgressReport theReport(theGlobalVariables);
+  ProgressReport theReport;
   elementSomeGroup currentElement;
   LargeInt groupSizeByFla=this->SizeByFormulaOrNeg1();
   this->flagCharPolysAreComputed=true;
@@ -812,7 +810,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives
     //in case there are two non-conjugate elements with the same char poly.
     for (int i=0; i<this->conjugacyClasseS.size; i++)
       for (int j=0; j<this->unionGeneratorsCC.size; j++)
-      { if (theGlobalVariables!=0)
+      { if (theGlobalVariables.flagReportEverything)
         { std::stringstream reportStream;
           reportStream << "Exploring conjugacy class " << i+1
           << " out of " << this->conjugacyClasseS.size
@@ -820,7 +818,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives
           theReport.Report(reportStream.str());
         }
         currentElement=this->conjugacyClasseS[i].representative*this->unionGeneratorsCC[j];
-        this->RegisterCCclass(currentElement,(phase==0), theGlobalVariables);
+        this->RegisterCCclass(currentElement,(phase==0));
         if (this->sizePrivate==groupSizeByFla)
           return true;
       }
@@ -831,21 +829,21 @@ bool FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives
 }
 
 template <class elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives(GlobalVariables *theGlobalVariables)
+void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives()
 { if(this->GetSizeByFormula)
   { LargeInt theSize = this->GetSizeByFormula(this);
     // extended digit separators only appear in cxx14
     if(theSize > 100000000)
       if(this->flagCanComputeCCsWithOrbitIterator)
-      { this->ComputeCCSizesAndRepresentativesWithOrbitIterator(theGlobalVariables);
+      { this->ComputeCCSizesAndRepresentativesWithOrbitIterator();
         return;
       }
   }
-  this->ComputeCCSizesRepresentativesWords(theGlobalVariables);
+  this->ComputeCCSizesRepresentativesWords();
 }
 
 template <class elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentativesWithOrbitIterator(GlobalVariables* theGlobalVariables)
+void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentativesWithOrbitIterator()
 { MacroRegisterFunctionWithName("FiniteGroup::ComputeCCSizesAndRepresentatives");
   if (this->flagCCRepresentativesComputed)
     return;
@@ -863,9 +861,9 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentativesWithOrbitIte
   if (recursionCount>100)
     crash << "Oh no something is very wrong " << crash;
   std::cout << "got to here!\n";
-  this->RegisterCCclass(currentElt, false, theGlobalVariables);
+  this->RegisterCCclass(currentElt, false);
   std::cout << "got to here2!\n";
-  this->ComputeCCRepresentatives(theGlobalVariables);
+  this->ComputeCCRepresentatives();
   recursionCount--;
   std::cout << "got to here3!\n";
   this->flagCCRepresentativesComputed=true;
@@ -891,9 +889,9 @@ void FiniteGroup<elementSomeGroup>::ComputeCCfromCCindicesInAllElements(const Li
 }
 
 template <class elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::ComputeCCfromAllElements(GlobalVariables* theGlobalVariables)
+void FiniteGroup<elementSomeGroup>::ComputeCCfromAllElements()
 { MacroRegisterFunctionWithName("Subgroup::ComputeCCfromAllElements");
-  this->ComputeAllElements(-1, theGlobalVariables);
+  this->ComputeAllElements(-1);
   List<bool> Accounted;
   Accounted.initFillInObject(this->theElements.size, false);
   HashedList<int, MathRoutines::IntUnsignIdentity> theStack;
@@ -921,6 +919,53 @@ void FiniteGroup<elementSomeGroup>::ComputeCCfromAllElements(GlobalVariables* th
     }
   ccIndices.QuickSortAscending();
   this->ComputeCCfromCCindicesInAllElements(ccIndices);
+}
+
+template<class coefficient>
+LargeInt WeylGroupData::GetOrbitSize(Vector<coefficient>& theWeight)
+{ MacroRegisterFunctionWithName("WeylGroup::GetOrbitSize");
+  //I read somewhere, I think it was a paper by W. de Graaf, that the stabilizer
+  //of a weight is generated by
+  //the root reflections that stabilize the weight.
+  //Whether my memory has served me well shall be seen through implementing this function.
+  //In particular, we will compute all root reflections that stabilize the weight,
+  //then get a Dynkin diagram from these roots, then compute the size of the stabilizer,
+  // and finally compute the size of the orbit. I will check numerically if everything is ok
+  //all the way up to E6.
+  stOutput << "<hr>DEBUG: Calling WeylGroup::GetOrbitSize with input: " << theWeight.ToString()
+  << ". The Weyl type is: " << this->theDynkinType.ToString();
+  Vector<coefficient> currentWeight;
+  Vectors<Rational> theStabilizingRoots;
+  for (int i=0; i<this->RootsOfBorel.size; i++)
+  { this->ReflectBetaWRTAlpha(this->RootsOfBorel[i], theWeight, false, currentWeight);
+    if (currentWeight==theWeight)
+      theStabilizingRoots.AddOnTop(this->RootsOfBorel[i]);
+  }
+  stOutput << "<br>DEBUG: I found the stabilizing roots to be: " << theStabilizingRoots.ToString();
+  DynkinDiagramRootSubalgebra theStabilizerSubsystem;
+  theStabilizerSubsystem.ComputeDiagramTypeModifyInput(theStabilizingRoots, *this);
+  stOutput << "<br>DEBUG: The stabilizer subsystem is: " << theStabilizerSubsystem.ToString();
+  DynkinType theStabilizerDynkinType;
+  theStabilizerSubsystem.GetDynkinType(theStabilizerDynkinType);
+  Rational resultRat=this->theGroup.GetSize();
+  resultRat/=theStabilizerDynkinType.GetWeylGroupSizeByFormula();
+  LargeInt result;
+  if (!resultRat.IsInteger(&result))
+    crash << "Something has gone very wrong: orbit size reported to be " << resultRat.ToString()
+    << " which is non-integer!" << crash;
+  bool doDebug=true;
+  if (doDebug)
+    if (result<100000)
+    { HashedList<Vector<coefficient> > comparisonOrbit;
+      double DEbugStartTime=theGlobalVariables.GetElapsedSeconds();
+      stOutput << "<br>DEBUG: calling generateOrbit for input: " << theWeight.ToString();
+      this->GenerateOrbit(theWeight, false, comparisonOrbit, false, -1, 0, -1);
+      stOutput << "<br>Orbit generated in " << theGlobalVariables.GetElapsedSeconds()-DEbugStartTime << " seconds. ";
+      if (result!=comparisonOrbit.size)
+        crash << "Actual orbit of " << theWeight.ToString() << " has size " << comparisonOrbit.size << " but I computed "
+        << " the orbit size to be " << result.ToString() << ". This may be a mathematical error. " << crash;
+    }
+  return result;
 }
 
 template <class coefficient>
@@ -1039,7 +1084,7 @@ template <class coefficient>
 bool WeylGroupData::GenerateOrbit
 (Vectors<coefficient>& theWeights, bool RhoAction, HashedList<Vector<coefficient> >& output,
  bool UseMinusRho, int expectedOrbitSize, HashedList<ElementWeylGroup<WeylGroupData> >* outputSubset,
- int UpperLimitNumElements, GlobalVariables* theGlobalVariables)
+ int UpperLimitNumElements)
 { MacroRegisterFunctionWithName("WeylGroup::GenerateOrbit");
   output.Clear();
 //  stOutput << "<br>Generating orbit in type " << this->theDynkinType.ToString() << " of weights: "
@@ -1066,13 +1111,13 @@ bool WeylGroupData::GenerateOrbit
     outputSubset->Clear();
     outputSubset->AddOnTop(currentElt);
   }
-  ProgressReport theReport(theGlobalVariables);
+  ProgressReport theReport(&theGlobalVariables);
   simpleReflectionOrOuterAuto theGen;
   // stOutput << "<br>Got to main cycle of: WeylGroup::GenerateOrbit. ";
   for (int i=0; i<output.size; i++)
     for (int j=0; j<this->CartanSymmetric.NumRows; j++)
     { currentRoot=output[i];
-      if (theGlobalVariables!=0 && i%100==0)
+      if (theGlobalVariables.flagReportEverything && i%100==0)
       { std::stringstream reportStream;
         reportStream << "So far found " << i+1 << " elements in the orbit(s) of the starting weight(s) "
         << theWeights.ToString() << ". ";
@@ -2156,8 +2201,7 @@ void FiniteGroup<elementSomeGroup>::AddCharacter(const ClassFunction<FiniteGroup
 
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersion(
-    List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > initialIrreps,
-    GlobalVariables* theGlobalVariables)
+    List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > initialIrreps)
 { MacroRegisterFunctionWithName("WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion");
   if(this->irreps_grcam.size == 0)
     this->irreps_grcam = initialIrreps;
@@ -2168,16 +2212,16 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
       this->irreps_grcam.AddOnTop(irreps[i].MakeGRCAM());
   }
   if(this->theElements.size == 0)
-    this->ComputeCCfromAllElements(theGlobalVariables);
+    this->ComputeCCfromAllElements();
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> newRep;
   int NumClasses=this->ConjugacyClassCount();
   VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> decompositionNewRep;
-  ProgressReport theReport1(theGlobalVariables);
+  ProgressReport theReport1;
   int indexFirstPredefinedRep=1; //<-this should be the index of the sign rep.
   int indexLastPredefinedrep=2; //<-this should be the index of the standard rep.
   for (int i=0; i<this->irreps_grcam.size && this->irreps_grcam.size!=NumClasses; i++)
     for (int j=indexFirstPredefinedRep; j<=indexLastPredefinedrep; j++)
-    { if (theGlobalVariables!=0)
+    { if (theGlobalVariables.flagReportEverything)
       { std::stringstream reportStream;
         reportStream << this->irreps_grcam.size << " irreducible representations found so far. ";
         reportStream << "<br>Decomposing " << this->irreps_grcam[j].theCharacteR.ToString() << " * " << this->irreps_grcam[i].theCharacteR.ToString() << "\n";
@@ -2185,12 +2229,12 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
       }
       newRep= this->irreps_grcam[j];//we are initializing by the sign or natural rep.
       newRep*= this->irreps_grcam[i];
-      bool tempB=newRep.DecomposeTodorsVersion(decompositionNewRep, theGlobalVariables);
+      bool tempB=newRep.DecomposeTodorsVersion(decompositionNewRep);
       if (!tempB)
         crash << "This is a mathematical error: failed to decompose " << newRep.theCharacteR.ToString() << ". " << crash;
     }
   this->irreps_grcam.QuickSortAscending(0, &this->characterTable);
-  if (theGlobalVariables!=0)
+  if (theGlobalVariables.flagReportEverything)
   { std::stringstream reportStream;
     reportStream << "Irrep table:";
     for (int i=0; i<this->irreps.size; i++)
@@ -2408,8 +2452,7 @@ GroupRepresentation<somegroup, coefficient> GroupRepresentationCarriesAllMatrice
 
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersion(
-    GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational>* startingIrrep,
-    GlobalVariables* theGlobalVariables)
+    GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational>* startingIrrep)
 { MacroRegisterFunctionWithName("WeylGroup::ComputeIrreducibleRepresentationsThomasVersion");
   if(!startingIrrep)
   { if(this->irreps_grcam.size != 0)
@@ -2492,17 +2535,17 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
 }
 
 template <typename elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentations(GlobalVariables* theGlobalVariables)
+void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentations()
 { if(this->ComputeIrreducibleRepresentationsWithFormulas)
-    this->ComputeIrreducibleRepresentationsWithFormulas(*this, theGlobalVariables);
+    this->ComputeIrreducibleRepresentationsWithFormulas(*this);
   else
     if(this->irreps_grcam.size != 0)
-      this->ComputeIrreducibleRepresentationsTodorsVersion(this->irreps_grcam, theGlobalVariables);
+      this->ComputeIrreducibleRepresentationsTodorsVersion(this->irreps_grcam);
     else
       if(this->irreps.size != 0)
       { for(int i=0; i<this->irreps.size; i++)
           this->irreps_grcam.AddOnTop(this->irreps[i].MakeGRCAM());
-        this->ComputeIrreducibleRepresentationsTodorsVersion(this->irreps_grcam, theGlobalVariables);
+        this->ComputeIrreducibleRepresentationsTodorsVersion(this->irreps_grcam);
       }
       else
         crash << "FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentations: We must have either a formula to generate the irreps, or a list of irreps with everything in their tensor products" << __FILE__ << ":" << __LINE__;

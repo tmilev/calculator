@@ -458,8 +458,8 @@ void Calculator::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
   output.domainAlg=&this->theObjectContainer.theLieAlgebras.GetElement(this->theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempg2alg));
   output.rangeAlg =&this->theObjectContainer.theLieAlgebras.GetElement(this->theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempb3alg));
 
-  output.theRange().ComputeChevalleyConstants(&theGlobalVariables);
-  output.theDomain().ComputeChevalleyConstants(&theGlobalVariables);
+  output.theRange().ComputeChevalleyConstants();
+  output.theDomain().ComputeChevalleyConstants();
   ElementSemisimpleLieAlgebra<Rational> g_2, g_1plusg_3, g_m2, g_m1plusg_m3, tempElt;
   g_2.MakeGenerator         (13, output.theRange());
   g_m2.MakeGenerator        (7,  output.theRange());
@@ -1088,7 +1088,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
   std::stringstream latexReport;
   latexReport << "\\documentclass{article} <br>\\usepackage{longtable}\\begin{document}<br>\n\n\n\n\n";
   latexReport << " \\begin{longtable}{|lllll|} ";
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   bool ConjectureBholds=true;
   bool ConjectureCholds=true;
   LittelmannPath hwPath;
@@ -1098,7 +1098,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
   SemisimpleLieAlgebra tempAlg;
   for (int i=0; i<theRanks.size; i++)
   { tempAlg.theWeyl.MakeArbitrarySimple(theWeylLetters[i], theRanks[i]);
-    tempAlg.ComputeChevalleyConstants(&theGlobalVariables);
+    tempAlg.ComputeChevalleyConstants();
     SemisimpleLieAlgebra& currentAlg=theCommands.theObjectContainer.theLieAlgebras.GetElement
     (theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempAlg));
     currentAlg.theWeyl.GetHighestWeightsAllRepsDimLessThanOrEqualTo(theHighestWeights[i], dimBound);

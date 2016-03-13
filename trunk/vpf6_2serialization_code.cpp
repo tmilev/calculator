@@ -143,8 +143,9 @@ bool CalculatorConversions::innerDynkinType(Calculator& theCommands, const Expre
 bool CalculatorConversions::innerSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra*& outputPointer)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::innerLoadSSLieAlgebra");
+  stOutput << "<br>DEBUG: calling innerSSLieAlgebra";
+  double startTimeDebug=theGlobalVariables.GetElapsedSeconds();
   DynkinType theDynkinType;
-//  stOutput << "<br>Now I'm here!";
 //  stOutput.flush();
   outputPointer=0;
   if(!CalculatorConversions::innerDynkinType(theCommands, input, theDynkinType))
@@ -177,11 +178,21 @@ bool CalculatorConversions::innerSSLieAlgebra(Calculator& theCommands, const Exp
   output.AssignValue(theSSalgebra, theCommands);
   if (feelsLikeTheVeryFirstTime)
   { //crash << theSSalgebra.theWeyl.theDynkinType.ToString() << crash;
-    theSSalgebra.ComputeChevalleyConstants(&theGlobalVariables);
+    stOutput << "<br>Elapsed time before computing Chevalley consts: "
+    << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
+    theSSalgebra.ComputeChevalleyConstants();
+    stOutput << "<br>Elapsed time after computing Chevalley consts: "
+    << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
     Expression tempE;
+    stOutput << "<br>Elapsed time before printing subalgebra: "
+    << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
     theCommands.innerPrintSSLieAlgebra(theCommands, output, tempE, false);
+    stOutput << "<br>after printing time: "
+    << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
     theCommands << tempE.GetValue<std::string>();
   }
+  stOutput << "<br>DEBUG: needed: " <<
+  theGlobalVariables.GetElapsedSeconds()-startTimeDebug << " seconds for generating the Lie algebra. ";
   //theSSalgebra.TestForConsistency(theGlobalVariables);
   return true;
 }

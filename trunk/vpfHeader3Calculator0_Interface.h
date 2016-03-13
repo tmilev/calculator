@@ -1999,7 +1999,7 @@ bool Calculator::GetTypeWeight
   if (!input.IsListNElements(3))
   { theCommands
     << "Function TypeHighestWeightParabolic is expected to have two arguments: "
-    << "SS algebra type, highest weight in simple coords. ";
+    << "Semisimple  algebra type, highest weight in simple coordinates. ";
     return false;
   }
   const Expression& leftE=input[1];

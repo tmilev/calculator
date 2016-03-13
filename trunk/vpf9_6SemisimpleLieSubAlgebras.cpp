@@ -1225,7 +1225,7 @@ void DynkinType::GetDynkinIndicesSl2SubalgebrasSimpleType
     SemisimpleLieAlgebra simpleAlgebra;
     SltwoSubalgebras theSl2s;
     simpleAlgebra.theWeyl.MakeArbitrarySimple(theTypeDefaultScale.theLetter, theTypeDefaultScale.theRank);
-    simpleAlgebra.ComputeChevalleyConstants(theGlobalVariables);
+    simpleAlgebra.ComputeChevalleyConstants();
     simpleAlgebra.FindSl2Subalgebras(simpleAlgebra, theSl2s, theGlobalVariables);
     dynkinSimpleTypesWithComputedSl2Subalgebras.AddOnTop(theTypeDefaultScale);
     outputIndicesDefaultScale.SetExpectedSize(theSl2s.size);
@@ -1688,7 +1688,7 @@ void SemisimpleSubalgebras::RegisterPossibleCandidate(CandidateSSSubalgebra& inp
   bool needToComputeConstants=this->theSubalgebrasNonEmbedded->Contains(candidateSAnonEmbedded);
   int theIndex=this->theSubalgebrasNonEmbedded->AddNoRepetitionOrReturnIndexFirst(candidateSAnonEmbedded);
   if (needToComputeConstants)
-    this->theSubalgebrasNonEmbedded->GetElement(theIndex).ComputeChevalleyConstants(theGlobalVariables);
+    this->theSubalgebrasNonEmbedded->GetElement(theIndex).ComputeChevalleyConstants();
   input.indexInOwnersOfNonEmbeddedMe=theIndex;
 }
 
@@ -3909,7 +3909,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras
   inputOwner.CheckConsistency();
   output.reset(inputOwner);
   output.CheckConsistency();
-  output.GetOwner().ComputeChevalleyConstants(theGlobalVariables);
+  output.GetOwner().ComputeChevalleyConstants();
   output.theRootSAs.theGlobalVariables=theGlobalVariables;
   output.theRootSAs.owner=&inputOwner;
   output.theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();

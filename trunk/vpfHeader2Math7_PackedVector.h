@@ -413,7 +413,7 @@ List<VectorSpace<coefficient> > GetEigenspaces(const Matrix<coefficient> &M)
 template <typename somegroup>
 List<ClassFunction<somegroup, Rational> > ComputeCharacterTable(somegroup &G)
 { if(G.ConjugacyClassCount() == 0)
-    G.ComputeCCfromAllElements(0);
+    G.ComputeCCfromAllElements();
   List<int> classmap;
   int sizeOfG=-1;
   G.GetSize().IsIntegerFittingInInt(&sizeOfG);

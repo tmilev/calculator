@@ -246,8 +246,8 @@ public:
     return true;
   }
   bool CheckInitialization()const;
-  bool CheckConjugacyClassRepsMatchCCsizes(GlobalVariables* theGlobalVariables);
-  bool CheckOrthogonalityCharTable(GlobalVariables* theGlobalVariables);
+  bool CheckConjugacyClassRepsMatchCCsizes();
+  bool CheckOrthogonalityCharTable();
   void SetSizE(const LargeInt& inputSize)
   { this->sizePrivate=inputSize;
   }
@@ -270,35 +270,35 @@ public:
   bool AreConjugate_OLD_Deprecated_Version_By_Todor(const elementSomeGroup& left, const elementSomeGroup& right);
 
 
-  bool ComputeAllElements(int MaxElements=-1, GlobalVariables* theGlobalVariables=0);
+  bool ComputeAllElements(int MaxElements=-1);
 
   // Timing indicates that for small groups this code is slow
-  bool ComputeAllElementsLargeGroup(int MaxElements=-1, GlobalVariables* theGlobalVariables=0);
+  bool ComputeAllElementsLargeGroup(int MaxElements=-1);
 
   // Historical note: this was from Thomas' second finite group class, and is
   // as of 2015-11 the only way to generate the words and conjugacy information
   void ComputeAllElementsWordsConjugacyIfObvious(bool andWords=false);
 
-  void ComputeCCfromAllElements(GlobalVariables* theGlobalVariables);
+  void ComputeCCfromAllElements();
   void ComputeCCfromCCindicesInAllElements(const List<List<int> >& ccIndices);
 
   void ComputeCCSizeOrCCFromRepresentative
-(ConjugacyClass& inputOutputClass, bool storeCC, GlobalVariables* theGlobalVariables)
+(ConjugacyClass& inputOutputClass, bool storeCC)
 ;
   bool RegisterCCclass
-(const elementSomeGroup& theRepresentative, bool dontAddIfSameInvariants, GlobalVariables* theGlobalVariables)
+(const elementSomeGroup& theRepresentative, bool dontAddIfSameInvariants)
  ;
   bool ComputeCCRepresentatives
-  (GlobalVariables* theGlobalVariables)
+  ()
   ;
   void ComputeGeneratorsConjugacyClasses
-  (GlobalVariables* theGlobalVariables)
+  ()
   ;
-  void ComputeCCSizesAndRepresentatives(GlobalVariables* theGlobalVariables);
-  void ComputeCCSizesAndRepresentativesWithOrbitIterator(GlobalVariables* theGlobalVariables);
-  void ComputeCCSizesRepresentativesWords(GlobalVariables *theGlobalVariables);
+  void ComputeCCSizesAndRepresentatives();
+  void ComputeCCSizesAndRepresentativesWithOrbitIterator();
+  void ComputeCCSizesRepresentativesWords();
   bool CheckInitializationFDrepComputation()const;
-  void ComputeSquaresCCReps(GlobalVariables *theGlobalVariables);
+  void ComputeSquaresCCReps();
   bool HasElement(const elementSomeGroup& g);
   bool GetWord(const elementSomeGroup& g, List<int>& out);
   bool (*GetWordByFormula)(void* G, const elementSomeGroup& g, List<int>& out);
@@ -313,8 +313,8 @@ public:
   void VerifyCCSizesAndRepresentativesFormula();
   void VerifyWords();
   void VerifyArithmetic();
-  std::string PrettyPrintGeneratorCommutationRelations(GlobalVariables* theGlobalVariables = 0);
-  std::string PrettyPrintCharacterTable(GlobalVariables* theGlobalVariables = 0);
+  std::string PrettyPrintGeneratorCommutationRelations();
+  std::string PrettyPrintCharacterTable();
   JSData RepresentationDataIntoJS();
 
   // these methods are refugees from the WeylGroup class
@@ -325,14 +325,12 @@ public:
   // or with a GRCAM passed in.  Since it takes too long to type out the datatype for a GRCAM, it is
   // suggested that the first parameter be the .irreps_grcam member.
   void ComputeIrreducibleRepresentationsTodorsVersion(
-      List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > initialIrreps,
-      GlobalVariables* theGlobalVariables=0);
+      List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > initialIrreps);
   // In order for this to work, the starting irrep must be one whose n-fold tensor products contain every other irrep
   void ComputeIrreducibleRepresentationsThomasVersion(
-      GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational>* startingIrrep,
-      GlobalVariables* theGlobalVariables=0);
-  void (*ComputeIrreducibleRepresentationsWithFormulas)(FiniteGroup<elementSomeGroup>& G, GlobalVariables* GV);
-  void ComputeIrreducibleRepresentations(GlobalVariables* theGlobalVariables=0);
+      GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational>* startingIrrep);
+  void (*ComputeIrreducibleRepresentationsWithFormulas)(FiniteGroup<elementSomeGroup>& G);
+  void ComputeIrreducibleRepresentations();
 
   // A parabolic kinda subgroup H = <hᵢ> is a subgroup of G = <gᵢ> in which for h∈H,
   // there is a canonical word in gᵢ..gₖ for h in G, with the property that the gᵢ's
@@ -570,18 +568,19 @@ public:
   typedef FiniteGroup<ElementWeylGroup<WeylGroupData> > WeylGroupBase;
   void init();
   static void GetCoCartanSymmetric(const Matrix<Rational>& input, Matrix<Rational>& output);
-  void ComputeSquares(GlobalVariables* theGlobalVariables);
-  void ComputeInitialIrreps(GlobalVariables* theGlobalVariablesd);
+  void ComputeSquares();
+  void ComputeInitialIrreps();
   void ComputeConjugacyClassesThomasVersion();
-  void GetSignSignatureParabolics(List<SubgroupDataRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables=0);
-  void GetSignSignatureExtendedParabolics(List<SubgroupDataRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables);
-  void GetSignSignatureAllRootSubsystems(List<SubgroupDataRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables=0);
-  void GetSignSignatureRootSubgroups(List<SubgroupDataRootReflections>& outputSubgroups, const List<Vectors<Rational> >& rootsGeneratingReflections, GlobalVariables* theGlobalVariables=0);
+  void GetSignSignatureParabolics(List<SubgroupDataRootReflections>& outputSubgroups);
+  void GetSignSignatureExtendedParabolics(List<SubgroupDataRootReflections>& outputSubgroups);
+  void GetSignSignatureAllRootSubsystems(List<SubgroupDataRootReflections>& outputSubgroups);
+  void GetSignSignatureRootSubgroups(List<SubgroupDataRootReflections>& outputSubgroups, const List<Vectors<Rational> >& rootsGeneratingReflections);
   bool LoadConjugacyClassesHelper();
   bool LoadSignSignatures(List<SubgroupDataRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables);
-  void ComputeOrLoadCharacterTable(GlobalVariables* theGlobalVariables=0, std::stringstream* reportStream=0);
-  void ComputeOrLoadConjugacyClasses(GlobalVariables* theGlobalVariables=0, std::stringstream* reportStream=0);
-  static void ComputeIrreducibleRepresentationsWithFormulasImplementation(FiniteGroup<ElementWeylGroup<WeylGroupData> >& G, GlobalVariables* theGlobalVariables=0);
+  void ComputeOrLoadCharacterTable(std::stringstream* reportStream=0);
+  void ComputeOrLoadConjugacyClasses(std::stringstream* reportStream=0);
+  static void ComputeIrreducibleRepresentationsWithFormulasImplementation
+  (FiniteGroup<ElementWeylGroup<WeylGroupData> >& G);
   void ComputeExtremeRootInTheSameKMod(const Vectors<Rational>& inputSimpleBasisK, const Vector<Rational>& inputRoot, Vector<Rational>& output, bool lookingForHighest);
   void AddCharacter(const ClassFunction<WeylGroupData::WeylGroupBase, Rational>& X);
   void ComputeRho(bool Recompute);
@@ -596,7 +595,7 @@ public:
   void MakeFinalSteps();
   void InitGenerators();
   template <class coefficient>
-  LargeInt GetOrbitSize(Vector<coefficient>& theWeight, GlobalVariables* theGlobalVariableS=0);
+  LargeInt GetOrbitSize(Vector<coefficient>& theWeight);
   void MakeMeFromMyCartanSymmetric();
   void MakeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType);
   void ComputeCoCartanSymmetricFromCartanSymmetric();
@@ -764,14 +763,14 @@ public:
   template <class coefficient>
   bool GenerateOrbit
   (Vectors<coefficient>& theWeights, bool RhoAction, HashedList<Vector<coefficient> >& output, bool UseMinusRho, int expectedOrbitSize=-1,
-   HashedList<ElementWeylGroup<WeylGroupData> >* outputSubset=0, int UpperLimitNumElements=-1, GlobalVariables* theGlobalVariables=0);
+   HashedList<ElementWeylGroup<WeylGroupData> >* outputSubset=0, int UpperLimitNumElements=-1);
   template <class coefficient>
   bool GenerateOrbit
   (Vector<coefficient>& theWeight, bool RhoAction, HashedList<Vector<coefficient> >& output, bool UseMinusRho, int expectedOrbitSize=-1,
-   HashedList<ElementWeylGroup<WeylGroupData> >* outputSubset=0, int UpperLimitNumElements=-1, GlobalVariables* theGlobalVariables=0)
+   HashedList<ElementWeylGroup<WeylGroupData> >* outputSubset=0, int UpperLimitNumElements=-1)
   { Vectors<coefficient> theWeights;
     theWeights.AddOnTop(theWeight);
-    return this->GenerateOrbit(theWeights, RhoAction, output, UseMinusRho, expectedOrbitSize, outputSubset, UpperLimitNumElements, theGlobalVariables);
+    return this->GenerateOrbit(theWeights, RhoAction, output, UseMinusRho, expectedOrbitSize, outputSubset, UpperLimitNumElements);
   }
 //  int GetNumRootsFromFormula();
   void GenerateRootSystem();
@@ -1064,7 +1063,7 @@ void GroupRepresentation<someGroup, coefficient>::ComputeCharacter() const
     return;
   this->CheckInitialization();
   if(!this->ownerGroup->flagCCsComputed)
-    this->ownerGroup->ComputeCCSizesAndRepresentatives(NULL);
+    this->ownerGroup->ComputeCCSizesAndRepresentatives();
   this->theCharacteR.G = ownerGroup;
   this->theCharacteR.data.SetSize(this->ownerGroup->conjugacyClasseS.size);
   for(int cci=0; cci < this->ownerGroup->conjugacyClasseS.size; cci++)
@@ -1385,10 +1384,10 @@ public:
   }
   void initFromGroupAndGenerators(someGroup& inputGroup, const List<elementSomeGroup>& inputGenerators);
   void MakeTranslatableWordsSubgroup(someGroup& inputGroup, const List<elementSomeGroup>& subGenerators);
-  void ComputeCCRepresentativesPreimages(GlobalVariables* theGlobalVariables);
-  void ComputeCCSizesRepresentativesPreimages(GlobalVariables* theGlobalVariables)
-  { this->ComputeCCSizesAndRepresentatives(theGlobalVariables);
-    this->ComputeCCRepresentativesPreimages(theGlobalVariables);
+  void ComputeCCRepresentativesPreimages();
+  void ComputeCCSizesRepresentativesPreimages()
+  { this->ComputeCCSizesAndRepresentatives();
+    this->ComputeCCRepresentativesPreimages();
   }
   // Note: Cosets are... whichever of left coset or right coset they are
   bool flagCosetSetsComputed = false;
@@ -1629,7 +1628,7 @@ public:
   WeylGroupData* theWeylData;
   SubgroupData<FiniteGroup<ElementWeylGroup<WeylGroupData> >, ElementWeylGroup<WeylGroupData> >* theSubgroupData;
   List<Rational> tauSignature;
-  void ComputeTauSignature(GlobalVariables* theGlobalVariables);
+  void ComputeTauSignature();
   void GetSignCharacter(Vector<Rational>& out);
 };
 
@@ -1652,7 +1651,7 @@ public:
   (WeylGroupData& G, const std::string& inputParabolicity, const std::string& inputType,
    const std::string& inputIndicesGeneratingRoots, const std::string& inputTauSignature);
   void ComputeDynkinType();
-  void ComputeCCSizesRepresentativesPreimages(GlobalVariables* theGlobalVariables);
+  void ComputeCCSizesRepresentativesPreimages();
   SubgroupDataRootReflections()
   { this->flagIsParabolic=false;
     this->flagIsExtendedParabolic=false;
@@ -2103,51 +2102,6 @@ std::string FiniteGroup<elementSomeGroup>::ToString(FormatExpressions* theFormat
   if(this->flagCCRepresentativesComputed)
     out << this->ToStringConjugacyClasses(theFormat);
   return out.str();
-}
-
-template<class coefficient>
-LargeInt WeylGroupData::GetOrbitSize(Vector<coefficient>& theWeight, GlobalVariables* theGlobalVariableS)
-{ MacroRegisterFunctionWithName("WeylGroup::GetOrbitSize");
-  //I read somewhere, I think it was a paper by W. de Graaf, that the stabilizer
-  //of a weight is generated by
-  //the root reflections that stabilize the weight.
-  //Whether my memory has served me well shall be seen through implementing this function.
-  //In particular, we will compute all root reflections that stabilize the weight,
-  //then get a Dynkin diagram from these roots, then compute the size of the stabilizer,
-  // and finally compute the size of the orbit. I will check numerically if everything is ok
-  //all the way up to E6.
-  stOutput << "<hr>DEBUG: Calling WeylGroup::GetOrbitSize with input: " << theWeight.ToString()
-  << ". The Weyl type is: " << this->theDynkinType.ToString();
-  Vector<coefficient> currentWeight;
-  Vectors<Rational> theStabilizingRoots;
-  for (int i=0; i<this->RootsOfBorel.size; i++)
-  { this->ReflectBetaWRTAlpha(this->RootsOfBorel[i], theWeight, false, currentWeight);
-    if (currentWeight==theWeight)
-      theStabilizingRoots.AddOnTop(this->RootsOfBorel[i]);
-  }
-  stOutput << "<br>DEBUG: I found the stabilizing roots to be: " << theStabilizingRoots.ToString();
-  DynkinDiagramRootSubalgebra theStabilizerSubsystem;
-  theStabilizerSubsystem.ComputeDiagramTypeModifyInput
-  (theStabilizingRoots, *this);
-  stOutput << "<br>DEBUG: The stabilizer subsystem is: " << theStabilizerSubsystem.ToString();
-  DynkinType theStabilizerDynkinType;
-  theStabilizerSubsystem.GetDynkinType(theStabilizerDynkinType);
-  Rational resultRat=this->theGroup.GetSize();
-  resultRat/=theStabilizerDynkinType.GetWeylGroupSizeByFormula();
-  LargeInt result;
-  if (!resultRat.IsInteger(&result))
-    crash << "Something has gone very wrong: orbit size reported to be " << resultRat.ToString()
-    << " which is non-integer!" << crash;
-  bool doDebug=true;
-  if (doDebug)
-    if (result<100000)
-    { HashedList<Vector<coefficient> > comparisonOrbit;
-      this->GenerateOrbit(theWeight, false, comparisonOrbit, false, -1, 0, -1, theGlobalVariableS);
-      if (result!=comparisonOrbit.size)
-        crash << "Actual orbit of " << theWeight.ToString() << " has size " << comparisonOrbit.size << " but I computed "
-        << " the orbit size to be " << result.ToString() << ". This may be a mathematical error. " << crash;
-    }
-  return result;
 }
 
 template <typename elementSomeGroup>

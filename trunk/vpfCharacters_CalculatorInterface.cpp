@@ -307,8 +307,7 @@ bool Matrix<Element>::GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerT
   return false;
 }
 
-
-void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(FiniteGroup<ElementWeylGroup<WeylGroupData> >& G, GlobalVariables* globalVariableThing)
+void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(FiniteGroup<ElementWeylGroup<WeylGroupData> >& G)
 { List<char> letters;
   List<int> ranks;
   WeylGroupData& WD = *(G.generators[0].owner);
@@ -360,7 +359,7 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
 // work then using brute force
 //  else
 //    crash << "ComputeIrreducibleRepresentationsUsingSpechtModules: Type " << this->theDynkinType << " is unsupported.  If you think it should work, edit " << __FILE__ << ":" << __LINE__ << crash;
-  stOutput << G.PrettyPrintCharacterTable(globalVariableThing) << '\n';
+  stOutput << G.PrettyPrintCharacterTable() << '\n';
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(Calculator& theCommands, const Expression& input, Expression& output, bool useOuter)
@@ -468,18 +467,21 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(Calculator& th
 bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize");
+  double startTimeForDebug=theGlobalVariables.GetElapsedSeconds();
   SemisimpleLieAlgebra* theSSalgebra=0;
   Vector<Rational> theWeightRat;
   Expression theContextE;
   if (theCommands.GetTypeWeight<Rational>(theCommands, input, theWeightRat, theContextE, theSSalgebra, 0))
-  { stOutput << "Computing orbit size for: " << theSSalgebra->theWeyl.theDynkinType.ToString();
-    Rational result=theSSalgebra->theWeyl.GetOrbitSize(theWeightRat, &theGlobalVariables);
+  { stOutput << " DEBUG: needed " << theGlobalVariables.GetElapsedSeconds()-startTimeForDebug
+    << " seconds to get type/weight info. ";
+    stOutput << "DEBUG: Computing orbit size for: " << theSSalgebra->theWeyl.theDynkinType.ToString();
+    Rational result=theSSalgebra->theWeyl.GetOrbitSize(theWeightRat);
     return output.AssignValue(result, theCommands);
   }
   Vector<Polynomial<Rational> > theWeightPoly;
   if (theCommands.GetTypeWeight<Polynomial<Rational> >
       (theCommands, input, theWeightPoly, theContextE, theSSalgebra,CalculatorConversions::innerPolynomial<Rational>))
-  { Rational result=theSSalgebra->theWeyl.GetOrbitSize(theWeightPoly, &theGlobalVariables);
+  { Rational result=theSSalgebra->theWeyl.GetOrbitSize(theWeightPoly);
     return output.AssignValue(result, theCommands);
   }
   return false;
@@ -631,7 +633,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable(Calculat
     return false;
   }
   std::stringstream reportStream;
-  theGroup.ComputeOrLoadCharacterTable(&theGlobalVariables, &reportStream);
+  theGroup.ComputeOrLoadCharacterTable(&reportStream);
   theCommands << reportStream.str();
   return output.AssignValue(theGroup, theCommands);
 }
@@ -649,7 +651,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS(Calculator& th
     return false;
   }
   std::stringstream out;
-  theGroup.ComputeOrLoadConjugacyClasses(&theGlobalVariables, &out);
+  theGroup.ComputeOrLoadConjugacyClasses(&out);
   theCommands << out.str();
   return output.AssignValue(theGroup, theCommands);
 }
@@ -665,7 +667,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements
     return false;
   }
   double timeStart1=theGlobalVariables.GetElapsedSeconds();
-  theGroupData.theGroup.ComputeCCfromAllElements(&theGlobalVariables);
+  theGroupData.theGroup.ComputeCCfromAllElements();
   //std::stringstream out;
   theCommands << "<hr> Computed conjugacy classes of " << theGroupData.ToString() << " in " << theGlobalVariables.GetElapsedSeconds()-timeStart1
   << " second(s). ";
@@ -685,7 +687,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives
   double timeStart1=theGlobalVariables.GetElapsedSeconds();
   theGroupData.CheckConsistency();
 //  theGroup.ComputeCCRepresentatives(&theGlobalVariables);
-  theGroupData.theGroup.ComputeCCSizesAndRepresentatives(&theGlobalVariables);
+  theGroupData.theGroup.ComputeCCSizesAndRepresentatives();
   //std::stringstream out;
   theCommands << "<hr> Computed conjugacy classes representatives of "
   << theGroupData.theDynkinType.ToString() << " in " << theGlobalVariables.GetElapsedSeconds()-timeStart1
@@ -701,14 +703,14 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromSc
     return true;
   WeylGroupData& theGroupData=output.GetValueNonConst<WeylGroupData>();
 //  stOutput << "And the group is: " << theGroup.ToString();
-  theGroupData.ComputeInitialIrreps(&theGlobalVariables);
-  theGroupData.theGroup.ComputeIrreducibleRepresentationsTodorsVersion(theGroupData.theGroup.irreps_grcam, &theGlobalVariables);
+  theGroupData.ComputeInitialIrreps();
+  theGroupData.theGroup.ComputeIrreducibleRepresentationsTodorsVersion(theGroupData.theGroup.irreps_grcam);
   FormatExpressions tempFormat;
   tempFormat.flagUseLatex=true;
   tempFormat.flagUseHTML=false;
   std::stringstream out;
   out << "Character table: ";
-  out << theGroupData.theGroup.PrettyPrintCharacterTable(&theGlobalVariables);
+  out << theGroupData.theGroup.PrettyPrintCharacterTable();
   //Matrix<Rational> charMat;
   //charMat.init(theGroupData.theGroup.ConjugacyClassCount(), theGroupData.theGroup.ConjugacyClassCount());
   //for (int i=0; i<theGroupData.theGroup.irreps.size; i++)
@@ -1072,9 +1074,9 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(Calculator& 
   std::stringstream out;
   List<SubgroupDataRootReflections> parabolicSubgroupS, extendedParabolicSubgroups, allRootSubgroups, finalSubGroups;
   if (!theWeyl.LoadSignSignatures(finalSubGroups, &theGlobalVariables))
-  { theWeyl.GetSignSignatureParabolics(parabolicSubgroupS, &theGlobalVariables);
-    theWeyl.GetSignSignatureExtendedParabolics(extendedParabolicSubgroups, &theGlobalVariables);
-    theWeyl.GetSignSignatureAllRootSubsystems(allRootSubgroups, &theGlobalVariables);
+  { theWeyl.GetSignSignatureParabolics(parabolicSubgroupS);
+    theWeyl.GetSignSignatureExtendedParabolics(extendedParabolicSubgroups);
+    theWeyl.GetSignSignatureAllRootSubsystems(allRootSubgroups);
     List<Pair<std::string, List<Rational>, MathRoutines::hashString> > tauSigPairs;
     finalSubGroups.Reserve(allRootSubgroups.size);
     Pair<std::string, List<Rational>, MathRoutines::hashString> currentTauSig;
@@ -1146,8 +1148,8 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupNaturalRep(Calculator& theComma
     return false;
 //  stOutput << "not implemented!";
   WeylGroupData& theGroup=output.GetValueNonConst<WeylGroupData>();
-  theGroup.ComputeInitialIrreps(&theGlobalVariables);
-  theGroup.theGroup.ComputeIrreducibleRepresentationsTodorsVersion(theGroup.theGroup.irreps_grcam, &theGlobalVariables);
+  theGroup.ComputeInitialIrreps();
+  theGroup.theGroup.ComputeIrreducibleRepresentationsTodorsVersion(theGroup.theGroup.irreps_grcam);
 //  stOutput << theGroup.ToString();
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> tempRep;
   theGroup.GetStandardRepresentation(tempRep);
@@ -1566,7 +1568,7 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(Calculator& theCommands,
 template <typename somegroup, typename coefficient>
 void VirtualRepresentation<somegroup, coefficient>::operator*=(const VirtualRepresentation<somegroup, coefficient>& other)
 { MacroRegisterFunctionWithName("VirtualRepresentation::operator*=");
-  crash << "not implemented yet" << crash;
+  crash << "Not implemented yet. " << crash;
 /*  WeylGroupVirtualRepresentation<coefficient> output, currentContribution;
   output.ownerGroup=this->ownerGroup;
   output.coefficientsIrreps.MakeZero(this->coefficientsIrreps.size);
@@ -1612,10 +1614,10 @@ bool CalculatorFunctionsWeylGroup::innerMakeVirtualWeylRep(Calculator& theComman
       input.GetValueNonConst<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >();
   WeylGroupData* theWeylData = inputRep.ownerGroup->generators[0].owner;
   if (inputRep.ownerGroup->irreps.size<inputRep.ownerGroup->ConjugacyClassCount() && theWeylData->theGroup.ComputeIrreducibleRepresentationsWithFormulas)
-    theWeylData->theGroup.ComputeIrreducibleRepresentationsWithFormulas(theWeylData->theGroup, &theGlobalVariables);
+    theWeylData->theGroup.ComputeIrreducibleRepresentationsWithFormulas(theWeylData->theGroup);
   if (inputRep.ownerGroup->irreps.size<inputRep.ownerGroup->ConjugacyClassCount())
-  { theWeylData->ComputeInitialIrreps(&theGlobalVariables);
-    theWeylData->theGroup.ComputeIrreducibleRepresentationsTodorsVersion(theWeylData->theGroup.irreps_grcam, &theGlobalVariables);
+  { theWeylData->ComputeInitialIrreps();
+    theWeylData->theGroup.ComputeIrreducibleRepresentationsTodorsVersion(theWeylData->theGroup.irreps_grcam);
   }
   VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> outputRep;
   outputRep.AssignRep(inputRep);

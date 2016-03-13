@@ -148,7 +148,6 @@ void Partition::GetAllStandardTableaux(List<Tableau>& out) const
   }
 }
 
-
 void Partition::TestAllSpechtModules(int n)
 { MacroRegisterFunctionWithName("Partition::TestAllSpechtModules");
   List<Partition> partitions;
@@ -179,7 +178,7 @@ void Partition::TestAllSpechtModules(int n)
     std::cout << "got to here8\n";
     outg.generators = repgens;
     std::cout << "got to here9\n";
-    outg.ComputeCCSizesAndRepresentatives(0);
+    outg.ComputeCCSizesAndRepresentatives();
     std::cout << "got to here10\n";
     stOutput << outg << "\n\n\n";
     std::cout << "got to here11\n";

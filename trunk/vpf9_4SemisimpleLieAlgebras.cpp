@@ -93,7 +93,7 @@ void SemisimpleLieAlgebra::ComputeFolderNames(GlobalVariables& theGlobalVariable
   this->DisplayNameSSalgOutputFolder=outMainDisplayPath.str();
 }
 
-void SemisimpleLieAlgebra::ComputeChevalleyConstants(GlobalVariables* theGlobalVariables)
+void SemisimpleLieAlgebra::ComputeChevalleyConstants()
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::ComputeChevalleyConstants");
   this->theWeyl.ComputeRho(true);
   this->ChevalleyConstants.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
@@ -105,11 +105,11 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants(GlobalVariables* theGlobalV
   nonExploredRoots.MakeFullSelection(posRoots.size);
   Vector<Rational> tempRoot;
   std::stringstream out;
-  ProgressReport theReport(theGlobalVariables);
+  ProgressReport theReport;
   double startTimer=-1;
-  if (theGlobalVariables!=0)
+  if (theGlobalVariables.flagReportEverything)
   { out << "Initializing matrix for structure constant computation of " << this->GetLieAlgebraName() << "... ";
-    startTimer= theGlobalVariables->GetElapsedSeconds();
+    startTimer= theGlobalVariables.GetElapsedSeconds();
     theReport.Report(out.str());
   }
   for (int i=0; i<this->theWeyl.RootSystem.size; i++)
@@ -124,10 +124,10 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants(GlobalVariables* theGlobalV
         }
     }
   double startStructureConstantComputation=-1;
-  if (theGlobalVariables!=0)
-  { out << "done in " << theGlobalVariables->GetElapsedSeconds()- startTimer << " seconds.<br> " << "Computing structure constants...";
+  if (theGlobalVariables.flagReportEverything)
+  { out << "done in " << theGlobalVariables.GetElapsedSeconds()- startTimer << " seconds.<br> " << "Computing structure constants...";
     theReport.Report(out.str());
-    startStructureConstantComputation= theGlobalVariables->GetElapsedSeconds();
+    startStructureConstantComputation= theGlobalVariables.GetElapsedSeconds();
   }
   Rational tempRat;
   while (nonExploredRoots.CardinalitySelection>0)
@@ -183,16 +183,16 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants(GlobalVariables* theGlobalV
     nonExploredRoots.ComputeIndicesFromSelection();
   }
   double startMultTable=-1;
-  if (theGlobalVariables!=0)
-  { out << "done in " << theGlobalVariables->GetElapsedSeconds() - startStructureConstantComputation
+  if (theGlobalVariables.flagReportEverything)
+  { out << "done in " << theGlobalVariables.GetElapsedSeconds() - startStructureConstantComputation
     << " seconds.<br> Computing Lie bracket pairing (``multiplication'') table...";
     theReport.Report(out.str());
-    startMultTable=theGlobalVariables->GetElapsedSeconds();
+    startMultTable=theGlobalVariables.GetElapsedSeconds();
   }
-  this->ComputeMultTable(*theGlobalVariables);
-  if (theGlobalVariables!=0)
-  { out << " done in " << theGlobalVariables->GetElapsedSeconds()-startMultTable << " seconds. Total structure constant computation time: "
-    << theGlobalVariables->GetElapsedSeconds()- startTimer << " seconds. ";
+  this->ComputeMultTable();
+  if (theGlobalVariables.flagReportEverything)
+  { out << " done in " << theGlobalVariables.GetElapsedSeconds()-startMultTable << " seconds. Total structure constant computation time: "
+    << theGlobalVariables.GetElapsedSeconds()- startTimer << " seconds. ";
     theReport.Report(out.str());
   }
   if (this->GetNumPosRoots()<=0)
@@ -200,7 +200,7 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants(GlobalVariables* theGlobalV
 //  this->TestForConsistency(theGlobalVariables);
 }
 
-void SemisimpleLieAlgebra::ComputeMultTable(GlobalVariables& theGlobalVariables)
+void SemisimpleLieAlgebra::ComputeMultTable()
 { int numPosRoots=this->theWeyl.RootsOfBorel.size;
   int theRank= this->theWeyl.CartanSymmetric.NumRows;
   int numRoots = numPosRoots*2;

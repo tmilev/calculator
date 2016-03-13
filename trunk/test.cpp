@@ -2652,7 +2652,7 @@ void TestHyperoctahedralStuff()
   { HyperoctahedralGroupData Bn;
     Bn.MakeHyperoctahedralGroup(bni);
     Bn.theGroup->ComputeAllElements();
-    Bn.theGroup->ComputeCCSizesAndRepresentatives(NULL);
+    Bn.theGroup->ComputeCCSizesAndRepresentatives();
     stOutput << Bn << '\n';
     stOutput << Bn.theGroup->conjugacyClasseS.size << " conjugacy classes\n";
     for(int i=0; i<Bn.theGroup->conjugacyClasseS.size; i++)

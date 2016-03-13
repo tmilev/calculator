@@ -1152,6 +1152,7 @@ std::string WebWorker::GetAddUserEmails()
 
 int WebWorker::ProcessSubmitProblem()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSubmitProblem");
+  double startTime=theGlobalVariables.GetElapsedSeconds();
   CalculatorHTML theProblem;
   theProblem.LoadCurrentProblemItem();
   std::stringstream comments;
@@ -1260,20 +1261,63 @@ int WebWorker::ProcessSubmitProblem()
       << "This should not happen. " << CalculatorHTML::BugsGenericMessage << "</b>";
       theProblem.flagIsForReal=false;
     } else
-      for (int i=0; i<theProblem.studentTagsAnswered.CardinalitySelection; i++)
-      { int theIndex=theProblem.studentTagsAnswered.elements[i];
-        theProblem.theProblemData.numSubmissions[theIndex]++;
-        totalSubmissionsRelevant+=theProblem.theProblemData.numSubmissions[theIndex];
-        correctSubmissionsRelevant+=theProblem.theProblemData.numCorrectSubmissions[theIndex];
-        if (isCorrect)
-        { theProblem.theProblemData.numCorrectSubmissions[theIndex]++;
-          correctSubmissionsRelevant++;
-          if (theProblem.theProblemData.firstCorrectAnswer[theIndex]=="")
-            theProblem.theProblemData.firstCorrectAnswer[theIndex]=theProblem.studentAnswersUnadulterated[theIndex];
-          else
-            stOutput << "[correct answer already submitted: " << theProblem.theProblemData.firstCorrectAnswer[theIndex] << "]";
-        }
+    { CalculatorHTML theProblemHome;
+      theProblemHome.fileName=theProblem.currentExamHomE;
+      bool isGood=true;
+//      stOutput << "Time before loading collection: " << theGlobalVariables.GetElapsedSeconds()-startTime;
+      if (!theProblemHome.LoadMe(true, comments))
+        isGood=false;
+      if (isGood)
+        if (!theProblemHome.ParseHTML(comments))
+          isGood=false;
+ //     stOutput << "Time after loading collection: " << theGlobalVariables.GetElapsedSeconds()-startTime;
+      if (!isGood)
+      { stOutput << "<b>Failed to load problem collection home: " << theProblem.currentExamHomE
+        << ". Comments: " << comments.str()  << " Answer not recorded. "
+        << "This should not happen. " << CalculatorHTML::BugsGenericMessage << "</b>";
+        return 0;
       }
+ //     stOutput << "User: " << theProblem.currentUser.username.value << "; section: "
+ //     << theProblem.currentUser.extraInfoUnsafe;
+ //     bool tmp=false;
+ //     stOutput << "problem db info: " << theProblemHome.databaseProblemAndHomeworkGroupList.ToStringCommaDelimited();
+ //     stOutput
+      bool unused=false;
+      std::string theDeadlineString=theProblemHome.GetDeadline
+      (theProblem.fileName, theProblem.currentUser.extraInfoUnsafe, true, unused);
+      TimeWrapper now, deadline; //<-needs a fix for different time formats.
+      //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
+      std::stringstream badDateStream;
+      if (!deadline.AssignMonthDayYear(theDeadlineString, badDateStream))
+      { stOutput << "<b>Problem reading deadline. </b> Comments:"
+        << "<span style=\"color:red\">" << badDateStream.str() << "</span>"
+        << " This should not happen. " << CalculatorHTML::BugsGenericMessage;
+        return 0;
+      }
+      //  out << "deadline.date: " << deadline.theTime.tm_mday;
+      now.AssignLocalTime();
+      //  out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
+      //  << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
+      double secondsTillDeadline= deadline.SubtractAnotherTimeFromMeInSeconds(now)+7*3600;
+      bool deadLinePassed=(secondsTillDeadline<-18000);
+      if (deadLinePassed)
+        stOutput << "<span style=\"color:red\"> <b>Deadline has passed, no answer recorded.</b></span>";
+      else
+        for (int i=0; i<theProblem.studentTagsAnswered.CardinalitySelection; i++)
+        { int theIndex=theProblem.studentTagsAnswered.elements[i];
+          theProblem.theProblemData.numSubmissions[theIndex]++;
+          totalSubmissionsRelevant+=theProblem.theProblemData.numSubmissions[theIndex];
+          correctSubmissionsRelevant+=theProblem.theProblemData.numCorrectSubmissions[theIndex];
+          if (isCorrect)
+          { theProblem.theProblemData.numCorrectSubmissions[theIndex]++;
+            correctSubmissionsRelevant++;
+            if (theProblem.theProblemData.firstCorrectAnswer[theIndex]=="")
+              theProblem.theProblemData.firstCorrectAnswer[theIndex]=theProblem.studentAnswersUnadulterated[theIndex];
+            else
+              stOutput << "[correct answer already submitted: " << theProblem.theProblemData.firstCorrectAnswer[theIndex] << "]";
+          }
+        }
+    }
   }
 #endif // MACRO_use_MySQL
   stOutput << "<table width=\"300\"><tr><td>";
@@ -1308,6 +1352,8 @@ int WebWorker::ProcessSubmitProblem()
   stOutput << "</td></tr>";
 
   stOutput << "</table>";
+  stOutput << "Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+
 //  stOutput << "<hr>" << theInterpreter.outputString << "<hr><hr><hr><hr><hr><hr>";
 //  stOutput << this->ToStringCalculatorArgumentsHumanReadable();
   //Calculator answerInterpretter;
@@ -1876,8 +1922,9 @@ std::string DatabaseRoutines::ToStringClassDetails
       oneTableLineStream << "<td>No solutions history</td>";
     else if (currentUser.InterpretDatabaseProblemData
              (currentUser.selectedRowFieldsUnsafe[indexProblemData], commentsProblemData))
-    { currentUser.ComputePointsEarned(databaseSpanList, databaseProblemWeights);
-      oneTableLineStream << "<td>" << currentUser.pointsEarned << "</td>";
+    { oneTableLineStream.precision(1);
+      currentUser.ComputePointsEarned(databaseSpanList, databaseProblemWeights);
+      oneTableLineStream << "<td>" << currentUser.pointsEarned.GetDoubleValue() << "</td>";
     } else
       oneTableLineStream << "<td>Failed to load problem data. Comments: " << commentsProblemData.str() << "</td>";
     oneTableLineStream << "<td>" << userTable[i][indexExtraInfo] << "</td>";
@@ -2245,17 +2292,22 @@ std::string CalculatorHTML::GetDeadline
 { MacroRegisterFunctionWithName("CalculatorHTML::GetDeadline");
   outputIsInherited=false;
   std::string result;
+//  stOutput << "Fetchign deadline for: " << problemName;
   int indexInDatabase=this->databaseProblemAndHomeworkGroupList.GetIndex(problemName);
   if (indexInDatabase!=-1)
   { int indexSection=  this->databaseStudentSectionsPerProblem[indexInDatabase].GetIndex(sectionNumber);
     if (indexSection!=-1)
       result=this->databaseDeadlinesBySection[indexInDatabase][indexSection];
   }
+//  stOutput << "Index in db is: " << indexInDatabase << " result:" << result << "Inherit frm grp:"
+//  << inheritFromGroup;
   if (result!="" || !inheritFromGroup)
     return result;
+//  stOutput << "hd prob list: " << this->hdProblemList.ToStringCommaDelimited();
   int indexInHDproblemList=this->hdProblemList.GetIndex(problemName);
   if (indexInHDproblemList==-1)
     return "";
+//  stOutput << "got to hw group phase for prob: " << problemName;
   const std::string& hwGroup=this->hdHomeworkGroupCorrespondingToEachProblem[indexInHDproblemList];
   indexInDatabase=this->databaseProblemAndHomeworkGroupList.GetIndex(hwGroup);
   if (indexInDatabase!=-1)

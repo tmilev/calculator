@@ -2191,6 +2191,9 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       out << secondE;
   } else if (this->IsListStartingWithAtom(this->owner->opIsDenotedBy()))
     out << (*this)[1].ToString(theFormat) << "=:" << (*this)[2].ToString(theFormat);
+  else if (this->StartsWith(this->owner->opLogBase(), 3))
+    out << "\\log_{" << (*this)[1].ToString(theFormat) << "}"
+    << "\\left(" << (*this)[2].ToString(theFormat) << "\\right)";
   else if (this->StartsWith(this->owner->opQuote(),2))
     out << "\"" << (*this)[1].ToString(theFormat) << "\"";
   else if (this->IsListStartingWithAtom(this->owner->opDefineConditional()))

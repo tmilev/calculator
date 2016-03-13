@@ -1218,7 +1218,7 @@ public:
   bool DecomposeTodorsVersion
   (VirtualRepresentation<somegroup, coefficient>& outputIrrepMults, GlobalVariables* theGlobalVariables=0)
   ;
-  
+
 
   List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> > DecomposeThomasVersion();
 
@@ -2136,7 +2136,8 @@ LargeInt WeylGroupData::GetOrbitSize(Vector<coefficient>& theWeight, GlobalVaria
   resultRat/=theStabilizerDynkinType.GetWeylGroupSizeByFormula();
   LargeInt result;
   if (!resultRat.IsInteger(&result))
-    crash << "Something has gone very wrong: orbit size reported to be non-integer!" << crash;
+    crash << "Something has gone very wrong: orbit size reported to be " << resultRat.ToString()
+    << " which is non-integer!" << crash;
   bool doDebug=true;
   if (doDebug)
     if (result<100000)

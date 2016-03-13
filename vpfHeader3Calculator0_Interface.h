@@ -954,6 +954,8 @@ public:
   bool AllowsOrInPreceding(const std::string& lookAhead);
   bool AllowsAndInPreceding(const std::string& lookAhead);
   bool AllowsPlusInPreceding(const std::string& lookAhead);
+  bool AllowsTimesInPreceding(const SyntacticElement& thePreceding, const std::string& lookAhead);
+
   bool AllowsTimesInPreceding(const std::string& lookAhead);
   bool AllowsTensorInPreceding(const std::string& lookAhead);
   bool AllowsDivideInPreceding(const std::string& lookAhead);

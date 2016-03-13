@@ -1024,6 +1024,21 @@ bool Calculator::AllowsTensorInPreceding(const std::string& lookAhead)
 { return this->AllowsTimesInPreceding(lookAhead) || lookAhead=="\\otimes";
 }
 
+bool Calculator::AllowsTimesInPreceding(const SyntacticElement& thePreceding, const std::string& lookAhead)
+{ if (thePreceding.controlIndex==this->conExpression())
+    if (thePreceding.theData.IsBuiltInAtom())
+    { return lookAhead=="+" || lookAhead=="-" || lookAhead=="*" || lookAhead=="/" ||
+      lookAhead=="\\cup" ||
+      lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||
+      lookAhead=="=" || lookAhead==">" || lookAhead=="<" ||
+      lookAhead=="," || lookAhead==";" ||
+      lookAhead==":" || lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\" ||
+      lookAhead=="EndProgram"
+      ;
+    }
+  return this->AllowsAndInPreceding(lookAhead);
+}
+
 bool Calculator::AllowsTimesInPreceding(const std::string& lookAhead)
 { return lookAhead=="+" || lookAhead=="-" || lookAhead=="*" || lookAhead=="/" ||
   this->knownOperationsInterpretedAsFunctionsMultiplicatively.Contains(lookAhead) ||
@@ -1334,7 +1349,7 @@ bool Calculator::ApplyOneRule()
   if (secondToLastS=="Expression" && thirdToLastS=="\\times" && fourthToLastS=="Expression" && this->AllowsTimesInPreceding(lastS) )
     return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="*" && fourthToLastS=="Expression" &&
-      this->AllowsTimesInPreceding(lastS) && !secondToLastE.theData.IsBuiltInAtom())
+      this->AllowsTimesInPreceding(secondToLastE, lastS) )
     return this->ReplaceEOEXByEX(Expression::formatTimesDenotedByStar);
   if (secondToLastS=="Expression" && thirdToLastS=="/" && fourthToLastS=="Expression" && this->AllowsDivideInPreceding(lastS) )
     return this->ReplaceEOEXByEX();
@@ -1348,7 +1363,7 @@ bool Calculator::ApplyOneRule()
       secondToLastS=="Expression" && this->AllowsTimesInPreceding(lastS))
     return this->ReplaceOXEEXByEX();
   if (fourthToLastS!="{}" && thirdToLastS=="Expression" && secondToLastS=="Expression" &&
-      this->AllowsTimesInPreceding(lastS) && !secondToLastE.theData.IsBuiltInAtom())
+      this->AllowsTimesInPreceding(secondToLastE, lastS))
   { this->ReplaceEEXByEXusingO(this->conTimes());
     Expression impliedFunApplication;
     if (this->outerTimesToFunctionApplication

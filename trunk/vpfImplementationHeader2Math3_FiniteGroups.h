@@ -477,12 +477,12 @@ void SubgroupData<someGroup, elementSomeGroup>::MakeTranslatableWordsSubgroup(so
   }
   this->theSubgroup->GetWordByFormula = TranslatableWordsSubgroupElementGetWord<elementSomeGroup>;
   this->theSubgroup->parentRelationship = this;
-  stOutput << "SubgroupData::MakeTranslatableWordsSubgroup:\n";
-  for(int i=0; i<this->theSubgroup->generators.size; i++)
-    stOutput << i << " " << this->theSubgroup->generators[i] << " "
-             << this->superGeneratorSubWords[i].ToStringCommaDelimited() << '\n';
-  for(int i=0; i<this->theSubgroup->generators.size; i++)
-    stOutput << i << " " << this->theSubgroup->generators[i] << '\n';
+  //stOutput << "SubgroupData::MakeTranslatableWordsSubgroup:\n";
+  //for(int i=0; i<this->theSubgroup->generators.size; i++)
+  //  stOutput << i << " " << this->theSubgroup->generators[i] << " "
+  //           << this->superGeneratorSubWords[i].ToStringCommaDelimited() << '\n';
+  //for(int i=0; i<this->theSubgroup->generators.size; i++)
+  //  stOutput << i << " " << this->theSubgroup->generators[i] << '\n';
 }
 
 template <class someGroup, class elementSomeGroup>
@@ -2137,10 +2137,10 @@ void SubgroupData<someGroup, elementSomeGroup>::ComputeCosets()
   }
   this->flagCosetSetsComputed = true;
   this->flagCosetRepresentativesComputed = true;
-  stOutput << "Computed cosets of group " /*<< *parent*/ << " have " << cosets.size << '\n';
-  for(int i=0; i<cosets.size; i++)
-    stOutput << cosets[i].ToString() << ", ";
-  stOutput << '\n';
+  //stOutput << "Computed cosets of group " /*<< *parent*/ << " have " << cosets.size << '\n';
+  //for(int i=0; i<cosets.size; i++)
+  //  stOutput << cosets[i].ToString() << ", ";
+  //stOutput << '\n';
   this->VerifyCosets();
 }
 

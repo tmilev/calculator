@@ -1174,7 +1174,7 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
 void HyperoctahedralGroupData::SpechtModuleOfPartititons(const Partition &positive, const Partition &negative,
                                                      GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> &out)
 { List<Matrix<Rational> > pozm, negm;
-  stOutput << "HyperoctahedralGroupR2::SpectModuleOfPartitions(" << positive << ", " << negative << ")\n";
+  //stOutput << "HyperoctahedralGroupR2::SpectModuleOfPartitions(" << positive << ", " << negative << ")\n";
   // the next two things should be done in parallel.  How can I make that happen?
   positive.SpechtModuleMatricesOfTranspositionsjjplusone(pozm);
   negative.SpechtModuleMatricesOfTranspositionsjjplusone(negm);
@@ -1310,9 +1310,9 @@ void HyperoctahedralGroupData::AllSpechtModules()
       Partition::GetPartitions(pps,this->N-p);
       for(int ppi=0; ppi<pps.size; ppi++)
       { GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> sm;
-        stOutput << "Computing representation {" << nps[npi] << "}, {" << pps[ppi] << "}\n";
+        //stOutput << "Computing representation {" << nps[npi] << "}, {" << pps[ppi] << "}\n";
         this->SpechtModuleOfPartititons(pps[ppi],nps[npi],sm);
-        sm.VerifyRepresentation();
+        //sm.VerifyRepresentation();
         stOutput << sm << '\n';
         this->theGroup->irreps.AddOnTop(sm);
       }
@@ -1340,7 +1340,7 @@ int HyperoctahedralGroup::GetN()
 LargeInt HyperoctahedralGroupData::GetSizeByFormulaImplementation(void* GG)
 { FiniteGroup<ElementHyperoctahedralGroupR2>* G = (FiniteGroup<ElementHyperoctahedralGroupR2>*) GG;
   HyperoctahedralGroupData* HD = (HyperoctahedralGroupData*) G->specificDataPointer;
-  stOutput << "HyperoctahedralGroup::GetSize() called.  N=" << HD->N << '\n';
+  //stOutput << "HyperoctahedralGroup::GetSize() called.  N=" << HD->N << '\n';
   if(HD->flagIsEntireHyperoctahedralGroup)
     return MathRoutines::Factorial(HD->N) * (1<<HD->N);
   if(HD->flagIsEntireDn)

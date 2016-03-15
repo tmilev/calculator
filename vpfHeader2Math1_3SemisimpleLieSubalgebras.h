@@ -256,7 +256,8 @@ public:
   bool IsWeightSystemSpaceIndex(int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);
   void AddHincomplete(const Vector<Rational>& theH, const ElementWeylGroup<WeylGroupData>& theWE, int indexOfOrbit);
   bool CheckBasicInitialization()const;
-  bool CheckFullInitialization()const;
+  bool CheckCandidateInitialization()const;
+  bool CheckFullInitializatioN()const;
   bool CheckModuleDimensions()const;
   SemisimpleLieAlgebra& GetAmbientSS()const;
   WeylGroupData& GetAmbientWeyl()const;
@@ -385,6 +386,8 @@ public:
       crash << "This is a programming error: attempted to access non-initialized semisimple Lie subalgerbas. " << crash;
     return *this->owner;
   }
+  void MakeEmptyCandidateSA(CandidateSSSubalgebra& output);
+  void MakeCandidateSA(const DynkinType& input, CandidateSSSubalgebra& output);
   bool IncrementReturnFalseIfPastLast();
   bool RemoveLastSubalgebra();
   bool GetCentralizerTypeIfComputableAndKnown(const DynkinType& input, DynkinType& output);

@@ -470,7 +470,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
       return theCommands << "<hr>Error loading candidate subalgebra: failed to load candidate number "
       << i << " extracted from expression: "
       << theSAsE[i].ToString() << ". <hr>";
-    currentCandidate.CheckFullInitialization();
+    currentCandidate.CheckFullInitializatioN();
     //stOutput << "<hr>read cartan elements: " << currentCandidate.theHs.size;
     if (theSAs.theSubalgebras.Contains(currentCandidate.theHs))
     { theCommands << "<hr>Did not load subalgebra of type " << currentCandidate.theWeylNonEmbedded->ToString()

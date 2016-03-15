@@ -3066,21 +3066,19 @@ void rootSubalgebras::MakeProgressReportAutomorphisms(SubgroupWeylGroupOLD& theS
 void rootSubalgebras::GenerateActionKintersectBIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
 { Selection emptySel;
   emptySel.init(theRootSA.SimpleBasisCentralizerRoots.size);
-  SubgroupWeylGroupOLD tempGroup;
-  this->ComputeNormalizerOfCentralizerIntersectNilradical(tempGroup, emptySel, theRootSA, theGlobalVariables);
+  this->ComputeNormalizerOfCentralizerIntersectNilradical(emptySel, theRootSA, theGlobalVariables);
 }
 
 void rootSubalgebras::GenerateKintersectBOuterIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
 { Selection fullSel;
   fullSel.init(theRootSA.SimpleBasisCentralizerRoots.size);
   fullSel.incrementSelectionFixedCardinality(theRootSA.SimpleBasisCentralizerRoots.size);
-  SubgroupWeylGroupOLD tempGroup;
-  this->ComputeNormalizerOfCentralizerIntersectNilradical(tempGroup, fullSel, theRootSA, theGlobalVariables);
+  this->ComputeNormalizerOfCentralizerIntersectNilradical(fullSel, theRootSA, theGlobalVariables);
 }
 
 void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
-{ SubgroupWeylGroupOLD theSubgroup;
-  this->ComputeNormalizerOfCentralizerIntersectNilradical(theSubgroup, SelectedBasisRoots, theRootSA, theGlobalVariables);
+{ this->ComputeNormalizerOfCentralizerIntersectNilradical(SelectedBasisRoots, theRootSA, theGlobalVariables);
+  SubgroupWeylGroupOLD& theSubgroup=this->CentralizerIsomorphisms.LastObject();
   this->ActionsNormalizerCentralizerNilradical.SetSize(theSubgroup.size-1);
   Vector<Rational> tempRoot;
   ProgressReport theReport(&theGlobalVariables);
@@ -3106,12 +3104,19 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(Se
 }
 
 void rootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical
-(SubgroupWeylGroupOLD& outputSubgroup, Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
+(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
 { Vectors<Rational> selectedRootsBasisCentralizer;
   selectedRootsBasisCentralizer.size=0;
   for (int i=0; i<SelectedBasisRoots.MaxSize; i++)
     if (!SelectedBasisRoots.selected[i])
-      selectedRootsBasisCentralizer.AddOnTop(theRootSA.SimpleBasisCentralizerRoots.TheObjects[i]);
+      selectedRootsBasisCentralizer.AddOnTop(theRootSA.SimpleBasisCentralizerRoots[i]);
+  this->CentralizerIsomorphisms.Reserve(this->theSubalgebras.size);
+  this->CentralizerOuterIsomorphisms.Reserve(this->theSubalgebras.size);
+
+  this->CentralizerIsomorphisms.SetSize(this->CentralizerIsomorphisms.size+1);
+  this->CentralizerOuterIsomorphisms.SetSize(this->CentralizerIsomorphisms.size);
+  SubgroupWeylGroupOLD& outputSubgroup=this->CentralizerIsomorphisms.LastObject();
+
   outputSubgroup.AmbientWeyl=(&theRootSA.GetAmbientWeyl());
   this->MakeProgressReportAutomorphisms(outputSubgroup, theRootSA, theGlobalVariables);
   theRootSA.GenerateIsomorphismsPreservingBorel(theRootSA, theGlobalVariables, &outputSubgroup, true);
@@ -3123,12 +3128,8 @@ void rootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical
   outputSubgroup.ComputeSubGroupFromGeneratingReflections
   (&selectedRootsBasisCentralizer, &outputSubgroup.ExternalAutomorphisms, &theGlobalVariables, this->UpperLimitNumElementsWeyl, false);
   outputSubgroup.simpleGenerators=(selectedRootsBasisCentralizer);
-  this->CentralizerIsomorphisms.Reserve(this->theSubalgebras.size);
-  this->CentralizerOuterIsomorphisms.Reserve(this->theSubalgebras.size);
-  this->CentralizerIsomorphisms.AddOnTop(outputSubgroup);
-  this->CentralizerOuterIsomorphisms.SetSize(this->CentralizerIsomorphisms.size);
-  this->CentralizerOuterIsomorphisms.LastObject()->ExternalAutomorphisms=(outputSubgroup.ExternalAutomorphisms);
-  this->CentralizerOuterIsomorphisms.LastObject()->AmbientWeyl=(&this->GetOwnerWeyl());
+  this->CentralizerOuterIsomorphisms.LastObject().ExternalAutomorphisms=(outputSubgroup.ExternalAutomorphisms);
+  this->CentralizerOuterIsomorphisms.LastObject().AmbientWeyl=(&this->GetOwnerWeyl());
   this->MakeProgressReportAutomorphisms(outputSubgroup, theRootSA, theGlobalVariables);
   //theSubgroup.ComputeDebugString();
 }

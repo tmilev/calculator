@@ -5692,6 +5692,7 @@ void SubgroupWeylGroupOLD::ToString(std::string& output, bool displayElements)
 bool SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots
 (WeylGroupData& inputWeyl, const Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
 { MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots");
+  this->CheckInitialization();
   Vectors<Rational> selectedRoots;
   selectedRoots.Reserve(ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize- ZeroesMeanSimpleRootSpaceIsInParabolic.CardinalitySelection);
   this->AmbientWeyl=&inputWeyl;
@@ -5790,9 +5791,13 @@ bool SubgroupWeylGroupOLD::DrawContour
 }
 
 bool SubgroupWeylGroupOLD::CheckInitialization()
-{ if (this->AmbientWeyl==0 || this->Elements==0)
+{ if (this==0)
+    crash << "Subgroup of Weyl Group has 0 this pointer. " << crash;
+  if (this->AmbientWeyl==0)
     crash << "Use of non-initialized subgroup of Weyl Group. " << crash;
-  if (this->AmbientWeyl->flagDeallocated || this->Elements->flagDeallocated)
+  if (this->flagDeallocated)
+    crash << "Use after free of subgroup of a Weyl group. " << crash;
+  if (this->AmbientWeyl->flagDeallocated)
     crash << "Use after free of owner Weyl groups in a subgroup. " << crash;
   return true;
 }

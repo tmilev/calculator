@@ -1661,7 +1661,7 @@ class SubgroupWeylGroupOLD: public HashedList<ElementWeylGroup<WeylGroupData> >
 public:
   bool truncated;
   WeylGroupData* AmbientWeyl;
-  WeylGroupData* Elements;
+  WeylGroupData Elements;
   List<ElementWeylGroup<WeylGroupData> > RepresentativesQuotientAmbientOrder;
   Vectors<Rational> simpleGenerators;
   //format: each element of of the group is a list of generators, reflections with respect to the simple generators, and outer
@@ -1674,7 +1674,6 @@ public:
   Vectors<Rational> RootsOfBorel;
   SubgroupWeylGroupOLD()
   { this->AmbientWeyl=0;
-    this->Elements=0;
   }
   bool CheckInitialization();
   void ToString(std::string& output, bool displayElements);

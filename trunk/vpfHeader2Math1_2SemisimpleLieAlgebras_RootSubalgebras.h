@@ -274,8 +274,8 @@ public:
   coneRelations theGoodRelations;
   coneRelations theMinRels;
   List<List<int> > ActionsNormalizerCentralizerNilradical;
-  List<SubgroupWeylGroupOLD> CentralizerOuterIsomorphisms;
-  List<SubgroupWeylGroupOLD> CentralizerIsomorphisms;
+  ListReferences<SubgroupWeylGroupOLD> CentralizerOuterIsomorphisms;
+  ListReferences<SubgroupWeylGroupOLD> CentralizerIsomorphisms;
   //Code used in nilradical generation:
   List<Selection> ImpiedSelectionsNilradical;
   List<List<List<int> > > storedNilradicals;
@@ -322,7 +322,7 @@ public:
   void GenerateActionKintersectBIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
   void GenerateKintersectBOuterIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
   void ComputeActionNormalizerOfCentralizerIntersectNilradical(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
-  void ComputeNormalizerOfCentralizerIntersectNilradical(SubgroupWeylGroupOLD& outputSubgroup, Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
+  void ComputeNormalizerOfCentralizerIntersectNilradical(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
 
   void ComputeAllReductiveRootSAsInit();
   void ComputeAllReductiveRootSubalgebrasUpToIsomorphism();

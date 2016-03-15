@@ -749,35 +749,34 @@ void PermutationGroupData::MakeSymmetricGroupGeneratorsjjPlus1(int n)
   return this->SimpleFiniteGroup<PermutationR2>::AreConjugate(x,y);
 }*/
 
-LargeInt PermutationGroupData::GetSizeByFormulaImplementation(void* GG)
-{ FiniteGroup<PermutationR2>* G = (FiniteGroup<PermutationR2>*) GG;
-  PermutationGroupData* PD = (PermutationGroupData*) G->specificDataPointer;
-  if(PD->flagIsSymmetricGroup)
-    return MathRoutines::Factorial(G->generators.size + 1);
-  crash << "This method should not have been called " << __FILE__ << ":" << __LINE__ << crash;
-  // control reaches end of non-void function
-  return -1;
+LargeInt PermutationGroupData::GetSizeByFormulaImplementation(FiniteGroup<PermutationR2>& G)
+{ PermutationGroupData* PD = (PermutationGroupData*) G.specificDataPointer;
+  if(!PD || !PD->flagIsSymmetricGroup)
+  { crash << "This method should not have been called " << __FILE__ << ":" << __LINE__ << crash;
+    // control reaches end of non-void function
+    return -1;
+  }
+  return MathRoutines::Factorial(G.generators.size + 1);
 }
 
-void PermutationGroupData::ComputeCCSizesAndRepresentativesByFormulaImplementation(void* GG)
-{ FiniteGroup<PermutationR2>* G = (FiniteGroup<PermutationR2>*) GG;
-  PermutationGroupData* PD = (PermutationGroupData*) G->specificDataPointer;
-  if(!PD->flagIsSymmetricGroup)
+void PermutationGroupData::ComputeCCSizesAndRepresentativesByFormulaImplementation(FiniteGroup<PermutationR2>& G)
+{ PermutationGroupData* PD = (PermutationGroupData*) G.specificDataPointer;
+  if(!PD || !PD->flagIsSymmetricGroup)
     crash << "This should not have been called" << __FILE__ << ":" << __LINE__ << crash;
-  G->flagCCsComputed = true;
-  G->flagCCRepresentativesComputed = true;
-  int N = G->generators.size + 1;
+  G.flagCCsComputed = true;
+  G.flagCCRepresentativesComputed = true;
+  int N = G.generators.size + 1;
   List<Partition> parts;
   Partition::GetPartitions(parts, N);
-  G->conjugacyClasseS.SetSize(parts.size);
+  G.conjugacyClasseS.SetSize(parts.size);
   int facn = MathRoutines::Factorial(N);
   for(int i=0; i<parts.size; i++)
   { Tableau t;
     parts[i].FillTableauOrdered(t);
-    G->conjugacyClasseS[i].representative.MakeFromTableauRows(t);
-    G->GetWord(G->conjugacyClasseS[i].representative, G->conjugacyClasseS[i].representativeWord);
-    G->conjugacyClasseS[i].flagRepresentativeWordComputed = true;
-    G->conjugacyClasseS[i].size = facn / parts[i].Fulton61z();
+    G.conjugacyClasseS[i].representative.MakeFromTableauRows(t);
+    G.GetWord(G.conjugacyClasseS[i].representative, G.conjugacyClasseS[i].representativeWord);
+    G.conjugacyClasseS[i].flagRepresentativeWordComputed = true;
+    G.conjugacyClasseS[i].size = facn / parts[i].Fulton61z();
   }
 }
 
@@ -787,7 +786,7 @@ void PermutationGroupData::ComputeCCSizesAndRepresentativesByFormulaImplementati
   crash << "Maybe try implementing PermutationR2::GetWord1j or for whatever generator set you have " << __FILE__ << ":" << __LINE__ << crash;
 }*/
 
-bool PermutationGroupData::GetWordjjPlus1Implementation(void* G, const PermutationR2& g, List<int>& word)
+bool PermutationGroupData::GetWordjjPlus1Implementation(FiniteGroup<PermutationR2>& G, const PermutationR2& g, List<int>& word)
 { g.GetWordjjPlus1(word);
   return true;
 }
@@ -1337,10 +1336,11 @@ int HyperoctahedralGroup::GetN()
 }
 */
 
-LargeInt HyperoctahedralGroupData::GetSizeByFormulaImplementation(void* GG)
-{ FiniteGroup<ElementHyperoctahedralGroupR2>* G = (FiniteGroup<ElementHyperoctahedralGroupR2>*) GG;
-  HyperoctahedralGroupData* HD = (HyperoctahedralGroupData*) G->specificDataPointer;
+LargeInt HyperoctahedralGroupData::GetSizeByFormulaImplementation(FiniteGroup<ElementHyperoctahedralGroupR2>& G)
+{ HyperoctahedralGroupData* HD = (HyperoctahedralGroupData*) G.specificDataPointer;
   //stOutput << "HyperoctahedralGroup::GetSize() called.  N=" << HD->N << '\n';
+  if(!HD)
+    crash << "consistency error " << __FILE__ << ":" << __LINE__ << crash;
   if(HD->flagIsEntireHyperoctahedralGroup)
     return MathRoutines::Factorial(HD->N) * (1<<HD->N);
   if(HD->flagIsEntireDn)
@@ -1364,9 +1364,9 @@ bool HyperoctahedralGroup::GetWordByFormulaImplementation(void* GG, const Elemen
   return true;
 }*/
 
-bool HyperoctahedralGroupData::GetWordByFormulaImplementation(void* GG, const ElementHyperoctahedralGroupR2& g, List<int>& word)
-{ FiniteGroup<ElementHyperoctahedralGroupR2>* G = (FiniteGroup<ElementHyperoctahedralGroupR2>*) GG;
-  HyperoctahedralGroupData* HD = (HyperoctahedralGroupData*) G->specificDataPointer;
+bool HyperoctahedralGroupData::GetWordByFormulaImplementation(FiniteGroup<ElementHyperoctahedralGroupR2>& G,
+                                                              const ElementHyperoctahedralGroupR2& g, List<int>& word)
+{ HyperoctahedralGroupData* HD = (HyperoctahedralGroupData*) G.specificDataPointer;
   if(HD->flagIsEntireHyperoctahedralGroup)
   { g.h.GetWordjjPlus1(word);
     for(int i=0; i<g.k.bits.size; i++)

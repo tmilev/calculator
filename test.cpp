@@ -3570,6 +3570,14 @@ int mainTest(List<std::string>& inputArguments)
       } else
         TestInduction();
     }
+    if(inputArguments[0] == "TestWeylIrreps")
+    { if(inputArguments.size == 3)
+      { char l = (inputArguments[1].c_str())[0];
+        int n = atoi(inputArguments[2].c_str());
+        TestWeylIrreps(l,n);
+      } else
+        TestWeylIrreps('B',3);
+    }
   }
 
   stOutput << "Rational::TotalSmallAdditions: " << Rational::TotalSmallAdditions;

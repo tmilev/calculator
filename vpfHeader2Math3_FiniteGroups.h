@@ -257,14 +257,14 @@ public:
   LargeInt GetSize();
   LargeInt SizeByFormulaOrNeg1()
   { this->CheckConsistency();
-    if(this->GetSizeByFormula!=0 && this->specificDataPointer!=0)
-      return GetSizeByFormula(this->specificDataPointer);
+    if(this->GetSizeByFormula!=0)
+      return GetSizeByFormula(*this);
     return -1;
   } //non-positive result means no formula is known.
 
   bool (*AreConjugateByFormula)(const elementSomeGroup& x, const elementSomeGroup& y);
-  void (*ComputeCCSizesAndRepresentativesByFormula)(void* G);
-  LargeInt (*GetSizeByFormula)(void* G);
+  void (*ComputeCCSizesAndRepresentativesByFormula)(FiniteGroup<elementSomeGroup>& G);
+  LargeInt (*GetSizeByFormula)(FiniteGroup<elementSomeGroup>& G);
   bool AreConjugate(const elementSomeGroup& left, const elementSomeGroup& right);
   bool AreConjugate_OLD_Deprecated_Version_By_Todor(const elementSomeGroup& left, const elementSomeGroup& right);
 
@@ -299,7 +299,7 @@ public:
   void ComputeSquaresCCReps();
   bool HasElement(const elementSomeGroup& g);
   bool GetWord(const elementSomeGroup& g, List<int>& out);
-  bool (*GetWordByFormula)(void* G, const elementSomeGroup& g, List<int>& out);
+  bool (*GetWordByFormula)(FiniteGroup<elementSomeGroup>& G, const elementSomeGroup& g, List<int>& out);
   void GetSignCharacter(Vector<Rational>& outputCharacter);
   template <typename coefficient>
   coefficient GetHermitianProduct(const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter);
@@ -603,7 +603,7 @@ public:
   void ComputeOuterAutoGenerators();
   void ComputeOuterAutos();
   bool CheckConsistency()const;
-  static bool GetWordByFormulaImplementation(void* G, const ElementWeylGroup<WeylGroupData>& g, List<int>& out);
+  static bool GetWordByFormulaImplementation(FiniteGroup<ElementWeylGroup<WeylGroupData> >& G, const ElementWeylGroup<WeylGroupData>& g, List<int>& out);
   void GetSignCharacter(Vector<Rational>& out);
   void GetStandardRepresentation(GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& output);
   void GetSignRepresentation(GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& output);
@@ -747,7 +747,7 @@ public:
   }
   void ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output);
   void ComputeRootsOfBorel(Vectors<Rational>& output);
-  static LargeInt GetSizeByFormulaImplementation(void* GP);
+  static LargeInt GetSizeByFormulaImplementation(FiniteGroup<ElementWeylGroup<WeylGroupData> >& G);
   static LargeInt SizeByFormulaOrNeg1(char weylLetter, int theDim);
   bool IsARoot(const Vector<Rational>& input)const
   { return this->RootSystem.Contains(input);
@@ -1416,20 +1416,19 @@ GroupRepresentation<Subgroup<somegroup,elementSomeGroup>, Rational> Subgroup<som
 }*/
 
 template <typename elementSomeGroup>
-bool TranslatableWordsSubgroupElementGetWord(void* Hp, const elementSomeGroup& g, List<int>& out)
-{ FiniteGroup<elementSomeGroup> *H = (FiniteGroup<elementSomeGroup>*) Hp;
-  List<int> superword;
-  H->parentRelationship->theGroup->GetWord(g, superword);
+bool TranslatableWordsSubgroupElementGetWord(FiniteGroup<elementSomeGroup>& H, const elementSomeGroup& g, List<int>& out)
+{ List<int> superword;
+  H.parentRelationship->theGroup->GetWord(g, superword);
   out.SetSize(0);
   for(int i=0; i<superword.size; i++)
-  { if(!H->parentRelationship->superGeneratorSubWordExists[superword[i]])
-    { if(!H->HasElement(g))
+  { if(!H.parentRelationship->superGeneratorSubWordExists[superword[i]])
+    { if(!H.HasElement(g))
         stOutput << "element " << g << " isn't even a member of " << H << '\n';
       crash << "element " << g << " is assigned parent word " << superword.ToStringCommaDelimited()
             << " containing generator not found in subgroup " << superword[i]
             << " so if this does belong to the subgroup, we need a better algorithm at "  << __FILE__ << ":" << __LINE__ << crash;
     }
-    out.AddListOnTop(H->parentRelationship->superGeneratorSubWords[superword[i]]);
+    out.AddListOnTop(H.parentRelationship->superGeneratorSubWords[superword[i]]);
   }
   return true;
   //stOutput << "TranslatableWordsSubgroupElementGetWord: " << g << " is assigned word " << out.ToStringCommaDelimited()

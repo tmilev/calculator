@@ -4546,7 +4546,7 @@ void WeylGroupData::ActOnAffineHyperplaneByGroupElement(int index, affineHyperpl
   }
 }
 
-bool WeylGroupData::GetWordByFormulaImplementation(void *G, const ElementWeylGroup<WeylGroupData> &g, List<int> &out)
+bool WeylGroupData::GetWordByFormulaImplementation(FiniteGroup<ElementWeylGroup<WeylGroupData> >& G, const ElementWeylGroup<WeylGroupData> &g, List<int> &out)
 { out.SetSize(g.generatorsLastAppliedFirst.size);
   for(int i=0; i<g.generatorsLastAppliedFirst.size; i++)
   { if(g.generatorsLastAppliedFirst[i].flagIsOuter)
@@ -5071,10 +5071,10 @@ void WeylGroupData::GetEpsilonCoords(const List<Vector<Rational> >& input, Vecto
     this->GetEpsilonCoords(input[i], output[i]);
 }
 
-LargeInt WeylGroupData::GetSizeByFormulaImplementation(void* GP)
-{ WeylGroupData* G = (WeylGroupData*) GP;
-  G->CheckConsistency();
-  return G->theDynkinType.GetWeylGroupSizeByFormula();
+LargeInt WeylGroupData::GetSizeByFormulaImplementation(FiniteGroup<ElementWeylGroup<WeylGroupData> >& G)
+{ WeylGroupData* W = (WeylGroupData*) G.specificDataPointer;
+  W->CheckConsistency();
+  return W->theDynkinType.GetWeylGroupSizeByFormula();
 }
 
 void WeylGroupData::GetWeylChamber(Cone& output)

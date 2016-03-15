@@ -599,8 +599,8 @@ class HyperoctahedralGroupData
     this->theGroup->GetSizeByFormula = this->GetSizeByFormulaImplementation;
   }
 
-  static bool GetWordByFormulaImplementation(void* G, const ElementHyperoctahedralGroupR2& g, List<int>& out);
-  static LargeInt GetSizeByFormulaImplementation(void* G);
+  static bool GetWordByFormulaImplementation(FiniteGroup<ElementHyperoctahedralGroupR2>& G, const ElementHyperoctahedralGroupR2& g, List<int>& out);
+  static LargeInt GetSizeByFormulaImplementation(FiniteGroup<ElementHyperoctahedralGroupR2>& G);
   void AllSpechtModules();
   void SpechtModuleOfPartititons(const Partition& positive, const Partition& negative,
                                GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> &out);
@@ -1194,9 +1194,9 @@ class PermutationGroupData
 
   //bool AreConjugate(const PermutationR2& x, const PermutationR2& y);
 
-  static void ComputeCCSizesAndRepresentativesByFormulaImplementation(void* G);
-  static LargeInt GetSizeByFormulaImplementation(void* G);
-  static bool GetWordjjPlus1Implementation(void* G, const PermutationR2& g, List<int>& word);
+  static void ComputeCCSizesAndRepresentativesByFormulaImplementation(FiniteGroup<PermutationR2>& G);
+  static LargeInt GetSizeByFormulaImplementation(FiniteGroup<PermutationR2>& G);
+  static bool GetWordjjPlus1Implementation(FiniteGroup<PermutationR2>& G, const PermutationR2& g, List<int>& word);
 
   PermutationGroupData()
   { this->flagIsSymmetricGroup=false;
@@ -1465,7 +1465,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesRepresentativesWords()
   if(this->flagCCsComputed && this->flagWordsComputed)
     return;
   if(this->ComputeCCSizesAndRepresentativesByFormula!=0)
-  { this->ComputeCCSizesAndRepresentativesByFormula(this);
+  { this->ComputeCCSizesAndRepresentativesByFormula(*this);
     return;
   }
   if(this->AreConjugateByFormula!=0)
@@ -1506,7 +1506,7 @@ void FiniteGroup<elementSomeGroup>::ComputeElementsAndCCs(void* unused)
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::GetWord(const elementSomeGroup& g, List<int>& word)
 { if(this->GetWordByFormula!=0)
-    return this->GetWordByFormula(this,g,word);
+    return this->GetWordByFormula(*this,g,word);
   if(!this->flagWordsComputed)
     this->ComputeAllElementsLargeGroup(true);
   int index=this->theElements.GetIndex(g);
@@ -1934,9 +1934,9 @@ std::string GroupRepresentation<somegroup, coefficient>::DescribeAsDirectSum()
 template <typename somestream>
 somestream& HyperoctahedralGroupData::IntoStream(somestream& out) const
 { if(this->flagIsEntireHyperoctahedralGroup)
-    out << "Hyperoctahedral group with " << this->theGroup->GetSizeByFormula(this->theGroup) << " elements";
+    out << "Hyperoctahedral group with " << this->theGroup->GetSizeByFormula(*(this->theGroup)) << " elements";
   else if(this->flagIsEntireDn)
-    out << "Half hyperoctahedral group with " << this->theGroup->GetSizeByFormula(this->theGroup) << " elemets";
+    out << "Half hyperoctahedral group with " << this->theGroup->GetSizeByFormula(*(this->theGroup)) << " elemets";
   else
     out << this->theGroup;
   return out;

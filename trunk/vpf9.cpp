@@ -3805,7 +3805,7 @@ int DynkinType::GetCoxeterEdgeWeight(int v, int w)
 LargeInt DynkinType::GetWeylGroupSizeByFormula()const
 { MacroRegisterFunctionWithName("DynkinType::GetWeylGroupSizeByFormula");
   this->CheckFlagDeallocated();
-  stOutput << "DEBUG: Getting Weyl group size by f-la of type: " << this->ToString() << ": ";
+//  stOutput << "DEBUG: Getting Weyl group size by f-la of type: " << this->ToString() << ": ";
   LargeInt result=1;
   LargeInt tempLI;
   for (int i=0; i<this->size(); i++)
@@ -3816,7 +3816,7 @@ LargeInt DynkinType::GetWeylGroupSizeByFormula()const
   if (result<=0)
     crash << "Something has gone very wrong: Weyl group size reported to be " << result.ToString()
     << " which appears to not be a positive integer! " << crash;
-  stOutput << "DEBUG: result: " << result.ToString();
+  //stOutput << "DEBUG: result: " << result.ToString();
   return result;
 }
 
@@ -4532,7 +4532,7 @@ void WeylGroupData::init()
   this->theGroup.AreConjugateByFormula = 0;
   this->theGroup.ComputeIrreducibleRepresentationsWithFormulas =
   this->ComputeIrreducibleRepresentationsWithFormulasImplementation;
-  this->theGroup->CheckInitialization();
+  //this->theGroup.CheckInitialization();
 }
 
 void WeylGroupData::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho)
@@ -4679,7 +4679,7 @@ LargeInt WeylGroupData::SizeByFormulaOrNeg1(char weylLetter, int theDim)
   if (weylLetter!='A' && weylLetter!='B' && weylLetter!='C' && weylLetter!='D' &&
       weylLetter!='E' && weylLetter!='F' && weylLetter!='G')
     crash << "WeylGroupData::SizeByFormulaOrNeg1 called with impossible Weyl type: " << weylLetter << crash;
-  stOutput << "DEBUG: Calling WeylGroupData::SizeByFormulaOrNeg1 with input: " << weylLetter << ", " << theDim;
+  //stOutput << "DEBUG: Calling WeylGroupData::SizeByFormulaOrNeg1 with input: " << weylLetter << ", " << theDim;
   LargeInt theOutput=1;
   if (weylLetter=='A')
     theOutput= Rational::Factorial(theDim+1);

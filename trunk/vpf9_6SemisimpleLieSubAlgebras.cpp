@@ -660,7 +660,7 @@ bool SemisimpleSubalgebras::LoadState
   for (int i=0; i<currentChainInt.size; i++)
   { if (currentChainInt[i]==-1 && i==0)
     { CandidateSSSubalgebra emptySA;
-      emptySA.owner=this;
+      this->MakeEmptyCandidateSA(emptySA);
       this->AddSubalgebraToStack(emptySA, numExploredTypes[i], numExploredHs[i]);
 //      progReportStream << "<br>Called AddSubalgebraToStack with input: " << "0, " << numExploredTypes[i]
 //      << "," << numExploredHs[i];
@@ -762,6 +762,29 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasInit()
   this->currentSubalgebraChain.SetSize(0);
 }
 
+void SemisimpleSubalgebras::MakeEmptyCandidateSA(CandidateSSSubalgebra& output)
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::MakeEmptyCandidateSA");
+  DynkinType zeroType;
+  this->MakeCandidateSA(zeroType, output);
+  Matrix<Rational> theZeroCartan;
+  output.theSubalgebraNonEmbeddedDefaultScale=
+  &this->theSubalgebrasNonDefaultCartanAndScale.GetValueCreateIfNotPresent(theZeroCartan);
+  output.indexNonEmbeddedMeNonStandardCartan=
+  this->theSubalgebrasNonDefaultCartanAndScale.GetIndex(theZeroCartan);
+}
+
+void SemisimpleSubalgebras::MakeCandidateSA(const DynkinType& input, CandidateSSSubalgebra& output)
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::MakeCandidateSA");
+  output.owner=this;
+  bool needsInit=false;
+  if (!this->theSubalgebrasNonEmbedded->Contains(input))
+    needsInit=true;
+  output.theWeylNonEmbedded=&this->theSubalgebrasNonEmbedded->GetValueCreateIfNotPresent(input).theWeyl;
+  output.indexNonEmbeddedMeStandard=this->theSubalgebrasNonEmbedded->GetIndex(input);
+  if (needsInit)
+    output.theWeylNonEmbedded->MakeFromDynkinType(input);
+}
+
 bool SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch(SemisimpleLieAlgebra& newOwner, const DynkinType* targetType)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch");
   this->owner=&newOwner;
@@ -770,7 +793,7 @@ bool SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch(SemisimpleLieAlgebra
     this->targetDynkinType=*targetType;
   this->FindTheSSSubalgebrasInit();
   CandidateSSSubalgebra emptyCandidate;
-  emptyCandidate.owner=this;
+  this->MakeEmptyCandidateSA(emptyCandidate);
 //  stOutput << "Got to ere! ";
   this->AddSubalgebraToStack(emptyCandidate, 0, 0);
   return this->FindTheSSSubalgebrasContinue();
@@ -798,17 +821,21 @@ bool SemisimpleSubalgebras::GrowDynkinType(const DynkinType& input, List<DynkinT
 }
 
 Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot
-(const DynkinType& input, const List<int>& imagesOldSimpleRootsAndNewRoot, CandidateSSSubalgebra& theSSSubalgebraToBeModified)
+(const DynkinType& input, const List<int>& imagesOldSimpleRootsAndNewRoot,
+ CandidateSSSubalgebra& theSSSubalgebraToBeModified)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot");
+  theSSSubalgebraToBeModified.owner=this;
   Vector<Rational> result;
   if (input.IsEqualToZero())
-  { result.MakeZero(0);
+  { this->MakeEmptyCandidateSA(theSSSubalgebraToBeModified);
+    result.MakeZero(0);
     return result;
   }
   Vector<Rational> newSimpleRoot, highestRootInSimpleRootModuleSimpleCoords;
+  this->MakeCandidateSA(input, theSSSubalgebraToBeModified);
   WeylGroupData& theWeyl=*theSSSubalgebraToBeModified.theWeylNonEmbedded;
-  theWeyl.MakeFromDynkinType(input);
   theWeyl.ComputeRho(true);
+  theSSSubalgebraToBeModified.CheckCandidateInitialization();
   int newIndex=*imagesOldSimpleRootsAndNewRoot.LastObject();
   int newRank=theWeyl.GetDim();
   newSimpleRoot.MakeEi(newRank, newIndex);
@@ -831,7 +858,8 @@ void CandidateSSSubalgebra::SetUpInjectionHs
 (const CandidateSSSubalgebra& baseSubalgebra, const DynkinType& theNewType, const List<int>& theRootInjection, Vector<Rational>* newHScaledToActByTwo)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::SetUpInjectionHs");
   this->reset(baseSubalgebra.owner);
-  this->theWeylNonEmbedded->MakeFromDynkinType(theNewType);
+  this->owner->MakeCandidateSA(theNewType, *this);
+  this->CheckCandidateInitialization();
   this->theHsScaledToActByTwoInOrderOfCreation.Reserve(baseSubalgebra.theHsScaledToActByTwoInOrderOfCreation.size+1);
   this->theHsScaledToActByTwoInOrderOfCreation=baseSubalgebra.theHsScaledToActByTwoInOrderOfCreation;
   if (newHScaledToActByTwo!=0)
@@ -918,7 +946,7 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
   if (this->owner->SetUpParabolicInductionDataPrecomputedSA(*this))
     return true;
 //  this->owner->RegisterPossibleCandidate(*this);
-  this->CheckFullInitialization();
+  this->CheckFullInitializatioN();
   if (!baseSubalgebra.theWeylNonEmbedded->theDynkinType.IsEqualToZero() && baseSubalgebra.indexInOwner==-1)
     crash << "This is a programming error: attempting to induce a subalgebra from a non-registered base subalgebra. " << crash;
   ProgressReport theReport;
@@ -1343,6 +1371,7 @@ bool CandidateSSSubalgebra::ComputeCentralizerTypeFailureAllowed()
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeCentralizerTypeFailureAllowed");
   //stOutput << "<hr>Entering CandidateSSSubalgebra::ComputeCentralizerTypeFailureAllowed, type is: "
   //<< this->ToStringType();
+  this->CheckFullInitializatioN();
   if (this->GetRank()!=1)
     return false;
   Vector<Rational> theH= this->theHsScaledToActByTwo[0];
@@ -1827,16 +1856,26 @@ Rational DynkinType::GetPrincipalSlTwoCSInverseScale()const
 bool CandidateSSSubalgebra::CheckBasicInitialization()const
 { if (this->flagDeallocated)
     crash << "This is a programming error: use after free of CandidateSSSubalgebra. " << crash;
+  if (this==0)
+    crash << "Use of Candidate subalgebra with zero this pointer. " << crash;
   if (this->owner==0)
     crash << "This is a programming error: use of non-initialized semisimple subalgebra candidate. " << crash;
   return true;
 }
 
-bool CandidateSSSubalgebra::CheckFullInitialization()const
+bool CandidateSSSubalgebra::CheckCandidateInitialization()const
 { this->CheckBasicInitialization();
-  if (this->theWeylNonEmbedded==0 || this->theSubalgebraNonEmbeddedDefaultScale==0)
-    crash << "This is a programming error: Weyl group data not initialized for "
+  if (this->theWeylNonEmbedded==0)
+    crash << "Weyl group data not initialized for "
     << "a semisimple subalgebra candidate. " << crash;
+  return true;
+}
+
+bool CandidateSSSubalgebra::CheckFullInitializatioN()const
+{ this->CheckCandidateInitialization();
+  if (this->theSubalgebraNonEmbeddedDefaultScale==0)
+    crash << "The semisimple default scale subalgebra is not initialized. "
+    << crash;
   return true;
 }
 
@@ -2014,7 +2053,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
   theSystemToSolve.SetSize(0);
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > lieBracketMinusGoalValue, goalValue;
   Vector<Polynomial<Rational> > desiredHpart;
-  this->CheckFullInitialization();
+  this->CheckFullInitializatioN();
 //  bool doDebug=(this->theWeylNonEmbedded->theDynkinType.ToString()=="A^{1}_2+A^{2}_1");
 //  if (this->indexInOwnersOfNonEmbeddedMe<0 || this->indexInOwnersOfNonEmbeddedMe >=this->owner->theSubalgebrasNonEmbedded
   const SemisimpleLieAlgebra& nonEmbeddedMe=
@@ -3234,7 +3273,7 @@ bool CandidateSSSubalgebra::CompareLeftGreaterThanRight(const Vector<Rational>& 
 
 void CandidateSSSubalgebra::GetWeightProjectionFundCoords(const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::GetWeightProjectionFundCoords");
-  this->CheckFullInitialization();
+  this->CheckFullInitializatioN();
   output.SetSize(this->theHs.size);
   for (int j=0; j<this->theHs.size; j++)
     output[j]= this->GetAmbientWeyl().RootScalarCartanRoot(inputAmbientweight, this->theHs[j])*2/
@@ -3243,7 +3282,7 @@ void CandidateSSSubalgebra::GetWeightProjectionFundCoords(const Vector<Rational>
 
 void CandidateSSSubalgebra::GetPrimalWeightProjectionFundCoords(const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::GetPrimalWeightProjectionFundCoords");
-  this->CheckFullInitialization();
+  this->CheckFullInitializatioN();
   output.SetSize(this->theHs.size+this->CartanOfCentralizer.size);
   for (int j=0; j<this->theHs.size; j++)
     output[j]= this->GetAmbientWeyl().RootScalarCartanRoot(inputAmbientweight, this->theHs[j])*2/
@@ -3476,7 +3515,7 @@ void SemisimpleSubalgebras::reset()
 
 bool CandidateSSSubalgebra::AttemptToSolveSystem()
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::AttemptToSolveSystem");
-  this->CheckFullInitialization();
+  this->CheckFullInitializatioN();
   this->transformedSystem=this->theSystemToSolve;
   ProgressReport theReport;
   std::stringstream reportstream;
@@ -3490,8 +3529,6 @@ bool CandidateSSSubalgebra::AttemptToSolveSystem()
 //  << "System before transformation: " << this->transformedSystem.ToString()
 //  ;
   //stOutput << "<br>additions so far: " << Rational::total
-  if (theGlobalVariables.flagReportEverything)
-    crash << crash;
   theComputation.thePolynomialOrder.theMonOrder=
   MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
   for (int i=500; i<200000; i+=100000)
@@ -3589,7 +3626,7 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter)
 { if (this->indexNonEmbeddedMeStandard==-1)
     crash << "This is a programming error: attempting to compute char of candidate subalgebra that has not been initialized properly. " << crash;
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeChar");
-  this->CheckFullInitialization();
+  this->CheckCandidateInitialization();
   this->theWeylNonEmbedded->ComputeRho(true);
   Weight<Rational> tempMon;
   tempMon.weightFundamentalCoordS.MakeZero(this->theWeylNonEmbedded->GetDim());

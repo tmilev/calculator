@@ -270,7 +270,11 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
     << " elements while the weyl group is of rank " << this->GetOwner()->GetRank() << ". " << crash;
   outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, splittingParSel, theGlobalVariables, 1);
   outputWeylSub.ComputeRootSubsystem();
-  SubgroupWeylGroupOLD complementGroup;
+
+  SubgroupWeylGroupOLD complementGroup, theFDWeyl;
+  complementGroup.AmbientWeyl=outputWeylSub.AmbientWeyl;
+  theFDWeyl.AmbientWeyl=outputWeylSub.AmbientWeyl;
+
   Selection invertedSel;
   invertedSel=splittingParSel;
   invertedSel.InvertSelection();
@@ -281,7 +285,6 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
 //  stOutput << this->ToString();
 //  stOutput << out.str();
   charSSAlgMod charAmbientFDWeyl, remainingCharDominantLevi;
-  SubgroupWeylGroupOLD theFDWeyl;
   theFDWeyl.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, ParSelFDInducingPart, theGlobalVariables, 1);
   Weight<coefficient> tempMon, localHighest;
   List<coefficient> tempMults;
@@ -405,6 +408,7 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi
   const coefficient& theRingZero, List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors,
   Vectors<coefficient>* outputWeightsFundCoords, Vectors<coefficient>* outputEigenSpace, charSSAlgMod<coefficient>* outputChar)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::SplitOverLevi");
+  this->CheckInitialization();
   if (this->theChaR.size()!=1)
   { if (Report!=0)
     { std::stringstream out;
@@ -418,6 +422,8 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi
     crash << "This is a programming error: semisimple rank is " << this->GetOwner().GetRank() << " but splitting parabolic selects "
     << " out of " << splittingParSel.MaxSize << " simple roots. " << crash;
   SubgroupWeylGroupOLD subWeyl;
+  WeylGroupData theSubGroupContainer;
+  subWeyl.AmbientWeyl=&this->owner->theWeyl;
   MemorySaving<charSSAlgMod<coefficient> > buffer;
   charSSAlgMod<coefficient>& charWRTsubalgebra= (outputChar==0) ? buffer.GetElement() : *outputChar;
   this->theChaR.SplitOverLeviMonsEncodeHIGHESTWeight
@@ -433,7 +439,7 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi
   if (!splittingParSelectedInLevi.IsSubset(this->parabolicSelectionSelectedAreElementsLevi))
   { out << "The parabolic subalgebra you selected is not a subalgebra of the ambient parabolic subalgebra."
     << " The parabolic has root of Levi given by " << splittingParSel.ToString()
-    <<" while the ambient parabolic subalgebra has root of Levi given by "
+    << " while the ambient parabolic subalgebra has root of Levi given by "
     << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
     if (Report!=0)
       *Report=out.str();

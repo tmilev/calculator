@@ -56,6 +56,7 @@ public:
   bool flagIsInitialized;
   bool flagConjectureBholds;
   bool flagConjectureCholds;
+  bool flagDeallocated;
   int NumCachedPairsBeforeSimpleGen;
   int NumRationalMultiplicationsAndAdditionsBeforeSimpleGen;
   int MaxNumCachedPairs;
@@ -107,6 +108,15 @@ public:
   }
   int GetDim()const
   { return this->theGeneratingWordsNonReduced.size;
+  }
+  bool CheckInitialization()const
+  { if (this==0)
+      crash << "ModuleSSalgebra has zero this pointer. " << crash;
+    if (this->flagDeallocated)
+      crash << "Use after free of ModuleSSalgebra. " << crash;
+    if (this->owner==0)
+      crash << "ModuleSSalgebra does not have its owner Semisimple algebra properly set. " << crash;
+    return true;
   }
   void IntermediateStepForMakeFromHW(Vector<coefficient>& HWDualCoordS, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero);
   bool MakeFromHW
@@ -165,8 +175,11 @@ public:
   (ElementSemisimpleLieAlgebra<Rational>& inputElt, quasiDiffOp<Rational>& output, GlobalVariables& theGlobalVariables,
    bool useNilWeight, bool ascending);
   bool GetActionEulerOperatorPart(const MonomialP& theCoeff, ElementWeylAlgebra<Rational>& outputDO, GlobalVariables& theGlobalVariables);
-  ModuleSSalgebra() : owner(0), flagIsInitialized(false), MaxNumCachedPairs(1000000)
+  ModuleSSalgebra() : owner(0), flagIsInitialized(false), flagDeallocated(false), MaxNumCachedPairs(1000000)
   {
+  }
+  ~ModuleSSalgebra()
+  { this->flagDeallocated=true;
   }
 };
 

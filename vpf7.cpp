@@ -856,10 +856,10 @@ std::string CGI::GetMathMouseHover(const std::string& input, int upperNumChars)
 
 void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups");
-  this->WeylFDSmallAsSubInLarge.AmbientWeyl=this->theHmm.theRange().theWeyl;
-  this->WeylFDSmall.AmbientWeyl=this->theHmm.theDomain().theWeyl;
-  this->WeylFD.AmbientWeyl=this->theHmm.theRange().theWeyl;
-  this->selSmallParSel.init(WeylFDSmall.AmbientWeyl.GetDim());
+  this->WeylFDSmallAsSubInLarge.AmbientWeyl=&this->theHmm.theRange().theWeyl;
+  this->WeylFDSmall.AmbientWeyl=&this->theHmm.theDomain().theWeyl;
+  this->WeylFD.AmbientWeyl=&this->theHmm.theRange().theWeyl;
+  this->selSmallParSel.init(WeylFDSmall.AmbientWeyl->GetDim());
   for (int i=0; i<this->theHmm.ImagesCartanDomain.size; i++)
   { Vector<Rational>& currentV=this->theHmm.ImagesCartanDomain[i];
     this->generatorsSmallSub.AddOnTop(currentV);
@@ -953,7 +953,8 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariab
 void branchingData::initAssumingParSelAndHmmInittedPart2Subgroups(GlobalVariables& theGlobalVariables)
 { List<Vectors<Rational> > emptyList;
   this->WeylFDSmallAsSubInLarge.ComputeSubGroupFromGeneratingReflections(&this->generatorsSmallSub, &emptyList, &theGlobalVariables, 1000, true);
-  this->WeylFDSmall.MakeParabolicFromSelectionSimpleRoots(this->WeylFDSmall.AmbientWeyl, this->selSmallParSel, theGlobalVariables, 1000);
+  this->WeylFDSmall.MakeParabolicFromSelectionSimpleRoots
+  (*this->WeylFDSmall.AmbientWeyl, this->selSmallParSel, theGlobalVariables, 1000);
   this->WeylFD.MakeParabolicFromSelectionSimpleRoots(this->theHmm.theRange().theWeyl, this->selInducing, theGlobalVariables, 1000);
 
   //  stOutput << "Splitting parabolic selection: " << splittingParSel.ToString();

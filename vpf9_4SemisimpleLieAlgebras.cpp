@@ -82,7 +82,7 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   return out.str();
 }
 
-void SemisimpleLieAlgebra::ComputeFolderNames(GlobalVariables& theGlobalVariables)
+void SemisimpleLieAlgebra::ComputeFolderNames()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeFolderNames");
   std::stringstream outMainDisplayPath;
   this->CheckConsistency();
@@ -401,7 +401,7 @@ bool SemisimpleLieAlgebra::TestForConsistency()
           << crash;
           return false;
         }
-        this->MakeChevalleyTestReport(i, j, k, this->GetNumGenerators(), theGlobalVariables);
+        this->MakeChevalleyTestReport(i, j, k, this->GetNumGenerators());
       }
     }
   }
@@ -430,13 +430,13 @@ bool SemisimpleLieAlgebra::GetConstantOrHElement
   return false;
 }
 
-void SemisimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total, GlobalVariables& theGlobalVariables)
+void SemisimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total)
 { if (theGlobalVariables.IndicatorStringOutputFunction==0)
     return;
   std::stringstream out2, out3;
   int x=(i*Total*Total+j*Total+k+1);
   out2 << "i: " << i+1 << " of " << Total << " j: " << j+1 << " of " << Total << " k: " << k+1 << " of " << Total;
   out3 << "Total progress: " << x << " out of " << (Total*Total*Total);
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   theReport.Report(out2.str()+out3.str());
 }

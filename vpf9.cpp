@@ -3804,6 +3804,7 @@ int DynkinType::GetCoxeterEdgeWeight(int v, int w)
 
 LargeInt DynkinType::GetWeylGroupSizeByFormula()const
 { MacroRegisterFunctionWithName("DynkinType::GetWeylGroupSizeByFormula");
+  this->CheckFlagDeallocated();
   stOutput << "DEBUG: Getting Weyl group size by f-la of type: " << this->ToString() << ": ";
   LargeInt result=1;
   LargeInt tempLI;
@@ -4517,8 +4518,7 @@ Matrix<Rational> WeylGroupData::GetMatrixStandardRep(int elementIndex)const
 }
 
 void WeylGroupData::init()
-{ this->flagDeallocated = false;
-  this->flagFundamentalToSimpleMatricesAreComputed=false;
+{ this->flagFundamentalToSimpleMatricesAreComputed=false;
   this->flagAllOuterAutosComputed=false;
   this->flagOuterAutosGeneratorsComputed=false;
   this->flagIrrepsAreComputed=false;
@@ -5070,7 +5070,13 @@ void WeylGroupData::GetEpsilonCoords(const List<Vector<Rational> >& input, Vecto
     this->GetEpsilonCoords(input[i], output[i]);
 }
 
-void WeylGroupData::GetWeylChamber(Cone& output, GlobalVariables& theGlobalVariables)
+LargeInt WeylGroupData::GetSizeByFormulaImplementation(void* GP)
+{ WeylGroupData* G = (WeylGroupData*) GP;
+  G->CheckConsistency();
+  return G->theDynkinType.GetWeylGroupSizeByFormula();
+}
+
+void WeylGroupData::GetWeylChamber(Cone& output)
 { Matrix<Rational> tempMat;
   tempMat=this->CartanSymmetric;
   tempMat.Invert();
@@ -5180,7 +5186,6 @@ void WeylGroupData::GetExtremeElementInOrbit
   }
 //  stOutput << "<hr># simple reflections applied total: " << numTimesReflectionWasApplied;
 }
-
 
 bool WeylGroupData::IsElementWeylGroupOrOuterAuto(const MatrixTensor<Rational>& input)
 { MacroRegisterFunctionWithName("WeylGroup::IsElementGroup(WeylGroup)OrOuterAuto");
@@ -5353,7 +5358,7 @@ void WeylGroupData::DrawRootSystem
   }
   if (drawWeylChamber)
   { Cone theWeylChamber;
-    this->GetWeylChamber(theWeylChamber, theGlobalVariables);
+    this->GetWeylChamber(theWeylChamber);
     FormatExpressions tempFormat;
     theWeylChamber.DrawMeProjective(0, false, outputDV, tempFormat);
   }
@@ -5420,7 +5425,7 @@ std::string WeylGroupData::GenerateWeightSupportMethoD1
     << "Your input in simple coordinates was: " << highestWeightSimpleCoords.ToString() << ".<br> ";
   out << "The highest weight in simple coordinates is: " << highestWeightTrue.ToString() << ".<br>";
   std::string tempS;
-  bool isTrimmed = !this->GetAlLDominantWeightsHWFDIM(highestWeightSimpleCoords, theDominantWeights, upperBoundInt, &tempS, &theGlobalVariables);
+  bool isTrimmed = !this->GetAlLDominantWeightsHWFDIM(highestWeightSimpleCoords, theDominantWeights, upperBoundInt, &tempS);
   out << tempS << "<br>";
   if (isTrimmed)
     out << "Trimmed the # of dominant weights - upper bound is " << upperBoundInt << ". <br>";
@@ -5521,13 +5526,15 @@ void WeylGroupData::ComputeRho(bool Recompute)
 }
 
 std::string SubgroupWeylGroupOLD::ElementToStringFromLayersAndArrows(List<List<List<int> > >& arrows, List<List<int> >& Layers, int GraphWidth, bool useAmbientIndices)
-{ std::stringstream out;
+{ MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::ElementToStringFromLayersAndArrows");
+  this->CheckInitialization();
+  std::stringstream out;
 //  stOutput << this->simpleGenerators.ToString();
   List<int> DisplayIndicesSimpleGenerators;
   if (!useAmbientIndices)
   { DisplayIndicesSimpleGenerators.SetSize(this->simpleGenerators.size);
     for (int i=0; i<this->simpleGenerators.size; i++)
-      DisplayIndicesSimpleGenerators[i]=this->AmbientWeyl.RootsOfBorel.GetIndex(this->simpleGenerators[i])+1;
+      DisplayIndicesSimpleGenerators[i]=this->AmbientWeyl->RootsOfBorel.GetIndex(this->simpleGenerators[i])+1;
   }
   out << "\\xymatrix{";
   bool GraphWidthIsOdd=((GraphWidth%2)!=0);
@@ -5577,7 +5584,9 @@ std::string SubgroupWeylGroupOLD::ElementToStringFromLayersAndArrows(List<List<L
 }
 
 std::string SubgroupWeylGroupOLD::ElementToStringBruhatGraph()
-{ if (this->size<1)
+{ MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::ElementToStringBruhatGraph");
+  this->CheckInitialization();
+  if (this->size<1)
     return "Error, non-initialized group";
   if (this->size==1)
     return "id";
@@ -5598,7 +5607,7 @@ std::string SubgroupWeylGroupOLD::ElementToStringBruhatGraph()
   HashedList<Vector<Rational> > orbit;
   orbit.Reserve(this->size);
   for (int i=0; i<this->size; i++)
-  { this->ActByElement(i, this->AmbientWeyl.rho, tempRoot);
+  { this->ActByElement(i, this->AmbientWeyl->rho, tempRoot);
     orbit.AddOnTop(tempRoot);
   }
   arrows.SetSize(Layers.size);
@@ -5606,7 +5615,7 @@ std::string SubgroupWeylGroupOLD::ElementToStringBruhatGraph()
   { arrows[i].SetSize(Layers[i].size);
     for (int j=0; j<Layers[i].size; j++)
       for (int k=0; k<this->simpleGenerators.size; k++)
-      { this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[k], orbit[Layers[i][j]], false, tempRoot);
+      { this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleGenerators[k], orbit[Layers[i][j]], false, tempRoot);
         int index=orbit.GetIndex(tempRoot);
         if(index==-1)
           crash << crash;
@@ -5619,6 +5628,7 @@ std::string SubgroupWeylGroupOLD::ElementToStringBruhatGraph()
 
 void SubgroupWeylGroupOLD::ToString(std::string& output, bool displayElements)
 { MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::ToString");
+  this->CheckInitialization();
   std::stringstream out, head, head2;
   List<int> DisplayIndicesSimpleGenerators;
   DisplayIndicesSimpleGenerators.SetSize(this->simpleGenerators.size);
@@ -5627,7 +5637,7 @@ void SubgroupWeylGroupOLD::ToString(std::string& output, bool displayElements)
   latexFormat.flagUseLatex=true;
   bool isGood=true;
   for (int i=0; i<this->simpleGenerators.size; i++)
-  { DisplayIndicesSimpleGenerators[i]=this->AmbientWeyl.RootsOfBorel.GetIndex(this->simpleGenerators[i])+1;
+  { DisplayIndicesSimpleGenerators[i]=this->AmbientWeyl->RootsOfBorel.GetIndex(this->simpleGenerators[i])+1;
     if (DisplayIndicesSimpleGenerators[i]==0)
     { isGood=false;
       break;
@@ -5637,8 +5647,8 @@ void SubgroupWeylGroupOLD::ToString(std::string& output, bool displayElements)
     for (int i=0; i<this->simpleGenerators.size; i++)
       DisplayIndicesSimpleGenerators[i]=i+1;
   DynkinDiagramRootSubalgebra tempDyn;
-  tempDyn.AmbientRootSystem=this->AmbientWeyl.RootSystem;
-  tempDyn.AmbientBilinearForm=this->AmbientWeyl.CartanSymmetric;
+  tempDyn.AmbientRootSystem=this->AmbientWeyl->RootSystem;
+  tempDyn.AmbientBilinearForm=this->AmbientWeyl->CartanSymmetric;
   tempDyn.ComputeDiagramInputIsSimple(this->simpleGenerators);
   out << "Dynkin diagram & subalgebra of root subsystem generated by the given root: "
   << tempDyn.ToString();
@@ -5683,10 +5693,10 @@ bool SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots
 { MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots");
   Vectors<Rational> selectedRoots;
   selectedRoots.Reserve(ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize- ZeroesMeanSimpleRootSpaceIsInParabolic.CardinalitySelection);
-  this->AmbientWeyl=inputWeyl;
-  if (this->AmbientWeyl.GetDim()!=ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize)
+  this->AmbientWeyl=&inputWeyl;
+  if (this->AmbientWeyl->GetDim()!=ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize)
     crash << "This is a programming error: parabolic selection selects out of " << ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize
-    << " elements while the Weyl group is of rank " << this->AmbientWeyl.GetDim() << ". " << crash;
+    << " elements while the Weyl group is of rank " << this->AmbientWeyl->GetDim() << ". " << crash;
   for (int i=0; i<ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize; i++)
     if (!ZeroesMeanSimpleRootSpaceIsInParabolic.selected[i])
     { selectedRoots.SetSize(selectedRoots.size+1);
@@ -5697,7 +5707,9 @@ bool SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots
 }
 
 std::string SubgroupWeylGroupOLD::ElementToStringCosetGraph()
-{ if (this->size<1)
+{ MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::ElementToStringCosetGraph");
+  this->CheckInitialization();
+  if (this->size<1)
     return "Error, non-initialized group";
   if (this->size==1)
     return "id";
@@ -5718,9 +5730,9 @@ std::string SubgroupWeylGroupOLD::ElementToStringCosetGraph()
 //  HashedList<Vector<Rational>> orbit;
 //  orbit.Reserve(this->RepresentativesQuotientAmbientOrder.size);
   for (int i=0; i<this->RepresentativesQuotientAmbientOrder.size; i++)
-  { tempRoot=this->AmbientWeyl.rho;
-    this->AmbientWeyl.ActOnRootByGroupElement
-    (this->AmbientWeyl.theGroup.theElements.GetIndex(this->RepresentativesQuotientAmbientOrder[i]), tempRoot, false, false);
+  { tempRoot=this->AmbientWeyl->rho;
+    this->AmbientWeyl->ActOnRootByGroupElement
+    (this->AmbientWeyl->theGroup.theElements.GetIndex(this->RepresentativesQuotientAmbientOrder[i]), tempRoot, false, false);
 //    orbit.AddOnTop(tempRoot);
   }
   arrows.SetSize(Layers.size);
@@ -5728,7 +5740,7 @@ std::string SubgroupWeylGroupOLD::ElementToStringCosetGraph()
   { arrows[i].SetSize(Layers[i].size);
     for (int j=0; j<Layers[i].size; j++)
       for (int k=0; k<this->RepresentativesQuotientAmbientOrder.size; k++)
-        if (this->AmbientWeyl.LeftIsHigherInBruhatOrderThanRight
+        if (this->AmbientWeyl->LeftIsHigherInBruhatOrderThanRight
             (this->RepresentativesQuotientAmbientOrder[k], this->RepresentativesQuotientAmbientOrder[Layers[i][j]]))
           if (this->RepresentativesQuotientAmbientOrder[Layers[i][j]].generatorsLastAppliedFirst.size==this->RepresentativesQuotientAmbientOrder[k].generatorsLastAppliedFirst.size-1)
             arrows[i][j].AddOnTop(k);
@@ -5737,29 +5749,32 @@ std::string SubgroupWeylGroupOLD::ElementToStringCosetGraph()
 }
 
 void SubgroupWeylGroupOLD::FindQuotientRepresentatives(int UpperLimit)
-{ this->AmbientWeyl.theGroup.ComputeAllElements(UpperLimit);
+{ MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::FindQuotientRepresentatives");
+  this->CheckInitialization();
+  this->AmbientWeyl->theGroup.ComputeAllElements(UpperLimit);
   Vector<Rational> image1;
   this->RepresentativesQuotientAmbientOrder.size=0;
-  this->RepresentativesQuotientAmbientOrder.Reserve(this->AmbientWeyl.theGroup.theElements.size);
-  for (int i=0; i<this->AmbientWeyl.theGroup.theElements.size; i++)
-  { image1=this->AmbientWeyl.rho;
-    this->AmbientWeyl.ActOnRootByGroupElement(i, image1, false, false);
+  this->RepresentativesQuotientAmbientOrder.Reserve(this->AmbientWeyl->theGroup.theElements.size);
+  for (int i=0; i<this->AmbientWeyl->theGroup.theElements.size; i++)
+  { image1=this->AmbientWeyl->rho;
+    this->AmbientWeyl->ActOnRootByGroupElement(i, image1, false, false);
     bool isGood=true;
     for (int j=0; j<this->simpleGenerators.size; j++)
-      if (this->AmbientWeyl.RootScalarCartanRoot(image1, this->simpleGenerators[j]).IsNegative())
+      if (this->AmbientWeyl->RootScalarCartanRoot(image1, this->simpleGenerators[j]).IsNegative())
       { isGood=false;
         break;
       }
     if (isGood)
-      this->RepresentativesQuotientAmbientOrder.AddOnTop(this->AmbientWeyl.theGroup.theElements[i]);
+      this->RepresentativesQuotientAmbientOrder.AddOnTop(this->AmbientWeyl->theGroup.theElements[i]);
   }
 }
 
 bool SubgroupWeylGroupOLD::DrawContour
 (const Vector<Rational>& highestWeightSimpleCoord, DrawingVariables& theDV, GlobalVariables& theGlobalVariables, int theColor, int UpperBoundVertices)
-{ HashedList<Vector<Rational> > theOrbit;
+{ MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::DrawContour");
+  HashedList<Vector<Rational> > theOrbit;
   theOrbit.AddOnTop(highestWeightSimpleCoord);
-  WeylGroupData& theWeyl=this->AmbientWeyl;
+  WeylGroupData& theWeyl=*this->AmbientWeyl;
   Vector<Rational> tempRoot;
   for (int i=0; i<theOrbit.size; i++)
     for (int j=0; j<this->simpleGenerators.size; j++)
@@ -5773,6 +5788,14 @@ bool SubgroupWeylGroupOLD::DrawContour
   return true;
 }
 
+bool SubgroupWeylGroupOLD::CheckInitialization()
+{ if (this->AmbientWeyl==0 || this->Elements==0)
+    crash << "Use of non-initialized subgroup of Weyl Group. " << crash;
+  if (this->AmbientWeyl->flagDeallocated || this->Elements->flagDeallocated)
+    crash << "Use after free of owner Weyl groups in a subgroup. " << crash;
+  return true;
+}
+
 void SubgroupWeylGroupOLD::ComputeRootSubsystem()
 { MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::ComputeRootSubsystem");
   this->RootSubsystem.Clear();
@@ -5782,7 +5805,7 @@ void SubgroupWeylGroupOLD::ComputeRootSubsystem()
   for (int i=0; i<this->RootSubsystem.size; i++)
     for (int j=0; j<this->simpleGenerators.size; j++)
     { currentRoot=(this->RootSubsystem[i]);
-      this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[j], currentRoot, false, currentRoot);
+      this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleGenerators[j], currentRoot, false, currentRoot);
       this->RootSubsystem.AddOnTopNoRepetition(currentRoot);
     }
   Vectors<Rational> tempRoots;

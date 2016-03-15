@@ -41,14 +41,14 @@ void SubgroupWeylGroupOLD::WriteToFile(std::fstream& output, GlobalVariables* th
 
 Vector<Rational> SubgroupWeylGroupOLD::GetRho()
 { Vector<Rational> result;
-  this->RootsOfBorel.sum(result, this->AmbientWeyl.GetDim());
+  this->RootsOfBorel.sum(result, this->AmbientWeyl->GetDim());
   result/=2;
   return result;
 }
 
 void SubgroupWeylGroupOLD::GetMatrixOfElement(const ElementWeylGroup<WeylGroupData>& input, Matrix<Rational>& outputMatrix)const
 { Vectors<Rational> startBasis, imageBasis ;
-  startBasis.MakeEiBasis(this->AmbientWeyl.GetDim());
+  startBasis.MakeEiBasis(this->AmbientWeyl->GetDim());
   this->ActByElement(input, startBasis, imageBasis);
   outputMatrix.AssignVectorsToRows(imageBasis);
   outputMatrix.Transpose();
@@ -64,25 +64,27 @@ void SubgroupWeylGroupOLD::ReadFromFile(std::fstream& input, GlobalVariables* th
 
 bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
 (Vectors<Rational>* inputGenerators, List<Vectors<Rational> >* inputExternalAutos, GlobalVariables* theGlobalVariables, int UpperLimitNumElements, bool recomputeAmbientRho)
-{ MemorySaving< HashedList<Vector<Rational> > > bufferOrbit;
+{ MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections");
+  this->CheckInitialization();
+  MemorySaving<HashedList<Vector<Rational> > > bufferOrbit;
   HashedList<Vector<Rational> > orbitRho;
   this->truncated=false;
   this->Clear();
   orbitRho.Clear();
-  if (this->AmbientWeyl.CartanSymmetric.NumRows<1)
+  if (this->AmbientWeyl->CartanSymmetric.NumRows<1)
     return false;
   if (recomputeAmbientRho)
-    this->AmbientWeyl.ComputeRho(false);
+    this->AmbientWeyl->ComputeRho(false);
   if (inputGenerators!=0)
     this->simpleGenerators=(*inputGenerators);
   if (inputExternalAutos!=0)
     this->ExternalAutomorphisms=*inputExternalAutos;
-  this->AmbientWeyl.TransformToSimpleBasisGenerators(this->simpleGenerators, this->AmbientWeyl.RootSystem);
+  this->AmbientWeyl->TransformToSimpleBasisGenerators(this->simpleGenerators, this->AmbientWeyl->RootSystem);
   this->ComputeRootSubsystem();
   ElementWeylGroup<WeylGroupData> tempEW;
   tempEW.generatorsLastAppliedFirst.size=0;
   Vector<Rational> tempRoot;
-  tempRoot=(this->AmbientWeyl.rho);
+  tempRoot=(this->AmbientWeyl->rho);
   // rho is invariant under external graph automorphisms (!)
   //Hence the below lines. Needs to be fixed (mathematically).
   //for the time being the below lines remain, until I think of how to do it properly.
@@ -94,7 +96,7 @@ bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
   for (int i=0; i<this->size; i++)
   { tempEW=(*this)[i];
     for (int j=0; j<this->simpleGenerators.size; j++)
-    { this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[j], orbitRho[i], false, currentRoot);
+    { this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleGenerators[j], orbitRho[i], false, currentRoot);
       if (!orbitRho.Contains(currentRoot))
       { orbitRho.AddOnTop(currentRoot);
         tempEW.MultiplyOnTheRightBySimpleReflection(j);
@@ -354,7 +356,7 @@ void WeylGroupData::ReadFromFile(std::fstream& input)
   this->CartanSymmetric.ReadFromFile(input);
 }
 
-void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVariables, Matrix<Rational>& outputAuto, bool useNegativeRootsFirst)
+void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, bool useNegativeRootsFirst)
 { crash << "Not implemented yet!!!!!" << crash;
   rootSubalgebra theRootSA;
 //  theRootSA.init(*this);
@@ -443,7 +445,7 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVari
   outputAuto.MakeLinearOperatorFromDomainAndRange(vectorsLeft, vectorsRight);
 }
 
-bool SemisimpleLieAlgebra::IsInTheWeightSupport(Vector<Rational>& theWeight, Vector<Rational>& highestWeight, GlobalVariables& theGlobalVariables)
+bool SemisimpleLieAlgebra::IsInTheWeightSupport(Vector<Rational>& theWeight, Vector<Rational>& highestWeight)
 { Vector<Rational> correspondingDominant= theWeight;
   this->theWeyl.RaiseToDominantWeight(correspondingDominant);
   Vector<Rational> theDiff= highestWeight - correspondingDominant;
@@ -452,7 +454,7 @@ bool SemisimpleLieAlgebra::IsInTheWeightSupport(Vector<Rational>& theWeight, Vec
   return true;
 }
 
-void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vector<Rational>& theHighestWeight, GlobalVariables& theGlobalVariables)
+void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vector<Rational>& theHighestWeight)
 { /*Vectors<Rational> weightSupport;
   this->GenerateWeightSupport(theHighestWeight, weightSupport, theGlobalVariables);
   int highestWeight, distanceToHW;
@@ -693,12 +695,15 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
   return true;
 }
 
-void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId(char theWeylLetter, int theWeylDim, ListReferences<SemisimpleLieAlgebra>& ownerOfAlgebras, GlobalVariables& theGlobalVariables)
-{ SemisimpleLieAlgebra tempSS;
-  tempSS.theWeyl.MakeArbitrarySimple(theWeylLetter, theWeylDim);
-  int theIndex=ownerOfAlgebras.AddNoRepetitionOrReturnIndexFirst(tempSS);
-  this->domainAlg=&ownerOfAlgebras[theIndex];
-  this->rangeAlg=&ownerOfAlgebras[theIndex];
+void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId
+(char theWeylLetter, int theWeylDim, MapReferences<SemisimpleLieAlgebra, DynkinType>& ownerOfAlgebras)
+{ MacroRegisterFunctionWithName("HomomorphismSemisimpleLieAlgebra::MakeGinGWithId");
+  DynkinType theType;
+  theType.MakeSimpleType(theWeylLetter, theWeylDim);
+  this->domainAlg=&ownerOfAlgebras.GetValueCreateIfNotPresent(theType);
+  this->rangeAlg=this->domainAlg;
+  this->domainAlg->theWeyl.MakeArbitrarySimple(theWeylLetter, theWeylDim);
+
   this->theDomain().ComputeChevalleyConstants();
   int numPosRoots=this->theDomain().theWeyl.RootsOfBorel.size;
   this->imagesAllChevalleyGenerators.SetSize(numPosRoots*2+theWeylDim);
@@ -1607,22 +1612,31 @@ void RationalFunctionOld::ScaleClearDenominator(List<RationalFunctionOld>& input
   }
 }
 
+bool SemisimpleLieAlgebraOrdered::CheckInitialization()const
+{ if (this->theOwner==0)
+    crash << "Use of semisimple Lie algebra without an owner." << crash;
+  if (this->theOwner->flagDeallocated)
+    crash << "Use after free of semisimple Lie algebra. ";
+  return true;
+}
+
 void SemisimpleLieAlgebraOrdered::GetLinearCombinationFrom(ElementSemisimpleLieAlgebra<Rational>& input, Vector<Rational>& theCoeffs)
-{ theCoeffs.MakeZero(this->theOwner.GetNumGenerators());
+{ this->CheckInitialization();
+  theCoeffs.MakeZero(this->theOwner->GetNumGenerators());
   for (int i=0; i<input.size(); i++)
   { int theIndex=input[i].theGeneratorIndex;
-    theCoeffs[this->theOwner.GetGeneratorFromRootIndex(theIndex)]=input.theCoeffs[i];
+    theCoeffs[this->theOwner->GetGeneratorFromRootIndex(theIndex)]=input.theCoeffs[i];
   }
-  int numPosRoots=this->theOwner.GetNumPosRoots();
+  int numPosRoots=this->theOwner->GetNumPosRoots();
   Vector<Rational> tempH=input.GetCartanPart();
-  for (int i=0; i<this->theOwner.GetRank(); i++)
+  for (int i=0; i<this->theOwner->GetRank(); i++)
     theCoeffs[numPosRoots+i]= tempH[i];
   this->ChevalleyGeneratorsInCurrentCoords.ActOnVectorColumn(theCoeffs);
 }
 
 int SemisimpleLieAlgebraOrdered::GetDisplayIndexFromGeneratorIndex(int GeneratorIndex)
-{ int numPosRoots=this->theOwner.GetNumPosRoots();
-  int posRootsPlusRank=numPosRoots+this->theOwner.GetRank();
+{ int numPosRoots=this->theOwner->GetNumPosRoots();
+  int posRootsPlusRank=numPosRoots+this->theOwner->GetRank();
   if (GeneratorIndex>= posRootsPlusRank )
     return GeneratorIndex-posRootsPlusRank+1;
   if (GeneratorIndex>=numPosRoots)
@@ -1632,10 +1646,10 @@ int SemisimpleLieAlgebraOrdered::GetDisplayIndexFromGeneratorIndex(int Generator
 
 void SemisimpleLieAlgebraOrdered::init
 (List<ElementSemisimpleLieAlgebra<Rational> >& inputOrder, SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables)
-{ return;
+{ crash << "not implemented" << crash;
   if (inputOrder.size!=owner.GetNumGenerators())
     return;
-  this->theOwner=owner;
+  this->theOwner=&owner;
   this->theOrder=inputOrder;
   this->ChevalleyGeneratorsInCurrentCoords.init(owner.GetNumGenerators(), owner.GetNumGenerators());
   this->ChevalleyGeneratorsInCurrentCoords.MakeZero();
@@ -1644,7 +1658,7 @@ void SemisimpleLieAlgebraOrdered::init
   ElementSemisimpleLieAlgebra<Rational> currentElt;
   for (int i=0; i<owner.GetNumGenerators(); i++)
   { currentElt.MakeGenerator(i, owner);
-    currentElt.GetCoordsInBasis(this->theOrder, coordsInCurrentBasis, theGlobalVariables);
+    currentElt.GetCoordsInBasis(this->theOrder, coordsInCurrentBasis);
     for (int j=0; j<coordsInCurrentBasis.size; j++)
       this->ChevalleyGeneratorsInCurrentCoords.elements[j][i]=coordsInCurrentBasis[j];
 //    stOutput << "<br> " << currentElt.ToString() << " in new coords becomes: " << coordsInCurrentBasis.ToString();

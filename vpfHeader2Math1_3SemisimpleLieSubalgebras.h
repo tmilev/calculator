@@ -62,14 +62,13 @@ class NilradicalCandidate
   (int indexInNilradSubset, List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputLeft,
    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputRight, List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputBrackets)const
   ;
-  bool TryFindingLInfiniteRels(GlobalVariables* theGlobalVariables);
-  void ComputeParabolicACextendsToParabolicAC(GlobalVariables* theGlobalVariables);
-//  bool IsLInfiniteRel(GlobalVariables* theGlobalVariables);
+  bool TryFindingLInfiniteRels();
+  void ComputeParabolicACextendsToParabolicAC();
   bool IsCommutingSelectionNilradicalElements(Selection& inputNilradSel);
-  void ProcessMe(GlobalVariables* theGlobalVariables);
+  void ProcessMe();
   std::string ToString(FormatExpressions* theFormat=0)const;
   std::string ToStringTableElementWithWeights(const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& theElts, const Vectors<Rational>& theWeights)const;
-  void ComputeTheTwoCones(GlobalVariables* theGlobalVariables);
+  void ComputeTheTwoCones();
   void ComputeTheTwoConesRelativeToNilradicalSubset();
 };
 
@@ -97,8 +96,8 @@ class CandidateSSSubalgebra
   }
 
 public:
-  WeylGroupData theWeylNonEmbeddeD;
-  WeylGroupData theWeylNonEmbeddeDdefaultScale;
+  WeylGroupData* theWeylNonEmbedded;
+  SemisimpleLieAlgebra* theSubalgebraNonEmbeddedDefaultScale;
   DynkinDiagramRootSubalgebra theCentralizerSubDiagram;
   DynkinType theCentralizerType;
 
@@ -136,7 +135,8 @@ public:
   int indexInOwner;
   int indexIamInducedFrom;
   List<int> RootInjectionsFromInducer;
-  int indexInOwnersOfNonEmbeddedMe;
+  int indexNonEmbeddedMeStandard;
+  int indexNonEmbeddedMeNonStandardCartan;
   int indexHcandidateBeingGrown;
   int indexMaxSSContainer;
   int indexSSPartCentralizer;
@@ -198,6 +198,7 @@ public:
   ~CandidateSSSubalgebra()
   { this->flagDeallocated=true;
   }
+  WeylGroupData& GetWeylNonEmbeddedDefaultScale();
   void reset(SemisimpleSubalgebras* inputOwner=0);
   bool CheckConsistency()const;
   bool CheckMaximalDominance()const;
@@ -230,40 +231,41 @@ public:
   void SetUpInjectionHs
   (const CandidateSSSubalgebra& baseSubalgebra, const DynkinType& theNewType, const List<int>& theRootInjection,
    Vector<Rational>* newHScaledToActByTwo=0);
-  void EnumerateAllNilradicals(GlobalVariables* theGlobalVariables);
+  void EnumerateAllNilradicals();
   std::string ToStringNilradicalSelection(const List<int>& theSelection);
-  void EnumerateNilradicalsRecursively(List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream=0);
+  void EnumerateNilradicalsRecursively(List<int>& theSelection, std::stringstream* logStream=0);
   void ExtendNilradicalSelectionToMultFreeOverSSpartSubalgebra
-  (HashedList<int, MathRoutines::IntUnsignIdentity>& inputOutput, GlobalVariables* theGlobalVariables, std::stringstream* logStream);
-  bool IsPossibleNilradicalCarryOutSelectionImplications(List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream=0);
-  void ExtendToModule(List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& inputOutput, GlobalVariables* theGlobalVariables);
+  (HashedList<int, MathRoutines::IntUnsignIdentity>& inputOutput, std::stringstream* logStream);
+  bool IsPossibleNilradicalCarryOutSelectionImplications(List<int>& theSelection, std::stringstream* logStream=0);
+  void ExtendToModule(List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& inputOutput);
   Vector<Rational> GetPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input)const;
   Vector<Rational> GetNonPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input)const;
-  void ComputeKsl2triples(GlobalVariables* theGlobalVariables);
+  void ComputeKsl2triples();
   void ComputeKsl2triplesGetOppositeEltsInOppositeModule
   (const Vector<Rational>& theElementWeight, const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& inputOppositeModule,
    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElts);
   void ComputeKsl2triplesGetOppositeEltsAll(const Vector<Rational>& theElementWeight, List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElts);
   bool ComputeKsl2tripleSetUpAndSolveSystem
   (const ElementSemisimpleLieAlgebra<AlgebraicNumber>& theE, const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& FisLinearCombiOf,
-   ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF, GlobalVariables* theGlobalVariables);
+   ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF);
   void ComputeCharsPrimalModules();
-  void ComputePairingTable(GlobalVariables* theGlobalVariables);
-  void ComputeSinglePair(int leftIndex, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables);
+  void ComputePairingTable();
+  void ComputeSinglePair(int leftIndex, int rightIndex, List<int>& output);
   int GetNumModules()const;
-  void ComputePairKweightElementAndModule(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& leftKweightElt, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables);
+  void ComputePairKweightElementAndModule(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& leftKweightElt, int rightIndex, List<int>& output);
   bool IsWeightSystemSpaceIndex(int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);
   void AddHincomplete(const Vector<Rational>& theH, const ElementWeylGroup<WeylGroupData>& theWE, int indexOfOrbit);
-  bool CheckInitialization()const;
+  bool CheckBasicInitialization()const;
+  bool CheckFullInitialization()const;
   bool CheckModuleDimensions()const;
   SemisimpleLieAlgebra& GetAmbientSS()const;
   WeylGroupData& GetAmbientWeyl()const;
-  void ComputeCartanOfCentralizer(GlobalVariables* theGlobalVariables);
-  void ComputePrimalModuleDecomposition(GlobalVariables* theGlobalVariables);
-  void ComputePrimalModuleDecompositionHWsHWVsOnly(GlobalVariables* theGlobalVariables);
-  void ComputePrimalModuleDecompositionHWVsOnly(GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& inputHws);
-  void ComputePrimalModuleDecompositionHighestWeightsOnly(GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& outputHWsCoords);
-  void ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(GlobalVariables* theGlobalVariables);
+  void ComputeCartanOfCentralizer();
+  void ComputePrimalModuleDecomposition();
+  void ComputePrimalModuleDecompositionHWsHWVsOnly();
+  void ComputePrimalModuleDecompositionHWVsOnly(HashedList<Vector<Rational> >& inputHws);
+  void ComputePrimalModuleDecompositionHighestWeightsOnly(HashedList<Vector<Rational> >& outputHWsCoords);
+  void ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart();
   void GetPrimalWeightProjectionFundCoords(const Vector<Rational>& inputAmbientWeight, Vector<Rational>& output)const;
   bool CheckGensBracketToHs();
   void GetWeightProjectionFundCoords(const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)const;
@@ -299,13 +301,13 @@ public:
 class SemisimpleSubalgebras
 {
 public:
-  GlobalVariables* theGlobalVariables;
   FormatExpressions currentFormat;
   SemisimpleLieAlgebra* owner;
   AlgebraicClosureRationals* ownerField;
   DynkinType targetDynkinType;
   SltwoSubalgebras theSl2s;
-  HashedListReferences<SemisimpleLieAlgebra>* theSubalgebrasNonEmbedded;
+  MapReferences<SemisimpleLieAlgebra, DynkinType>* theSubalgebrasNonEmbedded;
+  MapReferences<SemisimpleLieAlgebra, Matrix<Rational> > theSubalgebrasNonDefaultCartanAndScale;
   List<List<Rational> > CachedDynkinIndicesSl2subalgebrasSimpleTypes;
   HashedList<DynkinSimpleType> CachedDynkinSimpleTypesWithComputedSl2Subalgebras;
   List<OrbitFDRepIteratorWeylGroup> theOrbiTs;
@@ -329,8 +331,7 @@ public:
 
   //end current computation state variables.
 
-  HashedList<Vectors<Rational> > theHsOfSubalgebras; //used to search for subalgebras quickly
-  List<CandidateSSSubalgebra> theSubalgebras;
+  MapReferences<CandidateSSSubalgebra, Vectors<Rational> > theSubalgebras; //used to search for subalgebras quickly
   bool flagRealizedAllCandidates;
   bool flagAttemptToSolveSystems;
   bool flagComputePairingTable;
@@ -393,8 +394,10 @@ public:
 
   bool ComputeCurrentHCandidates();
   void initHookUpPointers
-  (SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField, HashedListReferences<SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
-   ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras, GlobalVariables* inputGlobalVariables);
+  (SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField,
+   MapReferences<SemisimpleLieAlgebra, DynkinType>* inputSubalgebrasNonEmbedded,
+   ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras)
+   ;
   void reset();
   ~SemisimpleSubalgebras()
   { this->flagDeallocated=true;
@@ -406,12 +409,6 @@ public:
   void AddSubalgebraToStack
 (CandidateSSSubalgebra& input, int inputNumLargerTypesExplored, int inputNumHcandidatesExplored)
 ;
-  SemisimpleSubalgebras
-  (SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField, HashedListReferences<SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
-   ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras, GlobalVariables* inputGlobalVariables): flagDeallocated(false)
-  { this->reset();
-    this->initHookUpPointers(inputOwner, theField, inputSubalgebrasNonEmbedded, inputSl2sOfSubalgebras, inputGlobalVariables);
-  }
   bool SetUpParabolicInductionDataPrecomputedSA(CandidateSSSubalgebra& theCandidate);
   bool CheckConsistencyHs()const;
   bool CheckConsistency()const;
@@ -431,7 +428,7 @@ public:
   Vector<Rational>
   GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot
   (const DynkinType& input, const List<int>& imagesOldSimpleRootsAndNewRoot, CandidateSSSubalgebra& theSSSubalgebraToBeModified);
-  void RegisterPossibleCandidate(CandidateSSSubalgebra& theCandidate);
+  //void RegisterPossibleCandidate(CandidateSSSubalgebra& theCandidate);
   void HookUpCentralizers(bool allowNonPolynomialSystemFailure);
   void ComputeSl2sInitOrbitsForComputationOnDemand();
   void FindAllEmbeddings(DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner);

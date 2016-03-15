@@ -65,7 +65,7 @@ struct branchingData
 class SemisimpleLieAlgebraOrdered
 {
 public:
-  SemisimpleLieAlgebra theOwner;
+  SemisimpleLieAlgebra* theOwner;
   //the format of the order is arbitrary except for the following requirements:
   //-All elements of the order must be either 1) nilpotent or 2) elements of the Cartan
   //-Let the number of positive roots be N and the rank be K. Then the indices N,..., N+K-1 must
@@ -80,6 +80,8 @@ public:
   void AssignGeneratorCoeffOne(int theIndex, ElementSemisimpleLieAlgebra<Rational>& output)
   { output.operator=(this->theOrder[theIndex]);
   }
+  SemisimpleLieAlgebraOrdered();
+  bool CheckInitialization()const;
   int GetDisplayIndexFromGeneratorIndex(int GeneratorIndex);
   void GetLinearCombinationFrom(ElementSemisimpleLieAlgebra<Rational>& input, Vector<Rational>& theCoeffs);
   void init(List<ElementSemisimpleLieAlgebra<Rational> >& inputOrder, SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables);
@@ -140,8 +142,8 @@ public:
   ConeComplex smallerAlgebraChamber;
   ConeComplex projectivizedChambeR;
   std::stringstream log;
-  WeylGroupData WeylSmaller;
-  WeylGroupData WeylLarger;
+  WeylGroupData* WeylSmaller;
+  WeylGroupData* WeylLarger;
   int computationPhase;
   int NumProcessedConesParam;
   int NumProcessedExtremaEqualOne;
@@ -150,13 +152,8 @@ public:
   std::string ElementToStringMultiplicitiesReport(GlobalVariables& theGlobalVariables);
   void IncrementComputation(Vector<Rational>& parabolicSel, GlobalVariables& theGlobalVariables);
   std::string PrepareReport(GlobalVariables& theGlobalVariables);
-  GeneralizedVermaModuleCharacters()
-  { this->UpperLimitChambersForDebugPurposes=-1;
-    this->computationPhase=0;
-    this->NumProcessedConesParam=0;
-    this->NumProcessedExtremaEqualOne=0;
-    this->numNonZeroMults=0;
-  }
+  GeneralizedVermaModuleCharacters();
+  bool CheckInitialization()const;
   void ReadFromDefaultFile(GlobalVariables* theGlobalVariables);
   void WriteToDefaultFile(GlobalVariables* theGlobalVariables);
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);

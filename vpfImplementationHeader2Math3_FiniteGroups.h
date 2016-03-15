@@ -22,9 +22,6 @@ std::string FinitelyGeneratedMatrixMonoid<coefficient>::ToString(FormatExpressio
   return out.str();
 }
 
-// if the user expects more than a milion elements, or if the formula expects
-// more than a million elements, or if there are more than 7 generators, use
-// the slow method that won't use up all the memory and swap and then crash
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::ComputeAllElements(bool andWords, int MaxElements)
 { MacroRegisterFunctionWithName("FiniteGroup::ComputeAllElements");
@@ -560,7 +557,7 @@ LargeInt FiniteGroup<elementSomeGroup>::GetSize()
 { if(this->sizePrivate > 0)
     return sizePrivate;
   if(this->GetSizeByFormula!=0 && this->specificDataPointer!=0)
-  { this->sizePrivate = GetSizeByFormula(this->specificDataPointer);
+  { this->sizePrivate = this->GetSizeByFormula(this->specificDataPointer);
     return sizePrivate;
   }
   //crash << "Requesting size of group whose size is not computed.  If you want"
@@ -1298,7 +1295,7 @@ void WeylGroupData::RootScalarCartanRoot(const Vector<leftType>& r1, const Vecto
 template <class coefficient>
 bool WeylGroupData::FreudenthalEval
 (Vector<coefficient>& inputHWfundamentalCoords, HashedList<Vector<coefficient> >& outputDominantWeightsSimpleCoords,
- List<coefficient>& outputMultsSimpleCoords, std::string* outputDetails, GlobalVariables* theGlobalVariables, int UpperBoundFreudenthal)
+ List<coefficient>& outputMultsSimpleCoords, std::string* outputDetails, int UpperBoundFreudenthal)
 { //double startTimer=theGlobalVariables.GetElapsedSeconds();
   MacroRegisterFunctionWithName("WeylGroup::FreudenthalEval");
   for (int i=0; i<inputHWfundamentalCoords.size; i++)
@@ -1312,7 +1309,7 @@ bool WeylGroupData::FreudenthalEval
   EiBasis.MakeEiBasis(this->GetDim());
   List<bool> Explored;
   Vector<coefficient> hwSimpleCoords=this->GetSimpleCoordinatesFromFundamental(inputHWfundamentalCoords);
-  if (!this->GetAlLDominantWeightsHWFDIM(hwSimpleCoords, outputDominantWeightsSimpleCoords, UpperBoundFreudenthal, outputDetails, theGlobalVariables))
+  if (!this->GetAlLDominantWeightsHWFDIM(hwSimpleCoords, outputDominantWeightsSimpleCoords, UpperBoundFreudenthal, outputDetails))
     return false;
   Explored.initFillInObject(outputDominantWeightsSimpleCoords.size, false);
   outputMultsSimpleCoords.SetSize(outputDominantWeightsSimpleCoords.size);
@@ -1327,7 +1324,7 @@ bool WeylGroupData::FreudenthalEval
   //static double totalTimeSpentOnHashIndexing=0;
 //  static double timeSpentRaisingWeights=0;
   coefficient BufferCoeff;
-  ProgressReport theReport(theGlobalVariables);
+  ProgressReport theReport;
   for (int k=1; k<outputDominantWeightsSimpleCoords.size; k++)
   { Explored[k]=true;
     coefficient& currentAccum=outputMultsSimpleCoords[k];
@@ -1389,7 +1386,7 @@ bool WeylGroupData::FreudenthalEval
 template<class coefficient>
 bool WeylGroupData::GetAlLDominantWeightsHWFDIM
 (Vector<coefficient>& highestWeightSimpleCoords, HashedList<Vector<coefficient> >& outputWeightsSimpleCoords,
- int upperBoundDominantWeights, std::string* outputDetails, GlobalVariables* theGlobalVariables)
+ int upperBoundDominantWeights, std::string* outputDetails)
 { std::stringstream out;
 //  double startTime=theGlobalVariables.GetElapsedSeconds();
 //  stOutput << "<br>time elapsed: " << theGlobalVariables.GetElapsedSeconds()-startTime;
@@ -1741,7 +1738,7 @@ void SubgroupWeylGroupOLD::ActByElement(const ElementWeylGroup<WeylGroupData>& t
   for (int i=theElement.generatorsLastAppliedFirst.size-1; i>=0; i--)
   { int tempI=theElement.generatorsLastAppliedFirst[i].index;
     if(tempI<this->simpleGenerators.size)
-      this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[tempI], output, false, output);
+      this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleGenerators[tempI], output, false, output);
     else
     { tempI-=this->simpleGenerators.size;
       tempRoot.MakeZero(input.size);
@@ -1773,10 +1770,12 @@ bool SubgroupWeylGroupOLD::IsDominantWeight(const Vector<coefficient>& theWeight
 
 template<class coefficient>
 coefficient SubgroupWeylGroupOLD::WeylDimFormulaSimpleCoords(const Vector<coefficient>& theWeightInSimpleCoords, const coefficient& theRingUnit)
-{ coefficient Result, buffer;
+{ MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::WeylDimFormulaSimpleCoords");
+  this->CheckInitialization();
+  coefficient Result, buffer;
   Vector<coefficient> rhoOverNewRing, rootOfBorelNewRing, sumWithRho;//<-to facilitate type conversion!
   Vector<Rational> rho;
-  this->RootsOfBorel.sum(rho, this->AmbientWeyl.GetDim());
+  this->RootsOfBorel.sum(rho, this->AmbientWeyl->GetDim());
   rho/=2;
   rhoOverNewRing=rho;//<-type conversion here!
   Result=theRingUnit;
@@ -1786,8 +1785,8 @@ coefficient SubgroupWeylGroupOLD::WeylDimFormulaSimpleCoords(const Vector<coeffi
   for (int i=0; i<this->RootsOfBorel.size; i++)
   { rootOfBorelNewRing=this->RootsOfBorel[i]; //<-type conversion here!
     sumWithRho=rhoOverNewRing+theWeightInSimpleCoords;
-    buffer=(this->AmbientWeyl.RootScalarCartanRoot(sumWithRho, rootOfBorelNewRing));
-    buffer/=this->AmbientWeyl.RootScalarCartanRoot(rhoOverNewRing, rootOfBorelNewRing);
+    buffer=(this->AmbientWeyl->RootScalarCartanRoot(sumWithRho, rootOfBorelNewRing));
+    buffer/=this->AmbientWeyl->RootScalarCartanRoot(rhoOverNewRing, rootOfBorelNewRing);
 //    stOutput << "(" << buffer.ToString() << ")";
     Result*=buffer;
   }
@@ -1800,21 +1799,22 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIM
  int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIM");
   std::stringstream out;
+  this->CheckInitialization();
   this->ComputeRootSubsystem();
 //  double startTime=theGlobalVariables.GetElapsedSeconds();
 //  stOutput << "<br>time elapsed: " << theGlobalVariables.GetElapsedSeconds()-startTime;
   Vector<coefficient> highestWeightTrue=highestWeightSimpleCoords;
   Vectors<Rational> basisEi;
-  int theDim=this->AmbientWeyl.GetDim();
+  int theDim=this->AmbientWeyl->GetDim();
   basisEi.MakeEiBasis(theDim);
   this->RaiseToDominantWeight(highestWeightTrue);
-  Vector<coefficient> highestWeightFundCoords=this->AmbientWeyl.GetFundamentalCoordinatesFromSimple(highestWeightTrue);
+  Vector<coefficient> highestWeightFundCoords=this->AmbientWeyl->GetFundamentalCoordinatesFromSimple(highestWeightTrue);
   int theTopHeightSimpleCoords=(int) highestWeightSimpleCoords.GetVectorRational().SumCoords().GetDoubleValue()+1;
 //  int theTopHeightFundCoords=(int) highestWeightFundCoords.SumCoords().GetDoubleValue();
   if (theTopHeightSimpleCoords<0)
     theTopHeightSimpleCoords=0;
   List<HashedList<Vector<coefficient> > > outputWeightsByHeight;
-  int topHeightRootSystem=this->AmbientWeyl.RootsOfBorel.LastObject()->SumCoords().NumShort;
+  int topHeightRootSystem=this->AmbientWeyl->RootsOfBorel.LastObject()->SumCoords().NumShort;
   int topHeightRootSystemPlusOne=topHeightRootSystem+1;
   outputWeightsByHeight.SetSize(topHeightRootSystemPlusOne);
   int finalHashSize=100;
@@ -1874,13 +1874,13 @@ void SubgroupWeylGroupOLD::RaiseToDominantWeight(Vector<coefficient>& theWeight,
   if (stabilizerFound!=0)
     *stabilizerFound=false;
   Rational theScalarProd;
-//  int theDim=this->AmbientWeyl.GetDim();
+//  int theDim=this->AmbientWeyl->GetDim();
   for (bool found = true; found; )
   { found=false;
     for (int i=0; i<this->simpleGenerators.size; i++)
     { if (! this->IsDominantWRTgenerator(theWeight, i))
       { found=true;
-        this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[i], theWeight, false, theWeight);
+        this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleGenerators[i], theWeight, false, theWeight);
         if (sign!=0)
           *sign*=-1;
       }
@@ -1902,7 +1902,7 @@ bool SubgroupWeylGroupOLD::GenerateOrbitReturnFalseIfTruncated(const Vector<coef
   MemorySaving<Vectors<coefficient> >ExternalAutosOverAmbientField;
   for (int i=0; i<theOrbit.size; i++)
   { for (int j=0; j<this->simpleGenerators.size; j++)
-    { this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[j], theOrbit[i], false, tempRoot);
+    { this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleGenerators[j], theOrbit[i], false, tempRoot);
 //      int oldsize=theOrbit.size;
 //      std::string debugString=tempRoot.ToString() ;
       theOrbit.AddOnTopNoRepetition(tempRoot);
@@ -1948,8 +1948,8 @@ bool SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart
     else
       hwSimpleCoordsNilPart[i]=theRingZero;
   }
-  hwSimpleCoordsLeviPart=this->AmbientWeyl.GetSimpleCoordinatesFromFundamental(hwSimpleCoordsLeviPart);
-  hwSimpleCoordsNilPart=this->AmbientWeyl.GetSimpleCoordinatesFromFundamental(hwSimpleCoordsNilPart);
+  hwSimpleCoordsLeviPart=this->AmbientWeyl->GetSimpleCoordinatesFromFundamental(hwSimpleCoordsLeviPart);
+  hwSimpleCoordsNilPart=this->AmbientWeyl->GetSimpleCoordinatesFromFundamental(hwSimpleCoordsNilPart);
 //  stOutput << "highest weight levi part simple coords: " << hwSimpleCoordsLeviPart.ToString();
 //  stOutput << "highest weight nil part siple coords: " << hwSimpleCoordsNilPart.ToString();
   ///////////////////////////
@@ -1974,7 +1974,7 @@ bool SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart
 //  stOutput << "<br> Rho equals: " << Rho.ToString();
   //out << "<br> Rho equals: " << Rho.ToString();
   coefficient hwPlusRhoSquared;
-  hwPlusRhoSquared=this->AmbientWeyl.RootScalarCartanRoot(hwSimpleCoordsLeviPart+Rho, hwSimpleCoordsLeviPart+Rho);
+  hwPlusRhoSquared=this->AmbientWeyl->RootScalarCartanRoot(hwSimpleCoordsLeviPart+Rho, hwSimpleCoordsLeviPart+Rho);
   Explored[0]=true;
   outputMultsSimpleCoords[0]=1;
 //  stOutput << "<br>time for generating weights and initializations: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
@@ -2014,7 +2014,7 @@ bool SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart
           return false;
         }
         convertor=this->RootsOfBorel[j];//<-implicit type conversion here!
-        bufferCoeff=this->AmbientWeyl.RootScalarCartanRoot(currentWeight, convertor);
+        bufferCoeff=this->AmbientWeyl->RootScalarCartanRoot(currentWeight, convertor);
         bufferCoeff*=outputMultsSimpleCoords[theIndex];
         currentAccum+=bufferCoeff;
 //        stOutput << "<hr>current weight: " << currentWeight.ToString();
@@ -2023,7 +2023,7 @@ bool SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart
     currentAccum*=2;
    // stOutput << "<br>hwPlusRhoSquared: " << hwPlusRhoSquared.ToString();
     bufferCoeff=hwPlusRhoSquared;
-    bufferCoeff-=this->AmbientWeyl.RootScalarCartanRoot(outputDomWeightsSimpleCoordsLeviPart[k]+Rho, outputDomWeightsSimpleCoordsLeviPart[k]+Rho);
+    bufferCoeff-=this->AmbientWeyl->RootScalarCartanRoot(outputDomWeightsSimpleCoordsLeviPart[k]+Rho, outputDomWeightsSimpleCoordsLeviPart[k]+Rho);
     //bufferCoeff now holds the denominator participating in the Freudenthal formula.
     if(bufferCoeff.IsEqualToZero())
       crash << crash;

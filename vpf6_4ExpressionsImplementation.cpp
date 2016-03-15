@@ -263,9 +263,10 @@ int Expression::AddObjectReturnIndex(const
 SemisimpleSubalgebras
 & inputValue)const
 { this->CheckInitialization();
-  if (!this->owner->theObjectContainer.theSSsubalgebras.Contains(inputValue))
+  inputValue.CheckInitialization();
+  if (!this->owner->theObjectContainer.theSSLieAlgebras.Contains(inputValue.owner->theWeyl.theDynkinType))
     crash << "Semisimple subalgebras must be allocated directly in the object container. " << crash;
-  return this->owner->theObjectContainer.theSSsubalgebras.GetIndex(inputValue);
+  return this->owner->theObjectContainer.theSSLieAlgebras.GetIndex(inputValue.owner->theWeyl.theDynkinType);
 }
 
 template < >
@@ -390,9 +391,9 @@ int Expression::AddObjectReturnIndex(const
 SemisimpleLieAlgebra
 & inputValue)const
 { this->CheckInitialization();
-  if (!this->owner->theObjectContainer.theLieAlgebras.Contains(inputValue))
+  if (!this->owner->theObjectContainer.theSSLieAlgebras.Contains(inputValue.theWeyl.theDynkinType))
     crash << "Semisimple Lie algebra must be allocated directly in the object container. " << crash;
-  return this->owner->theObjectContainer.theLieAlgebras.GetIndex(inputValue);
+  return this->owner->theObjectContainer.theSSLieAlgebras.GetIndex(inputValue.theWeyl.theDynkinType);
 }
 
 template < >
@@ -510,13 +511,8 @@ int Expression::AddObjectReturnIndex(const
 WeylGroupData
 & inputValue)const
 { this->CheckInitialization();
-  for (int i=0; i<this->owner->theObjectContainer.theLieAlgebras.size; i++)
-    if (this->owner->theObjectContainer.theLieAlgebras[i].theWeyl==inputValue)
-      return i;
-  SemisimpleLieAlgebra theLA;
-  theLA.theWeyl=inputValue;
-  this->owner->theObjectContainer.theLieAlgebras.AddOnTop(theLA);
-  return this->owner->theObjectContainer.theLieAlgebras.size-1;
+  this->owner->theObjectContainer.GetLieAlgebraCreateIfNotPresent(inputValue.theDynkinType);
+  return this->owner->theObjectContainer.theSSLieAlgebras.GetIndex(inputValue.theDynkinType);
 }
 
 template < >
@@ -672,7 +668,7 @@ template < >
 SemisimpleLieAlgebra& Expression::GetValueNonConst()const
 { if (!this->IsOfType<SemisimpleLieAlgebra>())
     crash << "This is a programming error: expression not of required type SemisimpleLieAlgebra. The expression equals " << this->ToString() << "." << crash;
-  return this->owner->theObjectContainer.theLieAlgebras.GetElement(this->GetLastChild().theData);
+  return this->owner->theObjectContainer.theSSLieAlgebras.theValues[this->GetLastChild().theData];
 }
 
 template < >
@@ -708,7 +704,7 @@ template < >
 SemisimpleSubalgebras& Expression::GetValueNonConst()const
 { if (!this->IsOfType<SemisimpleSubalgebras>())
     crash << "This is a programming error: expression not of required type SemisimpleSubalgebras. The expression equals " << this->ToString() << "." << crash;
-  return this->owner->theObjectContainer.theSSsubalgebras[this->GetLastChild().theData];
+  return this->owner->theObjectContainer.theSSSubalgebraS.theValues[this->GetLastChild().theData];
 }
 
 template < >
@@ -721,8 +717,9 @@ Plot& Expression::GetValueNonConst()const
 template < >
 WeylGroupData& Expression::GetValueNonConst()const
 { if (!this->IsOfType<WeylGroupData>())
-    crash << "This is a programming error: expression not of required type WeylGroupData. The expression equals " << this->ToString() << "." << crash;
-  return this->owner->theObjectContainer.theLieAlgebras.GetElement(this->GetLastChild().theData).theWeyl;
+    crash << "This is a programming error: expression not of required type WeylGroupData. The expression equals "
+    << this->ToString() << "." << crash;
+  return this->owner->theObjectContainer.theSSLieAlgebras.theValues[this->GetLastChild().theData].theWeyl;
 }
 
 template < >
@@ -2853,7 +2850,9 @@ bool Expression::MakeContextWithOnePolyVarOneDiffVar(Calculator& owner, const Ex
 
 bool Expression::MakeContextSSLieAlg(Calculator& owner, const SemisimpleLieAlgebra& theSSLiealg)
 { this->MakeEmptyContext(owner);
-  return this->ContextSetSSLieAlgebrA(owner.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(theSSLiealg), owner);
+  owner.theObjectContainer.GetLieAlgebraCreateIfNotPresent(theSSLiealg.theWeyl.theDynkinType);
+  return this->ContextSetSSLieAlgebrA
+  (owner.theObjectContainer.theSSLieAlgebras.GetIndex(theSSLiealg.theWeyl.theDynkinType), owner);
 }
 
 bool Expression::ContextMakeContextWithOnePolyVar(Calculator& owner, const std::string& inputPolyVarName)

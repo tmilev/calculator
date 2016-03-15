@@ -483,7 +483,8 @@ bool Calculator::innerPrintSSsubalgebras
   SemisimpleLieAlgebra* ownerSSPointer=0;
   bool isAlreadySubalgebrasObject=input.IsOfType<SemisimpleSubalgebras>();
   if (!isAlreadySubalgebrasObject)
-  { if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input, ownerSSPointer))
+  { if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+        (CalculatorConversions::innerSSLieAlgebra, input, ownerSSPointer))
       return output.MakeError("Error extracting Lie algebra.", theCommands);
     if (ownerSSPointer->GetRank()>8)
     { out << "<b>This code is completely experimental and has been set to run up to rank 6. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
@@ -493,14 +494,11 @@ bool Calculator::innerPrintSSsubalgebras
   } else
     ownerSSPointer=input.GetValue<SemisimpleSubalgebras>().owner;
   if (ownerSSPointer==0)
-    crash << crash;
+    crash << "Zero pointer to semisimple Lie algebra: this shouldn't happen. " << crash;
   SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
-  SemisimpleSubalgebras tempSSsas
-  (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
-  &theCommands.theObjectContainer.theSltwoSAs, &theGlobalVariables);
-  int indexInContainer=theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas);
-  SemisimpleSubalgebras& theSSsubalgebras= isAlreadySubalgebrasObject ? input.GetValueNonConst<SemisimpleSubalgebras>() :
-  theCommands.theObjectContainer.theSSsubalgebras[indexInContainer];
+  SemisimpleSubalgebras& theSSsubalgebras=
+  theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
+
   theSSsubalgebras.ToStringExpressionString=CalculatorConversions::innerStringFromSemisimpleSubalgebras;
   theSSsubalgebras.ComputeFolderNames(theSSsubalgebras.currentFormat);
   out << "<br>Output file: <a href= \""
@@ -556,7 +554,7 @@ bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommand
   ElementSemisimpleLieAlgebra<AlgebraicNumber> theF, theH, theE;
   theE=theErational;
   std::stringstream out, logStream;
-  bool success=ownerSS->AttemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &logStream, &theGlobalVariables);
+  bool success=ownerSS->AttemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &logStream);
 //  stOutput << "<br>The elts: " <<  theOperators.ToString();
 //  stOutput << "<br> The common ad: " << commonAd.ToString();
   if (success)

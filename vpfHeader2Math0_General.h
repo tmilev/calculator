@@ -1815,6 +1815,10 @@ public:
     return false;
   }
   int TotalDegree();
+  void CheckFlagDeallocated()const
+  { if (this->theMonomials.flagDeallocated || this->theCoeffs.flagDeallocated)
+      crash << "Use after free of monomial collection. " << crash;
+  }
   void checkConsistency()const
   { this->theMonomials.GrandMasterConsistencyCheck();
     this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
@@ -2027,6 +2031,48 @@ public:
     this->theMonomials=other.theMonomials;
 //    int commentwhendone;
  //   this->checkConsistency();
+  }
+};
+
+template <class value, class key, unsigned int hashFunction(const key&)=key::HashFunction>
+class MapReferences
+{
+public:
+  HashedList<key, hashFunction> theKeys;
+  ListReferences<value> theValues;
+  int GetIndex(const key& input)const
+  { return this->theKeys.GetIndex(input);
+  }
+  bool Contains(const key& input)const
+  { return this->GetIndex(input)!=-1;
+  }
+  value& GetValueCreateIfNotPresent(const key& input)
+  { int theIndex=this->theKeys.GetIndex(input);
+    if (theIndex==-1)
+    { theIndex=this->theKeys.size;
+      this->theKeys.AddOnTop(input);
+      this->theValues.SetSize(this->theValues.size+1);
+    }
+    return this->theValues[theIndex];
+  }
+  void SetValue(const value& inputValue, const key& inputKey)
+  { if (this->Contains(inputKey))
+    { this->theValues[this->theKeys.GetIndex(inputKey)]=inputValue;
+      return;
+    }
+    this->theValues.AddOnTop(inputValue);
+    this->theKeys.AddOnTop(inputKey);
+  }
+  void SetExpectedSize(int theSize)
+  { this->theKeys.SetExpectedSize(theSize);
+    this->theValues.SetExpectedSize(theSize);
+  }
+  void Clear()
+  { this->theKeys.Clear();
+    this->theValues.SetSize(0);
+  }
+  value& operator[](int i)const
+  { return this->theValues[i];
   }
 };
 
@@ -3976,7 +4022,7 @@ public:
   void MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner);
   void ElementToVectorNegativeRootSpacesFirst(Vector<coefficient>& output)const;
   void AssignVectorNegRootSpacesCartanPosRootSpaces(const Vector<coefficient>& input, SemisimpleLieAlgebra& owner);
-  bool GetCoordsInBasis(const List<ElementSemisimpleLieAlgebra<coefficient> >& theBasis, Vector<coefficient>& output, GlobalVariables& theGlobalVariables)const;
+  bool GetCoordsInBasis(const List<ElementSemisimpleLieAlgebra<coefficient> >& theBasis, Vector<coefficient>& output)const;
   SemisimpleLieAlgebra* GetOwner()const
   { this->CheckConsistency();
     if (this->size()==0)
@@ -3984,7 +4030,7 @@ public:
     return (*this)[0].owner;
   }
   bool GetCoordsInBasis
-  (const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables)const
+  (const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<RationalFunctionOld>& output)const
   { Vector<Rational> tempVect;
     if (! this->GetCoordsInBasis(theBasis, tempVect, theGlobalVariables))
       return false;
@@ -5820,11 +5866,11 @@ public:
   static void GetDynkinIndicesSl2SubalgebrasSimpleType
   (const DynkinSimpleType& theType, List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
    HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
-   HashedList<Rational>& outputDynkinIndices, GlobalVariables* theGlobalVariables);
+   HashedList<Rational>& outputDynkinIndices);
   void GetDynkinIndicesSl2Subalgebras
   (List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
    HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
-   HashedList<Rational>& outputDynkinIndices, GlobalVariables* theGlobalVariables);
+   HashedList<Rational>& outputDynkinIndices);
   bool HasExceptionalComponent()const;
   bool operator>(const DynkinType& other)const;
   void operator=(const MonomialCollection<DynkinSimpleType, Rational>& other)
@@ -7239,7 +7285,7 @@ bool Matrix<coefficient>::IsPositiveDefinite()
 }
 
 template <class coefficient>
-bool ElementSemisimpleLieAlgebra<coefficient>::GetCoordsInBasis(const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<coefficient>& output, GlobalVariables& theGlobalVariables)const
+bool ElementSemisimpleLieAlgebra<coefficient>::GetCoordsInBasis(const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<coefficient>& output)const
 { if (theBasis.size==0)
     return false;
   if (this->IsEqualToZero())

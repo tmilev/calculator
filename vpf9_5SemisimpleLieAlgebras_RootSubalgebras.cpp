@@ -42,7 +42,7 @@ void rootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
   SubgroupWeylGroupOLD tempGroup;
   int coxeterNumber=1;
   for (int i=0; i<this->theDynkinDiagram.SimpleBasesConnectedComponents.size; i++)
-  { tempGroup.AmbientWeyl=this->GetAmbientWeyl();
+  { tempGroup.AmbientWeyl=&this->GetAmbientWeyl();
     tempGroup.simpleGenerators=this->theDynkinDiagram.SimpleBasesConnectedComponents[i];
     tempGroup.ComputeRootSubsystem();
     Vector<Rational>& lastRoot= *tempGroup.RootSubsystem.LastObject();
@@ -1993,7 +1993,7 @@ bool rootSubalgebra::ComputeEssentialsIfNew()
     this->SimpleBasisKScaledToActByTwo[i]*=2/this->GetAmbientWeyl().RootScalarCartanRoot
     (this->SimpleBasisK[i], this->SimpleBasisK[i]);
 //  }
-  if (this->ownEr->theGlobalVariables!=0)
+  if (theGlobalVariables.flagReportEverything)
   { reportStream << "Computing root subalgebra... ";
     theReport.Report(reportStream.str());
   }
@@ -2022,7 +2022,7 @@ bool rootSubalgebra::ComputeEssentialsIfNew()
       this->SimpleBasisK[extensionRootPermutations[goodPermutation][i]]=copySimpleBasisK[i];
   } else
     this->SimpleBasisK.GetGramMatrix(this->scalarProdMatrixOrdered, &this->GetAmbientWeyl().CartanSymmetric);
-  if (this->ownEr->theGlobalVariables!=0)
+  if (theGlobalVariables.flagReportEverything)
   { reportStream << "...found a candidate type... ";
     theReport.Report(reportStream.str());
   }
@@ -2037,7 +2037,7 @@ bool rootSubalgebra::ComputeEssentialsIfNew()
       this->ownEr->theSubalgebras[this->indexInducingSubalgebra].numHeirsRejectedNotMaximallyDominant++;
     return false;
   }
-  if (this->ownEr->theGlobalVariables!=0)
+  if (theGlobalVariables.flagReportEverything)
   { reportStream << "...the candidate's roots are maximally dominant... ";
     theReport.Report(reportStream.str());
   }
@@ -2059,7 +2059,7 @@ bool rootSubalgebra::ComputeEssentialsIfNew()
         this->ownEr->theSubalgebras[this->indexInducingSubalgebra].numHeirsRejectedSameModuleDecompo++;
       return false;
     }
-  if (this->ownEr->theGlobalVariables!=0)
+  if (theGlobalVariables.flagReportEverything)
   { reportStream << "...module decomposition computed, subalgebra type: " << this->theDynkinType.ToString()
     << ", centralizer type: " << this->theCentralizerDynkinType.ToString() << ". Computing outer automorphisms that "
     << " have zero action on centralizer and extend to ambient automorphisms... ";
@@ -2273,7 +2273,7 @@ void slTwoSubalgebra::initHEFSystemFromECoeffs
 }
 
 void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
-(SltwoSubalgebras& output, int indexRootSAinContainer, GlobalVariables* theGlobalVariables)
+(SltwoSubalgebras& output, int indexRootSAinContainer)
 { MacroRegisterFunctionWithName("rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition");
   //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1-10.4
   int theRelativeDimension= this->SimpleBasisK.size;
@@ -2294,7 +2294,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
       (this->SimpleBasisK[k], this->SimpleBasisK[j]);
   InvertedRelativeKillingForm.Invert();
   int numCycles= MathRoutines::TwoToTheNth(selectionRootsWithZeroCharacteristic.MaxSize);
-  ProgressReport theReport(theGlobalVariables);
+  ProgressReport theReport;
   Vectors<Rational> rootsZeroChar;
   rootsZeroChar.Reserve(selectionRootsWithZeroCharacteristic.MaxSize);
   Vectors<Rational> relativeRootSystem, bufferVectors;
@@ -2404,9 +2404,9 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
     if(theSl2.AttemptExtendingHFtoHEFWRTSubalgebra
        (theSl2.RootsWithScalar2WithH, selectionRootsWithZeroCharacteristic, reflectedSimpleBasisK,
         characteristicH, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved,
-        theSl2.theSystemColumnVector, theGlobalVariables))
+        theSl2.theSystemColumnVector, &theGlobalVariables))
     { int indexIsoSl2;
-      theSl2.MakeReportPrecomputations(theGlobalVariables, output, output.size, indexRootSAinContainer, *this);
+      theSl2.MakeReportPrecomputations(&theGlobalVariables, output, output.size, indexRootSAinContainer, *this);
       if(output.ContainsSl2WithGivenHCharacteristic(theSl2.hCharacteristic, &indexIsoSl2))
       { output.GetElement(indexIsoSl2).IndicesContainingRootSAs.AddOnTop(indexRootSAinContainer);
         output.IndicesSl2sContainedInRootSA[indexRootSAinContainer].AddOnTop(indexIsoSl2);
@@ -3112,7 +3112,7 @@ void rootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical
   for (int i=0; i<SelectedBasisRoots.MaxSize; i++)
     if (!SelectedBasisRoots.selected[i])
       selectedRootsBasisCentralizer.AddOnTop(theRootSA.SimpleBasisCentralizerRoots.TheObjects[i]);
-  outputSubgroup.AmbientWeyl=(theRootSA.GetAmbientWeyl());
+  outputSubgroup.AmbientWeyl=(&theRootSA.GetAmbientWeyl());
   this->MakeProgressReportAutomorphisms(outputSubgroup, theRootSA, theGlobalVariables);
   theRootSA.GenerateIsomorphismsPreservingBorel(theRootSA, theGlobalVariables, &outputSubgroup, true);
   //std::string tempS;
@@ -3128,7 +3128,7 @@ void rootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical
   this->CentralizerIsomorphisms.AddOnTop(outputSubgroup);
   this->CentralizerOuterIsomorphisms.SetSize(this->CentralizerIsomorphisms.size);
   this->CentralizerOuterIsomorphisms.LastObject()->ExternalAutomorphisms=(outputSubgroup.ExternalAutomorphisms);
-  this->CentralizerOuterIsomorphisms.LastObject()->AmbientWeyl=(this->GetOwnerWeyl());
+  this->CentralizerOuterIsomorphisms.LastObject()->AmbientWeyl=(&this->GetOwnerWeyl());
   this->MakeProgressReportAutomorphisms(outputSubgroup, theRootSA, theGlobalVariables);
   //theSubgroup.ComputeDebugString();
 }
@@ -3671,7 +3671,7 @@ bool coneRelation::IsStrictlyWeaklyProhibiting(rootSubalgebra& owner, Vectors<Ra
   {//  crash << crash;
   }
   SubgroupWeylGroupOLD tempSubgroup;
-  tempSubgroup.AmbientWeyl=(owner.GetAmbientWeyl());
+  tempSubgroup.AmbientWeyl=&(owner.GetAmbientWeyl());
   tempSubgroup.ComputeSubGroupFromGeneratingReflections(&tempRoots, &tempSubgroup.ExternalAutomorphisms, &theGlobalVariables, 0, true);
   Vectors<Rational> NilradicalIntersection, genSingHW;
   tempRoots=(tempSubgroup.RootSubsystem);

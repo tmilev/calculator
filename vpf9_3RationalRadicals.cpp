@@ -226,11 +226,11 @@ bool AlgebraicClosureRationals::ReduceMe()
 { MacroRegisterFunctionWithName("AlgebraicExtensionRationals::ReduceMe");
 //  double timeStart=0;
 //  if (this->owner!=0)
-//    if (this->owner->theGlobalVariables!=0)
+//    if (theGlobalVariables.flagReportEverything)
 //      timeStart=this->owner->theGlobalVariables->GetElapsedSeconds();
   this->ChooseGeneratingElement();
 //  if (this->owner!=0)
-//    if (this->owner->theGlobalVariables!=0)
+//    if (theGlobalVariables.flagReportEverything)
 //      stOutput << "<hr> Time needed to chose generating element: " << this->owner->theGlobalVariables->GetElapsedSeconds()-timeStart;
 //  stOutput << "Reducing: " << this->ToString();
   if (this->flagIsQuadraticRadicalExtensionRationals)

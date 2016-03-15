@@ -101,7 +101,7 @@ std::string Weight<coefficient>::TensorAndDecompose
   }
   HashedList<Vector<Rational> > weightsLeftSimpleCoords;
   List<Rational> multsLeft;
-  if (!theWeyl.FreudenthalEval(leftHWFundCoords, weightsLeftSimpleCoords, multsLeft, &tempS, &theGlobalVariables, 1000000))
+  if (!theWeyl.FreudenthalEval(leftHWFundCoords, weightsLeftSimpleCoords, multsLeft, &tempS, 1000000))
   { errorLog << "Freudenthal formula generated error: " << tempS;
     return errorLog.str();
   }
@@ -128,11 +128,11 @@ std::string Weight<coefficient>::TensorAndDecompose
 
 template <class coefficient>
 bool charSSAlgMod<coefficient>::FreudenthalEvalMeFullCharacter
-(charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails, GlobalVariables* theGlobalVariables)
+(charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails)
 { MacroRegisterFunctionWithName("charSSAlgMod_CoefficientType::FreudenthalEvalMeFullCharacter");
   this->CheckNonZeroOwner();
   charSSAlgMod<coefficient> domChar;
-  if (!this->FreudenthalEvalMeDominantWeightsOnly(domChar, upperBoundNumDominantWeights, outputDetails, theGlobalVariables))
+  if (!this->FreudenthalEvalMeDominantWeightsOnly(domChar, upperBoundNumDominantWeights, outputDetails))
     return false;
   outputCharOwnerSetToZero.MakeZero();
   Vectors<Rational> theVect;
@@ -187,12 +187,12 @@ void charSSAlgMod<coefficient>::MakeFromWeight(const Vector<coefficient>& inputW
 
 template <class coefficient>
 bool charSSAlgMod<coefficient>::FreudenthalEvalMeDominantWeightsOnly
-(charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails, GlobalVariables* theGlobalVariables)
+(charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails)
 { MacroRegisterFunctionWithName("charSSAlgMod_CoefficientType::FreudenthalEvalMeDominantWeightsOnly");
   if (&outputCharOwnerSetToZero==this)
   { charSSAlgMod<coefficient> thisCopy=*this;
     return thisCopy.FreudenthalEvalMeDominantWeightsOnly
-    (outputCharOwnerSetToZero, upperBoundNumDominantWeights, outputDetails, theGlobalVariables);
+    (outputCharOwnerSetToZero, upperBoundNumDominantWeights, outputDetails);
   }
   this->CheckNonZeroOwner();
   outputCharOwnerSetToZero.MakeZero();
@@ -207,7 +207,7 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeDominantWeightsOnly
   for (int i=0; i<this->size(); i++)
   { currentWeightFundCoords=(*this)[i].weightFundamentalCoordS;
     if (!this->GetOwner()->theWeyl.FreudenthalEval
-    (currentWeightFundCoords, currentWeights, currentMults, &localDetail, theGlobalVariables, upperBoundNumDominantWeights))
+    (currentWeightFundCoords, currentWeights, currentMults, &localDetail, upperBoundNumDominantWeights))
     { if (outputDetails!=0)
       { localErrors << "Encountered error while evaluating freudenthal formula. Error details: " << localDetail
         << "<br> Further computation detail: " << localDetails.str();
@@ -388,7 +388,7 @@ bool charSSAlgMod<coefficient>::DrawMe
 { MacroRegisterFunctionWithName("charSSAlgMod::DrawMe");
   this->CheckNonZeroOwner();
   charSSAlgMod<coefficient> CharCartan;
-  bool result= this->FreudenthalEvalMeDominantWeightsOnly(CharCartan, upperBoundWeights, &outputDetails, &theGlobalVariables);
+  bool result= this->FreudenthalEvalMeDominantWeightsOnly(CharCartan, upperBoundWeights, &outputDetails);
   std::stringstream out;
   Vectors<Rational> currentOrbit;
   WeylGroupData& theWeyl=this->GetOwner()->theWeyl;
@@ -561,12 +561,12 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
   //(remainingCharDominantLevI.ToString());
   remainingCharProjected.MakeZero();
   Vector<coefficient> fundCoordsSmaller, theProjection, inSimpleCoords;
-  fundCoordsSmaller.SetSize(WeylFDSmall.AmbientWeyl.GetDim());
+  fundCoordsSmaller.SetSize(WeylFDSmall.AmbientWeyl->GetDim());
   for (int i=0; i<remainingCharDominantLevI.size(); i++)
   { inSimpleCoords=theWeyL.GetSimpleCoordinatesFromFundamental(remainingCharDominantLevI[i].weightFundamentalCoordS);
-    for (int j=0; j<WeylFDSmall.AmbientWeyl.GetDim(); j++)
+    for (int j=0; j<WeylFDSmall.AmbientWeyl->GetDim(); j++)
     { fundCoordsSmaller[j]=theWeyL.RootScalarCartanRoot(inSimpleCoords, embeddingsSimpleEiGoesTo[j]);
-      fundCoordsSmaller[j]/=WeylFDSmall.AmbientWeyl.CartanSymmetric.elements[j][j]/2;
+      fundCoordsSmaller[j]/=WeylFDSmall.AmbientWeyl->CartanSymmetric(j,j)/2;
     }
     //stOutput << "<br>insimple coords: " << inSimpleCoords.ToString() << "; fundcoordssmaller: " << fundCoordsSmaller.ToString();
     tempMon.owner=&theSmallAlgebra;
@@ -584,7 +584,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
       for (int i=0; i<WeylFDSmall.RootsOfBorel.size; i++)
       { tempMon=localHighest;
         simpleGeneratorBaseField=WeylFDSmall.RootsOfBorel[i]; // <- implicit type conversion here!
-        tempMon.weightFundamentalCoordS+=WeylFDSmall.AmbientWeyl.GetFundamentalCoordinatesFromSimple(simpleGeneratorBaseField);
+        tempMon.weightFundamentalCoordS+=WeylFDSmall.AmbientWeyl->GetFundamentalCoordinatesFromSimple(simpleGeneratorBaseField);
 //        stOutput << "<br>candidate highest mon found simple & usual coords: "
 //        << WeylFDSmall.AmbientWeyl.GetSimpleCoordinatesFromFundamental(tempMon.weightFundamentalCoords).ToString()
 //        << " = " << tempMon.ToString();
@@ -611,7 +611,8 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
 //    << remainingCharProjected.ToString();
     for (int i=0; i<tempHashedRoots.size; i++)
     { tempMon.owner=&theSmallAlgebra;
-      tempMon.weightFundamentalCoordS=WeylFDSmall.AmbientWeyl.GetFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
+      tempMon.weightFundamentalCoordS=
+      WeylFDSmall.AmbientWeyl->GetFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
       bufferCoeff=tempMults[i];
       bufferCoeff*=highestCoeff;
       remainingCharProjected.SubtractMonomial(tempMon, bufferCoeff);
@@ -631,23 +632,23 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
     std::string tempS;
     output.DrawMeNoMults(tempS, theGlobalVariables, theDV1, 10000);
     Vector<Rational> tempRoot, tempRoot2;
-    WeylFDSmall.AmbientWeyl.theGroup.ComputeAllElements(20);
+    WeylFDSmall.AmbientWeyl->theGroup.ComputeAllElements(false, 20);
     out << "<hr>";//In the following weight visualization, a yellow line is drawn if the corresponding weights are "
     //<< " simple reflections of one another, with respect to a simple Vector<Rational> of the Levi part of the parabolic subalgebra. ";
     for (int i=0; i<output.size(); i++)
-    { tempRoot=WeylFDSmall.AmbientWeyl.GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordS).GetVectorRational();
+    { tempRoot=WeylFDSmall.AmbientWeyl->GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordS).GetVectorRational();
 //      smallWeyl.DrawContour
  //     (tempRoot, theDV1, theGlobalVariables, CGI::RedGreenBlue(200, 200, 0), 1000);
       std::stringstream tempStream;
       tempStream << output.theCoeffs[i].ToString();
       theDV1.drawTextAtVectorBuffer(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal, 0);
-      for (int j=1; j<WeylFDSmall.AmbientWeyl.theGroup.theElements.size; j++)
+      for (int j=1; j<WeylFDSmall.AmbientWeyl->theGroup.theElements.size; j++)
       { tempRoot2=tempRoot;
-        WeylFDSmall.AmbientWeyl.ActOnRhoModified(j, tempRoot2);
+        WeylFDSmall.AmbientWeyl->ActOnRhoModified(j, tempRoot2);
         theDV1.drawCircleAtVectorBuffer(tempRoot2, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(200,0,0));
       }
     }
-    out << "<hr>" << theDV1.GetHtmlFromDrawOperationsCreateDivWithUniqueName(WeylFDSmall.AmbientWeyl.GetDim());
+    out << "<hr>" << theDV1.GetHtmlFromDrawOperationsCreateDivWithUniqueName(WeylFDSmall.AmbientWeyl->GetDim());
 /*    DrawingVariables theDV2;
     std::string tempS;
     this->DrawMeNoMults(tempS, theGlobalVariables, theDV2, 10000);

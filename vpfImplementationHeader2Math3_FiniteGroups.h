@@ -25,6 +25,7 @@ std::string FinitelyGeneratedMatrixMonoid<coefficient>::ToString(FormatExpressio
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::ComputeAllElements(bool andWords, int MaxElements)
 { MacroRegisterFunctionWithName("FiniteGroup::ComputeAllElements");
+  this->CheckConsistency();
 //  double startTimeDebug=theGlobalVariables.GetElapsedSeconds();
   this->sizePrivate = this->SizeByFormulaOrNeg1();
   if (this->sizePrivate>0 && MaxElements>0 && this->sizePrivate>MaxElements)
@@ -554,7 +555,8 @@ coefficient FiniteGroup<elementSomeGroup>::GetHermitianProduct
 
 template <class elementSomeGroup>
 LargeInt FiniteGroup<elementSomeGroup>::GetSize()
-{ if(this->sizePrivate > 0)
+{ this->CheckConsistency();
+  if(this->sizePrivate > 0)
     return sizePrivate;
   if(this->GetSizeByFormula!=0 && this->specificDataPointer!=0)
   { this->sizePrivate = this->GetSizeByFormula(this->specificDataPointer);
@@ -839,7 +841,9 @@ bool FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives()
 
 template <class elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives()
-{ if(this->GetSizeByFormula!=0)
+{ MacroRegisterFunctionWithName("FiniteGroup::ComputeCCSizesAndRepresentatives");
+  this->CheckConsistency();
+  if(this->GetSizeByFormula!=0)
   { LargeInt theSize = this->GetSizeByFormula(this);
     // extended digit separators only appear in cxx14
     if(theSize > 100000000)
@@ -853,7 +857,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives()
 
 template <class elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentativesWithOrbitIterator()
-{ MacroRegisterFunctionWithName("FiniteGroup::ComputeCCSizesAndRepresentatives");
+{ MacroRegisterFunctionWithName("FiniteGroup::ComputeCCSizesAndRepresentativesWithOrbitIterator");
   if (this->flagCCRepresentativesComputed)
     return;
 

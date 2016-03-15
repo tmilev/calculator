@@ -4524,14 +4524,15 @@ void WeylGroupData::init()
   this->flagIrrepsAreComputed=false;
   this->flagCharTableIsComputed=false;
   this->MatrixSendsSimpleVectorsToEpsilonVectors.FreeMemory();
-  this->theGroup.specificDataPointer=this;
   this->theGroup.init();
+  this->theGroup.specificDataPointer=this;
   this->theGroup.GetWordByFormula = this->GetWordByFormulaImplementation;
   this->theGroup.GetSizeByFormula = this->GetSizeByFormulaImplementation;
   this->theGroup.ComputeCCSizesAndRepresentativesByFormula = 0;
   this->theGroup.AreConjugateByFormula = 0;
   this->theGroup.ComputeIrreducibleRepresentationsWithFormulas =
   this->ComputeIrreducibleRepresentationsWithFormulasImplementation;
+  this->theGroup->CheckInitialization();
 }
 
 void WeylGroupData::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho)

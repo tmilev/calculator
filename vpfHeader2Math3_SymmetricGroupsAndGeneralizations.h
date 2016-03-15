@@ -1420,7 +1420,8 @@ bool FiniteGroup<elementSomeGroup>::PossiblyConjugate(const elementSomeGroup& x,
 
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& x, const elementSomeGroup& y)
-{ if(this->AreConjugateByFormula!=0)
+{ this->CheckConsistency();
+  if(this->AreConjugateByFormula!=0)
     return this->AreConjugateByFormula(x,y);
   if(!this->flagCCsComputed)
     this->ComputeCCSizesAndRepresentatives();
@@ -1457,7 +1458,9 @@ void FiniteGroup<elementSomeGroup>::MakeID(elementSomeGroup& e)
 // representatives, and words.
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::ComputeCCSizesRepresentativesWords()
-{ if(this->GetWordByFormula)
+{ MacroRegisterFunctionWithName("FiniteGroup::ComputeCCSizesRepresentativesWords");
+  this->CheckConsistency();
+  if(this->GetWordByFormula!=0)
     this->flagWordsComputed = true;
   if(this->flagCCsComputed && this->flagWordsComputed)
     return;
@@ -1465,11 +1468,12 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesRepresentativesWords()
   { this->ComputeCCSizesAndRepresentativesByFormula(this);
     return;
   }
-
   if(this->AreConjugateByFormula!=0)
     stOutput << "This needs a rewrite";
   if(!this->flagWordsComputed || !this->flagAllElementsAreComputed)
     this->ComputeAllElements(true, -1);
+  stOutput << "GOT to here in computation of cc sizes and rep words";
+  //Thomas, at
   GraphOLD conjugacygraph = GraphOLD(this->theElements.size, this->generators.size);
   for(int i=0; i<this->theElements.size; i++)
     for(int j=0; j<this->generators.size; j++)
@@ -1486,7 +1490,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesRepresentativesWords()
     this->conjugacyClasseS[i].indicesEltsInOwner = components[i];
     this->conjugacyClasseS[i].representativeIndex = components[i][0];
     if(this->flagWordsComputed)
-      GetWord(conjugacyClasseS[i].representative, conjugacyClasseS[i].representativeWord);
+      this->GetWord(conjugacyClasseS[i].representative, conjugacyClasseS[i].representativeWord);
   }
   this->flagCCsComputed = true;
   this->flagCCRepresentativesComputed = true;
@@ -1501,7 +1505,7 @@ void FiniteGroup<elementSomeGroup>::ComputeElementsAndCCs(void* unused)
 
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::GetWord(const elementSomeGroup& g, List<int>& word)
-{ if(GetWordByFormula)
+{ if(this->GetWordByFormula!=0)
     return this->GetWordByFormula(this,g,word);
   if(!this->flagWordsComputed)
     this->ComputeAllElementsLargeGroup(true);

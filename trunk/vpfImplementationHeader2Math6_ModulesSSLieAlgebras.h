@@ -486,7 +486,7 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi
         currentElt+=tempElt;
         lastNonZeroIndex=i;
       }
-    currentWeight=subWeyl.AmbientWeyl.GetFundamentalCoordinatesFromSimple(this->theGeneratingWordsWeightsPlusWeightFDpart[lastNonZeroIndex]);//<-implicitTypeConversionHere
+    currentWeight=subWeyl.AmbientWeyl->GetFundamentalCoordinatesFromSimple(this->theGeneratingWordsWeightsPlusWeightFDpart[lastNonZeroIndex]);//<-implicitTypeConversionHere
     currentWeight+=hwFundCoordsNilPart;
     readyForLatexComsumption <<  "$" << currentWeight.ToStringLetterFormat("\\omega") << "$&$" << currentVect.ToStringLetterFormat("m") << "$";
     if (currentElt.size()>1)

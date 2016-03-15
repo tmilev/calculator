@@ -8,6 +8,9 @@ static ProjectInformationInstance ProjectInfoVpfHeaderSemisimpleLieAlgebras(__FI
 
 class SemisimpleLieAlgebra
 {
+private:
+  void operator=(const SemisimpleLieAlgebra& other);//<-semisimple Lie algebra can't be moved once created.
+  //<-Too many objects have pointers to it.
 public:
   bool flagAnErrorHasOccurredTimeToPanic;
   WeylGroupData theWeyl;
@@ -42,7 +45,7 @@ public:
   static unsigned int HashFunction(const SemisimpleLieAlgebra& input)
   { return input.theWeyl.HashFunction();
   }
-  void ComputeFolderNames(GlobalVariables& theGlobalVariables);
+  void ComputeFolderNames();
   template <class coefficient>
   void GetGenericElementCartan(ElementSemisimpleLieAlgebra<Polynomial<coefficient> >& output, int indexFirstVar=0)
   { output.MakeZero();
@@ -82,7 +85,7 @@ public:
   }
   bool CheckConsistency()const;
   template <class coefficient>
-  void GenerateLieSubalgebra(List<ElementSemisimpleLieAlgebra<coefficient> >& inputOutputGenerators, GlobalVariables* theGlobalVariables=0);
+  void GenerateLieSubalgebra(List<ElementSemisimpleLieAlgebra<coefficient> >& inputOutputGenerators);
   void ComputeMultTable();
   bool IsOfSimpleType(char desiredType, int desiredRank)const
   { return this->theWeyl.IsOfSimpleType(desiredType, desiredRank);
@@ -193,26 +196,26 @@ public:
   bool TestForConsistency();
   bool AttempTFindingHEF
   (ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputH, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputE,
-   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputF, std::stringstream* logStream=0, GlobalVariables* theGlobalVariables=0);
+   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputF, std::stringstream* logStream=0);
   bool AttemptExtendingEtoHEFwithHinCartan
   (ElementSemisimpleLieAlgebra<AlgebraicNumber>& theE, ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputH,
-   ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF, std::stringstream* logStream=0, GlobalVariables* theGlobalVariables=0);
+   ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF, std::stringstream* logStream=0);
   bool AttemptExtendingHtoHEFwithHinCartan
   (ElementSemisimpleLieAlgebra<Rational>& theH, ElementSemisimpleLieAlgebra<Rational>& outputE,
-   ElementSemisimpleLieAlgebra<Rational>& outputF, GlobalVariables* theGlobalVariables);
+   ElementSemisimpleLieAlgebra<Rational>& outputF);
   static void FindSl2Subalgebras
-  (SemisimpleLieAlgebra& inputOwner, SltwoSubalgebras& output, GlobalVariables* theGlobalVariables);
-  void GetSl2SubalgebraFromRootSA(GlobalVariables& theGlobalVariables);
+  (SemisimpleLieAlgebra& inputOwner, SltwoSubalgebras& output);
+  void GetSl2SubalgebraFromRootSA();
   template<class coefficient>
   void GetAd(Matrix<coefficient>& output, ElementSemisimpleLieAlgebra<coefficient>& e);
   template<class coefficient>
   void GetAd(MatrixTensor<coefficient>& output, ElementSemisimpleLieAlgebra<coefficient>& e);
-  void MakeChevalleyTestReport(int i, int j, int k, int Total, GlobalVariables& theGlobalVariables);
-  bool IsInTheWeightSupport(Vector<Rational>& theWeight, Vector<Rational>& highestWeight, GlobalVariables& theGlobalVariables);
-  void GenerateOneMonomialPerWeightInTheWeightSupport(Vector<Rational>& theHighestWeight, GlobalVariables& theGlobalVariables);
-  void CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vector<Rational>& theHighestWeight, GlobalVariables& theGlobalVariables);
+  void MakeChevalleyTestReport(int i, int j, int k, int Total);
+  bool IsInTheWeightSupport(Vector<Rational>& theWeight, Vector<Rational>& highestWeight);
+  void GenerateOneMonomialPerWeightInTheWeightSupport(Vector<Rational>& theHighestWeight);
+  void CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vector<Rational>& theHighestWeight);
   int GetLengthStringAlongAlphaThroughBeta(Vector<Rational>& alpha, Vector<Rational>& beta, int& distanceToHighestWeight, Vectors<Rational>& weightSupport);
-  void ComputeOneAutomorphism(GlobalVariables& theGlobalVariables, Matrix<Rational>& outputAuto,  bool useNegativeRootsFirst);
+  void ComputeOneAutomorphism(Matrix<Rational>& outputAuto,  bool useNegativeRootsFirst);
   bool operator==(const SemisimpleLieAlgebra& other)const
   { return this->theWeyl==other.theWeyl;
   }
@@ -296,9 +299,9 @@ class charSSAlgMod : public MonomialCollection<Weight<coefficient>, coefficient>
   bool GetDominantCharacterWRTsubalgebra
   (charSSAlgMod& outputCharOwnerSetToZero, std::string& outputDetails, GlobalVariables& theGlobalVariables, int upperBoundNumDominantWeights);
   bool FreudenthalEvalMeDominantWeightsOnly
-  (charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails, GlobalVariables* theGlobalVariables);
+  (charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails);
   bool FreudenthalEvalMeFullCharacter
-  (charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails, GlobalVariables* theGlobalVariables);
+  (charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails);
   std::string ToStringFullCharacterWeightsTable();
   bool DrawMeNoMults(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars, int upperBoundWeights)
   { return this->DrawMe(outputDetails, theGlobalVariables, theDrawingVars, upperBoundWeights, false);
@@ -378,7 +381,9 @@ public:
   { this->ToString(output, false, theGlobalVariables);
   }
   void ToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
-  void MakeGinGWithId(char theWeylLetter, int theWeylDim, ListReferences<SemisimpleLieAlgebra>& ownerOfAlgebras, GlobalVariables& theGlobalVariables);
+  void MakeGinGWithId
+ (char theWeylLetter, int theWeylDim, MapReferences<SemisimpleLieAlgebra, DynkinType>& ownerOfAlgebras)
+  ;
   void ProjectOntoSmallCartan(Vector<Rational>& input, Vector<Rational> & output, GlobalVariables& theGlobalVariables);
   void ProjectOntoSmallCartan(Vectors<Rational>& input, Vectors<Rational>& output, GlobalVariables& theGlobalVariables);
   void GetMapSmallCartanDualToLargeCartanDual(Matrix<Rational> & output);

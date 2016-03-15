@@ -1240,9 +1240,11 @@ void GeneralizedVermaModuleCharacters::SortMultiplicities(GlobalVariables& theGl
 }
 
 std::string GeneralizedVermaModuleCharacters::CheckMultiplicitiesVsOrbits(GlobalVariables& theGlobalVariables)
-{ std::stringstream out;
-  int totalDimAffine=this->WeylLarger.GetDim()+this->WeylSmaller.GetDim();
-  int smallDim=this->WeylSmaller.GetDim();
+{ MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::CheckMultiplicitiesVsOrbits");
+  this->CheckInitialization();
+  std::stringstream out;
+  int totalDimAffine=this->WeylLarger->GetDim()+this->WeylSmaller->GetDim();
+  int smallDim=this->WeylSmaller->GetDim();
   Vector<Rational> normal;
   normal.MakeZero(totalDimAffine+1);
   Vectors<Rational> newWalls;
@@ -1340,8 +1342,8 @@ void GeneralizedVermaModuleCharacters::WriteToFile(std::fstream& output, GlobalV
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected.WriteToFile(output);
   this->ParabolicSelectionSmallerAlgebra.WriteToFile(output);
   output << "\n";
-  this->WeylLarger.WriteToFile(output);
-  this->WeylSmaller.WriteToFile(output);
+  this->WeylLarger->WriteToFile(output);
+  this->WeylSmaller->WriteToFile(output);
   this->preferredBasiS.WriteToFile(output);
   this->preferredBasisChangE.WriteToFile(output);
   this->preferredBasisChangeInversE.WriteToFile(output);
@@ -1390,28 +1392,47 @@ void GeneralizedVermaModuleCharacters::WriteToFile(std::fstream& output, GlobalV
   output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
 }
 
+GeneralizedVermaModuleCharacters::GeneralizedVermaModuleCharacters()
+{ this->UpperLimitChambersForDebugPurposes=-1;
+  this->computationPhase=0;
+  this->NumProcessedConesParam=0;
+  this->NumProcessedExtremaEqualOne=0;
+  this->numNonZeroMults=0;
+  this->WeylLarger=0;
+  this->WeylSmaller=0;
+}
+
+bool GeneralizedVermaModuleCharacters::CheckInitialization()const
+{ if (this->WeylLarger==0 || this->WeylSmaller==0)
+    crash << "Use of non-initialized Weyl group within generalized Verma module characters. " << crash;
+  if (this->WeylLarger->flagDeallocated || this->WeylSmaller->flagDeallocated)
+    crash << "Use after free of Weyl group within Verma module characters. " << crash;
+  return true;
+}
+
 void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::initFromHomomorphism");
+
   Vectors<Rational> tempRoots;
-  this->WeylLarger=input.theRange().theWeyl;
-  this->WeylSmaller=input.theDomain().theWeyl;
+  this->WeylLarger= &input.theRange().theWeyl;
+  this->WeylSmaller=&input.theDomain().theWeyl;
   WeylGroupData& theWeYl=input.theRange().theWeyl;
 //  input.ProjectOntoSmallCartan(theWeyl.RootsOfBorel, tempRoots, theGlobalVariables);
   this->log << "projections: " << tempRoots.ToString();
   theWeYl.theGroup.ComputeAllElements(false);
   this->NonIntegralOriginModificationBasisChanged="(1/2,1/2)";
-  Matrix<Rational>  theProjectionBasisChanged;
+  Matrix<Rational> theProjectionBasisChanged;
   Vector<Rational> startingWeight, projectedWeight;
   FormatExpressions theFormat;
-  crash << crash;
+  crash << "Not implemented. " << crash;
 //  SSalgebraModuleOld tempM;
   std::stringstream tempStream;
   input.ComputeHomomorphismFromImagesSimpleChevalleyGenerators(theGlobalVariables);
-  crash << crash;
+  crash << "Not implemented. " << crash;
 //  tempM.InduceFromEmbedding(tempStream, input, theGlobalVariables);
   input.GetWeightsGmodKInSimpleCoordsK(this->GmodKnegativeWeightS, theGlobalVariables);
 //  this->log << "weights of g mod k: " << this->GmodKnegativeWeights.ToString();
-  Matrix<Rational>  tempMat;
+  Matrix<Rational> tempMat;
   tempMat=input.theDomain().theWeyl.CartanSymmetric;
   tempMat.Invert();
 //  tempMat.ActOnVectorsColumn(this->GmodKnegativeWeightS);
@@ -1784,8 +1805,8 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase(std::fstre
   input >> tempS;
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected.ReadFromFile(input);
   this->ParabolicSelectionSmallerAlgebra.ReadFromFile(input);
-  this->WeylLarger.ReadFromFile(input);
-  this->WeylSmaller.ReadFromFile(input);
+  this->WeylLarger->ReadFromFile(input);
+  this->WeylSmaller->ReadFromFile(input);
   this->preferredBasiS.ReadFromFile(input);
   this->preferredBasisChangE.ReadFromFile(input, theGlobalVariables);
   this->preferredBasisChangeInversE.ReadFromFile(input);

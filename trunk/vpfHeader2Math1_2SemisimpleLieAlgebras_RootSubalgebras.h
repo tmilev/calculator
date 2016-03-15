@@ -189,7 +189,7 @@ public:
   void GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables);
   void GetCoxeterElement(Matrix<Rational>& output);
   void ComputePotentialExtensions();
-  void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexRootSAinContainer, GlobalVariables* theGlobalVariables);
+  void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexRootSAinContainer);
   bool IsEquivalentToByDiagramsAndDimensions(const rootSubalgebra& other)const;
   void ComputeOuterSAautosExtendingToAmbientAutosGenerators();
   bool IsGeneratingSingularVectors(int indexKmod, Vectors<Rational>& NilradicalRoots);
@@ -420,11 +420,10 @@ public:
   (bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output)const;
   void ComputeModuleDecomposition
   (Vectors<Rational>& positiveRootsContainingRegularSA, int dimensionContainingRegularSA,
-   charSSAlgMod<Rational>& outputHWs, List<int>& outputModuleDimensions,
-   GlobalVariables* theGlobalVariables)
+   charSSAlgMod<Rational>& outputHWs, List<int>& outputModuleDimensions)
    ;
-  void ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables* theGlobalVariables);
-  bool AttemptToComputeCentralizer(GlobalVariables* theGlobalVariables);
+  void ComputeModuleDecompositionAmbientLieAlgebra();
+  bool AttemptToComputeCentralizer();
   bool AttemptExtendingHFtoHEFWRTSubalgebra
   (Vectors<Rational>& RootsWithCharacteristic2, Selection& theZeroCharacteristics, Vectors<Rational>& simpleBasisSA, Vector<Rational>& h,
    ElementSemisimpleLieAlgebra<Rational>& outputE, ElementSemisimpleLieAlgebra<Rational>& outputF, Matrix<Rational>& outputMatrixSystemToBeSolved,
@@ -435,7 +434,7 @@ public:
    Matrix<Rational>& outputMatrixSystemToBeSolved, Matrix<Rational>& outputSystemColumnVector, PolynomialSubstitution<Rational>& outputSystemToBeSolved);
 
   void ComputeModuleDecompositionOfMinimalContainingRegularSAs
-  (SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables* theGlobalVariables);
+  (SltwoSubalgebras& owner, int IndexInOwner);
   bool ModuleDecompositionFitsInto(const slTwoSubalgebra& other)const;
   static bool ModuleDecompositionLeftFitsIntoRight
   (const charSSAlgMod<Rational>& moduleDecompoLeft,
@@ -494,7 +493,7 @@ public:
   { this->CheckForCorrectInitializationCrashIfNot();
     return *this->owner;
   }
-  void ComputeModuleDecompositionsOfAmbientLieAlgebra(GlobalVariables* theGlobalVariables);
+  void ComputeModuleDecompositionsOfAmbientLieAlgebra();
   void reset(SemisimpleLieAlgebra& inputOwners);
   void ComputeDebugStringCurrent();
   bool ContainsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex);

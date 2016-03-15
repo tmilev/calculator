@@ -239,7 +239,18 @@ class Expression
   template <class theType>
   bool ConvertsToType(theType* whichElement=0)const;
   template <class theType>
-  bool IsOfType(theType* whichElement=0)const
+  bool IsOfType()const
+  { MacroRegisterFunctionWithName("Expression::IsOfType");
+    if (this->owner==0)
+      return false;
+    if (!this->StartsWith(this->GetTypeOperation<theType>()))
+      return false;
+    if(this->children.size<2 || !this->GetLastChild().IsAtom())
+      return false;
+    return true;
+  }
+  template <class theType>
+  bool IsOfType(theType* whichElement)const
   { MacroRegisterFunctionWithName("Expression::IsOfType");
     if (this->owner==0)
       return false;
@@ -636,12 +647,14 @@ class ObjectContainer
   //by various predefined function handlers.
 public:
   HashedListReferences<ElementWeylGroup<WeylGroupData> > theWeylGroupElements;
+///////////////////////
+  MapReferences<SemisimpleLieAlgebra, DynkinType> theSSLieAlgebras;
+  MapReferences<SemisimpleSubalgebras, DynkinType> theSSSubalgebraS;
+////////////////////////
   HashedListReferences<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> > theWeylGroupReps;
   HashedListReferences<VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> > theWeylGroupVirtualReps;
   ListReferences<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
-  HashedListReferences<SemisimpleLieAlgebra> theLieAlgebras;
   ListReferences<SltwoSubalgebras> theSltwoSAs;
-  ListReferences<SemisimpleSubalgebras> theSSsubalgebras;
   HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theTensorElts;
   HashedListReferences<Polynomial<Rational> > thePolys;
   HashedListReferences<Polynomial<AlgebraicNumber> > thePolysOverANs;
@@ -670,6 +683,10 @@ public:
   ListReferences<HyperoctahedralGroupData> theHyperOctahedralGroups;
 //  HashedList<DifferentialForm<Rational> > theDiffForm;
   HashedListReferences<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
+  WeylGroupData& GetWeylGroupDataCreateIfNotPresent(const DynkinType& input);
+  SemisimpleLieAlgebra& GetLieAlgebraCreateIfNotPresent(const DynkinType& input);
+  SemisimpleSubalgebras& GetSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input);
+
   void reset();
   std::string ToString();
 };
@@ -2014,10 +2031,10 @@ bool Calculator::GetTypeWeight
     << " polynomials. The second argument you gave is " << middleE.ToString() << ".";
     return false;
   }
-  if (!theCommands.theObjectContainer.theLieAlgebras.ContainsExactlyOnce(*ambientSSalgebra))
+  if (!theCommands.theObjectContainer.theSSLieAlgebras.Contains(ambientSSalgebra->theWeyl.theDynkinType))
     crash << "This is a programming error: " << ambientSSalgebra->GetLieAlgebraName()
     << " contained object container more than once. " << crash;
-  int algebraIndex=theCommands.theObjectContainer.theLieAlgebras.GetIndex(*ambientSSalgebra);
+  int algebraIndex=theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(ambientSSalgebra->theWeyl.theDynkinType);
   outputWeightContext.ContextSetSSLieAlgebrA(algebraIndex, theCommands);
   return true;
 }
@@ -2055,9 +2072,9 @@ bool Calculator::GetTypeHighestWeightParabolic
       if (!outputWeightHWFundcoords[i].IsSmallInteger())
         outputInducingSel.AddSelectionAppendNewIndex(i);
   }
-  if (!theCommands.theObjectContainer.theLieAlgebras.ContainsExactlyOnce(*ambientSSalgebra))
+  if (!theCommands.theObjectContainer.theSSLieAlgebras.Contains(ambientSSalgebra->theWeyl.theDynkinType))
     crash << "This is a programming error: " << ambientSSalgebra->GetLieAlgebraName() << " contained object container more than once. " << crash;
-  int algebraIndex=theCommands.theObjectContainer.theLieAlgebras.GetIndex(*ambientSSalgebra);
+  int algebraIndex=theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(ambientSSalgebra->theWeyl.theDynkinType);
   outputHWContext.ContextSetSSLieAlgebrA(algebraIndex, theCommands);
 //  stOutput << "final context of GetTypeHighestWeightParabolic: " << outputHWContext.ToString();
   return true;

@@ -53,6 +53,9 @@ public:
         return true;
     return false;
   }
+  void SwapTwoIndices(int index1, int index2)
+  { this->theReferences.SwapTwoIndices(index1, index2);
+  }
   void AllocateElements(int newSize);
   void Reserve(int desiredSize){this->AllocateElements(desiredSize);}
   void SetSize(int newSize)
@@ -90,6 +93,10 @@ public:
 //  void operator=(const ListReferences<Object>& other);
   Object& LastObject()const
   { return (*this)[this->size-1];
+  }
+  template <class otherType=Object>
+  void QuickSortAscending(bool theOrder(const Object& left, const Object& right)=0, List<otherType>* carbonCopy=0)
+  { MathRoutines::QuickSortAscending(*this, theOrder, carbonCopy);
   }
   ListReferences():flagDeallocated(false), size(0)
   {}

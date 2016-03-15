@@ -17,10 +17,12 @@ ProjectInformationInstance ProjectInfoVpf5cpp(__FILE__, "Calculator built-in fun
 
 template <>
 bool SubgroupWeylGroupOLD::IsDominantWRTgenerator<RationalFunctionOld>(const Vector<RationalFunctionOld>& theWeight, int generatorIndex)
-{ Vector<RationalFunctionOld> tempVect;
+{ MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::IsDominantWRTgenerator");
+  this->CheckInitialization();
+  Vector<RationalFunctionOld> tempVect;
   RationalFunctionOld tempRF;
   tempVect=this->simpleGenerators[generatorIndex].GetVectorRational();
-  tempRF=this->AmbientWeyl.RootScalarCartanRoot(theWeight, tempVect);
+  tempRF=this->AmbientWeyl->RootScalarCartanRoot(theWeight, tempVect);
   if (tempRF.expressionType!=tempRF.typeRational)
   { crash << "This might or might not be a programming mistake: I am being asked whether a weight"
     << " with rational function coefficients is dominant. I took the scalar products with the positive simple roots "
@@ -37,7 +39,8 @@ bool SubgroupWeylGroupOLD::IsDominantWRTgenerator<RationalFunctionOld>(const Vec
 
 template <>
 bool SubgroupWeylGroupOLD::IsDominantWRTgenerator<Rational>(const Vector<Rational>& theWeight, int generatorIndex)
-{ return !this->AmbientWeyl.RootScalarCartanRoot(theWeight, this->simpleGenerators[generatorIndex]).IsNegative();
+{ this->CheckInitialization();
+  return !this->AmbientWeyl->RootScalarCartanRoot(theWeight, this->simpleGenerators[generatorIndex]).IsNegative();
 }
 
 template <>
@@ -77,15 +80,17 @@ void SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots
 bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra
 (Vector<Rational>& highestWeightSimpleCoords, HashedList<Vector<Rational> >& outputWeightsSimpleCoords,
  int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
-{ std::stringstream out;
+{ MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra");
+  this->CheckInitialization();
+  std::stringstream out;
 //  double startTime=theGlobalVariables.GetElapsedSeconds();
 //  stOutput << "<br>time elapsed: " << theGlobalVariables.GetElapsedSeconds()-startTime;
   Vector<Rational> highestWeightTrue=highestWeightSimpleCoords;
   Vectors<Rational> basisEi;
-  int theDim=this->AmbientWeyl.GetDim();
+  int theDim=this->AmbientWeyl->GetDim();
   basisEi.MakeEiBasis(theDim);
   this->RaiseToDominantWeight(highestWeightTrue);
-  Vector<Rational> highestWeightFundCoords=this->AmbientWeyl.GetFundamentalCoordinatesFromSimple(highestWeightTrue);
+  Vector<Rational> highestWeightFundCoords=this->AmbientWeyl->GetFundamentalCoordinatesFromSimple(highestWeightTrue);
   if (!highestWeightFundCoords.SumCoords().IsSmallInteger())
     return false;
   int theTopHeightSimpleCoords=(int) highestWeightSimpleCoords.SumCoords().GetDoubleValue()+1;
@@ -93,7 +98,7 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebr
   if (theTopHeightSimpleCoords<0)
     theTopHeightSimpleCoords=0;
   List<HashedList<Vector<Rational> > > outputWeightsByHeight;
-  int topHeightRootSystem=this->AmbientWeyl.RootsOfBorel.LastObject()->SumCoords().NumShort;
+  int topHeightRootSystem=this->AmbientWeyl->RootsOfBorel.LastObject()->SumCoords().NumShort;
   int topHeightRootSystemPlusOne=topHeightRootSystem+1;
   outputWeightsByHeight.SetSize(topHeightRootSystemPlusOne);
   int finalHashSize=100;
@@ -102,7 +107,7 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebr
   outputWeightsSimpleCoords.Clear();
   outputWeightsByHeight[0].AddOnTop(highestWeightTrue);
   int numTotalWeightsFound=0;
-  int numPosRoots=this->AmbientWeyl.RootsOfBorel.size;
+  int numPosRoots=this->AmbientWeyl->RootsOfBorel.size;
   Vector<Rational> currentWeight, currentWeightRaisedToDominantWRTAmbientAlgebra;
 //  stOutput << "<br>time spend before working cycle: " << theGlobalVariables.GetElapsedSeconds()-startTime;
   for (int lowestUnexploredHeightDiff=0; lowestUnexploredHeightDiff<=theTopHeightSimpleCoords;
@@ -115,13 +120,13 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebr
     for (int lowest=0; lowest<currentHashes.size; lowest++)
       for (int i=0; i<numPosRoots; i++)
       { currentWeight=currentHashes[lowest];
-        currentWeight-=this->AmbientWeyl.RootsOfBorel[i];
+        currentWeight-=this->AmbientWeyl->RootsOfBorel[i];
         if (this->IsDominantWeight(currentWeight))
         { currentWeightRaisedToDominantWRTAmbientAlgebra=currentWeight;
-          this->AmbientWeyl.RaiseToDominantWeight(currentWeightRaisedToDominantWRTAmbientAlgebra);
+          this->AmbientWeyl->RaiseToDominantWeight(currentWeightRaisedToDominantWRTAmbientAlgebra);
           currentWeightRaisedToDominantWRTAmbientAlgebra-=highestWeightTrue;
           if (currentWeightRaisedToDominantWRTAmbientAlgebra.IsNegativeOrZero())
-          { int currentIndexShift=this->AmbientWeyl.RootsOfBorel[i].SumCoords().NumShort;
+          { int currentIndexShift=this->AmbientWeyl->RootsOfBorel[i].SumCoords().NumShort;
             currentIndexShift=(currentIndexShift+bufferIndexShift)%topHeightRootSystemPlusOne;
             if (outputWeightsByHeight[currentIndexShift].AddOnTopNoRepetition(currentWeight))
             { numTotalWeightsFound++;
@@ -452,11 +457,12 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
 }
 
 void Calculator::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
-{ SemisimpleLieAlgebra tempb3alg, tempg2alg;
-  tempb3alg.theWeyl.MakeArbitrarySimple('B',3);
-  tempg2alg.theWeyl.MakeArbitrarySimple('G',2);
-  output.domainAlg=&this->theObjectContainer.theLieAlgebras.GetElement(this->theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempg2alg));
-  output.rangeAlg =&this->theObjectContainer.theLieAlgebras.GetElement(this->theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempb3alg));
+{ MacroRegisterFunctionWithName("Calculator::MakeHmmG2InB3");
+  DynkinType b3Type, g2Type;
+  b3Type.MakeSimpleType('B', 3);
+  g2Type.MakeSimpleType('G',2);
+  output.domainAlg=&this->theObjectContainer.GetLieAlgebraCreateIfNotPresent(g2Type);
+  output.rangeAlg=&this->theObjectContainer.GetLieAlgebraCreateIfNotPresent(b3Type);
 
   output.theRange().ComputeChevalleyConstants();
   output.theDomain().ComputeChevalleyConstants();
@@ -567,7 +573,9 @@ bool Calculator::innerPrintB3G2branchingIntermediate(Calculator& theCommands, co
           }
           latexTable << "\\multirow{" << theG2B3Data.theEigenVectorS.size  << "}{*}{$" << theG2B3Data.theAmbientChar.ToString(&theG2B3Data.theFormat) << "$}";
           latexTable << "& \\multirow{" << theG2B3Data.theEigenVectorS.size  << "}{*}{$"
-          << theG2B3Data.WeylFD.WeylDimFormulaSimpleCoords(theG2B3Data.WeylFD.AmbientWeyl.GetSimpleCoordinatesFromFundamental(theG2B3Data.theAmbientChar[0].weightFundamentalCoordS)).ToString(&theG2B3Data.theFormat)
+          << theG2B3Data.WeylFD.WeylDimFormulaSimpleCoords
+          (theG2B3Data.WeylFD.AmbientWeyl->GetSimpleCoordinatesFromFundamental
+           (theG2B3Data.theAmbientChar[0].weightFundamentalCoordS)).ToString(&theG2B3Data.theFormat)
           << "$}";
         } else
           latexTable << "&";
@@ -583,7 +591,9 @@ bool Calculator::innerPrintB3G2branchingIntermediate(Calculator& theCommands, co
           latexTable << "&\\multirow{" << multiplicity  << "}{*}{$";
           if (multiplicity>1)
             latexTable << multiplicity << "\\times";
-          latexTable << theG2B3Data.WeylFDSmall.WeylDimFormulaSimpleCoords(theG2B3Data.WeylFDSmall.AmbientWeyl.GetSimpleCoordinatesFromFundamental(tempChar[0].weightFundamentalCoordS), rfOne).ToString(&theG2B3Data.theFormat) << "$}";
+          latexTable << theG2B3Data.WeylFDSmall.WeylDimFormulaSimpleCoords
+          (theG2B3Data.WeylFDSmall.AmbientWeyl->GetSimpleCoordinatesFromFundamental
+           (tempChar[0].weightFundamentalCoordS), rfOne).ToString(&theG2B3Data.theFormat) << "$}";
         } else
           latexTable << "&";
         latexTable << "&";
@@ -724,7 +734,9 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
     theCharacter.SplitCharOverRedSubalg(0, outputChar, theg2b3data, theGlobalVariables);
     theg2b3data.theFormat.fundamentalWeightLetter= "\\omega";
     out << "<tr><td> " << theCharacter.ToString(&theg2b3data.theFormat) << "</td> ";
-    out << "<td>" << theg2b3data.WeylFD.WeylDimFormulaSimpleCoords(theg2b3data.WeylFD.AmbientWeyl.GetSimpleCoordinatesFromFundamental(theCharacter[0].weightFundamentalCoordS)).ToString() << "</td>";
+    out << "<td>" << theg2b3data.WeylFD.WeylDimFormulaSimpleCoords
+    (theg2b3data.WeylFD.AmbientWeyl->GetSimpleCoordinatesFromFundamental
+     (theCharacter[0].weightFundamentalCoordS)).ToString() << "</td>";
     latexTable << " $ " << theCharacter.ToString(&theg2b3data.theFormat) << " $ ";
     theg2b3data.theFormat.fundamentalWeightLetter= "\\psi";
     out << "<td>" << outputChar.ToString(&theg2b3data.theFormat) << "</td>";
@@ -735,7 +747,9 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
     for (int i=0; i<outputChar.size(); i++)
     { if (!outputChar.theCoeffs[i].IsEqualToOne())
         out << outputChar.theCoeffs[i].ToString() << " x ";
-      out << theg2b3data.WeylFDSmall.WeylDimFormulaSimpleCoords(theg2b3data.WeylFDSmall.AmbientWeyl.GetSimpleCoordinatesFromFundamental(outputChar[i].weightFundamentalCoordS));
+      out << theg2b3data.WeylFDSmall.WeylDimFormulaSimpleCoords
+      (theg2b3data.WeylFDSmall.AmbientWeyl->GetSimpleCoordinatesFromFundamental
+       (outputChar[i].weightFundamentalCoordS));
       if (i!=outputChar.size()-1)
         out << "+";
       leftWeightSimple=smallWeyl.GetSimpleCoordinatesFromFundamental(outputChar[i].weightFundamentalCoordS);
@@ -1095,12 +1109,12 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
   List<LittelmannPath> tempList;
   List<List<int> > theStrings;
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> tempMon;
-  SemisimpleLieAlgebra tempAlg;
+  DynkinType currentType;
   for (int i=0; i<theRanks.size; i++)
-  { tempAlg.theWeyl.MakeArbitrarySimple(theWeylLetters[i], theRanks[i]);
-    tempAlg.ComputeChevalleyConstants();
-    SemisimpleLieAlgebra& currentAlg=theCommands.theObjectContainer.theLieAlgebras.GetElement
-    (theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempAlg));
+  { currentType.MakeSimpleType(theWeylLetters[i], theRanks[i]);
+    SemisimpleLieAlgebra& currentAlg=
+    theCommands.theObjectContainer.GetLieAlgebraCreateIfNotPresent(currentType);
+    currentAlg.ComputeChevalleyConstants();
     currentAlg.theWeyl.GetHighestWeightsAllRepsDimLessThanOrEqualTo(theHighestWeights[i], dimBound);
     latexReport << "\\hline\\multicolumn{5}{c}{" << "$" << currentAlg.GetLieAlgebraName() << "$}\\\\\\hline\n\n"
     << "$\\lambda$ & dim &\\# pairs 1& \\# pairs total  & \\# Arithmetic op.  \\\\\\hline";

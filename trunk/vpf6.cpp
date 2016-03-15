@@ -739,8 +739,7 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   if (this->owner==0)
     return "(Error: module not initialized)";
   SemisimpleLieAlgebra& theAlgebrA=*this->owner;
-  WeylGroupData theWeyl;
-  theWeyl=theAlgebrA.theWeyl;
+  WeylGroupData& theWeyl=theAlgebrA.theWeyl;
   std::stringstream out;
   GlobalVariables theGlobalVariables;
   out << "<br>Semisimple Lie algebra acting on generalized Verma module: " << theAlgebrA.GetLieAlgebraName() << ".";
@@ -972,7 +971,7 @@ bool Calculator::innerGetChevGen(Calculator& theCommands, const Expression& inpu
   ElementUniversalEnveloping<RationalFunctionOld> theUE;
   theUE.AssignElementLieAlgebra(theElt, *theSSalg);
   Expression theContext;
-  int indexInOwner=theCommands.theObjectContainer.theLieAlgebras.GetIndex(*theSSalg);
+  int indexInOwner=theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(theSSalg->theWeyl.theDynkinType);
   //theCommands.ToString();
   theContext.ContextMakeContextSSLieAlgebrA(indexInOwner, theCommands);
   //theCommands.ToString();
@@ -1001,7 +1000,7 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
   ElementUniversalEnveloping<RationalFunctionOld> theUE;
   theUE.AssignElementLieAlgebra(theElt, *theSSalg);
   Expression theContext;
-  int theAlgIndex=theCommands.theObjectContainer.theLieAlgebras.GetIndex(*theSSalg);
+  int theAlgIndex=theCommands.theObjectContainer.theSSLieAlgebras.GetIndex(theSSalg->theWeyl.theDynkinType);
   theContext.ContextMakeContextSSLieAlgebrA(theAlgIndex, theCommands);
   return output.AssignValueWithContext(theUE, theContext, theCommands);
 }
@@ -1833,7 +1832,7 @@ SemisimpleLieAlgebra* Expression::GetAmbientSSAlgebraNonConstUseWithCaution()con
   int indexSSalg=myContext.ContextGetIndexAmbientSSalg();
   if (indexSSalg==-1)
     return 0;
-  return &this->owner->theObjectContainer.theLieAlgebras.GetElement(indexSSalg);
+  return &this->owner->theObjectContainer.theSSLieAlgebras.theValues[indexSSalg];
 }
 
 Function& Calculator::GetFunctionHandlerFromNamedRule(const std::string& inputNamedRule)
@@ -2069,21 +2068,22 @@ std::string Function::ToStringFull()
 }
 
 std::string ObjectContainer::ToString()
-{ std::stringstream out;
-  if (this->theLieAlgebras.size>0)
-  { out << "Lie algebras created (" << this->theLieAlgebras.size << " total): ";
-    for (int i=0; i<this->theLieAlgebras.size; i++)
-    { out << this->theLieAlgebras[i].GetLieAlgebraName();
-      if (i!=this->theLieAlgebras.size-1)
+{ MacroRegisterFunctionWithName("ObjectContainer::ToString");
+  std::stringstream out;
+  if (this->theSSLieAlgebras.theValues.size>0)
+  { out << "Lie algebras created (" << this->theSSLieAlgebras.theValues.size << " total): ";
+    for (int i=0; i<this->theSSLieAlgebras.theValues.size; i++)
+    { out << this->theSSLieAlgebras.theValues[i].GetLieAlgebraName();
+      if (i!=this->theSSLieAlgebras.theValues.size-1)
         out << ", ";
     }
   }
-  if (this->theSSsubalgebras.size>0)
-  { out << "<br>Lie semisimple subalgebras computation data structures (" << this->theLieAlgebras.size << " total): ";
-    for (int i=0; i<this->theSSsubalgebras.size; i++)
-    { out << " Type " << this->theSSsubalgebras[i].owner->GetLieAlgebraName() << " with "
-      << this->theSSsubalgebras[i].theSubalgebras.size << " candidates";
-      if (i!=this->theLieAlgebras.size-1)
+  if (this->theSSSubalgebraS.theValues.size>0)
+  { out << "<br>Lie semisimple subalgebras computation data structures (" << this->theSSSubalgebraS.theValues.size << " total): ";
+    for (int i=0; i<this->theSSSubalgebraS.theValues.size; i++)
+    { out << " Type " << this->theSSSubalgebraS.theValues[i].owner->GetLieAlgebraName() << " with "
+      << this->theSSSubalgebraS.theValues[i].theSubalgebras.theValues.size << " candidates";
+      if (i!=this->theSSSubalgebraS.theValues.size-1)
         out << ", ";
     }
   }
@@ -2396,13 +2396,42 @@ bool Calculator::ReplaceXByConCon(int con1, int con2, int format1, int format2)
   return true;
 }
 
+SemisimpleSubalgebras& ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input)
+{ MacroRegisterFunctionWithName("ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPresent");
+  bool needToHookUpPointers=false;
+  if (!this->theSSSubalgebraS.Contains(input))
+    needToHookUpPointers=true;
+  SemisimpleSubalgebras& currentSAs=this->theSSSubalgebraS.GetValueCreateIfNotPresent(input);
+  if (needToHookUpPointers)
+  { SemisimpleLieAlgebra& ownerSS=this->GetLieAlgebraCreateIfNotPresent(input);
+    currentSAs.initHookUpPointers(ownerSS, &this->theAlgebraicClosure, &this->theSSLieAlgebras, &this->theSltwoSAs);
+  }
+  return currentSAs;
+}
+
+SemisimpleLieAlgebra& ObjectContainer::GetLieAlgebraCreateIfNotPresent(const DynkinType& input)
+{ MacroRegisterFunctionWithName("ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPresent");
+  bool needToInit=false;
+  if (!this->theSSLieAlgebras.Contains(input))
+    needToInit=true;
+  SemisimpleLieAlgebra& theLA=this->theSSLieAlgebras.GetValueCreateIfNotPresent(input);
+  if (needToInit)
+    theLA.theWeyl.MakeFromDynkinType(input);
+  return theLA;
+}
+
+WeylGroupData& ObjectContainer::GetWeylGroupDataCreateIfNotPresent(const DynkinType& input)
+{ MacroRegisterFunctionWithName("ObjectContainer::GetWeylGroupDataCreateIfNotPresent");
+  return this->GetLieAlgebraCreateIfNotPresent(input).theWeyl;
+}
+
 void ObjectContainer::reset()
 { this->theWeylGroupElements.Clear();
   this->theWeylGroupReps.Clear();
   this->theWeylGroupVirtualReps.Clear();
   this->theCategoryOmodules.SetSize(0);
-  this->theLieAlgebras.Clear();
-  this->theSSsubalgebras.SetSize(0);
+  this->theSSLieAlgebras.Clear();
+  this->theSSSubalgebraS.Clear();
   this->theTensorElts.Clear();
   this->thePolys.Clear();
   this->thePolysOverANs.Clear();
@@ -2497,7 +2526,7 @@ bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression&
   hwSimple=theSSalg->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
   startingChar.MakeFromWeight(hwSimple, theSSalg);
   std::string reportString;
-  if (!startingChar.FreudenthalEvalMeFullCharacter(resultChar, 10000, &reportString, &theGlobalVariables))
+  if (!startingChar.FreudenthalEvalMeFullCharacter(resultChar, 10000, &reportString))
     return output.MakeError(reportString, theCommands);
   std::stringstream out;
   out << resultChar.ToString();
@@ -2519,7 +2548,7 @@ bool Calculator::innerFreudenthalEval(Calculator& theCommands, const Expression&
   hwSimple=theSSalg->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
   startingChar.MakeFromWeight(hwSimple, theSSalg);
   std::string reportString;
-  if (!startingChar.FreudenthalEvalMeDominantWeightsOnly(resultChar, 10000, &reportString, &theGlobalVariables))
+  if (!startingChar.FreudenthalEvalMeDominantWeightsOnly(resultChar, 10000, &reportString))
     return output.MakeError(reportString, theCommands);
   return output.AssignValue(resultChar, theCommands);
 }

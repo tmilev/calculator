@@ -540,6 +540,9 @@ class WeylGroupData
   }
   bool LoadConjugacyClasses();
   bool LoadCharTable();
+  WeylGroupData(const WeylGroupData& other);
+  void operator=(const WeylGroupData& other);
+  //<- once created, WeylGroupData can't be moved: a pointer to it is stored in FiniteGroup
 public:
   bool flagIrrepsAreComputed;
   bool flagCharTableIsComputed;
@@ -615,7 +618,7 @@ public:
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
   }
-  WeylGroupData()
+  WeylGroupData(): flagDeallocated(false)
   { this->init();
   }
   ~WeylGroupData()
@@ -725,12 +728,12 @@ public:
   template <class coefficient>
   bool GetAlLDominantWeightsHWFDIM
   (Vector<coefficient>& highestWeightSimpleCoords, HashedList<Vector<coefficient> >& outputWeightsSimpleCoords,
-   int upperBoundDominantWeights, std::string* outputDetails, GlobalVariables* theGlobalVariables);
+   int upperBoundDominantWeights, std::string* outputDetails);
   template <class coefficient>
   bool FreudenthalEval
   (Vector<coefficient>& inputHWfundamentalCoords, HashedList<Vector<coefficient> >& outputDominantWeightsSimpleCoords,
-   List<coefficient>& outputMultsSimpleCoords, std::string* outputDetails, GlobalVariables* theGlobalVariables, int UpperBoundFreudenthal);
-  void GetWeylChamber(Cone& output, GlobalVariables& theGlobalVariables);
+   List<coefficient>& outputMultsSimpleCoords, std::string* outputDetails, int UpperBoundFreudenthal);
+  void GetWeylChamber(Cone& output);
   std::string GenerateWeightSupportMethoD1
   (Vector<Rational>& highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords, int upperBoundWeights, GlobalVariables& theGlobalVariables);
   void GetIntegralLatticeInSimpleCoordinates(Lattice& output);
@@ -740,10 +743,7 @@ public:
   }
   void ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output);
   void ComputeRootsOfBorel(Vectors<Rational>& output);
-  static LargeInt GetSizeByFormulaImplementation(void* GP)
-  { WeylGroupData* G = (WeylGroupData*) GP;
-    return G->theDynkinType.GetWeylGroupSizeByFormula();
-  }
+  static LargeInt GetSizeByFormulaImplementation(void* GP);
   static LargeInt SizeByFormulaOrNeg1(char weylLetter, int theDim);
   bool IsARoot(const Vector<Rational>& input)const
   { return this->RootSystem.Contains(input);
@@ -1654,10 +1654,11 @@ public:
 
 class SubgroupWeylGroupOLD: public HashedList<ElementWeylGroup<WeylGroupData> >
 {
+
 public:
   bool truncated;
-  WeylGroupData AmbientWeyl;
-  WeylGroupData Elements;
+  WeylGroupData* AmbientWeyl;
+  WeylGroupData* Elements;
   List<ElementWeylGroup<WeylGroupData> > RepresentativesQuotientAmbientOrder;
   Vectors<Rational> simpleGenerators;
   //format: each element of of the group is a list of generators, reflections with respect to the simple generators, and outer
@@ -1668,6 +1669,11 @@ public:
   List<Vectors<Rational> > ExternalAutomorphisms;
   HashedList<Vector<Rational> > RootSubsystem;
   Vectors<Rational> RootsOfBorel;
+  SubgroupWeylGroupOLD()
+  { this->AmbientWeyl=0;
+    this->Elements=0;
+  }
+  bool CheckInitialization();
   void ToString(std::string& output, bool displayElements);
   void GetGroupElementsIndexedAsAmbientGroup(List<ElementWeylGroup<WeylGroupData> >& output);
   std::string ElementToStringBruhatGraph();

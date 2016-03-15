@@ -3123,7 +3123,6 @@ bool CalculatorFunctionsGeneral::innerGrowDynkinType(Calculator& theCommands, co
   SemisimpleSubalgebras tempSas;
   tempSas.owner=theSSalg;
   tempSas.ownerField=&theCommands.theObjectContainer.theAlgebraicClosure;
-  tempSas.theGlobalVariables=&theGlobalVariables;
   tempSas.ComputeSl2sInitOrbitsForComputationOnDemand();
   if (!tempSas.RanksAndIndicesFit(theSmallDynkinType))
     return output.MakeError("Error: type "+theSmallDynkinType.ToString()+" does not fit inside "+theSSalg->theWeyl.theDynkinType.ToString(), theCommands);
@@ -3203,7 +3202,7 @@ bool Expression::MakeSequenceCommands(Calculator& owner, List<std::string>& inpu
 }
 
 bool Expression::MakeSequenceStatements(Calculator& owner, List<Expression>* inputStatements)
-{ MacroRegisterFunctionWithName("Expression::MakeSequence");
+{ MacroRegisterFunctionWithName("Expression::MakeSequenceStatements");
   this->reset(owner, inputStatements==0 ? 1 : inputStatements->size+1);
   this->AddChildAtomOnTop(owner.opEndStatement());
 //  stOutput << "Making sequence statements from: " << inputStatements.ToString();
@@ -3233,9 +3232,8 @@ bool CalculatorFunctionsGeneral::innerComputeSemisimpleSubalgebras(Calculator& t
     return output.AssignValue(out.str(), theCommands);
   } else
     out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
-  SemisimpleSubalgebras tempSSsas
-  (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras, &theCommands.theObjectContainer.theSltwoSAs, &theGlobalVariables);
-  SemisimpleSubalgebras& theSSsubalgebras=theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
+  SemisimpleSubalgebras& theSSsubalgebras=
+  theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
   theSSsubalgebras.flagComputePairingTable=false;
   theSSsubalgebras.flagComputeNilradicals=false;
   theSSsubalgebras.FindTheSSSubalgebrasFromScratch(ownerSS);
@@ -4138,7 +4136,8 @@ bool CalculatorFunctionsGeneral::innerGetCentralizerChainsSemisimpleSubalgebras(
   for (int i=0; i<theChains.size; i++)
   { out << "<br>Chain " << i+1 << ": LoadSemisimpleSubalgebras{}( " << theSAs.owner->theWeyl.theDynkinType.ToString() << ", (";
     for (int j=0; j<theChains[i].size; j++)
-    { CalculatorConversions::innerStoreCandidateSA(theCommands, theSAs.theSubalgebras[theChains[i][j]], currentChainE);
+    { CalculatorConversions::innerStoreCandidateSA
+      (theCommands, theSAs.theSubalgebras.theValues[theChains[i][j]], currentChainE);
       out << currentChainE.ToString();
       if (j!=theChains[i].size-1)
         out << ", ";
@@ -4208,9 +4207,9 @@ bool CalculatorFunctionsGeneral::innerGetDynkinIndicesSlTwoSubalgebras(Calculato
   List<List<Rational> > bufferIndices;
   HashedList<DynkinSimpleType> bufferTypes;
   HashedList<Rational> theIndices;
-  theType.GetDynkinIndicesSl2Subalgebras(bufferIndices, bufferTypes, theIndices, &theGlobalVariables);
+  theType.GetDynkinIndicesSl2Subalgebras(bufferIndices, bufferTypes, theIndices);
   std::stringstream out;
-  out << "There are " << theIndices.size << " aboslute Dynkin indices. The indices are: "
+  out << "There are " << theIndices.size << " absolute Dynkin indices. The indices are: "
   << theIndices.ToStringCommaDelimited();
   return output.AssignValue(out.str(), theCommands);
 }
@@ -4235,11 +4234,8 @@ bool CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg(Calculator& theCommands,
     return output.AssignValue(out.str(), theCommands);
   } else
     out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
-  SemisimpleSubalgebras tempSSsas
-  (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
-   &theCommands.theObjectContainer.theSltwoSAs, &theGlobalVariables);
   SemisimpleSubalgebras& theSSsubalgebras=
-  theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
+  theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
   theSSsubalgebras.ToStringExpressionString=CalculatorConversions::innerStringFromSemisimpleSubalgebras;
 
   out << "Attempting to embed " << theSmallSapointer->theWeyl.theDynkinType.ToString() << " in " << ownerSS.GetLieAlgebraName();
@@ -4362,14 +4358,14 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
   theSubgroup.FindQuotientRepresentatives(2000);
   out << "<br>Number elements of the coset: " << theSubgroup.RepresentativesQuotientAmbientOrder.size;
   out << "<br>Number of elements of the Weyl group of the Levi part: " << theSubgroup.size;
-  out << "<br>Number of elements of the ambient Weyl: " << theSubgroup.AmbientWeyl.theGroup.theElements.size;
+  out << "<br>Number of elements of the ambient Weyl: " << theSubgroup.AmbientWeyl->theGroup.theElements.size;
   outputFileContent << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
   outputFileContent2 << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
   FormatExpressions theFormat;
   hwContext.ContextGetFormatExpressions(theFormat);
   if (theSubgroup.size>498)
-  { if (theSubgroup.AmbientWeyl.SizeByFormulaOrNeg1('E', 6) <= theSubgroup.AmbientWeyl.theGroup.GetSize())
-      out << "Even I can't handle the truth, when it is so large<br>";
+  { if (theSubgroup.AmbientWeyl->SizeByFormulaOrNeg1('E', 6) <= theSubgroup.AmbientWeyl->theGroup.GetSize())
+      out << "Even I can't handle the truth, when it is so large. <br>";
     else
       out << "LaTeX can't handle handle the truth, when it is so large. <br>";
   } else
@@ -4551,8 +4547,7 @@ bool CalculatorFunctionsGeneral::innerDecomposeCharGenVerma(Calculator& theComma
   for (int i=0; i<parSel.CardinalitySelection; i++)
     theHWFundCoordsFDPart[parSel.elements[i]]=0;
   KLpolys theKLpolys;
-  WeylGroupData theWeyl;
-  theWeyl=theSSlieAlg->theWeyl;
+  WeylGroupData& theWeyl=theSSlieAlg->theWeyl;
   if (!theKLpolys.ComputeKLPolys(&theWeyl))
     return output.MakeError("failed to generate Kazhdan-Lusztig polynomials (output too large?)", theCommands);
 //  Vectors<Polynomial<Rational> > tempVects;
@@ -4964,10 +4959,11 @@ bool CalculatorFunctionsGeneral::innerHWTAABF(Calculator& theCommands, const Exp
   int algebraIndex=finalContext.ContextGetIndexAmbientSSalg();
   if (algebraIndex==-1)
     return output.MakeError("I couldn't extract a Lie algebra to compute hwtaabf.", theCommands);
-  SemisimpleLieAlgebra* constSSalg= &theCommands.theObjectContainer.theLieAlgebras.GetElement(algebraIndex);
+
+  SemisimpleLieAlgebra& constSSalg= theCommands.theObjectContainer.theSSLieAlgebras.theValues[algebraIndex];
   const Expression& weightExpression=input[3];
   Vector<RationalFunctionOld> weight;
-  if (!theCommands.GetVectoR<RationalFunctionOld>(weightExpression, weight, &finalContext, constSSalg->GetRank(), CalculatorConversions::innerRationalFunction))
+  if (!theCommands.GetVectoR<RationalFunctionOld>(weightExpression, weight, &finalContext, constSSalg.GetRank(), CalculatorConversions::innerRationalFunction))
     return theCommands << "<hr>Failed to obtain highest weight from the third argument which is " << weightExpression.ToString();
   if (!leftMerged.SetContextAtLeastEqualTo(finalContext) || !rightMerged.SetContextAtLeastEqualTo(finalContext))
     return output.MakeError("Failed to merge the contexts of the highest weight and the elements of the Universal enveloping. ", theCommands);
@@ -4978,17 +4974,16 @@ bool CalculatorFunctionsGeneral::innerHWTAABF(Calculator& theCommands, const Exp
     return false;
   const ElementUniversalEnveloping<RationalFunctionOld>& leftUE=leftConverted.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
   const ElementUniversalEnveloping<RationalFunctionOld>& rightUE=rightConverted.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
-  SemisimpleLieAlgebra theSSalgebra;
-  theSSalgebra=*constSSalg;
-  WeylGroupData& theWeyl=theSSalgebra.theWeyl;
+  WeylGroupData& theWeyl=constSSalg.theWeyl;
   std::stringstream out;
   Vector<RationalFunctionOld> hwDualCoords;
-  theSSalgebra.OrderSSalgebraForHWbfComputation();
+  constSSalg.OrderSSalgebraForHWbfComputation();
   hwDualCoords=theWeyl.GetDualCoordinatesFromFundamental(weight);
   RationalFunctionOld outputRF;
   //stOutput << "<br>The highest weight in dual coordinates, as I understand it:" << hwDualCoords.ToString();
   if(!leftUE.HWTAAbilinearForm(rightUE, outputRF, &hwDualCoords, 1, 0, &theCommands.Comments))
     return output.MakeError("Error: couldn't compute Shapovalov form, see comments.", theCommands);
+  constSSalg.OrderStandardAscending();
   return output.AssignValueWithContext(outputRF, finalContext, theCommands);
 }
 
@@ -5385,7 +5380,7 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input, ownerSS))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
-  ownerSS->ComputeFolderNames(theGlobalVariables);
+  ownerSS->ComputeFolderNames();
   FormatExpressions theFormat;
   theFormat.flagUseHTML=true;
   theFormat.flagUseLatex=false;
@@ -5434,10 +5429,10 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
     theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo=true;
 //    stOutput << "ChangeME";
 //    theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo=false;
-    ownerSS->FindSl2Subalgebras(*ownerSS, theSl2s, &theGlobalVariables);
+    ownerSS->FindSl2Subalgebras(*ownerSS, theSl2s);
     std::string PathSl2= outSltwoPath.str();
     std::string DisplayPathSl2=outSltwoDisplayPath.str();
-    theSl2s.ToHTML(&theFormat, &theGlobalVariables);
+    theSl2s.ToHTML(&theFormat);
   } else
     out << "The table is precomputed and served from the hard disk. <br>";
 //  out << "The full file name: " << outSltwoFileDisplayName.str();
@@ -6115,7 +6110,7 @@ std::string charSSAlgMod<coefficient>::ToStringFullCharacterWeightsTable()
 { MacroRegisterFunctionWithName("charSSAlgMod_CoefficientType::ToStringFullCharacterWeightsTable");
   std::stringstream out;
   charSSAlgMod<coefficient> outputChar;
-  if (!this->FreudenthalEvalMeFullCharacter(outputChar, 10000, 0, 0))
+  if (!this->FreudenthalEvalMeFullCharacter(outputChar, 10000, 0))
   { out << "Failed to compute the character with highest weight " << this->ToString()
     << " I used Fredenthal's formula; likely the computation was too large. ";
     return out.str();

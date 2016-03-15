@@ -1005,7 +1005,7 @@ void WeylGroupData::GetSignSignatureAllRootSubsystems(List<SubgroupDataRootRefle
 { MacroRegisterFunctionWithName("WeylGroup::GetSignSignatureAllRootSubsystems");
   rootSubalgebras theRootSAs;
   SemisimpleLieAlgebra theSSlieAlg;
-  theSSlieAlg.theWeyl=*this;
+  theSSlieAlg.theWeyl.MakeFromDynkinType(this->theDynkinType);
 //  theSSlieAlg.ComputeChevalleyConstants(theGlobalVariables);
   theRootSAs.theGlobalVariables=&theGlobalVariables;
   theRootSAs.owner=&theSSlieAlg;

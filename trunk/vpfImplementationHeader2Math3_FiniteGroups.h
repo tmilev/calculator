@@ -64,7 +64,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, 
           this->theWords.LastObject()->AddOnTop(i);
         } else
         { this->theWords.SetSize(this->theWords.size+1);
-          this->GetWordByFormula(this->specificDataPointer, currentElement, *this->theWords.LastObject());
+          this->GetWordByFormula(*this, currentElement, *this->theWords.LastObject());
         }
       }
       if (theGlobalVariables.flagReportEverything)
@@ -558,8 +558,8 @@ LargeInt FiniteGroup<elementSomeGroup>::GetSize()
 { this->CheckConsistency();
   if(this->sizePrivate > 0)
     return sizePrivate;
-  if(this->GetSizeByFormula!=0 && this->specificDataPointer!=0)
-  { this->sizePrivate = this->GetSizeByFormula(this->specificDataPointer);
+  if(this->GetSizeByFormula!=0)
+  { this->sizePrivate = this->GetSizeByFormula(*this);
     return sizePrivate;
   }
   //crash << "Requesting size of group whose size is not computed.  If you want"
@@ -844,7 +844,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives()
 { MacroRegisterFunctionWithName("FiniteGroup::ComputeCCSizesAndRepresentatives");
   this->CheckConsistency();
   if(this->GetSizeByFormula!=0)
-  { LargeInt theSize = this->GetSizeByFormula(this);
+  { LargeInt theSize = this->GetSizeByFormula(*this);
     // extended digit separators only appear in cxx14
     if(theSize > 100000000)
       if(this->flagCanComputeCCsWithOrbitIterator)

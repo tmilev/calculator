@@ -239,6 +239,8 @@ public:
   bool CheckConsistency()const
   { if (this->flagDeallocated)
       crash << "This is a programming error: use after free of Finite group. " << crash;
+    if (this==0)
+      crash << "Finite group this pointer is zero. " << crash;
     return true;
   }
   bool CheckInitialization()const;
@@ -254,7 +256,8 @@ public:
   int ConjugacyClassCount()const;
   LargeInt GetSize();
   LargeInt SizeByFormulaOrNeg1()
-  { if(this->GetSizeByFormula!=0 && this->specificDataPointer!=0)
+  { this->CheckConsistency();
+    if(this->GetSizeByFormula!=0 && this->specificDataPointer!=0)
       return GetSizeByFormula(this->specificDataPointer);
     return -1;
   } //non-positive result means no formula is known.
@@ -265,11 +268,12 @@ public:
   bool AreConjugate(const elementSomeGroup& left, const elementSomeGroup& right);
   bool AreConjugate_OLD_Deprecated_Version_By_Todor(const elementSomeGroup& left, const elementSomeGroup& right);
 
-
-  bool ComputeAllElements(bool andWords, int MaxElements=-1);
-
-  // Timing indicates that for small groups this code is slow
-  bool ComputeAllElementsLargeGroup(bool andWords, int MaxElements=-1);
+  bool ComputeAllElements(bool andWords, int MaxElements=1000000);
+  //MaxElements gives an upper bound to the number of elements this function will try to find.
+  //Set MaxElements=-1 for "unlimited" upper bound.
+  bool ComputeAllElementsLargeGroup(bool andWords, int MaxElements=1000000);
+  //MaxElements gives an upper bound to the number of elements this function will try to find.
+  //Set MaxElements=-1 for "unlimited" upper bound.
 
   // Historical note: this was from Thomas' second finite group class, and is
   // as of 2015-11 the only way to generate the words and conjugacy information

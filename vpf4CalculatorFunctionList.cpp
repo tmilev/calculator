@@ -278,7 +278,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("SpechtModule", CalculatorFunctionsWeylGroup::innerSpechtModule, "",
    "Gets the Specht module of the partition. ",
-   "SpechtModule((3,2,1))", true, false, "CalculatorFunctionsWeylGroup::innerSpechtModule");
+   "SpechtModule((3,2,1))", true, false, "CalculatorFunctionsWeylGroup::innerSpechtModule", "SpechtModule");
   this->AddOperationInnerHandler
   ("HyperOctahedralRepresentation", CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation, "",
    "Gets one hyperoctahedral representation from two partitions. ",
@@ -1161,7 +1161,7 @@ void Calculator::initPredefinedInnerFunctions()
    & x_{13}\\\\ x_{21} & x_{22} & x_{23} \\\\ x_{31} & x_{32} & x_{33} \\end{array} \\right) ");
   this->AddOperationInnerHandler
   ("Sort", CalculatorFunctionsGeneral::innerSort, "",
-   "Sorts a sequence. The purpose of this function is to test the exrpession comparison function of the calculator. ",
+   "Sorts a sequence. The purpose of this function is to test the expression comparison function of the calculator. ",
    "Sort(x^2, x^3, x^1, x^{-1}) ");
   this->AddOperationInnerHandler
   ("BlocksOfCommutativity", CalculatorFunctionsGeneral::innerGetUserDefinedSubExpressions, "",

@@ -121,35 +121,32 @@ bool CalculatorConversions::innerDynkinType(Calculator& theCommands, const Expre
 
 bool CalculatorConversions::innerSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra*& outputPointer)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
-  MacroRegisterFunctionWithName("Calculator::innerLoadSSLieAlgebra");
+  MacroRegisterFunctionWithName("Calculator::innerSSLieAlgebra");
 //  stOutput << "<br>DEBUG: calling innerSSLieAlgebra";
 //  double startTimeDebug=theGlobalVariables.GetElapsedSeconds();
   DynkinType theDynkinType;
 //  stOutput.flush();
   outputPointer=0;
   if(!CalculatorConversions::innerDynkinType(theCommands, input, theDynkinType))
-  { //  stOutput << "got to error";
-  //stOutput.flush();
-    return output.MakeError("Failed to extract Dynkin type.", theCommands);
-  }
+    return theCommands << "Failed to extract Dynkin type from: " << input.ToString();
 //  stOutput << "got to making semisimple Lie algebra of type " << theDynkinType.ToString() << " from input expression: "
 //  << input.ToString();
   if (theDynkinType.GetRank()>20)
-  { std::stringstream out;
-    out << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. If you would like to relax this limitation edit file " << __FILE__
-    << " line " << __LINE__ << ". Note that the Chevalley constant computation Reserves a dim(g)*dim(g) table of RAM memory, which means the RAM memory rises with the 4^th power of rank(g). "
-    << " You have been warned. Alternatively, you may want to implement a sparse structure constant table (write me an email if you want to do that, I will help you). ";
-    return output.MakeError(out.str(), theCommands);
-  }
+    return theCommands << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. "
+    << "If you would like to relax this limitation edit file " << __FILE__
+    << " line " << __LINE__ << ". Note that the Chevalley constant computation Reserves a dim(g)*dim(g) "
+    << "table of RAM memory, which means the RAM memory rises with the 4^th power of rank(g). "
+    << " You have been warned. Alternatively, you may want to implement a sparse structure constant table "
+    << "(write me an email if you want to do that, I will help you). ";
   bool newlyCreated=!theCommands.theObjectContainer.theSSLieAlgebras.Contains(theDynkinType);
-  SemisimpleLieAlgebra& theSSalgebra=
-  theCommands.theObjectContainer.GetLieAlgebraCreateIfNotPresent(theDynkinType);
-  output.AssignValue(theSSalgebra, theCommands);
+  outputPointer=&theCommands.theObjectContainer.GetLieAlgebraCreateIfNotPresent(theDynkinType);
+  outputPointer->CheckConsistency();
+  output.AssignValue(*outputPointer, theCommands);
   if (newlyCreated)
   { //crash << theSSalgebra.theWeyl.theDynkinType.ToString() << crash;
     //stOutput << "<br>Elapsed time before computing Chevalley consts: "
     //<< theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
-    theSSalgebra.ComputeChevalleyConstants();
+    outputPointer->ComputeChevalleyConstants();
     //stOutput << "<br>Elapsed time after computing Chevalley consts: "
     //<< theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
     Expression tempE;

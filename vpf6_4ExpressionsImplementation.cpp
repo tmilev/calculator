@@ -1978,9 +1978,9 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     out << theElt.ToString();
     result=true;
   } else if (this->IsOfType<SemisimpleSubalgebras>())
-  { stOutput << "got to here";
+  { //stOutput << "got to here";
     SemisimpleSubalgebras& theSubalgebras=this->GetValueNonConst<SemisimpleSubalgebras>();
-    stOutput << "got to here pt 2";
+    //stOutput << "got to here pt 2";
     contextFormat.GetElement().flagUseLatex=true;
     contextFormat.GetElement().flagUseHTML=true;
     contextFormat.GetElement().flagCandidateSubalgebraShortReportOnly=false;
@@ -2851,7 +2851,9 @@ bool Expression::MakeContextWithOnePolyVarOneDiffVar(Calculator& owner, const Ex
 }
 
 bool Expression::MakeContextSSLieAlg(Calculator& owner, const SemisimpleLieAlgebra& theSSLiealg)
-{ this->MakeEmptyContext(owner);
+{ MacroRegisterFunctionWithName("Expression::MakeContextSSLieAlg");
+  theSSLiealg.CheckConsistency();
+  this->MakeEmptyContext(owner);
   owner.theObjectContainer.GetLieAlgebraCreateIfNotPresent(theSSLiealg.theWeyl.theDynkinType);
   return this->ContextSetSSLieAlgebrA
   (owner.theObjectContainer.theSSLieAlgebras.GetIndex(theSSLiealg.theWeyl.theDynkinType), owner);

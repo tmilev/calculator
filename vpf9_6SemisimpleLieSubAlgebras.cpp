@@ -43,7 +43,9 @@ void SemisimpleLieAlgebra::GenerateLieSubalgebra
 }
 
 bool SemisimpleLieAlgebra::CheckConsistency()const
-{ if (this->flagDeallocated)
+{ if (this==0)
+    crash << "This pointer of semisimple Lie algebra is zero. " << crash;
+  if (this->flagDeallocated)
     crash << "This is a programming error: use after free of SemisimpleLieAlgebra. " << crash;
   this->theWeyl.CheckConsistency();
   return true;

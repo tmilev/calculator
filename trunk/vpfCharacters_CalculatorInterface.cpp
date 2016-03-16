@@ -14,7 +14,9 @@ FormatExpressions::GetMonOrder<ClassFunction<WeylGroupData::WeylGroupBase, Ratio
 }
 
 bool WeylGroupData::CheckConsistency()const
-{ if (this->flagDeallocated)
+{ if (this==0)
+    crash << "The this pointer of a Weyl group is zero. " << crash;
+  if (this->flagDeallocated)
     crash << "This is a programming error: use after free of WeylGroup. " << crash;
   for (int i=0; i<this->theGroup.generators.size; i++)
     this->theGroup.generators[i].CheckConsistency();

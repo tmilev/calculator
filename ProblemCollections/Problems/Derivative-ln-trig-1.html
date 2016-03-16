@@ -1,0 +1,34 @@
+<span class="setCalculatorExamProblem">
+</span>
+Compute the derivatives. 
+
+<span class="calculatorHidden">
+\(
+%UseLnInsteadOfLog
+a=selectAtRandom( \tan , \cot, \sec, \csc);
+b=randomInteger((2,7));
+TurnOffRules("ExpressSecViaCosine", "ExpressCscViaSine", "ExpressTanViaSineCosine", "ExpressCotViaSineCosine");
+\)</span>
+
+<br>
+<span class="calculator">
+\(\displaystyle f{}{{x}}=  \ln(a{}(b x) )
+\) 
+</span>.
+
+<span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
+\(%UseLnInsteadOfLog
+TurnOffRules("\log", "logBase");\)
+</span>
+<br>
+Answer: \(f'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswer">
+\(
+CompareFunctionsNumerically(d/dx(f{}x), AlgebraAnswer, 0.3, 1, 50, 0.00000001);
+\)
+</textarea>
+
+<span class="calculatorAnswerOnGiveUp">
+MakeExpression(MakeRationalFunction(
+d/dx (f{}x)))
+</span>
+To write \(\ln (x)\) you need to enter \ln(x), ln(x) or log(x) or \log(x). Please note that in the calculator log stands for the (complex) natural logarithm, i.e., the logarithm base e. 

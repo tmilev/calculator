@@ -141,13 +141,13 @@ void Calculator::initPredefinedInnerFunctions()
   ("LoadFileIntoString", CalculatorConversions::innerLoadFileIntoString, "",
    "Loads a file into a string. The file must be given its relative file name displayed when browsing \
    the web server. ",
-   "LoadFileIntoString(\"/ProblemCollections/Problems/functions-composing-fractional-linear-1.html\")",
+   "LoadFileIntoString(\"/ProblemCollections/Problems/Functions-composing-fractional-linear-1.html\")",
    true, false, "CalculatorConversions::innerLoadFileIntoString");
   this->AddOperationInnerHandler
   ("InterpretHtml", CalculatorFunctionsGeneral::innerInterpretHtml, "",
    "Does as ExtractCalculatorExpressionFromHtml but in addition interprets the calculator commands.",
    "InterpretHtml(LoadFileIntoString(\
-   \"/ProblemCollections/Problems/functions-composing-fractional-linear-1.html\"))", true, false,
+   \"/ProblemCollections/Problems/Functions-composing-fractional-linear-1.html\"))", true, false,
    "CalculatorFunctionsGeneral::innerInterpretHtml");
   this->AddOperationInnerHandler
   ("ExtractCalculatorExpressionFromHtml", CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml, "",
@@ -157,7 +157,7 @@ void Calculator::initPredefinedInnerFunctions()
     At the moment of writing, the planned span class names are:\
    \"calculator\", \"calculatorHidden\", \"calculatorAnswer\".",
    "ExtractCalculatorExpressionFromHtml(LoadFileIntoString(\
-   \"/ProblemCollections/Problems/functions-composing-fractional-linear-1.html\"))", true, false,
+   \"/ProblemCollections/Problems/Functions-composing-fractional-linear-1.html\"))", true, false,
    "CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml");
    ;
   this->AddOperationInnerHandler
@@ -329,7 +329,7 @@ void Calculator::initPredefinedInnerFunctions()
    "CartanSymmetric(e^7_6);");//, false);
   this->AddOperationInnerHandler
   ("GrowDynkinType", CalculatorFunctionsGeneral::innerGrowDynkinType, "",
-   "This is a calculator testing function. Grows a dynkin type inside an ambient Dynkin type. ",
+   "This is a calculator testing function. Grows a Dynkin type inside an ambient Dynkin type. ",
    "GrowDynkinType(A^30_1+d^30_4, e_6); GrowDynkinType(g^35_2+B^30_2, e_6);");//, false);
   this->AddOperationInnerHandler
   ("IsDifferentialOneFormOneVariable", CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable, "",
@@ -1008,21 +1008,24 @@ void Calculator::initPredefinedInnerFunctions()
    ",
    "plotCurve(sin(12t),cos(13t), 0, 2\\pi)")
    ;
-  this->AddOperationInnerHandler ("GetVariablesIncludeNamedConstants", CalculatorFunctionsGeneral::innerGetFreeVariablesExcludeNamedConstants, "",
+  this->AddOperationInnerHandler ("GetVariablesExcludeNamedConstants", CalculatorFunctionsGeneral::innerGetFreeVariablesExcludeNamedConstants, "",
    "Gets the variables on which the expression depends. Excludes the named constants. Here, the word ``variables'' is to be thought of as \
    ``free variables'' but the possibility for small distinctions is \
    reserved (to allow dealing with named constants, reserved keywords, etc.). \
    ",
-   "GetVariablesIncludeNamedConstants{}(e^x + x+5 +\\arctan x + x *y +x^y+x^{y^z})", true,
-   false, "CalculatorFunctionsGeneral::innerGetFreeVariablesExcludeNamedConstants")
+   "GetVariablesExcludeNamedConstants{}(e^x + x+5 +\\arctan x + x *y +x^y+x^{y^z});\
+    GetVariablesIncludeNamedConstants{}(e^x + x+5 +\\arctan x + x *y +x^y+x^{y^z})", true,
+   false, "CalculatorFunctionsGeneral::innerGetFreeVariablesExcludeNamedConstants", "GetVariablesExcludeNamedConstants")
    ;
-  this->AddOperationInnerHandler ("GetVariablesExcludeNamedConstants", CalculatorFunctionsGeneral::innerGetFreeVariablesIncludeNamedConstants, "",
-   "Gets the variables on which the expression depends. Excludes the named constants. Here, the word ``variables'' is to be thought of as \
+  this->AddOperationInnerHandler ("GetVariablesIncludeNamedConstants", CalculatorFunctionsGeneral::innerGetFreeVariablesIncludeNamedConstants, "",
+   "Gets the variables on which the expression depends. Includes the named constants. \
+   Here, the word ``variables'' is to be thought of as \
    ``free variables'' but the possibility for small distinctions is \
    reserved (to allow dealing with named constants, reserved keywords, etc.). \
    ",
-   "GetVariablesExcludeNamedConstants{}(e^x + x+5 +\\arctan x + x *y +x^y+x^{y^z})", true,
-   false, "CalculatorFunctionsGeneral::innerGetFreeVariablesIncludeNamedConstants")
+   "GetVariablesExcludeNamedConstants{}(e^x + x+5 +\\arctan x + x *y +x^y+x^{y^z});\
+    GetVariablesIncludeNamedConstants{}(e^x + x+5 +\\arctan x + x *y +x^y+x^{y^z})", true,
+   false, "CalculatorFunctionsGeneral::innerGetFreeVariablesIncludeNamedConstants", "GetVariablesIncludeNamedConstants")
    ;
   this->AddOperationInnerHandler ("plot2D", CalculatorFunctionsGeneral::innerPlot2D, "",
    "<b>Calculus teaching function.</b> Makes a 2d plot of a function given in the form \

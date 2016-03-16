@@ -945,8 +945,8 @@ LargeInt WeylGroupData::GetOrbitSize(Vector<coefficient>& theWeight)
   //then get a Dynkin diagram from these roots, then compute the size of the stabilizer,
   // and finally compute the size of the orbit. I will check numerically if everything is ok
   //all the way up to E6.
-  stOutput << "<hr>DEBUG: Calling WeylGroup::GetOrbitSize with input: " << theWeight.ToString()
-  << ". The Weyl type is: " << this->theDynkinType.ToString();
+//  stOutput << "<hr>DEBUG: Calling WeylGroup::GetOrbitSize with input: " << theWeight.ToString()
+//  << ". The Weyl type is: " << this->theDynkinType.ToString();
   Vector<coefficient> currentWeight;
   Vectors<Rational> theStabilizingRoots;
   for (int i=0; i<this->RootsOfBorel.size; i++)
@@ -954,10 +954,10 @@ LargeInt WeylGroupData::GetOrbitSize(Vector<coefficient>& theWeight)
     if (currentWeight==theWeight)
       theStabilizingRoots.AddOnTop(this->RootsOfBorel[i]);
   }
-  stOutput << "<br>DEBUG: I found the stabilizing roots to be: " << theStabilizingRoots.ToString();
+//  stOutput << "<br>DEBUG: I found the stabilizing roots to be: " << theStabilizingRoots.ToString();
   DynkinDiagramRootSubalgebra theStabilizerSubsystem;
   theStabilizerSubsystem.ComputeDiagramTypeModifyInput(theStabilizingRoots, *this);
-  stOutput << "<br>DEBUG: The stabilizer subsystem is: " << theStabilizerSubsystem.ToString();
+//  stOutput << "<br>DEBUG: The stabilizer subsystem is: " << theStabilizerSubsystem.ToString();
   DynkinType theStabilizerDynkinType;
   theStabilizerSubsystem.GetDynkinType(theStabilizerDynkinType);
   Rational resultRat=this->theGroup.GetSize();
@@ -970,10 +970,10 @@ LargeInt WeylGroupData::GetOrbitSize(Vector<coefficient>& theWeight)
   if (doDebug)
     if (result<100000)
     { HashedList<Vector<coefficient> > comparisonOrbit;
-      double DEbugStartTime=theGlobalVariables.GetElapsedSeconds();
-      stOutput << "<br>DEBUG: calling generateOrbit for input: " << theWeight.ToString();
+//      double DEbugStartTime=theGlobalVariables.GetElapsedSeconds();
+//      stOutput << "<br>DEBUG: calling generateOrbit for input: " << theWeight.ToString();
       this->GenerateOrbit(theWeight, false, comparisonOrbit, false, -1, 0, -1);
-      stOutput << "<br>Orbit generated in " << theGlobalVariables.GetElapsedSeconds()-DEbugStartTime << " seconds. ";
+//      stOutput << "<br>Orbit generated in " << theGlobalVariables.GetElapsedSeconds()-DEbugStartTime << " seconds. ";
       if (result!=comparisonOrbit.size)
         crash << "Actual orbit of " << theWeight.ToString() << " has size " << comparisonOrbit.size << " but I computed "
         << " the orbit size to be " << result.ToString() << ". This may be a mathematical error. " << crash;

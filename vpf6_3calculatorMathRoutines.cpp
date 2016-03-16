@@ -3121,8 +3121,10 @@ bool CalculatorFunctionsGeneral::innerGrowDynkinType(Calculator& theCommands, co
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[2], theSSalg))
     return output.MakeError("Error extracting ambient Lie algebra.", theCommands);
   SemisimpleSubalgebras tempSas;
-  tempSas.owner=theSSalg;
-  tempSas.ownerField=&theCommands.theObjectContainer.theAlgebraicClosure;
+  tempSas.initHookUpPointers
+  (*theSSalg, &theCommands.theObjectContainer.theAlgebraicClosure,
+   &theCommands.theObjectContainer.theSSLieAlgebras,
+   &theCommands.theObjectContainer.theSltwoSAs);
   tempSas.ComputeSl2sInitOrbitsForComputationOnDemand();
   if (!tempSas.RanksAndIndicesFit(theSmallDynkinType))
     return output.MakeError("Error: type "+theSmallDynkinType.ToString()+" does not fit inside "+theSSalg->theWeyl.theDynkinType.ToString(), theCommands);
@@ -3147,7 +3149,9 @@ bool CalculatorFunctionsGeneral::innerGrowDynkinType(Calculator& theCommands, co
           out << ", ";
       }
       out << "</td><td>";
-      out << CGI::GetMathSpanPure(tempSas.GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot(largerTypes[i], imagesSimpleRoots[i], tempCandidate).ToStringLetterFormat("\\omega"));
+      out << CGI::GetMathSpanPure
+      (tempSas.GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot
+       (largerTypes[i], imagesSimpleRoots[i], tempCandidate).ToStringLetterFormat("\\omega"));
       out << "</td></tr>";
     }
     out << "</table>";

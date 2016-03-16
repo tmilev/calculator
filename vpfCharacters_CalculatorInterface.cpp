@@ -477,9 +477,9 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize
   Vector<Rational> theWeightRat;
   Expression theContextE;
   if (theCommands.GetTypeWeight<Rational>(theCommands, input, theWeightRat, theContextE, theSSalgebra, 0))
-  { stOutput << " DEBUG: needed " << theGlobalVariables.GetElapsedSeconds()-startTimeForDebug
-    << " seconds to get type/weight info. ";
-    stOutput << "DEBUG: Computing orbit size for: " << theSSalgebra->theWeyl.theDynkinType.ToString();
+  { //stOutput << " DEBUG: needed " << theGlobalVariables.GetElapsedSeconds()-startTimeForDebug
+    //<< " seconds to get type/weight info. ";
+    //stOutput << "DEBUG: Computing orbit size for: " << theSSalgebra->theWeyl.theDynkinType.ToString();
     Rational result=theSSalgebra->theWeyl.GetOrbitSize(theWeightRat);
     return output.AssignValue(result, theCommands);
   }

@@ -264,9 +264,9 @@ SemisimpleSubalgebras
 & inputValue)const
 { this->CheckInitialization();
   inputValue.CheckInitialization();
-  if (!this->owner->theObjectContainer.theSSLieAlgebras.Contains(inputValue.owner->theWeyl.theDynkinType))
+  if (!this->owner->theObjectContainer.theSSSubalgebraS.Contains(inputValue.owner->theWeyl.theDynkinType))
     crash << "Semisimple subalgebras must be allocated directly in the object container. " << crash;
-  return this->owner->theObjectContainer.theSSLieAlgebras.GetIndex(inputValue.owner->theWeyl.theDynkinType);
+  return this->owner->theObjectContainer.theSSSubalgebraS.GetIndex(inputValue.owner->theWeyl.theDynkinType);
 }
 
 template < >
@@ -1978,7 +1978,9 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     out << theElt.ToString();
     result=true;
   } else if (this->IsOfType<SemisimpleSubalgebras>())
-  { SemisimpleSubalgebras& theSubalgebras=this->GetValueNonConst<SemisimpleSubalgebras>();
+  { stOutput << "got to here";
+    SemisimpleSubalgebras& theSubalgebras=this->GetValueNonConst<SemisimpleSubalgebras>();
+    stOutput << "got to here pt 2";
     contextFormat.GetElement().flagUseLatex=true;
     contextFormat.GetElement().flagUseHTML=true;
     contextFormat.GetElement().flagCandidateSubalgebraShortReportOnly=false;

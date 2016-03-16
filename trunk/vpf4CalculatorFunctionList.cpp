@@ -207,7 +207,7 @@ void Calculator::initPredefinedInnerFunctions()
    "LispifyFull( e^x)");
 
   this->AddOperationInnerHandler
-  ("ToString", CalculatorFunctionsGeneral::innerQuoteToString, "",
+  ("ToString", CalculatorFunctionsGeneral::innerExpressionToString, "",
    "Transforms an arbitrary expression to its string representation.",
    "ToString( e^x); \n \"e^x\";\"The quick brown fox jumps over the lazy dog.\"");
   this->AddOperationInnerHandler
@@ -1752,11 +1752,11 @@ void Calculator::initPredefinedInnerFunctions()
     Argument format same as the Freudenthal function. ",
    "FreudenthalFull{}(G_2, (2,1))", true, false)
    ;
-   this->AddOperationInnerHandler
-  ("TestMouseHover", CalculatorFunctionsGeneral::innerTestMathMouseHover, "",
-   "This is not a mathematical function; instead it is an html/javascript test function. Converts the input to a math mouse hover class.",
-   "TestMouseHover(x^2)", true, false)
-   ;
+//   this->AddOperationInnerHandler
+//  ("TestMouseHover", CalculatorFunctionsGeneral::innerTestMathMouseHover, "",
+//   "This is not a mathematical function; instead it is an html/javascript test function. Converts the input to a math mouse hover class.",
+//   "TestMouseHover(x^2)", true, false)
+//   ;
    this->AddOperationInnerHandler
   ("CoefficientOf", CalculatorFunctionsGeneral::innerCoefficientOf, "",
    "Gets the coefficient of the first argument in the second. ",

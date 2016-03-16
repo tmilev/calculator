@@ -248,6 +248,11 @@ bool CalculatorFunctionsGeneral::innerUrlStringToNormalString(Calculator& theCom
   return output.AssignValue(CGI::URLStringToNormal(theString), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerExpressionToString(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExpressionToString");
+  return output.AssignValue(input.ToString(), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerQuoteToString(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerQuoteToString");
   std::string atomString;
@@ -256,7 +261,7 @@ bool CalculatorFunctionsGeneral::innerQuoteToString(Calculator& theCommands, con
   theCommands << "<b>Warning: this shouldn't happen: quote operation is applied to the non-atomic expression: "
   << input.ToString() << "."
   << " This may be a bug with the function Calculator::ParseFillDictionary. </b>";
-  return output.AssignValue(input.ToString() , theCommands);
+  return output.AssignValue(input.ToString(), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerFourierTransformEWA(Calculator& theCommands, const Expression& input, Expression& output)

@@ -1623,7 +1623,7 @@ class SubgroupDataWeylGroup
 {
 public:
   WeylGroupData* theWeylData;
-  SubgroupData<FiniteGroup<ElementWeylGroup<WeylGroupData> >, ElementWeylGroup<WeylGroupData> >* theSubgroupData;
+  SubgroupData<FiniteGroup<ElementWeylGroup<WeylGroupData> >, ElementWeylGroup<WeylGroupData> > theSubgroupData;
   List<Rational> tauSignature;
   bool CheckInitialization();
   void ComputeTauSignature();

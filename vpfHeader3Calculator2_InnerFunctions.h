@@ -39,6 +39,7 @@ public:
   static bool innerUrlStringToNormalString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerURLKeyValuePairsToNormalRecursive(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerExpressionToString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerQuoteToString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerBase64ToCharToBase64Test(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCharToBase64(Calculator& theCommands, const Expression& input, Expression& output);

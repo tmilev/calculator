@@ -472,7 +472,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(Calculator& th
 bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize");
-  double startTimeForDebug=theGlobalVariables.GetElapsedSeconds();
+  //double startTimeForDebug=theGlobalVariables.GetElapsedSeconds();
   SemisimpleLieAlgebra* theSSalgebra=0;
   Vector<Rational> theWeightRat;
   Expression theContextE;
@@ -1339,10 +1339,11 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(Calculator& theCommands
 bool CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight");
   Weight<Polynomial<Rational> > resultWeight;
-  SemisimpleLieAlgebra* theSSowner;
+  SemisimpleLieAlgebra* theSSowner=0;
   Expression tempE;
   if (!CalculatorConversions::innerSSLieAlgebra(theCommands, input, tempE, theSSowner))
-    return theCommands << "<hr>Failed to load semisimple Lie algebra";
+    return theCommands << "<hr>Failed to load semisimple Lie algebra. ";
+  theSSowner->CheckConsistency();
   Expression theContext;
   theContext.MakeContextSSLieAlg(theCommands, *theSSowner);
   resultWeight.weightFundamentalCoordS= theSSowner->theWeyl.GetFundamentalCoordinatesFromSimple(theSSowner->theWeyl.rho);
@@ -1437,9 +1438,7 @@ bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(Calc
 bool CalculatorFunctionsWeylGroup::innerSpechtModule(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerSpechtModule");
   Vector<Rational> inputRat;
-  if (input.children.size!=3)
-    return theCommands << "CalculatorFunctionsWeylGroup::innerSpechtModule needs one argument, however, since SpechtModule((3,2,1)) is interpreted as SpechtModule(3,2,1), insert a dummy second argument of some sort.";
-  if (!theCommands.GetVectoR(input[1], inputRat))
+  if (!theCommands.GetVectorFromFunctionArguments(input, inputRat))
     return false;
   if (inputRat.size<1)
     return false;

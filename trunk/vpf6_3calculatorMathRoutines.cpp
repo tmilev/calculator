@@ -3095,18 +3095,14 @@ bool CalculatorFunctionsGeneral::outerAtimesBpowerJplusEtcDivBpowerI(Calculator&
 
 bool CalculatorFunctionsGeneral::innerSort(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSort");
-  if (!input.IsSequenceNElementS())
+  if (!input.IsListStartingWithAtom(theCommands.theAtoms.GetIndexIMustContainTheObject("Sort")))
     return false;
   List<Expression> sortedExpressions;
   sortedExpressions.Reserve(input.children.size-1);
   for (int i=1; i<input.children.size; i++)
     sortedExpressions.AddOnTop(input[i]);
   sortedExpressions.QuickSortAscending();
-  output.reset(theCommands, sortedExpressions.size+1);
-  output.AddChildAtomOnTop(theCommands.opSequence());
-  for (int i=0; i<sortedExpressions.size; i++)
-    output.AddChildOnTop(sortedExpressions[i]);
-  return true;
+  return output.MakeSequence(theCommands, &sortedExpressions);
 }
 
 bool CalculatorFunctionsGeneral::innerGrowDynkinType(Calculator& theCommands, const Expression& input, Expression& output)
@@ -3471,7 +3467,7 @@ bool CalculatorFunctionsGeneral::innerIsNilpotent(Calculator& theCommands, const
   }
   if (!found)
     return output.MakeError("Failed to extract matrix with rational coefficients", theCommands);
-  stOutput << "mat tensor: " << theMatTensor.ToString();
+//  stOutput << "mat tensor: " << theMatTensor.ToString();
   if (theMatTensor.IsNilpotent())
     return output.AssignValue(1, theCommands);
   return output.AssignValue(0, theCommands);
@@ -3480,7 +3476,7 @@ bool CalculatorFunctionsGeneral::innerIsNilpotent(Calculator& theCommands, const
 bool CalculatorFunctionsGeneral::innerInvertMatrix(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInvertMatrix");
   Matrix<Rational> theMat;
-  stOutput << "Lispified: " << input.ToString();
+//  stOutput << "Lispified: " << input.ToString();
   if (!input.IsOfType<Matrix<Rational> >(&theMat))
     if (!theCommands.GetMatriXFromArguments<Rational>(input, theMat, 0, -1, 0))
       return output.MakeError("Failed to extract matrix with rational coefficients", theCommands);

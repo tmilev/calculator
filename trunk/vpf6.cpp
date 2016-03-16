@@ -2410,13 +2410,17 @@ SemisimpleSubalgebras& ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPrese
 }
 
 SemisimpleLieAlgebra& ObjectContainer::GetLieAlgebraCreateIfNotPresent(const DynkinType& input)
-{ MacroRegisterFunctionWithName("ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPresent");
+{ MacroRegisterFunctionWithName("ObjectContainer::GetLieAlgebraCreateIfNotPresent");
   bool needToInit=false;
+  //  stOutput << "got to here pt1<br>";
   if (!this->theSSLieAlgebras.Contains(input))
     needToInit=true;
+  //  stOutput << "got to here pt2<br>";
   SemisimpleLieAlgebra& theLA=this->theSSLieAlgebras.GetValueCreateIfNotPresent(input);
+  //  stOutput << "got to here pt3<br>";
   if (needToInit)
     theLA.theWeyl.MakeFromDynkinType(input);
+  //  stOutput << "got to here pt4<br>";
   return theLA;
 }
 

@@ -870,15 +870,12 @@ bool FiniteGroup<elementSomeGroup>::CheckOrthogonalityCharTable()
 }
 
 SubgroupDataWeylGroup::SubgroupDataWeylGroup()
-{ this->theSubgroupData=0;
-  this->theWeylData=0;
+{ this->theWeylData=0;
 }
 
 bool SubgroupDataWeylGroup::CheckInitialization()
 { if (this==0)
     crash << "``this'' pointer of SubgroupDataWeylGroup equals zero. " << crash;
-  if (this->theSubgroupData==0)
-    crash << "SubgroupDataWeylGroup: non-initialized theSubgroupData pointer. " << crash;
   if (this->theWeylData==0)
     crash << "SubgroupDataWeylGroup: non-initialized theWeylData pointer. " << crash;
   return true;
@@ -887,22 +884,22 @@ bool SubgroupDataWeylGroup::CheckInitialization()
 void SubgroupDataWeylGroup::ComputeTauSignature()
 { MacroRegisterFunctionWithName("SubgroupWeylGroup::ComputeTauSignature");
   this->CheckInitialization();
-  if(!this->theSubgroupData->theGroup->flagCCRepresentativesComputed)
-  { this->theSubgroupData->theGroup->ComputeCCSizesAndRepresentatives();
-    this->theSubgroupData->ComputeCCRepresentativesPreimages();
+  if(!this->theSubgroupData.theGroup->flagCCRepresentativesComputed)
+  { this->theSubgroupData.theGroup->ComputeCCSizesAndRepresentatives();
+    this->theSubgroupData.ComputeCCRepresentativesPreimages();
   }
-  this->theSubgroupData->theGroup->CheckConjugacyClassRepsMatchCCsizes();
+  this->theSubgroupData.theGroup->CheckConjugacyClassRepsMatchCCsizes();
 //  this->theGroup->CheckOrthogonalityCharTable(theGlobalVariables);
   Vector<Rational> Xs, Xi;
-  this->theSubgroupData->theSubgroup->GetSignCharacter(Xs);
-  Xi.SetSize(this->theSubgroupData->theSubgroup->ConjugacyClassCount());
+  this->theSubgroupData.theSubgroup->GetSignCharacter(Xs);
+  Xi.SetSize(this->theSubgroupData.theSubgroup->ConjugacyClassCount());
 //  stOutput << "<hr>Computing in group with " << this->size().ToString() << " elements. ";
-  this->tauSignature.SetSize(this->theSubgroupData->theGroup->ConjugacyClassCount());
-  for(int i=0; i<this->theSubgroupData->theGroup->ConjugacyClassCount(); i++)
+  this->tauSignature.SetSize(this->theSubgroupData.theGroup->ConjugacyClassCount());
+  for(int i=0; i<this->theSubgroupData.theGroup->ConjugacyClassCount(); i++)
   { ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& Xip = this->theWeylData->theGroup.characterTable[i];
     for(int j=0; j<Xi.size; j++)
-      Xi[j] = Xip[this->theSubgroupData->ccRepresentativesPreimages[j]];
-    this->tauSignature[i]= this->theSubgroupData->theSubgroup->GetHermitianProduct(Xs,Xi);
+      Xi[j] = Xip[this->theSubgroupData.ccRepresentativesPreimages[j]];
+    this->tauSignature[i]= this->theSubgroupData.theSubgroup->GetHermitianProduct(Xs,Xi);
 //    stOutput << "<br>Hermitian product of " << Xs.ToString() << " and "
 //    << Xi.ToString() << " = " << this->GetHermitianProduct(Xs, Xi);
     if (!this->tauSignature[i].IsSmallInteger())
@@ -913,42 +910,42 @@ void SubgroupDataWeylGroup::ComputeTauSignature()
 void SubgroupDataRootReflections::ComputeCCSizesRepresentativesPreimages()
 { MacroRegisterFunctionWithName("SubgroupRootReflections::ComputeCCSizesRepresentativesPreimages");
   if (this->theDynkinType==this->theWeylData->theDynkinType && this->theWeylData->theGroup.flagCCRepresentativesComputed)
-  { this->theSubgroupData->theSubgroup->conjugacyClasseS.SetSize(this->theSubgroupData->theGroup->conjugacyClasseS.size);
-    for (int i=0; i<this->theSubgroupData->theSubgroup->conjugacyClasseS.size; i++)
-    { this->theSubgroupData->theSubgroup->conjugacyClasseS[i].flagRepresentativeComputed=true;
-      this->theSubgroupData->theSubgroup->conjugacyClasseS[i].representative=this->theSubgroupData->theGroup->conjugacyClasseS[i].representative;
-      this->theSubgroupData->theSubgroup->conjugacyClasseS[i].size=this->theSubgroupData->theGroup->conjugacyClasseS[i].size;
-      this->theSubgroupData->theSubgroup->conjugacyClasseS[i].flagElementsComputed=false;
+  { this->theSubgroupData.theSubgroup->conjugacyClasseS.SetSize(this->theSubgroupData.theGroup->conjugacyClasseS.size);
+    for (int i=0; i<this->theSubgroupData.theSubgroup->conjugacyClasseS.size; i++)
+    { this->theSubgroupData.theSubgroup->conjugacyClasseS[i].flagRepresentativeComputed=true;
+      this->theSubgroupData.theSubgroup->conjugacyClasseS[i].representative=this->theSubgroupData.theGroup->conjugacyClasseS[i].representative;
+      this->theSubgroupData.theSubgroup->conjugacyClasseS[i].size=this->theSubgroupData.theGroup->conjugacyClasseS[i].size;
+      this->theSubgroupData.theSubgroup->conjugacyClasseS[i].flagElementsComputed=false;
     }
-    this->theSubgroupData->ccRepresentativesPreimages.SetSize(this->theSubgroupData->theGroup->conjugacyClasseS.size);
-    for (int i=0; i<this->theSubgroupData->ccRepresentativesPreimages.size; i++)
-      this->theSubgroupData->ccRepresentativesPreimages[i]=i;
-    this->theSubgroupData->theSubgroup->flagCCRepresentativesComputed=true;
+    this->theSubgroupData.ccRepresentativesPreimages.SetSize(this->theSubgroupData.theGroup->conjugacyClasseS.size);
+    for (int i=0; i<this->theSubgroupData.ccRepresentativesPreimages.size; i++)
+      this->theSubgroupData.ccRepresentativesPreimages[i]=i;
+    this->theSubgroupData.theSubgroup->flagCCRepresentativesComputed=true;
   } else
   { if (this->theDynkinType.GetRank()<=6)
-      this->theSubgroupData->theSubgroup->ComputeCCfromAllElements();
+      this->theSubgroupData.theSubgroup->ComputeCCfromAllElements();
     else
-      this->theSubgroupData->theSubgroup->ComputeCCSizesAndRepresentatives();
+      this->theSubgroupData.theSubgroup->ComputeCCSizesAndRepresentatives();
 
-    this->theSubgroupData->ComputeCCRepresentativesPreimages();
+    this->theSubgroupData.ComputeCCRepresentativesPreimages();
   }
 }
 
 void SubgroupDataRootReflections::InitGenerators()
 { MacroRegisterFunctionWithName("SubgroupRootReflections::InitGenerators");
   if (this->theDynkinType.GetRank()==0)
-  { this->theSubgroupData->theSubgroup->generators.SetSize(1);
-    this->theSubgroupData->theSubgroup->generators[0].MakeID(*this->theSubgroupData->theGroup);
+  { this->theSubgroupData.theSubgroup->generators.SetSize(1);
+    this->theSubgroupData.theSubgroup->generators[0].MakeID(*this->theSubgroupData.theGroup);
     return;
   }
   int d=this->SubCartanSymmetric.NumRows;
-  this->theSubgroupData->generatorPreimages.SetSize(d);
-  this->theSubgroupData->theSubgroup->generators.SetSize(d);
+  this->theSubgroupData.generatorPreimages.SetSize(d);
+  this->theSubgroupData.theSubgroup->generators.SetSize(d);
   ElementWeylGroup<WeylGroupData> currentReflection;
   for(int i=0; i<d; i++)
   { currentReflection.MakeRootReflection(this->generatingSimpleRoots[i], *this->theWeylData);
-    this->theSubgroupData->generatorPreimages[i]=this->theSubgroupData->theGroup->theElements.GetIndex(currentReflection);
-    this->theSubgroupData->theSubgroup->generators[i]=currentReflection;
+    this->theSubgroupData.generatorPreimages[i]=this->theSubgroupData.theGroup->theElements.GetIndex(currentReflection);
+    this->theSubgroupData.theSubgroup->generators[i]=currentReflection;
   }
 }
 
@@ -956,11 +953,11 @@ void SubgroupDataRootReflections::MakeParabolicSubgroup(WeylGroupData& G, const 
 { MacroRegisterFunctionWithName("SubgroupDataRootReflections::MakeParabolicSubgroup");
   G.CheckConsistency();
   this->theWeylData = &G;
+  this->theSubgroupData.init();
+  this->theSubgroupData.theGroup = &(G.theGroup);
+  this->theSubgroupData.theSubgroup=&this->theSubgroupData.theSubgroupMayBeHere;
+  this->theSubgroupData.CheckInitialization();
   this->CheckInitialization();
-  this->theSubgroupData=&this->subGroupDataContainer;
-  this->theSubgroupData->init();
-  this->theSubgroupData->theGroup = &(G.theGroup);
-  this->theSubgroupData->CheckInitialization();
   this->flagIsParabolic=true;
   this->simpleRootsInLeviParabolic=inputGeneratingSimpleRoots;
   Vectors<Rational> EiBasis;
@@ -979,8 +976,8 @@ void SubgroupDataRootReflections::MakeParabolicSubgroup(WeylGroupData& G, const 
 void SubgroupDataRootReflections::MakeFromRoots
 (WeylGroupData& G, const Vectors<Rational>& inputRootReflections)
 { MacroRegisterFunctionWithName("SubgroupDataRootReflections::MakeFromRoots");
-  this->theSubgroupData->init();
-  this->theSubgroupData->theGroup = &(G.theGroup);
+  this->theSubgroupData.init();
+  this->theSubgroupData.theGroup = &(G.theGroup);
   this->theWeylData = &G;
   this->generatingSimpleRoots=inputRootReflections;
   DynkinDiagramRootSubalgebra theDiagram;

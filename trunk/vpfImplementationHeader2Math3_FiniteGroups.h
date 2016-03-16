@@ -487,8 +487,8 @@ template <class someGroup, class elementSomeGroup>
 bool SubgroupData<someGroup, elementSomeGroup>::CheckInitialization()
 { if (this==0)
     crash << "A subgroup has the ``this'' pointer equal to zero. " << crash;
-  if (this->theGroup==0 || this->theSubgroup == 0)
-    crash << "This is a programming error: subgroup not initialized when it should be";
+  if (this->theGroup==0)
+    crash << "This is a programming error: subgroup not initialized when it should be" << crash;
   return true;
 }
 

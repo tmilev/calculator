@@ -734,7 +734,7 @@ bool SemisimpleSubalgebras::FindTheSSSubalgebrasContinue()
   reportStream2 << "Found a total of " << this->theSubalgebras.theValues.size << " subalgebras. Proceding to"
   << " adjust centralizers. ";
   theReport2.Report(reportStream2.str());
-  stOutput << "The dynkin type, before hooking up the centralizers: " << this->targetDynkinType.ToString();
+//  stOutput << "The dynkin type, before hooking up the centralizers: " << this->targetDynkinType.ToString();
   if (this->targetDynkinType.IsEqualToZero())
   { this->HookUpCentralizers(false);
     if (this->flagComputeNilradicals)
@@ -830,9 +830,9 @@ Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromImag
   { this->MakeEmptyCandidateSA(theSSSubalgebraToBeModified);
     result.MakeZero(0);
     return result;
-  }
+  } else
+    this->MakeCandidateSA(input, theSSSubalgebraToBeModified);
   Vector<Rational> newSimpleRoot, highestRootInSimpleRootModuleSimpleCoords;
-  this->MakeCandidateSA(input, theSSSubalgebraToBeModified);
   WeylGroupData& theWeyl=*theSSSubalgebraToBeModified.theWeylNonEmbedded;
   theWeyl.ComputeRho(true);
   theSSSubalgebraToBeModified.CheckCandidateInitialization();

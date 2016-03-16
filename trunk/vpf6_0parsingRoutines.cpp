@@ -1025,9 +1025,12 @@ bool Calculator::AllowsTensorInPreceding(const std::string& lookAhead)
 }
 
 bool Calculator::AllowsTimesInPreceding(const SyntacticElement& thePreceding, const std::string& lookAhead)
-{ if (thePreceding.controlIndex==this->conExpression())
+{ //stOutput << "<hr><br><br>DEBUG: here i am0. Thepreceding: " << thePreceding.ToStringHumanReadable(*this, false)
+  //<< "<br>lookahead: " << lookAhead;
+  if (thePreceding.controlIndex==this->conExpression())
     if (thePreceding.theData.IsBuiltInAtom())
-    { return lookAhead=="+" || lookAhead=="-" || lookAhead=="*" || lookAhead=="/" ||
+    { //stOutput << "DEBUG: here i am";
+      return lookAhead=="+" || lookAhead=="-" || lookAhead=="*" || lookAhead=="/" ||
       lookAhead=="\\cup" ||
       lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||
       lookAhead=="=" || lookAhead==">" || lookAhead=="<" ||
@@ -1036,7 +1039,7 @@ bool Calculator::AllowsTimesInPreceding(const SyntacticElement& thePreceding, co
       lookAhead=="EndProgram"
       ;
     }
-  return this->AllowsAndInPreceding(lookAhead);
+  return this->AllowsTimesInPreceding(lookAhead);
 }
 
 bool Calculator::AllowsTimesInPreceding(const std::string& lookAhead)

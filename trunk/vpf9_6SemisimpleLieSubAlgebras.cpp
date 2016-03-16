@@ -948,7 +948,9 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
 //  this->owner->RegisterPossibleCandidate(*this);
   this->CheckFullInitializatioN();
   if (!baseSubalgebra.theWeylNonEmbedded->theDynkinType.IsEqualToZero() && baseSubalgebra.indexInOwner==-1)
-    crash << "This is a programming error: attempting to induce a subalgebra from a non-registered base subalgebra. " << crash;
+    crash << "This is a programming error: attempting to induce a subalgebra "
+    << "from a non-registered base subalgebra of type "
+    << baseSubalgebra.theWeylNonEmbedded->theDynkinType.ToString() << ". " << crash;
   ProgressReport theReport;
   if (!this->ComputeChar(false))
   { if (theGlobalVariables.flagReportEverything)
@@ -1072,7 +1074,9 @@ void OrbitFDRepIteratorWeylGroup::init
     this->reset();
   this->orbitDefiningElement=inputElement;
   if (this->maxOrbitBufferSize>=1)
+  { this->orbitBuffer.SetSize(0);
     this->orbitBuffer.AddOnTop(this->orbitDefiningElement);
+  }
   this->theIterator.init(inputGenerators, this->orbitDefiningElement, inputGroupAction);
 }
 
@@ -1195,7 +1199,7 @@ void SemisimpleSubalgebras::GetHCandidates
           theReport3.Report(out2.str());
           //stOutput << "<br>" << out2.str();
         }
-    } while (this->theOrbiTs[j].IncrementReturnFalseIfPastLast());
+    } while (currentOrbit.IncrementReturnFalseIfPastLast());
     if (outputHCandidatesScaledToActByTwo.size==0)
     { std::stringstream out2;
       out2 << "Sl(2) orbit " << j+1 << ": extension to " << currentType.ToString()
@@ -1209,7 +1213,12 @@ void SemisimpleSubalgebras::GetHCandidates
 }
 
 const CandidateSSSubalgebra& SemisimpleSubalgebras::baseSubalgebra()
-{ return * this->currentSubalgebraChain.LastObject();
+{ if (!this->currentSubalgebraChain.LastObject()->theWeylNonEmbedded->theDynkinType.IsEqualToZero() &&
+      this->currentSubalgebraChain.LastObject()->indexInOwner==-1)
+    crash << "This is a programming error: base subalgebra has index in owner equal to -1 yet "
+    << "is of non-zero type: "
+    << this->currentSubalgebraChain.LastObject()->theWeylNonEmbedded->theDynkinType.ToString() << ". " << crash;
+  return * this->currentSubalgebraChain.LastObject();
 }
 
 bool SemisimpleSubalgebras::RemoveLastSubalgebra()
@@ -1557,13 +1566,16 @@ bool SemisimpleSubalgebras::ComputeCurrentHCandidates()
 }
 
 void SemisimpleSubalgebras::AddSubalgebraIfNewSetToStackTop(CandidateSSSubalgebra& input)
-{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::AddNewSubalgebra");
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::AddSubalgebraIfNewSetToStackTop");
   this->CheckConsistencyHs();
   if (this->theSubalgebras.Contains(input.theHs))
-    input=this->theSubalgebras[this->theSubalgebras.GetIndex(input.theHs)];
-  else
-  { this->theSubalgebras.SetValue(input, input.theHs);
-    this->theSubalgebras.theValues.LastObject().indexInOwner=this->theSubalgebras.theValues.size-1;
+  { input=this->theSubalgebras[this->theSubalgebras.GetIndex(input.theHs)];
+    if (!input.theWeylNonEmbedded->theDynkinType.IsEqualToZero() && input.indexInOwner==-1)
+      crash << "This is not supposed to happen: subalgebra of type "
+      << input.theWeylNonEmbedded->theDynkinType.ToString() << " has index in owner -1. " << crash;
+  } else
+  { input.indexInOwner=this->theSubalgebras.theValues.size;
+    this->theSubalgebras.SetValue(input, input.theHs);
   }
   input.ComputeAndVerifyFromGeneratorsAndHs();
   this->AddSubalgebraToStack(input, 0, 0);
@@ -1572,6 +1584,8 @@ void SemisimpleSubalgebras::AddSubalgebraIfNewSetToStackTop(CandidateSSSubalgebr
 void SemisimpleSubalgebras::AddSubalgebraToStack
 (CandidateSSSubalgebra& input, int inputNumLargerTypesExplored, int inputNumHcandidatesExplored)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::AddSubalgebraToStack");
+  if (input.indexInOwner==-1 && !input.theWeylNonEmbedded->theDynkinType.IsEqualToZero())
+    crash << "Adding to stack subalgebra with indexInOwner equal to -1 is forbidden. " << crash;
   if (input.theHs.size!=input.theHsScaledToActByTwoInOrderOfCreation.size)
     crash << "In order to add subalgebra " << input.theWeylNonEmbedded->theDynkinType.ToString()
     << " to the stack I need to know the order of creation of its h-vectors. "
@@ -2057,7 +2071,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
 //  bool doDebug=(this->theWeylNonEmbedded->theDynkinType.ToString()=="A^{1}_2+A^{2}_1");
 //  if (this->indexInOwnersOfNonEmbeddedMe<0 || this->indexInOwnersOfNonEmbeddedMe >=this->owner->theSubalgebrasNonEmbedded
   const SemisimpleLieAlgebra& nonEmbeddedMe=
-  (*this->owner->theSubalgebrasNonEmbedded)[this->indexNonEmbeddedMeNonStandardCartan];
+  this->owner->theSubalgebrasNonDefaultCartanAndScale[this->indexNonEmbeddedMeNonStandardCartan];
   this->totalNumUnknownsNoCentralizer=0;
   if (this->theHs.size==0)
     crash << "This is a programming error: the number of involved H's cannot be zero. " << crash;

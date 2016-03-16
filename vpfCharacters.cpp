@@ -869,8 +869,24 @@ bool FiniteGroup<elementSomeGroup>::CheckOrthogonalityCharTable()
   return true;
 }
 
+SubgroupDataWeylGroup::SubgroupDataWeylGroup()
+{ this->theSubgroupData=0;
+  this->theWeylData=0;
+}
+
+bool SubgroupDataWeylGroup::CheckInitialization()
+{ if (this==0)
+    crash << "``this'' pointer of SubgroupDataWeylGroup equals zero. " << crash;
+  if (this->theSubgroupData==0)
+    crash << "SubgroupDataWeylGroup: non-initialized theSubgroupData pointer. " << crash;
+  if (this->theWeylData==0)
+    crash << "SubgroupDataWeylGroup: non-initialized theWeylData pointer. " << crash;
+  return true;
+}
+
 void SubgroupDataWeylGroup::ComputeTauSignature()
 { MacroRegisterFunctionWithName("SubgroupWeylGroup::ComputeTauSignature");
+  this->CheckInitialization();
   if(!this->theSubgroupData->theGroup->flagCCRepresentativesComputed)
   { this->theSubgroupData->theGroup->ComputeCCSizesAndRepresentatives();
     this->theSubgroupData->ComputeCCRepresentativesPreimages();
@@ -937,10 +953,14 @@ void SubgroupDataRootReflections::InitGenerators()
 }
 
 void SubgroupDataRootReflections::MakeParabolicSubgroup(WeylGroupData& G, const Selection& inputGeneratingSimpleRoots)
-{ MacroRegisterFunctionWithName("SubgroupRootReflections::MakeParabolicSubgroup");
+{ MacroRegisterFunctionWithName("SubgroupDataRootReflections::MakeParabolicSubgroup");
+  G.CheckConsistency();
+  this->theWeylData = &G;
+  this->CheckInitialization();
+  this->theSubgroupData=&this->subGroupDataContainer;
   this->theSubgroupData->init();
   this->theSubgroupData->theGroup = &(G.theGroup);
-  this->theWeylData = &G;
+  this->theSubgroupData->CheckInitialization();
   this->flagIsParabolic=true;
   this->simpleRootsInLeviParabolic=inputGeneratingSimpleRoots;
   Vectors<Rational> EiBasis;
@@ -958,7 +978,7 @@ void SubgroupDataRootReflections::MakeParabolicSubgroup(WeylGroupData& G, const 
 
 void SubgroupDataRootReflections::MakeFromRoots
 (WeylGroupData& G, const Vectors<Rational>& inputRootReflections)
-{ MacroRegisterFunctionWithName("SubgroupRootReflections::MakeFromRoots");
+{ MacroRegisterFunctionWithName("SubgroupDataRootReflections::MakeFromRoots");
   this->theSubgroupData->init();
   this->theSubgroupData->theGroup = &(G.theGroup);
   this->theWeylData = &G;

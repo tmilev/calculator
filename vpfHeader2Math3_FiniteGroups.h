@@ -1625,13 +1625,16 @@ public:
   WeylGroupData* theWeylData;
   SubgroupData<FiniteGroup<ElementWeylGroup<WeylGroupData> >, ElementWeylGroup<WeylGroupData> >* theSubgroupData;
   List<Rational> tauSignature;
+  bool CheckInitialization();
   void ComputeTauSignature();
   void GetSignCharacter(Vector<Rational>& out);
+  SubgroupDataWeylGroup();
 };
 
 class SubgroupDataRootReflections : public SubgroupDataWeylGroup
 {
 public:
+  SubgroupData<FiniteGroup<ElementWeylGroup<WeylGroupData> >, ElementWeylGroup<WeylGroupData> > subGroupDataContainer;
   Matrix<Rational> SubCartanSymmetric;
   DynkinType theDynkinType;
   Vectors<Rational> generatingSimpleRoots;

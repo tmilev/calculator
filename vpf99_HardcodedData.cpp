@@ -41,8 +41,13 @@ void WeylGroupData::ComputeOrLoadCharacterTable(std::stringstream* reportStream)
     this->flagCharTableIsComputed=true;
     return;
   }
-  this->ComputeInitialIrreps();
-  this->theGroup.ComputeIrreducibleRepresentationsTodorsVersion(this->theGroup.irreps_grcam);
+  if(this->theGroup.ComputeIrreducibleRepresentationsWithFormulas)
+    this->theGroup.ComputeIrreducibleRepresentationsWithFormulas(this->theGroup);
+  if(this->theGroup.irreps.size < this->theGroup.conjugacyClasseS.size)
+  { this->ComputeInitialIrreps();
+    this->theGroup.ComputeIrreducibleRepresentationsTodorsVersion();
+  }
+  // this flag should already be set
   this->flagCharTableIsComputed=true;
 }
 

@@ -1613,11 +1613,6 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::operator>(co
 }
 
 template <typename somegroup, typename coefficient>
-bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::operator<(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& right)const
-{ return this->theCharacteR < right.theCharacteR;
-}
-
-template <typename somegroup, typename coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::GetClassFunctionMatrix
 (ClassFunction<somegroup, coefficient>& inputChar, Matrix<coefficient>& outputMat, GlobalVariables* theGlobalVariables)
 { this->CheckInitialization();
@@ -2114,11 +2109,17 @@ bool ClassFunction<someFiniteGroup, coefficient>::operator==(const ClassFunction
   return false;
 }
 
+// collation order
 template<class someFiniteGroup, typename coefficient>
 bool ClassFunction<someFiniteGroup, coefficient>::operator>(const ClassFunction<someFiniteGroup, coefficient>& right) const
-{ for(int i=0; i<this->data.size; i++)
-    if(!(this->data[i] == right.data[i]))
-      return this->data[i] > right.data[i];
+{ if(this->data[0] > right.data[0])
+    return true;
+  if(right.data[0] > this->data[0])
+    return false;
+  if(this->data > right.data)
+    return false;
+  if(right.data > this->data)
+    return true;
   return false;
 }
 
@@ -2221,40 +2222,50 @@ void FiniteGroup<elementSomeGroup>::AddCharacter(const ClassFunction<FiniteGroup
 }
 
 template <typename elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersion(
-    List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > initialIrreps)
+void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersion()
 { MacroRegisterFunctionWithName("WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion");
-  if(this->irreps_grcam.size == 0)
-    this->irreps_grcam = initialIrreps;
   if(this->irreps_grcam.size == 0)
   { if(this->irreps.size == 0)
       crash << "Need an initial irrep.  Check up the call chain and find out where it should be provided" << crash;
     for(int i=0; i<this->irreps.size; i++)
       this->irreps_grcam.AddOnTop(irreps[i].MakeGRCAM());
   }
+  List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > appendOnlyIrrepsList;
+  appendOnlyIrrepsList = this->irreps_grcam;
+
+  { bool nontrivial = false;
+    for(int i=0; i<appendOnlyIrrepsList[0].theCharacteR.data.size; i++)
+      if(appendOnlyIrrepsList[0].theCharacteR.data[i] != 1)
+      { nontrivial = true;
+        break;
+      }
+    if(!nontrivial)
+      appendOnlyIrrepsList.RemoveIndexShiftDown(0);
+  }
+  int initialcount = appendOnlyIrrepsList.size;
+
   if(this->theElements.size == 0)
     this->ComputeCCfromAllElements();
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> newRep;
   int NumClasses=this->ConjugacyClassCount();
   VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> decompositionNewRep;
   ProgressReport theReport1;
-  int indexFirstPredefinedRep=1; //<-this should be the index of the sign rep.
-  int indexLastPredefinedrep=2; //<-this should be the index of the standard rep.
-  for (int i=0; i<this->irreps_grcam.size && this->irreps_grcam.size!=NumClasses; i++)
-    for (int j=indexFirstPredefinedRep; j<=indexLastPredefinedrep; j++)
+//  int indexFirstPredefinedRep=1; //<-this should be the index of the sign rep.
+//  int indexLastPredefinedrep=2; //<-this should be the index of the standard rep.
+  for (int i=0; i<appendOnlyIrrepsList.size && this->irreps!=NumClasses; i++)
+    for (int j=0; j<initialcount; j++)
     { if (theGlobalVariables.flagReportEverything)
       { std::stringstream reportStream;
-        reportStream << this->irreps_grcam.size << " irreducible representations found so far. ";
-        reportStream << "<br>Decomposing " << this->irreps_grcam[j].theCharacteR.ToString() << " * " << this->irreps_grcam[i].theCharacteR.ToString() << "\n";
+        reportStream << this->irreps.size << " irreducible representations found so far. ";
+        reportStream << "<br>Decomposing " << appendOnlyIrrepsList[j].theCharacteR << " * " << appendOnlyIrrepsList[i].theCharacteR << "\n";
         theReport1.Report(reportStream.str());
       }
-      newRep= this->irreps_grcam[j];//we are initializing by the sign or natural rep.
-      newRep*= this->irreps_grcam[i];
-      bool tempB=newRep.DecomposeTodorsVersion(decompositionNewRep);
+      newRep= appendOnlyIrrepsList[j];//we are initializing by the sign or natural rep.
+      newRep*= appendOnlyIrrepsList[i];
+      bool tempB=newRep.DecomposeTodorsVersion(decompositionNewRep, &appendOnlyIrrepsList);
       if (!tempB)
         crash << "This is a mathematical error: failed to decompose " << newRep.theCharacteR.ToString() << ". " << crash;
     }
-  this->irreps_grcam.QuickSortAscending(0, &this->characterTable);
   if (theGlobalVariables.flagReportEverything)
   { std::stringstream reportStream;
     reportStream << "Irrep table:";
@@ -2268,6 +2279,11 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
   }
   this->flagCharTableIsComputed=true;
   this->flagIrrepsAreComputed=true;
+  stOutput << this->PrettyPrintCharacterTable();
+  if(this->characterTable.size < this->conjugacyClasseS.size)
+    crash << crash;
+  if(this->irreps.size < this->conjugacyClasseS.size)
+    crash << crash;
 }
 
 
@@ -2301,12 +2317,15 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::GetLargestDe
       }
 }
 
+
 template <typename somegroup, typename coefficient>
 bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTodorsVersionRecursive(
     VirtualRepresentation<somegroup, coefficient>& outputIrrepMults,
-    List<GroupRepresentation<somegroup, coefficient>*>& appendOnlyIrrepsList, GlobalVariables* theGlobalVariables)
+    List<GroupRepresentation<somegroup, coefficient> >& appendOnlyIrrepsList,
+    List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >* appendOnlyGRCAMSList)
 { MacroRegisterFunctionWithName("WeylGroupRepresentation::DecomposeTodorsVersionRecursive");
   this->CheckInitialization();
+
   this->ownerGroup->CheckInitializationFDrepComputation();
   this->GetCharacter();
   coefficient SumOfNumComponentsSquared=this->GetNumberOfComponents();
@@ -2318,15 +2337,10 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
   { int i = this->ownerGroup->characterTable.BSGetIndex(this->theCharacteR);
     if(i == -1)
     { this->ownerGroup->AddIrreducibleRepresentation(*this);
+      appendOnlyIrrepsList.AddOnTop(this->MakeOtherGroupRepresentationClass());
+      if(appendOnlyGRCAMSList)
+        appendOnlyGRCAMSList->AddOnTop(*this);
       i = this->ownerGroup->characterTable.BSGetIndex(this->theCharacteR);
-      if(i == -1)
-        crash << "Thing just added to list not found in list " << __FILE__ << ":" << __LINE__ << crash;
-      // would prefer to use BSGetIndex :/
-      for(int ii=0; ii<this->ownerGroup->irreps.size; ii++)
-      { // this had better be true at some point
-        if(this->ownerGroup->irreps[ii].GetCharacter() == this->theCharacteR)
-          appendOnlyIrrepsList.AddOnTop(&(this->ownerGroup->irreps[ii]));
-      }
     }
     outputIrrepMults.AddMonomial(this->ownerGroup->characterTable[i], 1);
     return true;
@@ -2335,9 +2349,8 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
   Vectors<coefficient> splittingMatrixKernel, remainingVectorSpace, tempSpace;
   ClassFunction<somegroup, coefficient> remainingCharacter=this->theCharacteR;
   remainingVectorSpace.MakeEiBasis(this->GetDim());
-  ProgressReport Report1(theGlobalVariables), Report2(theGlobalVariables),
-  Report3(theGlobalVariables), Report4(theGlobalVariables);
-  if (theGlobalVariables!=0)
+  ProgressReport Report1(&theGlobalVariables), Report2(&theGlobalVariables),
+  Report3(&theGlobalVariables), Report4(&theGlobalVariables);
   { std::stringstream reportStream;
     reportStream << "<br>\nDecomposing module with character " << this->theCharacteR.ToString();
     LargeIntUnsigned largestDen, lcmDen;
@@ -2347,18 +2360,16 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
   }
   //chop off already known pieces:
   for(int i=0; i<appendOnlyIrrepsList.size; i++)
-  { coefficient NumIrrepsOfType=this->theCharacteR.InnerProduct(appendOnlyIrrepsList[i]->GetCharacter());
+  { coefficient NumIrrepsOfType=this->theCharacteR.InnerProduct(appendOnlyIrrepsList[i].GetCharacter());
     if(NumIrrepsOfType!=0)
     { this->ownerGroup->CheckInitializationFDrepComputation();
-      if (theGlobalVariables!=0)
       { std::stringstream reportStream;
-        reportStream << "<hr>\ncontains irrep " << appendOnlyIrrepsList[i]->theCharacteR.ToString() << " with multiplicity "
+        reportStream << "<hr>\ncontains irrep " << appendOnlyIrrepsList[i].theCharacteR.ToString() << " with multiplicity "
         << NumIrrepsOfType << "\n";
-        reportStream << "<hr>\nGetting class f-n matrix from character: " << appendOnlyIrrepsList[i]->theCharacteR;
+        reportStream << "<hr>\nGetting class f-n matrix from character: " << appendOnlyIrrepsList[i].theCharacteR;
         Report2.Report(reportStream.str());
       }
-      this->GetClassFunctionMatrix(appendOnlyIrrepsList[i]->theCharacteR, splittingOperatorMatrix, theGlobalVariables);
-      if (theGlobalVariables!=0)
+      this->GetClassFunctionMatrix(appendOnlyIrrepsList[i].theCharacteR, splittingOperatorMatrix, &theGlobalVariables);
       { std::stringstream reportStream;
         reportStream << "<br>class f-n matrix: " << splittingOperatorMatrix.ToString() << "\n <br>\n" << " computing its zero eigenspace... ";
         Report3.Report(reportStream.str());
@@ -2370,11 +2381,10 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
       // I'm not sure how much of a good idea it is to ensure that outputIrrepMults only takes monomials
       // from ownerGroup->characterTable, it might be better to add the character from irreps pointed to
       // by the appendOnlyIrrepsList[i]
-      int ci = this->ownerGroup->characterTable.BSGetIndex(appendOnlyIrrepsList[i]->theCharacteR);
+      int ci = this->ownerGroup->characterTable.BSGetIndex(appendOnlyIrrepsList[i].theCharacteR);
       outputIrrepMults.AddMonomial(this->ownerGroup->characterTable[ci],NumIrrepsOfType);
 
-      remainingCharacter-=appendOnlyIrrepsList[i]->theCharacteR*NumIrrepsOfType;
-      if (theGlobalVariables!=0)
+      remainingCharacter-=appendOnlyIrrepsList[i].theCharacteR*NumIrrepsOfType;
       { std::stringstream reportStream;
         reportStream << "<br>Intersecting kernel of class f-n matrix" << splittingMatrixKernel.ToString() << " with "
         << remainingVectorSpace.ToString() << " to get: " << tempSpace.ToString() << " with remaining character: " << remainingCharacter.ToString();
@@ -2395,10 +2405,10 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
   if((remainingVectorSpace.size < this->GetDim()) && (remainingVectorSpace.size > 0))
   { //stOutput << "<br>restricting to subrep(s)... ";
     GroupRepresentationCarriesAllMatrices<somegroup, coefficient> reducedRep;
-    this->Restrict(remainingVectorSpace, remainingCharacter, reducedRep, theGlobalVariables);
+    this->Restrict(remainingVectorSpace, remainingCharacter, reducedRep, &theGlobalVariables);
     //stOutput << "done" << "\n";
     //stOutput << "Decomposing remaining subrep(s) " << reducedRep.GetCharacter() << "\n";
-    return reducedRep.DecomposeTodorsVersionRecursive(outputIrrepMults, appendOnlyIrrepsList, theGlobalVariables);
+    return reducedRep.DecomposeTodorsVersionRecursive(outputIrrepMults, appendOnlyIrrepsList, appendOnlyGRCAMSList);
   }
   if(remainingVectorSpace.size == 0)
     return true;
@@ -2409,7 +2419,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
   { virtualChar.MakeZero(*this->ownerGroup);
     virtualChar[cfi] = 1;
 //    stOutput << "<br>getting matrix of virtual char " << virtualChar << "\n";
-    this->GetClassFunctionMatrix(virtualChar, splittingOperatorMatrix, theGlobalVariables);
+    this->GetClassFunctionMatrix(virtualChar, splittingOperatorMatrix, &theGlobalVariables);
 //    FormatExpressions tempFormat;
 //    tempFormat.flagUseLatex=true;
 //    stOutput << "... and the result is:<br>" << splittingOperatorMatrix.ToString(&tempFormat);
@@ -2425,7 +2435,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
       { //stOutput << "<br>restricting current rep to basis " << theSubRepsBasis[i].ToString();
         remainingCharacter.MakeZero(*this->ownerGroup);
         this->Restrict(theSubRepsBasis[i], remainingCharacter, newRep);
-        if (!newRep.DecomposeTodorsVersionRecursive(outputIrrepMults, appendOnlyIrrepsList, theGlobalVariables))
+        if (!newRep.DecomposeTodorsVersionRecursive(outputIrrepMults, appendOnlyIrrepsList, appendOnlyGRCAMSList))
           return false;
       }
       return true;
@@ -2559,17 +2569,10 @@ template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentations()
 { if(this->ComputeIrreducibleRepresentationsWithFormulas)
     this->ComputeIrreducibleRepresentationsWithFormulas(*this);
+  else if(this->irreps_grcam.size != 0 || this->irreps.size != 0)
+      this->ComputeIrreducibleRepresentationsTodorsVersion();
   else
-    if(this->irreps_grcam.size != 0)
-      this->ComputeIrreducibleRepresentationsTodorsVersion(this->irreps_grcam);
-    else
-      if(this->irreps.size != 0)
-      { for(int i=0; i<this->irreps.size; i++)
-          this->irreps_grcam.AddOnTop(this->irreps[i].MakeGRCAM());
-        this->ComputeIrreducibleRepresentationsTodorsVersion(this->irreps_grcam);
-      }
-      else
-        crash << "FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentations: We must have either a formula to generate the irreps, or a list of irreps with everything in their tensor products" << __FILE__ << ":" << __LINE__;
+      crash << "FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentations: We must have either a formula to generate the irreps, or a list of irreps with everything in their tensor products" << __FILE__ << ":" << __LINE__;
 }
 
 template <typename somegroup, typename coefficient>

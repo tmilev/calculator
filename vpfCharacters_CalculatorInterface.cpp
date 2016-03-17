@@ -266,15 +266,16 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Restrict
 }
 
 template <typename somegroup, typename coefficient>
-bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTodorsVersion(VirtualRepresentation<somegroup, coefficient>& outputIrrepMults, GlobalVariables* theGlobalVariables)
+bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTodorsVersion(VirtualRepresentation<somegroup, coefficient>& outputIrrepMults,
+                                                                                           List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >* appendOnlyGRCAMSList)
 { MacroRegisterFunctionWithName("WeylGroupRepresentation::DecomposeTodorsVersion");
   this->CheckInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
   outputIrrepMults.MakeZero();
-  List<GroupRepresentation<somegroup, coefficient>*> appendOnlyIrrepsList;
+  List<GroupRepresentation<somegroup, coefficient> > appendOnlyIrrepsList;
   for(int i=0; i<this->ownerGroup->irreps.size; i++)
-    appendOnlyIrrepsList.AddOnTop(&(this->ownerGroup->irreps[i]));
-  return this->DecomposeTodorsVersionRecursive(outputIrrepMults, appendOnlyIrrepsList, theGlobalVariables);
+    appendOnlyIrrepsList.AddOnTop(this->ownerGroup->irreps[i]);
+  return this->DecomposeTodorsVersionRecursive(outputIrrepMults, appendOnlyIrrepsList, appendOnlyGRCAMSList);
 }
 
 template <class Element>
@@ -711,7 +712,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromSc
   WeylGroupData& theGroupData=output.GetValueNonConst<WeylGroupData>();
 //  stOutput << "And the group is: " << theGroup.ToString();
   theGroupData.ComputeInitialIrreps();
-  theGroupData.theGroup.ComputeIrreducibleRepresentationsTodorsVersion(theGroupData.theGroup.irreps_grcam);
+  theGroupData.theGroup.ComputeIrreducibleRepresentationsTodorsVersion();
   FormatExpressions tempFormat;
   tempFormat.flagUseLatex=true;
   tempFormat.flagUseHTML=false;
@@ -1117,7 +1118,7 @@ bool CalculatorFunctionsWeylGroup::innerDecomposeWeylRep(Calculator& theCommands
   GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& inputRep =
       input.GetValueNonConst<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >();
   VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> outputRep;
-  inputRep.MakeGRCAM().DecomposeTodorsVersion(outputRep, &theGlobalVariables);
+  inputRep.MakeGRCAM().DecomposeTodorsVersion(outputRep);
   return output.AssignValue(outputRep, theCommands);
 }
 
@@ -1156,7 +1157,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupNaturalRep(Calculator& theComma
 //  stOutput << "not implemented!";
   WeylGroupData& theGroup=output.GetValueNonConst<WeylGroupData>();
   theGroup.ComputeInitialIrreps();
-  theGroup.theGroup.ComputeIrreducibleRepresentationsTodorsVersion(theGroup.theGroup.irreps_grcam);
+  theGroup.theGroup.ComputeIrreducibleRepresentationsTodorsVersion();
 //  stOutput << theGroup.ToString();
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> tempRep;
   theGroup.GetStandardRepresentation(tempRep);
@@ -1623,7 +1624,7 @@ bool CalculatorFunctionsWeylGroup::innerMakeVirtualWeylRep(Calculator& theComman
     theWeylData->theGroup.ComputeIrreducibleRepresentationsWithFormulas(theWeylData->theGroup);
   if (inputRep.ownerGroup->irreps.size<inputRep.ownerGroup->ConjugacyClassCount())
   { theWeylData->ComputeInitialIrreps();
-    theWeylData->theGroup.ComputeIrreducibleRepresentationsTodorsVersion(theWeylData->theGroup.irreps_grcam);
+    theWeylData->theGroup.ComputeIrreducibleRepresentationsTodorsVersion();
   }
   VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> outputRep;
   outputRep.AssignRep(inputRep);

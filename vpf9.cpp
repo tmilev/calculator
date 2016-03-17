@@ -4532,8 +4532,7 @@ void WeylGroupData::init()
   this->theGroup.GetSizeByFormula = this->GetSizeByFormulaImplementation;
   this->theGroup.ComputeCCSizesAndRepresentativesByFormula = 0;
   this->theGroup.AreConjugateByFormula = 0;
-  this->theGroup.ComputeIrreducibleRepresentationsWithFormulas =
-  this->ComputeIrreducibleRepresentationsWithFormulasImplementation;
+  this->theGroup.ComputeIrreducibleRepresentationsWithFormulas = 0;
   //this->theGroup.CheckInitialization();
 }
 
@@ -4990,6 +4989,16 @@ void WeylGroupData::MakeFromDynkinType(const DynkinType& inputType)
   this->theDynkinType.GetCartanSymmetric(this->CartanSymmetric);
   this->theDynkinType.GetCoCartanSymmetric(this->CoCartanSymmetric);
   this->MakeFinalSteps();
+
+  // eventually, there will be formulas for all classical types
+  List<char> letters;
+  List<int> ranks;
+  this->theDynkinType.GetLettersTypesMults(&letters,&ranks,NULL);
+  if(letters.size == 1)
+    if(ranks[0] == 1)
+      if(letters[0] == 'A')
+        this->theGroup.ComputeIrreducibleRepresentationsWithFormulas = this->ComputeIrreducibleRepresentationsWithFormulasImplementation;
+
   this->InitGenerators();
 }
 

@@ -319,11 +319,8 @@ public:
   int MultiplyElements(int left, int right) const;
   int Invert(int g) const;
   bool CheckInitializationConjugacyClasses()const;
-  // The following two methods can be called either with a GRCAM installed in the .irreps_grcam member,
-  // or with a GRCAM passed in.  Since it takes too long to type out the datatype for a GRCAM, it is
-  // suggested that the first parameter be the .irreps_grcam member.
-  void ComputeIrreducibleRepresentationsTodorsVersion(
-      List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > initialIrreps);
+  // This method needs some initial irreps to be seeded in either the irreps or the irreps_grcam locations
+  void ComputeIrreducibleRepresentationsTodorsVersion();
   // In order for this to work, the starting irrep must be one whose n-fold tensor products contain every other irrep
   void ComputeIrreducibleRepresentationsThomasVersion(
       GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational>* startingIrrep);
@@ -1087,15 +1084,7 @@ bool GroupRepresentation<someGroup, coefficient>::operator>(const GroupRepresent
     this->ComputeCharacter();
   if(!right.flagCharacterIsComputed)
     right.ComputeCharacter();
-  if(this->theCharacteR.data[0] > right.theCharacteR.data[0])
-    return true;
-  if(right.theCharacteR.data[0] > this->theCharacteR.data[0])
-    return false;
-  if(this->theCharacteR.data > right.theCharacteR.data)
-    return false;
-  if(right.theCharacteR.data > this->theCharacteR.data)
-    return true;
-  return false;
+  return this->theCharacteR > right.theCharacteR;
 }
 
 template <typename someGroup, typename coefficient>
@@ -1210,10 +1199,11 @@ public:
   (const Vectors<coefficient>& VectorSpaceBasisSubrep, const ClassFunction<somegroup, Rational>& remainingCharacter, GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& output,
    GlobalVariables* theGlobalVariables=0);
   bool DecomposeTodorsVersionRecursive
-  (VirtualRepresentation<somegroup, coefficient>& outputIrrepMults, List<GroupRepresentation<somegroup, coefficient>*>& unsortedIrrepList, GlobalVariables* theGlobalVariables=0)
+  (VirtualRepresentation<somegroup, coefficient>& outputIrrepMults, List<GroupRepresentation<somegroup, coefficient> >& appendOnlyIrrepList, List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >* appendOnlyGRCAMSList=0)
   ;
   bool DecomposeTodorsVersion
-  (VirtualRepresentation<somegroup, coefficient>& outputIrrepMults, GlobalVariables* theGlobalVariables=0)
+  (VirtualRepresentation<somegroup, coefficient>& outputIrrepMults,
+   List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >* appendOnlyIrrepsList=0)
   ;
 
 
@@ -1247,7 +1237,7 @@ public:
   { this->generatorS[generatorIndex] = input;
   }
   bool operator>(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other)const;
-  bool operator<(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other)const;
+//  bool operator<(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other)const;
 };
 
 template <class somegroup, class coefficient>

@@ -474,7 +474,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("MakeMatrix", CalculatorConversions::innerMakeMatrix,"",
    "Creates an internal c++ matrix structure from double list of rationals. \
-   ", "s_1=MatrixRationals{}((-1,-1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1));\
+   ", "s_1=MakeMatrix{}((-1,-1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1));\
    \ns_2=MakeMatrix{}((1,0,0,0), (-1,-1,-1,0), (0,0,1,0), (0,0,0,1)); \
    \ns_3=MakeMatrix{}((1,0,0,0), (0,1,0,0), (0,-2,-1,-1), (0,0,0,1)); \
    \ns_4=MakeMatrix{}((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,-1,-1)); ", true, false, "CalculatorConversions::innerMatrixRational");
@@ -541,14 +541,18 @@ void Calculator::initPredefinedInnerFunctions()
 
   this->AddOperationInnerHandler
   ("WeylGroupTauSignatures", CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems, "",
-   "Prints the tau signatures of a Weyl group. See a common article by T. Folz-Donahue, S. Jackson, T. Milev, A. Noel. ",
-   "WeylGroupTauSignatures{}(b_3);", true, false)
+   "Prints the tau signatures of a Weyl group. See a common article by \
+   T. Folz-Donahue, S. Jackson, T. Milev, A. Noel. ",
+   "WeylGroupTauSignatures{}(b_3);", true, true,
+   "CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems", "WeylGroupTauSignatures")
    ;
 
   this->AddOperationInnerHandler
   ("WeylGroupConjugacyClassesFromAllElements", CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements, "",
-   "For small ranks, computes the conjugacy classes of a Weyl group by enumerating all elements of the group. ",
-   "WeylGroupConjugacyClassesFromAllElements{}(A_2);", true, true, "CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements");
+   "For small ranks, computes the conjugacy classes of a Weyl \
+   group by enumerating all elements of the group. ",
+   "WeylGroupConjugacyClassesFromAllElements{}(A_2);", true, true,
+   "CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements");
    ;
   this->AddOperationInnerHandler
   ("WeylGroupConjugacyClassesRepresentatives", CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives, "",
@@ -980,13 +984,7 @@ void Calculator::initPredefinedInnerFunctions()
    "<b>Calculus teaching function.</b>Plots a cone with center of base at (0,0,0) with base lying in the xy plane\
     of radius r and height h(first and second argument) viewed from a distance d (third argument) and viewing height vh (fourth argument).\
    ",
-   "plotConeUsualProjection(2, 4, 3, 2)")
-   ;
-  this->AddOperationInnerHandler ("plotWedge", CalculatorFunctionsGeneral::innerPlotWedge, "",
-   "<b>Calculus teaching function.</b>Plots a wedge centered at x,y (first, second argument) or radius r (third argument) \
-   with starting/end angle given by fourth and fifth argument.\
-   ",
-   "plotWedge(2, 2, 1.1,1.570796327, 2*3.1415 )")
+   "plotConeUsualProjection(2, 4, 3, 2)", false, true)
    ;
 
   this->AddOperationInnerHandler ("GaussianElimination", CalculatorFunctionsGeneral::innerGaussianEliminationMatrix, "",
@@ -1043,11 +1041,11 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler ("plot2DWithBars", CalculatorFunctionsGeneral::innerPlot2DWithBars, "",
    "<b>Calculus teaching function.</b> Same as plot2D but plots two functions with bars locked between the two functions; \
    , used to illustrate approximations to definite integrals.",
-   "\nA=3/2- ((-3/4+1/4 (x))^{2});\nB= (1/4 (x))^{2}+2;\nplot2DWithBars{}(A, B, 0, 5, 1)")
+   "\nA=3/2- ((-3/4+1/4 (x))^{2});\nB= (1/4 (x))^{2}+2;\nplot2DWithBars{}(A, B, 0, 5, 1)", false, true)
    ;
   this->AddOperationInnerHandler ("plotIntegralOf", CalculatorFunctionsGeneral::innerPlotIntegralOf, "",
    "<b>Calculus teaching function.</b> Plots area locked under curve.",
-   "\nA=3/2- ((-3/4+1/4 (x))^{2});\nplotIntegralOf{}(A, 0, 5)")
+   "\nA=3/2- ((-3/4+1/4 (x))^{2});\nplotIntegralOf{}(A, 0, 5)", false, true)
    ;
   this->AddOperationInnerHandler ("CompareFunctionsNumerically", CalculatorFunctionsGeneral::innerCompareFunctionsNumerically, "",
    "<b>Calculus teaching function.</b> Compares two one-variable functions numerically.\
@@ -2647,16 +2645,16 @@ void Calculator::initPredefinedStandardOperations()
    this->opMatRat(), this->opMatRat(),
    "Tensor product of two matrices.",
     "P=((0 , 2 ),(1 , 0)); Q=((0 , 3 ),(1 , 0)); \
-    \nX=MakeMatrix{}P; Y=MatrixRationals{}Q; \
-    \nZ=MatrixRationalsTensorForm{}P; W=MatrixRationalsTensorForm{}Q; \
+    \nX=MakeMatrix{}P; Y=MakeMatrix{}Q; \
+    \nZ=MakeMatrixTensorForm{}P; W=MakeMatrixTensorForm{}Q; \
     X\\otimes Y; Z\\otimes W", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("\\otimes", CalculatorFunctionsBinaryOps::innerTensorMatByMatTensor,
    this->opMatTensorRat(), this->opMatTensorRat(),
    "Same as tensor product of matrices but uses class MatrixTensor instead of class Matrix.",
     "P=((0 , 2 ),(1 , 0)); Q=((0 , 3 ),(1 , 0)); \
-    \nX=MatrixRationals{}P; Y=MatrixRationals{}Q; \
-    \nZ=MatrixRationalsTensorForm{}P; W=MatrixRationalsTensorForm{}Q; \
+    \nX=MakeMatrix{}P; Y=MakeMatrix{}Q; \
+    \nZ=MakeMatrixTensorForm{}P; W=MakeMatrixTensorForm{}Q; \
     \nX\\otimes Y; Z\\otimes W", true);
   this->AddOperationOuterHandler
   ("\\otimes", this->outerTensor, "",

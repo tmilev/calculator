@@ -697,7 +697,8 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger(Calculator& theCo
   return false;
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger
+(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger");
   theCommands.CheckInputNotSameAsOutput(input, output);
 //  stOutput << "evaluating ..." << input.ToString();
@@ -934,7 +935,8 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat(Calculator& the
   return output.AssignMatrixExpressions(theMat, theCommands);
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors
+(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors");
   if (!input.StartsWith(theCommands.opThePower(), 3))
     return false;
@@ -943,7 +945,6 @@ bool CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors(Calculat
     return false;
   if (!input[2].IsOfType<Rational>(&exponent))
     return false;
-//  stOutput << "<br>reducing " << input.ToString();
   if (base==0)
   { if (exponent<0)
       return output.MakeError("Division by zero while evaluating " + input.ToString(), theCommands);

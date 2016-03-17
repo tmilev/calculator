@@ -3526,6 +3526,7 @@ bool CalculatorFunctionsGeneral::innerPlotWedge(Calculator& theCommands, const E
   thePlot.thePlotString=(out.str());
   thePlot.thePlotStringWithHtml=(out.str());
   thePlot.thePlotType="plotFunction";
+  theCommands.flagWriteLatexPlots=true;
   return output.AssignValue(thePlot, theCommands);
 }
 
@@ -3563,6 +3564,7 @@ bool CalculatorFunctionsGeneral::innerPlotIntegralOf(Calculator& theCommands, co
   thePlot.thePlotElement=(input[1]);
   Plot plotFinal;
   plotFinal+=thePlot;
+  theCommands.flagWriteLatexPlots=true;
   plotFinal.AddFunctionPlotOnTop
   (input[1], functionE.GetValue<std::string>(), lowerBound, upperBound, -4,  4, 0);
   return output.AssignValue(plotFinal, theCommands);

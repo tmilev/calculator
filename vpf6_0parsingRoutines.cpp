@@ -139,6 +139,7 @@ void Calculator::init()
   this->AddOperationNoRepetitionAllowed("\\otimes");
   this->AddOperationNoRepetitionAllowed("\\choose");
   this->AddOperationNoRepetitionAllowed("\\sqrt");
+  this->AddOperationNoRepetitionAllowed("\\in");
   this->AddOperationNoRepetitionAllowed("[]");
   this->AddOperationNoRepetitionAllowed("=:");
   this->AddOperationNoRepetitionAllowed("^");
@@ -1342,6 +1343,8 @@ bool Calculator::ApplyOneRule()
   if (secondToLastS=="Expression" && thirdToLastS=="-" && this->AllowsPlusInPreceding(lastS) )
     return this->ReplaceOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="mod" && fourthToLastS=="Expression")
+    return this->ReplaceEOEXByEX();
+  if (lastS=="Expression" && secondToLastS=="\\in" && thirdToLastS=="Expression")
     return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="\\choose" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();

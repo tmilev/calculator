@@ -2048,6 +2048,51 @@ bool CalculatorFunctionsGeneral::innerCompareFunctionsNumerically
 //  theFunE.
 }
 
+bool CalculatorFunctionsGeneral::innerCompareExpressionsNumerically
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompareFunctionsNumerically");
+  crash << "not implemented yet" << crash;
+
+  if (input.children.size<5)
+    return theCommands << "Comparing functions takes as input at least 4 arguments (two functions to compare and interval to compare over).";
+  Expression theFunE=input[1];
+  theFunE-=input[2];
+  HashedList<Expression> theVars;
+  if (!theFunE.GetFreeVariables(theVars, true))
+    return theCommands << "Was not able to extract the function argument of your function. " ;
+  if (theVars.size<=0)
+  { Expression zeroE;
+    zeroE.AssignValue(1, theCommands);
+    return output.MakeXOX(theCommands, theCommands.opEqualEqual(), theFunE, zeroE);
+  }
+  if (theVars.size>1)
+  { return theCommands << "I cannot compare the functions as they appear to depend on more than one variable, namely, on: "
+    << theVars.ToStringCommaDelimited();
+  }
+//  stOutput << "The vars: " << theVars.ToStringCommaDelimited();
+  double leftBoundary=0;
+  double rightBoundary=0;
+  if (! input[3].EvaluatesToDouble(&leftBoundary))
+    return theCommands << "Failed to extract the left endpoint of the comparison interval. ";
+  if (! input[4].EvaluatesToDouble(&rightBoundary))
+    return theCommands << "Failed to extract the right endpoint of the comparison interval. ";
+  int numPoints=50;
+  if (input.children.size>5)
+    if (!input[5].IsSmallInteger(&numPoints))
+      return theCommands << "Failed to convert argument: " << input[5].ToString() << " to a small integer. ";
+  double minDiff=0, maxDiff=0;
+  if (!theFunE.EvaluatesToDoubleInRange(theVars[0].ToString(), leftBoundary, rightBoundary, numPoints, &minDiff, &maxDiff, 0))
+    return theCommands << "Failed to evaluate your function to a number. The sampling interval may be outside of the domain of the function. ";
+  double tolerance=0.0001;
+  if (input.children.size>6)
+    if (!input[6].EvaluatesToDouble(&tolerance))
+      return theCommands << "Failed to evaluate the argument " << input[6].ToString() << " to a floating point number. ";
+  if (minDiff<- tolerance || maxDiff> tolerance)
+    return output.AssignValue(0, theCommands);
+  return output.AssignValue(1, theCommands);
+//  theFunE.
+}
+
 bool CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument");

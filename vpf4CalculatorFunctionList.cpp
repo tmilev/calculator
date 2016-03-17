@@ -1049,7 +1049,7 @@ void Calculator::initPredefinedInnerFunctions()
    ;
   this->AddOperationInnerHandler ("CompareFunctionsNumerically", CalculatorFunctionsGeneral::innerCompareFunctionsNumerically, "",
    "<b>Calculus teaching function.</b> Compares two one-variable functions numerically.\
-   First two arguments gives the two functions. Third and fourth arguments give the interval [a,b] over which to compare.\
+   First two arguments give the two functions. Third and fourth arguments give the interval [a,b] over which to compare.\
    Fifth argument is optional (default: 50) \
    and gives the number of sampling points. Sixth argument is optional (default: 0.0001) and gives the numerical tolerance eps- if two numbers are \
    at a distance less than eps they are considered equal .\
@@ -1057,6 +1057,17 @@ void Calculator::initPredefinedInnerFunctions()
    "CompareFunctionsNumerically{}(arctan (x), arcsin(x/\\sqrt{x^2+1}),0, 5,50,0.0001);\n\
     CompareFunctionsNumerically{}(e^x, 1+x+x^2/2+x^3/3!+x^4/4!+x^5/5!+x^6/6!,0, 5,50,0.0001)\
    ", true, false, "CalculatorFunctionsGeneral::innerCompareFunctionsNumerically")
+   ;
+
+  this->AddOperationInnerHandler ("CompareExpressionsNumerically",
+   CalculatorFunctionsGeneral::innerCompareExpressionsNumerically, "",
+   "<b>Calculus teaching function.</b> Compares two expressions numerically.\
+   First two arguments give the two functions. The third argument gives the precision.\
+   All remaining arguments come in pairs, in the form x\\in (2,3), 50. \
+   ",
+   "CompareExpressionsNumerically{}(\\arctan x + \\arctan y, \\arctan((x+y)/(1- x y)), 0.0001,\
+   x\\in(0,0.5), 20, y\\in(0,0.5), 20 );\n\
+   ", true, false, "CalculatorFunctionsGeneral::innerCompareExpressionsNumerically", "CompareExpressionsNumerically")
    ;
 
   this->AddOperationInnerHandler

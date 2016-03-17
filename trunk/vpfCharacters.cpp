@@ -921,15 +921,25 @@ void SubgroupDataWeylGroup::ComputeTauSignature()
 //  this->theGroup->CheckOrthogonalityCharTable(theGlobalVariables);
   Vector<Rational> Xs, Xi;
   this->theSubgroupData.theSubgroup->GetSignCharacter(Xs);
-  Xi.SetSize(this->theSubgroupData.theSubgroup->ConjugacyClassCount());
+  Xi.MakeZero(this->theSubgroupData.theSubgroup->ConjugacyClassCount());
   stOutput << "<hr>Computing in group with "
   << this->theSubgroupData.theSubgroup->theElements.size << " element(s). Group details: "
   << this->ToString();
 
   this->tauSignature.SetSize(this->theSubgroupData.theGroup->ConjugacyClassCount());
+  if (!(&this->theWeylData->theGroup==this->theSubgroupData.theGroup))
+  { stOutput << "<br>this->theWeylData=" << this->theWeylData
+    << "<br>this->theSubgroupData.theGroup=" << this->theSubgroupData.theGroup;
+  }
+  stOutput << "<br>The group conjugacy class number: "
+  << this->theSubgroupData.theGroup->ConjugacyClassCount();
+  stOutput << "char table weyl data: "
+  << this->theWeylData->theGroup.characterTable.ToString();
+
   for(int i=0; i<this->theSubgroupData.theGroup->ConjugacyClassCount(); i++)
   { ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& Xip =
     this->theWeylData->theGroup.characterTable[i];
+    stOutput << "Restricting character: " << Xip.ToString() << "<br>";
     for(int j=0; j<Xi.size; j++)
       Xi[j] = Xip[this->theSubgroupData.ccRepresentativesPreimages[j]];
     this->tauSignature[i]= this->theSubgroupData.theSubgroup->GetHermitianProduct(Xs,Xi);

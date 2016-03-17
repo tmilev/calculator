@@ -1949,7 +1949,8 @@ std::string DatabaseRoutines::ToStringClassDetails
     else if (currentUser.InterpretDatabaseProblemData
              (currentUser.selectedRowFieldsUnsafe[indexProblemData], commentsProblemData))
     { currentUser.ComputePointsEarned(databaseSpanList, databaseProblemWeights);
-      oneTableLineStream << "<td>" << std::setw(1) << std::setprecision(1) << currentUser.pointsEarned.GetDoubleValue() << "</td>";
+      oneTableLineStream << "<td>" << std::fixed << std::setw(1)
+      << std::setprecision(1) << currentUser.pointsEarned.GetDoubleValue() << "</td>";
     } else
       oneTableLineStream << "<td>Failed to load problem data. Comments: " << commentsProblemData.str() << "</td>";
     oneTableLineStream << "<td>" << userTable[i][indexExtraInfo] << "</td>";

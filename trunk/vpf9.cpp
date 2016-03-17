@@ -5694,10 +5694,10 @@ void SubgroupWeylGroupOLD::ToString(std::string& output, bool displayElements)
 bool SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots
 (WeylGroupData& inputWeyl, const Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
 { MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots");
+  this->AmbientWeyl=&inputWeyl;
   this->CheckInitialization();
   Vectors<Rational> selectedRoots;
   selectedRoots.Reserve(ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize- ZeroesMeanSimpleRootSpaceIsInParabolic.CardinalitySelection);
-  this->AmbientWeyl=&inputWeyl;
   if (this->AmbientWeyl->GetDim()!=ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize)
     crash << "This is a programming error: parabolic selection selects out of " << ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize
     << " elements while the Weyl group is of rank " << this->AmbientWeyl->GetDim() << ". " << crash;

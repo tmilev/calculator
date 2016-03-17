@@ -6508,8 +6508,7 @@ void WeylGroupData::TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theG
         { if (!this->IsPositiveOrPerpWRTh(tempRoot, theH))
           { tempRoot.Minus();
             theGens[j]=(tempRoot);
-          }
-          else
+          } else
             theGens[i]=(tempRoot);
           reductionOccured=true;
         }
@@ -6890,8 +6889,7 @@ std::string QuasiPolynomial::ToString(bool useHtml, bool useLatex, FormatExpress
         out << ", where $\\Lambda=\\mathbb{Z}^{" << this->GetNumVars() << "}$";
       else
         out << ", \\mathrm{~where~} \\Lambda=\\mathbb{Z}^{" << this->GetNumVars() << "}";
-    }
-    else
+    } else
       out << "Z^" <<  this->GetNumVars();
   if (useLatex&& !useHtml)
     out << "\\end{tabular}";

@@ -23,12 +23,13 @@ TurnOffRules("\log", "logBase");\)
 <br>
 Answer: \(f'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswer">
 \(
-CompareFunctionsNumerically(d/dx(f{}x), AlgebraAnswer, 0.3, 1, 50, 0.00000001);
+CompareFunctionsNumerically(d/dx(f{}x), AlgebraAnswer, 0.3/b, 1/b, 50, 0.000001);
 \)
 </textarea>
 
 <span class="calculatorAnswerOnGiveUp">
 MakeExpression(MakeRationalFunction(
-d/dx (f{}x)))
+d/dx (f{}x)
+))
 </span>
 To write \(\ln (x)\) you need to enter \ln(x), ln(x) or log(x) or \log(x). Please note that in the calculator log stands for the (complex) natural logarithm, i.e., the logarithm base e. 

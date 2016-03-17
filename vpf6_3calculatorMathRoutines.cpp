@@ -5280,6 +5280,10 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
   bool isKnownFunctionOneArgument=
   this->StartsWith(theCommands.opSin(),2) ||
   this->StartsWith(theCommands.opCos(),2) ||
+  this->StartsWith(theCommands.opTan(),2) ||
+  this->StartsWith(theCommands.opCot(),2) ||
+  this->StartsWith(theCommands.opCsc(),2) ||
+  this->StartsWith(theCommands.opSec(),2) ||
   this->StartsWith(theCommands.opArcTan(),2) ||
   this->StartsWith(theCommands.opArcCos(),2) ||
   this->StartsWith(theCommands.opArcSin(),2) ||
@@ -5316,6 +5320,34 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
     if (this->StartsWith(theCommands.opCos()))
       if (whichDouble!=0)
         *whichDouble=FloatingPoint::cos(argumentD);
+    if (this->StartsWith(theCommands.opTan()))
+      if (whichDouble!=0)
+      { double denominator=FloatingPoint::cos(argumentD);
+        if (denominator==0)
+          return false;
+        *whichDouble=FloatingPoint::sin(argumentD)/denominator;
+      }
+    if (this->StartsWith(theCommands.opCot()))
+      if (whichDouble!=0)
+      { double denominator=FloatingPoint::sin(argumentD);
+        if (denominator==0)
+          return false;
+        *whichDouble=FloatingPoint::cos(argumentD)/denominator;
+      }
+    if (this->StartsWith(theCommands.opCsc()))
+      if (whichDouble!=0)
+      { double denominator=FloatingPoint::sin(argumentD);
+        if (denominator==0)
+          return false;
+        *whichDouble=1/denominator;
+      }
+    if (this->StartsWith(theCommands.opSec()))
+      if (whichDouble!=0)
+      { double denominator=FloatingPoint::cos(argumentD);
+        if (denominator==0)
+          return false;
+        *whichDouble=1/denominator;
+      }
     if (this->StartsWith(theCommands.opArcTan()))
       if (whichDouble!=0)
         *whichDouble=FloatingPoint::arctan(argumentD);

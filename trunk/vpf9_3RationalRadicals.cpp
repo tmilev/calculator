@@ -741,7 +741,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other)
 { MacroRegisterFunctionWithName("AlgebraicNumber::operator*=");
   if (this==& other)
   { AlgebraicNumber otherCopy=other;
-    *this*=other;
+    *this*=otherCopy;
     return;
   }
   this->CheckConsistency();

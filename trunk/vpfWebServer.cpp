@@ -3286,8 +3286,8 @@ int WebServer::main_apache_client()
       IPAdressCaller[i]='A'+(IPAdressCaller[i]*SomeRandomPrimes[i])%26;
 	}
 	theParser.javaScriptDisplayingIndicator=WebWorker::GetJavaScriptIndicatorFromHD();
-	WebWorker theWorker;
-  return theWorker.ProcessCalculator();
+	theWebServer.CreateNewActiveWorker();
+  return theWebServer.GetActiveWorker().ProcessCalculator();
 }
 
 extern int mainTest(List<std::string>& remainingArgs);

@@ -161,6 +161,8 @@ RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const
   stackTop.fileName=fileName;
   stackTop.line=line;
   stackTop.functionName=functionName;
+  if (theStack.size>20000)
+    crash << "Stack too deep: 20000 layers. " << crash;
 }
 
 RegisterFunctionCall::~RegisterFunctionCall()

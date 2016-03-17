@@ -2152,6 +2152,8 @@ bool Expression::NeedsParenthesisForMultiplication()const
 
 std::string Expression::ToString(FormatExpressions* theFormat, Expression* startingExpression, Expression* Context)const
 { MacroRegisterFunctionWithName("Expression::ToString");
+  if (this==0)
+    crash << "Not supposed to happen: zero this pointer. " << crash;
   if (this->owner!=0)
   { if (this->owner->RecursionDeptH+1>this->owner->MaxRecursionDeptH)
       return "(...)";

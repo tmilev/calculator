@@ -885,22 +885,28 @@ template <class someGroup, class elementSomeGroup>
 std::string SubgroupData<someGroup, elementSomeGroup>::ToString(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SubgroupData::ToString");
   if (this->theGroup==0)
-    return "(not initialized)";
+    return "(not initialized (no owner group))";
+  if (this->theSubgroup==0)
+    return "(not initialized (subgroup pointer is 0))";
   std::stringstream out;
+  out << "<br>\nSubgroup: " << this->theSubgroup->ToString();
+
+  out << "<br>\nOwner group: " << this->theGroup->ToString();
+
   return out.str();
 }
 
 std::string SubgroupDataRootReflections::ToString(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SubgroupDataRootReflections::ToString");
   std::stringstream out;
-
+  out << subGroupDataContainer.ToString(theFormat);
   return out.str();
 }
 
 std::string SubgroupDataWeylGroup::ToString(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SubgroupDataWeylGroup::ToString");
   std::stringstream out;
-
+  out << this->theSubgroupData.ToString(theFormat);
   return out.str();
 }
 

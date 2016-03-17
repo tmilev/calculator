@@ -1388,11 +1388,12 @@ public:
     this->ComputeCCRepresentativesPreimages();
   }
   // Note: Cosets are... whichever of left coset or right coset they are
-  bool flagCosetSetsComputed = false;
-  bool flagCosetRepresentativesComputed = false;
+  bool flagCosetSetsComputed;
+  bool flagCosetRepresentativesComputed;
   void ComputeCosets();
   bool VerifyCosets();
   bool VerifyNormal();
+  std::string ToString(FormatExpressions* theFormat);
   bool SameCosetAs(elementSomeGroup& g1, elementSomeGroup& g2);
   int GetCosetId(elementSomeGroup& g);
   int QIDMul(int i, int j);

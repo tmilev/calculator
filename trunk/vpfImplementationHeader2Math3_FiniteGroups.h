@@ -516,6 +516,8 @@ void SubgroupData<someGroup, elementSomeGroup>::init()
   this->theSubgroupMayBeHere.init();
   this->ccRepresentativesPreimages.SetSize(0);
   this->generatorPreimages.SetSize(0);
+  this->flagCosetSetsComputed = false;
+  this->flagCosetRepresentativesComputed = false;
 }
 
 template <class someGroup, class elementSomeGroup>

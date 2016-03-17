@@ -1284,26 +1284,30 @@ int WebWorker::ProcessSubmitProblem()
  //     stOutput << "problem db info: " << theProblemHome.databaseProblemAndHomeworkGroupList.ToStringCommaDelimited();
  //     stOutput
       bool unused=false;
+      bool deadLinePassed=false;
       std::string theDeadlineString=theProblemHome.GetDeadline
       (theProblem.fileName, theProblem.currentUser.extraInfoUnsafe, true, unused);
-      TimeWrapper now, deadline; //<-needs a fix for different time formats.
+      if (theDeadlineString!="" && theDeadlineString!=" ")
+      { TimeWrapper now, deadline; //<-needs a fix for different time formats.
       //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
-/*      std::stringstream badDateStream;
-      if (!deadline.AssignMonthDayYear(theDeadlineString, badDateStream))
-      { stOutput << "<b>Problem reading deadline. </b> Comments:"
-        << "<span style=\"color:red\">" << badDateStream.str() << "</span>"
-        << " This should not happen. " << CalculatorHTML::BugsGenericMessage;
-        return 0;
-      }
-      //  out << "deadline.date: " << deadline.theTime.tm_mday;
-      now.AssignLocalTime();
-      //  out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
-      //  << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
+        std::stringstream badDateStream;
 
-      double secondsTillDeadline= deadline.SubtractAnotherTimeFromMeInSeconds(now)+7*3600;
-      bool deadLinePassed=(secondsTillDeadline<-18000);
-      */
-      bool deadLinePassed=false;
+        if (!deadline.AssignMonthDayYear(theDeadlineString, badDateStream))
+        { stOutput << "<b>Problem reading deadline. </b> The deadline string was: "
+          << theDeadlineString << ". Comments: "
+          << "<span style=\"color:red\">" << badDateStream.str() << "</span>"
+          << " This should not happen. " << CalculatorHTML::BugsGenericMessage;
+          return 0;
+        }
+        //  out << "deadline.date: " << deadline.theTime.tm_mday;
+        now.AssignLocalTime();
+        //  out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
+        //  << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
+
+        double secondsTillDeadline= deadline.SubtractAnotherTimeFromMeInSeconds(now)+7*3600;
+        deadLinePassed=(secondsTillDeadline<-18000);
+      }
+      //bool deadLinePassed=false;
       if (deadLinePassed)
         stOutput << "<span style=\"color:red\"> <b>Deadline has passed, no answer recorded.</b></span>";
       else

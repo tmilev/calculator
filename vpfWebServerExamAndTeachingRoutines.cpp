@@ -3,6 +3,7 @@
 #include "vpfHeader6WebServer.h"
 #include "vpfHeader3Calculator2_InnerFunctions.h"
 #include "vpfHeader7DatabaseInterface_MySQL.h"
+#include <iomanip>
 
 ProjectInformationInstance projectInfoInstanceWebServerExamAndTeachingRoutines
 (__FILE__, "Routines for calculus teaching: calculator exam mode.");
@@ -1947,9 +1948,8 @@ std::string DatabaseRoutines::ToStringClassDetails
       oneTableLineStream << "<td>No solutions history</td>";
     else if (currentUser.InterpretDatabaseProblemData
              (currentUser.selectedRowFieldsUnsafe[indexProblemData], commentsProblemData))
-    { oneTableLineStream.precision(1);
-      currentUser.ComputePointsEarned(databaseSpanList, databaseProblemWeights);
-      oneTableLineStream << "<td>" << currentUser.pointsEarned.GetDoubleValue() << "</td>";
+    { currentUser.ComputePointsEarned(databaseSpanList, databaseProblemWeights);
+      oneTableLineStream << "<td>" << std::setw(1) << std::setprecision(1) << currentUser.pointsEarned.GetDoubleValue() << "</td>";
     } else
       oneTableLineStream << "<td>Failed to load problem data. Comments: " << commentsProblemData.str() << "</td>";
     oneTableLineStream << "<td>" << userTable[i][indexExtraInfo] << "</td>";

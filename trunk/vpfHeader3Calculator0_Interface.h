@@ -1339,6 +1339,9 @@ public:
   int opInfinity()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\infty");
   }
+  int opIn()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\in");
+  }
   int opPi()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\pi");
   }

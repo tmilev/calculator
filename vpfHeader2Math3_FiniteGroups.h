@@ -1629,6 +1629,7 @@ public:
   void ComputeTauSignature();
   void GetSignCharacter(Vector<Rational>& out);
   SubgroupDataWeylGroup();
+  std::string ToString(FormatExpressions* theFormat=0);
 };
 
 class SubgroupDataRootReflections : public SubgroupDataWeylGroup
@@ -1656,6 +1657,7 @@ public:
   { this->flagIsParabolic=false;
     this->flagIsExtendedParabolic=false;
   }
+  std::string ToString(FormatExpressions* theFormat=0);
 };
 
 class SubgroupWeylGroupOLD: public HashedList<ElementWeylGroup<WeylGroupData> >

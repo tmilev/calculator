@@ -894,7 +894,9 @@ void SubgroupDataWeylGroup::ComputeTauSignature()
   this->theSubgroupData.theSubgroup->GetSignCharacter(Xs);
   Xi.SetSize(this->theSubgroupData.theSubgroup->ConjugacyClassCount());
   stOutput << "<hr>Computing in group with "
-  << this->theSubgroupData.theSubgroup->theElements.size << " element(s). ";
+  << this->theSubgroupData.theSubgroup->theElements.size << " element(s). Group details: "
+  << this->ToString();
+
   this->tauSignature.SetSize(this->theSubgroupData.theGroup->ConjugacyClassCount());
   for(int i=0; i<this->theSubgroupData.theGroup->ConjugacyClassCount(); i++)
   { ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& Xip =

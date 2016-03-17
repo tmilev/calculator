@@ -1472,8 +1472,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesRepresentativesWords()
     stOutput << "This needs a rewrite";
   if(!this->flagWordsComputed || !this->flagAllElementsAreComputed)
     this->ComputeAllElements(true, -1);
-  stOutput << "GOT to here in computation of cc sizes and rep words";
-  //Thomas, at
+//  stOutput << "GOT to here in computation of cc sizes and rep words";
   GraphOLD conjugacygraph = GraphOLD(this->theElements.size, this->generators.size);
   for(int i=0; i<this->theElements.size; i++)
     for(int j=0; j<this->generators.size; j++)

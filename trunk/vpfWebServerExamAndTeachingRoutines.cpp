@@ -1396,9 +1396,19 @@ std::string WebWorker::GetEditPageHTML()
   out << "<html>"
   << "<head>"
   << WebWorker::GetJavascriptStandardCookies()
-  << CGI::GetLaTeXProcessingJavascript()
-  << CGI::GetCalculatorStyleSheetWithTags()
+//  << CGI::GetLaTeXProcessingJavascript()
+//  << CGI::GetCalculatorStyleSheetWithTags()
   << theFile.GetJavascriptSubmitMainInputIncludeCurrentFile()
+<< "<style type=\"text/css\" media=\"screen\">\n"
+<< "    #editor { \n"
+<< "      height: 600px;\n"
+<< "      font-size: 100%;\n"
+<< "   }\n"
+<< "</style>\n"
+<< "<script src=\"https://cdn.jsdelivr.net/ace/1.2.3/min/ace.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n"
+//  << "<link rel=\"stylesheet\" href=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/styles/default.min.css\">"
+//  << "<script src=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js\"></script>"
+
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
   std::stringstream failureStream;
@@ -1413,7 +1423,10 @@ std::string WebWorker::GetEditPageHTML()
     return out.str();
   }
   std::stringstream buttonStream, submitModPageJS;
-  submitModPageJS << "submitStringAsMainInput(document.getElementById('mainInput').value, 'spanSubmitReport', 'modifyPage');";
+  submitModPageJS
+//  << "submitStringAsMainInput(document.getElementById('mainInput').value, 'spanSubmitReport', 'modifyPage');"
+<< "submitStringAsMainInput(editor.getValue(), 'spanSubmitReport', 'modifyPage');"
+  ;
   buttonStream
   << "<button "
   << "onclick=\"" << submitModPageJS.str() << "\" >Save changes</button>";
@@ -1424,11 +1437,18 @@ std::string WebWorker::GetEditPageHTML()
   << "<textarea cols=\"70\", rows=\"3\">"
   << theFile.ToStringCalculatorProblemSourceFromFileName(theFile.fileName) << "</textarea>";
   out << "<br>\n";
-  out << "Edit bravely, all files are backed-up/stored in a svn history tree."
+  out << "Ctrl+S saves your changes. Edit bravely, all files are backed-up/stored in a svn history tree."
   << " You only risk losing your own changes.";
   out << "<br>\n";
-  out << "<textarea cols=\"150\", rows=\"30\" id=\"mainInput\" name=\"mainInput\" onkeydown=\"ctrlSPress(event);\">";
-  out << "</textarea>\n<br>\n";
+  out
+<< "Many thanks to the <a href=\"https://ace.c9.io\">ace editor</a> project. <br>"
+<< "<div id=\"editor\" onkeydown=\"ctrlSPress(event);\" name=\"editor\">"
+  //<< "<textarea cols=\"150\", rows=\"30\" id=\"mainInput\" name=\"mainInput\" onkeydown=\"ctrlSPress(event);\">"
+;
+  out
+  //<< "</textarea>"
+<< "</div>"
+  << "\n<br>\n";
   out << "<script type=\"text/javascript\"> \n"
   << "function ctrlSPress(event){\n"
   << "   if (event.ctrlKey!=true)\n"
@@ -1440,9 +1460,14 @@ std::string WebWorker::GetEditPageHTML()
   << "}\n"
   << "</script>\n";
   out << "<script type=\"text/javascript\"> \n"
-  << " document.getElementById('mainInput').value=decodeURIComponent(\""
+  //<< " document.getElementById('mainInput').value=decodeURIComponent(\""
+<< " document.getElementById('editor').textContent=decodeURIComponent(\""
   << CGI::StringToURLString(theFile.inputHtml, false)
   << "\");\n"
+<< "    var editor = ace.edit(\"editor\");\n"
+<< "    editor.setTheme(\"ace/theme/chrome\");\n"
+<< "    editor.getSession().setMode(\"ace/mode/xml\");\n"
+
   << "</script>\n";
   out << buttonStream.str();
   out << "<span id=\"spanSubmitReport\"></span><br>";

@@ -893,10 +893,12 @@ void SubgroupDataWeylGroup::ComputeTauSignature()
   Vector<Rational> Xs, Xi;
   this->theSubgroupData.theSubgroup->GetSignCharacter(Xs);
   Xi.SetSize(this->theSubgroupData.theSubgroup->ConjugacyClassCount());
-//  stOutput << "<hr>Computing in group with " << this->size().ToString() << " elements. ";
+  stOutput << "<hr>Computing in group with "
+  << this->theSubgroupData.theSubgroup->theElements.size << " element(s). ";
   this->tauSignature.SetSize(this->theSubgroupData.theGroup->ConjugacyClassCount());
   for(int i=0; i<this->theSubgroupData.theGroup->ConjugacyClassCount(); i++)
-  { ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& Xip = this->theWeylData->theGroup.characterTable[i];
+  { ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& Xip =
+    this->theWeylData->theGroup.characterTable[i];
     for(int j=0; j<Xi.size; j++)
       Xi[j] = Xip[this->theSubgroupData.ccRepresentativesPreimages[j]];
     this->tauSignature[i]= this->theSubgroupData.theSubgroup->GetHermitianProduct(Xs,Xi);

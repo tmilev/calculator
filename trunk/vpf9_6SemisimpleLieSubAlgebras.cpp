@@ -4444,13 +4444,13 @@ std::string SltwoSubalgebras::ToString(FormatExpressions* theFormat)
   return out.str();
 }
 
-void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat, GlobalVariables* theGlobalVariables)
+void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SltwoSubalgebras::ToHTML");
   std::string physicalPathSAs= this->owner->RelativePhysicalNameSSAlgOutputFolder;
   std::string htmlPathServerSAs= this->owner->DisplayNameSSalgOutputFolder;
   std::string RelativePhysicalPathSl2s= this->owner->RelativePhysicalNameSSAlgOutputFolder+"sl2s/";
   std::string htmlPathServerSl2s= this->owner->DisplayNameSSalgOutputFolder+"sl2s/";
-  ProgressReport theReport(theGlobalVariables);
+  ProgressReport theReport;
   theReport.Report("Preparing html pages for sl(2) subalgebras. This might take a while.");
   this->theRootSAs.ToHTML(theFormat, this);
   bool usePNG=true;
@@ -4462,8 +4462,8 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat, GlobalVariables* the
   outNotationCommand << "printSemisimpleLieAlgebra{}("
   << this->GetOwnerWeyl().theDynkinType.ToString() << ")" ;
   outNotation << "Notation, structure constants and Weyl group info: "
-  << CGI::GetCalculatorLink(theGlobalVariables->DisplayNameCalculatorWithPath, outNotationCommand.str())
-  << "<br> <a href=\"" << theGlobalVariables->DisplayNameCalculatorWithPath
+  << CGI::GetCalculatorLink(theGlobalVariables.DisplayNameCalculatorWithPath, outNotationCommand.str())
+  << "<br> <a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath
   << "\"> Calculator main page</a><br><a href=\"../rootSubalgebras.html\">Root subsystem table</a><br>";
   std::string notation= outNotation.str();
   out << this->ToString(theFormat);
@@ -4592,11 +4592,14 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
     return "";
   std::stringstream out;
   if (thePrimalRank!=this->BilinearFormFundPrimal.NumCols)
-  { out << "<br>The primal rank was computed to be " << thePrimalRank << " but the bilinear form in fundamental coordinates relative to "
-    << " the subalgebra was not computed: this->BilinearFormFundPrimal has " << this->BilinearFormFundPrimal.NumRows << " rows. ";
+  { out << "<br>The primal rank was computed to be " << thePrimalRank
+    << " but the bilinear form in fundamental coordinates relative to "
+    << " the subalgebra was not computed: this->BilinearFormFundPrimal has "
+    << this->BilinearFormFundPrimal.NumRows << " rows. ";
     return out.str();
   }
-  out << "<br>Weight diagram. The coordinates corresponding to the simple roots of the subalgerba are fundamental.  "
+  out << "<br>Weight diagram. The coordinates corresponding to the simple roots of the "
+  << "subalgerba are fundamental.  "
   << "<br>The bilinear form is therefore given relative to the fundamental coordinates.<br> ";
 
 //  out << "Embeddings fund coords into fund coords ambient.";
@@ -4626,7 +4629,8 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
         { int color= CGI::RedGreenBlue(150,150,0);
           if (this->primalSubalgebraModules.Contains(i))
           { color=CGI::RedGreenBlue(0,250,0);
-            theDV.drawLineBetweenTwoVectorsBuffer(zeroVector, this->WeightsModulesPrimal[i][k], theDV.PenStyleNormal, color);
+            theDV.drawLineBetweenTwoVectorsBuffer
+            (zeroVector, this->WeightsModulesPrimal[i][k], theDV.PenStyleNormal, color);
           }
           theDV.drawCircleAtVectorBuffer(this->WeightsModulesPrimal[i][k], 2, theDV.PenStyleNormal, color);
           if (this->IsExtremeWeight(i, k))
@@ -4644,7 +4648,9 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
     for (int j=0; j<cornerWeights.size; j++)
     { Rational minDist=0;
       for (int k=0; k<cornerWeights.size; k++)
-      { Rational tempRat=Vector<Rational>::ScalarProduct((cornerWeights[k]-cornerWeights[j]), (cornerWeights[k]-cornerWeights[j]), this->BilinearFormFundPrimal);
+      { Rational tempRat=Vector<Rational>::ScalarProduct
+        ((cornerWeights[k]-cornerWeights[j]), (cornerWeights[k]-cornerWeights[j]),
+         this->BilinearFormFundPrimal);
         if (minDist==0)
           minDist=tempRat;
         else if (tempRat!=0)
@@ -4700,7 +4706,8 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompoLaTeX(FormatExpressions*
   if (!this->charFormaT.IsZeroPointer())
     tempCharFormat= this->charFormaT.GetElementConst();
   //bool useModuleIndex=false;
-  out << "\\documentclass{article}\\usepackage{amssymb}\\usepackage{longtable}\\usepackage{multirow}\\begin{document}" ;
+  out << "\\documentclass{article}\\usepackage{amssymb}\\usepackage{longtable}"
+  << "\\usepackage{multirow}\\begin{document}" ;
   out << "<br> \\begin{longtable}{c|c|c|c|c|c}\n<br>\n\\caption{Module decomposition of $"
   << this->owner->owner->theWeyl.theDynkinType.ToString() << "$ over $"
   << this->theWeylNonEmbedded->theDynkinType.ToString()

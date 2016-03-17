@@ -501,7 +501,8 @@ bool FiniteGroup<elementSomeGroup>::HasElement(const elementSomeGroup& g)
 
 template <class elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::GetSignCharacter(Vector<Rational>& outputCharacter)
-{ if(!this->flagCCsComputed)
+{ MacroRegisterFunctionWithName("FiniteGroup::GetSignCharacter");
+  if(!this->flagCCsComputed)
     this->ComputeCCSizesAndRepresentatives();
   outputCharacter.SetSize(this->ConjugacyClassCount());
   for(int i=0; i<this->ConjugacyClassCount(); i++)

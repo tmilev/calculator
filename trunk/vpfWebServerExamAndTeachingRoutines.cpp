@@ -1402,7 +1402,7 @@ std::string WebWorker::GetEditPageHTML()
   << theFile.GetJavascriptSubmitMainInputIncludeCurrentFile()
 << "<style type=\"text/css\" media=\"screen\">\n"
 << "    #editor { \n"
-<< "      height: 600px;\n"
+<< "      height: 400px;\n"
 << "      font-size: 100%;\n"
 << "   }\n"
 << "</style>\n"

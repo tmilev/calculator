@@ -2963,6 +2963,17 @@ void Calculator::initBuiltInAtomsNotInterpretedAsFunctions()
   this->AddKnownDoubleConstant("e", MathRoutines::E());
 }
 
+void Calculator::initPredefinedWordSplits()
+{ MacroRegisterFunctionWithName("Calculator::initPredefinedWordSplits");
+  List<std::string> theSplit;
+  theSplit.SetSize(0);
+  theSplit.AddOnTop("x"); theSplit.AddOnTop("y");
+  this->predefinedWordSplits.SetValue(theSplit, "xy");
+  theSplit.SetSize(0);
+  theSplit.AddOnTop("y"); theSplit.AddOnTop("x");
+  this->predefinedWordSplits.SetValue(theSplit, "yx");
+}
+
 void Calculator::initAtomsThatFreezeArguments()
 { MacroRegisterFunctionWithName("Calculator::initAtomsThatFreezeArguments");
   this->atomsThatFreezeArguments.SetExpectedSize(this->builtInTypes.size+100);

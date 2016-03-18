@@ -2034,6 +2034,56 @@ public:
   }
 };
 
+template <class listType, class value, class key, unsigned int hashFunction(const key&)=key::HashFunction>
+class MapTemplate
+{
+public:
+  HashedList<key, hashFunction> theKeys;
+  listType theValues;
+  int GetIndex(const key& input)const
+  { return this->theKeys.GetIndex(input);
+  }
+  bool Contains(const key& input)const
+  { return this->GetIndex(input)!=-1;
+  }
+  value& GetValueCreateIfNotPresent(const key& input)
+  { int theIndex=this->theKeys.GetIndex(input);
+    if (theIndex==-1)
+    { theIndex=this->theKeys.size;
+      this->theKeys.AddOnTop(input);
+      this->theValues.SetSize(this->theValues.size+1);
+    }
+    return this->theValues[theIndex];
+  }
+  void SetValue(const value& inputValue, const key& inputKey)
+  { if (this->Contains(inputKey))
+    { this->theValues[this->theKeys.GetIndex(inputKey)]=inputValue;
+      return;
+    }
+    this->theValues.AddOnTop(inputValue);
+    this->theKeys.AddOnTop(inputKey);
+  }
+  void SetExpectedSize(int theSize)
+  { this->theKeys.SetExpectedSize(theSize);
+    this->theValues.SetExpectedSize(theSize);
+  }
+  void Clear()
+  { this->theKeys.Clear();
+    this->theValues.SetSize(0);
+  }
+  value& operator[](int i)const
+  { return this->theValues[i];
+  }
+};
+
+//using C++11, not sure if that is a good idea:
+//In case this does not compile, please see the commented code below.
+template <class value, class key, unsigned int hashFunction(const key&)=key::HashFunction>
+using MapReferences=MapTemplate<ListReferences<value>, value, key, hashFunction>;
+template <class value, class key, unsigned int hashFunction(const key&)=key::HashFunction>
+using MapList=MapTemplate<List<value>, value, key, hashFunction>;
+
+/*
 template <class value, class key, unsigned int hashFunction(const key&)=key::HashFunction>
 class MapReferences
 {
@@ -2075,6 +2125,7 @@ public:
   { return this->theValues[i];
   }
 };
+*/
 
 class MonomialVector
 {

@@ -734,6 +734,8 @@ public:
   HashedList<std::string, MathRoutines::hashString> atomsNotInterpretedAsFunctions;
   HashedList<std::string, MathRoutines::hashString> atomsThatMustNotBeCached;
   HashedList<std::string, MathRoutines::hashString> operationsComposite;
+
+  MapList<List<std::string>, std::string, MathRoutines::hashString> predefinedWordSplits;
   List<List<Function> > FunctionHandlers;
   List<List<Function> > operationsCompositeHandlers;
   HashedList<std::string, MathRoutines::hashString> namedRules;
@@ -816,6 +818,8 @@ public:
   bool flagMaxTransformationsErrorEncountered;
   bool flagNewContextNeeded;
   bool flagCurrentExpressionIsNonCacheable;
+
+  bool flagUsePredefinedWordSplits;
 
   bool flagLogSyntaxRules;
   bool flagUseLnInsteadOfLog;
@@ -1089,6 +1093,7 @@ public:
     return true;
   }
   bool ReplaceXEXByE(int inputFormat=Expression::formatDefault);
+  bool ReplaceVbyVdotsVAccordingToPredefinedWordSplits();
   bool ReplaceAXbyEX();
   bool ReplaceXXByEEmptySequence();
   bool ReplaCeOXbyEX(int inputFormat=Expression::formatDefault);
@@ -1769,6 +1774,7 @@ public:
   }
   void init();
   void reset();
+  void initPredefinedWordSplits();
   void initAtomsThatFreezeArguments();
   void initAtomsNonCacheable();
   void initAtomsThatAllowCommutingOfArguments();

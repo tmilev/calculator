@@ -66,6 +66,10 @@ public:
   bool flagIsForReal;
   bool flagLoadedFromDB;
   bool flagParentIsIntermediateExamFile;
+  double timeToParseHtml;
+  List<double> timePerAttempt;
+  List<List<double> > timeIntermediatePerAttempt;
+  List<List<std::string> > timeIntermediateComments;
 #ifdef MACRO_use_MySQL
   UserCalculator currentUser;
 #endif
@@ -196,6 +200,7 @@ CalculatorHTML::CalculatorHTML()
   this->flagLoadedFromDB=false;
   this->flagParentIsIntermediateExamFile=false;
   this->flagLoadedClassDataSuccessfully=false;
+  this->timeToParseHtml=0;
 }
 
 const std::string CalculatorHTML::RelativePhysicalFolderProblemCollections="ProblemCollections/";
@@ -1509,7 +1514,21 @@ bool CalculatorFunctionsGeneral::innerInterpretHtml
   if (!input.IsOfType<std::string>(&theProblem.inputHtml))
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
   theProblem.InterpretHtml(theCommands.Comments);
-  return output.AssignValue(theProblem.outputHtmlMain, theCommands);
+  std::stringstream out;
+  out << theProblem.outputHtmlMain;
+  out << "<hr>Time to parse html: " << std::fixed
+  << theProblem.timeToParseHtml << " second(s). ";
+  out << "<br>Intermediate interpretation times (per attempt): ";
+  for (int i=0; i<theProblem.timeIntermediatePerAttempt.size; i++)
+    for (int j=0; j<theProblem.timeIntermediateComments[i].size; j++ )
+      out << "<br>" << theProblem.timeIntermediateComments[i][j]
+      << ": " << theProblem.timeIntermediatePerAttempt[i][j] << " second(s)";
+  out << "<br>Interpretation times (per attempt): "
+  << theProblem.timePerAttempt.ToStringCommaDelimited();
+  out << "<hr>Interpretation times (per attempt): "
+  << theProblem.problemCommandsWithInbetweens;
+
+  return output.AssignValue(out.str(), theCommands);
 }
 
 std::string CalculatorHTML::ToStringExtractedCommands()
@@ -1642,8 +1661,7 @@ bool SyntacticElementHTML::IsInterpretedByCalculatorDuringPreparation()
 { if (this->syntacticRole!="command")
     return false;
   std::string tagClass=this->GetKeyValue("class");
-  return tagClass=="calculator" || tagClass=="calculatorHidden" ||
-  tagClass=="calculatorHiddenIncludeInCommentsBeforeSubmission";
+  return tagClass=="calculator" || tagClass=="calculatorHidden" ;
 }
 
 bool SyntacticElementHTML::IsAnswer()
@@ -1673,6 +1691,8 @@ bool SyntacticElementHTML::IsCommentBeforeSubmission()
     return false;
   std::string tagClass=this->GetKeyValue("class");
   return tagClass=="calculatorCommentBeforeSubmission"
+//  ||
+//  tagClass=="calculatorHiddenIncludeInCommentsBeforeSubmission"
 ;
 }
 
@@ -1730,10 +1750,17 @@ bool CalculatorHTML::PrepareCommands(Calculator& theInterpreter, std::stringstre
 
 bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream& comments)
 { MacroRegisterFunctionWithName("Problem::PrepareAndExecuteCommands");
+  double startTime=theGlobalVariables.GetElapsedSeconds();
   this->PrepareCommands(theInterpreter, comments);
+
   theInterpreter.init();
+  this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
+  this->timeIntermediateComments.LastObject()->AddOnTop("calculator init time");
+
   //stOutput << "nput cmds: " << calculatorCommands.str();
   theInterpreter.Evaluate(this->problemCommandsWithInbetweens);
+  this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
+  this->timeIntermediateComments.LastObject()->AddOnTop("calculator evaluation time");
 //  stOutput << "<hr>Fter eval: " << theInterpreter.outputString;
   bool result=!theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors=="";
   if (!result)
@@ -2519,11 +2546,14 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 
 bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretHtmlOneAttempt");
+  double startTime=theGlobalVariables.GetElapsedSeconds();
   std::stringstream out;
   if (!this->flagIsForReal || !this->theProblemData.flagRandomSeedComputed)
     if (!this->flagRandomSeedGiven)
       this->theProblemData.randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
   this->FigureOutCurrentProblemList(comments);
+  this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
+  this->timeIntermediateComments.LastObject()->AddOnTop("Time before after loading problem list");
   this->outputHtmlNavigation=this->ToStringProblemNavigation();
   out << this->GetJavascriptSubmitMainInputIncludeCurrentFile();
   if (this->flagIsExamProblem)
@@ -2542,8 +2572,12 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   FormatExpressions theFormat;
   theFormat.flagExpressionIsFinal=true;
   theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
+  this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
+  this->timeIntermediateComments.LastObject()->AddOnTop("Time before execution");
   if (!this->PrepareAndExecuteCommands(theInterpreter, comments))
     return false;
+  this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
+  this->timeIntermediateComments.LastObject()->AddOnTop("Time after execution");
   bool moreThanOneCommand=false;
   std::string lastCommands;
   int commandCounter=2;
@@ -2580,6 +2614,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       moreThanOneCommand=true;
     }
   }
+  this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
+  this->timeIntermediateComments.LastObject()->AddOnTop("Time before class management routines");
 //  stOutput << "got to here, this->theProblemData: " << this->theProblemData.ToString();
   for (int i=0; i<this->theContent.size; i++)
     if (this->theContent[i].GetTagClass()=="calculatorManageClass")
@@ -2597,6 +2633,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
 //   out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
 //   out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
   //  out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();
+  this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
+  this->timeIntermediateComments.LastObject()->AddOnTop("Time before database storage");
 #ifdef MACRO_use_MySQL
   if (this->flagIsForReal)
   { //stOutput << "This is for real!<br>";
@@ -2654,10 +2692,13 @@ void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments)
 
 bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretHtml");
+  double startTime=theGlobalVariables.GetElapsedSeconds();
   if (!this->ParseHTML(comments))
   { this->outputHtmlMain="<b>Failed to interpret html input. </b><br>" +this->ToStringContent();
+    this->timeToParseHtml=theGlobalVariables.GetElapsedSeconds()-startTime;
     return false;
   }
+  this->timeToParseHtml=theGlobalVariables.GetElapsedSeconds()-startTime;
   this->NumAttemptsToInterpret=0;
   if (this->flagRandomSeedGiven)
     this->MaxInterpretationAttempts=1;
@@ -2665,11 +2706,22 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
   this->randomSeedsIfInterpretationFails.SetSize(this->MaxInterpretationAttempts);
   for (int i=0; i<this->randomSeedsIfInterpretationFails.size; i++)
     this->randomSeedsIfInterpretationFails[i]=rand()%100000000;
+  this->timePerAttempt.SetSize(0);
+  this->timeIntermediatePerAttempt.SetSize(0);
+  this->timeIntermediateComments.SetSize(0);
   while (this->NumAttemptsToInterpret<this->MaxInterpretationAttempts)
-  { Calculator theInterpreter;
+  { startTime=theGlobalVariables.GetElapsedSeconds();
+    this->timeIntermediatePerAttempt.SetSize(this->timeIntermediatePerAttempt.size+1);
+    this->timeIntermediatePerAttempt.LastObject()->SetSize(0);
+    this->timeIntermediateComments.SetSize(this->timeIntermediateComments.size+1);
+    this->timeIntermediateComments.LastObject()->SetSize(0);
+    Calculator theInterpreter;
     this->NumAttemptsToInterpret++;
     if (this->InterpretHtmlOneAttempt(theInterpreter, comments))
+    { this->timePerAttempt.AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
       return true;
+    }
+    this->timePerAttempt.AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
     if (this->NumAttemptsToInterpret>=this->MaxInterpretationAttempts)
     { std::stringstream out;
       out << "Failed to evaluate the commands: " << this->NumAttemptsToInterpret

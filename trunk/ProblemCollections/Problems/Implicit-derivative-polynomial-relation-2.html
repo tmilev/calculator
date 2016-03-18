@@ -1,0 +1,38 @@
+<span class="setCalculatorExamProblem">
+</span>
+Express the \(\displaystyle  \frac{d y }{d x}\) as a function of \(x\) and \(y\), where \(x\) and \(y\) are related by:
+<span class="calculatorHidden">
+\(
+%UseLnInsteadOfLog
+a=randomInteger((-1,-7),(1,7));
+b=selectAtRandom(3,5,7);
+c=selectAtRandom(3,5,7);
+g=randomInteger((-1,-7),(1,7));
+f=randomInteger((-1,-7),(1,7));
+left=a x^b y^c +g x^2 y^2;
+right=f(x+y)^b;
+theFun=left-right;
+
+\)</span>
+
+<br>
+<span class="calculator">
+\(\displaystyle left\) 
+</span>\(=\)<span class="calculator">
+\(\displaystyle right\) 
+</span>.
+
+<br>
+Answer: \(f'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswer">
+\(
+CompareExpressionsNumerically(
+(d/dx theFun;
+-(d/dx y=0;d/dx theFun)_2 /CoefficientOf{}(d/dx y, d/dx theFun)
+)_2, AlgebraAnswer, 0.000001, x\in (-1,1), 20, y\in (-1,1), 20)
+\)
+</textarea>
+
+<span class="calculatorAnswerOnGiveUp">
+(d/dx theFun;
+-(d/dx y=0;d/dx theFun)_2 /CoefficientOf{}(d/dx y, d/dx theFun)
+)_2</span>

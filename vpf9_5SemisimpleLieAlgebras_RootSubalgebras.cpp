@@ -1650,8 +1650,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
     tempSize+=tempList[i];
   }
   permComponentsCentralizer.initPermutation(tempList, tempSize);
-  int tempI2= permComponentsCentralizer.getTotalNumSubsets();
-  int NumAutosCentralizer= tempAutosCentralizer.getTotalNumSubsets();
+  int tempI2= permComponentsCentralizer.TotalNumSubsetsMustBeSmalInt();
+  int NumAutosCentralizer= tempAutosCentralizer.TotalNumSubsetsMustBeSmalInt();
   permComponentsCentralizer.GetPermutationLthElementIsTheImageofLthIndex(tempPermutation2);
   Matrix<Rational> tempMat;
   Selection tempSel;
@@ -1720,10 +1720,10 @@ bool rootSubalgebra::GenerateIsomorphismsPreservingBorel(rootSubalgebra& right, 
   permComponentsCentralizer.initPermutation(tempList, tempSize);
   int tempI1;
   int NumAutos;
-  tempI1= permComponents.getTotalNumSubsets();
-  NumAutos=tempAutos.getTotalNumSubsets();
-  int tempI2= permComponentsCentralizer.getTotalNumSubsets();
-  int NumAutosCentralizer= tempAutosCentralizer.getTotalNumSubsets();
+  tempI1= permComponents.TotalNumSubsetsMustBeSmalInt();
+  NumAutos=tempAutos.TotalNumSubsetsMustBeSmalInt();
+  int tempI2= permComponentsCentralizer.TotalNumSubsetsMustBeSmalInt();
+  int NumAutosCentralizer= tempAutosCentralizer.TotalNumSubsetsMustBeSmalInt();
   permComponents.GetPermutationLthElementIsTheImageofLthIndex(tempPermutation1);
   permComponentsCentralizer.GetPermutationLthElementIsTheImageofLthIndex(tempPermutation2);
   for (int i=0; i<tempI1; i++)

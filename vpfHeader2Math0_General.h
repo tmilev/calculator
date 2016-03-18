@@ -3630,7 +3630,7 @@ public:
   void incrementAndGetPermutation(List<int>& output);
   void GetPermutationLthElementIsTheImageofLthIndex(List<int>& output);
   int GetNumPermutations()
-  { return this->getTotalNumSubsets();
+  { return this->TotalNumSubsetsMustBeSmalInt();
   }
 };
 

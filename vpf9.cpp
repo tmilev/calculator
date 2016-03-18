@@ -1866,7 +1866,7 @@ void PartFraction::ApplyGeneralizedSzenesVergneFormulA
   { TheBigBadIndexingSet.clearNoMaxMultiplicitiesChange();
     int oldMaxMultiplicity= TheBigBadIndexingSet.MaxMultiplicities[i];
     TheBigBadIndexingSet.MaxMultiplicities[i]=0;
-    int NumSubsets=TheBigBadIndexingSet.getTotalNumSubsets();
+    int NumSubsets=TheBigBadIndexingSet.TotalNumSubsetsMustBeSmalInt();
     for (int j=0; j<NumSubsets; j++)
     { tempFrac.Assign(*this);
       tempFrac.RelevanceIsComputed=false;
@@ -2444,7 +2444,7 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, G
         }
       }
       thePowers.ComputeElements();
-      int numSummands=thePowers.getTotalNumSubsets();
+      int numSummands=thePowers.TotalNumSubsetsMustBeSmalInt();
       if (numSummands==1)
         owner.AddAlreadyReduced(tempFrac, theGlobalVariables, Indicator);
       else
@@ -3359,7 +3359,7 @@ int SelectionWithMultiplicities::CardinalitySelectionWithoutMultiplicities()
 { return this->elements.size;
 }
 
-int SelectionWithDifferentMaxMultiplicities::getTotalNumSubsets()
+int SelectionWithDifferentMaxMultiplicities::TotalNumSubsetsMustBeSmalInt()
 { int result=1;
   for (int i=0; i<this->MaxMultiplicities.size; i++)
   { result*=(this->MaxMultiplicities[i]+1);
@@ -3369,6 +3369,13 @@ int SelectionWithDifferentMaxMultiplicities::getTotalNumSubsets()
       << " encounter this error, write me an email and I will take the time to fix this issue. "
       << crash;
   }
+  return result;
+}
+
+LargeInt SelectionWithDifferentMaxMultiplicities::TotalNumSubsets()
+{ LargeInt result=1;
+  for (int i=0; i<this->MaxMultiplicities.size; i++)
+    result*=(this->MaxMultiplicities[i]+1);
   return result;
 }
 
@@ -4897,7 +4904,7 @@ std::string WeylGroupData::ToString(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("WeylGroup::ToString");
   std::stringstream out;
   out << "<br>Size: " << this->theGroup.theElements.size << "\n";
-  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n";
+  out << "Number of Vectors: "<< this->RootSystem.size << "\n";
   out << "<br>Half-sum positive roots:" << this->rho.ToString() << "\n";
   out << this->ToStringRootsAndRootReflections();
   out << "<br>Symmetric cartan: " << this->CartanSymmetric.ToString();
@@ -5433,7 +5440,7 @@ std::string WeylGroupData::GenerateWeightSupportMethoD1
   this->RaiseToDominantWeight(highestWeightTrue);
   std::stringstream out;
   if (highestWeightTrue!=highestWeightSimpleCoords)
-    out << "<br>Cheater! The input weight is not highest... using the highest weight in the same orbit instead. "
+    out << "<br>The input weight is not highest... using the highest weight in the same orbit instead. "
     << "Your input in simple coordinates was: " << highestWeightSimpleCoords.ToString() << ".<br> ";
   out << "The highest weight in simple coordinates is: " << highestWeightTrue.ToString() << ".<br>";
   std::string tempS;
@@ -5456,7 +5463,7 @@ std::string WeylGroupData::GenerateWeightSupportMethoD1
   if (finalWeights.size>=10000)
   { out << "Did not generate all weights of the module due to RAM limits. ";
     if (!isTrimmed)
-      out << "However, all dominant weights were computed and are drawn.";
+      out << "However, all dominant weights were computed and are drawn. ";
     out << "<br>";
   }
   if (!isTrimmed && finalWeights.size<10000)
@@ -6607,7 +6614,7 @@ bool Lattice::GetAllRepresentatives(const Lattice& rougherLattice, Vectors<Ratio
     thePeriods[i]--;
   SelectionWithDifferentMaxMultiplicities theCoeffSelection;
   theCoeffSelection.initFromInts(thePeriods);
-  int NumCycles=theCoeffSelection.getTotalNumSubsets();
+  int NumCycles=theCoeffSelection.TotalNumSubsetsMustBeSmalInt();
   output.SetSize(NumCycles);
   for (int i=0; i<NumCycles; i++, theCoeffSelection.IncrementReturnFalseIfPastLast())
   { output[i].MakeZero(theDim);

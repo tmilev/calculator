@@ -953,6 +953,7 @@ void WebWorker::OutputStandardResult()
   autocompleteKeyWords.AddOnTopNoRepetition("CalculatorStatus");
   autocompleteKeyWords.AddOnTopNoRepetition("FullTree");
   autocompleteKeyWords.AddOnTopNoRepetition("HideLHS");
+  autocompleteKeyWords.AddOnTopNoRepetition("UsePredefinedWordSplits");
   stOutput << "\n\n<script language=\"javascript\">\n" << "  var theAutocompleteDictionary = [\n  ";
   for (int i=0; i<autocompleteKeyWords.size; i++)
     if (autocompleteKeyWords[i].size()>2)

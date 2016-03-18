@@ -57,6 +57,7 @@ void Calculator::reset()
   this->flagNoApproximations=false;
   this->flagCurrentExpressionIsNonCacheable=false;
   this->flagDefaultRulesWereTamperedWith=false;
+  this->flagUsePredefinedWordSplits=false;
   this->MaxLatexChars=2000;
   this->numEmptyTokensStart=9;
   this->theObjectContainer.reset();
@@ -258,6 +259,7 @@ void Calculator::init()
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogRules");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogCache");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogFull");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("UsePredefinedWordSplits");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LatexLink");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("UseLnInsteadOfLog");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("CalculatorStatus");
@@ -280,6 +282,7 @@ void Calculator::init()
   this->initOperationsThatAreKnownFunctions();
   this->initAtomsNonCacheable();
   this->initArithmeticOperations();
+  this->initPredefinedWordSplits();
 
   Expression theSSLieAlgrule;
   this->RuleStack.reset(*this, 100);
@@ -885,6 +888,25 @@ bool Calculator::ReplaceEOXbyEX()
   return true;
 }
 
+bool Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits()
+{ MacroRegisterFunctionWithName("Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits");
+  SyntacticElement& theE =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
+  const std::string& currentVar=this->theAtoms[theE.theData.theData];
+  if (!this->predefinedWordSplits.Contains( currentVar))
+    crash << "Predefined word splits array does not contain the variable: " << theE.theData.ToString()
+    << ". This should not happen in the body of this function. " << crash;
+  List<std::string>& theSplit=this->predefinedWordSplits.GetValueCreateIfNotPresent(currentVar);
+  SyntacticElement newElt;
+  newElt.controlIndex=this->conVariable();
+  this->PopTopSyntacticStack();
+  for (int i=0; i<theSplit.size; i++)
+  { newElt.theData.MakeAtom(this->AddOperationNoRepetitionOrReturnIndexFirst(theSplit[i]), *this);
+    (*this->CurrentSyntacticStacK).AddOnTop(newElt);
+  }
+  return true;
+}
+
+
 bool Calculator::ReplaceEEXByEXusingO(int theControlIndex)
 { SyntacticElement& left =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
@@ -1210,6 +1232,12 @@ bool Calculator::ApplyOneRule()
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
+  if (secondToLastS=="%" && lastS=="UsePredefinedWordSplits")
+  { this->flagUsePredefinedWordSplits=true;
+    this->Comments << "Using predefined word splits -for example xy is replaced by x y. ";
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
   if (secondToLastS=="%" && lastS=="LogEvaluation")
   { this->flagLogEvaluatioN=true;
     this->PopTopSyntacticStack();
@@ -1282,6 +1310,10 @@ bool Calculator::ApplyOneRule()
     << " does not have properly initialized context. "
     << crash;
   }*/
+  if (this->flagUsePredefinedWordSplits)
+    if (lastS=="Variable")
+      if (this->predefinedWordSplits.Contains(this->theAtoms[lastE.theData.theData]))
+        return this->ReplaceVbyVdotsVAccordingToPredefinedWordSplits();
   if (secondToLastS=="=" && lastS==":")
     return this->ReplaceXXByCon(this->conIsDenotedBy());
   if (secondToLastS=="{" && lastS=="}")

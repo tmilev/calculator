@@ -47,7 +47,7 @@ void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(const MonomialWeylAlg
   MonomialWeylAlgebra buffer;
   buffer.MakeOne(theDimensioN);
   output.MakeZero();
-  int numCycles= tempSel.getTotalNumSubsets();
+  int numCycles= tempSel.TotalNumSubsetsMustBeSmalInt();
   Rational coeffBuff;
   output.SetExpectedSize(theExpectedSize);
   for (int i=0; i<numCycles; i++)

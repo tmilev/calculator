@@ -458,7 +458,7 @@ void Calculator::initPredefinedInnerFunctions()
 
   this->AddOperationInnerHandler
   ("ElementWeylAlgebraDO", Calculator::innerElementWeylAlgebra, "",
-   "Creates element of a weyl algebra = polynomial coefficient differential operator. First argument denotes differential operator letter, \
+   "Creates element of a Weyl algebra = polynomial coefficient differential operator. First argument denotes differential operator letter, \
    second argument - the dual polynomial expression. ",
    "\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i; \n[\\partial_1, x_1]; \n\\partial_1 x_1; \nx_1\\partial_1",
    true, false, "Calculator::innerElementWeylAlgebra");
@@ -489,7 +489,7 @@ void Calculator::initPredefinedInnerFunctions()
    ", "s_1=MakeMatrixRFs{}((1-t, 2), (3, 2-t))", true, false, "CalculatorConversions::innerMatrixRationalFunction");
   this->AddOperationInnerHandler
   ("FourierTransformDO", CalculatorFunctionsGeneral::innerFourierTransformEWA, "",
-   "Fourier-transforms an element of a weyl algebra. Multiplies each monomial term of odd total degree by -1 \
+   "Fourier-transforms an element of a Weyl algebra. Multiplies each monomial term of odd total degree by -1 \
    (total degree= sum of degrees in the polynomial variables plus the degrees of the differential variables. ",
    "x=ElementWeylAlgebraPoly{}(\\partial, x); \n\\partial=ElementWeylAlgebraDO{}(\\partial, x);\
    \n  a=x^3+x\\partial; b=\\partial x+\\partial^3+\\partial;  \n[FourierTransformDO{}a,FourierTransformDO{}b]-FourierTransformDO{}[a,b]");
@@ -556,7 +556,7 @@ void Calculator::initPredefinedInnerFunctions()
    ;
   this->AddOperationInnerHandler
   ("WeylGroupConjugacyClassesRepresentatives", CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives, "",
-   "Computes a representatvie in each conjugacy classes of a Weyl group by comparing conjugacy classes invariants and by enumerating conjugacy class orbits. ",
+   "Computes a representative in each conjugacy classes of a Weyl group by comparing conjugacy classes invariants and by enumerating conjugacy class orbits. ",
    "WeylGroupConjugacyClassesRepresentatives{}(A_2);", true, true)
    ;
   this->AddOperationInnerHandler
@@ -671,7 +671,7 @@ void Calculator::initPredefinedInnerFunctions()
    ;
   this->AddOperationInnerHandler
   ("GenerateVectorSpaceClosedWRTLieBracket", CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket, "",
-   "Generates a vector space closed with respect to the Lie bracket from input of type elements of weyl algebra or Lie algebra. \
+   "Generates a vector space closed with respect to the Lie bracket from input of type elements of Weyl algebra or Lie algebra. \
    The first argument of the input is an upper bound for the dimension of the vector space. The remaining \
    arguments must be differential operators. The output is a vector space \
    basis printout. Fails if the dimension of the vector space is larger than the upper bound.",
@@ -862,7 +862,7 @@ void Calculator::initPredefinedInnerFunctions()
    ;
   this->AddOperationInnerHandler
   ("AdCommonEigenspace", &this->innerAdCommonEigenSpaces, "",
-   "Computes common eigenspace of the adjoint action of semisimple Lie algebra elemets inside the \
+   "Computes common eigenspace of the adjoint action of semisimple Lie algebra elements inside the \
    semisimple Lie algebra. ",
    "AdCommonEigenspace{}(F_4, -5 (g_{9})+3 (g_{13})+5 (g_{16})+4 (g_{10}), g_{14}+g_{22}+g_{20})")
    ;
@@ -1051,7 +1051,8 @@ void Calculator::initPredefinedInnerFunctions()
    "<b>Calculus teaching function.</b> Compares two one-variable functions numerically.\
    First two arguments give the two functions. Third and fourth arguments give the interval [a,b] over which to compare.\
    Fifth argument is optional (default: 50) \
-   and gives the number of sampling points. Sixth argument is optional (default: 0.0001) and gives the numerical tolerance eps- if two numbers are \
+   and gives the number of sampling points. Sixth argument is optional (default: 0.0001) \
+   and gives the numerical tolerance eps- if two numbers are \
    at a distance less than eps they are considered equal .\
    ",
    "CompareFunctionsNumerically{}(arctan (x), arcsin(x/\\sqrt{x^2+1}),0, 5,50,0.0001);\n\
@@ -1066,7 +1067,9 @@ void Calculator::initPredefinedInnerFunctions()
    All remaining arguments come in pairs, in the form x\\in (2,3), 50. \
    ",
    "CompareExpressionsNumerically{}(\\arctan x + \\arctan y, \\arctan((x+y)/(1- x y)), 0.0001,\
-   x\\in(0,0.5), 20, y\\in(0,0.5), 20 );\n\
+   x\\in(0,0.5), 20, y\\in(0,0.5), 20 );\
+   \nCompareExpressionsNumerically{}(\\arctan x + \\arctan y, \\arctan((x+y)/(1- x y)), 0.0001,\
+   x\\in(0,2), 20, y\\in(0,2), 20 );\
    ", true, false, "CalculatorFunctionsGeneral::innerCompareExpressionsNumerically", "CompareExpressionsNumerically")
    ;
 
@@ -1109,8 +1112,8 @@ void Calculator::initPredefinedInnerFunctions()
     type letter with upper index equal to the inverse of the scale of the symmetric Cartan matrix and lower index equal to \
     the rank of the subalgebra. For example A^2_3 stands for type A_3 (sl (4)) with symmetric Cartan matrix scale equal to 1/2.\
     If the upper index is omitted, it is implied to be 1.<hr>\
-    We define the symmetric Cartan matrix as the matrix whose (i,j)^{th} enry is the scalar product of the i^{th} and j^{th} roots. \
-    We assume the roots to be ordered in the order implied by the (non-symmetric) Cartan matrices on page 59 in Huphreys, \
+    We define the symmetric Cartan matrix as the matrix whose (i,j)^{th} entry is the scalar product of the i^{th} and j^{th} roots. \
+    We assume the roots to be ordered in the order implied by the (non-symmetric) Cartan matrices on page 59 in Humphreys, \
     Introduction to Lie algebras and representation theory. If the upper index of the Dynkin type is 1, the corresponding symmetric Cartan matrix is\
     assigned the default value. The default values are chosen so that the long root has squared length 2 in types \
     A_n, B_n, D_n, E_6, E_7, E_8, and F_4, squared length 4 in C_n, and squared length 6 in type G_2. \
@@ -1234,7 +1237,8 @@ void Calculator::initPredefinedInnerFunctions()
    "Casimir{}(G_2)");
    this->AddOperationInnerHandler
   ("CasimirWRTLevi", CalculatorFunctionsGeneral::innerCasimirWRTlevi, "",
-   "Gives the Casimir element of a Levi part of a parabolic subalgebra. First argument = ambient Lie algebra. Second argument \
+   "Gives the Casimir element of a Levi part of a parabolic subalgebra. First argument = ambient Lie algebra. \
+   Second argument \
    = parabolic selection =1 stands for simple root outside of the Levi component, 0 stands for simple root of the Levi component.",
    "CasimirWRTLevi{}(B_3, (1,0,0))");
   this->AddOperationInnerHandler
@@ -1257,11 +1261,11 @@ void Calculator::initPredefinedInnerFunctions()
   ("drawWeightSupportWithMults", CalculatorFunctionsGeneral::innerDrawWeightSupportWithMults, "",
    "Draws the weight support of an irreducible finite-dimensional highest weight module. \
    The first argument gives the type and the second gives the highest weight given in \
-   fundamendal weight basis. \
+   fundamental weight basis. \
    The maximum number of drawn weights allowed is (hard-code) limited to 10 000. If \
    the number of weights in the weight support exceeds this number, only the first 10 000 weights will be drawn. \
    <b> Warning. Drawing text (i.e. multiplicities) \
-   is very javascrtipt-processor-intensive. Use only for *small* examples, else you might hang your browser. </b>",
+   is very javascript-processor-intensive. Use only for *small* examples, else you might hang your browser. </b>",
    "drawWeightSupportWithMults{}(B_3,(0,1,1));\n drawWeightSupportWithMults{}(G_2,(1,0))");
   this->AddOperationInnerHandler
   ("drawWeightSupport", CalculatorFunctionsGeneral::innerDrawWeightSupport, "",
@@ -1329,7 +1333,7 @@ void Calculator::initPredefinedInnerFunctions()
    the coordinates of the highest weight \
    vector must be small integers (because the highest\
    weight must be dominant and integral with respect to the Levi part of the inducing parabolic\
-   subalgebra). In the crossed-out root positions, the coordiantes of the highest weight vector\
+   subalgebra). In the crossed-out root positions, the coordinates of the highest weight vector\
    can be arbitrary polynomial expressions. \
    The algorithm depends on an order chosen on the Chevalley-Weyl generators of the nilradical.\
    Here, we sort the nilradical elements in descending order relative to the order of their roots.\
@@ -1357,7 +1361,7 @@ void Calculator::initPredefinedInnerFunctions()
    the coordinates of the highest weight \
    vector must be small integers (because the highest\
    weight must be dominant and integral with respect to the Levi part of the inducing parabolic\
-   subalgebra). In the crossed-out root positions, the coordiantes of the highest weight vector\
+   subalgebra). In the crossed-out root positions, the coordinates of the highest weight vector\
    can be arbitrary polynomial expressions. In addition to the first 3 arguments, this function\
    accepts further optional arguments, customizing the notation of the final printout.\
    The differential operator part of the algorithm uses the nil-order given by the function \
@@ -1434,7 +1438,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("LSpath", this->innerLSPath, "",
    "Lakshmibai-Seshadri path starting at 0. The first argument gives the semisimple Lie algebra, \
-    the next arguments give the waypoints of the path.",
+    the next arguments give the way-points of the path.",
    "LSpath{}(G_2, (0,0), (2,1) )");
   this->AddOperationInnerHandler
   ("LROdefine", this->innerLittelmannOperator, "",
@@ -1662,22 +1666,22 @@ void Calculator::initPredefinedInnerFunctions()
 
   this->AddOperationInnerHandler
   ("printSemisimpleSubalgebras", this->innerPrintSSsubalgebrasRegular, "",
-   " <b>This function is being developed and is not imiplemented fully yet. </b> \
+   " <b>This function is being developed and is not implemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
    "printSemisimpleSubalgebras(B_3)", true, false);
   this->AddOperationInnerHandler
   ("printSemisimpleSubalgebrasRecompute", Calculator::innerPrintSSsubalgebrasRecompute, "",
-   " <b>This function is being developed and is not imiplemented fully yet. </b> \
+   " <b>This function is being developed and is not implemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
    "printSemisimpleSubalgebrasRecompute(C_3)", false, false, "Calculator::innerPrintSSsubalgebrasRecompute");
   this->AddOperationInnerHandler
   ("printSemisimpleSubalgebrasNoCentralizers", this->innerPrintSSsubalgebrasNoCentralizers, "",
-   " <b>This function is being developed and is not imiplemented fully yet. </b> \
+   " <b>This function is being developed and is not implemented fully yet. </b> \
    Prints the semisimple subalgebra candidates of a Lie algebra. ",
    "printSemisimpleSubalgebrasNoCentralizers(A_3)", false, false);
   this->AddOperationInnerHandler
   ("printSemisimpleSubalgebrasFull", this->innerPrintSSsubalgebrasNilradicals, "",
-   " <b>This function is being developed and is not imiplemented fully yet. </b> \
+   " <b>This function is being developed and is not implemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
    "printSemisimpleSubalgebrasFull{}(A_2)", false, false);
   this->AddOperationInnerHandler
@@ -1689,17 +1693,17 @@ void Calculator::initPredefinedInnerFunctions()
    ", true, false);
   this->AddOperationInnerHandler
   ("EmbedSemisimpleInSemisimple", CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg, "",
-   " Trys to find all embeddings of the first semisimple type into the second. Records all intermediate subalgebras. ",
+   " Tries to find all embeddings of the first semisimple type into the second. Records all intermediate subalgebras. ",
    "EmbedSemisimpleInSemisimple{}(G^3_2, B_3);EmbedSemisimpleInSemisimple{}(G_2, B_3)", true, false);
   this->AddOperationInnerHandler
   ("LoadSemisimpleSubalgebras", CalculatorConversions::innerLoadSemisimpleSubalgebras, "",
-   " <b>This function is being developed and is not imiplemented fully yet. </b> \
+   " <b>This function is being developed and is not implemented fully yet. </b> \
    Loads a semisimpleSubalgebra from expression. ",
    "LoadSemisimpleSubalgebras {}(EmbedSemisimpleInSemisimple{}(G_2, B_3))", true, false)
    ;
   this->AddOperationInnerHandler
   ("SltwoSubalgebra", CalculatorConversions::innerSlTwoSubalgebraPrecomputed, "",
-   " <b>This function is being developed and is not imiplemented fully yet. </b> \
+   " <b>This function is being developed and is not implemented fully yet. </b> \
    Loads an sl(2) subalgebra from expression. ",
    "SltwoSubalgebra(B_{3},g_  +(B)_{3}, -1)\\\\\
     +3 ((getChevalleyGenerator, (B)_{3}, -2)), \
@@ -1709,7 +1713,7 @@ void Calculator::initPredefinedInnerFunctions()
    ;
   this->AddOperationInnerHandler
   ("LoadSlTwoSubalgebras", CalculatorConversions::innerLoadSltwoSubalgebras, "",
-   " <b>This function is being developed and is not imiplemented fully yet. </b> \
+   " <b>This function is being developed and is not implemented fully yet. </b> \
    Loads the sl(2) subalgebras of a semisimple Lie algebra from expression. ",
    "LoadSemisimpleSubalgebras{}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3))", true, true)
    ;
@@ -1944,22 +1948,22 @@ void Calculator::initPredefinedStandardOperations()
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opRational(), this->opElementWeylAlgebra(),
-   "Adds a rational or polynomial to element weyl algebra. ",
+   "Adds a rational or polynomial to element Weyl algebra. ",
    " \\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opPoly(), this->opElementWeylAlgebra(),
-   "Adds a rational or polynomial to element weyl algebra. ",
+   "Adds a rational or polynomial to element Weyl algebra. ",
    " \\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i+\\partial_i+x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opPoly(),
-   "Adds a rational or polynomial to element weyl algebra. ",
+   "Adds a rational or polynomial to element Weyl algebra. ",
    " \\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i+x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opElementWeylAlgebra(),
-   "Adds a rational or polynomial to element weyl algebra. ",
+   "Adds a rational or polynomial to element Weyl algebra. ",
    " \\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true, false, "CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -2110,31 +2114,31 @@ void Calculator::initPredefinedStandardOperations()
    , true, false, "CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt, this->opWeylGroupElement(), this->opWeylGroupElement(),
-   "Multiplies two coxeter elements if possible. ",
+   "Multiplies two Coxeter elements if possible. ",
    "x=MakeElementWeylGroup{}(A_2, 1); x*x", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg, this->opCharSSAlgMod(), this->opCharSSAlgMod(),
-   "Multiplies two semisimple Lie algebra finite dimensinal characters and decomposes using the \
+   "Multiplies two semisimple Lie algebra finite dimensional characters and decomposes using the \
    Brauer-Klimyk formula, Humphreys J. Introduction to Lie algebras and representation theory, \
    page 142, exercise 9. ",
    "x=MakeCharacterLieAlg{}(G_2, (1,0));\ny=MakeCharacterLieAlg{}(G_2, (0,1));\nx*y", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAl");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA, this->opRational(), this->opElementWeylAlgebra(),
-   "Multiplies rational or polynomial or element weyl algebra by rational or polynomial or element weyl algebra. ",
+   "Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. ",
    " \\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i; 3\\partial_i", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA, this->opPoly(), this->opElementWeylAlgebra(),
-   "Multiplies rational or polynomial or element weyl algebra by rational or polynomial or element weyl algebra. ",
+   "Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. ",
    " \\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]", true,
    false, "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opElementWeylAlgebra(),
-   "Multiplies rational or polynomial or element weyl algebra by rational or polynomial or element weyl algebra. ",
+   "Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. ",
    " \\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\na=x_1x_2;\nb=\\partial_1\\partial_2; a b - b a -[a,b] ",
    true, false, "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opPoly(),
-   "Multiplies rational or polynomial or element weyl algebra by rational or polynomial or element weyl algebra. ",
+   "Multiplies rational or polynomial or element Weyl algebra by rational or polynomial or element Weyl algebra. ",
    "\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]",
    true, false, "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -2397,7 +2401,7 @@ void Calculator::initPredefinedStandardOperations()
    , true, false, "CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly, this->opWeylGroupElement(), this->opWeightLieAlgPoly(),
-   "Element of weyl group action on a weight. ",
+   "Element of Weyl group action on a weight. ",
    "s_{{a}}=MakeElementWeylGroup(B_3, a); \\varepsilon_{{a}}=MakeWeight{}(B_3, a, epsilon);   \
    \nx=Polynomial{}x; \\mu= x\\varepsilon_1; s_1s_2s_3s_2s_1 \\mu"
    , true, false, "CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly");
@@ -2576,7 +2580,7 @@ void Calculator::initPredefinedStandardOperations()
     \nB=c+a x^{2}+b x;", true, false, "CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger, this->opElementWeylAlgebra(), this->opRational(),
-   "Raises element of weyl algebra to integer power. ",
+   "Raises element of Weyl algebra to integer power. ",
    "\\partial=ElementWeylAlgebraDO{}(\\partial, x); \nx=ElementWeylAlgebraPoly{}(\\partial, x); \na=x\\partial; \na^10; \\partial x^{3/2}; \\partial^{3/2} x",
    true, false, "CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger");
 
@@ -2638,7 +2642,7 @@ void Calculator::initPredefinedStandardOperations()
    \ng_{-1}g_{-1}(v\\otimes v)", true);
   this->AddOperationInnerHandler
   ("[]", CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA, "",
-   "Lie bracket of elements of weyl algebras=differential operators with polynomial coefficients. ",
+   "Lie bracket of elements of Weyl algebras=differential operators with polynomial coefficients. ",
    "\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i; \n[\\partial_1, x_1]; ", true);
   this->AddOperationInnerHandler
   ("[]", CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE, "",

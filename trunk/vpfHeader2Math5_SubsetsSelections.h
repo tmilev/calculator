@@ -147,7 +147,8 @@ public:
   void initIncomplete(int NumElements){ this->MaxMultiplicities.SetSize(NumElements); this->initWithMultiplicities(NumElements); }
   void clearNoMaxMultiplicitiesChange();
   bool IncrementReturnFalseIfPastLast();
-  int getTotalNumSubsets();
+  LargeInt TotalNumSubsets();
+  int TotalNumSubsetsMustBeSmalInt();
   int TotalMultiplicity();
   int MaxTotalMultiplicity();
   void initFromInts(int* theMaxMults, int NumberMaxMults);

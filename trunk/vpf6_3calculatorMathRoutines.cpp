@@ -2051,10 +2051,9 @@ bool CalculatorFunctionsGeneral::innerCompareFunctionsNumerically
 bool CalculatorFunctionsGeneral::innerCompareExpressionsNumerically
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompareFunctionsNumerically");
-  crash << "not implemented yet" << crash;
-
-  if (input.children.size<5)
-    return theCommands << "Comparing functions takes as input at least 4 arguments (two functions to compare and interval to compare over).";
+  if (input.children.size<6)
+    return theCommands << "Comparing functions takes as input at least 5 arguments "
+    << "- two functions to compare, precision, variable belonging to an interval and number of sampling points).";
   Expression theFunE=input[1];
   theFunE-=input[2];
   HashedList<Expression> theVars;
@@ -2065,30 +2064,105 @@ bool CalculatorFunctionsGeneral::innerCompareExpressionsNumerically
     zeroE.AssignValue(1, theCommands);
     return output.MakeXOX(theCommands, theCommands.opEqualEqual(), theFunE, zeroE);
   }
-  if (theVars.size>1)
-  { return theCommands << "I cannot compare the functions as they appear to depend on more than one variable, namely, on: "
-    << theVars.ToStringCommaDelimited();
-  }
 //  stOutput << "The vars: " << theVars.ToStringCommaDelimited();
-  double leftBoundary=0;
-  double rightBoundary=0;
-  if (! input[3].EvaluatesToDouble(&leftBoundary))
-    return theCommands << "Failed to extract the left endpoint of the comparison interval. ";
-  if (! input[4].EvaluatesToDouble(&rightBoundary))
-    return theCommands << "Failed to extract the right endpoint of the comparison interval. ";
-  int numPoints=50;
-  if (input.children.size>5)
-    if (!input[5].IsSmallInteger(&numPoints))
-      return theCommands << "Failed to convert argument: " << input[5].ToString() << " to a small integer. ";
-  double minDiff=0, maxDiff=0;
-  if (!theFunE.EvaluatesToDoubleInRange(theVars[0].ToString(), leftBoundary, rightBoundary, numPoints, &minDiff, &maxDiff, 0))
-    return theCommands << "Failed to evaluate your function to a number. The sampling interval may be outside of the domain of the function. ";
+  List<double> leftBoundaries;
+  List<double> rightBoundaries;
+  HashedList<Expression> theBoundaryVars;
+  List<int> numSamples;
+  for (int i=4; i<input.children.size; i+=2)
+  { const Expression& currentIntervalWithVariable=input[i];
+    if (!currentIntervalWithVariable.StartsWith(theCommands.opIn(), 3))
+      return theCommands << "Expression " << currentIntervalWithVariable.ToString()
+      << " is not a belonging relation (does not use the \\in symbol). ";
+    if (!currentIntervalWithVariable[2].IsSequenceNElementS(2))
+      return theCommands << "Could not get a two-element sequence from " << currentIntervalWithVariable[2].ToString();
+    double currentLeft, currentRight;
+    if (!currentIntervalWithVariable[2][1].EvaluatesToDouble(&currentLeft))
+      return theCommands << "Could not get a double from " << currentIntervalWithVariable[2][1].ToString();
+    if (!currentIntervalWithVariable[2][2].EvaluatesToDouble(&currentRight))
+      return theCommands << "Could not get a double from " << currentIntervalWithVariable[2][2].ToString();
+    if (theBoundaryVars.Contains(currentIntervalWithVariable[1]))
+      return theCommands << "Expression " << currentIntervalWithVariable[1].ToString()
+      << " specified an interval range more than once. ";
+    theBoundaryVars.AddOnTop(currentIntervalWithVariable[1]);
+    leftBoundaries.AddOnTop(currentLeft);
+    rightBoundaries.AddOnTop(currentRight);
+    numSamples.AddOnTop(10);
+    int currentNumSamplingPoints=0;
+    if (i+1<input.children.size)
+    { if (input[i+1].IsSmallInteger(&currentNumSamplingPoints))
+        *numSamples.LastObject()=currentNumSamplingPoints;
+      else
+        return theCommands << "Failed to extract a small integer for the number of sampling points from: "
+        << input[i+1].ToString();
+      if (*numSamples.LastObject()>1000)
+        return theCommands << *numSamples.LastObject() << " sampling points requested for variable/expression "
+        << theBoundaryVars.LastObject()->ToString() << "; this exceeds the hard-coded limit of 1000. ";
+      if (*numSamples.LastObject()<1)
+        return theCommands << *numSamples.LastObject() << " sampling points requested for variable/expression "
+        << theBoundaryVars.LastObject()->ToString() << "; this is not allowed. ";
+    }
+  }
+  for (int i=0; i<theVars.size; i++)
+    if (!theBoundaryVars.Contains(theVars[i]))
+      return theCommands << "Could not find an interval for variable/expression: " << theVars[i].ToString();
+  HashedList<Expression> knownEs= theCommands.knownDoubleConstants;
+  List<double> knownValues=theCommands.knownDoubleConstantValues;
+  for (int i=0; i<theBoundaryVars.size; i++)
+    if (knownEs.Contains(theBoundaryVars[i]))
+      return theCommands << theBoundaryVars[i]
+      << " is an already known constant and cannot be used as a variable in this context. ";
+    else
+      knownEs.AddOnTop(theBoundaryVars[i]);
+  knownValues.SetSize(knownEs.size);
+  SelectionWithDifferentMaxMultiplicities theSamplingSelector;
+  theSamplingSelector.initFromInts(numSamples);
+  if (theSamplingSelector.TotalNumSubsets()>1000000)
+    return theCommands << "The total number of sampling points, "
+    << theSamplingSelector.TotalNumSubsets().ToString() << " exceeds "
+    << "the hard-coded limit of 1000000. ";
   double tolerance=0.0001;
-  if (input.children.size>6)
-    if (!input[6].EvaluatesToDouble(&tolerance))
-      return theCommands << "Failed to evaluate the argument " << input[6].ToString() << " to a floating point number. ";
-  if (minDiff<- tolerance || maxDiff> tolerance)
-    return output.AssignValue(0, theCommands);
+  if (!input[3].EvaluatesToDouble(&tolerance))
+    return theCommands << "Failed to evaluate tolerance limit from " << input[3].ToString()
+    << " to a floating point number. ";
+  if (tolerance<0)
+    tolerance*=-1;
+  Rational totalSamples=theSamplingSelector.TotalNumSubsetsMustBeSmalInt();
+  Rational numFailedSamples=0;
+/*  stOutput << "<br>Total number of samples: " << totalSamples;
+  stOutput << "<br>Variables: " << theBoundaryVars.ToStringCommaDelimited();
+  stOutput << "<br>Boundaries left: " << leftBoundaries.ToStringCommaDelimited();
+  stOutput << "<br>Boundaries right: " << rightBoundaries.ToStringCommaDelimited();*/
+  do
+  { for (int i=0; i<theSamplingSelector.Multiplicities.size; i++)
+    { double& currentValue=knownValues[i+theCommands.knownDoubleConstants.size];
+      double& lBound=leftBoundaries[i];
+      double& rBound=rightBoundaries[i];
+      if (theSamplingSelector.MaxMultiplicities[i]==1)
+      { currentValue=(lBound+rBound)/2;
+        continue;
+      }
+      double paramBnZeroAndOne=theSamplingSelector.Multiplicities[i];
+      paramBnZeroAndOne/=theSamplingSelector.MaxMultiplicities[i]-1;
+      currentValue=lBound*(1-paramBnZeroAndOne)+rBound*paramBnZeroAndOne;
+    }
+    double floatingResult=0;
+    if (!theFunE.EvaluatesToDoubleUnderSubstitutions(knownEs, knownValues, &floatingResult))
+    { numFailedSamples++;
+      if ((numFailedSamples*100)/totalSamples>20)
+      { theCommands << "Failed to evaluate at least one of the functions in more than 20% of the sampling points. ";
+        return output.AssignValue(0, theCommands);
+      }
+/*    stOutput << "<br>Substitutions: " << knownEs.ToStringCommaDelimited()
+    << ", values: " << knownValues.ToStringCommaDelimited()
+    << ".  Output: <span style=\"color:red\">failed.</span> ";*/
+    }
+/*    stOutput << "<br>Substitutions: " << knownEs.ToStringCommaDelimited()
+    << ", values: " << knownValues.ToStringCommaDelimited()
+    << ".  Output: " << floatingResult;*/
+    if (floatingResult> tolerance || floatingResult <-tolerance)
+      return output.AssignValue(0, theCommands);
+  } while(theSamplingSelector.IncrementReturnFalseIfPastLast());
   return output.AssignValue(1, theCommands);
 //  theFunE.
 }

@@ -148,7 +148,7 @@ void Calculator::initPredefinedInnerFunctions()
    "Does as ExtractCalculatorExpressionFromHtml but in addition interprets the calculator commands.",
    "InterpretHtml(LoadFileIntoString(\
    \"/ProblemCollections/Problems/Functions-composing-fractional-linear-1.html\"))", true, false,
-   "CalculatorFunctionsGeneral::innerInterpretHtml");
+   "CalculatorFunctionsGeneral::innerInterpretHtml", "InterpretHtml");
   this->AddOperationInnerHandler
   ("ExtractCalculatorExpressionFromHtml", CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml, "",
    "Reads html and extracts embedded calculator commands. \

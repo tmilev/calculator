@@ -1345,7 +1345,7 @@ bool Calculator::ApplyOneRule()
   if (secondToLastS=="Expression" && thirdToLastS=="mod" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();
   if (lastS=="Expression" && secondToLastS=="\\in" && thirdToLastS=="Expression")
-    return this->ReplaceEOEXByEX();
+    return this->ReplaceEOEByE();
   if (secondToLastS=="Expression" && thirdToLastS=="\\choose" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="\\otimes" && fourthToLastS=="Expression" && this->AllowsTensorInPreceding(lastS))

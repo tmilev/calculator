@@ -543,7 +543,7 @@ void Calculator::initPredefinedInnerFunctions()
   ("WeylGroupTauSignatures", CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems, "",
    "Prints the tau signatures of a Weyl group. See a common article by \
    T. Folz-Donahue, S. Jackson, T. Milev, A. Noel. ",
-   "WeylGroupTauSignatures{}(b_3);", true, true,
+   "WeylGroupTauSignatures{}(b_3);", true, false,
    "CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems", "WeylGroupTauSignatures")
    ;
 
@@ -1056,7 +1056,7 @@ void Calculator::initPredefinedInnerFunctions()
    ",
    "CompareFunctionsNumerically{}(arctan (x), arcsin(x/\\sqrt{x^2+1}),0, 5,50,0.0001);\n\
     CompareFunctionsNumerically{}(e^x, 1+x+x^2/2+x^3/3!+x^4/4!+x^5/5!+x^6/6!,0, 5,50,0.0001)\
-   ", true, false, "CalculatorFunctionsGeneral::innerCompareFunctionsNumerically")
+   ", true, false, "CalculatorFunctionsGeneral::innerCompareFunctionsNumerically", "CompareFunctionsNumerically")
    ;
 
   this->AddOperationInnerHandler ("CompareExpressionsNumerically",

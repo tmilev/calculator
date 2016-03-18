@@ -1291,7 +1291,6 @@ int WebWorker::ProcessSubmitProblem()
       { TimeWrapper now, deadline; //<-needs a fix for different time formats.
       //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
         std::stringstream badDateStream;
-
         if (!deadline.AssignMonthDayYear(theDeadlineString, badDateStream))
         { stOutput << "<b>Problem reading deadline. </b> The deadline string was: "
           << theDeadlineString << ". Comments: "

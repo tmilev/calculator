@@ -2279,7 +2279,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersi
   }
   this->flagCharTableIsComputed=true;
   this->flagIrrepsAreComputed=true;
-  stOutput << this->PrettyPrintCharacterTable();
+//  stOutput << this->PrettyPrintCharacterTable();
   if(this->characterTable.size < this->conjugacyClasseS.size)
     crash << crash;
   if(this->irreps.size < this->conjugacyClasseS.size)
@@ -2451,8 +2451,8 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
     this->theElementImageS[i].ActOnVectorColumn(startingVector, tempV);
     average+=tempV;
   }
-  stOutput << "<br>Current char: " << this->theCharacteR.ToString();
-  stOutput << "<br>Spreading: " << average.ToString();
+//  stOutput << "<br>Current char: " << this->theCharacteR.ToString();
+//  stOutput << "<br>Spreading: " << average.ToString();
 /*  Vectors<coefficient> theSpread;
   this->SpreadVector(average, theSpread);
   if (theSpread.size==this->GetDim())
@@ -2500,7 +2500,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
     this->theGroup.ComputeSquaresCCReps(theGlobalVariables);
   this->theGroup.characterTable.SetSize(0);
   this->irreps_grcam.SetSize(0);
-  stOutput << "<hr>Character of initial module: " << sr.GetCharacter() << "\n";
+//  stOutput << "<hr>Character of initial module: " << sr.GetCharacter() << "\n";
   List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > newspaces;
   newspaces.AddOnTop(sr);
   List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > incompletely_digested;
@@ -2514,10 +2514,10 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
     }
     GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> tspace = sr * nspace;
     tspace.flagCharacterIsComputed=false;
-    stOutput << "<hr>Decomposing " << tspace.GetCharacter();
-    stOutput << " = " << sr.GetCharacter().ToString() << "*" << nspace.ToString() << "\n";
+    //stOutput << "<hr>Decomposing " << tspace.GetCharacter();
+    //stOutput << " = " << sr.GetCharacter().ToString() << "*" << nspace.ToString() << "\n";
     List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > spaces = tspace.DecomposeThomasVersion();
-    stOutput << "<hr><hr> to get: " << spaces.ToString() << "<hr><hr>";
+    //stOutput << "<hr><hr> to get: " << spaces.ToString() << "<hr><hr>";
 //      tspace = nspace * sr;
 //      tspace.character.data.size = 0;
 //      stOutput << "Decomposing (right tensor)" << tspace.GetCharacter() << "\n";
@@ -2528,7 +2528,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
         { this->theGroup.characterTable.AddOnTop(spaces[spi].GetCharacter());
           this->irreps_grcam.AddOnTop(spaces[spi]);
           newspaces.AddOnTop(spaces[spi]);
-          stOutput << "we have " << irreps_grcam.size << " irreps" << "\n";
+          //stOutput << "we have " << irreps_grcam.size << " irreps" << "\n";
         }
       } else
         incompletely_digested.AddOnTop(spaces[spi]);
@@ -2537,7 +2537,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
     for(int spi=0; spi<incompletely_digested.size; spi++)
       for(int ci=0; ci<this->theGroup.characterTable.size; ci++)
         if(incompletely_digested[spi].GetCharacter().InnerProduct(this->theGroup.characterTable[ci]) != 0)
-        { stOutput << "incompletely digested " << incompletely_digested[spi].GetCharacter() << " will now be further decomposed " << "\n";
+        { //stOutput << "incompletely digested " << incompletely_digested[spi].GetCharacter() << " will now be further decomposed " << "\n";
           List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > shards = incompletely_digested[spi].DecomposeThomasVersion();
           incompletely_digested.RemoveIndexShiftDown(spi);
           for(int shi=0; shi<shards.size; shi++)
@@ -2546,7 +2546,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
               { this->irreps_grcam.AddOnTop(spaces[spi]);
                 this->characterTable.AddOnTop(this->irreps_grcam.LastObject()->theCharacteR);
                 newspaces.AddOnTop(spaces[spi]);
-                stOutput << "we have " << irreps_grcam.size << " irreps (got from shards)" << "\n";
+                //stOutput << "we have " << irreps_grcam.size << " irreps (got from shards)" << "\n";
               }
             } else
               incompletely_digested.AddOnTop(shards[shi]);
@@ -2562,7 +2562,7 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
   }
   this->theGroup.flagCharTableIsComputed=true;
   this->theGroup.flagIrrepsAreComputed=true;
-  stOutput << this->PrettyPrintCharacterTable();
+  //stOutput << this->PrettyPrintCharacterTable();
 }
 
 template <typename elementSomeGroup>

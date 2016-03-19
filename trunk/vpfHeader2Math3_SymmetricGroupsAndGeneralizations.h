@@ -1562,7 +1562,7 @@ void FiniteGroup<elementSomeGroup>::ComputeGeneratorCommutationRelations()
 }
 
 template <typename elementSomeGroup>
-std::string FiniteGroup<elementSomeGroup>::PrettyPrintGeneratorCommutationRelations()
+std::string FiniteGroup<elementSomeGroup>::PrettyPrintGeneratorCommutationRelations(bool andPrint)
 { this->ComputeGeneratorCommutationRelations();
   std::string crs = this->generatorCommutationRelations.ToStringPlainText();
   List<char*> rows;
@@ -1606,11 +1606,14 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintGeneratorCommutationRelati
     out << i << (generatorStringsHaveNewline?"\n":" ") << genstrings[i] << '\n';
   for(int i=0; i<this->generators.size; i++)
     out << i << " " << rows[i] << '\n';
-  return out.str().c_str();
+  std::string outs = out.str();
+  if(andPrint)
+    stOutput << outs << '\n';
+  return outs;
 }
 
 template <typename elementSomeGroup>
-std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable()
+std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable(bool andPrint)
 { for(int i=0; i<this->irreps.size; i++)
     this->irreps[i].ComputeCharacter();
   std::stringstream out;
@@ -1683,7 +1686,60 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable()
       if(x != 0)
         out << "characters " << i << ", " << j << " have inner product " << x << '\n';
     }
-  return out.str();
+  std::string outs = out.str();
+  if(andPrint)
+    stOutput << outs << '\n';
+  return outs;
+}
+
+template <typename elementSomeGroup>
+std::string FiniteGroup<elementSomeGroup>::PrettyPrintCCRepsSizes(bool andPrint)
+{ std::stringstream out;
+
+  // pad the numbers out front
+  List<std::string> numbers;
+  int numpad = 0;
+  for(int i=0; i<this->conjugacyClasseS.size; i++)
+  { std::stringstream ns;
+    ns << i;
+    numbers.AddOnTop(ns.str());
+    int nilen = numbers.LastObject()->length();
+    if(numpad < nilen);
+      numpad = nilen;
+  }
+
+  // pad the sizes
+  List<std::string> sizes;
+  int sizepad = 0;
+  for(int i=0; i<this->conjugacyClasseS.size; i++)
+  { std::stringstream ns;
+    ns << this->conjugacyClasseS[i].size;
+    sizes.AddOnTop(ns.str());
+    int nilen = sizes.LastObject()->length();
+    if(sizepad < nilen);
+      sizepad = nilen;
+  }
+
+  for(int i=0; i<this->conjugacyClasseS.size; i++)
+  { int pad;
+    pad = numpad-numbers[i].length();
+    for(int j=0; j<pad; j++)
+      out << " ";
+    out << numbers[i];
+    out << " ";
+    pad = sizepad-sizes[i].length();
+    for(int j=0; j<pad; j++)
+      out << " ";
+    out << sizes[i];
+    out << " ";
+    out << this->conjugacyClasseS[i].representative;
+    out << '\n';
+  }
+
+  std::string outs = out.str();
+  if(andPrint)
+    stOutput << outs << '\n';
+  return outs;
 }
 
 template <typename elementSomeGroup>

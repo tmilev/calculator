@@ -5,10 +5,10 @@ Express \(\displaystyle  \frac{d y }{d x}\) as a function of \(x\) and \(y\), wh
 \(
 %UseLnInsteadOfLog
 %UsePredefinedWordSplits
-a=randomInteger((1,7));
+a=randomInteger((1,3));
 leftTrig=selectAtRandom(sin, cos);
 rightTrig=selectAtRandom(sin,cos);
-b=selectAtRandom(2,3,4,5,6,7);
+b=selectAtRandom(2,3,4);
 c=selectAtRandom(3,5,7);
 g=randomInteger((-1,-7),(1,7));
 f=randomInteger((-1,-7),(1,7));
@@ -26,6 +26,11 @@ theFunModified=leftSquared-rightSquared
 </span>\(=\)<span class="calculator">
 \(\displaystyle right\) 
 </span>.
+<span class="calculator">
+\(
+plotImplicit(theFunModified, (-5, -5), (5, 5), (10,10), (400,400))
+\) 
+</span>
 <span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
 \(
 %UsePredefinedWordSplits

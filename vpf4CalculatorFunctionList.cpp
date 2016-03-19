@@ -1009,7 +1009,8 @@ D-B;\
 
   this->AddOperationInnerHandler ("plotImplicit", CalculatorFunctionsGeneral::innerPlotImplicitFunction, "",
    "Plots implicitly a curve given by the zeros of an expression in the letters\
-   x and y. The function has not been optimized for speed, please use with care.\
+   x and y. The relation between x and y is assumed continuous at the points where it is defined.\
+   The function has not been optimized for speed, please use with care.\
     The first argument gives the relation between x and y, the next two arguments give\
     the lower left and upper right corners of the viewing screen in the format\
     (lowLeftX, lowLeftY), (upperRightX, upperRightY). The next argument gives the \

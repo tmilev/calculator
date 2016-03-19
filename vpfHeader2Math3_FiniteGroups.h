@@ -244,6 +244,7 @@ public:
     return true;
   }
   bool CheckInitialization()const;
+  // WARNING:  This recalculates conjugacy classes, screwing up their order for other methods
   bool CheckConjugacyClassRepsMatchCCsizes();
   bool CheckOrthogonalityCharTable();
   void SetSizE(const LargeInt& inputSize)
@@ -311,8 +312,9 @@ public:
   void VerifyCCSizesAndRepresentativesFormula();
   void VerifyWords();
   void VerifyArithmetic();
-  std::string PrettyPrintGeneratorCommutationRelations();
-  std::string PrettyPrintCharacterTable();
+  std::string PrettyPrintGeneratorCommutationRelations(bool andPrint = false);
+  std::string PrettyPrintCharacterTable(bool andPrint = false);
+  std::string PrettyPrintCCRepsSizes(bool andPrint = false);
   JSData RepresentationDataIntoJS();
 
   // these methods are refugees from the WeylGroup class

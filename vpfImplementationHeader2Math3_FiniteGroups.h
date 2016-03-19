@@ -589,18 +589,20 @@ void SubgroupData<someGroup, elementSomeGroup>::ComputeCCRepresentativesPreimage
     crash << "At this computation the group must have initialized generators. " << crash;
   if (this->theGroup->generators.size==0)
     crash << "Parent group must have initialized generators. " << crash;
-  for(int i=0; i<this->theSubgroup->ConjugacyClassCount(); i++)
-  { bool notFound=true;
-    elementSomeGroup& g=this->theSubgroup->conjugacyClasseS[i].representative;
-    for(int ci=0; notFound && ci<this->theGroup->ConjugacyClassCount(); ci++)
-      if(this->theGroup->AreConjugate(g, this->theGroup->conjugacyClasseS[ci].representative))
-      { this->ccRepresentativesPreimages[i] = ci;
+  for(int i=0; i<this->theSubgroup->conjugacyClasseS.size; i++)
+  { elementSomeGroup& scr = this->theSubgroup->conjugacyClasseS[i].representative;
+    bool notFound=true;
+    for(int j=0; notFound && j<this->theGroup->conjugacyClasseS.size; j++)
+    { elementSomeGroup& gcr = this->theGroup->conjugacyClasseS[j].representative;
+      if(this->theGroup->AreConjugate(scr,gcr))
+      { this->ccRepresentativesPreimages[i] = j;
+        //stOutput << "I think that " << scr << " is conjugate to " << gcr << '\n';
         notFound=false;
-      } //else
-        //stOutput << "<hr>" << g.ToString() << " and " << this->parent->conjugacyClasseS[ci].representative.ToString() << " are not conjugate. ";
-    if (notFound)
-      crash << "Programming error: couldn't find preimage of the subgroup conjugacy class representative "
-      << g.ToString() << crash;
+        break;
+      }
+    }
+    if(notFound)
+      crash << "Programming error: couldn't find preimage of the subgroup conjugacy class representative " << scr << crash;
   }
 }
 

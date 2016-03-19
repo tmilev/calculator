@@ -914,37 +914,37 @@ void SubgroupDataWeylGroup::ComputeTauSignature()
 { MacroRegisterFunctionWithName("SubgroupWeylGroup::ComputeTauSignature");
   this->CheckInitialization();
   if(!this->theSubgroupData.theGroup->flagCCRepresentativesComputed)
-  { this->theSubgroupData.theGroup->ComputeCCSizesAndRepresentatives();
-    this->theSubgroupData.ComputeCCRepresentativesPreimages();
-  }
+    this->theSubgroupData.theGroup->ComputeCCSizesAndRepresentatives();
   this->theSubgroupData.theGroup->CheckConjugacyClassRepsMatchCCsizes();
-//  this->theGroup->CheckOrthogonalityCharTable(theGlobalVariables);
-  Vector<Rational> Xs, Xi;
+  this->theSubgroupData.ComputeCCRepresentativesPreimages();
+  this->theSubgroupData.theGroup->CheckOrthogonalityCharTable();
+  Vector<Rational> Xs;
   this->theSubgroupData.theSubgroup->GetSignCharacter(Xs);
-  Xi.MakeZero(this->theSubgroupData.theSubgroup->ConjugacyClassCount());
- // stOutput << "<hr>Computing in group with "
-  //<< this->theSubgroupData.theSubgroup->theElements.size << " element(s). Group details: "
-  //<< this->ToString();
+  //if(theGlobalVariables.printOutThisKindaThing)
+  //{
+  stOutput << "here is the character table of the group, the representatives and sizes for "
+           << "conjugacy classes of the group and the subgroup, and for your convenience, "
+           << "a mapping from subgroup conjugacy classes to their preimages in the group. ";
+  stOutput << this->theSubgroupData.theGroup->PrettyPrintCharacterTable();
+  stOutput << Xs << " <- subgroup sign character\n";
+  stOutput << this->theSubgroupData.theGroup->PrettyPrintCCRepsSizes();
+  stOutput << this->theSubgroupData.theSubgroup->PrettyPrintCCRepsSizes();
+  stOutput << this->theSubgroupData.ccRepresentativesPreimages.ToStringCommaDelimited() << '\n';
+ //}
 
   this->tauSignature.SetSize(this->theSubgroupData.theGroup->ConjugacyClassCount());
-  //if (!(&this->theWeylData->theGroup==this->theSubgroupData.theGroup))
-  //{ //stOutput << "<br>this->theWeylData=" << this->theWeylData
-    //<< "<br>this->theSubgroupData.theGroup=" << this->theSubgroupData.theGroup;
-  //}
-  //stOutput << "<br>The group conjugacy class number: "
-  //<< this->theSubgroupData.theGroup->ConjugacyClassCount();
-  //stOutput << "char table weyl data: "
-  //<< this->theWeylData->theGroup.characterTable.ToString();
 
+  Vector<Rational> XiS;
+  XiS.MakeZero(this->theSubgroupData.theSubgroup->ConjugacyClassCount());
   for(int i=0; i<this->theSubgroupData.theGroup->ConjugacyClassCount(); i++)
-  { ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& Xip =
-    this->theWeylData->theGroup.characterTable[i];
+  { ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& XiG =
+        this->theWeylData->theGroup.characterTable[i];
     //stOutput << "Restricting character: " << Xip.ToString() << "<br>";
-    for(int j=0; j<Xi.size; j++)
-      Xi[j] = Xip[this->theSubgroupData.ccRepresentativesPreimages[j]];
-    this->tauSignature[i]= this->theSubgroupData.theSubgroup->GetHermitianProduct(Xs,Xi);
-//    stOutput << "<br>Hermitian product of " << Xs.ToString() << " and "
-//    << Xi.ToString() << " = " << this->GetHermitianProduct(Xs, Xi);
+    for(int j=0; j<this->theSubgroupData.theSubgroup->conjugacyClasseS.size; j++)
+      XiS[j] = XiG[this->theSubgroupData.ccRepresentativesPreimages[j]];
+    this->tauSignature[i]= this->theSubgroupData.theSubgroup->GetHermitianProduct(Xs,XiS);
+    stOutput << "<br>Hermitian product of " << Xs.ToString() << " and "
+        << XiS.ToString() << " = " << this->tauSignature[i];
     if (!this->tauSignature[i].IsSmallInteger())
       crash << " Tau signature is not integral, impossible! " << crash ;
   }

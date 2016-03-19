@@ -2367,7 +2367,11 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   else if (this->StartsWith(this->owner->opMinus(), 3))
   { if (!(this->children.size==3))
       crash << "This is a programming error: the minus function expects 1 or 2 arguments, instead there are " << this->children.size-1 << ". " << crash;
-    out << (*this)[1].ToString(theFormat) << "-" << (*this)[2].ToString(theFormat);
+    out << (*this)[1].ToString(theFormat) << "-";
+    if ((*this)[2].StartsWith(this->owner->opPlus()) || (*this)[2].StartsWith(this->owner->opMinus()))
+      out << "\\left(" << (*this)[2].ToString(theFormat) << "\\right)";
+    else
+      out << (*this)[2].ToString(theFormat);
   } else if (this->StartsWith(this->owner->opBind(), 2))
     out << "{{" << (*this)[1].ToString(theFormat) << "}}";
   else if (this->IsListStartingWithAtom(this->owner->opApplyFunction()))

@@ -21,7 +21,8 @@ public:
   bool flagUseMathMode;
   std::string interpretedCommand;
   static int ParsingNumDummyElements;
-  bool IsInterpretedByCalculatorDuringPreparation();
+  bool IsInterpretedByCalculatorDuringPreparatioN();
+  bool IsInterpretedByCalculatorDuringSubmission();
   bool IsInterpretedNotByCalculator();
   bool IsHidden();
   bool IsAnswer();
@@ -1657,11 +1658,20 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator()
   || tagClass=="calculatorAnswer" || tagClass=="calculatorManageClass";
 }
 
-bool SyntacticElementHTML::IsInterpretedByCalculatorDuringPreparation()
+bool SyntacticElementHTML::IsInterpretedByCalculatorDuringPreparatioN()
 { if (this->syntacticRole!="command")
     return false;
   std::string tagClass=this->GetKeyValue("class");
-  return tagClass=="calculator" || tagClass=="calculatorHidden" ;
+  return tagClass=="calculator" || tagClass=="calculatorHidden" ||
+  tagClass=="calculatorShowToUserOnly" ;
+}
+
+bool SyntacticElementHTML::IsInterpretedByCalculatorDuringSubmission()
+{ if (this->syntacticRole!="command")
+    return false;
+  std::string tagClass=this->GetKeyValue("class");
+  return tagClass=="calculator" || tagClass=="calculatorHidden"
+;
 }
 
 bool SyntacticElementHTML::IsAnswer()
@@ -1717,7 +1727,7 @@ bool CalculatorHTML::PrepareCommands(Calculator& theInterpreter, std::stringstre
   streamWithInbetween << "setRandomSeed{}(" << this->theProblemData.randomSeed << ");";
   streamNoVerification << streamWithInbetween.str();
   for (int i=1; i<this->theContent.size; i++) // the first element of the content is fake (used for the random seed)
-  { if (!this->theContent[i].IsInterpretedByCalculatorDuringPreparation())
+  { if (!this->theContent[i].IsInterpretedByCalculatorDuringPreparatioN())
     { streamWithInbetween << "SeparatorBetweenSpans; ";
       continue;
     }
@@ -1736,7 +1746,7 @@ bool CalculatorHTML::PrepareCommands(Calculator& theInterpreter, std::stringstre
     { streamVerification << this->CleanUpCommandString(this->theContent[i].content);
       continue;
     }
-    if (this->theContent[i].IsInterpretedByCalculatorDuringPreparation())
+    if (this->theContent[i].IsInterpretedByCalculatorDuringSubmission())
     { streamNoVerification << this->CleanUpCommandString( this->theContent[i].content);
       continue;
     }
@@ -2588,7 +2598,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   //first command and first syntactic element are the random seed and are ignored.
   for (int spanCounter=1; spanCounter <this->theContent.size; spanCounter++)
   { SyntacticElementHTML& currentElt=this->theContent[spanCounter];
-    if (!currentElt.IsInterpretedByCalculatorDuringPreparation())
+    if (!currentElt.IsInterpretedByCalculatorDuringPreparatioN())
     { if (theInterpreter.theProgramExpression[commandCounter].ToString()!="SeparatorBetweenSpans")
       { out << "<b>Error: calculator commands don't match the tags.</g>";
         this->outputHtmlMain=out.str();
@@ -2829,6 +2839,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   if (word!="")
     theElements.AddOnTop(word);
   this->calculatorClasses.AddOnTop("calculator");
+  this->calculatorClasses.AddOnTop("calculatorShowToUserOnly");
   this->calculatorClasses.AddOnTop("calculatorHidden");
   this->calculatorClasses.AddOnTop("calculatorHiddenIncludeInCommentsBeforeSubmission");
   this->calculatorClasses.AddOnTop("calculatorAnswer");
@@ -2983,7 +2994,8 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       this->theContent.LastObject()->content+=eltsStack[i].content;
     else
     { if (this->theContent.size>0)
-        if (this->theContent.LastObject()->IsInterpretedByCalculatorDuringPreparation() && eltsStack[i].IsInterpretedByCalculatorDuringPreparation())
+        if (this->theContent.LastObject()->IsInterpretedByCalculatorDuringPreparatioN() &&
+            eltsStack[i].IsInterpretedByCalculatorDuringPreparatioN())
         { SyntacticElementHTML emptyElt;
           this->theContent.AddOnTop(emptyElt);
         }

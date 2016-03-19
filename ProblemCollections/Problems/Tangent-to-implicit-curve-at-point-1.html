@@ -1,23 +1,18 @@
 <span class="setCalculatorExamProblem">
 </span>
-Express \(\displaystyle  \frac{d y }{d x}\) as a function of \(x\) and \(y\), where \(x\) and \(y\) are related by:
+Verify that the given point lies on the curve. Find the equation of the tangent line to the curve at the point.
 <span class="calculatorHidden">
 \(
 %UseLnInsteadOfLog
 %UsePredefinedWordSplits
-a=randomInteger((-1,-5));
-leftTrig=selectAtRandom(sin, cos);
-rightTrig=selectAtRandom(sin,cos);
-b=selectAtRandom(2,3,4);
+a=randomInteger((-4,-1), (1,4));
+b=randomInteger((-4,-1), (1,4));
 c=selectAtRandom(3,5,7);
 g=randomInteger((-1,-7),(1,7));
 f=randomInteger((-1,-7),(1,7));
-left=\sqrt(x y);
-leftSquared=x y;
-right=a+ b x^2 y ;
-rightSquared=right^2;
+left=y \sin (a x);
+right= x \cos (b y);
 theFun=left-right;
-theFunModified=leftSquared-rightSquared
 \)</span>
 
 <br>
@@ -25,10 +20,14 @@ theFunModified=leftSquared-rightSquared
 \(\displaystyle left\) 
 </span>\(=\)<span class="calculator">
 \(\displaystyle right\) 
-</span>.
-<span class="calculatorShowToUserOnly">
+</span> at the point: \((x,y)\)
+<span class="calculator">
+\(\displaystyle  (\pi/a, \pi/(2b))\) 
+</span>
+
+<span class="calculator">
 \(
-plotImplicit(theFunModified, (-5, -5), (5, 5), (50,50), (400,400), 3000)
+plotImplicit(theFun, (-5, -5), (5, 5), (20,20), (400,400), 3000)
 \) 
 </span>
 <span class="calculatorHiddenIncludeInCommentsBeforeSubmission">

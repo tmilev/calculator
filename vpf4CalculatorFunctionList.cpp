@@ -1015,8 +1015,10 @@ D-B;\
     the lower left and upper right corners of the viewing screen in the format\
     (lowLeftX, lowLeftY), (upperRightX, upperRightY). The next argument gives the \
     initial grid precision in the form (numIntervalsVertical, numIntervalsHorizontal).\
-    The final two arguments give the width and height of the image in the format (width, height). \
-    width and height of the image. The triangle used to generate the implicit plot is algorithmically chosen. \
+    The next two arguments give the width and height of the image in the format (width, height). \
+    width and height of the image. The last argument is optional and gives an upper limit for the number \
+    of triangles to use (max=20000, default=2000). The triangle used to generate \
+    the implicit plot is algorithmically chosen. \
    ",
    "plotImplicit((x-1) (y-1)-((x-1)^2(y-1)+1)^2, (-2, -2), (2, 2), (10,10), (400,400))", true, false,
    "CalculatorFunctionsGeneral::innerPlotImplicitFunction", "plotImplicit")

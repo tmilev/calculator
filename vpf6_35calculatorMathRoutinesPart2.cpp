@@ -331,6 +331,16 @@ bool CalculatorFunctionsGeneral::innerPlotImplicitFunctionFull(Calculator& theCo
   theMesh.thePlot.DesiredHtmlWidthInPixels=widthHeightInPixels[1];
   theMesh.XstartingGridCount=theGridCount[0];
   theMesh.YstartingGridCount=theGridCount[1];
+  if (input.children.size>=7)
+  { if (!input[6].IsSmallInteger(&theMesh.maxNumTriangles))
+      return theCommands << "Failed to extract small integer from: " << input[6].ToString();
+    if (theMesh.maxNumTriangles>20000)
+    { theMesh.maxNumTriangles=20000;
+      theCommands << "Max number of triangles decreased from your input: " << input[6].ToString()
+      << " to 20000. If you'd like to lift the restriction, modify code around: file: " << __FILE__
+      << " line: " << __LINE__ << ". ";
+    }
+  }
   theMesh.ComputeImplicitPlot();
   theCommands << "Evaluated function in: " << theMesh.numGoodEvaluations << " points and failed to evaluate it at: "
   << theMesh.numBadEvaluations << " points. ";

@@ -137,9 +137,7 @@ void MeshTriangles::AddPointFromVerticesValues
 
 int MeshTriangles::CleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex)
 { MacroRegisterFunctionWithName("MeshTriangles::CleanUpTrianglesReturnUpdatedCurrentIndex");
-  if (this->flagTriangleLimitReached)
-    return currentIndex;
-  if (this->theTriangles.size<this->maxNumTriangles*2)
+  if (this->flagTriangleLimitReached || this->theTriangles.size<this->maxNumTriangles*2)
     return currentIndex;
   //clean up carried out only when we have twice exceeded the triangle limit
   //this way clean up will be carried only after we have generated at least maxNumTriangles since the last cleanup
@@ -166,6 +164,8 @@ int MeshTriangles::CleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex)
 void MeshTriangles::Subdivide(int triangleIndex)
 { MacroRegisterFunctionWithName("MeshTriangles::Subdivide");
   List<Vector<double> > currentTriangle=this->theTriangles[triangleIndex];
+  if (currentTriangle.size!=3)
+    crash << "Triangle in mesh with less than 3 sides! " << crash;
   List<Vector<double> > insideTriange;
   insideTriange.SetSize(3);
   insideTriange[0]=(currentTriangle[1]+currentTriangle[2])*0.5;
@@ -203,8 +203,9 @@ void MeshTriangles::ComputeImplicitPlotPart2()
   }
   double minSide=MathRoutines::Minimum(this->Height, this->Width)*this->minTriangleSideAsPercentOfWidthPlusHeight;
   Vectors<double> theSegment;
+  List<Vector<double> > currentTriangle;
   for (int i=0; i<this->theTriangles.size; i++)
-  { List<Vector<double> >& currentTriangle=this->theTriangles[i];
+  { currentTriangle=this->theTriangles[i]; //making a copy in case this->theTriangles changes underneath.
     if (currentTriangle.size!=3)
       crash << "Error: triangle needs three vertices, instead it has vertices: " << currentTriangle << crash;
     bool isGood=true;

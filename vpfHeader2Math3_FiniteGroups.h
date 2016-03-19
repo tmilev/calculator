@@ -1369,6 +1369,11 @@ public:
   SubgroupData();
   bool CheckInitialization();
   void init();
+  void MakeSubgroupOf(someGroup& G)
+  { this->init();
+    this->theGroup = &G;
+    this->theSubgroup = &this->theSubgroupMayBeHere;
+  }
   LargeInt SizeByFormulaOrNeg1()const
   { return -1;
   }

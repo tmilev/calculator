@@ -916,10 +916,10 @@ void SubgroupDataWeylGroup::ComputeTauSignature()
   if(!this->theSubgroupData.theGroup->flagCCRepresentativesComputed)
     this->theSubgroupData.theGroup->ComputeCCSizesAndRepresentatives();
   this->theSubgroupData.theGroup->CheckConjugacyClassRepsMatchCCsizes();
-  this->theSubgroupData.ComputeCCRepresentativesPreimages();
   this->theSubgroupData.theGroup->CheckOrthogonalityCharTable();
   Vector<Rational> Xs;
   this->theSubgroupData.theSubgroup->GetSignCharacter(Xs);
+  this->theSubgroupData.ComputeCCRepresentativesPreimages();
   //if(theGlobalVariables.printOutThisKindaThing)
   //{
   stOutput << "here is the character table of the group, the representatives and sizes for "
@@ -935,8 +935,8 @@ void SubgroupDataWeylGroup::ComputeTauSignature()
   this->tauSignature.SetSize(this->theSubgroupData.theGroup->ConjugacyClassCount());
 
   Vector<Rational> XiS;
-  XiS.MakeZero(this->theSubgroupData.theSubgroup->ConjugacyClassCount());
-  for(int i=0; i<this->theSubgroupData.theGroup->ConjugacyClassCount(); i++)
+  XiS.MakeZero(this->theSubgroupData.theSubgroup->conjugacyClasseS.size);
+  for(int i=0; i<this->theSubgroupData.theGroup->conjugacyClasseS.size; i++)
   { ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& XiG =
         this->theWeylData->theGroup.characterTable[i];
     //stOutput << "Restricting character: " << Xip.ToString() << "<br>";
@@ -996,10 +996,7 @@ void SubgroupDataRootReflections::MakeParabolicSubgroup(WeylGroupData& G, const 
 { MacroRegisterFunctionWithName("SubgroupDataRootReflections::MakeParabolicSubgroup");
   G.CheckConsistency();
   this->theWeylData = &G;
-  this->theSubgroupData.init();
-  this->theSubgroupData.theGroup = &(G.theGroup);
-  this->theSubgroupData.theSubgroup=&this->theSubgroupData.theSubgroupMayBeHere;
-  this->theSubgroupData.CheckInitialization();
+  this->theSubgroupData.MakeSubgroupOf(G.theGroup);
   this->CheckInitialization();
   this->flagIsParabolic=true;
   this->simpleRootsInLeviParabolic=inputGeneratingSimpleRoots;
@@ -1019,8 +1016,7 @@ void SubgroupDataRootReflections::MakeParabolicSubgroup(WeylGroupData& G, const 
 void SubgroupDataRootReflections::MakeFromRoots
 (WeylGroupData& G, const Vectors<Rational>& inputRootReflections)
 { MacroRegisterFunctionWithName("SubgroupDataRootReflections::MakeFromRoots");
-  this->theSubgroupData.init();
-  this->theSubgroupData.theGroup = &(G.theGroup);
+  this->theSubgroupData.MakeSubgroupOf(G.theGroup);
   this->theWeylData = &G;
   this->generatingSimpleRoots=inputRootReflections;
   DynkinDiagramRootSubalgebra theDiagram;

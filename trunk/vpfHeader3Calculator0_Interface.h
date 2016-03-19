@@ -604,6 +604,7 @@ public:
   double yHigh;
   int colorRGB;
   Vectors<double> thePoints;
+  List<List<Vector<double> > > theLines;
   Expression thePlotElement;
   std::string thePlotType;
   void ComputeYbounds();
@@ -626,6 +627,7 @@ class Plot
   double highBoundY;
   int DesiredHtmlHeightInPixels;
   int DesiredHtmlWidthInPixels;
+  int defaultLineColor;
   bool flagIncludeExtraHtmlDescriptions;
   std::string GetPlotHtml();
   std::string GetPlotStringAddLatexCommands(bool useHtml);
@@ -1601,6 +1603,7 @@ public:
   bool GetVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory=-1);
   bool ConvertExpressionsToCommonContext(List<Expression>& inputOutputEs, Expression* inputOutputStartingContext=0);
   bool GetVectoRInt(const Expression& input, List<int>& output);
+  bool GetVectorDoubles(const Expression& input, Vector<double>& output);
   template <class theType>
   bool GetVectoR
   (const Expression& input, Vector<theType>& output, Expression* inputOutputStartingContext=0, int targetDimNonMandatory=-1,

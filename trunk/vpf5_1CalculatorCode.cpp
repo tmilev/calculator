@@ -841,6 +841,7 @@ Plot::Plot()
   this->flagIncludeExtraHtmlDescriptions=true;
   this->DesiredHtmlHeightInPixels=400;
   this->DesiredHtmlWidthInPixels=600;
+  this->defaultLineColor=0;
 }
 
 void Plot::ComputeAxesAndBoundingBox()
@@ -849,13 +850,25 @@ void Plot::ComputeAxesAndBoundingBox()
   this->theUpperBoundAxes=1.1;
   this->lowBoundY=-0.5;
   this->highBoundY=1.1;
-  for (int i=0; i<this->thePlots.size; i++)
-  { this->thePlots[i].ComputeYbounds();
-    this->theLowerBoundAxes=MathRoutines::Minimum(this->thePlots[i].xLow, theLowerBoundAxes);
-    this->theUpperBoundAxes=MathRoutines::Maximum(this->thePlots[i].xHigh, theUpperBoundAxes);
-    this->lowBoundY=MathRoutines::Minimum(this->thePlots[i].yLow, this->lowBoundY);
-    this->highBoundY=MathRoutines::Maximum(this->thePlots[i].yHigh, this->highBoundY);
+  for (int k=0; k<this->thePlots.size; k++)
+  { this->thePlots[k].ComputeYbounds();
+    this->theLowerBoundAxes=MathRoutines::Minimum(this->thePlots[k].xLow, theLowerBoundAxes);
+    this->theUpperBoundAxes=MathRoutines::Maximum(this->thePlots[k].xHigh, theUpperBoundAxes);
+    this->lowBoundY=MathRoutines::Minimum(this->thePlots[k].yLow, this->lowBoundY);
+    this->highBoundY=MathRoutines::Maximum(this->thePlots[k].yHigh, this->highBoundY);
+    for (int j=0; j<this->thePlots[k].theLines.size; j++)
+    { List<Vector<double> > currentLine=this->thePlots[k].theLines[j];
+      this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[0][0]);
+      this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[1][0]);
+      this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, currentLine[0][0]);
+      this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, currentLine[1][0]);
+      this->lowBoundY=MathRoutines::Minimum  (currentLine[0][1], this->lowBoundY);
+      this->lowBoundY=MathRoutines::Minimum  (currentLine[1][1], this->lowBoundY);
+      this->highBoundY=MathRoutines::Maximum (currentLine[0][1], this->highBoundY);
+      this->highBoundY=MathRoutines::Maximum (currentLine[1][1], this->highBoundY);
+    }
   }
+
 }
 
 std::string Plot::GetPlotHtml()
@@ -909,6 +922,13 @@ std::string Plot::GetPlotHtml()
       theDVs.drawLineBetweenTwoVectorsBufferDouble
       (thePlots[i].thePoints[j-1], thePlots[i].thePoints[j], theDVs.PenStyleNormal,
        thePlots[i].colorRGB);
+  for (int i=0; i<this->thePlots.size; i++)
+    for (int j=0; j<this->thePlots[i].theLines.size; j++)
+    { theDVs.drawLineBetweenTwoVectorsBufferDouble
+      (this->thePlots[i].theLines[j][0], this->thePlots[i].theLines[j][1],
+       theDVs.PenStyleNormal, this->thePlots[i].colorRGB);
+      //stOutput << "Drew line b-n: " <<this->thePlots[i].theLines[j][0] << " and " << this->thePlots[i].theLines[j][1];
+    }
   std::stringstream resultStream;
   theDVs.flagIncludeExtraHtmlDescriptions=this->flagIncludeExtraHtmlDescriptions;
   resultStream << theDVs.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);

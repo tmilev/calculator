@@ -67,6 +67,7 @@
 		<Unit filename="vpf6_0parsingRoutines.cpp" />
 		<Unit filename="vpf6_1innerTypedFunctions.cpp" />
 		<Unit filename="vpf6_2serialization_code.cpp" />
+		<Unit filename="vpf6_35calculatorMathRoutinesPart2.cpp" />
 		<Unit filename="vpf6_3calculatorMathRoutines.cpp" />
 		<Unit filename="vpf6_4ExpressionsImplementation.cpp" />
 		<Unit filename="vpf6_5calculator_web_routines.cpp" />

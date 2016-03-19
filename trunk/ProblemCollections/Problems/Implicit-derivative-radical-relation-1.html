@@ -5,15 +5,19 @@ Express \(\displaystyle  \frac{d y }{d x}\) as a function of \(x\) and \(y\), wh
 \(
 %UseLnInsteadOfLog
 %UsePredefinedWordSplits
-a=randomInteger((-1,-7),(1,7));
-b=selectAtRandom(3,5,7);
+a=randomInteger((1,7));
+leftTrig=selectAtRandom(sin, cos);
+rightTrig=selectAtRandom(sin,cos);
+b=selectAtRandom(2,3,4,5,6,7);
 c=selectAtRandom(3,5,7);
 g=randomInteger((-1,-7),(1,7));
 f=randomInteger((-1,-7),(1,7));
-left=a x^b y^c +g x^2 y^2;
-right=f(x+y)^b;
+left=\sqrt(x y);
+leftSquared=x y;
+right=a+ b x^2 y ;
+rightSquared=right^2;
 theFun=left-right;
-
+theFunModified=leftSquared-rightSquared
 \)</span>
 
 <br>
@@ -33,13 +37,21 @@ SeparatorBetweenSpans;
 Answer: \(f'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswer">
 \(
 CompareExpressionsNumerically(
-(d/dx theFun;
--(d/dx y=0;d/dx theFun)_2 /CoefficientOf{}(d/dx y, d/dx theFun)
-)_2, AlgebraAnswer, 0.000001, x\in (-1,1), 20, y\in (-1,1), 20)
+MakeExpression{}(
+MakeRationalFunction{}(
+(d/dx theFunModified;
+-(d/dx y=0;d/dx theFunModified)_2 /CoefficientOf{}(d/dx y, d/dx theFunModified)
+)_2
+))
+, AlgebraAnswer, 0.000001, x\in (2,3), 20, y\in (2,3), 20)
 \)
 </textarea>
 
 <span class="calculatorAnswerOnGiveUp">
-(d/dx theFun;
--(d/dx y=0;d/dx theFun)_2 /CoefficientOf{}(d/dx y, d/dx theFun)
-)_2</span>
+MakeExpression{}(
+MakeRationalFunction{}(
+(d/dx theFunModified;
+-(d/dx y=0;d/dx theFunModified)_2 /CoefficientOf{}(d/dx y, d/dx theFunModified)
+)_2
+))
+</span>

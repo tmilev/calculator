@@ -295,7 +295,13 @@ void Calculator::initPredefinedInnerFunctions()
   ("MakeExpression", CalculatorConversions::innerExpressionFromBuiltInType, "",
    "Creates expression from built-in polynomial. ",
    "MakeExpression(Polynomial{}((x-2y+z-1)^2(x+y-z)));\
-   \nMakeExpression( MakeRationalFunction(1/(1+x^2)));");
+A=\\frac{64 x^{2} y x y+16 x y- y}{-32 x^{2} y x^{2}-8 x^{2}+x};\
+B=MakeRationalFunction(A);\
+C=MakeExpression B;\
+D=MakeRationalFunction {}(\\frac{-2x^{3}y^{2}-\\frac{x y }{2}+\\frac{y }{32}}{x^{4}y +\\frac{x^{2}}{4}-\\frac{x }{32}}) ;\
+MakeExpression {}D-C;\
+D-B;\
+", true, false, "CalculatorConversions::innerExpressionFromBuiltInType", "MakeExpression");
   this->AddOperationInnerHandler
   ("Polynomial", CalculatorConversions::innerPolynomial<Rational>, "",
    "Creates a polynomial expression with rational coefficients. ",
@@ -853,7 +859,8 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("DoubleValue", CalculatorFunctionsGeneral::innerEvaluateToDouble, "",
    "Double value of a rational number.",
-   "DoubleValue{}(3/7)", true, false)
+   "DoubleValue{}(3/7)", true, false, "CalculatorFunctionsGeneral::innerEvaluateToDouble",
+   "DoubleValue")
    ;
   this->AddOperationInnerHandler
   ("ModP", this->innerZmodP, "",
@@ -1000,6 +1007,27 @@ void Calculator::initPredefinedInnerFunctions()
    "UnivariatePartialFractions(\\frac{x^11}{x^{8}-2x^{6}-2x^{5}+4x^{3}+x^{2}-2});")
    ;
 
+  this->AddOperationInnerHandler ("plotImplicit", CalculatorFunctionsGeneral::innerPlotImplicitFunction, "",
+   "Plots implicitly a curve given by the zeros of an expression in the letters\
+   x and y. The function has not been optimized for speed, please use with care.\
+    The first argument gives the relation between x and y, the next two arguments give\
+    the lower left and upper right corners of the viewing screen in the format\
+    (lowLeftX, lowLeftY), (upperRightX, upperRightY). The next argument gives the \
+    initial grid precision in the form (numIntervalsVertical, numIntervalsHorizontal).\
+    The final two arguments give the width and height of the image in the format (width, height). \
+    width and height of the image. The triangle used to generate the implicit plot is algorithmically chosen. \
+   ",
+   "plotImplicit((x-1) (y-1)-((x-1)^2(y-1)+1)^2, (-2, -2), (2, 2), (10,10), (400,400))", true, false,
+   "CalculatorFunctionsGeneral::innerPlotImplicitFunction", "plotImplicit")
+   ;
+  this->AddOperationInnerHandler ("plotImplicitShowGrid", CalculatorFunctionsGeneral::innerPlotImplicitShowGridFunction, "",
+   "Same as plotImplicit but shows the underlying grid. \
+   The yellow grid is the initial one (specified by the user), \
+   and the gray grid is obtained by a subdivision which depends on the concrete function. \
+   ",
+   "plotImplicitShowGrid((x-1) (y-1)-((x-1)^2(y-1)+1)^2, (-2, -2), (2, 2), (10,10), (400,400))", true, false,
+   "CalculatorFunctionsGeneral::innerPlotImplicitShowGridFunction", "plotImplicitShowGrid")
+   ;
   this->AddOperationInnerHandler ("plotCurve", CalculatorFunctionsGeneral::innerPlotParametricCurve, "",
    "<b>Calculus teaching function.</b> Plots a curve sitting in 2-dimensional space. \
     The first and second argument give the x and y coordinate functions; the curve parameter must be t.\

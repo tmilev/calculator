@@ -89,6 +89,10 @@ public:
   static bool innerConstantFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRationalFunctionSubstitution(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerPlotImplicitFunctionFull(Calculator& theCommands, const Expression& input, Expression& output, bool showGrid);
+  static bool innerPlotImplicitFunction(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPlotImplicitShowGridFunction(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerDifferentiateTrigAndInverseTrig(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateChainRule(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateAplusB(Calculator& theCommands, const Expression& input, Expression& output);

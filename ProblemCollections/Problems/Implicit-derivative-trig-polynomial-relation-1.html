@@ -6,23 +6,24 @@ Express \(\displaystyle  \frac{d y }{d x}\) as a function of \(x\) and \(y\), wh
 %UseLnInsteadOfLog
 %UsePredefinedWordSplits
 a=randomInteger((-1,-7),(1,7));
-b=randomInteger((-1,-7),(1,7));
-c=randomInteger((-1,-7),(1,7));
+leftTrig=selectAtRandom(sin, cos);
+rightTrig=selectAtRandom(sin,cos);
+b=selectAtRandom(3,5,7);
+c=selectAtRandom(3,5,7);
 g=randomInteger((-1,-7),(1,7));
-theFun=a x^3+ y^3+c x y-1 ;
+f=randomInteger((-1,-7),(1,7));
+left=a y leftTrig {}(b x^2);
+right=c x rightTrig{}(g y^2) ;
+theFun=left-right;
+
 \)</span>
 
-<span class="calculator">
-\(\displaystyle theFun+1=1
-\) 
-</span>.
 <br>
 <span class="calculator">
-\(
-plotImplicit(theFun, (-5, -5), (5, 5), (40,40), (400,400))
-\) 
-</span>
-
+\(\displaystyle left\) 
+</span>\(=\)<span class="calculator">
+\(\displaystyle right\) 
+</span>.
 <span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
 \(
 %UsePredefinedWordSplits
@@ -43,5 +44,4 @@ CompareExpressionsNumerically(
 <span class="calculatorAnswerOnGiveUp">
 (d/dx theFun;
 -(d/dx y=0;d/dx theFun)_2 /CoefficientOf{}(d/dx y, d/dx theFun)
-)_2
-</span>
+)_2</span>

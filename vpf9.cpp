@@ -926,8 +926,17 @@ char MathRoutines::ConvertHumanReadableHexToCharValue(char input)
 
 unsigned int MathRoutines::ListIntsHash(const List<int>& input)
 { unsigned int result=0;
-  for (int i =0; i<input.size; i++)
+  int numCycles=MathRoutines::Minimum(input.size, SomeRandomPrimesSize);
+  for (int i =0; i<numCycles; i++)
     result+=SomeRandomPrimes[i]*input[i];
+  return result;
+}
+
+unsigned int MathRoutines::HashListDoubles(const List<double>& input)
+{ unsigned int result=0;
+  int numCycles=MathRoutines::Minimum(input.size, SomeRandomPrimesSize);
+  for (int i =0; i<numCycles; i++)
+    result+=SomeRandomPrimes[i]*MathRoutines::HashDouble(input[i]);
   return result;
 }
 
@@ -937,6 +946,10 @@ unsigned int MathRoutines::hashString(const std::string& x)
   for (int i=0; i<numCycles; i++)
     result+=x[i]*SomeRandomPrimes[i%SomeRandomPrimesSize];
   return result;
+}
+
+unsigned int MathRoutines::HashVectorDoubles(const Vector<double>& input)
+{ return MathRoutines::HashListDoubles(input);
 }
 
 std::string MathRoutines::StringShortenInsertDots(const std::string& inputString, int maxNumChars)

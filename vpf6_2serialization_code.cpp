@@ -841,12 +841,20 @@ bool CalculatorConversions::innerExpressionFromRF
     return output.AssignValue(aConst, theCommands);
   Polynomial<Rational> numP, denP;
   input.GetNumerator(numP);
+
   if (input.IsConstant() || input.expressionType==input.typePoly)
     return CalculatorConversions::innerExpressionFromPoly<Rational>(theCommands, numP, output, inputContext);
   Expression numE, denE;
   input.GetDenominator(denP);
-  CalculatorConversions::innerExpressionFromPoly<Rational>(theCommands, numP, numE, inputContext);
-  CalculatorConversions::innerExpressionFromPoly<Rational>(theCommands, denP, denE, inputContext);
+  Polynomial<Rational> numRescaled=numP;
+  Polynomial<Rational> denRescaled=denP;
+  Rational topMultiple=  numRescaled.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+  Rational bottomMultiple=denRescaled.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+  Rational multipleTopBottom=bottomMultiple/topMultiple;
+  numRescaled*=multipleTopBottom.GetNumerator();
+  denRescaled*=multipleTopBottom.GetDenominator();
+  CalculatorConversions::innerExpressionFromPoly<Rational>(theCommands, numRescaled, numE, inputContext);
+  CalculatorConversions::innerExpressionFromPoly<Rational>(theCommands, denRescaled, denE, inputContext);
   return output.MakeXOX(theCommands, theCommands.opDivide(), numE, denE);
 }
 

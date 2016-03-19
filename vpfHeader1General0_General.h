@@ -303,6 +303,8 @@ public:
   inline static unsigned int HashDouble(const double& input)
   { return (unsigned) (input*10000);
   }
+  static unsigned int HashVectorDoubles(const Vector<double>& input);
+  static unsigned int HashListDoubles(const List<double>& input);
   inline static unsigned int IntUnsignIdentity(const int& input)
   { return (unsigned) input;
   }

@@ -300,8 +300,8 @@ bool CalculatorFunctionsGeneral::innerGetPointsImplicitly
     return false;
   HashedList<Vector<double>, MathRoutines::HashVectorDoubles> thePoints;
   for (int i=0; i<theMesh.theCurve.theLines.size; i++)
-  { thePoints.AddOnTopNoRepetition(theMesh.theCurve.theLines[0]);
-    thePoints.AddOnTopNoRepetition(theMesh.theCurve.theLines[1]);
+  { thePoints.AddOnTopNoRepetition(theMesh.theCurve.theLines[i][0]);
+    thePoints.AddOnTopNoRepetition(theMesh.theCurve.theLines[i][1]);
   }
   Matrix<double> theMatrix;
   theMatrix.AssignVectorsToRows(thePoints);

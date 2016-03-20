@@ -111,6 +111,12 @@ int Expression::GetTypeOperation<Matrix<double> >()const
 }
 
 template < >
+int Expression::GetTypeOperation<Matrix<Polynomial<Rational> > >()const
+{ this->CheckInitialization();
+  return this->owner->opMatPolyRat();
+}
+
+template < >
 int Expression::GetTypeOperation<Matrix<AlgebraicNumber> >()const
 { this->CheckInitialization();
   return this->owner->opMatAlgebraic();
@@ -713,6 +719,14 @@ Matrix<RationalFunctionOld>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<Matrix<RationalFunctionOld> >())
     crash << "This is a programming error: expression not of required type MatrixRF. The expression equals " << this->ToString() << "." << crash;
   return this->owner->theObjectContainer.theMatRFs.GetElement(this->GetLastChild().theData);
+}
+
+template < >
+Matrix<Polynomial<Rational> >& Expression::GetValueNonConst()const
+{ if (!this->IsOfType<Matrix<Polynomial<Rational> > >())
+    crash << "This is a programming error: expression not of required type MatrixPolynomialRatinoal."
+    << " The expression equals " << this->ToString() << "." << crash;
+  return this->owner->theObjectContainer.theMatPolyRational.GetElement(this->GetLastChild().theData);
 }
 
 template < >

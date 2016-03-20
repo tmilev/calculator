@@ -674,6 +674,7 @@ public:
   HashedListReferences<Matrix<Rational> > theMatRats;
   HashedListReferences<Matrix<AlgebraicNumber> > theMatsAlgebraic;
   HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
+  HashedListReferences<Matrix<Polynomial<Rational> > > theMatPolyRational;
   HashedListReferences<Matrix<RationalFunctionOld> > theMatRFs;
   HashedListReferences<ElementZmodP> theEltsModP;
   HashedListReferences<Weight<Rational> > theWeights;
@@ -1277,6 +1278,9 @@ public:
   }
   int opAlgNumber()
   { return this->theAtoms.GetIndexIMustContainTheObject("AlgebraicNumber");
+  }
+  int opMatPolyRat()
+  { return this->theAtoms.GetIndexIMustContainTheObject("MatrixPolynomialRational");
   }
   int opElementWeylAlgebra()
   { return this->theAtoms.GetIndexIMustContainTheObject("ElementWeylAlgebra");
@@ -1919,6 +1923,10 @@ template <class theType>
 bool Calculator::GetMatrix
 (const Expression& input, Matrix<theType>& outputMat, Expression* inputOutputStartingContext, int targetNumColsNonMandatory, Expression::FunctionAddress conversionFunction)
 { MacroRegisterFunctionWithName("Calculator::GetMatrix");
+  if (input.IsOfType<Matrix<theType> >())
+  { outputMat=input.GetValue<Matrix<theType> >();
+    return true;
+  }
   Matrix<Expression> nonConvertedEs;
   //stOutput << " Getting matrix from: " << input.ToString();
   if (!this->GetMatrixExpressions(input, nonConvertedEs, -1, targetNumColsNonMandatory))

@@ -1117,8 +1117,17 @@ D-B;\
    First two arguments give the two functions. The third argument gives the precision.\
    All remaining arguments come in pairs, in the form x\\in (2,3), 50. \
    ",
-   "CompareExpressionsNumericallyAtPoints{}(\\arctan x + \\arctan y, \\arctan((x+y)/(1- x y)), \
+   "\nCompareExpressionsNumericallyAtPoints{}(\\arctan x + \\arctan y, \\arctan((x+y)/(1- x y)),0.001, \
    (x,y)\\in ((0.5,0.5),(0.3,0.3)));\
+   \ntheFun=\\sqrt{x y}-( 4 x^{2} y-1);\
+\na=\\frac{-64 x^{3} y^{2}+16 x y+y}{32 x^{4} y-8 x^{2}- x};\
+\ntheDiff=d/dx(theFun);\
+\nnum=(d/dx y=0; theDiff)_2;\
+\nden=CoefficientOf (d/dx y, theDiff);\
+\nb=-num/den;\
+\nCompareExpressionsNumerically(a,b, 0.001, x\\in(0,5),10, y\\in (0,5),10);\
+\nA=pointsImplicitly(theFun, (0,0),(4,4), (10,10), (400,400));\
+\nCompareExpressionsNumericallyAtPoints(a,b, 0.01, (x,y)\\in A);\
    ", true, false, "CalculatorFunctionsGeneral::innerCompareExpressionsNumericallyAtPoints",
    "CompareExpressionsNumericallyAtPoints")
    ;

@@ -4,7 +4,6 @@ Express \(\displaystyle  \frac{d y }{d x}\) as a function of \(x\) and \(y\), wh
 <span class="calculatorHidden">
 \(
 %UseLnInsteadOfLog
-%UsePredefinedWordSplits
 a=randomInteger((-1,-7),(1,7));
 leftTrig=selectAtRandom(sin, cos);
 rightTrig=selectAtRandom(sin,cos);
@@ -24,7 +23,7 @@ theFun=left-right;
 </span>\(=\)<span class="calculator">
 \(\displaystyle right\) 
 </span>.
-<span class="calculator">
+<span class="calculatorShowToUserOnly">
 \(
 plotImplicit(theFun, (-3, -3), (3, 3), (40,40), (400,400))
 \) 
@@ -33,7 +32,6 @@ plotImplicit(theFun, (-3, -3), (3, 3), (40,40), (400,400))
 
 <span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
 \(
-%UsePredefinedWordSplits
 SeparatorBetweenSpans;
 \)
 </span>
@@ -41,10 +39,10 @@ SeparatorBetweenSpans;
 <br>
 Answer: \(f'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswer">
 \(
-CompareExpressionsNumerically(
+CompareExpressionsNumericallyAtPoints(
 (d/dx theFun;
 -(d/dx y=0;d/dx theFun)_2 /CoefficientOf{}(d/dx y, d/dx theFun)
-)_2, AlgebraAnswer, 0.000001, x\in (-1,1), 20, y\in (-1,1), 20)
+)_2, AlgebraAnswer, 0.001, (x,y)\in pointsImplicitly{}(theFun, (-3,-3),(3,3), (40,40), (400,400) ))
 \)
 </textarea>
 

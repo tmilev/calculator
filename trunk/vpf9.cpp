@@ -206,6 +206,7 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
   this->Selected=-2;
   this->textX=0;
   this->textY=15;
+  this->flagPlotShowJavascriptOnly=false;
   this->theBuffer.init();
 }
 

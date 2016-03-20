@@ -145,14 +145,15 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
 //  out << "<style>.leftTD {\n  "
 //  <<  "text-align:left;\n  padding:0;\n  border-spacing:0; "
 //  << "/* or border-collapse:collapse */\n}\n</style>\n";
-  out << "<table> "
-  << "<tr><td> <canvas width=\"" << this->DefaultHtmlWidth << "\" height=\"" << this->DefaultHtmlHeight << "\" style=\"border:solid 1px\" id=\"" << theCanvasId
-  << "\" onmousedown=\"clickCanvasCone" << timesCalled << "(event.clientX, event.clientY);\" onmouseup=\"selectedBasisIndexCone" << timesCalled
-  << "=-1;\" onmousemove=\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\" "
-  << "onmousewheel=\"mouseHandleWheelCone" << timesCalled << "(event);\""
-  << ">Your browser does not support the HTML5 canvas tag.</canvas></td>";
-  out << "<td style=\"min-width: 300px; vertical-align:top;\"><span id=\"canvas" << timesCalled << "Notes\"></span></td></tr></table>";
-
+  if (!this->flagPlotShowJavascriptOnly)
+  { out << "<table> "
+    << "<tr><td> <canvas width=\"" << this->DefaultHtmlWidth << "\" height=\"" << this->DefaultHtmlHeight << "\" style=\"border:solid 1px\" id=\"" << theCanvasId
+    << "\" onmousedown=\"clickCanvasCone" << timesCalled << "(event.clientX, event.clientY);\" onmouseup=\"selectedBasisIndexCone" << timesCalled
+    << "=-1;\" onmousemove=\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\" "
+    << "onmousewheel=\"mouseHandleWheelCone" << timesCalled << "(event);\""
+    << ">Your browser does not support the HTML5 canvas tag.</canvas></td>";
+    out << "<td style=\"min-width: 300px; vertical-align:top;\"><span id=\"canvas" << timesCalled << "Notes\"></span></td></tr></table>";
+  }
   List<List<std::string> > textEbasisNamesUserInput;
   List<List<std::string> > textEbasisNamesReadOnly;
   if (this->flagIncludeExtraHtmlDescriptions)

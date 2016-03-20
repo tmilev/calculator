@@ -1007,6 +1007,12 @@ D-B;\
    "UnivariatePartialFractions(\\frac{x^11}{x^{8}-2x^{6}-2x^{5}+4x^{3}+x^{2}-2});")
    ;
 
+  this->AddOperationInnerHandler ("EqualityToArithmeticExpression", CalculatorFunctionsGeneral::innerEqualityToArithmeticExpression, "",
+   "",
+   "EqualityToArithmeticExpression(a=b)", true, false,
+   "CalculatorFunctionsGeneral::innerEqualityToArithmeticExpression", "EqualityToArithmeticExpression")
+   ;
+
   this->AddOperationInnerHandler ("pointsImplicitly", CalculatorFunctionsGeneral::innerGetPointsImplicitly, "",
    "Returns points on or close to the curve in two dimensions. Same as plotImplicit but rather than plotting\
    the curve returns the (x,y) pairs of points found. The output given as a nx2 matrix of floating point numbers. \

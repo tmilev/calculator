@@ -1974,6 +1974,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     { Plot& thePlot=this->GetValueNonConst<Plot>();
       thePlot.flagIncludeExtraHtmlDescriptions=
       (theFormat==0) ? true : theFormat->flagIncludeExtraHtmlDescriptionsInPlots;
+      thePlot.flagPlotShowJavascriptOnly=this->owner->flagPlotShowJavascriptOnly;
       out << thePlot.GetPlotHtml();
       if (this->owner->flagWriteLatexPlots)
       { out << this->owner->WriteDefaultLatexFileReturnHtmlLink
@@ -2273,7 +2274,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   } else if (this->StartsWith(this->owner->opTensor(), 3) )
     out << (*this)[1].ToString(theFormat) << "\\otimes " << (*this)[2].ToString(theFormat);
   else if (this->StartsWith(this->owner->opIn(),3) )
-    out << (*this)[1].ToString(theFormat) << "\\in" << (*this)[2].ToString(theFormat);
+    out << (*this)[1].ToString(theFormat) << "\\in " << (*this)[2].ToString(theFormat);
   else if (this->StartsWith(this->owner->opChoose(),3) )
     out << (*this)[1].ToString(theFormat) << "\\choose " << (*this)[2].ToString(theFormat);
   else if (this->StartsWith(this->owner->opTimes(), 3))
@@ -2472,7 +2473,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       default:
         if (this->children.size==2)
           out << "{Sequence{}";
-        out << "(";
+        out << "\\left(";
         for (int i=1; i<this->children.size; i++)
         { std::string currentChildString=(*this)[i].ToString(theFormat);
           out << currentChildString;
@@ -2489,7 +2490,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
           }
           charCounter%=50;
         }
-        out << ")";
+        out << "\\right)";
         if (this->children.size==2)
           out << "}";
         break;

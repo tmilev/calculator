@@ -6767,6 +6767,14 @@ bool CalculatorFunctionsGeneral::innerTurnOnRules
   return CalculatorFunctionsGeneral::innerTurnRulesOnOff(theCommands, input, output, false);
 }
 
+bool CalculatorFunctionsGeneral::innerEqualityToArithmeticExpression
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerEqualityToArithmeticExpression");
+  if (!input.StartsWith(theCommands.opDefine(), 3))
+    return false;
+  return output.MakeXOX(theCommands, theCommands.opMinus(), input[1], input[2]);
+}
+
 bool CalculatorFunctionsGeneral::innerRandomInteger
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRandomInteger");

@@ -24,6 +24,9 @@ public:
   static bool innerTurnOnRules
   (Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerEqualityToArithmeticExpression
+  (Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerRandomInteger
   (Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSelectAtRandom

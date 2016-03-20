@@ -359,8 +359,8 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
   { commentsOnFailure << "Failed to parse your request";
     return false;
   }
-//  stOutput << "<hr>incoming sections: " << incomingSections << "<hr>";
- // stOutput << "incoming deadlines: " << incomingDeadlines << "<hr>";
+//  stOutput << "<hr>incoming sections: " << incomingSections.ToStringCommaDelimited() << "<hr>";
+//  stOutput << "incoming deadlines: " << incomingDeadlines.ToStringCommaDelimited() << "<hr>";
 
   std::string currentFileName;
   bool result=true;
@@ -383,16 +383,18 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
       problemHome.databaseDeadlinesBySection.AddOnTop(incomingDeadlines[i]);
       continue;
     }
+//    stOutput << "<br>DEBUG: modifying problem info for problem: " << incomingProblems[i];
     if (incomingWeights[i]!="")
       problemHome.databaseProblemWeights[theIndex]=incomingWeights[i];
     if (incomingSections[i].size!=0)
-      for (int j=0; j<incomingSections.size; j++)
+      for (int j=0; j<incomingSections[i].size; j++)
       { int sectionIndex=problemHome.databaseStudentSectionsPerProblem[theIndex].GetIndex(incomingSections[i][j]);
         if (sectionIndex==-1)
         { problemHome.databaseStudentSectionsPerProblem[theIndex].AddOnTop(incomingSections[i][j]);
           problemHome.databaseDeadlinesBySection[theIndex].AddOnTop(incomingDeadlines[i][j]);
           continue;
         }
+//        stOutput << "<br>DEBUG: modifying problem info for section: " << incomingSections[i][j];
         problemHome.databaseStudentSectionsPerProblem[theIndex][sectionIndex]=incomingSections[i][j];
         problemHome.databaseDeadlinesBySection[theIndex][sectionIndex]=incomingDeadlines[i][j];
       }
@@ -402,7 +404,8 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
   this->StoreProblemInfo
   (stringToStore, problemHome.databaseProblemAndHomeworkGroupList, problemHome.databaseProblemWeights,
    problemHome.databaseStudentSectionsPerProblem, problemHome.databaseDeadlinesBySection);
-//  stOutput << "<br>about to store back : <br>" << stringToStore;
+  //stOutput << "<br>about to store back : <br>" << stringToStore << " interpreted as: <br>"
+  //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(stringToStore) ;
   if (!this->StoreProblemDatabaseInfo(problemHomeName, stringToStore, commentsOnFailure))
     return false;
 //  stOutput << "<br>probs incoming: <br>" << incomingProblems.ToStringCommaDelimited()
@@ -1032,7 +1035,7 @@ std::string WebWorker::GetSetProblemDatabaseInfoHtml()
     //out << "<meta http-equiv=\"refresh\" content=\"0;\">";
   } else
     out << "<span style=\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
-//  out << "<br>Debug message:<br>inputProblemInfo raw: " << inputProblemInfo << "<br>Processed: "
+//out << "<br>Debug message:<br>inputProblemInfo raw: " << inputProblemInfo << "<br>Processed: "
 //  << CGI::URLKeyValuePairsToNormalRecursiveHtml(inputProblemInfo)
 //  << "<br>inputProblemHome: " << inputProblemHome;
   return out.str();
@@ -2188,7 +2191,7 @@ bool CalculatorHTML::PrepareClassData(std::stringstream& commentsOnFailure)
 
 void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretManageClass");
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  if (!theGlobalVariables.UserDefaultHasAdminRights() || theGlobalVariables.UserStudentViewOn())
     return;
 #ifdef MACRO_use_MySQL
   std::stringstream out;
@@ -2365,7 +2368,7 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
   }
   if (!weightPrinted)
     out << "<span style=\"color:orange\">No point weight assigned yet. </span>";
-  if (theGlobalVariables.UserDefaultHasAdminRights())
+  if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
   { //stOutput << "<hr>this->databaseProblemList is: " << this->databaseProblemList.ToStringCommaDelimited();
     //stOutput << "<br>this->databaseProblemWeights is: " << this->databaseProblemWeights.ToStringCommaDelimited();
     //stOutput << "<br> cleanedupLink: " << cleaneduplink;
@@ -2468,7 +2471,7 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
     out << hoursTillDeadlineStream.str();
     return out.str();
   }
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  if (!theGlobalVariables.UserDefaultHasAdminRights() || theGlobalVariables.UserStudentViewOn())
     return out.str();
   out << "<span style=\"color:blue\">" << currentDeadline << "</span>. ";
   out << hoursTillDeadlineStream.str();
@@ -2513,12 +2516,17 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   { if (!theGlobalVariables.UserDefaultHasAdminRights())
       out << this->ToStringOnEDeadlineFormatted
       (cleaneduplink, this->currentUser.extraInfoUnsafe, isActualProblem, problemAlreadySolved);
-    else
+    else if (!theGlobalVariables.UserStudentViewOn())
       out << this->ToStringDeadlinesFormatted
       (cleaneduplink, this->databaseStudentSectionS, isActualProblem, problemAlreadySolved);
+    else
+      out << this->ToStringDeadlinesFormatted
+      (cleaneduplink,
+       CGI::URLStringToNormal(theGlobalVariables.GetWebInput("studentSection")),
+       isActualProblem, problemAlreadySolved);
   }
 #endif // MACRO_use_MySQL
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  if (!theGlobalVariables.UserDefaultHasAdminRights() || theGlobalVariables.UserStudentViewOn())
     return out.str();
   std::stringstream deadlineStream;
   deadlineStream << "<table><tr><td> Deadline: </td>";
@@ -2637,11 +2645,12 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     out << this->GetSubmitAnswersJavascript();
   else if (this->flagIsExamHome)
     out << this->GetSubmitEmailsJavascript();
-  if ((this->flagIsExamIntermediate || this->flagIsExamHome)&& theGlobalVariables.UserDefaultHasAdminRights())
+  if ((this->flagIsExamIntermediate || this->flagIsExamHome)
+      &&  theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
   { out << WebWorker::GetJavascriptHideHtml();
     out << this->GetDatePickerJavascriptInit();
   }
-  if (theGlobalVariables.UserDefaultHasAdminRights())
+  if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
     out << this->GetEditPageButton();
 //  else
 //    out << " no date picker";

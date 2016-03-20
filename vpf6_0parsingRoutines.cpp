@@ -57,7 +57,7 @@ void Calculator::reset()
   this->flagNoApproximations=false;
   this->flagCurrentExpressionIsNonCacheable=false;
   this->flagDefaultRulesWereTamperedWith=false;
-  this->flagUsePredefinedWordSplits=false;
+  this->flagUsePredefinedWordSplits=true;
   this->MaxLatexChars=2000;
   this->numEmptyTokensStart=9;
   this->theObjectContainer.reset();
@@ -260,7 +260,8 @@ void Calculator::init()
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogRules");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogCache");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogFull");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("UsePredefinedWordSplits");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("DontUsePredefinedWordSplits");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("PlotShowJavascriptOnly");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LatexLink");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("UseLnInsteadOfLog");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("CalculatorStatus");
@@ -1110,6 +1111,11 @@ bool Calculator::AllowsOrInPreceding(const std::string& lookAhead)
   ;
 }
 
+bool Calculator::AllowsInInPreceding(const std::string& lookAhead)
+{ return this->AllowsIfInPreceding(lookAhead)
+  ;
+}
+
 bool Calculator::AllowsIfInPreceding(const std::string& lookAhead)
 { return
   lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||
@@ -1233,9 +1239,15 @@ bool Calculator::ApplyOneRule()
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
-  if (secondToLastS=="%" && lastS=="UsePredefinedWordSplits")
-  { this->flagUsePredefinedWordSplits=true;
+  if (secondToLastS=="%" && lastS=="DontUsePredefinedWordSplits")
+  { this->flagUsePredefinedWordSplits=false;
     this->Comments << "Using predefined word splits -for example xy is replaced by x y. ";
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
+  if (secondToLastS=="%" && lastS=="PlotShowJavascriptOnly")
+  { this->flagPlotShowJavascriptOnly=true;
+    this->Comments << "Plots show javascript only. ";
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
@@ -1377,9 +1389,9 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="mod" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();
-  if (lastS=="Expression" && secondToLastS=="\\in" && thirdToLastS=="Expression")
-    return this->ReplaceEOEByE();
-  if (secondToLastS=="Expression" && thirdToLastS=="\\in" && fourthToLastS=="Expression")
+//  if (lastS=="Expression" && secondToLastS=="\\in" && thirdToLastS=="Expression")
+//    return this->ReplaceEOEByE();
+  if (secondToLastS=="Expression" && thirdToLastS=="\\in" && fourthToLastS=="Expression" && this->AllowsInInPreceding(lastS))
     return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="\\choose" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();

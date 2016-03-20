@@ -946,6 +946,8 @@ int WebWorker::ProcessSubmitProblemPreview()
   theInterpreterWithAdvice.flagWriteLatexPlots=false;
   if (!theProblem.PrepareCommands(theInterpreterWithAdvice, comments))
   { stOutput << "Something went wrong while interpreting the problem file. ";
+    if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
+      stOutput << comments.str();
     stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return 0;
   }
@@ -959,14 +961,19 @@ int WebWorker::ProcessSubmitProblemPreview()
   theInterpreterWithAdvice.Evaluate(calculatorInputStream.str());
   //stOutput << "DEBUG: Interpreter with advice: " << theInterpreterWithAdvice.theProgramExpression.ToString();
   if (theInterpreterWithAdvice.syntaxErrors!="")
-    stOutput << "<br><span style=\"color:red\"><b>"
+  { stOutput << "<br><span style=\"color:red\"><b>"
     << "Something went wrong when parsing your answer in the context of the current problem. "
     << "</b></span>";
+    if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
+      stOutput << theInterpreterWithAdvice.outputString << "<br>" << theInterpreterWithAdvice.outputCommentsString;
+  }
   else if (theInterpreterWithAdvice.flagAbortComputationASAP )
-    stOutput << "<br><span style=\"color:red\"><b>"
+  { stOutput << "<br><span style=\"color:red\"><b>"
     << "Something went wrong when interpreting your answer in the context of the current problem. "
     << "</b></span>";
-  else
+    if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
+      stOutput << theInterpreterWithAdvice.outputString << "<br>" << theInterpreterWithAdvice.outputCommentsString;
+  } else
   { List<std::string> answersReverseOrder;
     FormatExpressions theFormat;
 //       stOutput << "DBGDBG<br>";

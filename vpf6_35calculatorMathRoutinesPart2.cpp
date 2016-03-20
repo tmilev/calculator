@@ -390,3 +390,12 @@ bool CalculatorFunctionsGeneral::innerPlotImplicitFunctionFull
     return false;
   return output.AssignValue(theMesh.thePlot, theCommands);
 }
+
+bool CalculatorConversions::innerMatrixDouble(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorConversions::innerMatrixDouble");
+//  stOutput << "ere i am, jh";
+  Matrix<double> theMat;
+  if (!theCommands.GetMatrix(input, theMat, 0, 0, CalculatorFunctionsGeneral::innerEvaluateToDouble))
+    return theCommands << "<br>Failed to get matrix of algebraic numbers. ";
+  return output.AssignValue(theMat, theCommands);
+}

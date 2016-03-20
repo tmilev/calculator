@@ -320,6 +320,7 @@ public:
   bool flagDrawingLinkToOrigin;
   bool flagFillUserDefinedProjection;
   bool flagIncludeExtraHtmlDescriptions;
+  bool flagPlotShowJavascriptOnly;
   Vectors<Rational> FillUserDefinedProjection;
   int Selected;
   static int NumHtmlGraphics;

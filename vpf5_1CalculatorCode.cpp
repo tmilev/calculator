@@ -842,6 +842,7 @@ Plot::Plot()
   this->DesiredHtmlHeightInPixels=400;
   this->DesiredHtmlWidthInPixels=600;
   this->defaultLineColor=0;
+  this->flagPlotShowJavascriptOnly=false;
 }
 
 void Plot::ComputeAxesAndBoundingBox()
@@ -931,6 +932,7 @@ std::string Plot::GetPlotHtml()
     }
   std::stringstream resultStream;
   theDVs.flagIncludeExtraHtmlDescriptions=this->flagIncludeExtraHtmlDescriptions;
+  theDVs.flagPlotShowJavascriptOnly=this->flagPlotShowJavascriptOnly;
   resultStream << theDVs.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
   return resultStream.str();
 }

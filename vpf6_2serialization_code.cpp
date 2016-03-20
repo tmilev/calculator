@@ -962,6 +962,8 @@ bool CalculatorConversions::innerMakeMatrix(Calculator& theCommands, const Expre
     return true;
   if (CalculatorConversions::innerMatrixAlgebraic(theCommands, input, output))
     return true;
+  if (CalculatorConversions::innerMatrixDouble(theCommands, input, output))
+    return true;
   return false;
 }
 

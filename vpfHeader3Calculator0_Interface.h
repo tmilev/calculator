@@ -629,6 +629,7 @@ class Plot
   int DesiredHtmlWidthInPixels;
   int defaultLineColor;
   bool flagIncludeExtraHtmlDescriptions;
+  bool flagPlotShowJavascriptOnly;
   std::string GetPlotHtml();
   std::string GetPlotStringAddLatexCommands(bool useHtml);
   Plot();
@@ -825,6 +826,8 @@ public:
 
   bool flagUsePredefinedWordSplits;
 
+  bool flagPlotShowJavascriptOnly;
+
   bool flagLogSyntaxRules;
   bool flagUseLnInsteadOfLog;
   bool flagLogEvaluatioN;
@@ -978,6 +981,7 @@ public:
   bool AllowsIfInPreceding(const std::string& lookAhead);
   bool AllowsOrInPreceding(const std::string& lookAhead);
   bool AllowsAndInPreceding(const std::string& lookAhead);
+  bool AllowsInInPreceding(const std::string& lookAhead);
   bool AllowsPlusInPreceding(const std::string& lookAhead);
   bool AllowsTimesInPreceding(const SyntacticElement& thePreceding, const std::string& lookAhead);
 
@@ -1838,6 +1842,7 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra& inputOwner);
 
   static bool innerMakeMatrix(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMatrixDouble(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMatrixAlgebraic(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMatrixRational(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMatrixRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);

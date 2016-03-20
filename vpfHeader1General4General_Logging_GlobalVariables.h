@@ -186,6 +186,7 @@ public:
  const std::string& inputUserStringCivilized);
   bool UserSecureNonAdminOperationsAllowed();
   bool UserDebugFlagOn();
+  bool UserStudentViewOn();
 //  void operator=(const GlobalVariables& other)
 //  { this->IndicatorStringOutputFunction=other.IndicatorStringOutputFunction;
 //    this->theDrawingVariables=other.theDrawingVariables;

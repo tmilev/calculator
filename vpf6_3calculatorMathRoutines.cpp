@@ -2052,7 +2052,7 @@ bool CalculatorFunctionsGeneral::innerCompareExpressionsNumericallyAtPoints
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompareExpressionsNumericallyAtPoints");
   if (input.children.size<5)
-    return theCommands << "Comparing functions takes at points takes as input at least 5 arguments "
+    return theCommands << "Comparing functions at points takes as input at least 5 arguments "
     << "- two functions to compare, precision, variable belonging to an interval and number of sampling points).";
   Expression theFunE=input[1];
   theFunE-=input[2];

@@ -1451,6 +1451,9 @@ FormatExpressions::FormatExpressions()
   this->flagSuppressOneIn1overXtimesY=true;
   this->flagFormatMatrixAsLinearSystem=false;
   this->flagIncludeExtraHtmlDescriptionsInPlots=true;
+  this->flagSuppressLongMatrices=true;
+  this->MaxMatrixDisplayedRows=20;
+  this->MaxMatrixLineLength=20;
 }
 
 std::string FormatExpressions::GetPolyLetter(int index)const

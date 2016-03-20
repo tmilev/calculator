@@ -460,26 +460,13 @@ public:
 };
 
 template <typename coefficient>
+std::ostream& operator<<  (std::ostream& output, const Matrix<coefficient>& theMat);
+
+
+template <typename coefficient>
 class Matrix
 { // friend std::iostream& operator<< <coefficient>(std::iostream& output, const Matrix<coefficient>& theMat);
-  friend std::ostream& operator<< (std::ostream& output, const Matrix<coefficient>& theMat)
-  { output << "\\left(\\begin{array}{";
-    for (int j=0; j<theMat.NumCols; j++)
-      output << "c";
-    output << "}";
-    for (int i=0; i<theMat.NumRows; i++)
-    { for (int j=0; j<theMat.NumCols; j++)
-      { output << theMat(i,j);
-        if (j!=theMat.NumCols-1)
-          output << " & ";
-        else
-          output << "\\\\";
-      }
-      output << "\n";
-    }
-    output << "\\end{array}\\right)";
-    return output;
-  }
+  friend std::ostream& operator<<  <coefficient>(std::ostream& output, const Matrix<coefficient>& theMat);
 //  friend std::iostream& operator>> <coefficient>(std::iostream& input, Matrix<coefficient>& theMat);
 public:
   int NumRows; int ActualNumRows;
@@ -1530,6 +1517,8 @@ public:
   int NumAmpersandsPerNewLineForLaTeX;
   int MaxRecursionDepthPerExpression;
   int MaxLineLength;
+  int MaxMatrixLineLength;
+  int MaxMatrixDisplayedRows;
   int MaxLinesPerPage;
   int MatrixColumnVerticalLineIndex;
   bool flagPassCustomCoeffMonSeparatorToCoeffs;
@@ -1555,12 +1544,57 @@ public:
   bool flagFormatMatrixAsLinearSystem;
   bool flagUseFrac;
   bool flagSuppressOneIn1overXtimesY;
+  bool flagSuppressLongMatrices;
   List<MonomialP>::OrderLeftGreaterThanRight thePolyMonOrder;
   template <typename templateMonomial>
   typename List<templateMonomial>::OrderLeftGreaterThanRight GetMonOrder();
   FormatExpressions();
 };
 
+template<class coefficient>
+std::ostream& operator<< (std::ostream& output, const Matrix<coefficient>& theMat)
+{ output << "\\left(\\begin{array}{";
+  for (int j=0; j<theMat.NumCols; j++)
+    output << "c";
+  output << "}";
+  int firstMatRowIndexToHide=theMat.NumRows;
+  int lastMatRowIndexToHide=theMat.NumRows;
+  int firstMatColIndexToHide=theMat.NumCols;
+  int lastMatColIndexToHide=theMat.NumCols;
+  FormatExpressions& theFormat=theGlobalVariables.theDefaultFormat.GetElement();
+  if (theFormat.flagSuppressLongMatrices)
+  { if (theMat.NumRows>theFormat.MaxMatrixDisplayedRows)
+    { firstMatRowIndexToHide=theFormat.MaxMatrixDisplayedRows/2;
+      lastMatRowIndexToHide=theMat.NumRows-1-theFormat.MaxMatrixDisplayedRows/2;
+    }
+    if (theMat.NumCols>theFormat.MaxMatrixLineLength)
+    { firstMatColIndexToHide=theFormat.MaxMatrixLineLength/2;
+      lastMatColIndexToHide=theMat.NumCols-1-theFormat.MaxMatrixLineLength/2;
+    }
+  }
+  for (int i=0; i<theMat.NumRows; i++)
+  { if (firstMatRowIndexToHide<=i && i<=lastMatRowIndexToHide)
+    { if (firstMatRowIndexToHide==i)
+        output << "...\\\\\n";
+      continue;
+    }
+    for (int j=0; j<theMat.NumCols; j++)
+    { if (firstMatColIndexToHide<=j && j<=lastMatColIndexToHide)
+      { if (firstMatColIndexToHide==j)
+          output << "...&";
+        continue;
+      }
+      output << theMat(i,j);
+      if (j!=theMat.NumCols-1)
+        output << " & ";
+      else
+        output << "\\\\";
+    }
+    output << "\n";
+  }
+  output << "\\end{array}\\right)";
+  return output;
+}
 
 class MonomialWeylAlgebra
 {

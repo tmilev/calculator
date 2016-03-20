@@ -1007,6 +1007,14 @@ D-B;\
    "UnivariatePartialFractions(\\frac{x^11}{x^{8}-2x^{6}-2x^{5}+4x^{3}+x^{2}-2});")
    ;
 
+  this->AddOperationInnerHandler ("pointsImplicitly", CalculatorFunctionsGeneral::innerGetPointsImplicitly, "",
+   "Returns points on or close to the curve in two dimensions. Same as plotImplicit but rather than plotting\
+   the curve returns the (x,y) pairs of points found. The output given as a nx2 matrix of floating point numbers. \
+   ",
+   "pointsImplicitly((x-1) (y-1)-((x-1)^2(y-1)+1)^2, (-2, -2), (2, 2), (10,10), (400,400))", true, false,
+   "CalculatorFunctionsGeneral::innerGetPointsImplicitly", "pointsImplicitly")
+   ;
+
   this->AddOperationInnerHandler ("plotImplicit", CalculatorFunctionsGeneral::innerPlotImplicitFunction, "",
    "Plots implicitly a curve given by the zeros of an expression in the letters\
    x and y. The relation between x and y is assumed continuous at the points where it is defined.\
@@ -1093,7 +1101,7 @@ D-B;\
 
   this->AddOperationInnerHandler ("CompareExpressionsNumerically",
    CalculatorFunctionsGeneral::innerCompareExpressionsNumerically, "",
-   "<b>Calculus teaching function.</b> Compares two expressions numerically.\
+   "Compares two expressions numerically.\
    First two arguments give the two functions. The third argument gives the precision.\
    All remaining arguments come in pairs, in the form x\\in (2,3), 50. \
    ",
@@ -1102,6 +1110,17 @@ D-B;\
    \nCompareExpressionsNumerically{}(\\arctan x + \\arctan y, \\arctan((x+y)/(1- x y)), 0.0001,\
    x\\in(0,2), 20, y\\in(0,2), 20 );\
    ", true, false, "CalculatorFunctionsGeneral::innerCompareExpressionsNumerically", "CompareExpressionsNumerically")
+   ;
+  this->AddOperationInnerHandler ("CompareExpressionsNumericallyAtPoints",
+   CalculatorFunctionsGeneral::innerCompareExpressionsNumericallyAtPoints, "",
+   "<b>Calculus teaching function.</b> Compares two expressions numerically.\
+   First two arguments give the two functions. The third argument gives the precision.\
+   All remaining arguments come in pairs, in the form x\\in (2,3), 50. \
+   ",
+   "CompareExpressionsNumericallyAtPoints{}(\\arctan x + \\arctan y, \\arctan((x+y)/(1- x y)), \
+   (x,y)\\in ((0.5,0.5),(0.3,0.3)));\
+   ", true, false, "CalculatorFunctionsGeneral::innerCompareExpressionsNumericallyAtPoints",
+   "CompareExpressionsNumericallyAtPoints")
    ;
 
   this->AddOperationInnerHandler

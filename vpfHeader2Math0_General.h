@@ -463,7 +463,21 @@ template <typename coefficient>
 class Matrix
 { // friend std::iostream& operator<< <coefficient>(std::iostream& output, const Matrix<coefficient>& theMat);
   friend std::ostream& operator<< (std::ostream& output, const Matrix<coefficient>& theMat)
-  { output << theMat.ToString();
+  { output << "\\left(\\begin{array}{";
+    for (int j=0; j<theMat.NumCols; j++)
+      output << "c";
+    output << "}";
+    for (int i=0; i<theMat.NumRows; i++)
+    { for (int j=0; j<theMat.NumCols; j++)
+      { output << theMat(i,j);
+        if (j!=theMat.NumCols-1)
+          output << " & ";
+        else
+          output << "\\\\";
+      }
+      output << "\n";
+    }
+    output << "\\end{array}\\right)";
     return output;
   }
 //  friend std::iostream& operator>> <coefficient>(std::iostream& input, Matrix<coefficient>& theMat);
@@ -828,7 +842,7 @@ public:
   // if S and T are endomorphisms of V and W, build the matrix of SⓧT that acts on
   // VⓧW with basis (v1ⓧw1,v1ⓧw2,...,v2ⓧw1,v2ⓧw2,...vnⓧwn)
   void AssignTensorProduct(const Matrix<coefficient>& left, const Matrix<coefficient>& right);
-  void AssignVectorsToRows(const Vectors<coefficient>& input)
+  void AssignVectorsToRows(const List<Vector<coefficient> >& input)
   { int numCols=-1;
     if (input.size>0)
       numCols=input[0].size;

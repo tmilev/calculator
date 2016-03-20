@@ -77,6 +77,7 @@ public:
   static bool innerGetFreeVariablesExcludeNamedConstants(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompareFunctionsNumerically(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompareExpressionsNumerically(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerCompareExpressionsNumericallyAtPoints(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPolynomialRelations(Calculator& theCommands, const Expression& input, Expression& output);
 
@@ -88,6 +89,8 @@ public:
   static bool innerCompositeApowerBevaluatedAtC(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConstantFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRationalFunctionSubstitution(Calculator& theCommands, const Expression& input, Expression& output);
+
+  static bool innerGetPointsImplicitly(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPlotImplicitFunctionFull(Calculator& theCommands, const Expression& input, Expression& output, bool showGrid);
   static bool innerPlotImplicitFunction(Calculator& theCommands, const Expression& input, Expression& output);

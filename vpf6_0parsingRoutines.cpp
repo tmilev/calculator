@@ -175,7 +175,8 @@ void Calculator::init()
   this->AddOperationBuiltInType("SemisimpleLieAlg");
   this->AddOperationBuiltInType("LittelmannPath");
   this->AddOperationBuiltInType("LRO");
-  this->AddOperationBuiltInType("Matrix_Rational");
+  this->AddOperationBuiltInType("MatrixRational");
+  this->AddOperationBuiltInType("MatrixDouble");
   this->AddOperationBuiltInType("MatrixAlgebraic");
   this->AddOperationBuiltInType("MatrixTensorRational");
   this->AddOperationBuiltInType("MatrixRF");

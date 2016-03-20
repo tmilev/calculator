@@ -739,6 +739,8 @@ std::string WebWorker::GetHtmlHiddenInputs()
     out << "<b>Your input formed had malformed entries.</b>";
   out
   << "<input type=\"hidden\" id=\"debugFlag\" name=\"debugFlag\">\n"
+  << "<input type=\"hidden\" id=\"studentView\" name=\"studentView\">\n"
+  << "<input type=\"hidden\" id=\"studentSection\" name=\"studentSection\">\n"
   << "<input type=\"hidden\" id=\"authenticationToken\" name=\"authenticationToken\">\n"
   << "<input type=\"hidden\" id=\"usernameHidden\" name=\"usernameHidden\">\n"
   << "<input type=\"hidden\" id=\"currentExamHome\" name=\"currentExamHome\">\n"
@@ -2287,6 +2289,10 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "function storeSettingsProgress(){\n";
   if (theGlobalVariables.GetWebInput("debugFlag")!="")
     out << "  addCookie(\"debugFlag\", \"" << theGlobalVariables.GetWebInput("debugFlag") << "\", 100);  \n";
+  if (theGlobalVariables.GetWebInput("studentSection")!="")
+    out << "  addCookie(\"studentSection\", \"" << theGlobalVariables.GetWebInput("studentSection") << "\", 100);  \n";
+  if (theGlobalVariables.GetWebInput("studentView")!="")
+    out << "  addCookie(\"studentView\", \"" << theGlobalVariables.GetWebInput("studentView") << "\", 100);  \n";
   if (this->IsAllowedAsRequestCookie(theGlobalVariables.userCalculatorRequestType))
     out << "  addCookie(\"request\", \"" << theGlobalVariables.userCalculatorRequestType << "\", 100);\n";
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType!="" &&
@@ -2341,6 +2347,12 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "  if (document.getElementById(\"debugFlag\")!=null)\n "
   << "    if(getCookie(\"debugFlag\")!='')\n"
   << "      document.getElementById(\"debugFlag\").value=getCookie(\"debugFlag\");\n"
+  << "  if (document.getElementById(\"studentView\")!=null)\n "
+  << "    if(getCookie(\"studentView\")!='')\n"
+  << "      document.getElementById(\"studentView\").value=getCookie(\"studentView\");\n"
+  << "  if (document.getElementById(\"studentSection\")!=null)\n "
+  << "    if(getCookie(\"studentSection\")!='')\n"
+  << "      document.getElementById(\"studentSection\").value=getCookie(\"studentSection\");\n"
   << "  if (document.getElementById(\"request\")!=null)\n "
   << "    if(getCookie(\"request\")!='')\n"
   << "      document.getElementById(\"request\").value=getCookie(\"request\");\n"

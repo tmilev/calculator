@@ -231,6 +231,10 @@ bool GlobalVariables::UserDebugFlagOn()
 { return theGlobalVariables.GetWebInput("debugFlag")=="true";
 }
 
+bool GlobalVariables::UserStudentViewOn()
+{ return theGlobalVariables.GetWebInput("studentView")=="true";
+}
+
 bool GlobalVariables::UserDefaultHasAdminRights()
 { return this->flagLoggedIn && (this->userRole=="admin") && !this->flagIgnoreSecurityToWorkaroundSafarisBugs;
 }
@@ -305,7 +309,8 @@ std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tag
     if (currentName=="request" ||
         currentName=="authenticationInsecure" || currentName=="password" || currentName=="currentExamFile" ||
         currentName=="currentExamHome" || currentName=="currentExamIntermediate" ||
-        currentName=="currentDatabaseTable" || currentName=="mainInput")
+        currentName=="currentDatabaseTable" || currentName=="mainInput" || currentName=="studentView" ||
+        currentName=="studentSection")
       continue;
     if (tagsToExclude!=0)
       if (tagsToExclude->Contains(currentName))

@@ -2048,6 +2048,81 @@ bool CalculatorFunctionsGeneral::innerCompareFunctionsNumerically
 //  theFunE.
 }
 
+bool CalculatorFunctionsGeneral::innerCompareExpressionsNumericallyAtPoints
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompareExpressionsNumericallyAtPoints");
+  if (input.children.size<5)
+    return theCommands << "Comparing functions takes at points takes as input at least 5 arguments "
+    << "- two functions to compare, precision, variable belonging to an interval and number of sampling points).";
+  Expression theFunE=input[1];
+  theFunE-=input[2];
+  HashedList<Expression> theFreeVars;
+  if (!theFunE.GetFreeVariables(theFreeVars, true))
+    return theCommands << "Was not able to extract the function argument of your function. " ;
+  if (theFreeVars.size<=0)
+  { Expression zeroE;
+    zeroE.AssignValue(1, theCommands);
+    return output.MakeXOX(theCommands, theCommands.opEqualEqual(), theFunE, zeroE);
+  }
+  double tolerance=0.0001;
+  if (!input[3].EvaluatesToDouble(&tolerance))
+    return theCommands << "Failed to evaluate tolerance limit from " << input[3].ToString()
+    << " to a floating point number. ";
+  if (tolerance<0)
+    tolerance*=-1;
+  if (!input[4].StartsWith(theCommands.opIn(), 3))
+    return theCommands << "The fourth argument " << input[4].ToString() << " needs to be "
+    << " of the form (x,y,...)\\in (...). ";
+  const Expression& theVarsE=input[4][1];
+  HashedList<Expression> varsGiven;
+  if (!theVarsE.IsSequenceNElementS())
+    varsGiven.AddOnTop(theVarsE);
+  else
+    for (int i=1; i< theVarsE.children.size; i++)
+    { if (varsGiven.Contains(theVarsE[i]))
+        return theCommands << theVarsE[i] << " given more than once. ";
+      varsGiven.AddOnTop(theVarsE[i]);
+    }
+  for (int i=0; i<theFreeVars.size; i++)
+    if (!varsGiven.Contains(theFreeVars[i]))
+      return theCommands << "The expression depends on  " << theFreeVars[i].ToString()
+      << " but I no value given for that expression. ";
+  const Expression& thePointsE=input[4][2];
+  Matrix<double> thePoints;
+  if (!theCommands.GetMatrix(thePointsE, thePoints, 0, varsGiven.size, CalculatorFunctionsGeneral::innerEvaluateToDouble))
+    return theCommands << "Failed to extract list of points from: " << thePointsE.ToString();
+  HashedList<Expression> knownEs= theCommands.knownDoubleConstants;
+  List<double> knownValues=theCommands.knownDoubleConstantValues;
+  for (int i=0; i<varsGiven.size; i++)
+    if (knownEs.Contains(varsGiven[i]))
+      return theCommands << varsGiven[i]
+      << " is an already known constant and cannot be used as a variable in this context. ";
+    else
+      knownEs.AddOnTop(varsGiven[i]);
+  knownValues.SetSize(knownEs.size);
+  int numFailedSamples=0;
+  int totalSamples=thePoints.NumRows;
+/*  stOutput << "<br>Total number of samples: " << totalSamples;
+  stOutput << "<br>Variables: " << theBoundaryVars.ToStringCommaDelimited();
+  stOutput << "<br>Boundaries left: " << leftBoundaries.ToStringCommaDelimited();
+  stOutput << "<br>Boundaries right: " << rightBoundaries.ToStringCommaDelimited();*/
+  for (int i=0; i<thePoints.NumRows; i++)
+  { for (int j=0; j<thePoints.NumCols; j++)
+      knownValues[j+theCommands.knownDoubleConstants.size]= thePoints(i,j);
+    double floatingResult=0;
+    if (!theFunE.EvaluatesToDoubleUnderSubstitutions(knownEs, knownValues, &floatingResult))
+    { numFailedSamples++;
+      if ((numFailedSamples*100)/totalSamples>20)
+      { theCommands << "Failed to evaluate at least one of the functions in more than 20% of the sampling points. ";
+        return output.AssignValue(0, theCommands);
+      }
+    }
+    if (floatingResult> tolerance || floatingResult <-tolerance)
+      return output.AssignValue(0, theCommands);
+  }
+  return output.AssignValue(1, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerCompareExpressionsNumerically
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompareFunctionsNumerically");

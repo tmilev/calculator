@@ -105,6 +105,12 @@ int Expression::GetTypeOperation<Matrix<Rational> >()const
 }
 
 template < >
+int Expression::GetTypeOperation<Matrix<double> >()const
+{ this->CheckInitialization();
+  return this->owner->opMatDouble();
+}
+
+template < >
 int Expression::GetTypeOperation<Matrix<AlgebraicNumber> >()const
 { this->CheckInitialization();
   return this->owner->opMatAlgebraic();
@@ -461,6 +467,15 @@ Matrix<Rational>
 
 template < >
 int Expression::AddObjectReturnIndex(const
+Matrix<double>
+& inputValue)const
+{ this->CheckInitialization();
+  return this->owner->theObjectContainer.theMatDoubles
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
 Matrix<AlgebraicNumber>
 & inputValue)const
 { this->CheckInitialization();
@@ -674,7 +689,7 @@ SemisimpleLieAlgebra& Expression::GetValueNonConst()const
 template < >
 Matrix<Rational>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<Matrix<Rational> >())
-    crash << "This is a programming error: expression not of required type Matrix_Rational. The expression equals " << this->ToString() << "." << crash;
+    crash << "This is a programming error: expression not of required type MatrixRational. The expression equals " << this->ToString() << "." << crash;
   return this->owner->theObjectContainer.theMatRats.GetElement(this->GetLastChild().theData);
 }
 
@@ -734,6 +749,13 @@ ElementWeylGroup<WeylGroupData>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<ElementWeylGroup<WeylGroupData> >())
     crash << "This is a programming error: expression not of required type ElementWeylGroup. The expression equals " << this->ToString() << "." << crash;
   return this->owner->theObjectContainer.theWeylGroupElements.GetElement(this->GetLastChild().theData);
+}
+
+template < >
+Matrix<double>& Expression::GetValueNonConst()const
+{ if (!this->IsOfType<Matrix<double> >())
+    crash << "This is a programming error: expression not of required type MatrixRational. The expression equals " << this->ToString() << "." << crash;
+  return this->owner->theObjectContainer.theMatDoubles[this->GetLastChild().theData];
 }
 
 template < >
@@ -1916,6 +1938,10 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     contextFormat.GetElement().flagUseLatex=true;
     contextFormat.GetElement().flagUseHTML=false;
     out << "MakeMatrix{}(" << this->GetValue<Matrix<Rational> >().ToString(&contextFormat.GetElement()) << ")";
+    result=true;
+  } else if (this->IsOfType<Matrix<double> >())
+  { out.precision(4);
+    out << "MakeMatrix{}(" << std::fixed << this->GetValue<Matrix<double> >() << ")";
     result=true;
   } else if (this->IsOfType<Matrix<AlgebraicNumber> >())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());

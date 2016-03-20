@@ -52,6 +52,9 @@ struct MeshTriangles{
   (Vectors<double>& outputAppend, const Vector<double>& left,
    const Vector<double>& right, double leftVal, double rightVal)
    ;
+  bool ComputePoints
+  (Calculator& theCommands, const Expression& input, bool showGrid)
+;
 };
 
 void MeshTriangles::PlotGrid(int theColor)
@@ -289,7 +292,24 @@ bool Calculator::GetVectorDoubles(const Expression& input, Vector<double>& outpu
 { return this->GetVectoR(input, output, 0, 0, CalculatorFunctionsGeneral::innerEvaluateToDouble);
 }
 
-bool CalculatorFunctionsGeneral::innerPlotImplicitFunction(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorFunctionsGeneral::innerGetPointsImplicitly
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetPointsImplicitly");
+  MeshTriangles theMesh;
+  if (!theMesh.ComputePoints(theCommands, input, false))
+    return false;
+  HashedList<Vector<double>, MathRoutines::HashVectorDoubles> thePoints;
+  for (int i=0; i<theMesh.theCurve.theLines.size; i++)
+  { thePoints.AddOnTopNoRepetition(theMesh.theCurve.theLines[0]);
+    thePoints.AddOnTopNoRepetition(theMesh.theCurve.theLines[1]);
+  }
+  Matrix<double> theMatrix;
+  theMatrix.AssignVectorsToRows(thePoints);
+  return output.AssignValue(theMatrix, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerPlotImplicitFunction
+(Calculator& theCommands, const Expression& input, Expression& output)
 { return CalculatorFunctionsGeneral::innerPlotImplicitFunctionFull(theCommands, input, output, false);
 }
 
@@ -297,26 +317,41 @@ bool CalculatorFunctionsGeneral::innerPlotImplicitShowGridFunction(Calculator& t
 { return CalculatorFunctionsGeneral::innerPlotImplicitFunctionFull(theCommands, input, output, true);
 }
 
-bool CalculatorFunctionsGeneral::innerPlotImplicitFunctionFull(Calculator& theCommands, const Expression& input, Expression& output, bool showGrid)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotImplicitFunction");
-  if (input.children.size<6)
+bool MeshTriangles::ComputePoints
+(Calculator& theCommands, const Expression& input, bool showGrid)
+{ if (input.children.size<6)
     return false;
-  MeshTriangles theMesh;
-  theMesh.flagShowGrid=showGrid;
-  theMesh.owner=&theCommands;
-  theMesh.theFun=input[1];
-  theMesh.knownEs=theCommands.knownDoubleConstants;
-  theMesh.knownValues=theCommands.knownDoubleConstantValues;
-  theMesh.knownValues.AddOnTop(0);
-  theMesh.knownValues.AddOnTop(0);
-  Expression xE, yE;
-  xE.MakeAtom("x", theCommands);
-  yE.MakeAtom("y", theCommands);
-  theMesh.knownEs.AddOnTopNoRepetitionMustBeNewCrashIfNot(xE);
-  theMesh.knownEs.AddOnTopNoRepetitionMustBeNewCrashIfNot(yE);
-  if (!theCommands.GetVectorDoubles(input[2], theMesh.lowerLeftCorner))
+  this->flagShowGrid=showGrid;
+  this->owner=&theCommands;
+  this->theFun=input[1];
+  this->knownEs=theCommands.knownDoubleConstants;
+  this->knownValues=theCommands.knownDoubleConstantValues;
+  this->knownValues.AddOnTop(0);
+  this->knownValues.AddOnTop(0);
+  HashedList<Expression> theFreeVars;
+  if (!this->theFun.GetFreeVariables(theFreeVars, true))
+    return theCommands << "Failed to extract free variables from: " << this->theFun.ToString();
+  theFreeVars.QuickSortAscending();
+  if (theFreeVars.size>2)
+    return theCommands << "I got that your curve depends on " << theFreeVars.size << " expressions, namely: "
+    << theFreeVars.ToStringCommaDelimited()
+    << " and that is too many (2 max). ";
+  Expression tempE;
+  if (theFreeVars.size==0)
+  { tempE.MakeAtom("x", theCommands);
+    theFreeVars.AddOnTop(tempE);
+  }
+  if (theFreeVars.size==1)
+  { tempE.MakeAtom("y",theCommands);
+    if (theFreeVars[0]==tempE)
+      tempE.MakeAtom("x", theCommands);
+    theFreeVars.AddOnTop(tempE);
+  }
+  this->knownEs.AddOnTopNoRepetitionMustBeNewCrashIfNot(theFreeVars[0]);
+  this->knownEs.AddOnTopNoRepetitionMustBeNewCrashIfNot(theFreeVars[1]);
+  if (!theCommands.GetVectorDoubles(input[2], this->lowerLeftCorner))
     return theCommands << "Failed to extract lower left corner from: " << input[2].ToString();
-  if (!theCommands.GetVectorDoubles(input[3], theMesh.upperRightCorner))
+  if (!theCommands.GetVectorDoubles(input[3], this->upperRightCorner))
     return theCommands << "Failed to extract upper right corner from: " << input[3].ToString();
   List<int> theGridCount, widthHeightInPixels;
   if (!theCommands.GetVectoRInt(input[4], theGridCount))
@@ -327,22 +362,31 @@ bool CalculatorFunctionsGeneral::innerPlotImplicitFunctionFull(Calculator& theCo
     return theCommands << "Failed to extract pair of small integers from: " << input[5].ToString();
   if (widthHeightInPixels.size!=2)
     return theCommands << "Failed to extract pair of small integers from: " << input[5].ToString();
-  theMesh.thePlot.DesiredHtmlWidthInPixels=widthHeightInPixels[0];
-  theMesh.thePlot.DesiredHtmlWidthInPixels=widthHeightInPixels[1];
-  theMesh.XstartingGridCount=theGridCount[0];
-  theMesh.YstartingGridCount=theGridCount[1];
+  this->thePlot.DesiredHtmlWidthInPixels=widthHeightInPixels[0];
+  this->thePlot.DesiredHtmlWidthInPixels=widthHeightInPixels[1];
+  this->XstartingGridCount=theGridCount[0];
+  this->YstartingGridCount=theGridCount[1];
   if (input.children.size>=7)
-  { if (!input[6].IsSmallInteger(&theMesh.maxNumTriangles))
+  { if (!input[6].IsSmallInteger(&this->maxNumTriangles))
       return theCommands << "Failed to extract small integer from: " << input[6].ToString();
-    if (theMesh.maxNumTriangles>20000)
-    { theMesh.maxNumTriangles=20000;
+    if (this->maxNumTriangles>20000)
+    { this->maxNumTriangles=20000;
       theCommands << "Max number of triangles decreased from your input: " << input[6].ToString()
       << " to 20000. If you'd like to lift the restriction, modify code around: file: " << __FILE__
       << " line: " << __LINE__ << ". ";
     }
   }
-  theMesh.ComputeImplicitPlot();
-  theCommands << "Evaluated function in: " << theMesh.numGoodEvaluations << " points and failed to evaluate it at: "
-  << theMesh.numBadEvaluations << " points. ";
+  this->ComputeImplicitPlot();
+  theCommands << "Evaluated function in: " << this->numGoodEvaluations << " points and failed to evaluate it at: "
+  << this->numBadEvaluations << " points. ";
+  return true;
+}
+
+bool CalculatorFunctionsGeneral::innerPlotImplicitFunctionFull
+(Calculator& theCommands, const Expression& input, Expression& output, bool showGrid)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotImplicitFunctionFull");
+  MeshTriangles theMesh;
+  if (!theMesh.ComputePoints(theCommands, input, showGrid))
+    return false;
   return output.AssignValue(theMesh.thePlot, theCommands);
 }

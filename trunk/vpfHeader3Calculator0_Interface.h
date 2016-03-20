@@ -670,6 +670,7 @@ public:
   HashedListReferences<std::string, MathRoutines::hashString> ExpressionNotation;
   HashedListReferences<Expression> ExpressionWithNotation;
   HashedListReferences<LittelmannPath> theLSpaths;
+  ListReferences<Matrix<double> > theMatDoubles;
   HashedListReferences<Matrix<Rational> > theMatRats;
   HashedListReferences<Matrix<AlgebraicNumber> > theMatsAlgebraic;
   HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
@@ -1302,7 +1303,10 @@ public:
   { return this->theAtoms.GetIndexIMustContainTheObject("MatrixAlgebraic");
   }
   int opMatRat()
-  { return this->theAtoms.GetIndexIMustContainTheObject("Matrix_Rational");
+  { return this->theAtoms.GetIndexIMustContainTheObject("MatrixRational");
+  }
+  int opMatDouble()
+  { return this->theAtoms.GetIndexIMustContainTheObject("MatrixDouble");
   }
   int opMatTensorRat()
   { return this->theAtoms.GetIndexIMustContainTheObject("MatrixTensorRational");

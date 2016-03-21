@@ -1282,8 +1282,12 @@ void Polynomial<coefficient>::GetValuesLagrangeInterpolandsAtConsecutivePoints
 template <class coefficient>
 bool Polynomial<coefficient>::FactorMe(List<Polynomial<Rational> >& outputFactors, std::stringstream* comments)const
 { MacroRegisterFunctionWithName("Polynomial::FactorMe");
-  List<Polynomial<Rational> > factorsToBeProcessed;
   outputFactors.SetSize(0);
+  if (this->IsEqualToZero() || this->IsConstant())
+  { outputFactors.AddOnTop(*this);
+    return true;
+  }
+  List<Polynomial<Rational> > factorsToBeProcessed;
   factorsToBeProcessed.AddOnTop(*this);
   Polynomial<Rational> currentFactor, divisor;
   while (factorsToBeProcessed.size>0)

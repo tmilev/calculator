@@ -3945,7 +3945,17 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
   double yLow, yHigh;
   Vectors<double> thePoints;
   if (!input[1].EvaluatesToDoubleInRange("x", lowerBound, upperBound, 500, &yLow, &yHigh, &thePoints))
-    return theCommands << "<hr>I failed to evaluate the input function, something is wrong!";
+  { bool hasOneGoodPoint=false;
+    for (int i=0; i<thePoints.size; i++)
+      if (!isnan(thePoints[i][1]))
+      { hasOneGoodPoint=true;
+        break;
+      }
+    if (!hasOneGoodPoint)
+      return theCommands << "<hr>I failed to evaluate the input function at all points, "
+      << "perhaps your expression is not a function of x.";
+    theCommands << "<hr>I failed to evaluate your function in a number of points. ";
+  }
   Plot thePlot;
   thePlot.DesiredHtmlHeightInPixels=desiredHtmlHeightPixels;
   thePlot.DesiredHtmlWidthInPixels=desiredHtmlWidthPixels;
@@ -5353,10 +5363,20 @@ bool Expression::EvaluatesToDoubleInRange
   double currentValue=0;
   if (outputPoints!=0)
     outputPoints->SetSize(numIntervals);
+  bool result=true;
   for (int i=0; i<numIntervals; i++)
   { if (!this->EvaluatesToDoubleUnderSubstitutions(knownEs, knownValues, &currentValue))
-      return *(this->owner) << "<hr>Failed to evaluate " << this->ToString() << " at " << varName << "="
+    { *(this->owner) << "<hr>Failed to evaluate " << this->ToString() << " at " << varName << "="
       << *knownValues.LastObject() << ". ";
+      result=false;
+      if (outputPoints!=0)
+      { (*outputPoints)[i].SetSize(2);
+        (*outputPoints)[i][0]=*knownValues.LastObject();
+        (*outputPoints)[i][1]=NAN;
+      }
+      *knownValues.LastObject()+=delta;
+      continue;
+    }
     if (outputPoints!=0)
     { (*outputPoints)[i].SetSize(2);
       (*outputPoints)[i][0]=*knownValues.LastObject();
@@ -5376,7 +5396,7 @@ bool Expression::EvaluatesToDoubleInRange
         *outputYmax=MathRoutines::Maximum(currentValue, *outputYmax);
     }
   }
-  return true;
+  return result;
 }
 
 bool Expression::EvaluatesToDouble(double* whichDouble)const
@@ -5451,18 +5471,42 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
       return true;
     }
     if ((*this).StartsWith(theCommands.opThePower(),3))
-    { double tempDouble=0;
+    { bool signChange=false;
+      if (leftD<0)
+      { Rational theRat;
+        if ((*this)[2].IsRational(&theRat))
+          if (!theRat.GetDenominator().IsEven())
+          { if (!theRat.GetNumerator().IsEven())
+              signChange=true;
+            leftD*=-1;
+          }
+      }
+      double tempDouble=0;
       if (whichDouble==0)
         whichDouble=&tempDouble;
       *whichDouble=FloatingPoint::power(leftD, rightD);
-      return (*whichDouble!=NAN);
+      if (signChange)
+        *whichDouble*=-1;
+      return !isnan(*whichDouble);
     }
     if ((*this).StartsWith(theCommands.opSqrt(),3))
-    { double tempDouble=0;
+    { bool signChange=false;
+      if (rightD<0)
+      { Rational theRat;
+        if ((*this)[1].IsRational(&theRat))
+          if (!theRat.GetNumerator().IsEven())
+          { if (!theRat.GetDenominator().IsEven())
+              signChange=true;
+            rightD*=-1;
+          }
+      }
+      double tempDouble=0;
       if (whichDouble==0)
         whichDouble=&tempDouble;
       *whichDouble=FloatingPoint::power(rightD,1/leftD);
-      return (*whichDouble)!=NAN;
+      if (signChange)
+        *whichDouble*=-1;
+      return !isnan(*whichDouble);
     }
     if ((*this).StartsWith(theCommands.opDivide(),3))
     { if (whichDouble!=0)

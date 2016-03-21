@@ -5364,10 +5364,15 @@ bool Expression::EvaluatesToDoubleInRange
   if (outputPoints!=0)
     outputPoints->SetSize(numIntervals);
   bool result=true;
+  int numFailedEvaluations=0;
   for (int i=0; i<numIntervals; i++)
   { if (!this->EvaluatesToDoubleUnderSubstitutions(knownEs, knownValues, &currentValue))
-    { *(this->owner) << "<hr>Failed to evaluate " << this->ToString() << " at " << varName << "="
-      << *knownValues.LastObject() << ". ";
+    { numFailedEvaluations++;
+      if (numFailedEvaluations<5)
+        *(this->owner) << "<br>Failed to evaluate " << this->ToString() << " at " << varName << "="
+        << *knownValues.LastObject() << ". ";
+      if (numFailedEvaluations==5)
+        *(this->owner) << "<br>...";
       result=false;
       if (outputPoints!=0)
       { (*outputPoints)[i].SetSize(2);
@@ -5396,6 +5401,8 @@ bool Expression::EvaluatesToDoubleInRange
         *outputYmax=MathRoutines::Maximum(currentValue, *outputYmax);
     }
   }
+  if (numFailedEvaluations>=5)
+    (*this->owner) << "<br>" << numFailedEvaluations << " evaluations total failed. ";
   return result;
 }
 

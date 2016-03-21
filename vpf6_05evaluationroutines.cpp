@@ -61,13 +61,14 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
   { const List<Function>* theHandlers=theCommands.GetOperationCompositeHandlers(functionNameNode[0].theData);
     if (theHandlers!=0)
       for (int i=0; i<theHandlers->size; i++)
-        if ((*theHandlers)[i].theFunction(theCommands, input, output))
-        { if (theCommands.flagLogEvaluatioN)
-            theCommands << "<hr>Built-in substitution: " << (*theHandlers)[i].ToStringSummary()
-            << "<br>Rule stack id: "
-            << theCommands.RuleStackCacheIndex;
-          return true;
-        }
+        if (!((*theHandlers)[i].flagDisabledByUser))
+          if ((*theHandlers)[i].theFunction(theCommands, input, output))
+          { if (theCommands.flagLogEvaluatioN)
+              theCommands << "<hr>Built-in substitution: " << (*theHandlers)[i].ToStringSummary()
+              << "<br>Rule stack id: "
+              << theCommands.RuleStackCacheIndex;
+            return true;
+          }
   }
   if (!functionNameNode.IsAtom())
     return false;

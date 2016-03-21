@@ -872,6 +872,13 @@ void Plot::ComputeAxesAndBoundingBox()
 
 }
 
+bool Plot::IsOKVector(const Vector<double>& input)
+{ for (int i=0; i<input.size; i++)
+    if (isnan(input[i]))
+      return false;
+  return true;
+}
+
 std::string Plot::GetPlotHtml()
 { MacroRegisterFunctionWithName("Plot::GetPlotHtml");
 /*  if (this->flagIncludeExtraHtmlDescriptions)
@@ -920,12 +927,18 @@ std::string Plot::GetPlotHtml()
   theDVs.drawTextAtVectorBuffer(v1, (std::string)"1", CGI::RedGreenBlue(0,0,0), theDVs.TextStyleNormal,0);
   for (int i=0; i<this->thePlots.size; i++)
     for (int j=1; j<thePlots[i].thePoints.size; j++)
+    { if (!this->IsOKVector(thePlots[i].thePoints[j-1]) || !this->IsOKVector(thePlots[i].thePoints[j] ))
+        continue;
       theDVs.drawLineBetweenTwoVectorsBufferDouble
       (thePlots[i].thePoints[j-1], thePlots[i].thePoints[j], theDVs.PenStyleNormal,
        thePlots[i].colorRGB);
+    }
   for (int i=0; i<this->thePlots.size; i++)
     for (int j=0; j<this->thePlots[i].theLines.size; j++)
-    { theDVs.drawLineBetweenTwoVectorsBufferDouble
+    { if (!this->IsOKVector(this->thePlots[i].theLines[j][0]) ||
+          !this->IsOKVector(this->thePlots[i].theLines[j][1]))
+        continue;
+      theDVs.drawLineBetweenTwoVectorsBufferDouble
       (this->thePlots[i].theLines[j][0], this->thePlots[i].theLines[j][1],
        theDVs.PenStyleNormal, this->thePlots[i].colorRGB);
       //stOutput << "Drew line b-n: " <<this->thePlots[i].theLines[j][0] << " and " << this->thePlots[i].theLines[j][1];

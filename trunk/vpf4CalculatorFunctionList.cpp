@@ -1125,7 +1125,7 @@ D-B;\
    ",
    "\nCompareExpressionsNumericallyAtPoints{}(\\arctan x + \\arctan y, \\arctan((x+y)/(1- x y)),0.001, \
    (x,y)\\in ((0.5,0.5),(0.3,0.3)));\
-   \ntheFun=\\sqrt{x y}-( 4 x^{2} y-1);\
+   \ntheFun=\\sqrt{x y}-(4 x^{2} y-1);\
 \na=\\frac{-64 x^{3} y^{2}+16 x y+y}{32 x^{4} y-8 x^{2}- x};\
 \ntheDiff=d/dx(theFun);\
 \nnum=(d/dx y=0; theDiff)_2;\

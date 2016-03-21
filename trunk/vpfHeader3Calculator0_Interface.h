@@ -632,6 +632,7 @@ class Plot
   bool flagPlotShowJavascriptOnly;
   std::string GetPlotHtml();
   std::string GetPlotStringAddLatexCommands(bool useHtml);
+  bool IsOKVector(const Vector<double>& input);
   Plot();
   void ComputeAxesAndBoundingBox();
   void AddFunctionPlotOnTop

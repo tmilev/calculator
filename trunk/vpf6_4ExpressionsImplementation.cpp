@@ -2547,7 +2547,9 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   } else if (this->children.size==1)
     out << (*this)[0].ToString(theFormat);
   else if (this->children.size>=2)
-  { out << (*this)[0].ToString(theFormat);
+  { if (this->format==this->formatFunctionUseUnderscore)
+      out << "{";
+    out << (*this)[0].ToString(theFormat);
     bool needParenthesis=true;
     if (this->children.size==2)
     { if ((*this)[0].IsAtomWhoseExponentsAreInterpretedAsFunction())
@@ -2556,7 +2558,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         needParenthesis=!(*this)[1].IsAtom();
     }
     if (this->format==this->formatFunctionUseUnderscore)
-      out << "_";
+      out << "}" << "_";
     else if (this->format==this->formatFunctionUseCdot)
       out << "\\cdot";
     else

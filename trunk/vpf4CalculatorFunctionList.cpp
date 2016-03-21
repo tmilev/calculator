@@ -2846,19 +2846,19 @@ void Calculator::initPredefinedOperationsComposite()
    "Equivalent to (a+b){}x=(a{}x)+(b{}x) ",
    "(a+b){}x;", true, true, false,
    "CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument",
-   "CompositeArithmeticOperationEvaluatedOnArgument");
+   "CompositeArithmeticOperationEvaluatedOnArgumentAddition");
   this->AddOperationComposite
   ("*", CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument, "",
    "Equivalent to (a*b){}x=(a{}x)*(b{}x) ",
    "(a*b){}x;", true, true, false,
    "CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument",
-   "CompositeArithmeticOperationEvaluatedOnArgument");
+   "CompositeArithmeticOperationEvaluatedOnArgumentMultiplication");
   this->AddOperationComposite
   ("/", CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument, "",
    "Equivalent to (a/b){}x=(a{}x)/(b{}x) ",
    "(a/b){}x;", true, true, false,
    "CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument",
-   "CompositeArithmeticOperationEvaluatedOnArgument");
+   "CompositeArithmeticOperationEvaluatedOnArgumentDivision");
   this->AddOperationComposite
   ("AlgebraicNumber", CalculatorFunctionsGeneral::innerConstantFunction, "",
    "If x is a constant, replaces x{}({{anything}})=x; ",

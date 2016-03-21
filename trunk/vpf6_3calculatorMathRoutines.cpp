@@ -6795,6 +6795,7 @@ bool CalculatorFunctionsGeneral::innerTurnRulesOnOff
   for (int i=0; i<rulesToSwitch.size; i++)
   { Function& currentFun=theCommands.GetFunctionHandlerFromNamedRule(rulesToSwitch[i]);
     currentFun.flagDisabledByUser=!currentFun.flagDisabledByUser;
+//    stOutput << "turned off rule " << currentFun.ToStringSummary();
   }
   output.reset(theCommands, rulesToSwitch.size+1);
   output.AddChildAtomOnTop(theCommands.opRulesChanged());

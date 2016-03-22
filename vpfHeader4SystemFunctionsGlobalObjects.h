@@ -21,7 +21,7 @@ class Calculator;
 extern logger theLog  ;
 extern logger logBlock;
 extern logger logIO   ;
-extern logger logConnections   ;
+extern logger logProcessKills   ;
 extern FormatExpressions consoleFormat;
 extern Calculator theParser;
 extern WebServer theWebServer;

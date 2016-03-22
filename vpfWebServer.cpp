@@ -2990,7 +2990,7 @@ void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress
           << ": more than " << this->MaxNumWorkersPerIPAdress << " connections from IP address: "
           << incomingUserAddress;
           this->theWorkers[i].pingMessage=errorStream.str();
-          logConnections << logger::red  << errorStream.str() << logger::endL;
+          logProcessKills << logger::red  << errorStream.str() << logger::endL;
           continue;
         }
       if (this->theWorkers[i].pipeWorkerToServerTimerPing.lastRead.size>0)
@@ -3011,7 +3011,7 @@ void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress
         << " seconds passed since worker " << i+1
         << " last pinged the server; killing pid: "
         << this->theWorkers[i].ProcessPID << ". ";
-        logIO << logger::red << pingTimeoutStream.str() << logger::endL;
+        logProcessKills << logger::red << pingTimeoutStream.str() << logger::endL;
         this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>" + pingTimeoutStream.str()+"</b></span>";
       }
     }

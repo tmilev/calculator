@@ -26,7 +26,7 @@ logger logBlock( "./../output/LogFiles/LogBlockingEvents"+GetDateForLogFiles()+"
 logger logIO( "./../output/LogFiles/LogIOErrorsEvents"+GetDateForLogFiles()+".html");
 logger logProcessKills( "./../output/LogFiles/LogMultiprocessing"+GetDateForLogFiles()+".html");
 logger logPlumbing( "./../output/LogFiles/LogServerPlumbing"+GetDateForLogFiles()+".html");
-logger logFailedAccepts( "./../output/LogFiles/LogFailedAccepts"+GetDateForLogFiles()+".html");
+logger logSocketAccept( "./../output/LogFiles/logSocketAccept"+GetDateForLogFiles()+".html");
 WebServer theWebServer;
 Calculator theParser;
 FormatExpressions consoleFormat;

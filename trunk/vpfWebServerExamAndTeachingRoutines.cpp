@@ -2637,7 +2637,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   double startTime=theGlobalVariables.GetElapsedSeconds();
   std::stringstream out;
   if (!this->flagIsForReal || !this->theProblemData.flagRandomSeedComputed)
-    if (!this->flagRandomSeedGiven)
+    if (!this->flagRandomSeedGiven || this->NumAttemptsToInterpret>1)
       this->theProblemData.randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
   this->FigureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
@@ -2789,7 +2789,7 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
   }
   this->timeToParseHtml=theGlobalVariables.GetElapsedSeconds()-startTime;
   this->NumAttemptsToInterpret=0;
-  if (this->flagRandomSeedGiven)
+  if (this->flagRandomSeedGiven && this->flagIsForReal)
     this->MaxInterpretationAttempts=1;
   srand (time(NULL));
   this->randomSeedsIfInterpretationFails.SetSize(this->MaxInterpretationAttempts);

@@ -3130,17 +3130,17 @@ int WebServer::Run()
 
   unsigned int connectionsSoFar=0;
   sockaddr_storage their_addr; // connector's address information
-  socklen_t sin_size;
+  socklen_t sin_size = sizeof their_addr;
   char userAddressBuffer[INET6_ADDRSTRLEN];
   this->initSSL();
   fd_set FDListenSockets;
   while(true)
   { // main accept() loop
-    sin_size = sizeof their_addr;
 //    theLog << logger::red << "select returned!" << logger::endL;
     FD_ZERO(&FDListenSockets);
     for (int i=0; i<this->theListeningSockets.size; i++)
       FD_SET(this->theListeningSockets[i], &FDListenSockets);
+
     while (select(this->highestSocketNumber+1, & FDListenSockets, 0, 0, 0)==-1)
     { if (this->flagReapingChildren)
         logIO << logger::yellow << "Select interrupted while reaping children. "
@@ -3151,6 +3151,7 @@ int WebServer::Run()
     }
     int newConnectedSocket =-1;
     theGlobalVariables.flagUsingSSLinCurrentConnection=false;
+    bool found=false;
     for (int i=theListeningSockets.size-1; i>=0; i--)
       if (FD_ISSET(this->theListeningSockets[i], &FDListenSockets))
       { //if (this->theListeningSockets[i]==this->listeningSocketHTTP)
@@ -3164,13 +3165,18 @@ int WebServer::Run()
           } else
             logIO << logger::yellow << " (non-encrypted)." << logger::endL;
           break;
+        } else
+        { logFailedAccepts << logger::red << "This is not supposed to happen: accept failed. Error: "
+          << this->ToStringLastErrorDescription() << logger::endL;
+          found=true;
         }
       }
+    if (newConnectedSocket<0 && !found)
+      logFailedAccepts << logger::red << "This is not supposed to to happen: select succeeded "
+      << "but I found no set socket. "
+      << logger::endL;
     if (newConnectedSocket <0)
-    { theLog << logger::red << "This is not supposed to happen: accept failed. Error: "
-      << this->ToStringLastErrorDescription() << logger::endL;
       continue;
-    }
 //    theLog << logger::purple << "NewconnectedSocket: " << newConnectedSocket << ", listeningSocket: "
 //    << theListeningSocket << logger::endL;
     inet_ntop

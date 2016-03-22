@@ -83,6 +83,7 @@
 		<Unit filename="vpf9_5SemisimpleLieAlgebras_RootSubalgebras.cpp" />
 		<Unit filename="vpf9_6SemisimpleLieSubAlgebras.cpp" />
 		<Unit filename="vpf9_7floating_point_routines.cpp" />
+		<Unit filename="vpf9_85TimeDateWrappers.cpp" />
 		<Unit filename="vpf9_8GlobalObjects.cpp" />
 		<Unit filename="vpf9_91html_routines_calculator.cpp" />
 		<Unit filename="vpf9_92multitasking.cpp" />
@@ -99,6 +100,7 @@
 		<Unit filename="vpfHeader1General2Multitasking.h" />
 		<Unit filename="vpfHeader1General3_Test.h" />
 		<Unit filename="vpfHeader1General4General_Logging_GlobalVariables.h" />
+		<Unit filename="vpfHeader1General5TimeDate.h" />
 		<Unit filename="vpfHeader2Math01_LargeIntArithmetic.h" />
 		<Unit filename="vpfHeader2Math02_Vectors.h" />
 		<Unit filename="vpfHeader2Math0_General.h" />

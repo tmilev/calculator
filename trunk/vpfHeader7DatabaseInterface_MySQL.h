@@ -3,6 +3,8 @@
 #ifndef vpfHeader7_databaseMySQL_already_included
 #define vpfHeader7_databaseMySQL_already_included
 #include "vpfHeader3Calculator0_Interface.h"
+#include "vpfHeader1General5TimeDate.h"
+
 static ProjectInformationInstance ProjectInfoVpf8_1HeaderDatabaseInterface_MySQLx(__FILE__, "MySQL interface header. ");
 
 class DatabaseRoutinesGlobalFunctions
@@ -82,7 +84,6 @@ public:
 
 #ifdef MACRO_use_MySQL
 #include <mysql/mysql.h>
-#include <ctime>
 
 //Command for installation of mysql on Ubuntu:
 //sudo apt-get install libmysqlclient-dev
@@ -106,22 +107,6 @@ public:
 
   EmailRoutines();
   std::string GetCommandToSendEmailWithMailX();
-};
-
-struct TimeWrapper
-{
-public:
-  tm theTime;
-  std::string theTimeStringNonReadable;
-  void AssignLocalTime();
-  void ComputeTimeStringNonReadable();
-  std::string ToStringHumanReadable();
-  void operator=(const std::string& inputTime);
-  double SubtractAnotherTimeFromMeInSeconds(TimeWrapper& other);
-  double SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(TimeWrapper& other);
-  bool AssignMonthDayYear(const std::string& input, std::stringstream& commentsOnFailure);
-  static std::string ToStringSecondsToDaysHoursSecondsString(double input, bool includeSeconds);
-  TimeWrapper();
 };
 
 class MySQLdata{

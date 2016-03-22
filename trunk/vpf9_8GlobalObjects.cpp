@@ -5,13 +5,26 @@
 #include "vpfHeader6WebServer.h"
 #include "vpfHeader3Calculator0_Interface.h"
 #include "vpfHeader1General4General_Logging_GlobalVariables.h"
+#include "vpfHeader1General5TimeDate.h"
+
 ProjectInformationInstance projectInfoInstanceCalculatorGlobal(__FILE__, "Global objects");
 
 GlobalVariables theGlobalVariables;
-logger theLog( "./../output/LogStandard.html");
-logger logBlock( "./../output/LogBlockingEvents.html");
-logger logIO( "./../output/LogIOErrorsEvents.html");
-logger logConnections( "./../output/LogConnections.html");
+std::string GetDateForLogFiles()
+{ static std::string tempDate;
+  if (tempDate!="")
+    return tempDate;
+  TimeWrapper now;
+  std::stringstream tempStream;
+  now.AssignLocalTime();
+  tempDate=now.ToStringHumanReadable();
+  return tempDate;
+}
+
+logger theLog( "./../output/LogStandard"+GetDateForLogFiles()+".html");
+logger logBlock( "./../output/LogBlockingEvents"+GetDateForLogFiles()+".html");
+logger logIO( "./../output/LogIOErrorsEvents"+GetDateForLogFiles()+".html");
+logger logConnections( "./../output/LogConnections"+GetDateForLogFiles()+".html");
 WebServer theWebServer;
 Calculator theParser;
 FormatExpressions consoleFormat;

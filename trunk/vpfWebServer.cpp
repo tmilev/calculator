@@ -2743,10 +2743,11 @@ bool WebServer::CreateNewActiveWorker()
   { crash << "Calling CreateNewActiveWorker requires the active worker index to be -1." << crash;
     return false;
   }
+  bool found=false;
   for (int i=0; i<this->theWorkers.size; i++)
     if (!this->theWorkers[i].flagInUse)
     { this->activeWorker=i;
-      this->theWorkers[i].pingMessage="";
+      found=true;
       break;
     }
   if (this->activeWorker==-1)
@@ -2754,10 +2755,14 @@ bool WebServer::CreateNewActiveWorker()
     this->theWorkers.SetSize(this->theWorkers.size+1);
   }
   this->GetActiveWorker().indexInParent=this->activeWorker;
-  this->GetActiveWorker().Release();
   this->GetActiveWorker().parent=this;
   this->GetActiveWorker().timeOfLastPingServerSideOnly=theGlobalVariables.GetElapsedSeconds();
   this->GetActiveWorker().pingMessage="";
+  if (found)
+  { this->theWorkers[this->activeWorker].flagInUse=true;
+    return true;
+  }
+  this->GetActiveWorker().Release();
   this->theWorkers[this->activeWorker].flagInUse=false; //<-until everything is initialized, we cannot be in use.
   if (!this->GetActiveWorker().PauseComputationReportReceived.CreateMe("server to worker computation report received"))
     return this->EmergencyRemoval_LastCreatedWorker();

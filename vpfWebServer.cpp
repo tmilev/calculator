@@ -2777,6 +2777,9 @@ bool WebServer::CreateNewActiveWorker()
     return this->EmergencyRemoval_LastCreatedWorker();
   if (!this->GetActiveWorker().pipeWorkerToServerWorkerStatus.CreateMe("worker to server worker status"))
     return this->EmergencyRemoval_LastCreatedWorker();
+  logPlumbing << logger::green
+  << "Allocated new worker & plumbing data structures. Total worker data structures: " << this->theWorkers.size << ". "
+  << logger::endL;
   this->theWorkers[this->activeWorker].flagInUse=true;
   return true;
 }
@@ -3184,7 +3187,7 @@ int WebServer::Run()
      userAddressBuffer, sizeof userAddressBuffer);
     this->RecycleChildrenIfPossible(userAddressBuffer);
     if (!this->CreateNewActiveWorker())
-    { logBlock << logger::purple << "Failed to create an active worker. System error string: "
+    { logPlumbing << logger::purple << "Failed to create an active worker. System error string: "
       << strerror(errno) << logger::endL;
       logIO << logger::red << "Failed to create active worker: closing connection. " << logger::endL;
       close (newConnectedSocket);
@@ -3201,7 +3204,7 @@ int WebServer::Run()
     //The original process is the parent, the almost identical copy is the child.
     //theLog << "\r\nChildPID: " << this->childPID;
     if (this->GetActiveWorker().ProcessPID==-1)
-      logIO << logger::red << "FAILED to spawn a child process. " << logger::endL;
+      logProcessKills << logger::red << "FAILED to spawn a child process. " << logger::endL;
     if (this->GetActiveWorker().ProcessPID==0)
     { // this is the child (worker) process
 /*      int val=fcntl(newConnectedSocket, F_GETFL, 0);

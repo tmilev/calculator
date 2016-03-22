@@ -21,12 +21,12 @@ std::string GetDateForLogFiles()
   return tempDate;
 }
 
-logger theLog( "./../output/LogStandard"+GetDateForLogFiles()+".html");
-logger logBlock( "./../output/LogBlockingEvents"+GetDateForLogFiles()+".html");
-logger logIO( "./../output/LogIOErrorsEvents"+GetDateForLogFiles()+".html");
-logger logProcessKills( "./../output/LogMultiprocessing"+GetDateForLogFiles()+".html");
-logger logPlumbing( "./../output/LogServerPlumbing"+GetDateForLogFiles()+".html");
-logger logFailedAccepts( "./../output/LogFailedAccepts"+GetDateForLogFiles()+".html");
+logger theLog( "./../output/LogFiles/LogStandard"+GetDateForLogFiles()+".html");
+logger logBlock( "./../output/LogFiles/LogBlockingEvents"+GetDateForLogFiles()+".html");
+logger logIO( "./../output/LogFiles/LogIOErrorsEvents"+GetDateForLogFiles()+".html");
+logger logProcessKills( "./../output/LogFiles/LogMultiprocessing"+GetDateForLogFiles()+".html");
+logger logPlumbing( "./../output/LogFiles/LogServerPlumbing"+GetDateForLogFiles()+".html");
+logger logFailedAccepts( "./../output/LogFiles/LogFailedAccepts"+GetDateForLogFiles()+".html");
 WebServer theWebServer;
 Calculator theParser;
 FormatExpressions consoleFormat;

@@ -11,9 +11,7 @@
 #define __DATE__ " unknown date "
 #endif
 
-
 static ProjectInformationInstance projectInfoInstanceCalculatorGlobalAndSystemHeader(__FILE__, "Global objects and system calls header");
-
 
 class WebServer;
 class logger;
@@ -23,6 +21,7 @@ extern logger logBlock;
 extern logger logIO   ;
 extern logger logProcessKills   ;
 extern logger logFailedAccepts;
+extern logger logPlumbing;
 extern FormatExpressions consoleFormat;
 extern Calculator theParser;
 extern WebServer theWebServer;

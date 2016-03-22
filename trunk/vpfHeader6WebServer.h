@@ -160,6 +160,7 @@ public:
   int listeningSocketHttpSSL;
   int highestSocketNumber;
   int MaxNumWorkersPerIPAdress;
+  int MaxTotalUsedWorkers;
   bool flagTryToKillOlderProcesses;
   bool flagSSLHandshakeSuccessful;
   bool flagReapingChildren;

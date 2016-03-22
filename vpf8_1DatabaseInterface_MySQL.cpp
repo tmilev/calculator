@@ -1491,6 +1491,11 @@ bool DatabaseRoutines::AddUsersFromEmails
     comments << "<br>Failed to create all users. ";
   outputSentAllEmails=true;
   if (doSendEmails)
+  { doSendEmails=false;
+    outputSentAllEmails=false;
+    comments << "Sending actual emails disabled for security reasons (system not stable enough yet). ";
+  }
+  if (doSendEmails)
     if (! this->SendActivationEmail(theEmails, false, comments))
       outputSentAllEmails=false;
   return result;

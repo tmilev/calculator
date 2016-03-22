@@ -2097,14 +2097,16 @@ std::string CalculatorHTML::ToStringClassDetails
   out << "</textarea>";
   out << "<br>";
   out
-  << "<button class=\"submitButton\" onclick=\"addEmailsOrUsers("
-  << "'"    << idAddressTextarea
-  << "', '" << CGI::StringToURLString(this->fileName)
-  << "', '" << idOutput
-  << "', '" << userRole
-  << "', '" << idExtraTextarea
-  << "', 'addEmails'"
-  << " )\"> Add emails</button>";
+  << "<button class=\"submitButton\" "
+//  << "onclick=\"addEmailsOrUsers("
+//  << "'"    << idAddressTextarea
+//  << "', '" << CGI::StringToURLString(this->fileName)
+//  << "', '" << idOutput
+//  << "', '" << userRole
+//  << "', '" << idExtraTextarea
+//  << "', 'addEmails'"
+//  << " )\" "
+  << "disabled> [Disabled] Add emails</button>";
   out
   << "<button class=\"submitButton\" onclick=\"addEmailsOrUsers("
   << "'"    << idAddressTextarea

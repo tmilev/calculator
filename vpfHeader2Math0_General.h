@@ -3812,7 +3812,9 @@ inline void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy
   }
   if (shouldReport)
   { std::stringstream reportStream;
-    reportStream << "Large polynomial computation: multiplying " << this->ToString() << " by " << other.ToString();
+    reportStream << "Large polynomial computation: " << this->size() << " x " << other.size() << "=" << totalMonPairs << " monomials:\n<br>\n"
+    << this->ToString() << " times " << other.ToString()
+    ;
     theReport2.Report(reportStream.str());
   }
   bufferPoly.SetExpectedSize(maxNumMonsFinal);

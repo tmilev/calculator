@@ -20,7 +20,7 @@ extern logger theLog  ;
 extern logger logBlock;
 extern logger logIO   ;
 extern logger logProcessKills   ;
-extern logger logFailedAccepts;
+extern logger logSocketAccept;
 extern logger logPlumbing;
 extern FormatExpressions consoleFormat;
 extern Calculator theParser;

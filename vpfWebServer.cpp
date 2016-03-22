@@ -2673,6 +2673,8 @@ WebServer::WebServer()
   this->flagReapingChildren=false;
   this->MaxNumWorkersPerIPAdress=8;
   this->MaxTotalUsedWorkers=20;
+  this->NumFailedSelectsSoFar=0;
+  this->NumSuccessfulSelectsSoFar=0;
 }
 
 WebWorker& WebServer::GetActiveWorker()
@@ -3164,6 +3166,9 @@ int WebServer::Run()
   char userAddressBuffer[INET6_ADDRSTRLEN];
   this->initSSL();
   fd_set FDListenSockets;
+  this->NumSuccessfulSelectsSoFar=0;
+  this->NumFailedSelectsSoFar=0;
+  long long previousReportedNumberOfSelects=0;
   while(true)
   { // main accept() loop
 //    theLog << logger::red << "select returned!" << logger::endL;
@@ -3178,6 +3183,13 @@ int WebServer::Run()
       else
         logIO << logger::red << "Select failed: possibly due to reaping children. Error message: "
         << strerror(errno) << logger::endL;
+      this->NumFailedSelectsSoFar++;
+    }
+    this->NumSuccessfulSelectsSoFar++;
+    if ((this->NumSuccessfulSelectsSoFar+this->NumFailedSelectsSoFar)-previousReportedNumberOfSelects>100)
+    { logSocketAccept << logger::blue << this->NumSuccessfulSelectsSoFar << " successful and " << this->NumFailedSelectsSoFar << "="
+      << this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar << " total selects. " << logger::endL;
+      previousReportedNumberOfSelects=this->NumSuccessfulSelectsSoFar+this->NumFailedSelectsSoFar;
     }
     int newConnectedSocket =-1;
     theGlobalVariables.flagUsingSSLinCurrentConnection=false;
@@ -3196,13 +3208,13 @@ int WebServer::Run()
             logIO << logger::yellow << " (non-encrypted)." << logger::endL;
           break;
         } else
-        { logFailedAccepts << logger::red << "This is not supposed to happen: accept failed. Error: "
+        { logSocketAccept << logger::red << "This is not supposed to happen: accept failed. Error: "
           << this->ToStringLastErrorDescription() << logger::endL;
           found=true;
         }
       }
     if (newConnectedSocket<0 && !found)
-      logFailedAccepts << logger::red << "This is not supposed to to happen: select succeeded "
+      logSocketAccept << logger::red << "This is not supposed to to happen: select succeeded "
       << "but I found no set socket. "
       << logger::endL;
     if (newConnectedSocket <0)

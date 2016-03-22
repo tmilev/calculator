@@ -161,6 +161,8 @@ public:
   int highestSocketNumber;
   int MaxNumWorkersPerIPAdress;
   int MaxTotalUsedWorkers;
+  long long NumFailedSelectsSoFar;
+  long long NumSuccessfulSelectsSoFar;
   bool flagTryToKillOlderProcesses;
   bool flagSSLHandshakeSuccessful;
   bool flagReapingChildren;

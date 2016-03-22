@@ -185,7 +185,7 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
       }
       if (thePower==0)
         if (resultP.IsEqualToZero())
-          return output.MakeError("Error: 0^0 is undefined. ", theCommands);
+          return output.MakeError("Error: 0^0 is undefined in the present version of the calculator. ", theCommands);
       resultP.RaiseToPower(thePower);
       return output.AssignValueWithContext(resultP, theConverted.GetContext(), theCommands);
     }

@@ -544,6 +544,7 @@ void WebServer::ReapChildren()
           this->theWorkers[i].flagInUse=false;
           this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
           theLog << logger::green << "Child with pid " << waitResult << " successfully reaped. " << logger::endL;
+          this->NumProcessesReaped++;
         }
   }while (waitResult>0);
 }
@@ -2675,6 +2676,10 @@ WebServer::WebServer()
   this->MaxTotalUsedWorkers=20;
   this->NumFailedSelectsSoFar=0;
   this->NumSuccessfulSelectsSoFar=0;
+  this->NumProcessesReaped=0;
+  this->NumProcessAssassinated=0;
+  this->NumConnectionsSoFar=0;
+  this->NumWorkersNormallyExited=0;
 }
 
 WebWorker& WebServer::GetActiveWorker()
@@ -2987,6 +2992,7 @@ void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress
         this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
         theLog << logger::green << "Worker " << i+1 << " done, marking for reuse. " << logger::endL;
         numInUse--;
+        this->NumWorkersNormallyExited++;
 //        waitpid(this->theWorkers[i].ProcessPID, 0, )
       } else
         theLog << logger::yellow << "Worker " << i+1 << " not done yet. " << logger::endL;
@@ -3008,6 +3014,7 @@ void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress
           this->theWorkers[i].pingMessage=errorStream.str();
           logProcessKills << logger::red  << errorStream.str() << logger::endL;
           numInUse--;
+          this->NumProcessAssassinated++;
           continue;
         }
       if (this->theWorkers[i].pipeWorkerToServerTimerPing.lastRead.size>0)
@@ -3031,6 +3038,7 @@ void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress
         logProcessKills << logger::red << pingTimeoutStream.str() << logger::endL;
         this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>" + pingTimeoutStream.str()+"</b></span>";
         numInUse--;
+        this->NumProcessAssassinated++;
       }
     }
   if (numInUse<=this->MaxTotalUsedWorkers)
@@ -3046,6 +3054,7 @@ void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress
       this->theWorkers[i].pingMessage=errorStream.str();
       logProcessKills << logger::red  << errorStream.str() << logger::endL;
       numInUse--;
+      this->NumProcessAssassinated++;
     }
 }
 
@@ -3160,7 +3169,6 @@ int WebServer::Run()
     return 1;
   theLog << logger::purple <<  "server: waiting for connections...\r\n" << logger::endL;
 
-  unsigned int connectionsSoFar=0;
   sockaddr_storage their_addr; // connector's address information
   socklen_t sin_size = sizeof their_addr;
   char userAddressBuffer[INET6_ADDRSTRLEN];
@@ -3169,6 +3177,7 @@ int WebServer::Run()
   this->NumSuccessfulSelectsSoFar=0;
   this->NumFailedSelectsSoFar=0;
   long long previousReportedNumberOfSelects=0;
+  int previousServerStatReport=0;
   while(true)
   { // main accept() loop
 //    theLog << logger::red << "select returned!" << logger::endL;
@@ -3190,6 +3199,13 @@ int WebServer::Run()
     { logSocketAccept << logger::blue << this->NumSuccessfulSelectsSoFar << " successful and " << this->NumFailedSelectsSoFar << "="
       << this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar << " total selects. " << logger::endL;
       previousReportedNumberOfSelects=this->NumSuccessfulSelectsSoFar+this->NumFailedSelectsSoFar;
+    }
+    if (this->NumProcessAssassinated+this->NumProcessesReaped+this->NumWorkersNormallyExited+this->NumConnectionsSoFar-previousServerStatReport>99)
+    { previousServerStatReport=this->NumProcessAssassinated+this->NumProcessesReaped+this->NumWorkersNormallyExited+this->NumConnectionsSoFar;
+      logProcessStats << "# kill commands: " << this->NumProcessAssassinated
+      << " #processes reaped: " << this->NumProcessesReaped
+      << " #normally reclaimed workers: " << this->NumWorkersNormallyExited
+      << " #connections so far: " << this->NumConnectionsSoFar << logger::endL;
     }
     int newConnectedSocket =-1;
     theGlobalVariables.flagUsingSSLinCurrentConnection=false;
@@ -3234,8 +3250,8 @@ int WebServer::Run()
     }
     this->GetActiveWorker().connectedSocketID=newConnectedSocket;
     this->GetActiveWorker().connectedSocketIDLastValueBeforeRelease=newConnectedSocket;
-    connectionsSoFar++;
-    this->GetActiveWorker().connectionID=connectionsSoFar;
+    this->NumConnectionsSoFar++;
+    this->GetActiveWorker().connectionID=this->NumConnectionsSoFar;
     this->GetActiveWorker().userAddress.theObject=userAddressBuffer;
     this->currentlyConnectedAddresses.AddMonomial(this->GetActiveWorker().userAddress, 1 );
 //    theLog << this->ToStringStatus();

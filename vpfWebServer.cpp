@@ -2672,6 +2672,7 @@ WebServer::WebServer()
   this->flagSSLHandshakeSuccessful=false;
   this->flagReapingChildren=false;
   this->MaxNumWorkersPerIPAdress=8;
+  this->MaxTotalUsedWorkers=20;
 }
 
 WebWorker& WebServer::GetActiveWorker()
@@ -2972,6 +2973,10 @@ void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress
   MacroRegisterFunctionWithName("WebServer::RecycleChildrenIfPossible");
 //  this->ReapChildren();
   MonomialWrapper<std::string, MathRoutines::hashString> incomingAddress(incomingUserAddress);
+  int numInUse=0;
+  for (int i=0; i<this->theWorkers.size; i++)
+    if (this->theWorkers[i].flagInUse)
+      numInUse++;
   for (int i=0; i<this->theWorkers.size; i++)
     if (this->theWorkers[i].flagInUse)
     { this->theWorkers[i].pipeWorkerToServerControls.Read();
@@ -2979,6 +2984,7 @@ void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress
       { this->theWorkers[i].flagInUse=false;
         this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
         theLog << logger::green << "Worker " << i+1 << " done, marking for reuse. " << logger::endL;
+        numInUse--;
 //        waitpid(this->theWorkers[i].ProcessPID, 0, )
       } else
         theLog << logger::yellow << "Worker " << i+1 << " not done yet. " << logger::endL;
@@ -2999,6 +3005,7 @@ void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress
           << incomingUserAddress;
           this->theWorkers[i].pingMessage=errorStream.str();
           logProcessKills << logger::red  << errorStream.str() << logger::endL;
+          numInUse--;
           continue;
         }
       if (this->theWorkers[i].pipeWorkerToServerTimerPing.lastRead.size>0)
@@ -3021,7 +3028,22 @@ void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress
         << this->theWorkers[i].ProcessPID << ". ";
         logProcessKills << logger::red << pingTimeoutStream.str() << logger::endL;
         this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>" + pingTimeoutStream.str()+"</b></span>";
+        numInUse--;
       }
+    }
+  if (numInUse<=this->MaxTotalUsedWorkers)
+    return;
+  for (int i=0; i<this->theWorkers.size && numInUse>this->MaxTotalUsedWorkers; i++)
+    if (this->theWorkers[i].flagInUse)
+    { this->TerminateChildSystemCall(i);
+      std::stringstream errorStream;
+      errorStream
+      << "Terminating child " << i+1 << " with PID "
+      << this->theWorkers[i].ProcessPID
+      << ": too many workers in use. ";
+      this->theWorkers[i].pingMessage=errorStream.str();
+      logProcessKills << logger::red  << errorStream.str() << logger::endL;
+      numInUse--;
     }
 }
 

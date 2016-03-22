@@ -24,7 +24,7 @@ std::string GetDateForLogFiles()
 logger theLog( "./../output/LogStandard"+GetDateForLogFiles()+".html");
 logger logBlock( "./../output/LogBlockingEvents"+GetDateForLogFiles()+".html");
 logger logIO( "./../output/LogIOErrorsEvents"+GetDateForLogFiles()+".html");
-logger logConnections( "./../output/LogConnections"+GetDateForLogFiles()+".html");
+logger logProcessKills( "./../output/LogMultiprocessing"+GetDateForLogFiles()+".html");
 WebServer theWebServer;
 Calculator theParser;
 FormatExpressions consoleFormat;

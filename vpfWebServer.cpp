@@ -135,14 +135,14 @@ void WebServer::SSLServerSideHandShake()
     return;
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
     return;
-  logIO << "Initiating SSL handshake. " << logger::endL;
+//  logOpenSSL << "Initiating SSL handshake. " << logger::endL;
 #ifdef MACRO_use_open_ssl
   MacroRegisterFunctionWithName("WebServer::SSLServerSideHandShake");
 //  theLog << "Got to here 1" << logger::endL;
   theSSLdata.ssl = SSL_new(theSSLdata.ctx);
 //  theLog << "Got to here 1.05" << logger::endL;
   if(theSSLdata.ssl==0)
-  { theLog << "Failed to allocate ssl" << logger::endL;
+  { logOpenSSL << logger::red << "Failed to allocate ssl" << logger::endL;
     crash << "Failed to allocate ssl: not supposed to happen" << crash;
   }
 //  theLog << "Got to here 1.1" << logger::endL;
@@ -155,57 +155,57 @@ void WebServer::SSLServerSideHandShake()
     this->flagSSLHandshakeSuccessful=false;
     if (theSSLdata.errorCode!=1)
     { if (theSSLdata.errorCode==0)
-        logIO << "Handshake not successful in a controlled manner. ";
+        logOpenSSL << "OpenSSL handshake not successful in a controlled manner. ";
       else
-        logIO << "Handshake not successful with a fatal error. ";
-      logIO << "Attempt " << i+1 << " out of " << maxNumHandshakeTries << " failed. ";
+        logOpenSSL << "OpenSSL handshake not successful with a fatal error. ";
+      logOpenSSL << "Attempt " << i+1 << " out of " << maxNumHandshakeTries << " failed. ";
       switch(SSL_get_error(theSSLdata.ssl, theSSLdata.errorCode))
       {
       case SSL_ERROR_NONE:
-        logIO << logger::red << "No error reported, this shouldn't happen. " << logger::endL;
+        logOpenSSL << logger::red << "No error reported, this shouldn't happen. " << logger::endL;
         maxNumHandshakeTries=1;
         break;
       case SSL_ERROR_ZERO_RETURN:
-        logIO << logger::red << "The TLS/SSL connection has been closed (possibly cleanly). " << logger::endL;
+        logOpenSSL << logger::red << "The TLS/SSL connection has been closed (possibly cleanly). " << logger::endL;
         maxNumHandshakeTries=1;
         break;
       case SSL_ERROR_WANT_READ:
       case SSL_ERROR_WANT_WRITE:
-        logIO << logger::red << " During regular I/O: repeat needed (not implemented). " << logger::endL;
+        logOpenSSL << logger::red << " During regular I/O: repeat needed (not implemented). " << logger::endL;
         break;
       case SSL_ERROR_WANT_CONNECT:
       case SSL_ERROR_WANT_ACCEPT:
-        logIO << logger::red << " During handshake negotiations: repeat needed (not implemented). "
+        logOpenSSL << logger::red << " During handshake negotiations: repeat needed (not implemented). "
         << logger::endL;
         break;
       case SSL_ERROR_WANT_X509_LOOKUP:
-        logIO << logger::red << " Application callback set by SSL_CTX_set_client_cert_cb(): "
+        logOpenSSL << logger::red << " Application callback set by SSL_CTX_set_client_cert_cb(): "
         << "repeat needed (not implemented). "
         << logger::endL;
         maxNumHandshakeTries=1;
         break;
   //    case SSL_ERROR_WANT_ASYNC:
-  //      logIO << logger::red << "Asynchronous engine is still processing data. "
+  //      logOpenSSL << logger::red << "Asynchronous engine is still processing data. "
   //      << logger::endL;
   //      break;
       case SSL_ERROR_SYSCALL:
-        logIO << logger::red << "Error: some I/O error occurred. "
+        logOpenSSL << logger::red << "Error: some I/O error occurred. "
         << logger::endL;
         maxNumHandshakeTries=1;
         break;
       case SSL_ERROR_SSL:
-        logIO << logger::red << "A failure in the SSL library occurred. "
+        logOpenSSL << logger::red << "A failure in the SSL library occurred. "
         << logger::endL;
 //        theError=ERR_get_error(3ssl);
 //        if (theError!=SSL_ERROR_WANT_READ && theError!=SSL_ERROR_WANT_WRITE)
 //          maxNumHandshakeTries=1;
         break;
       default:
-        logIO << logger::red << "Unknown error. " << logger::endL;
+        logOpenSSL << logger::red << "Unknown error. " << logger::endL;
         maxNumHandshakeTries=1;
         break;
       }
-      logIO << "Retrying connection in 0.5 seconds...";
+      logOpenSSL << "Retrying connection in 0.5 seconds...";
       theGlobalVariables.FallAsleep(500000);
     } else
     { this->flagSSLHandshakeSuccessful=true;
@@ -1805,6 +1805,7 @@ int WebWorker::ProcessCalculator()
     stOutput.Flush();
     return 0;
   }
+//  std::cout << "DEBUG: processing connection " << theWebServer.NumConnectionsSoFar << std::endl;
   if (this->flagPasswordWasSubmitted && theGlobalVariables.userCalculatorRequestType!="changePassword" &&
       theGlobalVariables.userCalculatorRequestType!="activateAccount" //&&
 //      !theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs
@@ -1816,9 +1817,14 @@ int WebWorker::ProcessCalculator()
           theGlobalVariables.webFormArgumentNames[i]!="authenticationInsecure")
         redirectedAddress << theGlobalVariables.webFormArgumentNames[i] << "="
         << theGlobalVariables.webFormArguments[i] << "&";
-    stOutput << "HTTP/1.0 303 See other\r\nLocation: ";
+//    std::cout << "DEBUG: redirect, connection: " << theWebServer.NumConnectionsSoFar << ", redirecting to: "
+//    << redirectedAddress.str() << "\n";
+    stOutput << "HTTP/1.1 303 See other\r\nLocation: ";
     stOutput << redirectedAddress.str();
-    stOutput << "\r\n\r\n";
+    stOutput << "\r\n\r\n<html><head>"
+    << "<meta http-equiv=\"refresh\" content=\"0; url='" << redirectedAddress.str()
+    << "'\" /></head><body>Click <a href=\"" << redirectedAddress.str() << "\">"
+    << " here "<< "</a> if your browser does not redirect the page automatically. </body></html>";
 //    stOutput << "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n";
 //    stOutput << "DEBUG " << "\r\n" << redirectedAddress.str();
 //    stOutput << "\r\n";
@@ -2467,6 +2473,9 @@ int WebWorker::ServeClient()
   theReport.SetStatus("All bytes from client received, processing. Worker process in use ...");
   theGlobalVariables.flagComputationStarted=true;
   theGlobalVariables.IndicatorStringOutputFunction=WebServer::PipeProgressReportToParentProcess;
+  //std::cout << "DEBUG: serving client on connection: " << theWebServer.NumConnectionsSoFar << " address raw: "
+  //<< this->mainAddresSRAW << " message raw: " << this->mainArgumentRAW;
+
   if (this->requestType==this->requestGetCalculator || this->requestType==this->requestPostCalculator)
   { theParser.inputStringRawestOfTheRaw=this->mainArgumentRAW;
     this->mainArgumentRAW="";
@@ -3272,17 +3281,6 @@ int WebServer::Run()
           logIO << "socket NON-blocking" << logger::endL;
       }
       */
-      this->SSLServerSideHandShake();
-      if (theGlobalVariables.flagSSLisAvailable &&
-          theGlobalVariables.flagUsingSSLinCurrentConnection &&
-          !this->flagSSLHandshakeSuccessful)
-      { theGlobalVariables.flagUsingSSLinCurrentConnection=false;
-        stOutput << "HTTP/1.0 400 SSL connection failed\r\n<html><meta http-equiv=\"refresh\" content=\"3\">"
-        << "<body>Cryptography error, retrying to connect in 3 seconds.</body></html>";
-        this->ReleaseEverything();
-        return -1;
-      }
-//      this->Release(theListeningSocket);//worker has no access to socket listener
       theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=
       this->ReturnActiveIndicatorAlthoughComputationIsNotDone;
       theGlobalVariables.WebServerTimerPing=this->WorkerTimerPing;
@@ -3290,6 +3288,19 @@ int WebServer::Run()
       crash.CleanUpFunction=WebServer::SignalActiveWorkerDoneReleaseEverything;
       InitializeTimer();
       CreateTimerThread();
+      this->SSLServerSideHandShake();
+      if (theGlobalVariables.flagSSLisAvailable &&
+          theGlobalVariables.flagUsingSSLinCurrentConnection &&
+          !this->flagSSLHandshakeSuccessful)
+      { theGlobalVariables.flagUsingSSLinCurrentConnection=false;
+        this->SignalActiveWorkerDoneReleaseEverything();
+        this->ReleaseEverything();
+        logOpenSSL << logger::red << "ssl fail #: " << this->NumConnectionsSoFar << logger::endL;
+        return -1;
+      }
+      if (theGlobalVariables.flagSSLisAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection)
+        logOpenSSL << logger::green << "ssl success #: " << this->NumConnectionsSoFar << ". " << logger::endL;
+//      this->Release(theListeningSocket);//worker has no access to socket listener
       /////////////////////////////////////////////////////////////////////////
 //      stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;
 //      stOutput.flushOutputFunction=this->FlushActiveWorker;
@@ -3309,14 +3320,15 @@ int WebServer::Run()
         << this->GetActiveWorker().ToStringMessageFullUnsafe()
         << "</body></html>";
         stOutput.Flush();
-        this->GetActiveWorker().SendAllBytes();
+        this->SignalActiveWorkerDoneReleaseEverything();
         this->ReleaseEverything();
 //        this->SSLfreeEverythingShutdownSSL();
         return -1;
       }
       this->GetActiveWorker().SendDisplayUserInputToServer();
-     // std::cout << "Got thus far 9" << std::endl;
+//      std::cout << "Serving step connection: " << this->NumConnectionsSoFar << std::endl;
       int result= this->GetActiveWorker().ServeClient();
+//      std::cout << "Serving SECOND step connection: " << this->NumConnectionsSoFar << std::endl;
       this->ReleaseEverything();
 //      this->SSLfreeEverythingShutdownSSL();
       return result;
@@ -3377,7 +3389,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   theGlobalVariables.programArguments.SetSize(argC);
   for (int i=0; i<argC; i++)
     theGlobalVariables.programArguments[i]=argv[i];
-  std::cout << "\nProgram arguments: " << theGlobalVariables.programArguments.ToStringCommaDelimited() << "\n";
+//  std::cout << "\nProgram arguments: " << theGlobalVariables.programArguments.ToStringCommaDelimited() << "\n";
 
   theGlobalVariables.flagUsingBuiltInWebServer=false;
   theGlobalVariables.flagRunningCommandLine=false;

@@ -244,13 +244,14 @@ public:
   std::string theDatabaseName;
   std::string hostname;
   int MaxNumRowsToFetch;
+  bool flagFirstLogin;
   MYSQL *connection; // Create a pointer to the MySQL instance
   operator bool()const
   { return false;
   }
   static std::string GetTableUnsafeNameUsersOfFile(const std::string& inputFileName);
   bool startMySQLDatabaseIfNotAlreadyStarted(std::stringstream* commentsOnFailure);
-  bool startMySQLDatabase(std::stringstream* commentsOnFailure);
+  bool startMySQLDatabase(std::stringstream* commentsOnFailure, bool* outputfirstLogin);
   static std::string ToStringSuggestionsReasonsForFailure
 (const std::string& inputUsernameUnsafe, DatabaseRoutines& theRoutines, UserCalculator& theUser)
 ;
@@ -345,7 +346,7 @@ bool PrepareClassData
 
   bool CreateTable
   (const std::string& tableNameUnsafe, const std::string& desiredTableContent,
-   std::stringstream* commentsOnCreation);
+   std::stringstream* commentsOnCreation, bool* outputTableNewlyCreated);
 
   static bool innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);

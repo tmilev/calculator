@@ -146,7 +146,7 @@ public:
 
   // certain methods, such as the Get*ByFormula methods, need access to special
   // data not found in FiniteGroup, but in WeylData, PermutationGroupData,
-  // and other such classes.  If a Get*ByFormula method is included in the
+  // and other such classes.  If a Get*ByFormula method is included in
   // a particular FiniteGroup, it may require something pointed from specificDataPointer
   // which should usually be a PermutationGroupData for FiniteGroup<PermutationR2>
   // and so forth
@@ -154,6 +154,8 @@ public:
 
   // It is occasionally useful to a group that is formed as a subgroup of another
   // group to know about its relationship to its parent
+  // Currently, 'occasionally useful' means the GetWordByFormula method of subgroups
+  // that can use the TranslatableWordsSubgroupGetWordByFormula algorithm
   SubgroupData<FiniteGroup<elementSomeGroup>, elementSomeGroup>* parentRelationship;
 
   List<elementSomeGroup> generators;
@@ -939,6 +941,7 @@ class GroupHomomorphism
   GroupRepresentation<FiniteGroup<elementFirstGroup>, coefficient> PullbackRepresentation(GroupRepresentation<FiniteGroup<elementSecondGroup>, coefficient> M2)
   { GroupRepresentation<FiniteGroup<elementFirstGroup>, coefficient> out;
     out.ownerGroup = this->preimageGroup;
+    out.identifyingString = M2.identifyingString;
     out.generatorS.SetSize(this->preimageGroup->generators.size);
     for(int i=0; i<this->preimageGroup->generators.size; i++)
     { elementSecondGroup ki = (*this)(this->preimageGroup->generators[i]);

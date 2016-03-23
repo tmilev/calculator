@@ -1531,7 +1531,7 @@ template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::ComputeGeneratorCommutationRelations()
 { if(this->generatorCommutationRelations.NumRows == this->generators.size)
     return;
-  this->generatorCommutationRelations.init(this->generators.size, this-> generators.size);
+  this->generatorCommutationRelations.init(this->generators.size, this->generators.size);
   for(int i=0; i<this->generators.size; i++)
     for(int j=i; j<this->generators.size; j++)
     { elementSomeGroup g;
@@ -1617,8 +1617,7 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable(bool andPri
 { for(int i=0; i<this->irreps.size; i++)
     this->irreps[i].ComputeCharacter();
   std::stringstream out;
-  out << *this;
-  out << this->GetSize() << "elements.  Representatives and sizes are ";
+  out << this->GetSize() << " elements.  Representatives and sizes are ";
   for(int i=0; i<this->conjugacyClasseS.size; i++)
   { out << this->conjugacyClasseS[i].representative << " " << this->conjugacyClasseS[i].size;
     if(i != this->conjugacyClasseS.size-1)

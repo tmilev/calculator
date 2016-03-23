@@ -324,14 +324,14 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
   { int theRank = ranks[0];
     List<Partition> thePartitions;
     Partition::GetPartitions(thePartitions,theRank+1);
-    G.irreps.SetSize(thePartitions.size);
     for(int i=0; i<thePartitions.size; i++)
-    { thePartitions[i].SpechtModuleMatricesOfTranspositionsjjplusone(G.irreps[i].generatorS);
-      G.irreps[i].ownerGroup = &G;
-      G.irreps[i].identifyingString = thePartitions[i].ToString();
-      G.irreps[i].ComputeCharacter();
+    { GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> irrep;
+      thePartitions[i].SpechtModuleMatricesOfTranspositionsjjplusone(irrep.generatorS);
+      irrep.ownerGroup = &G;
+      irrep.identifyingString = thePartitions[i].ToString();
+      irrep.ComputeCharacter();
+      G.AddIrreducibleRepresentation(irrep);
     }
-    G.irreps.QuickSortAscending();
   }
   else if((letters.size == 1)&&(letters[0] == 'B'))
   { int theRank = ranks[0];
@@ -341,26 +341,45 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
     GroupHomomorphism<ElementWeylGroup<WeylGroupData>, ElementHyperoctahedralGroupR2> phi;
     phi.preimageGroup = &G;
     phi.generatorImages.SetSize(G.generators.size);
-    for(int i=0; i<phi.generatorImages.size; i++)
-    { phi.generatorImages[i].h.AddTransposition(i,i+1);
-      phi.generatorImages[0].k.ToggleBit(i+1);
-    }
-    G.irreps.SetSize(HOG.theGroup->irreps.size);
-    for(int i=0; i<HOG.theGroup->irreps.size; i++)
-      G.irreps[i] = phi.PullbackRepresentation(HOG.theGroup->irreps[i]);
+    for(int i=0; i<phi.generatorImages.size-1; i++)
+      phi.generatorImages[i].h.AddTransposition(i,i+1);
+    for(int i=0; i<phi.generatorImages.size-1; i++)
+      phi.generatorImages.LastObject()->k.ToggleBit(i);
     stOutput << "Generator commutation relations of groups\n";
     stOutput << HOG.theGroup->PrettyPrintGeneratorCommutationRelations();
     FiniteGroup<ElementHyperoctahedralGroupR2> phiG;
     phiG.generators = phi.generatorImages;
     stOutput << phiG.PrettyPrintGeneratorCommutationRelations();
     stOutput << G.PrettyPrintGeneratorCommutationRelations();
+    stOutput << "pulling back irreps:\n";
+    for(int i=0; i<HOG.theGroup->irreps.size; i++)
+    { auto irrep = phi.PullbackRepresentation(HOG.theGroup->irreps[i]);
+      irrep.ComputeCharacter();
+      stOutput << HOG.theGroup->irreps[i].theCharacteR << "->" << irrep.theCharacteR << '\n';
+      G.AddIrreducibleRepresentation(irrep);
+    }
   }
   else if((letters.size == 1) && (letters[0] == 'D'))
   { int theRank = ranks[0];
     HyperoctahedralGroupData HOG;
-    HOG.MakeHyperoctahedralGroup(theRank);
+    HOG.MakeHyperoctahedralGroup(theRank+1);
     GroupHomomorphism<ElementWeylGroup<WeylGroupData>, ElementHyperoctahedralGroupR2> inclusionMap;
+    inclusionMap.preimageGroup = &G;
+    inclusionMap.generatorImages.SetSize(G.generators.size);
+    for(int i=0; i<inclusionMap.generatorImages.size-1; i++)
+    { inclusionMap.generatorImages[i].h.AddTransposition(i,i+1);
+      inclusionMap.generatorImages[i].k.ToggleBit(i);
+      inclusionMap.generatorImages[i].k.ToggleBit(i+1);
+    }
+    int oneortwo = (inclusionMap.generatorImages.size+1)%2;
+    for(int i=0; i<inclusionMap.generatorImages.size-1-oneortwo; i++)
+      inclusionMap.generatorImages.LastObject()->k.ToggleBit(i);
+
+    FiniteGroup<ElementHyperoctahedralGroupR2> imG;
+    imG.generators = inclusionMap.generatorImages;
+
     stOutput << HOG.theGroup->PrettyPrintGeneratorCommutationRelations() << '\n';
+    stOutput << imG.PrettyPrintGeneratorCommutationRelations();
     stOutput << G.PrettyPrintGeneratorCommutationRelations() << '\n';
   }
 // silently fail instead of crashing to support calling into this and if it doesn't

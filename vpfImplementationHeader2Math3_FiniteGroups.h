@@ -2195,7 +2195,8 @@ void FiniteGroup<elementSomeGroup>::AddIrreducibleRepresentation(GroupRepresenta
 
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::AddIrreducibleRepresentation(GroupRepresentation<FiniteGroup<elementSomeGroup>, Rational>& p)
-{ this->irreps.BSInsertDontDup(p);
+{ p.ComputeCharacter();
+  this->irreps.BSInsertDontDup(p);
   this->characterTable.BSInsertDontDup(p.theCharacteR);
 }
 

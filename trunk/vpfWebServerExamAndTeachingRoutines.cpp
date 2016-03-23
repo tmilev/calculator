@@ -300,7 +300,7 @@ bool DatabaseRoutines::ReadProblemDatabaseInfo
     return false;
   if (!this->TableExists("problemData", &commentsOnFailure))
     if (!this->CreateTable("problemData", "problemCollection VARCHAR(255) NOT NULL PRIMARY KEY, \
-        problemInformation LONGTEXT", &commentsOnFailure))
+        problemInformation LONGTEXT", &commentsOnFailure, 0))
       return false;
   if (!this->RowExists
       ((std::string) "problemCollection", problemHomeName,
@@ -324,7 +324,7 @@ bool DatabaseRoutines::StoreProblemDatabaseInfo
     return false;
   if (!this->TableExists("problemData", &commentsOnFailure))
     if (!this->CreateTable("problemData", "problemCollection VARCHAR(255) NOT NULL PRIMARY KEY, \
-        problemInformation LONGTEXT", &commentsOnFailure))
+        problemInformation LONGTEXT", &commentsOnFailure, 0))
       return false;
   if (!this->RowExists
       ((std::string) "problemCollection", problemHomeName,
@@ -2144,7 +2144,7 @@ bool DatabaseRoutines::PrepareClassData
   if (!theRoutines.TableExists(classTableName, &commentsOnFailure))
     if (!theRoutines.CreateTable
         (classTableName, "username VARCHAR(255) NOT NULL PRIMARY KEY, \
-        extraInfo LONGTEXT ", &commentsOnFailure))
+        extraInfo LONGTEXT ", &commentsOnFailure, 0))
       return false;
   bool tableTruncated=false;
   int numRows=-1;

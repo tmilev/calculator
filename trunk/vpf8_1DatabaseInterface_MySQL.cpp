@@ -20,7 +20,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
       *comments << "Failed to start database. ";
     return false;
   }
-  if (!theRoutines.TableExists("users", comments))
+  if (!theRoutines.TableExists("users", comments) || theRoutines.flagFirstLogin)
   { if (theUser.enteredPassword!="" && theUser.username!="")
     { if (comments!=0)
         *comments << "<b>First login! Setting first password as the calculator admin pass. </b>";
@@ -179,7 +179,7 @@ bool DatabaseRoutinesGlobalFunctions::CreateTable
     return false;
   DatabaseRoutines theRoutines;
   theRoutines.startMySQLDatabaseIfNotAlreadyStarted(&comments);
-  return theRoutines.CreateTable(tableName,  "username VARCHAR(255) NOT NULL PRIMARY KEY  ", &comments);
+  return theRoutines.CreateTable(tableName,  "username VARCHAR(255) NOT NULL PRIMARY KEY  ", &comments, 0);
 #else
   return false;
 #endif
@@ -587,6 +587,7 @@ bool DatabaseRoutines::FetchTableFromDatabaseIdentifier
 DatabaseRoutines::DatabaseRoutines()
 { this->connection=0;
   this->MaxNumRowsToFetch=1000;
+  this->flagFirstLogin=false;
 }
 
 DatabaseRoutines::~DatabaseRoutines()
@@ -607,7 +608,7 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   this->numRowsRead=0;
 //  stOutput << "<hr> querying: " << inputQuery;
   if (this->parent->connection==0)
-    if (!this->parent->startMySQLDatabase(outputFailureComments))
+    if (!this->parent->startMySQLDatabase(outputFailureComments, 0))
     { if (outputFailureComments!=0)
         *outputFailureComments << "Failed to start database. ";
       return;
@@ -1036,10 +1037,10 @@ bool DatabaseRoutines::startMySQLDatabaseIfNotAlreadyStarted(std::stringstream* 
 { MacroRegisterFunctionWithName("DatabaseRoutines::startMySQLDatabaseIfNotAlreadyStarted");
   if (this->connection!=0)
     return true;
-  return this->startMySQLDatabase(commentsOnFailure);
+  return this->startMySQLDatabase(commentsOnFailure, &this->flagFirstLogin);
 }
 
-bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure)
+bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, bool* outputfirstLogin)
 { MacroRegisterFunctionWithName("DatabaseRoutines::startMySQLDatabase");
   if (theGlobalVariables.flagUsingBuiltInWebServer)
     if (!theGlobalVariables.flagUsingSSLinCurrentConnection &&
@@ -1086,7 +1087,7 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure)
     userRole LONGTEXT,\
     userInfo LONGTEXT, \
     problemData LONGTEXT \
-    ", commentsOnFailure);
+    ", commentsOnFailure, outputfirstLogin);
 }
 
 std::string DatabaseRoutines::GetTableUnsafeNameUsersOfFile(const std::string& inputFileName)
@@ -1094,7 +1095,7 @@ std::string DatabaseRoutines::GetTableUnsafeNameUsersOfFile(const std::string& i
 }
 
 bool DatabaseRoutines::CreateTable
-(const std::string& tableNameUnsafe, const std::string& desiredTableContent, std::stringstream* commentsOnCreation)
+(const std::string& tableNameUnsafe, const std::string& desiredTableContent, std::stringstream* commentsOnCreation, bool* outputTableNewlyCreated)
 { MacroRegisterFunctionWithName("DatabaseRoutines::CreateTable");
   if (tableNameUnsafe=="" )
   { if (commentsOnCreation!=0)
@@ -1102,7 +1103,10 @@ bool DatabaseRoutines::CreateTable
     return false;
   }
   if (this->TableExists(tableNameUnsafe, commentsOnCreation))
+  { if (outputTableNewlyCreated!=0)
+      *outputTableNewlyCreated=false;
     return true;
+  }
   MySQLdata tableName=tableNameUnsafe;
   std::stringstream theQuery;
   theQuery << "CREATE TABLE " << tableName.GetIdentifieR();
@@ -1120,6 +1124,8 @@ bool DatabaseRoutines::CreateTable
       << mysql_error(this->connection);
     return false;
   }
+  if (outputTableNewlyCreated!=0)
+    *outputTableNewlyCreated=true;
   mysql_free_result( mysql_use_result(this->connection));
   return true;
 }
@@ -1453,7 +1459,7 @@ bool DatabaseRoutines::AddUsersFromEmails
     return false;
   if (!this->TableExists(currentFileUsersTableName, &comments))
     if (!this->CreateTable(currentFileUsersTableName, "username VARCHAR(255) NOT NULL PRIMARY KEY, \
-        extraInfo LONGTEXT ", &comments))
+        extraInfo LONGTEXT ", &comments, 0))
       result=false;
   currentUser.currentTable="users";
   for (int i=0; i<theEmails.size; i++)
@@ -1851,7 +1857,7 @@ bool DatabaseRoutines::innerTestDatabase(Calculator& theCommands, const Expressi
   std::stringstream out;
   out << "Testing database ... Comments:<br>";
   std::stringstream comments;
-  theRoutines.startMySQLDatabase(&comments);
+  theRoutines.startMySQLDatabase(&comments, 0);
   out << comments.str();
   return output.AssignValue(out.str(), theCommands);
 }

@@ -19,6 +19,7 @@ class Calculator;
 extern logger theLog  ;
 extern logger logBlock;
 extern logger logIO   ;
+extern logger logOpenSSL   ;
 extern logger logProcessKills   ;
 extern logger logSocketAccept;
 extern logger logProcessStats;

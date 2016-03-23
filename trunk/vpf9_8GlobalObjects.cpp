@@ -28,6 +28,7 @@ logger logProcessKills( "./../output/LogFiles/LogMultiprocessing"+GetDateForLogF
 logger logPlumbing( "./../output/LogFiles/LogServerPlumbing"+GetDateForLogFiles()+".html");
 logger logSocketAccept( "./../output/LogFiles/LogSocketAccept"+GetDateForLogFiles()+".html");
 logger logProcessStats( "./../output/LogFiles/LogWorkerProcessStats"+GetDateForLogFiles()+".html");
+logger logOpenSSL( "./../output/LogFiles/LogOpenSSL"+GetDateForLogFiles()+".html");
 WebServer theWebServer;
 Calculator theParser;
 FormatExpressions consoleFormat;

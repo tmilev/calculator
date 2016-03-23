@@ -1313,13 +1313,12 @@ void HyperoctahedralGroupData::AllSpechtModules()
         this->SpechtModuleOfPartititons(pps[ppi],nps[npi],sm);
         //sm.VerifyRepresentation();
         stOutput << sm << '\n';
-        this->theGroup->irreps.AddOnTop(sm);
+        this->theGroup->AddIrreducibleRepresentation(sm);
       }
     }
   }
-  this->theGroup->irreps.QuickSortAscending();
   stOutput << this->theGroup->PrettyPrintCharacterTable() << '\n';
-  this->theGroup->RepresentationDataIntoJS().writefile("representations_hyperoctahedral_group");
+  //this->theGroup->RepresentationDataIntoJS().writefile("representations_hyperoctahedral_group");
 }
 
 /*

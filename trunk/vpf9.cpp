@@ -5019,7 +5019,7 @@ void WeylGroupData::MakeFromDynkinType(const DynkinType& inputType)
   List<int> ranks;
   this->theDynkinType.GetLettersTypesMults(&letters,&ranks,NULL);
   if(letters.size == 1)
-    if(ranks[0] == 1)
+    if(ranks.size == 1)
       if(letters[0] == 'A')
         this->theGroup.ComputeIrreducibleRepresentationsWithFormulas = this->ComputeIrreducibleRepresentationsWithFormulasImplementation;
 

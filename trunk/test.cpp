@@ -3513,16 +3513,16 @@ void TestInduction(int n=4, int m=3)
 //  Vector<Polynomial<Rational> > relations;
 //  lie_bracket_relations(relations, 3);
 
-void TestWeylIrreps(char letter, int number)
+void TestWeylIrrepsFormulas(char letter, int number)
 { WeylGroupData W;
   W.MakeArbitrarySimple(letter, number);
-  W.theGroup.ComputeIrreducibleRepresentations();
+  W.ComputeIrreducibleRepresentationsWithFormulasImplementation(W.theGroup);
 }
 
 void LegacyTest()
-{ TestWeylIrreps('A',4);
-  TestWeylIrreps('B',4);
-  TestWeylIrreps('D',4);
+{ TestWeylIrrepsFormulas('A',4);
+  TestWeylIrrepsFormulas('B',4);
+  TestWeylIrrepsFormulas('D',4);
 }
 
 void TestFiniteFields()
@@ -3570,13 +3570,13 @@ int mainTest(List<std::string>& inputArguments)
       } else
         TestInduction();
     }
-    if(inputArguments[0] == "TestWeylIrreps")
+    if(inputArguments[0] == "TestWeylIrrepsFormulas")
     { if(inputArguments.size == 3)
       { char l = (inputArguments[1].c_str())[0];
         int n = atoi(inputArguments[2].c_str());
-        TestWeylIrreps(l,n);
+        TestWeylIrrepsFormulas(l,n);
       } else
-        TestWeylIrreps('B',3);
+        TestWeylIrrepsFormulas('B',3);
     }
   }
 

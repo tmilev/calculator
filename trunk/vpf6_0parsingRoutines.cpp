@@ -827,7 +827,7 @@ std::string Calculator::ToStringIsCorrectAsciiCalculatorString(const std::string
 }
 
 bool Calculator::isStandardCalculatorCharacter(char input)
-{ if (32<=input && input<=126)
+{ if (input<=126)
     return true;
   return false;
 }

@@ -76,9 +76,11 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   << " html format instead.</b> "
   << " Below you can find the same table in pure LaTeX, "
   << " which you can render in a separate LaTeX session, should "
-  << " wish to do so on your own. " <<  theHtmlStream.str()
-  << "The above table in LaTex format follows. <hr>"
-  << theTableLateXStream.str() << "<hr>";
+  << " wish to do so on your own. " <<  theHtmlStream.str();
+  if (theFormat!=0)
+    if (theFormat->flagLatexDetailsInHtml)
+      out << "The above table in LaTex format follows. <hr>"
+      << theTableLateXStream.str() << "<hr>";
   return out.str();
 }
 

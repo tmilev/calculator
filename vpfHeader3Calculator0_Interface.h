@@ -828,6 +828,7 @@ public:
   bool flagUsePredefinedWordSplits;
 
   bool flagPlotShowJavascriptOnly;
+  bool flagPlotNoControls;
 
   bool flagLogSyntaxRules;
   bool flagUseLnInsteadOfLog;

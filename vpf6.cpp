@@ -1050,30 +1050,36 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   out << "<hr>Lie algebra type: " << theWeyl.theDynkinType << ". ";
 //  stOutput << "<br>DEBUG: time before calling weylgroup size: "
 //  << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
-
   out << "<br>Weyl group size: " << theWeyl.theGroup.GetSize().ToString() << "." << "<br>To get extra details: ";
 //  stOutput << "<br>DEBUG: time after weylgroup size: "
 //  << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
-
   std::stringstream tempStream;
   tempStream << "printSemisimpleLieAlgebra{}(" << theWeyl.theDynkinType << ")";
   out << theCommands.GetCalculatorLink(tempStream.str()) << "<br>";
   if (Verbose)
-  { out << " The resulting Lie bracket pairing table follows. <hr> " << theSSalgebra.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
-    out << "Ready for LaTeX consumption version of the first three columns: ";
-    out << "<br>%Add to preamble: <br>\\usepackage{longtable} <br>%Add to body: <br>"
-    << " \\begin{longtable}{ccc}generator & root simple coord. & root $\\varepsilon$-notation \\\\\\hline<br>\n";
-    Vector<Rational> tempRoot, tempRoot2;
-    ElementSemisimpleLieAlgebra<Rational> tempElt1;
-    for (int i=0; i<theSSalgebra.GetNumGenerators(); i++)
-    { tempElt1.MakeGenerator(i, theSSalgebra);
-      tempRoot=theSSalgebra.GetWeightOfGenerator(i);
-      theWeyl.GetEpsilonCoords(tempRoot, tempRoot2);
-      out << "$" << tempElt1.ToString(&theFormat) << "$&$"<< tempRoot.ToString() << "$";
-      out << "&$" << tempRoot2.ToStringLetterFormat("\\varepsilon") << "$";
-      out << "\\\\\n";
+  { DrawingVariables theDV;
+    theWeyl.DrawRootSystem(theDV, true, theGlobalVariables, true, 0, true, 0);
+    out << "<hr>Below is a drawing of the root system in its corresponding Coxeter plane (computed as explained on John Stembridge's website). "
+    << "<br>The darker red dots can be dragged with the mouse to rotate the picture.<br>The grey lines are the edges of the Weyl chamber.<br>"
+    << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+    out << theWeyl.ToStringRootsAndRootReflections();
+    out << " The resulting Lie bracket pairing table follows. <hr> " << theSSalgebra.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
+    if (theCommands.flagWriteLatexPlots)
+    { out << "Ready for LaTeX consumption version of the first three columns: ";
+      out << "<br>%Add to preamble: <br>\\usepackage{longtable} <br>%Add to body: <br>"
+      << " \\begin{longtable}{ccc}generator & root simple coord. & root $\\varepsilon$-notation \\\\\\hline<br>\n";
+      Vector<Rational> tempRoot, tempRoot2;
+      ElementSemisimpleLieAlgebra<Rational> tempElt1;
+      for (int i=0; i<theSSalgebra.GetNumGenerators(); i++)
+      { tempElt1.MakeGenerator(i, theSSalgebra);
+        tempRoot=theSSalgebra.GetWeightOfGenerator(i);
+        theWeyl.GetEpsilonCoords(tempRoot, tempRoot2);
+        out << "$" << tempElt1.ToString(&theFormat) << "$&$"<< tempRoot.ToString() << "$";
+        out << "&$" << tempRoot2.ToStringLetterFormat("\\varepsilon") << "$";
+        out << "\\\\\n";
+      }
+      out << "\\end{longtable}" << "<hr>";
     }
-    out << "\\end{longtable}" << "<hr>";
   }
   out << "We define the symmetric Cartan matrix <br>by requesting that the entry in the i-th row and j-th column<br> "
   << " be the scalar product of the i^th and j^th roots. The symmetric Cartan matrix is:<br>"
@@ -1149,14 +1155,6 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
         << ", the Symmetric Cartan matrix is " << theWeyl.CartanSymmetric.ToString() << ", and the  "
         << "transpose of the epsilon matrix times the epsilon matrix:  " << tempM2.ToString() << ". " << crash;
     }
-  if (Verbose)
-  { out << theWeyl.ToStringRootsAndRootReflections();
-    DrawingVariables theDV;
-    theWeyl.DrawRootSystem(theDV, true, theGlobalVariables, true, 0, true, 0);
-    out << "<hr>Below a drawing of the root system in its corresponding Coxeter plane (computed as explained on John Stembridge's website). "
-    << "<br>The darker red dots can be dragged with the mouse to rotate the picture.<br>The grey lines are the edges of the Weyl chamber.<br>"
-    << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
-  }
   return output.AssignValue<std::string>(out.str(), theCommands);
 }
 

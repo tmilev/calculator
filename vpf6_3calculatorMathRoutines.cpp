@@ -4192,18 +4192,29 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
     << " the last two arguments stands for the variable range.";
   if (input.HasBoundVariables())
     return false;
-  if (input.children.size!=5)
-    return theCommands << "At the moment I can draw on curves sitting in 2d space. ";
+  int desiredHtmlHeightPixels=400;
+  int desiredHtmlWidthPixels=400;
+  if (input.children.size>=7)
+  { if (!input[5].IsSmallInteger(&desiredHtmlWidthPixels))
+      desiredHtmlWidthPixels=400;
+    if (!input[6].IsSmallInteger(&desiredHtmlHeightPixels))
+      desiredHtmlHeightPixels=400;
+  }
+  std::string colorString;
+  int colorTripleRGB=CGI::RedGreenBlue(255, 0, 0);
+  if (input.children.size>=8)
+    if (input[7].IsOfType<std::string>(&colorString))
+      DrawingVariables::GetColorIntFromColorString(colorString, colorTripleRGB);
   List<Expression> theConvertedExpressions;
   theConvertedExpressions.SetSize(input.children.size-3);
-  for (int i=1; i<input.children.size-2; i++)
+  for (int i=1; i<3; i++)
     if (!theCommands.CallCalculatorFunction(Calculator::innerSuffixNotationForPostScript, input[i], theConvertedExpressions[i-1]))
       return theCommands << "Failed to extract suffix notation from argument " << input[i].ToString();
   double leftEndPoint, rightEndPoint;
-  if (!input[input.children.size-2].EvaluatesToDouble(&leftEndPoint) ||
-      !input[input.children.size-1].EvaluatesToDouble(&rightEndPoint))
-    return theCommands << "Failed to convert " << input[input.children.size-2].ToString() << " and "
-    << input[input.children.size-1].ToString() << " to left and right endpoint of parameter interval. ";
+  if (!input[3].EvaluatesToDouble(&leftEndPoint) ||
+      !input[4].EvaluatesToDouble(&rightEndPoint))
+    return theCommands << "Failed to convert " << input[3].ToString() << " and "
+    << input[4].ToString() << " to left and right endpoint of parameter interval. ";
   std::stringstream outLatex, outHtml;
   outLatex << "\\parametricplot[linecolor=\\fcColorGraph, plotpoints=1000]{" << leftEndPoint << "}{" << rightEndPoint << "}{"
   << theConvertedExpressions[0].GetValue<std::string>() << theConvertedExpressions[1].GetValue<std::string>() << "}";
@@ -4211,8 +4222,8 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
   << "<br>\\parametricplot[linecolor=\\fcColorGraph, plotpoints=1000]{" << leftEndPoint << "}{" << rightEndPoint << "}{"
   << theConvertedExpressions[0].GetValue<std::string>() << theConvertedExpressions[1].GetValue<std::string>() << "}";
   PlotObject thePlot;
+  thePlot.colorRGB=colorTripleRGB;
   Vectors<double> theXs, theYs;
-
   if (!input[1].EvaluatesToDoubleInRange
       ("t", leftEndPoint, rightEndPoint, 1000, &thePlot.xLow, &thePlot.xHigh, &theXs))
     return theCommands << "<hr>Failed to evaluate curve function. ";
@@ -4228,7 +4239,11 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
   thePlot.thePlotElement=input;
   thePlot.thePlotString=outLatex.str();
   thePlot.thePlotStringWithHtml=outHtml.str();
-  return output.AssignValue(thePlot, theCommands);
+  Plot outputPlot;
+  outputPlot.DesiredHtmlHeightInPixels=desiredHtmlHeightPixels;
+  outputPlot.DesiredHtmlWidthInPixels=desiredHtmlWidthPixels;
+  outputPlot.thePlots.AddOnTop(thePlot);
+  return output.AssignValue(outputPlot, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerPlotConeUsualProjection(Calculator& theCommands, const Expression& input, Expression& output)

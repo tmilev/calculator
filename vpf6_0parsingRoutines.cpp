@@ -820,14 +820,14 @@ std::string Calculator::ToStringIsCorrectAsciiCalculatorString(const std::string
     << theBadChars.ToStringCommaDelimited() << ", ";
     List<int> ListInt;
     ListInt =theBadChars;
-    out << "with respective code numbers: " << ListInt.ToStringCommaDelimited();
-    out << " Perhaps you copy+pasted from webpage/pdf file? ";
+    out << "with respective code numbers: " << ListInt.ToStringCommaDelimited() << ". ";
+    out << " Perhaps you copy+pasted from webpage/pdf file or are using non-English keyboard setup? ";
   }
   return out.str();
 }
 
 bool Calculator::isStandardCalculatorCharacter(char input)
-{ if (input<=126)
+{ if (10<=input && input<=126)
     return true;
   return false;
 }

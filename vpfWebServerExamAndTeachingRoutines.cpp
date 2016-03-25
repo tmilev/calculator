@@ -1376,9 +1376,12 @@ int WebWorker::ProcessSubmitProblem()
   { stOutput << "\\(" << theProblem.studentAnswersUnadulterated[i] << "\\)";
     errorMessage=theInterpreter.ToStringIsCorrectAsciiCalculatorString(theProblem.studentAnswersUnadulterated[i]);
     if (errorMessage!="")
-      stOutput << "<br>" << errorMessage << "<br> <span style=\"color:red\">Presence of non-standard characters"
-      << " may be caused by copy+pasting your answer from a web site. "
-      << "<br>Copying and pasting an answer not computed by yourself is considered cheating. </span>";
+      stOutput << "<br>" << errorMessage
+      << "<hr><b>If you entered this expression through the keyboard (without copying + pasting) this is a bug: "
+      << "please report it to Todor Milev. Don't forget to mention your keyboard/character setup. "
+      << "Are you using the standard English keyboard? Cyrillic, Chinese, etc. characters are not accepted. </b> "
+      << "<hr><span style=\"color:red\"><b>Copying and pasting an answer not computed by yourself "
+      << " is considered cheating (example: answer from an online program for doing homework).</b> </span>";
     if (i<theProblem.studentAnswersUnadulterated.size-1)
       stOutput << "<br>";
   }

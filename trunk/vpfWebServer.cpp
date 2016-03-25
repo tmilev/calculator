@@ -2277,10 +2277,12 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "  return \"\";\n"
   << "}\n"
   << "\n"
-  << "function addCookie(theName, theValue, exdays)\n"
+  << "function addCookie(theName, theValue, exdays, secure)\n"
   << "{ exdate= new Date();\n"
   << "  exdate.setDate(exdate.getDate() + exdays);\n"
-  << "  c_value=escape(theValue) + ((exdays==null) ? \"\" : \"; expires=\"+exdate.toUTCString());\n"
+  << "  c_value=escape(theValue) + ((exdays==null) ? \"\" : \"; expires=\"+exdate.toUTCString());"
+  << "  if(secure)\n"
+  << "    c_value+=\"; secure;\"; \n"
   << "  document.cookie=theName + \"=\" + c_value;\n"
   << "}\n"
   << "function storeSettings()\n"
@@ -2295,21 +2297,21 @@ std::string WebWorker::GetJavascriptStandardCookies()
   out
   << "function storeSettingsProgress(){\n";
   if (theGlobalVariables.GetWebInput("debugFlag")!="")
-    out << "  addCookie(\"debugFlag\", \"" << theGlobalVariables.GetWebInput("debugFlag") << "\", 100);  \n";
+    out << "  addCookie(\"debugFlag\", \"" << theGlobalVariables.GetWebInput("debugFlag") << "\", 100, false);  \n";
   if (theGlobalVariables.GetWebInput("studentSection")!="")
-    out << "  addCookie(\"studentSection\", \"" << theGlobalVariables.GetWebInput("studentSection") << "\", 100);  \n";
+    out << "  addCookie(\"studentSection\", \"" << theGlobalVariables.GetWebInput("studentSection") << "\", 100, true);  \n";
   if (theGlobalVariables.GetWebInput("studentView")!="")
-    out << "  addCookie(\"studentView\", \"" << theGlobalVariables.GetWebInput("studentView") << "\", 100);  \n";
+    out << "  addCookie(\"studentView\", \"" << theGlobalVariables.GetWebInput("studentView") << "\", 100, true);  \n";
   if (this->IsAllowedAsRequestCookie(theGlobalVariables.userCalculatorRequestType))
-    out << "  addCookie(\"request\", \"" << theGlobalVariables.userCalculatorRequestType << "\", 100);\n";
+    out << "  addCookie(\"request\", \"" << theGlobalVariables.userCalculatorRequestType << "\", 100, false);\n";
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType!="" &&
       theGlobalVariables.userCalculatorRequestType!="compute")
   { out << "  addCookie(\"currentExamFile\", \""
-    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile")) << "\", 100);\n";
+    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile")) << "\", 100, true);\n";
     out << "  addCookie(\"currentExamHome\", \""
-    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome")) << "\", 100);\n";
+    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome")) << "\", 100, true);\n";
     out << "  addCookie(\"currentExamIntermediate\", \""
-    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate")) << "\", 100);\n";
+    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate")) << "\", 100, true);\n";
   }
   out
   << "}\n";
@@ -2317,9 +2319,9 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "function storeSettingsSecurity(){\n";
   if (theGlobalVariables.flagLoggedIn)
   { out << "   addCookie(\"authenticationToken\", \""
-    << this->authenticationToken << "\", 150);"
+    << this->authenticationToken << "\", 150, true);"
     << "//150 days is a little longer than a semester\n"
-    << "  addCookie(\"username\", \"" << theGlobalVariables.userDefault << "\", 150);\n";
+    << "  addCookie(\"username\", \"" << theGlobalVariables.userDefault << "\", 150, true);\n";
   }
   if (theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs ||
       theGlobalVariables.flagUsingSSLinCurrentConnection)
@@ -2328,7 +2330,7 @@ std::string WebWorker::GetJavascriptStandardCookies()
       out << "true";
     else
       out << "false";
-    out << "\", 150);\n"
+    out << "\", 150, false);\n"
     ;
   }
   out

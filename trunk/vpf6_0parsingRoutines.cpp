@@ -805,6 +805,33 @@ bool Calculator::ReplaceAXbyEX()
   return true;
 }
 
+std::string Calculator::ToStringIsCorrectAsciiCalculatorString(const std::string& input)
+{ std::stringstream out;
+  HashedList<char, MathRoutines::hashChar> theBadChars;
+/*  List<int> charCodes;
+  for (unsigned i=0; i<input.size(); i++)
+    charCodes.AddOnTop(input[i]);
+  out << "DEBUG: char codes: " << charCodes.ToStringCommaDelimited();*/
+  for (unsigned i=0; i<input.size(); i++)
+    if (!this->isStandardCalculatorCharacter(input[i]))
+      theBadChars.AddOnTopNoRepetition(input[i]);
+  if (theBadChars.size>0)
+  { out << "Non-ascii characters detected in your input, namely: "
+    << theBadChars.ToStringCommaDelimited() << ", ";
+    List<int> ListInt;
+    ListInt =theBadChars;
+    out << "with respective code numbers: " << ListInt.ToStringCommaDelimited();
+    out << " Perhaps you copy+pasted from webpage/pdf file? ";
+  }
+  return out.str();
+}
+
+bool Calculator::isStandardCalculatorCharacter(char input)
+{ if (32<=input && input<=126)
+    return true;
+  return false;
+}
+
 bool Calculator::AllowsApplyFunctionInPreceding(const std::string& lookAhead)
 { return lookAhead!="{" && lookAhead!="_" && lookAhead!="\\circ" && lookAhead!="{}" &&  lookAhead!="$";
 }

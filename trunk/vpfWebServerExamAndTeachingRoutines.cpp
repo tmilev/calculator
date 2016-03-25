@@ -1371,8 +1371,14 @@ int WebWorker::ProcessSubmitProblem()
     //stOutput << "<tr><td><b>Submitting problem solutions allowed only for logged-in users. </b></td></tr>";
 #endif
   stOutput << "<tr><td>Your answer was: ";
+  std::string errorMessage;
   for (int i=0; i< theProblem.studentAnswersUnadulterated.size; i++ )
   { stOutput << "\\(" << theProblem.studentAnswersUnadulterated[i] << "\\)";
+    errorMessage=theInterpreter.ToStringIsCorrectAsciiCalculatorString(theProblem.studentAnswersUnadulterated[i]);
+    if (errorMessage!="")
+      stOutput << "<br>" << errorMessage << "<br> <span style=\"color:red\">Presence of non-standard characters"
+      << " may be caused by copy+pasting your answer from a web site. "
+      << "<br>Copying and pasting an answer not computed by yourself is considered cheating. </span>";
     if (i<theProblem.studentAnswersUnadulterated.size-1)
       stOutput << "<br>";
   }

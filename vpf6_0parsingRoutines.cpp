@@ -588,8 +588,11 @@ bool Calculator::isLeftSeparator(unsigned char c)
 bool Calculator::isInterpretedAsEmptySpace(const std::string& input)
 { if (input.size()!=1)
     return false;
-  unsigned char x= (unsigned) input[0];//<-Optimization DANGER
-  switch (x)
+  return this->isInterpretedAsEmptySpace(input[0]);
+}
+
+bool Calculator::isInterpretedAsEmptySpace(unsigned char input)
+{ switch (input)
   {
   case '\n': //numerical value: 10
   case '~':
@@ -599,6 +602,7 @@ bool Calculator::isInterpretedAsEmptySpace(const std::string& input)
     return true;
   default: return false;
   }
+  return false;
 }
 
 void Calculator::ParseFillDictionary(const std::string& input)
@@ -828,6 +832,8 @@ std::string Calculator::ToStringIsCorrectAsciiCalculatorString(const std::string
 
 bool Calculator::isStandardCalculatorCharacter(char input)
 { if (10<=input && input<=126)
+    return true;
+  if (this->isInterpretedAsEmptySpace(input))
     return true;
   return false;
 }

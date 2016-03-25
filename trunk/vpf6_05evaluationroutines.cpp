@@ -553,6 +553,8 @@ void Calculator::EvaluateCommands()
   theGlobalVariables.theDefaultFormat.GetElement().flagUseLatex=true;
   theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal=true;
   theGlobalVariables.theDefaultFormat.GetElement().flagExpressionNewLineAllowed=true;
+  theGlobalVariables.theDefaultFormat.GetElement().flagIncludeExtraHtmlDescriptionsInPlots=!this->flagPlotNoControls;
+  theGlobalVariables.theDefaultFormat.GetElement().flagLatexDetailsInHtml=this->flagWriteLatexPlots;
   if(usingCommandline)
   { out << "Input: " << "\e[1;32m" << StartingExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\033[0m" << std::endl;
     out << "Output: " << "\e[1;33m" << this->theProgramExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\033[0m" << std::endl;

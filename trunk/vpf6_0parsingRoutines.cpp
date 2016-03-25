@@ -58,6 +58,9 @@ void Calculator::reset()
   this->flagCurrentExpressionIsNonCacheable=false;
   this->flagDefaultRulesWereTamperedWith=false;
   this->flagUsePredefinedWordSplits=true;
+  this->flagPlotNoControls=false;
+  this->flagPlotShowJavascriptOnly=false;
+
   this->MaxLatexChars=2000;
   this->numEmptyTokensStart=9;
   this->theObjectContainer.reset();
@@ -262,6 +265,7 @@ void Calculator::init()
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogFull");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("DontUsePredefinedWordSplits");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("PlotShowJavascriptOnly");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("PlotNoCoordinateDetails");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LatexLink");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("UseLnInsteadOfLog");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("CalculatorStatus");
@@ -1278,9 +1282,21 @@ bool Calculator::ApplyOneRule()
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
+  if (secondToLastS=="%" && lastS=="WriteLatexDetails")
+  { this->flagWriteLatexPlots=true;
+    this->Comments << "Creating LaTeX files.";
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
   if (secondToLastS=="%" && lastS=="PlotShowJavascriptOnly")
   { this->flagPlotShowJavascriptOnly=true;
     this->Comments << "Plots show javascript only. ";
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
+  if (secondToLastS=="%" && lastS=="PlotNoCoordinateDetails")
+  { this->flagPlotNoControls=true;
+    this->Comments << "Plot details suppressed. ";
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }

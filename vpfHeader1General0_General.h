@@ -310,6 +310,9 @@ public:
   }
   inline static unsigned int ListIntsHash(const List<int>& input);
   static unsigned int hashString(const std::string& x);
+  static unsigned int hashChar(const char& x)
+  { return x;
+  }
   template <class Element>
   static void LieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output);
   template <typename number>

@@ -959,13 +959,14 @@ public:
   std::string ToStringSyntacticStackHumanReadable(bool includeLispifiedExpressions);
   std::string WriteDefaultLatexFileReturnHtmlLink(const std::string& fileContent, bool useLatexDviPSpsToPNG=false);
   std::string GetCalculatorLink(const std::string& input);
+  std::string ToStringIsCorrectAsciiCalculatorString(const std::string& input);
   bool isInterpretedAsEmptySpace(const std::string& input);
   bool isSeparatorFromTheLeftGeneral(const std::string& input);
   bool isSeparatorFromTheLeftForDefinition(const std::string& input);
   bool isSeparatorFromTheLeftForList(const std::string& input);
   bool isSeparatorFromTheLeftForListMatrixRow(const std::string& input);
   bool isSeparatorFromTheLeftForMatrixRow(const std::string& input);
-
+  bool isStandardCalculatorCharacter(char input);
   bool isSeparatorFromTheRightGeneral(const std::string& input);
   bool isSeparatorFromTheRightForDefinition(const std::string& input);
   bool isSeparatorFromTheRightForList(const std::string& input);

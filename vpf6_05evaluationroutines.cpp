@@ -557,10 +557,17 @@ void Calculator::EvaluateCommands()
   { out << "Input: " << "\e[1;32m" << StartingExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\033[0m" << std::endl;
     out << "Output: " << "\e[1;33m" << this->theProgramExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\033[0m" << std::endl;
   } else if (!this->flagDisplayFullExpressionTree)
+  { std::string badCharsString=this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
+    if (badCharsString!="")
+      out << badCharsString << "<hr>";
     out << this->theProgramExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement(), &StartingExpression);
-  else
+  } else
+  { std::string badCharsString=this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
+    if (badCharsString!="")
+      out << badCharsString << "<hr>";
     out << "<hr>Input:<br> " << StartingExpression.ToStringFull() << "<hr>"
     << "Output:<br>" << this->theProgramExpression.ToStringFull();
+  }
   this->outputString=out.str();
   std::stringstream commentsStream;
   if (this->theObjectContainer.theAlgebraicClosure.theBasisMultiplicative.size>1)

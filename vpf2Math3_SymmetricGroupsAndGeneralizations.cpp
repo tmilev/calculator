@@ -545,7 +545,7 @@ void PermutationR2::MakeFromString(const std::string& cppin)
 { const char* in = cppin.c_str();
   int insize = cppin.length();
   List<List<int> > cycles;
-  int curintstart;
+  int curintstart=-1;
   for(int i=0; i<insize; i++)
   { switch(in[i])
     {

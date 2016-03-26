@@ -767,10 +767,10 @@ D-B;\
    The function assumes the freecalc project is installed in a folder called freecalc, \
    parallel to the calculator project folder (i.e, we have folders /vectorpartition and /freecalc next to one another).\
    The folders are given relative to the /freecalc base.",
-   "BuildFreecalc (\"lectures/UMB-M141-2016-Spring/Lecture_2016_Spring_Calculus_II_Math_141.tex\");\
-   \nBuildFreecalc(\"lectures/UMB-M140-2016-Spring/Lecture_2016_Spring_Calculus_I_Math_140.tex\");\
-   \nBuildFreecalc(\"homework/UMB-M141-2016-Spring/Homework_2016_Spring_Calculus_II_Math_141.tex\");\
-   \nBuildFreecalc(\"homework/UMB-M140-2016-Spring/Homework_2016_Spring_Calculus_I_Math_140.tex\");\
+   "BuildFreecalc (\"lectures/UMB-Reference-Lectures/Calculus_I.tex\");\
+   \nBuildFreecalc(\"lectures/UMB-Reference-Lectures/Calculus_II.tex\");\
+   \nBuildFreecalc(\"homework/UMB-UMB-All-Problems-By-Course/Homework_Calculus_I.tex\");\
+   \nBuildFreecalc(\"homework/UMB-UMB-All-Problems-By-Course/Homework_Calculus_II.tex\");\
    ", true, false
    , "CalculatorFunctionsGeneral::innerBuildFreecalc")
    ;

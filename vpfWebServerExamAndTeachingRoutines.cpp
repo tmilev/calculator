@@ -1833,7 +1833,8 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   out << theGlobalVariables.ToStringNavigation();
   List<std::string> randomSeedContainer;
   randomSeedContainer.AddOnTop("randomSeed");
-  std::string calcArgsNoPassExamDetails=theGlobalVariables.ToStringCalcArgsNoNavigation(&randomSeedContainer);
+  std::string calcArgsNoPassExamDetails=
+  theGlobalVariables.ToStringCalcArgsNoNavigation(&randomSeedContainer);
   if (theGlobalVariables.UserDefaultHasAdminRights())
   { if (theGlobalVariables.UserStudentViewOn())
       out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"

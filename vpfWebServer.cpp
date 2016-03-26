@@ -1379,6 +1379,13 @@ int WebWorker::ProcessCalculatorExamples()
   return 0;
 }
 
+int WebWorker::ProcessServerStatusPublic()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessServerStatusPublic");
+  stOutput << theWebServer.ToStringStatusPublic();
+  stOutput.Flush();
+  return 0;
+}
+
 int WebWorker::ProcessServerStatus()
 { MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestServerStatus");
   stOutput << "<html>"
@@ -1852,6 +1859,8 @@ int WebWorker::ProcessCalculator()
     return this->ProcessPauseWorker();
   if (theGlobalVariables.userCalculatorRequestType=="status")
     return this->ProcessServerStatus();
+  if (theGlobalVariables.userCalculatorRequestType=="statusPublic")
+    return this->ProcessServerStatusPublic();
   if (theGlobalVariables.userCalculatorRequestType=="indicator")
     return this->ProcessComputationIndicator();
   if (theGlobalVariables.userCalculatorRequestType=="monitor")
@@ -2845,6 +2854,42 @@ std::string WebServer::ToStringStatusActive()
   if (this->activeWorker!=this->GetActiveWorker().indexInParent)
     crash << "Bad index in parent!" << crash;
   out << this->GetActiveWorker().ToStringStatus();
+  return out.str();
+}
+
+std::string WebServer::ToStringStatusPublic()
+{ MacroRegisterFunctionWithName("WebServer::ToStringStatusPublic");
+  std::stringstream out;
+
+  out << "<html><body>"
+  << "<b>The calculator web server server status.</b><hr>"
+  << this->NumConnectionsSoFar << " connections served since last restart. "
+  << "(One computation per problem answer preview, page visit, progress report ping, etc). "
+  << "<br>" << this->GetActiveWorker().timeOfLastPingServerSideOnly
+  << " seconds =~"
+  << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
+  (this->GetActiveWorker().timeOfLastPingServerSideOnly, false)
+  << " web server uptime. ";
+  out << "<br>" << this->theWorkers.size  << " = peak number of concurrent connections. "
+  << " The number tends to be high as many browsers open more than one connection per page visit. <br>"
+  << this->MaxTotalUsedWorkers << " global maximum of simultaneous non-closed connections allowed. "
+  << "When the limit is exceeded, a random connection will be terminated. "
+  << "<br>  " << this->MaxNumWorkersPerIPAdress
+  << " maximum simultaneous connection per IP address. "
+  << "When the limit is exceeded, a random connection from that IP address will be terminated. "
+  ;
+  std::string topString= theGlobalVariables.CallSystemWithOutput("top -b -n 1 -s");
+  //out << "<br>" << topString;
+  std::string lineString, wordString;
+  std::stringstream topStream(topString);
+  out << "<hr><b>Server machine details.</b><br>";
+  for (int i=0; i<5; i++)
+  { std::getline(topStream, lineString);
+    out << lineString << "<br>\n ";
+  }
+  out << "The source code of the web server and the entire calculator can be found here: "
+  << "<a href=\"https://sourceforge.net/p/vectorpartition/code/HEAD/tree/\">calculator source code</a>. ";
+  out << "</body></html>";
   return out.str();
 }
 

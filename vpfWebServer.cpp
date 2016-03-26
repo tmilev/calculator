@@ -2864,9 +2864,9 @@ std::string WebServer::ToStringStatusPublic()
   out << "<html><body>"
   << "<b>The calculator web server server status.</b><hr>"
   << this->NumConnectionsSoFar << " connections served since last restart. "
-  << "(One computation per problem answer preview, page visit, progress report ping, etc). "
+  << "(One connection per problem answer preview, page visit, progress report ping, etc). "
   << "<br>" << this->GetActiveWorker().timeOfLastPingServerSideOnly
-  << " seconds =~"
+  << " seconds = "
   << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
   (this->GetActiveWorker().timeOfLastPingServerSideOnly, false)
   << " web server uptime. ";

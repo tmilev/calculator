@@ -2164,7 +2164,7 @@ int WebWorker::ProcessChangePassword()
   //stOutput << " ere i am";
 //  if (theGlobalVariables.UserDebugFlagOn())
   theGlobalVariables.SetWebInput("debugFlag", "true");
-  stOutput << "DEBUG: " << this->ToStringCalculatorArgumentsHumanReadable();
+//  stOutput << "DEBUG: " << this->ToStringCalculatorArgumentsHumanReadable();
   this->authenticationToken="";
   if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection)
   { stOutput << "<span style=\"color:red\"><b> Password change available only to logged in users via SSL.</b></span>";

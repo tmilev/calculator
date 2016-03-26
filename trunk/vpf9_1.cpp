@@ -239,8 +239,17 @@ bool GlobalVariables::UserDefaultHasAdminRights()
 { return this->flagLoggedIn && (this->userRole=="admin") && !this->flagIgnoreSecurityToWorkaroundSafarisBugs;
 }
 
+bool GlobalVariables::UserGuestMode()
+{ return this->userCalculatorRequestType=="exercisesNoLogin" ||
+  this->userCalculatorRequestType=="problemGiveUpNoLogin" ||
+  this->userCalculatorRequestType=="submitExerciseNoLogin" ||
+  this->userCalculatorRequestType=="submitExercisePreviewNoLogin" ;
+}
+
 bool GlobalVariables::UserRequestRequiresLoadingRealExamData()
-{ return this->flagLoggedIn &&
+{ if (this->UserGuestMode())
+    return false;
+  return this->flagLoggedIn &&
   (this->userCalculatorRequestType=="examForReal" || this->userCalculatorRequestType=="submitProblem" ||
    this->userCalculatorRequestType=="submitProblemPreview");
 }
@@ -291,17 +300,18 @@ std::string GlobalVariables::ToStringNavigation()
     out << "<b>Calculator</b><br>";
   if (theGlobalVariables.userCalculatorRequestType!="exercises" &&
       theGlobalVariables.userCalculatorRequestType!="examForReal" )
-    out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=exercises&"
-    << this->ToStringCalcArgsNoNavigation()
-    << "\">Exercises</a><hr>";
-  else
+  { if (theGlobalVariables.flagUsingSSLinCurrentConnection)
+      out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=exercises&"
+      << this->ToStringCalcArgsNoNavigation()
+      << "\">Exercises</a><hr>";
+  } else
     out << "<b>Exercises</b><hr>";
   return out.str();
 }
 
 std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude)
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringCalcArgsNoNavigation");
-  if (!this->flagLoggedIn)
+  if (!this->flagLoggedIn && !this->UserGuestMode())
     return "";
   std::stringstream out;
   for (int i =0; i<this->webFormArgumentNames.size; i++)

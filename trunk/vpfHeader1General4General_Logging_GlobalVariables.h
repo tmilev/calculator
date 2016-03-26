@@ -139,6 +139,7 @@ public:
   std::string DisplayNameExtraOutputWithPath;
   std::string DisplayNameExecutableWithPath;
   std::string DisplayNameCalculatorWithPath;
+  std::string DisplayNameCalculatorWithPathHTTPS;
   std::string DisplayNameProgressReport;
 
   std::string IPAdressCaller;
@@ -185,6 +186,7 @@ public:
 (const std::string& inputUserStringRAW,
  const std::string& inputUserStringCivilized);
   bool UserSecureNonAdminOperationsAllowed();
+  bool UserGuestMode();
   bool UserDebugFlagOn();
   bool UserStudentViewOn();
 //  void operator=(const GlobalVariables& other)

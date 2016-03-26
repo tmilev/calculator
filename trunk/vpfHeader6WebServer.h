@@ -173,6 +173,8 @@ public:
   MonomialCollection<MonomialWrapper<std::string, MathRoutines::hashString>, LargeInt> currentlyConnectedAddresses;
   List<std::string> PortsITryHttp;
   List<std::string> PortsITryHttpSSL;
+  std::string httpPort;
+  std::string httpSSLPort;
   List<int> theListeningSockets;
 //  List<int> theListeningSocketsReadyToAccept;
   ListReferences<WebWorker> theWorkers;

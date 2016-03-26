@@ -63,6 +63,7 @@ public:
   int ProcessModifyPage();
   int ProcessAddUserEmails();
   int ProcessServerStatus();
+  int ProcessServerStatusPublic();
   int ProcessComputationIndicator();
   int ProcessEditPage();
   int ProcessNonCalculator();
@@ -229,6 +230,7 @@ public:
   std::string ToStringLastErrorDescription();
   std::string ToStringStatusActive();
   std::string ToStringStatusAll();
+  std::string ToStringStatusPublic();
 };
 
 class ProgressReportWebServer

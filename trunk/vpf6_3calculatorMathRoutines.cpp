@@ -5777,6 +5777,10 @@ bool LaTeXcrawler::ExtractFileNamesFromRelativeFileName()
 
 void LaTeXcrawler::BuildFreecalc()
 { MacroRegisterFunctionWithName("LaTeXcrawler::BuildFreecalc");
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { this->displayResult << "Build freecalc command allowed only for logged-in admins.";
+    return;
+  }
   if (!this->ExtractFileNamesFromRelativeFileName())
     return;
   std::fstream inputFile;
@@ -5845,8 +5849,8 @@ void LaTeXcrawler::BuildFreecalc()
     if (desiredName=="")
       this->displayResult << "Failed to extract desired homework/lecture name from: " << buffer
       << "<br>This is the line immediately after the \\lect command. It should begin with the string \"%DesiredLectureName: \""
-      << "(<-has space bar in the end). The name itself should not contain the characters . / or \\"
-      << "I am assigning an automatic file name.";
+      << "(<-has space bar in the end). The name itself should not contain the characters . / or \\. "
+      << "I am assigning an automatic file name. <br>";
     theLectureDesiredNames.AddOnTop(desiredName);
   }
   reportStream << " done. Extracted: " << theLectureNumbers.size << " homework/lecture numbers. Preparing Homework/Lecture content ... ";
@@ -5889,25 +5893,28 @@ void LaTeXcrawler::BuildFreecalc()
     this->displayResult << "<table><tr><td>Homework number</td><td>Homework name</td><td>Homework pdf</td>"
     << "<td>Homework handout pdf</td><td>Comments</td></tr>";
   std::string lectureFileNameEnd;
-  std::string lecturePrintableFolder="lectures-printable/";
-  std::string lectureProjectorFolder="lectures-projector/";
   if (!MathRoutines::StringBeginsWith(this->theFileToCrawlNoPathPhysical, "Lecture_", &lectureFileNameEnd))
     if (!MathRoutines::StringBeginsWith(this->theFileToCrawlNoPathPhysical, "Homework_", &lectureFileNameEnd))
       lectureFileNameEnd="";
-  if (lectureFileNameEnd=="")
-  { lecturePrintableFolder="lectures_printable_" +this->theFileToCrawlNoPathPhysical + "/";
-    lectureProjectorFolder="lectures_projector_" +this->theFileToCrawlNoPathPhysical + "/";
-  }
+  std::string folderEnd=this->theFileToCrawlNoPathPhysical.substr(0, this->theFileToCrawlNoPathPhysical.size()-4);
+  std::string printableFolder;
+  std::string lectureProjectorFolder="lectures_projector_" + folderEnd + "/";
+  if (!isLecturE)
+    printableFolder="homework_" + folderEnd + "/";
+  else
+    printableFolder="lectures_printable_" + folderEnd + "/";
   if (lectureFileNameEnd.size()>4)
     lectureFileNameEnd=lectureFileNameEnd.substr(0, lectureFileNameEnd.size()-4);
   std::stringstream executedCommands, resultTable;
-  executedCommands << "Commands executed: ";
-  std::string currentSysCommand="ch " + this->baseFolderStartFilePhysical+"\n\n\n\n";
-  executedCommands << "<br>" << currentSysCommand;
-  reportStream << "<br>Directory changed: " << currentSysCommand;
+  std::string currentSysCommand; //"ch " + this->baseFolderStartFilePhysical+"\n\n\n\n";
+  //executedCommands << "<br>" << currentSysCommand;
   theGlobalVariables.ChDir(this->baseFolderStartFilePhysical);
-  theGlobalVariables.CallSystemNoOutput("mkdir "+lecturePrintableFolder);
-  theGlobalVariables.CallSystemNoOutput("mkdir "+lectureProjectorFolder);
+  executedCommands << "Commands executed: "
+  << "<br>Directory changed: " << this->baseFolderStartFilePhysical;
+  reportStream << "<br>Directory changed: " << this->baseFolderStartFilePhysical;
+  theGlobalVariables.CallSystemNoOutput("mkdir "+printableFolder);
+  if (isLecturE)
+    theGlobalVariables.CallSystemNoOutput("mkdir "+lectureProjectorFolder);
   //this->theFileWorkingCopy=this->baseFolderStartFilePhysical+ "working_file_"+ this->theFileToCrawlNoPathPhysical;
   //std::string theFileWorkingCopyPDF=this->baseFolderStartFilePhysical+ "working_file_"
   //+this->theFileToCrawlNoPathPhysical.substr(0, this->theFileToCrawlNoPathPhysical.size()-3)+"pdf";
@@ -5915,8 +5922,8 @@ void LaTeXcrawler::BuildFreecalc()
   std::string theFileWorkingCopyPDF= "working_file_"
   +this->theFileToCrawlNoPathPhysical.substr(0, this->theFileToCrawlNoPathPhysical.size()-3)+"pdf";
   for (int i=0; i<
-2
-//  theLectureNumbers.size
+//1
+  theLectureNumbers.size
   ; i++)
   { reportStream << "<br>Processing lecture " << i+1 << " out of " << theLectureNumbers.size << ". ";
     resultTable << "<tr>";
@@ -5945,13 +5952,13 @@ void LaTeXcrawler::BuildFreecalc()
     theGlobalVariables.CallSystemNoOutput(currentSysCommand);
     std::stringstream thePdfFileNameHandout;
     if (isLecturE)
-    { thePdfFileNameHandout << "./" << lecturePrintableFolder << "Lecture" << theLectureNumbers[i] << "Handout_"
+    { thePdfFileNameHandout << "./" << printableFolder << "Lecture" << theLectureNumbers[i] << "Handout_"
       << theLectureDesiredNames[i];
       if (lectureFileNameEnd!="")
         thePdfFileNameHandout << "_" << lectureFileNameEnd;
       thePdfFileNameHandout << ".pdf";
     } else
-    { thePdfFileNameHandout << "Homework" << theLectureNumbers[i] << "_" << theLectureDesiredNames[i];
+    { thePdfFileNameHandout << "./" << printableFolder << "Homework" << theLectureNumbers[i] << "_" << theLectureDesiredNames[i];
       if (lectureFileNameEnd!="")
         thePdfFileNameHandout << "_" << lectureFileNameEnd;
       thePdfFileNameHandout << ".pdf";
@@ -5987,7 +5994,7 @@ void LaTeXcrawler::BuildFreecalc()
     thePdfFileNameNormal << "./" << lectureProjectorFolder << "Lecture"
     << theLectureNumbers[i] << "_" << theLectureDesiredNames[i] << "_"
     << lectureFileNameEnd << ".pdf";
-    currentSysCommand="mv " +theFileWorkingCopyPDF + " " + thePdfFileNameNormal.str();
+    currentSysCommand= "mv " +theFileWorkingCopyPDF + " " + thePdfFileNameNormal.str();
     executedCommands << "<br>" << currentSysCommand;
     reportStream << "<br>Lecture " << i+1 << " regular slides compiled, renaming file ... ";
     theReport.Report(reportStream.str());
@@ -5999,6 +6006,7 @@ void LaTeXcrawler::BuildFreecalc()
   }
   resultTable << "</table>";
   this->displayResult << executedCommands.str() << "<br>" << resultTable.str();
+  theGlobalVariables.ChDir("../");
 }
 
 void LaTeXcrawler::Crawl()

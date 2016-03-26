@@ -763,14 +763,15 @@ D-B;\
   this->AddOperationInnerHandler
   ("BuildFreecalc", CalculatorFunctionsGeneral::innerBuildFreecalc, "",
    "Builds the freecalc lecture pdfs. \
+   This function performs file operations and is allowed only to logged-in administrator accounts. \
    Takes as arguments the lecture folder (within the freecalc project) and the file name. \
    The function assumes the freecalc project is installed in a folder called freecalc, \
    parallel to the calculator project folder (i.e, we have folders /vectorpartition and /freecalc next to one another).\
    The folders are given relative to the /freecalc base.",
    "BuildFreecalc (\"lectures/UMB-Reference-Lectures/Calculus_I.tex\");\
    \nBuildFreecalc(\"lectures/UMB-Reference-Lectures/Calculus_II.tex\");\
-   \nBuildFreecalc(\"homework/UMB-UMB-All-Problems-By-Course/Homework_Calculus_I.tex\");\
-   \nBuildFreecalc(\"homework/UMB-UMB-All-Problems-By-Course/Homework_Calculus_II.tex\");\
+   \nBuildFreecalc(\"homework/UMB-All-Problems-By-Course/Homework_Calculus_I.tex\");\
+   \nBuildFreecalc(\"homework/UMB-All-Problems-By-Course/Homework_Calculus_II.tex\");\
    ", true, false
    , "CalculatorFunctionsGeneral::innerBuildFreecalc")
    ;

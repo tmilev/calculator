@@ -671,15 +671,26 @@ bool WebWorker::ProcessRawArguments
     return this->ProcessRawArguments(newInput, argumentProcessingFailureComments, recursionDepth+1);
   }
   theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
+//  argumentProcessingFailureComments << "DEBUG: Comma delimited inputstringnames: "
+//  << inputStrings.ToStringCommaDelimited() << " values: " <<  inputStringNames.ToStringCommaDelimited();
 //  stOutput << "userCalculatorRequest type is: " << theGlobalVariables.userCalculatorRequestType;
   std::string password;
   std::string desiredUser;
   if (!theGlobalVariables.UserGuestMode())
-  { theGlobalVariables.GetWebInput("username");
+  { //argumentProcessingFailureComments << "DEBUG: not guest mode.";
+    desiredUser=theGlobalVariables.GetWebInput("username");
+    //if (!theGlobalVariables.webFormArgumentNames.Contains("username"))
+    //  argumentProcessingFailureComments << "<hr>no username" << "<hr>";
+    //argumentProcessingFailureComments << "DEBUG:  desired user1: " << desiredUser
+    // << this->ToStringCalculatorArgumentsHumanReadable() << " URL encoded input: "
+    // << urlEncodedInputString;
     if (desiredUser=="")
       desiredUser=theGlobalVariables.GetWebInput("usernameHidden");
     if (desiredUser!="")
       CGI::URLStringToNormal(desiredUser, desiredUser);
+    //argumentProcessingFailureComments << "DEBUG:  desired user: " << desiredUser
+    // << this->ToStringCalculatorArgumentsHumanReadable() << " URL encoded input: "
+    // << urlEncodedInputString;
     this->authenticationToken=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("authenticationToken"));
     if (this->authenticationToken!="")
       this->flagAuthenticationTokenWasSubmitted=true;
@@ -688,7 +699,8 @@ bool WebWorker::ProcessRawArguments
     { password=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("password"));
       inputStrings[inputStringNames.GetIndex("password")]="********************************************";
     }
-  }
+  } else
+    argumentProcessingFailureComments << "DEBUG: guest mode on.";
   if (inputStringNames.Contains("textInput") && !inputStringNames.Contains("mainInput"))
   { argumentProcessingFailureComments << "Received calculator link in an old format, interpreting 'textInput' as 'mainInput'";
     inputStringNames.SetObjectAtIndex(inputStringNames.GetIndex("textInput"), "mainInput");
@@ -703,6 +715,7 @@ bool WebWorker::ProcessRawArguments
     { theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs=true;
       password= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("authenticationInsecure"));
     }
+//  argumentProcessingFailureComments << "DEBUG: request: " << theGlobalVariables.userCalculatorRequestType;
   if (desiredUser!="" &&
       (theGlobalVariables.flagUsingSSLinCurrentConnection ||
        theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs))
@@ -710,12 +723,12 @@ bool WebWorker::ProcessRawArguments
     theGlobalVariables.userCalculatorRequestType=="activateAccount";
     if (changingPass)
       this->authenticationToken="";
-//    argumentProcessingFailureComments << "Logging in as: " << desiredUser << "<br>";
+    //argumentProcessingFailureComments << "DEBUG: Logging in as: " << desiredUser << " pass: " << password << "<br>";
     theGlobalVariables.flagLoggedIn=DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     (desiredUser, password, this->authenticationToken, theGlobalVariables.userRole, &argumentProcessingFailureComments);
     if (!theGlobalVariables.flagLoggedIn)
     { this->authenticationToken="";
-//      argumentProcessingFailureComments << "<b>DBG: Auth token set to empty</b>";
+      //argumentProcessingFailureComments << "<b>DEBUG: Auth token set to empty</b>";
     }
     if (theGlobalVariables.flagLoggedIn)
     { theGlobalVariables.userDefault=desiredUser;
@@ -1813,6 +1826,7 @@ int WebWorker::ProcessCalculator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCalculator");
   ProgressReportWebServer theReport;
   std::stringstream argumentProcessingFailureComments;
+//  stOutput <<"DEBIG: here i am";
   if (!this->ProcessRawArguments(theParser.inputStringRawestOfTheRaw, argumentProcessingFailureComments))
   { stOutput << "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n"
     << "<html><body>" << "Failed to process the calculator arguments. <b>"
@@ -1820,6 +1834,7 @@ int WebWorker::ProcessCalculator()
     stOutput.Flush();
     return 0;
   }
+//  stOutput <<"DEBIG: here i am2";
 //  std::cout << "DEBUG: processing connection " << theWebServer.NumConnectionsSoFar << std::endl;
   if (this->flagPasswordWasSubmitted && theGlobalVariables.userCalculatorRequestType!="changePassword" &&
       theGlobalVariables.userCalculatorRequestType!="activateAccount" //&&
@@ -1847,7 +1862,8 @@ int WebWorker::ProcessCalculator()
     return 0;
   }
   stOutput << "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n";
-  stOutput << argumentProcessingFailureComments.str();
+//  stOutput.Flush();
+//  stOutput << "<html>DEBUG 123:" << argumentProcessingFailureComments.str();
 //  if (theGlobalVariables.flagLoggedIn)
 //    stOutput << "LOGGED in canyabelieveit?";
 //  stOutput << "<br>got to this point, requesttype: " << theGlobalVariables.userCalculatorRequestType;
@@ -2146,6 +2162,9 @@ std::string WebWorker::GetChangePasswordPage()
 int WebWorker::ProcessChangePassword()
 { MacroRegisterFunctionWithName("WebWorker::ProcessChangePassword");
   //stOutput << " ere i am";
+//  if (theGlobalVariables.UserDebugFlagOn())
+  theGlobalVariables.SetWebInput("debugFlag", "true");
+  stOutput << "DEBUG: " << this->ToStringCalculatorArgumentsHumanReadable();
   this->authenticationToken="";
   if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection)
   { stOutput << "<span style=\"color:red\"><b> Password change available only to logged in users via SSL.</b></span>";

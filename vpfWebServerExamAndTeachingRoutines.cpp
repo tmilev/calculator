@@ -183,7 +183,8 @@ public:
   (const std::string& cleanedUpLink, const std::string& sectionNumber, bool isActualProblem, bool problemAlreadySolved)
   ;
   std::string ToStringCalculatorArgumentsForProblem
-  (const std::string& requestType, const std::string& studentView, const std::string& studentSection="")const;
+  (const std::string& requestType, const std::string& studentView,
+   const std::string& studentSection="", bool includeRandomSeedIfAppropriate=false)const;
   std::string ToStringProblemNavigation()const;
   std::string ToStringExtractedCommands();
   std::string ToStringContent();
@@ -432,7 +433,6 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
   this->inputHtml=contentStream.str();
   this->flagIsForReal=theGlobalVariables.UserRequestRequiresLoadingRealExamData();
 #ifdef MACRO_use_MySQL
-//stOutput << "loading: ";
   DatabaseRoutines theRoutines;
   if (doLoadDatabase)
   { //stOutput << " accessing db... ";
@@ -538,8 +538,11 @@ void CalculatorHTML::LoadCurrentProblemItem()
   this->LoadFileNames();
   this->flagLoadedSuccessfully=false;
   bool needToFindDefault=(this->fileName=="");
+  bool needToLoadDatabase=true;
+  if (theGlobalVariables.UserGuestMode())
+    needToLoadDatabase=false;
   if (!needToFindDefault)
-    needToFindDefault=!this->LoadMe(true, this->comments);
+    needToFindDefault=!this->LoadMe(needToLoadDatabase, this->comments);
   else
     this->comments << "<b>Selecting default course homework file.</b><br>";
   if (needToFindDefault)
@@ -549,7 +552,7 @@ void CalculatorHTML::LoadCurrentProblemItem()
       return;
     }
     theGlobalVariables.SetWebInput("currentExamHome", CGI::StringToURLString(this->fileName));
-    if (!this->LoadMe(true, this->comments))
+    if (!this->LoadMe(needToLoadDatabase, this->comments))
       return;
     this->inputHtml=this->comments.str()+this->inputHtml;
   }
@@ -693,14 +696,21 @@ std::string CalculatorHTML::GetSubmitEmailsJavascript()
 
 std::string CalculatorHTML::GetSubmitAnswersJavascript()
 { std::stringstream out;
-  std::string requestTypeSubmit, requestTypePreview;
+  std::string requestTypeSubmit, requestTypePreview, requestGiveUp;
   if (theGlobalVariables.UserRequestRequiresLoadingRealExamData())
   { requestTypeSubmit  = "submitProblem";
     requestTypePreview = "submitProblemPreview";
+  } else if (theGlobalVariables.UserGuestMode())
+  { requestTypeSubmit  = "submitExerciseNoLogin";
+    requestTypePreview = "submitExercisePreviewNoLogin";
   } else
   { requestTypeSubmit  = "submitExercise";
     requestTypePreview = "submitExercisePreview";
   }
+  if (!theGlobalVariables.UserGuestMode())
+    requestGiveUp="problemGiveUp";
+  else
+    requestGiveUp="problemGiveUpNoLogin";
   out
   << "<script type=\"text/javascript\"> \n"
   << "var JavascriptInsertionAlreadyCalled;\n"
@@ -722,7 +732,7 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   << "}\n"
   << "function giveUp(idAnswer, idVerification){\n"
   << "  clearTimeout(timerForPreviewAnswers);\n"
-  << "  params=\"" << this->ToStringCalculatorArgumentsForProblem("problemGiveUp", "true") << "\";\n"
+  << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestGiveUp, "true") << "\";\n"
   << "  submitOrPreviewAnswers(idAnswer, idVerification, params);\n"
   << "}\n"
   << "function submitOrPreviewAnswers(idAnswer, idVerification, inputParams){\n"
@@ -781,7 +791,7 @@ int WebWorker::ProcessProblemGiveUp()
   CalculatorHTML theProblem;
   theProblem.LoadCurrentProblemItem();
   if (!theProblem.flagLoadedSuccessfully)
-  { stOutput << "Prob name is: " << theProblem.fileName;
+  { stOutput << "Problem name is: " << theProblem.fileName;
     stOutput << " <b>Could not load problem, this may be a bug. "
     << CalculatorHTML::BugsGenericMessage << "</b>";
     if(theProblem.comments.str()!="")
@@ -1808,8 +1818,22 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
 std::string CalculatorHTML::ToStringProblemNavigation()const
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemNavigation");
   std::stringstream out;
+  std::string exerciseRequest="exercise";
+  if (theGlobalVariables.UserGuestMode())
+    exerciseRequest="exercisesNoLogin";
+  if (theGlobalVariables.UserGuestMode())
+  { out << "<b>Guest mode</b><br>No points scored/deadlines. <hr>"
+    << "<a href=\"" << theGlobalVariables.hopefullyPermanent_HTTPS_WebAdressOfServerExecutable
+    << "?request=login\" "
+//    << "onclick=\"javascript:event.target.port="
+//    << theWebServer.httpSSLPort
+//    << "\""
+    << ">Log in</a><br>";
+  }
   out << theGlobalVariables.ToStringNavigation();
-  std::string calcArgsNoPassExamDetails=theGlobalVariables.ToStringCalcArgsNoNavigation();
+  List<std::string> randomSeedContainer;
+  randomSeedContainer.AddOnTop("randomSeed");
+  std::string calcArgsNoPassExamDetails=theGlobalVariables.ToStringCalcArgsNoNavigation(&randomSeedContainer);
   if (theGlobalVariables.UserDefaultHasAdminRights())
   { if (theGlobalVariables.UserStudentViewOn())
       out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
@@ -1831,11 +1855,11 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   }
   std::string studentView= theGlobalVariables.UserStudentViewOn() ? "true" : "false";
   if (!this->flagIsExamHome)
-    out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
+  { out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercisesNoLogin&"
     << calcArgsNoPassExamDetails
     << "currentExamHome=" << CGI::StringToURLString(this->currentExamHomE) << "&" << "currentExamIntermediate=&"
     << "currentExamFile=" << CGI::StringToURLString(this->currentExamHomE) << "&\"> Course homework home </a><br>";
-  else
+  } else
     out << "<b>Course homework home</b>";
   if (this->flagIsExamProblem && this->currentExamIntermediatE!="")
     out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
@@ -1846,10 +1870,10 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     out << "<b>&nbspCurrent homework</b><br>";
   if (this->flagIsExamProblem)
   { if (theGlobalVariables.userCalculatorRequestType=="exercises")
-    { out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
+      out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
       << this->ToStringCalculatorArgumentsForProblem("examForReal", studentView)
       << "\">&nbsp&nbspStart exam for real</a><br>";
-    } else
+    else if (theGlobalVariables.userCalculatorRequestType=="examForReal")
       out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
       << this->ToStringCalculatorArgumentsForProblem("exercises", studentView)
       << "\">&nbsp&nbspExercise this problem type</a><br>";
@@ -1888,28 +1912,35 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         << "&\">Last problem, return to course page.</a><br>";
     }
   }
-  if (this->flagIsExamProblem && theGlobalVariables.userCalculatorRequestType=="exercises")
+  if (this->flagIsExamProblem &&
+      (theGlobalVariables.userCalculatorRequestType=="exercises" ||
+       theGlobalVariables.userCalculatorRequestType=="exercisesNoLogin"))
     out << "<hr><a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
-    << this->ToStringCalculatorArgumentsForProblem("exercises", studentView)
+    << this->ToStringCalculatorArgumentsForProblem(exerciseRequest, studentView, "", true)
     << "\">Link to this problem</a><br>";
 
   return out.str();
 }
 
 std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
-(const std::string& requestType, const std::string& studentView, const std::string& studentSection)const
+(const std::string& requestType, const std::string& studentView,
+ const std::string& studentSection, bool includeRandomSeedIfAppropriate)const
 { MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsForProblem");
-  if (!theGlobalVariables.flagLoggedIn)
+  if (!theGlobalVariables.flagLoggedIn && !theGlobalVariables.UserGuestMode())
     return "";
   std::stringstream out;
   out << "request=" << requestType << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation()
   << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&"
   << "currentExamIntermediate=" << theGlobalVariables.GetWebInput("currentExamIntermediate") << "&"
-  << "currentExamFile=" << CGI::StringToURLString(this->fileName) << "&"
-  << "studentView=" << studentView << "&";
-  if (studentSection!="")
-    out << "studentSection=" << CGI::StringToURLString(studentSection) << "&";
-  if (theGlobalVariables.GetWebInput("randomSeed")=="" && theGlobalVariables.userCalculatorRequestType!="examForReal")
+  << "currentExamFile=" << CGI::StringToURLString(this->fileName) << "&";
+  if (!theGlobalVariables.UserGuestMode())
+  { out << "studentView=" << studentView << "&";
+    if (studentSection!="")
+      out << "studentSection=" << CGI::StringToURLString(studentSection) << "&";
+  }
+  if (//theGlobalVariables.GetWebInput("randomSeed")=="" &&
+      //theGlobalVariables.userCalculatorRequestType!="examForReal" &&
+      includeRandomSeedIfAppropriate)
     out << "randomSeed=" << this->theProblemData.randomSeed << "&";
 //  out << "currentExamFile=" << CGI::StringToURLString(this->fileName) << "&";
   return out.str();
@@ -2331,8 +2362,13 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
  const std::string& cleaneduplink, const std::string& urledProblem)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateProblemManagementLink");
   std::stringstream out;
-  out << " <a href=\"" << refStreamForReal.str() << "\">Start (for credit)</a> ";
+  if (!theGlobalVariables.UserGuestMode())
+    out << " <a href=\"" << refStreamForReal.str() << "\">Start (for credit)</a> ";
   out << " <a href=\"" << refStreamExercise.str() << "\">Exercise (no credit, unlimited tries)</a> ";
+  if (theGlobalVariables.UserGuestMode())
+  { out << "Exercise points/deadlines require login. ";
+    return out.str();
+  }
   //stOutput << "<hr>CurrentUser.problemNames=" << this->currentUser.problemNames.ToStringCommaDelimited();
   std::string thePoints="";
   if (this->databaseProblemAndHomeworkGroupList.Contains(cleaneduplink))
@@ -2519,6 +2555,8 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
  const std::string& cleaneduplink, const std::string& urledProblem, bool problemAlreadySolved)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateDeadlineLink");
   //  return "Submission deadline: to be announced. ";
+  if (theGlobalVariables.UserGuestMode())
+    return "";
   std::stringstream out;
   bool deadlineInherited=false;
   bool isActualProblem=(inputOutput.GetTagClass()=="calculatorExamProblem");
@@ -2615,8 +2653,13 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   if (this->flagIsExamIntermediate)
     refStreamNoRequest << "currentExamIntermediate="
     << theGlobalVariables.GetWebInput("currentExamIntermediate") << "&";
-  refStreamExercise << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&" << refStreamNoRequest.str();
-  refStreamForReal << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=examForReal&" << refStreamNoRequest.str();
+  if (!theGlobalVariables.UserGuestMode())
+  { refStreamExercise << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&" << refStreamNoRequest.str();
+    refStreamForReal << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=examForReal&" << refStreamNoRequest.str();
+  } else
+  { refStreamExercise << theGlobalVariables.DisplayNameCalculatorWithPath
+    << "?request=exercisesNoLogin&" << refStreamNoRequest.str();
+  }
   if (inputOutput.GetTagClass()=="calculatorExamProblem")
     out << this->InterpretGenerateProblemManagementLink
     (inputOutput, refStreamForReal, refStreamExercise, cleaneduplink, urledProblem);

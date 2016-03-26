@@ -673,18 +673,21 @@ bool WebWorker::ProcessRawArguments
   theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
 //  stOutput << "userCalculatorRequest type is: " << theGlobalVariables.userCalculatorRequestType;
   std::string password;
-  std::string desiredUser=theGlobalVariables.GetWebInput("username");
-  if (desiredUser=="")
-    desiredUser=theGlobalVariables.GetWebInput("usernameHidden");
-  if (desiredUser!="")
-    CGI::URLStringToNormal(desiredUser, desiredUser);
-  this->authenticationToken=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("authenticationToken"));
-  if (this->authenticationToken!="")
-    this->flagAuthenticationTokenWasSubmitted=true;
-  this->flagPasswordWasSubmitted=(theGlobalVariables.GetWebInput("password")!="");
-  if (this->flagPasswordWasSubmitted)
-  { password=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("password"));
-    inputStrings[inputStringNames.GetIndex("password")]="********************************************";
+  std::string desiredUser;
+  if (!theGlobalVariables.UserGuestMode())
+  { theGlobalVariables.GetWebInput("username");
+    if (desiredUser=="")
+      desiredUser=theGlobalVariables.GetWebInput("usernameHidden");
+    if (desiredUser!="")
+      CGI::URLStringToNormal(desiredUser, desiredUser);
+    this->authenticationToken=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("authenticationToken"));
+    if (this->authenticationToken!="")
+      this->flagAuthenticationTokenWasSubmitted=true;
+    this->flagPasswordWasSubmitted=(theGlobalVariables.GetWebInput("password")!="");
+    if (this->flagPasswordWasSubmitted)
+    { password=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("password"));
+      inputStrings[inputStringNames.GetIndex("password")]="********************************************";
+    }
   }
   if (inputStringNames.Contains("textInput") && !inputStringNames.Contains("mainInput"))
   { argumentProcessingFailureComments << "Received calculator link in an old format, interpreting 'textInput' as 'mainInput'";
@@ -692,8 +695,8 @@ bool WebWorker::ProcessRawArguments
   }
   theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs=false;
   if (theGlobalVariables.userCalculatorRequestType!="changePassword" &&
-      theGlobalVariables.userCalculatorRequestType!="activateAccount" //&&
-//      theGlobalVariables.userCalculatorRequestType!="changePassword" &&
+      theGlobalVariables.userCalculatorRequestType!="activateAccount" &&
+      !theGlobalVariables.UserGuestMode()
       )
     if (theGlobalVariables.GetWebInput("ignoreSecurity")=="true" &&
         !theGlobalVariables.flagUsingSSLinCurrentConnection)
@@ -806,7 +809,7 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
   stOutput << this->closeIndentTag("</td>");
   stOutput << this->closeIndentTag("</tr>");
   if (startingIndent!=this->indentationLevelHTML)
-    crash << "Non-balanced html tags." << crash;
+    crash << "Non-balanced html tags. " << crash;
 }
 
 void WebWorker::OutputBeforeComputation()
@@ -836,8 +839,12 @@ void WebWorker::OutputBeforeComputation()
   stOutput << this->openIndentTag("<table><!-- Outermost table, 3 cells (3 columns 1 row)-->");
   stOutput << this->openIndentTag("<tr style=\"vertical-align:top\">");
   stOutput << this->openIndentTag("<td><!-- Cell containing the output table-->");
-  stOutput << this->openIndentTag("<table><!-- Output table, 2 cells (1 column 2 rows) -->");
+  stOutput << this->openIndentTag("<table><!-- Output table, 2 cells (1 column 2-3 rows) -->");
   this->OutputBeforeComputationUserInputAndAutoComplete();
+  if (theGlobalVariables.UserDebugFlagOn())
+    stOutput << "<tr><td>"
+    << this->ToStringCalculatorArgumentsHumanReadable()
+    << "</td></tr>";
   //  stOutput << "<br>Number of lists created before evaluation: " << NumListsCreated;
 }
 
@@ -1870,16 +1877,20 @@ int WebWorker::ProcessCalculator()
     return this->ProcessAddUserEmails();
   if ((theGlobalVariables.userCalculatorRequestType=="submitProblem" ||
        theGlobalVariables.userCalculatorRequestType=="submitExercise")
-      && theGlobalVariables.flagLoggedIn
-      )
+      && theGlobalVariables.flagLoggedIn)
     return this->ProcessSubmitProblem();
-  if (theGlobalVariables.userCalculatorRequestType=="problemGiveUp" &&
-      theGlobalVariables.flagLoggedIn)
+  if (theGlobalVariables.UserGuestMode() && theGlobalVariables.userCalculatorRequestType=="submitExerciseNoLogin")
+    return this->ProcessSubmitProblem();
+  if ((theGlobalVariables.userCalculatorRequestType=="problemGiveUp" &&
+       theGlobalVariables.flagLoggedIn) ||
+      theGlobalVariables.userCalculatorRequestType== "problemGiveUpNoLogin")
     return this->ProcessProblemGiveUp();
-
   if ((theGlobalVariables.userCalculatorRequestType=="submitProblemPreview" ||
-       theGlobalVariables.userCalculatorRequestType=="submitExercisePreview") &&
+       theGlobalVariables.userCalculatorRequestType=="submitExercisePreview" ) &&
       theGlobalVariables.flagLoggedIn)
+    return this->ProcessSubmitProblemPreview();
+  if (theGlobalVariables.userCalculatorRequestType=="submitExercisePreviewNoLogin" &&
+      theGlobalVariables.UserGuestMode())
     return this->ProcessSubmitProblemPreview();
   if (( theGlobalVariables.userCalculatorRequestType=="examForReal" ||
         theGlobalVariables.userCalculatorRequestType=="exercises"))
@@ -1888,6 +1899,8 @@ int WebWorker::ProcessCalculator()
     else
       return this->ProcessLoginPage();
   }
+  if (theGlobalVariables.userCalculatorRequestType=="exercisesNoLogin")
+    return this->ProcessExamPage();
   if (theGlobalVariables.userCalculatorRequestType=="editPage")
     return this->ProcessEditPage();
   if (theGlobalVariables.userCalculatorRequestType=="modifyPage")
@@ -2281,7 +2294,7 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "function addCookie(theName, theValue, exdays, secure)\n"
   << "{ exdate= new Date();\n"
   << "  exdate.setDate(exdate.getDate() + exdays);\n"
-  << "  c_value=escape(theValue) + ((exdays==null) ? \"\" : \"; expires=\"+exdate.toUTCString());"
+  << "  c_value=escape(theValue) + ((exdays==null) ? \"\" : \"; expires=\"+exdate.toUTCString());\n"
   << "  if(secure)\n"
   << "    c_value+=\"; secure;\"; \n"
   << "  document.cookie=theName + \"=\" + c_value;\n"
@@ -2305,14 +2318,15 @@ std::string WebWorker::GetJavascriptStandardCookies()
     out << "  addCookie(\"studentView\", \"" << theGlobalVariables.GetWebInput("studentView") << "\", 100, true);  \n";
   if (this->IsAllowedAsRequestCookie(theGlobalVariables.userCalculatorRequestType))
     out << "  addCookie(\"request\", \"" << theGlobalVariables.userCalculatorRequestType << "\", 100, false);\n";
-  if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType!="" &&
-      theGlobalVariables.userCalculatorRequestType!="compute")
+  if ((theGlobalVariables.flagLoggedIn || theGlobalVariables.UserGuestMode()) &&
+       theGlobalVariables.userCalculatorRequestType!="" &&
+       theGlobalVariables.userCalculatorRequestType!="compute")
   { out << "  addCookie(\"currentExamFile\", \""
-    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile")) << "\", 100, true);\n";
+    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile")) << "\", 100, false);\n";
     out << "  addCookie(\"currentExamHome\", \""
-    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome")) << "\", 100, true);\n";
+    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome")) << "\", 100, false);\n";
     out << "  addCookie(\"currentExamIntermediate\", \""
-    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate")) << "\", 100, true);\n";
+    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate")) << "\", 100, false);\n";
   }
   out
   << "}\n";
@@ -3124,6 +3138,10 @@ bool WebServer::initBindToPorts()
       }
       if (p!=NULL)
       { theLog << logger::yellow << "Successfully bound to port " << (*thePorts)[i] << logger::endL;
+        if (j==0)
+          this->httpPort=(*thePorts)[i];
+        else
+          this->httpSSLPort=(*thePorts)[i];
         break;
       }
       freeaddrinfo(servinfo); // all done with this structure

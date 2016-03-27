@@ -240,7 +240,9 @@ bool GlobalVariables::UserDefaultHasAdminRights()
 }
 
 bool GlobalVariables::UserGuestMode()
-{ return this->userCalculatorRequestType=="exercisesNoLogin" ||
+{ if (this->flagUsingSSLinCurrentConnection)
+    return false;
+  return this->userCalculatorRequestType=="exercisesNoLogin" ||
   this->userCalculatorRequestType=="problemGiveUpNoLogin" ||
   this->userCalculatorRequestType=="submitExerciseNoLogin" ||
   this->userCalculatorRequestType=="submitExercisePreviewNoLogin" ;

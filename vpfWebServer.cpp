@@ -671,6 +671,11 @@ bool WebWorker::ProcessRawArguments
     return this->ProcessRawArguments(newInput, argumentProcessingFailureComments, recursionDepth+1);
   }
   theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
+  if (theGlobalVariables.flagUsingSSLinCurrentConnection &&
+      theGlobalVariables.userCalculatorRequestType=="exercisesNoLogin")
+  { theGlobalVariables.userCalculatorRequestType="exercises";
+    theGlobalVariables.SetWebInput("request", "exercises");
+  }
 //  argumentProcessingFailureComments << "DEBUG: Comma delimited inputstringnames: "
 //  << inputStrings.ToStringCommaDelimited() << " values: " <<  inputStringNames.ToStringCommaDelimited();
 //  stOutput << "userCalculatorRequest type is: " << theGlobalVariables.userCalculatorRequestType;

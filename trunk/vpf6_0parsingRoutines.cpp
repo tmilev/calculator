@@ -936,10 +936,17 @@ bool Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits()
     << ". This should not happen in the body of this function. " << crash;
   List<std::string>& theSplit=this->predefinedWordSplits.GetValueCreateIfNotPresent(currentVar);
   SyntacticElement newElt;
-  newElt.controlIndex=this->conVariable();
   this->PopTopSyntacticStack();
+  *this << "Missing space bars: replacing "
+  << currentVar << " with the sequence of symbols " << theSplit.ToStringCommaDelimited()
+  << ". If you do not want such replacements to take place (for example, you like having variable names such as xy) "
+  << " you should add the %DontUsePredefinedWordSplits option at the start of your input. ";
+
   for (int i=0; i<theSplit.size; i++)
   { newElt.theData.MakeAtom(this->AddOperationNoRepetitionOrReturnIndexFirst(theSplit[i]), *this);
+    newElt.controlIndex=this->controlSequences.GetIndex(theSplit[i]);
+    if (newElt.controlIndex==-1)
+      newElt.controlIndex=this->conVariable();
     (*this->CurrentSyntacticStacK).AddOnTop(newElt);
   }
   return true;

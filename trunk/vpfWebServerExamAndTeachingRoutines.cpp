@@ -1821,7 +1821,7 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
 std::string CalculatorHTML::ToStringProblemNavigation()const
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemNavigation");
   std::stringstream out;
-  std::string exerciseRequest="exercise";
+  std::string exerciseRequest="exercises";
   if (theGlobalVariables.UserGuestMode())
     exerciseRequest="exercisesNoLogin";
   if (theGlobalVariables.UserGuestMode())
@@ -1859,7 +1859,8 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   }
   std::string studentView= theGlobalVariables.UserStudentViewOn() ? "true" : "false";
   if (!this->flagIsExamHome)
-  { out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercisesNoLogin&"
+  { out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
+    << exerciseRequest << "&"
     << calcArgsNoPassExamDetails
     << "currentExamHome=" << CGI::StringToURLString(this->currentExamHomE) << "&" << "currentExamIntermediate=&"
     << "currentExamFile=" << CGI::StringToURLString(this->currentExamHomE) << "&\"> Course homework home </a><br>";

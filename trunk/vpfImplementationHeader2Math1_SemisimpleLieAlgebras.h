@@ -410,9 +410,9 @@ bool charSSAlgMod<coefficient>::DrawMe
     }
     for (int j=0; j<finalWeights.size; j++)
     { convertor=finalWeights[j].GetVectorRational();
-      theDrawingVars.drawCircleAtVectorBuffer(convertor, 3, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+      theDrawingVars.drawCircleAtVectorBufferRational(convertor, 3, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
       if (useMults)
-        theDrawingVars.drawTextAtVectorBuffer
+        theDrawingVars.drawTextAtVectorBufferRational
         (convertor, CharCartan.theCoeffs[i].ToString(), CGI::RedGreenBlue(0,0,0), theDrawingVars.PenStyleNormal, 0);
     }
   }
@@ -436,8 +436,8 @@ void charSSAlgMod<coefficient>::DrawMeAssumeCharIsOverCartan(WeylGroupData& actu
   for (int j=0; j<this->size(); j++)
   { actualWeight=actualAmbientWeyl.GetSimpleCoordinatesFromFundamental((*this)[j].weightFundamentalCoordS);
     actualWeightRationalPart=actualWeight.GetVectorRational(); // <-type conversion here!
-    theDrawingVars.drawCircleAtVectorBuffer(actualWeightRationalPart, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
-    theDrawingVars.drawTextAtVectorBuffer(actualWeightRationalPart, this->theCoeffs[j].ToString(), CGI::RedGreenBlue(0,0,0), theDrawingVars.PenStyleNormal, 0);
+    theDrawingVars.drawCircleAtVectorBufferRational(actualWeightRationalPart, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+    theDrawingVars.drawTextAtVectorBufferRational(actualWeightRationalPart, this->theCoeffs[j].ToString(), CGI::RedGreenBlue(0,0,0), theDrawingVars.PenStyleNormal, 0);
   }
 }
 
@@ -641,11 +641,11 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
  //     (tempRoot, theDV1, theGlobalVariables, CGI::RedGreenBlue(200, 200, 0), 1000);
       std::stringstream tempStream;
       tempStream << output.theCoeffs[i].ToString();
-      theDV1.drawTextAtVectorBuffer(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal, 0);
+      theDV1.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal, 0);
       for (int j=1; j<WeylFDSmall.AmbientWeyl->theGroup.theElements.size; j++)
       { tempRoot2=tempRoot;
         WeylFDSmall.AmbientWeyl->ActOnRhoModified(j, tempRoot2);
-        theDV1.drawCircleAtVectorBuffer(tempRoot2, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(200,0,0));
+        theDV1.drawCircleAtVectorBufferRational(tempRoot2, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(200,0,0));
       }
     }
     out << "<hr>" << theDV1.GetHtmlFromDrawOperationsCreateDivWithUniqueName(WeylFDSmall.AmbientWeyl->GetDim());

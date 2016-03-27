@@ -212,6 +212,7 @@ public:
   static bool innerPlotPolarRfunctionThetaExtended(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotPolarRfunctionTheta(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlot2D(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPlotPoint(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlot2DWithBars(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerLastElement(Calculator& theCommands, const Expression& input, Expression& output);

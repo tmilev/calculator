@@ -3964,6 +3964,31 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
   return output.AssignValue(thePlot, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerPlotPoint(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotPoint");
+  //stOutput << input.ToString();
+  if (input.children.size<3)
+    return output.MakeError
+    ("Plotting a point takes at least two arguments, namely the x and y coordinate of the point. ", theCommands);
+  Vector<double> theV;
+  theV.initFillInObject(2,0);
+  if (!input[1].EvaluatesToDouble(&theV[0]) || !input[2].EvaluatesToDouble(&theV[1]))
+    return theCommands << "<hr>Failed to extract x, y coordinates from: " << input.ToString();
+  Plot theFinalPlot;
+  PlotObject thePlot;
+  thePlot.colorRGB=CGI::RedGreenBlue(0,0,0);
+  if (input.children.size>3)
+    if (input[3].IsOfType<std::string>())
+      DrawingVariables::GetColorIntFromColorString(input[3].GetValue<std::string>(), thePlot.colorRGB);
+  thePlot.thePoints.AddOnTop(theV);
+  thePlot.thePlotType="point";
+  theFinalPlot.thePlots.AddOnTop(thePlot);
+  theFinalPlot.DesiredHtmlHeightInPixels=100;
+  theFinalPlot.DesiredHtmlWidthInPixels=100;
+//  stOutput << "DEBUG: plotting point with coords: " << theV;
+  return output.AssignValue(theFinalPlot, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlot2DWithBars");
   //stOutput << input.ToString();
@@ -6669,20 +6694,20 @@ public:
     for (int i=0; i<this->DisplayedEstrings.size; i++)
     { if (this->DisplayedEstrings[i]!="")
       { int theColor= this->DisplayedStringIsLeaf[i] ? CGI::RedGreenBlue(255, 0,0) : CGI::RedGreenBlue(100,100,100);
-        theDV.drawTextAtVectorBuffer
+        theDV.drawTextAtVectorBufferRational
         (this->NodePositions[i],
          CGI::clearNewLines(CGI::backslashQuotes(
          CGI::DoubleBackslashes( this->DisplayedEstrings[i]) )),
          theColor, theDV.TextStyleNormal, 0);
       } else
-        theDV.drawCircleAtVectorBuffer
+        theDV.drawCircleAtVectorBufferRational
         (this->NodePositions[i], 0.04, theDV.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
       for (int j=0; j<this->arrows[i].size; j++)
       { arrowBase= this->NodePositions[i];
         arrowHead=this->NodePositions[this->arrows[i][j]];
         arrowHead[1]+=this->charHeight/2;
         //arrowHead=arrowHead*nineTenths+arrowBase*oneTenth;
-        theDV.drawLineBetweenTwoVectorsBuffer
+        theDV.drawLineBetweenTwoVectorsBufferRational
         (arrowBase, arrowHead, theDV.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
       }
     }

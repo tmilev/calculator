@@ -1071,6 +1071,12 @@ D-B;\
     GetVariablesIncludeNamedConstants{}(e^x + x+5 +\\arctan x + x *y +x^y+x^{y^z})", true,
    false, "CalculatorFunctionsGeneral::innerGetFreeVariablesIncludeNamedConstants", "GetVariablesIncludeNamedConstants")
    ;
+  this->AddOperationInnerHandler ("plotPoint", CalculatorFunctionsGeneral::innerPlotPoint, "",
+   "<b>Calculus teaching function.</b> Plots a point from x and y coordinate.\
+   ",
+   "plotPoint{}(1,2)", true, false, "CalculatorFunctionsGeneral::innerPlotPoint",
+   "plotPoint")
+   ;
   this->AddOperationInnerHandler ("plot2D", CalculatorFunctionsGeneral::innerPlot2D, "",
    "<b>Calculus teaching function.</b> Makes a 2d plot of a function given in the form \
    y=f(x). The the second and third argument give the upper and \

@@ -751,6 +751,10 @@ bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input
 
 void Plot::operator+=(const Plot& other)
 { this->thePlots.AddListOnTop(other.thePlots);
+  if (this->DesiredHtmlHeightInPixels<other.DesiredHtmlHeightInPixels)
+    this->DesiredHtmlHeightInPixels=other.DesiredHtmlHeightInPixels;
+  if (this->DesiredHtmlWidthInPixels<other.DesiredHtmlWidthInPixels)
+    this->DesiredHtmlWidthInPixels=other.DesiredHtmlWidthInPixels;
 }
 
 void Plot::operator+=(const PlotObject& other)
@@ -869,6 +873,13 @@ void Plot::ComputeAxesAndBoundingBox()
       this->highBoundY=MathRoutines::Maximum (currentLine[0][1], this->highBoundY);
       this->highBoundY=MathRoutines::Maximum (currentLine[1][1], this->highBoundY);
     }
+    for (int j=0; j<this->thePlots[k].thePoints.size; j++)
+    { Vector<double> currentPoint=this->thePlots[k].thePoints[j];
+      this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentPoint[0]);
+      this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, currentPoint[0]);
+      this->lowBoundY=MathRoutines::Minimum  (currentPoint[1], this->lowBoundY);
+      this->highBoundY=MathRoutines::Maximum (currentPoint[1], this->highBoundY);
+    }
   }
 
 }
@@ -923,17 +934,27 @@ std::string Plot::GetPlotHtml()
   theDVs.drawLineBetweenTwoVectorsBufferDouble(v1, v2, theDVs.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
   v1[0]=1;
   v1[1]=-0.2;
-  theDVs.drawTextAtVectorBuffer(v1, (std::string)"1", CGI::RedGreenBlue(0,0,0), theDVs.TextStyleNormal,0);
+  theDVs.drawTextAtVectorBufferDouble(v1, (std::string)"1", CGI::RedGreenBlue(0,0,0), theDVs.TextStyleNormal,0);
   v1.SwapTwoIndices(0,1);
-  theDVs.drawTextAtVectorBuffer(v1, (std::string)"1", CGI::RedGreenBlue(0,0,0), theDVs.TextStyleNormal,0);
+  theDVs.drawTextAtVectorBufferDouble(v1, (std::string)"1", CGI::RedGreenBlue(0,0,0), theDVs.TextStyleNormal,0);
   for (int i=0; i<this->thePlots.size; i++)
-    for (int j=1; j<thePlots[i].thePoints.size; j++)
-    { if (!this->IsOKVector(thePlots[i].thePoints[j-1]) || !this->IsOKVector(thePlots[i].thePoints[j] ))
-        continue;
-      theDVs.drawLineBetweenTwoVectorsBufferDouble
-      (thePlots[i].thePoints[j-1], thePlots[i].thePoints[j], theDVs.PenStyleNormal,
-       thePlots[i].colorRGB);
-    }
+    if (this->thePlots[i].thePlotType=="point")
+      for (int j=0; j<this->thePlots[i].thePoints.size; j++)
+      { if (!this->IsOKVector(thePlots[i].thePoints[j]))
+          continue;
+        theDVs.drawCircleAtVectorBufferDouble
+        (this->thePlots[i].thePoints[j], 2, theDVs.PenStyleNormal, thePlots[i].colorRGB);
+        theDVs.drawCircleAtVectorBufferDouble
+        (this->thePlots[i].thePoints[j], 1, theDVs.PenStyleNormal, thePlots[i].colorRGB);
+      }
+    else
+      for (int j=1; j<thePlots[i].thePoints.size; j++)
+      { if (!this->IsOKVector(thePlots[i].thePoints[j-1]) || !this->IsOKVector(thePlots[i].thePoints[j] ))
+          continue;
+        theDVs.drawLineBetweenTwoVectorsBufferDouble
+        (thePlots[i].thePoints[j-1], thePlots[i].thePoints[j], theDVs.PenStyleNormal,
+         thePlots[i].colorRGB);
+      }
   for (int i=0; i<this->thePlots.size; i++)
     for (int j=0; j<this->thePlots[i].theLines.size; j++)
     { if (!this->IsOKVector(this->thePlots[i].theLines[j][0]) ||

@@ -699,8 +699,7 @@ bool WebWorker::ProcessRawArguments
     { password=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("password"));
       inputStrings[inputStringNames.GetIndex("password")]="********************************************";
     }
-  } else
-    argumentProcessingFailureComments << "DEBUG: guest mode on.";
+  }
   if (inputStringNames.Contains("textInput") && !inputStringNames.Contains("mainInput"))
   { argumentProcessingFailureComments << "Received calculator link in an old format, interpreting 'textInput' as 'mainInput'";
     inputStringNames.SetObjectAtIndex(inputStringNames.GetIndex("textInput"), "mainInput");
@@ -715,7 +714,6 @@ bool WebWorker::ProcessRawArguments
     { theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs=true;
       password= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("authenticationInsecure"));
     }
-//  argumentProcessingFailureComments << "DEBUG: request: " << theGlobalVariables.userCalculatorRequestType;
   if (desiredUser!="" &&
       (theGlobalVariables.flagUsingSSLinCurrentConnection ||
        theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs))

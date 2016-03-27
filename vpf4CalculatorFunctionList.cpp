@@ -3038,6 +3038,12 @@ void Calculator::initPredefinedWordSplits()
   theSplit.SetSize(0);
   theSplit.AddOnTop("y"); theSplit.AddOnTop("x");
   this->predefinedWordSplits.SetValue(theSplit, "yx");
+  theSplit.SetSize(0);
+  theSplit.AddOnTop("\\sin"); theSplit.AddOnTop("x");
+  this->predefinedWordSplits.SetValue(theSplit, "sinx");
+  theSplit.SetSize(0);
+  theSplit.AddOnTop("\\sin"); theSplit.AddOnTop("y");
+  this->predefinedWordSplits.SetValue(theSplit, "siny");
 }
 
 void Calculator::initAtomsThatFreezeArguments()

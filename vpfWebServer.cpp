@@ -1872,8 +1872,10 @@ int WebWorker::ProcessCalculator()
 //  stOutput << "<br>got to this point, requesttype: " << theGlobalVariables.userCalculatorRequestType;
   if (theGlobalVariables.userCalculatorRequestType=="calculatorExamples")
     return this->ProcessCalculatorExamples();
-  if (theGlobalVariables.GetWebInput("error")!="" && argumentProcessingFailureComments.str()=="")
+  if (theGlobalVariables.GetWebInput("error")!="")
     stOutput << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("error"));
+  else if (argumentProcessingFailureComments.str()!="")
+    stOutput << argumentProcessingFailureComments.str();
   if (theGlobalVariables.userCalculatorRequestType=="pause")
     return this->ProcessPauseWorker();
   if (theGlobalVariables.userCalculatorRequestType=="status")

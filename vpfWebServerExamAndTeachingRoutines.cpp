@@ -697,15 +697,18 @@ std::string CalculatorHTML::GetSubmitEmailsJavascript()
 std::string CalculatorHTML::GetSubmitAnswersJavascript()
 { std::stringstream out;
   std::string requestTypeSubmit, requestTypePreview, requestGiveUp;
+  bool submitRandomSeed=false;
   if (theGlobalVariables.UserRequestRequiresLoadingRealExamData())
   { requestTypeSubmit  = "submitProblem";
     requestTypePreview = "submitProblemPreview";
   } else if (theGlobalVariables.UserGuestMode())
   { requestTypeSubmit  = "submitExerciseNoLogin";
     requestTypePreview = "submitExercisePreviewNoLogin";
+    submitRandomSeed=true;
   } else
   { requestTypeSubmit  = "submitExercise";
     requestTypePreview = "submitExercisePreview";
+    submitRandomSeed=true;
   }
   if (!theGlobalVariables.UserGuestMode())
     requestGiveUp="problemGiveUp";
@@ -727,12 +730,12 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   << "}\n"
   << "function submitAnswers(idAnswer, idVerification){\n"
   << "  clearTimeout(timerForPreviewAnswers);\n"
-  << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestTypeSubmit, "true") << "\";\n"
+  << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestTypeSubmit, "true", "", submitRandomSeed) << "\";\n"
   << "  submitOrPreviewAnswers(idAnswer, idVerification, params);\n"
   << "}\n"
   << "function giveUp(idAnswer, idVerification){\n"
   << "  clearTimeout(timerForPreviewAnswers);\n"
-  << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestGiveUp, "true") << "\";\n"
+  << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestGiveUp, "true", "", submitRandomSeed) << "\";\n"
   << "  submitOrPreviewAnswers(idAnswer, idVerification, params);\n"
   << "}\n"
   << "function submitOrPreviewAnswers(idAnswer, idVerification, inputParams){\n"

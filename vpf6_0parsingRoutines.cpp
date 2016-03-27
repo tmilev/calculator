@@ -937,10 +937,13 @@ bool Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits()
   List<std::string>& theSplit=this->predefinedWordSplits.GetValueCreateIfNotPresent(currentVar);
   SyntacticElement newElt;
   this->PopTopSyntacticStack();
-  *this << "Missing space bars: replacing "
+  *this << "Predefined symbol replacement: replacing "
   << currentVar << " with the sequence of symbols " << theSplit.ToStringCommaDelimited()
-  << ". If you do not want such replacements to take place (for example, you like having variable names such as xy) "
-  << " you should add the %DontUsePredefinedWordSplits option at the start of your input. ";
+  << ". If you do not want such replacements to take place you should add the %DontUsePredefinedWordSplits option"
+  << "  at the start of your input. "
+  << " The predefined symbol replacements are used to guard the user from accidental typos such as confusing  "
+  << " x y (the product of x and y) with xy (a single variable whose name contains the letters x and y). "
+  ;
 
   for (int i=0; i<theSplit.size; i++)
   { newElt.theData.MakeAtom(this->AddOperationNoRepetitionOrReturnIndexFirst(theSplit[i]), *this);

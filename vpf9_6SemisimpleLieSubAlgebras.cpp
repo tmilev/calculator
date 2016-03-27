@@ -4629,10 +4629,10 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
         { int color= CGI::RedGreenBlue(150,150,0);
           if (this->primalSubalgebraModules.Contains(i))
           { color=CGI::RedGreenBlue(0,250,0);
-            theDV.drawLineBetweenTwoVectorsBuffer
+            theDV.drawLineBetweenTwoVectorsBufferRational
             (zeroVector, this->WeightsModulesPrimal[i][k], theDV.PenStyleNormal, color);
           }
-          theDV.drawCircleAtVectorBuffer(this->WeightsModulesPrimal[i][k], 2, theDV.PenStyleNormal, color);
+          theDV.drawCircleAtVectorBufferRational(this->WeightsModulesPrimal[i][k], 2, theDV.PenStyleNormal, color);
           if (this->IsExtremeWeight(i, k))
             cornerWeights.AddOnTop(this->WeightsModulesPrimal[i][k]);
         }
@@ -4658,7 +4658,7 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
       }
       for (int k=j+1; k<cornerWeights.size; k++)
         if (minDist==Vector<Rational>::ScalarProduct((cornerWeights[k]-cornerWeights[j]), (cornerWeights[k]-cornerWeights[j]), this->BilinearFormFundPrimal))
-          theDV.drawLineBetweenTwoVectorsBuffer(cornerWeights[k], cornerWeights[j], theDV.PenStyleNormal, color);
+          theDV.drawLineBetweenTwoVectorsBufferRational(cornerWeights[k], cornerWeights[j], theDV.PenStyleNormal, color);
     }
   }
   theDV.theBuffer.labeledVectors.SetSize(0);
@@ -4683,7 +4683,7 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
   { theDV.theBuffer.BasisToDrawCirclesAt[i].SetSize(thePrimalRank);
     for (int j=0; j<thePrimalRank; j++)
       theDV.theBuffer.BasisToDrawCirclesAt[i][j]=BasisToDrawCirclesAt[i][j].GetDoubleValue();
-    theDV.drawCircleAtVectorBuffer(BasisToDrawCirclesAt[i], 4, theDV.PenStyleNormal, CGI::RedGreenBlue(250, 0,0));
+    theDV.drawCircleAtVectorBufferRational(BasisToDrawCirclesAt[i], 4, theDV.PenStyleNormal, CGI::RedGreenBlue(250, 0,0));
     //theDV.drawTextAtVectorBuffer
     //(BasisToDrawCirclesAt[i], BasisToDrawCirclesAt[i].ToString(), CGI::RedGreenBlue(0, 0,0), theDV.TextStyleNormal, 0);
   }

@@ -522,6 +522,7 @@ PlotObject
 & inputValue)const
 { this->CheckInitialization();
   Plot plotContainer;
+//  stOutput << "DEBUG: Calling addplot";
   plotContainer+=inputValue;
   return this->owner->theObjectContainer.thePlots
   .AddNoRepetitionOrReturnIndexFirst(plotContainer);
@@ -2142,7 +2143,6 @@ bool Expression::NeedsParenthesisForBaseOfExponent()const
 bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost()const
 { if (this->owner==0)
     return false;
-//  stOutput << "DEBUG: NeedsparenRightMost: " << this->ToString()  << ", Lispified: " << this->ToStringSemiFull() << "<hr>";
   if (this->StartsWith(this->owner->opPlus()) || this->StartsWith(this->owner->opMinus()))
     return true;
   if (this->IsOfType<Rational>())

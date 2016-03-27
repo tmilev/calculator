@@ -129,7 +129,7 @@ bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
   return true;
 }
 
-void DrawOperations::drawLineBetweenTwoVectorsBuffer(const Vector<Rational>& vector1, const Vector<Rational>& vector2, uint32_t thePenStyle, int ColorIndex)
+void DrawOperations::drawLineBetweenTwoVectorsBufferRational(const Vector<Rational>& vector1, const Vector<Rational>& vector2, uint32_t thePenStyle, int ColorIndex)
 { this->TypeNthDrawOperation.AddOnTop(this->typeDrawLineBetweenTwoVectors);
   this->IndexNthDrawOperation.AddOnTop(this->theDrawLineBetweenTwoRootsOperations.size);
   this->theDrawLineBetweenTwoRootsOperations.AddObjectOnTopCreateNew();
@@ -173,22 +173,30 @@ void DrawLineBetweenTwoRootsOperation::init
   this->ColorIndex=colorIndex;
 }
 
-void DrawOperations::drawCircleAtVectorBuffer
+void DrawOperations::drawCircleAtVectorBufferRational
 (const Vector<Rational>& input, double radius, uint32_t thePenStyle, int theColor)
 { this->TypeNthDrawOperation.AddOnTop(this->typeDrawCircleAtVector);
   this->IndexNthDrawOperation.AddOnTop(this->theDrawCircleAtVectorOperations.size);
   this->theDrawCircleAtVectorOperations.AddObjectOnTopCreateNew();
-  this->theDrawCircleAtVectorOperations.LastObject()->init(input, radius, thePenStyle, theColor);
+  this->theDrawCircleAtVectorOperations.LastObject()->initFromVectorRational(input, radius, thePenStyle, theColor);
 }
 
-void DrawOperations::drawTextAtVectorBuffer(const Vector<Rational>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle)
+void DrawOperations::drawCircleAtVectorBufferDouble
+(const Vector<double>& input, double radius, uint32_t thePenStyle, int theColor)
+{ this->TypeNthDrawOperation.AddOnTop(this->typeDrawCircleAtVector);
+  this->IndexNthDrawOperation.AddOnTop(this->theDrawCircleAtVectorOperations.size);
+  this->theDrawCircleAtVectorOperations.AddObjectOnTopCreateNew();
+  this->theDrawCircleAtVectorOperations.LastObject()->initFromVectorDouble(input, radius, thePenStyle, theColor);
+}
+
+void DrawOperations::drawTextAtVectorBufferRational(const Vector<Rational>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle)
 { this->TypeNthDrawOperation.AddOnTop(this->typeDrawTextAtVector);
   this->IndexNthDrawOperation.AddOnTop(this->theDrawTextAtVectorOperations.size);
   this->theDrawTextAtVectorOperations.AddObjectOnTopCreateNew();
   this->theDrawTextAtVectorOperations.LastObject()->init(input, inputText, ColorIndex, theFontSize, theTextStyle);
 }
 
-void DrawOperations::drawTextAtVectorBuffer(const Vector<double>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle)
+void DrawOperations::drawTextAtVectorBufferDouble(const Vector<double>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle)
 { this->TypeNthDrawOperation.AddOnTop(this->typeDrawTextAtVector);
   this->IndexNthDrawOperation.AddOnTop(this->theDrawTextAtVectorOperations.size);
   this->theDrawTextAtVectorOperations.AddObjectOnTopCreateNew();

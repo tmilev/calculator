@@ -1,0 +1,76 @@
+<span class="setCalculatorExamProblem">
+</span>
+Find the values of \(x\) for which the maximum and minimum value of \(f\) is attained over the given interval. 
+<span class="calculatorHidden">
+\(
+%UseLnInsteadOfLog
+a= randomInteger(-3,3);
+b= randomInteger(1,4);
+c= randomInteger(1,4);
+f{}{{x}}=(x-a)(x-(a+b))(x-(a+b+c));
+theCFs=CoefficientsPowersOf(x,d/dx f{}x);
+\)</span>
+
+<br>
+<span class="calculator">
+\(f{}x;
+\)
+</span>
+over the closed interval \(x\in[\)
+<span class="calculator">
+\(a\) 
+</span>,<span class="calculator">
+\(a+b+c\) 
+</span>\(]\)
+
+<span class="calculatorShowToUserOnly">
+\(
+plot2D(f{}x,a, a+b+c, 300,300, "red" )
+\) 
+</span>
+<span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
+\(
+SeparatorBetweenSpans;
+\)
+</span>
+
+<br>
+The value of \(x\) for which \(f\) attains its maximum is: \(x_{max}=\) 
+<textarea class="calculatorAnswer" id="AlgebraAnswerMax">
+\(
+((-(theCFs_2)-\sqrt{ (theCFs_2)^2-4 (theCFs_1) *( theCFs_3) })/{2 (theCFs_3)}- AlgebraAnswerMax)==0
+\)
+</textarea>
+<span style="color:red"> Please do not give numerical approximations for your 
+answer.</span> Instead, use square roots to give an exact answer. To write \(\sqrt{5}\) you need to type sqrt(5) or \sqrt(5). 
+<span class="calculatorCommentBeforeSubmission">
+\(
+%PlotShowJavascriptOnly
+plot2D(f{}x,a, a+b+c, 300,300, "red" )
++
+plotPoint(AlgebraAnswerMax, f{}AlgebraAnswerMax, "blue");
+\)
+</span>
+
+<span class="calculatorAnswerOnGiveUp">
+(-(theCFs_2)-\sqrt{ (theCFs_2)^2-4 (theCFs_1) *( theCFs_3) })/{2 (theCFs_3)};
+</span>
+
+<br>
+The value of \(x\) for which \(f\) attains its maximum is: 
+\(x_{min}=\) <textarea class="calculatorAnswer" id="AlgebraAnswerMin">
+\(
+((-(theCFs_2)+\sqrt{ (theCFs_2)^2-4 (theCFs_1) *( theCFs_3) })/{2 (theCFs_3)}-AlgebraAnswerMin)==0
+\)
+</textarea>
+
+<span class="calculatorCommentBeforeSubmission">
+\(%PlotShowJavascriptOnly
+plot2D(f{}x,a, a+b+c, 300,300, "red" )
++plotPoint(AlgebraAnswerMin, f{}AlgebraAnswerMin, "blue")
+\)
+</span>
+
+<span class="calculatorAnswerOnGiveUp">
+(-(theCFs_2)+\sqrt{ (theCFs_2)^2-4 (theCFs_1) *( theCFs_3) })/{2 (theCFs_3)};
+</span>

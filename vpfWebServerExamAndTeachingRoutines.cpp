@@ -600,7 +600,7 @@ std::string CalculatorHTML::GetEditPageButton()
   << "currentExamFile=" << urledProblem << "&"
   << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&";
   out << refStreamNoRequest.str() << "\">" << "Edit problem/page" << "</a>";
-  out << "<textarea id=\"clonePageAreaID\" rows=\"1\" cols=\"70\">" << this->fileName << "</textarea>\n"
+  out << "<textarea id=\"clonePageAreaID\" rows=\"1\" cols=\"100\">" << this->fileName << "</textarea>\n"
   << "<button class=\"submitButton\" onclick=\""
   << "submitStringAsMainInput(document.getElementById('clonePageAreaID').value, 'spanCloningAttemptResultID', 'clonePage');"
   << "\" >Clone page</button> <span id=\"spanCloningAttemptResultID\"></span><br>";
@@ -724,7 +724,7 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   << "function previewAnswers(idAnswer, idVerification){\n"
   << "  clearTimeout(timerForPreviewAnswers);\n"
   << "  timerForPreviewAnswers=setTimeout(function(){\n"
-  << "    params=\"" << this->ToStringCalculatorArgumentsForProblem(requestTypePreview, "true") << "\";\n"
+  << "    params=\"" << this->ToStringCalculatorArgumentsForProblem(requestTypePreview, "true", "", submitRandomSeed) << "\";\n"
   << "    submitOrPreviewAnswers(idAnswer, idVerification, params);\n"
   << "  }, 1700);"
   << "}\n"

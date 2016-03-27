@@ -1078,7 +1078,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
     }
     for (int i=0; i<currentOps.theDrawCircleAtVectorOperations.size; i++)
     { Vector<double>& current1=currentOps.theDrawCircleAtVectorOperations[i].theVector;
-      out << circRadiiArrayName<< "[" << k << "]" << "[" << i << "]=" << currentOps.theDrawCircleAtVectorOperations[i].radius << ";\n";
+      out << circRadiiArrayName << "[" << k << "]" << "[" << i << "]=" << currentOps.theDrawCircleAtVectorOperations[i].radius << ";\n";
       out << circArrayName << "[" << k << "]" << "[" << i << "]=[";
       for (int j=0; j<theDimension; j++)
       { out << current1[j];

@@ -251,14 +251,14 @@ std::string LittelmannPath::GenerateOrbitAndAnimate(GlobalVariables& theGlobalVa
     currentOps.theBuffer=tempDV.theBuffer;
     for (int j=0; j<currentPath.Waypoints.size; j++)
     { if (j!=currentPath.Waypoints.size-1)
-      { currentOps.drawLineBetweenTwoVectorsBuffer(currentPath.Waypoints[j], currentPath.Waypoints[j+1], DrawingVariables::PenStyleNormal, 0);
-        tempDV2.theBuffer.drawLineBetweenTwoVectorsBuffer(currentPath.Waypoints[j], currentPath.Waypoints[j+1], DrawingVariables::PenStyleNormal, 0);
+      { currentOps.drawLineBetweenTwoVectorsBufferRational(currentPath.Waypoints[j], currentPath.Waypoints[j+1], DrawingVariables::PenStyleNormal, 0);
+        tempDV2.theBuffer.drawLineBetweenTwoVectorsBufferRational(currentPath.Waypoints[j], currentPath.Waypoints[j+1], DrawingVariables::PenStyleNormal, 0);
       }
-      currentOps.drawCircleAtVectorBuffer(currentPath.Waypoints[j], 2, DrawingVariables::PenStyleNormal, 0);
-      tempDV2.theBuffer.drawCircleAtVectorBuffer(currentPath.Waypoints[j], 4, DrawingVariables::PenStyleNormal, 0);
+      currentOps.drawCircleAtVectorBufferRational(currentPath.Waypoints[j], 2, DrawingVariables::PenStyleNormal, 0);
+      tempDV2.theBuffer.drawCircleAtVectorBufferRational(currentPath.Waypoints[j], 4, DrawingVariables::PenStyleNormal, 0);
     }
   }
-  out << "<br>Animation of the Littelmann paths follows.";
+  out << "<br>Animation of the Littelmann paths follows. ";
   out << theBuffer.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->owner->GetDim());
   out << "<br>Here are all Littelmann paths drawn simultaneously. ";
   out << tempDV2.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->owner->GetDim());

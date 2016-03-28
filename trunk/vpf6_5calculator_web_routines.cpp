@@ -209,8 +209,6 @@ bool CalculatorFunctionsGeneral::innerFetchWebPage(Calculator& theCommands, cons
   theCrawler.init();
 //  theCrawler.addressToConnectTo="localhost";
 //  theCrawler.portOrService="8080";
-  theCrawler.portOrService="http";
-  theCrawler.addressToConnectTo="calculator-algebra.org";
 
   theCrawler.PingCalculatorStatus();
   return output.AssignValue(theCrawler.lastTransactionErrors+"<hr>"+theCrawler.lastTransaction, theCommands);

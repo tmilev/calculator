@@ -399,3 +399,36 @@ bool CalculatorConversions::innerMatrixDouble(Calculator& theCommands, const Exp
     return theCommands << "<br>Failed to get matrix of algebraic numbers. ";
   return output.AssignValue(theMat, theCommands);
 }
+
+bool CalculatorFunctionsGeneral::innerNumerator(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerNumerator");
+  if (input.StartsWith(theCommands.opDivide()))
+    if (input.children.size>1)
+    { output=input[1];
+      return true;
+    }
+  output=input;
+  return true;
+}
+
+bool CalculatorFunctionsGeneral::innerDenominator(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDenominator");
+  if (input.StartsWith(theCommands.opDivide()))
+    if (input.children.size>2)
+    { output=input[2];
+      return true;
+    }
+  return output.AssignValue(1, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerMultiplySequence(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMultiplySequence");
+  if (input.children.size<1)
+    return false;
+  if (input.children.size==1)
+    return output.AssignValue(1, theCommands);
+  List<Expression> theTerms;
+  for (int i=1; i<input.children.size; i++)
+    theTerms.AddOnTop(input[i]);
+  return output.MakeProducT(theCommands, theTerms);
+}

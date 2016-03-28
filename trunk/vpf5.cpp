@@ -1460,11 +1460,14 @@ bool Calculator::innerFactorPoly(Calculator& theCommands, const Expression& inpu
   if(!thePoly.FactorMe(theFactors, &theCommands.Comments))
     return false;
   output.reset(theCommands, theFactors.size+1);
-  Expression tempE;
+  Expression polyE(theCommands), expressionE(theCommands);
   output.AddChildAtomOnTop(theCommands.opSequence());
   for (int i=0; i<theFactors.size; i++)
-  { tempE.AssignValueWithContext(theFactors[i], theContext, theCommands);
-    output.AddChildOnTop(tempE);
+  { polyE.AssignValueWithContext(theFactors[i], theContext, theCommands);
+    expressionE.children.Clear();
+    expressionE.AddChildAtomOnTop("MakeExpression");
+    expressionE.AddChildOnTop(polyE);
+    output.AddChildOnTop(expressionE);
   }
   output.format=output.formatMatrix;
   //stOutput << "<hr>At this point of time, theExpression is: " << output.ToString();

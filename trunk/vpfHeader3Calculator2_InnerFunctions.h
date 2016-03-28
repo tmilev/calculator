@@ -284,8 +284,8 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output)
   { return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, true, true);
   }
-//  static bool innerGoogleLogin
-//  (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerFetchWebPage
+  (Calculator& theCommands, const Expression& input, Expression& output);
 
 
 };

@@ -969,10 +969,11 @@ D-B;\
    ",
    "DFQEuler(x^2 + y^2 - 1, 0, 0, 1000, -2.5, 2.5)")
    ;
-//  this->AddOperationInnerHandler ("googleLogin", CalculatorFunctionsGeneral::innerGoogleLogin, "",
-//   "Attempts to log you in google.",
-//   "googleLogin 0", false, true, "CalculatorFunctionsGeneral::innerGoogleLogin")
-//   ;
+  this->AddOperationInnerHandler ("FetchWebPage", CalculatorFunctionsGeneral::innerFetchWebPage, "",
+   "Attempts to fetch a web page. For logged-in admins only.",
+   "FetchWebPage(\"calculator-algebra.org/calculator?request=statusPublic\")", false,
+   true, "CalculatorFunctionsGeneral::innerFetchWebPage", "FetchWebPage")
+   ;
   this->AddOperationInnerHandler ("drawPolar", CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta, "",
    "<b>Calculus teaching function.</b> Draws polar curve given in polar coordinates in the form \
    r=f(t), where t is the angle variable. The angle variable is measured in degrees. \

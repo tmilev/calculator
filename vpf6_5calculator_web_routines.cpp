@@ -180,7 +180,7 @@ void WebCrawler::PingCalculatorStatus()
       close(this->theSocket);
       continue;
     } else
-      reportStream << "\nconnected";
+      reportStream << "<br>connected: " << this->addressToConnectTo << " port: " << this->portOrService << ". ";
     std::string getMessage= "GET /calculator?request=statusPublic";
 
     int numBytes = write(this->theSocket, getMessage.c_str(), getMessage.size());

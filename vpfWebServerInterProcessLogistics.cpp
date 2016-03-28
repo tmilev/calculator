@@ -256,6 +256,11 @@ void Pipe::Release()
   this->lastRead.SetSize(0);
 }
 
+void Pipe::ReadNoLocksUNSAFE_FOR_USE_BY_WEBSERVER_ONLY()
+{ MacroRegisterFunctionWithName("Pipe::ReadNoLocksUNSAFE_FOR_USE_BY_WEBSERVER_ONLY");
+  this->ReadNoLocks();
+}
+
 void Pipe::ReadNoLocks()
 { MacroRegisterFunctionWithName("Pipe::ReadFileDescriptor");
   this->CheckConsistency();
@@ -276,8 +281,10 @@ void Pipe::ReadNoLocks()
       break;
     counter++;
     if (counter>100)
-      logIO << logger::red << this->ToString()
-      << ". This is not supposed to happen: more than 100 iterations of read from pipe. " << logger::endL;
+    { logIO << logger::red << this->ToString()
+      << ". This is not supposed to happen: more than 100 iterations of read resulted in an error. " << logger::endL;
+      break;
+    }
   }
   if (numReadBytes>150000)
     logIO << logger::red << this->ToString()

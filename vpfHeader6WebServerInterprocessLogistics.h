@@ -27,6 +27,7 @@ public:
 
   bool CheckConsistency();
   bool CheckPauseIsRequested();
+  bool CheckPauseIsRequested_UNSAFE_SERVER_USE_ONLY();
   void PauseIfRequested();
   bool PauseIfRequestedWithTimeOut();
 
@@ -56,6 +57,7 @@ public:
   void Read();
   void ReadWithoutEmptying();
   void WriteAfterEmptying(const std::string& toBeSent);
+  void ReadNoLocksUNSAFE_FOR_USE_BY_WEBSERVER_ONLY();
 
   std::string ToString()const;
   void Release();

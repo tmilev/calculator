@@ -3268,7 +3268,7 @@ int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
   theGlobalVariables.RelativePhysicalNameCrashLog="crash_WebServerRun.html";
   theParser.init();
-  if (true)
+  if (false)
   { int pidServer=fork();
     if (pidServer<0)
       crash << "Failed to create server process. " << crash;

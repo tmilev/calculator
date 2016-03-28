@@ -292,6 +292,24 @@ void Calculator::initPredefinedInnerFunctions()
    "Prints macdonald polynomials from a semisimple type. ",
    "printMacdonaldPolys{}(B_3)", true);
   this->AddOperationInnerHandler
+  ("Numerator", CalculatorFunctionsGeneral::innerNumerator, "",
+   "If the expression is a fraction, returns the numerator, else returns the entire expression. ",
+   "Numerator(a/b); Numerator(1+1/x)", true, false, "CalculatorFunctionsGeneral::innerNumerator", "Numerator");
+  this->AddOperationInnerHandler
+  ("Denominator", CalculatorFunctionsGeneral::innerDenominator, "",
+   "If the expression is a fraction, returns the denominator, else returns 1. ",
+   "Denominator(a/b); Denominator(1+1/x)", true, false, "CalculatorFunctionsGeneral::innerDenominator", "Denominator");
+  this->AddOperationInnerHandler
+  ("Product", CalculatorFunctionsGeneral::innerMultiplySequence, "",
+   "Returns the product of the elements in a sequence. When used on non-sequences, the function \
+   will ignore the first element and \
+   return the product of the remaining elements. This may not produce the result you expected for non-sequences,\
+   so use on sequences only. \
+    ",
+   "Product(a,b); Product{}(Sequence{}a); Product(Sequence{}a); Product(a)",
+   true, false, "CalculatorFunctionsGeneral::innerMultiplySequence", "Product");
+
+  this->AddOperationInnerHandler
   ("MakeExpression", CalculatorConversions::innerExpressionFromBuiltInType, "",
    "Creates expression from built-in polynomial. ",
    "MakeExpression(Polynomial{}((x-2y+z-1)^2(x+y-z)));\

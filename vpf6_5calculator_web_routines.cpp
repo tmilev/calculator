@@ -55,6 +55,8 @@ void MonitorWebServer()
   TimeWrapper now;
   for (;;)
   { theGlobalVariables.FallAsleep(microsecondsToSleep);
+    std::cout << "Pinging " << theCrawler.addressToConnectTo
+      << " at port/service " << theCrawler.portOrService << ".\n";
     theCrawler.PingCalculatorStatus();
     numPings++;
     if (theCrawler.lastTransactionErrors!="")
@@ -94,7 +96,7 @@ void WebCrawler::init()
     return;
   MacroRegisterFunctionWithName("WebCrawler::init");
   buffer.initFillInObject(50000, 0);
-  this->portOrService="http";
+  this->portOrService="80";
 //  this->socketCommunication = socket(AF_INET, SOCK_STREAM, 0);
 //  if (this->socketCommunication < 0)
 //  { this->fatalErrors << "Couldn't create socket for initial connection. ";

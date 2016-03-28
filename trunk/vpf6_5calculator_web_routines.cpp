@@ -12,6 +12,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+//#include <libexplain/connect.h>
 
 ProjectInformationInstance ProjectInfoVpf6_5calculatorWebRoutines(__FILE__, "Calculator web routines. ");
 
@@ -172,7 +173,10 @@ void WebCrawler::PingCalculatorStatus()
     } else
       connectionResult =connect(this->theSocket, this->serverInfo->ai_addr, this->serverInfo->ai_addrlen);
     if (connectionResult==-1)
-    { this->lastTransactionErrors+= "<br>failed to connect";
+    { reportStream << "<br>Failed to connect: address: " << this->addressToConnectTo << " port: "
+      << this->portOrService << ". ";
+//      << explain_errno_connect(this->theSocket, this->serverInfo->ai_addr, this->serverInfo->ai_addrlen);
+      this->lastTransactionErrors= reportStream.str();
       close(this->theSocket);
       continue;
     } else

@@ -21,10 +21,11 @@ sdNumFactorLin=sdNumFactors_1;
 sdNumFactorQuad=MakeExpression(MakeRationalFunction (sdNum/sdNumFactorLin));
 sdQuadCfs=CoefficientsPowersOf(x, sdNumFactorQuad);
 sdLinCFs=CoefficientsPowersOf(x, sdNumFactorLin);
-inflectionPoints=(- sdLinCFs_1 /sdLinCFs_2, 
+inflectionPoints=Sort(- sdLinCFs_1 /sdLinCFs_2, 
 (-sdQuadCfs_2 -\sqrt((sdQuadCfs_2)^2 -4 sdQuadCfs_1 sdQuadCfs_3))/(2 sdQuadCfs_3),
 (-sdQuadCfs_2 +\sqrt((sdQuadCfs_2)^2-4 sdQuadCfs_1 sdQuadCfs_3))/(2 sdQuadCfs_3)
 ) ;
+concaveUpIntervals= ((inflectionPoints_1, inflectionPoints_2), (inflectionPoints_3, \infty))  ;
 TurnOffRules("DistributeMultiplication");
 \)</span>
 
@@ -101,9 +102,18 @@ The maximum of \(f\) is achieved for \(x\) equal to:
 xMax- increaseInterval_2==0;
 \)
 </textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+%PlotShowJavascriptOnly
+plot2D(f{}x, -6,6, 300,300, "red" )+
+plotPoint(xMax, f{}xMax, "blue" )
+;
+\)
+</span>
 <span class="calculatorAnswerOnGiveUp">
 increaseInterval_2
 </span>
+
 <hr>
 The minimum of \(f\) is achieved for \(x\) equal to:
 <textarea class="calculatorAnswer" id="xMin">
@@ -111,9 +121,64 @@ The minimum of \(f\) is achieved for \(x\) equal to:
 xMin- increaseInterval_1==0;
 \)
 </textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+%PlotShowJavascriptOnly
+plot2D(f{}x, -6,6, 300,300, "red" )+
+plotPoint(xMin, f{}xMin, "blue" )
+;
+\)
+</span>
+
 <span class="calculatorAnswerOnGiveUp">
 increaseInterval_1
 </span>
-Find the interval(s) on which \(f\) is concave up.
+<hr>
+Find the two interval(s) on which \(f\) is concave up. 
+<br>
+Enter the two intervals as open intervals in the format (a,b), (c,d). 
+<br>
+Make sure the left endpoint is smaller than the right and that the first interval is to the left of the second.
+<br>To enter \(\pm \infty\) write \infty, or infinity.  
 
+
+<br>
+<textarea class="calculatorAnswer" id="userConcaveUp">
+\(
+userConcaveUp==concaveUpIntervals
+\)
+</textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+%PlotShowJavascriptOnly
+plot2D(f{}x, -6,6, 300,300, "red" )+
+plot2D(f{}x, (userConcaveUp_1)_1, (userConcaveUp_1)_2, 300,300, "blue" )+
+plot2D(f{}x, (userConcaveUp_2)_1,6, 300,300, "blue" )
+;
+\)
+</span>
+<span class="calculatorAnswerOnGiveUp">
+concaveUpIntervals
+</span>
+<hr>
+Find the \(x\)-coordinates of the inflection points. If more than one, separate them by comma. 
+<br>
+For example, type 1,2,3 to enter those three values as the \(x\)-coordinates of the inflection points.
+<textarea class="calculatorAnswer" id="userInflectionPoints">
+\(
+(Sort(userInflectionPoints))==inflectionPoints;
+\)
+</textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+%PlotShowJavascriptOnly
+Sort{}userInflectionPoints;
+inflectionPoints;
+userInflectionPoints==inflectionPoints;
+\)
+</span>
+
+<span class="calculatorAnswerOnGiveUp">
+inflectionPoints
+</span>
 

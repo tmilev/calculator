@@ -3084,7 +3084,7 @@ void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress
 
   for (int i=0; i<this->theWorkers.size; i++)
     if (this->theWorkers[i].flagInUse)
-    { this->theWorkers[i].pipeWorkerToServerControls.Read();
+    { this->theWorkers[i].pipeWorkerToServerControls.ReadNoLocksUNSAFE_FOR_USE_BY_WEBSERVER_ONLY();
       if (this->theWorkers[i].pipeWorkerToServerControls.lastRead.size>0)
       { this->theWorkers[i].flagInUse=false;
         this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
@@ -3094,12 +3094,12 @@ void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress
 //        waitpid(this->theWorkers[i].ProcessPID, 0, )
       } else
         theLog << logger::yellow << "Worker " << i+1 << " not done yet. " << logger::endL;
-      this->theWorkers[i].pipeWorkerToServerUserInput.Read();
+      this->theWorkers[i].pipeWorkerToServerUserInput.ReadNoLocksUNSAFE_FOR_USE_BY_WEBSERVER_ONLY();
       if (this->theWorkers[i].pipeWorkerToServerUserInput.lastRead.size>0)
         this->theWorkers[i].displayUserInput.assign
         (this->theWorkers[i].pipeWorkerToServerUserInput.lastRead.TheObjects,
           this->theWorkers[i].pipeWorkerToServerUserInput.lastRead.size);
-      this->theWorkers[i].pipeWorkerToServerTimerPing.Read();
+      this->theWorkers[i].pipeWorkerToServerTimerPing.ReadNoLocksUNSAFE_FOR_USE_BY_WEBSERVER_ONLY();
       if (purgeIncomingAddress)
         if (this->theWorkers[i].userAddress==incomingAddress)
         { this->TerminateChildSystemCall(i);

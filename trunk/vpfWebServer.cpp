@@ -3268,12 +3268,14 @@ int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
   theGlobalVariables.RelativePhysicalNameCrashLog="crash_WebServerRun.html";
   theParser.init();
-  int pidServer=fork();
-  if (pidServer<0)
-    crash << "Failed to create server process. " << crash;
-  if (pidServer!=0)
-  { MonitorWebServer();//<-this attempts to connect to the server over the internet and restarts if it can't.
-    return 0;
+  if (false)
+  { int pidServer=fork();
+    if (pidServer<0)
+      crash << "Failed to create server process. " << crash;
+    if (pidServer!=0)
+    { MonitorWebServer();//<-this attempts to connect to the server over the internet and restarts if it can't.
+      return 0;
+    }
   }
   CGI::LoadStrings();
   theParser.flagShowCalculatorExamples=false;

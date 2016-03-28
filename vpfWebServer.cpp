@@ -3138,8 +3138,8 @@ void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress
     }
   if (numInUse<=this->MaxTotalUsedWorkers)
     return;
-  for (int i=0; i<this->theWorkers.size && numInUse>this->MaxTotalUsedWorkers; i++)
-    if (this->theWorkers[i].flagInUse)
+  for (int i=0; i<this->theWorkers.size && numInUse>1; i++)
+  { if (this->theWorkers[i].flagInUse)
     { this->TerminateChildSystemCall(i);
       std::stringstream errorStream;
       errorStream
@@ -3151,6 +3151,7 @@ void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress
       numInUse--;
       this->NumProcessAssassinated++;
     }
+  }
 }
 
 bool WebServer::initPrepareWebServerALL()

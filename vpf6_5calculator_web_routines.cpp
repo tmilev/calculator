@@ -97,7 +97,7 @@ void WebCrawler::init()
     return;
   MacroRegisterFunctionWithName("WebCrawler::init");
   buffer.initFillInObject(50000, 0);
-  this->portOrService="80";
+  this->portOrService="http";
   this->addressToConnectTo="calculator-algebra.org";
 }
 

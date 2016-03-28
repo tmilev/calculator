@@ -108,7 +108,7 @@ void WebCrawler::init()
     this->addressToConnectTo="localhost";
   } else
   { this->portOrService="8155";
-    this->addressToConnectTo="localhost";
+    this->addressToConnectTo="127.0.0.1";
   }
 }
 

@@ -41,10 +41,13 @@ void MonitorWebServer()
 { MacroRegisterFunctionWithName("MonitorWebServer");
   WebCrawler theCrawler;
   theCrawler.init();
-  int microsecondsToSleep=1000000*60*5;//5 minutes
+  int microsecondsToSleep=1000000;//*60;//*5;//1 minutes
   if (!theWebServer.flagPort8155)
-  { theCrawler.portOrService="http";
+  { theCrawler.portOrService="8080";
     theCrawler.addressToConnectTo="localhost";
+  } else
+  { theCrawler.portOrService="8155";
+    theCrawler.addressToConnectTo="calculator-algebra.org";
   }
   theLog << logger::blue << "Pinging " << theCrawler.addressToConnectTo << " at port/service "
   << theCrawler.portOrService << " every " << (microsecondsToSleep/1000000) << " second(s). "

@@ -41,7 +41,7 @@ void MonitorWebServer()
 { MacroRegisterFunctionWithName("MonitorWebServer");
   WebCrawler theCrawler;
   theCrawler.init();
-  int microsecondsToSleep=1000000;
+  int microsecondsToSleep=1000000*60*5;//5 minutes
   if (!theWebServer.flagPort8155)
   { theCrawler.portOrService="http";
     theCrawler.addressToConnectTo="localhost";
@@ -52,12 +52,13 @@ void MonitorWebServer()
   theLog << logger::red << "Please beware that the server will restart and you will lose all computations "
   << "if 3 consecutive pings fail. " << logger::endL;
   int numConsecutiveFailedPings=0;
+  int maxNumPingFailures=1;
   int numPings=0;
   TimeWrapper now;
   for (;;)
   { theGlobalVariables.FallAsleep(microsecondsToSleep);
     std::cout << "Pinging " << theCrawler.addressToConnectTo
-      << " at port/service " << theCrawler.portOrService << ".\n";
+    << " at port/service " << theCrawler.portOrService << ".\n";
     theCrawler.PingCalculatorStatus();
     numPings++;
     if (theCrawler.lastTransactionErrors!="")
@@ -72,7 +73,7 @@ void MonitorWebServer()
     { std::cout << "Ping success #" << numPings << std::endl;
       numConsecutiveFailedPings=0;
     }
-    if (numConsecutiveFailedPings>2)
+    if (numConsecutiveFailedPings>=maxNumPingFailures)
     { logProcessKills << logger::red << "Server stopped responding (probably locked pipe?)"
       << ", restarting. " << logger::endL;
       theWebServer.Restart();

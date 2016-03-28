@@ -2,122 +2,209 @@
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader3Calculator2_InnerFunctions.h"
 #include "vpfHeader6WebServer.h"
+#include "vpfHeader1General5TimeDate.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
 
 ProjectInformationInstance ProjectInfoVpf6_5calculatorWebRoutines(__FILE__, "Calculator web routines. ");
 
-
-/*
-bool CalculatorFunctionsGeneral::innerGoogleLogin(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGoogleLogin");
-  int sockfd, portno, n;
-  struct sockaddr_in serv_addr;
-  struct hostent *server;
-  portno = 80;
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (sockfd < 0)
-    return output.MakeError("Couldn't open socket.", theCommands);
-  std::stringstream reportStream;
-  int status;
+class WebCrawler
+{
+public:
+  int theSocket;
+  std::string portOrService;
+  bool flagInitialized;
+  List<char> buffer;
+  struct sockaddr_in serverAddress;
+  struct hostent *serverOtherSide;
   struct addrinfo hints;
-  struct addrinfo *servinfo;
-  struct addrinfo *p;  // will point to the results
+  struct addrinfo *serverInfo;
+  WebCrawler();
+  ~WebCrawler();
+  void init();
+  void PingCalculatorStatus();
+  void FreeAddressInfo();
+  std::string addressToConnectTo;
+  std::stringstream fatalErrors;
+  std::string lastTransactionErrors;
+  std::string lastTransaction;
+};
 
-  memset(&hints, 0, sizeof hints); // make sure the struct is empty
-  hints.ai_family = AF_UNSPEC;     // don't care IPv4 or IPv6
-  hints.ai_socktype = SOCK_STREAM; // TCP stream sockets
-  hints.ai_flags = AI_PASSIVE;     // fill in my IP for me
-  std::string theAddress="accounts.google.com";
-  if ((status = getaddrinfo(theAddress.c_str(), "https", &hints, &servinfo)) != 0)
-  { reportStream << "getaddrinfo error: " << gai_strerror(status);
-    return output.MakeError(reportStream.str(), theCommands);
+void MonitorWebServer()
+{ WebCrawler theCrawler;
+  theCrawler.init();
+  int microsecondsToSleep=10000000;
+  if (!theWebServer.flagPort8155)
+  { theCrawler.portOrService="8080";
+    theCrawler.addressToConnectTo="localhost";
   }
-  for(p = servinfo; p != 0; p = p->ai_next)
-  { void *addr;
+  theLog << logger::blue << "Pinging " << theCrawler.addressToConnectTo << " at port/service "
+  << theCrawler.portOrService << " every " << (microsecondsToSleep/1000000) << " second(s). "
+  << logger::endL;
+  theLog << logger::red << "Please beware that the server will restart and you will lose all computations "
+  << "if 3 consecutive pings fail. " << logger::endL;
+  int numConsecutiveFailedPings=0;
+  int numPings=0;
+  TimeWrapper now;
+  for (;;)
+  { theGlobalVariables.FallAsleep(microsecondsToSleep);
+    theCrawler.PingCalculatorStatus();
+    numPings++;
+    if (theCrawler.lastTransactionErrors!="")
+    { now.AssignLocalTime();
+      numConsecutiveFailedPings++;
+      logIO << logger::red << "Ping of " << theCrawler.addressToConnectTo
+      << " at port/service " << theCrawler.portOrService
+      << " failed on " << now.ToStringHumanReadable() << ". "
+      <<  numConsecutiveFailedPings << " consecutive fails so far, restarting on 3." << logger::endL;
+    } else
+    { std::cout << "Ping success #" << numPings << std::endl;
+      numConsecutiveFailedPings=0;
+    }
+    if (numConsecutiveFailedPings>2)
+    { logProcessKills << logger::red << "Server stopped responding (probably locked pipe?)"
+      << ", restarting. " << logger::endL;
+      theWebServer.Restart();
+    }
+  }
+}
+
+WebCrawler::WebCrawler()
+{ this->flagInitialized=false;
+  this->theSocket=-1;
+  this->serverOtherSide=0;
+  this->serverInfo=0;
+}
+
+void WebCrawler::FreeAddressInfo()
+{ if (this->serverInfo!=0)
+    freeaddrinfo(this->serverInfo);
+  this->serverInfo=0;
+}
+
+void WebCrawler::init()
+{ if (this->flagInitialized)
+    return;
+  MacroRegisterFunctionWithName("WebCrawler::init");
+  buffer.initFillInObject(50000, 0);
+  this->portOrService="http";
+//  this->socketCommunication = socket(AF_INET, SOCK_STREAM, 0);
+//  if (this->socketCommunication < 0)
+//  { this->fatalErrors << "Couldn't create socket for initial connection. ";
+//    return;
+//  }
+  this->addressToConnectTo="calculator-algebra.org";
+}
+
+WebCrawler::~WebCrawler()
+{ if (!this->flagInitialized)
+    return;
+  this->flagInitialized=false;
+  close(this->theSocket);
+  this->theSocket=-1;
+  this->FreeAddressInfo();
+}
+
+
+void WebCrawler::PingCalculatorStatus()
+{ MacroRegisterFunctionWithName("WebCrawler::PingCalculatorStatus");
+  std::stringstream reportStream;
+  this->lastTransaction="";
+  this->lastTransactionErrors="";
+  memset(&this->hints, 0, sizeof this->hints); // make sure the struct is empty
+  this->hints.ai_family = AF_UNSPEC;     // don't care IPv4 or IPv6
+  this->hints.ai_socktype = SOCK_STREAM; // TCP stream sockets
+  this->hints.ai_flags = AI_PASSIVE;     // fill in my IP for me
+  this->serverInfo=0;
+  int status=getaddrinfo(this->addressToConnectTo.c_str(), this->portOrService.c_str(), &hints, &this->serverInfo);
+  if (status!= 0)
+  { this->lastTransactionErrors =  "Could not find address: getaddrinfo error: ";
+    this->lastTransactionErrors+= gai_strerror(status);
+    this->FreeAddressInfo();
+    return;
+  }
+  if (this->serverInfo==0)
+  { this->lastTransactionErrors= "Server info is zero";
+    return;
+  }
+  struct addrinfo *p=0;  // will point to the results
+  this->theSocket=-1;
+  char ipString[INET6_ADDRSTRLEN];
+  for(p = this->serverInfo; p != 0; p = p->ai_next, close(this->theSocket))
+  { void *theAddress=0;
+    this->theSocket=-1;
     // get the pointer to the address itself,
     // different fields in IPv4 and IPv6:
     if (p->ai_family == AF_INET)
     { // IPv4
       struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
-      addr = &(ipv4->sin_addr);
+      theAddress = &(ipv4->sin_addr);
       reportStream << "IPv4: ";
     } else
     { // IPv6
       struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
-      addr = &(ipv6->sin6_addr);
+      theAddress = &(ipv6->sin6_addr);
       reportStream << "IPv6: ";
     }
     // convert the IP to a string and print it:
-    char ipstr[INET6_ADDRSTRLEN];
-    inet_ntop(p->ai_family, addr, ipstr, sizeof ipstr);
+    inet_ntop(p->ai_family, theAddress, ipString, sizeof ipString);
 //    std::string ipString()
-    reportStream << theAddress << ": " << ipstr << "<br>";
-    this->listeningSocketID= socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-      if (this->listeningSocketID == -1)
-      { theLog << "Error: socket failed.\n";
-        continue;
-      }
-      if (setsockopt(this->listeningSocketID, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
-        crash << "Error: setsockopt failed.\n" << crash;
-      if (bind(this->listeningSocketID, p->ai_addr, p->ai_addrlen) == -1)
-      { close(this->listeningSocketID);
-        theLog << "Error: bind failed. " << this->ToStringLastErrorDescription() << logger::endL;
-        continue;
-      }
-      break;
+    reportStream << this->addressToConnectTo << ": " << ipString << "<br>";
+    this->theSocket= socket(this->serverInfo->ai_family, this->serverInfo->ai_socktype, this->serverInfo->ai_protocol);
+    int connectionResult=-1;
+    if (this->theSocket<0)
+    { this->lastTransactionErrors= "failed to create socket ";
+      continue;
+    } else
+      connectionResult =connect(this->theSocket, this->serverInfo->ai_addr, this->serverInfo->ai_addrlen);
+    if (connectionResult==-1)
+    { this->lastTransactionErrors+= "<br>failed to connect";
+      close(this->theSocket);
+      continue;
+    } else
+      reportStream << "\nconnected";
+    std::string getMessage= "GET /calculator?request=statusPublic";
+
+    int numBytes = write(this->theSocket, getMessage.c_str(), getMessage.size());
+    if ((unsigned) numBytes !=getMessage.size())
+    { this->lastTransactionErrors+= "\nERROR writing to socket";
+      close(this->theSocket);
+      continue;
     }
-  if (servinfo==0)
-  { reportStream << "Servinfo is zero";
-    return output.AssignValue(reportStream.str(), theCommands);
-  }
-  WebWorker theWorker;
-  theWorker.connectedSocketID = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
-  int connectionResult=connect(theWorker.connectedSocketID, servinfo->ai_addr, servinfo->ai_addrlen);
-  if (connectionResult==-1)
-    reportStream << "<br>failed to connect";
-  else
-  { reportStream << "<br>connected";
-    reportStream << "<meta http-equiv=\"refresh\" "
-    << "content=\"0; url=https://accounts.google.com/o/oauth2/auth?"
-    << "redirect_uri=http://localhost:8080/vectorpartition/cgi-bin/calculator&"
-    << "response_type=code&client_id=538605306594&"
-    << "scope=&approval_prompt=force&access_type=offline\">";
-  }
-  close(theWorker.connectedSocketID);
-  // servinfo now points to a linked list of 1 or more struct addrinfos
-
-// ... do everything until you don't need servinfo anymore ....
-
-  freeaddrinfo(servinfo); // free the linked-list
-
-
-  server = gethostbyname(argv[1]);
-    if (server == NULL) {
-        fprintf(stderr,"ERROR, no such host\n");
-        exit(0);
+    numBytes = read(this->theSocket, buffer.TheObjects,49999);
+    if (numBytes < 0)
+    { this->lastTransactionErrors+= "\nERROR reading from socket";
+      close(this->theSocket);
+      continue;
     }
-    bzero((char *) &serv_addr, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    bcopy((char *)server->h_addr,
-         (char *)&serv_addr.sin_addr.s_addr,
-         server->h_length);
-    serv_addr.sin_port = htons(portno);
-    if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0)
-        error("ERROR connecting");
-    printf("Please enter the message: ");
-    bzero(buffer,256);
-    fgets(buffer,255,stdin);
-    n = write(sockfd,buffer,strlen(buffer));
-    if (n < 0)
-         error("ERROR writing to socket");
-    bzero(buffer,256);
-    n = read(sockfd,buffer,255);
-    if (n < 0)
-         error("ERROR reading from socket");
-    printf("%s\n",buffer);
-    close(sockfd);
-    return 0;
-  return output.AssignValue(reportStream.str(), theCommands);
-}*/
+    std::string readString;
+    readString.assign(buffer.TheObjects, numBytes);
+    reportStream << "<br>Read: " << readString;
+    this->lastTransaction=reportStream.str();
+    close(this->theSocket);
+  }
+  this->FreeAddressInfo();
+}
+
+bool CalculatorFunctionsGeneral::innerFetchWebPage(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFetchWebPage");
+//  if (!theGlobalVariables.UserDefaultHasAdminRights())
+//    return output.AssignValue((std::string) "Fetching web pages available only for logged-in admins. ", theCommands);
+
+  WebCrawler theCrawler;
+  theCrawler.init();
+  theCrawler.addressToConnectTo="localhost";
+  theCrawler.portOrService="8080";
+  theCrawler.PingCalculatorStatus();
+  return output.AssignValue(theCrawler.lastTransactionErrors+"<hr>"+theCrawler.lastTransaction, theCommands);
+}
 
 
 

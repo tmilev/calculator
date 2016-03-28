@@ -1693,11 +1693,18 @@ bool Calculator::outerGreaterThan(Calculator& theCommands, const Expression& inp
   const Expression& left=input[1];
   const Expression& right=input[2];
   Rational leftRat, rightRat;
-  if (!left.IsRational(&leftRat)|| ! right.IsRational(&rightRat))
-    return false;
-  if (leftRat>rightRat)
-    return output.AssignValue(1, theCommands);
-  return output.AssignValue(0, theCommands);
+  if (left.IsRational(&leftRat) && right.IsRational(&rightRat))
+  { if (leftRat>rightRat)
+      return output.AssignValue(1, theCommands);
+    return output.AssignValue(0, theCommands);
+  }
+  double leftD, rightD;
+  if (left.EvaluatesToDouble(&leftD) && right.EvaluatesToDouble(&rightD) )
+  { if (leftD>rightD)
+      return output.AssignValue(1, theCommands);
+    return output.AssignValue(0, theCommands);
+  }
+  return false;
 }
 
 bool Calculator::outerLessThan(Calculator& theCommands, const Expression& input, Expression& output)

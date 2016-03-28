@@ -43,7 +43,7 @@ void MonitorWebServer()
   theCrawler.init();
   int microsecondsToSleep=1000000;
   if (!theWebServer.flagPort8155)
-  { theCrawler.portOrService="8080";
+  { theCrawler.portOrService="http";
     theCrawler.addressToConnectTo="localhost";
   }
   theLog << logger::blue << "Pinging " << theCrawler.addressToConnectTo << " at port/service "
@@ -65,7 +65,8 @@ void MonitorWebServer()
       numConsecutiveFailedPings++;
       logIO << logger::red << "Ping of " << theCrawler.addressToConnectTo
       << " at port/service " << theCrawler.portOrService
-      << " failed on " << now.ToStringHumanReadable() << ". "
+      << " failed on " << now.ToStringHumanReadable() << ". " << "Got the following errors/messages: "
+      << theCrawler.lastTransactionErrors << theCrawler.lastTransaction << ". "
       <<  numConsecutiveFailedPings << " consecutive fails so far, restarting on 3." << logger::endL;
     } else
     { std::cout << "Ping success #" << numPings << std::endl;
@@ -198,8 +199,11 @@ bool CalculatorFunctionsGeneral::innerFetchWebPage(Calculator& theCommands, cons
 
   WebCrawler theCrawler;
   theCrawler.init();
-  theCrawler.addressToConnectTo="localhost";
-  theCrawler.portOrService="8080";
+//  theCrawler.addressToConnectTo="localhost";
+//  theCrawler.portOrService="8080";
+  theCrawler.portOrService="http";
+  theCrawler.addressToConnectTo="calculator-algebra.org";
+
   theCrawler.PingCalculatorStatus();
   return output.AssignValue(theCrawler.lastTransactionErrors+"<hr>"+theCrawler.lastTransaction, theCommands);
 }

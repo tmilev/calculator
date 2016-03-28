@@ -166,6 +166,7 @@ public:
   int NumProcessesReaped;
   int NumProcessAssassinated;
   int NumWorkersNormallyExited;
+  int WebServerPingIntervalInSeconds;
   long long NumFailedSelectsSoFar;
   long long NumSuccessfulSelectsSoFar;
   bool flagTryToKillOlderProcesses;

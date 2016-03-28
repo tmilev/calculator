@@ -42,7 +42,7 @@ void MonitorWebServer()
 { MacroRegisterFunctionWithName("MonitorWebServer");
   WebCrawler theCrawler;
   theCrawler.init();
-  int microsecondsToSleep=10000000;//*60;//*5;//1 minutes
+  int microsecondsToSleep=1000000*theWebServer.WebServerPingIntervalInSeconds;//60 seconds
   theLog << logger::blue << "Pinging " << theCrawler.addressToConnectTo << " at port/service "
   << theCrawler.portOrService << " every " << (microsecondsToSleep/1000000) << " second(s). "
   << logger::endL;

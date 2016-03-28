@@ -2739,6 +2739,7 @@ WebServer::WebServer()
   this->NumProcessAssassinated=0;
   this->NumConnectionsSoFar=0;
   this->NumWorkersNormallyExited=0;
+  this->WebServerPingIntervalInSeconds=60;
 }
 
 WebWorker& WebServer::GetActiveWorker()
@@ -2887,13 +2888,21 @@ std::string WebServer::ToStringStatusPublic()
 
   out << "<html><body>"
   << "<b>The calculator web server server status.</b><hr>"
-  << this->NumConnectionsSoFar << " connections served since last restart. "
-  << "(One connection per problem answer preview, page visit, progress report ping, etc). "
   << "<br>" << this->GetActiveWorker().timeOfLastPingServerSideOnly
   << " seconds = "
   << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
   (this->GetActiveWorker().timeOfLastPingServerSideOnly, false)
   << " web server uptime. ";
+  int approxNumPings=
+  this->GetActiveWorker().timeOfLastPingServerSideOnly/this->WebServerPingIntervalInSeconds;
+  if (approxNumPings<0)
+    approxNumPings=0;
+  out << this->NumConnectionsSoFar-approxNumPings << " connections + "
+  << approxNumPings << " self-test-pings (" << this->NumConnectionsSoFar << " connections total)"
+  << " served since last restart. "
+  << "This counts one connection per problem answer preview, page visit, progress report ping, etc. "
+  ;
+
   out << "<br>" << this->theWorkers.size  << " = peak number of concurrent connections. "
   << " The number tends to be high as many browsers open more than one connection per page visit. <br>"
   << this->MaxTotalUsedWorkers << " global maximum of simultaneous non-closed connections allowed. "

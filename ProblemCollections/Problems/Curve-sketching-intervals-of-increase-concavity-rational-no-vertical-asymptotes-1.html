@@ -1,0 +1,119 @@
+<span class="setCalculatorExamProblem">
+</span>
+The function \(f\)  is plotted below.
+<span class="calculatorHidden">
+\(
+a=randomInteger((1,3));
+b=randomInteger(1, 2);
+c=randomInteger(-3, 3);
+
+%UseLnInsteadOfLog
+goodF{}{{x}}=(x)/(x^2+a);
+f{}{{x}}=MakeExpression{}MakeRationalFunction{}( goodF{}(b x-c));
+firstDerivative=d/dx(f{}x);
+secondDerivative=d/dx firstDerivative;
+fdNumCfs=CoefficientsPowersOf(x, Numerator(firstDerivative));
+increaseInterval=(( -fdNumCfs_2 + sqrt((fdNumCfs_2)^2-4 fdNumCfs_1 fdNumCfs_3))/(2 fdNumCfs_3), 
+ ( -fdNumCfs_2 - sqrt((fdNumCfs_2)^2-4 fdNumCfs_1 fdNumCfs_3))/(2 fdNumCfs_3));
+sdNum= Numerator(secondDerivative);
+sdNumFactors=FactorOneVarPolyOverRationals( Numerator(secondDerivative));
+sdNumFactorLin=sdNumFactors_1;
+sdNumFactorQuad=MakeExpression(MakeRationalFunction (sdNum/sdNumFactorLin));
+sdQuadCfs=CoefficientsPowersOf(x, sdNumFactorQuad);
+sdLinCFs=CoefficientsPowersOf(x, sdNumFactorLin);
+inflectionPoints=(- sdLinCFs_1 /sdLinCFs_2, 
+(-sdQuadCfs_2 -\sqrt((sdQuadCfs_2)^2 -4 sdQuadCfs_1 sdQuadCfs_3))/(2 sdQuadCfs_3),
+(-sdQuadCfs_2 +\sqrt((sdQuadCfs_2)^2-4 sdQuadCfs_1 sdQuadCfs_3))/(2 sdQuadCfs_3)
+) ;
+TurnOffRules("DistributeMultiplication");
+\)</span>
+
+<span class="calculatorShowToUserOnly">
+\(
+plot2D(f{}x,-6, 6, 300,300, "red" )
+\) 
+</span>
+<br>
+The function's formula is:
+<br>
+\(f(x)=\)<span class="calculatorShowToUserOnly">
+\(\displaystyle
+f{}x;
+\)
+</span>
+<br>
+Computation shows the first derivative is <br>\(f'(x)=\)
+<span class="calculatorShowToUserOnly">
+\(\displaystyle
+firstDerivative
+\)
+</span>
+and the second derivative is <br> \(f''(x)=\)
+<span class="calculatorShowToUserOnly">
+\(\displaystyle
+secondDerivative
+\)
+</span>=
+<span class="calculatorShowToUserOnly">
+\(\displaystyle
+Product{}(sdNumFactors )/(Denominator(secondDerivative))
+\)
+</span>
+
+<span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
+\(
+SeparatorBetweenSpans;
+\)
+</span>
+
+<hr>
+Find the interval(s) on which \(f\) is increasing. 
+<br>
+<textarea class="calculatorAnswer" id="userIncreaseInterval">
+\(
+userIncreaseInterval== increaseInterval;
+\)
+</textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+%PlotShowJavascriptOnly
+plot2D(f{}x, -6,6, 300,300, "red" )+
+plot2D(f{}x, userIncreaseInterval_1, userIncreaseInterval_2, 300,300, "blue" )
+;
+if ( (userIncreaseInterval_1)>(userIncreaseInterval_2), "The LEFT ENDPOINT of your interval is larger than the RIGHT.", "Interval highlighted above.");
+\)
+</span>
+<span class="calculatorAnswerOnGiveUp">
+increaseInterval
+</span>
+Enter the interval(s) as open intervals, in increasing order separated by commas. 
+<br>
+For example, to enter the intervals (2,3) and (5,6), type in (2,3), (5,6). 
+<br>
+For a single interval type for example (2,3). 
+<br>
+The left endpoint of each interval should be smaller than the right endpoint. <span style="color:red"> Please do not give numerical approximations for your 
+answer.</span> Instead, use square roots to give an exact answer. To write \(\sqrt{5}\) you need to type sqrt(5) or \sqrt(5). 
+<hr>
+The maximum of \(f\) is achieved for \(x\) equal to:
+<textarea class="calculatorAnswer" id="xMax">
+\(
+xMax- increaseInterval_2==0;
+\)
+</textarea>
+<span class="calculatorAnswerOnGiveUp">
+increaseInterval_2
+</span>
+<hr>
+The minimum of \(f\) is achieved for \(x\) equal to:
+<textarea class="calculatorAnswer" id="xMin">
+\(
+xMin- increaseInterval_1==0;
+\)
+</textarea>
+<span class="calculatorAnswerOnGiveUp">
+increaseInterval_1
+</span>
+Find the interval(s) on which \(f\) is concave up.
+
+

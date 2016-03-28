@@ -3079,6 +3079,9 @@ void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress
   for (int i=0; i<this->theWorkers.size; i++)
     if (this->theWorkers[i].flagInUse)
       numInUse++;
+  bool purgeIncomingAddress=
+  (this->currentlyConnectedAddresses.GetMonomialCoefficient(incomingAddress)>this->MaxNumWorkersPerIPAdress);
+
   for (int i=0; i<this->theWorkers.size; i++)
     if (this->theWorkers[i].flagInUse)
     { this->theWorkers[i].pipeWorkerToServerControls.Read();
@@ -3097,15 +3100,15 @@ void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress
         (this->theWorkers[i].pipeWorkerToServerUserInput.lastRead.TheObjects,
           this->theWorkers[i].pipeWorkerToServerUserInput.lastRead.size);
       this->theWorkers[i].pipeWorkerToServerTimerPing.Read();
-      if (this->theWorkers[i].userAddress==incomingAddress)
-        if (this->currentlyConnectedAddresses.GetMonomialCoefficient(incomingAddress)>this->MaxNumWorkersPerIPAdress)
+      if (purgeIncomingAddress)
+        if (this->theWorkers[i].userAddress==incomingAddress)
         { this->TerminateChildSystemCall(i);
           std::stringstream errorStream;
           errorStream
           << "Terminating child " << i+1 << " with PID "
           << this->theWorkers[i].ProcessPID
-          << ": more than " << this->MaxNumWorkersPerIPAdress << " connections from IP address: "
-          << incomingUserAddress;
+          << ": purging all connections from " << incomingUserAddress
+          << ": address opened more than " << this->MaxNumWorkersPerIPAdress << " simultaneous connections. ";
           this->theWorkers[i].pingMessage=errorStream.str();
           logProcessKills << logger::red  << errorStream.str() << logger::endL;
           numInUse--;

@@ -102,8 +102,13 @@ void WebCrawler::init()
     return;
   MacroRegisterFunctionWithName("WebCrawler::init");
   buffer.initFillInObject(50000, 0);
-  this->portOrService="8080";
-  this->addressToConnectTo="localhost";
+  if (!theWebServer.flagPort8155)
+  { this->portOrService="8080";
+    this->addressToConnectTo="localhost";
+  } else
+  { this->portOrService="8155";
+    this->addressToConnectTo="localhost";
+  }
 }
 
 WebCrawler::~WebCrawler()
@@ -114,7 +119,6 @@ WebCrawler::~WebCrawler()
   this->theSocket=-1;
   this->FreeAddressInfo();
 }
-
 
 void WebCrawler::PingCalculatorStatus()
 { MacroRegisterFunctionWithName("WebCrawler::PingCalculatorStatus");

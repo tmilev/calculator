@@ -38,9 +38,10 @@ public:
 };
 
 void MonitorWebServer()
-{ WebCrawler theCrawler;
+{ MacroRegisterFunctionWithName("MonitorWebServer");
+  WebCrawler theCrawler;
   theCrawler.init();
-  int microsecondsToSleep=10000000;
+  int microsecondsToSleep=1000000;
   if (!theWebServer.flagPort8155)
   { theCrawler.portOrService="8080";
     theCrawler.addressToConnectTo="localhost";
@@ -96,12 +97,7 @@ void WebCrawler::init()
     return;
   MacroRegisterFunctionWithName("WebCrawler::init");
   buffer.initFillInObject(50000, 0);
-  this->portOrService="80";
-//  this->socketCommunication = socket(AF_INET, SOCK_STREAM, 0);
-//  if (this->socketCommunication < 0)
-//  { this->fatalErrors << "Couldn't create socket for initial connection. ";
-//    return;
-//  }
+  this->portOrService="8155";
   this->addressToConnectTo="calculator-algebra.org";
 }
 

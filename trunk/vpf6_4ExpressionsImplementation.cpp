@@ -1793,7 +1793,11 @@ int Expression::GetExpressionTreeSize()const
 }
 
 bool Expression::operator>(const Expression& other)const
-{ Rational leftCoeff, rightCoeff;
+{ MacroRegisterFunctionWithName("Expression::operatorGreaterThan");
+  double left=0, right=0;
+  if (this->EvaluatesToDouble(&left) && other.EvaluatesToDouble(&right))
+    return left>right;
+  Rational leftCoeff, rightCoeff;
   Expression leftMon, rightMon;
   this->GetCoefficientMultiplicandForm(leftCoeff, leftMon);
   other.GetCoefficientMultiplicandForm(rightCoeff, rightMon);

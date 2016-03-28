@@ -991,8 +991,9 @@ int WebWorker::ProcessSubmitProblemPreview()
   { stOutput << "<br><span style=\"color:red\"><b>"
     << "Something went wrong when interpreting your answer in the context of the current problem. "
     << "</b></span>";
-    if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
-      stOutput << theInterpreterWithAdvice.outputString << "<br>" << theInterpreterWithAdvice.outputCommentsString;
+    if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn() )
+      stOutput << "<br>Logged-in as admin with debug flag on=> printing error details. "
+      << theInterpreterWithAdvice.outputString << "<br>" << theInterpreterWithAdvice.outputCommentsString;
   } else
   { List<std::string> answersReverseOrder;
     FormatExpressions theFormat;

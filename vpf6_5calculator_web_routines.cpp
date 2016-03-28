@@ -47,7 +47,7 @@ void MonitorWebServer()
     theCrawler.addressToConnectTo="localhost";
   } else
   { theCrawler.portOrService="8155";
-    theCrawler.addressToConnectTo="calculator-algebra.org";
+    theCrawler.addressToConnectTo="localhost";
   }
   theLog << logger::blue << "Pinging " << theCrawler.addressToConnectTo << " at port/service "
   << theCrawler.portOrService << " every " << (microsecondsToSleep/1000000) << " second(s). "
@@ -102,8 +102,8 @@ void WebCrawler::init()
     return;
   MacroRegisterFunctionWithName("WebCrawler::init");
   buffer.initFillInObject(50000, 0);
-  this->portOrService="http";
-  this->addressToConnectTo="calculator-algebra.org";
+  this->portOrService="8080";
+  this->addressToConnectTo="localhost";
 }
 
 WebCrawler::~WebCrawler()

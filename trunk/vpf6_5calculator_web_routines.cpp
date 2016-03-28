@@ -42,7 +42,7 @@ void MonitorWebServer()
   WebCrawler theCrawler;
   theCrawler.init();
   int microsecondsToSleep=1000000;
-//  if (!theWebServer.flagPort8155)
+  if (!theWebServer.flagPort8155)
   { theCrawler.portOrService="http";
     theCrawler.addressToConnectTo="localhost";
   }

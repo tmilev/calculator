@@ -2187,7 +2187,12 @@ bool Expression::NeedsParenthesisForMultiplication()const
     if (firstE.IsAtomGivenData(this->owner->opTimes()))
       return false;
     if (firstE.IsAtomGivenData(this->owner->opThePower()))
+    { const Expression& base=(*this)[1];
+      if (base.children.size>0)
+        if (base[0].IsAtomWhoseExponentsAreInterpretedAsFunction())
+          return true;
       return false;
+    }
     if (this->StartsWith(this->owner->opBind()))
       return (*this)[1].NeedsParenthesisForMultiplication();
     return true;

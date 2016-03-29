@@ -1021,6 +1021,23 @@ bool Calculator::ReplaceEOEXByEX(int formatOptions)
   return true;
 }
 
+bool Calculator::ReplaceO_2O_1E_3XbyEX()
+{ SyntacticElement& middle=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+  SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
+  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  Expression newExpr;
+  newExpr.reset(*this, 3);
+  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(middle.controlIndex));
+  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(left.controlIndex));
+  newExpr.AddChildOnTop(right.theData);
+  left.theData=newExpr;
+  left.controlIndex=this->conExpression();
+//  left.IndexLastCharPlusOne=right.IndexLastCharPlusOne;
+  this->DecreaseStackExceptLast(2);
+//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+  return true;
+}
+
 bool Calculator::ReplaceXEEXByEXusingO(int inputOperation, int formatOptions)
 { //stOutput << "<b>Here iam!</b>";
   SyntacticElement& middle = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
@@ -1520,6 +1537,9 @@ bool Calculator::ApplyOneRule()
   if (this->knownOperationsInterpretedAsFunctionsMultiplicatively.Contains(thirdToLastS) &&
       secondToLastS=="Expression" && this->AllowsTimesInPreceding(lastS))
     return this->ReplaceOEXByEX();
+  if (this->knownOperationsInterpretedAsFunctionsMultiplicatively.Contains(fourthToLastS) &&
+      thirdToLastS=="^" && secondToLastS=="Expression" && this->AllowsPowerInPreceding(lastS))
+    return this->ReplaceO_2O_1E_3XbyEX();
   if (this->knownOperationsInterpretedAsFunctionsMultiplicatively.Contains(fourthToLastS) &&
       thirdToLastS=="{}" && secondToLastS=="Expression" && this->AllowsApplyFunctionInPreceding(lastS))
     return this->ReplaceOXEXByEX();

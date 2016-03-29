@@ -233,6 +233,7 @@ public:
   std::string ToStringStatusActive();
   std::string ToStringStatusAll();
   std::string ToStringStatusPublic();
+  std::string ToStringStatusPublicNoTop();
 };
 
 class ProgressReportWebServer

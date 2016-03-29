@@ -2887,12 +2887,10 @@ std::string WebServer::ToStringStatusActive()
   return out.str();
 }
 
-std::string WebServer::ToStringStatusPublic()
-{ MacroRegisterFunctionWithName("WebServer::ToStringStatusPublic");
+std::string WebServer::ToStringStatusPublicNoTop()
+{ MacroRegisterFunctionWithName("WebServer::ToStringStatusPublicNoTop");
   std::stringstream out;
-
-  out << "<html><body>"
-  << "<b>The calculator web server server status.</b><hr>"
+  out << "<b>The calculator web server server status.</b><hr>"
   << "<br>" << this->GetActiveWorker().timeOfLastPingServerSideOnly
   << " seconds = "
   << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
@@ -2916,6 +2914,13 @@ std::string WebServer::ToStringStatusPublic()
   << " maximum simultaneous connection per IP address. "
   << "When the limit is exceeded, a random connection from that IP address will be terminated. "
   ;
+  return out.str();
+}
+std::string WebServer::ToStringStatusPublic()
+{ MacroRegisterFunctionWithName("WebServer::ToStringStatusPublic");
+  std::stringstream out;
+  out << "<html><body>";
+  out << this->ToStringStatusPublicNoTop();
   std::string topString= theGlobalVariables.CallSystemWithOutput("top -b -n 1 -s");
   //out << "<br>" << topString;
   std::string lineString, wordString;
@@ -2934,6 +2939,7 @@ std::string WebServer::ToStringStatusPublic()
 std::string WebServer::ToStringStatusAll()
 { MacroRegisterFunctionWithName("WebServer::ToStringStatusFull");
   std::stringstream out;
+  out << this->ToStringStatusPublicNoTop() << "<hr>";
   if (this->activeWorker==-1)
     out << "The process is functioning as a server.";
   else

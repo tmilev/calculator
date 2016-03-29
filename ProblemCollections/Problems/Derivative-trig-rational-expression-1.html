@@ -28,6 +28,9 @@ Answer: \(f'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswer">
 CompareFunctionsNumerically(d/dx(f{}x), AlgebraAnswer, 0.05, \pi/2.1, 50, 0.0001);
 \)
 </textarea>
+<span class="calculatorAnswerOnGiveUp">
+MakeExpression( PolyDivRemainder{}( Numerator{}( d/dx (f{}x)) , \sin^2 x+\cos^2x-1 )) / Denominator{}(d/dx (f{}x))
+</span>
 
 
 

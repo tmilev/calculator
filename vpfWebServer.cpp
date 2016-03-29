@@ -2744,7 +2744,7 @@ WebServer::WebServer()
   this->NumProcessAssassinated=0;
   this->NumConnectionsSoFar=0;
   this->NumWorkersNormallyExited=0;
-  this->WebServerPingIntervalInSeconds=60;
+  this->WebServerPingIntervalInSeconds=20;
 }
 
 WebWorker& WebServer::GetActiveWorker()

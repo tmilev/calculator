@@ -42,14 +42,14 @@ void MonitorWebServer()
 { MacroRegisterFunctionWithName("MonitorWebServer");
   WebCrawler theCrawler;
   theCrawler.init();
+  int maxNumPingFailures=3;
   int microsecondsToSleep=1000000*theWebServer.WebServerPingIntervalInSeconds;//60 seconds
   theLog << logger::blue << "Pinging " << theCrawler.addressToConnectTo << " at port/service "
   << theCrawler.portOrService << " every " << (microsecondsToSleep/1000000) << " second(s). "
   << logger::endL;
   theLog << logger::red << "Please beware that the server will restart and you will lose all computations "
-  << "if 3 consecutive pings fail. " << logger::endL;
+  << "if " << maxNumPingFailures << " consecutive pings fail. " << logger::endL;
   int numConsecutiveFailedPings=0;
-  int maxNumPingFailures=1;
   int numPings=0;
   TimeWrapper now;
   for (;;)
@@ -65,7 +65,7 @@ void MonitorWebServer()
       << " at port/service " << theCrawler.portOrService
       << " failed on " << now.ToStringHumanReadable() << ". " << "Got the following errors/messages: "
       << theCrawler.lastTransactionErrors << theCrawler.lastTransaction << ". "
-      <<  numConsecutiveFailedPings << " consecutive fails so far, restarting on 3." << logger::endL;
+      <<  numConsecutiveFailedPings << " consecutive fails so far, restarting on " << maxNumPingFailures << "." << logger::endL;
     } else
     { std::cout << "Ping success #" << numPings << std::endl;
       numConsecutiveFailedPings=0;
@@ -197,15 +197,14 @@ void WebCrawler::PingCalculatorStatus()
       continue;
     } else
       reportStream << "<br>connected: " << this->addressToConnectTo << " port: " << this->portOrService << ". ";
-    std::string getMessage= "GET /calculator?request=statusPublic";
-
-    int numBytes = write(this->theSocket, getMessage.c_str(), getMessage.size());
+    std::string getMessage=  "GET /calculator?request=statusPublic";
+    int numBytes =Pipe::WriteWithTimeoutViaSelect(this->theSocket,getMessage, 1, 10, &reportStream);
     if ((unsigned) numBytes !=getMessage.size())
     { this->lastTransactionErrors+= "\nERROR writing to socket";
       close(this->theSocket);
       continue;
     }
-    numBytes = read(this->theSocket, buffer.TheObjects,49999);
+    numBytes = Pipe::ReadWithTimeOutViaSelect(this->theSocket, this->buffer,1,10, &reportStream);
     if (numBytes < 0)
     { this->lastTransactionErrors+= "\nERROR reading from socket";
       close(this->theSocket);

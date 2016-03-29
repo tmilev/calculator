@@ -53,7 +53,12 @@ public:
   List<char> pipeBuffer;
   bool flagDeallocated;
   std::string name;
+//  static int ConnectWithTimeoutViaSelect(int theFD, const std::string& input);
   static int WriteNoInterrupts(int theFD, const std::string& input);
+  static int WriteWithTimeoutViaSelect
+  (int theFD, const std::string& input, int timeOutInSeconds, int maxNumTries=10, std::stringstream* commentsOnFailure=0);
+  static int ReadWithTimeOutViaSelect
+  (int theFD, List<char>& output, int timeOutInSeconds, int maxNumTries=10, std::stringstream* commentsOnFailure=0);
   void Read();
   void ReadWithoutEmptying();
   void WriteAfterEmptying(const std::string& toBeSent);

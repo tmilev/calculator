@@ -34,6 +34,7 @@ public:
   bool flagAuthenticationTokenWasSubmitted;
   bool flagPasswordWasSubmitted;
   bool flagFoundMalformedFormInput;
+  bool flagProgressReportAllowed;
   std::string mainAddressNonSanitized;
   List<std::string> theStrings;
   int ContentLength;

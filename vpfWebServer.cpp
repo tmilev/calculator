@@ -1542,7 +1542,9 @@ void WebWorker::WriteProgressReportToFile(const std::string& input)
 }
 
 void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
-{ MacroRegisterFunctionWithName("WebWorker::PipeProgressReportToParentProcess");
+{ if (!this->flagProgressReportAllowed)
+    return;
+  MacroRegisterFunctionWithName("WebWorker::PipeProgressReportToParentProcess");
   static int counter=0;
   counter++;
   std::stringstream debugStream1, debugStream2;
@@ -1647,6 +1649,7 @@ void WebWorker::reset()
   this->flagAuthenticationTokenWasSubmitted=false;
   this->flagFoundMalformedFormInput=false;
   this->flagPasswordWasSubmitted=false;
+  this->flagProgressReportAllowed=false;
   theGlobalVariables.flagUsingSSLinCurrentConnection=false;
   theGlobalVariables.flagLoggedIn=false;
   for (unsigned i=0; i<theGlobalVariables.userDefault.size(); i++)
@@ -1954,8 +1957,10 @@ int WebWorker::ProcessCalculator()
 ////////////////////////////////////////////////
   if (theGlobalVariables.flagUsingBuiltInWebServer)
     theReport.SetStatus("OutputWeb: Computing...");
+  this->flagProgressReportAllowed=true;
   if (theParser.inputString!="")
     theParser.Evaluate(theParser.inputString);
+  this->flagProgressReportAllowed=false;
   if (theGlobalVariables.flagUsingBuiltInWebServer)
     theReport.SetStatus("OutputWeb: Computation complete, preparing output");
   theGlobalVariables.flagComputationCompletE=true;

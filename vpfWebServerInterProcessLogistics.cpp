@@ -112,6 +112,17 @@ void PauseController::RequestPausePauseIfLocked()
   this->mutexForProcessBlocking.GetElement().UnlockMe();
 }
 
+bool PauseController::CheckPauseIsRequested_UNSAFE_SERVER_USE_ONLY()
+{ this->CheckConsistency();
+  if (fcntl(this->thePausePipe[0], F_SETFL, O_NONBLOCK)<0)
+    return false;
+  bool result = !(read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size)>0);
+  if (!result)
+    write (this->thePausePipe[1], "!", 1);
+  fcntl(this->thePausePipe[0], F_SETFL, 0);
+  return result;
+}
+
 bool PauseController::CheckPauseIsRequested()
 { this->CheckConsistency();
   read (this->mutexPipe[0], this->buffer.TheObjects, this->buffer.size);

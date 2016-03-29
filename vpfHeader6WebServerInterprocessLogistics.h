@@ -58,6 +58,7 @@ public:
   void ReadWithoutEmptying();
   void WriteAfterEmptying(const std::string& toBeSent);
   void ReadNoLocksUNSAFE_FOR_USE_BY_WEBSERVER_ONLY();
+  void WriteNoLocksUNSAFE_FOR_USE_BY_WEBSERVER_ONLY(const std::string& toBeSent);
 
   std::string ToString()const;
   void Release();

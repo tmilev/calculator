@@ -1263,6 +1263,11 @@ D-B;\
    "DeterminantPolynomial{}\\left(\\begin{array}{ccc}x_{11}& x_{12} \
    & x_{13}\\\\ x_{21} & x_{22} & x_{23} \\\\ x_{31} & x_{32} & x_{33} \\end{array} \\right) ");
   this->AddOperationInnerHandler
+  ("Length", CalculatorFunctionsGeneral::innerLength, "",
+   "Returns the length of a sequence. ",
+   "Length(a,b) ", true, false, "CalculatorFunctionsGeneral::innerLength",
+   "Length");
+  this->AddOperationInnerHandler
   ("Sort", CalculatorFunctionsGeneral::innerSort, "",
    "Sorts a sequence. The purpose of this function is to test the expression comparison function of the calculator. ",
    "Sort(x^2, x^3, x^1, x^{-1}) ");

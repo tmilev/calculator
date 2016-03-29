@@ -155,6 +155,66 @@ std::string PauseController::ToString()const
   return out.str();
 }
 
+int Pipe::WriteWithTimeoutViaSelect
+(int theFD, const std::string& input, int timeOutInSeconds, int maxNumTries, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("Pipe::WriteWithTimeoutViaSelect");
+  fd_set theFDcontainer;
+  FD_ZERO(&theFDcontainer);
+  FD_SET(theFD, &theFDcontainer);
+  timeval timeOut;
+  timeOut.tv_sec=timeOutInSeconds;
+  timeOut.tv_usec=0;
+  int numFails=0;
+  int numSelected=-1;
+  std::stringstream failStream;
+  do
+  { if (numFails>maxNumTries)
+    { failStream << maxNumTries << " failed or timed-out select attempts on file descriptor: " << theFD;
+      break;
+    }
+    numSelected=select(theFD+1,0, &theFDcontainer, 0, &timeOut);
+    failStream << "While select-writing on file descriptor: " << theFD << ", select failed. Error message: "
+    << strerror(errno) << ". \n";
+    numFails++;
+  } while (numSelected<0);
+  if (numSelected<=0)
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << failStream.str();
+    return -1;
+  }
+  return Pipe::WriteNoInterrupts(theFD, input);
+}
+
+int Pipe::ReadWithTimeOutViaSelect
+(int theFD, List<char>& output, int timeOutInSeconds, int maxNumTries, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("Pipe::ReadWithTimeOutViaSelect");
+  fd_set theFDcontainer;
+  FD_ZERO(&theFDcontainer);
+  FD_SET(theFD, &theFDcontainer);
+  timeval timeOut;
+  timeOut.tv_sec=timeOutInSeconds;
+  timeOut.tv_usec=0;
+  int numFails=0;
+  int numSelected=-1;
+  std::stringstream failStream;
+  do
+  { if (numFails>maxNumTries)
+    { failStream << maxNumTries << " failed or timed-out select attempts on file descriptor: " << theFD;
+      break;
+    }
+    numSelected=select(theFD+1, &theFDcontainer,0, 0, &timeOut);
+    failStream << "While select-reading from file descriptor: " << theFD << ", select failed. Error message: "
+    << strerror(errno) << ". \n";
+    numFails++;
+  } while (numSelected<0);
+  if (numSelected<=0)
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << failStream.str();
+    return -1;
+  }
+  return read(theFD, output.TheObjects, output.size-1);
+}
+
 int Pipe::WriteNoInterrupts(int theFD, const std::string& input)
 { int numAttempts=0;
   for (;;)

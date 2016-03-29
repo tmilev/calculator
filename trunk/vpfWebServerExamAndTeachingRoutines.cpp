@@ -17,6 +17,7 @@ public:
   List<std::string> tagValues;
   List<std::string> defaultKeysIfMissing;
   List<std::string> defaultValuesIfMissing;
+  List<std::string> tagKeysWithoutValue;
   bool flagUseDisplaystyleInMathMode;
   bool flagUseMathMode;
   std::string interpretedCommand;
@@ -85,6 +86,7 @@ public:
   std::string currentExamHomE;
   std::string currentExamIntermediatE;
   static const std::string BugsGenericMessage;
+  HashedList<std::string, MathRoutines::hashString> tagKeysNoValue;
   List<std::string> calculatorClasses;
   List<char> splittingChars;
   List<SyntacticElementHTML> eltsStack;
@@ -513,7 +515,9 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
     return this->comments.str();
   std::stringstream out;
   if (!this->InterpretHtml(this->comments))
-  { out << "<b>Failed to interpret file: " << this->fileName << "</b>. Comments: " << this->comments.str();
+  { if (theGlobalVariables.UserDefaultHasAdminRights())
+      out << this->GetEditPageButton();
+    out << "<b>Failed to interpret file: " << this->fileName << "</b>. Comments: " << this->comments.str();
     return out.str();
   }
   out << "<nav>"
@@ -1470,7 +1474,7 @@ std::string WebWorker::GetEditPageHTML()
   if (!theFile.ParseHTML(failureStream))
   { out << "<b>Failed to parse file: " << theFile.fileName << ". Details:<br>" << failureStream.str();
     out << "</body></html>";
-    return out.str();
+//    return out.str();
   }
   std::stringstream buttonStream, submitModPageJS;
   submitModPageJS
@@ -1615,6 +1619,8 @@ std::string SyntacticElementHTML::ToStringOpenTag()
   for (int i=0; i<this->defaultKeysIfMissing.size; i++)
     if (!this->tagKeys.Contains(this->defaultKeysIfMissing[i]))
       out << " " << this->defaultKeysIfMissing[i] << "=\"" << this->defaultValuesIfMissing[i] << "\"";
+  if (this->tagKeysWithoutValue.size>0)
+    out << " " << this->tagKeysWithoutValue[0];
   out << ">";
   return out.str();
 }
@@ -2975,19 +2981,21 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   }
   if (word!="")
     theElements.AddOnTop(word);
-  this->calculatorClasses.AddOnTop("calculator");
-  this->calculatorClasses.AddOnTop("calculatorShowToUserOnly");
-  this->calculatorClasses.AddOnTop("calculatorHidden");
-  this->calculatorClasses.AddOnTop("calculatorHiddenIncludeInCommentsBeforeSubmission");
-  this->calculatorClasses.AddOnTop("calculatorAnswer");
-  this->calculatorClasses.AddOnTop("calculatorAnswerOnGiveUp");
-  this->calculatorClasses.AddOnTop("calculatorCommentBeforeSubmission");
-  this->calculatorClasses.AddOnTop("calculatorExamIntermediate");
-  this->calculatorClasses.AddOnTop("calculatorExamProblem");
-  this->calculatorClasses.AddOnTop("calculatorManageClass");
-  this->calculatorClasses.AddOnTop("setCalculatorExamProblem");
-  this->calculatorClasses.AddOnTop("setCalculatorExamIntermediate");
-  this->calculatorClasses.AddOnTop("setCalculatorExamHome");
+  if (this->calculatorClasses.size==0)
+  { this->calculatorClasses.AddOnTop("calculator");
+    this->calculatorClasses.AddOnTop("calculatorShowToUserOnly");
+    this->calculatorClasses.AddOnTop("calculatorHidden");
+    this->calculatorClasses.AddOnTop("calculatorHiddenIncludeInCommentsBeforeSubmission");
+    this->calculatorClasses.AddOnTop("calculatorAnswer");
+    this->calculatorClasses.AddOnTop("calculatorAnswerOnGiveUp");
+    this->calculatorClasses.AddOnTop("calculatorCommentBeforeSubmission");
+    this->calculatorClasses.AddOnTop("calculatorExamIntermediate");
+    this->calculatorClasses.AddOnTop("calculatorExamProblem");
+    this->calculatorClasses.AddOnTop("calculatorManageClass");
+    this->calculatorClasses.AddOnTop("setCalculatorExamProblem");
+    this->calculatorClasses.AddOnTop("setCalculatorExamIntermediate");
+    this->calculatorClasses.AddOnTop("setCalculatorExamHome");
+  }
   this->eltsStack.SetSize(0);
   SyntacticElementHTML dummyElt;
   dummyElt.content="<>";
@@ -3091,10 +3099,26 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       eltsStack.RemoveLastObject();
       continue;
     }
+
+    if (sixthToLast.syntacticRole=="<openTag" && fourthToLast=="=" && thirdToLast=="\""
+        && last!="\"" )
+    { if (last.syntacticRole!="" && last.content=="")
+        secondToLast.content+=last.syntacticRole;
+      else
+        secondToLast.content+=last.content;
+      eltsStack.RemoveLastObject();
+      continue;
+    }
     if (sixthToLast.syntacticRole=="<openTag" && fourthToLast=="=" && thirdToLast=="\""
         && last=="\"" )
     { sixthToLast.SetKeyValue(fifthToLast.content, secondToLast.content);
       eltsStack.SetSize(eltsStack.size-5);
+      continue;
+    }
+    if (thirdToLast.syntacticRole=="<openTag" && secondToLast.syntacticRole=="" && last.syntacticRole==">")
+    { thirdToLast.tagKeysWithoutValue.AddOnTop(secondToLast.content);
+      eltsStack[eltsStack.size-2]=*eltsStack.LastObject();
+      eltsStack.RemoveLastObject();
       continue;
     }
     if (secondToLast.syntacticRole=="<openTag" && last.syntacticRole==">")

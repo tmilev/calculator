@@ -118,27 +118,30 @@ bool PauseController::CheckPauseIsRequested_UNSAFE_SERVER_USE_ONLY()
     return false;
   bool result = !(read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size)>0);
   if (!result)
-    write (this->thePausePipe[1], "!", 1);
+    Pipe::WriteNoInterrupts(this->thePausePipe[1], "!");
   fcntl(this->thePausePipe[0], F_SETFL, 0);
   return result;
 }
 
 bool PauseController::CheckPauseIsRequested()
 { this->CheckConsistency();
-  read (this->mutexPipe[0], this->buffer.TheObjects, this->buffer.size);
-  fcntl(this->thePausePipe[0], F_SETFL, O_NONBLOCK);
-  bool result = !(read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size)>0);
-  if (!result)
-    write (this->thePausePipe[1], "!", 1);
-  fcntl(this->thePausePipe[0], F_SETFL, 0);
-  write (this->mutexPipe[1], "!", 1);
+  bool result=false;
+  if (read (this->mutexPipe[0], this->buffer.TheObjects, this->buffer.size)>=0)
+  { if (fcntl(this->thePausePipe[0], F_SETFL, O_NONBLOCK)>=0)
+    { result= !(read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size)>0);
+      if (!result)
+        Pipe::WriteNoInterrupts (this->thePausePipe[1], "!");
+      fcntl(this->thePausePipe[0], F_SETFL, 0);
+    }
+    Pipe::WriteNoInterrupts(this->mutexPipe[1], "!");
+  }
   return result;
 }
 
 void PauseController::ResumePausedProcessesIfAny()
 { MacroRegisterFunctionWithName("PauseController::ResumePausedProcessesIfAny");
 //  theLog << crash.GetStackTraceShort() << logger::endL;
-  write(this->thePausePipe[1], "!", 1);
+  Pipe::WriteNoInterrupts(this->thePausePipe[1], "!");
 //  theLog << "Unlocking done!" << logger::endL;
 }
 
@@ -153,13 +156,20 @@ std::string PauseController::ToString()const
 }
 
 int Pipe::WriteNoInterrupts(int theFD, const std::string& input)
-{ for (;;)
+{ int numAttempts=0;
+  for (;;)
   { int result=write(theFD, input.c_str(), input.size());
     if (result>=0)
       return result;
     if (result<0)
       if (errno==EINTR)
       { logBlock << logger::red << "Write operation interrupted, repeating. " << logger::endL;
+        numAttempts++;
+        if (numAttempts>100)
+        { logBlock << logger::red << "Write operation interrupted, more than 100 times, this is not supposed to happen. "
+          << logger::endL;
+          return -1;
+        }
         continue;
       }
     return result;

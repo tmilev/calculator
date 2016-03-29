@@ -3129,7 +3129,7 @@ void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress
         (this->theWorkers[i].pipeWorkerToServerTimerPing.lastRead.TheObjects,
          this->theWorkers[i].pipeWorkerToServerTimerPing.lastRead.size);
         this->theWorkers[i].timeOfLastPingServerSideOnly=theGlobalVariables.GetElapsedSeconds();
-      } else if (this->theWorkers[i].PauseWorker.CheckPauseIsRequested())
+      } else if (this->theWorkers[i].PauseWorker.CheckPauseIsRequested_UNSAFE_SERVER_USE_ONLY())
       { this->theWorkers[i].pingMessage="worker paused, no pings.";
         this->theWorkers[i].timeOfLastPingServerSideOnly=theGlobalVariables.GetElapsedSeconds();
       } else if (theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead>0 &&

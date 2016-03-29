@@ -1756,6 +1756,7 @@ public:
   int AddOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName);
   void AddOperationNoRepetitionAllowed(const std::string& theOpName);
   void AddOperationBuiltInType(const std::string& theOpName);
+  void AddTrigSplit(const std::string& trigFun, const std::string& theVar);
   void AddKnownDoubleConstant(const std::string& theConstantName, double theValue);
   void AddOperationComposite
   (const std::string& theOpName, Expression::FunctionAddress handler,

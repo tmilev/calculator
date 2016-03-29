@@ -3059,6 +3059,16 @@ void Calculator::initBuiltInAtomsNotInterpretedAsFunctions()
   this->AddKnownDoubleConstant("e", MathRoutines::E());
 }
 
+void Calculator::AddTrigSplit(const std::string& trigFun, const std::string& theVar)
+{ MacroRegisterFunctionWithName("Calculator::AddTrigSplit");
+  List<std::string> theSplit;
+  theSplit.SetSize(0);
+  theSplit.AddOnTop("\\"+trigFun);
+  theSplit.AddOnTop(theVar);
+  this->predefinedWordSplits.SetValue(theSplit, trigFun+theVar);
+  this->predefinedWordSplits.SetValue(theSplit, "\\"+trigFun+theVar);
+}
+
 void Calculator::initPredefinedWordSplits()
 { MacroRegisterFunctionWithName("Calculator::initPredefinedWordSplits");
   List<std::string> theSplit;
@@ -3068,12 +3078,18 @@ void Calculator::initPredefinedWordSplits()
   theSplit.SetSize(0);
   theSplit.AddOnTop("y"); theSplit.AddOnTop("x");
   this->predefinedWordSplits.SetValue(theSplit, "yx");
-  theSplit.SetSize(0);
-  theSplit.AddOnTop("\\sin"); theSplit.AddOnTop("x");
-  this->predefinedWordSplits.SetValue(theSplit, "sinx");
-  theSplit.SetSize(0);
-  theSplit.AddOnTop("\\sin"); theSplit.AddOnTop("y");
-  this->predefinedWordSplits.SetValue(theSplit, "siny");
+  this->AddTrigSplit("sin", "x");
+  this->AddTrigSplit("sin", "y");
+  this->AddTrigSplit("cos", "x");
+  this->AddTrigSplit("cos", "y");
+  this->AddTrigSplit("tan", "x");
+  this->AddTrigSplit("tan", "y");
+  this->AddTrigSplit("cot", "x");
+  this->AddTrigSplit("cot", "y");
+  this->AddTrigSplit("sec", "x");
+  this->AddTrigSplit("sec", "y");
+  this->AddTrigSplit("csc", "x");
+  this->AddTrigSplit("csc", "y");
 }
 
 void Calculator::initAtomsThatFreezeArguments()

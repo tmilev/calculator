@@ -178,12 +178,17 @@ void Pipe::WriteNoLocks(const std::string& toBeSent)
     return;
 //  std::string toBeSentCopy=toBeSent;
   int numBytesWritten=0;
+  int numBadAttempts=0;
   for (;;)
   { numBytesWritten=write(this->thePipe[1], toBeSent.c_str(), toBeSent.size());
     if (numBytesWritten<0)
       if (errno==EAI_AGAIN || errno==EWOULDBLOCK ||
           errno == EINTR || errno ==EIO)
+      { numBadAttempts++;
+        if (numBadAttempts>30)
+          break;
         continue;
+      }
     break;
   }
   if (numBytesWritten<0)

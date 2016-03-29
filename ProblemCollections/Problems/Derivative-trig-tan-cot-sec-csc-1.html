@@ -18,7 +18,13 @@ TurnOffRules("sqrt", "ConvertShortDenominatorToNegativePower", "CommonDenominato
 </span>.
 <span class="calculatorHidden">
 \(
-TurnOnRules("ExpressCotViaSineCosine", "ExpressTanViaSineCosine", "ExpressCscViaSine", "ExpressSecViaCosine"
+SeparatorBetweenSpans;
+\)
+</span>
+<span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
+\(
+TurnOffRules("sqrt", "ConvertShortDenominatorToNegativePower", "CommonDenominatorOneNonFraction", "CommuteIfUnivariate", "CommonDenominator",
+"ExpressCotViaSineCosine", "ExpressTanViaSineCosine", "ExpressCscViaSine", "ExpressSecViaCosine"
 );
 \)
 </span>
@@ -28,3 +34,6 @@ Answer: \(f'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswer">
 CompareFunctionsNumerically(d/dx(f{}x), AlgebraAnswer, 0.05, \pi/2.1, 50, 0.0001);
 \)
 </textarea>
+<span class="calculatorAnswerOnGiveUp">
+d/dx (f{}x)
+</span>

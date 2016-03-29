@@ -1011,6 +1011,7 @@ public:
     return this->DecreaseStackSetCharacterRangeS(numDots);
   }
   bool ReplaceOEXByEX(int formatOptions=Expression::formatDefault);
+  bool ReplaceO_2O_1E_3XbyEX();
   bool ReplaceEOByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOEByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEByE(int formatOptions=Expression::formatDefault);

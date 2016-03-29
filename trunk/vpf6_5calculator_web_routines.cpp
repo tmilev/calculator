@@ -164,7 +164,30 @@ void WebCrawler::PingCalculatorStatus()
     { this->lastTransactionErrors= "failed to create socket ";
       continue;
     } else
-      connectionResult =connect(this->theSocket, this->serverInfo->ai_addr, this->serverInfo->ai_addrlen);
+    { fd_set fdConnectSockets;
+      FD_ZERO(&fdConnectSockets);
+      FD_SET(this->theSocket, &fdConnectSockets);
+      timeval timeOut;
+      timeOut.tv_sec=1;
+      timeOut.tv_usec=0;
+      int numPingFails=0;
+      int numSelected=0;
+      std::stringstream failStream;
+      do
+      { if (numPingFails>10)
+          break;
+        numSelected=select(this->theSocket+1, &fdConnectSockets, 0, 0, &timeOut);
+        failStream << "While pinging, select failed. Error message: "
+        << strerror(errno) << ". \n";
+        numPingFails++;
+      } while (numSelected<0);
+      if (numSelected<=0)
+      { logIO << logger::red << failStream.str() << logger::endL;
+        reportStream << failStream.str() << "Could not connect through port. Select returned: " << numSelected;
+        connectionResult=-1;
+      } else
+        connectionResult =connect(this->theSocket, this->serverInfo->ai_addr, this->serverInfo->ai_addrlen);
+    }
     if (connectionResult==-1)
     { reportStream << "<br>Failed to connect: address: " << this->addressToConnectTo << " port: "
       << this->portOrService << ". ";

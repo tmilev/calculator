@@ -1400,6 +1400,8 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceXXVXdotsXbyE_BOUND_XdotsX(2);
   if (secondToLastS=="Variable" && ((lastS!="}" && lastS!=" ") || thirdToLastS!="{" || fourthToLastS!="{"))
     return this->ReplaceVXdotsXbyE_NONBOUND_XdotsX(1);
+  if (thirdToLastS=="Variable" && ((secondToLastS!="}" && secondToLastS!=" ") || fourthToLastS!="{" || fifthToLastS!="{"))
+    return this->ReplaceVXdotsXbyE_NONBOUND_XdotsX(2);
   if (fourthToLastS=="{" && thirdToLastS=="Variable" && secondToLastS=="}" && lastS!="}" && lastS!=" ")
     return this->ReplaceVXdotsXbyE_NONBOUND_XdotsX(2);
   if (secondToLastS=="\\left" && lastS == "(")

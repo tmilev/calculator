@@ -256,6 +256,11 @@ void Pipe::Release()
   this->lastRead.SetSize(0);
 }
 
+void Pipe::WriteNoLocksUNSAFE_FOR_USE_BY_WEBSERVER_ONLY(const std::string& toBeSent)
+{ this->WriteNoLocks(toBeSent);
+
+}
+
 void Pipe::ReadNoLocksUNSAFE_FOR_USE_BY_WEBSERVER_ONLY()
 { MacroRegisterFunctionWithName("Pipe::ReadNoLocksUNSAFE_FOR_USE_BY_WEBSERVER_ONLY");
   this->ReadNoLocks();

@@ -89,6 +89,7 @@ public:
   static bool innerNumerator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDenominator(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerLength(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDereferenceOperator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeEWAactOnPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeConstTimesAnyActOn(Calculator& theCommands, const Expression& input, Expression& output);

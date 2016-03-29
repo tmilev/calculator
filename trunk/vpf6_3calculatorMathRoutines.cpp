@@ -3306,6 +3306,14 @@ bool CalculatorFunctionsGeneral::innerSort(Calculator& theCommands, const Expres
   return output.MakeSequence(theCommands, &sortedExpressions);
 }
 
+bool CalculatorFunctionsGeneral::innerLength(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLength");
+  if (input.IsListStartingWithAtom(theCommands.theAtoms.GetIndexIMustContainTheObject("Length")) ||
+      input.IsSequenceNElementS())
+    return output.AssignValue(input.children.size-1, theCommands);
+  return false;
+}
+
 bool CalculatorFunctionsGeneral::innerGrowDynkinType(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGrowDynkinType");
   if (input.children.size!=3)

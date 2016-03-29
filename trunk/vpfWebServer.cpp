@@ -540,7 +540,7 @@ void WebServer::ReapChildren()
     if (waitResult>0)
       for (int i=0; i<this->theWorkers.size; i++)
         if (this->theWorkers[i].ProcessPID==waitResult)
-        { this->theWorkers[i].pipeWorkerToServerControls.WriteAfterEmptying("close");
+        { this->theWorkers[i].pipeWorkerToServerControls.WriteNoLocksUNSAFE_FOR_USE_BY_WEBSERVER_ONLY("close");
           this->theWorkers[i].flagInUse=false;
           this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
           theLog << logger::green << "Child with pid " << waitResult << " successfully reaped. " << logger::endL;

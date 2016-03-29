@@ -1689,10 +1689,10 @@ bool Calculator::WriteTestStrings(List<std::string>& inputCommands, List<std::st
 
 bool Calculator::innerAutomatedTestSetKnownGoodCopy(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerAutomatedTestSetKnownGoodCopy");
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=30000;
   List<std::string> inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit;
   std::stringstream out;
-  theCommands.theTestFileName=theGlobalVariables.PhysicalPathOutputFolder+"automatedTest.txt";
+  theCommands.theTestFileName="automatedTest.txt";
   if (!FileOperations::OpenFileOnTopOfOutputFolder(theCommands.theTestFile, theCommands.theTestFileName, false, true, false))
     crash << "This is a programming error or worse: file " << theCommands.theTestFileName << " does not exist but cannot be created. Something is very wrong. " << crash;
   double startTime=theGlobalVariables.GetElapsedSeconds();
@@ -1704,7 +1704,7 @@ bool Calculator::innerAutomatedTestSetKnownGoodCopy(Calculator& theCommands, con
 
 bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerAutomatedTest");
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=30000;
   double startingTime=theGlobalVariables.GetElapsedSeconds();
   theCommands.theTestFileName="automatedTest.txt";
   if (!FileOperations::FileExistsOnTopOfOutputFolder(theCommands.theTestFileName))

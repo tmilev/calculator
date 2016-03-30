@@ -727,8 +727,10 @@ bool WebWorker::ProcessRawArguments
     if (changingPass)
       this->authenticationToken="";
     //argumentProcessingFailureComments << "DEBUG: Logging in as: " << desiredUser << " pass: " << password << "<br>";
-    theGlobalVariables.flagLoggedIn=DatabaseRoutinesGlobalFunctions::LoginViaDatabase
-    (desiredUser, password, this->authenticationToken, theGlobalVariables.userRole, &argumentProcessingFailureComments);
+    theGlobalVariables.flagLoggedIn=false;
+    if (this->authenticationToken!="" || password!="")
+      theGlobalVariables.flagLoggedIn= DatabaseRoutinesGlobalFunctions::LoginViaDatabase
+      (desiredUser, password, this->authenticationToken, theGlobalVariables.userRole, &argumentProcessingFailureComments);
     if (!theGlobalVariables.flagLoggedIn)
     { this->authenticationToken="";
       //argumentProcessingFailureComments << "<b>DEBUG: Auth token set to empty</b>";
@@ -738,7 +740,7 @@ bool WebWorker::ProcessRawArguments
       theGlobalVariables.SetWebInput("authenticationToken", CGI::StringToURLString(this->authenticationToken));
     } else if (changingPass)
       theGlobalVariables.userDefault=desiredUser;
-    else
+    else if (this->authenticationToken!="" || password!="")
     { theGlobalVariables.userDefault="";
       theGlobalVariables.SetWebInput
       ("error", CGI::StringToURLString("<b>Invalid user or password.</b> Comments follow. "+argumentProcessingFailureComments.str()));
@@ -2063,7 +2065,11 @@ std::string WebWorker::GetLoginHTMLinternal()
   }
   out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"POST\" accept-charset=\"utf-8\">"
   <<  "User name: "
-  << "<input type=\"text\" id=\"username\" name=\"username\" placeholder=\"username\" required>"
+  << "<input type=\"text\" id=\"username\" name=\"username\" placeholder=\"username\" ";
+  if (!this->flagAuthenticationTokenWasSubmitted
+      && theGlobalVariables.GetWebInput("username")!="")
+    out << "value=\"" << theGlobalVariables.GetWebInput("username") << "\"";
+  out << "required>"
   << "<br>Password: ";
   if (!theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
     out << "<input type=\"password\" id=\"password\" name=\"password\" placeholder=\"password\" autocomplete=\"on\">";
@@ -2273,10 +2279,11 @@ std::string WebWorker::GetLoginPage()
   out << "onload=\"loadSettings();  ";
   if (!this->flagAuthenticationTokenWasSubmitted && !theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs
       && theGlobalVariables.flagUsingSSLinCurrentConnection)
-    out
-    << "if (document.getElementById('authenticationToken') !=null)"
-    << "  if (document.getElementById('authenticationToken').value!='')"
-    << "    document.getElementById('login').submit();"
+    if (theGlobalVariables.GetWebInput("username")=="")
+      out
+      << "if (document.getElementById('authenticationToken') !=null)"
+      << "  if (document.getElementById('authenticationToken').value!='')"
+      << "    document.getElementById('login').submit();"
 //    << "alert('was about to submit');"
     ;
 //    << "  window.location='calculator?username='+GlobalUser+'&authenticationToken='+GlobalAuthenticationToken;";

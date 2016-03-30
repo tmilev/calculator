@@ -2068,7 +2068,7 @@ std::string WebWorker::GetLoginHTMLinternal()
   << "<input type=\"text\" id=\"username\" name=\"username\" placeholder=\"username\" ";
   if (!this->flagAuthenticationTokenWasSubmitted
       && theGlobalVariables.GetWebInput("username")!="")
-    out << "value=\"" << theGlobalVariables.GetWebInput("username") << "\"";
+    out << "value=\"" << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("username")) << "\"";
   out << "required>"
   << "<br>Password: ";
   if (!theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)

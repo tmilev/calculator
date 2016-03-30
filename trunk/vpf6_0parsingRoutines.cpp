@@ -75,10 +75,12 @@ void Calculator::reset()
   this->atomsNotInterpretedAsFunctions.Clear();
   this->atomsNotAllowingChainRule.Clear();
   this->atomsWhoseExponentsAreInterpretedAsFunctions.Clear();
+  this->atomsThatMustNotBeCached.Clear();
   this->arithmeticOperations.Clear();
   this->knownFunctionsWithComplexRange.Clear();
   this->knownDoubleConstants.Clear();
   this->knownDoubleConstantValues.SetSize(0);
+  this->knownOperationsInterpretedAsFunctionsMultiplicatively.Clear();
   this->FunctionHandlers.SetSize(0);
 
   this->syntacticSouP.SetSize(0);

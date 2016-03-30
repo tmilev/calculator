@@ -2436,7 +2436,8 @@ WeylGroupData& ObjectContainer::GetWeylGroupDataCreateIfNotPresent(const DynkinT
 }
 
 void ObjectContainer::reset()
-{ this->theWeylGroupElements.Clear();
+{ MacroRegisterFunctionWithName("ObjectContainer::reset");
+  this->theWeylGroupElements.Clear();
   this->theWeylGroupReps.Clear();
   this->theWeylGroupVirtualReps.Clear();
   this->theCategoryOmodules.SetSize(0);
@@ -2464,6 +2465,13 @@ void ObjectContainer::reset()
   this->theAlgebraicNumbers.Clear();
   this->theLittelmannOperators.Clear();
   this->theSltwoSAs.SetSize(0);
+  this->theMatDoubles.SetSize(0);
+  this->theMatsAlgebraic.Clear();
+  this->theMatPolyRational.Clear();
+  this->theWeights.Clear();
+  this->theWeightsPoly.Clear();
+  this->theHyperOctahedralGroups.SetSize(0);
+  this->theElementsHyperOctGroup.Clear();
 }
 
 bool Calculator::IsBoundVarInContext(int inputOp)

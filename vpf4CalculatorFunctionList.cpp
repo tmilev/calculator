@@ -718,7 +718,8 @@ D-B;\
   this->AddOperationInnerHandler
   ("WeylGroupNaturalRep", CalculatorFunctionsWeylGroup::innerWeylGroupNaturalRep, "",
    "Gets the natural representation of the Weyl group.",
-   "WeylGroupNaturalRep{}(B_3)", true, false)
+   "WeylGroupNaturalRep{}(B_3)", true, false, "CalculatorFunctionsWeylGroup::innerWeylGroupNaturalRep",
+   "WeylGroupNaturalRep")
    ;
   this->AddOperationInnerHandler
   ("WeylGroupGetOuterAutoGenerators", CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint, "",
@@ -2992,11 +2993,11 @@ void Calculator::initAtomsThatAllowCommutingOfArguments()
 
 void Calculator::initArithmeticOperations()
 { MacroRegisterFunctionWithName("Calculator::initArithmeticOperations");
-  this->arithmeticOperations.AddOnTop("+");
-  this->arithmeticOperations.AddOnTop("-");
-  this->arithmeticOperations.AddOnTop("*");
-  this->arithmeticOperations.AddOnTop("/");
-  this->arithmeticOperations.AddOnTop("^");
+  this->arithmeticOperations.AddOnTopNoRepetitionMustBeNewCrashIfNot("+");
+  this->arithmeticOperations.AddOnTopNoRepetitionMustBeNewCrashIfNot("-");
+  this->arithmeticOperations.AddOnTopNoRepetitionMustBeNewCrashIfNot("*");
+  this->arithmeticOperations.AddOnTopNoRepetitionMustBeNewCrashIfNot("/");
+  this->arithmeticOperations.AddOnTopNoRepetitionMustBeNewCrashIfNot("^");
 }
 
 void Calculator::initOperationsInterpretedAsFunctionsMultiplicatively()

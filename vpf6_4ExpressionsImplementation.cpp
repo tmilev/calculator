@@ -2304,8 +2304,9 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         out << "\\left(" << firstE << "\\right)";
       else
         out << firstE;
-      bool mustHaveTimes=this->format==this->formatTimesDenotedByStar && firstE!="-" && firstE!="";
-      if (firstE!="")
+//      if (this->for)
+      bool mustHaveTimes=(this->format==this->formatTimesDenotedByStar) && firstE!="-" && firstE!="";
+      if (!firstNeedsBrackets && firstE!="")
         if (MathRoutines::isADigit(firstE[firstE.size()-1]) && MathRoutines::isADigit(secondE[0]) )
           mustHaveTimes=true;
       if (mustHaveTimes)
@@ -2613,6 +2614,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   }
 //  if (useLatex && recursionDepth==0 && this->theOperation!=owner->opEndStatement())
 //    return CGI::GetHtmlMathSpanFromLatexFormula(out.str());
+  if (this->format==this->formatTimesDenotedByStar)
+    stOutput << "Formatted by star: " << out.str() << "<br>";
   return out.str();
 }
 

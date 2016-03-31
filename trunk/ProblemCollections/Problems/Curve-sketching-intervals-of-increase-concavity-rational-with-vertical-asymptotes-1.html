@@ -1,0 +1,171 @@
+<span class="setCalculatorExamProblem">
+</span>
+The function \(f\)  is plotted below.
+<span class="calculatorHidden">
+\(
+a=selectAtRandom(-2,2);
+b=1;
+c=randomInteger(-3, 3);
+%UseLnInsteadOfLog
+f{}{{x}}=( x-a/b )/(MakeExpression( Polynomial (( x-a/b )^2)-1)) +3( x-a/b)+c;
+fd= (d/dx f{}x);
+sd= (d/dx (d/dx(f{}x)));
+TurnOffRules("DistributeMultiplication");
+sdNumFactors= FactorOneVarPolyOverRationals{}( Numerator{}(sd));
+fdNumFactors= FactorOneVarPolyOverRationals{}( Numerator{}(fd));
+\)</span>
+
+<span class="calculatorShowToUserOnly">
+\(
+plot2D(f{}x,-10, -1+a/b, 300,300, "red" )
++
+plot2D(f{}x, -1+a/b, 1+a/b , 300,300, "red" )
++
+plot2D(f{}x,1+a/b, 10, 300,300, "red" )
+\) 
+</span>
+<br>
+The function is given by the following formula.
+<br>
+\(f(x)=\)<span class="calculatorShowToUserOnly">
+\(\displaystyle
+f{}x;
+\)
+</span>
+<br>
+Computation shows the first derivative is <br>\(f'(x)=\)
+<span class="calculatorShowToUserOnly">
+\(\displaystyle
+fd
+\)
+</span>=
+<span class="calculatorShowToUserOnly">
+\(\displaystyle
+Product{}(fdNumFactors )/(Denominator(fd))
+\)
+</span>
+and the second derivative is <br> \(f''(x)=\)
+<span class="calculatorShowToUserOnly">
+\(\displaystyle
+sd
+\)
+</span>=
+<span class="calculatorShowToUserOnly">
+\(\displaystyle
+Product{}(sdNumFactors )/(Denominator(sd))
+\)
+</span>
+
+<span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
+\(
+SeparatorBetweenSpans;
+\)
+</span>
+
+<hr>
+Find the interval(s) on which \(f\) is increasing. 
+<br>
+<textarea class="calculatorAnswer" id="userIncreaseInterval">
+\(
+userIncreaseInterval== increaseInterval;
+\)
+</textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+%PlotShowJavascriptOnly
+plot2D(f{}x, -6,6, 300,300, "red" )+
+plot2D(f{}x, userIncreaseInterval_1, userIncreaseInterval_2, 300,300, "blue" )
+;
+if ( (userIncreaseInterval_1)>(userIncreaseInterval_2), "The LEFT ENDPOINT of your interval is larger than the RIGHT.", "Interval highlighted above.");
+\)
+</span>
+<span class="calculatorAnswerOnGiveUp">
+increaseInterval
+</span>
+Enter the interval(s) as open intervals, in increasing order separated by commas. 
+<br>
+For example, to enter the intervals (2,3) and (5,6), type in (2,3), (5,6). 
+<br>
+For a single interval type for example (2,3). 
+<br>
+The left endpoint of each interval should be smaller than the right endpoint. <span style="color:red"> Please do not give numerical approximations for your 
+answer.</span> Instead, use square roots to give an exact answer. To write \(\sqrt{5}\) you need to type sqrt(5) or \sqrt(5). 
+<hr>
+The maximum of \(f\) is achieved for \(x\) equal to:
+<textarea class="calculatorAnswer" id="xMax">
+\(
+xMax- increaseInterval_2==0;
+\)
+</textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+%PlotShowJavascriptOnly
+plot2D(f{}x, -6,6, 300,300, "red" )+
+plotPoint(xMax, f{}xMax, "blue" )
+;
+\)
+</span>
+<span class="calculatorAnswerOnGiveUp">
+increaseInterval_2
+</span>
+
+<hr>
+The minimum of \(f\) is achieved for \(x\) equal to:
+<textarea class="calculatorAnswer" id="xMin">
+\(
+xMin- increaseInterval_1==0;
+\)
+</textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+%PlotShowJavascriptOnly
+plot2D(f{}x, -6,6, 300,300, "red" )+
+plotPoint(xMin, f{}xMin, "blue" )
+;
+\)
+</span>
+
+<span class="calculatorAnswerOnGiveUp">
+increaseInterval_1
+</span>
+<hr>
+Find the two interval(s) on which \(f\) is concave up. 
+<br>
+Enter the two intervals as open intervals in the format (a,b), (c,d). 
+<br>
+Make sure the left endpoint is smaller than the right and that the first interval is to the left of the second.
+<br>To enter \(\pm \infty\) write \infty, or infinity.  
+
+
+<br>
+<textarea class="calculatorAnswer" id="userConcaveUp">
+\(
+userConcaveUp==concaveUpIntervals
+\)
+</textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+%PlotShowJavascriptOnly
+plot2D(f{}x, -6,6, 300,300, "red" )+
+plot2D(f{}x, (userConcaveUp_1)_1, (userConcaveUp_1)_2, 300,300, "blue" )+
+plot2D(f{}x, (userConcaveUp_2)_1,6, 300,300, "blue" )
+;
+\)
+</span>
+<span class="calculatorAnswerOnGiveUp">
+concaveUpIntervals
+</span>
+<hr>
+Find the \(x\)-coordinates of the inflection points. If more than one, separate them by comma. 
+<br>
+For example, type 1,2,3 to enter those three values as the \(x\)-coordinates of the inflection points.
+<textarea class="calculatorAnswer" id="userInflectionPoints">
+\(
+(Sort(userInflectionPoints))==inflectionPoints;
+\)
+</textarea>
+
+<span class="calculatorAnswerOnGiveUp">
+inflectionPoints
+</span>
+

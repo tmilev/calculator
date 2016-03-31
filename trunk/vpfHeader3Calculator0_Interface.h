@@ -644,9 +644,7 @@ class Plot
    double inputUpperBound, double inputYmin, double inputYmax, Vectors<double>* inputPoints, int* colorRGB=0);
   void operator+=(const Plot& other);
   void operator+=(const PlotObject& other);
-  bool operator==(const Plot& other)const
-  { return this->thePlots==other.thePlots;
-  }
+  bool operator==(const Plot& other)const;
 };
 
 class ObjectContainer

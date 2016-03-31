@@ -1038,7 +1038,6 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   input.CheckInitialization();
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input, tempSSpointer))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
-//  stOutput << "<br>DEBUG: time after calling conversion f-n: " << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
   SemisimpleLieAlgebra& theSSalgebra=*tempSSpointer;
   WeylGroupData& theWeyl=theSSalgebra.theWeyl;
   std::stringstream out;
@@ -1048,11 +1047,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
 //      theFormat.chevalleyHgeneratorLetter="\\bar{h}";
 //      theFormat.chevalleyGgeneratorLetter="\\bar{g}";
   out << "<hr>Lie algebra type: " << theWeyl.theDynkinType << ". ";
-//  stOutput << "<br>DEBUG: time before calling weylgroup size: "
-//  << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
   out << "<br>Weyl group size: " << theWeyl.theGroup.GetSize().ToString() << "." << "<br>To get extra details: ";
-//  stOutput << "<br>DEBUG: time after weylgroup size: "
-//  << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
   std::stringstream tempStream;
   tempStream << "printSemisimpleLieAlgebra{}(" << theWeyl.theDynkinType << ")";
   out << theCommands.GetCalculatorLink(tempStream.str()) << "<br>";

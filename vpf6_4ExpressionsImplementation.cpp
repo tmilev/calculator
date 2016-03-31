@@ -2614,8 +2614,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   }
 //  if (useLatex && recursionDepth==0 && this->theOperation!=owner->opEndStatement())
 //    return CGI::GetHtmlMathSpanFromLatexFormula(out.str());
-  if (this->format==this->formatTimesDenotedByStar)
-    stOutput << "Formatted by star: " << out.str() << "<br>";
+//  if (this->format==this->formatTimesDenotedByStar)
+//    stOutput << "DEBUG: Formatted by star: " << out.str() << "<br>";
   return out.str();
 }
 

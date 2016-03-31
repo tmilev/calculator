@@ -764,12 +764,17 @@ void Plot::operator+=(const Plot& other)
     this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, other.theLowerBoundAxes);
   }
   this->viewWindowPriority=MathRoutines::Maximum(this->viewWindowPriority, other.viewWindowPriority);
-  stOutput << "DEBIG: this->viewWindowPriority: " << this->viewWindowPriority;
   this->thePlots.AddListOnTop(other.thePlots);
   if (this->DesiredHtmlHeightInPixels<other.DesiredHtmlHeightInPixels)
     this->DesiredHtmlHeightInPixels=other.DesiredHtmlHeightInPixels;
   if (this->DesiredHtmlWidthInPixels<other.DesiredHtmlWidthInPixels)
     this->DesiredHtmlWidthInPixels=other.DesiredHtmlWidthInPixels;
+}
+
+bool Plot::operator==(const Plot& other)const
+{ if (this->viewWindowPriority!=other.viewWindowPriority)
+    return false;
+  return this->thePlots==other.thePlots;
 }
 
 void Plot::operator+=(const PlotObject& other)
@@ -869,14 +874,12 @@ Plot::Plot()
 void Plot::ComputeAxesAndBoundingBox()
 { MacroRegisterFunctionWithName("Plot::ComputeAxesAndBoundingBox");
   if (this->viewWindowPriority>0)
-  { stOutput << "DEBUG: " << this->viewWindowPriority << " is: " << this->viewWindowPriority;
-    if (this->theLowerBoundAxes>this->theUpperBoundAxes)
+  { if (this->theLowerBoundAxes>this->theUpperBoundAxes)
       this->theUpperBoundAxes=this->theLowerBoundAxes+0.1;
     if (this->lowBoundY>this->highBoundY)
       this->highBoundY=this->lowBoundY+0.1;
     return;
   }
-  stOutput << "DEBUG: " << this->viewWindowPriority << " is: " << this->viewWindowPriority;
   this->theLowerBoundAxes=-0.5;
   this->theUpperBoundAxes=1.1;
   this->lowBoundY=-0.5;

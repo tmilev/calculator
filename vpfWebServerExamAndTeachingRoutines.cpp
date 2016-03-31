@@ -1869,6 +1869,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   { out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
     << exerciseRequest << "&"
     << calcArgsNoPassExamDetails
+    << "studentView=" << studentView << "&"
     << "currentExamHome=" << CGI::StringToURLString(this->currentExamHomE) << "&" << "currentExamIntermediate=&"
     << "currentExamFile=" << CGI::StringToURLString(this->currentExamHomE) << "&\"> Course homework home </a><br>";
   } else
@@ -1876,6 +1877,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   if (this->flagIsExamProblem && this->currentExamIntermediatE!="")
     out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
     << calcArgsNoPassExamDetails
+    << "studentView=" << studentView << "&"
     << "currentExamHome=" << CGI::StringToURLString(this->currentExamHomE) << "&" << "currentExamIntermediate=&"
     << "currentExamFile=" << CGI::StringToURLString(this->currentExamIntermediatE) << "&\">&nbspCurrent homework. </a><br>";
   else if (this->flagIsExamIntermediate)

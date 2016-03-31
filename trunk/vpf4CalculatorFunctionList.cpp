@@ -1108,7 +1108,17 @@ D-B;\
    We recall that in the calculator, {}  stands for function application (the symbols {} were\
    chosen as they produce invisible LaTeX output).\
    ",
-   "plot2D{}(\\sin{}x+cos{}x, 0, 5, 200, 200, \"blue\")", true, false, "CalculatorFunctionsGeneral::innerPlot2D")
+   "plot2D{}(\\sin{}x+cos{}x, 0, 5, 200, 200, \"blue\")", true, false,
+   "CalculatorFunctionsGeneral::innerPlot2D", "plot2D")
+   ;
+  this->AddOperationInnerHandler ("plotViewRectangle", CalculatorFunctionsGeneral::innerPlotViewRectangle, "",
+   "Creates an empty plot whose sole purpose is to fix the view rectangle of another plot. \
+   To restrict/expand the view rectangle of another plot, simply add plotViewRectangle to the other plot. \
+   Takes as input two pairs of numbers: first pair gives the lower left corner of the viewing rectangle, \
+   the second argument gives the upper right corner.\
+   ",
+   "plot2D{}(1/x, -30, 30, 300, 300, \"red\") + plotViewRectangle((-5,-5), (5,5))", true, false,
+   "CalculatorFunctionsGeneral::plotViewRectangle", "plotViewRectangle")
    ;
   this->AddOperationInnerHandler ("plot2DWithBars", CalculatorFunctionsGeneral::innerPlot2DWithBars, "",
    "<b>Calculus teaching function.</b> Same as plot2D but plots two functions with bars locked between the two functions; \

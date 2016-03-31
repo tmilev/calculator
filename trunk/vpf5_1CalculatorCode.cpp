@@ -750,7 +750,22 @@ bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input
 }
 
 void Plot::operator+=(const Plot& other)
-{ this->thePlots.AddListOnTop(other.thePlots);
+{ MacroRegisterFunctionWithName("Plot::operator+=");
+  if (other.viewWindowPriority>this->viewWindowPriority)
+  { this->highBoundY=other.highBoundY;
+    this->lowBoundY=other.lowBoundY;
+    this->theLowerBoundAxes=other.theLowerBoundAxes;
+    this->theUpperBoundAxes=other.theUpperBoundAxes;
+  }
+  if (this->viewWindowPriority>0 && other.viewWindowPriority==this->viewWindowPriority)
+  { this->highBoundY=MathRoutines::Maximum(this->highBoundY, other.highBoundY);
+    this->lowBoundY=MathRoutines::Minimum(this->lowBoundY, other.lowBoundY);
+    this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, other.theUpperBoundAxes);
+    this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, other.theLowerBoundAxes);
+  }
+  this->viewWindowPriority=MathRoutines::Maximum(this->viewWindowPriority, other.viewWindowPriority);
+  stOutput << "DEBIG: this->viewWindowPriority: " << this->viewWindowPriority;
+  this->thePlots.AddListOnTop(other.thePlots);
   if (this->DesiredHtmlHeightInPixels<other.DesiredHtmlHeightInPixels)
     this->DesiredHtmlHeightInPixels=other.DesiredHtmlHeightInPixels;
   if (this->DesiredHtmlWidthInPixels<other.DesiredHtmlWidthInPixels)
@@ -848,10 +863,20 @@ Plot::Plot()
   this->DesiredHtmlWidthInPixels=600;
   this->defaultLineColor=0;
   this->flagPlotShowJavascriptOnly=false;
+  this->viewWindowPriority=0;
 }
 
 void Plot::ComputeAxesAndBoundingBox()
 { MacroRegisterFunctionWithName("Plot::ComputeAxesAndBoundingBox");
+  if (this->viewWindowPriority>0)
+  { stOutput << "DEBUG: " << this->viewWindowPriority << " is: " << this->viewWindowPriority;
+    if (this->theLowerBoundAxes>this->theUpperBoundAxes)
+      this->theUpperBoundAxes=this->theLowerBoundAxes+0.1;
+    if (this->lowBoundY>this->highBoundY)
+      this->highBoundY=this->lowBoundY+0.1;
+    return;
+  }
+  stOutput << "DEBUG: " << this->viewWindowPriority << " is: " << this->viewWindowPriority;
   this->theLowerBoundAxes=-0.5;
   this->theUpperBoundAxes=1.1;
   this->lowBoundY=-0.5;

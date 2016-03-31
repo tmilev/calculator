@@ -1639,6 +1639,7 @@ bool Expression::MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Express
   }
   this->MakeXOX(owner, theOp, input[input.size-2], *input.LastObject());
   Expression result;
+  result.format=this->formatDefault;
   for (int i=input.size-3; i>=0; i--)
   { result.reset(owner, 3);
     result.AddChildAtomOnTop(theOp);
@@ -1646,6 +1647,7 @@ bool Expression::MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Express
     result.AddChildOnTop(*this);
     *this=result;
   }
+  this->format=this->formatDefault;
   return true;
 }
 

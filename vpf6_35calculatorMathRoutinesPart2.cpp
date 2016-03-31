@@ -288,8 +288,8 @@ void MeshTriangles::ComputeImplicitPlot()
 //  stOutput << "ze lines: " << this->theCurve.theLines;
 }
 
-bool Calculator::GetVectorDoubles(const Expression& input, Vector<double>& output)
-{ return this->GetVectoR(input, output, 0, 0, CalculatorFunctionsGeneral::innerEvaluateToDouble);
+bool Calculator::GetVectorDoubles(const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory)
+{ return this->GetVectoR(input, output, 0, DesiredDimensionNonMandatory, CalculatorFunctionsGeneral::innerEvaluateToDouble);
 }
 
 bool CalculatorFunctionsGeneral::innerGetPointsImplicitly

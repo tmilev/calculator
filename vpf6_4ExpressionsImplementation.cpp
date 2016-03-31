@@ -2306,7 +2306,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         out << firstE;
 //      if (this->for)
       bool mustHaveTimes=(this->format==this->formatTimesDenotedByStar) && firstE!="-" && firstE!="";
-      if (!firstNeedsBrackets && firstE!="")
+      if (!firstNeedsBrackets && !secondNeedsBrackets && firstE!="")
         if (MathRoutines::isADigit(firstE[firstE.size()-1]) && MathRoutines::isADigit(secondE[0]) )
           mustHaveTimes=true;
       if (mustHaveTimes)

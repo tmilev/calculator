@@ -3918,6 +3918,24 @@ bool CalculatorFunctionsGeneral::innerDFQsEulersMethod(Calculator& theCommands, 
   return output.AssignValue(thePlot, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerPlotViewRectangle
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotViewRectangle");
+  if (input.children.size<3)
+    return false;
+  Vector<double> lowerLeft, upperRight;
+  if (!theCommands.GetVectorDoubles(input[1], lowerLeft, 2) || !theCommands.GetVectorDoubles(input[2], upperRight, 2))
+    return theCommands << "Failed to extract two pairs of floating point numbers from: "
+    << input[1].ToString() << " and " << input[2].ToString();
+  Plot emptyPlot;
+  emptyPlot.theLowerBoundAxes=lowerLeft[0];
+  emptyPlot.lowBoundY=lowerLeft[1];
+  emptyPlot.theUpperBoundAxes=upperRight[0];
+  emptyPlot.highBoundY=upperRight[1];
+  emptyPlot.viewWindowPriority=1;
+  return output.AssignValue(emptyPlot, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlot2D");
   //stOutput << input.ToString();
@@ -5566,7 +5584,12 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
       return !isnan(*whichDouble);
     }
     if ((*this).StartsWith(theCommands.opDivide(),3))
-    { if (whichDouble!=0)
+    { if (rightD==0)
+      { if (whichDouble!=0)
+          *whichDouble=NAN;
+        return false;
+      }
+      if (whichDouble!=0)
         *whichDouble=leftD/rightD;
       return true;
     }

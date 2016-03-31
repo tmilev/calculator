@@ -630,6 +630,10 @@ class Plot
   int defaultLineColor;
   bool flagIncludeExtraHtmlDescriptions;
   bool flagPlotShowJavascriptOnly;
+  int viewWindowPriority; //0 or less: compute the view Window. If this quantity is greater than zero,
+  //the user-given bounding box will overwrite any computations.
+  //When adding two plots with positive viewing window priorities, the window with the larger priority is used.
+  //If the priorities are equal, the windows are combined to the smallest window that fits both.
   std::string GetPlotHtml();
   std::string GetPlotStringAddLatexCommands(bool useHtml);
   bool IsOKVector(const Vector<double>& input);
@@ -1620,7 +1624,7 @@ public:
   bool GetVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory=-1);
   bool ConvertExpressionsToCommonContext(List<Expression>& inputOutputEs, Expression* inputOutputStartingContext=0);
   bool GetVectoRInt(const Expression& input, List<int>& output);
-  bool GetVectorDoubles(const Expression& input, Vector<double>& output);
+  bool GetVectorDoubles(const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory=-1);
   template <class theType>
   bool GetVectoR
   (const Expression& input, Vector<theType>& output, Expression* inputOutputStartingContext=0, int targetDimNonMandatory=-1,

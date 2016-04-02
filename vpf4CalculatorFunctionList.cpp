@@ -87,7 +87,7 @@ void Calculator::initPredefinedInnerFunctions()
    "f=selectAtRandom(\\sin, \\cos); \
     g=selectAtRandom(\\tan, \\cot, \\sec, \\csc);\
     f{}g{}x",
-   true, false, "CalculatorConversions::innerRandomInteger", "selectAtRandom");
+   true, false, "CalculatorConversions::selectAtRandom", "selectAtRandom");
   this->AddOperationInnerHandler
   ("randomInteger", CalculatorFunctionsGeneral::innerRandomInteger, "",
    "Generates a random integer. The random integer lives in intervals given by pairs of integers. The example code\
@@ -2147,7 +2147,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationOuterHandler
   ("-", this->outerMinus, "",
    "Transforms a-b to a+(-1)*b and -b to (-1)*b. Equivalent to a rule \
-   -{{b}}=MinnusOne*b; {{a}}-{{b}}=a+MinnusOne*b", "-1+(-5)", true);
+   -{{b}}=MinusOne*b; {{a}}-{{b}}=a+MinusOne*b", "-1+(-5)", true);
 
 //  this->AddOperationOuterHandler
 ////  ("*", Calculator::outerTimesToFunctionApplication, "",

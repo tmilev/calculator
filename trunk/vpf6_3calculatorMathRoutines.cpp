@@ -5482,13 +5482,12 @@ bool Expression::EvaluatesToDouble(double* whichDouble)const
 bool Expression::EvaluatesToDoubleUnderSubstitutions
 (const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble)const
 { MacroRegisterFunctionWithName("Expression::EvaluatesToDoubleUnderSubstitutions");
-//  if (this->owner==0)
-//    stOutput << "<br>Evaluating, but owner is zero!!! " << this->ToString();
+  if (this->owner==0)
+    stOutput << "<br>Evaluating, but owner is zero!!! " << this->ToString();
   if (this->owner==0)
     return false;
 //  stOutput << "<br>Evaluating to double: " << this->ToString();
   Calculator& theCommands=*this->owner;
-  RecursionDepthCounter theRcounter(&this->owner->RecursionDeptH);
   if (this->IsOfType<double>(whichDouble))
     return true;
   if (this->IsOfType<Rational>())
@@ -5501,7 +5500,8 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
       return true;
   RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
   if (this->owner->RecursionDeptH >this->owner->MaxRecursionDeptH)
-    return *(this->owner) << "<hr>Recursion depth exceeded while evaluating innerEvaluateToDouble. This may be a programming error. ";
+    return *(this->owner) << "<hr>Recursion depth exceeded while evaluating innerEvaluateToDouble."
+    << " This may be a programming error. ";
   if (knownEs.Contains(*this))
   { if (whichDouble!=0)
       *whichDouble=valuesKnownEs[knownEs.GetIndex(*this)];

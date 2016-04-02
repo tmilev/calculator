@@ -1540,7 +1540,7 @@ bool Calculator::ApplyOneRule()
       secondToLastS=="Expression" && this->AllowsTimesInPreceding(lastS))
     return this->ReplaceOEXByEX();
   if (this->knownOperationsInterpretedAsFunctionsMultiplicatively.Contains(fourthToLastS) &&
-      thirdToLastS=="^" && secondToLastS=="Expression" && this->AllowsPowerInPreceding(lastS))
+      thirdToLastS=="^" && secondToLastS=="Expression" && this->isSeparatorFromTheRightGeneral(lastS))
     return this->ReplaceO_2O_1E_3XbyEX();
   if (this->knownOperationsInterpretedAsFunctionsMultiplicatively.Contains(fourthToLastS) &&
       thirdToLastS=="{}" && secondToLastS=="Expression" && this->AllowsApplyFunctionInPreceding(lastS))

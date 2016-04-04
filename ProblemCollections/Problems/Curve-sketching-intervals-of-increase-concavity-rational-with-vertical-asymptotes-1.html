@@ -13,6 +13,7 @@ sd= (d/dx (d/dx(f{}x)));
 TurnOffRules("DistributeMultiplication");
 sdNumFactors= FactorOneVarPolyOverRationals{}( Numerator{}(sd));
 fdNumFactors= FactorOneVarPolyOverRationals{}( Numerator{}(fd));
+userIncreaseInterval=1;
 \)</span>
 
 <span class="calculatorShowToUserOnly">
@@ -22,6 +23,8 @@ plot2D(f{}x,-10, -1+a/b, 300,300, "red" )
 plot2D(f{}x, -1+a/b, 1+a/b , 300,300, "red" )
 +
 plot2D(f{}x,1+a/b, 10, 300,300, "red" )
++
+plotViewRectangle((-8,-8),(8,8))
 \) 
 </span>
 <br>

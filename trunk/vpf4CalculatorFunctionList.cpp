@@ -3070,37 +3070,50 @@ void Calculator::initBuiltInAtomsNotInterpretedAsFunctions()
   this->AddKnownDoubleConstant("e", MathRoutines::E());
 }
 
-void Calculator::AddTrigSplit(const std::string& trigFun, const std::string& theVar)
+void Calculator::AddTrigSplit(const std::string& trigFun, const List<std::string>& theVars)
 { MacroRegisterFunctionWithName("Calculator::AddTrigSplit");
   List<std::string> theSplit;
-  theSplit.SetSize(0);
-  theSplit.AddOnTop("\\"+trigFun);
-  theSplit.AddOnTop(theVar);
-  this->predefinedWordSplits.SetValue(theSplit, trigFun+theVar);
-  this->predefinedWordSplits.SetValue(theSplit, "\\"+trigFun+theVar);
+  for (int i=0; i<theVars.size; i++)
+  { const std::string& theVar=theVars[i];
+    theSplit.SetSize(0);
+    theSplit.AddOnTop("\\"+trigFun);
+    theSplit.AddOnTop(theVar);
+    this->predefinedWordSplits.SetValue(theSplit, trigFun+theVar);
+    this->predefinedWordSplits.SetValue(theSplit, "\\"+trigFun+theVar);
+    theSplit.SetSize(0);
+    theSplit.AddOnTop(theVar);
+    theSplit.AddOnTop("\\"+trigFun);
+    this->predefinedWordSplits.SetValue(theSplit, theVar+trigFun);
+    this->predefinedWordSplits.SetValue(theSplit, theVar+"\\"+trigFun);
+  }
+  for (int i=0; i<theVars.size; i++)
+    for (int j=0; j<theVars.size; j++)
+    { theSplit.SetSize(0);
+      theSplit.AddOnTop(theVars[i]);
+      theSplit.AddOnTop("\\"+trigFun);
+      theSplit.AddOnTop(theVars[j]);
+      this->predefinedWordSplits.SetValue(theSplit, theVars[i]+trigFun+theVars[j]);
+    }
 }
 
 void Calculator::initPredefinedWordSplits()
 { MacroRegisterFunctionWithName("Calculator::initPredefinedWordSplits");
   List<std::string> theSplit;
+  List<std::string> theVars;
+  theVars.AddOnTop("x");
+  theVars.AddOnTop("y");
   theSplit.SetSize(0);
   theSplit.AddOnTop("x"); theSplit.AddOnTop("y");
   this->predefinedWordSplits.SetValue(theSplit, "xy");
   theSplit.SetSize(0);
   theSplit.AddOnTop("y"); theSplit.AddOnTop("x");
   this->predefinedWordSplits.SetValue(theSplit, "yx");
-  this->AddTrigSplit("sin", "x");
-  this->AddTrigSplit("sin", "y");
-  this->AddTrigSplit("cos", "x");
-  this->AddTrigSplit("cos", "y");
-  this->AddTrigSplit("tan", "x");
-  this->AddTrigSplit("tan", "y");
-  this->AddTrigSplit("cot", "x");
-  this->AddTrigSplit("cot", "y");
-  this->AddTrigSplit("sec", "x");
-  this->AddTrigSplit("sec", "y");
-  this->AddTrigSplit("csc", "x");
-  this->AddTrigSplit("csc", "y");
+  this->AddTrigSplit("sin", theVars);
+  this->AddTrigSplit("cos", theVars);
+  this->AddTrigSplit("tan", theVars);
+  this->AddTrigSplit("cot", theVars);
+  this->AddTrigSplit("sec", theVars);
+  this->AddTrigSplit("csc", theVars);
 }
 
 void Calculator::initAtomsThatFreezeArguments()

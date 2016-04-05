@@ -1460,6 +1460,7 @@ FormatExpressions::FormatExpressions()
   this->flagIncludeExtraHtmlDescriptionsInPlots=true;
   this->flagSuppressLongMatrices=true;
   this->flagLatexDetailsInHtml=false;
+  this->flagUseQuotes=true;
   this->MaxMatrixDisplayedRows=20;
   this->MaxMatrixLineLength=20;
 }

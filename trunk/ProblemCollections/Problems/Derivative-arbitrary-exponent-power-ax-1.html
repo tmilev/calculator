@@ -4,6 +4,7 @@ Compute the derivative of the function.
 
 <span class="calculatorHidden">
 \(
+%UseLnInsteadOfLog
 a=randomInteger((2,6));  
 b=randomInteger((-2,-5), (2,5));  
 \)</span>
@@ -13,6 +14,7 @@ b=randomInteger((-2,-5), (2,5));
 \(\displaystyle f{}{{x}}= a^{b x}  \) 
 </span>.
 <span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
+%UseLnInsteadOfLog
 TurnOffRules("\log");
 </span>
 <br>
@@ -21,7 +23,26 @@ Answer: \(f'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswer">
 CompareFunctionsNumerically(d/dx(f{}x), AlgebraAnswer, 0, 3, 50, 0.0001);
 \)
 </textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+"<br>";
+if (
+(not (GetVariablesExcludeNamedConstants{}(AlgebraAnswer) == Sequence{}(x))) 
+and
+(not (GetVariablesExcludeNamedConstants{}(AlgebraAnswer) == ())) 
+,
+
+(
+"<div style='color:red'><b>Your answer depends on the following unrecognized variables:</b></div>" 
+GetVariablesExcludeNamedConstants{}(AlgebraAnswer) \setminus Sequence{}x
+), "");
+\)
+</span>
+
 <span class="calculatorAnswerOnGiveUp">
+%UseLnInsteadOfLog
+TurnOffRules("\log");
 d/dx (f{}x)
+
 </span>
 

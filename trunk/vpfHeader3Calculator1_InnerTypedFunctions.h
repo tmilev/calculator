@@ -81,6 +81,7 @@ public:
   static bool innerPowerSequenceMatrixByRat(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerNChooseK(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSetMinus(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerTensorEltTensorByEltTensor(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTensorMatRatByMatRat(Calculator& theCommands, const Expression& input, Expression& output);

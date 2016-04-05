@@ -1193,10 +1193,10 @@ D-B;\
    " If the argument has no bound variables, returns 1 if the argument is an rational, 0 otherwise. ",
    "IsRational{}a;IsRational{}-1;\nf{}{{a}}=IsRational{}a;\nIsRational{}1;\nIsRational{}b");
     this->AddOperationInnerHandler
-  ("Not", this->innerNot, "",
+  ("not", this->innerNot, "",
    " If the argument is a small integer, returns 1 if the argument is 0 and 1 the argument is non-zero. \
    If the argument is not a small integer, does nothing. ",
-   "Not{}1;Not{}a; Not{}0; Not{}(3==4)");
+   "not{}1;not{}a; not{}0; not{}(3==4)");
     this->AddOperationInnerHandler
   ("AllPartitions", CalculatorFunctionsGeneral::innerAllPartitions, "",
    "Prints all partitions of the vector (first argument) using a given list of vectors (second argument). \
@@ -2552,6 +2552,13 @@ void Calculator::initPredefinedStandardOperations()
   ("mod", Calculator::innerZmodP, "",
     "Same as ModP but uses the mod notation.",
     " 7 mod 3", true, false, "Calculator::innerZmodP");
+
+  this->AddOperationOuterHandler
+  ("\\setminus", CalculatorFunctionsBinaryOps::innerSetMinus, "",
+    "Removes the elements of the second set from the elements of the first set. \
+    The outputs will be sorted in ascending order.",
+    " (x,y,t)\\setminus Sequence{}x; (x,y)\\setminus (z,y)", true, false, "CalculatorFunctionsBinaryOps::innerSetMinus",
+    "\\setminus");
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat, this->opEltZmodP(), this->opEltZmodP(),

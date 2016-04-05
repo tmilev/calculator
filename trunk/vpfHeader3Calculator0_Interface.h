@@ -168,6 +168,9 @@ class Expression
   void GetCoefficientMultiplicandForm(Rational& outputCoeff, Expression& outputNoCoeff)const;
   bool SetChildAtomValue(int childIndex, const std::string& theAtom);
   bool SetChildAtomValue(int childIndex, int TheAtomValue);
+  int size()const
+  { return this->children.size;
+  }
   bool SetChilD(int childIndexInMe, const Expression& inputChild);
   bool SetChilD(int childIndexInMe, int childIndexInBoss);
   bool AssignMatrixExpressions(const Matrix<Expression>& input, Calculator& owner);
@@ -1483,6 +1486,9 @@ public:
   }
   int opChoose()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\choose");
+  }
+  int opSetMinus()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\setminus");
   }
   int opLieBracket()
   { return this->theAtoms.GetIndexIMustContainTheObject("[]");

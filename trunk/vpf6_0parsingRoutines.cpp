@@ -243,6 +243,7 @@ void Calculator::init()
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("SequenceMatrixRows");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("MatrixRow");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\circ");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\setminus");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("$");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("MatrixSeparator");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("MatrixRowSeparator");
@@ -1456,6 +1457,8 @@ bool Calculator::ApplyOneRule()
   if (secondToLastS=="Expression" && lastS=="!")
     return this->ReplaceEOByE();
   if (secondToLastS=="Expression" && thirdToLastS=="^" && fourthToLastS=="Expression" && this->AllowsPowerInPreceding(lastS) )
+    return this->ReplaceEOEXByEX();
+  if (secondToLastS=="Expression" && thirdToLastS=="\\setminus" && fourthToLastS=="Expression" && this->AllowsPowerInPreceding(lastS) )
     return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="or" && fourthToLastS=="Expression" && this->AllowsOrInPreceding(lastS) )
     return this->ReplaceEOEXByEX();

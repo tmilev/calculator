@@ -1854,6 +1854,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   std::stringstream out;
   bool result=false;
   bool isFinal=theFormat==0 ? false : theFormat->flagExpressionIsFinal;
+  bool useQuotes=theFormat==0 ? false : theFormat->flagUseQuotes;
   MemorySaving<FormatExpressions> contextFormat;
   bool showContext= this->owner==0 ? false : owner->flagDisplayContext;
   if (this->IsAtom())
@@ -1866,8 +1867,11 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     result=true;
   } else if (this->IsOfType<std::string>())
   { if (isFinal)
-      out << this->GetValue<std::string>();
-    else
+    { if (!useQuotes)
+        out << this->GetValue<std::string>();
+      else
+        out << "\"" << this->GetValue<std::string>() << "\"";
+    } else
     { out << "(string~ not~ shown~ to~ avoid~ javascript~ problems~ (in~ case~ the~ string~ has~ javascript))";
       //out << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     }
@@ -2175,6 +2179,8 @@ bool Expression::NeedsParenthesisForMultiplication()const
 { if (this->owner==0)
     return false;
 //  stOutput << "DEBUG: Needsparen: " << this->ToString()  << ", Lispified: " << this->ToStringSemiFull() << "<hr>";
+  if (this->IsOfType<std::string>())
+    return false;
   if (this->StartsWith(this->owner->opPlus()) || this->StartsWith(this->owner->opMinus()))
     return true;
   if (this->IsOfType<Rational>())
@@ -2225,6 +2231,12 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   bool allowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
   bool oldAllowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
   bool useFrac =this->owner->flagUseFracInRationalLaTeX; //(theFormat==0) ? true : theFormat->flagUseFrac;
+  if (theFormat!=0)
+  { if (startingExpression==0)
+      theFormat->flagUseQuotes=true;
+    else
+      theFormat->flagUseQuotes=false;
+  }
   int lineBreak=50;
   int charCounter=0;
   std::string tempS;
@@ -2288,6 +2300,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << (*this)[1].ToString(theFormat) << "\\in " << (*this)[2].ToString(theFormat);
   else if (this->StartsWith(this->owner->opChoose(),3) )
     out << (*this)[1].ToString(theFormat) << "\\choose " << (*this)[2].ToString(theFormat);
+  else if (this->StartsWith(this->owner->opSetMinus(),3) )
+    out << (*this)[1].ToString(theFormat) << "\\setminus " << (*this)[2].ToString(theFormat);
   else if (this->StartsWith(this->owner->opTimes(), 3))
   { std::string secondE=(*this)[2].ToString(theFormat);
     if ((*this)[1].IsAtomGivenData(this->owner->opSqrt()))

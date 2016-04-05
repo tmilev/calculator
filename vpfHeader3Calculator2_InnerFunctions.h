@@ -210,6 +210,8 @@ public:
   static bool innerOr(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAnd(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerSolveUnivariatePolynomialWithRadicalsWRT
+  (Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotConeUsualProjection(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotParametricCurve(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotIntegralOf(Calculator& theCommands, const Expression& input, Expression& output);

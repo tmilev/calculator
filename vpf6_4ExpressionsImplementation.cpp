@@ -10,7 +10,9 @@
 ProjectInformationInstance ProjectInfoVpf6_4ExpressionsImplementationcpp(__FILE__, "Calculator expression implementation. ");
 
 Expression operator*(const Expression& left, const Expression& right)
-{ left.CheckInitialization();
+{ MacroRegisterFunctionWithName("operator*(Expression, Expression)");
+//  stOutput << "DEBUG: Multiplying: " << left.ToString() << " by " << right.ToString();
+  left.CheckInitialization();
   Expression result;
 
   result.MakeXOX(*left.owner, left.owner->opTimes(), left, right);
@@ -2929,13 +2931,15 @@ bool Expression::ContextMakeContextWithOnePolyVar(Calculator& owner, const std::
 }
 
 bool Expression::MakeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex)
-{ Expression argumentE;
+{ MacroRegisterFunctionWithName("Expression::MakeSqrt");
+  Expression argumentE;
   argumentE.AssignValue(argument, owner);
   return this->MakeSqrt(owner, argumentE, radicalSuperIndex);
 }
 
 bool Expression::MakeSqrt(Calculator& owner, const Expression& argument, const Rational& radicalSuperIndex)
-{ this->reset(owner,3);
+{ MacroRegisterFunctionWithName("Expression::MakeSqrt");
+  this->reset(owner,3);
   Expression radicalIndexE;
   radicalIndexE.AssignValue(radicalSuperIndex, owner);
   this->AddChildAtomOnTop(owner.opSqrt());
@@ -2949,6 +2953,18 @@ bool Expression::MakeXOX(Calculator& owner, int theOp, const Expression& left, c
   { Expression leftCopy=left;
     Expression rightCopy=right;
     return this->MakeXOX(owner, theOp, leftCopy, rightCopy);
+  }
+  if (right.owner==0 && left.owner==0)
+    crash << "Cannot build an expression from two non-initialized expressions. " << crash;
+  if (right.owner==0)
+  { Expression rightCopy;
+    rightCopy.AssignValue(right.theData, *left.owner);
+    return this->MakeXOX(owner, theOp, left, rightCopy);
+  }
+ if (left.owner==0)
+  { Expression leftCopy;
+    leftCopy.AssignValue(left.theData, *right.owner);
+    return this->MakeXOX(owner, theOp, leftCopy, right);
   }
   left.CheckInitialization();
   right.CheckInitialization();

@@ -1777,12 +1777,65 @@ void Expression::operator-=(const Expression& other)
   *this=resultE;
 }
 
+Expression Expression::operator*(const Expression& other)
+{ MacroRegisterFunctionWithName("Expression::operator*");
+//  stOutput << "going nearby Expression::operator*";
+  Expression result;
+  result=*this;
+  result*=other;
+  return result;
+}
+
+Expression Expression::operator*(int other)
+{ MacroRegisterFunctionWithName("Expression::operator*");
+  //stOutput << "going nearby Expression::operator*";
+  Expression result;
+  if (this->owner==0)
+  { //perhaps we should allow the code below for convenience: really
+    //hard to judge if the convenience is worth it, or whether it will cause hard-to-detect bugs.
+    //Rational resultRat=this->theData;
+    //resultRat*=other;
+    //if (resultRat.IsSmallInteger(&result.theData))
+    //  return result;
+    crash << "Multiplying non-initialized expression with data: "
+    << this->theData << " by integer " << other << " results in a large integer. This is not allowed. "
+    << crash;
+  }
+  Expression otherE;
+  otherE.AssignValue(other, *this->owner);
+  result=*this;
+  result*=otherE;
+  return result;
+}
+
+Expression Expression::operator+(const Expression& other)
+{ Expression result;
+  result=*this;
+  result+=other;
+  return result;
+}
+
+Expression Expression::operator-(const Expression& other)
+{ Expression result;
+  result=*this;
+  result-=other;
+  return result;
+}
+
+Expression Expression::operator/(const Expression& other)
+{ MacroRegisterFunctionWithName("Expression::operator/");
+  Expression result;
+  result=*this;
+  result/=other;
+  return result;
+}
+
 void Expression::operator/=(const Expression& other)
 { MacroRegisterFunctionWithName("Expression::operator/=");
   if (this->owner==0 && other.owner==0)
   { this->theData/=other.theData;
     if (this->theData!=1 && this->theData!=0)
-      crash << "Attempting to add non-initialized expressions" << crash;
+      crash << "Attempting to divide non-initialized expressions" << crash;
     return;
   }
   if (other.owner==0)
@@ -1794,7 +1847,7 @@ void Expression::operator/=(const Expression& other)
   if (this->owner==0)
     this->AssignValue(this->theData, *other.owner);
   if (this->owner!=other.owner)
-    crash << "Error: adding expressions with different owners. " << crash;
+    crash << "Error: dividing expressions with different owners. " << crash;
   Expression resultE;
   resultE.MakeXOX(*this->owner, this->owner->opDivide(), *this, other);
   *this=resultE;
@@ -1802,6 +1855,7 @@ void Expression::operator/=(const Expression& other)
 
 void Expression::operator*=(const Expression& other)
 { MacroRegisterFunctionWithName("Expression::operator*=");
+//  stOutput << "going nearby Expression::operator*=";
   if (this->owner==0 && other.owner==0)
   { this->theData*=other.theData;
     if (this->theData!=1 && this->theData!=0)

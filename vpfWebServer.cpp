@@ -1951,6 +1951,9 @@ int WebWorker::ProcessCalculator()
     return this->ProcessDatabase();
   theParser.inputString=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
   theParser.flagShowCalculatorExamples=(theGlobalVariables.GetWebInput("showExamples")=="true");
+
+  theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=
+  theWebServer.ReturnActiveIndicatorAlthoughComputationIsNotDone;
   this->OutputBeforeComputation();
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(false);
 ////////////////////////////////////////////////
@@ -3403,18 +3406,6 @@ int WebServer::Run()
       logProcessKills << logger::red << "FAILED to spawn a child process. " << logger::endL;
     if (this->GetActiveWorker().ProcessPID==0)
     { // this is the child (worker) process
-/*      int val=fcntl(newConnectedSocket, F_GETFL, 0);
-      if ( val < 0)
-        logIO << "fcntl failed!!!!!" << logger::endL;
-      else
-      { if (!(val & O_NONBLOCK))
-          logIO << "socket blocking" << logger::endL;
-        else
-          logIO << "socket NON-blocking" << logger::endL;
-      }
-      */
-      theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=
-      this->ReturnActiveIndicatorAlthoughComputationIsNotDone;
       theGlobalVariables.WebServerTimerPing=this->WorkerTimerPing;
       theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
       crash.CleanUpFunction=WebServer::SignalActiveWorkerDoneReleaseEverything;

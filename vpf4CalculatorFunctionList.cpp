@@ -1597,6 +1597,21 @@ D-B;\
    "Reverse{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)", true, false, "Calculator::innerReverseOrderRecursively");
 
   this->AddOperationInnerHandler
+  ("solveFor", CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT, "",
+   "Tries to solve a polynomial equation with respect to a variable. The first argument gives the variable expression\
+   (arbitrary expressions allowed) and\
+   the second argument gives the polynomial. \
+   At the moment the calculator \
+   only knows the quadratic formula but Cardano's formula and \
+   the fourth degree formula will be implemented when\
+   need arises.\
+   The solutions of the equation are returned in a list (empty list for no solution). \
+   Solutions with multiplicity higher than one are repeated. \
+    ",
+   "solveFor(x, a x^2+b x +c); solveFor(x, a x +b)", true, false, "CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT",
+   "solveFor");
+
+  this->AddOperationInnerHandler
   ("FindOneSolutionSerreLikePolynomialSystem", CalculatorFunctionsGeneral::innerSolveSerreLikeSystemNoUpperLimit, "",
    "Attempts to heuristically solve a system of polynomial of equations over the rationals. \
    The input system of equations can be arbitrary, \

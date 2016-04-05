@@ -1408,6 +1408,28 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRati
   return output.AssignValue(result, theCommands);
 }
 
+bool CalculatorFunctionsBinaryOps::innerSetMinus
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerSetMinus");
+  if (input.children.size!=3)
+    return false;
+  const Expression& leftSetE=input[1];
+  const Expression& rightSetE=input[2];
+  if (!leftSetE.IsSequenceNElementS() || !rightSetE.IsSequenceNElementS())
+    return false;
+  if (leftSetE.HasBoundVariables() || rightSetE.HasBoundVariables())
+    return false;
+  HashedList<Expression> resultEs;
+  resultEs.SetExpectedSize(leftSetE.children.size-1);
+  for (int i=1; i<leftSetE.children.size; i++)
+    resultEs.AddOnTop(leftSetE[i]);
+  for (int i=1; i<rightSetE.children.size; i++)
+    if (resultEs.Contains(rightSetE[i]))
+      resultEs.RemoveIndexSwapWithLast(resultEs.GetIndex(rightSetE[i]));
+  resultEs.QuickSortAscending();
+  return output.MakeSequence(theCommands, &resultEs);
+}
+
 bool CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs");
   if (!input.IsListNElements(3))

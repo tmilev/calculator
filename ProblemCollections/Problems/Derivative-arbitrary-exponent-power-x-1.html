@@ -4,6 +4,7 @@ Compute the derivative of the function.
 
 <span class="calculatorHidden">
 \(
+%UseLnInsteadOfLog
 a=randomInteger((2,6));  
 b=randomInteger((-2,-5), (2,5));  
 TurnOffRules("\log", "sqrt", "ConvertShortDenominatorToNegativePower", "CommonDenominatorOneNonFraction", "CommuteIfUnivariate");
@@ -18,6 +19,7 @@ TurnOnRules("sqrt", "ConvertShortDenominatorToNegativePower", "CommonDenominator
 </span>
 <br>
 <span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
+%UseLnInsteadOfLog
 TurnOffRules("\log");
 </span>
 Answer: \(f'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswer">

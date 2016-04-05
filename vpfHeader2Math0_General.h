@@ -1546,6 +1546,7 @@ public:
   bool flagSuppressOneIn1overXtimesY;
   bool flagSuppressLongMatrices;
   bool flagLatexDetailsInHtml;
+  bool flagUseQuotes;
   List<MonomialP>::OrderLeftGreaterThanRight thePolyMonOrder;
   template <typename templateMonomial>
   typename List<templateMonomial>::OrderLeftGreaterThanRight GetMonOrder();

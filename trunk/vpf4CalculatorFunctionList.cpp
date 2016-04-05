@@ -806,6 +806,15 @@ D-B;\
    "Extracts the coefficients of the powers of the first argument in the second argument.",
    "CoefficientsPowersOf(x, a x^2+ b *3 x +c +\\pi +3)", true, false)
    ;
+  this->AddOperationInnerHandler
+  ("EnsureExpressionDependsOnlyOn", CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOn, "",
+   "Ensures the expression in the first argument depends only on the free variables given in the remaining arguments. \
+   Returns a warning string if that is not the case, else returns an empty string. Intended to warn users of \
+   potentially mistyped expressions. ",
+   "EnsureExpressionDependsOnlyOn(\\sin (\\ln x) x y, x, y); EnsureExpressionDependsOnlyOn(\\sin (\\ln x) x y, x);", true, false,
+   "CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOn",
+   "EnsureExpressionDependsOnlyOn")
+   ;
 
   this->AddOperationInnerHandler
   ("\\log", CalculatorFunctionsGeneral::innerLog, "",
@@ -2553,7 +2562,7 @@ void Calculator::initPredefinedStandardOperations()
     "Same as ModP but uses the mod notation.",
     " 7 mod 3", true, false, "Calculator::innerZmodP");
 
-  this->AddOperationOuterHandler
+  this->AddOperationInnerHandler
   ("\\setminus", CalculatorFunctionsBinaryOps::innerSetMinus, "",
     "Removes the elements of the second set from the elements of the first set. \
     The outputs will be sorted in ascending order.",

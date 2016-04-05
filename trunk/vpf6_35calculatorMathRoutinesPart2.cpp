@@ -434,6 +434,40 @@ bool CalculatorFunctionsGeneral::innerMultiplySequence
   return output.MakeProducT(theCommands, theTerms);
 }
 
+bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOn
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOn");
+  if (input.size()<3)
+    return false;
+  const Expression& theExpression=input[1];
+  HashedList<Expression> allowedFreeVars, presentFreeVars;
+  allowedFreeVars.SetExpectedSize(input.size()-2);
+  presentFreeVars.SetExpectedSize(input.size()-2);
+  for (int i=2; i<input.size(); i++)
+    allowedFreeVars.AddOnTopNoRepetition(input[i]);
+  std::stringstream out;
+  theExpression.GetFreeVariables(presentFreeVars, true);
+  if (!allowedFreeVars.Contains(presentFreeVars))
+  { out << "<hr>";
+    out << "Your expression:<br>\\(" << input[1].ToString() << "\\)"
+    << "<br><span style='color:red'><b>contains the unexpected variable(s):</b></span><br><b>";
+    bool found=false;
+    for (int i=0; i< presentFreeVars.size; i++)
+      if (!allowedFreeVars.Contains(presentFreeVars[i]))
+      { if (found)
+          out << ", ";
+        found=true;
+        out << presentFreeVars[i].ToString();
+      }
+    out << "</b>.";
+    out << "<br>The expected variables are: " << allowedFreeVars.ToStringCommaDelimited() << ". ";
+    out << "<br>Beware of typos such as:<br>[wrong:] <span style='color:red'>lnx</span>  "
+    << "<br>[correct:] <span style='color:green'>ln(x)</span> or <span style='color:green'>ln x</span>.<hr>";
+    return output.AssignValue(out.str(), theCommands);
+  }
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT");

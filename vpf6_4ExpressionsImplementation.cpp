@@ -2231,7 +2231,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   bool allowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
   bool oldAllowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
   bool useFrac =this->owner->flagUseFracInRationalLaTeX; //(theFormat==0) ? true : theFormat->flagUseFrac;
-  if (theFormat!=0)
+  if (theFormat!=0 && !this->IsOfType<std::string>())
   { if (startingExpression==0)
       theFormat->flagUseQuotes=true;
     else

@@ -990,8 +990,7 @@ int WebWorker::ProcessSubmitProblemPreview()
     << "</b></span>";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
       stOutput << theInterpreterWithAdvice.outputString << "<br>" << theInterpreterWithAdvice.outputCommentsString;
-  }
-  else if (theInterpreterWithAdvice.flagAbortComputationASAP )
+  } else if (theInterpreterWithAdvice.flagAbortComputationASAP )
   { stOutput << "<br><span style=\"color:red\"><b>"
     << "Something went wrong when interpreting your answer in the context of the current problem. "
     << "</b></span>";
@@ -1008,6 +1007,7 @@ int WebWorker::ProcessSubmitProblemPreview()
 //         stOutput << "<hr>DEBUG Before final computation: <hr>";
       theFormat.flagExpressionIsFinal=true;
       theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
+      theFormat.flagUseQuotes=false;
       answersReverseOrder.AddOnTop(theInterpreterWithAdvice.theProgramExpression[j].ToString(&theFormat));
     }
     for (int j=answersReverseOrder.size-1; j>=0; j--)

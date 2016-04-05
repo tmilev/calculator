@@ -83,6 +83,7 @@ public:
   static bool innerCompareExpressionsNumericallyAtPoints(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPolynomialRelations(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerEnsureExpressionDependsOnlyOn(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerMultiplySequence(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerPolynomialize(Calculator& theCommands, const Expression& input, Expression& output);

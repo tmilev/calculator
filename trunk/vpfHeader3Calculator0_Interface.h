@@ -124,11 +124,13 @@ class Expression
     this->format=other.format;
   }
   void operator=(const Rational& other)
-  { this->CheckInitialization();
+  { MacroRegisterFunctionWithName("Expression::operator=(Rational)");
+    this->CheckInitialization();
     this->AssignValue(other, *this->owner);
   }
   void operator=(int other)
-  { this->CheckInitialization();
+  { MacroRegisterFunctionWithName("Expression::operator=(int)");
+    this->CheckInitialization();
     this->AssignValue(other, *this->owner);
   }
   enum format
@@ -411,7 +413,8 @@ class Expression
   { this->reset();
   }
   Expression(int x) :flagDeallocated(false)
-  { this->reset();
+  { MacroRegisterFunctionWithName("Expression::Expression(int)");
+    this->reset();
     this->theData=x;
   }
   const Expression& GetLastChild()const
@@ -454,6 +457,14 @@ bool EvaluatesToDoubleUnderSubstitutions
   void operator/=(const Expression& other);
   void operator+=(const Expression& other);
   void operator-=(const Expression& other);
+  Expression operator+(int other);
+  Expression operator-(int other);
+  Expression operator*(int other);
+  Expression operator/(int other);
+  Expression operator+(const Expression& other);
+  Expression operator-(const Expression& other);
+  Expression operator*(const Expression& other);
+  Expression operator/(const Expression& other);
   void operator*=(const Expression& other);
 //  Rational GetConstantTerm() const;
   bool operator==(int other)const;

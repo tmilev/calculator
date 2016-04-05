@@ -13,7 +13,12 @@ sd= (d/dx (d/dx(f{}x)));
 TurnOffRules("DistributeMultiplication");
 sdNumFactors= FactorOneVarPolyOverRationals{}( Numerator{}(sd));
 fdNumFactors= FactorOneVarPolyOverRationals{}( Numerator{}(fd));
-userIncreaseInterval=1;
+fdFactorsFirstCF= CoefficientsPowersOf(x, fdNumFactors_1) ;
+fdFactorsSecondCF= CoefficientsPowersOf(x, fdNumFactors_2) ;
+fdNumZeroes=
+(
+
+)
 \)</span>
 
 <span class="calculatorShowToUserOnly">

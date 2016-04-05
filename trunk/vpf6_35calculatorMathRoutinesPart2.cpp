@@ -421,7 +421,8 @@ bool CalculatorFunctionsGeneral::innerDenominator(Calculator& theCommands, const
   return output.AssignValue(1, theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerMultiplySequence(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorFunctionsGeneral::innerMultiplySequence
+(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMultiplySequence");
   if (input.children.size<1)
     return false;
@@ -431,4 +432,45 @@ bool CalculatorFunctionsGeneral::innerMultiplySequence(Calculator& theCommands, 
   for (int i=1; i<input.children.size; i++)
     theTerms.AddOnTop(input[i]);
   return output.MakeProducT(theCommands, theTerms);
+}
+
+bool CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT");
+  if (input.children.size!=3)
+    return theCommands << "solveFor takes as input three arguments. ";
+  Expression thePowers;
+  if (!CalculatorFunctionsGeneral::innerCoefficientsPowersOf(theCommands, input, thePowers))
+    return theCommands << "Failed to extract the coefficients of " << input[1].ToString()
+    << " in " << input[2].ToString();
+  if (!thePowers.IsSequenceNElementS())
+    return theCommands << "This is not supposed to happen: expression "
+    << thePowers.ToString() << " should be a list. This may be a programming bug. ";
+  if (thePowers.children.size==2)
+    return theCommands << "Cannot solve: " << input[2].ToString()
+    << " the expression does not depend on " << input[1].ToString();
+  if (thePowers.children.size==3)
+  { output=thePowers[1];
+    output*=-1;
+    output/=thePowers[2];
+    return true;
+  }
+  if (thePowers.children.size==4)
+  { const Expression& a=thePowers[3];
+    const Expression& b=thePowers[2];
+    const Expression& c=thePowers[1];
+    output.MakeSequence(theCommands);
+//    stOutput << "DEBIG: a,b,c" << thePowers[3] << thePowers[2] << thePowers[1] << "<br>";
+    Expression currentRoot;
+    Expression theDiscriminant;
+    theDiscriminant=b*b-a*c*4;
+    Expression sqrtDiscriminant;
+    sqrtDiscriminant.MakeSqrt(theCommands, theDiscriminant, 2);
+    currentRoot=(b*(-1)-sqrtDiscriminant)/(a*2);
+    output.AddChildOnTop(currentRoot);
+    currentRoot=(b*(-1)+sqrtDiscriminant)/(a*2);
+    output.AddChildOnTop(currentRoot);
+    return true;
+  }
+  return false;
 }

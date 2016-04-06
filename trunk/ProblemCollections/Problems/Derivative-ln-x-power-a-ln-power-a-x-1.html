@@ -25,6 +25,11 @@ Answer: \(f'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswerF">
 CompareFunctionsNumerically(d/dx(f{}x), AlgebraAnswerF, 2, 3, 50, 0.0001);
 \)
 </textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+EnsureExpressionDependsOnlyOn(AlgebraAnswerF,x)
+\)
+</span>
 
 <span class="calculatorAnswerOnGiveUp">
 MakeExpression(MakeRationalFunction(
@@ -40,6 +45,11 @@ Answer: \(g'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswerG">
 CompareFunctionsNumerically(d/dx(g{}x), AlgebraAnswerG, 2, 3, 50, 0.0001);
 \)
 </textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+EnsureExpressionDependsOnlyOn(AlgebraAnswerG,x)
+\)
+</span>
 <span class="calculatorAnswerOnGiveUp">
 MakeExpression(MakeRationalFunction(
 d/dx (g{}x)))

@@ -44,10 +44,14 @@ MakeRationalFunction{}(
 -(d/dx y=0;d/dx theFunModified)_2 /CoefficientOf{}(d/dx y, d/dx theFunModified)
 )_2
 ))
-, AlgebraAnswer, 0.01, (x,y)\in pointsImplicitly{}(theFun, (0,0),(5,5), (10,10), (400,400)) )
+, AlgebraAnswer, 0.1, (x,y)\in pointsImplicitly{}(theFun, (0,0),(5,5), (10,10), (400,400)) )
 \)
 </textarea>
-
+<span class="calculatorCommentBeforeSubmission">
+\(
+EnsureExpressionDependsOnlyOn(AlgebraAnswer,x,y)
+\)
+</span>
 <span class="calculatorAnswerOnGiveUp">
 MakeExpression{}(
 MakeRationalFunction{}(

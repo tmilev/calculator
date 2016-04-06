@@ -461,8 +461,9 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOn
       }
     out << "</b>.";
     out << "<br>The expected variables are: " << allowedFreeVars.ToStringCommaDelimited() << ". ";
-    out << "<br>Beware of typos such as:<br>[wrong:] <span style='color:red'>lnx</span>  "
-    << "<br>[correct:] <span style='color:green'>ln(x)</span> or <span style='color:green'>ln x</span>.<hr>";
+    out << "<br>Beware of typos such as:<br>[wrong:] <span style='color:red'>lnx, sqrt2</span>  "
+    << "<br>[correct:] <span style='color:green'>ln(x)</span> or <span style='color:green'>ln x</span>, "
+    << "<span style='color:green'>sqrt(2)</span> or <span style='color:green'>sqrt 2</span>.<hr>";
     return output.AssignValue(out.str(), theCommands);
   }
   return output.AssignValue(out.str(), theCommands);

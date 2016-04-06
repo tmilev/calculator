@@ -34,6 +34,11 @@ Answer: \(f'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswer">
 CompareFunctionsNumerically(d/dx(f{}x), AlgebraAnswer, 0.05, \pi/2.1, 50, 0.0001);
 \)
 </textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+EnsureExpressionDependsOnlyOn(AlgebraAnswer,x)
+\)
+</span>
 <span class="calculatorAnswerOnGiveUp">
 d/dx (f{}x)
 </span>

@@ -1403,8 +1403,13 @@ bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVa
     return false;
   if (this->IsBuiltInType()) //<- this may need to be rewritten as some built in types will store free variables in their context.
     return true;
-  if (this->IsAtom())
+  std::string atomName;
+  if (this->IsAtom(&atomName))
   { bool doAddExpression=!this->IsKnownFunctionWithComplexRange();
+    if (doAddExpression)
+      if (atomName=="=" || atomName==">" || atomName=="\"" || atomName=="==" ||
+          atomName=="<" || atomName=="Sequence")
+        doAddExpression=false;
     if (doAddExpression && excludeNamedConstants)
       if (this->owner->knownDoubleConstants.Contains(*this))
         doAddExpression=false;
@@ -2372,16 +2377,15 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     if (firstE.StartsWith(-1, 2))
       if (firstE[0].IsAtomWhoseExponentsAreInterpretedAsFunction() && !secondE.IsEqualToMOne())
       { involvesExponentsInterpretedAsFunctions=true;
-        Expression newE, newFunE;
+        Expression  newFunE;
         newFunE.MakeXOX(*this->owner, this->owner->opThePower(), firstE[0], (*this)[2]);
-        newE.reset(*this->owner, 2);
-        newE.AddChildOnTop(newFunE);
-        newE.AddChildOnTop(firstE[1]);
-        this->CheckConsistency();
-        newE.CheckConsistency();
         newFunE.CheckConsistency();
         //stOutput << "<br> tostringing a very special case: " << newE.ToString() << " lispified: " << this->ToStringFull();
-        out << newE.ToString(theFormat);
+        out << "{" << newFunE.ToString(theFormat) << "}{}";
+        if (firstE[1].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost())
+          out << "\\left(" << firstE[1].ToString(theFormat) << "\\right)";
+        else
+          out << firstE[1].ToString(theFormat);
       }
     if (!involvesExponentsInterpretedAsFunctions)
     { bool isSqrt=false;

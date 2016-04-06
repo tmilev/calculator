@@ -26,6 +26,11 @@ Answer: \(f'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswer">
 CompareFunctionsNumerically(d/dx(f{}x), AlgebraAnswer, 0.3/b, 1/b, 50, 0.000001);
 \)
 </textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+EnsureExpressionDependsOnlyOn(AlgebraAnswer,x)
+\)
+</span>
 
 <span class="calculatorAnswerOnGiveUp">
 MakeExpression(MakeRationalFunction(

@@ -16,8 +16,10 @@ TurnOffRules("ConvertShortDenominatorToNegativePower", "sqrt", "logBase", "Conve
 \) 
 </span>.
 <span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
-\(%UseLnInsteadOfLog
-TurnOffRules("\log", "logBase");\)
+\(
+%UseLnInsteadOfLog
+TurnOffRules("\log", "logBase");
+\)
 </span>
 <span class="calculatorHidden">
 \(
@@ -29,9 +31,16 @@ Answer: \(f'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswer">
 CompareFunctionsNumerically(d/dx(f{}x), AlgebraAnswer, -2, -3, 50, 0.0001);
 \)
 </textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+EnsureExpressionDependsOnlyOn(AlgebraAnswer,x)
+\)
+</span>
 
 To write \(\ln (x)\) you need to enter \ln(x), ln(x) or log(x) or \log(x). Please note that in the calculator log stands for the (complex) natural logarithm, i.e., the logarithm base e. 
 <span class="calculatorAnswerOnGiveUp">
+%UseLnInsteadOfLog
+TurnOffRules("\log");
 MakeExpression(MakeRationalFunction(
 d/dx (f{}x)))
 </span>

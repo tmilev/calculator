@@ -25,17 +25,7 @@ CompareFunctionsNumerically(d/dx(f{}x), AlgebraAnswer, 0, 3, 50, 0.0001);
 </textarea>
 <span class="calculatorCommentBeforeSubmission">
 \(
-"<br>";
-if (
-(not (GetVariablesExcludeNamedConstants{}(AlgebraAnswer) == Sequence{}(x))) 
-and
-(not (GetVariablesExcludeNamedConstants{}(AlgebraAnswer) == ())) 
-,
-
-(
-"<div style='color:red'><b>Your answer depends on the following unrecognized variables:</b></div>" 
-GetVariablesExcludeNamedConstants{}(AlgebraAnswer) \setminus Sequence{}x
-), "");
+EnsureExpressionDependsOnlyOn(AlgebraAnswer,x)
 \)
 </span>
 

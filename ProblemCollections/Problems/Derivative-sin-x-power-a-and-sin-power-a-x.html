@@ -20,6 +20,11 @@ Answer: \(f'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswer">
 CompareFunctionsNumerically(d/dx(f{}x), AlgebraAnswer, 0, 5, 50, 0.0001);
 \)
 </textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+EnsureExpressionDependsOnlyOn(AlgebraAnswer,x)
+\)
+</span>
 <span class="calculatorAnswerOnGiveUp">
 d/dx (f{}x)
 </span>
@@ -36,6 +41,11 @@ Answer: \(g'(x)=\)<textarea class="calculatorAnswer" id="AlgebraAnswerTwo">
 CompareFunctionsNumerically(d/dx(g{}x), AlgebraAnswerTwo, 0, 5, 50, 0.0001);
 \)
 </textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+EnsureExpressionDependsOnlyOn(AlgebraAnswerTwo,x)
+\)
+</span>
 <span class="calculatorAnswerOnGiveUp">
 d/dx (g{}x)
 </span>

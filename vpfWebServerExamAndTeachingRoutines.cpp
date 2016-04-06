@@ -866,6 +866,7 @@ int WebWorker::ProcessProblemGiveUp()
 //        stOutput << "<hr>DEBUG Before final computation: <hr>";
     theFormat.flagExpressionIsFinal=true;
     theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
+    theFormat.flagUseQuotes=false;
     if (!theInterpreteR.theProgramExpression[j].StartsWith(theInterpreteR.opRulesChanged()))
       answersReverseOrder.AddOnTop(theInterpreteR.theProgramExpression[j].ToString(&theFormat));
   }

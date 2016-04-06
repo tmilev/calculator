@@ -45,7 +45,11 @@ CompareExpressionsNumericallyAtPoints(
 )_2, AlgebraAnswer, 0.001, (x,y)\in pointsImplicitly{}(theFun, (-3,-3),(3,3), (40,40), (400,400) ))
 \)
 </textarea>
-
+<span class="calculatorCommentBeforeSubmission">
+\(
+EnsureExpressionDependsOnlyOn(AlgebraAnswer,x,y)
+\)
+</span>
 <span class="calculatorAnswerOnGiveUp">
 (d/dx theFun;
 -(d/dx y=0;d/dx theFun)_2 /CoefficientOf{}(d/dx y, d/dx theFun)

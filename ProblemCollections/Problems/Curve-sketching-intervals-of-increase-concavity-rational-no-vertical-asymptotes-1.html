@@ -77,6 +77,11 @@ userIncreaseInterval== increaseInterval;
 </textarea>
 <span class="calculatorCommentBeforeSubmission">
 \(
+EnsureExpressionDependsOnlyOn(userIncreaseInterval,none)
+\)
+</span>
+<span class="calculatorCommentBeforeSubmission">
+\(
 %PlotShowJavascriptOnly
 plot2D(f{}x, -6,6, 300,300, "red" )+
 plot2D(f{}x, userIncreaseInterval_1, userIncreaseInterval_2, 300,300, "blue" )
@@ -104,6 +109,12 @@ xMax- increaseInterval_2==0;
 </textarea>
 <span class="calculatorCommentBeforeSubmission">
 \(
+EnsureExpressionDependsOnlyOn(xMax,none)
+\)
+</span>
+
+<span class="calculatorCommentBeforeSubmission">
+\(
 %PlotShowJavascriptOnly
 plot2D(f{}x, -6,6, 300,300, "red" )+
 plotPoint(xMax, f{}xMax, "blue" )
@@ -121,6 +132,12 @@ The minimum of \(f\) is achieved for \(x\) equal to:
 xMin- increaseInterval_1==0;
 \)
 </textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+EnsureExpressionDependsOnlyOn(xMin,none)
+\)
+</span>
+
 <span class="calculatorCommentBeforeSubmission">
 \(
 %PlotShowJavascriptOnly
@@ -150,6 +167,12 @@ userConcaveUp==concaveUpIntervals
 </textarea>
 <span class="calculatorCommentBeforeSubmission">
 \(
+EnsureExpressionDependsOnlyOn(userConcaveUp,\infty)
+\)
+</span>
+
+<span class="calculatorCommentBeforeSubmission">
+\(
 %PlotShowJavascriptOnly
 plot2D(f{}x, -6,6, 300,300, "red" )+
 plot2D(f{}x, (userConcaveUp_1)_1, (userConcaveUp_1)_2, 300,300, "blue" )+
@@ -169,6 +192,12 @@ For example, type 1,2,3 to enter those three values as the \(x\)-coordinates of 
 (Sort(userInflectionPoints))==inflectionPoints;
 \)
 </textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+EnsureExpressionDependsOnlyOn(userInflectionPoints,none)
+\)
+</span>
+
 
 <span class="calculatorAnswerOnGiveUp">
 inflectionPoints

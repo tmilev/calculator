@@ -84,7 +84,7 @@ EnsureExpressionDependsOnlyOn(userIncreaseInterval,none)
 \(
 %PlotShowJavascriptOnly
 plot2D(f{}x, -6,6, 300,300, "red" )+
-plot2D(f{}x, userIncreaseInterval_1, userIncreaseInterval_2, 300,300, "blue" )
+plot2D(f{}x, userIncreaseInterval_1, userIncreaseInterval_2, 300,300, "blue",5 )
 ;
 if ( (userIncreaseInterval_1)>(userIncreaseInterval_2), "The LEFT ENDPOINT of your interval is larger than the RIGHT.", "Interval highlighted above.");
 \)
@@ -175,8 +175,8 @@ EnsureExpressionDependsOnlyOn(userConcaveUp,\infty)
 \(
 %PlotShowJavascriptOnly
 plot2D(f{}x, -6,6, 300,300, "red" )+
-plot2D(f{}x, (userConcaveUp_1)_1, (userConcaveUp_1)_2, 300,300, "blue" )+
-plot2D(f{}x, (userConcaveUp_2)_1,6, 300,300, "blue" )
+plot2D(f{}x, (userConcaveUp_1)_1, (userConcaveUp_1)_2, 300,300, "blue",5 )+
+plot2D(f{}x, (userConcaveUp_2)_1,6, 300,300, "blue" ,5)
 ;
 \)
 </span>

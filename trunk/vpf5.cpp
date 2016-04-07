@@ -251,8 +251,8 @@ std::string LittelmannPath::GenerateOrbitAndAnimate(GlobalVariables& theGlobalVa
     currentOps.theBuffer=tempDV.theBuffer;
     for (int j=0; j<currentPath.Waypoints.size; j++)
     { if (j!=currentPath.Waypoints.size-1)
-      { currentOps.drawLineBetweenTwoVectorsBufferRational(currentPath.Waypoints[j], currentPath.Waypoints[j+1], DrawingVariables::PenStyleNormal, 0);
-        tempDV2.theBuffer.drawLineBetweenTwoVectorsBufferRational(currentPath.Waypoints[j], currentPath.Waypoints[j+1], DrawingVariables::PenStyleNormal, 0);
+      { currentOps.drawLineBetweenTwoVectorsBufferRational(currentPath.Waypoints[j], currentPath.Waypoints[j+1], DrawingVariables::PenStyleNormal, 0, 1);
+        tempDV2.theBuffer.drawLineBetweenTwoVectorsBufferRational(currentPath.Waypoints[j], currentPath.Waypoints[j+1], DrawingVariables::PenStyleNormal, 0, 1);
       }
       currentOps.drawCircleAtVectorBufferRational(currentPath.Waypoints[j], 2, DrawingVariables::PenStyleNormal, 0);
       tempDV2.theBuffer.drawCircleAtVectorBufferRational(currentPath.Waypoints[j], 4, DrawingVariables::PenStyleNormal, 0);

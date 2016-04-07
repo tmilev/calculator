@@ -783,13 +783,14 @@ void Plot::operator+=(const PlotObject& other)
 
 void PlotObject::CreatePlotFunction
 (const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound,
- double inputYmin, double inputYmax, Vectors<double>* inputPoints, int* inputColorRGB)
+ double inputYmin, double inputYmax, Vectors<double>* inputPoints, int* inputColorRGB, double inputlineWidth)
 { MacroRegisterFunctionWithName("PlotObject::Create");
   this->xLow=inputLowerBound;
   this->xHigh=inputUpperBound;
   this->yLow=inputYmin;
   this->yHigh=inputYmax;
   this->thePlotElement=(inputE);
+  this->lineWidth=lineWidth;
   if (inputColorRGB!=0)
     this->colorRGB=*inputColorRGB;
   else
@@ -803,14 +804,16 @@ void PlotObject::CreatePlotFunction
   if (inputPoints!=0)
     this->thePoints=*inputPoints;
   this->thePlotType="plotFunction";
+  this->lineWidth=inputlineWidth;
 }
 
 void Plot::AddFunctionPlotOnTop
 (const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound,
- double inputYmin, double inputYmax, Vectors<double>* inputPoints, int* colorRGB)
+ double inputYmin, double inputYmax, Vectors<double>* inputPoints, int* colorRGB, double penWidth)
 { PlotObject thePlot;
   thePlot.CreatePlotFunction
-  (inputE, inputPostfixNotation, inputLowerBound, inputUpperBound, inputYmin, inputYmax, inputPoints, colorRGB);
+  (inputE, inputPostfixNotation, inputLowerBound, inputUpperBound,
+   inputYmin, inputYmax, inputPoints, colorRGB, penWidth);
   this->thePlots.AddOnTop(thePlot);
 }
 
@@ -821,7 +824,11 @@ bool PlotObject::operator==(const PlotObject& other)const
   this->yLow==other.yLow &&
   this->yHigh==other.yHigh &&
   this->thePlotElement==other.thePlotElement &&
-  this->thePlotType==other.thePlotType;
+  this->thePlotType==other.thePlotType &&
+  this->thePoints==other.thePoints &&
+  this->theLines==other.theLines &&
+  this->lineWidth==other.lineWidth
+  ;
 }
 
 PlotObject::PlotObject()
@@ -830,6 +837,7 @@ PlotObject::PlotObject()
   this->yLow=(0);
   this->yHigh=(0);
   this->colorRGB=0;
+  this->lineWidth=1;
 }
 
 void PlotObject::ComputeYbounds()
@@ -946,20 +954,20 @@ std::string Plot::GetPlotHtml()
   v2[0]=this->theUpperBoundAxes+0.1;
   v2[1]=0;
   theDVs.drawLineBetweenTwoVectorsBufferDouble
-  (v1, v2, ((uint32_t) theDVs.PenStyleNormal), ((int) CGI::RedGreenBlue(0,0,0)));
+  (v1, v2, ((uint32_t) theDVs.PenStyleNormal), ((int) CGI::RedGreenBlue(0,0,0)), 1);
   v1[0]=0;
   v1[1]=this->lowBoundY-0.1;
   v2[0]=0;
   v2[1]=this->highBoundY+0.1;
-  theDVs.drawLineBetweenTwoVectorsBufferDouble(v1, v2, theDVs.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+  theDVs.drawLineBetweenTwoVectorsBufferDouble(v1, v2, theDVs.PenStyleNormal, CGI::RedGreenBlue(0,0,0), 1);
   v1[0]=1;
   v1[1]=-0.1;
   v2[0]=1;
   v2[1]=0.1;
-  theDVs.drawLineBetweenTwoVectorsBufferDouble(v1, v2, theDVs.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+  theDVs.drawLineBetweenTwoVectorsBufferDouble(v1, v2, theDVs.PenStyleNormal, CGI::RedGreenBlue(0,0,0), 1);
   v1.SwapTwoIndices(0,1);
   v2.SwapTwoIndices(0,1);
-  theDVs.drawLineBetweenTwoVectorsBufferDouble(v1, v2, theDVs.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+  theDVs.drawLineBetweenTwoVectorsBufferDouble(v1, v2, theDVs.PenStyleNormal, CGI::RedGreenBlue(0,0,0), 1);
   v1[0]=1;
   v1[1]=-0.2;
   theDVs.drawTextAtVectorBufferDouble(v1, (std::string)"1", CGI::RedGreenBlue(0,0,0), theDVs.TextStyleNormal,0);
@@ -981,7 +989,7 @@ std::string Plot::GetPlotHtml()
           continue;
         theDVs.drawLineBetweenTwoVectorsBufferDouble
         (thePlots[i].thePoints[j-1], thePlots[i].thePoints[j], theDVs.PenStyleNormal,
-         thePlots[i].colorRGB);
+         thePlots[i].colorRGB, thePlots[i].lineWidth);
       }
   for (int i=0; i<this->thePlots.size; i++)
     for (int j=0; j<this->thePlots[i].theLines.size; j++)
@@ -990,7 +998,7 @@ std::string Plot::GetPlotHtml()
         continue;
       theDVs.drawLineBetweenTwoVectorsBufferDouble
       (this->thePlots[i].theLines[j][0], this->thePlots[i].theLines[j][1],
-       theDVs.PenStyleNormal, this->thePlots[i].colorRGB);
+       theDVs.PenStyleNormal, this->thePlots[i].colorRGB, thePlots[i].lineWidth);
       //stOutput << "Drew line b-n: " <<this->thePlots[i].theLines[j][0] << " and " << this->thePlots[i].theLines[j][1];
     }
   std::stringstream resultStream;

@@ -1883,6 +1883,39 @@ bool Expression::operator==(const Expression& other)const
   return this->theData==other.theData && this->children==other.children;
 }
 
+bool Expression::IsEqualToMathematically(const Expression& other)const
+{ MacroRegisterFunctionWithName("Expression::IsEqualToMathematically");
+  //stOutput << "Calling Expression::IsEqualToMathematically with input: " << this->ToString() << " and " << other.ToString();
+  if (this->owner==0 && other.owner==0)
+    return this->theData==other.theData;
+  if (this->owner==0)
+    return false;
+  if (*this==other)
+    return true;
+  Rational theRat;
+  AlgebraicNumber theAlgebraic;
+  if (this->IsOfType<Rational>(&theRat) && other.IsOfType<AlgebraicNumber>(&theAlgebraic))
+    return theAlgebraic==theRat;
+  if (other.IsOfType<Rational>(&theRat) && this->IsOfType<AlgebraicNumber>(&theAlgebraic))
+    return theAlgebraic==theRat;
+  double leftD=-1, rightD=-1;
+  if (this->EvaluatesToDouble(&leftD) && other.EvaluatesToDouble(&rightD) )
+    return leftD==rightD;
+  Expression differenceE = *this;
+  differenceE-=other;
+  Expression differenceEsimplified;
+  if (!this->owner->EvaluateExpression(*this->owner, differenceE, differenceEsimplified))
+    return false;
+  if (differenceEsimplified.IsEqualToZero())
+    return true;
+  if (this->size()!=other.size())
+    return false;
+  for (int i=0; i<this->size(); i++)
+    if (! (*this)[i].IsEqualToMathematically(other[i]))
+      return false;
+  return true;
+}
+
 SemisimpleLieAlgebra* Expression::GetAmbientSSAlgebraNonConstUseWithCaution()const
 { this->CheckInitialization();
   Expression myContext=this->GetContext();

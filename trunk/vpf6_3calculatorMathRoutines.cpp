@@ -1719,12 +1719,7 @@ bool CalculatorFunctionsGeneral::outerEqualEqual(Calculator& theCommands, const 
     return false;
   if (left==right)
     return output.AssignValue(1, theCommands);
-  Expression differenceE = left;
-  differenceE-=right;
-  Expression differenceEsimplified;
-  if (!theCommands.EvaluateExpression(theCommands, differenceE, differenceEsimplified))
-    return false;
-  if (differenceEsimplified.IsEqualToZero())
+  if (left.IsEqualToMathematically(right))
     return output.AssignValue(1, theCommands);
   else
     return output.AssignValue(0, theCommands);

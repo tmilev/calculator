@@ -236,6 +236,7 @@ class Expression
   bool IsContext()const;
   bool NeedsParenthesisForBaseOfExponent()const;
   bool NeedsParenthesisForMultiplication()const;
+  bool NeedsParenthesisForAddition()const;
   bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost()const;
 
   int GetExpressionTreeSize()const;
@@ -470,6 +471,7 @@ bool EvaluatesToDoubleUnderSubstitutions
   Expression operator/(const Expression& other);
   void operator*=(const Expression& other);
 //  Rational GetConstantTerm() const;
+  bool IsEqualToMathematically(const Expression& other)const;
   bool operator==(int other)const;
   bool operator==(const Expression& other)const;
   bool operator==(const std::string& other)const;

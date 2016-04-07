@@ -2865,8 +2865,12 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationOuterHandler
   ("==", CalculatorFunctionsGeneral::outerEqualEqual, "",
    "If either the left or the right argument contains a bound variable does nothing. \
-    Else evaluates to 1 if the left argument equals the right argument.",
-   "%NumberColors\n x==y;\nx==1;\nIsEqualToX{} {{a}}=a==x;\nIsEqualToX{}y;\nIsEqualToX{}x;\
+    Else evaluates to 1 if the left argument equals mathematically the right argument.",
+   "%NumberColors\n  \
+   A=(a=3, b=4);\n\
+   B=(a=(sqrt(3))^2, b=4 );\n\
+   A==B;\n\
+   x==y;\nx==1;\nIsEqualToX{} {{a}}=a==x;\nIsEqualToX{}y;\nIsEqualToX{}x;\
    \nIsEqualToX{}1;\nx=1;\nIsEqualToX{}1; z= \\sqrt{}1; z==1", true);
   this->AddOperationOuterHandler
   ("last", CalculatorFunctionsGeneral::innerLastElement, "",

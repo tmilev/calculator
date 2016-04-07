@@ -19,7 +19,6 @@ f{}x;
 <span class="calculatorHidden">
 \(
 TurnOnRules("DistributeMultiplication");
-theCFs=CoefficientsPowersOf(x, CoefficientOf(e^{x},d/dx f{}x));
 \)</span>
 over the closed interval \(\displaystyle x\in[\)
 <span class="calculator"> -5</span>,
@@ -40,7 +39,7 @@ SeparatorBetweenSpans;
 The value of \(x\) for which \(f\) attains its maximum is: \(x_{max}=\) 
 <textarea class="calculatorAnswer" id="AlgebraAnswerMax">
 \(
-AlgebraAnswerMax== (-theCFs_2-sqrt((theCFs_2)^2-4(theCFs_1) (theCFs_3)))/(2theCFs_3) ;
+AlgebraAnswerMax== (solveFor{}(x, CoefficientOf(e^{x},d/dx f{}x)))_1 ;
 \)
 </textarea>
 <span class="calculatorCommentBeforeSubmission">
@@ -60,14 +59,14 @@ plotPoint(AlgebraAnswerMax, f{}AlgebraAnswerMax, "blue");
 </span>
 
 <span class="calculatorAnswerOnGiveUp">
-(-theCFs_2-sqrt((theCFs_2)^2-4(theCFs_1) (theCFs_3)))/(2theCFs_3) 
+(solveFor(x, CoefficientOf(e^{x},d/dx f{}x)))_1
 </span>
 
 <br>
 The value of \(x\) for which \(f\) attains its minimum is: 
 \(x_{min}=\) <textarea class="calculatorAnswer" id="AlgebraAnswerMin">
 \(
-(-theCFs_2+sqrt((theCFs_2)^2-4(theCFs_1) (theCFs_3)))/(2theCFs_3) ==AlgebraAnswerMin;
+(solveFor(x, CoefficientOf(e^{x},d/dx f{}x)))_2 ==AlgebraAnswerMin;
 \)
 </textarea>
 <span class="calculatorCommentBeforeSubmission">
@@ -84,5 +83,5 @@ plot2D(f{}x,-5, c+0.03, 300,300, "red" )
 </span>
 
 <span class="calculatorAnswerOnGiveUp">
-(-theCFs_2+sqrt((theCFs_2)^2-4(theCFs_1) (theCFs_3)))/(2theCFs_3)
+(solveFor(x, CoefficientOf(e^{x},d/dx f{}x)))_2
 </span>

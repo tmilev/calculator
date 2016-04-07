@@ -7,7 +7,8 @@ a=selectAtRandom(-2,2);
 b=1;
 c=randomInteger(-3, 3);
 %UseLnInsteadOfLog
-f{}{{x}}=( x-a/b )/(MakeExpression( Polynomial (( x-a/b )^2)-1)) +3( x-a/b)+c;
+den{}{{x}}=MakeExpression( Polynomial (( x-a/b )^2)-1);
+f{}{{x}}= ( x-a/b )/(den{}x) +3( x-a/b)+c;
 fd= (d/dx f{}x);
 sd= (d/dx (d/dx(f{}x)));
 TurnOffRules("DistributeMultiplication");
@@ -47,7 +48,7 @@ fd
 </span>=
 <span class="calculatorShowToUserOnly">
 \(\displaystyle
-Product{}(fdNumFactors )/(Denominator(fd))
+Product{}(fdNumFactors )/(Denominator{}(fd))
 \)
 </span>
 and the second derivative is <br> \(f''(x)=\)
@@ -74,9 +75,31 @@ If there is more than one, separate them by commas, in the format:
 x=1, x=2,x=5
 <textarea class="calculatorAnswer" id="userVerticalAsymptotes">
 \(
-u
+(
+ userVerticalAsymptotes==  
+ (
+  x=(solveFor(x, den{}x))_1,
+  x=(solveFor(x, den{}x))_2
+ )  
+)
+or
+(
+userVerticalAsymptotes== 
+ (
+  x=(solveFor(x, den{}x))_2,
+  x=(solveFor(x, den{}x))_1
+ )  
+);
 \)
 </textarea>
+<span class="calculatorAnswerOnGiveUp">
+(x=(solveFor(x, den{}x))_1,x=(solveFor(x, den{}x))_2)
+</span>
+<span class="calculatorCommentBeforeSubmission">
+\(
+EnsureExpressionDependsOnlyOn(userVerticalAsymptotes,x)
+\)
+</span>
 
 <hr>
 Find the interval(s) on which \(f\) is increasing. 
@@ -109,6 +132,11 @@ plot2D(f{}x, (userIncreaseInterval_3)_1, (userIncreaseInterval_3)_2, 300,300, "b
 );
 \)
 </span>
+<span class="calculatorCommentBeforeSubmission">
+\(
+EnsureExpressionDependsOnlyOn(userIncreaseInterval,none)
+\)
+</span>
 <span class="calculatorAnswerOnGiveUp">
 increaseInterval
 </span>
@@ -127,6 +155,11 @@ The local maxima of \(f\) are achieved for the following values of \(x\):
 ((fdNumZeroes_1, fdNumZeroes_3)==xMax ) or ((fdNumZeroes_3, fdNumZeroes_1)==xMax )  
 \)
 </textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+EnsureExpressionDependsOnlyOn(userIncreaseInterval,none)
+\)
+</span>
 Separate the different x-coordinates of the local maxima by commas, for example 1+sqrt(2),2+sqrt(3).
 <span class="calculatorCommentBeforeSubmission">
 
@@ -162,6 +195,11 @@ xMin- increaseInterval_1==0;
 </textarea>
 <span class="calculatorCommentBeforeSubmission">
 \(
+EnsureExpressionDependsOnlyOn(userIncreaseInterval,none)
+\)
+</span>
+<span class="calculatorCommentBeforeSubmission">
+\(
 %PlotShowJavascriptOnly
 plot2D(f{}x, -6,6, 300,300, "red" )+
 plotPoint(xMin, f{}xMin, "blue" )
@@ -189,6 +227,11 @@ userConcaveUp==concaveUpIntervals
 </textarea>
 <span class="calculatorCommentBeforeSubmission">
 \(
+EnsureExpressionDependsOnlyOn(userIncreaseInterval,none)
+\)
+</span>
+<span class="calculatorCommentBeforeSubmission">
+\(
 %PlotShowJavascriptOnly
 plot2D(f{}x, -6,6, 300,300, "red" )+
 plot2D(f{}x, (userConcaveUp_1)_1, (userConcaveUp_1)_2, 300,300, "blue" )+
@@ -208,6 +251,11 @@ For example, type 1,2,3 to enter those three values as the \(x\)-coordinates of 
 (Sort(userInflectionPoints))==inflectionPoints;
 \)
 </textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+EnsureExpressionDependsOnlyOn(userIncreaseInterval,none)
+\)
+</span>
 
 <span class="calculatorAnswerOnGiveUp">
 inflectionPoints

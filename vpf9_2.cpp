@@ -129,22 +129,25 @@ bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
   return true;
 }
 
-void DrawOperations::drawLineBetweenTwoVectorsBufferRational(const Vector<Rational>& vector1, const Vector<Rational>& vector2, uint32_t thePenStyle, int ColorIndex)
+void DrawOperations::drawLineBetweenTwoVectorsBufferRational
+(const Vector<Rational>& vector1, const Vector<Rational>& vector2, uint32_t thePenStyle, int ColorIndex, double lineWidth)
 { this->TypeNthDrawOperation.AddOnTop(this->typeDrawLineBetweenTwoVectors);
   this->IndexNthDrawOperation.AddOnTop(this->theDrawLineBetweenTwoRootsOperations.size);
   this->theDrawLineBetweenTwoRootsOperations.AddObjectOnTopCreateNew();
-  this->theDrawLineBetweenTwoRootsOperations.LastObject()->init(vector1, vector2, thePenStyle, ColorIndex);
+  this->theDrawLineBetweenTwoRootsOperations.LastObject()->init(vector1, vector2, thePenStyle, ColorIndex, lineWidth);
 }
 
-void DrawOperations::drawLineBetweenTwoVectorsBufferDouble(const Vector<double>& vector1, const Vector<double>& vector2, uint32_t thePenStyle, int ColorIndex)
+void DrawOperations::drawLineBetweenTwoVectorsBufferDouble
+(const Vector<double>& vector1, const Vector<double>& vector2, uint32_t thePenStyle, int ColorIndex,
+ double lineWidth)
 { this->TypeNthDrawOperation.AddOnTop(this->typeDrawLineBetweenTwoVectors);
   this->IndexNthDrawOperation.AddOnTop(this->theDrawLineBetweenTwoRootsOperations.size);
   this->theDrawLineBetweenTwoRootsOperations.AddObjectOnTopCreateNew();
-  this->theDrawLineBetweenTwoRootsOperations.LastObject()->init(vector1, vector2, thePenStyle, ColorIndex);
+  this->theDrawLineBetweenTwoRootsOperations.LastObject()->init(vector1, vector2, thePenStyle, ColorIndex, lineWidth);
 }
 
 void DrawLineBetweenTwoRootsOperation::init
-(const Vector<Rational>& input1, const Vector<Rational>& input2, uint32_t PenStyle, int colorIndex)
+(const Vector<Rational>& input1, const Vector<Rational>& input2, uint32_t PenStyle, int colorIndex, double inputLineWidth)
 { if(input1.size!=input2.size)
     crash << crash;
   int theDimension=input1.size;
@@ -156,10 +159,11 @@ void DrawLineBetweenTwoRootsOperation::init
   }
   this->thePenStyle=PenStyle;
   this->ColorIndex=colorIndex;
+  this->lineWidth=inputLineWidth;
 }
 
 void DrawLineBetweenTwoRootsOperation::init
-(const Vector<double>& input1, const Vector<double>& input2, uint32_t PenStyle, int colorIndex)
+(const Vector<double>& input1, const Vector<double>& input2, uint32_t PenStyle, int colorIndex, double inputLineWidth)
 { if(input1.size!=input2.size)
     crash << crash;
   int theDimension=input1.size;
@@ -171,6 +175,7 @@ void DrawLineBetweenTwoRootsOperation::init
   }
   this->thePenStyle=PenStyle;
   this->ColorIndex=colorIndex;
+  this->lineWidth=inputLineWidth;
 }
 
 void DrawOperations::drawCircleAtVectorBufferRational
@@ -203,15 +208,17 @@ void DrawOperations::drawTextAtVectorBufferDouble(const Vector<double>& input, c
   this->theDrawTextAtVectorOperations.LastObject()->init(input, inputText, ColorIndex, theFontSize, theTextStyle);
 }
 
-void DrawingVariables::drawLineDirectly(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex)
-{ this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex);
+void DrawingVariables::drawLineDirectly
+(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, double lineWidth)
+{ this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex, lineWidth);
 }
 
-void DrawOperations::drawLineBuffer(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex)
+void DrawOperations::drawLineBuffer
+(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, double lineWidth)
 { this->TypeNthDrawOperation.AddOnTop(this->typeDrawLine);
   this->IndexNthDrawOperation.AddOnTop(this->theDrawLineOperations.size);
   this->theDrawLineOperations.AddObjectOnTopCreateNew();
-  this->theDrawLineOperations.LastObject()->init(X1, Y1, X2, Y2, thePenStyle, ColorIndex);
+  this->theDrawLineOperations.LastObject()->init(X1, Y1, X2, Y2, thePenStyle, ColorIndex, lineWidth);
 }
 
 void DrawOperations::drawTextBuffer(double X1, double Y1, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle)
@@ -320,8 +327,9 @@ int DrawingVariables::GetActualTextStyleFromFlagsAnd(int inputTextStyle)
   return this->TextStyleNormal;
 }
 
-void DrawingVariables::drawLineBuffer(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex)
-{ this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex);
+void DrawingVariables::drawLineBuffer
+(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, double lineWidth)
+{ this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex, lineWidth);
 }
 
 void DrawingVariables::drawTextBuffer(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile)

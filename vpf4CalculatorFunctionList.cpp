@@ -1111,11 +1111,8 @@ D-B;\
    y=f(x). The the second and third argument give the upper and \
    lower bounds of x. The fourth and fifth argument are optional, specify the width \
    and height of the image. The sixth argument is optional and specifies color.\
+   The seventh argument is optional and specifies line width. \
    Plots may be added together- adding plots superimposes the plots. \
-   Trigonometry functions must be entered in the usual calculator format, i.e., in the form \
-   sin{}x, cos{}x, etc. or in the form \\sin{}x, \\cos{}x, etc. (both forms are fine).\
-   We recall that in the calculator, {}  stands for function application (the symbols {} were\
-   chosen as they produce invisible LaTeX output).\
    ",
    "plot2D{}(\\sin{}x+cos{}x, 0, 5, 200, 200, \"blue\")", true, false,
    "CalculatorFunctionsGeneral::innerPlot2D", "plot2D")

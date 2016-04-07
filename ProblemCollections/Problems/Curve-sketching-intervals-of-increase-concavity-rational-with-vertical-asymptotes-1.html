@@ -15,19 +15,17 @@ sdNumFactors= FactorOneVarPolyOverRationals{}( Numerator{}(sd));
 fdNumFactors= FactorOneVarPolyOverRationals{}( Numerator{}(fd));
 fdFactorsFirstCF= CoefficientsPowersOf(x, fdNumFactors_1) ;
 fdFactorsSecondCF= CoefficientsPowersOf(x, fdNumFactors_2) ;
-fdNumZeroes=
-(
-
-)
+fdNumZeroes=Sort( solveFor{}(x, fdNumFactors_1) \cup solveFor{}(x, fdNumFactors_2));
+increaseInterval=((-\infty, fdNumZeroes_1),(fdNumZeroes_2, fdNumZeroes_3), (fdNumZeroes_4, \infty))
 \)</span>
 
 <span class="calculatorShowToUserOnly">
 \(
-plot2D(f{}x,-10, -1+a/b, 300,300, "red" )
+plot2D(f{}x,-12, -1+a/b, 300,300, "red" )
 +
 plot2D(f{}x, -1+a/b, 1+a/b , 300,300, "red" )
 +
-plot2D(f{}x,1+a/b, 10, 300,300, "red" )
+plot2D(f{}x,1+a/b, 12, 300,300, "red" )
 +
 plotViewRectangle((-12,-12),(12,12))
 \) 
@@ -69,6 +67,16 @@ Product{}(sdNumFactors )/(Denominator(sd))
 SeparatorBetweenSpans;
 \)
 </span>
+<hr>
+Find the vertical asymptotes of \(f\). 
+Enter your vertical asymptotes in the form x=1. 
+If there is more than one, separate them by commas, in the format:
+x=1, x=2,x=5
+<textarea class="calculatorAnswer" id="userVerticalAsymptotes">
+\(
+u
+\)
+</textarea>
 
 <hr>
 Find the interval(s) on which \(f\) is increasing. 
@@ -81,10 +89,24 @@ userIncreaseInterval== increaseInterval;
 <span class="calculatorCommentBeforeSubmission">
 \(
 %PlotShowJavascriptOnly
-plot2D(f{}x, -6,6, 300,300, "red" )+
-plot2D(f{}x, userIncreaseInterval_1, userIncreaseInterval_2, 300,300, "blue" )
-;
-if ( (userIncreaseInterval_1)>(userIncreaseInterval_2), "The LEFT ENDPOINT of your interval is larger than the RIGHT.", "Interval highlighted above.");
+if (Length(userIncreaseInterval)==3, 
+plot2D(f{}x,-12, -1+a/b, 300,300, "red" )
++
+plot2D(f{}x, -1+a/b, 1+a/b , 300,300, "red" )
++
+plot2D(f{}x,1+a/b, 12, 300,300, "red" )
++
+plotViewRectangle((-12,-12),(12,12))
++
+(\infty=12;
+plot2D(f{}x, (userIncreaseInterval_1)_1, (userIncreaseInterval_1)_2, 300,300, "blue", 4)
++
+plot2D(f{}x, (userIncreaseInterval_2)_1, (userIncreaseInterval_2)_2, 300,300, "blue", 4)
++
+plot2D(f{}x, (userIncreaseInterval_3)_1, (userIncreaseInterval_3)_2, 300,300, "blue", 4)
+)_2
+, "Did not get the expected number of intervals."
+);
 \)
 </span>
 <span class="calculatorAnswerOnGiveUp">
@@ -99,22 +121,36 @@ For a single interval type for example (2,3).
 The left endpoint of each interval should be smaller than the right endpoint. <span style="color:red"> Please do not give numerical approximations for your 
 answer.</span> Instead, use square roots to give an exact answer. To write \(\sqrt{5}\) you need to type sqrt(5) or \sqrt(5). 
 <hr>
-The maximum of \(f\) is achieved for \(x\) equal to:
+The local maxima of \(f\) are achieved for the following values of \(x\):
 <textarea class="calculatorAnswer" id="xMax">
 \(
-xMax- increaseInterval_2==0;
+((fdNumZeroes_1, fdNumZeroes_3)==xMax ) or ((fdNumZeroes_3, fdNumZeroes_1)==xMax )  
 \)
 </textarea>
+Separate the different x-coordinates of the local maxima by commas, for example 1+sqrt(2),2+sqrt(3).
 <span class="calculatorCommentBeforeSubmission">
-\(
+
 %PlotShowJavascriptOnly
-plot2D(f{}x, -6,6, 300,300, "red" )+
-plotPoint(xMax, f{}xMax, "blue" )
-;
+if (Length(xMax)==2, 
+plot2D(f{}x,-12, -1+a/b, 300,300, "red" )
++
+plot2D(f{}x, -1+a/b, 1+a/b , 300,300, "red" )
++
+plot2D(f{}x,1+a/b, 12, 300,300, "red" )
++
+plotViewRectangle((-12,-12),(12,12))
++
+plotPoint(xMax_1, f{}xMax_1, "blue" )
++
+plotPoint(xMax_2, f{}xMax_2, "blue" )
+, "<br><b>Did not get the expected number of x coordinates.</b>"
+);
+(xMax_1, f{}xMax_1);
+(xMax_2, f{}xMax_2);
 \)
 </span>
 <span class="calculatorAnswerOnGiveUp">
-increaseInterval_2
+(fdNumZeroes_1, fdNumZeroes_3)
 </span>
 
 <hr>

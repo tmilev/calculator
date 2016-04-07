@@ -790,20 +790,24 @@ void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& TDV, int theDimen
   { tempRoot.MakeEi(theDimension, i);
     std::string tempS;
     tempS=tempRoot.ToString();
-    TDV.drawLineBetweenTwoVectorsBufferRational(zeroRoot, tempRoot, TDV.PenStyleNormal, CGI::RedGreenBlue(210, 210, 210));
-    TDV.drawTextAtVectorBufferRational(tempRoot, tempS, CGI::RedGreenBlue(100, 200, 100), TDV.TextStyleNormal, LatexOutFile);
+    TDV.drawLineBetweenTwoVectorsBufferRational
+    (zeroRoot, tempRoot, TDV.PenStyleNormal, CGI::RedGreenBlue(210, 210, 210), 1);
+    TDV.drawTextAtVectorBufferRational
+    (tempRoot, tempS, CGI::RedGreenBlue(100, 200, 100), TDV.TextStyleNormal, LatexOutFile);
     TDV.drawCircleAtVectorBufferRational(tempRoot, 2, TDV.PenStyleNormal, CGI::RedGreenBlue(100, 200, 100) );
   }
   TDV.theBuffer.BasisToDrawCirclesAt.MakeEiBasis(theDimension, 1, 0);
 }
 
-void DrawingVariables::drawLineBufferOld(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, std::fstream* LatexOutFile)
-{ this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex);
+void DrawingVariables::drawLineBufferOld
+(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, std::fstream* LatexOutFile)
+{ this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex, 1);
   if (LatexOutFile!=0)
     LaTeXProcedures::drawline(X1, Y1, X2, Y2, thePenStyle, ColorIndex, *LatexOutFile, *this);
 }
 
-void DrawingVariables::drawTextAtVectorBufferRational(const Vector<Rational>& point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile)
+void DrawingVariables::drawTextAtVectorBufferRational
+(const Vector<Rational>& point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile)
 { this->theBuffer.drawTextAtVectorBufferRational(point, inputText, textColor, this->fontSizeNormal, theTextStyle);
 }
 
@@ -5338,7 +5342,7 @@ void WeylGroupData::DrawRootSystem
     tempZero.MakeZero(2);
     tempRoot.MakeEi(2, 0);
     for (int i=0; i<2; i++)
-    { output.drawLineBetweenTwoVectorsBufferRational(tempZero, tempRoot, DrawingVariables::PenStyleNormal, color);
+    { output.drawLineBetweenTwoVectorsBufferRational(tempZero, tempRoot, DrawingVariables::PenStyleNormal, color, 1);
       output.drawCircleAtVectorBufferRational(tempRoot, 2, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,255));
       tempRoot.Minus();
     }
@@ -5412,13 +5416,14 @@ void WeylGroupData::DrawRootSystem
   output.centerY[0]=300;
   for (int i=0; i<RootSystemSorted.size; i++)
   { int color=CGI::RedGreenBlue(0, 255, 0);
-    output.drawLineBetweenTwoVectorsBufferRational(ZeroRoot, RootSystemSorted[i], DrawingVariables::PenStyleNormal, color);
+    output.drawLineBetweenTwoVectorsBufferRational(ZeroRoot, RootSystemSorted[i], DrawingVariables::PenStyleNormal, color, 1);
     output.drawCircleAtVectorBufferRational(RootSystemSorted[i], 2, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,255));
     for (int j=i+1; j<RootSystemSorted.size; j++)
     { differenceRoot=RootSystemSorted[i]-RootSystemSorted[j];
       tempRat=this->RootScalarCartanRoot(differenceRoot, differenceRoot);
       if (minLength== tempRat)
-        output.drawLineBetweenTwoVectorsBufferRational(RootSystemSorted[i], RootSystemSorted[j], DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0, 0, 255));
+        output.drawLineBetweenTwoVectorsBufferRational
+        (RootSystemSorted[i], RootSystemSorted[j], DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0, 0, 255), 1);
     }
   }
   Vector<Rational> tempRootRat;
@@ -5826,7 +5831,8 @@ bool SubgroupWeylGroupOLD::DrawContour
     { tempRoot=theOrbit[i];
       theWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[j], tempRoot, false, tempRoot);
       if (theOrbit.AddOnTopNoRepetition(tempRoot))
-        theDV.drawLineBetweenTwoVectorsBufferRational(theOrbit[i], tempRoot, DrawingVariables::PenStyleNormal, theColor);
+        theDV.drawLineBetweenTwoVectorsBufferRational
+        (theOrbit[i], tempRoot, DrawingVariables::PenStyleNormal, theColor, 1);
       if (theOrbit.size>UpperBoundVertices)
         return false;
     }
@@ -8270,7 +8276,7 @@ bool Cone::DrawMeLastCoordAffine
                 (iScaledVertex, jScaledVertex, theDrawingVariables.PenStyleNormal, CGI::RedGreenBlue(200,200,200));
               }*/
               theDrawingVariables.drawLineBetweenTwoVectorsBufferRational
-              (VerticesScaled[i], VerticesScaled[j], theDrawingVariables.PenStyleNormal, ChamberWallColor);
+              (VerticesScaled[i], VerticesScaled[j], theDrawingVariables.PenStyleNormal, ChamberWallColor, 1);
             }
   return foundBadVertex;
 }
@@ -8319,12 +8325,12 @@ bool Cone::DrawMeProjective
     for (int i=0; i<this->GetDim(); i++)
     { tempRoot.MakeEi(this->GetDim(), i);
       theDrawingVariables.drawLineBetweenTwoVectorsBufferRational
-      (ZeroRoot+coordCenter, tempRoot+coordCenter, theDrawingVariables.PenStyleNormal, CGI::RedGreenBlue(205,205,205));
+      (ZeroRoot+coordCenter, tempRoot+coordCenter, theDrawingVariables.PenStyleNormal, CGI::RedGreenBlue(205,205,205), 1);
     }
   }
   for (int i=0; i<this->Vertices.size; i++)
     theDrawingVariables.drawLineBetweenTwoVectorsBufferRational
-    (ZeroRoot+coordCenter, VerticesScaled[i]*10000+coordCenter, theDrawingVariables.PenStyleNormal, CGI::RedGreenBlue(180,180,180));
+    (ZeroRoot+coordCenter, VerticesScaled[i]*10000+coordCenter, theDrawingVariables.PenStyleNormal, CGI::RedGreenBlue(180,180,180), 1);
   for (int k=0; k<this->Normals.size; k++)
     for (int i=0; i<this->Vertices.size; i++)
       if (this->Normals[k].ScalarEuclidean(this->Vertices[i]).IsEqualToZero())
@@ -8332,7 +8338,7 @@ bool Cone::DrawMeProjective
           if(this->Normals[k].ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
             if (this->IsAnHonest1DEdgeAffine(i,j))
               theDrawingVariables.drawLineBetweenTwoVectorsBufferRational
-              (VerticesScaled[i]+coordCenter, VerticesScaled[j]+coordCenter, theDrawingVariables.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+              (VerticesScaled[i]+coordCenter, VerticesScaled[j]+coordCenter, theDrawingVariables.PenStyleNormal, CGI::RedGreenBlue(0,0,0),1);
   return true;
 }
 

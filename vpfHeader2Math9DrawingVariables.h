@@ -24,8 +24,16 @@ public:
   double Y2;
   int thePenStyle;
   int ColorIndex;
-  inline void init(double x1, double y1, double x2, double y2, uint32_t PenStyle, int colorIndex){ this->X1=x1; this->Y1= y1; this->X2=x2; this->Y2=y2; this->thePenStyle=PenStyle; this->ColorIndex= colorIndex;}
-  void operator=(const DrawLineOperation& other){ this->X1=other.X1; this->Y1=other.Y1; this->X2=other.X2; this->Y2=other.Y2; this->thePenStyle=other.thePenStyle; this->ColorIndex=other.ColorIndex;}
+  double lineWidth;
+  inline void init(double x1, double y1, double x2, double y2, uint32_t PenStyle, int colorIndex, double inputLineWidth)
+  { this->X1=x1;
+    this->Y1= y1;
+    this->X2=x2;
+    this->Y2=y2;
+    this->thePenStyle=PenStyle;
+    this->ColorIndex= colorIndex;
+    this->lineWidth=inputLineWidth;
+  }
 };
 
 class DrawLineBetweenTwoRootsOperation
@@ -35,9 +43,10 @@ public:
   Vector<double> v2;
   int thePenStyle;
   int ColorIndex;
+  double lineWidth;
   double precomputedX1, precomputedY1, precomputedX2, precomputedY2;
-  void init(const Vector<Rational>& input1, const Vector<Rational>& input2, uint32_t PenStyle, int colorIndex);
-  void init(const Vector<double>& input1, const Vector<double>& input2, uint32_t PenStyle, int colorIndex);
+  void init(const Vector<Rational>& input1, const Vector<Rational>& input2, uint32_t PenStyle, int colorIndex, double inputLineWidth);
+  void init(const Vector<double>& input1, const Vector<double>& input2, uint32_t PenStyle, int colorIndex, double inputLineWidth);
 };
 
 class DrawTextAtVectorOperation
@@ -221,10 +230,16 @@ public:
   //  this->draw();
   }
   void click(double x, double y);
-  void drawLineBuffer(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex);
+  void drawLineBuffer
+  (double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex,
+   double lineWidth);
   void drawTextBuffer(double X1, double Y1, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
-  void drawLineBetweenTwoVectorsBufferRational(const Vector<Rational>& vector1, const Vector<Rational>& vector2, uint32_t thePenStyle, int ColorIndex);
-  void drawLineBetweenTwoVectorsBufferDouble(const Vector<double>& vector1, const Vector<double>& vector2, uint32_t thePenStyle, int ColorIndex);
+  void drawLineBetweenTwoVectorsBufferRational
+  (const Vector<Rational>& vector1, const Vector<Rational>& vector2, uint32_t thePenStyle, int ColorIndex,
+   double lineWidth);
+  void drawLineBetweenTwoVectorsBufferDouble
+  (const Vector<double>& vector1, const Vector<double>& vector2, uint32_t thePenStyle, int ColorIndex,
+   double lineWidth);
   void drawTextAtVectorBufferRational(const Vector<Rational>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
   void drawTextAtVectorBufferDouble(const Vector<double>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
   void drawCircleAtVectorBufferRational(const Vector<Rational>& input, double radius, uint32_t thePenStyle, int theColor);
@@ -372,8 +387,12 @@ public:
   void drawString(DrawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle);
   void drawCoordSystemDirectlly(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile);
   void drawCoordSystemBuffer(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile);
-  void drawLineDirectly(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex);
-  void drawLineBuffer(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex);
+  void drawLineDirectly
+  (double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex,
+   double lineWidth);
+  void drawLineBuffer
+  (double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex,
+   double lineWidth);
   void drawTextDirectly(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile);
   void drawTextBuffer(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile);
   void drawBufferNoIniT(DrawOperations& theOps);
@@ -382,11 +401,13 @@ public:
   }
   //if the LatexOutFile is zero then the procedure defaults to the screen
   void drawLineBufferOld(double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex, std::fstream* LatexOutFile);
-  void drawLineBetweenTwoVectorsBufferRational(const Vector<Rational>& r1, const Vector<Rational>& r2, int PenStyle, int PenColor)
-  { this->theBuffer.drawLineBetweenTwoVectorsBufferRational(r1, r2, PenStyle, PenColor);
+  void drawLineBetweenTwoVectorsBufferRational
+  (const Vector<Rational>& r1, const Vector<Rational>& r2, int PenStyle, int PenColor, double lineWidth=1)
+  { this->theBuffer.drawLineBetweenTwoVectorsBufferRational(r1, r2, PenStyle, PenColor, lineWidth);
   }
-  void drawLineBetweenTwoVectorsBufferDouble(const Vector<double>& r1, const Vector<double>& r2, uint32_t PenStyle, int PenColor)
-  { this->theBuffer.drawLineBetweenTwoVectorsBufferDouble(r1, r2, PenStyle, PenColor);
+  void drawLineBetweenTwoVectorsBufferDouble
+  (const Vector<double>& r1, const Vector<double>& r2, uint32_t PenStyle, int PenColor, double lineWidth=1)
+  { this->theBuffer.drawLineBetweenTwoVectorsBufferDouble(r1, r2, PenStyle, PenColor, lineWidth);
   }
   void drawTextAtVectorBufferRational(const Vector<Rational>& point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile);
   void drawTextAtVectorBufferDouble(const Vector<double>& point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile);

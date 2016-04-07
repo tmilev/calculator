@@ -3933,6 +3933,8 @@ bool CalculatorFunctionsGeneral::innerPlotViewRectangle
   emptyPlot.theUpperBoundAxes=upperRight[0];
   emptyPlot.highBoundY=upperRight[1];
   emptyPlot.viewWindowPriority=1;
+  emptyPlot.DesiredHtmlHeightInPixels=100;
+  emptyPlot.DesiredHtmlWidthInPixels=100;
   return output.AssignValue(emptyPlot, theCommands);
 }
 
@@ -3959,6 +3961,13 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
   if (input.children.size>=7)
     if (input[6].IsOfType<std::string>(&colorString))
       DrawingVariables::GetColorIntFromColorString(colorString, colorTripleRGB);
+  double linewidth=1;
+  if (input.children.size>=8)
+  { if (input[7].EvaluatesToDouble(&linewidth))
+      DrawingVariables::GetColorIntFromColorString(colorString, colorTripleRGB);
+    else
+      linewidth=1;
+  }
   Expression functionE;
   double upperBound, lowerBound;
   if (!lowerE.EvaluatesToDouble(&lowerBound) || !upperE.EvaluatesToDouble(&upperBound))
@@ -3988,7 +3997,7 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
   thePlot.DesiredHtmlHeightInPixels=desiredHtmlHeightPixels;
   thePlot.DesiredHtmlWidthInPixels=desiredHtmlWidthPixels;
   thePlot.AddFunctionPlotOnTop
-  (input[1], functionE.GetValue<std::string>(), lowerBound, upperBound, yLow, yHigh, &thePoints, &colorTripleRGB);
+  (input[1], functionE.GetValue<std::string>(), lowerBound, upperBound, yLow, yHigh, &thePoints, &colorTripleRGB, linewidth);
   return output.AssignValue(thePlot, theCommands);
 }
 
@@ -6741,7 +6750,7 @@ public:
         arrowHead[1]+=this->charHeight/2;
         //arrowHead=arrowHead*nineTenths+arrowBase*oneTenth;
         theDV.drawLineBetweenTwoVectorsBufferRational
-        (arrowBase, arrowHead, theDV.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+        (arrowBase, arrowHead, theDV.PenStyleNormal, CGI::RedGreenBlue(0,0,0),1);
       }
     }
     double& theGraphicsUnit =theDV.theBuffer.GraphicsUnit[0];

@@ -505,6 +505,10 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
         out << theSurfaceName << ".strokeStyle=\""
         << this->GetColorHtmlFromColorIndex(this->theBuffer.theDrawLineBetweenTwoRootsOperations[currentIndex].ColorIndex)
         << "\"; ";
+        out << theSurfaceName << ".lineWidth="
+        << FloatingPoint::DoubleToString
+        (this->theBuffer.theDrawLineBetweenTwoRootsOperations[currentIndex].lineWidth)
+        << "; ";
         out << theSurfaceName << ".moveTo("
         << functionConvertToXYName << "( " << Points1ArrayName << "[" << currentIndex<< "])[0],"
         << functionConvertToXYName << "( " << Points1ArrayName << "["
@@ -1135,8 +1139,8 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   out << theSurfaceName << ".fillRect(0,0," << boss->DefaultHtmlWidth  << ", " << boss->DefaultHtmlHeight << ");\n";
   out
   << "for (s=0; s<" << Points1ArrayName << "[globalFrameCounter].length" << "; s++ ){\n  "
-  << theSurfaceName << ".beginPath(); "
-  << theSurfaceName << ".strokeStyle=" << Points1ArrayNameColors <<  "[globalFrameCounter][s];"
+  << theSurfaceName << ".beginPath();\n"
+  << theSurfaceName << ".strokeStyle=" << Points1ArrayNameColors <<  "[globalFrameCounter][s];\n"
   << theSurfaceName << ".moveTo("
   << functionConvertToXYName << "( " << Points1ArrayName << "[globalFrameCounter][s])[0],"
   << functionConvertToXYName << "( " << Points1ArrayName << "[globalFrameCounter][s])[1]); "

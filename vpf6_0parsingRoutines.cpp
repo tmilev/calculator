@@ -1105,11 +1105,11 @@ bool Calculator::isSeparatorFromTheRightForMatrixRow(const std::string& input)
 }
 
 bool Calculator::isSeparatorFromTheLeftForDefinition(const std::string& input)
-{ return input=="{" || input=="(" || input==";" || input=="SequenceStatements" || input==" ";
+{ return input=="{" || input=="(" || input==";" || input=="," || input=="SequenceStatements" || input==" ";
 }
 
 bool Calculator::isSeparatorFromTheRightForDefinition(const std::string& input)
-{ return input=="}" || input==")" || input==";" || input=="EndProgram";
+{ return input=="}" || input==")" || input==";" || input=="," || input=="EndProgram";
 }
 
 bool Calculator::AllowsTensorInPreceding(const std::string& lookAhead)

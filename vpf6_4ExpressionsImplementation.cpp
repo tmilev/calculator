@@ -2158,7 +2158,7 @@ bool Expression::NeedsParenthesisForBaseOfExponent()const
 bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost()const
 { if (this->owner==0)
     return false;
-  if (this->StartsWith(this->owner->opPlus()) || this->StartsWith(this->owner->opMinus()))
+  if (this->StartsWith(this->owner->opPlus()) || this->StartsWith(this->owner->opMinus()) || this->StartsWith(this->owner->opDefine()))
     return true;
   if (this->IsOfType<Rational>())
     return this->GetValue<Rational>().NeedsParenthesisForMultiplication();
@@ -2180,13 +2180,23 @@ bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost()con
   return false;
 }
 
+bool Expression::NeedsParenthesisForAddition()const
+{ MacroRegisterFunctionWithName("Expression::NeedsParenthesisForAddition");
+  if (this->owner==0)
+    return false;
+  if (this->StartsWith(this->owner->opDefine()))
+    return true;
+  return false;
+}
+
 bool Expression::NeedsParenthesisForMultiplication()const
 { if (this->owner==0)
     return false;
 //  stOutput << "DEBUG: Needsparen: " << this->ToString()  << ", Lispified: " << this->ToStringSemiFull() << "<hr>";
   if (this->IsOfType<std::string>())
     return false;
-  if (this->StartsWith(this->owner->opPlus()) || this->StartsWith(this->owner->opMinus()))
+  if (this->StartsWith(this->owner->opPlus()) || this->StartsWith(this->owner->opMinus()) ||
+      this->StartsWith(this->owner->opDefine()))
     return true;
   if (this->IsOfType<Rational>())
     return this->GetValue<Rational>().NeedsParenthesisForMultiplication();
@@ -2417,17 +2427,24 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     }
 //    stOutput << "<br>tostringing: " << out.str() << "   lispified: " << this->ToStringFull();
   } else if (this->IsListStartingWithAtom(this->owner->opPlus() ))
-  { if (this->children.size<2)
+  { if (this->children.size<3)
       crash << "Plus operation takes at least 2 arguments. " << crash;
-    std::string tempS2= (*this)[1].ToString(theFormat);
-    tempS=(*this)[2].ToString(theFormat);
-    out << tempS2;
-    if (allowNewLine && !useFrac && tempS2.size()>(unsigned)lineBreak)
+    const Expression& left=(*this)[1];
+    const Expression& right=(*this)[2];
+    std::string leftString;
+    if (left.NeedsParenthesisForAddition())
+      leftString= "\\left(" + left.ToString(theFormat) + "\\right)";
+    else
+      leftString= left.ToString(theFormat);
+    out << leftString;
+    if (allowNewLine && !useFrac && leftString.size()>(unsigned)lineBreak)
       out << "\\\\\n";
-    if (tempS.size()>0)
-      if (tempS[0]!='-')
+    std::string rightString= right.NeedsParenthesisForAddition() ?
+    ("\\left("+right.ToString(theFormat)+"\\right)") : right.ToString(theFormat);
+    if (rightString.size()>0)
+      if (rightString[0]!='-')
         out << "+";
-    out << tempS;
+    out << rightString;
   } else if (this->StartsWith(this->owner->opMinus(), 2))
   { if ((*this)[1].StartsWith(this->owner->opPlus()) ||(*this)[1].StartsWith(this->owner->opMinus()) )
       out << "-\\left(" << (*this)[1].ToString(theFormat) << "\\right)";

@@ -2654,7 +2654,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlo
 bool CalculatorFunctionsGeneral::innerCoefficientsPowersOf
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCoefficientsPowersOf");
-  if (input.children.size!=3)
+  if (input.size()!=3)
     return false;
   const Expression& theVarE=input[1];
   const Expression& theExpressionE=input[2];
@@ -4262,6 +4262,10 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
   if (input.children.size>=8)
     if (input[7].IsOfType<std::string>(&colorString))
       DrawingVariables::GetColorIntFromColorString(colorString, colorTripleRGB);
+  double lineWidth=1;
+  if (input.size()>=9)
+    if (!input[8].EvaluatesToDouble(&lineWidth))
+      lineWidth=1;
   List<Expression> theConvertedExpressions;
   theConvertedExpressions.SetSize(input.children.size-3);
   for (int i=1; i<3; i++)
@@ -4280,6 +4284,7 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
   << theConvertedExpressions[0].GetValue<std::string>() << theConvertedExpressions[1].GetValue<std::string>() << "}";
   PlotObject thePlot;
   thePlot.colorRGB=colorTripleRGB;
+  thePlot.lineWidth=lineWidth;
   Vectors<double> theXs, theYs;
   if (!input[1].EvaluatesToDoubleInRange
       ("t", leftEndPoint, rightEndPoint, 1000, &thePlot.xLow, &thePlot.xHigh, &theXs))

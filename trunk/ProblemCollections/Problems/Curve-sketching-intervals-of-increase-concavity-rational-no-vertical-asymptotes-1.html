@@ -77,11 +77,7 @@ userIncreaseInterval== increaseInterval;
 </textarea>
 <span class="calculatorCommentBeforeSubmission">
 \(
-EnsureExpressionDependsOnlyOn(userIncreaseInterval,none)
-\)
-</span>
-<span class="calculatorCommentBeforeSubmission">
-\(
+EnsureExpressionDependsOnlyOn(userIncreaseInterval,none);
 %PlotShowJavascriptOnly
 plot2D(f{}x, -6,6, 300,300, "red" )+
 plot2D(f{}x, userIncreaseInterval_1, userIncreaseInterval_2, 300,300, "blue",5 )
@@ -109,12 +105,7 @@ xMax- increaseInterval_2==0;
 </textarea>
 <span class="calculatorCommentBeforeSubmission">
 \(
-EnsureExpressionDependsOnlyOn(xMax,none)
-\)
-</span>
-
-<span class="calculatorCommentBeforeSubmission">
-\(
+EnsureExpressionDependsOnlyOn(xMax,none);
 %PlotShowJavascriptOnly
 plot2D(f{}x, -6,6, 300,300, "red" )+
 plotPoint(xMax, f{}xMax, "blue" )
@@ -134,12 +125,7 @@ xMin- increaseInterval_1==0;
 </textarea>
 <span class="calculatorCommentBeforeSubmission">
 \(
-EnsureExpressionDependsOnlyOn(xMin,none)
-\)
-</span>
-
-<span class="calculatorCommentBeforeSubmission">
-\(
+EnsureExpressionDependsOnlyOn(xMin,none);
 %PlotShowJavascriptOnly
 plot2D(f{}x, -6,6, 300,300, "red" )+
 plotPoint(xMin, f{}xMin, "blue" )
@@ -167,12 +153,7 @@ userConcaveUp==concaveUpIntervals
 </textarea>
 <span class="calculatorCommentBeforeSubmission">
 \(
-EnsureExpressionDependsOnlyOn(userConcaveUp,\infty)
-\)
-</span>
-
-<span class="calculatorCommentBeforeSubmission">
-\(
+EnsureExpressionDependsOnlyOn(userConcaveUp,\infty);
 %PlotShowJavascriptOnly
 plot2D(f{}x, -6,6, 300,300, "red" )+
 plot2D(f{}x, (userConcaveUp_1)_1, (userConcaveUp_1)_2, 300,300, "blue",5 )+
@@ -194,7 +175,17 @@ For example, type 1,2,3 to enter those three values as the \(x\)-coordinates of 
 </textarea>
 <span class="calculatorCommentBeforeSubmission">
 \(
-EnsureExpressionDependsOnlyOn(userInflectionPoints,none)
+EnsureExpressionDependsOnlyOn(userInflectionPoints,none);
+%PlotShowJavascriptOnly
+plot2D(f{}x, -6,6, 300,300, "red" )+
+if (Length(userInflectionPoints)==3, 
+plotPoint(userInflectionPoints_1, f{}userInflectionPoints_1, "blue" )
++
+plotPoint(userInflectionPoints_2, f{}userInflectionPoints_2, "blue" )
++
+plotPoint(userInflectionPoints_3, f{}userInflectionPoints_3, "blue" )
+,
+0);
 \)
 </span>
 

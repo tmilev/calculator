@@ -475,16 +475,37 @@ bool CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT
   if (input.children.size!=3)
     return theCommands << "solveFor takes as input three arguments. ";
   Expression thePowers;
-  if (!CalculatorFunctionsGeneral::innerCoefficientsPowersOf(theCommands, input, thePowers))
-    return theCommands << "Failed to extract the coefficients of " << input[1].ToString()
-    << " in " << input[2].ToString();
+  Expression modifiedInput=input;
+  if (!modifiedInput[2].StartsWith(theCommands.opDefine()))
+  { if (!CalculatorFunctionsGeneral::innerCoefficientsPowersOf(theCommands, modifiedInput, thePowers))
+      return theCommands << "Failed to extract the coefficients of " << modifiedInput[1].ToString()
+      << " in " << modifiedInput[2].ToString();
+  } else
+  { Expression convertedEqualityE, convertedSimplifiedEqualityE;
+    if (!CalculatorFunctionsGeneral::innerEqualityToArithmeticExpression(theCommands, modifiedInput[2], convertedEqualityE))
+      return theCommands << "Failed to interpret the equality " << modifiedInput[2].ToString();
+    if (!Calculator::EvaluateExpression(theCommands, convertedEqualityE, convertedSimplifiedEqualityE))
+      return theCommands << "Failed to simplify: " << convertedEqualityE.ToString();
+    //stOutput << "DEBUG: here be i; convertedSimplifiedEqualityE: " << convertedSimplifiedEqualityE.ToString() << ", lispified: "
+    //<< convertedSimplifiedEqualityE.ToStringSemiFull();
+    modifiedInput.SetChilD(2, convertedSimplifiedEqualityE);
+    //stOutput << "DEBUG: here be i; modifiedInput: " << modifiedInput.ToString() << ", lispified: "
+    //<< modifiedInput.ToStringSemiFull();
+    if (!CalculatorFunctionsGeneral::innerCoefficientsPowersOf(theCommands, modifiedInput, thePowers))
+      return theCommands << "Failed to extract the coefficients of " << modifiedInput[1].ToString()
+      << " in " << modifiedInput[2].ToString() << " which was obtained from the equality "
+      << input[2].ToString();
+    //stOutput << "DEBUG: here be i; thePowers: " << thePowers.ToString() << ", lispified: "
+    //<< thePowers.ToStringSemiFull();
+  }
   if (!thePowers.IsSequenceNElementS())
     return theCommands << "This is not supposed to happen: expression "
     << thePowers.ToString() << " should be a list. This may be a programming bug. ";
-  if (thePowers.children.size==2)
-    return theCommands << "Cannot solve: " << input[2].ToString()
-    << " the expression does not depend on " << input[1].ToString();
-  if (thePowers.children.size==3)
+  if (thePowers.size()==2)
+    return theCommands << "Cannot solve: " << modifiedInput[2].ToString()
+    << ". The expression does not depend on " << modifiedInput[1].ToString() << ". The coefficients of "
+    << modifiedInput[1].ToString() << " are: " << thePowers.ToString();
+  if (thePowers.size()==3)
   { output=thePowers[1];
     output*=-1;
     output/=thePowers[2];

@@ -14,10 +14,11 @@ sd= (d/dx (d/dx(f{}x)));
 TurnOffRules("DistributeMultiplication");
 sdNumFactors= FactorOneVarPolyOverRationals{}( Numerator{}(sd));
 fdNumFactors= FactorOneVarPolyOverRationals{}( Numerator{}(fd));
-fdFactorsFirstCF= CoefficientsPowersOf(x, fdNumFactors_1) ;
-fdFactorsSecondCF= CoefficientsPowersOf(x, fdNumFactors_2) ;
 fdNumZeroes=Sort( solveFor{}(x, fdNumFactors_1) \cup solveFor{}(x, fdNumFactors_2));
-increaseInterval=((-\infty, fdNumZeroes_1),(fdNumZeroes_2, fdNumZeroes_3), (fdNumZeroes_4, \infty))
+increaseInterval=((-\infty, fdNumZeroes_1),(fdNumZeroes_2, fdNumZeroes_3), (fdNumZeroes_4, \infty));
+inflectionPoint =(solveFor(x, sdNumFactors_1))_1;
+verticalAsymptotes=(a/b-1, a/b+1);
+concaveUpIntervals=((verticalAsymptotes_1, inflectionPoint), (verticalAsymptotes_2, \infty));
 \)</span>
 
 <span class="calculatorShowToUserOnly">
@@ -71,23 +72,23 @@ SeparatorBetweenSpans;
 <hr>
 Find the vertical asymptotes of \(f\). 
 Enter your vertical asymptotes in the form x=1. 
-If there is more than one, separate them by commas, in the format:
-x=1, x=2,x=5
+If there is more than one, separate them by commas, in a format similar to:
+x=1, x=2
 <textarea class="calculatorAnswer" id="userVerticalAsymptotes">
 \(
 (
  userVerticalAsymptotes==  
  (
-  x=(solveFor(x, den{}x))_1,
-  x=(solveFor(x, den{}x))_2
+  x=verticalAsymptotes_1,
+  x=verticalAsymptotes_2
  )  
 )
 or
 (
 userVerticalAsymptotes== 
  (
-  x=(solveFor(x, den{}x))_2,
-  x=(solveFor(x, den{}x))_1
+  x=verticalAsymptotes_2,
+  x=verticalAsymptotes_1
  )  
 );
 \)
@@ -97,7 +98,21 @@ userVerticalAsymptotes==
 </span>
 <span class="calculatorCommentBeforeSubmission">
 \(
-EnsureExpressionDependsOnlyOn(userVerticalAsymptotes,x)
+EnsureExpressionDependsOnlyOn(userVerticalAsymptotes,x);
+%PlotShowJavascriptOnly
+plot2D(f{}x,-12, -1+a/b, 300,300, "red" )
++
+plot2D(f{}x, -1+a/b, 1+a/b , 300,300, "red" )
++
+plot2D(f{}x,1+a/b, 12, 300,300, "red" )
++
+plotViewRectangle((-12,-12),(12,12))+
+if (Length(userVerticalAsymptotes)==2,
+plotCurve(solveFor(x, userVerticalAsymptotes_1), t, -50, 50, 300, 300, "blue", 1.5)+
+plotCurve(solveFor(x, userVerticalAsymptotes_2), t, -50, 50, 300, 300, "blue", 1.5)
+,
+0
+)
 \)
 </span>
 
@@ -134,7 +149,7 @@ plot2D(f{}x, (userIncreaseInterval_3)_1, (userIncreaseInterval_3)_2, 300,300, "b
 </span>
 <span class="calculatorCommentBeforeSubmission">
 \(
-EnsureExpressionDependsOnlyOn(userIncreaseInterval,none)
+EnsureExpressionDependsOnlyOn(userIncreaseInterval,\infty)
 \)
 </span>
 <span class="calculatorAnswerOnGiveUp">
@@ -147,7 +162,7 @@ For example, to enter the intervals (2,3) and (5,6), type in (2,3), (5,6).
 For a single interval type for example (2,3). 
 <br>
 The left endpoint of each interval should be smaller than the right endpoint. <span style="color:red"> Please do not give numerical approximations for your 
-answer.</span> Instead, use square roots to give an exact answer. To write \(\sqrt{5}\) you need to type sqrt(5) or \sqrt(5). 
+answer.</span> Instead, use square roots to give an exact answer. To write \(\sqrt{5}\) you need to type sqrt(5) or \sqrt(5) or \sqrt{5}. 
 <hr>
 The local maxima of \(f\) are achieved for the following values of \(x\):
 <textarea class="calculatorAnswer" id="xMax">
@@ -157,12 +172,11 @@ The local maxima of \(f\) are achieved for the following values of \(x\):
 </textarea>
 <span class="calculatorCommentBeforeSubmission">
 \(
-EnsureExpressionDependsOnlyOn(userIncreaseInterval,none)
+EnsureExpressionDependsOnlyOn(xMax,none)
 \)
 </span>
 Separate the different x-coordinates of the local maxima by commas, for example 1+sqrt(2),2+sqrt(3).
 <span class="calculatorCommentBeforeSubmission">
-
 %PlotShowJavascriptOnly
 if (Length(xMax)==2, 
 plot2D(f{}x,-12, -1+a/b, 300,300, "red" )
@@ -178,8 +192,6 @@ plotPoint(xMax_1, f{}xMax_1, "blue" )
 plotPoint(xMax_2, f{}xMax_2, "blue" )
 , "<br><b>Did not get the expected number of x coordinates.</b>"
 );
-(xMax_1, f{}xMax_1);
-(xMax_2, f{}xMax_2);
 \)
 </span>
 <span class="calculatorAnswerOnGiveUp">
@@ -187,35 +199,45 @@ plotPoint(xMax_2, f{}xMax_2, "blue" )
 </span>
 
 <hr>
-The minimum of \(f\) is achieved for \(x\) equal to:
+The local minima of \(f\) are achieved for \(x\) equal to:
 <textarea class="calculatorAnswer" id="xMin">
 \(
-xMin- increaseInterval_1==0;
+((xMin_1,xMin_2) == (fdNumZeroes_2, fdNumZeroes_4) ) or
+((xMin_2,xMin_1) == (fdNumZeroes_2, fdNumZeroes_4) ) 
 \)
 </textarea>
-<span class="calculatorCommentBeforeSubmission">
-\(
-EnsureExpressionDependsOnlyOn(userIncreaseInterval,none)
-\)
-</span>
+Separate the values of \(x\) by comma, for example 1,sqrt(2), 5.
 <span class="calculatorCommentBeforeSubmission">
 \(
 %PlotShowJavascriptOnly
-plot2D(f{}x, -6,6, 300,300, "red" )+
-plotPoint(xMin, f{}xMin, "blue" )
-;
+EnsureExpressionDependsOnlyOn(xMin,none);
+if (Length(xMin)==2,
+plot2D(f{}x,-12, -1+a/b, 300,300, "red" )
++
+plot2D(f{}x, -1+a/b, 1+a/b , 300,300, "red" )
++
+plot2D(f{}x,1+a/b, 12, 300,300, "red" )
++
+plotViewRectangle((-12,-12),(12,12))
++
+plotPoint(xMin_1, f{}xMin_1, "blue" )
++
+plotPoint(xMin_2, f{}xMin_2, "blue" )
+,
+"Wrong number of local minima"
+)
 \)
 </span>
 
 <span class="calculatorAnswerOnGiveUp">
-increaseInterval_1
+(fdNumZeroes_2, fdNumZeroes_4)
 </span>
 <hr>
-Find the two interval(s) on which \(f\) is concave up. 
+Find the two intervals on which \(f\) is concave up. 
 <br>
-Enter the two intervals as open intervals in the format (a,b), (c,d). 
+Enter the intervals as open intervals in the format similar to: (a,b), (c,d)
 <br>
-Make sure the left endpoint is smaller than the right and that the first interval is to the left of the second.
+Make sure the left endpoint is smaller than the right and that the intervals are given in order from left to right.
 <br>To enter \(\pm \infty\) write \infty, or infinity.  
 
 
@@ -227,15 +249,19 @@ userConcaveUp==concaveUpIntervals
 </textarea>
 <span class="calculatorCommentBeforeSubmission">
 \(
-EnsureExpressionDependsOnlyOn(userIncreaseInterval,none)
-\)
-</span>
-<span class="calculatorCommentBeforeSubmission">
-\(
+EnsureExpressionDependsOnlyOn(userConcaveUp,\infty);
 %PlotShowJavascriptOnly
-plot2D(f{}x, -6,6, 300,300, "red" )+
-plot2D(f{}x, (userConcaveUp_1)_1, (userConcaveUp_1)_2, 300,300, "blue" )+
-plot2D(f{}x, (userConcaveUp_2)_1,6, 300,300, "blue" )
+plot2D(f{}x,-12, -1+a/b, 300,300, "red" )
++
+plot2D(f{}x, -1+a/b, 1+a/b , 300,300, "red" )
++
+plot2D(f{}x,1+a/b, 12, 300,300, "red" )
++
+plotViewRectangle((-12,-12),(12,12))
+
++
+plot2D(f{}x, (userConcaveUp_1)_1, (userConcaveUp_1)_2, 300,300, "blue" , 2)+
+plot2D(f{}x, (userConcaveUp_2)_1,12, 300,300, "blue" ,2 )
 ;
 \)
 </span>
@@ -243,21 +269,34 @@ plot2D(f{}x, (userConcaveUp_2)_1,6, 300,300, "blue" )
 concaveUpIntervals
 </span>
 <hr>
-Find the \(x\)-coordinates of the inflection points. If more than one, separate them by comma. 
+Find the \(x\)-coordinates of the inflection point(s). 
+<br>If more than one, separate them by commas. 
+<br>How many inflection points do you see on the graph?
 <br>
-For example, type 1,2,3 to enter those three values as the \(x\)-coordinates of the inflection points.
 <textarea class="calculatorAnswer" id="userInflectionPoints">
 \(
-(Sort(userInflectionPoints))==inflectionPoints;
+userInflectionPoints==inflectionPoint;
 \)
 </textarea>
 <span class="calculatorCommentBeforeSubmission">
 \(
-EnsureExpressionDependsOnlyOn(userIncreaseInterval,none)
+EnsureExpressionDependsOnlyOn(userInflectionPoints,none);
+%PlotShowJavascriptOnly
+plot2D(f{}x,-12, -1+a/b, 300,300, "red" )
++
+plot2D(f{}x, -1+a/b, 1+a/b , 300,300, "red" )
++
+plot2D(f{}x,1+a/b, 12, 300,300, "red" )
++
+plotViewRectangle((-12,-12),(12,12))
+
++
+plotPoint(inflectionPoint, f{}inflectionPoint, "blue")
+;
 \)
 </span>
 
 <span class="calculatorAnswerOnGiveUp">
-inflectionPoints
+inflectionPoint
 </span>
 

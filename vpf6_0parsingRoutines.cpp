@@ -1498,7 +1498,7 @@ bool Calculator::ApplyOneRule()
   if (fifthToLastS=="logBase" && fourthToLastS=="_" && thirdToLastS=="Expression" &&
       secondToLastS=="Expression" && this->AllowsTimesInPreceding(lastS))
     return this->ReplaceOXEEXByEX();
-  if (fourthToLastS!="{}" && thirdToLastS=="Expression" && secondToLastS=="Expression" &&
+  if (fourthToLastS!="{}" && fourthToLastS!="^" && thirdToLastS=="Expression" && secondToLastS=="Expression" &&
       this->AllowsTimesInPreceding(secondToLastE, lastS))
   { this->ReplaceEEXByEXusingO(this->conTimes());
     Expression impliedFunApplication;

@@ -2387,12 +2387,13 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     if (firstE.StartsWith(-1, 2))
       if (firstE[0].IsAtomWhoseExponentsAreInterpretedAsFunction() && !secondE.IsEqualToMOne())
       { involvesExponentsInterpretedAsFunctions=true;
-        Expression  newFunE;
+        Expression newFunE;
         newFunE.MakeXOX(*this->owner, this->owner->opThePower(), firstE[0], (*this)[2]);
         newFunE.CheckConsistency();
         //stOutput << "<br> tostringing a very special case: " << newE.ToString() << " lispified: " << this->ToStringFull();
         out << "{" << newFunE.ToString(theFormat) << "}{}";
-        if (firstE[1].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost())
+        if (firstE[1].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() ||
+            firstE[1].StartsWith(this->owner->opTimes()))
           out << "\\left(" << firstE[1].ToString(theFormat) << "\\right)";
         else
           out << firstE[1].ToString(theFormat);

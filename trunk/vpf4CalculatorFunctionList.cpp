@@ -2709,7 +2709,7 @@ void Calculator::initPredefinedStandardOperations()
    true, false, "CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger, this->opAlgNumber(), this->opRational(),
-   "Raises algebraic number to small integer power. ",
+   "Raises algebraic number to small integer or half-integer power. ",
    "a=3/2; b=-15/2; c=33/4;\
     \nx=(-b+\\sqrt{}(b^2-4a c))/(2a);\
     \nB=c+a x^{2}+b x;", true, false, "CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger");

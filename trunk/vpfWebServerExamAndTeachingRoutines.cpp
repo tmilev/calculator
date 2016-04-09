@@ -1830,6 +1830,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemNavigation");
   std::stringstream out;
   std::string exerciseRequest="exercises";
+  std::string studentView= theGlobalVariables.UserStudentViewOn() ? "true" : "false";
   if (theGlobalVariables.UserGuestMode())
     exerciseRequest="exercisesNoLogin";
   if (theGlobalVariables.UserGuestMode())
@@ -1865,7 +1866,6 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
           << "\">Student view section " << this->databaseStudentSectionS[i] << " </a><br>";
     }
   }
-  std::string studentView= theGlobalVariables.UserStudentViewOn() ? "true" : "false";
   if (!this->flagIsExamHome)
   { out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
     << exerciseRequest << "&"
@@ -1905,6 +1905,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
         << theGlobalVariables.userCalculatorRequestType
         << "&" << calcArgsNoPassExamDetails
+        << "studentView=" << studentView << "&"
         << "&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE)
         << "&currentExamIntermediate=" << CGI::StringToURLString(this->currentExamIntermediatE)
         << "&currentExamFile=" << CGI::StringToURLString(this->problemListOfParent[indexInParent-1] )
@@ -1913,6 +1914,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
         << theGlobalVariables.userCalculatorRequestType
         << "&" << calcArgsNoPassExamDetails
+        << "studentView=" << studentView << "&"
         << "&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE)
         << "&currentExamIntermediate=" << CGI::StringToURLString(this->currentExamIntermediatE)
         << "&currentExamFile=" << CGI::StringToURLString(this->problemListOfParent[indexInParent+1] )
@@ -1921,6 +1923,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
         << theGlobalVariables.userCalculatorRequestType
         << "&" << calcArgsNoPassExamDetails
+        << "studentView=" << studentView << "&"
         << "&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE)
         << "&currentExamIntermediate="
         << "&currentExamFile=" << CGI::StringToURLString(this->currentExamHomE)

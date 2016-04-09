@@ -1513,11 +1513,17 @@ bool Calculator::innerSqrt(Calculator& theCommands, const Expression& input, Exp
     theExponent.AssignValue(thePowerRat, theCommands);
     return output.MakeXOX(theCommands, theCommands.opThePower(), input[2], theExponent);
   }
+  if (thePower>0 && input[2].IsEqualToZero())
+    return output.AssignValue(0, theCommands);
+  if (thePower==0 && input[2].IsEqualToZero())
+    return output.AssignValue(1, theCommands);
   Rational rationalValue;
   if (!input[2].IsRational(&rationalValue))
     return false;
   if (thePower<0)
-  { thePower*=-1;
+  { if (rationalValue.IsEqualToZero())
+      return output.MakeError("Division by zero in expression: " + input.ToString(), theCommands);
+    thePower*=-1;
     rationalValue.Invert();
   }
   if (thePower!=2)

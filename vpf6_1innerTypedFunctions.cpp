@@ -723,11 +723,28 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(Calcu
   if (!input.IsListNElements(3))
     return false;
   AlgebraicNumber base;
-  int thePower=0;
-  if (!input[1].IsOfType(&base)|| !input[2].IsSmallInteger(&thePower))
+  if (!input[1].IsOfType(&base))
     return false;
-  if (base.IsEqualToZero() && thePower<=0)
+  Rational powerRat;
+  if (input[2].IsRational(&powerRat))
+    if (powerRat.GetDenominator()==2)
+    { Rational baseRat;
+      if (base.IsRational(&baseRat))
+      { base.AssignRationalQuadraticRadical(baseRat, theCommands.theObjectContainer.theAlgebraicClosure);
+        output=input;
+        Expression newPower, newBase;
+        newPower.AssignValue(powerRat*2, theCommands);
+        newBase.AssignValue(base, theCommands);
+        return output.MakeXOX(theCommands, theCommands.opThePower(), newBase, newPower);
+      }
+    }
+  int thePower=0;
+  if (!input[2].IsSmallInteger(&thePower))
+    return false;
+  if (base.IsEqualToZero() && thePower<0)
     return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+  if (base.IsEqualToZero() && thePower==0)
+    return output.AssignValue(1, theCommands);
   if (thePower<0)
   { thePower*=-1;
     base.Invert();
@@ -772,8 +789,13 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(Calculator& theCo
     finalOutput.AddMonomial(theMon, 1);
     return output.AssignValueWithContext(finalOutput, input[1].GetContext(), theCommands);
   }
-  if (base.IsEqualToZero() && thePower<=0)
-    return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+
+  if (base.IsEqualToZero() )
+  { if (thePower<0)
+      return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+    if (thePower==0)
+      return output.AssignValue(1, theCommands);
+  }
   base.RaiseToPower(thePower);
   return output.AssignValueWithContext(base, input[1].GetContext(), theCommands);
 }
@@ -794,7 +816,9 @@ bool CalculatorFunctionsBinaryOps::innerPowerRatByRat(Calculator& theCommands, c
   int thePower;
   if (!exp.IsSmallInteger(&thePower))
     return false;
-  if (base==0 && thePower<=0)
+  if (base==0 && thePower==0)
+    return output.AssignValue(1, theCommands);
+  if (base==0 && thePower<0)
     return output.MakeError("Division by zero: trying to raise 0 to negative or zero power. ", theCommands);
   base.RaiseToPower(thePower);
   return output.AssignValue(base, theCommands);

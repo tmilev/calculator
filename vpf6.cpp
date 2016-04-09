@@ -1272,8 +1272,12 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(Calculator& theComman
       { bool isGood=true;
 //        stOutput << "<br>Right is: " << right->ToString();
        // if ((*right)[2].IsOfType<Rational>())
-        //  if (!(*right)[2].GetValue<Rational>().IsInteger())
-        //    isGood=false;
+       //   if (!(*right)[2].GetValue<Rational>().IsInteger())
+       //   { Rational ratBase;
+       //     if ((*right)[1].IsRational(&ratBase))
+       //       if (ratBase<0)
+       //         isGood=false;
+       //   }
         if(isGood)
         { constPower.AssignValue(1, theCommands);
           thePower.MakeXOX(theCommands, theCommands.opPlus(), (*right)[2], constPower);

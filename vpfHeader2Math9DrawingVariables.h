@@ -341,6 +341,7 @@ public:
   bool flagFillUserDefinedProjection;
   bool flagIncludeExtraHtmlDescriptions;
   bool flagPlotShowJavascriptOnly;
+  bool flagAllowMovingCoordinateSystemFromArbitraryClick;
   Vectors<Rational> FillUserDefinedProjection;
   int Selected;
   static int NumHtmlGraphics;

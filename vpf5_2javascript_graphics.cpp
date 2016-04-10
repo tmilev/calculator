@@ -554,8 +554,10 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   if (this->theBuffer.BasisProjectionPlane.size>2)
     out << "window.setTimeout(\"changeProjectionPlaneOnTimer" << timesCalled << "()\",100);\n";
   out << " }\n";
-  out << "var selectedBasisIndexCone" << timesCalled << "=-1;\n"
-  << "var clickTolerance=5;\n"
+  out << "var selectedBasisIndexCone" << timesCalled << "=-1;\n";
+  out << "var xShiftPointer" << timesCalled << "=0;\n";
+  out << "var yShiftPointer" << timesCalled << "=0;\n";
+  out << "var clickTolerance=5;\n"
   << "function ptsWithinClickToleranceCone" << timesCalled << "(x1, y1, x2, y2)\n"
   << "{ if (x1-x2>clickTolerance || x2-x1>clickTolerance || y1-y2>clickTolerance || y2-y1>clickTolerance )\n    return false;\n  return true;\n}";
 
@@ -750,26 +752,52 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "\n}\n";
   out << "\nfunction clickCanvasCone" << timesCalled << "(cx,cy)\n"
   << "{ divPosX=0;\n  divPosY=0;\n  thePointer= document.getElementById(\"idCanvasCone" << timesCalled << "\");\n"
-  << "  while(thePointer)  {\n  divPosX += thePointer.offsetLeft;\n  divPosY += thePointer.offsetTop;\n  thePointer = thePointer.offsetParent;\n  }"
-  << "\n  posx=(cx-divPosX+document.body.scrollLeft-" << shiftX << ");"
-  << "\n  posy=(cy-divPosY+document.body.scrollTop-" << shiftY << ");\n  selectedBasisIndexCone" << timesCalled <<"=-1;\n"
-  << "if (ptsWithinClickToleranceCone" << timesCalled << "(posx,posy,0,0))" << "\nselectedBasisIndexCone" << timesCalled << "=-2;\n"
-  <<  "for (i=0; i<" << this->theBuffer.BasisToDrawCirclesAt.size << ";i++)  {\n if (ptsWithinClickToleranceCone" << timesCalled
+  << "  while(thePointer)  {\n"
+  << "    divPosX += thePointer.offsetLeft;\n"
+  << "    divPosY += thePointer.offsetTop;\n"
+  << "    thePointer = thePointer.offsetParent;\n  "
+  << "  }\n"
+  << "  posx=(cx-divPosX+document.body.scrollLeft-" << shiftX << ");\n"
+  << "  posy=(cy-divPosY+document.body.scrollTop-" << shiftY << ");\n"
+  << "  selectedBasisIndexCone" << timesCalled <<"=-1;\n";
+  if (!this->flagAllowMovingCoordinateSystemFromArbitraryClick)
+    out << "if (ptsWithinClickToleranceCone" << timesCalled << "(posx, posy, 0, 0))\n"
+    << "  selectedBasisIndexCone" << timesCalled << "=-2;\n";
+  else
+  { out << "selectedBasisIndexCone" << timesCalled << "=-2;\n";
+    out
+    << "xShiftPointer" << timesCalled << "=posx" << "; "
+    << "yShiftPointer" << timesCalled << "=posy" << "; ";
+  }
+  out
+  <<  "for (i=0; i<" << this->theBuffer.BasisToDrawCirclesAt.size << ";i++){\n"
+  << "   if (ptsWithinClickToleranceCone" << timesCalled
   << "(posx, posy, " << projBasisCircles << "[i][0]" << ", " << projBasisCircles
   << "[i][1]" << "))\n"
-  << "  selectedBasisIndexCone" << timesCalled << "=i;  \n}\n}\nfunction mouseMoveRedrawCone" << timesCalled << "(cx, cy)\n"
-  << "{ "
+  << "  selectedBasisIndexCone" << timesCalled << "=i;\n"
+  << "}\n"
+  << "}\n"
+  << "function mouseMoveRedrawCone" << timesCalled << "(cx, cy){\n"
   << "  divPosX=0;\n  divPosY=0;\n"
-  << "  thePointer= document.getElementById(\"idCanvasCone"<< timesCalled << "\");\n  while(thePointer)\n  { divPosX += thePointer.offsetLeft;\n"
-  << "    divPosY += thePointer.offsetTop;\n    thePointer = thePointer.offsetParent;\n  }\n"
+  << "  thePointer= document.getElementById(\"idCanvasCone" << timesCalled << "\");\n"
+  << "  while(thePointer){\n"
+  << "    divPosX += thePointer.offsetLeft;\n"
+  << "    divPosY += thePointer.offsetTop;\n"
+  << "    thePointer = thePointer.offsetParent;\n  "
+  << "  }\n"
   << "  posx=(cx-divPosX+document.body.scrollLeft-" << shiftX << ");\n"
   << "  posy=-(cy-divPosY+document.body.scrollTop-" << shiftY << ");\n"
   << "  processMousePosition" << timesCalled << "(posx, -posy);\n"
-  << "  if (selectedBasisIndexCone" << timesCalled << "==-1)\n    return;\n"
-  << "  if (selectedBasisIndexCone" << timesCalled << "==-2)\n{ shiftXCone" << timesCalled << "=(cx-divPosX+document.body.scrollLeft);\n"
-  << shiftY << "=(cy-divPosY+document.body.scrollTop);\n  }  else\n"
+  << "  if (selectedBasisIndexCone" << timesCalled << "==-1)\n"
+  << "    return;\n"
+  << "  if (selectedBasisIndexCone" << timesCalled << "==-2){\n"
+  << "    " << shiftX << "=(cx-divPosX+document.body.scrollLeft)- xShiftPointer" << timesCalled << ";\n"
+  << "    " << shiftY << "=(cy-divPosY+document.body.scrollTop) - yShiftPointer" << timesCalled << ";\n"
+  << "}\n"
+  << "else\n"
   << "{ changeBasis" << timesCalled << "(selectedBasisIndexCone" << timesCalled << ", posx, posy);\n  }\n  "
-  << theDrawFunctionName << " ();\n}\n";
+  << theDrawFunctionName << " ();\n"
+  << "}\n";
   out << "\n tempDiv=document.getElementById(\"" << theCanvasId << "\");";
   out << "\ntempDiv.addEventListener (\"DOMMouseScroll\", mouseHandleWheelCone"
   << timesCalled << ", true);\n";

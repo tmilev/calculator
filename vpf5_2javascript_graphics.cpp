@@ -472,7 +472,8 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   out << "var " << shiftY << "=" << this->theBuffer.centerY[0] << ";\n";
   out << "var GraphicsUnitCone" << timesCalled << "=" << this->theBuffer.GraphicsUnit[0] << ";\n";
   out << "function " << functionConvertToXYName << "(vector){\n"
-  << "  resultX=" << shiftX << "; resultY=" << shiftY << ";\n"
+  << "  resultX=" << shiftX << ";\n"
+  << "  resultY=" << shiftY << ";\n"
   << "  for (i=0; i<" << theDimension << "; i++){\n"
   << "    resultX+=vector[i]*" << projName << "[i][0];\n"
   << "    resultY+=vector[i]*" << projName << "[i][1];\n"
@@ -514,10 +515,11 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
         (this->theBuffer.theDrawLineBetweenTwoRootsOperations[currentIndex].lineWidth)
         << "; ";
         out << theSurfaceName << ".moveTo("
-        << functionConvertToXYName << "( " << Points1ArrayName << "[" << currentIndex<< "])[0],"
+        << functionConvertToXYName << "( " << Points1ArrayName << "[" << currentIndex << "])[0],"
         << functionConvertToXYName << "( " << Points1ArrayName << "["
         << currentIndex << "])[1]); ";
-        out << theSurfaceName << ".lineTo("  << functionConvertToXYName << "( " << Points2ArrayName << "["
+        out << theSurfaceName << ".lineTo("
+        << functionConvertToXYName << "( " << Points2ArrayName << "["
         << currentIndex << "])[0],"
         << " " << functionConvertToXYName << "( " << Points2ArrayName << "["
         << currentIndex << "])[1]); ";
@@ -812,13 +814,29 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   out << "\ntempDiv.addEventListener (\"DOMMouseScroll\", mouseHandleWheelCone"
   << timesCalled << ", true);\n";
   out << "function mouseHandleWheelCone" << timesCalled << "(theEvent){\n"
-  << "theEvent = theEvent ? theEvent : window.event;\n theEvent.preventDefault();\ntheEvent.stopPropagation();\ntheWheelDelta = theEvent.detail ? theEvent.detail * -1 : theEvent.wheelDelta / 40;\n"
+  << "  theEvent = theEvent ? theEvent : window.event;\n"
+  << "  theEvent.preventDefault();\n"
+  << "  theEvent.stopPropagation();\n"
+  << "  theWheelDelta = theEvent.detail ? theEvent.detail * -1 : theEvent.wheelDelta / 40;\n"
 
-  << "  posx=getPosXPosY" << timesCalled << "(theEvent.clientX,theEvent.clientY)[0];\n"
-  << "  posy=getPosXPosY" << timesCalled << "(theEvent.clientX,theEvent.clientY)[1];\n"
+  << "  posX=getPosXPosY" << timesCalled << "(theEvent.clientX, theEvent.clientY)[0];\n"
+  << "  posY=-getPosXPosY" << timesCalled << "(theEvent.clientX, theEvent.clientY)[1];\n"
+
+  << "  posXnew=posX/" << "GraphicsUnitCone" << timesCalled << ";\n"
+  << "  posYnew=posY/" << "GraphicsUnitCone" << timesCalled << ";\n"
 
   << "GraphicsUnitCone" << timesCalled << "+=theWheelDelta;\n"
-  << "if (GraphicsUnitCone" << timesCalled << "<=0)\n GraphicsUnitCone" << timesCalled << "=3;\n"
+
+//  << "  alert('posX, posY, posXnew, posYnew:'+ posX  +', '+ posY+', '+ posXnew+', '+ posYnew);\n"
+
+  << "if (GraphicsUnitCone" << timesCalled << "<=0)\n "
+  << "  GraphicsUnitCone" << timesCalled << "=3;\n"
+
+  << "  posXnew*=" << "GraphicsUnitCone" << timesCalled << ";\n"
+  << "  posYnew*=" << "GraphicsUnitCone" << timesCalled << ";\n"
+  << "  " << shiftX << "+=posX-posXnew;\n"
+  << "  " << shiftY << "+=-posY+posYnew;\n"
+
 //  << "for (i=0; i<" << theDimension << "; i++){\n "
 //  << basisName << "[i][0]*=GraphicsUnitCone" << timesCalled << "/(GraphicsUnitCone" << timesCalled << "-theWheelDelta);\n"
 //  << basisName << "[i][1]*=GraphicsUnitCone" << timesCalled << "/(GraphicsUnitCone" << timesCalled << "-theWheelDelta);\n"

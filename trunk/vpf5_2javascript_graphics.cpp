@@ -469,15 +469,17 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   }
 //  stOutput << " got to here pt 8";
   out << "var " << shiftX << "=" << this->theBuffer.centerX[0] << ";\n";
-  out << "var " <<  shiftY << "=" << this->theBuffer.centerY[0] << ";\n";
+  out << "var " << shiftY << "=" << this->theBuffer.centerY[0] << ";\n";
   out << "var GraphicsUnitCone" << timesCalled << "=" << this->theBuffer.GraphicsUnit[0] << ";\n";
-  out << "function " << functionConvertToXYName << "(vector){\n";
-  out << "resultX=" << shiftX << "; resultY=" << shiftY << ";\nfor (i=0; i<" << theDimension << "; i++){\n";
-  out << "resultX+=vector[i]*" << projName << "[i][0];\n";
-  out << "resultY+=vector[i]*" << projName << "[i][1];\n}\n";
-  out << "result=[resultX, resultY];\n";
-  out << "return result;\n";
-  out << "}\n";
+  out << "function " << functionConvertToXYName << "(vector){\n"
+  << "  resultX=" << shiftX << "; resultY=" << shiftY << ";\n"
+  << "  for (i=0; i<" << theDimension << "; i++){\n"
+  << "    resultX+=vector[i]*" << projName << "[i][0];\n"
+  << "    resultY+=vector[i]*" << projName << "[i][1];\n"
+  << "  }\n"
+  << "  result=[resultX, resultY];\n"
+  << "  return result;\n"
+  << "}\n";
   out << "var " << theSurfaceName << "=0;\n";
   out << "function drawHighlights" << timesCalled << "() {\n"
   << "for (var i=0; i<" << this->theBuffer.labeledVectors.size << "; i++)\n"
@@ -613,11 +615,13 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "  ScaleToUnitLength" << timesCalled << "(VectorE1Cone" << timesCalled << ");\n"
   << "  ScaleToUnitLength" << timesCalled << "(VectorE2Cone" << timesCalled << ");\n"
   << "}\n";
-  out << "function ComputeProjections" << timesCalled << "()\n"
-  << "{ for (var i=0; i<" << theDimension << "; i++)\n"
-  << "  { " << projName << "[i][0]=GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled
+  out << "function ComputeProjections" << timesCalled << "(){\n"
+  << " for (var i=0; i<" << theDimension << "; i++)\n"
+  << "  { " << projName << "[i][0]=GraphicsUnitCone"
+  << timesCalled << "*getScalarProduct" << timesCalled
   << "(VectorE1Cone" << timesCalled << ","  << eiBasis << "[i]);\n"
-  << "    " << projName << "[i][1]=-GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled
+  << "    " << projName << "[i][1]=-GraphicsUnitCone" << timesCalled
+  << "*getScalarProduct" << timesCalled
   << "(VectorE2Cone" << timesCalled << ", " << eiBasis << "[i]);\n"
   << "  }\n";
 //    stOutput << " got to here pt 11C";
@@ -628,16 +632,21 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
       << "  document.getElementById(\"" << textEbasisNamesReadOnly[1][j] << "\").innerHTML="
       << "VectorE2Cone" << timesCalled << "[" << j << "];\n";
   }
-  out << "  for (var i=0; i<" << this->theBuffer.BasisToDrawCirclesAt.size << "; i++)\n"
-  << "  { " << projBasisCircles << "[i][0]=GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled
+  out
+  << "  for (var i=0; i<" << this->theBuffer.BasisToDrawCirclesAt.size << "; i++)\n"
+  << "  { " << projBasisCircles << "[i][0]=GraphicsUnitCone" << timesCalled
+  << "*getScalarProduct" << timesCalled
   << "(VectorE1Cone" << timesCalled << ", " << basisCircles << "[i]);\n"
-  << "    " << projBasisCircles << "[i][1]=-GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled
+  << "    " << projBasisCircles << "[i][1]=-GraphicsUnitCone" << timesCalled
+  << "*getScalarProduct" << timesCalled
   << "(VectorE2Cone" << timesCalled << ", " << basisCircles << "[i]);\n"
   << "  }\n";
   out << "  for (var i=0; i<" << this->theBuffer.labeledVectors.size << "; i++)\n"
-  << "  { proj" << labeledVectorsVarName << "[i][0]=GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled
+  << "  { proj" << labeledVectorsVarName << "[i][0]=GraphicsUnitCone" << timesCalled
+  << "*getScalarProduct" << timesCalled
   << "(VectorE1Cone" << timesCalled << ", " << labeledVectorsVarName << "[i]);\n"
-  << "    proj" << labeledVectorsVarName << "[i][1]=-GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled
+  << "    proj" << labeledVectorsVarName << "[i][1]=-GraphicsUnitCone" << timesCalled
+  << "*getScalarProduct" << timesCalled
   << "(VectorE2Cone" << timesCalled << ", " << labeledVectorsVarName << "[i]);\n"
   << "  }\n";
   out << "}\n";
@@ -749,9 +758,11 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "    " << theDrawFunctionName << "();\n"
   //<< "    jsMath.Process(document.getElementById(\"canvas" << timesCalled << "Notes\"));\n"
   << "  }\n"
-  << "\n}\n";
-  out << "\nfunction clickCanvasCone" << timesCalled << "(cx,cy)\n"
-  << "{ divPosX=0;\n  divPosY=0;\n  thePointer= document.getElementById(\"idCanvasCone" << timesCalled << "\");\n"
+  << "}\n";
+  out << "\nfunction getPosXPosY" << timesCalled << "(cx,cy){\n"
+  << "  divPosX=0;\n"
+  << "  divPosY=0;\n"
+  << "  thePointer= document.getElementById(\"idCanvasCone" << timesCalled << "\");\n"
   << "  while(thePointer)  {\n"
   << "    divPosX += thePointer.offsetLeft;\n"
   << "    divPosY += thePointer.offsetTop;\n"
@@ -759,6 +770,12 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "  }\n"
   << "  posx=(cx-divPosX+document.body.scrollLeft-" << shiftX << ");\n"
   << "  posy=(cy-divPosY+document.body.scrollTop-" << shiftY << ");\n"
+  << "  return [posx,posy];\n"
+  << "}\n"
+  ;
+  out << "\nfunction clickCanvasCone" << timesCalled << "(cx,cy){\n"
+  << "  posx=getPosXPosY" << timesCalled << "(cx,cy)[0];\n"
+  << "  posy=getPosXPosY" << timesCalled << "(cx,cy)[1];\n"
   << "  selectedBasisIndexCone" << timesCalled <<"=-1;\n";
   if (!this->flagAllowMovingCoordinateSystemFromArbitraryClick)
     out << "if (ptsWithinClickToleranceCone" << timesCalled << "(posx, posy, 0, 0))\n"
@@ -778,15 +795,8 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "}\n"
   << "}\n"
   << "function mouseMoveRedrawCone" << timesCalled << "(cx, cy){\n"
-  << "  divPosX=0;\n  divPosY=0;\n"
-  << "  thePointer= document.getElementById(\"idCanvasCone" << timesCalled << "\");\n"
-  << "  while(thePointer){\n"
-  << "    divPosX += thePointer.offsetLeft;\n"
-  << "    divPosY += thePointer.offsetTop;\n"
-  << "    thePointer = thePointer.offsetParent;\n  "
-  << "  }\n"
-  << "  posx=(cx-divPosX+document.body.scrollLeft-" << shiftX << ");\n"
-  << "  posy=-(cy-divPosY+document.body.scrollTop-" << shiftY << ");\n"
+  << "  posx=getPosXPosY" << timesCalled << "(cx,cy)[0];\n"
+  << "  posy=-getPosXPosY" << timesCalled << "(cx,cy)[1];\n"
   << "  processMousePosition" << timesCalled << "(posx, -posy);\n"
   << "  if (selectedBasisIndexCone" << timesCalled << "==-1)\n"
   << "    return;\n"
@@ -803,8 +813,12 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << timesCalled << ", true);\n";
   out << "function mouseHandleWheelCone" << timesCalled << "(theEvent){\n"
   << "theEvent = theEvent ? theEvent : window.event;\n theEvent.preventDefault();\ntheEvent.stopPropagation();\ntheWheelDelta = theEvent.detail ? theEvent.detail * -1 : theEvent.wheelDelta / 40;\n"
+
+  << "  posx=getPosXPosY" << timesCalled << "(theEvent.clientX,theEvent.clientY)[0];\n"
+  << "  posy=getPosXPosY" << timesCalled << "(theEvent.clientX,theEvent.clientY)[1];\n"
+
   << "GraphicsUnitCone" << timesCalled << "+=theWheelDelta;\n"
-  << "if (GraphicsUnitCone" << timesCalled << "==0)\n GraphicsUnitCone" << timesCalled << "=3;\n"
+  << "if (GraphicsUnitCone" << timesCalled << "<=0)\n GraphicsUnitCone" << timesCalled << "=3;\n"
 //  << "for (i=0; i<" << theDimension << "; i++){\n "
 //  << basisName << "[i][0]*=GraphicsUnitCone" << timesCalled << "/(GraphicsUnitCone" << timesCalled << "-theWheelDelta);\n"
 //  << basisName << "[i][1]*=GraphicsUnitCone" << timesCalled << "/(GraphicsUnitCone" << timesCalled << "-theWheelDelta);\n"

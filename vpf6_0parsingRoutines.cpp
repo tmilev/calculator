@@ -469,6 +469,8 @@ bool Calculator::ReplaceOEByE(int formatOptions)
 bool Calculator::ReplaceOEXByEX(int formatOptions)
 { SyntacticElement& middle=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  if (this->flagLogSyntaxRules)
+    this->parsingLog+= "[Rule: Calculator::ReplaceOEXByEX]";
   Expression newExpr;
   newExpr.reset(*this, 2);
   newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(middle.controlIndex));
@@ -694,6 +696,8 @@ bool Calculator::ReplaceXXXbyE(int inputFormat)
 bool Calculator::ReplaCeOXbyEX(int inputFormat)
 { SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   theElt.theData.MakeAtom(this->GetOperationIndexFromControlIndex(theElt.controlIndex), *this);
+  if (this->flagLogSyntaxRules)
+    this->parsingLog+= "[Rule: Calculator::ReplaCeOXbyEX]";
   return this->ReplaceXXbyEX(inputFormat);
 }
 
@@ -701,6 +705,8 @@ bool Calculator::ReplaceXXbyEX(int inputFormat)
 { SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   theElt.theData.format=inputFormat;
   theElt.controlIndex=this->conExpression();
+  if (this->flagLogSyntaxRules)
+    this->parsingLog+= "[Rule: Calculator::ReplaceXXbyEX]";
   return true;
 }
 
@@ -796,6 +802,8 @@ bool Calculator::ReplaceOOEEXbyEXpowerLike()
   SyntacticElement& innerO = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5];
   SyntacticElement& innerArg = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   SyntacticElement& outerArg = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+  if (this->flagLogSyntaxRules)
+    this->parsingLog+= "[Rule: Calculator::ReplaceOOEEXbyEXpowerLike]";
   Expression newInnerE(*this), newFinalE(*this);
   newInnerE.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(innerO.controlIndex));
   newInnerE.AddChildOnTop(innerArg.theData);
@@ -962,6 +970,8 @@ bool Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits()
 bool Calculator::ReplaceEEXByEXusingO(int theControlIndex)
 { SyntacticElement& left =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  if (this->flagLogSyntaxRules)
+    this->parsingLog+= "[Rule: Calculator::ReplaceEEXByEXusingO]";
   Expression newExpr;
   newExpr.reset(*this, 3);
   newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
@@ -1010,6 +1020,8 @@ bool Calculator::ReplaceEOEXByEX(int formatOptions)
 { SyntacticElement& middle=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  if (this->flagLogSyntaxRules)
+    this->parsingLog+= "[Rule: Calculator::ReplaceEOEXByEX]";
   Expression newExpr;
   newExpr.reset(*this, 3);
   newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(middle.controlIndex));
@@ -1028,6 +1040,8 @@ bool Calculator::ReplaceO_2O_1E_3XbyEX()
 { SyntacticElement& middle=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  if (this->flagLogSyntaxRules)
+    this->parsingLog+= "[Rule: Calculator::ReplaceO_2O_1E_3XbyEX]";
   Expression newExpr;
   newExpr.reset(*this, 3);
   newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(middle.controlIndex));
@@ -1395,13 +1409,6 @@ bool Calculator::ApplyOneRule()
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
-
-/*  if (lastE.theData.IndexBoundVars==-1)
-  { crash << "<hr>The last expression, " << lastE.ToString(*this) << ", while reducing "
-    << this->ElementToStringSyntacticStackHTMLTable()
-    << " does not have properly initialized context. "
-    << crash;
-  }*/
   if (this->flagUsePredefinedWordSplits)
     if (lastS=="Variable")
       if (this->predefinedWordSplits.Contains(this->theAtoms[lastE.theData.theData]))

@@ -389,8 +389,10 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   }
 //    stOutput << " got to here pt 5";
 
-  out << CreateStaticJavaScriptVectorsArrayWithProjection(this->theBuffer.labeledVectors, labeledVectorsVarName, "proj"+labeledVectorsVarName);
-  out << CreateStaticJavaScriptTextArray(this->theBuffer.labelsOfLabeledVectors, "labels"+labeledVectorsVarName);
+  out << CreateStaticJavaScriptVectorsArrayWithProjection
+  (this->theBuffer.labeledVectors, labeledVectorsVarName, "proj"+labeledVectorsVarName);
+  out << CreateStaticJavaScriptTextArray
+  (this->theBuffer.labelsOfLabeledVectors, "labels"+labeledVectorsVarName);
   out << CreateJavaScriptListVectors(this->theBuffer.toBeHighlightedWhenLabeledVectorHovered, "highlight"+labeledVectorsVarName);
 //    stOutput << " got to here pt 6";
   out << "var selectedLabels" << timesCalled << "= new Array(" << this->theBuffer.labeledVectors.size << ");\n";
@@ -752,7 +754,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "\n  posx=(cx-divPosX+document.body.scrollLeft-" << shiftX << ");"
   << "\n  posy=(cy-divPosY+document.body.scrollTop-" << shiftY << ");\n  selectedBasisIndexCone" << timesCalled <<"=-1;\n"
   << "if (ptsWithinClickToleranceCone" << timesCalled << "(posx,posy,0,0))" << "\nselectedBasisIndexCone" << timesCalled << "=-2;\n"
-  <<  "for (i=0; i<" << theDimension << ";i++)  {\n if (ptsWithinClickToleranceCone" << timesCalled
+  <<  "for (i=0; i<" << this->theBuffer.BasisToDrawCirclesAt.size << ";i++)  {\n if (ptsWithinClickToleranceCone" << timesCalled
   << "(posx, posy, " << projBasisCircles << "[i][0]" << ", " << projBasisCircles
   << "[i][1]" << "))\n"
   << "  selectedBasisIndexCone" << timesCalled << "=i;  \n}\n}\nfunction mouseMoveRedrawCone" << timesCalled << "(cx, cy)\n"
@@ -764,7 +766,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "  posy=-(cy-divPosY+document.body.scrollTop-" << shiftY << ");\n"
   << "  processMousePosition" << timesCalled << "(posx, -posy);\n"
   << "  if (selectedBasisIndexCone" << timesCalled << "==-1)\n    return;\n"
-  << "if (selectedBasisIndexCone" << timesCalled << "==-2)\n{ shiftXCone" << timesCalled << "=(cx-divPosX+document.body.scrollLeft);\n"
+  << "  if (selectedBasisIndexCone" << timesCalled << "==-2)\n{ shiftXCone" << timesCalled << "=(cx-divPosX+document.body.scrollLeft);\n"
   << shiftY << "=(cy-divPosY+document.body.scrollTop);\n  }  else\n"
   << "{ changeBasis" << timesCalled << "(selectedBasisIndexCone" << timesCalled << ", posx, posy);\n  }\n  "
   << theDrawFunctionName << " ();\n}\n";

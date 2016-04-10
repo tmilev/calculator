@@ -1004,6 +1004,7 @@ std::string Plot::GetPlotHtml()
   std::stringstream resultStream;
   theDVs.flagIncludeExtraHtmlDescriptions=this->flagIncludeExtraHtmlDescriptions;
   theDVs.flagPlotShowJavascriptOnly=this->flagPlotShowJavascriptOnly;
+  theDVs.theBuffer.BasisToDrawCirclesAt.SetSize(0);
   resultStream << theDVs.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
   return resultStream.str();
 }

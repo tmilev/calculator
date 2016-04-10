@@ -59,6 +59,7 @@ public:
   static bool innerGenerateVectorSpaceClosedWRTLieBracket(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFourierTransformEWA(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCasimirWRTlevi(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSqrt(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFactorial(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLogBase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLog(Calculator& theCommands, const Expression& input, Expression& output);
@@ -81,6 +82,8 @@ public:
   static bool innerCompareFunctionsNumerically(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompareExpressionsNumerically(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompareExpressionsNumericallyAtPoints(Calculator& theCommands, const Expression& input, Expression& output);
+
+//  static bool innerPowerSqrt(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPolynomialRelations(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerEnsureExpressionDependsOnlyOn(Calculator& theCommands, const Expression& input, Expression& output);

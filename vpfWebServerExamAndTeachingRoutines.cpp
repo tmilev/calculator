@@ -1821,7 +1821,8 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
     comments << "Failed to interpret your file. The interpretation input was:<br> "
     << this->problemCommandsWithInbetweens << "<br>"
     << "The result of the interpretation attempt is:<br>"
-    << theInterpreter.outputString;
+    << theInterpreter.outputString << "<br><b>Comments</b><br>"
+    << theInterpreter.outputCommentsString;
   return result;
 }
 

@@ -2,6 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #include "vpf.h"
 #include "vpfHeader3Calculator2_InnerFunctions.h"
+#include "vpfHeader3Calculator1_InnerTypedFunctions.h"
 
 ProjectInformationInstance ProjectInfoVpf6_35cpp(__FILE__, "More calculator built-in functions. ");
 
@@ -529,4 +530,59 @@ bool CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT
     return true;
   }
   return false;
+}
+
+bool CalculatorFunctionsGeneral::innerSqrt(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerSqrt");
+  if (input.size()!=3)
+    return false;
+  Rational ratPower;
+  if (input[1].IsRational(&ratPower))
+    if (ratPower!=0)
+    { Expression powerE, powerEreduced, theExponentE;
+      ratPower.Invert();
+      theExponentE.AssignValue(ratPower, theCommands);
+      powerE.MakeXOX(theCommands,theCommands.opThePower(), input[2], theExponentE);
+      if (CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors
+          (theCommands, powerE, powerEreduced))
+        if (powerEreduced!=powerE && powerEreduced!=input)
+        { output=powerEreduced;
+          return true;
+        }
+    }
+  if (input[2].IsEqualToOne())
+    return output.AssignValue(1, theCommands);
+  int thePower=0;
+//  stOutput << "<br>Calling sqrt with input: " << input.ToString();
+  if (!input[1].IsSmallInteger(&thePower))
+    return false;
+//  stOutput << "<br>the power that be: " << thePower ;
+  if (!input[2].IsConstantNumber())
+  {// stOutput << "<br>input is: " << input[2].ToString();
+    theCommands.CheckInputNotSameAsOutput(input, output);
+    Expression theExponent;
+    Rational thePowerRat(1, thePower);
+    theExponent.AssignValue(thePowerRat, theCommands);
+    return output.MakeXOX(theCommands, theCommands.opThePower(), input[2], theExponent);
+  }
+  if (thePower>0 && input[2].IsEqualToZero())
+    return output.AssignValue(0, theCommands);
+  if (thePower==0 && input[2].IsEqualToZero())
+    return output.AssignValue(1, theCommands);
+  Rational rationalValue;
+  if (!input[2].IsRational(&rationalValue))
+    return false;
+  if (thePower<0)
+  { if (rationalValue.IsEqualToZero())
+      return output.MakeError("Division by zero in expression: " + input.ToString(), theCommands);
+    thePower*=-1;
+    rationalValue.Invert();
+  }
+  if (thePower!=2)
+    return false;
+//  stOutput << "<br>Got here: rat value is: " << rationalValue.ToString();
+  AlgebraicNumber theNumber;
+  if (!theNumber.AssignRationalQuadraticRadical(rationalValue, theCommands.theObjectContainer.theAlgebraicClosure))
+    return false;
+  return output.AssignValue(theNumber, theCommands);
 }

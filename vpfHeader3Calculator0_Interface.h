@@ -507,9 +507,9 @@ class Function
   bool flagDisabledByUser;
   Expression::FunctionAddress theFunction;
 
-  std::string ToStringShort();
-  std::string ToStringSummary();
-  std::string ToStringFull();
+  std::string ToStringShort()const;
+  std::string ToStringSummary()const;
+  std::string ToStringFull()const;
   void operator =(const Function& other)
   { this->theArgumentTypes=other.theArgumentTypes;
     this->theDescription=other.theDescription;
@@ -928,6 +928,7 @@ public:
   operator bool()const
   { return false;
   }
+  void RegisterCalculatorFunctionIdentifier(const Function& theFun, int indexOp, int functionType, int theFunIndex);
   std::string ToStringLinksToCalculator(const DynkinType& theType, FormatExpressions* theFormat=0);
   std::string ToStringLinksToCalculatorDirectlyFromHD(const DynkinType& theType, FormatExpressions* theFormat=0);
   //void GetOutputFolders(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay, FormatExpressions& outputFormat);
@@ -1726,7 +1727,6 @@ public:
   static bool innerSplitFDpartB3overG2inner(Calculator& theCommands, branchingData& theG2B3Data, Expression& output);
   static bool innerLittelmannOperator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAnimateLittelmannPaths(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSqrt(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFactorPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLSPath(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestMonomialBaseConjecture(Calculator& theCommands, const Expression& input, Expression& output);
@@ -1788,8 +1788,10 @@ public:
    const std::string& inputAdditionalIdentifier, const std::string& inputCalculatorIdentifier)
    ;
   void AddOperationBinaryInnerHandlerWithTypes
-  (const std::string& theOpName, Expression::FunctionAddress innerHandler, int leftType, int rightType, const std::string& opDescription,
-   const std::string& opExample, bool visible=true, bool experimental=false, const std::string& inputAdditionalIdentifier="");
+  (const std::string& theOpName, Expression::FunctionAddress innerHandler, int leftType, int rightType,
+   const std::string& opDescription,
+   const std::string& opExample, bool visible=true, bool experimental=false,
+   const std::string& inputAdditionalIdentifier="", const std::string& inputCalculatorIdentifier="");
   void AddOperationHandler
   (const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing, const std::string& opDescription,
    const std::string& opExample, bool isInner, bool visible, bool experimental,

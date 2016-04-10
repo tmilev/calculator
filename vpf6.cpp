@@ -1963,8 +1963,10 @@ void Calculator::AddOperationNoRepetitionAllowed(const std::string& theOpName)
 }
 
 void Calculator::AddOperationBinaryInnerHandlerWithTypes
-(const std::string& theOpName, Expression::FunctionAddress innerHandler, int leftType, int rightType, const std::string& opDescription,
- const std::string& opExample, bool visible, bool experimental, const std::string& inputAdditionalIdentifier)
+(const std::string& theOpName, Expression::FunctionAddress innerHandler, int leftType, int rightType,
+ const std::string& opDescription,
+ const std::string& opExample, bool visible, bool experimental,
+ const std::string& inputAdditionalIdentifier, const std::string& inputCalculatorIdentifier)
 { int indexOp=this->theAtoms.GetIndex(theOpName);
   if (indexOp==-1)
   { this->theAtoms.AddOnTop(theOpName);
@@ -1977,8 +1979,31 @@ void Calculator::AddOperationBinaryInnerHandlerWithTypes
   innerFunction.theArgumentTypes.AddChildAtomOnTop(leftType);
   innerFunction.theArgumentTypes.AddChildAtomOnTop(rightType);
   innerFunction.additionalIdentifier=inputAdditionalIdentifier;
+  innerFunction.calculatorIdentifier=inputCalculatorIdentifier;
   this->FunctionHandlers[indexOp].Reserve(10);
   this->FunctionHandlers[indexOp].AddOnTop(innerFunction);
+  this->RegisterCalculatorFunctionIdentifier(innerFunction, indexOp, 0, this->FunctionHandlers[indexOp].size-1);
+}
+
+void Calculator::RegisterCalculatorFunctionIdentifier
+(const Function& theFun, int indexOp, int functionType, int theFunIndex)
+{ MacroRegisterFunctionWithName("Calculator::RegisterCalculatorFunctionIdentifier");
+  if (theFun.calculatorIdentifier=="")
+    return;
+//  stOutput << "Registering: " << theFun.ToStringShort();
+  int namedRuleIndex=this->namedRules.GetIndex(theFun.calculatorIdentifier);
+  if (namedRuleIndex==-1)
+  { this->namedRules.AddOnTop(theFun.calculatorIdentifier);
+    this->namedRulesLocations.SetSize(this->namedRulesLocations.size+1);
+    this->namedRulesLocations.LastObject()->SetSize(0);
+    namedRuleIndex=this->namedRules.size-1;
+  }
+  List<int> triple;
+  triple.SetSize(3);
+  triple[0]=functionType;
+  triple[1]=indexOp;
+  triple[2]=theFunIndex;
+  this->namedRulesLocations[namedRuleIndex]=(triple);
 }
 
 void Calculator::AddOperationHandler
@@ -2004,21 +2029,7 @@ void Calculator::AddOperationHandler
   else
     this->FunctionHandlers[indexOp].Reserve(10);
   this->FunctionHandlers[indexOp].AddOnTop(theFun);
-  if (theFun.calculatorIdentifier!="")
-  { int namedRuleIndex=this->namedRules.GetIndex(theFun.calculatorIdentifier);
-    if (namedRuleIndex==-1)
-    { this->namedRules.AddOnTop(theFun.calculatorIdentifier);
-      this->namedRulesLocations.SetSize(this->namedRulesLocations.size+1);
-      this->namedRulesLocations.LastObject()->SetSize(0);
-      namedRuleIndex=this->namedRules.size-1;
-    }
-    List<int> triple;
-    triple.SetSize(3);
-    triple[0]=0;
-    triple[1]=indexOp;
-    triple[2]=this->FunctionHandlers[indexOp].size-1;
-    this->namedRulesLocations[namedRuleIndex]=(triple);
-  }
+  this->RegisterCalculatorFunctionIdentifier(theFun, indexOp, 0, this->FunctionHandlers[indexOp].size-1);
 }
 
 void Calculator::AddOperationComposite
@@ -2043,21 +2054,7 @@ void Calculator::AddOperationComposite
   theFun.calculatorIdentifier=inputCalculatorIdentifier;
   theFun.flagIsCompositeHandler=true;
   this->operationsCompositeHandlers[theIndex].AddOnTop(theFun);
-  if (theFun.calculatorIdentifier!="")
-  { int namedRuleIndex=this->namedRules.GetIndex(theFun.calculatorIdentifier);
-    if (namedRuleIndex==-1)
-    { this->namedRules.AddOnTop(theFun.calculatorIdentifier);
-      this->namedRulesLocations.SetSize(this->namedRulesLocations.size+1);
-      this->namedRulesLocations.LastObject()->SetSize(0);
-      namedRuleIndex=this->namedRules.size-1;
-    }
-    List<int> triple;
-    triple.SetSize(3);
-    triple[0]=1;
-    triple[1]=theIndex;
-    triple[2]=this->operationsCompositeHandlers[theIndex].size-1;
-    this->namedRulesLocations[namedRuleIndex]=triple;
-  }
+  this->RegisterCalculatorFunctionIdentifier(theFun, theIndex, 1, this->operationsCompositeHandlers[theIndex].size-1);
 }
 
 std::string Calculator::ElementToStringNonBoundVars()
@@ -2104,7 +2101,7 @@ bool Function::inputFitsMyInnerType(const Expression& input)
   return argument1good && argument2good;
 }
 
-std::string Function::ToStringShort()
+std::string Function::ToStringShort()const
 { if (this->owner==0)
     return "(non-initialized)";
   std::stringstream out;
@@ -2119,7 +2116,7 @@ std::string Function::ToStringShort()
   return out.str();
 }
 
-std::string Function::ToStringSummary()
+std::string Function::ToStringSummary()const
 { if (this->owner==0)
     return "(non-initialized)";
   std::stringstream out;
@@ -2129,7 +2126,7 @@ std::string Function::ToStringSummary()
   return out.str();
 }
 
-std::string Function::ToStringFull()
+std::string Function::ToStringFull()const
 { if (!this->flagIamVisible)
     return "";
   if (this->owner==0)

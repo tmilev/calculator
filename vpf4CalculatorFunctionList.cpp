@@ -1855,7 +1855,7 @@ D-B;\
 //   "Differential. ",
 //   "d{}{{a}}=Differential{}a;\nx=Polynomial{}x;\nd{}(x^2/(x+1))");
   this->AddOperationInnerHandler
-  ("\\sqrt", this->innerSqrt, "",
+  ("\\sqrt", CalculatorFunctionsGeneral::innerSqrt, "",
    "Square root of a rational, implemented as algebraic extension of the rationals. ",
    "\\sqrt 2+\\sqrt 3;(\\sqrt{}2+\\sqrt{}3+\\sqrt{}6)^2", true, false, "Calculator::innerSqrt",
    "sqrt");
@@ -2642,6 +2642,7 @@ void Calculator::initPredefinedStandardOperations()
    "Polynomial{}(-x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}+x_{2}+1)/\
    \nPolynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+1) ", true, false, "CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly");
 
+
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRatGetAlgebraicNumber, this->opRational(), this->opRational(),
    "Convert rational exponent to the sqrt function. ",
@@ -2649,11 +2650,14 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRat, this->opRational(), this->opRational(),
    "Raises rational to power, provided the power is a small integer. ",
-   "{3^3}^3; 3^{3^3}; 3^3^3; 0^3; 0^{-3}; ", true, false, "CalculatorFunctionsBinaryOps::innerPowerRatByRat");
+   "{3^3}^3; 3^{3^3}; 3^3^3; 0^3; 0^{-3}; ", true, false,
+   "CalculatorFunctionsBinaryOps::innerPowerRatByRat",
+   "PowerIntegerByInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors, this->opRational(), this->opRational(),
    "If a rational number is small enough to factor, reduces the rational exponents of the rational number. ",
-   "\n(4/9)^{17/3}; (12/7)^{7/2} ", true, false, "CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors");
+   "\n(4/9)^{17/3}; (12/7)^{7/2} ", true, false,
+   "CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors", "PowerRationalByRational");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat, this->opRational(), this->opDouble(),
    "Calls the built-in cpp functions to approximately raise a double to a power,\

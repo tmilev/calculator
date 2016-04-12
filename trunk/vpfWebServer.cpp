@@ -65,7 +65,7 @@ const std::string fileKey= "../key.pem";
 const std::string signedFileCertificate1= "../2_calculator-algebra.org.crt";
 const std::string signedFileCertificate2= "../1_Intermediate.crt";
 const std::string signedFileCertificate3= "../root.crt";
-const std::string signedFileKey= "../privateKey.pem";
+const std::string signedFileKey= "../privateKey.key";
 
 void WebServer::initSSL()
 { MacroRegisterFunctionWithName("WebServer::initSSL");

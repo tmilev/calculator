@@ -706,34 +706,50 @@ void AlgebraicNumber::operator-=(const AlgebraicNumber& other)
 
 void AlgebraicNumber::operator+=(const AlgebraicNumber& other)
 { MacroRegisterFunctionWithName("AlgebraicNumber::operator+=");
-  //stOutput << "Adding " << this->ToString() << " to " << other.ToString();
+  this->CheckConsistency();
+  other.CheckConsistency();
   if (this==& other)
   { AlgebraicNumber otherCopy=other;
     *this+=other;
+    this->CheckConsistency();
     return;
   }
   this->CheckCommonOwner(other);
-  if (this->basisIndex==other.basisIndex)
-  { this->theElT+=other.theElT;
-    return;
-  }
   AlgebraicClosureRationals* theOwner=this->owner;
   if (theOwner==0)
     theOwner=other.owner;
   if (theOwner==0)
     crash << "This is a programming error: algebraic numbers with zero owners but different basis indices. " << crash;
+  if (this->basisIndex==other.basisIndex)
+  { this->owner=theOwner;
+    this->CheckConsistency();
+    other.CheckConsistency();
+    this->theElT+=other.theElT;
+    this->CheckConsistency();
+    return;
+  }
   VectorSparse<Rational> AdditiveFormOther;
   theOwner->GetAdditionTo(*this, this->theElT);
   theOwner->GetAdditionTo(other, AdditiveFormOther);
   this->owner=theOwner;
   this->basisIndex=theOwner->theBasesAdditive.size-1;
   this->theElT+=AdditiveFormOther;
-//  stOutput << " ... to get: " << this->ToString();
+  this->CheckConsistency();
 }
 
 bool AlgebraicNumber::CheckConsistency()const
 { if (this->flagDeallocated)
     crash << "This is a programming error: use after free of AlgebraicNumber. " << crash;
+  if (this->owner==0)
+  { if (!this->IsRational())
+    { for (int i=0; i<this->theElT.size(); i++)
+        stOutput << "<br>index: " << this->theElT[i].theIndex << ", coefficient: "
+        << this->theElT.theCoeffs[i];
+      crash << "Detected non-rational algebraic number with zero owner. " << crash;
+    }
+    if (this->basisIndex!=0)
+      crash << "Algebraic number with non-zero basis and zero owner. " << crash;
+  }
   return true;
 }
 
@@ -798,6 +814,7 @@ bool AlgebraicNumber::operator>(const AlgebraicNumber& other)const
 
 void AlgebraicNumber::AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner)
 { this->owner=0;
+  this->basisIndex=0;
   this->theElT.MaKeEi(0, input);
 }
 
@@ -859,14 +876,18 @@ bool AlgebraicNumber::EvaluatesToDouble(double* outputWhichDouble)const
 
 bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, AlgebraicClosureRationals& inputOwner)
 { MacroRegisterFunctionWithName("AlgebraicNumber::AssignRationalRadical");
-  //stOutput << "<hr>Assigning rational radical of  " << inpuT.ToString();
+//  stOutput << "<hr>Assigning rational radical of  " << inpuT.ToString();
+  this->CheckConsistency();
   if (inpuT==0)
     return false;
   if (!inputOwner.flagIsQuadraticRadicalExtensionRationals)
   { Polynomial<AlgebraicNumber> minPoly;
     minPoly.MakeMonomiaL(0,2);
     minPoly-=inpuT;
-    return this->ConstructFromMinPoly(minPoly, inputOwner);
+    bool result= this->ConstructFromMinPoly(minPoly, inputOwner);
+    if (result)
+      this->CheckConsistency();
+    return result;
   }
   List<LargeInt> theFactors;
   Rational absoluteInput=inpuT;
@@ -878,6 +899,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, Alge
   squareFreeInput*=absoluteInput.GetDenominator();
   List<LargeInt> primeFactors;
   List<int> theMults;
+  //stOutput << "<br>So far so good ... ";
   if (!squareFreeInput.value.Factor(primeFactors, theMults))
     return false;
   squareFreeInput.value=1;
@@ -894,7 +916,9 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, Alge
   if (!squareFreeInput.IsEqualToOne())
     theFactors.AddOnTop(squareFreeInput);
   if (theFactors.size==0)
-  { this->AssignRational(squareRootRationalPart, inputOwner);
+  { //stOutput << "DEBUG: assigning rational ... ";
+    this->AssignRational(squareRootRationalPart, inputOwner);
+    this->CheckConsistency();
     return true;
   }
   if(!inputOwner.MergeRadicals(theFactors))
@@ -910,10 +934,13 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, Alge
         if (inputOwner.theQuadraticRadicals[j]!=-1)
           if (theFactors[i]%inputOwner.theQuadraticRadicals[j]==0)
             FactorSel.AddSelectionAppendNewIndex(j);
+  //stOutput << "<br>DEBUG: so far gone... ";
   this->owner=&inputOwner;
   this->basisIndex=this->owner->theBasesAdditive.size-1;
   this->theElT.MaKeEi(this->owner->GetIndexFromRadicalSelection(FactorSel));
   this->theElT*=squareRootRationalPart;
+
+  this->CheckConsistency();
 //  VectorSparse<Rational> commentMeOut;
 //  this->owner->GetAdditionTo(*this, commentMeOut);
 //  stOutput << "<hr>radical additive form: " << commentMeOut.ToString() << "<br>radical final value: " << this->ToString() << "<br>";
@@ -987,17 +1014,22 @@ std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat)con
 }
 
 bool AlgebraicNumber::IsRational(Rational* whichRational)const
-{ if (this->IsEqualToZero())
+{ //stOutput << "<br>Checking whether " << this->ToString() << " is rational... ";
+  if (this->IsEqualToZero())
   { if (whichRational!=0)
       *whichRational=0;
     return true;
   }
   for (int i=0; i<this->theElT.size(); i++)
     if (this->theElT[i].theIndex!=0)
+    { //stOutput << "Not rational: index " << this->theElT[i].theIndex  << " present with coefficient: "
+      //<< this->theElT.theCoeffs[i].ToString();
       return false;
-    else
+
+    } else
       if (whichRational!=0)
         *whichRational=this->theElT.theCoeffs[i];
+  //stOutput << "it is!";
   return true;
 }
 
@@ -1022,15 +1054,19 @@ std::string AlgebraicNumber::ToString(FormatExpressions* theFormat)const
   return out.str();
 }
 
-bool AlgebraicNumber::operator==(const AlgebraicNumber& other)const
+  bool AlgebraicNumber::operator==(const AlgebraicNumber& other)const
 { Rational ratValue;
+  this->CheckConsistency();
+  other.CheckConsistency();
   if (this->IsRational(&ratValue))
     return other==ratValue;
   if (other.IsRational(&ratValue))
     return *this==ratValue;
   if (this->owner!=other.owner)
   { crash.theCrashReport << "This might or might not be a programming error: comparing two algebraic number that do not have the same owner. "
-    << "The numbers have owners of respective addresses " << this->owner << " and " << other.owner << ". Crashing to let you know. ";
+    << "The numbers have owners of respective addresses "
+    << this->owner << " and " << other.owner << ". The numbers are: "
+    << this->ToString() << " and " << other.ToString() << ". Crashing to let you know. ";
     crash << crash;
   }
   this->CheckNonZeroOwner();

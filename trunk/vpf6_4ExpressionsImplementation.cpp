@@ -2161,16 +2161,16 @@ bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost()con
   if (this->StartsWith(this->owner->opPlus()) || this->StartsWith(this->owner->opMinus()) || this->StartsWith(this->owner->opDefine()))
     return true;
   if (this->IsOfType<Rational>())
-    return this->GetValue<Rational>().NeedsParenthesisForMultiplication();
+    return this->GetValue<Rational>().NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
   if (this->IsOfType<AlgebraicNumber>())
-    return this->GetValue<AlgebraicNumber>().NeedsParenthesisForMultiplication();
+    return this->GetValue<AlgebraicNumber>().NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
   if (this->IsAtom() || this->children.size==0)
     return false;
   if (this->children.size>1)
   { const Expression& firstE=(*this)[0];
     //const Expression& secondE=(*this)[1];
     if (firstE.IsAtomGivenData(this->owner->opTimes()))
-      return false;
+      return (*this)[1].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() || (*this)[1].NeedsParenthesisForMultiplication();
     if (firstE.IsAtomGivenData(this->owner->opThePower()))
       return false;
     if (this->StartsWith(this->owner->opBind()))

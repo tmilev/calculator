@@ -63,8 +63,8 @@ void SSL_write_Wrapper(SSL* inputSSL, const std::string& theString)
 const std::string fileCertificate= "../cert.pem";
 const std::string fileKey= "../key.pem";
 const std::string signedFileCertificate1= "../2_calculator-algebra.org.crt";
-const std::string signedFileCertificate2= "../1_Intermediate.crt";
-const std::string signedFileCertificate3= "../root.crt";
+//const std::string signedFileCertificate2= "../1_Intermediate.crt";
+const std::string signedFileCertificate3= "../1_root_bundle.crt";
 const std::string signedFileKey= "../privateKey.key";
 
 void WebServer::initSSL()
@@ -99,7 +99,7 @@ void WebServer::initSSL()
     theLog << logger::orange << "Restricted ciphers to workaround Safari's bugs. " << logger::endL;
 */
   //////////////////////////////////////////////////////////////////////////
-  if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, signedFileCertificate1.c_str()) <=0)
+  if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, signedFileCertificate3.c_str()) <=0)
   { theLog << logger::purple << "Found no officially signed certificate, trying self-signed certificate. "
     << logger::endL;
     if (SSL_CTX_use_certificate_file(theSSLdata.ctx, fileCertificate.c_str(), SSL_FILETYPE_PEM) <= 0)
@@ -112,11 +112,11 @@ void WebServer::initSSL()
     }
   } else
   { theLog << logger::green << "Found officially signed certificate... " << logger::endL;
-    if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, signedFileCertificate2.c_str()) <=0)
-    { ERR_print_errors_fp(stderr);
-      exit(3);
-    }
-    if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, signedFileCertificate3.c_str()) <=0)
+//    if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, signedFileCertificate2.c_str()) <=0)
+//    { ERR_print_errors_fp(stderr);
+//      exit(3);
+//    }
+    if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, signedFileCertificate1.c_str()) <=0)
     { ERR_print_errors_fp(stderr);
       exit(3);
     }

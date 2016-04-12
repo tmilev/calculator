@@ -57,8 +57,15 @@ void SSL_write_Wrapper(SSL* inputSSL, const std::string& theString)
 #endif // MACRO_use_open_ssl
 //http://stackoverflow.com/questions/10175812/how-to-create-a-self-signed-certificate-with-openssl
 //openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 1001
+//Alternatively:
+//certificate with certificate signing request:
+//openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout privateKey.key
 const std::string fileCertificate= "../cert.pem";
 const std::string fileKey= "../key.pem";
+const std::string signedFileCertificate1= "../2_calculator-algebra.org.crt";
+const std::string signedFileCertificate2= "../1_Intermediate.crt";
+const std::string signedFileCertificate3= "../root.crt";
+const std::string signedFileKey= "../privateKey.pem";
 
 void WebServer::initSSL()
 { MacroRegisterFunctionWithName("WebServer::initSSL");
@@ -92,13 +99,31 @@ void WebServer::initSSL()
     theLog << logger::orange << "Restricted ciphers to workaround Safari's bugs. " << logger::endL;
 */
   //////////////////////////////////////////////////////////////////////////
-  if (SSL_CTX_use_certificate_file(theSSLdata.ctx, fileCertificate.c_str(), SSL_FILETYPE_PEM) <= 0)
-  { ERR_print_errors_fp(stderr);
-    exit(3);
-  }
-  if (SSL_CTX_use_PrivateKey_file(theSSLdata.ctx, fileKey.c_str(), SSL_FILETYPE_PEM) <= 0)
-  { ERR_print_errors_fp(stderr);
-    exit(4);
+  if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, signedFileCertificate1.c_str()) <=0)
+  { theLog << logger::purple << "Found no officially signed certificate, trying self-signed certificate. "
+    << logger::endL;
+    if (SSL_CTX_use_certificate_file(theSSLdata.ctx, fileCertificate.c_str(), SSL_FILETYPE_PEM) <= 0)
+    { ERR_print_errors_fp(stderr);
+      exit(3);
+    }
+    if (SSL_CTX_use_PrivateKey_file(theSSLdata.ctx, fileKey.c_str(), SSL_FILETYPE_PEM) <= 0)
+    { ERR_print_errors_fp(stderr);
+      exit(4);
+    }
+  } else
+  { theLog << logger::green << "Found officially signed certificate... " << logger::endL;
+    if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, signedFileCertificate2.c_str()) <=0)
+    { ERR_print_errors_fp(stderr);
+      exit(3);
+    }
+    if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, signedFileCertificate3.c_str()) <=0)
+    { ERR_print_errors_fp(stderr);
+      exit(3);
+    }
+    if (SSL_CTX_use_PrivateKey_file(theSSLdata.ctx, signedFileKey.c_str(), SSL_FILETYPE_PEM) <= 0)
+    { ERR_print_errors_fp(stderr);
+      exit(4);
+    }
   }
   if (!SSL_CTX_check_private_key(theSSLdata.ctx))
   { fprintf(stderr,"Private key does not match the certificate public key\n");

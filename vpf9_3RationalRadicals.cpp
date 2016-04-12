@@ -462,6 +462,21 @@ bool AlgebraicNumber::NeedsParenthesisForMultiplication()const
   return (additiveForm.size()>1);
 }
 
+bool AlgebraicNumber::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost()const
+{ if (this->owner==0)
+  { Rational tempRat;
+    if (this->IsRational(&tempRat))
+      return tempRat.NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
+    return false;
+  }
+  VectorSparse<Rational> additiveForm;
+  this->owner->GetAdditionTo(*this, additiveForm);
+//  stOutput << "additive form size: " << additiveForm.size();
+  if (additiveForm.size()!=1 )
+    return true;
+  return additiveForm.theCoeffs[0].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
+}
+
 bool AlgebraicNumber::CheckNonZeroOwner()const
 { if (this->owner==0)
     crash << "This is a programming error: algebraic number with non-initialized owner not permitted in the current context." << crash;

@@ -44,7 +44,7 @@ class AlgebraicNumber
   { Rational rHalf(1,2);
     return this->AssignCosRationalTimesPi(rHalf-input, inputOwner);
   }
-
+  bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost()const;
   bool NeedsParenthesisForMultiplication()const;
   bool CheckConsistency()const;
   bool CheckNonZeroOwner()const;

@@ -574,6 +574,9 @@ public:
       << crash;
     return result;
   }*/
+  bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost()const
+  { return this->IsNegative();
+  }
   bool NeedsParenthesisForMultiplication()const
   { return false;
     //return this->IsNegative();

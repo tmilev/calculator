@@ -536,6 +536,7 @@ bool CalculatorFunctionsGeneral::innerSqrt(Calculator& theCommands, const Expres
 { MacroRegisterFunctionWithName("Calculator::innerSqrt");
   if (input.size()!=3)
     return false;
+//  stOutput << "<br>Calling sqrt with input: " << input.ToString();
   Rational ratPower;
   if (input[1].IsRational(&ratPower))
     if (ratPower!=0)
@@ -553,7 +554,6 @@ bool CalculatorFunctionsGeneral::innerSqrt(Calculator& theCommands, const Expres
   if (input[2].IsEqualToOne())
     return output.AssignValue(1, theCommands);
   int thePower=0;
-//  stOutput << "<br>Calling sqrt with input: " << input.ToString();
   if (!input[1].IsSmallInteger(&thePower))
     return false;
 //  stOutput << "<br>the power that be: " << thePower ;

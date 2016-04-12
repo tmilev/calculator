@@ -248,7 +248,10 @@ bool CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber(Calc
       return false;
     rightAN.AssignRational(tempRat, theCommands.theObjectContainer.theAlgebraicClosure);
   }
+  leftAN.CheckConsistency();
+  rightAN.CheckConsistency();
   leftAN+=rightAN;
+  leftAN.CheckConsistency();
   return output.AssignValue(leftAN, theCommands);
 }
 
@@ -269,16 +272,9 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt(Calculato
   ElementWeylGroup<WeylGroupData> leftR, rightR;
   if (!input[1].IsOfType(&leftR) || !input[2].IsOfType(&rightR))
     return false;
-  //stOutput << "<br>leftR= " << leftR.ToString();
-  //stOutput << "<br>rightR=" << rightR.ToString();
-  //for (int i=0; i<theCommands.theObjectContainer.theCoxeterElements.size; i++)
-  //{ stOutput << "<br>Coxeter element " << i+1 << ": "
-  //  << theCommands.theObjectContainer.theCoxeterElements[i].ToString();
-  //}
   if (leftR.owner!=rightR.owner)
     return theCommands << "<hr>Attempting to multiply elements of different groups, possible user typo?";
   leftR*=rightR;
-  //stOutput << "<br>final output: " << leftR.ToString();
   return output.AssignValue(leftR, theCommands);
 }
 
@@ -725,19 +721,18 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(Calcu
   AlgebraicNumber base;
   if (!input[1].IsOfType(&base))
     return false;
-  Rational powerRat;
+  Rational powerRat, baseRat;
   if (input[2].IsRational(&powerRat))
     if (powerRat.GetDenominator()==2)
-    { Rational baseRat;
       if (base.IsRational(&baseRat))
-      { base.AssignRationalQuadraticRadical(baseRat, theCommands.theObjectContainer.theAlgebraicClosure);
-        output=input;
-        Expression newPower, newBase;
-        newPower.AssignValue(powerRat*2, theCommands);
-        newBase.AssignValue(base, theCommands);
-        return output.MakeXOX(theCommands, theCommands.opThePower(), newBase, newPower);
-      }
-    }
+        if( base.AssignRationalQuadraticRadical(baseRat, theCommands.theObjectContainer.theAlgebraicClosure))
+        { base.CheckConsistency();
+          output=input;
+          Expression newPower, newBase;
+          newPower.AssignValue(powerRat*2, theCommands);
+          newBase.AssignValue(base, theCommands);
+          return output.MakeXOX(theCommands, theCommands.opThePower(), newBase, newPower);
+        }
   int thePower=0;
   if (!input[2].IsSmallInteger(&thePower))
     return false;

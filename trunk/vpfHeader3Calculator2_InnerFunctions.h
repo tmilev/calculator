@@ -119,6 +119,7 @@ public:
   static bool innerDifferentiateAPowerB(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeDifferentiateLog(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerIntegralUpperBound(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerAnyToZero(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDiffdivDiffxToDifferentiation(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDdivDxToDiffDivDiffx(Calculator& theCommands, const Expression& input, Expression& output);

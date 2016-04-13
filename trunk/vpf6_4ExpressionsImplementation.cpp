@@ -2483,6 +2483,9 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     }
   } else if (this->IsListStartingWithAtom(this->owner->opEqualEqual()))
     out << (*this)[1].ToString(theFormat) << "==" << (*this)[2].ToString(theFormat);
+  else if (this->StartsWith(this->owner->opIntegral(),3))
+    out << "{\\int_{" << (*this)[1].ToString(theFormat) << "}^{"
+    << (*this)[2].ToString(theFormat) << "}}";
   else if (this->IsListStartingWithAtom(this->owner->opGreaterThan()))
     out << (*this)[1].ToString(theFormat) << ">" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opLimit()))

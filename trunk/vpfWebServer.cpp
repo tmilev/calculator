@@ -60,6 +60,8 @@ void SSL_write_Wrapper(SSL* inputSSL, const std::string& theString)
 //Alternatively:
 //certificate with certificate signing request:
 //openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout privateKey.key
+//then get the CSR.csr file to a signing authority,
+//from where you get the signedFileCertificate1 andsignedFileCertificate3
 const std::string fileCertificate= "../cert.pem";
 const std::string fileKey= "../key.pem";
 const std::string signedFileCertificate1= "../2_calculator-algebra.org.crt";

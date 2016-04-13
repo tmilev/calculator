@@ -532,6 +532,16 @@ bool CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT
   return false;
 }
 
+bool CalculatorFunctionsGeneral::innerIntegralUpperBound(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerIntegralUpperBound");
+  if (input.size()!=3)
+    return false;
+  const Expression& base=input[1];
+  if (!base.StartsWith(theCommands.opIntegral(),2))
+    return false;
+  return output.MakeXOX(theCommands, theCommands.opIntegral(), base[1], input[2]);
+}
+
 bool CalculatorFunctionsGeneral::innerSqrt(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerSqrt");
   if (input.size()!=3)

@@ -1117,6 +1117,19 @@ D-B;\
    "plot2D{}(\\sin{}x+cos{}x, 0, 5, 200, 200, \"blue\")", true, false,
    "CalculatorFunctionsGeneral::innerPlot2D", "plot2D")
    ;
+  this->AddOperationInnerHandler ("plotRectangle", CalculatorFunctionsGeneral::innerPlotRectangle, "",
+   "Plots a rectangle. Arguments format: plotRectangle{}((lowerCornerLeftXcoord,  lowerCornerLeftXcoord), \
+   (width, height)). \
+   ",
+   "plotRectangle{}((1,2), (2,1))", true, false,
+   "CalculatorFunctionsGeneral::innerPlotRectangle", "plotRectangle")
+   ;
+  this->AddOperationInnerHandler ("plotLabel", CalculatorFunctionsGeneral::innerPlotLabel, "",
+   "Plots a label at a given position. Arguments format: plotLabel(Xcoord, Ycoord, \"Label\"). \
+   ",
+   "plotLabel{}(1,1, \"(1,1)\")", true, false,
+   "CalculatorFunctionsGeneral::innerPlotLabel", "plotLabel")
+   ;
   this->AddOperationInnerHandler ("plotViewRectangle", CalculatorFunctionsGeneral::innerPlotViewRectangle, "",
    "Creates an empty plot whose sole purpose is to fix the view rectangle of another plot. \
    To restrict/expand the view rectangle of another plot, simply add plotViewRectangle to the other plot. \

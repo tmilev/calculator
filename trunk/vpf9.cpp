@@ -8455,6 +8455,12 @@ std::iostream& operator<< (std::iostream& output, const CompleX<Base>& input)
   return output;
 }
 
+DrawParallelogramOperation::DrawParallelogramOperation()
+{ this->thePenStyle=DrawingVariables::PenStyleNormal;
+  this->ColorIndex=0;
+  this->lineWidth=1;
+}
+
 void DrawOperations::init()
 { this->IndexNthDrawOperation.Reserve(10000);
   this->TypeNthDrawOperation.Reserve(10000);

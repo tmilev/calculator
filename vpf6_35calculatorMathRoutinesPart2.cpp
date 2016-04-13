@@ -470,6 +470,26 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOn
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerPlotLabel
+(Calculator& theCommands, const Expression& input, Expression& output)
+{
+
+}
+
+bool CalculatorFunctionsGeneral::innerPlotRectangle
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotRectangle");
+  if (input.size()!=3)
+    return false;
+  Vectors<double> theRectangle;
+  theRectangle.SetSize(2);
+  if (!theCommands.GetVectorDoubles(input[1], theRectangle[0],2) || !theCommands.GetVectorDoubles(input[2], theRectangle[1], 2))
+    return false;
+  PlotObject thePlot;
+  thePlot.theRectangles.AddOnTop(theRectangle);
+  return output.AssignValue(thePlot, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT");

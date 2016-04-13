@@ -100,48 +100,27 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
 { MacroRegisterFunctionWithName("DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName");
   if (theDimension<2)
     return "<br><b>Pictures of dimension less than two are not drawn.</b><br>";
-  std::stringstream out, tempStream1, tempStream2, tempStream3, tempStream4, tempStream5, tempStream6;
-  std::stringstream tempStream7, tempStream8, tempStream9, tempStream10, tempStream11,
-  tempStream12, tempStream13, tempStream14, tempStream15, tempStream16;
+  std::stringstream out;
   this->NumHtmlGraphics++;
   int timesCalled=this->NumHtmlGraphics;
-  tempStream1 << "drawConeInit" << timesCalled;
-  std::string theInitFunctionName= tempStream1.str();
-  tempStream5 << "drawAll" << timesCalled;
-  std::string theDrawFunctionName= tempStream5.str();
-  tempStream2 << "idCanvasCone" << timesCalled;
-  std::string theCanvasId= tempStream2.str();
-  tempStream3 << "surf" << timesCalled;
-  std::string theSurfaceName=tempStream3.str();
-  tempStream4 << "pts1" << timesCalled;
-  std::string Points1ArrayName=tempStream4.str();
-  tempStream10 << "pts2" << timesCalled;
-  std::string Points2ArrayName=tempStream10.str();
-  tempStream11<< "circ" << timesCalled;
-  std::string circArrayName=tempStream11.str();
-  tempStream12 << "txt" << timesCalled;
-  std::string txtArrayName=tempStream12.str();
-
-  tempStream6 << "basisCircles" << timesCalled;
-  std::string basisCircles = tempStream6.str();
-  tempStream13 << "proj" << timesCalled;
-  std::string projName = tempStream13.str();
-  tempStream14 << "projCirc" << timesCalled;
-  std::string projBasisCircles= tempStream14.str();
-  tempStream15 << "eiBasis" << timesCalled;
-  std::string eiBasis= tempStream15.str();
-  tempStream16 << "cloneVector" << timesCalled;
-  std::string cloneVector= tempStream16.str();
-
-  tempStream7 << "shiftXCone" << timesCalled;
-  std::string shiftX=tempStream7.str();
-  tempStream8 << "shiftYCone" << timesCalled;
-  std::string shiftY=tempStream8.str();
-  tempStream9 << "convXY" << timesCalled;
-  std::string functionConvertToXYName=tempStream9.str();
-  std::stringstream tempStream17;
-  tempStream17 << "labeledVectors" << timesCalled;
-  std::string labeledVectorsVarName = tempStream17.str();
+  std::string theInitFunctionName = "drawConeInit" + std::to_string(timesCalled);
+  std::string theDrawFunctionName = "drawAll" + std::to_string(timesCalled);
+  std::string theCanvasId = "idCanvasCone" + std::to_string(timesCalled);
+  std::string theSurfaceName = "surf" + std::to_string(timesCalled);
+  std::string Points1ArrayName="pts1" + std::to_string(timesCalled);
+  std::string Points2ArrayName="pts2" + std::to_string(timesCalled);
+  std::string filledShapes="FC" + std::to_string(timesCalled);
+  std::string circArrayName="circ" + std::to_string(timesCalled);
+  std::string txtArrayName="txt" + std::to_string(timesCalled);
+  std::string basisCircles = "basisCircles" + std::to_string(timesCalled);
+  std::string projName = "proj" + std::to_string(timesCalled);
+  std::string projBasisCircles= "projCirc" + std::to_string(timesCalled);
+  std::string eiBasis= "eiBasis" + std::to_string(timesCalled);
+  std::string cloneVector= "cloneVector" + std::to_string(timesCalled);
+  std::string shiftX="shiftXCone" + std::to_string(timesCalled);
+  std::string shiftY="shiftYCone" + std::to_string(timesCalled);
+  std::string functionConvertToXYName="convXY" + std::to_string(timesCalled);
+  std::string labeledVectorsVarName ="labeledVectors" + std::to_string(timesCalled);
 //  out << "<style>.leftTD {\n  "
 //  <<  "text-align:left;\n  padding:0;\n  border-spacing:0; "
 //  << "/* or border-collapse:collapse */\n}\n</style>\n";
@@ -198,6 +177,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "theText.innerHTML=\"\\\\documentclass{article} \\\\usepackage{auto-pst-pdf}<br>\\n%\\\\usepackage{pst-plot}<br>\\n\\\\begin{document}<br>\\n\";\n"
   << "theText.innerHTML+=\"\\\\psset{xunit=0.01cm, yunit=0.01cm} <br>\\n\\\\begin{pspicture}(0,0)(1,1)\";\n";
   out << "ComputeProjections" << timesCalled << "();\n";
+  bool nonImplementedFound=false;
   for (int i=0; i<this->theBuffer.IndexNthDrawOperation.size; i++)
   { int currentIndex=this->theBuffer.IndexNthDrawOperation[i];
     switch(theBuffer.TypeNthDrawOperation[i])
@@ -227,6 +207,19 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
         << currentIndex << "])[1]*-1" << "+ \"){\"+"
         << (((double)this->theBuffer.theDrawCircleAtVectorOperations[currentIndex].radius)/40) << "+\"}<br>\";\n";
         break;
+      case DrawOperations::typeDrawParallelogram:
+/*        out << "theText.innerHTML+=\""
+        << this->GetColorPsTricksFromColorIndex
+        (this->theBuffer.theParallelograms[currentIndex].ColorIndex)
+        << "<br>\";\n";
+        out << "theText.innerHTML+=\"\\\\pscustom[linecolor=currentColor](\"+ "
+        << functionConvertToXYName << "( " << circArrayName << "["
+        << currentIndex << "])[0]" << "+\",\"+"
+        << functionConvertToXYName << "( " << circArrayName << "["
+        << currentIndex << "])[1]*-1" << "+ \"){\"+"
+        << (((double)this->theBuffer.theDrawCircleAtVectorOperations[currentIndex].radius)/40) << "+\"}<br>\";\n";*/
+        nonImplementedFound=true;
+        break;
       case DrawOperations::typeDrawTextAtVector:
         out << "theText.innerHTML+=\""
         << this->GetColorPsTricksFromColorIndex(this->theBuffer.theDrawTextAtVectorOperations[currentIndex].ColorIndex)
@@ -242,7 +235,11 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     }
   }
 //  out << theSurfaceName << ".stroke();\n";
-  out << "theText.innerHTML+=\"\\\\end{pspicture}<br>\" + \"\\\\end{document}\";\n"
+  out << "theText.innerHTML+=\"\\\\end{pspicture}<br>\" ";
+  if (nonImplementedFound)
+    out << "+\"Not all elements in the html picture were drawn in the LaTeX version. "
+    << " Fixing this is on our to-do list. \"";
+  out << "+ \"\\\\end{document}\";\n"
   << "}\n"
   << " </script>";
   out << "The bilinear form of the vector space follows. The ij^th element "
@@ -426,9 +423,25 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   out << "var " << Points1ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n"
   << "var " << Points2ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n"
   << "var " << circArrayName << "=new Array(" << this->theBuffer.theDrawCircleAtVectorOperations.size << ");\n"
-  << "var " << txtArrayName << "=new Array(" << this->theBuffer.theDrawTextAtVectorOperations.size << ");\n";
-//  stOutput << " got to here pt 7";
-
+  << "var " << txtArrayName << "=new Array(" << this->theBuffer.theDrawTextAtVectorOperations.size << ");\n"
+  ;
+  out << "var " << filledShapes << "=new Array(" << this->theBuffer.theParallelograms.size << ");\n";
+  for (int i=0; i<this->theBuffer.theParallelograms.size; i++)
+    out << filledShapes << "[" << i << "]=["
+    << this->theBuffer.theParallelograms[i].lowerLeftCorner
+        .ToStringSquareBracketsBasicType() << ", "
+    << (this->theBuffer.theParallelograms[i].lowerLeftCorner+
+        this->theBuffer.theParallelograms[i].sidesAsVectors[0]
+       ).ToStringSquareBracketsBasicType() << ", "
+    << (this->theBuffer.theParallelograms[i].lowerLeftCorner+
+        this->theBuffer.theParallelograms[i].sidesAsVectors[0]+
+        this->theBuffer.theParallelograms[i].sidesAsVectors[1]
+       ).ToStringSquareBracketsBasicType() << ", "
+    << (this->theBuffer.theParallelograms[i].lowerLeftCorner+
+        this->theBuffer.theParallelograms[i].sidesAsVectors[1]
+       ).ToStringSquareBracketsBasicType() << ", "
+    << this->theBuffer.theParallelograms[i].lowerLeftCorner
+        .ToStringSquareBracketsBasicType() << "]";
   for (int i=0; i<this->theBuffer.theDrawLineBetweenTwoRootsOperations.size; i++)
   { Vector<double>& current1=theBuffer.theDrawLineBetweenTwoRootsOperations[i].v1;
     Vector<double>& current2=theBuffer.theDrawLineBetweenTwoRootsOperations[i].v2;
@@ -523,6 +536,33 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
         << currentIndex << "])[0],"
         << " " << functionConvertToXYName << "( " << Points2ArrayName << "["
         << currentIndex << "])[1]); ";
+        out << theSurfaceName << ".stroke();\n";
+        break;
+      case DrawOperations::typeDrawParallelogram:
+        if (theDimension!=2)
+          break;
+        out << theSurfaceName << ".beginPath(); ";
+        out << theSurfaceName << ".strokeStyle=\""
+        << this->GetColorHtmlFromColorIndex(this->theBuffer.theParallelograms[currentIndex].ColorIndex)
+        << "\"; ";
+        out << theSurfaceName << ".fillStyle=\""
+        << this->GetColorHtmlFromColorIndex(this->theBuffer.theParallelograms[currentIndex].ColorFillIndex)
+        << "\"; ";
+        out << theSurfaceName << ".lineWidth="
+        << FloatingPoint::DoubleToString
+        (this->theBuffer.theParallelograms[currentIndex].lineWidth)
+        << "; ";
+        out << theSurfaceName << ".moveTo("
+        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[0],"
+        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[1]); ";
+        out << "for (var i=1; i< " << filledShapes << ".length; i++)";
+        out << "  " << theSurfaceName << ".lineTo("
+        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][i])[0],"
+        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][i])[1]); ";
+        out << theSurfaceName << ".lineTo("
+        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[0],"
+        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[1]); ";
+        out << theSurfaceName << ".fill();\n";
         out << theSurfaceName << ".stroke();\n";
         break;
       case DrawOperations::typeDrawCircleAtVector:

@@ -36,6 +36,19 @@ public:
   }
 };
 
+class DrawParallelogramOperation
+{
+public:
+  Vector<double> lowerLeftCorner;
+  List<Vector<double> > sidesAsVectors;
+  int thePenStyle;
+  int ColorIndex;
+  int ColorFillIndex;
+  double lineWidth;
+  DrawParallelogramOperation();
+};
+
+
 class DrawLineBetweenTwoRootsOperation
 {
 public:
@@ -125,6 +138,7 @@ private:
 public:
   List<int> IndexNthDrawOperation;
   List<int> TypeNthDrawOperation;
+  List<DrawParallelogramOperation> theParallelograms;
   List<DrawTextOperation> theDrawTextOperations;
   List<DrawLineOperation> theDrawLineOperations;
   List<DrawLineBetweenTwoRootsOperation> theDrawLineBetweenTwoRootsOperations;
@@ -264,7 +278,7 @@ public:
     this->indexStartingModifiableTextCommands=0;
   }
   void init();
-  enum DrawOperationType{ typeDrawLine, typeDrawText, typeDrawLineBetweenTwoVectors, typeDrawTextAtVector, typeDrawCircleAtVector,};
+  enum DrawOperationType{ typeDrawLine, typeDrawText, typeDrawLineBetweenTwoVectors, typeDrawTextAtVector, typeDrawCircleAtVector, typeDrawParallelogram};
 };
 
 class VirtualDrawOp

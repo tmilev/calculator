@@ -39,11 +39,35 @@ public:
     out.precision(5);
     out << "(";
     for(int i=0; i<this->size; i++)
-    { out << this->TheObjects[i].ToString(theFormat);
+    { out << (*this)[i].ToString(theFormat);
       if (i!=this->size-1)
         out << ", ";
     }
     out << ")";
+    return out.str();
+  }
+  std::string ToStringSquareBrackets(FormatExpressions* theFormat=0)const
+  { std::stringstream out;
+    out.precision(5);
+    out << "[";
+    for(int i=0; i<this->size; i++)
+    { out << (*this)[i].ToString(theFormat);
+      if (i!=this->size-1)
+        out << ", ";
+    }
+    out << "]";
+    return out.str();
+  }
+  std::string ToStringSquareBracketsBasicType(FormatExpressions* theFormat=0)const
+  { std::stringstream out;
+    out.precision(5);
+    out << "[";
+    for(int i=0; i<this->size; i++)
+    { out << std::to_string((*this)[i]);
+      if (i!=this->size-1)
+        out << ", ";
+    }
+    out << "]";
     return out.str();
   }
   std::string ToStringLetterFormat(const std::string& inputLetter, FormatExpressions* theFormat=0, bool DontIncludeLastVar=false)const;

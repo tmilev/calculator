@@ -619,9 +619,13 @@ public:
   double yLow;
   double yHigh;
   int colorRGB;
+  int fillColorRGB;
   double lineWidth;
   Vectors<double> thePoints;
   List<List<Vector<double> > > theLines;
+  List<Vectors<double> > theRectangles;
+  // each rectangle is a list of two 2-dim vectors. First vector gives the (x,y)-coords
+  //of the lower left corner of the rectangle. Second vector gives the (width,height) of the rectangle.
   Expression thePlotElement;
   std::string thePlotType;
   void ComputeYbounds();

@@ -2495,7 +2495,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   else if (this->IsListStartingWithAtom(this->owner->opLessThan()))
     out << (*this)[1].ToString(theFormat) << "<" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opSequence()))
-  { switch (this->format)
+    switch (this->format)
     { case Expression::formatMatrixRow:
         for (int i=1; i<this->children.size; i++)
         { out << (*this)[i].ToString(theFormat);
@@ -2546,7 +2546,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
           out << "}";
         break;
     }
-  } else if (this->IsListStartingWithAtom(this->owner->opLieBracket()))
+  else if (this->IsListStartingWithAtom(this->owner->opLieBracket()))
     out << "[" << (*this)[1].ToString(theFormat) << "," << (*this)[2].ToString(theFormat) << "]";
   else if (this->IsListStartingWithAtom(this->owner->opMod()))
     out << (*this)[1].ToString(theFormat) << " mod " << (*this)[2].ToString(theFormat);

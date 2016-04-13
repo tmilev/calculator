@@ -838,6 +838,7 @@ PlotObject::PlotObject()
   this->yHigh=(0);
   this->colorRGB=0;
   this->lineWidth=1;
+  this->fillColorRGB=0;
 }
 
 void PlotObject::ComputeYbounds()

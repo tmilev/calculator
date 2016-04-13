@@ -1452,9 +1452,11 @@ bool Calculator::ApplyOneRule()
 //  if (fourthToLastS=="Expression" && thirdToLastS=="{}" && secondToLastS=="Expression"
 //      && this->AllowsApplyFunctionInPreceding(lastS) )
 //    return this->ReplaceEOEXByEX(secondToLastE.theData.format);
-  if (fourthToLastS=="Expression" && thirdToLastS=="{}" && secondToLastS=="Expression" && this->AllowsApplyFunctionInPreceding(lastS))
+  if (fourthToLastS=="Expression" && thirdToLastS=="{}" && secondToLastS=="Expression" &&
+      this->AllowsApplyFunctionInPreceding(lastS))
     return this->ReplaceEXEXByEX(Expression::formatDefault);
-  if (fifthToLastS=="\\lim" && fourthToLastS=="_" && thirdToLastS=="Expression" &&  secondToLastS=="Expression" && this->AllowsLimitProcessInPreceding(lastS))
+  if (fifthToLastS=="\\lim" && fourthToLastS=="_" && thirdToLastS=="Expression" &&
+      secondToLastS=="Expression" && this->AllowsLimitProcessInPreceding(lastS))
     return this->ReplaceOXEEXByEX(Expression::formatDefault);
   if (fourthToLastS=="Expression" && thirdToLastS=="_" && secondToLastS=="Expression" && lastS!="_")
     return this->ReplaceEXEXByEX(Expression::formatFunctionUseUnderscore);

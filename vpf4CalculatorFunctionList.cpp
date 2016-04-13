@@ -2680,6 +2680,12 @@ void Calculator::initPredefinedStandardOperations()
    "X=\\begin{array}{cc}0 & 1 \\\\ 1 &1\\end{array}; X^5; X^{-5}  ",
    true, false, "CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat");
   this->AddOperationHandler
+  ("^", CalculatorFunctionsGeneral::innerIntegralUpperBound, "",
+   "Replaces \\int_a^b by (\\int, a, b) .",
+   "A=\\int_a^b; Lispify(A); DrawExpressionTree(A); ",
+   true, true, false, "CalculatorFunctionsGeneral::innerIntegralUpperBound",
+   "IntegralUpperBound");
+  this->AddOperationHandler
   ("^", CalculatorFunctionsGeneral::innerPowerAnyToZero, "",
    "Replaces p^0 by 1 if p is non-zero, and by an error message if p is zero.",
    "A=x^0; x=0; A; B=x^0; 0^0; ",

@@ -194,6 +194,24 @@ void DrawOperations::drawCircleAtVectorBufferDouble
   this->theDrawCircleAtVectorOperations.LastObject()->initFromVectorDouble(input, radius, thePenStyle, theColor);
 }
 
+void DrawOperations::drawParallelogram
+  (const Vector<double>& lowerLeftCorner, const Vector<double>& vector1,
+   const Vector<double>& vector2, uint32_t thePenStyle, int ColorIndex, int fillColorIndex,
+   double lineWidth)
+{ this->TypeNthDrawOperation.AddOnTop(this->typeDrawParallelogram);
+  this->IndexNthDrawOperation.AddOnTop(this->theParallelograms.size);
+  this->theParallelograms.AddObjectOnTopCreateNew();
+  DrawParallelogramOperation& theOp = *this->theParallelograms.LastObject();
+  theOp.ColorIndex=ColorIndex;
+  theOp.ColorFillIndex=fillColorIndex;
+  theOp.thePenStyle=thePenStyle;
+  theOp.lineWidth=lineWidth;
+  theOp.lowerLeftCorner=lowerLeftCorner;
+  theOp.sidesAsVectors.SetSize(2);
+  theOp.sidesAsVectors[0]=vector1;
+  theOp.sidesAsVectors[1]=vector2;
+}
+
 void DrawOperations::drawTextAtVectorBufferRational(const Vector<Rational>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle)
 { this->TypeNthDrawOperation.AddOnTop(this->typeDrawTextAtVector);
   this->IndexNthDrawOperation.AddOnTop(this->theDrawTextAtVectorOperations.size);

@@ -487,6 +487,8 @@ bool CalculatorFunctionsGeneral::innerPlotRectangle
     return false;
   PlotObject thePlot;
   thePlot.theRectangles.AddOnTop(theRectangle);
+  thePlot.colorRGB=CGI::RedGreenBlue(0,0,255);
+  thePlot.fillColorRGB=CGI::RedGreenBlue(0,255,255);
   return output.AssignValue(thePlot, theCommands);
 }
 

@@ -827,7 +827,8 @@ bool PlotObject::operator==(const PlotObject& other)const
   this->thePlotType==other.thePlotType &&
   this->thePoints==other.thePoints &&
   this->theLines==other.theLines &&
-  this->lineWidth==other.lineWidth
+  this->lineWidth==other.lineWidth &&
+  this->theRectangles==other.theRectangles
   ;
 }
 
@@ -974,6 +975,20 @@ std::string Plot::GetPlotHtml()
   theDVs.drawTextAtVectorBufferDouble(v1, (std::string)"1", CGI::RedGreenBlue(0,0,0), theDVs.TextStyleNormal,0);
   v1.SwapTwoIndices(0,1);
   theDVs.drawTextAtVectorBufferDouble(v1, (std::string)"1", CGI::RedGreenBlue(0,0,0), theDVs.TextStyleNormal,0);
+  Vector<double> widthVector, heightVector;
+  widthVector.SetSize(2);
+  heightVector.SetSize(2);
+  widthVector[1]=0;
+  heightVector[0]=0;
+  for (int i=0; i<this->thePlots.size; i++)
+    for (int j=0; j<this->thePlots[i].theRectangles.size; j++)
+    { widthVector[0]=this->thePlots[i].theRectangles[j][1][0];
+      heightVector[1]=this->thePlots[i].theRectangles[j][1][1];
+      theDVs.theBuffer.drawParallelogram
+      (this->thePlots[i].theRectangles[j][0], widthVector, heightVector, theDVs.PenStyleNormal,
+       this->thePlots[i].colorRGB, this->thePlots[i].fillColorRGB, this->thePlots[i].lineWidth);
+    }
+
   for (int i=0; i<this->thePlots.size; i++)
     if (this->thePlots[i].thePlotType=="point")
       for (int j=0; j<this->thePlots[i].thePoints.size; j++)

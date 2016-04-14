@@ -251,6 +251,10 @@ public:
   void drawLineBetweenTwoVectorsBufferRational
   (const Vector<Rational>& vector1, const Vector<Rational>& vector2, uint32_t thePenStyle, int ColorIndex,
    double lineWidth);
+  void drawParallelogram
+  (const Vector<double>& lowerLeftCorner, const Vector<double>& vector1,
+   const Vector<double>& vector2, uint32_t thePenStyle, int ColorIndex, int fillColorIndex,
+   double lineWidth);
   void drawLineBetweenTwoVectorsBufferDouble
   (const Vector<double>& vector1, const Vector<double>& vector2, uint32_t thePenStyle, int ColorIndex,
    double lineWidth);

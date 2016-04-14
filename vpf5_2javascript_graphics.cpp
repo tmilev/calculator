@@ -441,7 +441,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
         this->theBuffer.theParallelograms[i].sidesAsVectors[1]
        ).ToStringSquareBracketsBasicType() << ", "
     << this->theBuffer.theParallelograms[i].lowerLeftCorner
-        .ToStringSquareBracketsBasicType() << "]";
+        .ToStringSquareBracketsBasicType() << "];\n";
   for (int i=0; i<this->theBuffer.theDrawLineBetweenTwoRootsOperations.size; i++)
   { Vector<double>& current1=theBuffer.theDrawLineBetweenTwoRootsOperations[i].v1;
     Vector<double>& current2=theBuffer.theDrawLineBetweenTwoRootsOperations[i].v2;
@@ -519,7 +519,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   { int currentIndex=this->theBuffer.IndexNthDrawOperation[i];
     switch(theBuffer.TypeNthDrawOperation[i])
     { case DrawOperations::typeDrawLineBetweenTwoVectors:
-        out << theSurfaceName << ".beginPath(); ";
+        out << theSurfaceName << ".beginPath();\n ";
         out << theSurfaceName << ".strokeStyle=\""
         << this->GetColorHtmlFromColorIndex(this->theBuffer.theDrawLineBetweenTwoRootsOperations[currentIndex].ColorIndex)
         << "\"; ";
@@ -541,28 +541,28 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
       case DrawOperations::typeDrawParallelogram:
         if (theDimension!=2)
           break;
-        out << theSurfaceName << ".beginPath(); ";
-        out << theSurfaceName << ".strokeStyle=\""
-        << this->GetColorHtmlFromColorIndex(this->theBuffer.theParallelograms[currentIndex].ColorIndex)
-        << "\"; ";
+        out << theSurfaceName << ".beginPath();\n ";
         out << theSurfaceName << ".fillStyle=\""
         << this->GetColorHtmlFromColorIndex(this->theBuffer.theParallelograms[currentIndex].ColorFillIndex)
-        << "\"; ";
+        << "\";\n";
         out << theSurfaceName << ".lineWidth="
         << FloatingPoint::DoubleToString
         (this->theBuffer.theParallelograms[currentIndex].lineWidth)
-        << "; ";
+        << ";\n ";
         out << theSurfaceName << ".moveTo("
         << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[0],"
-        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[1]); ";
-        out << "for (var i=1; i< " << filledShapes << ".length; i++)";
+        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[1]);\n ";
+        out << "for (var i=1; i< " << filledShapes << "[" << currentIndex << "].length; i++)\n";
         out << "  " << theSurfaceName << ".lineTo("
         << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][i])[0],"
-        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][i])[1]); ";
+        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][i])[1]);\n ";
         out << theSurfaceName << ".lineTo("
         << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[0],"
-        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[1]); ";
+        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[1]);\n ";
         out << theSurfaceName << ".fill();\n";
+        out << theSurfaceName << ".strokeStyle=\""
+        << this->GetColorHtmlFromColorIndex(this->theBuffer.theParallelograms[currentIndex].ColorIndex)
+        << "\";\n";
         out << theSurfaceName << ".stroke();\n";
         break;
       case DrawOperations::typeDrawCircleAtVector:

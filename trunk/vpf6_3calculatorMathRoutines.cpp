@@ -720,8 +720,9 @@ public:
   Polynomial<AlgebraicNumber> remainderRescaledAlgebraic;
   RationalFunctionOld transformedRF;
   FormatExpressions currentFormaT;
+  Expression integrationSetE;
   Expression contextE;
-  Expression inputE;
+  Expression inpuTE;
   Expression outputIntegralE;
   AlgebraicNumber additionalMultiple;
   Calculator* owner;
@@ -803,7 +804,9 @@ bool IntegralRFComputation::IntegrateRF()
       currentIntegrand=currentNum;
       currentIntegrand/=currentDen;
 //      stOutput << "<br>CurrentIntegrand is: " << currentIntegrand.ToString();
-      currentIntegralNoCoeff.MakeIntegral(*this->owner, currentIntegrand, this->contextE.ContextGetContextVariable(0));
+      currentIntegralNoCoeff.MakeIntegral
+      (*this->owner, this->integrationSetE, currentIntegrand,
+       this->contextE.ContextGetContextVariable(0));
       coeffE.AssignValue(currentCoefficient, *this->owner);
       currentIntegralWithCoeff=coeffE*currentIntegralNoCoeff;
       currentIntegralWithCoeff.CheckConsistencyRecursively();
@@ -818,7 +821,9 @@ bool IntegralRFComputation::IntegrateRF()
       << " to expression. This shouldn't happen. ";
       return false;
     }
-    currentIntegralWithCoeff.MakeIntegral(*this->owner, currentIntegrand, this->contextE.ContextGetContextVariable(0));
+    currentIntegralWithCoeff.MakeIntegral
+    (*this->owner, this->integrationSetE, currentIntegrand,
+     this->contextE.ContextGetContextVariable(0));
     currentIntegralWithCoeff.CheckConsistencyRecursively();
 
     this->theIntegralSummands.AddOnTop(currentIntegralWithCoeff);
@@ -1133,7 +1138,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringLaTeX()
 bool IntegralRFComputation::ComputePartialFractionDecomposition()
 { MacroRegisterFunctionWithName("IntegralRFComputation::ComputePartialFractionDecomposition");
   this->CheckConsistency();
-  this->contextE=this->inputE.GetContext();
+  this->contextE=this->inpuTE.GetContext();
   //stOutput << "<hr>Context: " << this->contextE.ToString();
   //stOutput << "<br>Context variable 1: " << this->contextE.ContextGetContextVariable(0).ToString();
   //stOutput << "<br>Context variable 2: " << this->contextE.ContextGetContextVariable(1).ToString();
@@ -1297,13 +1302,13 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
 bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals");
   IntegralRFComputation theComputation(&theCommands);
-  bool isGood=CalculatorConversions::innerRationalFunction(theCommands, input, theComputation.inputE);
+  bool isGood=CalculatorConversions::innerRationalFunction(theCommands, input, theComputation.inpuTE);
   if (isGood)
-    isGood=theComputation.inputE.IsOfType<RationalFunctionOld>();
+    isGood=theComputation.inpuTE.IsOfType<RationalFunctionOld>();
   if (!isGood)
     return theCommands << "CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals: Failed to convert "
     << input.ToString() << " to rational function. ";
-  theComputation.theRF=theComputation.inputE.GetValue<RationalFunctionOld>();
+  theComputation.theRF=theComputation.inpuTE.GetValue<RationalFunctionOld>();
   if (theComputation.theRF.GetMinNumVars()>1)
     return theCommands << "The input rational function is of " << theComputation.theRF.GetMinNumVars() << " variables and "
     << " I can handle only 1.";
@@ -2255,19 +2260,6 @@ bool CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArg
   return output.MakeXOX(theCommands, input[0][0].theData, leftE, rightE);
 }
 
-bool CalculatorFunctionsGeneral::innerExtractDifferentialOneFormOneVariable
-(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExtractDifferentialOneFormOneVariable");
-  Expression theVariableE;
-  if (!input.IsDifferentialOneFormOneVariable(&theVariableE, &output))
-    return false;
-  Expression theVarDiffFormE(theCommands);
-  theVarDiffFormE.AddChildAtomOnTop("\\diff");
-  theVarDiffFormE.AddChildOnTop(theVariableE);
-  output*=theVarDiffFormE;
-  return true;
-}
-
 bool CalculatorFunctionsGeneral::innerIsEven(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsEven");
   if (input.HasBoundVariables())
@@ -2299,44 +2291,75 @@ bool CalculatorFunctionsGeneral::innerIsNonEmptySequence(Calculator& theCommands
 
 bool CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable");
-  return output.AssignValue((int) input.IsDifferentialOneFormOneVariable(), theCommands);
+  return output.AssignValue((int) input.IsDifferentialOneFormOneVariablE(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerCompositeMultiplyIntegralFbyDx(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompositeMultiplyIntegralFbyDx");
-  //stOutput << "called innerCompositeMultiplyIntegralFbyDx with input: " << input.ToString();
+bool CalculatorFunctionsGeneral::innerInterpretAsDifferential
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInterpretAsDifferential");
   if (!input.StartsWith(theCommands.opTimes(), 3))
     return false;
-  if (!input[1].StartsWith(theCommands.opIntegral(), 2))
+  if (!input[1].StartsWith(theCommands.opIntegral()))
     return false;
-  if (!input[2].IsDifferentialOneFormOneVariable())
-    return false;
-  Expression dxPartE;
-  if (!CalculatorFunctionsGeneral::innerExtractDifferentialOneFormOneVariable(theCommands, input[2], dxPartE))
-    return false;
-//  stOutput << "ExtractedDifferential form: " << dxPartE.ToString();
-  Expression theDifferentialForm=input[1][1]* dxPartE;
-  output.reset(theCommands, 2);
-  output.AddChildAtomOnTop(theCommands.opIntegral());
-  return output.AddChildOnTop(theDifferentialForm);
+  const Expression& theDiffFormCandidateE=input[2];
+  std::string theDiff;
+  if (theDiffFormCandidateE.IsAtom(&theDiff))
+    if (theDiff.size()>1)
+      if (theDiff[0]=='d')
+      { Expression variableE, diffFormE;
+        variableE.MakeAtom(theDiff.substr(1, std::string::npos), theCommands);
+        diffFormE.reset(theCommands);
+        diffFormE.AddChildAtomOnTop(theCommands.opDifferential());
+        diffFormE.AddChildOnTop(variableE);
+        diffFormE.AddChildRationalOnTop(1);
+        output=input;
+        return output.SetChilD(2, diffFormE);
+      }
+  return false;
 }
 
-bool Calculator::GetFunctionFromDiffOneForm(const Expression& input, Expression& outputFunction, Expression& outputVariable)
-{ MacroRegisterFunctionWithName("Calculator::GetFunctionFromDiffOneForm");
-  Expression theFormE;
-  if (!CalculatorFunctionsGeneral::innerExtractDifferentialOneFormOneVariable(*this, input, theFormE))
-  { //*this << "<hr>Failed to extract one variable one-form from " << input.ToString();
-    return false;
+bool CalculatorFunctionsGeneral::innerIntegralOperator(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompositeMultiplyIntegralFbyDx");
+  //stOutput << "called innerCompositeMultiplyIntegralFbyDx with input: " << input.ToString();
+  int theOp=theCommands.opTimes();
+  if (!input.StartsWith(theOp, 3))
+  { theOp=theCommands.opDivide();
+    if (!input.StartsWith(theOp, 3))
+      return false;
   }
-  if (!this->EvaluateExpression(*this, theFormE[1], outputFunction))
-  { *this << "Failed to evaluate expression: " << theFormE[1].ToString();
-    return false;
+  const Expression& integralE=input[1];
+  if (integralE.IsAtomGivenData(theCommands.opIntegral()))
+  { Expression integralOperatorE;
+    integralOperatorE.reset(theCommands, 2);
+    integralOperatorE.AddChildAtomOnTop(theCommands.opIntegral());
+    integralOperatorE.AddChildAtomOnTop(theCommands.opIndefiniteIntegralIndicator());
+    output=input;
+    return output.SetChilD(1, integralOperatorE);
   }
-//  outputFunction=theFormE[1];
-  outputVariable=theFormE[2][1];
-//  *this << "<hr>Extracted differential: " << theFormE.ToString() << "(Variable: " << outputVariable.ToString()
-//  << ", function: " << outputFunction.ToString() << ").";
-  return true;
+  if (!integralE.StartsWith(theCommands.opIntegral()))
+    return false;
+  if (integralE.size()<3)
+  { output=integralE;
+    return output.AddChildOnTop(input[2]);
+  }
+  if (integralE.size()!=3)
+    return false;
+  const Expression& startingIntegrand=integralE[2];
+  if (startingIntegrand.IsDifferentialOneFormOneVariablE())
+    return false;
+  const Expression& incomingIntegrand=input[2];
+  Expression newIntegrand;
+  Expression newFun;
+  if (incomingIntegrand.IsDifferentialOneFormOneVariablE())
+  { newFun.MakeXOX(theCommands, theOp, startingIntegrand, incomingIntegrand[2]);
+    newIntegrand.MakeXOX
+    (theCommands, theCommands.opDifferential(), incomingIntegrand[1], newFun);
+    output=integralE;
+    return output.SetChilD(2, newIntegrand);
+  }
+  newIntegrand.MakeXOX(theCommands, theOp, startingIntegrand,incomingIntegrand);
+  output=integralE;
+  return output.SetChilD(2, newIntegrand);
 }
 
 bool CalculatorFunctionsGeneral::innerRationalFunctionSubstitution(Calculator& theCommands, const Expression& input, Expression& output)
@@ -2609,30 +2632,31 @@ bool CalculatorFunctionsGeneral::outerPolynomialize(Calculator& theCommands, con
 
 bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks");
-  Expression theFunctionE, theVariableE, integralE(theCommands);
-  if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, theVariableE))
+  Expression theFunctionE, theVariableE, integrationSetE;
+  if (!input.IsIntegralfdx(&theVariableE, &theFunctionE, &integrationSetE))
     return false;
   //stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks, input: " << input.ToString();
   IntegralRFComputation theComputation(&theCommands);
-  if(!CalculatorConversions::innerRationalFunction(theCommands, theFunctionE, theComputation.inputE))
+  if(!CalculatorConversions::innerRationalFunction(theCommands, theFunctionE, theComputation.inpuTE))
     return theCommands << "<hr>Call of function CalculatorConversions::innerRationalFunction failed, input was: "
     << theFunctionE.ToString();
-  if (!theComputation.inputE.IsOfType<RationalFunctionOld>())
+  if (!theComputation.inpuTE.IsOfType<RationalFunctionOld>())
     return theCommands << "<hr>CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks: failed to convert "
-    << theFunctionE.ToString() << " to rational function. Attempt to converted expression yielded: " << theComputation.inputE.ToString();
-  if (theComputation.inputE.GetNumContextVariables()>1)
+    << theFunctionE.ToString() << " to rational function. Attempt to converted expression yielded: " << theComputation.inpuTE.ToString();
+  if (theComputation.inpuTE.GetNumContextVariables()>1)
     return theCommands << "<hr>I converted " << theFunctionE.ToString() << " to rational function, but it is of "
-    << theComputation.inputE.GetNumContextVariables() << " variables. I have been taught to work with 1 variable only. "
-    << "<br>The context of the rational function is: " << theComputation.inputE.GetContext().ToString();
-  if (theComputation.inputE.GetNumContextVariables()==1)
-    if (theComputation.inputE.GetContext().ContextGetContextVariable(0)!=theVariableE)
-      return theCommands << "<hr>The univariate rational function was in variable " << theComputation.inputE.GetContext().ToString()
+    << theComputation.inpuTE.GetNumContextVariables() << " variables. I have been taught to work with 1 variable only. "
+    << "<br>The context of the rational function is: " << theComputation.inpuTE.GetContext().ToString();
+  if (theComputation.inpuTE.GetNumContextVariables()==1)
+    if (theComputation.inpuTE.GetContext().ContextGetContextVariable(0)!=theVariableE)
+      return theCommands << "<hr>The univariate rational function was in variable " << theComputation.inpuTE.GetContext().ToString()
       << " but the variable of integration is " << theVariableE.ToString();
-  theComputation.theRF=theComputation.inputE.GetValue<RationalFunctionOld>();
+  theComputation.integrationSetE=integrationSetE;
+  theComputation.theRF=theComputation.inpuTE.GetValue<RationalFunctionOld>();
   theComputation.theRF.GetDenominator(theComputation.theDen);
   theComputation.theRF.GetNumerator(theComputation.theNum);
 //  stOutput << "<br>partial fraction decompo called, the den is: " << theComputation.theDen.ToString();
-  if (theComputation.theDen.TotalDegree()<1 )
+  if (theComputation.theDen.TotalDegree()<1)
     return false;
 //  stOutput << "<br>calling integration... ";
   if (!theComputation.IntegrateRF())
@@ -2642,7 +2666,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlo
   //stOutput << "got before check consistency 3";
   //stOutput << "result of "
   output=theComputation.theIntegralSum;
-  if (output.StartsWith(theCommands.opIntegral(),2))
+  if (output.StartsWith(theCommands.opIntegral()))
     if (output[1]==input)
       return false;
   output.CheckConsistencyRecursively();
@@ -2680,7 +2704,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa");
   Expression theFunctionE, theVariableE, integralE(theCommands);
-  if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, theVariableE))
+  if (!input.IsIntegralfdx(&theVariableE, &theFunctionE))
     return false;
 //  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockI, input: " << input.ToString();
   if (!theFunctionE.StartsWith(theCommands.opDivide(), 3))
@@ -2709,7 +2733,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa
 bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIb(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa");
   Expression theFunctionE, theVariableE, integralE(theCommands);
-  if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, theVariableE))
+  if (!input.IsIntegralfdx(&theVariableE, &theFunctionE))
     return false;
 //  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockI, input: " << input.ToString();
   if (!theFunctionE.StartsWith(theCommands.opDivide(), 3))
@@ -2791,7 +2815,7 @@ bool CalculatorFunctionsGeneral::extractLinearCoeffsWRTvariable
 bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa");
   Expression theFunctionE, x, integralE(theCommands);
-  if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, x))
+  if (!input.IsIntegralfdx(&x, &theFunctionE))
     return false;
 //  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa, input: " << input.ToString();
   if (!theFunctionE.StartsWith(theCommands.opDivide(), 3))
@@ -2848,8 +2872,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaan
 
 bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb");
-  Expression theFunctionE, x, integralE(theCommands);
-  if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, x))
+  Expression theFunctionE, x, integrationSetE;
+  if (!input.IsIntegralfdx(&x, &theFunctionE, &integrationSetE))
     return false;
   //stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockI, input: " << input.ToString();
   if (!theFunctionE.StartsWith(theCommands.opDivide(), 3))
@@ -2898,7 +2922,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb(
   theQuadraticPowerOneMinusN.MakeXOX(theCommands, theCommands.opThePower(), theMonicQuadratic, oneE-numPowerE);
   theQuadraticPowerNMinusOne.MakeXOX(theCommands, theCommands.opThePower(), theMonicQuadratic, numPowerE-oneE);
   functionRemainingToIntegrate=oneE/theQuadraticPowerNMinusOne;
-  remainingIntegral.MakeIntegral(theCommands, functionRemainingToIntegrate, x);
+  remainingIntegral.MakeIntegral(theCommands, integrationSetE, functionRemainingToIntegrate, x);
   output =oneE/D *
   ((x+b/twoE)/(twoE*numPowerE-twoE) * theQuadraticPowerOneMinusN+
   (twoE*numPowerE-threeE)/(twoE*numPowerE-twoE)*remainingIntegral);
@@ -2911,8 +2935,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb(
 
 bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb");
-  Expression theFunctionE, x, integralE(theCommands);
-  if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, x))
+  Expression theFunctionE, x, integrationSetE;
+  if (!input.IsIntegralfdx(&x, &theFunctionE, &integrationSetE))
     return false;
 //  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockI, input: " << input.ToString();
   if (!theFunctionE.StartsWith(theCommands.opDivide(), 3))
@@ -2963,7 +2987,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb(C
   quadraticPowerN.MakeXOX(theCommands, theCommands.opThePower(), theQuadraticDiva, nE);
   quadraticPowerOneMinusN.MakeXOX(theCommands, theCommands.opThePower(), theQuadraticDiva, oneE-nE);
   remainingFunctionToIntegrate=oneE/quadraticPowerN;
-  remainingIntegral.MakeIntegral(theCommands, remainingFunctionToIntegrate, x);
+  remainingIntegral.MakeIntegral(theCommands, integrationSetE, remainingFunctionToIntegrate, x);
   Expression xplusbdiv2a = x+b/(twoE*a);
   Expression D=(fourE*a*c-bSquared)/(fourE*aSquared);
   Expression C=B-(A*b)/(twoE*a);
@@ -2987,8 +3011,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb(C
 
 bool CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst");
-  Expression newIntegral, theFunctionE, integrandE, newIntegralE, theVariableE;
-  if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, theVariableE))
+  Expression theFunctionE, integrandE, newIntegralE, theVariableE, integrationSetE;
+  if (!input.IsIntegralfdx(&theVariableE, &theFunctionE, &integrationSetE))
     return false;
 //  stOutput << "<br>innerIntegratePowerByUncoveringParenthesisFirst: Integrating function " << theFunctionE.ToString();
   if (!theFunctionE.StartsWith(theCommands.opThePower()))
@@ -2998,7 +3022,7 @@ bool CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst
 //  stOutput << "<br>integrand polynomialized: " << integrandE.ToString();
   if (integrandE==theFunctionE)
     return false;
-  newIntegralE.MakeIntegral(theCommands, integrandE, theVariableE);
+  newIntegralE.MakeIntegral(theCommands, integrationSetE, integrandE, theVariableE);
   if (!theCommands.EvaluateExpression(theCommands, newIntegralE, output))
     return false;
   if (output.ContainsAsSubExpression(theCommands.opIntegral()))
@@ -3008,36 +3032,37 @@ bool CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst
   return true;
 }
 
-bool Expression::MakeIntegral(Calculator& theCommands, const Expression& theFunction, const Expression& theVariable)
+bool Expression::MakeIntegral
+(Calculator& theCommands, const Expression& integrationSet, const Expression& theFunction,
+ const Expression& theVariable)
 { MacroRegisterFunctionWithName("Expression::MakeIntegral");
-  if (this==&theFunction || this==&theVariable)
+  if (this==&theFunction || this==&theVariable || this==&integrationSet)
   { Expression theFunCopy=theFunction;
     Expression theVarCopy=theVariable;
-    return this->MakeIntegral(theCommands, theFunction, theVariable);
+    Expression integrationSetCopy=integrationSet;
+    return this->MakeIntegral(theCommands, integrationSetCopy, theFunCopy, theVarCopy);
   }
-  Expression theDx, theDiffForm;
-  theDx.reset(theCommands);
-  theDx.AddChildAtomOnTop(theCommands.opDifferential());
-  theDx.AddChildOnTop(theVariable);
-  theDiffForm=theFunction*theDx;
+  Expression theDiffForm;
+  theDiffForm.MakeXOX(theCommands, theCommands.opDifferential(), theVariable, theFunction);
   this->reset(theCommands);
   this->AddChildAtomOnTop(theCommands.opIntegral());
+  this->AddChildOnTop(integrationSet);
   return this->AddChildOnTop(theDiffForm);
 }
 
 bool CalculatorFunctionsGeneral::innerIntegrateSum(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateSum");
-  Expression theFunctionE, theVariableE;
-  if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, theVariableE))
+  Expression theFunctionE, theVariableE, integrationSetE;
+  if (!input.IsIntegralfdx(&theVariableE, &theFunctionE, &integrationSetE))
     return false;
 //  stOutput << "<br>innerIntegrateSum: Integrating function " << theFunctionE.ToString();
   if (!theFunctionE.StartsWith(theCommands.opPlus()))
     return false;
   List<Expression> integralsOfSummands;
   integralsOfSummands.SetSize(theFunctionE.children.size-1);
-  Expression newIntegralE, newDx, newDiffFormE, newFunctionE, result, newSummand;
+  Expression newIntegralE, result, newSummand;
   for (int i=1; i<theFunctionE.children.size; i++)
-  { newIntegralE.MakeIntegral(theCommands, theFunctionE[i], theVariableE);
+  { newIntegralE.MakeIntegral(theCommands, integrationSetE, theFunctionE[i], theVariableE);
 //    stOutput << "New integral: " << newIntegralE.ToString();
     if (!theCommands.EvaluateExpression(theCommands, newIntegralE, newSummand))
       return false;
@@ -3057,7 +3082,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateSum(Calculator& theCommands, cons
 bool CalculatorFunctionsGeneral::innerIntegrateXnDiffX(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateXnDiffX");
   Expression theFunctionE, theVariableE;
-  if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, theVariableE))
+  if (!input.IsIntegralfdx(&theVariableE, &theFunctionE))
     return false;
 //  stOutput << "<br>innerIntegrateXnDiffX: Integrating function " << theFunctionE.ToString();
   Expression theFunCoeff, theFunNoCoeff, outputNoCoeff;

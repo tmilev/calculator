@@ -472,7 +472,21 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOn
 
 bool CalculatorFunctionsGeneral::innerPlotLabel
 (Calculator& theCommands, const Expression& input, Expression& output)
-{
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotRectangle");
+  if (input.size()<4)
+    return false;
+  Vector<double> labelPosition;
+  labelPosition.SetSize(2);
+  if (!input[1].EvaluatesToDouble(& labelPosition[0]) || !input[2].EvaluatesToDouble(& labelPosition[2]))
+    return false;
+  std::string theLabel;
+  if (!input[3].IsOfType<std::string>(&theLabel))
+    theLabel=input[3].ToString();
+  PlotObject thePlot;
+  thePlot.thePlotString=theLabel;
+  thePlot.thePoints.AddOnTop(labelPosition);
+  thePlot.thePlotType="label";
+  return output.AssignValue(thePlot, theCommands);
 
 }
 
@@ -561,7 +575,9 @@ bool CalculatorFunctionsGeneral::innerIntegralUpperBound(Calculator& theCommands
   const Expression& base=input[1];
   if (!base.StartsWith(theCommands.opIntegral(),2))
     return false;
-  return output.MakeXOX(theCommands, theCommands.opIntegral(), base[1], input[2]);
+  Expression newSetE;
+  newSetE.MakeXOX(theCommands, theCommands.opSequence(), base[1], input[2]);
+  return output.MakeOX(theCommands, theCommands.opIntegral(), newSetE);
 }
 
 bool CalculatorFunctionsGeneral::innerSqrt(Calculator& theCommands, const Expression& input, Expression& output)

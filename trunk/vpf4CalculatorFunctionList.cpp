@@ -374,21 +374,26 @@ D-B;\
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst, "",
    "Attempts to rearrange into standard polynomial form and then integrate.  ",
-   "\\int  \\left( \\frac{x(x+1) }{ 2} \\right)^2 dx ", true, false, "CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst");
+   "\\int  \\left( \\frac{x(x+1) }{ 2} \\right)^2 dx ", true, false,
+   "CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst",
+   "IntegrateAfterPolynomialization");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateXnDiffX, "",
    "Integrates x^n dx.  ",
-   "\\int x dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateXnDiffX");
+   "\\int x dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateXnDiffX",
+   "IntegratePowerRule");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateSum, "",
    "If the integral is of the form \\int (A+B )dx, tries recursively to integrate A and B. \
    If successful, integrates the sum in the obvious way.",
-   "\\int (x+1+\\sqrt{}2) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateSum");
+   "\\int (x+1+\\sqrt{}2) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateSum",
+   "IntegrateSum");
 
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateSqrt, "",
    "Differentiation - square root function.  ",
-   "d/dx(sqrt(x));", true, false, "CalculatorFunctionsGeneral::innerDifferentiateSqrt", "DifferentiateSqrt");
+   "d/dx(sqrt(x));", true, false, "CalculatorFunctionsGeneral::innerDifferentiateSqrt",
+   "DifferentiateSqrt");
 
 
   //the function integrating the building blocks must come in the exact order below:
@@ -396,27 +401,39 @@ D-B;\
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa, "",
    "Integrates building block Ia.  ",
-   "\\int  (\\frac{3}{(x/2-1)} ) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa");
+   "\\int  (\\frac{3}{(x/2-1)} ) dx ", true, false,
+   "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa",
+   "IntegrateBlockIa");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIb, "",
    "Integrates building block Ib.  ",
-   "\\int  (\\frac{2}{(3x-1)^2} ) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIb");
+   "\\int  (\\frac{2}{(3x-1)^2} ) dx ", true, false,
+   "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIb",
+   "IntegrateBlockIb");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa, "",
    "Integrates building blocks IIa and IIIa.  ",
-   "\\int  (\\frac{3x+2}{x^2+x+1} ) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa");
+   "\\int  (\\frac{3x+2}{x^2+x+1} ) dx ", true, false,
+   "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa",
+   "IntegrateBlockIIaIIIa");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb, "",
    "Integrates building blocks IIIb.  ",
-   "\\int  (\\frac{3x+2}{(x^2+x+1)^2} ) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb");
+   "\\int  (\\frac{3x+2}{(x^2+x+1)^2} ) dx ", true, false,
+   "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb",
+   "IntegrateBlockIIIb");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb, "",
    "Integrates building blocks IIb.  ",
-   "\\int  (\\frac{3x+2}{(x^2+x+1)^2} ) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb");
+   "\\int  (\\frac{3x+2}{(x^2+x+1)^2} ) dx ", true, false,
+   "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb",
+   "IntegrateBlockIIb");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks, "",
    "Attempts to split an integral of a rational function into building block integrals.  ",
-   "\\int  \\frac{1}{x(x+1)} dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks");
+   "\\int  \\frac{1}{x(x+1)} dx ", true, false,
+   "CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks",
+   "IntegratePartialFractions");
 
 
 /*  this->AddOperationInnerHandler
@@ -2188,9 +2205,15 @@ void Calculator::initPredefinedStandardOperations()
 //   "On condition that F is a built-int function name or built-in operation, replaces F*x with F{}x.",
 //   "plot2D(\\sin{}x+cos{}x, 0, 5) ", true, false, "Calculator::outerTimesToFunctionApplication");
   this->AddOperationInnerHandler
-  ("*", CalculatorFunctionsGeneral::innerCompositeMultiplyIntegralFbyDx, "",
-   "Transformation: (\\int{} f) dx= \\int{}(f dx)",
-   "(\\int x)dx", true, false, "CalculatorFunctionsGeneral::innerCompositeMultiplyIntegralFbyDx");
+  ("*", CalculatorFunctionsGeneral::innerInterpretAsDifferential, "",
+   "If circumstances imply it, interprets an atom of the form dx as the differential \\diff x. ",
+   "(\\int x)dx; \\int x (1+x) dx; \\int_2^3 x dx; \\int_2^3 x(1+x)dx", true, false,
+   "CalculatorFunctionsGeneral::innerInterpretAsDifferential", "InterpretAsDifferential");
+  this->AddOperationInnerHandler
+  ("*", CalculatorFunctionsGeneral::innerIntegralOperator, "",
+   "Transforms integral notation into an integral expression. ",
+   "(\\int x)dx; \\int x (1+x) dx; \\int_2^3 x dx; \\int_2^3 x(1+x)dx", true, false,
+   "CalculatorFunctionsGeneral::innerIntegralOperator", "IntegralOperator");
 
   this->AddOperationOuterHandler
   ("*", CalculatorFunctionsGeneral::outerDifferentiateWRTxTimesAny, "",
@@ -2579,6 +2602,11 @@ void Calculator::initPredefinedStandardOperations()
     " (x,y,t)\\setminus Sequence{}x; (x,y)\\setminus (z,y)", true, false, "CalculatorFunctionsBinaryOps::innerSetMinus",
     "\\setminus");
 
+  this->AddOperationInnerHandler
+  ("/", CalculatorFunctionsGeneral::innerIntegralOperator, "",
+   "Transforms integral notation into an integral expression. ",
+   "(\\int x)dx; \\int x (1+x) dx; \\int_2^3 x dx; \\int_2^3 x(1+x)dx", true, false,
+   "CalculatorFunctionsGeneral::innerIntegralOperator", "IntegralOperator");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat, this->opEltZmodP(), this->opEltZmodP(),
    "Divides elements of Z_p. ",
@@ -3023,6 +3051,7 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler()
   this->AddOperationNoRepetitionAllowed("MonomialPoly");
   this->AddOperationNoRepetitionAllowed("Melt");
   this->AddOperationNoRepetitionAllowed("Bind");
+  this->AddOperationNoRepetitionAllowed("IndefiniteIntegralIndicator");
   this->AddOperationNoRepetitionAllowed("\\log");
   //additional operations with the same status as user-input expressions.
   this->AddOperationNoRepetitionAllowed("\\pi");
@@ -3126,6 +3155,7 @@ void Calculator::initBuiltInAtomsNotInterpretedAsFunctions()
 
   this->AddKnownDoubleConstant("\\pi", MathRoutines::Pi());
   this->AddKnownDoubleConstant("e", MathRoutines::E());
+  this->atomsNotInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\int");
 }
 
 void Calculator::AddTrigSplit(const std::string& trigFun, const List<std::string>& theVars)

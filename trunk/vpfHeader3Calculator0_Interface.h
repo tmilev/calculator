@@ -153,6 +153,7 @@ class Expression
     this->children.Clear();
     this->children.SetExpectedSize(numExpectedChildren);
   }
+  bool AddChildRationalOnTop(const Rational& inputRat);
   bool AddChildOnTop(const Expression& inputChild);
   bool AddChildAtomOnTop(const std::string& theOperationString);
   bool AddChildAtomOnTop(int theOp)
@@ -164,6 +165,7 @@ class Expression
   void GetBlocksOfCommutativity(HashedListSpecialized<Expression>& inputOutputList)const;
   bool SplitProduct(int numDesiredMultiplicandsLeft, Expression& outputLeftMultiplicand, Expression& outputRightMultiplicand)const;
   void GetBaseExponentForm(Expression& outputBase, Expression& outputExponent)const;
+  void GetMultiplicandsDivisorsRecursive(List<Expression>& outputAppendList, int depth=0)const;
   void GetCoefficientMultiplicandForm(Expression& outputCoeff, Expression& outputNoCoeff)const;
   void GetCoefficientMultiplicandForm(Rational& outputCoeff, Expression& outputNoCoeff)const;
   bool SetChildAtomValue(int childIndex, const std::string& theAtom);
@@ -222,8 +224,8 @@ class Expression
   bool IsAtomGivenData(int desiredDataUseMinusOneForAny=-1)const;
   bool IsBuiltInAtom(std::string* outputWhichOperation=0)const;
   bool IsGoodForChainRuleFunction(std::string* outputWhichOperation=0)const;
-
-  bool IsDifferentialOneFormOneVariable(Expression* outputDifferentialOfWhat=0, Expression* outputCoeffInFrontOfDifferential=0)const;
+  bool IsIntegralfdx(Expression* differentialVariable=0, Expression* functionToIntegrate=0, Expression* integrationSet=0)const;
+  bool IsDifferentialOneFormOneVariablE(Expression* outputDifferentialOfWhat=0, Expression* outputCoeffInFrontOfDifferential=0)const;
   bool IsKnownFunctionWithComplexRange(std::string* outputWhichOperation=0)const;
   bool IsArithmeticOperation(std::string* outputWhichOperation=0)const;
   bool IsCacheableExpression()const;
@@ -357,7 +359,9 @@ class Expression
   bool MakeAtom(const std::string& atomName, Calculator& newBoss);
   bool EvaluatesToVariableNonBound()const;
   Expression::FunctionAddress GetHandlerFunctionIamNonBoundVar();
-  bool MakeIntegral(Calculator& theCommands, const Expression& theFunction, const Expression& theVariable);
+  bool MakeIntegral
+  (Calculator& theCommands, const Expression& integrationSet, const Expression& theFunction,
+  const Expression& theVariable);
   template<class coefficient>
   bool MakeSum(Calculator& theCommands, const MonomialCollection<Expression, coefficient>& theSum);
   bool MakeSum(Calculator& theCommands, const List<Expression>& theSum);
@@ -1333,6 +1337,9 @@ public:
   int opDifferential()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\diff");
   }
+  int opIndefiniteIntegralIndicator()
+  { return this->theAtoms.GetIndexIMustContainTheObject("IndefiniteIntegralIndicator");
+  }
   int opIntegral()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\int");
   }
@@ -1669,8 +1676,6 @@ public:
   static bool innerGCD(Calculator& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerGCDOrLCM(theCommands, input, output, true);
   }
-  bool GetFunctionFromDiffOneForm
-  (const Expression& input, Expression& outputFunction, Expression& outputVariable);
   bool GetListPolysVariableLabelsInLex(const Expression& input, Vector<Polynomial<Rational> >& output, Expression& outputContext);
   static bool innerPolynomialDivisionRemainder(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialDivisionVerbose

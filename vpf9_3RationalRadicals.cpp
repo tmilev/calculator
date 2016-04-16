@@ -709,7 +709,7 @@ void AlgebraicNumber::operator-=(const AlgebraicNumber& other)
   AlgebraicClosureRationals* theOwner=this->owner;
   if (theOwner==0)
     theOwner=other.owner;
-  if (theOwner==0)
+  if (theOwner==0 && this->basisIndex!=other.basisIndex)
     crash << "This is a programming error: algebraic numbers with zero owners but different basis indices. " << crash;
   VectorSparse<Rational> AdditiveFormOther;
   theOwner->GetAdditionTo(*this, this->theElT);
@@ -725,7 +725,7 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other)
   other.CheckConsistency();
   if (this==& other)
   { AlgebraicNumber otherCopy=other;
-    *this+=other;
+    *this+=otherCopy;
     this->CheckConsistency();
     return;
   }
@@ -733,8 +733,10 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other)
   AlgebraicClosureRationals* theOwner=this->owner;
   if (theOwner==0)
     theOwner=other.owner;
-  if (theOwner==0)
-    crash << "This is a programming error: algebraic numbers with zero owners but different basis indices. " << crash;
+  if (theOwner==0 && this->basisIndex!=other.basisIndex)
+    crash << "This is a programming error: algebraic numbers: "
+    << this->ToString() << " and " << other.ToString()
+    << " have with zero owners but different basis indices. " << crash;
   if (this->basisIndex==other.basisIndex)
   { this->owner=theOwner;
     this->CheckConsistency();
@@ -828,8 +830,7 @@ bool AlgebraicNumber::operator>(const AlgebraicNumber& other)const
 }
 
 void AlgebraicNumber::AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner)
-{ this->owner=0;
-  this->basisIndex=0;
+{ this->basisIndex=0;
   this->theElT.MaKeEi(0, input);
 }
 
@@ -1041,9 +1042,10 @@ bool AlgebraicNumber::IsRational(Rational* whichRational)const
       //<< this->theElT.theCoeffs[i].ToString();
       return false;
 
-    } else
-      if (whichRational!=0)
-        *whichRational=this->theElT.theCoeffs[i];
+    } else if (whichRational!=0)
+      *whichRational=this->theElT.theCoeffs[i];
+//  if (this->basisIndex!=0)
+//    crash << "Rational algebraic number: must have basis index 0" << crash;
   //stOutput << "it is!";
   return true;
 }
@@ -1069,7 +1071,7 @@ std::string AlgebraicNumber::ToString(FormatExpressions* theFormat)const
   return out.str();
 }
 
-  bool AlgebraicNumber::operator==(const AlgebraicNumber& other)const
+bool AlgebraicNumber::operator==(const AlgebraicNumber& other)const
 { Rational ratValue;
   this->CheckConsistency();
   other.CheckConsistency();

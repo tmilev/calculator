@@ -243,10 +243,12 @@ bool CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber(Calc
     if (!input[1].IsOfType<Rational>(&tempRat))
       return false;
     leftAN.AssignRational(tempRat, theCommands.theObjectContainer.theAlgebraicClosure);
+    leftAN.CheckConsistency();
   } else if (!input[2].IsOfType(&rightAN))
   { if (!input[2].IsOfType(&tempRat))
       return false;
     rightAN.AssignRational(tempRat, theCommands.theObjectContainer.theAlgebraicClosure);
+    rightAN.CheckConsistency();
   }
   leftAN.CheckConsistency();
   rightAN.CheckConsistency();

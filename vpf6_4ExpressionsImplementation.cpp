@@ -985,6 +985,13 @@ const Expression& Expression::operator[](int n)const
   return this->owner->theExpressionContainer[childIndex];
 }
 
+bool Expression::AddChildRationalOnTop(const Rational& inputRat)
+{ this->CheckInitialization();
+  Expression ratE;
+  ratE.AssignValue(inputRat, *this->owner);
+  return this->AddChildOnTop(ratE);
+}
+
 bool Expression::AddChildOnTop(const Expression& inputChild)
 { this->CheckInitialization();
   this->children.AddOnTop(this->owner->theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(inputChild));
@@ -1423,73 +1430,30 @@ bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVa
   return true;
 }
 
-bool Expression::IsDifferentialOneFormOneVariable(Expression* outputDifferentialOfWhat, Expression* outputCoeffInFrontOfDifferential)const
-{ MacroRegisterFunctionWithName("Expression::IsDifferentialOneFormOneVariable");
+bool Expression::IsIntegralfdx
+(Expression* differentialVariable, Expression* functionToIntegrate, Expression* integrationSet)const
+{ MacroRegisterFunctionWithName("Expression::IsIntegralfdx");
   if (this->owner==0)
     return false;
-  RecursionDepthCounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::IsDifferentialOneFormOneVariable:"))
+  if (!this->StartsWith(this->owner->opIntegral(), 3))
     return false;
-  if (this->StartsWith(this->owner->opPlus(), 3))
-  { Expression leftDiff, rightDiff, leftCoeff, rightCoeff;
-    if (!(*this)[1].IsDifferentialOneFormOneVariable(&leftDiff, &leftCoeff))
-      return false;
-    if (!(*this)[2].IsDifferentialOneFormOneVariable(&rightDiff, &rightCoeff))
-      return false;
-    if (leftDiff!=rightDiff)
-      return false;
-    if (outputDifferentialOfWhat!=0)
-      *outputDifferentialOfWhat=leftDiff;
-    if (outputCoeffInFrontOfDifferential!=0)
-      *outputCoeffInFrontOfDifferential=leftCoeff+rightCoeff;
-    return true;
-  }
-  if (this->StartsWith(this->owner->opTimes(), 3))
-  { if (!(*this)[1].IsDifferentialOneFormOneVariable(outputDifferentialOfWhat))
-    { if (outputCoeffInFrontOfDifferential!=0)
-        *outputCoeffInFrontOfDifferential=(*this)[1];
-      Expression secondCoefficientOfDifferential;
-      if((*this)[2].IsDifferentialOneFormOneVariable(outputDifferentialOfWhat, &secondCoefficientOfDifferential))
-      { if (outputCoeffInFrontOfDifferential!=0)
-          *outputCoeffInFrontOfDifferential*=secondCoefficientOfDifferential;
-        return true;
-      }
-      return false;
-    }
-    if (outputCoeffInFrontOfDifferential!=0)
-      *outputCoeffInFrontOfDifferential=(*this)[2];
-    return !(*this)[2].IsDifferentialOneFormOneVariable();
-  }
-  if (this->StartsWith(this->owner->opDivide(), 3))
-  { if (!(*this)[1].IsDifferentialOneFormOneVariable(outputDifferentialOfWhat))
-      return false;
-    if (outputCoeffInFrontOfDifferential!=0)
-    { outputCoeffInFrontOfDifferential->reset(*this->owner);
-      *outputCoeffInFrontOfDifferential=1;
-      *outputCoeffInFrontOfDifferential/=(*this)[2];
-    }
-    return !(*this)[2].IsDifferentialOneFormOneVariable();
-  }
-  std::string theDiff;
-  if (this->IsAtom(&theDiff))
-    if (theDiff.size()>1)
-      if (theDiff[0]=='d')
-      { if (outputDifferentialOfWhat!=0)
-          outputDifferentialOfWhat->MakeAtom(theDiff.substr(1, std::string::npos), *this->owner);
-        if (outputCoeffInFrontOfDifferential!=0)
-          outputCoeffInFrontOfDifferential->AssignValue(1, *this->owner);
-//        stOutput << "theDiff string: " << theDiff;
-        return true;
-      }
-//  stOutput << "theDiff string: " << theDiff;
-  if (!this->IsListNElements(2))
+  if (!(*this)[2].IsDifferentialOneFormOneVariablE(differentialVariable, functionToIntegrate))
     return false;
-  if ((*this)[0]!="\\diff")
+  if (integrationSet!=0)
+    *integrationSet=(*this)[1];
+  return true;
+}
+
+bool Expression::IsDifferentialOneFormOneVariablE(Expression* outputDifferentialOfWhat, Expression* outputCoeffInFrontOfDifferential)const
+{ MacroRegisterFunctionWithName("Expression::IsDifferentialOneFormOneVariablE");
+  if (this->owner==0)
+    return false;
+  if (!this->StartsWith(this->owner->opDifferential()) || this->size()!=3)
     return false;
   if (outputDifferentialOfWhat!=0)
     *outputDifferentialOfWhat=(*this)[1];
   if (outputCoeffInFrontOfDifferential!=0)
-    outputCoeffInFrontOfDifferential->AssignValue(1, *this->owner);
+    *outputCoeffInFrontOfDifferential=(*this)[2];
   return true;
 }
 
@@ -1757,6 +1721,19 @@ int Expression::GetNumCols()const
         (*this)[i].IsSequenceNElementS())
       theMax=MathRoutines::Maximum((*this)[i].children.size-1, theMax);
   return theMax;
+}
+
+void Expression::GetMultiplicandsDivisorsRecursive(List<Expression>& outputAppendList, int depth)const
+{ MacroRegisterFunctionWithName("Expression::GetMultiplicandsDivisorsRecursive");
+  this->CheckInitialization();
+  if (depth==0)
+    outputAppendList.SetSize(0);
+  if (!this->StartsWith(this->owner->opTimes()) && !this->StartsWith(this->owner->opDivide()))
+  { outputAppendList.AddOnTop(*this);
+    return;
+  }
+  for (int i=1; i<this->size(); i++)
+    (*this)[i].GetMultiplicandsDivisorsRecursive(outputAppendList, depth+1);
 }
 
 void Expression::GetCoefficientMultiplicandForm(Expression& outputCoeff, Expression& outputNoCoeff)const
@@ -2283,6 +2260,18 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << (*this)[1].ToString(theFormat) << " :if " << (*this)[2].ToString(theFormat) << "=" << (*this)[3].ToString(theFormat);
   else if (this->StartsWith(this->owner->opDivide(), 3))
   { bool doUseFrac= this->formatUseFrac || this->owner->flagUseFracInRationalLaTeX;
+    if (doUseFrac && ((*this)[1].StartsWith(this->owner->opTimes()) ||
+                      (*this)[1].StartsWith(this->owner->opDivide())))
+    { //stOutput << "DEBUG: should i use frac on " << (*this)[1].ToString() << "<br>";
+      List<Expression> multiplicandsLeft;
+      this->GetMultiplicandsDivisorsRecursive(multiplicandsLeft, 0);
+      for (int i=0; i<multiplicandsLeft.size; i++)
+        if (multiplicandsLeft[i].StartsWith(this->owner->opIntegral()) ||
+            multiplicandsLeft[i].IsAtomGivenData(this->owner->opIntegral()))
+        { doUseFrac=false;
+          break;
+        }
+    }
     if(!doUseFrac)
     { std::string firstE= (*this)[1].ToString(theFormat);
       std::string secondE=(*this)[2].ToString(theFormat);
@@ -2483,10 +2472,23 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     }
   } else if (this->IsListStartingWithAtom(this->owner->opEqualEqual()))
     out << (*this)[1].ToString(theFormat) << "==" << (*this)[2].ToString(theFormat);
-  else if (this->StartsWith(this->owner->opIntegral(),3))
-    out << "{\\int_{" << (*this)[1].ToString(theFormat) << "}^{"
-    << (*this)[2].ToString(theFormat) << "}}";
-  else if (this->IsListStartingWithAtom(this->owner->opGreaterThan()))
+  else if (this->StartsWith(this->owner->opDifferential(), 3))
+    out << (*this)[2].ToString(theFormat)
+    << "\\diff " << (*this)[1].ToString(theFormat);
+  else if (this->StartsWith(this->owner->opIntegral()))
+  { std::string indexString=" ";
+    if (this->size()>=2)
+    { if ((*this)[1].IsSequenceNElementS(2))
+        indexString= "_{"+(*this)[1][1].ToString(theFormat) + "}^{"
+        + (*this)[1][2].ToString(theFormat) + "}";
+      else if (!(*this)[1].IsAtomGivenData(this->owner->opIndefiniteIntegralIndicator()))
+        indexString="_{" + (*this)[1].ToString(theFormat) + "}";
+    }
+    out << "{\\int" << indexString;
+    if (this->size()==3)
+      out << (*this)[2].ToString(theFormat);
+    out << "}";
+  } else if (this->IsListStartingWithAtom(this->owner->opGreaterThan()))
     out << (*this)[1].ToString(theFormat) << ">" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opLimit()))
     out << "\\lim_{" << (*this)[1].ToString(theFormat) << "}" << (*this)[2].ToString(theFormat);

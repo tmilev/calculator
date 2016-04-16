@@ -167,7 +167,6 @@ public:
   static bool outerCommuteAtimesBtimesCifUnivariate(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerIsDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerExtractDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerIntegrateRationalFunctionSplitToBuidingBlocks(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateRationalFunctionBuidingBlockIa(Calculator& theCommands, const Expression& input, Expression& output);
@@ -187,7 +186,8 @@ public:
   static bool innerIntegrateSum(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateXnDiffX(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerCompositeMultiplyIntegralFbyDx(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerInterpretAsDifferential(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntegralOperator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateSqrt(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerDifferentiateWRTxTimesAny(Calculator& theCommands, const Expression& input, Expression& output);
 

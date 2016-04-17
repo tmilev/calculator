@@ -102,12 +102,12 @@ void Calculator::initPredefinedInnerFunctions()
    "TurnOffRules(\"sqrt\"); \na= \\sqrt[4]{t}; \nTurnOnRules(\"sqrt\"); \na; \
    \nTurnOffRules(\"ConvertShortDenominatorToNegativePower\"); \
    \nb=1/t^3; TurnOnRules(\"ConvertShortDenominatorToNegativePower\"); b",
-   true, false, "CalculatorConversions::innerTurnOffRules");
+   true, false, "CalculatorConversions::innerTurnOffRules", "TurnOffRules");
   this->AddOperationInnerHandler
   ("TurnOnRules", CalculatorFunctionsGeneral::innerTurnOnRules, "",
    "Turns on computational rules.",
    "TurnOffRules(\"sqrt\"); a= \\sqrt[4]{t}; TurnOnRules(\"sqrt\"); a",
-   true, false, "CalculatorConversions::innerTurnOnRules");
+   true, false, "CalculatorConversions::innerTurnOnRules", "TurnOnRules");
 
   this->AddOperationInnerHandler
   ("or", CalculatorFunctionsGeneral::innerOr, "",
@@ -213,7 +213,8 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("\"", CalculatorFunctionsGeneral::innerQuoteToString, "",
    "Creates a string.",
-   "\"The quick brown fox jumps over the lazy dog.\"");
+   "\"The quick brown fox jumps over the lazy dog.\"", true, false,
+   "CalculatorFunctionsGeneral::innerQuoteToString", "QuoteToString");
   this->AddOperationInnerHandler
   ("TestBase64", CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test, "",
    "Test function: converts a base64 string to bitstream and back to base64. Output must be identical to input. ",
@@ -1981,7 +1982,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatToRat, this->opRational(), this->opRational(),
    "Adds two rational numbers. ",
-   "2+3", true, false, "CalculatorFunctionsBinaryOps::innerAddRatToRat");
+   "2+3", true, false, "CalculatorFunctionsBinaryOps::innerAddRatToRat", "AddRationals");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat, this->opRational(), this->opEltZmodP(),
    "Adds elements of Z_p. ",
@@ -2016,7 +2017,7 @@ void Calculator::initPredefinedStandardOperations()
   ("+", Calculator::outerPlus, "",
    "Collects all terms (over the rationals), adding up terms proportional up to a rational number. \
     Zero summands are removed, unless zero is the only term left. ", "1+a-2a_1+1/2+a_1", true, false,
-    "Calculator::outerPlus");
+    "Calculator::outerPlus", "AddTerms");
   this->AddOperationOuterHandler
   ("+", CalculatorFunctionsGeneral::outerCombineFractionsCommutative, "",
    "Combines fractions on condition that all participants commute. \
@@ -2467,15 +2468,18 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationOuterHandler
   ("*", Calculator::outerExtractBaseMultiplication, "",
    "Pulls rationals in the front of multiplicative terms.",
-   "2*((3*c)*(4*d)); 3*((a*(d-d))b*c)", true, false, "Calculator::outerExtractBaseMultiplication");
+   "2*((3*c)*(4*d)); 3*((a*(d-d))b*c)", true, false, "Calculator::outerExtractBaseMultiplication",
+   "ConstantExtraction");
   this->AddOperationOuterHandler
   ("*", Calculator::outerAssociateTimesDivision, "",
    "Associative law w.r.t. division. ",
-   "a*(b/c); (a*b)/c-a*(b/c)", true, false, "Calculator::outerAssociateTimesDivision");
+   "a*(b/c); (a*b)/c-a*(b/c)", true, false, "Calculator::outerAssociateTimesDivision",
+   "AssociateTimesDivision");
   this->AddOperationOuterHandler
   ("*", Calculator::innerCancelMultiplicativeInverse, "",
    "Cancels multiplicative inverse. ",
-   "(a*b)/b; (a/b)*b", true, false, "Calculator::innerCancelMultiplicativeInverse");
+   "(a*b)/b; (a/b)*b", true, false, "Calculator::innerCancelMultiplicativeInverse",
+   "CancelMultiplicativeInverse");
   this->AddOperationOuterHandler
   ("*", Calculator::outerDistributeTimes, "",
    "Distributive law (left and right).",
@@ -2634,7 +2638,8 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationOuterHandler
   ("/", CalculatorFunctionsGeneral::outerDivideByNumber, "",
     "If b is rational, algebraic, or double, substitutes (anything)/b with anything* (1/b).",
-    "6/15+(a+b)/5; a/\\sqrt{}2; x/DoubleValue{}10^10;x/DoubleValue{}5 ; 6/4+3/0", true, false, "CalculatorFunctionsGeneral::outerDivideByNumber");
+    "6/15+(a+b)/5; a/\\sqrt{}2; x/DoubleValue{}10^10;x/DoubleValue{}5 ; 6/4+3/0", true, false,
+    "CalculatorFunctionsGeneral::outerDivideByNumber", "DivideByNumber");
   this->AddOperationOuterHandler
   ("/", Calculator::innerSubZeroDivAnythingWithZero, "",
    "Provided that x is not equal to zero, substitutes 0/x with 0. ",
@@ -2664,7 +2669,8 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CalculatorFunctionsBinaryOps::innerDivideRatByRat, this->opRational(), this->opRational(),
    "Divides two rational numbers. ",
-   "4/6; 2/0;", true, false, "CalculatorFunctionsBinaryOps::innerDivideRatByRat");
+   "4/6; 2/0;", true, false, "CalculatorFunctionsBinaryOps::innerDivideRatByRat",
+   "DivideRationalByRational");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble, this->opRational(), this->opDouble(),
    "Divides doubles. ",
@@ -2811,7 +2817,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationOuterHandler
   ("^", Calculator::innerDistributeExponent, "",
    "If a is a constant, substitutes (a*b)^c with a^c b^c.",
-   "(a*b)^n; (\\sqrt(2)*b)^2", true, false, "Calculator::innerDistributeExponent");
+   "(a*b)^n; (\\sqrt(2)*b)^2", true, false, "Calculator::innerDistributeExponent", "DistributeExponent");
   this->AddOperationOuterHandler
   ("^", Calculator::outerPowerRaiseToFirst, "",
    "Realizes the tranformation {{anything}}^1=a. ",

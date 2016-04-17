@@ -477,7 +477,7 @@ bool CalculatorFunctionsGeneral::innerPlotLabel
     return false;
   Vector<double> labelPosition;
   labelPosition.SetSize(2);
-  if (!input[1].EvaluatesToDouble(& labelPosition[0]) || !input[2].EvaluatesToDouble(& labelPosition[2]))
+  if (!input[1].EvaluatesToDouble(& labelPosition[0]) || !input[2].EvaluatesToDouble(& labelPosition[1]))
     return false;
   std::string theLabel;
   if (!input[3].IsOfType<std::string>(&theLabel))

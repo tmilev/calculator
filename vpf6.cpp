@@ -2121,6 +2121,8 @@ std::string Function::ToStringSummary()const
     return "(non-initialized)";
   std::stringstream out;
   out << this->ToStringShort();
+  if (this->calculatorIdentifier!="")
+    out << "Rule name: <span style='color:blue'>" << this->calculatorIdentifier << "</span>. ";
   if (this->additionalIdentifier!="")
     out << "Handler: " << this->additionalIdentifier << ". ";
   return out.str();

@@ -999,6 +999,14 @@ std::string Plot::GetPlotHtml()
         theDVs.drawCircleAtVectorBufferDouble
         (this->thePlots[i].thePoints[j], 1, theDVs.PenStyleNormal, thePlots[i].colorRGB);
       }
+    else if (this->thePlots[i].thePlotType=="label")
+      for (int j=0; j<this->thePlots[i].thePoints.size; j++)
+      { if (!this->IsOKVector(thePlots[i].thePoints[j]))
+          continue;
+        theDVs.drawTextAtVectorBufferDouble
+        (this->thePlots[i].thePoints[j], this->thePlots[i].thePlotString, this->thePlots[i].colorRGB,
+         theDVs.TextStyleNormal,0);
+      }
     else
       for (int j=1; j<thePlots[i].thePoints.size; j++)
       { if (!this->IsOKVector(thePlots[i].thePoints[j-1]) || !this->IsOKVector(thePlots[i].thePoints[j] ))

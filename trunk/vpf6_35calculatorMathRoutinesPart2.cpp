@@ -435,8 +435,19 @@ bool CalculatorFunctionsGeneral::innerMultiplySequence
   return output.MakeProducT(theCommands, theTerms);
 }
 
-bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOn
+bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnStandard
 (Calculator& theCommands, const Expression& input, Expression& output)
+{ return CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyON(theCommands, input, output, false);
+
+}
+
+bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ return CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyON(theCommands, input, output, true);
+}
+
+bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyON
+(Calculator& theCommands, const Expression& input, Expression& output, bool mandatoryVariables)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOn");
   if (input.size()<3)
     return false;

@@ -86,7 +86,9 @@ public:
 //  static bool innerPowerSqrt(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPolynomialRelations(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerEnsureExpressionDependsOnlyOn(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerEnsureExpressionDependsOnlyON(Calculator& theCommands, const Expression& input, Expression& output, bool mandatoryVars);
+  static bool innerEnsureExpressionDependsOnlyOnMandatoryVariables(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerEnsureExpressionDependsOnlyOnStandard(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerMultiplySequence(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerPolynomialize(Calculator& theCommands, const Expression& input, Expression& output);

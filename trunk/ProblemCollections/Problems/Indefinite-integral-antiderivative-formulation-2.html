@@ -1,0 +1,46 @@
+<span class="setCalculatorExamProblem">
+</span>
+<span class="calculatorHidden">
+\(
+%UseLnInsteadOfLog
+a=randomInteger{}(-5,5);
+b=randomInteger{}(-5,5);
+f{}{{x}}=x^2+a x+b;
+\)
+</span>
+Find all antiderivatives of 
+\(f(x)=\)<span class="calculator">
+\(\displaystyle f{}x  \) 
+</span>.
+<br>
+<span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
+\(
+SeparatorBetweenSpans;
+\)
+</span>
+
+<br>
+The antiderivatives of <span class="calculator">f</span>, up to (addition of) constant(s): 
+<textarea class="calculatorAnswer" id="AlgebraAnswer">
+\(
+CompareFunctionsNumerically{}(
+AlgebraAnswer-\int f{}x dx, 
+(theDifference= AlgebraAnswer-\int f{}x dx; x=0; theDifference)_3, 
+f{}0-(x=0; g)_2,-5, 5,50,0.000001);
+\)
+</textarea>
+
+Since the answer asks you to give your answer 
+``<b><span style="color:red">up to constant(s)</span></b>'' 
+you <b><span style="color:red">do not need to include \(+C\)</span></b> in your answer. 
+
+ 
+<span class="calculatorCommentBeforeSubmission">
+\(
+EnsureExpressionDependsOnlyOn(AlgebraAnswer,x)
+\)
+</span>
+
+<span class="calculatorAnswerOnGiveUp">
+\int f{}x dx
+</span>

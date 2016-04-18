@@ -8,11 +8,6 @@ b=randomInteger{}(-5,5);
 f{}{{x}}=x^2+a x+b;
 \)
 </span>
-Find all antiderivatives of 
-\(f(x)=\)<span class="calculator">
-\(\displaystyle f{}x  \) 
-</span>.
-<br>
 <span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
 \(
 SeparatorBetweenSpans;
@@ -20,10 +15,13 @@ SeparatorBetweenSpans;
 </span>
 
 <br>
-Find the indefinite integral (antiderivative) of <span class="calculator">f</span>. 
-
-<b><span style="color:red">Please do not forget to include +C in your answer. </span></b> 
-If you forget to do so, you will be reminded in the comments to your problem.
+Find all antiderivatives of \(f(x)=\)<span class="calculator">
+\(\displaystyle  f{}x  \) 
+</span>.
+<br>
+Answer: \(\displaystyle \int (\)<span class="calculator">
+\(\displaystyle  f{}x  \) 
+</span>\()\diff x\)=
 <textarea class="calculatorAnswer" id="AlgebraAnswer">
 \(
 CompareFunctionsNumerically{}(
@@ -32,11 +30,12 @@ AlgebraAnswer-\int f{}x dx,
 f{}0-(x=0; g)_2,-5, 5,50,0.000001);
 \)
 </textarea>
-
+<b><span style="color:red">Do not forget to include +C in your answer. </span></b> 
+If you forget to do so, you will be marked wrong.
  
 <span class="calculatorCommentBeforeSubmission">
 \(
-EnsureExpressionDependsOnlyOn(AlgebraAnswer,x)
+EnsureExpressionDependsMandatoryVariables(AlgebraAnswer,C, x)
 \)
 </span>
 
@@ -44,13 +43,13 @@ EnsureExpressionDependsOnlyOn(AlgebraAnswer,x)
 \int f{}x dx
 </span>
 
+<br><br>
 <hr>
-
 <small>
 <p>
-Please when the function \(f\) 
+When the function \(f\) 
 is defined on multiple disconnected intervals, we still write a single +C. 
 
-In this way our answers is valid over a single interval over which \(f\) is defined.
+Our answer is then only valid over a single interval over which \(f\) is defined.
 </p>
 </small>

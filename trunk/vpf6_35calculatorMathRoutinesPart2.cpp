@@ -437,18 +437,7 @@ bool CalculatorFunctionsGeneral::innerMultiplySequence
 
 bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnStandard
 (Calculator& theCommands, const Expression& input, Expression& output)
-{ return CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyON(theCommands, input, output, false);
-
-}
-
-bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables
-(Calculator& theCommands, const Expression& input, Expression& output)
-{ return CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyON(theCommands, input, output, true);
-}
-
-bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyON
-(Calculator& theCommands, const Expression& input, Expression& output, bool mandatoryVariables)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOn");
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnStandard");
   if (input.size()<3)
     return false;
   const Expression& theExpression=input[1];
@@ -480,6 +469,69 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyON
   }
   return output.AssignValue(out.str(), theCommands);
 }
+
+bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables");
+  if (input.size()<3)
+    return false;
+  const Expression& theExpression=input[1];
+  HashedList<Expression> mandatoryFreeVars, allowedFreeVars, presentFreeVars;
+  if (input[2].IsSequenceNElementS())
+  { mandatoryFreeVars.SetExpectedSize(input[2].size()-1);
+    for (int i=1; i<input[2].size(); i++)
+      mandatoryFreeVars.AddOnTop(input[2][i]);
+  } else
+    mandatoryFreeVars.AddOnTop(input[2]);
+  allowedFreeVars.AddOnTop(mandatoryFreeVars);
+  if (input.size()>3)
+  { if (input[3].IsSequenceNElementS())
+      for (int i=1; i<input[3].size(); i++)
+        allowedFreeVars.AddOnTop(input[3][i]);
+    else
+      allowedFreeVars.AddOnTop(input[3]);
+  }
+  presentFreeVars.SetExpectedSize(input.size()-2);
+  theExpression.GetFreeVariables(presentFreeVars, true);
+  std::stringstream out;
+  if (!presentFreeVars.Contains(mandatoryFreeVars))
+  { out << "<hr>";
+    out << "Your expression:<br>\\(" << input[1].ToString() << "\\)"
+    << "<br><span style='color:red'><b>is required to contain the variables:</b></span><br><b>";
+    bool found=false;
+    for (int i=0; i< mandatoryFreeVars.size; i++)
+      if (!presentFreeVars.Contains(mandatoryFreeVars[i]))
+      { if (found)
+          out << ", ";
+        found=true;
+        out << mandatoryFreeVars[i].ToString();
+      }
+    out << "</b>.";
+    out << "<br>The mandatory variable(s) are: " << mandatoryFreeVars.ToStringCommaDelimited() << ". ";
+  }
+  if (!allowedFreeVars.Contains(presentFreeVars))
+  { out << "<hr>";
+    out << "Your expression:<br>\\(" << input[1].ToString() << "\\)"
+    << "<br><span style='color:red'><b>contains the unexpected variable(s):</b></span><br><b>";
+    bool found=false;
+    for (int i=0; i< presentFreeVars.size; i++)
+      if (!allowedFreeVars.Contains(presentFreeVars[i]))
+      { if (found)
+          out << ", ";
+        found=true;
+        out << presentFreeVars[i].ToString();
+      }
+    out << "</b>.";
+    out << "<br>The expected variables are: " << allowedFreeVars.ToStringCommaDelimited() << ". ";
+  }
+  if (out.str()!="")
+    out << "<br>Beware of typos such as:<br>[wrong:] <span style='color:red'>lnx, sqrt2</span>  "
+    << "<br>[correct:] <span style='color:green'>ln(x)</span> or <span style='color:green'>ln x</span>, "
+    << "<span style='color:green'>sqrt(2)</span> or <span style='color:green'>sqrt 2</span>.<hr>";
+
+  return output.AssignValue(out.str(), theCommands);
+}
+
 
 bool CalculatorFunctionsGeneral::innerPlotLabel
 (Calculator& theCommands, const Expression& input, Expression& output)

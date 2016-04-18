@@ -2017,7 +2017,7 @@ bool CalculatorFunctionsGeneral::innerCompareFunctionsNumerically
     return theCommands << "Was not able to extract the function argument of your function. " ;
   if (theVars.size<=0)
   { Expression zeroE;
-    zeroE.AssignValue(1, theCommands);
+    zeroE.AssignValue(0, theCommands);
     return output.MakeXOX(theCommands, theCommands.opEqualEqual(), theFunE, zeroE);
   }
   if (theVars.size>1)

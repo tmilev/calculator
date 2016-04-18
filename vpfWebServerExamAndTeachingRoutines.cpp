@@ -1124,7 +1124,7 @@ std::string WebWorker::GetClonePageResult()
   }
   std::fstream theFile;
   if (FileOperations::FileExistsOnTopOfProjectBase(fileNameResultRelative))
-  { out << "<b>File: " << fileNameToBeCloned << " already exists. </b>";
+  { out << "<b>File: " << fileNameResultRelative << " already exists. </b>";
     return out.str();
   }
   if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfProjectBase(theFile, fileNameResultRelative, false, false, false))
@@ -2531,9 +2531,9 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   if (isActualProblem)
   { out << "Deadline: ";
     if (deadlineInherited)
-      out << "<span style=\"color:blue\">" << currentDeadline << " (default)</span>. ";
+      out << "<span style=\"color:blue\">" << currentDeadline << " (section deadline)</span>. ";
     else
-      out << "<span style=\"color:brown\">" << currentDeadline << " (individual deadline)</span>. ";
+      out << "<span style=\"color:brown\">" << currentDeadline << " (per-problem deadline)</span>. ";
     out << hoursTillDeadlineStream.str();
     return out.str();
   }
@@ -2650,9 +2650,9 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
 //  out << deadlineStream.str();
   out << CGI::GetHtmlSpanHidableStartsHiddeN(deadlineStream.str(), "Set deadline (show/hide). ");
   if (isActualProblem)
-    out << "(overrides default). ";
+    out << "(overrides section deadline). ";
   else
-    out << "(overridden by individual deadlines). ";
+    out << "(overridden by per-problem-deadline). ";
   return out.str();
 }
 

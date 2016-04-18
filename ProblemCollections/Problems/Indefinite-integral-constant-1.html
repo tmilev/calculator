@@ -1,0 +1,56 @@
+<span class="setCalculatorExamProblem">
+</span>
+<span class="calculatorHidden">
+\(
+%UseLnInsteadOfLog
+a=randomInteger{}(-5,5);
+b=randomInteger{}(-5,5);
+f{}{{x}}=x^2+a x+b;
+\)
+</span>
+Find all antiderivatives of 
+\(f(x)=\)<span class="calculator">
+\(\displaystyle f{}x  \) 
+</span>.
+<br>
+<span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
+\(
+SeparatorBetweenSpans;
+\)
+</span>
+
+<br>
+Find the indefinite integral (antiderivative) of <span class="calculator">f</span>. 
+
+<b><span style="color:red">Please do not forget to include +C in your answer. </span></b> 
+If you forget to do so, you will be reminded in the comments to your problem.
+<textarea class="calculatorAnswer" id="AlgebraAnswer">
+\(
+CompareFunctionsNumerically{}(
+AlgebraAnswer-\int f{}x dx, 
+(theDifference= AlgebraAnswer-\int f{}x dx; x=0; theDifference)_3, 
+f{}0-(x=0; g)_2,-5, 5,50,0.000001);
+\)
+</textarea>
+
+ 
+<span class="calculatorCommentBeforeSubmission">
+\(
+EnsureExpressionDependsOnlyOn(AlgebraAnswer,x)
+\)
+</span>
+
+<span class="calculatorAnswerOnGiveUp">
+\int f{}x dx
+</span>
+
+<hr>
+
+<small>
+<p>
+Please when the function \(f\) 
+is defined on multiple disconnected intervals, we still write a single +C. 
+
+In this way our answers is valid over a single interval over which \(f\) is defined.
+</p>
+</small>

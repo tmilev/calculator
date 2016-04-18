@@ -825,15 +825,27 @@ D-B;\
    "CoefficientsPowersOf(x, a x^2+ b *3 x +c +\\pi +3)", true, false)
    ;
   this->AddOperationInnerHandler
-  ("EnsureExpressionDependsOnlyOn", CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOn, "",
+  ("EnsureExpressionDependsOnlyOn", CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnStandard, "",
    "Ensures the expression in the first argument depends only on the free variables given in the remaining arguments. \
    Returns a warning string if that is not the case, else returns an empty string. Intended to warn users of \
    potentially mistyped expressions. ",
-   "EnsureExpressionDependsOnlyOn(\\sin (\\ln x) x y, x, y); EnsureExpressionDependsOnlyOn(\\sin (\\ln x) x y, x);", true, false,
-   "CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOn",
+   "EnsureExpressionDependsOnlyOn(\\sin (\\ln x) x y, x, y); \
+   EnsureExpressionDependsOnlyOn(\\sin (\\ln x) x y, x);\
+   ", true, false,
+   "CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnStandard",
    "EnsureExpressionDependsOnlyOn")
    ;
-
+  this->AddOperationInnerHandler
+  ("EnsureExpressionDependsMandatoryVariables", CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables, "",
+   "Similar to EnsureExpressionDependsOnlyOn, but requests that the expression \
+   depend on two lists, first \
+   with mandatory variables, second with non-mandatory. ",
+   "EnsureExpressionDependsMandatoryVariables(\\sin (\\ln x) x y, x, y); \
+   EnsureExpressionDependsMandatoryVariables(\\sin (\\ln x) x y,  (x,y,z) );\
+   ", true, false,
+   "CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables",
+   "EnsureExpressionDependsMandatoryVariables")
+   ;
   this->AddOperationInnerHandler
   ("\\log", CalculatorFunctionsGeneral::innerLog, "",
    "Logarithm function. Gives a decimal approximation of the natural logarithm provided the input is a double number. ",

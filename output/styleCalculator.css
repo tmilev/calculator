@@ -17,12 +17,24 @@ display:none;
 }
 .problemForm{
 }
+.normalButton{
+}
 .submitButton{
+color:red;
 }
 .submitButton:hover {
-	background-color:#878787;
+  background-color:#878787;
 }
-.submitButton:active {
-	position:relative;
-	top:1px;
+.previewButton {
+  color:green;
 }
+.previewButton:hover {
+  background-color:#878787;
+}
+.showAnswerButton {
+  color:green;
+}
+.showAnswerButton:hover {
+  background-color:#878787;
+}
+

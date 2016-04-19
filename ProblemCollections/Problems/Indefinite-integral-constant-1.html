@@ -25,11 +25,14 @@ Integrate.
 CompareFunctionsNumerically{}(
 AlgebraAnswer-\int f{}x dx, 
 (theDifference= AlgebraAnswer-\int f{}x dx; x=0; theDifference)_3, 
-f{}0-(x=0; g)_2,-5, 5,50,0.000001);
+-5, 5,50,0.000001) 
+and 
+(EnsureExpressionDependsMandatoryVariables(AlgebraAnswer,C,x)=="")
+;
 \)
 </textarea>
-<b><span style="color:red">Do not forget to include +C in your answer. </span></b> 
-If you forget to do so, you will be marked wrong.
+Do not forget to <b><span style="color:red">include +C in your answer</span></b> 
+or else your answer <b><span style="color:red">will be marked wrong</span></b>.
  
 <span class="calculatorCommentBeforeSubmission">
 \(
@@ -38,7 +41,7 @@ EnsureExpressionDependsMandatoryVariables(AlgebraAnswer,C, x)
 </span>
 
 <span class="calculatorAnswerOnGiveUp">
-\int f{}x dx
+\int f{}x dx+C
 </span>
 
 <br><br>

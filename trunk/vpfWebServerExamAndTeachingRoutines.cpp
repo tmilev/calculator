@@ -605,7 +605,7 @@ std::string CalculatorHTML::GetEditPageButton()
   << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&";
   out << refStreamNoRequest.str() << "\">" << "Edit problem/page" << "</a>";
   out << "<textarea id=\"clonePageAreaID\" rows=\"1\" cols=\"100\">" << this->fileName << "</textarea>\n"
-  << "<button class=\"submitButton\" onclick=\""
+  << "<button class=\"normalButton\" onclick=\""
   << "submitStringAsMainInput(document.getElementById('clonePageAreaID').value, 'spanCloningAttemptResultID', 'clonePage');"
   << "\" >Clone page</button> <span id=\"spanCloningAttemptResultID\"></span><br>";
   return out.str();
@@ -2156,7 +2156,7 @@ std::string CalculatorHTML::ToStringClassDetails
   out << "</textarea>";
   out << "<br>";
   out
-  << "<button class=\"submitButton\" "
+  << "<button class=\"normalButton\" "
 //  << "onclick=\"addEmailsOrUsers("
 //  << "'"    << idAddressTextarea
 //  << "', '" << CGI::StringToURLString(this->fileName)
@@ -2167,7 +2167,7 @@ std::string CalculatorHTML::ToStringClassDetails
 //  << " )\" "
   << "disabled> [Disabled] Add emails</button>";
   out
-  << "<button class=\"submitButton\" onclick=\"addEmailsOrUsers("
+  << "<button class=\"normalButton\" onclick=\"addEmailsOrUsers("
   << "'"    << idAddressTextarea
   << "', '" << CGI::StringToURLString(this->fileName)
   << "', '" << idOutput
@@ -2281,7 +2281,8 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
   else
   { std::string answerEvaluationId="verification"+inputOutput.GetKeyValue("id");
     std::stringstream previewAnswerStream;
-    previewAnswerStream << "previewAnswers('" << answerId << "', '" << answerEvaluationId << "')";
+    previewAnswerStream << "previewAnswers('" << answerId << "', '"
+    << answerEvaluationId << "')";
     inputOutput.defaultKeysIfMissing.AddOnTop("onkeypress");
     inputOutput.defaultValuesIfMissing.AddOnTop(previewAnswerStream.str());
     inputOutput.defaultKeysIfMissing.AddOnTop("style");
@@ -2290,12 +2291,15 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     //out << "<td>";
     out << "<button class=\"submitButton\" onclick=\"submitAnswers('"
     << answerId << "', '" << answerEvaluationId << "')\"> Submit </button>";
+    out << "<button class=\"previewButton\" onclick=\""
+    <<  previewAnswerStream.str() << "\"> Interpret (no submission)</button>";
+
     if (!this->flagIsForReal)
     { int theIndex=this->theProblemData.answerIds.GetIndex(answerId);
       bool hasShowAnswerButton=false;
       if (theIndex!=-1)
         if (this->theProblemData.commandsForGiveUpAnswer[theIndex]!="")
-        { out << "<button class=\"submitButton\" onclick=\"giveUp('"
+        { out << "<button class=\"showAnswerButton\" onclick=\"giveUp('"
           << answerId << "', '" << answerEvaluationId << "')\"> Show answer </button>";
           hasShowAnswerButton=true;
         }

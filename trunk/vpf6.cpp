@@ -1889,7 +1889,7 @@ bool Expression::operator==(const Expression& other)const
 
 bool Expression::IsEqualToMathematically(const Expression& other)const
 { MacroRegisterFunctionWithName("Expression::IsEqualToMathematically");
-  //stOutput << "Calling Expression::IsEqualToMathematically with input: " << this->ToString() << " and " << other.ToString();
+  //stOutput << "<br>DEBUG: Calling Expression::IsEqualToMathematically with input: " << this->ToString() << " and " << other.ToString();
   if (this->owner==0 && other.owner==0)
     return this->theData==other.theData;
   if (this->owner==0)
@@ -1903,20 +1903,28 @@ bool Expression::IsEqualToMathematically(const Expression& other)const
   if (other.IsOfType<Rational>(&theRat) && this->IsOfType<AlgebraicNumber>(&theAlgebraic))
     return theAlgebraic==theRat;
   double leftD=-1, rightD=-1;
+//  stOutput << "<br>DEBUG: step 1: Calling Expression::IsEqualToMathematically with input: " << this->ToString() << " and " << other.ToString();
   if (this->EvaluatesToDouble(&leftD) && other.EvaluatesToDouble(&rightD) )
+  { //stOutput << "<br>DEBUG: step 1.1: comparing leftD: " << leftD << " to rightD: " << rightD << ";<br>";
     return leftD==rightD;
+  }
   Expression differenceE = *this;
   differenceE-=other;
   Expression differenceEsimplified;
   if (!this->owner->EvaluateExpression(*this->owner, differenceE, differenceEsimplified))
     return false;
+ // stOutput << "<br>DEBUG: step 2: Calling Expression::IsEqualToMathematically with input: " << this->ToString() << " and " << other.ToString();
   if (differenceEsimplified.IsEqualToZero())
     return true;
+ // stOutput << "<br>DEBUG: step 3: Calling Expression::IsEqualToMathematically with input: " << this->ToString() << " and " << other.ToString();
   if (this->size()!=other.size())
     return false;
+  if (this->size()==0)
+    return this->theData==other.theData;
   for (int i=0; i<this->size(); i++)
     if (! (*this)[i].IsEqualToMathematically(other[i]))
       return false;
+//  stOutput << "<br>DEBUG: step 4: Calling Expression::IsEqualToMathematically with input: " << this->ToString() << " and " << other.ToString();
   return true;
 }
 

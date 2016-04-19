@@ -3,9 +3,8 @@
 <span class="calculatorHidden">
 \(
 %UseLnInsteadOfLog
-a=randomInteger{}(-5,5);
-b=randomInteger{}(-5,5);
-f{}{{x}}=x^2+a x+b;
+a=randomInteger{}((-2,-1), (1,2));
+f{}{{x}}=a;
 \)
 </span>
 <span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
@@ -17,9 +16,9 @@ SeparatorBetweenSpans;
 <br>
 Integrate.
 <br>
-\(\displaystyle \int (\)<span class="calculator">
+\(\displaystyle \int \)<span class="calculator">
 \(\displaystyle  f{}x  \) 
-</span>\()\diff x\)=
+</span>\(\diff x\)=
 <textarea class="calculatorAnswer" id="AlgebraAnswer">
 \(
 CompareFunctionsNumerically{}(
@@ -43,14 +42,3 @@ EnsureExpressionDependsMandatoryVariables(AlgebraAnswer,C, x)
 <span class="calculatorAnswerOnGiveUp">
 \int f{}x dx+C
 </span>
-
-<br><br>
-<hr>
-<small>
-<p>
-When the function \(f\) 
-is defined on multiple disconnected intervals, we still write a single +C. 
-
-Our answer is then only valid over a single interval over which \(f\) is defined.
-</p>
-</small>

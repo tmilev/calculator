@@ -732,6 +732,11 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   << "    submitOrPreviewAnswers(idAnswer, idVerification, params);\n"
   << "  }, 1700);"
   << "}\n"
+  << "function previewAnswersNoTimeOut(idAnswer, idVerification){\n"
+  << "  clearTimeout(timerForPreviewAnswers);\n"
+  << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestTypePreview, "true", "", submitRandomSeed) << "\";\n"
+  << "  submitOrPreviewAnswers(idAnswer, idVerification, params);\n"
+  << "}\n"
   << "function submitAnswers(idAnswer, idVerification){\n"
   << "  clearTimeout(timerForPreviewAnswers);\n"
   << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestTypeSubmit, "true", "", submitRandomSeed) << "\";\n"
@@ -2290,9 +2295,10 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     out << "<td>" << inputOutput.ToStringOpenTag() << inputOutput.ToStringCloseTag() ;// << "</td>";
     //out << "<td>";
     out << "<button class=\"submitButton\" onclick=\"submitAnswers('"
-    << answerId << "', '" << answerEvaluationId << "')\"> Submit </button>";
+    << answerId << "', '" << answerEvaluationId << "')\">Submit</button>";
     out << "<button class=\"previewButton\" onclick=\""
-    <<  previewAnswerStream.str() << "\"> Interpret (no submission)</button>";
+    << "previewAnswersNoTimeOut('" << answerId << "', '"
+    << answerEvaluationId << "')" << "\">Interpret</button>";
 
     if (!this->flagIsForReal)
     { int theIndex=this->theProblemData.answerIds.GetIndex(answerId);
@@ -2300,7 +2306,7 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
       if (theIndex!=-1)
         if (this->theProblemData.commandsForGiveUpAnswer[theIndex]!="")
         { out << "<button class=\"showAnswerButton\" onclick=\"giveUp('"
-          << answerId << "', '" << answerEvaluationId << "')\"> Show answer </button>";
+          << answerId << "', '" << answerEvaluationId << "')\">Answer</button>";
           hasShowAnswerButton=true;
         }
       if (!hasShowAnswerButton)

@@ -369,6 +369,26 @@ bool CalculatorFunctionsGeneral::innerArcsin(Calculator& theCommands, const Expr
   return output.AssignValue(FloatingPoint::arcsin(theArgument), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerAbs(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerAbs");
+  Rational theRat;
+  if (input.IsRational(&theRat))
+  { if (theRat<0)
+      return output.AssignValue(-theRat, theCommands);
+    return output.AssignValue(theRat, theCommands);
+  }
+  double theDouble=0;
+  if (input.EvaluatesToDouble(&theDouble))
+    if (theDouble<0)
+    { Expression moneE;
+      moneE.AssignValue(-1, theCommands);
+      output=input;
+      output*=moneE;
+      return true;
+    }
+  return false;
+}
+
 bool CalculatorFunctionsGeneral::innerSin(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSin");
   if (input.IsAtomGivenData(theCommands.opPi()))
@@ -5468,7 +5488,8 @@ bool Expression::EvaluatesToDoubleInRange
   bool result=true;
   int numFailedEvaluations=0;
   for (int i=0; i<numIntervals; i++)
-  { if (!this->EvaluatesToDoubleUnderSubstitutions(knownEs, knownValues, &currentValue))
+  { stOutput << "<br>Debug: evaluating to double under subs: ";
+    if (!this->EvaluatesToDoubleUnderSubstitutions(knownEs, knownValues, &currentValue))
     { numFailedEvaluations++;
       if (numFailedEvaluations<5)
         *(this->owner) << "<br>Failed to evaluate " << this->ToString() << " at " << varName << "="
@@ -5520,7 +5541,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
     stOutput << "<br>Evaluating, but owner is zero!!! " << this->ToString();
   if (this->owner==0)
     return false;
-//  stOutput << "<br>Evaluating to double: " << this->ToString();
+  stOutput << "<br>DEBUG: Evaluating to double: " << this->ToString();
   Calculator& theCommands=*this->owner;
   if (this->IsOfType<double>(whichDouble))
     return true;
@@ -5640,7 +5661,8 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
   this->StartsWith(theCommands.opArcCos(),2) ||
   this->StartsWith(theCommands.opArcSin(),2) ||
   this->StartsWith(theCommands.opSqrt(),2) ||
-  this->StartsWith(theCommands.opLog(),2)
+  this->StartsWith(theCommands.opLog(),2) ||
+  this->StartsWith(theCommands.opAbsoluteValue(),2)
   ;
 
   if(isKnownFunctionOneArgument)
@@ -5654,6 +5676,13 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
       if (whichDouble!=0)
         *whichDouble= FloatingPoint::sqrt(argumentD);
     }
+    if (this->StartsWith(theCommands.opAbsoluteValue()))
+      if (whichDouble!=0)
+      { if (argumentD<0)
+          *whichDouble=-argumentD;
+        else
+          *whichDouble=argumentD;
+      }
     if (this->StartsWith(theCommands.opArcCos()))
     { if (argumentD>1 || argumentD<-1)
         return false;

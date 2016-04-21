@@ -873,9 +873,14 @@ D-B;\
    "\\arcsin(3/4)", true, false)
    ;
   this->AddOperationInnerHandler
+  ("|", CalculatorFunctionsGeneral::innerAbs, "",
+   "Absolute value function ",
+   "|-1|", true, false, "CalculatorFunctionsGeneral::innerAbs", "AbsoluteValue")
+   ;
+  this->AddOperationInnerHandler
   ("\\sin", CalculatorFunctionsGeneral::innerSin, "",
    "Sine function. Evaluates to a decimal approximation if the input is a double number. ",
-   "\\sin{}(3.1415)", true, false)
+   "\\sin{}(3.1415)", true, false, "CalculatorFunctionsGeneral::innerSin", "Sine")
    ;
   this->AddOperationInnerHandler
   ("\\cos", CalculatorFunctionsGeneral::innerCos, "",
@@ -3098,6 +3103,7 @@ void Calculator::initAtomsThatAllowCommutingOfArguments()
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("*");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("/");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("^");
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("|");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sin");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cos");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\log");
@@ -3146,6 +3152,7 @@ void Calculator::initOperationsThatAreKnownFunctions()
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("*");
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("/");
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("^");
+  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("|");
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sqrt");
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sin");
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cos");

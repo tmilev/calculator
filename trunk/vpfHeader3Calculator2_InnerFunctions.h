@@ -63,6 +63,7 @@ public:
   static bool innerFactorial(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLogBase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLog(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAbs(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSin(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCos(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSec(Calculator& theCommands, const Expression& input, Expression& output);

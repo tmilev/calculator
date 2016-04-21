@@ -1174,6 +1174,7 @@ bool Calculator::AllowsTimesInPreceding(const std::string& lookAhead)
   lookAhead=="\\frac" ||
   lookAhead=="Expression" ||  lookAhead== "Integer" || lookAhead=="\\cup" ||
   lookAhead=="(" || lookAhead=="[" ||
+  lookAhead=="|" ||
   lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||
   lookAhead=="=" || lookAhead==">" || lookAhead=="<" ||
   lookAhead=="Variable" || lookAhead=="," || lookAhead==";" ||
@@ -1502,9 +1503,15 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="+" && fourthToLastS=="Expression" && this->AllowsPlusInPreceding(lastS) )
     return this->ReplaceEOEXByEX();
+  if (fifthToLastS=="|" && secondToLastS=="Expression" && thirdToLastS=="+" && fourthToLastS=="Expression" && lastS=="|" )
+    return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="-" && fourthToLastS=="Expression" && this->AllowsPlusInPreceding(lastS) )
     return this->ReplaceEOEXByEX();
+  if (secondToLastS=="Expression" && thirdToLastS=="-" && fourthToLastS=="Expression" && lastS=="|" && fifthToLastS=="|" )
+    return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="-" && this->AllowsPlusInPreceding(lastS) )
+    return this->ReplaceOEXByEX();
+  if (secondToLastS=="Expression" && thirdToLastS=="-" && lastS=="|" && fourthToLastS=="|" )
     return this->ReplaceOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="mod" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();

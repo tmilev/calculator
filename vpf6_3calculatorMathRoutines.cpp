@@ -2028,10 +2028,11 @@ bool CalculatorFunctionsGeneral::innerGetFreeVariablesExcludeNamedConstants
 bool CalculatorFunctionsGeneral::innerCompareFunctionsNumerically
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompareFunctionsNumerically");
-  if (input.children.size<5)
+  if (input.size()<5)
     return theCommands << "Comparing functions takes as input at least 4 arguments (two functions to compare and interval to compare over).";
   Expression theFunE=input[1];
   theFunE-=input[2];
+  //stOutput << "Finding free vars in: " << theFunE.ToString();
   HashedList<Expression> theVars;
   if (!theFunE.GetFreeVariables(theVars, true))
     return theCommands << "Was not able to extract the function argument of your function. " ;
@@ -2040,16 +2041,15 @@ bool CalculatorFunctionsGeneral::innerCompareFunctionsNumerically
     zeroE.AssignValue(0, theCommands);
     return output.MakeXOX(theCommands, theCommands.opEqualEqual(), theFunE, zeroE);
   }
+  //stOutput << "The vars: " << theVars.ToStringCommaDelimited();
   if (theVars.size>1)
-  { return theCommands << "I cannot compare the functions as they appear to depend on more than one variable, namely, on: "
+    return theCommands << "I cannot compare the functions as they appear to depend on more than one variable, namely, on: "
     << theVars.ToStringCommaDelimited();
-  }
-//  stOutput << "The vars: " << theVars.ToStringCommaDelimited();
   double leftBoundary=0;
   double rightBoundary=0;
-  if (! input[3].EvaluatesToDouble(&leftBoundary))
+  if (!input[3].EvaluatesToDouble(&leftBoundary))
     return theCommands << "Failed to extract the left endpoint of the comparison interval. ";
-  if (! input[4].EvaluatesToDouble(&rightBoundary))
+  if (!input[4].EvaluatesToDouble(&rightBoundary))
     return theCommands << "Failed to extract the right endpoint of the comparison interval. ";
   int numPoints=50;
   if (input.children.size>5)

@@ -24,15 +24,18 @@ or else your answer <b><span style="color:red">will be marked wrong</span></b>.
 </span>=
 <textarea class="calculatorAnswer" id="AlgebraAnswer">
 \(
-(TurnOnRules("IntegratePowerRule");
-CompareFunctionsNumerically{}(
-AlgebraAnswer-\int f{}x dx, 
-(theDifference= AlgebraAnswer-\int f{}x dx; x=0; theDifference)_3, 
--5, 5,50,0.000001) 
-and 
+(
+TurnOnRules
+("DistributeMultiplication", "IntegratePowerRule",
+"ConvertShortDenominatorToNegativePower", "IntegrateBlockIb",
+"IntegratePartialFractions");
+
+CompareExpressionsNumerically {}(
+AlgebraAnswer-\int f{}x dx,
+(theDifference= AlgebraAnswer-\int f{}x dx; x=1; theDifference)_3, 0.00001, x\in (1,5), 20, C\in (0,3), 4)
+and
 (EnsureExpressionDependsMandatoryVariables(AlgebraAnswer,C,x)=="")
 )_2
-;
 \)
 </textarea>
 

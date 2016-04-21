@@ -5488,7 +5488,7 @@ bool Expression::EvaluatesToDoubleInRange
   bool result=true;
   int numFailedEvaluations=0;
   for (int i=0; i<numIntervals; i++)
-  { stOutput << "<br>Debug: evaluating to double under subs: ";
+  { //stOutput << "<br>Debug: evaluating to double under subs: ";
     if (!this->EvaluatesToDoubleUnderSubstitutions(knownEs, knownValues, &currentValue))
     { numFailedEvaluations++;
       if (numFailedEvaluations<5)
@@ -5541,7 +5541,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
     stOutput << "<br>Evaluating, but owner is zero!!! " << this->ToString();
   if (this->owner==0)
     return false;
-  stOutput << "<br>DEBUG: Evaluating to double: " << this->ToString();
+//  stOutput << "<br>DEBUG: Evaluating to double: " << this->ToString();
   Calculator& theCommands=*this->owner;
   if (this->IsOfType<double>(whichDouble))
     return true;

@@ -859,6 +859,7 @@ public:
 
   bool flagLogSyntaxRules;
   bool flagUseLnInsteadOfLog;
+  bool flagUseLnAbsInsteadOfLogForIntegrationNotation;
   bool flagLogEvaluatioN;
   bool flagUseNumberColors;
   bool flagLogRules;
@@ -1038,6 +1039,7 @@ public:
   { this->ReplaceEXdotsXbySsXdotsX(numDots);
     return this->DecreaseStackSetCharacterRangeS(numDots);
   }
+  bool ReplaceOEXByE();
   bool ReplaceOEXByEX(int formatOptions=Expression::formatDefault);
   bool ReplaceO_2O_1E_3XbyEX();
   bool ReplaceEOByE(int formatOptions=Expression::formatDefault);
@@ -1342,6 +1344,9 @@ public:
   }
   int opIntegral()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\int");
+  }
+  int opAbsoluteValue()
+  { return this->theAtoms.GetIndexIMustContainTheObject("|");
   }
   int opMatAlgebraic()
   { return this->theAtoms.GetIndexIMustContainTheObject("MatrixAlgebraic");

@@ -3,14 +3,24 @@
 <span class="calculatorHidden">
 \(
 %UseLnInsteadOfLog
-TurnOffRules("IntegratePowerRule");
-a=randomInteger{}((-2,-1), (1,2));
-f{}{{x}}=a;
+TurnOffRules
+("DistributeMultiplication", "IntegratePowerRule", 
+"ConvertShortDenominatorToNegativePower", "IntegrateBlockIb", 
+"IntegratePartialFractions");
+a=randomInteger{}( (2,5));
+b=randomInteger{}( 1,4);
+c=randomInteger{}( (-1,-5),(1,5));
+g=randomInteger{}( (-1,-5),(1,5));
+
+f{}{{x}}=c/x^a +g/x^{a+b};
 \)
 </span>
 <span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
 \(
-TurnOnRules("IntegratePowerRule");
+TurnOnRules
+("DistributeMultiplication", "IntegratePowerRule", 
+"ConvertShortDenominatorToNegativePower", "IntegrateBlockIb", 
+"IntegratePartialFractions");
 SeparatorBetweenSpans;
 \)
 </span>
@@ -24,13 +34,19 @@ or else your answer <b><span style="color:red">will be marked wrong</span></b>.
 </span>=
 <textarea class="calculatorAnswer" id="AlgebraAnswer">
 \(
-(TurnOnRules("IntegratePowerRule");
+(
+TurnOnRules
+("DistributeMultiplication", "IntegratePowerRule", 
+"ConvertShortDenominatorToNegativePower", "IntegrateBlockIb", 
+"IntegratePartialFractions");
+
 CompareFunctionsNumerically{}(
 AlgebraAnswer-\int f{}x dx, 
-(theDifference= AlgebraAnswer-\int f{}x dx; x=0; theDifference)_3, 
--5, 5,50,0.000001) 
+(theDifference= AlgebraAnswer-\int f{}x dx; x=1; theDifference)_3, 
+1, 5,50,0.000001) 
 and 
 (EnsureExpressionDependsMandatoryVariables(AlgebraAnswer,C,x)=="")
+
 )_2
 ;
 \)
@@ -44,6 +60,12 @@ EnsureExpressionDependsMandatoryVariables(AlgebraAnswer,C, x)
 </span>
 
 <span class="calculatorAnswerOnGiveUp">
-(TurnOnRules("IntegratePowerRule");
-\int f{}x dx+C)_2
+(
+TurnOnRules
+("DistributeMultiplication", "IntegratePowerRule", 
+"ConvertShortDenominatorToNegativePower", "IntegrateBlockIb", 
+"IntegratePartialFractions");
+
+\int (f{}x) dx+C
+)_2
 </span>

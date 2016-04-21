@@ -48,6 +48,7 @@ void Calculator::reset()
   this->flagLogRules=false;
   this->flagLogCache=false;
   this->flagLogPatternMatching=false;
+  this->flagUseLnAbsInsteadOfLogForIntegrationNotation=false;
   this->flagLogFullTreeCrunching=false;
   this->flagNewContextNeeded=true;
   this->flagProduceLatexLink=false;
@@ -158,6 +159,7 @@ void Calculator::init()
   this->AddOperationNoRepetitionAllowed("Error");
   this->AddOperationNoRepetitionAllowed("Sequence");
   this->AddOperationNoRepetitionAllowed("Context");
+  this->AddOperationNoRepetitionAllowed("|");
   this->AddOperationNoRepetitionAllowed("\"");
   this->AddOperationNoRepetitionAllowed("PolyVars");
   this->AddOperationNoRepetitionAllowed("DiffOpVars");
@@ -271,6 +273,7 @@ void Calculator::init()
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("PlotNoCoordinateDetails");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LatexLink");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("UseLnInsteadOfLog");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("UseLnAbsInsteadOfLog");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("CalculatorStatus");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("FullTree");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("HideLHS");
@@ -483,6 +486,21 @@ bool Calculator::ReplaceOEXByEX(int formatOptions)
   return true;
 }
 
+bool Calculator::ReplaceOEXByE()
+{ SyntacticElement& middle=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  if (this->flagLogSyntaxRules)
+    this->parsingLog+= "[Rule: Calculator::ReplaceOEXByE]";
+  Expression newExpr;
+  newExpr.reset(*this, 2);
+  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(middle.controlIndex));
+  newExpr.AddChildOnTop(right.theData);
+  middle.theData=newExpr;
+  middle.controlIndex=this->conExpression();
+  return this->DecreaseStackSetCharacterRangeS(2);
+//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+}
+
 bool Calculator::ReplaceXXByEmptyString()
 { SyntacticElement& left=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   Expression newExpr;
@@ -538,6 +556,7 @@ bool Calculator::isRightSeparator(unsigned char c)
     case ')':
     case '.':
     case '!':
+    case '|':
     case '\"':
       return true;
     default:
@@ -587,6 +606,7 @@ bool Calculator::isLeftSeparator(unsigned char c)
     case '9':
     case '.':
     case '!':
+    case '|':
     case '\"':
       return true;
     default:
@@ -1354,6 +1374,11 @@ bool Calculator::ApplyOneRule()
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
+  if (secondToLastS=="%" && lastS=="UseLnAbsInsteadOfLog")
+  { this->flagUseLnAbsInsteadOfLogForIntegrationNotation=true;
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
   if (secondToLastS=="%" && lastS=="NumberColors")
   { if (!this->flagUseNumberColors)
     { *this << "<span style=\"color:blue\">Floating point numbers</span> are displayed in <span style=\"color:blue\">blue</span>."
@@ -1431,6 +1456,8 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceVXdotsXbyE_NONBOUND_XdotsX(2);
   if (fourthToLastS=="{" && thirdToLastS=="Variable" && secondToLastS=="}" && lastS!="}" && lastS!=" ")
     return this->ReplaceVXdotsXbyE_NONBOUND_XdotsX(2);
+  if ((secondToLastS=="\\left" || secondToLastS=="\\right") && lastS == "|")
+    return this->ReplaceXYByY();
   if (secondToLastS=="\\left" && lastS == "(")
     return this->ReplaceXYByY();
   if (secondToLastS=="\\right" && lastS == ")")
@@ -1516,6 +1543,8 @@ bool Calculator::ApplyOneRule()
       (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].theData=impliedFunApplication;
     return true;
   }
+  if (thirdToLastS=="|" && secondToLastS=="Expression" && lastS=="|")
+    return this->ReplaceOEXByE();
   if (thirdToLastS=="(" && secondToLastS=="Expression" && lastS==")")
     return this->ReplaceXEXByE(secondToLastE.theData.format);
   if (thirdToLastS=="{" && secondToLastS=="Expression" && lastS=="}")

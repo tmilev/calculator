@@ -136,10 +136,8 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
   RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
 //  stOutput << "Extracting poly from: " << input.ToString();
   if (theCommands.RecursionDeptH>theCommands.MaxRecursionDeptH)
-  { theCommands << "Max recursion depth of " << theCommands.MaxRecursionDeptH
+    return theCommands << "Max recursion depth of " << theCommands.MaxRecursionDeptH
     << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";
-    return false;
-  }
   if (input.IsOfType<Polynomial<coefficient> >())
   { output=input;
     return true;
@@ -155,9 +153,7 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
     theComputed.AddChildOnTop(input[0]);
     for (int i=1; i<input.children.size; i++)
     { if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, input[i], theConverted))
-      { theCommands << "<hr>Failed to extract polynomial from " << input[i].ToString();
-        return false;
-      }
+        return theCommands << "<hr>Failed to extract polynomial from " << input[i].ToString();
       theComputed.AddChildOnTop(theConverted);
     }
     if (input.IsListStartingWithAtom(theCommands.opTimes()))
@@ -170,16 +166,12 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
   if (input.StartsWith(theCommands.opThePower(), 3))
     if (input[2].IsSmallInteger(&thePower))
     { if(!CalculatorConversions::innerPolynomial<coefficient>(theCommands, input[1], theConverted))
-      { theCommands << "<hr>Failed to extract polynomial from " << input[1].ToString() << ".";
-        return false;
-      }
+        return theCommands << "<hr>Failed to extract polynomial from " << input[1].ToString() << ".";
       Polynomial<coefficient> resultP=theConverted.GetValue<Polynomial<coefficient> >();
       if (thePower<0)
       { coefficient theConst;
         if (!resultP.IsConstant(&theConst))
-        { theCommands << "<hr>Failed to extract polynomial from  " << input.ToString() << " because the exponent was negative. ";
-          return false;
-        }
+          return theCommands << "<hr>Failed to extract polynomial from  " << input.ToString() << " because the exponent was negative. ";
         theConst.Invert();
         thePower*=-1;
         resultP=theConst;

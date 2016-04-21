@@ -4,8 +4,12 @@
 \(
 %UseLnInsteadOfLog
 TurnOffRules("IntegratePowerRule");
-a=randomInteger{}((-2,-1), (1,2));
-f{}{{x}}=a;
+a=randomInteger{}((-5,-1), (1,5));
+b=randomInteger{}((-5,-1), (1,5));
+c=randomInteger{}((-5,-1), (1,5));
+g=randomInteger{}((-5,-1), (1,5));
+
+f{}{{x}}=a x^3+b x^2+c x +g;
 \)
 </span>
 <span class="calculatorHiddenIncludeInCommentsBeforeSubmission">

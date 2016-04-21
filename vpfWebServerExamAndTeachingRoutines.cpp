@@ -1856,7 +1856,8 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   if (theGlobalVariables.UserDefaultHasAdminRights())
   { if (theGlobalVariables.UserStudentViewOn())
       out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
-      << this->ToStringCalculatorArgumentsForProblem(theGlobalVariables.userCalculatorRequestType, "false")
+      << this->ToStringCalculatorArgumentsForProblem
+      (theGlobalVariables.userCalculatorRequestType, "false", theGlobalVariables.GetWebInput("studentSection"))
       << "\">Admin view</a><br>";
     else
     { if (this->databaseStudentSectionS.size==0)
@@ -1876,18 +1877,23 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   { out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
     << exerciseRequest << "&"
     << calcArgsNoPassExamDetails
-    << "studentView=" << studentView << "&"
-    << "currentExamHome=" << CGI::StringToURLString(this->currentExamHomE) << "&" << "currentExamIntermediate=&"
+    << "studentView=" << studentView << "&";
+    if (theGlobalVariables.GetWebInput("studentSection")!="")
+      out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
+    out << "currentExamHome=" << CGI::StringToURLString(this->currentExamHomE) << "&" << "currentExamIntermediate=&"
     << "currentExamFile=" << CGI::StringToURLString(this->currentExamHomE) << "&\"> Course homework home </a><br>";
   } else
     out << "<b>Course homework home</b>";
   if (this->flagIsExamProblem && this->currentExamIntermediatE!="")
-    out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
+  { out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
     << calcArgsNoPassExamDetails
-    << "studentView=" << studentView << "&"
+    << "studentView=" << studentView << "&";
+    if (theGlobalVariables.GetWebInput("studentSection")!="")
+      out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
+    out
     << "currentExamHome=" << CGI::StringToURLString(this->currentExamHomE) << "&" << "currentExamIntermediate=&"
     << "currentExamFile=" << CGI::StringToURLString(this->currentExamIntermediatE) << "&\">&nbspCurrent homework. </a><br>";
-  else if (this->flagIsExamIntermediate)
+  } else if (this->flagIsExamIntermediate)
     out << "<b>&nbspCurrent homework</b><br>";
   if (this->flagIsExamProblem)
   { if (theGlobalVariables.userCalculatorRequestType=="exercises")
@@ -1908,32 +1914,43 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
       //<< this->problemListOfParent.ToStringCommaDelimited();
     } else
     { if (indexInParent>0)
-        out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
+      { out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
         << theGlobalVariables.userCalculatorRequestType
         << "&" << calcArgsNoPassExamDetails
-        << "studentView=" << studentView << "&"
+        << "studentView=" << studentView << "&";
+        if (theGlobalVariables.GetWebInput("studentSection")!="")
+          out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
+        out
         << "&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE)
         << "&currentExamIntermediate=" << CGI::StringToURLString(this->currentExamIntermediatE)
         << "&currentExamFile=" << CGI::StringToURLString(this->problemListOfParent[indexInParent-1] )
         << "&\"> <-Previous </a><br>";
+      }
       if (indexInParent<this->problemListOfParent.size-1)
-        out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
+      { out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
         << theGlobalVariables.userCalculatorRequestType
         << "&" << calcArgsNoPassExamDetails
-        << "studentView=" << studentView << "&"
+        << "studentView=" << studentView << "&";
+        if (theGlobalVariables.GetWebInput("studentSection")!="")
+          out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
+        out
         << "&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE)
         << "&currentExamIntermediate=" << CGI::StringToURLString(this->currentExamIntermediatE)
         << "&currentExamFile=" << CGI::StringToURLString(this->problemListOfParent[indexInParent+1] )
         << "\"> Next-> </a><br>";
-      else
-        out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
+      } else
+      { out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
         << theGlobalVariables.userCalculatorRequestType
         << "&" << calcArgsNoPassExamDetails
-        << "studentView=" << studentView << "&"
+        << "studentView=" << studentView << "&";
+        if (theGlobalVariables.GetWebInput("studentSection")!="")
+          out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
+        out
         << "&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE)
         << "&currentExamIntermediate="
         << "&currentExamFile=" << CGI::StringToURLString(this->currentExamHomE)
         << "&\">Last problem, return to course page.</a><br>";
+      }
     }
   }
   if (this->flagIsExamProblem &&
@@ -2677,6 +2694,11 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 //  out << "<br>urled link: " <<  urledProblem;
   refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation()
   << "currentExamFile=" << urledProblem << "&";
+  if (theGlobalVariables.UserStudentViewOn())
+  { refStreamNoRequest << "studentView=true&";
+    if (theGlobalVariables.GetWebInput("studentSection")!="")
+      refStreamNoRequest << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
+  }
   if (this->currentExamHomE!="")
     refStreamNoRequest << "currentExamHome=" << this->currentExamHomE << "&";
   if (this->flagIsExamIntermediate)

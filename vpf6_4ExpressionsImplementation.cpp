@@ -2248,7 +2248,14 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       out << secondE;
   } else if (this->IsListStartingWithAtom(this->owner->opIsDenotedBy()))
     out << (*this)[1].ToString(theFormat) << "=:" << (*this)[2].ToString(theFormat);
-  else if (this->StartsWith(this->owner->opLogBase(), 3))
+  else if (this->owner->flagUseLnAbsInsteadOfLogForIntegrationNotation &&
+           this->StartsWith(this->owner->opLog(), 2))
+  { std::string theArg=(*this)[1].ToString(theFormat);
+    if (!MathRoutines::StringBeginsWith(theArg, "\\left|"))
+      out << "\\ln \\left|" << theArg << "\\right|";
+    else
+      out << "\\ln " << theArg;
+  } else if (this->StartsWith(this->owner->opLogBase(), 3))
     out << "\\log_{" << (*this)[1].ToString(theFormat) << "}"
     << "\\left(" << (*this)[2].ToString(theFormat) << "\\right)";
   else if (this->StartsWith(this->owner->opQuote(),2))
@@ -2369,6 +2376,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       out << "\\sqrt[" << (*this)[1].ToString() << "]{" << (*this)[2].ToString() << "}";
   } else if (this->IsListStartingWithAtom(this->owner->opFactorial()))
     out << (*this)[1].ToString(theFormat) << "!";
+  else if (this->StartsWith(this->owner->opAbsoluteValue(), 2))
+    out << "\\left|" << (*this)[1].ToString(theFormat) << "\\right|";
   else if (this->StartsWith(this->owner->opThePower(), 3))
   { bool involvesExponentsInterpretedAsFunctions=false;
     const Expression& firstE=(*this)[1];
@@ -2398,7 +2407,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       { std::string secondEstr=(*this)[2].ToString(theFormat);
         std::string firstEstr=(*this)[1].ToString(theFormat);
         if ((*this)[1].NeedsParenthesisForBaseOfExponent())
-        { bool useBigParenthesis=false;
+        { bool useBigParenthesis=true;
           if ((*this)[1].StartsWith(this->owner->opDivide()))
             useBigParenthesis=true;
           if (useBigParenthesis)
@@ -2454,7 +2463,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << "{{" << (*this)[1].ToString(theFormat) << "}}";
   else if (this->IsListStartingWithAtom(this->owner->opApplyFunction()))
   { if (this->children.size<2)
-      crash << crash;
+      crash << "This shouldn't happen: too few children. " << crash;
     switch(this->format)
     { case Expression::formatFunctionUseUnderscore:
         if (allowNewLine)
@@ -2473,9 +2482,15 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   } else if (this->IsListStartingWithAtom(this->owner->opEqualEqual()))
     out << (*this)[1].ToString(theFormat) << "==" << (*this)[2].ToString(theFormat);
   else if (this->StartsWith(this->owner->opDifferential(), 3))
-    out << (*this)[2].ToString(theFormat)
-    << "\\diff " << (*this)[1].ToString(theFormat);
-  else if (this->StartsWith(this->owner->opIntegral()))
+  { bool needsParen=(*this)[2].NeedsParenthesisForMultiplication() ||
+    (*this)[2].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
+    if (needsParen)
+      out << "\\left(";
+    out << (*this)[2].ToString(theFormat);
+    if (needsParen)
+      out << "\\right)";
+    out << "\\diff " << (*this)[1].ToString(theFormat);
+  } else if (this->StartsWith(this->owner->opIntegral()))
   { std::string indexString=" ";
     if (this->size()>=2)
     { if ((*this)[1].IsSequenceNElementS(2))

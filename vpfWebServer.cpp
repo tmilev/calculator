@@ -1005,6 +1005,7 @@ void WebWorker::OutputStandardResult()
   autocompleteKeyWords.AddOnTopNoRepetition("LogFull");
   autocompleteKeyWords.AddOnTopNoRepetition("LatexLink");
   autocompleteKeyWords.AddOnTopNoRepetition("UseLnInsteadOfLog");
+  autocompleteKeyWords.AddOnTopNoRepetition("UseLnAbsInsteadOfLog");
   autocompleteKeyWords.AddOnTopNoRepetition("CalculatorStatus");
   autocompleteKeyWords.AddOnTopNoRepetition("FullTree");
   autocompleteKeyWords.AddOnTopNoRepetition("HideLHS");

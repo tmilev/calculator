@@ -3,14 +3,18 @@
 <span class="calculatorHidden">
 \(
 %UseLnInsteadOfLog
-TurnOffRules("IntegratePowerRule");
-a=randomInteger{}((-2,-1), (1,2));
-f{}{{x}}=a;
+TurnOffRules("DistributeMultiplication", "IntegratePowerRule");
+a=randomInteger{}((-5,-1), (1,5));
+b=randomInteger{}((-5,-1), (1,5));
+c=randomInteger{}((-5,-1), (1,5));
+g=randomInteger{}((-5,-1), (1,5));
+
+f{}{{x}}=(a x+b)(c x^2+g);
 \)
 </span>
 <span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
 \(
-TurnOnRules("IntegratePowerRule");
+TurnOnRules("DistributeMultiplication", "IntegratePowerRule");
 SeparatorBetweenSpans;
 \)
 </span>
@@ -24,7 +28,7 @@ or else your answer <b><span style="color:red">will be marked wrong</span></b>.
 </span>=
 <textarea class="calculatorAnswer" id="AlgebraAnswer">
 \(
-(TurnOnRules("IntegratePowerRule");
+(TurnOnRules("DistributeMultiplication", "IntegratePowerRule");
 CompareFunctionsNumerically{}(
 AlgebraAnswer-\int f{}x dx, 
 (theDifference= AlgebraAnswer-\int f{}x dx; x=0; theDifference)_3, 
@@ -44,6 +48,6 @@ EnsureExpressionDependsMandatoryVariables(AlgebraAnswer,C, x)
 </span>
 
 <span class="calculatorAnswerOnGiveUp">
-(TurnOnRules("IntegratePowerRule");
+(TurnOnRules("DistributeMultiplication", "IntegratePowerRule");
 \int f{}x dx+C)_2
 </span>

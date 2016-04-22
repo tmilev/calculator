@@ -235,18 +235,21 @@ bool Calculator::innerGCDOrLCM(Calculator& theCommands, const Expression& input,
 }
 
 bool Calculator::GetListPolysVariableLabelsInLex(const Expression& input, Vector<Polynomial<Rational> >& output, Expression& outputContext)
-{ Expression theContextStart(*this);
+{ MacroRegisterFunctionWithName("Calculator::GetListPolysVariableLabelsInLex");
+  Expression theContextStart(*this);
   if (!this->GetVectorFromFunctionArguments(input, output, &theContextStart, 0, CalculatorConversions::innerPolynomial<Rational>))
     return false;
   if (output.size<2)
     return false;
   int numVars=theContextStart.ContextGetNumContextVariables();
+//  stOutput << "<hr>DEBIG: output: " << output.ToString();
+ // stOutput << "<br>numVArs: " << numVars;
   HashedList<Expression> theVars;
   theVars.SetExpectedSize(numVars);
   for (int i=0; i<numVars; i++)
     theVars.AddOnTop(theContextStart.ContextGetContextVariable(i));
   theVars.QuickSortAscending();
-//  stOutput << "<hr>the vars: " << theVars.ToString();
+  //stOutput << "<hr>DEBUG: he vars: " << theVars.ToString();
   PolynomialSubstitution<Rational> theSub;
   theSub.SetSize(numVars);
   for (int i=0; i<theSub.size; i++)
@@ -257,17 +260,23 @@ bool Calculator::GetListPolysVariableLabelsInLex(const Expression& input, Vector
   PolyVarsE.children.Reserve(numVars+1);
   tempE.MakeAtom(this->opPolynomialVariables(), *this);
   PolyVarsE.AddChildOnTop(tempE);
-
-  for (int i=0; i<numVars; i++)
-  { PolyVarsE.AddChildOnTop(theVars[i]);
+  for (int i=0; i<theVars.size; i++)
+    PolyVarsE.AddChildOnTop(theVars[i]);
+  //stOutput << "<hr>DEBUG: got ere " << theSub.ToString() << "theVars.size="  << theVars.size
+  //<< "<br>num vars: " << numVars;
+  for (int i=0; i< output.size; i++)
+  { //stOutput << "<hr>DEBUG: adding on top: " << theVars[i].ToString();
+    //stOutput << "<hr>got to here 1.5";
     Polynomial<Rational>& currentP=output[i];
+    //stOutput << "<hr>subbing  in: " << currentP.ToString() << " sub: " << theSub.ToString();
     currentP.Substitution(theSub);
   }
+//  stOutput << "<hr>DEBUG: got ere2 " << theSub.ToString();
   return outputContext.AddChildOnTop(PolyVarsE);
 }
 
 bool Calculator::innerPolynomialDivisionRemainder(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::fPolynomialDivisionQuotientRemainder");
+{ MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionRemainder");
   Expression theContext;
   Vector<Polynomial<Rational> > thePolys;
   if (!theCommands.GetListPolysVariableLabelsInLex(input, thePolys, theContext))
@@ -279,8 +288,8 @@ bool Calculator::innerPolynomialDivisionRemainder(Calculator& theCommands, const
       return output.MakeError("Division by zero.", theCommands);
     theGB.theBasiS[i-1]=thePolys[i];
   }
-//  stOutput << "<hr>The polys: " << thePolys.ToString() << "<br>The gb basis: "
-//  << theGB.theBasiS.ToString() << "<hr>";
+  stOutput << "<hr>The polys: " << thePolys.ToString() << "<br>The gb basis: "
+  << theGB.theBasiS.ToString() << "<hr>";
   Polynomial<Rational> outputRemainder;
   theGB.initForDivisionAlone(theGB.theBasiS);
   theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &outputRemainder, -1);

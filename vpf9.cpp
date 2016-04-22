@@ -644,6 +644,7 @@ bool FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
 (std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
 { if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
     return false;
+  std::cout << "DEBUG: opening file " << theFileName << "\n";
   return FileOperations::OpenFileCreateIfNotPresentUnsecure
   (theFile, theGlobalVariables.PhysicalPathOutputFolder+ theFileName, OpenInAppendMode, truncate, openAsBinary);
 }
@@ -657,7 +658,9 @@ bool FileOperations::OpenFileCreateIfNotPresentOnTopOfProjectBase
 }
 
 bool FileOperations::OpenFileCreateIfNotPresentUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
-{ if (OpenInAppendMode)
+{   std::cout << "DEBUG: opening file " << theFileName << "\n";
+
+  if (OpenInAppendMode)
   { if (openAsBinary)
       theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app|std::fstream::binary);
     else

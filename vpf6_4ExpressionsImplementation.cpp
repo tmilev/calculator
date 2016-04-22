@@ -1204,7 +1204,8 @@ bool Expression::MergeContexts(Expression& leftE, Expression& rightE)
 }
 
 Expression Expression::ContextGetContextVariable(int variableIndex)const
-{ Expression thePolVars=this->ContextGetPolynomialVariables();
+{ MacroRegisterFunctionWithName("Expression::ContextGetContextVariable");
+  Expression thePolVars=this->ContextGetPolynomialVariables();
   if (thePolVars.children.size<=variableIndex+1)
   { Expression errorE;
     std::stringstream out;

@@ -926,7 +926,9 @@ void Plot::ComputeAxesAndBoundingBox()
       this->highBoundY=MathRoutines::Maximum (currentLine[1][1], this->highBoundY);
     }*/
     for (int j=0; j<this->thePlots[k].thePoints.size; j++)
-    { Vector<double> currentPoint=this->thePlots[k].thePoints[j];
+    { Vector<double>& currentPoint=this->thePlots[k].thePoints[j];
+      if (!this->IsOKVector(currentPoint))
+        continue;
       this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentPoint[0]);
       this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, currentPoint[0]);
       this->lowBoundY=MathRoutines::Minimum  (currentPoint[1], this->lowBoundY);
@@ -1002,38 +1004,47 @@ std::string Plot::GetPlotHtml()
       (this->thePlots[i].theRectangles[j][0], widthVector, heightVector, theDVs.PenStyleNormal,
        this->thePlots[i].colorRGB, this->thePlots[i].fillColorRGB, this->thePlots[i].lineWidth);
     }
-
+  List<Vector<double> > cleanedUpVectors;
   for (int i=0; i<this->thePlots.size; i++)
+  { List<Vector<double> >& currentVectors=thePlots[i].thePoints;
     if (this->thePlots[i].thePlotType=="point")
-      for (int j=0; j<this->thePlots[i].thePoints.size; j++)
-      { if (!this->IsOKVector(thePlots[i].thePoints[j]))
+      for (int j=0; j<currentVectors.size; j++)
+      { if (!this->IsOKVector(currentVectors[j]))
           continue;
         theDVs.drawCircleAtVectorBufferDouble
-        (this->thePlots[i].thePoints[j], 2, theDVs.PenStyleNormal, thePlots[i].colorRGB);
+        (currentVectors[j], 2, theDVs.PenStyleNormal, thePlots[i].colorRGB);
         theDVs.drawCircleAtVectorBufferDouble
-        (this->thePlots[i].thePoints[j], 1, theDVs.PenStyleNormal, thePlots[i].colorRGB);
+        (currentVectors[j], 1, theDVs.PenStyleNormal, thePlots[i].colorRGB);
       }
     else if (this->thePlots[i].thePlotType=="label")
-      for (int j=0; j<this->thePlots[i].thePoints.size; j++)
-      { if (!this->IsOKVector(thePlots[i].thePoints[j]))
+      for (int j=0; j<currentVectors.size; j++)
+      { if (!this->IsOKVector(currentVectors[j]))
           continue;
         theDVs.drawTextAtVectorBufferDouble
-        (this->thePlots[i].thePoints[j], this->thePlots[i].thePlotString, this->thePlots[i].colorRGB,
+        (currentVectors[j], this->thePlots[i].thePlotString, this->thePlots[i].colorRGB,
          theDVs.TextStyleNormal,0);
       }
     else
     { if (thePlots[i].fillStyle=="filled")
+      { cleanedUpVectors.SetSize(0);
+        cleanedUpVectors.SetExpectedSize(currentVectors.size);
+        for (int k=0; k< currentVectors.size; k++)
+          if (this->IsOKVector(currentVectors[k]))
+            cleanedUpVectors.AddOnTop(currentVectors[k]);
         theDVs.theBuffer.drawFilledShape
-        (thePlots[i].thePoints, theDVs.PenStyleNormal, thePlots[i].colorRGB, thePlots[i].fillColorRGB,
+        (cleanedUpVectors, theDVs.PenStyleNormal, thePlots[i].colorRGB, thePlots[i].fillColorRGB,
          thePlots[i].lineWidth);
-      for (int j=1; j<thePlots[i].thePoints.size; j++)
-      { if (!this->IsOKVector(thePlots[i].thePoints[j-1]) || !this->IsOKVector(thePlots[i].thePoints[j] ))
+      }
+      for (int j=1; j<currentVectors.size; j++)
+      { if (!this->IsOKVector(currentVectors[j-1]) || !this->IsOKVector(currentVectors[j] ))
           continue;
+//        stOutput << "<br>ISOKvectors:" << currentVectors[j-1] << ", " << currentVectors[j];
         theDVs.drawLineBetweenTwoVectorsBufferDouble
-        (thePlots[i].thePoints[j-1], thePlots[i].thePoints[j], theDVs.PenStyleNormal,
+        (currentVectors[j-1], currentVectors[j], theDVs.PenStyleNormal,
          thePlots[i].colorRGB, thePlots[i].lineWidth);
       }
     }
+  }
 /*  for (int i=0; i<this->thePlots.size; i++)
     for (int j=0; j<this->thePlots[i].theLines.size; j++)
     { if (!this->IsOKVector(this->thePlots[i].theLines[j][0]) ||

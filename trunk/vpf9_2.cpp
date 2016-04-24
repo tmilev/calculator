@@ -198,18 +198,34 @@ void DrawOperations::drawParallelogram
   (const Vector<double>& lowerLeftCorner, const Vector<double>& vector1,
    const Vector<double>& vector2, uint32_t thePenStyle, int ColorIndex, int fillColorIndex,
    double lineWidth)
-{ this->TypeNthDrawOperation.AddOnTop(this->typeDrawParallelogram);
-  this->IndexNthDrawOperation.AddOnTop(this->theParallelograms.size);
-  this->theParallelograms.AddObjectOnTopCreateNew();
-  DrawParallelogramOperation& theOp = *this->theParallelograms.LastObject();
+{ this->TypeNthDrawOperation.AddOnTop(this->typeFilledShape);
+  this->IndexNthDrawOperation.AddOnTop(this->theShapes.size);
+  this->theShapes.AddObjectOnTopCreateNew();
+  DrawFilledShapeOperation& theOp = *this->theShapes.LastObject();
   theOp.ColorIndex=ColorIndex;
   theOp.ColorFillIndex=fillColorIndex;
   theOp.thePenStyle=thePenStyle;
   theOp.lineWidth=lineWidth;
-  theOp.lowerLeftCorner=lowerLeftCorner;
-  theOp.sidesAsVectors.SetSize(2);
-  theOp.sidesAsVectors[0]=vector1;
-  theOp.sidesAsVectors[1]=vector2;
+  theOp.theCorners.SetSize(5);
+  theOp.theCorners[0] =lowerLeftCorner;
+  theOp.theCorners[1]=theOp.theCorners[0]+ vector1;
+  theOp.theCorners[2]=theOp.theCorners[1]+vector2;
+  theOp.theCorners[3]=theOp.theCorners[2]-vector1;
+  theOp.theCorners[4]=lowerLeftCorner;
+}
+
+void DrawOperations::drawFilledShape
+  (const List<Vector<double> >& theCorners, uint32_t thePenStyle, int ColorIndex, int fillColorIndex,
+   double lineWidth)
+{ this->TypeNthDrawOperation.AddOnTop(this->typeFilledShape);
+  this->IndexNthDrawOperation.AddOnTop(this->theShapes.size);
+  this->theShapes.AddObjectOnTopCreateNew();
+  DrawFilledShapeOperation& theOp = *this->theShapes.LastObject();
+  theOp.ColorIndex=ColorIndex;
+  theOp.ColorFillIndex=fillColorIndex;
+  theOp.thePenStyle=thePenStyle;
+  theOp.lineWidth=lineWidth;
+  theOp.theCorners=theCorners;
 }
 
 void DrawOperations::drawTextAtVectorBufferRational(const Vector<Rational>& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle)

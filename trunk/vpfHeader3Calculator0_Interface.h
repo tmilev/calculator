@@ -617,6 +617,7 @@ class PlotObject
 {
 public:
   std::string thePlotString;
+  std::string fillStyle;
   std::string thePlotStringWithHtml;
   double xLow;
   double xHigh;
@@ -626,7 +627,7 @@ public:
   int fillColorRGB;
   double lineWidth;
   Vectors<double> thePoints;
-  List<List<Vector<double> > > theLines;
+//  List<List<Vector<double> > > theLines;
   List<Vectors<double> > theRectangles;
   // each rectangle is a list of two 2-dim vectors. First vector gives the (x,y)-coords
   //of the lower left corner of the rectangle. Second vector gives the (width,height) of the rectangle.
@@ -636,8 +637,11 @@ public:
   std::string GetPlotStringFromFunctionStringAndRanges
   (bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat, double lowerBound, double upperBound);
   void CreatePlotFunction
-  (const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound,
-   double inputYmin, double inputYmax, Vectors<double>* inputPoints, int* inputColorRGB=0, double inputlineWidth=1);
+  (const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound,
+   double inputUpperBound,
+   double inputYmin, double inputYmax, Vectors<double>* inputPoints, int* inputColorRGB=0,
+   double inputlineWidth=1, std::string* inputFillStyle=0
+   );
   PlotObject();
   bool operator==(const PlotObject& other)const;
 };
@@ -666,7 +670,8 @@ class Plot
   void ComputeAxesAndBoundingBox();
   void AddFunctionPlotOnTop
   (const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound,
-   double inputUpperBound, double inputYmin, double inputYmax, Vectors<double>* inputPoints, int* colorRGB=0, double penWidth=1);
+   double inputUpperBound, double inputYmin, double inputYmax, Vectors<double>* inputPoints,
+   int* colorRGB=0, double penWidth=1, std::string* inputFillStyle=0);
   void operator+=(const Plot& other);
   void operator+=(const PlotObject& other);
   bool operator==(const Plot& other)const;

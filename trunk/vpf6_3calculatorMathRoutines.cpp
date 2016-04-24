@@ -3978,6 +3978,24 @@ bool CalculatorFunctionsGeneral::innerPlotViewRectangle
   return output.AssignValue(emptyPlot, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerPlotFill(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotFill");
+  //stOutput << input.ToString();
+  if (input.size()<3)
+    return false;
+  const Expression& thePlotE=input[1];
+  Plot outputPlot, startPlot;
+  if (!thePlotE.IsOfType<Plot>(&startPlot))
+    return false;
+  PlotObject theFilledPlot;
+  for (int i=0; i<startPlot.thePlots.size; i++)
+    theFilledPlot.thePoints.AddListOnTop(startPlot.thePlots[i].thePoints);
+  theFilledPlot.fillStyle="filled";
+  outputPlot.thePlots.AddOnTop(theFilledPlot);
+  outputPlot.thePlots.AddListOnTop(startPlot.thePlots);
+  return output.AssignValue(outputPlot, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlot2D");
   //stOutput << input.ToString();
@@ -4008,6 +4026,10 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
     else
       linewidth=1;
   }
+  std::string fillStyle;
+  if (input.children.size>=9)
+    if (!input[8].IsOfType<std::string>(&fillStyle))
+      fillStyle=input[8].ToString();
   Expression functionE;
   double upperBound, lowerBound;
   if (!lowerE.EvaluatesToDouble(&lowerBound) || !upperE.EvaluatesToDouble(&upperBound))
@@ -4037,7 +4059,8 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
   thePlot.DesiredHtmlHeightInPixels=desiredHtmlHeightPixels;
   thePlot.DesiredHtmlWidthInPixels=desiredHtmlWidthPixels;
   thePlot.AddFunctionPlotOnTop
-  (input[1], functionE.GetValue<std::string>(), lowerBound, upperBound, yLow, yHigh, &thePoints, &colorTripleRGB, linewidth);
+  (input[1], functionE.GetValue<std::string>(), lowerBound, upperBound, yLow, yHigh, &thePoints,
+   &colorTripleRGB, linewidth, &fillStyle);
   return output.AssignValue(thePlot, theCommands);
 }
 

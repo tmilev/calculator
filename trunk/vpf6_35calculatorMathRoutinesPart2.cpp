@@ -34,8 +34,8 @@ struct MeshTriangles{
   HashedList<Expression> knownEs;
   List<double> knownValues;
   Vector<double> lowerLeftCorner, upperRightCorner;
-  PlotObject theGrid;
-  PlotObject theCurve;
+  Plot theGrid;
+  Plot theCurve;
   Plot thePlot;
   bool flagShowGrid;
   bool flagFunctionEvaluationFailed;
@@ -60,22 +60,22 @@ struct MeshTriangles{
 
 void MeshTriangles::PlotGrid(int theColor)
 { MacroRegisterFunctionWithName("MeshTriangles::PlotGrid");
-  this->theGrid.theLines.SetSize(0);
-  this->theGrid.theLines.SetExpectedSize(this->theGrid.theLines.size+this->theTriangles.size*3);
-  List<Vector<double> > currentLine;
-  currentLine.SetSize(2);
+  this->theGrid.thePlots.SetSize(0);
+  this->theGrid.thePlots.SetExpectedSize(this->theGrid.thePlots.size+this->theTriangles.size*3);
+//  List<Vector<double> > currentLine;
+//  currentLine.SetSize(2);
+  PlotObject currentLinePlot;
+  List<Vector<double> >& pointsVector=currentLinePlot.thePoints;
+  currentLinePlot.thePoints.SetSize(4);
+  currentLinePlot.colorRGB=theColor;
   for (int i=0; i<this->theTriangles.size; i++)
-  { currentLine[0]=this->theTriangles[i][0];
-    currentLine[1]=this->theTriangles[i][1];
-    this->theGrid.theLines.AddOnTop(currentLine);
-    currentLine[0]=this->theTriangles[i][1];
-    currentLine[1]=this->theTriangles[i][2];
-    this->theGrid.theLines.AddOnTop(currentLine);
-    currentLine[0]=this->theTriangles[i][2];
-    currentLine[1]=this->theTriangles[i][0];
-    this->theGrid.theLines.AddOnTop(currentLine);
+  { pointsVector[0]=this->theTriangles[i][0];
+    pointsVector[1]=this->theTriangles[i][1];
+    pointsVector[2]=this->theTriangles[i][2];
+    pointsVector[3]=this->theTriangles[i][0];
+    this->theGrid.thePlots.AddOnTop(currentLinePlot);
   }
-  this->theGrid.colorRGB=theColor;
+//  this->theGrid.the=theColor;
 }
 
 double MeshTriangles::GetValueAtPoint(const Vector<double>& thePoint)
@@ -206,7 +206,9 @@ void MeshTriangles::ComputeImplicitPlotPart2()
     return;
   }
   double minSide=MathRoutines::Minimum(this->Height, this->Width)*this->minTriangleSideAsPercentOfWidthPlusHeight;
-  Vectors<double> theSegment;
+  PlotObject currentPlot;
+  currentPlot.colorRGB=CGI::RedGreenBlue(255, 0, 0);
+  Vectors<double>& theSegment=currentPlot.thePoints;
   List<Vector<double> > currentTriangle;
   for (int i=0; i<this->theTriangles.size; i++)
   { currentTriangle=this->theTriangles[i]; //making a copy in case this->theTriangles changes underneath.
@@ -246,7 +248,7 @@ void MeshTriangles::ComputeImplicitPlotPart2()
       this->AddPointFromVerticesValues(theSegment, currentTriangle[2], currentTriangle[0], val2, val0);
     if (theSegment.size!=2)
       continue;
-    this->theCurve.theLines.AddOnTop(theSegment);
+    this->theCurve.thePlots.AddOnTop(currentPlot);
   }
 }
 
@@ -277,15 +279,15 @@ void MeshTriangles::ComputeImplicitPlot()
     }
   if (this->flagShowGrid)
   { this->PlotGrid(CGI::RedGreenBlue(240, 240, 0));
-    this->thePlot.thePlots.AddOnTop(this->theGrid);
+    this->thePlot.thePlots.AddListOnTop(this->theGrid.thePlots);
   }
   this->ComputeImplicitPlotPart2();
   if (this->flagShowGrid)
   { this->PlotGrid(CGI::RedGreenBlue(100, 100, 100));
-    this->thePlot.thePlots.AddOnTop(this->theGrid);
+    this->thePlot.thePlots.AddListOnTop(this->theGrid.thePlots);
   }
-  this->theCurve.colorRGB=CGI::RedGreenBlue(255,0,0);
-  this->thePlot.thePlots.AddOnTop(this->theCurve);
+//  this->theCurve.colorRGB=CGI::RedGreenBlue(255,0,0);
+  this->thePlot.thePlots.AddListOnTop(this->theCurve.thePlots);
 //  stOutput << "ze lines: " << this->theCurve.theLines;
 }
 
@@ -300,9 +302,9 @@ bool CalculatorFunctionsGeneral::innerGetPointsImplicitly
   if (!theMesh.ComputePoints(theCommands, input, false))
     return false;
   HashedList<Vector<double>, MathRoutines::HashVectorDoubles> thePoints;
-  for (int i=0; i<theMesh.theCurve.theLines.size; i++)
-  { thePoints.AddOnTopNoRepetition(theMesh.theCurve.theLines[i][0]);
-    thePoints.AddOnTopNoRepetition(theMesh.theCurve.theLines[i][1]);
+  for (int i=0; i<theMesh.theCurve.thePlots.size; i++)
+  { thePoints.AddOnTopNoRepetition(theMesh.theCurve.thePlots[i].thePoints[0]);
+    thePoints.AddOnTopNoRepetition(theMesh.theCurve.thePlots[i].thePoints[1]);
   }
   Matrix<double> theMatrix;
   theMatrix.AssignVectorsToRows(thePoints);

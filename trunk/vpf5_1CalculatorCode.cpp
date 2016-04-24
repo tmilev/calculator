@@ -791,8 +791,10 @@ void Plot::operator+=(const PlotObject& other)
 }
 
 void PlotObject::CreatePlotFunction
-(const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound,
- double inputYmin, double inputYmax, Vectors<double>* inputPoints, int* inputColorRGB, double inputlineWidth)
+(const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound,
+ double inputUpperBound,
+ double inputYmin, double inputYmax, Vectors<double>* inputPoints, int* inputColorRGB,
+ double inputlineWidth, std::string* inputFillStyle)
 { MacroRegisterFunctionWithName("PlotObject::Create");
   this->xLow=inputLowerBound;
   this->xHigh=inputUpperBound;
@@ -800,6 +802,8 @@ void PlotObject::CreatePlotFunction
   this->yHigh=inputYmax;
   this->thePlotElement=(inputE);
   this->lineWidth=lineWidth;
+  if (inputFillStyle!=0)
+    this->fillStyle=*inputFillStyle;
   if (inputColorRGB!=0)
     this->colorRGB=*inputColorRGB;
   else
@@ -818,11 +822,12 @@ void PlotObject::CreatePlotFunction
 
 void Plot::AddFunctionPlotOnTop
 (const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound,
- double inputYmin, double inputYmax, Vectors<double>* inputPoints, int* colorRGB, double penWidth)
+ double inputYmin, double inputYmax, Vectors<double>* inputPoints, int* colorRGB, double penWidth,
+ std::string* inputFillString)
 { PlotObject thePlot;
   thePlot.CreatePlotFunction
   (inputE, inputPostfixNotation, inputLowerBound, inputUpperBound,
-   inputYmin, inputYmax, inputPoints, colorRGB, penWidth);
+   inputYmin, inputYmax, inputPoints, colorRGB, penWidth, inputFillString);
   this->thePlots.AddOnTop(thePlot);
 }
 
@@ -835,7 +840,7 @@ bool PlotObject::operator==(const PlotObject& other)const
   this->thePlotElement==other.thePlotElement &&
   this->thePlotType==other.thePlotType &&
   this->thePoints==other.thePoints &&
-  this->theLines==other.theLines &&
+//  this->theLines==other.theLines &&
   this->lineWidth==other.lineWidth &&
   this->theRectangles==other.theRectangles
   ;
@@ -909,7 +914,7 @@ void Plot::ComputeAxesAndBoundingBox()
     this->theUpperBoundAxes=MathRoutines::Maximum(this->thePlots[k].xHigh, theUpperBoundAxes);
     this->lowBoundY=MathRoutines::Minimum(this->thePlots[k].yLow, this->lowBoundY);
     this->highBoundY=MathRoutines::Maximum(this->thePlots[k].yHigh, this->highBoundY);
-    for (int j=0; j<this->thePlots[k].theLines.size; j++)
+/*    for (int j=0; j<this->thePlots[k].theLines.size; j++)
     { List<Vector<double> > currentLine=this->thePlots[k].theLines[j];
       this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[0][0]);
       this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[1][0]);
@@ -919,7 +924,7 @@ void Plot::ComputeAxesAndBoundingBox()
       this->lowBoundY=MathRoutines::Minimum  (currentLine[1][1], this->lowBoundY);
       this->highBoundY=MathRoutines::Maximum (currentLine[0][1], this->highBoundY);
       this->highBoundY=MathRoutines::Maximum (currentLine[1][1], this->highBoundY);
-    }
+    }*/
     for (int j=0; j<this->thePlots[k].thePoints.size; j++)
     { Vector<double> currentPoint=this->thePlots[k].thePoints[j];
       this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentPoint[0]);
@@ -1017,6 +1022,10 @@ std::string Plot::GetPlotHtml()
          theDVs.TextStyleNormal,0);
       }
     else
+    { if (thePlots[i].fillStyle=="filled")
+        theDVs.theBuffer.drawFilledShape
+        (thePlots[i].thePoints, theDVs.PenStyleNormal, thePlots[i].colorRGB, thePlots[i].fillColorRGB,
+         thePlots[i].lineWidth);
       for (int j=1; j<thePlots[i].thePoints.size; j++)
       { if (!this->IsOKVector(thePlots[i].thePoints[j-1]) || !this->IsOKVector(thePlots[i].thePoints[j] ))
           continue;
@@ -1024,7 +1033,8 @@ std::string Plot::GetPlotHtml()
         (thePlots[i].thePoints[j-1], thePlots[i].thePoints[j], theDVs.PenStyleNormal,
          thePlots[i].colorRGB, thePlots[i].lineWidth);
       }
-  for (int i=0; i<this->thePlots.size; i++)
+    }
+/*  for (int i=0; i<this->thePlots.size; i++)
     for (int j=0; j<this->thePlots[i].theLines.size; j++)
     { if (!this->IsOKVector(this->thePlots[i].theLines[j][0]) ||
           !this->IsOKVector(this->thePlots[i].theLines[j][1]))
@@ -1033,7 +1043,7 @@ std::string Plot::GetPlotHtml()
       (this->thePlots[i].theLines[j][0], this->thePlots[i].theLines[j][1],
        theDVs.PenStyleNormal, this->thePlots[i].colorRGB, thePlots[i].lineWidth);
       //stOutput << "Drew line b-n: " <<this->thePlots[i].theLines[j][0] << " and " << this->thePlots[i].theLines[j][1];
-    }
+    }*/
   std::stringstream resultStream;
   theDVs.flagIncludeExtraHtmlDescriptions=this->flagIncludeExtraHtmlDescriptions;
   theDVs.flagPlotShowJavascriptOnly=this->flagPlotShowJavascriptOnly;

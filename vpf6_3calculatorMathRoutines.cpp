@@ -2052,14 +2052,14 @@ bool CalculatorFunctionsGeneral::innerCompareFunctionsNumerically
   if (!input[4].EvaluatesToDouble(&rightBoundary))
     return theCommands << "Failed to extract the right endpoint of the comparison interval. ";
   int numPoints=50;
-  if (input.children.size>5)
+  if (input.size()>5)
     if (!input[5].IsSmallInteger(&numPoints))
       return theCommands << "Failed to convert argument: " << input[5].ToString() << " to a small integer. ";
   double minDiff=0, maxDiff=0;
   if (!theFunE.EvaluatesToDoubleInRange(theVars[0].ToString(), leftBoundary, rightBoundary, numPoints, &minDiff, &maxDiff, 0))
     return theCommands << "Failed to evaluate your function to a number. The sampling interval may be outside of the domain of the function. ";
   double tolerance=0.0001;
-  if (input.children.size>6)
+  if (input.size()>6)
     if (!input[6].EvaluatesToDouble(&tolerance))
       return theCommands << "Failed to evaluate the argument " << input[6].ToString() << " to a floating point number. ";
   if (minDiff<- tolerance || maxDiff> tolerance)
@@ -3984,10 +3984,16 @@ bool CalculatorFunctionsGeneral::innerPlotFill(Calculator& theCommands, const Ex
   if (input.size()<3)
     return false;
   const Expression& thePlotE=input[1];
+  const Expression& colorE=input[2];
   Plot outputPlot, startPlot;
+  PlotObject theFilledPlot;
   if (!thePlotE.IsOfType<Plot>(&startPlot))
     return false;
-  PlotObject theFilledPlot;
+  std::string colorString;
+  if (!colorE.IsOfType<std::string>(&colorString))
+    colorString=colorE.ToString();
+  if (!DrawingVariables::GetColorIntFromColorString(colorString, theFilledPlot.fillColorRGB))
+    theCommands << "Failed to extract color from: " << colorE.ToString() << "; using default color value. ";
   for (int i=0; i<startPlot.thePlots.size; i++)
     theFilledPlot.thePoints.AddListOnTop(startPlot.thePlots[i].thePoints);
   theFilledPlot.fillStyle="filled";
@@ -5503,15 +5509,17 @@ bool Expression::EvaluatesToDoubleInRange
   knownEs.AddOnTop(theVarNameE);
   knownValues.AddOnTop(0);
   int numPoints=numIntervals+1;
-  double delta=(highBound-lowBound)/(numPoints);
+  double delta=(highBound-lowBound)/(numIntervals);
   *knownValues.LastObject()=lowBound;
   double currentValue=0;
   if (outputPoints!=0)
-    outputPoints->SetSize(numIntervals);
+    outputPoints->SetSize(numPoints);
   bool result=true;
   int numFailedEvaluations=0;
-  for (int i=0; i<numIntervals; i++)
+  for (int i=0; i<numPoints; i++)
   { //stOutput << "<br>Debug: evaluating to double under subs: ";
+    if (i==numPoints-1)
+      *knownValues.LastObject()=highBound; //correcting for floating point errors.
     if (!this->EvaluatesToDoubleUnderSubstitutions(knownEs, knownValues, &currentValue))
     { numFailedEvaluations++;
       if (numFailedEvaluations<5)
@@ -5637,9 +5645,13 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
       double tempDouble=0;
       if (whichDouble==0)
         whichDouble=&tempDouble;
-      *whichDouble=FloatingPoint::power(leftD, rightD);
+      if (leftD==0 && rightD>0)
+        *whichDouble=0;
+      else
+        *whichDouble=FloatingPoint::power(leftD, rightD);
       if (signChange)
         *whichDouble*=-1;
+//      stOutput << "debug: here i am power " << leftD << " ^ " << rightD << " = " << *whichDouble << "<br>";
       return !isnan(*whichDouble);
     }
     if ((*this).StartsWith(theCommands.opSqrt(),3))
@@ -5653,10 +5665,14 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
             rightD*=-1;
           }
       }
+//      stOutput << "debug: here i am";
       double tempDouble=0;
       if (whichDouble==0)
         whichDouble=&tempDouble;
-      *whichDouble=FloatingPoint::power(rightD,1/leftD);
+      if (rightD==0 && leftD>0)
+        *whichDouble=0;
+      else
+        *whichDouble=FloatingPoint::power(rightD,1/leftD);
       if (signChange)
         *whichDouble*=-1;
       return !isnan(*whichDouble);

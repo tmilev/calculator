@@ -207,7 +207,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
         << currentIndex << "])[1]*-1" << "+ \"){\"+"
         << (((double)this->theBuffer.theDrawCircleAtVectorOperations[currentIndex].radius)/40) << "+\"}<br>\";\n";
         break;
-      case DrawOperations::typeDrawParallelogram:
+      case DrawOperations::typeFilledShape:
 /*        out << "theText.innerHTML+=\""
         << this->GetColorPsTricksFromColorIndex
         (this->theBuffer.theParallelograms[currentIndex].ColorIndex)
@@ -425,23 +425,17 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "var " << circArrayName << "=new Array(" << this->theBuffer.theDrawCircleAtVectorOperations.size << ");\n"
   << "var " << txtArrayName << "=new Array(" << this->theBuffer.theDrawTextAtVectorOperations.size << ");\n"
   ;
-  out << "var " << filledShapes << "=new Array(" << this->theBuffer.theParallelograms.size << ");\n";
-  for (int i=0; i<this->theBuffer.theParallelograms.size; i++)
-    out << filledShapes << "[" << i << "]=["
-    << this->theBuffer.theParallelograms[i].lowerLeftCorner
-        .ToStringSquareBracketsBasicType() << ", "
-    << (this->theBuffer.theParallelograms[i].lowerLeftCorner+
-        this->theBuffer.theParallelograms[i].sidesAsVectors[0]
-       ).ToStringSquareBracketsBasicType() << ", "
-    << (this->theBuffer.theParallelograms[i].lowerLeftCorner+
-        this->theBuffer.theParallelograms[i].sidesAsVectors[0]+
-        this->theBuffer.theParallelograms[i].sidesAsVectors[1]
-       ).ToStringSquareBracketsBasicType() << ", "
-    << (this->theBuffer.theParallelograms[i].lowerLeftCorner+
-        this->theBuffer.theParallelograms[i].sidesAsVectors[1]
-       ).ToStringSquareBracketsBasicType() << ", "
-    << this->theBuffer.theParallelograms[i].lowerLeftCorner
-        .ToStringSquareBracketsBasicType() << "];\n";
+  out << "var " << filledShapes << "=new Array(" << this->theBuffer.theShapes.size << ");\n";
+  for (int i=0; i<this->theBuffer.theShapes.size; i++)
+  { out << filledShapes << "[" << i << "]=[";
+    DrawFilledShapeOperation& currentShape=this->theBuffer.theShapes[i];
+    for (int j=0; j<currentShape.theCorners.size; j++)
+    { out << currentShape.theCorners[j].ToStringSquareBracketsBasicType();
+      if (j!=currentShape.theCorners.size-1)
+        out << ", ";
+    }
+    out << "];\n";
+  }
   for (int i=0; i<this->theBuffer.theDrawLineBetweenTwoRootsOperations.size; i++)
   { Vector<double>& current1=theBuffer.theDrawLineBetweenTwoRootsOperations[i].v1;
     Vector<double>& current2=theBuffer.theDrawLineBetweenTwoRootsOperations[i].v2;
@@ -538,16 +532,16 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
         << currentIndex << "])[1]); ";
         out << theSurfaceName << ".stroke();\n";
         break;
-      case DrawOperations::typeDrawParallelogram:
+      case DrawOperations::typeFilledShape:
         if (theDimension!=2)
           break;
         out << theSurfaceName << ".beginPath();\n ";
         out << theSurfaceName << ".fillStyle=\""
-        << this->GetColorHtmlFromColorIndex(this->theBuffer.theParallelograms[currentIndex].ColorFillIndex)
+        << this->GetColorHtmlFromColorIndex(this->theBuffer.theShapes[currentIndex].ColorFillIndex)
         << "\";\n";
         out << theSurfaceName << ".lineWidth="
         << FloatingPoint::DoubleToString
-        (this->theBuffer.theParallelograms[currentIndex].lineWidth)
+        (this->theBuffer.theShapes[currentIndex].lineWidth)
         << ";\n ";
         out << theSurfaceName << ".moveTo("
         << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[0],"
@@ -561,7 +555,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
         << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[1]);\n ";
         out << theSurfaceName << ".fill();\n";
         out << theSurfaceName << ".strokeStyle=\""
-        << this->GetColorHtmlFromColorIndex(this->theBuffer.theParallelograms[currentIndex].ColorIndex)
+        << this->GetColorHtmlFromColorIndex(this->theBuffer.theShapes[currentIndex].ColorIndex)
         << "\";\n";
         out << theSurfaceName << ".stroke();\n";
         break;

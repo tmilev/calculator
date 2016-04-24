@@ -36,16 +36,15 @@ public:
   }
 };
 
-class DrawParallelogramOperation
+class DrawFilledShapeOperation
 {
 public:
-  Vector<double> lowerLeftCorner;
-  List<Vector<double> > sidesAsVectors;
+  List<Vector<double> > theCorners;
   int thePenStyle;
   int ColorIndex;
   int ColorFillIndex;
   double lineWidth;
-  DrawParallelogramOperation();
+  DrawFilledShapeOperation();
 };
 
 
@@ -138,7 +137,7 @@ private:
 public:
   List<int> IndexNthDrawOperation;
   List<int> TypeNthDrawOperation;
-  List<DrawParallelogramOperation> theParallelograms;
+  List<DrawFilledShapeOperation> theShapes;
   List<DrawTextOperation> theDrawTextOperations;
   List<DrawLineOperation> theDrawLineOperations;
   List<DrawLineBetweenTwoRootsOperation> theDrawLineBetweenTwoRootsOperations;
@@ -255,6 +254,9 @@ public:
   (const Vector<double>& lowerLeftCorner, const Vector<double>& vector1,
    const Vector<double>& vector2, uint32_t thePenStyle, int ColorIndex, int fillColorIndex,
    double lineWidth);
+  void drawFilledShape
+  (const List<Vector<double> >& theCorners, uint32_t thePenStyle, int ColorIndex, int fillColorIndex,
+   double lineWidth);
   void drawLineBetweenTwoVectorsBufferDouble
   (const Vector<double>& vector1, const Vector<double>& vector2, uint32_t thePenStyle, int ColorIndex,
    double lineWidth);
@@ -282,7 +284,7 @@ public:
     this->indexStartingModifiableTextCommands=0;
   }
   void init();
-  enum DrawOperationType{ typeDrawLine, typeDrawText, typeDrawLineBetweenTwoVectors, typeDrawTextAtVector, typeDrawCircleAtVector, typeDrawParallelogram};
+  enum DrawOperationType{ typeDrawLine, typeDrawText, typeDrawLineBetweenTwoVectors, typeDrawTextAtVector, typeDrawCircleAtVector, typeFilledShape};
 };
 
 class VirtualDrawOp

@@ -1149,8 +1149,13 @@ D-B;\
    The seventh argument is optional and specifies line width. \
    Plots may be added together- adding plots superimposes the plots. \
    ",
-   "plot2D{}(\\sin{}x+cos{}x, 0, 5, 200, 200, \"blue\")", true, false,
+   "plot2D{}(\\sin{}x+cos{}x, 0, 5, 200, 200, \"blue\",2)", true, false,
    "CalculatorFunctionsGeneral::innerPlot2D", "plot2D")
+   ;
+  this->AddOperationInnerHandler ("plotFill", CalculatorFunctionsGeneral::innerPlotFill, "",
+   "Fills a plot with color. ",
+   "plotFill(plot2D{}(sqrt(1-x^2), -1, 1, 200, 200, \"blue\",2)+plot2D(-sqrt(1-x^2),-1,1, 200,200), \"blue\")", true, false,
+   "CalculatorFunctionsGeneral::innerPlotFill", "plotFill")
    ;
   this->AddOperationInnerHandler ("plotRectangle", CalculatorFunctionsGeneral::innerPlotRectangle, "",
    "Plots a rectangle. Arguments format: plotRectangle{}((lowerCornerLeftXcoord,  lowerCornerLeftXcoord), \

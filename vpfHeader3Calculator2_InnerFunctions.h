@@ -225,6 +225,7 @@ public:
   static bool innerPlotPolarRfunctionThetaExtended(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotPolarRfunctionTheta(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlot2D(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPlotFill(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotRectangle(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotLabel(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotViewRectangle(Calculator& theCommands, const Expression& input, Expression& output);

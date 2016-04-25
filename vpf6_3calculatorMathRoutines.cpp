@@ -4037,16 +4037,18 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
     else
       linewidth=1;
   }
-  std::string fillStyle;
+  int numIntervals=500;
   if (input.children.size>=9)
-    if (!input[8].IsOfType<std::string>(&fillStyle))
-      fillStyle=input[8].ToString();
+    if (!input[8].IsSmallInteger(&numIntervals))
+      numIntervals=500;
+  if (numIntervals<2)
+    numIntervals=2;
   Expression functionE;
   double upperBound, lowerBound;
   if (!lowerE.EvaluatesToDouble(&lowerBound) || !upperE.EvaluatesToDouble(&upperBound))
     return output.MakeError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
-  if (upperBound<lowerBound)
-    MathRoutines::swap(upperBound, lowerBound);
+//  if (upperBound<lowerBound)//no bounds swapping! this messes up filling commands.
+//    MathRoutines::swap(upperBound, lowerBound);
   if (!theCommands.CallCalculatorFunction(theCommands.innerSuffixNotationForPostScript, input[1], functionE))
   { std::stringstream out;
     out << "Failed to convert expression " << input[1].ToString() << " to postfix notation. ";
@@ -4054,7 +4056,7 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
   }
   double yLow, yHigh;
   Vectors<double> thePoints;
-  if (!input[1].EvaluatesToDoubleInRange("x", lowerBound, upperBound, 500, &yLow, &yHigh, &thePoints))
+  if (!input[1].EvaluatesToDoubleInRange("x", lowerBound, upperBound, numIntervals, &yLow, &yHigh, &thePoints))
   { bool hasOneGoodPoint=false;
     for (int i=0; i<thePoints.size; i++)
       if (!isnan(thePoints[i][1]))
@@ -4071,7 +4073,7 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
   thePlot.DesiredHtmlWidthInPixels=desiredHtmlWidthPixels;
   thePlot.AddFunctionPlotOnTop
   (input[1], functionE.GetValue<std::string>(), lowerBound, upperBound, yLow, yHigh, &thePoints,
-   &colorTripleRGB, linewidth, &fillStyle);
+   &colorTripleRGB, linewidth);
   return output.AssignValue(thePlot, theCommands);
 }
 

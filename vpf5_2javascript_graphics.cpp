@@ -546,9 +546,10 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
         out << "  " << theSurfaceName << ".lineTo("
         << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][i])[0],"
         << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][i])[1]);\n ";
-        out << theSurfaceName << ".lineTo("
-        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[0],"
-        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[1]);\n ";
+//        out << theSurfaceName << ".lineTo("
+//        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[0],"
+//        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[1]);\n ";
+        out << theSurfaceName << ".closePath();\n";
         out << theSurfaceName << ".fill();\n";
         out << theSurfaceName << ".strokeStyle=\""
         << this->GetColorHtmlFromColorIndex(this->theBuffer.theShapes[currentIndex].ColorIndex)

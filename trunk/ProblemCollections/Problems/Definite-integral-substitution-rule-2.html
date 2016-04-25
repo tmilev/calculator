@@ -8,13 +8,12 @@ TurnOffRules
 ("DistributeMultiplication", "IntegratePowerRule", 
 "ConvertShortDenominatorToNegativePower", "IntegrateBlockIb", 
 "IntegratePartialFractions", "CommonDenominator", "CommonDenominatorOneNonFraction");
-leftPoint=0;
-rightPoint=randomInteger{}(1,2);
+a= randomInteger(2,10);
+leftPoint=1/a;
+rightPoint=e/a;
 b=randomInteger{}( (-1,-5),(1,5));
-a=(64-b^2)/rightPoint^3;
-c=randomInteger{}( (-1,-5),(1,5));
-theIndefiniteIntegral{}{{x}}= c/(3a) 2/3(a x^3 + b^2)^{3/2};
-f{}{{x}}=c x^2\sqrt{a x^3+b^2};
+theIndefiniteIntegral{}{{x}}= -1/pi \cos (\pi \ln (a x));
+f{}{{x}}= \frac{\sin (\pi ln{}(a x) ) }{x};
 \)
 </span>
 <span class="calculatorHiddenIncludeInCommentsBeforeSubmission">

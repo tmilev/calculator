@@ -5,16 +5,16 @@
 %UseLnInsteadOfLog
 %NoApproximations
 TurnOffRules
-("DistributeMultiplication", "IntegratePowerRule", 
+( "IntegratePowerRule", 
 "ConvertShortDenominatorToNegativePower", "IntegrateBlockIb", 
 "IntegratePartialFractions", "CommonDenominator", "CommonDenominatorOneNonFraction");
-leftPoint=0;
-rightPoint=randomInteger{}(1,2);
+a= randomInteger(2,10);
 b=randomInteger{}( (-1,-5),(1,5));
-a=(64-b^2)/rightPoint^3;
-c=randomInteger{}( (-1,-5),(1,5));
-theIndefiniteIntegral{}{{x}}= c/(3a) 2/3(a x^3 + b^2)^{3/2};
-f{}{{x}}=c x^2\sqrt{a x^3+b^2};
+
+leftPoint=-b/a;
+rightPoint=-b/a+pi/a;
+theIndefiniteIntegral{}{{x}}= -3/(a pi) sin{}(\pi/3 cos (a x+b) );
+f{}{{x}}= \cos {}(\pi/3 \cos{} (a x+b) )  sin{}(a x+b);
 \)
 </span>
 <span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
@@ -38,14 +38,14 @@ plotCurve(leftPoint, t, 0 , f{}leftPoint)
 </span>
 <br>
 Integrate. This is a definite integral so your answer should be a constant expression/number. 
-If your answer involves natural logarithm do not approximate with calculator (but enter them algebraically).
+If your answer involves natural logarithm or trig functions do not approximate with calculator (but enter them algebraically).
 <br>
 <span class="calculator">
 \(\displaystyle \int_{leftPoint}^{rightPoint} f{}x dx  \) 
 </span>=
 <textarea class="calculatorAnswer" id="AlgebraAnswer">
 \(
-AlgebraAnswer==theIndefiniteIntegral{}rightPoint-theIndefiniteIntegral{}leftPoint
+|DoubleValue {}(AlgebraAnswer-(theIndefiniteIntegral{}rightPoint-theIndefiniteIntegral{}leftPoint))|<0.0000000001
 \)
 </textarea>
 
@@ -57,5 +57,6 @@ EnsureExpressionDependsOnlyOn(AlgebraAnswer,none)
 </span>
 
 <span class="calculatorAnswerOnGiveUp">
-theIndefiniteIntegral{}rightPoint-theIndefiniteIntegral{}leftPoint
+%NumberColors
+MakeExpression(MakeRationalFunction( theIndefiniteIntegral{}rightPoint-theIndefiniteIntegral{}leftPoint))
 </span>

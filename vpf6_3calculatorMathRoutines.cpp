@@ -408,8 +408,9 @@ bool CalculatorFunctionsGeneral::innerSin(Calculator& theCommands, const Express
           return output.AssignValue(algOutput, theCommands);
         }
       }
-
-  double theArgument;
+  if (theCommands.flagNoApproximations)
+    return false;
+  double theArgument=0;
   if (!input.EvaluatesToDouble(&theArgument))
     return false;
   return output.AssignValue(FloatingPoint::sin(theArgument), theCommands);
@@ -419,6 +420,8 @@ bool CalculatorFunctionsGeneral::innerCos(Calculator& theCommands, const Express
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCos");
   if (input.IsAtomGivenData(theCommands.opPi()))
     return output.AssignValue(-1, theCommands);
+  if (input.IsEqualToZero())
+    return output.AssignValue(1, theCommands);
   Rational piProportion;
   if (input.StartsWith(theCommands.opTimes(), 3))
     if (input[2].IsAtomGivenData(theCommands.opPi()))
@@ -431,7 +434,9 @@ bool CalculatorFunctionsGeneral::innerCos(Calculator& theCommands, const Express
           return output.AssignValue(algOutput, theCommands);
         }
       }
-  double theArgument;
+  if (theCommands.flagNoApproximations)
+    return false;
+  double theArgument=0;
   if (!input.EvaluatesToDouble(&theArgument))
     return false;
   return output.AssignValue(FloatingPoint::cos(theArgument), theCommands );

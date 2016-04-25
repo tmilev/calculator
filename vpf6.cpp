@@ -1544,6 +1544,7 @@ bool Calculator::CollectSummands
   Rational coeffRat=1;
   AlgebraicNumber coeffAlg=1;
   double coeffDouble=1;
+//  stOutput << "The summands are: " << summands.ToStringCommaDelimited();
   for (int i=0; i<summands.size; i++)
   { if (summands[i].IsEqualToZero())
       continue;
@@ -1563,7 +1564,10 @@ bool Calculator::CollectSummands
         continue;
       }
     }
-    outputSum.AddMonomial(summands[i],1);
+    if (summands[i].IsRational(&coeffRat))
+      outputSum.AddMonomial(oneE, coeffRat);
+    else
+      outputSum.AddMonomial(summands[i],1);
   }
   if (!sumOverDoubles.IsEqualToZero())
   { sumOverDoubles.QuickSortDescending();

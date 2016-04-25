@@ -1111,10 +1111,14 @@ D-B;\
    "CalculatorFunctionsGeneral::innerPlotImplicitShowGridFunction", "plotImplicitShowGrid")
    ;
   this->AddOperationInnerHandler ("plotCurve", CalculatorFunctionsGeneral::innerPlotParametricCurve, "",
-   "<b>Calculus teaching function.</b> Plots a curve sitting in 2-dimensional space. \
+   " Plots a curve sitting in 2-dimensional space. \
     The first and second argument give the x and y coordinate functions; the curve parameter must be t.\
+    The third and fourth argument give the start/finish range for t. The fifth and sixth argument give the image\
+    height/width. The seventh argument gives the curve color. The eighth argument gives the curve width. \
+    The ninth argument gives the number of points used to draw the curve. \
    ",
-   "plotCurve(sin(12t),cos(13t), 0, 2\\pi)")
+   "plotCurve(sin(12t),cos(13t), 0, 2\\pi); plotCurve(sin(12t),cos(13t), 0, 2\\pi, 300,300, blue, 2, 2000)", true, false, "CalculatorFunctionsGeneral::innerPlotParametricCurve",
+   "PlotCurve")
    ;
   this->AddOperationInnerHandler ("GetVariablesExcludeNamedConstants", CalculatorFunctionsGeneral::innerGetFreeVariablesExcludeNamedConstants, "",
    "Gets the variables on which the expression depends. Excludes the named constants. Here, the word ``variables'' is to be thought of as \
@@ -2035,6 +2039,11 @@ void Calculator::initPredefinedStandardOperations()
    addition, returning double. ",
    "DoubleValue{}(3.14159265358979323846)+1"
    , true, false, "CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat");
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CalculatorFunctionsBinaryOps::innerAddPlotToPlot, this->opCalculusPlot(), this->opCalculusPlot(),
+   "Superimposes two plots. ",
+   "plot2D{}(sin{}(x), -5, 5)+ plot2D{}(1/sin{}(x ), 0.1, 3.041592654)",
+   true, false, "CalculatorFunctionsBinaryOps::innerAddPlotToPlot", "AddPlots");//must come before outer plus.
   this->AddOperationOuterHandler
   ("+", Calculator::outerPlus, "",
    "Collects all terms (over the rationals), adding up terms proportional up to a rational number. \
@@ -2060,11 +2069,6 @@ void Calculator::initPredefinedStandardOperations()
    "Adds two elements of tensor products of generalized Verma modules. ",
    "v=hwv{}(G_2, (1,0),(0,0));\
    \n(3/4 v)\\otimes v-3/4 (v\\otimes v)", true, false, "CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", CalculatorFunctionsBinaryOps::innerAddPlotToPlot, this->opCalculusPlot(), this->opCalculusPlot(),
-   "Superimposes two plots. ",
-   "plot2D{}(sin{}(x), -5, 5)+ plot2D{}(1/sin{}(x ), 0.1, 3.041592654)",
-   true, false, "CalculatorFunctionsBinaryOps::innerAddPlotToPlot");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly, this->opRational(), this->opPoly(),
    "Adds a rational to a polynomial. ",
@@ -2932,14 +2936,15 @@ void Calculator::initPredefinedStandardOperations()
   << CGI::GetHtmlSpanHidableStartsHiddeN(moreInfoOnIntegers.str());
 
   this->AddOperationOuterHandler
-  ("<", this->outerLessThan, "",
+  ("<", Calculator::outerLessThan, "",
    "If both the left hand side and the right hand side are rational, replaces the expression by \
    1 if the left number is less than the right, else replaces the expression by 0.",
-   "3<4; 5<4", true);
+   "3<4; 5<4", true, false, "Calculator::outerLessThan", "LessThan");
   this->AddOperationOuterHandler
-  (">", this->outerGreaterThan, "",
+  (">", Calculator::outerGreaterThan, "",
    "Greater than: has similar action to the less than sign. The following example shows an implementation of commutativity. ",
-   "x_{{i}}*x_{{j}}*{{a}}:if i>j=x_j*x_i*a;\n x_{{i}}*x_{{j}}:if i>j=x_j*x_i; (x_2*x_1- x_1*x_3)(x_1x_5+x_5x_4x_2); x_5x_4x_3x_2x_1", true);
+   "x_{{i}}*x_{{j}}*{{a}}:if i>j=x_j*x_i*a;\n x_{{i}}*x_{{j}}:if i>j=x_j*x_i; (x_2*x_1- x_1*x_3)(x_1x_5+x_5x_4x_2); x_5x_4x_3x_2x_1", true, false,
+   "Calculator::outerGreaterThan", "GreaterThan");
 
   this->AddOperationOuterHandler
   ("==", CalculatorFunctionsGeneral::outerEqualEqual, "",

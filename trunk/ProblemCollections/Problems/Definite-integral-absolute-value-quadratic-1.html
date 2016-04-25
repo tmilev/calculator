@@ -3,18 +3,19 @@
 <span class="calculatorHidden">
 \(
 %UseLnInsteadOfLog
+%NoApproximations
 TurnOffRules
-("DistributeMultiplication", "IntegratePowerRule", 
+("IntegratePowerRule", 
 "ConvertShortDenominatorToNegativePower", "IntegrateBlockIb", 
 "IntegratePartialFractions", "CommonDenominator", "CommonDenominatorOneNonFraction");
-leftPoint=0;
-rightPoint=1;
-a=randomInteger{}( (-1,-5),(1,5));
-b=randomInteger{}( (-1,-5),(1,5));
+a=randomInteger{}( (-5,5));
+b=randomInteger{}( (1,5));
+c=randomInteger{}( (2,4));
+leftPoint=a-1;
+rightPoint=a+b+1;
 
-f{}{{x}}=a x +b;
-
-
+g{}{{x}}= c/2(x-a)(x-a-b);
+f{}{{x}}=|g{}x|;
 \)
 </span>
 <span class="calculatorHiddenIncludeInCommentsBeforeSubmission">
@@ -26,14 +27,13 @@ TurnOnRules
 SeparatorBetweenSpans;
 \)
 </span>
-
 <span class="calculatorShowToUserOnly">
 \(
 plotFill(
-plotCurve(leftPoint, t, 0 , f{}leftPoint, 300, 300)
+plotCurve(leftPoint, t, 0 , f{}leftPoint)
 +plot2D(f{}x, leftPoint,rightPoint ,300,300)
-+plotCurve(rightPoint, t, f{}rightPoint,0, 300 ,300)
-+plotCurve(t,0, rightPoint, leftPoint), cyan,300,300)
++plotCurve(rightPoint, t, f{}rightPoint,0)
++plotCurve(t,0, rightPoint, leftPoint), cyan)
 ;
 \) 
 </span>
@@ -45,13 +45,17 @@ Integrate. This is a definite integral so your answer should be a constant expre
 </span>=
 <textarea class="calculatorAnswer" id="AlgebraAnswer">
 \(
-(
+AlgebraAnswer==
+
+2 (
 TurnOnRules
-("DistributeMultiplication", "IntegratePowerRule",
-"ConvertShortDenominatorToNegativePower", "IntegrateBlockIb",
+("DistributeMultiplication", "IntegratePowerRule", 
+"ConvertShortDenominatorToNegativePower", "IntegrateBlockIb", 
 "IntegratePartialFractions");
-| DoubleValue((theIndefiniteIntegral= \int f{}x dx; x=rightPoint; theIndefiniteIntegral)_3-
-(theIndefiniteIntegral= \int f{}x dx; x=leftPoint; theIndefiniteIntegral)_3 -AlgebraAnswer) | <0.0000001
+
+-(theInt=(\int g{}x dx); x=leftPoint; theInt)_3+
+2(theInt=(\int g{}x dx); x=a; theInt)_3-
+(theInt=(\int g{}x dx); x=a+b/2; theInt)_3
 )_2
 \)
 </textarea>
@@ -59,18 +63,19 @@ TurnOnRules
  
 <span class="calculatorCommentBeforeSubmission">
 \(
-EnsureExpressionDependsOnlyOn(AlgebraAnswer, none)
+EnsureExpressionDependsOnlyOn(AlgebraAnswer,none)
 \)
 </span>
 
 <span class="calculatorAnswerOnGiveUp">
-(
+2 (
 TurnOnRules
 ("DistributeMultiplication", "IntegratePowerRule", 
 "ConvertShortDenominatorToNegativePower", "IntegrateBlockIb", 
 "IntegratePartialFractions");
 
-(theIndefiniteIntegral= \int f{}x dx; x=rightPoint; theIndefiniteIntegral)_3-
-(theIndefiniteIntegral= \int f{}x dx; x=leftPoint; theIndefiniteIntegral)_3
+-(theInt=(\int g{}x dx); x=leftPoint; theInt)_3+
+2(theInt=(\int g{}x dx); x=a; theInt)_3-
+(theInt=(\int g{}x dx); x=a+b/2; theInt)_3
 )_2
 </span>

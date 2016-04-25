@@ -1700,6 +1700,7 @@ bool Calculator::outerGreaterThan(Calculator& theCommands, const Expression& inp
     return output.AssignValue(0, theCommands);
   }
   double leftD, rightD;
+//  stOutput << "DEBUG: Got to here, comparing " << left.ToString() << " to " << right.ToString();
   if (left.EvaluatesToDouble(&leftD) && right.EvaluatesToDouble(&rightD) )
   { if (leftD>rightD)
       return output.AssignValue(1, theCommands);
@@ -1711,14 +1712,11 @@ bool Calculator::outerGreaterThan(Calculator& theCommands, const Expression& inp
 bool Calculator::outerLessThan(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElements(3))
     return false;
-  const Expression& left=input[1];
-  const Expression& right=input[2];
-  Rational leftRat, rightRat;
-  if (!left.IsRational(&leftRat)|| ! right.IsRational(&rightRat))
-    return false;
-  if (rightRat>leftRat)
-    return output.AssignValue(1, theCommands);
-  return output.AssignValue(0, theCommands);
+  Expression swappedE(theCommands);
+  swappedE.AddChildOnTop(input[0]);
+  swappedE.AddChildOnTop(input[2]);
+  swappedE.AddChildOnTop(input[1]);
+  return Calculator::outerGreaterThan(theCommands, swappedE, output);
 }
 
 bool Calculator::outerMinus(Calculator& theCommands, const Expression& input, Expression& output)

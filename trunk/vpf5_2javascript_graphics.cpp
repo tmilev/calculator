@@ -420,11 +420,9 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     //////////////////
     out << projBasisCircles << "[" << i << "]= new Array(2);\n";
   }
-  out << "var " << Points1ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n"
-  << "var " << Points2ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n"
-  << "var " << circArrayName << "=new Array(" << this->theBuffer.theDrawCircleAtVectorOperations.size << ");\n"
-  << "var " << txtArrayName << "=new Array(" << this->theBuffer.theDrawTextAtVectorOperations.size << ");\n"
-  ;
+  out << "var " << Points2ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n";
+  out << "var " << circArrayName << "=new Array(" << this->theBuffer.theDrawCircleAtVectorOperations.size << ");\n";
+  out << "var " << txtArrayName << "=new Array(" << this->theBuffer.theDrawTextAtVectorOperations.size << ");\n";
   out << "var " << filledShapes << "=new Array(" << this->theBuffer.theShapes.size << ");\n";
   for (int i=0; i<this->theBuffer.theShapes.size; i++)
   { out << filledShapes << "[" << i << "]=[";
@@ -436,24 +434,22 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     }
     out << "];\n";
   }
+  out << "var " << Points1ArrayName << "=[ ";
   for (int i=0; i<this->theBuffer.theDrawLineBetweenTwoRootsOperations.size; i++)
   { Vector<double>& current1=theBuffer.theDrawLineBetweenTwoRootsOperations[i].v1;
-    Vector<double>& current2=theBuffer.theDrawLineBetweenTwoRootsOperations[i].v2;
-    out << Points1ArrayName << "[" << i << "]=[";
-    for (int j=0; j<theDimension; j++)
-    { out << current1[j];
-      if (j!=theDimension-1)
-        out << ",";
-    }
-    out << "];\n";
-    out << Points2ArrayName << "[" << i << "]=[";
-    for (int j=0; j<theDimension; j++)
-    { out << current2[j];
-      if (j!=theDimension-1)
-        out << ",";
-    }
-    out << "];\n";
+    out << current1.ToStringSquareBracketsBasicType();
+    if (i<this->theBuffer.theDrawLineBetweenTwoRootsOperations.size-1)
+      out << ", ";
   }
+  out << "];\n";
+  out << "var " << Points2ArrayName << "=[";
+  for (int i=0; i<this->theBuffer.theDrawLineBetweenTwoRootsOperations.size; i++)
+  { Vector<double>& current2=theBuffer.theDrawLineBetweenTwoRootsOperations[i].v2;
+    out << current2.ToStringSquareBracketsBasicType();
+    if (i<this->theBuffer.theDrawLineBetweenTwoRootsOperations.size-1)
+      out << ", ";
+  }
+  out << "];\n";
   for (int i=0; i<this->theBuffer.theDrawCircleAtVectorOperations.size; i++)
   { Vector<double>& current1=theBuffer.theDrawCircleAtVectorOperations[i].theVector;
     out << circArrayName << "[" << i << "]=[";

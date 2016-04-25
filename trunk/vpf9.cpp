@@ -644,7 +644,7 @@ bool FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
 (std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
 { if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
     return false;
-  std::cout << "DEBUG: opening file " << theFileName << "\n";
+//  std::cout << "DEBUG: opening file " << theFileName << "\n";
   return FileOperations::OpenFileCreateIfNotPresentUnsecure
   (theFile, theGlobalVariables.PhysicalPathOutputFolder+ theFileName, OpenInAppendMode, truncate, openAsBinary);
 }
@@ -658,7 +658,7 @@ bool FileOperations::OpenFileCreateIfNotPresentOnTopOfProjectBase
 }
 
 bool FileOperations::OpenFileCreateIfNotPresentUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
-{   std::cout << "DEBUG: opening file " << theFileName << "\n";
+{ //  std::cout << "DEBUG: opening file " << theFileName << "\n";
 
   if (OpenInAppendMode)
   { if (openAsBinary)
@@ -8089,6 +8089,10 @@ bool DrawingVariables::GetColorIntFromColorString(const std::string& input, int&
   }
   if (input=="red")
   { output= CGI::RedGreenBlue(255,0,0);
+    return true;
+  }
+  if (input=="cyan")
+  { output= CGI::RedGreenBlue(0,255,255);
     return true;
   }
   return false;

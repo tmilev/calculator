@@ -2173,6 +2173,8 @@ bool Expression::NeedsParenthesisForMultiplication()const
 //  stOutput << "DEBUG: Needsparen: " << this->ToString()  << ", Lispified: " << this->ToStringSemiFull() << "<hr>";
   if (this->IsOfType<std::string>())
     return false;
+  if (this->StartsWith(this->owner->opAbsoluteValue()))
+    return false;
   if (this->StartsWith(this->owner->opPlus()) || this->StartsWith(this->owner->opMinus()) ||
       this->StartsWith(this->owner->opDefine()))
     return true;

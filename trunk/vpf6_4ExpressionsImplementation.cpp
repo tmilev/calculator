@@ -2386,7 +2386,11 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     const Expression& firstE=(*this)[1];
     const Expression& secondE=(*this)[2];
     if (firstE.StartsWith(-1, 2))
-      if (firstE[0].IsAtomWhoseExponentsAreInterpretedAsFunction() && !secondE.IsEqualToMOne())
+    { bool shouldProceed=firstE[0].IsAtomWhoseExponentsAreInterpretedAsFunction() && !secondE.IsEqualToMOne();
+      if (shouldProceed && firstE[0].IsAtomGivenData(this->owner->opLog()) &&
+          this->owner->flagUseLnAbsInsteadOfLogForIntegrationNotation)
+        shouldProceed=false;
+      if (shouldProceed)
       { involvesExponentsInterpretedAsFunctions=true;
         Expression newFunE;
         newFunE.MakeXOX(*this->owner, this->owner->opThePower(), firstE[0], (*this)[2]);
@@ -2399,6 +2403,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         else
           out << firstE[1].ToString(theFormat);
       }
+    }
     if (!involvesExponentsInterpretedAsFunctions)
     { bool isSqrt=false;
       if ((*this)[2].IsOfType<Rational>())

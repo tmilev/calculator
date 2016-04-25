@@ -8,14 +8,14 @@ TurnOffRules
 ("IntegratePowerRule", 
 "ConvertShortDenominatorToNegativePower", "IntegrateBlockIb", 
 "IntegratePartialFractions", "CommonDenominator", "CommonDenominatorOneNonFraction");
-a=randomInteger{}( (1,2));
+a=randomInteger{}( (2,3));
 b=randomInteger{}( -5,5);
 c=randomInteger{}( (-3,3));
 leftPoint=randomInteger{}(-4,4);
 rightPoint=leftPoint+randomInteger{}( (4,10));
 curve1{}{{x}}= x^2+b x +c;
-curve2{}{{x}}= a (x-leftPoint)(x-rightPoint) + curve1{}x;
-theArea{}{{x}}=curve1{}x-curve2{}x;
+curve2{}{{x}}= -a (x-leftPoint)(x-rightPoint) + curve1{}x;
+theArea{}{{x}}=curve2{}x-curve1{}x;
 
 \)
 </span>

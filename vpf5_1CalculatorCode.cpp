@@ -965,6 +965,20 @@ std::string Plot::GetPlotHtml()
   double widthUnit=((double)theDVs.DefaultHtmlWidth)/theWidth;
   double heightUnit=((double)theDVs.DefaultHtmlHeight)/theHeight;
   theDVs.theBuffer.GraphicsUnit[0]= heightUnit<widthUnit ? heightUnit : widthUnit;
+  List<Vector<double> > cleanedUpVectors;
+  for (int i=0; i<this->thePlots.size; i++)
+  { List<Vector<double> >& currentVectors=thePlots[i].thePoints;
+    if (thePlots[i].fillStyle!="filled")
+      continue;
+    cleanedUpVectors.SetSize(0);
+    cleanedUpVectors.SetExpectedSize(currentVectors.size);
+    for (int k=0; k< currentVectors.size; k++)
+      if (this->IsOKVector(currentVectors[k]))
+        cleanedUpVectors.AddOnTop(currentVectors[k]);
+    theDVs.theBuffer.drawFilledShape
+    (cleanedUpVectors, theDVs.PenStyleNormal, thePlots[i].colorRGB, thePlots[i].fillColorRGB,
+    thePlots[i].lineWidth);
+  }
   v1.MakeZero(2);
   v2.MakeZero(2);
   v1[0]=this->theLowerBoundAxes-0.1;
@@ -1004,7 +1018,6 @@ std::string Plot::GetPlotHtml()
       (this->thePlots[i].theRectangles[j][0], widthVector, heightVector, theDVs.PenStyleNormal,
        this->thePlots[i].colorRGB, this->thePlots[i].fillColorRGB, this->thePlots[i].lineWidth);
     }
-  List<Vector<double> > cleanedUpVectors;
   for (int i=0; i<this->thePlots.size; i++)
   { List<Vector<double> >& currentVectors=thePlots[i].thePoints;
     if (this->thePlots[i].thePlotType=="point")
@@ -1025,16 +1038,6 @@ std::string Plot::GetPlotHtml()
          theDVs.TextStyleNormal,0);
       }
     else
-    { if (thePlots[i].fillStyle=="filled")
-      { cleanedUpVectors.SetSize(0);
-        cleanedUpVectors.SetExpectedSize(currentVectors.size);
-        for (int k=0; k< currentVectors.size; k++)
-          if (this->IsOKVector(currentVectors[k]))
-            cleanedUpVectors.AddOnTop(currentVectors[k]);
-        theDVs.theBuffer.drawFilledShape
-        (cleanedUpVectors, theDVs.PenStyleNormal, thePlots[i].colorRGB, thePlots[i].fillColorRGB,
-         thePlots[i].lineWidth);
-      }
       for (int j=1; j<currentVectors.size; j++)
       { if (!this->IsOKVector(currentVectors[j-1]) || !this->IsOKVector(currentVectors[j] ))
           continue;
@@ -1043,7 +1046,6 @@ std::string Plot::GetPlotHtml()
         (currentVectors[j-1], currentVectors[j], theDVs.PenStyleNormal,
          thePlots[i].colorRGB, thePlots[i].lineWidth);
       }
-    }
   }
 /*  for (int i=0; i<this->thePlots.size; i++)
     for (int j=0; j<this->thePlots[i].theLines.size; j++)
@@ -1124,6 +1126,8 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
       return output.AssignValue<std::string>(" 3.141592654 ", theCommands);
     if (input.theData>=theCommands.NumPredefinedAtoms)
       return output.AssignValue(currentString, theCommands);
+    if (currentString=="|")
+      return output.AssignValue<std::string>("abs ", theCommands);
     if (currentString=="+")
       return output.AssignValue<std::string>("add ", theCommands);
     if (currentString=="*")

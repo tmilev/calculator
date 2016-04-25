@@ -379,13 +379,16 @@ bool CalculatorFunctionsGeneral::innerAbs(Calculator& theCommands, const Express
   }
   double theDouble=0;
   if (input.EvaluatesToDouble(&theDouble))
-    if (theDouble<0)
+  { if (theDouble<0)
     { Expression moneE;
       moneE.AssignValue(-1, theCommands);
       output=input;
       output*=moneE;
       return true;
     }
+    output=input;
+    return true;
+  }
   return false;
 }
 
@@ -3997,6 +4000,8 @@ bool CalculatorFunctionsGeneral::innerPlotFill(Calculator& theCommands, const Ex
   for (int i=0; i<startPlot.thePlots.size; i++)
     theFilledPlot.thePoints.AddListOnTop(startPlot.thePlots[i].thePoints);
   theFilledPlot.fillStyle="filled";
+  outputPlot.DesiredHtmlHeightInPixels=startPlot.DesiredHtmlHeightInPixels;
+  outputPlot.DesiredHtmlWidthInPixels=startPlot.DesiredHtmlWidthInPixels;
   outputPlot.thePlots.AddOnTop(theFilledPlot);
   outputPlot.thePlots.AddListOnTop(startPlot.thePlots);
   return output.AssignValue(outputPlot, theCommands);
@@ -4334,12 +4339,23 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
   std::string colorString;
   int colorTripleRGB=CGI::RedGreenBlue(255, 0, 0);
   if (input.children.size>=8)
-    if (input[7].IsOfType<std::string>(&colorString))
-      DrawingVariables::GetColorIntFromColorString(colorString, colorTripleRGB);
+    if (!input[7].IsOfType<std::string>(&colorString))
+      colorString=input[7].ToString();
+  DrawingVariables::GetColorIntFromColorString(colorString, colorTripleRGB);
   double lineWidth=1;
   if (input.size()>=9)
     if (!input[8].EvaluatesToDouble(&lineWidth))
       lineWidth=1;
+  int numPoints=1000;
+  if (input.size()>=10)
+    if (!input[9].IsSmallInteger(&numPoints))
+    { numPoints=1000;
+      theCommands << "<hr>Could not extract number of points from " << input[9].ToString();
+    }
+  if (numPoints<2 || numPoints>30000)
+  { numPoints=1000;
+    theCommands << "<hr>Extracted " << numPoints << " point but that is not valid. Changing to 1000. ";
+  }
   List<Expression> theConvertedExpressions;
   theConvertedExpressions.SetSize(input.children.size-3);
   for (int i=1; i<3; i++)
@@ -4351,20 +4367,20 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
     return theCommands << "Failed to convert " << input[3].ToString() << " and "
     << input[4].ToString() << " to left and right endpoint of parameter interval. ";
   std::stringstream outLatex, outHtml;
-  outLatex << "\\parametricplot[linecolor=\\fcColorGraph, plotpoints=1000]{" << leftEndPoint << "}{" << rightEndPoint << "}{"
+  outLatex << "\\parametricplot[linecolor=\\fcColorGraph, plotpoints=" << numPoints << "]{" << leftEndPoint << "}{" << rightEndPoint << "}{"
   << theConvertedExpressions[0].GetValue<std::string>() << theConvertedExpressions[1].GetValue<std::string>() << "}";
   outHtml << "<br>%Calculator input: " << input.ToString()
-  << "<br>\\parametricplot[linecolor=\\fcColorGraph, plotpoints=1000]{" << leftEndPoint << "}{" << rightEndPoint << "}{"
+  << "<br>\\parametricplot[linecolor=\\fcColorGraph, plotpoints=" << numPoints << "]{" << leftEndPoint << "}{" << rightEndPoint << "}{"
   << theConvertedExpressions[0].GetValue<std::string>() << theConvertedExpressions[1].GetValue<std::string>() << "}";
   PlotObject thePlot;
   thePlot.colorRGB=colorTripleRGB;
   thePlot.lineWidth=lineWidth;
   Vectors<double> theXs, theYs;
   if (!input[1].EvaluatesToDoubleInRange
-      ("t", leftEndPoint, rightEndPoint, 1000, &thePlot.xLow, &thePlot.xHigh, &theXs))
+      ("t", leftEndPoint, rightEndPoint, numPoints, &thePlot.xLow, &thePlot.xHigh, &theXs))
     return theCommands << "<hr>Failed to evaluate curve function. ";
   if (!input[2].EvaluatesToDoubleInRange
-      ("t", leftEndPoint, rightEndPoint, 1000, &thePlot.yLow, &thePlot.yHigh, &theYs))
+      ("t", leftEndPoint, rightEndPoint, numPoints, &thePlot.yLow, &thePlot.yHigh, &theYs))
     return theCommands << "<hr>Failed to evaluate curve function. ";
   thePlot.thePoints.SetSize(theXs.size);
   for (int i=0; i<theXs.size; i++)

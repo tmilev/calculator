@@ -26,9 +26,19 @@ TurnOnRules
 SeparatorBetweenSpans;
 \)
 </span>
-
+<span class="calculatorShowToUserOnly">
+\(
+plotFill(
+plotCurve(leftPoint, t, 0 , f{}leftPoint)
++plot2D(f{}x, leftPoint,rightPoint ,300,300)
++plotCurve(rightPoint, t, f{}rightPoint,0)
++plotCurve(t,0, rightPoint, leftPoint), cyan)
+;
+\) 
+</span>
 <br>
-Integrate. This is a definite integral so your answer should be a constant expression/number.
+Integrate. This is a definite integral so your answer should be a constant expression/number. 
+If your answer involves natural logarithm do not approximate with calculator (but enter them algebraically).
 <br>
 <span class="calculator">
 \(\displaystyle \int_{leftPoint}^{rightPoint} f{}x dx  \) 
@@ -41,7 +51,7 @@ TurnOnRules
 "ConvertShortDenominatorToNegativePower", "IntegrateBlockIb",
 "IntegratePartialFractions");
 | DoubleValue((theIndefiniteIntegral= \int f{}x dx; x=rightPoint; theIndefiniteIntegral)_3-
-(theIndefiniteIntegral= \int f{}x dx; x=leftPoint; theIndefiniteIntegral)_3) | <0.0000001
+(theIndefiniteIntegral= \int f{}x dx; x=leftPoint; theIndefiniteIntegral)_3-AlgebraAnswer) | <DoubleValue{}( 0.0000001)
 )_2
 \)
 </textarea>
@@ -49,7 +59,7 @@ TurnOnRules
  
 <span class="calculatorCommentBeforeSubmission">
 \(
-EnsureExpressionDependsMandatoryVariables(AlgebraAnswer,C, x)
+EnsureExpressionDependsOnlyOn(AlgebraAnswer,none)
 \)
 </span>
 

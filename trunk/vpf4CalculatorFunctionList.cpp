@@ -2752,6 +2752,12 @@ void Calculator::initPredefinedStandardOperations()
    the matrix is zero, returns error. ",
    "X=\\begin{array}{cc}0 & 1 \\\\ 1 &1\\end{array}; X^5; X^{-5}  ",
    true, false, "CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat");
+  this->AddOperationInnerHandler
+  ("^", CalculatorFunctionsGeneral::innerPowerExponentToLog, "",
+   "Replaces e^{\\ln x} by x.",
+   "e^{\\ln x}; ",
+    true, false, "CalculatorFunctionsGeneral::innerPowerExponentToLog",
+   "PowerToLog");
   this->AddOperationHandler
   ("^", CalculatorFunctionsGeneral::innerIntegralUpperBound, "",
    "Replaces \\int_a^b by (\\int, a, b) .",

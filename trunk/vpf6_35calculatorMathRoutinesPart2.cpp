@@ -645,6 +645,20 @@ bool CalculatorFunctionsGeneral::innerIntegralUpperBound(Calculator& theCommands
   return output.MakeOX(theCommands, theCommands.opIntegral(), newSetE);
 }
 
+bool CalculatorFunctionsGeneral::innerPowerExponentToLog(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPowerExponentToLog");
+  if (!input.StartsWith(theCommands.opThePower(), 3))
+    return false;
+  const Expression& baseE=input[1];
+  const Expression& powerE=input[2];
+  if (baseE.IsAtomGivenData(theCommands.opE()))
+    if (powerE.StartsWith(theCommands.opLog(), 2))
+    { output=powerE[1];
+      return true;
+    }
+  return false;
+}
+
 bool CalculatorFunctionsGeneral::innerSqrt(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerSqrt");
   if (input.size()!=3)

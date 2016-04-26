@@ -3,12 +3,12 @@
 The function \(f\)  is plotted below.
 <span class="calculatorHidden">
 \(
-a=selectAtRandom(-2,2);
-b=1;
+a=selectAtRandom(-3,3);
+b=selectAtRandom(-2,-1,1,2);
 c=randomInteger(-3, 3);
 %UseLnInsteadOfLog
 den{}{{x}}=MakeExpression( Polynomial (( x-a/b )^2)-1);
-f{}{{x}}= ( x-a/b )/(den{}x) +3( x-a/b)+c;
+f{}{{x}}= (b*( x-a/b ))/(b*den{}x) +3( x-a/b)+c;
 fd= (d/dx f{}x);
 sd= (d/dx (d/dx(f{}x)));
 TurnOffRules("DistributeMultiplication");

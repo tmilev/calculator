@@ -751,25 +751,70 @@ std::string CGI::GetMathSpanBeginArrayL(const std::string& input, int upperNumCh
 }
 
 std::string CGI::StyleSheetCalculatorWithTags;
+std::string CGI::StyleSheetMathQuillWithTags;
 std::string CGI::JavascriptAutoCompleteWithTags;
 std::string CGI::JavascriptSha1;
+std::string CGI::JavascriptMathjax;
+std::string CGI::JavascriptMathQuill;
 
 void CGI::LoadStrings()
 { CGI::GetJavascriptSha1();
-  CGI::GetCalculatorStyleSheetWithTags();
   CGI::GetJavascriptAutocompleteWithTags();
+  CGI::GetJavascriptMathjax();
+  CGI::GetJavascriptMathQuill();
+  CGI::GetCalculatorStyleSheetWithTags();
+  CGI::GetMathQuillStyleSheetWithTags();
+}
+
+extern logger theLog;
+
+std::string& CGI::GetMathQuillStyleSheetWithTags()
+{ if (CGI::StyleSheetMathQuillWithTags!="")
+    return CGI::StyleSheetMathQuillWithTags;
+  std::stringstream out, commentsOnFailure;
+  std::string fileReader;
+  out << "<style>";
+  if (!FileOperations::LoadFileToStringOnTopOfOutputFolder("mathquill.css", fileReader, commentsOnFailure))
+    theLog << logger::red  << "Style file mathquill.css is missing. " << logger::endL;
+  else
+    out << fileReader;
+  out << "</style>";
+  CGI::StyleSheetMathQuillWithTags=out.str();
+  return CGI::StyleSheetMathQuillWithTags;
 }
 
 std::string& CGI::GetCalculatorStyleSheetWithTags()
 { if (CGI::StyleSheetCalculatorWithTags!="")
     return CGI::StyleSheetCalculatorWithTags;
-  std::stringstream out;
-  std::string theStyleInside;
-  if (!FileOperations::LoadFileToStringOnTopOfOutputFolder("styleCalculator.css", theStyleInside, out))
-    CGI::StyleSheetCalculatorWithTags=out.str();
+  std::stringstream out, commentsOnFailure;
+  std::string fileReader;
+  out << "<style>";
+  if (!FileOperations::LoadFileToStringOnTopOfOutputFolder("styleCalculator.css", fileReader, commentsOnFailure))
+    out << commentsOnFailure.str();
   else
-    CGI::StyleSheetCalculatorWithTags="<style>"+ theStyleInside+"</style>";
+    out << fileReader;
+  out << "</style>";
+  CGI::StyleSheetCalculatorWithTags=out.str();
   return CGI::StyleSheetCalculatorWithTags;
+}
+
+std::string& CGI::GetJavascriptMathQuill()
+{ if (CGI::JavascriptMathQuill!="")
+    return CGI::JavascriptMathQuill;
+  std::stringstream out;
+  out << "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js\"></script>";
+  std::string theJS;
+  if (!FileOperations::LoadFileToStringOnTopOfOutputFolder("mathquill.min.js", theJS, out))
+    CGI::JavascriptMathQuill=out.str();
+  else
+//    CGI::JavascriptMathQuill= "<script type=\"text/javascript\">" + theJS + "</script><script type=\"text/javascript\">\n"
+//    + "var globalMQ = MathQuill.getInterface(2); // for backcompat\n"
+//    + "</script>\n";
+  CGI::JavascriptMathQuill=
+  "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js\"></script><script src=\"/mathquill.min.js\"></script>\
+  <script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2); // for backcompat\n</script>"
+;
+  return CGI::JavascriptMathQuill;
 }
 
 std::string& CGI::GetJavascriptAutocompleteWithTags()

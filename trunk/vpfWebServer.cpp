@@ -863,7 +863,7 @@ void WebWorker::OutputBeforeComputation()
   << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
   << "Root subalgebras, sl(2)-triples\"> <head> <title>calculator version  " << __DATE__ << ", " << __TIME__ << "</title>";
 //  if (theGlobalVariables.flagUsingBuiltInWebServer)
-  stOutput << CGI::GetLaTeXProcessingJavascript();
+  stOutput << CGI::GetJavascriptMathjax();
   stOutput << CGI::GetJavascriptInjectCalculatorResponseInNode();
 //  else
 //    stOutput << "<script src=\"" << theGlobalVariables.DisplayPathServerBase << "/jsmath/easy/load.js\">";

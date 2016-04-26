@@ -305,13 +305,13 @@ void SemisimpleSubalgebras::WriteReportToFiles()
   fileSlowLoad << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
   << this->owner->theWeyl.theDynkinType.ToString()
   << "</title>"
-  << CGI::GetLaTeXProcessingJavascript()
+  << CGI::GetJavascriptMathjax()
   << "<body>" << this->ToString(&this->currentFormat);
   this->currentFormat.flagUseMathSpanPureVsMouseHover=false;
   fileFastLoad << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
   << this->owner->theWeyl.theDynkinType.ToString()
   << "</title>"
-  << CGI::GetLaTeXProcessingJavascript()
+  << CGI::GetJavascriptMathjax()
   << "<body>" << this->ToString(&this->currentFormat);
   fileFastLoad << "</body></html>";
   fileSlowLoad << "</body></html>";
@@ -540,7 +540,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
           << "2. The calculator has no write permission to the folder in which the file is located. "
           << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
         }
-        outputFileSubalgebra << "<html>" << CGI::GetLaTeXProcessingJavascript()
+        outputFileSubalgebra << "<html>" << CGI::GetJavascriptMathjax()
         << "\n<body>Subalgebra number "
         << this->GetDisplayIndexFromActual(i) << ".<br>" << this->theSubalgebras[i].ToString(&theFormatCopy);
         if (this->flagComputeNilradicals)
@@ -554,7 +554,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
             << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. " << crash;
           }
           outputFileFKFTnilradicals << "<html>"
-          << CGI::GetLaTeXProcessingJavascript()
+          << CGI::GetJavascriptMathjax()
           << "<body>"
           << this->ToStringAlgebraLink(i, &theFormatCopy) << this->theSubalgebras[i].ToStringNilradicals(&theFormatCopy) << "\n</body></html>";
         }
@@ -4473,9 +4473,9 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat)
     fileName.append("sl2s.html");
     FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(theFile, fileName, false, true, false);
     tempS= out.str();
-    theFile << "<HMTL><title>sl(2)-subalgebras of "
+    theFile << "<html><title>sl(2)-subalgebras of "
     << this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString() << "</title>";
-    theFile << CGI::GetLaTeXProcessingJavascript();
+    theFile << CGI::GetJavascriptMathjax();
     theFile << "<meta name=\"keywords\" content=\""
     <<  this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString()
     << " sl(2)-triples, sl(2)-subalgebras, nilpotent orbits simple Lie algebras, nilpotent orbits of "
@@ -4483,8 +4483,8 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat)
     << ", sl(2)-triples of "
     << this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString()
     << " \">";
-    theFile << "<BODY>" << notation << "<a href=\"" << htmlPathServerSl2s << "sl2s_nopng.html\"> Plain html for your copy+paste convenience</a><br>\n"
-    << tempS << "</HTML></BODY>";
+    theFile << "<body>" << notation << "<a href=\"" << htmlPathServerSl2s << "sl2s_nopng.html\"> Plain html for your copy+paste convenience</a><br>\n"
+    << tempS << "</html></body>";
     theFile.close();
   }
   fileName= RelativePhysicalPathSl2s;
@@ -4494,9 +4494,9 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat)
   tempS = this->ToString(theFormat);
   theFormat->flagUsePNG=tempB;
   FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(theFile, fileName, false, true, false);
-  theFile << "<HMTL><BODY>" << notation << "<a href=\"" << htmlPathServerSl2s
+  theFile << "<html><body>" << notation << "<a href=\"" << htmlPathServerSl2s
   << "sl2s.html\"> Math formulas rendered via javascript.</a><br>\n"
-  << tempS << "</HTML></BODY>";
+  << tempS << "</html></body>";
   theFile.close();
 }
 

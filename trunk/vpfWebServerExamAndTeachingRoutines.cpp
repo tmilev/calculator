@@ -1547,8 +1547,10 @@ std::string WebWorker::GetExamPage()
   out << "<html>"
   << "<head>"
   << WebWorker::GetJavascriptStandardCookies()
-  << CGI::GetLaTeXProcessingJavascript()
+  << CGI::GetJavascriptMathjax()
+  << CGI::GetJavascriptMathQuill()
   << CGI::GetCalculatorStyleSheetWithTags()
+  << CGI::GetMathQuillStyleSheetWithTags()
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
   out << theFile.LoadAndInterpretCurrentProblemItem();
@@ -2298,20 +2300,32 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
 void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateStudentAnswerButton");
   std::stringstream out;
-  out << "<table><tr>";
   std::string answerId = inputOutput.GetKeyValue("id");
+  std::string answerIdSpan = answerId+"span";
+  std::string answerIdMathQuillSpan = answerId+"MQspan";
+  std::string mathquillSpanId = answerId+"MQspan";
+  std::string mathquillSpan = answerId+"MQ";
+  std::string mathquillObject= answerId+"MQField";
+  std::string updateMQfunction= answerId+"MQFieldUpdate";
+  std::string answerEvaluationId="verification"+inputOutput.GetKeyValue("id");
+
+
+  out << "<table>";
   if (answerId=="")
     out << "<td><b>Error: could not generate submit button: the answer area does not have a valid id</b></td>";
   else
-  { std::string answerEvaluationId="verification"+inputOutput.GetKeyValue("id");
-    std::stringstream previewAnswerStream;
+  { std::stringstream previewAnswerStream;
     previewAnswerStream << "previewAnswers('" << answerId << "', '"
-    << answerEvaluationId << "')";
-    inputOutput.defaultKeysIfMissing.AddOnTop("onkeypress");
-    inputOutput.defaultValuesIfMissing.AddOnTop(previewAnswerStream.str());
+    << answerEvaluationId << "');";
+    inputOutput.defaultKeysIfMissing.AddOnTop("onkeydown");
+    inputOutput.defaultValuesIfMissing.AddOnTop(previewAnswerStream.str()+updateMQfunction +"();");
     inputOutput.defaultKeysIfMissing.AddOnTop("style");
     inputOutput.defaultValuesIfMissing.AddOnTop("height:70px");
-    out << "<td>" << inputOutput.ToStringOpenTag() << inputOutput.ToStringCloseTag() ;// << "</td>";
+    out << "<tr><td><small>easy type:</small><td></tr>";
+    out << "<tr><td><span id='" << mathquillSpanId << "'>" << "</span></td></tr>";
+    out << "<tr><td><small>answer:</small><td></tr>";
+    out << "<tr><td>" << inputOutput.ToStringOpenTag()
+    << inputOutput.ToStringCloseTag()  ;// << "</td>";
     //out << "<td>";
     out << "<button class=\"submitButton\" onclick=\"submitAnswers('"
     << answerId << "', '" << answerEvaluationId << "')\">Submit</button>";
@@ -2368,6 +2382,26 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     } else
       out << " <b><span style=\"color:brown\">Submit (no credit, unlimited tries)</span></b>";
     out << "</span></td>";
+
+  out << "<script>\n"
+  << "var " << mathquillSpan << " = document.getElementById('" << answerIdMathQuillSpan << "');\n"
+  << "var " << answerIdSpan << " = document.getElementById('" << answerId << "');\n"
+  << "globalMQ.config({\n"
+  << "  autoFunctionize: 'sin cos tan sec csc cot log ln'\n"
+  << "  });\n"
+  << "var " << mathquillObject << " = globalMQ.MathField(" << mathquillSpan << ", {\n"
+  << "spaceBehavesLikeTab: true, // configurable\n"
+  << "handlers: {\n"
+  << "edit: function() { // useful event handlers\n"
+  << answerIdSpan << ".value = " << mathquillObject << ".latex(); // simple API\n"
+  << previewAnswerStream.str()
+  << "}\n"
+  << "}\n"
+  << "});\n"
+  << "function " << updateMQfunction << "()\n"
+  << "{ " << mathquillObject << ".latex(" << answerIdSpan << ".value);\n"
+  << "}\n"
+  << "</script>";
   }
   out << "</tr></table>";
   inputOutput.interpretedCommand=out.str();

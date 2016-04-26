@@ -859,7 +859,9 @@ int WebWorker::ProcessProblemGiveUp()
   { stOutput << "<span style=\"color:red\"><b>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b></span>"
     << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
-    << theInterpreteR.outputString;
+    << theInterpreteR.outputString
+    << theInterpreteR.outputCommentsString
+    << "<hr>Input: <br>" << theInterpreteR.inputString;
     stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return 0;
   }

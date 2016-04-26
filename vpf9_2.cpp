@@ -2292,8 +2292,10 @@ void CGI::URLStringToNormal(const std::string& input, std::string& output)
   output=out.str();
 }
 
-std::string CGI::GetLaTeXProcessingJavascript()
-{ std::stringstream out;
+std::string& CGI::GetJavascriptMathjax()
+{ if (CGI::JavascriptMathjax!="")
+    return CGI::JavascriptMathjax;
+  std::stringstream out;
   out
   << "<script type=\"text/x-mathjax-config\">\n"
   << "function showTex(originalTex, item, event){\n  "
@@ -2366,7 +2368,8 @@ std::string CGI::GetLaTeXProcessingJavascript()
   << "</script>\n"
   << "<script src=\"//beta.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full\"></script>"
   ;
-  return out.str();
+  CGI::JavascriptMathjax=out.str();
+  return CGI::JavascriptMathjax;
 //   return "<script src=\"../../jsmath/easy/load.js\"></script>";
 }
 

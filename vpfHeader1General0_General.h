@@ -1166,8 +1166,11 @@ public:
 struct CGI
 {
 public:
+  static std::string StyleSheetMathQuillWithTags;
   static std::string StyleSheetCalculatorWithTags;
   static std::string JavascriptAutoCompleteWithTags;
+  static std::string JavascriptMathjax;
+  static std::string JavascriptMathQuill;
   static std::string JavascriptSha1;
   static std::stringstream outputStream;
   static int GlobalMathSpanID;
@@ -1203,11 +1206,13 @@ public:
   static std::string GetLatexEmbeddableLinkFromCalculatorInput(const std::string& address, const std::string& display);
   static bool StringToHtmlString(const std::string& input, std::string& output);
   static std::string StringToHtmlStrinG(const std::string& theString);
-  static std::string GetLaTeXProcessingJavascript();
   static std::string DoubleBackslashes(const std::string& input);
+  static std::string& GetMathQuillStyleSheetWithTags();
   static std::string& GetCalculatorStyleSheetWithTags();
   static std::string& GetJavascriptAutocompleteWithTags();
   static std::string& GetJavascriptSha1();
+  static std::string& GetJavascriptMathjax();
+  static std::string& GetJavascriptMathQuill();
 
   static std::string GetMathSpanPure(const std::string& input, int upperNumChars=10000);
   static std::string GetMathSpanBeginArrayL(const std::string& input, int upperNumChars=10000);

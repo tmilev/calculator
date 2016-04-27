@@ -773,6 +773,8 @@ public:
   HashedList<std::string, MathRoutines::hashString> atomsThatMustNotBeCached;
   HashedList<std::string, MathRoutines::hashString> operationsComposite;
 
+  HashedList<std::string, MathRoutines::hashString> stringsThatSplitIfFollowedByDigit;
+
   MapList<List<std::string>, std::string, MathRoutines::hashString> predefinedWordSplits;
   List<List<Function> > FunctionHandlers;
   List<List<Function> > operationsCompositeHandlers;
@@ -1842,6 +1844,7 @@ public:
   void initAtomsThatFreezeArguments();
   void initAtomsNonCacheable();
   void initAtomsThatAllowCommutingOfArguments();
+  void initStringsThatSplitIfFollowedByDigit();
   void initOperationsInterpretedAsFunctionsMultiplicatively();
   void initOperationsThatAreKnownFunctions();
   void initArithmeticOperations();

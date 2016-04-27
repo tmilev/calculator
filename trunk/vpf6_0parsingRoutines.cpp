@@ -295,6 +295,7 @@ void Calculator::init()
   this->initAtomsNonCacheable();
   this->initArithmeticOperations();
   this->initPredefinedWordSplits();
+  this->initStringsThatSplitIfFollowedByDigit();
 
   Expression theSSLieAlgrule;
   this->RuleStack.reset(*this, 100);
@@ -657,9 +658,15 @@ void Calculator::ParseFillDictionary(const std::string& input)
         current=" ";
     bool shouldSplit=
     (this->isLeftSeparator(current[0]) || this->isRightSeparator(LookAheadChar) || current==" ");
+
     if (MathRoutines::isADigit(LookAheadChar))
-      if (current[current.size()-1]=='\\')
-        shouldSplit=true;
+    { //stOutput << "DEBUG: lookahead digit, current: " << current;
+      if (current[current.size()-1]=='\\' || this->stringsThatSplitIfFollowedByDigit.Contains(current))
+      { shouldSplit=true;
+        //stOutput << "DEBUG: shouldsplit true";
+
+      }
+    }
     if (inQuotes)
       shouldSplit=(LookAheadChar=='"');
     if (current=="\"")
@@ -1444,7 +1451,7 @@ bool Calculator::ApplyOneRule()
   if (secondToLastS=="{" && lastS=="}")
     return this->ReplaceXXByCon(this->conApplyFunction(), Expression::formatDefault);
   if (lastS=="\\cdot")
-    return this->ReplaceXByCon(this->conApplyFunction(), Expression::formatFunctionUseCdot);
+    return this->ReplaceXByCon(this->conTimes(), Expression::formatTimesDenotedByStar);
   if (lastS=="\\circ")
     return this->ReplaceXByCon(this->conApplyFunction(), Expression::formatFunctionUseCdot);
 //  if ( thirdToLastS=="{" && secondToLastS=="{}" && lastS=="}")

@@ -288,8 +288,8 @@ bool Calculator::innerPolynomialDivisionRemainder(Calculator& theCommands, const
       return output.MakeError("Division by zero.", theCommands);
     theGB.theBasiS[i-1]=thePolys[i];
   }
-  stOutput << "<hr>The polys: " << thePolys.ToString() << "<br>The gb basis: "
-  << theGB.theBasiS.ToString() << "<hr>";
+//  stOutput << "<hr>The polys: " << thePolys.ToString() << "<br>The gb basis: "
+//  << theGB.theBasiS.ToString() << "<hr>";
   Polynomial<Rational> outputRemainder;
   theGB.initForDivisionAlone(theGB.theBasiS);
   theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &outputRemainder, -1);

@@ -3114,6 +3114,7 @@ void Calculator::initAtomsNotGoodForChainRule()
 
 void Calculator::initStringsThatSplitIfFollowedByDigit()
 { MacroRegisterFunctionWithName("Calculator::initStringsThatSplitIfFollowedByDigit");
+  this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cdot");
   this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\circ");
   this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\frac");
   this->stringsThatSplitIfFollowedByDigit.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\ln");

@@ -2387,7 +2387,7 @@ bool CGI::AccountOneInputCGIString
   }
   if (fieldValue=="")
     return true;
-  if (outputData[theIndex]!="")
+  if (outputData[theIndex]!="" && outputData[theIndex]!=fieldValue)
   { commentsOnFailure << "More than one value specified for input field " << fieldName << ": "
     << fieldValue << " and " << outputData[theIndex];
     return false;

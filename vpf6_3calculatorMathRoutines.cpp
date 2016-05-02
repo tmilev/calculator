@@ -4849,7 +4849,6 @@ bool CalculatorFunctionsGeneral::innerDeterminant
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDeterminant");
   Matrix<Rational> matRat;
-  Expression theContext;
   bool isMatRat=input.IsOfType(&matRat);
   if (!isMatRat)
    isMatRat= theCommands.GetMatriXFromArguments(input, matRat, 0, 0, 0);
@@ -4890,19 +4889,27 @@ bool CalculatorFunctionsGeneral::innerDeterminant
       return output.MakeError("Requesting to compute determinant of non-square matrix. ", theCommands);
     }
   }
+//  stOutput << "<hr>got to here";
   Matrix<RationalFunctionOld> matRF;
+  Expression theContext;
   if (!input.IsOfType(&matRF))
-    if (!theCommands.GetMatriXFromArguments(input, matRF, &theContext, -1, CalculatorConversions::innerRationalFunction))
+  { if (!theCommands.GetMatriXFromArguments(input, matRF, &theContext, -1, CalculatorConversions::innerRationalFunction))
       return theCommands << "<hr>I have been instructed to only compute determinants of matrices whose entries are "
       << " rational functions or rationals, and I failed to convert your matrix to either type. "
       << " If this is not how you expect this function to act, correct it: the code is located in  "
       << " file " << __FILE__ << ", line " << __LINE__ << ". ";
+  } else
+    theContext= input.GetContext();
+  //  stOutput << "<hr>got to here 2";
   if (matRF.NumRows==matRF.NumCols)
   { if (matRF.NumRows>50)
       return theCommands << "I have been instructed not to compute determinants of matrices of rational functions larger than "
       << " 50 x 50, and your matrix had " << matRF.NumRows << " rows. To lift the restriction edit function located in file "
       << __FILE__ << ", line " << __LINE__ << ". ";
-    return output.AssignValueWithContext(matRF.GetDeterminant(), theContext, theCommands);
+    //stOutput << "<hr>DEBUG: determinant of " << matRF.ToString();
+    RationalFunctionOld theDet=matRF.GetDeterminant();
+    //stOutput << "<hr>Equals: " << theDet.ToString();
+    return output.AssignValueWithContext(theDet, theContext, theCommands);
   } else
   { theCommands << "Requesting to compute determinant of the non-square "
     << matRat.NumRows << " by "

@@ -6979,10 +6979,10 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(coefficient& output,
   output=theRingOne;
   coefficient tempRat;
   if (this->NumCols!=this->NumRows)
-    crash << crash;
+    crash << "Error: determinant computation: number of columns different from number of rows. " << crash;
   int dim =this->NumCols;
   for (int i=0; i<dim; i++)
-  {  //this->ComputeDebugString();
+  { //stOutput << "Computing determinant, matrix current state: " << this->ToString() << "<hr>";
     tempI = this->FindPivot(i, i);
     if (tempI==-1)
     { output=theRingZero;

@@ -986,8 +986,10 @@ bool CalculatorConversions::innerMatrixRationalFunction(Calculator& theCommands,
   Expression ContextE;
   if (!theCommands.GetMatriXFromArguments(input, outputMat, &ContextE, -1, CalculatorConversions::innerRationalFunction))
     return theCommands << "<hr>Failed to get matrix of rational functions. ";
-//  stOutput << "<hr>And the context is: " << ContextE.ToString();
-  return output.AssignValueWithContext(outputMat, ContextE, theCommands);
+  //stOutput << "<hr>And the context is: " << ContextE.ToString() << " with outputMat: " << outputMat.ToString();
+  output.AssignValueWithContext(outputMat, ContextE, theCommands);
+  output.CheckConsistency();
+  return true;
 }
 
 bool CalculatorConversions::innerLoadFileIntoString(Calculator& theCommands, const Expression& input, Expression& output)

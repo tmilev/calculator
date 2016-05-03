@@ -940,7 +940,7 @@ void Plot::ComputeAxesAndBoundingBox()
 
 bool Plot::IsOKVector(const Vector<double>& input)
 { for (int i=0; i<input.size; i++)
-    if (isnan(input[i]))
+    if (std::isnan(input[i]))
       return false;
   return true;
 }

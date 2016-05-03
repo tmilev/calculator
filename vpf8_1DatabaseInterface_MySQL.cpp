@@ -21,13 +21,16 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     return false;
   }
   if (!theRoutines.TableExists("users", comments) || theRoutines.flagFirstLogin)
-  { if (theUser.enteredPassword!="" && theUser.username!="")
-    { if (comments!=0)
+  { //stOutput << "DEBUG: GOT TO HERE\n" ;
+    if (theUser.enteredPassword!="" && theUser.username!="")
+    { //stOutput << "DEBUG: FIRST LOGIN\n" ;
+      if (comments!=0)
         *comments << "<b>First login! Setting first password as the calculator admin pass. </b>";
       theUser.CreateMeIfUsernameUnique(theRoutines, comments);
       theUser.SetColumnEntry("activationToken", "activated", theRoutines, comments);
       theUser.SetColumnEntry("userRole", "admin", theRoutines, comments);
       outputUserRole="admin";
+      //stOutput << "DEBG: comments in first login: " << comments->str();
     }
 
     return true;
@@ -810,13 +813,13 @@ bool UserCalculator::ResetAuthenticationToken(DatabaseRoutines& theRoutines, std
   this->actualAuthenticationToken=Crypto::computeSha1outputBase64(out.str());
   std::stringstream failure;
   if (!this->SetColumnEntry("authenticationToken", this->actualAuthenticationToken.value, theRoutines, &failure))
-  { if (*commentsOnFailure!=0)
+  { if (commentsOnFailure!=0)
       *commentsOnFailure << "Couldn't set column entry for token." << failure.str();
     return false;
   }
   this->flagNewAuthenticationTokenComputedUserNeedsIt=true;
   if (!this->SetColumnEntry("authenticationCreationTime", now.theTimeStringNonReadable, theRoutines, &failure))
-  { if (*commentsOnFailure!=0)
+  { if (commentsOnFailure!=0)
       *commentsOnFailure << "Couldn't set column entry for creation time. " << failure.str();
     return false;
   }
@@ -1079,8 +1082,8 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, 
   mysql_free_result( mysql_use_result(this->connection));
   return this->CreateTable("users", "\
     username VARCHAR(255) NOT NULL PRIMARY KEY,  \
-    password LONGTEXT NOT NULL, \
-    email LONGTEXT NOT NULL,\
+    password LONGTEXT, \
+    email LONGTEXT,\
     authenticationCreationTime LONGTEXT, \
     authenticationToken LONGTEXT , \
     activationToken LONGTEXT,\

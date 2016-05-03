@@ -4064,7 +4064,7 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
   if (!input[1].EvaluatesToDoubleInRange("x", lowerBound, upperBound, numIntervals, &yLow, &yHigh, &thePoints))
   { bool hasOneGoodPoint=false;
     for (int i=0; i<thePoints.size; i++)
-      if (!isnan(thePoints[i][1]))
+      if (!std::isnan(thePoints[i][1]))
       { hasOneGoodPoint=true;
         break;
       }
@@ -5682,7 +5682,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
       if (signChange)
         *whichDouble*=-1;
 //      stOutput << "debug: here i am power " << leftD << " ^ " << rightD << " = " << *whichDouble << "<br>";
-      return !isnan(*whichDouble);
+      return !std::isnan(*whichDouble);
     }
     if ((*this).StartsWith(theCommands.opSqrt(),3))
     { bool signChange=false;
@@ -5705,7 +5705,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
         *whichDouble=FloatingPoint::power(rightD,1/leftD);
       if (signChange)
         *whichDouble*=-1;
-      return !isnan(*whichDouble);
+      return !std::isnan(*whichDouble);
     }
     if ((*this).StartsWith(theCommands.opDivide(),3))
     { if (rightD==0)

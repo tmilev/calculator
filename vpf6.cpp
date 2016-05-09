@@ -1668,13 +1668,13 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.StartsWith(theCommands.opPlus()))
     return false;
-  stOutput << "<hr><hr>DEBUG: processing outer plus with input: <br>" << input.Lispify();
+//  stOutput << "<hr><hr>DEBUG: processing outer plus with input: <br>" << input.Lispify();
   MonomialCollection<Expression, Rational> theSum;
   theCommands.CollectSummands(theCommands, input, theSum);
-  stOutput << "<br>Debug: collected summands: " << theSum.ToString();
+//  stOutput << "<br>Debug: collected summands: " << theSum.ToString();
   theSum.QuickSortDescending();
-  stOutput << "<br>Debug: sorted: " << theSum.ToString();
-  if (theSum.size()==3)
+//  stOutput << "<br>Debug: sorted: " << theSum.ToString();
+  /*if (theSum.size()==3)
   { if (theSum[0]>theSum[1])
       stOutput << "<br>" << theSum[0].ToString() << "&gt;" << theSum[1].ToString();
     else
@@ -1687,7 +1687,7 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
       stOutput << "<br>" << theSum[1].ToString() << "&gt;" << theSum[2].ToString();
     else
       stOutput << "<br>" << theSum[2].ToString() << "&gt;" << theSum[1].ToString();
-  }
+  }*/
   if (theSum.size()<5)
     for (int i=0; i<theSum.size(); i++)
       for (int j=i; j<theSum.size(); j++)
@@ -1695,7 +1695,7 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
           crash << "Faulty comparison: " << theSum[i].ToString() << " and " << theSum[j].ToString()
           << " are mutually greater than one another. " << crash;
   output.MakeSum(theCommands, theSum);
-  stOutput << "<br>to get output:<br>" << output.Lispify();
+//  stOutput << "<br>to get output:<br>" << output.Lispify();
   return true;
 }
 

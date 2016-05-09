@@ -135,7 +135,8 @@ class Expression
   }
   enum format
   { formatDefault, formatFunctionUseUnderscore, formatTimesDenotedByStar,
-    formatFunctionUseCdot, formatNoBracketsForFunctionArgument, formatMatrix, formatMatrixRow, formatUseFrac
+    formatFunctionUseCdot, formatNoBracketsForFunctionArgument, formatMatrix, formatMatrixRow, formatUseFrac,
+    formatSequenceWithBraces
   };
   friend std::ostream& operator << (std::ostream& output, const Expression& theMon)
   { output << theMon.ToString();

@@ -472,6 +472,59 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnStandard
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerSort(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSort");
+  if (!input.IsListStartingWithAtom(theCommands.theAtoms.GetIndexIMustContainTheObject("Sort"))
+      &&
+      !input.IsSequenceNElementS())
+    return false;
+  List<Expression> sortedExpressions;
+  sortedExpressions.Reserve(input.children.size-1);
+  for (int i=1; i<input.children.size; i++)
+    sortedExpressions.AddOnTop(input[i]);
+/*  stOutput << "<hr>DEBUG";
+  if (sortedExpressions.size==3)
+  { if (sortedExpressions[0]>sortedExpressions[1])
+      stOutput << "<br>" << sortedExpressions[0].ToString() << "&gt;" << sortedExpressions[1].ToString();
+    else
+      stOutput << "<br>" << sortedExpressions[1].ToString() << "&gt;" << sortedExpressions[0].ToString();
+    if (sortedExpressions[0]>sortedExpressions[2])
+      stOutput << "<br>" << sortedExpressions[0].ToString() << "&gt;" << sortedExpressions[2].ToString();
+    else
+      stOutput << "<br>" << sortedExpressions[2].ToString() << "&gt;" << sortedExpressions[0].ToString();
+    if (sortedExpressions[1]>sortedExpressions[2])
+      stOutput << "<br>" << sortedExpressions[1].ToString() << "&gt;" << sortedExpressions[2].ToString();
+    else
+      stOutput << "<br>" << sortedExpressions[2].ToString() << "&gt;" << sortedExpressions[1].ToString();
+  }
+    stOutput << "<hr>";*/
+  sortedExpressions.QuickSortAscending();
+  return output.MakeSequence(theCommands, &sortedExpressions);
+}
+
+bool CalculatorFunctionsGeneral::innerSortDescending
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSortDescending");
+  if (!input.IsListStartingWithAtom(theCommands.theAtoms.GetIndexIMustContainTheObject("SortDescending"))
+      &&
+      !input.IsSequenceNElementS())
+    return false;
+  List<Expression> sortedExpressions;
+  sortedExpressions.Reserve(input.children.size-1);
+  for (int i=1; i<input.children.size; i++)
+    sortedExpressions.AddOnTop(input[i]);
+  sortedExpressions.QuickSortDescending();
+  return output.MakeSequence(theCommands, &sortedExpressions);
+}
+
+bool CalculatorFunctionsGeneral::innerLength(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLength");
+  if (input.IsListStartingWithAtom(theCommands.theAtoms.GetIndexIMustContainTheObject("Length")) ||
+      input.IsSequenceNElementS())
+    return output.AssignValue(input.children.size-1, theCommands);
+  return false;
+}
+
 bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables");

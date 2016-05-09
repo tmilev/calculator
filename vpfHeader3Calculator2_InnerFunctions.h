@@ -148,6 +148,7 @@ public:
   static bool innerGetAlgebraicNumberFromMinPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMakeMakeFile(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSort(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSortDescending(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserDefinedSubExpressions(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGrowDynkinType(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetPrincipalSl2Index(Calculator& theCommands, const Expression& input, Expression& output);

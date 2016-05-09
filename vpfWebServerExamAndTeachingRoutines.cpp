@@ -1280,6 +1280,12 @@ int WebWorker::ProcessSubmitProblem()
       else
         stOutput << isolatedInterpreter.outputString;
     }
+    if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
+    { stOutput << "<hr><b>Admin view internals:</b><br>" << theInterpreter.outputString
+      << "<br>" << theInterpreter.outputCommentsString
+      << "<hr><b>Submited completed problem stream.</b><br>" << completedProblemStream.str();
+
+    }
 //    stOutput << "yer input: " << completedProblemStream.str();
 //    stOutput << theInterpreter.outputString;
     return 0;

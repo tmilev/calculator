@@ -1779,16 +1779,34 @@ int Expression::GetExpressionTreeSize()const
 
 bool Expression::operator>(const Expression& other)const
 { MacroRegisterFunctionWithName("Expression::operatorGreaterThan");
+  stOutput << "<br>DEBUG: comparing " << this->ToString() << " &gt; " << other.ToString() << ": ";
   double left=0, right=0;
   if (this->EvaluatesToDouble(&left) && other.EvaluatesToDouble(&right))
-    return left>right;
+  { bool result =(left>right);
+    if (result)
+      stOutput << "true";
+    else
+      stOutput << "false";
+    return result;
+  }
   Rational leftCoeff, rightCoeff;
   Expression leftMon, rightMon;
   this->GetCoefficientMultiplicandForm(leftCoeff, leftMon);
   other.GetCoefficientMultiplicandForm(rightCoeff, rightMon);
   if (leftMon==rightMon)
-    return leftCoeff>rightCoeff;
-  return leftMon.GreaterThanNoCoeff(rightMon);
+  { bool result= leftCoeff>rightCoeff;
+    if (result)
+      stOutput << "true";
+    else
+      stOutput << "false";
+    return result;
+  }
+  bool result= leftMon.GreaterThanNoCoeff(rightMon);
+  if (result)
+    stOutput << "true";
+  else
+    stOutput << "false";
+  return result;
 }
 
 bool Expression::GreaterThanNoCoeff(const Expression& other)const
@@ -1820,7 +1838,7 @@ bool Expression::GreaterThanNoCoeff(const Expression& other)const
 //  stOutput << "<br>Got to here";
   if (this->children.size>other.children.size)
     return true;
-  if (this->children.size<other.children.size)
+  if (other.children.size>this->children.size)
     return false;
   for (int i=0; i<this->children.size; i++)
     if ((*this)[i]>other[i])

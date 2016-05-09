@@ -3340,28 +3340,6 @@ bool CalculatorFunctionsGeneral::outerAtimesBpowerJplusEtcDivBpowerI(Calculator&
   return output.MakeSum(theCommands, numeratorsNew);
 }
 
-bool CalculatorFunctionsGeneral::innerSort(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSort");
-  if (!input.IsListStartingWithAtom(theCommands.theAtoms.GetIndexIMustContainTheObject("Sort"))
-      &&
-      !input.IsSequenceNElementS())
-    return false;
-  List<Expression> sortedExpressions;
-  sortedExpressions.Reserve(input.children.size-1);
-  for (int i=1; i<input.children.size; i++)
-    sortedExpressions.AddOnTop(input[i]);
-  sortedExpressions.QuickSortAscending();
-  return output.MakeSequence(theCommands, &sortedExpressions);
-}
-
-bool CalculatorFunctionsGeneral::innerLength(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLength");
-  if (input.IsListStartingWithAtom(theCommands.theAtoms.GetIndexIMustContainTheObject("Length")) ||
-      input.IsSequenceNElementS())
-    return output.AssignValue(input.children.size-1, theCommands);
-  return false;
-}
-
 bool CalculatorFunctionsGeneral::innerGrowDynkinType(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGrowDynkinType");
   if (input.children.size!=3)

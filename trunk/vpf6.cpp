@@ -1665,13 +1665,37 @@ bool Expression::MakeIdMatrixExpressions(int theDim, Calculator& inputBoss)
 
 bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::outerPlus");
-//  theCommands << "<hr><hr>processing outer plus with input: " << input.Lispify();
+  theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.StartsWith(theCommands.opPlus()))
     return false;
+  stOutput << "<hr><hr>DEBUG: processing outer plus with input: <br>" << input.Lispify();
   MonomialCollection<Expression, Rational> theSum;
   theCommands.CollectSummands(theCommands, input, theSum);
-//  stOutput << "<br>Collected summands: " << theSum.ToString();
+  stOutput << "<br>Debug: collected summands: " << theSum.ToString();
+  theSum.QuickSortDescending();
+  stOutput << "<br>Debug: sorted: " << theSum.ToString();
+  if (theSum.size()==3)
+  { if (theSum[0]>theSum[1])
+      stOutput << "<br>" << theSum[0].ToString() << "&gt;" << theSum[1].ToString();
+    else
+      stOutput << "<br>" << theSum[1].ToString() << "&gt;" << theSum[0].ToString();
+    if (theSum[0]>theSum[2])
+      stOutput << "<br>" << theSum[0].ToString() << "&gt;" << theSum[2].ToString();
+    else
+      stOutput << "<br>" << theSum[2].ToString() << "&gt;" << theSum[0].ToString();
+    if (theSum[1]>theSum[2])
+      stOutput << "<br>" << theSum[1].ToString() << "&gt;" << theSum[2].ToString();
+    else
+      stOutput << "<br>" << theSum[2].ToString() << "&gt;" << theSum[1].ToString();
+  }
+  if (theSum.size()<5)
+    for (int i=0; i<theSum.size(); i++)
+      for (int j=i; j<theSum.size(); j++)
+        if (theSum[i]>theSum[j] && theSum[j]>theSum[i])
+          crash << "Faulty comparison: " << theSum[i].ToString() << " and " << theSum[j].ToString()
+          << " are mutually greater than one another. " << crash;
   output.MakeSum(theCommands, theSum);
+  stOutput << "<br>to get output:<br>" << output.Lispify();
   return true;
 }
 

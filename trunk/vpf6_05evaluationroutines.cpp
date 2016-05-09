@@ -84,6 +84,10 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
           if (theCommands.flagLogEvaluatioN)
             theCommands << "<hr>Built-in substitution: " << outerFun.ToStringSummary() << "<br>Rule stack id: "
             << theCommands.RuleStackCacheIndex;
+          if (input.Lispify()==output.Lispify())
+            crash << "Temporary check failed. " << crash;
+          stOutput << "<hr>DEBUG: Subbing: input: " << input.ToString()
+          << " by: " << output.ToString();
           return true;
         }
     } else

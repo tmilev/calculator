@@ -1343,8 +1343,12 @@ D-B;\
    "Length");
   this->AddOperationInnerHandler
   ("Sort", CalculatorFunctionsGeneral::innerSort, "",
-   "Sorts a sequence. The purpose of this function is to test the expression comparison function of the calculator. ",
-   "Sort(x^2, x^3, x^1, x^{-1}) ");
+   "Sorts a sequence. ",
+   "Sort(x^2, x^3, x^1, x^{-1}) ", true, false, "CalculatorFunctionsGeneral::innerSort", "Sort");
+  this->AddOperationInnerHandler
+  ("SortDescending", CalculatorFunctionsGeneral::innerSortDescending, "",
+   "Sorts a sequence in descending order.  ",
+   "SortDescending(x^2, x^3, x^1, x^{-1}) ", true, false, "CalculatorFunctionsGeneral::innerSortDescending", "SortDescending");
   this->AddOperationInnerHandler
   ("BlocksOfCommutativity", CalculatorFunctionsGeneral::innerGetUserDefinedSubExpressions, "",
    "Returns subexpression blocks of commutativity. ",

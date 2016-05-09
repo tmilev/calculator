@@ -2036,9 +2036,14 @@ bool Expression::MakeSum(Calculator& theCommands, const MonomialCollection<Expre
     } else
       current=theSum[i];
   }
-  if (summandsWithCoeff.size>=2)
-    if (summandsWithCoeff[0]>summandsWithCoeff[1] && summandsWithCoeff[1]>summandsWithCoeff[0])
-      crash << "This is a programming error: bad comparison! " << crash;
+//  stOutput << "<hr>Debug: theSum: " << theSum << "<br> summandswithcf: " << summandsWithCoeff;
+  if (summandsWithCoeff.size<5)
+    for (int i =0; i<summandsWithCoeff.size; i++)
+      for (int j =i; j<summandsWithCoeff.size; j++)
+        if (summandsWithCoeff[i]>summandsWithCoeff[j] && summandsWithCoeff[j]>summandsWithCoeff[i])
+          crash << "This is a programming error: faulty comparison function: each of the expressions "
+          << summandsWithCoeff[i].ToString() << " and " << summandsWithCoeff[j].ToString()
+          << " is reported to be greater than the other. " << crash;
   return this->MakeOXdotsX(theCommands, theCommands.opPlus(), summandsWithCoeff);
 }
 

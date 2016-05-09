@@ -2168,6 +2168,9 @@ bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost()con
     return this->GetValue<AlgebraicNumber>().NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
   if (this->IsAtom() || this->children.size==0)
     return false;
+  if (this->IsLisT())
+    if (this->format==this->formatFunctionUseUnderscore)
+      return false;
   if (this->children.size>1)
   { const Expression& firstE=(*this)[0];
     //const Expression& secondE=(*this)[1];
@@ -2208,6 +2211,9 @@ bool Expression::NeedsParenthesisForMultiplication()const
     return this->GetValue<AlgebraicNumber>().NeedsParenthesisForMultiplication();
   if (this->IsAtom() || this->children.size==0)
     return false;
+  if (this->IsLisT())
+    if (this->format==this->formatFunctionUseUnderscore)
+      return false;
   if (this->children.size>1)
   { const Expression& firstE=(*this)[0];
     //const Expression& secondE=(*this)[1];
@@ -2573,7 +2579,10 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       default:
         if (this->children.size==2)
           out << "{Sequence{}";
-        out << "\\left(";
+        if (this->format!=formatSequenceWithBraces)
+          out << "\\left(";
+        else
+          out << "{";
         for (int i=1; i<this->children.size; i++)
         { std::string currentChildString=(*this)[i].ToString(theFormat);
           out << currentChildString;
@@ -2590,7 +2599,10 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
           }
           charCounter%=50;
         }
-        out << "\\right)";
+        if (this->format!=formatSequenceWithBraces)
+          out << "\\right)";
+        else
+          out << "}";
         if (this->children.size==2)
           out << "}";
         break;

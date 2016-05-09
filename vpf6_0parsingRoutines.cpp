@@ -1658,7 +1658,9 @@ bool Calculator::ApplyOneRule()
       ((thirdToLastS=="(" && lastS==")")||
        (thirdToLastS=="{" && lastS=="}")
       ))
-    return this->ReplaceXXbyEX();
+  { int theFormat=thirdToLastS=="(" ? Expression::formatDefault : Expression::formatSequenceWithBraces;
+    return this->ReplaceXXbyEX(theFormat);
+  }
   if (fifthToLastS=="\\begin" && fourthToLastS=="{" && thirdToLastS=="array" && secondToLastS=="}" && lastS=="Expression")
   { this->registerNumNonClosedBeginArray++;
     return this->ReplaceXXXXXByCon(this->conMatrixSeparator(), Expression::formatMatrix);

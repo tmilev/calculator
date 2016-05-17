@@ -1486,13 +1486,10 @@ bool Calculator::CollectCoefficientsPowersVar
   for (int i=0; i<theSummands.size; i++)
   { theCommands.CollectOpands(theSummands[i], theCommands.opTimes(), currentMultiplicands);
     bool found=false;
-    for (int j=0; j<2; j++)
-    { const Expression& currentE=j==0 ? currentMultiplicands[0] : *currentMultiplicands.LastObject();
+    for (int j=0; j<currentMultiplicands.size; j++)
+    { const Expression& currentE= currentMultiplicands[j];
       remainingMultiplicands=currentMultiplicands;
-      if (j==0)
-        remainingMultiplicands.RemoveIndexShiftDown(0);
-      else
-        remainingMultiplicands.RemoveLastObject();
+      remainingMultiplicands.RemoveIndexShiftDown(j);
       if (remainingMultiplicands.size==0)
         currentCoeff.AssignValue(1, theCommands);
       else

@@ -9,6 +9,13 @@ TEMPLATE = app
 CONFIG += c++11
 QMAKE_CXXFLAGS += -std=c++11
 
+DEFINES+=MACRO_use_MySQL
+DEFINES+=MACRO_use_open_ssl
+LIBS+=-L/usr/lib64/mysql
+LIBS+=-lmysqlclient
+LIBS+=-lssl
+LIBS+=-lcrypto
+
 SOURCES += \
     test.cpp \
     vpf2Math3_SymmetricGroupsAndGeneralizations.cpp \

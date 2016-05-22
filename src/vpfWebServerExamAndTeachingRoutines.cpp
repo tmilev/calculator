@@ -130,7 +130,7 @@ public:
   bool InterpretHtml(std::stringstream& comments);
   bool InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments);
   bool PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream& comments);
-  bool PrepareCommands(Calculator& theInterpreter, std::stringstream& comments);
+  bool PrepareCommands(std::stringstream& comments);
   std::string CleanUpCommandString(const std::string& inputCommand);
   void InterpretNotByCalculator(SyntacticElementHTML& inputOutput);
   std::string GetDeadline
@@ -839,7 +839,7 @@ int WebWorker::ProcessProblemGiveUp()
   }
   Calculator theInterpreteR;
   theInterpreteR.init();
-  if(!theProblem.PrepareCommands(theInterpreteR, comments))
+  if(!theProblem.PrepareCommands(comments))
   { stOutput << "<b>Failed to prepare calculator commands. </b> <br>Comments:<br>" << comments.str();
     return 0;
   }
@@ -976,7 +976,7 @@ int WebWorker::ProcessSubmitProblemPreview()
   Calculator theInterpreterWithAdvice;
   theInterpreterWithAdvice.init();
   theInterpreterWithAdvice.flagWriteLatexPlots=false;
-  if (!theProblem.PrepareCommands(theInterpreterWithAdvice, comments))
+  if (!theProblem.PrepareCommands(comments))
   { stOutput << "Something went wrong while interpreting the problem file. ";
     if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
       stOutput << comments.str();
@@ -1188,7 +1188,7 @@ std::string WebWorker::GetAddUserEmails()
   (currentExamHome, theCollection.userTablE, theCollection.labelsUserTablE, comments);
   out << theRoutines.ToStringClassDetails
   (usersAreAdmins, theCollection.userTablE, theCollection.labelsUserTablE,
-   currentExamHome, theCollection.databaseProblemAndHomeworkGroupList, theCollection.databaseProblemWeights);
+   theCollection.databaseProblemAndHomeworkGroupList, theCollection.databaseProblemWeights);
   if (!createdUsers || !sentEmails)
     out << "<br>Comments:<br>" << comments.str();
   return out.str();
@@ -1213,7 +1213,7 @@ int WebWorker::ProcessSubmitProblem()
     return 0;
   }
   Calculator theInterpreter;
-  if (!theProblem.PrepareCommands(theInterpreter, comments))
+  if (!theProblem.PrepareCommands(comments))
   { stOutput << "<b>Failed to prepare commands.</b>" << comments.str();
     return 0;
   }
@@ -1773,7 +1773,7 @@ bool SyntacticElementHTML::IsCommentAfterSubmission()
 ;
 }
 
-bool CalculatorHTML::PrepareCommands(Calculator& theInterpreter, std::stringstream& comments)
+bool CalculatorHTML::PrepareCommands(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommands");
   if (this->theContent.size==0)
   { comments << "Empty content not allowed. ";
@@ -1820,7 +1820,7 @@ bool CalculatorHTML::PrepareCommands(Calculator& theInterpreter, std::stringstre
 bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream& comments)
 { MacroRegisterFunctionWithName("Problem::PrepareAndExecuteCommands");
   double startTime=theGlobalVariables.GetElapsedSeconds();
-  this->PrepareCommands(theInterpreter, comments);
+  this->PrepareCommands(comments);
 
   theInterpreter.init();
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
@@ -2005,7 +2005,6 @@ std::string SyntacticElementHTML::GetTagClass()
 
 std::string DatabaseRoutines::ToStringClassDetails
 (bool adminsOnly, List<List<std::string> >& userTable, List<std::string>& userLabels,
- const std::string& classFileName,
  HashedList<std::string, MathRoutines::hashString>& databaseSpanList,
  List<std::string>& databaseProblemWeights
  )
@@ -2210,7 +2209,7 @@ std::string CalculatorHTML::ToStringClassDetails
   out << "<br><span id=\"" << idOutput << "\">\n";
   DatabaseRoutines theRoutines;
   out << theRoutines.ToStringClassDetails
-  (adminsOnly, this->userTablE, this->labelsUserTablE, this->fileName,
+  (adminsOnly, this->userTablE, this->labelsUserTablE,
    this->databaseProblemAndHomeworkGroupList, this->databaseProblemWeights);
   out << "</span>";
 #else

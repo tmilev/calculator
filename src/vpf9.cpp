@@ -4835,6 +4835,7 @@ void WeylGroupData::ComputeRootsOfBorel(Vectors<Rational>& output)
 
 std::string WeylGroupData::ToStringCppCharTable(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("WeylGroup::ToStringCppConjugacyClasses");
+  (void) theFormat;//portable way to avoid non-used parameter warning.
   if (!this->flagCharTableIsComputed)
     return "<br>Conjugacy classes not computed";
   std::stringstream out;
@@ -4871,6 +4872,7 @@ std::string WeylGroupData::ToStringCppCharTable(FormatExpressions* theFormat)
 
 std::string WeylGroupData::ToStringCppConjugacyClasses(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("WeylGroup::ToStringCppConjugacyClasses");
+  (void) theFormat;//portable way to avoid non-used parameter warning.
   if (!this->theGroup.flagCCRepresentativesComputed)
     return "";
   std::stringstream out;
@@ -4912,6 +4914,7 @@ std::string WeylGroupData::ToStringCppConjugacyClasses(FormatExpressions* theFor
 
 std::string WeylGroupData::ToStringRootsAndRootReflections(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("WeylGroup::ToStringRootsAndRootReflections");
+  (void) theFormat;//portable way to avoid non-used parameter warning.
   std::stringstream out, outLatex;
   out << "<br>The root system has " << this->RootSystem.size << " elements.\n";
   out << "<table><tr><td>Simple basis coordinates</td><td>Epsilon coordinates</td>"
@@ -5470,6 +5473,7 @@ void WeylGroupData::DrawRootSystem
 std::string WeylGroupData::GenerateWeightSupportMethoD1
 (Vector<Rational>& highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords, int upperBoundWeights)
 { HashedList<Vector<Rational> > theDominantWeights;
+  (void) upperBoundWeights;//portable way to avoid non-used parameter warning.
   double upperBoundDouble=100000/((Rational)this->theGroup.GetSize()).GetDoubleValue();
   int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 10000);
   //int upperBoundInt = 10000;
@@ -9626,7 +9630,7 @@ void Lattice::ApplyLinearMap(Matrix<Rational> & theMap, Lattice& output)
 std::string ConeLatticeAndShiftMaxComputation::ToString
   (FormatExpressions* theFormat)
 { std::stringstream out;
-  out << "<hr>Resulting lattice: " << this->theFinalRougherLattice.ToString(true, false) << "<hr><hr>";
+  out << "<hr>Resulting lattice: " << this->theFinalRougherLattice.ToString() << "<hr><hr>";
 /*  if (this->complexStartingPerRepresentative.size>0)
   { out << "<hr> Non-refined complex per representative:<br>\n ";
     for (int i=0; i<this->complexStartingPerRepresentative.size; i++)
@@ -10738,7 +10742,7 @@ void Lattice::MakeFromRoots(const Vectors<Rational>& input)
   this->Reduce();
 }
 
-std::string Lattice::ToString(bool useHtml, bool useLatex)const
+std::string Lattice::ToString()const
 { std::stringstream out;
   out << "L=<";
   Vectors<Rational> tempRoots;

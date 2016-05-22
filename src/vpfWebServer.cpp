@@ -3112,12 +3112,14 @@ void WebServer::ReleaseWorkerSideResources()
 }
 
 void segfault_sigaction(int signal, siginfo_t *si, void *arg)
-{ crash << "Caught segfault at address: " << si->si_addr << crash;
+{ (void) arg;
+  crash << "Caught segfault at address: " << si->si_addr << crash;
   exit(0);
 }
 
 void fperror_sigaction(int signal)
-{ crash << "Fatal arithmetic error. " << crash;
+{ (void) signal;
+  crash << "Fatal arithmetic error. " << crash;
   exit(0);
 }
 

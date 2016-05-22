@@ -588,7 +588,7 @@ bool LargeIntUnsigned::IsEqualToZero()const
 { return this->theDigits.size==1 && this->theDigits[0]==0;
 }
 
-void LargeIntUnsigned::AssignFactorial(unsigned int x, GlobalVariables* theGlobalVariables)
+void LargeIntUnsigned::AssignFactorial(unsigned int x)
 { this->MakeOne();
   List<unsigned int> primesBelowX;
   LargeIntUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(x, primesBelowX);
@@ -1090,13 +1090,13 @@ bool Rational::ShrinkExtendedPartIfPossible()
   return true;
 }
 
-Rational Rational::Factorial(int n, GlobalVariables* theGlobalVariables)
+Rational Rational::Factorial(int n)
 { if (n<0)
   { crash << "This is a programming error: taking factorial of the negative number " << n << ". " << crash;
     return 0;
   }
   LargeIntUnsigned result;
-  result.AssignFactorial((unsigned int) n, theGlobalVariables);
+  result.AssignFactorial((unsigned int) n);
   Rational answer;
   answer=result;
   return answer;
@@ -1195,7 +1195,7 @@ void Rational::Simplify()
 }
 
 /*
-void Rational::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData)
+void Rational::DrawElement(DrawElementInputOutput& theDrawData)
 { std::string tempS;
   tempS=this->ToString();
   theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer
@@ -1249,7 +1249,8 @@ std::string Rational::ToString(FormatExpressions* theFormat)const
 }
 
 std::string Rational::ToStringForFileOperations(FormatExpressions* notUsed)const
-{ std::stringstream out;
+{ (void) notUsed; //portable way of avoiding unused parameter warning
+  std::stringstream out;
   if (this->Extended==0)
   { if (this->NumShort<0)
       out << "-";
@@ -1352,7 +1353,8 @@ void Rational::AssignString(const std::string& input)
 // haha, qtcreator doesn't understand this cxx11 code.  guess it wasn't such
 // a good idea to use it.  anyway "3/5"_R is now a rational literal.
 Rational operator"" _R(const char* in, size_t insize)
-{ Rational x;
+{ (void) insize;//remove unused variable warning, portable.
+  Rational x;
   x.AssignString(in);
   return x;
 }

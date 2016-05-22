@@ -71,15 +71,15 @@ bool WeylGroupData::IsDominantWRTgenerator<Rational>(const Vector<Rational>& the
 }
 
 void SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots
-(WeylGroupData& inputWeyl, const Vector<Rational> & ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
+(WeylGroupData& inputWeyl, const Vector<Rational>& ZeroesMeanSimpleRootSpaceIsInParabolic, int UpperLimitNumElements)
 { Selection tempSel;
   tempSel=ZeroesMeanSimpleRootSpaceIsInParabolic;
-  this->MakeParabolicFromSelectionSimpleRoots(inputWeyl, tempSel, theGlobalVariables, UpperLimitNumElements);
+  this->MakeParabolicFromSelectionSimpleRoots(inputWeyl, tempSel, UpperLimitNumElements);
 }
 
 bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra
 (Vector<Rational>& highestWeightSimpleCoords, HashedList<Vector<Rational> >& outputWeightsSimpleCoords,
- int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
+ int upperBoundDominantWeights, std::string& outputDetails)
 { MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra");
   this->CheckInitialization();
   std::stringstream out;
@@ -173,7 +173,7 @@ bool Calculator::innerAnimateLittelmannPaths(Calculator& theCommands, const Expr
   theCommands << "<br>Function innerAnimateLittelmannPaths: your input in simple coords: " << theWeightInSimpleCoords.ToString();
   LittelmannPath thePath;
   thePath.MakeFromWeightInSimpleCoords(theWeightInSimpleCoords, theSSowner->theWeyl);
-  return output.AssignValue(thePath.GenerateOrbitAndAnimate(theGlobalVariables), theCommands);
+  return output.AssignValue(thePath.GenerateOrbitAndAnimate(), theCommands);
 }
 
 bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, Expression& output)
@@ -206,17 +206,18 @@ bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& inp
 
   ElementUniversalEnveloping<RationalFunctionOld> argument=output.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
   ElementUniversalEnveloping<RationalFunctionOld> outputUE;
-  if(!theHmm.ApplyHomomorphism(argument, outputUE, theGlobalVariables))
+  if(!theHmm.ApplyHomomorphism(argument, outputUE))
     return output.MakeError("Failed to apply homomorphism for unspecified reason", theCommands);
 //  stOutput << theHmm.ToString(theGlobalVariables);
-  outputUE.Simplify(&theGlobalVariables);
+  outputUE.Simplify();
   Expression contextE;
   contextE.MakeContextSSLieAlg(theCommands, theHmm.theRange());
   return output.AssignValueWithContext(outputUE, contextE, theCommands);
 }
 
 std::string CGI::GetSliderSpanStartsHidden(const std::string& content, const std::string& label, const std::string& desiredID)
-{ std::stringstream out;
+{ (void) label;//avoid unused parameter warning, portable
+  std::stringstream out;
   CGI::GlobalGeneralPurposeID++;
   std::stringstream idStringStream;
   idStringStream << desiredID;
@@ -227,22 +228,22 @@ std::string CGI::GetSliderSpanStartsHidden(const std::string& content, const std
   return out.str();
 }
 
-std::string LittelmannPath::GenerateOrbitAndAnimate(GlobalVariables& theGlobalVariables)
+std::string LittelmannPath::GenerateOrbitAndAnimate()
 { std::stringstream out;
   List<LittelmannPath> theOrbit;
   List<List<int> > theGens;
-  if (!this->GenerateOrbit(theOrbit, theGens, theGlobalVariables, 1000, 0))
+  if (!this->GenerateOrbit(theOrbit, theGens, 1000, 0))
     out  << "<b>Not all paths were genenerated, only the first " << theOrbit.size << "</b>";
   AnimationBuffer theBuffer;
 //  int theDim=this->owner->GetDim();
   Vectors<double> coxPlane;
   coxPlane.SetSize(2);
   Vectors<double> draggableBAsis;
-  this->owner->GetCoxeterPlane(coxPlane[0], coxPlane[1], theGlobalVariables);
+  this->owner->GetCoxeterPlane(coxPlane[0], coxPlane[1]);
 //  theBuffer.theBuffer.initDimensions(this->owner.CartanSymmetric, draggableBAsis, coxPlane, 1);
   DrawingVariables tempDV, tempDV2;
-  this->owner->DrawRootSystem(tempDV, true, theGlobalVariables, true);
-  this->owner->DrawRootSystem(tempDV2, true, theGlobalVariables, true);
+  this->owner->DrawRootSystem(tempDV, true, true);
+  this->owner->DrawRootSystem(tempDV2, true, true);
   theBuffer.theBuffer=tempDV.theBuffer;
   theBuffer.theFrames.SetSize(theOrbit.size);
   for (int i=0; i<theOrbit.size; i++)
@@ -323,7 +324,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate(GlobalVariables& theGlobalVa
 template<class coefficient>
 void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
 (HomomorphismSemisimpleLieAlgebra& theHmm, Selection& LeviInSmall, List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors,
- Vectors<coefficient>* outputWeightsFundCoords, Vectors<coefficient>* outputEigenSpace, std::stringstream* comments, const coefficient& theRingUnit, const coefficient& theRingZero)
+ Vectors<coefficient>* outputWeightsFundCoords, Vectors<coefficient>* outputEigenSpace, std::stringstream* comments)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg");
   if (this->theChaR.size()!=1)
   { if (comments!=0)
@@ -340,7 +341,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
 //  Selection LeviInSmall;
 //  this->theChaR.SplitCharOverRedSubalg
 //  (&tempS, charWRTsubalgebra, this->parabolicSelectionNonSelectedAreElementsLevi, theHmm.ImagesCartanDomain,
-//   *theHmm.owners, theHmm.indexDomain, LeviInSmall, subWeylInLarge, subWeylStandalone, theGlobalVariables);
+//   *theHmm.owners, theHmm.indexDomain, LeviInSmall, subWeylInLarge, subWeylStandalone);
   Vector<Rational> theHWsimpleCoords, theHWfundCoords;
   std::stringstream out;
   if(comments!=0)
@@ -349,7 +350,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
   std::stringstream tempStream1;
   tempStream1 << "Started splitting the f.d. part of the " << theHmm.theRange().GetLieAlgebraName() << "-module with highest weight in fund coords "
   << this->theChaR[0].weightFundamentalCoordS.ToString();
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   theReport.Report(tempStream1.str());
 //  stOutput << "<br>Parabolic selection: " << LeviInSmall.ToString();
   List<List<Vector<coefficient> > > eigenSpacesPerSimpleGenerator;
@@ -372,7 +373,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
     currentOp.MakeZero();
     for (int j=0; j<currentElt.size(); j++)
     { //stOutput << "<br>fetching action of generator of index " << currentElt[j].theGeneratorIndex;
-      tempMat=this->GetActionGeneratorIndeX(currentElt[j].theGeneratorIndex, theRingUnit, theRingZero);
+      tempMat=this->GetActionGeneratorIndeX(currentElt[j].theGeneratorIndex);
       tempMat*=currentElt.theCoeffs[j];
       currentOp+=tempMat;
     }
@@ -484,12 +485,13 @@ void Calculator::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
   output.imagesSimpleChevalleyGenerators[1]=g_2;
   output.imagesSimpleChevalleyGenerators[3]=g_m2;
   output.imagesSimpleChevalleyGenerators[2]=g_m1plusg_m3;
-  output.ComputeHomomorphismFromImagesSimpleChevalleyGenerators(theGlobalVariables);
-  output.GetRestrictionAmbientRootSystemToTheSmallerCartanSA(output.RestrictedRootSystem, theGlobalVariables);
+  output.ComputeHomomorphismFromImagesSimpleChevalleyGenerators();
+  output.GetRestrictionAmbientRootSystemToTheSmallerCartanSA(output.RestrictedRootSystem);
 }
 
 bool Calculator::innerPrintB3G2branchingIntermediate(Calculator& theCommands, const Expression& input, Expression& output, Vectors<RationalFunctionOld>& theHWs, branchingData& theG2B3Data, Expression& theContext)
 { MacroRegisterFunctionWithName("Calculator::innerPrintB3G2branchingIntermediate");
+  (void) input;//avoid unused parameter warning, portable
   std::stringstream out, timeReport;
   std::stringstream latexTable, latexTable2;
   bool isFD=(theG2B3Data.selInducing.CardinalitySelection==0);
@@ -731,7 +733,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
   { theCharacter.MakeFromWeight
     (theg2b3data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(theHWs[k]),
      &theg2b3data.theHmm.theRange());
-    theCharacter.SplitCharOverRedSubalg(0, outputChar, theg2b3data, theGlobalVariables);
+    theCharacter.SplitCharOverRedSubalg(0, outputChar, theg2b3data);
     theg2b3data.theFormat.fundamentalWeightLetter= "\\omega";
     out << "<tr><td> " << theCharacter.ToString(&theg2b3data.theFormat) << "</td> ";
     out << "<td>" << theg2b3data.WeylFD.WeylDimFormulaSimpleCoords
@@ -761,8 +763,8 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
         if ((rightWeightSimple-leftWeightSimple).IsPositive())
         { resultChar=theCasimir;
           theCentralCharacter=theCasimir;
-          resultChar.ModOutVermaRelations(&theGlobalVariables, &rightWeightDual);
-          theCentralCharacter.ModOutVermaRelations(&theGlobalVariables, &leftWeightDual);
+          resultChar.ModOutVermaRelations(&rightWeightDual);
+          theCentralCharacter.ModOutVermaRelations(&leftWeightDual);
           resultChar-=theCentralCharacter;
           resultChar.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
           resultChar*=-1;
@@ -830,10 +832,10 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
 //  std::stringstream out;
 //  stOutput << "Highest weight: " << theWeightFundCoords.ToString() << "; Parabolic selection: " << selInducing.ToString();
   ModuleSSalgebra<RationalFunctionOld> theModCopy;
-  theModCopy.MakeFromHW(theG2B3Data.theHmm.theRange(), theG2B3Data.theWeightFundCoords, theG2B3Data.selInducing, theGlobalVariables, 1, 0, 0, false);
+  theModCopy.MakeFromHW(theG2B3Data.theHmm.theRange(), theG2B3Data.theWeightFundCoords, theG2B3Data.selInducing, 1, 0, 0, false);
   std::string report;
   theG2B3Data.resetOutputData();
-  theG2B3Data.initAssumingParSelAndHmmInitted(theGlobalVariables);
+  theG2B3Data.initAssumingParSelAndHmmInitted();
   theG2B3Data.SelSplittingParSel=theG2B3Data.selInducing;
   if (theG2B3Data.SelSplittingParSel.selected[0]!=theG2B3Data.SelSplittingParSel.selected[2])
   { theG2B3Data.SelSplittingParSel.AddSelectionAppendNewIndex(0);
@@ -898,7 +900,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
   for (int i=0; i< theG2B3Data.outputWeightsSimpleCoords.size; i++)
   { Vector<RationalFunctionOld>& currentG2DualWeight=theG2B3Data.g2DualWeights[i];
     theG2CasimirCopy=theG2Casimir;
-    theG2CasimirCopy.ModOutVermaRelations(&theGlobalVariables, &currentG2DualWeight, 1,0);
+    theG2CasimirCopy.ModOutVermaRelations(&currentG2DualWeight, 1,0);
     if (theG2CasimirCopy.IsEqualToZero())
       theG2B3Data.theChars[i]=0;
     else
@@ -915,7 +917,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
   theHWV*=-1;
   *theG2B3Data.theEigenVectorS.LastObject()=theHWV;
   Vector<RationalFunctionOld> weightDifference, weightDifferenceDualCoords;
-  theG2B3Data.theHmm.ApplyHomomorphism(theG2Casimir, imageCasimirInB3, theGlobalVariables);
+  theG2B3Data.theHmm.ApplyHomomorphism(theG2Casimir, imageCasimirInB3);
   theG2Casimir.checkConsistency();
   imageCasimirInB3.checkConsistency();
   RationalFunctionOld charDiff;
@@ -955,7 +957,11 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
 }
 
 bool Calculator::innerJacobiSymbol(Calculator& theCommands, const Expression& input, Expression& output)
-{ //this function is not implemented yet.
+{ MacroRegisterFunctionWithName("Calculator::innerJacobiSymbol");
+  //this function is not implemented yet.
+  crash << "Function not implemented yet.";
+  (void) theCommands;//avoid unused parameter warning, portable
+  (void) output;
   return false;
   if (input.children.size!=3)
     return false;
@@ -1136,7 +1142,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
       (currentAlg.theWeyl.GetSimpleCoordinatesFromFundamental(currentHW), currentAlg.theWeyl);
 //      double timeBeforeOrbit=theGlobalVariables.GetElapsedSeconds();
       hwPath.GenerateOrbit
-      (tempList, theStrings, theGlobalVariables, MathRoutines::Minimum(1000, currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW).NumShort), 0);
+      (tempList, theStrings, MathRoutines::Minimum(1000, currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW).NumShort), 0);
       reportStream << "\nPath orbit size = " << theStrings.size << " generated in " << theGlobalVariables.GetElapsedSeconds() << " seconds.";
       theReport.Report(reportStream.str());
       for (int k=0; k<theStrings.size; k++)
@@ -1156,7 +1162,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
 //      goto tmp;
 /*      if (theMod.MakeFromHW
           (theCommands.theObjectContainer.theLieAlgebras, i,
-           currentHW, tempSel, theGlobalVariables, 1, 0, 0, true))
+           currentHW, tempSel, 1, 0, 0, true))
       { out << "<td>is good</td>";
         if (!theMod.flagConjectureBholds)
         { out << "<td><b>conjecture B fails!</b></td>";
@@ -1656,6 +1662,7 @@ bool Calculator::WriteTestStrings(List<std::string>& inputCommands, List<std::st
 
 bool Calculator::innerAutomatedTestSetKnownGoodCopy(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerAutomatedTestSetKnownGoodCopy");
+  (void) input;//avoid unused variable warning, portable
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=30000;
   List<std::string> inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit;
   std::stringstream out;

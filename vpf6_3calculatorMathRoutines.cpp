@@ -18,7 +18,7 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation
 { MacroRegisterFunctionWithName("MathRoutines::GenerateVectorSpaceClosedWRTOperation");
   inputOutputElts[0].GaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
   theType theOpResult;
-  ProgressReport theReport1(&theGlobalVariables), theReport2(&theGlobalVariables);
+  ProgressReport theReport1, theReport2;
   bool flagDoReport=theGlobalVariables.flagReportEverything|| theGlobalVariables.flagReportGaussianElimination;
   if (flagDoReport)
     theReport1.Report("Extending vector space to closed with respect to binary operation. ");
@@ -527,6 +527,7 @@ bool CalculatorFunctionsGeneral::innerCoefficientOf(Calculator& theCommands, con
 
 bool CalculatorFunctionsGeneral::innerDereferenceOperator(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDereferenceOperator");
+  (void) theCommands;
   if (input.children.size!=2)
     return false;
 //  if (!input[0].IsListStartingWithAtom(theCommands.opSequence()))
@@ -640,6 +641,7 @@ bool CalculatorFunctionsGeneral::innerCompositeApowerBevaluatedAtC(Calculator& t
 
 bool CalculatorFunctionsGeneral::innerConstantFunction(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConstantFunction");
+  (void) theCommands;//portable way of avoiding unused parameter warning
   if (!input.IsListNElements())
     return false;
   if (!input[0].IsConstantNumber())
@@ -1055,7 +1057,7 @@ void IntegralRFComputation::PrepareDenominatorFactors()
 template<class coefficient>
 std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMonomialsLaTeX
   (const Polynomial<coefficient>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
-   bool underline, std::string* highlightColor, List<MonomialP>* theHighLightedMons)
+   std::string* highlightColor, List<MonomialP>* theHighLightedMons)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::GetPolynomialStringSpacedMonomialsLaTeX");
   std::stringstream out;
   bool found=false;
@@ -1119,7 +1121,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringLaTeX()
   out << "&" <<  "\\multicolumn{" << totalMonCollection.size << "}{|c|}{\\textbf{Remainder}}" << "\\\\";
   out << "\\multicolumn{1}{|c|}{} & ";
   out << this->GetPolynomialStringSpacedMonomialsLaTeX
-  (this->remainderDivision, totalMonCollection, true, &HighlightedColor, &this->remainderDivision.theMonomials)
+  (this->remainderDivision, totalMonCollection, &HighlightedColor, &this->remainderDivision.theMonomials)
   << "\\\\\\hline";
   out << "\\textbf{Divisor(s)} &" << "\\multicolumn{" << totalMonCollection.size << "}{|c|}{\\textbf{Quotient(s)}}"
   << "\\\\";
@@ -1144,18 +1146,18 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringLaTeX()
     out << "$\\underline{~}$";
   out << "} &";
   out << this->GetPolynomialStringSpacedMonomialsLaTeX
-  (this->startingPoly.GetElement(), totalMonCollection, false, &HighlightedColor,
+  (this->startingPoly.GetElement(), totalMonCollection, &HighlightedColor,
    &this->intermediateHighlightedMons.GetElement()[0]);
   out << "\\\\";
   for (int i=0; i<theRemainders.size; i++)
   { out << "&";
-    out << this->GetPolynomialStringSpacedMonomialsLaTeX(theSubtracands[i], totalMonCollection, true, &HighlightedColor)
+    out << this->GetPolynomialStringSpacedMonomialsLaTeX(theSubtracands[i], totalMonCollection, &HighlightedColor)
     << "\\\\\\cline{2-" << totalMonCollection.size+1 << "}";
     if (i<theRemainders.size-1)
       out << "$\\underline{~}$";
     out << "&"
     << this->GetPolynomialStringSpacedMonomialsLaTeX
-    (theRemainders[i], totalMonCollection, false, &HighlightedColor, &this->intermediateHighlightedMons.GetElement()[i+1])
+    (theRemainders[i], totalMonCollection, &HighlightedColor, &this->intermediateHighlightedMons.GetElement()[i+1])
     << "\\\\";
   }
   out << "\\hline";
@@ -1414,6 +1416,7 @@ bool CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly(Calculator& theComma
 
 bool CalculatorFunctionsGeneral::innerMakeMakeFile(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMakeMakeFile");
+  (void) input;
   List<std::string> cppFilesNoExtension;
   for (int i=0; i<theGlobalVariables.theSourceCodeFiles().size; i++)
   { std::string theFileNameWithPath=theGlobalVariables.theSourceCodeFiles()[i].FileName;
@@ -4660,9 +4663,9 @@ bool CalculatorFunctionsGeneral::innerDecomposeFDPartGeneralizedVermaModuleOverL
   ModuleSSalgebra<RationalFunctionOld> theMod;
   Selection selInducing= inducingParSel;
   Selection selSplittingParSel=splittingParSel;
-  theMod.MakeFromHW(ownerSS, theWeightFundCoords, selInducing, theGlobalVariables, 1, 0, 0, false);
+  theMod.MakeFromHW(ownerSS, theWeightFundCoords, selInducing, 1, 0, 0, false);
   std::string report;
-  theMod.SplitOverLevi(&report, selSplittingParSel, theGlobalVariables, 1, 0);
+  theMod.SplitOverLevi(&report, selSplittingParSel);
   return output.AssignValue(report, theCommands);
 }
 
@@ -4678,7 +4681,7 @@ bool CalculatorFunctionsGeneral::innerSplitFDpartB3overG2Init(Calculator& theCom
   for (int i=0; i<theG2B3Data.theWeightFundCoords.size; i++)
     if (!theG2B3Data.theWeightFundCoords[i].IsSmallInteger())
       theG2B3Data.selInducing.AddSelectionAppendNewIndex(i);
-  theG2B3Data.initAssumingParSelAndHmmInittedPart1NoSubgroups(theGlobalVariables);
+  theG2B3Data.initAssumingParSelAndHmmInittedPart1NoSubgroups();
   return true;
 }
 
@@ -4692,7 +4695,7 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroups(Calculator& theCommand
   SubgroupWeylGroupOLD theSubgroup;
   std::stringstream out;
   for (int i=0; i<numCycles; i++, selectionParSel.incrementSelection())
-  { theSubgroup.MakeParabolicFromSelectionSimpleRoots(theSSalgebra.theWeyl, selectionParSel, theGlobalVariables, 2000);
+  { theSubgroup.MakeParabolicFromSelectionSimpleRoots(theSSalgebra.theWeyl, selectionParSel, 2000);
     out << "<hr>" << CGI::GetMathSpanPure(theSubgroup.ToString());
   }
   return output.AssignValue(out.str(), theCommands);
@@ -4716,7 +4719,7 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
   SubgroupWeylGroupOLD theSubgroup;
   std::stringstream out;
   std::stringstream outputFileContent, outputFileContent2;
-  if (!theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl, parabolicSel, theGlobalVariables, 500))
+  if (!theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl, parabolicSel, 500))
     return output.MakeError("<br><br>Failed to generate Weyl subgroup, 500 elements is the limit", theCommands);
   theSubgroup.FindQuotientRepresentatives(2000);
   out << "<br>Number elements of the coset: " << theSubgroup.RepresentativesQuotientAmbientOrder.size;
@@ -4808,7 +4811,7 @@ bool CalculatorFunctionsGeneral::innerAllPartitions(Calculator& theCommands, con
 //  stOutput << "<br>at start: " << thePartition.ToStringPartitioningVectors();
   std::stringstream out;
   int numFound=0;
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   out << thePartition.ToStringPartitioningVectors();
   while (thePartition.IncrementReturnFalseIfPastLast())
   { out << "<br>" << thePartition.ToStringOnePartition(thePartition.currentPartition);
@@ -4931,7 +4934,7 @@ bool CalculatorFunctionsGeneral::innerDecomposeCharGenVerma(Calculator& theComma
 //  theSSlieAlg.theWeyl.RaiseToDominantWeight
 //  (theHWSimpCoordsFDPart, 0, 0, &raisingElt);
   SubgroupWeylGroupOLD theSub;
-  if (!theSub.MakeParabolicFromSelectionSimpleRoots(theWeyl, parSel, theGlobalVariables, 1000))
+  if (!theSub.MakeParabolicFromSelectionSimpleRoots(theWeyl, parSel, 1000))
     return output.MakeError("Failed to generate Weyl subgroup of Levi part (possibly too large? element limit is 1000).", theCommands);
   theHWsimpCoords=theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords);
   List<ElementWeylGroup<WeylGroupData> > theWeylElements;
@@ -5185,7 +5188,7 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
     << theGenMod.GetOwner().GetRank() << ". " << crash;
   std::string report;
   theFDMod.SplitOverLevi
-  (&report, theGenMod.parabolicSelectionNonSelectedAreElementsLevi, theGlobalVariables, RFOne, RFZero,
+  (&report, theGenMod.parabolicSelectionNonSelectedAreElementsLevi,
    &theLeviEigenVectors, &theEigenVectorWeightsFund, 0, &theFDLeviSplit);
   theFDMod.GetFDchar(theFDChaR);
   List<ElementUniversalEnveloping<RationalFunctionOld> > theCentralCharacters;
@@ -5219,7 +5222,7 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
     theFDLeviSplitShifteD.AddMonomial(tempMon, RFOne);
     currentHWdualcoords=theSSalgebra->theWeyl.GetDualCoordinatesFromFundamental(tempMon.weightFundamentalCoordS);
     currentChar=theCasimir;
-    currentChar.ModOutVermaRelations(&theGlobalVariables, & currentHWdualcoords, RFOne, RFZero);
+    currentChar.ModOutVermaRelations(& currentHWdualcoords, RFOne, RFZero);
     theCentralCharacters.AddOnTop(currentChar);
     out << "<tr><td>" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.ToStringLetterFormat("\\psi") << "</td><td>"
     << currentChar.ToString(&tempFormat) << "</td></tr>";
@@ -5250,13 +5253,13 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
   { Vector<RationalFunctionOld> currentWeightSimpleCoords=
     theSSalgebra->theWeyl.GetSimpleCoordinatesFromFundamental(theEigenVectorWeightsFund[i]);
     tempElt.MakeHWV(theFDMod, RFOne);
-    tempElt.MultiplyOnTheLeft(theLeviEigenVectors[i], theElt, *theSSalgebra, theGlobalVariables, RFOne, RFZero);
+    tempElt.MultiplyOnTheLeft(theLeviEigenVectors[i], theElt, *theSSalgebra, RFOne);
     tempElt.MakeHWV(theGenMod, RFOne);
 //      tempElt.MultiplyOnTheLeft
 //      (theGenMod.theGeneratingWordsNonReduced[0], tempElt2, theMods, theSSalgebra,
 //         theGlobalVariables,
 //       RFOne, RFZero);
-    theElt.TensorOnTheRight(tempElt, theGlobalVariables, RFOne, RFZero);
+    theElt.TensorOnTheRight(tempElt);
     theElt*=-1;
     std::string startingEltString=theElt.ToString(&tempFormat);
     std::stringstream tempStream, tempStream2;
@@ -5268,7 +5271,7 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
       if ((otherWeightSimpleCoords-currentWeightSimpleCoords).IsPositive())
       { theCasimirMinusChar=theCasimir;
         theCasimirMinusChar-=theCentralCharacters[j];
-        theElt.MultiplyOnTheLeft(theCasimirMinusChar, tempElt2, *theSSalgebra, theGlobalVariables, RFOne, RFZero);
+        theElt.MultiplyOnTheLeft(theCasimirMinusChar, tempElt2, *theSSalgebra, RFOne);
         theElt=tempElt2;
         tempStream << "(i(\\bar c)- (" << theCentralCharacters[j].ToString() << ") )\\\\";
         tempStream2 << " $(\\bar c-p_" << j+1 << ") $ ";
@@ -5374,7 +5377,7 @@ bool CalculatorFunctionsGeneral::innerSplitFDpartB3overG2CharsOutput(Calculator&
   charSSAlgMod<RationalFunctionOld> tempChar;
   charSSAlgMod<RationalFunctionOld> startingChar;
   startingChar.MakeFromWeight(theG2B3Data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(theG2B3Data.theWeightFundCoords), &theG2B3Data.theHmm.theRange());
-  startingChar.SplitCharOverRedSubalg(&report, tempChar, theG2B3Data, theGlobalVariables);
+  startingChar.SplitCharOverRedSubalg(&report, tempChar, theG2B3Data);
   out << report;
   return output.AssignValue(out.str(), theCommands);
 }
@@ -5805,6 +5808,7 @@ bool CalculatorFunctionsGeneral::innerTestStandardOutput(Calculator& theCommands
 bool CalculatorFunctionsGeneral::innerTestTopCommand
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestTopCommand");
+  (void)input;  (void) theCommands;//portable way of avoiding unused parameter warning
   return output.AssignValue(theGlobalVariables.ToStringHTMLTopCommandLinuxSystem(), theCommands);
 }
 
@@ -5824,7 +5828,7 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, con
     theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
   else
     theCommands << "WebServerReturnDisplayIndicatorCloseConnection is zero.";
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
 
   for (int i=0; i<numRuns; i++)
   { std::stringstream reportStream;
@@ -5959,7 +5963,7 @@ void LaTeXcrawler::BuildFreecalc()
   List<std::string> theLectureNumbers, theLectureDesiredNames;
   inputFile.seekg(0);
   std::string buffer;
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   std::stringstream reportStream;
   reportStream << "Processing input file: extracting lecture numbers...";
   theReport.Report(reportStream.str());
@@ -6316,8 +6320,8 @@ bool CalculatorFunctionsGeneral::innerFindProductDistanceModN(Calculator& theCom
   }
   LargeIntUnsigned currentIndexLarge, currentDistance, maxDistanceGenerated;
   int currentIndex;
-  ProgressReport theReport(&theGlobalVariables);
-  ProgressReport theReport0(&theGlobalVariables);
+  ProgressReport theReport;
+  ProgressReport theReport0;
   std::stringstream reportstream;
   reportstream << "Finding product distance mod " << theMod.ToString() << " w.r.t. elements "
   << theInts;
@@ -6417,7 +6421,7 @@ bool CalculatorFunctionsGeneral::innerSolveProductSumEquationOverSetModN(Calcula
   LargeIntUnsigned theModLarge;
   theModLarge=theMod;
   int numTestedSoFar=0;
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   LargeIntUnsigned oneUI=1;
   while (thePartition.IncrementReturnFalseIfPastLast())
   { LargeIntUnsigned theProduct=1;
@@ -6467,7 +6471,7 @@ void Calculator::AutomatedTestRun
       outputCommandStrings.AddOnTop(this->operationsCompositeHandlers[i][j].theExample);
   outputResultsWithInit.SetSize(outputCommandStrings.size);
   outputResultsNoInit.SetSize(outputCommandStrings.size);
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   FormatExpressions theFormat;
   theFormat.flagExpressionIsFinal=true;
   for (int i=0; i<outputCommandStrings.size; i++)
@@ -6490,12 +6494,14 @@ void Calculator::AutomatedTestRun
 bool CalculatorFunctionsGeneral::innerPrintRuleStack
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrash");
+  (void) input;//portable way of avoiding unused parameter warning
   return output.AssignValue(theCommands.RuleStack.ToString(), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerCrash
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrash");
+  (void) input;//portable way of avoiding unused parameter warning
   crash << "<hr>This is a test of the crashing mechanism of the calculator. Are log files created correctly? Check the /output/ directory." << crash;
   return output.AssignValue((std::string)"Crashed succesfully", theCommands);
 }
@@ -6504,6 +6510,7 @@ bool CalculatorFunctionsGeneral::innerCrash
 bool CalculatorFunctionsGeneral::innerCrashByListOutOfBounds
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrashByListOutOfBounds");
+  (void) input;//portable way of avoiding unused parameter warning
   List<int> theList;
   std::vector<int> theVector;
   for (int i=0; i<5; i++)
@@ -6520,13 +6527,14 @@ bool CalculatorFunctionsGeneral::innerCrashByListOutOfBounds
 bool CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds");
+  (void) input;//portable way of avoiding unused parameter warning
   std::vector<int> theVector;
   theVector[1]=1;
   return output.AssignValue((std::string) "Crashing: std::vector out of bounds.", theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerDrawWeightSupportWithMults(Calculator& theCommands, const Expression& input, Expression& output)
-{ //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
+{ //theNode.owner->theHmm.MakeG2InB3(theParser);
   if (!input.IsListNElements(3))
     return output.MakeError("Error: the function for drawing weight support takes two  arguments (type and highest weight)", theCommands);
   const Expression& typeNode=input[1];
@@ -6547,13 +6555,13 @@ bool CalculatorFunctionsGeneral::innerDrawWeightSupportWithMults(Calculator& the
   theChar.MakeFromWeight(highestWeightSimpleCoords, theSSalgpointer);
   DrawingVariables theDV;
   std::string report;
-  theChar.DrawMeWithMults(report, theGlobalVariables, theDV, 10000);
+  theChar.DrawMeWithMults(report, theDV, 10000);
   out << report << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
   return output.AssignValue(out.str(), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerDrawRootSystem(Calculator& theCommands, const Expression& input, Expression& output)
-{ //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
+{ //theNode.owner->theHmm.MakeG2InB3(theParser);
   bool hasPreferredProjectionPlane= input.IsListNElements(4);
   const Expression& typeNode= hasPreferredProjectionPlane ? input[1] : input;
   SemisimpleLieAlgebra* theAlgPointer;
@@ -6571,7 +6579,7 @@ bool CalculatorFunctionsGeneral::innerDrawRootSystem(Calculator& theCommands, co
   }
   std::stringstream out;
   DrawingVariables theDV;
-  theWeyl.DrawRootSystem(theDV, true, theGlobalVariables, false, 0, true, 0);
+  theWeyl.DrawRootSystem(theDV, true, false, 0, true, 0);
   if (hasPreferredProjectionPlane)
   { theDV.flagFillUserDefinedProjection=true;
     theDV.FillUserDefinedProjection=preferredProjectionPlane;
@@ -6841,7 +6849,7 @@ public:
         (this->NodePositions[i],
          CGI::clearNewLines(CGI::backslashQuotes(
          CGI::DoubleBackslashes( this->DisplayedEstrings[i]) )),
-         theColor, theDV.TextStyleNormal, 0);
+         theColor, theDV.TextStyleNormal);
       } else
         theDV.drawCircleAtVectorBufferRational
         (this->NodePositions[i], 0.04, theDV.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
@@ -6881,7 +6889,7 @@ bool CalculatorFunctionsGeneral::innerDrawExpressionGraphWithOptions
 
 bool CalculatorFunctionsGeneral::innerDrawWeightSupport(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDrawWeightSupport");
-  //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
+  //theNode.owner->theHmm.MakeG2InB3(theParser);
   if (!input.IsListNElements(3))
     return output.MakeError("Wrong number of arguments, must be 2. ", theCommands);
   const Expression& typeNode=input[1];
@@ -6903,7 +6911,7 @@ bool CalculatorFunctionsGeneral::innerDrawWeightSupport(Calculator& theCommands,
   theChar.MakeFromWeight(highestWeightSimpleCoords, theAlgPointer);
   DrawingVariables theDV;
   std::string report;
-  theChar.DrawMeNoMults(report, theGlobalVariables, theDV, 10000);
+  theChar.DrawMeNoMults(report, theDV, 10000);
   out << report << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
   out << "<br>A table with the weights of the character follows. <br>";
   out << theChar.ToStringFullCharacterWeightsTable();
@@ -6953,6 +6961,7 @@ bool CalculatorFunctionsGeneral::innerOr
 bool CalculatorFunctionsGeneral::innerIf
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerOr");
+  (void) theCommands;//portable way of avoiding unused parameter warning
   if (input.children.size!=4)
     return false;
   if (input[1].IsEqualToOne())

@@ -104,7 +104,7 @@ public:
   { return this->theWeyl.theDynkinType.GetLieAlgebraName();
   }
   void GetMinusTransposeAuto(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output);
-  void GenerateWeightSupportMethod2(Vector<Rational>& theHighestWeight, Vectors<Rational>& output, GlobalVariables& theGlobalVariables);
+  void GenerateWeightSupportMethod2(Vector<Rational>& theHighestWeight, Vectors<Rational>& output);
   inline int GetNumGenerators()const
   { return this->theWeyl.CartanSymmetric.NumRows+this->theWeyl.RootSystem.size;
   }
@@ -162,7 +162,7 @@ public:
     int right=this->GetRootIndexFromGenerator(rightIndex);
     return (this->theWeyl.RootSystem[left]+this->theWeyl.RootSystem[right]).IsEqualToZero();
   }
-  void GenerateVermaMonomials(Vector<Rational>& highestWeight, GlobalVariables& theGlobalVariables);
+  void GenerateVermaMonomials(Vector<Rational>& highestWeight);
   void ComputeChevalleyConstants();
   template<class coefficient>
   coefficient GetKillingForm(const ElementSemisimpleLieAlgebra<coefficient>& left, const ElementSemisimpleLieAlgebra<coefficient>& right);
@@ -179,7 +179,7 @@ public:
   void ExploitTheCyclicTrick(int i, int j, int k);
   bool GetMaxQForWhichBetaMinusQAlphaIsARoot(const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output)const;
   Rational GetConstant(const Vector<Rational>& root1, const Vector<Rational>& root2);
-  bool CheckClosedness(std::string& output, GlobalVariables& theGlobalVariables);
+  bool CheckClosedness(std::string& output);
   void ElementToStringVermaMonomials(std::string& output);
   void ElementToStringEmbedding(std::string& output);
   Vector<Rational> GetWeightOfGenerator(int index)
@@ -227,7 +227,7 @@ class Weight
 public:
   SemisimpleLieAlgebra* owner;
   Vector<coefficient> weightFundamentalCoordS;
-  static const bool IsMonEqualToZero()
+  static bool IsMonEqualToZero()
   { return false;
   }
   friend std::ostream& operator << (std::ostream& output, const Weight<coefficient>& input)
@@ -243,7 +243,7 @@ public:
   void AccountSingleWeight
   (const Vector<Rational>& currentWeightSimpleCoords, const Vector<Rational>& otherHighestWeightSimpleCoords,
    Rational& theMult, charSSAlgMod<coefficient>& outputAccum)const;
-  std::string TensorAndDecompose(const Weight<coefficient>& other, charSSAlgMod<coefficient>& output, GlobalVariables& theGlobalVariables)const;
+  std::string TensorAndDecompose(const Weight<coefficient>& other, charSSAlgMod<coefficient>& output)const;
   std::string ToString(FormatExpressions* theFormat=0)const;
   inline unsigned int HashFunction()const
   { return weightFundamentalCoordS.HashFunction();
@@ -295,38 +295,38 @@ class charSSAlgMod : public MonomialCollection<Weight<coefficient>, coefficient>
   }
   void GetDual(charSSAlgMod<coefficient>& output)const;
   void MakeFromWeight(const Vector<coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner);
-  bool SplitCharOverRedSubalg(std::string* Report, charSSAlgMod& output, branchingData& inputData, GlobalVariables& theGlobalVariables);
+  bool SplitCharOverRedSubalg(std::string* Report, charSSAlgMod& output, branchingData& inputData);
   bool GetDominantCharacterWRTsubalgebra
-  (charSSAlgMod& outputCharOwnerSetToZero, std::string& outputDetails, GlobalVariables& theGlobalVariables, int upperBoundNumDominantWeights);
+  (charSSAlgMod& outputCharOwnerSetToZero, std::string& outputDetails, int upperBoundNumDominantWeights);
   bool FreudenthalEvalMeDominantWeightsOnly
   (charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails);
   bool FreudenthalEvalMeFullCharacter
   (charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails);
   std::string ToStringFullCharacterWeightsTable();
-  bool DrawMeNoMults(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars, int upperBoundWeights)
-  { return this->DrawMe(outputDetails, theGlobalVariables, theDrawingVars, upperBoundWeights, false);
+  bool DrawMeNoMults(std::string& outputDetails, DrawingVariables& theDrawingVars, int upperBoundWeights)
+  { return this->DrawMe(outputDetails, theDrawingVars, upperBoundWeights, false);
   }
   int
 GetPosNstringSuchThatWeightMinusNalphaIsWeight
 (const Weight<coefficient>& theWeightInFundCoords, const Vector<coefficient>& theAlphaInFundCoords)
 ;
 
-  bool DrawMeWithMults(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars, int upperBoundWeights)
-  { return this->DrawMe(outputDetails, theGlobalVariables, theDrawingVars, upperBoundWeights, true);
+  bool DrawMeWithMults(std::string& outputDetails, DrawingVariables& theDrawingVars, int upperBoundWeights)
+  { return this->DrawMe(outputDetails, theDrawingVars, upperBoundWeights, true);
   }
-  void DrawMeAssumeCharIsOverCartan(WeylGroupData& actualAmbientWeyl, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars)const;
+  void DrawMeAssumeCharIsOverCartan(WeylGroupData& actualAmbientWeyl, DrawingVariables& theDrawingVars)const;
   SemisimpleLieAlgebra* GetOwner()const
   { if (this->size()==0)
       crash << "This is a programming error: requesting owner semisimple Lie algebra of zero character. " << crash;
     return (*this)[0].owner;
   }
-  bool DrawMe(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults);
+  bool DrawMe(std::string& outputDetails, DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults);
   bool SplitOverLeviMonsEncodeHIGHESTWeight
   (std::string* Report, charSSAlgMod& output, const Selection& splittingParSel, const Selection& ParSelFDInducingPart,
-   SubgroupWeylGroupOLD& outputWeylSub, GlobalVariables& theGlobalVariables);
+   SubgroupWeylGroupOLD& outputWeylSub);
   int GetIndexExtremeWeightRelativeToWeyl(WeylGroupData& theWeyl)const;
   void MakeTrivial(SemisimpleLieAlgebra& inputOwner);
-  std::string MultiplyBy(const charSSAlgMod& other, GlobalVariables& theGlobalVariables);
+  std::string MultiplyBy(const charSSAlgMod& other);
   std::string operator*=(const charSSAlgMod& other);
   std::string operator*=(const Weight<Rational>& other);
   charSSAlgMod<coefficient> operator-(const charSSAlgMod<coefficient>& right)const
@@ -369,43 +369,43 @@ public:
   }
   HomomorphismSemisimpleLieAlgebra(): domainAlg(0), rangeAlg(0){}
   std::string DebugString;
-  void GetWeightsGmodKInSimpleCoordsK(Vectors<Rational>& outputWeights, GlobalVariables& theGlobalVariables)
-  { this->GetWeightsWrtKInSimpleCoordsK(outputWeights, this->GmodK, theGlobalVariables);
+  void GetWeightsGmodKInSimpleCoordsK(Vectors<Rational>& outputWeights)
+  { this->GetWeightsWrtKInSimpleCoordsK(outputWeights, this->GmodK);
   }
-  void GetWeightsKInSimpleCoordsK(Vectors<Rational>& outputWeights, GlobalVariables& theGlobalVariables)
-  { this->GetWeightsWrtKInSimpleCoordsK(outputWeights, this->imagesAllChevalleyGenerators, theGlobalVariables);
+  void GetWeightsKInSimpleCoordsK(Vectors<Rational>& outputWeights)
+  { this->GetWeightsWrtKInSimpleCoordsK(outputWeights, this->imagesAllChevalleyGenerators);
   }
   void GetWeightsWrtKInSimpleCoordsK
-  (Vectors<Rational>& outputWeights, List<ElementSemisimpleLieAlgebra<Rational> >& inputElts, GlobalVariables& theGlobalVariables);
-  void ToString(std::string& output, GlobalVariables& theGlobalVariables)
-  { this->ToString(output, false, theGlobalVariables);
+  (Vectors<Rational>& outputWeights, List<ElementSemisimpleLieAlgebra<Rational> >& inputElts);
+  void ToString(std::string& output)
+  { this->ToString(output, false);
   }
-  void ToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
+  void ToString(std::string& output, bool useHtml);
   void MakeGinGWithId
  (char theWeylLetter, int theWeylDim, MapReferences<SemisimpleLieAlgebra, DynkinType>& ownerOfAlgebras)
   ;
-  void ProjectOntoSmallCartan(Vector<Rational>& input, Vector<Rational> & output, GlobalVariables& theGlobalVariables);
-  void ProjectOntoSmallCartan(Vectors<Rational>& input, Vectors<Rational>& output, GlobalVariables& theGlobalVariables);
+  void ProjectOntoSmallCartan(Vector<Rational>& input, Vector<Rational> & output);
+  void ProjectOntoSmallCartan(Vectors<Rational>& input, Vectors<Rational>& output);
   void GetMapSmallCartanDualToLargeCartanDual(Matrix<Rational> & output);
-  void ComputeDebugString(GlobalVariables& theGlobalVariables)
-  { this->ToString(this->DebugString, theGlobalVariables);
+  void ComputeDebugString()
+  { this->ToString(this->DebugString);
   }
-  void ComputeDebugString(bool useHtml, GlobalVariables& theGlobalVariables)
-  { this->ToString(this->DebugString, useHtml, theGlobalVariables);
+  void ComputeDebugString(bool useHtml)
+  { this->ToString(this->DebugString, useHtml);
   }
-  std::string ToString(GlobalVariables& theGlobalVariables)
+  std::string ToString()
   { std::string tempS;
-    this->ToString(tempS, theGlobalVariables);
+    this->ToString(tempS);
     return tempS;
   }
-  void GetRestrictionAmbientRootSystemToTheSmallerCartanSA(Vectors<Rational>& output, GlobalVariables& theGlobalVariables);
-  bool ComputeHomomorphismFromImagesSimpleChevalleyGenerators(GlobalVariables& theGlobalVariables);
-  bool CheckClosednessLieBracket(GlobalVariables& theGlobalVariables);
+  void GetRestrictionAmbientRootSystemToTheSmallerCartanSA(Vectors<Rational>& output);
+  bool ComputeHomomorphismFromImagesSimpleChevalleyGenerators();
+  bool CheckClosednessLieBracket();
   void ApplyHomomorphism(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output);
   bool ApplyHomomorphism
-  (const ElementUniversalEnveloping<RationalFunctionOld>& input, ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables);
+  (const ElementUniversalEnveloping<RationalFunctionOld>& input, ElementUniversalEnveloping<RationalFunctionOld>& output);
   bool ApplyHomomorphism
-  (const MonomialUniversalEnveloping<RationalFunctionOld>& input, const RationalFunctionOld& theCoeff, ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables);
+  (const MonomialUniversalEnveloping<RationalFunctionOld>& input, const RationalFunctionOld& theCoeff, ElementUniversalEnveloping<RationalFunctionOld>& output);
 };
 
 #endif

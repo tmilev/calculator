@@ -72,7 +72,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       }
     if (EnteringVariable!=-1)
     { int LeavingVariableRow;  Rational MaxMovement;
-      Matrix<Rational>::GetMaxMovementAndLeavingVariableRow(MaxMovement, LeavingVariableRow, EnteringVariable, NumTrueVariables, tempMatA, matX, BaseVariables);
+      Matrix<Rational>::GetMaxMovementAndLeavingVariableRow(MaxMovement, LeavingVariableRow, EnteringVariable, tempMatA, matX, BaseVariables);
       Rational tempRat, tempTotalChange;
       if (tempMatA.elements[LeavingVariableRow][EnteringVariable].IsEqualToZero())
         crash << crash;
@@ -370,7 +370,8 @@ const std::string GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFold
 "http://calculator-algebra.org/output/";
 
 std::string Calculator::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType& theType, FormatExpressions* theFormat)
-{ std::stringstream out;
+{ (void)theFormat;
+  std::stringstream out;
   std::string theTitlePageFileNameNoPathSlowLoad= "SemisimpleSubalgebras_" + theType.ToString() + ".html";
   std::string theTitlePageFileNameNoPathFastLoad= "SemisimpleSubalgebras_FastLoad_" + theType.ToString() + ".html";
   out << "<tr><td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
@@ -397,7 +398,8 @@ std::string Calculator::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType
 }
 
 std::string Calculator::ToStringLinksToCalculator(const DynkinType& theType, FormatExpressions* theFormat)
-{ std::stringstream out;
+{ (void) theFormat;//avoid unused parameter warning, portable
+  std::stringstream out;
   out << "<tr><td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
   << "?request=compute&mainInput=printSemisimpleLieAlgebra%7B%7D"
   << theType[0].theLetter << "_" << theType[0].theRank << "\">" << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
@@ -414,7 +416,8 @@ std::string Calculator::ToStringLinksToCalculator(const DynkinType& theType, For
 }
 
 bool Calculator::innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const Expression& input, Expression& output)
-{ std::stringstream out, out2;
+{ (void) input;//avoid unused parameter warning, portable
+  std::stringstream out, out2;
   out << "\n\n<p>\n<table><tr><td>Structure constants </td><td>Semisimple subalgebras</td> "
   << "<td>sl(2) subalgebras</td><td>root subalgebras</td> </tr>\n";
   out2 << "\n\n<p>\n\n<table><tr><td>Structure constants </td><td>Semisimple subalgebras</td> "
@@ -1002,9 +1005,9 @@ std::string Plot::GetPlotHtml()
   theDVs.drawLineBetweenTwoVectorsBufferDouble(v1, v2, theDVs.PenStyleNormal, CGI::RedGreenBlue(0,0,0), 1);
   v1[0]=1;
   v1[1]=-0.2;
-  theDVs.drawTextAtVectorBufferDouble(v1, (std::string)"1", CGI::RedGreenBlue(0,0,0), theDVs.TextStyleNormal,0);
+  theDVs.drawTextAtVectorBufferDouble(v1, (std::string)"1", CGI::RedGreenBlue(0,0,0), theDVs.TextStyleNormal);
   v1.SwapTwoIndices(0,1);
-  theDVs.drawTextAtVectorBufferDouble(v1, (std::string)"1", CGI::RedGreenBlue(0,0,0), theDVs.TextStyleNormal,0);
+  theDVs.drawTextAtVectorBufferDouble(v1, (std::string)"1", CGI::RedGreenBlue(0,0,0), theDVs.TextStyleNormal);
   Vector<double> widthVector, heightVector;
   widthVector.SetSize(2);
   heightVector.SetSize(2);
@@ -1035,7 +1038,7 @@ std::string Plot::GetPlotHtml()
           continue;
         theDVs.drawTextAtVectorBufferDouble
         (currentVectors[j], this->thePlots[i].thePlotString, this->thePlots[i].colorRGB,
-         theDVs.TextStyleNormal,0);
+         theDVs.TextStyleNormal);
       }
     else
       for (int j=1; j<currentVectors.size; j++)

@@ -1023,7 +1023,7 @@ void WebWorker::OutputStandardResult()
   stOutput << "</script>\n";
   stOutput << "</body></html>";
   stOutput << "<!--";
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   for(int i=0; i<theParser.SystemCommands.size; i++)
   { std::stringstream out;
     out << "\n\ncommand: " << theParser.SystemCommands[i] << "\n" ;

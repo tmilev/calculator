@@ -7,6 +7,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
 (const std::string& inputUsernameUnsafe, const std::string& inputPassword,
  std::string& inputOutputAuthenticationToken, std::string& outputUserRole, std::stringstream* comments)
 {
+ (void) inputUsernameUnsafe; (void) inputPassword; (void) inputOutputAuthenticationToken; (void) outputUserRole; (void) comments;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
   DatabaseRoutines theRoutines;
@@ -104,6 +105,7 @@ bool DatabaseRoutinesGlobalFunctions::SetPassword
 (const std::string& inputUsername, const std::string& inputNewPassword, std::string& outputAuthenticationToken,
  std::stringstream& comments)
 {
+  (void) inputUsername; (void) inputNewPassword; (void) outputAuthenticationToken; (void) comments;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::SetPassword");
   if(!theGlobalVariables.flagLoggedIn)
@@ -125,7 +127,7 @@ bool DatabaseRoutinesGlobalFunctions::SetPassword
 
 bool DatabaseRoutinesGlobalFunctions::RowExists
   (const std::string& inputUsername, const std::string& tableName, std::stringstream& comments)
-{
+{ (void) inputUsername; (void) tableName; (void) comments;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::RowExists");
   if (!theGlobalVariables.flagLoggedIn)
@@ -140,7 +142,7 @@ bool DatabaseRoutinesGlobalFunctions::RowExists
 bool DatabaseRoutinesGlobalFunctions::SetEntry
   (const std::string& inputUsername, const std::string& tableNameUnsafe, const std::string& keyNameUnsafe,
    const std::string& valueUnsafe, std::stringstream& comments)
-{
+{ (void) inputUsername; (void) tableNameUnsafe; (void) keyNameUnsafe; (void) valueUnsafe; (void) comments;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::SetEntry");
   if (!theGlobalVariables.flagLoggedIn)
@@ -175,7 +177,7 @@ bool DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights()
 
 bool DatabaseRoutinesGlobalFunctions::CreateTable
 (const std::string& tableName, std::stringstream& comments)
-{
+{ (void) tableName; (void) comments;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::CreateTable");
   if (!theGlobalVariables.flagLoggedIn)
@@ -190,7 +192,7 @@ bool DatabaseRoutinesGlobalFunctions::CreateTable
 
 bool DatabaseRoutinesGlobalFunctions::ColumnExists
 (const std::string& columnNameUnsafe, const std::string& tableNameUnsafe, std::stringstream& commentsStream)
-{
+{ (void) columnNameUnsafe; (void) tableNameUnsafe; (void) commentsStream;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::ColumnExists");
   DatabaseRoutines theRoutines;
@@ -203,7 +205,7 @@ bool DatabaseRoutinesGlobalFunctions::ColumnExists
 bool DatabaseRoutinesGlobalFunctions::CreateColumn
 (const std::string& columnNameUnsafe, const std::string& tableNameUnsafe,
  std::stringstream& commentsOnCreation)
-{
+{ (void) columnNameUnsafe; (void) tableNameUnsafe; (void) commentsOnCreation;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::CreateColumn");
   DatabaseRoutines theRoutines;
@@ -216,7 +218,7 @@ bool DatabaseRoutinesGlobalFunctions::CreateColumn
 
 bool DatabaseRoutinesGlobalFunctions::TableExists
 (const std::string& tableName, std::stringstream& comments)
-{
+{ (void) tableName; (void) comments;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::TableExists");
   if (!theGlobalVariables.flagLoggedIn)
@@ -235,7 +237,8 @@ bool DatabaseRoutinesGlobalFunctions::FetchTablE
  List<std::string>& outputColumnLabels,
  bool& outputWasTruncated, int& actualNumRowsIfTruncated,
  const std::string& tableName, std::stringstream& comments)
-{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::FetchTable");
+{ (void) output; (void) outputColumnLabels; (void) outputWasTruncated; (void) actualNumRowsIfTruncated; (void) tableName; (void) comments;
+  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::FetchTable");
 #ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
   return theRoutines.FetchTablE
@@ -252,7 +255,8 @@ bool DatabaseRoutinesGlobalFunctions::FetchTableFromDatabaseIdentifier
  List<std::string>& outputColumnLabels,
  bool& outputWasTruncated, int& actualNumRowsIfTruncated,
  const std::string& tableIdentifier, std::stringstream& comments)
-{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::FetchTable");
+{ (void) output; (void) outputColumnLabels; (void) outputWasTruncated; (void) actualNumRowsIfTruncated; (void) tableIdentifier; (void) comments;
+  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::FetchTable");
 #ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
   return theRoutines.FetchTableFromDatabaseIdentifier
@@ -267,7 +271,7 @@ bool DatabaseRoutinesGlobalFunctions::FetchTableFromDatabaseIdentifier
 bool DatabaseRoutinesGlobalFunctions::FetchEntry
 (const std::string& inputUsername, const std::string& tableName, const std::string& keyName,
  std::string& output, std::stringstream& comments)
-{
+{ (void) inputUsername; (void) tableName; (void) keyName; (void) output; (void) comments;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::FetchEntry");
   if (!theGlobalVariables.flagLoggedIn)

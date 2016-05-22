@@ -1063,7 +1063,6 @@ void WeylGroupData::GetSignSignatureAllRootSubsystems(List<SubgroupDataRootRefle
   SemisimpleLieAlgebra theSSlieAlg;
   theSSlieAlg.theWeyl.MakeFromDynkinType(this->theDynkinType);
 //  theSSlieAlg.ComputeChevalleyConstants(theGlobalVariables);
-  theRootSAs.theGlobalVariables=&theGlobalVariables;
   theRootSAs.owner=&theSSlieAlg;
   theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism
   ();

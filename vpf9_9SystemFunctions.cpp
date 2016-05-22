@@ -177,7 +177,9 @@ void CreateTimerThread()
 }
 
 void CallSystemWrapperNoOutput(const std::string& theCommand)
-{ system(theCommand.c_str());
+{ int systemOutput= system(theCommand.c_str());
+  if (systemOutput!=0)
+    theLog << logger::red << "System command: " << theCommand << " exited with " << systemOutput << ". " << logger::endL;
 }
 
 std::string CallSystemWrapperReturnStandardOutput(const std::string& inputCommand)
@@ -196,5 +198,8 @@ std::string CallSystemWrapperReturnStandardOutput(const std::string& inputComman
 }
 
 void CallChDirWrapper(const std::string& theDir)
-{ chdir(theDir.c_str());
+{ int systemOutput= chdir(theDir.c_str());;
+  if (systemOutput!=0)
+    theLog << logger::red << "Chdir command to directory: " << theDir << " exited with " << systemOutput
+    << ". " << logger::endL;
 }

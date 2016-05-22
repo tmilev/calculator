@@ -79,6 +79,8 @@ std::string TimeWrapper::ToStringSecondsToDaysHoursSecondsString(double input, b
   out.precision(1);
   if (input>0)
     out << std::fixed << input/3600 << " hour(s)";
+  if (includeSeconds)
+    out << std::fixed << (((int)input) /60) << " minute(s) " << (((int)input) %60) << " second(s).";
   if (!isPositive)
     out << ")";
   return out.str();

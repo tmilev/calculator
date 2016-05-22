@@ -49,12 +49,12 @@ struct branchingData
   template <class coefficient>
   Vector<coefficient> ProjectWeight(Vector<coefficient>& input);
   void resetOutputData();
-  void initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariables& theGlobalVariables);
-  void initAssumingParSelAndHmmInittedPart2Subgroups(GlobalVariables& theGlobalVariables);
-  void initAssumingParSelAndHmmInitted(GlobalVariables& theGlobalVariables)
+  void initAssumingParSelAndHmmInittedPart1NoSubgroups();
+  void initAssumingParSelAndHmmInittedPart2Subgroups();
+  void initAssumingParSelAndHmmInitted()
   { MacroRegisterFunctionWithName("branchingData::initAssumingParSelAndHmmInitted");
-    this->initAssumingParSelAndHmmInittedPart1NoSubgroups(theGlobalVariables);
-    this->initAssumingParSelAndHmmInittedPart2Subgroups(theGlobalVariables);
+    this->initAssumingParSelAndHmmInittedPart1NoSubgroups();
+    this->initAssumingParSelAndHmmInittedPart2Subgroups();
   }
   branchingData()
   { this->flagUseNilWeightGeneratorOrder=false;
@@ -84,8 +84,8 @@ public:
   bool CheckInitialization()const;
   int GetDisplayIndexFromGeneratorIndex(int GeneratorIndex);
   void GetLinearCombinationFrom(ElementSemisimpleLieAlgebra<Rational>& input, Vector<Rational>& theCoeffs);
-  void init(List<ElementSemisimpleLieAlgebra<Rational> >& inputOrder, SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables);
- void initDefaultOrder(SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables);
+  void init(List<ElementSemisimpleLieAlgebra<Rational> >& inputOrder, SemisimpleLieAlgebra& owner);
+ void initDefaultOrder(SemisimpleLieAlgebra& owner);
 };
 
 template <class coefficient>
@@ -147,52 +147,43 @@ public:
   int computationPhase;
   int NumProcessedConesParam;
   int NumProcessedExtremaEqualOne;
-  std::string ComputeMultsLargerAlgebraHighestWeight(Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords, Vector<Rational>& parabolicSel, GlobalVariables& theGlobalVariables);
-  std::string CheckMultiplicitiesVsOrbits(GlobalVariables& theGlobalVariables);
-  std::string ElementToStringMultiplicitiesReport(GlobalVariables& theGlobalVariables);
-  void IncrementComputation(Vector<Rational>& parabolicSel, GlobalVariables& theGlobalVariables);
-  std::string PrepareReport(GlobalVariables& theGlobalVariables);
+  std::string ComputeMultsLargerAlgebraHighestWeight(Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords, Vector<Rational>& parabolicSel);
+  std::string CheckMultiplicitiesVsOrbits();
+  std::string ElementToStringMultiplicitiesReport();
+  void IncrementComputation(Vector<Rational>& parabolicSel);
+  std::string PrepareReport();
   GeneralizedVermaModuleCharacters();
   bool CheckInitialization()const;
-  void ReadFromDefaultFile(GlobalVariables* theGlobalVariables);
-  void WriteToDefaultFile(GlobalVariables* theGlobalVariables);
-  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
-  bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
+  void ReadFromDefaultFile();
+  void WriteToDefaultFile();
+  void WriteToFile(std::fstream& output);
+  bool ReadFromFile(std::fstream& input)
   { std::string tempS;
     int numReadWords;
     Vector<Rational>  parSel; parSel=this->ParabolicLeviPartRootSpacesZeroStandsForSelected;
-    if (theGlobalVariables!=0)
-    { //this->theParser.theHmm.MakeG2InB3(this->theParser, *theGlobalVariables);
-//      this->initFromHomomorphism(parSel, this->theParser.theHmm, *theGlobalVariables);
-    } else
-    { GlobalVariables tempGlobalVars;
-//      this->theParser.theHmm.MakeG2InB3(this->theParser, tempGlobalVars);
-  //    this->initFromHomomorphism(parSel, this->theParser.theHmm, tempGlobalVars);
-    }
-    XML::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
     input >> tempS >> this->computationPhase;
     if (tempS!="ComputationPhase:")
       crash << crash;
     bool result=true;
     if (this->computationPhase!=0)
-      result= this->ReadFromFileNoComputationPhase(input, theGlobalVariables);
+      result= this->ReadFromFileNoComputationPhase(input);
     XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
     return result;
   }
-  bool ReadFromFileNoComputationPhase(std::fstream& input, GlobalVariables* theGlobalVariables);
-  std::string PrepareReportOneCone(FormatExpressions& theFormat, const Cone& theCone, GlobalVariables& theGlobalVariables);
+  bool ReadFromFileNoComputationPhase(std::fstream& input);
+  std::string PrepareReportOneCone(FormatExpressions& theFormat, const Cone& theCone);
   void GetProjection(int indexOperator, const Vector<Rational> & input, Vector<Rational> & output);
   void SplitByMultiplicityFreeWall(Cone& theCone, ConeComplex& output);
-  void InitTheMaxComputation(GlobalVariables& theGlobalVariables);
-  void ComputeQPsFromChamberComplex(GlobalVariables& theGlobalVariables);
+  void InitTheMaxComputation();
+  void ComputeQPsFromChamberComplex();
   void GetSubFromIndex(PolynomialSubstitution<Rational>& outputSub, Matrix<LargeInt>& outputMat, LargeIntUnsigned& ouputDen, int theIndex);
-  void SortMultiplicities(GlobalVariables& theGlobalVariables);
+  void SortMultiplicities();
   void GetSubFromNonParamArray(Matrix<Rational>& output, Vector<Rational>& outputTranslation, Vectors<Rational>& NonParams, int numParams);
   void initQPs(GlobalVariables& theGlobalVariables);
-  void initFromHomomorphism(Vector<Rational>& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables);
-  void TransformToWeylProjectiveStep1(GlobalVariables& theGlobalVariables);
-  void TransformToWeylProjectiveStep2(GlobalVariables& theGlobalVariables);
-  void TransformToWeylProjective(int indexOperator, Vector<Rational> & startingNormal, Vector<Rational> & outputNormal);
+  void initFromHomomorphism(Vector<Rational>& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input);
+  void TransformToWeylProjectiveStep1();
+  void TransformToWeylProjectiveStep2();
+  void TransformToWeylProjective(int indexOperator, Vector<Rational>& startingNormal, Vector<Rational>& outputNormal);
 };
 
 template<class coefficient>
@@ -206,7 +197,7 @@ class MonomialUniversalEnvelopingOrdered
 public:
   SemisimpleLieAlgebraOrdered* owner;
   std::string DebugString;
-  std::string ToString(bool useLatex, bool useCalculatorFormat, FormatExpressions* PolyFormatLocal, GlobalVariables& theGlobalVariables)const;
+  std::string ToString(bool useLatex, bool useCalculatorFormat, FormatExpressions* PolyFormatLocal)const;
   void ComputeDebugString()
   { GlobalVariables theGlobalVariables;
     FormatExpressions PolyFormatLocal;
@@ -286,20 +277,16 @@ private:
 public:
   std::string DebugString;
   GlobalVariables* context;
-  void ToString(std::string& output, bool useLatex, bool useCalculatorFormat, FormatExpressions& PolyFormatLocal, GlobalVariables& theGlobalVariables)const;
-  std::string ToString(bool useLatex, bool useCalculatorFormat, FormatExpressions& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
+  void ToString(std::string& output, bool useLatex, bool useCalculatorFormat, FormatExpressions& PolyFormatLocal)const;
+  std::string ToString(bool useLatex, bool useCalculatorFormat, FormatExpressions& PolyFormatLocal)const
   { std::string tempS;
     this->ToString(tempS, useLatex, useCalculatorFormat, PolyFormatLocal, theGlobalVariables);
     return tempS;
   }
-  std::string ToString(FormatExpressions& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
-  { std::string tempS;
-    this->ToString(tempS, true, true, PolyFormatLocal, theGlobalVariables);
-    return tempS;
-  }
   std::string ToString(FormatExpressions& PolyFormatLocal)const
-  { GlobalVariables theGlobalVariables;
-    return this->ToString(PolyFormatLocal, theGlobalVariables);
+  { std::string tempS;
+    this->ToString(tempS, true, true, PolyFormatLocal);
+    return tempS;
   }
   bool NeedsParenthesisForMultiplication()const
   { return this->size>1;
@@ -352,16 +339,15 @@ public:
   template<class CoefficientTypeQuotientField>
   static void GetBasisFromSpanOfElements
   (List<ElementUniversalEnvelopingOrdered<coefficient> >& theElements, Vectors<CoefficientTypeQuotientField>& outputCoords, List<ElementUniversalEnvelopingOrdered<coefficient> >& outputTheBasis,
-   const CoefficientTypeQuotientField& theFieldUnit, const CoefficientTypeQuotientField& theFieldZero, GlobalVariables& theGlobalVariables);
+   const CoefficientTypeQuotientField& theFieldUnit, const CoefficientTypeQuotientField& theFieldZero);
   static void GetBasisFromSpanOfElements
-  (List<ElementUniversalEnvelopingOrdered>& theElements, Vectors<Polynomial<coefficient> >& outputCoordinates, List<ElementUniversalEnvelopingOrdered>& outputTheBasis, GlobalVariables& theGlobalVariables);
+  (List<ElementUniversalEnvelopingOrdered>& theElements, Vectors<Polynomial<coefficient> >& outputCoordinates, List<ElementUniversalEnvelopingOrdered>& outputTheBasis);
   bool GetCoordsInBasis
-  (List<ElementUniversalEnvelopingOrdered<coefficient> >& theBasis, Vector<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero,
-   GlobalVariables& theGlobalVariables)const;
+  (List<ElementUniversalEnvelopingOrdered<coefficient> >& theBasis, Vector<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero)const;
   static void GetCoordinateFormOfSpanOfElements
-  (int numVars, List<ElementUniversalEnvelopingOrdered>& theElements, Vectors<Polynomial<coefficient> >& outputCoordinates, ElementUniversalEnvelopingOrdered& outputCorrespondingMonomials, GlobalVariables& theGlobalVariables);
+  (int numVars, List<ElementUniversalEnvelopingOrdered>& theElements, Vectors<Polynomial<coefficient> >& outputCoordinates, ElementUniversalEnvelopingOrdered& outputCorrespondingMonomials);
 //  static void GetCoordinateFormOfSpanOfElements
-//  (List<ElementUniversalEnvelopingOrdered>& theElements, Vectors<Rational>& outputCoordinates, ElementUniversalEnvelopingOrdered& outputCorrespondingMonomials, GlobalVariables& theGlobalVariables)
+//  (List<ElementUniversalEnvelopingOrdered>& theElements, Vectors<Rational>& outputCoordinates, ElementUniversalEnvelopingOrdered& outputCorrespondingMonomials)
 //;
   void AssignFromCoordinateFormWRTBasis
   (List<ElementUniversalEnveloping<coefficient> >& theBasis, Vector<Polynomial<coefficient> >& input, SemisimpleLieAlgebraOrdered& owner);
@@ -376,7 +362,7 @@ public:
       return false;
     return true;
   }
-  void MakeCasimir(SemisimpleLieAlgebraOrdered& theOwner, int numVars, GlobalVariables& theGlobalVariables);
+  void MakeCasimir(SemisimpleLieAlgebraOrdered& theOwner, int numVars);
   void ActOnMe(const ElementSemisimpleLieAlgebra<Rational>& theElt, ElementUniversalEnvelopingOrdered& output);
   void LieBracketOnTheRight(const ElementUniversalEnvelopingOrdered& right, ElementUniversalEnvelopingOrdered& output);
   void LieBracketOnTheRight(const ElementSemisimpleLieAlgebra<Rational>& right, const coefficient& ringUnit, const coefficient& ringZero);
@@ -447,9 +433,9 @@ public:
   (const ElementSemisimpleLieAlgebra<Rational>& actingElt, ElementVermaModuleOrdered<coefficient>& output, SemisimpleLieAlgebra& owner, const coefficient& theRingUnit, const coefficient& theRingZero, GlobalVariables* theContext)const;
   static void GetBasisFromSpanOfElements
   (List<ElementVermaModuleOrdered<coefficient> >& theElements, Vectors<RationalFunctionOld>& outputCoordinates, List<ElementVermaModuleOrdered>& outputTheBasis,
-   const RationalFunctionOld& RFOne, const RationalFunctionOld& RFZero, GlobalVariables& theGlobalVariables);
+   const RationalFunctionOld& RFOne, const RationalFunctionOld& RFZero);
   bool GetCoordsInBasis
-  (const List<ElementVermaModuleOrdered<coefficient> >& theBasis, Vector<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero, GlobalVariables& theGlobalVariables)const;
+  (const List<ElementVermaModuleOrdered<coefficient> >& theBasis, Vector<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero)const;
   bool IsProportionalTo(const ElementVermaModuleOrdered<coefficient>& other, coefficient& outputTimesMeEqualsOther, const coefficient& theRingZero)const
   { return this->theElT.IsProportionalTo(other.theElT, outputTimesMeEqualsOther, theRingZero);
   }

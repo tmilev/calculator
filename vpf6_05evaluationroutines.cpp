@@ -335,7 +335,7 @@ bool Calculator::EvaluateExpression
     //////------End of handling naughty expressions------
     //bool foundError=false;
     /////-------Children evaluation-------
-    ProgressReport theReport(&theGlobalVariables);
+    ProgressReport theReport;
     if (!output.IsFrozen())
       for (int i=0; i<output.children.size && !theCommands.flagAbortComputationASAP; i++)
       { if (i>0 && output.StartsWith(theCommands.opEndStatement()))
@@ -546,7 +546,7 @@ void Calculator::EvaluateCommands()
   this->flagAbortComputationASAP=false;
   this->Comments.clear();
   bool usingCommandline=!this->flagDisplayFullExpressionTree && !this->flagUseHtml;
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   if (!usingCommandline)
     theReport.Report("Evaluating expressions, current expression stack:\n");
   this->EvaluateExpression(*this, this->theProgramExpression, this->theProgramExpression);

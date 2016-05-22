@@ -1202,7 +1202,7 @@ public:
   static std::string GetSliderSpanStartsHidden(const std::string& content, const std::string& label="Expand/collapse", const std::string& desiredID="");
   static std::string GetHtmlLinkFromProjectFileName
   (const std::string& fileName, const std::string& fileDesc="", int line=-1);
-  static std::string GetHtmlSwitchMenuDoNotEncloseInTags(const std::string& serverBase);
+  static std::string GetHtmlSwitchMenuDoNotEncloseInTags();
   static std::string GetLatexEmbeddableLinkFromCalculatorInput(const std::string& address, const std::string& display);
   static bool StringToHtmlString(const std::string& input, std::string& output);
   static std::string StringToHtmlStrinG(const std::string& theString);
@@ -1549,7 +1549,7 @@ public:
   void QuickSortAscending(typename List<Object>::OrderLeftGreaterThanRight theOrder=0, List<otherType>* carbonCopy=0)
   { List<Object> theList;
     theList=*this;
-    theList.QuickSortAscending(theOrder);
+    theList.QuickSortAscending(theOrder, carbonCopy);
     this->operator=(theList);
   }
   template<typename otherType>
@@ -1613,7 +1613,7 @@ template <class Object, unsigned int hashFunction(const Object&)=Object::HashFun
 class HashedList: public HashTemplate<Object, List<Object>, hashFunction>
 {
 public:
-  HashedList(const HashedList& other)
+  HashedList(const HashedList& other):HashTemplate<Object, List<Object>, hashFunction>()
   { this->operator=(other);
   }
   HashedList(){}
@@ -1733,9 +1733,6 @@ public:
   void Report(const std::string& theReport);
   void init();
   ProgressReport()
-  { this->init();
-  }
-  ProgressReport(GlobalVariables* dummyArgumentComesFromOldVersionOfCodeNeedsToBeRefactored)
   { this->init();
   }
   ProgressReport(const std::string& theReport)

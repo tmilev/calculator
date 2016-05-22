@@ -2,6 +2,7 @@
 //For additional information refer to the file "vpf.h".#include "vpfHeader3Calculator0_Interface.h"
 #include "vpfHeader3Calculator0_Interface.h"
 #include "vpfHeader3Calculator1_InnerTypedFunctions.h"
+#include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 #include "vpfImplementationHeader2Math15_UniversalEnveloping.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::MakeZero(SemisimpleLieAlgebra&)'
 static ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "C++ object <-> calculator expression conversions.");
 
@@ -264,11 +265,6 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(Calculator& theComma
   return output.AssignValue(tempSL2.ToString(), theCommands);
 }
 
-bool CalculatorConversions::innerLoadSltwoSubalgebras(Calculator& theCommands, const Expression& input, Expression& output)
-{
-  return false;
-}
-
 bool CalculatorConversions::innerAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorConversions::innerAlgebraicNumber");
   if(input.IsOfType<AlgebraicNumber>())
@@ -428,7 +424,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
 //  stOutput << "<br>numExploredTypes: " << numExploredTypes;
   SemisimpleLieAlgebra* ownerSS=0;
   Expression tempE;
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   std::stringstream reportStream;
   reportStream << "Extracting semisimple Lie algebra ... ";
   theReport.Report(reportStream.str());
@@ -926,7 +922,7 @@ bool CalculatorConversions::innerRationalFunction(Calculator& theCommands, const
   //if (input.IsBuiltInType(&tempS))
   //  stOutput << ", input is of type: " << tempS;
   RationalFunctionOld theRF;
-  theRF.MakeOneLetterMoN(0, 1, &theGlobalVariables);
+  theRF.MakeOneLetterMoN(0, 1);
   return output.AssignValueWithContext(theRF, theContext, theCommands);
 }
 

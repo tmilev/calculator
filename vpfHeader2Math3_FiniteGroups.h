@@ -182,7 +182,8 @@ public:
     bool flagRepresentativeWordComputed;
     List<int> representativeWord;
     std::string ToString(FormatExpressions* theFormat=0)const
-    { std::stringstream out;
+    { (void) theFormat;//avoid unused parameter warning, portable
+      std::stringstream out;
       out << "Conj. class size: " << this->size.ToString();
       return out.str();
     }
@@ -460,7 +461,7 @@ public:
   void MakeID(const ElementWeylGroup& initializeFrom);
   bool IsID();
   std::string ToStringInvariants(FormatExpressions* theFormat)const;
-  std::string ToString(FormatExpressions* theFormat=0, List<int>* DisplayIndicesOfSimpleRoots=0)const;
+  std::string ToString(FormatExpressions* theFormat=0)const;
   unsigned int HashFunction() const;
   static inline unsigned int HashFunction(const ElementWeylGroup<templateWeylGroup>& input)
   { return input.HashFunction();
@@ -494,12 +495,12 @@ class FinitelyGeneratedMatrixMonoid
   public:
   List<MatrixTensor<coefficient> > theGenerators;
   HashedList<MatrixTensor<coefficient> > theElements;
-  bool GenerateElements(int upperBoundNonPositiveMeansNoLimit, GlobalVariables* theGlobalVariables=0);
+  bool GenerateElements(int upperBoundNonPositiveMeansNoLimit);
   std::string ToString(FormatExpressions* theFormat=0)const;
 };
 
 template <class coefficient>
-bool FinitelyGeneratedMatrixMonoid<coefficient>::GenerateElements(int upperBoundNonPositiveMeansNoLimit, GlobalVariables* theGlobalVariables)
+bool FinitelyGeneratedMatrixMonoid<coefficient>::GenerateElements(int upperBoundNonPositiveMeansNoLimit)
 { MacroRegisterFunctionWithName("FinitelyGeneratedMatrixMonoid::GenerateElements");
   this->theElements.Clear();
   this->theElements.AddOnTopNoRepetition(theGenerators);
@@ -578,7 +579,7 @@ public:
   void GetSignSignatureAllRootSubsystems(List<SubgroupDataRootReflections>& outputSubgroups);
   void GetSignSignatureRootSubgroups(List<SubgroupDataRootReflections>& outputSubgroups, const List<Vectors<Rational> >& rootsGeneratingReflections);
   bool LoadConjugacyClassesHelper();
-  bool LoadSignSignatures(List<SubgroupDataRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables);
+  bool LoadSignSignatures(List<SubgroupDataRootReflections>& outputSubgroups);
   void ComputeOrLoadCharacterTable(std::stringstream* reportStream=0);
   void ComputeOrLoadConjugacyClasses(std::stringstream* reportStream=0);
   static void ComputeIrreducibleRepresentationsWithFormulasImplementation
@@ -612,7 +613,7 @@ public:
   void GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors<Rational>& output);
   bool LoadGAPRootSystem(HashedList<Vector<Rational> >& outputPositiveRootSystem)const;
   Rational GetKillingDivTraceRatio();
-  Rational EstimateNumDominantWeightsBelow(Vector<Rational>& inputHWsimpleCoords, GlobalVariables& theGlobalVariables);
+  Rational EstimateNumDominantWeightsBelow(Vector<Rational>& inputHWsimpleCoords);
   bool ContainsARootNonStronglyPerpendicularTo(Vectors<Rational>& theVectors, Vector<Rational>& input);
   int NumRootsConnectedTo(Vectors<Rational>& theVectors, Vector<Rational>& input);
   void GetHighestWeightsAllRepsDimLessThanOrEqualTo(List<Vector<Rational> >& outputHighestWeightsFundCoords, int inputDimBound);
@@ -682,19 +683,19 @@ public:
   template <class coefficient>
   coefficient WeylDimFormulaSimpleCoords(Vector<coefficient>& theWeightInSimpleCoords, const coefficient& theRingUnit=1);
   template <class coefficient>
-  coefficient WeylDimFormulaFundamentalCoords(Vector<coefficient>& weightFundCoords, const coefficient& theRingUnit=1);
+  coefficient WeylDimFormulaFundamentalCoords(Vector<coefficient>& weightFundCoords);
   template <class coefficient>
   void RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign=0, bool* stabilizerFound=0, ElementWeylGroup<WeylGroupData>* raisingElt=0);
   bool AreMaximallyDominant(List<Vector<Rational> >& theWeights, bool useOuterAutos);
   template <class coefficient>
   void RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeights, bool useOuterAutos);
-  void GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables);
+  void GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2);
   void GetSimpleReflectionMatrix(int indexSimpleRoot, Matrix<Rational>& output)const;
   ElementWeylGroup<WeylGroupData> SimpleConjugation(int i, const ElementWeylGroup<WeylGroupData>& vv);
   Matrix<Rational> SimpleReflectionMatrix(int indexSimpleRoot)const;
   void GetStandardRepresentationMatrix(int g, Matrix<Rational>& output) const;
   void DrawRootSystem
-  (DrawingVariables& outputDV, bool wipeCanvas, GlobalVariables& theGlobalVariables, bool drawWeylChamber, Vector<Rational> * bluePoint=0,
+  (DrawingVariables& outputDV, bool wipeCanvas, bool drawWeylChamber, Vector<Rational> * bluePoint=0,
   bool LabelDynkinDiagramVertices=false, Vectors<Rational>* predefinedProjectionPlane=0);
   bool HasStronglyPerpendicularDecompositionWRT
   (Vector<Rational>& input, int UpperBoundNumBetas, Vectors<Rational>& theSet, Vectors<Rational>& output,
@@ -740,7 +741,7 @@ public:
    List<coefficient>& outputMultsSimpleCoords, std::string* outputDetails, int UpperBoundFreudenthal);
   void GetWeylChamber(Cone& output);
   std::string GenerateWeightSupportMethoD1
-  (Vector<Rational>& highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords, int upperBoundWeights, GlobalVariables& theGlobalVariables);
+  (Vector<Rational>& highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords, int upperBoundWeights);
   void GetIntegralLatticeInSimpleCoordinates(Lattice& output);
   void GetFundamentalWeightsInSimpleCoordinates(Vectors<Rational>& output);
   inline int GetDim()const
@@ -776,7 +777,7 @@ public:
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input);
   void ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho);
-  void ProjectOnTwoPlane(Vector<Rational> & orthonormalBasisVector1, Vector<Rational> & orthonormalBasisVector2, GlobalVariables& theGlobalVariables);
+  void ProjectOnTwoPlane(Vector<Rational>& orthonormalBasisVector1, Vector<Rational>& orthonormalBasisVector2);
   void GetLowestElementInOrbit
   (Vector<Rational>& inputOutput, ElementWeylGroup<WeylGroupData>* outputWeylElt, Vectors<Rational>& bufferEiBAsis, bool RhoAction, bool UseMinusRho, int* sign=0,
    bool* stabilizerFound=0)
@@ -1127,7 +1128,8 @@ somestream& GroupRepresentation<someGroup, coefficient>::IntoStream(somestream& 
 
 template <typename someGroup, typename coefficient>
 std::string GroupRepresentation<someGroup, coefficient>::ToString(FormatExpressions* fmt)const
-{ std::stringstream out;
+{ (void) fmt;//portable way of avoiding unused parameter warning
+  std::stringstream out;
   this->IntoStream(out);
   return out.str();
 }
@@ -1188,7 +1190,7 @@ public:
   static unsigned int HashFunction(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& input)
   { return input.HashFunction();
   }
-  void ComputeAllElementImages(GlobalVariables* theGlobalVariables=0);
+  void ComputeAllElementImages();
   const ClassFunction<somegroup, coefficient>& GetCharacter();
   VectorSpace<coefficient> FindDecentBasis() const;
   void MultiplyBy(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other, GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& output) const;
@@ -1197,12 +1199,11 @@ public:
   void reset();
   void init(somegroup& inputOwner);
   void CheckRepIsMultiplicativelyClosed();
-  void GetClassFunctionMatrix(ClassFunction<somegroup, coefficient>& inputChar, Matrix<coefficient>& outputMat, GlobalVariables* theGlobalVariables=0);
-  void ClassFunctionMatrix(ClassFunction<somegroup, coefficient>& inputCF, Matrix<coefficient>& outputMat, GlobalVariables* theGlobalVariables=0);
+  void GetClassFunctionMatrix(ClassFunction<somegroup, coefficient>& inputChar, Matrix<coefficient>& outputMat);
+  void ClassFunctionMatrix(ClassFunction<somegroup, coefficient>& inputCF, Matrix<coefficient>& outputMat);
   int GetDim()const;
   void Restrict
-  (const Vectors<coefficient>& VectorSpaceBasisSubrep, const ClassFunction<somegroup, Rational>& remainingCharacter, GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& output,
-   GlobalVariables* theGlobalVariables=0);
+  (const Vectors<coefficient>& VectorSpaceBasisSubrep, const ClassFunction<somegroup, Rational>& remainingCharacter, GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& output);
   bool DecomposeTodorsVersionRecursive
   (VirtualRepresentation<somegroup, coefficient>& outputIrrepMults, List<GroupRepresentation<somegroup, coefficient> >& appendOnlyIrrepList, List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >* appendOnlyGRCAMSList=0)
   ;
@@ -1250,8 +1251,8 @@ class VirtualRepresentation : public MonomialCollection<ClassFunction<somegroup,
 {
 public:
   void operator*=(const VirtualRepresentation<somegroup, coefficient>& other);
-  void AssignRep(const GroupRepresentationCarriesAllMatrices<somegroup, Rational>& other, GlobalVariables* theGlobalVariables=0);
-  void AssignRep(const GroupRepresentation<somegroup, Rational>& other, GlobalVariables* theGlobalVariables=0);
+  void AssignRep(const GroupRepresentationCarriesAllMatrices<somegroup, Rational>& other);
+  void AssignRep(const GroupRepresentation<somegroup, Rational>& other);
   inline static unsigned int HashFunction(const VirtualRepresentation<somegroup, coefficient>& input)
   { return input.HashFunction();
   }
@@ -1698,20 +1699,20 @@ public:
   template <class coefficient>
   bool FreudenthalEvalIrrepIsWRTLeviPart
   (const Vector<coefficient>& inputHWfundamentalCoords, HashedList<Vector<coefficient> >& outputDominantWeightsSimpleCoords,
-   List<coefficient>& outputMultsSimpleCoordS, std::string& outputDetails, GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal);
+   List<coefficient>& outputMultsSimpleCoordS, std::string& outputDetails, int UpperBoundFreudenthal);
   bool MakeParabolicFromSelectionSimpleRoots
-  (WeylGroupData& inputWeyl, const Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements);
+  (WeylGroupData& inputWeyl, const Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, int UpperLimitNumElements);
   void MakeParabolicFromSelectionSimpleRoots
-  (WeylGroupData& inputWeyl, const Vector<Rational>& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements);
+  (WeylGroupData& inputWeyl, const Vector<Rational>& ZeroesMeanSimpleRootSpaceIsInParabolic, int UpperLimitNumElements);
   bool GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra
   (Vector<Rational>& highestWeightSimpleCoords, HashedList<Vector<Rational> >& outputWeightsSimpleCoords,
-   int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables);
+   int upperBoundDominantWeights, std::string& outputDetails);
   template <class coefficient>
   bool GetAlLDominantWeightsHWFDIM
   (Vector<coefficient>& highestWeightSimpleCoords, HashedList<Vector<coefficient> >& outputWeightsSimpleCoords,
-   int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables);
+   int upperBoundDominantWeights, std::string& outputDetails);
   bool DrawContour
-  (const Vector<Rational>& highestWeightSimpleCoord, DrawingVariables& theDV, GlobalVariables& theGlobalVariables, int theColor,
+  (const Vector<Rational>& highestWeightSimpleCoord, DrawingVariables& theDV, int theColor,
    int UpperBoundVertices);
 //The dirty C++ language forces that the body of this function appear after the definitions of IsDominantWRTgenerator.
 //Apparently the algorithm of making an oriented acyclic graph totally ordered is a too difficult task for the designers of c++
@@ -1727,7 +1728,7 @@ public:
   template <class coefficient>
   bool GenerateOrbitReturnFalseIfTruncated(const Vector<coefficient>& input, Vectors<coefficient>& outputOrbit, int UpperLimitNumElements);
   bool ComputeSubGroupFromGeneratingReflections
-  (Vectors<Rational>* inputGenerators, List<Vectors<Rational> >* inputExternalAutos, GlobalVariables* theGlobalVariables, int UpperLimitNumElements,
+  (Vectors<Rational>* inputGenerators, List<Vectors<Rational> >* inputExternalAutos, int UpperLimitNumElements,
    bool recomputeAmbientRho);
   void ComputeRootSubsystem();
   template <class coefficient>
@@ -1744,8 +1745,8 @@ public:
   template <class coefficient>
   void ActByElement
   (const ElementWeylGroup<WeylGroupData>& theElement, const Vectors<coefficient>& input, Vectors<coefficient>& output)const;
-  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
-  void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
+  void WriteToFile(std::fstream& output);
+  void ReadFromFile(std::fstream& input);
 };
 
 template <typename coefficient>

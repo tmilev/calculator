@@ -182,16 +182,13 @@ public:
 
   bool flagIsQuadraticRadicalExtensionRationals;
   HashedList<LargeInt> theQuadraticRadicals;
-
-  GlobalVariables* theGlobalVariables;
-
   List<std::string> DisplayNamesBasisElements;
   void AddNewBasis();
 
   void RegisterNewBasis(const MatrixTensor<Rational>& theInjection);
   void reset();
   bool CheckConsistency()const;
-  AlgebraicClosureRationals():theGlobalVariables(0)
+  AlgebraicClosureRationals()
   { this->reset();
   }
   bool MergeRadicals(const List<LargeInt>& theRadicals);
@@ -206,8 +203,8 @@ public:
   void GetAdditionTo(const AlgebraicNumber& input, VectorSparse<Rational>& output);
   void ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail
   (const Polynomial<AlgebraicNumber>& input, Polynomial<AlgebraicNumber>& output);
-  bool AdjoinRootMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot, GlobalVariables* theGlobalVariables);
-  bool AdjoinRootQuadraticPolyToQuadraticRadicalExtension(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot, GlobalVariables* theGlobalVariables);
+  bool AdjoinRootMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot);
+  bool AdjoinRootQuadraticPolyToQuadraticRadicalExtension(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot);
   std::string ToString(FormatExpressions* theFormat=0)const;
   bool splitToPartialFractionsOverRealAlgebraicNumbers
   (RationalFunctionOld& inputRF, List<Polynomial<AlgebraicNumber> >& outputNumerators, List<Polynomial<AlgebraicNumber> >& outputDenominators,

@@ -66,12 +66,12 @@ void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(const MonomialWeylAlg
 }
 
 template <class coefficient>
-void ElementWeylAlgebra<coefficient>::LieBracketOnTheLeftMakeReport(const ElementWeylAlgebra& standsOnTheLeft, GlobalVariables* theGlobalVariables)
+void ElementWeylAlgebra<coefficient>::LieBracketOnTheLeftMakeReport(const ElementWeylAlgebra& standsOnTheLeft)
 { this->LieBracketOnTheLeft(standsOnTheLeft, theGlobalVariables);
 }
 
 template <class coefficient>
-void ElementWeylAlgebra<coefficient>::LieBracketOnTheRightMakeReport(const ElementWeylAlgebra& standsOnTheRight, GlobalVariables* theGlobalVariables)
+void ElementWeylAlgebra<coefficient>::LieBracketOnTheRightMakeReport(const ElementWeylAlgebra& standsOnTheRight)
 { this->LieBracketOnTheRight(standsOnTheRight, theGlobalVariables);
 }
 
@@ -92,13 +92,13 @@ void ElementWeylAlgebra<coefficient>::LieBracket(const ElementWeylAlgebra& left,
 }
 
 template <class coefficient>
-void ElementWeylAlgebra<coefficient>::LieBracketOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft, GlobalVariables* theGlobalVariables)
+void ElementWeylAlgebra<coefficient>::LieBracketOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft)
 { ElementWeylAlgebra tempEl1, tempEl2;
   tempEl1=(*this);
-  tempEl1.MultiplyOnTheLeft(standsOnTheLeft, theGlobalVariables);
+  tempEl1.MultiplyOnTheLeft(standsOnTheLeft);
   //tempEl1.ComputeDebugString(false);
   tempEl2=(standsOnTheLeft);
-  tempEl2.MultiplyOnTheLeft(*this, theGlobalVariables);
+  tempEl2.MultiplyOnTheLeft(*this);
   //tempEl2.ComputeDebugString(false);
   *this=(tempEl1);
   *this-=(tempEl2);
@@ -106,10 +106,10 @@ void ElementWeylAlgebra<coefficient>::LieBracketOnTheLeft(const ElementWeylAlgeb
 }
 
 template <class coefficient>
-void ElementWeylAlgebra<coefficient>::LieBracketOnTheRight(const ElementWeylAlgebra& standsOnTheRight, GlobalVariables* theGlobalVariables)
+void ElementWeylAlgebra<coefficient>::LieBracketOnTheRight(const ElementWeylAlgebra& standsOnTheRight)
 { ElementWeylAlgebra tempEl1, tempEl2;
   tempEl1=(standsOnTheRight);
-  tempEl1.MultiplyOnTheLeft(*this, theGlobalVariables);
+  tempEl1.MultiplyOnTheLeft(*this);
   //tempEl1.ComputeDebugString(false);
   tempEl2=(*this);
   tempEl2.MultiplyOnTheLeft(standsOnTheRight, theGlobalVariables);
@@ -120,7 +120,7 @@ void ElementWeylAlgebra<coefficient>::LieBracketOnTheRight(const ElementWeylAlge
 }
 
 template <class coefficient>
-void ElementWeylAlgebra<coefficient>::MultiplyOnTheLeft(const  ElementWeylAlgebra& standsOnTheLeft, GlobalVariables* theGlobalVariables)
+void ElementWeylAlgebra<coefficient>::MultiplyOnTheLeft(const  ElementWeylAlgebra& standsOnTheLeft)
 { ElementWeylAlgebra buffer;
   ElementWeylAlgebra Accum;
   Accum.MakeZero();
@@ -252,7 +252,7 @@ void ElementWeylAlgebra<coefficient>::Makexidj(int i, int j, int NumVars)
 
 template <class coefficient>
 void ElementWeylAlgebra<coefficient>::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
-(const Rational& inputRationalPower, int indexVar, ElementWeylAlgebra& outputDO, Polynomial<Rational>& outputDenominator, GlobalVariables& theGlobalVariables)
+(const Rational& inputRationalPower, int indexVar, ElementWeylAlgebra& outputDO, Polynomial<Rational>& outputDenominator)
 { outputDenominator.MakeOne();
   MonomialWeylAlgebra tempMon;
   outputDO.MakeZero();

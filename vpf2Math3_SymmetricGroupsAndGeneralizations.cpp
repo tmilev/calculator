@@ -437,7 +437,8 @@ PermutationR2 PermutationR2::operator*(const PermutationR2& right) const
 }
 
 void PermutationR2::MakeID(const PermutationR2& unused)
-{ this->cycles.SetSize(0);
+{ (void) unused;//avoid unused parameter warning, portable
+  this->cycles.SetSize(0);
 }
 
 void PermutationR2::Invert()
@@ -787,7 +788,8 @@ void PermutationGroupData::ComputeCCSizesAndRepresentativesByFormulaImplementati
 }*/
 
 bool PermutationGroupData::GetWordjjPlus1Implementation(FiniteGroup<PermutationR2>& G, const PermutationR2& g, List<int>& word)
-{ g.GetWordjjPlus1(word);
+{ (void) G;//avoid unused parameter warning, portable
+  g.GetWordjjPlus1(word);
   return true;
 }
 
@@ -1449,7 +1451,8 @@ void ElementHyperoctahedralGroupR2::MakeFromString(const std::string& in)
 }
 
 ElementHyperoctahedralGroupR2 operator"" _EHOG(const char *in, size_t insize)
-{ ElementHyperoctahedralGroupR2 out;
+{ (void) insize;//avoid unused parameter warning, portable
+  ElementHyperoctahedralGroupR2 out;
   std::string cooked_in = in;
   out.MakeFromString(cooked_in);
   return out;
@@ -1457,7 +1460,7 @@ ElementHyperoctahedralGroupR2 operator"" _EHOG(const char *in, size_t insize)
 
 //"(),0,0,1"_EHOG
 
-std::string HyperoctahedralGroupData::ToString(GlobalVariables* unused) const
+std::string HyperoctahedralGroupData::ToString() const
 { std::stringstream out;
   this->IntoStream(out);
   return out.str();

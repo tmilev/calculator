@@ -7,7 +7,7 @@
 static ProjectInformationInstance ProjectInfovpfImplementationHeaderPolynomialComputationsBasic(__FILE__, "Implementation header, basic polynomial computations. ");
 
 template <class coefficient>
-bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstitution, Polynomial<coefficient>& output, const coefficient& theRingUnit)const
+bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstitution, Polynomial<coefficient>& output)const
 { MacroRegisterFunctionWithName("MonomialP::Substitution");
   output.MakeConst(1);
   if (this->IsConstant())
@@ -37,7 +37,7 @@ bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstituti
       }
       //TheSubstitution.TheObjects[i]->ComputeDebugString();
       tempPoly=TheSubstitution[i];
-      tempPoly.RaiseToPower(theExponent, 1);
+      tempPoly.RaiseToPower(theExponent);
 //      tempPoly.ComputeDebugString();
       output*=(tempPoly);
 //      output.ComputeDebugString();
@@ -141,7 +141,7 @@ int Polynomial<coefficient>::TotalDegreeInt()const
 }
 
 template <class coefficient>
-bool Polynomial<coefficient>::Substitution(const List<Polynomial<coefficient> >& TheSubstitution, const coefficient& theRingUnit, const coefficient& theRingZero)
+bool Polynomial<coefficient>::Substitution(const List<Polynomial<coefficient> >& TheSubstitution)
 { MacroRegisterFunctionWithName("Polynomial::Substitution");
   /*if (TheSubstitution.size<this->GetMinNumVars())
     crash << "This is a programming error: attempting to carry out a substitution in a polynomial of " << this->GetMinNumVars()
@@ -152,7 +152,7 @@ bool Polynomial<coefficient>::Substitution(const List<Polynomial<coefficient> >&
 //  int commentGrandMasterCheckWhenDone;
 //  this->GrandMasterConsistencyCheck();
   for(int i=0; i<this->size(); i++)
-  { if(!(*this)[i].SubstitutioN(TheSubstitution, TempPoly, theRingUnit))
+  { if(!(*this)[i].SubstitutioN(TheSubstitution, TempPoly))
       return false;
     TempPoly*=this->theCoeffs[i];
     Accum+=(TempPoly);

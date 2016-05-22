@@ -95,8 +95,8 @@ public:
 //  HashedList<MonomialUniversalEnveloping<coefficient> > theGeneratingMonsPBWform;
 //  List
 //  List<Matrix<coefficient> > ActionsChevalleyGenerators;
-  MatrixTensor<coefficient>& GetActionGeneratorIndeX(int generatorIndex, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
-  MatrixTensor<coefficient>& GetActionSimpleGeneratorIndex(int generatorIndex, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
+  MatrixTensor<coefficient>& GetActionGeneratorIndeX(int generatorIndex);
+  MatrixTensor<coefficient>& GetActionSimpleGeneratorIndex(int generatorIndex);
   int GetMinNumVars()
   { if (this->theHWFundamentalCoordsBaseField.size<=0)
       return -1;
@@ -118,10 +118,10 @@ public:
       crash << "ModuleSSalgebra does not have its owner Semisimple algebra properly set. " << crash;
     return true;
   }
-  void IntermediateStepForMakeFromHW(Vector<coefficient>& HWDualCoordS, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero);
+  void IntermediateStepForMakeFromHW(const coefficient& theRingUnit, const coefficient& theRingZero);
   bool MakeFromHW
   (SemisimpleLieAlgebra& inputAlgebra, Vector<coefficient>& HWFundCoords, const Selection& selNonSelectedAreElementsLevi,
-   GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero, std::string* outputReport,
+   const coefficient& theRingUnit, const coefficient& theRingZero, std::string* outputReport,
   bool computeSimpleGens=true);
   SemisimpleLieAlgebra& GetOwner()const
   { if (this->owner==0)
@@ -130,14 +130,14 @@ public:
   }
   void GetAdActionHomogenousElT
   (ElementUniversalEnveloping<coefficient>& inputHomogeneous, Vector<Rational> & weightUEEltSimpleCoords, List<List<ElementUniversalEnveloping<coefficient> > >& outputSortedByArgumentWeight,
-   GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero);
+   const coefficient& theRingUnit, const coefficient& theRingZero);
   void GetMatrixHomogenousElt
   (ElementUniversalEnveloping<coefficient>& inputHomogeneous, List<List<ElementUniversalEnveloping<coefficient> > >& outputSortedByArgumentWeight,
-   Vector<Rational> & weightUEEltSimpleCoords, MatrixTensor<coefficient>& output, GlobalVariables& theGlobalVariables,
+   Vector<Rational> & weightUEEltSimpleCoords, MatrixTensor<coefficient>& output,
    const coefficient& theRingUnit, const coefficient& theRingZero);
   void ExpressAsLinearCombinationHomogenousElement
   (ElementUniversalEnveloping<coefficient>& inputHomogeneous, ElementUniversalEnveloping<coefficient>& outputHomogeneous, int indexInputBasis,
-   const Vector<coefficient>& subHiGoesToIthElement, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero);
+   const Vector<coefficient>& subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero);
   std::string ToString(FormatExpressions* theFormat=0)const;
   std::string ElementToStringHWV(FormatExpressions* theFormat=0)const
   { if (this->highestWeightVectorNotation!="")
@@ -149,13 +149,13 @@ public:
 //    + Vector<Rational> (this->parabolicSelectionNonSelectedAreElementsLevi).ToString(theFormat) + ")";
   }
   void SplitOverLevi
-  (std::string* Report, Selection& splittingParSel, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero,
+  (std::string* Report, Selection& splittingParSel,
    List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors=0, Vectors<coefficient>* outputWeightsFundCoords=0, Vectors<coefficient>* outputEigenSpace=0,
    charSSAlgMod<coefficient>* outputChar=0);
   void SplitFDpartOverFKLeviRedSubalg
   (HomomorphismSemisimpleLieAlgebra& theHmm, Selection& LeviInSmall,
    List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors=0, Vectors<coefficient>* outputWeightsFundCoords=0,
-   Vectors<coefficient>* outputEigenSpace=0, std::stringstream* comments=0, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
+   Vectors<coefficient>* outputEigenSpace=0, std::stringstream* comments=0);
   template<class ResultType>
   void GetElementsNilradical
   (List<ElementUniversalEnveloping<ResultType> >& output, bool useNegativeNilradical,
@@ -163,18 +163,18 @@ public:
   bool IsNotInLevi(int theGeneratorIndex);
   bool IsNotInParabolic(int theGeneratorIndex);
   void GetGenericUnMinusElt
-  (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<Polynomial<Rational> >& output, GlobalVariables& theGlobalVariables,
+  (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<Polynomial<Rational> >& output,
    bool useNilWeight, bool ascending);
   void GetGenericUnMinusElt
-  (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables,
+  (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunctionOld>& output,
    bool useNilWeight, bool ascending);
   //The input of the following function is supposed to be an honest element of the
   //Universal enveloping,
   //i.e. inputElt is not allowed to have non-small integer exponents.
   bool GetActionGenVermaModuleAsDiffOperator
-  (ElementSemisimpleLieAlgebra<Rational>& inputElt, quasiDiffOp<Rational>& output, GlobalVariables& theGlobalVariables,
+  (ElementSemisimpleLieAlgebra<Rational>& inputElt, quasiDiffOp<Rational>& output,
    bool useNilWeight, bool ascending);
-  bool GetActionEulerOperatorPart(const MonomialP& theCoeff, ElementWeylAlgebra<Rational>& outputDO, GlobalVariables& theGlobalVariables);
+  bool GetActionEulerOperatorPart(const MonomialP& theCoeff, ElementWeylAlgebra<Rational>& outputDO);
   ModuleSSalgebra() : owner(0), flagIsInitialized(false), flagDeallocated(false), MaxNumCachedPairs(1000000)
   {
   }
@@ -190,16 +190,16 @@ public MonomialCollection<MonomialTensorGeneralizedVermas<coefficient>, coeffici
 public:
   bool MultiplyOnTheLeft
   (const ElementUniversalEnveloping<coefficient>& theUE, ElementTensorsGeneralizedVermas<coefficient>& output, SemisimpleLieAlgebra& ownerAlgebra,
-   GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)const;
+   const coefficient& theRingUnit)const;
   bool MultiplyOnTheLeft
   (const MonomialUniversalEnveloping<coefficient>& theUE, ElementTensorsGeneralizedVermas<coefficient>& output, SemisimpleLieAlgebra& ownerAlgebra,
-   GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)const;
+   const coefficient& theRingUnit)const;
   void TensorOnTheRight
-  (const ElementTensorsGeneralizedVermas<coefficient>& right, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
+  (const ElementTensorsGeneralizedVermas<coefficient>& right);
   void MultiplyByElementLieAlg
-  (ElementTensorsGeneralizedVermas<coefficient>& output, SemisimpleLieAlgebra& ownerAlgebra, int indexGenerator, GlobalVariables& theGlobalVariables,
-   const coefficient& theRingUnit, const coefficient& theRingZero)const;
-  void MultiplyBy(const ElementTensorsGeneralizedVermas<coefficient>& standsOnTheRight, GlobalVariables& theGlobalVariables);
+  (ElementTensorsGeneralizedVermas<coefficient>& output, SemisimpleLieAlgebra& ownerAlgebra, int indexGenerator,
+   const coefficient& theRingUnit)const;
+  void MultiplyBy(const ElementTensorsGeneralizedVermas<coefficient>& standsOnTheRight);
   bool IsHWV()const
   { if (this->theCoeffs.size!=1)
       return false;

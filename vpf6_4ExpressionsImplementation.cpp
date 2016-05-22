@@ -1577,6 +1577,19 @@ bool Expression::DivisionByMeShouldBeWrittenInExponentForm()const
   return true;
 }
 
+bool Expression::IsPositiveNumber()const
+{ MacroRegisterFunctionWithName("Expression::IsPositiveNumber");
+  Rational theRat;
+  if (this->IsOfType<Rational>(&theRat))
+    return theRat.IsPositive();
+  double theDouble=-1;
+  if (!this->EvaluatesToDouble(&theDouble))
+    return false;
+  if(std::isnan(theDouble))
+    return false;
+  return theDouble>0;
+}
+
 bool Expression::IsConstantNumber()const
 { MacroRegisterFunctionWithName("Expression::IsConstantNumber");
 //  stOutput << "<br>Testing whether " << this->ToString() << " is constant.";
@@ -2233,7 +2246,7 @@ bool Expression::NeedsParenthesisForMultiplication()const
   return false;
 }
 
-std::string Expression::ToString(FormatExpressions* theFormat, Expression* startingExpression, Expression* Context)const
+std::string Expression::ToString(FormatExpressions* theFormat, Expression* startingExpression)const
 { MacroRegisterFunctionWithName("Expression::ToString");
   if (this==0)
     crash << "Not supposed to happen: zero this pointer. " << crash;

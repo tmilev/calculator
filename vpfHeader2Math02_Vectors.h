@@ -20,7 +20,7 @@ class Vector: public List<coefficient>
   friend std::ostream& operator<< <coefficient>(std::ostream& output, const Vector<coefficient>& theVector);
 public:
   Vector(){}
-  Vector(const Vector<coefficient>& other)
+  Vector(const Vector<coefficient>& other):List<coefficient>(other)
   { *this=other;
   }
   template <class otherCoeff>
@@ -59,7 +59,8 @@ public:
     return out.str();
   }
   std::string ToStringSquareBracketsBasicType(FormatExpressions* theFormat=0)const
-  { std::stringstream out;
+  { (void) theFormat;
+    std::stringstream out;
     out.precision(5);
     out << "[";
     for(int i=0; i<this->size; i++)
@@ -686,7 +687,7 @@ class Vectors: public List<Vector<coefficient> >
         return true;
     return false;
   }
-  bool PerturbVectorToRegular(Vector<coefficient>& inputOutput, GlobalVariables& theGlobalVariables);
+  bool PerturbVectorToRegular(Vector<coefficient>& inputOutput);
   void SelectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output);
   void SelectionToMatrixAppend(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex);
   void SelectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex);
@@ -694,7 +695,7 @@ class Vectors: public List<Vector<coefficient> >
   void GetMatrixRootsToRows(Matrix<Rational>& output)const;
   void GetOrthogonalComplement(Vectors<coefficient>& output, Matrix<Rational>* theBilinearForm=0);
   bool LinSpanContainsVector(const Vector<coefficient>& input, Matrix<coefficient>& bufferMatrix, Selection& bufferSelection)const;
-  void MakeEiBasis(int theDimension, const coefficient& theRingUnit=1, const coefficient& theRingZero=0)
+  void MakeEiBasis(int theDimension)
   { this->SetSize(theDimension);
     for (int i=0; i<this->size; i++)
       this->TheObjects[i].MakeEi(theDimension, i);
@@ -723,8 +724,7 @@ class Vectors: public List<Vector<coefficient> >
       output+=this->TheObjects[i];
   }
   bool GetCoordsInBasis
-  (const Vectors<coefficient>& inputBasis, Vectors<coefficient>& outputCoords, Vectors<coefficient>& bufferVectors, Matrix<coefficient>& bufferMat,
-   const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
+  (const Vectors<coefficient>& inputBasis, Vectors<coefficient>& outputCoords);
   bool GetIntegralCoordsInBasisIfTheyExist
   (const Vectors<coefficient>& inputBasis, Vectors<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingMinusUnit, const coefficient& theRingZero)const
   { Matrix<coefficient> bufferMatGaussianEliminationCC, bufferMatGaussianElimination;
@@ -763,7 +763,7 @@ class Vectors: public List<Vector<coefficient> >
   void GaussianEliminationForNormalComputation(Matrix<coefficient>& inputMatrix, Selection& outputNonPivotPoints, int theDimension)const;
   //the below function returns a n row 1 column matrix with the coefficients in the obvious order
   bool GetLinearDependence(Matrix<coefficient>& outputTheLinearCombination);
-  void GetLinearDependenceRunTheLinearAlgebra(Matrix<coefficient>& outputTheLinearCombination, Matrix<coefficient>& outputTheSystem, Selection& outputNonPivotPoints);
+  void GetLinearDependenceRunTheLinearAlgebra(Matrix<coefficient>& outputTheSystem, Selection& outputNonPivotPoints);
   bool ContainsARootNonPerpendicularTo(const Vector<coefficient>& input, const Matrix<coefficient>& theBilinearForm);
   bool ContainsOppositeRoots()
   { if (this->size<10)
@@ -911,7 +911,7 @@ bool Vector<coefficient>::GetCoordsInBasiS(const Vectors<coefficient>& inputBasi
 }
 
 template <class coefficient>
-void Vectors<coefficient>::GetLinearDependenceRunTheLinearAlgebra(Matrix<coefficient>& outputTheLinearCombination, Matrix<coefficient>& outputTheSystem, Selection& outputNonPivotPoints)
+void Vectors<coefficient>::GetLinearDependenceRunTheLinearAlgebra(Matrix<coefficient>& outputTheSystem, Selection& outputNonPivotPoints)
 { MacroRegisterFunctionWithName("Vectors::GetLinearDependenceRunTheLinearAlgebra");
   if (this->size==0)
     return;
@@ -938,8 +938,7 @@ bool Vectors<coefficient>::LinSpanContainsVector(const Vector<coefficient>& inpu
 
 template <class coefficient>
 bool Vectors<coefficient>::GetCoordsInBasis
-(const Vectors<coefficient>& inputBasis, Vectors<coefficient>& outputCoords, Vectors<coefficient>& bufferVectors, Matrix<coefficient>& bufferMat,
- const coefficient& theRingUnit, const coefficient& theRingZero)
+(const Vectors<coefficient>& inputBasis, Vectors<coefficient>& outputCoords)
 { MacroRegisterFunctionWithName("Vectors::GetCoordsInBasis");
   if (this==0 || &outputCoords==0 || this==&outputCoords)
     crash << "This is a programming error: input and output addresses are zero or coincide. this address: "
@@ -986,7 +985,7 @@ bool Vector<coefficient>::GetIntegralCoordsInBasisIfTheyExist
   if (!theCombination.IsEqualToZero())
     return false;
 //  stOutput << "<br>" << bufferMatGaussianEliminationCC.ToString(true, false) << " acting on " << output.ToString();
-  bufferMatGaussianEliminationCC.ActMultiplyVectorRowOnTheRight(output, theRingZero);
+  bufferMatGaussianEliminationCC.ActMultiplyVectorRowOnTheRight(output);
 //  stOutput << " gives " << output.ToString();
   return true;
 }

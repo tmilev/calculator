@@ -133,7 +133,7 @@ public:
 class DrawOperations
 {
 private:
-  void changeBasisPReserveAngles(double newX, double newY, GlobalVariables& theGlobalVariables);
+  void changeBasisPReserveAngles(double newX, double newY);
 public:
   List<int> IndexNthDrawOperation;
   List<int> TypeNthDrawOperation;
@@ -163,8 +163,8 @@ public:
   int SelectedPlane;
   std::string DebugString;
   int indexStartingModifiableTextCommands;
-  void (*specialOperationsOnBasisChange)(DrawOperations& theOps, GlobalVariables& theGlobalVariables);
-  static void projectionMultiplicityMergeOnBasisChange(DrawOperations& theOps, GlobalVariables& theGlobalVariables);
+  void (*specialOperationsOnBasisChange)(DrawOperations& theOps);
+  static void projectionMultiplicityMergeOnBasisChange(DrawOperations& theOps);
   void MakeMeAStandardBasis(int theDim);
   void operator+=(const DrawOperations& other);
   void initDimensions(Matrix<double>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane, int NumAnimationFrames)
@@ -225,7 +225,7 @@ public:
       y1=-y1;
     return x1<=this->ClickToleranceX && y1<=this->ClickToleranceY;
   }
-  bool mouseMoveRedraw(int X, int Y, GlobalVariables& theGlobalVariables)
+  bool mouseMoveRedraw(int X, int Y)
   { if (this->SelectedCircleMinus2noneMinus1Center==-2)
       return false;
     if (this->SelectedCircleMinus2noneMinus1Center==-1)
@@ -235,7 +235,7 @@ public:
     }
     if (this->SelectedCircleMinus2noneMinus1Center>=0)
     { if (this->flagRotatingPreservingAngles)
-      { this->changeBasisPReserveAngles((double) X , (double) Y, theGlobalVariables);
+      { this->changeBasisPReserveAngles((double) X , (double) Y);
         return true;
       }
     }
@@ -322,7 +322,7 @@ public:
   std::string ToString();
   bool IncrementOpReturnNeedsRedraw();
   int GetIndexCurrentPhysicalFrame();
-  void DrawNoInit(DrawingVariables& theDrawingVariables, GlobalVariables& theGlobalVariables);
+  void DrawNoInit(DrawingVariables& theDrawingVariables);
   AnimationBuffer();
   DrawOperations& GetCurrentDrawOps();
   DrawOperations& GetLastDrawOps();
@@ -376,12 +376,9 @@ public:
   int ColorWeylChamberWalls;
   int DefaultHtmlWidth;
   int DefaultHtmlHeight;
-  void initDrawingVariables(int cX1, int cY1);
-  DrawingVariables(int cx, int cy)
-  { this->initDrawingVariables(cx, cy);
-  }
+  void initDrawingVariables();
   DrawingVariables()
-  { this->initDrawingVariables(100, 100);
+  { this->initDrawingVariables();
   }
   void SetDrawLineFunction(drawLineFunction theFunction)
   { this->theDrawLineFunction=theFunction;
@@ -395,9 +392,9 @@ public:
   void SetDrawClearFunction(drawClearScreenFunction theFunction)
   { this->theDrawClearScreenFunction=theFunction;
   }
-  int GetColorFromChamberIndex(int index, std::fstream* LaTexOutput);
+  int GetColorFromChamberIndex(int index);
   static void GetCoordsForDrawing(DrawingVariables& TDV, Vector<Rational>& r, double& x, double& y);
-  static void ProjectOnToHyperPlaneGraphics(Vector<Rational>& input, Vector<Rational>& output, Vectors<Rational>& directions);
+  static void ProjectOnToHyperPlaneGraphics(Vector<Rational>& input, Vector<Rational>& output);
   std::string GetColorHtmlFromColorIndex(int colorIndex);
   std::string GetColorPsTricksFromColorIndex(int colorIndex);
   static bool GetColorIntFromColorString(const std::string& input, int& output);
@@ -407,7 +404,7 @@ public:
   std::string GetHtmlFromDrawOperationsCreateDivWithUniqueName(int theDimension);
   void drawString(DrawElementInputOutput& theDrawData, const std::string& input, int theFontSize, int theTextStyle);
   void drawCoordSystemDirectlly(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile);
-  void drawCoordSystemBuffer(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile);
+  void drawCoordSystemBuffer(DrawingVariables& TDV, int theDimension);
   void drawLineDirectly
   (double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex,
    double lineWidth);
@@ -415,7 +412,7 @@ public:
   (double X1, double Y1, double X2, double Y2, uint32_t thePenStyle, int ColorIndex,
    double lineWidth);
   void drawTextDirectly(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile);
-  void drawTextBuffer(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile);
+  void drawTextBuffer(double X1, double Y1, const std::string& inputText, int color);
   void drawBufferNoIniT(DrawOperations& theOps);
   void drawBufferNoIniT()
   { this->drawBufferNoIniT(this->theBuffer);
@@ -430,8 +427,8 @@ public:
   (const Vector<double>& r1, const Vector<double>& r2, uint32_t PenStyle, int PenColor, double lineWidth=1)
   { this->theBuffer.drawLineBetweenTwoVectorsBufferDouble(r1, r2, PenStyle, PenColor, lineWidth);
   }
-  void drawTextAtVectorBufferRational(const Vector<Rational>& point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile);
-  void drawTextAtVectorBufferDouble(const Vector<double>& point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile);
+  void drawTextAtVectorBufferRational(const Vector<Rational>& point, const std::string& inputText, int textColor, int theTextStyle);
+  void drawTextAtVectorBufferDouble(const Vector<double>& point, const std::string& inputText, int textColor, int theTextStyle);
   void drawCircleAtVectorBufferRational(const Vector<Rational>& point, double radius, uint32_t thePenStyle, int theColor);
   void drawCircleAtVectorBufferDouble(const Vector<double>& point, double radius, uint32_t thePenStyle, int theColor);
   void operator=(const DrawingVariables& other)

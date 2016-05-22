@@ -6,9 +6,8 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-
-CONFIG += -std=c++11
-CONFIG += -std=c++0x
+CONFIG += c++11
+QMAKE_CXXFLAGS += -std=c++11
 
 SOURCES += \
     test.cpp \
@@ -53,6 +52,7 @@ SOURCES += \
     vpfWebServer.cpp \
     vpfWebServerExamAndTeachingRoutines.cpp \
     vpfWebServerInterProcessLogistics.cpp
+
 HEADERS += \
     vpf.h \
     vpfFiniteFields.h \
@@ -99,4 +99,3 @@ HEADERS += \
     vpfJson.h \
     vpfMacros.h \
     vpfPackedVector.h
-

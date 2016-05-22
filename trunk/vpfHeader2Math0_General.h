@@ -43,7 +43,7 @@ public:
     return output;
   }
   bool CheckInitialization()const;
-  static const bool IsMonEqualToZero()
+  static bool IsMonEqualToZero()
   { return false;
   }
   static inline unsigned int HashFunction(const ChevalleyGenerator& input)
@@ -303,7 +303,7 @@ public:
         return false;
     return true;
   }
-  static const inline bool IsMonEqualToZero()
+  static bool IsMonEqualToZero()
   { return false;
   }
   void ExponentMeBy(const Rational& theExp);
@@ -370,7 +370,7 @@ public:
     return (*whichLetter)!=-1;
   }
   template <class coefficient>
-  bool SubstitutioN(const List<Polynomial<coefficient> >& TheSubstitution, Polynomial<coefficient>& output, const coefficient& theRingUnit=1)const;
+  bool SubstitutioN(const List<Polynomial<coefficient> >& TheSubstitution, Polynomial<coefficient>& output)const;
   void MakeEi(int LetterIndex, int Power=1, int ExpectedNumVars=0);
   int GetHighestIndexSuchThatHigherIndexVarsDontParticipate()
   { for (int i=this->monBody.size-1; i>=0; i--)
@@ -430,7 +430,7 @@ public:
   { for (int i=0; i<this->monBody.size; i++)
       this->monBody[i].Minus();
   }
-  void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
+  void DrawElement(DrawElementInputOutput& theDrawData);
   void RaiseToPower(const Rational& thePower)
   { for (int i=0; i<this->monBody.size; i++)
       this->monBody[i]*=thePower;
@@ -445,14 +445,8 @@ public:
   void operator=(const MonomialP& other)
   { this->monBody=(other.monBody);
   }
-  void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
-  { this->monBody.ReadFromFile(input);
-  }
   void ReadFromFile(std::fstream& input)
   { this->monBody.ReadFromFile(input);
-  }
-  inline void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)const
-  { this->monBody.WriteToFile(output);
   }
   void WriteToFile(std::fstream& output)const
   { this->monBody.WriteToFile(output);
@@ -598,12 +592,12 @@ public:
         output[i]+= standOnTheRightAsVectorRow[j]*(*this)(i,j);
     }
   }
-  void ActMultiplyVectorRowOnTheRight(Vector<coefficient>& standsOnTheLeft, const coefficient& TheRingZero=0)const
+  void ActMultiplyVectorRowOnTheRight(Vector<coefficient>& standsOnTheLeft)const
   { Vector<coefficient> output;
-    this->ActMultiplyVectorRowOnTheRight(standsOnTheLeft, output, TheRingZero);
+    this->ActMultiplyVectorRowOnTheRight(standsOnTheLeft, output);
     standsOnTheLeft=output;
   }
-  void ActMultiplyVectorRowOnTheRight(const Vector<coefficient>& standsOnTheLeft, Vector<coefficient>& output, const coefficient& TheRingZero=0)const
+  void ActMultiplyVectorRowOnTheRight(const Vector<coefficient>& standsOnTheLeft, Vector<coefficient>& output)const
   { if (&standsOnTheLeft==&output || this->NumRows!=standsOnTheLeft.size)
       crash << crash;
     output.MakeZero(this->NumCols);
@@ -797,7 +791,7 @@ public:
   }
   void MultiplyOnTheLeft(const Matrix<coefficient>& standsOnTheLeft, Matrix<coefficient>& output, const coefficient& theRingZero=0) const;
   void MultiplyOnTheLeft(const Matrix<coefficient>& standsOnTheLeft, const coefficient& theRingZero=0);
-  void MultiplyOnTheRight(const Matrix<coefficient>& standsOnTheRight, const coefficient& theRingZero=0)
+  void MultiplyOnTheRight(const Matrix<coefficient>& standsOnTheRight)
   { Matrix<coefficient> temp=*this;
     *this=standsOnTheRight;
     this->MultiplyOnTheLeft(temp);
@@ -934,12 +928,6 @@ public:
         (*this)(i,j)-=right(i,j);
   }
   void WriteToFile(std::fstream& output);
-  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
-  { this->WriteToFile(output);
-  }
-  bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
-  { return this->ReadFromFile(input);
-  }
   bool ReadFromFile(std::fstream& input);
   void operator/=(const coefficient& input)
   { for (int j=0; j<this->NumRows; j++)
@@ -989,7 +977,6 @@ public:
   static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(Matrix<coefficient>& A, Matrix<coefficient>& b, Matrix<coefficient>& output);
   coefficient GetDeterminant();
   coefficient GetTrace()const;
-  void Transpose(GlobalVariables& theGlobalVariables){this->Transpose();}
   void AssignMatrixIntWithDen(Matrix<LargeInt>& theMat, const LargeIntUnsigned& Den);
   void ScaleToIntegralForMinRationalHeightNoSignChange();
   void GetMatrixIntWithDen(Matrix<LargeInt>& outputMat, LargeIntUnsigned& outputDen);
@@ -1011,7 +998,7 @@ public:
   static bool SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(Matrix<coefficient>& matA, Matrix<coefficient>& matb, Vector<coefficient>* outputSolution=0);
   static void ComputePotentialChangeGradient(Matrix<coefficient>& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational& outputChangeGradient, bool& hasAPotentialLeavingVariable);
   static void GetMaxMovementAndLeavingVariableRow
-  (Rational& maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, Matrix<coefficient>& tempMatA, Vector<coefficient>& inputVectorX,
+  (Rational& maxMovement, int& LeavingVariableRow, int EnteringVariable, Matrix<coefficient>& tempMatA, Vector<coefficient>& inputVectorX,
    Selection& BaseVariables);
   int FindPositiveLCMCoefficientDenominatorsTruncated();
   int FindPositiveGCDCoefficientNumeratorsTruncated();
@@ -1607,7 +1594,7 @@ class MonomialWeylAlgebra
   { output << theMon.ToString();
     return output;
   }
-  static const inline bool IsMonEqualToZero()
+  static bool IsMonEqualToZero()
   { return false;
   }
   bool IsConstant()const
@@ -1871,7 +1858,7 @@ public:
   }
   void checkConsistency()const
   { this->theMonomials.GrandMasterConsistencyCheck();
-    this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
+    this->CheckNumCoeffsConsistency();
     for (int i =0; i<this->size(); i++)
       this->theCoeffs[i].checkConsistency();
   }
@@ -1932,7 +1919,7 @@ public:
   }
 
   static std::string GetBlendCoeffAndMon(const templateMonomial& inputMon, coefficient& inputCoeff, bool addPlusToFront, FormatExpressions* theFormat=0);
-  void CheckNumCoeffsConsistency(const char* fileName, int lineName)const
+  void CheckNumCoeffsConsistency()const
   { if (this->theCoeffs.size!=this->theMonomials.size)
       crash << "This is a programming error: a monomial collection has " << this->theMonomials.size << " monomials but "
       << this->theCoeffs.size << " coefficients. " << crash;
@@ -1957,9 +1944,6 @@ public:
   }
   bool HasGEQMonomial(templateMonomial& m, int& WhichIndex);
   void WriteToFile(std::fstream& output);
-  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
-  { return this->WriteToFile(output);
-  }
   void ClearDenominators(Rational& output)
   { output.MakeOne();
     Rational tempRat;
@@ -2422,7 +2406,7 @@ public:
   }
   void ScaleToPositiveMonomials(MonomialP& outputScale);
   void DecreaseNumVariables(int increment, Polynomial<coefficient>& output);
-  bool Substitution(const List<Polynomial<coefficient> >& TheSubstitution, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
+  bool Substitution(const List<Polynomial<coefficient> >& TheSubstitution);
   Rational TotalDegree()const;
   int TotalDegreeInt()const;
   bool IsEqualToOne()const
@@ -2472,7 +2456,7 @@ public:
         return false;
     return true;
   }
-  bool IsLinearGetRootConstantTermLastCoordinate(Vector<coefficient>& outputRoot, const coefficient& theZero)
+  bool IsLinearGetRootConstantTermLastCoordinate(Vector<coefficient>& outputRoot)
   { outputRoot.MakeZero(this->GetMinNumVars()+1);
     int index;
     for (int i=0; i<this->size(); i++)
@@ -2485,7 +2469,7 @@ public:
           return false;
     return true;
   }
-  void RaiseToPower(int d, const coefficient& theRingUniT=1)
+  void RaiseToPower(int d)
   { if (d==1)
       return;
     if (d<0)
@@ -2495,13 +2479,13 @@ public:
     theOne.MakeOne(this->GetMinNumVars());
     MathRoutines::RaiseToPower(*this, d, theOne);
   }
-  inline bool GetRootFromLinPolyConstTermLastVariable(Vector<coefficient>& outputRoot, const coefficient& theZero= (coefficient) 0)
-  { return this->IsLinearGetRootConstantTermLastCoordinate(outputRoot, theZero);
+  inline bool GetRootFromLinPolyConstTermLastVariable(Vector<coefficient>& outputRoot)
+  { return this->IsLinearGetRootConstantTermLastCoordinate(outputRoot);
   }
   Matrix<coefficient> EvaluateUnivariatePoly(const Matrix<coefficient>& input);//<-for univariate polynomials only
   coefficient Evaluate(const Vector<coefficient>& input);
   bool IsProportionalTo(const Polynomial<coefficient>& other, coefficient& TimesMeEqualsOther, const coefficient& theRingUnit)const;
-  void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData, FormatExpressions& PolyFormatLocal);
+  void DrawElement(DrawElementInputOutput& theDrawData, FormatExpressions& PolyFormatLocal);
   const MonomialP& GetMaxMonomial(List<MonomialP>::OrderLeftGreaterThanRight theMonOrder=0)const
   { return (*this)[this->GetIndexMaxMonomial(theMonOrder)];
   }
@@ -2759,17 +2743,17 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> >
     for (int i=0; i<theDimension; i++)
       output+=(EpsForm.TheObjects[i]);
   }
-  void MakeLinearSubConstTermsLastRow(Matrix<coefficient> & theMat);
-  void MakeConstantShiftCoordinatesAreAdded(Vector<Rational> & shiftPerVariable);
-  void MakeLinearSubbedVarsCorrespondToMatRows(Matrix<Rational> & theMat, Vector<Rational> & theConstants);
+  void MakeLinearSubConstTermsLastRow(Matrix<coefficient>& theMat);
+  void MakeConstantShiftCoordinatesAreAdded(Vector<Rational>& shiftPerVariable);
+  void MakeLinearSubbedVarsCorrespondToMatRows(Matrix<Rational>& theMat, Vector<Rational>& theConstants);
   void ComputeDiscreteIntegrationUpTo(int d);
-  void MakeLinearSubOnLastVariable(int NumVars, Polynomial<Rational> & LastVarSub)
+  void MakeLinearSubOnLastVariable(int NumVars, Polynomial<Rational>& LastVarSub)
   { this->SetSize(NumVars);
     for (int i=0; i<NumVars-1; i++)
       this->TheObjects[i].MakeDegreeOne(NumVars, i, 1);
     this->TheObjects[NumVars-1]=LastVarSub;
   }
-  void MakeSubNVarForOtherChamber(Vector<Rational> & direction, Vector<Rational> & normal, Rational& Correction, GlobalVariables& theGlobalVariables)
+  void MakeSubNVarForOtherChamber(Vector<Rational>& direction, Vector<Rational>& normal, Rational& Correction)
   { this->SetSize(direction.size);
     Polynomial<Rational> TempPoly;
     TempPoly.MakePolyFromDirectionAndNormal(direction, normal, Correction);
@@ -2785,7 +2769,7 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> >
   void MakeSubAddExtraVarForIntegration(Vector<Rational> & direction)
   { this->SetSize(direction.size);
     for (int i=0; i<direction.size; i++)
-    { Rational tempRat; tempRat.Assign(direction.TheObjects[i]); tempRat.Minus();
+    { Rational tempRat; tempRat.Assign(direction[i]); tempRat.Minus();
       this->TheObjects[i].MakeDegreeOne((int)(direction.size+1), i, direction.size, 1, tempRat);
     }
   }
@@ -2848,10 +2832,10 @@ class GroebnerBasisComputation
   std::string ToStringSerreLikeSolution();
   std::string GetPolynomialStringSpacedMonomialsHtml
   (const Polynomial<coefficient>& thePoly, const HashedList<MonomialP>& theMonomialOrder, const std::string& extraStyle,
-   const std::string& extraHighlightStyle, List<MonomialP>* theHighLightedMons=0);
+    List<MonomialP>* theHighLightedMons=0);
   std::string GetPolynomialStringSpacedMonomialsLaTeX
   (const Polynomial<coefficient>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
-   bool underline=false, std::string* highlightColor=0, List<MonomialP>* theHighLightedMons=0);
+   std::string* highlightColor=0, List<MonomialP>* theHighLightedMons=0);
   std::string GetDivisionStringHtml();
   std::string GetDivisionStringLaTeX();
   int SelectPolyIndexToAddNext();
@@ -3063,7 +3047,7 @@ public:
   { this->SetNumVariablesSubDeletedVarsByOne(GoalNumVars);
   }
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
-  void MakeOneLetterMoN(int theIndex, const Rational& theCoeff, GlobalVariables* theGlobalVariables=0, int ExpectedNumVars=0);
+  void MakeOneLetterMoN(int theIndex, const Rational& theCoeff, int ExpectedNumVars=0);
   void GetNumerator(Polynomial<Rational>& output)const
   { switch(this->expressionType)
     { case RationalFunctionOld::typeRational: output.MakeConst(this->ratValue); return;
@@ -3210,9 +3194,9 @@ public:
    ;
   static bool gcdQuicK(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output);
   static void ScaleClearDenominator(List<RationalFunctionOld>& input, Vector<Polynomial<Rational> >& output);
-  static void gcd(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output, GlobalVariables* theGlobalVariables=0);
+  static void gcd(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output);
   static void lcm(const Polynomial<Rational>& left, const Polynomial<Rational>& right,
-  Polynomial<Rational>& output, GlobalVariables* theGlobalVariables=0);
+  Polynomial<Rational>& output);
   inline void operator-=(int other)
   { *this-=(Rational) other;
   }
@@ -3806,7 +3790,7 @@ inline void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy
     maxNumMonsFinal=2000000;
   bool shouldReport=false;
   int totalMonPairs=0;
-  ProgressReport theReport1(&theGlobalVariables), theReport2(&theGlobalVariables);
+  ProgressReport theReport1, theReport2;
   if (theGlobalVariables.flagReportEverything ||
       theGlobalVariables.flagReportProductsMonomialAlgebras)
   { totalMonPairs=other.size()*this->size();
@@ -3837,7 +3821,7 @@ template <class coefficient>
 void Matrix<coefficient>::GaussianEliminationEuclideanDomain
 (Matrix<coefficient>* otherMatrix, const coefficient& theRingMinusUnit, const coefficient& theRingUnit, bool (*comparisonGEQFunction) (const coefficient& left, const coefficient& right))
 { MacroRegisterFunctionWithName("Matrix_Element::GaussianEliminationEuclideanDomain");
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   if (otherMatrix==this)
     crash << "This is a programming error: the Carbon copy in the Gaussian elimination coincides with the matrix which we are row-reducing "
     << "(most probably this is a wrong pointer typo). " << crash;
@@ -3931,7 +3915,7 @@ void Vectors<coefficient>::SelectABasisInSubspace
     return;
   }
   MacroRegisterFunctionWithName("Vectors::SelectABasisInSubspace");
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   int theDim=input[0].size;
   bool doProgressReport=theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportGaussianElimination;
   if (doProgressReport)
@@ -4024,7 +4008,8 @@ class CompleX
   coefficient Im;
   coefficient Re;
   std::string ToString(FormatExpressions* theFormat=0)
-  { std::stringstream tempStream;
+  { (void) theFormat; //taking care of unused parameters
+    std::stringstream tempStream;
     tempStream << *this;
     return tempStream.str();
   }
@@ -4142,11 +4127,11 @@ public:
   }
   void MultiplyByRational(SemisimpleLieAlgebra& owner, const Rational& theNumber);
   static void GetBasisFromSpanOfElements
-  (List<ElementSemisimpleLieAlgebra>& theElements, Vectors<RationalFunctionOld>& outputCoords, List<ElementSemisimpleLieAlgebra>& outputTheBasis, GlobalVariables& theGlobalVariables);
+  (List<ElementSemisimpleLieAlgebra>& theElements, Vectors<RationalFunctionOld>& outputCoords, List<ElementSemisimpleLieAlgebra>& outputTheBasis);
   void ActOnMe(const ElementSemisimpleLieAlgebra& theElt, ElementSemisimpleLieAlgebra& output, SemisimpleLieAlgebra& owner);
   void ActOnMe
   (const ElementSemisimpleLieAlgebra& theElt, ElementSemisimpleLieAlgebra& output, SemisimpleLieAlgebra& owner,
-   const RationalFunctionOld& theRingUnit, const RationalFunctionOld& theRingZero, GlobalVariables* theGlobalVariables);
+   const RationalFunctionOld& theRingUnit, const RationalFunctionOld& theRingZero);
   bool IsACoeffOneChevalleyGenerator(int& outputGenerator, SemisimpleLieAlgebra& owner);
   bool IsProportionalTo(const ElementSemisimpleLieAlgebra& other)const
   { Vector<Rational> tempRoot1, tempRoot2;
@@ -4399,7 +4384,7 @@ void Matrix<coefficient>::ComputePotentialChangeGradient
 
 template<class coefficient>
 void Matrix<coefficient>::GetMaxMovementAndLeavingVariableRow
-(Rational& maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, Matrix<coefficient>& tempMatA,
+(Rational& maxMovement, int& LeavingVariableRow, int EnteringVariable, Matrix<coefficient>& tempMatA,
  Vector<coefficient>& inputVectorX, Selection& BaseVariables)
 { LeavingVariableRow=-1;
   maxMovement.MakeZero();
@@ -4957,7 +4942,7 @@ std::string MonomialCollection<templateMonomial, coefficient>::ToString(FormatEx
 
 template <typename coefficient>
 inline void Matrix<coefficient>::AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const coefficient& scalar)
-{ ProgressReport theReport(&theGlobalVariables);
+{ ProgressReport theReport;
   bool doProgressReport=false;
   doProgressReport=theGlobalVariables.flagReportGaussianElimination || theGlobalVariables.flagReportEverything;
   coefficient tempElement;
@@ -4998,7 +4983,7 @@ void Matrix<coefficient>::GaussianEliminationByRows
   bool doProgressReport=theGlobalVariables.flagReportGaussianElimination || theGlobalVariables.flagReportEverything;
   bool formatAsLinearSystem= theFormat==0? false : theFormat->flagFormatMatrixAsLinearSystem;
   bool useHtmlInReport=theFormat==0? true : theFormat->flagUseHTML;
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   if (humanReadableReport!=0)
   { if(useHtmlInReport)
       *humanReadableReport << "\n\n\n\n<table><tr><td style=\"border-bottom:3pt solid black;\">System status</td>"
@@ -5111,10 +5096,10 @@ public:
   int GetRank()const{return this->basis.NumRows;}
   void IntersectWith(const Lattice& other);
   bool FindOnePreimageInLatticeOf
-    (const Matrix<Rational>& theLinearMap, const Vectors<Rational>& input, Vectors<Rational>& output, GlobalVariables& theGlobalVariables)
+    (const Matrix<Rational>& theLinearMap, const Vectors<Rational>& input, Vectors<Rational>& output)
 ;
   void IntersectWithPreimageOfLattice
-  (const Matrix<Rational> & theLinearMap, const Lattice& other, GlobalVariables& theGlobalVariables)
+  (const Matrix<Rational> & theLinearMap, const Lattice& other)
 ;
   void IntersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Rational>& outputGenerator);
   static bool GetClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralStepsInDirection
@@ -5122,17 +5107,16 @@ public:
   ;
   void GetDefaultFundamentalDomainInternalPoint(Vector<Rational>& output);
   bool GetInternalPointInConeForSomeFundamentalDomain
-(Vector<Rational>& output, Cone& coneContainingOutputPoint, GlobalVariables& theGlobalVariables)
+(Vector<Rational>& output, Cone& coneContainingOutputPoint)
   ;
   void GetRootOnLatticeSmallestPositiveProportionalTo
-(Vector<Rational>& input, Vector<Rational>& output, GlobalVariables& theGlobalVariables)
+(Vector<Rational>& input, Vector<Rational>& output)
   ;
   void GetRougherLatticeFromAffineHyperplaneDirectionAndLattice
   (const Vector<Rational>& theDirection, Vector<Rational>& outputDirectionMultipleOnLattice, Vector<Rational>& theShift, Vector<Rational>& theAffineHyperplane,
    Vectors<Rational>& outputRepresentatives,
    Vectors<Rational>& movementInDirectionPerRepresentative,
-   Lattice& outputRougherLattice,
-   GlobalVariables& theGlobalVariables)
+   Lattice& outputRougherLattice)
      ;
   void ApplyLinearMap
   (Matrix<Rational>& theMap, Lattice& output)
@@ -5159,21 +5143,21 @@ public:
   //1 -1
   //1  0
   bool SubstitutionHomogeneous
-    (const Matrix<Rational>& theSub, GlobalVariables& theGlobalVariables)
+    (const Matrix<Rational>& theSub)
 ;
   bool SubstitutionHomogeneous
-    (const PolynomialSubstitution<Rational>& theSub, GlobalVariables& theGlobalVariables)
+    (const PolynomialSubstitution<Rational>& theSub)
 ;
 //the following function follows the same convention as the preceding except that we allow n<m. However,
 // in order to assure that the preimage of the lattice is a lattice,
 //we provide as input an ambient lattice in the new vector space of dimension m
-  bool SubstitutionHomogeneous(const Matrix<Rational>& theSub, Lattice& resultIsSubsetOf, GlobalVariables& theGlobalVariables);
+  bool SubstitutionHomogeneous(const Matrix<Rational>& theSub, Lattice& resultIsSubsetOf);
   void Reduce();
   void IntersectWithLinearSubspaceSpannedBy(const Vectors<Rational>& theSubspaceBasis);
   void IntersectWithLinearSubspaceGivenByNormals(const Vectors<Rational>& theSubspaceNormals);
   void IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& theNormal);
   static bool GetHomogeneousSubMatFromSubIgnoreConstantTerms
-  (const PolynomialSubstitution<Rational>& theSub, Matrix<Rational>& output, GlobalVariables& theGlobalVariables)
+  (const PolynomialSubstitution<Rational>& theSub, Matrix<Rational>& output)
   ;
   //returning false means that the lattice given as rougher is not actually rougher than the current lattice
   //or that there are too many representatives
@@ -5226,7 +5210,7 @@ public:
   void AddAssumingLatticeIsSame(const QuasiPolynomial& other);
   void MakeRougherLattice(const Lattice& latticeToRoughenBy);
   void MakeFromPolyShiftAndLattice
-  (const Polynomial<Rational>& inputPoly, const MonomialP& theShift, const Lattice& theLattice, GlobalVariables& theGlobalVariables);
+  (const Polynomial<Rational>& inputPoly, const MonomialP& theShift, const Lattice& theLattice);
   void MakeZeroLatTiceZn(int theDim);
   void MakeZeroOverLattice(Lattice& theLattice);
 //  bool ExtractLinearMapAndTranslationFromSub
@@ -5235,18 +5219,18 @@ public:
   bool IsEqualToZero()const {return this->valueOnEachLatticeShift.size==0;}
   void Substitution
   (const Matrix<Rational> & mapFromNewSpaceToOldSpace, const Vector<Rational> & inputTranslationSubtractedFromArgument,
-   const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
+   const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output)
   ;
   void Substitution
   (const Matrix<Rational>& mapFromNewSpaceToOldSpace,
-   const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
+   const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output)
   ;
   void Substitution
   (const Vector<Rational>& inputTranslationSubtractedFromArgument,
-   QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
+   QuasiPolynomial& output)
   ;
   bool SubstitutionLessVariables
-  (const PolynomialSubstitution<Rational>& theSub, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)const
+  (const PolynomialSubstitution<Rational>& theSub, QuasiPolynomial& output)const
   ;
   void operator+=(const QuasiPolynomial& other);
   QuasiPolynomial(){}
@@ -5268,7 +5252,7 @@ private:
   void findPivot();
   void findInitialPivot();
   //void intRootToString(std::stringstream& out, int* TheRoot, bool MinusInExponent);
-  bool rootIsInFractionCone (PartFractions& owner, Vector<Rational>* theRoot, GlobalVariables& theGlobalVariables)const;
+  bool rootIsInFractionCone (PartFractions& owner, Vector<Rational>* theRoot)const;
   friend class PartFractions;
   friend class partFractionPolynomialSubstitution;
 public:
@@ -5280,16 +5264,17 @@ public:
   bool RelevanceIsComputed;
   List<int> IndicesNonZeroMults;
   friend std::ostream& operator << (std::ostream& output, const PartFraction& input)
-  { crash << " Not implemented, please fix. " << crash;
+  { (void) input;//avoid unused parameter warning, portable
+    crash << " Not implemented, please fix. " << crash;
     return output;
   }
-  static const bool IsMonEqualToZero()
+  static bool IsMonEqualToZero()
   { return false;
   }
   bool RemoveRedundantShortRootsClassicalRootSystem
-  (PartFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInt>& buffer1, int theDimension, GlobalVariables& theGlobalVariables)
+  (PartFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInt>& buffer1, int theDimension)
   ;
-  bool RemoveRedundantShortRoots(PartFractions& owner, Vector<Rational>* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
+  bool RemoveRedundantShortRoots(PartFractions& owner, Vector<Rational>* Indicator, int theDimension);
   bool AlreadyAccountedForInGUIDisplay;
   static bool flagAnErrorHasOccurredTimeToPanic;
 //  static  bool flagUsingPrecomputedOrlikSolomonBases;
@@ -5301,7 +5286,7 @@ public:
 //  static ListPointers<PartFraction> GlobalCollectorPartFraction;
   void ComputePolyCorrespondingToOneMonomial
   (QuasiPolynomial& outputQP, const MonomialP& theMon, Vectors<Rational>& normals,
-   Lattice& theLattice, GlobalVariables& theGlobalVariables)const
+   Lattice& theLattice)const
   ;
   static void EvaluateIntPoly
   (const Polynomial<LargeInt>& input, const Vector<Rational>& values, Rational& output)
@@ -5319,7 +5304,7 @@ public:
   (PartFractions& owner, Vectors<Rational>& output)const
 ;
   void GetVectorPartitionFunction
-  (PartFractions& owner, Polynomial<LargeInt>& theCoeff, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)const
+  (PartFractions& owner, Polynomial<LargeInt>& theCoeff, QuasiPolynomial& output)const
   ;
   LargeInt EvaluateIntPolyAtOne(Polynomial<LargeInt>& input);
   //void InsertNewRootIndex(int index);
@@ -5327,43 +5312,41 @@ public:
   void MultiplyCoeffBy(Rational& r);
   void decomposeAMinusNB
   (int indexA, int indexB, int n, int indexAminusNB, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
-   GlobalVariables& theGlobalVariables, Vector<Rational>* Indicator, PartFractions& owner)
+   PartFractions& owner)
    ;
   bool DecomposeFromLinRelation
-  (Matrix<Rational> & theLinearRelation, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
-   Vector<Rational>* Indicator, GlobalVariables& theGlobalVariables, bool flagUsingOSbasis, List<Vector<Rational> >& startingVectors)
+  (Matrix<Rational>& theLinearRelation, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
+   bool flagUsingOSbasis, List<Vector<Rational> >& startingVectors)
    ;
   void ComputeOneCheckSuM
-  (PartFractions& owner, Rational& output, int theDimension, GlobalVariables& theGlobalVariables)const
+  (PartFractions& owner, Rational& output, int theDimension)const
   ;
   bool ReduceMeOnce
-  (const Polynomial<LargeInt>& myCoeff, Polynomial<LargeInt>& outputCoeff, GlobalVariables& theGlobalVariables,
-   Vector<Rational>* Indicator, Vectors<Rational>& startingVectors)
+  (const Polynomial<LargeInt>& myCoeff, Polynomial<LargeInt>& outputCoeff,
+   Vectors<Rational>& startingVectors)
   ;
-  void ReduceMonomialByMonomial(PartFractions& owner, int myIndex, GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator);
+  void ReduceMonomialByMonomial(PartFractions& owner, int myIndex, Vector<Rational> * Indicator);
   void ApplySzenesVergneFormulA
   (List<Vector<Rational> >& startingVectors,  List<int>& theSelectedIndices, List<int>& theElongations, int GainingMultiplicityIndex,
-   int ElongationGainingMultiplicityIndex, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
-   GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator)
+   int ElongationGainingMultiplicityIndex, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output)
   ;
   void ApplyGeneralizedSzenesVergneFormulA
   (List<int>& theSelectedIndices, List<int>& theGreatestElongations, List<int>& theCoefficients,
    int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
-   GlobalVariables& theGlobalVariables, Vector<Rational>* Indicator, List<Vector<Rational> >& startingVectors)
+   List<Vector<Rational> >& startingVectors)
    ;
   bool CheckForOrlikSolomonAdmissibility(List<int>& theSelectedIndices);
   bool reduceOnceTotalOrderMethod
-  (MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, GlobalVariables& theGlobalVariables,
-   Vector<Rational>* Indicator, PartFractions& owner)
+  (MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, PartFractions& owner)
    ;
 //  void reduceOnceOrlikSolomonBasis(PartFractions&Accum);
   bool reduceOnceGeneralMethodNoOSBasis
-  (PartFractions& owner, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, GlobalVariables& theGlobalVariables,
-   Vector<Rational>* Indicator, Vectors<Rational>& bufferVectors, Matrix<Rational>& bufferMat)
+  (PartFractions& owner, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
+   Vectors<Rational>& bufferVectors, Matrix<Rational>& bufferMat)
    ;
   bool ReduceOnceGeneralMethod
-  (PartFractions& owner, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, GlobalVariables& theGlobalVariables,
-   Vector<Rational>* Indicator, Vectors<Rational>& bufferVectors, Matrix<Rational>& bufferMat)
+  (PartFractions& owner, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
+   Vectors<Rational>& bufferVectors, Matrix<Rational>& bufferMat)
   ;
   bool AreEqual(PartFraction& p);
   bool IsReduced();
@@ -5391,9 +5374,9 @@ public:
   //void swap(int indexA, int indexB);
   PartFraction();
   ~PartFraction();
-  void GetPolyReduceMonomialByMonomial(PartFractions& owner, GlobalVariables& theGlobalVariables, Vector<Rational>& theExponent, int StartMonomialPower, int DenPowerReduction, int startDenominatorPower, Polynomial<LargeInt>& output);
+  void GetPolyReduceMonomialByMonomial(PartFractions& owner, Vector<Rational>& theExponent, int StartMonomialPower, int DenPowerReduction, int startDenominatorPower, Polynomial<LargeInt>& output);
   void ReduceMonomialByMonomialModifyOneMonomial
-  (PartFractions& Accum, GlobalVariables& theGlobalVariables, SelectionWithDifferentMaxMultiplicities& thePowers,
+  (PartFractions& Accum, SelectionWithDifferentMaxMultiplicities& thePowers,
    List<int>& thePowersSigned, MonomialP& input, LargeInt& inputCoeff)
   ;
   void GetAlphaMinusNBetaPoly
@@ -5413,18 +5396,17 @@ public:
   void operator=(const PartFraction& right);
   bool initFromRoots(PartFractions& owner, Vectors<Rational>& input);
   std::string ToString
-  (PartFractions& owner, bool LatexFormat, bool includeVPsummand, bool includeNumerator,
-   FormatExpressions& PolyFormatLocal, GlobalVariables& theGlobalVariables, int& NumLinesUsed)
+  (bool LatexFormat, FormatExpressions& PolyFormatLocal, int& NumLinesUsed)
    ;
-  void ReadFromFile(PartFractions& owner, std::fstream& input, GlobalVariables* theGlobalVariables, int theDimension);
-  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)const;
+  void ReadFromFile(PartFractions& owner, std::fstream& input);
+  void WriteToFile(std::fstream& output)const;
   int SizeWithoutDebugString()const;
 };
 
 class Cone
 {
-  void ComputeVerticesFromNormalsNoFakeVertices(GlobalVariables* theGlobalVariables=0);
-  bool EliminateFakeNormalsUsingVertices(int theDiM, int numAddedFakeWalls, GlobalVariables* theGlobalVariables=0);
+  void ComputeVerticesFromNormalsNoFakeVertices();
+  bool EliminateFakeNormalsUsingVertices(int theDiM, int numAddedFakeWalls);
   friend std::ostream& operator << (std::ostream& output, const Cone& theCone)
   { output << theCone.ToString();
     return output;
@@ -5440,11 +5422,11 @@ public:
   int LowestIndexNotCheckedForChopping;
   int LowestIndexNotCheckedForSlicingInDirection;
   std::string ToString(FormatExpressions* theFormat=0)const;
-  void TransformToWeylProjective(ConeComplex& owner, GlobalVariables& theGlobalVariables);
+  void TransformToWeylProjective(ConeComplex& owner);
   std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
   std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
   void GetLinesContainedInCone(Vectors<Rational>& output);
-//  void GetOrthogonalComplementCone(Cone& output, GlobalVariables* theGlobalVariables=0);
+//  void GetOrthogonalComplementCone(Cone& output);
   void TranslateMeMyLastCoordinateAffinization(Vector<Rational>& theTranslationVector);
   bool IsAnHonest1DEdgeAffine(const Vector<Rational>& vertex1, const Vector<Rational>& vertex2)const
   { int numCommonWalls=0;
@@ -5477,24 +5459,24 @@ public:
   bool GetLatticePointsInCone
   (Lattice& theLattice, Vector<Rational>& theShift, int upperBoundPointsInEachDim, bool lastCoordinateIsOne,
    Vectors<Rational>& outputPoints, Vector<Rational>* shiftAllPointsBy)const;
-  bool MakeConvexHullOfMeAnd(const Cone& other, GlobalVariables& theGlobalVariables);
-  void ChangeBasis(Matrix<Rational>& theLinearMap, GlobalVariables& theGlobalVariables);
+  bool MakeConvexHullOfMeAnd(const Cone& other);
+  void ChangeBasis(Matrix<Rational>& theLinearMap);
   std::string DebugString;
   int GetDim()const
   { if (this->Normals.size==0)
       return 0;
     return this->Normals[0].size;
   }
-  void SliceInDirection(Vector<Rational>& theDirection, ConeComplex& output, GlobalVariables& theGlobalVariables);
+  void SliceInDirection(Vector<Rational>& theDirection, ConeComplex& output);
   bool CreateFromNormalS
-  (Vectors<Rational>& inputNormals, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables* theGlobalVariables=0);
+  (Vectors<Rational>& inputNormals, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices);
   //returns false if the cone is non-proper, i.e. when either
   //1) the cone is empty or is of smaller dimension than it should be
   //2) the resulting cone is the entire space
-  bool CreateFromNormals(Vectors<Rational>& inputNormals, GlobalVariables* theGlobalVariables=0)
-  { return this->CreateFromNormalS(inputNormals, false, theGlobalVariables);
+  bool CreateFromNormals(Vectors<Rational>& inputNormals)
+  { return this->CreateFromNormalS(inputNormals, false);
   }
-  bool CreateFromVertices(const Vectors<Rational>& inputVertices, GlobalVariables* theGlobalVariables=0);
+  bool CreateFromVertices(const Vectors<Rational>& inputVertices);
   void GetInternalPoint(Vector<Rational>& output)const
   { if (this->Vertices.size<=0)
       return;
@@ -5532,10 +5514,10 @@ public:
     this->flagIsTheZeroCone=true;
     //this->flagHasSufficientlyManyVertices=true;
   }
-  void IntersectAHyperplane(Vector<Rational>& theNormal, Cone& outputConeLowerDim, GlobalVariables& theGlobalVariables);
+  void IntersectAHyperplane(Vector<Rational>& theNormal, Cone& outputConeLowerDim);
   bool GetRootFromLPolyConstantTermGoesToLastVariable(Polynomial<Rational>& inputLPoly, Vector<Rational>& output);
-  bool SolveLPolyEqualsZeroIAmProjective(Polynomial<Rational>& inputLPoly, Cone& outputCone, GlobalVariables& theGlobalVariables);
-  bool SolveLQuasiPolyEqualsZeroIAmProjective(QuasiPolynomial& inputLQP, List<Cone>& outputConesOverEachLatticeShift, GlobalVariables& theGlobalVariables);
+  bool SolveLPolyEqualsZeroIAmProjective(Polynomial<Rational>& inputLPoly, Cone& outputCone);
+  bool SolveLQuasiPolyEqualsZeroIAmProjective(QuasiPolynomial& inputLQP, List<Cone>& outputConesOverEachLatticeShift);
   bool operator>(const Cone& other)const
   { return this->Normals>other.Normals;
   }
@@ -5554,7 +5536,7 @@ class ConeLatticeAndShift
   Lattice theLattice;
   Vector<Rational> theShift;
   void FindExtremaInDirectionOverLatticeOneNonParam
-  (Vector<Rational>& theLPToMaximizeAffine, Vectors<Rational>& outputAppendLPToMaximizeAffine, List<ConeLatticeAndShift>& outputAppend, GlobalVariables& theGlobalVariables);
+  (Vector<Rational>& theLPToMaximizeAffine, Vectors<Rational>& outputAppendLPToMaximizeAffine, List<ConeLatticeAndShift>& outputAppend);
   void operator=(const ConeLatticeAndShift& other)
   { this->theProjectivizedCone=other.theProjectivizedCone;
     this->theLattice=other.theLattice;
@@ -5563,7 +5545,7 @@ class ConeLatticeAndShift
   void WriteToFile(std::fstream& output);
   void FindExtremaInDirectionOverLatticeOneNonParamDegenerateCase
   (Vector<Rational>& theLPToMaximizeAffine, Vectors<Rational>& outputAppendLPToMaximizeAffine, List<ConeLatticeAndShift>& outputAppend,
-   Matrix<Rational>& theProjectionLatticeLevel, GlobalVariables& theGlobalVariables);
+   Matrix<Rational>& theProjectionLatticeLevel);
   bool ReadFromFile(std::fstream& input);
   std::string ToString(FormatExpressions& theFormat);
   int GetDimProjectivized()
@@ -5585,26 +5567,26 @@ public:
   Vectors<Rational> slicingDirections;
   Cone ConvexHull;
   std::string DebugString;
-  void RefineOneStep(GlobalVariables& theGlobalVariables);
-  void Refine(GlobalVariables& theGlobalVariables);
-  void RefineMakeCommonRefinement(const ConeComplex& other, GlobalVariables& theGlobalVariables);
-  void Sort(GlobalVariables& theGlobalVariables);
-  void RefineAndSort(GlobalVariables& theGlobalVariables);
-  void FindMaxmumOverNonDisjointChambers(Vectors<Rational>& theMaximaOverEachChamber, Vectors<Rational>& outputMaxima, GlobalVariables& theGlobalVariables);
-  void MakeAffineAndTransformToProjectiveDimPlusOne(Vector<Rational>& affinePoint, ConeComplex& output, GlobalVariables& theGlobalVariables);
-  void TransformToWeylProjective(GlobalVariables& theGlobalVariables);
+  void RefineOneStep();
+  void Refine();
+  void RefineMakeCommonRefinement(const ConeComplex& other);
+  void Sort();
+  void RefineAndSort();
+  void FindMaxmumOverNonDisjointChambers(Vectors<Rational>& theMaximaOverEachChamber, Vectors<Rational>& outputMaxima);
+  void MakeAffineAndTransformToProjectiveDimPlusOne(Vector<Rational>& affinePoint, ConeComplex& output);
+  void TransformToWeylProjective();
   int GetDim()
   { if (this->size<=0)
       return -1;
     return this->TheObjects[0].GetDim();
   }
-  bool AddNonRefinedChamberOnTopNoRepetition(const Cone& newCone, GlobalVariables& theGlobalVariables);
+  bool AddNonRefinedChamberOnTopNoRepetition(const Cone& newCone);
   void PopChamberSwapWithLast(int index);
   void GetAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(Vectors<Rational>& output)const;
   bool DrawMeLastCoordAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
-  void TranslateMeMyLastCoordinateAffinization(Vector<Rational> & theTranslationVector, GlobalVariables& theGlobalVariables);
-  void InitFromDirectionsAndRefine(Vectors<Rational>& inputVectors, GlobalVariables& theGlobalVariables);
-  void InitFromAffineDirectionsAndRefine(Vectors<Rational>& inputDirections, Vectors<Rational>& inputAffinePoints, GlobalVariables& theGlobalVariables);
+  void TranslateMeMyLastCoordinateAffinization(Vector<Rational> & theTranslationVector);
+  void InitFromDirectionsAndRefine(Vectors<Rational>& inputVectors);
+  void InitFromAffineDirectionsAndRefine(Vectors<Rational>& inputDirections, Vectors<Rational>& inputAffinePoints);
   std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
   bool DrawMeProjective(Vector<Rational>* coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
   std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
@@ -5622,17 +5604,17 @@ public:
     return -1;
   }
   bool findMaxLFOverConeProjective
-  (const Cone& input, List<Polynomial<Rational> >& inputLinPolys, List<int>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables);
+  (const Cone& input, List<Polynomial<Rational> >& inputLinPolys, List<int>& outputMaximumOverEeachSubChamber);
   bool findMaxLFOverConeProjective
-  (const Cone& input, Vectors<Rational>& inputLFsLastCoordConst, List<int>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables);
+  (const Cone& input, Vectors<Rational>& inputLFsLastCoordConst, List<int>& outputMaximumOverEeachSubChamber);
   void initFromCones
-  (List<Vectors<Rational> >& NormalsOfCones, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables);
+  (List<Vectors<Rational> >& NormalsOfCones, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices);
   void initFromCones
-  (List<Cone>& NormalsOfCones, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables);
+  (List<Cone>& NormalsOfCones, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices);
   bool SplitChamber
-  (int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, const Vector<Rational>& killerNormal, GlobalVariables& theGlobalVariables);
+  (int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, const Vector<Rational>& killerNormal);
   void GetNewVerticesAppend
-  (Cone& myDyingCone, const Vector<Rational>& killerNormal, HashedList<Vector<Rational> >& outputVertices, GlobalVariables& theGlobalVariables);
+  (Cone& myDyingCone, const Vector<Rational>& killerNormal, HashedList<Vector<Rational> >& outputVertices);
   void init()
   { this->splittingNormals.Clear();
     this->slicingDirections.size=0;
@@ -5642,7 +5624,7 @@ public:
     this->ConvexHull.Vertices.size=0;
     this->ConvexHull.flagIsTheZeroCone=true;
   }
-  ConeComplex(const ConeComplex& other)
+  ConeComplex(const ConeComplex& other):HashedList<Cone>()
   { this->operator=(other);
   }
   ConeComplex()
@@ -5662,7 +5644,7 @@ public:
 };
 
 class PartFractions: public MonomialCollection<PartFraction, Polynomial<LargeInt> >
-{ bool splitPartial(GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator);
+{ bool splitPartial();
   void initCommon();
   PartFractions(const PartFractions& other);
 public:
@@ -5717,66 +5699,65 @@ public:
   int getIndex(const Vector<Rational>& TheRoot);
   int getIndexDoubleOfARoot(const Vector<Rational>& TheRoot);
   void ComputeTable(int theDimension);
-  void PrepareCheckSums(GlobalVariables& theGlobalVariables);
+  void PrepareCheckSums();
   std::string DoTheFullComputationReturnLatexFileString
-  (GlobalVariables& theGlobalVariables, Vectors<Rational>& toBePartitioned, FormatExpressions& theFormat, std::string* outputHtml);
-  bool ArgumentsAllowed(Vectors<Rational>& theArguments, std::string& outputWhatWentWrong, GlobalVariables& theGlobalVariables);
-  bool AssureIndicatorRegularity(GlobalVariables& theGlobalVariables, Vector<Rational> & theIndicator);
-  void CompareCheckSums(GlobalVariables& theGlobalVariables);
-  void ComputeDebugString(GlobalVariables& theGlobalVariables);
-  void ComputeDebugStringNoNumerator(GlobalVariables& theGlobalVariables);
-  void ComputeDebugStringWithVPfunction(GlobalVariables& theGlobalVariables);
+  (Vectors<Rational>& toBePartitioned, FormatExpressions& theFormat, std::string* outputHtml);
+  bool ArgumentsAllowed(Vectors<Rational>& theArguments, std::string& outputWhatWentWrong);
+  bool AssureIndicatorRegularity(Vector<Rational> & theIndicator);
+  void CompareCheckSums();
+  void ComputeDebugString();
+  void ComputeDebugStringNoNumerator();
+  void ComputeDebugStringWithVPfunction();
   void ComputePolyCorrespondingToOneMonomial
-  (QuasiPolynomial& outputQP, int monomialIndex, Vectors<Rational>& normals, Lattice& theLattice, GlobalVariables& theGlobalVariables);
-  void ComputeDebugStringBasisChange(Matrix<LargeInt>& VarChange, GlobalVariables& theGlobalVariables);
-  bool initFromRoots(Vectors<Rational>& input, GlobalVariables& theGlobalVariables);
-  void initAndSplit(Vectors<Rational>& input, GlobalVariables& theGlobalVariables);
-  void Run(Vectors<Rational>& input, GlobalVariables& theGlobalVariables);
+  (QuasiPolynomial& outputQP, int monomialIndex, Vectors<Rational>& normals, Lattice& theLattice);
+  void ComputeDebugStringBasisChange(Matrix<LargeInt>& VarChange);
+  bool initFromRoots(Vectors<Rational>& input);
+  void initAndSplit(Vectors<Rational>& input);
+  void Run(Vectors<Rational>& input);
   //row index is the index of the Vector<Rational> ; column(second) index is the coordinate index
-  void RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator);
-  void RemoveRedundantShortRoots(GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator);
+  void RemoveRedundantShortRootsClassicalRootSystem(Vector<Rational>* Indicator);
+  void RemoveRedundantShortRoots(Vector<Rational>* Indicator);
   bool RemoveRedundantShortRootsIndex
-  (MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, int theIndex, GlobalVariables& theGlobalVariables, Vector<Rational>* Indicator);
-  bool splitClassicalRootSystem(bool ShouldElongate, GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator);
-  bool split(GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator);
+  (MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, int theIndex, Vector<Rational>* Indicator);
+  bool splitClassicalRootSystem(bool ShouldElongate, Vector<Rational>* Indicator);
+  bool split(Vector<Rational>* Indicator);
   void ComputeKostantFunctionFromWeylGroup
-  (char WeylGroupLetter, int WeylGroupNumber, QuasiPolynomial& output, Vector<Rational>* ChamberIndicator, bool UseOldData, bool StoreToFile, GlobalVariables&  theGlobalVariables);
+  (char WeylGroupLetter, int WeylGroupNumber, QuasiPolynomial& output, Vector<Rational>* ChamberIndicator);
   bool IsHigherThanWRTWeight
   (const Vector<Rational>& left, const Vector<Rational>& r, const Vector<Rational>& theWeights);
-  void ComputeSupport(List<Vectors<Rational> >& output, std::stringstream& outputString);
-  void ComputeOneCheckSum(Rational& output, GlobalVariables& theGlobalVariables);
-  void AccountPartFractionInternals(int sign, int index, Vector<Rational> * Indicator, GlobalVariables& theGlobalVariables);
-  void PopIndexHashChooseSwapByLowestNonProcessedAndAccount(int index, GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator);
-  void PopIndexSwapLastHashAndAccount(int index, GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator);
+  void ComputeSupport(List<Vectors<Rational> >& output);
+  void ComputeOneCheckSum(Rational& output);
+  void AccountPartFractionInternals(int sign, int index, Vector<Rational>* Indicator);
+  void PopIndexHashChooseSwapByLowestNonProcessedAndAccount(int index, Vector<Rational> * Indicator);
+  void PopIndexSwapLastHashAndAccount(int index, Vector<Rational>* Indicator);
   void PrepareIndicatorVariables();
-  void initFromOtherPartFractions(PartFractions& input, GlobalVariables& theGlobalVariables);
+  void initFromOtherPartFractions(PartFractions& input);
   void IncreaseHighestIndex(int increment);
-  std::string ToString(GlobalVariables& theGlobalVariables, FormatExpressions& theFormat){std::string tempS; this->ToString(tempS, theGlobalVariables, theFormat);  return tempS;}
-  void ToString(std::string& output, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat);
-  int ToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat);
+  std::string ToString(FormatExpressions& theFormat){std::string tempS; this->ToString(tempS, theFormat);  return tempS;}
+  void ToString(std::string& output, FormatExpressions& theFormat);
+  int ToString(std::string& output, bool LatexFormat, FormatExpressions& theFormat);
   int ElementToStringBasisChange
-  (Matrix<LargeInt>& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand,
-   bool includeNumerator, GlobalVariables& theGlobalVariables, FormatExpressions& PolyFormatLocal);
-  int ElementToStringOutputToFile(std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
-  int ElementToStringBasisChangeOutputToFile(Matrix<LargeInt>& VarChange, bool UsingVarChange, std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
+  (std::string& output, bool LatexFormat, FormatExpressions& PolyFormatLocal);
+  int ElementToStringOutputToFile(std::fstream& output, bool LatexFormat);
+  int ElementToStringBasisChangeOutputToFile(std::fstream& output, bool LatexFormat);
   bool GetVectorPartitionFunction
-  (QuasiPolynomial& output, Vector<Rational> & newIndicator, GlobalVariables& theGlobalVariables)
+  (QuasiPolynomial& output, Vector<Rational> & newIndicator)
   ;
-  bool VerifyFileComputedContributions(GlobalVariables& theGlobalVariables);
-  void WriteToFileComputedContributions(std::fstream& output, GlobalVariables&  theGlobalVariables);
-  int ReadFromFileComputedContributions(std::fstream& input, GlobalVariables&  theGlobalVariables);
-  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
-  void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
+  bool VerifyFileComputedContributions();
+  void WriteToFileComputedContributions(std::fstream& output);
+  int ReadFromFileComputedContributions(std::fstream& input);
+  void WriteToFile(std::fstream& output);
+  void ReadFromFile(std::fstream& input);
   void ResetRelevanceIsComputed()
   { crash << "This is not implemented yet. " << crash;
   }
   PartFractions();
   int SizeWithoutDebugString();
-  bool CheckForMinimalityDecompositionWithRespectToRoot(Vector<Rational>  *theRoot, GlobalVariables& theGlobalVariables);
-  void MakeProgressReportSplittingMainPart(GlobalVariables& theGlobalVariables);
-  void MakeProgressReportRemovingRedundantRoots(GlobalVariables& theGlobalVariables);
-  void MakeProgressReportUncoveringBrackets(GlobalVariables& theGlobalVariables);
-  void MakeProgressVPFcomputation(GlobalVariables& theGlobalVariables);
+  bool CheckForMinimalityDecompositionWithRespectToRoot(Vector<Rational>  *theRoot);
+  void MakeProgressReportSplittingMainPart();
+  void MakeProgressReportRemovingRedundantRoots();
+  void MakeProgressReportUncoveringBrackets();
+  void MakeProgressVPFcomputation();
 };
 
 class DynkinSimpleType
@@ -6078,16 +6059,16 @@ public:
   void Makedidj(int i, int j, int NumVars);
   void Makexidj(int i, int j, int NumVars);
   static void GetStandardOrderDiffOperatorCorrespondingToNraisedTo
-  (const Rational& inputRationalPower, int indexVar, ElementWeylAlgebra& outputDO, Polynomial<Rational>& outputDenominator, GlobalVariables& theGlobalVariables);
+  (const Rational& inputRationalPower, int indexVar, ElementWeylAlgebra& outputDO, Polynomial<Rational>& outputDenominator);
   void FourierTransform (ElementWeylAlgebra<coefficient>& output)const;
   bool ActOnPolynomial(Polynomial<Rational>& thePoly)const;
   void SetNumVariables(int newNumVars);
-  void MultiplyOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft, GlobalVariables* theGlobalVariables=0);
+  void MultiplyOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft);
   static void LieBracket(const ElementWeylAlgebra& left, const ElementWeylAlgebra& right, ElementWeylAlgebra& output);
-  void LieBracketOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft, GlobalVariables* theGlobalVariables=0);
-  void LieBracketOnTheLeftMakeReport(const ElementWeylAlgebra& standsOnTheLeft, GlobalVariables* theGlobalVariables=0);
-  void LieBracketOnTheRightMakeReport(const ElementWeylAlgebra& standsOnTheRight, GlobalVariables* theGlobalVariables=0);
-  void LieBracketOnTheRight(const ElementWeylAlgebra& standsOnTheRight, GlobalVariables* theGlobalVariables=0);
+  void LieBracketOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft);
+  void LieBracketOnTheLeftMakeReport(const ElementWeylAlgebra& standsOnTheLeft);
+  void LieBracketOnTheRightMakeReport(const ElementWeylAlgebra& standsOnTheRight);
+  void LieBracketOnTheRight(const ElementWeylAlgebra& standsOnTheRight);
   bool Substitution(const PolynomialSubstitution<Rational>& SubPolyPart, const PolynomialSubstitution<Rational>& SubDiffPArt);
   void MakeOne(int ExpectedNumVars=0)
   { MonomialWeylAlgebra tempMon;
@@ -6143,9 +6124,9 @@ public:
   std::string ElementToStringIndicesToCalculatorOutput(LittelmannPath& inputStartingPath, List<int>& input);
   std::string ElementToStringOperatorSequenceStartingOnMe(List<int>& input);
   bool GenerateOrbit
-  (List<LittelmannPath>& output, List<List<int> >& outputOperators, GlobalVariables& theGlobalVariables, int UpperBoundNumElts,
+  (List<LittelmannPath>& output, List<List<int> >& outputOperators, int UpperBoundNumElts,
    Selection* parabolicNonSelectedAreInLeviPart=0);
-  std::string GenerateOrbitAndAnimate(GlobalVariables& theGlobalVariables);
+  std::string GenerateOrbitAndAnimate();
   bool MinimaAreIntegral();
   std::string ToString(bool useSimpleCoords=true, bool useArrows=true, bool includeDominance=false)const;
   void Simplify();
@@ -6191,11 +6172,11 @@ class ConeLatticeAndShiftMaxComputation
 
   std::string ToString(FormatExpressions* theFormat=0);
   void init(Vector<Rational>& theNEq, Cone& startingCone, Lattice& startingLattice, Vector<Rational> & startingShift);
-  void FindExtremaParametricStep1(Controller& thePauseController, bool assumeNewConesHaveSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables);
-  void FindExtremaParametricStep2TrimChamberForMultOne(Controller& thePauseController, GlobalVariables& theGlobalVariables);
-  void FindExtremaParametricStep3(Controller& thePauseController, GlobalVariables& theGlobalVariables);
-  void FindExtremaParametricStep4(Controller& thePauseController, GlobalVariables& theGlobalVariables);
-  void FindExtremaParametricStep5(Controller& thePauseController, GlobalVariables& theGlobalVariables);
+  void FindExtremaParametricStep1(Controller& thePauseController, bool assumeNewConesHaveSufficientlyManyProjectiveVertices);
+  void FindExtremaParametricStep2TrimChamberForMultOne(Controller& thePauseController);
+  void FindExtremaParametricStep3(Controller& thePauseController);
+  void FindExtremaParametricStep4(Controller& thePauseController);
+  void FindExtremaParametricStep5(Controller& thePauseController);
   void WriteToFile(std::fstream& output);
   bool ReadFromFile(std::fstream& input, int UpperLimitDebugPurposes);
 };
@@ -6234,11 +6215,11 @@ class PiecewiseQuasipolynomial
   { this->MakeCommonRefinement(other.theProjectivizedComplex);
   }
   void MakeCommonRefinement(const ConeComplex& other);
-  void TranslateArgument(Vector<Rational>& translateToBeAddedToArgument, GlobalVariables& theGlobalVariables);
-  bool MakeVPF(Vectors<Rational>& theRoots, std::string& outputstring, GlobalVariables& theGlobalVariables);
+  void TranslateArgument(Vector<Rational>& translateToBeAddedToArgument);
+  bool MakeVPF(Vectors<Rational>& theRoots, std::string& outputstring);
   Rational Evaluate(const Vector<Rational>& thePoint);
   Rational EvaluateInputProjectivized(const Vector<Rational>& thePoint);
-  void MakeZero(int numVars, GlobalVariables& theGlobalVariables)
+  void MakeZero(int numVars)
   { this->NumVariables=numVars;
     this->theProjectivizedComplex.init();
     this->theBuffers=& theGlobalVariables;
@@ -6310,7 +6291,8 @@ class MonomialMatrix
     this->IsId=true;
   }
   std::string ToString(FormatExpressions* theFormat=0)const
-  { std::stringstream out;
+  { (void) theFormat;//avoid unused parameter warning, portable
+    std::stringstream out;
     if (!this->IsId)
       out << "m_{" << this->vIndex+1 << "}\\otimes " << "m^*_{" << this->dualIndex+1 << "}";
     else
@@ -6683,7 +6665,7 @@ class MonomialGeneralizedVerma
   }
   void MultiplyMeByUEEltOnTheLefT
   (const ElementUniversalEnveloping<coefficient>& theUE,
-   ElementSumGeneralizedVermas<coefficient>& output, GlobalVariables& theGlobalVariables
+   ElementSumGeneralizedVermas<coefficient>& output
    )const;
   void operator=(const MonomialGeneralizedVerma<coefficient>& other)
   { this->owner=other.owner;
@@ -6692,7 +6674,7 @@ class MonomialGeneralizedVerma
   }
 
   std::string ToString(FormatExpressions* theFormat=0, bool includeV=true)const;
-  static const bool IsMonEqualToZero()
+  static bool IsMonEqualToZero()
   { return false;
   }
   bool operator==(const MonomialGeneralizedVerma<coefficient>& other)const
@@ -6723,7 +6705,7 @@ class MonomialGeneralizedVerma
     return this->theMonCoeffOne>other.theMonCoeffOne;
   }
   void ReduceMe
-  (ElementSumGeneralizedVermas<coefficient>& output, GlobalVariables& theGlobalVariables)const;
+  (ElementSumGeneralizedVermas<coefficient>& output)const;
   bool IsHWV()const
   { if (!this->theMonCoeffOne.IsEqualToOne())
       return false;
@@ -6784,7 +6766,7 @@ public:
   { output << input.ToString();
     return output;
   }
-  static const bool IsMonEqualToZero()
+  static bool IsMonEqualToZero()
   { return false;
   }
   int GetNumVars()
@@ -6899,7 +6881,7 @@ public:
   std::string ElementModuleIndexToString(int input, bool useHtml);
   std::string GetNotationString(bool useHtml);
   bool ComputeInvariantsOfDegree
-  (List<int>& decompositionDimensions, int theDegree, List<Polynomial<Rational> >& output, std::string& outputError, GlobalVariables& theGlobalVariables);
+  (List<int>& decompositionDimensions, int theDegree, List<Polynomial<Rational> >& output, std::string& outputError);
   std::string PairTwoIndices(List<int>& output, int leftIndex, int rightIndex, bool useHtml);
   void ExtractHighestWeightVectorsFromVector(Matrix<Rational> & input, List<Matrix<Rational> >& outputDecompositionOfInput, List<Matrix<Rational> >& outputTheHWVectors);
   void ClimbDownFromHighestWeightAlongSl2String(Matrix<Rational> & input, Matrix<Rational> & output, Rational& outputCoeff, int generatorPower);
@@ -6974,7 +6956,7 @@ void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(coefficient& output,
   bool doReport=false;
   if (theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportGaussianElimination)
     doReport=this->NumCols>10 && this->NumRows>10 && this->NumCols*this->NumRows>=400;
-  ProgressReport theReport(&theGlobalVariables), theReport2(&theGlobalVariables);
+  ProgressReport theReport, theReport2;
   int tempI;
   output=theRingOne;
   coefficient tempRat;
@@ -7162,12 +7144,12 @@ void MonomialTensorGeneralizedVermas<coefficient>::operator=
 template <class coefficient>
 void MonomialGeneralizedVerma<coefficient>::MultiplyMeByUEEltOnTheLefT
 (const ElementUniversalEnveloping<coefficient>& theUE,
- ElementSumGeneralizedVermas<coefficient>& output, GlobalVariables& theGlobalVariables)const
+ ElementSumGeneralizedVermas<coefficient>& output)const
 { MacroRegisterFunctionWithName("MonomialGeneralizedVerma<coefficient>::MultiplyMeByUEEltOnTheLefT");
   MonomialGeneralizedVerma<coefficient> currentMon;
   output.MakeZero();
   ElementSumGeneralizedVermas<coefficient> buffer;
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   if (!this->GetOwner().owner->flagHasNilradicalOrder)
     crash << "Calling generalized verma module simplification requires nilradical order on the generators. "
     << crash;
@@ -7184,7 +7166,7 @@ void MonomialGeneralizedVerma<coefficient>::MultiplyMeByUEEltOnTheLefT
     reportStream << "reducing mon: " << currentMon.ToString() << ", index" << j+1 << " out of " << theUE.size() << "...";
 //    stOutput << "reducing mon: " << currentMon.ToString() << ", index" << j+1 << " out of " << theUE.size() << "...";
     theReport.Report(reportStream.str());
-    currentMon.ReduceMe(buffer, theGlobalVariables);
+    currentMon.ReduceMe(buffer);
     reportStream << " done.";
 //    stOutput << " done.";
     theReport.Report(reportStream.str());
@@ -7205,7 +7187,7 @@ void ElementSumGeneralizedVermas<coefficient>::MultiplyMeByUEEltOnTheLeft
   Accum.MakeZero();
   for (int i=0; i<this->size(); i++)
   {// stOutput << "<br>Multiplying " << this->TheObjects[i].ToString() << " by " << theUE.ToString() << " by " << this->theCoeffs[i].ToString();
-    (*this)[i].MultiplyMeByUEEltOnTheLefT(theUE, buffer, theGlobalVariables);
+    (*this)[i].MultiplyMeByUEEltOnTheLefT(theUE, buffer);
     //stOutput << "<br>buffer " << buffer.ToString() << " multiplied by coeff " << this->theCoeffs[i].ToString();
     buffer*=this->theCoeffs[i];
 //    stOutput << "<br>to obtain " << buffer.ToString();
@@ -7218,7 +7200,7 @@ void ElementSumGeneralizedVermas<coefficient>::MultiplyMeByUEEltOnTheLeft
 
 template <class coefficient>
 void MonomialGeneralizedVerma<coefficient>::ReduceMe
-(ElementSumGeneralizedVermas<coefficient>& output, GlobalVariables& theGlobalVariables)const
+(ElementSumGeneralizedVermas<coefficient>& output)const
 { MacroRegisterFunctionWithName("MonomialGeneralizedVerma::ReduceMe");
   //stOutput << "<hr><hr>Reducing  " << this->ToString();
   ModuleSSalgebra<coefficient>& theMod=*this->owner;
@@ -7250,7 +7232,7 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe
   theUEelt.MakeZero(*this->GetOwner().owner);
   theUEelt.AddMonomial(this->theMonCoeffOne, 1);
 //  stOutput << " <br>the monomial:" << this->ToString();
-  theUEelt.Simplify(&theGlobalVariables, 1, 0);
+  theUEelt.Simplify();
 //  stOutput << " <br>the corresponding ue with F.D. part cut off: " << theUEelt.ToString();
 
   MonomialUniversalEnveloping<coefficient> currentMon;
@@ -7259,7 +7241,7 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe
   //stOutput << theMod.ToString();
   //stOutput << "<br>theMod.theModuleWeightsSimpleCoords.size: "
   //<< theMod.theModuleWeightsSimpleCoords.size;
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   coefficient theCF;
   for (int l=0; l<theUEelt.size(); l++)
   { currentMon=theUEelt[l];

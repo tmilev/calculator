@@ -21,7 +21,8 @@ void Crasher::FirstRun()
 }
 
 Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
-{ this->FirstRun();
+{ (void) dummyCrasherSignalsActualCrash;
+  this->FirstRun();
   static bool ThisCodeHasntRunYet=true;
   if (!ThisCodeHasntRunYet)
   //this would mean one of the crash-processing functions below has requested a crash, which is an
@@ -904,11 +905,13 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent)
 }
 
 bool affineCone::SplitByAffineHyperplane(affineHyperplane<Rational>& theKillerPlane, affineCones& output)
-{ return true;
+{ (void) theKillerPlane; (void) output;
+  return true;
 }
 
 bool affineCone::WallIsInternalInCone(affineHyperplane<Rational>& theKillerCandidate)
-{ return true;
+{ (void) theKillerCandidate;
+  return true;
 }
 
 int affineCone::GetDimension()
@@ -1026,24 +1029,24 @@ void WeylGroupData::GenerateRootSubsystem(Vectors<Rational>& theRoots)
     }
 }
 
-void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex(GlobalVariables& theGlobalVariables)
+void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex()
 { std::stringstream out;
   FormatExpressions theFormat;
   Vector<Rational> tempRoot;
   FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
   (this->theMultiplicitiesMaxOutputReport2, "ExtremaPolys.txt", false, true, false);
-  this->thePfs.initFromRoots(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
-  this->thePfs.ComputeDebugString(theGlobalVariables);
+  this->thePfs.initFromRoots(this->GmodKNegWeightsBasisChanged);
+  this->thePfs.ComputeDebugString();
   out << this->thePfs.DebugString;
-  this->thePfs.split(theGlobalVariables, 0);
-  this->thePfs.ComputeDebugString(theGlobalVariables);
+  this->thePfs.split(0);
+  this->thePfs.ComputeDebugString();
   out << "=" << this->thePfs.DebugString;
 //  int totalDim=this->theTranslationS[0].size+this->theTranslationsProjecteD[0].size;
   this->theQPsSubstituted.SetSize(this->projectivizedChambeR.size);
   crash << "not implemented fully, crashing to let you know. " << crash;
 //  this->thePfs.theChambersOld.init();
 //  this->thePfs.theChambersOld.theDirections=this->GmodKNegWeightsBasisChanged;
-//  this->thePfs.theChambersOld.SliceTheEuclideanSpace(theGlobalVariables, false);
+//  this->thePfs.theChambersOld.SliceTheEuclideanSpace(false);
 //  this->theQPsNonSubstituted.SetSize(this->thePfs.theChambersOld.size);
 //  this->theQPsSubstituted.SetSize(this->thePfs.theChambersOld.size);
   out << "\n\nThe vector partition functions in each chamber follow.";
@@ -1053,7 +1056,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex(GlobalVariab
     if (this->thePfs.theChambersOld.TheObjects[i]!=0)
     { QuasiPolynomial& currentQPNoSub= this->theQPsNonSubstituted.TheObjects[i];
       this->theQPsSubstituted.TheObjects[i].SetSize(this->theLinearOperators.size);
-      this->thePfs.GetVectorPartitionFunction(currentQPNoSub, this->thePfs.theChambersOld.TheObjects[i]->InternalPoint, theGlobalVariables);
+      this->thePfs.GetVectorPartitionFunction(currentQPNoSub, this->thePfs.theChambersOld.TheObjects[i]->InternalPoint);
       out << "\nChamber " << i+1 << " with internal point " << this->thePfs.theChambersOld.TheObjects[i]->InternalPoint.ToString() << " the quasipoly is: " << currentQPNoSub.ToString(false, false);
       for (int k=0; k<this->theLinearOperators.size; k++)
       { QuasiPolynomial& currentQPSub=this->theQPsSubstituted.TheObjects[i].TheObjects[k];
@@ -1061,7 +1064,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex(GlobalVariab
         tempStream << "Processing chamber " << i+1 << " linear operator " << k+1;
         theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]= tempStream.str();
         theGlobalVariables.MakeReport();
-        currentQPNoSub.Substitution(this->theLinearOperatorsExtended.TheObjects[k], this->theTranslationsProjectedBasisChanged[k], this->theExtendedIntegralLatticeMatForM, currentQPSub, theGlobalVariables);
+        currentQPNoSub.Substitution(this->theLinearOperatorsExtended.TheObjects[k], this->theTranslationsProjectedBasisChanged[k], this->theExtendedIntegralLatticeMatForM, currentQPSub);
         out << "; after substitution we get: " << currentQPSub.ToString(false, false);
       }
     }
@@ -1072,8 +1075,8 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex(GlobalVariab
   QuasiPolynomial tempQP;
   this->theMultiplicities.SetSize(this->projectivizedChambeR.size);
   this->numNonZeroMults=0;
-  ProgressReport theReport(&theGlobalVariables);
-  ProgressReport theReport2(&theGlobalVariables);
+  ProgressReport theReport;
+  ProgressReport theReport2;
   for (int i=0; i<this->projectivizedChambeR.size; i++)
   { QuasiPolynomial& currentSum=this->theMultiplicities.TheObjects[i];
     currentSum.MakeZeroOverLattice(this->theExtendedIntegralLatticeMatForM);
@@ -1107,15 +1110,15 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex(GlobalVariab
 }
 
 std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWeight
-(Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords, Vector<Rational>& parabolicSel, GlobalVariables& theGlobalVariables)
+(Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords, Vector<Rational>& parabolicSel)
 { std::stringstream out;
   WeylGroupData& LargerWeyl=this->theHmm.theRange().theWeyl;
   WeylGroupData& SmallerWeyl=this->theHmm.theDomain().theWeyl;
   if (!LargerWeyl.IsOfSimpleType('B', 3))
     return "Error: algebra is not so(7).";
-  this->initFromHomomorphism(parabolicSel, this->theHmm, theGlobalVariables);
-  this->TransformToWeylProjectiveStep1(theGlobalVariables);
-  this->TransformToWeylProjectiveStep2(theGlobalVariables);
+  this->initFromHomomorphism(parabolicSel, this->theHmm);
+  this->TransformToWeylProjectiveStep1();
+  this->TransformToWeylProjectiveStep2();
   Vector<Rational> highestWeightLargerAlgSimpleCoords;
   highestWeightLargerAlgSimpleCoords=LargerWeyl.GetSimpleCoordinatesFromFundamental(highestWeightLargerAlgebraFundamentalCoords);
   Matrix<Rational> tempMat;
@@ -1124,7 +1127,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   int theSmallDim=SmallerWeyl.CartanSymmetric.NumRows;
 //  drawOps.theBuffer.initDimensions(theSmallDim, 1);
   Vectors<double> theDraggableBasis;
-  theDraggableBasis.MakeEiBasis(theSmallDim, 1, 0);
+  theDraggableBasis.MakeEiBasis(theSmallDim);
   WeylGroupData tmpWeyl;
   tmpWeyl.MakeArbitrarySimple('A',2);
   drawOps.theBuffer.initDimensions(tmpWeyl.CartanSymmetric, theDraggableBasis, theDraggableBasis, 1);
@@ -1136,11 +1139,10 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   drawOps.theBuffer.ModifyToOrthonormalNoShiftSecond
   (drawOps.theBuffer.BasisProjectionPlane[0][1], drawOps.theBuffer.BasisProjectionPlane[0][0]);
   drawOps.theBuffer.GraphicsUnit[0]=50;
-  PiecewiseQuasipolynomial theStartingPoly(theGlobalVariables),
-  theSubbedPoly(theGlobalVariables), Accum(theGlobalVariables);
+  PiecewiseQuasipolynomial theStartingPoly, theSubbedPoly, Accum;
   //stOutput << "<hr>" << this->GmodKNegWeightsBasisChanged.ToString() << "<hr>";
   std::string tempS;
-  theStartingPoly.MakeVPF(this->GmodKNegWeightsBasisChanged, tempS, theGlobalVariables);
+  theStartingPoly.MakeVPF(this->GmodKNegWeightsBasisChanged, tempS);
   Vectors<Rational> translationsProjectedFinal;
   translationsProjectedFinal.SetSize(this->theLinearOperators.size);
   this->theLinearOperators[0].ActOnVectorColumn(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[0]);
@@ -1150,9 +1152,9 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   out << "<br>the argument translations: " << this->theTranslationsProjectedBasisChanged.ToString();
   out << "<br>Element u_w: projection, multiplication by -1, and basis change of so(7)-highest weight to G_2: "
   << translationsProjectedFinal[0].ToString();
-  theStartingPoly.MakeVPF(this->GmodKNegWeightsBasisChanged, tempS, theGlobalVariables);
+  theStartingPoly.MakeVPF(this->GmodKNegWeightsBasisChanged, tempS);
   //stOutput << theStartingPoly.ToString(false, true);
-  drawOps.drawCoordSystemBuffer(drawOps, 2, 0);
+  drawOps.drawCoordSystemBuffer(drawOps, 2);
   //out << this->log.str();
   Cone smallWeylChamber;
   tempMat=SmallerWeyl.CartanSymmetric;
@@ -1167,7 +1169,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
     if(this->ParabolicSelectionSmallerAlgebra.selected[i])
       tempVertices.AddOnTop(-tempRoot);
   }
-  smallWeylChamber.CreateFromVertices(tempVertices, &theGlobalVariables);
+  smallWeylChamber.CreateFromVertices(tempVertices);
   tempMat.init(2,2);
   tempMat.elements[0][0]=1; tempMat.elements[0][1]=0;
   tempMat.elements[1][0]=1; tempMat.elements[1][1]=1;
@@ -1175,7 +1177,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
 //  stOutput << smallWeylChamber.ToString(false, true, theFormat);
   tempMat.Transpose();
   smallWeylChamber.ChangeBasis
-  (tempMat, theGlobalVariables)
+  (tempMat)
   ;
 //  stOutput << "<br> after the basis change: " << smallWeylChamber.ToString(false, true, theFormat);
   out << "<br> The small Weyl chamber: " << smallWeylChamber.ToString(&theFormat);
@@ -1188,11 +1190,11 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
     drawOps.drawCircleAtVectorBufferRational(-translationsProjectedFinal[i], 3, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(250,0,0));
   }
   out << "<br>the translations projected final: " << translationsProjectedFinal.ToString();
-  Accum.MakeZero(theStartingPoly.NumVariables, theGlobalVariables);
+  Accum.MakeZero(theStartingPoly.NumVariables);
   for (int i=0; i<this->theLinearOperators.size; i++)
   { theSubbedPoly=theStartingPoly;
     theSubbedPoly*=this->theCoeffs[i];
-    theSubbedPoly.TranslateArgument(translationsProjectedFinal[i], theGlobalVariables);
+    theSubbedPoly.TranslateArgument(translationsProjectedFinal[i]);
     //theSubbedPoly.DrawMe(tempVars);
    /* if (i==2)
     { DrawingVariables tempDV, tempDV2;
@@ -1242,7 +1244,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   return out.str();
 }
 
-void GeneralizedVermaModuleCharacters::SortMultiplicities(GlobalVariables& theGlobalVariables)
+void GeneralizedVermaModuleCharacters::SortMultiplicities()
 { List<Cone> tempList;
   tempList=this->projectivizedChambeR;
   tempList.QuickSortAscending();
@@ -1256,7 +1258,7 @@ void GeneralizedVermaModuleCharacters::SortMultiplicities(GlobalVariables& theGl
     this->projectivizedChambeR.AddOnTop(tempList[i]);
 }
 
-std::string GeneralizedVermaModuleCharacters::CheckMultiplicitiesVsOrbits(GlobalVariables& theGlobalVariables)
+std::string GeneralizedVermaModuleCharacters::CheckMultiplicitiesVsOrbits()
 { MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::CheckMultiplicitiesVsOrbits");
   this->CheckInitialization();
   std::stringstream out;
@@ -1274,61 +1276,61 @@ std::string GeneralizedVermaModuleCharacters::CheckMultiplicitiesVsOrbits(Global
     tempComplex.splittingNormals.AddOnTop(normal);
   }
   tempComplex.indexLowestNonRefinedChamber=0;
-  tempComplex.Refine(theGlobalVariables);
+  tempComplex.Refine();
   out << "Number chambers with new walls: " << tempComplex.size;
   out << "\n" << tempComplex.ToString();
   return out.str();
 }
 
 void GeneralizedVermaModuleCharacters::IncrementComputation
-  (Vector<Rational>& parabolicSel, GlobalVariables& theGlobalVariables)
+  (Vector<Rational>& parabolicSel)
 { std::stringstream out;
 //  this->UpperLimitChambersForDebugPurposes=5;
   this->thePauseControlleR.InitComputation();
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected=parabolicSel;
   if (false)
   if (this->UpperLimitChambersForDebugPurposes==0 || this->theLinearOperators.size==0)
-    this->ReadFromDefaultFile(&theGlobalVariables);
+    this->ReadFromDefaultFile();
   switch (this->computationPhase)
   { case 0:
-//      this->theParser.theHmm.MakeG2InB3(this->theParser, theGlobalVariables);
-      this->initFromHomomorphism(parabolicSel, this->theHmm, theGlobalVariables);
-      this->TransformToWeylProjectiveStep1(theGlobalVariables);
+//      this->theParser.theHmm.MakeG2InB3(this->theParser);
+      this->initFromHomomorphism(parabolicSel, this->theHmm);
+      this->TransformToWeylProjectiveStep1();
 //      out << theGlobalVariables.theIndicatorVariables.StatusString1;
-      this->TransformToWeylProjectiveStep2(theGlobalVariables);
+      this->TransformToWeylProjectiveStep2();
 //      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     case 1:
-      this->projectivizedChambeR.Refine(theGlobalVariables);
-      this->SortMultiplicities(theGlobalVariables);
+      this->projectivizedChambeR.Refine();
+      this->SortMultiplicities();
       out << this->projectivizedChambeR.ToString(false, false);
 //      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     case 2:
-      this->ComputeQPsFromChamberComplex(theGlobalVariables);
-      out << this->ElementToStringMultiplicitiesReport(theGlobalVariables);
+      this->ComputeQPsFromChamberComplex();
+      out << this->ElementToStringMultiplicitiesReport();
       break;
     case 3:
-//      out << this->CheckMultiplicitiesVsOrbits(theGlobalVariables);
+//      out << this->CheckMultiplicitiesVsOrbits();
       break;
     case 4:
-      this->InitTheMaxComputation(theGlobalVariables);
+      this->InitTheMaxComputation();
 //      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     case 5:
-      this->theMaxComputation.FindExtremaParametricStep1(this->thePauseControlleR, true, theGlobalVariables);
+      this->theMaxComputation.FindExtremaParametricStep1(this->thePauseControlleR, true);
 //      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     case 6:
-      this->theMaxComputation.FindExtremaParametricStep3(this->thePauseControlleR, theGlobalVariables);
+      this->theMaxComputation.FindExtremaParametricStep3(this->thePauseControlleR);
 //      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     case 7:
-      this->theMaxComputation.FindExtremaParametricStep4(this->thePauseControlleR, theGlobalVariables);
+      this->theMaxComputation.FindExtremaParametricStep4(this->thePauseControlleR);
 //      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     case 8:
-      this->theMaxComputation.FindExtremaParametricStep5(this->thePauseControlleR, theGlobalVariables);
+      this->theMaxComputation.FindExtremaParametricStep5(this->thePauseControlleR);
 //      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     default:
@@ -1337,17 +1339,17 @@ void GeneralizedVermaModuleCharacters::IncrementComputation
   this->computationPhase++;
 //  theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
   if (this->computationPhase>8)
-  { //theGlobalVariables.theIndicatorVariables.StatusString1=this->PrepareReport(theGlobalVariables);
+  { //theGlobalVariables.theIndicatorVariables.StatusString1=this->PrepareReport();
   }
 //  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
 //  theGlobalVariables.MakeReport();
   if (this->UpperLimitChambersForDebugPurposes<=0)
     if (this->computationPhase < 30)
-      this->WriteToDefaultFile(&theGlobalVariables);
+      this->WriteToDefaultFile();
   this->thePauseControlleR.ExitComputation();
 }
 
-void GeneralizedVermaModuleCharacters::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
+void GeneralizedVermaModuleCharacters::WriteToFile(std::fstream& output)
 { output << XML::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
   output << "ComputationPhase: " << this->computationPhase << "\n";
   output << "NumProcessedConesParam: " << this->NumProcessedConesParam << "\n";
@@ -1365,8 +1367,8 @@ void GeneralizedVermaModuleCharacters::WriteToFile(std::fstream& output, GlobalV
   this->preferredBasisChangE.WriteToFile(output);
   this->preferredBasisChangeInversE.WriteToFile(output);
   this->theExtendedIntegralLatticeMatForM.WriteToFile(output);
-  ProgressReport theReport(theGlobalVariables);
-  if (theGlobalVariables!=0)
+  ProgressReport theReport;
+  if (theGlobalVariables.flagReportFileIO)
     theReport.Report("Writing small data... ");
   this->theMaxComputation.WriteToFile(output);
   this->GmodKnegativeWeightS.WriteToFile(output);
@@ -1376,35 +1378,35 @@ void GeneralizedVermaModuleCharacters::WriteToFile(std::fstream& output, GlobalV
   this->PreimageWeylChamberLargerAlgebra.WriteToFile(output);
   this->PreimageWeylChamberSmallerAlgebra.WriteToFile(output);
   this->WeylChamberSmallerAlgebra.WriteToFile(output);
-  if (theGlobalVariables!=0)
+  if (theGlobalVariables.flagReportFileIO)
     theReport.Report("Writing QP's non-subbed... ");
   this->theQPsNonSubstituted.WriteToFile(output);
-  if (theGlobalVariables!=0)
+  if (theGlobalVariables.flagReportFileIO)
     theReport.Report("Writing QP's subbed... ");
   output << XML::GetOpenTagNoInputCheckAppendSpacE("QPsSubbed");
   this->theQPsSubstituted.WriteToFile(output);
   output << XML::GetCloseTagNoInputCheckAppendSpacE("QPsSubbed");
-  if (theGlobalVariables!=0)
+  if (theGlobalVariables.flagReportFileIO)
     theReport.Report("Writing small data... ");
 
   output << XML::GetOpenTagNoInputCheckAppendSpacE("theMultiplicities");
   this->theMultiplicities.WriteToFile(output, this->UpperLimitChambersForDebugPurposes);
   output << XML::GetCloseTagNoInputCheckAppendSpacE("theMultiplicities");
-//  this->theMultiplicitiesExtremaCandidates.WriteToFile(output, theGlobalVariables);
+//  this->theMultiplicitiesExtremaCandidates.WriteToFile(output);
   this->theCoeffs.WriteToFile(output);
   this->theTranslationS.WriteToFile(output);
   this->theTranslationsProjectedBasisChanged.WriteToFile(output);
-  this->thePfs.WriteToFile(output, theGlobalVariables);
-//  this->paramSubChambers.WriteToFile(output, theGlobalVariables);
-//  this->nonParamVertices.WriteToFile(output, theGlobalVariables);
-  if (theGlobalVariables!=0)
+  this->thePfs.WriteToFile(output);
+//  this->paramSubChambers.WriteToFile(output);
+//  this->nonParamVertices.WriteToFile(output);
+  if (theGlobalVariables.flagReportFileIO)
     theReport.Report("Writing param chamber complex... ");
   this->projectivizedParamComplex.WriteToFile(output);
-  if (theGlobalVariables!=0)
+  if (theGlobalVariables.flagReportFileIO)
     theReport.Report("Writing projectivized chamber complex... ");
   this->smallerAlgebraChamber.WriteToFile(output, this->UpperLimitChambersForDebugPurposes);
   this->projectivizedChambeR.WriteToFile(output, this->UpperLimitChambersForDebugPurposes);
-  if (theGlobalVariables!=0)
+  if (theGlobalVariables.flagReportFileIO)
     theReport.Report("Writing to file done...");
   output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
 }
@@ -1427,14 +1429,14 @@ bool GeneralizedVermaModuleCharacters::CheckInitialization()const
   return true;
 }
 
-void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
+void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input)
 { MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::initFromHomomorphism");
 
   Vectors<Rational> tempRoots;
   this->WeylLarger= &input.theRange().theWeyl;
   this->WeylSmaller=&input.theDomain().theWeyl;
   WeylGroupData& theWeYl=input.theRange().theWeyl;
-//  input.ProjectOntoSmallCartan(theWeyl.RootsOfBorel, tempRoots, theGlobalVariables);
+//  input.ProjectOntoSmallCartan(theWeyl.RootsOfBorel, tempRoots);
   this->log << "projections: " << tempRoots.ToString();
   theWeYl.theGroup.ComputeAllElements(false);
   this->NonIntegralOriginModificationBasisChanged="(1/2,1/2)";
@@ -1444,10 +1446,10 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   crash << "Not implemented. " << crash;
 //  SSalgebraModuleOld tempM;
   std::stringstream tempStream;
-  input.ComputeHomomorphismFromImagesSimpleChevalleyGenerators(theGlobalVariables);
+  input.ComputeHomomorphismFromImagesSimpleChevalleyGenerators();
   crash << "Not implemented. " << crash;
-//  tempM.InduceFromEmbedding(tempStream, input, theGlobalVariables);
-  input.GetWeightsGmodKInSimpleCoordsK(this->GmodKnegativeWeightS, theGlobalVariables);
+//  tempM.InduceFromEmbedding(tempStream, input);
+  input.GetWeightsGmodKInSimpleCoordsK(this->GmodKnegativeWeightS);
 //  this->log << "weights of g mod k: " << this->GmodKnegativeWeights.ToString();
   Matrix<Rational> tempMat;
   tempMat=input.theDomain().theWeyl.CartanSymmetric;
@@ -1482,7 +1484,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   theProjectionBasisChanged.init(input.theDomain().GetRank(), input.theRange().GetRank());
   for (int i=0; i<input.theRange().GetRank(); i++)
   { startingWeight.MakeEi(input.theRange().GetRank(), i);
-    input.ProjectOntoSmallCartan(startingWeight, projectedWeight, theGlobalVariables);
+    input.ProjectOntoSmallCartan(startingWeight, projectedWeight);
     this->preferredBasisChangeInversE.ActOnVectorColumn(projectedWeight);
     for (int j=0; j<projectedWeight.size; j++)
       theProjectionBasisChanged.elements[j][i]=projectedWeight[j];
@@ -1504,7 +1506,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   this->log << "\nParabolic subalgebra large algebra: " << this->ParabolicLeviPartRootSpacesZeroStandsForSelected.ToString();
   tempRoot= this->ParabolicSelectionSmallerAlgebra;
   this->log << "\nParabolic subalgebra smaller algebra: " << tempRoot.ToString();
-  theSubgroup.MakeParabolicFromSelectionSimpleRoots(theWeYl, this->ParabolicLeviPartRootSpacesZeroStandsForSelected, theGlobalVariables, -1);
+  theSubgroup.MakeParabolicFromSelectionSimpleRoots(theWeYl, this->ParabolicLeviPartRootSpacesZeroStandsForSelected, -1);
 
   this->theLinearOperators.SetSize(theSubgroup.size);
   this->theLinearOperatorsExtended.SetSize(theSubgroup.size);
@@ -1581,7 +1583,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
     tempMatPoly.ActOnVectorColumn(tempVect, tempVect2, polyZero);
     for (int j=0; j<tempVect2.size; j++)
       tempVect2[j]+=this->theTranslationsProjectedBasisChanged[i][j];
-    this->log << "\n$" <<  theSubgroup[i].ToString(0, & displayIndicesReflections) << "$&$"
+    this->log << "\n$" << theSubgroup[i].ToString() << "$&$"
     << tempVect2.ToString(&theFormat) << "$\\\\";
   }
   this->log <<"\\end{longtable}\n\n";
@@ -1608,7 +1610,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   rootsGeneratingExtendedLattice.SetSize(totalDim);
   this->log << "\n" << tempMat.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\n";
   this->log << this->theExtendedIntegralLatticeMatForM.ToString(false, false);
-  this->WeylChamberSmallerAlgebra.CreateFromNormals(WallsWeylChamberLargerAlgebra, &theGlobalVariables);
+  this->WeylChamberSmallerAlgebra.CreateFromNormals(WallsWeylChamberLargerAlgebra);
   this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->WeylChamberSmallerAlgebra.ToString(&theFormat) << "\n";
   this->PreimageWeylChamberSmallerAlgebra.Normals=this->WeylChamberSmallerAlgebra.Normals;
   for (int i=0; i<this->PreimageWeylChamberLargerAlgebra.Normals.size; i++)
@@ -1633,7 +1635,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   this->log << "**********************\n\n\n";
   this->log << "\nthe smaller parabolic selection: " << this->ParabolicSelectionSmallerAlgebra.ToString();
   this->log << "the Vectors<Rational> generating the chamber walls: " << tempRoots.ToString();
-  this->PreimageWeylChamberSmallerAlgebra.CreateFromVertices(tempRoots, &theGlobalVariables);
+  this->PreimageWeylChamberSmallerAlgebra.CreateFromVertices(tempRoots);
   this->log << "\nWeyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ToString(&theFormat) << "\n";
   this->log << "**********************\n\n\n";
   this->log << "\nThe first operator extended:\n" << this->theLinearOperatorsExtended[0].ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\n";
@@ -1664,7 +1666,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   //theGlobalVariables.MakeReport();
 }
 
-std::string GeneralizedVermaModuleCharacters::PrepareReport(GlobalVariables& theGlobalVariables)
+std::string GeneralizedVermaModuleCharacters::PrepareReport()
 { std::stringstream out;
   FormatExpressions theFormat;
   int tempI=0;
@@ -1701,7 +1703,7 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport(GlobalVariables& the
     { numFoundChambers++;
       out << "\\hline\\multicolumn{2}{c}{Chamber " << numFoundChambers << "}\\\\\n";
       DisplayIndicesprojectivizedChambers.AddOnTop(numFoundChambers);
-      out << this->PrepareReportOneCone(theFormat, this->projectivizedChambeR[i], theGlobalVariables) << "&";
+      out << this->PrepareReportOneCone(theFormat, this->projectivizedChambeR[i]) << "&";
       out << "\\begin{tabular}{c}";
       out << theMult.ToString(false, true, &theFormat) << "\\end{tabular}\\\\\n";
     } else
@@ -1742,7 +1744,7 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport(GlobalVariables& the
       if (indexMultFreeChamber!=-1)
       { numFoundChambers++;
         out << "\\hline\\multicolumn{2}{c}{Chamber " << DisplayIndicesprojectivizedChambers.TheObjects[i] << "}\\\\\n";
-        out << this->PrepareReportOneCone(theFormat, this->projectivezedChambersSplitByMultFreeWalls.TheObjects[indexMultFreeChamber], theGlobalVariables) << "&";
+        out << this->PrepareReportOneCone(theFormat, this->projectivezedChambersSplitByMultFreeWalls.TheObjects[indexMultFreeChamber]) << "&";
         out << theMult.ToString(false, true, theFormat) << "\\\\\n";
       }
     }
@@ -1753,8 +1755,9 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport(GlobalVariables& the
   return out.str();
 }
 
-void GeneralizedVermaModuleCharacters::InitTheMaxComputation(GlobalVariables& theGlobalVariables)
-{ this->theMaxComputation.numNonParaM=2;
+void GeneralizedVermaModuleCharacters::InitTheMaxComputation()
+{ MacroRegisterFunctionWithName("GeneralizedVermaModuleCharacters::InitTheMaxComputation");
+  this->theMaxComputation.numNonParaM=2;
   this->theMaxComputation.theConesLargerDim.Reserve(this->projectivizedChambeR.size);
   this->theMaxComputation.LPtoMaximizeLargerDim.Reserve(this->theMultiplicities.size);
   this->theMaxComputation.theConesLargerDim.SetSize(0);
@@ -1764,7 +1767,7 @@ void GeneralizedVermaModuleCharacters::InitTheMaxComputation(GlobalVariables& th
 //  int theProjectivizedDim=theAffineDim+1;
   ZnLattice.MakeZn(theAffineDim);
   this->numNonZeroMults=0;
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   ConeLatticeAndShift currentCLS;
   Vector<Rational> theLPtoMax;
   for (int i=0; i<this->theMultiplicities.size; i++)
@@ -1772,9 +1775,9 @@ void GeneralizedVermaModuleCharacters::InitTheMaxComputation(GlobalVariables& th
     { currentCLS.theProjectivizedCone=this->projectivizedChambeR.TheObjects[i];
       currentCLS.theShift.MakeZero(theAffineDim);
       currentCLS.theLattice=ZnLattice;
-      bool tempBool= this->theMultiplicities[i].valueOnEachLatticeShift[0].GetRootFromLinPolyConstTermLastVariable(theLPtoMax, (Rational) 0);
+      bool tempBool= this->theMultiplicities[i].valueOnEachLatticeShift[0].GetRootFromLinPolyConstTermLastVariable(theLPtoMax);
       if(!tempBool)
-        crash << crash;
+        crash << "This should not happen" << crash;
       this->theMaxComputation.theConesLargerDim.AddOnTop(currentCLS);
       this->theMaxComputation.LPtoMaximizeLargerDim.AddOnTop(theLPtoMax);
       this->numNonZeroMults++;
@@ -1786,7 +1789,7 @@ void GeneralizedVermaModuleCharacters::InitTheMaxComputation(GlobalVariables& th
 }
 
 std::string GeneralizedVermaModuleCharacters::PrepareReportOneCone
-(FormatExpressions& theFormat, const Cone& theCone, GlobalVariables& theGlobalVariables)
+(FormatExpressions& theFormat, const Cone& theCone)
 { std::stringstream out1;
   std::string tempS1, tempS2;
   Vector<Rational> normalNoConstant;
@@ -1807,9 +1810,9 @@ std::string GeneralizedVermaModuleCharacters::PrepareReportOneCone
   return out1.str();
 }
 
-bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase(std::fstream& input, GlobalVariables* theGlobalVariables)
+bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase(std::fstream& input)
 { std::string tempS;
-  ProgressReport theReport(theGlobalVariables);
+  ProgressReport theReport;
   input >> tempS >> this->NumProcessedConesParam;
   input >> tempS >> this->NumProcessedExtremaEqualOne;
   input >> tempS;
@@ -1825,15 +1828,9 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase(std::fstre
   this->WeylLarger->ReadFromFile(input);
   this->WeylSmaller->ReadFromFile(input);
   this->preferredBasiS.ReadFromFile(input);
-  this->preferredBasisChangE.ReadFromFile(input, theGlobalVariables);
+  this->preferredBasisChangE.ReadFromFile(input);
   this->preferredBasisChangeInversE.ReadFromFile(input);
   this->theExtendedIntegralLatticeMatForM.ReadFromFile(input);
-  if (theGlobalVariables!=0)
-{} //   this->theParser.theHmm.MakeG2InB3(this->theParser, *theGlobalVariables);
-  else
-  { GlobalVariables tempGlobalVars;
-{}//    this->theParser.theHmm.MakeG2InB3(this->theParser, tempGlobalVars);
-  }
   theReport.Report("Loading param subchambers cone form... ");
   this->theMaxComputation.ReadFromFile(input, this->UpperLimitChambersForDebugPurposes);
   theReport.Report("Loading more pieces of data... ");
@@ -1856,7 +1853,7 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase(std::fstre
   this->theTranslationS.ReadFromFile(input);
   this->theTranslationsProjectedBasisChanged.ReadFromFile(input);
   theReport.Report("Loading partial fractions... ");
-//  this->thePfs.ReadFromFile(input, theGlobalVariables);
+//  this->thePfs.ReadFromFile(input);
   theReport.Report("Loading projectivized param complex... ");
   this->projectivizedParamComplex.ReadFromFile(input);
   theReport.Report("Loading the complex... ");
@@ -1866,24 +1863,24 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase(std::fstre
   return true;
 }
 
-void GeneralizedVermaModuleCharacters::ReadFromDefaultFile(GlobalVariables* theGlobalVariables)
+void GeneralizedVermaModuleCharacters::ReadFromDefaultFile()
 { std::fstream input;
   if (!FileOperations::FileExistsOnTopOfOutputFolder( "GenVermaComputation.txt"))
   { this->computationPhase=0;
     return;
   }
   FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(input, "GenVermaComputation.txt", false, false, false);
-  this->ReadFromFile(input, theGlobalVariables);
+  this->ReadFromFile(input);
   input.close();
 }
 
-void GeneralizedVermaModuleCharacters::WriteToDefaultFile(GlobalVariables* theGlobalVariables)
+void GeneralizedVermaModuleCharacters::WriteToDefaultFile()
 { std::fstream output;
   FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(output, "GenVermaComputation.txt", false, true, false);
-  this->WriteToFile(output, theGlobalVariables);
+  this->WriteToFile(output);
 }
 
-std::string GeneralizedVermaModuleCharacters::ElementToStringMultiplicitiesReport(GlobalVariables& theGlobalVariables)
+std::string GeneralizedVermaModuleCharacters::ElementToStringMultiplicitiesReport()
 { if (this->theMultiplicities.size!= this->projectivizedChambeR.size)
     crash << crash;
   std::stringstream out;
@@ -1901,7 +1898,7 @@ std::string GeneralizedVermaModuleCharacters::ElementToStringMultiplicitiesRepor
   }
   out << "\nNumber of inequalities: " << numInequalities;
   if (!this->ParabolicLeviPartRootSpacesZeroStandsForSelected.CardinalitySelection==0)
-    out << this->PrepareReport(theGlobalVariables);
+    out << this->PrepareReport();
   return out.str();
 }
 
@@ -1966,23 +1963,23 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjective(int indexOperat
   *outputNormal.LastObject()=-theConst;
 }
 
-void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep1(GlobalVariables& theGlobalVariables)
-{ this->smallerAlgebraChamber.InitFromDirectionsAndRefine(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
-  ProgressReport theReport1(&theGlobalVariables);
-  ProgressReport theReport2(&theGlobalVariables);
+void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep1()
+{ this->smallerAlgebraChamber.InitFromDirectionsAndRefine(this->GmodKNegWeightsBasisChanged);
+  ProgressReport theReport1;
+  ProgressReport theReport2;
   theReport1.Report(this->smallerAlgebraChamber.ToString(false, false));
   this->log << "Directions for making the chamber basis changed: " << this->GmodKNegWeightsBasisChanged.ToString() << "\n Resulting chamber before projectivization:\n "
   << this->smallerAlgebraChamber.ToString(false, false);
   theReport2.Report(this->log.str());
 }
 
-void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2(GlobalVariables& theGlobalVariables)
+void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2()
 { std::stringstream out;
   ConeComplex projectivizedChamberFinal;
   Cone currentProjectiveCone;
   Vectors<Rational> tempRoots, extraWeylChamberWalls;
   Vector<Rational> tempRoot, wallAtInfinity, wallToSliceWith;
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
 //  int dimSmallerAlgebra=this->theLinearOperators.TheObjects[0].NumRows;
 //  int dimLargerAlgebra=this->theLinearOperators.TheObjects[0].NumCols;
 //  int dimFinal=dimSmallerAlgebra+dimLargerAlgebra+1;
@@ -1994,13 +1991,13 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2(GlobalVari
       this->TransformToWeylProjective(0, currentAffineCone.Normals[j], tempRoots[j]);
     tempRoots.AddListOnTop(this->PreimageWeylChamberLargerAlgebra.Normals);
     theReport.Report(tempRoots.ToString());
-    currentProjectiveCone.CreateFromNormals(tempRoots, &theGlobalVariables);
-    projectivizedChamberFinal.AddNonRefinedChamberOnTopNoRepetition(currentProjectiveCone, theGlobalVariables);
+    currentProjectiveCone.CreateFromNormals(tempRoots);
+    projectivizedChamberFinal.AddNonRefinedChamberOnTopNoRepetition(currentProjectiveCone);
   }
   for (int i=0; i<this->PreimageWeylChamberSmallerAlgebra.Normals.size; i++)
     projectivizedChamberFinal.splittingNormals.AddOnTop(this->PreimageWeylChamberSmallerAlgebra.Normals[i]);
   out << "projectivized chamber before chopping non-dominant part:\n" << projectivizedChamberFinal.ToString(false, false);
-  projectivizedChamberFinal.Refine(theGlobalVariables);
+  projectivizedChamberFinal.Refine();
   out << "Refined projectivized chamber before chopping non-dominant part:\n" << projectivizedChamberFinal.ToString(false, false);
   for (int i=0; i<projectivizedChamberFinal.size; i++)
   { const Cone& currentCone=projectivizedChamberFinal[i];

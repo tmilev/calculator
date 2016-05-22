@@ -485,7 +485,7 @@ bool AlgebraicNumber::CheckNonZeroOwner()const
 
 bool AlgebraicNumber::ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner)
 { MacroRegisterFunctionWithName("AlgebraicNumber::ConstructFromMinPoly");
-  return inputOwner.AdjoinRootMinPoly(thePoly, *this, &theGlobalVariables);
+  return inputOwner.AdjoinRootMinPoly(thePoly, *this);
 }
 
 void AlgebraicClosureRationals::reset()
@@ -508,7 +508,7 @@ void AlgebraicClosureRationals::reset()
 }
 
 bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtension
-(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot, GlobalVariables* theGlobalVariables)
+(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot)
 { MacroRegisterFunctionWithName("AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtension");
   if (thePoly.TotalDegree()!=2|| !this->flagIsQuadraticRadicalExtensionRationals)
     return false;
@@ -563,9 +563,9 @@ void AlgebraicClosureRationals::ConvertPolyDependingOneVariableToPolyDependingOn
 //  stOutput << "<hr>" << output.ToString() << "<br>";
 }
 
-bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot, GlobalVariables* theGlobalVariables)
+bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot)
 { MacroRegisterFunctionWithName("AlgebraicClosureRationals::AdjoinRootMinPoly");
-  if(this->AdjoinRootQuadraticPolyToQuadraticRadicalExtension(thePoly, outputRoot, theGlobalVariables))
+  if(this->AdjoinRootQuadraticPolyToQuadraticRadicalExtension(thePoly, outputRoot))
     return true;
   Polynomial<AlgebraicNumber> minPoly;
   this->ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(thePoly, minPoly);
@@ -831,6 +831,7 @@ bool AlgebraicNumber::operator>(const AlgebraicNumber& other)const
 
 void AlgebraicNumber::AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner)
 { this->basisIndex=0;
+  this->owner=&inputOwner;
   this->theElT.MaKeEi(0, input);
 }
 
@@ -964,7 +965,8 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, Alge
 }
 
 void AlgebraicNumber::RadicalMeDefault(int theRad)
-{ crash << "Not implemented yet!" << crash;
+{ (void) theRad;
+  crash << "Not implemented yet!" << crash;
 /*  MatrixTensor<Rational> theRadicalOp;
   theRadicalOp.MakeZero();
   MonomialTensor tempM;
@@ -979,6 +981,7 @@ void AlgebraicNumber::RadicalMeDefault(int theRad)
 
 std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("AlgebraicClosureRationals::ToString");
+  (void) theFormat;//remove unused parameter warning, portable.
   std::stringstream out;
   FormatExpressions tempFormat;
   tempFormat.flagUseHTML=false;
@@ -1107,7 +1110,8 @@ void AlgebraicNumber::operator=(const Rational& other)
 }
 
 std::string ElementZmodP::ToString(FormatExpressions* theFormat)const
-{ std::stringstream out;
+{ (void) theFormat; //remove unused parameter warnign portable.
+  std::stringstream out;
   out << "(" << this->theValue.ToString() << " ~mod~ " << this->theModulo.ToString() << ")";
   return out.str();
 }

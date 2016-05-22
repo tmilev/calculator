@@ -1900,13 +1900,6 @@ D-B;\
     +6 ((getChevalleyGenerator, (B)_{3}, 1))\\\\\
     +10/3 ((getChevalleyGenerator, (B)_{3}, 2)))", true, true)
    ;
-  this->AddOperationInnerHandler
-  ("LoadSlTwoSubalgebras", CalculatorConversions::innerLoadSltwoSubalgebras, "",
-   " <b>This function is being developed and is not implemented fully yet. </b> \
-   Loads the sl(2) subalgebras of a semisimple Lie algebra from expression. ",
-   "LoadSemisimpleSubalgebras{}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3))", true, true)
-   ;
-
 //     this->AddOperationInnerHandler
 //  ("printAllPartitions", & this->innerPrintAllPartitions, "",
 //   "Prints (Kostant) partitions . ",

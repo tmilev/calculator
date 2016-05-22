@@ -358,7 +358,9 @@ class SemidirectProductElement
   static unsigned int HashFunction(const SemidirectProductElement<helt, kelt, oa>& in) {return in.HashFunction();}
 
   bool HasDifferentConjugacyInvariantsFrom(const SemidirectProductElement& other) const
-  {return false;}
+  { (void) other;//avoid unused parameter warning, portable
+    return false;
+  }
   template <typename coefficient>
   void GetCharacteristicPolyStandardRepresentation(Polynomial<coefficient>& theCharPoly)
   { Polynomial<Rational> p;
@@ -475,7 +477,8 @@ class ElementZ2N
   }
 
   void MakeID(const ElementZ2N& unused)
-  { this->bits.SetSize(0);
+  { (void) unused;//avoid unused parameter warning, portable
+    this->bits.SetSize(0);
   }
 
   bool IsID() const
@@ -610,7 +613,7 @@ class HyperoctahedralGroupData
     return this->N==other.N;
   }
 
-  std::string ToString(GlobalVariables* unused) const;
+  std::string ToString() const;
   template <typename somestream>
   somestream& IntoStream(somestream& outstream) const;
 };
@@ -1634,7 +1637,7 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintCharacterTable(bool andPri
     ns << i;
     numbers.AddOnTop(ns.str());
     int nil = numbers.LastObject()->length();
-    if(numpad < nil);
+    if(numpad < nil)
       numpad = nil;
   }
 
@@ -1703,7 +1706,7 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintCCRepsSizes(bool andPrint)
     ns << i;
     numbers.AddOnTop(ns.str());
     int nilen = numbers.LastObject()->length();
-    if(numpad < nilen);
+    if(numpad < nilen)
       numpad = nilen;
   }
 
@@ -1715,7 +1718,7 @@ std::string FiniteGroup<elementSomeGroup>::PrettyPrintCCRepsSizes(bool andPrint)
     ns << this->conjugacyClasseS[i].size;
     sizes.AddOnTop(ns.str());
     int nilen = sizes.LastObject()->length();
-    if(sizepad < nilen);
+    if(sizepad < nilen)
       sizepad = nilen;
   }
 

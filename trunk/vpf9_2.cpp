@@ -32,7 +32,7 @@ std::string MonomialWeylAlgebra::ToString(FormatExpressions* theFormat)const
   return out.str();
 }
 
-void SubgroupWeylGroupOLD::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
+void SubgroupWeylGroupOLD::WriteToFile(std::fstream& output)
 { output << "generator_reflections: ";
   this->simpleGenerators.WriteToFile(output);
   output << "\nouter_generators: ";
@@ -54,7 +54,7 @@ void SubgroupWeylGroupOLD::GetMatrixOfElement(const ElementWeylGroup<WeylGroupDa
   outputMatrix.Transpose();
 }
 
-void SubgroupWeylGroupOLD::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
+void SubgroupWeylGroupOLD::ReadFromFile(std::fstream& input)
 { std::string tempS;
   input >> tempS;
   this->simpleGenerators.ReadFromFile(input);
@@ -63,7 +63,7 @@ void SubgroupWeylGroupOLD::ReadFromFile(std::fstream& input, GlobalVariables* th
 }
 
 bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
-(Vectors<Rational>* inputGenerators, List<Vectors<Rational> >* inputExternalAutos, GlobalVariables* theGlobalVariables, int UpperLimitNumElements, bool recomputeAmbientRho)
+(Vectors<Rational>* inputGenerators, List<Vectors<Rational> >* inputExternalAutos, int UpperLimitNumElements, bool recomputeAmbientRho)
 { MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections");
   this->CheckInitialization();
   MemorySaving<HashedList<Vector<Rational> > > bufferOrbit;
@@ -366,7 +366,7 @@ void DrawingVariables::drawLineBuffer
 { this->theBuffer.drawLineBuffer(X1, Y1, X2, Y2, thePenStyle, ColorIndex, lineWidth);
 }
 
-void DrawingVariables::drawTextBuffer(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile)
+void DrawingVariables::drawTextBuffer(double X1, double Y1, const std::string& inputText, int color)
 { this->theBuffer.drawTextBuffer(X1, Y1, inputText, color, this->fontSizeNormal, this->TextStyleNormal);
 }
 
@@ -413,14 +413,14 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
   int theDimension= this->theWeyl.CartanSymmetric.NumRows;
   theRootSA.genK.MakeEiBasis(theDimension);
   SubgroupWeylGroupOLD theAutos;
-  theRootSA.GenerateAutomorphismsPreservingBorel(theGlobalVariables, theAutos);
+  theRootSA.GenerateAutomorphismsPreservingBorel(theAutos);
   Matrix<Rational> mapOnRootSpaces;
   int theAutoIndex= theAutos.ExternalAutomorphisms.size>1? 1 : 0;
   /*if (this->theWeyl.WeylLetter=='D' && theDimension==4)
     theAutoIndex=2;
 */
   mapOnRootSpaces.AssignVectorsToRows(theAutos.ExternalAutomorphisms[theAutoIndex]);
-  mapOnRootSpaces.Transpose(theGlobalVariables);
+  mapOnRootSpaces.Transpose();
 //  mapOnRootSpaces.ComputeDebugString();
 //  Matrix<Rational>  theDet=mapOnRootSpaces;
 //  Rational tempRat;
@@ -505,8 +505,9 @@ bool SemisimpleLieAlgebra::IsInTheWeightSupport(Vector<Rational>& theWeight, Vec
 }
 
 void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vector<Rational>& theHighestWeight)
-{ /*Vectors<Rational> weightSupport;
-  this->GenerateWeightSupport(theHighestWeight, weightSupport, theGlobalVariables);
+{ (void) theHighestWeight;
+  /*Vectors<Rational> weightSupport;
+  this->GenerateWeightSupport(theHighestWeight, weightSupport);
   int highestWeight, distanceToHW;
   this->EmbeddingsRootSpaces.SetSize(this->theWeyl.RootSystem.size);
   int theDimension= this->theWeyl.CartanSymmetric.NumRows;
@@ -582,7 +583,7 @@ int SemisimpleLieAlgebra::GetLengthStringAlongAlphaThroughBeta(Vector<Rational>&
 //  return -1;
 }
 
-bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleChevalleyGenerators(GlobalVariables& theGlobalVariables)
+bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleChevalleyGenerators()
 { MacroRegisterFunctionWithName("HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleChevalleyGenerators");
   this->theDomain().ComputeChevalleyConstants();
   this->theRange().ComputeChevalleyConstants();
@@ -671,13 +672,13 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   return true;
 }
 
-void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan(Vectors<Rational>& input, Vectors<Rational>& output, GlobalVariables& theGlobalVariables)
+void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan(Vectors<Rational>& input, Vectors<Rational>& output)
 { output.SetSize(input.size);
   for (int i=0; i<input.size; i++)
-    this->ProjectOntoSmallCartan(input[i], output[i], theGlobalVariables);
+    this->ProjectOntoSmallCartan(input[i], output[i]);
 }
 
-void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan(Vector<Rational>& input, Vector<Rational>& output, GlobalVariables& theGlobalVariables)
+void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan(Vector<Rational>& input, Vector<Rational>& output)
 { Matrix<Rational> invertedSmallCartan;
   invertedSmallCartan=this->theDomain().theWeyl.CartanSymmetric;
   invertedSmallCartan.Invert();
@@ -689,8 +690,7 @@ void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan(Vector<Rational>& 
 }
 
 bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
-(const MonomialUniversalEnveloping<RationalFunctionOld>& input, const RationalFunctionOld& theCoeff, ElementUniversalEnveloping<RationalFunctionOld>& output,
- GlobalVariables& theGlobalVariables)
+(const MonomialUniversalEnveloping<RationalFunctionOld>& input, const RationalFunctionOld& theCoeff, ElementUniversalEnveloping<RationalFunctionOld>& output)
 { ElementUniversalEnveloping<RationalFunctionOld> tempElt;
   output.MakeZero(this->theRange());
   RationalFunctionOld polyOne;
@@ -699,7 +699,7 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
   for (int i=0; i<input.generatorsIndices.size; i++)
   { if (input.generatorsIndices[i]>=this->imagesAllChevalleyGenerators.size)
       return false;
-    tempElt.AssignElementLieAlgebra(this->imagesAllChevalleyGenerators[input.generatorsIndices[i]], this->theRange(), polyOne, polyOne.GetZero());
+    tempElt.AssignElementLieAlgebra(this->imagesAllChevalleyGenerators[input.generatorsIndices[i]], this->theRange(), polyOne);
     RationalFunctionOld& thePower=input.Powers[i];
     int theIntegralPower;
     if (!thePower.IsSmallInteger(&theIntegralPower))
@@ -732,13 +732,13 @@ void HomomorphismSemisimpleLieAlgebra::GetMapSmallCartanDualToLargeCartanDual(Ma
 }
 
 bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
-(const ElementUniversalEnveloping<RationalFunctionOld>& input, ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables)
+(const ElementUniversalEnveloping<RationalFunctionOld>& input, ElementUniversalEnveloping<RationalFunctionOld>& output)
 { if(&output==&input)
     crash << crash;
   output.MakeZero(this->theRange());
   ElementUniversalEnveloping<RationalFunctionOld> tempElt;
   for (int i=0; i<input.size(); i++)
-  { if(!this->ApplyHomomorphism(input[i], input.theCoeffs[i], tempElt, theGlobalVariables))
+  { if(!this->ApplyHomomorphism(input[i], input.theCoeffs[i], tempElt))
       return false;
     output+=tempElt;
   }
@@ -774,10 +774,10 @@ void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId
 //  stOutput << this->ToString(theGlobalVariables);
 }
 
-void HomomorphismSemisimpleLieAlgebra::ToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables)
+void HomomorphismSemisimpleLieAlgebra::ToString(std::string& output, bool useHtml)
 { std::stringstream out;
   std::string tempS, tempS2;
-  if (this->CheckClosednessLieBracket(theGlobalVariables))
+  if (this->CheckClosednessLieBracket())
     out << "Lie bracket closes, everything is good!";
   else
     out << "The Lie bracket is BAD BAD BAD!";
@@ -801,7 +801,7 @@ void HomomorphismSemisimpleLieAlgebra::ToString(std::string& output, bool useHtm
 
 class slTwoInSlN;
 
-void HomomorphismSemisimpleLieAlgebra::GetRestrictionAmbientRootSystemToTheSmallerCartanSA(Vectors<Rational>& output, GlobalVariables& theGlobalVariables)
+void HomomorphismSemisimpleLieAlgebra::GetRestrictionAmbientRootSystemToTheSmallerCartanSA(Vectors<Rational>& output)
 { List<Vector<Rational> >& theRootSystem= this->theRange().theWeyl.RootSystem;
   int rankSA=this->theDomain().theWeyl.GetDim();
   Matrix<Rational> tempMat;
@@ -825,7 +825,7 @@ void HomomorphismSemisimpleLieAlgebra::GetRestrictionAmbientRootSystemToTheSmall
     this->ImagesCartanDomain[i]=this->imagesAllChevalleyGenerators[i+numPosRootsDomain].GetCartanPart();
 }
 
-bool HomomorphismSemisimpleLieAlgebra::CheckClosednessLieBracket(GlobalVariables& theGlobalVariables)
+bool HomomorphismSemisimpleLieAlgebra::CheckClosednessLieBracket()
 { ElementSemisimpleLieAlgebra<Rational> tempElt;
   Vectors<Rational> tempRoots;
   Vector<Rational> tempRoot;
@@ -1230,12 +1230,12 @@ std::string RationalFunctionOld::ToString(FormatExpressions* theFormat)const
   return out.str();
 }
 
-void RationalFunctionOld::gcd(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output, GlobalVariables* theGlobalVariables)
+void RationalFunctionOld::gcd(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output)
 { if (RationalFunctionOld::gcdQuicK(left, right, output))
     return;
   MacroRegisterFunctionWithName("RationalFunctionOld::gcd");
   Polynomial<Rational> lcmBuf, prodBuf, remBuf;
-  RationalFunctionOld::lcm(left, right, lcmBuf, theGlobalVariables);
+  RationalFunctionOld::lcm(left, right, lcmBuf);
   prodBuf=left;
   prodBuf*=right;
 //  stOutput << "<hr>the product: " << buffer2.ToString() << " and the lcm: " << buffer1.ToString() << "<br>";
@@ -1249,13 +1249,13 @@ void RationalFunctionOld::gcd(const Polynomial<Rational>& left, const Polynomial
 //  stOutput << "<br>and the result of gcd (product/lcm)= " << output.ToString() << "<hr>";
 }
 
-void RationalFunctionOld::MakeOneLetterMoN(int theIndex, const Rational& theCoeff, GlobalVariables* theGlobalVariables, int ExpectedNumVars)
+void RationalFunctionOld::MakeOneLetterMoN(int theIndex, const Rational& theCoeff, int ExpectedNumVars)
 { if ( theIndex<0)
     crash << "This is a programming error: I am asked to create Monomial which has a variable of negative index " << theIndex << ". " << crash;
   this->expressionType=this->typePoly;
   ExpectedNumVars=MathRoutines::Maximum(theIndex+1, ExpectedNumVars);
   this->Numerator.GetElement().MakeDegreeOne(ExpectedNumVars, theIndex, theCoeff);
-  this->context=theGlobalVariables;
+  this->context=&theGlobalVariables;
 }
 
 void RationalFunctionOld::MakeMonomiaL
@@ -1311,7 +1311,7 @@ void RationalFunctionOld::operator=(const RationalFunctionOld& other)
 //    this->checkConsistency();
 }
 
-void RationalFunctionOld::lcm(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output, GlobalVariables* theGlobalVariables)
+void RationalFunctionOld::lcm(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output)
 { MacroRegisterFunctionWithName("RationalFunctionOld::lcm");
   MemorySaving<Polynomial<Rational> > buffer1, buffer2, buffer3;
   Polynomial<Rational> leftTemp, rightTemp, tempP;
@@ -1337,8 +1337,7 @@ void RationalFunctionOld::lcm(const Polynomial<Rational>& left, const Polynomial
 //  { stOutput << theBasis[i].ToString() << "<br>\n";
 //  }
   MemorySaving<GroebnerBasisComputation<Rational> > bufComp;
-  GroebnerBasisComputation<Rational>& theComp=theGlobalVariables==0?
-  bufComp.GetElement(): theGlobalVariables->theGroebnerBasisComputation.GetElement();
+  GroebnerBasisComputation<Rational> theComp;
   theComp.thePolynomialOrder.theMonOrder=MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
   theComp.MaxNumGBComputations=-1;
   if (!theComp.TransformToReducedGroebnerBasis(theBasis))
@@ -1397,14 +1396,14 @@ void RationalFunctionOld::operator*=(const Polynomial<Rational>& other)
     return;
   }
   Polynomial<Rational> theGCD, theResult, tempP;
-  ProgressReport theReport(this->context);
-  if (this->context!=0)
+  ProgressReport theReport;
+  if (theGlobalVariables.flagReportEverything)
   { std::stringstream out;
     out << "Multiplying " << this->ToString(&this->context->theDefaultFormat.GetElement()) << " by "
     << other.ToString(&this->context->theDefaultFormat.GetElement());
     theReport.Report(out.str());
   }
-  RationalFunctionOld::gcd(this->Denominator.GetElement(), other, theGCD, this->context);
+  RationalFunctionOld::gcd(this->Denominator.GetElement(), other, theGCD);
   this->Numerator.GetElement()*=other;
   this->Numerator.GetElement().DivideBy(theGCD, theResult, tempP);
   //theGCD.ComputeDebugString();
@@ -1504,15 +1503,15 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other)
 //  RationalFunctionOld tempde_Bugger;
 //  tempde_Bugger=other;
 //  tempde_Bugger.ComputeDebugString();
-  ProgressReport theReport(this->context);
+  ProgressReport theReport;
   if (this->context!=0)
   { std::stringstream out;
     out << "Multiplying " << this->ToString() << " by " << other.ToString();
     //stOutput << out.str();
     theReport.Report(out.str());
   }
-  RationalFunctionOld::gcd(other.Denominator.GetElementConst(), this->Numerator.GetElement(), theGCD1, this->context);
-  RationalFunctionOld::gcd(this->Denominator.GetElement(), other.Numerator.GetElementConst(), theGCD2, this->context);
+  RationalFunctionOld::gcd(other.Denominator.GetElementConst(), this->Numerator.GetElement(), theGCD1);
+  RationalFunctionOld::gcd(this->Denominator.GetElement(), other.Numerator.GetElementConst(), theGCD2);
   this->Numerator.GetElement().DivideBy(theGCD1, tempP1, tempP2);
   this->Numerator.GetElement()=tempP1;
   if(!tempP2.IsEqualToZero())
@@ -1584,7 +1583,7 @@ void RationalFunctionOld::Simplify()
     { Polynomial<Rational> theGCD, tempP, tempP2;
 //      stOutput << "<br>fetching gcd of " << this->Numerator.GetElement().ToString() << " and "
 //      << this->Denominator.GetElement().ToString() << "<br>";
-      this->gcd(this->Numerator.GetElement(), this->Denominator.GetElement(), theGCD, this->context);
+      this->gcd(this->Numerator.GetElement(), this->Denominator.GetElement(), theGCD);
       if (theGCD.IsEqualToZero())
         crash << "This is a programing error: " << " while fetching the gcd of " << this->Numerator.GetElement().ToString() << " and " << this->Denominator.GetElement().ToString()
         << " I got 0, which is impossible. " << crash;
@@ -1695,7 +1694,7 @@ int SemisimpleLieAlgebraOrdered::GetDisplayIndexFromGeneratorIndex(int Generator
 }
 
 void SemisimpleLieAlgebraOrdered::init
-(List<ElementSemisimpleLieAlgebra<Rational> >& inputOrder, SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables)
+(List<ElementSemisimpleLieAlgebra<Rational> >& inputOrder, SemisimpleLieAlgebra& owner)
 { crash << "not implemented" << crash;
   if (inputOrder.size!=owner.GetNumGenerators())
     return;
@@ -1719,14 +1718,14 @@ void SemisimpleLieAlgebraOrdered::init
   //stOutput << this->ChevalleyGeneratorsInCurrentCoords.ToString(true, false);
 }
 
-void SemisimpleLieAlgebraOrdered::initDefaultOrder(SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables)
+void SemisimpleLieAlgebraOrdered::initDefaultOrder(SemisimpleLieAlgebra& owner)
 { List<ElementSemisimpleLieAlgebra<Rational> > defaultOrder;
   defaultOrder.SetSize(owner.GetNumGenerators());
   for (int i=0; i<defaultOrder.size; i++)
   { ElementSemisimpleLieAlgebra<Rational>& currentElt=defaultOrder[i];
     currentElt.MakeGenerator(i, owner);
   }
-  this->init(defaultOrder, owner, theGlobalVariables);
+  this->init(defaultOrder, owner);
 }
 
 template <class coefficient>
@@ -1745,7 +1744,7 @@ bool ElementSemisimpleLieAlgebra<coefficient>::IsACoeffOneChevalleyGenerator(int
 }
 
 void HomomorphismSemisimpleLieAlgebra::GetWeightsWrtKInSimpleCoordsK
-(Vectors<Rational>& outputWeights, List<ElementSemisimpleLieAlgebra<Rational> >& inputElts, GlobalVariables& theGlobalVariables)
+(Vectors<Rational>& outputWeights, List<ElementSemisimpleLieAlgebra<Rational> >& inputElts)
 { outputWeights.SetSize(inputElts.size);
   Rational tempRat;
   ElementSemisimpleLieAlgebra<Rational> tempLieElement;
@@ -1767,7 +1766,7 @@ void HomomorphismSemisimpleLieAlgebra::GetWeightsWrtKInSimpleCoordsK
 
 template <class coefficient>
 void ElementSemisimpleLieAlgebra<coefficient>::GetBasisFromSpanOfElements
-(List<ElementSemisimpleLieAlgebra>& theElements, Vectors<RationalFunctionOld>& outputCoords, List<ElementSemisimpleLieAlgebra>& outputTheBasis, GlobalVariables& theGlobalVariables)
+(List<ElementSemisimpleLieAlgebra>& theElements, Vectors<RationalFunctionOld>& outputCoords, List<ElementSemisimpleLieAlgebra>& outputTheBasis)
 { Vectors<Rational> theRootForm;
   theRootForm.SetSize(theElements.size);
   for(int i=0; i<theElements.size; i++)
@@ -1832,11 +1831,11 @@ void RationalFunctionOld::RaiseToPower(int thePower)
       this->ratValue.RaiseToPower(thePower);
       break;
     case RationalFunctionOld::typePoly:
-      this->Numerator.GetElement().RaiseToPower(thePower, (Rational) 1);
+      this->Numerator.GetElement().RaiseToPower(thePower);
       break;
     case RationalFunctionOld::typeRationalFunction:
-      this->Numerator.GetElement().RaiseToPower(thePower, (Rational) 1);
-      this->Denominator.GetElement().RaiseToPower(thePower, (Rational) 1);
+      this->Numerator.GetElement().RaiseToPower(thePower);
+      this->Denominator.GetElement().RaiseToPower(thePower);
       break;
   }
   this->checkConsistency();
@@ -1871,8 +1870,9 @@ bool ElementSemisimpleLieAlgebra<coefficient>::NeedsParenthesisForMultiplication
 }
 
 void slTwoInSlN::ClimbDownFromHighestWeightAlongSl2String(Matrix<Rational>& input, Matrix<Rational>& output, Rational& outputCoeff, int generatorPower)
-{ if(&input==&output);
-    crash << crash;
+{ MacroRegisterFunctionWithName("slTwoInSlN::ClimbDownFromHighestWeightAlongSl2String");
+  if(&input==&output)
+    crash << "input coincides with output. " << crash;
   Rational currentWeight;
   Matrix<Rational> ::LieBracket(this->theH, input, output);
   bool tempBool=input.IsProportionalTo(output, currentWeight);

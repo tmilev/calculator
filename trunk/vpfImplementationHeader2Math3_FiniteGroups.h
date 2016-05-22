@@ -157,8 +157,9 @@ Vector<Rational> ElementWeylGroup<templateWeylGroup>::operator*(const Vector<Rat
 
 template <class templateWeylGroup>
 std::string ElementWeylGroup<templateWeylGroup>::ToString
-(FormatExpressions* theFormat, List<int>* DisplayIndicesOfSimpleRoots)const
+(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("ElementWeylGroup::ToString");
+  (void) theFormat;//avoid unused parameter warning, portable
   if (this->generatorsLastAppliedFirst.size==0)
     return "id";
   std::stringstream out;
@@ -609,6 +610,7 @@ void SubgroupData<someGroup, elementSomeGroup>::ComputeCCRepresentativesPreimage
 template <class elementSomeGroup>
 std::string FiniteGroup<elementSomeGroup>::ToStringElements(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("FiniteGroup::ToStringElements");
+  (void) theFormat;//avoid unused parameter warning, portable
   if (!this->flagAllElementsAreComputed)
     return "";
   std::stringstream out;
@@ -1003,7 +1005,7 @@ bool WeylGroupData::GenerateOuterOrbit
   ElementWeylGroup<WeylGroupData> currentElt;
   int numElementsToReserve=MathRoutines::Minimum(UpperLimitNumElements, 1000000);
   output.SetExpectedSize(numElementsToReserve);
-  ProgressReport theReport(theGlobalVariables);
+  ProgressReport theReport;
   simpleReflectionOrOuterAuto theGen;
   if (outputSubset!=0)
   { currentElt.MakeID(*this);
@@ -1131,7 +1133,7 @@ bool WeylGroupData::GenerateOrbit
     outputSubset->Clear();
     outputSubset->AddOnTop(currentElt);
   }
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   simpleReflectionOrOuterAuto theGen;
   // stOutput << "<br>Got to main cycle of: WeylGroup::GenerateOrbit. ";
   for (int i=0; i<output.size; i++)
@@ -1278,7 +1280,7 @@ Vectors<coefficient> WeylGroupData::GetSimpleCoordinatesFromFundamental(const Ve
 }
 
 template<class coefficient>
-coefficient WeylGroupData::WeylDimFormulaFundamentalCoords(Vector<coefficient>& weightFundCoords, const coefficient& theRingUnit)
+coefficient WeylGroupData::WeylDimFormulaFundamentalCoords(Vector<coefficient>& weightFundCoords)
 { Vector<coefficient> theWeightInSimpleCoords;
   theWeightInSimpleCoords = this->GetSimpleCoordinatesFromFundamental(weightFundCoords);
   return this->WeylDimFormulaSimpleCoords(theWeightInSimpleCoords);
@@ -1616,12 +1618,12 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::operator>(co
 
 template <typename somegroup, typename coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::GetClassFunctionMatrix
-(ClassFunction<somegroup, coefficient>& inputChar, Matrix<coefficient>& outputMat, GlobalVariables* theGlobalVariables)
+(ClassFunction<somegroup, coefficient>& inputChar, Matrix<coefficient>& outputMat)
 { this->CheckInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
   outputMat.MakeZeroMatrix(this->GetDim());
   int numClasses=this->ownerGroup->ConjugacyClassCount();
-  ProgressReport theReport(theGlobalVariables);
+  ProgressReport theReport;
   for(int cci=0; cci<numClasses; cci++)
   { if(inputChar[cci] == 0)
       continue;
@@ -1638,9 +1640,9 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::GetClassFunc
         this->classFunctionMatrices[cci].MakeZeroMatrix(this->GetDim());
         for (int i=0; i<currentCC.theElements.size; i++)
         { if (!this->theElementIsComputed[currentCC.indicesEltsInOwner[i]])
-            this->ComputeAllElementImages(theGlobalVariables);
+            this->ComputeAllElementImages();
           this->classFunctionMatrices[cci]+=this->theElementImageS[currentCC.indicesEltsInOwner[i]];
-          if (theGlobalVariables!=0)
+          if (theGlobalVariables.flagReportEverything)
           { std::stringstream reportstream;
             reportstream << " Computing conjugacy class " << currentCC.indicesEltsInOwner[i]+1
             << " (total num classes is " << numClasses << ").";
@@ -1648,7 +1650,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::GetClassFunc
           }
         }
       }
-      if (theGlobalVariables!=0)
+      if (theGlobalVariables.flagReportEverything)
       { std::stringstream reportstream;
         reportstream << "<br>Class function matrix of conjugacy class " << cci+1 << " (total num classes is " << numClasses << ") computed to be: "
         << this->classFunctionMatrices[cci].ToString();
@@ -1664,7 +1666,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::GetClassFunc
 
 template <typename somegroup, typename coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ClassFunctionMatrix
-(ClassFunction<somegroup, coefficient>& inputCF, Matrix<coefficient>& outputMat, GlobalVariables* theGlobalVariables)
+(ClassFunction<somegroup, coefficient>& inputCF, Matrix<coefficient>& outputMat)
 { int theDim=this->generatorS[0].NumRows;
   outputMat.MakeZeroMatrix(theDim);
   if(classFunctionMatrices.size == 0)
@@ -1802,7 +1804,7 @@ coefficient SubgroupWeylGroupOLD::WeylDimFormulaSimpleCoords(const Vector<coeffi
 template <class coefficient>
 bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIM
 (Vector<coefficient>& highestWeightSimpleCoords, HashedList<Vector<coefficient> >& outputWeightsSimpleCoords,
- int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
+ int upperBoundDominantWeights, std::string& outputDetails)
 { MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIM");
   std::stringstream out;
   this->CheckInitialization();
@@ -1935,7 +1937,7 @@ bool SubgroupWeylGroupOLD::GenerateOrbitReturnFalseIfTruncated(const Vector<coef
 template <class coefficient>
 bool SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart
 (const Vector<coefficient>& inputHWfundamentalCoords, HashedList<Vector<coefficient> >& outputDominantWeightsSimpleCoordS,
- List<coefficient>& outputMultsSimpleCoords, std::string& outputDetails, GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
+ List<coefficient>& outputMultsSimpleCoords, std::string& outputDetails, int UpperBoundFreudenthal)
 { MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart");
   //double startTimer=theGlobalVariables.GetElapsedSeconds();
   this->ComputeRootSubsystem();
@@ -1961,7 +1963,7 @@ bool SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart
   ///////////////////////////
   HashedList<Vector<coefficient> > outputDomWeightsSimpleCoordsLeviPart;
 
-  if (!this->GetAlLDominantWeightsHWFDIM(hwSimpleCoordsLeviPart, outputDomWeightsSimpleCoordsLeviPart, UpperBoundFreudenthal, outputDetails, theGlobalVariables))
+  if (!this->GetAlLDominantWeightsHWFDIM(hwSimpleCoordsLeviPart, outputDomWeightsSimpleCoordsLeviPart, UpperBoundFreudenthal, outputDetails))
   { std::stringstream errorLog;
     errorLog << "Error: the number of dominant weights exceeded hard-coded limit of " << UpperBoundFreudenthal
     << ". Please check out whether LiE's implementation of the Freudenthal formula can do your computation.";
@@ -1989,7 +1991,7 @@ bool SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart
 //stOutput << "Freudenthal eval w.r.t subalgebra: positive root subsystem: " <<  this->RootsOfBorel.ToString();
   Vector<coefficient> convertor;
   coefficient bufferCoeff;
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   for (int k=1; k< outputDomWeightsSimpleCoordsLeviPart.size; k++)
   { Explored[k]=true;
     coefficient& currentAccum=outputMultsSimpleCoords[k];
@@ -2067,7 +2069,8 @@ coefficient& ClassFunction<someFiniteGroup, coefficient>::operator[](int i) cons
 
 template<class someFiniteGroup, typename coefficient>
 std::string ClassFunction<someFiniteGroup, coefficient>::ToString(FormatExpressions* theFormat) const
-{ if (this->G==0)
+{ (void) theFormat;//avoid unused parameter warning, portable
+  if (this->G==0)
     return "(not initialized)";
   std::stringstream out;
   out << "(";
@@ -2352,8 +2355,8 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
   Vectors<coefficient> splittingMatrixKernel, remainingVectorSpace, tempSpace;
   ClassFunction<somegroup, coefficient> remainingCharacter=this->theCharacteR;
   remainingVectorSpace.MakeEiBasis(this->GetDim());
-  ProgressReport Report1(&theGlobalVariables), Report2(&theGlobalVariables),
-  Report3(&theGlobalVariables), Report4(&theGlobalVariables);
+  ProgressReport Report1, Report2,
+  Report3, Report4;
   { std::stringstream reportStream;
     reportStream << "<br>\nDecomposing module with character " << this->theCharacteR.ToString();
     LargeIntUnsigned largestDen, lcmDen;
@@ -2372,7 +2375,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
         reportStream << "<hr>\nGetting class f-n matrix from character: " << appendOnlyIrrepsList[i].theCharacteR;
         Report2.Report(reportStream.str());
       }
-      this->GetClassFunctionMatrix(appendOnlyIrrepsList[i].theCharacteR, splittingOperatorMatrix, &theGlobalVariables);
+      this->GetClassFunctionMatrix(appendOnlyIrrepsList[i].theCharacteR, splittingOperatorMatrix);
       { std::stringstream reportStream;
         reportStream << "<br>class f-n matrix: " << splittingOperatorMatrix.ToString() << "\n <br>\n" << " computing its zero eigenspace... ";
         Report3.Report(reportStream.str());
@@ -2408,7 +2411,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
   if((remainingVectorSpace.size < this->GetDim()) && (remainingVectorSpace.size > 0))
   { //stOutput << "<br>restricting to subrep(s)... ";
     GroupRepresentationCarriesAllMatrices<somegroup, coefficient> reducedRep;
-    this->Restrict(remainingVectorSpace, remainingCharacter, reducedRep, &theGlobalVariables);
+    this->Restrict(remainingVectorSpace, remainingCharacter, reducedRep);
     //stOutput << "done" << "\n";
     //stOutput << "Decomposing remaining subrep(s) " << reducedRep.GetCharacter() << "\n";
     return reducedRep.DecomposeTodorsVersionRecursive(outputIrrepMults, appendOnlyIrrepsList, appendOnlyGRCAMSList);
@@ -2422,7 +2425,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
   { virtualChar.MakeZero(*this->ownerGroup);
     virtualChar[cfi] = 1;
 //    stOutput << "<br>getting matrix of virtual char " << virtualChar << "\n";
-    this->GetClassFunctionMatrix(virtualChar, splittingOperatorMatrix, &theGlobalVariables);
+    this->GetClassFunctionMatrix(virtualChar, splittingOperatorMatrix);
 //    FormatExpressions tempFormat;
 //    tempFormat.flagUseLatex=true;
 //    stOutput << "... and the result is:<br>" << splittingOperatorMatrix.ToString(&tempFormat);

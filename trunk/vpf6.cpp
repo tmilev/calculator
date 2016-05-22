@@ -114,7 +114,7 @@ bool ModuleSSalgebra<coefficient>::IsNotInLevi(int theGeneratorIndex)
 template <class coefficient>
 void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt
  (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunctionOld>& output,
-  GlobalVariables& theGlobalVariables, bool useNilWeight, bool ascending)
+  bool useNilWeight, bool ascending)
 { MacroRegisterFunctionWithName("ModuleSSalgebra::GetGenericUnMinusElt");
   List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
   this->GetElementsNilradical(eltsNilrad, true, useNilWeight, ascending);
@@ -127,7 +127,7 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt
     varShift=this->GetMinNumVars();
   int numVars=varShift+eltsNilrad.size;
   for (int i=0; i<eltsNilrad.size; i++)
-  { tempRF.MakeOneLetterMoN(i+varShift, 1, &theGlobalVariables);
+  { tempRF.MakeOneLetterMoN(i+varShift, 1);
     tempMon.MultiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
   }
   tempRF.MakeOne(&theGlobalVariables);
@@ -137,7 +137,7 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt
 template <class coefficient>
 void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt
 (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<Polynomial<Rational> >& output,
- GlobalVariables& theGlobalVariables, bool useNilWeight, bool ascending)
+ bool useNilWeight, bool ascending)
 { MacroRegisterFunctionWithName("ModuleSSalgebra::GetGenericUnMinusElt");
   List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
   this->GetElementsNilradical(eltsNilrad, true, 0, useNilWeight, ascending);
@@ -373,7 +373,7 @@ std::string quasiDiffOp<coefficient>::ToString(FormatExpressions* theFormat)cons
 }
 
 template <class coefficient>
-bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart(const MonomialP& theCoeff, ElementWeylAlgebra<Rational>& outputDO, GlobalVariables& theGlobalVariables)
+bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart(const MonomialP& theCoeff, ElementWeylAlgebra<Rational>& outputDO)
 { MacroRegisterFunctionWithName("ModuleSSalgebra_CoefficientType::GetActionMonGenVermaModuleAsDiffOperator");
 //  int varShift=this->GetMinNumVars();
 //  stOutput << "<br>varShift for Euler operator: " << varShift;
@@ -400,22 +400,22 @@ bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart(const MonomialP& t
 template <class coefficient>
 bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
 (ElementSemisimpleLieAlgebra<Rational>& inputElt, quasiDiffOp<Rational>& output,
- GlobalVariables& theGlobalVariables, bool useNilWeight, bool ascending)
+ bool useNilWeight, bool ascending)
 { MacroRegisterFunctionWithName("ModuleSSalgebra_CoefficientType::GetActionGenVermaModuleAsDiffOperator");
   List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
   List<int> indicesNilrad;
   this->GetElementsNilradical(eltsNilrad, true, &indicesNilrad, useNilWeight, ascending);
   ElementUniversalEnveloping<Polynomial<Rational> > theGenElt, result;
-  this->GetGenericUnMinusElt(true, theGenElt, theGlobalVariables, useNilWeight, ascending);
+  this->GetGenericUnMinusElt(true, theGenElt, useNilWeight, ascending);
 //  Polynomial<Rational> Pone, Pzero;
-  result.AssignElementLieAlgebra(inputElt, *this->owner, 1, 0);
+  result.AssignElementLieAlgebra(inputElt, *this->owner, 1);
   std::stringstream out;
 //  stOutput << "<br>the generic elt:" << CGI::GetHtmlMathSpanPure(theGenElt.ToString());
-  theGenElt.Simplify(&theGlobalVariables);
+  theGenElt.Simplify();
 //  stOutput << "<br>the generic elt simplified:" << CGI::GetHtmlMathSpanPure(theGenElt.ToString());
 //  stOutput << "<br>" << CGI::GetHtmlMathSpanPure(result.ToString() ) << " times " << CGI::GetHtmlMathSpanPure(theGenElt.ToString()) << " = ";
   result*=(theGenElt);
-  result.Simplify(&theGlobalVariables);
+  result.Simplify();
 //  stOutput << " <br>" << CGI::GetHtmlMathSpanPure(result.ToString());
   MatrixTensor<Polynomial<Rational> > endoPart, tempMT, idMT;
   idMT.MakeIdSpecial();
@@ -459,7 +459,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
       //problemCounter++;
       currentMon.Powers[j].GetConstantTerm(currentShift);
       ElementWeylAlgebra<Rational>::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
-      (currentShift, j+varShift, oneIndexContribution, negativeExponentDenominatorContribution, theGlobalVariables);
+      (currentShift, j+varShift, oneIndexContribution, negativeExponentDenominatorContribution);
 //      stOutput << "<br>result from GetStandardOrderDiffOperatorCorrespondingToNraisedTo: "
 //      << negativeExponentDenominatorContribution.ToString() << " divided by "
 //      << oneIndexContribution.ToString();
@@ -475,7 +475,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
     { //problemCounter++;
       //if (problemCounter==249)
         //stOutput << "ere be problem!";
-      if (!this->GetActionEulerOperatorPart(theCoeff[l], eulerOperatorContribution, theGlobalVariables))
+      if (!this->GetActionEulerOperatorPart(theCoeff[l], eulerOperatorContribution))
         return false;
 //      stOutput << "<br>Euler operator contribution: " << eulerOperatorContribution.ToString();
       weylPartSummand=exponentContribution;
@@ -582,14 +582,14 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
   for (int i=0; i<theHws.size; i++)
   { ModuleSSalgebra<RationalFunctionOld>& theMod=theMods[i];
     tempV=theHws[i];
-    if (!theMod.MakeFromHW(theSSalgebra, tempV, selInducing, theGlobalVariables, 1, 0, 0, true))
+    if (!theMod.MakeFromHW(theSSalgebra, tempV, selInducing, 1, 0, 0, true))
       return output.MakeError("Failed to create module.", theCommands);
     if (i==0)
     { theMod.GetElementsNilradical(elementsNegativeNilrad, true,0, useNilWeight, ascending);
       Polynomial<Rational> Pone, Pzero;
       Pone.MakeOne(elementsNegativeNilrad.size+theMod.GetMinNumVars());
       Pzero.MakeZero();
-      theMod.GetGenericUnMinusElt(true, genericElt, theGlobalVariables, useNilWeight, ascending);
+      theMod.GetGenericUnMinusElt(true, genericElt, useNilWeight, ascending);
       //stOutput << "<br>highest weight: " << tempV.ToString();
       //stOutput << "<br>generic elt: " <<  genericElt.ToString();
 
@@ -634,10 +634,10 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
       out << "<tr><td>" << CGI::GetMathMouseHover(genericElt.ToString(&theUEformat)) << "</td>";
       latexReport << "$" << genericElt.ToString(&theUEformat) << "$";
       for (int j=0; j<theGeneratorsItry.size; j++)
-      { actionOnGenericElt.AssignElementLieAlgebra(theGeneratorsItry[j], theSSalgebra, Pone, Pzero);
+      { actionOnGenericElt.AssignElementLieAlgebra(theGeneratorsItry[j], theSSalgebra, Pone);
         actionOnGenericElt*=(genericElt);
         theSSalgebra.OrderNilradical(theMod.parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
-        actionOnGenericElt.Simplify(&theGlobalVariables);
+        actionOnGenericElt.Simplify();
         theUEformat.NumAmpersandsPerNewLineForLaTeX=2;
         out << "<td>" << CGI::GetMathMouseHover("\\begin{array}{rcl}&&" +actionOnGenericElt.ToString(&theUEformat)+"\\end{array}") << "</td>";
         theUEformat.NumAmpersandsPerNewLineForLaTeX=0;
@@ -660,7 +660,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
       currentTime= theGlobalVariables.GetElapsedSeconds();
       currentAdditions=Rational::TotalAdditions();
       currentMultiplications=Rational::TotalMultiplications();
-      theMod.GetActionGenVermaModuleAsDiffOperator(theGenerator, theQDOs[j], theGlobalVariables, useNilWeight, ascending);
+      theMod.GetActionGenVermaModuleAsDiffOperator(theGenerator, theQDOs[j], useNilWeight, ascending);
       totalAdditions+=Rational::TotalAdditions()-currentAdditions;
       totalMultiplications+=Rational::TotalMultiplications()-currentMultiplications;
       totalTime+=theGlobalVariables.GetElapsedSeconds()-currentTime;
@@ -805,7 +805,7 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   out << "</table>";
   std::string tempS;
   DrawingVariables theDV;
-  this->theCharOverH.DrawMeAssumeCharIsOverCartan(theWeyl, theGlobalVariables, theDV);
+  this->theCharOverH.DrawMeAssumeCharIsOverCartan(theWeyl, theDV);
   out << " A picture of the weight support follows. " << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
 
   bool isBad=false;
@@ -875,7 +875,7 @@ bool Calculator::innerHWVCommon
   }
   ModuleSSalgebra<RationalFunctionOld>& theMod=theMods[indexOfModule];
   if (!theMod.flagIsInitialized)
-  { bool isGood=theMod.MakeFromHW(*owner, highestWeightFundCoords, selectionParSel, theGlobalVariables, RFOne, RFZero, &report);
+  { bool isGood=theMod.MakeFromHW(*owner, highestWeightFundCoords, selectionParSel, RFOne, RFZero, &report);
     if (Verbose)
       theCommands << theMod.ToString();
     if (!isGood)
@@ -1053,7 +1053,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   out << theCommands.GetCalculatorLink(tempStream.str()) << "<br>";
   if (Verbose)
   { DrawingVariables theDV;
-    theWeyl.DrawRootSystem(theDV, true, theGlobalVariables, true, 0, true, 0);
+    theWeyl.DrawRootSystem(theDV, true, true, 0, true, 0);
     out << "<hr>Below is a drawing of the root system in its corresponding Coxeter plane (computed as explained on John Stembridge's website). "
     << "<br>The darker red dots can be dragged with the mouse to rotate the picture.<br>The grey lines are the edges of the Weyl chamber.<br>"
     << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
@@ -1105,7 +1105,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
 //  << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
   Vectors<Rational> fundamentalWeights, fundamentalWeightsEpsForm;
   //integralRoots.AssignMatrixRows(tempLattice.basisRationalForm);
-  //theWeyl.GetEpsilonCoords(integralRoots, integralRootsEpsForm, theGlobalVariables);
+  //theWeyl.GetEpsilonCoords(integralRoots, integralRootsEpsForm);
   //out << "<br>The integral lattice generators in epsilon format: " << integralRootsEpsForm.ElementToStringEpsilonForm();
   theWeyl.GetFundamentalWeightsInSimpleCoordinates(fundamentalWeights);
   Vectors<Rational> simpleBasis, simplebasisEpsCoords;
@@ -1230,10 +1230,10 @@ bool Calculator::AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& inp
   return result;
 }
 
-Expression::FunctionAddress Calculator::GetInnerFunctionFromOp(int theOp, const Expression& left, const Expression& right)
-{ crash << "Function Calculator::GetfOp not implemented yet. " << crash;
-  return 0;
-}
+//Expression::FunctionAddress Calculator::GetInnerFunctionFromOp(int theOp, const Expression& left, const Expression& right)
+//{ crash << "Function Calculator::GetfOp not implemented yet. " << crash;
+//  return 0;
+//}
 
 bool Calculator::outerTensor(Calculator& theCommands, const Expression& input, Expression& output)
 { //stOutput << "<br>At start of evaluate standard times: " << theExpression.ToString();
@@ -1441,37 +1441,52 @@ bool Calculator::outerTimesToFunctionApplication(Calculator& theCommands, const 
   return true;
 }
 
-bool Calculator::outerDistribute(Calculator& theCommands, const Expression& input, Expression& output, int AdditiveOp, int multiplicativeOp)
-{ if (theCommands.outerLeftDistributeBracketIsOnTheLeft(theCommands, input, output, AdditiveOp, multiplicativeOp))
+bool Calculator::outerDistribute(Calculator& theCommands, const Expression& input, Expression& output,
+int theAdditiveOp, int theMultiplicativeOp)
+{ if (theCommands.outerLeftDistributeBracketIsOnTheLeft(theCommands, input, output, theAdditiveOp, theMultiplicativeOp))
     return true;
-  return theCommands.outerRightDistributeBracketIsOnTheRight(theCommands, input, output, AdditiveOp, multiplicativeOp);
+  return theCommands.outerRightDistributeBracketIsOnTheRight(theCommands, input, output, theAdditiveOp, theMultiplicativeOp);
 }
 
-bool Calculator::outerLeftDistributeBracketIsOnTheLeft(Calculator& theCommands, const Expression& input, Expression& output, int AdditiveOp, int multiplicativeOp)
-{ if (!input.StartsWith(-1, 3))
+bool Calculator::outerDistributeTimes(Calculator& theCommands, const Expression& input, Expression& output)
+{ return Calculator::outerDistribute(theCommands, input, output,theCommands.opPlus(), theCommands.opTimes());
+}
+
+bool Calculator::outerLeftDistributeBracketIsOnTheLeft
+(Calculator& theCommands, const Expression& input, Expression& output,
+ int theAdditiveOp, int theMultiplicativeOp)
+{ MacroRegisterFunctionWithName("Calculator::outerLeftDistributeBracketIsOnTheLeft");
+  if (theAdditiveOp==-1)
+    theAdditiveOp= theCommands.opPlus();
+  if(theMultiplicativeOp==-1)
+    theMultiplicativeOp=theCommands.opTimes();
+  if (!input.StartsWith(theMultiplicativeOp, 3))
     return false;
-  int theAdditiveOp=theCommands.opPlus();
-  int theMultiplicativeOP=input[0].theData;
   if (!input[1].StartsWith(theAdditiveOp,3))
     return false;
 //  int theFormat=input.format;
   Expression leftE, rightE;
-  leftE.MakeXOX(theCommands, theMultiplicativeOP, input[1][1], input[2]);
-  rightE.MakeXOX(theCommands, theMultiplicativeOP, input[1][2], input[2]);
+  leftE.MakeXOX(theCommands, theMultiplicativeOp, input[1][1], input[2]);
+  rightE.MakeXOX(theCommands, theMultiplicativeOp, input[1][2], input[2]);
   return output.MakeXOX(theCommands, theAdditiveOp, leftE, rightE);
 }
 
-bool Calculator::outerRightDistributeBracketIsOnTheRight(Calculator& theCommands, const Expression& input, Expression& output, int AdditiveOp, int multiplicativeOp)
-{ if (!input.StartsWith(-1, 3))
+bool Calculator::outerRightDistributeBracketIsOnTheRight
+(Calculator& theCommands, const Expression& input, Expression& output,
+ int theAdditiveOp, int theMultiplicativeOp)
+{ MacroRegisterFunctionWithName("Calculator::outerRightDistributeBracketIsOnTheRight");
+  if (theAdditiveOp==-1)
+    theAdditiveOp= theCommands.opPlus();
+  if (theMultiplicativeOp==-1)
+    theMultiplicativeOp=theCommands.opTimes();
+  if (!input.StartsWith(theMultiplicativeOp, 3))
     return false;
-  int theAdditiveOp=theCommands.opPlus();
-  int theMultiplicativeOP=input[0].theData;
   if (!input[2].StartsWith(theAdditiveOp, 3))
     return false;
 //  int theFormat=input.format;
   Expression leftE, rightE;
-  leftE.MakeXOX(theCommands, theMultiplicativeOP, input[1], input[2][1]);
-  rightE.MakeXOX(theCommands, theMultiplicativeOP, input[1], input[2][2]);
+  leftE.MakeXOX(theCommands, theMultiplicativeOp, input[1], input[2][1]);
+  rightE.MakeXOX(theCommands, theMultiplicativeOp, input[1], input[2][2]);
   return output.MakeXOX(theCommands, theAdditiveOp, leftE, rightE);
 }
 
@@ -1602,11 +1617,27 @@ bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const E
 }
 
 bool Calculator::innerDistributeExponent(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!input.StartsWith(theCommands.opThePower(), 3))
+{ MacroRegisterFunctionWithName("Calculator::innerDistributeExponent");
+  if (!input.StartsWith(theCommands.opThePower(), 3))
     return false;
+  const Expression& base = input[1];
+  const Expression& exponentE=input[2];
   if (!input[1].StartsWith(theCommands.opTimes(), 3))
     return false;
-  if (!input[1][1].IsConstantNumber())
+  if (!base[1].IsConstantNumber())
+    return false;
+  bool isGood=base[1].IsPositiveNumber() || base[2].IsPositiveNumber();
+  if (!isGood)
+  { if (exponentE.IsInteger())
+      isGood=true;
+    else
+    { Rational exponentRat;
+      if (exponentE.IsRational(&exponentRat))
+        if (exponentRat.GetDenominator().IsEven())
+          isGood=true;
+    }
+  }
+  if (!isGood)
     return false;
   Expression leftE, rightE;
   leftE.MakeXOX(theCommands, theCommands.opThePower(), input[1][1], input[2]);
@@ -2464,7 +2495,7 @@ bool Calculator::ReplaceXXXByConCon(int con1, int con2, int inputFormat1, int in
   return true;
 }
 
-bool Calculator::ReplaceXXXXXByCon(int theCon, int inputFormat)
+bool Calculator::ReplaceXXXXXByCon(int theCon)
 { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5].controlIndex=theCon;
   this->DecreaseStackSetCharacterRangeS(4);
   return true;

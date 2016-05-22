@@ -1572,8 +1572,7 @@ void make_macdonald_polynomial(const WeylGroupData& G, const List<Vector<Rationa
 }
 
 void matrix_acts_on_polynomial(const Matrix<Rational>& m,const Polynomial<Rational>& p, Polynomial<Rational>& q)
-{ Rational one = 1;
-  q = q.GetZero();
+{ q = q.GetZero();
   List<MonomialP> vars;
   vars.SetSize(m.NumCols);
   for(int i=0; i<m.NumCols; i++)
@@ -1587,7 +1586,7 @@ void matrix_acts_on_polynomial(const Matrix<Rational>& m,const Polynomial<Ration
         qj = qj.GetZero();
         for(int k=0; k<m.NumCols; k++)
           qj.AddMonomial(vars[k],m.elements[k][j]);
-        qj.RaiseToPower((p.theMonomials[i](j)).floorIfSmall(),one);
+        qj.RaiseToPower((p.theMonomials[i](j)).floorIfSmall());
         qi *= qj;
       }
     qi *= p.theCoeffs[i];
@@ -1905,7 +1904,8 @@ bool pointlt(const Vector<int>& pointi, const Vector<int>& pointj)
 
 template<>
   std::string Vector<int>::ToString(FormatExpressions* theFormat)const
-  { std::stringstream out;
+  { (void) theFormat;//avoid unused parameter warning, portable
+    std::stringstream out;
     out.precision(5);
     out << "(";
     for(int i=0; i<this->size; i++)

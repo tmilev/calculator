@@ -162,7 +162,7 @@ void ModuleSSalgebra<coefficient>::Substitution(const PolynomialSubstitution<Rat
 
 template <class coefficient>
 MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionGeneratorIndeX
-(int generatorIndex, const coefficient& theRingUnit, const coefficient& theRingZero)
+(int generatorIndex)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::GetActionGeneratorIndeX");
   int numGenerators=this->GetOwner().GetNumGenerators();
   if (generatorIndex<0 || generatorIndex>=numGenerators)
@@ -185,7 +185,7 @@ MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionGeneratorIndeX
     return this->actionsGeneratorsMaT[generatorIndex];
   }
   if (this->GetOwner().IsASimpleGenerator(generatorIndex))
-    return this->GetActionSimpleGeneratorIndex(generatorIndex, theRingUnit, theRingZero);
+    return this->GetActionSimpleGeneratorIndex(generatorIndex);
   MatrixTensor<coefficient>& output=this->actionsGeneratorsMaT[generatorIndex];
   if (this->GetOwner().IsGeneratorFromCartan(generatorIndex))
   { output.MakeZero();
@@ -227,11 +227,11 @@ MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionGeneratorIndeX
 template  <class coefficient>
 void ModuleSSalgebra<coefficient>::GetMatrixHomogenousElt
 (ElementUniversalEnveloping<coefficient>& inputHomogeneous, List<List<ElementUniversalEnveloping<coefficient> > >& outputSortedByArgumentWeight,
- Vector<Rational>& weightUEEltSimpleCoords, MatrixTensor<coefficient>& output, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
+ Vector<Rational>& weightUEEltSimpleCoords, MatrixTensor<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero)
 { MacroRegisterFunctionWithName("ModuleSSalgebra::GetMatrixHomogenousElt");
   // stOutput << "<hr>status of the module @ start GetMatrixHomogenousElt" << this->ToString();
   this->GetAdActionHomogenousElT
-  (inputHomogeneous, weightUEEltSimpleCoords, outputSortedByArgumentWeight, theGlobalVariables, theRingUnit, theRingZero)
+  (inputHomogeneous, weightUEEltSimpleCoords, outputSortedByArgumentWeight, theRingUnit, theRingZero)
   ;
   output.MakeZero();
   for (int j=0; j<outputSortedByArgumentWeight.size; j++)
@@ -259,7 +259,7 @@ void ModuleSSalgebra<coefficient>::GetMatrixHomogenousElt
 template <class coefficient>
 bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
 (std::string* Report, charSSAlgMod& output, const Selection& splittingParSel, const Selection& ParSelFDInducingPart,
- SubgroupWeylGroupOLD& outputWeylSub, GlobalVariables& theGlobalVariables)
+ SubgroupWeylGroupOLD& outputWeylSub)
 { MacroRegisterFunctionWithName("charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight");
   this->CheckNonZeroOwner();
   std::stringstream out;
@@ -268,7 +268,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
   if (this->GetOwner()->GetRank()!=splittingParSel.MaxSize)
     crash << "This is a programming error: parabolic selection selects out of " << splittingParSel.MaxSize
     << " elements while the weyl group is of rank " << this->GetOwner()->GetRank() << ". " << crash;
-  outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, splittingParSel, theGlobalVariables, 1);
+  outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, splittingParSel, 1);
   outputWeylSub.ComputeRootSubsystem();
 
   SubgroupWeylGroupOLD complementGroup, theFDWeyl;
@@ -278,14 +278,14 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
   Selection invertedSel;
   invertedSel=splittingParSel;
   invertedSel.InvertSelection();
-  complementGroup.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, invertedSel, theGlobalVariables, 1);
+  complementGroup.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, invertedSel, 1);
   complementGroup.ComputeRootSubsystem();
   out << outputWeylSub.ToString(false);
 //  stOutput << "<hr> the Weyl subgroup: " << outputWeylSub.ToString(false);
 //  stOutput << this->ToString();
 //  stOutput << out.str();
   charSSAlgMod charAmbientFDWeyl, remainingCharDominantLevi;
-  theFDWeyl.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, ParSelFDInducingPart, theGlobalVariables, 1);
+  theFDWeyl.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, ParSelFDInducingPart, 1);
   Weight<coefficient> tempMon, localHighest;
   List<coefficient> tempMults;
   HashedList<Vector<coefficient> > tempHashedRoots;
@@ -296,7 +296,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
   tempMon.owner=this->GetOwner();
   for (int i=0; i<this->size(); i++)
   { const Weight<coefficient>& currentMon=(*this)[i];
-    if (!theFDWeyl.FreudenthalEvalIrrepIsWRTLeviPart(currentMon.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
+    if (!theFDWeyl.FreudenthalEvalIrrepIsWRTLeviPart(currentMon.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000))
     { if (Report!=0)
         *Report=tempS;
       return false;
@@ -362,7 +362,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
     highestCoeff=remainingCharDominantLevi.theCoeffs[remainingCharDominantLevi.theMonomials.GetIndex(localHighest)];
     output.AddMonomial(localHighest, highestCoeff);
     if (!outputWeylSub.FreudenthalEvalIrrepIsWRTLeviPart
-        (localHighest.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
+        (localHighest.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000))
     { if (Report!=0)
         *Report=tempS;
       return false;
@@ -385,16 +385,16 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
   { //out << "<hr>"  << "The split character is: " << output.ToString("V", "\\omega", false);
     DrawingVariables theDV;
     std::string tempS;
-    this->DrawMeNoMults(tempS, theGlobalVariables, theDV, 10000);
+    this->DrawMeNoMults(tempS, theDV, 10000);
     Vector<Rational> tempRoot;
     out << "<hr>In the following weight visualization, a yellow line is drawn if the corresponding weights are "
     << " simple reflections of one another, with respect to a simple root of the Levi part of the parabolic subalgebra. ";
     for (int i=0; i<output.size(); i++)
     { tempRoot=theWeyL.GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordS).GetVectorRational();
-      outputWeylSub.DrawContour(tempRoot, theDV, theGlobalVariables, CGI::RedGreenBlue(200, 200, 0), 1000);
+      outputWeylSub.DrawContour(tempRoot, theDV, CGI::RedGreenBlue(200, 200, 0), 1000);
       std::stringstream tempStream;
       tempStream << output.theCoeffs[i].ToString();
-      theDV.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal, 0);
+      theDV.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal);
     }
     out << "<hr>" << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyL.GetDim());
     *Report=out.str();
@@ -404,8 +404,8 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
 
 template<class coefficient>
 void ModuleSSalgebra<coefficient>::SplitOverLevi
-(std::string* Report, Selection& splittingParSel, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit,
-  const coefficient& theRingZero, List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors,
+(std::string* Report, Selection& splittingParSel,
+ List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors,
   Vectors<coefficient>* outputWeightsFundCoords, Vectors<coefficient>* outputEigenSpace, charSSAlgMod<coefficient>* outputChar)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::SplitOverLevi");
   this->CheckInitialization();
@@ -428,7 +428,7 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi
   charSSAlgMod<coefficient>& charWRTsubalgebra= (outputChar==0) ? buffer.GetElement() : *outputChar;
   this->theChaR.SplitOverLeviMonsEncodeHIGHESTWeight
   (Report, charWRTsubalgebra, splittingParSel, this->parabolicSelectionNonSelectedAreElementsLevi,
-   subWeyl, theGlobalVariables);
+   subWeyl);
   Vector<Rational> theHWsimpleCoords, theHWfundCoords;
   std::stringstream out;
   if(Report!=0)
@@ -453,11 +453,11 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi
   MemorySaving<Vectors<coefficient> > tempEigenVects;
   Vectors<coefficient>& theFinalEigenSpace= (outputEigenSpace==0) ? tempEigenVects.GetElement() : *outputEigenSpace;
 //  WeylGroup& theWeyL=this->theAlgebra.theWeyl;
-  theFinalEigenSpace.MakeEiBasis(this->GetDim(), theRingUnit, theRingZero);
+  theFinalEigenSpace.MakeEiBasis(this->GetDim());
   for (int i=0; i<splittingParSelectedInLevi.CardinalitySelection; i++)
   { int theGenIndex=splittingParSelectedInLevi.elements[i]+this->GetOwner().GetRank()+this->GetOwner().GetNumPosRoots();
     MatrixTensor<coefficient>& currentOp=
-    this->GetActionGeneratorIndeX(theGenIndex, theRingUnit, theRingZero);
+    this->GetActionGeneratorIndeX(theGenIndex);
     Matrix<coefficient> currentOpMat;
     currentOp.GetMatrix(currentOpMat, this->GetDim() );
     currentOpMat.GetZeroEigenSpaceModifyMe(eigenSpacesPerSimpleGenerator[i]);
@@ -518,7 +518,7 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi
 
 template <class coefficient>
 MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionSimpleGeneratorIndex
-(int generatorIndex, const coefficient& theRingUnit, const coefficient& theRingZero)
+(int generatorIndex)
 { Vector<Rational> genWeight=this->GetOwner().GetWeightOfGenerator(generatorIndex);
   Vector<Rational> targetWeight;
   Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> >
@@ -554,7 +554,7 @@ MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionSimpleGenerato
             this->ApplyTAA(currentPair.Object1);
             currentPair.Object2=otherWordList[k];
           }
-          ProgressReport theReport(&theGlobalVariables);
+          ProgressReport theReport;
           theScalarProds[k]=this->hwTrace(currentPair, &theReport);
         }
         this->theBilinearFormsInverted[weightLevelIndex].ActOnVectorColumn(theScalarProds);
@@ -569,9 +569,9 @@ MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionSimpleGenerato
 template<class coefficient>
 bool ModuleSSalgebra<coefficient>::MakeFromHW
 (SemisimpleLieAlgebra& inputAlgebra, Vector<coefficient>& HWFundCoords, const Selection& selNonSelectedAreElementsLevi,
- GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero, std::string* outputReport, bool computeSimpleGens)
+ const coefficient& theRingUnit, const coefficient& theRingZero, std::string* outputReport, bool computeSimpleGens)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::MakeFromHW");
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   this->owner=&inputAlgebra;
   SemisimpleLieAlgebra& theAlgebrA=inputAlgebra;
 
@@ -625,7 +625,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
   startingPath.MakeFromWeightInSimpleCoords(this->theHWFDpartSimpleCoordS, theWeyl);
 //  stOutput << "<br>starting littelmann path: " << startingPath.ToString() << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
   List<List<int> > generatorsIndices;
-  if (!startingPath.GenerateOrbit(this->thePaths, generatorsIndices, theGlobalVariables, 1000, & this->parabolicSelectionNonSelectedAreElementsLevi))
+  if (!startingPath.GenerateOrbit(this->thePaths, generatorsIndices, 1000, & this->parabolicSelectionNonSelectedAreElementsLevi))
   { if (outputReport!=0)
       *outputReport = "Error: number of Littelmann paths exceeded allowed limit of 1000.";
     return false;
@@ -697,7 +697,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
       this->theGeneratingWordsWeightsPlusWeightFDpart.AddOnTop(this->theModuleWeightsSimpleCoords[i]);
     }
   }
-  this->IntermediateStepForMakeFromHW(this->theHWDualCoordsBaseFielD, theGlobalVariables, theRingUnit, theRingZero);
+  this->IntermediateStepForMakeFromHW(theRingUnit, theRingZero);
   this->NumCachedPairsBeforeSimpleGen=this->cachedPairs.size;
   this->NumRationalMultiplicationsAndAdditionsBeforeSimpleGen
   =Rational::TotalLargeAdditions+Rational::TotalSmallAdditions+Rational::TotalLargeMultiplications+Rational::TotalSmallMultiplications-startingNumRationalOperations;
@@ -728,7 +728,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
           tempSSElt.MakeGenerator(theIndex, this->GetOwner());
           if (outputReport!=0)
             out2 << "<hr>Simple generator: " << tempSSElt.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
-          MatrixTensor<coefficient>& theMatrix=this->GetActionGeneratorIndeX(theIndex, theRingUnit, theRingZero);
+          MatrixTensor<coefficient>& theMatrix=this->GetActionGeneratorIndeX(theIndex);
           std::stringstream tempStream;
           tempStream << "computing action simple generator index " << (2*k-1)*(j+1) << " ... ";
           theReport.Report(tempStream.str());
@@ -743,14 +743,14 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
       /*    for (int j=0; j<this->actionsSimpleGens[i].size; j++)
             for (int k=0; k<this->actionsSimpleGens[i][j].size; k++)
             { out << "<br>" << theSimpleGenerator.ToString(theGlobalVariables, tempFormat) << "\\cdot "
-              << this->theGeneratingWordsGrouppedByWeight[j][k].ToString(false, false, theGlobalVariables, tempFormat)
+              << this->theGeneratingWordsGrouppedByWeight[j][k].ToString(false, false, tempFormat)
               << "\\cdot v=" << this->actionsSimpleGens[i][j][k].ToString(theGlobalVariables, tempFormat)
               << "\\cdot v"
               ;
             }*/
           if (k==1)
             this->GetActionGeneratorIndeX
-            (this->GetOwner().GetNumPosRoots()+j, theRingUnit, theRingZero);
+            (this->GetOwner().GetNumPosRoots()+j);
         }
   if (outputReport!=0)
     *outputReport= out2.str();
@@ -763,10 +763,10 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
 
 template<class coefficient>
 void ModuleSSalgebra<coefficient>::IntermediateStepForMakeFromHW
-(Vector<coefficient>& HWDualCoordS, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
+(const coefficient& theRingUnit, const coefficient& theRingZero)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::IntermediateStepForMakeFromHW");
-  ProgressReport theReport(&theGlobalVariables);
-  ProgressReport theReport2(&theGlobalVariables);
+  ProgressReport theReport;
+  ProgressReport theReport2;
   Vector<Rational> targetWeight;
   this->theBilinearFormsAtEachWeightLevel.SetSize(this->theGeneratingWordsGrouppedByWeight.size);
   this->theBilinearFormsInverted.SetSize(this->theGeneratingWordsGrouppedByWeight.size);
@@ -790,7 +790,7 @@ void ModuleSSalgebra<coefficient>::IntermediateStepForMakeFromHW
         tempStream << " Computing Shapovalov form layer " << l << " out of " << this->theGeneratingWordsGrouppedByWeight.size
         << " between indices " << i +1 << " and " << j+1 << " out of " << currentWordList.size;
         //currentWordList[i].HWTAAbilinearForm
-        //(currentWordList[j], currentBF.elements[i][j], &HWDualCoordS, theGlobalVariables, theRingUnit, theRingZero, 0)
+        //(currentWordList[j], currentBF.elements[i][j], &HWDualCoordS, theRingUnit, theRingZero, 0)
         //;
         numScalarProducts++;
         currentBF.elements[i][j]=this->hwtaabfSimpleGensOnly(currentWordListInt[i], currentWordListInt[j], &theReport2);
@@ -856,12 +856,12 @@ void ModuleSSalgebra<coefficient>::GetElementsNilradical
 template<class coefficient>
 void ModuleSSalgebra<coefficient>::CheckConsistency(GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::TestConsistency");
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   MatrixTensor<coefficient> left, right, output, otherOutput, tempMat, diffMat;
   for (int i=0; i<this->GetOwner().GetNumGenerators(); i++)
     for (int j=0; j<this->GetOwner().GetNumGenerators(); j++)
-    { left = this->GetActionGeneratorIndeX(i, theGlobalVariables);
-      right = this->GetActionGeneratorIndeX(j, theGlobalVariables);
+    { left = this->GetActionGeneratorIndeX(i);
+      right = this->GetActionGeneratorIndeX(j);
       output=right;
       output.LieBracketOnTheLeft(left);
       ElementSemisimpleLieAlgebra<Rational> leftGen, rightGen, outputGen;
@@ -870,7 +870,7 @@ void ModuleSSalgebra<coefficient>::CheckConsistency(GlobalVariables& theGlobalVa
       this->GetOwner().LieBracket(leftGen, rightGen, outputGen);
       otherOutput.MakeZero();
       for (int k=0; k<outputGen.size(); k++)
-      { tempMat=this->GetActionGeneratorIndeX(outputGen[k].theGeneratorIndex, theGlobalVariables);
+      { tempMat=this->GetActionGeneratorIndeX(outputGen[k].theGeneratorIndex);
         tempMat*=outputGen.theCoeffs[k];
         otherOutput+=tempMat;
       }
@@ -887,12 +887,12 @@ void ModuleSSalgebra<coefficient>::CheckConsistency(GlobalVariables& theGlobalVa
       }
     }
   for (int i=0; i<this->GetOwner().GetNumPosRoots(); i++)
-  { left=this->GetActionGeneratorIndeX(i, theGlobalVariables);
-    right=this->GetActionGeneratorIndeX(this->GetOwner().GetNumGenerators()-1-i, theGlobalVariables);
+  { left=this->GetActionGeneratorIndeX(i);
+    right=this->GetActionGeneratorIndeX(this->GetOwner().GetNumGenerators()-1-i);
     left.Transpose();
     left-=right;
 //    stOutput << "<br>left minus right: " << left.ToString();
-    left=this->GetActionGeneratorIndeX(i, theGlobalVariables);
+    left=this->GetActionGeneratorIndeX(i);
     right.LieBracketOnTheLeft(left);
 //    stOutput << "<br> [left,right]" << right.ToString();
 
@@ -917,28 +917,28 @@ void ModuleSSalgebra<coefficient>::GetFDchar(charSSAlgMod<coefficient>& output)
 template <class coefficient>
 void ModuleSSalgebra<coefficient>::ExpressAsLinearCombinationHomogenousElement
 (ElementUniversalEnveloping<coefficient>& inputHomogeneous, ElementUniversalEnveloping<coefficient>& outputHomogeneous, int indexInputBasis,
- const Vector<coefficient>& subHiGoesToIthElement, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
+ const Vector<coefficient>& subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero)
 { Vector <coefficient> theScalarProducts;
   List<MonomialUniversalEnveloping<coefficient> >& inputBasis =this->theGeneratingWordsGrouppedByWeight[indexInputBasis];
   theScalarProducts.SetSize(inputBasis.size);
 //  stOutput << "<hr>Expressing " << inputHomogeneous.ToString
-//  (theGlobalVariables, theGlobalVariables.theDefaultFormat);
+//  (theGlobalVariables.theDefaultFormat);
 
   for (int i=0; i<inputBasis.size; i++)
   { std::stringstream tempStream;
-//    stOutput << "<br>(" << inputHomogeneous.ToString(false, false, theGlobalVariables, theGlobalVariables.theDefaultFormat)
-//    << "," << inputBasis[i].ToString(false, false, theGlobalVariables, theGlobalVariables.theDefaultFormat)
+//    stOutput << "<br>(" << inputHomogeneous.ToString(false, false, theGlobalVariables.theDefaultFormat)
+//    << "," << inputBasis[i].ToString(false, false, theGlobalVariables.theDefaultFormat)
 //    << " )=";
 //    stOutput << theScalarProducts[i].ToString() ;
 
-    inputHomogeneous.HWTAAbilinearForm(inputBasis[i], theScalarProducts[i], &subHiGoesToIthElement, theGlobalVariables, theRingUnit, theRingZero, &tempStream);
+    inputHomogeneous.HWTAAbilinearForm(inputBasis[i], theScalarProducts[i], &subHiGoesToIthElement, theRingUnit, theRingZero, &tempStream);
 /*    stOutput << "<br>Computation details: " << tempStream.str();
-    if ( inputHomogeneous.ToString(false, false, theGlobalVariables, theGlobalVariables.theDefaultFormat)=="x_{-1}"
+    if ( inputHomogeneous.ToString(false, false, theGlobalVariables.theDefaultFormat)=="x_{-1}"
         &&  theScalarProducts[i].ToString()=="0"
         )
     { stOutput << "<b>Problem here!</b>";
       inputHomogeneous.HWTAAbilinearForm
-      (inputBasis[i], theScalarProducts[i], &subHiGoesToIthElement, theGlobalVariables, theRingUnit, theRingZero, &tempStream);
+      (inputBasis[i], theScalarProducts[i], &subHiGoesToIthElement, theRingUnit, theRingZero, &tempStream);
     }*/
 
   }
@@ -1004,13 +1004,13 @@ void ModuleSSalgebra<coefficient>::reset()
 template <class coefficient>
 void ModuleSSalgebra<coefficient>::GetAdActionHomogenousElT
 (ElementUniversalEnveloping<coefficient>& inputHomogeneous, Vector<Rational>& weightUEEltSimpleCoords,
- List<List<ElementUniversalEnveloping<coefficient> > >& outputSortedByArgumentWeight, GlobalVariables& theGlobalVariables,
+ List<List<ElementUniversalEnveloping<coefficient> > >& outputSortedByArgumentWeight,
  const coefficient& theRingUnit, const coefficient& theRingZero)
 { Vector<Rational> targetWeight;
   outputSortedByArgumentWeight.SetSize(this->theGeneratingWordsGrouppedByWeight.size);
   ElementUniversalEnveloping<coefficient> theElt;
   std::string generatorString=inputHomogeneous.ToString();
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
   { List<MonomialUniversalEnveloping<coefficient> >& currentWordList=this->theGeneratingWordsGrouppedByWeight[i];
     List<ElementUniversalEnveloping<coefficient> >& outputCurrentList=outputSortedByArgumentWeight[i];
@@ -1031,7 +1031,7 @@ void ModuleSSalgebra<coefficient>::GetAdActionHomogenousElT
       else
       { theElt=inputHomogeneous;
         theElt.MultiplyBy(currentWordList[j], theRingUnit);
-        this->ExpressAsLinearCombinationHomogenousElement(theElt, currentOutputWord, theIndex, this->theHWDualCoordsBaseFielD, theGlobalVariables, theRingUnit, theRingZero);
+        this->ExpressAsLinearCombinationHomogenousElement(theElt, currentOutputWord, theIndex, this->theHWDualCoordsBaseFielD, theRingUnit, theRingZero);
       }
       progressStream << " done!";
       theReport.Report(progressStream.str());
@@ -1073,11 +1073,11 @@ void ElementTensorsGeneralizedVermas<coefficient>::operator=(const ElementSumGen
 template <class coefficient>
 bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft
 (const ElementUniversalEnveloping<coefficient>& theUE, ElementTensorsGeneralizedVermas<coefficient>& output, SemisimpleLieAlgebra& ownerAlgebra,
- GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)const
+ const coefficient& theRingUnit)const
 { ElementTensorsGeneralizedVermas<coefficient> buffer;
   output.MakeZero();
   for (int i=0; i<theUE.size(); i++)
-  { if (!this->MultiplyOnTheLeft(theUE[i], buffer, ownerAlgebra, theGlobalVariables, theRingUnit, theRingZero))
+  { if (!this->MultiplyOnTheLeft(theUE[i], buffer, ownerAlgebra, theRingUnit))
     { ElementSumGeneralizedVermas<coefficient> tempOutput;
       stOutput << "<hr>emergency mode!";
       for (int j=0; j<this->size(); j++)
@@ -1127,10 +1127,10 @@ void ElementTensorsGeneralizedVermas<coefficient>::MakeHWV(ModuleSSalgebra<coeff
 template <class coefficient>
 bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft
 (const MonomialUniversalEnveloping<coefficient>& theUE, ElementTensorsGeneralizedVermas<coefficient>& output, SemisimpleLieAlgebra& ownerAlgebra,
- GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)const
+ const coefficient& theRingUnit)const
 { MacroRegisterFunctionWithName("ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft");
   if (&output==this)
-    crash << crash;
+    crash << "Output equals input, this is not supposed to happen. " << crash;
 //  int commentmewhendone;
 //  static int problemCounter=0;
 //  problemCounter++;
@@ -1152,7 +1152,7 @@ bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft
     int theIndex=theUE.generatorsIndices[i];
     for (int j=0; j<thePower; j++)
     { //stOutput <<"<hr>Acting by generator index " << theIndex << " on " << output.ToString();
-      output.MultiplyByElementLieAlg(buffer, ownerAlgebra, theIndex, theGlobalVariables, theRingUnit, theRingZero);
+      output.MultiplyByElementLieAlg(buffer, ownerAlgebra, theIndex, theRingUnit);
 //      buffer.checkConsistency();
       output=buffer;
 //  int commentmewhendone4;
@@ -1167,8 +1167,8 @@ bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft
 
 template <class coefficient>
 void ElementTensorsGeneralizedVermas<coefficient>::MultiplyByElementLieAlg
-(ElementTensorsGeneralizedVermas<coefficient>& output, SemisimpleLieAlgebra& ownerAlgebra, int indexGenerator, GlobalVariables& theGlobalVariables,
- const coefficient& theRingUnit, const coefficient& theRingZero)const
+(ElementTensorsGeneralizedVermas<coefficient>& output, SemisimpleLieAlgebra& ownerAlgebra, int indexGenerator,
+ const coefficient& theRingUnit)const
 { output.MakeZero();
   MonomialTensorGeneralizedVermas<coefficient> accumMon, monActedOn;
   ElementSumGeneralizedVermas<coefficient> tempElt;
@@ -1207,7 +1207,7 @@ void ElementTensorsGeneralizedVermas<coefficient>::MultiplyByElementLieAlg
 
 template <class coefficient>
 void ElementTensorsGeneralizedVermas<coefficient>::TensorOnTheRight
-(const ElementTensorsGeneralizedVermas<coefficient>& right, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
+(const ElementTensorsGeneralizedVermas<coefficient>& right)
 { MacroRegisterFunctionWithName("ElementTensorsGeneralizedVermas<coefficient>::TensorOnTheRight");
   if (right.IsEqualToZero())
   { this->MakeZero();

@@ -221,6 +221,7 @@ void WebCrawler::PingCalculatorStatus()
 
 bool CalculatorFunctionsGeneral::innerFetchWebPage(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFetchWebPage");
+  (void) input;//portable way of avoiding unused parameter warning
 //  if (!theGlobalVariables.UserDefaultHasAdminRights())
 //    return output.AssignValue((std::string) "Fetching web pages available only for logged-in admins. ", theCommands);
 

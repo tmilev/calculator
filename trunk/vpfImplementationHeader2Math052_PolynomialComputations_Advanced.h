@@ -29,7 +29,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedBasis
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::TransformToReducedBasis");
   this->initForGroebnerComputation(inputOutpuT.size);
   this->basisCandidates=inputOutpuT;
-  ProgressReport theReport1(&theGlobalVariables), theReport2(&theGlobalVariables);
+  ProgressReport theReport1, theReport2;
   if (this->flagDoProgressReport)
   { std::stringstream reportStream;
     reportStream << "<br>Transforming to reduced (NON-Groebner) basis a system of "
@@ -54,7 +54,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis
   //stOutput << "<hr>Processing" << inputOutpuT.ToString() << ".<br>";
   this->initForGroebnerComputation(inputOutpuT.size);
   this->basisCandidates=inputOutpuT;
-  ProgressReport theReport1(&theGlobalVariables), theReport2(&theGlobalVariables);
+  ProgressReport theReport1, theReport2;
   if (this->flagDoProgressReport)
   { std::stringstream reportStream;
     reportStream << "<br>Transforming to Groebner basis a system of "
@@ -166,7 +166,7 @@ template<class coefficient>
 bool GroebnerBasisComputation<coefficient>::AddPolysAndReduceBasis()
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::AddPolyAndReduceBasis");
   bool changed=false;
-  ProgressReport theReport1(&theGlobalVariables);
+  ProgressReport theReport1;
   if (this->flagDoProgressReport)
     theReport1.Report(this->ToStringPolynomialBasisStatus());
   while (this->basisCandidates.size>0)
@@ -438,7 +438,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml()
   out << theRemainders.size << " division steps total.<br>";
   out << "<table style=\"white-space: nowrap; border:1px solid black;\">";
   out << "<tr><td " << underlineStyle << "><b>Remainder:</b></td>";
-  out << this->GetPolynomialStringSpacedMonomialsHtml(this->remainderDivision, totalMonCollection, underlineStyle, HighlightedStyle, &this->remainderDivision.theMonomials)
+  out << this->GetPolynomialStringSpacedMonomialsHtml(this->remainderDivision, totalMonCollection, underlineStyle, &this->remainderDivision.theMonomials)
   << "</td></tr>";
   out << "<tr><td style=\"border-right:1px solid black;\"><b>Divisor(s)</b></td><td colspan=\"" << totalMonCollection.size+1 << "\"><b>Quotient(s) </b></td>"
   << "</tr>";
@@ -478,14 +478,14 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml()
   << "\"><b>Divident </b></td>" << "</tr>";
   out << "<tr><td style=\"border-right:1px solid black;\"></td>";
   out << this->GetPolynomialStringSpacedMonomialsHtml
-  (this->startingPoly.GetElement(), totalMonCollection, "", HighlightedStyle, &this->intermediateHighlightedMons.GetElement()[0]);
+  (this->startingPoly.GetElement(), totalMonCollection, "", &this->intermediateHighlightedMons.GetElement()[0]);
   out << "</tr>";
   for (int i=0; i<theRemainders.size; i++)
   { out << "<tr><td>-</td></tr>";
-    out << "<tr><td></td>" << this->GetPolynomialStringSpacedMonomialsHtml(theSubtracands[i], totalMonCollection, underlineStyle, underlineStyleHighlighted)
+    out << "<tr><td></td>" << this->GetPolynomialStringSpacedMonomialsHtml(theSubtracands[i], totalMonCollection, underlineStyle)
     << "</tr>";
     out << "<tr><td></td>"
-    << this->GetPolynomialStringSpacedMonomialsHtml(theRemainders[i], totalMonCollection, "", HighlightedStyle, &this->intermediateHighlightedMons.GetElement()[i+1])
+    << this->GetPolynomialStringSpacedMonomialsHtml(theRemainders[i], totalMonCollection, "", &this->intermediateHighlightedMons.GetElement()[i+1])
     << "</tr>";
   }
   out << "</table>";
@@ -735,7 +735,7 @@ void GroebnerBasisComputation<coefficient>::CheckConsistency()
 template<class coefficient>
 std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMonomialsHtml
 (const Polynomial<coefficient>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
- const std::string& extraStyle, const std::string& extraHighlightStyle,
+ const std::string& extraStyle,
  List<MonomialP>* theHighLightedMons)
 { std::stringstream out;
   bool found=false;
@@ -954,8 +954,7 @@ template <class coefficient>
 void GroebnerBasisComputation<coefficient>::PolySystemSolutionSimplificationPhase
 (List<Polynomial<coefficient> >& inputSystem)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::PolySystemSolutionSimplificationPhase");
-  ProgressReport theReport1(&theGlobalVariables), theReport2(&theGlobalVariables),
-  theReport3(&theGlobalVariables);
+  ProgressReport theReport1, theReport2, theReport3;
   if (this->flagDoProgressReport)
   { std::stringstream reportStream;
     reportStream << "Reducing input system without use of heuristics.";
@@ -1118,7 +1117,7 @@ template <class coefficient>
 void GroebnerBasisComputation<coefficient>::TrySettingValueToVariable
 (List<Polynomial<coefficient> >& inputSystem, const Rational& aValueToTryOnPreferredVariable)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::TrySettingValueToVariable");
-  ProgressReport theReport1(&theGlobalVariables);
+  ProgressReport theReport1;
   GroebnerBasisComputation& theHeuristicAttempt=
   this->ComputationUsedInRecursiveCalls.GetElement();
   this->SetUpRecursiveComputation(theHeuristicAttempt);
@@ -1171,7 +1170,7 @@ template <class coefficient>
 void GroebnerBasisComputation<coefficient>::SolveWhenSystemHasSingleMonomial
 (List<Polynomial<coefficient> >& inputSystem, const MonomialP& theMon)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::SolveWhenSystemHasSingleMonomial");
-  ProgressReport theReport1(&theGlobalVariables);
+  ProgressReport theReport1;
   List<Polynomial<coefficient> > inputSystemCopy=inputSystem;
   bool allProvenToHaveNoSolution=true;
   for (int i=0; i<theMon.GetMinNumVars(); i++)
@@ -1209,7 +1208,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
 (List<Polynomial<coefficient> >& inputSystem)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::SolveSerreLikeSystemRecursively");
   RecursionDepthCounter theCounter(&this->RecursionCounterSerreLikeSystem);
-  ProgressReport theReport1(&theGlobalVariables), theReport2(&theGlobalVariables), theReport3(&theGlobalVariables);
+  ProgressReport theReport1, theReport2, theReport3;
   List<Polynomial<coefficient> > startingSystemNoModifications=inputSystem;
   this->NumVarsToSolveForStarT=this->GetNumVarsToSolveFor(inputSystem);
   if (this->flagDoProgressReport)
@@ -1303,7 +1302,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem
     numVars=MathRoutines::Maximum(numVars, workingSystem[i].GetMinNumVars());
   this->systemSolution.GetElement().initFillInObject(numVars, 0);
   this->solutionsFound.GetElement().init(numVars);
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   std::stringstream reportStream;
   if (this->flagDoProgressReport)
   { reportStream << "Solving system " << this->ToStringCalculatorInputFromSystem(inputSystem);

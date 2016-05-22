@@ -34,8 +34,9 @@ public:
   void SubtractSmallerPositive(const LargeIntUnsigned& x);
   void ToString(std::string& output)const;
   void ElementToStringLargeElementDecimal(std::string& output)const;
-  inline std::string ToString(FormatExpressions* theFormat=0)const
-  { std::string tempS;
+  std::string ToString(FormatExpressions* theFormat=0)const
+  { (void) theFormat;//to avoid unused paramater warning
+    std::string tempS;
     this->ToString(tempS);
     return tempS;
   }
@@ -67,7 +68,7 @@ public:
       { output.AddOnTop(i);
 //        stOutput << i << ",";
         for (unsigned int j=i; j<=n; j+=i)
-          theSieve.TheObjects[j]=0;
+          theSieve[j]=0;
       }
   }
   static void gcd(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output);
@@ -97,10 +98,7 @@ public:
   { this->AddUInt(1);
   }
   bool IsIntegerFittingInInt(int* whichInt);
-  void AssignFactorial(unsigned int x)
-  { this->AssignFactorial(x, 0);
-  }
-  void AssignFactorial(unsigned int x, GlobalVariables* theGlobalVariables);
+  void AssignFactorial(unsigned int x);
   void MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& output)const;
   void MultiplyByUInt(unsigned int x);
   void AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift);
@@ -225,7 +223,8 @@ public:
   void MultiplyByInt(int x);
   void ToString(std::string& output)const;
   inline std::string ToString(FormatExpressions* theFormat=0)const
-  { std::string tempS;
+  { (void) theFormat;//avoid unused parameter warning, portable
+    std::string tempS;
     this->ToString(tempS);
     return tempS;
   }
@@ -441,8 +440,8 @@ private:
     return output;
   }
   friend std::istream& operator >> (std::istream& input, const Rational& output)
-  { std::string tempS;
-    crash << crash;
+  { (void) output;
+    crash << "This line of code should not be running. " << crash;
     return input;
   }
   friend bool operator < (int left, const Rational& right)
@@ -623,8 +622,9 @@ public:
   inline const Rational& GetComplexConjugate()const
   { return *this;
   }
-  inline void SetDynamicSubtype(int dummyParameter)
-  {}
+//  inline void SetDynamicSubtype(int dummyParameter)
+//  {(void) dummyParameter;
+//  }
   Rational RationalValue()
   { return *this;
   }
@@ -827,14 +827,8 @@ ParallelComputing::GlobalPointerCounter++;
     this->FreeExtended();
   }
   void WriteToFile(std::fstream& output);
-  inline void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
-  { this->WriteToFile(output);
-  }
   void ReadFromFile(std::istream& input);
-  inline void ReadFromFile(std::istream& input, GlobalVariables* theGlobalVariables)
-  { this->ReadFromFile(input);
-  }
-  void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
+  void DrawElement(DrawElementInputOutput& theDrawData);
   inline void AssignAbsoluteValue()
   { if(this->IsNegative())
       this->Minus();
@@ -849,10 +843,7 @@ ParallelComputing::GlobalPointerCounter++;
   { return Rational::TotalAdditions()+Rational::TotalMultiplications();
   }
   static Rational NChooseK(const Rational& n, int k);
-  static Rational Factorial(int n, GlobalVariables* theGlobalVariables);
-  static Rational Factorial(int n)
-  { return Rational::Factorial(n,0);
-  }
+  static Rational Factorial(int n);
   static Rational TwoToTheNth(int n);
   static Rational NtoTheKth(int n, int k);
   void RaiseToPower(int x);

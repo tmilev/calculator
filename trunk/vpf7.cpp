@@ -43,11 +43,11 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens
     }
 }
 
-bool PartFractions::ArgumentsAllowed(Vectors<Rational>& theArguments, std::string& outputWhatWentWrong, GlobalVariables& theGlobalVariables)
+bool PartFractions::ArgumentsAllowed(Vectors<Rational>& theArguments, std::string& outputWhatWentWrong)
 { if (theArguments.size<1)
     return false;
   Cone tempCone;
-  bool result=tempCone.CreateFromVertices(theArguments, &theGlobalVariables);
+  bool result=tempCone.CreateFromVertices(theArguments);
   if (tempCone.IsTheEntireSpace())
   { outputWhatWentWrong="Error: the vectors you gave as input span the entire space.";
     return false;
@@ -311,7 +311,7 @@ std::string LittelmannPath::ElementToStringIndicesToCalculatorOutput(LittelmannP
 }
 
 bool LittelmannPath::GenerateOrbit
-(List<LittelmannPath>& output, List<List<int> >& outputOperators, GlobalVariables& theGlobalVariables, int UpperBoundNumElts, Selection* parabolicNonSelectedAreInLeviPart)
+(List<LittelmannPath>& output, List<List<int> >& outputOperators, int UpperBoundNumElts, Selection* parabolicNonSelectedAreInLeviPart)
 { HashedList<LittelmannPath> hashedOutput;
   hashedOutput.AddOnTop(*this);
   int theDim=this->owner->GetDim();
@@ -461,7 +461,7 @@ bool ElementUniversalEnveloping<coefficient>::GetCoordsInBasis
   tempBasis=theBasis;
   tempBasis.AddOnTop(*this);
   Vectors<coefficient> tempCoords;
-  if (!this->GetBasisFromSpanOfElements(tempBasis, tempCoords, tempElts, theRingUnit, theRingZero, theGlobalVariables))
+  if (!this->GetBasisFromSpanOfElements(tempBasis, tempCoords, tempElts, theRingUnit, theRingZero))
     return false;
   Vector<coefficient> tempRoot;
   tempRoot=*tempCoords.LastObject();
@@ -499,7 +499,7 @@ bool ElementUniversalEnveloping<coefficient>::GetBasisFromSpanOfElements
   basisCoordForm.Reserve(theElements.size);
   Selection selectedBasis;
 //  outputCoordsBeforeReduction.ComputeDebugString();
-  outputCoordsBeforeReduction.SelectABasis(basisCoordForm, theFieldZero, selectedBasis, theGlobalVariables);
+  outputCoordsBeforeReduction.SelectABasis(basisCoordForm, theFieldZero, selectedBasis);
   for (int i=0; i<selectedBasis.CardinalitySelection; i++)
     outputTheBasis.AddOnTop(theElements.TheObjects[selectedBasis.elements[i]]);
   Matrix<coefficient> bufferMat;
@@ -899,7 +899,7 @@ std::string CGI::GetMathMouseHover(const std::string& input, int upperNumChars)
   return out.str();
 }
 
-void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariables& theGlobalVariables)
+void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups()
 { MacroRegisterFunctionWithName("branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups");
   this->WeylFDSmallAsSubInLarge.AmbientWeyl=&this->theHmm.theRange().theWeyl;
   this->WeylFDSmall.AmbientWeyl=&this->theHmm.theDomain().theWeyl;
@@ -995,15 +995,15 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariab
   stOutput  << "<br>Nil mod pre-nil weights: " << this->weightsNilModPreNil.ToString();*/
 }
 
-void branchingData::initAssumingParSelAndHmmInittedPart2Subgroups(GlobalVariables& theGlobalVariables)
+void branchingData::initAssumingParSelAndHmmInittedPart2Subgroups()
 { List<Vectors<Rational> > emptyList;
-  this->WeylFDSmallAsSubInLarge.ComputeSubGroupFromGeneratingReflections(&this->generatorsSmallSub, &emptyList, &theGlobalVariables, 1000, true);
+  this->WeylFDSmallAsSubInLarge.ComputeSubGroupFromGeneratingReflections(&this->generatorsSmallSub, &emptyList, 1000, true);
   this->WeylFDSmall.MakeParabolicFromSelectionSimpleRoots
-  (*this->WeylFDSmall.AmbientWeyl, this->selSmallParSel, theGlobalVariables, 1000);
-  this->WeylFD.MakeParabolicFromSelectionSimpleRoots(this->theHmm.theRange().theWeyl, this->selInducing, theGlobalVariables, 1000);
+  (*this->WeylFDSmall.AmbientWeyl, this->selSmallParSel, 1000);
+  this->WeylFD.MakeParabolicFromSelectionSimpleRoots(this->theHmm.theRange().theWeyl, this->selInducing, 1000);
 
   //  stOutput << "Splitting parabolic selection: " << splittingParSel.ToString();
-  //outputWeylSub.outputFDactingWeyl(this->GetOwner().theWeyl, splittingParSel, theGlobalVariables,1);
+  //outputWeylSub.outputFDactingWeyl(this->GetOwner().theWeyl, splittingParSel,1);
   this->WeylFD.ComputeRootSubsystem();
   this->WeylFDSmallAsSubInLarge.ComputeRootSubsystem();
   this->WeylFDSmall.ComputeRootSubsystem();

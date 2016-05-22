@@ -135,7 +135,7 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllGe
 
 // This method uses auto everywhere, and a lot of copying data in order to use auto
 template <typename somegroup, typename coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllElementImages(GlobalVariables* theGlobalVariables)
+void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllElementImages()
 { MacroRegisterFunctionWithName("GroupRepresentationCarriesAllMatrices::ComputeAllGeneratorImagesFromSimple");
   this->CheckInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
@@ -228,7 +228,7 @@ void GroupRepresentation<somegroup, coefficient>::operator*=(const GroupRepresen
 template <typename somegroup, typename coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Restrict
 (const Vectors<coefficient>& VectorSpaceBasisSubrep, const ClassFunction<somegroup, Rational>& remainingCharacter,
- GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& output, GlobalVariables* theGlobalVariables)
+ GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& output)
 { MacroRegisterFunctionWithName("WeylGroupRepresentation::Restrict");
   this->CheckAllSimpleGensAreOK();
   if (VectorSpaceBasisSubrep.size==0)
@@ -238,9 +238,9 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Restrict
   output.basis.GetGramMatrix(output.gramMatrixInverted, 0);
   output.gramMatrixInverted.Invert();
   output.theCharacteR=remainingCharacter;
-  ProgressReport theReport(theGlobalVariables);
+  ProgressReport theReport;
   for(int i=0; i<this->generatorS.size; i++)
-  { if (theGlobalVariables!=0)
+  { if (theGlobalVariables.flagReportEverything)
     { std::stringstream reportStream;
       reportStream << "Restricting the action of generator of index " << i;
       theReport.Report(reportStream.str());
@@ -1100,7 +1100,7 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(Calculator& 
   }
   std::stringstream out;
   List<SubgroupDataRootReflections> parabolicSubgroupS, extendedParabolicSubgroups, allRootSubgroups, finalSubGroups;
-  if (!theWeyl.LoadSignSignatures(finalSubGroups, &theGlobalVariables))
+  if (!theWeyl.LoadSignSignatures(finalSubGroups))
   { theWeyl.GetSignSignatureParabolics(parabolicSubgroupS);
     theWeyl.GetSignSignatureExtendedParabolics(extendedParabolicSubgroups);
     theWeyl.GetSignSignatureAllRootSubsystems(allRootSubgroups);
@@ -1214,14 +1214,14 @@ public:
 
 std::string MonomialMacdonald::ToString(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("MonomialMacdonald::ToString");
+  (void) theFormat; //prevent unused parameter warning, portable
   if (this->owner==0)
     return "(non-initialized)";
   if (this->rootSel.CardinalitySelection==0)
     return "1";
   std::stringstream out;
   for (int i=0; i<this->rootSel.CardinalitySelection; i++)
-  { out << "a_" << this->rootSel.elements[i] << "";
-  }
+    out << "a_" << this->rootSel.elements[i] << "";
   return out.str();
 }
 
@@ -1560,7 +1560,7 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(Calculator& theCommands,
   int numGenerators=theSet.size;
   Expression theProduct, evaluatedProduct;
   //stOutput << "<br>" << theSet[0].ToString() << "->" << theSet[0].ToStringFull() << " is with hash " << theSet[0].HashFunction();
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport;
   for (int i=0; i<theSet.size; i++)
     for (int j=0; j<numGenerators; j++)
     { theProduct.MakeProducT(theCommands, theSet[j], theSet[i]);
@@ -1594,6 +1594,7 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(Calculator& theCommands,
 template <typename somegroup, typename coefficient>
 void VirtualRepresentation<somegroup, coefficient>::operator*=(const VirtualRepresentation<somegroup, coefficient>& other)
 { MacroRegisterFunctionWithName("VirtualRepresentation::operator*=");
+  (void) other;
   crash << "Not implemented yet. " << crash;
 /*  WeylGroupVirtualRepresentation<coefficient> output, currentContribution;
   output.ownerGroup=this->ownerGroup;
@@ -1613,7 +1614,7 @@ void VirtualRepresentation<somegroup, coefficient>::operator*=(const VirtualRepr
 }
 
 template <typename somegroup, typename coefficient>
-void VirtualRepresentation<somegroup, coefficient>::AssignRep(const GroupRepresentationCarriesAllMatrices<somegroup, Rational>& other, GlobalVariables* theGlobalVariables)
+void VirtualRepresentation<somegroup, coefficient>::AssignRep(const GroupRepresentationCarriesAllMatrices<somegroup, Rational>& other)
 { crash << " not implemented " << crash;
   GroupRepresentationCarriesAllMatrices<somegroup, coefficient> otherCopy;
   otherCopy=other;
@@ -1621,7 +1622,7 @@ void VirtualRepresentation<somegroup, coefficient>::AssignRep(const GroupReprese
 }
 
 template <typename somegroup, typename coefficient>
-void VirtualRepresentation<somegroup, coefficient>::AssignRep(const GroupRepresentation<somegroup, Rational>& other, GlobalVariables* theGlobalVariables)
+void VirtualRepresentation<somegroup, coefficient>::AssignRep(const GroupRepresentation<somegroup, Rational>& other)
 { VirtualRepresentation<somegroup, coefficient> out;
   out.AddMonomial(other.theCharacteR, 1);
 //  otherCopy.DecomposeTodorsVersion(this->coefficientsIrreps, theGlobalVariables);

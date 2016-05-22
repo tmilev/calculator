@@ -396,7 +396,7 @@ class Expression
   bool ToStringData(std::string& output, FormatExpressions* theFormat=0)const;
   std::string ToStringSemiFull()const;
   std::string ToStringFull()const;
-  std::string ToString(FormatExpressions* theFormat=0, Expression* startingExpression=0, Expression* Context=0)const;
+  std::string ToString(FormatExpressions* theFormat=0, Expression* startingExpression=0)const;
   static unsigned int HashFunction(const Expression& input)
   { return input.HashFunction();
   }
@@ -448,6 +448,7 @@ class Expression
   bool IsInteger(LargeInt* whichInteger=0)const;
   bool IsRational(Rational* whichRational=0)const;
   bool IsConstantNumber()const;
+  bool IsPositiveNumber()const;
   bool EvaluatesToDoubleInRange
   (const std::string& varName, double lowBound, double highBound, int numPoints,
    double* outputYmin=0, double* outputYmax=0, Vectors<double>* outputPoints=0)const
@@ -1011,7 +1012,7 @@ public:
   bool isSeparatorFromTheRightForList(const std::string& input);
   bool isSeparatorFromTheRightForListMatrixRow(const std::string& input);
   bool isSeparatorFromTheRightForMatrixRow(const std::string& input);
-  Expression::FunctionAddress GetInnerFunctionFromOp(int theOp, const Expression& left, const Expression& right);
+//  Expression::FunctionAddress GetInnerFunctionFromOp(int theOp, const Expression& left, const Expression& right);
   bool AllowsPowerInPreceding(const std::string& lookAhead)
   { return lookAhead!="{}";
   }
@@ -1112,7 +1113,7 @@ public:
   bool ReplaceXByConCon(int con1, int con2, int format1=Expression::formatDefault, int format2=Expression::formatDefault);
   bool ReplaceXXXByCon(int theCon);
   bool ReplaceXXXByConCon(int con1, int con2, int inputFormat1=Expression::formatDefault, int inputFormat2=Expression::formatDefault);
-  bool ReplaceXXXXXByCon(int theCon, int inputFormat=Expression::formatDefault);
+  bool ReplaceXXXXXByCon(int theCon);
   bool ReplaceXXXXXByConCon(int con1, int con2, int inputFormat1=Expression::formatDefault, int inputFormat2=Expression::formatDefault);
   bool ReplaceXXXXByConCon(int con1, int con2, int inputFormat1=Expression::formatDefault, int inputFormat2=Expression::formatDefault);
   bool ReplaceXXXXByCon(int con1, int inputFormat1=Expression::formatDefault);
@@ -1151,7 +1152,7 @@ public:
   bool ReplaceXXbyEX(int inputFormat=Expression::formatDefault);
   bool ReplaceXEXByEcontainingOE(int inputOpIndex, int inputFormat=Expression::formatDefault);
   bool ReplaceXXByEmptyString();
-  bool ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence(int inputFormat=Expression::formatDefault);
+  bool ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   bool ReplaceXXbyE(int inputFormat=Expression::formatDefault);
   bool ReplaceIntIntBy10IntPlusInt();
   bool GetMatrixExpressions(const Expression& input, Matrix<Expression>& output, int desiredNumRows=-1, int desiredNumCols=-1);
@@ -1525,7 +1526,7 @@ public:
   { return this->theAtoms.GetIndexIMustContainTheObject("/");
   }
   bool AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& input, List<Expression>& output, int theOp);
-  bool AppendMultiplicandsReturnTrueIfOrderNonCanonical(Expression& theExpression, List<Expression>& output, int RecursionDepth, int MaxRecursionDepth)
+  bool AppendMultiplicandsReturnTrueIfOrderNonCanonical(Expression& theExpression, List<Expression>& output)
   { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opTimes());
   }
   bool AppendSummandsReturnTrueIfOrderNonCanonical(const Expression& theExpression, List<Expression>& output)
@@ -1633,13 +1634,17 @@ public:
   static bool outerExtractBaseMultiplication(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerMeltBrackets(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyByOne(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool outerDistribute(Calculator& theCommands, const Expression& input, Expression& output, int AdditiveOp, int multiplicativeOp);
   static bool outerTimesToFunctionApplication(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool outerDistributeTimes(Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.outerDistribute(theCommands, input, output, theCommands.opPlus(), theCommands.opTimes());
-  }
-  static bool outerLeftDistributeBracketIsOnTheLeft(Calculator& theCommands, const Expression& input, Expression& output, int AdditiveOp, int multiplicativeOp);
-  static bool outerRightDistributeBracketIsOnTheRight(Calculator& theCommands, const Expression& input, Expression& output, int AdditiveOp, int multiplicativeOp);
+  static bool outerDistributeTimes(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool outerDistribute
+  (Calculator& theCommands, const Expression& input, Expression& output,
+   int theAdditiveOp=-1, int theMultiplicativeOp=-1);
+  static bool outerLeftDistributeBracketIsOnTheLeft
+  (Calculator& theCommands, const Expression& input, Expression& output,
+   int theAdditiveOp=-1, int theMultiplicativeOp=-1);
+  static bool outerRightDistributeBracketIsOnTheRight
+  (Calculator& theCommands, const Expression& input, Expression& output,
+   int theAdditiveOp=-1, int theMultiplicativeOp=-1);
   static bool EvaluateIf(Calculator& theCommands, const Expression& input, Expression& output);
   template<class theType>
   bool GetMatriXFromArguments
@@ -1736,7 +1741,7 @@ public:
   static bool innerGroebnerRevLex(Calculator& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerGroebner(theCommands, input, output, false, true);
   }
-  static bool innerGroebnerModZpLex(Calculator& theCommands, const Expression& input, Expression& output, bool useGr)
+  static bool innerGroebnerModZpLex(Calculator& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerGroebner(theCommands, input, output, false, false, true);
   }
   static bool innerGroebner(Calculator& theCommands, const Expression& input, Expression& output, bool useGr, bool useRevLex=false, bool useModZp=false);
@@ -1939,7 +1944,6 @@ public:
   static bool innerStoreSemisimpleSubalgebras
   (Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSlTwoSubalgebraPrecomputed(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerLoadSltwoSubalgebras(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLoadSemisimpleSubalgebras(Calculator& theCommands, const Expression& inpuT, Expression& output);
   static bool innerExpressionFromChevalleyGenerator
   (Calculator& theCommands, const ChevalleyGenerator& input, Expression& output);

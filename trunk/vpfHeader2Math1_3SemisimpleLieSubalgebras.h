@@ -235,7 +235,7 @@ public:
   std::string ToStringNilradicalSelection(const List<int>& theSelection);
   void EnumerateNilradicalsRecursively(List<int>& theSelection, std::stringstream* logStream=0);
   void ExtendNilradicalSelectionToMultFreeOverSSpartSubalgebra
-  (HashedList<int, MathRoutines::IntUnsignIdentity>& inputOutput, std::stringstream* logStream);
+  (HashedList<int, MathRoutines::IntUnsignIdentity>& inputOutput);
   bool IsPossibleNilradicalCarryOutSelectionImplications(List<int>& theSelection, std::stringstream* logStream=0);
   void ExtendToModule(List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& inputOutput);
   Vector<Rational> GetPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input)const;
@@ -254,7 +254,7 @@ public:
   int GetNumModules()const;
   void ComputePairKweightElementAndModule(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& leftKweightElt, int rightIndex, List<int>& output);
   bool IsWeightSystemSpaceIndex(int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);
-  void AddHincomplete(const Vector<Rational>& theH, const ElementWeylGroup<WeylGroupData>& theWE, int indexOfOrbit);
+  void AddHincomplete(const Vector<Rational>& theH);
   bool CheckBasicInitialization()const;
   bool CheckCandidateInitialization()const;
   bool CheckFullInitializatioN()const;

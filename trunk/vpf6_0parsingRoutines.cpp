@@ -123,7 +123,6 @@ void Calculator::init()
   this->operationsCompositeHandlers.SetExpectedSize(50);
 
   this->formatVisibleStrings.flagExpressionIsFinal=true;
-  this->theObjectContainer.theAlgebraicClosure.theGlobalVariables=&theGlobalVariables;
 
   //operation List is the very first operation. It signifies a non-atomic expression.
   //operation List is signified by the empty string
@@ -737,7 +736,7 @@ bool Calculator::ReplaceXXbyEX(int inputFormat)
   return true;
 }
 
-bool Calculator::ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence(int inputFormat)
+bool Calculator::ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence()
 { SyntacticElement& theSequenceElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   SyntacticElement& theFunctionElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5];
   Expression newExpr;
@@ -1663,7 +1662,7 @@ bool Calculator::ApplyOneRule()
   }
   if (fifthToLastS=="\\begin" && fourthToLastS=="{" && thirdToLastS=="array" && secondToLastS=="}" && lastS=="Expression")
   { this->registerNumNonClosedBeginArray++;
-    return this->ReplaceXXXXXByCon(this->conMatrixSeparator(), Expression::formatMatrix);
+    return this->ReplaceXXXXXByCon(this->conMatrixSeparator());
   }
   if (fourthToLastS=="\\end" && thirdToLastS=="{" && secondToLastS=="array" && lastS=="}" )
   { this->registerNumNonClosedBeginArray--;

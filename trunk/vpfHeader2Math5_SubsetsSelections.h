@@ -65,14 +65,12 @@ public:
   void initSelectionFixedCardinality(int card);
   void incrementSelectionFixedCardinality(int card);
   void WriteToFile(std::fstream& output);
-  inline void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables){this->WriteToFile(output);}
   void ReadFromFile(std::fstream& input);
   void InvertSelection()
   { for (int i=0; i<this->MaxSize; i++)
       this->selected[i]=!this->selected[i];
     this->ComputeIndicesFromSelection();
   }
-  inline void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables){ this->ReadFromFile(input);}
   void operator=(const Selection& right);
   void operator=(const Vector<Rational>& other);
 //  void operator=(const std::string& other);
@@ -268,7 +266,8 @@ class SelectionPositiveIntegers
   public:
   Vector<LargeIntUnsigned> theInts;
   std::string ToString(FormatExpressions* theFormat=0)
-  { return this->theInts.ToString();
+  { (void) theFormat;//avoid unused parameter warning, portable
+    return this->theInts.ToString();
   }
   LargeIntUnsigned GetGrading()
   { return this->theInts.SumCoords();
@@ -453,7 +452,7 @@ template <class coefficient>
 bool Vectors<coefficient>::GetLinearDependence(Matrix<coefficient>& outputTheLinearCombination)
 { Matrix<coefficient> tempMat;
   Selection nonPivotPoints;
-  this->GetLinearDependenceRunTheLinearAlgebra(outputTheLinearCombination, tempMat, nonPivotPoints);
+  this->GetLinearDependenceRunTheLinearAlgebra(tempMat, nonPivotPoints);
   //stOutput << tempMat.ToString(true, false);
   if (nonPivotPoints.CardinalitySelection==0)
     return false;

@@ -78,7 +78,7 @@ void Weight<coefficient>::AccountSingleWeight
 
 template <class coefficient>
 std::string Weight<coefficient>::TensorAndDecompose
-(const Weight<coefficient>& other, charSSAlgMod<coefficient>& output, GlobalVariables& theGlobalVariables)const
+(const Weight<coefficient>& other, charSSAlgMod<coefficient>& output)const
 { //This is the Brauer-Klimyk formula. Reference:
   //Humphreys J. Introduction to Lie algebras and representation theory
   //page 142, exercise 9.
@@ -304,7 +304,7 @@ void ElementSemisimpleLieAlgebra<coefficient>::ActOnMe(const ElementSemisimpleLi
 template <class coefficient>
 void ElementSemisimpleLieAlgebra<coefficient>::ActOnMe
 (const ElementSemisimpleLieAlgebra<coefficient>& theElt, ElementSemisimpleLieAlgebra<coefficient>& output, SemisimpleLieAlgebra& owner,
- const RationalFunctionOld& theRingUnit, const RationalFunctionOld& theRingZero, GlobalVariables* theGlobalVariables)
+ const RationalFunctionOld& theRingUnit, const RationalFunctionOld& theRingZero)
 { owner.LieBracket(theElt, *this, output);
 }
 
@@ -384,7 +384,7 @@ void ElementSemisimpleLieAlgebra<coefficient>::MakeHgenerator(const Vector<coeff
 
 template<class coefficient>
 bool charSSAlgMod<coefficient>::DrawMe
-(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults)
+(std::string& outputDetails, DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults)
 { MacroRegisterFunctionWithName("charSSAlgMod::DrawMe");
   this->CheckNonZeroOwner();
   charSSAlgMod<coefficient> CharCartan;
@@ -392,7 +392,7 @@ bool charSSAlgMod<coefficient>::DrawMe
   std::stringstream out;
   Vectors<Rational> currentOrbit;
   WeylGroupData& theWeyl=this->GetOwner()->theWeyl;
-  theWeyl.DrawRootSystem(theDrawingVars, false, theGlobalVariables, true);
+  theWeyl.DrawRootSystem(theDrawingVars, false, true);
   int totalNumWeights=0;
   Vectors<coefficient> dominantWeightsNonHashed;
   HashedList<Vector<coefficient> > finalWeights;
@@ -413,7 +413,7 @@ bool charSSAlgMod<coefficient>::DrawMe
       theDrawingVars.drawCircleAtVectorBufferRational(convertor, 3, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
       if (useMults)
         theDrawingVars.drawTextAtVectorBufferRational
-        (convertor, CharCartan.theCoeffs[i].ToString(), CGI::RedGreenBlue(0,0,0), theDrawingVars.PenStyleNormal, 0);
+        (convertor, CharCartan.theCoeffs[i].ToString(), CGI::RedGreenBlue(0,0,0), theDrawingVars.PenStyleNormal);
     }
   }
   out << "<br>Number of computed weights: " << totalNumWeights << ". ";
@@ -426,18 +426,18 @@ bool charSSAlgMod<coefficient>::DrawMe
 }
 
 template <class coefficient>
-void charSSAlgMod<coefficient>::DrawMeAssumeCharIsOverCartan(WeylGroupData& actualAmbientWeyl, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars)const
+void charSSAlgMod<coefficient>::DrawMeAssumeCharIsOverCartan(WeylGroupData& actualAmbientWeyl, DrawingVariables& theDrawingVars)const
 { if (actualAmbientWeyl.GetDim()<2)
     return;
   Vector<coefficient> actualWeight;
   Vector<Rational> actualWeightRationalPart;
 
-  actualAmbientWeyl.DrawRootSystem(theDrawingVars, true, theGlobalVariables, false, 0, false);
+  actualAmbientWeyl.DrawRootSystem(theDrawingVars, true, false, 0, false);
   for (int j=0; j<this->size(); j++)
   { actualWeight=actualAmbientWeyl.GetSimpleCoordinatesFromFundamental((*this)[j].weightFundamentalCoordS);
     actualWeightRationalPart=actualWeight.GetVectorRational(); // <-type conversion here!
     theDrawingVars.drawCircleAtVectorBufferRational(actualWeightRationalPart, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
-    theDrawingVars.drawTextAtVectorBufferRational(actualWeightRationalPart, this->theCoeffs[j].ToString(), CGI::RedGreenBlue(0,0,0), theDrawingVars.PenStyleNormal, 0);
+    theDrawingVars.drawTextAtVectorBufferRational(actualWeightRationalPart, this->theCoeffs[j].ToString(), CGI::RedGreenBlue(0,0,0), theDrawingVars.PenStyleNormal);
   }
 }
 
@@ -452,12 +452,11 @@ void charSSAlgMod<coefficient>::MakeTrivial(SemisimpleLieAlgebra& inputOwner)
 
 template <class coefficient>
 std::string charSSAlgMod<coefficient>::operator*=(const charSSAlgMod& other)
-{ GlobalVariables theGlobalVariables;
-  return this->MultiplyBy(other, theGlobalVariables);
+{ return this->MultiplyBy(other);
 }
 
 template <class coefficient>
-std::string charSSAlgMod<coefficient>::MultiplyBy(const charSSAlgMod& other, GlobalVariables& theGlobalVariables)
+std::string charSSAlgMod<coefficient>::MultiplyBy(const charSSAlgMod& other)
 { if (this->GetOwner()!=other.GetOwner() || this->GetOwner()==0)
     crash << "This is a programming error: attempting to multiply characters of different or non-initialized semisimple Lie algebras." << crash;
   this->SetExpectedSize(other.size()+this->size());
@@ -469,7 +468,7 @@ std::string charSSAlgMod<coefficient>::MultiplyBy(const charSSAlgMod& other, Glo
     for (int j=0; j<other.size(); j++)
     { const Weight<Rational>& left = (*this)[i];
       const Weight<Rational>& right=other[j];
-      potentialError=left.TensorAndDecompose(right, summand, theGlobalVariables);
+      potentialError=left.TensorAndDecompose(right, summand);
       if (potentialError!="")
         return potentialError;
       theCF=this->theCoeffs[i];
@@ -482,14 +481,14 @@ std::string charSSAlgMod<coefficient>::MultiplyBy(const charSSAlgMod& other, Glo
 }
 
 template <class coefficient>
-bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, charSSAlgMod& output, branchingData& inputData, GlobalVariables& theGlobalVariables)
+bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, charSSAlgMod& output, branchingData& inputData)
 { if (this->IsEqualToZero())
     return false;
   this->CheckNonZeroOwner();
   WeylGroupData& theWeyL=this->GetOwner()->theWeyl;
   std::stringstream out;
   std::string tempS;
-  inputData.initAssumingParSelAndHmmInitted(theGlobalVariables);
+  inputData.initAssumingParSelAndHmmInitted();
   SubgroupWeylGroupOLD& WeylFDSmallAsSubInLarge=inputData.WeylFDSmallAsSubInLarge;
   SubgroupWeylGroupOLD& WeylFDSmall=inputData.WeylFDSmall;
   SemisimpleLieAlgebra& theSmallAlgebra= inputData.theHmm.theDomain();
@@ -507,7 +506,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
   coefficient bufferCoeff, highestCoeff;
   for (int i=0; i<this->size(); i++)
   { const Weight<coefficient>& currentMon=(*this)[i];
-    if (!inputData.WeylFD.FreudenthalEvalIrrepIsWRTLeviPart(currentMon.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
+    if (!inputData.WeylFD.FreudenthalEvalIrrepIsWRTLeviPart(currentMon.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000))
     { if (Report!=0)
         *Report=tempS;
       return false;
@@ -600,7 +599,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
     highestCoeff=remainingCharProjected.theCoeffs[remainingCharProjected.theMonomials.GetIndex(localHighest)];
     output.AddMonomial(localHighest, highestCoeff);
     if (!WeylFDSmall.FreudenthalEvalIrrepIsWRTLeviPart
-        (localHighest.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
+        (localHighest.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, 10000))
     { if (Report!=0)
         *Report=tempS;
       return false;
@@ -630,7 +629,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
   { //out << "<hr>"  << "The split character is: " << output.ToString("V", "\\omega", false);
     DrawingVariables theDV1;
     std::string tempS;
-    output.DrawMeNoMults(tempS, theGlobalVariables, theDV1, 10000);
+    output.DrawMeNoMults(tempS, theDV1, 10000);
     Vector<Rational> tempRoot, tempRoot2;
     WeylFDSmall.AmbientWeyl->theGroup.ComputeAllElements(false, 20);
     out << "<hr>";//In the following weight visualization, a yellow line is drawn if the corresponding weights are "
@@ -638,10 +637,10 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
     for (int i=0; i<output.size(); i++)
     { tempRoot=WeylFDSmall.AmbientWeyl->GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordS).GetVectorRational();
 //      smallWeyl.DrawContour
- //     (tempRoot, theDV1, theGlobalVariables, CGI::RedGreenBlue(200, 200, 0), 1000);
+ //     (tempRoot, theDV1, CGI::RedGreenBlue(200, 200, 0), 1000);
       std::stringstream tempStream;
       tempStream << output.theCoeffs[i].ToString();
-      theDV1.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal, 0);
+      theDV1.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal);
       for (int j=1; j<WeylFDSmall.AmbientWeyl->theGroup.theElements.size; j++)
       { tempRoot2=tempRoot;
         WeylFDSmall.AmbientWeyl->ActOnRhoModified(j, tempRoot2);
@@ -651,14 +650,14 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
     out << "<hr>" << theDV1.GetHtmlFromDrawOperationsCreateDivWithUniqueName(WeylFDSmall.AmbientWeyl->GetDim());
 /*    DrawingVariables theDV2;
     std::string tempS;
-    this->DrawMeNoMults(tempS, theGlobalVariables, theDV2, 10000);
+    this->DrawMeNoMults(tempS, theDV2, 10000);
     Vector<Rational> tempRoot;
     out << "<hr>In the following weight visualization, a yellow line is drawn if the corresponding weights are "
     << " simple reflections of one another, with respect to a simple Vector<Rational> of the Levi part of the parabolic subalgebra. ";
     for (int i=0; i<output.size; i++)
     { tempRoot=theWeyl.GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoords).GetVectorRational();
       outputSubGroup.DrawContour
-      (tempRoot, theDV2, theGlobalVariables, CGI::RedGreenBlue(200, 200, 0), 1000);
+      (tempRoot, theDV2, CGI::RedGreenBlue(200, 200, 0), 1000);
       std::stringstream tempStream;
       tempStream << output.theCoeffs[i].ToString();
       theDV2.drawTextAtVectorBuffer(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal, 0);

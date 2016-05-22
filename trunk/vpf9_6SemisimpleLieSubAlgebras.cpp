@@ -141,6 +141,7 @@ bool SubalgebraSemisimpleLieAlgebra::CheckInitialization()
 
 std::string SubalgebraSemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SubalgebraSemisimpleLieAlgebra::ToString");
+  (void) theFormat;//avoid unused parameter warning in a portable way
   if(this->owner==0)
     return "A non-initialized subalgebra of a semisimple Lie algebra; ";
   std::stringstream out;
@@ -166,7 +167,7 @@ void SubalgebraSemisimpleLieAlgebra::ComputeCartanSA()
   this->CartanSA.SetSize(0);
   CurrentCentralizer=this->theBasis;
   ElementSemisimpleLieAlgebra<AlgebraicNumber> newElt;
-  ProgressReport theReport0(this->theGlobalVariables), theReport1(this->theGlobalVariables);
+  ProgressReport theReport0, theReport1;
   std::stringstream reportStream0;
   reportStream0 << "Computing Cartan subalgebra of a subalgebra of " << this->owner->theWeyl.theDynkinType.ToString()
   << " with basis " << this->theBasis.ToStringCommaDelimited();
@@ -245,6 +246,7 @@ std::string SemisimpleSubalgebras::GetRelativePhysicalFileNameFKFTNilradicals(in
 
 std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebraAbsolute(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { std::stringstream out;
+  (void) theFormat;//avoid unused parameter warning in a portable way
   out << this->owner->DisplayNameSSalgOutputFolder;
   out << CGI::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
   return out.str();
@@ -252,6 +254,7 @@ std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebraAbsolute(int Actu
 
 std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebraRelative(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { std::stringstream out;
+  (void) theFormat;//avoid unused parameter warning in a portable way
   out << "./";
   out << CGI::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
   return out.str();
@@ -259,6 +262,7 @@ std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebraRelative(int Actu
 
 std::string SemisimpleSubalgebras::GetDisplayFileNameFKFTNilradicals(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { std::stringstream out;
+  (void) theFormat;//avoid unused parameter warning in a portable way
   out << this->owner->DisplayNameSSalgOutputFolder;
   out << CGI::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "_subalgebra_"
   << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << "_FKFTnilradicals.html";
@@ -319,6 +323,7 @@ void SemisimpleSubalgebras::WriteReportToFiles()
 
 void SemisimpleSubalgebras::ComputeFolderNames(FormatExpressions& inputFormat)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeFolderNames");
+  (void) inputFormat;//avoid unused parameter warning in a portable way
   this->CheckConsistency();
   this->owner->ComputeFolderNames();
   this->currentFormat.flagUseHTML=true;
@@ -339,6 +344,7 @@ void SemisimpleSubalgebras::ComputeFolderNames(FormatExpressions& inputFormat)
 
 std::string SemisimpleSubalgebras::ToStringSSsumaryHTML(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToStringSSsumaryHTML");
+  (void) theFormat;//avoid unused parameter warning in a portable way
   if (!this->flagComputeNilradicals)
     return "";
   std::stringstream out;
@@ -1615,6 +1621,7 @@ void SemisimpleSubalgebras::AddSubalgebraToStack
 
 std::string SemisimpleSubalgebras::ToStringCurrentChain(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToStringCurrentChain");
+  (void) theFormat;//avoid unused parameter warning in a portable way
   std::stringstream out;
   out << "<br>Current subalgebra chain length: " << this->currentSubalgebraChain.size << "<br>";
   for (int i=0; i<this->currentSubalgebraChain.size; i++)
@@ -1905,7 +1912,7 @@ SemisimpleLieAlgebra& CandidateSSSubalgebra::GetAmbientSS()const
   return this->owner->GetSSowner();
 }
 
-void CandidateSSSubalgebra::AddHincomplete(const Vector<Rational>& theH, const ElementWeylGroup<WeylGroupData>& theWE, int indexOfOrbit)
+void CandidateSSSubalgebra::AddHincomplete(const Vector<Rational>& theH)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::AddHincomplete");
   this->CheckBasicInitialization();
   if (this->CartanSAsByComponentScaledToActByTwo.size==1)
@@ -3170,7 +3177,7 @@ bool CandidateSSSubalgebra::IsPossibleNilradicalCarryOutSelectionImplications(Li
   MemorySaving<List<int> > oldSelection;
   if (logStream!=0)
     oldSelection.GetElement()=theSelection;
-  this->ExtendNilradicalSelectionToMultFreeOverSSpartSubalgebra(selectedIndices, logStream);
+  this->ExtendNilradicalSelectionToMultFreeOverSSpartSubalgebra(selectedIndices);
   for (int i=0; i<theSelection.size; i++)
     if (theSelection[i]==0 && selectedIndices.Contains(i))
     { if (logStream!=0)
@@ -3201,7 +3208,7 @@ bool CandidateSSSubalgebra::IsPossibleNilradicalCarryOutSelectionImplications(Li
 }
 
 void CandidateSSSubalgebra::ExtendNilradicalSelectionToMultFreeOverSSpartSubalgebra
-(HashedList<int, MathRoutines::IntUnsignIdentity>& inputOutput, std::stringstream* logStream)
+(HashedList<int, MathRoutines::IntUnsignIdentity>& inputOutput)
 { for (int i=0; i<inputOutput.size; i++)
     for (int j=0; j<inputOutput.size; j++)
       for (int k=0; k<this->NilradicalPairingTable[inputOutput[i] ][inputOutput[j]].size; k++)
@@ -3504,7 +3511,8 @@ void SemisimpleSubalgebras::initHookUpPointers
   (SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField,
    MapReferences<SemisimpleLieAlgebra, DynkinType>* inputSubalgebrasNonEmbedded,
    ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras)
-{ this->owner=&inputOwner;
+{ (void) inputSl2sOfSubalgebras;
+  this->owner=&inputOwner;
   this->theSl2s.owner=&inputOwner;
   this->ownerField=theField;
   this->theSubalgebrasNonEmbedded=inputSubalgebrasNonEmbedded;
@@ -4185,7 +4193,7 @@ void slTwoSubalgebra::ComputeModuleDecompositionAmbientLieAlgebra()
 }
 
 void slTwoSubalgebra::ComputeModuleDecompositionOfMinimalContainingRegularSAs
-(SltwoSubalgebras& owner, int IndexInOwner)
+(SltwoSubalgebras& owner)
 { MacroRegisterFunctionWithName("slTwoSubalgebra::ComputeModuleDecompositionOfMinimalContainingRegularSAs");
   this->moduleDecompositionMinimalContainingRootSAs.SetSize(this->IndicesMinimalContainingRootSAs.size);
   List<int> buffer;
@@ -4198,7 +4206,7 @@ void slTwoSubalgebra::ComputeModuleDecompositionOfMinimalContainingRegularSAs
 }
 
 void slTwoSubalgebra::MakeReportPrecomputations
-(GlobalVariables* theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra)
+(int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra)
 { MacroRegisterFunctionWithName("slTwoSubalgebra::MakeReportPrecomputations");
   int theDimension=this->GetOwnerSSAlgebra().GetRank();
   this->IndicesContainingRootSAs.size=0;
@@ -4248,10 +4256,9 @@ void slTwoSubalgebra::ComputeModuleDecomposition
   outputModuleDimensions[IndexZeroWeight]=dimensionContainingRegularSA;
   List<int> BufferHighestWeights;
   Rational tempRat;
-  Vectors<Rational> coordsInPreferredSimpleBasis, tempRoots2;
-  Matrix<Rational> tempMat;
+  Vectors<Rational> coordsInPreferredSimpleBasis;
   positiveRootsContainingRegularSA.GetCoordsInBasis
-  (this->preferredAmbientSimpleBasis, coordsInPreferredSimpleBasis, tempRoots2, tempMat);
+  (this->preferredAmbientSimpleBasis, coordsInPreferredSimpleBasis);
   for (int k=0; k<positiveRootsContainingRegularSA.size; k++)
   { tempRat=this->hCharacteristic.ScalarEuclidean(coordsInPreferredSimpleBasis[k]);
     if(tempRat.DenShort!=1)
@@ -4452,7 +4459,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat)
   std::string htmlPathServerSl2s= this->owner->DisplayNameSSalgOutputFolder+"sl2s/";
   ProgressReport theReport;
   theReport.Report("Preparing html pages for sl(2) subalgebras. This might take a while.");
-  this->theRootSAs.ToHTML(theFormat, this);
+  this->theRootSAs.ToHTML(theFormat);
   bool usePNG=true;
   if (physicalPathSAs=="")
     usePNG=false;
@@ -4929,6 +4936,7 @@ std::string NilradicalCandidate::ToStringTableElementWithWeights(const List<Elem
 
 std::string NilradicalCandidate::ToString(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("NilradicalCandidate::ToString");
+  (void) theFormat; //avoid unused parameter warning in a portable way.
   std::stringstream out;
   out << this->FKnilradicalLog;
   Vector<Rational> currentNilrad;
@@ -5029,6 +5037,7 @@ void NilradicalCandidate::GetModGeneratedByNonHWVandNilradElt
 
 std::string CandidateSSSubalgebra::ToStringNilradicalsSummary(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringNilradicalsSummary");
+  (void) theFormat; //avoid unused parameter warning in a portable way.
   if (this->FKNilradicalCandidates.size==0)
     return "";
   std::stringstream out;
@@ -5175,6 +5184,7 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
 std::string CandidateSSSubalgebra::ToStringPairingTableLaTeX(FormatExpressions* theFormat)const
 { if (!(this->NilradicalPairingTable.size>0))
     return "";
+  (void) theFormat; //avoid unused parameter warning in a portable way.
   std::stringstream out;
   out << "\\documentclass{article}\\usepackage{longtable} \\begin{document}<br>";
   out << "Modules that have a zero weight (" << this->modulesWithZeroWeights.size << " total): ";
@@ -5237,6 +5247,7 @@ std::string CandidateSSSubalgebra::ToStringPairingTableLaTeX(FormatExpressions* 
 
 std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringPairingTable");
+  (void) theFormat; //avoid unused parameter warning, portable.
   if (!(this->NilradicalPairingTable.size>0))
     return "";
   std::stringstream out;
@@ -5445,6 +5456,7 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
 
 std::string CandidateSSSubalgebra::ToStringCentralizerDebugData(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringCentralizerDebugData");
+  (void) theFormat; //avoid unused parameter warning in a portable way.
   std::stringstream out;
   out << "Subalgebra of type: " << this->theWeylNonEmbedded->theDynkinType.ToString()
   << ". this->centralizerRank computed: " << this->centralizerRank.ToString()
@@ -5579,7 +5591,8 @@ std::string CandidateSSSubalgebra::ToStringSystem(FormatExpressions* theFormat)c
 }
 
 std::string CandidateSSSubalgebra::ToStringSystemPart2(FormatExpressions* theFormat)const
-{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringSystem");
+{ (void) theFormat;//avoid unused parameter warning in a portable way
+  MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringSystem");
   std::stringstream out;
   out << "<br><b>For the calculator: </b><br>\n" << this->ToStringLoadUnknown() << ";"
   << "<br>FindOneSolutionSerreLikePolynomialSystem{}( ";
@@ -5601,7 +5614,8 @@ std::string CandidateSSSubalgebra::ToStringSystemPart2(FormatExpressions* theFor
 }
 
 std::string CandidateSSSubalgebra::ToStringLoadUnknown(FormatExpressions* theFormat)const
-{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringLoadUnknown");
+{ (void) theFormat;//avoid unused parameter warning in a portable way.
+  MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringLoadUnknown");
   std::stringstream out;
   out << "(";
   out << "DynkinType=" << this->theWeylNonEmbedded->theDynkinType.ToString() << "; ElementsCartan=";

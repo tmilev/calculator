@@ -1609,7 +1609,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   int totalDim=input.theRange().GetRank()+input.theDomain().GetRank();
   rootsGeneratingExtendedLattice.SetSize(totalDim);
   this->log << "\n" << tempMat.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\n";
-  this->log << this->theExtendedIntegralLatticeMatForM.ToString(false, false);
+  this->log << this->theExtendedIntegralLatticeMatForM.ToString();
   this->WeylChamberSmallerAlgebra.CreateFromNormals(WallsWeylChamberLargerAlgebra);
   this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->WeylChamberSmallerAlgebra.ToString(&theFormat) << "\n";
   this->PreimageWeylChamberSmallerAlgebra.Normals=this->WeylChamberSmallerAlgebra.Normals;

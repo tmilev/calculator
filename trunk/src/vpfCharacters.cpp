@@ -696,7 +696,8 @@ List<Vector<coefficient> > DestructiveColumnSpace(Matrix<coefficient>& M)
 
 // guess at integers
 List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkDivisorsOf=0)
-{ int n = M.NumCols;
+{ (void) checkDivisorsOf;//avoid unused parameter warning, portable.
+  int n = M.NumCols;
   List<List<Vector<Rational> > > spaces;
   int found = 0;
 // for(int i=0; found < n; i++){

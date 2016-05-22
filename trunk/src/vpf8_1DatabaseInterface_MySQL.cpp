@@ -791,7 +791,7 @@ bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstre
 bool UserCalculator::AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::Authenticate");
   if (!theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
-    this->ComputeShaonedSaltedPassword(false);
+    this->ComputeShaonedSaltedPassword();
   else
     this->enteredShaonedSaltedPassword=this->enteredPassword;
 //  stOutput <<  "computed shaoned saltes pass from pass "
@@ -902,7 +902,7 @@ bool UserCalculator::CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, std
   return this->SetPassword(theRoutines, commentsOnFailure);
 }
 
-void UserCalculator::ComputeShaonedSaltedPassword(bool recomputeSafeEntries)
+void UserCalculator::ComputeShaonedSaltedPassword()
 { MacroRegisterFunctionWithName("UserCalculator::ComputeShaonedSaltedPassword");
   this->usernamePlusPassWord=this->username.value;
   this->usernamePlusPassWord+=this->enteredPassword;
@@ -1034,7 +1034,7 @@ bool UserCalculator::SetPassword(DatabaseRoutines& theRoutines, std::stringstrea
     return false;
   }
 //  stOutput << "Whats going on here<br>";
-  this->ComputeShaonedSaltedPassword(false);
+  this->ComputeShaonedSaltedPassword();
 //  std::stringstream mustdeleteme;
   return this->SetColumnEntry("password", this->enteredShaonedSaltedPassword, theRoutines, commentsOnFailure);
 //  stOutput << mustdeleteme.str();
@@ -1170,6 +1170,7 @@ bool UserCalculator::IsAcceptableDatabaseInpuT(const std::string& input, std::st
 
 bool DatabaseRoutines::TableExists(const std::string& tableNameUnsafe, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::TableExists");
+  (void) commentsOnFailure;//portable way to avoid unused parameter warning
   if (this->connection==0)
     crash << "this->connection equals 0 at a place where this shouldn't happen. " << crash;
   MySQLdata tableName=tableNameUnsafe;
@@ -1205,6 +1206,7 @@ std::string UserCalculator::GetSelectedRowEntry(const std::string& theKey)
 
 bool DatabaseRoutines::ExtractEmailList(const std::string& emailList, List<std::string>& outputList, std::stringstream& comments)
 { MacroRegisterFunctionWithName("DatabaseRoutines::ExtractEmailList");
+  (void) comments;//portable way to avoid unused parameter warning
   List<unsigned char> delimiters;
   delimiters.AddOnTop(' ');
   delimiters.AddOnTop('\r');
@@ -1221,7 +1223,7 @@ bool DatabaseRoutines::SendActivationEmail(const std::string& emailList, std::st
 { MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
   List<std::string> theEmails;
   this->ExtractEmailList(emailList, theEmails, comments);
-  return this->SendActivationEmail(theEmails, true, comments);
+  return this->SendActivationEmail(theEmails, comments);
 }
 
 void UserCalculator::ComputePointsEarned
@@ -1265,7 +1267,7 @@ void UserCalculator::ComputeActivationToken()
   this->activationToken=Crypto::computeSha1outputBase64(activationTokenStream.str());
 }
 
-bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, bool forceResend, std::stringstream& comments)
+bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, std::stringstream& comments)
 { MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
   if (!this->ColumnExists("activationToken", "users", comments))
     if (!this->CreateColumn("activationToken", "users", comments))
@@ -1509,7 +1511,7 @@ bool DatabaseRoutines::AddUsersFromEmails
     comments << "Sending actual emails disabled for security reasons (system not stable enough yet). ";
   }
   if (doSendEmails)
-    if (! this->SendActivationEmail(theEmails, false, comments))
+    if (! this->SendActivationEmail(theEmails, comments))
       outputSentAllEmails=false;
   return result;
 }
@@ -1582,7 +1584,7 @@ bool UserCalculator::SendActivationEmail(DatabaseRoutines& theRoutines, std::str
 //  << " todor.milev@gmail.com\n\n";
 //  emailStream << this->activationTokenUnsafe << "\n\nGood luck with our course, \n Your calculus instructors.";
   std::string emailLog=theGlobalVariables.CallSystemWithOutput(theEmailRoutines.GetCommandToSendEmailWithMailX());
-  unsigned int indexGoAhead= emailLog.find("Go ahead");
+  size_t indexGoAhead= emailLog.find("Go ahead");
   bool result=true;
   if (indexGoAhead== std::string::npos)
     result=false;
@@ -1606,6 +1608,7 @@ bool DatabaseRoutines::innerAddUsersFromEmailListAndCourseName(Calculator& theCo
     return theCommands << "First argument of " << input.ToString() << " is not a string. ";
   if (!input[2].IsOfType(&inputClassHome))
     return theCommands << "Second argument of " << input.ToString() << " is not a string. ";
+  (void) output;
   crash << "not implemented yet" << crash;
   return false;
 /*  DatabaseRoutines theRoutines;
@@ -1807,6 +1810,7 @@ bool DatabaseRoutines::innerGetUserDetails(Calculator& theCommands, const Expres
 
 bool DatabaseRoutines::innerDisplayTables(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerDisplayTables");
+  (void) input;//prevent unused parameter, portable
   std::stringstream out;
   DatabaseRoutines theRoutines;
   List<std::string> theTables;
@@ -1860,6 +1864,7 @@ bool DatabaseRoutines::innerGetAuthentication(Calculator& theCommands, const Exp
 
 bool DatabaseRoutines::innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerTestDatabase");
+  (void) input;//prevent unused parameter, portable
   DatabaseRoutines theRoutines;
   std::stringstream out;
   out << "Testing database ... Comments:<br>";

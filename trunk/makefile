@@ -61,8 +61,52 @@ ifeq ($(mysql),1)
 endif
 
 #if this is missing something, add it, or, ls | grep cpp | xargs echo
-SOURCES=test.cpp vpf2Math3_SymmetricGroupsAndGeneralizations.cpp vpf4CalculatorFunctionList.cpp vpf5_1CalculatorCode.cpp vpf5_2javascript_graphics.cpp vpf5.cpp vpf6_05evaluationroutines.cpp vpf6_0parsingRoutines.cpp vpf6_1innerTypedFunctions.cpp vpf6_2serialization_code.cpp vpf6_3calculatorMathRoutines.cpp vpf6_35calculatorMathRoutinesPart2.cpp vpf6_4ExpressionsImplementation.cpp vpf6.cpp vpf7.cpp vpf8.cpp vpf9_1.cpp vpf9_2.cpp vpf9_3RationalRadicals.cpp vpf9_4SemisimpleLieAlgebras.cpp vpf9_5SemisimpleLieAlgebras_RootSubalgebras.cpp vpf9_6SemisimpleLieSubAlgebras.cpp vpf9_7floating_point_routines.cpp vpf9_8GlobalObjects.cpp vpf9_91html_routines_calculator.cpp vpf9_92multitasking.cpp vpf99_HardcodedData.cpp vpf9_9SystemFunctions.cpp vpf9.cpp vpfCalculatorMain.cpp vpfCharacters_CalculatorInterface.cpp vpfCharacters.cpp vpfCrypto.cpp vpfFiniteFields.cpp vpfGraph.cpp vpfJson.cpp vpfWebServer.cpp vpfWebServerInterProcessLogistics.cpp vpf6_5calculator_web_routines.cpp vpf8_1DatabaseInterface_MySQL.cpp vpfWebServerExamAndTeachingRoutines.cpp vpf9_85TimeDateWrappers.cpp
-OBJECTS=$(SOURCES:.cpp=.o)
+SOURCES=\
+./src/test.cpp \
+./src/vpf2Math3_SymmetricGroupsAndGeneralizations.cpp \
+./src/vpf4CalculatorFunctionList.cpp \
+./src/vpf5_1CalculatorCode.cpp \
+./src/vpf5_2javascript_graphics.cpp \
+./src/vpf5.cpp \
+./src/vpf6_05evaluationroutines.cpp \
+./src/vpf6_0parsingRoutines.cpp \
+./src/vpf6_1innerTypedFunctions.cpp \
+./src/vpf6_2serialization_code.cpp \
+./src/vpf6_3calculatorMathRoutines.cpp \
+./src/vpf6_35calculatorMathRoutinesPart2.cpp \
+./src/vpf6_4ExpressionsImplementation.cpp \
+./src/vpf6.cpp \
+./src/vpf7.cpp \
+./src/vpf8.cpp \
+./src/vpf9_1.cpp \
+./src/vpf9_2.cpp \
+./src/vpf9_3RationalRadicals.cpp \
+./src/vpf9_4SemisimpleLieAlgebras.cpp \
+./src/vpf9_5SemisimpleLieAlgebras_RootSubalgebras.cpp \
+./src/vpf9_6SemisimpleLieSubAlgebras.cpp \
+./src/vpf9_7floating_point_routines.cpp \
+./src/vpf9_8GlobalObjects.cpp \
+./src/vpf9_91html_routines_calculator.cpp \
+./src/vpf9_92multitasking.cpp \
+./src/vpf99_HardcodedData.cpp \
+./src/vpf9_9SystemFunctions.cpp \
+./src/vpf9.cpp \
+./src/vpfCalculatorMain.cpp \
+./src/vpfCharacters_CalculatorInterface.cpp \
+./src/vpfCharacters.cpp \
+./src/vpfCrypto.cpp \
+./src/vpfFiniteFields.cpp \
+./src/vpfGraph.cpp \
+./src/vpfJson.cpp \
+./src/vpfWebServer.cpp \
+./src/vpfWebServerInterProcessLogistics.cpp \
+./src/vpf6_5calculator_web_routines.cpp \
+./src/vpf8_1DatabaseInterface_MySQL.cpp \
+./src/vpfWebServerExamAndTeachingRoutines.cpp \
+./src/vpf9_85TimeDateWrappers.cpp
+
+
+OBJECTS=$(SOURCES:.cpp=.o) 
 DEPS=$(SOURCES:.cpp=.d)
 
 all: directories Debug_calculator 

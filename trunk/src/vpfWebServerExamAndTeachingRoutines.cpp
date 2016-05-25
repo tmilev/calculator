@@ -141,14 +141,14 @@ public:
    const std::string& sectionNumber
    , bool inheritFromGroup, bool& outputIsInherited);
   std::string InterpretGenerateDeadlineLink
-(SyntacticElementHTML& inputOutput, std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
+(SyntacticElementHTML& inputOutput,
  const std::string& cleaneduplink, const std::string& urledProblem, bool problemAlreadySolved)
   ;
   std::string ToStringLinkFromFileName(const std::string& theFileName);
   std::string ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName);
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
   std::string InterpretGenerateProblemManagementLink
-(SyntacticElementHTML& inputOutput, std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
+(std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
  const std::string& cleaneduplink, const std::string& urledProblem)
   ;
   void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
@@ -2445,7 +2445,7 @@ std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink)
 
 #include "vpfHeader5Crypto.h"
 std::string CalculatorHTML::InterpretGenerateProblemManagementLink
-(SyntacticElementHTML& inputOutput, std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
+(std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
  const std::string& cleaneduplink, const std::string& urledProblem)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateProblemManagementLink");
   std::stringstream out;
@@ -2638,7 +2638,7 @@ std::string CalculatorHTML::ToStringDeadlinesFormatted
 }
 
 std::string CalculatorHTML::InterpretGenerateDeadlineLink
-(SyntacticElementHTML& inputOutput, std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
+(SyntacticElementHTML& inputOutput,
  const std::string& cleaneduplink, const std::string& urledProblem, bool problemAlreadySolved)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateDeadlineLink");
   //  return "Submission deadline: to be announced. ";
@@ -2753,8 +2753,7 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
     << "?request=exercisesNoLogin&" << refStreamNoRequest.str();
   }
   if (inputOutput.GetTagClass()=="calculatorExamProblem")
-    out << this->InterpretGenerateProblemManagementLink
-    (inputOutput, refStreamForReal, refStreamExercise, cleaneduplink, urledProblem);
+    out << this->InterpretGenerateProblemManagementLink(refStreamForReal, refStreamExercise, cleaneduplink, urledProblem);
   //else
   //  out << " <a href=\"" << refStreamExercise.str() << "\">Start</a> ";
   //if (inputOutput.GetTagClass()=="calculatorExamIntermediate")
@@ -2767,7 +2766,7 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 //    out << " probdata crct: " << theProbData.numCorrectlyAnswered << " # answ id: " << theProbData.answerIds.size;
   }
   out << this->InterpretGenerateDeadlineLink
-  (inputOutput, refStreamForReal, refStreamExercise, cleaneduplink, urledProblem, problemAlreadySolved);
+  (inputOutput, cleaneduplink, urledProblem, problemAlreadySolved);
 #endif // MACRO_use_MySQL
   std::string stringToDisplay = FileOperations::GetFileNameFromFileNameWithPath(inputOutput.content);
   //out << " " << this->NumProblemsFound << ". "

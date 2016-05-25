@@ -110,17 +110,14 @@ void f65521::operator=(const Rational rhs)
 }
 
 std::string f65521::ToString(FormatExpressions* f) const
-{ return std::to_string(n);
+{ (void) f; //avoid unused parameter warning, portable.
+  return std::to_string(n);
 }
 
 std::ostream& operator<<(std::ostream& out, const f65521& data)
 { out << data.ToString();
   return out;
 }
-
-
-
-
 
 f211 f211::operator+(const f211 right) const
 { f211 out;
@@ -283,7 +280,8 @@ unsigned int f211::HashFunction() const
 }
 
 std::string f211::ToString(FormatExpressions* f) const
-{ return std::to_string(n);
+{ (void) f; //avoid unused parameter warning, portable.
+  return std::to_string(n);
 }
 
 std::ostream& operator<<(std::ostream& out, const f211& data)

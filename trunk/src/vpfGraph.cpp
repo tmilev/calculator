@@ -56,7 +56,8 @@ void GraphOLD::TreeRecurseCopyDelete(List<int> &l, int v, int m){
 }
 
 std::string GraphEdge::ToString(FormatExpressions* theFormat)const
-{ std::stringstream out;
+{ (void) theFormat; //avoid unused parameter warning, portable.
+  std::stringstream out;
   out << this->vStart+1 << "->" << this->vEnd+1;
   if (this->label!="")
     out << "(" << this->label << ")";
@@ -189,7 +190,8 @@ std::string Graph::GetNodePSStrings(int groupIndex, int indexInGroup)
 }
 
 double Graph::GetXnode(int groupIndex, int indexInGroup)
-{ return groupIndex;
+{ (void) indexInGroup; //avoid unused parameter warning, portable.
+  return groupIndex;
 }
 
 double Graph::GetYnode(int groupIndex, int indexInGroup)
@@ -209,6 +211,7 @@ double Graph::GetYnode(int groupIndex, int indexInGroup)
 
 std::string Graph::ToStringNodesAndEdges(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("Graph::ToStringNodesAndEdges");
+  (void) theFormat; //avoid unused parameter warning, portable.
   std::stringstream out;
   out << "The graph has " << this->theEdges.size() << " edges: <br>\n";
   for (int i=0; i<this->theEdges.size(); i++)
@@ -229,6 +232,7 @@ std::string Graph::ToStringNodesAndEdges(FormatExpressions* theFormat)
 
 std::string Graph::ToStringPsTricksEdge(int fromIndex, int toIndex, FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("Graph::ToStringPsTricksEdge");
+  (void) theFormat; //avoid unused parameter warning, portable.
   std::stringstream out;
   int startGroupIndex=this->displayGroupIndices[fromIndex];
   int startIndexInGroup=this->positionInDisplayGroup[fromIndex];

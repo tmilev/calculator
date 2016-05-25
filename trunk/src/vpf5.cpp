@@ -531,8 +531,8 @@ bool Calculator::innerPrintB3G2branchingIntermediate(Calculator& theCommands, co
   theG2B3Data.theFormat.NumAmpersandsPerNewLineForLaTeX=0;
   Expression tempExpression;
   RationalFunctionOld rfZero, rfOne;
-  rfZero.MakeZero(&theGlobalVariables);
-  rfOne.MakeOne(&theGlobalVariables);
+  rfZero.MakeZero();
+  rfOne.MakeOne();
   latexTable2 << "\\begin{longtable}{|rll|}\\caption"
   << "{Values of $x_1$ for each $v_{\\lambda,i}$}\\label{tableCriticalValuesvlambda}"
   << "\\endhead";

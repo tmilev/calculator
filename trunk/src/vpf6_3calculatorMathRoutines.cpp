@@ -874,22 +874,24 @@ bool Polynomial<coefficient>::FactorMeNormalizedFactors
   List<Polynomial<Rational> > factorsToBeProcessed;
   outputFactors.SetSize(0);
   factorsToBeProcessed.AddOnTop(*this);
+
   outputCoeff=factorsToBeProcessed.LastObject()->ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
   outputCoeff.Invert();
+
   Polynomial<Rational> currentFactor, divisor;
   while (factorsToBeProcessed.size>0)
   { currentFactor=factorsToBeProcessed.PopLastObject();
-//    stOutput << "<hr>Factoring " << currentFactor.ToString() << "<br>";
+    stOutput << "<hr>Factoring " << currentFactor.ToString() << "<br>";
     if(!currentFactor.FactorMeOutputIsADivisor(divisor, comments))
       return false;
     if (currentFactor.IsEqualToOne())
-    { outputFactors.AddOnTop(divisor);
+    { outputCoeff/=divisor.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+      outputFactors.AddOnTop(divisor);
       continue;
     }
-//    stOutput << "<br><b>Smallest divisor: " << divisor.ToString() << ", thepoly: "
-//    << currentFactor.ToString() << "</b>";
-    Rational tempRat=divisor.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-    outputCoeff/=tempRat;
+    stOutput << "<br><b>Smallest divisor: " << divisor.ToString() << ", thepoly: "
+    << currentFactor.ToString() << "</b>";
+    divisor.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
     factorsToBeProcessed.AddOnTop(divisor);
     factorsToBeProcessed.AddOnTop(currentFactor);
   }
@@ -976,7 +978,7 @@ void IntegralRFComputation::PrepareNumerators()
   this->theNumerators.SetSize(this->theDenominatorFactorsWithMults.size());
   for (int i =0; i<this->theDenominatorFactorsWithMults.size(); i++)
   { int tempSize=-1;
-    stOutput << "DEBUG: Accounting denominator: " << this->theDenominatorFactorsWithMults[i].ToString() << " with coeff: "
+    stOutput << "<br>DEBUG: Accounting denominator: " << this->theDenominatorFactorsWithMults[i].ToString() << " with coeff: "
     << this->theDenominatorFactorsWithMults.theCoeffs[i].ToString();
     this->theDenominatorFactorsWithMults.theCoeffs[i].IsSmallInteger(&tempSize);
     this->theNumerators[i].SetSize(tempSize);
@@ -1187,11 +1189,13 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   this->theRF.GetDenominator(this->theDen);
   this->theRF.GetNumerator(this->theNum);
   this->theNum*= this->theDen.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+  stOutput << "<br>The den: " << this->theDen << " the num: " << this->theNum.ToString();
   Rational theConstantCoeff;
-  if (!this->theDen.FactorMeNormalizedFactors(theConstantCoeff, theFactors, &this->printoutPFsHtml))
+  if (!this->theDen.FactorMeNormalizedFactors(theConstantCoeff, this->theFactors, &this->printoutPFsHtml))
   { this->printoutPFsHtml << "<hr>Failed to factor the denominator of the rational function, I surrender.";
     return false;
   }
+  stOutput << "<br>The factors: " << this->theFactors.ToString();
   this->theNum/=theConstantCoeff;
   this->theDen/=theConstantCoeff;
   Polynomial<Rational> tempP;

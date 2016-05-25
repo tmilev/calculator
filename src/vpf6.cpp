@@ -130,7 +130,7 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt
   { tempRF.MakeOneLetterMoN(i+varShift, 1);
     tempMon.MultiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
   }
-  tempRF.MakeOne(&theGlobalVariables);
+  tempRF.MakeOne();
   output.AddMonomial(tempMon, tempRF);
 }
 
@@ -853,8 +853,8 @@ bool Calculator::innerHWVCommon
   //  stOutput << "<br>highest weight in fundamental coords: " << highestWeightFundCoords.ToString() << "<br>";
 //  stOutput << "<br>parabolic selection: " << parabolicSel.ToString();
   RationalFunctionOld RFOne, RFZero;
-  RFOne.MakeOne(&theGlobalVariables);
-  RFZero.MakeZero(&theGlobalVariables);
+  RFOne.MakeOne();
+  RFZero.MakeZero();
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFunctionOld> theElt;
   //=theElementData.theElementTensorGenVermas.GetElement();

@@ -42,7 +42,8 @@ Matrix<Rational> WeylGroupData::SimpleReflectionMatrix(int i) const
 }
 
 ElementWeylGroup<WeylGroupData> WeylGroupData::SimpleConjugation(int i, const ElementWeylGroup<WeylGroupData>& vv)
-{ ElementWeylGroup<WeylGroupData> eltSimpleReflection;
+{ (void) vv;//avoid unused parameter warning, portable.
+  ElementWeylGroup<WeylGroupData> eltSimpleReflection;
   eltSimpleReflection.MakeSimpleReflection(i, *this);
   return eltSimpleReflection*this->theGroup.theElements[i]*eltSimpleReflection;
 }
@@ -885,6 +886,7 @@ bool SubgroupDataWeylGroup::CheckInitialization()
 template <class someGroup, class elementSomeGroup>
 std::string SubgroupData<someGroup, elementSomeGroup>::ToString(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SubgroupData::ToString");
+  (void) theFormat;//avoid unused parameter warning, portable.
   if (this->theGroup==0)
     return "(not initialized (no owner group))";
   if (this->theSubgroup==0)

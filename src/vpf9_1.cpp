@@ -1303,7 +1303,7 @@ void GeneralizedVermaModuleCharacters::IncrementComputation
     case 1:
       this->projectivizedChambeR.Refine();
       this->SortMultiplicities();
-      out << this->projectivizedChambeR.ToString(false, false);
+      out << this->projectivizedChambeR.ToString(false);
 //      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     case 2:
@@ -1318,19 +1318,19 @@ void GeneralizedVermaModuleCharacters::IncrementComputation
 //      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     case 5:
-      this->theMaxComputation.FindExtremaParametricStep1(this->thePauseControlleR, true);
+      this->theMaxComputation.FindExtremaParametricStep1(this->thePauseControlleR);
 //      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     case 6:
-      this->theMaxComputation.FindExtremaParametricStep3(this->thePauseControlleR);
+      this->theMaxComputation.FindExtremaParametricStep3();
 //      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     case 7:
-      this->theMaxComputation.FindExtremaParametricStep4(this->thePauseControlleR);
+      this->theMaxComputation.FindExtremaParametricStep4();
 //      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     case 8:
-      this->theMaxComputation.FindExtremaParametricStep5(this->thePauseControlleR);
+      this->theMaxComputation.FindExtremaParametricStep5();
 //      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     default:
@@ -1967,9 +1967,9 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep1()
 { this->smallerAlgebraChamber.InitFromDirectionsAndRefine(this->GmodKNegWeightsBasisChanged);
   ProgressReport theReport1;
   ProgressReport theReport2;
-  theReport1.Report(this->smallerAlgebraChamber.ToString(false, false));
+  theReport1.Report(this->smallerAlgebraChamber.ToString(false));
   this->log << "Directions for making the chamber basis changed: " << this->GmodKNegWeightsBasisChanged.ToString() << "\n Resulting chamber before projectivization:\n "
-  << this->smallerAlgebraChamber.ToString(false, false);
+  << this->smallerAlgebraChamber.ToString(false);
   theReport2.Report(this->log.str());
 }
 
@@ -1996,9 +1996,9 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2()
   }
   for (int i=0; i<this->PreimageWeylChamberSmallerAlgebra.Normals.size; i++)
     projectivizedChamberFinal.splittingNormals.AddOnTop(this->PreimageWeylChamberSmallerAlgebra.Normals[i]);
-  out << "projectivized chamber before chopping non-dominant part:\n" << projectivizedChamberFinal.ToString(false, false);
+  out << "projectivized chamber before chopping non-dominant part:\n" << projectivizedChamberFinal.ToString(false);
   projectivizedChamberFinal.Refine();
-  out << "Refined projectivized chamber before chopping non-dominant part:\n" << projectivizedChamberFinal.ToString(false, false);
+  out << "Refined projectivized chamber before chopping non-dominant part:\n" << projectivizedChamberFinal.ToString(false);
   for (int i=0; i<projectivizedChamberFinal.size; i++)
   { const Cone& currentCone=projectivizedChamberFinal[i];
     bool isNonDominant=false;
@@ -2023,6 +2023,6 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2()
         wallToSliceWith.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
         this->projectivizedChambeR.splittingNormals.AddOnTopNoRepetition(wallToSliceWith);
       }
-  out << "projectivized chamber chopped non-dominant part:\n"  << this->projectivizedChambeR.ToString(false, false);
+  out << "projectivized chamber chopped non-dominant part:\n"  << this->projectivizedChambeR.ToString(false);
   theReport.Report(out.str());
 }

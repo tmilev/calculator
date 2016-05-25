@@ -551,7 +551,8 @@ void WebServer::Signal_SIGINT_handler(int s)
 }
 
 void WebServer::Signal_SIGCHLD_handler(int s)
-{ theLog << "Received SIGCHLD signal." << logger::endL;
+{ (void) s; //avoid unused parameter warning, portable.
+  theLog << "Received SIGCHLD signal." << logger::endL;
   theWebServer.flagReapingChildren=true;
   theWebServer.ReapChildren();
   theWebServer.flagReapingChildren=false;
@@ -3112,7 +3113,8 @@ void WebServer::ReleaseWorkerSideResources()
 }
 
 void segfault_sigaction(int signal, siginfo_t *si, void *arg)
-{ (void) arg;
+{ (void) signal; //avoid unused parameter warning, portable.
+  (void) arg;
   crash << "Caught segfault at address: " << si->si_addr << crash;
   exit(0);
 }

@@ -961,8 +961,11 @@ void IntegralRFComputation::PrepareFormatExpressions()
 
 void IntegralRFComputation::PrepareNumerators()
 { MacroRegisterFunctionWithName("IntegralRFComputation::PrepareNumerators");
+  stOutput << "DEBUG: Remainder rat: " << this->remainderRat.ToString();
   this->transformedRF=this->remainderRat;
+  stOutput << " denominator: " << this->theDen.ToString();
   this->transformedRF/=this->theDen;
+  stOutput << " transformed rf: " << this->transformedRF.ToString();
   this->remainderRescaledAlgebraic=this->remainderRat;
   this->remainderRescaledAlgebraic/=additionalMultiple;
   this->NumberOfSystemVariables=0;
@@ -973,6 +976,8 @@ void IntegralRFComputation::PrepareNumerators()
   this->theNumerators.SetSize(this->theDenominatorFactorsWithMults.size());
   for (int i =0; i<this->theDenominatorFactorsWithMults.size(); i++)
   { int tempSize=-1;
+    stOutput << "DEBUG: Accounting denominator: " << this->theDenominatorFactorsWithMults[i].ToString() << " with coeff: "
+    << this->theDenominatorFactorsWithMults.theCoeffs[i].ToString();
     this->theDenominatorFactorsWithMults.theCoeffs[i].IsSmallInteger(&tempSize);
     this->theNumerators[i].SetSize(tempSize);
     for (int k=0; k<this->theDenominatorFactorsWithMults.theCoeffs[i]; k++)
@@ -1672,7 +1677,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig(Calculator
     RationalFunctionOld oneOverOnePlusXsquared;
     onePlusXsquared.MakeMonomiaL(0,2);
     onePlusXsquared+=1;
-    oneOverOnePlusXsquared.MakeOne(&theGlobalVariables);
+    oneOverOnePlusXsquared.MakeOne();
     oneOverOnePlusXsquared/=onePlusXsquared;
     Expression theContext;
     theContext.ContextMakeContextWithOnePolyVar(theCommands, "x");
@@ -4622,7 +4627,7 @@ bool CalculatorFunctionsGeneral::innerWeylDimFormula(Calculator& theCommands, co
   if (!theCommands.GetVectoR<RationalFunctionOld>(input[2], theWeight, &newContext, theSSowner->GetRank(), CalculatorConversions::innerRationalFunction))
     return output.MakeError("Failed to convert the argument of the function to a highest weight vector", theCommands);
   RationalFunctionOld rfOne;
-  rfOne.MakeOne(&theGlobalVariables);
+  rfOne.MakeOne();
   Vector<RationalFunctionOld> theWeightInSimpleCoords;
   FormatExpressions theFormat;
   newContext.ContextGetFormatExpressions(theFormat);
@@ -5046,8 +5051,8 @@ bool CalculatorFunctionsGeneral::innerWriteGenVermaModAsDiffOperatorUpToLevel(Ca
 
 //  int theNumVars=hwContext.VariableImages.size;
   RationalFunctionOld RFOne, RFZero;
-  RFOne.MakeOne(&theGlobalVariables);
-  RFZero.MakeZero(&theGlobalVariables);
+  RFOne.MakeOne();
+  RFZero.MakeZero();
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFunctionOld> theElt;
   //=theElementData.theElementTensorGenVermas.GetElement();
@@ -5126,8 +5131,8 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
 //  stOutput << "<br>parabolic selection: " << parabolicSel.ToString();
   int theNumVars=hwContext.ContextGetNumContextVariables();
   RationalFunctionOld RFOne, RFZero;
-  RFOne.MakeOne(&theGlobalVariables);
-  RFZero.MakeZero(&theGlobalVariables);
+  RFOne.MakeOne();
+  RFZero.MakeZero();
   ElementTensorsGeneralizedVermas<RationalFunctionOld> theElt;
   //=theElementData.theElementTensorGenVermas.GetElement();
   Selection selParSel1, selFD;

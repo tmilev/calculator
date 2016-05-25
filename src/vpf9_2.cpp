@@ -1197,6 +1197,105 @@ bool RationalFunctionOld::checkConsistency()const
   return true;
 }
 
+void RationalFunctionOld::operator/=(int other)
+{ RationalFunctionOld tempRF;
+  tempRF.MakeConst(other);
+  *this/=tempRF;
+}
+
+void RationalFunctionOld::Minus()
+{ this->operator*=((Rational) -1);
+  if(!this->checkConsistency())
+    crash << crash;
+}
+
+void RationalFunctionOld::operator-=(const RationalFunctionOld& other)
+{ if (!this->checkConsistency())
+    crash << crash;
+  if(!other.checkConsistency())
+    crash << crash;
+  RationalFunctionOld tempRF;
+  tempRF=other;
+  tempRF.Minus();
+  this->operator+=(tempRF);
+  if (!this->checkConsistency())
+    crash << crash;
+}
+
+void RationalFunctionOld::operator-=(const Rational& other)
+{ if(!this->checkConsistency())
+    crash << crash;
+  RationalFunctionOld tempRF;
+  tempRF.MakeConst(other);
+  tempRF.Minus();
+  this->operator+=(tempRF);
+  if(!(this->checkConsistency()))
+    crash << crash;
+}
+
+void RationalFunctionOld::MakeOne()
+{ this->MakeConst(1);
+}
+
+void RationalFunctionOld::MakeZero()
+{ this->expressionType=this->typeRational;
+  this->ratValue.MakeZero();
+  this->Numerator.FreeMemory();
+  this->Denominator.FreeMemory();
+  if(!this->checkConsistency())
+    crash << crash;
+}
+
+void RationalFunctionOld::operator+=(int theConstant)
+{ RationalFunctionOld tempRF;
+  tempRF.MakeConst((Rational) theConstant);
+  (*this)+=tempRF;
+}
+
+Rational RationalFunctionOld::RationalValue()const
+{ switch(this->expressionType)
+  { case RationalFunctionOld::typeRational:
+      return this->ratValue;
+    case RationalFunctionOld::typeError:
+      return 0;
+    default:
+      return this->Numerator.GetElementConst().GetConstantTerm();
+  }
+}
+
+RationalFunctionOld::RationalFunctionOld()
+{ this->expressionType=this->typeError;
+  this->ratValue.MakeZero();
+}
+
+RationalFunctionOld::RationalFunctionOld(int other)
+{ this->expressionType=this->typeRational;
+  this->operator=(other);
+}
+
+RationalFunctionOld::RationalFunctionOld(const Rational& other)
+{ this->expressionType=this->typeRational;
+  this->operator=(other);
+}
+
+RationalFunctionOld::RationalFunctionOld(const RationalFunctionOld& other): expressionType(RationalFunctionOld::typeError)
+{ this->operator=(other);
+}
+
+
+RationalFunctionOld RationalFunctionOld::GetZero()const
+{ RationalFunctionOld tempRat;
+  tempRat.MakeZero();
+  return tempRat;
+}
+
+RationalFunctionOld RationalFunctionOld::GetOne()const
+{ RationalFunctionOld tempRat;
+  tempRat.MakeConst(1);
+  return tempRat;
+}
+
+
 std::string RationalFunctionOld::ToString(FormatExpressions* theFormat)const
 { //out << "( Number variables: " << this->NumVars << ", hash: " << this->HashFunction() << ")";
   if (this->expressionType==this->typeRational)
@@ -1255,7 +1354,6 @@ void RationalFunctionOld::MakeOneLetterMoN(int theIndex, const Rational& theCoef
   this->expressionType=this->typePoly;
   ExpectedNumVars=MathRoutines::Maximum(theIndex+1, ExpectedNumVars);
   this->Numerator.GetElement().MakeDegreeOne(ExpectedNumVars, theIndex, theCoeff);
-  this->context=&theGlobalVariables;
 }
 
 void RationalFunctionOld::MakeMonomiaL
@@ -1281,8 +1379,6 @@ void RationalFunctionOld::operator=(const RationalFunctionOld& other)
   //other.checkConsistency();
   //this->checkConsistency();
   this->expressionType=other.expressionType;
-  if (other.context!=0)
-    this->context=other.context;
   switch (this->expressionType)
   { case RationalFunctionOld::typeRational:
       this->ratValue=other.ratValue;
@@ -1385,7 +1481,7 @@ void RationalFunctionOld::operator*=(const MonomialP& other)
 
 void RationalFunctionOld::operator*=(const Polynomial<Rational>& other)
 { if (other.IsEqualToZero())
-  { this->MakeZero(this->context);
+  { this->MakeZero();
     return;
   }
   if (this->expressionType== this->typeRational)
@@ -1399,8 +1495,8 @@ void RationalFunctionOld::operator*=(const Polynomial<Rational>& other)
   ProgressReport theReport;
   if (theGlobalVariables.flagReportEverything)
   { std::stringstream out;
-    out << "Multiplying " << this->ToString(&this->context->theDefaultFormat.GetElement()) << " by "
-    << other.ToString(&this->context->theDefaultFormat.GetElement());
+    out << "Multiplying " << this->ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << " by "
+    << other.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
     theReport.Report(out.str());
   }
   RationalFunctionOld::gcd(this->Denominator.GetElement(), other, theGCD);
@@ -1421,10 +1517,10 @@ void RationalFunctionOld::operator*=(const Polynomial<Rational>& other)
   this->Denominator.GetElement()=theResult;
   this->ReduceMemory();
   this->SimplifyLeadingCoefficientOnly();
-  if (this->context!=0)
+  if (theGlobalVariables.flagReportEverything)
   { std::stringstream out;
-    out << "Multiplying " << this->ToString(&this->context->theDefaultFormat.GetElement()) << " by "
-    << other.ToString(&this->context->theDefaultFormat.GetElement());
+    out << "Multiplying " << this->ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << " by "
+    << other.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
     out << " and the result is:\n" << this->ToString();
     theReport.Report(out.str());
   }
@@ -1434,8 +1530,6 @@ void RationalFunctionOld::operator*=(const Polynomial<Rational>& other)
 void RationalFunctionOld::operator/=(const RationalFunctionOld& other)
 { this->checkConsistency();
   RationalFunctionOld tempRF;
-  if (other.context!=0)
-    this->context=other.context;
   tempRF=other;
   tempRF.checkConsistency();
   tempRF.Invert();
@@ -1449,7 +1543,7 @@ void RationalFunctionOld::operator/=(const RationalFunctionOld& other)
 void RationalFunctionOld::operator*=(const Rational& other)
 { //if(!this->checkConsistency()) crash << crash;
   if (other.IsEqualToZero())
-  { this->MakeZero(this->context);
+  { this->MakeZero();
     return;
   }
   switch(this->expressionType)
@@ -1470,10 +1564,8 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other)
   { this->RaiseToPower(2);
     return;
   }
-  if (other.context!=0)
-    this->context=other.context;
   if (other.IsEqualToZero() || this->IsEqualToZero())
-  { this->MakeZero(this->context);
+  { this->MakeZero();
     return;
   }
   if (other.expressionType==this->typeRational)
@@ -1504,7 +1596,7 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other)
 //  tempde_Bugger=other;
 //  tempde_Bugger.ComputeDebugString();
   ProgressReport theReport;
-  if (this->context!=0)
+  if (theGlobalVariables.flagReportEverything)
   { std::stringstream out;
     out << "Multiplying " << this->ToString() << " by " << other.ToString();
     //stOutput << out.str();
@@ -1530,7 +1622,7 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other)
   this->Numerator.GetElement()*=(tempP1);
   this->ReduceMemory();
   this->SimplifyLeadingCoefficientOnly();
-  if (this->context!=0)
+  if (theGlobalVariables.flagReportEverything)
   { std::stringstream out;
     out << "Multiplying " << this->ToString() << " by " << other.ToString();
     out << " and the result is:\n" << this->ToString();
@@ -1547,8 +1639,6 @@ void RationalFunctionOld::operator+=(const RationalFunctionOld& other)
     crash << crash;
   if(!other.checkConsistency())
     crash << crash;
-  if (this->context==0)
-    this->context=other.context;
   if (other.expressionType< this->expressionType)
   { RationalFunctionOld tempRF;
     tempRF=other;
@@ -1823,7 +1913,7 @@ void RationalFunctionOld::RaiseToPower(int thePower)
   if (thePower==0)
   { if (this->IsEqualToZero())
       crash << "This is a programming error: attempting to raise 0 to the 0th power, which is undefined. " << crash;
-    this->MakeOne(this->context);
+    this->MakeOne();
     return;
   }
   switch (this->expressionType)
@@ -1847,12 +1937,12 @@ void RationalFunctionOld::ClearDenominators(RationalFunctionOld& outputWasMultip
   switch(this->expressionType)
   { case RationalFunctionOld::typeRational:
       tempRat=this->ratValue.GetDenominator();
-      outputWasMultipliedBy.MakeConst(tempRat, this->context);
+      outputWasMultipliedBy.MakeConst(tempRat);
       this->ratValue*=tempRat;
     break;
     case RationalFunctionOld::typePoly:
       this->Numerator.GetElement().ClearDenominators(tempRat);
-      outputWasMultipliedBy.MakeConst(tempRat, this->context);
+      outputWasMultipliedBy.MakeConst(tempRat);
     break;
     case RationalFunctionOld::typeRationalFunction:
       RationalFunctionOld tempRF;

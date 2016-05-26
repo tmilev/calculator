@@ -875,27 +875,31 @@ bool Polynomial<coefficient>::FactorMeNormalizedFactors
   outputFactors.SetSize(0);
   factorsToBeProcessed.AddOnTop(*this);
 
-  outputCoeff=factorsToBeProcessed.LastObject()->ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-  outputCoeff.Invert();
-
+  factorsToBeProcessed.LastObject()->ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
   Polynomial<Rational> currentFactor, divisor;
   while (factorsToBeProcessed.size>0)
   { currentFactor=factorsToBeProcessed.PopLastObject();
-    stOutput << "<hr>Factoring " << currentFactor.ToString() << "<br>";
+//    stOutput << "<hr>Factoring " << currentFactor.ToString() << "<br>";
     if(!currentFactor.FactorMeOutputIsADivisor(divisor, comments))
       return false;
     if (currentFactor.IsEqualToOne())
-    { outputCoeff/=divisor.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+    { divisor.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
       outputFactors.AddOnTop(divisor);
       continue;
     }
-    stOutput << "<br><b>Smallest divisor: " << divisor.ToString() << ", thepoly: "
-    << currentFactor.ToString() << "</b>";
+//    stOutput << "<br><b>Smallest divisor: " << divisor.ToString() << ", thepoly: "
+//    << currentFactor.ToString() << "</b>";
     divisor.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
     factorsToBeProcessed.AddOnTop(divisor);
     factorsToBeProcessed.AddOnTop(currentFactor);
   }
   outputFactors.QuickSortAscending();
+  Polynomial<Rational> checkComputations;
+  checkComputations.MakeOne();
+  for (int i=0; i<outputFactors.size; i++)
+    checkComputations*=outputFactors[i];
+  if (!checkComputations.IsProportionalTo(*this, outputCoeff, 1))
+    crash << "Error in polynomial factorization function." << crash;
   return true;
 }
 
@@ -963,11 +967,11 @@ void IntegralRFComputation::PrepareFormatExpressions()
 
 void IntegralRFComputation::PrepareNumerators()
 { MacroRegisterFunctionWithName("IntegralRFComputation::PrepareNumerators");
-  stOutput << "DEBUG: Remainder rat: " << this->remainderRat.ToString();
+//  stOutput << "DEBUG: Remainder rat: " << this->remainderRat.ToString();
   this->transformedRF=this->remainderRat;
-  stOutput << " denominator: " << this->theDen.ToString();
+  //stOutput << " denominator: " << this->theDen.ToString();
   this->transformedRF/=this->theDen;
-  stOutput << " transformed rf: " << this->transformedRF.ToString();
+  //stOutput << " transformed rf: " << this->transformedRF.ToString();
   this->remainderRescaledAlgebraic=this->remainderRat;
   this->remainderRescaledAlgebraic/=additionalMultiple;
   this->NumberOfSystemVariables=0;
@@ -978,8 +982,8 @@ void IntegralRFComputation::PrepareNumerators()
   this->theNumerators.SetSize(this->theDenominatorFactorsWithMults.size());
   for (int i =0; i<this->theDenominatorFactorsWithMults.size(); i++)
   { int tempSize=-1;
-    stOutput << "<br>DEBUG: Accounting denominator: " << this->theDenominatorFactorsWithMults[i].ToString() << " with coeff: "
-    << this->theDenominatorFactorsWithMults.theCoeffs[i].ToString();
+    //stOutput << "<br>DEBUG: Accounting denominator: " << this->theDenominatorFactorsWithMults[i].ToString() << " with coeff: "
+    //<< this->theDenominatorFactorsWithMults.theCoeffs[i].ToString();
     this->theDenominatorFactorsWithMults.theCoeffs[i].IsSmallInteger(&tempSize);
     this->theNumerators[i].SetSize(tempSize);
     for (int k=0; k<this->theDenominatorFactorsWithMults.theCoeffs[i]; k++)
@@ -1189,13 +1193,13 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   this->theRF.GetDenominator(this->theDen);
   this->theRF.GetNumerator(this->theNum);
   this->theNum*= this->theDen.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-  stOutput << "<br>The den: " << this->theDen << " the num: " << this->theNum.ToString();
+  //stOutput << "<br>The den: " << this->theDen << " the num: " << this->theNum.ToString();
   Rational theConstantCoeff;
   if (!this->theDen.FactorMeNormalizedFactors(theConstantCoeff, this->theFactors, &this->printoutPFsHtml))
   { this->printoutPFsHtml << "<hr>Failed to factor the denominator of the rational function, I surrender.";
     return false;
   }
-  stOutput << "<br>The factors: " << this->theFactors.ToString();
+//  stOutput << "<br>The factors: " << this->theFactors.ToString() << "; <br> the const coeff: " << theConstantCoeff;
   this->theNum/=theConstantCoeff;
   this->theDen/=theConstantCoeff;
   Polynomial<Rational> tempP;

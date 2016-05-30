@@ -173,6 +173,7 @@ public:
   bool flagTryToKillOlderProcesses;
   bool flagSSLHandshakeSuccessful;
   bool flagReapingChildren;
+  bool flagThisIsWorkerProcess;
   MonomialCollection<MonomialWrapper<std::string, MathRoutines::hashString>, LargeInt> currentlyConnectedAddresses;
   List<std::string> PortsITryHttp;
   List<std::string> PortsITryHttpSSL;

@@ -552,6 +552,8 @@ void WebServer::Signal_SIGINT_handler(int s)
 
 void WebServer::Signal_SIGCHLD_handler(int s)
 { (void) s; //avoid unused parameter warning, portable.
+  if (theWebServer.flagThisIsWorkerProcess)
+    return;
   theLog << "Received SIGCHLD signal." << logger::endL;
   theWebServer.flagReapingChildren=true;
   theWebServer.ReapChildren();
@@ -2785,6 +2787,7 @@ WebServer::WebServer()
   this->NumConnectionsSoFar=0;
   this->NumWorkersNormallyExited=0;
   this->WebServerPingIntervalInSeconds=20;
+  this->flagThisIsWorkerProcess=false;
 }
 
 WebWorker& WebServer::GetActiveWorker()
@@ -3439,6 +3442,7 @@ int WebServer::Run()
       logProcessKills << logger::red << "FAILED to spawn a child process. " << logger::endL;
     if (this->GetActiveWorker().ProcessPID==0)
     { // this is the child (worker) process
+      this->flagThisIsWorkerProcess=true;
       theGlobalVariables.WebServerTimerPing=this->WorkerTimerPing;
       theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
       crash.CleanUpFunction=WebServer::SignalActiveWorkerDoneReleaseEverything;

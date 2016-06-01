@@ -2943,7 +2943,10 @@ std::string WebServer::ToStringStatusPublicNoTop()
   this->GetActiveWorker().timeOfLastPingServerSideOnly/this->WebServerPingIntervalInSeconds;
   if (approxNumPings<0)
     approxNumPings=0;
-  out << this->NumConnectionsSoFar-approxNumPings << " connections + "
+  int numConnectionsSoFarApprox=this->NumConnectionsSoFar-approxNumPings;
+  if (numConnectionsSoFarApprox<0)
+    numConnectionsSoFarApprox=0;
+  out << "~" << numConnectionsSoFarApprox << " actual connections + ~"
   << approxNumPings << " self-test-pings (" << this->NumConnectionsSoFar << " connections total)"
   << " served since last restart. "
   << "This counts one connection per problem answer preview, page visit, progress report ping, etc. "

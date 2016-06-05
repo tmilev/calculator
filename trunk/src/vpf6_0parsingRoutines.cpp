@@ -166,6 +166,7 @@ void Calculator::init()
   this->AddOperationNoRepetitionAllowed("if");
   this->AddOperationNoRepetitionAllowed("\\lim");
   this->AddOperationNoRepetitionAllowed("logBase");
+  this->AddOperationNoRepetitionAllowed("userInputTextBox");
 
   this->AddOperationBuiltInType("Rational");
   this->AddOperationBuiltInType("EltZmodP");
@@ -198,7 +199,6 @@ void Calculator::init()
   this->AddOperationBuiltInType("ElementWeylAlgebra");
   this->AddOperationBuiltInType("weightLieAlg");
   this->AddOperationBuiltInType("weightLieAlgPoly");
-//  this->AddOperationBuiltInType("\\arctan");
 
   this->initOperationsInterpretedAsFunctionsMultiplicatively();
 

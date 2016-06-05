@@ -1,0 +1,64 @@
+<span class="setCalculatorExamProblem">
+</span>
+Compute the composite functions \((f\circ g)(x)\). Simplify your answer to a single fraction. 
+
+Make sure to indicate the domain of the composite function. 
+
+<br>
+
+
+<span class="calculator">
+\(
+
+\displaystyle
+f{}({{x}})= \frac{makeInputBox(name=af)  x +makeInputBox(name=bf)}{makeInputBox(name=cf) x +makeInputBox(name=df)};
+\)
+</span>.
+<br>
+<span class="calculator">
+\(\displaystyle
+g{}({{x}})= \frac{ag x +bg}{cg x +dg};
+\)
+</span>.
+
+<br>
+Answer: 
+
+\( (f \circ g)(x)=\)
+
+
+<textarea class="calculatorAnswer" id="AlgebraAnswer">
+\(
+(AlgebraAnswer-f{}(g{}(x))==0);
+\)
+</textarea>
+<span class="calculatorCommentBeforeSubmission">
+\(
+EnsureExpressionDependsOnlyOn(AlgebraAnswer,x)
+\)
+</span>
+
+<span class="calculatorAnswerOnGiveUp">
+f{}g{}x
+</span>
+<br>
+The domain of \(f\circ g\) is:
+
+\(x\neq\)
+<textarea class="calculatorAnswer" id="DomainAnswer">
+\(
+(DomainAnswer==(
+Sequence{}(-dg/cg) \sqcup Sequence{}(-(df dg+cf bg)/(df cg 
++cf ag)))) or ((DomainAnswer== (Sequence{}(-(df dg+cf bg)/(df cg 
++cf ag)) \sqcup Sequence{}(-dg/cg))));
+\)
+</textarea>
+<span class="calculatorAnswerOnGiveUp">
+Sequence{}(-dg/cg) \sqcup Sequence{}(-(df dg+cf bg)/(df cg 
++cf ag))
+</span>
+<br> 
+If there is more than value outside of the domain, separate the values by commas. 
+<br>
+
+

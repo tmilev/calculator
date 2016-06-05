@@ -7,6 +7,7 @@
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
+#include "vpfHeader3Calculator4HtmlFunctions.h"
 ProjectInformationInstance ProjectInfoVpf6_4ExpressionsImplementationcpp(__FILE__, "Calculator expression implementation. ");
 
 Expression operator*(const Expression& left, const Expression& right)
@@ -2310,6 +2311,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       out << "(Corrupt string)";
   } else if (this->IsListStartingWithAtom(this->owner->opDefineConditional()))
     out << (*this)[1].ToString(theFormat) << " :if " << (*this)[2].ToString(theFormat) << "=" << (*this)[3].ToString(theFormat);
+  else if (this->StartsWith(this->owner->opUserInputTextBox()))
+    out << CalculatorHtmlFunctions::GetUserInputBox(*this);
   else if (this->StartsWith(this->owner->opDivide(), 3))
   { bool doUseFrac= this->formatUseFrac || this->owner->flagUseFracInRationalLaTeX;
     if (doUseFrac && ((*this)[1].StartsWith(this->owner->opTimes()) ||

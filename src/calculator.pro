@@ -58,7 +58,8 @@ SOURCES += \
     vpfJson.cpp \
     vpfWebServer.cpp \
     vpfWebServerExamAndTeachingRoutines.cpp \
-    vpfWebServerInterProcessLogistics.cpp
+    vpfWebServerInterProcessLogistics.cpp \
+    vpf6_36calculatorHtmlRoutines.cpp
 
 HEADERS += \
     vpf.h \
@@ -105,4 +106,6 @@ HEADERS += \
     vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h \
     vpfJson.h \
     vpfMacros.h \
-    vpfPackedVector.h
+    vpfPackedVector.h \
+    vpfheader3calculator4htmlfunctions.h \
+    vpfHeader3Calculator4HtmlFunctions.h

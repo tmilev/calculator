@@ -1498,6 +1498,9 @@ public:
   int opPlus()
   { return this->theAtoms.GetIndexIMustContainTheObject("+");
   }
+  int opUserInputTextBox()
+  { return this->theAtoms.GetIndexIMustContainTheObject("userInputTextBox");
+  }
   int opMod()
   { return this->theAtoms.GetIndexIMustContainTheObject("mod");
   }
@@ -1919,6 +1922,13 @@ public:
    Expression* inputContext=0);
 
   static bool innerLoadKey(Calculator& theCommands, const Expression& inputStatementList, const std::string& inputKey, Expression& output);
+  static bool innerLoadKeysFromStatementList
+  (Calculator& theCommands, const Expression& input,
+  MapList<Expression, std::string, MathRoutines::hashString>& output, std::stringstream* commentsOnFailure=0);
+  static bool innerLoadKeysFromStatementList
+  (Calculator& theCommands, const Expression& input,
+  MapList<Expression, Expression>& output, std::stringstream* commentsOnFailure=0);
+
   static bool innerStoreSemisimpleSubalgebras
   (Calculator& theCommands, const SemisimpleSubalgebras& input, Expression& output);
   static std::string innerStringFromSemisimpleSubalgebras

@@ -279,6 +279,44 @@ bool CalculatorConversions::innerAlgebraicNumber(Calculator& theCommands, const 
   return false;
 }
 
+bool CalculatorConversions::innerLoadKeysFromStatementList
+  (Calculator& theCommands, const Expression& input,
+  MapList<Expression, std::string, MathRoutines::hashString>& output, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKeysFromStatementList");
+  MapList<Expression, Expression> outputExpressionFormat;
+  if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, outputExpressionFormat, commentsOnFailure))
+    return false;
+  output.Clear();
+  std::string keyName;
+  for (int i=0; i<outputExpressionFormat.theKeys.size; i++)
+  { if (!outputExpressionFormat.theKeys[i].IsOfType<std::string>(&keyName))
+      keyName=outputExpressionFormat.theKeys[i].ToString();
+    output.SetValue(outputExpressionFormat[i], keyName);
+  }
+  return true;
+}
+
+bool CalculatorConversions::innerLoadKeysFromStatementList
+  (Calculator& theCommands, const Expression& input,
+  MapList<Expression, Expression>& output, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKeysFromStatementList");
+  output.Clear();
+  if (input.StartsWith(theCommands.opDefine(), 3))
+  { output.SetValue(input[2], input[1]);
+    return true;
+  }
+  for (int i=1; i<input.size(); i++)
+    if (input[i].StartsWith(theCommands.opDefine(), 3))
+      output.SetValue(input[i][2], input[i][1]);
+    else
+    { if (commentsOnFailure!=0)
+        *commentsOnFailure << "Could not extract key-value pair from: " << input.ToString() << ": failed to process: "
+        << input[i].ToString() ;
+      return false;
+    }
+  return true;
+}
+
 bool CalculatorConversions::innerLoadKey
 (Calculator& theCommands, const Expression& inputStatementList, const std::string& inputKey, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKey");

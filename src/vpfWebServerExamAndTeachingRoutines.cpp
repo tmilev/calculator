@@ -2,6 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader6WebServer.h"
 #include "vpfHeader3Calculator2_InnerFunctions.h"
+#include "vpfHeader3Calculator4HtmlFunctions.h"
 #include "vpfHeader7DatabaseInterface_MySQL.h"
 #include <iomanip>
 
@@ -1565,7 +1566,7 @@ std::string WebWorker::GetExamPage()
   return out.str();
 }
 
-bool CalculatorFunctionsGeneral::innerInterpretHtml
+bool CalculatorHtmlFunctions::innerInterpretHtml
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInterpretHtml");
   CalculatorHTML theProblem;
@@ -2387,8 +2388,13 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     } else
       out << " <b><span style=\"color:brown\">Submit (no credit, unlimited tries)</span></b>";
     out << "</span></td>";
-
-  out << "<script>\n"
+    out << CalculatorHtmlFunctions::GetMathQuillBox
+    ( mathquillSpan, answerIdMathQuillSpan,
+      answerIdSpan, answerId,
+      mathquillObject, previewAnswerStream.str(),
+      updateMQfunction
+    );
+/*  out << "<script>\n"
   << "var " << mathquillSpan << " = document.getElementById('" << answerIdMathQuillSpan << "');\n"
   << "var " << answerIdSpan << " = document.getElementById('" << answerId << "');\n"
   << "globalMQ.config({\n"
@@ -2406,7 +2412,7 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
   << "function " << updateMQfunction << "()\n"
   << "{ " << mathquillObject << ".latex(" << answerIdSpan << ".value);\n"
   << "}\n"
-  << "</script>";
+  << "</script>";*/
   }
   out << "</tr></table>";
   inputOutput.interpretedCommand=out.str();
@@ -3066,6 +3072,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     this->calculatorClasses.AddOnTop("calculatorHidden");
     this->calculatorClasses.AddOnTop("calculatorHiddenIncludeInCommentsBeforeSubmission");
     this->calculatorClasses.AddOnTop("calculatorAnswer");
+    this->calculatorClasses.AddOnTop("calculatorInput");
     this->calculatorClasses.AddOnTop("calculatorAnswerOnGiveUp");
     this->calculatorClasses.AddOnTop("calculatorCommentBeforeSubmission");
     this->calculatorClasses.AddOnTop("calculatorExamIntermediate");
@@ -3371,7 +3378,7 @@ std::string CalculatorHTML::CleanUpCommandString(const std::string& inputCommand
   return result;
 }
 
-bool CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml
+bool CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml");
   CalculatorHTML theFile;

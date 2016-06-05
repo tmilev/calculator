@@ -4,6 +4,7 @@
 #include "vpfHeader3Calculator3_WeylGroupCharacters.h"
 #include "vpfHeader3Calculator1_InnerTypedFunctions.h"
 #include "vpfHeader3Calculator2_InnerFunctions.h"
+#include "vpfHeader3Calculator4HtmlFunctions.h"
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h" //undefined reference to Polynomial<AlgebraicNumber>::MakeOne(int)
 #include "vpfHeader7DatabaseInterface_MySQL.h"
 ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator functions. ");
@@ -144,13 +145,18 @@ void Calculator::initPredefinedInnerFunctions()
    "LoadFileIntoString(\"/ProblemCollections/Problems/Functions-composing-fractional-linear-1.html\")",
    true, false, "CalculatorConversions::innerLoadFileIntoString");
   this->AddOperationInnerHandler
-  ("InterpretHtml", CalculatorFunctionsGeneral::innerInterpretHtml, "",
-   "Does as ExtractCalculatorExpressionFromHtml but in addition interprets the calculator commands.",
+  ("InterpretHtml", CalculatorHtmlFunctions::innerInterpretHtml, "",
+   "Does as ExtractCalculatorExpressionFromHtml but in addition interprets the calculator commands. ",
    "InterpretHtml(LoadFileIntoString(\
    \"/ProblemCollections/Problems/Functions-composing-fractional-linear-1.html\"))", true, false,
-   "CalculatorFunctionsGeneral::innerInterpretHtml", "InterpretHtml");
+   "CalculatorHtmlFunctions::innerInterpretHtml", "InterpretHtml");
   this->AddOperationInnerHandler
-  ("ExtractCalculatorExpressionFromHtml", CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml, "",
+  ("makeInputBox", CalculatorHtmlFunctions::innerUserInputBox, "",
+   "Creates an user input text box.  ",
+   " makeInputBox(name=afBox, default=randomInteger((-5,-1), (1,5)))", true, false,
+   "CalculatorHtmlFunctions::innerUserInputBox", "InterpretHtml");
+  this->AddOperationInnerHandler
+  ("ExtractCalculatorExpressionFromHtml", CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml, "",
    "Reads html and extracts embedded calculator commands. \
    Content enclosed in \
    spans with appropriate class names is interpreted; all other content is copied without any change.\
@@ -158,7 +164,7 @@ void Calculator::initPredefinedInnerFunctions()
    \"calculator\", \"calculatorHidden\", \"calculatorAnswer\".",
    "ExtractCalculatorExpressionFromHtml(LoadFileIntoString(\
    \"/ProblemCollections/Problems/Functions-composing-fractional-linear-1.html\"))", true, false,
-   "CalculatorFunctionsGeneral::innerExtractCalculatorExpressionFromHtml");
+   "CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml");
    ;
   this->AddOperationInnerHandler
   ("TestCalculatorIndicator", CalculatorFunctionsGeneral::innerTestIndicator, "",

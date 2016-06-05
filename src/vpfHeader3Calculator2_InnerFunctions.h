@@ -4,7 +4,7 @@
 #define vpfHeader6_2InnerFns
 #include "vpfHeader3Calculator0_Interface.h"
 
-static ProjectInformationInstance ProjectInfoVpf6_2Header(__FILE__, "Heder, calculator built-in functions. ");
+static ProjectInformationInstance ProjectInfoVpf6_2Header(__FILE__, "Header, calculator built-in functions. ");
 
 class CalculatorFunctionsGeneral
 {
@@ -32,11 +32,6 @@ public:
   static bool innerSelectAtRandom
   (Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetRandomSeed
-  (Calculator& theCommands, const Expression& input, Expression& output);
-
-  static bool innerExtractCalculatorExpressionFromHtml
-  (Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerInterpretHtml
   (Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerUrlStringToNormalString(Calculator& theCommands, const Expression& input, Expression& output);

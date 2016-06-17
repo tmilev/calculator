@@ -17,7 +17,7 @@
 # megabyte boundary, in order to find hot spots of massive memory allocation
 # it needs -rdynamic due to implementation
 # 
-FEATUREFLAGS= -std=c++11 -pthread -fopenmp
+FEATUREFLAGS= -std=c++0x -pthread -fopenmp
 CFLAGS=-Wall -Wno-address $(FEATUREFLAGS) -c
 LDFLAGS=$(FEATUREFLAGS)
 LIBRARYINCLUDESEND=

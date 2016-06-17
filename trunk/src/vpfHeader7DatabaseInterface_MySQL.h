@@ -68,6 +68,7 @@ public:
   int totalNumSubmissions;
 //  int numAnswersSought;
   List<std::string> firstCorrectAnswer;
+  List<std::string> inputNonAnswerIds;
   List<std::string> answerIds;
   List<List<std::string> > commandsForPreview;
   List<std::string> commandsForGiveUpAnswer;

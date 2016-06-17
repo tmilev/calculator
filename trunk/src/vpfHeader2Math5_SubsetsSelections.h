@@ -138,11 +138,13 @@ public:
   }
 };
 
-class SelectionWithDifferentMaxMultiplicities : public SelectionWithMultiplicities
+class SelectionWithDifferentMaxMultiplicities
 {
 public:
+  List<int> elements;
+  List<int> Multiplicities;
   List<int> MaxMultiplicities;
-  void initIncomplete(int NumElements){ this->MaxMultiplicities.SetSize(NumElements); this->initWithMultiplicities(NumElements); }
+  void initPart1(int NumElements);
   void clearNoMaxMultiplicitiesChange();
   bool IncrementReturnFalseIfPastLast();
   LargeInt TotalNumSubsets();

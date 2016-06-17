@@ -1640,7 +1640,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
   List<List<List<int> > > CentralizerDiagramAutomorphisms;
   theDomainRootSA.theCentralizerDiagram.GetAutomorphisms(CentralizerDiagramAutomorphisms);
   theDomainRootSA.theCentralizerDiagram.ToString();
-  tempAutosCentralizer.initIncomplete(CentralizerDiagramAutomorphisms.size);
+  tempAutosCentralizer.initPart1(CentralizerDiagramAutomorphisms.size);
   for (int i=0; i<CentralizerDiagramAutomorphisms.size; i++)
     tempAutosCentralizer.MaxMultiplicities[i] = CentralizerDiagramAutomorphisms[i].size-1;
   tempList.SetSize(theDomainRootSA.theCentralizerDiagram.sameTypeComponents.size);
@@ -1698,8 +1698,8 @@ bool rootSubalgebra::GenerateIsomorphismsPreservingBorel(rootSubalgebra& right, 
   List<List<List<int> > > DiagramAutomorphisms, CentralizerDiagramAutomorphisms;
   this->theDynkinDiagram.GetAutomorphisms(DiagramAutomorphisms);
   this->theCentralizerDiagram.GetAutomorphisms(CentralizerDiagramAutomorphisms);
-  tempAutos.initIncomplete(DiagramAutomorphisms.size);
-  tempAutosCentralizer.initIncomplete(CentralizerDiagramAutomorphisms.size);
+  tempAutos.initPart1(DiagramAutomorphisms.size);
+  tempAutosCentralizer.initPart1(CentralizerDiagramAutomorphisms.size);
   for (int i=0; i<DiagramAutomorphisms.size; i++)
     tempAutos.MaxMultiplicities[i]= DiagramAutomorphisms[i].size-1;
   for (int i=0; i<CentralizerDiagramAutomorphisms.size; i++)

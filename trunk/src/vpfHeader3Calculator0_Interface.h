@@ -717,6 +717,9 @@ public:
   HashedListReferences<Weight<Polynomial<Rational> > > theWeightsPoly;
   ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational > > theHyperoctahedralReps;
   ListReferences<Plot> thePlots;
+  MapReferences<Expression, std::string, MathRoutines::hashString> theUserInputTextBoxesWithValues;
+  HashedList<std::string, MathRoutines::hashString> theUserInputTextBoxes;
+
   AlgebraicClosureRationals theAlgebraicClosure;
   HashedList<AlgebraicNumber> theAlgebraicNumbers;
   HashedListReferences<ElementHyperoctahedralGroupR2> theElementsHyperOctGroup;
@@ -888,6 +891,8 @@ public:
   bool flagWriteLatexPlots;
 
   bool flagNoApproximations;
+
+//  bool flagReplaceInputBoxesByValues;
 
   bool flagForkingProcessAllowed;
   ///////////////////////////////////////////////////////////////////////////

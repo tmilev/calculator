@@ -152,9 +152,15 @@ void Calculator::initPredefinedInnerFunctions()
    "CalculatorHtmlFunctions::innerInterpretHtml", "InterpretHtml");
   this->AddOperationInnerHandler
   ("makeInputBox", CalculatorHtmlFunctions::innerUserInputBox, "",
-   "Creates an user input text box.  ",
-   " makeInputBox(name=afBox, default=randomInteger((-5,-1), (1,5)))", true, false,
-   "CalculatorHtmlFunctions::innerUserInputBox", "InterpretHtml");
+   "Creates an user input text box. ",
+   " makeInputBox(name=a, default=randomInteger((-5,-1), (1,5)));", true, false,
+   "CalculatorHtmlFunctions::innerUserInputBox", "makeInputBox");
+  this->AddOperationInnerHandler
+  ("setInputBox", CalculatorHtmlFunctions::innerSetInputBox, "",
+   "Sets value for input box that overrides the input box (no box is displayed). ",
+   " setInputBox(name=a, value=randomInteger((-5,-1), (1,5)));\
+     makeInputBox(name=a)", true, false,
+   "CalculatorHtmlFunctions::innerSetInputBox", "setInputBox");
   this->AddOperationInnerHandler
   ("ExtractCalculatorExpressionFromHtml", CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml, "",
    "Reads html and extracts embedded calculator commands. \
@@ -1266,13 +1272,36 @@ D-B;\
    " If the argument is a small integer, returns 1 if the argument is 0 and 1 the argument is non-zero. \
    If the argument is not a small integer, does nothing. ",
    "not{}1;not{}a; not{}0; not{}(3==4)");
-    this->AddOperationInnerHandler
+  this->AddOperationInnerHandler
   ("AllPartitions", CalculatorFunctionsGeneral::innerAllPartitions, "",
    "Prints all partitions of the vector (first argument) using a given list of vectors (second argument). \
    All partitioning vectors should have positive coordinates. ",
-   "AllPartitions((10,11), ((1,2), (2,3), (4,5), (2,1), (3,2), (5,4))) ");
+   "AllPartitions((10,11), ((1,2), (2,3), (4,5), (2,1), (3,2), (5,4))) ", true, false,
+   "CalculatorFunctionsGeneral::innerAllPartitions", "AllPartitions");
+  this->AddOperationInnerHandler
+  ("AllSelectionsFixedRank", CalculatorFunctionsGeneral::innerAllSelectionsFixedRank, "",
+   "Prints all selections of fixed size (given by first argument) from a \
+    collection of objects with multiplicities (given as a non-negative integer \
+    vector by the second argument). ",
+   "AllSelectionsFixedRank(3, (3,5,7))\
+    \nAllSelectionsFixedRank(5, (3,1,1));\
+    \nAllSelectionsFixedRank(5, (3,0,1));\
+    \nAllSelectionsFixedRank(0, (3,5,7));\
+    \nAllSelectionsFixedRank(0, (0,0,0));\
+    \nAllSelectionsFixedRank(2, 5);\
+    \nAllSelectionsFixedRank(2, 1);", true, false,
+   "CalculatorFunctionsGeneral::innerAllSelectionsFixedRank",
+   "AllSelectionsFixedRank");
+  this->AddOperationInnerHandler
+  ("KostkaNumber", CalculatorFunctionsGeneral::innerKostkaNumber, "",
+   "Computes a Kostka number. First argument= partition given as a tuple\
+    a_1, ..., a_n with a_1>a_2> ...> a_n. Second argument = tableaux content = arbitrary tuple of \
+    positive integers. \
+   ",
+   "KostkaNumber((3,2,1), (4,2)) ", true, false,
+   "CalculatorFunctionsGeneral::innerKostkaNumbers", "KostkaNumber");
 
-    this->AddOperationInnerHandler
+  this->AddOperationInnerHandler
   ("PrintNonNegativeVectorsLevel", this->innerPrintZnEnumeration, "",
    " Prints all vectors of grade level d with n coordinates lying in Z_{>=0}. Function meant for \
    debugging purposes. First argument =dimension, second argument=grading level. ",

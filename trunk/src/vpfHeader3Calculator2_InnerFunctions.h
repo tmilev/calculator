@@ -245,6 +245,8 @@ public:
   static bool innerParabolicWeylGroups(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerParabolicWeylGroupsBruhatGraph(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAllPartitions(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAllSelectionsFixedRank(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerKostkaNumber(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDeterminant(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPrintGenVermaModule(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWriteGenVermaModAsDiffOperatorUpToLevel(Calculator& theCommands, const Expression& input, Expression& output);

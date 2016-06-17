@@ -131,6 +131,7 @@ public:
   bool InterpretHtml(std::stringstream& comments);
   bool InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments);
   bool PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream& comments);
+  void PrepareUserInputBoxes(std::stringstream &completedProblemStream);
   bool PrepareCommands(std::stringstream& comments);
   std::string CleanUpCommandString(const std::string& inputCommand);
   void InterpretNotByCalculator(SyntacticElementHTML& inputOutput);
@@ -758,7 +759,15 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   << "  }\n"
   << "  spanStudentAnswer = document.getElementById(idAnswer);\n"
   << "  inputParams+=\"&calculatorAnswer\" + idAnswer\n"
-  << "          + \"=\"+encodeURIComponent(spanStudentAnswer.value);\n"
+  << "          + \"=\"+encodeURIComponent(spanStudentAnswer.value);\n";
+  for (int i=0; i<this->theProblemData.inputNonAnswerIds.size; i++)
+  { out << "  inputParams+=\"&userInputBox" << this->theProblemData.inputNonAnswerIds[i]
+    << "=\"+encodeURIComponent(document.getElementById(\""
+    << this->theProblemData.inputNonAnswerIds[i] << "\").value);\n";
+  }
+
+
+  out
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
@@ -832,6 +841,11 @@ int WebWorker::ProcessProblemGiveUp()
   { stOutput << "<b>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
     << "</b><br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
+    { stOutput << "<hr>Allowed answer ids: " << theProblem.theProblemData.answerIds << "<br>";
+      stOutput << "<hr>Client input: " << this->mainArgumentRAW << "<hr>";
+      stOutput << this->ToStringCalculatorArgumentsHumanReadable();
+    }
     return 0;
   }
   if (theProblem.theProblemData.commandsForGiveUpAnswer[indexLastAnswerId]=="")
@@ -845,6 +859,7 @@ int WebWorker::ProcessProblemGiveUp()
     return 0;
   }
   std::stringstream answerCommands;
+  theProblem.PrepareUserInputBoxes(answerCommands);
   answerCommands << theProblem.problemCommandsNoVerification;
   answerCommands << "SeparatorBetweenSpans; "
   << theProblem.theProblemData.commandsForGiveUpAnswer[indexLastAnswerId];
@@ -884,6 +899,9 @@ int WebWorker::ProcessProblemGiveUp()
       stOutput << "<br>";
   }
   stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+  if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
+    stOutput <<  "<hr>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString
+    << "<hr>Raw input: " << this->ToStringCalculatorArgumentsHumanReadable();
   return 0;
 }
 
@@ -1232,7 +1250,6 @@ int WebWorker::ProcessSubmitProblem()
     crash << "This shouldn't happen: empty file name: theProblem.fileName." << crash;
   std::string problemStatement=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("problemStatement"));
   std::stringstream studentAnswerStream, completedProblemStream;
-  completedProblemStream << theProblem.problemCommandsNoVerification;
   std::string studentAnswerNameReader;
   theProblem.studentAnswersUnadulterated.SetSize(theProblem.theProblemData.answerIds.size);
   theProblem.studentTagsAnswered.init(theProblem.theProblemData.answerIds.size);
@@ -1260,6 +1277,7 @@ int WebWorker::ProcessSubmitProblem()
   { stOutput << "<b>Something is wrong: I found no submitted answers.</b>";
     return 0;
   }
+  completedProblemStream << theProblem.problemCommandsNoVerification;
   completedProblemStream << studentAnswerStream.str();
   completedProblemStream << "SeparatorBetweenSpans; ";
   for (int i=0; i<theProblem.studentTagsAnswered.CardinalitySelection; i++)
@@ -1774,6 +1792,21 @@ bool SyntacticElementHTML::IsCommentAfterSubmission()
 ;
 }
 
+void CalculatorHTML::PrepareUserInputBoxes(std::stringstream &completedProblemStream)
+{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareInterpreter");
+  if (this->flagIsForReal)
+    return;
+  std::string inputNonAnswerReader;
+  for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
+    if (MathRoutines::StringBeginsWith(theGlobalVariables.webFormArgumentNames[i], "userInputBox", &inputNonAnswerReader))
+      if (inputNonAnswerReader!="" && theGlobalVariables.webFormArguments[i]!="")
+      { completedProblemStream << "setInputBox(name="
+        << inputNonAnswerReader
+        << ", value=" << CGI::URLStringToNormal(theGlobalVariables.webFormArguments[i])
+        << ");";
+      }
+}
+
 bool CalculatorHTML::PrepareCommands(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommands");
   if (this->theContent.size==0)
@@ -1839,6 +1872,10 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
     << "The result of the interpretation attempt is:<br>"
     << theInterpreter.outputString << "<br><b>Comments</b><br>"
     << theInterpreter.outputCommentsString;
+
+  for (int i=0; i<theInterpreter.theObjectContainer.theUserInputTextBoxes.size; i++)
+    this->theProblemData.inputNonAnswerIds.AddOnTop
+    (theInterpreter.theObjectContainer.theUserInputTextBoxes[i]);
   return result;
 }
 
@@ -2394,25 +2431,7 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
       mathquillObject, previewAnswerStream.str(),
       updateMQfunction
     );
-/*  out << "<script>\n"
-  << "var " << mathquillSpan << " = document.getElementById('" << answerIdMathQuillSpan << "');\n"
-  << "var " << answerIdSpan << " = document.getElementById('" << answerId << "');\n"
-  << "globalMQ.config({\n"
-  << "  autoFunctionize: 'sin cos tan sec csc cot log ln'\n"
-  << "  });\n"
-  << "var " << mathquillObject << " = globalMQ.MathField(" << mathquillSpan << ", {\n"
-  << "spaceBehavesLikeTab: true, // configurable\n"
-  << "handlers: {\n"
-  << "edit: function() { // useful event handlers\n"
-  << answerIdSpan << ".value = " << mathquillObject << ".latex(); // simple API\n"
-  << previewAnswerStream.str()
-  << "}\n"
-  << "}\n"
-  << "});\n"
-  << "function " << updateMQfunction << "()\n"
-  << "{ " << mathquillObject << ".latex(" << answerIdSpan << ".value);\n"
-  << "}\n"
-  << "</script>";*/
+//    out << "<hr>DEBUG: input non-answer ids: " << this->theProblemData.inputNonAnswerIds;
   }
   out << "</tr></table>";
   inputOutput.interpretedCommand=out.str();
@@ -2792,6 +2811,17 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before after loading problem list");
   out << this->GetJavascriptSubmitMainInputIncludeCurrentFile();
+//  else
+//    out << " no date picker";
+  theInterpreter.flagWriteLatexPlots=false;
+  FormatExpressions theFormat;
+  theFormat.flagExpressionIsFinal=true;
+  theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
+  this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
+  this->timeIntermediateComments.LastObject()->AddOnTop("Time before execution");
+  if (!this->PrepareAndExecuteCommands(theInterpreter, comments))
+    return false;
+//////////////////////////////interpretation takes place before javascript generation as the latter depends on the former.
   if (this->flagIsExamProblem)
     out << this->GetSubmitAnswersJavascript();
   else if (this->flagIsExamHome)
@@ -2803,16 +2833,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   }
   if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
     out << this->GetEditPageButton();
-//  else
-//    out << " no date picker";
-  theInterpreter.flagWriteLatexPlots=false;
-  FormatExpressions theFormat;
-  theFormat.flagExpressionIsFinal=true;
-  theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
-  this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
-  this->timeIntermediateComments.LastObject()->AddOnTop("Time before execution");
-  if (!this->PrepareAndExecuteCommands(theInterpreter, comments))
-    return false;
+//////////////////////////////
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time after execution");
   bool moreThanOneCommand=false;
@@ -3072,7 +3093,6 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     this->calculatorClasses.AddOnTop("calculatorHidden");
     this->calculatorClasses.AddOnTop("calculatorHiddenIncludeInCommentsBeforeSubmission");
     this->calculatorClasses.AddOnTop("calculatorAnswer");
-    this->calculatorClasses.AddOnTop("calculatorInput");
     this->calculatorClasses.AddOnTop("calculatorAnswerOnGiveUp");
     this->calculatorClasses.AddOnTop("calculatorCommentBeforeSubmission");
     this->calculatorClasses.AddOnTop("calculatorExamIntermediate");

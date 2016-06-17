@@ -1381,9 +1381,19 @@ void WebWorker::SanitizeMainAddress()
   resultAddress.reserve(this->mainAddress.size());
   bool foundslash=false;
   for (signed i=(signed) this->mainAddress.size()-1; i>=0; i--)
-  { if (foundslash && this->mainAddress[i]=='.')
+    if (this->mainAddress[i]=='?')
+    { this->mainAddress=this->mainAddress.substr(0, i);
       this->flagMainAddressSanitized=true;
-    else
+      break;
+    }
+  for (signed i=(signed) this->mainAddress.size()-1; i>=0; i--)
+  { bool isOK=true;
+    if (foundslash && this->mainAddress[i]=='.')
+      if (i>0 && this->mainAddress[i-1]=='.')
+      { this->flagMainAddressSanitized=true;
+        isOK=false;
+      }
+    if (isOK)
       resultAddress.push_back(this->mainAddress[i]);
     if (this->mainAddress[i]=='/')
       foundslash=true;

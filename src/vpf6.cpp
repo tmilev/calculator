@@ -2,6 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #include "vpf.h"
 #include "vpfImplementationHeader2Math3_WeylAlgebra.h"
+#include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 #include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
 #include "vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h"
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"

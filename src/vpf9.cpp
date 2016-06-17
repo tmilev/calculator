@@ -1064,11 +1064,13 @@ int MathRoutines::NChooseK(int n, int k)
 }
 
 bool MathRoutines::StringBeginsWith(const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd)
-{ std::string actualBeginning, tempS;
-  if (outputStringEnd==0)
-    outputStringEnd=&tempS;
-  MathRoutines::SplitStringInTwo(theString, desiredBeginning.size(), actualBeginning, *outputStringEnd);
-  return actualBeginning==desiredBeginning;
+{ std::string actualBeginning, stringEnd;
+  MathRoutines::SplitStringInTwo(theString, desiredBeginning.size(), actualBeginning, stringEnd);
+  bool result=(actualBeginning==desiredBeginning);
+  //outputstring is only modified if result is true
+  if (result && outputStringEnd!=0)
+    *outputStringEnd=stringEnd;
+  return result;
 }
 
 bool MathRoutines::isALatinLetter(char input)
@@ -1887,7 +1889,7 @@ void PartFraction::ApplyGeneralizedSzenesVergneFormulA
   output.MakeZero();
   int theDim=startingVectors[0].size;
   SelectionWithDifferentMaxMultiplicities TheBigBadIndexingSet;
-  TheBigBadIndexingSet.initIncomplete(theSelectedIndices.size);
+  TheBigBadIndexingSet.initPart1(theSelectedIndices.size);
   int TotalMultiplicity;
   TotalMultiplicity=0;
   for (int i=0; i<theSelectedIndices.size; i++)
@@ -1905,8 +1907,6 @@ void PartFraction::ApplyGeneralizedSzenesVergneFormulA
     { tempFrac.Assign(*this);
       tempFrac.RelevanceIsComputed=false;
       int tempN= TheBigBadIndexingSet.TotalMultiplicity()+oldMaxMultiplicity;
-      if (this->flagAnErrorHasOccurredTimeToPanic)
-        TheBigBadIndexingSet.ComputeDebugString();
       for (int k=0; k<theSelectedIndices.size; k++)
       { int multiplicityChange;
         if (k!=i)
@@ -3268,6 +3268,13 @@ int PartFractions::getIndex(const Vector<Rational>& TheRoot)
 
 int PartFractions::getIndexDoubleOfARoot(const Vector<Rational>& TheRoot)
 { return this->getIndex(TheRoot*2);
+}
+
+void SelectionWithDifferentMaxMultiplicities::initPart1(int NumElements)
+{ this->Multiplicities.initFillInObject(NumElements, 0);
+  this->MaxMultiplicities.initFillInObject(NumElements,0);
+  this->elements.Reserve(NumElements);
+  this->elements.size=0;
 }
 
 void SelectionWithMultiplicities::initWithMultiplicities(int NumElements)

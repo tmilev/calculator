@@ -10,7 +10,7 @@ TurnOffRules
 "IntegratePartialFractions", "CommonDenominator", "CommonDenominatorOneNonFraction", "sqrt");
 a=randomInteger{}((-1,-5),(2,5));
 b=randomInteger{}( (-1,-5),(1,5));
-c=selectAtRandom{}( 3/2, 4/3, 5/3,5/4, -6/5,7/5,8/5,9/5, 7/6, 11/6);
+c=selectAtRandom{}( 3/2, 4/3, 5/3,5/4, 6/5,7/5,8/5,9/5, 7/6, 11/6);
 g=randomInteger{}( (-1,-5),(1,5));
 
 theIntegral{}{{x}}=\frac{(a+ b x )^{-c+1}}{b(-c+1)} ;
@@ -44,7 +44,7 @@ TurnOnRules
 
 CompareExpressionsNumerically {}(
 AlgebraAnswer-theIntegral{}x,
-(theDifference= AlgebraAnswer-theIntegral{}x; x=1; theDifference)_3, 0.001, x\in (-b/a+1/b,-b/a+2/b), 20, C\in (0,3), 4)
+(theDifference= AlgebraAnswer-theIntegral{}x; x=-b/a+1/2; theDifference)_3, 0.001, x\in (-b/a+1/b,-b/a+2/b), 20, C\in (0,3), 4)
 and
 (EnsureExpressionDependsMandatoryVariables(AlgebraAnswer,C,x)=="")
 )_2

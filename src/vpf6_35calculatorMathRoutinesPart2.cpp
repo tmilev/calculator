@@ -766,3 +766,129 @@ bool CalculatorFunctionsGeneral::innerSqrt(Calculator& theCommands, const Expres
     return false;
   return output.AssignValue(theNumber, theCommands);
 }
+
+class KostkaNumber
+{
+public:
+  List<int> partition;
+  List<int> tuple;
+  int sumPartition;
+  int sumTuple;
+
+  List<int> remainingPartition;
+  List<int> remainingTuple;
+  int remainingSumPartition;
+  int remainingSumTuple;
+  int currentRow;
+  int currentTupleIndex;
+
+  List<List<int> > numTupleEntriesInRow;
+  LargeInt value;
+  bool Compute(std::stringstream* comments=0);
+  bool IncrementReturnFalseIfPastLast();
+  bool initTableaux(std::stringstream* comments=0);
+};
+
+bool KostkaNumber::initTableaux(std::stringstream* comments)
+{ for (int i=0; i<this->partition.size-1; i++)
+    if (this->partition[i]<this->partition[i+1])
+    { if (comments!=0)
+        *comments << "Partition is supposed to be a non-decreasing sequence of integers, instead it is: "
+        << this->partition;
+      return false;
+    }
+  this->remainingPartition=this->partition;
+  this->remainingTuple=this->tuple;
+  this->numTupleEntriesInRow.SetSize(this->partition.size);
+  for (int i=0; i<this->numTupleEntriesInRow.size; i++)
+    this->numTupleEntriesInRow[i].initFillInObject(this->tuple.size, -1);
+  this->remainingTuple=this->tuple;
+  this->sumTuple=0;
+  this->sumPartition=0;
+  for (int i=0; i<this->tuple.size; i++)
+  { this->sumTuple+=this->tuple[i];
+    if (this->sumTuple>10000000 || this->tuple[i]>10000000 || this->tuple[i]<0)
+    { if (comments!=0)
+        *comments << "Failed to compute Kostka number: the tuple "
+        << this->tuple << " is too large or negative. ";
+      return false;
+    }
+  }
+  for (int i=0; i<this->partition.size; i++)
+  { this->sumPartition+=this->partition[i];
+    if (this->sumPartition>10000000 || this->partition[i]>10000000 || this->partition[i]<0)
+    { if (comments!=0)
+        *comments << "Failed to compute Kostka number: the partition: "
+        << this->partition << " is too large or negative. ";
+      return false;
+    }
+  }
+  this->remainingSumPartition=this->sumPartition;
+  this->remainingSumTuple=this->sumTuple;
+  this->currentRow=-1;
+  this->currentTupleIndex=this->tuple.size-1;
+  return true;
+}
+
+bool KostkaNumber::IncrementReturnFalseIfPastLast()
+{ /*if (this->currentRow>=0 && this->currentTupleIndex>=0)
+  { int& currentEntry=this->numTupleEntriesInRow[this->currentRow][this->currentTupleIndex];
+    //if (this->currentEntry)
+
+    currentEntry++;
+    this->remainingPartition[this->currentRow]--;
+    this->remainingTuple[this->currentTupleIndex]--;
+    if (this->currentRow)
+  }
+
+  this->currentRow++;
+  if (this->currentRow>=this->partition.size)
+  { this->currentRow=0;
+    this->currentTupleIndex--;
+  }
+  if (this->currentTupleIndex>= 0)
+  {
+
+  }*/
+}
+
+bool KostkaNumber::Compute(std::stringstream* comments)
+{ MacroRegisterFunctionWithName("KostkaNumber::Compute");
+  this->value=-1;
+  if (!this->initTableaux(comments))
+    return false;
+  if (this->sumTuple!=this->sumPartition)
+  { this->value=0;
+    return true;
+  }
+  if (this->sumTuple==0)
+  { this->value=0;
+    return true;
+  } //we are now guaranteed each of the tuple and the partition has at least one entry.
+
+  while (this->IncrementReturnFalseIfPastLast())
+  {
+  }
+}
+
+bool CalculatorFunctionsGeneral::innerKostkaNumber(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerKostkaNumber");
+  if (input.size()!=3)
+    return false;
+  KostkaNumber theKN;
+  if (!theCommands.GetVectoRInt(input[1], theKN.partition) ||
+      !theCommands.GetVectoRInt(input[2], theKN.tuple))
+    return theCommands << "Failed to extract partition and tuple from input: " << input.ToString();
+  std::stringstream out;
+  if (theKN.Compute(&out))
+    out << "<br>Final result: " << theKN.value.ToString();
+  return output.AssignValue(out.str(), theCommands);
+}
+
+
+bool CalculatorFunctionsGeneral::innerAllSelectionsFixedRank(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerKostkaNumber");
+  if (input.size()!=3)
+    return false;
+  return false;
+}

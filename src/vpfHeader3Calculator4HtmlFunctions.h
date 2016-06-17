@@ -13,8 +13,14 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerUserInputBox
   (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSetInputBox
+  (Calculator& theCommands, const Expression& input, Expression& output);
 
   static std::string GetUserInputBox
+(const Expression& theBox
+)
+  ;
+  static std::string GetUserInputBoxName
 (const Expression& theBox
 )
   ;

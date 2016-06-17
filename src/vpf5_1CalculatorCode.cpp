@@ -369,7 +369,7 @@ const std::string GlobalVariables::hopefullyPermanent_HTTPS_WebAdressOfServerExe
 const std::string GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder=
 "http://calculator-algebra.org/";
 const std::string GlobalVariables::hopefullyPermanent_HTTPS_WebAdressJavascriptFolder=
-"http://calculator-algebra.org/";
+"https://calculator-algebra.org/";
 
 std::string Calculator::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType& theType, FormatExpressions* theFormat)
 { (void)theFormat;

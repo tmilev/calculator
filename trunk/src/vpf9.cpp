@@ -458,9 +458,15 @@ bool FileOperations::IsOKforFileNameOnTopOfOutputFolder(const std::string& theFi
   std::string theFilePath=FileOperations::GetPathFromFileNameWithPath(theFileName);
 //  std::cout << "Calling IsOKforFileNameOnTopOfOutputFolder, theFilePath: "
 //  << theFilePath << "\ntheFileNameNoPath: " << theFileNameNoPath << "\n";
+  if (theFilePath.size()>10000000)
+    return false;
+  if (theFilePath[0]=='.')
+    return false;
   for (unsigned i=0; i<theFilePath.size(); i++)
     if (theFilePath[i]=='.')
-      return false;
+      if (i+1<theFilePath.size())
+        if (theFilePath[i+1]=='.')
+          return false;
   if (theFileNameNoPath.size()>0)
     if (theFileNameNoPath[0]=='.')
       return false;

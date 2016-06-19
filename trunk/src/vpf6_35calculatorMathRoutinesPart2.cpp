@@ -767,27 +767,69 @@ bool CalculatorFunctionsGeneral::innerSqrt(Calculator& theCommands, const Expres
   return output.AssignValue(theNumber, theCommands);
 }
 
+class SelectionFixedRankDifferentMaxMultiplicities
+{
+public:
+  List<int> Multiplicities;
+  List<int> MaxMultiplicities;
+  int rank;
+  bool flagFirstComputed;
+  bool init();
+  bool firstIncrement();
+  bool IncrementReturnFalseIfPastLast();
+  SelectionFixedRankDifferentMaxMultiplicities();
+  std::string ToString();
+  std::string ToStringFull();
+};
+
 class KostkaNumber
 {
 public:
   List<int> partition;
   List<int> tuple;
-  int sumPartition;
   int sumTuple;
-
-  List<int> remainingPartition;
-  List<int> remainingTuple;
-  int remainingSumPartition;
-  int remainingSumTuple;
-  int currentRow;
-  int currentTupleIndex;
-
-  List<List<int> > numTupleEntriesInRow;
+  int sumPartition;
+  int MaxNumCachedKostkaNumbers;
   LargeInt value;
-  bool Compute(std::stringstream* comments=0);
-  bool IncrementReturnFalseIfPastLast();
+//  bool IncrementReturnFalseIfPastLast();
   bool initTableaux(std::stringstream* comments=0);
+  bool operator==(const KostkaNumber& other)const;
+  static unsigned int HashFunction(const KostkaNumber& input);
+  std::string ToString();
+  KostkaNumber();
+  bool Compute(HashedList<KostkaNumber>* KNcache, std::stringstream* comments=0);
 };
+
+unsigned int KostkaNumber::HashFunction(const KostkaNumber& input)
+{ return  MathRoutines::HashListInts(input.partition)+
+          MathRoutines::HashListInts(input.tuple);
+}
+
+bool KostkaNumber::operator ==(const KostkaNumber& other)const
+{ return this->partition==other.partition && this->tuple==other.tuple;
+}
+
+KostkaNumber::KostkaNumber()
+{ this->MaxNumCachedKostkaNumbers=10000;
+}
+
+std::string KostkaNumber::ToString()
+{ std::stringstream out;
+  out << "KostkaNumber" << "((";
+  for (int i=0; i<this->partition.size; i++)
+  { out << this->partition[i];
+    if (i!=this->partition.size-1)
+      out << ", ";
+  }
+  out << "), (";
+  for (int i=0; i<this->tuple.size; i++)
+  { out << this->tuple[i];
+    if (i!=this->tuple.size-1)
+      out << ", ";
+  }
+  out << "))";
+  return out.str();
+}
 
 bool KostkaNumber::initTableaux(std::stringstream* comments)
 { for (int i=0; i<this->partition.size-1; i++)
@@ -797,12 +839,6 @@ bool KostkaNumber::initTableaux(std::stringstream* comments)
         << this->partition;
       return false;
     }
-  this->remainingPartition=this->partition;
-  this->remainingTuple=this->tuple;
-  this->numTupleEntriesInRow.SetSize(this->partition.size);
-  for (int i=0; i<this->numTupleEntriesInRow.size; i++)
-    this->numTupleEntriesInRow[i].initFillInObject(this->tuple.size, -1);
-  this->remainingTuple=this->tuple;
   this->sumTuple=0;
   this->sumPartition=0;
   for (int i=0; i<this->tuple.size; i++)
@@ -823,36 +859,10 @@ bool KostkaNumber::initTableaux(std::stringstream* comments)
       return false;
     }
   }
-  this->remainingSumPartition=this->sumPartition;
-  this->remainingSumTuple=this->sumTuple;
-  this->currentRow=-1;
-  this->currentTupleIndex=this->tuple.size-1;
   return true;
 }
 
-bool KostkaNumber::IncrementReturnFalseIfPastLast()
-{ /*if (this->currentRow>=0 && this->currentTupleIndex>=0)
-  { int& currentEntry=this->numTupleEntriesInRow[this->currentRow][this->currentTupleIndex];
-    //if (this->currentEntry)
-
-    currentEntry++;
-    this->remainingPartition[this->currentRow]--;
-    this->remainingTuple[this->currentTupleIndex]--;
-    if (this->currentRow)
-  }
-
-  this->currentRow++;
-  if (this->currentRow>=this->partition.size)
-  { this->currentRow=0;
-    this->currentTupleIndex--;
-  }
-  if (this->currentTupleIndex>= 0)
-  {
-
-  }*/
-}
-
-bool KostkaNumber::Compute(std::stringstream* comments)
+bool KostkaNumber::Compute(HashedList<KostkaNumber>* KNcache, std::stringstream* comments)
 { MacroRegisterFunctionWithName("KostkaNumber::Compute");
   this->value=-1;
   if (!this->initTableaux(comments))
@@ -862,13 +872,49 @@ bool KostkaNumber::Compute(std::stringstream* comments)
     return true;
   }
   if (this->sumTuple==0)
-  { this->value=0;
+  { if (this->sumPartition==0)
+      this->value=1;
+    else
+      this->value=0;
     return true;
   } //we are now guaranteed each of the tuple and the partition has at least one entry.
+  stOutput << "<br>Computing: " << this->ToString();
 
-  while (this->IncrementReturnFalseIfPastLast())
-  {
+  SelectionFixedRankDifferentMaxMultiplicities theSel;
+  theSel.init();
+  theSel.MaxMultiplicities.SetSize(this->partition.size);
+  for (int i=0; i<this->partition.size; i++)
+    if (i!=this->partition.size-1)
+      theSel.MaxMultiplicities[i]=this->partition[i]-this->partition[i+1];
+    else
+      theSel.MaxMultiplicities[i]=this->partition[i];
+  theSel.rank=*this->tuple.LastObject();
+  this->value=0;
+//  stOutput << "<br>Selection before start: " << theSel.ToStringFull();
+  while (theSel.IncrementReturnFalseIfPastLast())
+  { stOutput << "<br>current selection: " << theSel.ToStringFull();
+    KostkaNumber ancestor;
+    ancestor.partition=this->partition;
+    ancestor.tuple=this->tuple;
+    ancestor.tuple.SetSize(ancestor.tuple.size-1);
+    for (int i=0; i<theSel.Multiplicities.size; i++)
+      ancestor.partition[i]-=theSel.Multiplicities[i];
+    if (KNcache!=0)
+    { int ancestorIndex=KNcache->GetIndex(ancestor);
+      if (ancestorIndex!=-1)
+        ancestor=KNcache->GetElement(ancestorIndex);
+      else
+        if (!ancestor.Compute(KNcache, comments))
+          return false;
+        else
+          if (KNcache->size<this->MaxNumCachedKostkaNumbers)
+            KNcache->AddOnTop(ancestor);
+    } else
+      if (!ancestor.Compute(KNcache, comments))
+        return false;
+    this->value+=ancestor.value;
   }
+  return true;
 }
 
 bool CalculatorFunctionsGeneral::innerKostkaNumber(Calculator& theCommands, const Expression& input, Expression& output)
@@ -880,30 +926,27 @@ bool CalculatorFunctionsGeneral::innerKostkaNumber(Calculator& theCommands, cons
       !theCommands.GetVectoRInt(input[2], theKN.tuple))
     return theCommands << "Failed to extract partition and tuple from input: " << input.ToString();
   std::stringstream out;
-  if (theKN.Compute(&out))
+  HashedList<KostkaNumber> theKNs;
+  if (theKN.Compute(&theKNs, &out))
     out << "<br>Final result: " << theKN.value.ToString();
   return output.AssignValue(out.str(), theCommands);
 }
-
-class SelectionFixedRankDifferentMaxMultiplicities
-{
-public:
-  List<int> Multiplicities;
-  List<int> MaxMultiplicities;
-  int rank;
-  bool flagFirstComputed;
-  bool init();
-  bool firstIncrement();
-  bool IncrementReturnFalseIfPastLast();
-  SelectionFixedRankDifferentMaxMultiplicities();
-  std::string ToString();
-};
 
 std::string SelectionFixedRankDifferentMaxMultiplicities::ToString()
 { std::stringstream out;
   Vector<int> theMults;
   theMults=this->Multiplicities;
   out << theMults;
+  return out.str();
+}
+
+std::string SelectionFixedRankDifferentMaxMultiplicities::ToStringFull()
+{ std::stringstream out;
+  Vector<int> theMults, theMaxMults;
+  theMaxMults=this->MaxMultiplicities;
+  theMults=this->Multiplicities;
+  out << "Multiplicities: " << theMults << "; max: " << theMaxMults
+  << "; rank: " << this->rank;
   return out.str();
 }
 

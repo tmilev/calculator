@@ -885,10 +885,101 @@ bool CalculatorFunctionsGeneral::innerKostkaNumber(Calculator& theCommands, cons
   return output.AssignValue(out.str(), theCommands);
 }
 
+class SelectionFixedRankDifferentMaxMultiplicities
+{
+public:
+  List<int> Multiplicities;
+  List<int> MaxMultiplicities;
+  int rank;
+  bool flagFirstComputed;
+  bool init();
+  bool firstIncrement();
+  bool IncrementReturnFalseIfPastLast();
+  SelectionFixedRankDifferentMaxMultiplicities();
+  std::string ToString();
+};
+
+std::string SelectionFixedRankDifferentMaxMultiplicities::ToString()
+{ std::stringstream out;
+  Vector<int> theMults;
+  theMults=this->Multiplicities;
+  out << theMults;
+  return out.str();
+}
+
+SelectionFixedRankDifferentMaxMultiplicities::SelectionFixedRankDifferentMaxMultiplicities()
+{ this->flagFirstComputed=false;
+}
+
+bool SelectionFixedRankDifferentMaxMultiplicities::init()
+{ this->flagFirstComputed=false;
+  return true;
+}
+
+bool SelectionFixedRankDifferentMaxMultiplicities::firstIncrement()
+{ MacroRegisterFunctionWithName("SelectionFixedRankDifferentMaxMultiplicities::firstIncrement");
+  this->flagFirstComputed=true;
+  this->Multiplicities.SetSize(this->MaxMultiplicities.size);
+  int remainingRank=this->rank;
+  for (int i=this->MaxMultiplicities.size-1; i>=0; i--)
+  { if (this->MaxMultiplicities[i]<remainingRank)
+      this->Multiplicities[i]=this->MaxMultiplicities[i];
+    else
+      this->Multiplicities[i]=remainingRank;
+    remainingRank-=this->Multiplicities[i];
+  }
+  if (remainingRank>0)
+    return false;
+  return true;
+}
+
+bool SelectionFixedRankDifferentMaxMultiplicities::IncrementReturnFalseIfPastLast()
+{ MacroRegisterFunctionWithName("SelectionFixedRankDifferentMaxMultiplicities::IncrementReturnFalseIfPastLast");
+  if (this->rank<0)
+    return false;
+  if (!this->flagFirstComputed)
+    return this->firstIncrement();
+  int rankToRedistribute=0;
+  for (int i=this->Multiplicities.size-2; i>=0; i--)
+    if (this->Multiplicities[i+1]>0)
+    { rankToRedistribute+=this->Multiplicities[i+1];
+      this->Multiplicities[i+1]=0;
+      if (this->Multiplicities[i]<this->MaxMultiplicities[i])
+      { this->Multiplicities[i]++;
+        rankToRedistribute--;
+        for (int j=this->Multiplicities.size-1; j>=0; j--)
+        { if (this->MaxMultiplicities[j]<=rankToRedistribute)
+            this->Multiplicities[j]=this->MaxMultiplicities[j];
+          else
+            this->Multiplicities[j]=rankToRedistribute;
+          rankToRedistribute-=this->Multiplicities[j];
+          if (rankToRedistribute==0)
+            return true;
+        }
+        return true;
+      }
+    }
+  return false;
+}
 
 bool CalculatorFunctionsGeneral::innerAllSelectionsFixedRank(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerKostkaNumber");
   if (input.size()!=3)
     return false;
-  return false;
+  SelectionFixedRankDifferentMaxMultiplicities theSel;
+  if (!input[1].IsSmallInteger(&theSel.rank))
+    return false;
+  if (!theCommands.GetVectoRInt(input[2], theSel.MaxMultiplicities))
+    return theCommands << "Failed to extract list of multiplicities from "
+    << input[2].ToString();
+  if (theSel.rank<0)
+    return output.AssignValue(0, theCommands);
+  theSel.init();
+  std::stringstream out;
+  out << "Max multiplicities: " << theSel.MaxMultiplicities << " rank: "
+  << theSel.rank;
+  while (theSel.IncrementReturnFalseIfPastLast())
+  { out << "<br>" << theSel.ToString();
+  }
+  return output.AssignValue(out.str(), theCommands);
 }

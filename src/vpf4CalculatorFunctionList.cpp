@@ -1283,7 +1283,7 @@ D-B;\
    "Prints all selections of fixed size (given by first argument) from a \
     collection of objects with multiplicities (given as a non-negative integer \
     vector by the second argument). ",
-   "AllSelectionsFixedRank(3, (3,5,7))\
+   "AllSelectionsFixedRank(4, (1,2,3,4));\
     \nAllSelectionsFixedRank(5, (3,1,1));\
     \nAllSelectionsFixedRank(5, (3,0,1));\
     \nAllSelectionsFixedRank(0, (3,5,7));\

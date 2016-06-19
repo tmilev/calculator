@@ -961,6 +961,14 @@ unsigned int MathRoutines::HashListDoubles(const List<double>& input)
   return result;
 }
 
+unsigned int MathRoutines::HashListInts(const List<int>& input)
+{ unsigned int result=0;
+  int numCycles=MathRoutines::Minimum(input.size, SomeRandomPrimesSize);
+  for (int i =0; i<numCycles; i++)
+    result+=SomeRandomPrimes[i]*MathRoutines::IntUnsignIdentity(input[i]);
+  return result;
+}
+
 unsigned int MathRoutines::hashString(const std::string& x)
 { int numCycles=x.size();
   unsigned int result=0;

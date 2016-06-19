@@ -914,6 +914,8 @@ bool KostkaNumber::Compute(HashedList<KostkaNumber>* KNcache, std::stringstream*
         return false;
     this->value+=ancestor.value;
   }
+  stOutput << "<hr>" << this->ToString() << " = "
+            << this->value.ToString() << "<hr>";
   return true;
 }
 
@@ -984,24 +986,23 @@ bool SelectionFixedRankDifferentMaxMultiplicities::IncrementReturnFalseIfPastLas
     return this->firstIncrement();
   int rankToRedistribute=0;
   for (int i=this->Multiplicities.size-2; i>=0; i--)
-    if (this->Multiplicities[i+1]>0)
-    { rankToRedistribute+=this->Multiplicities[i+1];
-      this->Multiplicities[i+1]=0;
-      if (this->Multiplicities[i]<this->MaxMultiplicities[i])
-      { this->Multiplicities[i]++;
-        rankToRedistribute--;
-        for (int j=this->Multiplicities.size-1; j>=0; j--)
-        { if (this->MaxMultiplicities[j]<=rankToRedistribute)
-            this->Multiplicities[j]=this->MaxMultiplicities[j];
-          else
-            this->Multiplicities[j]=rankToRedistribute;
-          rankToRedistribute-=this->Multiplicities[j];
-          if (rankToRedistribute==0)
-            return true;
-        }
-        return true;
+  { rankToRedistribute+=this->Multiplicities[i+1];
+    this->Multiplicities[i+1]=0;
+    if (this->Multiplicities[i]<this->MaxMultiplicities[i] && rankToRedistribute>0)
+    { this->Multiplicities[i]++;
+      rankToRedistribute--;
+      for (int j=this->Multiplicities.size-1; j>i; j--)
+      { if (this->MaxMultiplicities[j]<=rankToRedistribute)
+          this->Multiplicities[j]=this->MaxMultiplicities[j];
+        else
+          this->Multiplicities[j]=rankToRedistribute;
+        rankToRedistribute-=this->Multiplicities[j];
+        if (rankToRedistribute==0)
+          return true;
       }
+      return true;
     }
+  }
   return false;
 }
 

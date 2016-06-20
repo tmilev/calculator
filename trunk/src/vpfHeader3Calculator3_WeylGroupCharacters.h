@@ -48,6 +48,7 @@ public:
   static bool innerMakeVirtualWeylRep(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsOuterAutoWeylGroup(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSignSignatureRootSubsystems(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSignSignatureRootSubsystemsFromKostkaNumbers(Calculator& theCommands, const Expression& input, Expression& output);
 };
 
 #endif

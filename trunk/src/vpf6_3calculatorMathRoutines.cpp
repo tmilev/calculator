@@ -4804,8 +4804,25 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
 
 bool CalculatorFunctionsGeneral::innerAllPartitions(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerAllPartitions");
+  int theRank=-1;
+  if (!input.IsSmallInteger(&theRank))
+    return false;
+  if (theRank>33 || theRank<0)
+    return theCommands << "Partitions printouts are limited from n=0 to n=33, your input was: " << input.ToString();
+  List<Partition> thePartitions;
+  Partition::GetPartitions(thePartitions, theRank);
+  std::stringstream out;
+  out << "The partitions of " << theRank << " (total: " << thePartitions.size << ")"
+  << ": ";
+  for (int i=0; i<thePartitions.size; i++)
+    out << "<br>" << thePartitions[i].ToString();
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerAllVectorPartitions(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerAllVectorPartitions");
   if (input.children.size!=3)
-    return theCommands << "<hr>AllPartitions function takes 3 arguments.";
+    return theCommands << "<hr>AllVectorPartitions function takes 3 arguments.";
   VectorPartition thePartition;
   const Expression& theVectorE=input[1];
   const Expression& thePartitioningVectorsE=input[2];

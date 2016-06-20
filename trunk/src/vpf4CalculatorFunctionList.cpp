@@ -594,6 +594,22 @@ D-B;\
 
 
   this->AddOperationInnerHandler
+  ("WeylGroupClassicalSignMultiplicities", CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNumbers, "",
+   "Prints the sign multiplicities of a simple Weyl group of classical type. See a common article by \
+   T. Folz-Donahue, S. Jackson, T. Milev, A. Noel. ",
+   "WeylGroupClassicalSignMultiplicities{}(b_3);\
+    \nWeylGroupClassicalSignMultiplicities{}(b_4);\
+    \nWeylGroupClassicalSignMultiplicities{}(b_5);\
+    \nWeylGroupClassicalSignMultiplicities{}(d_4);\
+    \nWeylGroupClassicalSignMultiplicities{}(d_5);\
+    \nWeylGroupClassicalSignMultiplicities{}(d_6);\
+    \nWeylGroupClassicalSignMultiplicities{}(a_2);\
+    \nWeylGroupClassicalSignMultiplicities{}(a_3);\
+    \nWeylGroupClassicalSignMultiplicities{}(a_4);\
+", true, false,
+   "CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNumbers", "WeylGroupClassicalSignMultiplicities")
+   ;
+  this->AddOperationInnerHandler
   ("WeylGroupTauSignatures", CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems, "",
    "Prints the tau signatures of a Weyl group. See a common article by \
    T. Folz-Donahue, S. Jackson, T. Milev, A. Noel. ",
@@ -1274,10 +1290,15 @@ D-B;\
    "not{}1;not{}a; not{}0; not{}(3==4)");
   this->AddOperationInnerHandler
   ("AllPartitions", CalculatorFunctionsGeneral::innerAllPartitions, "",
+   "Prints all partitions of a positive number into a sum of positive integers. ",
+   "AllPartitions(10) ", true, false,
+   "CalculatorFunctionsGeneral::innerAllPartitions", "AllPartitions");
+  this->AddOperationInnerHandler
+  ("AllVectorPartitions", CalculatorFunctionsGeneral::innerAllVectorPartitions, "",
    "Prints all partitions of the vector (first argument) using a given list of vectors (second argument). \
    All partitioning vectors should have positive coordinates. ",
-   "AllPartitions((10,11), ((1,2), (2,3), (4,5), (2,1), (3,2), (5,4))) ", true, false,
-   "CalculatorFunctionsGeneral::innerAllPartitions", "AllPartitions");
+   "AllVectorPartitions((10,11), ((1,2), (2,3), (4,5), (2,1), (3,2), (5,4))) ", true, false,
+   "CalculatorFunctionsGeneral::innerAllVectorPartitions", "AllVectorPartitions");
   this->AddOperationInnerHandler
   ("AllSelectionsFixedRank", CalculatorFunctionsGeneral::innerAllSelectionsFixedRank, "",
    "Prints all selections of fixed size (given by first argument) from a \

@@ -878,7 +878,7 @@ bool KostkaNumber::Compute(HashedList<KostkaNumber>* KNcache, std::stringstream*
       this->value=0;
     return true;
   } //we are now guaranteed each of the tuple and the partition has at least one entry.
-  stOutput << "<br>Computing: " << this->ToString();
+//  stOutput << "<br>Computing: " << this->ToString();
 
   SelectionFixedRankDifferentMaxMultiplicities theSel;
   theSel.init();
@@ -892,7 +892,7 @@ bool KostkaNumber::Compute(HashedList<KostkaNumber>* KNcache, std::stringstream*
   this->value=0;
 //  stOutput << "<br>Selection before start: " << theSel.ToStringFull();
   while (theSel.IncrementReturnFalseIfPastLast())
-  { stOutput << "<br>current selection: " << theSel.ToStringFull();
+  { //stOutput << "<br>current selection: " << theSel.ToStringFull();
     KostkaNumber ancestor;
     ancestor.partition=this->partition;
     ancestor.tuple=this->tuple;

@@ -1105,8 +1105,16 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNum
     return theCommands << "You requested computation for type " << type
     << " but our formulas work only for classical types: A, B-C and D. ";
   if (type=='A')
-  { Partition thePartition;
-
+  { int permutationSize=rank+1;
+    List<Partition> thePartitions, partitionsTransposed;
+    Partition::GetPartitions(thePartitions, permutationSize);
+    partitionsTransposed.SetSize(thePartitions.size);
+    for (int i=0; i<thePartitions.size; i++)
+    { partitionsTransposed[i]=thePartitions[i];
+      partitionsTransposed[i].Transpose();
+      out << "<br>Partition: " << thePartitions[i].ToString()
+      << ", transposed: " << partitionsTransposed[i].ToString();
+    }
   }
   return output.AssignValue(out.str(), theCommands);
 }

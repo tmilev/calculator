@@ -1710,7 +1710,7 @@ public:
   static bool innerPolynomialDivisionVerboseGrLexRev(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialDivisionVerboseLexRev(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialDivisionVerboseLex(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPrintAllPartitions(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPrintAllVectorPartitions(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, const Expression& input, Expression& output);
   bool innerPrintB3G2branchingIntermediate
   (Calculator& theCommands, const Expression& input, Expression& output, Vectors<RationalFunctionOld>& theHWs, branchingData& theG2B3Data, Expression& theContext);

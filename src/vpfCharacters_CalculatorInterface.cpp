@@ -1087,6 +1087,30 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
   return out.str();
 }
 
+bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNumbers(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems");
+  std::stringstream out;
+  if (!CalculatorConversions::innerLoadWeylGroup(theCommands, input, output))
+    return false;
+  if (!output.IsOfType<WeylGroupData>())
+    return false;
+  WeylGroupData& theWeyl=output.GetValueNonConst<WeylGroupData>();
+  if (theWeyl.GetDim()>12)
+    return theCommands << "<hr>Computing sign signatures restricted up to rank 12.";
+  char type='X';
+  int rank=-1;
+  if (!theWeyl.theDynkinType.IsSimple(&type, &rank))
+    return theCommands << "This function is implemented for simple classical Weyl groups only.";
+  if (type!='A' && type!='B' && type!='C' && type!='D')
+    return theCommands << "You requested computation for type " << type
+    << " but our formulas work only for classical types: A, B-C and D. ";
+  if (type=='A')
+  { Partition thePartition;
+
+  }
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems");
   if (!CalculatorConversions::innerLoadWeylGroup(theCommands, input, output))

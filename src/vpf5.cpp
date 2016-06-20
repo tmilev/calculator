@@ -974,8 +974,8 @@ bool Calculator::innerJacobiSymbol(Calculator& theCommands, const Expression& in
   return true;
 }
 
-bool Calculator::innerPrintAllPartitions(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::innerPrintAllPartitions");
+bool Calculator::innerPrintAllVectorPartitions(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerPrintAllVectorPartitions");
   RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(3))
     return output.MakeError("Function innerPrintAllPartitions expects 2 arguments.", theCommands);

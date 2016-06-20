@@ -83,21 +83,22 @@ void Partition::GetPartitions(List<Partition>& out, int n)
     return;
   }
   List<int> p;
-  p.SetSize(n);
-  for(int i=0; i<n; i++)
-    p[i] = 0;
+  p.initFillInObject(n,0);
   p[1] = n;
   int k = 1;
   while(k != 0)
   { int x = p[k-1] + 1;
     int y = p[k] - 1;
     k -= 1;
+//    stOutput << "x: " << x << "<br>y: " << y << "<br>p: " << p << "<br>k: " << k << "<hr>";
     while(x <= y)
     { p[k] = x;
       y -= x;
       k += 1;
+//    stOutput << "x: " << x << "<br>y: " << y << "<br>p: " << p << "<br>k: " << k << "<hr>";
     }
     p[k] = x+y;
+//    stOutput << "x: " << x << "<br>y: " << y << "<br>p: " << p << "<br>k: " << k << "<hr>";
     //out.SetSize(out.size+1);
     //out[out.size-1].FromListInt(p,k+1);
     int s = out.size;

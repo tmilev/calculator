@@ -110,6 +110,32 @@ void Partition::GetPartitions(List<Partition>& out, int n)
   }
 }
 
+void Partition::Transpose()
+{ if (this->n==0)
+    return;
+  //if a partition is laid out like this:
+  // example: partition [4,2,1]:
+  // ****
+  // **
+  // *
+  // then the transpose operation transposes the boxes above to give the partition
+  // [3,2,1,1]:
+  // ***
+  // **
+  // *
+  // *
+  Partition myCopy=*this;
+  this->p.SetSize(myCopy.p[0]);
+  for (int i=0; i<*myCopy.p.LastObject(); i++)
+    this->p[i]=myCopy.p.size;
+  int currentIndex=*myCopy.p.LastObject();
+  for (int i=myCopy.p.size-2; i>=0; i--)
+    for (int j=0; j<myCopy.p[i]-myCopy.p[i+1]; j++)
+    { this->p[currentIndex]=i+1;
+      currentIndex++;
+    }
+}
+
 void Partition::FillTableau(Tableau& out, List<int>& stuffing) const
 { if(stuffing.size < this->n)
     crash << "need at least " << this->n << " things to stuff tableau with partition " << *this << " but you provided only " << stuffing.size << '\n' << crash;

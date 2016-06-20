@@ -109,6 +109,7 @@ class Partition
   int& operator[](int i) const;
   void FromListInt(const List<int> &in, int lastElement = -1);
   static void GetPartitions(List<Partition> &out, int n);
+  void Transpose();
   void FillTableau(Tableau& out, List<int>& stuffing) const;
   void FillTableauOrdered(Tableau& out) const;
   void GetAllStandardTableaux(List<Tableau>& out) const;

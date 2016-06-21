@@ -69,6 +69,7 @@ public:
   double MaxComputationTimeBeforeWeTakeAction;
 //  bool flagLogInterProcessCommunication;
 //flags: what mode are we running in?
+  bool flagRunningAsProblemInterpreter;
   bool flagRunningCommandLine;
   bool flagRunningConsoleTest;
   bool flagUsingApacheWebServer;

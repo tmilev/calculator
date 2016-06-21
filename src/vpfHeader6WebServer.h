@@ -193,6 +193,7 @@ public:
   static int main(int argc, char **argv);
   static int main_apache_client();
   static int main_command_input();
+  static int main_problem_interpreter();
   static void AnalyzeMainArguments(int argC, char **argv);
   static void InitializeGlobalVariables();
   void ReleaseWorkerSideResources();

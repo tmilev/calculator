@@ -3519,7 +3519,8 @@ void WebServer::Release(int& theDescriptor)
 
 int WebServer::main_command_input()
 { MacroRegisterFunctionWithName("main_command_input");
-  theGlobalVariables.IndicatorStringOutputFunction=CGI::MakeStdCoutReport;
+  if (!theGlobalVariables.programArguments.Contains("noReport"))
+    theGlobalVariables.IndicatorStringOutputFunction=CGI::MakeStdCoutReport;
   //  stOutput << "\n\n\n" << theParser.DisplayPathServerBase << "\n\n";
   //  return 0;
   theParser.init();

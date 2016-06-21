@@ -3517,10 +3517,25 @@ void WebServer::Release(int& theDescriptor)
 { PauseController::Release(theDescriptor);
 }
 
+int WebServer::main_problem_interpreter()
+{ MacroRegisterFunctionWithName("main_problem_interpreter");
+//  std::cout << "no progress reports! \n\n\n\n\n\n\n\n\n\n\n\n\\n\n";
+  theParser.init();
+  theParser.inputStringRawestOfTheRaw =theGlobalVariables.programArguments[0];
+  theParser.flagUseHtml=false;
+  theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
+  std::fstream outputFile;
+  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
+  (outputFile, "outputFileCommandLine.html", false, true, false);
+  stOutput << theParser.outputString;
+  outputFile << theParser.outputString;
+  stOutput << "\nTotal running time: " << GetElapsedTimeInSeconds() << " seconds. \nOutput written in file ./outputFileCommandLine.html\n";
+  return 0;
+}
+
 int WebServer::main_command_input()
 { MacroRegisterFunctionWithName("main_command_input");
-  if (!theGlobalVariables.programArguments.Contains("noReport"))
-    theGlobalVariables.IndicatorStringOutputFunction=CGI::MakeStdCoutReport;
+  theGlobalVariables.IndicatorStringOutputFunction=CGI::MakeStdCoutReport;
   //  stOutput << "\n\n\n" << theParser.DisplayPathServerBase << "\n\n";
   //  return 0;
   theParser.init();
@@ -3558,12 +3573,13 @@ extern int mainTest(List<std::string>& remainingArgs);
 
 void WebServer::AnalyzeMainArguments(int argC, char **argv)
 { MacroRegisterFunctionWithName("WebServer::AnalyzeMainArguments");
+  //std::cout << "here i am";
   if (argC<0)
     argC=0;
   theGlobalVariables.programArguments.SetSize(argC);
   for (int i=0; i<argC; i++)
     theGlobalVariables.programArguments[i]=argv[i];
-//  std::cout << "\nProgram arguments: " << theGlobalVariables.programArguments.ToStringCommaDelimited() << "\n";
+  //std::cout << "\nProgram arguments: " << theGlobalVariables.programArguments.ToStringCommaDelimited() << "\n";
 
   theGlobalVariables.flagUsingBuiltInWebServer=false;
   theGlobalVariables.flagRunningCommandLine=false;
@@ -3589,10 +3605,17 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
     theGlobalVariables.flagRunningConsoleTest=true;
     return;
   }
+  if (secondArgument=="interpretHTML")
+  { theGlobalVariables.programArguments.PopIndexShiftDown(0);
+    theGlobalVariables.flagRunningAsProblemInterpreter=true;
+  }
   theGlobalVariables.flagUsingBuiltInWebServer=
   (secondArgument=="server" || secondArgument=="server8155" || secondArgument=="serverSSL");
-  theGlobalVariables.flagRunningCommandLine=!theGlobalVariables.flagUsingBuiltInWebServer;
-  if (theGlobalVariables.flagRunningCommandLine)
+  theGlobalVariables.flagRunningCommandLine=
+  !theGlobalVariables.flagUsingBuiltInWebServer &&
+  !theGlobalVariables.flagRunningAsProblemInterpreter;
+  if (theGlobalVariables.flagRunningCommandLine ||
+      theGlobalVariables.flagRunningAsProblemInterpreter)
   { theGlobalVariables.programArguments.PopIndexShiftDown(0);
     for (int i=1; i<theGlobalVariables.programArguments.size; i++)
       theGlobalVariables.programArguments[0]+="\n"+ theGlobalVariables.programArguments[i];
@@ -3649,6 +3672,8 @@ int WebServer::main(int argc, char **argv)
     return WebServer::main_apache_client();
   if (theGlobalVariables.flagUsingBuiltInWebServer)
     return theWebServer.Run();
+  if (theGlobalVariables.flagRunningAsProblemInterpreter)
+    return theWebServer.main_problem_interpreter();
   if (theGlobalVariables.flagRunningCommandLine)
     return WebServer::main_command_input();
   }

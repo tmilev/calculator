@@ -116,6 +116,7 @@ GlobalVariables::GlobalVariables()
   this->flagRunningCommandLine=false;
   this->flagUsingApacheWebServer=false;
   this->flagUsingBuiltInWebServer=false;
+  this->flagRunningAsProblemInterpreter=false;
   this->flagLoggedIn=false;
   this->flagUsingSSLinCurrentConnection=false;
   this->flagSSLisAvailable=false;

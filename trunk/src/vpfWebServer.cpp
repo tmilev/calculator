@@ -3519,7 +3519,7 @@ void WebServer::Release(int& theDescriptor)
 
 int WebServer::main_problem_interpreter()
 { MacroRegisterFunctionWithName("main_problem_interpreter");
-//  std::cout << "no progress reports! \n\n\n\n\n\n\n\n\n\n\n\n\\n\n";
+//std::cout << "Running offline interpreter. \n";
   theParser.init();
   theParser.inputStringRawestOfTheRaw =theGlobalVariables.programArguments[0];
   theParser.flagUseHtml=false;
@@ -3538,7 +3538,8 @@ int WebServer::main_command_input()
   theGlobalVariables.IndicatorStringOutputFunction=CGI::MakeStdCoutReport;
   //  stOutput << "\n\n\n" << theParser.DisplayPathServerBase << "\n\n";
   //  return 0;
-  theParser.init();
+std::cout << "Running cmd line. \n";
+    theParser.init();
   theParser.inputStringRawestOfTheRaw =theGlobalVariables.programArguments[0];
   theParser.flagUseHtml=false;
   theParser.Evaluate(theParser.inputStringRawestOfTheRaw);

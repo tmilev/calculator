@@ -545,7 +545,7 @@ void Calculator::EvaluateCommands()
   Expression StartingExpression=this->theProgramExpression;
   this->flagAbortComputationASAP=false;
   this->Comments.clear();
-  bool usingCommandline=!this->flagDisplayFullExpressionTree && !this->flagUseHtml;
+  bool usingCommandline=!this->flagDisplayFullExpressionTree && !this->flagUseHtml && !theGlobalVariables.flagRunningAsProblemInterpreter;
   ProgressReport theReport;
   if (!usingCommandline)
     theReport.Report("Evaluating expressions, current expression stack:\n");
@@ -559,7 +559,9 @@ void Calculator::EvaluateCommands()
   theGlobalVariables.theDefaultFormat.GetElement().flagExpressionNewLineAllowed=true;
   theGlobalVariables.theDefaultFormat.GetElement().flagIncludeExtraHtmlDescriptionsInPlots=!this->flagPlotNoControls;
   theGlobalVariables.theDefaultFormat.GetElement().flagLatexDetailsInHtml=this->flagWriteLatexPlots;
-  if(usingCommandline)
+  if (theGlobalVariables.flagRunningAsProblemInterpreter)
+  { out << this->theProgramExpression.ToString(& theGlobalVariables.theDefaultFormat.GetElement());
+  } else if(usingCommandline)
   { out << "Input: " << "\e[1;32m" << StartingExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\033[0m" << std::endl;
     out << "Output: " << "\e[1;33m" << this->theProgramExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\033[0m" << std::endl;
   } else if (!this->flagDisplayFullExpressionTree)
@@ -583,4 +585,6 @@ void Calculator::EvaluateCommands()
   this->outputCommentsString=commentsStream.str();
   if(usingCommandline && this->Comments.str()!="")
     this->outputString+=this->outputCommentsString;
+  if (theGlobalVariables.flagRunningAsProblemInterpreter)
+    this->outputString+= "<hr><hr>" + this->outputCommentsString;
 }

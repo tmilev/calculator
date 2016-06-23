@@ -1127,6 +1127,8 @@ public:
 struct FileOperations
 {
 public:
+  static HashedList<std::string, MathRoutines::hashString>& GetAllowedFolderNamesParallelToProjectFolder();
+  static HashedList<std::string, MathRoutines::hashString>& GetAllowedFolderNamesInsideProjectFolder();
   static bool LoadFileToStringUnsecure
   (const std::string& theFileName, std::string& output, std::stringstream& commentsOnFailure);
   static bool LoadFileToStringOnTopOfOutputFolder

@@ -141,8 +141,19 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("LoadFileIntoString", CalculatorConversions::innerLoadFileIntoString, "",
    "Loads a file into a string. The file must be given its relative file name displayed when browsing \
-   the web server. ",
-   "LoadFileIntoString(\"/ProblemCollections/Problems/Functions-composing-fractional-linear-1.html\")",
+   the web server. \
+   There are two exceptions. 1) The file can be located in a folder in the project base \
+   that is otherwise not visible by the webserver **provided that** the folder is white-listed\
+   via the FileOperations class within the C++ source. Example: folder ProblemCollections \
+   is white-listed. To access this file simply start your file name with the foldername. \
+   Do not start the folder name with the / character.\
+   2) The file can be located in a folder in a level parallel to the project base \
+   - such folders are outside of the project folder - **provided that** \
+   the folder is white listed in the C++ code.\
+   ",
+   "LoadFileIntoString(\"robots.txt\");\
+    \nLoadFileIntoString(\"freecalc/contributors.tex\");\
+    \nLoadFileIntoString(\"ProblemCollections/Problems/Functions-composing-fractional-linear-1.html\")",
    true, false, "CalculatorConversions::innerLoadFileIntoString");
   this->AddOperationInnerHandler
   ("InterpretHtml", CalculatorHtmlFunctions::innerInterpretHtml, "",

@@ -589,6 +589,32 @@ bool FileOperations::LoadFileToStringUnsecure
   return true;
 }
 
+HashedList<std::string, MathRoutines::hashString>&
+FileOperations::GetAllowedFolderNamesParallelToProjectFolder()
+{ static HashedList<std::string, MathRoutines::hashString> result;
+  if (result.size==0)
+  { MutexRecursiveWrapper theMutex;
+    MutexLockGuard safetyFirst(theMutex);
+    if (result.size==0)
+    { result.AddOnTop("public_html");
+      result.AddOnTop("freecalc");
+    }
+  }
+  return result;
+}
+
+HashedList<std::string, MathRoutines::hashString>&
+FileOperations::GetAllowedFolderNamesInsideProjectFolder()
+{ static HashedList<std::string, MathRoutines::hashString> result;
+  if (result.size==0)
+  { MutexRecursiveWrapper theMutex;
+    MutexLockGuard safetyFirst(theMutex);
+    if (result.size==0)
+      result.AddOnTop("ProblemCollections");
+  }
+  return result;
+}
+
 bool FileOperations::FileExistsOnTopOfOutputFolder(const std::string& theFileName)
 { if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
     return false;

@@ -678,10 +678,19 @@ bool CGI::GetPhysicalFileNameFromRelativeInput(const std::string& inputFileName,
 { MacroRegisterFunctionWithName("CGI::GetPhysicalFileNameFromRelativeInput");
   if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(inputFileName))
     return false;
-  if (MathRoutines::StringBeginsWith(inputFileName, "/ProblemCollections/"))
-    output=theGlobalVariables.PhysicalPathProjectBase+inputFileName;
-  else
-    output=theGlobalVariables.PhysicalPathOutputFolder+inputFileName;
+  for (int i=0; i<FileOperations::GetAllowedFolderNamesParallelToProjectFolder().size; i++)
+    if (MathRoutines::StringBeginsWith
+        (inputFileName, FileOperations::GetAllowedFolderNamesParallelToProjectFolder()[i]))
+    { output = theGlobalVariables.PhysicalPathProjectBase+"../"+inputFileName;
+      return true;
+    }
+  for (int i=0; i<FileOperations::GetAllowedFolderNamesInsideProjectFolder().size; i++)
+    if (MathRoutines::StringBeginsWith
+        (inputFileName, FileOperations::GetAllowedFolderNamesInsideProjectFolder()[i]))
+    { output=theGlobalVariables.PhysicalPathProjectBase+inputFileName;
+      return true;
+    }
+  output=theGlobalVariables.PhysicalPathOutputFolder+inputFileName;
   return true;
 }
 

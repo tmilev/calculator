@@ -1890,7 +1890,9 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     { if (!useQuotes)
         out << this->GetValue<std::string>();
       else
+      { //out << "USING QUOTES \n";
         out << "\"" << this->GetValue<std::string>() << "\"";
+      }
     } else
     { out << "(string~ not~ shown~ to~ avoid~ javascript~ problems~ (in~ case~ the~ string~ has~ javascript))";
       //out << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -2269,7 +2271,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   bool allowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
   bool oldAllowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
   bool useFrac =this->owner->flagUseFracInRationalLaTeX; //(theFormat==0) ? true : theFormat->flagUseFrac;
-  if (theFormat!=0 && !this->IsOfType<std::string>())
+  if (theFormat!=0 && !this->IsOfType<std::string>() && !this->StartsWith(this->owner->opEndStatement()))
   { if (startingExpression==0)
       theFormat->flagUseQuotes=true;
     else

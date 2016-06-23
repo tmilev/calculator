@@ -159,7 +159,7 @@ void Calculator::initPredefinedInnerFunctions()
   ("InterpretHtml", CalculatorHtmlFunctions::innerInterpretHtml, "",
    "Does as ExtractCalculatorExpressionFromHtml but in addition interprets the calculator commands. ",
    "InterpretHtml(LoadFileIntoString(\
-   \"/ProblemCollections/Problems/Functions-composing-fractional-linear-1.html\"))", true, false,
+   \"ProblemCollections/Problems/Functions-composing-fractional-linear-1.html\"))", true, false,
    "CalculatorHtmlFunctions::innerInterpretHtml", "InterpretHtml");
   this->AddOperationInnerHandler
   ("makeInputBox", CalculatorHtmlFunctions::innerUserInputBox, "",

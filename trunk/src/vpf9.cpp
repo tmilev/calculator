@@ -596,9 +596,8 @@ FileOperations::GetAllowedFolderNamesParallelToProjectFolder()
   { MutexRecursiveWrapper theMutex;
     MutexLockGuard safetyFirst(theMutex);
     if (result.size==0)
-    { result.AddOnTop("public_html");
-      result.AddOnTop("freecalc");
-      result.AddOnTop("acelearning");
+    { result.AddOnTop("freecalc");
+      result.AddOnTop("problemtemplates");
     }
   }
   return result;

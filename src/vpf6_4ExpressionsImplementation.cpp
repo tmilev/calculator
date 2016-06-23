@@ -1890,8 +1890,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     { if (!useQuotes)
         out << this->GetValue<std::string>();
       else
-      { //out << "USING QUOTES \n";
-        out << "\"" << this->GetValue<std::string>() << "\"";
+      { out << "\"" << this->GetValue<std::string>() << "\"";
       }
     } else
     { out << "(string~ not~ shown~ to~ avoid~ javascript~ problems~ (in~ case~ the~ string~ has~ javascript))";

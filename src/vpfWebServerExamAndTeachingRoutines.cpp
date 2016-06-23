@@ -750,8 +750,6 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   << "  submitOrPreviewAnswers(idAnswer, idVerification, params);\n"
   << "}\n"
   << "function submitOrPreviewAnswers(idAnswer, idVerification, inputParams){\n";
-  if (theGlobalVariables.flagRunningAsProblemInterpreter)
-    out << "return;\n";
   out << "  clearTimeout(timerForPreviewAnswers);\n"
   << "  spanVerification = document.getElementById(idVerification);\n"
   << "  if (spanVerification==null){\n"

@@ -3524,12 +3524,8 @@ int WebServer::main_problem_interpreter()
   theParser.inputStringRawestOfTheRaw =theGlobalVariables.programArguments[0];
   theParser.flagUseHtml=false;
   theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
-  std::fstream outputFile;
-  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
-  (outputFile, "outputFileCommandLine.html", false, true, false);
   stOutput << theParser.outputString;
-  outputFile << theParser.outputString;
-  stOutput << "\nTotal running time: " << GetElapsedTimeInSeconds() << " seconds. \nOutput written in file ./outputFileCommandLine.html\n";
+  stOutput << "\nTotal running time: " << GetElapsedTimeInSeconds() << " seconds.\n";
   return 0;
 }
 
@@ -3538,8 +3534,8 @@ int WebServer::main_command_input()
   theGlobalVariables.IndicatorStringOutputFunction=CGI::MakeStdCoutReport;
   //  stOutput << "\n\n\n" << theParser.DisplayPathServerBase << "\n\n";
   //  return 0;
-std::cout << "Running cmd line. \n";
-    theParser.init();
+//std::cout << "Running cmd line. \n";
+  theParser.init();
   theParser.inputStringRawestOfTheRaw =theGlobalVariables.programArguments[0];
   theParser.flagUseHtml=false;
   theParser.Evaluate(theParser.inputStringRawestOfTheRaw);

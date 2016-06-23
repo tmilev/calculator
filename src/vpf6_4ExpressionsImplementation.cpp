@@ -2634,7 +2634,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << (*this)[1].ToString(theFormat) << "\\sqcup " << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opEndStatement()))
   { bool createTable=(startingExpression!=0);
-    if (!createTable)
+    if (!createTable && this->size()>2)
       out << "(";
     for (int i=1; i<this->children.size; i++)
       if (createTable)
@@ -2665,7 +2665,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         if (i!=this->children.size-1)
           out << ";";
       }
-    if (!createTable)
+    if (!createTable && this->size()>2)
       out << ")";
   } else if (this->StartsWith(this->owner->opError(), 2))
   { this->owner->NumErrors++;

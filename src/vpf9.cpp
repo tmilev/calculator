@@ -598,6 +598,7 @@ FileOperations::GetAllowedFolderNamesParallelToProjectFolder()
     if (result.size==0)
     { result.AddOnTop("public_html");
       result.AddOnTop("freecalc");
+      result.AddOnTop("acelearning");
     }
   }
   return result;

@@ -110,16 +110,16 @@ SOURCES=\
 OBJECTS=$(SOURCES:.cpp=.o) 
 DEPS=$(SOURCES:.cpp=.d)
 
-all: directories Debug_calculator 
-directories: Debug
-Debug:
-	mkdir ./Debug
+all: directories bin_calculator 
+directories: bin
+bin:
+	mkdir ./bin
 
-Debug_calculator: $(OBJECTS)
-	$(CXX) $(LDFLAGS) $(OBJECTS) -o  ./Debug/calculator $(LIBRARYINCLUDESEND)
+bin_calculator: $(OBJECTS)
+	$(CXX) $(LDFLAGS) $(OBJECTS) -o  ./bin/calculator $(LIBRARYINCLUDESEND)
 
-testrun: Debug/calculator
-	time ./Debug/calculator test
+testrun: bin/calculator
+	time ./bin/calculator test
 
 %.o:%.cpp
 	$(CXX) $(CFLAGS) -MMD -MP $< -o $@

@@ -1584,12 +1584,14 @@ std::string WebWorker::GetExamPage()
   return out.str();
 }
 
-bool CalculatorHtmlFunctions::innerInterpretHtml
+bool CalculatorHtmlFunctions::innerInterpretProblem
 (Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInterpretHtml");
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInterpretProblem");
   CalculatorHTML theProblem;
   if (!input.IsOfType<std::string>(&theProblem.inputHtml))
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
+  theProblem.flagRandomSeedGiven=true;
+  theProblem.theProblemData.randomSeed=theCommands.theObjectContainer.CurrentRandomSeed;
   theProblem.InterpretHtml(theCommands.Comments);
   std::stringstream out;
   out << theProblem.outputHtmlMain;
@@ -2807,6 +2809,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   if (!this->flagIsForReal || !this->theProblemData.flagRandomSeedComputed)
     if (!this->flagRandomSeedGiven || this->NumAttemptsToInterpret>1)
       this->theProblemData.randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
+  //stOutput << "DEBUG: Interpreting problem with random seed: " << this->theProblemData.randomSeed;
   this->FigureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before after loading problem list");
@@ -2959,9 +2962,11 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
   }
   this->timeToParseHtml=theGlobalVariables.GetElapsedSeconds()-startTime;
   this->NumAttemptsToInterpret=0;
+  if (!this->flagRandomSeedGiven)
+  { srand(time(NULL));
+  }
   if (this->flagRandomSeedGiven && this->flagIsForReal)
     this->MaxInterpretationAttempts=1;
-  srand (time(NULL));
   this->randomSeedsIfInterpretationFails.SetSize(this->MaxInterpretationAttempts);
   for (int i=0; i<this->randomSeedsIfInterpretationFails.size; i++)
     this->randomSeedsIfInterpretationFails[i]=rand()%100000000;

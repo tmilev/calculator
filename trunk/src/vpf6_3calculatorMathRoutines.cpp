@@ -1450,15 +1450,15 @@ bool CalculatorFunctionsGeneral::innerMakeMakeFile(Calculator& theCommands, cons
   FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(theFileStream, "makefile", false, true, false);
   std::stringstream outHtml;
   theFileStream << "all: directories calculator\n\n";
-  theFileStream << "directories: Debug\n";
-  theFileStream << "Debug:\n" << "\tmkdir ./Debug\n";
+  theFileStream << "directories: bin\n";
+  theFileStream << "bin:\n" << "\tmkdir ./bin\n";
   theFileStream << "calculator: ";
   for (int i=0; i<cppFilesNoExtension.size; i++)
     theFileStream << cppFilesNoExtension[i] << ".o ";
   theFileStream << "\n\tg++ -std=c++11 -pthread ";
   for (int i=0; i<cppFilesNoExtension.size; i++)
     theFileStream << cppFilesNoExtension[i] << ".o ";
-  theFileStream << "-o ./Debug/calculator\n\n";
+  theFileStream << "-o ./bin/calculator\n\n";
   for (int i=0; i<cppFilesNoExtension.size; i++)
     theFileStream << cppFilesNoExtension[i] << ".o: " << cppFilesNoExtension[i] << ".cpp\n\tg++ -std=c++0x -pthread -c " << cppFilesNoExtension[i] << ".cpp\n\n";
   outHtml << "<a href=\" " << theGlobalVariables.DisplayPathOutputFolder << "makefile" << "\"> makefile </a>";
@@ -6956,6 +6956,7 @@ bool CalculatorFunctionsGeneral::innerSetRandomSeed
   if (!input.IsIntegerFittingInInt(& theInt))
     return theCommands << "Failed to extract small integer";
   std::stringstream out;
+  theCommands.theObjectContainer.CurrentRandomSeed=theInt;
   srand((unsigned) theInt);
   out << "Successfully set random seed to: " << (unsigned) theInt;
   return output.AssignValue(out.str(), theCommands);

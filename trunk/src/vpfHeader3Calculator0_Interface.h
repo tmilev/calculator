@@ -729,7 +729,7 @@ public:
   WeylGroupData& GetWeylGroupDataCreateIfNotPresent(const DynkinType& input);
   SemisimpleLieAlgebra& GetLieAlgebraCreateIfNotPresent(const DynkinType& input);
   SemisimpleSubalgebras& GetSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input);
-
+  int CurrentRandomSeed;
   void reset();
   std::string ToString();
 };
@@ -1532,6 +1532,9 @@ public:
   }
   int opDivide()
   { return this->theAtoms.GetIndexIMustContainTheObject("/");
+  }
+  int opInterpretProblem()
+  { return this->theAtoms.GetIndexIMustContainTheObject("InterpretProblem");
   }
   bool AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& input, List<Expression>& output, int theOp);
   bool AppendMultiplicandsReturnTrueIfOrderNonCanonical(Expression& theExpression, List<Expression>& output)

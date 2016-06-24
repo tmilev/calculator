@@ -70,6 +70,7 @@ public:
 //  bool flagLogInterProcessCommunication;
 //flags: what mode are we running in?
   bool flagRunningAsProblemInterpreter;
+  bool flagRunningAsProblemInterpreterIntepretProblemInitial;
   bool flagRunningCommandLine;
   bool flagRunningConsoleTest;
   bool flagUsingApacheWebServer;

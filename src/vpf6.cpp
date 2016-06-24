@@ -2622,6 +2622,9 @@ void ObjectContainer::reset()
   this->theWeightsPoly.Clear();
   this->theHyperOctahedralGroups.SetSize(0);
   this->theElementsHyperOctGroup.Clear();
+  this->CurrentRandomSeed=  time(NULL);
+   //Setting up a random seed.
+  srand (this->CurrentRandomSeed);
 }
 
 bool Calculator::IsBoundVarInContext(int inputOp)

@@ -107,8 +107,6 @@ void Calculator::reset()
   this->cachedRuleStacks.Clear();
   //The expression container must be cleared last!
   this->theExpressionContainer.Clear();
-  //Setting up a random seed.
-  srand (time(NULL));
 }
 
 void Calculator::init()

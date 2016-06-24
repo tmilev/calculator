@@ -3602,7 +3602,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
     theGlobalVariables.flagRunningConsoleTest=true;
     return;
   }
-  if (secondArgument=="interpretHTML")
+  if (secondArgument=="interpretProblem")
   { theGlobalVariables.programArguments.PopIndexShiftDown(0);
     theGlobalVariables.flagRunningAsProblemInterpreter=true;
   }

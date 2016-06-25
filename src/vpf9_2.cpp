@@ -2335,23 +2335,22 @@ std::string CGI::URLKeyValuePairsToNormalRecursiveHtml(const std::string& input,
 //  stOutput << "I'm here<br>";
   if (recursionDepth>50)
     return input;
-  HashedList<std::string, MathRoutines::hashString> theKeys;
-  List<std::string> theValues;
+  MapList<std::string, std::string, MathRoutines::hashString> currentMap;
   std::stringstream notUsed;
-  if (!CGI::ChopCGIInputStringToMultipleStrings(input, theValues, theKeys, notUsed))
+  if (!CGI::ChopCGIInputStringToMultipleStrings(input, currentMap, notUsed))
   { //stOutput << "oh no: " << notUsed.str();
     return input;
   }
   std::stringstream out;
   out << "<table border=\"1px solid black;\">";
-  for (int i=0; i<theValues.size; i++)
+  for (int i=0; i<currentMap.size(); i++)
   { out << "<tr>";
     out << "<td>"
-    << CGI::URLStringToNormal(theKeys[i]) << " </td>";
-    if (theValues[i]!="")
+    << CGI::URLStringToNormal(currentMap.theKeys[i]) << " </td>";
+    if (currentMap[i]!="")
     { out << "<td>=</td><td>";
-      if (theValues[i]!="")
-        out << CGI::URLKeyValuePairsToNormalRecursiveHtml(CGI::URLStringToNormal(theValues[i]), recursionDepth+1);
+      if (currentMap[i]!="")
+        out << CGI::URLKeyValuePairsToNormalRecursiveHtml(CGI::URLStringToNormal(currentMap.theValues[i]), recursionDepth+1);
       out << "</td>";
     }
     out << "</tr>";
@@ -2466,37 +2465,28 @@ std::string& CGI::GetJavascriptMathjax()
 }
 
 bool CGI::AccountOneInputCGIString
-(const std::string& fieldName, const std::string& fieldValue, List<std::string>& outputData,
- HashedList<std::string, MathRoutines::hashString>& outputFieldNames, std::stringstream& commentsOnFailure)
+(const std::string& fieldName, const std::string& fieldValue, MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
+ std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("CGI::AccountOneInputCGIString");
   if (fieldName=="")
     return true;
-  int theIndex=outputFieldNames.GetIndex(fieldName);
-  if (theIndex==-1)
-  { outputFieldNames.AddOnTop(fieldName);
-    outputData.AddOnTop(fieldValue);
-    return true;
-  }
-  if (fieldValue=="")
-    return true;
-  if (outputData[theIndex]!="" && outputData[theIndex]!=fieldValue)
-  { commentsOnFailure << "More than one value specified for input field " << fieldName << ": "
-    << fieldValue << " and " << outputData[theIndex];
-    return false;
-  }
-  outputData[theIndex]=fieldValue;
+  if (fieldValue!="" && outputMap.Contains(fieldName))
+    if (outputMap.GetValueCreateIfNotPresent(fieldName)!=fieldValue)
+    { commentsOnFailure << "More than one value specified for input field " << fieldName << ": "
+      << fieldValue << " and " << outputMap.GetValueCreateIfNotPresent(fieldName) << ". ";
+      return false;
+    }
+  outputMap.SetValue(fieldValue, fieldName);
   return true;
 }
 
 bool CGI::ChopCGIInputStringToMultipleStrings
-(const std::string& input, List<std::string>& outputData,
- HashedList<std::string, MathRoutines::hashString>& outputFieldNames, std::stringstream& commentsOnFailure)
+(const std::string& input, MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
+ std::stringstream& commentsOnFailure)
 { int inputLength= (signed) input.size();
   bool readingData=false;
-  outputData.SetSize(0);
-  outputFieldNames.Clear();
-  outputData.SetExpectedSize(15);
-  outputFieldNames.SetExpectedSize(15);
+  outputMap.Clear();
+  outputMap.SetExpectedSize(15);
   std::string currentFieldName="";
   std::string currentFieldValue="";
   currentFieldName.reserve(input.size());
@@ -2513,13 +2503,13 @@ bool CGI::ChopCGIInputStringToMultipleStrings
         currentFieldName.push_back(input[i]);
       continue;
     }
-    if (!CGI::AccountOneInputCGIString(currentFieldName, currentFieldValue, outputData, outputFieldNames, commentsOnFailure))
+    if (!CGI::AccountOneInputCGIString(currentFieldName, currentFieldValue, outputMap, commentsOnFailure))
       return false;
     currentFieldName="";
     currentFieldValue="";
     readingData=false;
   }
-  return CGI::AccountOneInputCGIString(currentFieldName, currentFieldValue, outputData, outputFieldNames, commentsOnFailure);
+  return CGI::AccountOneInputCGIString(currentFieldName, currentFieldValue, outputMap, commentsOnFailure);
 }
 
 bool CGI::URLStringToNormalOneStep(std::string& readAhead, std::stringstream& out)

@@ -672,9 +672,9 @@ std::string WebWorker::ToStringCalculatorArgumentsHumanReadable()
   if (theGlobalVariables.UserDefaultHasAdminRights())
     out << "<br><b>User has admin rights</b>";
   out << "<hr>";
-  for (int i=0; i<theGlobalVariables.webFormArguments.size; i++)
-  { out << theGlobalVariables.webFormArgumentNames[i] << ": " << theGlobalVariables.webFormArguments[i];
-    if (i!=theGlobalVariables.webFormArgumentNames.size-1)
+  for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
+  { out << theGlobalVariables.webArguments.theKeys[i] << ": " << theGlobalVariables.webArguments[i];
+    if (i!=theGlobalVariables.webArguments.size()-1)
       out << "<br>";
   }
   out << "<hr>";
@@ -685,19 +685,17 @@ std::string WebWorker::ToStringCalculatorArgumentsHumanReadable()
 bool WebWorker::ProcessRawArguments
 (const std::string& urlEncodedInputString, std::stringstream& argumentProcessingFailureComments, int recursionDepth)
 { MacroRegisterFunctionWithName("WebWorker::ProcessRawArguments");
+  MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
   if (recursionDepth>1)
   { argumentProcessingFailureComments << "Error: input string encoded too many times";
     return false;
   }
-  HashedList<std::string, MathRoutines::hashString>& inputStringNames=theGlobalVariables.webFormArgumentNames;
-  List<std::string>& inputStrings=theGlobalVariables.webFormArguments;
   if (!CGI::ChopCGIInputStringToMultipleStrings
-      (urlEncodedInputString, inputStrings, inputStringNames, argumentProcessingFailureComments))
+      (urlEncodedInputString, theArgs, argumentProcessingFailureComments))
     return false;
-  if (inputStringNames.Contains("doubleURLencodedInput"))
+  if (theArgs.Contains("doubleURLencodedInput"))
   { std::string newInput=theGlobalVariables.GetWebInput("doubleURLencodedInput");
-    inputStringNames.Clear();
-    inputStrings.SetSize(0);
+    theArgs.Clear();
     return this->ProcessRawArguments(newInput, argumentProcessingFailureComments, recursionDepth+1);
   }
   theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
@@ -732,12 +730,16 @@ bool WebWorker::ProcessRawArguments
     this->flagPasswordWasSubmitted=(theGlobalVariables.GetWebInput("password")!="");
     if (this->flagPasswordWasSubmitted)
     { password=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("password"));
-      inputStrings[inputStringNames.GetIndex("password")]="********************************************";
+      //this may need a security overview: the SetValue function may leave traces in memory
+      //of the old password. Not a big deal for the time being.
+      theArgs.SetValue
+      ("********************************************", "password");
     }
   }
-  if (inputStringNames.Contains("textInput") && !inputStringNames.Contains("mainInput"))
-  { argumentProcessingFailureComments << "Received calculator link in an old format, interpreting 'textInput' as 'mainInput'";
-    inputStringNames.SetObjectAtIndex(inputStringNames.GetIndex("textInput"), "mainInput");
+  if (theArgs.Contains("textInput") && !theArgs.Contains("mainInput"))
+  { argumentProcessingFailureComments
+    << "Received calculator link in an old format, interpreting 'textInput' as 'mainInput'";
+    theArgs.theKeys.SetObjectAtIndex(theArgs.theKeys.GetIndex("textInput"), "mainInput");
   }
   theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs=false;
   if (theGlobalVariables.userCalculatorRequestType!="changePassword" &&
@@ -1875,7 +1877,7 @@ int WebWorker::ProcessCalculator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCalculator");
   ProgressReportWebServer theReport;
   std::stringstream argumentProcessingFailureComments;
-//  stOutput <<"DEBIG: here i am";
+//  stOutput <<"DEBUG: here i am";
   if (!this->ProcessRawArguments(theParser.inputStringRawestOfTheRaw, argumentProcessingFailureComments))
   { stOutput << "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n"
     << "<html><body>" << "Failed to process the calculator arguments. <b>"
@@ -1891,11 +1893,11 @@ int WebWorker::ProcessCalculator()
       )
   { std::stringstream redirectedAddress;
     redirectedAddress << theGlobalVariables.DisplayNameCalculatorWithPath << "?";
-    for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
-      if (theGlobalVariables.webFormArgumentNames[i]!="password" &&
-          theGlobalVariables.webFormArgumentNames[i]!="authenticationInsecure")
-        redirectedAddress << theGlobalVariables.webFormArgumentNames[i] << "="
-        << theGlobalVariables.webFormArguments[i] << "&";
+    for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
+      if (theGlobalVariables.webArguments.theKeys[i]!="password" &&
+          theGlobalVariables.webArguments.theKeys[i]!="authenticationInsecure")
+        redirectedAddress << theGlobalVariables.webArguments.theKeys[i] << "="
+        << theGlobalVariables.webArguments.theValues[i] << "&";
 //    std::cout << "DEBUG: redirect, connection: " << theWebServer.NumConnectionsSoFar << ", redirecting to: "
 //    << redirectedAddress.str() << "\n";
     stOutput << "HTTP/1.1 303 See other\r\nLocation: ";
@@ -3521,7 +3523,23 @@ int WebServer::main_problem_interpreter()
 { MacroRegisterFunctionWithName("main_problem_interpreter");
 //std::cout << "Running offline interpreter. \n";
   theParser.init();
-  theParser.inputStringRawestOfTheRaw =theGlobalVariables.programArguments[0];
+  if (theGlobalVariables.programArguments.size>0)
+    theParser.inputStringRawestOfTheRaw =theGlobalVariables.programArguments[0];
+  else
+    stOutput << "This is a programming error or very unexpected user behavior: "
+    << "calculator called with empty input. ";
+  if (theGlobalVariables.programArguments.size>=2)
+  { std::stringstream argumentProcessingFailureComments;
+    if (!CGI::ChopCGIInputStringToMultipleStrings
+      (theGlobalVariables.programArguments[1], theGlobalVariables.webArguments, argumentProcessingFailureComments))
+    return false;
+  } else
+    stOutput << "Did not receive any additional arguments. ";
+  if (theGlobalVariables.programArguments.size>2)
+  { stOutput << "Received extra arguments, here they are: ";
+    for (int i=2; i<theGlobalVariables.programArguments.size; i++)
+      stOutput << "<br>" << theGlobalVariables.programArguments[i];
+  }
   theParser.flagUseHtml=false;
   theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
   stOutput << theParser.outputString;
@@ -3576,7 +3594,8 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   theGlobalVariables.programArguments.SetSize(argC);
   for (int i=0; i<argC; i++)
     theGlobalVariables.programArguments[i]=argv[i];
-  //std::cout << "\nProgram arguments: " << theGlobalVariables.programArguments.ToStringCommaDelimited() << "\n";
+  //std::cout << "\nProgram arguments: "
+  //<< theGlobalVariables.programArguments.ToStringCommaDelimited() << "\n";
 
   theGlobalVariables.flagUsingBuiltInWebServer=false;
   theGlobalVariables.flagRunningCommandLine=false;
@@ -3603,9 +3622,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
     return;
   }
   if (secondArgument=="interpretProblem")
-  { theGlobalVariables.programArguments.PopIndexShiftDown(0);
     theGlobalVariables.flagRunningAsProblemInterpreter=true;
-  }
   theGlobalVariables.flagUsingBuiltInWebServer=
   (secondArgument=="server" || secondArgument=="server8155" || secondArgument=="serverSSL");
   theGlobalVariables.flagRunningCommandLine=
@@ -3613,10 +3630,9 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   !theGlobalVariables.flagRunningAsProblemInterpreter;
   if (theGlobalVariables.flagRunningCommandLine ||
       theGlobalVariables.flagRunningAsProblemInterpreter)
-  { theGlobalVariables.programArguments.PopIndexShiftDown(0);
-    for (int i=1; i<theGlobalVariables.programArguments.size; i++)
-      theGlobalVariables.programArguments[0]+="\n"+ theGlobalVariables.programArguments[i];
-    theGlobalVariables.programArguments.SetSize(1);
+  { theGlobalVariables.programArguments.RemoveIndicesShiftDown(0,2);
+    //std::cout << "<br>After popping args, remaining are: "
+    //<< theGlobalVariables.programArguments.ToStringCommaDelimited();
     return;
   }
   if (secondArgument=="server8155")

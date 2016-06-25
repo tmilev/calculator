@@ -223,43 +223,37 @@ bool DatabaseRoutines::ReadProblemInfo
    List<List<std::string> >& outputSections, List<List<std::string> >& outputDeadlinesPerSection,
    std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::ReadProblemInfo");
-  HashedList<std::string, MathRoutines::hashString> problemNamesCGIed;
-  List<std::string> theProblemData;
+  MapList<std::string, std::string, MathRoutines::hashString> CGIedProbs, currentProblem, sectionInfo;
   if (!CGI::ChopCGIInputStringToMultipleStrings
-      (stringToReadFrom, theProblemData, problemNamesCGIed, commentsOnFailure) )
+      (stringToReadFrom, CGIedProbs, commentsOnFailure) )
     return false;
   outputProblemNames.Clear();
-  outputProblemNames.SetExpectedSize(problemNamesCGIed.size);
-  for (int i=0; i<problemNamesCGIed.size; i++)
-    outputProblemNames.AddOnTop(CGI::URLStringToNormal(problemNamesCGIed[i]));
-  HashedList<std::string, MathRoutines::hashString> problemKeys, sectionKeys;
-  List<std::string> problemValues, sectionValues;
+  outputProblemNames.SetExpectedSize(CGIedProbs.size());
+  for (int i=0; i<CGIedProbs.size(); i++)
+    outputProblemNames.AddOnTop(CGI::URLStringToNormal(CGIedProbs.theKeys[i]));
 //  outputHomeworkGroups.initFillInObject(outputProblemNames.size, "");
   outputWeights.initFillInObject(outputProblemNames.size, "");
-  outputSections.initFillInObject(outputProblemNames.size, problemValues);
-  outputDeadlinesPerSection.initFillInObject(outputProblemNames.size, problemValues);
+  outputSections.initFillInObject(outputProblemNames.size, CGIedProbs.size());
+  outputDeadlinesPerSection.initFillInObject(outputProblemNames.size, CGIedProbs.size());
   for (int i=0; i<outputProblemNames.size; i++)
   { if (!CGI::ChopCGIInputStringToMultipleStrings
-        (CGI::URLStringToNormal(theProblemData[i]), problemValues, problemKeys, commentsOnFailure))
+        (CGI::URLStringToNormal(CGIedProbs.theValues[i]), currentProblem, commentsOnFailure))
       return false;
-//    stOutput << "<br>current problem: " << outputProblemNames[i]
-//    << "<br>being read from data: " << theProblemData[i]
-//    << "<br>which is normalized to: " << CGI::URLStringToNormal(theProblemData[i]);
-//    if (problemKeys.Contains("homeworkGroup"))
-//      outputHomeworkGroups[i]=
-//      CGI::URLStringToNormal(problemValues[problemKeys.GetIndex("homeworkGroup")]);
-    if (problemKeys.Contains("weight"))
+//    stOutput << "<br>DEBUG: current problem: " << outputProblemNames[i]
+//    << "<br>being read from data: " << CGIedProbs[i]
+//    << "<br>which is normalized to: " << CGI::URLStringToNormal(CGIedProbs[i]);
+    if (currentProblem.Contains("weight"))
       outputWeights[i]=
-      CGI::URLStringToNormal(problemValues[problemKeys.GetIndex("weight")]);
-    if (!problemKeys.Contains("deadlines"))
+      CGI::URLStringToNormal(currentProblem.GetValueCreateIfNotPresent("weight"));
+    if (!currentProblem.Contains("deadlines"))
       continue;
-    std::string deadlineString=CGI::URLStringToNormal(problemValues[problemKeys.GetIndex("deadlines")]);
+    std::string deadlineString=CGI::URLStringToNormal(currentProblem.GetValueCreateIfNotPresent("deadlines"));
     if (!CGI::ChopCGIInputStringToMultipleStrings
-        (deadlineString, sectionValues, sectionKeys, commentsOnFailure))
+        (deadlineString, sectionInfo, commentsOnFailure))
       return false;
-    for (int j=0; j<sectionKeys.size; j++)
-    { outputSections[i].AddOnTop(CGI::URLStringToNormal(sectionKeys[j]));
-      outputDeadlinesPerSection[i].AddOnTop(CGI::URLStringToNormal(sectionValues[j]));
+    for (int j=0; j<sectionInfo.size(); j++)
+    { outputSections[i].AddOnTop(CGI::URLStringToNormal(sectionInfo.theKeys[j]));
+      outputDeadlinesPerSection[i].AddOnTop(CGI::URLStringToNormal(sectionInfo.theValues[j]));
     }
   }
 //  stOutput << "reading from: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(stringToReadFrom);
@@ -358,14 +352,16 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
   List<std::string> incomingWeights;
   List<List<std::string> > incomingSections;
   List<List<std::string> > incomingDeadlines;
+//  stOutput << "<hr>DEBUG: incoming string: " << inputString
+//  << ", human readable: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(inputString);
   if (!this->ReadProblemInfo
       (inputString, incomingProblems, incomingWeights,
        incomingSections, incomingDeadlines, commentsOnFailure))
   { commentsOnFailure << "Failed to parse your request";
     return false;
   }
-//  stOutput << "<hr>incoming sections: " << incomingSections.ToStringCommaDelimited() << "<hr>";
-//  stOutput << "incoming deadlines: " << incomingDeadlines.ToStringCommaDelimited() << "<hr>";
+//  stOutput << "<br>DEBUG: incoming sections: " << incomingSections.ToStringCommaDelimited() << "<hr>";
+//  stOutput << "<br>DEBUG: incoming deadlines: " << incomingDeadlines.ToStringCommaDelimited() << "<hr>";
 
   std::string currentFileName;
   bool result=true;
@@ -399,7 +395,7 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
           problemHome.databaseDeadlinesBySection[theIndex].AddOnTop(incomingDeadlines[i][j]);
           continue;
         }
-//        stOutput << "<br>DEBUG: modifying problem info for section: " << incomingSections[i][j];
+        //stOutput << "<br>DEBUG: modifying problem info for section: " << incomingSections[i][j];
         problemHome.databaseStudentSectionsPerProblem[theIndex][sectionIndex]=incomingSections[i][j];
         problemHome.databaseDeadlinesBySection[theIndex][sectionIndex]=incomingDeadlines[i][j];
       }
@@ -413,10 +409,10 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
   //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(stringToStore) ;
   if (!this->StoreProblemDatabaseInfo(problemHomeName, stringToStore, commentsOnFailure))
     return false;
-//  stOutput << "<br>probs incoming: <br>" << incomingProblems.ToStringCommaDelimited()
-//  << " with weights: " << incomingWeights.ToStringCommaDelimited()
-//  << "Problems final: " << theProblems.ToStringCommaDelimited()
-//  << " weights: " << theProblemWeights.ToStringCommaDelimited() << "<br>";
+  //stOutput << "<br>probs incoming: <br>" << incomingProblems.ToStringCommaDelimited()
+  //<< " with weights: " << incomingWeights.ToStringCommaDelimited()
+  //<< "Problems final: " <<  problemHome.databaseProblemAndHomeworkGroupList.ToStringCommaDelimited()
+  //<< " weights: " << problemHome.databaseProblemWeights.ToStringCommaDelimited() << "<br>";
   return result;
 }
 #endif // MACRO_use_MySQL
@@ -442,11 +438,15 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
   { //stOutput << " accessing db... ";
     this->currentUser.username=theGlobalVariables.userDefault;
     if (!this->currentUser.LoadProblemStringFromDatabase(theRoutines, this->currentUserDatabaseString, comments))
-    { comments << "Failed to load current users' problem save-file.";
+    { comments << "Failed to load current user's problem save-file. ";
+      stOutput << "DEBUG!";
+      comments << "DEBUG: " << this->currentUserDatabaseString;
       return false;
     }
     if (!this->currentUser.InterpretDatabaseProblemData(this->currentUserDatabaseString, comments))
-    { comments << "Failed to load current users' problem save-file.";
+    { comments << "Failed to interpret user's problem save-file. ";
+      stOutput << "DEBUG!";
+      comments << "DEBUG: " << this->currentUserDatabaseString;
       return false;
     }
     this->theProblemData=this->currentUser.GetProblemDataAddIfNotPresent(this->fileName);
@@ -731,25 +731,29 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   << "  clearTimeout(timerForPreviewAnswers);\n"
   << "  timerForPreviewAnswers=setTimeout(function(){\n"
   << "    params=\"" << this->ToStringCalculatorArgumentsForProblem(requestTypePreview, "true", "", submitRandomSeed) << "\";\n"
-  << "    submitOrPreviewAnswers(idAnswer, idVerification, params);\n"
+  << "    submitOrPreviewAnswers(idAnswer, idVerification, params,\"" << requestTypePreview
+  << "\");\n"
   << "  }, 1700);"
   << "}\n"
   << "function previewAnswersNoTimeOut(idAnswer, idVerification){\n"
   << "  clearTimeout(timerForPreviewAnswers);\n"
   << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestTypePreview, "true", "", submitRandomSeed) << "\";\n"
-  << "  submitOrPreviewAnswers(idAnswer, idVerification, params);\n"
+  << "  submitOrPreviewAnswers(idAnswer, idVerification, params,\""
+  << requestTypePreview << "\");\n"
   << "}\n"
   << "function submitAnswers(idAnswer, idVerification){\n"
   << "  clearTimeout(timerForPreviewAnswers);\n"
   << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestTypeSubmit, "true", "", submitRandomSeed) << "\";\n"
-  << "  submitOrPreviewAnswers(idAnswer, idVerification, params);\n"
+  << "  submitOrPreviewAnswers(idAnswer, idVerification, params, \""
+  << requestTypeSubmit <<  "\");\n"
   << "}\n"
   << "function giveUp(idAnswer, idVerification){\n"
   << "  clearTimeout(timerForPreviewAnswers);\n"
   << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestGiveUp, "true", "", submitRandomSeed) << "\";\n"
-  << "  submitOrPreviewAnswers(idAnswer, idVerification, params);\n"
+  << "  submitOrPreviewAnswers(idAnswer, idVerification, params, \""
+  << requestGiveUp << "\");\n"
   << "}\n"
-  << "function submitOrPreviewAnswers(idAnswer, idVerification, inputParams){\n";
+  << "function submitOrPreviewAnswers(idAnswer, idVerification, inputParams, requestType){\n";
   out << "  clearTimeout(timerForPreviewAnswers);\n"
   << "  spanVerification = document.getElementById(idVerification);\n"
   << "  if (spanVerification==null){\n"
@@ -769,7 +773,12 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
 
   out
   << "  var https = new XMLHttpRequest();\n"
-  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
+  << "  https.open(\"POST\", \"";
+  if (!theGlobalVariables.flagRunningAsProblemInterpreter)
+    out << theGlobalVariables.DisplayNameCalculatorWithPath;
+  else
+    out << "/cgi-bin/interpret.py";
+  out << "\", true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
 ;
 //Old code, submits all answers. May need to be used as an alternative
@@ -834,8 +843,9 @@ int WebWorker::ProcessProblemGiveUp()
     return 0;
   }
   std::string lastStudentAnswerID;
-  for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
-    MathRoutines::StringBeginsWith(theGlobalVariables.webFormArgumentNames[i], "calculatorAnswer", &lastStudentAnswerID);
+  MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
+  for (int i=0; i<theArgs.size(); i++)
+    MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
   int indexLastAnswerId=theProblem.theProblemData.answerIds.GetIndex(lastStudentAnswerID);
   if (indexLastAnswerId==-1)
   { stOutput << "<b>Student submitted answerID: " << lastStudentAnswerID
@@ -911,9 +921,10 @@ int WebWorker::ProcessSubmitProblemPreview()
   std::stringstream studentInterpretation;
   std::string lastStudentAnswerID;
   std::string lastAnswer;
-  for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
-    if (MathRoutines::StringBeginsWith(theGlobalVariables.webFormArgumentNames[i], "calculatorAnswer", &lastStudentAnswerID))
-    { lastAnswer= "("+ CGI::URLStringToNormal( theGlobalVariables.webFormArguments[i]) + "); ";
+  MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
+  for (int i=0; i<theArgs.size(); i++)
+    if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID))
+    { lastAnswer= "("+ CGI::URLStringToNormal(theArgs[i]) + "); ";
       studentInterpretation << lastAnswer;
     }
   stOutput << "Your answer(s): \\(" << studentInterpretation.str() << "\\)" << "\n<br>\n";
@@ -1080,9 +1091,9 @@ std::string WebWorker::GetSetProblemDatabaseInfoHtml()
     //out << "<meta http-equiv=\"refresh\" content=\"0;\">";
   } else
     out << "<span style=\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
-//out << "<br>Debug message:<br>inputProblemInfo raw: " << inputProblemInfo << "<br>Processed: "
-//  << CGI::URLKeyValuePairsToNormalRecursiveHtml(inputProblemInfo)
-//  << "<br>inputProblemHome: " << inputProblemHome;
+  //out << "<br>Debug message:<br>inputProblemInfo raw: " << inputProblemInfo << "<br>Processed: "
+  //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(inputProblemInfo)
+  //<< "<br>inputProblemHome: " << inputProblemHome;
   return out.str();
 #else
   return "Cannot modify problem weights (no database available)";
@@ -1253,8 +1264,9 @@ int WebWorker::ProcessSubmitProblem()
   std::string studentAnswerNameReader;
   theProblem.studentAnswersUnadulterated.SetSize(theProblem.theProblemData.answerIds.size);
   theProblem.studentTagsAnswered.init(theProblem.theProblemData.answerIds.size);
-  for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
-    if (MathRoutines::StringBeginsWith(theGlobalVariables.webFormArgumentNames[i], "calculatorAnswer", &studentAnswerNameReader))
+  MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
+  for (int i=0; i<theArgs.size(); i++)
+    if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &studentAnswerNameReader))
     { int answerIdIndex=theProblem.theProblemData.answerIds.GetIndex(studentAnswerNameReader);
       if (answerIdIndex==-1)
       { stOutput << "<b> You submitted an answer to tag with id " << studentAnswerNameReader
@@ -1262,7 +1274,7 @@ int WebWorker::ProcessSubmitProblem()
         << "answerable tags. </b>";
         return 0;
       }
-      std::string theAnswer= CGI::URLStringToNormal( theGlobalVariables.webFormArguments[i]);
+      std::string theAnswer= CGI::URLStringToNormal(theArgs.theValues[i]);
       if (theAnswer=="")
       { stOutput << "<b> Your answer to tag with id " << studentAnswerNameReader
         << " appears to be empty, please resubmit. </b>";
@@ -1271,7 +1283,7 @@ int WebWorker::ProcessSubmitProblem()
       theProblem.studentAnswersUnadulterated[answerIdIndex]=theAnswer;
       theProblem.studentTagsAnswered.AddSelectionAppendNewIndex(answerIdIndex);
       studentAnswerStream << studentAnswerNameReader << "= ("
-      << CGI::URLStringToNormal(theGlobalVariables.webFormArguments[i]) << ");";
+      << CGI::URLStringToNormal(theArgs.theValues[i]) << ");";
     }
   if (theProblem.studentTagsAnswered.CardinalitySelection==0)
   { stOutput << "<b>Something is wrong: I found no submitted answers.</b>";
@@ -1798,13 +1810,14 @@ void CalculatorHTML::PrepareUserInputBoxes(std::stringstream &completedProblemSt
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareInterpreter");
   if (this->flagIsForReal)
     return;
+  MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
   std::string inputNonAnswerReader;
-  for (int i=0; i<theGlobalVariables.webFormArgumentNames.size; i++)
-    if (MathRoutines::StringBeginsWith(theGlobalVariables.webFormArgumentNames[i], "userInputBox", &inputNonAnswerReader))
-      if (inputNonAnswerReader!="" && theGlobalVariables.webFormArguments[i]!="")
+  for (int i=0; i<theArgs.size(); i++)
+    if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "userInputBox", &inputNonAnswerReader))
+      if (inputNonAnswerReader!="" && theArgs.theValues[i]!="")
       { completedProblemStream << "setInputBox(name="
         << inputNonAnswerReader
-        << ", value=" << CGI::URLStringToNormal(theGlobalVariables.webFormArguments[i])
+        << ", value=" << CGI::URLStringToNormal(theArgs.theValues[i])
         << ");";
       }
 }

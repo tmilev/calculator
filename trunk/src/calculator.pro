@@ -108,4 +108,6 @@ HEADERS += \
     vpfMacros.h \
     vpfPackedVector.h \
     vpfheader3calculator4htmlfunctions.h \
-    vpfHeader3Calculator4HtmlFunctions.h
+    vpfHeader3Calculator4HtmlFunctions.h \
+    vpfHeader1General6Maps.h \
+    vpfHeader1General7FileOperations_Encodings.h

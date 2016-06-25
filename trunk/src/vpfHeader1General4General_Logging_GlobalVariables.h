@@ -4,6 +4,7 @@
 #define vpfHeaderLoggingGlobalVars_already_defined
 #include "vpfHeader1General0_General.h"
 #include "vpfHeader1General1_ListReferences.h"
+#include "vpfHeader1General6Maps.h"
 #include <thread>
 
 static ProjectInformationInstance projectInfoHeaderLoggingRoutines
@@ -107,8 +108,7 @@ public:
   ListReferences<List<std::string> > ProgressReportStringS;
   List<std::string> programArguments;
 
-  List<std::string> webFormArguments;
-  HashedList<std::string, MathRoutines::hashString> webFormArgumentNames;
+  MapList<std::string, std::string, MathRoutines::hashString> webArguments;
   std::string userRole;
   std::string userDefault;
   std::string userCalculatorRequestType;

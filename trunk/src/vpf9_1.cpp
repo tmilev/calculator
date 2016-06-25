@@ -214,13 +214,7 @@ void GlobalVariables::initDefaultFolderAndFileNames
 
 void GlobalVariables::SetWebInput(const std::string& inputName, const std::string& inputValue)
 { MacroRegisterFunctionWithName("GlobalVariables::SetWebInput");
-  int theIndex=this->webFormArgumentNames.GetIndex(inputName);
-  if (theIndex==-1)
-  { this->webFormArgumentNames.AddOnTop(inputName);
-    this->webFormArguments.AddOnTop(inputValue);
-    return;
-  }
-  this->webFormArguments[theIndex]=inputValue;
+  this->webArguments.SetValue(inputValue, inputName);
 }
 
 bool GlobalVariables::UserSecureNonAdminOperationsAllowed()
@@ -317,8 +311,8 @@ std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tag
   if (!this->flagLoggedIn && !this->UserGuestMode())
     return "";
   std::stringstream out;
-  for (int i =0; i<this->webFormArgumentNames.size; i++)
-  { const std::string& currentName=this->webFormArgumentNames[i];
+  for (int i =0; i<this->webArguments.size(); i++)
+  { const std::string& currentName=this->webArguments.theKeys[i];
     if (currentName=="request" ||
         currentName=="authenticationInsecure" || currentName=="password" || currentName=="currentExamFile" ||
         currentName=="currentExamHome" || currentName=="currentExamIntermediate" ||
@@ -328,18 +322,15 @@ std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tag
     if (tagsToExclude!=0)
       if (tagsToExclude->Contains(currentName))
         continue;
-    out << theGlobalVariables.webFormArgumentNames[i] << "=" << theGlobalVariables.webFormArguments[i]
+    out << theGlobalVariables.webArguments.theKeys[i] << "="
+    << theGlobalVariables.webArguments.theValues[i]
     << "&";
   }
   return out.str();
 }
 
 std::string GlobalVariables::GetWebInput(const std::string& inputName)
-{ MacroRegisterFunctionWithName("GlobalVariables::GetWebInput");
-  int theIndex=this->webFormArgumentNames.GetIndex(inputName);
-  if (theIndex==-1)
-    return "";
-  return this->webFormArguments[theIndex];
+{ return this->webArguments.GetValueCreateIfNotPresent(inputName);
 }
 
 void GlobalVariables::MakeReport()

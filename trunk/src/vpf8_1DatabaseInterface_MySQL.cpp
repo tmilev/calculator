@@ -1338,15 +1338,14 @@ void UserCalculator::SetProblemData(const std::string& problemName, const Proble
 
 bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("ProblemData::LoadFrom");
-  List<std::string> theValues;
-  HashedList<std::string, MathRoutines::hashString> theKeys;
-  if (!CGI::ChopCGIInputStringToMultipleStrings(inputData, theValues, theKeys, commentsOnFailure))
+  MapList<std::string, std::string, MathRoutines::hashString> theMap;
+  if (!CGI::ChopCGIInputStringToMultipleStrings(inputData, theMap, commentsOnFailure))
     return false;
-//  stOutput << "<hr>Interpreting: <br>" << inputData << "<hr>";
+//  stOutput << "<hr>DEBUG: Interpreting: <br>" << inputData << "<hr>";
   this->flagRandomSeedComputed=false;
   if (theGlobalVariables.UserRequestRequiresLoadingRealExamData() )
-    if (theKeys.Contains("randomSeed"))
-    { this->randomSeed=atoi(theValues[theKeys.GetIndex("randomSeed")].c_str());
+    if (theMap.Contains("randomSeed"))
+    { this->randomSeed=atoi(theMap.GetValueCreateIfNotPresent("randomSeed").c_str());
       this->flagRandomSeedComputed=true;
     }
   this->numCorrectSubmissions.SetSize(0);
@@ -1354,27 +1353,29 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
   this->firstCorrectAnswer.SetSize(0);
   this->answerIds.SetSize(0);
   bool result=true;
-  HashedList<std::string, MathRoutines::hashString> currentQuestionKeys;
-  List<std::string> currentQuestionValues;
-  for (int i=0; i<theKeys.size; i++)
-  { if (theKeys[i]=="randomSeed")
+  MapList<std::string, std::string, MathRoutines::hashString> currentQuestionMap;
+  for (int i=0; i<theMap.size(); i++)
+  { if (theMap.theKeys[i]=="randomSeed")
       continue;
-    this->AddEmptyAnswerIdOnTop(CGI::URLStringToNormal(theKeys[i]));
+    this->AddEmptyAnswerIdOnTop(CGI::URLStringToNormal(theMap.theKeys[i]));
     int currentIndex=this->answerIds.size-1;
-    std::string currentQuestion=CGI::URLStringToNormal(theValues[i]);
+    std::string currentQuestion=CGI::URLStringToNormal(theMap.theValues[i]);
     result=CGI::ChopCGIInputStringToMultipleStrings
-    (currentQuestion, currentQuestionValues, currentQuestionKeys, commentsOnFailure);
+    (currentQuestion, currentQuestionMap, commentsOnFailure);
     if (!result)
+    { commentsOnFailure << "Failed to interpret as key-value pair: "
+      << currentQuestion << ". ";
       continue;
-    if (currentQuestionKeys.Contains("numCorrectSubmissions"))
+    }
+    if (currentQuestionMap.Contains("numCorrectSubmissions"))
       this->numCorrectSubmissions[currentIndex]=
-      atoi(currentQuestionValues[currentQuestionKeys.GetIndex("numCorrectSubmissions")].c_str());
-    if (currentQuestionKeys.Contains("numSubmissions"))
+      atoi(currentQuestionMap.GetValueCreateIfNotPresent("numCorrectSubmissions").c_str());
+    if (currentQuestionMap.Contains("numSubmissions"))
       this->numSubmissions[currentIndex]=
-      atoi(currentQuestionValues[currentQuestionKeys.GetIndex("numSubmissions")].c_str());
-    if (currentQuestionKeys.Contains("firstCorrectAnswer"))
+      atoi(currentQuestionMap.GetValueCreateIfNotPresent("numSubmissions").c_str());
+    if (currentQuestionMap.Contains("firstCorrectAnswer"))
       this->firstCorrectAnswer[currentIndex]=CGI::URLStringToNormal
-      (currentQuestionValues[currentQuestionKeys.GetIndex("firstCorrectAnswer")]);
+      (currentQuestionMap.GetValueCreateIfNotPresent("firstCorrectAnswer"));
   }
   return result;
 }
@@ -1399,19 +1400,19 @@ std::string ProblemData::Store()
 bool UserCalculator::InterpretDatabaseProblemData
 (const std::string& theInfo, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::InterpretDatabaseProblemData");
-  HashedList<std::string, MathRoutines::hashString> keys;
-  List<std::string> values;
-  if (!CGI::ChopCGIInputStringToMultipleStrings(theInfo, values, keys, commentsOnFailure))
+
+  MapList<std::string, std::string, MathRoutines::hashString> theMap;
+  if (!CGI::ChopCGIInputStringToMultipleStrings(theInfo, theMap, commentsOnFailure))
     return false;
   this->problemNames.Clear();
   this->problemData.SetSize(0);
-  this->problemNames.SetExpectedSize(keys.size);
-  this->problemData.SetExpectedSize(keys.size);
+  this->problemNames.SetExpectedSize(theMap.size());
+  this->problemData.SetExpectedSize(theMap.size());
   bool result=true;
-  for (int i=0; i<keys.size; i++)
-  { this->problemNames.AddOnTop(CGI::URLStringToNormal(keys[i]));
+  for (int i=0; i<theMap.size(); i++)
+  { this->problemNames.AddOnTop(CGI::URLStringToNormal(theMap.theKeys[i]));
     this->problemData.SetSize(this->problemData.size+1);
-    if (!this->problemData.LastObject()->LoadFrom(CGI::URLStringToNormal(values[i]), commentsOnFailure))
+    if (!this->problemData.LastObject()->LoadFrom(CGI::URLStringToNormal(theMap[i]), commentsOnFailure))
       result=false;
   }
   return result;

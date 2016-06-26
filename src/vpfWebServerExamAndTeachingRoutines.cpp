@@ -63,12 +63,10 @@ public:
   List<int> randomSeedsIfInterpretationFails;
   bool flagRandomSeedGiven;
   bool flagIsExamHome;
-  bool flagIsExamIntermediate;
   bool flagIsExamProblem;
   bool flagParentInvestigated;
   bool flagIsForReal;
   bool flagLoadedFromDB;
-  bool flagParentIsIntermediateExamFile;
   double timeToParseHtml;
   List<double> timePerAttempt;
   List<List<double> > timeIntermediatePerAttempt;
@@ -85,7 +83,6 @@ public:
   std::string outputHtmlMain;
   std::string outputHtmlNavigation;
   std::string currentExamHomE;
-  std::string currentExamIntermediatE;
   static const std::string BugsGenericMessage;
   HashedList<std::string, MathRoutines::hashString> tagKeysNoValue;
   List<std::string> calculatorClasses;
@@ -202,13 +199,11 @@ CalculatorHTML::CalculatorHTML()
   this->MaxInterpretationAttempts=10;
   this->flagLoadedSuccessfully=false;
   this->flagIsExamHome=false;
-  this->flagIsExamIntermediate=false;
   this->flagIsExamProblem=false;
   this->flagParentInvestigated=false;
   this->NumProblemsFound=0;
   this->flagIsForReal=false;
   this->flagLoadedFromDB=false;
-  this->flagParentIsIntermediateExamFile=false;
   this->flagLoadedClassDataSuccessfully=false;
   this->timeToParseHtml=0;
 }
@@ -535,7 +530,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
 }
 
 void CalculatorHTML::LoadFileNames()
-{ this->fileName = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile"));
+{ this->fileName = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"));
   this->currentExamHomE = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
 }
 
@@ -573,20 +568,10 @@ bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt)
   if (tagClass=="setCalculatorExamHome")
   { this->flagIsExamHome=true;
     this->flagIsExamProblem=false;
-    this->flagIsExamIntermediate=false;
     theGlobalVariables.SetWebInput("currentExamHome", CGI::StringToURLString(this->fileName));
-    theGlobalVariables.SetWebInput("currentExamIntermediate", "");
-  }
-  if (tagClass=="setCalculatorExamIntermediate")
-  { this->flagIsExamHome=false;
-    this->flagIsExamIntermediate=true;
-    this->flagIsExamProblem=false;
-    theGlobalVariables.SetWebInput("currentExamIntermediate", CGI::StringToURLString(this->fileName));
-    return true;
   }
   if (tagClass=="setCalculatorExamProblem")
   { this->flagIsExamHome=false;
-    this->flagIsExamIntermediate=false;
     this->flagIsExamProblem=true;
     return true;
   }
@@ -603,7 +588,7 @@ std::string CalculatorHTML::GetEditPageButton()
 //  out << "cleaned up link: " << cleaneduplink;
 //  out << "<br>urled link: " <<  urledProblem;
   refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation()
-  << "currentExamFile=" << urledProblem << "&"
+  << "fileName=" << urledProblem << "&"
   << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&";
   out << refStreamNoRequest.str() << "\">" << "Edit problem/page" << "</a>";
   out << "<textarea id=\"clonePageAreaID\" rows=\"1\" cols=\"100\">" << this->fileName << "</textarea>\n"
@@ -626,7 +611,7 @@ std::string CalculatorHTML::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "  }\n"
   << "  inputParams='request='+requestType;\n"
   << "  inputParams+='&" << theGlobalVariables.ToStringCalcArgsNoNavigation() << "';\n"
-  << "  inputParams+='&currentExamFile=" << CGI::StringToURLString(this->fileName) << "';\n"
+  << "  inputParams+='&fileName=" << CGI::StringToURLString(this->fileName) << "';\n"
   << "  inputParams+='&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE) << "';\n"
   << "  inputParams+='&mainInput=' + encodeURIComponent(theString);\n"
 //  << "  inputParams+='&currentExamHome=' + problemCollectionName;\n"
@@ -1107,7 +1092,7 @@ std::string WebWorker::GetModifyProblemReport()
     return "<b>Modifying problems allowed only for logged-in admins under ssl connection. </b>";
   std::string mainInput=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
   std::string fileName= CalculatorHTML::RelativePhysicalFolderProblemCollections+
-  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile"));
+  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"));
   std::fstream theFile;
   std::stringstream out;
   if (!FileOperations::OpenFileOnTopOfProjectBase(theFile, fileName, false, true, false))
@@ -1152,7 +1137,7 @@ std::string WebWorker::GetClonePageResult()
   std::string fileNameResulT = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
   std::string fileNameResultRelative = CalculatorHTML::RelativePhysicalFolderProblemCollections+fileNameResulT;
   std::string fileNameToBeCloned = CalculatorHTML::RelativePhysicalFolderProblemCollections+
-  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile"));
+  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"));
   std::stringstream out;
   std::string startingFileString;
   if (!FileOperations::LoadFileToStringOnTopOfProjectBase(fileNameToBeCloned, startingFileString, out))
@@ -1251,7 +1236,6 @@ int WebWorker::ProcessSubmitProblem()
     stOutput << "<b>Random seed not given.</b>";
 //  stOutput << "<b>debug remove when done: Random seed: " << theProblem.theProblemData.randomSeed << "</b>";
   theProblem.currentExamHomE         = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
-  theProblem.currentExamIntermediatE = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate"));
   if (theProblem.currentExamHomE == "")
   { stOutput << "<b>Could not find the problem collection to which this problem belongs. "
     << "If you think this is a bug, do the following. " << theProblem.BugsGenericMessage << "</b>";
@@ -1943,21 +1927,10 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     << "studentView=" << studentView << "&";
     if (theGlobalVariables.GetWebInput("studentSection")!="")
       out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
-    out << "currentExamHome=" << CGI::StringToURLString(this->currentExamHomE) << "&" << "currentExamIntermediate=&"
-    << "currentExamFile=" << CGI::StringToURLString(this->currentExamHomE) << "&\"> Course homework home </a><br>";
+    out << "currentExamHome=" << CGI::StringToURLString(this->currentExamHomE) << "&"
+    << "fileName=" << CGI::StringToURLString(this->currentExamHomE) << "&\"> Course homework home </a><br>";
   } else
     out << "<b>Course homework home</b>";
-  if (this->flagIsExamProblem && this->currentExamIntermediatE!="")
-  { out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&"
-    << calcArgsNoPassExamDetails
-    << "studentView=" << studentView << "&";
-    if (theGlobalVariables.GetWebInput("studentSection")!="")
-      out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
-    out
-    << "currentExamHome=" << CGI::StringToURLString(this->currentExamHomE) << "&" << "currentExamIntermediate=&"
-    << "currentExamFile=" << CGI::StringToURLString(this->currentExamIntermediatE) << "&\">&nbspCurrent homework. </a><br>";
-  } else if (this->flagIsExamIntermediate)
-    out << "<b>&nbspCurrent homework</b><br>";
   if (this->flagIsExamProblem)
   { if (theGlobalVariables.userCalculatorRequestType=="exercises")
       out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
@@ -1985,8 +1958,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
           out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
         out
         << "&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE)
-        << "&currentExamIntermediate=" << CGI::StringToURLString(this->currentExamIntermediatE)
-        << "&currentExamFile=" << CGI::StringToURLString(this->problemListOfParent[indexInParent-1] )
+        << "&fileName=" << CGI::StringToURLString(this->problemListOfParent[indexInParent-1] )
         << "&\"> <-Previous </a><br>";
       }
       if (indexInParent<this->problemListOfParent.size-1)
@@ -1998,8 +1970,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
           out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
         out
         << "&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE)
-        << "&currentExamIntermediate=" << CGI::StringToURLString(this->currentExamIntermediatE)
-        << "&currentExamFile=" << CGI::StringToURLString(this->problemListOfParent[indexInParent+1] )
+        << "&fileName=" << CGI::StringToURLString(this->problemListOfParent[indexInParent+1] )
         << "\"> Next-> </a><br>";
       } else
       { out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
@@ -2010,8 +1981,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
           out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
         out
         << "&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE)
-        << "&currentExamIntermediate="
-        << "&currentExamFile=" << CGI::StringToURLString(this->currentExamHomE)
+        << "&fileName=" << CGI::StringToURLString(this->currentExamHomE)
         << "&\">Last problem, return to course page.</a><br>";
       }
     }
@@ -2030,13 +2000,13 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
 (const std::string& requestType, const std::string& studentView,
  const std::string& studentSection, bool includeRandomSeedIfAppropriate)const
 { MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsForProblem");
-  if (!theGlobalVariables.flagLoggedIn && !theGlobalVariables.UserGuestMode())
+  if (!theGlobalVariables.flagLoggedIn && !theGlobalVariables.UserGuestMode()&&
+      !theGlobalVariables.flagRunningAsProblemInterpreter)
     return "";
   std::stringstream out;
   out << "request=" << requestType << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation()
   << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&"
-  << "currentExamIntermediate=" << theGlobalVariables.GetWebInput("currentExamIntermediate") << "&"
-  << "currentExamFile=" << CGI::StringToURLString(this->fileName) << "&";
+  << "fileName=" << CGI::StringToURLString(this->fileName) << "&";
   if (!theGlobalVariables.UserGuestMode())
   { out << "studentView=" << studentView << "&";
     if (studentSection!="")
@@ -2046,7 +2016,7 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
       //theGlobalVariables.userCalculatorRequestType!="examForReal" &&
       includeRandomSeedIfAppropriate)
     out << "randomSeed=" << this->theProblemData.randomSeed << "&";
-//  out << "currentExamFile=" << CGI::StringToURLString(this->fileName) << "&";
+//  out << "fileName=" << CGI::StringToURLString(this->fileName) << "&";
   return out.str();
 }
 
@@ -2639,7 +2609,7 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   if (isActualProblem)
   { out << "Deadline: ";
     if (deadlineInherited)
-      out << "<span style=\"color:blue\">" << currentDeadline << " (section deadline)</span>. ";
+      out << "<span style=\"color:blue\">" << currentDeadline << " (topic deadline)</span>. ";
     else
       out << "<span style=\"color:brown\">" << currentDeadline << " (per-problem deadline)</span>. ";
     out << hoursTillDeadlineStream.str();
@@ -2774,7 +2744,7 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 //  out << "cleaned up link: " << cleaneduplink;
 //  out << "<br>urled link: " <<  urledProblem;
   refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation()
-  << "currentExamFile=" << urledProblem << "&";
+  << "fileName=" << urledProblem << "&";
   if (theGlobalVariables.UserStudentViewOn())
   { refStreamNoRequest << "studentView=true&";
     if (theGlobalVariables.GetWebInput("studentSection")!="")
@@ -2782,9 +2752,6 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   }
   if (this->currentExamHomE!="")
     refStreamNoRequest << "currentExamHome=" << this->currentExamHomE << "&";
-  if (this->flagIsExamIntermediate)
-    refStreamNoRequest << "currentExamIntermediate="
-    << theGlobalVariables.GetWebInput("currentExamIntermediate") << "&";
   if (!theGlobalVariables.UserGuestMode())
   { refStreamExercise << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&" << refStreamNoRequest.str();
     refStreamForReal << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=examForReal&" << refStreamNoRequest.str();
@@ -2842,8 +2809,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     out << this->GetSubmitAnswersJavascript();
   else if (this->flagIsExamHome)
     out << this->GetSubmitEmailsJavascript();
-  if ((this->flagIsExamIntermediate || this->flagIsExamHome)
-      &&  theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
+  if (this->flagIsExamHome && theGlobalVariables.UserDefaultHasAdminRights() &&
+      !theGlobalVariables.UserStudentViewOn())
   { out << WebWorker::GetJavascriptHideHtml();
     out << this->GetDatePickerJavascriptInit();
   }
@@ -2937,8 +2904,6 @@ void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments)
     return;
   this->flagParentInvestigated=true;
   this->currentExamHomE=  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
-  this->currentExamIntermediatE=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate"));
-  //stOutput << "Is this an exam problem? ";
   if (!this->flagIsExamProblem)
   { //stOutput << "NONONO! -Emily";
     return;
@@ -2946,13 +2911,7 @@ void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments)
   //stOutput << "yesyesyes! -Emily";
 
   CalculatorHTML parserOfParent;
-  parserOfParent.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate"));
-  if (parserOfParent.fileName!="")
-    this->flagParentIsIntermediateExamFile=true;
-  else
-  { this->flagParentIsIntermediateExamFile=false;
-    parserOfParent.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
-  }
+  parserOfParent.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
   std::stringstream commentsOfparent;
   if (!parserOfParent.LoadMe(false, commentsOfparent))
   { comments << "Failed to load parent problem collection. Comments: " << commentsOfparent.str();
@@ -3117,7 +3076,6 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     this->calculatorClasses.AddOnTop("calculatorExamProblem");
     this->calculatorClasses.AddOnTop("calculatorManageClass");
     this->calculatorClasses.AddOnTop("setCalculatorExamProblem");
-    this->calculatorClasses.AddOnTop("setCalculatorExamIntermediate");
     this->calculatorClasses.AddOnTop("setCalculatorExamHome");
   }
   this->eltsStack.SetSize(0);
@@ -3131,7 +3089,6 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   bool reduced=false;
   this->flagIsExamProblem=true;
   this->flagIsExamHome=false;
-  this->flagIsExamIntermediate=false;
   do
   { if (!reduced)
     { indexInElts++;

@@ -48,6 +48,16 @@ public:
   value& operator[](int i)const
   { return this->theValues[i];
   }
+  std::string ToStringHtml()const
+  { std::stringstream out;
+    out << this->size() << " key-value pairs.";
+    for (int i=0; i<this->size(); i++)
+    { out << this->theKeys[i] << ": " << this->theValues[i];
+      if (i!=this->size()-1)
+        out << "\n<br>\n";
+    }
+    return out.str();
+  }
 };
 
 //using C++11, not sure if that is a good idea:

@@ -79,6 +79,7 @@ public:
   int ProcessSubmitProblem();
   int ProcessSubmitProblemPreview();
   int ProcessProblemGiveUp();
+  static std::string GetProblemGiveUpAnswer();
   int ProcessPauseWorker();
   int ProcessMonitor();
   int ProcessUnknown();

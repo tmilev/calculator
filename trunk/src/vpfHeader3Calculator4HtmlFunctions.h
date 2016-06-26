@@ -9,6 +9,8 @@ class CalculatorHtmlFunctions{
 public:
   static bool innerExtractCalculatorExpressionFromHtml
   (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerInterpretProblemGiveUp
+  (Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerInterpretProblem
   (Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerUserInputBox

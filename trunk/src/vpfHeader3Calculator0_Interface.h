@@ -1536,6 +1536,9 @@ public:
   int opInterpretProblem()
   { return this->theAtoms.GetIndexIMustContainTheObject("InterpretProblem");
   }
+  int opInterpretProblemGiveUp()
+  { return this->theAtoms.GetIndexIMustContainTheObject("ProblemGiveUp");
+  }
   bool AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& input, List<Expression>& output, int theOp);
   bool AppendMultiplicandsReturnTrueIfOrderNonCanonical(Expression& theExpression, List<Expression>& output)
   { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opTimes());

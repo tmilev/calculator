@@ -798,8 +798,7 @@ std::string WebWorker::GetHtmlHiddenInputs()
   << "<input type=\"hidden\" id=\"authenticationToken\" name=\"authenticationToken\">\n"
   << "<input type=\"hidden\" id=\"usernameHidden\" name=\"usernameHidden\">\n"
   << "<input type=\"hidden\" id=\"currentExamHome\" name=\"currentExamHome\">\n"
-  << "<input type=\"hidden\" id=\"currentExamIntermediate\" name=\"currentExamIntermediate\">\n"
-  << "<input type=\"hidden\" id=\"currentExamFile\" name=\"currentExamFile\">\n"
+  << "<input type=\"hidden\" id=\"fileName\" name=\"fileName\">\n"
   << "<input type=\"hidden\" id=\"ignoreSecurity\" name=\"ignoreSecurity\">\n"
   ;
   return out.str();
@@ -2257,10 +2256,8 @@ int WebWorker::ProcessChangePassword()
   << "&username="
   << CGI::StringToURLString(theGlobalVariables.userDefault)
   << "&authenticationToken=" << CGI::StringToURLString(newAuthenticationToken)
-  << "&currentExamIntermediate="
-  << theGlobalVariables.GetWebInput("currentExamIntermediate")
-  << "&currentExamFile="
-  << theGlobalVariables.GetWebInput("currentExamFile")
+  << "&fileName="
+  << theGlobalVariables.GetWebInput("fileName")
   << "\" />"
   ;
   stOutput.Flush();
@@ -2412,12 +2409,10 @@ std::string WebWorker::GetJavascriptStandardCookies()
   if ((theGlobalVariables.flagLoggedIn || theGlobalVariables.UserGuestMode()) &&
        theGlobalVariables.userCalculatorRequestType!="" &&
        theGlobalVariables.userCalculatorRequestType!="compute")
-  { out << "  addCookie(\"currentExamFile\", \""
-    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamFile")) << "\", 100, false);\n";
+  { out << "  addCookie(\"fileName\", \""
+    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName")) << "\", 100, false);\n";
     out << "  addCookie(\"currentExamHome\", \""
     << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome")) << "\", 100, false);\n";
-    out << "  addCookie(\"currentExamIntermediate\", \""
-    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamIntermediate")) << "\", 100, false);\n";
   }
   out
   << "}\n";
@@ -2446,7 +2441,7 @@ std::string WebWorker::GetJavascriptStandardCookies()
 //  << "  result =\"examStatus=\"+getCookie(\"examStatus\");\n"
 //  << "  result+=\"&username=\"+getCookie(\"username\");\n"
 //  << "  result+=\"&authenticationToken=\"+getCookie(\"authenticationToken\");\n"
-//  << "  result+=\"&currentExamFile=\"+getCookie(\"currentExamFile\");\n"
+//  << "  result+=\"&fileName=\"+getCookie(\"fileName\");\n"
 //  << "  return result;\n"
 //  << "}\n"
   << "function loadSettings(){\n"
@@ -2472,15 +2467,12 @@ std::string WebWorker::GetJavascriptStandardCookies()
   << "    if(getCookie(\"request\")!='')\n"
   << "      if(getCookie(\"request\")!='logout' && getCookie(\"request\")!='login' )\n"
   << "        document.getElementById(\"request\").value=getCookie(\"request\");\n"
-  << "  if (document.getElementById(\"currentExamFile\")!=null)\n "
-  << "    if(getCookie(\"currentExamFile\")!='')\n"
-  << "      document.getElementById(\"currentExamFile\").value=getCookie(\"currentExamFile\");\n"
+  << "  if (document.getElementById(\"fileName\")!=null)\n "
+  << "    if(getCookie(\"fileName\")!='')\n"
+  << "      document.getElementById(\"fileName\").value=getCookie(\"fileName\");\n"
   << "  if (document.getElementById(\"currentExamHome\")!=null)\n "
   << "    if(getCookie(\"currentExamHome\")!='')\n"
   << "      document.getElementById(\"currentExamHome\").value=getCookie(\"currentExamHome\");\n"
-  << "  if (document.getElementById(\"currentExamIntermediate\")!=null)\n "
-  << "    if(getCookie(\"currentExamIntermediate\")!='')\n"
-  << "      document.getElementById(\"currentExamIntermediate\").value=getCookie(\"currentExamIntermediate\");\n"
   << "  if (document.getElementById(\"authenticationToken\")!=null)\n"
   << "    if(getCookie(\"authenticationToken\")!='')\n"
   << "      document.getElementById(\"authenticationToken\").value=getCookie(\"authenticationToken\");\n "
@@ -3531,8 +3523,10 @@ int WebServer::main_problem_interpreter()
   if (theGlobalVariables.programArguments.size>=2)
   { std::stringstream argumentProcessingFailureComments;
     if (!CGI::ChopCGIInputStringToMultipleStrings
-      (theGlobalVariables.programArguments[1], theGlobalVariables.webArguments, argumentProcessingFailureComments))
-    return false;
+        (theGlobalVariables.programArguments[1], theGlobalVariables.webArguments,
+         argumentProcessingFailureComments))
+      stOutput << "<b>Failed to process the calculator arguments: "
+      << theGlobalVariables.programArguments[1];
   } else
     stOutput << "Did not receive any additional arguments. ";
   if (theGlobalVariables.programArguments.size>2)
@@ -3544,6 +3538,9 @@ int WebServer::main_problem_interpreter()
   theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
   stOutput << theParser.outputString;
   stOutput << "\nTotal running time: " << GetElapsedTimeInSeconds() << " seconds.\n";
+  if (theGlobalVariables.GetWebInput("debugFlag")=="true")
+    stOutput << "<hr>The calculator additional arguments are: "
+    << theGlobalVariables.webArguments.ToStringHtml();
   return 0;
 }
 
@@ -3631,8 +3628,8 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   if (theGlobalVariables.flagRunningCommandLine ||
       theGlobalVariables.flagRunningAsProblemInterpreter)
   { theGlobalVariables.programArguments.RemoveIndicesShiftDown(0,2);
-    //std::cout << "<br>After popping args, remaining are: "
-    //<< theGlobalVariables.programArguments.ToStringCommaDelimited();
+    std::cout << "<br>After popping args, remaining are: "
+    << theGlobalVariables.programArguments.ToStringCommaDelimited();
     return;
   }
   if (secondArgument=="server8155")

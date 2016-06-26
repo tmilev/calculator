@@ -162,6 +162,13 @@ void Calculator::initPredefinedInnerFunctions()
    \"ProblemCollections/Problems/Functions-composing-fractional-linear-1.html\"))", true, false,
    "CalculatorHtmlFunctions::innerInterpretProblem", "InterpretProblem");
   this->AddOperationInnerHandler
+  ("ProblemGiveUp", CalculatorHtmlFunctions::innerInterpretProblemGiveUp, "",
+   "Gives the predefined answer to a problem. First argument must be a string with the problem. \
+    the second argument must be the id of the answer. ",
+   "ProblemGiveUp(LoadFileIntoString(\
+   \"ProblemCollections/Problems/Functions-composing-fractional-linear-1.html\"), AlgebraAnswer)", true, false,
+   "CalculatorHtmlFunctions::innerInterpretProblemGiveUp", "ProblemGiveUp");
+  this->AddOperationInnerHandler
   ("makeInputBox", CalculatorHtmlFunctions::innerUserInputBox, "",
    "Creates an user input text box. ",
    " makeInputBox(name=a, default=randomInteger((-5,-1), (1,5)));", true, false,

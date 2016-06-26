@@ -3538,9 +3538,9 @@ int WebServer::main_problem_interpreter()
   theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
   stOutput << theParser.outputString;
   stOutput << "\nTotal running time: " << GetElapsedTimeInSeconds() << " seconds.\n";
-  if (theGlobalVariables.GetWebInput("debugFlag")=="true")
+  if (theGlobalVariables.GetWebInput("debugFlag")=="true" || true)
     stOutput << "<hr>The calculator additional arguments are: "
-    << theGlobalVariables.webArguments.ToStringHtml();
+    << theGlobalVariables.webArguments.ToStringHtml() << "<hr>";
   return 0;
 }
 
@@ -3628,8 +3628,8 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   if (theGlobalVariables.flagRunningCommandLine ||
       theGlobalVariables.flagRunningAsProblemInterpreter)
   { theGlobalVariables.programArguments.RemoveIndicesShiftDown(0,2);
-    std::cout << "<br>After popping args, remaining are: "
-    << theGlobalVariables.programArguments.ToStringCommaDelimited();
+//    std::cout << "<br>After popping args, remaining are: "
+//    << theGlobalVariables.programArguments.ToStringCommaDelimited();
     return;
   }
   if (secondArgument=="server8155")

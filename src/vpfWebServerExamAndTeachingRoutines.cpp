@@ -754,16 +754,15 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
     << "=\"+encodeURIComponent(document.getElementById(\""
     << this->theProblemData.inputNonAnswerIds[i] << "\").value);\n";
   }
-
-
   out
   << "  var https = new XMLHttpRequest();\n"
-  << "  https.open(\"POST\", \"";
+  << "  https.open(\"GET\", \"";
   if (!theGlobalVariables.flagRunningAsProblemInterpreter)
     out << theGlobalVariables.DisplayNameCalculatorWithPath;
   else
     out << "/cgi-bin/interpret.py";
-  out << "\", true);\n"
+
+  out << "\" + \"?\"+params, true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
 ;
 //Old code, submits all answers. May need to be used as an alternative
@@ -791,7 +790,8 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   << "    JavascriptInsertionAlreadyCalled=true;\n"
   << "    MathJax.Hub.Queue(['Typeset', MathJax.Hub, spanVerification]);\n"
   << "  }\n"
-  << "  https.send(inputParams);\n"
+//  << "  https.send(inputParams);\n"
+  << "  https.send();\n"
   << "}\n"
   << "</script>";
   return out.str();
@@ -799,33 +799,34 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
 
 const std::string CalculatorHTML::BugsGenericMessage=
 "Please take a screenshot, copy the link address and send those along \
-with a short explanation to the following UMass instructor: Todor Milev (todor.milev@gmail.com)";
+with a short explanation to the administrator of the web site. ";
 
-int WebWorker::ProcessProblemGiveUp()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessProblemGiveUp");
+std::string WebWorker::GetProblemGiveUpAnswer()
+{ MacroRegisterFunctionWithName("WebWorker::GetProblemGiveUpAnswer");
   double startTime=theGlobalVariables.GetElapsedSeconds();
   CalculatorHTML theProblem;
   theProblem.LoadCurrentProblemItem();
+  std::stringstream out;
   if (!theProblem.flagLoadedSuccessfully)
-  { stOutput << "Problem name is: " << theProblem.fileName;
-    stOutput << " <b>Could not load problem, this may be a bug. "
+  { out << "Problem name is: " << theProblem.fileName
+    << " <b>Could not load problem, this may be a bug. "
     << CalculatorHTML::BugsGenericMessage << "</b>";
     if(theProblem.comments.str()!="")
-      stOutput << " Comments: " << theProblem.comments.str();
-    return 0;
+      out << " Comments: " << theProblem.comments.str();
+    return out.str();
   }
   if (theProblem.flagIsForReal)
-  { stOutput << " <b>Not allowed to show answer of a problem being tested for real. </b>";
-    return 0;
+  { out << " <b>Not allowed to show answer of a problem being tested for real. </b>";
+    return out.str();
   }
   if(theGlobalVariables.GetWebInput("randomSeed")=="")
-  { stOutput << " <b>I could not figure out the exercise problem (missing random seed). </b>";
-    return 0;
+  { out << " <b>I could not figure out the exercise problem (missing random seed). </b>";
+    return out.str();
   }
   std::stringstream comments;
   if (!theProblem.ParseHTML(comments))
   { stOutput << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
-    return 0;
+    return out.str();
   }
   std::string lastStudentAnswerID;
   MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
@@ -833,25 +834,25 @@ int WebWorker::ProcessProblemGiveUp()
     MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
   int indexLastAnswerId=theProblem.theProblemData.answerIds.GetIndex(lastStudentAnswerID);
   if (indexLastAnswerId==-1)
-  { stOutput << "<b>Student submitted answerID: " << lastStudentAnswerID
+  { out << "<b>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
     << "</b><br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
-    { stOutput << "<hr>Allowed answer ids: " << theProblem.theProblemData.answerIds << "<br>";
-      stOutput << "<hr>Client input: " << this->mainArgumentRAW << "<hr>";
-      stOutput << this->ToStringCalculatorArgumentsHumanReadable();
+    { out << "<hr>Allowed answer ids: " << theProblem.theProblemData.answerIds << "<br>";
+      //out << "<hr>Client input: " << this->mainArgumentRAW << "<hr>";
+      out << WebWorker::ToStringCalculatorArgumentsHumanReadable();
     }
-    return 0;
+    return out.str();
   }
   if (theProblem.theProblemData.commandsForGiveUpAnswer[indexLastAnswerId]=="")
-  { stOutput << "<b> Unfortunately there is no answer given for this question (answerID: " << lastStudentAnswerID << ").";
-    return 0;
+  { out << "<b> Unfortunately there is no answer given for this question (answerID: " << lastStudentAnswerID << ").";
+    return out.str();
   }
   Calculator theInterpreteR;
   theInterpreteR.init();
   if(!theProblem.PrepareCommands(comments))
-  { stOutput << "<b>Failed to prepare calculator commands. </b> <br>Comments:<br>" << comments.str();
-    return 0;
+  { out << "<b>Failed to prepare calculator commands. </b> <br>Comments:<br>" << comments.str();
+    return out.str();
   }
   std::stringstream answerCommands;
   theProblem.PrepareUserInputBoxes(answerCommands);
@@ -860,21 +861,21 @@ int WebWorker::ProcessProblemGiveUp()
   << theProblem.theProblemData.commandsForGiveUpAnswer[indexLastAnswerId];
   theInterpreteR.Evaluate(answerCommands.str());
   if (theInterpreteR.syntaxErrors!="")
-  { stOutput << "<span style=\"color:red\"><b>Failed to evaluate the default answer. "
+  { out << "<span style=\"color:red\"><b>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b></span>"
     << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false);
-    stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
-    return 0;
+    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    return out.str();
   } else if (theInterpreteR.flagAbortComputationASAP)
-  { stOutput << "<span style=\"color:red\"><b>Failed to evaluate the default answer. "
+  { out << "<span style=\"color:red\"><b>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b></span>"
     << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.outputString
     << theInterpreteR.outputCommentsString
     << "<hr>Input: <br>" << theInterpreteR.inputString;
-    stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
-    return 0;
+    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    return out.str();
   }
   FormatExpressions theFormat;
   List<std::string> answersReverseOrder;
@@ -889,14 +890,20 @@ int WebWorker::ProcessProblemGiveUp()
       answersReverseOrder.AddOnTop(theInterpreteR.theProgramExpression[j].ToString(&theFormat));
   }
   for (int i=answersReverseOrder.size-1; i>=0; i--)
-  { stOutput << "\\(" << answersReverseOrder[i] << "\\)";
+  { out << "\\(" << answersReverseOrder[i] << "\\)";
     if (i!=0)
-      stOutput << "<br>";
+      out << "<br>";
   }
-  stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+  out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
-    stOutput <<  "<hr>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString
-    << "<hr>Raw input: " << this->ToStringCalculatorArgumentsHumanReadable();
+    out <<  "<hr>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString
+    << "<hr>Raw input: " << WebWorker::ToStringCalculatorArgumentsHumanReadable();
+  return out.str();
+}
+
+int WebWorker::ProcessProblemGiveUp()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessProblemGiveUp");
+  stOutput << WebWorker::GetProblemGiveUpAnswer();
   return 0;
 }
 
@@ -1580,6 +1587,13 @@ std::string WebWorker::GetExamPage()
   return out.str();
 }
 
+bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInterpretProblemGiveUp");
+  (void)input;
+  return output.AssignValue(WebWorker::GetProblemGiveUpAnswer(), theCommands);
+}
+
 bool CalculatorHtmlFunctions::innerInterpretProblem
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInterpretProblem");
@@ -2000,13 +2014,17 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
 (const std::string& requestType, const std::string& studentView,
  const std::string& studentSection, bool includeRandomSeedIfAppropriate)const
 { MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsForProblem");
-  if (!theGlobalVariables.flagLoggedIn && !theGlobalVariables.UserGuestMode()&&
+  if (!theGlobalVariables.flagLoggedIn && !theGlobalVariables.UserGuestMode() &&
       !theGlobalVariables.flagRunningAsProblemInterpreter)
     return "";
   std::stringstream out;
   out << "request=" << requestType << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation()
-  << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&"
-  << "fileName=" << CGI::StringToURLString(this->fileName) << "&";
+  << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&";
+  if  (!theGlobalVariables.flagRunningAsProblemInterpreter && this->fileName!="")
+    out << "fileName=" << CGI::StringToURLString(this->fileName) << "&";
+  else
+    out << "fileName=" << CGI::StringToURLString(theGlobalVariables.GetWebInput("fileName") )
+    << "&";
   if (!theGlobalVariables.UserGuestMode())
   { out << "studentView=" << studentView << "&";
     if (studentSection!="")

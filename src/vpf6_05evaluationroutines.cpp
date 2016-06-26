@@ -564,7 +564,9 @@ void Calculator::EvaluateCommands()
     bool foundInterpretationCommand=false;
     if (theGlobalVariables.flagRunningAsProblemInterpreterIntepretProblemInitial)
       for (int i=1; i<StartingExpression.size(); i++)
-        if (StartingExpression[i].StartsWith(this->opInterpretProblem()))
+        if (StartingExpression[i].StartsWith(this->opInterpretProblem()) ||
+            StartingExpression[i].StartsWith(this->opInterpretProblemGiveUp())
+            )
         { if (foundInterpretationCommand)
             out << "<hr>More than one interpretation command found, this is likely an error. ";
           else

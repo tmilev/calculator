@@ -113,7 +113,6 @@ public:
   std::string currentProblemCollectionDatabaseString;
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;
-  static std::string RelativePhysicalFolderProblemCollections;
   std::stringstream comments;
   bool CheckContent(std::stringstream& comments);
   bool CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
@@ -207,8 +206,6 @@ CalculatorHTML::CalculatorHTML()
   this->flagLoadedClassDataSuccessfully=false;
   this->timeToParseHtml=0;
 }
-
-std::string CalculatorHTML::RelativePhysicalFolderProblemCollections="ProblemCollections/";
 
 #ifdef MACRO_use_MySQL
 bool DatabaseRoutines::ReadProblemInfo
@@ -415,7 +412,7 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
 bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadMe");
   this->RelativePhysicalFileNameWithFolder=
-  this->RelativePhysicalFolderProblemCollections+
+  ""+
   this->fileName
   ;
   std::fstream theFile;
@@ -490,9 +487,9 @@ bool CalculatorHTML::FindExamItem()
 { MacroRegisterFunctionWithName("CalculatorHTML::FindExamItem");
   List<std::string> theExerciseFileNames, theExerciseFileNameExtensions;
   if (!FileOperations::GetFolderFileNamesVirtual
-      (this->RelativePhysicalFolderProblemCollections, theExerciseFileNames, &theExerciseFileNameExtensions))
+      ("ProblemCollections/", theExerciseFileNames, &theExerciseFileNameExtensions))
   { this->comments << "Failed to open folder with relative file name: "
-    << this->RelativePhysicalFolderProblemCollections;
+    << "ProblemCollections/";
     return false;
   }
   for (int i=0; i<theExerciseFileNames.size; i++)
@@ -517,11 +514,13 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
     out << "<b>Failed to interpret file: " << this->fileName << "</b>. Comments: " << this->comments.str();
     return out.str();
   }
-  out << "<nav>"
-  << this->outputHtmlNavigation
-  << "<hr><small>Generated in "
-  << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds()-startTime)
-  << " second(s).</small>" << "</nav> "
+  if (!theGlobalVariables.flagRunningAsProblemInterpreter)
+    out << "<nav>"
+    << this->outputHtmlNavigation
+    << "<hr><small>Generated in "
+    << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds()-startTime)
+    << " second(s).</small>" << "</nav> ";
+  out
   //<< "<section>"
   << this->outputHtmlMain
   //<< "</section>"
@@ -550,7 +549,7 @@ void CalculatorHTML::LoadCurrentProblemItem()
   if (needToFindDefault)
   { if (!this->FindExamItem())
     { this->comments << "<b>No problems/exams to serve: found no html content in folder: "
-      << this->RelativePhysicalFolderProblemCollections << ".</b>";
+      << "ProblemCollections/" << ".</b>";
       return;
     }
     theGlobalVariables.SetWebInput("currentExamHome", CGI::StringToURLString(this->fileName));
@@ -1096,7 +1095,7 @@ std::string WebWorker::GetModifyProblemReport()
       !theGlobalVariables.flagUsingSSLinCurrentConnection)
     return "<b>Modifying problems allowed only for logged-in admins under ssl connection. </b>";
   std::string mainInput=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
-  std::string fileName= CalculatorHTML::RelativePhysicalFolderProblemCollections+
+  std::string fileName= "ProblemCollections/"+
   CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"));
   std::fstream theFile;
   std::stringstream out;
@@ -1140,8 +1139,8 @@ std::string WebWorker::GetClonePageResult()
       !theGlobalVariables.flagUsingSSLinCurrentConnection)
     return "<b>Cloning problems allowed only for logged-in admins under ssl connection. </b>";
   std::string fileNameResulT = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
-  std::string fileNameResultRelative = CalculatorHTML::RelativePhysicalFolderProblemCollections+fileNameResulT;
-  std::string fileNameToBeCloned = CalculatorHTML::RelativePhysicalFolderProblemCollections+
+  std::string fileNameResultRelative = "ProblemCollections/"+fileNameResulT;
+  std::string fileNameToBeCloned = "ProblemCollections/"+
   CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"));
   std::stringstream out;
   std::string startingFileString;
@@ -1241,7 +1240,7 @@ int WebWorker::ProcessSubmitProblem()
     stOutput << "<b>Random seed not given.</b>";
 //  stOutput << "<b>debug remove when done: Random seed: " << theProblem.theProblemData.randomSeed << "</b>";
   theProblem.currentExamHomE         = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
-  if (theProblem.currentExamHomE == "")
+  if (theProblem.currentExamHomE == "" && !theGlobalVariables.flagRunningAsProblemInterpreter)
   { stOutput << "<b>Could not find the problem collection to which this problem belongs. "
     << "If you think this is a bug, do the following. " << theProblem.BugsGenericMessage << "</b>";
     return 0;
@@ -1582,6 +1581,15 @@ std::string WebWorker::GetExamPage()
   out << theFile.LoadAndInterpretCurrentProblemItem();
   out << this->ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
+  return out.str();
+}
+
+std::string WebWorker::GetExamPageInterpreter()
+{ MacroRegisterFunctionWithName("WebWorker::GetExamPageInterpreter");
+  CalculatorHTML theFile;
+  std::stringstream out;
+  out << theFile.LoadAndInterpretCurrentProblemItem();
+  out << this->ToStringCalculatorArgumentsHumanReadable();
   return out.str();
 }
 

@@ -538,7 +538,7 @@ bool FileOperations::GetFolderFileNamesUnsecure
 bool FileOperations::LoadFileToStringVirtual
 (const std::string& theFileName, std::string& output, std::stringstream& commentsOnFailure)
 { std::string computedFileName;
-  stOutput << "DEBUG: loading string virtual from: " << theFileName;
+//  stOutput << "DEBUG: loading string virtual from: " << theFileName;
   if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName))
     return false;
   return FileOperations::LoadFileToStringUnsecure
@@ -570,9 +570,11 @@ FileOperations::FolderVirtualLinks()
 { static MapList<std::string, std::string, MathRoutines::hashString> result;
   static bool firstRun=false;
   if (!firstRun)
-  { MutexRecursiveWrapper theMutex;
+  { firstRun=true;
+    MutexRecursiveWrapper theMutex;
     MutexLockGuard theGuard(theMutex);
-    firstRun=true;
+    result.SetValue("output/", "output/");
+    result.SetValue("ProblemCollections/", "ProblemCollections/");
     result.SetValue("../problemtemplates/", "problemtemplates/");
     result.SetValue("../freecalc/", "freecalc/");
   }
@@ -624,7 +626,7 @@ bool FileOperations::OpenFileUnsecure(std::fstream& theFile, const std::string& 
 
 bool FileOperations::GetPhysicalFileNameFromVirtual(const std::string& inputFileName, std::string& output)
 { MacroRegisterFunctionWithName("FileOperations::GetPhysicalFileNameFromVirtual");
-  stOutput << "<br>DEBUG: processing " << inputFileName << " -> ... " << output;
+//  stOutput << "<br>DEBUG: processing " << inputFileName << " -> ... <br>";
   if (!FileOperations::IsOKfileNameVirtual(inputFileName))
     return false;
   if (&inputFileName==&output)
@@ -634,12 +636,13 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(const std::string& inputFile
   std::string folderEnd;
   for (int i=0; i<FileOperations::FolderVirtualLinks().size(); i++)
     if (MathRoutines::StringBeginsWith(inputFileName, FileOperations::FolderVirtualLinks().theKeys[i], &folderEnd))
-    { output=theGlobalVariables.PhysicalPathOutputFolder+FileOperations::FolderVirtualLinks().theValues[i]+folderEnd;
-      stOutput << inputFileName << " transformed to: " << output;
+    { output=theGlobalVariables.PhysicalPathProjectBase+FileOperations::FolderVirtualLinks().theValues[i]+folderEnd;
+      //stOutput << inputFileName << " transformed to: " << output;
       return true;
     }
-  output=theGlobalVariables.PhysicalPathOutputFolder+"output/"+inputFileName;
-  stOutput << "<br>DEBUG: computed file name transf.: " << inputFileName << " -> " << output;
+
+  output=theGlobalVariables.PhysicalPathOutputFolder+inputFileName;
+//  stOutput << "<br>No key mathcing: " << inputFileName << ". Selecting default: " << output << "<br>";
   return true;
 }
 

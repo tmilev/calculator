@@ -93,6 +93,10 @@ public:
 
   bool IsAllowedAsRequestCookie(const std::string& input);
   int ProcessCalculator();
+  int ProcessCalculatorNoLoginInterpreterMode();
+  bool ProcessRawArgumentsNoLoginInterpreterMode
+  (const std::string& urlEncodedInputString, std::stringstream& argumentProcessingFailureComments, int recursionDepth=0)
+  ;
   bool ProcessRawArguments
   (const std::string& urlEncodedInputString, std::stringstream& argumentProcessingFailureComments, int recursionDepth=0)
   ;

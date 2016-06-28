@@ -146,7 +146,7 @@ bool CalculatorFunctionsGeneral::innerX509certificateCrunch(Calculator& theComma
     return theCommands << "The file name contains forbidden characters, computation aborted. ";
   std::string theCertificateFileName=theCertificateFileNameNoFolder;
   std::fstream theCertFile;
-  if (!FileOperations::OpenFileOnTopOfOutputFolder(theCertFile, theCertificateFileName, false, false, false))
+  if (!FileOperations::OpenFileVirtual(theCertFile, "output/"+ theCertificateFileName, false, false, false))
     return theCommands << "Failed to open file " << theCertificateFileName;
   theCertFile.seekg(0);
   List<std::string> theCerts, theShas, certsAndShas;
@@ -1447,7 +1447,7 @@ bool CalculatorFunctionsGeneral::innerMakeMakeFile(Calculator& theCommands, cons
     cppFilesNoExtension.AddOnTop(theFileNameNoPathNoExtension);
   }
   std::fstream theFileStream;
-  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(theFileStream, "makefile", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual(theFileStream, "output/makefile", false, true, false);
   std::stringstream outHtml;
   theFileStream << "all: directories calculator\n\n";
   theFileStream << "directories: bin\n";
@@ -4495,7 +4495,7 @@ bool CalculatorFunctionsGeneral::innerComputePairingTablesAndFKFTsubalgebras(Cal
   tempFormat.flagUseLatex=true;
   tempFormat.flagUseHTML=true;
   tempFormat.flagCandidateSubalgebraShortReportOnly=false;
-  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(theFile, theFileName, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, "output/"+theFileName, false, true, false);
   theFile << theSAs.ToString(&tempFormat);
   std::stringstream out;
   out << "<a href=\"" << theGlobalVariables.DisplayPathOutputFolder << "FKFTcomputation.html\">FKFTcomputation.html</a>";
@@ -5895,7 +5895,7 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
   outSltwoFileDisplayName << outSltwoDisplayPath.str() << "sl2s.html";
   outRootHtmlFileName << ownerSS->RelativePhysicalNameSSAlgOutputFolder << "rootSubalgebras.html";
   outRootHtmlDisplayName << ownerSS->DisplayNameSSalgOutputFolder << "rootSubalgebras.html";
-  bool NeedToCreateFolders=!FileOperations::FileExistsOnTopOfOutputFolder(outSltwoMainFile.str());
+  bool NeedToCreateFolders=!FileOperations::FileExistsVirtual("output/"+outSltwoMainFile.str());
   if (NeedToCreateFolders)
   { std::stringstream outMkDirCommand1, outMkDirCommand2;
     outMkDirCommand1 << "mkdir " << theGlobalVariables.PhysicalPathOutputFolder
@@ -5906,8 +5906,8 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
     theGlobalVariables.CallSystemNoOutput(outMkDirCommand2.str());
   }
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit =1000;
-  if (!FileOperations::FileExistsOnTopOfOutputFolder(outSltwoMainFile.str()) ||
-      !FileOperations::FileExistsOnTopOfOutputFolder(outRootHtmlFileName.str()))
+  if (!FileOperations::FileExistsVirtual("output/"+outSltwoMainFile.str()) ||
+      !FileOperations::FileExistsVirtual("output/"+outRootHtmlFileName.str()))
     MustRecompute=true;
   std::stringstream out;
   if (MustRecompute)
@@ -5965,7 +5965,7 @@ class LaTeXcrawler
 
 bool LaTeXcrawler::ExtractFileNamesFromRelativeFileName()
 { MacroRegisterFunctionWithName("LaTeXcrawler::ExtractFileNamesFromRelativeFileName");
-  if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(this->theFileToCrawlRelative))
+  if (!FileOperations::IsOKfileNameVirtual(this->theFileToCrawlRelative))
   { this->displayResult << "The folders below the file name contain dots. This is not allowed. ";
     return false;
   }
@@ -6220,7 +6220,7 @@ void LaTeXcrawler::Crawl()
   this->CrawlRecursive(this->theFileToCrawlPhysical);
   std::fstream outputFile;
   std::string outputFileName = "latexOutput.tex";
-  if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(outputFile, outputFileName, false, true, false))
+  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(outputFile,"output/"+ outputFileName, false, true, false))
   { this->displayResult << "Failed to open output file: " << outputFileName << ", check write permissions. ";
     //this->displayResult << "The crawling appears to have been successful, below is the crawled file.<hr>"
     //<< this->crawlingResult.str();

@@ -113,7 +113,7 @@ public:
   std::string currentProblemCollectionDatabaseString;
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;
-  static const std::string RelativePhysicalFolderProblemCollections;
+  static std::string RelativePhysicalFolderProblemCollections;
   std::stringstream comments;
   bool CheckContent(std::stringstream& comments);
   bool CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
@@ -208,7 +208,7 @@ CalculatorHTML::CalculatorHTML()
   this->timeToParseHtml=0;
 }
 
-const std::string CalculatorHTML::RelativePhysicalFolderProblemCollections="ProblemCollections/";
+std::string CalculatorHTML::RelativePhysicalFolderProblemCollections="ProblemCollections/";
 
 #ifdef MACRO_use_MySQL
 bool DatabaseRoutines::ReadProblemInfo
@@ -419,8 +419,8 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
   this->fileName
   ;
   std::fstream theFile;
-  if (!FileOperations::OpenFileOnTopOfProjectBase(theFile, this->RelativePhysicalFileNameWithFolder, false, false, false))
-  { comments << "<b>Failed to open file " << this->RelativePhysicalFileNameWithFolder << "</b>";
+  if (!FileOperations::OpenFileVirtual(theFile, this->RelativePhysicalFileNameWithFolder, false, false, false))
+  { comments << "<b>Failed to open file " << this->RelativePhysicalFileNameWithFolder << ". </b>";
     return false;
   }
   std::stringstream contentStream;
@@ -434,14 +434,14 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
     this->currentUser.username=theGlobalVariables.userDefault;
     if (!this->currentUser.LoadProblemStringFromDatabase(theRoutines, this->currentUserDatabaseString, comments))
     { comments << "Failed to load current user's problem save-file. ";
-      stOutput << "DEBUG!";
-      comments << "DEBUG: " << this->currentUserDatabaseString;
+//      stOutput << "DEBUG!";
+//      comments << "DEBUG: " << this->currentUserDatabaseString;
       return false;
     }
     if (!this->currentUser.InterpretDatabaseProblemData(this->currentUserDatabaseString, comments))
     { comments << "Failed to interpret user's problem save-file. ";
-      stOutput << "DEBUG!";
-      comments << "DEBUG: " << this->currentUserDatabaseString;
+//      stOutput << "DEBUG!";
+//      comments << "DEBUG: " << this->currentUserDatabaseString;
       return false;
     }
     this->theProblemData=this->currentUser.GetProblemDataAddIfNotPresent(this->fileName);
@@ -489,7 +489,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
 bool CalculatorHTML::FindExamItem()
 { MacroRegisterFunctionWithName("CalculatorHTML::FindExamItem");
   List<std::string> theExerciseFileNames, theExerciseFileNameExtensions;
-  if (!FileOperations::GetFolderFileNamesOnTopOfProjectBase
+  if (!FileOperations::GetFolderFileNamesVirtual
       (this->RelativePhysicalFolderProblemCollections, theExerciseFileNames, &theExerciseFileNameExtensions))
   { this->comments << "Failed to open folder with relative file name: "
     << this->RelativePhysicalFolderProblemCollections;
@@ -540,7 +540,8 @@ void CalculatorHTML::LoadCurrentProblemItem()
   this->flagLoadedSuccessfully=false;
   bool needToFindDefault=(this->fileName=="");
   bool needToLoadDatabase=true;
-  if (theGlobalVariables.UserGuestMode())
+  if (theGlobalVariables.UserGuestMode() ||
+      theGlobalVariables.flagRunningAsProblemInterpreter)
     needToLoadDatabase=false;
   if (!needToFindDefault)
     needToFindDefault=!this->LoadMe(needToLoadDatabase, this->comments);
@@ -757,12 +758,9 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   out
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"GET\", \"";
-  if (!theGlobalVariables.flagRunningAsProblemInterpreter)
-    out << theGlobalVariables.DisplayNameCalculatorWithPath;
-  else
-    out << "/cgi-bin/interpret.py";
+  out << theGlobalVariables.DisplayNameCalculatorWithPath;
 
-  out << "\" + \"?\"+params, true);\n"
+  out << "\" + \"?\"+inputParams, true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
 ;
 //Old code, submits all answers. May need to be used as an alternative
@@ -1102,7 +1100,7 @@ std::string WebWorker::GetModifyProblemReport()
   CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"));
   std::fstream theFile;
   std::stringstream out;
-  if (!FileOperations::OpenFileOnTopOfProjectBase(theFile, fileName, false, true, false))
+  if (!FileOperations::OpenFileVirtual(theFile, fileName, false, true, false))
   { out << "<b><span style=\"color:red\">Failed to open file: " << fileName << ". </span></b>";
     return out.str();
   }
@@ -1147,16 +1145,16 @@ std::string WebWorker::GetClonePageResult()
   CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"));
   std::stringstream out;
   std::string startingFileString;
-  if (!FileOperations::LoadFileToStringOnTopOfProjectBase(fileNameToBeCloned, startingFileString, out))
+  if (!FileOperations::LoadFileToStringVirtual(fileNameToBeCloned, startingFileString, out))
   { out << "Could not find file: " << fileNameToBeCloned;
     return out.str();
   }
   std::fstream theFile;
-  if (FileOperations::FileExistsOnTopOfProjectBase(fileNameResultRelative))
+  if (FileOperations::FileExistsVirtual(fileNameResultRelative))
   { out << "<b>File: " << fileNameResultRelative << " already exists. </b>";
     return out.str();
   }
-  if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfProjectBase(theFile, fileNameResultRelative, false, false, false))
+  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, fileNameResultRelative, false, false, false))
   { out << "<b><span style=\"color:red\">Failed to open output file: " << fileNameResultRelative << ". </span></b>";
     return out.str();
   }

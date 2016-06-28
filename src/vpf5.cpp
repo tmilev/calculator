@@ -1667,7 +1667,7 @@ bool Calculator::innerAutomatedTestSetKnownGoodCopy(Calculator& theCommands, con
   List<std::string> inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit;
   std::stringstream out;
   theCommands.theTestFileName="automatedTest.txt";
-  if (!FileOperations::OpenFileOnTopOfOutputFolder(theCommands.theTestFile, theCommands.theTestFileName, false, true, false))
+  if (!FileOperations::OpenFileVirtual(theCommands.theTestFile, "output/"+ theCommands.theTestFileName, false, true, false))
     crash << "This is a programming error or worse: file " << theCommands.theTestFileName << " does not exist but cannot be created. Something is very wrong. " << crash;
   double startTime=theGlobalVariables.GetElapsedSeconds();
   theCommands.AutomatedTestRun(inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit);
@@ -1681,9 +1681,9 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=30000;
   double startingTime=theGlobalVariables.GetElapsedSeconds();
   theCommands.theTestFileName="automatedTest.txt";
-  if (!FileOperations::FileExistsOnTopOfOutputFolder(theCommands.theTestFileName))
+  if (!FileOperations::FileExistsVirtual("output/"+theCommands.theTestFileName))
     return theCommands.innerAutomatedTestSetKnownGoodCopy(theCommands, input, output);
-  if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(theCommands.theTestFile, theCommands.theTestFileName, false, false, false))
+  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(theCommands.theTestFile, "ouput/"+ theCommands.theTestFileName, false, false, false))
     crash << "This is a programming error or worse: failed to open an existing file: " << theCommands.theTestFileName << ". Something is very wrong. " << crash;
   List<std::string> knownResults;
   HashedList<std::string, MathRoutines::hashString> knownCommands;

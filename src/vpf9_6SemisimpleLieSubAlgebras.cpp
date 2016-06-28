@@ -284,12 +284,12 @@ void SemisimpleSubalgebras::CheckFileWritePermissions()
   theGlobalVariables.CallSystemNoOutput
   ("mkdir " +theGlobalVariables.PhysicalPathOutputFolder+ this->owner->RelativePhysicalNameSSAlgOutputFolder);
 
-  if(!FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(testFile, testFileNameRelative, false, true, false))
+  if(!FileOperations::OpenFileCreateIfNotPresentVirtual(testFile, "output/"+testFileNameRelative, false, true, false))
     crash << "<br>This may or may not be a programming error. I requested to create file "
     << this->RelativePhysicalNameRelativeMainFile1
     << " for output. However, the file failed to create. Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
     << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. " << crash;
-  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(testFile, testFileNameRelative, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual(testFile, "output/"+testFileNameRelative, false, true, false);
   testFile << "Write permissions test file.";
 }
 
@@ -302,10 +302,10 @@ void SemisimpleSubalgebras::WriteReportToFiles()
   this->currentFormat.flagUseLatex=true;
   this->currentFormat.flagUseMathSpanPureVsMouseHover=true;
   std::fstream fileSlowLoad, fileFastLoad;
-  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
-  (fileSlowLoad, this->RelativePhysicalNameRelativeMainFile1, false, true, false);
-  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
-  (fileFastLoad, this->RelativePhysicalNameRelativeMainFile1, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual
+  (fileSlowLoad, "output/"+this->RelativePhysicalNameRelativeMainFile1, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual
+  (fileFastLoad, "output/"+this->RelativePhysicalNameRelativeMainFile1, false, true, false);
   fileSlowLoad << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
   << this->owner->theWeyl.theDynkinType.ToString()
   << "</title>"
@@ -537,8 +537,8 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
     for (int i=0; i<this->theSubalgebras.theValues.size; i++)
       if (!this->theSubalgebras[i].flagSystemProvedToHaveNoSolution)
       { std::fstream outputFileSubalgebra;
-        if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
-            (outputFileSubalgebra, this->GetRelativePhysicalFileNameSubalgebra(i), false, true, false))
+        if (!FileOperations::OpenFileCreateIfNotPresentVirtual
+            (outputFileSubalgebra, "output/"+this->GetRelativePhysicalFileNameSubalgebra(i), false, true, false))
         { crash << "<br>This may or may not be a programming error. While processing subalgebra of actual index " << i << " and display index "
           << this->GetDisplayIndexFromActual(i) << ", I requested to create file "
           << this->GetRelativePhysicalFileNameSubalgebra(i)
@@ -551,8 +551,8 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
         << this->GetDisplayIndexFromActual(i) << ".<br>" << this->theSubalgebras[i].ToString(&theFormatCopy);
         if (this->flagComputeNilradicals)
         { std::fstream outputFileFKFTnilradicals;
-          if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
-              (outputFileFKFTnilradicals, this->GetRelativePhysicalFileNameFKFTNilradicals(i), false, true, false))
+          if (!FileOperations::OpenFileCreateIfNotPresentVirtual
+              (outputFileFKFTnilradicals, "output/"+ this->GetRelativePhysicalFileNameFKFTNilradicals(i), false, true, false))
           { crash << "<br>This may or may not be a programming error. While processing subalgebra of actual index " << i
             << " and display index " << this->GetDisplayIndexFromActual(i) << ", I requested to create file "
             << this->GetRelativePhysicalFileNameFKFTNilradicals(i) << " for output. However, the file failed to create. "
@@ -759,8 +759,8 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasInit()
   if (theGlobalVariables.flagReportEverything)
   { this->fileNameToLogComments="LogFileComments_"+ CGI::CleanUpForFileNameUse( this->owner->theWeyl.theDynkinType.ToString()) + ".html";
     std::fstream LogFile;
-    if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
-        (LogFile, this->fileNameToLogComments, true, false, false))
+    if (!FileOperations::OpenFileCreateIfNotPresentVirtual
+        (LogFile, "output/"+this->fileNameToLogComments, true, false, false))
       crash << "Failed to open/create log file " << this->fileNameToLogComments
       << ". This is not fatal but I am crashing to let you know. ";
     LogFile.close();
@@ -1371,8 +1371,8 @@ bool SemisimpleSubalgebras::CentralizersComputedToHaveUnsuitableNilpotentOrbits(
         << theDynkinIndicesCurrentSummand.ToStringCommaDelimited() << ". ";
         this->comments+=reportStream.str();
         std::fstream theLogFile;
-        if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
-            (theLogFile, this->fileNameToLogComments, true, false, false))
+        if (!FileOperations::OpenFileCreateIfNotPresentVirtual
+            (theLogFile, "output/"+this->fileNameToLogComments, true, false, false))
           crash << "Failed to open log file: " << this->fileNameToLogComments << ". This is not fatal but "
           << " I am crashing to let you know. " << crash;
         theLogFile << reportStream.str();
@@ -1446,7 +1446,7 @@ bool SemisimpleSubalgebras::CentralizerOfBaseComputedToHaveUnsuitableNilpotentOr
   if (DynkinIndicesTheyGotToFitIn.Contains(theDynkinIndicesNewSummand))
     return false;
   std::fstream theLogFile;
-  if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(theLogFile, this->fileNameToLogComments, true, false, false))
+  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(theLogFile, "output/"+this->fileNameToLogComments, true, false, false))
     crash << "Failed to open log file: " << this->fileNameToLogComments << ". This is not fatal but "
     << " I am crashing to let you know. " << crash;
   std::stringstream reportStream;
@@ -3956,7 +3956,7 @@ void slTwoSubalgebra::ToHTML(std::string& filePath)
 { std::fstream theFile;
   std::string theFileName=filePath;
   theFileName.append("theSlTwo.txt");
-  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(theFile, filePath, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, "output/"+filePath, false, true, false);
 }
 
 void SltwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner)
@@ -4478,7 +4478,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat)
   if(usePNG)
   { fileName= RelativePhysicalPathSl2s;
     fileName.append("sl2s.html");
-    FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(theFile, fileName, false, true, false);
+    FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, "output/"+fileName, false, true, false);
     tempS= out.str();
     theFile << "<html><title>sl(2)-subalgebras of "
     << this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString() << "</title>";
@@ -4500,7 +4500,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat)
   theFormat->flagUsePNG=false;
   tempS = this->ToString(theFormat);
   theFormat->flagUsePNG=tempB;
-  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(theFile, fileName, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, "output/" + fileName, false, true, false);
   theFile << "<html><body>" << notation << "<a href=\"" << htmlPathServerSl2s
   << "sl2s.html\"> Math formulas rendered via javascript.</a><br>\n"
   << tempS << "</html></body>";

@@ -2023,7 +2023,7 @@ int WebWorker::ProcessCalculatorNoLoginInterpreterMode()
     return this->ProcessModifyPage();
   if (theGlobalVariables.userCalculatorRequestType=="clonePage")
     return this->ProcessClonePage();
-  return this->ProcessExamPage();
+  return this->ProcessExamPageInterpreter();
 }
 
 int WebWorker::ProcessCalculator()
@@ -2436,6 +2436,12 @@ int WebWorker::ProcessLogout()
 int WebWorker::ProcessExamPage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessExamPage");
   stOutput << this->GetExamPage();
+  stOutput.Flush();
+  return 0;
+}
+
+int WebWorker::ProcessExamPageInterpreter()
+{ stOutput << this->GetExamPageInterpreter();
   stOutput.Flush();
   return 0;
 }
@@ -3672,6 +3678,7 @@ int WebServer::main_problem_interpreter()
   theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
   theGlobalVariables.flagComputationStarted=true;
   theGlobalVariables.DisplayNameCalculatorWithPath="/cgi-bin/interpret.py";
+//  stOutput << "<hr>DEBUG: physical output folder: " << theGlobalVariables.PhysicalPathOutputFolder << "<br>";
   InitializeTimer();
 //  CreateTimerThread();
 

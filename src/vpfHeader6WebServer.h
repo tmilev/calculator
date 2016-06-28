@@ -73,6 +73,7 @@ public:
   int ProcessChangePasswordPage();
   int ProcessDatabase();
   int ProcessExamPage();
+  int ProcessExamPageInterpreter();
   int ProcessLoginPage();
   int ProcessLogout();
   int ProcessCalculatorExamples();
@@ -129,6 +130,7 @@ public:
   std::string GetLoginHTMLinternal();
   std::string GetEditPageHTML();
   std::string GetExamPage();
+  std::string GetExamPageInterpreter();
   std::string GetDatabasePage();
   std::string GetAddUserEmails();
   std::string GetSetProblemDatabaseInfoHtml();

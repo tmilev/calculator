@@ -1033,11 +1033,8 @@ bool CalculatorConversions::innerLoadFileIntoString(Calculator& theCommands, con
   { theCommands << "Input of load file string command is supposed to be a string. Converting your expression to a string and using that instead. ";
     theRelativeFileName=input.ToString();
   }
-  std::string thePhysicalFileName;
-  if (!CGI::GetPhysicalFileNameFromRelativeInput(theRelativeFileName, thePhysicalFileName))
-    return theCommands << "File name invalid: " << theRelativeFileName << ".";
   std::string outputString;
-  if (!FileOperations::LoadFileToStringUnsecure(thePhysicalFileName, outputString, theCommands.Comments))
+  if (!FileOperations::LoadFileToStringVirtual(theRelativeFileName, outputString, theCommands.Comments))
     return false;
   return output.AssignValue(outputString, theCommands);
 }

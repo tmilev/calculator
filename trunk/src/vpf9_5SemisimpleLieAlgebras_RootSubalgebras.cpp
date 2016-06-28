@@ -1093,7 +1093,7 @@ void rootSubalgebra::ToHTML(int index, FormatExpressions* theFormat)
   std::stringstream myPath;
   myPath << this->ownEr->owner->RelativePhysicalNameSSAlgOutputFolder;
   myPath << "rootSubalgebra_" << index+1 << ".html";
-  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(output, myPath.str(), false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual(output, "output/"+myPath.str(), false, true, false);
   output << "<html><title>" << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName() << " root subalgebra of type "
   << this->theDynkinDiagram.ToString() << "</title>";
   output << "<meta name=\"keywords\" content=\"" << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName()
@@ -2672,8 +2672,8 @@ void rootSubalgebras::ToHTML(FormatExpressions* theFormat)
   this->CheckInitialization();
   std::string MyPathPhysical=this->owner->RelativePhysicalNameSSAlgOutputFolder+"rootSubalgebras.html";
   std::fstream output;
-  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(output, MyPathPhysical, false, true, false);
-  if (!FileOperations::FileExistsOnTopOfOutputFolder(MyPathPhysical))
+  FileOperations::OpenFileCreateIfNotPresentVirtual(output, "output/"+MyPathPhysical, false, true, false);
+  if (!FileOperations::FileExistsVirtual("output/"+MyPathPhysical))
   { crash << "This may or may not be a programming error. Failed to create file " << MyPathPhysical
     << ". Possible explanations. 1. File permissions - can I write in that folder? 2. Programming error (less likely). "
     << crash;
@@ -2703,7 +2703,7 @@ std::string rootSubalgebras::ToString(FormatExpressions* theFormat)
 
 bool rootSubalgebras::ReadFromDefaultFileNilradicalGeneration()
 { std::fstream theFile;
-  if (FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(theFile, "theNilradicalsGenerator.txt", false, false, false))
+  if (FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, "output/theNilradicalsGenerator.txt", false, false, false))
   { theFile.seekg(0);
     this->ReadFromFileNilradicalGeneration(theFile);
     return true;
@@ -2713,7 +2713,7 @@ bool rootSubalgebras::ReadFromDefaultFileNilradicalGeneration()
 
 void rootSubalgebras::WriteToDefaultFileNilradicalGeneration()
 { std::fstream theFile;
-  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(theFile, "theNilradicalsGenerator.txt", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, "output/theNilradicalsGenerator.txt", false, true, false);
   this->WriteToFileNilradicalGeneration(theFile);
 }
 

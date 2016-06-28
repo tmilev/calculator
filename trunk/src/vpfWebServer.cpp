@@ -540,7 +540,8 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
 }
 
 void WebServer::Signal_SIGINT_handler(int s)
-{ theLog << "Signal interrupt handler called with input: " << s;
+{ MacroRegisterFunctionWithName("WebServer::Signal_SIGINT_handler");
+  theLog << "Signal interrupt handler called with input: " << s;
 //  << ". Waiting for children to exit... " << logger::endL;
   theWebServer.ReleaseActiveWorker();
   theWebServer.ReleaseNonActiveWorkers();
@@ -678,13 +679,116 @@ std::string WebWorker::ToStringCalculatorArgumentsHumanReadable()
       out << "<br>";
   }
   out << "<hr>";
-  out << theWebServer.GetActiveWorker().ToStringMessageUnsafe();
+  if (theGlobalVariables.flagUsingBuiltInWebServer)
+    out << theWebServer.GetActiveWorker().ToStringMessageUnsafe();
   return out.str();
 }
 
 bool WebWorker::ProcessRawArguments
 (const std::string& urlEncodedInputString, std::stringstream& argumentProcessingFailureComments, int recursionDepth)
 { MacroRegisterFunctionWithName("WebWorker::ProcessRawArguments");
+//  stOutput << "DEBUG: here I am.";
+  MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
+  if (recursionDepth>1)
+  { argumentProcessingFailureComments << "Error: input string encoded too many times";
+    return false;
+  }
+  if (!CGI::ChopCGIInputStringToMultipleStrings
+      (urlEncodedInputString, theArgs, argumentProcessingFailureComments))
+    return false;
+  if (theArgs.Contains("doubleURLencodedInput"))
+  { std::string newInput=theGlobalVariables.GetWebInput("doubleURLencodedInput");
+    theArgs.Clear();
+    return this->ProcessRawArguments(newInput, argumentProcessingFailureComments, recursionDepth+1);
+  }
+  theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
+  if (theGlobalVariables.flagUsingSSLinCurrentConnection &&
+      theGlobalVariables.userCalculatorRequestType=="exercisesNoLogin")
+  { theGlobalVariables.userCalculatorRequestType="exercises";
+    theGlobalVariables.SetWebInput("request", "exercises");
+  }
+//  argumentProcessingFailureComments << "DEBUG: Comma delimited inputstringnames: "
+//  << inputStrings.ToStringCommaDelimited() << " values: " <<  inputStringNames.ToStringCommaDelimited();
+//  stOutput << "userCalculatorRequest type is: " << theGlobalVariables.userCalculatorRequestType;
+  std::string password;
+  std::string desiredUser;
+  if (!theGlobalVariables.UserGuestMode())
+  { //argumentProcessingFailureComments << "DEBUG: not guest mode.";
+    desiredUser=theGlobalVariables.GetWebInput("username");
+    //if (!theGlobalVariables.webFormArgumentNames.Contains("username"))
+    //  argumentProcessingFailureComments << "<hr>no username" << "<hr>";
+    //argumentProcessingFailureComments << "DEBUG:  desired user1: " << desiredUser
+    // << this->ToStringCalculatorArgumentsHumanReadable() << " URL encoded input: "
+    // << urlEncodedInputString;
+    if (desiredUser=="")
+      desiredUser=theGlobalVariables.GetWebInput("usernameHidden");
+    if (desiredUser!="")
+      CGI::URLStringToNormal(desiredUser, desiredUser);
+    //argumentProcessingFailureComments << "DEBUG:  desired user: " << desiredUser
+    // << this->ToStringCalculatorArgumentsHumanReadable() << " URL encoded input: "
+    // << urlEncodedInputString;
+    this->authenticationToken=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("authenticationToken"));
+    if (this->authenticationToken!="")
+      this->flagAuthenticationTokenWasSubmitted=true;
+    this->flagPasswordWasSubmitted=(theGlobalVariables.GetWebInput("password")!="");
+    if (this->flagPasswordWasSubmitted)
+    { password=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("password"));
+      //this may need a security overview: the SetValue function may leave traces in memory
+      //of the old password. Not a big deal for the time being.
+      theArgs.SetValue
+      ("********************************************", "password");
+    }
+  }
+  if (theArgs.Contains("textInput") && !theArgs.Contains("mainInput"))
+  { argumentProcessingFailureComments
+    << "Received calculator link in an old format, interpreting 'textInput' as 'mainInput'";
+    theArgs.theKeys.SetObjectAtIndex(theArgs.theKeys.GetIndex("textInput"), "mainInput");
+  }
+  theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs=false;
+  if (theGlobalVariables.userCalculatorRequestType!="changePassword" &&
+      theGlobalVariables.userCalculatorRequestType!="activateAccount" &&
+      !theGlobalVariables.UserGuestMode()
+      )
+    if (theGlobalVariables.GetWebInput("ignoreSecurity")=="true" &&
+        !theGlobalVariables.flagUsingSSLinCurrentConnection)
+    { theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs=true;
+      password= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("authenticationInsecure"));
+    }
+  if (desiredUser!="" &&
+      (theGlobalVariables.flagUsingSSLinCurrentConnection ||
+       theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs))
+  { bool changingPass=theGlobalVariables.userCalculatorRequestType=="changePassword" ||
+    theGlobalVariables.userCalculatorRequestType=="activateAccount";
+    if (changingPass)
+      this->authenticationToken="";
+    //argumentProcessingFailureComments << "DEBUG: Logging in as: " << desiredUser << " pass: " << password << "<br>";
+    theGlobalVariables.flagLoggedIn=false;
+    if (this->authenticationToken!="" || password!="")
+      theGlobalVariables.flagLoggedIn= DatabaseRoutinesGlobalFunctions::LoginViaDatabase
+      (desiredUser, password, this->authenticationToken, theGlobalVariables.userRole, &argumentProcessingFailureComments);
+    if (!theGlobalVariables.flagLoggedIn)
+    { this->authenticationToken="";
+      //argumentProcessingFailureComments << "<b>DEBUG: Auth token set to empty</b>";
+    }
+    if (theGlobalVariables.flagLoggedIn)
+    { theGlobalVariables.userDefault=desiredUser;
+      theGlobalVariables.SetWebInput("authenticationToken", CGI::StringToURLString(this->authenticationToken));
+    } else if (changingPass)
+      theGlobalVariables.userDefault=desiredUser;
+    else if (this->authenticationToken!="" || password!="")
+    { theGlobalVariables.userDefault="";
+      theGlobalVariables.SetWebInput
+      ("error", CGI::StringToURLString("<b>Invalid user or password.</b> Comments follow. "+argumentProcessingFailureComments.str()));
+    }
+  }
+  password="********************************************";
+  return true;
+}
+
+bool WebWorker::ProcessRawArgumentsNoLoginInterpreterMode
+(const std::string& urlEncodedInputString, std::stringstream& argumentProcessingFailureComments, int recursionDepth)
+{ MacroRegisterFunctionWithName("WebWorker::ProcessRawArgumentsNoLoginInterpreterMode");
+  //stOutput << "DEBUG: here I am.";
   MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
   if (recursionDepth>1)
   { argumentProcessingFailureComments << "Error: input string encoded too many times";
@@ -917,8 +1021,8 @@ void WebWorker::OutputResultAfterTimeout()
   out << this->closeIndentTag("</tr>");
   out << this->closeIndentTag("</table>");
   std::fstream outputTimeOutFile;
-  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
-  (outputTimeOutFile, theGlobalVariables.RelativePhysicalNameOutpuT, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual
+  (outputTimeOutFile, "output/" + theGlobalVariables.RelativePhysicalNameOutpuT, false, true, false);
   outputTimeOutFile << "<html><body>" << out.str() << "</body></html>";
   outputTimeOutFile.close();
   WebWorker::OutputSendAfterTimeout(out.str());
@@ -1576,9 +1680,9 @@ void WebWorker::WriteProgressReportToFile(const std::string& input)
 { MacroRegisterFunctionWithName("WebWorker::WriteProgressReportToFile");
   theLog << logger::green << "Progress report written to file: " << theGlobalVariables.RelativePhysicalNameProgressReport << logger::endL;
   std::fstream theFile;
-  if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(theFile, theGlobalVariables.RelativePhysicalNameProgressReport, false, true, false))
-    FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
-    (theFile, "progressReport_failed_to_create_file.html",
+  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, "output/" + theGlobalVariables.RelativePhysicalNameProgressReport, false, true, false))
+    FileOperations::OpenFileCreateIfNotPresentVirtual
+    (theFile, "output/progressReport_failed_to_create_file.html",
      false, true, false);
   theFile << standardOutputStreamAfterTimeout.str() << "<hr>" << input;
   theFile.flush();
@@ -1769,7 +1873,7 @@ int WebWorker::ProcessNonCalculator()
   theProgressReport.SetStatus("<br>Processing non-computational web-server request.");
   //theLog << this->ToStringShort() << "\r\n";
 //  std::cout << " ere be i at this moment10\n";
-  if (!CGI::GetPhysicalFileNameFromRelativeInput(this->RelativePhysicalFileName, this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(this->RelativePhysicalFileName, this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE))
   { stOutput << "HTTP/1.0 404 Object not found\r\nContent-Type: text/html\r\n\r\n";
     stOutput << "<html><body><b>File name deemed unsafe. "
     << "Please note that folder names are not allowed to contain dots and file names "
@@ -1872,8 +1976,59 @@ bool WebWorker::ShouldDisplayLoginPage()
   return false;
 }
 
+int WebWorker::ProcessCalculatorNoLoginInterpreterMode()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessCalculatorNoLoginInterpreterMode");
+//  this->CheckConsistency();
+
+  std::stringstream argumentProcessingFailureComments;
+  if (!this->ProcessRawArgumentsNoLoginInterpreterMode
+      (theParser.inputStringRawestOfTheRaw, argumentProcessingFailureComments))
+  { stOutput << "Failed to process the calculator arguments. <b>"
+    << argumentProcessingFailureComments.str() << "</b>";
+    stOutput.Flush();
+    return 0;
+  }
+//  stOutput << "DEBUG: got here!";
+//  stOutput.Flush();
+  //The user is assumed logged in.
+  theGlobalVariables.flagLoggedIn=true;
+  if (theGlobalVariables.userCalculatorRequestType=="calculatorExamples")
+    return this->ProcessCalculatorExamples();
+  if (theGlobalVariables.GetWebInput("error")!="")
+    stOutput << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("error"));
+  else if (argumentProcessingFailureComments.str()!="")
+    stOutput << argumentProcessingFailureComments.str();
+  if ((theGlobalVariables.userCalculatorRequestType=="submitProblem" ||
+       theGlobalVariables.userCalculatorRequestType=="submitExercise")
+      && theGlobalVariables.flagLoggedIn)
+    return this->ProcessSubmitProblem();
+  if (theGlobalVariables.UserGuestMode() && theGlobalVariables.userCalculatorRequestType=="submitExerciseNoLogin")
+    return this->ProcessSubmitProblem();
+  if ((theGlobalVariables.userCalculatorRequestType=="problemGiveUp" &&
+       theGlobalVariables.flagLoggedIn) ||
+      theGlobalVariables.userCalculatorRequestType== "problemGiveUpNoLogin")
+    return this->ProcessProblemGiveUp();
+  if ((theGlobalVariables.userCalculatorRequestType=="submitProblemPreview" ||
+       theGlobalVariables.userCalculatorRequestType=="submitExercisePreview" ) &&
+      theGlobalVariables.flagLoggedIn)
+    return this->ProcessSubmitProblemPreview();
+  if (theGlobalVariables.userCalculatorRequestType=="submitExercisePreviewNoLogin" &&
+      theGlobalVariables.UserGuestMode())
+    return this->ProcessSubmitProblemPreview();
+  if (theGlobalVariables.userCalculatorRequestType=="exercisesNoLogin")
+    return this->ProcessExamPage();
+  if (theGlobalVariables.userCalculatorRequestType=="editPage")
+    return this->ProcessEditPage();
+  if (theGlobalVariables.userCalculatorRequestType=="modifyPage")
+    return this->ProcessModifyPage();
+  if (theGlobalVariables.userCalculatorRequestType=="clonePage")
+    return this->ProcessClonePage();
+  return this->ProcessExamPage();
+}
+
 int WebWorker::ProcessCalculator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCalculator");
+//  this->CheckConsistency();
   ProgressReportWebServer theReport;
   std::stringstream argumentProcessingFailureComments;
 //  stOutput <<"DEBUG: here i am";
@@ -3513,34 +3668,25 @@ void WebServer::Release(int& theDescriptor)
 
 int WebServer::main_problem_interpreter()
 { MacroRegisterFunctionWithName("main_problem_interpreter");
-//std::cout << "Running offline interpreter. \n";
+  theGlobalVariables.IndicatorStringOutputFunction=0;
+  theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
+  theGlobalVariables.flagComputationStarted=true;
+  theGlobalVariables.DisplayNameCalculatorWithPath="/cgi-bin/interpret.py";
+  InitializeTimer();
+//  CreateTimerThread();
+
+  theWebServer.initPrepareSignals();
+//  std::cout << "DEBUG: Running offline interpreter. \n";
   theParser.init();
-  if (theGlobalVariables.programArguments.size>0)
-    theParser.inputStringRawestOfTheRaw =theGlobalVariables.programArguments[0];
-  else
-    stOutput << "This is a programming error or very unexpected user behavior: "
-    << "calculator called with empty input. ";
-  if (theGlobalVariables.programArguments.size>=2)
-  { std::stringstream argumentProcessingFailureComments;
-    if (!CGI::ChopCGIInputStringToMultipleStrings
-        (theGlobalVariables.programArguments[1], theGlobalVariables.webArguments,
-         argumentProcessingFailureComments))
-      stOutput << "<b>Failed to process the calculator arguments: "
-      << theGlobalVariables.programArguments[1];
-  } else
-    stOutput << "Did not receive any additional arguments. ";
-  if (theGlobalVariables.programArguments.size>2)
-  { stOutput << "Received extra arguments, here they are: ";
-    for (int i=2; i<theGlobalVariables.programArguments.size; i++)
-      stOutput << "<br>" << theGlobalVariables.programArguments[i];
+  if (theGlobalVariables.programArguments.size<3)
+  { stOutput << "This is either programming error or very unexpected user behavior: "
+    << "calculator called with input: " << theGlobalVariables.programArguments;
+    return 0;
   }
-  theParser.flagUseHtml=false;
-  theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
-  stOutput << theParser.outputString;
-  stOutput << "\nTotal running time: " << GetElapsedTimeInSeconds() << " seconds.\n";
-  if (theGlobalVariables.GetWebInput("debugFlag")=="true" || true)
-    stOutput << "<hr>The calculator additional arguments are: "
-    << theGlobalVariables.webArguments.ToStringHtml() << "<hr>";
+  theParser.inputStringRawestOfTheRaw=theGlobalVariables.programArguments[2];
+  WebWorker theWorker;
+  theWorker.ProcessCalculatorNoLoginInterpreterMode();
+  theGlobalVariables.flagComputationCompletE=true;
   return 0;
 }
 
@@ -3555,8 +3701,8 @@ int WebServer::main_command_input()
   theParser.flagUseHtml=false;
   theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
   std::fstream outputFile;
-  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
-  (outputFile, "outputFileCommandLine.html", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual
+  (outputFile, "output/outputFileCommandLine.html", false, true, false);
   stOutput << theParser.outputString;
   outputFile << theParser.outputString;
   stOutput << "\nTotal running time: " << GetElapsedTimeInSeconds() << " seconds. \nOutput written in file ./outputFileCommandLine.html\n";
@@ -3585,13 +3731,13 @@ extern int mainTest(List<std::string>& remainingArgs);
 
 void WebServer::AnalyzeMainArguments(int argC, char **argv)
 { MacroRegisterFunctionWithName("WebServer::AnalyzeMainArguments");
-  //std::cout << "here i am";
+  //std::cout << "DEBUG: Here I am. ";
   if (argC<0)
     argC=0;
   theGlobalVariables.programArguments.SetSize(argC);
   for (int i=0; i<argC; i++)
     theGlobalVariables.programArguments[i]=argv[i];
-  //std::cout << "\nProgram arguments: "
+  //std::cout << "\nDEBUG: Program arguments: "
   //<< theGlobalVariables.programArguments.ToStringCommaDelimited() << "\n";
 
   theGlobalVariables.flagUsingBuiltInWebServer=false;
@@ -3625,13 +3771,6 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   theGlobalVariables.flagRunningCommandLine=
   !theGlobalVariables.flagUsingBuiltInWebServer &&
   !theGlobalVariables.flagRunningAsProblemInterpreter;
-  if (theGlobalVariables.flagRunningCommandLine ||
-      theGlobalVariables.flagRunningAsProblemInterpreter)
-  { theGlobalVariables.programArguments.RemoveIndicesShiftDown(0,2);
-//    std::cout << "<br>After popping args, remaining are: "
-//    << theGlobalVariables.programArguments.ToStringCommaDelimited();
-    return;
-  }
   if (secondArgument=="server8155")
     theWebServer.flagPort8155=true;
   if (secondArgument=="serverSSL" || secondArgument=="server8155")

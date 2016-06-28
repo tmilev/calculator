@@ -674,26 +674,6 @@ bool ElementUniversalEnveloping<coefficient>::ConvertToRationalCoeff(ElementUniv
   return true;
 }
 
-bool CGI::GetPhysicalFileNameFromRelativeInput(const std::string& inputFileName, std::string& output)
-{ MacroRegisterFunctionWithName("CGI::GetPhysicalFileNameFromRelativeInput");
-  if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(inputFileName))
-    return false;
-  for (int i=0; i<FileOperations::GetAllowedFolderNamesParallelToProjectFolder().size; i++)
-    if (MathRoutines::StringBeginsWith
-        (inputFileName, FileOperations::GetAllowedFolderNamesParallelToProjectFolder()[i]))
-    { output = theGlobalVariables.PhysicalPathProjectBase+"../"+inputFileName;
-      return true;
-    }
-  for (int i=0; i<FileOperations::GetAllowedFolderNamesInsideProjectFolder().size; i++)
-    if (MathRoutines::StringBeginsWith
-        (inputFileName, FileOperations::GetAllowedFolderNamesInsideProjectFolder()[i]))
-    { output=theGlobalVariables.PhysicalPathProjectBase+inputFileName;
-      return true;
-    }
-  output=theGlobalVariables.PhysicalPathOutputFolder+inputFileName;
-  return true;
-}
-
 std::string CGI::GetHtmlLinkFromProjectFileName(const std::string& fileName, const std::string& fileDesc, int line)
 { std::stringstream out;
   out << " <a href=\"https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/src/"
@@ -783,7 +763,7 @@ std::string& CGI::GetMathQuillStyleSheetWithTags()
   std::stringstream out, commentsOnFailure;
   std::string fileReader;
   out << "<style>";
-  if (!FileOperations::LoadFileToStringOnTopOfOutputFolder("mathquill.css", fileReader, commentsOnFailure))
+  if (!FileOperations::LoadFileToStringVirtual("output/mathquill.css", fileReader, commentsOnFailure))
     theLog << logger::red  << "Style file mathquill.css is missing. " << logger::endL;
   else
     out << fileReader;
@@ -798,7 +778,7 @@ std::string& CGI::GetCalculatorStyleSheetWithTags()
   std::stringstream out, commentsOnFailure;
   std::string fileReader;
   out << "<style>";
-  if (!FileOperations::LoadFileToStringOnTopOfOutputFolder("styleCalculator.css", fileReader, commentsOnFailure))
+  if (!FileOperations::LoadFileToStringVirtual("output/styleCalculator.css", fileReader, commentsOnFailure))
     out << commentsOnFailure.str();
   else
     out << fileReader;
@@ -813,7 +793,7 @@ std::string& CGI::GetJavascriptMathQuill()
   std::stringstream out;
   out << "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js\"></script>";
   std::string theJS;
-  if (!FileOperations::LoadFileToStringOnTopOfOutputFolder("mathquill.min.js", theJS, out))
+  if (!FileOperations::LoadFileToStringVirtual("output/mathquill.min.js", theJS, out))
     CGI::JavascriptMathQuill=out.str();
   else
 //    CGI::JavascriptMathQuill= "<script type=\"text/javascript\">" + theJS + "</script><script type=\"text/javascript\">\n"
@@ -831,7 +811,7 @@ std::string& CGI::GetJavascriptAutocompleteWithTags()
     return CGI::JavascriptAutoCompleteWithTags;
   std::stringstream out;
   std::string theJS;
-  if (!FileOperations::LoadFileToStringOnTopOfOutputFolder("autocomplete.js", theJS, out))
+  if (!FileOperations::LoadFileToStringVirtual("output/autocomplete.js", theJS, out))
     CGI::JavascriptAutoCompleteWithTags=out.str();
   else
     CGI::JavascriptAutoCompleteWithTags= "<script type=\"text/javascript\">" + theJS + "</script>\n";
@@ -843,7 +823,7 @@ std::string& CGI::GetJavascriptSha1()
     return CGI::JavascriptSha1;
   std::stringstream out;
   std::string theJS;
-  if (!FileOperations::LoadFileToStringOnTopOfOutputFolder("sha1.js", theJS, out))
+  if (!FileOperations::LoadFileToStringVirtual("output/sha1.js", theJS, out))
     CGI::JavascriptSha1=out.str();
   else
     CGI::JavascriptSha1= "<script type=\"text/javascript\">" + theJS + "</script>\n";

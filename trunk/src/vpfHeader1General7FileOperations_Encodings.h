@@ -9,43 +9,37 @@ static ProjectInformationInstance ProjectInfoVpfHeader1General7FileOperations_En
 struct FileOperations
 {
 public:
-  static HashedList<std::string, MathRoutines::hashString>& GetAllowedFolderNamesParallelToProjectFolder();
-  static HashedList<std::string, MathRoutines::hashString>& GetAllowedFolderNamesInsideProjectFolder();
+  static MapList<std::string, std::string, MathRoutines::hashString>&
+  FolderVirtualLinks();
+
   static bool LoadFileToStringUnsecure
-  (const std::string& theFileName, std::string& output, std::stringstream& commentsOnFailure);
-  static bool LoadFileToStringOnTopOfOutputFolder
   (const std::string& fileNameUnsecure, std::string& output, std::stringstream& commentsOnFailure);
-  static bool LoadFileToStringOnTopOfProjectBase
-  (const std::string& theFileName, std::string& output, std::stringstream& commentsOnFailure);
+  static bool LoadFileToStringVirtual
+  (const std::string& fileName, std::string& output, std::stringstream& commentsOnFailure);
+  static bool IsOKfileNameVirtual(const std::string& fileName);
   static bool IsFileNameWithoutDotsAndSlashes(const std::string& fileName);
   static std::string GetFileNameFromFileNameWithPath(const std::string& fileName);
-  static bool IsOKforFileNameOnTopOfOutputFolder(const std::string& fileName);
   static std::string GetPathFromFileNameWithPath(const std::string& fileName);
   static std::string GetFileExtensionWithDot(const std::string& theFileName);
   static bool FileExistsUnsecure(const std::string& theFileName);
-  static bool FileExistsOnTopOfOutputFolder(const std::string& theFileName);
-  static bool FileExistsOnTopOfProjectBase(const std::string& theFileName);
+  static bool FileExistsVirtual(const std::string& theFileName);
   static bool IsFolderUnsecure(const std::string& theFolderName);
-  static bool IsFolderOnTopOfOutputFolder(const std::string& relativeFolderName);
-  static bool IsFolderOnTopOfProjectBase(const std::string& relativeFolderName);
   static bool GetFolderFileNamesUnsecure
   (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
    List<std::string>* outputFileTypes=0)
    ;
-  static bool GetFolderFileNamesOnTopOfOutputFolder
+  static bool GetFolderFileNamesVirtual
   (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
    List<std::string>* outputFileTypes=0)
    ;
-  static bool GetFolderFileNamesOnTopOfProjectBase
-  (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
-   List<std::string>* outputFileTypes=0)
-   ;
+  static bool GetPhysicalFileNameFromVirtual
+  (const std::string& inputFileName, std::string& output);
+
   static bool OpenFileCreateIfNotPresentUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
-  static bool OpenFileCreateIfNotPresentOnTopOfOutputFolder(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
-  static bool OpenFileCreateIfNotPresentOnTopOfProjectBase(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
+  static bool OpenFileCreateIfNotPresentVirtual(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
+
   static bool OpenFileUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
-  static bool OpenFileOnTopOfOutputFolder(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
-  static bool OpenFileOnTopOfProjectBase(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
+  static bool OpenFileVirtual(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
 };
 
 struct CGI
@@ -79,7 +73,6 @@ public:
     return output;
   }
   static bool URLStringToNormalOneStep(std::string& readAhead, std::stringstream& out);
-  static bool GetPhysicalFileNameFromRelativeInput(const std::string& inputFileName, std::string& output);
   static std::string StringToURLString(const std::string& input, bool usePlusesForSpacebars=true);
   static void ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput);
   static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);

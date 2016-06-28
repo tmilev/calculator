@@ -53,8 +53,8 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
   stOutput.Flush();
   if (!theGlobalVariables.flagNotAllocated)
   { std::fstream theFile;
-    bool succeededToOpen=FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
-    (theFile, theGlobalVariables.RelativePhysicalNameCrashLog, false, true, false);
+    bool succeededToOpen=FileOperations::OpenFileCreateIfNotPresentVirtual
+    (theFile, "output/"+theGlobalVariables.RelativePhysicalNameCrashLog, false, true, false);
     if (succeededToOpen)
       stOutput << "<hr>Crash dumped in file " << theGlobalVariables.RelativePhysicalNameCrashLog << " located inside the output folder.";
     else
@@ -1024,8 +1024,8 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex()
 { std::stringstream out;
   FormatExpressions theFormat;
   Vector<Rational> tempRoot;
-  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
-  (this->theMultiplicitiesMaxOutputReport2, "ExtremaPolys.txt", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual
+  (this->theMultiplicitiesMaxOutputReport2, "output/ExtremaPolys.txt", false, true, false);
   this->thePfs.initFromRoots(this->GmodKNegWeightsBasisChanged);
   this->thePfs.ComputeDebugString();
   out << this->thePfs.DebugString;
@@ -1856,18 +1856,18 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase(std::fstre
 
 void GeneralizedVermaModuleCharacters::ReadFromDefaultFile()
 { std::fstream input;
-  if (!FileOperations::FileExistsOnTopOfOutputFolder( "GenVermaComputation.txt"))
+  if (!FileOperations::FileExistsVirtual("output/GenVermaComputation.txt"))
   { this->computationPhase=0;
     return;
   }
-  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(input, "GenVermaComputation.txt", false, false, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual(input, "output/GenVermaComputation.txt", false, false, false);
   this->ReadFromFile(input);
   input.close();
 }
 
 void GeneralizedVermaModuleCharacters::WriteToDefaultFile()
 { std::fstream output;
-  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(output, "GenVermaComputation.txt", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual(output, "output/GenVermaComputation.txt", false, true, false);
   this->WriteToFile(output);
 }
 

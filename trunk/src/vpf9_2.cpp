@@ -2471,7 +2471,8 @@ bool CGI::AccountOneInputCGIString
   if (fieldName=="")
     return true;
   if (fieldValue!="" && outputMap.Contains(fieldName))
-    if (outputMap.GetValueCreateIfNotPresent(fieldName)!=fieldValue)
+    if (outputMap.GetValueCreateIfNotPresent(fieldName)!=fieldValue &&
+        outputMap.GetValueCreateIfNotPresent(fieldName)!="")
     { commentsOnFailure << "More than one value specified for input field " << fieldName << ": "
       << fieldValue << " and " << outputMap.GetValueCreateIfNotPresent(fieldName) << ". ";
       return false;

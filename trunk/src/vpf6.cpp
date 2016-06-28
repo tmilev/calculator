@@ -34,7 +34,7 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
 
   fileNameRelative << theGlobalVariables.RelativePhysicalNameExtraOutputWithPath << fileIdentifier;
   std::string fileNamePhysical=theGlobalVariables.PhysicalPathOutputFolder + fileNameRelative.str();
-  if (!FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(theFile, fileNameRelative.str()+".tex", false, true, false))
+  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, "output/"+fileNameRelative.str()+".tex", false, true, false))
     return "failed to create file: " + fileNameRelative.str() + ".tex";
   theFile << fileContent;
   theFile.flush();

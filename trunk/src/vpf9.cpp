@@ -391,7 +391,7 @@ std::string CGI::GetJavascriptInjectCalculatorResponseInNode
 
 void CGI::FormatCPPSourceCode(const std::string& FileName)
 { std::fstream fileIn, fileOut;
-  FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(fileIn, FileName, false, false, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual(fileIn, "output/"+ FileName, false, false, false);
   if(!fileIn.is_open())
     crash << "Can't open file for code formatting: something is wrong." << crash;
   fileIn.clear(std::ios::goodbit);
@@ -403,7 +403,7 @@ void CGI::FormatCPPSourceCode(const std::string& FileName)
   fileIn.read(theBuffer.TheObjects, theSize*2);
   std::string nameFileOut= FileName;
   nameFileOut.append(".new");
-  ::FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder(fileOut, nameFileOut, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual(fileOut, "output/"+nameFileOut, false, true, false);
   for (int i=0; i<theSize; i++)
   { char lookAhead= (i< theSize-1)? theBuffer[i+1] : ' ';
     switch(theBuffer[i])
@@ -434,15 +434,6 @@ bool FileOperations::IsFolderUnsecure(const std::string& theFolderName)
   return false;
 }
 
-bool FileOperations::IsFolderOnTopOfOutputFolder(const std::string& relativeFolderName)
-{ MacroRegisterFunctionWithName("FileOperations::IsFolderOnTopOfOutputFolder");
-  if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(relativeFolderName))
-  { //stOutput << "Name " << relativeFolderName << " not ok for folder on top of output folder<br>\n";
-    return false;
-  }
-  return FileOperations::IsFolderUnsecure(theGlobalVariables.PhysicalPathOutputFolder+relativeFolderName);
-}
-
 std::string FileOperations::GetFileExtensionWithDot(const std::string& theFileName)
 { MacroRegisterFunctionWithName("FileOperations::GetFileExtensionWithDot");
   if (theFileName=="" || theFileName.size()<=0)
@@ -454,11 +445,11 @@ std::string FileOperations::GetFileExtensionWithDot(const std::string& theFileNa
   return "";
 }
 
-bool FileOperations::IsOKforFileNameOnTopOfOutputFolder(const std::string& theFileName)
-{ MacroRegisterFunctionWithName("FileOperations::IsOKforFileNameOnTopOfOutputFolder");
+bool FileOperations::IsOKfileNameVirtual(const std::string& theFileName)
+{ MacroRegisterFunctionWithName("FileOperations::IsOKfileNameVirtual");
   std::string theFileNameNoPath=FileOperations::GetFileNameFromFileNameWithPath(theFileName);
   std::string theFilePath=FileOperations::GetPathFromFileNameWithPath(theFileName);
-//  std::cout << "Calling IsOKforFileNameOnTopOfOutputFolder, theFilePath: "
+//  std::cout << "Calling IsOKfileNameVirtual, theFilePath: "
 //  << theFilePath << "\ntheFileNameNoPath: " << theFileNameNoPath << "\n";
   if (theFilePath.size()>10000000)
     return false;
@@ -505,21 +496,14 @@ std::string FileOperations::GetPathFromFileNameWithPath(const std::string& fileN
   return folderName.str();
 }
 
-bool FileOperations::GetFolderFileNamesOnTopOfOutputFolder
-(const std::string& theFolderName, List<std::string>& outputFileNamesNoPath, List<std::string>* outputFileTypes)
-{ MacroRegisterFunctionWithName("FileOperations::GetFolderFileNamesOnTopOfOutputFolder");
-  if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFolderName))
-    return false;
-  return FileOperations::GetFolderFileNamesUnsecure(theGlobalVariables.PhysicalPathOutputFolder+theFolderName, outputFileNamesNoPath, outputFileTypes);
-}
-
-bool FileOperations::GetFolderFileNamesOnTopOfProjectBase
+bool FileOperations::GetFolderFileNamesVirtual
 (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath, List<std::string>* outputFileTypes)
 { MacroRegisterFunctionWithName("FileOperations::GetFolderFileNamesOnTopOfProjectBase");
-  if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFolderName))
+  std::string computedFolderName;
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFolderName, computedFolderName))
     return false;
   return FileOperations::GetFolderFileNamesUnsecure
-  (theGlobalVariables.PhysicalPathProjectBase+theFolderName, outputFileNamesNoPath, outputFileTypes);
+  (computedFolderName, outputFileNamesNoPath, outputFileTypes);
 }
 
 bool FileOperations::GetFolderFileNamesUnsecure
@@ -551,24 +535,14 @@ bool FileOperations::GetFolderFileNamesUnsecure
   return true;
 }
 
-bool FileOperations::LoadFileToStringOnTopOfProjectBase
+bool FileOperations::LoadFileToStringVirtual
 (const std::string& theFileName, std::string& output, std::stringstream& commentsOnFailure)
-{ if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
-  { commentsOnFailure << "File name not secure, refusing to read. ";
+{ std::string computedFileName;
+  stOutput << "DEBUG: loading string virtual from: " << theFileName;
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName))
     return false;
-  }
   return FileOperations::LoadFileToStringUnsecure
-  (theGlobalVariables.PhysicalPathProjectBase+ theFileName, output, commentsOnFailure);
-}
-
-bool FileOperations::LoadFileToStringOnTopOfOutputFolder
-(const std::string& theFileName, std::string& output, std::stringstream& commentsOnFailure)
-{ if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
-  { commentsOnFailure << "File name not secure, refusing to read. ";
-    return false;
-  }
-  return FileOperations::LoadFileToStringUnsecure
-  (theGlobalVariables.PhysicalPathOutputFolder+ theFileName, output, commentsOnFailure);
+  (computedFileName, output, commentsOnFailure);
 }
 
 bool FileOperations::LoadFileToStringUnsecure
@@ -590,47 +564,26 @@ bool FileOperations::LoadFileToStringUnsecure
   return true;
 }
 
-HashedList<std::string, MathRoutines::hashString>&
-FileOperations::GetAllowedFolderNamesParallelToProjectFolder()
-{ static HashedList<std::string, MathRoutines::hashString> result;
-  if (result.size==0)
+#include "vpfHeader1General2Multitasking.h"
+MapList<std::string, std::string, MathRoutines::hashString>&
+FileOperations::FolderVirtualLinks()
+{ static MapList<std::string, std::string, MathRoutines::hashString> result;
+  static bool firstRun=false;
+  if (!firstRun)
   { MutexRecursiveWrapper theMutex;
-    MutexLockGuard safetyFirst(theMutex);
-    if (result.size==0)
-    { result.AddOnTop("freecalc");
-      result.AddOnTop("problemtemplates");
-    }
+    MutexLockGuard theGuard(theMutex);
+    firstRun=true;
+    result.SetValue("../problemtemplates/", "problemtemplates/");
+    result.SetValue("../freecalc/", "freecalc/");
   }
   return result;
 }
 
-HashedList<std::string, MathRoutines::hashString>&
-FileOperations::GetAllowedFolderNamesInsideProjectFolder()
-{ static HashedList<std::string, MathRoutines::hashString> result;
-  if (result.size==0)
-  { MutexRecursiveWrapper theMutex;
-    MutexLockGuard safetyFirst(theMutex);
-    if (result.size==0)
-      result.AddOnTop("ProblemCollections");
-  }
-  return result;
-}
-
-bool FileOperations::FileExistsOnTopOfOutputFolder(const std::string& theFileName)
-{ if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
+bool FileOperations::FileExistsVirtual(const std::string& theFileName)
+{ std::string computedFileName;
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName))
     return false;
-//  std::cout << "got to here\nchecking unsecure file existence: "
-//  << theGlobalVariables.PhysicalPathOutputFolder << theFileName << "\n";
-  return FileOperations::FileExistsUnsecure(theGlobalVariables.PhysicalPathOutputFolder+theFileName);
-}
-
-bool FileOperations::FileExistsOnTopOfProjectBase(const std::string& theFileName)
-{ if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
-    return false;
-//  std::cout << "got to here\nchecking unsecure file existence: "
-//  << theGlobalVariables.PhysicalPathOutputFolder << theFileName << "\n";
-  return FileOperations::FileExistsUnsecure
-  (theGlobalVariables.PhysicalPathProjectBase+theFileName);
+  return FileOperations::FileExistsUnsecure(computedFileName);
 }
 
 bool FileOperations::FileExistsUnsecure(const std::string& theFileName)
@@ -643,16 +596,11 @@ bool FileOperations::FileExistsUnsecure(const std::string& theFileName)
     return false;
 }
 
-bool FileOperations::OpenFileOnTopOfOutputFolder(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
-{ if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
+bool FileOperations::OpenFileVirtual(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
+{ std::string computedFileName;
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName))
     return false;
-  return FileOperations::OpenFileUnsecure(theFile, theGlobalVariables.PhysicalPathOutputFolder+ theFileName, OpenInAppendMode, truncate, openAsBinary);
-}
-
-bool FileOperations::OpenFileOnTopOfProjectBase(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
-{ if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
-    return false;
-  return FileOperations::OpenFileUnsecure(theFile, theGlobalVariables.PhysicalPathProjectBase+ theFileName, OpenInAppendMode, truncate, openAsBinary);
+  return FileOperations::OpenFileUnsecure(theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary);
 }
 
 bool FileOperations::OpenFileUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
@@ -674,26 +622,38 @@ bool FileOperations::OpenFileUnsecure(std::fstream& theFile, const std::string& 
   return theFile.is_open();
 }
 
-bool FileOperations::OpenFileCreateIfNotPresentOnTopOfOutputFolder
-(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
-{ if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
+bool FileOperations::GetPhysicalFileNameFromVirtual(const std::string& inputFileName, std::string& output)
+{ MacroRegisterFunctionWithName("FileOperations::GetPhysicalFileNameFromVirtual");
+  stOutput << "<br>DEBUG: processing " << inputFileName << " -> ... " << output;
+  if (!FileOperations::IsOKfileNameVirtual(inputFileName))
     return false;
-//  std::cout << "DEBUG: opening file " << theFileName << "\n";
-  return FileOperations::OpenFileCreateIfNotPresentUnsecure
-  (theFile, theGlobalVariables.PhysicalPathOutputFolder+ theFileName, OpenInAppendMode, truncate, openAsBinary);
+  if (&inputFileName==&output)
+  { std::string inputCopy=inputFileName;
+    return FileOperations::GetPhysicalFileNameFromVirtual(inputCopy, output);
+  }
+  std::string folderEnd;
+  for (int i=0; i<FileOperations::FolderVirtualLinks().size(); i++)
+    if (MathRoutines::StringBeginsWith(inputFileName, FileOperations::FolderVirtualLinks().theKeys[i], &folderEnd))
+    { output=theGlobalVariables.PhysicalPathOutputFolder+FileOperations::FolderVirtualLinks().theValues[i]+folderEnd;
+      stOutput << inputFileName << " transformed to: " << output;
+      return true;
+    }
+  output=theGlobalVariables.PhysicalPathOutputFolder+"output/"+inputFileName;
+  stOutput << "<br>DEBUG: computed file name transf.: " << inputFileName << " -> " << output;
+  return true;
 }
 
-bool FileOperations::OpenFileCreateIfNotPresentOnTopOfProjectBase
+bool FileOperations::OpenFileCreateIfNotPresentVirtual
 (std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
-{ if (!FileOperations::IsOKforFileNameOnTopOfOutputFolder(theFileName))
+{ std::string computedFileName;
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName))
     return false;
   return FileOperations::OpenFileCreateIfNotPresentUnsecure
-  (theFile, theGlobalVariables.PhysicalPathProjectBase+ theFileName, OpenInAppendMode, truncate, openAsBinary);
+  (theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary);
 }
 
 bool FileOperations::OpenFileCreateIfNotPresentUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
 { //  std::cout << "DEBUG: opening file " << theFileName << "\n";
-
   if (OpenInAppendMode)
   { if (openAsBinary)
       theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app|std::fstream::binary);

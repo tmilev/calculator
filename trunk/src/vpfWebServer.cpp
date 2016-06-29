@@ -808,81 +808,21 @@ bool WebWorker::ProcessRawArgumentsNoLoginInterpreterMode
   { theGlobalVariables.userCalculatorRequestType="exercises";
     theGlobalVariables.SetWebInput("request", "exercises");
   }
-//  argumentProcessingFailureComments << "DEBUG: Comma delimited inputstringnames: "
-//  << inputStrings.ToStringCommaDelimited() << " values: " <<  inputStringNames.ToStringCommaDelimited();
-//  stOutput << "userCalculatorRequest type is: " << theGlobalVariables.userCalculatorRequestType;
-  std::string password;
   std::string desiredUser;
   if (!theGlobalVariables.UserGuestMode())
-  { //argumentProcessingFailureComments << "DEBUG: not guest mode.";
-    desiredUser=theGlobalVariables.GetWebInput("username");
-    //if (!theGlobalVariables.webFormArgumentNames.Contains("username"))
-    //  argumentProcessingFailureComments << "<hr>no username" << "<hr>";
-    //argumentProcessingFailureComments << "DEBUG:  desired user1: " << desiredUser
-    // << this->ToStringCalculatorArgumentsHumanReadable() << " URL encoded input: "
-    // << urlEncodedInputString;
+  { desiredUser=theGlobalVariables.GetWebInput("username");
     if (desiredUser=="")
       desiredUser=theGlobalVariables.GetWebInput("usernameHidden");
     if (desiredUser!="")
       CGI::URLStringToNormal(desiredUser, desiredUser);
-    //argumentProcessingFailureComments << "DEBUG:  desired user: " << desiredUser
-    // << this->ToStringCalculatorArgumentsHumanReadable() << " URL encoded input: "
-    // << urlEncodedInputString;
-    this->authenticationToken=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("authenticationToken"));
-    if (this->authenticationToken!="")
-      this->flagAuthenticationTokenWasSubmitted=true;
-    this->flagPasswordWasSubmitted=(theGlobalVariables.GetWebInput("password")!="");
-    if (this->flagPasswordWasSubmitted)
-    { password=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("password"));
-      //this may need a security overview: the SetValue function may leave traces in memory
-      //of the old password. Not a big deal for the time being.
-      theArgs.SetValue
-      ("********************************************", "password");
-    }
   }
   if (theArgs.Contains("textInput") && !theArgs.Contains("mainInput"))
   { argumentProcessingFailureComments
     << "Received calculator link in an old format, interpreting 'textInput' as 'mainInput'";
     theArgs.theKeys.SetObjectAtIndex(theArgs.theKeys.GetIndex("textInput"), "mainInput");
   }
-  theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs=false;
-  if (theGlobalVariables.userCalculatorRequestType!="changePassword" &&
-      theGlobalVariables.userCalculatorRequestType!="activateAccount" &&
-      !theGlobalVariables.UserGuestMode()
-      )
-    if (theGlobalVariables.GetWebInput("ignoreSecurity")=="true" &&
-        !theGlobalVariables.flagUsingSSLinCurrentConnection)
-    { theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs=true;
-      password= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("authenticationInsecure"));
-    }
-  if (desiredUser!="" &&
-      (theGlobalVariables.flagUsingSSLinCurrentConnection ||
-       theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs))
-  { bool changingPass=theGlobalVariables.userCalculatorRequestType=="changePassword" ||
-    theGlobalVariables.userCalculatorRequestType=="activateAccount";
-    if (changingPass)
-      this->authenticationToken="";
-    //argumentProcessingFailureComments << "DEBUG: Logging in as: " << desiredUser << " pass: " << password << "<br>";
-    theGlobalVariables.flagLoggedIn=false;
-    if (this->authenticationToken!="" || password!="")
-      theGlobalVariables.flagLoggedIn= DatabaseRoutinesGlobalFunctions::LoginViaDatabase
-      (desiredUser, password, this->authenticationToken, theGlobalVariables.userRole, &argumentProcessingFailureComments);
-    if (!theGlobalVariables.flagLoggedIn)
-    { this->authenticationToken="";
-      //argumentProcessingFailureComments << "<b>DEBUG: Auth token set to empty</b>";
-    }
-    if (theGlobalVariables.flagLoggedIn)
-    { theGlobalVariables.userDefault=desiredUser;
-      theGlobalVariables.SetWebInput("authenticationToken", CGI::StringToURLString(this->authenticationToken));
-    } else if (changingPass)
-      theGlobalVariables.userDefault=desiredUser;
-    else if (this->authenticationToken!="" || password!="")
-    { theGlobalVariables.userDefault="";
-      theGlobalVariables.SetWebInput
-      ("error", CGI::StringToURLString("<b>Invalid user or password.</b> Comments follow. "+argumentProcessingFailureComments.str()));
-    }
-  }
-  password="********************************************";
+  theGlobalVariables.userDefault=desiredUser;
+  theGlobalVariables.userRole=theGlobalVariables.GetWebInput("userRole");
   return true;
 }
 
@@ -3745,8 +3685,8 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   theGlobalVariables.programArguments.SetSize(argC);
   for (int i=0; i<argC; i++)
     theGlobalVariables.programArguments[i]=argv[i];
-  //std::cout << "\nDEBUG: Program arguments: "
-  //<< theGlobalVariables.programArguments.ToStringCommaDelimited() << "\n";
+//  std::cout << "\nDEBUG: Program arguments: "
+//  << theGlobalVariables.programArguments.ToStringCommaDelimited() << "\n";
 
   theGlobalVariables.flagUsingBuiltInWebServer=false;
   theGlobalVariables.flagRunningCommandLine=false;
@@ -3779,6 +3719,10 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   theGlobalVariables.flagRunningCommandLine=
   !theGlobalVariables.flagUsingBuiltInWebServer &&
   !theGlobalVariables.flagRunningAsProblemInterpreter;
+  if (theGlobalVariables.flagRunningCommandLine)
+  { theGlobalVariables.programArguments.RemoveIndexShiftDown(0);
+    return;
+  }
   if (secondArgument=="server8155")
     theWebServer.flagPort8155=true;
   if (secondArgument=="serverSSL" || secondArgument=="server8155")

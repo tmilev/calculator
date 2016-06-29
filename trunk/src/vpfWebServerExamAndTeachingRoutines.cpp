@@ -2024,7 +2024,9 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
       !theGlobalVariables.flagRunningAsProblemInterpreter)
     return "";
   std::stringstream out;
-  out << "request=" << requestType << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation()
+  List<std::string> excludedTags;
+  excludedTags.AddOnTop("randomSeed");
+  out << "request=" << requestType << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(&excludedTags)
   << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&";
   if  (!theGlobalVariables.flagRunningAsProblemInterpreter && this->fileName!="")
     out << "fileName=" << CGI::StringToURLString(this->fileName) << "&";

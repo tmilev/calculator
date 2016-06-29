@@ -412,12 +412,12 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
 bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadMe");
   this->RelativePhysicalFileNameWithFolder=
-  ""+
   this->fileName
   ;
   std::fstream theFile;
   if (!FileOperations::OpenFileVirtual(theFile, this->RelativePhysicalFileNameWithFolder, false, false, false))
-  { comments << "<b>Failed to open file " << this->RelativePhysicalFileNameWithFolder << ". </b>";
+  { comments << "<b>Failed to open file " << this->RelativePhysicalFileNameWithFolder << ". </b> ";
+    comments << "Call stack: " << crash.GetStackTraceEtcErrorMessage();
     return false;
   }
   std::stringstream contentStream;
@@ -495,7 +495,7 @@ bool CalculatorHTML::FindExamItem()
   for (int i=0; i<theExerciseFileNames.size; i++)
   { if (theExerciseFileNameExtensions[i]!=".html")
       continue;
-    this->fileName=theExerciseFileNames[i];
+    this->fileName="ProblemCollections/"+ theExerciseFileNames[i];
     return true;
   }
   return false;
@@ -594,7 +594,7 @@ std::string CalculatorHTML::GetEditPageButton()
   out << "<textarea id=\"clonePageAreaID\" rows=\"1\" cols=\"100\">" << this->fileName << "</textarea>\n"
   << "<button class=\"normalButton\" onclick=\""
   << "submitStringAsMainInput(document.getElementById('clonePageAreaID').value, 'spanCloningAttemptResultID', 'clonePage');"
-  << "\" >Clone page</button> <span id=\"spanCloningAttemptResultID\"></span><br>";
+  << "\" >Clone page</button> <span id=\"spanCloningAttemptResultID\"></span><hr>";
   return out.str();
 }
 
@@ -1095,7 +1095,7 @@ std::string WebWorker::GetModifyProblemReport()
       !theGlobalVariables.flagUsingSSLinCurrentConnection)
     return "<b>Modifying problems allowed only for logged-in admins under ssl connection. </b>";
   std::string mainInput=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
-  std::string fileName= "ProblemCollections/"+
+  std::string fileName=
   CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"));
   std::fstream theFile;
   std::stringstream out;
@@ -1476,7 +1476,9 @@ out << "<b>Database not available. </b>";
 std::string WebWorker::GetEditPageHTML()
 { MacroRegisterFunctionWithName("WebWorker::GetEditPageHTML");
   std::stringstream out;
-  if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights())
+  if ((!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights()) &&
+      !theGlobalVariables.flagRunningAsProblemInterpreter
+      )
     return "<b>Only logged-in admins are allowed to edit pages. </b>";
   CalculatorHTML theFile;
   theFile.LoadFileNames();

@@ -3677,6 +3677,7 @@ int WebServer::main_problem_interpreter()
   theGlobalVariables.IndicatorStringOutputFunction=0;
   theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
   theGlobalVariables.flagComputationStarted=true;
+//  stOutput << "<hr>First line<hr>";
   theGlobalVariables.DisplayNameCalculatorWithPath="/cgi-bin/interpret.py";
 //  stOutput << "<hr>DEBUG: physical output folder: " << theGlobalVariables.PhysicalPathOutputFolder << "<br>";
   InitializeTimer();

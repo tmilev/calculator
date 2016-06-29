@@ -502,6 +502,7 @@ bool FileOperations::GetFolderFileNamesVirtual
   std::string computedFolderName;
   if (!FileOperations::GetPhysicalFileNameFromVirtual(theFolderName, computedFolderName))
     return false;
+//  stOutput << "Getting folder names from physical folder: " << computedFolderName;
   return FileOperations::GetFolderFileNamesUnsecure
   (computedFolderName, outputFileNamesNoPath, outputFileTypes);
 }

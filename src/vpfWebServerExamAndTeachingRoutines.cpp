@@ -1095,8 +1095,10 @@ std::string WebWorker::GetSetProblemDatabaseInfoHtml()
 
 std::string WebWorker::GetModifyProblemReport()
 { MacroRegisterFunctionWithName("WebWorker::GetModifyProblemReport");
-  if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights() ||
-      !theGlobalVariables.flagUsingSSLinCurrentConnection)
+  bool shouldProceed=theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights();
+  if (shouldProceed && !theGlobalVariables.flagRunningAsProblemInterpreter)
+    shouldProceed= theGlobalVariables.flagUsingSSLinCurrentConnection;
+  if (!shouldProceed)
     return "<b>Modifying problems allowed only for logged-in admins under ssl connection. </b>";
   std::string mainInput=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
   std::string fileName=

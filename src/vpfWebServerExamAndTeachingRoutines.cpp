@@ -616,12 +616,16 @@ std::string CalculatorHTML::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "  inputParams+='&mainInput=' + encodeURIComponent(theString);\n"
 //  << "  inputParams+='&currentExamHome=' + problemCollectionName;\n"
   << "  var https = new XMLHttpRequest();\n"
-  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
+//  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
+  << "  https.open(\"GET\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\""
+  << "+ \"?\"+inputParams"
+  << ", true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
   << "  https.onload = function() {\n"
   << "    spanOutput.innerHTML=https.responseText;\n"
   << "  }\n"
-  << "  https.send(inputParams);\n"
+//  << "  https.send(inputParams);\n"
+  << "  https.send();\n"
   << "}\n"
   << "</script>";
   return out.str();

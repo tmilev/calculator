@@ -594,7 +594,7 @@ std::string CalculatorHTML::GetEditPageButton()
   out << "<textarea id=\"clonePageAreaID\" rows=\"1\" cols=\"100\">" << this->fileName << "</textarea>\n"
   << "<button class=\"normalButton\" onclick=\""
   << "submitStringAsMainInput(document.getElementById('clonePageAreaID').value, 'spanCloningAttemptResultID', 'clonePage');"
-  << "\" >Clone page</button> <span id=\"spanCloningAttemptResultID\"></span><hr>";
+  << "\" >Clone page</button> <span id=\"spanCloningAttemptResultID\"></span><br><br>";
   return out.str();
 }
 

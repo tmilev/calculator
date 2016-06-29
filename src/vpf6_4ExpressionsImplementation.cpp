@@ -2538,6 +2538,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   else if (this->StartsWith(this->owner->opDifferential(), 3))
   { bool needsParen=(*this)[2].NeedsParenthesisForMultiplication() ||
     (*this)[2].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
+    if ((*this)[2].StartsWith(this->owner->opDivide()))
+      needsParen=false;
     if (needsParen)
       out << "\\left(";
     out << (*this)[2].ToString(theFormat);

@@ -745,6 +745,7 @@ std::string CGI::JavascriptAutoCompleteWithTags;
 std::string CGI::JavascriptSha1;
 std::string CGI::JavascriptMathjax;
 std::string CGI::JavascriptMathQuill;
+std::string CGI::JavascriptInitializeButtons;
 
 void CGI::LoadStrings()
 { CGI::GetJavascriptSha1();
@@ -753,9 +754,29 @@ void CGI::LoadStrings()
   CGI::GetJavascriptMathQuill();
   CGI::GetCalculatorStyleSheetWithTags();
   CGI::GetMathQuillStyleSheetWithTags();
+  CGI::GetJavascriptInitilizeButtons();
 }
 
 extern logger theLog;
+
+std::string& CGI::GetJavascriptInitilizeButtons()
+{ if (CGI::JavascriptInitializeButtons!="")
+    return CGI::JavascriptInitializeButtons;
+  std::stringstream out, commentsOnFailure;
+  std::string fileReader;
+  out << "<style>";
+  bool found=true;
+  if (!FileOperations::LoadFileToStringVirtual("html/javascriptlibs/initializebuttons.js", fileReader, commentsOnFailure))
+    if (!FileOperations::LoadFileToStringVirtual("output/initializebuttons.js", fileReader, commentsOnFailure))
+    { theLog << logger::red  << "Javascript file initializebuttons.js not found. " << logger::endL;
+      found=false;
+    }
+  if (found)
+    out << fileReader;
+  out << "</style>";
+  CGI::StyleSheetMathQuillWithTags=out.str();
+  return CGI::StyleSheetMathQuillWithTags;
+}
 
 std::string& CGI::GetMathQuillStyleSheetWithTags()
 { if (CGI::StyleSheetMathQuillWithTags!="")

@@ -149,6 +149,13 @@ public:
 (std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
  const std::string& cleaneduplink, const std::string& urledProblem)
   ;
+  static std::string GetIdLatexSpan(const std::string& inputId)
+  { return inputId+"span";
+  }
+  static std::string GetIdMathQuillField(const std::string& inputId)
+  { return inputId+"MQField";
+  }
+
   void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
   bool PrepareClassData(std::stringstream& commentsOnFailure);
   void InterpretManageClass(SyntacticElementHTML& inputOutput);
@@ -1584,8 +1591,9 @@ std::string WebWorker::GetExamPage()
   << CGI::GetJavascriptMathQuill()
   << CGI::GetCalculatorStyleSheetWithTags()
   << CGI::GetMathQuillStyleSheetWithTags()
+  << CGI::GetJavascriptInitilizeButtons()
   << "</head>"
-  << "<body onload=\"loadSettings();\">\n";
+  << "<body onload=\"loadSettings(); initializeButtons();\">\n";
   out << theFile.LoadAndInterpretCurrentProblemItem();
   out << this->ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
@@ -2363,11 +2371,11 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateStudentAnswerButton");
   std::stringstream out;
   std::string answerId = inputOutput.GetKeyValue("id");
-  std::string answerIdSpan = answerId+"span";
+  std::string answerIdSpan = CalculatorHTML::GetIdLatexSpan(answerId);
   std::string answerIdMathQuillSpan = answerId+"MQspan";
   std::string mathquillSpanId = answerId+"MQspan";
   std::string mathquillSpan = answerId+"MQ";
-  std::string mathquillObject= answerId+"MQField";
+  std::string mathquillObject= CalculatorHTML::GetIdMathQuillField(answerId);
   std::string updateMQfunction= answerId+"MQFieldUpdate";
   std::string answerEvaluationId="verification"+inputOutput.GetKeyValue("id");
 
@@ -2905,6 +2913,23 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   for (int i=0; i<this->theContent.size; i++)
     if (!this->theContent[i].IsHidden())
       out << this->theContent[i].ToStringInterpreted();
+  out << "<script type=\"text/javascript\"> \n ";
+  out << "answerIdsPureLatex = [";
+  for (int i=0; i<this->theProblemData.answerIds.size; i++)
+  { out << "\"" << CalculatorHTML::GetIdLatexSpan( this->theProblemData.answerIds[i]) << "\"";
+    if (i!=this->theProblemData.answerIds.size-1)
+      out << ", ";
+  }
+  out << "];\n";
+  out << "answerIdsMathQuill = [";
+  for (int i=0; i<this->theProblemData.answerIds.size; i++)
+  { out << "\"" << CalculatorHTML::GetIdMathQuillField( this->theProblemData.answerIds[i]) << "\"";
+    if (i!=this->theProblemData.answerIds.size-1)
+      out << ", ";
+  }
+  out << "];";
+
+  out << "</script>;";
 //   out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
 //   out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
   //  out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();

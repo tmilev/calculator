@@ -51,6 +51,7 @@ public:
   static std::string JavascriptMathjax;
   static std::string JavascriptMathQuill;
   static std::string JavascriptSha1;
+  static std::string JavascriptInitializeButtons;
   static std::stringstream outputStream;
   static int GlobalMathSpanID;
   static int GlobalCanvasID;
@@ -86,6 +87,7 @@ public:
   static std::string StringToHtmlStrinG(const std::string& theString);
   static std::string DoubleBackslashes(const std::string& input);
   static std::string& GetMathQuillStyleSheetWithTags();
+  static std::string& GetJavascriptInitilizeButtons();
   static std::string& GetCalculatorStyleSheetWithTags();
   static std::string& GetJavascriptAutocompleteWithTags();
   static std::string& GetJavascriptSha1();

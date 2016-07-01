@@ -158,6 +158,9 @@ public:
   static std::string GetVariableNameLatexSpan(const std::string& inputId)
   { return inputId+"span";
   }
+  static std::string GetMQSpanId(const std::string& inputId)
+  { return inputId+"MQspan";
+  }
 
   void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
   bool PrepareClassData(std::stringstream& commentsOnFailure);
@@ -2377,7 +2380,7 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
   std::string answerId = inputOutput.GetKeyValue("id");
   std::string answerIdVariableName = CalculatorHTML::GetVariableNameLatexSpan(answerId);
   std::string answerIdMathQuillSpan = answerId+"MQspan";
-  std::string mathquillSpanId = answerId+"MQspan";
+  std::string mathquillSpanId = this->GetMQSpanId(answerId);
   std::string mathquillSpan = answerId+"MQ";
 
   std::string mathquillObject= "answerMathQuillObjects["+ std::to_string(this->NumAnswerIdsMathquilled)+"]" ;
@@ -2923,6 +2926,14 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       out << this->theContent[i].ToStringInterpreted();
 ////////////////////////////////////////////////////////////////////
   out << "<script type=\"text/javascript\"> \n ";
+  out << "answerMQspanIds = [";
+  for (int i=0; i<this->theProblemData.answerIds.size; i++)
+  { out << "\"" << this->GetMQSpanId( this->theProblemData.answerIds[i]) << "\"";
+    if (i!=this->theProblemData.answerIds.size-1)
+      out << ", ";
+  }
+  out << "];\n";
+
   out << "answerIdsPureLatex = [";
   for (int i=0; i<this->theProblemData.answerIds.size; i++)
   { out << "\"" << this->theProblemData.answerIds[i] << "\"";

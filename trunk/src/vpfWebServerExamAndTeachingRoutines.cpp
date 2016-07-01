@@ -161,6 +161,9 @@ public:
   static std::string GetMQSpanId(const std::string& inputId)
   { return inputId+"MQspan";
   }
+  static std::string GetMQbuttonsPreferredLocation(const std::string& inputId)
+  { return inputId+"buttonPanel";
+  }
 
   void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
   bool PrepareClassData(std::stringstream& commentsOnFailure);
@@ -2400,13 +2403,19 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     inputOutput.defaultValuesIfMissing.AddOnTop(previewAnswerStream.str()+updateMQfunction +"();");
     inputOutput.defaultKeysIfMissing.AddOnTop("style");
     inputOutput.defaultValuesIfMissing.AddOnTop("height:70px");
-    out << "<tr><td><small>easy type:</small><td></tr>";
-    out << "<tr><td><span id='" << mathquillSpanId << "'>" << "</span></td></tr>";
     out << "<tr><td><small>answer:</small><td></tr>";
-    out << "<tr><td>" << inputOutput.ToStringOpenTag()
-    << inputOutput.ToStringCloseTag()  ;// << "</td>";
-    //out << "<td>";
-    out << "<button class=\"submitButton\" onclick=\"submitAnswers('"
+    out << "<tr><td>";
+    out << "<table><tr>";
+    out << "<td id=\"" << this->GetMQbuttonsPreferredLocation(answerId) << "\"></td>";
+    out << "<td>" << "<span id='" << mathquillSpanId << "'>" << "</span>" << "</td>";
+    out << "</tr></table>";
+    out << "</td></tr>";
+    out << "<tr>";
+    out << "<td>";
+    out << inputOutput.ToStringOpenTag() << inputOutput.ToStringCloseTag();
+    out<< "</td>";
+    out << "</tr>";
+    out << "<tr><td><button class=\"submitButton\" onclick=\"submitAnswers('"
     << answerId << "', '" << answerEvaluationId << "')\">Submit</button>";
     out << "<button class=\"previewButton\" onclick=\""
     << "previewAnswersNoTimeOut('" << answerId << "', '"
@@ -2933,7 +2942,13 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       out << ", ";
   }
   out << "];\n";
-
+  out << "preferredButtonContainers = [";
+  for (int i=0; i<this->theProblemData.answerIds.size; i++)
+  { out << "\"" << this->GetMQbuttonsPreferredLocation(this->theProblemData.answerIds[i]) << "\"";
+    if (i!=this->theProblemData.answerIds.size-1)
+      out << ", ";
+  }
+  out << "];\n";
   out << "answerIdsPureLatex = [";
   for (int i=0; i<this->theProblemData.answerIds.size; i++)
   { out << "\"" << this->theProblemData.answerIds[i] << "\"";

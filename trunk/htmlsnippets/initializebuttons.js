@@ -1,6 +1,7 @@
 var answerIdsPureLatex;
 var answerMathQuillObjects=[];
 var answerMQspanIds;
+var preferredButtonContainers;
 function initializeButtons(){
 for (i=0; i<answerIdsPureLatex.length; i++){ 
   newElt= document.createElement("span");
@@ -13,8 +14,8 @@ for (i=0; i<answerIdsPureLatex.length; i++){
 "</table>"
 ;
   currentMJElt=document.getElementById(answerIdsPureLatex[i]);	
-  currentMathQuillField=document.getElementById(answerMQspanIds[i]);	
-  currentMathQuillField.parentNode.insertBefore(newElt, currentMathQuillField.nextSibling);
+  currentButtonPanel=document.getElementById(preferredButtonContainers[i]);	
+  currentButtonPanel.appendChild(newElt);
 }
 //alert(answerIdsPureLatex);
 //alert(answerIdsMathQuill);

@@ -11,6 +11,7 @@ ProjectInformationInstance projectInfoInstanceWebServerExamAndTeachingRoutines
 
 class SyntacticElementHTML{
 public:
+  int indexInOwner;
   std::string syntacticRole;
   std::string content;
   std::string tag;
@@ -40,11 +41,15 @@ public:
   std::string ToStringCloseTag();
   std::string GetTagClass();
   std::string ToStringDebug();
-  SyntacticElementHTML(){this->flagUseDisplaystyleInMathMode=false;}
+  SyntacticElementHTML()
+  { this->flagUseDisplaystyleInMathMode=false;
+    this->indexInOwner=-1;
+  }
   SyntacticElementHTML(const std::string& inputContent)
   { this->flagUseDisplaystyleInMathMode=false;
     this->flagUseMathMode=true;
     this->content=inputContent;
+    this->indexInOwner=-1;
   }
   bool operator==(const std::string& other)
   { return this->content==other;
@@ -60,6 +65,7 @@ public:
   int NumAttemptsToInterpret;
   int MaxInterpretationAttempts;
   int NumProblemsFound;
+  int NumAnswerIdsMathquilled;
   List<int> randomSeedsIfInterpretationFails;
   bool flagRandomSeedGiven;
   bool flagIsExamHome;
@@ -152,9 +158,6 @@ public:
   static std::string GetVariableNameLatexSpan(const std::string& inputId)
   { return inputId+"span";
   }
-  static std::string GetIdMathQuillField(const std::string& inputId)
-  { return inputId+"MQField";
-  }
 
   void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
   bool PrepareClassData(std::stringstream& commentsOnFailure);
@@ -202,6 +205,7 @@ public:
 CalculatorHTML::CalculatorHTML()
 { this->flagRandomSeedGiven=false;
   this->NumAttemptsToInterpret=0;
+  this->NumAnswerIdsMathquilled=0;
   this->MaxInterpretationAttempts=10;
   this->flagLoadedSuccessfully=false;
   this->flagIsExamHome=false;
@@ -2375,7 +2379,9 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
   std::string answerIdMathQuillSpan = answerId+"MQspan";
   std::string mathquillSpanId = answerId+"MQspan";
   std::string mathquillSpan = answerId+"MQ";
-  std::string mathquillObject= CalculatorHTML::GetIdMathQuillField(answerId);
+
+  std::string mathquillObject= "answerMathQuillObjects["+ std::to_string(this->NumAnswerIdsMathquilled)+"]" ;
+  this->NumAnswerIdsMathquilled++;
   std::string updateMQfunction= answerId+"MQFieldUpdate";
   std::string answerEvaluationId="verification"+inputOutput.GetKeyValue("id");
 
@@ -2907,12 +2913,15 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     }
 
 //  out << "Debug data: homework groups found: " << this->hdHomeworkGroups.ToStringCommaDelimited();
+  this->NumAnswerIdsMathquilled=0;
   for (int i=0; i<this->theContent.size; i++)
     if (this->theContent[i].IsInterpretedNotByCalculator())
       this->InterpretNotByCalculator(this->theContent[i]);
+
   for (int i=0; i<this->theContent.size; i++)
     if (!this->theContent[i].IsHidden())
       out << this->theContent[i].ToStringInterpreted();
+////////////////////////////////////////////////////////////////////
   out << "<script type=\"text/javascript\"> \n ";
   out << "answerIdsPureLatex = [";
   for (int i=0; i<this->theProblemData.answerIds.size; i++)
@@ -2921,15 +2930,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       out << ", ";
   }
   out << "];\n";
-  out << "answerIdsMathQuill = [";
-  for (int i=0; i<this->theProblemData.answerIds.size; i++)
-  { out << "\"" << CalculatorHTML::GetIdMathQuillField( this->theProblemData.answerIds[i]) << "\"";
-    if (i!=this->theProblemData.answerIds.size-1)
-      out << ", ";
-  }
-  out << "];";
-
   out << "</script>";
+////////////////////////////////////////////////////////////////////
 //   out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
 //   out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
   //  out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();
@@ -3307,6 +3309,8 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     result=false;
   if (result)
     result=this->ExtractAnswerIds(comments);
+  for (int i=0; i<this->theContent.size; i++)
+    this->theContent[i].indexInOwner=i;
   if (result)
     result=this->CheckContent(comments);
   return result;

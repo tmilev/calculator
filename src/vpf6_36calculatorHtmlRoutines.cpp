@@ -94,7 +94,7 @@ std::string CalculatorHtmlFunctions::GetMathQuillBox
   << "globalMQ.config({\n"
   << "  autoFunctionize: 'sin cos tan sec csc cot log ln'\n"
   << "  });\n"
-  << "var " << mathquillObject << " = globalMQ.MathField(" << mathquillSpan << ", {\n"
+  << mathquillObject << " = globalMQ.MathField(" << mathquillSpan << ", {\n"
   << "spaceBehavesLikeTab: true, // configurable\n"
   << "handlers: {\n"
   << "edit: function() { // useful event handlers\n"

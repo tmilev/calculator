@@ -2405,6 +2405,7 @@ std::string& CGI::GetJavascriptMathjax()
   << "  extensions: [\"tex2jax.js\", \""
   << theGlobalVariables.hopefullyPermanent_HTTPS_WebAdressJavascriptFolder
   << "forminput.js\"],\n"
+//  << "/forminput.js\"],\n"
   << "  jax: [\"input/TeX\", \"output/HTML-CSS\"],\n"
   << "  tex2jax: {\n"
   << "    inlineMath: [ ['\\\\(','\\\\)'] ],\n"

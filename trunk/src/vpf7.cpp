@@ -789,7 +789,7 @@ std::string& CGI::GetMathQuillStyleSheetWithTags()
   std::stringstream out, commentsOnFailure;
   std::string fileReader;
   out << "<style>";
-  if (!FileOperations::LoadFileToStringVirtual("output/mathquill.css", fileReader, commentsOnFailure))
+  if (!FileOperations::LoadFileToStringVirtual("htmlsnippets/mathquill.css", fileReader, commentsOnFailure))
     theLog << logger::red  << "Style file mathquill.css is missing. " << logger::endL;
   else
     out << fileReader;
@@ -804,7 +804,7 @@ std::string& CGI::GetCalculatorStyleSheetWithTags()
   std::stringstream out, commentsOnFailure;
   std::string fileReader;
   out << "<style>";
-  if (!FileOperations::LoadFileToStringVirtual("output/styleCalculator.css", fileReader, commentsOnFailure))
+  if (!FileOperations::LoadFileToStringVirtual("htmlsnippets/styleCalculator.css", fileReader, commentsOnFailure))
     out << commentsOnFailure.str();
   else
     out << fileReader;
@@ -819,7 +819,7 @@ std::string& CGI::GetJavascriptMathQuill()
   std::stringstream out;
   out << "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js\"></script>";
   std::string theJS;
-  if (!FileOperations::LoadFileToStringVirtual("output/mathquill.min.js", theJS, out))
+  if (!FileOperations::LoadFileToStringVirtual("htmlsnippets/mathquill.min.js", theJS, out))
     CGI::JavascriptMathQuill=out.str();
   else
 //    CGI::JavascriptMathQuill= "<script type=\"text/javascript\">" + theJS + "</script><script type=\"text/javascript\">\n"
@@ -837,7 +837,7 @@ std::string& CGI::GetJavascriptAutocompleteWithTags()
     return CGI::JavascriptAutoCompleteWithTags;
   std::stringstream out;
   std::string theJS;
-  if (!FileOperations::LoadFileToStringVirtual("output/autocomplete.js", theJS, out))
+  if (!FileOperations::LoadFileToStringVirtual("htmlsnippets/autocomplete.js", theJS, out))
     CGI::JavascriptAutoCompleteWithTags=out.str();
   else
     CGI::JavascriptAutoCompleteWithTags= "<script type=\"text/javascript\">" + theJS + "</script>\n";
@@ -849,7 +849,7 @@ std::string& CGI::GetJavascriptSha1()
     return CGI::JavascriptSha1;
   std::stringstream out;
   std::string theJS;
-  if (!FileOperations::LoadFileToStringVirtual("output/sha1.js", theJS, out))
+  if (!FileOperations::LoadFileToStringVirtual("htmlsnippets/sha1.js", theJS, out))
     CGI::JavascriptSha1=out.str();
   else
     CGI::JavascriptSha1= "<script type=\"text/javascript\">" + theJS + "</script>\n";

@@ -2404,7 +2404,7 @@ std::string& CGI::GetJavascriptMathjax()
   << "MathJax.Hub.Config({\n"
   << "  extensions: [\"tex2jax.js\", \""
   << theGlobalVariables.hopefullyPermanent_HTTPS_WebAdressJavascriptFolder
-  << "forminput.js\"],\n"
+  << "/htmlsnippets/forminput.js\"],\n"
 //  << "/forminput.js\"],\n"
   << "  jax: [\"input/TeX\", \"output/HTML-CSS\"],\n"
   << "  tex2jax: {\n"

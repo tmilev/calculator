@@ -3377,7 +3377,8 @@ bool WebServer::initBindToPorts()
         if (bind(*theListeningSocket, p->ai_addr, p->ai_addrlen) == -1)
         { close(*theListeningSocket);
           *theListeningSocket=-1;
-          theLog << "Error: bind failed. " << this->ToStringLastErrorDescription() << logger::endL;
+          theLog << "Error: bind failed at port: " << (*thePorts)[i] << ". Error: "
+          << this->ToStringLastErrorDescription() << logger::endL;
           continue;
         }
         fcntl(*theListeningSocket, F_SETFL, O_NONBLOCK);

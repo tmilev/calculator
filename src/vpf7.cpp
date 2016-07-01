@@ -764,7 +764,7 @@ std::string& CGI::GetJavascriptInitilizeButtons()
     return CGI::JavascriptInitializeButtons;
   std::stringstream out, commentsOnFailure;
   std::string fileReader;
-  out << "<style>";
+  out << "<script type=\"text/javascript\">";
   bool found=true;
   if (theGlobalVariables.flagRunningAsProblemInterpreter)
   { if (!FileOperations::LoadFileToStringVirtual("html/javascriptlibs/initializebuttons.js", fileReader, commentsOnFailure))
@@ -778,9 +778,9 @@ std::string& CGI::GetJavascriptInitilizeButtons()
     }
   if (found)
     out << fileReader;
-  out << "</style>";
-  CGI::StyleSheetMathQuillWithTags=out.str();
-  return CGI::StyleSheetMathQuillWithTags;
+  out << "</script>";
+  CGI::JavascriptInitializeButtons=out.str();
+  return CGI::JavascriptInitializeButtons;
 }
 
 std::string& CGI::GetMathQuillStyleSheetWithTags()
@@ -790,8 +790,9 @@ std::string& CGI::GetMathQuillStyleSheetWithTags()
   std::string fileReader;
   out << "<style>";
   if (!FileOperations::LoadFileToStringVirtual("htmlsnippets/mathquill.css", fileReader, commentsOnFailure))
-    theLog << logger::red  << "Style file mathquill.css is missing. " << logger::endL;
-  else
+  { theLog << logger::red  << "Style file mathquill.css is missing. " << logger::endL;
+    out << "Style file mathquill.css is missing. ";
+  } else
     out << fileReader;
   out << "</style>";
   CGI::StyleSheetMathQuillWithTags=out.str();
@@ -816,19 +817,17 @@ std::string& CGI::GetCalculatorStyleSheetWithTags()
 std::string& CGI::GetJavascriptMathQuill()
 { if (CGI::JavascriptMathQuill!="")
     return CGI::JavascriptMathQuill;
-  std::stringstream out;
-  out << "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js\"></script>";
+  std::stringstream commentsOnError;
   std::string theJS;
-  if (!FileOperations::LoadFileToStringVirtual("htmlsnippets/mathquill.min.js", theJS, out))
-    CGI::JavascriptMathQuill=out.str();
-  else
-//    CGI::JavascriptMathQuill= "<script type=\"text/javascript\">" + theJS + "</script><script type=\"text/javascript\">\n"
-//    + "var globalMQ = MathQuill.getInterface(2); // for backcompat\n"
-//    + "</script>\n";
-  CGI::JavascriptMathQuill=
-  "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js\"></script><script src=\"/mathquill.min.js\"></script>\
-  <script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2); // for backcompat\n</script>"
-;
+  if (!FileOperations::LoadFileToStringVirtual("htmlsnippets/mathquill.min.js", theJS, commentsOnError))
+  { CGI::JavascriptMathQuill=commentsOnError.str();
+    return CGI::JavascriptMathQuill;
+  }
+  std::stringstream out;
+  out << "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js\"></script>"
+  << "<script type=\"text/javascript\">" << theJS << "</script>"
+  << "<script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2);</script>";
+  CGI::JavascriptMathQuill=out.str();
   return CGI::JavascriptMathQuill;
 }
 

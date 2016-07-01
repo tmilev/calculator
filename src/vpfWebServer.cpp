@@ -1474,6 +1474,9 @@ void WebWorker::ExtractPhysicalAddressFromMainAddress()
 //    numBytesToChop=0;
   this->SanitizeMainAddress();
   this->RelativePhysicalFileName= this->mainAddress;//.substr(numBytesToChop, std::string::npos);
+  if (this->RelativePhysicalFileName.size()>0)
+    if (this->RelativePhysicalFileName[0]=='/')
+      this->RelativePhysicalFileName=this->RelativePhysicalFileName.substr(1,std::string::npos);
 //  this->RelativePhysicalFileName= this->mainAddress.substr(numBytesToChop, std::string::npos);
 }
 
@@ -1833,7 +1836,9 @@ int WebWorker::ProcessNonCalculator()
       << " Therefore I have sanitized the main address to: " << this->mainAddress;
     }
     stOutput << "<br><b> File display name:</b> "
-    << this->mainAddress << "<br><b>Relative physical name of file:</b> " << this->RelativePhysicalFileName;
+    << this->mainAddress << "<br><b>Relative physical name of file:</b> " << this->RelativePhysicalFileName
+    << this->mainAddress << "<br><b>Physical name of file relative to running environment:</b> " << this->PhysicalFileName_COMPUTED_DO_NOT_CHANGE
+    ;
     stOutput << "<hr><hr><hr>Message details:<br>" << this->ToStringMessageUnsafe();
     stOutput << "</body></html>";
     return 0;

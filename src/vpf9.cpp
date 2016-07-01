@@ -579,6 +579,7 @@ FileOperations::FolderVirtualLinks()
     result.SetValue("../problemtemplates/", "problemtemplates/");
     result.SetValue("../freecalc/", "freecalc/");
     result.SetValue("../public_html/", "html/");
+    result.SetValue("htmlsnippets/", "htmlsnippets/");
   }
   return result;
 }

@@ -149,7 +149,7 @@ public:
 (std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
  const std::string& cleaneduplink, const std::string& urledProblem)
   ;
-  static std::string GetIdLatexSpan(const std::string& inputId)
+  static std::string GetVariableNameLatexSpan(const std::string& inputId)
   { return inputId+"span";
   }
   static std::string GetIdMathQuillField(const std::string& inputId)
@@ -2371,7 +2371,7 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateStudentAnswerButton");
   std::stringstream out;
   std::string answerId = inputOutput.GetKeyValue("id");
-  std::string answerIdSpan = CalculatorHTML::GetIdLatexSpan(answerId);
+  std::string answerIdVariableName = CalculatorHTML::GetVariableNameLatexSpan(answerId);
   std::string answerIdMathQuillSpan = answerId+"MQspan";
   std::string mathquillSpanId = answerId+"MQspan";
   std::string mathquillSpan = answerId+"MQ";
@@ -2454,7 +2454,7 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     out << "</span></td>";
     out << CalculatorHtmlFunctions::GetMathQuillBox
     ( mathquillSpan, answerIdMathQuillSpan,
-      answerIdSpan, answerId,
+      answerIdVariableName, answerId,
       mathquillObject, previewAnswerStream.str(),
       updateMQfunction
     );
@@ -2916,7 +2916,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   out << "<script type=\"text/javascript\"> \n ";
   out << "answerIdsPureLatex = [";
   for (int i=0; i<this->theProblemData.answerIds.size; i++)
-  { out << "\"" << CalculatorHTML::GetIdLatexSpan( this->theProblemData.answerIds[i]) << "\"";
+  { out << "\"" << this->theProblemData.answerIds[i] << "\"";
     if (i!=this->theProblemData.answerIds.size-1)
       out << ", ";
   }
@@ -2929,7 +2929,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   }
   out << "];";
 
-  out << "</script>;";
+  out << "</script>";
 //   out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
 //   out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
   //  out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();

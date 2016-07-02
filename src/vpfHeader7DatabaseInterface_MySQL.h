@@ -54,12 +54,30 @@ public:
    static bool UserDefaultHasInstructorRights();
 };
 
-struct ProblemData{
+struct Answer
+{
+  int numSubmissions;
+  int numCorrectSubmissions;
+  std::string answerId;
+  std::string submitButtonIds;
+  std::string interpretButtonIds;
+  std::string builtInAnswerButtonIds;
+  //////////////////////////////////////
+  std::string answerMQButtonPanelId;
+  std::string answerMQfieldObjects;
+  std::string answerMQfieldIds;
+  std::string firstCorrectAnswer;
+  Answer()
+  { this->numSubmissions=0;
+    this->numCorrectSubmissions=0;
+  }
+};
+
+struct ProblemData
+{
 public:
   bool flagRandomSeedComputed;
   unsigned int randomSeed;
-  List<int> numSubmissions;
-  List<int> numCorrectSubmissions;
   std::string ProblemWeightUserInput;
   bool flagProblemWeightIsOK;
   Rational ProblemWeight;
@@ -67,9 +85,8 @@ public:
   int numCorrectlyAnswered;
   int totalNumSubmissions;
 //  int numAnswersSought;
-  List<std::string> firstCorrectAnswer;
+  List<Answer> theAnswers;
   List<std::string> inputNonAnswerIds;
-  List<std::string> answerIds;
   List<List<std::string> > commandsForPreview;
   List<std::string> commandsForGiveUpAnswer;
   List<List<std::string> > commentsBeforeSubmission;
@@ -81,6 +98,7 @@ public:
   bool LoadFrom(const std::string& inputData, std::stringstream& commentsOnFailure);
   std::string Store();
   std::string ToString();
+  std::string ToStringAvailableAnswerIds();
 };
 
 #ifdef MACRO_use_MySQL

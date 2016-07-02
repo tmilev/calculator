@@ -3625,7 +3625,7 @@ int WebServer::main_problem_interpreter()
   theGlobalVariables.flagComputationStarted=true;
 //  stOutput << "<hr>First line<hr>";
   theGlobalVariables.DisplayNameCalculatorWithPath="/cgi-bin/interpret.py";
-//  stOutput << "<hr>DEBUG: physical output folder: " << theGlobalVariables.PhysicalPathOutputFolder << "<br>";
+//  stOutput << "<hr>DEBUG: physical path project base: " << theGlobalVariables.PhysicalPathProjectBase << "<br>";
   InitializeTimer();
 //  CreateTimerThread();
 
@@ -3691,8 +3691,8 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   theGlobalVariables.programArguments.SetSize(argC);
   for (int i=0; i<argC; i++)
     theGlobalVariables.programArguments[i]=argv[i];
-//  std::cout << "\nDEBUG: Program arguments: "
-//  << theGlobalVariables.programArguments.ToStringCommaDelimited() << "\n";
+  //std::cout << "\nDEBUG: Program arguments: "
+  //<< theGlobalVariables.programArguments.ToStringCommaDelimited() << "\n";
 
   theGlobalVariables.flagUsingBuiltInWebServer=false;
   theGlobalVariables.flagRunningCommandLine=false;

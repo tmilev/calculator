@@ -295,15 +295,25 @@ ProblemData::ProblemData()
 }
 
 void ProblemData::AddEmptyAnswerIdOnTop(const std::string& inputAnswerId)
-{ this->answerIds.AddOnTop(inputAnswerId);
-  this->firstCorrectAnswer.AddOnTop("");
-  this->numCorrectSubmissions.AddOnTop(0);
-  this->numSubmissions.AddOnTop(0);
+{ Answer theAnswer;
+  theAnswer.answerId=inputAnswerId;
+  this->theAnswers.AddOnTop(theAnswer);
   List<std::string> emptyList;
   this->commentsAfterSubmission.AddOnTop(emptyList);
   this->commentsBeforeSubmission.AddOnTop(emptyList);
   this->commandsForPreview.AddOnTop(emptyList);
   this->commandsForGiveUpAnswer.AddOnTop("");
+}
+
+std::string ProblemData::ToStringAvailableAnswerIds()
+{ std::stringstream out;
+  out << "Available answer ids: ";
+  for (int i=0; i<this->theAnswers.size; i++)
+  { out << this->theAnswers[i].answerId;
+    if (i!=this->theAnswers.size-1)
+      out << ", ";
+  }
+  return out.str();
 }
 
 std::string ProblemData::ToString()
@@ -313,23 +323,16 @@ std::string ProblemData::ToString()
   if (this->flagRandomSeedComputed)
     out << " (loaded from database)";
   out << ". ";
-  for (int i=0; i<this->answerIds.size; i++)
-  { out << "AnswerId: " << this->answerIds[i];
-    out << ", numCorrectSubmissions: ";
-    if (i>=this->numCorrectSubmissions.size)
-      out << "missing";
-    else
-      out << this->numCorrectSubmissions[i];
-    out << ", numSubmissions: ";
-    if (i>=this->numSubmissions.size)
-      out << "missing";
-    else
-      out << this->numSubmissions[i];
+  for (int i=0; i<this->theAnswers.size; i++)
+  { Answer& currentA=this->theAnswers[i];
+    out << "AnswerId: " << currentA.answerId;
+    out << ", numCorrectSubmissions: " << currentA.numCorrectSubmissions;
+    out << ", numSubmissions: " << currentA.numSubmissions;
     out << ", firstCorrectAnswer: ";
-    if (i>=this->firstCorrectAnswer.size)
-      out << "missing";
+    if (currentA.firstCorrectAnswer!="")
+      out << "none yet";
     else
-      out << this->firstCorrectAnswer[i];
+      out << currentA.firstCorrectAnswer;
   }
   return out.str();
 }
@@ -1232,7 +1235,8 @@ void UserCalculator::ComputePointsEarned
 { MacroRegisterFunctionWithName("UserCalculator::ComputePointsEarned");
   this->pointsEarned=0;
   for (int i=0; i<this->problemData.size; i++)
-  { this->problemData[i].Points=0;
+  { ProblemData& currentP=this->problemData[i];
+    this->problemData[i].Points=0;
     this->problemData[i].totalNumSubmissions=0;
     this->problemData[i].numCorrectlyAnswered=0;
     if (gradableProblems.Contains(this->problemNames[i]) )
@@ -1243,15 +1247,13 @@ void UserCalculator::ComputePointsEarned
       (this->problemData[i].ProblemWeightUserInput);
     }
 //    this->problemData[i].numAnswersSought=this->problemData[i].answerIds.size;
-    for (int j=0; j<this->problemData[i].answerIds.size; j++)
-    { if (this->problemData[i].numCorrectSubmissions[j]>0)
-        this->problemData[i].numCorrectlyAnswered++;
-      this->problemData[i].totalNumSubmissions+=this->problemData[i].numSubmissions[j];
+    for (int j=0; j<currentP.theAnswers.size; j++)
+    { if (currentP.theAnswers[j].numCorrectSubmissions>0)
+        currentP.numCorrectlyAnswered++;
+      currentP.totalNumSubmissions+=currentP.theAnswers[j].numSubmissions;
     }
-    if (this->problemData[i].flagProblemWeightIsOK && this->problemData[i].answerIds.size>0)
-    { this->problemData[i].Points=
-      (this->problemData[i].ProblemWeight*this->problemData[i].numCorrectlyAnswered)/
-      this->problemData[i].answerIds.size;
+    if (this->problemData[i].flagProblemWeightIsOK && currentP.theAnswers.size>0)
+    { currentP.Points=(currentP.ProblemWeight*currentP.numCorrectlyAnswered)/currentP.theAnswers.size;
       this->pointsEarned+= this->problemData[i].Points;
     }
   }
@@ -1348,17 +1350,14 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
     { this->randomSeed=atoi(theMap.GetValueCreateIfNotPresent("randomSeed").c_str());
       this->flagRandomSeedComputed=true;
     }
-  this->numCorrectSubmissions.SetSize(0);
-  this->numSubmissions.SetSize(0);
-  this->firstCorrectAnswer.SetSize(0);
-  this->answerIds.SetSize(0);
+  this->theAnswers.SetSize(0);
   bool result=true;
   MapList<std::string, std::string, MathRoutines::hashString> currentQuestionMap;
   for (int i=0; i<theMap.size(); i++)
   { if (theMap.theKeys[i]=="randomSeed")
       continue;
     this->AddEmptyAnswerIdOnTop(CGI::URLStringToNormal(theMap.theKeys[i]));
-    int currentIndex=this->answerIds.size-1;
+    Answer& currentA=*this->theAnswers.LastObject();
     std::string currentQuestion=CGI::URLStringToNormal(theMap.theValues[i]);
     result=CGI::ChopCGIInputStringToMultipleStrings
     (currentQuestion, currentQuestionMap, commentsOnFailure);
@@ -1368,13 +1367,13 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
       continue;
     }
     if (currentQuestionMap.Contains("numCorrectSubmissions"))
-      this->numCorrectSubmissions[currentIndex]=
+      currentA.numCorrectSubmissions=
       atoi(currentQuestionMap.GetValueCreateIfNotPresent("numCorrectSubmissions").c_str());
     if (currentQuestionMap.Contains("numSubmissions"))
-      this->numSubmissions[currentIndex]=
+      currentA.numSubmissions=
       atoi(currentQuestionMap.GetValueCreateIfNotPresent("numSubmissions").c_str());
     if (currentQuestionMap.Contains("firstCorrectAnswer"))
-      this->firstCorrectAnswer[currentIndex]=CGI::URLStringToNormal
+      currentA.firstCorrectAnswer=CGI::URLStringToNormal
       (currentQuestionMap.GetValueCreateIfNotPresent("firstCorrectAnswer"));
   }
   return result;
@@ -1383,15 +1382,15 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
 std::string ProblemData::Store()
 { MacroRegisterFunctionWithName("ProblemData::Store");
   std::stringstream out;
-  out
-  << "randomSeed=" << this->randomSeed;
-  for (int i=0; i<this->answerIds.size; i++)
-  { out << "&" << CGI::StringToURLString(this->answerIds[i]) << "=";
+  out << "randomSeed=" << this->randomSeed;
+  for (int i=0; i<this->theAnswers.size; i++)
+  { Answer& currentA=this->theAnswers[i];
+    out << "&" << CGI::StringToURLString(currentA.answerId) << "=";
     std::stringstream questionsStream;
     questionsStream
-    << "numCorrectSubmissions=" << this->numCorrectSubmissions[i]
-    << "&numSubmissions=" << this->numSubmissions[i]
-    << "&firstCorrectAnswer=" << CGI::StringToURLString(this->firstCorrectAnswer[i]);
+    << "numCorrectSubmissions=" << currentA.numCorrectSubmissions
+    << "&numSubmissions=" << currentA.numSubmissions
+    << "&firstCorrectAnswer=" << CGI::StringToURLString(currentA.firstCorrectAnswer);
     out << CGI::StringToURLString(questionsStream.str());
   }
   return out.str();

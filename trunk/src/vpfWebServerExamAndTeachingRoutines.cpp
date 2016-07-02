@@ -120,6 +120,7 @@ public:
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;
   std::stringstream comments;
+  int GetAnswerIndex(const std::string& desiredAnswerId);
   bool CheckContent(std::stringstream& comments);
   bool CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
   bool LoadMe(bool doLoadDatabase, std::stringstream& comments);
@@ -856,13 +857,13 @@ std::string WebWorker::GetProblemGiveUpAnswer()
   MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
   for (int i=0; i<theArgs.size(); i++)
     MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
-  int indexLastAnswerId=theProblem.theProblemData.answerIds.GetIndex(lastStudentAnswerID);
+  int indexLastAnswerId=theProblem.GetAnswerIndex(lastStudentAnswerID);
   if (indexLastAnswerId==-1)
   { out << "<b>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
     << "</b><br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
-    { out << "<hr>Allowed answer ids: " << theProblem.theProblemData.answerIds << "<br>";
+    { out << "<hr>" << theProblem.theProblemData.ToStringAvailableAnswerIds();
       //out << "<hr>Client input: " << this->mainArgumentRAW << "<hr>";
       out << WebWorker::ToStringCalculatorArgumentsHumanReadable();
     }
@@ -951,7 +952,7 @@ int WebWorker::ProcessSubmitProblemPreview()
   std::stringstream comments;
   if (!theProblem.ParseHTML(comments))
     stOutput << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
-  int indexLastAnswerId=theProblem.theProblemData.answerIds.GetIndex(lastStudentAnswerID);
+  int indexLastAnswerId=theProblem.GetAnswerIndex(lastStudentAnswerID);
   if (indexLastAnswerId==-1)
   { stOutput << "<br>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
@@ -1029,9 +1030,9 @@ int WebWorker::ProcessSubmitProblemPreview()
     stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return 0;
   }
+  Answer& currentAnswer=theProblem.theProblemData.theAnswers[indexLastAnswerId];
   calculatorInputStream << theProblem.problemCommandsNoVerification;
-  calculatorInputStream << theProblem.theProblemData.answerIds[indexLastAnswerId] << " = "
-  << lastAnswer;
+  calculatorInputStream << currentAnswer.answerId << " = " << lastAnswer;
   calculatorInputStream << "SeparatorBetweenSpans; ";
   for (int i=0; i<theProblem.theProblemData.commentsBeforeSubmission[indexLastAnswerId].size; i++)
     calculatorInputStream << theProblem.CleanUpCommandString
@@ -1279,12 +1280,12 @@ int WebWorker::ProcessSubmitProblem()
   std::string problemStatement=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("problemStatement"));
   std::stringstream studentAnswerStream, completedProblemStream;
   std::string studentAnswerNameReader;
-  theProblem.studentAnswersUnadulterated.SetSize(theProblem.theProblemData.answerIds.size);
-  theProblem.studentTagsAnswered.init(theProblem.theProblemData.answerIds.size);
+  theProblem.studentAnswersUnadulterated.SetSize(theProblem.theProblemData.theAnswers.size);
+  theProblem.studentTagsAnswered.init(theProblem.theProblemData.theAnswers.size);
   MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
   for (int i=0; i<theArgs.size(); i++)
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &studentAnswerNameReader))
-    { int answerIdIndex=theProblem.theProblemData.answerIds.GetIndex(studentAnswerNameReader);
+    { int answerIdIndex=theProblem.GetAnswerIndex(studentAnswerNameReader);
       if (answerIdIndex==-1)
       { stOutput << "<b> You submitted an answer to tag with id " << studentAnswerNameReader
         << " which is not on my list of "
@@ -1412,16 +1413,17 @@ int WebWorker::ProcessSubmitProblem()
       else
         for (int i=0; i<theProblem.studentTagsAnswered.CardinalitySelection; i++)
         { int theIndex=theProblem.studentTagsAnswered.elements[i];
-          theProblem.theProblemData.numSubmissions[theIndex]++;
-          totalSubmissionsRelevant+=theProblem.theProblemData.numSubmissions[theIndex];
-          correctSubmissionsRelevant+=theProblem.theProblemData.numCorrectSubmissions[theIndex];
+          Answer& currentA=theProblem.theProblemData.theAnswers[theIndex];
+          currentA.numSubmissions++;
+          totalSubmissionsRelevant+=currentA.numSubmissions;
+          correctSubmissionsRelevant+=currentA.numCorrectSubmissions;
           if (isCorrect)
-          { theProblem.theProblemData.numCorrectSubmissions[theIndex]++;
+          { currentA.numCorrectSubmissions++;
             correctSubmissionsRelevant++;
-            if (theProblem.theProblemData.firstCorrectAnswer[theIndex]=="")
-              theProblem.theProblemData.firstCorrectAnswer[theIndex]=theProblem.studentAnswersUnadulterated[theIndex];
+            if (currentA.firstCorrectAnswer=="")
+              currentA.firstCorrectAnswer=theProblem.studentAnswersUnadulterated[theIndex];
             else
-              stOutput << "[correct answer already submitted: " << theProblem.theProblemData.firstCorrectAnswer[theIndex] << "]";
+              stOutput << "[correct answer already submitted: " << currentA.firstCorrectAnswer << "]";
           }
         }
     }
@@ -2428,7 +2430,7 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     << answerEvaluationId << "')" << "\">Interpret</button>";
 
     if (!this->flagIsForReal)
-    { int theIndex=this->theProblemData.answerIds.GetIndex(answerId);
+    { int theIndex=this->GetAnswerIndex(answerId);
       bool hasShowAnswerButton=false;
       if (theIndex!=-1)
         if (this->theProblemData.commandsForGiveUpAnswer[theIndex]!="")
@@ -2443,29 +2445,16 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     out << "</tr><tr>";
     out << "<td>";
     out << "<span id=\"" << answerEvaluationId << "\">";
-
-    int theIndex=this->theProblemData.answerIds.GetIndex(answerId);
+    int theIndex=this->GetAnswerIndex(answerId);
     if (theIndex==-1)
       crash << "Index of answer id not found: this shouldn't happen. " << crash;
-    int numCorrectSubmissions=0;
-    int numSubmissions= 0;
-    if (theIndex >=this->theProblemData.numCorrectSubmissions.size ||
-        theIndex >=this->theProblemData.numSubmissions.size ||
-        theIndex >=this->theProblemData.firstCorrectAnswer.size)
-      out << "<b>Error: the problemData index is " << theIndex << " but "
-      << "  numCorrectSubmissions.size is: " << this->theProblemData.numCorrectSubmissions.size
-      << ", numSubmissions.size is: " << this->theProblemData.numSubmissions.size
-      << ", firstCorrectAnswer.size is: " << this->theProblemData.firstCorrectAnswer.size
-      << ". </b>";
-    if (theIndex!=-1)
-    { numCorrectSubmissions= this->theProblemData.numCorrectSubmissions[theIndex];
-      numSubmissions= this->theProblemData.numSubmissions[theIndex];
-    }
-//    stOutput << "got to here 2";
+    Answer& currentA=this->theProblemData.theAnswers[theIndex];
+    int numCorrectSubmissions=currentA.numCorrectSubmissions;
+    int numSubmissions= currentA.numSubmissions;
     if (theGlobalVariables.userCalculatorRequestType=="examForReal")
     { if (numCorrectSubmissions >0)
       { out << "<b><span style=\"color:green\">Correctly answered: \\("
-        << this->theProblemData.firstCorrectAnswer[theIndex] << "\\) </span></b> ";
+        << currentA.firstCorrectAnswer<< "\\) </span></b> ";
         if (numSubmissions>0)
           out << "<br>Used: " << numSubmissions << " attempt(s) (" << numCorrectSubmissions << " correct).";
       } else
@@ -2546,25 +2535,22 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
       if (theProbData.ProblemWeightUserInput!="")
         out << "<span style=\"color:red\"><b>Failed to interpret weight string: "
         << theProbData.ProblemWeightUserInput << ". </b></span>";
-
-      if (theProbData.numSubmissions!=0)
-      { if (theProbData.answerIds.size==1)
-        { if (theProbData.numCorrectlyAnswered==1)
-            out << theProbData.totalNumSubmissions << " submission(s), problem correctly answered. ";
-          else
-            out << theProbData.totalNumSubmissions << " submission(s), problem not correctly answered yet. ";
-        } else if (theProbData.answerIds.size>1)
-          out << theProbData.totalNumSubmissions << " submission(s), " << theProbData.numCorrectlyAnswered
-          << " out of "<< theProbData.answerIds.size << " subproblems correctly answered. ";
-      }
+      if (theProbData.theAnswers.size==1)
+      { if (theProbData.numCorrectlyAnswered==1)
+          out << theProbData.totalNumSubmissions << " submission(s), problem correctly answered. ";
+        else
+          out << theProbData.totalNumSubmissions << " submission(s), problem not correctly answered yet. ";
+      } else if (theProbData.theAnswers.size>1)
+        out << theProbData.totalNumSubmissions << " submission(s), " << theProbData.numCorrectlyAnswered
+        << " out of "<< theProbData.theAnswers.size << " subproblems correctly answered. ";
       weightPrinted=true;
     } else if (theProbData.totalNumSubmissions==0)
       noSubmissionsYet=true;
-    else if (theProbData.numCorrectlyAnswered<theProbData.answerIds.size)
+    else if (theProbData.numCorrectlyAnswered<theProbData.theAnswers.size)
     { out << "<span style=\"color:red\"><b> "
       << theProbData.Points << " out of " << theProbData.ProblemWeight << " point(s). </b></span>";
       weightPrinted=true;
-    } else if (theProbData.numCorrectlyAnswered==theProbData.answerIds.size)
+    } else if (theProbData.numCorrectlyAnswered==theProbData.theAnswers.size)
     { out << "<span style=\"color:green\"><b> "
       << theProbData.Points << " out of " << theProbData.ProblemWeight << " point(s). </b></span>";
       weightPrinted=true;
@@ -2834,9 +2820,8 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   bool problemAlreadySolved=false;
   if (this->currentUser.problemNames.Contains(cleaneduplink))
   { ProblemData& theProbData=this->currentUser.problemData[this->currentUser.problemNames.GetIndex(cleaneduplink)];
-    if (theProbData.numCorrectlyAnswered>=theProbData.answerIds.size)
+    if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size)
       problemAlreadySolved=true;
-//    out << " probdata crct: " << theProbData.numCorrectlyAnswered << " # answ id: " << theProbData.answerIds.size;
   }
   out << this->InterpretGenerateDeadlineLink
   (inputOutput, cleaneduplink, urledProblem, problemAlreadySolved);
@@ -2942,23 +2927,23 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
 ////////////////////////////////////////////////////////////////////
   out << "<script type=\"text/javascript\"> \n ";
   out << "answerMQspanIds = [";
-  for (int i=0; i<this->theProblemData.answerIds.size; i++)
-  { out << "\"" << this->GetMQSpanId( this->theProblemData.answerIds[i]) << "\"";
-    if (i!=this->theProblemData.answerIds.size-1)
+  for (int i=0; i<this->theProblemData.theAnswers.size; i++)
+  { out << "\"" << this->theProblemData.theAnswers[i].answerMQfieldIds << "\"";
+    if (i!=this->theProblemData.theAnswers.size-1)
       out << ", ";
   }
   out << "];\n";
   out << "preferredButtonContainers = [";
-  for (int i=0; i<this->theProblemData.answerIds.size; i++)
-  { out << "\"" << this->GetMQbuttonsPreferredLocation(this->theProblemData.answerIds[i]) << "\"";
-    if (i!=this->theProblemData.answerIds.size-1)
+  for (int i=0; i<this->theProblemData.theAnswers.size; i++)
+  { out << "\"" << this->theProblemData.theAnswers[i].answerMQButtonPanelId << "\"";
+    if (i!=this->theProblemData.theAnswers.size-1)
       out << ", ";
   }
   out << "];\n";
   out << "answerIdsPureLatex = [";
-  for (int i=0; i<this->theProblemData.answerIds.size; i++)
-  { out << "\"" << this->theProblemData.answerIds[i] << "\"";
-    if (i!=this->theProblemData.answerIds.size-1)
+  for (int i=0; i<this->theProblemData.theAnswers.size; i++)
+  { out << "\"" << this->theProblemData.theAnswers[i].answerId << "\"";
+    if (i!=this->theProblemData.theAnswers.size-1)
       out << ", ";
   }
   out << "];\n";
@@ -3085,6 +3070,13 @@ std::string CalculatorHTML::ToStringParsingStack(List<SyntacticElementHTML>& the
     out << theContent << "</span>";
   }
   return out.str();
+}
+
+int CalculatorHTML::GetAnswerIndex(const std::string& desiredAnswerId)
+{ for (int i=0; i<this->theProblemData.theAnswers.size; i++)
+    if (this->theProblemData.theAnswers[i].answerId==desiredAnswerId)
+      return i;
+  return -1;
 }
 
 bool CalculatorHTML::CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right)
@@ -3353,7 +3345,7 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
   //we shouldn't touch this->theProblemData.answerIds.SetSize: it may contain
   //outdated information loaded from the database. We don't want to loose that info
   //(say we renamed an answerId but students have already stored answers using the old answerId...).
-  this->answerVerificationCommand.SetSize(this->theProblemData.answerIds.size);
+  this->answerVerificationCommand.SetSize(this->theProblemData.theAnswers.size);
   List<std::string> answerIdsInTheFile;
   List<std::string> absoluteCommandsFoundSoFar;
   for (int i=0; i<this->theContent.size; i++)
@@ -3364,7 +3356,7 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
         << "to the first answer tag above it. </b>";
         return false;
       }
-      int theIndex=this->theProblemData.answerIds.GetIndex(*answerIdsInTheFile.LastObject());
+      int theIndex=this->GetAnswerIndex(*answerIdsInTheFile.LastObject());
       if (theIndex==-1)
         crash << "This shouldn't happen: answerId from file not found in problem data. " << crash;
       if (this->theContent[i].IsAnswerOnGiveUp())
@@ -3391,8 +3383,8 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
       return false;
     }
     answerIdsInTheFile.AddOnTop(newId);
-    if (this->theProblemData.answerIds.Contains(newId))
-    { int indexID=this->theProblemData.answerIds.GetIndex(newId);
+    if (this->GetAnswerIndex(newId)!=-1)
+    { int indexID=this->GetAnswerIndex(newId);
       this->answerVerificationCommand[indexID]=this->theContent[i].content;
       this->theProblemData.commandsForPreview[indexID]=(absoluteCommandsFoundSoFar);
     } else

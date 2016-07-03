@@ -66,6 +66,11 @@ struct Answer
   std::string answerIdVariableName;
   std::string verificationSpanId;
   std::string previewAnswerJavascript;
+  std::string buttonInterpretHtml;
+  std::string buttonAnswerHtml;
+  std::string buttonSubmitHtml;
+  std::string textareaLatexAnswerHtml;
+  std::string spanVerifyAnswerHtml;
   //////////////////////////////////////
   std::string MQButtonPanelId;
   std::string MQfieldVariable;

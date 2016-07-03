@@ -79,39 +79,3 @@ std::string CalculatorHtmlFunctions::GetUserInputBoxName(const Expression& theBo
     theBoxName=theArguments.GetValueCreateIfNotPresent("name").ToString();
   return theBoxName;
 }
-
-std::string CalculatorHtmlFunctions::GetMathQuillBox
- (const std::string& mathquillSpan, const std::string& answerIdMathQuillSpan,
- const std::string& answerIdSpan, const std::string& answerId,
- const std::string& mathquillObject, const std::string& previewAnswerStream,
- const std::string& updateMQfunction)
-{ MacroRegisterFunctionWithName("CalculatorHtmlFunctions::GetMathQuillBox");
-  std::stringstream out;
-  out << "<script>\n"
-  << "var " << mathquillSpan << " = document.getElementById('" << answerIdMathQuillSpan << "');\n"
-  << "var " << answerIdSpan << " = document.getElementById('" << answerId << "');\n"
-  << "var ignoreNextMathQuillUpdateEvent=false;\n"
-  << "globalMQ.config({\n"
-  << "  autoFunctionize: 'sin cos tan sec csc cot log ln'\n"
-  << "  });\n"
-  << mathquillObject << " = globalMQ.MathField(" << mathquillSpan << ", {\n"
-  << "spaceBehavesLikeTab: true, // configurable\n"
-  << "handlers: {\n"
-  << "edit: function() { // useful event handlers\n"
-  << "if (ignoreNextMathQuillUpdateEvent){\n"
-//  << "  ignoreNextMathQuillUpdateEvent=false;\n"
-  << "  return;\n"
-  << "}\n"
-  << answerIdSpan << ".value = " << mathquillObject << ".latex(); // simple API\n"
-  << previewAnswerStream
-  << "}\n"
-  << "}\n"
-  << "});\n"
-  << "function " << updateMQfunction << "(){\n"
-  << "ignoreNextMathQuillUpdateEvent=true;\n"
-  << mathquillObject << ".latex(" << answerIdSpan << ".value);\n"
-  << "ignoreNextMathQuillUpdateEvent=false;\n"
-  << "}\n"
-  << "</script>";
-  return out.str();
-}

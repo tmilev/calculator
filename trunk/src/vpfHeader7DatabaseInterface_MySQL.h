@@ -56,20 +56,27 @@ public:
 
 struct Answer
 {
+  bool flagAutogenerateUserInterface;
   int numSubmissions;
   int numCorrectSubmissions;
   std::string answerId;
   std::string submitButtonIds;
   std::string interpretButtonIds;
   std::string builtInAnswerButtonIds;
+  std::string answerIdVariableName;
+  std::string verificationSpanId;
+  std::string previewAnswerJavascript;
   //////////////////////////////////////
-  std::string answerMQButtonPanelId;
-  std::string answerMQfieldObjects;
-  std::string answerMQfieldIds;
+  std::string MQButtonPanelId;
+  std::string MQfieldVariable;
+  std::string MQobject;
+  std::string MQfieldId;
+  std::string MQUpdateFunction;
   std::string firstCorrectAnswer;
   Answer()
   { this->numSubmissions=0;
     this->numCorrectSubmissions=0;
+    this->flagAutogenerateUserInterface=true;
   }
 };
 

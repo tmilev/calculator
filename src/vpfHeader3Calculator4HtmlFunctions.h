@@ -4,6 +4,7 @@
 #include "vpfHeader3Calculator0_Interface.h"
 static ProjectInformationInstance ProjectInfoVPFHEADER3CALCULATOR4HTMLFUNCTIONS_H(__FILE__, "Header, calculator html functions. ");
 
+class Answer;
 
 class CalculatorHtmlFunctions{
 public:
@@ -19,19 +20,11 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output);
 
   static std::string GetUserInputBox
-(const Expression& theBox
-)
+(const Expression& theBox)
   ;
   static std::string GetUserInputBoxName
-(const Expression& theBox
-)
-  ;
-  static std::string GetMathQuillBox
-(const std::string& mathquillSpan, const std::string& answerIdMathQuillSpan,
- const std::string& answerIdSpan, const std::string& answerId,
- const std::string& mathquillObject, const std::string& previewAnswerStream,
- const std::string& updateMQfunction)
-  ;
+(const Expression& theBox);
+  static std::string GetMathQuillBox(Answer& theAnswer);
 };
 
 

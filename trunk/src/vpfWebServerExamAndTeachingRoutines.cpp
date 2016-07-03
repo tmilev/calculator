@@ -156,7 +156,7 @@ public:
 (std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
  const std::string& cleaneduplink, const std::string& urledProblem)
   ;
-
+  bool ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutput);
   void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
   bool PrepareClassData(std::stringstream& commentsOnFailure);
   void InterpretManageClass(SyntacticElementHTML& inputOutput);
@@ -2376,15 +2376,12 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
 #endif // MACRO_use_MySQL
 }
 
-void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput)
-{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateStudentAnswerButton");
-  std::stringstream out;
+bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutput)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ComputeAnswerRelatedStrings");
   std::string desiredAnswerId = inputOutput.GetKeyValue("id");
   if (desiredAnswerId=="")
-  { out << "<b>Error: could not generate submit button: the answer"
-    << " tag does not have a valid id. Please fix the problem template.</b>";
-    inputOutput.interpretedCommand=out.str();
-    return;
+  { inputOutput.interpretedCommand= "<b>Error: could not generate submit button: the answer tag does not have a valid id. Please fix the problem template.</b>";
+    return false;
   }
   int theIndex=this->GetAnswerIndex(desiredAnswerId);
   if (theIndex==-1)
@@ -2407,11 +2404,58 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
   previewAnswerStream << "previewAnswers('" << answerId << "', '"
   << currentA.verificationSpanId << "');";
   currentA.previewAnswerJavascript=previewAnswerStream.str();
-  out << "<table>";
+  currentA.buttonSubmitHtml= "<button class=\"submitButton\" onclick=\"submitAnswers('"
+  + answerId + "', '" + currentA.verificationSpanId + "')\">Submit</button>";
+  currentA.buttonInterpretHtml= (std::string)"<button class=\"previewButton\" onclick=\""
+  + "previewAnswersNoTimeOut('" + answerId + "', '"
+  + currentA.verificationSpanId + "')" + "\">Interpret</button>";
+  if (!this->flagIsForReal)
+  { bool hasShowAnswerButton=false;
+    if (this->theProblemData.commandsForGiveUpAnswer[theIndex]!="")
+    { currentA.buttonAnswerHtml= "<button class=\"showAnswerButton\" onclick=\"giveUp('"
+      + answerId + "', '" + currentA.verificationSpanId + "')\">Answer</button>";
+      hasShowAnswerButton=true;
+    }
+    if (!hasShowAnswerButton)
+      currentA.buttonAnswerHtml= "No ``give-up'' answer available. ";
+  }
   inputOutput.defaultKeysIfMissing.AddOnTop("onkeydown");
-  inputOutput.defaultValuesIfMissing.AddOnTop(previewAnswerStream.str()+currentA.MQUpdateFunction +"();");
+  inputOutput.defaultValuesIfMissing.AddOnTop
+  (currentA.previewAnswerJavascript+currentA.MQUpdateFunction +"();");
   inputOutput.defaultKeysIfMissing.AddOnTop("style");
   inputOutput.defaultValuesIfMissing.AddOnTop("height:70px");
+  currentA.textareaLatexAnswerHtml= inputOutput.ToStringOpenTag() + inputOutput.ToStringCloseTag();
+
+  std::stringstream verifyStream;
+  verifyStream << "<span id=\"" << currentA.verificationSpanId << "\">";
+  int numCorrectSubmissions=currentA.numCorrectSubmissions;
+  int numSubmissions= currentA.numSubmissions;
+  if (theGlobalVariables.userCalculatorRequestType=="examForReal")
+  { if (numCorrectSubmissions >0)
+    { verifyStream << "<b><span style=\"color:green\">Correctly answered: \\("
+      << currentA.firstCorrectAnswer<< "\\) </span></b> ";
+      if (numSubmissions>0)
+        verifyStream << "<br>Used: " << numSubmissions << " attempt(s) (" << numCorrectSubmissions << " correct).";
+    } else
+    { verifyStream << " <b><span style=\"color:brown\">Need to submit answer. </span></b>";
+      if (numSubmissions>0)
+        verifyStream << numSubmissions << " attempt(s) so far. ";
+    }
+  } else
+    verifyStream << " <b><span style=\"color:brown\">Submit (no credit, unlimited tries)</span></b>";
+  verifyStream << "</span>";
+  currentA.spanVerifyAnswerHtml=verifyStream.str();
+  return true;
+}
+
+void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateStudentAnswerButton");
+  if (!this->ComputeAnswerRelatedStrings(inputOutput))
+    return;
+  Answer& currentA=this->theProblemData.
+  theAnswers[this->GetAnswerIndex(inputOutput.GetKeyValue("id"))];
+  std::stringstream out;
+  out << "<table>";
   out << "<tr><td><small>answer:</small><td></tr>";
   out << "<tr><td>";
   out << "<table><tr>";
@@ -2421,46 +2465,18 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
   out << "</td></tr>";
   out << "<tr>";
   out << "<td>";
-  out << inputOutput.ToStringOpenTag() << inputOutput.ToStringCloseTag();
-  out<< "</td>";
+  out << currentA.textareaLatexAnswerHtml;
+  out << "</td>";
   out << "</tr>";
-  out << "<tr><td><button class=\"submitButton\" onclick=\"submitAnswers('"
-  << answerId << "', '" << currentA.verificationSpanId << "')\">Submit</button>";
-  out << "<button class=\"previewButton\" onclick=\""
-  << "previewAnswersNoTimeOut('" << answerId << "', '"
-  << currentA.verificationSpanId << "')" << "\">Interpret</button>";
-  if (!this->flagIsForReal)
-  { int theIndex=this->GetAnswerIndex(answerId);
-    bool hasShowAnswerButton=false;
-    if (theIndex!=-1)
-      if (this->theProblemData.commandsForGiveUpAnswer[theIndex]!="")
-      { out << "<button class=\"showAnswerButton\" onclick=\"giveUp('"
-        << answerId << "', '" << currentA.verificationSpanId << "')\">Answer</button>";
-        hasShowAnswerButton=true;
-      }
-    if (!hasShowAnswerButton)
-      out << "No ``give-up'' answer available. ";
-  }
+  out << "<tr><td>";
+  out << currentA.buttonSubmitHtml;
+  out << currentA.buttonInterpretHtml;
+  out << currentA.buttonAnswerHtml;
   out << "</td>";
   out << "</tr><tr>";
   out << "<td>";
-  out << "<span id=\"" << currentA.verificationSpanId << "\">";
-  int numCorrectSubmissions=currentA.numCorrectSubmissions;
-  int numSubmissions= currentA.numSubmissions;
-  if (theGlobalVariables.userCalculatorRequestType=="examForReal")
-  { if (numCorrectSubmissions >0)
-    { out << "<b><span style=\"color:green\">Correctly answered: \\("
-      << currentA.firstCorrectAnswer<< "\\) </span></b> ";
-      if (numSubmissions>0)
-        out << "<br>Used: " << numSubmissions << " attempt(s) (" << numCorrectSubmissions << " correct).";
-    } else
-    { out << " <b><span style=\"color:brown\">Need to submit answer. </span></b>";
-      if (numSubmissions>0)
-        out << numSubmissions << " attempt(s) so far. ";
-    }
-  } else
-    out << " <b><span style=\"color:brown\">Submit (no credit, unlimited tries)</span></b>";
-  out << "</span></td>";
+  out << currentA.spanVerifyAnswerHtml;
+  out << "</td>";
   out << CalculatorHtmlFunctions::GetMathQuillBox( currentA);
 //    out << "<hr>DEBUG: input non-answer ids: " << this->theProblemData.inputNonAnswerIds;
   out << "</tr></table>";

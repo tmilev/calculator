@@ -56,21 +56,26 @@ public:
 
 struct Answer
 {
-  bool flagAutogenerateUserInterface;
+  bool flagAutoGenerateSubmitButtons;
+  bool flagAutoGenerateMQButtonPanel;
+  bool flagAutoGenerateMQfield;
+  bool flagAutoGenerateVerificationField;
   int numSubmissions;
   int numCorrectSubmissions;
   std::string answerId;
   std::string submitButtonIds;
   std::string interpretButtonIds;
-  std::string builtInAnswerButtonIds;
   std::string answerIdVariableName;
   std::string verificationSpanId;
   std::string previewAnswerJavascript;
-  std::string buttonInterpretHtml;
-  std::string buttonAnswerHtml;
-  std::string buttonSubmitHtml;
-  std::string textareaLatexAnswerHtml;
-  std::string spanVerifyAnswerHtml;
+  std::string htmlMQjavascript;
+  std::string htmlMQfield;
+  std::string htmlContainerMQButtonPanel;
+  std::string htmlButtonInterpret;
+  std::string htmlButtonAnswer;
+  std::string htmlButtonSubmit;
+  std::string htmlTextareaLatexAnswer;
+  std::string htmlSpanVerifyAnswer;
   //////////////////////////////////////
   std::string MQButtonPanelId;
   std::string MQfieldVariable;
@@ -81,7 +86,10 @@ struct Answer
   Answer()
   { this->numSubmissions=0;
     this->numCorrectSubmissions=0;
-    this->flagAutogenerateUserInterface=true;
+    this->flagAutoGenerateSubmitButtons=true;
+    this->flagAutoGenerateMQButtonPanel=true;
+    this->flagAutoGenerateMQfield=true;
+    this->flagAutoGenerateVerificationField=true;
   }
 };
 

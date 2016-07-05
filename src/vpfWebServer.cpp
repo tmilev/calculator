@@ -3691,7 +3691,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   theGlobalVariables.programArguments.SetSize(argC);
   for (int i=0; i<argC; i++)
     theGlobalVariables.programArguments[i]=argv[i];
-  //std::cout << "\nDEBUG: Program arguments: "
+  //std::cout << "\nDEBUG: Program arguments: <br>"
   //<< theGlobalVariables.programArguments.ToStringCommaDelimited() << "\n";
 
   theGlobalVariables.flagUsingBuiltInWebServer=false;
@@ -3719,12 +3719,17 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
     return;
   }
   if (secondArgument=="interpretProblem")
-    theGlobalVariables.flagRunningAsProblemInterpreter=true;
+  { theGlobalVariables.flagRunningAsProblemInterpreter=true;
+    theGlobalVariables.flagUsingBuiltInWebServer=false;
+    theGlobalVariables.flagRunningCommandLine=false;
+    return;
+  }
   theGlobalVariables.flagUsingBuiltInWebServer=
   (secondArgument=="server" || secondArgument=="server8155" || secondArgument=="serverSSL");
   theGlobalVariables.flagRunningCommandLine=
   !theGlobalVariables.flagUsingBuiltInWebServer &&
   !theGlobalVariables.flagRunningAsProblemInterpreter;
+  //std::cout << "\n<br>DEBUG: got to here pt 1. <br>";
   if (theGlobalVariables.flagRunningCommandLine)
   { theGlobalVariables.programArguments.RemoveIndexShiftDown(0);
     return;
@@ -3745,8 +3750,9 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   if (thirdArgument!="nokill")
     timeLimitString=thirdArgument;
   else if (argC>3)
-      timeLimitString=theGlobalVariables.programArguments[3];
+    timeLimitString=theGlobalVariables.programArguments[3];
 //  std::cout << "<br>timelimitstring: " << timeLimitString;
+  //std::cout << "\nDEBUG: got to here pt 2. ";
   Rational timeLimit;
   timeLimit.AssignString(timeLimitString);
   int timeLimitInt=0;

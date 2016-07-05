@@ -39,7 +39,7 @@ public:
   void resetAllExceptContent();
   std::string ToStringInterpreted();
   std::string ToStringTagAndContent();
-  std::string ToStringOpenTag();
+  std::string ToStringOpenTag(bool immediatelyClose=false);
   std::string ToStringCloseTag();
   std::string GetTagClass();
   std::string ToStringDebug();
@@ -1535,7 +1535,7 @@ std::string WebWorker::GetEditPageHTML()
     return out.str();
   }
   if (!theFile.ParseHTML(failureStream))
-  { out << "<b>Failed to parse file: " << theFile.fileName << ". Details:<br>" << failureStream.str();
+  { out << "<b>Failed to parse file: " << theFile.fileName << ".</b> Details:<br>" << failureStream.str();
     out << "</body></html>";
 //    return out.str();
   }
@@ -1693,7 +1693,7 @@ void SyntacticElementHTML::resetAllExceptContent()
   this->flagUseDisplaystyleInMathMode=false;
 }
 
-std::string SyntacticElementHTML::ToStringOpenTag()
+std::string SyntacticElementHTML::ToStringOpenTag(bool immediatelyClose)
 { if (this->tag=="")
     return "";
   std::stringstream out;
@@ -1705,6 +1705,8 @@ std::string SyntacticElementHTML::ToStringOpenTag()
       out << " " << this->defaultKeysIfMissing[i] << "=\"" << this->defaultValuesIfMissing[i] << "\"";
   if (this->tagKeysWithoutValue.size>0)
     out << " " << this->tagKeysWithoutValue[0];
+  if (immediatelyClose)
+    out << "/";
   out << ">";
   return out.str();
 }
@@ -3258,7 +3260,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       if (indexInElts<theElements.size)
         eltsStack.AddOnTop(theElements[indexInElts]);
     }
-//    stOutput << "<br>" << this->ToStringParsingStack(eltsStack);
+    //stOutput << "<br>" << this->ToStringParsingStack(eltsStack);
     reduced=true;
     SyntacticElementHTML& last         = eltsStack[eltsStack.size-1];
     SyntacticElementHTML& secondToLast = eltsStack[eltsStack.size-2];
@@ -3274,9 +3276,14 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
         eltsStack.RemoveLastObject();
       continue;
     }
-    if (thirdToLast.syntacticRole=="<openTagCalc" &&
-        secondToLast.syntacticRole=="/" && last.syntacticRole==">")
-    { thirdToLast.syntacticRole="command";
+    if (thirdToLast.syntacticRole=="<openTag" && secondToLast=="/" && last.syntacticRole==">")
+    { if (this->calculatorClasses.Contains(thirdToLast.GetKeyValue("class")))
+         thirdToLast.syntacticRole="command";
+       else
+       { thirdToLast.content=thirdToLast.ToStringOpenTag(true);
+         thirdToLast.resetAllExceptContent();
+         stOutput << "<hr>processed " << thirdToLast.ToStringOpenTag(true) << "<hr>";
+       }
       eltsStack.RemoveLastObject();
       eltsStack.RemoveLastObject();
       if (this->IsStateModifierApplyIfYes(thirdToLast))
@@ -3342,8 +3349,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     }
     if (last==" " &&
         (secondToLast.syntacticRole=="<openTag" || thirdToLast.syntacticRole=="<openTag"
-         || fourthToLast.syntacticRole=="<openTag")
-        )
+         || fourthToLast.syntacticRole=="<openTag"))
     { eltsStack.RemoveLastObject();
       continue;
     }
@@ -3375,7 +3381,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       continue;
     }
     if (secondToLast.syntacticRole=="<openTag" && last.syntacticRole==">")
-    { //stOutput << secondToLast.ToStringDebug() << " class key value: " << secondToLast.GetKeyValue("class");
+    { //stOutput << "<hr>DEBUG: " << secondToLast.ToStringDebug() << " class key value: " << secondToLast.GetKeyValue("class");
       if (this->calculatorClasses.Contains(secondToLast.GetKeyValue("class")))
         secondToLast.syntacticRole="<openTagCalc>";
       else

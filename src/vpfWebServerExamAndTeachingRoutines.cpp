@@ -32,6 +32,7 @@ public:
   bool IsAnswerElement(std::string* desiredAnswerId);
   bool IsCommentBeforeSubmission();
   bool IsAnswerOnGiveUp();
+  bool IsSolution();
   bool IsCommentAfterSubmission();
   std::string GetKeyValue(const std::string& theKey)const;
   void SetKeyValue(const std::string& theKey, const std::string& theValue);
@@ -1816,6 +1817,14 @@ bool SyntacticElementHTML::IsHidden()
 ;
 }
 
+bool SyntacticElementHTML::IsSolution()
+{ if (this->syntacticRole!="command")
+    return false;
+  std::string tagClass=this->GetKeyValue("class");
+  return tagClass=="calculatorAnswerOnGiveUp"
+;
+}
+
 bool SyntacticElementHTML::IsAnswerOnGiveUp()
 { if (this->syntacticRole!="command")
     return false;
@@ -1849,6 +1858,7 @@ bool SyntacticElementHTML::IsAnswerElement(std::string* desiredAnswerId)
   bool result= tagClass=="calculatorButtonSubmit" ||
   tagClass=="calculatorButtonInterpret" ||
   tagClass=="calculatorButtonGiveUp" ||
+  tagClass=="calculatorButtonSolution" ||
   tagClass=="calculatorMQField" ||
   tagClass=="calculatorMQButtonPanel" ||
   tagClass=="calculatorAnswerVerification"
@@ -2413,48 +2423,50 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
     << this->theProblemData.ToStringAvailableAnswerIds() << crash;
   Answer& currentA=this->theProblemData.theAnswers[theIndex];
   std::string& answerId=currentA.answerId;
-  currentA.answerIdVariableName = answerId+"spanVariable";
-  currentA.MQfieldVariable=answerId+"MQspanVar";
+  currentA.varAnswerId = answerId+"spanVariable";
+  currentA.varMQfield=answerId+"MQspanVar";
   currentA.MQobject= "answerMathQuillObjects["+ std::to_string(this->NumAnswerIdsMathquilled)+"]";
   this->NumAnswerIdsMathquilled++;
   currentA.MQUpdateFunction  = answerId+"MQFieldUpdate";
-  currentA.verificationSpanId="verification"+answerId;
-  if (currentA.MQfieldId=="")
-    currentA.MQfieldId = answerId+"MQspanId";
-  if (currentA.MQButtonPanelId=="")
-    currentA.MQButtonPanelId=answerId+"MQbuttonPanel";
+  currentA.idVerificationSpan="verification"+answerId;
+  if (currentA.idMQfield=="")
+    currentA.idMQfield = answerId+"MQspanId";
+  if (currentA.idMQButtonPanelLocation=="")
+    currentA.idMQButtonPanelLocation=answerId+"MQbuttonPanel";
   std::stringstream previewAnswerStream;
   previewAnswerStream << "previewAnswers('" << answerId << "', '"
-  << currentA.verificationSpanId << "');";
-  currentA.previewAnswerJavascript=previewAnswerStream.str();
+  << currentA.idVerificationSpan << "');";
+  currentA.javascriptPreviewAnswer=previewAnswerStream.str();
   currentA.htmlButtonSubmit= "<button class=\"submitButton\" onclick=\"submitAnswers('"
-  + answerId + "', '" + currentA.verificationSpanId + "')\">Submit</button>";
+  + answerId + "', '" + currentA.idVerificationSpan + "')\">Submit</button>";
   currentA.htmlButtonInterpret= (std::string)"<button class=\"previewButton\" onclick=\""
   + "previewAnswersNoTimeOut('" + answerId + "', '"
-  + currentA.verificationSpanId + "')" + "\">Interpret</button>";
+  + currentA.idVerificationSpan + "')" + "\">Interpret</button>";
   if (!this->flagIsForReal)
-  { bool hasShowAnswerButton=false;
-    if (this->theProblemData.commandsForGiveUpAnswer[theIndex]!="")
-    { currentA.htmlButtonAnswer= "<button class=\"showAnswerButton\" onclick=\"giveUp('"
-      + answerId + "', '" + currentA.verificationSpanId + "')\">Answer</button>";
-      hasShowAnswerButton=true;
-    }
-    if (!hasShowAnswerButton)
+  { if (this->theProblemData.commandsForGiveUpAnswer[theIndex]!="")
+      currentA.htmlButtonAnswer= "<button class=\"showAnswerButton\" onclick=\"giveUp('"
+      + answerId + "', '" + currentA.idVerificationSpan + "')\">Answer</button>";
+    else
       currentA.htmlButtonAnswer= "No ``give-up'' answer available. ";
+    if (currentA.commandsSolution.size!=0)
+      currentA.htmlButtonSolution="<button onlick=\"showSolution('" +answerId+ "','"
+      + currentA.idSolution +"');\"> Solution</button>";
+    else
+      currentA.htmlButtonSolution="No solution available.";
   }
   inputOutput.defaultKeysIfMissing.AddOnTop("onkeydown");
   inputOutput.defaultValuesIfMissing.AddOnTop
-  (currentA.previewAnswerJavascript+currentA.MQUpdateFunction +"();");
+  (currentA.javascriptPreviewAnswer+currentA.MQUpdateFunction +"();");
   inputOutput.defaultKeysIfMissing.AddOnTop("style");
   inputOutput.defaultValuesIfMissing.AddOnTop("height:70px");
   currentA.htmlTextareaLatexAnswer=
   inputOutput.ToStringOpenTag() + inputOutput.ToStringCloseTag();
-  currentA.htmlMQfield = "<span id='" + currentA.MQfieldId + "'>" + "</span>";
+  currentA.htmlMQfield = "<span id='" + currentA.idMQfield + "'>" + "</span>";
   currentA.htmlMQjavascript= CalculatorHtmlFunctions::GetJavascriptMathQuillBox(currentA);
   currentA.htmlContainerMQButtonPanel=
-  "<span id=\"" + currentA.MQButtonPanelId + "\"></span>";
+  "<span id=\"" + currentA.idMQButtonPanelLocation + "\"></span>";
   std::stringstream verifyStream;
-  verifyStream << "<span id=\"" << currentA.verificationSpanId << "\">";
+  verifyStream << "<span id=\"" << currentA.idVerificationSpan << "\">";
   int numCorrectSubmissions=currentA.numCorrectSubmissions;
   int numSubmissions= currentA.numSubmissions;
   if (theGlobalVariables.userCalculatorRequestType=="examForReal")
@@ -2509,6 +2521,7 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     out << currentA.htmlButtonSubmit;
     out << currentA.htmlButtonInterpret;
     out << currentA.htmlButtonAnswer;
+    out << currentA.htmlButtonSolution;
     out << "</td>";
     out << "</tr>";
   }
@@ -2980,14 +2993,14 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   out << "<script type=\"text/javascript\"> \n ";
   out << "answerMQspanIds = [";
   for (int i=0; i<this->theProblemData.theAnswers.size; i++)
-  { out << "\"" << this->theProblemData.theAnswers[i].MQfieldId << "\"";
+  { out << "\"" << this->theProblemData.theAnswers[i].idMQfield << "\"";
     if (i!=this->theProblemData.theAnswers.size-1)
       out << ", ";
   }
   out << "];\n";
   out << "preferredButtonContainers = [";
   for (int i=0; i<this->theProblemData.theAnswers.size; i++)
-  { out << "\"" << this->theProblemData.theAnswers[i].MQButtonPanelId << "\"";
+  { out << "\"" << this->theProblemData.theAnswers[i].idMQButtonPanelLocation << "\"";
     if (i!=this->theProblemData.theAnswers.size-1)
       out << ", ";
   }
@@ -3205,12 +3218,16 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   { this->calculatorClassesAnswerFields.AddOnTop("calculatorButtonSubmit");
     this->calculatorClassesAnswerFields.AddOnTop("calculatorButtonInterpret");
     this->calculatorClassesAnswerFields.AddOnTop("calculatorButtonGiveUp");
+    this->calculatorClassesAnswerFields.AddOnTop("calculatorButtonSolution");
     this->calculatorClassesAnswerFields.AddOnTop("calculatorMQField");
     this->calculatorClassesAnswerFields.AddOnTop("calculatorMQButtonPanel");
     this->calculatorClassesAnswerFields.AddOnTop("calculatorAnswerVerification");
   }
   if (this->calculatorClasses.size==0)
   { this->calculatorClasses.AddOnTop("calculator");
+    this->calculatorClasses.AddOnTop("calculatorSolution");
+    this->calculatorClasses.AddOnTop("calculatorSolutionStart");
+    this->calculatorClasses.AddOnTop("calculatorSolutionFinish");
     this->calculatorClasses.AddOnTop("calculatorShowToUserOnly");
     this->calculatorClasses.AddOnTop("calculatorHidden");
     this->calculatorClasses.AddOnTop("calculatorHiddenIncludeInCommentsBeforeSubmission");
@@ -3254,6 +3271,15 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     { secondToLast.syntacticRole="command";
       eltsStack.RemoveLastObject();
       if (this->IsStateModifierApplyIfYes(secondToLast))
+        eltsStack.RemoveLastObject();
+      continue;
+    }
+    if (thirdToLast.syntacticRole=="<openTagCalc" &&
+        secondToLast.syntacticRole=="/" && last.syntacticRole==">")
+    { thirdToLast.syntacticRole="command";
+      eltsStack.RemoveLastObject();
+      eltsStack.RemoveLastObject();
+      if (this->IsStateModifierApplyIfYes(thirdToLast))
         eltsStack.RemoveLastObject();
       continue;
     }
@@ -3422,6 +3448,8 @@ bool CalculatorHTML::InterpretOneAnswerElement(SyntacticElementHTML& inputOutput
     inputOutput.interpretedCommand=currentA.htmlButtonInterpret;
   if (tagClass=="calculatorButtonGiveUp")
     inputOutput.interpretedCommand=currentA.htmlButtonAnswer;
+  if (tagClass=="calculatorButtonSolution")
+    inputOutput.interpretedCommand=currentA.htmlButtonSolution;
   if (tagClass=="calculatorMQField")
     inputOutput.interpretedCommand=currentA.htmlMQfield;
   if (tagClass=="calculatorMQButtonPanel")
@@ -3456,6 +3484,8 @@ bool CalculatorHTML::PrepareAnswerElements(std::stringstream &comments)
           tagClass=="calculatorButtonInterpret" ||
           tagClass=="calculatorButtonGiveUp")
         currentA.flagAutoGenerateSubmitButtons=false;
+      if (tagClass=="calculatorButtonSolution")
+        currentA.flagAutoGenerateButtonSolution=false;
       if (tagClass=="calculatorMQField")
         currentA.flagAutoGenerateMQfield=false;
       if (tagClass=="calculatorMQButtonPanel")
@@ -3475,22 +3505,27 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
   List<std::string> answerIdsInTheFile;
   List<std::string> absoluteCommandsFoundSoFar;
   for (int i=0; i<this->theContent.size; i++)
-  { if (this->theContent[i].IsCommentBeforeSubmission() || this->theContent[i].IsCommentAfterSubmission()||
-        this->theContent[i].IsAnswerOnGiveUp())
+  { SyntacticElementHTML& currentE=this->theContent[i];
+    if (currentE.IsCommentBeforeSubmission() || currentE.IsCommentAfterSubmission() ||
+        currentE.IsAnswerOnGiveUp() || currentE.IsSolution())
     { if (answerIdsInTheFile.size<=0)
-      { comments << "<b>Found comment to an answer before finding any answer tag. Each comment applies "
+      { comments << "<b>Found answer element before finding any answer tag."
+        << " Each answer element applies "
         << "to the first answer tag above it. </b>";
         return false;
       }
       int theIndex=this->GetAnswerIndex(*answerIdsInTheFile.LastObject());
       if (theIndex==-1)
         crash << "This shouldn't happen: answerId from file not found in problem data. " << crash;
-      if (this->theContent[i].IsAnswerOnGiveUp())
-        this->theProblemData.commandsForGiveUpAnswer[theIndex]=this->theContent[i].content;
-      if (this->theContent[i].IsCommentAfterSubmission())
-        this->theProblemData.commentsAfterSubmission[theIndex].AddOnTop(this->theContent[i].content);
-      if (this->theContent[i].IsCommentBeforeSubmission())
-        this->theProblemData.commentsBeforeSubmission[theIndex].AddOnTop(this->theContent[i].content);
+      Answer& currentA=this->theProblemData.theAnswers[theIndex];
+      if (currentE.IsAnswerOnGiveUp())
+        this->theProblemData.commandsForGiveUpAnswer[theIndex]=currentE.content;
+      if (currentE.IsCommentAfterSubmission())
+        this->theProblemData.commentsAfterSubmission[theIndex].AddOnTop(currentE.content);
+      if (currentE.IsCommentBeforeSubmission())
+        this->theProblemData.commentsBeforeSubmission[theIndex].AddOnTop(currentE.content);
+      if (currentE.IsSolution())
+        currentA.commandsSolution.AddOnTop(currentE.content);
       continue;
     }
     if (this->theContent[i].GetTagClass()=="calculatorHiddenIncludeInCommentsBeforeSubmission")
@@ -3601,13 +3636,13 @@ std::string CalculatorHtmlFunctions::GetJavascriptMathQuillBox(Answer& theAnswer
 { MacroRegisterFunctionWithName("CalculatorHtmlFunctions::GetMathQuillBox");
   std::stringstream out;
   out << "<script>\n"
-  << "var " << theAnswer.MQfieldVariable << " = document.getElementById('" << theAnswer.MQfieldId << "');\n"
-  << "var " << theAnswer.answerIdVariableName << " = document.getElementById('" << theAnswer.answerId << "');\n"
+  << "var " << theAnswer.varMQfield << " = document.getElementById('" << theAnswer.idMQfield << "');\n"
+  << "var " << theAnswer.varAnswerId << " = document.getElementById('" << theAnswer.answerId << "');\n"
   << "var ignoreNextMathQuillUpdateEvent=false;\n"
   << "globalMQ.config({\n"
   << "  autoFunctionize: 'sin cos tan sec csc cot log ln'\n"
   << "  });\n"
-  << theAnswer.MQobject << " = globalMQ.MathField(" << theAnswer.MQfieldVariable << ", {\n"
+  << theAnswer.MQobject << " = globalMQ.MathField(" << theAnswer.varMQfield << ", {\n"
   << "spaceBehavesLikeTab: true, // configurable\n"
   << "handlers: {\n"
   << "edit: function() { // useful event handlers\n"
@@ -3615,14 +3650,14 @@ std::string CalculatorHtmlFunctions::GetJavascriptMathQuillBox(Answer& theAnswer
 //  << "  ignoreNextMathQuillUpdateEvent=false;\n"
   << "  return;\n"
   << "}\n"
-  << theAnswer.answerIdVariableName << ".value = " << theAnswer.MQobject << ".latex(); // simple API\n"
-  << theAnswer.previewAnswerJavascript
+  << theAnswer.varAnswerId << ".value = " << theAnswer.MQobject << ".latex(); // simple API\n"
+  << theAnswer.javascriptPreviewAnswer
   << "}\n"
   << "}\n"
   << "});\n"
   << "function " << theAnswer.MQUpdateFunction << "(){\n"
   << "ignoreNextMathQuillUpdateEvent=true;\n"
-  << theAnswer.MQobject << ".latex(" << theAnswer.answerIdVariableName << ".value);\n"
+  << theAnswer.MQobject << ".latex(" << theAnswer.varAnswerId << ".value);\n"
   << "ignoreNextMathQuillUpdateEvent=false;\n"
   << "}\n"
   << "</script>";

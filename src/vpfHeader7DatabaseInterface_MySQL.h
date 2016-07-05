@@ -60,27 +60,29 @@ struct Answer
   bool flagAutoGenerateMQButtonPanel;
   bool flagAutoGenerateMQfield;
   bool flagAutoGenerateVerificationField;
+  bool flagAutoGenerateButtonSolution;
   int numSubmissions;
   int numCorrectSubmissions;
+  List<std::string> commandsSolution;
   std::string answerId;
-  std::string submitButtonIds;
-  std::string interpretButtonIds;
-  std::string answerIdVariableName;
-  std::string verificationSpanId;
-  std::string previewAnswerJavascript;
+  std::string varAnswerId;
+  std::string idVerificationSpan;
+  std::string idSolution;
+  std::string javascriptPreviewAnswer;
   std::string htmlMQjavascript;
   std::string htmlMQfield;
   std::string htmlContainerMQButtonPanel;
   std::string htmlButtonInterpret;
   std::string htmlButtonAnswer;
   std::string htmlButtonSubmit;
+  std::string htmlButtonSolution;
   std::string htmlTextareaLatexAnswer;
   std::string htmlSpanVerifyAnswer;
   //////////////////////////////////////
-  std::string MQButtonPanelId;
-  std::string MQfieldVariable;
+  std::string idMQButtonPanelLocation;
+  std::string varMQfield;
   std::string MQobject;
-  std::string MQfieldId;
+  std::string idMQfield;
   std::string MQUpdateFunction;
   std::string firstCorrectAnswer;
   Answer()
@@ -90,6 +92,7 @@ struct Answer
     this->flagAutoGenerateMQButtonPanel=true;
     this->flagAutoGenerateMQfield=true;
     this->flagAutoGenerateVerificationField=true;
+    this->flagAutoGenerateButtonSolution=true;
   }
 };
 

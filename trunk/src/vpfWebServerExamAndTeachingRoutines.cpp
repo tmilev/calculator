@@ -712,7 +712,7 @@ std::string CalculatorHTML::GetSubmitEmailsJavascript()
 
 std::string CalculatorHTML::GetSubmitAnswersJavascript()
 { std::stringstream out;
-  std::string requestTypeSubmit, requestTypePreview, requestGiveUp;
+  std::string requestTypeSubmit, requestTypePreview, requestGiveUp, requestSolution;
   bool submitRandomSeed=false;
   if (theGlobalVariables.UserRequestRequiresLoadingRealExamData())
   { requestTypeSubmit  = "submitProblem";
@@ -730,6 +730,10 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
     requestGiveUp="problemGiveUp";
   else
     requestGiveUp="problemGiveUpNoLogin";
+  if (!theGlobalVariables.UserGuestMode())
+    requestGiveUp="problemSolution";
+  else
+    requestGiveUp="problemSolutionNoLogin";
   out
   << "<script type=\"text/javascript\"> \n"
   << "var JavascriptInsertionAlreadyCalled;\n"
@@ -762,6 +766,12 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestGiveUp, "true", "", submitRandomSeed) << "\";\n"
   << "  submitOrPreviewAnswers(idAnswer, idVerification, params, \""
   << requestGiveUp << "\");\n"
+  << "}\n"
+  << "function showSolution(idAnswer, idVerification){\n"
+  << "  clearTimeout(timerForPreviewAnswers);\n"
+  << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestSolution, "true", "", submitRandomSeed) << "\";\n"
+  << "  submitOrPreviewAnswers(idAnswer, idVerification, params, \""
+  << requestSolution << "\");\n"
   << "}\n"
   << "function submitOrPreviewAnswers(idAnswer, idVerification, inputParams, requestType){\n";
   out << "  clearTimeout(timerForPreviewAnswers);\n"
@@ -923,9 +933,119 @@ std::string WebWorker::GetProblemGiveUpAnswer()
   return out.str();
 }
 
+std::string WebWorker::GetProblemSolution()
+{ MacroRegisterFunctionWithName("WebWorker::GetProblemSolution");
+  double startTime=theGlobalVariables.GetElapsedSeconds();
+  CalculatorHTML theProblem;
+  theProblem.LoadCurrentProblemItem();
+  std::stringstream out;
+  if (!theProblem.flagLoadedSuccessfully)
+  { out << "Problem name is: " << theProblem.fileName
+    << " <b>Could not load problem, this may be a bug. "
+    << CalculatorHTML::BugsGenericMessage << "</b>";
+    if(theProblem.comments.str()!="")
+      out << " Comments: " << theProblem.comments.str();
+    return out.str();
+  }
+  if (theProblem.flagIsForReal)
+  { out << " <b>Not allowed to show answer of a problem being tested for real. </b>";
+    return out.str();
+  }
+  if(theGlobalVariables.GetWebInput("randomSeed")=="")
+  { out << " <b>I could not figure out the exercise problem (missing random seed). </b>";
+    return out.str();
+  }
+  std::stringstream comments;
+  if (!theProblem.ParseHTML(comments))
+  { stOutput << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
+    return out.str();
+  }
+  std::string lastStudentAnswerID;
+  MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
+  for (int i=0; i<theArgs.size(); i++)
+    MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
+  int indexLastAnswerId=theProblem.GetAnswerIndex(lastStudentAnswerID);
+  if (indexLastAnswerId==-1)
+  { out << "<b>Student submitted answerID: " << lastStudentAnswerID
+    << " but that is not an ID of an answer tag. "
+    << "</b><br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
+    { out << "<hr>" << theProblem.theProblemData.ToStringAvailableAnswerIds();
+      //out << "<hr>Client input: " << this->mainArgumentRAW << "<hr>";
+      out << WebWorker::ToStringCalculatorArgumentsHumanReadable();
+    }
+    return out.str();
+  }
+  Answer& currentA=theProblem.theProblemData.theAnswers[indexLastAnswerId];
+  if (currentA.commandsSolution.size!=0)
+  { out << "<b> Unfortunately there is no solution given for this question (answerID: " << lastStudentAnswerID << ").";
+    return out.str();
+  }
+  Calculator theInterpreteR;
+  theInterpreteR.init();
+  if(!theProblem.PrepareCommands(comments))
+  { out << "<b>Failed to prepare calculator commands. </b> <br>Comments:<br>" << comments.str();
+    return out.str();
+  }
+  std::stringstream answerCommands;
+  theProblem.PrepareUserInputBoxes(answerCommands);
+  answerCommands << theProblem.problemCommandsNoVerification;
+  for (int i=0; i<currentA.commandsSolution.size; i++)
+    answerCommands << "SeparatorBetweenSpans; "
+    << currentA.commandsSolution[indexLastAnswerId];
+  theInterpreteR.Evaluate(answerCommands.str());
+  if (theInterpreteR.syntaxErrors!="")
+  { out << "<span style=\"color:red\"><b>Failed to compose the solution. "
+    << "Likely there is a bug with the problem. </b></span>"
+    << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
+    << theInterpreteR.ToStringSyntacticStackHumanReadable(false);
+    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    return out.str();
+  } else if (theInterpreteR.flagAbortComputationASAP)
+  { out << "<span style=\"color:red\"><b>Failed to compose the solution. "
+    << "Likely there is a bug with the problem. </b></span>"
+    << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
+    << theInterpreteR.outputString
+    << theInterpreteR.outputCommentsString
+    << "<hr>Input: <br>" << theInterpreteR.inputString;
+    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    return out.str();
+  }
+  FormatExpressions theFormat;
+  List<std::string> answersReverseOrder;
+  for (int j=theInterpreteR.theProgramExpression.children.size-1; j>=0; j--)
+  { if (theInterpreteR.theProgramExpression[j].ToString()=="SeparatorBetweenSpans")
+      break;
+
+      //need to continue programming here.
+//        stOutput << "<hr>DEBUG Before final computation: <hr>";
+    theFormat.flagExpressionIsFinal=true;
+    theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
+    theFormat.flagUseQuotes=false;
+    if (!theInterpreteR.theProgramExpression[j].StartsWith(theInterpreteR.opRulesChanged()))
+      answersReverseOrder.AddOnTop(theInterpreteR.theProgramExpression[j].ToString(&theFormat));
+  }
+  for (int i=answersReverseOrder.size-1; i>=0; i--)
+  { out << "\\(" << answersReverseOrder[i] << "\\)";
+    if (i!=0)
+      out << "<br>";
+  }
+  out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+  if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
+    out <<  "<hr>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString
+    << "<hr>Raw input: " << WebWorker::ToStringCalculatorArgumentsHumanReadable();
+  return out.str();
+}
+
 int WebWorker::ProcessProblemGiveUp()
 { MacroRegisterFunctionWithName("WebWorker::ProcessProblemGiveUp");
   stOutput << WebWorker::GetProblemGiveUpAnswer();
+  return 0;
+}
+
+int WebWorker::ProcessProblemSolution()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessProblemSolution");
+  stOutput << WebWorker::GetProblemSolution();
   return 0;
 }
 

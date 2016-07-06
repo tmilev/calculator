@@ -1953,6 +1953,10 @@ int WebWorker::ProcessCalculatorNoLoginInterpreterMode()
        theGlobalVariables.flagLoggedIn) ||
       theGlobalVariables.userCalculatorRequestType== "problemGiveUpNoLogin")
     return this->ProcessProblemGiveUp();
+  if ((theGlobalVariables.userCalculatorRequestType=="problemSolution" &&
+       theGlobalVariables.flagLoggedIn) ||
+      theGlobalVariables.userCalculatorRequestType== "problemSolutionNoLogin")
+    return this->ProcessProblemSolution();
   if ((theGlobalVariables.userCalculatorRequestType=="submitProblemPreview" ||
        theGlobalVariables.userCalculatorRequestType=="submitExercisePreview" ) &&
       theGlobalVariables.flagLoggedIn)
@@ -2062,6 +2066,10 @@ int WebWorker::ProcessCalculator()
        theGlobalVariables.flagLoggedIn) ||
       theGlobalVariables.userCalculatorRequestType== "problemGiveUpNoLogin")
     return this->ProcessProblemGiveUp();
+  if ((theGlobalVariables.userCalculatorRequestType=="problemSolution" &&
+       theGlobalVariables.flagLoggedIn) ||
+      theGlobalVariables.userCalculatorRequestType== "problemSolution")
+    return this->ProcessProblemSolution();
   if ((theGlobalVariables.userCalculatorRequestType=="submitProblemPreview" ||
        theGlobalVariables.userCalculatorRequestType=="submitExercisePreview" ) &&
       theGlobalVariables.flagLoggedIn)

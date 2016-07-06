@@ -43,6 +43,7 @@ public:
   std::string ToStringCloseTag();
   std::string GetTagClass();
   std::string ToStringDebug();
+  List<SyntacticElementHTML> children;
   SyntacticElementHTML()
   { this->flagUseDisplaystyleInMathMode=false;
     this->indexInOwner=-1;
@@ -1834,14 +1835,25 @@ std::string SyntacticElementHTML::ToStringOpenTag(bool immediatelyClose)
 std::string SyntacticElementHTML::ToStringCloseTag()
 { if (this->tag=="")
     return "";
-  return  "</" + this->tag + ">";
+  return "</" + this->tag + ">";
 }
 
 std::string SyntacticElementHTML::ToStringTagAndContent()
 { MacroRegisterFunctionWithName("SyntacticElementHTML::ToStringTagAndContent");
   if (this->syntacticRole=="")
     return this->content;
-  return this->ToStringOpenTag() + this->content + this->ToStringCloseTag();
+  std::stringstream out;
+  out << this->ToStringOpenTag() + this->content + this->ToStringCloseTag();
+  if (this->children.size>0)
+  { out << "[";
+    for (int i=0; i< this->children.size; i++)
+    { out << this->children[i].ToStringDebug();
+      if (i!=this->children.size-1)
+        out << ", ";
+    }
+    out << "]";
+  }
+  return out.str();
 }
 
 std::string SyntacticElementHTML::ToStringDebug()
@@ -1852,7 +1864,7 @@ std::string SyntacticElementHTML::ToStringDebug()
   out << "<span style=\"color:green\">";
   out << CGI::StringToHtmlStrinG(this->syntacticRole);
   out << "</span>";
-  out << "[" << CGI::StringToHtmlStrinG(this->ToStringTagAndContent() ) << "]";
+  out << "[" << CGI::StringToHtmlStrinG(this->ToStringTagAndContent()) << "]";
   return out.str();
 }
 
@@ -3348,8 +3360,6 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   if (this->calculatorClasses.size==0)
   { this->calculatorClasses.AddOnTop("calculator");
     this->calculatorClasses.AddOnTop("calculatorSolution");
-    this->calculatorClasses.AddOnTop("calculatorSolutionStart");
-    this->calculatorClasses.AddOnTop("calculatorSolutionFinish");
     this->calculatorClasses.AddOnTop("calculatorShowToUserOnly");
     this->calculatorClasses.AddOnTop("calculatorHidden");
     this->calculatorClasses.AddOnTop("calculatorHiddenIncludeInCommentsBeforeSubmission");
@@ -3374,6 +3384,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   bool reduced=false;
   this->flagIsExamProblem=true;
   this->flagIsExamHome=false;
+  std::string tagClass;
   do
   { if (!reduced)
     { indexInElts++;
@@ -3397,17 +3408,27 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       continue;
     }
     if (thirdToLast.syntacticRole=="<openTag" && secondToLast=="/" && last.syntacticRole==">")
-    { if (this->calculatorClasses.Contains(thirdToLast.GetKeyValue("class")))
-         thirdToLast.syntacticRole="command";
-       else
-       { thirdToLast.content=thirdToLast.ToStringOpenTag(true);
-         thirdToLast.resetAllExceptContent();
-         stOutput << "<hr>processed " << thirdToLast.ToStringOpenTag(true) << "<hr>";
-       }
+    { tagClass=thirdToLast.GetKeyValue("class");
+      if (tagClass=="calculatorSolution")
+        thirdToLast.syntacticRole="<calculatorSolution>";
+      else if (this->calculatorClasses.Contains(tagClass))
+        thirdToLast.syntacticRole="command";
+      else
+      { thirdToLast.content=thirdToLast.ToStringOpenTag(true);
+        thirdToLast.resetAllExceptContent();
+        stOutput << "<hr>processed " << thirdToLast.ToStringOpenTag(true) << "<hr>";
+      }
       eltsStack.RemoveLastObject();
       eltsStack.RemoveLastObject();
       if (this->IsStateModifierApplyIfYes(thirdToLast))
         eltsStack.RemoveLastObject();
+      continue;
+    }
+    if (thirdToLast=="<calculatorSolution>" && (secondToLast=="" || secondToLast!="command") && last!="" &&
+        last!="<" && last!=">" && last!="\"" && last!="/")
+    { thirdToLast.children.AddOnTop(secondToLast);
+      eltsStack[eltsStack.size-2]=last;
+      eltsStack.RemoveLastObject();
       continue;
     }
     if (last.syntacticRole=="</closeTag>")

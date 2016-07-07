@@ -54,6 +54,58 @@ public:
    static bool UserDefaultHasInstructorRights();
 };
 
+class SyntacticElementHTML{
+public:
+  int indexInOwner;
+  std::string syntacticRole;
+  std::string content;
+  std::string tag;
+  List<std::string> tagKeys;
+  List<std::string> tagValues;
+  List<std::string> defaultKeysIfMissing;
+  List<std::string> defaultValuesIfMissing;
+  List<std::string> tagKeysWithoutValue;
+  bool flagUseDisplaystyleInMathMode;
+  bool flagUseMathMode;
+  std::string interpretedCommand;
+  static int ParsingNumDummyElements;
+  bool IsInterpretedByCalculatorDuringPreparatioN();
+  bool IsInterpretedByCalculatorDuringSubmission();
+  bool IsInterpretedNotByCalculator();
+  bool IsHidden();
+  bool IsAnswer();
+  bool IsAnswerElement(std::string* desiredAnswerId);
+  bool IsCommentBeforeSubmission();
+  bool IsAnswerOnGiveUp();
+  bool IsCommentAfterSubmission();
+  std::string GetKeyValue(const std::string& theKey)const;
+  void SetKeyValue(const std::string& theKey, const std::string& theValue);
+  void resetAllExceptContent();
+  std::string ToStringInterpreted();
+  std::string ToStringTagAndContent();
+  std::string ToStringOpenTag(bool immediatelyClose=false);
+  std::string ToStringCloseTag();
+  std::string GetTagClass();
+  std::string ToStringDebug();
+  List<SyntacticElementHTML> children;
+  SyntacticElementHTML()
+  { this->flagUseDisplaystyleInMathMode=false;
+    this->indexInOwner=-1;
+  }
+  SyntacticElementHTML(const std::string& inputContent)
+  { this->flagUseDisplaystyleInMathMode=false;
+    this->flagUseMathMode=true;
+    this->content=inputContent;
+    this->indexInOwner=-1;
+  }
+  bool operator==(const std::string& other)
+  { return this->content==other;
+  }
+  bool operator!=(const std::string& other)
+  { return this->content!=other;
+  }
+};
+
 struct Answer
 {
   bool flagAutoGenerateSubmitButtons;
@@ -61,28 +113,32 @@ struct Answer
   bool flagAutoGenerateMQfield;
   bool flagAutoGenerateVerificationField;
   bool flagAutoGenerateButtonSolution;
+  bool flagSolutionFound;
   int numSubmissions;
   int numCorrectSubmissions;
-  List<std::string> commandsSolution;
+  std::string commandsSolution;
+  std::string commandsAnswerOnGiveUp;
+  List<SyntacticElementHTML> solutionElements;
   std::string answerId;
   std::string varAnswerId;
   std::string idVerificationSpan;
-  std::string idSolution;
   std::string javascriptPreviewAnswer;
   std::string htmlMQjavascript;
-  std::string htmlMQfield;
-  std::string htmlContainerMQButtonPanel;
   std::string htmlButtonInterpret;
   std::string htmlButtonAnswer;
   std::string htmlButtonSubmit;
   std::string htmlButtonSolution;
   std::string htmlTextareaLatexAnswer;
+  std::string htmlSpanMQfield;
   std::string htmlSpanVerifyAnswer;
+  std::string htmlSpanSolution;
+  std::string htmlSpanMQButtonPanel;
   //////////////////////////////////////
-  std::string idMQButtonPanelLocation;
   std::string varMQfield;
   std::string MQobject;
+  std::string idSpanSolution;
   std::string idMQfield;
+  std::string idMQButtonPanelLocation;
   std::string MQUpdateFunction;
   std::string firstCorrectAnswer;
   Answer()
@@ -93,7 +149,9 @@ struct Answer
     this->flagAutoGenerateMQfield=true;
     this->flagAutoGenerateVerificationField=true;
     this->flagAutoGenerateButtonSolution=true;
+    this->flagSolutionFound=false;
   }
+  std::string ToString();
 };
 
 struct ProblemData
@@ -111,7 +169,6 @@ public:
   List<Answer> theAnswers;
   List<std::string> inputNonAnswerIds;
   List<List<std::string> > commandsForPreview;
-  List<std::string> commandsForGiveUpAnswer;
   List<List<std::string> > commentsBeforeSubmission;
   List<List<std::string> > commentsAfterSubmission;
   void AddEmptyAnswerIdOnTop(const std::string& inputAnswerId);

@@ -302,7 +302,6 @@ void ProblemData::AddEmptyAnswerIdOnTop(const std::string& inputAnswerId)
   this->commentsAfterSubmission.AddOnTop(emptyList);
   this->commentsBeforeSubmission.AddOnTop(emptyList);
   this->commandsForPreview.AddOnTop(emptyList);
-  this->commandsForGiveUpAnswer.AddOnTop("");
 }
 
 std::string ProblemData::ToStringAvailableAnswerIds()

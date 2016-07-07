@@ -1859,7 +1859,7 @@ std::string SyntacticElementHTML::ToStringTagAndContent()
 std::string SyntacticElementHTML::ToStringDebug()
 { MacroRegisterFunctionWithName("SyntacticElementHTML::ToString");
   if (this->syntacticRole=="")
-    return CGI::StringToHtmlStrinG( this->ToStringTagAndContent());
+    return CGI::StringToHtmlStrinG(this->ToStringTagAndContent());
   std::stringstream out;
   out << "<span style=\"color:green\">";
   out << CGI::StringToHtmlStrinG(this->syntacticRole);
@@ -2026,16 +2026,17 @@ bool CalculatorHTML::PrepareCommands(std::stringstream& comments)
   }
   if (this->theContent[0].syntacticRole!="")
     crash << "First command must be empty to allow for command for setting of random seed. " << crash;
-  std::stringstream streamWithInbetween, streamNoVerification, streamVerification;
+  std::stringstream streamWithInbetween, streamNoVerification, streamVerification, streamSolution;
   //stOutput << " The big bad random seed: " << this->randomSeed ;
   streamWithInbetween << "setRandomSeed{}(" << this->theProblemData.randomSeed << ");";
   streamNoVerification << streamWithInbetween.str();
+  streamSolution << streamWithInbetween.str();
   for (int i=1; i<this->theContent.size; i++) // the first element of the content is fake (used for the random seed)
   { if (!this->theContent[i].IsInterpretedByCalculatorDuringPreparatioN())
     { streamWithInbetween << "SeparatorBetweenSpans; ";
       continue;
     }
-    std::string cleanedupCommand=this->CleanUpCommandString( this->theContent[i].content);
+    std::string cleanedupCommand=this->CleanUpCommandString(this->theContent[i].content);
     if (cleanedupCommand.find("\\displaystyle")!=std::string::npos)
       this->theContent[i].flagUseDisplaystyleInMathMode=true;
     if (cleanedupCommand!="")
@@ -3400,7 +3401,8 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     SyntacticElementHTML& fifthToLast  = eltsStack[eltsStack.size-5];
     SyntacticElementHTML& sixthToLast  = eltsStack[eltsStack.size-6];
 //    SyntacticElementHTML& seventhToLast = eltsStack[eltsStack.size-7];
-    if (secondToLast.syntacticRole=="<openTagCalc>" && last.syntacticRole=="</closeTag>" && secondToLast.tag==last.tag)
+    if ((secondToLast.syntacticRole=="<openTagCalc>" || secondToLast.syntacticRole=="<calculatorSolution>") &&
+        last.syntacticRole=="</closeTag>" && secondToLast.tag==last.tag)
     { secondToLast.syntacticRole="command";
       eltsStack.RemoveLastObject();
       if (this->IsStateModifierApplyIfYes(secondToLast))
@@ -3416,19 +3418,12 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       else
       { thirdToLast.content=thirdToLast.ToStringOpenTag(true);
         thirdToLast.resetAllExceptContent();
-        stOutput << "<hr>processed " << thirdToLast.ToStringOpenTag(true) << "<hr>";
+        //stOutput << "<hr>Rule 1: processed " << thirdToLast.ToStringOpenTag(true) << "<hr>";
       }
       eltsStack.RemoveLastObject();
       eltsStack.RemoveLastObject();
       if (this->IsStateModifierApplyIfYes(thirdToLast))
         eltsStack.RemoveLastObject();
-      continue;
-    }
-    if (thirdToLast=="<calculatorSolution>" && (secondToLast=="" || secondToLast!="command") && last!="" &&
-        last!="<" && last!=">" && last!="\"" && last!="/")
-    { thirdToLast.children.AddOnTop(secondToLast);
-      eltsStack[eltsStack.size-2]=last;
-      eltsStack.RemoveLastObject();
       continue;
     }
     if (last.syntacticRole=="</closeTag>")
@@ -3499,6 +3494,14 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       eltsStack.RemoveLastObject();
       continue;
     }
+    if (thirdToLast.syntacticRole=="<calculatorSolution>" &&
+        (secondToLast.syntacticRole=="" || secondToLast.syntacticRole=="command"))
+    { thirdToLast.children.AddOnTop(secondToLast);
+      eltsStack[eltsStack.size-2]=last;
+      eltsStack.RemoveLastObject();
+      //stOutput << "<hr>Rule 2: processed " << thirdToLast.ToStringOpenTag(true) << "<hr>";
+      continue;
+    }
 
     if (sixthToLast.syntacticRole=="<openTag" && fourthToLast=="=" && thirdToLast=="\""
         && last!="\"" )
@@ -3523,12 +3526,16 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     }
     if (secondToLast.syntacticRole=="<openTag" && last.syntacticRole==">")
     { //stOutput << "<hr>DEBUG: " << secondToLast.ToStringDebug() << " class key value: " << secondToLast.GetKeyValue("class");
-      if (this->calculatorClasses.Contains(secondToLast.GetKeyValue("class")))
+      tagClass=secondToLast.GetKeyValue("class");
+      if (tagClass=="calculatorSolution")
+        secondToLast.syntacticRole="<calculatorSolution>";
+      else if (this->calculatorClasses.Contains(tagClass))
         secondToLast.syntacticRole="<openTagCalc>";
       else
       { secondToLast.content=secondToLast.ToStringOpenTag();
         secondToLast.resetAllExceptContent();
       }
+      //stOutput << "<hr>Rule 3: processed: " << secondToLast.ToStringDebug() << "<hr>";
       eltsStack.RemoveLastObject();
       continue;
     }

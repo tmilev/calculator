@@ -171,17 +171,6 @@ bool Calculator::ExpressionMatchesPattern(const Expression& thePattern, const Ex
   return true;
 }
 
-struct StackMaintainerRules
-{
-public:
-  Calculator* owner;
-  int startingRuleStackIndex;
-  int startingRuleStackSize;
-  StackMaintainerRules(Calculator* inputBoss);
-  void AddRule(const Expression& theRule);
-  ~StackMaintainerRules();
-};
-
 void StackMaintainerRules::AddRule(const Expression& theRule)
 { if (this->owner==0)
     crash << crash;
@@ -219,6 +208,25 @@ StackMaintainerRules::~StackMaintainerRules()
   this->owner->RuleStackCacheIndex=this->startingRuleStackIndex;
   this->owner->RuleStack.children.SetSize(this->startingRuleStackSize);
   this->owner=0;
+}
+
+bool Calculator::AccountRule(const Expression &ruleE, StackMaintainerRules &theRuleStackMaintainer)
+{ MacroRegisterFunctionWithName("Calculator::AccountRule");
+  RecursionDepthCounter theRecursionCounter(&this->RecursionDeptH);
+  if (this->RecursionDeptH>this->MaxRecursionDeptH)
+    return false;
+  if (ruleE.IsCalculatorStatusChanger())
+    theRuleStackMaintainer.AddRule(ruleE);
+  if (!ruleE.IsListStartingWithAtom(this->opCommandEnclosure()))
+    return true;
+  if (ruleE.size()<=1)
+    return true;
+  if (!ruleE[1].IsListStartingWithAtom(this->opEndStatement()))
+    return this->AccountRule(ruleE[1], theRuleStackMaintainer);
+  for (int i=1; i<ruleE[1].size(); i++)
+    if (!this->AccountRule(ruleE[1][i], theRuleStackMaintainer))
+      return false;
+  return true;
 }
 
 bool Calculator::EvaluateExpression
@@ -357,8 +365,14 @@ bool Calculator::EvaluateExpression
           break;
         }
         if (output.StartsWith(theCommands.opEndStatement()))
-          if (output[i].IsCalculatorStatusChanger())
-            theRuleStackMaintainer.AddRule(output[i]);
+          if (!theCommands.AccountRule(output[i], theRuleStackMaintainer))
+          { std::stringstream out;
+            out << "Failed to account rule: " << output[i].ToString()
+            << ". Most likely the cause is too deeply nested recursion. ";
+            output.MakeError(out.str(), theCommands);
+            theCommands.flagAbortComputationASAP=true;
+            break;
+          }
       }
     /////-------Children evaluation end-------
     if (theCommands.flagAbortComputationASAP)

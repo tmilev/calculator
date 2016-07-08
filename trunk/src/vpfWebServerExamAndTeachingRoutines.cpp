@@ -84,6 +84,7 @@ public:
   bool ExtractAnswerIds(std::stringstream& comments);
   bool InterpretHtml(std::stringstream& comments);
   bool InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments);
+  std::string ToStringInterprettedCommands(Calculator& theInterpreter, List<SyntacticElementHTML>& theElements);
   bool ProcessInterprettedCommands(Calculator& theInterpreter, List<SyntacticElementHTML>& theElements, std::stringstream& comments);
   bool PrepareAnswerElements(std::stringstream &comments);
   bool InterpretAnswerElements(std::stringstream& comments);
@@ -2985,8 +2986,38 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   inputOutput.interpretedCommand=out.str();
 }
 
+std::string CalculatorHTML::ToStringInterprettedCommands(Calculator &theInterpreter, List<SyntacticElementHTML> &theElements)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringInterprettedCommands");
+  std::stringstream out;
+  out << "<table>";
+  int commandCounter=theInterpreter.theProgramExpression.size()-1;
+  for (int eltCounter=theElements.size-1; eltCounter>0; eltCounter--)
+  { SyntacticElementHTML& currentElt=theElements[eltCounter];
+    std::string currentEltString=currentElt.GetTagClass()+ "["+
+    currentElt.content.substr(0,10)+"...]";
+    std::stringstream currentStream;
+    if (!currentElt.IsInterpretedByCalculatorDuringPreparatioN())
+    { out << "<tr><td>" << currentEltString << "</td>"
+      << "<td>"
+      << theInterpreter.theProgramExpression[commandCounter].ToString()
+      << "</td></tr>";
+      commandCounter--;
+      continue;
+    }
+    for (; commandCounter>1; commandCounter--)
+    { std::string currentString=theInterpreter.theProgramExpression[commandCounter].ToString();
+      out << "<tr><td>" << currentEltString << "</td><td>"
+      << currentString << "</td></tr>";
+      if (currentString=="SeparatorBetweenSpans")
+        break;
+    }
+  }
+  out << "</table>";
+  return out.str();
+}
 
-bool CalculatorHTML::ProcessInterprettedCommands(Calculator &theInterpreter, List<SyntacticElementHTML>& theElements, std::stringstream &comments)
+bool CalculatorHTML::ProcessInterprettedCommands
+(Calculator &theInterpreter, List<SyntacticElementHTML>& theElements, std::stringstream &comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::ProcessInterprettedCommands");
   FormatExpressions theFormat;
   theFormat.flagExpressionIsFinal=true;
@@ -2998,7 +3029,10 @@ bool CalculatorHTML::ProcessInterprettedCommands(Calculator &theInterpreter, Lis
     if (!currentElt.IsInterpretedByCalculatorDuringPreparatioN())
     { if (theInterpreter.theProgramExpression[commandCounter].ToString()!="SeparatorBetweenSpans")
       { comments << "<b>Error:</b> calculator command: " << theInterpreter.theProgramExpression[commandCounter].ToString()
-        << " does not match tag: " << currentElt.ToStringDebug();
+        << " does not match tag: " << currentElt.ToStringDebug() << ". "
+        << crash.GetStackTraceEtcErrorMessage();
+        if (theGlobalVariables.UserDefaultHasAdminRights())
+          comments << this->ToStringInterprettedCommands(theInterpreter, theElements);
         return false;
       }
       commandCounter--;

@@ -755,6 +755,17 @@ struct ExpressionTripleCrunchers
   }
 };
 
+struct StackMaintainerRules
+{
+public:
+  Calculator* owner;
+  int startingRuleStackIndex;
+  int startingRuleStackSize;
+  StackMaintainerRules(Calculator* inputBoss);
+  void AddRule(const Expression& theRule);
+  ~StackMaintainerRules();
+};
+
 class Calculator
 {
   template<typename anyType>
@@ -1168,6 +1179,7 @@ public:
   int GetOperationIndexFromControlIndex(int controlIndex);
   int GetExpressionIndex();
   SyntacticElement GetEmptySyntacticElement();
+  bool AccountRule(const Expression& ruleE, StackMaintainerRules& theRuleStackMaintainer);
   bool ApplyOneRule();
   void resetStack()
   { SyntacticElement emptyElement=this->GetEmptySyntacticElement();
@@ -1259,6 +1271,9 @@ public:
   }
   int opDefine()
   { return this->theAtoms.GetIndexIMustContainTheObject("=");
+  }
+  int opCommandEnclosure()
+  { return this->theAtoms.GetIndexIMustContainTheObject("CommandEnclosure");
   }
   int opRulesChanged()
   { return this->theAtoms.GetIndexIMustContainTheObject("RulesChanged");

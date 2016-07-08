@@ -3157,6 +3157,7 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler()
   this->AddOperationNoRepetitionAllowed("RulesChanged");
   this->AddOperationNoRepetitionAllowed("Freeze");
   this->AddOperationNoRepetitionAllowed("\\infty");
+  this->AddOperationNoRepetitionAllowed("CommandEnclosure");
   this->AddOperationNoRepetitionAllowed("MonomialCollection");
   this->AddOperationNoRepetitionAllowed("MonomialPoly");
   this->AddOperationNoRepetitionAllowed("Melt");

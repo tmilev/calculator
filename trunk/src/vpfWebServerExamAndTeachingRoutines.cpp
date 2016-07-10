@@ -1987,7 +1987,7 @@ bool CalculatorHTML::PrepareCommandsGenerateProblem(std::stringstream &comments)
     std::string commandCleaned=this->CleanUpCommandString(currentElt.content);
     std::string commandEnclosed="CommandEnclosure{}( " + commandCleaned + " );";
     streamCommands << commandEnclosed;
-    currentElt.commandIndexProblemGeneration=numEnclosuresSoFar;
+    currentElt.commandIndex=numEnclosuresSoFar;
     numEnclosuresSoFar++;
   }
   this->theProblemData.commandsGenerateProblem=streamCommands.str();
@@ -3032,44 +3032,33 @@ std::string CalculatorHTML::ToStringInterprettedCommands(Calculator &theInterpre
 bool CalculatorHTML::ProcessInterprettedCommands
 (Calculator &theInterpreter, List<SyntacticElementHTML>& theElements, std::stringstream &comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::ProcessInterprettedCommands");
+  (void) comments;
   FormatExpressions theFormat;
   theFormat.flagExpressionIsFinal=true;
   theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
-  List<std::string> resultReversedOrder;
-  int commandCounter=theInterpreter.theProgramExpression.size()-1;
-  for (int eltCounter=theElements.size-1; eltCounter>0; eltCounter--)
-  { SyntacticElementHTML& currentElt=theElements[eltCounter];
+  bool result=true;
+  for (int i=0; i<theElements.size; i++)
+  { SyntacticElementHTML& currentElt=theElements[i];
     if (!currentElt.IsInterpretedByCalculatorDuringProblemGeneration())
-    { if (theInterpreter.theProgramExpression[commandCounter].ToString()!="SeparatorBetweenSpans")
-      { comments << "<b>Error:</b> calculator command: " << theInterpreter.theProgramExpression[commandCounter].ToString()
-        << " does not match tag: " << currentElt.ToStringDebug() << ". "
-        << crash.GetStackTraceEtcErrorMessage();
-        if (theGlobalVariables.UserDefaultHasAdminRights())
-          comments << this->ToStringInterprettedCommands(theInterpreter, theElements);
-        return false;
-      }
-      commandCounter--;
+    { currentElt.interpretedCommand="";
       continue;
     }
-    theElements[eltCounter].interpretedCommand="";
-    theElements[eltCounter].flagUseMathMode=true;
-    resultReversedOrder.SetSize(0);
-    for (; commandCounter>1; commandCounter--)
-    { std::string currentString=theInterpreter.theProgramExpression[commandCounter].ToString(&theFormat);
-      if (currentString=="SeparatorBetweenSpans")
-        break;
-      resultReversedOrder.AddOnTop(currentString);
-      if(theInterpreter.theProgramExpression[commandCounter].IsOfType<Plot>() ||
-         theInterpreter.theProgramExpression[commandCounter].IsOfType<std::string>())
-        currentElt.flagUseMathMode=false;
+    if (currentElt.commandIndex>= theInterpreter.theProgramExpression.size() ||
+        currentElt.commandIndex<0)
+    { std::stringstream errorStream;
+      errorStream << "<b>This is a programming error: syntactic element "
+      << currentElt.ToStringDebug() << " has wrongly computed commandIndex: "
+      << currentElt.commandIndex << ". "
+      << "Please report this error to the website admins. </b>";
+      currentElt.interpretedCommand=errorStream.str();
+      result=false;
+      continue;
     }
-    for (int i=resultReversedOrder.size-1; i>=0; i--)
-    { currentElt.interpretedCommand+=resultReversedOrder[i];
-      if (i!=0)
-        currentElt.interpretedCommand+="<br>";
-    }
+    const Expression& currentE=
+    theInterpreter.theProgramExpression[currentElt.commandIndex][1];
+    currentElt.interpretedCommand=  currentE.ToString(&theFormat);
   }
-  return true;
+  return result;
 }
 
 bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments)

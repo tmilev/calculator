@@ -57,6 +57,8 @@ public:
 class SyntacticElementHTML{
 public:
   int indexInOwner;
+  int commandIndexInSolution;
+  int commandIndexProblemGeneration;
   std::string syntacticRole;
   std::string content;
   std::string tag;
@@ -65,15 +67,20 @@ public:
   List<std::string> defaultKeysIfMissing;
   List<std::string> defaultValuesIfMissing;
   List<std::string> tagKeysWithoutValue;
+  List<SyntacticElementHTML> children;
   bool flagUseDisplaystyleInMathMode;
   bool flagUseMathMode;
   std::string interpretedCommand;
   static int ParsingNumDummyElements;
-  bool IsInterpretedByCalculatorDuringPreparatioN();
+  bool IsInterpretedByCalculatorDuringProblemGeneration();
   bool IsInterpretedByCalculatorDuringSubmission();
   bool IsInterpretedNotByCalculator();
   bool IsHidden();
+  bool IsCalculatorHidden();
+  bool IsCalculatorCommand();
+  bool IsCalculatorHiddenCommentsBeforeSubmission();
   bool IsAnswer();
+  bool IsSolution();
   bool IsAnswerElement(std::string* desiredAnswerId);
   bool IsCommentBeforeSubmission();
   bool IsAnswerOnGiveUp();
@@ -87,10 +94,11 @@ public:
   std::string ToStringCloseTag();
   std::string GetTagClass();
   std::string ToStringDebug();
-  List<SyntacticElementHTML> children;
   SyntacticElementHTML()
   { this->flagUseDisplaystyleInMathMode=false;
     this->indexInOwner=-1;
+    this->commandIndexInSolution=-1;
+    this->commandIndexProblemGeneration=-1;
   }
   SyntacticElementHTML(const std::string& inputContent)
   { this->flagUseDisplaystyleInMathMode=false;
@@ -116,8 +124,14 @@ struct Answer
   bool flagSolutionFound;
   int numSubmissions;
   int numCorrectSubmissions;
-  std::string commandsSolution;
-  std::string commandsAnswerOnGiveUp;
+  int commandIndexAnswer;
+  int commandIndexAnswerOnGiveUp;
+  List<int> commandIndicesCommentsBeforeSubmission;
+  std::string commandsBeforeAnswer;
+  std::string commandVerificationOnly;
+  std::string commandsSolutionOnly;
+  std::string commandsAnswerOnGiveUpOnly;
+  std::string commandsCommentsBeforeSubmissionOnly;
   List<SyntacticElementHTML> solutionElements;
   std::string answerId;
   std::string varAnswerId;
@@ -144,6 +158,8 @@ struct Answer
   Answer()
   { this->numSubmissions=0;
     this->numCorrectSubmissions=0;
+    this->commandIndexAnswer=-1;
+    this->commandIndexAnswerOnGiveUp=-1;
     this->flagAutoGenerateSubmitButtons=true;
     this->flagAutoGenerateMQButtonPanel=true;
     this->flagAutoGenerateMQfield=true;
@@ -166,11 +182,9 @@ public:
   int numCorrectlyAnswered;
   int totalNumSubmissions;
 //  int numAnswersSought;
+  std::string commandsGenerateProblem;
   List<Answer> theAnswers;
   List<std::string> inputNonAnswerIds;
-  List<List<std::string> > commandsForPreview;
-  List<List<std::string> > commentsBeforeSubmission;
-  List<List<std::string> > commentsAfterSubmission;
   void AddEmptyAnswerIdOnTop(const std::string& inputAnswerId);
   int GetAnswerIdIndex(const std::string& inputAnswerId);
 //  List<List<std::string> > allAnswers;

@@ -298,10 +298,6 @@ void ProblemData::AddEmptyAnswerIdOnTop(const std::string& inputAnswerId)
 { Answer theAnswer;
   theAnswer.answerId=inputAnswerId;
   this->theAnswers.AddOnTop(theAnswer);
-  List<std::string> emptyList;
-  this->commentsAfterSubmission.AddOnTop(emptyList);
-  this->commentsBeforeSubmission.AddOnTop(emptyList);
-  this->commandsForPreview.AddOnTop(emptyList);
 }
 
 std::string ProblemData::ToStringAvailableAnswerIds()

@@ -30,9 +30,6 @@ public:
 #ifdef MACRO_use_MySQL
   UserCalculator currentUser;
 #endif
-  std::string problemCommandsWithInbetweens;
-  std::string problemCommandsNoVerification;
-  std::string problemCommandsVerification;
   std::string fileName;
   std::string RelativePhysicalFileNameWithFolder;
   std::string inputHtml;
@@ -70,6 +67,7 @@ public:
   std::string currentProblemCollectionDatabaseString;
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;
+  /////////////////
   std::stringstream comments;
   int GetAnswerIndex(const std::string& desiredAnswerId);
   bool CheckContent(std::stringstream& comments);
@@ -90,7 +88,10 @@ public:
   bool InterpretAnswerElements(std::stringstream& comments);
   bool InterpretOneAnswerElement(SyntacticElementHTML& inputOutput);
   bool PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream& comments);
-  void PrepareUserInputBoxes(std::stringstream &completedProblemStream);
+  std::string PrepareUserInputBoxes();
+  bool PrepareCommandsAnswer(Answer& theAnswer, std::stringstream& comments);
+  bool PrepareCommandsGenerateProblem(std::stringstream& comments);
+  std::string GetProblemHeaderEnclosure();
   bool PrepareCommands(std::stringstream& comments);
   std::string CleanUpCommandString(const std::string& inputCommand);
   void InterpretNotByCalculator(SyntacticElementHTML& inputOutput);
@@ -783,7 +784,7 @@ std::string Answer::ToString()
 { MacroRegisterFunctionWithName("Answer::ToString");
   std::stringstream out;
   out << "Answer id: " << this->answerId;
-  out << "<br>Answer commands on give-up: " << this->commandsAnswerOnGiveUp;
+  out << "<br>Answer commands on give-up: " << this->commandsAnswerOnGiveUpOnly;
   return out.str();
 }
 
@@ -835,7 +836,7 @@ std::string WebWorker::GetProblemGiveUpAnswer()
     return out.str();
   }
   Answer& currentA=theProblem.theProblemData.theAnswers[indexLastAnswerId];
-  if (currentA.commandsAnswerOnGiveUp=="")
+  if (currentA.commandsAnswerOnGiveUpOnly=="")
   { out << "<b> Unfortunately there is no answer given for this question (answerID: " << lastStudentAnswerID << ").</b>";
     //out << "<br>DEBUG: Answer status: " << currentA.ToString();
     return out.str();
@@ -847,9 +848,8 @@ std::string WebWorker::GetProblemGiveUpAnswer()
     return out.str();
   }
   std::stringstream answerCommands;
-  theProblem.PrepareUserInputBoxes(answerCommands);
-  answerCommands << theProblem.problemCommandsNoVerification;
-  answerCommands << "SeparatorBetweenSpans; "  << currentA.commandsAnswerOnGiveUp;
+  answerCommands << currentA.commandsBeforeAnswer;
+  answerCommands << currentA.commandsAnswerOnGiveUpOnly;
   theInterpreteR.Evaluate(answerCommands.str());
   if (theInterpreteR.syntaxErrors!="")
   { out << "<span style=\"color:red\"><b>Failed to evaluate the default answer. "
@@ -858,7 +858,8 @@ std::string WebWorker::GetProblemGiveUpAnswer()
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false);
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return out.str();
-  } else if (theInterpreteR.flagAbortComputationASAP)
+  }
+  if (theInterpreteR.flagAbortComputationASAP)
   { out << "<span style=\"color:red\"><b>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b></span>"
     << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
@@ -869,22 +870,29 @@ std::string WebWorker::GetProblemGiveUpAnswer()
     return out.str();
   }
   FormatExpressions theFormat;
-  List<std::string> answersReverseOrder;
-  for (int j=theInterpreteR.theProgramExpression.children.size-1; j>=0; j--)
-  { if (theInterpreteR.theProgramExpression[j].ToString()=="SeparatorBetweenSpans")
-      break;
-//        stOutput << "<hr>DEBUG Before final computation: <hr>";
-    theFormat.flagExpressionIsFinal=true;
-    theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
-    theFormat.flagUseQuotes=false;
-    if (!theInterpreteR.theProgramExpression[j].StartsWith(theInterpreteR.opRulesChanged()))
-      answersReverseOrder.AddOnTop(theInterpreteR.theProgramExpression[j].ToString(&theFormat));
-  }
-  for (int i=answersReverseOrder.size-1; i>=0; i--)
-  { out << "\\(" << answersReverseOrder[i] << "\\)";
-    if (i!=0)
-      out << "<br>";
-  }
+  theFormat.flagExpressionIsFinal=true;
+  theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
+  theFormat.flagUseQuotes=false;
+  bool isFirst=true;
+  const Expression& currentE=
+  theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size()-1][1];
+  if (!currentE.StartsWith(theInterpreteR.opEndStatement()))
+    out << "\\(" << currentE.ToString(&theFormat) << "\\)";
+  else
+    for (int j=0; j<currentE.size(); j++)
+    { if (currentE[j].StartsWith(theInterpreteR.opRulesChanged()))
+        continue;
+      if (!isFirst)
+        out << "<br>";
+      isFirst=false;
+      theFormat.flagExpressionIsFinal=true;
+      theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
+      theFormat.flagUseQuotes=false;
+      if (currentE[j].IsOfType<std::string>())
+        out << currentE[j].GetValue<std::string>();
+      else
+        out << "\\(" << currentE[j] << "\\)";
+    }
   out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
     out <<  "<hr>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString
@@ -947,8 +955,8 @@ std::string WebWorker::GetProblemSolution()
     return out.str();
   }
   std::stringstream answerCommands;
-  theProblem.PrepareUserInputBoxes(answerCommands);
-  answerCommands << currentA.commandsSolution;
+  answerCommands << "CommandEnclosure{}(" << currentA.commandsBeforeAnswer << "); "
+  << currentA.commandsSolutionOnly;
   theInterpreteR.Evaluate(answerCommands.str());
   if (theInterpreteR.syntaxErrors!="")
   { out << "<span style=\"color:red\"><b>Failed to compose the solution. "
@@ -957,7 +965,8 @@ std::string WebWorker::GetProblemSolution()
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false);
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return out.str();
-  } else if (theInterpreteR.flagAbortComputationASAP)
+  }
+  if (theInterpreteR.flagAbortComputationASAP)
   { out << "<span style=\"color:red\"><b>Failed to compose the solution. "
     << "Likely there is a bug with the problem. </b></span>"
     << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
@@ -967,7 +976,8 @@ std::string WebWorker::GetProblemSolution()
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return out.str();
   }
-  if (!theProblem.ProcessInterprettedCommands(theInterpreteR, currentA.solutionElements, out))
+  if (!theProblem.ProcessInterprettedCommands
+       (theInterpreteR, currentA.solutionElements, out))
     return out.str();
   for (int i=1; i<currentA.solutionElements.size; i++)
     if (!currentA.solutionElements[i].IsHidden())
@@ -1018,6 +1028,7 @@ int WebWorker::ProcessSubmitProblemPreview()
     << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return 0;
   }
+  Answer& currentA=theProblem.theProblemData.theAnswers[indexLastAnswerId];
   Calculator theInterpreteR;
   theInterpreteR.init();
   theInterpreteR.Evaluate(studentInterpretation.str());
@@ -1032,100 +1043,64 @@ int WebWorker::ProcessSubmitProblemPreview()
     stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return 0;
   }
-  Calculator interpreterWithContext;
-  interpreterWithContext.init();
-  std::stringstream interpreterInputStream;
-  if (theProblem.theProblemData.commandsForPreview[indexLastAnswerId].size>0)
-  { for (int i=0; i<theProblem.theProblemData.commandsForPreview[indexLastAnswerId].size; i++)
-      interpreterInputStream << theProblem.CleanUpCommandString
-      (theProblem.theProblemData.commandsForPreview[indexLastAnswerId][i]);
-    interpreterInputStream << "SeparatorBetweenSpans; ";
-  }
-  interpreterInputStream << studentInterpretation.str();
-  interpreterWithContext.Evaluate(interpreterInputStream.str());
-  if (interpreterWithContext.syntaxErrors!="")
-  { stOutput << "<span style=\"color:red\">"
-    << "<b>Failed to parse your answer in the context of the problem, got:</b>"
-    << "</span><br>"
-    << interpreterWithContext.ToStringSyntacticStackHumanReadable(false);
-    stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
-    return 0;
-  } else if (interpreterWithContext.flagAbortComputationASAP)
-  { stOutput << "<span style=\"color:red\">"
-    << "<b>Failed to evaluate your answer in the context of the problem, got:</b>"
-    << "</span><br>"
-    << interpreterWithContext.outputString;
-    stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
-    return 0;
-  }
+  const Expression& studentAnswerNoContextE=theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size()-1];
   stOutput << "<span style=\"color:magenta\"><b>Interpreting your answer as:</b></span><br>";
-  int indexLowest=-1;
-  for (indexLowest=interpreterWithContext.theProgramExpression.children.size-1; indexLowest>=1; indexLowest--)
-    if (interpreterWithContext.theProgramExpression[indexLowest].ToString()=="SeparatorBetweenSpans")
-    { indexLowest++;
-      break;
-    }
-  if (indexLowest<1)
-    indexLowest=1;
-  stOutput << "\\(";
-  for (int i=indexLowest; i<interpreterWithContext.theProgramExpression.children.size; i++)
-  { stOutput << interpreterWithContext.theProgramExpression[i].ToString() ;
-    if (i!=interpreterWithContext.theProgramExpression.children.size-1)
-      stOutput << "; ";
-  }
-  stOutput << "\\)";
-  if (theProblem.theProblemData.commentsBeforeSubmission[indexLastAnswerId].size==0)
+  stOutput << "\\(" << studentAnswerNoContextE.ToString() << "\\)";
+  if (currentA.commandIndicesCommentsBeforeSubmission.size==0)
   { stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return 0;
   }
-  std::stringstream calculatorInputStream;
   Calculator theInterpreterWithAdvice;
   theInterpreterWithAdvice.init();
   theInterpreterWithAdvice.flagWriteLatexPlots=false;
   if (!theProblem.PrepareCommands(comments))
   { stOutput << "Something went wrong while interpreting the problem file. ";
-    if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
+    if (theGlobalVariables.UserDebugFlagOn() &&
+        theGlobalVariables.UserDefaultHasAdminRights())
       stOutput << comments.str();
-    stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    stOutput << "<br>Response time: "
+    << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return 0;
   }
-  Answer& currentAnswer=theProblem.theProblemData.theAnswers[indexLastAnswerId];
-  calculatorInputStream << theProblem.problemCommandsNoVerification;
-  calculatorInputStream << currentAnswer.answerId << " = " << lastAnswer;
-  calculatorInputStream << "SeparatorBetweenSpans; ";
-  for (int i=0; i<theProblem.theProblemData.commentsBeforeSubmission[indexLastAnswerId].size; i++)
-    calculatorInputStream << theProblem.CleanUpCommandString
-    (theProblem.theProblemData.commentsBeforeSubmission[indexLastAnswerId][i]);
+  std::stringstream calculatorInputStream;
+  calculatorInputStream << "CommandEnclosure{}("
+  << currentA.commandsBeforeAnswer << ")";
+  calculatorInputStream << "CommandEnclosure{}("
+  << currentA.answerId << " = " << lastAnswer << "); ";
+  calculatorInputStream << currentA.commandsCommentsBeforeSubmissionOnly;
   theInterpreterWithAdvice.Evaluate(calculatorInputStream.str());
-  //stOutput << "DEBUG: Interpreter with advice: " << theInterpreterWithAdvice.theProgramExpression.ToString();
   if (theInterpreterWithAdvice.syntaxErrors!="")
   { stOutput << "<br><span style=\"color:red\"><b>"
-    << "Something went wrong when parsing your answer in the context of the current problem. "
+    << "Something went wrong when parsing your answer "
+    << "in the context of the current problem. "
     << "</b></span>";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
       stOutput << theInterpreterWithAdvice.outputString << "<br>" << theInterpreterWithAdvice.outputCommentsString;
-  } else if (theInterpreterWithAdvice.flagAbortComputationASAP )
+    stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    return 0;
+  }
+  if (theInterpreterWithAdvice.flagAbortComputationASAP )
   { stOutput << "<br><span style=\"color:red\"><b>"
-    << "Something went wrong when interpreting your answer in the context of the current problem. "
+    << "Something went wrong when interpreting your answer "
+    << "in the context of the current problem. "
     << "</b></span>";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn() )
       stOutput << "<br>Logged-in as admin with debug flag on=> printing error details. "
       << theInterpreterWithAdvice.outputString << "<br>" << theInterpreterWithAdvice.outputCommentsString;
-  } else
-  { List<std::string> answersReverseOrder;
-    FormatExpressions theFormat;
-//       stOutput << "DBGDBG<br>";
-    for (int j=theInterpreterWithAdvice.theProgramExpression.children.size-1; j>=0; j--)
-    { if (theInterpreterWithAdvice.theProgramExpression[j].ToString()=="SeparatorBetweenSpans")
-        break;
-//         stOutput << "<hr>DEBUG Before final computation: <hr>";
-      theFormat.flagExpressionIsFinal=true;
-      theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
-      theFormat.flagUseQuotes=false;
-      answersReverseOrder.AddOnTop(theInterpreterWithAdvice.theProgramExpression[j].ToString(&theFormat));
-    }
-    for (int j=answersReverseOrder.size-1; j>=0; j--)
-      stOutput << answersReverseOrder[j];
+    stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    return 0;
+  }
+  FormatExpressions theFormat;
+  theFormat.flagExpressionIsFinal=true;
+  theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
+  theFormat.flagUseQuotes=false;
+  for (int j=0; j<currentA.commandIndicesCommentsBeforeSubmission.size; j++)
+  { int actualIndex=1+j;
+    const Expression& currentE=theInterpreterWithAdvice.
+    theProgramExpression[actualIndex][1];
+    stOutput << currentE.ToString(&theFormat);
+    if (j!=currentA.commandIndicesCommentsBeforeSubmission.size-1)
+      stOutput << "<br>";
   }
   stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
   return 0;
@@ -1337,36 +1312,48 @@ int WebWorker::ProcessSubmitProblem()
   if (theProblem.fileName=="")
     crash << "This shouldn't happen: empty file name: theProblem.fileName." << crash;
   std::string problemStatement=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("problemStatement"));
-  std::stringstream studentAnswerStream, completedProblemStream;
   std::string studentAnswerNameReader;
   theProblem.studentAnswersUnadulterated.SetSize(theProblem.theProblemData.theAnswers.size);
   theProblem.studentTagsAnswered.init(theProblem.theProblemData.theAnswers.size);
   MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
+  int answerIdIndex=-1;
+  std::string theAnswer;
   for (int i=0; i<theArgs.size(); i++)
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &studentAnswerNameReader))
-    { int answerIdIndex=theProblem.GetAnswerIndex(studentAnswerNameReader);
+    { int newAnswerIndex=theProblem.GetAnswerIndex(studentAnswerNameReader);
       if (answerIdIndex==-1)
-      { stOutput << "<b> You submitted an answer to tag with id " << studentAnswerNameReader
-        << " which is not on my list of "
-        << "answerable tags. </b>";
+        answerIdIndex=newAnswerIndex;
+      else if (answerIdIndex!=newAnswerIndex && answerIdIndex!=-1 && newAnswerIndex!=-1)
+      { stOutput << "<b>You submitted two or more answers [answer tags: "
+        << theProblem.theProblemData.theAnswers[answerIdIndex].answerId
+        << " and " << theProblem.theProblemData.theAnswers[newAnswerIndex].answerId
+        << "].</b> At present, multiple answer submission is not supported. ";
         return 0;
       }
-      std::string theAnswer= CGI::URLStringToNormal(theArgs.theValues[i]);
+      if (answerIdIndex==-1)
+      { stOutput << "<b> You submitted an answer to tag with id "
+        << studentAnswerNameReader
+        << " which is not on my list of answerable tags. </b>";
+        return 0;
+      }
+      theAnswer= CGI::URLStringToNormal(theArgs.theValues[i]);
       if (theAnswer=="")
       { stOutput << "<b> Your answer to tag with id " << studentAnswerNameReader
         << " appears to be empty, please resubmit. </b>";
         return 0;
       }
-      theProblem.studentAnswersUnadulterated[answerIdIndex]=theAnswer;
-      theProblem.studentTagsAnswered.AddSelectionAppendNewIndex(answerIdIndex);
-      studentAnswerStream << studentAnswerNameReader << "= ("
-      << CGI::URLStringToNormal(theArgs.theValues[i]) << ");";
     }
-  if (theProblem.studentTagsAnswered.CardinalitySelection==0)
+  if (answerIdIndex==-1)
   { stOutput << "<b>Something is wrong: I found no submitted answers.</b>";
     return 0;
   }
-  completedProblemStream << theProblem.problemCommandsNoVerification;
+  Answer& currentA=theProblem.theProblemData.theAnswers[answerIdIndex];
+  theProblem.studentAnswersUnadulterated[answerIdIndex]=theAnswer;
+  theProblem.studentTagsAnswered.AddSelectionAppendNewIndex(answerIdIndex);
+  std::stringstream studentAnswerStream, completedProblemStream;
+  studentAnswerStream << currentA.answerId << "= ("
+  << CGI::URLStringToNormal(theAnswer) << ");";
+  completedProblemStream << currentA.commandsBeforeAnswer;
   completedProblemStream << studentAnswerStream.str();
   completedProblemStream << "SeparatorBetweenSpans; ";
   for (int i=0; i<theProblem.studentTagsAnswered.CardinalitySelection; i++)
@@ -1713,9 +1700,6 @@ bool CalculatorHtmlFunctions::innerInterpretProblem
       << ": " << theProblem.timeIntermediatePerAttempt[i][j] << " second(s)";
   out << "<br>Interpretation times (per attempt): "
   << theProblem.timePerAttempt.ToStringCommaDelimited();
-  out << "<hr>Interpretation times (per attempt): "
-  << theProblem.problemCommandsWithInbetweens;
-
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -1863,7 +1847,7 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator()
   ;
 }
 
-bool SyntacticElementHTML::IsInterpretedByCalculatorDuringPreparatioN()
+bool SyntacticElementHTML::IsInterpretedByCalculatorDuringProblemGeneration()
 { if (this->syntacticRole!="command")
     return false;
   std::string tagClass=this->GetKeyValue("class");
@@ -1885,11 +1869,37 @@ bool SyntacticElementHTML::IsAnswer()
   return this->GetKeyValue("class")=="calculatorAnswer";
 }
 
+bool SyntacticElementHTML::IsCalculatorCommand()
+{ if (this->syntacticRole!="command")
+    return false;
+  return this->GetKeyValue("class")=="calculator";
+}
+
+bool SyntacticElementHTML::IsCalculatorHidden()
+{ if (this->syntacticRole!="command")
+    return false;
+  return this->GetKeyValue("class")=="calculatorHidden";
+}
+
+bool SyntacticElementHTML::IsCalculatorHiddenCommentsBeforeSubmission()
+{ if (this->syntacticRole!="command")
+    return false;
+  return this->GetKeyValue("class") =="calculatorHiddenIncludeInCommentsBeforeSubmission";
+}
+
 bool SyntacticElementHTML::IsHidden()
 { if (this->syntacticRole!="command")
     return false;
   std::string tagClass=this->GetKeyValue("class");
   return tagClass=="calculatorHidden" || tagClass== "calculatorHiddenIncludeInCommentsBeforeSubmission"
+;
+}
+
+bool SyntacticElementHTML::IsSolution()
+{ if (this->syntacticRole!="command")
+    return false;
+  std::string tagClass=this->GetKeyValue("class");
+  return tagClass=="calculatorSolution"
 ;
 }
 
@@ -1937,84 +1947,87 @@ bool SyntacticElementHTML::IsAnswerElement(std::string* desiredAnswerId)
   return result;
 }
 
-void CalculatorHTML::PrepareUserInputBoxes(std::stringstream &completedProblemStream)
+std::string CalculatorHTML::PrepareUserInputBoxes()
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareInterpreter");
   if (this->flagIsForReal)
-    return;
+    return "";
+  std::stringstream out;
   MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
   std::string inputNonAnswerReader;
   for (int i=0; i<theArgs.size(); i++)
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "userInputBox", &inputNonAnswerReader))
       if (inputNonAnswerReader!="" && theArgs.theValues[i]!="")
-      { completedProblemStream << "setInputBox(name="
+      { out << "setInputBox(name="
         << inputNonAnswerReader
         << ", value=" << CGI::URLStringToNormal(theArgs.theValues[i])
-        << ");";
+        << "); ";
       }
+  return out.str();
 }
 
-bool CalculatorHTML::PrepareCommands(std::stringstream& comments)
-{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommands");
-  if (this->theContent.size==0)
-  { comments << "Empty content not allowed. ";
-    return false;
+std::string CalculatorHTML::GetProblemHeaderEnclosure()
+{ std::stringstream out;
+  out << "CommandEnclosure{}(";
+  out <<  " setRandomSeed{}(" << this->theProblemData.randomSeed << "); ";
+  out << this->PrepareUserInputBoxes();
+  out << "); ";
+  return out.str();
+}
+
+bool CalculatorHTML::PrepareCommandsGenerateProblem(std::stringstream &comments)
+{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommandsGenerateProblem");
+  (void) comments;
+  std::stringstream streamCommands;
+  streamCommands << this->GetProblemHeaderEnclosure();//first calculator enclosure contains the header
+  int numEnclosuresSoFar=1;
+  for (int i=0; i<this->theContent.size; i++)
+  { SyntacticElementHTML& currentElt=this->theContent[i];
+    if (!currentElt.IsInterpretedByCalculatorDuringProblemGeneration())
+      continue;
+    std::string commandCleaned=this->CleanUpCommandString(currentElt.content);
+    std::string commandEnclosed="CommandEnclosure{}( " + commandCleaned + " );";
+    streamCommands << commandEnclosed;
+    currentElt.commandIndexProblemGeneration=numEnclosuresSoFar;
+    numEnclosuresSoFar++;
   }
-  if (this->theContent[0].syntacticRole!="")
-    crash << "First command must be empty to allow for command for setting of random seed. " << crash;
-  std::stringstream streamWithInbetween, streamNoVerification, streamVerification;
-  //stOutput << " The big bad random seed: " << this->randomSeed ;
-  streamWithInbetween << "setRandomSeed{}(" << this->theProblemData.randomSeed << ");";
-  streamNoVerification << streamWithInbetween.str();
-  for (int i=1; i<this->theContent.size; i++) // the first element of the content is fake (used for the random seed)
-  { if (this->theContent[i].GetTagClass()=="calculatorSolution")
-    { int answerIndex=this->GetAnswerIndex(this->theContent[i].GetKeyValue("name"));
-      if (answerIndex!=-1)
-      { Answer& currentAnswer=this->theProblemData.theAnswers[answerIndex];
-        currentAnswer.solutionElements.SetSize(1);
-        currentAnswer.solutionElements.LastObject()->SetKeyValue("class", "calculatorHidden");
-        currentAnswer.solutionElements.AddListOnTop(this->theContent[i].children);
-        std::stringstream solutionStream;
-        solutionStream << streamWithInbetween.str();
-        for (int j=1; j<currentAnswer.solutionElements.size; j++)
-        { SyntacticElementHTML& currentSolutionElt=currentAnswer.solutionElements[j];
-          if (!currentSolutionElt.IsInterpretedByCalculatorDuringPreparatioN())
-          { solutionStream << "SeparatorBetweenSpans; ";
-            continue;
-          }
-          solutionStream << this->CleanUpCommandString(currentSolutionElt.content);
-        }
-        currentAnswer.commandsSolution=solutionStream.str();
-      }
-    }
-    if (!this->theContent[i].IsInterpretedByCalculatorDuringPreparatioN())
-    { streamWithInbetween << "SeparatorBetweenSpans; ";
-      continue;
-    }
-    std::string cleanedupCommand=this->CleanUpCommandString(this->theContent[i].content);
-    if (cleanedupCommand.find("\\displaystyle")!=std::string::npos)
-      this->theContent[i].flagUseDisplaystyleInMathMode=true;
-    if (cleanedupCommand!="")
-      streamWithInbetween << cleanedupCommand;
-    else
-      streamWithInbetween << "SeparatorBetweenSpans; ";
-  }
-  for (int i=1; i<this->theContent.size; i++)
-  { if (this->theContent[i].syntacticRole!="command")
-      continue;
-    if (this->theContent[i].IsAnswer())
-    { streamVerification << this->CleanUpCommandString(this->theContent[i].content);
-      continue;
-    }
-    if (this->theContent[i].IsInterpretedByCalculatorDuringSubmission())
-    { streamNoVerification << this->CleanUpCommandString(this->theContent[i].content);
-      continue;
-    }
-  }
-  streamWithInbetween << "SeparatorBetweenSpans; " << streamVerification.str();
-  this->problemCommandsWithInbetweens=streamWithInbetween.str();
-  this->problemCommandsNoVerification=streamNoVerification.str();
-  this->problemCommandsVerification=streamVerification.str();
+  this->theProblemData.commandsGenerateProblem=streamCommands.str();
   return true;
+}
+
+bool CalculatorHTML::PrepareCommands(std::stringstream &comments)
+{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommands");
+  if (!this->PrepareCommandsGenerateProblem(comments))
+    return false;
+  for (int i=0; i<this->theProblemData.theAnswers.size; i++)
+    if (!this->PrepareCommandsAnswer(this->theProblemData.theAnswers[i], comments))
+      return false;
+  return true;
+}
+
+bool CalculatorHTML::PrepareCommandsAnswer
+(Answer& theAnswer, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommandsAnswer");
+  std::stringstream streamCommands;
+  streamCommands << this->GetProblemHeaderEnclosure();//first calculator enclosure contains the header
+  for (int i=0; i<this->theContent.size; i++)
+  { SyntacticElementHTML& currentElt=this->theContent[i];
+    if (!currentElt.IsCalculatorHidden() && !currentElt.IsCalculatorCommand()
+        && !currentElt.IsAnswer())
+      continue;
+    std::string commandCleaned=this->CleanUpCommandString(this->theContent[i].content);
+    std::string commandEnclosed="CommandEnclosure{}( " + commandCleaned + " );";
+    if (currentElt.IsAnswer() && currentElt.GetKeyValue("id")==theAnswer.answerId)
+    { theAnswer.commandsBeforeAnswer = streamCommands.str();
+      theAnswer.commandVerificationOnly=commandCleaned;
+      return true;
+    }
+    if (this->theContent[i].IsCalculatorHidden() ||
+        this->theContent[i].IsCalculatorCommand())
+      streamCommands << commandEnclosed;
+  }
+  comments << "<b>Somethins is wrong: did not find answer for answer tag: "
+  << theAnswer.answerId << ". </b>";
+  return false;
 }
 
 bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream& comments)
@@ -2027,14 +2040,14 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
   this->timeIntermediateComments.LastObject()->AddOnTop("calculator init time");
 
   //stOutput << "nput cmds: " << calculatorCommands.str();
-  theInterpreter.Evaluate(this->problemCommandsWithInbetweens);
+  theInterpreter.Evaluate(this->theProblemData.commandsGenerateProblem);
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("calculator evaluation time");
 //  stOutput << "<hr>Fter eval: " << theInterpreter.outputString;
   bool result=!theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors=="";
   if (!result)
     comments << "Failed to interpret your file. The interpretation input was:<br> "
-    << this->problemCommandsWithInbetweens << "<br>"
+    << this->theProblemData.commandsGenerateProblem << "<br>"
     << "The result of the interpretation attempt is:<br>"
     << theInterpreter.outputString << "<br><b>Comments</b><br>"
     << theInterpreter.outputCommentsString;
@@ -2533,7 +2546,7 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   + "previewAnswersNoTimeOut('" + answerId + "', '"
   + currentA.idVerificationSpan + "')" + "\">Interpret</button>";
   if (!this->flagIsForReal)
-  { if (currentA.commandsAnswerOnGiveUp!="")
+  { if (currentA.commandsAnswerOnGiveUpOnly!="")
       currentA.htmlButtonAnswer= "<button class=\"showAnswerButton\" onclick=\"giveUp('"
       + answerId + "', '" + currentA.idVerificationSpan + "')\">Answer</button>";
     else
@@ -2996,7 +3009,7 @@ std::string CalculatorHTML::ToStringInterprettedCommands(Calculator &theInterpre
     std::string currentEltString=currentElt.GetTagClass()+ "["+
     currentElt.content.substr(0,10)+"...]";
     std::stringstream currentStream;
-    if (!currentElt.IsInterpretedByCalculatorDuringPreparatioN())
+    if (!currentElt.IsInterpretedByCalculatorDuringProblemGeneration())
     { out << "<tr><td>" << currentEltString << "</td>"
       << "<td>"
       << theInterpreter.theProgramExpression[commandCounter].ToString()
@@ -3026,7 +3039,7 @@ bool CalculatorHTML::ProcessInterprettedCommands
   int commandCounter=theInterpreter.theProgramExpression.size()-1;
   for (int eltCounter=theElements.size-1; eltCounter>0; eltCounter--)
   { SyntacticElementHTML& currentElt=theElements[eltCounter];
-    if (!currentElt.IsInterpretedByCalculatorDuringPreparatioN())
+    if (!currentElt.IsInterpretedByCalculatorDuringProblemGeneration())
     { if (theInterpreter.theProgramExpression[commandCounter].ToString()!="SeparatorBetweenSpans")
       { comments << "<b>Error:</b> calculator command: " << theInterpreter.theProgramExpression[commandCounter].ToString()
         << " does not match tag: " << currentElt.ToStringDebug() << ". "
@@ -3543,8 +3556,6 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   } while (reduced || indexInElts<theElements.size);
   this->theContent.SetSize(0);
   bool result=true;
-  SyntacticElementHTML emptyElt;
-  this->theContent.AddOnTop(emptyElt);//<-adding one fake element on top.
   for (int i=SyntacticElementHTML::ParsingNumDummyElements; i<eltsStack.size; i++)
   { bool needNewTag=false;
     if (i==SyntacticElementHTML::ParsingNumDummyElements)
@@ -3562,8 +3573,8 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       this->theContent.LastObject()->content+=eltsStack[i].content;
     else
     { if (this->theContent.size>0)
-        if (this->theContent.LastObject()->IsInterpretedByCalculatorDuringPreparatioN() &&
-            eltsStack[i].IsInterpretedByCalculatorDuringPreparatioN())
+        if (this->theContent.LastObject()->IsInterpretedByCalculatorDuringProblemGeneration() &&
+            eltsStack[i].IsInterpretedByCalculatorDuringProblemGeneration())
         { SyntacticElementHTML emptyElt;
           this->theContent.AddOnTop(emptyElt);
         }
@@ -3655,65 +3666,44 @@ bool CalculatorHTML::PrepareAnswerElements(std::stringstream &comments)
 
 bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::ExtractAnswerIds");
-  //we shouldn't touch this->theProblemData.answerIds.SetSize: it may contain
+  //we shouldn't clear this->theProblemData.theAnswers: it may contain
   //outdated information loaded from the database. We don't want to loose that info
   //(say we renamed an answerId but students have already stored answers using the old answerId...).
   this->answerVerificationCommand.SetSize(this->theProblemData.theAnswers.size);
-  List<std::string> answerIdsInTheFile;
-  List<std::string> absoluteCommandsFoundSoFar;
+  List<std::string> answerIdsSeenSoFar;
   for (int i=0; i<this->theContent.size; i++)
   { SyntacticElementHTML& currentE=this->theContent[i];
-    if (currentE.IsCommentBeforeSubmission() || currentE.IsCommentAfterSubmission() ||
-        currentE.IsAnswerOnGiveUp() )
-    { if (answerIdsInTheFile.size<=0)
-      { comments << "<b>Found answer element before finding any answer tag."
-        << " Each answer element applies "
-        << "to the first answer tag above it. </b>";
+    if (currentE.IsAnswer())
+    { std::string currentId=currentE.GetKeyValue("id");
+      int theIndex=this->GetAnswerIndex(currentId);
+      if (theIndex==-1)
+        this->theProblemData.AddEmptyAnswerIdOnTop(currentId);
+      if (answerIdsSeenSoFar.Contains(currentId))
+      { comments << "<b>Answer with id: "
+        << currentId << " contained more than once. </b>";
         return false;
       }
-      int theIndex=this->GetAnswerIndex(*answerIdsInTheFile.LastObject());
-      if (theIndex==-1)
-        crash << "This shouldn't happen: answerId from file not found in problem data. " << crash;
-      Answer& currentA=this->theProblemData.theAnswers[theIndex];
-      if (currentE.IsAnswerOnGiveUp())
-      { currentA.commandsAnswerOnGiveUp=currentE.content;
-//        stOutput << currentE.ToStringDebug() << " is answer on give up";
-      }
-      if (currentE.IsCommentAfterSubmission())
-        this->theProblemData.commentsAfterSubmission[theIndex].AddOnTop(currentE.content);
-      if (currentE.IsCommentBeforeSubmission())
-        this->theProblemData.commentsBeforeSubmission[theIndex].AddOnTop(currentE.content);
-
+      answerIdsSeenSoFar.AddOnTopNoRepetition(currentId);
       continue;
     }
-    if (this->theContent[i].GetTagClass()=="calculatorHiddenIncludeInCommentsBeforeSubmission")
-    { absoluteCommandsFoundSoFar.AddOnTop(this->theContent[i].content);
+    if (!currentE.IsCommentBeforeSubmission() &&
+        !currentE.IsCommentAfterSubmission() &&
+        !currentE.IsAnswerOnGiveUp() &&
+        !currentE.IsSolution())
       continue;
-    }
-    if (!this->theContent[i].IsAnswer())
-      continue;
-    std::string newId=this->theContent[i].GetKeyValue("id");
-    if (newId=="")
-    { comments << "<b>Error: answer tag has no id</b>";
+    if (!answerIdsSeenSoFar.size==0 && currentE.GetKeyValue("name")=="")
+    { comments << "<b>Found auxilary answer element before finding an answer tag. "
+      << "Each auxilary answer element applies "
+      << "to the first answer tag above it: please place auxilary comment "
+      << "elements after the answer tag they apply to.<b>";
       return false;
     }
-    if (answerIdsInTheFile.Contains(newId))
-    { comments << "<b>Error: answer tag id: " << newId << " contained more than once</b>";
-      return false;
-    }
-    answerIdsInTheFile.AddOnTop(newId);
-    if (this->GetAnswerIndex(newId)!=-1)
-    { int indexID=this->GetAnswerIndex(newId);
-      this->answerVerificationCommand[indexID]=this->theContent[i].content;
-      this->theProblemData.commandsForPreview[indexID]=(absoluteCommandsFoundSoFar);
-    } else
-    { this->theProblemData.AddEmptyAnswerIdOnTop(newId);
-      *this->theProblemData.commandsForPreview.LastObject()=absoluteCommandsFoundSoFar;
-      this->answerVerificationCommand.AddOnTop(this->theContent[i].content);
-    }
+    if (answerIdsSeenSoFar.size==0)
+      continue;
+    currentE.SetKeyValue("name", *answerIdsSeenSoFar.LastObject());
   }
-//  stOutput << "cmnts before sub: " << this->theProblemData.commentsBeforeSubmission.ToStringCommaDelimited()
-//  << "abs cmds: " << absoluteCommandsFoundSoFar.ToStringCommaDelimited();
+  //  stOutput << "cmnts before sub: " << this->theProblemData.commentsBeforeSubmission.ToStringCommaDelimited()
+  //  << "abs cmds: " << absoluteCommandsFoundSoFar.ToStringCommaDelimited();
   return true;
 }
 

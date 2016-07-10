@@ -57,8 +57,7 @@ public:
 class SyntacticElementHTML{
 public:
   int indexInOwner;
-  int commandIndexInSolution;
-  int commandIndexProblemGeneration;
+  int commandIndex;
   std::string syntacticRole;
   std::string content;
   std::string tag;
@@ -97,8 +96,7 @@ public:
   SyntacticElementHTML()
   { this->flagUseDisplaystyleInMathMode=false;
     this->indexInOwner=-1;
-    this->commandIndexInSolution=-1;
-    this->commandIndexProblemGeneration=-1;
+    this->commandIndex=-1;
   }
   SyntacticElementHTML(const std::string& inputContent)
   { this->flagUseDisplaystyleInMathMode=false;

@@ -175,6 +175,7 @@ public:
   }
   static void InitThreadsExecutableStart();
   bool UserDefaultHasAdminRights();
+  bool UserDefaultHasProblemComposingRights();
   bool UserRequestRequiresLoadingRealExamData();
   bool UserRequestMustBePromptedToLogInIfNotLoggedIn();
 

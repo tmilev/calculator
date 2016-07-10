@@ -36,6 +36,7 @@ public:
   std::string outputHtmlMain;
   std::string outputHtmlNavigation;
   std::string currentExamHomE;
+  std::string logCommandsProblemGeneration;
   static const std::string BugsGenericMessage;
   HashedList<std::string, MathRoutines::hashString> tagKeysNoValue;
   List<std::string> calculatorClasses;
@@ -1659,6 +1660,8 @@ std::string WebWorker::GetExamPage()
   << "</head>"
   << "<body onload=\"loadSettings(); initializeButtons();\">\n";
   out << theFile.LoadAndInterpretCurrentProblemItem();
+  if (theFile.logCommandsProblemGeneration!="")
+    out << "<hr>" << theFile.logCommandsProblemGeneration << "<hr>";
   out << this->ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
@@ -1979,7 +1982,8 @@ bool CalculatorHTML::PrepareCommandsGenerateProblem(std::stringstream &comments)
   (void) comments;
   std::stringstream streamCommands;
   streamCommands << this->GetProblemHeaderEnclosure();//first calculator enclosure contains the header
-  int numEnclosuresSoFar=1;
+  int numCommandsSoFar=2;//two commands at the start: the opEndStatement command and
+  // the first enclosure.
   for (int i=0; i<this->theContent.size; i++)
   { SyntacticElementHTML& currentElt=this->theContent[i];
     if (!currentElt.IsInterpretedByCalculatorDuringProblemGeneration())
@@ -1987,8 +1991,8 @@ bool CalculatorHTML::PrepareCommandsGenerateProblem(std::stringstream &comments)
     std::string commandCleaned=this->CleanUpCommandString(currentElt.content);
     std::string commandEnclosed="CommandEnclosure{}( " + commandCleaned + " );";
     streamCommands << commandEnclosed;
-    currentElt.commandIndex=numEnclosuresSoFar;
-    numEnclosuresSoFar++;
+    currentElt.commandIndex=numCommandsSoFar;
+    numCommandsSoFar++;
   }
   this->theProblemData.commandsGenerateProblem=streamCommands.str();
   return true;
@@ -3058,6 +3062,20 @@ bool CalculatorHTML::ProcessInterprettedCommands
     theInterpreter.theProgramExpression[currentElt.commandIndex][1];
     currentElt.interpretedCommand=  currentE.ToString(&theFormat);
   }
+  if(theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasProblemComposingRights())
+  { std::stringstream streamLog;
+    streamLog << "<table border='1'>";
+    for (int i=0; i<theInterpreter.theProgramExpression.size(); i++)
+    { streamLog << "<tr>";
+      for (int j=0; j<this->theContent.size; j++)
+        if (this->theContent[j].commandIndex==i)
+          streamLog << "<td>" << this->theContent[j].ToStringDebug() << "</td>";
+      streamLog << "<td>" << theInterpreter.theProgramExpression[i].ToString()
+      << "</td></tr>";
+    }
+    streamLog << "</table>";
+    this->logCommandsProblemGeneration=streamLog.str();
+  }
   return result;
 }
 
@@ -3680,11 +3698,15 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
         !currentE.IsAnswerOnGiveUp() &&
         !currentE.IsSolution())
       continue;
-    if (!answerIdsSeenSoFar.size==0 && currentE.GetKeyValue("name")=="")
-    { comments << "<b>Found auxilary answer element before finding an answer tag. "
-      << "Each auxilary answer element applies "
-      << "to the first answer tag above it: please place auxilary comment "
-      << "elements after the answer tag they apply to.<b>";
+    if (answerIdsSeenSoFar.size==0 && currentE.GetKeyValue("name")=="")
+    { comments << "<b>Auxilary answer element: " << currentE.ToStringDebug()
+      << " has no name and appears before the first answer tag. "
+      << "Auxilary answers apply the answer tag whose id is specified in the name"
+      << " tag of the auxilary answer. If the auxilary answer has no "
+      << " name tag, it is assumed to apply to the (nearest) answer tag above it."
+      << " To fix the issue either place the auxilary element after the answer or "
+      << " specify the answer's id in the name tag of the auxilary element. "
+      << "</b>";
       return false;
     }
     if (answerIdsSeenSoFar.size==0)

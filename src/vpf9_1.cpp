@@ -234,6 +234,12 @@ bool GlobalVariables::UserDefaultHasAdminRights()
 { return this->flagLoggedIn && (this->userRole=="admin") && !this->flagIgnoreSecurityToWorkaroundSafarisBugs;
 }
 
+bool GlobalVariables::UserDefaultHasProblemComposingRights()
+{ return this->flagLoggedIn &&
+  (this->userRole=="admin" || this->userRole=="teacher") &&
+  !this->flagIgnoreSecurityToWorkaroundSafarisBugs;
+}
+
 bool GlobalVariables::UserGuestMode()
 { if (this->flagUsingSSLinCurrentConnection)
     return false;

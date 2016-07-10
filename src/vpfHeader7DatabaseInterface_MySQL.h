@@ -103,6 +103,7 @@ public:
     this->flagUseMathMode=true;
     this->content=inputContent;
     this->indexInOwner=-1;
+    this->commandIndex=-1;
   }
   bool operator==(const std::string& other)
   { return this->content==other;

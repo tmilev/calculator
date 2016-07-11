@@ -2037,9 +2037,10 @@ bool CalculatorHTML::PrepareCommandsSolution
 //    << currentElt.GetKeyValue("name");
     if (solutionElt.GetKeyValue("name")!=theAnswer.answerId)
       continue;
-    int numCommandsSoFar=0;
-    for (int j=0; j<solutionElt.children.size; j++)
-    { SyntacticElementHTML& currentElt=solutionElt.children[j];
+    int numCommandsSoFar=2;
+    theAnswer.solutionElements=solutionElt.children;
+    for (int j=0; j<theAnswer.solutionElements.size; j++)
+    { SyntacticElementHTML& currentElt=theAnswer.solutionElements[j];
       if (!currentElt.IsCalculatorCommand() && !currentElt.IsCalculatorHidden())
         continue;
       currentElt.commandIndex=numCommandsSoFar;
@@ -3103,6 +3104,10 @@ bool CalculatorHTML::ProcessInterprettedCommands
       result=false;
       continue;
     }
+    if (!theInterpreter.theProgramExpression[currentElt.commandIndex].StartsWith(theInterpreter.opCommandEnclosure()) )
+      crash << "Element: " << theInterpreter.theProgramExpression[currentElt.commandIndex].ToString()
+      << " in " << theInterpreter.theProgramExpression.ToString()
+      << " is supposed to be a command enclosure but apparently isn't. " << crash;
     const Expression& currentE=
     theInterpreter.theProgramExpression[currentElt.commandIndex][1];
     currentElt.interpretedCommand=  currentE.ToString(&theFormat);

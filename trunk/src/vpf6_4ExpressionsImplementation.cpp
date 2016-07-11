@@ -2247,7 +2247,58 @@ bool Expression::NeedsParenthesisForMultiplication()const
   return false;
 }
 
-std::string Expression::ToString(FormatExpressions* theFormat, Expression* startingExpression)const
+bool Calculator::innerFlattenCommandEnclosuresOneLayer(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFlattenCommandEnclosuresOneLayer");
+  //RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
+  //if (*theCounter.theCounter>theCommands.MaxRecursionDeptH)
+  //  return theCommands << "Max recursion depth exceeded. ";
+  //if (input.IsBuiltInType() || input.IsAtom())
+  //{ output=input;
+  //  return true;
+  //}
+//  stOutput << "<br>DEBUG: Flattening: " << input.ToString();
+  if(input.StartsWith(theCommands.opCommandEnclosure()))
+  { if (input.size()<=1)
+      return false;
+    Expression result(theCommands);
+    result.AddChildAtomOnTop(theCommands.opCommandEnclosureStart());
+    if (input.size()==2)
+    { result.AddChildOnTop(input[1]);
+      result.AddChildAtomOnTop(theCommands.opCommandEnclosureFinish());
+      output=result;
+      return true;
+    }
+    for (int i=1; i<input.size(); i++)
+      result.AddChildOnTop(input[i]);
+    result.AddChildAtomOnTop(theCommands.opCommandEnclosureFinish());
+    output=result;
+    return true;
+  }
+  if (!input.StartsWith(theCommands.opEndStatement()))
+    return false;
+  Expression result(theCommands);
+  for (int i=0; i<input.size(); i++)
+    if (input[i].StartsWith(theCommands.opCommandEnclosure()))
+    { bool processed=false;
+      result.AddChildAtomOnTop(theCommands.opCommandEnclosureStart());
+      if (input[i].size()==2)
+        if (input[i][1].StartsWith(theCommands.opEndStatement()))
+        { for (int j=1; j<input[i][1].size(); j++)
+            result.AddChildOnTop(input[i][1][j]);
+          processed=true;
+        }
+      if (!processed)
+        for (int j=1; j<input[i].size(); j++)
+          result.AddChildOnTop(input[i][j]);
+      result.AddChildAtomOnTop(theCommands.opCommandEnclosureFinish());
+    } else
+      result.AddChildOnTop(input[i]);
+  output=result;
+  return true;
+}
+
+
+std::string Expression::ToString(FormatExpressions* theFormat, Expression* startingExpression, bool unfoldCommandEnclosures)const
 { MacroRegisterFunctionWithName("Expression::ToString");
   if (this==0)
     crash << "Not supposed to happen: zero this pointer. " << crash;
@@ -2258,6 +2309,12 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     return "(Error:NoOwner)";
   RecursionDepthCounter theRecursionCounter(&this->owner->RecursionDeptH);
   this->CheckConsistency();
+  if (startingExpression!=0 && unfoldCommandEnclosures)
+  { Expression newStart, newMe;
+    if (this->owner->innerFlattenCommandEnclosuresOneLayer(*this->owner, *this, newMe) &&
+        this->owner->innerFlattenCommandEnclosuresOneLayer(*this->owner, *startingExpression, newStart))
+      return newMe.ToString(theFormat, &newStart, false);
+  }
   int notationIndex=owner->theObjectContainer.ExpressionWithNotation.GetIndex(*this);
   if (notationIndex!=-1)
     return owner->theObjectContainer.ExpressionNotation[notationIndex];

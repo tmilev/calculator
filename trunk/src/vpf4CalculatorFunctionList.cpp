@@ -232,6 +232,11 @@ void Calculator::initPredefinedInnerFunctions()
    "Lispify( e^x)");
 
   this->AddOperationInnerHandler
+  ("FlattenCommandEnclosuresOneLayer", Calculator::innerFlattenCommandEnclosuresOneLayer, "",
+   "Flattens command enclosures. ",
+   "FlattenCommandEnclosuresOneLayer(CommandClosure{}(x=5; x); CommandClosure{}(y; x)  ) ", true, false, "Calculator::FlattenCommandEnclosuresOneLayer",
+   "FlattenCommandEnclosuresOneLayer");
+  this->AddOperationInnerHandler
   ("LispifyFull", CalculatorFunctionsGeneral::innerLispifyFull, "",
    "Shows the complete internal tree structure of an expression (replacing the expression with a string).",
    "LispifyFull( e^x)");
@@ -3169,6 +3174,8 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler()
   this->AddOperationNoRepetitionAllowed("e");
   this->AddOperationNoRepetitionAllowed("\\arctan");
   this->AddOperationNoRepetitionAllowed("\\diff");
+  this->AddOperationNoRepetitionAllowed("CommandEnclosureStart");
+  this->AddOperationNoRepetitionAllowed("CommandEnclosureFinish");
 }
 
 void Calculator::initAtomsNonCacheable()

@@ -396,7 +396,7 @@ class Expression
   bool ToStringData(std::string& output, FormatExpressions* theFormat=0)const;
   std::string ToStringSemiFull()const;
   std::string ToStringFull()const;
-  std::string ToString(FormatExpressions* theFormat=0, Expression* startingExpression=0)const;
+  std::string ToString(FormatExpressions* theFormat=0, Expression* startingExpression=0, bool unfoldCommandEnclosures=true)const;
   static unsigned int HashFunction(const Expression& input)
   { return input.HashFunction();
   }
@@ -1275,6 +1275,12 @@ public:
   int opCommandEnclosure()
   { return this->theAtoms.GetIndexIMustContainTheObject("CommandEnclosure");
   }
+  int opCommandEnclosureStart()
+  { return this->theAtoms.GetIndexIMustContainTheObject("CommandEnclosureStart");
+  }
+  int opCommandEnclosureFinish()
+  { return this->theAtoms.GetIndexIMustContainTheObject("CommandEnclosureFinish");
+  }
   int opRulesChanged()
   { return this->theAtoms.GetIndexIMustContainTheObject("RulesChanged");
   }
@@ -1659,6 +1665,7 @@ public:
   static bool innerDistributeExponent(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAssociateExponentExponent(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerAssociateTimesDivision(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerFlattenCommandEnclosuresOneLayer(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyAtoXtimesAtoYequalsAtoXplusY(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerExtractBaseMultiplication(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerMeltBrackets(Calculator& theCommands, const Expression& input, Expression& output);

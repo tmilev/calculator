@@ -123,7 +123,6 @@ struct Answer
   bool flagSolutionFound;
   int numSubmissions;
   int numCorrectSubmissions;
-  int commandIndexAnswer;
   List<int> commandIndicesCommentsBeforeSubmission;
   std::string commandsBeforeAnswer;
   std::string commandVerificationOnly;
@@ -156,7 +155,6 @@ struct Answer
   Answer()
   { this->numSubmissions=0;
     this->numCorrectSubmissions=0;
-    this->commandIndexAnswer=-1;
     this->flagAutoGenerateSubmitButtons=true;
     this->flagAutoGenerateMQButtonPanel=true;
     this->flagAutoGenerateMQfield=true;

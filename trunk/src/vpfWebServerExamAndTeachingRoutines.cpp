@@ -1347,14 +1347,14 @@ int WebWorker::ProcessSubmitProblem()
   Answer& currentA=theProblem.theProblemData.theAnswers[answerIdIndex];
   currentA.currentAnswerClean=CGI::URLStringToNormal(currentA.currentAnswerURLed);
   currentA.currentAnswerURLed=CGI::StringToURLString(currentA.currentAnswerClean);//<-encoding back to overwrite malformed input
-  stOutput << "<hr>DEBUG: Processing answer: " << currentA.currentAnswerClean << " to answer object: " << currentA.ToString();
+  //stOutput << "<hr>DEBUG: Processing answer: " << currentA.currentAnswerClean << " to answer object: " << currentA.ToString();
   theProblem.studentTagsAnswered.AddSelectionAppendNewIndex(answerIdIndex);
   std::stringstream studentAnswerStream, completedProblemStream;
   completedProblemStream << currentA.commandsBeforeAnswer;
   studentAnswerStream << currentA.answerId << "= (" << currentA.currentAnswerClean << ");";
   completedProblemStream << studentAnswerStream.str();
   completedProblemStream << theProblem.CleanUpCommandString(currentA.commandVerificationOnly);
-  stOutput << "<br>DEBUG: input to the calculator: " << completedProblemStream.str() << "<hr>";
+  //stOutput << "<br>DEBUG: input to the calculator: " << completedProblemStream.str() << "<hr>";
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
   theInterpreter.init();
   theInterpreter.Evaluate(completedProblemStream.str());
@@ -2606,7 +2606,7 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
     else
       currentA.htmlButtonSolution="No solution available.";
   }
-  inputOutput.defaultKeysIfMissing.AddOnTop("onkeydown");
+  inputOutput.defaultKeysIfMissing.AddOnTop("onkeyup");
   inputOutput.defaultValuesIfMissing.AddOnTop
   (currentA.javascriptPreviewAnswer+currentA.MQUpdateFunction +"();");
   inputOutput.defaultKeysIfMissing.AddOnTop("style");
@@ -3859,7 +3859,9 @@ std::string CalculatorHtmlFunctions::GetJavascriptMathQuillBox(Answer& theAnswer
   << "});\n"
   << "function " << theAnswer.MQUpdateFunction << "(){\n"
   << "ignoreNextMathQuillUpdateEvent=true;\n"
-  << theAnswer.MQobject << ".latex(" << theAnswer.varAnswerId << ".value);\n"
+  << theAnswer.MQobject << ".latex(" << theAnswer.varAnswerId << ".value+' ');\n"
+//  << "alert('writing: ' +" << theAnswer.varAnswerId  << ".value);\n"
+//  << theAnswer.MQobject << ".latex(" << theAnswer.varAnswerId << ".value);\n"
   << "ignoreNextMathQuillUpdateEvent=false;\n"
   << "}\n"
   << "</script>";

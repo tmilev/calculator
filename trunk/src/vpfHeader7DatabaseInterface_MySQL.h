@@ -124,12 +124,11 @@ struct Answer
   int numSubmissions;
   int numCorrectSubmissions;
   int commandIndexAnswer;
-  int commandIndexAnswerOnGiveUp;
   List<int> commandIndicesCommentsBeforeSubmission;
   std::string commandsBeforeAnswer;
   std::string commandVerificationOnly;
   std::string commandsSolutionOnly;
-  std::string commandsAnswerOnGiveUpOnly;
+  std::string commandsNoEnclosureAnswerOnGiveUpOnly;
   std::string commandsCommentsBeforeSubmissionOnly;
   List<SyntacticElementHTML> solutionElements;
   std::string answerId;
@@ -158,7 +157,6 @@ struct Answer
   { this->numSubmissions=0;
     this->numCorrectSubmissions=0;
     this->commandIndexAnswer=-1;
-    this->commandIndexAnswerOnGiveUp=-1;
     this->flagAutoGenerateSubmitButtons=true;
     this->flagAutoGenerateMQButtonPanel=true;
     this->flagAutoGenerateMQfield=true;

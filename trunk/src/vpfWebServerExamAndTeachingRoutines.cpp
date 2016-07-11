@@ -77,6 +77,7 @@ public:
   std::string CleanUpFileName(const std::string& inputLink);
   bool ParseHTMLComputeChildFiles(std::stringstream& comments);
   bool ParseHTML(std::stringstream& comments);
+  bool ParseHTMLPrepareCommands(std::stringstream& comments);
   bool IsSplittingChar(const std::string& input);
   void LoadFileNames();
   bool IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt);
@@ -90,6 +91,7 @@ public:
   bool InterpretOneAnswerElement(SyntacticElementHTML& inputOutput);
   bool PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream& comments);
   std::string PrepareUserInputBoxes();
+  bool PrepareCommandsAnswerOnGiveUp(Answer& theAnswer, std::stringstream& comments);
   bool PrepareCommandsAnswer(Answer& theAnswer, std::stringstream& comments);
   bool PrepareCommandsGenerateProblem(std::stringstream& comments);
   std::string GetProblemHeaderEnclosure();
@@ -785,7 +787,7 @@ std::string Answer::ToString()
 { MacroRegisterFunctionWithName("Answer::ToString");
   std::stringstream out;
   out << "Answer id: " << this->answerId;
-  out << "<br>Answer commands on give-up: " << this->commandsAnswerOnGiveUpOnly;
+  out << "<br>Answer commands on give-up: " << this->commandsNoEnclosureAnswerOnGiveUpOnly;
   return out.str();
 }
 
@@ -816,10 +818,11 @@ std::string WebWorker::GetProblemGiveUpAnswer()
     return out.str();
   }
   std::stringstream comments;
-  if (!theProblem.ParseHTML(comments))
-  { stOutput << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
+  if (!theProblem.ParseHTMLPrepareCommands(comments))
+  { out << "<br><b>Problem preparation failed.</b><br>" << comments.str();
     return out.str();
   }
+
   std::string lastStudentAnswerID;
   MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
   for (int i=0; i<theArgs.size(); i++)
@@ -837,20 +840,17 @@ std::string WebWorker::GetProblemGiveUpAnswer()
     return out.str();
   }
   Answer& currentA=theProblem.theProblemData.theAnswers[indexLastAnswerId];
-  if (currentA.commandsAnswerOnGiveUpOnly=="")
+  if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly=="")
   { out << "<b> Unfortunately there is no answer given for this question (answerID: " << lastStudentAnswerID << ").</b>";
-    //out << "<br>DEBUG: Answer status: " << currentA.ToString();
+    if (theGlobalVariables.UserDebugFlagOn()&& theGlobalVariables.UserDefaultHasProblemComposingRights())
+      out << "<br>Answer status: " << currentA.ToString();
     return out.str();
   }
   Calculator theInterpreteR;
   theInterpreteR.init();
-  if(!theProblem.PrepareCommands(comments))
-  { out << "<b>Failed to prepare calculator commands. </b> <br>Comments:<br>" << comments.str();
-    return out.str();
-  }
   std::stringstream answerCommands;
   answerCommands << currentA.commandsBeforeAnswer;
-  answerCommands << currentA.commandsAnswerOnGiveUpOnly;
+  answerCommands << "CommandEnclosure{}(" << currentA.commandsNoEnclosureAnswerOnGiveUpOnly << ");";
   theInterpreteR.Evaluate(answerCommands.str());
   if (theInterpreteR.syntaxErrors!="")
   { out << "<span style=\"color:red\"><b>Failed to evaluate the default answer. "
@@ -880,7 +880,7 @@ std::string WebWorker::GetProblemGiveUpAnswer()
   if (!currentE.StartsWith(theInterpreteR.opEndStatement()))
     out << "\\(" << currentE.ToString(&theFormat) << "\\)";
   else
-    for (int j=0; j<currentE.size(); j++)
+    for (int j=1; j<currentE.size(); j++)
     { if (currentE[j].StartsWith(theInterpreteR.opRulesChanged()))
         continue;
       if (!isFirst)
@@ -896,7 +896,7 @@ std::string WebWorker::GetProblemGiveUpAnswer()
     }
   out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
-    out <<  "<hr>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString
+    out << "<hr>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString
     << "<hr>Raw input: " << WebWorker::ToStringCalculatorArgumentsHumanReadable();
   return out.str();
 }
@@ -1020,7 +1020,7 @@ int WebWorker::ProcessSubmitProblemPreview()
   if (!theProblem.flagLoadedSuccessfully)
     stOutput << "<br><b>Failed to load problem.</b> Comments: " << theProblem.comments.str();
   std::stringstream comments;
-  if (!theProblem.ParseHTML(comments))
+  if (!theProblem.ParseHTMLPrepareCommands(comments))
     stOutput << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
   int indexLastAnswerId=theProblem.GetAnswerIndex(lastStudentAnswerID);
   if (indexLastAnswerId==-1)
@@ -1292,15 +1292,11 @@ int WebWorker::ProcessSubmitProblem()
     stOutput.Flush();
     return 0;
   }
-  if (!theProblem.ParseHTML(comments))
+  if (!theProblem.ParseHTMLPrepareCommands(comments))
   { stOutput << "<b>Failed to parse problem. </b>Comments: " << comments.str();
     return 0;
   }
   Calculator theInterpreter;
-  if (!theProblem.PrepareCommands(comments))
-  { stOutput << "<b>Failed to prepare commands.</b>" << comments.str();
-    return 0;
-  }
   if (!theProblem.flagRandomSeedGiven && !theProblem.flagIsForReal)
     stOutput << "<b>Random seed not given.</b>";
 //  stOutput << "<b>debug remove when done: Random seed: " << theProblem.theProblemData.randomSeed << "</b>";
@@ -1998,13 +1994,44 @@ bool CalculatorHTML::PrepareCommandsGenerateProblem(std::stringstream &comments)
   return true;
 }
 
+bool CalculatorHTML::ParseHTMLPrepareCommands(std::stringstream &comments)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ParseHTMLPrepareCommands");
+  if (!this->ParseHTML(comments))
+    return false;
+  return this->PrepareCommands(comments);
+}
+
 bool CalculatorHTML::PrepareCommands(std::stringstream &comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommands");
   if (!this->PrepareCommandsGenerateProblem(comments))
     return false;
   for (int i=0; i<this->theProblemData.theAnswers.size; i++)
-    if (!this->PrepareCommandsAnswer(this->theProblemData.theAnswers[i], comments))
+  { if (!this->PrepareCommandsAnswer(this->theProblemData.theAnswers[i], comments))
       return false;
+    if (!this->PrepareCommandsAnswerOnGiveUp(this->theProblemData.theAnswers[i], comments))
+      return false;
+  }
+  return true;
+}
+
+bool CalculatorHTML::PrepareCommandsAnswerOnGiveUp
+(Answer& theAnswer, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommandsAnswerOnGiveUp");
+  (void) comments;
+  std::stringstream streamCommands;
+//  stOutput << "<hr>DEBUG: Preparing give-up commands for: " << theAnswer.answerId << "<hr>";
+  for (int i=0; i<this->theContent.size; i++)
+  { SyntacticElementHTML& currentElt=this->theContent[i];
+    if (!currentElt.IsAnswerOnGiveUp())
+      continue;
+//    stOutput << "<br>Current element: " << currentElt.ToStringDebug();
+//    stOutput << "<br>Comparing: " << theAnswer.answerId << " to: "
+//    << currentElt.GetKeyValue("name");
+    if (currentElt.GetKeyValue("name")==theAnswer.answerId)
+      streamCommands << this->CleanUpCommandString(currentElt.content);
+  }
+  theAnswer.commandsNoEnclosureAnswerOnGiveUpOnly=streamCommands.str();
+//  stOutput << "<br>Final give up command: " << theAnswer.commandsNoEnclosureAnswerOnGiveUpOnly;
   return true;
 }
 
@@ -2550,7 +2577,7 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   + "previewAnswersNoTimeOut('" + answerId + "', '"
   + currentA.idVerificationSpan + "')" + "\">Interpret</button>";
   if (!this->flagIsForReal)
-  { if (currentA.commandsAnswerOnGiveUpOnly!="")
+  { if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly!="")
       currentA.htmlButtonAnswer= "<button class=\"showAnswerButton\" onclick=\"giveUp('"
       + answerId + "', '" + currentA.idVerificationSpan + "')\">Answer</button>";
     else
@@ -3709,12 +3736,11 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
       << "</b>";
       return false;
     }
-    if (answerIdsSeenSoFar.size==0)
-      continue;
-    currentE.SetKeyValue("name", *answerIdsSeenSoFar.LastObject());
+    if (currentE.GetKeyValue("name")=="")
+      currentE.SetKeyValue("name", *answerIdsSeenSoFar.LastObject());
+//    stOutput << "<hr>Debug: processed element " << currentE.ToStringDebug();
   }
-  //  stOutput << "cmnts before sub: " << this->theProblemData.commentsBeforeSubmission.ToStringCommaDelimited()
-  //  << "abs cmds: " << absoluteCommandsFoundSoFar.ToStringCommaDelimited();
+//  stOutput << "<hr>DEBUG: Elements: " << this->ToStringContent() << "<hr>";
   return true;
 }
 

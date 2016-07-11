@@ -92,6 +92,7 @@ public:
   bool PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream& comments);
   std::string PrepareUserInputBoxes();
   bool PrepareCommandsAnswerOnGiveUp(Answer& theAnswer, std::stringstream& comments);
+  bool PrepareCommandsSolution(Answer& theAnswer, std::stringstream& comments);
   bool PrepareCommandsAnswer(Answer& theAnswer, std::stringstream& comments);
   bool PrepareCommandsGenerateProblem(std::stringstream& comments);
   std::string GetProblemHeaderEnclosure();
@@ -841,8 +842,10 @@ std::string WebWorker::GetProblemGiveUpAnswer()
   }
   Answer& currentA=theProblem.theProblemData.theAnswers[indexLastAnswerId];
   if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly=="")
-  { out << "<b> Unfortunately there is no answer given for this question (answerID: " << lastStudentAnswerID << ").</b>";
-    if (theGlobalVariables.UserDebugFlagOn()&& theGlobalVariables.UserDefaultHasProblemComposingRights())
+  { out << "<b> Unfortunately there is no answer given for this "
+    << "question (answerID: " << lastStudentAnswerID << ").</b>";
+    if (theGlobalVariables.UserDebugFlagOn()&&
+        theGlobalVariables.UserDefaultHasProblemComposingRights())
       out << "<br>Answer status: " << currentA.ToString();
     return out.str();
   }
@@ -924,7 +927,7 @@ std::string WebWorker::GetProblemSolution()
     return out.str();
   }
   std::stringstream comments;
-  if (!theProblem.ParseHTML(comments))
+  if (!theProblem.ParseHTMLPrepareCommands(comments))
   { stOutput << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
     return out.str();
   }
@@ -2010,6 +2013,8 @@ bool CalculatorHTML::PrepareCommands(std::stringstream &comments)
       return false;
     if (!this->PrepareCommandsAnswerOnGiveUp(this->theProblemData.theAnswers[i], comments))
       return false;
+    if (!this->PrepareCommandsSolution(this->theProblemData.theAnswers[i], comments))
+      return false;
   }
   return true;
 }
@@ -2031,6 +2036,37 @@ bool CalculatorHTML::PrepareCommandsAnswerOnGiveUp
       streamCommands << this->CleanUpCommandString(currentElt.content);
   }
   theAnswer.commandsNoEnclosureAnswerOnGiveUpOnly=streamCommands.str();
+//  stOutput << "<br>Final give up command: " << theAnswer.commandsNoEnclosureAnswerOnGiveUpOnly;
+  return true;
+}
+
+bool CalculatorHTML::PrepareCommandsSolution
+(Answer& theAnswer, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommandsSolution");
+  (void) comments;
+  std::stringstream streamCommands;
+//  stOutput << "<hr>DEBUG: Preparing give-up commands for: " << theAnswer.answerId << "<hr>";
+  for (int i=0; i<this->theContent.size; i++)
+  { SyntacticElementHTML& solutionElt=this->theContent[i];
+    if (!solutionElt.IsSolution())
+      continue;
+//    stOutput << "<br>Current element: " << currentElt.ToStringDebug();
+//    stOutput << "<br>Comparing: " << theAnswer.answerId << " to: "
+//    << currentElt.GetKeyValue("name");
+    if (solutionElt.GetKeyValue("name")!=theAnswer.answerId)
+      continue;
+    int numCommandsSoFar=0;
+    for (int j=0; j<solutionElt.children.size; j++)
+    { SyntacticElementHTML& currentElt=solutionElt.children[j];
+      if (!currentElt.IsCalculatorCommand() && !currentElt.IsCalculatorHidden())
+        continue;
+      currentElt.commandIndex=numCommandsSoFar;
+      numCommandsSoFar++;
+      streamCommands << "CommandEnclosure{}("
+      << this->CleanUpCommandString(currentElt.content) << "); ";
+    }
+  }
+  theAnswer.commandsSolutionOnly=streamCommands.str();
 //  stOutput << "<br>Final give up command: " << theAnswer.commandsNoEnclosureAnswerOnGiveUpOnly;
   return true;
 }

@@ -151,7 +151,10 @@ struct Answer
   std::string idMQfield;
   std::string idMQButtonPanelLocation;
   std::string MQUpdateFunction;
-  std::string firstCorrectAnswer;
+  std::string currentAnswerURLed;
+  std::string currentAnswerClean;
+  std::string firstCorrectAnswerURLed;
+  std::string firstCorrectAnswerClean;
   Answer()
   { this->numSubmissions=0;
     this->numCorrectSubmissions=0;

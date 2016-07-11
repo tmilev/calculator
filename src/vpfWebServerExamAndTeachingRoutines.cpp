@@ -44,11 +44,9 @@ public:
   List<char> splittingChars;
   List<SyntacticElementHTML> eltsStack;
   List<SyntacticElementHTML> theContent;
-  List<std::string> answerVerificationCommand;
 //  List<std::string> answerFirstCorrectSubmission;
   Selection studentTagsAnswered;
   ProblemData theProblemData;
-  List<std::string> studentAnswersUnadulterated;
   HashedList<std::string, MathRoutines::hashString> hdProblemList;
   List<std::string> hdHomeworkGroupCorrespondingToEachProblem;
   List<List<std::string> > hdHomeworkGroups;
@@ -1313,11 +1311,9 @@ int WebWorker::ProcessSubmitProblem()
     crash << "This shouldn't happen: empty file name: theProblem.fileName." << crash;
   std::string problemStatement=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("problemStatement"));
   std::string studentAnswerNameReader;
-  theProblem.studentAnswersUnadulterated.SetSize(theProblem.theProblemData.theAnswers.size);
   theProblem.studentTagsAnswered.init(theProblem.theProblemData.theAnswers.size);
   MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
   int answerIdIndex=-1;
-  std::string theAnswer;
   for (int i=0; i<theArgs.size(); i++)
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &studentAnswerNameReader))
     { int newAnswerIndex=theProblem.GetAnswerIndex(studentAnswerNameReader);
@@ -1336,8 +1332,9 @@ int WebWorker::ProcessSubmitProblem()
         << " which is not on my list of answerable tags. </b>";
         return 0;
       }
-      theAnswer= CGI::URLStringToNormal(theArgs.theValues[i]);
-      if (theAnswer=="")
+      Answer& currentA=theProblem.theProblemData.theAnswers[answerIdIndex];
+      currentA.currentAnswerURLed = theArgs.theValues[i];
+      if (currentA.currentAnswerURLed=="")
       { stOutput << "<b> Your answer to tag with id " << studentAnswerNameReader
         << " appears to be empty, please resubmit. </b>";
         return 0;
@@ -1348,33 +1345,29 @@ int WebWorker::ProcessSubmitProblem()
     return 0;
   }
   Answer& currentA=theProblem.theProblemData.theAnswers[answerIdIndex];
-  theProblem.studentAnswersUnadulterated[answerIdIndex]=theAnswer;
+  currentA.currentAnswerClean=CGI::URLStringToNormal(currentA.currentAnswerURLed);
+  currentA.currentAnswerURLed=CGI::StringToURLString(currentA.currentAnswerClean);//<-encoding back to overwrite malformed input
+  stOutput << "<hr>DEBUG: Processing answer: " << currentA.currentAnswerClean << " to answer object: " << currentA.ToString();
   theProblem.studentTagsAnswered.AddSelectionAppendNewIndex(answerIdIndex);
   std::stringstream studentAnswerStream, completedProblemStream;
-  studentAnswerStream << currentA.answerId << "= ("
-  << CGI::URLStringToNormal(theAnswer) << ");";
   completedProblemStream << currentA.commandsBeforeAnswer;
+  studentAnswerStream << currentA.answerId << "= (" << currentA.currentAnswerClean << ");";
   completedProblemStream << studentAnswerStream.str();
-  completedProblemStream << "SeparatorBetweenSpans; ";
-  for (int i=0; i<theProblem.studentTagsAnswered.CardinalitySelection; i++)
-    completedProblemStream << theProblem.CleanUpCommandString(
-    theProblem.answerVerificationCommand[theProblem.studentTagsAnswered.elements[i]]);
-//  stOutput << "input to the calculator: " << completedProblemStream.str() << "<hr>";
+  completedProblemStream << theProblem.CleanUpCommandString(currentA.commandVerificationOnly);
+  stOutput << "<br>DEBUG: input to the calculator: " << completedProblemStream.str() << "<hr>";
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
   theInterpreter.init();
   theInterpreter.Evaluate(completedProblemStream.str());
   if (theInterpreter.flagAbortComputationASAP || theInterpreter.syntaxErrors!="")
   { stOutput << "<b>Error while processing your answer(s).</b> Here's what I understood. ";
-    for (int i=0; i<theProblem.studentAnswersUnadulterated.size; i++)
-    { Calculator isolatedInterpreter;
-      isolatedInterpreter.init();
-      theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
-      isolatedInterpreter.Evaluate("("+theProblem.studentAnswersUnadulterated[i]+")");
-      if (isolatedInterpreter.syntaxErrors!="")
-        stOutput << isolatedInterpreter.ToStringSyntacticStackHumanReadable(false);
-      else
-        stOutput << isolatedInterpreter.outputString;
-    }
+    Calculator isolatedInterpreter;
+    isolatedInterpreter.init();
+    theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
+    isolatedInterpreter.Evaluate("("+currentA.currentAnswerClean+")");
+    if (isolatedInterpreter.syntaxErrors!="")
+      stOutput << isolatedInterpreter.ToStringSyntacticStackHumanReadable(false);
+    else
+      stOutput << isolatedInterpreter.outputString;
     if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
     { stOutput << "<hr><b>Admin view internals:</b><br>" << theInterpreter.outputString
       << "<br>" << theInterpreter.outputCommentsString
@@ -1386,17 +1379,11 @@ int WebWorker::ProcessSubmitProblem()
     return 0;
   }
   bool isCorrect=false;
-  for (int i=theInterpreter.theProgramExpression.children.size-1; i>=0; i--)
-  { if (theInterpreter.theProgramExpression[i].ToString()== "SeparatorBetweenSpans")
-      break;
-    int mustbeOne=-1;
-    if (!theInterpreter.theProgramExpression[i].IsSmallInteger(&mustbeOne))
-      isCorrect=false;
-    else
-      isCorrect=(mustbeOne==1);
-    if (!isCorrect)
-      break;
-  }
+  int mustBeOne=-1;
+  if (!theInterpreter.theProgramExpression[theInterpreter.theProgramExpression.size()-1].IsSmallInteger(&mustBeOne))
+    isCorrect=false;
+  else
+    isCorrect=(mustBeOne==1);
 #ifdef MACRO_use_MySQL
   int correctSubmissionsRelevant=0;
   int totalSubmissionsRelevant=0;
@@ -1466,10 +1453,10 @@ int WebWorker::ProcessSubmitProblem()
           if (isCorrect)
           { currentA.numCorrectSubmissions++;
             correctSubmissionsRelevant++;
-            if (currentA.firstCorrectAnswer=="")
-              currentA.firstCorrectAnswer=theProblem.studentAnswersUnadulterated[theIndex];
+            if (currentA.firstCorrectAnswerClean=="")
+              currentA.firstCorrectAnswerClean=currentA.currentAnswerClean;
             else
-              stOutput << "[correct answer already submitted: " << currentA.firstCorrectAnswer << "]";
+              stOutput << "[correct answer already submitted: " << currentA.firstCorrectAnswerClean << "]";
           }
         }
     }
@@ -1500,21 +1487,16 @@ int WebWorker::ProcessSubmitProblem()
 #endif
   stOutput << "<tr><td>Your answer was: ";
   std::string errorMessage;
-  for (int i=0; i< theProblem.studentAnswersUnadulterated.size; i++ )
-  { stOutput << "\\(" << theProblem.studentAnswersUnadulterated[i] << "\\)";
-    errorMessage=theInterpreter.ToStringIsCorrectAsciiCalculatorString(theProblem.studentAnswersUnadulterated[i]);
-    if (errorMessage!="")
-      stOutput << "<br>" << errorMessage
-      << "<hr><b>If you entered this expression through the keyboard (without copying + pasting) this is a bug: "
-      << "please report it to Todor Milev. Don't forget to mention your keyboard/character setup. "
-      << "Are you using the standard English keyboard? Cyrillic, Chinese, etc. characters are not accepted. </b> "
-      << "<hr><span style=\"color:red\"><b>Copying and pasting an answer not computed by yourself "
-      << " is considered cheating (example: answer from an online program for doing homework).</b> </span>";
-    if (i<theProblem.studentAnswersUnadulterated.size-1)
-      stOutput << "<br>";
-  }
+  stOutput << "\\(" << currentA.currentAnswerClean << "\\)";
+  errorMessage=theInterpreter.ToStringIsCorrectAsciiCalculatorString(currentA.currentAnswerClean);
+  if (errorMessage!="")
+    stOutput << "<br>" << errorMessage
+    << "<hr><b>If you entered this expression through the keyboard (without copying + pasting) this is a bug: "
+    << "please report it to the web site administrator. Don't forget to mention your keyboard/character setup. "
+    << "Are you using the standard English keyboard? Cyrillic, Chinese, etc. characters are not accepted. </b> "
+    << "<hr><span style=\"color:red\"><b>Copying and pasting an answer not computed by yourself "
+    << " is considered cheating (example: answer from an online program for doing homework).</b> </span>";
   stOutput << "</td></tr>";
-
   stOutput << "</table>";
   stOutput << "Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
 
@@ -2643,7 +2625,7 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   if (theGlobalVariables.userCalculatorRequestType=="examForReal")
   { if (numCorrectSubmissions >0)
     { verifyStream << "<b><span style=\"color:green\">Correctly answered: \\("
-      << currentA.firstCorrectAnswer<< "\\) </span></b> ";
+      << currentA.firstCorrectAnswerClean << "\\) </span></b> ";
       if (numSubmissions>0)
         verifyStream << "<br>Used: " << numSubmissions << " attempt(s) (" << numCorrectSubmissions << " correct).";
     } else
@@ -3739,7 +3721,6 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
   //we shouldn't clear this->theProblemData.theAnswers: it may contain
   //outdated information loaded from the database. We don't want to loose that info
   //(say we renamed an answerId but students have already stored answers using the old answerId...).
-  this->answerVerificationCommand.SetSize(this->theProblemData.theAnswers.size);
   List<std::string> answerIdsSeenSoFar;
   for (int i=0; i<this->theContent.size; i++)
   { SyntacticElementHTML& currentE=this->theContent[i];
@@ -3763,8 +3744,8 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
       continue;
     if (answerIdsSeenSoFar.size==0 && currentE.GetKeyValue("name")=="")
     { comments << "<b>Auxilary answer element: " << currentE.ToStringDebug()
-      << " has no name and appears before the first answer tag. "
-      << "Auxilary answers apply the answer tag whose id is specified in the name"
+      << " has no name and appears before the first answer tag."
+      << " Auxilary answers apply the answer tag whose id is specified in the name"
       << " tag of the auxilary answer. If the auxilary answer has no "
       << " name tag, it is assumed to apply to the (nearest) answer tag above it."
       << " To fix the issue either place the auxilary element after the answer or "

@@ -324,10 +324,10 @@ std::string ProblemData::ToString()
     out << ", numCorrectSubmissions: " << currentA.numCorrectSubmissions;
     out << ", numSubmissions: " << currentA.numSubmissions;
     out << ", firstCorrectAnswer: ";
-    if (currentA.firstCorrectAnswer!="")
+    if (currentA.firstCorrectAnswerClean!="")
       out << "none yet";
     else
-      out << currentA.firstCorrectAnswer;
+      out << currentA.firstCorrectAnswerClean;
   }
   return out.str();
 }
@@ -1368,8 +1368,11 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
       currentA.numSubmissions=
       atoi(currentQuestionMap.GetValueCreateIfNotPresent("numSubmissions").c_str());
     if (currentQuestionMap.Contains("firstCorrectAnswer"))
-      currentA.firstCorrectAnswer=CGI::URLStringToNormal
-      (currentQuestionMap.GetValueCreateIfNotPresent("firstCorrectAnswer"));
+    { currentA.firstCorrectAnswerURLed=currentQuestionMap.GetValueCreateIfNotPresent("firstCorrectAnswer");
+      currentA.firstCorrectAnswerClean= CGI::URLStringToNormal(currentA.firstCorrectAnswerURLed);
+      currentA.firstCorrectAnswerURLed=CGI::StringToURLString(currentA.firstCorrectAnswerClean); //url-encoding back the cleaned up answer:
+      //this protects from the possibility that currentA.firstCorrectAnswerURLed was not encoded properly.
+    }
   }
   return result;
 }
@@ -1385,7 +1388,7 @@ std::string ProblemData::Store()
     questionsStream
     << "numCorrectSubmissions=" << currentA.numCorrectSubmissions
     << "&numSubmissions=" << currentA.numSubmissions
-    << "&firstCorrectAnswer=" << CGI::StringToURLString(currentA.firstCorrectAnswer);
+    << "&firstCorrectAnswer=" << CGI::StringToURLString(currentA.firstCorrectAnswerClean);
     out << CGI::StringToURLString(questionsStream.str());
   }
   return out.str();

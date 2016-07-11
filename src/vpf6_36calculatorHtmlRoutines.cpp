@@ -7,7 +7,6 @@
 
 ProjectInformationInstance ProjectInfoVpf6_36pp(__FILE__, "Calculator html functions implementation. ");
 
-
 bool CalculatorHtmlFunctions::innerUserInputBox
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");

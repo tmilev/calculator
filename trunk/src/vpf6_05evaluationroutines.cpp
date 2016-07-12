@@ -216,12 +216,14 @@ bool Calculator::AccountRule(const Expression &ruleE, StackMaintainerRules &theR
   if (this->RecursionDeptH>this->MaxRecursionDeptH)
     return false;
   if (ruleE.IsCalculatorStatusChanger())
-    theRuleStackMaintainer.AddRule(ruleE);
+  { theRuleStackMaintainer.AddRule(ruleE);
+    stOutput << "<br>DEBUG: accounted rule: " << ruleE.ToString();
+  }
   if (!ruleE.IsListStartingWithAtom(this->opCommandEnclosure()))
     return true;
   if (ruleE.size()<=1)
     return true;
-  if (!ruleE[1].IsListStartingWithAtom(this->opEndStatement()))
+  if (!ruleE[1].StartsWith(this->opEndStatement()))
     return this->AccountRule(ruleE[1], theRuleStackMaintainer);
   for (int i=1; i<ruleE[1].size(); i++)
     if (!this->AccountRule(ruleE[1][i], theRuleStackMaintainer))
@@ -345,7 +347,7 @@ bool Calculator::EvaluateExpression
     /////-------Children evaluation-------
     ProgressReport theReport;
     if (!output.IsFrozen())
-      for (int i=0; i<output.children.size && !theCommands.flagAbortComputationASAP; i++)
+      for (int i=0; i<output.size() && !theCommands.flagAbortComputationASAP; i++)
       { if (i>0 && output.StartsWith(theCommands.opEndStatement()))
         { std::stringstream reportStream;
           reportStream << "Substitution rules so far:";
@@ -395,7 +397,7 @@ bool Calculator::EvaluateExpression
     }
     /////-------Built-in evaluation end-------
     /////-------User-defined pattern matching------
-    for (int i=0; i<theCommands.RuleStack.children.size && !theCommands.flagAbortComputationASAP; i++)
+    for (int i=0; i<theCommands.RuleStack.size() && !theCommands.flagAbortComputationASAP; i++)
     { const Expression& currentPattern=theCommands.RuleStack[i];
       theCommands.TotalNumPatternMatchedPerformed++;
       if (theCommands.flagLogEvaluatioN)

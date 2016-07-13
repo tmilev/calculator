@@ -173,8 +173,19 @@ bool Calculator::ExpressionMatchesPattern(const Expression& thePattern, const Ex
 
 void StackMaintainerRules::AddRule(const Expression& theRule)
 { if (this->owner==0)
-    crash << crash;
+    crash << "StackMaintainerRules has zero owner. " << crash;
   this->owner->RuleStack.AddChildOnTop(theRule);
+  std::string currentRule;
+  if (theRule.StartsWith(this->owner->opRulesOn() ) ||
+      theRule.StartsWith(this->owner->opRulesOff() ) )
+    for (int j=1; j<theRule.size(); j++)
+    { if (!theRule[j].IsOfType(&currentRule))
+        continue;
+      if (!this->owner->namedRules.Contains(currentRule))
+        continue;
+      this->owner->GetFunctionHandlerFromNamedRule(currentRule).flagDisabledByUser=
+      theRule.StartsWith(this->owner->opRulesOff());
+    }
   this->owner->RuleStackCacheIndex=this->owner->cachedRuleStacks.GetIndex(this->owner->RuleStack);
   if (this->owner->RuleStackCacheIndex==-1)
     if (this->owner->cachedRuleStacks.size<this->owner->MaxCachedExpressionPerRuleStack)
@@ -191,20 +202,39 @@ StackMaintainerRules::StackMaintainerRules(Calculator* inputBoss)
   if (this->owner==0)
     return;
   this->startingRuleStackIndex=inputBoss->RuleStackCacheIndex;
-  this->startingRuleStackSize=inputBoss->RuleStack.children.size;
+  this->startingRuleStackSize=inputBoss->RuleStack.size();
 }
 
 StackMaintainerRules::~StackMaintainerRules()
 { if (this->owner==0)
     return;
   Expression& theRuleStack=this->owner->RuleStack;
-  for (int i=theRuleStack.children.size-1; i>this->startingRuleStackIndex; i--)
-    if (theRuleStack[i].StartsWith(this->owner->opRulesChanged()))
-      for (int j=1; j<theRuleStack[i].children.size; j++)
-      { Function& currentFun=
-        this->owner->GetFunctionHandlerFromNamedRule(theRuleStack[i][j].GetValue<std::string>());
-        currentFun.flagDisabledByUser=! currentFun.flagDisabledByUser;
+  std::string currentRuleName;
+  bool shouldUpdateRules=false;
+  for (int i=this->startingRuleStackSize; i<theRuleStack.size(); i++)
+    if (theRuleStack[i].StartsWith(this->owner->opRulesOn()) ||
+        theRuleStack[i].StartsWith(this->owner->opRulesOff()))
+      for (int j=1; j<theRuleStack[i].size(); j++)
+      { if (!theRuleStack[i][j].IsOfType<std::string>(&currentRuleName))
+          continue;
+        if (!this->owner->namedRules.Contains(currentRuleName))
+          continue;
+        this->owner->GetFunctionHandlerFromNamedRule(currentRuleName).flagDisabledByUser=false;
       }
+  if (shouldUpdateRules)
+    for (int i=0; i<=this->startingRuleStackSize; i++)
+      if (theRuleStack[i].StartsWith(this->owner->opRulesOn()))
+        for (int j=1; j<theRuleStack[i].size(); j++)
+        { Function& currentFun=
+          this->owner->GetFunctionHandlerFromNamedRule(theRuleStack[i][j].GetValue<std::string>());
+          currentFun.flagDisabledByUser=false;
+        }
+      else if (theRuleStack[i].StartsWith(this->owner->opRulesOff()))
+        for (int j=1; j<theRuleStack[i].size(); j++)
+        { Function& currentFun=
+          this->owner->GetFunctionHandlerFromNamedRule(theRuleStack[i][j].GetValue<std::string>());
+          currentFun.flagDisabledByUser=true;
+        }
   this->owner->RuleStackCacheIndex=this->startingRuleStackIndex;
   this->owner->RuleStack.children.SetSize(this->startingRuleStackSize);
   this->owner=0;
@@ -217,7 +247,7 @@ bool Calculator::AccountRule(const Expression &ruleE, StackMaintainerRules &theR
     return false;
   if (ruleE.IsCalculatorStatusChanger())
   { theRuleStackMaintainer.AddRule(ruleE);
-    stOutput << "<br>DEBUG: accounted rule: " << ruleE.ToString();
+//    stOutput << "<br>DEBUG: accounted rule: " << ruleE.ToString();
   }
   if (!ruleE.IsListStartingWithAtom(this->opCommandEnclosure()))
     return true;

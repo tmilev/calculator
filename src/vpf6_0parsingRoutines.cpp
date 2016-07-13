@@ -634,9 +634,18 @@ bool Calculator::isInterpretedAsEmptySpace(unsigned char input)
 
 void Calculator::ParseFillDictionary(const std::string& input)
 { MacroRegisterFunctionWithName("Calculator::ParseFillDictionary");
+  this->ParseFillDictionary(input, *this->CurrrentSyntacticSouP);
+  SyntacticElement currentElement;
+  currentElement.theData.reset(*this);
+  currentElement.controlIndex=this->conEndProgram();
+  (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
+}
+
+void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticElement>& output)
+{ MacroRegisterFunctionWithName("Calculator::ParseFillDictionary");
   std::string current;
-  (*this->CurrrentSyntacticSouP).Reserve(input.size());
-  (*this->CurrrentSyntacticSouP).SetSize(0);
+  output.Reserve(input.size());
+  output.SetSize(0);
   char LookAheadChar;
   SyntacticElement currentElement;
   int currentDigit;
@@ -655,7 +664,6 @@ void Calculator::ParseFillDictionary(const std::string& input)
         current=" ";
     bool shouldSplit=
     (this->isLeftSeparator(current[0]) || this->isRightSeparator(LookAheadChar) || current==" ");
-
     if (MathRoutines::isADigit(LookAheadChar))
     { //stOutput << "DEBUG: lookahead digit, current: " << current;
       if (current[current.size()-1]=='\\' || this->stringsThatSplitIfFollowedByDigit.Contains(current))
@@ -680,22 +688,19 @@ void Calculator::ParseFillDictionary(const std::string& input)
     if (this->controlSequences.Contains(current) && !mustInterpretAsVariable)
     { currentElement.controlIndex=this->controlSequences.GetIndex(current);
       currentElement.theData.reset(*this);
-      (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
+      output.AddOnTop(currentElement);
     } else if (MathRoutines::isADigit(current, &currentDigit) && !mustInterpretAsVariable)
     { currentElement.theData.AssignValue<Rational>(currentDigit, *this);
       currentElement.controlIndex=this->conInteger();
-      (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
+      output.AddOnTop(currentElement);
     } else
     { currentElement.controlIndex=this->controlSequences.GetIndex("Variable");
       currentElement.theData.MakeAtom(this->AddOperationNoRepetitionOrReturnIndexFirst(current), *this);
-      (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
+      output.AddOnTop(currentElement);
     // stOutput << "<br>Adding syntactic element " << currentElement.ToString(*this);
     }
     current="";
   }
-  currentElement.theData.reset(*this);
-  currentElement.controlIndex=this->conEndProgram();
-  (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
 }
 
 int Calculator::GetOperationIndexFromControlIndex(int controlIndex)

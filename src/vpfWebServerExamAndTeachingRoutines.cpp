@@ -882,7 +882,8 @@ std::string WebWorker::GetProblemGiveUpAnswer()
     out << "\\(" << currentE.ToString(&theFormat) << "\\)";
   else
     for (int j=1; j<currentE.size(); j++)
-    { if (currentE[j].StartsWith(theInterpreteR.opRulesChanged()))
+    { if (currentE[j].StartsWith(theInterpreteR.opRulesOff()) ||
+          currentE[j].StartsWith(theInterpreteR.opRulesOn()))
         continue;
       if (!isFirst)
         out << "<br>";
@@ -3086,6 +3087,7 @@ bool CalculatorHTML::ProcessInterprettedCommands
   FormatExpressions theFormat;
   theFormat.flagExpressionIsFinal=true;
   theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
+  theFormat.flagUseQuotes=false;
   bool result=true;
   for (int i=0; i<theElements.size; i++)
   { SyntacticElementHTML& currentElt=theElements[i];
@@ -3108,8 +3110,8 @@ bool CalculatorHTML::ProcessInterprettedCommands
       crash << "Element: " << theInterpreter.theProgramExpression[currentElt.commandIndex].ToString()
       << " in " << theInterpreter.theProgramExpression.ToString()
       << " is supposed to be a command enclosure but apparently isn't. " << crash;
-    const Expression& currentE=
-    theInterpreter.theProgramExpression[currentElt.commandIndex][1];
+    const Expression& currentE=theInterpreter.theProgramExpression[currentElt.commandIndex][1];
+    theFormat.flagUseQuotes=false;
     currentElt.interpretedCommand=  currentE.ToString(&theFormat);
   }
   if(theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasProblemComposingRights())

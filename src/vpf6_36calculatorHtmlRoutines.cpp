@@ -34,6 +34,39 @@ bool CalculatorHtmlFunctions::innerUserInputBox
   return true;
 }
 
+bool CalculatorHtmlFunctions::innerEvaluateSymbols
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerEvaluateSymbols");
+  std::string theString;
+  if (!input.IsOfType(&theString))
+    return false;
+  List<SyntacticElement> theElts;
+  theCommands.ParseFillDictionary(theString, theElts);
+  Expression evaluatedE;
+  std::stringstream out;
+  bool previousWasInteger=false;
+  for (int i=0; i<theElts.size; i++)
+  { SyntacticElement& currentElt=theElts[i];
+    if (currentElt.controlIndex==theCommands.conVariable())
+    { theCommands.EvaluateExpression(theCommands, currentElt.theData, evaluatedE);
+      out << evaluatedE.ToString();
+      continue;
+    }
+    if (currentElt.controlIndex==theCommands.conInteger())
+    { if (!previousWasInteger)
+        out << "{";
+      out << currentElt.theData.ToString();
+      previousWasInteger=true;
+      continue;
+    }
+    if (previousWasInteger)
+      out << "}";
+    previousWasInteger=false;
+    out << theCommands.controlSequences[currentElt.controlIndex];
+  }
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool CalculatorHtmlFunctions::innerSetInputBox
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorHtmlFunctions::innerUserInputBox");

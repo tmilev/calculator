@@ -1275,14 +1275,17 @@ public:
   int opCommandEnclosure()
   { return this->theAtoms.GetIndexIMustContainTheObject("CommandEnclosure");
   }
+  int opRulesOff()
+  { return this->theAtoms.GetIndexIMustContainTheObject("RulesOff");
+  }
+  int opRulesOn()
+  { return this->theAtoms.GetIndexIMustContainTheObject("RulesOn");
+  }
   int opCommandEnclosureStart()
   { return this->theAtoms.GetIndexIMustContainTheObject("CommandEnclosureStart");
   }
   int opCommandEnclosureFinish()
   { return this->theAtoms.GetIndexIMustContainTheObject("CommandEnclosureFinish");
-  }
-  int opRulesChanged()
-  { return this->theAtoms.GetIndexIMustContainTheObject("RulesChanged");
   }
   int opTurnOnRules()
   { return this->theAtoms.GetIndexIMustContainTheObject("TurnOnRules");
@@ -1909,6 +1912,7 @@ public:
   (const std::string& theInputString, Expression& outputExp, List<SyntacticElement>& outputSynSoup, List<SyntacticElement>& outputSynStack, std::string* outputSynErrors);
   bool isLeftSeparator(unsigned char c);
   bool isRightSeparator(unsigned char c);
+  void ParseFillDictionary(const std::string& input, List<SyntacticElement>& output);
   void ParseFillDictionary(const std::string& input);
 };
 

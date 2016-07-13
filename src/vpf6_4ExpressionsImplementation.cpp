@@ -2919,7 +2919,9 @@ bool Expression::IsCalculatorStatusChanger()const
   return
   this->StartsWith(this->owner->opDefine()) ||
   this->StartsWith(this->owner->opDefineConditional()) ||
-  this->StartsWith(this->owner->opRulesChanged());
+  this->StartsWith(this->owner->opRulesOff()) ||
+  this->StartsWith(this->owner->opRulesOn())
+  ;
 }
 
 bool Expression::IsArithmeticOperation(std::string* outputWhichOperation)const

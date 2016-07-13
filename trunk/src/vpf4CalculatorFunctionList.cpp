@@ -111,6 +111,12 @@ void Calculator::initPredefinedInnerFunctions()
    true, false, "CalculatorConversions::innerTurnOnRules", "TurnOnRules");
 
   this->AddOperationInnerHandler
+  ("EvaluateSymbols", CalculatorHtmlFunctions::innerEvaluateSymbols, "",
+   "Evaluates and replaces individual symbols/variables in LaTeX string. Leaves the rest of the string intact.",
+   "x=5; left=a; EvaluateSymbols(\"x^x+ax+a x+\\left(left \\right)\")",
+   true, false, "CalculatorConversions::innerTurnOnRules", "TurnOnRules");
+
+  this->AddOperationInnerHandler
   ("or", CalculatorFunctionsGeneral::innerOr, "",
    "Logical or.",
    "0 or 0; 0 or 1; 1 or 0; 1 or 1; a or 1; a or 0;",
@@ -3159,7 +3165,8 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler()
 { MacroRegisterFunctionWithName("Calculator::initPredefinedStandardOperationsWithoutHandler");
   //additional operations treated like function names but otherwise not parsed as syntactic elements.
 
-  this->AddOperationNoRepetitionAllowed("RulesChanged");
+  this->AddOperationNoRepetitionAllowed("RulesOff");
+  this->AddOperationNoRepetitionAllowed("RulesOn");
   this->AddOperationNoRepetitionAllowed("Freeze");
   this->AddOperationNoRepetitionAllowed("\\infty");
   this->AddOperationNoRepetitionAllowed("CommandEnclosure");

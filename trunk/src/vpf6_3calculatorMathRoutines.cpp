@@ -7036,15 +7036,12 @@ bool CalculatorFunctionsGeneral::innerTurnRulesOnOff
 //      << theCommands.namedRules.ToStringCommaDelimited()
       ;
     else
-      if (theCommands.GetFunctionHandlerFromNamedRule(rulesToConsider[i]).flagDisabledByUser!=turnOff)
-        rulesToSwitch.AddOnTopNoRepetition(rulesToConsider[i]);
-  for (int i=0; i<rulesToSwitch.size; i++)
-  { Function& currentFun=theCommands.GetFunctionHandlerFromNamedRule(rulesToSwitch[i]);
-    currentFun.flagDisabledByUser=!currentFun.flagDisabledByUser;
-//    stOutput << "turned off rule " << currentFun.ToStringSummary();
-  }
+      rulesToSwitch.AddOnTopNoRepetition(rulesToConsider[i]);
   output.reset(theCommands, rulesToSwitch.size+1);
-  output.AddChildAtomOnTop(theCommands.opRulesChanged());
+  if (turnOff)
+    output.AddChildAtomOnTop(theCommands.opRulesOff());
+  else
+    output.AddChildAtomOnTop(theCommands.opRulesOn());
   Expression currentRuleE;
   for (int i=0; i<rulesToSwitch.size; i++)
   { currentRuleE.AssignValue(rulesToSwitch[i], theCommands);

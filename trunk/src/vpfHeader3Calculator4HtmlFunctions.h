@@ -18,6 +18,8 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetInputBox
   (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerEvaluateSymbols
+  (Calculator& theCommands, const Expression& input, Expression& output);
 
   static std::string GetUserInputBox
 (const Expression& theBox)

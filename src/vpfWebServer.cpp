@@ -28,6 +28,7 @@ ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server im
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
+WebServer theWebServer;
 struct SSLdata{
 public:
   int errorCode;
@@ -91,7 +92,7 @@ void WebServer::initSSL()
   { ERR_print_errors_fp(stderr);
     crash << "openssl error: failed to create CTX object." << crash;
   }
-  //////////Safari web browser: no further user of foul language necessary
+  //////////Safari web browser: no further use of foul language necessary
 /*  if (!SSL_CTX_set_cipher_list(theSSLdata.ctx,
   "ALL:!ECDHE-ECDSA-AES256-SHA:!ECDHE-ECDSA-AES128-SHA:!ECDHE-ECDSA-RC4-SHA:!ECDHE-ECDSA-DES-CBC3-SHA"
   ))
@@ -606,7 +607,7 @@ std::string WebWorker::ToStringMessageShortUnsafe(FormatExpressions* theFormat)c
   out << lineBreak << "Main address: " << this->mainAddress;
   out << lineBreak << "Main argument: " << this->mainArgumentRAW;
   out << lineBreak << "Relative physical file address referred to by main address: " << this->RelativePhysicalFileName;
-  out << lineBreak << "Calculator address: " << theGlobalVariables.DisplayNameCalculatorWithPath;
+  out << lineBreak << "Calculator address: " << theGlobalVariables.DisplayNameExecutableWithPath;
   out << lineBreak << "Physical address project base: " << theGlobalVariables.PhysicalPathProjectBase;
   out << lineBreak << "Physical address server base: " << theGlobalVariables.PhysicalPathServerBasE;
   out << lineBreak << "Physical address output folder: " << theGlobalVariables.PhysicalPathOutputFolder;
@@ -858,7 +859,7 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!-- input form here -->");
   //stOutput << this->ToStringCalculatorArgumentsHumanReadable();
   stOutput << "\n<FORM method=\"POST\" id=\"formCalculator\" name=\"formCalculator\" action=\""
-  << theGlobalVariables.DisplayNameCalculatorWithPath << "\">\n";
+  << theGlobalVariables.DisplayNameExecutableWithPath << "\">\n";
   std::string civilizedInputSafish;
   if (CGI::StringToHtmlString(theParser.inputString, civilizedInputSafish))
     stOutput << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are "
@@ -876,7 +877,7 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
   << "name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" ";
   stOutput << "> ";
   if (theParser.inputString!="")
-    stOutput << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
+    stOutput << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
   stOutput << "\n</FORM>\n";
   stOutput << this->closeIndentTag("</td>");
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!--Autocomplete space here -->");
@@ -1086,13 +1087,13 @@ void WebWorker::OutputStandardResult()
 void WebWorker::ExtractArgumentFromAddress()
 { MacroRegisterFunctionWithName("WebWorker::ExtractArgumentFromAddress");
 //  theLog << "\nmain address:" << this->mainAddress << "=?="
-//  << theGlobalVariables.DisplayNameCalculatorWithPath << "\nmainaddress.size: "
-//  << this->mainAddress.size() << "\nonePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size(): "
-//  << theGlobalVariables.DisplayNameCalculatorWithPath.size();
+//  << theGlobalVariables.DisplayNameExecutableWithPath << "\nmainaddress.size: "
+//  << this->mainAddress.size() << "\nonePredefinedCopyOfGlobalVariables.DisplayNameExecutableWithPath.size(): "
+//  << theGlobalVariables.DisplayNameExecutableWithPath.size();
   this->mainArgumentRAW="";
   std::string calculatorArgumentRawWithQuestionMark, tempS;
   if (!MathRoutines::StringBeginsWith
-      (this->mainAddresSRAW, theGlobalVariables.DisplayNameCalculatorWithPath, &calculatorArgumentRawWithQuestionMark))
+      (this->mainAddresSRAW, theGlobalVariables.DisplayNameExecutableWithPath, &calculatorArgumentRawWithQuestionMark))
   { bool isDeprecatedAddress=//used to capture old links to the calculator
     MathRoutines::StringBeginsWith
     (this->mainAddresSRAW, "/vectorpartition/cgi-bin/calculator", &calculatorArgumentRawWithQuestionMark) ||
@@ -1995,7 +1996,7 @@ int WebWorker::ProcessCalculator()
 //      !theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs
       )
   { std::stringstream redirectedAddress;
-    redirectedAddress << theGlobalVariables.DisplayNameCalculatorWithPath << "?";
+    redirectedAddress << theGlobalVariables.DisplayNameExecutableWithPath << "?";
     for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
       if (theGlobalVariables.webArguments.theKeys[i]!="password" &&
           theGlobalVariables.webArguments.theKeys[i]!="authenticationInsecure")
@@ -2274,7 +2275,7 @@ std::string WebWorker::GetChangePasswordPage()
   << "          + \"&reenteredPassword=\"+encodeURIComponent(inputReenteredPassword.value)\n"
   << "  ;\n"
   << "  var https = new XMLHttpRequest();\n"
-  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
+  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameExecutableWithPath << "\", true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
   ;
   //Old code, submits all answers. May need to be used as an alternative
@@ -2360,7 +2361,7 @@ int WebWorker::ProcessChangePassword()
   stOutput << "<span style=\"color:green\"> <b>Password change successful. </b></span>";
   stOutput
   << "<meta http-equiv=\"refresh\" content=\"0; url="
-  << theGlobalVariables.DisplayNameCalculatorWithPath  << "?request=login"
+  << theGlobalVariables.DisplayNameExecutableWithPath  << "?request=login"
   << "&username="
   << CGI::StringToURLString(theGlobalVariables.userDefault)
   << "&authenticationToken=" << CGI::StringToURLString(newAuthenticationToken)
@@ -2631,7 +2632,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex, bool 
     theLog << logger::red << "Worker index in parent is -1!!!" << logger::endL;
   else
     theLog << "Worker index: " << inputIndex << logger::endL;
-  out << "  var sURL  = \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=indicator&mainInput="
+  out << "  var sURL  = \"" << theGlobalVariables.DisplayNameExecutableWithPath << "?request=indicator&mainInput="
   << inputIndex+1 << "\";\n";
   out << "  oRequest.open(\"GET\",sURL,false);\n";
 //  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
@@ -2653,7 +2654,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex, bool 
   out << "    return;\n";
   out << "  var pauseRequest = new XMLHttpRequest();\n";
   theLog << "Generating indicator address for worker number " << inputIndex+1 << "." << logger::endL;
-  out << "  pauseURL  = \"" << theGlobalVariables.DisplayNameCalculatorWithPath
+  out << "  pauseURL  = \"" << theGlobalVariables.DisplayNameExecutableWithPath
   << "?request=pause&mainInput=" << inputIndex+1 << "\";\n";
   out << "  pauseRequest.open(\"GET\",pauseURL,false);\n";
 //  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
@@ -3632,7 +3633,7 @@ int WebServer::main_problem_interpreter()
   theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
   theGlobalVariables.flagComputationStarted=true;
 //  stOutput << "<hr>First line<hr>";
-  theGlobalVariables.DisplayNameCalculatorWithPath="/cgi-bin/interpret.py";
+  theGlobalVariables.DisplayNameExecutableWithPath="/cgi-bin/interpret.py";
 //  stOutput << "<hr>DEBUG: physical path project base: " << theGlobalVariables.PhysicalPathProjectBase << "<br>";
   InitializeTimer();
 //  CreateTimerThread();

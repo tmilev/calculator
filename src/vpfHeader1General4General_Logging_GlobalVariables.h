@@ -141,8 +141,7 @@ public:
   std::string DisplayNameExtraOutputNoPath;
   std::string DisplayNameExtraOutputWithPath;
   std::string DisplayNameExecutableWithPath;
-  std::string DisplayNameCalculatorWithPath;
-  std::string DisplayNameCalculatorWithPathHTTPS;
+  std::string DisplayNameExecutableWithPathHTTPS;
   std::string DisplayNameProgressReport;
 
   std::string IPAdressCaller;

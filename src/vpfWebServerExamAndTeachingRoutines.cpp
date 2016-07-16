@@ -555,7 +555,7 @@ bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt)
 std::string CalculatorHTML::GetEditPageButton()
 { MacroRegisterFunctionWithName("CalculatorHTML::GetEditPageButton");
   std::stringstream out;
-  out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath
   << "?request=editPage&";
   std::string urledProblem=CGI::StringToURLString(this->fileName);
   std::stringstream refStreamNoRequest;
@@ -590,8 +590,8 @@ std::string CalculatorHTML::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "  inputParams+='&mainInput=' + encodeURIComponent(theString);\n"
 //  << "  inputParams+='&currentExamHome=' + problemCollectionName;\n"
   << "  var https = new XMLHttpRequest();\n"
-//  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
-  << "  https.open(\"GET\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\""
+//  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameExecutableWithPath << "\", true);\n"
+  << "  https.open(\"GET\", \"" << theGlobalVariables.DisplayNameExecutableWithPath << "\""
   << "+ \"?\"+inputParams"
   << ", true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
@@ -646,7 +646,7 @@ std::string CalculatorHTML::GetSubmitEmailsJavascript()
 //  << "  inputParams+='&currentExamHome=' + problemCollectionName;\n"
   << "  inputParams+='&currentExamHome=" << CGI::StringToURLString(this->fileName) << "';\n"
   << "  var https = new XMLHttpRequest();\n"
-  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameCalculatorWithPath << "\", true);\n"
+  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameExecutableWithPath << "\", true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
   << "  https.onload = function() {\n"
   << "    spanOutput.innerHTML=https.responseText;\n"
@@ -745,7 +745,7 @@ std::string CalculatorHTML::GetSubmitAnswersJavascript()
   out
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"GET\", \"";
-  out << theGlobalVariables.DisplayNameCalculatorWithPath;
+  out << theGlobalVariables.DisplayNameExecutableWithPath;
 
   out << "\" + \"?\"+inputParams, true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
@@ -2133,26 +2133,26 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   theGlobalVariables.ToStringCalcArgsNoNavigation(&randomSeedContainer);
   if (theGlobalVariables.UserDefaultHasAdminRights())
   { if (theGlobalVariables.UserStudentViewOn())
-      out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?"
       << this->ToStringCalculatorArgumentsForProblem
       (theGlobalVariables.userCalculatorRequestType, "false", theGlobalVariables.GetWebInput("studentSection"))
       << "\">Admin view</a><br>";
     else
     { if (this->databaseStudentSectionS.size==0)
-        out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
+        out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?"
         << this->ToStringCalculatorArgumentsForProblem
         (theGlobalVariables.userCalculatorRequestType, "true", "")
         << "\">Student view</a><br>";
       for (int i=0; i<this->databaseStudentSectionS.size; i++)
         if (this->databaseStudentSectionS[i]!="")
-          out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
+          out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?"
           << this->ToStringCalculatorArgumentsForProblem
           (theGlobalVariables.userCalculatorRequestType, "true", this->databaseStudentSectionS[i])
           << "\">Student view section " << this->databaseStudentSectionS[i] << " </a><br>";
     }
   }
   if (!this->flagIsExamHome)
-  { out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
+  { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?request="
     << exerciseRequest << "&"
     << calcArgsNoPassExamDetails
     << "studentView=" << studentView << "&";
@@ -2164,11 +2164,11 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     out << "<b>Course homework home</b>";
   if (this->flagIsExamProblem)
   { if (theGlobalVariables.userCalculatorRequestType=="exercises")
-      out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?"
       << this->ToStringCalculatorArgumentsForProblem("examForReal", studentView)
       << "\">&nbsp&nbspStart exam for real</a><br>";
     else if (theGlobalVariables.userCalculatorRequestType=="examForReal")
-      out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?"
       << this->ToStringCalculatorArgumentsForProblem("exercises", studentView)
       << "\">&nbsp&nbspExercise this problem type</a><br>";
   }
@@ -2181,7 +2181,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
       //<< this->problemListOfParent.ToStringCommaDelimited();
     } else
     { if (indexInParent>0)
-      { out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
+      { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?request="
         << theGlobalVariables.userCalculatorRequestType
         << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
@@ -2193,7 +2193,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         << "&\"> <-Previous </a><br>";
       }
       if (indexInParent<this->problemListOfParent.size-1)
-      { out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
+      { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?request="
         << theGlobalVariables.userCalculatorRequestType
         << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
@@ -2204,7 +2204,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         << "&fileName=" << CGI::StringToURLString(this->problemListOfParent[indexInParent+1] )
         << "\"> Next-> </a><br>";
       } else
-      { out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?request="
+      { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?request="
         << theGlobalVariables.userCalculatorRequestType
         << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
@@ -2220,7 +2220,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   if (this->flagIsExamProblem &&
       (theGlobalVariables.userCalculatorRequestType=="exercises" ||
        theGlobalVariables.userCalculatorRequestType=="exercisesNoLogin"))
-    out << "<hr><a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath << "?"
+    out << "<hr><a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?"
     << this->ToStringCalculatorArgumentsForProblem(exerciseRequest, studentView, "", true)
     << "\">Link to this problem</a><br>";
 
@@ -2329,7 +2329,7 @@ std::string DatabaseRoutines::ToStringClassDetails
         oneTableLineStream << "<td>"
         << "<a href=\""
         << UserCalculator::GetActivationAddressFromActivationToken
-        (currentUser.activationToken.value, theGlobalVariables.DisplayNameCalculatorWithPath,
+        (currentUser.activationToken.value, theGlobalVariables.DisplayNameExecutableWithPath,
          userTable[i][indexUser])
         << "\"> (Re)activate account and change password</a>"
         << "</td>";
@@ -3022,10 +3022,10 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   if (this->currentExamHomE!="")
     refStreamNoRequest << "currentExamHome=" << this->currentExamHomE << "&";
   if (!theGlobalVariables.UserGuestMode())
-  { refStreamExercise << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=exercises&" << refStreamNoRequest.str();
-    refStreamForReal << theGlobalVariables.DisplayNameCalculatorWithPath << "?request=examForReal&" << refStreamNoRequest.str();
+  { refStreamExercise << theGlobalVariables.DisplayNameExecutableWithPath << "?request=exercises&" << refStreamNoRequest.str();
+    refStreamForReal << theGlobalVariables.DisplayNameExecutableWithPath << "?request=examForReal&" << refStreamNoRequest.str();
   } else
-  { refStreamExercise << theGlobalVariables.DisplayNameCalculatorWithPath
+  { refStreamExercise << theGlobalVariables.DisplayNameExecutableWithPath
     << "?request=exercisesNoLogin&" << refStreamNoRequest.str();
   }
   if (inputOutput.GetTagClass()=="calculatorExamProblem")

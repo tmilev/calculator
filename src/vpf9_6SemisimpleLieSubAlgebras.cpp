@@ -4469,8 +4469,8 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat)
   outNotationCommand << "printSemisimpleLieAlgebra{}("
   << this->GetOwnerWeyl().theDynkinType.ToString() << ")" ;
   outNotation << "Notation, structure constants and Weyl group info: "
-  << CGI::GetCalculatorLink(theGlobalVariables.DisplayNameCalculatorWithPath, outNotationCommand.str())
-  << "<br> <a href=\"" << theGlobalVariables.DisplayNameCalculatorWithPath
+  << CGI::GetCalculatorLink(theGlobalVariables.DisplayNameExecutableWithPath, outNotationCommand.str())
+  << "<br> <a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath
   << "\"> Calculator main page</a><br><a href=\"../rootSubalgebras.html\">Root subsystem table</a><br>";
   std::string notation= outNotation.str();
   out << this->ToString(theFormat);

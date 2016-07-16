@@ -2301,7 +2301,11 @@ public:
   void TimesInteger(int a);
   void DivideBy(const Polynomial<coefficient>& inputDivisor, Polynomial<coefficient>& outputQuotient, Polynomial<coefficient>& outputRemainder)const;
   void DivideByConstant(const coefficient& r);
-  void AddConstant(const coefficient& theConst);
+  void AddConstant(const coefficient& theConst)
+  { MonomialP tempMon;
+    tempMon.MakeOne();
+    this->AddMonomial(tempMon, theConst);
+  }
   void ShiftVariableIndicesToTheRight(int VarIndexShift);
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
   inline void SetDynamicSubtype(int newNumVars)

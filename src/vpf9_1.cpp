@@ -143,7 +143,7 @@ std::string GlobalVariables::ToStringHTMLTopCommandLinuxSystem()
 std::string GlobalVariables::ToStringFolderInfo()const
 { std::stringstream out;
   out << "<br>Physical path server base: " << this->PhysicalPathServerBasE;
-  out << "<br>Display name calculator with path: " << this->DisplayNameCalculatorWithPath;
+  out << "<br>Display name calculator with path: " << this->DisplayNameExecutableWithPath;
   out << "<br>Physical name folder below executable: " << this->PhysicalNameFolderBelowExecutable;
 //  out << "<br>Display path server base: " << this->DisplayPathServerBasE;
   out << "<br>Display name calculator with path: " << this->DisplayNameExecutableWithPath;
@@ -208,7 +208,7 @@ void GlobalVariables::initDefaultFolderAndFileNames
   this->DisplayNameExtraOutputNoPath = "defaultoutput";
   this->DisplayNameExtraOutputWithPath = this->DisplayPathOutputFolder + this->DisplayNameExtraOutputNoPath;
 
-  this->DisplayNameCalculatorWithPath = "/calculator";
+  this->DisplayNameExecutableWithPath = "/"+this->PhysicalNameExecutableNoPath;
   this->initOutputReportAndCrashFileNames("", "");
 }
 
@@ -273,38 +273,38 @@ std::string GlobalVariables::ToStringNavigation()
     if (theGlobalVariables.UserDefaultHasAdminRights())
       out << " <b>(admin)</b>";
     out << ": " << this->userDefault << "<br>";
-    out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=logout&";
+    out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=logout&";
 //    if (theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs &&
 //        !theGlobalVariables.flagUsingSSLinCurrentConnection)
 //      out << "ignoreSecurity=true&";
     out << this->ToStringCalcArgsNoNavigation() << " \">Log out</a><br>";
     if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-      out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=changePasswordPage&"
+      out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=changePasswordPage&"
       << this->ToStringCalcArgsNoNavigation() << " \">Change password</a><hr>";
     else
       out << "<b>Password change: <br>secure connection<br>only</b><br>";
   }
   if (this->UserDefaultHasAdminRights())
   { if (theGlobalVariables.userCalculatorRequestType!="status")
-      out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=status&" << this->ToStringCalcArgsNoNavigation()
+      out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=status&" << this->ToStringCalcArgsNoNavigation()
       << "\">Server status</a><br>";
     else
       out << "<b>Server status</b><br>";
     if (theGlobalVariables.userCalculatorRequestType!="browseDatabase")
-      out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=browseDatabase&" << this->ToStringCalcArgsNoNavigation()
+      out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=browseDatabase&" << this->ToStringCalcArgsNoNavigation()
       << "\">Database</a><br>";
     else
       out << "<b>Database</b><br>";
   }
   if (theGlobalVariables.userCalculatorRequestType!="compute")
-    out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=compute&"
+    out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=compute&"
     << this->ToStringCalcArgsNoNavigation() << " \">Calculator</a><br>";
   else
     out << "<b>Calculator</b><br>";
   if (theGlobalVariables.userCalculatorRequestType!="exercises" &&
       theGlobalVariables.userCalculatorRequestType!="examForReal" )
   { if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-      out << "<a href=\"" << this->DisplayNameCalculatorWithPath << "?request=exercises&"
+      out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=exercises&"
       << this->ToStringCalcArgsNoNavigation()
       << "\">Exercises</a><hr>";
   } else

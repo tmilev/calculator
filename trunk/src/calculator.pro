@@ -3,11 +3,11 @@ QT-= gui
 TARGET = calculator
 CONFIG   += console
 CONFIG   -= app_bundle
+CONFIG += c++11
+QMAKE_CXXFLAGS += -std=c++11
 
 TEMPLATE = app
 
-CONFIG += c++11
-QMAKE_CXXFLAGS += -std=c++11
 
 DEFINES+=MACRO_use_MySQL
 DEFINES+=MACRO_use_open_ssl

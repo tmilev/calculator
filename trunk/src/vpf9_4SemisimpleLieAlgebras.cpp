@@ -1,6 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
+#include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 ProjectInformationInstance ProjectInfoVpf9_4cpp(__FILE__, "Semisimple Lie algebras. ");
 
 std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)

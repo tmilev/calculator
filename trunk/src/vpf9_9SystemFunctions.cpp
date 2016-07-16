@@ -3,7 +3,6 @@
 #include <chrono>
 #include <sys/time.h>
 #include <unistd.h>
-#include <pthread.h>
 //#define cgiLimitRAMuseNumPointersInList
 
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"

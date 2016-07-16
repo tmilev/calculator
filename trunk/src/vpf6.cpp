@@ -22,7 +22,7 @@ Calculator::Calculator()
 }
 
 std::string Calculator::GetCalculatorLink(const std::string& input)
-{ return CGI::GetCalculatorLink(theGlobalVariables.DisplayNameCalculatorWithPath, input);
+{ return CGI::GetCalculatorLink(theGlobalVariables.DisplayNameExecutableWithPath, input);
 }
 
 std::string Calculator::WriteDefaultLatexFileReturnHtmlLink

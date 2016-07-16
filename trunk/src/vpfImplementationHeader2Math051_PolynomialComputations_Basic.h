@@ -503,13 +503,6 @@ void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(int index
     output=this->theCoeffs[i];
 }
 
-template <class coefficient>
-void Polynomial<coefficient>::AddConstant(const coefficient& theConst)
-{ MonomialP tempMon;
-  tempMon.MakeOne();
-  this->AddMonomial(tempMon, theConst);
-}
-
 template<class coefficient>
 bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output)
 { MacroRegisterFunctionWithName("Polynomial::FindOneVarRatRoots");

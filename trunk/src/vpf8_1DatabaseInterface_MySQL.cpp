@@ -7,7 +7,11 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
 (const std::string& inputUsernameUnsafe, const std::string& inputPassword,
  std::string& inputOutputAuthenticationToken, std::string& outputUserRole, std::stringstream* comments)
 {
- (void) inputUsernameUnsafe; (void) inputPassword; (void) inputOutputAuthenticationToken; (void) outputUserRole; (void) comments;
+ (void) inputUsernameUnsafe;
+ (void) inputPassword;
+ (void) inputOutputAuthenticationToken;
+ (void) outputUserRole;
+ (void) comments;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
   DatabaseRoutines theRoutines;
@@ -490,7 +494,7 @@ std::string DatabaseRoutines::ToStringAllTables()
   out << "<table>";
   for (int i=0; i<tableNames.size; i++)
   { std::stringstream linkStream;
-    linkStream << theGlobalVariables.DisplayNameCalculatorWithPath
+    linkStream << theGlobalVariables.DisplayNameExecutableWithPath
     << "?request=browseDatabase&currentDatabaseTable="
     << CGI::StringToURLString(tableNames[i]) << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation();
     out << "<tr><td><a href=\"" << linkStream.str() << "\">" << CGI::URLStringToNormal(tableNames[i])

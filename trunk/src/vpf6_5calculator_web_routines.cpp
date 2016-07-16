@@ -14,6 +14,8 @@
 #include <arpa/inet.h>
 //#include <libexplain/connect.h>
 
+
+extern WebServer theWebServer;
 ProjectInformationInstance ProjectInfoVpf6_5calculatorWebRoutines(__FILE__, "Calculator web routines. ");
 
 class WebCrawler

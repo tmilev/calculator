@@ -6,7 +6,7 @@
 //#define cgiLimitRAMuseNumPointersInList
 
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
-#include "vpfHeader6WebServer.h"
+#include "vpfHeader1General4General_Logging_GlobalVariables.h"
 ProjectInformationInstance projectInfoInstanceCalculatorSystem(__FILE__, "System functions, platform dependent code.");
 
 
@@ -33,7 +33,6 @@ struct TimerThreadData{
   double computationStartTime;
   int counter=0;
   int microsecondsleep=100000;
-  ProgressReportWebServer theReport1, theReport2;
 //  ThreadWrapper theThread;
   void Run();
   bool HandleComputationTimer();
@@ -56,17 +55,17 @@ bool TimerThreadData::HandleComputationTimer()
 }
 
 bool TimerThreadData::HandleComputationCompleteStandard()
-{ if (theGlobalVariables.flagComputationCompletE)
-    theReport1.SetStatus("Starting timer cycle break: computation is complete.");
+{ //if (theGlobalVariables.flagComputationCompletE)
+  //  theReport1.SetStatus("Starting timer cycle break: computation is complete.");
   return false;
 }
 
 bool TimerThreadData::HandleTimerSignalToServer()
 { if (this->counter%20!=0)
     return false;
-  std::stringstream reportStream;
-  reportStream << "Timer: " << this->elapsedtime << " seconds elapsed since the timer was launched.";
-  theReport1.SetStatus(reportStream.str());
+//  std::stringstream reportStream;
+//  reportStream << "Timer: " << this->elapsedtime << " seconds elapsed since the timer was launched.";
+//  theReport1.SetStatus(reportStream.str());
   return false;
 }
 
@@ -78,11 +77,11 @@ bool TimerThreadData::HandleMaxComputationTime()
   if (elapsedComputationTime<=theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit)
     return false;
   if (theGlobalVariables.flagComputationCompletE)
-  { theReport2.SetStatus((std::string)"The allowed clock time has ran out, but it seems the computation is already done. "+
-                         (std::string)"Continuing to run (in order to wrap it up)...");
+  { //theReport2.SetStatus((std::string)"The allowed clock time has ran out, but it seems the computation is already done. "+
+    //                     (std::string)"Continuing to run (in order to wrap it up)...");
     return false;
   }
-  theReport2.SetStatus("Starting timer cycle break: computation time too long.");
+  //theReport2.SetStatus("Starting timer cycle break: computation time too long.");
   if (!theGlobalVariables.flagComputationStarted)
     crash << "Something has gone wrong. Computation has not started, yet " << elapsedtime
     << " seconds have already passed."
@@ -121,9 +120,9 @@ bool TimerThreadData::HandleComputationTimeout()
     return false;
 //  std::cout << "GOT TO HERE pt 3\n";
   theGlobalVariables.flagTimeOutExplanationAlreadyDisplayed=true;
-  theReport2.SetStatus("Starting timer cycle displaying time out explanation.");
+  //theReport2.SetStatus("Starting timer cycle displaying time out explanation.");
   theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
-  theReport2.SetStatus("Starting timer cycle displaying time out indicator done, continuing timer cycle.");
+  //theReport2.SetStatus("Starting timer cycle displaying time out indicator done, continuing timer cycle.");
   return false;
 }
 

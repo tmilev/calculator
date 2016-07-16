@@ -62,6 +62,9 @@ endif
 
 #if this is missing something, add it, or, ls | grep cpp | xargs echo
 SOURCES=\
+./src/custom/vpfWebServer.cpp \
+./src/custom/vpfCalculatorMain.cpp \
+./src/custom/vpf6_5calculator_web_routines.cpp \
 ./src/test.cpp \
 ./src/vpf2Math3_SymmetricGroupsAndGeneralizations.cpp \
 ./src/vpf4CalculatorFunctionList.cpp \
@@ -92,16 +95,13 @@ SOURCES=\
 ./src/vpf99_HardcodedData.cpp \
 ./src/vpf9_9SystemFunctions.cpp \
 ./src/vpf9.cpp \
-./src/custom/vpfCalculatorMain.cpp \
 ./src/vpfCharacters_CalculatorInterface.cpp \
 ./src/vpfCharacters.cpp \
 ./src/vpfCrypto.cpp \
 ./src/vpfFiniteFields.cpp \
 ./src/vpfGraph.cpp \
 ./src/vpfJson.cpp \
-./src/custom/vpfWebServer.cpp \
 ./src/vpfWebServerInterProcessLogistics.cpp \
-./src/vpf6_5calculator_web_routines.cpp \
 ./src/vpf8_1DatabaseInterface_MySQL.cpp \
 ./src/vpfWebServerExamAndTeachingRoutines.cpp \
 ./src/vpf9_85TimeDateWrappers.cpp

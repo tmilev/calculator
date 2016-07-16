@@ -28,7 +28,7 @@ SOURCES += \
     vpf6_2serialization_code.cpp \
     vpf6_3calculatorMathRoutines.cpp \
     vpf6_4ExpressionsImplementation.cpp \
-    vpf6_5calculator_web_routines.cpp \
+    custom/vpf6_5calculator_web_routines.cpp \
     vpf6_05evaluationroutines.cpp \
     vpf6_35calculatorMathRoutinesPart2.cpp \
     vpf6.cpp \
@@ -106,7 +106,6 @@ HEADERS += \
     vpfJson.h \
     vpfMacros.h \
     vpfPackedVector.h \
-    vpfheader3calculator4htmlfunctions.h \
     vpfHeader3Calculator4HtmlFunctions.h \
     vpfHeader1General6Maps.h \
     vpfHeader1General7FileOperations_Encodings.h \

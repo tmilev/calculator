@@ -2,8 +2,8 @@
 //For additional information refer to the file "vpf.h".
 #ifndef vpfHeaderWebServerAlreadyDefined
 #define vpfHeaderWebServerAlreadyDefined
-#include "vpfHeader6WebServerInterprocessLogistics.h"
-#include "vpfHeader4SystemFunctionsGlobalObjects.h"
+#include "../vpfHeader6WebServerInterprocessLogistics.h"
+#include "../vpfHeader4SystemFunctionsGlobalObjects.h"
 
 static ProjectInformationInstance projectInfoInstanceWebServerHeader(__FILE__, "Web server classes declarations.");
 

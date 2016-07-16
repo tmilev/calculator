@@ -1,8 +1,8 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#include "vpfHeader3Calculator2_InnerFunctions.h"
+#include "../vpfHeader3Calculator2_InnerFunctions.h"
+#include "../vpfHeader1General5TimeDate.h"
 #include "vpfHeader6WebServer.h"
-#include "vpfHeader1General5TimeDate.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

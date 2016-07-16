@@ -5,15 +5,12 @@
 #define vpfHeaderSystemGlobalObjects_already_included
 #include <iostream>
 #include "vpfHeader1General1_ListReferences.h"
-//#include "vpfHeader3Calculator0_Interface.h"
-//#include "vpfHeader6WebServer.h"
 #ifndef __DATE__
 #define __DATE__ " unknown date "
 #endif
 
 static ProjectInformationInstance projectInfoInstanceCalculatorGlobalAndSystemHeader(__FILE__, "Global objects and system calls header");
 
-class WebServer;
 class logger;
 class Calculator;
 extern logger theLog  ;
@@ -26,7 +23,6 @@ extern logger logProcessStats;
 extern logger logPlumbing;
 extern FormatExpressions consoleFormat;
 extern Calculator theParser;
-extern WebServer theWebServer;
 
 extern double GetElapsedTimeInSeconds();
 extern void CallSystemWrapperNoOutput(const std::string& theCommand);

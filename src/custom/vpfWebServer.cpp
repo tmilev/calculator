@@ -1,8 +1,10 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader6WebServer.h"
-#include "vpfHeader3Calculator0_Interface.h"
-#include "vpfHeader7DatabaseInterface_MySQL.h"
+WebServer theWebServer;
+
+#include "../vpfHeader3Calculator0_Interface.h"
+#include "../vpfHeader7DatabaseInterface_MySQL.h"
 
 ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 
@@ -28,7 +30,6 @@ ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server im
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-WebServer theWebServer;
 struct SSLdata{
 public:
   int errorCode;
@@ -73,7 +74,7 @@ const std::string signedFileKey= "../privateKey.key";
 void WebServer::initSSL()
 { MacroRegisterFunctionWithName("WebServer::initSSL");
   if (!theGlobalVariables.flagSSLisAvailable)
-  { theLog << logger::red << "SSL is NOT available." << logger::endL;
+  { theLog << logger::red << "SSL is DISABLED." << logger::endL;
     return;
   }
 #ifdef MACRO_use_open_ssl

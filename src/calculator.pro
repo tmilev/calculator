@@ -49,17 +49,17 @@ SOURCES += \
     vpf9_92multitasking.cpp \
     vpf9.cpp \
     vpf99_HardcodedData.cpp \
-    vpfCalculatorMain.cpp \
     vpfCharacters_CalculatorInterface.cpp \
     vpfCharacters.cpp \
     vpfCrypto.cpp \
     vpfFiniteFields.cpp \
     vpfGraph.cpp \
     vpfJson.cpp \
-    vpfWebServer.cpp \
     vpfWebServerExamAndTeachingRoutines.cpp \
     vpfWebServerInterProcessLogistics.cpp \
-    vpf6_36calculatorHtmlRoutines.cpp
+    vpf6_36calculatorHtmlRoutines.cpp \
+    custom/vpfCalculatorMain.cpp \
+    custom/vpfWebServer.cpp
 
 HEADERS += \
     vpf.h \
@@ -93,7 +93,6 @@ HEADERS += \
     vpfHeader3Calculator3_WeylGroupCharacters.h \
     vpfHeader4SystemFunctionsGlobalObjects.h \
     vpfHeader5Crypto.h \
-    vpfHeader6WebServer.h \
     vpfHeader6WebServerInterprocessLogistics.h \
     vpfHeader7DatabaseInterface_MySQL.h \
     vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h \
@@ -110,4 +109,5 @@ HEADERS += \
     vpfheader3calculator4htmlfunctions.h \
     vpfHeader3Calculator4HtmlFunctions.h \
     vpfHeader1General6Maps.h \
-    vpfHeader1General7FileOperations_Encodings.h
+    vpfHeader1General7FileOperations_Encodings.h \
+    custom/vpfHeader6WebServer.h

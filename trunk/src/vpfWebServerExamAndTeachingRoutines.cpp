@@ -519,14 +519,14 @@ void CalculatorHTML::LoadCurrentProblemItem()
   if (!needToFindDefault)
     needToFindDefault=!this->LoadMe(needToLoadDatabase, this->comments);
   else
-    this->comments << "<b>Selecting default course homework file.</b><br>";
+    this->comments << "<b>Selecting default course homework file. </b><br>";
   if (needToFindDefault)
-  { if (!this->FindExamItem())
+  { needToLoadDatabase=false;
+    if (!this->FindExamItem())
     { this->comments << "<b>No problems/exams to serve: found no html content in folder: "
-      << "ProblemCollections/" << ".</b>";
+      << "ProblemCollections/" << ". </b>";
       return;
     }
-    theGlobalVariables.SetWebInput("currentExamHome", CGI::StringToURLString(this->fileName));
     if (!this->LoadMe(needToLoadDatabase, this->comments))
       return;
     this->inputHtml=this->comments.str()+this->inputHtml;
@@ -542,7 +542,7 @@ bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt)
   if (tagClass=="setCalculatorExamHome")
   { this->flagIsExamHome=true;
     this->flagIsExamProblem=false;
-    theGlobalVariables.SetWebInput("currentExamHome", CGI::StringToURLString(this->fileName));
+    theGlobalVariables.SetWebInpuT("currentExamHome", CGI::StringToURLString(this->fileName));
   }
   if (tagClass=="setCalculatorExamProblem")
   { this->flagIsExamHome=false;

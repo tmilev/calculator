@@ -80,8 +80,8 @@ bool CalculatorHtmlFunctions::innerSetInputBox
   std::string boxName= CalculatorHtmlFunctions::GetUserInputBoxName(input);
   if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.Contains(boxName))
     return theCommands << "Input box with name: " << boxName << " already has value.";
-  theCommands.theObjectContainer.theUserInputTextBoxesWithValues.SetValue
-  (theArguments.GetValueCreateIfNotPresent("value"), boxName);
+  theCommands.theObjectContainer.theUserInputTextBoxesWithValues.SetKeyValue
+  (boxName, theArguments.GetValueCreateIfNotPresent("value"));
   std::stringstream out;
   out << "Set value to input box name: " << boxName;
   return output.AssignValue(out.str(), theCommands);

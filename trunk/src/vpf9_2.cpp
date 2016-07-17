@@ -2480,7 +2480,7 @@ bool CGI::AccountOneInputCGIString
       << fieldValue << " and " << outputMap.GetValueCreateIfNotPresent(fieldName) << ". ";
       return false;
     }
-  outputMap.SetValue(fieldValue, fieldName);
+  outputMap.SetKeyValue(fieldName, fieldValue);
   return true;
 }
 

@@ -3311,13 +3311,13 @@ void Calculator::AddTrigSplit(const std::string& trigFun, const List<std::string
     theSplit.SetSize(0);
     theSplit.AddOnTop("\\"+trigFun);
     theSplit.AddOnTop(theVar);
-    this->predefinedWordSplits.SetValue(theSplit, trigFun+theVar);
-    this->predefinedWordSplits.SetValue(theSplit, "\\"+trigFun+theVar);
+    this->predefinedWordSplits.SetKeyValue(trigFun+theVar, theSplit);
+    this->predefinedWordSplits.SetKeyValue("\\"+trigFun+theVar, theSplit);
     theSplit.SetSize(0);
     theSplit.AddOnTop(theVar);
     theSplit.AddOnTop("\\"+trigFun);
-    this->predefinedWordSplits.SetValue(theSplit, theVar+trigFun);
-    this->predefinedWordSplits.SetValue(theSplit, theVar+"\\"+trigFun);
+    this->predefinedWordSplits.SetKeyValue(theVar+trigFun, theSplit);
+    this->predefinedWordSplits.SetKeyValue(theVar+"\\"+trigFun, theSplit);
   }
   for (int i=0; i<theVars.size; i++)
     for (int j=0; j<theVars.size; j++)
@@ -3325,7 +3325,7 @@ void Calculator::AddTrigSplit(const std::string& trigFun, const List<std::string
       theSplit.AddOnTop(theVars[i]);
       theSplit.AddOnTop("\\"+trigFun);
       theSplit.AddOnTop(theVars[j]);
-      this->predefinedWordSplits.SetValue(theSplit, theVars[i]+trigFun+theVars[j]);
+      this->predefinedWordSplits.SetKeyValue(theVars[i]+trigFun+theVars[j], theSplit);
     }
 }
 
@@ -3337,10 +3337,10 @@ void Calculator::initPredefinedWordSplits()
   theVars.AddOnTop("y");
   theSplit.SetSize(0);
   theSplit.AddOnTop("x"); theSplit.AddOnTop("y");
-  this->predefinedWordSplits.SetValue(theSplit, "xy");
+  this->predefinedWordSplits.SetKeyValue("xy", theSplit);
   theSplit.SetSize(0);
   theSplit.AddOnTop("y"); theSplit.AddOnTop("x");
-  this->predefinedWordSplits.SetValue(theSplit, "yx");
+  this->predefinedWordSplits.SetKeyValue("yx", theSplit);
   this->AddTrigSplit("sin", theVars);
   this->AddTrigSplit("cos", theVars);
   this->AddTrigSplit("tan", theVars);

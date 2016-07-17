@@ -1583,7 +1583,7 @@ void SemisimpleSubalgebras::AddSubalgebraIfNewSetToStackTop(CandidateSSSubalgebr
       << input.theWeylNonEmbedded->theDynkinType.ToString() << " has index in owner -1. " << crash;
   } else
   { input.indexInOwner=this->theSubalgebras.theValues.size;
-    this->theSubalgebras.SetValue(input, input.theHs);
+    this->theSubalgebras.SetKeyValue(input.theHs, input);
   }
   input.ComputeAndVerifyFromGeneratorsAndHs();
   this->AddSubalgebraToStack(input, 0, 0);

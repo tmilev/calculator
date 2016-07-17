@@ -26,7 +26,7 @@ public:
     }
     return this->theValues[theIndex];
   }
-  void SetValue(const value& inputValue, const key& inputKey)
+  void SetKeyValue(const key& inputKey, const value& inputValue)
   { if (this->Contains(inputKey))
     { this->theValues[this->theKeys.GetIndex(inputKey)]=inputValue;
       return;

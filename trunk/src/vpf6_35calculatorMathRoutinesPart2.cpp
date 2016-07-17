@@ -91,7 +91,7 @@ double MeshTriangles::GetValueAtPoint(const Vector<double>& thePoint)
   { this->numBadEvaluations++;
     functionValue=NAN;
   }
-  this->theEvaluatedPoints.SetValue(functionValue, thePoint);
+  this->theEvaluatedPoints.SetKeyValue(thePoint, functionValue);
   return functionValue;
 }
 

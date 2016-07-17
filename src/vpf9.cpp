@@ -574,12 +574,13 @@ FileOperations::FolderVirtualLinks()
   { firstRun=true;
     MutexRecursiveWrapper theMutex;
     MutexLockGuard theGuard(theMutex);
-    result.SetValue("output/", "output/");
-    result.SetValue("ProblemCollections/", "ProblemCollections/");
-    result.SetValue("../problemtemplates/", "problemtemplates/");
-    result.SetValue("../freecalc/", "freecalc/");
-    result.SetValue("../public_html/", "html/");
-    result.SetValue("htmlsnippets/", "htmlsnippets/");
+    result.SetKeyValue("output/", "output/");
+    result.SetKeyValue("ProblemCollections/", "ProblemCollections/");
+    result.SetKeyValue("problemtemplates/", "../problemtemplates/");
+    result.SetKeyValue("freecalc/", "../freecalc/");
+    result.SetKeyValue("html/", "../public_html/");
+    result.SetKeyValue("htmlsnippets/", "htmlsnippets/");
+    result.SetKeyValue("LogFiles/", "LogFiles/");
   }
   return result;
 }

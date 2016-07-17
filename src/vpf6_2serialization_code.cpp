@@ -291,7 +291,7 @@ bool CalculatorConversions::innerLoadKeysFromStatementList
   for (int i=0; i<outputExpressionFormat.theKeys.size; i++)
   { if (!outputExpressionFormat.theKeys[i].IsOfType<std::string>(&keyName))
       keyName=outputExpressionFormat.theKeys[i].ToString();
-    output.SetValue(outputExpressionFormat[i], keyName);
+    output.SetKeyValue(keyName, outputExpressionFormat[i]);
   }
   return true;
 }
@@ -302,12 +302,12 @@ bool CalculatorConversions::innerLoadKeysFromStatementList
 { MacroRegisterFunctionWithName("CalculatorConversions::innerLoadKeysFromStatementList");
   output.Clear();
   if (input.StartsWith(theCommands.opDefine(), 3))
-  { output.SetValue(input[2], input[1]);
+  { output.SetKeyValue(input[1], input[2]);
     return true;
   }
   for (int i=1; i<input.size(); i++)
     if (input[i].StartsWith(theCommands.opDefine(), 3))
-      output.SetValue(input[i][2], input[i][1]);
+      output.SetKeyValue(input[i][1], input[i][2]);
     else
     { if (commentsOnFailure!=0)
         *commentsOnFailure << "Could not extract key-value pair from: " << input.ToString() << ": failed to process: "
@@ -508,7 +508,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
       << " because I've already loaded a subalgebra with the same cartan subalgebra. ";
       continue;
     }
-    theSAs.theSubalgebras.SetValue(currentCandidate, currentCandidate.theHs);
+    theSAs.theSubalgebras.SetKeyValue(currentCandidate.theHs, currentCandidate);
     theSAs.theSubalgebras.theValues.LastObject().indexInOwner=theSAs.theSubalgebras.theValues.size-1;
   }
   reportStream << "Subalgebra loading done, total  " << theSAs.theSubalgebras.theValues.size << " subalgebras loaded. ";

@@ -98,7 +98,7 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
   theUser.username=theGlobalVariables.userDefault;
   theUser.currentTable="users";
   theUser.ResetAuthenticationToken(theRoutines, 0);
-  theGlobalVariables.SetWebInput("authenticationToken", "");
+  theGlobalVariables.SetWebInpuT("authenticationToken", "");
   return true;
 #else
   return true;

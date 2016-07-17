@@ -707,7 +707,7 @@ bool WebWorker::ProcessRawArguments
   if (theGlobalVariables.flagUsingSSLinCurrentConnection &&
       theGlobalVariables.userCalculatorRequestType=="exercisesNoLogin")
   { theGlobalVariables.userCalculatorRequestType="exercises";
-    theGlobalVariables.SetWebInput("request", "exercises");
+    theGlobalVariables.SetWebInpuT("request", "exercises");
   }
 //  argumentProcessingFailureComments << "DEBUG: Comma delimited inputstringnames: "
 //  << inputStrings.ToStringCommaDelimited() << " values: " <<  inputStringNames.ToStringCommaDelimited();
@@ -737,8 +737,8 @@ bool WebWorker::ProcessRawArguments
     { password=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("password"));
       //this may need a security overview: the SetValue function may leave traces in memory
       //of the old password. Not a big deal for the time being.
-      theArgs.SetValue
-      ("********************************************", "password");
+      theArgs.SetKeyValue
+      ("password", "********************************************");
     }
   }
   if (theArgs.Contains("textInput") && !theArgs.Contains("mainInput"))
@@ -774,12 +774,12 @@ bool WebWorker::ProcessRawArguments
     }
     if (theGlobalVariables.flagLoggedIn)
     { theGlobalVariables.userDefault=desiredUser;
-      theGlobalVariables.SetWebInput("authenticationToken", CGI::StringToURLString(this->authenticationToken));
+      theGlobalVariables.SetWebInpuT("authenticationToken", CGI::StringToURLString(this->authenticationToken));
     } else if (changingPass)
       theGlobalVariables.userDefault=desiredUser;
     else if (this->authenticationToken!="" || password!="")
     { theGlobalVariables.userDefault="";
-      theGlobalVariables.SetWebInput
+      theGlobalVariables.SetWebInpuT
       ("error", CGI::StringToURLString("<b>Invalid user or password.</b> Comments follow. "+argumentProcessingFailureComments.str()));
     }
   }
@@ -808,7 +808,7 @@ bool WebWorker::ProcessRawArgumentsNoLoginInterpreterMode
   if (theGlobalVariables.flagUsingSSLinCurrentConnection &&
       theGlobalVariables.userCalculatorRequestType=="exercisesNoLogin")
   { theGlobalVariables.userCalculatorRequestType="exercises";
-    theGlobalVariables.SetWebInput("request", "exercises");
+    theGlobalVariables.SetWebInpuT("request", "exercises");
   }
   std::string desiredUser;
   if (!theGlobalVariables.UserGuestMode())
@@ -2334,7 +2334,7 @@ int WebWorker::ProcessChangePassword()
 { MacroRegisterFunctionWithName("WebWorker::ProcessChangePassword");
   //stOutput << " ere i am";
 //  if (theGlobalVariables.UserDebugFlagOn())
-  theGlobalVariables.SetWebInput("debugFlag", "true");
+  theGlobalVariables.SetWebInpuT("debugFlag", "true");
 //  stOutput << "DEBUG: " << this->ToStringCalculatorArgumentsHumanReadable();
   this->authenticationToken="";
   if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection)

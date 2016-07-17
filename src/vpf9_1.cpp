@@ -212,9 +212,9 @@ void GlobalVariables::initDefaultFolderAndFileNames
   this->initOutputReportAndCrashFileNames("", "");
 }
 
-void GlobalVariables::SetWebInput(const std::string& inputName, const std::string& inputValue)
+void GlobalVariables::SetWebInpuT(const std::string& inputName, const std::string& inputValue)
 { MacroRegisterFunctionWithName("GlobalVariables::SetWebInput");
-  this->webArguments.SetValue(inputValue, inputName);
+  this->webArguments.SetKeyValue(inputName, inputValue);
 }
 
 bool GlobalVariables::UserSecureNonAdminOperationsAllowed()
@@ -284,7 +284,7 @@ std::string GlobalVariables::ToStringNavigation()
     else
       out << "<b>Password change: <br>secure connection<br>only</b><br>";
   }
-  if (this->UserDefaultHasAdminRights())
+  if (this->UserDefaultHasAdminRights() && !this->UserStudentViewOn())
   { if (theGlobalVariables.userCalculatorRequestType!="status")
       out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=status&" << this->ToStringCalcArgsNoNavigation()
       << "\">Server status</a><br>";
@@ -295,12 +295,12 @@ std::string GlobalVariables::ToStringNavigation()
       << "\">Database</a><br>";
     else
       out << "<b>Database</b><br>";
-  }
   if (theGlobalVariables.userCalculatorRequestType!="compute")
     out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=compute&"
     << this->ToStringCalcArgsNoNavigation() << " \">Calculator</a><br>";
   else
     out << "<b>Calculator</b><br>";
+  }
   if (theGlobalVariables.userCalculatorRequestType!="exercises" &&
       theGlobalVariables.userCalculatorRequestType!="examForReal" )
   { if (theGlobalVariables.flagUsingSSLinCurrentConnection)

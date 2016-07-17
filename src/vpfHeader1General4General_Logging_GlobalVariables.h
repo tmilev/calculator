@@ -181,7 +181,7 @@ public:
   std::string ToStringNavigation();
   std::string ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude=0);
 
-  void SetWebInput(const std::string& inputName, const std::string& inputValue);
+  void SetWebInpuT(const std::string& inputName, const std::string& inputValue);
   std::string GetWebInput(const std::string& inputName);
   void initDefaultFolderAndFileNames
 (const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow);

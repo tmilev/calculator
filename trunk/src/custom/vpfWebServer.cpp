@@ -746,19 +746,7 @@ bool WebWorker::ProcessRawArguments
     << "Received calculator link in an old format, interpreting 'textInput' as 'mainInput'";
     theArgs.theKeys.SetObjectAtIndex(theArgs.theKeys.GetIndex("textInput"), "mainInput");
   }
-  theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs=false;
-  if (theGlobalVariables.userCalculatorRequestType!="changePassword" &&
-      theGlobalVariables.userCalculatorRequestType!="activateAccount" &&
-      !theGlobalVariables.UserGuestMode()
-      )
-    if (theGlobalVariables.GetWebInput("ignoreSecurity")=="true" &&
-        !theGlobalVariables.flagUsingSSLinCurrentConnection)
-    { theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs=true;
-      password= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("authenticationInsecure"));
-    }
-  if (desiredUser!="" &&
-      (theGlobalVariables.flagUsingSSLinCurrentConnection ||
-       theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs))
+  if (desiredUser!="" && theGlobalVariables.flagUsingSSLinCurrentConnection)
   { bool changingPass=theGlobalVariables.userCalculatorRequestType=="changePassword" ||
     theGlobalVariables.userCalculatorRequestType=="activateAccount";
     if (changingPass)
@@ -830,8 +818,7 @@ bool WebWorker::ProcessRawArgumentsNoLoginInterpreterMode
 
 std::string WebWorker::GetHtmlHiddenInputs()
 { MacroRegisterFunctionWithName("WebWorker::GetHtmlHiddenInputs");
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection &&
-      !theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
     return "";
   std::stringstream out;
   //the values of the hidden inputs will be filled in via javascript
@@ -2194,56 +2181,54 @@ std::string WebWorker::GetLoginHTMLinternal()
 //  << this->theMessage
 //  << "<hr> main argument: "
 //  << this->mainArgumentRAW;
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
-    theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs=true;
-  else
-    theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs=false;
-  if (theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
-  { out
-    << WebWorker::GetInsecureConnectionAngryMessage()
-    << "<br>Please do not use a password you use in other sites here.</b>";
-    out << CGI::GetJavascriptSha1();
-    out << "<script type=\"text/javascript\">\n";
-    out
-    << "function submitAuthentication(){\n"
-    << " shaObj = new jsSHA('SHA-1','TEXT');\n"
+  //if (theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
+//  { out
+//    << WebWorker::GetInsecureConnectionAngryMessage()
+//    << "<br>Please do not use a password you use in other sites here.</b>";
+//    out << CGI::GetJavascriptSha1();
+//    out << "<script type=\"text/javascript\">\n";
+//    out
+//    << "function submitAuthentication(){\n"
+//    << " shaObj = new jsSHA('SHA-1','TEXT');\n"
 //    << " alert(document.getElementById('password').value);\n"
-    << " shaObj.update(document.getElementById('username').value+document.getElementById('authenticationInsecure').value);\n"
-    << " var hash = shaObj.getHash('B64');\n"
-    << " document.getElementById('authenticationInsecure').value=hash;\n"
+//    << " shaObj.update(document.getElementById('username').value+document.getElementById('authenticationInsecure').value);\n"
+//    << " var hash = shaObj.getHash('B64');\n"
+//    << " document.getElementById('authenticationInsecure').value=hash;\n"
 //    << " document.getElementById('authenticationToken').value= encodeURIComponent(hash);\n"
     //<< " alert(hash);\n"
-    << " document.getElementById('login').submit();"
-    << "}\n"
-    ;
-    out << "</script>\n";
-  }
-  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"POST\" accept-charset=\"utf-8\">"
-  <<  "User name: "
+//    << " document.getElementById('login').submit();"
+//    << "}\n"
+//    ;
+//    out << "</script>\n";
+//  }
+  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"POST\" accept-charset=\"utf-8\">\n"
+  <<  "User name:\n"
   << "<input type=\"text\" id=\"username\" name=\"username\" placeholder=\"username\" ";
   if (!this->flagAuthenticationTokenWasSubmitted
-      && theGlobalVariables.GetWebInput("username")!="")
+      &&
+      theGlobalVariables.GetWebInput("username")!="")
     out << "value=\"" << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("username")) << "\"";
-  out << "required>"
-  << "<br>Password: ";
-  if (!theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
-    out << "<input type=\"password\" id=\"password\" name=\"password\" placeholder=\"password\" autocomplete=\"on\">";
-  else
-    out << "<input type=\"password\" id=\"authenticationInsecure\" "
-    << "name=\"authenticationInsecure\" placeholder=\"password\" autocomplete=\"off\">";
+  out << "required>";
+  out << "</input>\n";
+  out << "<br>Password: ";
+  //if (!theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
+  out << "<input type=\"password\" id=\"password\" name=\"password\" placeholder=\"password\" autocomplete=\"on\">";
+  //else
+    //out << "<input type=\"password\" id=\"authenticationInsecure\" "
+    //<< "name=\"authenticationInsecure\" placeholder=\"password\" autocomplete=\"off\">";
 
   out << this->GetHtmlHiddenInputExercise() << this->GetHtmlHiddenInputs();
-  if (!theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
-    out << "<input type=\"submit\" value=\"Login\"></form>";
-  else
-    out << "</form><button onclick=\"submitAuthentication();\">Login</button>";
-  if (theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
-  { out << "<br>Ignoring ssl encryption as a workaround. "
-    << " Only a thin javascript layer of in-browser encryption is protecting your password. "
-    << " Javascript encryption is courtesy of Brian Turek "
-    << "(<a href=\"http://caligatio.github.com/jsSHA/\">http://caligatio.github.com/jsSHA/</a>). "
-    ;
-  }
+//  if (!theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
+  out << "<input type=\"submit\" value=\"Login\"></form>";
+  //else
+  //out << "</form><button onclick=\"submitAuthentication();\">Login</button>";
+//  if (theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
+//  { out << "<br>Ignoring ssl encryption as a workaround. "
+//    << " Only a thin javascript layer of in-browser encryption is protecting your password. "
+//    << " Javascript encryption is courtesy of Brian Turek "
+//    << "(<a href=\"http://caligatio.github.com/jsSHA/\">http://caligatio.github.com/jsSHA/</a>). "
+//    ;
+//  }
   out << this->ToStringCalculatorArgumentsHumanReadable();
   return out.str();
 }
@@ -2320,7 +2305,8 @@ std::string WebWorker::GetChangePasswordPage()
   out << "<br>New password: \n"
   << "<input type=\"password\" id=\"newPassword\" placeholder=\"password\">\n"
   << "<br>Re-enter new password: \n"
-  << "<input type=\"password\"  id=\"reenteredPassword\" placeholder=\"password\">\n"
+  << "<input type=\"password\"  id=\"reenteredPassword\" placeholder=\"password\" "
+  << "onkeyup=\"if (event.keyCode == 13) submitChangePassRequest();\">\n"
   << "<button  onclick=\"submitChangePassRequest() \"> Submit</button>\n"
   << "<span id=\"passwordChangeResult\"> </span>\n"
 //  << "</form>"
@@ -2436,8 +2422,8 @@ std::string WebWorker::GetLoginPage()
   << WebWorker::GetJavascriptStandardCookies()
   << "<body ";
   out << "onload=\"loadSettings();  ";
-  if (!this->flagAuthenticationTokenWasSubmitted && !theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs
-      && theGlobalVariables.flagUsingSSLinCurrentConnection)
+  if (!this->flagAuthenticationTokenWasSubmitted &&
+      theGlobalVariables.flagUsingSSLinCurrentConnection)
     if (theGlobalVariables.GetWebInput("username")=="")
       out
       << "if (document.getElementById('authenticationToken') !=null)"
@@ -2522,13 +2508,18 @@ std::string WebWorker::GetJavascriptStandardCookies()
     out << "  addCookie(\"studentView\", \"" << theGlobalVariables.GetWebInput("studentView") << "\", 100, true);  \n";
   if (this->IsAllowedAsRequestCookie(theGlobalVariables.userCalculatorRequestType))
     out << "  addCookie(\"request\", \"" << theGlobalVariables.userCalculatorRequestType << "\", 100, false);\n";
-  if ((theGlobalVariables.flagLoggedIn || theGlobalVariables.UserGuestMode()) &&
+  if (
+      //(theGlobalVariables.flagLoggedIn || theGlobalVariables.UserGuestMode()) &&
        theGlobalVariables.userCalculatorRequestType!="" &&
        theGlobalVariables.userCalculatorRequestType!="compute")
-  { out << "  addCookie(\"fileName\", \""
-    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName")) << "\", 100, false);\n";
-    out << "  addCookie(\"currentExamHome\", \""
-    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome")) << "\", 100, false);\n";
+  { if (theGlobalVariables.GetWebInput("fileName")!="")
+      out << "  addCookie(\"fileName\", \""
+      << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"))
+      << "\", 100, false);\n";
+    if (theGlobalVariables.GetWebInput("currentExamHome")!="")
+      out << "  addCookie(\"currentExamHome\", \""
+      << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"))
+      << "\", 100, false);\n";
   }
   out
   << "}\n";
@@ -2540,18 +2531,7 @@ std::string WebWorker::GetJavascriptStandardCookies()
     << "//150 days is a little longer than a semester\n"
     << "  addCookie(\"username\", \"" << theGlobalVariables.userDefault << "\", 150, true);\n";
   }
-  if (theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs ||
-      theGlobalVariables.flagUsingSSLinCurrentConnection)
-  { out << "  addCookie(\"ignoreSecurity\", \"";
-    if (theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
-      out << "true";
-    else
-      out << "false";
-    out << "\", 150, false);\n"
-    ;
-  }
-  out
-  << "}\n";
+  out << "}\n";
   out
 //  << "function getCalculatorCGIsettings(){\n"
 //  << "  result =\"examStatus=\"+getCookie(\"examStatus\");\n"

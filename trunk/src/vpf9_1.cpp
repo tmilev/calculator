@@ -218,8 +218,7 @@ void GlobalVariables::SetWebInpuT(const std::string& inputName, const std::strin
 }
 
 bool GlobalVariables::UserSecureNonAdminOperationsAllowed()
-{ return this->flagLoggedIn &&
-  (this->flagUsingSSLinCurrentConnection || this->flagIgnoreSecurityToWorkaroundSafarisBugs);
+{ return this->flagLoggedIn && this->flagUsingSSLinCurrentConnection;
 }
 
 bool GlobalVariables::UserDebugFlagOn()
@@ -231,13 +230,12 @@ bool GlobalVariables::UserStudentViewOn()
 }
 
 bool GlobalVariables::UserDefaultHasAdminRights()
-{ return this->flagLoggedIn && (this->userRole=="admin") && !this->flagIgnoreSecurityToWorkaroundSafarisBugs;
+{ return this->flagLoggedIn && (this->userRole=="admin");
 }
 
 bool GlobalVariables::UserDefaultHasProblemComposingRights()
 { return this->flagLoggedIn &&
-  (this->userRole=="admin" || this->userRole=="teacher") &&
-  !this->flagIgnoreSecurityToWorkaroundSafarisBugs;
+  (this->userRole=="admin" || this->userRole=="teacher") ;
 }
 
 bool GlobalVariables::UserGuestMode()
@@ -280,10 +278,14 @@ std::string GlobalVariables::ToStringNavigation()
     out << this->ToStringCalcArgsNoNavigation() << " \">Log out</a><br>";
     if (theGlobalVariables.flagUsingSSLinCurrentConnection)
       out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=changePasswordPage&"
-      << this->ToStringCalcArgsNoNavigation() << " \">Change password</a><hr>";
+      << this->ToStringCalcArgsNoNavigation() << "\">Change password</a><br>";
     else
       out << "<b>Password change: <br>secure connection<br>only</b><br>";
   }
+  out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=exercises&"
+  << this->ToStringCalcArgsNoNavigation()
+  << "fileName=ProblemCollections/CourseList.html"
+  << "\">Select course</a><hr>";
   if (this->UserDefaultHasAdminRights() && !this->UserStudentViewOn())
   { if (theGlobalVariables.userCalculatorRequestType!="status")
       out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=status&" << this->ToStringCalcArgsNoNavigation()
@@ -295,20 +297,20 @@ std::string GlobalVariables::ToStringNavigation()
       << "\">Database</a><br>";
     else
       out << "<b>Database</b><br>";
-  if (theGlobalVariables.userCalculatorRequestType!="compute")
-    out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=compute&"
-    << this->ToStringCalcArgsNoNavigation() << " \">Calculator</a><br>";
-  else
-    out << "<b>Calculator</b><br>";
+    if (theGlobalVariables.userCalculatorRequestType!="compute")
+      out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=compute&"
+      << this->ToStringCalcArgsNoNavigation() << " \">Calculator</a><br>";
+    else
+      out << "<b>Calculator</b><br>";
+    if (theGlobalVariables.userCalculatorRequestType!="exercises" &&
+        theGlobalVariables.userCalculatorRequestType!="examForReal" )
+    { if (theGlobalVariables.flagUsingSSLinCurrentConnection)
+        out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=exercises&"
+        << this->ToStringCalcArgsNoNavigation()
+        << "\">Exercises</a><hr>";
+    } else
+      out << "<b>Exercises</b><hr>";
   }
-  if (theGlobalVariables.userCalculatorRequestType!="exercises" &&
-      theGlobalVariables.userCalculatorRequestType!="examForReal" )
-  { if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-      out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=exercises&"
-      << this->ToStringCalcArgsNoNavigation()
-      << "\">Exercises</a><hr>";
-  } else
-    out << "<b>Exercises</b><hr>";
   return out.str();
 }
 

@@ -792,10 +792,10 @@ bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstre
 
 bool UserCalculator::AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::Authenticate");
-  if (!theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
+  //if (!theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
     this->ComputeShaonedSaltedPassword();
-  else
-    this->enteredShaonedSaltedPassword=this->enteredPassword;
+  //else
+  //  this->enteredShaonedSaltedPassword=this->enteredPassword;
 //  stOutput <<  "computed shaoned saltes pass from pass "
 //  << this->enteredPassword << " to get: " << this->enteredShaonedSaltedPassword;
   bool result=this->FetchOneColumn("password", this->actualShaonedSaltedPassword, theRoutines, commentsOnFailure);
@@ -1052,8 +1052,7 @@ bool DatabaseRoutines::startMySQLDatabaseIfNotAlreadyStarted(std::stringstream* 
 bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, bool* outputfirstLogin)
 { MacroRegisterFunctionWithName("DatabaseRoutines::startMySQLDatabase");
   if (theGlobalVariables.flagUsingBuiltInWebServer)
-    if (!theGlobalVariables.flagUsingSSLinCurrentConnection &&
-        !theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
+    if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
     { if (commentsOnFailure!=0)
         *commentsOnFailure << "Database operations forbidden for connections not carried over ssl. ";
       return false;

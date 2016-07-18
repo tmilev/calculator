@@ -590,16 +590,22 @@ std::string CalculatorHTML::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "  inputParams+='&mainInput=' + encodeURIComponent(theString);\n"
 //  << "  inputParams+='&currentExamHome=' + problemCollectionName;\n"
   << "  var https = new XMLHttpRequest();\n"
-//  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameExecutableWithPath << "\", true);\n"
-  << "  https.open(\"GET\", \"" << theGlobalVariables.DisplayNameExecutableWithPath << "\""
-  << "+ \"?\"+inputParams"
-  << ", true);\n"
+////////////////////////////////////////////
+  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameExecutableWithPath << "\", true);\n"
+/////////////////or/////////////////////////
+//  << "  https.open(\"GET\", \"" << theGlobalVariables.DisplayNameExecutableWithPath << "\""
+//  << "+ \"?\"+inputParams"
+//  << ", true);\n"
+////////////////////////////////////////////
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
   << "  https.onload = function() {\n"
   << "    spanOutput.innerHTML=https.responseText;\n"
   << "  }\n"
-//  << "  https.send(inputParams);\n"
-  << "  https.send();\n"
+////////////////////////////////////////////
+  << "  https.send(inputParams);\n"
+/////////////////or/////////////////////////
+//  << "  https.send();\n"
+////////////////////////////////////////////
   << "}\n"
   << "</script>";
   return out.str();
@@ -1303,7 +1309,8 @@ int WebWorker::ProcessSubmitProblem()
     stOutput << "<b>Random seed not given.</b>";
 //  stOutput << "<b>debug remove when done: Random seed: " << theProblem.theProblemData.randomSeed << "</b>";
   theProblem.currentExamHomE         = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
-  if (theProblem.currentExamHomE == "" && !theGlobalVariables.flagRunningAsProblemInterpreter)
+  if (theProblem.currentExamHomE == "" &&
+      !theGlobalVariables.flagRunningAsProblemInterpreter)
   { stOutput << "<b>Could not find the problem collection to which this problem belongs. "
     << "If you think this is a bug, do the following. " << theProblem.BugsGenericMessage << "</b>";
     return 0;
@@ -2151,7 +2158,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
           << "\">Student view section " << this->databaseStudentSectionS[i] << " </a><br>";
     }
   }
-  if (!this->flagIsExamHome)
+  if (this->flagIsExamProblem)
   { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?request="
     << exerciseRequest << "&"
     << calcArgsNoPassExamDetails
@@ -2160,7 +2167,8 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
       out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
     out << "currentExamHome=" << CGI::StringToURLString(this->currentExamHomE) << "&"
     << "fileName=" << CGI::StringToURLString(this->currentExamHomE) << "&\"> Course homework home </a><br>";
-  } else
+  }
+  if (this->flagIsExamHome)
     out << "<b>Course homework home</b>";
   if (this->flagIsExamProblem)
   { if (theGlobalVariables.userCalculatorRequestType=="exercises")
@@ -2223,7 +2231,6 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     out << "<hr><a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?"
     << this->ToStringCalculatorArgumentsForProblem(exerciseRequest, studentView, "", true)
     << "\">Link to this problem</a><br>";
-
   return out.str();
 }
 
@@ -2606,7 +2613,7 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
       currentA.htmlButtonSolution="<button onclick=\"showSolution('" +answerId+ "','"
       + currentA.idSpanSolution +"')\"> Solution</button>";
     else
-      currentA.htmlButtonSolution="No solution available.";
+      currentA.htmlButtonSolution="";
   }
   inputOutput.defaultKeysIfMissing.AddOnTop("onkeyup");
   inputOutput.defaultValuesIfMissing.AddOnTop
@@ -2615,7 +2622,10 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   inputOutput.defaultValuesIfMissing.AddOnTop("height:70px");
   currentA.htmlTextareaLatexAnswer=
   inputOutput.ToStringOpenTag() + inputOutput.ToStringCloseTag();
-  currentA.htmlSpanMQfield = "<span id='" + currentA.idMQfield + "'>" + "</span>";
+  currentA.htmlSpanMQfield =
+  (std::string)"<div class=\"calculatorMQfieldEnclosure\">"+
+  "<span id='" + currentA.idMQfield + "'>" + "</span>"+
+  "</div>";
   currentA.htmlMQjavascript= CalculatorHtmlFunctions::GetJavascriptMathQuillBox(currentA);
   currentA.htmlSpanMQButtonPanel=
   "<span id=\"" + currentA.idMQButtonPanelLocation + "\"></span>";
@@ -2631,12 +2641,12 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
       if (numSubmissions>0)
         verifyStream << "<br>Used: " << numSubmissions << " attempt(s) (" << numCorrectSubmissions << " correct).";
     } else
-    { verifyStream << " <b><span style=\"color:brown\">Need to submit answer. </span></b>";
+    { verifyStream << " <b><span style=\"color:brown\">Waiting for answer. </span></b>";
       if (numSubmissions>0)
         verifyStream << numSubmissions << " attempt(s) so far. ";
     }
   } else
-    verifyStream << " <b><span style=\"color:brown\">Submit (no credit, unlimited tries)</span></b>";
+    verifyStream << " <b><span style=\"color:brown\">Waiting for answer [unlimited tries]</span></b>";
   verifyStream << "</span>";
   currentA.htmlSpanVerifyAnswer=verifyStream.str();
   return true;
@@ -2655,42 +2665,43 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
   }
   std::stringstream out;
   out << "<table>";
-  out << "<tr><td><small>answer:</small><td></tr>";
-  if (currentA.flagAutoGenerateMQButtonPanel || currentA.flagAutoGenerateMQfield)
-  { out << "<tr><td>";
-    out << "<table><tr>";
-    if (currentA.flagAutoGenerateMQButtonPanel)
-      out << "<td>" << currentA.htmlSpanMQButtonPanel << "</td>";
-    if (currentA.flagAutoGenerateMQfield)
-      out << "<td>" << currentA.htmlSpanMQfield  << "</td>";
-    out << "</tr></table>";
+//  out << "<tr><td><small>answer:</small><td></tr>";
+  out << "<tr><td>";
+  out << "<table><tr>";
+  if (currentA.flagAutoGenerateMQfield)
+    out << "<td>" << currentA.htmlSpanMQfield  << "</td>";
+  if (currentA.flagAutoGenerateMQButtonPanel)
+    out << "<td>" << currentA.htmlSpanMQButtonPanel << "</td>";
+  out << "</tr></table>";
+  out << "</td>";
+  if (currentA.flagAutoGenerateSubmitButtons)
+  { out << "<td>";
+    out << "<table>";
+    out << "<tr><td>";
+    out << currentA.htmlButtonSubmit;
     out << "</td></tr>";
+    out << "<tr><td>";
+    out << currentA.htmlButtonInterpret;
+    out << "</td></tr>";
+    out << "<tr><td>";
+    out << currentA.htmlButtonAnswer;
+    out << "</td></tr>";
+    out << "<tr><td>";
+    out << currentA.htmlButtonSolution;
+    out << "</td></tr>";
+    out << "</table>";
+    out << "</td>";
   }
-  out << "<tr>";
   out << "<td>";
+  out << "<button class=\"accordion\">details</button>";
+  out << "<div class=\"panel\">";
   out << currentA.htmlTextareaLatexAnswer;
+  out << "</div>";
   out << "</td>";
   out << "</tr>";
-  if (currentA.flagAutoGenerateSubmitButtons)
-  { out << "<tr><td>";
-    out << currentA.htmlButtonSubmit;
-    out << currentA.htmlButtonInterpret;
-    out << currentA.htmlButtonAnswer;
-    out << currentA.htmlButtonSolution;
-    out << "</td>";
-    out << "</tr>";
-  }
-  if (currentA.flagAutoGenerateVerificationField)
-  { out << "<tr>";
-    out << "<td>";
-    out << currentA.htmlSpanVerifyAnswer;
-    out << "</td>";
-    // out << "<hr>DEBUG: input non-answer ids: "
-    //<< this->theProblemData.inputNonAnswerIds;
-    out << "</tr>";
-  }
-
   out << "</table>";
+  if (currentA.flagAutoGenerateVerificationField)
+    out << currentA.htmlSpanVerifyAnswer;
   inputOutput.interpretedCommand=out.str();
 }
 
@@ -2706,7 +2717,10 @@ void CalculatorHTML::InterpretNotByCalculator(SyntacticElementHTML& inputOutput)
 }
 
 std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink)
-{ unsigned firstMeaningfulChar=0;
+{ MacroRegisterFunctionWithName("CalculatorHTML::CleanUpFileName");
+  if (inputLink.size()==0)
+    return inputLink;
+  unsigned firstMeaningfulChar=0;
   for (; firstMeaningfulChar<inputLink.size(); firstMeaningfulChar++)
     if (inputLink[firstMeaningfulChar]!='\n' &&
         inputLink[firstMeaningfulChar]!='\r' &&
@@ -3452,10 +3466,10 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   dummyElt.syntacticRole="filler";
   eltsStack.SetExpectedSize(theElements.size+SyntacticElementHTML::ParsingNumDummyElements);
   for (int i=0; i<SyntacticElementHTML::ParsingNumDummyElements; i++)
-    eltsStack.AddOnTop( dummyElt);
+    eltsStack.AddOnTop(dummyElt);
   int indexInElts=-1;
   bool reduced=false;
-  this->flagIsExamProblem=true;
+  this->flagIsExamProblem=false;
   this->flagIsExamHome=false;
   std::string tagClass;
   do
@@ -3531,7 +3545,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       eltsStack.RemoveLastObject();
       continue;
     }
-    if (secondToLast.syntacticRole=="" && last=="/")
+    if (secondToLast.syntacticRole=="" && secondToLast!="\"" && last=="/")
     { secondToLast.content+=last.content;
       eltsStack.RemoveLastObject();
       continue;
@@ -3564,6 +3578,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     if (this->CanBeMerged(secondToLast, last))
     { secondToLast.content+=last.content;
       eltsStack.RemoveLastObject();
+      //stOutput << "<hr>Merge<hr>";
       continue;
     }
     if (thirdToLast.syntacticRole=="<calculatorSolution>" &&
@@ -3582,12 +3597,25 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       else
         secondToLast.content+=last.content;
       eltsStack.RemoveLastObject();
+      //stOutput << "<hr>Rule X executed<hr> ";
+      continue;
+    }
+    if (thirdToLast=="\"" && secondToLast!="\"" && last!="\"")
+    { if (secondToLast.syntacticRole!="" && secondToLast.content=="")
+        secondToLast.content=secondToLast.syntacticRole;
+      if (last.syntacticRole!="" && last.content=="")
+        last.content=last.syntacticRole;
+      secondToLast.content+=last.content;
+      //stOutput << "<hr>Rule quote executed<hr> ";
+
+      eltsStack.RemoveLastObject();
       continue;
     }
     if (sixthToLast.syntacticRole=="<openTag" && fourthToLast=="=" && thirdToLast=="\""
         && last=="\"" )
     { sixthToLast.SetKeyValue(fifthToLast.content, secondToLast.content);
       eltsStack.SetSize(eltsStack.size-5);
+      //stOutput << "<hr>Rule ZZ executed<hr> ";
       continue;
     }
     if (thirdToLast.syntacticRole=="<openTag" && secondToLast.syntacticRole=="" && last.syntacticRole==">")

@@ -3,9 +3,9 @@ var answerMathQuillObjects=[];
 var answerMQspanIds;
 var preferredButtonContainers;
 function initializeButtons(){
-for (i=0; i<answerIdsPureLatex.length; i++){ 
-  newElt= document.createElement("span");
-  newElt.innerHTML=
+  for (i=0; i<answerIdsPureLatex.length; i++){ 
+    currentButtonPanel=document.getElementById(preferredButtonContainers[i]);	
+    currentButtonPanel.innerHTML=
 "<table><tr>"+
 "<td>" + getSqrtButton(i)+ "</td><td>"+getSqrt_N_Button(i) + "</td>"+ 
 "</tr>"+
@@ -17,14 +17,18 @@ for (i=0; i<answerIdsPureLatex.length; i++){
 "</tr>"+
 "</table>"
 ;
-  currentMJElt=document.getElementById(answerIdsPureLatex[i]);	
-  currentButtonPanel=document.getElementById(preferredButtonContainers[i]);	
-  currentButtonPanel.appendChild(newElt);
+  }
+  ///initializing accordions
+  acc = document.getElementsByClassName("accordion");
+  for (i = 0; i < acc.length; i++) {
+    acc[i].onclick = function(){
+      this.classList.toggle("active");
+      this.nextElementSibling.classList.toggle("show");
+    }
+  }
 }
-//alert(answerIdsPureLatex);
-//alert(answerIdsMathQuill);
 
-}
+
 
 function getSqrt_N_Button(indexMathField){
   return "<button style='width:25' onclick='sqrt_N_Click(answerMathQuillObjects[" + indexMathField + "]);'>&#8731;</button>";

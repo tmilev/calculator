@@ -79,7 +79,7 @@ public:
 //webserver flags
   bool flagLoggedIn;
   bool flagUsingSSLinCurrentConnection;
-  bool flagIgnoreSecurityToWorkaroundSafarisBugs;
+  //bool flagIgnoreSecurityToWorkaroundSafarisBugs;
   bool flagSSLisAvailable;
 
   bool flagAllowUseOfThreadsAndMutexes;

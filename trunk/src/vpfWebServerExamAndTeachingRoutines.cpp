@@ -1020,10 +1020,9 @@ int WebWorker::ProcessSubmitProblemPreview()
   MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
   for (int i=0; i<theArgs.size(); i++)
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID))
-    { lastAnswer= "("+ CGI::URLStringToNormal(theArgs[i]) + "); ";
-      studentInterpretation << lastAnswer;
-    }
-  stOutput << "Your answer(s): \\(" << studentInterpretation.str() << "\\)" << "\n<br>\n";
+      lastAnswer= "("+ CGI::URLStringToNormal(theArgs[i]) + "); ";
+  studentInterpretation << lastAnswer;
+  stOutput << "Your answer(s): \\(" << lastAnswer << "\\)" << "\n<br>\n";
   CalculatorHTML theProblem;
   theProblem.LoadCurrentProblemItem();
   if (!theProblem.flagLoadedSuccessfully)
@@ -1107,13 +1106,13 @@ int WebWorker::ProcessSubmitProblemPreview()
   theFormat.flagExpressionIsFinal=true;
   theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
   theFormat.flagUseQuotes=false;
+  //stOutput << "<hr>DEBUG: <hr>" << theInterpreterWithAdvice.theProgramExpression.ToString() << "<hr>";
   for (int j=0; j<currentA.commandIndicesCommentsBeforeSubmission.size; j++)
-  { int actualIndex=1+j;
-    const Expression& currentE=theInterpreterWithAdvice.
-    theProgramExpression[actualIndex][1];
-    stOutput << currentE.ToString(&theFormat);
-    if (j!=currentA.commandIndicesCommentsBeforeSubmission.size-1)
-      stOutput << "<br>";
+  { int actualIndex=3+currentA.commandIndicesCommentsBeforeSubmission[j];
+    //stOutput << "<hr>DEBUG: Command index " << j << ": " << currentA.commandIndicesCommentsBeforeSubmission[j] << ", actual index: "
+    //<< actualIndex << "<hr>";
+    const Expression& currentE=theInterpreterWithAdvice.theProgramExpression[actualIndex][1];
+    stOutput << currentE.ToString(&theFormat);  
   }
   stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
   return 0;
@@ -2044,6 +2043,8 @@ bool CalculatorHTML::PrepareCommentsBeforeSubmission
   //stOutput << "<hr>DEBUG: Preparing give-up commands for: "
   //<< theAnswer.answerId << "<hr>";
   int counter=0;
+//  stOutput << "<hr>DEBUG: Call stack: " << crash.GetStackTraceEtcErrorMessage();
+  theAnswer.commandIndicesCommentsBeforeSubmission.SetSize(0);
   for (int i=0; i<this->theContent.size; i++)
   { SyntacticElementHTML& currentElt=this->theContent[i];
     if (!currentElt.IsCommentBeforeSubmission())
@@ -2114,8 +2115,7 @@ bool CalculatorHTML::PrepareCommandsAnswer
       theAnswer.commandVerificationOnly=commandCleaned;
       return true;
     }
-    if (this->theContent[i].IsCalculatorHidden() ||
-        this->theContent[i].IsCalculatorCommand())
+    if (this->theContent[i].IsCalculatorHidden() || this->theContent[i].IsCalculatorCommand())
       streamCommands << commandEnclosed;
   }
   comments << "<b>Somethins is wrong: did not find answer for answer tag: "
@@ -3211,14 +3211,14 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   }
   if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
     out << this->GetEditPageButton();
-//////////////////////////////
+  //////////////////////////////
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time after execution");
   std::string lastCommands;
-//  out << "DEBUG nfo, remove when done. <br>randseed: " << this->theProblemData.randomSeed
-//  << "<br> forReal: " << this->flagIsForReal << " seed computed: " << this->theProblemData.flagRandomSeedComputed
-//  << " flagRandomSeedGiven: " << this->flagRandomSeedGiven
-//  << this->ToStringCalculatorArgumentsForProblem("exercise");
+  //out << "DEBUG nfo, remove when done. <br>randseed: " << this->theProblemData.randomSeed
+  //<< "<br> forReal: " << this->flagIsForReal << " seed computed: " << this->theProblemData.flagRandomSeedComputed
+  //<< " flagRandomSeedGiven: " << this->flagRandomSeedGiven
+  //<< this->ToStringCalculatorArgumentsForProblem("exercise");
   //first command and first syntactic element are the random seed and are ignored.
   if (!this->ProcessInterprettedCommands(theInterpreter, this->theContent, comments))
   { out << comments.str();
@@ -3227,13 +3227,13 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   }
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before class management routines");
-//  stOutput << "got to here, this->theProblemData: " << this->theProblemData.ToString();
+  //stOutput << "got to here, this->theProblemData: " << this->theProblemData.ToString();
   for (int i=0; i<this->theContent.size; i++)
     if (this->theContent[i].GetTagClass()=="calculatorManageClass")
     { this->flagLoadedClassDataSuccessfully= this->PrepareClassData(comments);
       break;
     }
-//  out << "Debug data: homework groups found: " << this->hdHomeworkGroups.ToStringCommaDelimited();
+  //out << "Debug data: homework groups found: " << this->hdHomeworkGroups.ToStringCommaDelimited();
   this->PrepareAnswerElements(comments);
   this->NumAnswerIdsMathquilled=0;
   for (int i=0; i<this->theContent.size; i++)
@@ -3245,7 +3245,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       out << this->theContent[i].ToStringInterpreted();
   for (int i=0; i<this->theProblemData.theAnswers.size; i++)
     out << this->theProblemData.theAnswers[i].htmlMQjavascript;
-////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////
   out << "<script type=\"text/javascript\"> \n ";
   out << "answerMQspanIds = [";
   for (int i=0; i<this->theProblemData.theAnswers.size; i++)
@@ -3269,10 +3269,10 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   }
   out << "];\n";
   out << "</script>";
-////////////////////////////////////////////////////////////////////
-//   out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
-//   out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
-  //  out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();
+  ////////////////////////////////////////////////////////////////////
+  //out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
+  //out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
+  //out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before database storage");
 #ifdef MACRO_use_MySQL
@@ -3281,7 +3281,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     this->theProblemData.flagRandomSeedComputed=true;
     DatabaseRoutines theRoutines;
     //this->currentUser.username=theGlobalVariables.userDefault;
-//    stOutput << "About to store problem data: " << this->theProblemData.ToString();
+    //stOutput << "About to store problem data: " << this->theProblemData.ToString();
     //if (!this->currentUser.InterpretDatabaseProblemData(this->currentUserDatabaseString, comments))
       //out << "<b>Error: corrupt database string. </b>";
     //else
@@ -3289,8 +3289,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     if (!this->currentUser.StoreProblemDataToDatabase(theRoutines, comments))
       out << "<b>Error: failed to store problem in database. </b>" << comments.str();
   }
-//  out << "Current collection problems: " << this->databaseProblemList.ToStringCommaDelimited()
-//  << " with weights: " << this->databaseProblemWeights.ToStringCommaDelimited();
+  //out << "Current collection problems: " << this->databaseProblemList.ToStringCommaDelimited()
+  //<< " with weights: " << this->databaseProblemWeights.ToStringCommaDelimited();
 #endif // MACRO_use_MySQL
   this->outputHtmlNavigation=this->ToStringProblemNavigation();
   this->outputHtmlMain=out.str();

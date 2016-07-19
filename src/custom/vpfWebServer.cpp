@@ -3681,8 +3681,8 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   theGlobalVariables.programArguments.SetSize(argC);
   for (int i=0; i<argC; i++)
     theGlobalVariables.programArguments[i]=argv[i];
-  //std::cout << "\nDEBUG: Program arguments: <br>"
-  //<< theGlobalVariables.programArguments.ToStringCommaDelimited() << "\n";
+  std::cout << "\nDEBUG: Program arguments: <br>"
+  << theGlobalVariables.programArguments.ToStringCommaDelimited() << "\n";
 
   theGlobalVariables.flagUsingBuiltInWebServer=false;
   theGlobalVariables.flagRunningCommandLine=false;

@@ -2653,8 +2653,8 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   inputOutput.defaultKeysIfMissing.AddOnTop("onkeyup");
   inputOutput.defaultValuesIfMissing.AddOnTop
   (currentA.javascriptPreviewAnswer+currentA.MQUpdateFunction +"();");
-  inputOutput.defaultKeysIfMissing.AddOnTop("style");
-  inputOutput.defaultValuesIfMissing.AddOnTop("height:70px");
+//  inputOutput.defaultKeysIfMissing.AddOnTop("style");
+//  inputOutput.defaultValuesIfMissing.AddOnTop("height:70px");
   currentA.htmlTextareaLatexAnswer=
   inputOutput.ToStringOpenTag() + inputOutput.ToStringCloseTag();
   currentA.htmlSpanMQfield =
@@ -2729,9 +2729,9 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
   }
   out << "<td>";
   out << "<button class=\"accordion\">details</button>";
-  out << "<div class=\"panel\">";
+//  out << "<div class=\"panel\">";
   out << currentA.htmlTextareaLatexAnswer;
-  out << "</div>";
+//  out << "</div>";
   out << "</td>";
   out << "</tr>";
   out << "</table>";
@@ -3159,9 +3159,23 @@ bool CalculatorHTML::ProcessInterprettedCommands
       crash << "Element: " << theInterpreter.theProgramExpression[currentElt.commandIndex].ToString()
       << " in " << theInterpreter.theProgramExpression.ToString()
       << " is supposed to be a command enclosure but apparently isn't. " << crash;
-    const Expression& currentE=theInterpreter.theProgramExpression[currentElt.commandIndex][1];
+    Expression currentExpr=theInterpreter.theProgramExpression[currentElt.commandIndex][1];
+    if (currentExpr.StartsWith(theInterpreter.opEndStatement()) && currentExpr.size()==2)
+      currentExpr=currentExpr[1];
     theFormat.flagUseQuotes=false;
-    currentElt.interpretedCommand=  currentE.ToString(&theFormat);
+    currentElt.interpretedCommand=  currentExpr.ToString(&theFormat);
+    currentElt.flagUseDisplaystyleInMathMode= ( currentElt.content.find("\\displaystyle")!=std::string::npos);
+    currentElt.flagUseMathMode=true;
+    if (currentExpr.IsOfType<std::string> () ||
+        currentExpr.IsOfType<Plot>())
+    { currentElt.flagUseMathMode=false;
+//      stOutput << "<hr>currentExpr: " << currentExpr.ToString() << "is plot or string<hr>";
+    }// else
+    //{ stOutput << "<hr>currentExpr: " << currentExpr.ToString() << "not of type plot or string";
+    //  if (currentExpr.StartsWith(theInterpreter.opEndStatement()))
+    //    stOutput << " but is a command list statement";
+    //  stOutput << "<hr>";
+    //}
   }
   if(theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasProblemComposingRights())
   { std::stringstream streamLog;

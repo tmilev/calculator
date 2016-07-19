@@ -22,6 +22,7 @@ textarea{
 }
 .normalButton{
 }
+
 .submitButton{
     color:red;
     width:60px;
@@ -76,6 +77,7 @@ div.panel {
     padding: 0 0px;
     background-color: white;
     max-height: 0;
+    max-width: 100;
     overflow: hidden;
     transition: 0.6s ease-in-out;
     opacity: 0;
@@ -84,6 +86,24 @@ div.panel {
 div.panel.show {
     opacity: 1;
     max-height: 500px;
+
+}
+
+textarea.calculatorAnswer {
+    padding: 0 0px;
+    background-color: white;
+    max-height: 0;
+    overflow: hidden;
+    transition: 0.6s ease-in-out;
+    opacity: 0;
+    word-wrap: break-word;
+    width: 60px
+}
+
+textarea.calculatorAnswer.show {
+    opacity: 1;
+    max-height: 500px;
+
 }
 
 

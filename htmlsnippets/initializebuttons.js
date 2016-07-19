@@ -32,7 +32,6 @@ function initializeButtons(){
 }
 
 
-
 function getSqrt_N_Button(indexMathField){
   return "<button style='width:25' onclick='sqrt_N_Click(answerMathQuillObjects[" + indexMathField + "]);'>&#8731;</button>";
 }

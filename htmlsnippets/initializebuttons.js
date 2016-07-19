@@ -15,6 +15,9 @@ function initializeButtons(){
 "<tr>"+
 "<td>" + getPlusButton(i)+ "</td><td>"+getTimesButton(i) + "</td>"+ 
 "</tr>"+
+"<tr>"+
+"<td>" + getIInftyButton(i)+ "</td><td>" +"</td>"+ 
+"</tr>"+
 "</table>"
 ;
   }
@@ -76,6 +79,14 @@ function getTimesButton(indexMathField){
 
 function timesClick(currentMathField){ 
   currentMathField.write("\\cdot");
+}
+
+function getIInftyButton(indexMathField){
+  return "<button style='width:25' onclick='inftyClick(answerMathQuillObjects[" + indexMathField + "]);'>&#8734</button>";
+}
+
+function inftyClick(currentMathField){ 
+  currentMathField.write("\\infty");
 }
 
 

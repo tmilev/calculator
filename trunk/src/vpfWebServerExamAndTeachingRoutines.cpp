@@ -3618,6 +3618,12 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       //stOutput << "<hr>Rule ZZ executed<hr> ";
       continue;
     }
+    if (thirdToLast=="\"" && secondToLast!="\"" && last=="\"")
+    { thirdToLast.content+=secondToLast.content;
+      thirdToLast.content+=last.content;
+      eltsStack.SetSize(eltsStack.size-2);
+      continue;
+    }
     if (thirdToLast.syntacticRole=="<openTag" && secondToLast.syntacticRole=="" && last.syntacticRole==">")
     { thirdToLast.tagKeysWithoutValue.AddOnTop(secondToLast.content);
       eltsStack[eltsStack.size-2]=*eltsStack.LastObject();

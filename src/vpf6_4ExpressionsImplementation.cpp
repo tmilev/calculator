@@ -1893,7 +1893,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
       { out << "\"" << this->GetValue<std::string>() << "\"";
       }
     } else
-    { out << "(string~ not~ shown~ to~ avoid~ javascript~ problems~ (in~ case~ the~ string~ has~ javascript))";
+    { out << "\"StringNotShown\"";
       //out << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     }
     result=true;

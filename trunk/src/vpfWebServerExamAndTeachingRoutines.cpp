@@ -90,6 +90,7 @@ public:
   bool PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream& comments);
   std::string PrepareUserInputBoxes();
   bool PrepareCommandsAnswerOnGiveUp(Answer& theAnswer, std::stringstream& comments);
+  bool PrepareCommentsBeforeSubmission(Answer& theAnswer, std::stringstream& comments);
   bool PrepareCommandsSolution(Answer& theAnswer, std::stringstream& comments);
   bool PrepareCommandsAnswer(Answer& theAnswer, std::stringstream& comments);
   bool PrepareCommandsGenerateProblem(std::stringstream& comments);
@@ -1056,12 +1057,14 @@ int WebWorker::ProcessSubmitProblemPreview()
   stOutput << "<span style=\"color:magenta\"><b>Interpreting your answer as:</b></span><br>";
   stOutput << "\\(" << studentAnswerNoContextE.ToString() << "\\)";
   if (currentA.commandIndicesCommentsBeforeSubmission.size==0)
-  { stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+  { //stOutput << "<br>DEBUG:NO comment<br>";
+    stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return 0;
   }
   Calculator theInterpreterWithAdvice;
   theInterpreterWithAdvice.init();
   theInterpreterWithAdvice.flagWriteLatexPlots=false;
+  //stOutput << "DEBUG: got to interpreter with advice. ";
   if (!theProblem.PrepareCommands(comments))
   { stOutput << "Something went wrong while interpreting the problem file. ";
     if (theGlobalVariables.UserDebugFlagOn() &&
@@ -1073,7 +1076,7 @@ int WebWorker::ProcessSubmitProblemPreview()
   }
   std::stringstream calculatorInputStream;
   calculatorInputStream << "CommandEnclosure{}("
-  << currentA.commandsBeforeAnswer << ")";
+  << currentA.commandsBeforeAnswer << ");";
   calculatorInputStream << "CommandEnclosure{}("
   << currentA.answerId << " = " << lastAnswer << "); ";
   calculatorInputStream << currentA.commandsCommentsBeforeSubmissionOnly;
@@ -1084,7 +1087,8 @@ int WebWorker::ProcessSubmitProblemPreview()
     << "in the context of the current problem. "
     << "</b></span>";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
-      stOutput << theInterpreterWithAdvice.outputString << "<br>" << theInterpreterWithAdvice.outputCommentsString;
+      stOutput << theInterpreterWithAdvice.outputString << "<br>"
+      << theInterpreterWithAdvice.outputCommentsString;
     stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return 0;
   }
@@ -1908,8 +1912,8 @@ bool SyntacticElementHTML::IsCommentBeforeSubmission()
     return false;
   std::string tagClass=this->GetKeyValue("class");
   return tagClass=="calculatorCommentBeforeSubmission"
-//  ||
-//  tagClass=="calculatorHiddenIncludeInCommentsBeforeSubmission"
+  //||
+  //tagClass=="calculatorHiddenIncludeInCommentsBeforeSubmission"
 ;
 }
 
@@ -2005,6 +2009,8 @@ bool CalculatorHTML::PrepareCommands(std::stringstream &comments)
       return false;
     if (!this->PrepareCommandsSolution(this->theProblemData.theAnswers[i], comments))
       return false;
+    if (!this->PrepareCommentsBeforeSubmission(this->theProblemData.theAnswers[i], comments))
+      return false;
   }
   return true;
 }
@@ -2014,19 +2020,48 @@ bool CalculatorHTML::PrepareCommandsAnswerOnGiveUp
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommandsAnswerOnGiveUp");
   (void) comments;
   std::stringstream streamCommands;
-//  stOutput << "<hr>DEBUG: Preparing give-up commands for: " << theAnswer.answerId << "<hr>";
+  //stOutput << "<hr>DEBUG: Preparing give-up commands for: " << theAnswer.answerId << "<hr>";
   for (int i=0; i<this->theContent.size; i++)
   { SyntacticElementHTML& currentElt=this->theContent[i];
     if (!currentElt.IsAnswerOnGiveUp())
       continue;
-//    stOutput << "<br>Current element: " << currentElt.ToStringDebug();
-//    stOutput << "<br>Comparing: " << theAnswer.answerId << " to: "
-//    << currentElt.GetKeyValue("name");
+    //stOutput << "<br>Current element: " << currentElt.ToStringDebug();
+    //stOutput << "<br>Comparing: " << theAnswer.answerId << " to: "
+    //<< currentElt.GetKeyValue("name");
     if (currentElt.GetKeyValue("name")==theAnswer.answerId)
       streamCommands << this->CleanUpCommandString(currentElt.content);
   }
   theAnswer.commandsNoEnclosureAnswerOnGiveUpOnly=streamCommands.str();
-//  stOutput << "<br>Final give up command: " << theAnswer.commandsNoEnclosureAnswerOnGiveUpOnly;
+  //stOutput << "<br>Final give up command: " << theAnswer.commandsNoEnclosureAnswerOnGiveUpOnly;
+  return true;
+}
+
+bool CalculatorHTML::PrepareCommentsBeforeSubmission
+(Answer& theAnswer, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommentsBeforeSubmission");
+  (void) comments;
+  std::stringstream streamCommands;
+  //stOutput << "<hr>DEBUG: Preparing give-up commands for: "
+  //<< theAnswer.answerId << "<hr>";
+  int counter=0;
+  for (int i=0; i<this->theContent.size; i++)
+  { SyntacticElementHTML& currentElt=this->theContent[i];
+    if (!currentElt.IsCommentBeforeSubmission())
+      continue;
+    //stOutput << "<br>Current element: " << currentElt.ToStringDebug();
+    //stOutput << "<br>Comparing: " << theAnswer.answerId << " to: "
+    //<< currentElt.GetKeyValue("name");
+    if (currentElt.GetKeyValue("name")==theAnswer.answerId)
+    { streamCommands << "CommandEnclosure{}{"
+      << this->CleanUpCommandString(currentElt.content)
+      << "};";
+      theAnswer.commandIndicesCommentsBeforeSubmission.AddOnTop(counter);
+      counter++;
+    }
+  }
+  theAnswer.commandsCommentsBeforeSubmissionOnly=streamCommands.str();
+//  stOutput << "<br>Final comments command: "
+//  << theAnswer.commandsNoEnclosureAnswerOnGiveUpOnly;
   return true;
 }
 
@@ -2035,14 +2070,14 @@ bool CalculatorHTML::PrepareCommandsSolution
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommandsSolution");
   (void) comments;
   std::stringstream streamCommands;
-//  stOutput << "<hr>DEBUG: Preparing give-up commands for: " << theAnswer.answerId << "<hr>";
+  //stOutput << "<hr>DEBUG: Preparing give-up commands for: " << theAnswer.answerId << "<hr>";
   for (int i=0; i<this->theContent.size; i++)
   { SyntacticElementHTML& solutionElt=this->theContent[i];
     if (!solutionElt.IsSolution())
       continue;
-//    stOutput << "<br>Current element: " << currentElt.ToStringDebug();
-//    stOutput << "<br>Comparing: " << theAnswer.answerId << " to: "
-//    << currentElt.GetKeyValue("name");
+    //stOutput << "<br>Current element: " << currentElt.ToStringDebug();
+    //stOutput << "<br>Comparing: " << theAnswer.answerId << " to: "
+    //<< currentElt.GetKeyValue("name");
     if (solutionElt.GetKeyValue("name")!=theAnswer.answerId)
       continue;
     int numCommandsSoFar=2;
@@ -2058,7 +2093,7 @@ bool CalculatorHTML::PrepareCommandsSolution
     }
   }
   theAnswer.commandsSolutionOnly=streamCommands.str();
-//  stOutput << "<br>Final give up command: " << theAnswer.commandsNoEnclosureAnswerOnGiveUpOnly;
+  //stOutput << "<br>Final give up command: " << theAnswer.commandsNoEnclosureAnswerOnGiveUpOnly;
   return true;
 }
 
@@ -2101,7 +2136,7 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
   theInterpreter.Evaluate(this->theProblemData.commandsGenerateProblem);
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("calculator evaluation time");
-//  stOutput << "<hr>Fter eval: " << theInterpreter.outputString;
+  //stOutput << "<hr>Fter eval: " << theInterpreter.outputString;
   bool result=!theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors=="";
   if (!result)
     comments << "Failed to interpret your file. The interpretation input was:<br> "

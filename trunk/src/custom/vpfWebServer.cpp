@@ -64,12 +64,12 @@ void SSL_write_Wrapper(SSL* inputSSL, const std::string& theString)
 //openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout privateKey.key
 //then get the CSR.csr file to a signing authority,
 //from where you get the signedFileCertificate1 andsignedFileCertificate3
-const std::string fileCertificate= "../cert.pem";
-const std::string fileKey= "../key.pem";
-const std::string signedFileCertificate1= "../2_calculator-algebra.org.crt";
-//const std::string signedFileCertificate2= "../1_Intermediate.crt";
-const std::string signedFileCertificate3= "../1_root_bundle.crt";
-const std::string signedFileKey= "../privateKey.key";
+const std::string fileCertificate= "certificates/cert.pem";
+const std::string fileKey= "certificates/key.pem";
+const std::string signedFileCertificate1= "certificates/2_calculator-algebra.org.crt";
+//const std::string signedFileCertificate2= "certificates/1_Intermediate.crt";
+const std::string signedFileCertificate3= "certificates/1_root_bundle.crt";
+const std::string signedFileKey= "certificates/privateKey.key";
 
 void WebServer::initSSL()
 { MacroRegisterFunctionWithName("WebServer::initSSL");
@@ -78,7 +78,26 @@ void WebServer::initSSL()
     return;
   }
 #ifdef MACRO_use_open_ssl
-  if (!FileOperations::FileExistsUnsecure(fileCertificate) || !FileOperations::FileExistsUnsecure(fileKey))
+  //////////////////////////////////////////////////////////////////////////
+  std::string fileCertificatePhysical, fileKeyPhysical,
+  singedFileCertificate1Physical, signedFileCertificate3Physical,
+  signedFileKeyPhysical;
+
+  FileOperations::GetPhysicalFileNameFromVirtual
+  (signedFileCertificate1, singedFileCertificate1Physical);
+  FileOperations::GetPhysicalFileNameFromVirtual
+  (signedFileCertificate3, signedFileCertificate3Physical);
+  FileOperations::GetPhysicalFileNameFromVirtual
+  (fileCertificate, fileCertificatePhysical);
+  FileOperations::GetPhysicalFileNameFromVirtual
+  (fileKey, fileKeyPhysical);
+  FileOperations::GetPhysicalFileNameFromVirtual
+  (signedFileKey, signedFileKeyPhysical);
+//  std::cout << "\n\nproject base: " << theGlobalVariables.PhysicalPathProjectBase;
+//  std::cout << "\n\nfileKey physical: " << fileKeyPhysical;
+  //////////////////////////////////////////////////////////
+  if (!FileOperations::FileExistsVirtual(fileCertificate) ||
+      !FileOperations::FileExistsVirtual(fileKey))
   { theLog << logger::red << "SSL is available but CERTIFICATE files are missing." << logger::endL;
     theGlobalVariables.flagSSLisAvailable=false;
     return;
@@ -102,15 +121,16 @@ void WebServer::initSSL()
   } else
     theLog << logger::orange << "Restricted ciphers to workaround Safari's bugs. " << logger::endL;
 */
-  //////////////////////////////////////////////////////////////////////////
-  if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, signedFileCertificate3.c_str()) <=0)
+
+
+  if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, signedFileCertificate3Physical.c_str()) <=0)
   { theLog << logger::purple << "Found no officially signed certificate, trying self-signed certificate. "
     << logger::endL;
-    if (SSL_CTX_use_certificate_file(theSSLdata.ctx, fileCertificate.c_str(), SSL_FILETYPE_PEM) <= 0)
+    if (SSL_CTX_use_certificate_file(theSSLdata.ctx, fileCertificatePhysical.c_str(), SSL_FILETYPE_PEM) <= 0)
     { ERR_print_errors_fp(stderr);
       exit(3);
     }
-    if (SSL_CTX_use_PrivateKey_file(theSSLdata.ctx, fileKey.c_str(), SSL_FILETYPE_PEM) <= 0)
+    if (SSL_CTX_use_PrivateKey_file(theSSLdata.ctx, fileKeyPhysical.c_str(), SSL_FILETYPE_PEM) <= 0)
     { ERR_print_errors_fp(stderr);
       exit(4);
     }
@@ -120,11 +140,11 @@ void WebServer::initSSL()
 //    { ERR_print_errors_fp(stderr);
 //      exit(3);
 //    }
-    if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, signedFileCertificate1.c_str()) <=0)
+    if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, singedFileCertificate1Physical.c_str()) <=0)
     { ERR_print_errors_fp(stderr);
       exit(3);
     }
-    if (SSL_CTX_use_PrivateKey_file(theSSLdata.ctx, signedFileKey.c_str(), SSL_FILETYPE_PEM) <= 0)
+    if (SSL_CTX_use_PrivateKey_file(theSSLdata.ctx, signedFileKeyPhysical.c_str(), SSL_FILETYPE_PEM) <= 0)
     { ERR_print_errors_fp(stderr);
       exit(4);
     }
@@ -133,7 +153,7 @@ void WebServer::initSSL()
   { fprintf(stderr,"Private key does not match the certificate public key\n");
     exit(5);
   }
-////////Safari web browser: no further user of foul language necessary.
+////////Safari web browser: no further use of foul language necessary.
 //  SSL_CTX_set_options(theSSLdata.ctx, SSL_OP_SAFARI_ECDHE_ECDSA_BUG);
 ////////
 #endif // MACRO_use_open_ssl
@@ -2831,7 +2851,7 @@ void WebServer::ReleaseEverything()
   for (int i=0; i<this->theWorkers.size; i++)
     this->theWorkers[i].Release();
   theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=0;
-  theGlobalVariables.WebServerTimerPing=0;
+  //theGlobalVariables.WebServerTimerPing=0;
   theGlobalVariables.IndicatorStringOutputFunction=0;
   theGlobalVariables.PauseUponUserRequest=0;
   this->activeWorker=-1;
@@ -3547,7 +3567,7 @@ int WebServer::Run()
     if (this->GetActiveWorker().ProcessPID==0)
     { // this is the child (worker) process
       this->flagThisIsWorkerProcess=true;
-      theGlobalVariables.WebServerTimerPing=this->WorkerTimerPing;
+      //theGlobalVariables.WebServerTimerPing=this->WorkerTimerPing;
       theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
       crash.CleanUpFunction=WebServer::SignalActiveWorkerDoneReleaseEverything;
       InitializeTimer();
@@ -3564,13 +3584,13 @@ int WebServer::Run()
       }
       if (theGlobalVariables.flagSSLisAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection)
         logOpenSSL << logger::green << "ssl success #: " << this->NumConnectionsSoFar << ". " << logger::endL;
-//      this->Release(theListeningSocket);//worker has no access to socket listener
+      //  this->Release(theListeningSocket);//worker has no access to socket listener
       /////////////////////////////////////////////////////////////////////////
-//      stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;
-//      stOutput.flushOutputFunction=this->FlushActiveWorker;
-//      theLog << this->ToStringStatusActive() << logger::endL;
+      // stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;
+      // stOutput.flushOutputFunction=this->FlushActiveWorker;
+      // theLog << this->ToStringStatusActive() << logger::endL;
       this->GetActiveWorker().CheckConsistency();
-//      std::cout << "Got thus far 7" << std::endl;
+      // std::cout << "Got thus far 7" << std::endl;
 
       //if (!this->flagUseSSL)
       //{
@@ -3679,10 +3699,11 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   if (argC<0)
     argC=0;
   theGlobalVariables.programArguments.SetSize(argC);
+//  std::cout << "Program arguments: \n";
   for (int i=0; i<argC; i++)
     theGlobalVariables.programArguments[i]=argv[i];
-  std::cout << "\nDEBUG: Program arguments: <br>"
-  << theGlobalVariables.programArguments.ToStringCommaDelimited() << "\n";
+  //std::cout << "\nDEBUG: Program arguments: <br>"
+  //<< theGlobalVariables.programArguments.ToStringCommaDelimited() << "\n";
 
   theGlobalVariables.flagUsingBuiltInWebServer=false;
   theGlobalVariables.flagRunningCommandLine=false;
@@ -3765,6 +3786,8 @@ int WebServer::main(int argc, char **argv)
   try {
   InitializeGlobalObjects();
   theWebServer.InitializeGlobalVariables();
+//  std::cout << "display name calculator: "
+//  << theGlobalVariables.DisplayNameExecutableWithPath << std::endl;
   theWebServer.AnalyzeMainArguments(argc, argv);
   //theLog << logger::red << " At ze moment theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit= "
   //<< theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit << logger::endL;

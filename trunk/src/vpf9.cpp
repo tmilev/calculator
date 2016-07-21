@@ -328,9 +328,9 @@ std::string CGI::GetStyleButtonLikeHtml()
 { return " style=\"background:none; border:0; text-decoration:underline; color:blue; cursor:pointer\" ";
 }
 
-std::string CGI::StringToHtmlStrinG(const std::string& theString)
+std::string CGI::StringToHtmlString(const std::string& theString)
 { std::string result;
-  CGI::StringToHtmlString(theString, result);
+  CGI::StringToHtmlStringReturnTrueIfModified(theString, result);
   return result;
 }
 
@@ -7864,21 +7864,26 @@ bool Cone::SolveLQuasiPolyEqualsZeroIAmProjective
   return result;
 }
 
-bool CGI::StringToHtmlString(const std::string& input, std::string& output)
+bool CGI::StringToHtmlStringReturnTrueIfModified(const std::string& input, std::string& output)
 { std::stringstream out;
-  bool result=false;
+  bool modified=false;
   for (unsigned int i=0; i<input.size(); i++)
-  { if (input[i]=='<')
+  { bool currentlyModified=true;
+    if (input[i]=='<')
       out << "&lt;";
-    if (input[i]=='>')
+    else if (input[i]=='>')
       out << "&gt;";
-    if (input[i]!='<' && input[i]!='>')
-      out << input[i];
+    else if (input[i]=='&')
+      out << "&amp;";
     else
-      result=true;
+    { out << input[i];
+      currentlyModified=false;
+    }
+    if (currentlyModified)
+      modified=true;
   }
   output=out.str();
-  return result;
+  return modified;
 }
 
 bool CGI::IsRepresentedByItselfInURLs(char input)

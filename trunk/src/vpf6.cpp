@@ -33,13 +33,13 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
   unsigned int fileIdentifier=MathRoutines::hashString(fileContent);
 
   fileNameRelative << theGlobalVariables.RelativePhysicalNameExtraOutputWithPath << fileIdentifier;
-  std::string fileNamePhysical=theGlobalVariables.PhysicalPathOutputFolder + fileNameRelative.str();
+  std::string fileNamePhysical=theGlobalVariables.PhysicalPathHtmlFolder + fileNameRelative.str();
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, "output/"+fileNameRelative.str()+".tex", false, true, false))
     return "failed to create file: " + fileNameRelative.str() + ".tex";
   theFile << fileContent;
   theFile.flush();
   theFile.close();
-  systemCommand1 << " latex -output-directory=" << theGlobalVariables.PhysicalPathOutputFolder << " "
+  systemCommand1 << " latex -output-directory=" << theGlobalVariables.PhysicalPathHtmlFolder << " "
   << fileNamePhysical << ".tex";
   //stOutput << "<br>system command:<br>" << systemCommand1.str();
   this->SystemCommands.AddOnTop(systemCommand1.str());

@@ -646,7 +646,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(const std::string& inputFile
       return true;
     }
 
-  output=theGlobalVariables.PhysicalPathOutputFolder+inputFileName;
+  output=theGlobalVariables.PhysicalPathHtmlFolder+inputFileName;
 //  stOutput << "<br>No key mathcing: " << inputFileName << ". Selecting default: " << output << "<br>";
   return true;
 }

@@ -147,7 +147,7 @@ std::string GlobalVariables::ToStringFolderInfo()const
   out << "<br>Physical name folder below executable: " << this->PhysicalNameFolderBelowExecutable;
 //  out << "<br>Display path server base: " << this->DisplayPathServerBasE;
   out << "<br>Display name calculator with path: " << this->DisplayNameExecutableWithPath;
-  out << "<br>Physical path output folder: " << this->PhysicalPathOutputFolder;
+  out << "<br>Physical path output folder: " << this->PhysicalPathHtmlFolder;
   out << "<br>Display path output folder: " << this->DisplayPathOutputFolder;
   return out.str();
 }
@@ -199,8 +199,8 @@ void GlobalVariables::initDefaultFolderAndFileNames
   this->PhysicalNameExecutableWithPath=this->PhysicalNameFolderBelowExecutable+this->PhysicalNameExecutableNoPath;
   if (this->PhysicalPathProjectBase=="")
     this->PhysicalPathProjectBase="./../";
-  this->PhysicalPathOutputFolder = this->PhysicalPathProjectBase + "output/";
-  this->PhysicalPathServerBasE=this->PhysicalPathOutputFolder;
+  this->PhysicalPathHtmlFolder = this->PhysicalPathProjectBase + "output/";
+  this->PhysicalPathServerBasE=this->PhysicalPathHtmlFolder;
   this->DisplayPathOutputFolder ="/";
 
   this->PhysicalNameExtraOutputNoPatH="defaultoutput";

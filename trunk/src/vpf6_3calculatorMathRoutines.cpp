@@ -5898,9 +5898,9 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
   bool NeedToCreateFolders=!FileOperations::FileExistsVirtual("output/"+outSltwoMainFile.str());
   if (NeedToCreateFolders)
   { std::stringstream outMkDirCommand1, outMkDirCommand2;
-    outMkDirCommand1 << "mkdir " << theGlobalVariables.PhysicalPathOutputFolder
+    outMkDirCommand1 << "mkdir " << theGlobalVariables.PhysicalPathHtmlFolder
     << ownerSS->RelativePhysicalNameSSAlgOutputFolder;
-    outMkDirCommand2 << "mkdir " << theGlobalVariables.PhysicalPathOutputFolder
+    outMkDirCommand2 << "mkdir " << theGlobalVariables.PhysicalPathHtmlFolder
     << outSltwoPath.str();
     theGlobalVariables.CallSystemNoOutput(outMkDirCommand1.str());
     theGlobalVariables.CallSystemNoOutput(outMkDirCommand2.str());

@@ -631,7 +631,7 @@ std::string WebWorker::ToStringMessageShortUnsafe(FormatExpressions* theFormat)c
   out << lineBreak << "Calculator address: " << theGlobalVariables.DisplayNameExecutableWithPath;
   out << lineBreak << "Physical address project base: " << theGlobalVariables.PhysicalPathProjectBase;
   out << lineBreak << "Physical address server base: " << theGlobalVariables.PhysicalPathServerBasE;
-  out << lineBreak << "Physical address output folder: " << theGlobalVariables.PhysicalPathOutputFolder;
+  out << lineBreak << "Physical address output folder: " << theGlobalVariables.PhysicalPathHtmlFolder;
   return out.str();
 }
 

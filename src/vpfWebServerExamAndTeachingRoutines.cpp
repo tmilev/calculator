@@ -1780,12 +1780,12 @@ std::string SyntacticElementHTML::ToStringTagAndContent()
 std::string SyntacticElementHTML::ToStringDebug()
 { MacroRegisterFunctionWithName("SyntacticElementHTML::ToString");
   if (this->syntacticRole=="")
-    return CGI::StringToHtmlStrinG(this->ToStringTagAndContent());
+    return CGI::StringToHtmlString(this->ToStringTagAndContent());
   std::stringstream out;
   out << "<span style=\"color:green\">";
-  out << CGI::StringToHtmlStrinG(this->syntacticRole);
+  out << CGI::StringToHtmlString(this->syntacticRole);
   out << "</span>";
-  out << "[" << CGI::StringToHtmlStrinG(this->ToStringTagAndContent()) << "]";
+  out << "[" << CGI::StringToHtmlString(this->ToStringTagAndContent()) << "]";
   return out.str();
 }
 

@@ -1287,7 +1287,7 @@ bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, s
   now.AssignLocalTime();
   now.ComputeTimeStringNonReadable();
   std::string emailActivationLogFileName = "LogFileEmailsDebug"+now.theTimeStringNonReadable + ".html";
-  logger emailActivationLogFile(theGlobalVariables.PhysicalPathOutputFolder+emailActivationLogFileName);
+  logger emailActivationLogFile(theGlobalVariables.PhysicalPathHtmlFolder+emailActivationLogFileName);
   emailActivationLogFile.MaxLogSize=10000000;
   for (int i=0; i<theEmails.size; i++)
   { std::stringstream reportStream;

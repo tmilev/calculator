@@ -282,7 +282,7 @@ void SemisimpleSubalgebras::CheckFileWritePermissions()
   std::string testFileNameRelative=
   this->owner->RelativePhysicalNameSSAlgOutputFolder+ "testFileWritePermissionsSSsas.txt";
   theGlobalVariables.CallSystemNoOutput
-  ("mkdir " +theGlobalVariables.PhysicalPathOutputFolder+ this->owner->RelativePhysicalNameSSAlgOutputFolder);
+  ("mkdir " +theGlobalVariables.PhysicalPathHtmlFolder+ this->owner->RelativePhysicalNameSSAlgOutputFolder);
 
   if(!FileOperations::OpenFileCreateIfNotPresentVirtual(testFile, "output/"+testFileNameRelative, false, true, false))
     crash << "<br>This may or may not be a programming error. I requested to create file "

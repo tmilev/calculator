@@ -129,7 +129,7 @@ public:
 
   std::string PhysicalPathProjectBase;
   std::string PhysicalPathServerBasE;
-  std::string PhysicalPathOutputFolder;
+  std::string PhysicalPathHtmlFolder;
   std::string PhysicalNameExtraOutputNoPatH;
   std::string RelativePhysicalNameExtraOutputWithPath;
   std::string PhysicalNameFolderBelowExecutable;

@@ -869,7 +869,7 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
   stOutput << "\n<FORM method=\"POST\" id=\"formCalculator\" name=\"formCalculator\" action=\""
   << theGlobalVariables.DisplayNameExecutableWithPath << "\">\n";
   std::string civilizedInputSafish;
-  if (CGI::StringToHtmlString(theParser.inputString, civilizedInputSafish))
+  if (CGI::StringToHtmlStringReturnTrueIfModified(theParser.inputString, civilizedInputSafish))
     stOutput << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are "
     << " modified due to a javascript hijack issue. <br>";
   stOutput << this->GetHtmlHiddenInputComputation();

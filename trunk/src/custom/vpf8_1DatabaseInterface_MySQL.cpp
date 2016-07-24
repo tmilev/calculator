@@ -1339,7 +1339,7 @@ void UserCalculator::SetProblemData(const std::string& problemName, const Proble
 bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("ProblemData::LoadFrom");
   MapList<std::string, std::string, MathRoutines::hashString> theMap;
-  if (!CGI::ChopCGIInputStringToMultipleStrings(inputData, theMap, commentsOnFailure))
+  if (!CGI::ChopCGIString(inputData, theMap, commentsOnFailure))
     return false;
 //  stOutput << "<hr>DEBUG: Interpreting: <br>" << inputData << "<hr>";
   this->flagRandomSeedComputed=false;
@@ -1357,7 +1357,7 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
     this->AddEmptyAnswerIdOnTop(CGI::URLStringToNormal(theMap.theKeys[i]));
     Answer& currentA=*this->theAnswers.LastObject();
     std::string currentQuestion=CGI::URLStringToNormal(theMap.theValues[i]);
-    result=CGI::ChopCGIInputStringToMultipleStrings
+    result=CGI::ChopCGIString
     (currentQuestion, currentQuestionMap, commentsOnFailure);
     if (!result)
     { commentsOnFailure << "Failed to interpret as key-value pair: "
@@ -1402,7 +1402,7 @@ bool UserCalculator::InterpretDatabaseProblemData
 { MacroRegisterFunctionWithName("UserCalculator::InterpretDatabaseProblemData");
 
   MapList<std::string, std::string, MathRoutines::hashString> theMap;
-  if (!CGI::ChopCGIInputStringToMultipleStrings(theInfo, theMap, commentsOnFailure))
+  if (!CGI::ChopCGIString(theInfo, theMap, commentsOnFailure))
     return false;
   this->problemNames.Clear();
   this->problemData.SetSize(0);

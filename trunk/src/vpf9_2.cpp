@@ -2337,7 +2337,7 @@ std::string CGI::URLKeyValuePairsToNormalRecursiveHtml(const std::string& input,
     return input;
   MapList<std::string, std::string, MathRoutines::hashString> currentMap;
   std::stringstream notUsed;
-  if (!CGI::ChopCGIInputStringToMultipleStrings(input, currentMap, notUsed))
+  if (!CGI::ChopCGIString(input, currentMap, notUsed))
   { //stOutput << "oh no: " << notUsed.str();
     return input;
   }
@@ -2517,13 +2517,19 @@ bool CGI::AccountOneInputCGIString
   return true;
 }
 
-bool CGI::ChopCGIInputStringToMultipleStrings
-(const std::string& input, MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
+bool CGI::ChopCGIString(const std::string& input, MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
  std::stringstream& commentsOnFailure)
-{ int inputLength= (signed) input.size();
-  bool readingData=false;
+{ MacroRegisterFunctionWithName("CGI::ChopCGIString");
   outputMap.Clear();
   outputMap.SetExpectedSize(15);
+  return CGI::ChopCGIStringAppend(input, outputMap, commentsOnFailure);
+}
+
+bool CGI::ChopCGIStringAppend(const std::string& input, MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
+ std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("CGI::ChopCGIStringAppend");
+  int inputLength= (signed) input.size();
+  bool readingData=false;
   std::string currentFieldName="";
   std::string currentFieldValue="";
   currentFieldName.reserve(input.size());

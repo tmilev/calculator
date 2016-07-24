@@ -1,9 +1,9 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#include "./custom/vpfHeader6WebServer.h"
+#include "custom/vpfHeader6WebServer.h"
 #include "vpfHeader3Calculator2_InnerFunctions.h"
 #include "vpfHeader3Calculator4HtmlFunctions.h"
-#include "vpfHeader7DatabaseInterface_MySQL.h"
+#include "custom/vpfHeader7DatabaseInterface_MySQL.h"
 #include <iomanip>
 
 ProjectInformationInstance projectInfoInstanceWebServerExamAndTeachingRoutines
@@ -185,7 +185,7 @@ bool DatabaseRoutines::ReadProblemInfo
    std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::ReadProblemInfo");
   MapList<std::string, std::string, MathRoutines::hashString> CGIedProbs, currentProblem, sectionInfo;
-  if (!CGI::ChopCGIInputStringToMultipleStrings
+  if (!CGI::ChopCGIString
       (stringToReadFrom, CGIedProbs, commentsOnFailure) )
     return false;
   outputProblemNames.Clear();
@@ -197,7 +197,7 @@ bool DatabaseRoutines::ReadProblemInfo
   outputSections.initFillInObject(outputProblemNames.size, CGIedProbs.size());
   outputDeadlinesPerSection.initFillInObject(outputProblemNames.size, CGIedProbs.size());
   for (int i=0; i<outputProblemNames.size; i++)
-  { if (!CGI::ChopCGIInputStringToMultipleStrings
+  { if (!CGI::ChopCGIString
         (CGI::URLStringToNormal(CGIedProbs.theValues[i]), currentProblem, commentsOnFailure))
       return false;
 //    stOutput << "<br>DEBUG: current problem: " << outputProblemNames[i]
@@ -209,7 +209,7 @@ bool DatabaseRoutines::ReadProblemInfo
     if (!currentProblem.Contains("deadlines"))
       continue;
     std::string deadlineString=CGI::URLStringToNormal(currentProblem.GetValueCreateIfNotPresent("deadlines"));
-    if (!CGI::ChopCGIInputStringToMultipleStrings
+    if (!CGI::ChopCGIString
         (deadlineString, sectionInfo, commentsOnFailure))
       return false;
     for (int j=0; j<sectionInfo.size(); j++)

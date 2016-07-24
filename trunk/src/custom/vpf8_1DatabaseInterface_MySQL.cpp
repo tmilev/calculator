@@ -335,7 +335,7 @@ std::string ProblemData::ToString()
 }
 
 #ifdef MACRO_use_MySQL
-#include "vpfHeader5Crypto.h"
+#include "../vpfHeader5Crypto.h"
 #include <time.h>
 #include <ctime>
 

@@ -4,7 +4,7 @@
 WebServer theWebServer;
 
 #include "../vpfHeader3Calculator0_Interface.h"
-#include "../vpfHeader7DatabaseInterface_MySQL.h"
+#include "vpfHeader7DatabaseInterface_MySQL.h"
 
 ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 
@@ -715,7 +715,7 @@ bool WebWorker::ProcessRawArguments
   { argumentProcessingFailureComments << "Error: input string encoded too many times";
     return false;
   }
-  if (!CGI::ChopCGIInputStringToMultipleStrings
+  if (!CGI::ChopCGIString
       (urlEncodedInputString, theArgs, argumentProcessingFailureComments))
     return false;
   if (theArgs.Contains("doubleURLencodedInput"))
@@ -804,7 +804,7 @@ bool WebWorker::ProcessRawArgumentsNoLoginInterpreterMode
   { argumentProcessingFailureComments << "Error: input string encoded too many times";
     return false;
   }
-  if (!CGI::ChopCGIInputStringToMultipleStrings
+  if (!CGI::ChopCGIString
       (urlEncodedInputString, theArgs, argumentProcessingFailureComments))
     return false;
   if (theArgs.Contains("doubleURLencodedInput"))

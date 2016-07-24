@@ -117,7 +117,11 @@ public:
 (const std::string& fieldName, const std::string& fieldValue, MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
  std::stringstream& commentsOnFailure)
   ;
-  static bool ChopCGIInputStringToMultipleStrings
+  static bool ChopCGIString
+(const std::string& input, MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
+ std::stringstream& commentsOnFailure)
+  ;
+  static bool ChopCGIStringAppend
 (const std::string& input, MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
  std::stringstream& commentsOnFailure)
   ;

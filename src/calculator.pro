@@ -17,6 +17,10 @@ LIBS+=-lssl
 LIBS+=-lcrypto
 
 SOURCES += \
+    custom/vpf6_5calculator_web_routines.cpp \
+    custom/vpfCalculatorMain.cpp \
+    custom/vpfWebServer.cpp \
+    custom/vpf8_1DatabaseInterface_MySQL.cpp \
     test.cpp \
     vpf2Math3_SymmetricGroupsAndGeneralizations.cpp \
     vpf4CalculatorFunctionList.cpp \
@@ -28,12 +32,10 @@ SOURCES += \
     vpf6_2serialization_code.cpp \
     vpf6_3calculatorMathRoutines.cpp \
     vpf6_4ExpressionsImplementation.cpp \
-    custom/vpf6_5calculator_web_routines.cpp \
     vpf6_05evaluationroutines.cpp \
     vpf6_35calculatorMathRoutinesPart2.cpp \
     vpf6.cpp \
     vpf7.cpp \
-    vpf8_1DatabaseInterface_MySQL.cpp \
     vpf8.cpp \
     vpf9_1.cpp \
     vpf9_2.cpp \
@@ -57,9 +59,7 @@ SOURCES += \
     vpfJson.cpp \
     vpfWebServerExamAndTeachingRoutines.cpp \
     vpfWebServerInterProcessLogistics.cpp \
-    vpf6_36calculatorHtmlRoutines.cpp \
-    custom/vpfCalculatorMain.cpp \
-    custom/vpfWebServer.cpp
+    vpf6_36calculatorHtmlRoutines.cpp
 
 HEADERS += \
     vpf.h \
@@ -94,7 +94,6 @@ HEADERS += \
     vpfHeader4SystemFunctionsGlobalObjects.h \
     vpfHeader5Crypto.h \
     vpfHeader6WebServerInterprocessLogistics.h \
-    vpfHeader7DatabaseInterface_MySQL.h \
     vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h \
     vpfImplementationHeader2Math3_FiniteGroups.h \
     vpfImplementationHeader2Math3_WeylAlgebra.h \
@@ -109,4 +108,5 @@ HEADERS += \
     vpfHeader3Calculator4HtmlFunctions.h \
     vpfHeader1General6Maps.h \
     vpfHeader1General7FileOperations_Encodings.h \
-    custom/vpfHeader6WebServer.h
+    custom/vpfHeader6WebServer.h \
+    custom/vpfHeader7DatabaseInterface_MySQL.h

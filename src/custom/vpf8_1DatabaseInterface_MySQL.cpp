@@ -36,9 +36,8 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
       theUser.SetColumnEntry("userRole", "admin", theRoutines, comments);
       outputUserRole="admin";
       //stOutput << "DEBG: comments in first login: " << comments->str();
+      return true;
     }
-
-    return true;
   }
   //if (comments!=0)
   //{ //*comments << "DEBUG: Attempting to login with user: " << inputUsernameUnsafe
@@ -69,7 +68,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
   }
   inputOutputAuthenticationToken=theUser.actualAuthenticationToken.value;
   if (theUser.username=="admin" && theUser.enteredPassword!="")
-  { if (!theUser.Iexist(theRoutines))
+    if (!theUser.Iexist(theRoutines))
     { if (comments!=0)
         *comments << "<b>First login of user admin: setting admin pass. </b>";
       theUser.CreateMeIfUsernameUnique(theRoutines, comments);
@@ -77,8 +76,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
       theUser.SetColumnEntry("userRole", "admin", theRoutines, comments);
       outputUserRole="admin";
     }
-    return true;
-  }
+
   if (comments!=0)
     *comments << DatabaseRoutines::ToStringSuggestionsReasonsForFailure(inputUsernameUnsafe, theRoutines, theUser);
   return false;

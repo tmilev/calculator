@@ -2506,13 +2506,14 @@ bool CGI::AccountOneInputCGIString
 { MacroRegisterFunctionWithName("CGI::AccountOneInputCGIString");
   if (fieldName=="")
     return true;
-  if (fieldValue!="" && outputMap.Contains(fieldName))
-    if (outputMap.GetValueCreateIfNotPresent(fieldName)!=fieldValue &&
-        outputMap.GetValueCreateIfNotPresent(fieldName)!="")
-    { commentsOnFailure << "More than one value specified for input field " << fieldName << ": "
-      << fieldValue << " and " << outputMap.GetValueCreateIfNotPresent(fieldName) << ". ";
-      return false;
-    }
+  (void) commentsOnFailure;
+//  if (fieldValue!="" && outputMap.Contains(fieldName))
+//    if (outputMap.GetValueCreateIfNotPresent(fieldName)!=fieldValue &&
+//        outputMap.GetValueCreateIfNotPresent(fieldName)!="")
+//    { commentsOnFailure << "More than one value specified for input field " << fieldName << ": "
+//      << fieldValue << " and " << outputMap.GetValueCreateIfNotPresent(fieldName) << ". ";
+//      return false;
+//    }
   outputMap.SetKeyValue(fieldName, fieldValue);
   return true;
 }

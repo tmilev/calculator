@@ -109,4 +109,4 @@ HEADERS += \
     vpfHeader1General6Maps.h \
     vpfHeader1General7FileOperations_Encodings.h \
     custom/vpfHeader6WebServer.h \
-    custom/vpfHeader7DatabaseInterface_MySQL.h
+    vpfHeader7DatabaseInterface_MySQL.h

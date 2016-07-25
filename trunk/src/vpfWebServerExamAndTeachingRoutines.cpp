@@ -1519,30 +1519,6 @@ int WebWorker::ProcessSubmitProblem()
   return 0;
 }
 
-std::string WebWorker::GetDatabasePage()
-{ MacroRegisterFunctionWithName("WebWorker::GetDatabasePage");
-  std::stringstream out;
-  out << "<html>"
-  << "<head>"
-  << CGI::GetCalculatorStyleSheetWithTags()
-  << WebWorker::GetJavascriptStandardCookies()
-  << "</head>"
-  << "<body onload=\"loadSettings();\">\n";
-  out << "<nav>" << theGlobalVariables.ToStringNavigation() << "</nav>";
-#ifdef MACRO_use_MySQL
-  DatabaseRoutines theRoutines;
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
-    out << "Browsing database allowed only for logged-in admins.";
-  else
-    out << "<section>" << theRoutines.ToStringCurrentTableHTML() << "</section>";
-#else
-out << "<b>Database not available. </b>";
-#endif // MACRO_use_MySQL
-  out << this->ToStringCalculatorArgumentsHumanReadable();
-  out << "</body></html>";
-  return out.str();
-}
-
 std::string WebWorker::GetEditPageHTML()
 { MacroRegisterFunctionWithName("WebWorker::GetEditPageHTML");
   std::stringstream out;
@@ -2385,7 +2361,7 @@ std::string DatabaseRoutines::ToStringClassDetails
       emailBody << "Dear student,\n you have not activated your homework server account yet. \n"
       << "To activate your account and set your password please use the link: "
       << CGI::StringToURLString("\n\n")
-      << CGI::StringToURLString( UserCalculator::GetActivationAddressFromActivationToken
+      << CGI::StringToURLString(UserCalculator::GetActivationAddressFromActivationToken
         (currentUser.activationToken.value, theGlobalVariables.hopefullyPermanent_HTTPS_WebAdressOfServerExecutable,
          userTable[i][indexUser]) )
       << CGI::StringToURLString("\n\n")

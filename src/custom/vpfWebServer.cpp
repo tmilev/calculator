@@ -2684,6 +2684,30 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex, bool 
   return out.str();
 }
 
+std::string WebWorker::GetDatabasePage()
+{ MacroRegisterFunctionWithName("WebWorker::GetDatabasePage");
+  std::stringstream out;
+  out << "<html>"
+  << "<head>"
+  << CGI::GetCalculatorStyleSheetWithTags()
+  << WebWorker::GetJavascriptStandardCookies()
+  << "</head>"
+  << "<body onload=\"loadSettings();\">\n";
+  out << "<nav>" << theGlobalVariables.ToStringNavigation() << "</nav>";
+#ifdef MACRO_use_MySQL
+  DatabaseRoutines theRoutines;
+  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn)
+    out << "Browsing database allowed only for logged-in admins.";
+  else
+    out << "<section>" << theRoutines.ToStringCurrentTableHTML() << "</section>";
+#else
+out << "<b>Database not available. </b>";
+#endif // MACRO_use_MySQL
+  out << this->ToStringCalculatorArgumentsHumanReadable();
+  out << "</body></html>";
+  return out.str();
+}
+
 int WebWorker::ServeClient()
 { MacroRegisterFunctionWithName("WebWorker::ServeClient");
   ProgressReportWebServer theReport;

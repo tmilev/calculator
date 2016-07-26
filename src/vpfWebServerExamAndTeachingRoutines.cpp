@@ -201,24 +201,27 @@ bool DatabaseRoutines::ReadProblemInfo
   { if (!CGI::ChopCGIString
         (CGI::URLStringToNormal(CGIedProbs.theValues[i]), currentProblem, commentsOnFailure))
       return false;
-//    stOutput << "<br>DEBUG: current problem: " << outputProblemNames[i]
-//    << "<br>being read from data: " << CGIedProbs[i]
-//    << "<br>which is normalized to: " << CGI::URLStringToNormal(CGIedProbs[i]);
+    //    stOutput << "<br>DEBUG: current problem: " << outputProblemNames[i]
+    //    << "<br>being read from data: " << CGIedProbs[i]
+    //    << "<br>which is normalized to: " << CGI::URLStringToNormal(CGIedProbs[i]);
     if (currentProblem.Contains("weight"))
       outputWeights[i]=
       CGI::URLStringToNormal(currentProblem.GetValueCreateIfNotPresent("weight"));
     if (!currentProblem.Contains("deadlines"))
       continue;
     std::string deadlineString=CGI::URLStringToNormal(currentProblem.GetValueCreateIfNotPresent("deadlines"));
-    if (!CGI::ChopCGIString
-        (deadlineString, sectionInfo, commentsOnFailure))
+    //stOutput << "<hr><hr>DEBUG: deadline string: " << deadlineString;
+    if (!CGI::ChopCGIString(deadlineString, sectionInfo, commentsOnFailure))
       return false;
+    //stOutput << "<hr><hr>DEBUG: sectionInfo: " << sectionInfo.ToStringHtml();
     for (int j=0; j<sectionInfo.size(); j++)
     { outputSections[i].AddOnTop(CGI::URLStringToNormal(sectionInfo.theKeys[j]));
       outputDeadlinesPerSection[i].AddOnTop(CGI::URLStringToNormal(sectionInfo.theValues[j]));
     }
   }
-//  stOutput << "reading from: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(stringToReadFrom);
+  //stOutput << "reading from: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(stringToReadFrom);
+  //stOutput << "<hr><hr>DEBUG: final outputSections: " << outputSections
+  //<< "<br>outputDeadlinesPerSection: " << outputDeadlinesPerSection;
   return true;
 }
 
@@ -385,27 +388,27 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   this->currentUser.username=theGlobalVariables.userDefault;
   if (!this->currentUser.LoadProblemStringFromDatabase(theRoutines, this->currentUserDatabaseString, comments))
   { comments << "Failed to load current user's problem save-file. ";
-      stOutput << "DEBUG!";
-      comments << "DEBUG: " << this->currentUserDatabaseString;
+    //stOutput << "DEBUG!";
+    //comments << "DEBUG: " << this->currentUserDatabaseString;
     return false;
   }
-  stOutput << "<br>DEBUG: "<< CGI::URLKeyValuePairsToNormalRecursiveHtml(this->currentUserDatabaseString)
-  << "<br>";
+  //stOutput << "<br>DEBUG: "<< CGI::URLKeyValuePairsToNormalRecursiveHtml(this->currentUserDatabaseString)
+  //<< "<br>";
   if (!this->currentUser.InterpretDatabaseProblemData(this->currentUserDatabaseString, comments))
   { comments << "Failed to interpret user's problem save-file. ";
-    stOutput << "DEBUG!";
-    comments << "DEBUG: " << this->currentUserDatabaseString;
+    //stOutput << "DEBUG!";
+    //comments << "DEBUG: " << this->currentUserDatabaseString;
     return false;
   }
   this->theProblemData=this->currentUser.GetProblemDataAddIfNotPresent(this->fileName);
   if (this->currentExamHomE=="")
     return true;
-  stOutput << "loading db, problem collection: " << this->currentExamHomE;
+  //stOutput << "loading db, problem collection: " << this->currentExamHomE;
   this->currentUser.currentTable=theRoutines.GetTableUnsafeNameUsersOfFile(this->currentExamHomE);
-  stOutput << "loading extra info ... " << this->currentExamHomE;
+  //stOutput << "loading extra info ... " << this->currentExamHomE;
   if(!this->currentUser.FetchOneColumn("extraInfo", this->currentUser.extraInfoUnsafe, theRoutines, &comments))
   { comments << "Failed to load the section/group of the current user. ";
-    stOutput << "Failed to load the section/group of the current user. ";
+    //stOutput << "Failed to load the section/group of the current user. ";
     //return false;
   }
   if (!theRoutines.ReadProblemDatabaseInfo
@@ -413,7 +416,7 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   { comments << "Failed to load current problem collection's database string. ";
     return false;
   }
-  stOutput << ", the db string is: " << CGI::URLKeyValuePairsToNormalRecursiveHtml( this->currentProblemCollectionDatabaseString);
+  //stOutput << "<hr><hr>DEBUG GOT HERE:  the db string is: " << CGI::URLKeyValuePairsToNormalRecursiveHtml( this->currentProblemCollectionDatabaseString);
   if (!theRoutines.ReadProblemInfo
       (this->currentProblemCollectionDatabaseString, this->databaseProblemAndHomeworkGroupList,
        this->databaseProblemWeights,
@@ -421,6 +424,8 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   { comments << "Failed to interpret the database problem string. ";
     return false;
   }
+  //stOutput << "<hr><hr>DEBUG read databaseProblemAndHomeworkGroupList: "
+  //<< this->databaseProblemAndHomeworkGroupList;
   this->currentUser.ComputePointsEarned
   (this->databaseProblemAndHomeworkGroupList, this->databaseProblemWeights);
   return true;
@@ -2812,18 +2817,21 @@ std::string CalculatorHTML::GetDeadline
 { MacroRegisterFunctionWithName("CalculatorHTML::GetDeadline");
   outputIsInherited=false;
   std::string result;
-//  stOutput << "Fetchign deadline for: " << problemName;
+  //stOutput << "<br>DEBUG: Fetching deadline for: " << problemName << "<br>this->databaseStudentSectionsPerProblem: " << this->databaseStudentSectionsPerProblem;
   int indexInDatabase=this->databaseProblemAndHomeworkGroupList.GetIndex(problemName);
+  //stOutput << "<br>DEBUG: index of  " << problemName << " in  " << this->databaseProblemAndHomeworkGroupList
+  //<< ": " << indexInDatabase;
+
   if (indexInDatabase!=-1)
   { int indexSection=  this->databaseStudentSectionsPerProblem[indexInDatabase].GetIndex(sectionNumber);
     if (indexSection!=-1)
       result=this->databaseDeadlinesBySection[indexInDatabase][indexSection];
   }
-//  stOutput << "Index in db is: " << indexInDatabase << " result:" << result << "Inherit frm grp:"
-//  << inheritFromGroup;
+  //stOutput << "DEBUG: Index in db is: " << indexInDatabase << " result:" << result << "Inherit frm grp:"
+  //<< inheritFromGroup;
   if (result!="" || !inheritFromGroup)
     return result;
-//  stOutput << "hd prob list: " << this->hdProblemList.ToStringCommaDelimited();
+  //stOutput << "DEBUG: hd prob list: " << this->hdProblemList.ToStringCommaDelimited();
   int indexInHDproblemList=this->hdProblemList.GetIndex(problemName);
   if (indexInHDproblemList==-1)
     return "";
@@ -3182,13 +3190,21 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size)
         problemAlreadySolved=true;
     }
-    if (!this->LoadDatabaseInfo(comments))
-      out << comments.str();
-    else
-      out << this->ToStringDeadlinesFormatted
-      (this->fileName, this->databaseStudentSectionS, true, problemAlreadySolved);
-    out << "<br>DEBUG: exam home: " << this->currentExamHomE << "<br>";
-
+    CalculatorHTML theProblemHome;
+    theProblemHome.fileName=this->currentExamHomE;
+    bool isGood=true;
+    if (!theProblemHome.LoadMe(true, comments))
+      isGood=false;
+    if (isGood)
+      if (!theProblemHome.ParseHTML(comments))
+        isGood=false;
+         //     stOutput << "Time after loading collection: " << theGlobalVariables.GetElapsedSeconds()-startTime;
+    if (!isGood)
+    { out << "<b>Failed to load problem collection home: " << this->currentExamHomE
+      << ". Comments: " << comments.str()  << "</b>";
+    }
+    out << theProblemHome.ToStringOnEDeadlineFormatted
+    (this->fileName, this->currentUser.extraInfoUnsafe, true, problemAlreadySolved);
     out << "<br>";
   }
 

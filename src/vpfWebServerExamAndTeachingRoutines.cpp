@@ -72,6 +72,7 @@ public:
   bool CheckContent(std::stringstream& comments);
   bool CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
   bool LoadMe(bool doLoadDatabase, std::stringstream& comments);
+  bool LoadDatabaseInfo(std::stringstream& comments);
   std::string CleanUpFileName(const std::string& inputLink);
   bool ParseHTMLComputeChildFiles(std::stringstream& comments);
   bool ParseHTML(std::stringstream& comments);
@@ -378,6 +379,53 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
 }
 #endif // MACRO_use_MySQL
 
+bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
+{ MacroRegisterFunctionWithName("CalculatorHTML::LoadDatabaseInfo");
+  DatabaseRoutines theRoutines;
+  this->currentUser.username=theGlobalVariables.userDefault;
+  if (!this->currentUser.LoadProblemStringFromDatabase(theRoutines, this->currentUserDatabaseString, comments))
+  { comments << "Failed to load current user's problem save-file. ";
+      stOutput << "DEBUG!";
+      comments << "DEBUG: " << this->currentUserDatabaseString;
+    return false;
+  }
+  stOutput << "<br>DEBUG: "<< CGI::URLKeyValuePairsToNormalRecursiveHtml(this->currentUserDatabaseString)
+  << "<br>";
+  if (!this->currentUser.InterpretDatabaseProblemData(this->currentUserDatabaseString, comments))
+  { comments << "Failed to interpret user's problem save-file. ";
+    stOutput << "DEBUG!";
+    comments << "DEBUG: " << this->currentUserDatabaseString;
+    return false;
+  }
+  this->theProblemData=this->currentUser.GetProblemDataAddIfNotPresent(this->fileName);
+  if (this->currentExamHomE=="")
+    return true;
+  stOutput << "loading db, problem collection: " << this->currentExamHomE;
+  this->currentUser.currentTable=theRoutines.GetTableUnsafeNameUsersOfFile(this->currentExamHomE);
+  stOutput << "loading extra info ... " << this->currentExamHomE;
+  if(!this->currentUser.FetchOneColumn("extraInfo", this->currentUser.extraInfoUnsafe, theRoutines, &comments))
+  { comments << "Failed to load the section/group of the current user. ";
+    stOutput << "Failed to load the section/group of the current user. ";
+    //return false;
+  }
+  if (!theRoutines.ReadProblemDatabaseInfo
+      (this->currentExamHomE, this->currentProblemCollectionDatabaseString, comments))
+  { comments << "Failed to load current problem collection's database string. ";
+    return false;
+  }
+  stOutput << ", the db string is: " << CGI::URLKeyValuePairsToNormalRecursiveHtml( this->currentProblemCollectionDatabaseString);
+  if (!theRoutines.ReadProblemInfo
+      (this->currentProblemCollectionDatabaseString, this->databaseProblemAndHomeworkGroupList,
+       this->databaseProblemWeights,
+       this->databaseStudentSectionsPerProblem, this->databaseDeadlinesBySection, comments))
+  { comments << "Failed to interpret the database problem string. ";
+    return false;
+  }
+  this->currentUser.ComputePointsEarned
+  (this->databaseProblemAndHomeworkGroupList, this->databaseProblemWeights);
+  return true;
+}
+
 bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadMe");
   this->RelativePhysicalFileNameWithFolder=
@@ -400,49 +448,9 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
   this->inputHtml=contentStream.str();
   this->flagIsForReal=theGlobalVariables.UserRequestRequiresLoadingRealExamData();
 #ifdef MACRO_use_MySQL
-  DatabaseRoutines theRoutines;
-  if (doLoadDatabase)
-  { //stOutput << " accessing db... ";
-    this->currentUser.username=theGlobalVariables.userDefault;
-    if (!this->currentUser.LoadProblemStringFromDatabase(theRoutines, this->currentUserDatabaseString, comments))
-    { comments << "Failed to load current user's problem save-file. ";
-//      stOutput << "DEBUG!";
-//      comments << "DEBUG: " << this->currentUserDatabaseString;
-      return false;
-    }
-    if (!this->currentUser.InterpretDatabaseProblemData(this->currentUserDatabaseString, comments))
-    { comments << "Failed to interpret user's problem save-file. ";
-//      stOutput << "DEBUG!";
-//      comments << "DEBUG: " << this->currentUserDatabaseString;
-      return false;
-    }
-    this->theProblemData=this->currentUser.GetProblemDataAddIfNotPresent(this->fileName);
-  }
   this->currentExamHomE=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
-  if (doLoadDatabase && this->currentExamHomE!="")
-  { //stOutput << "loading db, problem collection: " << this->currentExamHomE;
-    this->currentUser.currentTable=theRoutines.GetTableUnsafeNameUsersOfFile(this->currentExamHomE);
-    //stOutput << "loading extra info ... " << this->currentExamHomE;
-    if(!this->currentUser.FetchOneColumn("extraInfo", this->currentUser.extraInfoUnsafe, theRoutines, &comments))
-    { comments << "Failed to load the section/group of the current user. ";
-//      return false;
-    }
-    if (!theRoutines.ReadProblemDatabaseInfo
-        (this->currentExamHomE, this->currentProblemCollectionDatabaseString, comments))
-    { comments << "Failed to load current problem collection's database string. ";
-      return false;
-    }
-    //stOutput << ", the db string is: " << this->currentProblemCollectionDatabaseString;
-    if (!theRoutines.ReadProblemInfo
-        (this->currentProblemCollectionDatabaseString, this->databaseProblemAndHomeworkGroupList,
-         this->databaseProblemWeights,
-         this->databaseStudentSectionsPerProblem, this->databaseDeadlinesBySection, comments))
-    { comments << "Failed to interpret the database problem string. ";
-      return false;
-    }
-    this->currentUser.ComputePointsEarned
-    (this->databaseProblemAndHomeworkGroupList, this->databaseProblemWeights);
-  }
+  if (doLoadDatabase)
+    this->LoadDatabaseInfo(comments);
 #endif // MACRO_use_MySQL
   if (!this->flagIsForReal)
   { std::string randString= theGlobalVariables.GetWebInput("randomSeed");
@@ -3167,6 +3175,23 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   }
   if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
     out << this->GetEditPageButton();
+  if (this->flagIsExamProblem)
+  { bool problemAlreadySolved=false;
+    if (this->currentUser.problemNames.Contains(this->fileName))
+    { ProblemData& theProbData=this->currentUser.problemData[this->currentUser.problemNames.GetIndex(this->fileName)];
+      if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size)
+        problemAlreadySolved=true;
+    }
+    if (!this->LoadDatabaseInfo(comments))
+      out << comments.str();
+    else
+      out << this->ToStringDeadlinesFormatted
+      (this->fileName, this->databaseStudentSectionS, true, problemAlreadySolved);
+    out << "<br>DEBUG: exam home: " << this->currentExamHomE << "<br>";
+
+    out << "<br>";
+  }
+
   //////////////////////////////
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time after execution");

@@ -130,7 +130,7 @@ public:
   std::string GetJavascriptSubmitMainInputIncludeCurrentFile();
   std::string GetDatePickerJavascriptInit();
   std::string GetDatePickerStart(const std::string& theId);
-  std::string GetSubmitAnswersJavascript();
+  std::string GetJavascriptSubmitAnswers();
   std::string GetJavascriptSubmitEmails();
   void LoadCurrentProblemItem();
   void FigureOutCurrentProblemList(std::stringstream& comments);
@@ -649,7 +649,7 @@ std::string CalculatorHTML::GetJavascriptSubmitEmails()
 { return WebWorker::GetJavascriptSubmitEmails(this->fileName);
 }
 
-std::string CalculatorHTML::GetSubmitAnswersJavascript()
+std::string CalculatorHTML::GetJavascriptSubmitAnswers()
 { std::stringstream out;
   std::string requestTypeSubmit, requestTypePreview, requestGiveUp, requestSolution;
   bool submitRandomSeed=false;
@@ -3173,7 +3173,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     return false;
 //////////////////////////////interpretation takes place before javascript generation as the latter depends on the former.
   if (this->flagIsExamProblem)
-    out << this->GetSubmitAnswersJavascript();
+    out << this->GetJavascriptSubmitAnswers();
   else if (this->flagIsExamHome)
     out << this->GetJavascriptSubmitEmails();
   if (this->flagIsExamHome && theGlobalVariables.UserDefaultHasAdminRights() &&

@@ -13,6 +13,7 @@ struct TimeWrapper
 public:
   tm theTime;
   std::string theTimeStringNonReadable;
+//  std::string GetRFC1123time();
   void AssignLocalTime();
   void ComputeTimeStringNonReadable();
   std::string ToStringHumanReadable();

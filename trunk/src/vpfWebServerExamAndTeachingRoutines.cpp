@@ -1097,26 +1097,6 @@ int WebWorker::ProcessSubmitProblemPreview()
   return 0;
 }
 
-int WebWorker::ProcessSetProblemDatabaseInfo()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessSetProblemDatabaseInfo");
-  stOutput << this->GetSetProblemDatabaseInfoHtml();
-  return 0;
-}
-
-int WebWorker::ProcessAddUserEmails()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessAddUserEmails");
-  stOutput << this->GetAddUserEmails();
-  stOutput.Flush();
-  return 0;
-}
-
-int WebWorker::ProcessModifyPage()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessModifyPage");
-  stOutput << this->GetModifyProblemReport();
-  stOutput.Flush();
-  return 0;
-}
-
 std::string WebWorker::GetSetProblemDatabaseInfoHtml()
 { MacroRegisterFunctionWithName("WebWorker::GetSetProblemDatabaseInfoHtml");
 #ifdef MACRO_use_MySQL

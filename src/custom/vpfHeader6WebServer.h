@@ -135,6 +135,7 @@ public:
   std::string GetExamPageInterpreter();
   std::string GetDatabasePage();
   std::string GetAddUserEmails();
+  std::string GetAddUserEmailsAceDB();
   std::string GetSetProblemDatabaseInfoHtml();
   static std::string GetJavaScriptIndicatorFromHD();
   static std::string GetJavascriptHideHtml();

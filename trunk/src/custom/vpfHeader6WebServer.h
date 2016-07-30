@@ -5,7 +5,7 @@
 #include "../vpfHeader6WebServerInterprocessLogistics.h"
 #include "../vpfHeader4SystemFunctionsGlobalObjects.h"
 
-static ProjectInformationInstance projectInfoInstanceWebServerHeader(__FILE__, "Web server classes declarations.");
+static ProjectInformationInstance projectInfoInstanceWebServerHeaderContent(__FILE__, "Web server classes declarations.");
 
 class WebServer;
 
@@ -94,7 +94,7 @@ public:
 
   static void StandardOutputAfterTimeOut(const std::string& input);
 
-  bool IsAllowedAsRequestCookie(const std::string& input);
+  static bool IsAllowedAsRequestCookie(const std::string& input);
   int ProcessCalculator();
   int ProcessCalculatorNoLoginInterpreterMode();
   bool ProcessRawArgumentsNoLoginInterpreterMode
@@ -126,15 +126,9 @@ public:
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
   std::string GetJavaScriptIndicatorBuiltInServer(int inputIndex, bool callProgressReport);
   std::string GetChangePasswordPage();
-  std::string GetClonePageResult();
-  std::string GetModifyProblemReport();
   std::string GetLoginPage();
   std::string GetLoginHTMLinternal();
-  std::string GetEditPageHTML();
-  std::string GetExamPage();
-  std::string GetExamPageInterpreter();
   std::string GetDatabasePage();
-  std::string GetAddUserEmails();
   std::string GetAddUserEmailsAceDB();
   std::string GetSetProblemDatabaseInfoHtml();
   static std::string GetJavaScriptIndicatorFromHD();
@@ -143,7 +137,6 @@ public:
   std::string GetHtmlHiddenInputExercise();
   std::string GetHtmlHiddenInputComputation();
   std::string GetHtmlHiddenInputs();
-  std::string GetJavascriptStandardCookies();
   bool IsFileExtensionOfBinaryFile(const std::string& fileExtension);
   WebWorker();
   ~WebWorker();
@@ -154,7 +147,6 @@ public:
   void SendDisplayUserInputToServer();
   enum requestTypes {requestUnknown, requestGetCalculator, requestPostCalculator,
   requestGetNotCalculator};
-  static std::string ToStringCalculatorArgumentsHumanReadable();
   std::string ToStringStatus()const;
   std::string ToStringMessageUnsafe()const;
   std::string ToStringMessageShortUnsafe(FormatExpressions* theFormat=0)const;

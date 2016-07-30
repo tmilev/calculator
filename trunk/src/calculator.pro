@@ -59,7 +59,9 @@ SOURCES += \
     vpfJson.cpp \
     vpfWebServerExamAndTeachingRoutines.cpp \
     vpfWebServerInterProcessLogistics.cpp \
-    vpf6_36calculatorHtmlRoutines.cpp
+    vpf6_36calculatorHtmlRoutines.cpp \
+    vpfHtmlInterpretationInterface.cpp \
+    vpfHtmlSnippets.cpp
 
 HEADERS += \
     vpf.h \
@@ -109,4 +111,9 @@ HEADERS += \
     vpfHeader1General6Maps.h \
     vpfHeader1General7FileOperations_Encodings.h \
     custom/vpfHeader6WebServer.h \
-    vpfHeader7DatabaseInterface_MySQL.h
+    vpfHeader7DatabaseInterface_MySQL.h \
+    vpfHeader8HtmlSnippets.h \
+    vpfHeader8HtmlInterpretationInterface.h \
+    vpfHeader8HtmlInterpretation.h \
+    vpfHeader6WebServer2_Interface.h \
+    vpfWebServerCommon.h

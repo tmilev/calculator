@@ -62,50 +62,51 @@ endif
 
 #if this is missing something, add it, or, ls | grep cpp | xargs echo
 SOURCES=\
-./src/custom/vpfWebServer.cpp \
-./src/custom/vpfCalculatorMain.cpp \
-./src/custom/vpf6_5calculator_web_routines.cpp \
-./src/custom/vpf8_1DatabaseInterface_MySQL.cpp \
-./src/test.cpp \
-./src/vpf2Math3_SymmetricGroupsAndGeneralizations.cpp \
-./src/vpf4CalculatorFunctionList.cpp \
-./src/vpf5_1CalculatorCode.cpp \
-./src/vpf5_2javascript_graphics.cpp \
-./src/vpf5.cpp \
-./src/vpf6_05evaluationroutines.cpp \
-./src/vpf6_0parsingRoutines.cpp \
-./src/vpf6_1innerTypedFunctions.cpp \
-./src/vpf6_2serialization_code.cpp \
-./src/vpf6_3calculatorMathRoutines.cpp \
-./src/vpf6_35calculatorMathRoutinesPart2.cpp \
-./src/vpf6_36calculatorHtmlRoutines.cpp \
-./src/vpf6_4ExpressionsImplementation.cpp \
-./src/vpf6.cpp \
-./src/vpf7.cpp \
-./src/vpf8.cpp \
-./src/vpf9_1.cpp \
-./src/vpf9_2.cpp \
-./src/vpf9_3RationalRadicals.cpp \
-./src/vpf9_4SemisimpleLieAlgebras.cpp \
-./src/vpf9_5SemisimpleLieAlgebras_RootSubalgebras.cpp \
-./src/vpf9_6SemisimpleLieSubAlgebras.cpp \
-./src/vpf9_7floating_point_routines.cpp \
-./src/vpf9_8GlobalObjects.cpp \
-./src/vpf9_91html_routines_calculator.cpp \
-./src/vpf9_92multitasking.cpp \
-./src/vpf99_HardcodedData.cpp \
-./src/vpf9_9SystemFunctions.cpp \
-./src/vpf9.cpp \
-./src/vpfCharacters_CalculatorInterface.cpp \
-./src/vpfCharacters.cpp \
-./src/vpfCrypto.cpp \
-./src/vpfFiniteFields.cpp \
-./src/vpfGraph.cpp \
-./src/vpfJson.cpp \
-./src/vpfWebServerInterProcessLogistics.cpp \
-./src/vpfWebServerExamAndTeachingRoutines.cpp \
-./src/vpf9_85TimeDateWrappers.cpp
-
+    ./src/custom/vpf6_5calculator_web_routines.cpp \
+    ./src/custom/vpfCalculatorMain.cpp \
+    ./src/custom/vpfWebServer.cpp \
+    ./src/custom/vpf8_1DatabaseInterface_MySQL.cpp \
+    ./src/test.cpp \
+    ./src/vpf2Math3_SymmetricGroupsAndGeneralizations.cpp \
+    ./src/vpf4CalculatorFunctionList.cpp \
+    ./src/vpf5_1CalculatorCode.cpp \
+    ./src/vpf5_2javascript_graphics.cpp \
+    ./src/vpf5.cpp \
+    ./src/vpf6_0parsingRoutines.cpp \
+    ./src/vpf6_1innerTypedFunctions.cpp \
+    ./src/vpf6_2serialization_code.cpp \
+    ./src/vpf6_3calculatorMathRoutines.cpp \
+    ./src/vpf6_4ExpressionsImplementation.cpp \
+    ./src/vpf6_05evaluationroutines.cpp \
+    ./src/vpf6_35calculatorMathRoutinesPart2.cpp \
+    ./src/vpf6.cpp \
+    ./src/vpf7.cpp \
+    ./src/vpf8.cpp \
+    ./src/vpf9_1.cpp \
+    ./src/vpf9_2.cpp \
+    ./src/vpf9_3RationalRadicals.cpp \
+    ./src/vpf9_4SemisimpleLieAlgebras.cpp \
+    ./src/vpf9_5SemisimpleLieAlgebras_RootSubalgebras.cpp \
+    ./src/vpf9_6SemisimpleLieSubAlgebras.cpp \
+    ./src/vpf9_7floating_point_routines.cpp \
+    ./src/vpf9_8GlobalObjects.cpp \
+    ./src/vpf9_9SystemFunctions.cpp \
+    ./src/vpf9_85TimeDateWrappers.cpp \
+    ./src/vpf9_91html_routines_calculator.cpp \
+    ./src/vpf9_92multitasking.cpp \
+    ./src/vpf9.cpp \
+    ./src/vpf99_HardcodedData.cpp \
+    ./src/vpfCharacters_CalculatorInterface.cpp \
+    ./src/vpfCharacters.cpp \
+    ./src/vpfCrypto.cpp \
+    ./src/vpfFiniteFields.cpp \
+    ./src/vpfGraph.cpp \
+    ./src/vpfJson.cpp \
+    ./src/vpfWebServerExamAndTeachingRoutines.cpp \
+    ./src/vpfWebServerInterProcessLogistics.cpp \
+    ./src/vpf6_36calculatorHtmlRoutines.cpp \
+    ./src/vpfHtmlInterpretationInterface.cpp \
+    ./src/vpfHtmlSnippets.cpp \
 
 OBJECTS=$(SOURCES:.cpp=.o) 
 DEPS=$(SOURCES:.cpp=.d)

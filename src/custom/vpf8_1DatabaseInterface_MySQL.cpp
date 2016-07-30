@@ -1,6 +1,6 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#include "vpfHeader7DatabaseInterface_MySQL.h"
+#include "../vpfHeader7DatabaseInterface_MySQL.h"
 ProjectInformationInstance ProjectInfoVpf8_1MySQLcpp(__FILE__, "MySQL interface. ");
 
 bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase

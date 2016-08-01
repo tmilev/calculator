@@ -116,4 +116,5 @@ HEADERS += \
     vpfHeader8HtmlInterpretationInterface.h \
     vpfHeader8HtmlInterpretation.h \
     vpfHeader6WebServer2_Interface.h \
-    vpfWebServerCommon.h
+    vpfWebServerCommon.h \
+    vpfHeader7DatabaseShared.h

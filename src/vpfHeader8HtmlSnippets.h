@@ -12,7 +12,8 @@ class HtmlSnippets{
 public:
 static std::string GetJavascriptStandardCookies();
 static std::string GetJavascriptHideHtml();
-static std::string GetJavascriptSubmitEmails(const std::string& homeFile);
+static std::string GetJavascriptSubmitEmailS(const std::string& homeFile);
+static std::string GetJavascriptSubmitEmailsAce(const std::string& homeFile);
 static std::string GetJavascriptCookieFunctions();
 
 };

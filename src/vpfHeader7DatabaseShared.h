@@ -579,12 +579,6 @@ bool UserCalculator::AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutin
   return this->enteredShaonedSaltedPassword==this->actualShaonedSaltedPassword;
 }
 
-DatabaseRoutines::DatabaseRoutines()
-{ this->connection=0;
-  this->MaxNumRowsToFetch=1000;
-  this->flagFirstLogin=false;
-}
-
 std::string UserCalculator::GetPassword(DatabaseRoutines& theRoutines)
 { MacroRegisterFunctionWithName("UserCalculator::GetUserPassword");
   std::string storedShaonedSaltedPass;

@@ -2,6 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #ifndef vpfWebServerCommon_h_already_included
 #define vpfWebServerCommon_h_already_included
+#include "vpfHeader8HtmlSnippets.h"
 ProjectInformationInstance projectInfoInstanceWebServerCommonImplementation(__FILE__, "Web server common code implementation.");
 
 void WebWorker::SendAllBytesHttp()

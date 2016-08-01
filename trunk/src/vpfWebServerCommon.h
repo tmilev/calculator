@@ -3,6 +3,7 @@
 #ifndef vpfWebServerCommon_h_already_included
 #define vpfWebServerCommon_h_already_included
 #include "vpfHeader8HtmlSnippets.h"
+#include "vpfHeader1General4General_Logging_GlobalVariables.h"
 ProjectInformationInstance projectInfoInstanceWebServerCommonImplementation(__FILE__, "Web server common code implementation.");
 
 void WebWorker::SendAllBytesHttp()
@@ -241,11 +242,18 @@ std::string HtmlSnippets::GetJavascriptStandardCookies()
   << "      document.getElementById(\"currentExamHome\").value=getCookie(\"currentExamHome\");\n"
   << "  if (document.getElementById(\"authenticationToken\")!=null)\n"
   << "    if(getCookie(\"authenticationToken\")!='')\n"
-  << "      document.getElementById(\"authenticationToken\").value=getCookie(\"authenticationToken\");\n "
-  << "  if (document.getElementById(\"usernameHidden\")!=null)\n"
-  << "    if(getCookie(\"username\")!='')\n"
-  << "      document.getElementById(\"usernameHidden\").value=getCookie(\"username\");\n "
-  << "}\n";
+  << "      document.getElementById(\"authenticationToken\").value=getCookie(\"authenticationToken\");\n ";
+  if (!theGlobalVariables.flagRunningAceWebserver)
+    out
+    << "  if (document.getElementById(\"usernameHidden\")!=null)\n"
+    << "    if(getCookie(\"username\")!='')\n"
+    << "      document.getElementById(\"usernameHidden\").value=getCookie(\"username\");\n ";
+  else
+    out
+    << "  if (document.getElementById(\"username\")!=null)\n"
+    << "    if(getCookie(\"username\")!='')\n"
+    << "      document.getElementById(\"username\").value=getCookie(\"username\");\n ";
+  out << "}\n";
   out << " </script>\n";
   return out.str();
 }

@@ -70,6 +70,7 @@ public:
   double MaxComputationTimeBeforeWeTakeAction;
 //  bool flagLogInterProcessCommunication;
 //flags: what mode are we running in?
+  bool flagRunningAceWebserver;
   bool flagRunningAsProblemInterpreter;
   bool flagRunningAsProblemInterpreterIntepretProblemInitial;
   bool flagRunningCommandLine;
@@ -179,6 +180,8 @@ public:
   bool UserRequestMustBePromptedToLogInIfNotLoggedIn();
 
   std::string ToStringNavigation();
+  std::string ToStringNavigationAce();
+  std::string ToStringNavigationOLD();
   std::string ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude=0);
 
   void SetWebInpuT(const std::string& inputName, const std::string& inputValue);

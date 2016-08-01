@@ -90,6 +90,7 @@ void GlobalVariables::ChDir(const std::string& systemCommand)
 
 GlobalVariables::GlobalVariables()
 { this->flagNotAllocated=false;
+  this->flagRunningAceWebserver=false;
   this->IndicatorStringOutputFunction=0;
   this->WebServerReturnDisplayIndicatorCloseConnection=0;
   this->WebServerTimerPing=0;

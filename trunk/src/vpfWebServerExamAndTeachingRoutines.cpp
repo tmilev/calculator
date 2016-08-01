@@ -1391,18 +1391,11 @@ std::string DatabaseRoutines::ToStringClassDetails
       oneTableLineStream << emailBody.str() << "\">Send email manually.</a> "
       ;
       oneTableLineStream << "</td>";
-      //      else
-//        oneTableLineStream << "<td>Activation token: " << currentUser.activationToken.value << "</td>";
     } else if (currentUser.activationToken=="error")
       oneTableLineStream << "<td>error</td><td></td>";
     else
-    { oneTableLineStream << "<td><span style=\"color:green\">activated</span></td><td></td><td></td>";
-/*      oneTableLineStream << "<td><span style=\"color:red\">"
-      << "<a href=\""
-      << UserCalculator::GetActivationAbsoluteAddressFromActivationToken(currentUser.activationToken.value, userTable[i][indexUser])
-      << "\"> (Re)activate account and change password</a>"
-      << "</span></td>";*/
-    }
+      oneTableLineStream << "<td><span style=\"color:green\">activated</span></td><td></td><td></td>";
+
     int indexProblemData=currentUser.selectedRowFieldNamesUnsafe.GetIndex("problemData");
     std::stringstream commentsProblemData;
     if (indexProblemData==-1)
@@ -2207,7 +2200,11 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   if (this->flagIsExamProblem)
     out << this->GetJavascriptSubmitAnswers();
   else if (this->flagIsExamHome)
-    out << HtmlSnippets::GetJavascriptSubmitEmails(this->fileName);
+  { if (theGlobalVariables.flagRunningAceWebserver)
+      out << HtmlSnippets::GetJavascriptSubmitEmailsAce(this->fileName);
+    else
+      out << HtmlSnippets::GetJavascriptSubmitEmailS(this->fileName);
+  }
   if (this->flagIsExamHome && theGlobalVariables.UserDefaultHasAdminRights() &&
       !theGlobalVariables.UserStudentViewOn())
   { out << HtmlSnippets::GetJavascriptHideHtml();

@@ -129,11 +129,9 @@ public:
   std::string GetLoginPage();
   std::string GetLoginHTMLinternal();
   std::string GetDatabasePage();
-  std::string GetAddUserEmailsAceDB();
   std::string GetSetProblemDatabaseInfoHtml();
   static std::string GetJavaScriptIndicatorFromHD();
   static std::string GetJavascriptHideHtml();
-  static std::string GetJavascriptSubmitEmails(const std::string& homeFile);
   std::string GetHtmlHiddenInputExercise();
   std::string GetHtmlHiddenInputComputation();
   std::string GetHtmlHiddenInputs();

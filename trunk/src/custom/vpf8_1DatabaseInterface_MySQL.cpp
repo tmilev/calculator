@@ -93,6 +93,12 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
 #include <time.h>
 #include <ctime>
 
+DatabaseRoutines::DatabaseRoutines()
+{ this->connection=0;
+  this->MaxNumRowsToFetch=1000;
+  this->flagFirstLogin=false;
+}
+
 bool DatabaseRoutines::RowExists
   (const MySQLdata& key, const MySQLdata& value, const MySQLdata& tableName, std::stringstream* comments)
 { MacroRegisterFunctionWithName("DatabaseRoutines::RowExists");

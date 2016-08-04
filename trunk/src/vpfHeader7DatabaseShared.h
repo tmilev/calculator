@@ -2,7 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #ifndef vpfHeader7DatabaseInterface_MySQL_already_included
 #define vpfHeader7DatabaseInterface_MySQL_already_included
-#include "../../calculator/src/vpfHeader5Crypto.h"
+#include "vpfHeader5Crypto.h"
 
 ProjectInformationInstance ProjectInfoVpfDatabaseSharedh(__FILE__, "MySQL interface, shared code. ");
 

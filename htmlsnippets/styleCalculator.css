@@ -1,10 +1,11 @@
 nav {
-    line-height:30px;
     background-color:#eeeeee;
     width:auto;
-    float:right;
+    float:top;
     overflow: auto;
-    padding:5px;	      
+    padding:5px;
+    white-space: nowrap;
+}	      
 }
 textarea{
     resize: both;

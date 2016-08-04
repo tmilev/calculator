@@ -104,61 +104,60 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   std::stringstream studentInterpretation;
   std::string lastStudentAnswerID;
   std::string lastAnswer;
+  std::stringstream out;
   MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
   for (int i=0; i<theArgs.size(); i++)
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID))
       lastAnswer= "("+ CGI::URLStringToNormal(theArgs[i]) + "); ";
   studentInterpretation << lastAnswer;
-  stOutput << "Your answer(s): \\(" << lastAnswer << "\\)" << "\n<br>\n";
+  out << "Your answer(s): \\(" << lastAnswer << "\\)" << "\n<br>\n";
   CalculatorHTML theProblem;
   theProblem.LoadCurrentProblemItem();
   if (!theProblem.flagLoadedSuccessfully)
-    stOutput << "<br><b>Failed to load problem.</b> Comments: " << theProblem.comments.str();
+    out << "<br><b>Failed to load problem.</b> Comments: " << theProblem.comments.str();
   std::stringstream comments;
   if (!theProblem.ParseHTMLPrepareCommands(comments))
-    stOutput << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
+    out << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
   int indexLastAnswerId=theProblem.GetAnswerIndex(lastStudentAnswerID);
   if (indexLastAnswerId==-1)
-  { stOutput << "<br>Student submitted answerID: " << lastStudentAnswerID
+  { out << "<br>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
     << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
-    return 0;
+    return out.str();
   }
   Answer& currentA=theProblem.theProblemData.theAnswers[indexLastAnswerId];
   Calculator theInterpreteR;
   theInterpreteR.init();
   theInterpreteR.Evaluate(studentInterpretation.str());
   if (theInterpreteR.syntaxErrors!="")
-  { stOutput << "<span style=\"color:red\"><b>Failed to parse your answer, got:</b></span><br>"
+  { out << "<span style=\"color:red\"><b>Failed to parse your answer, got:</b></span><br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false);
-    stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
-    return 0;
+    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    return out.str();
   } else if (theInterpreteR.flagAbortComputationASAP)
-  { stOutput << "<span style=\"color:red\"><b>Failed to evaluate your answer, got:</b></span><br>"
+  { out << "<span style=\"color:red\"><b>Failed to evaluate your answer, got:</b></span><br>"
     << theInterpreteR.outputString;
-    stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
-    return 0;
+    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    return out.str();
   }
   const Expression& studentAnswerNoContextE=theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size()-1];
-  stOutput << "<span style=\"color:magenta\"><b>Interpreting your answer as:</b></span><br>";
-  stOutput << "\\(" << studentAnswerNoContextE.ToString() << "\\)";
+  out << "<span style=\"color:magenta\"><b>Interpreting your answer as:</b></span><br>";
+  out << "\\(" << studentAnswerNoContextE.ToString() << "\\)";
   if (currentA.commandIndicesCommentsBeforeSubmission.size==0)
-  { //stOutput << "<br>DEBUG:NO comment<br>";
-    stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
-    return 0;
+  { out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    return out.str();
   }
   Calculator theInterpreterWithAdvice;
   theInterpreterWithAdvice.init();
   theInterpreterWithAdvice.flagWriteLatexPlots=false;
-  //stOutput << "DEBUG: got to interpreter with advice. ";
   if (!theProblem.PrepareCommands(comments))
-  { stOutput << "Something went wrong while interpreting the problem file. ";
+  { out << "Something went wrong while interpreting the problem file. ";
     if (theGlobalVariables.UserDebugFlagOn() &&
         theGlobalVariables.UserDefaultHasAdminRights())
-      stOutput << comments.str();
-    stOutput << "<br>Response time: "
+      out << comments.str();
+    out << "<br>Response time: "
     << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
-    return 0;
+    return out.str();
   }
   std::stringstream calculatorInputStream;
   calculatorInputStream << "CommandEnclosure{}("
@@ -168,41 +167,40 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   calculatorInputStream << currentA.commandsCommentsBeforeSubmissionOnly;
   theInterpreterWithAdvice.Evaluate(calculatorInputStream.str());
   if (theInterpreterWithAdvice.syntaxErrors!="")
-  { stOutput << "<br><span style=\"color:red\"><b>"
+  { out << "<br><span style=\"color:red\"><b>"
     << "Something went wrong when parsing your answer "
     << "in the context of the current problem. "
     << "</b></span>";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
-      stOutput << theInterpreterWithAdvice.outputString << "<br>"
+      out << theInterpreterWithAdvice.outputString << "<br>"
       << theInterpreterWithAdvice.outputCommentsString;
-    stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
-    return 0;
+    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    return out.str();
   }
   if (theInterpreterWithAdvice.flagAbortComputationASAP )
-  { stOutput << "<br><span style=\"color:red\"><b>"
+  { out << "<br><span style=\"color:red\"><b>"
     << "Something went wrong when interpreting your answer "
     << "in the context of the current problem. "
     << "</b></span>";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn() )
-      stOutput << "<br>Logged-in as admin with debug flag on=> printing error details. "
+      out << "<br>Logged-in as admin with debug flag on=> printing error details. "
       << theInterpreterWithAdvice.outputString << "<br>" << theInterpreterWithAdvice.outputCommentsString;
-    stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
-    return 0;
+    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    return out.str();
   }
   FormatExpressions theFormat;
   theFormat.flagExpressionIsFinal=true;
   theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
   theFormat.flagUseQuotes=false;
-  //stOutput << "<hr>DEBUG: <hr>" << theInterpreterWithAdvice.theProgramExpression.ToString() << "<hr>";
   for (int j=0; j<currentA.commandIndicesCommentsBeforeSubmission.size; j++)
   { int actualIndex=3+currentA.commandIndicesCommentsBeforeSubmission[j];
-    //stOutput << "<hr>DEBUG: Command index " << j << ": " << currentA.commandIndicesCommentsBeforeSubmission[j] << ", actual index: "
-    //<< actualIndex << "<hr>";
+    if (actualIndex>=theInterpreterWithAdvice.theProgramExpression.size() )
+      continue;
     const Expression& currentE=theInterpreterWithAdvice.theProgramExpression[actualIndex][1];
-    stOutput << currentE.ToString(&theFormat);
+    out << currentE.ToString(&theFormat);
   }
-  stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
-  return 0;
+  out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+  return out.str();
 }
 
 std::string HtmlInterpretation::ClonePageResult()

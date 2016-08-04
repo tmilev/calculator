@@ -3296,6 +3296,9 @@ void WebServer::InitializeGlobalVariables()
   ParallelComputing::cgiLimitRAMuseNumPointersInList=4000000000;
 }
 
+#include<exception>
+#include<typeinfo>
+
 int WebServer::main(int argc, char **argv)
 { theGlobalVariables.InitThreadsExecutableStart();
   //for (int i=0; i<argc; i++)
@@ -3321,9 +3324,13 @@ int WebServer::main(int argc, char **argv)
   if (theGlobalVariables.flagRunningCommandLine)
     return WebServer::main_command_input();
   }
-  catch (...)
-  { crash << "Exception caught: something very wrong has happened. " << crash;
+  catch (std::exception& e)
+  { crash << "Exception " << (std::string) e.what() << ": something very wrong has happened. " << crash;
   }
+  //catch (..)
+  //{ crash << "Unhandled exception: something very wrong has happened. " << crash;
+  //}
+
   crash << "This point of code is not supposed to be reachable. " << crash;
   return -1;
 }

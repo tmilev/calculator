@@ -360,10 +360,13 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
     out << "<b>Failed to interpret file: " << this->fileName << "</b>. Comments: " << this->comments.str();
     return out.str();
   }
+  std::string linkSeparator=" | ";
+  std::string linkBigSeparator=" || ";
+
   if (!theGlobalVariables.flagRunningAsProblemInterpreter)
     out << "<nav>"
     << this->outputHtmlNavigation
-    << "<hr><small>Generated in "
+    << linkBigSeparator << "<small>Generated in "
     << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds()-startTime)
     << " second(s).</small>" << "</nav> ";
   out
@@ -1144,6 +1147,8 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   std::stringstream out;
   std::string exerciseRequest="exercises";
   std::string studentView= theGlobalVariables.UserStudentViewOn() ? "true" : "false";
+  std::string linkSeparator=" | ";
+  std::string linkBigSeparator=" || ";
   if (theGlobalVariables.UserGuestMode())
     exerciseRequest="exercisesNoLogin";
   if (theGlobalVariables.UserGuestMode())
@@ -1155,7 +1160,6 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
 //    << "\""
     << ">Log in</a><br>";
   }
-  out << theGlobalVariables.ToStringNavigation();
   List<std::string> randomSeedContainer;
   randomSeedContainer.AddOnTop("randomSeed");
   std::string calcArgsNoPassExamDetails=
@@ -1165,7 +1169,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?"
       << this->ToStringCalculatorArgumentsForProblem
       (theGlobalVariables.userCalculatorRequestType, "false", theGlobalVariables.GetWebInput("studentSection"))
-      << "\">Admin view</a><br>";
+      << "\">Admin view</a>" << linkSeparator;
     else
     { if (this->databaseStudentSectionS.size==0)
         out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?"
@@ -1177,7 +1181,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
           out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?"
           << this->ToStringCalculatorArgumentsForProblem
           (theGlobalVariables.userCalculatorRequestType, "true", this->databaseStudentSectionS[i])
-          << "\">Student view section " << this->databaseStudentSectionS[i] << " </a><br>";
+          << "\">Student view section " << this->databaseStudentSectionS[i] << " </a>" << linkSeparator;
     }
   }
   if (this->flagIsExamProblem)
@@ -1188,7 +1192,8 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     if (theGlobalVariables.GetWebInput("studentSection")!="")
       out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
     out << "currentExamHome=" << CGI::StringToURLString(this->currentExamHomE) << "&"
-    << "fileName=" << CGI::StringToURLString(this->currentExamHomE) << "&\"> Course homework home </a><br>";
+    << "fileName=" << CGI::StringToURLString(this->currentExamHomE) << "&\"> Home </a>"
+    << linkSeparator;
   }
   if (this->flagIsExamHome)
     out << "<b>Course homework home</b>";
@@ -1196,11 +1201,11 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   { if (theGlobalVariables.userCalculatorRequestType=="exercises")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?"
       << this->ToStringCalculatorArgumentsForProblem("examForReal", studentView)
-      << "\">&nbsp&nbspStart exam for real</a><br>";
+      << "\">&nbsp&nbspStart for real</a>" << linkSeparator;
     else if (theGlobalVariables.userCalculatorRequestType=="examForReal")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?"
       << this->ToStringCalculatorArgumentsForProblem("exercises", studentView)
-      << "\">&nbsp&nbspExercise this problem type</a><br>";
+      << "\">&nbsp&nbspExercise</a>" << linkSeparator;
   }
   if (this->flagIsExamProblem && this->flagParentInvestigated)
   { int indexInParent=this->problemListOfParent.GetIndex(this->fileName);
@@ -1220,7 +1225,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         out
         << "&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE)
         << "&fileName=" << CGI::StringToURLString(this->problemListOfParent[indexInParent-1] )
-        << "&\"> <-Previous </a><br>";
+        << "&\"> <-Previous </a>" << linkSeparator;
       }
       if (indexInParent<this->problemListOfParent.size-1)
       { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?request="
@@ -1232,7 +1237,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         out
         << "&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE)
         << "&fileName=" << CGI::StringToURLString(this->problemListOfParent[indexInParent+1] )
-        << "\"> Next-> </a><br>";
+        << "\"> Next-> </a>" << linkSeparator;
       } else
       { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?request="
         << theGlobalVariables.userCalculatorRequestType
@@ -1243,16 +1248,17 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         out
         << "&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE)
         << "&fileName=" << CGI::StringToURLString(this->currentExamHomE)
-        << "&\">Last problem, return to course page.</a><br>";
+        << "&\">Last problem, return to course page.</a>" << linkSeparator;
       }
     }
   }
   if (this->flagIsExamProblem &&
       (theGlobalVariables.userCalculatorRequestType=="exercises" ||
        theGlobalVariables.userCalculatorRequestType=="exercisesNoLogin"))
-    out << "<hr><a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?"
+    out << linkBigSeparator << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?"
     << this->ToStringCalculatorArgumentsForProblem(exerciseRequest, studentView, "", true)
-    << "\">Link to this problem</a><br>";
+    << "\">Link to this problem</a>";
+  out << linkBigSeparator << theGlobalVariables.ToStringNavigation();
   return out.str();
 }
 

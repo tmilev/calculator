@@ -236,7 +236,7 @@ if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminR
 }
 
 std::string HtmlInterpretation::GetExamPageInterpreter()
-{
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetExamPageInterpreter");
   CalculatorHTML theFile;
   std::stringstream out;
   out << theFile.LoadAndInterpretCurrentProblemItem();
@@ -246,8 +246,8 @@ std::string HtmlInterpretation::GetExamPageInterpreter()
 }
 
 std::string HtmlInterpretation::GetExamPage()
-{
-CalculatorHTML theFile;
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetExamPage");
+  CalculatorHTML theFile;
   std::stringstream out;
   out << "<html>"
   << "<head>"
@@ -268,8 +268,8 @@ CalculatorHTML theFile;
 }
 
 std::string HtmlInterpretation::GetEditPageHTML()
-{
-std::stringstream out;
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetEditPageHTML");
+  std::stringstream out;
   if ((!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights()) &&
       !theGlobalVariables.flagRunningAsProblemInterpreter
       )
@@ -619,7 +619,7 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   }
   std::string userRole=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("userRole"));
   bool usersAreAdmins= (userRole=="admin");
-  if (theGlobalVariables.flagRunningAceWebserver)
+  if (!theGlobalVariables.flagRunningAceWebserver)
   { CalculatorHTML theCollection;
     std::string currentExamHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
     theRoutines.PrepareClassData
@@ -630,8 +630,10 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   } else
   { List<List<std::string> > userTable;
     List<std::string> userLabels;
-    theRoutines.FetchAllUsers(userTable, userLabels, comments);
-    out << HtmlInterpretation::ToStringUserDetails(usersAreAdmins, userTable, userLabels, hostWebAddressWithPort);
+    if (!theRoutines.FetchAllUsers(userTable, userLabels, comments))
+      out << comments.str();
+    out << HtmlInterpretation::ToStringUserDetailsTable(usersAreAdmins, userTable, userLabels, hostWebAddressWithPort);
+//    out << "<hr>Debug: got to here. ";
   }
   if (!createdUsers || !sentEmails)
     out << "<br>Comments:<br>" << comments.str();
@@ -767,7 +769,7 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
 //  out << "<nav>" << theGlobalVariables.ToStringNavigation() << "</nav>";
 #ifdef MACRO_use_MySQL
   if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection)
-  { out << "Browsing database allowed only for logged-in admins over ssl connection.";
+  { out << "Browsing accounts allowed only for logged-in admins over ssl connection.";
     out << "</body></html>";
     return out.str();
   }
@@ -949,8 +951,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     tableStream << "</table>";
     out << "\n" << numUsers << " user(s)";
     if (numActivatedUsers>0)
-      out << ", <span style=\"color:red\">" << numActivatedUsers << " have not activated their accounts";
-    out << ". </span>";
+      out << ", <span style=\"color:red\">" << numActivatedUsers << " have not activated their accounts. </span>";
     out << tableStream.str();
     return out.str();
 }

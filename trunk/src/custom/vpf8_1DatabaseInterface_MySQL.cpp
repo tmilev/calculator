@@ -464,4 +464,36 @@ std::string DatabaseRoutines::ToStringAllUsersHTMLFormat()
   out << "</table>";
   return out.str();
 }
+
+bool DatabaseRoutines::PrepareClassData
+(const std::string& classFileName, List<List<std::string> >& outputUserTable,
+ List<std::string>& outputLabelsUserTable, std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareClassData");
+  DatabaseRoutines theRoutines;
+  if (!theRoutines.startMySQLDatabaseIfNotAlreadyStarted(&commentsOnFailure))
+  { commentsOnFailure << "<b>Failed to start database</b>";
+    return false;
+  }
+  std::string classTableName=DatabaseRoutines::GetTableUnsafeNameUsersOfFile(classFileName);
+  if (!theRoutines.TableExists(classTableName, &commentsOnFailure))
+    if (!theRoutines.CreateTable
+        (classTableName, "username VARCHAR(255) NOT NULL PRIMARY KEY, \
+        extraInfo LONGTEXT ", &commentsOnFailure, 0))
+      return false;
+  bool tableTruncated=false;
+  int numRows=-1;
+  if (!DatabaseRoutinesGlobalFunctions::FetchTablE
+      (outputUserTable, outputLabelsUserTable, tableTruncated, numRows, classTableName, commentsOnFailure))
+  { commentsOnFailure << "<span style=\"color:red\"><b>Failed to fetch table: "
+    << classTableName << "</b></span>";
+    return false;
+  }
+  if (tableTruncated)
+  { commentsOnFailure << "<span style=\"color:red\"><b>This shouldn't happen: email list truncated. "
+    << "This is likely a software bug.</b></span>";
+    return false;
+  }
+  return true;
+}
+
 #endif

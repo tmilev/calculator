@@ -3,7 +3,6 @@
 #include "vpfHeader8HtmlInterpretation.h"
 #include "vpfHeader8HtmlSnippets.h"
 #include "vpfHeader8HtmlInterpretationInterface.h"
-#include "vpfHeader6WebServer2_Interface.h"
 #include <iomanip>
 
 ProjectInformationInstance projectInfoInstanceHtmlInterpretationInterfaceImplementation
@@ -48,7 +47,7 @@ std::string HtmlInterpretation::GetProblemSolution()
     if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
     { out << "<hr>" << theProblem.theProblemData.ToStringAvailableAnswerIds();
       //out << "<hr>Client input: " << this->mainArgumentRAW << "<hr>";
-      out << WebServerInterface::ToStringCalculatorArgumentsHumanReadable();
+      out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
     }
     return out.str();
   }
@@ -94,7 +93,7 @@ std::string HtmlInterpretation::GetProblemSolution()
   out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
     out <<  "<hr>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString
-    << "<hr>Raw input: " << WebServerInterface::ToStringCalculatorArgumentsHumanReadable();
+    << "<hr>Raw input: " << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   return out.str();
 }
 
@@ -241,7 +240,7 @@ std::string HtmlInterpretation::GetExamPageInterpreter()
   CalculatorHTML theFile;
   std::stringstream out;
   out << theFile.LoadAndInterpretCurrentProblemItem();
-  out << WebServerInterface::ToStringCalculatorArgumentsHumanReadable();
+  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   return out.str();
 
 }
@@ -263,7 +262,7 @@ CalculatorHTML theFile;
   out << theFile.LoadAndInterpretCurrentProblemItem();
   if (theFile.logCommandsProblemGeneration!="")
     out << "<hr>" << theFile.logCommandsProblemGeneration << "<hr>";
-  out << WebServerInterface::ToStringCalculatorArgumentsHumanReadable();
+  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
 }
@@ -361,7 +360,6 @@ std::stringstream out;
   out << "</body></html>";
   return out.str();
 }
-
 
 std::string HtmlInterpretation::ProcessSubmitProblem()
 { MacroRegisterFunctionWithName("HtmlInterpretation::ProcessSubmitProblem");
@@ -587,9 +585,9 @@ std::string HtmlInterpretation::ProcessSubmitProblem()
   return out.str();
 }
 
-std::string HtmlInterpretation::AddUserEmails()
-{
-std::stringstream out;
+std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressWithPort)
+{ MacroRegisterFunctionWithName("HtmlInterpretation::AddUserEmails");
+  std::stringstream out;
   if (!theGlobalVariables.UserDefaultHasAdminRights())
   { out << "<b>Only admins may add users.</b>";
     return out.str();
@@ -619,16 +617,22 @@ std::stringstream out;
     else
       out << "<span style=\"color:red\">Failed to send all activation emails. </span>";
   }
-  CalculatorHTML theProblemCollection;
   std::string userRole=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("userRole"));
   bool usersAreAdmins= (userRole=="admin");
-  std::string currentExamHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
-  CalculatorHTML theCollection;
-  theRoutines.PrepareClassData
-  (currentExamHome, theCollection.userTablE, theCollection.labelsUserTablE, comments);
-  out << theRoutines.ToStringClassDetails
-  (usersAreAdmins, theCollection.userTablE, theCollection.labelsUserTablE,
-   theCollection.databaseProblemAndHomeworkGroupList, theCollection.databaseProblemWeights);
+  if (theGlobalVariables.flagRunningAceWebserver)
+  { CalculatorHTML theCollection;
+    std::string currentExamHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
+    theRoutines.PrepareClassData
+    (currentExamHome, theCollection.userTablE, theCollection.labelsUserTablE, comments);
+    out << theRoutines.ToStringClassDetails
+    (usersAreAdmins, theCollection.userTablE, theCollection.labelsUserTablE,
+     theCollection.databaseProblemAndHomeworkGroupList, theCollection.databaseProblemWeights);
+  } else
+  { List<List<std::string> > userTable;
+    List<std::string> userLabels;
+    theRoutines.FetchAllUsers(userTable, userLabels, comments);
+    out << HtmlInterpretation::ToStringUserDetails(usersAreAdmins, userTable, userLabels, hostWebAddressWithPort);
+  }
   if (!createdUsers || !sentEmails)
     out << "<br>Comments:<br>" << comments.str();
   return out.str();
@@ -681,7 +685,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp()
     if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
     { out << "<hr>" << theProblem.theProblemData.ToStringAvailableAnswerIds();
       //out << "<hr>Client input: " << this->mainArgumentRAW << "<hr>";
-      out << WebServerInterface::ToStringCalculatorArgumentsHumanReadable();
+      out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
     }
     return out.str();
   }
@@ -746,6 +750,250 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp()
   out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
     out << "<hr>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString
-    << "<hr>Raw input: " << WebServerInterface::ToStringCalculatorArgumentsHumanReadable();
+    << "<hr>Raw input: " << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+  return out.str();
+}
+
+std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddressWithPort)
+{ MacroRegisterFunctionWithName("WebWorker::GetAccountsPage");
+  std::stringstream out;
+  out << "<html>"
+  << "<head>"
+  << CGI::GetCalculatorStyleSheetWithTags()
+  << HtmlSnippets::GetJavascriptStandardCookies()
+  << HtmlSnippets::GetJavascriptSubmitEmailsAce("")
+  << "</head>"
+  << "<body onload=\"loadSettings();\">\n";
+//  out << "<nav>" << theGlobalVariables.ToStringNavigation() << "</nav>";
+#ifdef MACRO_use_MySQL
+  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection)
+  { out << "Browsing database allowed only for logged-in admins over ssl connection.";
+    out << "</body></html>";
+    return out.str();
+  }
+  DatabaseRoutines theRoutines;
+  std::string notUsed;
+  List<List<std::string> > userTable;
+  List<std::string> columnLabels;
+  std::stringstream commentsOnFailure;
+  out << "Database: " << theRoutines.theDatabaseName
+  << "<br>Database user: " << theRoutines.databaseUser;
+  if (!theRoutines.PrepareClassData(notUsed, userTable, columnLabels, commentsOnFailure))
+  { out << "<b>Failed to load user info.</b> Comments: " << commentsOnFailure.str();
+    out << "</body></html>";
+    return out.str();
+  }
+//  out << "DEBUG: Usertable: " << userTable.ToStringCommaDelimited();
+  int indexExtraInfo=-1;
+  for (int i=0; i<columnLabels.size; i++)
+    if (columnLabels[i]=="userInfo")
+      indexExtraInfo=i;
+  if (indexExtraInfo==-1)
+  { out << "Failed to load extra user info. ";
+    out << "</body></html>";
+    return out.str();
+  }
+  HashedList<std::string, MathRoutines::hashString> theSections;
+  for (int i=0; i<userTable.size; i++)
+    theSections.AddOnTopNoRepetition(userTable[i][indexExtraInfo]);
+  theSections.QuickSortAscending();
+  out << "<hr><hr>";
+  out << HtmlInterpretation::ToStringUserDetails(true, userTable, columnLabels, hostWebAddressWithPort);
+  out << "<hr><hr>";
+  out << HtmlInterpretation::ToStringUserDetails(false, userTable, columnLabels, hostWebAddressWithPort);
+#else
+  out << "<b>Database not available. </b>";
+#endif // MACRO_use_MySQL
+  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+  out << "</body></html>";
+  return out.str();
+}
+
+std::string HtmlInterpretation::ToStringUserDetailsTable
+(bool adminsOnly, List<List<std::string> > userTable, List<std::string> columnLabels,
+ const std::string& hostWebAddressWithPort)
+{ MacroRegisterFunctionWithName("WebWorker::ToStringUserDetailsTable");
+  std::stringstream out;
+  std::string userRole = adminsOnly ? "admin" : "student";
+  int numUsers=0;
+  std::stringstream tableStream;
+  tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th>"
+  << "<th>Activation manual email</th>"
+  << "<th>Section/Group</th></tr>";
+  UserCalculator currentUser;
+  currentUser.currentTable="users";
+  int indexUser=-1;
+  int indexEmail=-1;
+  int indexActivationToken=-1;
+  int indexUserRole=-1;
+  int indexExtraInfo=-1;
+  for (int i=0; i<columnLabels.size; i++)
+  { if (columnLabels[i]=="username")
+      indexUser=i;
+    if (columnLabels[i]=="email")
+      indexEmail=i;
+    if (columnLabels[i]=="activationToken")
+      indexActivationToken=i;
+    if (columnLabels[i]=="userRole")
+      indexUserRole=i;
+    if (columnLabels[i]=="userInfo")
+      indexExtraInfo=i;
+  }
+  if (
+      indexUser           ==-1 ||
+      indexEmail          ==-1 ||
+      indexActivationToken==-1 ||
+      indexUserRole       ==-1 ||
+      indexExtraInfo      ==-1
+      )
+  { out << "<span style=\"color:red\"><b>This shouldn't happen: failed to find necessary "
+    << "column entries in the database. "
+    << "This is likely a software bug.</b></span>"
+    << "indexUser, indexExtraInfo, indexEmail, indexActivationToken, indexUserRole:  "
+    << indexUser << ", "
+    << indexEmail          << ", "
+    << indexActivationToken << ", "
+    << indexUserRole << ", "
+    << indexExtraInfo << ". "
+    ;
+    return out.str();
+  }
+  HashedList<std::string, MathRoutines::hashString> sectionNames;
+  List<List<std::string> > activatedAccountBucketsBySection;
+  List<List<std::string> > nonActivatedAccountBucketsBySection;
+  for (int i=0; i<userTable.size; i++)
+    sectionNames.AddOnTopNoRepetition(userTable[i][indexExtraInfo]);
+  sectionNames.QuickSortAscending();
+  activatedAccountBucketsBySection.SetSize(sectionNames.size);
+  nonActivatedAccountBucketsBySection.SetSize(sectionNames.size);
+  int numActivatedUsers=0;
+  for (int i=0; i<userTable.size; i++)
+  { std::stringstream failureStream;
+    currentUser.username=userTable[i][indexUser];
+    currentUser.extraInfoUnsafe=userTable[i][indexExtraInfo];
+    currentUser.email=userTable[i][indexEmail];
+    currentUser.activationToken=userTable[i][indexActivationToken];
+    currentUser.userRole=userTable[i][indexUserRole];
+    if (adminsOnly xor (currentUser.userRole=="admin"))
+      continue;
+    numUsers++;
+    std::stringstream oneTableLineStream;
+    oneTableLineStream << "<tr>"
+    << "<td>" << currentUser.username.value << "</td>"
+    << "<td>" << currentUser.email.value << "</td>"
+    ;
+    bool isActivated=true;
+    std::string webAddress="https://"+ hostWebAddressWithPort;
+    if (!theGlobalVariables.flagRunningAceWebserver)
+      webAddress+="/calculator";
+    if (currentUser.activationToken!="activated" && currentUser.activationToken!="error")
+    { isActivated=false;
+      numActivatedUsers++;
+      oneTableLineStream << "<td><span style=\"color:red\">not activated</span></td>";
+      if (currentUser.activationToken!="")
+        oneTableLineStream << "<td>"
+        << "<a href=\""
+        << UserCalculator::GetActivationAddressFromActivationToken
+        (currentUser.activationToken.value, webAddress,
+         userTable[i][indexUser])
+        << "\"> (Re)activate account and change password</a>"
+        << "</td>";
+      oneTableLineStream << "<td>";
+      oneTableLineStream
+      << "<a href=\"mailto:" << currentUser.email.value
+      << "?subject=Math 140 Homework account activation&";
+
+      oneTableLineStream << "body=";
+      std::stringstream emailBody;
+      emailBody << "Dear student,\n you have not activated your homework server account yet. \n"
+      << "To activate your account and set your password please use the link: "
+      << CGI::StringToURLString("\n\n")
+      << CGI::StringToURLString( UserCalculator::GetActivationAddressFromActivationToken
+        (currentUser.activationToken.value, webAddress,
+         userTable[i][indexUser]) )
+      << CGI::StringToURLString("\n\n")
+      << "The link does not work with apple safari; if you use safari, please contact us by email"
+      << " and we will activate your account manually. "
+      << " Once you activate your account, you can log in safely here: \n"
+      << CGI::StringToURLString("\n\n")
+      << webAddress
+      << CGI::StringToURLString("\n\n")
+      << "Best regards, \n your Math 140 instructors."
+      ;
+      oneTableLineStream << emailBody.str() << "\">Send email manually.</a> "
+      ;
+      oneTableLineStream << "</td>";
+      //      else
+        //  oneTableLineStream << "<td>Activation token: " << currentUser.activationToken.value << "</td>";
+    } else if (currentUser.activationToken=="error")
+      oneTableLineStream << "<td>error</td><td></td>";
+    else
+      oneTableLineStream << "<td><span style=\"color:green\">activated</span></td><td></td><td></td>";
+    oneTableLineStream << "<td>" << userTable[i][indexExtraInfo] << "</td>";
+    oneTableLineStream << "</tr>";
+    if (isActivated)
+      activatedAccountBucketsBySection[sectionNames.GetIndex(userTable[i][indexExtraInfo])].AddOnTop(oneTableLineStream.str());
+    else
+      nonActivatedAccountBucketsBySection[sectionNames.GetIndex(userTable[i][indexExtraInfo])].AddOnTop(oneTableLineStream.str());
+  }
+  for (int i=0; i<nonActivatedAccountBucketsBySection.size; i++)
+    nonActivatedAccountBucketsBySection[i].QuickSortAscending();
+  for (int i=0; i<activatedAccountBucketsBySection.size; i++)
+    activatedAccountBucketsBySection[i].QuickSortAscending();
+  for (int i=0; i<nonActivatedAccountBucketsBySection.size; i++)
+    for (int j=0; j<nonActivatedAccountBucketsBySection[i].size; j++)
+      tableStream << nonActivatedAccountBucketsBySection[i][j];
+    for (int i=0; i<activatedAccountBucketsBySection.size; i++)
+      for (int j=0; j<activatedAccountBucketsBySection[i].size; j++)
+        tableStream << activatedAccountBucketsBySection[i][j];
+    tableStream << "</table>";
+    out << "\n" << numUsers << " user(s)";
+    if (numActivatedUsers>0)
+      out << ", <span style=\"color:red\">" << numActivatedUsers << " have not activated their accounts";
+    out << ". </span>";
+    out << tableStream.str();
+    return out.str();
+}
+
+std::string HtmlInterpretation::ToStringUserDetails
+(bool adminsOnly, List<List<std::string> > userTable, List<std::string> columnLabels,
+ const std::string& hostWebAddressWithPort)
+{ MacroRegisterFunctionWithName("WebWorker::ToStringUserDetails");
+  std::stringstream out;
+#ifdef MACRO_use_MySQL
+  std::string idAddressTextarea= adminsOnly ? "inputAddAdmins" : "inputAddStudents";
+  std::string idExtraTextarea= adminsOnly ? "inputAddAdminsExtraInfo" : "inputAddStudentsExtraInfo";
+  std::string userRole = adminsOnly ? "admin" : "student";
+  std::string idOutput="outputAdd";
+  if (adminsOnly)
+    idOutput+="Admins";
+  else
+    idOutput+="Students";
+  out << "Add <b>" << userRole << "(s)</b>.<br> ";
+//  out << "<b>Warning: there's no remove button yet.</b><br>";
+  out << "<textarea width=\"500px\" ";
+  out << "id=\"" << idAddressTextarea << "\"";
+  out << "placeholder=\"email or user list, comma, space or ; separated\">";
+  out << "</textarea>";
+  out << "<textarea width=\"500px\" ";
+  out << "id=\"" << idExtraTextarea << "\"";
+  out << " placeholder=\"optional, for sorting users in groups; for example section #\">";
+  out << "</textarea>";
+  out << "<br>";
+  out
+  << "<button class=\"normalButton\" onclick=\"addEmailsOrUsers("
+  << "'"    << idAddressTextarea
+  << "', '"
+  << "', '" << idOutput
+  << "', '" << userRole
+  << "', '" << idExtraTextarea
+  << "', 'addUsers'"
+  << " )\"> Add users</button> ";
+  out << "<br><span id=\"" << idOutput << "\">\n";
+  out << HtmlInterpretation::ToStringUserDetailsTable(adminsOnly, userTable, columnLabels, hostWebAddressWithPort);
+  out << "</span>";
+#else
+  out << "<b>Adding emails not available (database not present).</b> ";
+#endif // MACRO_use_MySQL
   return out.str();
 }

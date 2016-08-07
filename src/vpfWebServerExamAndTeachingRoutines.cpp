@@ -1,6 +1,5 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#include "vpfHeader6WebServer2_Interface.h"
 #include "vpfHeader3Calculator2_InnerFunctions.h"
 #include "vpfHeader3Calculator4HtmlFunctions.h"
 #include "vpfHeader7DatabaseInterface_MySQL.h"
@@ -1308,6 +1307,8 @@ std::string DatabaseRoutines::ToStringClassDetails
   std::string userRole = adminsOnly ? "admin" : "student";
   int numUsers=0;
   std::stringstream tableStream;
+  tableStream << "Database name: " << this->theDatabaseName;
+  tableStream << "<br>Database user: " << this->databaseUser << "<br>";
   tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th>"
   << "<th>Activation manual email</th>"
   << "<th>Points</th><th>Section/Group</th></tr>";
@@ -1434,13 +1435,17 @@ std::string DatabaseRoutines::ToStringClassDetails
   out << "\n" << numUsers << " user(s)";
   if (numActivatedUsers>0)
     out << ", <span style=\"color:red\">" << numActivatedUsers << " have not activated their accounts";
-  out << "</span>.";
+  out << "</span>. \n"
+
+  << "<br>";
   out << tableStream.str();
+  out << "<hr>DEBUG<br>"
+  <<  userTable.ToStringCommaDelimited() << "<hr><hr>";
   return out.str();
 }
 #endif // MACRO_use_MySQL
 
-std::string CalculatorHTML::ToStringClassDetails
+std::string CalculatorHTML::  ToStringClassDetails
 ( bool adminsOnly,
   const SyntacticElementHTML& inputElement
 )
@@ -1506,41 +1511,6 @@ std::string CalculatorHTML::ToStringClassDetails
 
   return out.str();
 }
-
-#ifdef MACRO_use_MySQL
-bool DatabaseRoutines::PrepareClassData
-(const std::string& classFileName, List<List<std::string> >& outputUserTable,
- List<std::string>& outputLabelsUserTable,
-  std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareClassData");
-  DatabaseRoutines theRoutines;
-  if (!theRoutines.startMySQLDatabaseIfNotAlreadyStarted(&commentsOnFailure))
-  { commentsOnFailure << "<b>Failed to start database</b>";
-    return false;
-  }
-  std::string classTableName=DatabaseRoutines::GetTableUnsafeNameUsersOfFile(classFileName);
-  if (!theRoutines.TableExists(classTableName, &commentsOnFailure))
-    if (!theRoutines.CreateTable
-        (classTableName, "username VARCHAR(255) NOT NULL PRIMARY KEY, \
-        extraInfo LONGTEXT ", &commentsOnFailure, 0))
-      return false;
-  bool tableTruncated=false;
-  int numRows=-1;
-  if (!DatabaseRoutinesGlobalFunctions::FetchTablE
-      (outputUserTable, outputLabelsUserTable, tableTruncated, numRows,
-       classTableName, commentsOnFailure))
-  { commentsOnFailure << "<span style=\"color:red\"><b>Failed to fetch table: "
-    << classTableName << "</b></span>";
-    return false;
-  }
-  if (tableTruncated)
-  { commentsOnFailure << "<span style=\"color:red\"><b>This shouldn't happen: email list truncated. "
-    << "This is likely a software bug.</b></span>";
-    return false;
-  }
-  return true;
-}
-#endif // MACRO_use_MySQL
 
 bool CalculatorHTML::PrepareClassData(std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareClassData");

@@ -11,16 +11,24 @@ static ProjectInformationInstance ProjectInfoHeaderHtmlInterpretationInterface(_
 class HtmlInterpretation{
 public:
 
-static std::string ModifyProblemReport();
-static std::string ClonePageResult();
-static std::string AddUserEmails();
-static std::string ProcessSubmitProblem();
-static std::string GetProblemSolution();
-static std::string GetEditPageHTML();
-static std::string GetExamPage();
-static std::string GetExamPageInterpreter();
-static std::string GetAnswerOnGiveUp();
-static std::string SubmitProblemPreview();
+  static std::string ModifyProblemReport();
+  static std::string ClonePageResult();
+  static std::string AddUserEmails(const std::string& hostWebAddressWithPort);
+  static std::string ProcessSubmitProblem();
+  static std::string GetProblemSolution();
+  static std::string GetEditPageHTML();
+  static std::string GetExamPage();
+  static std::string GetExamPageInterpreter();
+  static std::string GetAnswerOnGiveUp();
+  static std::string SubmitProblemPreview();
+  static std::string GetAccountsPage(const std::string& hostWebAddressWithPort);
+  static std::string ToStringUserDetails
+  (bool adminsOnly, List<List<std::string> > userTable, List<std::string> columnLabels,
+   const std::string& hostWebAddressWithPort);
+  static std::string ToStringUserDetailsTable
+  (bool adminsOnly, List<List<std::string> > userTable, List<std::string> columnLabels,
+   const std::string& hostWebAddressWithPort);
+  static std::string ToStringCalculatorArgumentsHumanReadable();
 };
 
 

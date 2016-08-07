@@ -354,6 +354,7 @@ public:
   std::string databaseUser;
   std::string theDatabaseName;
   std::string hostname;
+  std::string usersTableName;
   int MaxNumRowsToFetch;
   bool flagFirstLogin;
   MYSQL *connection; // Create a pointer to the MySQL instance
@@ -421,6 +422,10 @@ public:
 bool PrepareClassData
 (const std::string& classFileName, List<List<std::string> >& outputUserTable,
  List<std::string>& outputLabelsUserTable,
+  std::stringstream& commentsOnFailure)
+  ;
+bool FetchAllUsers
+(List<List<std::string> >& outputUserTable, List<std::string>& outputLabelsUserTable,
   std::stringstream& commentsOnFailure)
   ;
   std::string ToStringClassDetails

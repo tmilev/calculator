@@ -1,7 +1,6 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader6WebServer.h"
-#include "../vpfHeader6WebServer2_Interface.h"
 #include "../vpfHeader8HtmlSnippets.h"
 #include "../vpfHeader8HtmlInterpretationInterface.h"
 WebServer theWebServer;
@@ -439,29 +438,6 @@ void WebWorker::StandardOutputAfterTimeOut(const std::string& input)
 //  << logger::endL;
 }
 
-std::string WebServerInterface::ToStringCalculatorArgumentsHumanReadable()
-{ MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsHumanReadable");
-  if (!theGlobalVariables.UserDebugFlagOn())
-    return "";
-  std::stringstream out;
-  out << "<hr>";
-  out << "Default user: " << theGlobalVariables.userDefault;
-  if (theGlobalVariables.flagLoggedIn)
-    out << "<br>Logged in. ";
-  if (theGlobalVariables.UserDefaultHasAdminRights())
-    out << "<br><b>User has admin rights</b>";
-  out << "<hr>";
-  for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
-  { out << theGlobalVariables.webArguments.theKeys[i] << ": " << theGlobalVariables.webArguments[i];
-    if (i!=theGlobalVariables.webArguments.size()-1)
-      out << "<br>";
-  }
-  out << "<hr>";
-  if (theGlobalVariables.flagUsingBuiltInWebServer)
-    out << theWebServer.GetActiveWorker().ToStringMessageUnsafe();
-  return out.str();
-}
-
 bool WebWorker::ProcessRawArguments
 (const std::string& urlEncodedInputString, std::stringstream& argumentProcessingFailureComments, int recursionDepth)
 { MacroRegisterFunctionWithName("WebWorker::ProcessRawArguments");
@@ -701,7 +677,7 @@ void WebWorker::OutputBeforeComputation()
   this->OutputBeforeComputationUserInputAndAutoComplete();
   if (theGlobalVariables.UserDebugFlagOn())
     stOutput << "<tr><td>"
-    << WebServerInterface::ToStringCalculatorArgumentsHumanReadable()
+    << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
     << "</td></tr>";
   //  stOutput << "<br>Number of lists created before evaluation: " << NumListsCreated;
 }
@@ -1789,7 +1765,7 @@ int WebWorker::ProcessSetProblemDatabaseInfo()
 
 int WebWorker::ProcessAddUserEmails()
 { MacroRegisterFunctionWithName("WebWorker::ProcessAddUserEmails");
-  stOutput << HtmlInterpretation::AddUserEmails();
+  stOutput << HtmlInterpretation::AddUserEmails(theGlobalVariables.hopefullyPermanentWebAdressOfServerExecutable);
   return 0;
 }
 
@@ -1903,7 +1879,7 @@ std::string WebWorker::GetLoginHTMLinternal()
 //    << "(<a href=\"http://caligatio.github.com/jsSHA/\">http://caligatio.github.com/jsSHA/</a>). "
 //    ;
 //  }
-  out << WebServerInterface::ToStringCalculatorArgumentsHumanReadable();
+  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   return out.str();
 }
 
@@ -1985,7 +1961,7 @@ std::string WebWorker::GetChangePasswordPage()
   << "<span id=\"passwordChangeResult\"> </span>\n"
 //  << "</form>"
   ;
-  out << WebServerInterface::ToStringCalculatorArgumentsHumanReadable();
+  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
 }
@@ -2197,7 +2173,7 @@ std::string WebWorker::GetDatabasePage()
 #else
 out << "<b>Database not available. </b>";
 #endif // MACRO_use_MySQL
-  out << WebServerInterface::ToStringCalculatorArgumentsHumanReadable();
+  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
 }
@@ -3335,4 +3311,26 @@ int WebServer::main(int argc, char **argv)
   return -1;
 }
 
-
+std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
+{ MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsHumanReadable");
+  if (!theGlobalVariables.UserDebugFlagOn())
+    return "";
+  std::stringstream out;
+  out << "<hr>";
+  out << "Default user: " << theGlobalVariables.userDefault;
+  if (theGlobalVariables.flagLoggedIn)
+    out << "<br>Logged in. ";
+  if (theGlobalVariables.UserDefaultHasAdminRights())
+    out << "<br><b>User has admin rights</b>";
+  out << "<hr>";
+  for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
+  { out << theGlobalVariables.webArguments.theKeys[i] << ": "
+    << CGI::StringToHtmlString(theGlobalVariables.webArguments[i]);
+    if (i!=theGlobalVariables.webArguments.size()-1)
+      out << "<br>";
+  }
+  out << "<hr>";
+  if (theGlobalVariables.flagUsingBuiltInWebServer)
+    out << theWebServer.GetActiveWorker().ToStringMessageUnsafe();
+  return out.str();
+}

@@ -3,6 +3,7 @@
 #ifndef vpfHeader7DatabaseInterface_MySQL_already_included
 #define vpfHeader7DatabaseInterface_MySQL_already_included
 #include "vpfHeader5Crypto.h"
+#include "vpfHeader7DatabaseInterface_MySQL.h"
 
 ProjectInformationInstance ProjectInfoVpfDatabaseSharedh(__FILE__, "MySQL interface, shared code. ");
 
@@ -805,6 +806,31 @@ std::string UserCalculator::GetSelectedRowEntry(const std::string& theKey)
   if (theIndex==-1)
     return "";
   return this->selectedRowFieldsUnsafe[theIndex];
+}
+
+bool DatabaseRoutines::FetchAllUsers
+(List<List<std::string> >& outputUserTable, List<std::string>& outputLabelsUserTable,
+ std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareClassData");
+  DatabaseRoutines theRoutines;
+  if (!theRoutines.startMySQLDatabaseIfNotAlreadyStarted(&commentsOnFailure))
+  { commentsOnFailure << "<b>Failed to start database</b>";
+    return false;
+  }
+  bool tableTruncated=false;
+  int numRows=-1;
+  if (!DatabaseRoutinesGlobalFunctions::FetchTablE
+      (outputUserTable, outputLabelsUserTable, tableTruncated, numRows, theRoutines.usersTableName, commentsOnFailure))
+  { commentsOnFailure << "<span style=\"color:red\"><b>Failed to fetch table: "
+    << theRoutines.usersTableName << "</b></span>";
+    return false;
+  }
+  if (tableTruncated)
+  { commentsOnFailure << "<span style=\"color:red\"><b>This shouldn't happen: email list truncated. "
+    << "This is likely a software bug.</b></span>";
+    return false;
+  }
+  return true;
 }
 
 bool DatabaseRoutines::ExtractEmailList(const std::string& emailList, List<std::string>& outputList, std::stringstream& comments)

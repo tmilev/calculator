@@ -66,6 +66,7 @@ SOURCES=\
     ./src/custom/vpfCalculatorMain.cpp \
     ./src/custom/vpfWebServer.cpp \
     ./src/custom/vpf8_1DatabaseInterface_MySQL.cpp \
+    ./src/custom/vpfExamAndTeachingRoutines.cpp \
     ./src/test.cpp \
     ./src/vpf2Math3_SymmetricGroupsAndGeneralizations.cpp \
     ./src/vpf4CalculatorFunctionList.cpp \
@@ -102,7 +103,6 @@ SOURCES=\
     ./src/vpfFiniteFields.cpp \
     ./src/vpfGraph.cpp \
     ./src/vpfJson.cpp \
-    ./src/vpfWebServerExamAndTeachingRoutines.cpp \
     ./src/vpfWebServerInterProcessLogistics.cpp \
     ./src/vpf6_36calculatorHtmlRoutines.cpp \
     ./src/vpfHtmlInterpretationInterface.cpp \

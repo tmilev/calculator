@@ -815,6 +815,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
 (bool adminsOnly, List<List<std::string> > userTable, List<std::string> columnLabels,
  const std::string& hostWebAddressWithPort)
 { MacroRegisterFunctionWithName("WebWorker::ToStringUserDetailsTable");
+#ifdef MACRO_use_MySQL
   std::stringstream out;
   std::string userRole = adminsOnly ? "admin" : "student";
   int numUsers=0;
@@ -953,7 +954,10 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     if (numActivatedUsers>0)
       out << ", <span style=\"color:red\">" << numActivatedUsers << " have not activated their accounts. </span>";
     out << tableStream.str();
-    return out.str();
+  return out.str();
+#else
+  return "Compiled without database support. ";
+#endif
 }
 
 std::string HtmlInterpretation::ToStringUserDetails

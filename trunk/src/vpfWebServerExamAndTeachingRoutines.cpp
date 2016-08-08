@@ -302,7 +302,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
     << this->RelativePhysicalFileNameWithFolder << "<br>computed file name: <br>"
     << theFileName
     << "</b> ";
-    comments << "Call stack: " << crash.GetStackTraceEtcErrorMessage();
+    //comments << "Call stack: " << crash.GetStackTraceEtcErrorMessage();
     return false;
   }
   std::stringstream contentStream;
@@ -1149,7 +1149,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   std::string linkSeparator=" | ";
   std::string linkBigSeparator=" || ";
   if (theGlobalVariables.UserGuestMode())
-    exerciseRequest="exercisesNoLogin";
+    exerciseRequest="exerciseNoLogin";
   if (theGlobalVariables.UserGuestMode())
   { out << "<b>Guest mode</b><br>No points scored/deadlines. <hr>"
     << "<a href=\"" << theGlobalVariables.hopefullyPermanent_HTTPS_WebAdressOfServerExecutable
@@ -1253,7 +1253,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   }
   if (this->flagIsExamProblem &&
       (theGlobalVariables.userCalculatorRequestType=="exercise" ||
-       theGlobalVariables.userCalculatorRequestType=="exercisesNoLogin"))
+       theGlobalVariables.userCalculatorRequestType=="exerciseNoLogin"))
     out << linkBigSeparator << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?"
     << this->ToStringCalculatorArgumentsForProblem(exerciseRequest, studentView, "", true)
     << "\">Link to this problem</a>";
@@ -1601,7 +1601,7 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
     else
       currentA.htmlButtonAnswer= "No ``give-up'' answer available. ";
     if (currentA.flagSolutionFound)
-      currentA.htmlButtonSolution="<button onclick=\"showSolution('" +answerId+ "','"
+      currentA.htmlButtonSolution="<button class=\"showSolutionButton\" onclick=\"showSolution('" +answerId+ "','"
       + currentA.idSpanSolution +"')\"> Solution</button>";
     else
       currentA.htmlButtonSolution="";

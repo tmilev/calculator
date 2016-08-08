@@ -14,7 +14,7 @@ public:
   static std::string ModifyProblemReport();
   static std::string ClonePageResult();
   static std::string AddUserEmails(const std::string& hostWebAddressWithPort);
-  static std::string ProcessSubmitProblem();
+  static std::string SubmitProblem();
   static std::string GetProblemSolution();
   static std::string GetEditPageHTML();
   static std::string GetExamPage();

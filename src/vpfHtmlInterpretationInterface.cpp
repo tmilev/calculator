@@ -203,8 +203,8 @@ std::string HtmlInterpretation::SubmitProblemPreview()
 }
 
 std::string HtmlInterpretation::ClonePageResult()
-{
-if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights() ||
+{ MacroRegisterFunctionWithName("HtmlInterpretation::ClonePageResult");
+  if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights() ||
       !theGlobalVariables.flagUsingSSLinCurrentConnection)
     return "<b>Cloning problems allowed only for logged-in admins under ssl connection. </b>";
   std::string fileNameResulT = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
@@ -361,8 +361,8 @@ std::string HtmlInterpretation::GetEditPageHTML()
   return out.str();
 }
 
-std::string HtmlInterpretation::ProcessSubmitProblem()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::ProcessSubmitProblem");
+std::string HtmlInterpretation::SubmitProblem()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::SubmitProblem");
   std::stringstream out;
   double startTime=theGlobalVariables.GetElapsedSeconds();
   CalculatorHTML theProblem;
@@ -382,7 +382,8 @@ std::string HtmlInterpretation::ProcessSubmitProblem()
 //  stOutput << "<b>debug remove when done: Random seed: " << theProblem.theProblemData.randomSeed << "</b>";
   theProblem.currentExamHomE         = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
   if (theProblem.currentExamHomE == "" &&
-      !theGlobalVariables.flagRunningAsProblemInterpreter)
+      !theGlobalVariables.flagRunningAsProblemInterpreter &&
+      !theGlobalVariables.flagRunningAceWebserver)
   { out << "<b>Could not find the problem collection to which this problem belongs. "
     << "If you think this is a bug, do the following. " << theProblem.BugsGenericMessage << "</b>";
     return out.str();

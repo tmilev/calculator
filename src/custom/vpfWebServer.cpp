@@ -1591,7 +1591,7 @@ int WebWorker::ProcessProblemGiveUp()
 
 int WebWorker::ProcessSubmitProblem()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSubmitProblem");
-  stOutput << HtmlInterpretation::ProcessSubmitProblem();
+  stOutput << HtmlInterpretation::SubmitProblem();
   return 0;
 }
 

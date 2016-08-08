@@ -766,16 +766,10 @@ std::string& CGI::GetJavascriptInitilizeButtons()
   std::string fileReader;
   out << "<script type=\"text/javascript\">";
   bool found=true;
-  if (theGlobalVariables.flagRunningAsProblemInterpreter)
-  { if (!FileOperations::LoadFileToStringVirtual("html/javascriptlibs/initializebuttons.js", fileReader, commentsOnFailure))
-    { theLog << logger::red  << "Javascript file initializebuttons.js not found. " << logger::endL;
-      found=false;
-    }
-  } else
-    if (!FileOperations::LoadFileToStringVirtual("html-common/initializebuttons.js", fileReader, commentsOnFailure))
-    { theLog << logger::red  << "Javascript file initializebuttons.js not found. " << logger::endL;
-      found=false;
-    }
+  if (!FileOperations::LoadFileToStringVirtual("html-common/initializebuttons.js", fileReader, commentsOnFailure))
+  { theLog << logger::red  << "Javascript file initializebuttons.js not found. " << logger::endL;
+    found=false;
+  }
   if (found)
     out << fileReader;
   out << "</script>";

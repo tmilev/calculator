@@ -251,14 +251,14 @@ bool GlobalVariables::UserRequestRequiresLoadingRealExamData()
 { if (this->UserGuestMode())
     return false;
   return this->flagLoggedIn &&
-  (this->userCalculatorRequestType=="examForReal" || this->userCalculatorRequestType=="submitProblem" ||
+  (this->userCalculatorRequestType=="scoredQuiz" || this->userCalculatorRequestType=="submitProblem" ||
    this->userCalculatorRequestType=="submitProblemPreview");
 }
 
 bool GlobalVariables::UserRequestMustBePromptedToLogInIfNotLoggedIn()
 { return
-  this->userCalculatorRequestType=="examForReal" ||
-  this->userCalculatorRequestType=="exercises"
+  this->userCalculatorRequestType=="scoredQuiz" ||
+  this->userCalculatorRequestType=="exercise"
   ;
 }
 
@@ -294,7 +294,7 @@ std::string GlobalVariables::ToStringNavigationOLD()
     else
       out << "<b>Password change: <br>secure connection<br>only</b>" << linkSeparator;
   }
-  out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=exercises&"
+  out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=exercises"
   << this->ToStringCalcArgsNoNavigation()
   << "fileName=ProblemCollections/CourseList.html"
   << "\">Select course</a>" << linkBigSeparator;
@@ -314,10 +314,10 @@ std::string GlobalVariables::ToStringNavigationOLD()
       << this->ToStringCalcArgsNoNavigation() << " \">Calculator</a>" << linkBigSeparator;
     else
       out << "<b>Calculator</b> " << linkBigSeparator;
-    if (theGlobalVariables.userCalculatorRequestType!="exercises" &&
-        theGlobalVariables.userCalculatorRequestType!="examForReal" )
+    if (theGlobalVariables.userCalculatorRequestType!="exercise" &&
+        theGlobalVariables.userCalculatorRequestType!="scoredQuiz" )
     { if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-        out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=exercises&"
+        out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=exercise&"
         << this->ToStringCalcArgsNoNavigation()
         << "\">Exercises</a> " << linkBigSeparator;
     } else
@@ -362,8 +362,8 @@ std::string GlobalVariables::ToStringNavigationAce()
       << this->ToStringCalcArgsNoNavigation() << " \">Calculator</a><br>";
     else
       out << "<b>Calculator</b><br>";
-    if (theGlobalVariables.userCalculatorRequestType!="exercises" &&
-        theGlobalVariables.userCalculatorRequestType!="examForReal" )
+    if (theGlobalVariables.userCalculatorRequestType!="exercise" &&
+        theGlobalVariables.userCalculatorRequestType!="scoredQuiz" )
     { if (theGlobalVariables.flagUsingSSLinCurrentConnection)
         out << "<a href=\"exercises?"
         << this->ToStringCalcArgsNoNavigation()

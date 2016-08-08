@@ -581,7 +581,7 @@ FileOperations::FolderVirtualLinks()
     result.SetKeyValue("problemtemplates/", "../problemtemplates/");
     result.SetKeyValue("freecalc/", "../freecalc/");
     result.SetKeyValue("html/", "../public_html/");
-    result.SetKeyValue("htmlsnippets/", "htmlsnippets/");
+    result.SetKeyValue("html-common/", "html-common/");
     result.SetKeyValue("LogFiles/", "LogFiles/");
   }
   return result;

@@ -772,7 +772,7 @@ std::string& CGI::GetJavascriptInitilizeButtons()
       found=false;
     }
   } else
-    if (!FileOperations::LoadFileToStringVirtual("htmlsnippets/initializebuttons.js", fileReader, commentsOnFailure))
+    if (!FileOperations::LoadFileToStringVirtual("html-common/initializebuttons.js", fileReader, commentsOnFailure))
     { theLog << logger::red  << "Javascript file initializebuttons.js not found. " << logger::endL;
       found=false;
     }
@@ -789,7 +789,7 @@ std::string& CGI::GetMathQuillStyleSheetWithTags()
   std::stringstream out, commentsOnFailure;
   std::string fileReader;
   out << "<style>";
-  if (!FileOperations::LoadFileToStringVirtual("htmlsnippets/mathquill.css", fileReader, commentsOnFailure))
+  if (!FileOperations::LoadFileToStringVirtual("html-common/mathquill.css", fileReader, commentsOnFailure))
   { theLog << logger::red  << "Style file mathquill.css is missing. " << logger::endL;
     out << "Style file mathquill.css is missing. ";
   } else
@@ -805,7 +805,7 @@ std::string& CGI::GetCalculatorStyleSheetWithTags()
   std::stringstream out, commentsOnFailure;
   std::string fileReader;
   out << "<style>";
-  if (!FileOperations::LoadFileToStringVirtual("htmlsnippets/styleCalculator.css", fileReader, commentsOnFailure))
+  if (!FileOperations::LoadFileToStringVirtual("html-common/styleCalculator.css", fileReader, commentsOnFailure))
     out << commentsOnFailure.str();
   else
     out << fileReader;
@@ -819,12 +819,12 @@ std::string& CGI::GetJavascriptMathQuill()
     return CGI::JavascriptMathQuill;
   std::stringstream commentsOnError;
   std::string theJS;
-  if (!FileOperations::LoadFileToStringVirtual("htmlsnippets/mathquill.min.js", theJS, commentsOnError))
+  if (!FileOperations::LoadFileToStringVirtual("html-common/mathquill.min.js", theJS, commentsOnError))
   { CGI::JavascriptMathQuill=commentsOnError.str();
     return CGI::JavascriptMathQuill;
   }
   std::stringstream out;
-  out << "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js\"></script>"
+  out << "<script src=\"html-common/jquery.min.js\"></script>"
   << "<script type=\"text/javascript\">" << theJS << "</script>"
   << "<script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2);</script>";
   CGI::JavascriptMathQuill=out.str();
@@ -836,7 +836,7 @@ std::string& CGI::GetJavascriptAutocompleteWithTags()
     return CGI::JavascriptAutoCompleteWithTags;
   std::stringstream out;
   std::string theJS;
-  if (!FileOperations::LoadFileToStringVirtual("htmlsnippets/autocomplete.js", theJS, out))
+  if (!FileOperations::LoadFileToStringVirtual("html-common/autocomplete.js", theJS, out))
     CGI::JavascriptAutoCompleteWithTags=out.str();
   else
     CGI::JavascriptAutoCompleteWithTags= "<script type=\"text/javascript\">" + theJS + "</script>\n";
@@ -848,7 +848,7 @@ std::string& CGI::GetJavascriptSha1()
     return CGI::JavascriptSha1;
   std::stringstream out;
   std::string theJS;
-  if (!FileOperations::LoadFileToStringVirtual("htmlsnippets/sha1.js", theJS, out))
+  if (!FileOperations::LoadFileToStringVirtual("html-common/sha1.js", theJS, out))
     CGI::JavascriptSha1=out.str();
   else
     CGI::JavascriptSha1= "<script type=\"text/javascript\">" + theJS + "</script>\n";

@@ -2421,7 +2421,7 @@ std::string& CGI::GetJavascriptMathjax()
   << "  extensions: [\"tex2jax.js\""
 //  ", \""
 //  << theGlobalVariables.hopefullyPermanent_HTTPS_WebAdressJavascriptFolder
-//  << "/htmlsnippets/forminput.js\"],\n"
+//  << "/html-common/forminput.js\"],\n"
 //  << "/forminput.js\"
   << "],\n"
   << "  jax: [\"input/TeX\", \"output/HTML-CSS\"],\n"

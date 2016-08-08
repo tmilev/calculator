@@ -241,7 +241,7 @@ bool GlobalVariables::UserDefaultHasProblemComposingRights()
 bool GlobalVariables::UserGuestMode()
 { if (this->flagUsingSSLinCurrentConnection)
     return false;
-  return this->userCalculatorRequestType=="exercisesNoLogin" ||
+  return this->userCalculatorRequestType=="exerciseNoLogin" ||
   this->userCalculatorRequestType=="problemGiveUpNoLogin" ||
   this->userCalculatorRequestType=="submitExerciseNoLogin" ||
   this->userCalculatorRequestType=="submitExercisePreviewNoLogin" ;
@@ -294,7 +294,7 @@ std::string GlobalVariables::ToStringNavigationOLD()
     else
       out << "<b>Password change: <br>secure connection<br>only</b>" << linkSeparator;
   }
-  out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=exercises"
+  out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=exercise"
   << this->ToStringCalcArgsNoNavigation()
   << "fileName=ProblemCollections/CourseList.html"
   << "\">Select course</a>" << linkBigSeparator;
@@ -344,7 +344,7 @@ std::string GlobalVariables::ToStringNavigationAce()
     else
       out << "<b>Password change: <br>secure connection<br>only</b>" << linkSeparator;
   }
-  out << "<a href=\"exercises&"
+  out << "<a href=\"exercise&"
   << this->ToStringCalcArgsNoNavigation()
   << "fileName=ProblemCollections/CourseList.html"
   << "\">Select course</a>";
@@ -367,7 +367,7 @@ std::string GlobalVariables::ToStringNavigationAce()
     if (theGlobalVariables.userCalculatorRequestType!="exercise" &&
         theGlobalVariables.userCalculatorRequestType!="scoredQuiz" )
     { if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-        out << "<a href=\"exercises?"
+        out << "<a href=\"exercise?"
         << this->ToStringCalcArgsNoNavigation()
         << "\">Exercises</a>";
     } else

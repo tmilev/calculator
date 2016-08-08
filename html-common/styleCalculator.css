@@ -28,6 +28,10 @@ textarea{
     color:red;
     width:60px;
 }
+.showSolutionButton{
+    color:green;
+    width:60px;
+}
 .submitButton:hover {
     background-color:#878787;
 }

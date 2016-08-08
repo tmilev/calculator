@@ -1144,7 +1144,7 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
 std::string CalculatorHTML::ToStringProblemNavigation()const
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemNavigation");
   std::stringstream out;
-  std::string exerciseRequest="exercises";
+  std::string exerciseRequest="exercise";
   std::string studentView= theGlobalVariables.UserStudentViewOn() ? "true" : "false";
   std::string linkSeparator=" | ";
   std::string linkBigSeparator=" || ";
@@ -1197,13 +1197,13 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   if (this->flagIsExamHome)
     out << "<b>Course homework home</b>";
   if (this->flagIsExamProblem)
-  { if (theGlobalVariables.userCalculatorRequestType=="exercises")
+  { if (theGlobalVariables.userCalculatorRequestType=="exercise")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?"
-      << this->ToStringCalculatorArgumentsForProblem("examForReal", studentView)
+      << this->ToStringCalculatorArgumentsForProblem("scoredQuiz", studentView)
       << "\">&nbsp&nbspStart for real</a>" << linkSeparator;
-    else if (theGlobalVariables.userCalculatorRequestType=="examForReal")
+    else if (theGlobalVariables.userCalculatorRequestType=="scoredQuiz")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?"
-      << this->ToStringCalculatorArgumentsForProblem("exercises", studentView)
+      << this->ToStringCalculatorArgumentsForProblem("exercise", studentView)
       << "\">&nbsp&nbspExercise</a>" << linkSeparator;
   }
   if (this->flagIsExamProblem && this->flagParentInvestigated)
@@ -1252,7 +1252,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     }
   }
   if (this->flagIsExamProblem &&
-      (theGlobalVariables.userCalculatorRequestType=="exercises" ||
+      (theGlobalVariables.userCalculatorRequestType=="exercise" ||
        theGlobalVariables.userCalculatorRequestType=="exercisesNoLogin"))
     out << linkBigSeparator << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?"
     << this->ToStringCalculatorArgumentsForProblem(exerciseRequest, studentView, "", true)
@@ -1284,7 +1284,7 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
       out << "studentSection=" << CGI::StringToURLString(studentSection) << "&";
   }
   if (//theGlobalVariables.GetWebInput("randomSeed")=="" &&
-      //theGlobalVariables.userCalculatorRequestType!="examForReal" &&
+      //theGlobalVariables.userCalculatorRequestType!="scoredQuiz" &&
       includeRandomSeedIfAppropriate)
     out << "randomSeed=" << this->theProblemData.randomSeed << "&";
 //  out << "fileName=" << CGI::StringToURLString(this->fileName) << "&";
@@ -1625,7 +1625,7 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   verifyStream << "<span id=\"" << currentA.idVerificationSpan << "\">";
   int numCorrectSubmissions=currentA.numCorrectSubmissions;
   int numSubmissions= currentA.numSubmissions;
-  if (theGlobalVariables.userCalculatorRequestType=="examForReal")
+  if (theGlobalVariables.userCalculatorRequestType=="scoredQuiz")
   { if (numCorrectSubmissions >0)
     { verifyStream << "<b><span style=\"color:green\">Correctly answered: \\("
       << currentA.firstCorrectAnswerClean << "\\) </span></b> ";
@@ -2030,11 +2030,11 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   if (this->currentExamHomE!="")
     refStreamNoRequest << "currentExamHome=" << this->currentExamHomE << "&";
   if (!theGlobalVariables.UserGuestMode())
-  { refStreamExercise << theGlobalVariables.DisplayNameExecutableWithPath << "?request=exercises&" << refStreamNoRequest.str();
-    refStreamForReal << theGlobalVariables.DisplayNameExecutableWithPath << "?request=examForReal&" << refStreamNoRequest.str();
+  { refStreamExercise << theGlobalVariables.DisplayNameExecutableWithPath << "?request=exercise&" << refStreamNoRequest.str();
+    refStreamForReal << theGlobalVariables.DisplayNameExecutableWithPath << "?request=scoredQuiz&" << refStreamNoRequest.str();
   } else
   { refStreamExercise << theGlobalVariables.DisplayNameExecutableWithPath
-    << "?request=exercisesNoLogin&" << refStreamNoRequest.str();
+    << "?request=exerciseNoLogin&" << refStreamNoRequest.str();
   }
   if (inputOutput.GetTagClass()=="calculatorExamProblem")
     out << this->InterpretGenerateProblemManagementLink(refStreamForReal, refStreamExercise, cleaneduplink, urledProblem);

@@ -1,5 +1,8 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
+#ifndef vpfHeader8htmlExamAndTeachingRoutinesCommon_h
+#define vpfHeader8htmlExamAndTeachingRoutinesCommon_h
+
 #include "vpfHeader3Calculator2_InnerFunctions.h"
 #include "vpfHeader3Calculator4HtmlFunctions.h"
 #include "vpfHeader7DatabaseInterface_MySQL.h"
@@ -9,9 +12,8 @@
 #include "vpfHeader8HtmlInterpretationInterface.h"
 #include <iomanip>
 
-ProjectInformationInstance projectInfoInstanceWebServerExamAndTeachingRoutines
-(__FILE__, "Routines for calculus teaching: calculator exam mode.");
-
+ProjectInformationInstance projectInfoInstanceWebServerExamAndTeachingRoutinesCommonCode
+(__FILE__, "Routines for calculus teaching: calculator exam mode. Shared code. ");
 
 CalculatorHTML::CalculatorHTML()
 { this->flagRandomSeedGiven=false;
@@ -2950,3 +2952,4 @@ std::string CalculatorHtmlFunctions::GetJavascriptMathQuillBox(Answer& theAnswer
   return out.str();
 }
 
+#endif

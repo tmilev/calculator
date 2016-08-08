@@ -21,6 +21,7 @@ SOURCES += \
     custom/vpfCalculatorMain.cpp \
     custom/vpfWebServer.cpp \
     custom/vpf8_1DatabaseInterface_MySQL.cpp \
+    custom/vpfExamAndTeachingRoutines.cpp \
     test.cpp \
     vpf2Math3_SymmetricGroupsAndGeneralizations.cpp \
     vpf4CalculatorFunctionList.cpp \
@@ -57,7 +58,6 @@ SOURCES += \
     vpfFiniteFields.cpp \
     vpfGraph.cpp \
     vpfJson.cpp \
-    vpfWebServerExamAndTeachingRoutines.cpp \
     vpfWebServerInterProcessLogistics.cpp \
     vpf6_36calculatorHtmlRoutines.cpp \
     vpfHtmlInterpretationInterface.cpp \
@@ -116,4 +116,5 @@ HEADERS += \
     vpfHeader8HtmlInterpretationInterface.h \
     vpfHeader8HtmlInterpretation.h \
     vpfWebServerCommon.h \
-    vpfHeader7DatabaseShared.h
+    vpfHeader7DatabaseShared.h \
+    vpfHeader8HtmlExamAndTeachingCommon.h

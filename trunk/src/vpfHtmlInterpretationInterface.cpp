@@ -473,48 +473,51 @@ std::string HtmlInterpretation::SubmitProblem()
       << "This should not happen. " << CalculatorHTML::BugsGenericMessage << "</b>";
       theProblem.flagIsForReal=false;
     } else
-    { CalculatorHTML theProblemHome;
-      theProblemHome.fileName=theProblem.currentExamHomE;
-      bool isGood=true;
-      if (!theProblemHome.LoadMe(true, comments))
-        isGood=false;
-      if (isGood)
-        if (!theProblemHome.ParseHTML(comments))
+    { bool deadLinePassed=false;
+      if (!theGlobalVariables.flagRunningAceWebserver)
+      { CalculatorHTML theProblemHome;
+        theProblemHome.fileName=theProblem.currentExamHomE;
+        bool isGood=true;
+        if (!theProblemHome.LoadMe(true, comments))
           isGood=false;
-      if (!isGood)
-      { out << "<b>Failed to load problem collection home: " << theProblem.currentExamHomE
-        << ". Comments: " << comments.str()  << " Answer not recorded. "
-        << "This should not happen. " << CalculatorHTML::BugsGenericMessage << "</b>";
-        return out.str();
-      }
- //     stOutput << "User: " << theProblem.currentUser.username.value << "; section: "
- //     << theProblem.currentUser.extraInfoUnsafe;
- //     bool tmp=false;
- //     stOutput << "problem db info: " << theProblemHome.databaseProblemAndHomeworkGroupList.ToStringCommaDelimited();
- //     stOutput
-      bool unused=false;
-      bool deadLinePassed=false;
-      std::string theDeadlineString=theProblemHome.GetDeadline
-      (theProblem.fileName, theProblem.currentUser.extraInfoUnsafe, true, unused);
-      if (theDeadlineString!="" && theDeadlineString!=" ")
-      { TimeWrapper now, deadline; //<-needs a fix for different time formats.
-      //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
-        std::stringstream badDateStream;
-        if (!deadline.AssignMonthDayYear(theDeadlineString, badDateStream))
-        { out << "<b>Problem reading deadline. </b> The deadline string was: "
-          << theDeadlineString << ". Comments: "
-          << "<span style=\"color:red\">" << badDateStream.str() << "</span>"
-          << " This should not happen. " << CalculatorHTML::BugsGenericMessage;
+        if (isGood)
+          if (!theProblemHome.ParseHTML(comments))
+            isGood=false;
+        if (!isGood)
+        { out << "<b>Failed to load problem collection home: " << theProblem.currentExamHomE
+          << ". Comments: " << comments.str()  << " Answer not recorded. "
+          << "This should not happen. " << CalculatorHTML::BugsGenericMessage << "</b>";
           return out.str();
         }
-        //  out << "deadline.date: " << deadline.theTime.tm_mday;
-        now.AssignLocalTime();
-        //  out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
-        //  << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
+     //     stOutput << "User: " << theProblem.currentUser.username.value << "; section: "
+     //     << theProblem.currentUser.extraInfoUnsafe;
+     //     bool tmp=false;
+     //     stOutput << "problem db info: " << theProblemHome.databaseProblemAndHomeworkGroupList.ToStringCommaDelimited();
+     //     stOutput
+        bool unused=false;
+        std::string theDeadlineString=theProblemHome.GetDeadline
+        (theProblem.fileName, theProblem.currentUser.extraInfoUnsafe, true, unused);
+        if (theDeadlineString!="" && theDeadlineString!=" ")
+        { TimeWrapper now, deadline; //<-needs a fix for different time formats.
+        //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
+          std::stringstream badDateStream;
+          if (!deadline.AssignMonthDayYear(theDeadlineString, badDateStream))
+          { out << "<b>Problem reading deadline. </b> The deadline string was: "
+            << theDeadlineString << ". Comments: "
+            << "<span style=\"color:red\">" << badDateStream.str() << "</span>"
+            << " This should not happen. " << CalculatorHTML::BugsGenericMessage;
+            return out.str();
+          }
+          //  out << "deadline.date: " << deadline.theTime.tm_mday;
+          now.AssignLocalTime();
+          //  out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
+          //  << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
 
-        double secondsTillDeadline= deadline.SubtractAnotherTimeFromMeInSeconds(now)+7*3600;
-        deadLinePassed=(secondsTillDeadline<-18000);
+          double secondsTillDeadline= deadline.SubtractAnotherTimeFromMeInSeconds(now)+7*3600;
+          deadLinePassed=(secondsTillDeadline<-18000);
+        }
       }
+
       //bool deadLinePassed=false;
       if (deadLinePassed)
         out << "<span style=\"color:red\"> <b>Deadline has passed, no answer recorded.</b></span>";

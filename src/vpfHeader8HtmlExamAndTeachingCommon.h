@@ -428,45 +428,6 @@ bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt)
   return false;
 }
 
-std::string CalculatorHTML::GetJavascriptSubmitMainInputIncludeCurrentFile()
-{ std::stringstream out;
-  out
-  << "<script type=\"text/javascript\"> \n"
-  << "function submitStringAsMainInput(theString, idOutput, requestType){\n"
-  << "  spanOutput = document.getElementById(idOutput);\n"
-  << "  if (spanOutput==null){\n"
-  << "    spanOutput = document.createElement('span');\n"
-  << "    document.body.appendChild(spanOutput);\n"
-  << "    spanOutput.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idOutput + \"MISSING! </span>\";\n"
-  << "  }\n"
-  << "  inputParams='request='+requestType;\n"
-  << "  inputParams+='&" << theGlobalVariables.ToStringCalcArgsNoNavigation() << "';\n"
-  << "  inputParams+='&fileName=" << CGI::StringToURLString(this->fileName) << "';\n"
-  << "  inputParams+='&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE) << "';\n"
-  << "  inputParams+='&mainInput=' + encodeURIComponent(theString);\n"
-//  << "  inputParams+='&currentExamHome=' + problemCollectionName;\n"
-  << "  var https = new XMLHttpRequest();\n"
-////////////////////////////////////////////
-  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameExecutableWithPath << "\", true);\n"
-/////////////////or/////////////////////////
-//  << "  https.open(\"GET\", \"" << theGlobalVariables.DisplayNameExecutableWithPath << "\""
-//  << "+ \"?\"+inputParams"
-//  << ", true);\n"
-////////////////////////////////////////////
-  << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
-  << "  https.onload = function() {\n"
-  << "    spanOutput.innerHTML=https.responseText;\n"
-  << "  }\n"
-////////////////////////////////////////////
-  << "  https.send(inputParams);\n"
-/////////////////or/////////////////////////
-//  << "  https.send();\n"
-////////////////////////////////////////////
-  << "}\n"
-  << "</script>";
-  return out.str();
-}
-
 std::string CalculatorHTML::GetDatePickerStart(const std::string& theId)
 { std::stringstream out;
   out << "\n<script type=\"text/javascript\">\n"
@@ -1562,87 +1523,6 @@ std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink)
 }
 
 #include "vpfHeader5Crypto.h"
-std::string CalculatorHTML::InterpretGenerateProblemManagementLink
-(std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
- const std::string& cleaneduplink, const std::string& urledProblem)
-{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateProblemManagementLink");
-  std::stringstream out;
-  if (!theGlobalVariables.UserGuestMode())
-    out << " <a href=\"" << refStreamForReal.str() << "\">Start (for credit)</a> ";
-  out << " <a href=\"" << refStreamExercise.str() << "\">Exercise (no credit, unlimited tries)</a> ";
-  if (theGlobalVariables.UserGuestMode())
-  { out << "Exercise points/deadlines require login. ";
-    return out.str();
-  }
-  //stOutput << "<hr>CurrentUser.problemNames=" << this->currentUser.problemNames.ToStringCommaDelimited();
-  std::string thePoints="";
-  if (this->databaseProblemAndHomeworkGroupList.Contains(cleaneduplink))
-    thePoints= this->databaseProblemWeights[this->databaseProblemAndHomeworkGroupList.GetIndex(cleaneduplink)];
-  #ifdef MACRO_use_MySQL
-  bool noSubmissionsYet=false;
-  bool weightPrinted=false;
-  if (this->currentUser.problemNames.Contains(cleaneduplink))
-  { ProblemData& theProbData=this->currentUser.problemData[this->currentUser.problemNames.GetIndex(cleaneduplink)];
-    if (!theProbData.flagProblemWeightIsOK)
-    { out << "<span style=\"color:orange\">No point weight assigned yet. </span>";
-      if (theProbData.ProblemWeightUserInput!="")
-        out << "<span style=\"color:red\"><b>Failed to interpret weight string: "
-        << theProbData.ProblemWeightUserInput << ". </b></span>";
-      if (theProbData.theAnswers.size==1)
-      { if (theProbData.numCorrectlyAnswered==1)
-          out << theProbData.totalNumSubmissions << " submission(s), problem correctly answered. ";
-        else
-          out << theProbData.totalNumSubmissions << " submission(s), problem not correctly answered yet. ";
-      } else if (theProbData.theAnswers.size>1)
-        out << theProbData.totalNumSubmissions << " submission(s), " << theProbData.numCorrectlyAnswered
-        << " out of "<< theProbData.theAnswers.size << " subproblems correctly answered. ";
-      weightPrinted=true;
-    } else if (theProbData.totalNumSubmissions==0)
-      noSubmissionsYet=true;
-    else if (theProbData.numCorrectlyAnswered<theProbData.theAnswers.size)
-    { out << "<span style=\"color:red\"><b> "
-      << theProbData.Points << " out of " << theProbData.ProblemWeight << " point(s). </b></span>";
-      weightPrinted=true;
-    } else if (theProbData.numCorrectlyAnswered==theProbData.theAnswers.size)
-    { out << "<span style=\"color:green\"><b> "
-      << theProbData.Points << " out of " << theProbData.ProblemWeight << " point(s). </b></span>";
-      weightPrinted=true;
-    }
-  } else
-    noSubmissionsYet=true;
-  if (thePoints!="" && noSubmissionsYet)
-  { out << "<span style=\"color:brown\"><b>No submissions: 0 out of " << thePoints
-    << " point(s). </b> </span>" ;
-    weightPrinted=true;
-  }
-  if (!weightPrinted)
-    out << "<span style=\"color:orange\">No point weight assigned yet. </span>";
-  if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
-  { //stOutput << "<hr>this->databaseProblemList is: " << this->databaseProblemList.ToStringCommaDelimited();
-    //stOutput << "<br>this->databaseProblemWeights is: " << this->databaseProblemWeights.ToStringCommaDelimited();
-    //stOutput << "<br> cleanedupLink: " << cleaneduplink;
-    std::string idPoints = "points" + urledProblem;
-    std::string idNumTries= "numTries"+urledProblem;
-    std::string idButtonModifyPoints = "modifyPoints" + urledProblem;
-    std::string idPointsModOutput = "modifyPointsOutputSpan" + urledProblem;
-    out << "Points: <textarea rows=\"1\" cols=\"3\" id=\"" << idPoints << "\">";
-    out << thePoints;
-    out << "</textarea>";
-    out << "<button id=\"" << idButtonModifyPoints << "\" "
-    << "onclick=\"" << "submitStringAsMainInput('" << urledProblem
-    << "='+encodeURIComponent('weight='+  getElementById('" << idPoints << "').value)"
-//    << "  +encodeURIComponent('numTries='+getElementById('"
-    << ", '"
-    << idPointsModOutput << "', 'setProblemData');"
-    << "\""
-    << ">";
-    out << "Modify";
-    out << "</button>";
-    out << "<span id=\"" << idPointsModOutput << "\">" << "</span>";
-  }
-  #endif // MACRO_use_MySQL
-  return out.str();
-}
 
 std::string CalculatorHTML::GetDeadline
 (const std::string& problemName, const std::string& sectionNumber, bool inheritFromGroup, bool& outputIsInherited)
@@ -1842,53 +1722,6 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   return out.str();
 }
 
-void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
-{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateLink");
-  this->NumProblemsFound++;
-  std::string cleaneduplink = this->CleanUpFileName(inputOutput.content);
-  std::string urledProblem=CGI::StringToURLString(cleaneduplink);
-  std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
-//  out << "<span style=\"white-space: nowrap; display= inline-block; width=1200px; overflow-x: scroll;\">";
-//  out << "cleaned up link: " << cleaneduplink;
-//  out << "<br>urled link: " <<  urledProblem;
-  refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation()
-  << "fileName=" << urledProblem << "&";
-  if (theGlobalVariables.UserStudentViewOn())
-  { refStreamNoRequest << "studentView=true&";
-    if (theGlobalVariables.GetWebInput("studentSection")!="")
-      refStreamNoRequest << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
-  }
-  if (this->currentExamHomE!="")
-    refStreamNoRequest << "currentExamHome=" << this->currentExamHomE << "&";
-  if (!theGlobalVariables.UserGuestMode())
-  { refStreamExercise << theGlobalVariables.DisplayNameExecutableWithPath << "?request=exercise&" << refStreamNoRequest.str();
-    refStreamForReal << theGlobalVariables.DisplayNameExecutableWithPath << "?request=scoredQuiz&" << refStreamNoRequest.str();
-  } else
-  { refStreamExercise << theGlobalVariables.DisplayNameExecutableWithPath
-    << "?request=exerciseNoLogin&" << refStreamNoRequest.str();
-  }
-  if (inputOutput.GetTagClass()=="calculatorExamProblem")
-    out << this->InterpretGenerateProblemManagementLink(refStreamForReal, refStreamExercise, cleaneduplink, urledProblem);
-  //else
-  //  out << " <a href=\"" << refStreamExercise.str() << "\">Start</a> ";
-  //if (inputOutput.GetTagClass()=="calculatorExamIntermediate")
-#ifdef MACRO_use_MySQL
-  bool problemAlreadySolved=false;
-  if (this->currentUser.problemNames.Contains(cleaneduplink))
-  { ProblemData& theProbData=this->currentUser.problemData[this->currentUser.problemNames.GetIndex(cleaneduplink)];
-    if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size)
-      problemAlreadySolved=true;
-  }
-  out << this->InterpretGenerateDeadlineLink
-  (inputOutput, cleaneduplink, urledProblem, problemAlreadySolved);
-#endif // MACRO_use_MySQL
-  std::string stringToDisplay = FileOperations::GetFileNameFromFileNameWithPath(inputOutput.content);
-  //out << " " << this->NumProblemsFound << ". "
-  out << stringToDisplay;
-//  out << "</span>";
-  inputOutput.interpretedCommand=out.str();
-}
-
 std::string CalculatorHTML::ToStringInterprettedCommands(Calculator &theInterpreter, List<SyntacticElementHTML> &theElements)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringInterprettedCommands");
   std::stringstream out;
@@ -1896,8 +1729,7 @@ std::string CalculatorHTML::ToStringInterprettedCommands(Calculator &theInterpre
   int commandCounter=theInterpreter.theProgramExpression.size()-1;
   for (int eltCounter=theElements.size-1; eltCounter>0; eltCounter--)
   { SyntacticElementHTML& currentElt=theElements[eltCounter];
-    std::string currentEltString=currentElt.GetTagClass()+ "["+
-    currentElt.content.substr(0,10)+"...]";
+    std::string currentEltString=currentElt.GetTagClass()+ "[" + currentElt.content.substr(0,10) + "...]";
     std::stringstream currentStream;
     if (!currentElt.IsInterpretedByCalculatorDuringProblemGeneration())
     { out << "<tr><td>" << currentEltString << "</td>"

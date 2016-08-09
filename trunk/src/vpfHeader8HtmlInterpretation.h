@@ -29,6 +29,9 @@ public:
 #ifdef MACRO_use_MySQL
   UserCalculator currentUser;
 #endif
+  static std::string stringScoredQuizzes;
+  static std::string stringPractice;
+  static std::string stringProblemLink;
   std::string fileName;
   std::string RelativePhysicalFileNameWithFolder;
   std::string inputHtml;

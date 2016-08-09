@@ -271,27 +271,25 @@ std::string HtmlInterpretation::GetEditPageHTML()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetEditPageHTML");
   std::stringstream out;
   if ((!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights()) &&
-      !theGlobalVariables.flagRunningAsProblemInterpreter
-      )
+      !theGlobalVariables.flagRunningAsProblemInterpreter)
     return "<b>Only logged-in admins are allowed to edit pages. </b>";
   CalculatorHTML theFile;
   theFile.LoadFileNames();
   out << "<html>"
   << "<head>"
   << HtmlSnippets::GetJavascriptStandardCookies()
-//  << CGI::GetLaTeXProcessingJavascript()
-//  << CGI::GetCalculatorStyleSheetWithTags()
+  //  << CGI::GetLaTeXProcessingJavascript()
+  //  << CGI::GetCalculatorStyleSheetWithTags()
   << theFile.GetJavascriptSubmitMainInputIncludeCurrentFile()
-<< "<style type=\"text/css\" media=\"screen\">\n"
-<< "    #editor { \n"
-<< "      height: 400px;\n"
-<< "      font-size: 100%;\n"
-<< "   }\n"
-<< "</style>\n"
-<< "<script src=\"https://cdn.jsdelivr.net/ace/1.2.3/min/ace.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n"
-//  << "<link rel=\"stylesheet\" href=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/styles/default.min.css\">"
-//  << "<script src=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js\"></script>"
-
+  << "<style type=\"text/css\" media=\"screen\">\n"
+  << "    #editor { \n"
+  << "      height: 400px;\n"
+  << "      font-size: 100%;\n"
+  << "   }\n"
+  << "</style>\n"
+  << "<script src=\"https://cdn.jsdelivr.net/ace/1.2.3/min/ace.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n"
+  //  << "<link rel=\"stylesheet\" href=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/styles/default.min.css\">"
+  //  << "<script src=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js\"></script>"
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
   std::stringstream failureStream;
@@ -303,18 +301,18 @@ std::string HtmlInterpretation::GetEditPageHTML()
   if (!theFile.ParseHTML(failureStream))
   { out << "<b>Failed to parse file: " << theFile.fileName << ".</b> Details:<br>" << failureStream.str();
     out << "</body></html>";
-//    return out.str();
+    return out.str();
   }
   std::stringstream buttonStream, submitModPageJS;
   submitModPageJS
-//  << "submitStringAsMainInput(document.getElementById('mainInput').value, 'spanSubmitReport', 'modifyPage');"
-<< "submitStringAsMainInput(editor.getValue(), 'spanSubmitReport', 'modifyPage');"
+  //  << "submitStringAsMainInput(document.getElementById('mainInput').value, 'spanSubmitReport', 'modifyPage');"
+  << "submitStringAsMainInput(editor.getValue(), 'spanSubmitReport', 'modifyPage');"
   ;
   buttonStream
   << "<button "
   << "onclick=\"" << submitModPageJS.str() << "\" >Save changes</button>";
-//  out << "<form>";
-//  out << "<input type=\"submit\" value=\"Save changes\"> ";
+  //  out << "<form>";
+  //  out << "<input type=\"submit\" value=\"Save changes\"> ";
   out << buttonStream.str();
   out << "To include the problem in your problem home page, add the following source code. <br>"
   << "<textarea cols=\"70\", rows=\"3\">"
@@ -324,13 +322,13 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << " You only risk losing your own changes.";
   out << "<br>\n";
   out
-<< "Many thanks to the <a href=\"https://ace.c9.io\">ace editor</a> project. <br>"
-<< "<div id=\"editor\" onkeydown=\"ctrlSPress(event);\" name=\"editor\">"
+  << "Many thanks to the <a href=\"https://ace.c9.io\">ace editor</a> project. <br>"
+  << "<div id=\"editor\" onkeydown=\"ctrlSPress(event);\" name=\"editor\">"
   //<< "<textarea cols=\"150\", rows=\"30\" id=\"mainInput\" name=\"mainInput\" onkeydown=\"ctrlSPress(event);\">"
-;
+  ;
   out
   //<< "</textarea>"
-<< "</div>"
+  << "</div>"
   << "\n<br>\n";
   out << "<script type=\"text/javascript\"> \n"
   << "function ctrlSPress(event){\n"
@@ -344,19 +342,18 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << "</script>\n";
   out << "<script type=\"text/javascript\"> \n"
   //<< " document.getElementById('mainInput').value=decodeURIComponent(\""
-<< " document.getElementById('editor').textContent=decodeURIComponent(\""
+  << " document.getElementById('editor').textContent=decodeURIComponent(\""
   << CGI::StringToURLString(theFile.inputHtml, false)
   << "\");\n"
-<< "    var editor = ace.edit(\"editor\");\n"
-<< "    editor.setTheme(\"ace/theme/chrome\");\n"
-<< "    editor.getSession().setMode(\"ace/mode/xml\");\n"
-
+  << "    var editor = ace.edit(\"editor\");\n"
+  << "    editor.setTheme(\"ace/theme/chrome\");\n"
+  << "    editor.getSession().setMode(\"ace/mode/xml\");\n"
   << "</script>\n";
   out << buttonStream.str();
   out << "<span id=\"spanSubmitReport\"></span><br>";
   out << theFile.ToStringLinkFromFileName(theFile.fileName);
-//  out << "<input type=\"submit\" value=\"Save changes\">";
-//  out << "</form>";
+  //  out << "<input type=\"submit\" value=\"Save changes\">";
+  //  out << "</form>";
   out << "</body></html>";
   return out.str();
 }

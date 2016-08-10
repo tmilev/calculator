@@ -124,6 +124,7 @@ public:
   void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
   bool PrepareClassData(std::stringstream& commentsOnFailure);
   void InterpretManageClass(SyntacticElementHTML& inputOutput);
+  void InterpretTopicList(SyntacticElementHTML& inputOutput);
   std::string ToStringClassDetails
 ( bool adminsOnly,
   const SyntacticElementHTML& inputElement

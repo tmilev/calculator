@@ -245,6 +245,35 @@ std::string HtmlInterpretation::GetExamPageInterpreter()
 
 }
 
+std::string HtmlInterpretation::GetTopicTable()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetTopicTable");
+  std::stringstream out;
+  out << "<html><body>";
+  out << "Not implemented yet.";
+  out << "</body></html>";
+  return out.str();
+}
+
+std::string HtmlInterpretation::GetPageFromTemplate()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetPageFromTemplate");
+  std::stringstream out;
+  CalculatorHTML thePage;
+  std::stringstream comments;
+  thePage.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"));
+  if (! thePage.LoadMe(false, comments))
+  { out << "<html><body><b>Failed to load file: " << theGlobalVariables.GetWebInput("fileName") << ". </b>"
+    << "<br>Comments:<br> " << comments.str() << "</body></html>";
+    return out.str();
+  }
+  if (!thePage.InterpretHtml(comments))
+  { out << "<html><body><b>Failed to interpret file: " << theGlobalVariables.GetWebInput("fileName") << ". </b>"
+    << "<br>Comments:<br> " << comments.str() << "</body></html>";
+    return out.str();
+  }
+  out << "<html>" << thePage.outputHtmlMain << "</html>";
+  return out.str();
+}
+
 std::string HtmlInterpretation::GetExamPage()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetExamPage");
   CalculatorHTML theFile;

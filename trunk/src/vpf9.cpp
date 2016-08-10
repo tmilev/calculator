@@ -996,6 +996,24 @@ void MathRoutines::StringSplitExcludeDelimiter
   MathRoutines::StringSplitExcludeDelimiters(inputString, tempList, output);
 }
 
+std::string MathRoutines::StringTrimWhiteSpace(const std::string& inputString)
+{ std::string result;
+  MathRoutines:StringTrimWhiteSpace(inputString, result);
+  return result;
+}
+
+void MathRoutines::StringTrimWhiteSpace(const std::string& inputString, std::string& output)
+{ std::stringstream out;
+  output="";
+  output.reserve(inputString.size());
+  unsigned i=0;
+  for (i=0; i<inputString.size(); i++)
+    if (inputString[i]==' ')
+      break;
+  output=inputString.substr(i, std::string::npos);
+}
+
+
 void MathRoutines::StringSplitExcludeDelimiters
 (const std::string& inputString, const List<unsigned char>& delimiters, List<std::string>& output)
 { MacroRegisterFunctionWithName("MathRoutines::StringSplit");

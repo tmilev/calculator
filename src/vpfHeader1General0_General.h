@@ -234,6 +234,8 @@ public:
   static char ConvertHumanReadableHexToCharValue(char input);
   static void StringSplitExcludeDelimiter(const std::string& inputString, unsigned char delimiter, List<std::string>& output);
   static void StringSplitExcludeDelimiters(const std::string& inputString, const List<unsigned char>& delimiters, List<std::string>& output);
+  static void StringTrimWhiteSpace(const std::string& inputString, std::string& output);
+  static std::string StringTrimWhiteSpace(const std::string& inputString);
   static void SplitStringInTwo(const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond);
   static void NChooseK(int n, int k, LargeInt& result);
   static int NChooseK(int n, int k);

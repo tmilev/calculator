@@ -16,7 +16,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->FigureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before after loading problem list");
-  out << this->GetJavascriptSubmitMainInputIncludeCurrentFile();
+  if (!theGlobalVariables.flagRunningAceWebserver)
+    out << this->GetJavascriptSubmitMainInputIncludeCurrentFile();
 //  else
 //    out << " no date picker";
   theInterpreter.flagWriteLatexPlots=false;
@@ -488,4 +489,8 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   out << stringToDisplay;
 //  out << "</span>";
   inputOutput.interpretedCommand=out.str();
+}
+
+void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
+{
 }

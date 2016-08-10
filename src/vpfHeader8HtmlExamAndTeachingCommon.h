@@ -298,8 +298,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
   std::fstream theFile;
   if (!FileOperations::OpenFileVirtual(theFile, this->RelativePhysicalFileNameWithFolder, false, false, false))
   { std::string theFileName;
-    FileOperations::GetPhysicalFileNameFromVirtual
-    ( this->RelativePhysicalFileNameWithFolder, theFileName);
+    FileOperations::GetPhysicalFileNameFromVirtual(this->RelativePhysicalFileNameWithFolder, theFileName);
     comments << "<b>Failed to open:<br>\n"
     << this->RelativePhysicalFileNameWithFolder << "<br>computed file name: <br>"
     << theFileName
@@ -768,8 +767,10 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator()
   if (this->syntacticRole!="command")
     return false;
   std::string tagClass=this->GetKeyValue("class");
-  return tagClass=="calculatorExamProblem" || tagClass== "calculatorExamIntermediate" ||
+  return
+  tagClass=="calculatorExamProblem" || tagClass== "calculatorExamIntermediate" ||
   tagClass=="calculatorAnswer" || tagClass=="calculatorManageClass" ||
+  tagClass=="generateTopicTable" ||
   this->IsAnswerElement(0)
   ;
 }
@@ -1497,6 +1498,8 @@ void CalculatorHTML::InterpretNotByCalculator(SyntacticElementHTML& inputOutput)
     this->InterpretGenerateStudentAnswerButton(inputOutput);
   else if (tagClass=="calculatorManageClass")
     this->InterpretManageClass(inputOutput);
+  else if (tagClass=="generateTopicTable")
+    this->InterpretTopicList(inputOutput);
 }
 
 std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink)
@@ -2012,6 +2015,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     this->calculatorClasses.AddOnTop("calculatorManageClass");
     this->calculatorClasses.AddOnTop("setCalculatorExamProblem");
     this->calculatorClasses.AddOnTop("setCalculatorExamHome");
+    this->calculatorClasses.AddOnTop("generateTopicTable");
     this->calculatorClasses.AddListOnTop(this->calculatorClassesAnswerFields);
   }
   this->eltsStack.SetSize(0);
@@ -2129,6 +2133,13 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     { eltsStack.RemoveLastObject();
       continue;
     }
+    if (thirdToLast.syntacticRole=="<openTag" && secondToLast.syntacticRole=="" && last.syntacticRole=="" &&
+        secondToLast!="=" && secondToLast!="\"" && last!="=" && last!="\"")
+    { thirdToLast.tagKeysWithoutValue.AddOnTop(secondToLast.content);
+      eltsStack[eltsStack.size-2]=*eltsStack.LastObject();
+      eltsStack.RemoveLastObject();
+      continue;
+    }
     if (this->CanBeMerged(secondToLast, last))
     { secondToLast.content+=last.content;
       eltsStack.RemoveLastObject();
@@ -2228,6 +2239,8 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       this->theContent.AddOnTop(eltsStack[i]);
     }
   }
+  if (!result)
+    comments << "<hr>Parsing stack.<hr>" << this->ToStringParsingStack(this->eltsStack);
   if (!this->ParseHTMLComputeChildFiles(comments))
     result=false;
   if (result)

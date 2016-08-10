@@ -18,6 +18,8 @@ public:
   static std::string GetProblemSolution();
   static std::string GetEditPageHTML();
   static std::string GetExamPage();
+  static std::string GetPageFromTemplate();
+  static std::string GetTopicTable();
   static std::string GetExamPageInterpreter();
   static std::string GetAnswerOnGiveUp();
   static std::string SubmitProblemPreview();

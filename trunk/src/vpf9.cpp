@@ -583,6 +583,7 @@ FileOperations::FolderVirtualLinks()
     result.SetKeyValue("html/", "../public_html/");
     result.SetKeyValue("html-common/", "html-common/");
     result.SetKeyValue("LogFiles/", "LogFiles/");
+    result.SetKeyValue("crashes/", "LogFiles/crashes/");
   }
   return result;
 }
@@ -655,6 +656,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(const std::string& inputFile
 bool FileOperations::OpenFileCreateIfNotPresentVirtual
 (std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
 { std::string computedFileName;
+  //USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
   if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName))
     return false;
   return FileOperations::OpenFileCreateIfNotPresentUnsecure
@@ -663,6 +665,7 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtual
 
 bool FileOperations::OpenFileCreateIfNotPresentUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
 { //  std::cout << "DEBUG: opening file " << theFileName << "\n";
+  //USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
   if (OpenInAppendMode)
   { if (openAsBinary)
       theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app|std::fstream::binary);

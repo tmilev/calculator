@@ -265,12 +265,20 @@ std::string HtmlInterpretation::GetPageFromTemplate()
     << "<br>Comments:<br> " << comments.str() << "</body></html>";
     return out.str();
   }
+
   if (!thePage.InterpretHtml(comments))
   { out << "<html><body><b>Failed to interpret file: " << theGlobalVariables.GetWebInput("fileName") << ". </b>"
     << "<br>Comments:<br> " << comments.str() << "</body></html>";
     return out.str();
   }
-  out << "<html>" << thePage.outputHtmlMain << "</html>";
+  out << "<html>";
+  out << "<head>" << HtmlSnippets::GetJavascriptStandardCookies()
+//  << "<scipt type=\"text/javascript\">"
+//  << "loadSettings();"
+//  << "</script>"
+  << "</head>";
+  out << thePage.outputHtmlMain;
+  out << "</html>";
   return out.str();
 }
 

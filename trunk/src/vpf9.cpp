@@ -998,7 +998,7 @@ void MathRoutines::StringSplitExcludeDelimiter
 
 std::string MathRoutines::StringTrimWhiteSpace(const std::string& inputString)
 { std::string result;
-  MathRoutines:StringTrimWhiteSpace(inputString, result);
+  MathRoutines::StringTrimWhiteSpace(inputString, result);
   return result;
 }
 
@@ -1008,7 +1008,7 @@ void MathRoutines::StringTrimWhiteSpace(const std::string& inputString, std::str
   output.reserve(inputString.size());
   unsigned i=0;
   for (i=0; i<inputString.size(); i++)
-    if (inputString[i]==' ')
+    if (inputString[i]!=' ')
       break;
   output=inputString.substr(i, std::string::npos);
 }

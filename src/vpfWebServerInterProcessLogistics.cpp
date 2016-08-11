@@ -74,8 +74,9 @@ void PauseController::PauseIfRequested()
   if (this->CheckPauseIsRequested())
     logBlock << logger::blue << "Blocking on " << this->ToString() << logger::endL;
   bool pauseWasRequested= !((read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size))>0);
+  int numWrites=0;
   if (!pauseWasRequested)
-    write(this->thePausePipe[1], "!", 1);
+    Pipe::WriteNoInterrupts(this->thePausePipe[1], "!");
 }
 
 bool PauseController::PauseIfRequestedWithTimeOut()
@@ -417,7 +418,7 @@ void Pipe::Read()
 }
 
 logger::logger(const std::string& logFileName )
-{ FileOperations::OpenFileCreateIfNotPresentUnsecure(theFile, logFileName, false, true, false);
+{ FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, logFileName, false, true, false);
   this->currentColor=logger::normalColor;
   this->flagStopWritingToFile=false;
   this->MaxLogSize=50000000;

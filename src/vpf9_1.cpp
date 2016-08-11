@@ -54,7 +54,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
   if (!theGlobalVariables.flagNotAllocated)
   { std::fstream theFile;
     bool succeededToOpen=FileOperations::OpenFileCreateIfNotPresentVirtual
-    (theFile, "output/"+theGlobalVariables.RelativePhysicalNameCrashLog, false, true, false);
+    (theFile, "crashes/"+theGlobalVariables.RelativePhysicalNameCrashLog, false, true, false);
     if (succeededToOpen)
       stOutput << "<hr>Crash dumped in file " << theGlobalVariables.RelativePhysicalNameCrashLog << " located inside the output folder.";
     else

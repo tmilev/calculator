@@ -21,14 +21,14 @@ std::string GetDateForLogFiles()
   return tempDate;
 }
 
-logger theLog( "./../output/LogFiles/LogStandard"+GetDateForLogFiles()+".html");
-logger logBlock( "./../output/LogFiles/LogBlockingEvents"+GetDateForLogFiles()+".html");
-logger logIO( "./../output/LogFiles/LogIOErrorsEvents"+GetDateForLogFiles()+".html");
-logger logProcessKills( "./../output/LogFiles/LogMultiprocessing"+GetDateForLogFiles()+".html");
-logger logPlumbing( "./../output/LogFiles/LogServerPlumbing"+GetDateForLogFiles()+".html");
-logger logSocketAccept( "./../output/LogFiles/LogSocketAccept"+GetDateForLogFiles()+".html");
-logger logProcessStats( "./../output/LogFiles/LogWorkerProcessStats"+GetDateForLogFiles()+".html");
-logger logOpenSSL( "./../output/LogFiles/LogOpenSSL"+GetDateForLogFiles()+".html");
+logger theLog("LogFiles/LogStandard"+GetDateForLogFiles()+".html");
+logger logBlock( "LogFiles/LogBlockingEvents"+GetDateForLogFiles()+".html");
+logger logIO( "LogFiles/LogIOErrorsEvents"+GetDateForLogFiles()+".html");
+logger logProcessKills( "LogFiles/LogMultiprocessing"+GetDateForLogFiles()+".html");
+logger logPlumbing( "LogFiles/LogServerPlumbing"+GetDateForLogFiles()+".html");
+logger logSocketAccept( "LogFiles/LogSocketAccept"+GetDateForLogFiles()+".html");
+logger logProcessStats( "LogFiles/LogWorkerProcessStats"+GetDateForLogFiles()+".html");
+logger logOpenSSL( "LogFiles/LogOpenSSL"+GetDateForLogFiles()+".html");
 Calculator theParser;
 FormatExpressions consoleFormat;
 Crasher crash;

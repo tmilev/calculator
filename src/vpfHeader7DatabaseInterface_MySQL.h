@@ -87,7 +87,8 @@ public:
   std::string GetKeyValue(const std::string& theKey)const;
   void SetKeyValue(const std::string& theKey, const std::string& theValue);
   void resetAllExceptContent();
-  std::string ToStringInterpreted();
+  std::string ToStringInterpretedBody();
+  std::string ToStringInterpretedHead();
   std::string ToStringTagAndContent();
   std::string ToStringOpenTag(bool immediatelyClose=false);
   std::string ToStringCloseTag();

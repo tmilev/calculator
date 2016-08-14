@@ -28,6 +28,9 @@ CalculatorHTML::CalculatorHTML()
   this->flagIsForReal=false;
   this->flagLoadedFromDB=false;
   this->flagLoadedClassDataSuccessfully=false;
+  this->flagTagHeadPresent=false;
+  this->flagTagHtmlPresent=false;
+  this->flagTagBodyPresent=false;
   this->timeToParseHtml=0;
 }
 
@@ -365,15 +368,11 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
 
   if (!theGlobalVariables.flagRunningAsProblemInterpreter)
     out << "<nav>"
-    << this->outputHtmlNavigation
+    << this->outputHtmlNavigatioN
     << linkBigSeparator << "<small>Generated in "
     << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds()-startTime)
     << " second(s).</small>" << "</nav> ";
-  out
-  //<< "<section>"
-  << this->outputHtmlMain
-  //<< "</section>"
-  ;
+  out << this->outputHtmlBodyNoTag;
   return out.str();
 }
 
@@ -616,9 +615,8 @@ bool CalculatorHtmlFunctions::innerInterpretProblem
   theProblem.theProblemData.randomSeed=theCommands.theObjectContainer.CurrentRandomSeed;
   theProblem.InterpretHtml(theCommands.Comments);
   std::stringstream out;
-  out << theProblem.outputHtmlMain;
-  out << "<hr>Time to parse html: " << std::fixed
-  << theProblem.timeToParseHtml << " second(s). ";
+  out << theProblem.outputHtmlBodyNoTag;
+  out << "<hr>Time to parse html: " << std::fixed << theProblem.timeToParseHtml << " second(s). ";
   out << "<br>Intermediate interpretation times (per attempt): ";
   for (int i=0; i<theProblem.timeIntermediatePerAttempt.size; i++)
     for (int j=0; j<theProblem.timeIntermediateComments[i].size; j++ )
@@ -741,7 +739,7 @@ void SyntacticElementHTML::SetKeyValue(const std::string& theKey, const std::str
   this->tagValues[theIndex]=theValue;
 }
 
-std::string SyntacticElementHTML::ToStringInterpreted()
+std::string SyntacticElementHTML::ToStringInterpretedBody()
 { if (this->syntacticRole=="")
     return this->content;
   if (this->IsInterpretedNotByCalculator())
@@ -771,6 +769,9 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator()
   tagClass=="calculatorExamProblem" || tagClass== "calculatorExamIntermediate" ||
   tagClass=="calculatorAnswer" || tagClass=="calculatorManageClass" ||
   tagClass=="generateTopicTable" ||
+//  tagClass=="htmlStart" || tagClass=="htmlFinish" ||
+//  tagClass=="bodyStart" || tagClass=="bodyFinish" ||
+//  tagClass=="headStart" || tagClass=="headFinish" ||
   this->IsAnswerElement(0)
   ;
 }
@@ -1849,7 +1850,7 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretHtml");
   double startTime=theGlobalVariables.GetElapsedSeconds();
   if (!this->ParseHTML(comments))
-  { this->outputHtmlMain="<b>Failed to interpret html input. </b><br>" +this->ToStringContent();
+  { this->outputHtmlBodyNoTag="<b>Failed to interpret html input. </b><br>" +this->ToStringContent();
     this->timeToParseHtml=theGlobalVariables.GetElapsedSeconds()-startTime;
     return false;
   }
@@ -1885,7 +1886,7 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
       << " attempts made. Calculator evaluation details follow.<hr> "
       << theInterpreter.outputString << "<hr><b>Comments</b><br>"
       << theInterpreter.Comments.str();
-      this->outputHtmlMain=out.str();
+      this->outputHtmlBodyNoTag=out.str();
       return false;
     }
   }
@@ -2019,9 +2020,12 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     this->calculatorClasses.AddListOnTop(this->calculatorClassesAnswerFields);
   }
   this->eltsStack.SetSize(0);
-  SyntacticElementHTML dummyElt;
+  SyntacticElementHTML dummyElt, tempElt;
   dummyElt.content="<>";
   dummyElt.syntacticRole="filler";
+  tempElt.syntacticRole="command";
+  tempElt.tag="";
+  tempElt.content="";
   eltsStack.SetExpectedSize(theElements.size+SyntacticElementHTML::ParsingNumDummyElements);
   for (int i=0; i<SyntacticElementHTML::ParsingNumDummyElements; i++)
     eltsStack.AddOnTop(dummyElt);
@@ -2029,6 +2033,9 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   bool reduced=false;
   this->flagIsExamProblem=false;
   this->flagIsExamHome=false;
+  this->flagTagHeadPresent=false;
+  this->flagTagBodyPresent=false;
+  this->flagTagHtmlPresent=false;
   std::string tagClass;
   do
   { if (!reduced)
@@ -2061,8 +2068,24 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
         thirdToLast.syntacticRole="command";
       else
       { thirdToLast.content=thirdToLast.ToStringOpenTag(true);
-        thirdToLast.resetAllExceptContent();
-        //stOutput << "<hr>Rule 1: processed " << thirdToLast.ToStringOpenTag(true) << "<hr>";
+        std::string& lastTag=thirdToLast.tag;
+        if (lastTag=="head" || lastTag=="HEAD" || lastTag=="Head")
+        { thirdToLast.resetAllExceptContent();
+          thirdToLast.SetKeyValue("class", "headStart");
+          thirdToLast.syntacticRole="command";
+          this->flagTagHeadPresent=true;
+        } else if (lastTag=="body" || lastTag=="BODY" || lastTag=="Body")
+        { thirdToLast.resetAllExceptContent();
+          thirdToLast.SetKeyValue("class", "bodyStart");
+          thirdToLast.syntacticRole="command";
+          this->flagTagBodyPresent=true;
+        } else if (lastTag=="html" || lastTag=="HTML" || lastTag=="html")
+        { thirdToLast.resetAllExceptContent();
+          thirdToLast.SetKeyValue("class", "htmlStart");
+          thirdToLast.syntacticRole="command";
+          this->flagTagHtmlPresent=true;
+        } else
+          thirdToLast.resetAllExceptContent();
       }
       eltsStack.RemoveLastObject();
       eltsStack.RemoveLastObject();
@@ -2072,7 +2095,17 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     }
     if (last.syntacticRole=="</closeTag>")
     { last.content=last.ToStringCloseTag();
-      last.resetAllExceptContent();
+      if (last.tag=="head" || last.tag=="HEAD" || last.tag=="Head")
+      { last.SetKeyValue("class", "headFinish");
+        last.syntacticRole="command";
+      } else if (last.tag=="body" || last.tag=="BODY" || last.tag=="Body")
+      { tempElt.SetKeyValue("class", "bodyFinish");
+        last.syntacticRole="command";
+      } else if (last.tag=="html" || last.tag=="HTML" || last.tag=="Html")
+      { tempElt.SetKeyValue("class", "htmlFinish");
+        last.syntacticRole="command";
+      } else
+        last.resetAllExceptContent();
       continue;
     }
     if (thirdToLast.syntacticRole=="<openTagCalc>" && secondToLast=="<" && last=="/")
@@ -2099,6 +2132,12 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     if (secondToLast.syntacticRole=="<" && last!="/")
     { secondToLast.syntacticRole="<openTag";
       secondToLast.tag=last.content;
+/*      if (secondToLast.tag=="Head" || secondToLast.tag=="head" || secondToLast.tag=="HEAD")
+        this->flagTagHeadPresent=true;
+      if (secondToLast.tag=="body" || secondToLast.tag=="BODY" || secondToLast.tag=="Body")
+        this->flagTagBodyPresent=true;
+      if (secondToLast.tag=="html" || secondToLast.tag=="HTML" || secondToLast.tag=="Html")
+        this->flagTagHtmlPresent=true;*/
       secondToLast.content="";
       eltsStack.RemoveLastObject();
       continue;
@@ -2154,7 +2193,6 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       //stOutput << "<hr>Rule 2: processed " << thirdToLast.ToStringOpenTag(true) << "<hr>";
       continue;
     }
-
     if (sixthToLast.syntacticRole=="<openTag" && fourthToLast=="=" && thirdToLast=="\""
         && last!="\"" )
     { if (last.syntacticRole!="" && last.content=="")

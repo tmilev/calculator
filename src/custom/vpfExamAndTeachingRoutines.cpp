@@ -81,7 +81,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   //first command and first syntactic element are the random seed and are ignored.
   if (!this->ProcessInterprettedCommands(theInterpreter, this->theContent, comments))
   { out << comments.str();
-    this->outputHtmlMain=out.str();
+    this->outputHtmlBodyNoTag=out.str();
     return false;
   }
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
@@ -101,7 +101,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->InterpretAnswerElements(comments);
   for (int i=0; i<this->theContent.size; i++)
     if (!this->theContent[i].IsHidden())
-      out << this->theContent[i].ToStringInterpreted();
+      out << this->theContent[i].ToStringInterpretedBody();
   for (int i=0; i<this->theProblemData.theAnswers.size; i++)
     out << this->theProblemData.theAnswers[i].htmlMQjavascript;
   ////////////////////////////////////////////////////////////////////
@@ -151,8 +151,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   //out << "Current collection problems: " << this->databaseProblemList.ToStringCommaDelimited()
   //<< " with weights: " << this->databaseProblemWeights.ToStringCommaDelimited();
 #endif // MACRO_use_MySQL
-  this->outputHtmlNavigation=this->ToStringProblemNavigation();
-  this->outputHtmlMain=out.str();
+  this->outputHtmlNavigatioN=this->ToStringProblemNavigation();
+  this->outputHtmlBodyNoTag=out.str();
   return true;
 }
 

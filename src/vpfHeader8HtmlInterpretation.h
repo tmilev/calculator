@@ -104,6 +104,8 @@ public:
   bool PrepareCommandsGenerateProblem(std::stringstream& comments);
   std::string ProcessAnswerGiveUp();
   std::string GetProblemHeaderEnclosure();
+  void SetTagClassFromTag(SyntacticElementHTML& output, bool isClosing);
+
   bool PrepareCommands(std::stringstream& comments);
   std::string CleanUpCommandString(const std::string& inputCommand);
   void InterpretNotByCalculator(SyntacticElementHTML& inputOutput);

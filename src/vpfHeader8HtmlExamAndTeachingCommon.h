@@ -1965,6 +1965,33 @@ bool CalculatorHTML::ParseHTMLComputeChildFiles(std::stringstream& comments)
   return result;
 }
 
+void CalculatorHTML::SetTagClassFromTag(SyntacticElementHTML& output, bool isClosing)
+{ MacroRegisterFunctionWithName("CalculatorHTML::SetTagClassFromTag");
+  std::string& lastTag=output.tag;
+  if (lastTag=="head" || lastTag=="HEAD" || lastTag=="Head")
+  { if (isClosing)
+      output.SetKeyValue("class", "headFinish");
+    else
+      output.SetKeyValue("class", "headStart");
+    //output.syntacticRole="command";
+    this->flagTagHeadPresent=true;
+  } else if (lastTag=="body" || lastTag=="BODY" || lastTag=="Body")
+  { if (isClosing)
+      output.SetKeyValue("class", "bodyFinish");
+    else
+      output.SetKeyValue("class", "bodyStart");
+    //output.syntacticRole="command";
+    this->flagTagBodyPresent=true;
+  } else if (lastTag=="html" || lastTag=="HTML" || lastTag=="html")
+  { if (isClosing)
+      output.SetKeyValue("class", "htmlFinish");
+    else
+      output.SetKeyValue("class", "htmlStart");
+    //output.syntacticRole="command";
+    this->flagTagHtmlPresent=true;
+  }
+}
+
 bool CalculatorHTML::ParseHTML(std::stringstream& comments)
 { MacroRegisterFunctionWithName("Problem::ParseHTML");
   std::stringstream theReader(this->inputHtml);
@@ -2043,7 +2070,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       if (indexInElts<theElements.size)
         eltsStack.AddOnTop(theElements[indexInElts]);
     }
-    //stOutput << "<br>" << this->ToStringParsingStack(eltsStack);
+//    stOutput << "<br>" << this->ToStringParsingStack(eltsStack);
     reduced=true;
     SyntacticElementHTML& last         = eltsStack[eltsStack.size-1];
     SyntacticElementHTML& secondToLast = eltsStack[eltsStack.size-2];
@@ -2068,24 +2095,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
         thirdToLast.syntacticRole="command";
       else
       { thirdToLast.content=thirdToLast.ToStringOpenTag(true);
-        std::string& lastTag=thirdToLast.tag;
-        if (lastTag=="head" || lastTag=="HEAD" || lastTag=="Head")
-        { thirdToLast.resetAllExceptContent();
-          thirdToLast.SetKeyValue("class", "headStart");
-          thirdToLast.syntacticRole="command";
-          this->flagTagHeadPresent=true;
-        } else if (lastTag=="body" || lastTag=="BODY" || lastTag=="Body")
-        { thirdToLast.resetAllExceptContent();
-          thirdToLast.SetKeyValue("class", "bodyStart");
-          thirdToLast.syntacticRole="command";
-          this->flagTagBodyPresent=true;
-        } else if (lastTag=="html" || lastTag=="HTML" || lastTag=="html")
-        { thirdToLast.resetAllExceptContent();
-          thirdToLast.SetKeyValue("class", "htmlStart");
-          thirdToLast.syntacticRole="command";
-          this->flagTagHtmlPresent=true;
-        } else
-          thirdToLast.resetAllExceptContent();
+        thirdToLast.resetAllExceptContent();
       }
       eltsStack.RemoveLastObject();
       eltsStack.RemoveLastObject();
@@ -2095,17 +2105,8 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     }
     if (last.syntacticRole=="</closeTag>")
     { last.content=last.ToStringCloseTag();
-      if (last.tag=="head" || last.tag=="HEAD" || last.tag=="Head")
-      { last.SetKeyValue("class", "headFinish");
-        last.syntacticRole="command";
-      } else if (last.tag=="body" || last.tag=="BODY" || last.tag=="Body")
-      { tempElt.SetKeyValue("class", "bodyFinish");
-        last.syntacticRole="command";
-      } else if (last.tag=="html" || last.tag=="HTML" || last.tag=="Html")
-      { tempElt.SetKeyValue("class", "htmlFinish");
-        last.syntacticRole="command";
-      } else
-        last.resetAllExceptContent();
+      last.resetAllExceptContent();
+      //this->SetTagClassFromTag(last, true);
       continue;
     }
     if (thirdToLast.syntacticRole=="<openTagCalc>" && secondToLast=="<" && last=="/")
@@ -2130,16 +2131,11 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       continue;
     }
     if (secondToLast.syntacticRole=="<" && last!="/")
-    { secondToLast.syntacticRole="<openTag";
-      secondToLast.tag=last.content;
-/*      if (secondToLast.tag=="Head" || secondToLast.tag=="head" || secondToLast.tag=="HEAD")
-        this->flagTagHeadPresent=true;
-      if (secondToLast.tag=="body" || secondToLast.tag=="BODY" || secondToLast.tag=="Body")
-        this->flagTagBodyPresent=true;
-      if (secondToLast.tag=="html" || secondToLast.tag=="HTML" || secondToLast.tag=="Html")
-        this->flagTagHtmlPresent=true;*/
+    { secondToLast.tag=last.content;
+      secondToLast.syntacticRole="<openTag";
       secondToLast.content="";
       eltsStack.RemoveLastObject();
+      this->SetTagClassFromTag(secondToLast, false);
       continue;
     }
     if (secondToLast.syntacticRole=="" && secondToLast!="\"" && last=="/")

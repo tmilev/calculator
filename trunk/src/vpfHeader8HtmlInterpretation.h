@@ -22,6 +22,9 @@ public:
   bool flagParentInvestigated;
   bool flagIsForReal;
   bool flagLoadedFromDB;
+  bool flagTagHtmlPresent;
+  bool flagTagHeadPresent;
+  bool flagTagBodyPresent;
   double timeToParseHtml;
   List<double> timePerAttempt;
   List<List<double> > timeIntermediatePerAttempt;
@@ -35,8 +38,10 @@ public:
   std::string fileName;
   std::string RelativePhysicalFileNameWithFolder;
   std::string inputHtml;
-  std::string outputHtmlMain;
-  std::string outputHtmlNavigation;
+
+  std::string outputHtmlBodyNoTag;
+  std::string outputHtmlHeadNoTag;
+  std::string outputHtmlNavigatioN;
   std::string currentExamHomE;
   std::string logCommandsProblemGeneration;
   static const std::string BugsGenericMessage;

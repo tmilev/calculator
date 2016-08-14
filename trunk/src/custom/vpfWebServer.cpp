@@ -3080,7 +3080,7 @@ int WebServer::Run()
         logOpenSSL << logger::green << "ssl success #: " << this->NumConnectionsSoFar << ". " << logger::endL;
       //  this->Release(theListeningSocket);//worker has no access to socket listener
       /////////////////////////////////////////////////////////////////////////
-      // stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;
+      stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;
       // stOutput.flushOutputFunction=this->FlushActiveWorker;
       // theLog << this->ToStringStatusActive() << logger::endL;
       this->GetActiveWorker().CheckConsistency();
@@ -3333,4 +3333,110 @@ std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
   if (theGlobalVariables.flagUsingBuiltInWebServer)
     out << theWebServer.GetActiveWorker().ToStringMessageUnsafe();
   return out.str();
+}
+
+void WebWorker::SendAllBytes()
+{ MacroRegisterFunctionWithName("WebWorker::SendAllBytes");
+  if (theGlobalVariables.flagUsingSSLinCurrentConnection)
+  { this->SendAllBytesHttpSSL();
+    return;
+  }
+  this->SendAllBytesHttp();
+}
+
+void WebWorker::QueueBytesForSending(const List<char>& bytesToSend, bool MustSendAll)
+{ MacroRegisterFunctionWithName("WebWorker::QueueBytesForSending");
+  this->remainingBytesToSend.AddListOnTop(bytesToSend);
+  if (this->remainingBytesToSend.size>=1024*512 || MustSendAll)
+    this->SendAllBytes();
+}
+
+void WebWorker::QueueStringForSending(const std::string& stringToSend, bool MustSendAll)
+{ MacroRegisterFunctionWithName("WebWorker::SendStringToSocket");
+  int oldSize=this->remainingBytesToSend.size;
+  this->remainingBytesToSend.SetSize(this->remainingBytesToSend.size+stringToSend.size());
+  for (unsigned i=0; i<stringToSend.size(); i++)
+    this->remainingBytesToSend[i+oldSize]=stringToSend[i];
+//  if (stringToSend.size()>0)
+//    if (stringToSend[stringToSend.size()-1]=='\0')
+//      theLog << "WARNING: string is null terminated!\r\n";
+//    theLog << "Last character string: " << *this->remainingBytesToSend.LastObject() << "\r\n";
+  if (this->remainingBytesToSend.size>=1024*512 || MustSendAll)
+    this->SendAllBytes();
+}
+
+void WebWorker::SendAllBytesHttp()
+{ if (this->remainingBytesToSend.size==0)
+    return;
+  MacroRegisterFunctionWithName("WebWorker::SendAllBytesHttp");
+  this->CheckConsistency();
+  ProgressReportWebServer theReport;
+  theReport.SetStatus("WebWorker::SendAllBytes: starting ...");
+  if (this->connectedSocketID==-1)
+  { theLog << logger::red << "Socket::SendAllBytes failed: connectedSocketID=-1." << logger::endL;
+    theReport.SetStatus("Socket::SendAllBytes failed: connectedSocketID=-1. WebWorker::SendAllBytes - finished.");
+    return;
+  }
+  theLog << "Sending " << this->remainingBytesToSend.size << " bytes in chunks of: ";
+  theLog.flush();
+  std::stringstream reportStream;
+  ProgressReportWebServer theReport2;
+  reportStream << "Sending " << this->remainingBytesToSend.size << " bytes...";
+  theReport.SetStatus(reportStream.str());
+  //  theLog << "\r\nIn response to: " << this->theMessage;
+  double startTime=theGlobalVariables.GetElapsedSeconds();
+  struct timeval tv; //<- code involving tv taken from stackexchange
+  tv.tv_sec = 5;  // 5 Secs Timeout
+  tv.tv_usec = 0;  // Not init'ing this can cause strange errors
+  int numTimesRunWithoutSending=0;
+  int timeOutInSeconds =20;
+  setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO,(void*)(&tv), sizeof(timeval));
+  while (this->remainingBytesToSend.size>0)
+  { std::stringstream reportStream2;
+    reportStream2 << this->remainingBytesToSend.size << " bytes remaining to send. ";
+    if (numTimesRunWithoutSending>0)
+      reportStream2 << "Previous attempt to send bytes resulted in 0 bytes sent; this is attempt number "
+      << numTimesRunWithoutSending+1 << ". ";
+    theReport2.SetStatus(reportStream2.str());
+    if (theGlobalVariables.GetElapsedSeconds()-startTime>timeOutInSeconds)
+    { theLog << "WebWorker::SendAllBytes failed: more than " << timeOutInSeconds << " seconds have elapsed. "
+      << logger::endL;
+      std::stringstream reportStream3;
+      reportStream3 << "WebWorker::SendAllBytes failed: more than "
+      << timeOutInSeconds << " seconds have elapsed. Continuing ...";
+      theReport.SetStatus(reportStream3.str());
+      return;
+    }
+    int numBytesSent=send
+    (this->connectedSocketID, &this->remainingBytesToSend[0], this->remainingBytesToSend.size,0);
+    if (numBytesSent<0)
+    { if (errno==EAGAIN || errno ==EWOULDBLOCK || errno== EINTR || errno==EIO )
+      logIO << "WebWorker::SendAllBytes failed. Error: "
+      << this->parent->ToStringLastErrorDescription() << logger::endL;
+      theReport.SetStatus
+      ("WebWorker::SendAllBytes failed. Error: " + this->parent->ToStringLastErrorDescription()
+       + "WebWorker::SendAllBytes - continue ...");
+      return;
+    }
+    if (numBytesSent==0)
+      numTimesRunWithoutSending++;
+    else
+      numTimesRunWithoutSending=0;
+    theLog << numBytesSent;
+    this->remainingBytesToSend.Slice(numBytesSent, this->remainingBytesToSend.size-numBytesSent);
+    if (this->remainingBytesToSend.size>0)
+      theLog << ", ";
+    if (numTimesRunWithoutSending>3)
+    { theLog << "WebWorker::SendAllBytes failed: send function went through 3 cycles without "
+      << " sending any bytes. "
+      << logger::endL;
+      theReport.SetStatus
+      ("WebWorker::SendAllBytes failed: send function went through 3 cycles without sending any bytes. ");
+      return;
+    }
+    theLog << logger::endL;
+  }
+  reportStream << " done. ";
+  theReport2.SetStatus(reportStream.str());
+  theReport.SetStatus("WebWorker::SendAllBytes - finished.");
 }

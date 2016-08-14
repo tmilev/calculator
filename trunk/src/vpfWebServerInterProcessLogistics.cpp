@@ -74,7 +74,6 @@ void PauseController::PauseIfRequested()
   if (this->CheckPauseIsRequested())
     logBlock << logger::blue << "Blocking on " << this->ToString() << logger::endL;
   bool pauseWasRequested= !((read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size))>0);
-  int numWrites=0;
   if (!pauseWasRequested)
     Pipe::WriteNoInterrupts(this->thePausePipe[1], "!");
 }

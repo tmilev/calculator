@@ -271,14 +271,14 @@ std::string HtmlInterpretation::GetPageFromTemplate()
     << "<br>Comments:<br> " << comments.str() << "</body></html>";
     return out.str();
   }
-  out << "<html><!-- tag added automatically; user-specified html tag ignored-->";
-  out << "<head><!-- tag added automatically; user-specified head tag ignored-->";
+  out << "<html><!-- tag added automatically; user-specified html tag ignored-->\n";
+  out << "<head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << thePage.outputHtmlHeadNoTag;
-  out << "</head><!-- tag added automatically; user-specified head tag ignored-->";
-  out << "<body onload=\"loadSettings();\"><!-- tag added automatically; user-specified body tag ignored-->";
+  out << "</head><!-- tag added automatically; user-specified head tag ignored-->\n";
+  out << "<body onload=\"loadSettings();\"><!-- tag added automatically; user-specified body tag ignored-->\n";
   out << thePage.outputHtmlBodyNoTag;
-  out << "</body><!-- tag added automatically; user-specified body tag ignored-->";
-  out << "</html><!-- tag added automatically; user-specified html tag ignored-->";
+  out << "</body><!-- tag added automatically; user-specified body tag ignored-->\n";
+  out << "</html><!-- tag added automatically; user-specified html tag ignored-->\n";
   return out.str();
 }
 

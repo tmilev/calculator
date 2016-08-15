@@ -294,13 +294,13 @@ std::string HtmlInterpretation::GetExamPage()
   << HtmlSnippets::GetJavascriptStandardCookies() << "\n"
   << CGI::GetJavascriptMathjax() << "\n"
   << CGI::GetJavascriptMathQuill() << "\n"
-  << CGI::GetCalculatorStyleSheetWithTags() << "\n"
-  << CGI::GetMathQuillStyleSheetWithTags() << "\n";
+  << CGI::GetMathQuillStyleSheetWithTags() << "\n"
+  << CGI::GetCalculatorStyleSheetWithTags() << "\n"  ;
+  out << CGI::GetJavascriptInitilizeButtons() << "\n";
   if (theFile.flagLoadedSuccessfully)
     out << theFile.outputHtmlHeadNoTag;
-  out << CGI::GetJavascriptInitilizeButtons() << "\n";
   out << "</head>"
-  << "<body onload=\"loadSettings(); initializeButtons();\">\n";
+  << "<body onload=\"loadSettings(); initializeMathQuill(); initializeButtons();\">\n";
   out << problemBody;
   if (theFile.logCommandsProblemGeneration!="")
     out << "<hr>" << theFile.logCommandsProblemGeneration << "<hr>";

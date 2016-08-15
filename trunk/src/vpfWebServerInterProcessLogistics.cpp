@@ -98,7 +98,7 @@ bool PauseController::PauseIfRequestedWithTimeOut()
   }
   pauseWasRequested = !((read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size))>0);
   if (!pauseWasRequested)
-    write(this->thePausePipe[1], "!", 1);
+    Pipe::WriteNoInterrupts(this->thePausePipe[1], "!");
   return true;
 }
 
@@ -108,7 +108,9 @@ void PauseController::RequestPausePauseIfLocked()
   //through competing threads
   if (this->CheckPauseIsRequested())
     logBlock << logger::blue << "Blocking on " << this->ToString() << logger::endL;
-  read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size);
+  while(read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size)==-1)
+  {
+  };
   this->mutexForProcessBlocking.GetElement().UnlockMe();
 }
 

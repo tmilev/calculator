@@ -1965,31 +1965,42 @@ bool CalculatorHTML::ParseHTMLComputeChildFiles(std::stringstream& comments)
   return result;
 }
 
-void CalculatorHTML::SetTagClassFromTag(SyntacticElementHTML& output, bool isClosing)
-{ MacroRegisterFunctionWithName("CalculatorHTML::SetTagClassFromTag");
+bool CalculatorHTML::SetTagClassFromCloseTag(SyntacticElementHTML& output)
+{ MacroRegisterFunctionWithName("CalculatorHTML::SetTagClassFromCloseTag");
   std::string& lastTag=output.tag;
   if (lastTag=="head" || lastTag=="HEAD" || lastTag=="Head")
-  { if (isClosing)
-      output.SetKeyValue("class", "headFinish");
-    else
-      output.SetKeyValue("class", "headStart");
-    //output.syntacticRole="command";
+  { output.SetKeyValue("class", "headFinish");
     this->flagTagHeadPresent=true;
+    return true;
   } else if (lastTag=="body" || lastTag=="BODY" || lastTag=="Body")
-  { if (isClosing)
-      output.SetKeyValue("class", "bodyFinish");
-    else
-      output.SetKeyValue("class", "bodyStart");
-    //output.syntacticRole="command";
+  { output.SetKeyValue("class", "bodyFinish");
     this->flagTagBodyPresent=true;
+    return true;
   } else if (lastTag=="html" || lastTag=="HTML" || lastTag=="html")
-  { if (isClosing)
-      output.SetKeyValue("class", "htmlFinish");
-    else
-      output.SetKeyValue("class", "htmlStart");
-    //output.syntacticRole="command";
+  { output.SetKeyValue("class", "htmlFinish");
     this->flagTagHtmlPresent=true;
+    return true;
   }
+  return false;
+}
+
+bool CalculatorHTML::SetTagClassFromOpenTag(SyntacticElementHTML& output)
+{ MacroRegisterFunctionWithName("CalculatorHTML::SetTagClassFromOpenTag");
+  std::string& lastTag=output.tag;
+  if (lastTag=="head" || lastTag=="HEAD" || lastTag=="Head")
+  { output.SetKeyValue("class", "headStart");
+    this->flagTagHeadPresent=true;
+    return true;
+  } else if (lastTag=="body" || lastTag=="BODY" || lastTag=="Body")
+  { output.SetKeyValue("class", "bodyStart");
+    this->flagTagBodyPresent=true;
+    return true;
+  } else if (lastTag=="html" || lastTag=="HTML" || lastTag=="html")
+  { output.SetKeyValue("class", "htmlStart");
+    this->flagTagHtmlPresent=true;
+    return true;
+  }
+  return false;
 }
 
 bool CalculatorHTML::ParseHTML(std::stringstream& comments)
@@ -2135,7 +2146,6 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       secondToLast.syntacticRole="<openTag";
       secondToLast.content="";
       eltsStack.RemoveLastObject();
-      this->SetTagClassFromTag(secondToLast, false);
       continue;
     }
     if (secondToLast.syntacticRole=="" && secondToLast!="\"" && last=="/")
@@ -2159,6 +2169,8 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     }
     if (secondToLast.syntacticRole=="</closeTag" && last.syntacticRole==">")
     { secondToLast.syntacticRole="</closeTag>";
+      if (this->SetTagClassFromCloseTag(secondToLast))
+        secondToLast.syntacticRole="command";
       eltsStack.RemoveLastObject();
       continue;
     }
@@ -2236,6 +2248,8 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
         secondToLast.syntacticRole="<calculatorSolution>";
       else if (this->calculatorClasses.Contains(tagClass))
         secondToLast.syntacticRole="<openTagCalc>";
+      else if (this->SetTagClassFromOpenTag(secondToLast))
+        secondToLast.syntacticRole="command";
       else
       { secondToLast.content=secondToLast.ToStringOpenTag();
         secondToLast.resetAllExceptContent();

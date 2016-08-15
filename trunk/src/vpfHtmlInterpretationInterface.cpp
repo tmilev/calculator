@@ -275,7 +275,9 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   out << "<head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << thePage.outputHtmlHeadNoTag;
   out << "</head><!-- tag added automatically; user-specified head tag ignored-->\n";
-  out << "<body onload=\"loadSettings();\"><!-- tag added automatically; user-specified body tag ignored-->\n";
+  out << "<body" << ">"
+  //<< " onload=\"loadSettings();\"><!-- tag added automatically; user-specified body tag ignored-->\n"
+  ;
   out << thePage.outputHtmlBodyNoTag;
   out << "</body><!-- tag added automatically; user-specified body tag ignored-->\n";
   out << "</html><!-- tag added automatically; user-specified html tag ignored-->\n";

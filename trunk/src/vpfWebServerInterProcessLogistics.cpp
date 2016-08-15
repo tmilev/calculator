@@ -108,8 +108,12 @@ void PauseController::RequestPausePauseIfLocked()
   //through competing threads
   if (this->CheckPauseIsRequested())
     logBlock << logger::blue << "Blocking on " << this->ToString() << logger::endL;
+  int counter =0;
   while(read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size)==-1)
-  {
+  { counter++;
+    if (counter>50)
+      break;
+    logBlock << logger::red << "read(...) function returned -1, this was not expected. " << logger::endL;
   };
   this->mutexForProcessBlocking.GetElement().UnlockMe();
 }

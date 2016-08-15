@@ -287,18 +287,21 @@ std::string HtmlInterpretation::GetPageFromTemplate()
 std::string HtmlInterpretation::GetExamPage()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetExamPage");
   CalculatorHTML theFile;
+  std::string problemBody= theFile.LoadAndInterpretCurrentProblemItem();
   std::stringstream out;
   out << "<html>"
   << "<head>"
-  << HtmlSnippets::GetJavascriptStandardCookies()
-  << CGI::GetJavascriptMathjax()
-  << CGI::GetJavascriptMathQuill()
-  << CGI::GetCalculatorStyleSheetWithTags()
-  << CGI::GetMathQuillStyleSheetWithTags()
-  << CGI::GetJavascriptInitilizeButtons()
-  << "</head>"
+  << HtmlSnippets::GetJavascriptStandardCookies() << "\n"
+  << CGI::GetJavascriptMathjax() << "\n"
+  << CGI::GetJavascriptMathQuill() << "\n"
+  << CGI::GetCalculatorStyleSheetWithTags() << "\n"
+  << CGI::GetMathQuillStyleSheetWithTags() << "\n";
+  if (theFile.flagLoadedSuccessfully)
+    out << theFile.outputHtmlHeadNoTag;
+  out << CGI::GetJavascriptInitilizeButtons() << "\n";
+  out << "</head>"
   << "<body onload=\"loadSettings(); initializeButtons();\">\n";
-  out << theFile.LoadAndInterpretCurrentProblemItem();
+  out << problemBody;
   if (theFile.logCommandsProblemGeneration!="")
     out << "<hr>" << theFile.logCommandsProblemGeneration << "<hr>";
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();

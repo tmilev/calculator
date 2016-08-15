@@ -818,8 +818,8 @@ std::string& CGI::GetJavascriptMathQuill()
     return CGI::JavascriptMathQuill;
   }
   std::stringstream out;
-  out << "<script src=\"html-common/jquery.min.js\"></script>"
-  << "<script type=\"text/javascript\">" << theJS << "</script>"
+  out << "<script src=\"html-common/jquery.min.js\"></script>\n"
+  << "<script type=\"text/javascript\">" << theJS << "</script>\n"
   << "<script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2);</script>";
   CGI::JavascriptMathQuill=out.str();
   return CGI::JavascriptMathQuill;

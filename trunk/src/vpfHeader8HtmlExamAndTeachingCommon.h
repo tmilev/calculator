@@ -2493,10 +2493,14 @@ bool CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml
 std::string CalculatorHtmlFunctions::GetJavascriptMathQuillBox(Answer& theAnswer)
 { MacroRegisterFunctionWithName("CalculatorHtmlFunctions::GetMathQuillBox");
   std::stringstream out;
-  out << "<script>\n"
-  << "var " << theAnswer.varMQfield << " = document.getElementById('" << theAnswer.idMQfield << "');\n"
-  << "var " << theAnswer.varAnswerId << " = document.getElementById('" << theAnswer.answerId << "');\n"
+  out << "<script>\n";
+  out << "var " << theAnswer.varMQfield << ";\n";
+  out << "var " << theAnswer.varAnswerId << ";\n";
+  out
   << "var ignoreNextMathQuillUpdateEvent=false;\n"
+  << "function initializeMathQuill(){\n"
+  << theAnswer.varMQfield  << " = document.getElementById('" << theAnswer.idMQfield << "');\n"
+  << theAnswer.varAnswerId << " = document.getElementById('" << theAnswer.answerId << "');\n"
   << "globalMQ.config({\n"
   << "  autoFunctionize: 'sin cos tan sec csc cot log ln'\n"
   << "  });\n"
@@ -2513,6 +2517,7 @@ std::string CalculatorHtmlFunctions::GetJavascriptMathQuillBox(Answer& theAnswer
   << "}\n"
   << "}\n"
   << "});\n"
+  << "}//closing initializeMathQuill\n"
   << "function " << theAnswer.MQUpdateFunction << "(){\n"
   << "ignoreNextMathQuillUpdateEvent=true;\n"
   << theAnswer.MQobject << ".latex(" << theAnswer.varAnswerId << ".value+' ');\n"

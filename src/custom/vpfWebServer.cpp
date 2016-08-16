@@ -507,18 +507,18 @@ bool WebWorker::ProcessRawArguments
     theGlobalVariables.flagLoggedIn=false;
     if (this->authenticationToken!="" || password!="")
       theGlobalVariables.flagLoggedIn= DatabaseRoutinesGlobalFunctions::LoginViaDatabase
-      (desiredUser, password, this->authenticationToken, theGlobalVariables.userRole, &argumentProcessingFailureComments);
+      (desiredUser, password, this->authenticationToken, theGlobalVariables.userDefault.username.value, &argumentProcessingFailureComments);
     if (!theGlobalVariables.flagLoggedIn)
     { this->authenticationToken="";
       //argumentProcessingFailureComments << "<b>DEBUG: Auth token set to empty</b>";
     }
     if (theGlobalVariables.flagLoggedIn)
-    { theGlobalVariables.userDefault=desiredUser;
+    { theGlobalVariables.userDefault.username=desiredUser;
       theGlobalVariables.SetWebInpuT("authenticationToken", CGI::StringToURLString(this->authenticationToken));
     } else if (changingPass)
-      theGlobalVariables.userDefault=desiredUser;
+      theGlobalVariables.userDefault.username=desiredUser;
     else if (this->authenticationToken!="" || password!="")
-    { theGlobalVariables.userDefault="";
+    { theGlobalVariables.userDefault.username="";
       theGlobalVariables.SetWebInpuT
       ("error", CGI::StringToURLString("<b>Invalid user or password.</b> Comments follow. "+argumentProcessingFailureComments.str()));
     }
@@ -563,8 +563,8 @@ bool WebWorker::ProcessRawArgumentsNoLoginInterpreterMode
     << "Received calculator link in an old format, interpreting 'textInput' as 'mainInput'";
     theArgs.theKeys.SetObjectAtIndex(theArgs.theKeys.GetIndex("textInput"), "mainInput");
   }
-  theGlobalVariables.userDefault=desiredUser;
-  theGlobalVariables.userRole=theGlobalVariables.GetWebInput("userRole");
+  theGlobalVariables.userDefault.username=desiredUser;
+  theGlobalVariables.userDefault.userRole=theGlobalVariables.GetWebInput("userRole");
   return true;
 }
 
@@ -1339,9 +1339,7 @@ void WebWorker::reset()
   this->flagProgressReportAllowed=false;
   theGlobalVariables.flagUsingSSLinCurrentConnection=false;
   theGlobalVariables.flagLoggedIn=false;
-  for (unsigned i=0; i<theGlobalVariables.userDefault.size(); i++)
-    theGlobalVariables.userDefault[i]=' ';
-  theGlobalVariables.userDefault="";
+  theGlobalVariables.userDefault.reset();
   for (unsigned i=0; i<this->authenticationToken.size(); i++)
     this->authenticationToken[i]=' ';
   this->authenticationToken="";
@@ -1937,13 +1935,13 @@ std::string WebWorker::GetChangePasswordPage()
     out
     <<  "User name or email: "
     << "<input type=\"text\" id=\"username\" placeholder=\"username\" "
-    << "value=\"" << theGlobalVariables.userDefault << "\" "
+    << "value=\"" << theGlobalVariables.userDefault.username.value << "\" "
     << "required>";
   else
     out
-    <<  "User: " << theGlobalVariables.userDefault
+    <<  "User: " << theGlobalVariables.userDefault.username.value
     << "<input type=\"hidden\" id=\"username\" placeholder=\"username\" "
-    << "value=\"" << theGlobalVariables.userDefault << "\" "
+    << "value=\"" << theGlobalVariables.userDefault.username.value << "\" "
     << "required>";
 
   if (theGlobalVariables.userCalculatorRequestType=="activateAccount")
@@ -1986,12 +1984,13 @@ int WebWorker::ProcessChangePassword()
   }
   std::stringstream commentsOnFailure;
   std::string newAuthenticationToken;
-  if (!DatabaseRoutinesGlobalFunctions::SetPassword(theGlobalVariables.userDefault, newPassword, newAuthenticationToken, commentsOnFailure))
+  if (!DatabaseRoutinesGlobalFunctions::SetPassword
+      (theGlobalVariables.userDefault.username.value, newPassword, newAuthenticationToken, commentsOnFailure))
   { stOutput << "<span style=\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
     return 0;
   }
   if (!DatabaseRoutinesGlobalFunctions::SetEntry
-      (theGlobalVariables.userDefault, "users", "activationToken", "activated", commentsOnFailure))
+      (theGlobalVariables.userDefault.username.value, "users", "activationToken", "activated", commentsOnFailure))
     stOutput << "<span style=\"color:red\"><b>Failed to set activationToken: "
     << commentsOnFailure.str() << "</b></span>";
 
@@ -2000,7 +1999,7 @@ int WebWorker::ProcessChangePassword()
   << "<meta http-equiv=\"refresh\" content=\"0; url="
   << theGlobalVariables.DisplayNameExecutableWithPath  << "?request=login"
   << "&username="
-  << CGI::StringToURLString(theGlobalVariables.userDefault)
+  << CGI::StringToURLString(theGlobalVariables.userDefault.username.value)
   << "&authenticationToken=" << CGI::StringToURLString(newAuthenticationToken)
   << "&fileName="
   << theGlobalVariables.GetWebInput("fileName")
@@ -3317,7 +3316,7 @@ std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
     return "";
   std::stringstream out;
   out << "<hr>";
-  out << "Default user: " << theGlobalVariables.userDefault;
+  out << "Default user: " << theGlobalVariables.userDefault.username.value;
   if (theGlobalVariables.flagLoggedIn)
     out << "<br>Logged in. ";
   if (theGlobalVariables.UserDefaultHasAdminRights())

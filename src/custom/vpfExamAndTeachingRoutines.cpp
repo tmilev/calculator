@@ -492,5 +492,5 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 }
 
 void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
-{
+{ (void) inputOutput;
 }

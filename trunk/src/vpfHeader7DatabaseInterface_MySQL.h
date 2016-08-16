@@ -4,6 +4,7 @@
 #define vpfHeader7_databaseMySQL_already_included
 #include "vpfHeader3Calculator0_Interface.h"
 #include "vpfHeader1General5TimeDate.h"
+#include "vpfHeader1General8DatabaseSystemIndependent.h"
 
 static ProjectInformationInstance ProjectInfoVpf8_1HeaderDatabaseInterface_MySQLx(__FILE__, "MySQL interface header. ");
 
@@ -221,41 +222,8 @@ public:
   std::string GetCommandToSendEmailWithMailX();
 };
 
-class MySQLdata{
-//This class is needed to attempt to deal with mySQL's
-//numerous design errors, to the extent possible.
-//Documenting those errors for the interested reader.
-//1. Mysql identifiers have max length of 64 characters.
-//   Workaround this MySQL bug: when used as identifiers, strings are
-//   trimmed. We use the first 30 characters
-//   + we append SHA-1 of the entire string.
-//   Motivation: we don't loose human-readability for small strings.
-//2. Mysql identifiers cannot have ` characters in them.
-//   Workaround this MySQL bug: we url-encode any data stored in
-//   the database.
-//   Motivation: we retain limited human-readability.
-public:
-  std::string value;
-  MySQLdata(const std::string& other)
-  { this->value=other;
-  }
-  MySQLdata(){}
-  bool operator==(const std::string& other)
-  { return this->value==other;
-  }
-  bool operator!=(const std::string& other)
-  { return !(*this==other);
-  }
-  void operator=(const std::string& other)
-  { this->value=other;
-  }
-  std::string GetDatA()const;
-  std::string GetIdentifierNoQuotes()const;
-  std::string GetIdentifieR()const;
-};
-
 class DatabaseRoutines;
-class UserCalculator
+class UserCalculator : public UserCalculatorData
 {
 // Unsafe entries may contain arbitrary strings.
 // Safe entries, when enclosed with "" in ANSI mode are guaranteed to be valid safe Database identifiers.
@@ -265,25 +233,6 @@ class UserCalculator
 // Those are internally (and automatically) converted to safe entries (stored in the private variables below), and only then stored in
 // the database.
 public:
-  double approximateHoursSinceLastTokenWasIssued;
-  std::string usernamePlusPassWord;
-  MySQLdata username;
-  MySQLdata email;
-  MySQLdata currentTable;
-  MySQLdata activationToken;
-  MySQLdata enteredAuthenticationToken;
-  MySQLdata actualAuthenticationToken;
-  std::string extraInfoUnsafe;
-  std::string enteredPassword;
-  std::string actualShaonedSaltedPassword;
-  std::string enteredShaonedSaltedPassword;
-  std::string userRole;
-  List<std::string> selectedColumnsUnsafe;
-  List<std::string> selectedColumnValuesUnsafe;
-  List<std::string> selectedColumnsRetrievalFailureRemarks;
-
-  List<std::string> selectedRowFieldsUnsafe;
-  List<std::string> selectedRowFieldNamesUnsafe;
 
   HashedList<std::string, MathRoutines::hashString> problemNames;
   List<ProblemData> problemData;
@@ -303,7 +252,7 @@ public:
   bool StoreProblemDataToDatabase(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure);
   std::string GetSelectedRowEntry(const std::string& theKey);
   bool FetchOneUserRow
-  (DatabaseRoutines& theRoutines, std::stringstream& failureStream);
+  (DatabaseRoutines& theRoutines, std::stringstream* failureStream);
   bool FetchOneColumn
   (const std::string& columnNameUnsafe, std::string& outputUnsafe,
    DatabaseRoutines& theRoutines, std::stringstream* failureComments=0);
@@ -493,6 +442,7 @@ public:
   std::string theQueryString;
   std::string firstResultString;
   List<List<std::string> > allQueryResultStrings;
+  List<List<List<std::string> > > additionalResultStrings;
   bool flagQuerySucceeded;
   bool flagQueryReturnedResult;
   void close();

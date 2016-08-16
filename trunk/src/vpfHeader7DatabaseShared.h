@@ -75,7 +75,8 @@ bool DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights()
   if (!DatabaseRoutinesGlobalFunctions::TableExists("instructors", comments))
     DatabaseRoutinesGlobalFunctions::CreateTable("instructors", comments);
   std::string notUsed;
-  return DatabaseRoutinesGlobalFunctions::FetchEntry(theGlobalVariables.userDefault, "instructors", "users", notUsed, comments);
+  return DatabaseRoutinesGlobalFunctions::FetchEntry
+  (theGlobalVariables.userDefault.username.value, "instructors", "users", notUsed, comments);
 #else
   return false;
 #endif
@@ -196,12 +197,16 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
 {
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LogoutViaDatabase");
+  //stOutput << "Got to logout";
   if (!theGlobalVariables.flagLoggedIn)
+  { //stOutput << "but not resetting token. ";
     return true;
+  }
   DatabaseRoutines theRoutines;
   UserCalculator theUser;
-  theUser.username=theGlobalVariables.userDefault;
+  theUser.UserCalculatorData::operator=(theGlobalVariables.userDefault);
   theUser.currentTable="users";
+  //stOutput << "resetting token ... ";
   theUser.ResetAuthenticationToken(theRoutines, 0);
   theGlobalVariables.SetWebInpuT("authenticationToken", "");
   return true;
@@ -520,20 +525,69 @@ bool UserCalculator::AuthenticateWithToken(DatabaseRoutines& theRoutines, std::s
   return this->enteredAuthenticationToken.value==this->actualAuthenticationToken.value;
 }
 
+bool UserCalculator::FetchOneUserRow
+(DatabaseRoutines& theRoutines, std::stringstream* failureStream)
+{ MacroRegisterFunctionWithName("UserCalculator::FetchOneUserRow");
+  if (this->currentTable=="")
+    crash << "Calling UserCalculator::FetchOneUserRow with an empty table is forbidden. " << crash;
+  std::stringstream queryStream;
+  queryStream << "SELECT * FROM " << theRoutines.theDatabaseName << "." << this->currentTable.GetIdentifieR()
+  << " WHERE " << "username=" << this->username.GetDatA();
+  DatabaseQuery theQuery(theRoutines, queryStream.str(), failureStream, 5);
+  if (!theQuery.flagQuerySucceeded)
+  { if (failureStream!=0)
+      *failureStream << "Query: " << queryStream.str() << " failed. ";
+    return false;
+  }
+  if (!theQuery.flagQueryReturnedResult)
+  { if (failureStream!=0)
+      *failureStream << "The table appears to be empty: query: " << queryStream.str()
+      << " succeeded but returned no result. ";
+    return false;
+  }
+  if (theQuery.allQueryResultStrings.size!=1)
+  { if (failureStream!=0)
+      *failureStream << "Could not find entries for user " << this->username.value << ".";
+    return false;
+  }
+  this->selectedRowFieldsUnsafe.SetSize(theQuery.allQueryResultStrings[0].size);
+  for (int i=0; i<this->selectedRowFieldsUnsafe.size; i++)
+    this->selectedRowFieldsUnsafe[i]=CGI::URLStringToNormal(theQuery.allQueryResultStrings[0][i]);
+  theQuery.close();
+  std::stringstream queryStreamFields;
+  queryStreamFields
+  << "SELECT `COLUMN_NAME` FROM information_schema.COLUMNS WHERE "
+  << "TABLE_SCHEMA='" << theRoutines.theDatabaseName << "' "
+  << "AND TABLE_NAME='" << this->currentTable.GetIdentifierNoQuotes() << "' ";
+  DatabaseQuery theFieldQuery(theRoutines, queryStreamFields.str(), failureStream);
+  if (!theFieldQuery.flagQuerySucceeded)
+  { if (failureStream!=0)
+      *failureStream << "Query: " << queryStreamFields.str() << " failed. ";
+    return false;
+  }
+  this->selectedRowFieldNamesUnsafe.SetSize(theFieldQuery.allQueryResultStrings.size);
+  for (int i=0; i<theFieldQuery.allQueryResultStrings.size; i++)
+    if (theFieldQuery.allQueryResultStrings[i].size>0 )
+      this->selectedRowFieldNamesUnsafe[i]=CGI::URLStringToNormal(theFieldQuery.allQueryResultStrings[i][0]);
+  if (this->currentTable=="users")
+  { this->activationToken= this->GetSelectedRowEntry("activationToken");
+    this->email= this->GetSelectedRowEntry("email");
+    this->userRole= this->GetSelectedRowEntry("userRole");
+    this->username=this->GetSelectedRowEntry("username"); //<-Important! Database lookup may be
+    //case insensitive. The preceding line of code guarantees we have read the username as it is stored in the DB.
+    this->actualShaonedSaltedPassword=this->GetSelectedRowEntry("password");
+  }
+  return true;
+}
+
 bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::Authenticate");
   this->currentTable="users";
-  if (!this->Iexist(theRoutines))
-  { //if (this->username!="")
-    //  stOutput << "user: '" << this->username << "' does not exist";
-    if (commentsOnFailure!=0)
-      *commentsOnFailure << "User " << this->username.value << " does not exist. ";
+  if (!this->FetchOneUserRow(theRoutines, commentsOnFailure))
+  { if (!this->Iexist(theRoutines))
+      if (commentsOnFailure!=0)
+        *commentsOnFailure << "User " << this->username.value << " does not exist. ";
     return false;
-  } else
-  { std::string userNameAsStoredInDB;
-    if (!this->FetchOneColumn("username", userNameAsStoredInDB, theRoutines, commentsOnFailure))
-      return false;
-    this->username=userNameAsStoredInDB;
   }
   if (this->AuthenticateWithToken(theRoutines, commentsOnFailure))
   { if(!this->FetchOneColumn("userRole", this->userRole, theRoutines, commentsOnFailure))
@@ -544,15 +598,6 @@ bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstre
     return true;
   }
   bool result= this->AuthenticateWithUserNameAndPass(theRoutines, commentsOnFailure);
-  if (result)
-    if(!this->FetchOneColumn("userRole", this->userRole, theRoutines, commentsOnFailure))
-    { if (commentsOnFailure!=0)
-        *commentsOnFailure << "Failed to fetch user role";
-      return false;
-    }
-  if (result)
-    if (this->userRole =="")
-      crash << "user role is empty" << crash;
 //  stOutput << "Approximate hours since last token issued: " << this->approximateHoursSinceLastTokenWasIssued << ". ";
 //  if (this->approximateHoursSinceLastTokenWasIssued>1 || this->approximateHoursSinceLastTokenWasIssued<=0)
   this->ResetAuthenticationToken(theRoutines, commentsOnFailure);
@@ -563,20 +608,9 @@ bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstre
 
 bool UserCalculator::AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::Authenticate");
-  //if (!theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs)
-    this->ComputeShaonedSaltedPassword();
-  //else
-  //  this->enteredShaonedSaltedPassword=this->enteredPassword;
-//  stOutput <<  "computed shaoned saltes pass from pass "
-//  << this->enteredPassword << " to get: " << this->enteredShaonedSaltedPassword;
-  bool result=this->FetchOneColumn("password", this->actualShaonedSaltedPassword, theRoutines, commentsOnFailure);
-  if (!result)
-  { //stOutput << "fail remarks: " << failureRemarks;
-    //stOutput << "pass doesnt match!";
-    return false;
-  }
-//  *commentsOnFailure << "DEBUG INFO: this->enteredShaonedSaltedPassword: " << this->enteredShaonedSaltedPassword
-//  << ", this->actualShaonedSaltedPassword: " << this->actualShaonedSaltedPassword;
+  (void) theRoutines;
+  (void) commentsOnFailure;
+  this->ComputeShaonedSaltedPassword();
   return this->enteredShaonedSaltedPassword==this->actualShaonedSaltedPassword;
 }
 
@@ -639,7 +673,11 @@ bool UserCalculator::SetColumnEntry
 }
 
 std::string MySQLdata::GetDatA()const
-{ return "'" + CGI::StringToURLString(this->value) + "'";
+{ return "'" + this->GetDataNoQuotes() + "'";
+}
+
+std::string MySQLdata::GetDataNoQuotes()const
+{ return CGI::StringToURLString(this->value);
 }
 
 std::string MySQLdata::GetIdentifierNoQuotes()const
@@ -1097,7 +1135,7 @@ bool DatabaseRoutines::AddUsersFromEmails
       if (theEmails[i].find('@')!=std::string::npos)
         currentUser.SetColumnEntry("email", theEmails[i], *this, &comments);
     } else
-      if (!currentUser.FetchOneUserRow(*this, comments))
+      if (!currentUser.FetchOneUserRow(*this, &comments))
         result=false;
     currentUser.SetColumnEntry("userRole", userRole, *this, &comments);
     currentUser.ComputeActivationToken();
@@ -1142,7 +1180,7 @@ bool UserCalculator::GetActivationAddress
   (std::string& output, const std::string& calculatorBase, DatabaseRoutines& theRoutines,
    std::stringstream& comments)
 { MacroRegisterFunctionWithName("UserCalculator::GetActivationAbsoluteAddress");
-  if (!this->FetchOneUserRow(theRoutines, comments))
+  if (!this->FetchOneUserRow(theRoutines, &comments))
     return false;
   this->activationToken= this->GetSelectedRowEntry("activationToken");
   if (this->activationToken=="")
@@ -1256,7 +1294,7 @@ bool DatabaseRoutines::innerSetUserPassword(Calculator& theCommands, const Expre
   if (!theUser.getUserAndPass(theCommands, input))
     return false;
   bool authorized=false;
-  if (theUser.username==theGlobalVariables.userDefault)
+  if (theUser.username.value==theGlobalVariables.userDefault.username.value)
     authorized=true;
   else if (theGlobalVariables.UserDefaultHasAdminRights())
   { authorized=true;

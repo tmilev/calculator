@@ -95,7 +95,7 @@ std::string HtmlSnippets::GetJavascriptStandardCookies()
   { out << "   addCookie(\"authenticationToken\", \""
     << theWebServer.GetActiveWorker().authenticationToken << "\", 150, true);"
     << "//150 days is a little longer than a semester\n"
-    << "  addCookie(\"username\", \"" << theGlobalVariables.userDefault << "\", 150, true);\n";
+    << "  addCookie(\"username\", \"" << theGlobalVariables.userDefault.username.GetDatA() << "\", 150, true);\n";
   }
   out << "}\n";
   out

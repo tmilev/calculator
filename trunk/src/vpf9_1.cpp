@@ -230,12 +230,12 @@ bool GlobalVariables::UserStudentViewOn()
 }
 
 bool GlobalVariables::UserDefaultHasAdminRights()
-{ return this->flagLoggedIn && (this->userRole=="admin");
+{ return this->flagLoggedIn && (this->userDefault.userRole=="admin");
 }
 
 bool GlobalVariables::UserDefaultHasProblemComposingRights()
 { return this->flagLoggedIn &&
-  (this->userRole=="admin" || this->userRole=="teacher") ;
+  (this->userDefault.userRole=="admin" || this->userDefault.userRole=="teacher") ;
 }
 
 bool GlobalVariables::UserGuestMode()
@@ -282,7 +282,7 @@ std::string GlobalVariables::ToStringNavigationOLD()
   { out << "User";
     if (theGlobalVariables.UserDefaultHasAdminRights())
       out << " <b>(admin)</b>";
-    out << ": " << this->userDefault << linkSeparator;
+    out << ": " << this->userDefault.username.value << linkSeparator;
     out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=logout&";
 //    if (theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs &&
 //        !theGlobalVariables.flagUsingSSLinCurrentConnection)
@@ -336,7 +336,7 @@ std::string GlobalVariables::ToStringNavigationAce()
   { out << "User";
     if (theGlobalVariables.UserDefaultHasAdminRights())
       out << " <b>(admin)</b>";
-    out << ": " << this->userDefault << linkSeparator;
+    out << ": " << this->userDefault.username.value << linkSeparator;
     out << "<a href=\"logout\">Log out</a>" << linkSeparator;
     if (theGlobalVariables.flagUsingSSLinCurrentConnection)
       out << "<a href=\"changePasswordPage&"
@@ -482,6 +482,16 @@ std::string GlobalVariables::ToStringSourceCodeInfo()
   }
   out << "</div>";
   return out.str();
+}
+
+void UserCalculatorData::reset()
+{ MacroRegisterFunctionWithName("UserCalculatorData::reset");
+  for (unsigned i=0; i<this->username.value.size(); i++)
+    this->username.value[i]=' ';
+  this->username="";
+  for (unsigned i=0; i<this->usernamePlusPassWord.size(); i++)
+    this->usernamePlusPassWord[i]=' ';
+  this->usernamePlusPassWord="";
 }
 
 template<>

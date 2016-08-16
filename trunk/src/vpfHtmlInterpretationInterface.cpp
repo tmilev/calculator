@@ -508,7 +508,7 @@ std::string HtmlInterpretation::SubmitProblem()
   int correctSubmissionsRelevant=0;
   int totalSubmissionsRelevant=0;
   DatabaseRoutines theRoutines;
-  theProblem.currentUser.username=theGlobalVariables.userDefault;
+  theProblem.currentUser.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
   if (theProblem.flagIsForReal)
   { if (!theProblem.currentUser.InterpretDatabaseProblemData(theProblem.currentUserDatabaseString, comments))
     { out << "<b>Failed to load user information from database. Answer not recorded. "

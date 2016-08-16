@@ -5,6 +5,7 @@
 #include "vpfHeader1General0_General.h"
 #include "vpfHeader1General1_ListReferences.h"
 #include "vpfHeader1General6Maps.h"
+#include "vpfHeader1General8DatabaseSystemIndependent.h"
 #include <thread>
 
 static ProjectInformationInstance projectInfoHeaderLoggingRoutines
@@ -110,8 +111,7 @@ public:
   List<std::string> programArguments;
 
   MapList<std::string, std::string, MathRoutines::hashString> webArguments;
-  std::string userRole;
-  std::string userDefault;
+  UserCalculatorData userDefault;
   std::string userCalculatorRequestType;
 
   Controller theLocalPauseController;

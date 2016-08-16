@@ -243,19 +243,13 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadDatabaseInfo");
 #ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
-  this->currentUser.username=theGlobalVariables.userDefault;
-  if (!this->currentUser.LoadProblemStringFromDatabase(theRoutines, this->currentUserDatabaseString, comments))
+  this->currentUser.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
+  if (this->currentUser.problemDataString=="")
   { comments << "Failed to load current user's problem save-file. ";
-    //stOutput << "DEBUG!";
-    //comments << "DEBUG: " << this->currentUserDatabaseString;
     return false;
   }
-  //stOutput << "<br>DEBUG: "<< CGI::URLKeyValuePairsToNormalRecursiveHtml(this->currentUserDatabaseString)
-  //<< "<br>";
   if (!this->currentUser.InterpretDatabaseProblemData(this->currentUserDatabaseString, comments))
   { comments << "Failed to interpret user's problem save-file. ";
-    //stOutput << "DEBUG!";
-    //comments << "DEBUG: " << this->currentUserDatabaseString;
     return false;
   }
   this->theProblemData=this->currentUser.GetProblemDataAddIfNotPresent(this->fileName);
@@ -1137,7 +1131,7 @@ std::string DatabaseRoutines::ToStringClassDetails
   for (int i=0; i<userTable.size; i++)
   { std::stringstream failureStream;
     currentUser.username=userTable[i][indexUser];
-    if (!currentUser.FetchOneUserRow(*this, failureStream ))
+    if (!currentUser.FetchOneUserRow(*this, &failureStream))
     { currentUser.email=failureStream.str();
       currentUser.activationToken="error";
       currentUser.userRole="error";

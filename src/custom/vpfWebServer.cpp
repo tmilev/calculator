@@ -507,7 +507,7 @@ bool WebWorker::ProcessRawArguments
     theGlobalVariables.flagLoggedIn=false;
     if (this->authenticationToken!="" || password!="")
       theGlobalVariables.flagLoggedIn= DatabaseRoutinesGlobalFunctions::LoginViaDatabase
-      (desiredUser, password, this->authenticationToken, theGlobalVariables.userDefault.username.value, &argumentProcessingFailureComments);
+      (theGlobalVariables.userDefault, &argumentProcessingFailureComments);
     if (!theGlobalVariables.flagLoggedIn)
     { this->authenticationToken="";
       //argumentProcessingFailureComments << "<b>DEBUG: Auth token set to empty</b>";

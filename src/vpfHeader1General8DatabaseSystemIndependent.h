@@ -50,7 +50,8 @@ class UserCalculatorData{
   MySQLdata username;
   MySQLdata email;
   MySQLdata currentTable;
-  MySQLdata activationToken;
+  MySQLdata actualActivationToken;
+  MySQLdata enteredActivationToken;
   MySQLdata enteredAuthenticationToken;
   MySQLdata actualAuthenticationToken;
   MySQLdata problemDataString;
@@ -59,6 +60,7 @@ class UserCalculatorData{
   std::string enteredShaonedSaltedPassword;
   std::string userRole;
   std::string extraInfoUnsafe;
+  std::string authenticationTokenCreationTime;
   List<std::string> selectedColumnsUnsafe;
   List<std::string> selectedColumnValuesUnsafe;
   List<std::string> selectedColumnsRetrievalFailureRemarks;
@@ -66,5 +68,7 @@ class UserCalculatorData{
   List<std::string> selectedRowFieldsUnsafe;
   List<std::string> selectedRowFieldNamesUnsafe;
   void reset();
+  void resetPassword();
+  void resetAuthenticationTokenAndPassword();
 };
 #endif

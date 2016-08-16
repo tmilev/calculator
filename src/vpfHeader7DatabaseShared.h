@@ -496,32 +496,17 @@ bool UserCalculator::FetchOneColumn
    columnNameUnsafe, outputUnsafe, failureComments);
 }
 
-bool UserCalculator::AuthenticateWithToken(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
+bool UserCalculator::AuthenticateWithToken(std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::AuthenticateWithToken");
+  (void) commentsOnFailure;
   this->currentTable="users";
   if (this->enteredAuthenticationToken=="")
     return false;
-  std::string authenticationCreationTimeSTRING;
-  if (!this->FetchOneColumn
-      ("authenticationCreationTime", authenticationCreationTimeSTRING,
-       theRoutines, commentsOnFailure))
-  { if (commentsOnFailure!=0)
-      *commentsOnFailure << "Failed to fetch authentication token creation time: "
-      << commentsOnFailure;
-    return false;
-  }
-  this->authenticationCreationTime=authenticationCreationTimeSTRING;
   TimeWrapper now;
   now.AssignLocalTime();
   this->approximateHoursSinceLastTokenWasIssued=now.SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours
   (this->authenticationCreationTime);
-//  stOutput << "approx hours since token issued: " << this->approximateHoursSinceLastTokenWasIssued;
-//  if (this->approximateHoursSinceLastTokenWasIssued>3600 || this->approximateHoursSinceLastTokenWasIssued<=0) //3600 hours = 150 days, a bit more than the length of a semester
-//    return false;
-  if (!this->FetchOneColumn
-      ("authenticationToken", this->actualAuthenticationToken.value,
-      theRoutines, commentsOnFailure))
-    return false;
+  //<-to do: revoke authentication token if expired.
   return this->enteredAuthenticationToken.value==this->actualAuthenticationToken.value;
 }
 
@@ -570,12 +555,13 @@ bool UserCalculator::FetchOneUserRow
     if (theFieldQuery.allQueryResultStrings[i].size>0 )
       this->selectedRowFieldNamesUnsafe[i]=CGI::URLStringToNormal(theFieldQuery.allQueryResultStrings[i][0]);
   if (this->currentTable=="users")
-  { this->activationToken= this->GetSelectedRowEntry("activationToken");
+  { this->actualActivationToken= this->GetSelectedRowEntry("activationToken");
     this->email= this->GetSelectedRowEntry("email");
     this->userRole= this->GetSelectedRowEntry("userRole");
     this->username=this->GetSelectedRowEntry("username"); //<-Important! Database lookup may be
     //case insensitive. The preceding line of code guarantees we have read the username as it is stored in the DB.
     this->actualShaonedSaltedPassword=this->GetSelectedRowEntry("password");
+    this->authenticationTokenCreationTime=this->GetSelectedRowEntry("authenticationCreationTime");
   }
   return true;
 }
@@ -583,26 +569,18 @@ bool UserCalculator::FetchOneUserRow
 bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::Authenticate");
   this->currentTable="users";
-  if (!this->FetchOneUserRow(theRoutines, commentsOnFailure))
+  std::stringstream secondCommentsStream;
+  if (!this->FetchOneUserRow(theRoutines, &secondCommentsStream))
   { if (!this->Iexist(theRoutines))
       if (commentsOnFailure!=0)
         *commentsOnFailure << "User " << this->username.value << " does not exist. ";
     return false;
   }
-  if (this->AuthenticateWithToken(theRoutines, commentsOnFailure))
-  { if(!this->FetchOneColumn("userRole", this->userRole, theRoutines, commentsOnFailure))
-    { if (commentsOnFailure!=0)
-        *commentsOnFailure << "Failed to fetch user role";
-      return false;
-    }
+  if (this->AuthenticateWithToken(&secondCommentsStream))
     return true;
-  }
   bool result= this->AuthenticateWithUserNameAndPass(theRoutines, commentsOnFailure);
-//  stOutput << "Approximate hours since last token issued: " << this->approximateHoursSinceLastTokenWasIssued << ". ";
-//  if (this->approximateHoursSinceLastTokenWasIssued>1 || this->approximateHoursSinceLastTokenWasIssued<=0)
   this->ResetAuthenticationToken(theRoutines, commentsOnFailure);
-//  else if (result)
-//    this->FetchOneColumn("authenticationToken", this->actualAuthenticationTokeNUnsafe, theRoutines, false, 0);
+  //<- this needs to be fixed: an attacker may cause denial of service by launching fake login attempts.
   return result;
 }
 
@@ -930,7 +908,7 @@ void UserCalculator::ComputeActivationToken()
   now.AssignLocalTime();
   std::stringstream activationTokenStream;
   activationTokenStream << now.theTimeStringNonReadable << rand();
-  this->activationToken=Crypto::computeSha1outputBase64(activationTokenStream.str());
+  this->actualActivationToken=Crypto::computeSha1outputBase64(activationTokenStream.str());
 }
 
 bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, std::stringstream& comments)
@@ -962,7 +940,7 @@ bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, s
     theReport.Report(reportStream.str());
     currentUser.username=theEmails[i];
     currentUser.email=theEmails[i];
-    if (currentUser.activationToken=="" || currentUser.activationToken=="error")
+    if (currentUser.actualActivationToken=="" || currentUser.actualActivationToken=="error")
     { comments << "<span style=\"color:red\">Failed to get an activation token for user: "
       << currentUser.username.value << "</span>";
       continue;
@@ -1139,10 +1117,10 @@ bool DatabaseRoutines::AddUsersFromEmails
         result=false;
     currentUser.SetColumnEntry("userRole", userRole, *this, &comments);
     currentUser.ComputeActivationToken();
-    if (!currentUser.SetColumnEntry("activationToken", currentUser.activationToken.value, *this, &comments))
+    if (!currentUser.SetColumnEntry("activationToken", currentUser.actualActivationToken.value, *this, &comments))
     { comments << "Setting activation token failed.";
       result=false;
-      currentUser.activationToken="";
+      currentUser.actualActivationToken="";
     }
   }
   currentUser.currentTable=currentFileUsersTableName;
@@ -1182,17 +1160,17 @@ bool UserCalculator::GetActivationAddress
 { MacroRegisterFunctionWithName("UserCalculator::GetActivationAbsoluteAddress");
   if (!this->FetchOneUserRow(theRoutines, &comments))
     return false;
-  this->activationToken= this->GetSelectedRowEntry("activationToken");
-  if (this->activationToken=="")
+  this->actualActivationToken= this->GetSelectedRowEntry("activationToken");
+  if (this->actualActivationToken.value=="")
   { comments << "Failed to fetch activation token for user: " << this->username.value;
     return false;
   }
-  if (this->activationToken=="activated")
+  if (this->actualActivationToken=="activated")
   { comments << "Account of user: " << this->username.value << "already activated";
     return false;
   }
   output= this->GetActivationAddressFromActivationToken
-  (this->activationToken.value, calculatorBase, this->username.value);
+  (this->actualActivationToken.value, calculatorBase, this->username.value);
   return true;
 }
 

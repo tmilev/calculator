@@ -12,11 +12,7 @@ class DatabaseRoutinesGlobalFunctions
 {
 public:
   static bool LogoutViaDatabase();
-  static bool LoginViaDatabase
-(const std::string& inputUsernameUnsafe, const std::string& inputPassword,
- std::string& inputOutputAuthenticationToken, std::string& outputUserRole, std::stringstream* comments)
-
-  ;
+  static bool LoginViaDatabase(UserCalculatorData& theUseR, std::stringstream* comments);
   static bool SetPassword
 (const std::string& inputUsername, const std::string& inputNewPassword, std::string& outputAuthenticationToken,
  std::stringstream& comments)
@@ -258,7 +254,7 @@ public:
    DatabaseRoutines& theRoutines, std::stringstream* failureComments=0);
   void FetchColumns(DatabaseRoutines& theRoutines);
   bool AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure);
-  bool AuthenticateWithToken(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure);
+  bool AuthenticateWithToken(std::stringstream* commentsOnFailure);
   bool Authenticate(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure);
   bool ResetAuthenticationToken(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure);
   std::string GetPassword(DatabaseRoutines& theRoutines);

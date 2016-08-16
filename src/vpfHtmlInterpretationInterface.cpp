@@ -918,7 +918,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     currentUser.username=userTable[i][indexUser];
     currentUser.extraInfoUnsafe=userTable[i][indexExtraInfo];
     currentUser.email=userTable[i][indexEmail];
-    currentUser.activationToken=userTable[i][indexActivationToken];
+    currentUser.actualActivationToken=userTable[i][indexActivationToken];
     currentUser.userRole=userTable[i][indexUserRole];
     if (adminsOnly xor (currentUser.userRole=="admin"))
       continue;
@@ -932,16 +932,15 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     std::string webAddress="https://"+ hostWebAddressWithPort;
     if (!theGlobalVariables.flagRunningAceWebserver)
       webAddress+="/calculator";
-    if (currentUser.activationToken!="activated" && currentUser.activationToken!="error")
+    if (currentUser.actualActivationToken.value!="activated" && currentUser.actualActivationToken.value!="error")
     { isActivated=false;
       numActivatedUsers++;
       oneTableLineStream << "<td><span style=\"color:red\">not activated</span></td>";
-      if (currentUser.activationToken!="")
+      if (currentUser.actualActivationToken.value!="")
         oneTableLineStream << "<td>"
         << "<a href=\""
         << UserCalculator::GetActivationAddressFromActivationToken
-        (currentUser.activationToken.value, webAddress,
-         userTable[i][indexUser])
+        (currentUser.actualActivationToken.value, webAddress, userTable[i][indexUser])
         << "\"> (Re)activate account and change password</a>"
         << "</td>";
       oneTableLineStream << "<td>";
@@ -955,7 +954,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       << "To activate your account and set your password please use the link: "
       << CGI::StringToURLString("\n\n")
       << CGI::StringToURLString( UserCalculator::GetActivationAddressFromActivationToken
-        (currentUser.activationToken.value, webAddress,
+        (currentUser.actualActivationToken.value, webAddress,
          userTable[i][indexUser]) )
       << CGI::StringToURLString("\n\n")
       << "The link does not work with apple safari; if you use safari, please contact us by email"
@@ -971,7 +970,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       oneTableLineStream << "</td>";
       //      else
         //  oneTableLineStream << "<td>Activation token: " << currentUser.activationToken.value << "</td>";
-    } else if (currentUser.activationToken=="error")
+    } else if (currentUser.actualActivationToken=="error")
       oneTableLineStream << "<td>error</td><td></td>";
     else
       oneTableLineStream << "<td><span style=\"color:green\">activated</span></td><td></td><td></td>";

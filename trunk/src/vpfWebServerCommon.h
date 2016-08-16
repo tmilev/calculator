@@ -93,7 +93,7 @@ std::string HtmlSnippets::GetJavascriptStandardCookies()
   << "function storeSettingsSecurity(){\n";
   if (theGlobalVariables.flagLoggedIn)
   { out << "   addCookie(\"authenticationToken\", \""
-    << theWebServer.GetActiveWorker().authenticationToken << "\", 150, true);"
+    << theGlobalVariables.userDefault.actualActivationToken.value << "\", 150, true);"
     << "//150 days is a little longer than a semester\n"
     << "  addCookie(\"username\", \"" << theGlobalVariables.userDefault.username.value << "\", 150, true);\n";
   }

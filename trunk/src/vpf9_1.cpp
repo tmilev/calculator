@@ -489,9 +489,34 @@ void UserCalculatorData::reset()
   for (unsigned i=0; i<this->username.value.size(); i++)
     this->username.value[i]=' ';
   this->username="";
-  for (unsigned i=0; i<this->usernamePlusPassWord.size(); i++)
-    this->usernamePlusPassWord[i]=' ';
-  this->usernamePlusPassWord="";
+  this->resetAuthenticationTokenAndPassword();
+}
+
+void UserCalculatorData::resetPassword()
+{ MacroRegisterFunctionWithName("UserCalculatorData::resetPassword");
+  for (unsigned i=0; i<this->actualShaonedSaltedPassword.size(); i++)
+    this->actualShaonedSaltedPassword[i]=' ';
+  this->actualShaonedSaltedPassword="";
+  for (unsigned i=0; i<this->enteredPassword.size(); i++)
+    this->enteredPassword[i]=' ';
+  this->enteredPassword="";
+  for (unsigned i=0; i<this->enteredShaonedSaltedPassword.size(); i++)
+    this->enteredShaonedSaltedPassword[i]=' ';
+  this->enteredShaonedSaltedPassword="";
+  for (unsigned i=0; i<this->actualActivationToken.value.size(); i++)
+    this->actualActivationToken.value[i]=' ';
+  this->actualActivationToken="";
+  for (unsigned i=0; i<this->enteredActivationToken.value.size(); i++)
+    this->enteredActivationToken.value[i]=' ';
+  this->enteredActivationToken="";
+}
+
+void UserCalculatorData::resetAuthenticationTokenAndPassword()
+{ MacroRegisterFunctionWithName("UserCalculatorData::reset");
+  this->resetPassword();
+  for (unsigned i=0; i<this->actualAuthenticationToken.value.size(); i++)
+    this->actualAuthenticationToken.value[i]=' ';
+  this->actualAuthenticationToken="";
 }
 
 template<>

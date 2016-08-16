@@ -4,9 +4,7 @@
 #include "../vpfHeader7DatabaseShared.h"
 ProjectInformationInstance ProjectInfoVpf8_1MySQLcpp(__FILE__, "MySQL interface. ");
 
-bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
-(const std::string& inputUsernameUnsafe, const std::string& inputPassword,
- std::string& inputOutputAuthenticationToken, std::string& outputUserRole, std::stringstream* comments)
+bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(UserCalculatorData& theUser, std::stringstream* comments)
 {
  (void) inputUsernameUnsafe;
  (void) inputPassword;

@@ -70,5 +70,6 @@ class UserCalculatorData{
   void reset();
   void resetPassword();
   void resetAuthenticationTokenAndPassword();
+  std::string ToStringUnsecure();
 };
 #endif

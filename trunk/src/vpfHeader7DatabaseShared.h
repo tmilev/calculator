@@ -206,15 +206,15 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
   UserCalculator theUser;
   theUser.UserCalculatorData::operator=(theGlobalVariables.userDefault);
   theUser.currentTable="users";
-  //stOutput << "resetting token ... ";
+//  stOutput << "<hr>DEBUG: logout: resetting token ... ";
   theUser.ResetAuthenticationToken(theRoutines, 0);
+//  stOutput << "token reset!... <hr>";
   theGlobalVariables.SetWebInpuT("authenticationToken", "");
   return true;
 #else
   return true;
 #endif
 }
-
 
 ProblemData::ProblemData()
 { this->randomSeed=0;
@@ -499,7 +499,8 @@ bool UserCalculator::FetchOneColumn
 bool UserCalculator::AuthenticateWithToken(std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::AuthenticateWithToken");
   (void) commentsOnFailure;
-  this->currentTable="users";
+//  stOutput << "DEBUG: token-authenticating user: " << this->username.value << " with entered token: " << this->enteredAuthenticationToken.value
+//  << " against actual token: " << this->actualAuthenticationToken.value;
   if (this->enteredAuthenticationToken=="")
     return false;
   TimeWrapper now;
@@ -559,16 +560,18 @@ bool UserCalculator::FetchOneUserRow
     this->email= this->GetSelectedRowEntry("email");
     this->userRole= this->GetSelectedRowEntry("userRole");
     this->username=this->GetSelectedRowEntry("username"); //<-Important! Database lookup may be
-    //case insensitive. The preceding line of code guarantees we have read the username as it is stored in the DB.
+    //case insensitive (this shouldn't be the case, so welcome to the insane design of mysql).
+    //The preceding line of code guarantees we have read the username as it is stored in the DB.
     this->actualShaonedSaltedPassword=this->GetSelectedRowEntry("password");
     this->authenticationTokenCreationTime=this->GetSelectedRowEntry("authenticationCreationTime");
+    this->actualAuthenticationToken=this->GetSelectedRowEntry("authenticationToken");
   }
   return true;
 }
 
 bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::Authenticate");
-  stOutput << "Authenticating user: " << this->username.value << " with password: " << this->enteredPassword;
+  //stOutput << "DEBUG: Authenticating user: " << this->username.value << " with password: " << this->enteredPassword;
   this->currentTable="users";
   std::stringstream secondCommentsStream;
   if (!this->FetchOneUserRow(theRoutines, &secondCommentsStream))
@@ -579,8 +582,10 @@ bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstre
   }
   if (this->AuthenticateWithToken(&secondCommentsStream))
     return true;
+  //stOutput << "DEBUG: User could not authenticate with token.";
   bool result= this->AuthenticateWithUserNameAndPass(theRoutines, commentsOnFailure);
-  this->ResetAuthenticationToken(theRoutines, commentsOnFailure);
+  if (this->enteredPassword!="")
+    this->ResetAuthenticationToken(theRoutines, commentsOnFailure);
   //<- this needs to be fixed: an attacker may cause denial of service by launching fake login attempts.
   return result;
 }
@@ -674,7 +679,7 @@ std::string MySQLdata::GetIdentifieR()const
 bool UserCalculator::ResetAuthenticationToken(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::ResetAuthenticationToken");
   TimeWrapper now;
-//  stOutput << "Resetting authentication token. ";
+//  stOutput << "<hr>Resetting authentication token... ";
   now.AssignLocalTime();
   std::stringstream out;
   out << now.theTimeStringNonReadable << rand();
@@ -691,6 +696,8 @@ bool UserCalculator::ResetAuthenticationToken(DatabaseRoutines& theRoutines, std
       *commentsOnFailure << "Couldn't set column entry for creation time. " << failure.str();
     return false;
   }
+  //stOutput << "done. Token reset to: " << this->actualAuthenticationToken.value << "<br>Call stack: " << crash.GetStackTraceEtcErrorMessage()
+  //<< "<hr>";
   //if (theQuery.flagQueryReturnedResult)
   //  this->authentication="authenticationCreationTime: "
   return true;

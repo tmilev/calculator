@@ -62,11 +62,11 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
       << "executable has file permissions for file " << theGlobalVariables.RelativePhysicalNameCrashLog << " located inside the output folder.";
     theFile << this->theCrashReport.str();
     theFile.close();
-  }
+  } else
+    stOutput << "GlobalVariables.flagNotAllocated is true. ";
   if (this->CleanUpFunction!=0)
-  { this->CleanUpFunction();
-    std::cout.flush();
-  }
+    this->CleanUpFunction();
+  std::cout.flush();
   assert(false);
   return *this;
 }
@@ -517,6 +517,19 @@ void UserCalculatorData::resetAuthenticationTokenAndPassword()
   for (unsigned i=0; i<this->actualAuthenticationToken.value.size(); i++)
     this->actualAuthenticationToken.value[i]=' ';
   this->actualAuthenticationToken="";
+}
+
+std::string UserCalculatorData::ToStringUnsecure()
+{ MacroRegisterFunctionWithName("UserCalculatorData::ToStringUnsecure");
+  std::stringstream out;
+  out << "User: " << this->username.value
+  << "\n<br>Actual authentication token: "
+  << this->actualAuthenticationToken.value
+  << "\n<br>Entered authentication token: "
+  << this->enteredAuthenticationToken.value
+  << "\n<br>Entered password: "
+  << this->enteredPassword;
+  return out.str();
 }
 
 template<>

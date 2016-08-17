@@ -568,6 +568,7 @@ bool UserCalculator::FetchOneUserRow
 
 bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::Authenticate");
+  stOutput << "Authenticating user: " << this->username.value << " with password: " << this->enteredPassword;
   this->currentTable="users";
   std::stringstream secondCommentsStream;
   if (!this->FetchOneUserRow(theRoutines, &secondCommentsStream))

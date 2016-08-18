@@ -302,7 +302,7 @@ std::string HtmlInterpretation::GetExamPage()
     out << theFile.outputHtmlHeadNoTag;
   out << "</head>"
   << "<body onload=\"loadSettings(); initializeMathQuill(); initializeButtons();\">\n";
-  out << "DEbUG: HERE I AM";
+//  out << "DEbUG: HERE I AM";
   out << problemBody;
   if (theFile.logCommandsProblemGeneration!="")
     out << "<hr>" << theFile.logCommandsProblemGeneration << "<hr>";

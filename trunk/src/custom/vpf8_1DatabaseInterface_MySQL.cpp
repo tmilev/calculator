@@ -4,80 +4,50 @@
 #include "../vpfHeader7DatabaseShared.h"
 ProjectInformationInstance ProjectInfoVpf8_1MySQLcpp(__FILE__, "MySQL interface. ");
 
-bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(UserCalculatorData& theUser, std::stringstream* comments)
+bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
+(UserCalculatorData& theUseR, std::stringstream* comments)
 {
- (void) inputUsernameUnsafe;
- (void) inputPassword;
- (void) inputOutputAuthenticationToken;
- (void) outputUserRole;
- (void) comments;
+  (void) comments;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
   DatabaseRoutines theRoutines;
-  UserCalculator theUser;
-  theUser.username.value=inputUsernameUnsafe;
-  theUser.currentTable="users";
-  theUser.enteredPassword=inputPassword;
-  theUser.enteredAuthenticationToken=inputOutputAuthenticationToken;
-  if (!theRoutines.startMySQLDatabaseIfNotAlreadyStarted(comments))
-  { if (comments!=0)
-      *comments << "Failed to start database. ";
-    return false;
-  }
-  if (!theRoutines.TableExists("users", comments) || theRoutines.flagFirstLogin)
-  { //stOutput << "DEBUG: GOT TO HERE\n" ;
-    if (theUser.enteredPassword!="" && theUser.username!="")
-    { //stOutput << "DEBUG: FIRST LOGIN\n" ;
-      if (comments!=0)
-        *comments << "<b>First login! Setting first password as the calculator admin pass. </b>";
-      theUser.CreateMeIfUsernameUnique(theRoutines, comments);
-      theUser.SetColumnEntry("activationToken", "activated", theRoutines, comments);
-      theUser.SetColumnEntry("userRole", "admin", theRoutines, comments);
-      outputUserRole="admin";
-      //stOutput << "DEBG: comments in first login: " << comments->str();
-      return true;
-    }
-  }
-  //if (comments!=0)
-  //{ //*comments << "DEBUG: Attempting to login with user: " << inputUsernameUnsafe
-    //<< "<br>pass: " << inputPassword
-    //<< "<br>token: " << inputOutputAuthenticationToken << "<br>";
-  //}
-  if (theUser.Authenticate(theRoutines, comments))
-  { inputOutputAuthenticationToken=theUser.actualAuthenticationToken.value;
-    outputUserRole=theUser.userRole;
-//    *comments << "SUCCESS <br>DEBUG The actual authenticationToken is now: " << theUser.actualAuthenticationToken.value;
+  UserCalculator userWrapper;
+  userWrapper.::UserCalculatorData::operator=(theUseR);
+  userWrapper.currentTable="users";
+  if (userWrapper.Authenticate(theRoutines, comments))
+  { theUseR=userWrapper;
     return true;
   }
-  if (inputOutputAuthenticationToken!="" && comments!=0)
-  { *comments << "<b> Authentication with token " << inputOutputAuthenticationToken << " failed. </b>";
-//    *comments << "DEBUG the actual token is: " << theUser.actualAuthenticationToken.value;
+  if (userWrapper.enteredAuthenticationToken!="" && comments!=0)
+  { *comments << "<b> Authentication of user: " << userWrapper.username.value
+    << " with token " << userWrapper.enteredAuthenticationToken.value << " failed. </b>";
+    //*comments << "<br>DEBUG: actual token: " << userWrapper.actualAuthenticationToken.value
+    //<< "<br>database user: " << theRoutines.databaseUser << "<br>database name: " << theRoutines.theDatabaseName << "<br>";
   }
   std::string activationTokenUnsafe;
-  if (theGlobalVariables.userCalculatorRequestType=="changePassword")
-  { if (!theUser.FetchOneColumn("activationToken", activationTokenUnsafe, theRoutines, comments))
-      *comments << "Failed to fetch activationToken column.";
-    else
-      if (activationTokenUnsafe!="" && activationTokenUnsafe!="activated" &&
-          inputPassword==activationTokenUnsafe)
-      { inputOutputAuthenticationToken="";
-        outputUserRole=theUser.userRole;
-        return true;
-      }
-  }
-  inputOutputAuthenticationToken=theUser.actualAuthenticationToken.value;
-  if (theUser.username=="admin" && theUser.enteredPassword!="")
-    if (!theUser.Iexist(theRoutines))
+  if (theGlobalVariables.userCalculatorRequestType=="changePassword" ||
+      theGlobalVariables.userCalculatorRequestType=="activateAccount")
+    if (userWrapper.enteredActivationToken!="")
+      if (userWrapper.actualActivationToken!="activated" &&
+          userWrapper.actualActivationToken!="" &&
+          userWrapper.actualActivationToken!="error")
+        if (userWrapper.enteredActivationToken.value==userWrapper.actualActivationToken.value)
+        { theUseR=userWrapper;
+          return true;
+        }
+  if (userWrapper.username.value=="admin" && userWrapper.enteredPassword!="")
+    if (!userWrapper.Iexist(theRoutines))
     { if (comments!=0)
         *comments << "<b>First login of user admin: setting admin pass. </b>";
-      theUser.CreateMeIfUsernameUnique(theRoutines, comments);
-      theUser.SetColumnEntry("activationToken", "activated", theRoutines, comments);
-      theUser.SetColumnEntry("userRole", "admin", theRoutines, comments);
-      outputUserRole="admin";
+      userWrapper.CreateMeIfUsernameUnique(theRoutines, comments);
+      userWrapper.SetColumnEntry("activationToken", "activated", theRoutines, comments);
+      userWrapper.SetColumnEntry("userRole", "admin", theRoutines, comments);
+      userWrapper.userRole="admin";
+      theUseR=userWrapper;
       return true;
     }
   if (comments!=0)
-    *comments << DatabaseRoutines::ToStringSuggestionsReasonsForFailure(inputUsernameUnsafe, theRoutines, theUser);
+    *comments << DatabaseRoutines::ToStringSuggestionsReasonsForFailure(userWrapper.username.value, theRoutines, userWrapper);
   return false;
 #else
   return true;

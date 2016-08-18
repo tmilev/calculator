@@ -32,7 +32,7 @@ extern void ignoreUserAbortSignal();
 
 extern void SleepFunction(int nanoseconds);
 extern void InitializeGlobalObjects();
-extern void InitializeTimer();
+extern void InitializeTimer(void* desiredStartTime=0);
 extern void CreateTimerThread();
 
 extern void* RunTimerVoidPtr(void* ptr);

@@ -2273,6 +2273,7 @@ std::string Calculator::ToString()
   out2 << " Total number of pattern matches performed: " << this->TotalNumPatternMatchedPerformed << "";
   double elapsedSecs=theGlobalVariables.GetElapsedSeconds();
   out2 << "<br>Computation time: " << elapsedSecs << " seconds (" << elapsedSecs*1000 << " milliseconds).<br>";
+  out2 << "<br>Computation time: " << elapsedSecs << " seconds (" << elapsedSecs*1000 << " milliseconds).<br>";
   std::stringstream tempStreamTime;
   tempStreamTime << " Of them " << this->StartTimeEvaluationInSecondS << " seconds (" << this->StartTimeEvaluationInSecondS*1000
   << " millisecond(s)) boot + " << elapsedSecs-this->StartTimeEvaluationInSecondS << " (" << (elapsedSecs-this->StartTimeEvaluationInSecondS)*1000

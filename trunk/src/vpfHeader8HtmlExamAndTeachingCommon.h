@@ -242,21 +242,21 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
 bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadDatabaseInfo");
 #ifdef MACRO_use_MySQL
-  DatabaseRoutines theRoutines;
-  this->currentUser.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
-  if (this->currentUser.problemDataString=="")
+  this->currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
+  if (this->currentUseR.problemDataString=="")
   { comments << "Failed to load current user's problem save-file. ";
     return false;
   }
-  if (!this->currentUser.InterpretDatabaseProblemData(this->currentUserDatabaseString, comments))
+  if (!this->currentUseR.InterpretDatabaseProblemData(this->currentUseR.problemDataString.value, comments))
   { comments << "Failed to interpret user's problem save-file. ";
     return false;
   }
-  this->theProblemData=this->currentUser.GetProblemDataAddIfNotPresent(this->fileName);
-  if (this->currentExamHomE=="")
-    return true;
+  this->theProblemData=this->currentUseR.GetProblemDataAddIfNotPresent(this->fileName);
+  //if (this->currentExamHomE=="")
+  //  return true;
   //stOutput << "loading db, problem collection: " << this->currentExamHomE;
-  this->currentUser.currentTable=theRoutines.GetTableUnsafeNameUsersOfFile(this->currentExamHomE);
+  int toDoFixDeadlines;
+/*  this->currentUser.currentTable=theRoutines.GetTableUnsafeNameUsersOfFile(this->currentExamHomE);
   //stOutput << "loading extra info ... " << this->currentExamHomE;
   if(!this->currentUser.FetchOneColumn("extraInfo", this->currentUser.extraInfoUnsafe, theRoutines, &comments))
   { comments << "Failed to load the section/group of the current user. ";
@@ -279,7 +279,8 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   //stOutput << "<hr><hr>DEBUG read databaseProblemAndHomeworkGroupList: "
   //<< this->databaseProblemAndHomeworkGroupList;
   this->currentUser.ComputePointsEarned
-  (this->databaseProblemAndHomeworkGroupList, this->databaseProblemWeights);
+  (this->databaseProblemAndHomeworkGroupList, this->databaseProblemWeights);*/
+  theGlobalVariables.userDefault=this->currentUseR;
   return true;
 #else
   comments << "Database not available. ";
@@ -292,6 +293,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
   this->RelativePhysicalFileNameWithFolder=
   this->fileName
   ;
+  (void) doLoadDatabase;
   std::fstream theFile;
   if (!FileOperations::OpenFileVirtual(theFile, this->RelativePhysicalFileNameWithFolder, false, false, false))
   { std::string theFileName;
@@ -309,7 +311,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
   this->flagIsForReal=theGlobalVariables.UserRequestRequiresLoadingRealExamData();
 #ifdef MACRO_use_MySQL
   this->currentExamHomE=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
-  if (doLoadDatabase)
+//  if (doLoadDatabase)
     this->LoadDatabaseInfo(comments);
 #endif // MACRO_use_MySQL
   if (!this->flagIsForReal)
@@ -1645,7 +1647,8 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   bool isActualProblem=(inputOutput.GetTagClass()=="calculatorExamProblem");
 #ifdef MACRO_use_MySQL
   if (isActualProblem)
-  { if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { int todoDeadlines;
+    /*if (!theGlobalVariables.UserDefaultHasAdminRights())
       out << this->ToStringOnEDeadlineFormatted
       (cleaneduplink, this->currentUser.extraInfoUnsafe, isActualProblem, problemAlreadySolved);
     else if (!theGlobalVariables.UserStudentViewOn())
@@ -1655,7 +1658,7 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
       out << this->ToStringDeadlinesFormatted
       (cleaneduplink,
        CGI::URLStringToNormal(theGlobalVariables.GetWebInput("studentSection")),
-       isActualProblem, problemAlreadySolved);
+       isActualProblem, problemAlreadySolved);*/
   }
 #endif // MACRO_use_MySQL
   if (!theGlobalVariables.UserDefaultHasAdminRights() || theGlobalVariables.UserStudentViewOn())

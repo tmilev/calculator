@@ -420,7 +420,7 @@ std::string HtmlInterpretation::SubmitProblem()
   Calculator theInterpreter;
   if (!theProblem.flagRandomSeedGiven && !theProblem.flagIsForReal)
     out << "<b>Random seed not given.</b>";
-//  stOutput << "<b>debug remove when done: Random seed: " << theProblem.theProblemData.randomSeed << "</b>";
+//  stOutput << "<b>DEBUG remove when done: Random seed: " << theProblem.theProblemData.randomSeed << "</b>";
   theProblem.currentExamHomE         = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
   if (theProblem.currentExamHomE == "" &&
       !theGlobalVariables.flagRunningAsProblemInterpreter &&
@@ -510,9 +510,10 @@ std::string HtmlInterpretation::SubmitProblem()
   int correctSubmissionsRelevant=0;
   int totalSubmissionsRelevant=0;
   DatabaseRoutines theRoutines;
-  theProblem.currentUser.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
+  UserCalculator& theUser=theProblem.currentUseR;
+  theUser.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
   if (theProblem.flagIsForReal)
-  { if (!theProblem.currentUser.InterpretDatabaseProblemData(theProblem.currentUserDatabaseString, comments))
+  { if (!theUser.InterpretDatabaseProblemData(theUser.problemDataString.value, comments))
     { out << "<b>Failed to load user information from database. Answer not recorded. "
       << "This should not happen. " << CalculatorHTML::BugsGenericMessage << "</b>";
       theProblem.flagIsForReal=false;
@@ -540,7 +541,7 @@ std::string HtmlInterpretation::SubmitProblem()
      //     stOutput
         bool unused=false;
         std::string theDeadlineString=theProblemHome.GetDeadline
-        (theProblem.fileName, theProblem.currentUser.extraInfoUnsafe, true, unused);
+        (theProblem.fileName, theProblem.currentUseR.extraInfoUnsafe, true, unused);
         if (theDeadlineString!="" && theDeadlineString!=" ")
         { TimeWrapper now, deadline; //<-needs a fix for different time formats.
         //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
@@ -588,7 +589,7 @@ std::string HtmlInterpretation::SubmitProblem()
   if (!isCorrect)
   { out << "<span style=\"color:red\"><b>Your answer appears to be incorrect. </b></span>";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
-      out << "For debugging: the calculator output is: " << theInterpreter.outputString
+      out << "For debug purposes: the calculator output is: " << theInterpreter.outputString
       << "Comments: " << theInterpreter.Comments.str();
   } else
     out << "<span style=\"color:green\"><b>Correct! </b></span>";
@@ -596,8 +597,8 @@ std::string HtmlInterpretation::SubmitProblem()
 #ifdef MACRO_use_MySQL
   if (theProblem.flagIsForReal)
   { std::stringstream comments;
-    theProblem.currentUser.SetProblemData(theProblem.fileName, theProblem.theProblemData);
-    if (!theProblem.currentUser.StoreProblemDataToDatabase(theRoutines, comments))
+    theProblem.currentUseR.SetProblemData(theProblem.fileName, theProblem.theProblemData);
+    if (!theProblem.currentUseR.StoreProblemDataToDatabase(theRoutines, comments))
       out << "<tr><td><b>This shouldn't happen and may be a bug: failed to store your answer in the database. "
       << CalculatorHTML::BugsGenericMessage << "</b><br>Comments: "
       << comments.str() << "</td></tr>";

@@ -565,6 +565,7 @@ bool UserCalculator::FetchOneUserRow
     this->actualShaonedSaltedPassword=this->GetSelectedRowEntry("password");
     this->authenticationTokenCreationTime=this->GetSelectedRowEntry("authenticationCreationTime");
     this->actualAuthenticationToken=this->GetSelectedRowEntry("authenticationToken");
+    this->problemDataString=this->GetSelectedRowEntry("problemData");
   }
   return true;
 }
@@ -993,12 +994,13 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
   MapList<std::string, std::string, MathRoutines::hashString> theMap;
   if (!CGI::ChopCGIString(inputData, theMap, commentsOnFailure))
     return false;
-//  stOutput << "<hr>DEBUG: Interpreting: <br>" << inputData << "<hr>";
+//  stOutput << "<hr>DEBUG: Interpreting: <br>" << CGI::URLKeyValuePairsToNormalRecursiveHtml( inputData )<< "<hr>";
   this->flagRandomSeedComputed=false;
   if (theGlobalVariables.UserRequestRequiresLoadingRealExamData() )
     if (theMap.Contains("randomSeed"))
     { this->randomSeed=atoi(theMap.GetValueCreateIfNotPresent("randomSeed").c_str());
       this->flagRandomSeedComputed=true;
+//      stOutput << "<br>random seed found. <br>";
     }
   this->theAnswers.SetSize(0);
   bool result=true;
@@ -1061,6 +1063,8 @@ bool UserCalculator::InterpretDatabaseProblemData
   this->problemNames.SetExpectedSize(theMap.size());
   this->problemData.SetExpectedSize(theMap.size());
   bool result=true;
+//  stOutput << "<hr>DEBUG: Interpreting: <br>" << CGI::URLKeyValuePairsToNormalRecursiveHtml( theInfo )<< "<br>Map has: "
+//  << theMap.size() << " entries. ";
   for (int i=0; i<theMap.size(); i++)
   { this->problemNames.AddOnTop(CGI::URLStringToNormal(theMap.theKeys[i]));
     this->problemData.SetSize(this->problemData.size+1);
@@ -1084,8 +1088,10 @@ bool UserCalculator::StoreProblemDataToDatabase
   for (int i=0; i<this->problemNames.size; i++)
     problemDataStream << CGI::StringToURLString(this->problemNames[i]) << "="
     << CGI::StringToURLString( this->problemData[i].Store()) << "&";
+  //stOutput << "DEBUG: storing in database string: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(problemDataStream.str());
   this->currentTable="users";
-  return this->SetColumnEntry("problemData", problemDataStream.str(), theRoutines, &commentsOnFailure);
+  bool result= this->SetColumnEntry("problemData", problemDataStream.str(), theRoutines, &commentsOnFailure);
+  return result;
 }
 
 bool DatabaseRoutines::AddUsersFromEmails

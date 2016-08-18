@@ -3053,7 +3053,7 @@ int WebServer::Run()
     this->GetActiveWorker().userAddress.theObject=userAddressBuffer;
     this->currentlyConnectedAddresses.AddMonomial(this->GetActiveWorker().userAddress, 1 );
 //    theLog << this->ToStringStatus();
-    gettimeofday(&timeBeforeFork);
+    gettimeofday(&timeBeforeFork, NULL);
     this->GetActiveWorker().ProcessPID=fork(); //creates an almost identical copy of this process.
     //The original process is the parent, the almost identical copy is the child.
     //theLog << "\r\nChildPID: " << this->childPID;

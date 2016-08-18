@@ -30,7 +30,7 @@ public:
   List<List<double> > timeIntermediatePerAttempt;
   List<List<std::string> > timeIntermediateComments;
 #ifdef MACRO_use_MySQL
-  UserCalculator currentUser;
+  UserCalculator currentUseR;
 #endif
   static std::string stringScoredQuizzes;
   static std::string stringPractice;
@@ -69,7 +69,6 @@ public:
   List<List<std::string> > userTablE;
   List<std::string> labelsUserTablE;
   List<std::string> problemListOfParent;
-  std::string currentUserDatabaseString;
   std::string currentProblemCollectionDatabaseString;
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;

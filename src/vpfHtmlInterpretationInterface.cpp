@@ -240,6 +240,7 @@ std::string HtmlInterpretation::GetExamPageInterpreter()
   CalculatorHTML theFile;
   std::stringstream out;
   out << theFile.LoadAndInterpretCurrentProblemItem();
+//  out << "asdf;kajdfljadljflsd";
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   return out.str();
 
@@ -301,6 +302,7 @@ std::string HtmlInterpretation::GetExamPage()
     out << theFile.outputHtmlHeadNoTag;
   out << "</head>"
   << "<body onload=\"loadSettings(); initializeMathQuill(); initializeButtons();\">\n";
+  out << "DEbUG: HERE I AM";
   out << problemBody;
   if (theFile.logCommandsProblemGeneration!="")
     out << "<hr>" << theFile.logCommandsProblemGeneration << "<hr>";

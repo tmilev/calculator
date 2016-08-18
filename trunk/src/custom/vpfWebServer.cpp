@@ -2975,6 +2975,7 @@ int WebServer::Run()
   this->NumFailedSelectsSoFar=0;
   long long previousReportedNumberOfSelects=0;
   int previousServerStatReport=0;
+  timeval timeBeforeFork;
   while(true)
   { // main accept() loop
 //    theLog << logger::red << "select returned!" << logger::endL;
@@ -3052,6 +3053,7 @@ int WebServer::Run()
     this->GetActiveWorker().userAddress.theObject=userAddressBuffer;
     this->currentlyConnectedAddresses.AddMonomial(this->GetActiveWorker().userAddress, 1 );
 //    theLog << this->ToStringStatus();
+    gettimeofday(&timeBeforeFork);
     this->GetActiveWorker().ProcessPID=fork(); //creates an almost identical copy of this process.
     //The original process is the parent, the almost identical copy is the child.
     //theLog << "\r\nChildPID: " << this->childPID;
@@ -3063,7 +3065,7 @@ int WebServer::Run()
       //theGlobalVariables.WebServerTimerPing=this->WorkerTimerPing;
       theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
       crash.CleanUpFunction=WebServer::SignalActiveWorkerDoneReleaseEverything;
-      InitializeTimer();
+      InitializeTimer(&timeBeforeFork);
       CreateTimerThread();
       this->SSLServerSideHandShake();
       if (theGlobalVariables.flagSSLisAvailable &&

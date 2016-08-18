@@ -18,8 +18,11 @@ double GetElapsedTimeInSeconds()
   return ((double) miliSeconds)/1000;
 }
 
-void InitializeTimer()
-{
+void InitializeTimer( void* desiredStartTime)
+{ if (desiredStartTime!=0)
+  { ComputationStartGlobal=*( static_cast<timeval*>(desiredStartTime) );
+    return;
+  }
   gettimeofday(&ComputationStartGlobal, NULL);
 }
 

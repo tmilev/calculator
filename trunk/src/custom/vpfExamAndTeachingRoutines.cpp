@@ -44,8 +44,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   if (this->flagIsExamProblem)
   { bool problemAlreadySolved=false;
 #ifdef MACRO_use_MySQL
-    if (this->currentUser.problemNames.Contains(this->fileName))
-    { ProblemData& theProbData=this->currentUser.problemData[this->currentUser.problemNames.GetIndex(this->fileName)];
+    if (this->currentUseR.problemNames.Contains(this->fileName))
+    { ProblemData& theProbData=this->currentUseR.problemData[this->currentUseR.problemNames.GetIndex(this->fileName)];
       if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size)
         problemAlreadySolved=true;
     }
@@ -65,7 +65,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     }
 #ifdef MACRO_use_MySQL
     out << theProblemHome.ToStringOnEDeadlineFormatted
-    (this->fileName, this->currentUser.extraInfoUnsafe, true, problemAlreadySolved);
+    (this->fileName, this->currentUseR.extraInfoUnsafe, true, problemAlreadySolved);
 #endif
     out << "<br>";
   }
@@ -144,8 +144,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     //if (!this->currentUser.InterpretDatabaseProblemData(this->currentUserDatabaseString, comments))
       //out << "<b>Error: corrupt database string. </b>";
     //else
-    this->currentUser.SetProblemData(this->fileName, this->theProblemData);
-    if (!this->currentUser.StoreProblemDataToDatabase(theRoutines, comments))
+    this->currentUseR.SetProblemData(this->fileName, this->theProblemData);
+    if (!this->currentUseR.StoreProblemDataToDatabase(theRoutines, comments))
       out << "<b>Error: failed to store problem in database. </b>" << comments.str();
   }
   //out << "Current collection problems: " << this->databaseProblemList.ToStringCommaDelimited()
@@ -166,9 +166,9 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   if (theGlobalVariables.UserGuestMode())
     exerciseRequest="exerciseNoLogin";
   if (theGlobalVariables.UserGuestMode())
-  { out << "<b>Guest mode</b><br>No points scored/deadlines. <hr>"
+  { out << "<b>Guest mode</b>No points scored/deadlines. <hr>"
     << "<a href=\"login\" "
-    << ">Log in</a><br>";
+    << ">Log in</a>";
   }
   List<std::string> randomSeedContainer;
   randomSeedContainer.AddOnTop("randomSeed");
@@ -185,7 +185,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?"
         << this->ToStringCalculatorArgumentsForProblem
         (theGlobalVariables.userCalculatorRequestType, "true", "")
-        << "\">Student view</a><br>";
+        << "\">Student view</a>" << linkSeparator;
       for (int i=0; i<this->databaseStudentSectionS.size; i++)
         if (this->databaseStudentSectionS[i]!="")
           out << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?"
@@ -381,8 +381,8 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
   #ifdef MACRO_use_MySQL
   bool noSubmissionsYet=false;
   bool weightPrinted=false;
-  if (this->currentUser.problemNames.Contains(cleaneduplink))
-  { ProblemData& theProbData=this->currentUser.problemData[this->currentUser.problemNames.GetIndex(cleaneduplink)];
+  if (this->currentUseR.problemNames.Contains(cleaneduplink))
+  { ProblemData& theProbData=this->currentUseR.problemData[this->currentUseR.problemNames.GetIndex(cleaneduplink)];
     if (!theProbData.flagProblemWeightIsOK)
     { out << "<span style=\"color:orange\">No point weight assigned yet. </span>";
       if (theProbData.ProblemWeightUserInput!="")
@@ -476,8 +476,8 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   //if (inputOutput.GetTagClass()=="calculatorExamIntermediate")
 #ifdef MACRO_use_MySQL
   bool problemAlreadySolved=false;
-  if (this->currentUser.problemNames.Contains(cleaneduplink))
-  { ProblemData& theProbData=this->currentUser.problemData[this->currentUser.problemNames.GetIndex(cleaneduplink)];
+  if (this->currentUseR.problemNames.Contains(cleaneduplink))
+  { ProblemData& theProbData=this->currentUseR.problemData[this->currentUseR.problemNames.GetIndex(cleaneduplink)];
     if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size)
       problemAlreadySolved=true;
   }

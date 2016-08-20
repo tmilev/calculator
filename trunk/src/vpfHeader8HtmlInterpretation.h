@@ -25,6 +25,7 @@ public:
   bool flagTagHtmlPresent;
   bool flagTagHeadPresent;
   bool flagTagBodyPresent;
+  bool flagUseNavigationBar;
   double timeToParseHtml;
   List<double> timePerAttempt;
   List<List<double> > timeIntermediatePerAttempt;

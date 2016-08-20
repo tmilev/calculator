@@ -31,6 +31,7 @@ CalculatorHTML::CalculatorHTML()
   this->flagTagHeadPresent=false;
   this->flagTagHtmlPresent=false;
   this->flagTagBodyPresent=false;
+  this->flagUseNavigationBar=true;
   this->timeToParseHtml=0;
 }
 
@@ -359,15 +360,15 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
     out << "<b>Failed to interpret file: " << this->fileName << "</b>. Comments: " << this->comments.str();
     return out.str();
   }
-  std::string linkSeparator=" | ";
-  std::string linkBigSeparator=" || ";
-
-  if (!theGlobalVariables.flagRunningAsProblemInterpreter)
+  if (this->flagUseNavigationBar && !theGlobalVariables.flagRunningAsProblemInterpreter)
+  { std::string linkSeparator=" | ";
+    std::string linkBigSeparator=" || ";
     out << "<nav>"
     << this->outputHtmlNavigatioN
     << linkBigSeparator << "<small>Generated in "
     << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds()-startTime)
     << " second(s).</small>" << "</nav> ";
+   }
   out << this->outputHtmlBodyNoTag;
   return out.str();
 }
@@ -386,6 +387,7 @@ void CalculatorHTML::LoadCurrentProblemItem()
   if (theGlobalVariables.UserGuestMode() ||
       theGlobalVariables.flagRunningAsProblemInterpreter)
     needToLoadDatabase=false;
+  this->flagUseNavigationBar=(theGlobalVariables.GetWebInput("navigationBar")=="true");
   if (!needToFindDefault)
     needToFindDefault=!this->LoadMe(needToLoadDatabase, this->comments);
   else

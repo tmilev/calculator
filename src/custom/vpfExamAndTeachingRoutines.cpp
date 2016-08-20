@@ -494,3 +494,7 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
 { (void) inputOutput;
 }
+
+void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
+{ (void) inputOutput;
+}

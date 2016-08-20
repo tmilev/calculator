@@ -44,6 +44,8 @@ public:
   std::string outputHtmlNavigatioN;
   std::string currentExamHomE;
   std::string logCommandsProblemGeneration;
+  std::string theTopicList;
+
   static const std::string BugsGenericMessage;
   HashedList<std::string, MathRoutines::hashString> tagKeysNoValue;
   List<std::string> calculatorClasses;
@@ -132,6 +134,7 @@ public:
   bool PrepareClassData(std::stringstream& commentsOnFailure);
   void InterpretManageClass(SyntacticElementHTML& inputOutput);
   void InterpretTopicList(SyntacticElementHTML& inputOutput);
+  void InterpretTableOfContents(SyntacticElementHTML& inputOutput);
   std::string ToStringClassDetails
 ( bool adminsOnly,
   const SyntacticElementHTML& inputElement

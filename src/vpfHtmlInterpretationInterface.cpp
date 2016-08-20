@@ -272,6 +272,8 @@ std::string HtmlInterpretation::GetPageFromTemplate()
     << "<br>Comments:<br> " << comments.str() << "</body></html>";
     return out.str();
   }
+  out << "<!-- File automatically generated from template: " << theGlobalVariables.GetWebInput("fileName")
+  << ".-->\n";
   out << "<html><!-- tag added automatically; user-specified html tag ignored-->\n";
   out << "<head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << thePage.outputHtmlHeadNoTag;

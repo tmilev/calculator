@@ -765,6 +765,7 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator()
   tagClass=="calculatorExamProblem" || tagClass== "calculatorExamIntermediate" ||
   tagClass=="calculatorAnswer" || tagClass=="calculatorManageClass" ||
   tagClass=="generateTopicTable" ||
+  tagClass=="generateTableOfContents" ||
 //  tagClass=="htmlStart" || tagClass=="htmlFinish" ||
 //  tagClass=="bodyStart" || tagClass=="bodyFinish" ||
 //  tagClass=="headStart" || tagClass=="headFinish" ||
@@ -1497,6 +1498,8 @@ void CalculatorHTML::InterpretNotByCalculator(SyntacticElementHTML& inputOutput)
     this->InterpretManageClass(inputOutput);
   else if (tagClass=="generateTopicTable")
     this->InterpretTopicList(inputOutput);
+  else if (tagClass=="generateTableOfContents")
+    this->InterpretTableOfContents(inputOutput);
 }
 
 std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink)
@@ -2052,6 +2055,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     this->calculatorClasses.AddOnTop("setCalculatorExamProblem");
     this->calculatorClasses.AddOnTop("setCalculatorExamHome");
     this->calculatorClasses.AddOnTop("generateTopicTable");
+    this->calculatorClasses.AddOnTop("generateTableOfContents");
     this->calculatorClasses.AddListOnTop(this->calculatorClassesAnswerFields);
   }
   this->eltsStack.SetSize(0);

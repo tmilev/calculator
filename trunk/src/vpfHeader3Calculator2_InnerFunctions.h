@@ -67,6 +67,7 @@ public:
   static bool innerTan(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCot(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCoefficientOf(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerFloor(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerArcsin(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerArccos(Calculator& theCommands, const Expression& input, Expression& output);

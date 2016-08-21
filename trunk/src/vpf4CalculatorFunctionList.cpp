@@ -976,6 +976,12 @@ D-B;\
    "ExpressSecViaCosine"
    )
    ;
+  this->AddOperationInnerHandler
+  ("floor", CalculatorFunctionsGeneral::innerFloor, "",
+   "Floor function.",
+   "floor(3/7)", true, false, "CalculatorFunctionsGeneral::innerFloor",
+   "floor")
+   ;
 
   this->AddOperationInnerHandler
   ("DoubleValue", CalculatorFunctionsGeneral::innerEvaluateToDouble, "",

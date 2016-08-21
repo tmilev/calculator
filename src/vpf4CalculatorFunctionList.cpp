@@ -537,7 +537,7 @@ D-B;\
   this->AddOperationInnerHandler
   ("\\times", CalculatorFunctionsGeneral::innerCrossProduct, "",
    "Cross product in IIId. Returns error if given two non-3d vectors.",
-   "(1,-2,3 ) \\times( 1,-1,-1)", true, false, "CalculatorFunctionsGeneral::innerCrossProduct");
+   "(1,-2,3 ) \\times( 1,-1,-1)", true, false, "CalculatorFunctionsGeneral::innerCrossProduct", "crossProduct");
 
   this->AddOperationInnerHandler
   ("ElementWeylAlgebraDO", Calculator::innerElementWeylAlgebra, "",

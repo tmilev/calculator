@@ -2219,6 +2219,9 @@ bool Expression::NeedsParenthesisForMultiplication()const
   if (this->StartsWith(this->owner->opPlus()) || this->StartsWith(this->owner->opMinus()) ||
       this->StartsWith(this->owner->opDefine()))
     return true;
+  if (this->IsSequenceNElementS())
+    if (this->size()>2)
+      return false;
   if (this->IsOfType<Rational>())
     return this->GetValue<Rational>().NeedsParenthesisForMultiplication();
   if (this->IsOfType<AlgebraicNumber>())

@@ -208,9 +208,7 @@ std::string HtmlInterpretation::ClonePageResult()
       !theGlobalVariables.flagUsingSSLinCurrentConnection)
     return "<b>Cloning problems allowed only for logged-in admins under ssl connection. </b>";
   std::string fileNameResulT = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
-  std::string fileNameResultRelative = "ProblemCollections/"+fileNameResulT;
-  std::string fileNameToBeCloned = "ProblemCollections/"+
-  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"));
+  std::string fileNameToBeCloned = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"));
   std::stringstream out;
   std::string startingFileString;
   if (!FileOperations::LoadFileToStringVirtual(fileNameToBeCloned, startingFileString, out))
@@ -218,12 +216,12 @@ std::string HtmlInterpretation::ClonePageResult()
     return out.str();
   }
   std::fstream theFile;
-  if (FileOperations::FileExistsVirtual(fileNameResultRelative))
-  { out << "<b>File: " << fileNameResultRelative << " already exists. </b>";
+  if (FileOperations::FileExistsVirtual(fileNameResulT))
+  { out << "<b>File: " << fileNameResulT << " already exists. </b>";
     return out.str();
   }
-  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, fileNameResultRelative, false, false, false))
-  { out << "<b><span style=\"color:red\">Failed to open output file: " << fileNameResultRelative << ". </span></b>";
+  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, fileNameResulT, false, false, false))
+  { out << "<b><span style=\"color:red\">Failed to open output file: " << fileNameResulT << ". </span></b>";
     return out.str();
   }
   theFile << startingFileString;
@@ -776,6 +774,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp()
   theFormat.flagExpressionIsFinal=true;
   theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
   theFormat.flagUseQuotes=false;
+  theFormat.flagUseLatex=true;
   bool isFirst=true;
   const Expression& currentE=
   theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size()-1][1];
@@ -792,6 +791,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp()
       theFormat.flagExpressionIsFinal=true;
       theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
       theFormat.flagUseQuotes=false;
+      theFormat.flagUseLatex=true;
       if (currentE[j].IsOfType<std::string>())
         out << currentE[j].GetValue<std::string>();
       else

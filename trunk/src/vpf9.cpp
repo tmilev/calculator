@@ -446,8 +446,9 @@ std::string FileOperations::GetFileExtensionWithDot(const std::string& theFileNa
   return "";
 }
 
-bool FileOperations::IsOKfileNameVirtual(const std::string& theFileName)
+bool FileOperations::IsOKfileNameVirtual(const std::string& theFileName, bool accessSensitiveFolders)
 { MacroRegisterFunctionWithName("FileOperations::IsOKfileNameVirtual");
+  (void) accessSensitiveFolders;
   std::string theFileNameNoPath=FileOperations::GetFileNameFromFileNameWithPath(theFileName);
   std::string theFilePath=FileOperations::GetPathFromFileNameWithPath(theFileName);
 //  std::cout << "Calling IsOKfileNameVirtual, theFilePath: "
@@ -498,10 +499,10 @@ std::string FileOperations::GetPathFromFileNameWithPath(const std::string& fileN
 }
 
 bool FileOperations::GetFolderFileNamesVirtual
-(const std::string& theFolderName, List<std::string>& outputFileNamesNoPath, List<std::string>* outputFileTypes)
+(const std::string& theFolderName, List<std::string>& outputFileNamesNoPath, List<std::string>* outputFileTypes, bool accessSensitiveFolders)
 { MacroRegisterFunctionWithName("FileOperations::GetFolderFileNamesOnTopOfProjectBase");
   std::string computedFolderName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFolderName, computedFolderName))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFolderName, computedFolderName, accessSensitiveFolders))
     return false;
 //  stOutput << "Getting folder names from physical folder: " << computedFolderName;
   return FileOperations::GetFolderFileNamesUnsecure
@@ -538,10 +539,11 @@ bool FileOperations::GetFolderFileNamesUnsecure
 }
 
 bool FileOperations::LoadFileToStringVirtual
-(const std::string& theFileName, std::string& output, std::stringstream& commentsOnFailure)
+(const std::string& theFileName, std::string& output, std::stringstream& commentsOnFailure,
+ bool accessSensitiveFolders)
 { std::string computedFileName;
 //  stOutput << "DEBUG: loading string virtual from: " << theFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders))
     return false;
   return FileOperations::LoadFileToStringUnsecure
   (computedFileName, output, commentsOnFailure);
@@ -568,7 +570,7 @@ bool FileOperations::LoadFileToStringUnsecure
 
 #include "vpfHeader1General2Multitasking.h"
 MapList<std::string, std::string, MathRoutines::hashString>&
-FileOperations::FolderVirtualLinks()
+FileOperations::FolderVirtualLinksNonSensitive()
 { static MapList<std::string, std::string, MathRoutines::hashString> result;
   static bool firstRun=false;
   if (!firstRun)
@@ -577,20 +579,32 @@ FileOperations::FolderVirtualLinks()
     MutexLockGuard theGuard(theMutex);
     result.SetKeyValue("output/", "output/");
     result.SetKeyValue("ProblemCollections/", "ProblemCollections/");
-    result.SetKeyValue("certificates/", "certificates/");
     result.SetKeyValue("problemtemplates/", "../problemtemplates/");
     result.SetKeyValue("freecalc/", "../freecalc/");
     result.SetKeyValue("html/", "../public_html/");
     result.SetKeyValue("html-common/", "html-common/");
+  }
+  return result;
+}
+
+MapList<std::string, std::string, MathRoutines::hashString>&
+FileOperations::FolderVirtualLinksSensitive()
+{ static MapList<std::string, std::string, MathRoutines::hashString> result;
+  static bool firstRun=false;
+  if (!firstRun)
+  { firstRun=true;
+    MutexRecursiveWrapper theMutex;
+    MutexLockGuard theGuard(theMutex);
+    result.SetKeyValue("certificates/", "certificates/");
     result.SetKeyValue("LogFiles/", "LogFiles/");
     result.SetKeyValue("crashes/", "LogFiles/crashes/");
   }
   return result;
 }
 
-bool FileOperations::FileExistsVirtual(const std::string& theFileName)
+bool FileOperations::FileExistsVirtual(const std::string& theFileName, bool accessSensitiveFolders)
 { std::string computedFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders))
     return false;
   return FileOperations::FileExistsUnsecure(computedFileName);
 }
@@ -605,9 +619,9 @@ bool FileOperations::FileExistsUnsecure(const std::string& theFileName)
     return false;
 }
 
-bool FileOperations::OpenFileVirtual(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
+bool FileOperations::OpenFileVirtual(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders)
 { std::string computedFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders))
     return false;
   return FileOperations::OpenFileUnsecure(theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary);
 }
@@ -631,33 +645,39 @@ bool FileOperations::OpenFileUnsecure(std::fstream& theFile, const std::string& 
   return theFile.is_open();
 }
 
-bool FileOperations::GetPhysicalFileNameFromVirtual(const std::string& inputFileName, std::string& output)
+bool FileOperations::GetPhysicalFileNameFromVirtual(const std::string& inputFileName, std::string& output, bool accessSensitiveFolders)
 { MacroRegisterFunctionWithName("FileOperations::GetPhysicalFileNameFromVirtual");
 //  stOutput << "<br>DEBUG: processing " << inputFileName << " -> ... <br>";
-  if (!FileOperations::IsOKfileNameVirtual(inputFileName))
+  if (!FileOperations::IsOKfileNameVirtual(inputFileName, accessSensitiveFolders))
     return false;
   if (&inputFileName==&output)
   { std::string inputCopy=inputFileName;
-    return FileOperations::GetPhysicalFileNameFromVirtual(inputCopy, output);
+    return FileOperations::GetPhysicalFileNameFromVirtual(inputCopy, output, accessSensitiveFolders);
   }
   std::string folderEnd;
-  for (int i=0; i<FileOperations::FolderVirtualLinks().size(); i++)
-    if (MathRoutines::StringBeginsWith(inputFileName, FileOperations::FolderVirtualLinks().theKeys[i], &folderEnd))
-    { output=theGlobalVariables.PhysicalPathProjectBase+FileOperations::FolderVirtualLinks().theValues[i]+folderEnd;
+  for (int i=0; i<FileOperations::FolderVirtualLinksNonSensitive().size(); i++)
+    if (MathRoutines::StringBeginsWith(inputFileName, FileOperations::FolderVirtualLinksNonSensitive().theKeys[i], &folderEnd))
+    { output=theGlobalVariables.PhysicalPathProjectBase+FileOperations::FolderVirtualLinksNonSensitive().theValues[i]+folderEnd;
       //stOutput << inputFileName << " transformed to: " << output;
       return true;
     }
-
+  if (accessSensitiveFolders)
+    for (int i=0; i<FileOperations::FolderVirtualLinksSensitive().size(); i++)
+      if (MathRoutines::StringBeginsWith(inputFileName, FileOperations::FolderVirtualLinksSensitive().theKeys[i], &folderEnd))
+      { output=theGlobalVariables.PhysicalPathProjectBase+FileOperations::FolderVirtualLinksSensitive().theValues[i]+folderEnd;
+        //stOutput << inputFileName << " transformed to: " << output;
+        return true;
+      }
   output=theGlobalVariables.PhysicalPathHtmlFolder+inputFileName;
 //  stOutput << "<br>No key mathcing: " << inputFileName << ". Selecting default: " << output << "<br>";
   return true;
 }
 
 bool FileOperations::OpenFileCreateIfNotPresentVirtual
-(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
+(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders)
 { std::string computedFileName;
   //USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders))
     return false;
   return FileOperations::OpenFileCreateIfNotPresentUnsecure
   (theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary);

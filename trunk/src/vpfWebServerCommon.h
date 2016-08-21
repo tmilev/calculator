@@ -271,21 +271,16 @@ void WebServer::initSSL()
   singedFileCertificate1Physical, signedFileCertificate3Physical,
   signedFileKeyPhysical;
 
-  FileOperations::GetPhysicalFileNameFromVirtual
-  (signedFileCertificate1, singedFileCertificate1Physical);
-  FileOperations::GetPhysicalFileNameFromVirtual
-  (signedFileCertificate3, signedFileCertificate3Physical);
-  FileOperations::GetPhysicalFileNameFromVirtual
-  (fileCertificate, fileCertificatePhysical);
-  FileOperations::GetPhysicalFileNameFromVirtual
-  (fileKey, fileKeyPhysical);
-  FileOperations::GetPhysicalFileNameFromVirtual
-  (signedFileKey, signedFileKeyPhysical);
+  FileOperations::GetPhysicalFileNameFromVirtual(signedFileCertificate1, singedFileCertificate1Physical, true);
+  FileOperations::GetPhysicalFileNameFromVirtual(signedFileCertificate3, signedFileCertificate3Physical, true);
+  FileOperations::GetPhysicalFileNameFromVirtual (fileCertificate, fileCertificatePhysical, true);
+  FileOperations::GetPhysicalFileNameFromVirtual(fileKey, fileKeyPhysical, true);
+  FileOperations::GetPhysicalFileNameFromVirtual(signedFileKey, signedFileKeyPhysical, true);
   //std::cout << "\n\nproject base: " << theGlobalVariables.PhysicalPathProjectBase;
   //std::cout << "\n\nfileKey physical: " << fileKeyPhysical;
   //////////////////////////////////////////////////////////
-  if (!FileOperations::FileExistsVirtual(fileCertificate) ||
-      !FileOperations::FileExistsVirtual(fileKey))
+  if (!FileOperations::FileExistsVirtual(fileCertificate, true) ||
+      !FileOperations::FileExistsVirtual(fileKey, true))
   { theLog << logger::red << "SSL is available but CERTIFICATE files are missing." << logger::endL;
     theGlobalVariables.flagSSLisAvailable=false;
     return;

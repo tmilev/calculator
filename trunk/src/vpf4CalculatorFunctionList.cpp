@@ -2266,7 +2266,7 @@ void Calculator::initPredefinedStandardOperations()
    "Adds two sequences (termwise), provided the sequences have the same number of entries. \
    In case the entries of the sequences are elements of a base field, corresponds to vector addition.",
    "v_{1}=(1, 2, 3);\nv_{2}=(1, 3, 2);\nv_{3}=(3, 1, 1);\nv_{4}=(-2, 2, 2);\n1/2v_{1}+1/2v_{2}+7/8v_{3}+13/16v_{4}"
-   , true, false, "CalculatorFunctionsBinaryOps::innerAddSequenceToSequence");
+   , true, false, "CalculatorFunctionsBinaryOps::innerAddSequenceToSequence", "AddSequences");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic,
    this->opMatRat(), this->opMatRat(),
@@ -2657,7 +2657,7 @@ void Calculator::initPredefinedStandardOperations()
    (however please note a sequence does not necessarily consist of elements of a ring, so the latter \
     interpretation might not be applicable).",
    "v_{1}=(1, 2, 3);\nv_{2}=(1, 3, 2);\nv_{3}=(3, 1, 1);\nv_{4}=(-2, 2, 2);\n1/2v_{1}+1/2v_{2}+7/8v_{3}+13/16v_{4}"
-   , true, false, "CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence");
+   , true, false, "CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence", "ScalarTimesSequence");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence, this->opDouble(), this->opSequence(),
    "Carries out multiplication between a double number on left \

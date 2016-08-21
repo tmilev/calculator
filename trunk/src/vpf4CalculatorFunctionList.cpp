@@ -1183,6 +1183,12 @@ D-B;\
    "plotCurve(sin(12t),cos(13t), 0, 2\\pi); plotCurve(sin(12t),cos(13t), 0, 2\\pi, 300,300, blue, 2, 2000)", true, false, "CalculatorFunctionsGeneral::innerPlotParametricCurve",
    "PlotCurve")
    ;
+  this->AddOperationInnerHandler ("plotSegment", CalculatorFunctionsGeneral::innerPlotSegment, "",
+   " Plots a segment connecting two points. \
+   ",
+   "plotSegment( (1,2), (3,4))", true, false, "CalculatorFunctionsGeneral::innerPlotSegment",
+   "plotSegment")
+   ;
   this->AddOperationInnerHandler ("GetVariablesExcludeNamedConstants", CalculatorFunctionsGeneral::innerGetFreeVariablesExcludeNamedConstants, "",
    "Gets the variables on which the expression depends. Excludes the named constants. Here, the word ``variables'' is to be thought of as \
    ``free variables'' but the possibility for small distinctions is \

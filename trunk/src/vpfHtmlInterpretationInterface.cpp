@@ -143,6 +143,7 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   out << "<span style=\"color:magenta\"><b>Interpreting your answer as:</b></span><br>";
   FormatExpressions theFormat;
   theFormat.flagUseLatex=true;
+  theFormat.flagUsePmatrix=true;
   out << "\\(" << studentAnswerNoContextE.ToString(&theFormat) << "\\)";
   if (currentA.commandIndicesCommentsBeforeSubmission.size==0)
   { out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";

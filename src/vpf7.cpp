@@ -744,14 +744,16 @@ std::string CGI::StyleSheetMathQuillWithTags;
 std::string CGI::JavascriptAutoCompleteWithTags;
 std::string CGI::JavascriptSha1;
 std::string CGI::JavascriptMathjax;
-std::string CGI::JavascriptMathQuill;
+std::string CGI::JavascriptMathQuillMatrixSupport;
+std::string CGI::JavascriptMathQuillDefault;
 std::string CGI::JavascriptInitializeButtons;
 
 void CGI::LoadStrings()
 { CGI::GetJavascriptSha1();
   CGI::GetJavascriptAutocompleteWithTags();
   CGI::GetJavascriptMathjax();
-  CGI::GetJavascriptMathQuill();
+  CGI::GetJavascriptMathQuillMatrixSupport();
+  CGI::GetJavascriptMathQuillDefault();
   CGI::GetCalculatorStyleSheetWithTags();
   CGI::GetMathQuillStyleSheetWithTags();
   CGI::GetJavascriptInitilizeButtons();
@@ -808,21 +810,38 @@ std::string& CGI::GetCalculatorStyleSheetWithTags()
   return CGI::StyleSheetCalculatorWithTags;
 }
 
-std::string& CGI::GetJavascriptMathQuill()
-{ if (CGI::JavascriptMathQuill!="")
-    return CGI::JavascriptMathQuill;
+std::string& CGI::GetJavascriptMathQuillDefault()
+{ if (CGI::JavascriptMathQuillDefault!="")
+    return CGI::JavascriptMathQuillDefault;
   std::stringstream commentsOnError;
   std::string theJS;
   if (!FileOperations::LoadFileToStringVirtual("html-common/mathquill.min.js", theJS, commentsOnError))
-  { CGI::JavascriptMathQuill=commentsOnError.str();
-    return CGI::JavascriptMathQuill;
+  { CGI::JavascriptMathQuillDefault=commentsOnError.str();
+    return CGI::JavascriptMathQuillDefault;
   }
   std::stringstream out;
   out << "<script src=\"html-common/jquery.min.js\"></script>\n"
   << "<script type=\"text/javascript\">" << theJS << "</script>\n"
   << "<script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2);</script>";
-  CGI::JavascriptMathQuill=out.str();
-  return CGI::JavascriptMathQuill;
+  CGI::JavascriptMathQuillDefault=out.str();
+  return CGI::JavascriptMathQuillDefault;
+}
+
+std::string& CGI::GetJavascriptMathQuillMatrixSupport()
+{ if (CGI::JavascriptMathQuillMatrixSupport!="")
+    return CGI::JavascriptMathQuillMatrixSupport;
+  std::stringstream commentsOnError;
+  std::string theJS;
+  if (!FileOperations::LoadFileToStringVirtual("html-common/mathquill.min-matrix.js", theJS, commentsOnError))
+  { CGI::JavascriptMathQuillMatrixSupport=commentsOnError.str();
+    return CGI::JavascriptMathQuillMatrixSupport;
+  }
+  std::stringstream out;
+  out << "<script src=\"html-common/jquery.min.js\"></script>\n"
+  << "<script type=\"text/javascript\">" << theJS << "</script>\n"
+  << "<script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2);</script>";
+  CGI::JavascriptMathQuillMatrixSupport=out.str();
+  return CGI::JavascriptMathQuillMatrixSupport;
 }
 
 std::string& CGI::GetJavascriptAutocompleteWithTags()

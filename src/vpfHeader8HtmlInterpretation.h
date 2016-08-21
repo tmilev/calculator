@@ -26,6 +26,7 @@ public:
   bool flagTagHeadPresent;
   bool flagTagBodyPresent;
   bool flagUseNavigationBar;
+  bool flagMathQuillWithMatrices;
   double timeToParseHtml;
   List<double> timePerAttempt;
   List<List<double> > timeIntermediatePerAttempt;

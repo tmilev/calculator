@@ -51,7 +51,8 @@ public:
   static std::string StyleSheetCalculatorWithTags;
   static std::string JavascriptAutoCompleteWithTags;
   static std::string JavascriptMathjax;
-  static std::string JavascriptMathQuill;
+  static std::string JavascriptMathQuillDefault;
+  static std::string JavascriptMathQuillMatrixSupport;
   static std::string JavascriptSha1;
   static std::string JavascriptInitializeButtons;
   static std::stringstream outputStream;
@@ -94,7 +95,8 @@ public:
   static std::string& GetJavascriptAutocompleteWithTags();
   static std::string& GetJavascriptSha1();
   static std::string& GetJavascriptMathjax();
-  static std::string& GetJavascriptMathQuill();
+  static std::string& GetJavascriptMathQuillDefault();
+  static std::string& GetJavascriptMathQuillMatrixSupport();
 
   static std::string GetMathSpanPure(const std::string& input, int upperNumChars=10000);
   static std::string GetMathSpanBeginArrayL(const std::string& input, int upperNumChars=10000);

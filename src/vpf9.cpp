@@ -1498,6 +1498,7 @@ FormatExpressions::FormatExpressions()
   this->flagUseHTML=true;
   this->flagUseLatex=false;
   this->flagUsePNG=false;
+  this->flagUsePmatrix=false;
   this->MatrixColumnVerticalLineIndex=-1;
   this->flagQuasiDiffOpCombineWeylPart=true;
   this->flagMakingExpressionTableWithLatex=false;

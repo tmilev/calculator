@@ -141,7 +141,9 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   }
   const Expression& studentAnswerNoContextE=theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size()-1];
   out << "<span style=\"color:magenta\"><b>Interpreting your answer as:</b></span><br>";
-  out << "\\(" << studentAnswerNoContextE.ToString() << "\\)";
+  FormatExpressions theFormat;
+  theFormat.flagUseLatex=true;
+  out << "\\(" << studentAnswerNoContextE.ToString(&theFormat) << "\\)";
   if (currentA.commandIndicesCommentsBeforeSubmission.size==0)
   { out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return out.str();
@@ -187,7 +189,6 @@ std::string HtmlInterpretation::SubmitProblemPreview()
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return out.str();
   }
-  FormatExpressions theFormat;
   theFormat.flagExpressionIsFinal=true;
   theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
   theFormat.flagUseQuotes=false;
@@ -196,6 +197,7 @@ std::string HtmlInterpretation::SubmitProblemPreview()
     if (actualIndex>=theInterpreterWithAdvice.theProgramExpression.size() )
       continue;
     const Expression& currentE=theInterpreterWithAdvice.theProgramExpression[actualIndex][1];
+    theFormat.flagUseLatex=true;
     out << currentE.ToString(&theFormat);
   }
   out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
@@ -293,16 +295,23 @@ std::string HtmlInterpretation::GetExamPage()
   out << "<html>"
   << "<head>"
   << HtmlSnippets::GetJavascriptStandardCookies() << "\n"
-  << CGI::GetJavascriptMathjax() << "\n"
-  << CGI::GetJavascriptMathQuill() << "\n"
-  << CGI::GetMathQuillStyleSheetWithTags() << "\n"
+  << CGI::GetJavascriptMathjax() << "\n";
+  if (theFile.flagMathQuillWithMatrices)
+    out << CGI::GetJavascriptMathQuillMatrixSupport() << "\n";
+  else
+    out << CGI::GetJavascriptMathQuillDefault() << "\n";
+  out << CGI::GetMathQuillStyleSheetWithTags() << "\n"
   << CGI::GetCalculatorStyleSheetWithTags() << "\n"  ;
   out << CGI::GetJavascriptInitilizeButtons() << "\n";
   if (theFile.flagLoadedSuccessfully)
     out << theFile.outputHtmlHeadNoTag;
   out << "</head>"
-  << "<body onload=\"loadSettings(); initializeMathQuill(); initializeButtons();\">\n";
-//  out << "DEbUG: HERE I AM";
+  << "<body onload=\"loadSettings(); initializeMathQuill(); ";
+  if (!theFile.flagMathQuillWithMatrices)
+    out << "initializeButtons();";
+  else
+    out << "initializeButtonsMatrixSupport();";
+  out <<"\">\n";
   out << problemBody;
   if (theFile.logCommandsProblemGeneration!="")
     out << "<hr>" << theFile.logCommandsProblemGeneration << "<hr>";
@@ -775,6 +784,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp()
   theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
   theFormat.flagUseQuotes=false;
   theFormat.flagUseLatex=true;
+  theFormat.flagUsePmatrix=true;
   bool isFirst=true;
   const Expression& currentE=
   theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size()-1][1];
@@ -795,7 +805,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp()
       if (currentE[j].IsOfType<std::string>())
         out << currentE[j].GetValue<std::string>();
       else
-        out << "\\(" << currentE[j] << "\\)";
+        out << "\\(" << currentE[j].ToString(&theFormat) << "\\)";
     }
   out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())

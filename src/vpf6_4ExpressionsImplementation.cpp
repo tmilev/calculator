@@ -2297,7 +2297,6 @@ bool Calculator::innerFlattenCommandEnclosuresOneLayer(Calculator& theCommands, 
   return true;
 }
 
-
 std::string Expression::ToString(FormatExpressions* theFormat, Expression* startingExpression, bool unfoldCommandEnclosures)const
 { MacroRegisterFunctionWithName("Expression::ToString");
   if (this==0)
@@ -2327,6 +2326,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   bool allowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
   bool oldAllowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
   bool useFrac =this->owner->flagUseFracInRationalLaTeX; //(theFormat==0) ? true : theFormat->flagUseFrac;
+  bool usingPmatrix=false;
   if (theFormat!=0 && !this->IsOfType<std::string>() && !this->StartsWith(this->owner->opEndStatement()))
   { if (startingExpression==0)
       theFormat->flagUseQuotes=true;
@@ -2635,20 +2635,28 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         break;
       case Expression::formatMatrix:
         if (theFormat!=0)
-          if (theFormat->flagUseLatex)
+          usingPmatrix=theFormat->flagUsePmatrix;
+        if (theFormat!=0)
+          if (theFormat->flagUseLatex && !theFormat->flagUsePmatrix)
             out << "\\left(";
-        out << "\\begin{array}{";
-        for (int i=0; i<this->GetNumCols(); i++)
-          out << "c";
-        out << "} ";
+        if (!usingPmatrix)
+        { out << "\\begin{array}{";
+          for (int i=0; i<this->GetNumCols(); i++)
+            out << "c";
+          out << "} ";
+        } else
+          out << "\\begin{pmatrix}";
         for (int i=1; i<this->children.size; i++)
         { out << (*this)[i].ToString(theFormat);
           if (i!=this->children.size-1)
             out << "\\\\ \n";
         }
-        out << " \\end{array}";
+        if (usingPmatrix)
+          out << " \\end{pmatrix}";
+        else
+          out << " \\end{array}";
         if (theFormat!=0)
-          if (theFormat->flagUseLatex)
+          if (theFormat->flagUseLatex && !theFormat->flagUsePmatrix)
             out << "\\right)";
         break;
       default:

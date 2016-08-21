@@ -33,6 +33,7 @@ CalculatorHTML::CalculatorHTML()
   this->flagTagBodyPresent=false;
   this->flagUseNavigationBar=true;
   this->timeToParseHtml=0;
+  this->flagMathQuillWithMatrices=false;
 }
 
 #ifdef MACRO_use_MySQL
@@ -360,6 +361,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
     out << "<b>Failed to interpret file: " << this->fileName << "</b>. Comments: " << this->comments.str();
     return out.str();
   }
+  //out << "DEBUG: flagMathQuillWithMatrices=" << this->flagMathQuillWithMatrices << "<br>";
   if (this->flagUseNavigationBar && !theGlobalVariables.flagRunningAsProblemInterpreter)
   { std::string linkSeparator=" | ";
     std::string linkBigSeparator=" || ";
@@ -2274,6 +2276,9 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       needNewTag=true;
     if (eltsStack[i].syntacticRole!="")
       needNewTag=true;
+    if (eltsStack[i].GetTagClass()=="calculatorAnswer")
+      if (eltsStack[i].GetKeyValue("mqMatrices")=="true")
+        this->flagMathQuillWithMatrices=true;
     if (eltsStack[i].syntacticRole!="command" && eltsStack[i].syntacticRole!="" )
     { result=false;
       comments << "<br>Syntactic element: " << eltsStack[i].ToStringDebug()

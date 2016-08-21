@@ -250,6 +250,7 @@ void Calculator::init()
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\left");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\right");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("array");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("pmatrix");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\end");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\\\");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\");
@@ -1663,11 +1664,15 @@ bool Calculator::ApplyOneRule()
   { int theFormat=thirdToLastS=="(" ? Expression::formatDefault : Expression::formatSequenceWithBraces;
     return this->ReplaceXXbyEX(theFormat);
   }
+  if (fourthToLastS=="\\begin" && thirdToLastS=="{" && secondToLastS=="pmatrix" && lastS=="}")
+  { this->registerNumNonClosedBeginArray++;
+    return this->ReplaceXXXXByCon(this->conMatrixSeparator());
+  }
   if (fifthToLastS=="\\begin" && fourthToLastS=="{" && thirdToLastS=="array" && secondToLastS=="}" && lastS=="Expression")
   { this->registerNumNonClosedBeginArray++;
     return this->ReplaceXXXXXByCon(this->conMatrixSeparator());
   }
-  if (fourthToLastS=="\\end" && thirdToLastS=="{" && secondToLastS=="array" && lastS=="}" )
+  if (fourthToLastS=="\\end" && thirdToLastS=="{" && ( secondToLastS=="array"  || secondToLastS=="pmatrix")&& lastS=="}" )
   { this->registerNumNonClosedBeginArray--;
     return this->ReplaceXXXXByCon(this->conMatrixSeparator(), Expression::formatMatrix);
   }

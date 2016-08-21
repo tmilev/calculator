@@ -1040,3 +1040,29 @@ bool CalculatorFunctionsGeneral::innerFloor(Calculator& theCommands, const Expre
     return output.AssignValue((int) std::floor(theDouble), theCommands);
   return false;
 }
+
+bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotSegment");
+  if (input.children.size<3)
+    return false;
+//  stOutput << "DEBUG: Here i am";
+  const Expression& leftE=input[1];
+  const Expression& rightE=input[2];
+  Vector<Rational> leftV, rightV;
+//  Vector<double> leftVd, rightVd;
+  if (!theCommands.GetVectoR(leftE,leftV ) || !theCommands.GetVectoR(rightE, rightV))
+    return false;
+  if (leftV.size!=rightV.size)
+    return false;
+  if (leftV.size!=2)
+    return false;
+  if (input.children.size>=3)
+  {
+
+  }
+  PlotObject theSegment;
+  theSegment.thePlotType="plotFunction";
+  theSegment.thePoints.AddOnTop(leftV.GetVectorDouble());
+  theSegment.thePoints.AddOnTop(rightV.GetVectorDouble());
+  return output.AssignValue(theSegment, theCommands);
+}

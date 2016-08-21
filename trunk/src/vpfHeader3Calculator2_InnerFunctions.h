@@ -102,7 +102,6 @@ public:
 
   static bool innerGetPointsImplicitly(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerPlotSegment(Calculator& theCommands, const Expression& input, Expression& output, bool showGrid);
   static bool innerPlotImplicitFunctionFull(Calculator& theCommands, const Expression& input, Expression& output, bool showGrid);
   static bool innerPlotImplicitFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotImplicitShowGridFunction(Calculator& theCommands, const Expression& input, Expression& output);

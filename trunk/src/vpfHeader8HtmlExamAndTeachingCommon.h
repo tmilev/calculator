@@ -1569,13 +1569,15 @@ std::string CalculatorHTML::GetDeadline
 
 std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   (const std::string& cleanedUpLink,  const std::string& sectionNumber, bool isActualProblem,
-   bool problemAlreadySolved)
+   bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
 { bool deadlineInherited=false;
   std::stringstream out;
   std::string currentDeadline =
   this->GetDeadline(cleanedUpLink, sectionNumber, true, deadlineInherited);
   if (currentDeadline=="")
-  { if (isActualProblem)
+  { if (returnEmptyStringIfNoDeadline)
+      return "";
+    if (isActualProblem)
       out << "<span style=\"color:orange\">No deadline yet. </span>";
     return out.str();
   }
@@ -1622,12 +1624,12 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
 
 std::string CalculatorHTML::ToStringDeadlinesFormatted
   (const std::string& cleanedUpLink,  const List<std::string>& sectionNumbers, bool isActualProblem,
-   bool problemAlreadySolved)
+   bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
 { if (sectionNumbers.size==0)
     return "No section number. ";
   if (sectionNumbers.size==1)
     return this->ToStringOnEDeadlineFormatted
-    (cleanedUpLink, sectionNumbers[0], isActualProblem, problemAlreadySolved);
+    (cleanedUpLink, sectionNumbers[0], isActualProblem, problemAlreadySolved, returnEmptyStringIfNoDeadline);
   std::stringstream out;
   out << "<table>";
   for (int i=0; i<sectionNumbers.size; i++)
@@ -1635,7 +1637,7 @@ std::string CalculatorHTML::ToStringDeadlinesFormatted
       continue;
     out << "<tr><td>Section " << sectionNumbers[i] << ":</td>";
     out << "<td>" << this->ToStringOnEDeadlineFormatted
-    (cleanedUpLink, sectionNumbers[i], isActualProblem, problemAlreadySolved) << "</td>";
+    (cleanedUpLink, sectionNumbers[i], isActualProblem, problemAlreadySolved, returnEmptyStringIfNoDeadline) << "</td>";
     out << "</tr>";
   }
   out << "</table>";

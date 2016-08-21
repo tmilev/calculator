@@ -160,10 +160,12 @@ public:
   { return this->fileName==other.fileName;
   }
   std::string ToStringDeadlinesFormatted
-  (const std::string& cleanedUpLink, const List<std::string>& sectionNumbers, bool isActualProblem, bool problemAlreadySolved)
+  (const std::string& cleanedUpLink, const List<std::string>& sectionNumbers, bool isActualProblem,
+  bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
   ;
   std::string ToStringOnEDeadlineFormatted
-  (const std::string& cleanedUpLink, const std::string& sectionNumber, bool isActualProblem, bool problemAlreadySolved)
+  (const std::string& cleanedUpLink, const std::string& sectionNumber, bool isActualProblem,
+  bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
   ;
   std::string ToStringCalculatorArgumentsForProblem
   (const std::string& requestType, const std::string& studentView,

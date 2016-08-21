@@ -65,7 +65,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     }
 #ifdef MACRO_use_MySQL
     out << theProblemHome.ToStringOnEDeadlineFormatted
-    (this->fileName, this->currentUseR.extraInfoUnsafe, true, problemAlreadySolved);
+    (this->fileName, this->currentUseR.extraInfoUnsafe, true, problemAlreadySolved, theGlobalVariables.flagRunningAsProblemInterpreter);
 #endif
     out << "<br>";
   }

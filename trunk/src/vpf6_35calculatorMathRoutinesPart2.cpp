@@ -1055,7 +1055,7 @@ bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const
     return false;
   if (leftV.size!=rightV.size)
     return false;
-  if (leftV.size!=2)
+  if (leftV.size!=2 && leftV.size!=3)
     return false;
   int colorIndex=0;
   if (input.children.size>=4)
@@ -1078,6 +1078,8 @@ bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const
   PlotObject theSegment;
   theSegment.thePlotType="plotFunction";
   theSegment.colorRGB=colorIndex;
+  if (leftV.size==3)
+    theSegment.flagIs3d=true;
   theSegment.thePoints.AddOnTop(leftV.GetVectorDouble());
   theSegment.thePoints.AddOnTop(rightV.GetVectorDouble());
   return output.AssignValue(theSegment, theCommands);

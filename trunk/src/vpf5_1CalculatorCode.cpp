@@ -792,7 +792,9 @@ bool Plot::operator==(const Plot& other)const
 }
 
 void Plot::operator+=(const PlotObject& other)
-{ this->thePlots.AddOnTop(other);
+{ if (this->thePlots.size==0)
+    this->flagIs3d=other.flagIs3d;
+  this->thePlots.AddOnTop(other);
 }
 
 void PlotObject::CreatePlotFunction
@@ -847,7 +849,8 @@ bool PlotObject::operator==(const PlotObject& other)const
   this->thePoints==other.thePoints &&
 //  this->theLines==other.theLines &&
   this->lineWidth==other.lineWidth &&
-  this->theRectangles==other.theRectangles
+  this->theRectangles==other.theRectangles &&
+  this->flagIs3d==other.flagIs3d
   ;
 }
 
@@ -859,6 +862,7 @@ PlotObject::PlotObject()
   this->colorRGB=0;
   this->lineWidth=1;
   this->fillColorRGB=0;
+  this->flagIs3d=false;
 }
 
 void PlotObject::ComputeYbounds()
@@ -898,10 +902,54 @@ Plot::Plot()
   this->defaultLineColor=0;
   this->flagPlotShowJavascriptOnly=false;
   this->viewWindowPriority=0;
+  this->flagIs3d=false;
 }
 
 void Plot::ComputeAxesAndBoundingBox()
 { MacroRegisterFunctionWithName("Plot::ComputeAxesAndBoundingBox");
+  if (this->viewWindowPriority>0)
+  { if (this->theLowerBoundAxes>this->theUpperBoundAxes)
+      this->theUpperBoundAxes=this->theLowerBoundAxes+0.1;
+    if (this->lowBoundY>this->highBoundY)
+      this->highBoundY=this->lowBoundY+0.1;
+    return;
+  }
+  this->theLowerBoundAxes=-0.5;
+  this->theUpperBoundAxes=1.1;
+  this->lowBoundY=-0.5;
+  this->highBoundY=1.1;
+  for (int k=0; k<this->thePlots.size; k++)
+  { this->thePlots[k].ComputeYbounds();
+    this->theLowerBoundAxes=MathRoutines::Minimum(this->thePlots[k].xLow, theLowerBoundAxes);
+    this->theUpperBoundAxes=MathRoutines::Maximum(this->thePlots[k].xHigh, theUpperBoundAxes);
+    this->lowBoundY=MathRoutines::Minimum(this->thePlots[k].yLow, this->lowBoundY);
+    this->highBoundY=MathRoutines::Maximum(this->thePlots[k].yHigh, this->highBoundY);
+/*    for (int j=0; j<this->thePlots[k].theLines.size; j++)
+    { List<Vector<double> > currentLine=this->thePlots[k].theLines[j];
+      this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[0][0]);
+      this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[1][0]);
+      this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, currentLine[0][0]);
+      this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, currentLine[1][0]);
+      this->lowBoundY=MathRoutines::Minimum  (currentLine[0][1], this->lowBoundY);
+      this->lowBoundY=MathRoutines::Minimum  (currentLine[1][1], this->lowBoundY);
+      this->highBoundY=MathRoutines::Maximum (currentLine[0][1], this->highBoundY);
+      this->highBoundY=MathRoutines::Maximum (currentLine[1][1], this->highBoundY);
+    }*/
+    for (int j=0; j<this->thePlots[k].thePoints.size; j++)
+    { Vector<double>& currentPoint=this->thePlots[k].thePoints[j];
+      if (!this->IsOKVector(currentPoint))
+        continue;
+      this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentPoint[0]);
+      this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, currentPoint[0]);
+      this->lowBoundY=MathRoutines::Minimum  (currentPoint[1], this->lowBoundY);
+      this->highBoundY=MathRoutines::Maximum (currentPoint[1], this->highBoundY);
+    }
+  }
+
+}
+
+void Plot::ComputeAxesAndBoundingBox3d()
+{ MacroRegisterFunctionWithName("Plot::ComputeAxesAndBoundingBox3d");
   if (this->viewWindowPriority>0)
   { if (this->theLowerBoundAxes>this->theUpperBoundAxes)
       this->theUpperBoundAxes=this->theLowerBoundAxes+0.1;
@@ -950,18 +998,20 @@ bool Plot::IsOKVector(const Vector<double>& input)
   return true;
 }
 
-std::string Plot::GetPlotHtml()
-{ MacroRegisterFunctionWithName("Plot::GetPlotHtml");
+std::string Plot::GetPlotHtml3d()
+{ MacroRegisterFunctionWithName("Plot::GetPlotHtml3d");
 /*  if (this->flagIncludeExtraHtmlDescriptions)
     stOutput << "including xtra html";
   else
     stOutput << "NOT including xtra html";*/
-  this->ComputeAxesAndBoundingBox();
+  this->ComputeAxesAndBoundingBox3d();
   DrawingVariables theDVs;
+  theDVs.theBuffer.initDimensions(3,1);
+  theDVs.theBuffer.MakeMeAStandardBasis(3);
+
   theDVs.DefaultHtmlHeight=this->DesiredHtmlHeightInPixels;
   theDVs.DefaultHtmlWidth=this->DesiredHtmlWidthInPixels;
-  Vector<double> v1;
-  Vector<double> v2;
+  Vector<double> v1, v2;
   double theWidth=(this->theUpperBoundAxes-this->theLowerBoundAxes)*1.2+0.1;
   double theHeight=(this->highBoundY-this->lowBoundY)*1.2+0.1;
   theDVs.theBuffer.centerX[0]=((-this->theLowerBoundAxes+0.1)/theWidth)*((double) theDVs.DefaultHtmlWidth);
@@ -984,6 +1034,119 @@ std::string Plot::GetPlotHtml()
     (cleanedUpVectors, theDVs.PenStyleNormal, thePlots[i].colorRGB, thePlots[i].fillColorRGB,
     thePlots[i].lineWidth);
   }
+  v1.MakeZero(3);
+  v2.MakeZero(3);
+  v1[0]=-1;
+  v2[0]=1;
+  theDVs.drawLineBetweenTwoVectorsBufferDouble
+  (v1, v2, ((uint32_t) theDVs.PenStyleNormal), ((int) CGI::RedGreenBlue(0,0,0)), 1);
+  theDVs.drawCircleAtVectorBufferDouble(v2, 2, theDVs.PenStyleNormal, ((int) CGI::RedGreenBlue(255,0,0)));
+  theDVs.drawTextAtVectorBufferDouble(v2, "x", ((int) CGI::RedGreenBlue(0,0,255)), theDVs.TextStyleNormal);
+  v1.MakeZero(3);
+  v2.MakeZero(3);
+  v1[1]=-1;
+  v2[1]=1;
+  theDVs.drawLineBetweenTwoVectorsBufferDouble
+  (v1, v2, ((uint32_t) theDVs.PenStyleNormal), ((int) CGI::RedGreenBlue(0,0,0)), 1);
+  theDVs.drawCircleAtVectorBufferDouble(v2, 2, theDVs.PenStyleNormal, ((int) CGI::RedGreenBlue(255,0,0)));
+  theDVs.drawTextAtVectorBufferDouble(v2, "y", ((int) CGI::RedGreenBlue(0,0,255)), theDVs.TextStyleNormal);
+  v1.MakeZero(3);
+  v2.MakeZero(3);
+  v1[2]=-1;
+  v2[2]=1;
+  theDVs.drawLineBetweenTwoVectorsBufferDouble
+  (v1, v2, ((uint32_t) theDVs.PenStyleNormal), ((int) CGI::RedGreenBlue(0,0,0)), 1);
+  theDVs.drawCircleAtVectorBufferDouble(v2, 2, theDVs.PenStyleNormal, ((int) CGI::RedGreenBlue(255,0,0)));
+  theDVs.drawTextAtVectorBufferDouble(v2, "z", ((int) CGI::RedGreenBlue(0,0,255)), theDVs.TextStyleNormal);
+
+  for (int i=0; i<this->thePlots.size; i++)
+  { List<Vector<double> >& currentVectors=thePlots[i].thePoints;
+    if (this->thePlots[i].thePlotType=="point")
+      for (int j=0; j<currentVectors.size; j++)
+      { if (!this->IsOKVector(currentVectors[j]))
+          continue;
+        theDVs.drawCircleAtVectorBufferDouble
+        (currentVectors[j], 2, theDVs.PenStyleNormal, thePlots[i].colorRGB);
+        theDVs.drawCircleAtVectorBufferDouble
+        (currentVectors[j], 1, theDVs.PenStyleNormal, thePlots[i].colorRGB);
+      }
+    else if (this->thePlots[i].thePlotType=="label")
+      for (int j=0; j<currentVectors.size; j++)
+      { if (!this->IsOKVector(currentVectors[j]))
+          continue;
+        theDVs.drawTextAtVectorBufferDouble
+        (currentVectors[j], this->thePlots[i].thePlotString, this->thePlots[i].colorRGB,
+         theDVs.TextStyleNormal);
+      }
+    else
+      for (int j=1; j<currentVectors.size; j++)
+      { if (!this->IsOKVector(currentVectors[j-1]) || !this->IsOKVector(currentVectors[j] ))
+          continue;
+//        stOutput << "<br>ISOKvectors:" << currentVectors[j-1] << ", " << currentVectors[j];
+        theDVs.drawLineBetweenTwoVectorsBufferDouble
+        (currentVectors[j-1], currentVectors[j], theDVs.PenStyleNormal,
+         thePlots[i].colorRGB, thePlots[i].lineWidth);
+      }
+  }
+/*  for (int i=0; i<this->thePlots.size; i++)
+    for (int j=0; j<this->thePlots[i].theLines.size; j++)
+    { if (!this->IsOKVector(this->thePlots[i].theLines[j][0]) ||
+          !this->IsOKVector(this->thePlots[i].theLines[j][1]))
+        continue;
+      theDVs.drawLineBetweenTwoVectorsBufferDouble
+      (this->thePlots[i].theLines[j][0], this->thePlots[i].theLines[j][1],
+       theDVs.PenStyleNormal, this->thePlots[i].colorRGB, thePlots[i].lineWidth);
+      //stOutput << "Drew line b-n: " <<this->thePlots[i].theLines[j][0] << " and " << this->thePlots[i].theLines[j][1];
+    }*/
+  std::stringstream resultStream;
+  theDVs.flagIncludeExtraHtmlDescriptions=this->flagIncludeExtraHtmlDescriptions;
+  theDVs.flagPlotShowJavascriptOnly=this->flagPlotShowJavascriptOnly;
+//  theDVs.theBuffer.BasisToDrawCirclesAt.SetSize(0);
+  resultStream << theDVs.GetHtmlFromDrawOperationsCreateDivWithUniqueName(3);
+  return resultStream.str();
+}
+
+std::string Plot::GetPlotHtml()
+{ MacroRegisterFunctionWithName("Plot::GetPlotHtml");
+  if (this->flagIs3d)
+    return this->GetPlotHtml3d();
+  else
+    return this->GetPlotHtml2d();
+}
+
+std::string Plot::GetPlotHtml2d()
+{ MacroRegisterFunctionWithName("Plot::GetPlotHtml2d");
+/*  if (this->flagIncludeExtraHtmlDescriptions)
+    stOutput << "including xtra html";
+  else
+    stOutput << "NOT including xtra html";*/
+  this->ComputeAxesAndBoundingBox();
+  DrawingVariables theDVs;
+  theDVs.DefaultHtmlHeight=this->DesiredHtmlHeightInPixels;
+  theDVs.DefaultHtmlWidth=this->DesiredHtmlWidthInPixels;
+  double theWidth=(this->theUpperBoundAxes-this->theLowerBoundAxes)*1.2+0.1;
+  double theHeight=(this->highBoundY-this->lowBoundY)*1.2+0.1;
+  theDVs.theBuffer.centerX[0]=((-this->theLowerBoundAxes+0.1)/theWidth)*((double) theDVs.DefaultHtmlWidth);
+  theDVs.theBuffer.centerY[0]=((this->highBoundY+0.1)/theHeight)*((double) theDVs.DefaultHtmlHeight);
+
+  double widthUnit=((double)theDVs.DefaultHtmlWidth)/theWidth;
+  double heightUnit=((double)theDVs.DefaultHtmlHeight)/theHeight;
+  theDVs.theBuffer.GraphicsUnit[0]= heightUnit<widthUnit ? heightUnit : widthUnit;
+  List<Vector<double> > cleanedUpVectors;
+  for (int i=0; i<this->thePlots.size; i++)
+  { List<Vector<double> >& currentVectors=thePlots[i].thePoints;
+    if (thePlots[i].fillStyle!="filled")
+      continue;
+    cleanedUpVectors.SetSize(0);
+    cleanedUpVectors.SetExpectedSize(currentVectors.size);
+    for (int k=0; k< currentVectors.size; k++)
+      if (this->IsOKVector(currentVectors[k]))
+        cleanedUpVectors.AddOnTop(currentVectors[k]);
+    theDVs.theBuffer.drawFilledShape
+    (cleanedUpVectors, theDVs.PenStyleNormal, thePlots[i].colorRGB, thePlots[i].fillColorRGB,
+    thePlots[i].lineWidth);
+  }
+  Vector<double> v1, v2;
   v1.MakeZero(2);
   v2.MakeZero(2);
   v1[0]=this->theLowerBoundAxes-0.1;

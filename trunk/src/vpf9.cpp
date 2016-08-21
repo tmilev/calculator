@@ -8200,24 +8200,39 @@ void DrawOperations::MakeMeAStandardBasis(int theDim)
     { this->ProjectionsEiVectors[i][0]=FloatingPoint::sin((double)i/(double)theDim* MathRoutines::Pi());
       this->ProjectionsEiVectors[i][1]=FloatingPoint::cos((double)i/(double)theDim* MathRoutines::Pi());
     }
-  } else
+  } else if (theDim==3)
   { this->ProjectionsEiVectors.SetSizeMakeMatrix(3, 2);
+    this->ProjectionsEiVectors[0][0]=1;
+    this->ProjectionsEiVectors[0][1]=-0.2;
+    this->ProjectionsEiVectors[1][0]=0.1;
+    this->ProjectionsEiVectors[1][1]=1;
+    this->ProjectionsEiVectors[2][0]=0.01;
+    this->ProjectionsEiVectors[2][1]=0.01;
+  } else //if (theDim==2)
+  { this->ProjectionsEiVectors.SetSizeMakeMatrix(2, 2);
     this->ProjectionsEiVectors[0][0]=1;
     this->ProjectionsEiVectors[0][1]=0;
     this->ProjectionsEiVectors[1][0]=0;
     this->ProjectionsEiVectors[1][1]=-1;
-    this->ProjectionsEiVectors[2][0]=.7;
-    this->ProjectionsEiVectors[2][1]=-0.4;
-    this->ProjectionsEiVectors.SetSize(theDim);
   }
   if (this->BasisProjectionPlane.size<1)
     this->BasisProjectionPlane.SetSize(1);
   this->BasisProjectionPlane[0].MakeEiBasis(theDim);
-  this->BasisProjectionPlane[0].size=2;
-  for (int i=0; i<this->BasisProjectionPlane[0][1].size; i++)
-    this->BasisProjectionPlane[0][1][i]=2*i+1;
-  for (int i=0; i<this->BasisProjectionPlane[0][0].size; i++)
-    this->BasisProjectionPlane[0][0][i]=3*i+2;
+  this->BasisProjectionPlane[0].SetSize(2);
+  if (theDim!=3)
+  { for (int i=0; i<this->BasisProjectionPlane[0][1].size; i++)
+      this->BasisProjectionPlane[0][1][i]=2*i+1;
+    for (int i=0; i<this->BasisProjectionPlane[0][0].size; i++)
+      this->BasisProjectionPlane[0][0][i]=3*i+2;
+  } else if (theDim==3) //<-if not needed but good for documentation purposes
+  { this->BasisProjectionPlane[0][0][0]=0.6;
+    this->BasisProjectionPlane[0][0][1]=0.4;
+    this->BasisProjectionPlane[0][0][2]=0;
+    this->BasisProjectionPlane[0][1][0]=-0.4;
+    this->BasisProjectionPlane[0][1][1]=0.6;
+    this->BasisProjectionPlane[0][1][2]=1;
+  }
+
   if (this->theBilinearForm.NumRows!=theDim)
     this->theBilinearForm.MakeIdMatrix(theDim, 1, 0);
 }

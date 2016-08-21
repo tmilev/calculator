@@ -135,6 +135,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   }
   List<List<std::string> > textEbasisNamesUserInput;
   List<List<std::string> > textEbasisNamesReadOnly;
+//  stOutput << "<hr>DEBUG: got to here pt 1";
   if (this->flagIncludeExtraHtmlDescriptions)
   {
 
@@ -234,7 +235,8 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
       default: break;
     }
   }
-//  out << theSurfaceName << ".stroke();\n";
+//  stOutput << "<hr>DEBUG: got to here pt 2";
+  //  out << theSurfaceName << ".stroke();\n";
   out << "theText.innerHTML+=\"\\\\end{pspicture}<br>\" ";
   if (nonImplementedFound)
     out << "+\"Not all elements in the html picture were drawn in the LaTeX version. "
@@ -272,6 +274,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "<br>The mouse wheel zooms in/out. "
   << " Zooming is tested to work on Firefox and google Chrome browsers on Ubuntu."
   ;
+//  stOutput << "<hr>DEBUG: got to here pt 3";
   out << "<br>Currently, " << this->theBuffer.IndexNthDrawOperation.size << " elements are drawn. ";
   if (this->theBuffer.IndexNthDrawOperation.size>500)
     out << " The visualization is javascript/pc processor <b>intensive</b> so it will <b>not work well</b> "
@@ -348,8 +351,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "  " << theDrawFunctionName << "();\n"
   << "  window.setTimeout(\"changeProjectionPlaneUser" << timesCalled << "()\",100);\n"
   << "}";
-//    stOutput << " got to here pt 4";
-
+//  stOutput << "<hr>DEBUG: got to here pt 4";
   if (this->theBuffer.BasisProjectionPlane.size>2)
   { out << "BasisProjectionPlane" << timesCalled << "=new Array(" << this->theBuffer.BasisProjectionPlane.size << ");\n";
     for (int j=0; j<this->theBuffer.BasisProjectionPlane.size; j++)
@@ -384,14 +386,14 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     out << theDrawFunctionName << "();\n";
     out << "window.setTimeout(\"changeProjectionPlaneOnTimer" << timesCalled << "()\",100);\n" << "}\n";
   }
-//    stOutput << " got to here pt 5";
+//  stOutput << "<hr>DEBUG: got to here pt 5";
 
   out << CreateStaticJavaScriptVectorsArrayWithProjection
   (this->theBuffer.labeledVectors, labeledVectorsVarName, "proj"+labeledVectorsVarName);
   out << CreateStaticJavaScriptTextArray
   (this->theBuffer.labelsOfLabeledVectors, "labels"+labeledVectorsVarName);
   out << CreateJavaScriptListVectors(this->theBuffer.toBeHighlightedWhenLabeledVectorHovered, "highlight"+labeledVectorsVarName);
-//    stOutput << " got to here pt 6";
+//  stOutput << "<hr>DEBUG: got to here pt 6";
   out << "var selectedLabels" << timesCalled << "= new Array(" << this->theBuffer.labeledVectors.size << ");\n";
   out << "var " << projName << "= new Array(" << theDimension << ");\n";
   out << "var " << eiBasis << "= new Array(" << theDimension << ");\n";
@@ -399,6 +401,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     out << projName << "[" << i << "]= new Array(2);\n";
   out << "var " << basisCircles << "=new Array(" << this->theBuffer.BasisToDrawCirclesAt.size << ");\n";
   out << "var " << projBasisCircles << "=new Array(" << this->theBuffer.BasisToDrawCirclesAt.size << ");\n";
+//  stOutput << "<hr>DEBUG: got to here pt 6.5";
   for (int i=0; i<this->theBuffer.BasisToDrawCirclesAt.size; i++)
   { out << basisCircles << "[" << i << "]=[";
     for (int j=0; j<theDimension; j++)
@@ -408,6 +411,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
      }
     out <<  "];\n";
   }
+//  stOutput << "<hr>DEBUG: got to here pt 7";
   for (int i=0; i<theDimension; i++)
   { ////////////////////
     out << eiBasis << "[" << i << "]=[";
@@ -470,7 +474,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     }
     out << "];\n";
   }
-//  stOutput << " got to here pt 8";
+  //stOutput << "<hr>DEBUG: got to here pt 8";
   out << "var " << shiftX << "=" << this->theBuffer.centerX[0] << ";\n";
   out << "var " << shiftY << "=" << this->theBuffer.centerY[0] << ";\n";
   out << "var GraphicsUnitCone" << timesCalled << "=" << this->theBuffer.GraphicsUnit[0] << ";\n";
@@ -504,7 +508,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "ComputeProjections" << timesCalled << "();\n";
   out << theSurfaceName << ".fillStyle=\"#FFFFFF\";\n";
   out << theSurfaceName << ".fillRect(0,0," << this->DefaultHtmlWidth  << " ," << this->DefaultHtmlHeight << ");\n";
-//  stOutput << " got to here pt 9";
+  //stOutput << "<hr>DEBUG: got to here pt 9";
   for (int i=0; i<this->theBuffer.IndexNthDrawOperation.size; i++)
   { int currentIndex=this->theBuffer.IndexNthDrawOperation[i];
     switch(theBuffer.TypeNthDrawOperation[i])

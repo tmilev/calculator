@@ -628,6 +628,7 @@ public:
   int colorRGB;
   int fillColorRGB;
   double lineWidth;
+  bool flagIs3d;
   Vectors<double> thePoints;
 //  List<List<Vector<double> > > theLines;
   List<Vectors<double> > theRectangles;
@@ -661,14 +662,18 @@ class Plot
   int defaultLineColor;
   bool flagIncludeExtraHtmlDescriptions;
   bool flagPlotShowJavascriptOnly;
+  bool flagIs3d;
   int viewWindowPriority; //0 or less: compute the view Window. If this quantity is greater than zero,
   //the user-given bounding box will overwrite any computations.
   //When adding two plots with positive viewing window priorities, the window with the larger priority is used.
   //If the priorities are equal, the windows are combined to the smallest window that fits both.
   std::string GetPlotHtml();
+  std::string GetPlotHtml3d();
+  std::string GetPlotHtml2d();
   std::string GetPlotStringAddLatexCommands(bool useHtml);
   bool IsOKVector(const Vector<double>& input);
   Plot();
+  void ComputeAxesAndBoundingBox3d();
   void ComputeAxesAndBoundingBox();
   void AddFunctionPlotOnTop
   (const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound,

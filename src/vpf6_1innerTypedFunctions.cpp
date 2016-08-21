@@ -596,6 +596,8 @@ bool CalculatorFunctionsBinaryOps::innerAddPlotToPlot(Calculator& theCommands, c
     return false;
   if(!input[2].IsOfType<Plot>(&rightPlot))
     return false;
+  if (leftPlot.flagIs3d!=rightPlot.flagIs3d)
+    return false;
   leftPlot+=rightPlot;
   return output.AssignValue(leftPlot, theCommands);
 }

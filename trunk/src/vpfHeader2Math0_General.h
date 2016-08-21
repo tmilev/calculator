@@ -1513,6 +1513,7 @@ public:
   bool flagPassCustomCoeffMonSeparatorToCoeffs;
   bool flagMakingExpressionTableWithLatex;
   bool flagUseLatex;
+  bool flagUsePmatrix;
   bool flagUsePNG;
   bool flagUseHTML;
   bool flagUseHtmlAndStoreToHD;

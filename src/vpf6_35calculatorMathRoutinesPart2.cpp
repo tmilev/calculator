@@ -1027,3 +1027,16 @@ bool CalculatorFunctionsGeneral::innerAllSelectionsFixedRank(Calculator& theComm
   }
   return output.AssignValue(out.str(), theCommands);
 }
+
+bool CalculatorFunctionsGeneral::innerFloor(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFloor");
+  Rational theRat;
+  if(input.IsOfType<Rational>(&theRat))
+  { theRat.AssignFloor();
+    return output.AssignValue(theRat, theCommands);
+  }
+  double theDouble=0;
+  if (input.EvaluatesToDouble(&theDouble))
+    return output.AssignValue((int) std::floor(theDouble), theCommands);
+  return false;
+}

@@ -10,19 +10,21 @@ struct FileOperations
 {
 public:
   static MapList<std::string, std::string, MathRoutines::hashString>&
-  FolderVirtualLinks();
+  FolderVirtualLinksNonSensitive();
+  static MapList<std::string, std::string, MathRoutines::hashString>&
+  FolderVirtualLinksSensitive();
 
   static bool LoadFileToStringUnsecure
   (const std::string& fileNameUnsecure, std::string& output, std::stringstream& commentsOnFailure);
   static bool LoadFileToStringVirtual
-  (const std::string& fileName, std::string& output, std::stringstream& commentsOnFailure);
-  static bool IsOKfileNameVirtual(const std::string& fileName);
+  (const std::string& fileName, std::string& output, std::stringstream& commentsOnFailure, bool accessSensitiveFolders=false);
+  static bool IsOKfileNameVirtual(const std::string& fileName, bool accessSensitiveFolders=false);
   static bool IsFileNameWithoutDotsAndSlashes(const std::string& fileName);
   static std::string GetFileNameFromFileNameWithPath(const std::string& fileName);
   static std::string GetPathFromFileNameWithPath(const std::string& fileName);
   static std::string GetFileExtensionWithDot(const std::string& theFileName);
   static bool FileExistsUnsecure(const std::string& theFileName);
-  static bool FileExistsVirtual(const std::string& theFileName);
+  static bool FileExistsVirtual(const std::string& theFileName, bool accessSensitiveFolders=false);
   static bool IsFolderUnsecure(const std::string& theFolderName);
   static bool GetFolderFileNamesUnsecure
   (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
@@ -30,16 +32,16 @@ public:
    ;
   static bool GetFolderFileNamesVirtual
   (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
-   List<std::string>* outputFileTypes=0)
+   List<std::string>* outputFileTypes=0, bool accessSensitiveFolders=false)
    ;
   static bool GetPhysicalFileNameFromVirtual
-  (const std::string& inputFileName, std::string& output);
+  (const std::string& inputFileName, std::string& output, bool accessSensitiveFolders=false);
 
   static bool OpenFileCreateIfNotPresentUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
-  static bool OpenFileCreateIfNotPresentVirtual(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
+  static bool OpenFileCreateIfNotPresentVirtual(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders=false);
 
   static bool OpenFileUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
-  static bool OpenFileVirtual(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
+  static bool OpenFileVirtual(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders=false);
 };
 
 struct CGI

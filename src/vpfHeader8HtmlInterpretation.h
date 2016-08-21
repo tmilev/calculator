@@ -104,7 +104,6 @@ public:
   bool PrepareCommandsSolution(Answer& theAnswer, std::stringstream& comments);
   bool PrepareCommandsAnswer(Answer& theAnswer, std::stringstream& comments);
   bool PrepareCommandsGenerateProblem(std::stringstream& comments);
-  std::string ProcessAnswerGiveUp();
   std::string GetProblemHeaderEnclosure();
   bool SetTagClassFromOpenTag(SyntacticElementHTML& output);
   bool SetTagClassFromCloseTag(SyntacticElementHTML& output);

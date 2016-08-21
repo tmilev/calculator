@@ -1765,6 +1765,7 @@ bool CalculatorHTML::ProcessInterprettedCommands
   theFormat.flagExpressionIsFinal=true;
   theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
   theFormat.flagUseQuotes=false;
+  theFormat.flagUseLatex=true;
   bool result=true;
   for (int i=0; i<theElements.size; i++)
   { SyntacticElementHTML& currentElt=theElements[i];

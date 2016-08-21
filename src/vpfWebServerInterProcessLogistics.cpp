@@ -423,7 +423,7 @@ void Pipe::Read()
 }
 
 logger::logger(const std::string& logFileName )
-{ FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, logFileName, false, true, false);
+{ FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, logFileName, false, true, false, true);
   this->currentColor=logger::normalColor;
   this->flagStopWritingToFile=false;
   this->MaxLogSize=50000000;

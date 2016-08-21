@@ -1139,6 +1139,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(Calculator& 
   { tempProduct.MakeProducT(theCommands, input[1], input[2][i]);
     output.AddChildOnTop(tempProduct);
   }
+  output.format=input[2].format;
   return true;
 }
 

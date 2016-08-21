@@ -3,6 +3,7 @@
 #include "vpf.h"
 #include "vpfHeader3Calculator2_InnerFunctions.h"
 #include "vpfHeader3Calculator1_InnerTypedFunctions.h"
+#include "vpfHeader2Math9DrawingVariables.h"
 
 ProjectInformationInstance ProjectInfoVpf6_35cpp(__FILE__, "More calculator built-in functions. ");
 
@@ -1056,12 +1057,27 @@ bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const
     return false;
   if (leftV.size!=2)
     return false;
-  if (input.children.size>=3)
-  {
-
+  int colorIndex=0;
+  if (input.children.size>=4)
+  { std::string theColor="black";
+    int colorCandidate=0;
+    const Expression& colorE=input[3];
+    bool usingColorString= colorE.IsOfType<std::string>(&theColor);
+    if (!usingColorString)
+      usingColorString= colorE.IsAtom(&theColor);
+    if (usingColorString)
+    { usingColorString=DrawingVariables::GetColorIntFromColorString(theColor, colorIndex);
+      if (!usingColorString)
+        theCommands << "Unrecognized color: " << theColor;
+    }
+    if (!usingColorString)
+      if(colorE.IsIntegerFittingInInt(&colorCandidate))
+        colorIndex=colorCandidate;
+//    stOutput << "Final color index: " << colorIndex;
   }
   PlotObject theSegment;
   theSegment.thePlotType="plotFunction";
+  theSegment.colorRGB=colorIndex;
   theSegment.thePoints.AddOnTop(leftV.GetVectorDouble());
   theSegment.thePoints.AddOnTop(rightV.GetVectorDouble());
   return output.AssignValue(theSegment, theCommands);

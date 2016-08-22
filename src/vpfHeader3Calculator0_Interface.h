@@ -240,7 +240,7 @@ class Expression
   bool NeedsParenthesisForBaseOfExponent()const;
   bool NeedsParenthesisForMultiplication()const;
   bool NeedsParenthesisForAddition()const;
-  bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost()const;
+  bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(const Expression* leftNeighbor=0)const;
 
   int GetExpressionTreeSize()const;
   template <class theType>

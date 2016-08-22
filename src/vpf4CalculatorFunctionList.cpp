@@ -2339,7 +2339,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationOuterHandler
   ("*", CalculatorFunctionsGeneral::outerDifferentiateWRTxTimesAny, "",
    "Replaces Differentiate{}(x)*a by  Differentiate{}(x,a).",
-   "d/dx (1/x) ", true, false, "CalculatorFunctionsGeneral::outerDifferentiateWRTxTimesAny");
+   "d/dx (1/x) ", true, false, "CalculatorFunctionsGeneral::outerDifferentiateWRTxTimesAny", "DifferentiateLog");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyEltHypOctByEltHypOct, this->opElementHyperOctahedral(), this->opElementHyperOctahedral(),
    "Multiplies two elements of hyperoctahedral groups. ",
@@ -2738,11 +2738,11 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationOuterHandler
   ("/", CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation, "",
    "Replaces \\diff /\\diff {}x by Differentiate{}(x). Note that the variable of differentiation is expected to be the string following the d letter. ",
-   "\\diff /\\diff {}x x", true, false, "CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation");
+   "\\diff /\\diff {}x x", true, false, "CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation", "LeibnizDifferentialOperatorToDifferentialOperator");
   this->AddOperationOuterHandler
   ("/", CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx, "",
    "Replaces d/dx by \\diff /\\diff{}x. Note that the variable of differentiation is expected to be the string following the d letter. ",
-   "d/dx x", true, false, "CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx");
+   "d/dx x", true, false, "CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx", "LeibnizDifferentialOperatorNotation");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat, this->opAlgNumber(), this->opAlgNumber(),
    "Divides algebraic numbers. ",

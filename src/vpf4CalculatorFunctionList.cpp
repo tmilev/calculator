@@ -2552,7 +2552,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationInnerHandler
   ("*", Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY, "",
    "Collects multiplicand exponents. ",
-   "x*(x*y)*x*(x*x^3*x); ", true, false, "Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY");
+   "x*(x*y)*x*(x*x^3*x); ", true, false, "Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY", "CombineExponents");
   this->AddOperationInnerHandler
   ("*", Calculator::innerMultiplyByOne, "",
    "Rule 1*{{anything}}=anything.",

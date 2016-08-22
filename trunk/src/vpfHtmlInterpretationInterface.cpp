@@ -126,6 +126,7 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   }
   Answer& currentA=theProblem.theProblemData.theAnswers[indexLastAnswerId];
   Calculator theInterpreteR;
+  theInterpreteR.flagUseLnInsteadOfLog=true;
   theInterpreteR.init();
   theInterpreteR.Evaluate(studentInterpretation.str());
   if (theInterpreteR.syntaxErrors!="")
@@ -150,6 +151,7 @@ std::string HtmlInterpretation::SubmitProblemPreview()
     return out.str();
   }
   Calculator theInterpreterWithAdvice;
+  theInterpreterWithAdvice.flagUseLnInsteadOfLog=true;
   theInterpreterWithAdvice.init();
   theInterpreterWithAdvice.flagWriteLatexPlots=false;
   if (!theProblem.PrepareCommands(comments))
@@ -202,6 +204,10 @@ std::string HtmlInterpretation::SubmitProblemPreview()
     out << currentE.ToString(&theFormat);
   }
   out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+  if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn() )
+    out << "<hr>Logged-in as admin with debug flag on = including (lots of) details. "
+    << "Executed command:<br>" << calculatorInputStream.str() << "<hr>"
+    << theInterpreterWithAdvice.outputString << "<br>" << theInterpreterWithAdvice.outputCommentsString;
   return out.str();
 }
 

@@ -2171,9 +2171,13 @@ bool Expression::NeedsParenthesisForBaseOfExponent()const
   return true;
 }
 
-bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost()const
+bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(const Expression* leftNeighbor)const
 { if (this->owner==0)
     return false;
+  if (leftNeighbor!=0)
+    if (leftNeighbor->StartsWith(this->owner->opDivide(), 3))
+      if ((*leftNeighbor)[1]=="\\diff")
+        return true;
   if (this->StartsWith(this->owner->opPlus()) || this->StartsWith(this->owner->opMinus()) || this->StartsWith(this->owner->opDefine()))
     return true;
   if (this->IsOfType<Rational>())
@@ -2219,6 +2223,11 @@ bool Expression::NeedsParenthesisForMultiplication()const
   if (this->StartsWith(this->owner->opPlus()) || this->StartsWith(this->owner->opMinus()) ||
       this->StartsWith(this->owner->opDefine()))
     return true;
+  if (this->StartsWith(this->owner->opDivide(), 3))
+  { //stOutput << "DEBUG: needparen here";
+    if ((*this)[1]=="\\diff")
+      return false;
+  }
   if (this->IsSequenceNElementS())
     if (this->size()>2)
       return false;
@@ -2429,7 +2438,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     else
     { std::string firstE= (*this)[1].ToString(theFormat);
       bool firstNeedsBrackets=(*this)[1].NeedsParenthesisForMultiplication();
-      bool secondNeedsBrackets=(*this)[2].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
+      bool secondNeedsBrackets=(*this)[2].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(&((*this)[1]));
       if (firstE=="-1" )
       { firstE="-";
         firstNeedsBrackets=false;
@@ -2606,6 +2615,15 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     if (needsParen)
       out << "\\right)";
     out << "\\diff " << (*this)[1].ToString(theFormat);
+  } else if (this->StartsWith(this->owner->opDifferential(), 2))
+  { bool needsParen=(*this)[1].NeedsParenthesisForMultiplication() ||
+    (*this)[1].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
+    out << "\\diff{}";
+    if (needsParen)
+      out << "\\left(";
+    out << (*this)[1].ToString(theFormat);
+    if (needsParen)
+      out << "\\right)";
   } else if (this->StartsWith(this->owner->opIntegral()))
   { std::string indexString=" ";
     if (this->size()>=2)

@@ -3201,7 +3201,7 @@ bool CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation(Calculator& 
     return false;
   if (input[1]!="\\diff")
     return false;
-  if (input[2].children.size!=2)
+  if (input[2].size()!=2)
     return false;
   if (input[2][0]!="\\diff")
     return false;

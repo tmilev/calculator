@@ -2455,7 +2455,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         if (MathRoutines::isADigit(firstE[firstE.size()-1]) && MathRoutines::isADigit(secondE[0]) )
           mustHaveTimes=true;
       if (mustHaveTimes)
-        out << "*";
+        out << "\\cdot";
       else
         out << " ";
       if (secondNeedsBrackets)

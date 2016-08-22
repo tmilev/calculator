@@ -8163,6 +8163,10 @@ bool DrawingVariables::GetColorIntFromColorString(const std::string& input, int&
   { output= CGI::RedGreenBlue(0,255,255);
     return true;
   }
+  if (input=="orange")
+  { output= CGI::RedGreenBlue(255,127,0);
+    return true;
+  }
   return false;
 }
 

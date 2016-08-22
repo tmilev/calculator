@@ -1381,7 +1381,8 @@ bool Calculator::ApplyOneRule()
     return this->PopTopSyntacticStack();
   }
   if (secondToLastS=="%" && lastS=="UseLnInsteadOfLog")
-  { this->flagUseLnInsteadOfLog=true;
+  { this->Comments << "Displaying complex logarithms as ln. ";
+    this->flagUseLnInsteadOfLog=true;
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }

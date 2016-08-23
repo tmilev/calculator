@@ -22,6 +22,7 @@ public:
   static std::string GetTopicTable();
   static std::string GetExamPageInterpreter();
   static std::string GetAnswerOnGiveUp();
+  static std::string GetSelectCourse();
   static std::string SubmitProblemPreview();
   static std::string GetAccountsPage(const std::string& hostWebAddressWithPort);
   static std::string ToStringUserDetails

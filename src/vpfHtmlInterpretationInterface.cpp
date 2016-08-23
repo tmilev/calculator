@@ -253,6 +253,23 @@ std::string HtmlInterpretation::GetExamPageInterpreter()
 
 }
 
+std::string HtmlInterpretation::GetSelectCourse()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetSelectCourse");
+  std::stringstream out;
+  out << "<html><body>";
+  List<std::string> theFileNames, theExtensions;
+  if (!FileOperations::GetFolderFileNamesVirtual("topiclists/", theFileNames, &theExtensions))
+  { out << "<b>Failed to fetch file names from topiclists/</b>. </body></html>";
+    return out.str();
+  }
+  for (int i=0; i<theFileNames.size; i++)
+    if (theExtensions[i]==".txt")
+    out << "<a href=\"/template?topicList=topiclists/" << theFileNames[i] << "&fileName=pagetemplates/ace-learning-Singapore-H2.html\">"
+    << theFileNames[i] << "</a><br>";
+  out << "</body></html>";
+  return out.str();
+}
+
 std::string HtmlInterpretation::GetTopicTable()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetTopicTable");
   std::stringstream out;

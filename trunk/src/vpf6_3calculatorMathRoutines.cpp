@@ -4073,6 +4073,7 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
   thePlot.AddFunctionPlotOnTop
   (input[1], functionE.GetValue<std::string>(), lowerBound, upperBound, yLow, yHigh, &thePoints,
    &colorTripleRGB, linewidth);
+//  stOutput << "DEBUG: height, width: " << desiredHtmlHeightPixels << ", " << desiredHtmlWidthPixels;
   return output.AssignValue(thePlot, theCommands);
 }
 

@@ -788,6 +788,9 @@ void Plot::operator+=(const Plot& other)
 bool Plot::operator==(const Plot& other)const
 { if (this->viewWindowPriority!=other.viewWindowPriority)
     return false;
+  if (this->DesiredHtmlHeightInPixels!=other.DesiredHtmlHeightInPixels ||
+      this->DesiredHtmlWidthInPixels!=other.DesiredHtmlWidthInPixels)
+    return false;
   return this->thePlots==other.thePlots;
 }
 
@@ -1230,6 +1233,7 @@ std::string Plot::GetPlotHtml2d()
   theDVs.flagPlotShowJavascriptOnly=this->flagPlotShowJavascriptOnly;
   theDVs.theBuffer.BasisToDrawCirclesAt.SetSize(0);
   resultStream << theDVs.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
+//  resultStream << "DEBUG: height: " << theDVs.DefaultHtmlHeight << " width: " << theDVs.DefaultHtmlWidth;
   return resultStream.str();
 }
 

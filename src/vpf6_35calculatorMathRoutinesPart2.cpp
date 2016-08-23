@@ -1082,5 +1082,9 @@ bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const
     theSegment.flagIs3d=true;
   theSegment.thePoints.AddOnTop(leftV.GetVectorDouble());
   theSegment.thePoints.AddOnTop(rightV.GetVectorDouble());
-  return output.AssignValue(theSegment, theCommands);
+  Plot thePlot;
+  thePlot+=theSegment;
+  thePlot.DesiredHtmlWidthInPixels=200;
+  thePlot.DesiredHtmlHeightInPixels=200;
+  return output.AssignValue(thePlot, theCommands);
 }

@@ -2365,7 +2365,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps:: innerMultiplyRatByRat, this->opRational(), this->opRational(),
    "Multiplies two rationals. ",
-   "2*3", true, false, "CalculatorFunctionsBinaryOps:: innerMultiplyRatByRat");
+   "2*3", true, false, "CalculatorFunctionsBinaryOps:: innerMultiplyRatByRat", "MultiplyRationals");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat, this->opRational(), this->opDouble(),
    "Multiplies rational by a double approximately using the built-in cpp multiplication \

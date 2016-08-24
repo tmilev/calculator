@@ -1,6 +1,6 @@
 QT+= core
 QT-= gui
-TARGET = calculator
+TARGET = webserver
 CONFIG   += console
 CONFIG   -= app_bundle
 CONFIG += c++11
@@ -17,11 +17,10 @@ LIBS+=-lssl
 LIBS+=-lcrypto
 
 SOURCES += \
-    custom/vpf6_5calculator_web_routines.cpp \
-    custom/vpfCalculatorMain.cpp \
-    custom/vpfWebServer.cpp \
-    custom/vpf8_1DatabaseInterface_MySQL.cpp \
-    custom/vpfExamAndTeachingRoutines.cpp \
+    webserver.cpp \
+    database.cpp \
+    web-routines-1.cpp \
+    examRoutines.cpp \
     test.cpp \
     vpf2Math3_SymmetricGroupsAndGeneralizations.cpp \
     vpf4CalculatorFunctionList.cpp \
@@ -35,6 +34,7 @@ SOURCES += \
     vpf6_4ExpressionsImplementation.cpp \
     vpf6_05evaluationroutines.cpp \
     vpf6_35calculatorMathRoutinesPart2.cpp \
+    vpf6_36calculatorHtmlRoutines.cpp \
     vpf6.cpp \
     vpf7.cpp \
     vpf8.cpp \
@@ -59,11 +59,12 @@ SOURCES += \
     vpfGraph.cpp \
     vpfJson.cpp \
     vpfWebServerInterProcessLogistics.cpp \
-    vpf6_36calculatorHtmlRoutines.cpp \
     vpfHtmlInterpretationInterface.cpp \
     vpfHtmlSnippets.cpp
 
 HEADERS += \
+    webserver.h \
+    vpfHeader7DatabaseInterface_MySQL.h \
     vpf.h \
     vpfFiniteFields.h \
     vpfHeader1General0_General.h \
@@ -72,6 +73,8 @@ HEADERS += \
     vpfHeader1General3_Test.h \
     vpfHeader1General4General_Logging_GlobalVariables.h \
     vpfHeader1General5TimeDate.h \
+    vpfHeader1General6Maps.h \
+    vpfHeader1General7FileOperations_Encodings.h \
     vpfHeader2Math0_General.h \
     vpfHeader2Math1_2SemisimpleLieAlgebras_RootSubalgebras.h \
     vpfHeader2Math1_3SemisimpleLieSubalgebras.h \
@@ -93,6 +96,7 @@ HEADERS += \
     vpfHeader3Calculator1_InnerTypedFunctions.h \
     vpfHeader3Calculator2_InnerFunctions.h \
     vpfHeader3Calculator3_WeylGroupCharacters.h \
+    vpfHeader3Calculator4HtmlFunctions.h \
     vpfHeader4SystemFunctionsGlobalObjects.h \
     vpfHeader5Crypto.h \
     vpfHeader6WebServerInterprocessLogistics.h \
@@ -107,15 +111,11 @@ HEADERS += \
     vpfJson.h \
     vpfMacros.h \
     vpfPackedVector.h \
-    vpfHeader3Calculator4HtmlFunctions.h \
-    vpfHeader1General6Maps.h \
-    vpfHeader1General7FileOperations_Encodings.h \
-    custom/vpfHeader6WebServer.h \
-    vpfHeader7DatabaseInterface_MySQL.h \
-    vpfHeader8HtmlSnippets.h \
-    vpfHeader8HtmlInterpretationInterface.h \
     vpfHeader8HtmlInterpretation.h \
-    vpfWebServerCommon.h \
+    vpfHeader8HtmlInterpretationInterface.h \
+    vpfHeader8HtmlSnippets.h \
     vpfHeader7DatabaseShared.h \
+    vpfWebServerCommon.h \
     vpfHeader8HtmlExamAndTeachingCommon.h \
     vpfHeader1General8DatabaseSystemIndependent.h
+

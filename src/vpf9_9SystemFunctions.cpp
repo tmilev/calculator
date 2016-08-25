@@ -107,7 +107,7 @@ bool TimerThreadData::HandleMaxComputationTime()
 }
 
 bool TimerThreadData::HandleComputationTimeout()
-{ if (!theGlobalVariables.flagUsingBuiltInWebServer)
+{ if (!theGlobalVariables.flagRunningBuiltInWebServer)
     return false;
   if (theGlobalVariables.MaxComputationTimeBeforeWeTakeAction<=0)
     return false;

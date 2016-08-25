@@ -495,7 +495,7 @@ logger& logger::operator << (const loggerSpecialSymbols& input)
 { this->CheckLogSize();
   switch (input)
   { case logger::endL:
-      if (theGlobalVariables.flagUsingBuiltInWebServer)
+      if (theGlobalVariables.flagRunningBuiltInWebServer || theGlobalVariables.flagRunningApache)
         std::cout << this->closeTagConsole() << std::endl;
         std::cout.flush();
       if (this->flagStopWritingToFile)
@@ -511,7 +511,7 @@ logger& logger::operator << (const loggerSpecialSymbols& input)
     case logger::orange:
     case logger::cyan:
       this->currentColor=input;
-      if (theGlobalVariables.flagUsingBuiltInWebServer)
+      if (theGlobalVariables.flagRunningBuiltInWebServer || theGlobalVariables.flagRunningApache)
         std::cout << this->openTagConsole();
       if (this->flagStopWritingToFile)
         return *this;
@@ -519,7 +519,7 @@ logger& logger::operator << (const loggerSpecialSymbols& input)
       this->theFile << this->openTagHtml();
       return *this;
     case logger::normalColor:
-      if (theGlobalVariables.flagUsingBuiltInWebServer)
+      if (theGlobalVariables.flagRunningBuiltInWebServer || theGlobalVariables.flagRunningApache)
         std::cout << this->closeTagConsole();
       if (this->flagStopWritingToFile)
         return *this;

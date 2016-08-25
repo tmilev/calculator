@@ -264,7 +264,8 @@ public:
   std::string ToStringStatusPublic();
   std::string ToStringStatusPublicNoTop();
   static int main(int argc, char **argv);
-  static int main_problem_interpreter();
+  static int mainApache();
+  static int mainCommandLine();
 };
 
 class ProgressReportWebServer

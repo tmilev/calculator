@@ -181,16 +181,10 @@ std::string HtmlSnippets::GetJavascriptStandardCookies()
   << "  if (document.getElementById(\"authenticationToken\")!=null)\n"
   << "    if(getCookie(\"authenticationToken\")!='')\n"
   << "      document.getElementById(\"authenticationToken\").value=getCookie(\"authenticationToken\");\n ";
-  if (!theGlobalVariables.flagRunningAceWebserver)
-    out
-    << "  if (document.getElementById(\"usernameHidden\")!=null)\n"
-    << "    if(getCookie(\"username\")!='')\n"
-    << "      document.getElementById(\"usernameHidden\").value=getCookie(\"username\");\n ";
-  else
-    out
-    << "  if (document.getElementById(\"username\")!=null)\n"
-    << "    if(getCookie(\"username\")!='')\n"
-    << "      document.getElementById(\"username\").value=getCookie(\"username\");\n ";
+  out
+  << "  if (document.getElementById(\"username\")!=null)\n"
+  << "    if(getCookie(\"username\")!='')\n"
+  << "      document.getElementById(\"username\").value=getCookie(\"username\");\n ";
   out << "}\n";
   out << " </script>\n";
   return out.str();
@@ -691,7 +685,7 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
 { MacroRegisterFunctionWithName("ProgressReportWebServer::SetStatus");
   if (theGlobalVariables.flagComputationFinishedAllOutputSentClosing || !this->flagServerExists)
     return;
-  if (!theGlobalVariables.flagUsingBuiltInWebServer)
+  if (!theGlobalVariables.flagRunningBuiltInWebServer)
     return;
   theWebServer.CheckConsistency();
 //  theLog << logger::endL << logger::red << "SetStatus: outputFunction: "
@@ -711,7 +705,7 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
   safetyFirst.UnlockMe();
   // theLog << logger::endL << logger::red << "SetStatus before the issue: outputFunction: "
   // << (int) stOutput.theOutputFunction << logger::endL;
-  if (!theGlobalVariables.flagUsingBuiltInWebServer)
+  if (!theGlobalVariables.flagRunningBuiltInWebServer)
     return;
   theWebServer.GetActiveWorker().pipeWorkerToServerWorkerStatus.WriteAfterEmptying(toBePiped.str());
 }
@@ -2205,7 +2199,7 @@ int WebWorker::ProcessCalculator()
     theParser.Evaluate(theParser.inputString);
   this->flagProgressReportAllowed=false;
   theGlobalVariables.flagComputationCompletE=true;
-  if (theGlobalVariables.flagUsingBuiltInWebServer)
+  if (theGlobalVariables.flagRunningBuiltInWebServer)
     if (theGlobalVariables.flagOutputTimedOut)
     { this->OutputResultAfterTimeout();
       stOutput.Flush();
@@ -2392,7 +2386,7 @@ std::string WebWorker::GetSetProblemDatabaseInfoHtml()
 std::string HtmlInterpretation::ModifyProblemReport()
 { MacroRegisterFunctionWithName("WebWorker::GetModifyProblemReport");
   bool shouldProceed=theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights();
-  if (shouldProceed && !theGlobalVariables.flagRunningAsProblemInterpreter)
+  if (shouldProceed && !theGlobalVariables.flagRunningAce)
     shouldProceed= theGlobalVariables.flagUsingSSLinCurrentConnection;
   if (!shouldProceed)
     return "<b>Modifying problems allowed only for logged-in admins under ssl connection. </b>";
@@ -2555,7 +2549,7 @@ int WebWorker::ServeClient()
     return this->ProcessServerStatus();
   else if (theGlobalVariables.userCalculatorRequestType=="statusPublic")
     return this->ProcessServerStatusPublic();
-  else if (theGlobalVariables.userCalculatorRequestType=="monitor" && theGlobalVariables.flagRunningAceWebserver)
+  else if (theGlobalVariables.userCalculatorRequestType=="monitor" && false)
     return this->ProcessMonitor(); //<-this line of code should never be executed. Keeping it as a reminder of what can be done.
 
   //unless the worker is an server monitor, it has no access to communication channels of the other workers
@@ -3397,6 +3391,7 @@ extern void MonitorWebServer();
 
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
+  theWebServer.InitializeGlobalVariables();
   theGlobalVariables.RelativePhysicalNameCrashLog="crash_WebServerRun.html";
   theParser.init();
   if (true)
@@ -3570,41 +3565,52 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
 //    std::cout << "Argument " << i+1 << ": " << theGlobalVariables.programArguments[i] << "\n";
   }
   ////////////////////////////////////////////////////
+  theGlobalVariables.flagRunningAce=true;
   theGlobalVariables.flagRunningCommandLine=false;
   theGlobalVariables.flagRunningConsoleTest=false;
-  theGlobalVariables.flagUsingApacheWebServer=false;
-  theGlobalVariables.flagRunningAsProblemInterpreter=false;
+  theGlobalVariables.flagRunningApache=false;
   theGlobalVariables.flagSSLisAvailable=true;
-  theGlobalVariables.flagUsingBuiltInWebServer=true;
+  theGlobalVariables.flagRunningBuiltInWebServer=false;
   ////////////////////////////////////////////////////
   theGlobalVariables.initDefaultFolderAndFileNames(theGlobalVariables.programArguments[0]);
   theGlobalVariables.PhysicalPathHtmlFolder=
   theGlobalVariables.PhysicalPathProjectBase + "../public_html/";
+  if (!FileOperations::FileExistsUnsecure(theGlobalVariables.PhysicalPathHtmlFolder ))
+    theGlobalVariables.flagRunningAce=false;
+  else
+    theGlobalVariables.flagRunningAce=true;
   if (argC<2)
+  { theGlobalVariables.flagRunningApache=true;
     return;
-  std::string timeLimitString="100";
-  std::string killOrder="";
-  std::string& secondArgument=theGlobalVariables.programArguments[1];
-  if (argC==2)
-  { if (secondArgument=="nokill")
-      killOrder="nokill";
-    else  if (secondArgument=="interpretProblem")
-    { theGlobalVariables.flagRunningAsProblemInterpreter=true;
-      theGlobalVariables.flagUsingBuiltInWebServer=false;
-      theGlobalVariables.flagRunningCommandLine=false;
-      return;
-    } else
-      timeLimitString=secondArgument;
-  } else if (argC>2)
-  { timeLimitString=theGlobalVariables.programArguments[1];
-    killOrder=theGlobalVariables.programArguments[2];
   }
-  theWebServer.flagTryToKillOlderProcesses=!(killOrder=="nokill");
-  Rational timeLimit;
-  timeLimit.AssignString(timeLimitString);
-  int timeLimitInt=0;
-  if (timeLimit.IsIntegerFittingInInt(&timeLimitInt))
-    theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=timeLimitInt;
+  std::string& secondArgument=theGlobalVariables.programArguments[1];
+  if (secondArgument=="server")
+  { theGlobalVariables.flagRunningBuiltInWebServer=true;
+    theWebServer.flagTryToKillOlderProcesses=true;
+    if (argC==2)
+      return;
+    std::string& thirdArgument=theGlobalVariables.programArguments[2];
+    std::string timeLimitString="100";
+    std::string killOrder="";
+    if (thirdArgument=="nokill")
+      killOrder="nokill";
+    else
+      timeLimitString=thirdArgument;
+    if (argC>=4 && killOrder=="nokill")
+      timeLimitString=theGlobalVariables.programArguments[3];
+    theWebServer.flagTryToKillOlderProcesses=!(killOrder=="nokill");
+    Rational timeLimit;
+    timeLimit.AssignString(timeLimitString);
+    int timeLimitInt=0;
+    if (timeLimit.IsIntegerFittingInInt(&timeLimitInt))
+      theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=timeLimitInt;
+    return;
+  }
+  if (secondArgument=="test")
+  { theGlobalVariables.flagRunningConsoleTest=true;
+    return;
+  }
+  theGlobalVariables.flagRunningCommandLine=true;
 }
 
 void WebServer::InitializeGlobalVariables()
@@ -3640,17 +3646,22 @@ int main(int argc, char **argv)
 { return WebServer::main(argc, argv);
 }
 
+extern int mainTest(List<std::string>& remainingArgs);
+
 int WebServer::main(int argc, char **argv)
 { theGlobalVariables.InitThreadsExecutableStart();
-  theGlobalVariables.flagRunningAceWebserver=true;
   MacroRegisterFunctionWithName("main");
   try {
   InitializeGlobalObjects();
   theWebServer.AnalyzeMainArguments(argc, argv);
-  theWebServer.InitializeGlobalVariables();
-  if (theGlobalVariables.flagRunningAsProblemInterpreter)
-    return WebServer::main_problem_interpreter();
-  return theWebServer.Run();
+   if (theGlobalVariables.flagRunningConsoleTest)
+    return mainTest(theGlobalVariables.programArguments);
+  if (theGlobalVariables.flagRunningApache)
+    return WebServer::mainApache();
+  if (theGlobalVariables.flagRunningBuiltInWebServer)
+    return theWebServer.Run();
+  if (theGlobalVariables.flagRunningCommandLine)
+    return WebServer::mainCommandLine();
   }
   catch (...)
   { crash << "Exception caught: something very wrong has happened. " << crash;
@@ -3659,8 +3670,27 @@ int WebServer::main(int argc, char **argv)
   return -1;
 }
 
-int WebServer::main_problem_interpreter()
-{ MacroRegisterFunctionWithName("WebServer::main_problem_interpreter");
+int WebServer::mainCommandLine()
+{ MacroRegisterFunctionWithName("main_command_input");
+  theGlobalVariables.IndicatorStringOutputFunction=CGI::MakeStdCoutReport;
+  //  stOutput << "\n\n\n" << theParser.DisplayPathServerBase << "\n\n";
+  //  return 0;
+//std::cout << "Running cmd line. \n";
+  theParser.init();
+  theParser.inputStringRawestOfTheRaw =theGlobalVariables.programArguments[0];
+  theParser.flagUseHtml=false;
+  theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
+  std::fstream outputFile;
+  FileOperations::OpenFileCreateIfNotPresentVirtual
+  (outputFile, "output/outputFileCommandLine.html", false, true, false);
+  stOutput << theParser.outputString;
+  outputFile << theParser.outputString;
+  stOutput << "\nTotal running time: " << GetElapsedTimeInSeconds() << " seconds. \nOutput written in file ./outputFileCommandLine.html\n";
+  return 0;
+}
+
+int WebServer::mainApache()
+{ MacroRegisterFunctionWithName("main_apache");
   theGlobalVariables.IndicatorStringOutputFunction=0;
   theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
   theGlobalVariables.flagComputationStarted=true;
@@ -3683,6 +3713,25 @@ int WebServer::main_problem_interpreter()
   //theWorker.ProcessCalculatorNoLoginInterpreterMode();
   theGlobalVariables.flagComputationCompletE=true;
   return 0;
+
+
+
+
+
+  stOutput << "Content-Type: text/html\n\n";
+  theGlobalVariables.IndicatorStringOutputFunction=CGI::MakeReportIndicatorFile;
+  std::cin >> theParser.inputStringRawestOfTheRaw;
+
+  if (theParser.inputStringRawestOfTheRaw=="")
+  { theParser.inputStringRawestOfTheRaw=getenv("QUERY_STRING");
+    std::string& IPAdressCaller=theGlobalVariables.IPAdressCaller;
+    IPAdressCaller=getenv("REMOTE_ADDR");
+    for (int i=0; i<MathRoutines::Minimum((int)IPAdressCaller.size(), SomeRandomPrimesSize); i++)
+      IPAdressCaller[i]='A'+(IPAdressCaller[i]*SomeRandomPrimes[i])%26;
+  }
+  theParser.javaScriptDisplayingIndicator=WebWorker::GetJavaScriptIndicatorFromHD();
+  theWebServer.CreateNewActiveWorker();
+  return theWebServer.GetActiveWorker().ProcessCalculator();
 }
 
 std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
@@ -3711,7 +3760,7 @@ std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
       out << "<br>";
   }
   out << "<hr>";
-  if (theGlobalVariables.flagUsingBuiltInWebServer)
+  if (theGlobalVariables.flagRunningBuiltInWebServer)
     out << theWebServer.GetActiveWorker().ToStringMessageUnsafe();
   return out.str();
 }

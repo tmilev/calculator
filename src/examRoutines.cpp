@@ -33,7 +33,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   if (this->flagIsExamProblem)
     outHead << this->GetJavascriptSubmitAnswers();
   else if (this->flagIsExamHome)
-  { if (theGlobalVariables.flagRunningAceWebserver)
+  { if (theGlobalVariables.flagRunningAce)
       outHead << HtmlSnippets::GetJavascriptSubmitEmailsAce(this->fileName);
     else
       outHead << HtmlSnippets::GetJavascriptSubmitEmailS(this->fileName);
@@ -310,7 +310,7 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
  const std::string& studentSection, bool includeRandomSeedIfAppropriate)const
 { MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsForProblem");
   if (!theGlobalVariables.flagLoggedIn && !theGlobalVariables.UserGuestMode() &&
-      !theGlobalVariables.flagRunningAsProblemInterpreter)
+      !theGlobalVariables.flagRunningApache)
     return "";
   (void) requestType;
   std::stringstream out;
@@ -318,7 +318,7 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
   excludedTags.AddOnTop("randomSeed");
   out << theGlobalVariables.ToStringCalcArgsNoNavigation(&excludedTags)
   << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&";
-  if  (!theGlobalVariables.flagRunningAsProblemInterpreter && this->fileName!="")
+  if  (!theGlobalVariables.flagRunningApache && this->fileName!="")
     out << "fileName=" << CGI::StringToURLString(this->fileName) << "&";
   else
     out << "fileName=" << CGI::StringToURLString(theGlobalVariables.GetWebInput("fileName") )

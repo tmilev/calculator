@@ -90,7 +90,6 @@ void GlobalVariables::ChDir(const std::string& systemCommand)
 
 GlobalVariables::GlobalVariables()
 { this->flagNotAllocated=false;
-  this->flagRunningAceWebserver=false;
   this->IndicatorStringOutputFunction=0;
   this->WebServerReturnDisplayIndicatorCloseConnection=0;
   this->WebServerTimerPing=0;
@@ -115,10 +114,9 @@ GlobalVariables::GlobalVariables()
   this->flagComputationFinishedAllOutputSentClosing=false;
   this->flagRunningConsoleTest=false;
   this->flagRunningCommandLine=false;
-  this->flagUsingApacheWebServer=false;
-  this->flagUsingBuiltInWebServer=false;
-  this->flagRunningAsProblemInterpreter=false;
-  this->flagRunningAsProblemInterpreterIntepretProblemInitial=true;
+  this->flagRunningApache=false;
+  this->flagRunningBuiltInWebServer=false;
+  this->flagRunningAce=false;
   this->flagLoggedIn=false;
   this->flagUsingSSLinCurrentConnection=false;
   this->flagSSLisAvailable=false;

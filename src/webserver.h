@@ -21,6 +21,7 @@ public:
   MonomialWrapper<std::string, MathRoutines::hashString> userAddress;
   std::string hostWithPort;
   std::string hostNoPort;
+  std::string cookiesApache;
   List<std::string> cookies;
   std::string addressGetOrPost;
   std::string lastHeadMessage;

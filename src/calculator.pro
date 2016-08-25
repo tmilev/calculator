@@ -1,6 +1,6 @@
 QT+= core
 QT-= gui
-TARGET = webserver
+TARGET = calculator
 CONFIG   += console
 CONFIG   -= app_bundle
 CONFIG += c++11

@@ -238,7 +238,9 @@ class logger
   void flush();
   template <typename theType>
   logger& operator << (const theType& toBePrinted)
-  { if (theGlobalVariables.flagRunningBuiltInWebServer)
+  { if (theGlobalVariables.flagRunningApache)
+      return *this;
+    if (theGlobalVariables.flagRunningBuiltInWebServer)
       std::cout << toBePrinted;
     this->CheckLogSize();
     if (this->flagStopWritingToFile)

@@ -3112,7 +3112,7 @@ void WebServer::Restart()
   int timeInteger=(int) theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   theCommand << "killall " << theGlobalVariables.PhysicalNameExecutableNoPath << " \r\n./";
   theCommand << theGlobalVariables.PhysicalNameExecutableNoPath;
-  theCommand << " " << timeInteger << " nokill " ;
+  theCommand << " server " << " nokill " << timeInteger;
 //  std::cout << "\nCalling: " << theCommand.str() << "\n";
   theGlobalVariables.CallSystemNoOutput(theCommand.str()); //kill any other running copies of the calculator.
 }
@@ -3391,7 +3391,6 @@ extern void MonitorWebServer();
 
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
-  theWebServer.InitializeGlobalVariables();
   theGlobalVariables.RelativePhysicalNameCrashLog="crash_WebServerRun.html";
   theParser.init();
   if (true)
@@ -3555,14 +3554,14 @@ extern int mainTest(List<std::string>& remainingArgs);
 
 void WebServer::AnalyzeMainArguments(int argC, char **argv)
 { MacroRegisterFunctionWithName("WebServer::AnalyzeMainArguments");
-  //std::cout << "DEBUG: Here I am. ";
+//  std::cout << "DEBUG: Here I am. ";
   if (argC<0)
     argC=0;
   theGlobalVariables.programArguments.SetSize(argC);
-//  std::cout << "Program arguments: \n";
+  //std::cout << "Program arguments: \n";
   for (int i=0; i<argC; i++)
   { theGlobalVariables.programArguments[i]=argv[i];
-//    std::cout << "Argument " << i+1 << ": " << theGlobalVariables.programArguments[i] << "\n";
+    //std::cout << "Argument " << i+1 << ": " << theGlobalVariables.programArguments[i] << "\n";
   }
   ////////////////////////////////////////////////////
   theGlobalVariables.flagRunningAce=true;
@@ -3573,12 +3572,6 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   theGlobalVariables.flagRunningBuiltInWebServer=false;
   ////////////////////////////////////////////////////
   theGlobalVariables.initDefaultFolderAndFileNames(theGlobalVariables.programArguments[0]);
-  theGlobalVariables.PhysicalPathHtmlFolder=
-  theGlobalVariables.PhysicalPathProjectBase + "../public_html/";
-  if (!FileOperations::FileExistsUnsecure(theGlobalVariables.PhysicalPathHtmlFolder ))
-    theGlobalVariables.flagRunningAce=false;
-  else
-    theGlobalVariables.flagRunningAce=true;
   if (argC<2)
   { theGlobalVariables.flagRunningApache=true;
     return;
@@ -3654,7 +3647,8 @@ int WebServer::main(int argc, char **argv)
   try {
   InitializeGlobalObjects();
   theWebServer.AnalyzeMainArguments(argc, argv);
-   if (theGlobalVariables.flagRunningConsoleTest)
+  theWebServer.InitializeGlobalVariables();
+  if (theGlobalVariables.flagRunningConsoleTest)
     return mainTest(theGlobalVariables.programArguments);
   if (theGlobalVariables.flagRunningApache)
     return WebServer::mainApache();
@@ -3691,47 +3685,48 @@ int WebServer::mainCommandLine()
 
 int WebServer::mainApache()
 { MacroRegisterFunctionWithName("main_apache");
+  stOutput.theOutputFunction=0;
+  stOutput << "Content-Type: text/html\r\n\r\n";
+  stOutput << "<html><body>"
+  << "Num threads: " << theGlobalVariables.theThreads.size << "<br>";
   theGlobalVariables.IndicatorStringOutputFunction=0;
   theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
   theGlobalVariables.flagComputationStarted=true;
 //  stOutput << "<hr>First line<hr>";
-  theGlobalVariables.DisplayNameExecutableWithPath="/cgi-bin/interpret.py";
-//  stOutput << "<hr>DEBUG: physical path project base: " << theGlobalVariables.PhysicalPathProjectBase << "<br>";
-  InitializeTimer();
-//  CreateTimerThread();
-
+  theGlobalVariables.DisplayNameExecutableWithPath="/cgi-bin/calculator";
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=30; //<-30 second computation time restriction!
   theWebServer.initPrepareSignals();
-//  std::cout << "DEBUG: Running offline interpreter. \n";
-  theParser.init();
-  if (theGlobalVariables.programArguments.size<3)
-  { stOutput << "This is either programming error or very unexpected user behavior: "
-    << "calculator called with input: " << theGlobalVariables.programArguments;
-    return 0;
-  }
-  theParser.inputStringRawestOfTheRaw=theGlobalVariables.programArguments[2];
-  //WebWorker theWorker;
-  //theWorker.ProcessCalculatorNoLoginInterpreterMode();
-  theGlobalVariables.flagComputationCompletE=true;
+  CreateTimerThread();
   return 0;
-
-
-
-
-
-  stOutput << "Content-Type: text/html\n\n";
-  theGlobalVariables.IndicatorStringOutputFunction=CGI::MakeReportIndicatorFile;
-  std::cin >> theParser.inputStringRawestOfTheRaw;
-
-  if (theParser.inputStringRawestOfTheRaw=="")
-  { theParser.inputStringRawestOfTheRaw=getenv("QUERY_STRING");
-    std::string& IPAdressCaller=theGlobalVariables.IPAdressCaller;
-    IPAdressCaller=getenv("REMOTE_ADDR");
-    for (int i=0; i<MathRoutines::Minimum((int)IPAdressCaller.size(), SomeRandomPrimesSize); i++)
-      IPAdressCaller[i]='A'+(IPAdressCaller[i]*SomeRandomPrimes[i])%26;
-  }
-  theParser.javaScriptDisplayingIndicator=WebWorker::GetJavaScriptIndicatorFromHD();
   theWebServer.CreateNewActiveWorker();
-  return theWebServer.GetActiveWorker().ProcessCalculator();
+  WebWorker& theWorker=theWebServer.GetActiveWorker();
+  theParser.init();
+  std::cin >> theWorker.messageBody;
+  theWorker.addressGetOrPost =getenv("QUERY_STRING");
+  theWorker.cookiesApache=getenv("HTTP_COOKIE");
+  std::string theRequestMethod=getenv("REQUEST_METHOD");
+  if (theRequestMethod=="GET")
+    theWorker.requestTypE=theWorker.requestGet;
+  if (theRequestMethod=="POST")
+    theWorker.requestTypE=theWorker.requestPost;
+  std::string& IPAdressCaller=theGlobalVariables.IPAdressCaller;
+  IPAdressCaller=getenv("REMOTE_ADDR");
+  theParser.javaScriptDisplayingIndicator=WebWorker::GetJavaScriptIndicatorFromHD();
+  theGlobalVariables.flagComputationCompletE=true;
+
+  stOutput << "DEBUG: <br>"
+  << "number of threads: " << theGlobalVariables.theThreads.size
+  << "DEBUG: your input, bounced back: "
+  << "<hr>Server base: <br> " << theGlobalVariables.PhysicalPathProjectBase
+  << "<hr>Cookies: <br> " << theWorker.cookiesApache
+  << "<hr>query string:<br> " << theWorker.addressGetOrPost
+  << "<hr>message body:<br> " << theWorker.messageBody
+  << "</body></html>";
+  theWorker.ServeClient();
+  stOutput.Flush();
+  //stou
+  //theWorker
+  return 0;
 }
 
 std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()

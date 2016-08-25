@@ -153,6 +153,7 @@ bool Controller::IsPausedWhileRunning()const
 
 ThreadData::ThreadData()
 { this->index=0;
+//  this->theId=0;
 }
 
 ThreadData::~ThreadData()
@@ -172,10 +173,21 @@ void ThreadData::RegisterCurrentThread(const std::string& inputName)
 }
 
 void ThreadData::CreateThread(void (*InputFunction)())
-{ MutexLockGuard(theGlobalVariables.MutexRegisterNewThread);
+{ stOutput << "Got to here pt1. \n\n\r\n";
+  stOutput.Flush();
+  MutexLockGuard(theGlobalVariables.MutexRegisterNewThread);
+  stOutput << "Got to here pt2.\n\n\r\n";
+  stOutput.Flush();
   theGlobalVariables.theThreads.SetSize(theGlobalVariables.theThreads.size+1);
+  stOutput << "Got to here pt3.\n\n\r\n";
+  stOutput.Flush();
   std::thread newThread(InputFunction);
+  stOutput << "Got to here pt4.\n\n\r\n";
+  stOutput.Flush();
   theGlobalVariables.theThreads.LastObject().swap(newThread);
+  stOutput << "Got to here pt5.\n\n\r\n";
+  stOutput.Flush();
+  return;
 }
 
 int ThreadData::getCurrentThreadId(const std::string& inputName)

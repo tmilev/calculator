@@ -184,6 +184,7 @@ void ThreadData::CreateThread(void (*InputFunction)())
   std::thread newThread(InputFunction);
   stOutput << "Got to here pt4.\n\n\r\n";
   stOutput.Flush();
+  return;
   theGlobalVariables.theThreads.LastObject().swap(newThread);
   stOutput << "Got to here pt5.\n\n\r\n";
   stOutput.Flush();

@@ -71,13 +71,14 @@ public:
   double MaxComputationTimeBeforeWeTakeAction;
 //  bool flagLogInterProcessCommunication;
 //flags: what mode are we running in?
-  bool flagRunningAceWebserver;
-  bool flagRunningAsProblemInterpreter;
-  bool flagRunningAsProblemInterpreterIntepretProblemInitial;
+
+  bool flagRunningApache;
   bool flagRunningCommandLine;
   bool flagRunningConsoleTest;
-  bool flagUsingApacheWebServer;
-  bool flagUsingBuiltInWebServer;
+  bool flagRunningBuiltInWebServer;
+
+//special flags
+  bool flagRunningAce;
 //webserver flags
   bool flagLoggedIn;
   bool flagUsingSSLinCurrentConnection;
@@ -237,7 +238,7 @@ class logger
   void flush();
   template <typename theType>
   logger& operator << (const theType& toBePrinted)
-  { if (theGlobalVariables.flagUsingBuiltInWebServer)
+  { if (theGlobalVariables.flagRunningBuiltInWebServer)
       std::cout << toBePrinted;
     this->CheckLogSize();
     if (this->flagStopWritingToFile)

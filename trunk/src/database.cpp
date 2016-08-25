@@ -264,7 +264,7 @@ bool DatabaseRoutines::SetEntry
 
 bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, bool* outputfirstLogin)
 { MacroRegisterFunctionWithName("DatabaseRoutines::startMySQLDatabase");
-  if (theGlobalVariables.flagUsingBuiltInWebServer)
+  if (theGlobalVariables.flagRunningBuiltInWebServer)
     if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
     { if (commentsOnFailure!=0)
         *commentsOnFailure << "Database operations forbidden for connections not carried over ssl. ";

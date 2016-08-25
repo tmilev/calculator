@@ -596,9 +596,8 @@ void Calculator::EvaluateCommands()
   Expression StartingExpression=this->theProgramExpression;
   this->flagAbortComputationASAP=false;
   this->Comments.clear();
-  bool usingCommandline=!this->flagDisplayFullExpressionTree && !this->flagUseHtml && !theGlobalVariables.flagRunningAsProblemInterpreter;
   ProgressReport theReport;
-  if (!usingCommandline)
+  if (!theGlobalVariables.flagRunningCommandLine)
     theReport.Report("Evaluating expressions, current expression stack:\n");
   this->EvaluateExpression(*this, this->theProgramExpression, this->theProgramExpression);
   if (this->RecursionDeptH!=0)
@@ -610,27 +609,7 @@ void Calculator::EvaluateCommands()
   theGlobalVariables.theDefaultFormat.GetElement().flagExpressionNewLineAllowed=true;
   theGlobalVariables.theDefaultFormat.GetElement().flagIncludeExtraHtmlDescriptionsInPlots=!this->flagPlotNoControls;
   theGlobalVariables.theDefaultFormat.GetElement().flagLatexDetailsInHtml=this->flagWriteLatexPlots;
-  if (theGlobalVariables.flagRunningAsProblemInterpreter)
-  { theGlobalVariables.theDefaultFormat.GetElement().flagUseQuotes=false;
-    bool foundInterpretationCommand=false;
-    if (theGlobalVariables.flagRunningAsProblemInterpreterIntepretProblemInitial)
-      for (int i=1; i<StartingExpression.size(); i++)
-        if (StartingExpression[i].StartsWith(this->opInterpretProblem()) ||
-            StartingExpression[i].StartsWith(this->opInterpretProblemGiveUp())
-            )
-        { if (foundInterpretationCommand)
-            out << "<hr>More than one interpretation command found, this is likely an error. ";
-          else
-            if (i<this->theProgramExpression.size())
-              out << this->theProgramExpression[i].ToString(&theGlobalVariables.theDefaultFormat.GetElement());
-            else
-              out << "<hr>Problem interpretation has yielded an unexpected result. "
-              << "This could both be due to a programming error and to a malformed user input."
-              << "Please take a screenshot and email it to us with a bug report. ";
-        }
-    if (!foundInterpretationCommand)
-      out << "Did not find interpretation command. The input received was: " << StartingExpression.ToString();
-  } else if(usingCommandline)
+  if(theGlobalVariables.flagRunningCommandLine)
   { theGlobalVariables.theDefaultFormat.GetElement().flagUseQuotes=false;
     out << "Input: " << "\e[1;32m" << StartingExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\033[0m" << std::endl;
     out << "Output: " << "\e[1;33m" << this->theProgramExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\033[0m" << std::endl;
@@ -653,8 +632,6 @@ void Calculator::EvaluateCommands()
   if (this->Comments.str()!="")
     commentsStream << "<b>Comments.</b><br><span>" << this->Comments.str() << "</span>";
   this->outputCommentsString=commentsStream.str();
-  if(usingCommandline && this->Comments.str()!="")
+  if(theGlobalVariables.flagRunningCommandLine && this->Comments.str()!="")
     this->outputString+=this->outputCommentsString;
-  if (theGlobalVariables.flagRunningAsProblemInterpreter)
-    this->outputString+= "<hr><hr>" + this->outputCommentsString;
 }

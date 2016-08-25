@@ -348,7 +348,7 @@ std::string HtmlInterpretation::GetEditPageHTML()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetEditPageHTML");
   std::stringstream out;
   if ((!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights()) &&
-      !theGlobalVariables.flagRunningAsProblemInterpreter)
+      !theGlobalVariables.flagRunningApache)
     return "<b>Only logged-in admins are allowed to edit pages. </b>";
   CalculatorHTML theFile;
   theFile.LoadFileNames();
@@ -456,8 +456,8 @@ std::string HtmlInterpretation::SubmitProblem()
 //  stOutput << "<b>DEBUG remove when done: Random seed: " << theProblem.theProblemData.randomSeed << "</b>";
   theProblem.currentExamHomE         = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
   if (theProblem.currentExamHomE == "" &&
-      !theGlobalVariables.flagRunningAsProblemInterpreter &&
-      !theGlobalVariables.flagRunningAceWebserver)
+      !theGlobalVariables.flagRunningApache &&
+      !theGlobalVariables.flagRunningAce)
   { out << "<b>Could not find the problem collection to which this problem belongs. "
     << "If you think this is a bug, do the following. " << theProblem.BugsGenericMessage << "</b>";
     return out.str();
@@ -552,7 +552,7 @@ std::string HtmlInterpretation::SubmitProblem()
       theProblem.flagIsForReal=false;
     } else
     { bool deadLinePassed=false;
-      if (!theGlobalVariables.flagRunningAceWebserver)
+      if (!theGlobalVariables.flagRunningAce)
       { CalculatorHTML theProblemHome;
         theProblemHome.fileName=theProblem.currentExamHomE;
         bool isGood=true;
@@ -698,7 +698,7 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   }
   std::string userRole=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("userRole"));
   bool usersAreAdmins= (userRole=="admin");
-  if (!theGlobalVariables.flagRunningAceWebserver)
+  if (!theGlobalVariables.flagRunningAce)
   { CalculatorHTML theCollection;
     std::string currentExamHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
     theRoutines.PrepareClassData
@@ -969,7 +969,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     ;
     bool isActivated=true;
     std::string webAddress="https://"+ hostWebAddressWithPort;
-    if (!theGlobalVariables.flagRunningAceWebserver)
+    if (!theGlobalVariables.flagRunningAce)
       webAddress+="/calculator";
     if (currentUser.actualActivationToken.value!="activated" && currentUser.actualActivationToken.value!="error")
     { isActivated=false;

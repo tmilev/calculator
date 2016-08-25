@@ -362,7 +362,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
     return out.str();
   }
   //out << "DEBUG: flagMathQuillWithMatrices=" << this->flagMathQuillWithMatrices << "<br>";
-  if (this->flagUseNavigationBar && !theGlobalVariables.flagRunningAsProblemInterpreter)
+  if (this->flagUseNavigationBar && !theGlobalVariables.flagRunningApache)
   { std::string linkSeparator=" | ";
     std::string linkBigSeparator=" || ";
     out << "<nav>"
@@ -386,8 +386,7 @@ void CalculatorHTML::LoadCurrentProblemItem()
   this->flagLoadedSuccessfully=false;
   bool needToFindDefault=(this->fileName=="");
   bool needToLoadDatabase=true;
-  if (theGlobalVariables.UserGuestMode() ||
-      theGlobalVariables.flagRunningAsProblemInterpreter)
+  if (theGlobalVariables.UserGuestMode())
     needToLoadDatabase=false;
   this->flagUseNavigationBar=(theGlobalVariables.GetWebInput("navigationBar")=="true");
   if (!needToFindDefault)
@@ -518,7 +517,7 @@ std::string CalculatorHTML::GetJavascriptSubmitAnswers()
   out
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"GET\", ";
-  if (!theGlobalVariables.flagRunningAceWebserver)
+  if (theGlobalVariables.flagRunningApache)
     out << "\"" << theGlobalVariables.DisplayNameExecutableWithPath << "\"";
   else
     out << "requestType";

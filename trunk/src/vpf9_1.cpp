@@ -15,7 +15,7 @@ Crasher::Crasher()
 }
 
 void Crasher::FirstRun()
-{ if (this->flagFirstRun && theGlobalVariables.flagUsingBuiltInWebServer)
+{ if (this->flagFirstRun && (theGlobalVariables.flagRunningApache || theGlobalVariables.flagRunningBuiltInWebServer) )
     this->theCrashReport << "\n<tr><td>";
   this->flagFirstRun=false;
 }
@@ -45,7 +45,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
     { this->theCrashReport << "<hr>In addition, I have an account of the computation progress report strings, attached below.<hr>"
       << theGlobalVariables.ToStringProgressReportHtml();
     }
-  if (theGlobalVariables.flagUsingBuiltInWebServer)
+  if (theGlobalVariables.flagRunningApache || theGlobalVariables.flagRunningBuiltInWebServer)
     this->theCrashReport << "</td></tr></table></td></table>";
   if (stOutput.theOutputFunction!=0)
     std::cout << this->theCrashReport.str() << std::endl;
@@ -264,7 +264,7 @@ bool GlobalVariables::UserRequestMustBePromptedToLogInIfNotLoggedIn()
 
 std::string GlobalVariables::ToStringNavigation()
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringNavigation");
-  if (this->flagRunningAceWebserver)
+  if (this->flagRunningAce)
     return this->ToStringNavigationAce();
   else
     return this->ToStringNavigationOLD();

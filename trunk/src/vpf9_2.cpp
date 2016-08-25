@@ -2385,7 +2385,7 @@ std::string& CGI::GetJavascriptMathjax()
 { if (CGI::JavascriptMathjax!="")
     return CGI::JavascriptMathjax;
   std::stringstream out;
-  if (theGlobalVariables.flagRunningAceWebserver)
+  if (theGlobalVariables.flagRunningAce)
     out << "<script type=\"text/javascript\" async src=\"/MathJax-2.6-latest/MathJax.js?config=TeX-AMS_HTML-full,local/local\"></script>\n";
   else
   { out

@@ -3554,7 +3554,7 @@ extern int mainTest(List<std::string>& remainingArgs);
 
 void WebServer::AnalyzeMainArguments(int argC, char **argv)
 { MacroRegisterFunctionWithName("WebServer::AnalyzeMainArguments");
-//  std::cout << "DEBUG: Here I am. ";
+  //std::cout << "Content-Type: text/html\r\n\r\n<html><body>DEBUG: ";
   if (argC<0)
     argC=0;
   theGlobalVariables.programArguments.SetSize(argC);
@@ -3576,7 +3576,13 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   { theGlobalVariables.flagRunningApache=true;
     return;
   }
+  std::string envRequestMethodApache=getenv("REQUEST_METHOD");
+  if (envRequestMethodApache =="GET" || envRequestMethodApache=="POST" || envRequestMethodApache=="HEAD")
+  { theGlobalVariables.flagRunningApache=true;
+    return;
+  }
   std::string& secondArgument=theGlobalVariables.programArguments[1];
+
   if (secondArgument=="server")
   { theGlobalVariables.flagRunningBuiltInWebServer=true;
     theWebServer.flagTryToKillOlderProcesses=true;
@@ -3599,6 +3605,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
       theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=timeLimitInt;
     return;
   }
+  ////////////////////////////////
   if (secondArgument=="test")
   { theGlobalVariables.flagRunningConsoleTest=true;
     return;
@@ -3696,17 +3703,18 @@ int WebServer::mainApache()
   theGlobalVariables.DisplayNameExecutableWithPath="/cgi-bin/calculator";
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=30; //<-30 second computation time restriction!
   theWebServer.initPrepareSignals();
-  CreateTimerThread();
-  return 0;
+//  CreateTimerThread();
   theWebServer.CreateNewActiveWorker();
   WebWorker& theWorker=theWebServer.GetActiveWorker();
   theParser.init();
   std::cin >> theWorker.messageBody;
   theWorker.addressGetOrPost =getenv("QUERY_STRING");
-  theWorker.cookiesApache=getenv("HTTP_COOKIE");
   std::string theRequestMethod=getenv("REQUEST_METHOD");
+  theWorker.cookiesApache=getenv("HTTP_COOKIE");
   if (theRequestMethod=="GET")
-    theWorker.requestTypE=theWorker.requestGet;
+  { theWorker.requestTypE=theWorker.requestGet;
+
+  }
   if (theRequestMethod=="POST")
     theWorker.requestTypE=theWorker.requestPost;
   std::string& IPAdressCaller=theGlobalVariables.IPAdressCaller;
@@ -3721,6 +3729,7 @@ int WebServer::mainApache()
   << "<hr>Cookies: <br> " << theWorker.cookiesApache
   << "<hr>query string:<br> " << theWorker.addressGetOrPost
   << "<hr>message body:<br> " << theWorker.messageBody
+  << "<hr>request method:<br> " << theRequestMethod
   << "</body></html>";
   theWorker.ServeClient();
   stOutput.Flush();

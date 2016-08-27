@@ -3573,12 +3573,16 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   theGlobalVariables.flagSSLisAvailable=true;
   theGlobalVariables.flagRunningBuiltInWebServer=false;
   ////////////////////////////////////////////////////
+  if (argC==0)
+  { theGlobalVariables.flagRunningCommandLine=true;
+    return;
+  }
   theGlobalVariables.initDefaultFolderAndFileNames(theGlobalVariables.programArguments[0]);
   if (argC<2)
   { theGlobalVariables.flagRunningApache=true;
     return;
   }
-  std::string envRequestMethodApache=getenv("REQUEST_METHOD");
+  std::string envRequestMethodApache=WebServer::GetEnvironment("REQUEST_METHOD");
   if (envRequestMethodApache =="GET" || envRequestMethodApache=="POST" || envRequestMethodApache=="HEAD")
   { theGlobalVariables.flagRunningApache=true;
     return;
@@ -3692,7 +3696,16 @@ int WebServer::mainCommandLine()
   return 0;
 }
 
-#include <sys/resource.h>
+std::string WebServer::GetEnvironment(const std::string& envVarName)
+{
+  char* queryStringPtr=getenv(envVarName.c_str());
+  if (queryStringPtr==0)
+    return "";
+  return queryStringPtr;
+
+}
+
+#include <sys/resource.h> //<- for setrlimit(...) function. Restricts the time the executable can run.
 int WebServer::mainApache()
 { MacroRegisterFunctionWithName("main_apache");
   rlimit theLimit;
@@ -3700,6 +3713,7 @@ int WebServer::mainApache()
   theLimit.rlim_max=60;
   setrlimit(RLIMIT_CPU, &theLimit);
   stOutput.theOutputFunction=0;
+  theGlobalVariables.DisplayNameCalculatorApache="/cgi-bin/calculator?";
   stOutput << "Content-Type: text/html\r\n\r\n";
   theGlobalVariables.IndicatorStringOutputFunction=0;
   theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
@@ -3713,10 +3727,11 @@ int WebServer::mainApache()
   WebWorker& theWorker=theWebServer.GetActiveWorker();
   theParser.init();
   std::cin >> theWorker.messageBody;
-  theWorker.addressGetOrPost =getenv("QUERY_STRING");
-  std::string theRequestMethod=getenv("REQUEST_METHOD");
-  theWorker.cookiesApache=getenv("HTTP_COOKIE");
-  std::string thePort=getenv("SERVER_PORT");
+  theWorker.addressGetOrPost = WebServer::GetEnvironment("QUERY_STRING");
+  std::string theRequestMethod=WebServer::GetEnvironment("REQUEST_METHOD");
+  theWorker.cookiesApache=WebServer::GetEnvironment("HTTP_COOKIE");
+  std::string thePort=WebServer::GetEnvironment("SERVER_PORT");
+  theGlobalVariables.IPAdressCaller= WebServer::GetEnvironment("REMOTE_ADDR");
   if (thePort=="443")
   { theGlobalVariables.flagUsingSSLinCurrentConnection=true;
     theGlobalVariables.flagSSLisAvailable=true;
@@ -3727,12 +3742,10 @@ int WebServer::mainApache()
   }
   if (theRequestMethod=="POST")
     theWorker.requestTypE=theWorker.requestPost;
-  std::string& IPAdressCaller=theGlobalVariables.IPAdressCaller;
-  IPAdressCaller=getenv("REMOTE_ADDR");
   theParser.javaScriptDisplayingIndicator=WebWorker::GetJavaScriptIndicatorFromHD();
   theGlobalVariables.flagComputationCompletE=true;
 
-  stOutput << "<html><body>";
+/*  stOutput << "<html><body>";
   stOutput << "DEBUG: your input, bounced back: "
   << "<hr>server port: <br> " << thePort
   << "<hr>Server base: <br> " << theGlobalVariables.PhysicalPathProjectBase
@@ -3740,7 +3753,7 @@ int WebServer::mainApache()
   << "<hr>query string:<br> " << theWorker.addressGetOrPost
   << "<hr>message body:<br> " << theWorker.messageBody
   << "<hr>request method:<br> " << theRequestMethod
-  << "</body></html>";
+  << "</body></html>";*/
   theWorker.ServeClient();
 //  std::string theOutputHeader(theWorker.remainingHeaderToSend.TheObjects, theWorker.remainingHeaderToSend.size);
   //std::string theOutputBody(theWorker.remainingBodyToSend.TheObjects, theWorker.remainingBodyToSend.size);

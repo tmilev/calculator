@@ -174,28 +174,10 @@ void ThreadData::RegisterCurrentThread(const std::string& inputName)
 }
 
 void ThreadData::CreateThread(void (*InputFunction)())
-{ stOutput << "Got to here pt1. \n\n\r\n";
-  stOutput.Flush();
-  MutexLockGuard(theGlobalVariables.MutexRegisterNewThread);
-  stOutput << "Got to here pt2.\n\n\r\n";
-  stOutput.Flush();
+{ MutexLockGuard(theGlobalVariables.MutexRegisterNewThread);
   theGlobalVariables.theThreads.SetSize(theGlobalVariables.theThreads.size+1);
-  stOutput << "Got to here pt3.\n\n\r\n";
-  stOutput.Flush();
   std::thread newThread(InputFunction);
-  stOutput << "Got to here pt4.\n\n\r\n";
-  //for (int i=0; i<100000; i++)
-  { stOutput <<  ThreadData::ToStringAllThreadsHtml();
-    stOutput.Flush();
-  }
   theGlobalVariables.theThreads.LastObject().swap(newThread);
-  stOutput << "Got to here pt5.\n\n\r\n";
-//  for (int i=0; i<100000; i++)
-  { stOutput <<  ThreadData::ToStringAllThreadsHtml();
-    stOutput.Flush();
-  }
-  stOutput << "Got to here pt5.\n\n\r\n";
-  stOutput.Flush();
   return;
 }
 

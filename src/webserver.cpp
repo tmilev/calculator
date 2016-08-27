@@ -2462,15 +2462,15 @@ int WebWorker::ServeClient()
   if (theGlobalVariables.theThreads.size<=1)
     crash << "Number of threads must be at least 2 in this point of code..." << crash;
   this->ExtractAddressParts();
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection && !theGlobalVariables.flagRunningApache)
   { std::stringstream redirectStream;
     redirectStream << "HTTP/1.1 301 Moved Permanently\r\n";
     redirectStream << "Location: https://" << this->hostNoPort << ":" << this->parent->httpSSLPort
     << this->addressGetOrPost;
     this->SetHeader(redirectStream.str());
+    stOutput << "<html><body>Location: https://" << this->hostNoPort << ":" << this->parent->httpSSLPort
+    << this->addressGetOrPost << "</body></html>";
 //    this->SetHeaderOKNoContentLength();
-//    stOutput << "<html><body>Location: https://" << this->hostNoPort << ":" << this->parent->httpSSLPort
-//    << this->addressGetOrPost << "</body></html>";
     return 0;
   }
 //  std::cout << "GOT TO HERE 2" << std::endl;
@@ -3694,8 +3694,6 @@ int WebServer::mainApache()
 { MacroRegisterFunctionWithName("main_apache");
   stOutput.theOutputFunction=0;
   stOutput << "Content-Type: text/html\r\n\r\n";
-  stOutput << "<html><body>"
-  << "Num threads: " << theGlobalVariables.theThreads.size << "<br>";
   theGlobalVariables.IndicatorStringOutputFunction=0;
   theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
   theGlobalVariables.flagComputationStarted=true;
@@ -3703,7 +3701,7 @@ int WebServer::mainApache()
   theGlobalVariables.DisplayNameExecutableWithPath="/cgi-bin/calculator";
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=30; //<-30 second computation time restriction!
   theWebServer.initPrepareSignals();
-//  CreateTimerThread();
+  CreateTimerThread();
   theWebServer.CreateNewActiveWorker();
   WebWorker& theWorker=theWebServer.GetActiveWorker();
   theParser.init();
@@ -3711,6 +3709,11 @@ int WebServer::mainApache()
   theWorker.addressGetOrPost =getenv("QUERY_STRING");
   std::string theRequestMethod=getenv("REQUEST_METHOD");
   theWorker.cookiesApache=getenv("HTTP_COOKIE");
+  std::string thePort=getenv("SERVER_PORT");
+  if (thePort=="443")
+  { theGlobalVariables.flagUsingSSLinCurrentConnection=true;
+    theGlobalVariables.flagSSLisAvailable=true;
+  }
   if (theRequestMethod=="GET")
   { theWorker.requestTypE=theWorker.requestGet;
 
@@ -3722,9 +3725,9 @@ int WebServer::mainApache()
   theParser.javaScriptDisplayingIndicator=WebWorker::GetJavaScriptIndicatorFromHD();
   theGlobalVariables.flagComputationCompletE=true;
 
-  stOutput << "DEBUG: <br>"
-  << "number of threads: " << theGlobalVariables.theThreads.size
-  << "DEBUG: your input, bounced back: "
+  stOutput << "<html><body>";
+  stOutput << "DEBUG: your input, bounced back: "
+  << "<hr>server port: <br> " << thePort
   << "<hr>Server base: <br> " << theGlobalVariables.PhysicalPathProjectBase
   << "<hr>Cookies: <br> " << theWorker.cookiesApache
   << "<hr>query string:<br> " << theWorker.addressGetOrPost
@@ -3732,9 +3735,10 @@ int WebServer::mainApache()
   << "<hr>request method:<br> " << theRequestMethod
   << "</body></html>";
   theWorker.ServeClient();
-  stOutput.Flush();
-  //stou
-  //theWorker
+//  std::string theOutputHeader(theWorker.remainingHeaderToSend.TheObjects, theWorker.remainingHeaderToSend.size);
+  //std::string theOutputBody(theWorker.remainingBodyToSend.TheObjects, theWorker.remainingBodyToSend.size);
+  //stOutput << theOutputBody;
+  theGlobalVariables.flagComputationFinishedAllOutputSentClosing=true;
   return 0;
 }
 

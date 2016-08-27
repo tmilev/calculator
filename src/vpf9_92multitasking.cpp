@@ -163,6 +163,7 @@ ThreadData::~ThreadData()
 GlobalVariables::~GlobalVariables()
 { //double startTime=this->GetElapsedSeconds();
 //  logBlock << logger::yellow << "joining threads ..." << logger::endL;
+  this->flagComputationFinishedAllOutputSentClosing=true;
   for (int i=1; i<this->theThreads.size; i++)
     this->theThreads[i].join();
 //  logBlock << logger::yellow << " done in " << logger::green << this->GetElapsedSeconds()-startTime << " seconds. " << logger::endL;
@@ -183,8 +184,16 @@ void ThreadData::CreateThread(void (*InputFunction)())
   stOutput.Flush();
   std::thread newThread(InputFunction);
   stOutput << "Got to here pt4.\n\n\r\n";
-  stOutput.Flush();
+  //for (int i=0; i<100000; i++)
+  { stOutput <<  ThreadData::ToStringAllThreadsHtml();
+    stOutput.Flush();
+  }
   theGlobalVariables.theThreads.LastObject().swap(newThread);
+  stOutput << "Got to here pt5.\n\n\r\n";
+//  for (int i=0; i<100000; i++)
+  { stOutput <<  ThreadData::ToStringAllThreadsHtml();
+    stOutput.Flush();
+  }
   stOutput << "Got to here pt5.\n\n\r\n";
   stOutput.Flush();
   return;

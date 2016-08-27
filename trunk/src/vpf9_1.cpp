@@ -268,7 +268,6 @@ std::string GlobalVariables::ToStringNavigation()
     return this->ToStringNavigationAce();
   else
     return this->ToStringNavigationOLD();
-
 }
 
 std::string GlobalVariables::ToStringNavigationOLD()

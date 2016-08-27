@@ -264,6 +264,7 @@ public:
   std::string ToStringStatusAll();
   std::string ToStringStatusPublic();
   std::string ToStringStatusPublicNoTop();
+  static std::string GetEnvironment(const std::string& envVarName);
   static int main(int argc, char **argv);
   static int mainApache();
   static int mainCommandLine();

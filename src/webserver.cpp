@@ -2462,17 +2462,6 @@ int WebWorker::ServeClient()
   if (theGlobalVariables.theThreads.size<=1)
     crash << "Number of threads must be at least 2 in this point of code..." << crash;
   this->ExtractAddressParts();
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection && !theGlobalVariables.flagRunningApache)
-  { std::stringstream redirectStream;
-    redirectStream << "HTTP/1.1 301 Moved Permanently\r\n";
-    redirectStream << "Location: https://" << this->hostNoPort << ":" << this->parent->httpSSLPort
-    << this->addressGetOrPost;
-    this->SetHeader(redirectStream.str());
-    stOutput << "<html><body>Location: https://" << this->hostNoPort << ":" << this->parent->httpSSLPort
-    << this->addressGetOrPost << "</body></html>";
-//    this->SetHeaderOKNoContentLength();
-    return 0;
-  }
 //  std::cout << "GOT TO HERE 2" << std::endl;
   std::stringstream argumentProcessingFailureComments;
   this->flagArgumentsAreOK=true;
@@ -2481,6 +2470,19 @@ int WebWorker::ServeClient()
   if (!this->ExtractArgumentsFromCookies(argumentProcessingFailureComments))
     this->flagArgumentsAreOK=false;
   theGlobalVariables.userCalculatorRequestType=this->addressComputed;
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
+  { std::stringstream redirectStream;
+    redirectStream << "HTTP/1.1 301 Moved Permanently\r\n";
+    redirectStream << "Location: https://" << this->hostNoPort << ":" << this->parent->httpSSLPort
+    << this->addressGetOrPost;
+    this->SetHeader(redirectStream.str());
+    stOutput << "<html><body>Address available through secure (SSL) connection only."
+    << "Click <a href=\"https://" << this->hostNoPort << ":" << this->parent->httpSSLPort
+    << this->addressGetOrPost << "\">here</a> if not redirected automatically. "
+    << "</body></html>";
+//    this->SetHeaderOKNoContentLength();
+    return 0;
+  }
   if (this->parent->AddressRequiresLogin(theGlobalVariables.userCalculatorRequestType))
   { if (!this->ProcessWebArguments(argumentProcessingFailureComments))
       this->flagArgumentsAreOK=false;
@@ -3690,8 +3692,13 @@ int WebServer::mainCommandLine()
   return 0;
 }
 
+#include <sys/resource.h>
 int WebServer::mainApache()
 { MacroRegisterFunctionWithName("main_apache");
+  rlimit theLimit;
+  theLimit.rlim_cur=30;
+  theLimit.rlim_max=60;
+  setrlimit(RLIMIT_CPU, &theLimit);
   stOutput.theOutputFunction=0;
   stOutput << "Content-Type: text/html\r\n\r\n";
   theGlobalVariables.IndicatorStringOutputFunction=0;

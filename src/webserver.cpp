@@ -1023,7 +1023,7 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!-- input form here -->");
   //stOutput << this->ToStringCalculatorArgumentsHumanReadable();
   stOutput << "\n<FORM method=\"GET\" id=\"formCalculator\" name=\"formCalculator\" action=\""
-  << theGlobalVariables.DisplayNameExecutableWithPath << "\">\n";
+  << theGlobalVariables.DisplayNameCalculatorApache << "\">\n";
   std::string civilizedInputSafish;
   if (CGI::StringToHtmlStringReturnTrueIfModified(theParser.inputString, civilizedInputSafish))
     stOutput << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are "
@@ -2031,12 +2031,14 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   std::stringstream out;
   out << reasonForLogin;
   out << "<form name=\"login\" id=\"login\" action=\"";
-  if (theGlobalVariables.userCalculatorRequestType=="logout")
+  if (theGlobalVariables.userCalculatorRequestType=="logout" && !theGlobalVariables.flagRunningApache)
     out << "/";
-  else
-    out << ""
-           //theGlobalVariables.userCalculatorRequestType
-           ;
+  else if (theGlobalVariables.userCalculatorRequestType=="logout" && theGlobalVariables.flagRunningApache)
+    out << theGlobalVariables.DisplayNameCalculatorApache;
+  else if (theGlobalVariables.userCalculatorRequestType!="logout" && theGlobalVariables.flagRunningApache)
+    out << theGlobalVariables.DisplayNameCalculatorApache;
+  else if (theGlobalVariables.userCalculatorRequestType!="logout" && !theGlobalVariables.flagRunningApache)
+    out << "";
   out << "\" method=\"POST\" accept-charset=\"utf-8\">\n"
   <<  "User name:\n"
   << "<input type=\"text\" id=\"username\" name=\"username\" placeholder=\"username\" ";
@@ -2048,7 +2050,10 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   out << "<br>Password: ";
   out << "<input type=\"password\" id=\"password\" name=\"password\" placeholder=\"password\" autocomplete=\"on\">";
   out << this->GetHtmlHiddenInputs(false, false);
-  out << "<button type=\"submit\" value=\"Submit\">Login</button>";
+  out << "<button type=\"submit\" value=\"Submit\" ";
+  if (theGlobalVariables.flagRunningApache)
+    out << "action=\"" << theGlobalVariables.DisplayNameCalculatorApache << "\"";
+  out << ">Login</button>";
   out << "</form>";
 //  out << "<button onclick=\"submitLoginInfo();\">Login</button>";
   out << "<span id=\"loginResult\"></span>";
@@ -2470,20 +2475,25 @@ int WebWorker::ServeClient()
   if (!this->ExtractArgumentsFromCookies(argumentProcessingFailureComments))
     this->flagArgumentsAreOK=false;
   theGlobalVariables.userCalculatorRequestType=this->addressComputed;
-  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
-  { std::stringstream redirectStream;
+  bool needLogin=this->parent->AddressRequiresLogin(theGlobalVariables.userCalculatorRequestType);
+  if (needLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection)
+  { std::stringstream redirectStream, newAddressStream;
     redirectStream << "HTTP/1.1 301 Moved Permanently\r\n";
-    redirectStream << "Location: https://" << this->hostNoPort << ":" << this->parent->httpSSLPort
-    << this->addressGetOrPost;
+    newAddressStream << "https://" << this->hostNoPort << ":" << this->parent->httpSSLPort
+    << theGlobalVariables.DisplayNameCalculatorApacheQ << this->addressGetOrPost;
+    redirectStream << "Location: " << newAddressStream.str();
     this->SetHeader(redirectStream.str());
-    stOutput << "<html><body>Address available through secure (SSL) connection only."
-    << "Click <a href=\"https://" << this->hostNoPort << ":" << this->parent->httpSSLPort
-    << this->addressGetOrPost << "\">here</a> if not redirected automatically. "
-    << "</body></html>";
+    stOutput << "<html><body>Address available through secure (SSL) connection only. "
+    << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. ";
+    if (theGlobalVariables.flagRunningApache)
+      stOutput << "To avoid seeing this message, <b><span \"style=color:red\">please use the secure version:</span></b> "
+      << "<a href=\"https://" << this->hostNoPort << "\">https://" << this->hostNoPort
+      << "</a>. If using bookmarks, don't forget to re-bookmark to the secure site. ";
+    stOutput << "</body></html>";
 //    this->SetHeaderOKNoContentLength();
     return 0;
   }
-  if (this->parent->AddressRequiresLogin(theGlobalVariables.userCalculatorRequestType))
+  if (needLogin)
   { if (!this->ProcessWebArguments(argumentProcessingFailureComments))
       this->flagArgumentsAreOK=false;
     if (!this->Login(argumentProcessingFailureComments))
@@ -2521,7 +2531,7 @@ int WebWorker::ServeClient()
   if (this->flagPasswordWasSubmitted && theGlobalVariables.userCalculatorRequestType!="changePassword" &&
       theGlobalVariables.userCalculatorRequestType!="activateAccount")
   { std::stringstream redirectedAddress;
-    redirectedAddress << this->addressComputed << "?";
+    redirectedAddress << theGlobalVariables.DisplayNameCalculatorApacheQ << this->addressComputed << "?";
     for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
       if (theGlobalVariables.webArguments.theKeys[i]!="password")
         redirectedAddress << theGlobalVariables.webArguments.theKeys[i] << "="
@@ -3713,13 +3723,11 @@ int WebServer::mainApache()
   theLimit.rlim_max=60;
   setrlimit(RLIMIT_CPU, &theLimit);
   stOutput.theOutputFunction=0;
-  theGlobalVariables.DisplayNameCalculatorApache="/cgi-bin/calculator?";
   stOutput << "Content-Type: text/html\r\n\r\n";
   theGlobalVariables.IndicatorStringOutputFunction=0;
   theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
   theGlobalVariables.flagComputationStarted=true;
 //  stOutput << "<hr>First line<hr>";
-  theGlobalVariables.DisplayNameExecutableWithPath="/cgi-bin/calculator";
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=30; //<-30 second computation time restriction!
   theWebServer.initPrepareSignals();
   CreateTimerThread();
@@ -3727,18 +3735,28 @@ int WebServer::mainApache()
   WebWorker& theWorker=theWebServer.GetActiveWorker();
   theParser.init();
   std::cin >> theWorker.messageBody;
+  theWebServer.httpSSLPort="443";
+  theWebServer.httpPort="80";
   theWorker.addressGetOrPost = WebServer::GetEnvironment("QUERY_STRING");
   std::string theRequestMethod=WebServer::GetEnvironment("REQUEST_METHOD");
   theWorker.cookiesApache=WebServer::GetEnvironment("HTTP_COOKIE");
   std::string thePort=WebServer::GetEnvironment("SERVER_PORT");
   theGlobalVariables.IPAdressCaller= WebServer::GetEnvironment("REMOTE_ADDR");
+  theWorker.hostWithPort=WebServer::GetEnvironment("SERVER_NAME")+":"+thePort;
+  std::string theURL = WebServer::GetEnvironment("REQUEST_URI");
+  unsigned numBytesBeforeQuestiMark=0;
+  for (numBytesBeforeQuestiMark=0; numBytesBeforeQuestiMark<theURL.size(); numBytesBeforeQuestiMark++)
+    if (theURL[numBytesBeforeQuestiMark]=='?')
+      break;
+  theGlobalVariables.DisplayNameCalculatorApache=theURL.substr(0, numBytesBeforeQuestiMark);
+  theGlobalVariables.DisplayNameCalculatorApacheQ=theGlobalVariables.DisplayNameCalculatorApache+"?";
+
   if (thePort=="443")
   { theGlobalVariables.flagUsingSSLinCurrentConnection=true;
     theGlobalVariables.flagSSLisAvailable=true;
   }
   if (theRequestMethod=="GET")
   { theWorker.requestTypE=theWorker.requestGet;
-
   }
   if (theRequestMethod=="POST")
     theWorker.requestTypE=theWorker.requestPost;
@@ -3747,13 +3765,14 @@ int WebServer::mainApache()
 
 /*  stOutput << "<html><body>";
   stOutput << "DEBUG: your input, bounced back: "
-  << "<hr>server port: <br> " << thePort
-  << "<hr>Server base: <br> " << theGlobalVariables.PhysicalPathProjectBase
-  << "<hr>Cookies: <br> " << theWorker.cookiesApache
-  << "<hr>query string:<br> " << theWorker.addressGetOrPost
-  << "<hr>message body:<br> " << theWorker.messageBody
-  << "<hr>request method:<br> " << theRequestMethod
-  << "</body></html>";*/
+  << "\n<hr>server port: <br>\n" << thePort
+  << "\n<hr>Server base: <br>\n" << theGlobalVariables.PhysicalPathProjectBase
+  << "\n<hr>Calculator display name apache: <br>\n" << theGlobalVariables.DisplayNameCalculatorApache
+  << "\n<hr>Cookies: <br>\n" << theWorker.cookiesApache
+  << "\n<hr>query string:<br>\n" << theWorker.addressGetOrPost
+  << "\n<hr>message body:<br>\n" << theWorker.messageBody
+  << "\n<hr>request method:<br>\n" << theRequestMethod
+  << "\n</body></html>";*/
   theWorker.ServeClient();
 //  std::string theOutputHeader(theWorker.remainingHeaderToSend.TheObjects, theWorker.remainingHeaderToSend.size);
   //std::string theOutputBody(theWorker.remainingBodyToSend.TheObjects, theWorker.remainingBodyToSend.size);

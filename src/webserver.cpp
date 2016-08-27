@@ -2052,8 +2052,14 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   out << this->GetHtmlHiddenInputs(false, false);
   out << "<button type=\"submit\" value=\"Submit\" ";
   if (theGlobalVariables.flagRunningApache)
-    out << "action=\"" << theGlobalVariables.DisplayNameCalculatorApache << "\"";
+    out << "action=\"" << theGlobalVariables.DisplayNameCalculatorApacheQ
+    << theGlobalVariables.userCalculatorRequestType << "\"";
+  else
+    out << "action=\"" << theGlobalVariables.userCalculatorRequestType << "\"";
   out << ">Login</button>";
+//  if (theGlobalVariables.flagRunningApache)
+//    out << "action=\"" << theGlobalVariables.DisplayNameCalculatorApacheQ
+//    << theGlobalVariables.userCalculatorRequestType << "\"";
   out << "</form>";
 //  out << "<button onclick=\"submitLoginInfo();\">Login</button>";
   out << "<span id=\"loginResult\"></span>";
@@ -2391,7 +2397,7 @@ std::string WebWorker::GetSetProblemDatabaseInfoHtml()
 std::string HtmlInterpretation::ModifyProblemReport()
 { MacroRegisterFunctionWithName("WebWorker::GetModifyProblemReport");
   bool shouldProceed=theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights();
-  if (shouldProceed && !theGlobalVariables.flagRunningAce)
+  if (shouldProceed)
     shouldProceed= theGlobalVariables.flagUsingSSLinCurrentConnection;
   if (!shouldProceed)
     return "<b>Modifying problems allowed only for logged-in admins under ssl connection. </b>";
@@ -3650,6 +3656,8 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problemtemplates/");
   folderSubstitutionsNonSensitive.SetKeyValue("pagetemplates/", "../pagetemplates/");
   folderSubstitutionsNonSensitive.SetKeyValue("topiclists/", "../topiclists/");
+  if (theGlobalVariables.flagRunningAce)
+    folderSubstitutionsNonSensitive.SetKeyValue("MathJax-2.6-latest/", "../public_html/MathJax-2.6-latest/");
 
   folderSubstitutionsSensitive.Clear();
   folderSubstitutionsSensitive.SetKeyValue("output/", "LogFiles/");
@@ -3744,11 +3752,11 @@ int WebServer::mainApache()
   theGlobalVariables.IPAdressCaller= WebServer::GetEnvironment("REMOTE_ADDR");
   theWorker.hostWithPort=WebServer::GetEnvironment("SERVER_NAME")+":"+thePort;
   std::string theURL = WebServer::GetEnvironment("REQUEST_URI");
-  unsigned numBytesBeforeQuestiMark=0;
-  for (numBytesBeforeQuestiMark=0; numBytesBeforeQuestiMark<theURL.size(); numBytesBeforeQuestiMark++)
-    if (theURL[numBytesBeforeQuestiMark]=='?')
+  unsigned numBytesBeforeQuestionMark=0;
+  for (numBytesBeforeQuestionMark=0; numBytesBeforeQuestionMark<theURL.size(); numBytesBeforeQuestionMark++)
+    if (theURL[numBytesBeforeQuestionMark]=='?')
       break;
-  theGlobalVariables.DisplayNameCalculatorApache=theURL.substr(0, numBytesBeforeQuestiMark);
+  theGlobalVariables.DisplayNameCalculatorApache=theURL.substr(0, numBytesBeforeQuestionMark);
   theGlobalVariables.DisplayNameCalculatorApacheQ=theGlobalVariables.DisplayNameCalculatorApache+"?";
 
   if (thePort=="443")

@@ -1446,13 +1446,20 @@ std::string WebWorker::GetHeaderSetCookie()
   return out.str();
 }
 
-void WebWorker::SetHeader(const std::string& theHeader)
+void WebWorker::SetHeader(const std::string& httpResponse, const std::string& remainingHeader)
 { MacroRegisterFunctionWithName("WebWorker::SetHeader");
   std::stringstream out;
-  out << theHeader;
+  if (!theGlobalVariables.flagRunningApache)
+    out << httpResponse;
+  if (remainingHeader!="")
+    out << "\r\n" << remainingHeader;
 //  int ohno;
   if (theGlobalVariables.flagLoggedIn && WebWorker::GetHeaderSetCookie()!="")
     out << "\r\n" << WebWorker::GetHeaderSetCookie();
+  if (theGlobalVariables.flagRunningApache)
+  { stOutput << out.str() << "\r\n\r\n";
+    return;
+  }
   std::string finalHeader=out.str();
   this->remainingHeaderToSend.SetSize(0);
   this->remainingHeaderToSend.SetExpectedSize(finalHeader.size());
@@ -1462,7 +1469,7 @@ void WebWorker::SetHeader(const std::string& theHeader)
 
 void WebWorker::SetHeaderOKNoContentLength()
 { MacroRegisterFunctionWithName("WebWorker::SetHeaderOKNoContentLength");
-  this->SetHeader("HTTP/1.0 200 OK\r\nContent-Type: text/html");
+  this->SetHeader("HTTP/1.0 200 OK", "Content-Type: text/html");
   this->flagDoAddContentLength=true;
 }
 
@@ -1737,7 +1744,7 @@ int WebWorker::ProcessFile()
 { MacroRegisterFunctionWithName("WebWorker::ProcessFile");
   if (!FileOperations::FileExistsUnsecure(this->RelativePhysicalFileNamE))
   { //std::cout << "ere be i: file name not found" << std::endl;
-    this->SetHeader("HTTP/1.0 404 Object not found\r\nContent-Type: text/html");
+    this->SetHeader("HTTP/1.0 404 Object not found", "Content-Type: text/html");
 //    if (stOutput.theOutputFunction==0)
 //      theLog << logger::red << "WTF??????????????" << logger::endL;
     stOutput << "<html><body><b>File does not exist.</b>";
@@ -1779,7 +1786,7 @@ int WebWorker::ProcessFile()
   theFile.seekp(0, std::ifstream::end);
   unsigned int fileSize=theFile.tellp();
   if (fileSize>50000000)
-  { this->SetHeader( "HTTP/1.0 413 Payload Too Large");
+  { this->SetHeader( "HTTP/1.0 413 Payload Too Large", "");
     stOutput << "<html><body><b>Error: user requested file: "
     << this->VirtualFileName
     << " but it is too large, namely, " << fileSize
@@ -1912,7 +1919,7 @@ std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExten
 
 int WebWorker::ProcessUnknown()
 { MacroRegisterFunctionWithName("WebWorker::ProcessUnknown");
-  this->SetHeader("HTTP/1.0 501 Method Not Implemented\r\nContent-Type: text/html");
+  this->SetHeader("HTTP/1.0 501 Method Not Implemented", "Content-Type: text/html");
   stOutput << "<b>Requested method is not implemented. </b> <hr>The original message received from the server follows."
   << "<hr>\n" << this->ToStringMessageUnsafe();
   theLog << logger::red << "Method not implemented. " << logger::endL;
@@ -2484,11 +2491,10 @@ int WebWorker::ServeClient()
   bool needLogin=this->parent->AddressRequiresLogin(theGlobalVariables.userCalculatorRequestType);
   if (needLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection)
   { std::stringstream redirectStream, newAddressStream;
-    redirectStream << "HTTP/1.1 301 Moved Permanently\r\n";
     newAddressStream << "https://" << this->hostNoPort << ":" << this->parent->httpSSLPort
     << theGlobalVariables.DisplayNameCalculatorApacheQ << this->addressGetOrPost;
     redirectStream << "Location: " << newAddressStream.str();
-    this->SetHeader(redirectStream.str());
+    this->SetHeader("HTTP/1.1 301 Moved Permanently", redirectStream.str());
     stOutput << "<html><body>Address available through secure (SSL) connection only. "
     << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. ";
     if (theGlobalVariables.flagRunningApache)
@@ -2543,9 +2549,8 @@ int WebWorker::ServeClient()
         redirectedAddress << theGlobalVariables.webArguments.theKeys[i] << "="
         << theGlobalVariables.webArguments.theValues[i] << "&";
     std::stringstream headerStream;
-    headerStream << "HTTP/1.1 303 See other\r\nLocation: "
-    << redirectedAddress.str();
-    this->SetHeader(headerStream.str());
+    headerStream << "Location: " << redirectedAddress.str();
+    this->SetHeader("HTTP/1.1 303 See other", headerStream.str());
     //this->SetHeaderOKNoContentLength();
     stOutput << "<html><head>"
     << "<meta http-equiv=\"refresh\" content=\"0; url='" << redirectedAddress.str()
@@ -2637,7 +2642,7 @@ int WebWorker::ServeClient()
 
   if (!FileOperations::GetPhysicalFileNameFromVirtual(this->VirtualFileName, this->RelativePhysicalFileNamE))
   { //  std::cout << "GOT TO not found!" << std::endl;
-    this->SetHeader("HTTP/1.0 404 Object not found\r\nContent-Type: text/html");
+    this->SetHeader("HTTP/1.0 404 Object not found", "Content-Type: text/html");
     stOutput << "<html><body><b>File name deemed unsafe. "
     << "Please note that folder names are not allowed to contain dots and file names "
     << "are not allowed to start with dots.</b> There may be additional restrictions "
@@ -3539,7 +3544,7 @@ int WebServer::Run()
       stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;
       this->GetActiveWorker().CheckConsistency();
       if (!this->GetActiveWorker().ReceiveAll())
-      { this->GetActiveWorker().SetHeader("HTTP/1.0 400 Bad request\r\nContent-type: text/html");
+      { this->GetActiveWorker().SetHeader("HTTP/1.0 400 Bad request", "Content-type: text/html");
         stOutput << "<html><body><b>HTTP error 400 (bad request). </b> There was an error with the request. "
         << "One possibility is that the input was too large. "
         << "<br>The error message returned was:<br>"
@@ -3651,6 +3656,7 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("problemtemplates/", "../problemtemplates/");
   folderSubstitutionsNonSensitive.SetKeyValue("freecalc/", "../freecalc/");
   folderSubstitutionsNonSensitive.SetKeyValue("html/", "../public_html/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/", "../public_html/html-common/");
   folderSubstitutionsNonSensitive.SetKeyValue("html-common/", "../public_html/html-common/");
   folderSubstitutionsNonSensitive.SetKeyValue("font/", "../public_html/html-common/font/");
   folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problemtemplates/");
@@ -3731,7 +3737,6 @@ int WebServer::mainApache()
   theLimit.rlim_max=60;
   setrlimit(RLIMIT_CPU, &theLimit);
   stOutput.theOutputFunction=0;
-  stOutput << "Content-Type: text/html\r\n\r\n";
   theGlobalVariables.IndicatorStringOutputFunction=0;
   theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
   theGlobalVariables.flagComputationStarted=true;

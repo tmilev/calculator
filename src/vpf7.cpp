@@ -820,7 +820,7 @@ std::string& CGI::GetJavascriptMathQuillDefault()
     return CGI::JavascriptMathQuillDefault;
   }
   std::stringstream out;
-  out << "<script src=\"html-common/jquery.min.js\"></script>\n"
+  out << "<script src=\"/html-common/jquery.min.js\"></script>\n"
   << "<script type=\"text/javascript\">" << theJS << "</script>\n"
   << "<script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2);</script>";
   CGI::JavascriptMathQuillDefault=out.str();
@@ -837,7 +837,7 @@ std::string& CGI::GetJavascriptMathQuillMatrixSupport()
     return CGI::JavascriptMathQuillMatrixSupport;
   }
   std::stringstream out;
-  out << "<script src=\"html-common/jquery.min.js\"></script>\n"
+  out << "<script src=\"/html-common/jquery.min.js\"></script>\n"
   << "<script type=\"text/javascript\">" << theJS << "</script>\n"
   << "<script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2);</script>";
   CGI::JavascriptMathQuillMatrixSupport=out.str();

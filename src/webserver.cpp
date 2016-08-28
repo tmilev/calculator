@@ -3770,17 +3770,21 @@ int WebServer::mainApache()
     theWorker.requestTypE=theWorker.requestPost;
   theParser.javaScriptDisplayingIndicator=WebWorker::GetJavaScriptIndicatorFromHD();
   theGlobalVariables.flagComputationCompletE=true;
+  MathRoutines::StringSplitExcludeDelimiter(theWorker.cookiesApache, ' ', theWorker.cookies);
 
 /*  stOutput << "<html><body>";
   stOutput << "DEBUG: your input, bounced back: "
   << "\n<hr>server port: <br>\n" << thePort
   << "\n<hr>Server base: <br>\n" << theGlobalVariables.PhysicalPathProjectBase
   << "\n<hr>Calculator display name apache: <br>\n" << theGlobalVariables.DisplayNameCalculatorApache
-  << "\n<hr>Cookies: <br>\n" << theWorker.cookiesApache
-  << "\n<hr>query string:<br>\n" << theWorker.addressGetOrPost
+  << "\n<hr>Cookies: <br>\n" << theWorker.cookiesApache;
+  for (int i=0; i<theWorker.cookies.size; i++)
+    stOutput << "<br>\n" << theWorker.cookies[i] << "\n";
+  stOutput << "\n<hr>query string:<br>\n" << theWorker.addressGetOrPost
   << "\n<hr>message body:<br>\n" << theWorker.messageBody
   << "\n<hr>request method:<br>\n" << theRequestMethod
-  << "\n</body></html>";*/
+  << "\n</body></html>";
+  */
   theWorker.ServeClient();
 //  std::string theOutputHeader(theWorker.remainingHeaderToSend.TheObjects, theWorker.remainingHeaderToSend.size);
   //std::string theOutputBody(theWorker.remainingBodyToSend.TheObjects, theWorker.remainingBodyToSend.size);

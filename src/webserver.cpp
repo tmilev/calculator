@@ -1448,18 +1448,20 @@ std::string WebWorker::GetHeaderSetCookie()
 
 void WebWorker::SetHeader(const std::string& httpResponse, const std::string& remainingHeader)
 { MacroRegisterFunctionWithName("WebWorker::SetHeader");
-  std::stringstream out;
-  if (!theGlobalVariables.flagRunningApache)
-    out << httpResponse;
-  if (remainingHeader!="")
-    out << "\r\n" << remainingHeader;
-//  int ohno;
-  if (theGlobalVariables.flagLoggedIn && WebWorker::GetHeaderSetCookie()!="")
-    out << "\r\n" << WebWorker::GetHeaderSetCookie();
   if (theGlobalVariables.flagRunningApache)
-  { stOutput << out.str() << "\r\n\r\n";
+  { if (remainingHeader!="")
+      stOutput << remainingHeader << "\r\n";
+    if (theGlobalVariables.flagLoggedIn && WebWorker::GetHeaderSetCookie()!="")
+      stOutput << WebWorker::GetHeaderSetCookie() << "\r\n";
+    stOutput << "\r\n";
     return;
   }
+  std::stringstream out;
+  out << httpResponse;
+  if (remainingHeader!="")
+    out << "\r\n" << remainingHeader;
+  if (theGlobalVariables.flagLoggedIn && WebWorker::GetHeaderSetCookie()!="")
+    out << "\r\n" << WebWorker::GetHeaderSetCookie();
   std::string finalHeader=out.str();
   this->remainingHeaderToSend.SetSize(0);
   this->remainingHeaderToSend.SetExpectedSize(finalHeader.size());
@@ -2259,12 +2261,14 @@ int WebWorker::ProcessTemplate()
 
 int WebWorker::ProcessTopicTable()
 { MacroRegisterFunctionWithName("WebWorker::ProcessTopicTable");
+  this->SetHeaderOKNoContentLength();
   stOutput << HtmlInterpretation::GetTopicTable();
   return 0;
 }
 
 int WebWorker::ProcessExamPage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessExamPage");
+  this->SetHeaderOKNoContentLength();
   stOutput << HtmlInterpretation::GetExamPage();
   return 0;
 }
@@ -3737,6 +3741,7 @@ int WebServer::mainApache()
   theLimit.rlim_max=60;
   setrlimit(RLIMIT_CPU, &theLimit);
   stOutput.theOutputFunction=0;
+  //stOutput << "Content-Type: text/html\r\nSet-cookie: test=1;\r\n\r\nThe output bytes start here:\n";
   theGlobalVariables.IndicatorStringOutputFunction=0;
   theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
   theGlobalVariables.flagComputationStarted=true;

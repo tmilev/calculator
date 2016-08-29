@@ -915,6 +915,9 @@ int recursionDepth)
   theGlobalVariables.webArguments;
   if (!CGI::ChopCGIStringAppend(input, theArgs, argumentProcessingFailureComments))
     return false;
+  if (theGlobalVariables.flagRunningApache)
+    if (this->addressComputed=="")
+      this->addressComputed=theGlobalVariables.GetWebInput("request");
   if (theArgs.Contains("doubleURLencodedInput"))
   { std::string newInput=theGlobalVariables.GetWebInput("doubleURLencodedInput");
     theArgs.Clear();
@@ -1008,8 +1011,6 @@ std::string WebWorker::GetHtmlHiddenInputs(bool includeUserName, bool includeAut
   << "<input type=\"hidden\" id=\"currentExamHome\" name=\"currentExamHome\">\n"
   << "<input type=\"hidden\" id=\"fileName\" name=\"fileName\">\n"
   ;
-  if (theGlobalVariables.GetWebInput("")!="")
-    out << "<input type=\"hidden\" id=\"desiredLocation\" name=\"desiredLocation\">\n";
   return out.str();
 }
 
@@ -1426,6 +1427,24 @@ void WebWorker::ExtractAddressParts()
   if (this->addressComputed.size()>0)
     if (this->addressComputed[0]=='/')
       this->addressComputed=this->addressComputed.substr(1,std::string::npos);
+  if (theGlobalVariables.flagRunningApache && this->argumentComputed=="")
+  { this->argumentComputed=this->addressComputed;
+    this->addressComputed="";
+/*  this->addressComputed="";
+    this->
+    std::string addressEnd;
+
+    if (MathRoutines::StringBeginsWith(this->addressComputed, "request=", &addressEnd))
+    { this->addressComputed="";
+      this->argumentComputed="";
+      for (unsigned firstAmpersandPos=0; firstAmpersandPos< addressEnd.size(); firstAmpersandPos++)
+        if (addressEnd[firstAmpersandPos]=='&')
+        { this->addressComputed=addressEnd.substr(0, firstAmpersandPos);
+          this->argumentComputed=addressEnd.substr(firstAmpersandPos+1, std::string::npos);
+          break;
+        }
+    }*/
+  }
 //  stOutput << "Address and argument computed:"
 //    << this->addressComputed << " and argument: "
 //    << this->argumentComputed << "\r\n\r\n";
@@ -1737,6 +1756,8 @@ int WebWorker::ProcessFolder()
     out << theFolderNamesHtml[i];
   for (int i =0; i< theFileNamesHtml.size; i++)
     out << theFileNamesHtml[i];
+  //out << "DEBUG: " << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+  //out << this->ToStringMessageFullUnsafe();
   out << "</body></html>";
   stOutput << out.str();
   return 0;
@@ -1748,7 +1769,6 @@ int WebWorker::ProcessFile()
   { //std::cout << "ere be i: file name not found" << std::endl;
     this->SetHeader("HTTP/1.0 404 Object not found", "Content-Type: text/html");
 //    if (stOutput.theOutputFunction==0)
-//      theLog << logger::red << "WTF??????????????" << logger::endL;
     stOutput << "<html><body><b>File does not exist.</b>";
     if (this->flagFileNameSanitized)
     { stOutput << "<hr>You requested virtual file: " << this->VirtualFileName
@@ -2059,10 +2079,11 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   out << "<br>Password: ";
   out << "<input type=\"password\" id=\"password\" name=\"password\" placeholder=\"password\" autocomplete=\"on\">";
   out << this->GetHtmlHiddenInputs(false, false);
+  if (theGlobalVariables.flagRunningApache)
+    out << this->GetHtmlHiddenInputAddressAsRequest();
   out << "<button type=\"submit\" value=\"Submit\" ";
   if (theGlobalVariables.flagRunningApache)
-    out << "action=\"" << theGlobalVariables.DisplayNameCalculatorApacheQ
-    << theGlobalVariables.userCalculatorRequestType << "\"";
+    out << "action=\"" << theGlobalVariables.DisplayNameCalculatorApache << "\"";
   else
     out << "action=\"" << theGlobalVariables.userCalculatorRequestType << "\"";
   out << ">Login</button>";
@@ -2073,6 +2094,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
 //  out << "<button onclick=\"submitLoginInfo();\">Login</button>";
   out << "<span id=\"loginResult\"></span>";
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+  //out << "<hr><hr>DEBUG: " << this->ToStringMessageFullUnsafe();
   return out.str();
 }
 
@@ -2082,6 +2104,13 @@ std::string WebWorker::GetHtmlHiddenInputComputation()
 
 std::string WebWorker::GetHtmlHiddenInputExercise()
 { return "<input type=\"hidden\" name=\"request\" id=\"request\" value=\"exercise\">";
+}
+
+std::string WebWorker::GetHtmlHiddenInputAddressAsRequest()
+{ std::stringstream out;
+  out << "<input type=\"hidden\" name=\"request\" id=\"request\" value=\""
+  << CGI::StringToURLString(this->addressComputed) << "\">";
+  return out.str();
 }
 
 std::string WebWorker::GetChangePasswordPage()
@@ -2531,7 +2560,6 @@ int WebWorker::ServeClient()
     else
       argumentProcessingFailureComments << "[html base folder]";
     argumentProcessingFailureComments << " requires login. </b>";
-    theGlobalVariables.SetWebInpuT("desiredLocation", CGI::StringToURLString(theGlobalVariables.userCalculatorRequestType));
     return this->ProcessLoginPage(argumentProcessingFailureComments.str());
   }
   if (argumentProcessingFailureComments.str()!="")
@@ -2539,15 +2567,18 @@ int WebWorker::ServeClient()
   this->errorCalculatorArguments=argumentProcessingFailureComments.str();
   if ((theGlobalVariables.userCalculatorRequestType=="/" || theGlobalVariables.userCalculatorRequestType=="")
       && theGlobalVariables.flagLoggedIn)
-  { //this->addressComputed="selectCourse";
-    //theGlobalVariables.userCalculatorRequestType="selectCourse";
+  { this->addressComputed="html/selectCourse.html";
+    theGlobalVariables.userCalculatorRequestType="selectCourse";
 //    theGlobalVariables.SetWebInpuT("topicList", "topiclists/Singapore-H2-2017.txt");
 //    theGlobalVariables.SetWebInpuT("fileName", "pagetemplates/ace-learning-Singapore-H2.html");
   }
   if (this->flagPasswordWasSubmitted && theGlobalVariables.userCalculatorRequestType!="changePassword" &&
       theGlobalVariables.userCalculatorRequestType!="activateAccount")
   { std::stringstream redirectedAddress;
-    redirectedAddress << theGlobalVariables.DisplayNameCalculatorApacheQ << this->addressComputed << "?";
+    if (theGlobalVariables.flagRunningApache)
+      redirectedAddress << theGlobalVariables.DisplayNameCalculatorApacheQ << "request=" << this->addressComputed << "&";
+    else
+      redirectedAddress << this->addressComputed << "?";
     for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
       if (theGlobalVariables.webArguments.theKeys[i]!="password")
         redirectedAddress << theGlobalVariables.webArguments.theKeys[i] << "="
@@ -2557,15 +2588,20 @@ int WebWorker::ServeClient()
     this->SetHeader("HTTP/1.1 303 See other", headerStream.str());
     //this->SetHeaderOKNoContentLength();
     stOutput << "<html><head>"
-    //<< "<meta http-equiv=\"refresh\" content=\"0; url='" << redirectedAddress.str()
-    //<< "'\" />"
+    << "<meta http-equiv=\"refresh\" content=\"0; url='" << redirectedAddress.str()
+    << "'\" />"
     << "</head>"
     << "<body>Click <a href=\"" << redirectedAddress.str() << "\">"
     << " here " << "</a> if your browser does not redirect the page automatically. ";
 
-    stOutput << "<hr>DEBUG: addressComputed: <br>" << this->addressComputed
-    << "<hr>addressGetOrPost<br>" << this->addressGetOrPost << "<hr>MessageBody: "
-    << this->messageBody << " <br>MessageHead: " << this->messageHead;
+/*    stOutput << "<hr>DEBUG: addressComputed: <br>" << CGI::StringToHtmlString( this->addressComputed)
+    << "<hr>addressToRedirectTo: <br>\n" << CGI::StringToHtmlString( redirectedAddress.str())
+    << "<hr>argumentComputed: <br>\n" << CGI::StringToHtmlString( this->argumentComputed)
+    << "<hr>addressGetOrPost: <br>" << CGI::StringToHtmlString( this->addressGetOrPost )
+    << "<hr>MessageBody: <br>\n" << CGI::StringToHtmlString( this->messageBody)
+    << " <br>MessageHead: <br>\n" << CGI::StringToHtmlString(this->messageHead);
+    stOutput << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
+    << this->ToStringMessageFullUnsafe();*/
     stOutput << "</body></html>";
     return 0;
   }
@@ -2628,8 +2664,6 @@ int WebWorker::ServeClient()
       return this->ProcessLoginPage();
   } else if (theGlobalVariables.userCalculatorRequestType=="exerciseNoLogin")
     return this->ProcessExamPage();
-  else if (theGlobalVariables.userCalculatorRequestType=="selectCourse")
-    return this->ProcessSelectCourse();
   else if (theGlobalVariables.userCalculatorRequestType=="template")
     return this->ProcessTemplate();
   else if (theGlobalVariables.userCalculatorRequestType=="topicTable")
@@ -3728,8 +3762,7 @@ int WebServer::mainCommandLine()
 }
 
 std::string WebServer::GetEnvironment(const std::string& envVarName)
-{
-  char* queryStringPtr=getenv(envVarName.c_str());
+{ char* queryStringPtr=getenv(envVarName.c_str());
   if (queryStringPtr==0)
     return "";
   return queryStringPtr;
@@ -3808,7 +3841,7 @@ int WebServer::mainApache()
 
 std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
 { MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsHumanReadable");
-  if (!theGlobalVariables.UserDebugFlagOn())
+  if (!theGlobalVariables.UserDebugFlagOn() )
     return "";
   std::stringstream out;
   out << "<hr>";

@@ -157,6 +157,7 @@ int recursionDepth=0)
   std::string GetSetProblemDatabaseInfoHtml();
   static std::string GetJavaScriptIndicatorFromHD();
   static std::string GetJavascriptSubmitLoginInfo();
+  std::string GetHtmlHiddenInputAddressAsRequest();
   std::string GetHtmlHiddenInputExercise();
   std::string GetHtmlHiddenInputComputation();
   std::string GetHtmlHiddenInputs(bool includeUserName, bool includeAuthenticationToken);

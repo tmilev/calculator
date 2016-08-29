@@ -178,6 +178,7 @@ int recursionDepth=0)
   std::string ToStringMessageShortUnsafe(FormatExpressions* theFormat=0)const;
   std::string ToStringMessageFullUnsafe()const;
   void ParseMessageHead();
+  void ExtractHostInfo();
   void ExtractAddressParts();
   void SanitizeVirtualFileName();
   int ServeClient();
@@ -212,6 +213,7 @@ public:
 //  List<int> theListeningSocketsReadyToAccept;
   ListReferences<WebWorker> theWorkers;
 
+  List<std::string> requestStartsNotNeedingLogin;
   List<std::string> addressStartsNotNeedingLogin;
 
   int activeWorker;
@@ -223,7 +225,7 @@ public:
   ~WebServer();
   static void AnalyzeMainArguments(int argC, char **argv);
   static void InitializeGlobalVariables();
-  bool AddressRequiresLogin(const std::string& inputAddress);
+  bool RequiresLogin(const std::string& inputRequest, const std::string& inputAddress);
 
   void ReleaseWorkerSideResources();
   void ReleaseActiveWorker();

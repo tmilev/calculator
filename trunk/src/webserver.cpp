@@ -1402,6 +1402,18 @@ void WebWorker::SendDisplayUserInputToServer()
 //  theLog << logger::blue << "Piping " << this->displayUserInput << " to the server. " << logger::endL;
 }
 
+void WebWorker::ExtractHostInfo()
+{ MacroRegisterFunctionWithName("WebWorker::ExtractHostInfo");
+  unsigned int i=0;
+  for (i=0; i<this->hostWithPort.size(); i++)
+    if (this->hostWithPort[i]==':')
+      break;
+  if (i<this->hostWithPort.size())
+    this->hostNoPort=this->hostWithPort.substr(0, i);
+  else
+    this->hostNoPort=this->hostWithPort;
+}
+
 void WebWorker::ExtractAddressParts()
 { MacroRegisterFunctionWithName("WebWorker::ExtractAdressParts");
   bool found=false;
@@ -1416,38 +1428,16 @@ void WebWorker::ExtractAddressParts()
     this->addressComputed=this->addressGetOrPost;
   if (this->messageBody!="")
     this->argumentComputed=this->messageBody;
-  unsigned int i=0;
-  for (i=0; i<this->hostWithPort.size(); i++)
-    if (this->hostWithPort[i]==':')
-      break;
-  if (i<this->hostWithPort.size())
-    this->hostNoPort=this->hostWithPort.substr(0, i);
-  else
-    this->hostNoPort=this->hostWithPort;
   if (this->addressComputed.size()>0)
     if (this->addressComputed[0]=='/')
       this->addressComputed=this->addressComputed.substr(1,std::string::npos);
   if (theGlobalVariables.flagRunningApache && this->argumentComputed=="")
   { this->argumentComputed=this->addressComputed;
     this->addressComputed="";
-/*  this->addressComputed="";
-    this->
-    std::string addressEnd;
-
-    if (MathRoutines::StringBeginsWith(this->addressComputed, "request=", &addressEnd))
-    { this->addressComputed="";
-      this->argumentComputed="";
-      for (unsigned firstAmpersandPos=0; firstAmpersandPos< addressEnd.size(); firstAmpersandPos++)
-        if (addressEnd[firstAmpersandPos]=='&')
-        { this->addressComputed=addressEnd.substr(0, firstAmpersandPos);
-          this->argumentComputed=addressEnd.substr(firstAmpersandPos+1, std::string::npos);
-          break;
-        }
-    }*/
   }
-//  stOutput << "Address and argument computed:"
-//    << this->addressComputed << " and argument: "
-//    << this->argumentComputed << "\r\n\r\n";
+  ////////////////////////////////////////////////
+
+
 }
 
 std::string WebWorker::GetHeaderSetCookie()
@@ -1817,7 +1807,8 @@ int WebWorker::ProcessFile()
   }
   std::stringstream debugBytesStream;
   if (theGlobalVariables.UserDebugFlagOn() && fileExtension==".html")
-    debugBytesStream << "<!-- DEBUG info: " << this->ToStringMessageFullUnsafe() << "-->";
+    debugBytesStream << "<!-- DEBUG info: " << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
+    << "-->";
   unsigned int totalLength=fileSize+debugBytesStream.str().size();
 
   std::stringstream theHeader;
@@ -2512,23 +2503,27 @@ int WebWorker::ServeClient()
 //  std::cout << "GOT TO HERE" << std::endl;
   if (theGlobalVariables.theThreads.size<=1)
     crash << "Number of threads must be at least 2 in this point of code..." << crash;
+  this->ExtractHostInfo();
   this->ExtractAddressParts();
 //  std::cout << "GOT TO HERE 2" << std::endl;
   std::stringstream argumentProcessingFailureComments;
   this->flagArgumentsAreOK=true;
   if (!this->ExtractArgumentsFromMessage(this->argumentComputed, argumentProcessingFailureComments))
     this->flagArgumentsAreOK=false;
+  theGlobalVariables.userCalculatorRequestType="";
+  if (this->addressComputed==theGlobalVariables.DisplayNameExecutable)
+  { theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
+  }
   if (!this->ExtractArgumentsFromCookies(argumentProcessingFailureComments))
     this->flagArgumentsAreOK=false;
-  theGlobalVariables.userCalculatorRequestType=this->addressComputed;
-  bool needLogin=this->parent->AddressRequiresLogin(theGlobalVariables.userCalculatorRequestType);
+  bool needLogin=this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
   if (needLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection)
   { std::stringstream redirectStream, newAddressStream;
     newAddressStream << "https://" << this->hostNoPort << ":" << this->parent->httpSSLPort
-    << theGlobalVariables.DisplayNameExecutable << "?" << this->addressGetOrPost;
+    << this->addressGetOrPost;
     redirectStream << "Location: " << newAddressStream.str();
     this->SetHeader("HTTP/1.1 301 Moved Permanently", redirectStream.str());
-//    this->SetHeaderOKNoContentLength();
+    //this->SetHeaderOKNoContentLength();
     stOutput << "<html><body>Address available through secure (SSL) connection only. "
     << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. ";
     if (theGlobalVariables.flagRunningApache)
@@ -2553,7 +2548,7 @@ int WebWorker::ServeClient()
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
       theGlobalVariables.userCalculatorRequestType=="navigation")
     return this->ProcessNavigation();
-  if (!theGlobalVariables.flagLoggedIn && this->parent->AddressRequiresLogin(theGlobalVariables.userCalculatorRequestType))
+  if (!theGlobalVariables.flagLoggedIn && this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed))
   { argumentProcessingFailureComments << "<b>Accessing: ";
     if (theGlobalVariables.userCalculatorRequestType!="")
       argumentProcessingFailureComments << theGlobalVariables.userCalculatorRequestType;
@@ -3230,8 +3225,11 @@ void WebServer::ReleaseWorkerSideResources()
   this->activeWorker=-1; //<-The active worker is needed only in the child process.
 }
 
-bool WebServer::AddressRequiresLogin(const std::string& inputAddress)
+bool WebServer::RequiresLogin(const std::string& inputRequest, const std::string& inputAddress)
 { MacroRegisterFunctionWithName("WebServer::AddressRequiresLogin");
+  for (int i=0; i<this->requestStartsNotNeedingLogin.size; i++)
+    if (MathRoutines::StringBeginsWith(inputRequest, this->requestStartsNotNeedingLogin[i]))
+      return false;
   for (int i=0; i<this->addressStartsNotNeedingLogin.size; i++)
     if (MathRoutines::StringBeginsWith(inputAddress, this->addressStartsNotNeedingLogin[i]))
       return false;
@@ -3843,27 +3841,26 @@ std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
   if (!theGlobalVariables.UserDebugFlagOn() )
     return "";
   std::stringstream out;
-  out << "<hr>";
+  out << "<hr>\n";
   out << "Default user: " << theGlobalVariables.userDefault.username.value;
   if (theGlobalVariables.flagLoggedIn)
-    out << "<br>Logged in. ";
-  out << "<br>Address: " << CGI::StringToHtmlString(theWebServer.GetActiveWorker().addressComputed);
-  if (theWebServer.GetActiveWorker().addressComputed!=theGlobalVariables.userCalculatorRequestType)
-    out << "<br>Request is different from address: " << theGlobalVariables.userCalculatorRequestType;
+    out << "\n<br>\nLogged in.";
+  out << "\n<br>\nAddress: " << CGI::StringToHtmlString(theWebServer.GetActiveWorker().addressComputed);
+  out << "\n<br>\nRequest: " << theGlobalVariables.userCalculatorRequestType;
   if (theGlobalVariables.UserDefaultHasAdminRights())
-    out << "<br><b>User has admin rights</b>";
-  if (theWebServer.AddressRequiresLogin(theWebServer.GetActiveWorker().addressComputed))
-    out << "<br>Address requires login. ";
+    out << "\n<br>\n<b>User has admin rights</b>";
+  if (theWebServer.RequiresLogin(theGlobalVariables.userCalculatorRequestType, theWebServer.GetActiveWorker().addressComputed))
+    out << "\n<br>\nAddress requires login. ";
   else
-    out << "<br>Address <b>does not</b> require any login. ";
-  out << "<hr>";
+    out << "\n<br>\nAddress <b>does not</b> require any login. ";
+  out << "\n<hr>\n";
   for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
   { out << theGlobalVariables.webArguments.theKeys[i] << ": "
     << CGI::StringToHtmlString(theGlobalVariables.webArguments[i]);
     if (i!=theGlobalVariables.webArguments.size()-1)
-      out << "<br>";
+      out << "\n<br>\n";
   }
-  out << "<hr>";
+  out << "\n<hr>\n";
   if (theGlobalVariables.flagRunningBuiltInWebServer)
     out << theWebServer.GetActiveWorker().ToStringMessageUnsafe();
   return out.str();

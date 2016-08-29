@@ -264,8 +264,8 @@ std::string HtmlInterpretation::GetSelectCourse()
   }
   for (int i=0; i<theFileNames.size; i++)
     if (theExtensions[i]==".txt")
-    out << "<a href=\"" << theGlobalVariables.DisplayNameCalculatorApacheQ
-    << "template?topicList=topiclists/" << theFileNames[i]
+    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "?request=template&topicList=topiclists/" << theFileNames[i]
     << "&fileName=pagetemplates/ace-learning-Singapore-H2.html\">"
     << theFileNames[i] << "</a><br>";
   out << "</body></html>";

@@ -22,7 +22,7 @@ Calculator::Calculator()
 }
 
 std::string Calculator::GetCalculatorLink(const std::string& input)
-{ return CGI::GetCalculatorLink(theGlobalVariables.DisplayNameExecutableWithPath, input);
+{ return CGI::GetCalculatorLink(theGlobalVariables.DisplayNameExecutable, input);
 }
 
 std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
@@ -2215,7 +2215,7 @@ std::string Function::ToStringFull()const
       out << " <br> " << this->theExample << "&nbsp&nbsp&nbsp";
     out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());
     if (this->theExample!="")
-      out2 << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath
+      out2 << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
       << "?request=compute&showExamples=true&mainInput="
       << CGI::StringToURLString(this->theExample) << "\"> " << " Example" << "</a>" ;
   } else

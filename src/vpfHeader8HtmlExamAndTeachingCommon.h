@@ -517,10 +517,7 @@ std::string CalculatorHTML::GetJavascriptSubmitAnswers()
   out
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"GET\", ";
-  if (theGlobalVariables.flagRunningApache)
-    out << "\"" << theGlobalVariables.DisplayNameExecutableWithPath << "\"";
-  else
-    out << "requestType";
+  out << "\"" << theGlobalVariables.DisplayNameExecutable << "\"";
   out << " + \"?\"+inputParams, true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
 ;
@@ -1159,7 +1156,7 @@ std::string DatabaseRoutines::ToStringClassDetails
         oneTableLineStream << "<td>"
         << "<a href=\""
         << UserCalculator::GetActivationAddressFromActivationToken
-        (currentUser.actualActivationToken.value, theGlobalVariables.DisplayNameExecutableWithPath,
+        (currentUser.actualActivationToken.value, theGlobalVariables.DisplayNameExecutable,
          userTable[i][indexUser])
         << "\"> (Re)activate account and change password</a>"
         << "</td>";

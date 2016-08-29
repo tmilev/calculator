@@ -875,7 +875,7 @@ std::string CGI::GetCalculatorLink(const std::string& DisplayNameCalculator, con
 }
 
 std::string CGI::GetCalculatorLinkUnclosedPostArguments(const std::string& input)
-{ return CGI::GetCalculatorLinkUnclosedPostArguments(theGlobalVariables.DisplayNameExecutableWithPath, input);
+{ return CGI::GetCalculatorLinkUnclosedPostArguments(theGlobalVariables.DisplayNameExecutable, input);
 }
 
 std::string CGI::GetCalculatorLinkUnclosedPostArguments(const std::string& DisplayNameCalculator, const std::string& input)

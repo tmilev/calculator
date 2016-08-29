@@ -790,7 +790,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
 std::string TopicElement::GetTableStart()
 { std::stringstream out;
   out
-  << "\n\n<table class=\"customers\" id=\"customers\"><tr> <th style=\"width:400px\">Sub-Topic</th>"
+  << "\n\n<table class=\"topicList\"><tr> <th style=\"width:400px\">Sub-Topic</th>"
   << "<th style=\"width:400px\">Resource Links</th>"
   << "<th style=\"width:150px\">Current Score</th></tr>\n";
   return out.str();

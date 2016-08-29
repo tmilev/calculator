@@ -1428,9 +1428,6 @@ void WebWorker::ExtractAddressParts()
     this->addressComputed=this->addressGetOrPost;
   if (this->messageBody!="")
     this->argumentComputed=this->messageBody;
-//  if (this->addressComputed.size()>0)
-//    if (this->addressComputed[0]=='/')
-//      this->addressComputed=this->addressComputed.substr(1, std::string::npos);
   if (theGlobalVariables.flagRunningApache && this->argumentComputed=="")
   { this->argumentComputed=this->addressComputed;
     this->addressComputed="";

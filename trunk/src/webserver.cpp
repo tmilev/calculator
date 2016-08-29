@@ -220,7 +220,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex, bool 
     theLog << logger::red << "Worker index in parent is -1!!!" << logger::endL;
   else
     theLog << "Worker index: " << inputIndex << logger::endL;
-  out << "  var sURL  = \"" << theGlobalVariables.DisplayNameExecutableWithPath << "?request=indicator&mainInput="
+  out << "  var sURL  = \"" << theGlobalVariables.DisplayNameExecutable << "?request=indicator&mainInput="
   << inputIndex+1 << "\";\n";
   out << "  oRequest.open(\"GET\",sURL,false);\n";
 //  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
@@ -242,7 +242,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex, bool 
   out << "    return;\n";
   out << "  var pauseRequest = new XMLHttpRequest();\n";
   theLog << "Generating indicator address for worker number " << inputIndex+1 << "." << logger::endL;
-  out << "  pauseURL  = \"" << theGlobalVariables.DisplayNameExecutableWithPath
+  out << "  pauseURL  = \"" << theGlobalVariables.DisplayNameExecutable
   << "?request=pause&mainInput=" << inputIndex+1 << "\";\n";
   out << "  pauseRequest.open(\"GET\",pauseURL,false);\n";
 //  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
@@ -776,7 +776,7 @@ std::string WebWorker::ToStringMessageShortUnsafe(FormatExpressions* theFormat)c
   out << lineBreak << "Argument computed: " << CGI::StringToHtmlString(this->argumentComputed);
   out << lineBreak << "Virtual file/directory name: " << CGI::StringToHtmlString(this->VirtualFileName);
   out << lineBreak << "Relative physical file/directory name: " << CGI::StringToHtmlString(this->RelativePhysicalFileNamE);
-  out << lineBreak << "Executable location: " << theGlobalVariables.DisplayNameExecutableWithPath;
+  out << lineBreak << "Executable url: " << theGlobalVariables.DisplayNameExecutable;
   out << lineBreak << "Physical address project base: " << theGlobalVariables.PhysicalPathProjectBase;
   out << lineBreak << "Physical address server base: " << theGlobalVariables.PhysicalPathServerBasE;
   out << lineBreak << "Physical address output folder: " << theGlobalVariables.PhysicalPathHtmlFolder;
@@ -1024,7 +1024,7 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!-- input form here -->");
   //stOutput << this->ToStringCalculatorArgumentsHumanReadable();
   stOutput << "\n<FORM method=\"GET\" id=\"formCalculator\" name=\"formCalculator\" action=\""
-  << theGlobalVariables.DisplayNameCalculatorApache << "\">\n";
+  << theGlobalVariables.DisplayNameExecutable << "\">\n";
   std::string civilizedInputSafish;
   if (CGI::StringToHtmlStringReturnTrueIfModified(theParser.inputString, civilizedInputSafish))
     stOutput << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are "
@@ -1041,7 +1041,7 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
   << "name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" ";
   stOutput << "> ";
   if (theParser.inputString!="")
-    stOutput << "<a href=\"" << theGlobalVariables.DisplayNameExecutableWithPath << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
+    stOutput << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
   stOutput << "\n</FORM>\n";
   stOutput << this->closeIndentTag("</td>");
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!--Autocomplete space here -->");
@@ -2063,9 +2063,9 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   if (theGlobalVariables.userCalculatorRequestType=="logout" && !theGlobalVariables.flagRunningApache)
     out << "/";
   else if (theGlobalVariables.userCalculatorRequestType=="logout" && theGlobalVariables.flagRunningApache)
-    out << theGlobalVariables.DisplayNameCalculatorApache;
+    out << theGlobalVariables.DisplayNameExecutable;
   else if (theGlobalVariables.userCalculatorRequestType!="logout" && theGlobalVariables.flagRunningApache)
-    out << theGlobalVariables.DisplayNameCalculatorApache;
+    out << theGlobalVariables.DisplayNameExecutable;
   else if (theGlobalVariables.userCalculatorRequestType!="logout" && !theGlobalVariables.flagRunningApache)
     out << "";
   out << "\" method=\"POST\" accept-charset=\"utf-8\">\n"
@@ -2083,7 +2083,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
     out << this->GetHtmlHiddenInputAddressAsRequest();
   out << "<button type=\"submit\" value=\"Submit\" ";
   if (theGlobalVariables.flagRunningApache)
-    out << "action=\"" << theGlobalVariables.DisplayNameCalculatorApache << "\"";
+    out << "action=\"" << theGlobalVariables.DisplayNameExecutable << "\"";
   else
     out << "action=\"" << theGlobalVariables.userCalculatorRequestType << "\"";
   out << ">Login</button>";
@@ -2221,7 +2221,7 @@ int WebWorker::ProcessChangePassword()
   stOutput << "<span style=\"color:green\"> <b>Password change successful. </b></span>";
   stOutput
   << "<meta http-equiv=\"refresh\" content=\"0; url=\""
-  << theGlobalVariables.DisplayNameExecutableWithPath  << "?request=login"
+  << theGlobalVariables.DisplayNameExecutable  << "?request=login"
   << "&username="
   << theGlobalVariables.userDefault.username.GetDataNoQuotes()
   << "\" />"
@@ -2525,7 +2525,7 @@ int WebWorker::ServeClient()
   if (needLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection)
   { std::stringstream redirectStream, newAddressStream;
     newAddressStream << "https://" << this->hostNoPort << ":" << this->parent->httpSSLPort
-    << theGlobalVariables.DisplayNameCalculatorApacheQ << this->addressGetOrPost;
+    << theGlobalVariables.DisplayNameExecutable << "?" << this->addressGetOrPost;
     redirectStream << "Location: " << newAddressStream.str();
     this->SetHeader("HTTP/1.1 301 Moved Permanently", redirectStream.str());
 //    this->SetHeaderOKNoContentLength();
@@ -2576,7 +2576,7 @@ int WebWorker::ServeClient()
       theGlobalVariables.userCalculatorRequestType!="activateAccount")
   { std::stringstream redirectedAddress;
     if (theGlobalVariables.flagRunningApache)
-      redirectedAddress << theGlobalVariables.DisplayNameCalculatorApacheQ << "request=" << this->addressComputed << "&";
+      redirectedAddress << theGlobalVariables.DisplayNameExecutable << "?request=" << this->addressComputed << "&";
     else
       redirectedAddress << this->addressComputed << "?";
     for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
@@ -2674,7 +2674,7 @@ int WebWorker::ServeClient()
     return this->ProcessModifyPage();
   else if (theGlobalVariables.userCalculatorRequestType=="clonePage")
     return this->ProcessClonePage();
-  else if (theGlobalVariables.userCalculatorRequestType=="calculator")
+  else if (theGlobalVariables.userCalculatorRequestType=="compute")
     return this->ProcessCalculator();
 //  stOutput << "<html><body> got to here pt 2";
   this->VirtualFileName=this->addressComputed;
@@ -3075,6 +3075,7 @@ std::string WebServer::ToStringStatusPublicNoTop()
   ;
   return out.str();
 }
+
 std::string WebServer::ToStringStatusPublic()
 { MacroRegisterFunctionWithName("WebServer::ToStringStatusPublic");
   std::stringstream out;
@@ -3685,7 +3686,6 @@ void WebServer::InitializeGlobalVariables()
 { theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=5000000;
   theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=5;
   theGlobalVariables.flagReportEverything=true;
-  theGlobalVariables.DisplayNameExecutableWithPath="calculator";
   ParallelComputing::cgiLimitRAMuseNumPointersInList=4000000000;
   MapList<std::string, std::string, MathRoutines::hashString>&
   folderSubstitutionsNonSensitive=FileOperations::FolderVirtualLinksNonSensitive();
@@ -3802,8 +3802,7 @@ int WebServer::mainApache()
   for (numBytesBeforeQuestionMark=0; numBytesBeforeQuestionMark<theURL.size(); numBytesBeforeQuestionMark++)
     if (theURL[numBytesBeforeQuestionMark]=='?')
       break;
-  theGlobalVariables.DisplayNameCalculatorApache=theURL.substr(0, numBytesBeforeQuestionMark);
-  theGlobalVariables.DisplayNameCalculatorApacheQ=theGlobalVariables.DisplayNameCalculatorApache+"?";
+  theGlobalVariables.DisplayNameExecutable=theURL.substr(0, numBytesBeforeQuestionMark);
 
   if (thePort=="443")
   { theGlobalVariables.flagUsingSSLinCurrentConnection=true;

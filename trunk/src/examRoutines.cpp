@@ -309,11 +309,10 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
 (const std::string& requestType, const std::string& studentView,
  const std::string& studentSection, bool includeRandomSeedIfAppropriate)const
 { MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsForProblem");
-  if (!theGlobalVariables.flagLoggedIn && !theGlobalVariables.UserGuestMode() &&
-      !theGlobalVariables.flagRunningApache)
+  if (!theGlobalVariables.flagLoggedIn && !theGlobalVariables.UserGuestMode() )
     return "";
-  (void) requestType;
   std::stringstream out;
+  out << "request=" << requestType << "&";
   List<std::string> excludedTags;
   excludedTags.AddOnTop("randomSeed");
   out << theGlobalVariables.ToStringCalcArgsNoNavigation(&excludedTags)

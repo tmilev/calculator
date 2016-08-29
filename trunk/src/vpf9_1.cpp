@@ -143,10 +143,9 @@ std::string GlobalVariables::ToStringHTMLTopCommandLinuxSystem()
 std::string GlobalVariables::ToStringFolderInfo()const
 { std::stringstream out;
   out << "<br>Physical path server base: " << this->PhysicalPathServerBasE;
-  out << "<br>Display name calculator with path: " << this->DisplayNameExecutableWithPath;
+  out << "<br>Diplay name executable: " << this->DisplayNameExecutable;
   out << "<br>Physical name folder below executable: " << this->PhysicalNameFolderBelowExecutable;
 //  out << "<br>Display path server base: " << this->DisplayPathServerBasE;
-  out << "<br>Display name calculator with path: " << this->DisplayNameExecutableWithPath;
   out << "<br>Physical path output folder: " << this->PhysicalPathHtmlFolder;
   out << "<br>Display path output folder: " << this->DisplayPathOutputFolder;
   return out.str();
@@ -208,7 +207,7 @@ void GlobalVariables::initDefaultFolderAndFileNames
   this->DisplayNameExtraOutputNoPath = "defaultoutput";
   this->DisplayNameExtraOutputWithPath = this->DisplayPathOutputFolder + this->DisplayNameExtraOutputNoPath;
 
-  this->DisplayNameExecutableWithPath = "/"+this->PhysicalNameExecutableNoPath;
+  this->DisplayNameExecutable = "/cgi-bin/"+this->PhysicalNameExecutableNoPath;
   this->initOutputReportAndCrashFileNames("", "");
 }
 
@@ -282,41 +281,41 @@ std::string GlobalVariables::ToStringNavigationOLD()
     if (theGlobalVariables.UserDefaultHasAdminRights())
       out << " <b>(admin)</b>";
     out << ": " << this->userDefault.username.value << linkSeparator;
-    out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=logout&";
+    out << "<a href=\"" << this->DisplayNameExecutable << "?request=logout&";
 //    if (theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs &&
 //        !theGlobalVariables.flagUsingSSLinCurrentConnection)
 //      out << "ignoreSecurity=true&";
     out << this->ToStringCalcArgsNoNavigation() << " \">Log out</a>" << linkSeparator;
     if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-      out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=changePasswordPage&"
+      out << "<a href=\"" << this->DisplayNameExecutable << "?request=changePasswordPage&"
       << this->ToStringCalcArgsNoNavigation() << "\">Change password</a>" << linkSeparator;
     else
       out << "<b>Password change: <br>secure connection<br>only</b>" << linkSeparator;
   }
-  out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=exercise"
+  out << "<a href=\"" << this->DisplayNameExecutable << "?request=exercise"
   << this->ToStringCalcArgsNoNavigation()
   << "fileName=ProblemCollections/CourseList.html"
   << "\">Select course</a>" << linkBigSeparator;
   if (this->UserDefaultHasAdminRights() && !this->UserStudentViewOn())
   { if (theGlobalVariables.userCalculatorRequestType!="status")
-      out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=status&" << this->ToStringCalcArgsNoNavigation()
+      out << "<a href=\"" << this->DisplayNameExecutable << "?request=status&" << this->ToStringCalcArgsNoNavigation()
       << "\">Server status</a>" << linkSeparator;
     else
       out << "<b>Server status</b>" << linkBigSeparator;
     if (theGlobalVariables.userCalculatorRequestType!="browseDatabase")
-      out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=browseDatabase&" << this->ToStringCalcArgsNoNavigation()
+      out << "<a href=\"" << this->DisplayNameExecutable << "?request=browseDatabase&" << this->ToStringCalcArgsNoNavigation()
       << "\">Database</a>" << linkBigSeparator;
     else
       out << "<b>Database</b>" << linkBigSeparator;
     if (theGlobalVariables.userCalculatorRequestType!="compute")
-      out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=compute&"
+      out << "<a href=\"" << this->DisplayNameExecutable << "?request=compute&"
       << this->ToStringCalcArgsNoNavigation() << " \">Calculator</a>" << linkBigSeparator;
     else
       out << "<b>Calculator</b> " << linkBigSeparator;
     if (theGlobalVariables.userCalculatorRequestType!="exercise" &&
         theGlobalVariables.userCalculatorRequestType!="scoredQuiz" )
     { if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-        out << "<a href=\"" << this->DisplayNameExecutableWithPath << "?request=exercise&"
+        out << "<a href=\"" << this->DisplayNameExecutable << "?request=exercise&"
         << this->ToStringCalcArgsNoNavigation()
         << "\">Exercises</a> " << linkBigSeparator;
     } else

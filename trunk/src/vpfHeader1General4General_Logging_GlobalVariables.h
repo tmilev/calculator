@@ -142,15 +142,10 @@ public:
   std::string DisplayPathOutputFolder;
   std::string DisplayNameExtraOutputNoPath;
   std::string DisplayNameExtraOutputWithPath;
-  std::string DisplayNameCalculatorApache;
-  //<- to be left empty for built-in webserver.
-  //When running under apache: to contain the url of the executable,
-  //with appended question mark. Example:
-  // DisplayNameCalculatorApache="/cgi-bin/calculator";
-  std::string DisplayNameCalculatorApacheQ;
-  //same as above with appended question mark (to make easier on long expressions). Example:
-  // DisplayNameCalculatorApache="/cgi-bin/calculator?";
-  std::string DisplayNameExecutableWithPath;
+  std::string DisplayNameExecutable;
+  //To contain the url of the executable.
+  // Example:
+  // DisplayNameExecutable="/cgi-bin/calculator";
   std::string DisplayNameExecutableWithPathHTTPS;
   std::string DisplayNameProgressReport;
 

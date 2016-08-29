@@ -2499,6 +2499,7 @@ int WebWorker::ServeClient()
     << theGlobalVariables.DisplayNameCalculatorApacheQ << this->addressGetOrPost;
     redirectStream << "Location: " << newAddressStream.str();
     this->SetHeader("HTTP/1.1 301 Moved Permanently", redirectStream.str());
+//    this->SetHeaderOKNoContentLength();
     stOutput << "<html><body>Address available through secure (SSL) connection only. "
     << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. ";
     if (theGlobalVariables.flagRunningApache)
@@ -2506,7 +2507,6 @@ int WebWorker::ServeClient()
       << "<a href=\"https://" << this->hostNoPort << "\">https://" << this->hostNoPort
       << "</a>. If using bookmarks, don't forget to re-bookmark to the secure site. ";
     stOutput << "</body></html>";
-//    this->SetHeaderOKNoContentLength();
     return 0;
   }
   if (needLogin)
@@ -2539,8 +2539,8 @@ int WebWorker::ServeClient()
   this->errorCalculatorArguments=argumentProcessingFailureComments.str();
   if ((theGlobalVariables.userCalculatorRequestType=="/" || theGlobalVariables.userCalculatorRequestType=="")
       && theGlobalVariables.flagLoggedIn)
-  { this->addressComputed="selectCourse";
-    theGlobalVariables.userCalculatorRequestType="selectCourse";
+  { //this->addressComputed="selectCourse";
+    //theGlobalVariables.userCalculatorRequestType="selectCourse";
 //    theGlobalVariables.SetWebInpuT("topicList", "topiclists/Singapore-H2-2017.txt");
 //    theGlobalVariables.SetWebInpuT("fileName", "pagetemplates/ace-learning-Singapore-H2.html");
   }
@@ -2553,16 +2553,19 @@ int WebWorker::ServeClient()
         redirectedAddress << theGlobalVariables.webArguments.theKeys[i] << "="
         << theGlobalVariables.webArguments.theValues[i] << "&";
     std::stringstream headerStream;
-    headerStream << "Location: " << redirectedAddress.str();
+    //headerStream << "Location: " << redirectedAddress.str();
     this->SetHeader("HTTP/1.1 303 See other", headerStream.str());
     //this->SetHeaderOKNoContentLength();
     stOutput << "<html><head>"
-    << "<meta http-equiv=\"refresh\" content=\"0; url='" << redirectedAddress.str()
-    << "'\" />"
+    //<< "<meta http-equiv=\"refresh\" content=\"0; url='" << redirectedAddress.str()
+    //<< "'\" />"
     << "</head>"
     << "<body>Click <a href=\"" << redirectedAddress.str() << "\">"
     << " here " << "</a> if your browser does not redirect the page automatically. ";
-  //stOutput << "<br>DEBUG: " << this->ToStringCalculatorArgumentsHumanReadable();
+
+    stOutput << "<hr>DEBUG: addressComputed: <br>" << this->addressComputed
+    << "<hr>addressGetOrPost<br>" << this->addressGetOrPost << "<hr>MessageBody: "
+    << this->messageBody << " <br>MessageHead: " << this->messageHead;
     stOutput << "</body></html>";
     return 0;
   }

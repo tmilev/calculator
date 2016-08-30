@@ -2573,7 +2573,7 @@ int WebWorker::ServeClient()
       theGlobalVariables.userCalculatorRequestType!="activateAccount")
   { std::stringstream redirectedAddress;
     if (theGlobalVariables.flagRunningApache)
-      redirectedAddress << theGlobalVariables.DisplayNameExecutable << "?request=" << this->addressComputed << "&";
+      redirectedAddress << theGlobalVariables.DisplayNameExecutable << "?" << this->argumentComputed << "&";
     else
       redirectedAddress << this->addressComputed << "?";
     for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
@@ -3696,11 +3696,13 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("ProblemCollections/", "ProblemCollections/");
   folderSubstitutionsNonSensitive.SetKeyValue("problemtemplates/", "../problemtemplates/");
   folderSubstitutionsNonSensitive.SetKeyValue("freecalc/", "../freecalc/");
-  folderSubstitutionsNonSensitive.SetKeyValue("html/", "../public_html/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/", "../public_html/html-common/");
-  folderSubstitutionsNonSensitive.SetKeyValue("html-common/", "../public_html/html-common/");
-  folderSubstitutionsNonSensitive.SetKeyValue("font/", "../public_html/html-common/font/");
-  folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problemtemplates/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/html/", "../public_html/");//<-coming from webserver
+  folderSubstitutionsNonSensitive.SetKeyValue("html/", "../public_html/"); //<-internal use
+  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/", "../public_html/html-common/");//<-coming from webserver
+  folderSubstitutionsNonSensitive.SetKeyValue("html-common/", "../public_html/html-common/");//<-internal use
+  folderSubstitutionsNonSensitive.SetKeyValue("/font/", "../public_html/html-common/font/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/DefaultProblemLocation/", "../problemtemplates/");//<-coming from webserver
+  folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problemtemplates/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("pagetemplates/", "../pagetemplates/");
   folderSubstitutionsNonSensitive.SetKeyValue("topiclists/", "../topiclists/");
   folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.6-latest/", "../public_html/MathJax-2.6-latest/");
@@ -3790,7 +3792,6 @@ int WebServer::mainApache()
   std::cin >> theWorker.messageBody;
   theWebServer.httpSSLPort="443";
   theWebServer.httpPort="80";
-  theWorker.addressGetOrPost = WebServer::GetEnvironment("QUERY_STRING");
   std::string theRequestMethod=WebServer::GetEnvironment("REQUEST_METHOD");
   theWorker.cookiesApache=WebServer::GetEnvironment("HTTP_COOKIE");
   std::string thePort=WebServer::GetEnvironment("SERVER_PORT");
@@ -3802,6 +3803,7 @@ int WebServer::mainApache()
     if (theURL[numBytesBeforeQuestionMark]=='?')
       break;
   theGlobalVariables.DisplayNameExecutable=theURL.substr(0, numBytesBeforeQuestionMark);
+  theWorker.addressGetOrPost = theURL+"?"+ WebServer::GetEnvironment("QUERY_STRING");
 
   if (thePort=="443")
   { theGlobalVariables.flagUsingSSLinCurrentConnection=true;

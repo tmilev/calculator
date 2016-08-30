@@ -288,17 +288,20 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   std::stringstream comments;
   thePage.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"));
   if (! thePage.LoadMe(false, comments))
-  { out << "<html><body><b>Failed to load file: " << theGlobalVariables.GetWebInput("fileName") << ". </b>"
+  { out << "<html><body><b>Failed to load file: "
+    << theGlobalVariables.GetWebInput("fileName") << ". </b>"
     << "<br>Comments:<br> " << comments.str() << "</body></html>";
     return out.str();
   }
 
   if (!thePage.InterpretHtml(comments))
-  { out << "<html><body><b>Failed to interpret file: " << theGlobalVariables.GetWebInput("fileName") << ". </b>"
+  { out << "<html><body><b>Failed to interpret file: "
+    << theGlobalVariables.GetWebInput("fileName") << ". </b>"
     << "<br>Comments:<br> " << comments.str() << "</body></html>";
     return out.str();
   }
-  out << "<!-- File automatically generated from template: " << theGlobalVariables.GetWebInput("fileName")
+  out << "<!-- File automatically generated from template: "
+  << theGlobalVariables.GetWebInput("fileName")
   << ".-->\n";
   out << "<html><!-- tag added automatically; user-specified html tag ignored-->\n";
   out << "<head><!-- tag added automatically; user-specified head tag ignored-->\n";
@@ -331,6 +334,7 @@ std::string HtmlInterpretation::GetExamPage()
   out << CGI::GetJavascriptInitilizeButtons() << "\n";
   if (theFile.flagLoadedSuccessfully)
     out << theFile.outputHtmlHeadNoTag;
+  //<- ?????must come after theFile.outputHtmlHeadNoTag
   out << "</head>"
   << "<body onload=\"loadSettings(); initializeMathQuill(); ";
   if (!theFile.flagMathQuillWithMatrices)

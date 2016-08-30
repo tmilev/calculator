@@ -146,6 +146,7 @@ public:
   std::string GetDatePickerJavascriptInit();
   std::string GetDatePickerStart(const std::string& theId);
   std::string GetJavascriptSubmitAnswers();
+  std::string GetJavascriptMathQuillBoxes();
   void LoadCurrentProblemItem();
   void FigureOutCurrentProblemList(std::stringstream& comments);
   std::string LoadAndInterpretCurrentProblemItem();

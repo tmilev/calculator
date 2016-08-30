@@ -44,9 +44,9 @@ public:
   std::string outputHtmlBodyNoTag;
   std::string outputHtmlHeadNoTag;
   std::string outputHtmlNavigatioN;
-  std::string currentExamHomE;
   std::string logCommandsProblemGeneration;
-  std::string theTopicList;
+  std::string topicList;
+  std::string currentExamHome;
 
   static const std::string BugsGenericMessage;
   HashedList<std::string, MathRoutines::hashString> tagKeysNoValue;
@@ -120,10 +120,9 @@ public:
    const std::string& sectionNumber
    , bool inheritFromGroup, bool& outputIsInherited);
   std::string InterpretGenerateDeadlineLink
-(SyntacticElementHTML& inputOutput,
- const std::string& cleaneduplink, const std::string& urledProblem, bool problemAlreadySolved)
+(bool isActualProblem, const std::string& cleaneduplink, const std::string& urledProblem, bool problemAlreadySolved)
   ;
-  std::string ToStringLinkFromFileName(const std::string& theFileName);
+  std::string ToStringLinkFromFileName(const std::string& theFileName, const std::string& stringToDisplay="");
   std::string ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName);
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
   std::string InterpretGenerateProblemManagementLink
@@ -136,10 +135,7 @@ public:
   void InterpretManageClass(SyntacticElementHTML& inputOutput);
   void InterpretTopicList(SyntacticElementHTML& inputOutput);
   void InterpretTableOfContents(SyntacticElementHTML& inputOutput);
-  std::string ToStringClassDetails
-( bool adminsOnly,
-  const SyntacticElementHTML& inputElement
-)
+  std::string ToStringClassDetails(bool adminsOnly, const SyntacticElementHTML& inputElement)
   ;
   std::string GetEditPageButton();
   std::string GetJavascriptSubmitMainInputIncludeCurrentFile();

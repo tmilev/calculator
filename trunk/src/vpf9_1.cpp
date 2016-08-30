@@ -302,8 +302,8 @@ std::string GlobalVariables::ToStringNavigationOLD()
       << "\">Server status</a>" << linkSeparator;
     else
       out << "<b>Server status</b>" << linkBigSeparator;
-    if (theGlobalVariables.userCalculatorRequestType!="browseDatabase")
-      out << "<a href=\"" << this->DisplayNameExecutable << "?request=browseDatabase&" << this->ToStringCalcArgsNoNavigation()
+    if (theGlobalVariables.userCalculatorRequestType!="database")
+      out << "<a href=\"" << this->DisplayNameExecutable << "?request=database&" << this->ToStringCalcArgsNoNavigation()
       << "\">Database</a>" << linkBigSeparator;
     else
       out << "<b>Database</b>" << linkBigSeparator;
@@ -352,7 +352,7 @@ std::string GlobalVariables::ToStringNavigationAce()
       << "\">Server status</a>" << linkSeparator;
     else
       out << "<b>Server status</b>" << linkSeparator;
-    if (theGlobalVariables.userCalculatorRequestType!="browseDatabase")
+    if (theGlobalVariables.userCalculatorRequestType!="database")
       out << "<a href=\"database?" << this->ToStringCalcArgsNoNavigation()
       << "\">Database</a>" << linkSeparator;
     else

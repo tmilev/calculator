@@ -45,7 +45,8 @@ public:
   std::string outputHtmlHeadNoTag;
   std::string outputHtmlNavigatioN;
   std::string logCommandsProblemGeneration;
-  std::string topicList;
+  std::string topicListContent;
+  std::string topicListFileName;
   std::string currentExamHome;
 
   static const std::string BugsGenericMessage;

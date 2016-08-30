@@ -8,47 +8,9 @@
 ProjectInformationInstance projectInfoInstanceHtmlSnippets
 (__FILE__, "Html Snippets.");
 
-std::string HtmlSnippets::GetJavascriptSubmitEmailS(const std::string& homeFile)
+std::string HtmlSnippets::GetJavascriptSubmitEmails()
 { std::stringstream out;
-  out
-  << "<script type=\"text/javascript\" id=\"scriptSubmitEmails\"> \n"
-  << "function addEmailsOrUsers(idEmailList, problemCollectionName, idOutput, userRole, idExtraInfo, requestType){\n"
-  << "  spanOutput = document.getElementById(idOutput);\n"
-  << "  if (spanOutput==null){\n"
-  << "    spanOutput = document.createElement('span');\n"
-  << "    document.body.appendChild(spanOutput);\n"
-  << "    spanOutput.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idEmailList + \"MISSING! </span>\";\n"
-  << "  }\n"
-  << "  spanEmailList = document.getElementById(idEmailList);\n"
-  << "  spanExtraInfo = document.getElementById(idExtraInfo);\n"
-  << "  inputParams='request='+requestType;\n"
-  << "  inputParams+='&userRole='+userRole;\n"
-  << "  inputParams+='&" << theGlobalVariables.ToStringCalcArgsNoNavigation() << "';\n"
-  << "  inputParams+='&mainInput=' + encodeURIComponent(spanEmailList.value);\n"
-  << "  inputParams+='&extraInfo=' + encodeURIComponent(spanExtraInfo.value);\n"
-//  << "  inputParams+='&currentExamHome=' + problemCollectionName;\n"
-  << "  inputParams+='&currentExamHome=" << CGI::StringToURLString(homeFile) << "';\n"
-  << "  var https = new XMLHttpRequest();\n"
-  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameExecutable << "\", true);\n"
-  << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
-  << "  https.onload = function() {\n"
-  << "    spanOutput.innerHTML=https.responseText;\n"
-//  << "    code=document.getElementById('progressReportJavascript').innerHTML;"
-//  << "    eval.call(code);\n"
-  //<< "    p();\n"
-//  << "    eval(spanOutput.innerHTML);\n"
-//  << "    if (typeof progressReport == 'function')\n"
-//  << "      progressReport();\n"
-  << "  }\n"
-  << "  https.send(inputParams);\n"
-  << "}\n"
-  << "</script>";
-  return out.str();
-}
-
-std::string HtmlSnippets::GetJavascriptSubmitEmailsAce(const std::string& homeFile)
-{ std::stringstream out;
-  (void) homeFile;
+  std::string deadlineInfoFileName="defaultDeadlines";
   out
   << "<script type=\"text/javascript\" id=\"scriptSubmitEmails\"> \n"
   << "function addEmailsOrUsers(idEmailList, problemCollectionName, idOutput, userRole, idExtraInfo, requestType){\n"
@@ -64,17 +26,12 @@ std::string HtmlSnippets::GetJavascriptSubmitEmailsAce(const std::string& homeFi
   << "  params+='userRole='+userRole;\n"
   << "  params+='&mainInput=' + encodeURIComponent(spanEmailList.value);\n"
   << "  params+='&extraInfo=' + encodeURIComponent(spanExtraInfo.value);\n"
+  << "  params+='&deadlineInfoFileName=' + encodeURIComponent('" << deadlineInfoFileName << "');\n"
   << "  var https = new XMLHttpRequest();\n"
-  << "  https.open(\"POST\", requestType, true);\n"
+  << "  https.open(\"POST\", '" << theGlobalVariables.DisplayNameExecutable << "', true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
   << "  https.onload = function() {\n"
   << "    spanOutput.innerHTML=https.responseText;\n"
-//  << "    code=document.getElementById('progressReportJavascript').innerHTML;"
-//  << "    eval.call(code);\n"
-  //<< "    p();\n"
-//  << "    eval(spanOutput.innerHTML);\n"
-//  << "    if (typeof progressReport == 'function')\n"
-//  << "      progressReport();\n"
   << "  }\n"
   << "  https.send(params);\n"
   << "}\n"

@@ -312,7 +312,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
   this->inputHtml=contentStream.str();
   this->flagIsForReal=theGlobalVariables.UserRequestRequiresLoadingRealExamData();
 #ifdef MACRO_use_MySQL
-  this->topicList=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
+  this->topicListFileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
 //  if (doLoadDatabase)
     this->LoadDatabaseInfo(comments);
 #endif // MACRO_use_MySQL
@@ -378,7 +378,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
 void CalculatorHTML::LoadFileNames()
 { this->fileName = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"));
   this->currentExamHome = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
-  this->topicList=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
+  this->topicListFileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
 }
 
 void CalculatorHTML::LoadCurrentProblemItem()
@@ -604,8 +604,8 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
     if (theGlobalVariables.GetWebInput("studentSection")!="")
       refStreamNoRequest << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
   }
-  if (this->topicList!="")
-    refStreamNoRequest << "topicList=" << this->topicList << "&";
+  if (this->topicListFileName!="")
+    refStreamNoRequest << "topicList=" << this->topicListFileName << "&";
   if (this->currentExamHome!="")
     refStreamNoRequest << "currentExamHome=" << this->currentExamHome << "&";
   if (!theGlobalVariables.UserGuestMode())
@@ -1869,7 +1869,7 @@ void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments)
   if (this->flagParentInvestigated)
     return;
   this->flagParentInvestigated=true;
-  this->topicList = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
+  this->topicListFileName = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
   if (!this->flagIsExamProblem)
   { //stOutput << "NONONO! -Emily";
     return;

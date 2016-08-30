@@ -210,7 +210,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     << "studentView=" << studentView << "&";
     if (theGlobalVariables.GetWebInput("studentSection")!="")
       out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
-    out << "topicList=" << CGI::StringToURLString(this->topicList) << "&";
+    out << "topicList=" << CGI::StringToURLString(this->topicListFileName) << "&";
     out << "currentExamHome=" << CGI::StringToURLString(this->currentExamHome) << "&";
     out << "fileName=" << CGI::StringToURLString(this->currentExamHome) << "&\"> Home </a>"
     << linkSeparator;
@@ -242,7 +242,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         << "studentView=" << studentView << "&";
         if (theGlobalVariables.GetWebInput("studentSection")!="")
           out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
-        out << "topicList=" << CGI::StringToURLString(this->topicList) << "&";
+        out << "topicList=" << CGI::StringToURLString(this->topicListFileName) << "&";
         out << "currentExamHome=" << CGI::StringToURLString(this->currentExamHome) << "&";
         out << "fileName=" << CGI::StringToURLString(this->problemListOfParent[indexInParent-1])
         << "\"> <-Previous </a>" << linkSeparator;
@@ -254,7 +254,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         << "studentView=" << studentView << "&";
         if (theGlobalVariables.GetWebInput("studentSection")!="")
           out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
-        out << "topicList=" << CGI::StringToURLString(this->topicList) << "&";
+        out << "topicList=" << CGI::StringToURLString(this->topicListFileName) << "&";
         out << "currentExamHome=" << CGI::StringToURLString(this->currentExamHome) << "&";
         out << "fileName=" << CGI::StringToURLString(this->problemListOfParent[indexInParent+1] )
         << "\"> Next-> </a>" << linkSeparator;
@@ -264,7 +264,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         << "studentView=" << studentView << "&";
         if (theGlobalVariables.GetWebInput("studentSection")!="")
           out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
-        out << "topicList=" << CGI::StringToURLString(this->topicList) << "&";
+        out << "topicList=" << CGI::StringToURLString(this->topicListFileName) << "&";
         out << "currentExamHome=" << CGI::StringToURLString(this->currentExamHome) << "&";
         out << "fileName=" << CGI::StringToURLString(this->currentExamHome)
         << "\">Last problem, return to course page.</a>" << linkSeparator;
@@ -343,7 +343,7 @@ std::string CalculatorHTML::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "  inputParams='request='+requestType+'&';\n"
   << "  inputParams+='" << theGlobalVariables.ToStringCalcArgsNoNavigation() << "';\n"
   << "  inputParams+='&fileName=" << CGI::StringToURLString(this->fileName) << "';\n"
-  << "  inputParams+='&topicList=" << CGI::StringToURLString(this->topicList) << "';\n"
+  << "  inputParams+='&topicList=" << CGI::StringToURLString(this->topicListFileName) << "';\n"
   << "  inputParams+='&currentExamHome=" << CGI::StringToURLString(this->currentExamHome) << "';\n"
   << "  inputParams+='&mainInput=' + encodeURIComponent(theString);\n"
   << "  var https = new XMLHttpRequest();\n"
@@ -527,20 +527,18 @@ void TopicElement::GetTopicList(const std::string& inputString, List<TopicElemen
 void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretTableOfContents");
   std::stringstream out;
-  std::string theVirtualFileName= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
-  if (this->topicList=="")
-  { if (!FileOperations::LoadFileToStringVirtual(theVirtualFileName, this->topicList, out))
+  if (this->topicListContent=="")
+    if (!FileOperations::LoadFileToStringVirtual(this->topicListFileName, this->topicListContent, out))
     { inputOutput.interpretedCommand=out.str();
       return;
     }
-  }
   List<TopicElement> theTopics;
-  TopicElement::GetTopicList(this->topicList, theTopics);
+  TopicElement::GetTopicList(this->topicListContent, theTopics);
   TopicElement currentElt;
   bool sectionStarted=false;
   bool subSectionStarted=false;
   bool chapterStarted=false;
-  out << "<!--Topic list automatically generated from topic list: " << theVirtualFileName
+  out << "<!--Topic list automatically generated from topic list: " << this->topicListFileName
   << ".-->";
   out << "<ol>";
   for (int i=0; i<theTopics.size; i++)
@@ -556,7 +554,7 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
         out << "</ol></li>";
     if (currentElt.flagIsChapter)
     { out << "<li>" << "<a href=\"" << "template?fileName=" << this->fileName << "&"
-      << "topicList=" << theVirtualFileName << "&" << "chapter=" << currentElt.title
+      << "topicList=" << this->topicListFileName << "&" << "chapter=" << currentElt.title
       << "\">" << currentElt.title << "</a>" << "<br>\n";
       chapterStarted=true;
       sectionStarted=false;
@@ -586,14 +584,13 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
 void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretTopicList");
   std::stringstream out;
-  std::string theVirtualFileName= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
-  if (this->topicList=="")
-    if (!FileOperations::LoadFileToStringVirtual(theVirtualFileName, this->topicList, out))
+  if (this->topicListContent=="")
+    if (!FileOperations::LoadFileToStringVirtual(this->topicListFileName, this->topicListContent, out))
     { inputOutput.interpretedCommand=out.str();
       return;
     }
   List<TopicElement> theTopics;
-  TopicElement::GetTopicList(this->topicList, theTopics);
+  TopicElement::GetTopicList(this->topicListContent, theTopics);
   TopicElement currentElt;
   bool tableStarted=false;
   bool sectionStarted=false;
@@ -601,7 +598,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   bool chapterStarted=false;
   std::string desiredChapter= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("chapter"));
   std::string currentChapter="";
-  out << "<!--Topic list automatically generated from topic list: " << theVirtualFileName
+  out << "<!--Topic list automatically generated from topic list: " << this->topicListFileName
   << ".-->";
   //out << "<br>DEBUG: Desired chapter: " << desiredChapter;
   bool firstListStarted=false;

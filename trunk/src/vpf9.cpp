@@ -554,8 +554,8 @@ bool FileOperations::LoadFileToStringUnsecure
     << " appears not to exist. ";
     return false;
   }
-  std::fstream theFile;
-  if(!FileOperations::OpenFileUnsecure(theFile, fileNameUnsecure, false, false, false))
+  std::ifstream theFile;
+  if(!FileOperations::OpenFileUnsecureReadOnly(theFile, fileNameUnsecure, false))
   { commentsOnFailure << "The requested file " << fileNameUnsecure
     << " exists but I failed to open it in text mode (perhaps not a valid ASCII/UTF8 file). ";
     return false;
@@ -640,6 +640,14 @@ bool FileOperations::OpenFileUnsecure(std::fstream& theFile, const std::string& 
         theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out);
     }
   }
+  return theFile.is_open();
+}
+
+bool FileOperations::OpenFileUnsecureReadOnly(std::ifstream& theFile, const std::string& theFileName, bool openAsBinary)
+{ if (openAsBinary)
+    theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::binary);
+  else
+    theFile.open(theFileName.c_str(), std::fstream::in);
   return theFile.is_open();
 }
 

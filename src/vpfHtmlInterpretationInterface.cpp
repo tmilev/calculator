@@ -843,7 +843,7 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
   << "<head>"
   << CGI::GetCalculatorStyleSheetWithTags()
   << HtmlSnippets::GetJavascriptStandardCookies()
-  << HtmlSnippets::GetJavascriptSubmitEmailsAce("")
+  << HtmlSnippets::GetJavascriptSubmitEmails()
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
 //  out << "<nav>" << theGlobalVariables.ToStringNavigation() << "</nav>";

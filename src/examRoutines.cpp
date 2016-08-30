@@ -33,11 +33,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   if (this->flagIsExamProblem)
     outHeadPt2 << this->GetJavascriptSubmitAnswers();
   else if (this->flagIsExamHome)
-  { if (theGlobalVariables.flagRunningAce)
-      outHeadPt2 << HtmlSnippets::GetJavascriptSubmitEmailsAce(this->fileName);
-    else
-      outHeadPt2 << HtmlSnippets::GetJavascriptSubmitEmailS(this->fileName);
-  }
+    outHeadPt2 << HtmlSnippets::GetJavascriptSubmitEmails();
   if (this->flagIsExamHome && theGlobalVariables.UserDefaultHasAdminRights() &&
       !theGlobalVariables.UserStudentViewOn())
   { outHeadPt2 << HtmlSnippets::GetJavascriptHideHtml();

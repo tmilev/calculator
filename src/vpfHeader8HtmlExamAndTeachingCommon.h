@@ -312,7 +312,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
   this->inputHtml=contentStream.str();
   this->flagIsForReal=theGlobalVariables.UserRequestRequiresLoadingRealExamData();
 #ifdef MACRO_use_MySQL
-  this->currentExamHomE=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
+  this->topicList=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
 //  if (doLoadDatabase)
     this->LoadDatabaseInfo(comments);
 #endif // MACRO_use_MySQL
@@ -377,7 +377,8 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
 
 void CalculatorHTML::LoadFileNames()
 { this->fileName = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"));
-  this->currentExamHomE = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
+  this->currentExamHome = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
+  this->topicList=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
 }
 
 void CalculatorHTML::LoadCurrentProblemItem()
@@ -580,18 +581,59 @@ std::string CalculatorHTML::ToStringCalculatorProblemSourceFromFileName(const st
   return out.str();
 }
 
-std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileName)
-{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringLinkFromFileName");
-  std::stringstream notUsed;
+void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateLink");
+  this->NumProblemsFound++;
 //  stOutput << "Figuring out current prob list ...";
-  this->FigureOutCurrentProblemList(notUsed);
-//  stOutput << "current home: " << this->currentExamHomE;
-  SyntacticElementHTML theElt;
-  theElt.content=theFileName;
-  theElt.tagKeys.AddOnTop("class");
-  theElt.tagValues.AddOnTop("calculatorExamProblem");
-  this->InterpretGenerateLink(theElt);
-  return  theElt.interpretedCommand;
+//  std::stringstream notUsed;
+//  this->FigureOutCurrentProblemList(notUsed);
+  inputOutput.interpretedCommand= this->ToStringLinkFromFileName(this->CleanUpFileName(inputOutput.content));
+}
+
+std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileName, const std::string& stringToDisplay)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringLinkFromFileName");
+  std::string urledProblem=CGI::StringToURLString(theFileName);
+  std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
+//  out << "<span style=\"white-space: nowrap; display= inline-block; width=1200px; overflow-x: scroll;\">";
+//  out << "cleaned up link: " << cleaneduplink;
+//  out << "<br>urled link: " <<  urledProblem;
+  refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation()
+  << "fileName=" << urledProblem << "&";
+  if (theGlobalVariables.UserStudentViewOn())
+  { refStreamNoRequest << "studentView=true&";
+    if (theGlobalVariables.GetWebInput("studentSection")!="")
+      refStreamNoRequest << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
+  }
+  if (this->topicList!="")
+    refStreamNoRequest << "topicList=" << this->topicList << "&";
+  if (this->currentExamHome!="")
+    refStreamNoRequest << "currentExamHome=" << this->currentExamHome << "&";
+  if (!theGlobalVariables.UserGuestMode())
+  { refStreamExercise << theGlobalVariables.DisplayNameExecutable << "?request=exercise&" << refStreamNoRequest.str();
+    refStreamForReal << theGlobalVariables.DisplayNameExecutable << "?request=scoredQuiz&" << refStreamNoRequest.str();
+  } else
+  { refStreamExercise << "?request=exerciseNoLogin&" << refStreamNoRequest.str();
+  }
+  bool isActualProblem=true;
+  if (isActualProblem)
+    out << this->InterpretGenerateProblemManagementLink(refStreamForReal, refStreamExercise, theFileName, urledProblem);
+  //else
+  //  out << " <a href=\"" << refStreamExercise.str() << "\">Start</a> ";
+  //if (inputOutput.GetTagClass()=="calculatorExamIntermediate")
+#ifdef MACRO_use_MySQL
+  bool problemAlreadySolved=false;
+  if (this->currentUseR.problemNames.Contains(theFileName))
+  { ProblemData& theProbData=this->currentUseR.problemData[this->currentUseR.problemNames.GetIndex(theFileName)];
+    if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size)
+      problemAlreadySolved=true;
+  }
+  out << this->InterpretGenerateDeadlineLink(isActualProblem, theFileName, urledProblem, problemAlreadySolved);
+#endif // MACRO_use_MySQL
+  std::string finalStringToDisplay=stringToDisplay;
+  if (finalStringToDisplay=="")
+    finalStringToDisplay= FileOperations::GetFileNameFromFileNameWithPath(theFileName);
+  out << finalStringToDisplay;
+  return out.str();
 }
 
 bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp
@@ -1641,7 +1683,7 @@ std::string CalculatorHTML::ToStringDeadlinesFormatted
 }
 
 std::string CalculatorHTML::InterpretGenerateDeadlineLink
-(SyntacticElementHTML& inputOutput,
+(bool isActualProblem,
  const std::string& cleaneduplink, const std::string& urledProblem, bool problemAlreadySolved)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateDeadlineLink");
   //  return "Submission deadline: to be announced. ";
@@ -1649,7 +1691,6 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
     return "";
   std::stringstream out;
   bool deadlineInherited=false;
-  bool isActualProblem=(inputOutput.GetTagClass()=="calculatorExamProblem");
 #ifdef MACRO_use_MySQL
   if (isActualProblem)
   { int todoDeadlines;
@@ -1828,7 +1869,7 @@ void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments)
   if (this->flagParentInvestigated)
     return;
   this->flagParentInvestigated=true;
-  this->currentExamHomE=  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
+  this->topicList = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
   if (!this->flagIsExamProblem)
   { //stOutput << "NONONO! -Emily";
     return;

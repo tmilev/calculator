@@ -247,7 +247,6 @@ std::string HtmlInterpretation::GetExamPageInterpreter()
   CalculatorHTML theFile;
   std::stringstream out;
   out << theFile.LoadAndInterpretCurrentProblemItem();
-//  out << "asdf;kajdfljadljflsd";
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   return out.str();
 
@@ -460,14 +459,6 @@ std::string HtmlInterpretation::SubmitProblem()
   if (!theProblem.flagRandomSeedGiven && !theProblem.flagIsForReal)
     out << "<b>Random seed not given.</b>";
 //  stOutput << "<b>DEBUG remove when done: Random seed: " << theProblem.theProblemData.randomSeed << "</b>";
-  theProblem.currentExamHomE         = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
-  if (theProblem.currentExamHomE == "" &&
-      !theGlobalVariables.flagRunningApache &&
-      !theGlobalVariables.flagRunningAce)
-  { out << "<b>Could not find the problem collection to which this problem belongs. "
-    << "If you think this is a bug, do the following. " << theProblem.BugsGenericMessage << "</b>";
-    return out.str();
-  }
   if (theProblem.fileName=="")
     crash << "This shouldn't happen: empty file name: theProblem.fileName." << crash;
   std::string problemStatement=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("problemStatement"));
@@ -558,9 +549,10 @@ std::string HtmlInterpretation::SubmitProblem()
       theProblem.flagIsForReal=false;
     } else
     { bool deadLinePassed=false;
-      if (!theGlobalVariables.flagRunningAce)
+      if (!theGlobalVariables.flagRunningAce && false)
       { CalculatorHTML theProblemHome;
-        theProblemHome.fileName=theProblem.currentExamHomE;
+        bool todoDeadlineSystem;
+//        theProblemHome.fileName=theProblem.currentExamHomE;
         bool isGood=true;
         if (!theProblemHome.LoadMe(true, comments))
           isGood=false;
@@ -568,9 +560,9 @@ std::string HtmlInterpretation::SubmitProblem()
           if (!theProblemHome.ParseHTML(comments))
             isGood=false;
         if (!isGood)
-        { out << "<b>Failed to load problem collection home: " << theProblem.currentExamHomE
-          << ". Comments: " << comments.str()  << " Answer not recorded. "
-          << "This should not happen. " << CalculatorHTML::BugsGenericMessage << "</b>";
+        { //out << "<b>Failed to load problem collection home: " << theProblem.currentExamHomE
+          //<< ". Comments: " << comments.str()  << " Answer not recorded. "
+          //<< "This should not happen. " << CalculatorHTML::BugsGenericMessage << "</b>";
           return out.str();
         }
      //     stOutput << "User: " << theProblem.currentUser.username.value << "; section: "

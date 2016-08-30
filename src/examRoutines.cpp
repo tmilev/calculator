@@ -180,10 +180,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   if (theGlobalVariables.UserGuestMode())
     exerciseRequest="exerciseNoLogin";
   if (theGlobalVariables.UserGuestMode())
-  { out << "<b>Guest mode</b>No points scored/deadlines. <hr>"
-    << "<a href=\"login\" "
-    << ">Log in</a>";
-  }
+    out << "<b>Guest mode</b>" << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=login\">Log in</a> ";
   List<std::string> randomSeedContainer;
   randomSeedContainer.AddOnTop("randomSeed");
   std::string calcArgsNoPassExamDetails=
@@ -209,12 +206,13 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     }
   }
   if (this->flagIsExamProblem)
-  { out << "<a href=\"" << exerciseRequest << "?" << calcArgsNoPassExamDetails
+  { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=" << exerciseRequest << "&" << calcArgsNoPassExamDetails
     << "studentView=" << studentView << "&";
     if (theGlobalVariables.GetWebInput("studentSection")!="")
       out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
-    out << "currentExamHome=" << CGI::StringToURLString(this->currentExamHomE) << "&"
-    << "fileName=" << CGI::StringToURLString(this->currentExamHomE) << "&\"> Home </a>"
+    out << "topicList=" << CGI::StringToURLString(this->topicList) << "&";
+    out << "currentExamHome=" << CGI::StringToURLString(this->currentExamHome) << "&";
+    out << "fileName=" << CGI::StringToURLString(this->currentExamHome) << "&\"> Home </a>"
     << linkSeparator;
   }
   if (this->flagIsExamHome)
@@ -238,43 +236,46 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
       //<< this->problemListOfParent.ToStringCommaDelimited();
     } else
     { if (indexInParent>0)
-      { out << "<a href=\"" << theGlobalVariables.userCalculatorRequestType
-        << "&" << calcArgsNoPassExamDetails
+      { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request="
+        << theGlobalVariables.userCalculatorRequestType;
+        out << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
         if (theGlobalVariables.GetWebInput("studentSection")!="")
           out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
-        out
-        << "&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE)
-        << "&fileName=" << CGI::StringToURLString(this->problemListOfParent[indexInParent-1] )
-        << "&\"> <-Previous </a>" << linkSeparator;
+        out << "topicList=" << CGI::StringToURLString(this->topicList) << "&";
+        out << "currentExamHome=" << CGI::StringToURLString(this->currentExamHome) << "&";
+        out << "fileName=" << CGI::StringToURLString(this->problemListOfParent[indexInParent-1])
+        << "\"> <-Previous </a>" << linkSeparator;
       }
       if (indexInParent<this->problemListOfParent.size-1)
-      { out << "<a href=\"" << theGlobalVariables.userCalculatorRequestType
-        << "&" << calcArgsNoPassExamDetails
+      { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request="
+        << theGlobalVariables.userCalculatorRequestType;
+        out << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
         if (theGlobalVariables.GetWebInput("studentSection")!="")
           out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
-        out
-        << "&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE)
-        << "&fileName=" << CGI::StringToURLString(this->problemListOfParent[indexInParent+1] )
+        out << "topicList=" << CGI::StringToURLString(this->topicList) << "&";
+        out << "currentExamHome=" << CGI::StringToURLString(this->currentExamHome) << "&";
+        out << "fileName=" << CGI::StringToURLString(this->problemListOfParent[indexInParent+1] )
         << "\"> Next-> </a>" << linkSeparator;
       } else
-      { out << "<a href=\"" << theGlobalVariables.userCalculatorRequestType
-        << "&" << calcArgsNoPassExamDetails
+      { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=template";
+        out << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
         if (theGlobalVariables.GetWebInput("studentSection")!="")
           out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
-        out
-        << "&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE)
-        << "&fileName=" << CGI::StringToURLString(this->currentExamHomE)
-        << "&\">Last problem, return to course page.</a>" << linkSeparator;
+        out << "topicList=" << CGI::StringToURLString(this->topicList) << "&";
+        out << "currentExamHome=" << CGI::StringToURLString(this->currentExamHome) << "&";
+        out << "fileName=" << CGI::StringToURLString(this->currentExamHome)
+        << "\">Last problem, return to course page.</a>" << linkSeparator;
       }
     }
   }
   if (this->flagIsExamProblem &&
       (theGlobalVariables.userCalculatorRequestType=="exercise" ||
        theGlobalVariables.userCalculatorRequestType=="exerciseNoLogin"))
-    out << "<a href=\"" << theGlobalVariables.userCalculatorRequestType << "?"
+    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "?request=" << theGlobalVariables.userCalculatorRequestType << "&"
     << this->ToStringCalculatorArgumentsForProblem(exerciseRequest, studentView, "", true)
     << "\">" << this->stringProblemLink << "</a>";
 //  out << linkBigSeparator << theGlobalVariables.ToStringNavigation();
@@ -312,7 +313,7 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
 std::string CalculatorHTML::GetEditPageButton()
 { MacroRegisterFunctionWithName("CalculatorHTML::GetEditPageButton");
   std::stringstream out;
-  out << "<a href=\"editPage?";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=editPage&";
   std::string urledProblem=CGI::StringToURLString(this->fileName);
   std::stringstream refStreamNoRequest;
   //  out << "cleaned up link: " << cleaneduplink;
@@ -339,19 +340,15 @@ std::string CalculatorHTML::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "    document.body.appendChild(spanOutput);\n"
   << "    spanOutput.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idOutput + \"MISSING! </span>\";\n"
   << "  }\n"
-  << "  inputParams='" << theGlobalVariables.ToStringCalcArgsNoNavigation() << "';\n"
+  << "  inputParams='request='+requestType+'&';\n"
+  << "  inputParams+='" << theGlobalVariables.ToStringCalcArgsNoNavigation() << "';\n"
   << "  inputParams+='&fileName=" << CGI::StringToURLString(this->fileName) << "';\n"
-  << "  inputParams+='&currentExamHome=" << CGI::StringToURLString(this->currentExamHomE) << "';\n"
+  << "  inputParams+='&topicList=" << CGI::StringToURLString(this->topicList) << "';\n"
+  << "  inputParams+='&currentExamHome=" << CGI::StringToURLString(this->currentExamHome) << "';\n"
   << "  inputParams+='&mainInput=' + encodeURIComponent(theString);\n"
-  //  << "  inputParams+='&currentExamHome=' + problemCollectionName;\n"
   << "  var https = new XMLHttpRequest();\n"
   ////////////////////////////////////////////
-  << "  https.open(\"POST\", requestType, true);\n"
-  /////////////////or/////////////////////////
-  //  << "  https.open(\"GET\", \"" << theGlobalVariables.DisplayNameExecutableWithPath << "\""
-  //  << "+ \"?\"+inputParams"
-  //  << ", true);\n"
-  ////////////////////////////////////////////
+  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameExecutable << "\", true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
   << "  https.onload = function() {\n"
   << "    spanOutput.innerHTML=https.responseText;\n"
@@ -448,52 +445,6 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
   return out.str();
 }
 
-void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
-{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateLink");
-  this->NumProblemsFound++;
-  std::string cleaneduplink = this->CleanUpFileName(inputOutput.content);
-  std::string urledProblem=CGI::StringToURLString(cleaneduplink);
-  std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
-//  out << "<span style=\"white-space: nowrap; display= inline-block; width=1200px; overflow-x: scroll;\">";
-//  out << "cleaned up link: " << cleaneduplink;
-//  out << "<br>urled link: " <<  urledProblem;
-  refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation()
-  << "fileName=" << urledProblem << "&";
-  if (theGlobalVariables.UserStudentViewOn())
-  { refStreamNoRequest << "studentView=true&";
-    if (theGlobalVariables.GetWebInput("studentSection")!="")
-      refStreamNoRequest << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
-  }
-  if (this->currentExamHomE!="")
-    refStreamNoRequest << "currentExamHome=" << this->currentExamHomE << "&";
-  if (!theGlobalVariables.UserGuestMode())
-  { refStreamExercise << "exercise?" << refStreamNoRequest.str();
-    refStreamForReal << "scoredQuiz?" << refStreamNoRequest.str();
-  } else
-  { refStreamExercise << "exerciseNoLogin?" << refStreamNoRequest.str();
-  }
-  if (inputOutput.GetTagClass()=="calculatorExamProblem")
-    out << this->InterpretGenerateProblemManagementLink(refStreamForReal, refStreamExercise, cleaneduplink, urledProblem);
-  //else
-  //  out << " <a href=\"" << refStreamExercise.str() << "\">Start</a> ";
-  //if (inputOutput.GetTagClass()=="calculatorExamIntermediate")
-#ifdef MACRO_use_MySQL
-  bool problemAlreadySolved=false;
-  if (this->currentUseR.problemNames.Contains(cleaneduplink))
-  { ProblemData& theProbData=this->currentUseR.problemData[this->currentUseR.problemNames.GetIndex(cleaneduplink)];
-    if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size)
-      problemAlreadySolved=true;
-  }
-  out << this->InterpretGenerateDeadlineLink
-  (inputOutput, cleaneduplink, urledProblem, problemAlreadySolved);
-#endif // MACRO_use_MySQL
-  std::string stringToDisplay = FileOperations::GetFileNameFromFileNameWithPath(inputOutput.content);
-  //out << " " << this->NumProblemsFound << ". "
-  out << stringToDisplay;
-//  out << "</span>";
-  inputOutput.interpretedCommand=out.str();
-}
-
 struct TopicElement{
 public:
   bool flagIsChapter;
@@ -577,14 +528,14 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretTableOfContents");
   std::stringstream out;
   std::string theVirtualFileName= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
-  if (this->theTopicList=="")
-  { if (!FileOperations::LoadFileToStringVirtual(theVirtualFileName, this->theTopicList, out))
+  if (this->topicList=="")
+  { if (!FileOperations::LoadFileToStringVirtual(theVirtualFileName, this->topicList, out))
     { inputOutput.interpretedCommand=out.str();
       return;
     }
   }
   List<TopicElement> theTopics;
-  TopicElement::GetTopicList(this->theTopicList, theTopics);
+  TopicElement::GetTopicList(this->topicList, theTopics);
   TopicElement currentElt;
   bool sectionStarted=false;
   bool subSectionStarted=false;
@@ -636,13 +587,13 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretTopicList");
   std::stringstream out;
   std::string theVirtualFileName= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
-  if (this->theTopicList=="")
-    if (!FileOperations::LoadFileToStringVirtual(theVirtualFileName, this->theTopicList, out))
+  if (this->topicList=="")
+    if (!FileOperations::LoadFileToStringVirtual(theVirtualFileName, this->topicList, out))
     { inputOutput.interpretedCommand=out.str();
       return;
     }
   List<TopicElement> theTopics;
-  TopicElement::GetTopicList(this->theTopicList, theTopics);
+  TopicElement::GetTopicList(this->topicList, theTopics);
   TopicElement currentElt;
   bool tableStarted=false;
   bool sectionStarted=false;
@@ -655,6 +606,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   //out << "<br>DEBUG: Desired chapter: " << desiredChapter;
   bool firstListStarted=false;
   int chapterCounter=0;
+  //CalculatorHTML currentProblem;
   for (int i=0; i<theTopics.size; i++)
   { currentElt=theTopics[i];
     if (currentElt.flagIsChapter)
@@ -739,12 +691,18 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       if (currentElt.slidesPrintable!="")
         out << " | <a href=\"" << currentElt.slidesPrintable << "\">Printable slides</a>";
       if (currentElt.problem!="")
-      { out << " | <a href=\"#\" onclick=\"window.open('"
-        << theGlobalVariables.DisplayNameExecutable << "?request=exercise&fileName="
-        << currentElt.problem << "',  'width=300', 'height=250', 'top=400'); return false;\">Practice</a>";
-        out << " | <a href=\"#\" onclick=\"window.open('"
-        << theGlobalVariables.DisplayNameExecutable << "?request=scoredQuiz&fileName="
-        << currentElt.problem << "',  'width=300', 'height=250', 'top=400'); return false;\">Scored Quizzes</a>";
+      { if (theGlobalVariables.flagRunningAce)
+        { out << " | <a href=\"#\" onclick=\"window.open('"
+          << theGlobalVariables.DisplayNameExecutable << "?request=scoredQuiz&fileName="
+          << currentElt.problem << "',  'width=300', 'height=250', 'top=400'); return false;\">Scored Quizzes</a>";
+          out << " | <a href=\"#\" onclick=\"window.open('"
+          << theGlobalVariables.DisplayNameExecutable << "?request=exercise&fileName="
+          << currentElt.problem << "',  'width=300', 'height=250', 'top=400'); return false;\">Practice</a>";
+        } else
+        { //currentProblem.fileName=currentElt.problem;
+          //currentProblem.currentExamHomE=this->fileName;
+          out << this->ToStringLinkFromFileName(currentElt.problem);
+        }
       }
       out << "  </td>\n";
       out << "  <td>";

@@ -2452,16 +2452,19 @@ std::string HtmlInterpretation::ModifyProblemReport()
 
 std::string WebWorker::GetEditPageHTML()
 { MacroRegisterFunctionWithName("WebWorker::GetEditPageHTML");
+  this->SetHeaderOKNoContentLength();
   return HtmlInterpretation::GetEditPageHTML();
 }
 
 std::string WebWorker::GetExamPageInterpreter()
 { MacroRegisterFunctionWithName("WebWorker::GetExamPageInterpreter");
+  this->SetHeaderOKNoContentLength();
   return HtmlInterpretation::GetExamPageInterpreter();
 }
 
 int WebWorker::ProcessSubmitProblem()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSubmitProblem");
+  this->SetHeaderOKNoContentLength();
   stOutput << HtmlInterpretation::SubmitProblem();
   return 0;
 }
@@ -3654,6 +3657,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
 
   if (secondArgument=="server")
   { theGlobalVariables.flagRunningBuiltInWebServer=true;
+    theGlobalVariables.flagRunningAce=false;
     theWebServer.flagTryToKillOlderProcesses=true;
     if (argC==2)
       return;
@@ -3706,6 +3710,7 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("pagetemplates/", "../pagetemplates/");
   folderSubstitutionsNonSensitive.SetKeyValue("topiclists/", "../topiclists/");
   folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.6-latest/", "../public_html/MathJax-2.6-latest/");
+  folderSubstitutionsNonSensitive.SetKeyValue("MathJax-2.6-latest/", "../public_html/MathJax-2.6-latest/");
 
   folderSubstitutionsSensitive.Clear();
   folderSubstitutionsSensitive.SetKeyValue("output/", "LogFiles/");

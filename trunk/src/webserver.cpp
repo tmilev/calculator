@@ -2526,6 +2526,8 @@ int WebWorker::ServeClient()
   { std::stringstream redirectStream, newAddressStream;
     newAddressStream << "https://" << this->hostNoPort << ":" << this->parent->httpSSLPort
     << this->addressGetOrPost;
+    if (theGlobalVariables.flagRunningApache)
+      redirectStream << "Content-Type: text/html\r\n";
     redirectStream << "Location: " << newAddressStream.str();
     this->SetHeader("HTTP/1.1 301 Moved Permanently", redirectStream.str());
     //this->SetHeaderOKNoContentLength();

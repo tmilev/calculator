@@ -13,7 +13,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretHtmlOneAttempt");
   double startTime=theGlobalVariables.GetElapsedSeconds();
   std::stringstream outBody;
-  std::stringstream outHead;
+  std::stringstream outHeaD, outHeadPt1, outHeadPt2;
   if (!this->flagIsForReal || !this->theProblemData.flagRandomSeedComputed)
     if (!this->flagRandomSeedGiven || this->NumAttemptsToInterpret>1)
       this->theProblemData.randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
@@ -21,7 +21,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->FigureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before after loading problem list");
-  outHead << this->GetJavascriptSubmitMainInputIncludeCurrentFile();
+  outHeadPt2 << this->GetJavascriptSubmitMainInputIncludeCurrentFile();
 //  else
 //    out << " no date picker";
   theInterpreter.flagWriteLatexPlots=false;
@@ -31,17 +31,17 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     return false;
 //////////////////////////////interpretation takes place before javascript generation as the latter depends on the former.
   if (this->flagIsExamProblem)
-    outHead << this->GetJavascriptSubmitAnswers();
+    outHeadPt2 << this->GetJavascriptSubmitAnswers();
   else if (this->flagIsExamHome)
   { if (theGlobalVariables.flagRunningAce)
-      outHead << HtmlSnippets::GetJavascriptSubmitEmailsAce(this->fileName);
+      outHeadPt2 << HtmlSnippets::GetJavascriptSubmitEmailsAce(this->fileName);
     else
-      outHead << HtmlSnippets::GetJavascriptSubmitEmailS(this->fileName);
+      outHeadPt2 << HtmlSnippets::GetJavascriptSubmitEmailS(this->fileName);
   }
   if (this->flagIsExamHome && theGlobalVariables.UserDefaultHasAdminRights() &&
       !theGlobalVariables.UserStudentViewOn())
-  { outHead << HtmlSnippets::GetJavascriptHideHtml();
-    outHead << this->GetDatePickerJavascriptInit();
+  { outHeadPt2 << HtmlSnippets::GetJavascriptHideHtml();
+    outHeadPt2 << this->GetDatePickerJavascriptInit();
   }
   if (this->flagUseNavigationBar)
     if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
@@ -123,48 +123,23 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     { tagClass=this->theContent[i].GetTagClass();
       if (tagClass=="headFinish")
       { headFinished=true;
-        outHead << "<!--Tag class: " << tagClass << " replaced by auto-generated one-->";
+        outHeadPt2 << "<!--Tag class: " << tagClass << " replaced by auto-generated one-->";
         continue;
       }
       if (tagClass=="bodyStart" || tagClass=="bodyFinish" || tagClass=="headStart" || tagClass=="headFinish" ||
           tagClass=="htmlStart" || tagClass=="htmlFinish")
       { if (headFinished)
-          outHead << "<!--Tag class: " << tagClass << " replaced by auto-generated one-->";
+          outHeadPt2 << "<!--Tag class: " << tagClass << " replaced by auto-generated one-->";
         else
-          outHead << "<!--Tag class: " << tagClass << " replaced by auto-generated one-->";
+          outHeadPt2 << "<!--Tag class: " << tagClass << " replaced by auto-generated one-->";
         continue;
       }
       if (headFinished)
         outBody << this->theContent[i].ToStringInterpretedBody();
       else
-        outHead << this->theContent[i].ToStringInterpretedBody();
+        outHeadPt2 << this->theContent[i].ToStringInterpretedBody();
     }
-  for (int i=0; i<this->theProblemData.theAnswers.size; i++)
-    outHead << this->theProblemData.theAnswers[i].htmlMQjavascript;
-  ////////////////////////////////////////////////////////////////////
-  outHead << "<script type=\"text/javascript\"> \n ";
-  outHead << "answerMQspanIds = [";
-  for (int i=0; i<this->theProblemData.theAnswers.size; i++)
-  { outHead << "\"" << this->theProblemData.theAnswers[i].idMQfield << "\"";
-    if (i!=this->theProblemData.theAnswers.size-1)
-      outHead << ", ";
-  }
-  outHead << "];\n";
-  outHead << "preferredButtonContainers = [";
-  for (int i=0; i<this->theProblemData.theAnswers.size; i++)
-  { outHead << "\"" << this->theProblemData.theAnswers[i].idMQButtonPanelLocation << "\"";
-    if (i!=this->theProblemData.theAnswers.size-1)
-      outHead << ", ";
-  }
-  outHead << "];\n";
-  outHead << "answerIdsPureLatex = [";
-  for (int i=0; i<this->theProblemData.theAnswers.size; i++)
-  { outHead << "\"" << this->theProblemData.theAnswers[i].answerId << "\"";
-    if (i!=this->theProblemData.theAnswers.size-1)
-      outHead << ", ";
-  }
-  outHead << "];\n";
-  outHead << "</script>";
+  outHeadPt2 << this->GetJavascriptMathQuillBoxes();
   ////////////////////////////////////////////////////////////////////
   //out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
   //out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";
@@ -190,7 +165,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
 #endif // MACRO_use_MySQL
   this->outputHtmlNavigatioN=this->ToStringProblemNavigation();
   this->outputHtmlBodyNoTag=outBody.str();
-  this->outputHtmlHeadNoTag=outHead.str();
+  outHeaD << outHeadPt1.str() << outHeadPt2.str();
+  this->outputHtmlHeadNoTag=outHeaD.str();
   return true;
 }
 
@@ -661,11 +637,10 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   std::stringstream out;
   std::string theVirtualFileName= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
   if (this->theTopicList=="")
-  { if (!FileOperations::LoadFileToStringVirtual(theVirtualFileName, this->theTopicList, out))
+    if (!FileOperations::LoadFileToStringVirtual(theVirtualFileName, this->theTopicList, out))
     { inputOutput.interpretedCommand=out.str();
       return;
     }
-  }
   List<TopicElement> theTopics;
   TopicElement::GetTopicList(this->theTopicList, theTopics);
   TopicElement currentElt;
@@ -764,9 +739,11 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       if (currentElt.slidesPrintable!="")
         out << " | <a href=\"" << currentElt.slidesPrintable << "\">Printable slides</a>";
       if (currentElt.problem!="")
-      { out << " | <a href=\"#\" onclick=\"window.open('exercise?fileName="
+      { out << " | <a href=\"#\" onclick=\"window.open('"
+        << theGlobalVariables.DisplayNameExecutable << "?request=exercise&fileName="
         << currentElt.problem << "',  'width=300', 'height=250', 'top=400'); return false;\">Practice</a>";
-        out << " | <a href=\"#\" onclick=\"window.open('scoredQuiz?fileName="
+        out << " | <a href=\"#\" onclick=\"window.open('"
+        << theGlobalVariables.DisplayNameExecutable << "?request=scoredQuiz&fileName="
         << currentElt.problem << "',  'width=300', 'height=250', 'top=400'); return false;\">Scored Quizzes</a>";
       }
       out << "  </td>\n";

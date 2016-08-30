@@ -26,7 +26,6 @@ public:
   ;
   static std::string GetUserInputBoxName
 (const Expression& theBox);
-  static std::string GetJavascriptMathQuillBox(Answer& theAnswer);
 };
 
 

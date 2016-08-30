@@ -1023,17 +1023,21 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
   stOutput << this->openIndentTag("<tr>");
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!-- input form here -->");
   //stOutput << this->ToStringCalculatorArgumentsHumanReadable();
-  stOutput << "\n<FORM method=\"GET\" id=\"formCalculator\" name=\"formCalculator\" action=\""
+  stOutput << "\n<FORM method=\"POST\" id=\"formCalculator\" name=\"formCalculator\" action=\""
   << theGlobalVariables.DisplayNameExecutable << "\">\n";
   std::string civilizedInputSafish;
   if (CGI::StringToHtmlStringReturnTrueIfModified(theParser.inputString, civilizedInputSafish))
-    stOutput << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are "
+    stOutput << "Your input has been treated normally, however the return string "
+    << "of your input has been modified. More precisely, &lt; and &gt;  are "
     << " modified due to a javascript hijack issue. <br>";
   stOutput << this->GetHtmlHiddenInputs(true, true);
-  stOutput << "<textarea rows=\"3\" cols=\"30\" name=\"mainInput\" id=\"mainInputID\", style=\"white-space:normal\" "
+  stOutput << this->GetHtmlHiddenInputComputation();
+  stOutput << "<textarea rows=\"3\" cols=\"30\" name=\"mainInput\" id=\"mainInputID\" "
+  << "style=\"white-space:normal\" "
   << "onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {storeSettings(); "
   << " this.form.submit(); return false;}\" "
-  << "onkeyup=\"suggestWord();\", onkeydown=\"suggestWord(); arrowAction(event);\", onmouseup=\"suggestWord();\", oninput=\"suggestWord();\""
+  << "onkeyup=\"suggestWord();\", onkeydown=\"suggestWord(); "
+  << "arrowAction(event);\", onmouseup=\"suggestWord();\", oninput=\"suggestWord();\""
   << ">";
   stOutput << civilizedInputSafish;
   stOutput << "</textarea>\n<br>\n";
@@ -1041,14 +1045,16 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
   << "name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" ";
   stOutput << "> ";
   if (theParser.inputString!="")
-    stOutput << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
+    stOutput << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
   stOutput << "\n</FORM>\n";
   stOutput << this->closeIndentTag("</td>");
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!--Autocomplete space here -->");
   stOutput << this->openIndentTag("<table><!-- Autocomplete table 2 cells (2 rows 1 column)-->");
   stOutput << this->openIndentTag("<tr>");
   stOutput << this->openIndentTag("<td nowrap>");
-  stOutput << "<span \"style:nowrap\" id=\"idAutocompleteHints\">Ctrl+space autocompletes, ctrl+arrow selects word</span>";
+  stOutput << "<span \"style:nowrap\" id=\"idAutocompleteHints\">"
+  << "Ctrl+space autocompletes, ctrl+arrow selects word</span>";
   stOutput << this->closeIndentTag("</td>");
   stOutput << this->closeIndentTag("</tr>");
   stOutput << this->openIndentTag("<tr>");
@@ -1074,21 +1080,16 @@ void WebWorker::OutputBeforeComputation()
 { MacroRegisterFunctionWithName("WebServer::OutputBeforeComputation");
   stOutput << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, "
   << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
-  << "Root subalgebras, sl(2)-triples\"> <head> <title>calculator version  " << __DATE__ << ", " << __TIME__ << "</title>";
+  << "Root subalgebras, sl(2)-triples\"> <head> <title>calculator version  "
+  << __DATE__ << ", " << __TIME__ << "</title>";
 //  if (theGlobalVariables.flagUsingBuiltInWebServer)
   stOutput << CGI::GetJavascriptMathjax();
   stOutput << CGI::GetJavascriptInjectCalculatorResponseInNode();
-//  else
-//    stOutput << "<script src=\"" << theGlobalVariables.DisplayPathServerBase << "/jsmath/easy/load.js\">";
-
   stOutput << CGI::GetCalculatorStyleSheetWithTags();
   stOutput << "\n</head>\n<body onload=\"loadSettings();\">\n";
   if (theGlobalVariables.flagLoggedIn)
     stOutput << "<nav>" << theGlobalVariables.ToStringNavigation() << "</nav>" << "<section>";
 
-//  civilizedInput="\\int( 1/x dx)";
-//  civilizedInput="\\int (1/(x(1+x^2)^2))dx";
-//  civilizedInput="%LogEvaluation \\int (1/(5+2x+7x^2)^2)dx";
   theGlobalVariables.initOutputReportAndCrashFileNames
   (theParser.inputStringRawestOfTheRaw, theParser.inputString);
 
@@ -1103,7 +1104,6 @@ void WebWorker::OutputBeforeComputation()
     stOutput << "<tr><td>"
     << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
     << "</td></tr>";
-  //  stOutput << "<br>Number of lists created before evaluation: " << NumListsCreated;
 }
 
 void WebWorker::OutputResultAfterTimeout()
@@ -1803,6 +1803,14 @@ int WebWorker::ProcessFile()
   if (theGlobalVariables.UserDebugFlagOn() && fileExtension==".html")
     debugBytesStream << "<!-- DEBUG info: " << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
     << "-->";
+  if (theGlobalVariables.flagRunningApache)
+  { this->SetHeaderOKNoContentLength();
+    stOutput << "<html><body>"
+    << "<a href=\"" << this->VirtualFileName << "\">" << this->VirtualFileName << "</a>"
+    << "</body></html>";
+    stOutput << debugBytesStream.str();
+    return 0;
+  }
   unsigned int totalLength=fileSize+debugBytesStream.str().size();
 
   std::stringstream theHeader;
@@ -2215,7 +2223,7 @@ int WebWorker::ProcessChangePassword()
 }
 
 int WebWorker::ProcessCalculator()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessDatabase");
+{ MacroRegisterFunctionWithName("WebWorker::ProcessCalculator");
   this->SetHeaderOKNoContentLength();
   theParser.inputString=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
   theParser.flagShowCalculatorExamples=(theGlobalVariables.GetWebInput("showExamples")=="true");
@@ -2554,7 +2562,7 @@ int WebWorker::ServeClient()
   if (argumentProcessingFailureComments.str()!="")
     theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
   this->errorCalculatorArguments=argumentProcessingFailureComments.str();
-  if ((theGlobalVariables.userCalculatorRequestType=="/" || theGlobalVariables.userCalculatorRequestType=="")
+  if ((this->addressComputed=="/" || this->addressComputed=="")
       && theGlobalVariables.flagLoggedIn)
   { this->addressComputed="html/selectCourse.html";
     theGlobalVariables.userCalculatorRequestType="selectCourse";
@@ -3695,8 +3703,7 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problemtemplates/");
   folderSubstitutionsNonSensitive.SetKeyValue("pagetemplates/", "../pagetemplates/");
   folderSubstitutionsNonSensitive.SetKeyValue("topiclists/", "../topiclists/");
-  if (theGlobalVariables.flagRunningAce)
-    folderSubstitutionsNonSensitive.SetKeyValue("MathJax-2.6-latest/", "../public_html/MathJax-2.6-latest/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.6-latest/", "../public_html/MathJax-2.6-latest/");
 
   folderSubstitutionsSensitive.Clear();
   folderSubstitutionsSensitive.SetKeyValue("output/", "LogFiles/");

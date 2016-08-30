@@ -132,7 +132,7 @@ struct Answer
   std::string varAnswerId;
   std::string idVerificationSpan;
   std::string javascriptPreviewAnswer;
-  std::string htmlMQjavascript;
+  //std::string htmlMQjavascript;
   std::string htmlButtonInterpret;
   std::string htmlButtonAnswer;
   std::string htmlButtonSubmit;

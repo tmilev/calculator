@@ -1408,7 +1408,7 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   (std::string)"<div class=\"calculatorMQfieldEnclosure\">"+
   "<span id='" + currentA.idMQfield + "'>" + "</span>"+
   "</div>";
-  currentA.htmlMQjavascript= CalculatorHtmlFunctions::GetJavascriptMathQuillBox(currentA);
+  //currentA.htmlMQjavascript= CalculatorHtmlFunctions::GetJavascriptMathQuillBox(currentA);
   currentA.htmlSpanMQButtonPanel=
   "<span id=\"" + currentA.idMQButtonPanelLocation + "\"></span>";
   currentA.htmlSpanSolution=  "<span id=\"" + currentA.idSpanSolution + "\"></span>";
@@ -2497,42 +2497,73 @@ bool CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml
   return output.AssignValue(theFile.ToStringExtractedCommands(), theCommands);
 }
 
-std::string CalculatorHtmlFunctions::GetJavascriptMathQuillBox(Answer& theAnswer)
-{ MacroRegisterFunctionWithName("CalculatorHtmlFunctions::GetMathQuillBox");
+std::string CalculatorHTML::GetJavascriptMathQuillBoxes()
+{ MacroRegisterFunctionWithName("CalculatorHTML::GetJavascriptMathQuillBoxes");
   std::stringstream out;
-  out << "<script>\n";
-  out << "var " << theAnswer.varMQfield << ";\n";
-  out << "var " << theAnswer.varAnswerId << ";\n";
+  ////////////////////////////////////////////////////////////////////
+  out << "<script type=\"text/javascript\">\n";
+  out << "answerMQspanIds = [";
+  for (int i=0; i<this->theProblemData.theAnswers.size; i++)
+  { out << "\"" << this->theProblemData.theAnswers[i].idMQfield << "\"";
+    if (i!=this->theProblemData.theAnswers.size-1)
+      out << ", ";
+  }
+  out << "];\n";
+  out << "preferredButtonContainers = [";
+  for (int i=0; i<this->theProblemData.theAnswers.size; i++)
+  { out << "\"" << this->theProblemData.theAnswers[i].idMQButtonPanelLocation << "\"";
+    if (i!=this->theProblemData.theAnswers.size-1)
+      out << ", ";
+  }
+  out << "];\n";
+  out << "answerIdsPureLatex = [";
+  for (int i=0; i<this->theProblemData.theAnswers.size; i++)
+  { out << "\"" << this->theProblemData.theAnswers[i].answerId << "\"";
+    if (i!=this->theProblemData.theAnswers.size-1)
+      out << ", ";
+  }
+  out << "];\n";
+  for (int answerCounter=0; answerCounter<this->theProblemData.theAnswers.size; answerCounter++)
+  { Answer& currentA=this->theProblemData.theAnswers[answerCounter];
+    out << "var " << currentA.varMQfield << ";\n";
+    out << "var " << currentA.varAnswerId << ";\n";
+    out
+    << "function " << currentA.MQUpdateFunction << "(){\n"
+    << "ignoreNextMathQuillUpdateEvent=true;\n"
+    << currentA.MQobject << ".latex(" << currentA.varAnswerId << ".value+' ');\n"
+    //<< "alert('writing: ' +" << currentA.varAnswerId  << ".value);\n"
+    //<< currentA.MQobject << ".latex(" << currentA.varAnswerId << ".value);\n"
+    << "ignoreNextMathQuillUpdateEvent=false;\n"
+    << "}\n";
+  }
   out
-  << "var ignoreNextMathQuillUpdateEvent=false;\n"
-  << "function initializeMathQuill(){\n"
-  << theAnswer.varMQfield  << " = document.getElementById('" << theAnswer.idMQfield << "');\n"
-  << theAnswer.varAnswerId << " = document.getElementById('" << theAnswer.answerId << "');\n"
-  << "globalMQ.config({\n"
-  << "  autoFunctionize: 'sin cos tan sec csc cot log ln'\n"
-  << "  });\n"
-  << theAnswer.MQobject << " = globalMQ.MathField(" << theAnswer.varMQfield << ", {\n"
-  << "spaceBehavesLikeTab: true, // configurable\n"
-  << "handlers: {\n"
-  << "edit: function() { // useful event handlers\n"
-  << "if (ignoreNextMathQuillUpdateEvent){\n"
-//  << "  ignoreNextMathQuillUpdateEvent=false;\n"
-  << "  return;\n"
-  << "}\n"
-  << theAnswer.varAnswerId << ".value = " << theAnswer.MQobject << ".latex(); // simple API\n"
-  << theAnswer.javascriptPreviewAnswer
-  << "}\n"
-  << "}\n"
-  << "});\n"
-  << "}//closing initializeMathQuill\n"
-  << "function " << theAnswer.MQUpdateFunction << "(){\n"
-  << "ignoreNextMathQuillUpdateEvent=true;\n"
-  << theAnswer.MQobject << ".latex(" << theAnswer.varAnswerId << ".value+' ');\n"
-//  << "alert('writing: ' +" << theAnswer.varAnswerId  << ".value);\n"
-//  << theAnswer.MQobject << ".latex(" << theAnswer.varAnswerId << ".value);\n"
-  << "ignoreNextMathQuillUpdateEvent=false;\n"
-  << "}\n"
-  << "</script>";
+    << "var ignoreNextMathQuillUpdateEvent=false;\n"
+    << "function initializeMathQuill(){\n";
+
+  for (int answerCounter=0; answerCounter<this->theProblemData.theAnswers.size; answerCounter++)
+  { Answer& currentA=this->theProblemData.theAnswers[answerCounter];
+    out << "////////////////////////\n";
+    out << currentA.varMQfield  << " = document.getElementById('" << currentA.idMQfield << "');\n"
+    << currentA.varAnswerId << " = document.getElementById('" << currentA.answerId << "');\n"
+    << "globalMQ.config({\n"
+    << "  autoFunctionize: 'sin cos tan sec csc cot log ln'\n"
+    << "  });\n"
+    << currentA.MQobject << " = globalMQ.MathField(" << currentA.varMQfield << ", {\n"
+    << "spaceBehavesLikeTab: true, // configurable\n"
+    << "handlers: {\n"
+    << "edit: function() { // useful event handlers\n"
+    << "if (ignoreNextMathQuillUpdateEvent){\n"
+  //  << "  ignoreNextMathQuillUpdateEvent=false;\n"
+    << "  return;\n"
+    << "}\n"
+    << currentA.varAnswerId << ".value = " << currentA.MQobject << ".latex(); // simple API\n"
+    << currentA.javascriptPreviewAnswer
+    << "}\n"
+    << "}\n"
+    << "});\n";
+  }
+  out << "}//closing initializeMathQuill\n";
+  out << "</script>";
   return out.str();
 }
 

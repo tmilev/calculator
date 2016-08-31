@@ -84,7 +84,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       outBody << "Exam problem here. ";
     outBody << "<br>randseed: " << this->theProblemData.randomSeed
     << "<br>ForReal: " << this->flagIsForReal << "<br>seed computed: " << this->theProblemData.flagRandomSeedComputed
-    << "<br>flagRandomSeedGiven: " << this->flagRandomSeedGiven
+    << "<br>flagRandomSeedGiven: " << this->flagRandomSeedGiven << "\n<br>\n"
     << CGI::StringToHtmlString(this->ToStringCalculatorArgumentsForProblem("exercise", "false"));
 
     outBody << "<br>Problem data: " << this->currentUseR.problemNames;
@@ -535,7 +535,7 @@ void CalculatorHTML::InterpretAccountInformationLinks(SyntacticElementHTML& inpu
   }
   out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=changePasswordPage\">Change password</a>";
   if (theGlobalVariables.UserDefaultHasAdminRights())
-    out << "<br><a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts\">Manage accounts</a>";
+    out << "<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts\">Manage accounts</a>";
   inputOutput.interpretedCommand= out.str();
   return;
 }

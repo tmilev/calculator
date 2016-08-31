@@ -845,7 +845,7 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
   << HtmlSnippets::GetJavascriptSubmitEmails()
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
-//  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation>";
+  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation>";
 #ifdef MACRO_use_MySQL
   if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection)
   { out << "Browsing accounts allowed only for logged-in admins over ssl connection.";

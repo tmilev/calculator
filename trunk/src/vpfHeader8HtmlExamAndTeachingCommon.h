@@ -296,8 +296,8 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
   this->fileName
   ;
   (void) doLoadDatabase;
-  std::fstream theFile;
-  if (!FileOperations::OpenFileVirtual(theFile, this->RelativePhysicalFileNameWithFolder, false, false, false))
+  std::ifstream theFile;
+  if (!FileOperations::OpenFileVirtualReadOnly(theFile, this->RelativePhysicalFileNameWithFolder, false))
   { std::string theFileName;
     FileOperations::GetPhysicalFileNameFromVirtual(this->RelativePhysicalFileNameWithFolder, theFileName);
     comments << "<b>Failed to open:<br>\n"

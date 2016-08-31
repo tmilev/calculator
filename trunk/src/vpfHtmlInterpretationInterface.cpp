@@ -286,13 +286,12 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   CalculatorHTML thePage;
   std::stringstream comments;
   thePage.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"));
-  if (! thePage.LoadMe(false, comments))
+  if (!thePage.LoadMe(false, comments))
   { out << "<html><body><b>Failed to load file: "
     << theGlobalVariables.GetWebInput("fileName") << ". </b>"
     << "<br>Comments:<br> " << comments.str() << "</body></html>";
     return out.str();
   }
-
   if (!thePage.InterpretHtml(comments))
   { out << "<html><body><b>Failed to interpret file: "
     << theGlobalVariables.GetWebInput("fileName") << ". </b>"

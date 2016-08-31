@@ -617,6 +617,13 @@ bool FileOperations::FileExistsUnsecure(const std::string& theFileName)
     return false;
 }
 
+bool FileOperations::OpenFileVirtualReadOnly(std::ifstream& theFile, const std::string& theFileName, bool openAsBinary, bool accessSensitiveFolders)
+{ std::string computedFileName;
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders))
+    return false;
+  return FileOperations::OpenFileUnsecureReadOnly(theFile, computedFileName, openAsBinary);
+}
+
 bool FileOperations::OpenFileVirtual(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders)
 { std::string computedFileName;
   if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders))

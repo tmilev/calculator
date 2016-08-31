@@ -2072,13 +2072,9 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   out << "<br>Password: ";
   out << "<input type=\"password\" id=\"password\" name=\"password\" placeholder=\"password\" autocomplete=\"on\">";
   out << this->GetHtmlHiddenInputs(false, false);
-  if (theGlobalVariables.flagRunningApache)
-    out << this->GetHtmlHiddenInputAddressAsRequest();
+  out << this->GetHtmlHiddenInputAddressAsRequest();
   out << "<button type=\"submit\" value=\"Submit\" ";
-  if (theGlobalVariables.flagRunningApache)
-    out << "action=\"" << theGlobalVariables.DisplayNameExecutable << "\"";
-  else
-    out << "action=\"" << theGlobalVariables.userCalculatorRequestType << "\"";
+  out << "action=\"" << theGlobalVariables.DisplayNameExecutable << "\"";
   out << ">Login</button>";
 //  if (theGlobalVariables.flagRunningApache)
 //    out << "action=\"" << theGlobalVariables.DisplayNameCalculatorApacheQ
@@ -2567,7 +2563,9 @@ int WebWorker::ServeClient()
   if (argumentProcessingFailureComments.str()!="")
     theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
   this->errorCalculatorArguments=argumentProcessingFailureComments.str();
-  if ((this->addressComputed=="/" || this->addressComputed=="")
+  if ((this->addressComputed=="/" || this->addressComputed=="" ||
+      (this->addressComputed==theGlobalVariables.DisplayNameExecutable &&
+       theGlobalVariables.userCalculatorRequestType==""))
       && theGlobalVariables.flagLoggedIn)
   { this->addressComputed="html/selectCourse.html";
     theGlobalVariables.userCalculatorRequestType="selectCourse";

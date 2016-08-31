@@ -308,6 +308,8 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   out << "<body" << ">"
   //<< " onload=\"loadSettings();\"><!-- tag added automatically; user-specified body tag ignored-->\n"
   ;
+  if (!theGlobalVariables.flagRunningApache)
+    out << "<problemNavigation>" << thePage.outputHtmlNavigatioN << "</problemNavigation>";
   out << thePage.outputHtmlBodyNoTag;
   out << "</body><!-- tag added automatically; user-specified body tag ignored-->\n";
   out << "</html><!-- tag added automatically; user-specified html tag ignored-->\n";

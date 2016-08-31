@@ -2116,21 +2116,16 @@ std::string WebWorker::GetChangePasswordPage()
   << "  inputPassword= document.getElementById(\"password\");\n"
   << "  inputNewPassword= document.getElementById(\"newPassword\");\n"
   << "  inputReenteredPassword= document.getElementById(\"reenteredPassword\");\n"
-  << "  params=\"&username=\" + encodeURIComponent(inputUser.value) \n"
+  << "  params=\"request=changePassword\";\n"
+  << "  params+=\"&username=\" + encodeURIComponent(inputUser.value) \n"
   << "          + \"&password=\"+encodeURIComponent(inputPassword.value)\n"
   << "          + \"&newPassword=\"+encodeURIComponent(inputNewPassword.value)\n"
   << "          + \"&reenteredPassword=\"+encodeURIComponent(inputReenteredPassword.value)\n"
   << "  ;\n"
   << "  var https = new XMLHttpRequest();\n"
-  << "  https.open(\"POST\", \"changePassword\", true);\n"
+  << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameExecutable << "\", true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
   ;
-  //Old code, submits all answers. May need to be used as an alternative
-  //submission option.
-  //  for (int i=0; i<this->theContent.size; i++)
-  //    if (this->IsStudentAnswer(this->theContent[i]))
-  //      out << "  inputParams+=\"&calculatorAnswer" << this->theContent[i].GetKeyValue("id") << "=\"+encodeURIComponent("
-  //      << "document.getElementById('" << this->theContent[i].GetKeyValue("id") << "').value);\n";
   out
   << "  https.onload = function() {\n"
   << "    spanVerification.innerHTML=https.responseText;\n"
@@ -2577,12 +2572,14 @@ int WebWorker::ServeClient()
   if (this->flagPasswordWasSubmitted && theGlobalVariables.userCalculatorRequestType!="changePassword" &&
       theGlobalVariables.userCalculatorRequestType!="activateAccount")
   { std::stringstream redirectedAddress;
-    if (theGlobalVariables.flagRunningApache)
-      redirectedAddress << theGlobalVariables.DisplayNameExecutable << "?" << this->argumentComputed << "&";
+    if (this->addressComputed==theGlobalVariables.DisplayNameExecutable)
+      redirectedAddress << theGlobalVariables.DisplayNameExecutable << "?request="
+      << theGlobalVariables.userCalculatorRequestType << "&";
     else
-      redirectedAddress << this->addressComputed << "?";
+      redirectedAddress << this->addressComputed;
     for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
-      if (theGlobalVariables.webArguments.theKeys[i]!="password")
+      if (theGlobalVariables.webArguments.theKeys[i]!="password" &&
+          theGlobalVariables.webArguments.theKeys[i]!="request")
         redirectedAddress << theGlobalVariables.webArguments.theKeys[i] << "="
         << theGlobalVariables.webArguments.theValues[i] << "&";
     std::stringstream headerStream;
@@ -3810,7 +3807,7 @@ int WebServer::mainApache()
     if (theURL[numBytesBeforeQuestionMark]=='?')
       break;
   theGlobalVariables.DisplayNameExecutable=theURL.substr(0, numBytesBeforeQuestionMark);
-  theWorker.addressGetOrPost = theURL+"?"+ WebServer::GetEnvironment("QUERY_STRING");
+  theWorker.addressGetOrPost = theGlobalVariables.DisplayNameExecutable+"?"+ WebServer::GetEnvironment("QUERY_STRING");
 
   if (thePort=="443")
   { theGlobalVariables.flagUsingSSLinCurrentConnection=true;

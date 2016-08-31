@@ -136,8 +136,8 @@ public:
   void InterpretManageClass(SyntacticElementHTML& inputOutput);
   void InterpretTopicList(SyntacticElementHTML& inputOutput);
   void InterpretTableOfContents(SyntacticElementHTML& inputOutput);
-  std::string ToStringClassDetails(bool adminsOnly, const SyntacticElementHTML& inputElement)
-  ;
+  void InterpretAccountInformationLinks(SyntacticElementHTML& inputOutput);
+  std::string ToStringClassDetails(bool adminsOnly, const SyntacticElementHTML& inputElement);
   std::string GetEditPageButton();
   std::string GetJavascriptSubmitMainInputIncludeCurrentFile();
   std::string GetDatePickerJavascriptInit();

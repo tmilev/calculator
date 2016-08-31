@@ -365,11 +365,11 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
   if (this->flagUseNavigationBar && !theGlobalVariables.flagRunningApache)
   { std::string linkSeparator=" | ";
     std::string linkBigSeparator=" || ";
-    out << "<nav>"
+    out << "<problemNavigation>"
     << this->outputHtmlNavigatioN
     << linkBigSeparator << "<small>Generated in "
     << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds()-startTime)
-    << " second(s).</small>" << "</nav> ";
+    << " second(s).</small>" << "</problemNavigation> ";
    }
   out << this->outputHtmlBodyNoTag;
   return out.str();
@@ -385,27 +385,22 @@ void CalculatorHTML::LoadCurrentProblemItem()
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadCurrentProblemItem");
   this->LoadFileNames();
   this->flagLoadedSuccessfully=false;
-  bool needToFindDefault=(this->fileName=="");
   bool needToLoadDatabase=true;
   if (theGlobalVariables.UserGuestMode())
     needToLoadDatabase=false;
-  this->flagUseNavigationBar=(theGlobalVariables.GetWebInput("navigationBar")=="true");
-  if (!needToFindDefault)
-    needToFindDefault=!this->LoadMe(needToLoadDatabase, this->comments);
+  if (theGlobalVariables.flagRunningApache)
+    this->flagUseNavigationBar=(theGlobalVariables.GetWebInput("navigationBar")=="true");
   else
-    this->comments << "<b>Selecting default course homework file. </b><br>";
-  if (needToFindDefault)
-  { needToLoadDatabase=false;
-    if (!this->FindExamItem())
-    { this->comments << "<b>No problems/exams to serve: found no html content in folder: "
-      << "ProblemCollections/" << ". </b>";
-      return;
-    }
-    if (!this->LoadMe(needToLoadDatabase, this->comments))
-      return;
-    this->inputHtml=this->comments.str()+this->inputHtml;
-  }
+    this->flagUseNavigationBar=true;
   this->flagLoadedSuccessfully=true;
+  if (this->fileName=="")
+  { this->flagLoadedSuccessfully=false;
+    this->comments << "<b>No problem file name found. </b>";
+  }
+  if (!this->LoadMe(needToLoadDatabase, this->comments))
+    this->flagLoadedSuccessfully =false;
+  if (!this->flagLoadedSuccessfully)
+    this->comments << "<a href=\"/selectCourse.html\">Go to course list page.</a>";
 }
 
 bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt)
@@ -807,6 +802,7 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator()
   tagClass=="calculatorExamProblem" || tagClass== "calculatorExamIntermediate" ||
   tagClass=="calculatorAnswer" || tagClass=="calculatorManageClass" ||
   tagClass=="generateTopicTable" ||
+  tagClass=="accountInformationLinks" ||
   tagClass=="generateTableOfContents" ||
 //  tagClass=="htmlStart" || tagClass=="htmlFinish" ||
 //  tagClass=="bodyStart" || tagClass=="bodyFinish" ||
@@ -1542,6 +1538,8 @@ void CalculatorHTML::InterpretNotByCalculator(SyntacticElementHTML& inputOutput)
     this->InterpretTopicList(inputOutput);
   else if (tagClass=="generateTableOfContents")
     this->InterpretTableOfContents(inputOutput);
+  else if (tagClass=="accountInformationLinks")
+    this->InterpretAccountInformationLinks(inputOutput);
 }
 
 std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink)
@@ -2100,6 +2098,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     this->calculatorClasses.AddOnTop("setCalculatorExamHome");
     this->calculatorClasses.AddOnTop("generateTopicTable");
     this->calculatorClasses.AddOnTop("generateTableOfContents");
+    this->calculatorClasses.AddOnTop("accountInformationLinks");
     this->calculatorClasses.AddListOnTop(this->calculatorClassesAnswerFields);
   }
   this->eltsStack.SetSize(0);

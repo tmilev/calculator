@@ -198,7 +198,7 @@ void GlobalVariables::initDefaultFolderAndFileNames
   this->PhysicalNameExecutableWithPath=this->PhysicalNameFolderBelowExecutable+this->PhysicalNameExecutableNoPath;
   if (this->PhysicalPathProjectBase=="")
     this->PhysicalPathProjectBase="./../";
-  this->PhysicalPathHtmlFolder = this->PhysicalPathProjectBase + "output/";
+  this->PhysicalPathHtmlFolder = this->PhysicalPathProjectBase + "../public_html/";
   this->PhysicalPathServerBasE=this->PhysicalPathHtmlFolder;
   this->DisplayPathOutputFolder ="/";
 

@@ -864,7 +864,7 @@ std::string WebWorker::GetDatabasePage()
   << HtmlSnippets::GetJavascriptStandardCookies()
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
-//  out << "<nav>" << theGlobalVariables.ToStringNavigation() << "</nav>";
+//  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation>";
 #ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
   if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn)
@@ -1088,7 +1088,8 @@ void WebWorker::OutputBeforeComputation()
   stOutput << CGI::GetCalculatorStyleSheetWithTags();
   stOutput << "\n</head>\n<body onload=\"loadSettings();\">\n";
   if (theGlobalVariables.flagLoggedIn)
-    stOutput << "<nav>" << theGlobalVariables.ToStringNavigation() << "</nav>" << "<section>";
+    stOutput << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
+    << "</problemNavigation>" << "<section>";
 
   theGlobalVariables.initOutputReportAndCrashFileNames
   (theParser.inputStringRawestOfTheRaw, theParser.inputString);
@@ -1520,7 +1521,7 @@ int WebWorker::ProcessServerStatus()
   << "</head>"
   << "<body>";
   if (theGlobalVariables.flagLoggedIn)
-    stOutput << "<nav>" << theGlobalVariables.ToStringNavigation() << "</nav>";
+    stOutput << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation>";
   stOutput << "<section>";
   if (theGlobalVariables.UserDefaultHasAdminRights())
     stOutput << " <table><tr><td style=\"vertical-align:top\">"
@@ -2250,6 +2251,7 @@ int WebWorker::ProcessCalculator()
 
 int WebWorker::ProcessChangePasswordPage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessChangePasswordPage");
+  this->SetHeaderOKNoContentLength();
   stOutput << this->GetChangePasswordPage();
   return 0;
 }

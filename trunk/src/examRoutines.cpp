@@ -520,6 +520,26 @@ void TopicElement::GetTopicList(const std::string& inputString, List<TopicElemen
   output.AddOnTop(currentElt);
 }
 
+void CalculatorHTML::InterpretAccountInformationLinks(SyntacticElementHTML& inputOutput)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretAccountInformationLinks");
+  std::stringstream out;
+  if (!theGlobalVariables.flagLoggedIn)
+  { out << "<b>User not logged-in.</b>";
+    inputOutput.interpretedCommand= out.str();
+    return;
+  }
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
+  { out << "<b>Account management requires https.</b>";
+    inputOutput.interpretedCommand= out.str();
+    return;
+  }
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=changePasswordPage\">Change password</a>";
+  if (theGlobalVariables.UserDefaultHasAdminRights())
+    out << "<br><a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts\">Manage accounts</a>";
+  inputOutput.interpretedCommand= out.str();
+  return;
+}
+
 void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretTableOfContents");
   std::stringstream out;

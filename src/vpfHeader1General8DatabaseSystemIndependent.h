@@ -55,6 +55,8 @@ class UserCalculatorData{
   MySQLdata enteredAuthenticationToken;
   MySQLdata actualAuthenticationToken;
   MySQLdata problemDataString;
+  MySQLdata deadlineInfoFileName;
+  MySQLdata deadlineInfoString;
   std::string enteredPassword;
   std::string actualShaonedSaltedPassword;
   std::string enteredShaonedSaltedPassword;

@@ -183,19 +183,19 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   theGlobalVariables.ToStringCalcArgsNoNavigation(&randomSeedContainer);
   if (theGlobalVariables.UserDefaultHasAdminRights())
   { if (theGlobalVariables.UserStudentViewOn())
-      out << "<a href=\"" << theGlobalVariables.userCalculatorRequestType << "?"
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=" << theGlobalVariables.userCalculatorRequestType << "&"
       << this->ToStringCalculatorArgumentsForProblem
       (theGlobalVariables.userCalculatorRequestType, "false", theGlobalVariables.GetWebInput("studentSection"))
       << "\">Admin view</a>" << linkSeparator;
     else
     { if (this->databaseStudentSectionS.size==0)
-        out << "<a href=\"" << theGlobalVariables.userCalculatorRequestType << "?"
+        out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=" << theGlobalVariables.userCalculatorRequestType << "&"
         << this->ToStringCalculatorArgumentsForProblem
         (theGlobalVariables.userCalculatorRequestType, "true", "")
         << "\">Student view</a>" << linkSeparator;
       for (int i=0; i<this->databaseStudentSectionS.size; i++)
         if (this->databaseStudentSectionS[i]!="")
-          out << "<a href=\"" << theGlobalVariables.userCalculatorRequestType << "?"
+          out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=" << theGlobalVariables.userCalculatorRequestType << "&"
           << this->ToStringCalculatorArgumentsForProblem
           (theGlobalVariables.userCalculatorRequestType, "true", this->databaseStudentSectionS[i])
           << "\">Student view section " << this->databaseStudentSectionS[i] << " </a>" << linkSeparator;
@@ -215,11 +215,11 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     out << "<b>Course homework home</b>";
   if (this->flagIsExamProblem)
   { if (theGlobalVariables.userCalculatorRequestType=="exercise")
-      out << "<a href=\"scoredQuiz?"
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=scoredQuiz&"
       << this->ToStringCalculatorArgumentsForProblem("scoredQuiz", studentView)
       << "\">" << this->stringScoredQuizzes << "</a>" << linkSeparator;
     else if (theGlobalVariables.userCalculatorRequestType=="scoredQuiz")
-      out << "<a href=\"exercise?"
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=exercise"
       << this->ToStringCalculatorArgumentsForProblem("exercise", studentView)
       << "\">" << this->stringPractice << "</a>" << linkSeparator;
   }

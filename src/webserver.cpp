@@ -2581,7 +2581,7 @@ int WebWorker::ServeClient()
       redirectedAddress << theGlobalVariables.DisplayNameExecutable << "?request="
       << theGlobalVariables.userCalculatorRequestType << "&";
     else
-      redirectedAddress << this->addressComputed;
+      redirectedAddress << this->addressComputed << "?";
     for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
       if (theGlobalVariables.webArguments.theKeys[i]!="password" &&
           theGlobalVariables.webArguments.theKeys[i]!="request")

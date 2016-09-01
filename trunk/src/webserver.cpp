@@ -207,6 +207,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex, bool 
   out << "\nfunction progressReport()\n";
   out << "{ if (isFinished)\n";
   out << "    return;\n";
+  out << "  clearTimeout(progressReport);\n";
   out << "  var progReport = document.getElementById(\"idProgressReport\");	\n";
   out << "  var progReportTimer = document.getElementById(\"idProgressReportTimer\");	\n";
   out << "  if(isPaused)\n";
@@ -215,26 +216,28 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex, bool 
   out << "  progReportTimer.style.display = '';\n";
   out << "  progReport.style.display = '';\n";
   out << "  timeOutCounter+=timeIncrementInTenthsOfSecond;\n";
-  out << "  var oRequest = new XMLHttpRequest();\n";
   if (inputIndex==-1)
     theLog << logger::red << "Worker index in parent is -1!!!" << logger::endL;
   else
     theLog << "Worker index: " << inputIndex << logger::endL;
   out << "  var sURL  = \"" << theGlobalVariables.DisplayNameExecutable << "?request=indicator&mainInput="
   << inputIndex+1 << "\";\n";
-  out << "  oRequest.open(\"GET\",sURL,false);\n";
-//  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
-  out << "  oRequest.send(null)\n";
-  out << "  if (oRequest.status==200)\n";
-  out << "  { newReportString= oRequest.responseText;\n";
-  out << "    if (oRequest.responseText==\"finished\")\n";
-  out << "    { isFinished=true;\n";
-  out << "      document.getElementById(\"idPauseToggleServerResponse\").innerHTML=\"Computation finished.\";\n";
-  out << "      return;\n";
-  out << "    }\n";
-  out << "    if (oRequest.responseText!=\"\")\n";
-  out << "      progReport.innerHTML=newReportString+\"<hr>\";\n";
-  out << "  }\n";
+  out << "  var https = new XMLHttpRequest();\n";
+  out << "  https.open(\"GET\",sURL,true);\n"
+  << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
+  << "  https.onload = function() {\n"
+  << "    newReportString= https.responseText;\n"
+  << "    if (https.responseText==\"finished\")\n"
+  << "    { isFinished=true;\n"
+  << "      document.getElementById(\"idPauseToggleServerResponse\").innerHTML=\"Computation finished.\";\n"
+  << "      return;\n"
+  << "    }\n"
+  << "    if (https.responseText!=\"\")\n"
+  << "      progReport.innerHTML=newReportString+\"<hr>\";\n"
+  << "  }\n"
+  ////////////////////////////////////////////
+  << "  https.send(null);\n";
+//  out << "  if (oRequest.status==200)\n";
   out << "   window.setTimeout(\"progressReport()\",timeIncrementInTenthsOfSecond*100);\n";
   out << " }\n";
   out << "function SendTogglePauseRequest()\n";
@@ -1537,6 +1540,7 @@ int WebWorker::ProcessServerStatus()
 
 int WebWorker::ProcessPauseWorker()
 { MacroRegisterFunctionWithName("WebWorker::ProcessPauseWorker");
+  this->SetHeaderOKNoContentLength();
   theLog << "Proceeding to toggle worker pause." << logger::endL;
   std::string theMainInput=theGlobalVariables.GetWebInput("mainInput");
   if (theMainInput=="")
@@ -1570,6 +1574,7 @@ int WebWorker::ProcessPauseWorker()
 
 int WebWorker::ProcessMonitor()
 { MacroRegisterFunctionWithName("WebWorker::ProcessMonitor");
+  this->SetHeaderOKNoContentLength();
   theLog << "Processing get monitor." << logger::endL;
   std::string theMainInput=theGlobalVariables.GetWebInput("mainInput");
   if (theMainInput=="")
@@ -1584,8 +1589,8 @@ int WebWorker::ProcessMonitor()
 
 int WebWorker::ProcessComputationIndicator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessComputationIndicator");
+  this->SetHeaderOKNoContentLength();
   theLog << "Processing get request indicator." << logger::endL;
-  ProgressReportWebServer theReport("Preparing indicator report");
   std::string theMainInput=theGlobalVariables.GetWebInput("mainInput");
   if (theMainInput=="")
   { stOutput << "<b>To get a computation indicator you need to supply the number "
@@ -1969,7 +1974,7 @@ std::string WebWorker::GetJavaScriptIndicatorFromHD()
   out << "  el.style.display = '';\n";
   out << "  timeOutCounter++;\n";
   out << "  var oRequest = new XMLHttpRequest();\n";
-  out << "  var sURL  = \"" << theGlobalVariables.DisplayNameProgressReport << "\";\n";
+  out << "  var sURL  = \"" << theGlobalVariables.DisplayNameExecutable << "\";\n";
   out << "  oRequest.open(\"GET\",sURL,false);\n";
 //  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
   out << "  oRequest.send(null)\n";
@@ -2614,9 +2619,14 @@ int WebWorker::ServeClient()
     return this->ProcessServerStatus();
   else if (theGlobalVariables.userCalculatorRequestType=="statusPublic")
     return this->ProcessServerStatusPublic();
-  else if (theGlobalVariables.userCalculatorRequestType=="monitor" && false)
-    return this->ProcessMonitor(); //<-this line of code should never be executed. Keeping it as a reminder of what can be done.
-
+  else if (theGlobalVariables.flagAllowProcessMonitoring)
+  { if (theGlobalVariables.userCalculatorRequestType=="monitor")
+      return this->ProcessMonitor();
+    else if (theGlobalVariables.userCalculatorRequestType=="pause")
+      return this->ProcessPauseWorker();
+    else if (theGlobalVariables.userCalculatorRequestType=="indicator")
+      return this->ProcessComputationIndicator();
+  }
   //unless the worker is an server monitor, it has no access to communication channels of the other workers
   this->parent->ReleaseNonActiveWorkers();
   //stOutput << this->GetHeaderOKNoContentLength();
@@ -3726,11 +3736,15 @@ extern int mainTest(List<std::string>& remainingArgs);
 
 int WebServer::main(int argc, char **argv)
 { theGlobalVariables.InitThreadsExecutableStart();
+  //use of loggers forbidden before calling   theWebServer.AnalyzeMainArguments(...):
+  //we need to initialize first the folder locations relative to the executable.
   MacroRegisterFunctionWithName("main");
   try {
   InitializeGlobalObjects();
   theWebServer.AnalyzeMainArguments(argc, argv);
+  //using loggers allowed from now on.
   theWebServer.InitializeGlobalVariables();
+  theGlobalVariables.flagAllowProcessMonitoring=true;
   if (theGlobalVariables.flagRunningConsoleTest)
     return mainTest(theGlobalVariables.programArguments);
   if (theGlobalVariables.flagRunningApache)

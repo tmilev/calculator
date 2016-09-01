@@ -97,7 +97,9 @@ public:
   bool flagTimedOutComputationIsDone;
   bool flagOutputTimedOut;
   bool flagComputationFinishedAllOutputSentClosing;
-//progress report flags:
+//experimental flags, known to cause stability issues when set to true:
+  bool flagAllowProcessMonitoring;
+//progress report flags:  
   bool flagReportEverything;
   bool flagReportFileIO;
   bool flagReportLargeIntArithmetic;
@@ -142,12 +144,10 @@ public:
   std::string DisplayPathOutputFolder;
   std::string DisplayNameExtraOutputNoPath;
   std::string DisplayNameExtraOutputWithPath;
-  std::string DisplayNameExecutable;
   //To contain the url of the executable.
   // Example:
   // DisplayNameExecutable="/cgi-bin/calculator";
-  std::string DisplayNameExecutableWithPathHTTPS;
-  std::string DisplayNameProgressReport;
+  std::string DisplayNameExecutable;
 
   std::string IPAdressCaller;
 
@@ -228,8 +228,10 @@ class logger
   public:
   int currentColor;
   int MaxLogSize;
+  std::string theFileName;
   std::fstream theFile;
   bool flagStopWritingToFile;
+  bool flagInitialized;
   logger(const std::string& logFileName);
   void CheckLogSize();
   enum loggerSpecialSymbols{ endL, red, blue, yellow, green, purple, cyan, normalColor, orange};
@@ -237,12 +239,15 @@ class logger
   std::string closeTagHtml();
   std::string openTagConsole();
   std::string openTagHtml();
+  void initializeIfNeeded();
+  void reset();
   logger& operator << (const loggerSpecialSymbols& input);
   void flush();
   template <typename theType>
   logger& operator << (const theType& toBePrinted)
   { if (theGlobalVariables.flagRunningApache)
       return *this;
+    this->initializeIfNeeded();
     if (theGlobalVariables.flagRunningBuiltInWebServer)
       std::cout << toBePrinted;
     this->CheckLogSize();

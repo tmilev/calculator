@@ -90,6 +90,7 @@ void GlobalVariables::ChDir(const std::string& systemCommand)
 
 GlobalVariables::GlobalVariables()
 { this->flagNotAllocated=false;
+  this->flagAllowProcessMonitoring=false;
   this->IndicatorStringOutputFunction=0;
   this->WebServerReturnDisplayIndicatorCloseConnection=0;
   this->WebServerTimerPing=0;
@@ -697,7 +698,7 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtual
 }
 
 bool FileOperations::OpenFileCreateIfNotPresentUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
-{ //  std::cout << "DEBUG: opening file " << theFileName << "\n";
+{ std::cout << "DEBUG: opening file " << theFileName << "\n";
   //USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
   if (OpenInAppendMode)
   { if (openAsBinary)

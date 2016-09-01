@@ -95,9 +95,8 @@ double TimeWrapper::SubtractAnotherTimeFromMeInSeconds(TimeWrapper& other)
 }
 
 std::string TimeWrapper::ToStringHumanReadable()
-{ std::stringstream out;
-  out << std::asctime(&this->theTime);
-  return out.str();
+{ std::string result(std::asctime(&this->theTime), 24);
+  return result;
 }
 
 void TimeWrapper::operator=(const std::string& input)

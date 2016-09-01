@@ -15,7 +15,6 @@ std::string GetDateForLogFiles()
   if (tempDate!="")
     return tempDate;
   TimeWrapper now;
-  std::stringstream tempStream;
   now.AssignLocalTime();
   tempDate=now.ToStringHumanReadable();
   return tempDate;

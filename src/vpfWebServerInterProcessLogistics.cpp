@@ -422,21 +422,44 @@ void Pipe::Read()
   safetyFirst.UnlockMe(); //preventing threads from locking one another
 }
 
-logger::logger(const std::string& logFileName )
-{ FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, logFileName, false, true, false, true);
+logger::logger(const std::string& logFileName)
+{ this->flagInitialized=false;
+  this->theFileName=logFileName;
+}
+
+void logger::initializeIfNeeded()
+{ if (!this->flagInitialized)
+    this->reset();
+}
+
+void logger::reset()
+{ this->flagInitialized=true;
   this->currentColor=logger::normalColor;
   this->flagStopWritingToFile=false;
   this->MaxLogSize=50000000;
+  if (theGlobalVariables.flagRunningApache)
+    return;
+  FileOperations::OpenFileCreateIfNotPresentVirtual(this->theFile, this->theFileName, false, true, false, true);
+  if (! this->theFile.is_open())
+  { this->currentColor=logger::red;
+    std::string computedFileName;
+    FileOperations::GetPhysicalFileNameFromVirtual(this->theFileName, computedFileName, true);
+    std::cout << this->openTagConsole() << "Could not open log file with virtual name: "
+    << this->theFileName << " and computed name: "
+    << computedFileName << this->closeTagConsole()
+    << std::endl;
+  }
 }
 
 void logger::CheckLogSize()
-{ theFile.seekg(0, std::ios::end);
+{ this->initializeIfNeeded();
+  theFile.seekg(0, std::ios::end);
   if (theFile.tellg()>this->MaxLogSize)
     this->flagStopWritingToFile=true;
 }
 
 void logger::flush()
-{
+{ this->initializeIfNeeded();
   std::cout.flush();
   theFile.flush();
 }

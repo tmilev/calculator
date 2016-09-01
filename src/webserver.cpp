@@ -3181,9 +3181,8 @@ void WebServer::Restart()
 //sleep(1);
 //execv("/proc/self/exe", exec_argv);
   std::stringstream theCommand;
-  theLog << logger::red << " restarting with time limit "
-  << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit << logger::endL;
   int timeInteger=(int) theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
+  theLog << logger::red << " restarting with time limit " << timeInteger << logger::endL;
   theCommand << "killall " << theGlobalVariables.PhysicalNameExecutableNoPath << " \r\n./";
   theCommand << theGlobalVariables.PhysicalNameExecutableNoPath;
   theCommand << " server " << " nokill " << timeInteger;
@@ -3294,7 +3293,7 @@ void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress
         this->NumWorkersNormallyExited++;
 //        waitpid(this->theWorkers[i].ProcessPID, 0, )
       } else
-        theLog << logger::yellow << "Worker " << i+1 << " not done yet. " << logger::endL;
+        theLog << logger::orange << "Worker " << i+1 << " not done yet. " << logger::endL;
       this->theWorkers[i].pipeWorkerToServerUserInput.ReadNoLocksUNSAFE_FOR_USE_BY_WEBSERVER_ONLY();
       if (this->theWorkers[i].pipeWorkerToServerUserInput.lastRead.size>0)
         this->theWorkers[i].displayUserInput.assign
@@ -3684,7 +3683,9 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
     timeLimit.AssignString(timeLimitString);
     int timeLimitInt=0;
     if (timeLimit.IsIntegerFittingInInt(&timeLimitInt))
-      theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=timeLimitInt;
+    { theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=timeLimitInt;
+      std::cout << "Max computation time: " << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit << std::endl;
+    }
     return;
   }
   ////////////////////////////////
@@ -3696,8 +3697,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
 }
 
 void WebServer::InitializeGlobalVariables()
-{ theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=5000000;
-  theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=5;
+{ theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=5;
   theGlobalVariables.flagReportEverything=true;
   ParallelComputing::cgiLimitRAMuseNumPointersInList=4000000000;
   MapList<std::string, std::string, MathRoutines::hashString>&
@@ -3742,6 +3742,7 @@ int WebServer::main(int argc, char **argv)
   try {
   InitializeGlobalObjects();
   theWebServer.AnalyzeMainArguments(argc, argv);
+  theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead=theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit-2;
   //using loggers allowed from now on.
   theWebServer.InitializeGlobalVariables();
   theGlobalVariables.flagAllowProcessMonitoring=true;

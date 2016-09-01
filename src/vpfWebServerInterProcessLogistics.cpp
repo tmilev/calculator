@@ -425,6 +425,9 @@ void Pipe::Read()
 logger::logger(const std::string& logFileName)
 { this->flagInitialized=false;
   this->theFileName=logFileName;
+  this->currentColor=logger::normalColor;
+  this->flagTagColorHtmlOpened=false;
+  this->flagTagColorConsoleOpened=false;
 }
 
 void logger::initializeIfNeeded()
@@ -435,6 +438,8 @@ void logger::initializeIfNeeded()
 void logger::reset()
 { this->flagInitialized=true;
   this->currentColor=logger::normalColor;
+  this->flagTagColorHtmlOpened=false;
+  this->flagTagColorConsoleOpened=false;
   this->flagStopWritingToFile=false;
   this->MaxLogSize=50000000;
   if (theGlobalVariables.flagRunningApache)
@@ -465,64 +470,100 @@ void logger::flush()
 }
 
 std::string logger::closeTagConsole()
-{ return "\e[0m";
+{ if (!this->flagTagColorConsoleOpened)
+    return "";
+  this->flagTagColorConsoleOpened=false;
+  return "\e[0m";
 }
 
 std::string logger::closeTagHtml()
-{ if (currentColor==logger::normalColor)
+{ if (!this->flagTagColorHtmlOpened)
     return "";
+  this->flagTagColorHtmlOpened=false;
   return "</span>";
 }
 
 std::string logger::openTagConsole()
-{ switch (this->currentColor)
+{ std::stringstream out;
+  out << logger::closeTagConsole();
+  switch (this->currentColor)
   { case logger::red:
-      return "\e[1;31m";
+      out << "\e[1;31m";
+      this->flagTagColorConsoleOpened=true;
+      return out.str();
     case logger::green:
-      return "\e[1;32m";
+      out << "\e[1;32m";
+      this->flagTagColorConsoleOpened=true;
+      return out.str();
     case logger::yellow:
-      return "\e[1;33m";
+      out << "\e[1;33m";
+      this->flagTagColorConsoleOpened=true;
+      return out.str();
     case logger::blue:
-      return "\e[1;34m";
+      out << "\e[1;34m";
+      this->flagTagColorConsoleOpened=true;
+      return out.str();
     case logger::purple:
-      return "\e[1;35m";
+      out << "\e[1;35m";
+      this->flagTagColorConsoleOpened=true;
+      return out.str();
     case logger::cyan:
-      return "\e[1;36m";
+      out << "\e[1;36m";
+      this->flagTagColorConsoleOpened=true;
+      return out.str();
     case logger::orange:
-      return "\e[0;33m";
+      out << "\e[0;33m";
+      this->flagTagColorConsoleOpened=true;
+      return out.str();
     default:
-      return "";
+      return out.str();
   }
 }
 
 std::string logger::openTagHtml()
-{ switch (this->currentColor)
+{ std::stringstream out;
+  out << logger::closeTagHtml();
+  switch (this->currentColor)
   { case logger::red:
-      return "<span style=\"color:red\">";
+      out << "<span style=\"color:red\">";
+      this->flagTagColorHtmlOpened=true;
+      return out.str();
     case logger::green:
-      return "<span style=\"color:green\">";
+      out << "<span style=\"color:green\">";
+      this->flagTagColorHtmlOpened=true;
+      return out.str();
     case logger::blue:
-      return "<span style=\"color:blue\">";
+      out << "<span style=\"color:blue\">";
+      this->flagTagColorHtmlOpened=true;
+      return out.str();
     case logger::yellow:
-      return "<span style=\"color:yellow\">";
+      out << "<span style=\"color:yellow\">";
+      this->flagTagColorHtmlOpened=true;
+      return out.str();
     case logger::orange:
-      return "<span style=\"color:orange\">";
+      out << "<span style=\"color:orange\">";
+      this->flagTagColorHtmlOpened=true;
+      return out.str();
     case logger::purple:
-      return "<span style=\"color:purple\">";
+      out << "<span style=\"color:purple\">";
+      this->flagTagColorHtmlOpened=true;
+      return out.str();
     default:
-      return "";
+      return out.str();
   }
 }
 
 logger& logger::operator << (const loggerSpecialSymbols& input)
 { if (theGlobalVariables.flagRunningApache)
     return *this;
+  this->initializeIfNeeded();
   this->CheckLogSize();
   switch (input)
   { case logger::endL:
       if (theGlobalVariables.flagRunningBuiltInWebServer)
         std::cout << this->closeTagConsole() << std::endl;
         std::cout.flush();
+      this->currentColor=logger::normalColor;
       if (this->flagStopWritingToFile)
         return *this;
       theFile << this->closeTagHtml() << "\n<br>\n";
@@ -540,12 +581,12 @@ logger& logger::operator << (const loggerSpecialSymbols& input)
         std::cout << this->openTagConsole();
       if (this->flagStopWritingToFile)
         return *this;
-      this->theFile << this->closeTagHtml();
       this->theFile << this->openTagHtml();
       return *this;
     case logger::normalColor:
       if (theGlobalVariables.flagRunningBuiltInWebServer)
         std::cout << this->closeTagConsole();
+      this->currentColor=logger::normalColor;
       if (this->flagStopWritingToFile)
         return *this;
       theFile << this->closeTagHtml();

@@ -232,6 +232,8 @@ class logger
   std::fstream theFile;
   bool flagStopWritingToFile;
   bool flagInitialized;
+  bool flagTagColorHtmlOpened;
+  bool flagTagColorConsoleOpened;
   logger(const std::string& logFileName);
   void CheckLogSize();
   enum loggerSpecialSymbols{ endL, red, blue, yellow, green, purple, cyan, normalColor, orange};

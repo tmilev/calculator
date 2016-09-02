@@ -304,9 +304,10 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   out << "<html><!-- tag added automatically; user-specified html tag ignored-->\n";
   out << "<head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << thePage.outputHtmlHeadNoTag;
+  out << HtmlSnippets::GetJavascriptStandardCookies();
   out << "</head><!-- tag added automatically; user-specified head tag ignored-->\n";
-  out << "<body" << ">"
-  //<< " onload=\"loadSettings();\"><!-- tag added automatically; user-specified body tag ignored-->\n"
+  out << "<body" //<< ">"
+  << " onload=\"loadSettings();\"><!-- tag added automatically; user-specified body tag ignored-->\n"
   ;
   if (!theGlobalVariables.flagRunningApache)
     out << "<problemNavigation>" << thePage.outputHtmlNavigatioN

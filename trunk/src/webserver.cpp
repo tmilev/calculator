@@ -3061,8 +3061,11 @@ std::string WebServer::ToStringStatusActive()
 
 std::string WebServer::ToStringStatusPublicNoTop()
 { MacroRegisterFunctionWithName("WebServer::ToStringStatusPublicNoTop");
+  if (theGlobalVariables.flagRunningApache)
+     return "Running through standard Apache web server, no connection details to display. ";
   std::stringstream out;
-  out << "<b>The calculator web server server status.</b><hr>"
+  out << "<b>The calculator web server status.</b><hr>";
+  out
   << "<br>" << this->GetActiveWorker().timeOfLastPingServerSideOnly
   << " seconds = "
   << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
@@ -3117,7 +3120,9 @@ std::string WebServer::ToStringStatusPublic()
 }
 
 std::string WebServer::ToStringStatusAll()
-{ MacroRegisterFunctionWithName("WebServer::ToStringStatusFull");
+{ MacroRegisterFunctionWithName("WebServer::ToStringStatusAll");
+  if (theGlobalVariables.flagRunningApache)
+    return "Running through Apache. ";
   std::stringstream out;
   out << this->ToStringStatusPublicNoTop() << "<hr>";
   if (this->activeWorker==-1)

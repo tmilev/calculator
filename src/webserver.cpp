@@ -92,7 +92,8 @@ std::string WebWorker::closeIndentTag(const std::string& theTag)
 bool WebWorker::IsAllowedAsRequestCookie(const std::string& input)
 { return input!="login" && input!="logout"
   && input!="changePassword"
-  && input!="changePasswordPage";
+  && input!="changePasswordPage"
+  && input!="activateAccount";
 }
 
 std::string HtmlSnippets::GetJavascriptStandardCookies()
@@ -962,7 +963,8 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   }
   if (theUser.username.value=="" || !theGlobalVariables.flagUsingSSLinCurrentConnection)
     return false;
-  if (theGlobalVariables.userCalculatorRequestType=="activateAccount" && theGlobalVariables.userDefault.enteredPassword=="")
+  if ((theGlobalVariables.userCalculatorRequestType=="activateAccount" || theGlobalVariables.userCalculatorRequestType=="changePassword")
+      && theGlobalVariables.userDefault.enteredPassword=="")
   { theGlobalVariables.userDefault.enteredActivationToken=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("activationToken"));
     //argumentProcessingFailureComments << "DEBUG: entered activatino token: " << theGlobalVariables.userDefault.enteredActivationToken.value;
   }
@@ -1445,9 +1447,12 @@ std::string WebWorker::GetHeaderSetCookie()
     return "";
   std::stringstream out;
   if (theGlobalVariables.userDefault.username.value!="")
-    out << "Set-cookie: " << "username="
+  { out << "Set-cookie: " << "username="
     << theGlobalVariables.userDefault.username.GetDataNoQuotes()
-    << "; Expires: Sat, 01 Jan 2050 20:00:00 GMT; Secure;\r\n";
+    << "; Expires: Sat, 01 Jan 2050 20:00:00 GMT; Secure;";
+    if (theGlobalVariables.userDefault.actualAuthenticationToken.value!="")
+      out << "\r\n";
+  }
   if (theGlobalVariables.userDefault.actualAuthenticationToken.value!="")
     out << "Set-cookie: " << "authenticationToken="
     << theGlobalVariables.userDefault.actualAuthenticationToken.GetDataNoQuotes()
@@ -1520,6 +1525,7 @@ int WebWorker::ProcessServerStatusPublic()
 
 int WebWorker::ProcessServerStatus()
 { MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestServerStatus");
+  this->SetHeaderOKNoContentLength();
   stOutput << "<html>"
   << "<head>"
   << CGI::GetCalculatorStyleSheetWithTags()
@@ -2118,14 +2124,21 @@ std::string WebWorker::GetChangePasswordPage()
   << "<script type=\"text/javascript\"> \n"
   << "function submitChangePassRequest(){\n"
   << "  spanVerification = document.getElementById(\"passwordChangeResult\");\n"
-  << "  inputUser= document.getElementById(\"username\");\n"
-  << "  inputPassword= document.getElementById(\"password\");\n"
+  << "  inputUser= document.getElementById(\"username\");\n";
+  if (theGlobalVariables.userCalculatorRequestType=="activateAccount")
+    out << "  inputActivationToken= document.getElementById(\"activationToken\");\n";
+  else
+    out << "  inputPassword= document.getElementById(\"password\");\n";
+  out
   << "  inputNewPassword= document.getElementById(\"newPassword\");\n"
   << "  inputReenteredPassword= document.getElementById(\"reenteredPassword\");\n"
   << "  params=\"request=changePassword\";\n"
-  << "  params+=\"&username=\" + encodeURIComponent(inputUser.value) \n"
-  << "          + \"&password=\"+encodeURIComponent(inputPassword.value)\n"
-  << "          + \"&newPassword=\"+encodeURIComponent(inputNewPassword.value)\n"
+  << "  params+=\"&username=\" + encodeURIComponent(inputUser.value) \n";
+  if (theGlobalVariables.userCalculatorRequestType=="activateAccount")
+    out << "          + \"&activationToken=\"+encodeURIComponent(inputActivationToken.value)\n";
+  else
+    out  << "          + \"&password=\"+encodeURIComponent(inputPassword.value)\n";
+  out << "          + \"&newPassword=\"+encodeURIComponent(inputNewPassword.value)\n"
   << "          + \"&reenteredPassword=\"+encodeURIComponent(inputReenteredPassword.value)\n"
   << "  ;\n"
   << "  var https = new XMLHttpRequest();\n"
@@ -2144,22 +2157,14 @@ std::string WebWorker::GetChangePasswordPage()
 //    << "  window.location='calculator?username='+GlobalUser+'&authenticationToken='+GlobalAuthenticationToken;";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
 //  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"GET\" accept-charset=\"utf-8\">";
-  if (!theGlobalVariables.flagLoggedIn &&
-      theGlobalVariables.userCalculatorRequestType!="activateAccount")
-    out
-    <<  "User name or email: "
-    << "<input type=\"text\" id=\"username\" placeholder=\"username\" "
-    << "value=\"" << theGlobalVariables.userDefault.username.value << "\" "
-    << "required>";
-  else
-    out
-    <<  "User: " << theGlobalVariables.userDefault.username.value
-    << "<input type=\"hidden\" id=\"username\" placeholder=\"username\" "
-    << "value=\"" << theGlobalVariables.userDefault.username.value << "\" "
-    << "required>";
+  out
+  <<  "User: " << theGlobalVariables.userDefault.username.value
+  << "<input type=\"hidden\" id=\"username\" placeholder=\"username\" "
+  << "value=\"" << theGlobalVariables.userDefault.username.value << "\" "
+  << "required>";
 
   if (theGlobalVariables.userCalculatorRequestType=="activateAccount")
-    out << "<input type=\"hidden\" id=\"password\" value=\""
+    out << "<input type=\"hidden\" id=\"activationToken\" value=\""
     << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("activationToken")) << "\">";
   else
     out << "<br>Password: "
@@ -2211,11 +2216,11 @@ int WebWorker::ProcessChangePassword()
 
   stOutput << "<span style=\"color:green\"> <b>Password change successful. </b></span>";
   stOutput
-  << "<meta http-equiv=\"refresh\" content=\"0; url=\""
-  << theGlobalVariables.DisplayNameExecutable  << "?request=login"
+  << "<meta http-equiv=\"refresh\" content=\"0; url='"
+  << theGlobalVariables.DisplayNameExecutable  << "?request=logout"
   << "&username="
-  << theGlobalVariables.userDefault.username.GetDataNoQuotes()
-  << "\" />"
+  << theGlobalVariables.userDefault.username.GetDataNoQuotes() << "&activationToken=&authenticationToken=&"
+  << "'\" />"
   ;
   return 0;
 }
@@ -2248,7 +2253,6 @@ int WebWorker::ProcessCalculator()
   WebWorker::OutputStandardResult();
   return 0;
 }
-
 
 int WebWorker::ProcessChangePasswordPage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessChangePasswordPage");
@@ -2554,13 +2558,17 @@ int WebWorker::ServeClient()
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
       theGlobalVariables.userCalculatorRequestType=="navigation")
     return this->ProcessNavigation();
-  if (!theGlobalVariables.flagLoggedIn && this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed))
-  { argumentProcessingFailureComments << "<b>Accessing: ";
-    if (theGlobalVariables.userCalculatorRequestType!="")
-      argumentProcessingFailureComments << theGlobalVariables.userCalculatorRequestType;
-    else
-      argumentProcessingFailureComments << "[html base folder]";
-    argumentProcessingFailureComments << " requires login. </b>";
+  if (!theGlobalVariables.flagLoggedIn &&
+      this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed))
+  { if(theGlobalVariables.userCalculatorRequestType!="logout" &&
+       theGlobalVariables.userCalculatorRequestType!="login")
+    { argumentProcessingFailureComments << "<b>Accessing: ";
+      if (theGlobalVariables.userCalculatorRequestType!="")
+        argumentProcessingFailureComments << theGlobalVariables.userCalculatorRequestType;
+      else
+        argumentProcessingFailureComments << "[html base folder]";
+      argumentProcessingFailureComments << " requires login. </b>";
+    }
     return this->ProcessLoginPage(argumentProcessingFailureComments.str());
   }
   if (argumentProcessingFailureComments.str()!="")
@@ -3916,7 +3924,7 @@ void WebWorker::SendAllBytesWithHeaders()
 { MacroRegisterFunctionWithName("WebWorker::SendAllBytesWithHeaders");
   this->PrepareFullMessageHeaderAndFooter();
   //std::string tempS(this->remainingBytesToSenD.TheObjects, this->remainingBytesToSenD.size);
-  //  theLog << logger::red << "Message: " << logger::normalColor << tempS << logger::endL;
+  //theLog << logger::red << "DEBUG Message:\n" << logger::normalColor << tempS << logger::endL;
   this->SendAllBytesNoHeaders();
 }
 

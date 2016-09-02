@@ -183,8 +183,9 @@ std::string HtmlSnippets::GetJavascriptStandardCookies()
   << "      document.getElementById(\"authenticationToken\").value=getCookie(\"authenticationToken\");\n ";
   out
   << "  if (document.getElementById(\"username\")!=null)\n"
-  << "    if(getCookie(\"username\")!='')\n"
-  << "      document.getElementById(\"username\").value=getCookie(\"username\");\n ";
+  << "    if(document.getElementById(\"username\").value=='' || document.getElementById(\"username\").value==null)\n "
+  << "      if(getCookie(\"username\")!='')\n"
+  << "        document.getElementById(\"username\").value=getCookie(\"username\");\n ";
   out << "}\n";
   out << " </script>\n";
   return out.str();
@@ -963,12 +964,13 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     return false;
   if (theGlobalVariables.userCalculatorRequestType=="activateAccount" && theGlobalVariables.userDefault.enteredPassword=="")
   { theGlobalVariables.userDefault.enteredActivationToken=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("activationToken"));
+    //argumentProcessingFailureComments << "DEBUG: entered activatino token: " << theGlobalVariables.userDefault.enteredActivationToken.value;
   }
   bool changingPass=theGlobalVariables.userCalculatorRequestType=="changePassword" ||
   theGlobalVariables.userCalculatorRequestType=="activateAccount";
   if (changingPass)
     theUser.enteredAuthenticationToken = "";
-  if (theUser.enteredAuthenticationToken!="" || theUser.enteredPassword!="")
+  if (theUser.enteredAuthenticationToken!="" || theUser.enteredPassword!="" || theUser.enteredActivationToken!="")
     theGlobalVariables.flagLoggedIn= DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     (theUser, &argumentProcessingFailureComments);
   theUser.resetPassword();
@@ -2070,8 +2072,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   out << "\" method=\"POST\" accept-charset=\"utf-8\">\n"
   <<  "User name:\n"
   << "<input type=\"text\" id=\"username\" name=\"username\" placeholder=\"username\" ";
-  if (!this->flagAuthenticationTokenWasSubmitted &&
-      theGlobalVariables.GetWebInput("username")!="")
+  if (theGlobalVariables.GetWebInput("username")!="")
     out << "value=\"" << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("username")) << "\"";
   out << "required>";
   out << "</input>\n";

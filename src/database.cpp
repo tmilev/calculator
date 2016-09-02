@@ -6,8 +6,7 @@ ProjectInformationInstance ProjectInfoVpf8_1MySQLcpp(__FILE__, "MySQL interface.
 
 bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
 (UserCalculatorData& theUseR, std::stringstream* comments)
-{
-  (void) comments;
+{ (void) comments;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
   DatabaseRoutines theRoutines;
@@ -18,23 +17,37 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
   { theUseR=userWrapper;
     return true;
   }
-  if (userWrapper.enteredAuthenticationToken!="" && comments!=0)
+  if (userWrapper.enteredAuthenticationToken!="" && userWrapper.enteredActivationToken=="" && comments!=0)
   { *comments << "<b> Authentication of user: " << userWrapper.username.value
     << " with token " << userWrapper.enteredAuthenticationToken.value << " failed. </b>";
     //*comments << "<br>DEBUG: actual token: " << userWrapper.actualAuthenticationToken.value
-    //<< "<br>database user: " << theRoutines.databaseUser << "<br>database name: " << theRoutines.theDatabaseName << "<br>";
+    //<< "<br>database user: " << theRoutines.databaseUser << "<br>database name: " << theRoutines.theDatabaseName << "<br>"
+    //<< "user request: " << theGlobalVariables.userCalculatorRequestType;
+  }
+  if (userWrapper.enteredActivationToken!="" && comments!=0)
+  { //*comments << "<br>DEBUG: actual activation token: " << userWrapper.actualActivationToken.value
+    //<< ". Entered activation token: " << userWrapper.enteredActivationToken.value
+    //<< "<br>database user: " << theRoutines.databaseUser << "<br>database name: " << theRoutines.theDatabaseName << "<br>"
+    //<< "user request: " << theGlobalVariables.userCalculatorRequestType;
   }
   std::string activationTokenUnsafe;
   if (theGlobalVariables.userCalculatorRequestType=="changePassword" ||
       theGlobalVariables.userCalculatorRequestType=="activateAccount")
     if (userWrapper.enteredActivationToken!="")
-      if (userWrapper.actualActivationToken!="activated" &&
+    { if (userWrapper.actualActivationToken!="activated" &&
           userWrapper.actualActivationToken!="" &&
           userWrapper.actualActivationToken!="error")
-        if (userWrapper.enteredActivationToken.value==userWrapper.actualActivationToken.value)
+      { if (userWrapper.enteredActivationToken.value==userWrapper.actualActivationToken.value)
         { theUseR=userWrapper;
           return true;
         }
+      } else if (comments!=0)
+      { if (userWrapper.actualActivationToken!="error")
+          *comments << "<b>Account already activated. </b>";
+        else
+          *comments << "<b>An error during activation ocurred.</b>";
+      }
+    }
   if (userWrapper.username.value=="admin" && userWrapper.enteredPassword!="")
     if (!userWrapper.Iexist(theRoutines))
     { if (comments!=0)
@@ -332,7 +345,8 @@ std::string UserCalculator::GetActivationAddressFromActivationToken
 { MacroRegisterFunctionWithName("UserCalculator::GetActivationLinkFromActivationToken");
   (void) calculatorBase;
   std::stringstream out;
-  out << "activateAccount?username=" << CGI::StringToURLString(inputUserNameUnsafe)
+  out << theGlobalVariables.DisplayPathExecutable
+  << "?request=activateAccount&username=" << CGI::StringToURLString(inputUserNameUnsafe)
   << "&activationToken=" << CGI::StringToURLString(theActivationToken)
   ;
   return out.str();

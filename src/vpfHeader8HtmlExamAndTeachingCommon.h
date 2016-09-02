@@ -1269,8 +1269,8 @@ std::string DatabaseRoutines::ToStringClassDetails
 
   << "<br>";
   out << tableStream.str();
-  out << "<hr>DEBUG<br>"
-  <<  userTable.ToStringCommaDelimited() << "<hr><hr>";
+  //out << "<hr>DEBUG<br>"
+  //<<  userTable.ToStringCommaDelimited() << "<hr><hr>";
   return out.str();
 }
 #endif // MACRO_use_MySQL

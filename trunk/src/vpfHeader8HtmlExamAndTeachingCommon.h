@@ -1131,7 +1131,7 @@ std::string DatabaseRoutines::ToStringClassDetails
  HashedList<std::string, MathRoutines::hashString>& databaseSpanList,
  List<std::string>& databaseProblemWeights
  )
-{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringClassDetails");
+{ MacroRegisterFunctionWithName("DatabaseRoutines::ToStringClassDetails");
   std::stringstream out;
   std::string userRole = adminsOnly ? "admin" : "student";
   int numUsers=0;
@@ -1159,6 +1159,7 @@ std::string DatabaseRoutines::ToStringClassDetails
     << indexUser << ", "
     << indexExtraInfo << ", "
     ;
+    return out.str();
   }
   HashedList<std::string, MathRoutines::hashString> sectionNames;
   List<List<std::string> > activatedAccountBucketsBySection;

@@ -263,28 +263,16 @@ bool GlobalVariables::UserRequestMustBePromptedToLogInIfNotLoggedIn()
 
 std::string GlobalVariables::ToStringNavigation()
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringNavigation");
-  if (this->flagRunningAce)
-    return this->ToStringNavigationAce();
-  else
-    return this->ToStringNavigationOLD();
-}
-
-std::string GlobalVariables::ToStringNavigationOLD()
-{ MacroRegisterFunctionWithName("GlobalVariables::ToStringNavigationOLD");
   std::stringstream out;
   //out << "<table>";
   std::string linkSeparator=" | ";
   std::string linkBigSeparator=" || ";
-
   if (theGlobalVariables.flagLoggedIn)
   { out << "User";
     if (theGlobalVariables.UserDefaultHasAdminRights())
       out << " <b>(admin)</b>";
     out << ": " << this->userDefault.username.value << linkSeparator;
     out << "<a href=\"" << this->DisplayNameExecutable << "?request=logout&";
-//    if (theGlobalVariables.flagIgnoreSecurityToWorkaroundSafarisBugs &&
-//        !theGlobalVariables.flagUsingSSLinCurrentConnection)
-//      out << "ignoreSecurity=true&";
     out << this->ToStringCalcArgsNoNavigation() << " \">Log out</a>" << linkSeparator;
     if (theGlobalVariables.flagUsingSSLinCurrentConnection)
       out << "<a href=\"" << this->DisplayNameExecutable << "?request=changePasswordPage&"
@@ -292,16 +280,18 @@ std::string GlobalVariables::ToStringNavigationOLD()
     else
       out << "<b>Password change: <br>secure connection<br>only</b>" << linkSeparator;
   }
-  out << "<a href=\"" << this->DisplayNameExecutable << "?request=exercise"
-  << this->ToStringCalcArgsNoNavigation()
-  << "fileName=ProblemCollections/CourseList.html"
-  << "\">Select course</a>" << linkBigSeparator;
+  out << "<a href=\"/selectCourse.html\">Select course</a>" << linkBigSeparator;
   if (this->UserDefaultHasAdminRights() && !this->UserStudentViewOn())
-  { if (theGlobalVariables.userCalculatorRequestType!="status")
-      out << "<a href=\"" << this->DisplayNameExecutable << "?request=status&" << this->ToStringCalcArgsNoNavigation()
-      << "\">Server status</a>" << linkSeparator;
+  { if (theGlobalVariables.userCalculatorRequestType!="accounts")
+      out << "<a href=\"" << this->DisplayNameExecutable << "?request=accounts&" << this->ToStringCalcArgsNoNavigation()
+      << "\">Accounts</a>" << linkSeparator;
     else
-      out << "<b>Server status</b>" << linkBigSeparator;
+      out << "<b>Accounts</b>" << linkBigSeparator;
+    if (theGlobalVariables.userCalculatorRequestType!="status")
+      out << "<a href=\"" << this->DisplayNameExecutable << "?request=status&" << this->ToStringCalcArgsNoNavigation()
+      << "\">Server</a>" << linkSeparator;
+    else
+      out << "<b>Server</b>" << linkBigSeparator;
     if (theGlobalVariables.userCalculatorRequestType!="database")
       out << "<a href=\"" << this->DisplayNameExecutable << "?request=database&" << this->ToStringCalcArgsNoNavigation()
       << "\">Database</a>" << linkBigSeparator;
@@ -312,64 +302,6 @@ std::string GlobalVariables::ToStringNavigationOLD()
       << this->ToStringCalcArgsNoNavigation() << " \">Calculator</a>" << linkBigSeparator;
     else
       out << "<b>Calculator</b> " << linkBigSeparator;
-    if (theGlobalVariables.userCalculatorRequestType!="exercise" &&
-        theGlobalVariables.userCalculatorRequestType!="scoredQuiz" )
-    { if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-        out << "<a href=\"" << this->DisplayNameExecutable << "?request=exercise&"
-        << this->ToStringCalcArgsNoNavigation()
-        << "\">Exercises</a> " << linkBigSeparator;
-    } else
-      out << "<b>Exercises</b> " << linkBigSeparator;
-  }
-  return out.str();
-}
-
-std::string GlobalVariables::ToStringNavigationAce()
-{ MacroRegisterFunctionWithName("GlobalVariables::ToStringNavigationAce");
-  std::stringstream out;
-  std::string linkSeparator=" | ";
-  std::string linkBigSeparator=" || ";
-  //out << "<table>";
-  if (theGlobalVariables.flagLoggedIn)
-  { out << "User";
-    if (theGlobalVariables.UserDefaultHasAdminRights())
-      out << " <b>(admin)</b>";
-    out << ": " << this->userDefault.username.value << linkSeparator;
-    out << "<a href=\"logout\">Log out</a>" << linkSeparator;
-    if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-      out << "<a href=\"changePasswordPage&"
-      << this->ToStringCalcArgsNoNavigation() << "\">Change password</a>" << linkSeparator;
-    else
-      out << "<b>Password change: <br>secure connection<br>only</b>" << linkSeparator;
-  }
-  out << "<a href=\"exercise&"
-  << this->ToStringCalcArgsNoNavigation()
-  << "fileName=ProblemCollections/CourseList.html"
-  << "\">Select course</a>";
-  if (this->UserDefaultHasAdminRights() && !this->UserStudentViewOn())
-  { if (theGlobalVariables.userCalculatorRequestType!="status")
-      out << "<a href=\"status&" << this->ToStringCalcArgsNoNavigation()
-      << "\">Server status</a>" << linkSeparator;
-    else
-      out << "<b>Server status</b>" << linkSeparator;
-    if (theGlobalVariables.userCalculatorRequestType!="database")
-      out << "<a href=\"database?" << this->ToStringCalcArgsNoNavigation()
-      << "\">Database</a>" << linkSeparator;
-    else
-      out << "<b>Database</b>" << linkSeparator;
-    if (theGlobalVariables.userCalculatorRequestType!="compute")
-      out << "<a href=\"calculator?"
-      << this->ToStringCalcArgsNoNavigation() << " \">Calculator</a>" << linkSeparator;
-    else
-      out << "<b>Calculator</b>" << linkSeparator;
-    if (theGlobalVariables.userCalculatorRequestType!="exercise" &&
-        theGlobalVariables.userCalculatorRequestType!="scoredQuiz" )
-    { if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-        out << "<a href=\"exercise?"
-        << this->ToStringCalcArgsNoNavigation()
-        << "\">Exercises</a>";
-    } else
-      out << "<b>Exercises</b>";
   }
   return out.str();
 }

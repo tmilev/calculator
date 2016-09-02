@@ -309,7 +309,8 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   //<< " onload=\"loadSettings();\"><!-- tag added automatically; user-specified body tag ignored-->\n"
   ;
   if (!theGlobalVariables.flagRunningApache)
-    out << "<problemNavigation>" << thePage.outputHtmlNavigatioN << "</problemNavigation>";
+    out << "<problemNavigation>" << thePage.outputHtmlNavigatioN
+    << theGlobalVariables.ToStringNavigation() << "</problemNavigation>";
   out << thePage.outputHtmlBodyNoTag;
   out << "</body><!-- tag added automatically; user-specified body tag ignored-->\n";
   out << "</html><!-- tag added automatically; user-specified html tag ignored-->\n";
@@ -847,7 +848,7 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
   << HtmlSnippets::GetJavascriptSubmitEmails()
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
-  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation>";
+  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation><br>";
 #ifdef MACRO_use_MySQL
   if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection)
   { out << "Browsing accounts allowed only for logged-in admins over ssl connection.";

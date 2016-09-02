@@ -846,9 +846,9 @@ bool DatabaseRoutines::FetchAllUsers
   bool tableTruncated=false;
   int numRows=-1;
   if (!DatabaseRoutinesGlobalFunctions::FetchTablE
-      (outputUserTable, outputLabelsUserTable, tableTruncated, numRows, theRoutines.usersTableName, commentsOnFailure))
+      (outputUserTable, outputLabelsUserTable, tableTruncated, numRows, DatabaseStrings::usersTableName, commentsOnFailure))
   { commentsOnFailure << "<span style=\"color:red\"><b>Failed to fetch table: "
-    << theRoutines.usersTableName << "</b></span>";
+    << DatabaseStrings::usersTableName << "</b></span>";
     return false;
   }
   if (tableTruncated)
@@ -1096,13 +1096,13 @@ bool UserCalculator::StoreProblemDataToDatabase
 }
 
 bool DatabaseRoutines::AddUsersFromEmails
-  (bool doSendEmails, const std::string& emailList, const std::string& extraInfo, bool& outputSentAllEmails,
+  (bool doSendEmails, const std::string& emailList, bool& outputSentAllEmails,
    std::stringstream& comments)
 { MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000;
   theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=1000;
   std::string userRole=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("userRole"));
-  std::string extraUserInfo=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("extraInfo"));
+  std::string userGroup=CGI::URLStringToNormal(theGlobalVariables.GetWebInput(DatabaseStrings::userGroupLabel));
   std::string currentExamHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
   std::string currentFileUsersTableName=this->GetTableUnsafeNameUsersOfFile(currentExamHome);
   List<std::string> theEmails;
@@ -1144,7 +1144,7 @@ bool DatabaseRoutines::AddUsersFromEmails
     if (!currentUser.IamPresentInTable(*this, currentFileUsersTableName))
       if (!this->InsertRow("username", theEmails[i], currentFileUsersTableName, comments))
         result=false;
-    if (!currentUser.SetColumnEntry("extraInfo", extraInfo, *this, &comments))
+    if (!currentUser.SetColumnEntry(DatabaseStrings::userGroupLabel, userGroup, *this, &comments))
       result=false;
   }
   if (!result)

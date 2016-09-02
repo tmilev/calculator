@@ -1148,13 +1148,13 @@ std::string DatabaseRoutines::ToStringClassDetails
   for (int i=0; i<userLabels.size; i++)
   { if (userLabels[i]=="username")
       indexUser=i;
-    if (userLabels[i]=="extraInfo")
+    if (userLabels[i]==DatabaseStrings::userGroupLabel)
       indexExtraInfo=i;
   }
   if (indexUser==-1 || indexExtraInfo==-1)
   { out << "<span style=\"color:red\"><b>This shouldn't happen: failed to find necessary "
     << "column entries in the database. "
-    << "This is likely a software bug.</b></span>"
+    << "This is likely a software bug. </b></span>"
     << "indexUser, indexExtraInfo: "
     << indexUser << ", "
     << indexExtraInfo << ", "

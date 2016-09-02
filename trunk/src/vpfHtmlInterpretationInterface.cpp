@@ -574,7 +574,7 @@ std::string HtmlInterpretation::SubmitProblem()
      //     stOutput
         bool unused=false;
         std::string theDeadlineString=theProblemHome.GetDeadline
-        (theProblem.fileName, theProblem.currentUseR.extraInfoUnsafe, true, unused);
+        (theProblem.fileName, theProblem.currentUseR.userGroup.GetDataNoQuotes(), true, unused);
         if (theDeadlineString!="" && theDeadlineString!=" ")
         { TimeWrapper now, deadline; //<-needs a fix for different time formats.
         //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
@@ -671,11 +671,10 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   { out << "<b>Only admins may add users.</b>";
     return out.str();
   }
-  std::string inputEmails, extraInfo;
+  std::string inputEmails, userGroup;
   inputEmails=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
-  extraInfo= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("extraInfo"));
-//  if (extraInfo=="")
-//    extraInfo="default";
+//  if (userGroup=="")
+//    userGroup="default";
   if (inputEmails=="")
   { out << "<b>No emails to add</b>";
     return out.str();
@@ -685,7 +684,7 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   std::stringstream comments;
   bool sentEmails=true;
   bool doSendEmails= theGlobalVariables.userCalculatorRequestType=="sendEmails" ?  true : false;
-  bool createdUsers=theRoutines.AddUsersFromEmails(doSendEmails, inputEmails, extraInfo, sentEmails, comments);
+  bool createdUsers=theRoutines.AddUsersFromEmails(doSendEmails, inputEmails, sentEmails, comments);
   if (createdUsers)
     out << "<span style=\"color:green\">Users successfully added. </span>";
   else
@@ -896,7 +895,7 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
 std::string HtmlInterpretation::ToStringUserDetailsTable
 (bool adminsOnly, List<List<std::string> > userTable, List<std::string> columnLabels,
  const std::string& hostWebAddressWithPort)
-{ MacroRegisterFunctionWithName("WebWorker::ToStringUserDetailsTable");
+{ MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserDetailsTable");
 #ifdef MACRO_use_MySQL
   std::stringstream out;
   std::string userRole = adminsOnly ? "admin" : "student";
@@ -921,7 +920,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       indexActivationToken=i;
     if (columnLabels[i]=="userRole")
       indexUserRole=i;
-    if (columnLabels[i]=="userInfo")
+    if (columnLabels[i]==DatabaseStrings::userGroupLabel)
       indexExtraInfo=i;
   }
   if (
@@ -933,7 +932,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       )
   { out << "<span style=\"color:red\"><b>This shouldn't happen: failed to find necessary "
     << "column entries in the database. "
-    << "This is likely a software bug.</b></span>"
+    << "This is likely a software bug. </b></span>"
     << "indexUser, indexExtraInfo, indexEmail, indexActivationToken, indexUserRole:  "
     << indexUser << ", "
     << indexEmail          << ", "
@@ -955,7 +954,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   for (int i=0; i<userTable.size; i++)
   { std::stringstream failureStream;
     currentUser.username=userTable[i][indexUser];
-    currentUser.extraInfoUnsafe=userTable[i][indexExtraInfo];
+    currentUser.userGroup=CGI::URLStringToNormal( userTable[i][indexExtraInfo]);
     currentUser.email=userTable[i][indexEmail];
     currentUser.actualActivationToken=userTable[i][indexActivationToken];
     currentUser.userRole=userTable[i][indexUserRole];

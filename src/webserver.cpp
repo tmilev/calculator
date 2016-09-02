@@ -873,8 +873,8 @@ std::string WebWorker::GetDatabasePage()
   if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn)
     out << "Browsing database allowed only for logged-in admins.";
   else
-    out << "Database: " << theRoutines.theDatabaseName
-    << "<br>Database user: " << theRoutines.databaseUser
+    out << "Database: " << DatabaseStrings::theDatabaseName
+    << "<br>Database user: " << DatabaseStrings::databaseUser
     <<  "<section>" << theRoutines.ToStringCurrentTableHTML() << "</section>";
 #else
 out << "<b>Database not available. </b>";

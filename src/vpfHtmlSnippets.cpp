@@ -13,7 +13,7 @@ std::string HtmlSnippets::GetJavascriptSubmitEmails()
   std::string deadlineInfoFileName="defaultDeadlines";
   out
   << "<script type=\"text/javascript\" id=\"scriptSubmitEmails\"> \n"
-  << "function addEmailsOrUsers(idEmailList, problemCollectionName, idOutput, userRole, idExtraInfo, requestType){\n"
+  << "function addEmailsOrUsers(idEmailList, problemCollectionName, idOutput, userRole, idUserGroup, requestType){\n"
   << "  spanOutput = document.getElementById(idOutput);\n"
   << "  if (spanOutput==null){\n"
   << "    spanOutput = document.createElement('span');\n"
@@ -21,11 +21,11 @@ std::string HtmlSnippets::GetJavascriptSubmitEmails()
   << "    spanOutput.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idEmailList + \"MISSING! </span>\";\n"
   << "  }\n"
   << "  spanEmailList = document.getElementById(idEmailList);\n"
-  << "  spanExtraInfo = document.getElementById(idExtraInfo);\n"
+  << "  spanUserGroup = document.getElementById(idUserGroup);\n"
   << "  params='request='+requestType+'&';\n"
   << "  params+='userRole='+userRole;\n"
   << "  params+='&mainInput=' + encodeURIComponent(spanEmailList.value);\n"
-  << "  params+='&extraInfo=' + encodeURIComponent(spanExtraInfo.value);\n"
+  << "  params+='&" << DatabaseStrings::userGroupLabel << "=' + encodeURIComponent(spanUserGroup.value);\n"
   << "  params+='&deadlineInfoFileName=' + encodeURIComponent('" << deadlineInfoFileName << "');\n"
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"POST\", '" << theGlobalVariables.DisplayNameExecutable << "', true);\n"

@@ -297,10 +297,9 @@ class DatabaseRoutines
 {
 public:
   std::string databasePassword;
+  std::string hostname;
   std::string databaseUser;
   std::string theDatabaseName;
-  std::string hostname;
-  std::string usersTableName;
   int MaxNumRowsToFetch;
   bool flagFirstLogin;
   MYSQL *connection; // Create a pointer to the MySQL instance
@@ -387,11 +386,11 @@ bool FetchAllUsers
  const MySQLdata& inputTable, std::stringstream& comments)
   ;
   bool AddUsersFromEmailsAndCourseName
-  (const std::string& emailList, const std::string& ExamHomeFile, const std::string& extraInfo,
+  (const std::string& emailList, const std::string& ExamHomeFile, const std::string& userGroup,
    std::stringstream& comments)
    ;
   bool AddUsersFromEmails
-  (bool doSendEmails, const std::string& emailList, const std::string& extraInfo, bool& outputSentAllEmails,
+  (bool doSendEmails, const std::string& emailList, bool& outputSentAllEmails,
    std::stringstream& comments)
   ;
   bool SendActivationEmail(const std::string& emailList, std::stringstream& comments);

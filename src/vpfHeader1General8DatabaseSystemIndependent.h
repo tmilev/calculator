@@ -57,11 +57,11 @@ class UserCalculatorData{
   MySQLdata problemDataString;
   MySQLdata deadlineInfoFileName;
   MySQLdata deadlineInfoString;
+  MySQLdata userGroup;
   std::string enteredPassword;
   std::string actualShaonedSaltedPassword;
   std::string enteredShaonedSaltedPassword;
   std::string userRole;
-  std::string extraInfoUnsafe;
   std::string authenticationTokenCreationTime;
   List<std::string> selectedColumnsUnsafe;
   List<std::string> selectedColumnValuesUnsafe;
@@ -73,5 +73,13 @@ class UserCalculatorData{
   void resetPassword();
   void resetAuthenticationTokenAndPassword();
   std::string ToStringUnsecure();
+};
+
+struct DatabaseStrings{
+public:
+  static std::string databaseUser;
+  static std::string theDatabaseName;
+  static std::string usersTableName;
+  static std::string userGroupLabel;
 };
 #endif

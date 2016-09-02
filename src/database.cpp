@@ -61,13 +61,16 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
 #include <time.h>
 #include <ctime>
 
+std::string DatabaseStrings::usersTableName="users";
+std::string DatabaseStrings::userGroupLabel="userInfo";
+std::string DatabaseStrings::databaseUser="ace";
+std::string DatabaseStrings::theDatabaseName="aceDB";
 DatabaseRoutines::DatabaseRoutines()
 { this->connection=0;
   this->MaxNumRowsToFetch=1000;
   this->flagFirstLogin=false;
-  this->databaseUser="ace";
-  this->theDatabaseName="aceDB";
-  this->usersTableName="users";
+  this->theDatabaseName=DatabaseStrings::theDatabaseName;
+  this->databaseUser=DatabaseStrings::databaseUser;
 }
 
 bool DatabaseRoutines::RowExists
@@ -378,7 +381,7 @@ bool DatabaseRoutines::PrepareClassData
   std::string classTableName=DatabaseRoutines::GetTableUnsafeNameUsersOfFile(classFileName);
   if (!theRoutines.TableExists(classTableName, &commentsOnFailure))
     if (!theRoutines.CreateTable
-        (classTableName, "username VARCHAR(255) NOT NULL PRIMARY KEY, extraInfo LONGTEXT ", &commentsOnFailure, 0))
+        (classTableName, "username VARCHAR(255) NOT NULL PRIMARY KEY, " + DatabaseStrings::userGroupLabel +" LONGTEXT ", &commentsOnFailure, 0))
       return false;
   bool tableTruncated=false;
   int numRows=-1;
@@ -390,7 +393,7 @@ bool DatabaseRoutines::PrepareClassData
   }
   if (tableTruncated)
   { commentsOnFailure << "<span style=\"color:red\"><b>This shouldn't happen: email list truncated. "
-    << "This is likely a software bug.</b></span>";
+    << "This is likely a software bug. </b></span>";
     return false;
   }
   return true;

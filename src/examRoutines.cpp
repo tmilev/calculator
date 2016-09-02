@@ -186,19 +186,23 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=" << theGlobalVariables.userCalculatorRequestType << "&"
       << this->ToStringCalculatorArgumentsForProblem
       (theGlobalVariables.userCalculatorRequestType, "false", theGlobalVariables.GetWebInput("studentSection"))
-      << "\">Admin view</a>" << linkSeparator;
+      << "\">Admin view</a>" << linkBigSeparator;
     else
     { if (this->databaseStudentSectionS.size==0)
         out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=" << theGlobalVariables.userCalculatorRequestType << "&"
         << this->ToStringCalculatorArgumentsForProblem
         (theGlobalVariables.userCalculatorRequestType, "true", "")
-        << "\">Student view</a>" << linkSeparator;
+        << "\">Student view</a>";
       for (int i=0; i<this->databaseStudentSectionS.size; i++)
         if (this->databaseStudentSectionS[i]!="")
-          out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=" << theGlobalVariables.userCalculatorRequestType << "&"
+        { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=" << theGlobalVariables.userCalculatorRequestType << "&"
           << this->ToStringCalculatorArgumentsForProblem
           (theGlobalVariables.userCalculatorRequestType, "true", this->databaseStudentSectionS[i])
-          << "\">Student view section " << this->databaseStudentSectionS[i] << " </a>" << linkSeparator;
+          << "\">Student view section " << this->databaseStudentSectionS[i] << " </a>";
+          if (i!=this->databaseStudentSectionS.size-1)
+            out << linkSeparator;
+        }
+      out << linkBigSeparator;
     }
   }
   if (this->flagIsExamProblem)
@@ -309,7 +313,7 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
 std::string CalculatorHTML::GetEditPageButton()
 { MacroRegisterFunctionWithName("CalculatorHTML::GetEditPageButton");
   std::stringstream out;
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=editPage&";
+  out << "\n<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=editPage&";
   std::string urledProblem=CGI::StringToURLString(this->fileName);
   std::stringstream refStreamNoRequest;
   //  out << "cleaned up link: " << cleaneduplink;
@@ -318,7 +322,8 @@ std::string CalculatorHTML::GetEditPageButton()
   << "fileName=" << urledProblem << "&"
   << "currentExamHome=" << theGlobalVariables.GetWebInput("currentExamHome") << "&";
   out << refStreamNoRequest.str() << "\">" << "Edit problem/page" << "</a>";
-  out << "<textarea id=\"clonePageAreaID\" rows=\"1\" cols=\"100\">" << this->fileName << "</textarea>\n"
+  out << "<textarea class=\"currentFileNameArea\" id=\"clonePageAreaID\" cols=\""
+  << this->fileName.size()+4 << "\">" << this->fileName << "</textarea>\n"
   << "<button class=\"normalButton\" onclick=\""
   << "submitStringAsMainInput(document.getElementById('clonePageAreaID').value, 'spanCloningAttemptResultID', 'clonePage');"
   << "\" >Clone page</button> <span id=\"spanCloningAttemptResultID\"></span><br><br>";

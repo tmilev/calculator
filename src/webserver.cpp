@@ -867,7 +867,7 @@ std::string WebWorker::GetDatabasePage()
   << HtmlSnippets::GetJavascriptStandardCookies()
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
-//  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation>";
+  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation><br>";
 #ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
   if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn)
@@ -3745,7 +3745,7 @@ int WebServer::main(int argc, char **argv)
   theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead=theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit-2;
   //using loggers allowed from now on.
   theWebServer.InitializeGlobalVariables();
-  theGlobalVariables.flagAllowProcessMonitoring=true;
+  theGlobalVariables.flagAllowProcessMonitoring=false;
   if (theGlobalVariables.flagRunningConsoleTest)
     return mainTest(theGlobalVariables.programArguments);
   if (theGlobalVariables.flagRunningApache)

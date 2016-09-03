@@ -182,7 +182,8 @@ public:
   std::string ToStringLinkFromFileName(const std::string& theFileName, const std::string& stringToDisplay="");
   std::string ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName);
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
-  std::string ToStringProblemWeight(const std::string& theFileName);
+  std::string ToStringProblemWeighT(const std::string& theFileName);
+  std::string ToStringProblemScore(const std::string& theFileName);
   bool ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutput);
   void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
   bool PrepareClassData(std::stringstream& commentsOnFailure);

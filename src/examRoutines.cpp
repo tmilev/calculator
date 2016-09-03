@@ -446,38 +446,6 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
   return out.str();
 }
 
-struct TopicElement{
-public:
-  bool flagIsChapter;
-  bool flagIsSection;
-  bool flagIsSubSection;
-  bool flagIsError;
-  std::string title;
-  std::string video;
-  std::string slides;
-  std::string slidesPrintable;
-  std::string problem;
-  std::string error;
-  void reset()
-  { this->flagIsSection=false;
-    this->flagIsSubSection=false;
-    this->flagIsChapter=false;
-    this->flagIsError=false;
-    this->title="empty";
-    this->video="";
-    this->slides="";
-    this->slidesPrintable="";
-    this->problem="";
-    this->error="";
-  }
-  static std::string GetTableStart();
-  static std::string GetTableFinish();
-  TopicElement()
-  { this->reset();
-  }
-  static void GetTopicList(const std::string& inputString, List<TopicElement>& output);
-};
-
 void TopicElement::GetTopicList(const std::string& inputString, List<TopicElement>& output)
 { MacroRegisterFunctionWithName("TopicElement::GetTopicList");
   std::stringstream tableReader(inputString);
@@ -545,16 +513,22 @@ void CalculatorHTML::InterpretAccountInformationLinks(SyntacticElementHTML& inpu
   return;
 }
 
+bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
+{ MacroRegisterFunctionWithName("CalculatorHTML::LoadAndParseTopicList");
+  if (this->topicListContent=="")
+    if (!FileOperations::LoadFileToStringVirtual(this->topicListFileName, this->topicListContent, comments))
+      return false;
+  TopicElement::GetTopicList(this->topicListContent, this->theTopics);
+  return true;
+}
+
 void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretTableOfContents");
   std::stringstream out;
-  if (this->topicListContent=="")
-    if (!FileOperations::LoadFileToStringVirtual(this->topicListFileName, this->topicListContent, out))
-    { inputOutput.interpretedCommand=out.str();
-      return;
-    }
-  List<TopicElement> theTopics;
-  TopicElement::GetTopicList(this->topicListContent, theTopics);
+  if (!this->LoadAndParseTopicList(out))
+  { inputOutput.interpretedCommand=out.str();
+    return;
+  }
   TopicElement currentElt;
   bool sectionStarted=false;
   bool subSectionStarted=false;
@@ -605,12 +579,11 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
 void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretTopicList");
   std::stringstream out;
-  if (this->topicListContent=="")
-    if (!FileOperations::LoadFileToStringVirtual(this->topicListFileName, this->topicListContent, out))
-    { inputOutput.interpretedCommand=out.str();
-      return;
-    }
-  List<TopicElement> theTopics;
+  if (!this->LoadAndParseTopicList(out))
+  { inputOutput.interpretedCommand=out.str();
+    return;
+  }
+  bool plainStyle=(inputOutput.GetKeyValue("topicListStyle")=="plain");
   TopicElement::GetTopicList(this->topicListContent, theTopics);
   TopicElement currentElt;
   bool tableStarted=false;
@@ -642,12 +615,12 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       out << "<ol start=\"" << chapterCounter << "\">";
     }
     if (!currentElt.flagIsSection && !currentElt.flagIsSubSection && !currentElt.flagIsChapter && !tableStarted)
-    { out << TopicElement::GetTableStart();
+    { out << TopicElement::GetTableStart(plainStyle);
       tableStarted=true;
     }
     if ((currentElt.flagIsSection || currentElt.flagIsSubSection || currentElt.flagIsChapter || currentElt.flagIsError)
         && tableStarted)
-    { out << TopicElement::GetTableFinish();
+    { out << TopicElement::GetTableFinish(plainStyle);
       tableStarted=false;
     }
     if (subSectionStarted)
@@ -689,39 +662,20 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       << "PrintableSlides: modules/substitution-rule/pdf/printable-integral-derivative-f-over-f-intro.pdf<br>\n"
       << "\n";
     else
-    { out << "<tr>\n";
+    { currentElt.ComputeLinks(*this, plainStyle);
+      out << "<tr>\n";
       out << "  <td>\n";
-      if (currentElt.title=="")
-        out << "    -\n";
-      else
-        out << "    " << currentElt.title << "\n";
+      out << currentElt.displayTitle;
       out << "  </td>\n";
-      out << "  <td>\n";
-      if (currentElt.video=="")
-        out << "    Lesson coming soon";
-      else if (currentElt.video=="-")
-        out << "    -";
+      out << "  <td>\n" << currentElt.displayVideoLink;
+      if (currentElt.displaySlidesPrintableLink!="")
+        out << " | " << currentElt.displaySlidesLink;
+      if (currentElt.displaySlidesPrintableLink!="")
+        out << " | " << currentElt.displaySlidesPrintableLink;
+      if (theGlobalVariables.flagRunningAce)
+        out << currentElt.displayAceProblemLink;
       else
-        out << "    <a href=\"#\" onclick=\"window.open('"
-        << currentElt.video << "',  'width=300', 'height=250', 'top=400'); return false;\">Go to lesson</a>";
-      if (currentElt.slides!="")
-        out << " | <a href=\"" << currentElt.slides << "\">Slides</a>";
-      if (currentElt.slidesPrintable!="")
-        out << " | <a href=\"" << currentElt.slidesPrintable << "\">Printable slides</a>";
-      if (currentElt.problem!="")
-      { if (theGlobalVariables.flagRunningAce)
-        { out << " | <a href=\"#\" onclick=\"window.open('"
-          << theGlobalVariables.DisplayNameExecutable << "?request=scoredQuiz&fileName="
-          << currentElt.problem << "',  'width=300', 'height=250', 'top=400'); return false;\">Scored Quizzes</a>";
-          out << " | <a href=\"#\" onclick=\"window.open('"
-          << theGlobalVariables.DisplayNameExecutable << "?request=exercise&fileName="
-          << currentElt.problem << "',  'width=300', 'height=250', 'top=400'); return false;\">Practice</a>";
-        } else
-        { //currentProblem.fileName=currentElt.problem;
-          //currentProblem.currentExamHomE=this->fileName;
-          out << this->ToStringLinkFromFileName(currentElt.problem);
-        }
-      }
+        out << currentElt.displayProblemLink;
       out << "  </td>\n";
       out << "  <td>";
       if (currentElt.problem=="")
@@ -733,23 +687,61 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     }
   }
   if (tableStarted)
-    out << TopicElement::GetTableFinish();
+    out << TopicElement::GetTableFinish(plainStyle);
   out << "</ol>";
   tableStarted=false;
   inputOutput.interpretedCommand=out.str();
 }
 
-std::string TopicElement::GetTableStart()
+void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
+{ MacroRegisterFunctionWithName("TopicElement::ComputeLinks");
+  if (this->displayProblemLink!="")
+    return;
+  if (this->title=="")
+    this->displayTitle= "-";
+  else
+    this->displayTitle=this->title;
+  if (this->video=="")
+    this->displayVideoLink = "Lesson coming soon";
+  else if (this->video=="-")
+    this->displayVideoLink = "-";
+  else
+    this->displayVideoLink= "<a href=\"#\" onclick=\"window.open('"
+    + this->video + "',  'width=300', 'height=250', 'top=400'); return false;\">Go to lesson</a>";
+  if (this->slides!="")
+    this->displaySlidesLink = "<a href=\"" + this->slides + "\">Slides</a>";
+  if (this->slidesPrintable!="")
+    this->displaySlidesPrintableLink = "<a href=\"" + this->slidesPrintable + "\">Printable slides</a>";
+  if (this->problem!="")
+  { std::string theRawSQLink=theGlobalVariables.DisplayNameExecutable +
+    "?request=scoredQuiz&fileName=" + this->problem;
+    std::string theRawExerciseLink=theGlobalVariables.DisplayNameExecutable +
+    "?request=exercise&fileName=" + this->problem;
+    this->displayAceProblemLink=
+    " | <a href=\"#\" onclick=\"window.open('" + theRawSQLink +
+    "', 'width=300', 'height=250', 'top=400'); return false;\">Scored Quizzes</a>"+
+    " | <a href=\"#\" onclick=\"window.open('" + theRawExerciseLink+
+    "',  'width=300', 'height=250', 'top=400'); return false;\">Practice</a>";
+    this->displayProblemLink= owner.ToStringLinkFromFileName(this->problem);
+  }
+}
+
+std::string TopicElement::GetTableStart(bool plainStyle)
 { std::stringstream out;
-  out
-  << "\n\n<table class=\"topicList\"><tr> <th style=\"width:400px\">Sub-Topic</th>"
-  << "<th style=\"width:400px\">Resource Links</th>"
-  << "<th style=\"width:150px\">Current Score</th></tr>\n";
+  out << "\n\n<table class=\"topicList\">\n";
+  out << "<colgroup><col><col><col></colgroup>\n";
+  out << "<tbody>\n";
+  if (!plainStyle)
+    out
+    << "<tr> <th style=\"width:400px\">Sub-Topic</th>"
+    << "<th style=\"width:400px\">Resource Links</th>"
+    << "<th style=\"width:150px\">Current Score</th></tr>\n";
   return out.str();
 }
 
-std::string TopicElement::GetTableFinish()
+std::string TopicElement::GetTableFinish(bool plainStyle)
 { std::stringstream out;
+  out << "</tbody>\n";
   out << "</table>\n\n";
   return out.str();
 }

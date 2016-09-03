@@ -3759,7 +3759,7 @@ int WebServer::main(int argc, char **argv)
   theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead=theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit-2;
   //using loggers allowed from now on.
   theWebServer.InitializeGlobalVariables();
-  theGlobalVariables.flagAllowProcessMonitoring=false;
+  theGlobalVariables.flagAllowProcessMonitoring=true;
   if (theGlobalVariables.flagRunningConsoleTest)
     return mainTest(theGlobalVariables.programArguments);
   if (theGlobalVariables.flagRunningApache)

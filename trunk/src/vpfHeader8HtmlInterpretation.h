@@ -8,6 +8,59 @@
 
 static ProjectInformationInstance ProjectInfoHeaderHtmlInterpretation(__FILE__, "Html interpretation.");
 
+class CalculatorHTML;
+
+struct TopicElement{
+public:
+  bool flagIsChapter;
+  bool flagIsSection;
+  bool flagIsSubSection;
+  bool flagIsError;
+  std::string title;
+  std::string video;
+  std::string slides;
+  std::string slidesPrintable;
+  std::string problem;
+  std::string error;
+  std::string displayTitle;
+  std::string displayVideoLink;
+  std::string displaySlidesLink;
+  std::string displaySlidesPrintableLink;
+  std::string displayProblemLink;
+  std::string displayAceProblemLink;
+  std::string displayDeadlineString;
+  std::string displayPointsString;
+  void reset()
+  { this->flagIsSection=false;
+    this->flagIsSubSection=false;
+    this->flagIsChapter=false;
+    this->flagIsError=false;
+    this->title="empty";
+    this->video="";
+    this->slides="";
+    this->slidesPrintable="";
+    this->problem="";
+    this->error="";
+  }
+  static std::string GetTableStart(bool plainStyle);
+  static std::string GetTableFinish(bool plainStyle);
+  void ComputeLinks(CalculatorHTML& owner, bool plainStyle);
+  TopicElement()
+  { this->reset();
+  }
+  static void GetTopicList(const std::string& inputString, List<TopicElement>& output);
+};
+
+struct ProblemResources{
+public:
+  std::string video;
+  std::string slides;
+  std::string slidesPrintable;
+  std::string deadline;
+  Rational pointsScored;
+  Rational maxPoints;
+};
+
 class CalculatorHTML
 {
 public:
@@ -45,8 +98,6 @@ public:
   std::string outputHtmlHeadNoTag;
   std::string outputHtmlNavigatioN;
   std::string logCommandsProblemGeneration;
-  std::string topicListContent;
-  std::string topicListFileName;
   std::string currentExamHome;
 
   static const std::string BugsGenericMessage;
@@ -59,6 +110,9 @@ public:
 //  List<std::string> answerFirstCorrectSubmission;
   Selection studentTagsAnswered;
   ProblemData theProblemData;
+  std::string topicListContent;
+  std::string topicListFileName;
+  List<TopicElement> theTopics;
   HashedList<std::string, MathRoutines::hashString> hdProblemList;
   List<std::string> hdHomeworkGroupCorrespondingToEachProblem;
   List<List<std::string> > hdHomeworkGroups;
@@ -83,6 +137,7 @@ public:
   bool CheckContent(std::stringstream& comments);
   bool CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
   bool LoadMe(bool doLoadDatabase, std::stringstream& comments);
+  bool LoadAndParseTopicList(std::stringstream& comments);
   bool LoadDatabaseInfo(std::stringstream& comments);
   std::string CleanUpFileName(const std::string& inputLink);
   bool ParseHTMLComputeChildFiles(std::stringstream& comments);

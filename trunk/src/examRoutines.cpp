@@ -6,7 +6,7 @@ ProjectInformationInstance projectInfoInstanceWebServerExamAndTeachingRoutinesCu
 (__FILE__, "Routines for calculus teaching: calculator exam mode. Shared code. ");
 
 std::string CalculatorHTML::stringScoredQuizzes="Scored Quizzes";
-std::string CalculatorHTML::stringPractice="Practice";
+std::string CalculatorHTML::stringPracticE="Practice";
 std::string CalculatorHTML::stringProblemLink="Problem link";
 
 bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments)
@@ -225,7 +225,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     else if (theGlobalVariables.userCalculatorRequestType=="scoredQuiz")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=exercise"
       << this->ToStringCalculatorArgumentsForProblem("exercise", studentView)
-      << "\">" << this->stringPractice << "</a>" << linkSeparator;
+      << "\">" << this->stringPracticE << "</a>" << linkSeparator;
   }
   if (this->flagIsExamProblem && this->flagParentInvestigated)
   { int indexInParent=this->problemListOfParent.GetIndex(this->fileName);
@@ -364,27 +364,22 @@ std::string CalculatorHTML::GetJavascriptSubmitMainInputIncludeCurrentFile()
   return out.str();
 }
 
-std::string CalculatorHTML::InterpretGenerateProblemManagementLink
-(std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
- const std::string& cleaneduplink, const std::string& urledProblem)
+std::string CalculatorHTML::ToStringProblemWeight(const std::string& theFileName)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateProblemManagementLink");
   std::stringstream out;
-  if (!theGlobalVariables.UserGuestMode())
-    out << " <a href=\"" << refStreamForReal.str() << "\">" << CalculatorHTML::stringScoredQuizzes << "</a> ";
-  out << " <a href=\"" << refStreamExercise.str() << "\">" << CalculatorHTML::stringPractice << "</a> ";
   if (theGlobalVariables.UserGuestMode())
   { out << "Exercise points/deadlines require login. ";
     return out.str();
   }
   //stOutput << "<hr>CurrentUser.problemNames=" << this->currentUser.problemNames.ToStringCommaDelimited();
   std::string thePoints="";
-  if (this->databaseProblemAndHomeworkGroupList.Contains(cleaneduplink))
-    thePoints= this->databaseProblemWeights[this->databaseProblemAndHomeworkGroupList.GetIndex(cleaneduplink)];
+  if (this->databaseProblemAndHomeworkGroupList.Contains(theFileName))
+    thePoints= this->databaseProblemWeights[this->databaseProblemAndHomeworkGroupList.GetIndex(theFileName)];
   #ifdef MACRO_use_MySQL
   bool noSubmissionsYet=false;
   bool weightPrinted=false;
-  if (this->currentUseR.problemNames.Contains(cleaneduplink))
-  { ProblemData& theProbData=this->currentUseR.problemData[this->currentUseR.problemNames.GetIndex(cleaneduplink)];
+  if (this->currentUseR.problemNames.Contains(theFileName))
+  { ProblemData& theProbData=this->currentUseR.problemData[this->currentUseR.problemNames.GetIndex(theFileName)];
     if (!theProbData.flagProblemWeightIsOK)
     { out << "<span style=\"color:orange\">No point weight assigned yet. </span>";
       if (theProbData.ProblemWeightUserInput!="")
@@ -419,6 +414,7 @@ std::string CalculatorHTML::InterpretGenerateProblemManagementLink
   }
   if (!weightPrinted)
     out << "<span style=\"color:orange\">No point weight assigned yet. </span>";
+  std::string urledProblem=CGI::StringToURLString(theFileName);
   if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
   { //stOutput << "<hr>this->databaseProblemList is: " << this->databaseProblemList.ToStringCommaDelimited();
     //stOutput << "<br>this->databaseProblemWeights is: " << this->databaseProblemWeights.ToStringCommaDelimited();
@@ -454,6 +450,9 @@ void TopicElement::GetTopicList(const std::string& inputString, List<TopicElemen
   while(std::getline(tableReader, currentLine, '\n'))
   { if (MathRoutines::StringTrimWhiteSpace(currentLine)=="")
       continue;
+    if (currentLine.size()>0)
+      if (currentLine[0]=='%')
+        continue;
     if (MathRoutines::StringBeginsWith(currentLine, "Chapter:", &currentArgument))
     { if (currentElt.title!="empty")
         output.AddOnTop(currentElt);
@@ -704,7 +703,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   if (this->video=="")
     this->displayVideoLink = "Lesson coming soon";
   else if (this->video=="-")
-    this->displayVideoLink = "-";
+    this->displayVideoLink = "";
   else
     this->displayVideoLink= "<a href=\"#\" onclick=\"window.open('"
     + this->video + "',  'width=300', 'height=250', 'top=400'); return false;\">Go to lesson</a>";
@@ -719,9 +718,9 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     "?request=exercise&fileName=" + this->problem;
     this->displayAceProblemLink=
     " | <a href=\"#\" onclick=\"window.open('" + theRawSQLink +
-    "', 'width=300', 'height=250', 'top=400'); return false;\">Scored Quizzes</a>"+
+    "', 'width=300', 'height=250', 'top=400'); return false;\">" + CalculatorHTML::stringScoredQuizzes + "</a>"+
     " | <a href=\"#\" onclick=\"window.open('" + theRawExerciseLink+
-    "',  'width=300', 'height=250', 'top=400'); return false;\">Practice</a>";
+    "',  'width=300', 'height=250', 'top=400'); return false;\">" +CalculatorHTML::stringPracticE+ "</a>";
     this->displayProblemLink= owner.ToStringLinkFromFileName(this->problem);
   }
 }

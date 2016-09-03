@@ -582,16 +582,13 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 //  stOutput << "Figuring out current prob list ...";
 //  std::stringstream notUsed;
 //  this->FigureOutCurrentProblemList(notUsed);
-  inputOutput.interpretedCommand= this->ToStringLinkFromFileName(this->CleanUpFileName(inputOutput.content));
+  inputOutput.interpretedCommand= this->ToStringLinkAndDetailsFromFileName(this->CleanUpFileName(inputOutput.content));
 }
 
 std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileName, const std::string& stringToDisplay)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringLinkFromFileName");
-  std::string urledProblem=CGI::StringToURLString(theFileName);
   std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
-//  out << "<span style=\"white-space: nowrap; display= inline-block; width=1200px; overflow-x: scroll;\">";
-//  out << "cleaned up link: " << cleaneduplink;
-//  out << "<br>urled link: " <<  urledProblem;
+  std::string urledProblem=CGI::StringToURLString(theFileName);
   refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation()
   << "fileName=" << urledProblem << "&";
   if (theGlobalVariables.UserStudentViewOn())
@@ -607,14 +604,22 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
   { refStreamExercise << theGlobalVariables.DisplayNameExecutable << "?request=exercise&" << refStreamNoRequest.str();
     refStreamForReal << theGlobalVariables.DisplayNameExecutable << "?request=scoredQuiz&" << refStreamNoRequest.str();
   } else
-  { refStreamExercise << "?request=exerciseNoLogin&" << refStreamNoRequest.str();
-  }
+    refStreamExercise << "?request=exerciseNoLogin&" << refStreamNoRequest.str();
+  if (!theGlobalVariables.UserGuestMode())
+    out << " <a href=\"" << refStreamForReal.str() << "\">" << CalculatorHTML::stringScoredQuizzes << "</a> ";
+  out << " | <a href=\"" << refStreamExercise.str() << "\">" << CalculatorHTML::stringPracticE << "</a> ";
+  return out.str();
+
+}
+
+std::string CalculatorHTML::ToStringLinkAndDetailsFromFileName(const std::string& theFileName, const std::string& stringToDisplay)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringLinkAndDetailsFromFileName");
+  std::stringstream out;
+  std::string urledProblem=CGI::StringToURLString(theFileName);
+  out << this->ToStringLinkFromFileName(theFileName, stringToDisplay);
   bool isActualProblem=true;
   if (isActualProblem)
-    out << this->InterpretGenerateProblemManagementLink(refStreamForReal, refStreamExercise, theFileName, urledProblem);
-  //else
-  //  out << " <a href=\"" << refStreamExercise.str() << "\">Start</a> ";
-  //if (inputOutput.GetTagClass()=="calculatorExamIntermediate")
+    out << this->ToStringProblemWeight(theFileName);
 #ifdef MACRO_use_MySQL
   bool problemAlreadySolved=false;
   if (this->currentUseR.problemNames.Contains(theFileName))

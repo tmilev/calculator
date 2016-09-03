@@ -88,7 +88,7 @@ public:
   UserCalculator currentUseR;
 #endif
   static std::string stringScoredQuizzes;
-  static std::string stringPractice;
+  static std::string stringPracticE;
   static std::string stringProblemLink;
   std::string fileName;
   std::string RelativePhysicalFileNameWithFolder;
@@ -178,13 +178,11 @@ public:
   std::string InterpretGenerateDeadlineLink
 (bool isActualProblem, const std::string& cleaneduplink, const std::string& urledProblem, bool problemAlreadySolved)
   ;
+  std::string ToStringLinkAndDetailsFromFileName(const std::string& theFileName, const std::string& stringToDisplay="");
   std::string ToStringLinkFromFileName(const std::string& theFileName, const std::string& stringToDisplay="");
   std::string ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName);
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
-  std::string InterpretGenerateProblemManagementLink
-(std::stringstream& refStreamForReal, std::stringstream& refStreamExercise,
- const std::string& cleaneduplink, const std::string& urledProblem)
-  ;
+  std::string ToStringProblemWeight(const std::string& theFileName);
   bool ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutput);
   void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
   bool PrepareClassData(std::stringstream& commentsOnFailure);

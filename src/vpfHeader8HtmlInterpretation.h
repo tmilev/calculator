@@ -28,8 +28,10 @@ public:
   std::string displaySlidesPrintableLink;
   std::string displayProblemLink;
   std::string displayAceProblemLink;
-  std::string displayDeadlineString;
-  std::string displayPointsString;
+  std::string displayDeadline;
+  std::string displayScore;
+  std::string displayModifyWeight;
+  std::string displayModifyDeadline;
   void reset()
   { this->flagIsSection=false;
     this->flagIsSubSection=false;
@@ -183,7 +185,8 @@ public:
   std::string ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName);
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
   std::string ToStringProblemWeighT(const std::string& theFileName);
-  std::string ToStringProblemScore(const std::string& theFileName);
+  std::string ToStringProblemScoreFull(const std::string& theFileName);
+  std::string ToStringProblemScoreShort(const std::string& theFileName);
   bool ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutput);
   void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
   bool PrepareClassData(std::stringstream& commentsOnFailure);

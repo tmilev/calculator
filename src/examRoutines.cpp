@@ -620,7 +620,7 @@ std::string CalculatorHTML::ToStringLinkAndDetailsFromFileName(const std::string
   out << this->ToStringLinkFromFileName(theFileName, stringToDisplay);
   bool isActualProblem=true;
   if (isActualProblem)
-  { out << this->ToStringProblemScore(theFileName);
+  { out << this->ToStringProblemScoreFull(theFileName);
     out << this->ToStringProblemWeighT(theFileName);
   }
 #ifdef MACRO_use_MySQL
@@ -2971,11 +2971,11 @@ std::string CalculatorHTML::GetJavascriptSubmitMainInputIncludeCurrentFile()
   return out.str();
 }
 
-std::string CalculatorHTML::ToStringProblemScore(const std::string& theFileName)
-{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemScore");
+std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileName)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemScoreFull");
   std::stringstream out;
   if (theGlobalVariables.UserGuestMode())
-  { out << "Exercise points/deadlines require login. ";
+  { out << "need to login";
     return out.str();
   }
   //stOutput << "<hr>CurrentUser.problemNames=" << this->currentUser.problemNames.ToStringCommaDelimited();
@@ -3025,6 +3025,36 @@ std::string CalculatorHTML::ToStringProblemScore(const std::string& theFileName)
   #endif // MACRO_use_MySQL
   return out.str();
 
+}
+
+std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFileName)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemScoreShort");
+  std::stringstream out;
+  if (theGlobalVariables.UserGuestMode())
+  { out << "need to login";
+    return out.str();
+  }
+  std::string thePoints="";
+  if (this->databaseProblemAndHomeworkGroupList.Contains(theFileName))
+    thePoints= this->databaseProblemWeights[this->databaseProblemAndHomeworkGroupList.GetIndex(theFileName)];
+  #ifdef MACRO_use_MySQL
+  if (!this->currentUseR.problemNames.Contains(theFileName))
+    return "<span style=\"color:brown\"><b>need to solve</b></span>";
+  ProblemData& theProbData=this->currentUseR.problemData[this->currentUseR.problemNames.GetIndex(theFileName)];
+  std::stringstream problemWeight;
+  if (!theProbData.flagProblemWeightIsOK)
+  { problemWeight << "?";
+    if (theProbData.ProblemWeightUserInput!="")
+      problemWeight << "<span style=\"color:red\">" << theProbData.ProblemWeightUserInput << "(Error)</span>";
+  }
+  Rational percentSolved;
+  percentSolved.AssignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.theAnswers.size);
+  if (percentSolved<1)
+    out << "<span style=\"color:red\"><b>" << percentSolved << " out of " << problemWeight.str() << "</b></span>";
+  else
+    out << "<span style=\"color:green\"><b>" << percentSolved << " out of " << problemWeight.str() << "</b></span>";
+  #endif // MACRO_use_MySQL
+  return out.str();
 }
 
 std::string CalculatorHTML::ToStringProblemWeighT(const std::string& theFileName)
@@ -3132,6 +3162,8 @@ void CalculatorHTML::InterpretAccountInformationLinks(SyntacticElementHTML& inpu
 
 bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadAndParseTopicList");
+  if (this->theTopics.size!=0)
+    return true;
   if (this->topicListContent=="")
     if (!FileOperations::LoadFileToStringVirtual(this->topicListFileName, this->topicListContent, comments))
       return false;
@@ -3201,7 +3233,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     return;
   }
   bool plainStyle=(inputOutput.GetKeyValue("topicListStyle")=="plain");
-  TopicElement::GetTopicList(this->topicListContent, theTopics);
+  this->LoadAndParseTopicList(this->comments);
   TopicElement currentElt;
   bool tableStarted=false;
   bool sectionStarted=false;
@@ -3296,10 +3328,11 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       out << "  </td>\n";
       out << "  <td>";
       if (currentElt.problem=="")
-        out << "<FONT COLOR=\"brown\">-</FONT>";
+        out << "-";
       else
-        out << "<FONT COLOR=\"green\">10/10</FONT>";
-      out << "</td>\n";
+        out << currentElt.displayScore;
+      out << "  </td>\n";
+      out << "  <td>\n" << currentElt.displayDeadline << "  </td>\n";
       out << "</tr>\n";
     }
   }
@@ -3312,6 +3345,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
 
 void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
 { MacroRegisterFunctionWithName("TopicElement::ComputeLinks");
+  (void) plainStyle;
   if (this->displayProblemLink!="")
     return;
   if (this->title=="")
@@ -3340,13 +3374,20 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     " | <a href=\"#\" onclick=\"window.open('" + theRawExerciseLink+
     "',  'width=300', 'height=250', 'top=400'); return false;\">" +CalculatorHTML::stringPracticE+ "</a>";
     this->displayProblemLink= owner.ToStringLinkFromFileName(this->problem);
+    this->displayScore=owner.ToStringProblemScoreShort(this->problem);
+    this->displayModifyWeight=owner.ToStringProblemWeighT(this->problem);
+    if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserStudentViewOn())
+    { this->displayScore+="\n<br>\n" + this->displayModifyWeight;
+      this->displayDeadline+="\n<br>\n" + this->displayModifyDeadline;
+    }
   }
+
 }
 
 std::string TopicElement::GetTableStart(bool plainStyle)
 { std::stringstream out;
   out << "\n\n<table class=\"topicList\">\n";
-  out << "<colgroup><col><col><col></colgroup>\n";
+  out << "<colgroup><col><col><col><col></colgroup>\n";
   out << "<tbody>\n";
   if (!plainStyle)
     out
@@ -3358,6 +3399,7 @@ std::string TopicElement::GetTableStart(bool plainStyle)
 
 std::string TopicElement::GetTableFinish(bool plainStyle)
 { std::stringstream out;
+  (void) plainStyle;
   out << "</tbody>\n";
   out << "</table>\n\n";
   return out.str();

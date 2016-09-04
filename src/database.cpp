@@ -7,6 +7,7 @@ ProjectInformationInstance ProjectInfoVpf8_1MySQLcpp(__FILE__, "MySQL interface.
 bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
 (UserCalculatorData& theUseR, std::stringstream* comments)
 { (void) comments;
+  (void) theUseR;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
   DatabaseRoutines theRoutines;
@@ -233,8 +234,11 @@ bool UserCalculator::CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, std
     return false;
   }
   std::stringstream queryStream;
-  queryStream << "INSERT INTO " << theRoutines.theDatabaseName << ".users(username) VALUES("
-  << this->username.GetDatA() << ")";
+  queryStream << "INSERT INTO " << theRoutines.theDatabaseName
+  << ".users(username, deadlineInfoTableName, problemInfoTableName)"
+  << " VALUES("
+  << this->username.GetDatA() << ", 'defaultDeadlines', 'defaultProblemInfo' "
+  << ")";
   DatabaseQuery theQuery(theRoutines, queryStream.str());
   if (this->enteredPassword=="")
     return true;
@@ -312,15 +316,17 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, 
   //CANT use DatabaseQuery object as its constructor calls this method!!!!!
   mysql_free_result( mysql_use_result(this->connection));
   return this->CreateTable("users", "\
-    id int NOT NULL AUTO_INCREMENT PRIMARY KEY,\
-    username VARCHAR(255) NOT NULL ,  \
+    id int NOT NULL AUTO_INCREMENT PRIMARY KEY, \
+    username VARCHAR(255) NOT NULL,  \
     password LONGTEXT, \
-    email LONGTEXT,\
+    email LONGTEXT, \
     authenticationCreationTime LONGTEXT, \
-    authenticationToken LONGTEXT , \
-    activationToken LONGTEXT,\
-    userRole LONGTEXT,\
+    authenticationToken LONGTEXT, \
+    activationToken LONGTEXT, \
+    userRole LONGTEXT, \
     userInfo LONGTEXT, \
+    problemInfoTableName LONGTEXT, \
+    deadlineInfoTableName LONGTEXT, \
     problemData LONGTEXT \
     ", commentsOnFailure, outputfirstLogin);
 }
@@ -395,7 +401,8 @@ bool DatabaseRoutines::PrepareClassData
   std::string classTableName=DatabaseRoutines::GetTableUnsafeNameUsersOfFile(classFileName);
   if (!theRoutines.TableExists(classTableName, &commentsOnFailure))
     if (!theRoutines.CreateTable
-        (classTableName, "username VARCHAR(255) NOT NULL PRIMARY KEY, " + DatabaseStrings::userGroupLabel +" LONGTEXT ", &commentsOnFailure, 0))
+        (classTableName, "username VARCHAR(255) NOT NULL PRIMARY KEY, " +
+         DatabaseStrings::userGroupLabel +" LONGTEXT ", &commentsOnFailure, 0))
       return false;
   bool tableTruncated=false;
   int numRows=-1;

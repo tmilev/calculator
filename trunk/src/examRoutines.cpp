@@ -2813,7 +2813,8 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     }
   }
   if (this->flagIsExamProblem)
-  { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=" << exerciseRequest << "&" << calcArgsNoPassExamDetails
+  { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=template"
+    << "&" << calcArgsNoPassExamDetails
     << "studentView=" << studentView << "&";
     if (theGlobalVariables.GetWebInput("studentSection")!="")
       out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";

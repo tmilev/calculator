@@ -314,8 +314,8 @@ std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tag
   for (int i =0; i<this->webArguments.size(); i++)
   { const std::string& currentName=this->webArguments.theKeys[i];
     if (currentName=="request" ||
-        currentName=="authenticationInsecure" || currentName=="password" || currentName=="fileName" ||
-        currentName=="currentExamHome" ||
+        currentName=="authenticationInsecure" || currentName=="password" ||
+        currentName=="fileName" || currentName=="courseHome" || currentName=="topicList" ||
         currentName=="currentDatabaseTable" || currentName=="mainInput" || currentName=="studentView" ||
         currentName=="studentSection")
       continue;

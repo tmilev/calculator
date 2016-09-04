@@ -370,7 +370,7 @@ std::string CGI::GetJavascriptInjectCalculatorResponseInNode
   << "  }\n"
   << "  inputParams='request='+requestType;\n"
   << "  inputParams+='&mainInput=' + encodeURIComponent(mainInput);\n"
-//  << "  inputParams+='&currentExamHome=' + problemCollectionName;\n"
+//  << "  inputParams+='&courseHome=' + problemCollectionName;\n"
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameExecutable << "\", true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"

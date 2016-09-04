@@ -1104,8 +1104,8 @@ bool DatabaseRoutines::AddUsersFromEmails
   theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=1000;
   std::string userRole=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("userRole"));
   std::string userGroup=CGI::URLStringToNormal(theGlobalVariables.GetWebInput(DatabaseStrings::userGroupLabel));
-  std::string currentExamHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
-  std::string currentFileUsersTableName=this->GetTableUnsafeNameUsersOfFile(currentExamHome);
+  std::string courseHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"));
+  std::string currentFileUsersTableName=this->GetTableUnsafeNameUsersOfFile(courseHome);
   List<std::string> theEmails;
   this->ExtractEmailList(emailList, theEmails, comments);
 //  stOutput << " <br>creating users: " << theEmails.ToStringCommaDelimited() << "<br>";

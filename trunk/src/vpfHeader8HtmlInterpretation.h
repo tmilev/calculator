@@ -100,7 +100,7 @@ public:
   std::string outputHtmlHeadNoTag;
   std::string outputHtmlNavigatioN;
   std::string logCommandsProblemGeneration;
-  std::string currentExamHome;
+  std::string courseHome;
 
   static const std::string BugsGenericMessage;
   HashedList<std::string, MathRoutines::hashString> tagKeysNoValue;

@@ -126,9 +126,9 @@ std::string HtmlSnippets::GetJavascriptStandardCookies()
       out << "  addCookie(\"fileName\", \""
       << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"))
       << "\", 100, false);\n";
-    if (theGlobalVariables.GetWebInput("currentExamHome")!="")
-      out << "  addCookie(\"currentExamHome\", \""
-      << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"))
+    if (theGlobalVariables.GetWebInput("courseHome")!="")
+      out << "  addCookie(\"courseHome\", \""
+      << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"))
       << "\", 100, false);\n";
   }
   out
@@ -176,9 +176,9 @@ std::string HtmlSnippets::GetJavascriptStandardCookies()
   << "  if (document.getElementById(\"fileName\")!=null)\n "
   << "    if(getCookie(\"fileName\")!='')\n"
   << "      document.getElementById(\"fileName\").value=getCookie(\"fileName\");\n"
-  << "  if (document.getElementById(\"currentExamHome\")!=null)\n "
-  << "    if(getCookie(\"currentExamHome\")!='')\n"
-  << "      document.getElementById(\"currentExamHome\").value=getCookie(\"currentExamHome\");\n"
+  << "  if (document.getElementById(\"courseHome\")!=null)\n "
+  << "    if(getCookie(\"courseHome\")!='')\n"
+  << "      document.getElementById(\"courseHome\").value=getCookie(\"courseHome\");\n"
   << "  if (document.getElementById(\"authenticationToken\")!=null)\n"
   << "    if(getCookie(\"authenticationToken\")!='')\n"
   << "      document.getElementById(\"authenticationToken\").value=getCookie(\"authenticationToken\");\n ";
@@ -1015,7 +1015,7 @@ std::string WebWorker::GetHtmlHiddenInputs(bool includeUserName, bool includeAut
   << "<input type=\"hidden\" id=\"debugFlag\" name=\"debugFlag\">\n"
   << "<input type=\"hidden\" id=\"studentView\" name=\"studentView\">\n"
   << "<input type=\"hidden\" id=\"studentSection\" name=\"studentSection\">\n"
-  << "<input type=\"hidden\" id=\"currentExamHome\" name=\"currentExamHome\">\n"
+  << "<input type=\"hidden\" id=\"courseHome\" name=\"courseHome\">\n"
   << "<input type=\"hidden\" id=\"fileName\" name=\"fileName\">\n"
   ;
   return out.str();
@@ -1447,16 +1447,16 @@ std::string WebWorker::GetHeaderSetCookie()
     return "";
   std::stringstream out;
   if (theGlobalVariables.userDefault.username.value!="")
-  { out << "Set-cookie: " << "username="
+  { out << "Set-Cookie: " << "username="
     << theGlobalVariables.userDefault.username.GetDataNoQuotes()
-    << "; Expires: Sat, 01 Jan 2050 20:00:00 GMT; Secure;";
+    << "; Path=/; Expires: Sat, 01 Jan 2050 20:00:00 GMT; Secure;";
     if (theGlobalVariables.userDefault.actualAuthenticationToken.value!="")
       out << "\r\n";
   }
   if (theGlobalVariables.userDefault.actualAuthenticationToken.value!="")
     out << "Set-cookie: " << "authenticationToken="
     << theGlobalVariables.userDefault.actualAuthenticationToken.GetDataNoQuotes()
-    << "; Expires: Sat, 01 Jan 2050 20:00:00 GMT; Secure;";
+    << "; Path=/; Expires: Sat, 01 Jan 2050 20:00:00 GMT; Secure;";
   return out.str();
 }
 
@@ -2411,7 +2411,7 @@ std::string WebWorker::GetSetProblemDatabaseInfoHtml()
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "<b>Only admins may set problem weights.</b>";
   std::string inputProblemInfo=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
-  std::string inputProblemHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
+  std::string inputProblemHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"));
   DatabaseRoutines theRoutines;
   std::stringstream commentsOnFailure;
   bool result=theRoutines.MergeProblemInfoInDatabase(inputProblemHome, inputProblemInfo, commentsOnFailure);

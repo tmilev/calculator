@@ -60,6 +60,7 @@ class UserCalculatorData{
   MySQLdata deadlineInfoTableName;
   MySQLdata deadlineInfoString;
   MySQLdata userGroup;
+
   std::string enteredPassword;
   std::string actualShaonedSaltedPassword;
   std::string enteredShaonedSaltedPassword;

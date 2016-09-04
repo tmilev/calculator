@@ -3759,7 +3759,29 @@ int WebServer::main(int argc, char **argv)
   theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead=theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit-2;
   //using loggers allowed from now on.
   theWebServer.InitializeGlobalVariables();
-  theGlobalVariables.flagAllowProcessMonitoring=true;
+  if (theGlobalVariables.flagRunningBuiltInWebServer)
+  { theLog
+    << logger::purple << "************************" << logger::endL
+    << logger::red << "WARNING: theGlobalVariables.flagAllowProcessMonitoring is set to TRUE. " << logger::endL
+    << logger::purple << "************************" << logger::endL
+    ;
+    theGlobalVariables.flagAllowProcessMonitoring=true;
+  }
+  if (theGlobalVariables.flagRunningBuiltInWebServer)
+  {  if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit<=0)
+      theLog
+      << logger::purple << "************************" << logger::endL
+      << logger::red << "WARNING: no computation time limit set. " << logger::endL
+      << logger::purple << "************************" << logger::endL
+      ;
+    if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>500)
+      theLog
+      << logger::purple << "************************" << logger::endL
+      << logger::red << "WARNING: computation time limit is high: "
+      << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit << " seconds. " << logger::endL
+      << logger::purple << "************************" << logger::endL
+      ;
+  }
   if (theGlobalVariables.flagRunningConsoleTest)
     return mainTest(theGlobalVariables.programArguments);
   if (theGlobalVariables.flagRunningApache)

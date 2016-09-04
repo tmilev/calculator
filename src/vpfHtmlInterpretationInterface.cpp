@@ -285,16 +285,16 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   std::stringstream out;
   CalculatorHTML thePage;
   std::stringstream comments;
-  thePage.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"));
+  thePage.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"));
   if (!thePage.LoadMe(false, comments))
   { out << "<html><body><b>Failed to load file: "
-    << theGlobalVariables.GetWebInput("fileName") << ". </b>"
+    << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
     << "<br>Comments:<br> " << comments.str() << "</body></html>";
     return out.str();
   }
   if (!thePage.InterpretHtml(comments))
   { out << "<html><body><b>Failed to interpret file: "
-    << theGlobalVariables.GetWebInput("fileName") << ". </b>"
+    << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
     << "<br>Comments:<br> " << comments.str() << "</body></html>";
     return out.str();
   }
@@ -555,7 +555,6 @@ std::string HtmlInterpretation::SubmitProblem()
       if (!theGlobalVariables.flagRunningAce && false)
       { CalculatorHTML theProblemHome;
         bool todoDeadlineSystem;
-//        theProblemHome.fileName=theProblem.currentExamHomE;
         bool isGood=true;
         if (!theProblemHome.LoadMe(true, comments))
           isGood=false;
@@ -563,7 +562,7 @@ std::string HtmlInterpretation::SubmitProblem()
           if (!theProblemHome.ParseHTML(comments))
             isGood=false;
         if (!isGood)
-        { //out << "<b>Failed to load problem collection home: " << theProblem.currentExamHomE
+        { //out << "<b>Failed to load problem collection home: " << theProblem.courseHome
           //<< ". Comments: " << comments.str()  << " Answer not recorded. "
           //<< "This should not happen. " << CalculatorHTML::BugsGenericMessage << "</b>";
           return out.str();
@@ -700,9 +699,9 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   bool usersAreAdmins= (userRole=="admin");
   if (!theGlobalVariables.flagRunningAce)
   { CalculatorHTML theCollection;
-    std::string currentExamHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentExamHome"));
+    std::string courseHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"));
     theRoutines.PrepareClassData
-    (currentExamHome, theCollection.userTablE, theCollection.labelsUserTablE, comments);
+    (courseHome, theCollection.userTablE, theCollection.labelsUserTablE, comments);
     out << theRoutines.ToStringClassDetails
     (usersAreAdmins, theCollection.userTablE, theCollection.labelsUserTablE,
      theCollection.databaseProblemAndHomeworkGroupList, theCollection.databaseProblemWeights);

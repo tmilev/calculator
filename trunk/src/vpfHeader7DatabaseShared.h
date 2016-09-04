@@ -566,7 +566,8 @@ bool UserCalculator::FetchOneUserRow
     this->authenticationTokenCreationTime=this->GetSelectedRowEntry("authenticationCreationTime");
     this->actualAuthenticationToken=this->GetSelectedRowEntry("authenticationToken");
     this->problemDataString=this->GetSelectedRowEntry("problemData");
-    this->deadlineInfoFileName=this->GetSelectedRowEntry("deadlineInfoFileName");
+    this->deadlineInfoTableName=this->GetSelectedRowEntry("deadlineInfoTableName");
+    this->problemInfoTableName=this->GetSelectedRowEntry("problemInfoTableName");
   }
   return true;
 }

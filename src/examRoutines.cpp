@@ -2697,6 +2697,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     outBody << "<br>Problem data: " << this->currentUseR.problemNames;
     outBody << "<br>Problem data string: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(this->currentUseR.problemDataString.value);
     outBody << "<hr>";
+    outBody << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+    outBody << "<hr>";
   }
   //first command and first syntactic element are the random seed and are ignored.
   if (!this->ProcessInterprettedCommands(theInterpreter, this->theContent, comments))
@@ -2790,19 +2792,19 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   theGlobalVariables.ToStringCalcArgsNoNavigation(&randomSeedContainer);
   if (theGlobalVariables.UserDefaultHasAdminRights())
   { if (theGlobalVariables.UserStudentViewOn())
-      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=" << theGlobalVariables.userCalculatorRequestType << "&"
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
       << this->ToStringCalculatorArgumentsForProblem
       (theGlobalVariables.userCalculatorRequestType, "false", theGlobalVariables.GetWebInput("studentSection"))
       << "\">Admin view</a>" << linkBigSeparator;
     else
     { if (this->databaseStudentSectionS.size==0)
-        out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=" << theGlobalVariables.userCalculatorRequestType << "&"
+        out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
         << this->ToStringCalculatorArgumentsForProblem
         (theGlobalVariables.userCalculatorRequestType, "true", "")
         << "\">Student view</a>";
       for (int i=0; i<this->databaseStudentSectionS.size; i++)
         if (this->databaseStudentSectionS[i]!="")
-        { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=" << theGlobalVariables.userCalculatorRequestType << "&"
+        { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
           << this->ToStringCalculatorArgumentsForProblem
           (theGlobalVariables.userCalculatorRequestType, "true", this->databaseStudentSectionS[i])
           << "\">Student view section " << this->databaseStudentSectionS[i] << " </a>";
@@ -2907,6 +2909,7 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
   else
     out << "fileName=" << CGI::StringToURLString(theGlobalVariables.GetWebInput("fileName") )
     << "&";
+  out << "topicList=" << theGlobalVariables.GetWebInput("topicList") << "&";
   if (!theGlobalVariables.UserGuestMode())
   { out << "studentView=" << studentView << "&";
     if (studentSection!="")
@@ -3244,19 +3247,19 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   std::string currentChapter="";
   out << "<!--Topic list automatically generated from topic list: " << this->topicListFileName
   << ".-->";
-  //out << "<br>DEBUG: Desired chapter: " << desiredChapter;
+  //out << "<br>DEBUG: Desired chapter: " << desiredChapter << "<hr>Total chapters: " << this->theTopics.size;
   bool firstListStarted=false;
   int chapterCounter=0;
   //CalculatorHTML currentProblem;
-  for (int i=0; i<theTopics.size; i++)
-  { currentElt=theTopics[i];
+  for (int i=0; i<this->theTopics.size; i++)
+  { currentElt=this->theTopics[i];
     if (currentElt.flagIsChapter)
     { currentChapter=currentElt.title;
       chapterCounter++;
     }
     if (desiredChapter!="")
       if (currentChapter!=desiredChapter)
-      { //out << "<br>DEBUG: Chapter: " << currentChapter << " skipped. ";
+      { out << "<br>DEBUG: Chapter: " << currentChapter << " skipped. ";
         continue;
       }
     if (!firstListStarted)

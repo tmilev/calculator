@@ -776,15 +776,15 @@ std::string WebWorker::ToStringMessageShortUnsafe(FormatExpressions* theFormat)c
     out << "POST " << "(from calculator)";
   else
     out << "Request type undefined.";
-  out << "<hr>Address get or post: " << CGI::StringToHtmlString(this->addressGetOrPost);
-  out << lineBreak << "Address computed: " << CGI::StringToHtmlString(this->addressComputed);
-  out << lineBreak << "Argument computed: " << CGI::StringToHtmlString(this->argumentComputed);
-  out << lineBreak << "Virtual file/directory name: " << CGI::StringToHtmlString(this->VirtualFileName);
-  out << lineBreak << "Relative physical file/directory name: " << CGI::StringToHtmlString(this->RelativePhysicalFileNamE);
-  out << lineBreak << "Executable url: " << theGlobalVariables.DisplayNameExecutable;
-  out << lineBreak << "Physical address project base: " << theGlobalVariables.PhysicalPathProjectBase;
-  out << lineBreak << "Physical address server base: " << theGlobalVariables.PhysicalPathServerBasE;
-  out << lineBreak << "Physical address output folder: " << theGlobalVariables.PhysicalPathHtmlFolder;
+  out << "<hr>Address get or post:\n" << CGI::StringToHtmlString(this->addressGetOrPost);
+  out << lineBreak << "\nAddress computed:\n" << CGI::StringToHtmlString(this->addressComputed);
+  out << lineBreak << "\nArgument computed:\n" << CGI::StringToHtmlString(this->argumentComputed);
+  out << lineBreak << "\nVirtual file/directory name:\n" << CGI::StringToHtmlString(this->VirtualFileName);
+  out << lineBreak << "\nRelative physical file/directory name:\n" << CGI::StringToHtmlString(this->RelativePhysicalFileNamE);
+  out << lineBreak << "\nExecutable url:\n" << theGlobalVariables.DisplayNameExecutable;
+  out << lineBreak << "\nPhysical address project base:\n" << theGlobalVariables.PhysicalPathProjectBase;
+  out << lineBreak << "\nPhysical address server base:\n" << theGlobalVariables.PhysicalPathServerBasE;
+  out << lineBreak << "\nPhysical address output folder:\n" << theGlobalVariables.PhysicalPathHtmlFolder;
   return out.str();
 }
 
@@ -910,7 +910,7 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
 bool WebWorker::ExtractArgumentsFromMessage
 (const std::string& input, std::stringstream& argumentProcessingFailureComments,
 int recursionDepth)
-{ MacroRegisterFunctionWithName("WebWorker::ExtractArgumentsFromMessageArgument");
+{ MacroRegisterFunctionWithName("WebWorker::ExtractArgumentsFromMessage");
 //  stOutput << "DEBUG: here I am.";
   if (recursionDepth>1)
   { argumentProcessingFailureComments << "Error: input string encoded too many times";
@@ -2281,6 +2281,8 @@ int WebWorker::ProcessTemplate()
 { MacroRegisterFunctionWithName("WebWorker::ProcessTemplate");
   this->SetHeaderOKNoContentLength();
   stOutput << HtmlInterpretation::GetPageFromTemplate();
+  //if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
+  //  stOutput << "<!--" << this->ToStringMessageFullUnsafe() << "-->";
   return 0;
 }
 
@@ -3872,7 +3874,8 @@ int WebServer::mainApache()
   theParser.javaScriptDisplayingIndicator=WebWorker::GetJavaScriptIndicatorFromHD();
   theGlobalVariables.flagComputationCompletE=true;
   MathRoutines::StringSplitExcludeDelimiter(theWorker.cookiesApache, ' ', theWorker.cookies);
-
+  for (int i=0; i<theWorker.cookies.size; i++)
+    theWorker.cookies[i]=MathRoutines::StringTrimWhiteSpace(theWorker.cookies[i]);
 /*  stOutput << "<html><body>";
   stOutput << "DEBUG: your input, bounced back: "
   << "\n<hr>server port: <br>\n" << thePort
@@ -3903,8 +3906,8 @@ std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
   out << "Default user: " << theGlobalVariables.userDefault.username.value;
   if (theGlobalVariables.flagLoggedIn)
     out << "\n<br>\nLogged in.";
-  out << "\n<br>\nAddress: " << CGI::StringToHtmlString(theWebServer.GetActiveWorker().addressComputed);
-  out << "\n<br>\nRequest: " << theGlobalVariables.userCalculatorRequestType;
+  out << "\n<br>\nAddress:\n" << CGI::StringToHtmlString(theWebServer.GetActiveWorker().addressComputed);
+  out << "\n<br>\nRequest:\n" << theGlobalVariables.userCalculatorRequestType;
   if (theGlobalVariables.UserDefaultHasAdminRights())
     out << "\n<br>\n<b>User has admin rights</b>";
   if (theWebServer.RequiresLogin(theGlobalVariables.userCalculatorRequestType, theWebServer.GetActiveWorker().addressComputed))

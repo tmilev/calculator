@@ -82,8 +82,8 @@ std::string HtmlSnippets::GetJavascriptCookieFunctions()
   << "  exdate.setDate(exdate.getDate() + exdays);\n"
   << "  c_value=escape(theValue) + ((exdays==null) ? \"\" : \"; expires=\"+exdate.toUTCString());\n"
   << "  if(secure)\n"
-  << "    c_value+=\"; secure;\"; \n"
-  << "  document.cookie=theName + \"=\" + c_value;\n"
+  << "    c_value+=\"; Secure\"; \n"
+  << "  document.cookie=theName + \"=\" + c_value+\"; Path=/;\";\n"
   << "}\n";
   return out.str();
 }

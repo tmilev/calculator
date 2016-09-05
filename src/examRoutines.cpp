@@ -370,7 +370,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
     << this->outputHtmlNavigatioN
     << linkBigSeparator << "<small>Generated in "
     << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds()-startTime)
-    << " second(s).</small>" << "</problemNavigation> ";
+    << " second(s).</small>" << "</problemNavigation><br> ";
    }
   out << this->outputHtmlBodyNoTag;
   return out.str();
@@ -2924,7 +2924,7 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
 std::string CalculatorHTML::GetEditPageButton()
 { MacroRegisterFunctionWithName("CalculatorHTML::GetEditPageButton");
   std::stringstream out;
-  out << "\n<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=editPage&";
+  out << "\n<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=editPage&";
   std::string urledProblem=CGI::StringToURLString(this->fileName);
   std::stringstream refStreamNoRequest;
   //  out << "cleaned up link: " << cleaneduplink;

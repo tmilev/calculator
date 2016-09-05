@@ -311,7 +311,7 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   ;
   if (!theGlobalVariables.flagRunningApache)
     out << "<problemNavigation>" << thePage.outputHtmlNavigatioN
-    << theGlobalVariables.ToStringNavigation() << "</problemNavigation>";
+    << theGlobalVariables.ToStringNavigation() << "</problemNavigation><br>";
   out << thePage.outputHtmlBodyNoTag;
   out << "</body><!-- tag added automatically; user-specified body tag ignored-->\n";
   out << "</html><!-- tag added automatically; user-specified html tag ignored-->\n";
@@ -343,7 +343,7 @@ std::string HtmlInterpretation::GetExamPage()
     out << "initializeButtons();";
   else
     out << "initializeButtonsMatrixSupport();";
-  out <<"\">\n";
+  out << "\">\n";
   out << problemBody;
   if (theFile.logCommandsProblemGeneration!="")
     out << "<hr>" << theFile.logCommandsProblemGeneration << "<hr>";

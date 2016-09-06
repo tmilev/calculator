@@ -217,7 +217,7 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
 
 ProblemData::ProblemData()
 { this->randomSeed=0;
-  this->flagRandomSeedComputed=false;
+  this->flagRandomSeedGiven=false;
   this->numCorrectlyAnswered=0;
   this->totalNumSubmissions=0;
   this->flagProblemWeightIsOK=false;
@@ -244,7 +244,7 @@ std::string ProblemData::ToString()
 { std::stringstream out;
   out << "Problem data. "
   << "Random seed: " << this->randomSeed;
-  if (this->flagRandomSeedComputed)
+  if (this->flagRandomSeedGiven)
     out << " (loaded from database)";
   out << ". ";
   for (int i=0; i<this->theAnswers.size; i++)
@@ -467,8 +467,9 @@ std::string UserCalculator::ToString()
 { MacroRegisterFunctionWithName("UserCalculator::ToString");
   std::stringstream out;
   out << "Calculator user: " << this->username.value;
-  for (int i=0; i<this->problemData.size; i++)
-    out << "<br>Problem: " << this->problemNames[i] << " random seed: " << this->problemData[i].randomSeed;
+  for (int i=0; i<this->theProblemData.size(); i++)
+    out << "<br>Problem: " << this->theProblemData.theKeys[i] << " random seed: "
+    << this->theProblemData.theValues[i].randomSeed;
   return out.str();
 }
 
@@ -916,17 +917,18 @@ void UserCalculator::ComputePointsEarned
  )
 { MacroRegisterFunctionWithName("UserCalculator::ComputePointsEarned");
   this->pointsEarned=0;
-  for (int i=0; i<this->problemData.size; i++)
-  { ProblemData& currentP=this->problemData[i];
-    this->problemData[i].Points=0;
-    this->problemData[i].totalNumSubmissions=0;
-    this->problemData[i].numCorrectlyAnswered=0;
-    if (gradableProblems.Contains(this->problemNames[i]) )
-    { this->problemData[i].adminData=
-      databaseProblemInfo.GetValueCreateIfNotPresent(this->problemNames[i]);
-      this->problemData[i].flagProblemWeightIsOK=
-      this->problemData[i].adminData.ProblemWeight.AssignStringFailureAllowed
-      (this->problemData[i].adminData.ProblemWeightUserInput);
+  for (int i=0; i<this->theProblemData.size(); i++)
+  { ProblemData& currentP=this->theProblemData.theValues[i];
+    const std::string problemName=this->theProblemData.theKeys[i];
+    currentP.Points=0;
+    currentP.totalNumSubmissions=0;
+    currentP.numCorrectlyAnswered=0;
+    if (gradableProblems.Contains(problemName) )
+    { currentP.adminData=
+      databaseProblemInfo.GetValueCreateIfNotPresent(problemName);
+      currentP.flagProblemWeightIsOK=
+      currentP.adminData.ProblemWeight.AssignStringFailureAllowed
+      (currentP.adminData.ProblemWeightUserInput);
     }
 //    this->problemData[i].numAnswersSought=this->problemData[i].answerIds.size;
     for (int j=0; j<currentP.theAnswers.size; j++)
@@ -934,9 +936,9 @@ void UserCalculator::ComputePointsEarned
         currentP.numCorrectlyAnswered++;
       currentP.totalNumSubmissions+=currentP.theAnswers[j].numSubmissions;
     }
-    if (this->problemData[i].flagProblemWeightIsOK && currentP.theAnswers.size>0)
+    if (currentP.flagProblemWeightIsOK && currentP.theAnswers.size>0)
     { currentP.Points=(currentP.adminData.ProblemWeight*currentP.numCorrectlyAnswered)/currentP.theAnswers.size;
-      this->pointsEarned+= this->problemData[i].Points;
+      this->pointsEarned+= currentP.Points;
     }
   }
 }
@@ -1001,23 +1003,12 @@ bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, s
 
 ProblemData& UserCalculator::GetProblemDataAddIfNotPresent(const std::string& problemName)
 { MacroRegisterFunctionWithName("UserCalculator::GetProblemDataAddIfNotPresent");
-  int theIndex=this->problemNames.GetIndex(problemName);
-  if (theIndex==-1)
-  { this->problemNames.AddOnTop(problemName);
-    this->problemData.SetSize(this->problemData.size+1);
-    return *this->problemData.LastObject();
-  }
-  return this->problemData[theIndex];
+  return this->theProblemData.GetValueCreateIfNotPresent(problemName);
 }
 
 void UserCalculator::SetProblemData(const std::string& problemName, const ProblemData& inputData)
 { MacroRegisterFunctionWithName("UserCalculator::SetProblemData");
-  int theIndex=this->problemNames.GetIndex(problemName);
-  if (theIndex==-1)
-  { this->problemNames.AddOnTop(problemName);
-    this->problemData.AddOnTop(inputData);
-  } else
-    this->problemData[theIndex]=inputData;
+  this->theProblemData.SetKeyValue(problemName, inputData);
 }
 
 bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& commentsOnFailure)
@@ -1025,13 +1016,13 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
   MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
   if (!CGI::ChopCGIString(inputData, theMap, commentsOnFailure))
     return false;
-//  stOutput << "<hr>DEBUG: Interpreting: <br>" << CGI::URLKeyValuePairsToNormalRecursiveHtml( inputData )<< "<hr>";
-  this->flagRandomSeedComputed=false;
-  if (theGlobalVariables.UserRequestRequiresLoadingRealExamData() )
+  stOutput << "<hr>DEBUG: Interpreting: <br>" << CGI::URLKeyValuePairsToNormalRecursiveHtml( inputData )<< "<hr>";
+  this->flagRandomSeedGiven=false;
+  if (theGlobalVariables.UserRequestRequiresLoadingRealExamData())
     if (theMap.Contains("randomSeed"))
     { this->randomSeed=atoi(theMap.GetValueCreateIfNotPresent("randomSeed").c_str());
-      this->flagRandomSeedComputed=true;
-//      stOutput << "<br>random seed found. <br>";
+      this->flagRandomSeedGiven=true;
+      stOutput << "<br>random seed found. <br>";
     }
   this->theAnswers.SetSize(0);
   bool result=true;
@@ -1088,18 +1079,19 @@ bool UserCalculator::InterpretDatabaseProblemData
   MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
   if (!CGI::ChopCGIString(theInfo, theMap, commentsOnFailure))
     return false;
-  this->problemNames.Clear();
-  this->problemData.SetSize(0);
-  this->problemNames.SetExpectedSize(theMap.size());
-  this->problemData.SetExpectedSize(theMap.size());
+  this->theProblemData.Clear();
+  this->theProblemData.SetExpectedSize(theMap.size());
   bool result=true;
-//  stOutput << "<hr>DEBUG: Interpreting: <br>" << CGI::URLKeyValuePairsToNormalRecursiveHtml( theInfo )<< "<br>Map has: "
-//  << theMap.size() << " entries. ";
+  stOutput << "<hr>DEBUG: Interpreting: <br>" << CGI::URLKeyValuePairsToNormalRecursiveHtml(theInfo)
+  << "<br>Map has: "
+  << theMap.size() << " entries. ";
+  ProblemData reader;
   for (int i=0; i<theMap.size(); i++)
-  { this->problemNames.AddOnTop(CGI::URLStringToNormal(theMap.theKeys[i]));
-    this->problemData.SetSize(this->problemData.size+1);
-    if (!this->problemData.LastObject()->LoadFrom(CGI::URLStringToNormal(theMap[i]), commentsOnFailure))
-      result=false;
+  { if (!reader.LoadFrom(CGI::URLStringToNormal(theMap[i]), commentsOnFailure))
+    { result=false;
+      continue;
+    }
+    this->theProblemData.SetKeyValue(CGI::URLStringToNormal(theMap.theKeys[i]), reader);
   }
   return result;
 }
@@ -1115,9 +1107,9 @@ bool UserCalculator::StoreProblemDataToDatabase
 (DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::StoreDatabaseInfo");
   std::stringstream problemDataStream;
-  for (int i=0; i<this->problemNames.size; i++)
-    problemDataStream << CGI::StringToURLString(this->problemNames[i]) << "="
-    << CGI::StringToURLString( this->problemData[i].Store()) << "&";
+  for (int i=0; i<this->theProblemData.size(); i++)
+    problemDataStream << CGI::StringToURLString(this->theProblemData.theKeys[i]) << "="
+    << CGI::StringToURLString( this->theProblemData.theValues[i].Store()) << "&";
   //stOutput << "DEBUG: storing in database string: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(problemDataStream.str());
   this->currentTable="users";
   bool result= this->SetColumnEntry("problemData", problemDataStream.str(), theRoutines, &commentsOnFailure);

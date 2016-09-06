@@ -177,7 +177,7 @@ public:
 struct ProblemData
 {
 public:
-  bool flagRandomSeedComputed;
+  bool flagRandomSeedGiven;
   unsigned int randomSeed;
   bool flagProblemWeightIsOK;
   Rational Points;
@@ -236,9 +236,7 @@ class UserCalculator : public UserCalculatorData
 // Those are internally (and automatically) converted to safe entries (stored in the private variables below), and only then stored in
 // the database.
 public:
-
-  HashedList<std::string, MathRoutines::hashString> problemNames;
-  List<ProblemData> problemData;
+  MapLisT<std::string, ProblemData, MathRoutines::hashString> theProblemData;
   TimeWrapper authenticationCreationTime;
   Rational pointsEarned;
   Rational pointsMax;

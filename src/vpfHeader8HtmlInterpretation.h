@@ -71,7 +71,6 @@ public:
   int NumProblemsFound;
   int NumAnswerIdsMathquilled;
   List<int> randomSeedsIfInterpretationFails;
-  bool flagRandomSeedGiven;
   bool flagIsExamHome;
   bool flagIsExamProblem;
   bool flagParentInvestigated;

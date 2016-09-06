@@ -17,8 +17,7 @@ std::string CalculatorHTML::stringPracticE="Practice";
 std::string CalculatorHTML::stringProblemLink="Problem link";
 
 CalculatorHTML::CalculatorHTML()
-{ this->flagRandomSeedGiven=false;
-  this->NumAttemptsToInterpret=0;
+{ this->NumAttemptsToInterpret=0;
   this->NumAnswerIdsMathquilled=0;
   this->MaxInterpretationAttempts=10;
   this->flagLoadedSuccessfully=false;
@@ -246,35 +245,33 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadDatabaseInfo");
 #ifdef MACRO_use_MySQL
   this->currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
-  stOutput << "<hr><hr>DEBUG reading problem info from: " << CGI::StringToHtmlString(this->currentUseR.problemDataString.value);
-  stOutput << "<hr>Starting user: " << this->currentUseR.ToString();
+  //stOutput << "<hr><hr>DEBUG reading problem info from: " << CGI::StringToHtmlString(this->currentUseR.problemDataString.value);
+  //stOutput << "<hr>Starting user: " << this->currentUseR.ToString();
   if (this->currentUseR.problemDataString=="")
   { comments << "Failed to load current user's problem save-file. ";
     return false;
   }
-  if (!this->currentUseR.InterpretDatabaseProblemData
-      (this->currentUseR.problemDataString.value, comments))
+  if (!this->currentUseR.InterpretDatabaseProblemData(this->currentUseR.problemDataString.value, comments))
   { comments << "Failed to interpret user's problem save-file. ";
     return false;
   }
-  stOutput << "<hr>After interpretation of datastring: user: " << this->currentUseR.ToString();
-  if (!this->ReadProblemInfoAppend
-      (this->currentUseR.deadlineInfoString.value,
-       this->databaseProblemInfo, comments))
+  stOutput << "<hr>Debug: user: " << this->currentUseR.ToString() << "<hr>";
+  if (!this->ReadProblemInfoAppend(this->currentUseR.deadlineInfoString.value, this->databaseProblemInfo, comments))
   { comments << "Failed to interpret the deadline string. ";
     return false;
   }
-  if (!this->ReadProblemInfoAppend
-      (this->currentUseR.problemInfoString.value,
-       this->databaseProblemInfo, comments))
+  //stOutput << "<hr>Debug: user: " << this->currentUseR.ToString();
+  if (!this->ReadProblemInfoAppend(this->currentUseR.problemInfoString.value, this->databaseProblemInfo, comments))
   { comments << "Failed to interpret the problem weight string. ";
     return false;
   }
+  //stOutput << "<hr>Debug: user: " << this->currentUseR.ToString();
   //stOutput << "<hr><hr>DEBUG read databaseProblemAndHomeworkGroupList: "
   //<< this->databaseProblemAndHomeworkGroupList;
 //  this->currentUseR.ComputePointsEarned
 //  (this->databaseProblemAndHomeworkGroupList, this->databaseProblemWeights);
   theGlobalVariables.userDefault=this->currentUseR;
+  stOutput << "<hr>After interpretation of datastring: user: " << this->currentUseR.ToString();
   return true;
 #else
   comments << "Database not available. ";
@@ -308,6 +305,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
   if (doLoadDatabase)
     this->LoadDatabaseInfo(comments);
 #endif // MACRO_use_MySQL
+  //stOutput << "DEBUG: flagIsForReal: " << this->flagIsForReal;
   if (!this->flagIsForReal)
   { std::string randString= theGlobalVariables.GetWebInput("randomSeed");
     if (randString!="")
@@ -315,10 +313,10 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
       //stOutput << "radSeedStream: " << randString;
       randSeedStream >> this->theProblemData.randomSeed;
       //stOutput << ", interpreted as: " << this->theProblemData.randomSeed;
-      this->flagRandomSeedGiven=true;
+      this->theProblemData.flagRandomSeedGiven=true;
     }
   }
-//  stOutput << "debug info: rand seed after all's been said and done: " << this->theProblemData.randomSeed;
+  //  stOutput << "debug info: rand seed after all's been said and done: " << this->theProblemData.randomSeed;
   return true;
 }
 
@@ -616,8 +614,8 @@ std::string CalculatorHTML::ToStringLinkAndDetailsFromFileName(const std::string
   }
 #ifdef MACRO_use_MySQL
   bool problemAlreadySolved=false;
-  if (this->currentUseR.problemNames.Contains(theFileName))
-  { ProblemData& theProbData=this->currentUseR.problemData[this->currentUseR.problemNames.GetIndex(theFileName)];
+  if (this->currentUseR.theProblemData.Contains(theFileName))
+  { ProblemData& theProbData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName);
     if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size)
       problemAlreadySolved=true;
   }
@@ -643,7 +641,7 @@ bool CalculatorHtmlFunctions::innerInterpretProblem
   CalculatorHTML theProblem;
   if (!input.IsOfType<std::string>(&theProblem.inputHtml))
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
-  theProblem.flagRandomSeedGiven=true;
+  theProblem.theProblemData.flagRandomSeedGiven=true;
   theProblem.theProblemData.randomSeed=theCommands.theObjectContainer.CurrentRandomSeed;
   theProblem.InterpretHtml(theCommands.Comments);
   std::stringstream out;
@@ -1819,10 +1817,11 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
   }
   this->timeToParseHtml=theGlobalVariables.GetElapsedSeconds()-startTime;
   this->NumAttemptsToInterpret=0;
-  if (!this->flagRandomSeedGiven)
+  stOutput << "DEBUG: this->theProblemData.flagRandomSeedGiven: " << this->theProblemData.flagRandomSeedGiven;
+  if (!this->theProblemData.flagRandomSeedGiven)
   { srand(time(NULL));
   }
-  if (this->flagRandomSeedGiven && this->flagIsForReal)
+  if (this->theProblemData.flagRandomSeedGiven && this->flagIsForReal)
     this->MaxInterpretationAttempts=1;
   this->randomSeedsIfInterpretationFails.SetSize(this->MaxInterpretationAttempts);
   for (int i=0; i<this->randomSeedsIfInterpretationFails.size; i++)
@@ -2535,8 +2534,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   double startTime=theGlobalVariables.GetElapsedSeconds();
   std::stringstream outBody;
   std::stringstream outHeaD, outHeadPt1, outHeadPt2;
-  if (!this->flagIsForReal || !this->theProblemData.flagRandomSeedComputed)
-    if (!this->flagRandomSeedGiven || this->NumAttemptsToInterpret>1)
+  if (!this->flagIsForReal || !this->theProblemData.flagRandomSeedGiven)
+    if (this->NumAttemptsToInterpret>1)
       this->theProblemData.randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
   //stOutput << "DEBUG: Interpreting problem with random seed: " << this->theProblemData.randomSeed;
   this->FigureOutCurrentProblemList(comments);
@@ -2566,8 +2565,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   if (this->flagIsExamProblem)
   { bool problemAlreadySolved=false;
 #ifdef MACRO_use_MySQL
-    if (this->currentUseR.problemNames.Contains(this->fileName))
-    { ProblemData& theProbData=this->currentUseR.problemData[this->currentUseR.problemNames.GetIndex(this->fileName)];
+    if (this->currentUseR.theProblemData.Contains(this->fileName))
+    { ProblemData& theProbData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(this->fileName);
       if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size)
         problemAlreadySolved=true;
     }
@@ -2603,12 +2602,12 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   { outBody << "Debug information follows. ";
     if (this->flagIsExamProblem)
       outBody << "Exam problem here. ";
-    outBody << "<br>randseed: " << this->theProblemData.randomSeed
-    << "<br>ForReal: " << this->flagIsForReal << "<br>seed computed: " << this->theProblemData.flagRandomSeedComputed
-    << "<br>flagRandomSeedGiven: " << this->flagRandomSeedGiven << "\n<br>\n"
+    outBody << "<br>Random seed: " << this->theProblemData.randomSeed
+    << "<br>ForReal: " << this->flagIsForReal << "<br>seed given: " << this->theProblemData.flagRandomSeedGiven
+    << "<br>flagRandomSeedGiven: " << this->theProblemData.flagRandomSeedGiven << "\n<br>\n"
     << CGI::StringToHtmlString(this->ToStringCalculatorArgumentsForProblem("exercise", "false"));
 
-    outBody << "<br>Problem data: " << this->currentUseR.problemNames;
+    outBody << "<br>Problem names: " << this->currentUseR.theProblemData.theKeys.ToStringCommaDelimited();
     outBody << "<br>Problem data string: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(this->currentUseR.problemDataString.value);
     outBody << "<hr>";
     outBody << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
@@ -2668,7 +2667,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
 #ifdef MACRO_use_MySQL
   if (this->flagIsForReal)
   { //stOutput << "This is for real!<br>";
-    this->theProblemData.flagRandomSeedComputed=true;
+    this->theProblemData.flagRandomSeedGiven=true;
     DatabaseRoutines theRoutines;
     //this->currentUser.username=theGlobalVariables.userDefault;
     //stOutput << "About to store problem data: " << this->theProblemData.ToString();
@@ -2899,8 +2898,8 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
   //stOutput << "<hr>CurrentUser.problemNames=" << this->currentUser.problemNames.ToStringCommaDelimited();
   #ifdef MACRO_use_MySQL
   bool noSubmissionsYet=false;
-  if (this->currentUseR.problemNames.Contains(theFileName))
-  { ProblemData& theProbData=this->currentUseR.problemData[this->currentUseR.problemNames.GetIndex(theFileName)];   
+  if (this->currentUseR.theProblemData.Contains(theFileName))
+  { ProblemData& theProbData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName);
     if (!theProbData.flagProblemWeightIsOK)
     { out << "<span style=\"color:orange\">No point weight assigned yet. </span>";
       if (this->databaseProblemInfo.Contains(theFileName))
@@ -2944,9 +2943,9 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
     return out.str();
   }
   #ifdef MACRO_use_MySQL
-  if (!this->currentUseR.problemNames.Contains(theFileName))
+  if (!this->currentUseR.theProblemData.Contains(theFileName))
     return "<span style=\"color:brown\"><b>need to solve</b></span>";
-  ProblemData& theProbData=this->currentUseR.problemData[this->currentUseR.problemNames.GetIndex(theFileName)];
+  ProblemData& theProbData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName);
   if (this->databaseProblemInfo.Contains(theFileName))
     theProbData.adminData=this->databaseProblemInfo.GetValueCreateIfNotPresent(theFileName);
   std::stringstream problemWeight;

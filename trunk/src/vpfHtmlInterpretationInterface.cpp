@@ -486,7 +486,7 @@ std::string HtmlInterpretation::SubmitProblem()
     return out.str();
   }
   Calculator theInterpreter;
-  if (!theProblem.flagRandomSeedGiven && !theProblem.flagIsForReal)
+  if (!theProblem.theProblemData.flagRandomSeedGiven && !theProblem.flagIsForReal)
     out << "<b>Random seed not given.</b>";
 //  stOutput << "<b>DEBUG remove when done: Random seed: " << theProblem.theProblemData.randomSeed << "</b>";
   if (theProblem.fileName=="")

@@ -212,7 +212,6 @@ public:
   void InterpretTopicList(SyntacticElementHTML& inputOutput);
   void InterpretTableOfContents(SyntacticElementHTML& inputOutput);
   void InterpretAccountInformationLinks(SyntacticElementHTML& inputOutput);
-  std::string ToStringClassDetails(bool adminsOnly, const SyntacticElementHTML& inputElement);
   std::string GetEditPageButton();
   std::string GetJavascriptSubmitMainInputIncludeCurrentFile();
   std::string GetDatePickerJavascriptInit();

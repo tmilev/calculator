@@ -724,22 +724,12 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   }
   std::string userRole=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("userRole"));
   bool usersAreAdmins= (userRole=="admin");
-  if (!theGlobalVariables.flagRunningAce)
-  { CalculatorHTML theCollection;
-    std::string courseHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"));
-    theRoutines.PrepareClassData
-    (courseHome, theCollection.userTablE, theCollection.labelsUserTablE, comments);
-    out << theRoutines.ToStringClassDetails
-    (usersAreAdmins, theCollection.userTablE, theCollection.labelsUserTablE,
-     theCollection.databaseProblemAndHomeworkGroupList, theCollection.databaseProblemInfo);
-  } else
-  { List<List<std::string> > userTable;
-    List<std::string> userLabels;
-    if (!theRoutines.FetchAllUsers(userTable, userLabels, comments))
-      out << comments.str();
-    out << HtmlInterpretation::ToStringUserDetailsTable(usersAreAdmins, userTable, userLabels, hostWebAddressWithPort);
+  List<List<std::string> > userTable;
+  List<std::string> userLabels;
+  if (!theRoutines.FetchAllUsers(userTable, userLabels, comments))
+    out << comments.str();
+  out << HtmlInterpretation::ToStringUserDetailsTable(usersAreAdmins, userTable, userLabels, hostWebAddressWithPort);
 //    out << "<hr>Debug: got to here. ";
-  }
   if (!createdUsers || !sentEmails)
     out << "<br>Comments:<br>" << comments.str();
   return out.str();
@@ -864,18 +854,11 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp()
   return out.str();
 }
 
-std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddressWithPort)
-{ MacroRegisterFunctionWithName("WebWorker::GetAccountsPage");
-  std::stringstream out;
-  out << "<html>"
-  << "<head>"
-  << CGI::GetCalculatorStyleSheetWithTags()
-  << HtmlSnippets::GetJavascriptStandardCookies()
-  << HtmlSnippets::GetJavascriptSubmitEmails()
-  << "</head>"
-  << "<body onload=\"loadSettings();\">\n";
-  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation><br>";
+std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAddressWithPort)
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetAccountsPageBody");
+  (void) hostWebAddressWithPort;
 #ifdef MACRO_use_MySQL
+  std::stringstream out;
   if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection)
   { out << "Browsing accounts allowed only for logged-in admins over ssl connection.";
     out << "</body></html>";
@@ -911,9 +894,24 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
   out << HtmlInterpretation::ToStringUserDetails(true, userTable, columnLabels, hostWebAddressWithPort);
   out << "<hr><hr>";
   out << HtmlInterpretation::ToStringUserDetails(false, userTable, columnLabels, hostWebAddressWithPort);
+  return out.str();
 #else
-  out << "<b>Database not available. </b>";
+  return "<b>Database not available. </b>";
 #endif // MACRO_use_MySQL
+}
+
+std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddressWithPort)
+{ MacroRegisterFunctionWithName("WebWorker::GetAccountsPage");
+  std::stringstream out;
+  out << "<html>"
+  << "<head>"
+  << CGI::GetCalculatorStyleSheetWithTags()
+  << HtmlSnippets::GetJavascriptStandardCookies()
+  << HtmlSnippets::GetJavascriptSubmitEmails()
+  << "</head>"
+  << "<body onload=\"loadSettings();\">\n";
+  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation><br>";
+  out << HtmlInterpretation::GetAccountsPageBody(hostWebAddressWithPort);
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
@@ -939,7 +937,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   int indexUserRole=-1;
   int indexExtraInfo=-1;
   for (int i=0; i<columnLabels.size; i++)
-  { if (columnLabels[i]=="username")
+  { if (columnLabels[i]==DatabaseStrings::userColumnLabel)
       indexUser=i;
     if (columnLabels[i]=="email")
       indexEmail=i;
@@ -959,7 +957,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       )
   { out << "<span style=\"color:red\"><b>This shouldn't happen: failed to find necessary "
     << "column entries in the database. "
-    << "This is likely a software bug. </b></span>"
+    << "This is likely a software bug. Function: HtmlInterpretation::ToStringUserDetailsTable. </b></span>"
     << "indexUser, indexExtraInfo, indexEmail, indexActivationToken, indexUserRole:  "
     << indexUser << ", "
     << indexEmail          << ", "

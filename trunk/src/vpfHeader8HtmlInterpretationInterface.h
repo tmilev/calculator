@@ -26,6 +26,7 @@ public:
   static std::string SubmitProblemPreview();
   static std::string GetSetProblemDatabaseInfoHtml();
   static std::string GetAccountsPage(const std::string& hostWebAddressWithPort);
+  static std::string GetAccountsPageBody(const std::string& hostWebAddressWithPort);
   static std::string ToStringUserDetails
   (bool adminsOnly, List<List<std::string> > userTable, List<std::string> columnLabels,
    const std::string& hostWebAddressWithPort);

@@ -246,7 +246,8 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadDatabaseInfo");
 #ifdef MACRO_use_MySQL
   this->currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
-  stOutput << "<hr><hr>DEBUG reading problem info from: " << CGI::StringToHtmlString( this->currentUseR.problemDataString.value);
+  stOutput << "<hr><hr>DEBUG reading problem info from: " << CGI::StringToHtmlString(this->currentUseR.problemDataString.value);
+  stOutput << "<hr>Starting user: " << this->currentUseR.ToString();
   if (this->currentUseR.problemDataString=="")
   { comments << "Failed to load current user's problem save-file. ";
     return false;
@@ -256,6 +257,7 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   { comments << "Failed to interpret user's problem save-file. ";
     return false;
   }
+  stOutput << "<hr>After interpretation of datastring: user: " << this->currentUseR.ToString();
   if (!this->ReadProblemInfoAppend
       (this->currentUseR.deadlineInfoString.value,
        this->databaseProblemInfo, comments))

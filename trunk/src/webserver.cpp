@@ -888,7 +888,7 @@ out << "<b>Database not available. </b>";
 
 bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessingFailureComments)
 { MacroRegisterFunctionWithName("WebWorker::ExtractArgumentsFromCookies");
-  MapList<std::string, std::string, MathRoutines::hashString> newlyFoundArgs;
+  MapLisT<std::string, std::string, MathRoutines::hashString> newlyFoundArgs;
   bool result=true;
   for (int i=0; i<this->cookies.size; i++)
     if (!CGI::ChopCGIStringAppend(this->cookies[i], newlyFoundArgs, argumentProcessingFailureComments))
@@ -916,7 +916,7 @@ int recursionDepth)
   { argumentProcessingFailureComments << "Error: input string encoded too many times";
     return false;
   }
-  MapList<std::string, std::string, MathRoutines::hashString>& theArgs=
+  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs=
   theGlobalVariables.webArguments;
   if (!CGI::ChopCGIStringAppend(input, theArgs, argumentProcessingFailureComments))
     return false;
@@ -940,7 +940,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   theGlobalVariables.flagLoggedIn=false;
   if (theGlobalVariables.UserGuestMode())
     return true;
-  MapList<std::string, std::string, MathRoutines::hashString>& theArgs= theGlobalVariables.webArguments;
+  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs= theGlobalVariables.webArguments;
   UserCalculatorData& theUser= theGlobalVariables.userDefault;
   theUser.username= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("username"));
   theUser.enteredAuthenticationToken=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("authenticationToken"));
@@ -2329,7 +2329,7 @@ int WebWorker::ProcessLoginPage(const std::string& reasonForLogin)
 int WebWorker::ProcessSetProblemDatabaseInfo()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSetProblemDatabaseInfo");
   this->SetHeaderOKNoContentLength();
-  stOutput << this->GetSetProblemDatabaseInfoHtml();
+  stOutput << HtmlInterpretation::GetSetProblemDatabaseInfoHtml();
   return 0;
 }
 
@@ -2405,31 +2405,6 @@ std::string WebWorker::GetClonePageResult()
 std::string WebWorker::GetAddUserEmails()
 { MacroRegisterFunctionWithName("WebWorker::GetAddUserEmails");
   return HtmlInterpretation::AddUserEmails(this->hostWithPort);
-}
-
-std::string WebWorker::GetSetProblemDatabaseInfoHtml()
-{ MacroRegisterFunctionWithName("WebWorker::GetSetProblemDatabaseInfoHtml");
-#ifdef MACRO_use_MySQL
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
-    return "<b>Only admins may set problem weights.</b>";
-  std::string inputProblemInfo=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
-  std::string inputProblemHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"));
-  DatabaseRoutines theRoutines;
-  std::stringstream commentsOnFailure;
-  bool result=theRoutines.MergeProblemInfoInDatabase(inputProblemHome, inputProblemInfo, commentsOnFailure);
-  std::stringstream out;
-  if (result)
-  { out << "<span style=\"color:green\"><b>Successfully modified problem data. </b></span>";
-    //out << "<meta http-equiv=\"refresh\" content=\"0;\">";
-  } else
-    out << "<span style=\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
-  //out << "<br>Debug message:<br>inputProblemInfo raw: " << inputProblemInfo << "<br>Processed: "
-  //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(inputProblemInfo)
-  //<< "<br>inputProblemHome: " << inputProblemHome;
-  return out.str();
-#else
-  return "Cannot modify problem weights (no database available)";
-#endif // MACRO_use_MySQL
 }
 
 std::string HtmlInterpretation::ModifyProblemReport()
@@ -3716,9 +3691,9 @@ void WebServer::InitializeGlobalVariables()
 { theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=5;
   theGlobalVariables.flagReportEverything=true;
   ParallelComputing::cgiLimitRAMuseNumPointersInList=4000000000;
-  MapList<std::string, std::string, MathRoutines::hashString>&
+  MapLisT<std::string, std::string, MathRoutines::hashString>&
   folderSubstitutionsNonSensitive=FileOperations::FolderVirtualLinksNonSensitive();
-  MapList<std::string, std::string, MathRoutines::hashString>&
+  MapLisT<std::string, std::string, MathRoutines::hashString>&
   folderSubstitutionsSensitive=FileOperations::FolderVirtualLinksSensitive();
 
   folderSubstitutionsNonSensitive.Clear();

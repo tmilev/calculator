@@ -166,15 +166,22 @@ struct Answer
   std::string ToString();
 };
 
+struct ProblemDataAdministrative
+{
+public:
+  std::string ProblemWeightUserInput;
+  Rational ProblemWeight;
+  MapLisT<std::string, std::string, MathRoutines::hashString> deadlinesPerSection;
+};
+
 struct ProblemData
 {
 public:
   bool flagRandomSeedComputed;
   unsigned int randomSeed;
-  std::string ProblemWeightUserInput;
   bool flagProblemWeightIsOK;
-  Rational ProblemWeight;
   Rational Points;
+  ProblemDataAdministrative adminData;
   int numCorrectlyAnswered;
   int totalNumSubmissions;
 //  int numAnswersSought;
@@ -238,7 +245,9 @@ public:
 
   void ComputePointsEarned
   (const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
-   const List<std::string>& problemWeights);
+      MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
+  databaseProblemInfo
+   );
   ProblemData& HasProblemData(const std::string& problemName);
   ProblemData& GetProblemDataAddIfNotPresent(const std::string& problemName);
   void SetProblemData(const std::string& problemName, const ProblemData& inputData);
@@ -337,24 +346,8 @@ public:
    std::stringstream& commentsOnFailure)
   ;
   bool StoreProblemDatabaseInfo
-  (const std::string& problemHomeName, const std::string& inputString,
-   std::stringstream& commentsOnFailure)
+  (const UserCalculatorData& theUser, std::stringstream& commentsOnFailure)
   ;
-  bool MergeProblemInfoInDatabase
-  (const std::string& problemHomeName, std::string& inputString,
-   std::stringstream& commentsOnFailure)
-  ;
-  bool ReadProblemInfo
-  (const std::string& stringToReadFrom, HashedList<std::string, MathRoutines::hashString>& outputProblemNames,
-   List<std::string>& outputWeights,
-   List<List<std::string> >& outputSections, List<List<std::string> >& outputDeadlinesPerSection,
-   std::stringstream& commentsOnFailure)
-      ;
-  void StoreProblemInfo
-  (std::string& outputString, const HashedList<std::string, MathRoutines::hashString>& inputProblemNames,
-   const List<std::string>& inputWeights, const List<List<std::string> >& inputSections,
-   const List<List<std::string> >& inputDeadlines)
-   ;
   bool FetchEntry
   (const MySQLdata& key, const MySQLdata& valueSearchKey, const MySQLdata& tableName,
    const MySQLdata& desiredColumn, std::string& outputUnsafe, std::stringstream* failureComments)
@@ -376,7 +369,8 @@ bool FetchAllUsers
   std::string ToStringClassDetails
 (bool adminsOnly, List<List<std::string> >& userTable, List<std::string>& userLabels,
  HashedList<std::string, MathRoutines::hashString>& databaseSpanList,
- List<std::string>& databaseProblemWeights
+  MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
+  databaseProblemInfo
  )
   ;
   bool FetchTablE

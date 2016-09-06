@@ -31,7 +31,7 @@ struct MeshTriangles{
   }
   List<bool> trianglesUsed;
   List<List<Vector<double> > > theTriangles;
-  MapList<double, Vector<double>, MathRoutines::HashVectorDoubles> theEvaluatedPoints;
+  MapLisT<Vector<double>, double, MathRoutines::HashVectorDoubles> theEvaluatedPoints;
   HashedList<Expression> knownEs;
   List<double> knownValues;
   Vector<double> lowerLeftCorner, upperRightCorner;

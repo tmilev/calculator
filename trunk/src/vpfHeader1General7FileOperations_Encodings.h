@@ -9,9 +9,9 @@ static ProjectInformationInstance ProjectInfoVpfHeader1General7FileOperations_En
 struct FileOperations
 {
 public:
-  static MapList<std::string, std::string, MathRoutines::hashString>&
+  static MapLisT<std::string, std::string, MathRoutines::hashString>&
   FolderVirtualLinksNonSensitive();
-  static MapList<std::string, std::string, MathRoutines::hashString>&
+  static MapLisT<std::string, std::string, MathRoutines::hashString>&
   FolderVirtualLinksSensitive();
 
   static bool LoadFileToStringUnsecure
@@ -120,15 +120,15 @@ public:
   static void clearDollarSigns(std::string& theString, std::string& output);
   static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
   static bool AccountOneInputCGIString
-(const std::string& fieldName, const std::string& fieldValue, MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
+(const std::string& fieldName, const std::string& fieldValue, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
  std::stringstream& commentsOnFailure)
   ;
   static bool ChopCGIString
-(const std::string& input, MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
+(const std::string& input, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
  std::stringstream& commentsOnFailure)
   ;
   static bool ChopCGIStringAppend
-(const std::string& input, MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
+(const std::string& input, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
  std::stringstream& commentsOnFailure)
   ;
   static std::string GetJavascriptInjectCalculatorResponseInNode();

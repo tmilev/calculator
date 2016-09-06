@@ -113,7 +113,7 @@ public:
   ListReferences<List<std::string> > ProgressReportStringS;
   List<std::string> programArguments;
 
-  MapList<std::string, std::string, MathRoutines::hashString> webArguments;
+  MapLisT<std::string, std::string, MathRoutines::hashString> webArguments;
   UserCalculatorData userDefault;
   std::string userCalculatorRequestType;
 

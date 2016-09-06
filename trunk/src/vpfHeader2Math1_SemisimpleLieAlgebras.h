@@ -382,7 +382,7 @@ public:
   }
   void ToString(std::string& output, bool useHtml);
   void MakeGinGWithId
- (char theWeylLetter, int theWeylDim, MapReferences<SemisimpleLieAlgebra, DynkinType>& ownerOfAlgebras)
+ (char theWeylLetter, int theWeylDim, MapReferenceS<DynkinType, SemisimpleLieAlgebra>& ownerOfAlgebras)
   ;
   void ProjectOntoSmallCartan(Vector<Rational>& input, Vector<Rational> & output);
   void ProjectOntoSmallCartan(Vectors<Rational>& input, Vectors<Rational>& output);

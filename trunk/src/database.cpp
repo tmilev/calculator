@@ -79,6 +79,14 @@ std::string DatabaseStrings::usersTableName="users";
 std::string DatabaseStrings::userGroupLabel="userInfo";
 std::string DatabaseStrings::databaseUser="ace";
 std::string DatabaseStrings::theDatabaseName="aceDB";
+std::string DatabaseStrings::deadlinesTableName="deadlines";
+std::string DatabaseStrings::deadlinesIdColumnName="id";
+std::string DatabaseStrings::deadlinesInfoColumnName="info";
+
+std::string DatabaseStrings::problemWeightsTableName="problemWeights";
+std::string DatabaseStrings::problemWeightsIdColumnName="id";
+std::string DatabaseStrings::problemWeightsInfoColumnName="info";
+
 DatabaseRoutines::DatabaseRoutines()
 { this->connection=0;
   this->MaxNumRowsToFetch=1000;
@@ -235,7 +243,7 @@ bool UserCalculator::CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, std
   }
   std::stringstream queryStream;
   queryStream << "INSERT INTO " << theRoutines.theDatabaseName
-  << ".users(username, deadlineInfoTableName, problemInfoTableName)"
+  << ".users(username, deadlineInfoRowId, problemInfoRowId)"
   << " VALUES("
   << this->username.GetDatA() << ", 'defaultDeadlines', 'defaultProblemInfo' "
   << ")";
@@ -315,20 +323,28 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, 
   }
   //CANT use DatabaseQuery object as its constructor calls this method!!!!!
   mysql_free_result( mysql_use_result(this->connection));
-  return this->CreateTable("users", "\
-    id int NOT NULL AUTO_INCREMENT PRIMARY KEY, \
-    username VARCHAR(255) NOT NULL,  \
-    password LONGTEXT, \
-    email LONGTEXT, \
-    authenticationCreationTime LONGTEXT, \
-    authenticationToken LONGTEXT, \
-    activationToken LONGTEXT, \
-    userRole LONGTEXT, \
-    userInfo LONGTEXT, \
-    problemInfoTableName LONGTEXT, \
-    deadlineInfoTableName LONGTEXT, \
-    problemData LONGTEXT \
-    ", commentsOnFailure, outputfirstLogin);
+  if (! this->CreateTable
+      ("users", "\
+        id int NOT NULL AUTO_INCREMENT PRIMARY KEY, \
+        username VARCHAR(255) NOT NULL,  \
+        password LONGTEXT, \
+        email LONGTEXT, \
+        authenticationCreationTime LONGTEXT, \
+        authenticationToken LONGTEXT, \
+        activationToken LONGTEXT, \
+        userRole LONGTEXT, \
+        userInfo LONGTEXT, \
+        problemInfoRowId LONGTEXT, \
+        deadlineInfoRowId LONGTEXT, \
+        problemData LONGTEXT \
+        ", commentsOnFailure, outputfirstLogin))
+    return false;
+  if (!this->CreateTable
+      (DatabaseStrings::deadlinesTableName,
+      "id VARCHAR(50) not null, info LONGTEXT", commentsOnFailure, 0))
+    return false;
+  return this->CreateTable
+  (DatabaseStrings::problemWeightsTableName, "id VARCHAR(50) not null, info LONGTEXT", commentsOnFailure, 0);
 }
 
 bool DatabaseRoutines::InsertRow

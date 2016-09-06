@@ -115,22 +115,18 @@ public:
   std::string topicListContent;
   std::string topicListFileName;
   List<TopicElement> theTopics;
-  HashedList<std::string, MathRoutines::hashString> hdProblemList;
+  MapLisT<std::string, TopicElement, MathRoutines::hashString> theTopicsOrdered;
   List<std::string> hdHomeworkGroupCorrespondingToEachProblem;
   List<List<std::string> > hdHomeworkGroups;
   HashedList<std::string, MathRoutines::hashString> hdHomeworkGroupNames;
   HashedList<std::string, MathRoutines::hashString> databaseProblemAndHomeworkGroupList;
 //  List<std::string> databaseHomeworkGroupCorrespondingToEachProblem;
-  List<List<std::string> > databaseHomeworkGroupDeadlinesPerSection;
-  List<List<std::string> > databaseHomeworkGroupMaxNumTriesPerSection;
-  List<std::string> databaseProblemWeights;
-  List<List<std::string> > databaseStudentSectionsPerProblem;
-  List<List<std::string> > databaseDeadlinesBySection;
-  List<std::string> databaseStudentSectionS;
+  MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>
+  databaseProblemInfo;
   List<List<std::string> > userTablE;
   List<std::string> labelsUserTablE;
   List<std::string> problemListOfParent;
-  std::string currentProblemCollectionDatabaseString;
+  List<std::string> databaseStudentSections;
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;
   /////////////////
@@ -171,12 +167,34 @@ public:
   std::string CleanUpCommandString(const std::string& inputCommand);
   void InterpretNotByCalculator(SyntacticElementHTML& inputOutput);
   std::string GetDeadline
-  (
-   const std::string& problemName
-   //int indexInDatabase
-   ,
-   const std::string& sectionNumber
-   , bool inheritFromGroup, bool& outputIsInherited);
+  (const std::string& problemName, const std::string& sectionNumber,
+   bool inheritFromGroup, bool& outputIsInherited);
+  bool MergeOneProblemAdminData
+(const std::string& inputProblemName, ProblemDataAdministrative& inputProblemInfo,
+ std::stringstream& commentsOnFailure)
+  ;
+  bool MergeProblemInfoInDatabase
+  (const std::string& problemHomeName,
+   std::string& incomingProblemInfo,
+   std::stringstream& commentsOnFailure)
+  ;
+  bool ReadProblemInfoAppend
+  (const std::string& inputInfoString,
+   MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
+   outputProblemInfo,
+   std::stringstream& commentsOnFailure
+   )
+   ;
+  void StoreDeadlineInfo
+  (std::string& outputString,
+   MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
+   inputProblemInfo)
+   ;
+  void StoreProblemWeightInfo
+  (std::string& outputString,
+   MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
+   inputProblemInfo)
+   ;
   std::string InterpretGenerateDeadlineLink
 (bool isActualProblem, const std::string& cleaneduplink, const std::string& urledProblem, bool problemAlreadySolved)
   ;

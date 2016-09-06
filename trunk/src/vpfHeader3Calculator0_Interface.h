@@ -691,8 +691,8 @@ class ObjectContainer
 public:
   HashedListReferences<ElementWeylGroup<WeylGroupData> > theWeylGroupElements;
 ///////////////////////
-  MapReferences<SemisimpleLieAlgebra, DynkinType> theSSLieAlgebras;
-  MapReferences<SemisimpleSubalgebras, DynkinType> theSSSubalgebraS;
+  MapReferenceS<DynkinType, SemisimpleLieAlgebra> theSSLieAlgebras;
+  MapReferenceS<DynkinType, SemisimpleSubalgebras> theSSSubalgebraS;
 ////////////////////////
   HashedListReferences<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> > theWeylGroupReps;
   HashedListReferences<VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> > theWeylGroupVirtualReps;
@@ -722,7 +722,7 @@ public:
   HashedListReferences<Weight<Polynomial<Rational> > > theWeightsPoly;
   ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational > > theHyperoctahedralReps;
   ListReferences<Plot> thePlots;
-  MapReferences<Expression, std::string, MathRoutines::hashString> theUserInputTextBoxesWithValues;
+  MapReferenceS<std::string, Expression, MathRoutines::hashString> theUserInputTextBoxesWithValues;
   HashedList<std::string, MathRoutines::hashString> theUserInputTextBoxes;
 
   AlgebraicClosureRationals theAlgebraicClosure;
@@ -796,7 +796,7 @@ public:
 
   HashedList<std::string, MathRoutines::hashString> stringsThatSplitIfFollowedByDigit;
 
-  MapList<List<std::string>, std::string, MathRoutines::hashString> predefinedWordSplits;
+  MapLisT<std::string, List<std::string>, MathRoutines::hashString> predefinedWordSplits;
   List<List<Function> > FunctionHandlers;
   List<List<Function> > operationsCompositeHandlers;
   HashedList<std::string, MathRoutines::hashString> namedRules;
@@ -1966,10 +1966,10 @@ public:
   static bool innerLoadKey(Calculator& theCommands, const Expression& inputStatementList, const std::string& inputKey, Expression& output);
   static bool innerLoadKeysFromStatementList
   (Calculator& theCommands, const Expression& input,
-  MapList<Expression, std::string, MathRoutines::hashString>& output, std::stringstream* commentsOnFailure=0);
+  MapLisT<std::string, Expression, MathRoutines::hashString>& output, std::stringstream* commentsOnFailure=0);
   static bool innerLoadKeysFromStatementList
   (Calculator& theCommands, const Expression& input,
-  MapList<Expression, Expression>& output, std::stringstream* commentsOnFailure=0);
+  MapLisT<Expression, Expression>& output, std::stringstream* commentsOnFailure=0);
 
   static bool innerStoreSemisimpleSubalgebras
   (Calculator& theCommands, const SemisimpleSubalgebras& input, Expression& output);

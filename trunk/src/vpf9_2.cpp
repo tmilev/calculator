@@ -746,7 +746,7 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
 }
 
 void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId
-(char theWeylLetter, int theWeylDim, MapReferences<SemisimpleLieAlgebra, DynkinType>& ownerOfAlgebras)
+(char theWeylLetter, int theWeylDim, MapReferenceS<DynkinType, SemisimpleLieAlgebra>& ownerOfAlgebras)
 { MacroRegisterFunctionWithName("HomomorphismSemisimpleLieAlgebra::MakeGinGWithId");
   DynkinType theType;
   theType.MakeSimpleType(theWeylLetter, theWeylDim);
@@ -2335,7 +2335,7 @@ std::string CGI::URLKeyValuePairsToNormalRecursiveHtml(const std::string& input,
 //  stOutput << "I'm here<br>";
   if (recursionDepth>50)
     return input;
-  MapList<std::string, std::string, MathRoutines::hashString> currentMap;
+  MapLisT<std::string, std::string, MathRoutines::hashString> currentMap;
   std::stringstream notUsed;
   if (!CGI::ChopCGIString(input, currentMap, notUsed))
   { //stOutput << "oh no: " << notUsed.str();
@@ -2505,7 +2505,7 @@ std::string& CGI::GetJavascriptMathjax()
 }
 
 bool CGI::AccountOneInputCGIString
-(const std::string& fieldName, const std::string& fieldValue, MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
+(const std::string& fieldName, const std::string& fieldValue, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
  std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("CGI::AccountOneInputCGIString");
   if (fieldName=="")
@@ -2522,7 +2522,7 @@ bool CGI::AccountOneInputCGIString
   return true;
 }
 
-bool CGI::ChopCGIString(const std::string& input, MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
+bool CGI::ChopCGIString(const std::string& input, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
  std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("CGI::ChopCGIString");
   outputMap.Clear();
@@ -2530,7 +2530,7 @@ bool CGI::ChopCGIString(const std::string& input, MapList<std::string, std::stri
   return CGI::ChopCGIStringAppend(input, outputMap, commentsOnFailure);
 }
 
-bool CGI::ChopCGIStringAppend(const std::string& input, MapList<std::string, std::string, MathRoutines::hashString>& outputMap,
+bool CGI::ChopCGIStringAppend(const std::string& input, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
  std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("CGI::ChopCGIStringAppend");
   int inputLength= (signed) input.size();

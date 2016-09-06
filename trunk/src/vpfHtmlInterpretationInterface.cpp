@@ -36,7 +36,7 @@ std::string HtmlInterpretation::GetProblemSolution()
     return out.str();
   }
   std::string lastStudentAnswerID;
-  MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
+  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
   for (int i=0; i<theArgs.size(); i++)
     MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
   int indexLastAnswerId=theProblem.GetAnswerIndex(lastStudentAnswerID);
@@ -97,6 +97,33 @@ std::string HtmlInterpretation::GetProblemSolution()
   return out.str();
 }
 
+std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
+{ MacroRegisterFunctionWithName("WebWorker::GetSetProblemDatabaseInfoHtml");
+#ifdef MACRO_use_MySQL
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return "<b>Only admins may set problem weights.</b>";
+  std::string inputProblemInfo=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
+  std::string inputProblemHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"));
+  std::stringstream commentsOnFailure;
+  CalculatorHTML theProblem;
+  theProblem.fileName=inputProblemHome;
+  bool result=theProblem.MergeProblemInfoInDatabase
+  (inputProblemHome, inputProblemInfo, commentsOnFailure);
+  std::stringstream out;
+  if (result)
+  { out << "<span style=\"color:green\"><b>Successfully modified problem data. </b></span>";
+    //out << "<meta http-equiv=\"refresh\" content=\"0;\">";
+  } else
+    out << "<span style=\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
+  //out << "<br>Debug message:<br>inputProblemInfo raw: " << inputProblemInfo << "<br>Processed: "
+  //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(inputProblemInfo)
+  //<< "<br>inputProblemHome: " << inputProblemHome;
+  return out.str();
+#else
+  return "Cannot modify problem weights (no database available)";
+#endif // MACRO_use_MySQL
+}
+
 std::string HtmlInterpretation::SubmitProblemPreview()
 { MacroRegisterFunctionWithName("WebWorker::SubmitProblemPreview");
   double startTime=theGlobalVariables.GetElapsedSeconds();
@@ -104,7 +131,7 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   std::string lastStudentAnswerID;
   std::string lastAnswer;
   std::stringstream out;
-  MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
+  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
   for (int i=0; i<theArgs.size(); i++)
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID))
       lastAnswer= "("+ CGI::URLStringToNormal(theArgs[i]) + "); ";
@@ -467,7 +494,7 @@ std::string HtmlInterpretation::SubmitProblem()
   std::string problemStatement=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("problemStatement"));
   std::string studentAnswerNameReader;
   theProblem.studentTagsAnswered.init(theProblem.theProblemData.theAnswers.size);
-  MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
+  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
   int answerIdIndex=-1;
   for (int i=0; i<theArgs.size(); i++)
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &studentAnswerNameReader))
@@ -704,7 +731,7 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
     (courseHome, theCollection.userTablE, theCollection.labelsUserTablE, comments);
     out << theRoutines.ToStringClassDetails
     (usersAreAdmins, theCollection.userTablE, theCollection.labelsUserTablE,
-     theCollection.databaseProblemAndHomeworkGroupList, theCollection.databaseProblemWeights);
+     theCollection.databaseProblemAndHomeworkGroupList, theCollection.databaseProblemInfo);
   } else
   { List<List<std::string> > userTable;
     List<std::string> userLabels;
@@ -754,7 +781,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp()
   }
 
   std::string lastStudentAnswerID;
-  MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
+  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
   for (int i=0; i<theArgs.size(); i++)
     MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
   int indexLastAnswerId=theProblem.GetAnswerIndex(lastStudentAnswerID);

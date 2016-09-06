@@ -566,10 +566,36 @@ bool UserCalculator::FetchOneUserRow
     this->authenticationTokenCreationTime=this->GetSelectedRowEntry("authenticationCreationTime");
     this->actualAuthenticationToken=this->GetSelectedRowEntry("authenticationToken");
     this->problemDataString=this->GetSelectedRowEntry("problemData");
-    this->deadlineInfoTableName=this->GetSelectedRowEntry("deadlineInfoTableName");
-    this->problemInfoTableName=this->GetSelectedRowEntry("problemInfoTableName");
+    this->deadlineInfoRowId=this->GetSelectedRowEntry("deadlineInfoRowId");
+    this->problemInfoRowId=this->GetSelectedRowEntry("problemInfoRowId");
   }
-  return true;
+  std::string reader;
+  bool result=true;
+  if (this->deadlineInfoRowId!="")
+  { if (theRoutines.FetchEntry
+        (DatabaseStrings::deadlinesIdColumnName,
+         this->deadlineInfoRowId,
+         DatabaseStrings::deadlinesTableName,
+         DatabaseStrings::deadlinesInfoColumnName,
+         reader,
+         failureStream))
+      result=false;
+    else
+      this->deadlineInfoString=CGI::URLStringToNormal(reader);
+  }
+  if (this->problemInfoRowId!="")
+  { if (theRoutines.FetchEntry
+        (DatabaseStrings::problemWeightsIdColumnName,
+         this->problemInfoRowId,
+         DatabaseStrings::problemWeightsTableName,
+         DatabaseStrings::problemWeightsInfoColumnName,
+         reader,
+         failureStream))
+      result=false;
+    else
+      this->problemInfoString=CGI::URLStringToNormal(reader);
+  }
+  return result;
 }
 
 bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
@@ -884,7 +910,9 @@ bool DatabaseRoutines::SendActivationEmail(const std::string& emailList, std::st
 
 void UserCalculator::ComputePointsEarned
 (const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
- const List<std::string>& problemWeights)
+   MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
+  databaseProblemInfo
+ )
 { MacroRegisterFunctionWithName("UserCalculator::ComputePointsEarned");
   this->pointsEarned=0;
   for (int i=0; i<this->problemData.size; i++)
@@ -893,11 +921,11 @@ void UserCalculator::ComputePointsEarned
     this->problemData[i].totalNumSubmissions=0;
     this->problemData[i].numCorrectlyAnswered=0;
     if (gradableProblems.Contains(this->problemNames[i]) )
-    { this->problemData[i].ProblemWeightUserInput=
-      problemWeights[gradableProblems.GetIndex(this->problemNames[i])];
+    { this->problemData[i].adminData=
+      databaseProblemInfo.GetValueCreateIfNotPresent(this->problemNames[i]);
       this->problemData[i].flagProblemWeightIsOK=
-      this->problemData[i].ProblemWeight.AssignStringFailureAllowed
-      (this->problemData[i].ProblemWeightUserInput);
+      this->problemData[i].adminData.ProblemWeight.AssignStringFailureAllowed
+      (this->problemData[i].adminData.ProblemWeightUserInput);
     }
 //    this->problemData[i].numAnswersSought=this->problemData[i].answerIds.size;
     for (int j=0; j<currentP.theAnswers.size; j++)
@@ -906,7 +934,7 @@ void UserCalculator::ComputePointsEarned
       currentP.totalNumSubmissions+=currentP.theAnswers[j].numSubmissions;
     }
     if (this->problemData[i].flagProblemWeightIsOK && currentP.theAnswers.size>0)
-    { currentP.Points=(currentP.ProblemWeight*currentP.numCorrectlyAnswered)/currentP.theAnswers.size;
+    { currentP.Points=(currentP.adminData.ProblemWeight*currentP.numCorrectlyAnswered)/currentP.theAnswers.size;
       this->pointsEarned+= this->problemData[i].Points;
     }
   }
@@ -993,7 +1021,7 @@ void UserCalculator::SetProblemData(const std::string& problemName, const Proble
 
 bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("ProblemData::LoadFrom");
-  MapList<std::string, std::string, MathRoutines::hashString> theMap;
+  MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
   if (!CGI::ChopCGIString(inputData, theMap, commentsOnFailure))
     return false;
 //  stOutput << "<hr>DEBUG: Interpreting: <br>" << CGI::URLKeyValuePairsToNormalRecursiveHtml( inputData )<< "<hr>";
@@ -1006,7 +1034,7 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
     }
   this->theAnswers.SetSize(0);
   bool result=true;
-  MapList<std::string, std::string, MathRoutines::hashString> currentQuestionMap;
+  MapLisT<std::string, std::string, MathRoutines::hashString> currentQuestionMap;
   for (int i=0; i<theMap.size(); i++)
   { if (theMap.theKeys[i]=="randomSeed")
       continue;
@@ -1056,8 +1084,7 @@ std::string ProblemData::Store()
 bool UserCalculator::InterpretDatabaseProblemData
 (const std::string& theInfo, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::InterpretDatabaseProblemData");
-
-  MapList<std::string, std::string, MathRoutines::hashString> theMap;
+  MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
   if (!CGI::ChopCGIString(theInfo, theMap, commentsOnFailure))
     return false;
   this->problemNames.Clear();

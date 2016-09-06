@@ -55,9 +55,9 @@ class UserCalculatorData{
   MySQLdata enteredAuthenticationToken;
   MySQLdata actualAuthenticationToken;
   MySQLdata problemDataString;
-  MySQLdata problemInfoTableName;
+  MySQLdata problemInfoRowId;
   MySQLdata problemInfoString;
-  MySQLdata deadlineInfoTableName;
+  MySQLdata deadlineInfoRowId;
   MySQLdata deadlineInfoString;
   MySQLdata userGroup;
 
@@ -84,5 +84,11 @@ public:
   static std::string theDatabaseName;
   static std::string usersTableName;
   static std::string userGroupLabel;
+  static std::string deadlinesTableName;
+  static std::string deadlinesIdColumnName;
+  static std::string deadlinesInfoColumnName;
+  static std::string problemWeightsTableName;
+  static std::string problemWeightsIdColumnName;
+  static std::string problemWeightsInfoColumnName;
 };
 #endif

@@ -10,8 +10,8 @@ ProjectInformationInstance projectInfoInstanceHtmlSnippets
 
 std::string HtmlSnippets::GetJavascriptSubmitEmails()
 { std::stringstream out;
-  std::string deadlineInfoTableName="defaultDeadlines";
-  std::string problemInfoTableName="defaultProblemInfo";
+  std::string deadlineInfoRowId="defaultDeadlines";
+  std::string problemInfoRowId="defaultProblemInfo";
   out
   << "<script type=\"text/javascript\" id=\"scriptSubmitEmails\"> \n"
   << "function addEmailsOrUsers(idEmailList, problemCollectionName, idOutput, userRole, idUserGroup, requestType){\n"
@@ -27,8 +27,8 @@ std::string HtmlSnippets::GetJavascriptSubmitEmails()
   << "  params+='userRole='+userRole;\n"
   << "  params+='&mainInput=' + encodeURIComponent(spanEmailList.value);\n"
   << "  params+='&" << DatabaseStrings::userGroupLabel << "=' + encodeURIComponent(spanUserGroup.value);\n"
-  << "  params+='&deadlineInfoTableName=' + encodeURIComponent('" << deadlineInfoTableName << "');\n"
-  << "  params+='&problemInfoTableName=' + encodeURIComponent('" << problemInfoTableName << "');\n"
+  << "  params+='&deadlineInfoRowId=' + encodeURIComponent('" << deadlineInfoRowId << "');\n"
+  << "  params+='&problemInfoRowId=' + encodeURIComponent('" << problemInfoRowId << "');\n"
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"POST\", '" << theGlobalVariables.DisplayNameExecutable << "', true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"

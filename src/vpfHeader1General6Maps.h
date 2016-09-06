@@ -5,8 +5,8 @@
 
 #include "vpfHeader1General0_General.h"
 static ProjectInformationInstance ProjectInfovpfHeader1General6Maps(__FILE__, "Header, Map implementation. ");
-template <class listType, class value, class key, unsigned int hashFunction(const key&)=key::HashFunction>
-class MapTemplate
+template <class listType, class key, class value, unsigned int hashFunction(const key&)=key::HashFunction>
+class MapTemplatE
 {
 public:
   HashedList<key, hashFunction> theKeys;
@@ -59,10 +59,10 @@ public:
 
 //using C++11, not sure if that is a good idea:
 //In case this does not compile, please see the commented code below.
-template <class value, class key, unsigned int hashFunction(const key&)=key::HashFunction>
-using MapReferences=MapTemplate<ListReferences<value>, value, key, hashFunction>;
-template <class value, class key, unsigned int hashFunction(const key&)=key::HashFunction>
-using MapList=MapTemplate<List<value>, value, key, hashFunction>;
+template <class key, class value, unsigned int hashFunction(const key&)=key::HashFunction>
+using MapReferenceS=MapTemplatE<ListReferences<value>, key, value, hashFunction>;
+template <class key, class value, unsigned int hashFunction(const key&)=key::HashFunction>
+using MapLisT=MapTemplatE<List<value>, key, value, hashFunction>;
 
 /*
 template <class value, class key, unsigned int hashFunction(const key&)=key::HashFunction>

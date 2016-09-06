@@ -568,9 +568,9 @@ bool FileOperations::LoadFileToStringUnsecure
 }
 
 #include "vpfHeader1General2Multitasking.h"
-MapList<std::string, std::string, MathRoutines::hashString>&
+MapLisT<std::string, std::string, MathRoutines::hashString>&
 FileOperations::FolderVirtualLinksNonSensitive()
-{ static MapList<std::string, std::string, MathRoutines::hashString> result;
+{ static MapLisT<std::string, std::string, MathRoutines::hashString> result;
   static bool firstRun=false;
   if (!firstRun)
   { firstRun=true;
@@ -586,9 +586,9 @@ FileOperations::FolderVirtualLinksNonSensitive()
   return result;
 }
 
-MapList<std::string, std::string, MathRoutines::hashString>&
+MapLisT<std::string, std::string, MathRoutines::hashString>&
 FileOperations::FolderVirtualLinksSensitive()
-{ static MapList<std::string, std::string, MathRoutines::hashString> result;
+{ static MapLisT<std::string, std::string, MathRoutines::hashString> result;
   static bool firstRun=false;
   if (!firstRun)
   { firstRun=true;

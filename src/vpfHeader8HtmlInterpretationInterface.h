@@ -24,6 +24,7 @@ public:
   static std::string GetAnswerOnGiveUp();
   static std::string GetSelectCourse();
   static std::string SubmitProblemPreview();
+  static std::string GetSetProblemDatabaseInfoHtml();
   static std::string GetAccountsPage(const std::string& hostWebAddressWithPort);
   static std::string ToStringUserDetails
   (bool adminsOnly, List<List<std::string> > userTable, List<std::string> columnLabels,

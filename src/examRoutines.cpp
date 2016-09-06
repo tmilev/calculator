@@ -38,81 +38,83 @@ CalculatorHTML::CalculatorHTML()
 }
 
 #ifdef MACRO_use_MySQL
-bool DatabaseRoutines::ReadProblemInfo
-  (const std::string& stringToReadFrom, HashedList<std::string, MathRoutines::hashString>& outputProblemNames,
-//   List<std::string>& outputHomeworkGroups,
-   List<std::string>& outputWeights,
-   List<List<std::string> >& outputSections, List<List<std::string> >& outputDeadlinesPerSection,
-   std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::ReadProblemInfo");
-  MapList<std::string, std::string, MathRoutines::hashString> CGIedProbs, currentProblem, sectionInfo;
-  if (!CGI::ChopCGIString
-      (stringToReadFrom, CGIedProbs, commentsOnFailure) )
+bool CalculatorHTML::ReadProblemInfoAppend
+(const std::string& inputInfoString,
+ MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
+ outputProblemInfo,
+ std::stringstream& commentsOnFailure
+)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::ReadProblemInfoAppend");
+  MapLisT<std::string, std::string, MathRoutines::hashString>
+  CGIedProbs, currentKeyValues, sectionInfo;
+  if (!CGI::ChopCGIString(inputInfoString, CGIedProbs, commentsOnFailure) )
     return false;
-  outputProblemNames.Clear();
-  outputProblemNames.SetExpectedSize(CGIedProbs.size());
+  outputProblemInfo.SetExpectedSize(outputProblemInfo.size()+ CGIedProbs.size());
+  ProblemDataAdministrative currentProblemValue;
+  std::string currentProbName, currentProbString;
   for (int i=0; i<CGIedProbs.size(); i++)
-    outputProblemNames.AddOnTop(CGI::URLStringToNormal(CGIedProbs.theKeys[i]));
-//  outputHomeworkGroups.initFillInObject(outputProblemNames.size, "");
-  outputWeights.initFillInObject(outputProblemNames.size, "");
-  outputSections.initFillInObject(outputProblemNames.size, CGIedProbs.size());
-  outputDeadlinesPerSection.initFillInObject(outputProblemNames.size, CGIedProbs.size());
-  for (int i=0; i<outputProblemNames.size; i++)
-  { if (!CGI::ChopCGIString
-        (CGI::URLStringToNormal(CGIedProbs.theValues[i]), currentProblem, commentsOnFailure))
+  { currentProbName=CGI::URLStringToNormal(CGIedProbs.theKeys[i]);
+    currentProbString=CGI::URLStringToNormal(CGIedProbs.theValues[i]);
+    if (!CGI::ChopCGIString(currentProbString, currentKeyValues, commentsOnFailure))
       return false;
-    //    stOutput << "<br>DEBUG: current problem: " << outputProblemNames[i]
-    //    << "<br>being read from data: " << CGIedProbs[i]
-    //    << "<br>which is normalized to: " << CGI::URLStringToNormal(CGIedProbs[i]);
-    if (currentProblem.Contains("weight"))
-      outputWeights[i]=
-      CGI::URLStringToNormal(currentProblem.GetValueCreateIfNotPresent("weight"));
-    if (!currentProblem.Contains("deadlines"))
+    if (currentKeyValues.Contains("weight"))
+      currentProblemValue.ProblemWeight=
+      CGI::URLStringToNormal(currentKeyValues.GetValueCreateIfNotPresent("weight"));
+    if (!currentKeyValues.Contains("deadlines"))
       continue;
-    std::string deadlineString=CGI::URLStringToNormal(currentProblem.GetValueCreateIfNotPresent("deadlines"));
-    //stOutput << "<hr><hr>DEBUG: deadline string: " << deadlineString;
+    std::string deadlineString=CGI::URLStringToNormal(currentKeyValues.GetValueCreateIfNotPresent("deadlines"));
     if (!CGI::ChopCGIString(deadlineString, sectionInfo, commentsOnFailure))
       return false;
-    //stOutput << "<hr><hr>DEBUG: sectionInfo: " << sectionInfo.ToStringHtml();
     for (int j=0; j<sectionInfo.size(); j++)
-    { outputSections[i].AddOnTop(CGI::URLStringToNormal(sectionInfo.theKeys[j]));
-      outputDeadlinesPerSection[i].AddOnTop(CGI::URLStringToNormal(sectionInfo.theValues[j]));
-    }
+      currentProblemValue.deadlinesPerSection.SetKeyValue
+      (CGI::URLStringToNormal(sectionInfo.theKeys[j]),
+       CGI::URLStringToNormal(sectionInfo.theValues[j]));
+    outputProblemInfo.SetKeyValue(currentProbName, currentProblemValue);
   }
-  //stOutput << "reading from: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(stringToReadFrom);
-  //stOutput << "<hr><hr>DEBUG: final outputSections: " << outputSections
-  //<< "<br>outputDeadlinesPerSection: " << outputDeadlinesPerSection;
   return true;
 }
 
-void DatabaseRoutines::StoreProblemInfo
-  (std::string& outputString, const HashedList<std::string, MathRoutines::hashString>& inputProblemNames,
-   const List<std::string>& inputWeights, const List<List<std::string> >& inputSections,
-   const List<List<std::string> >& inputDeadlines)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemInfo");
-  if (inputProblemNames.size!=inputWeights.size ||
-      inputProblemNames.size!=inputDeadlines.size ||
-      inputProblemNames.size!=inputSections.size
-      )
-    crash << "This shouldn't happen: non-matching data sizes while storing problem info. "
-    << "The present function should only be called with sanitized input. " << crash;
+void CalculatorHTML::StoreProblemWeightInfo
+(std::string& outputString,
+ MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
+ inputProblemInfo)
+{ MacroRegisterFunctionWithName("CalculatorHTML::StoreProblemWeightInfo");
   std::stringstream out;
-  for (int i=0; i<inputProblemNames.size; i++)
-  { std::stringstream currentProblemStream, currentDeadlineStream;
-    if (inputWeights[i]!="")
-      currentProblemStream << "weight=" << CGI::StringToURLString(inputWeights[i]) << "&";
-    if (inputSections[i].size!=inputDeadlines[i].size)
-      crash << "Input sections and input deadlines have mismatching sizes. " << crash;
-    for (int j=0; j<inputSections[i].size; j++)
-      currentDeadlineStream << CGI::StringToURLString(inputSections[i][j])
-      << "=" << CGI::StringToURLString(inputDeadlines[i][j]) << "&";
+  for (int i=0; i<inputProblemInfo.size(); i++)
+  { ProblemDataAdministrative& currentProblem=inputProblemInfo.theValues[i];
+    std::string currentProbName=inputProblemInfo.theKeys[i];
+    std::stringstream currentProblemStream;
+    if (currentProblem.ProblemWeightUserInput!="")
+      currentProblemStream << "weight="
+      << CGI::StringToURLString(currentProblem.ProblemWeightUserInput) << "&";
+    out << CGI::StringToURLString( currentProbName )
+    << "="
+    << CGI::StringToURLString(currentProblemStream.str())
+    << "&";
+  }
+  outputString= out.str();
+}
+
+void CalculatorHTML::StoreDeadlineInfo
+(std::string& outputString,
+ MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
+ inputProblemInfo)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemInfo");
+  std::stringstream out;
+  for (int i=0; i<inputProblemInfo.size(); i++)
+  { ProblemDataAdministrative& currentProblem=inputProblemInfo.theValues[i];
+    std::string currentProbName=inputProblemInfo.theKeys[i];
+    std::stringstream currentProblemStream, currentDeadlineStream;
+    for (int j=0; j<currentProblem.deadlinesPerSection.size(); j++)
+      currentDeadlineStream
+      << CGI::StringToURLString(currentProblem.deadlinesPerSection.theKeys[j])
+      << "="
+      << CGI::StringToURLString(currentProblem.deadlinesPerSection.theValues[j])
+      << "&";
     currentProblemStream << "deadlines=" << CGI::StringToURLString(currentDeadlineStream.str()) << "&";
-    out << CGI::StringToURLString(inputProblemNames[i]) << "="
+    out << CGI::StringToURLString(currentProbName) << "="
     << CGI::StringToURLString(currentProblemStream.str()) << "&";
   }
-
-//  stOutput << "Storing prob string: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(out.str())
-//  << "<br>nput sections: " << inputSections << "<br>";
   outputString=out.str();
 }
 
@@ -141,31 +143,70 @@ bool DatabaseRoutines::ReadProblemDatabaseInfo
 }
 
 bool DatabaseRoutines::StoreProblemDatabaseInfo
-  (const std::string& problemHomeName, const std::string& inputString,
-   std::stringstream& commentsOnFailure)
+(const UserCalculatorData& theUser, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
   if (!this->startMySQLDatabaseIfNotAlreadyStarted(&commentsOnFailure))
     return false;
-  if (!this->TableExists("problemData", &commentsOnFailure))
-    if (!this->CreateTable("problemData", "problemCollection VARCHAR(255) NOT NULL PRIMARY KEY, \
-        problemInformation LONGTEXT", &commentsOnFailure, 0))
-      return false;
-  if (!this->RowExists
-      ((std::string) "problemCollection", problemHomeName,
-       (std::string) "problemData", &commentsOnFailure))
-    if (!this->SetEntry
-        ((std::string) "problemCollection", problemHomeName,
-         (std::string) "problemData", (std::string) "problemInformation",
-         (std::string) "", &commentsOnFailure))
-      return false;
-  return this->SetEntry
-  ((std::string) "problemCollection", problemHomeName, (std::string) "problemData",
-   (std::string) "problemInformation", inputString, &commentsOnFailure);
+  if (!this->SetEntry
+      (DatabaseStrings::deadlinesIdColumnName,
+       theUser.deadlineInfoRowId,
+       DatabaseStrings::deadlinesTableName,
+       theUser.deadlineInfoRowId,
+       theUser.deadlineInfoString, &commentsOnFailure))
+    return false;
+  if (!this->SetEntry
+      (DatabaseStrings::problemWeightsIdColumnName,
+       theUser.problemInfoRowId,
+       DatabaseStrings::problemWeightsTableName,
+       theUser.problemInfoRowId,
+       theUser.problemInfoString, &commentsOnFailure))
+    return false;
+  return true;
 }
 
-bool DatabaseRoutines::MergeProblemInfoInDatabase
-(const std::string& problemHomeName, std::string& inputString,
-  std::stringstream& commentsOnFailure)
+bool CalculatorHTML::MergeOneProblemAdminData
+(const std::string& inputProblemName, ProblemDataAdministrative& inputProblemInfo,
+ std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("CalculatorHTML::MergeOneProblemAdminData");
+  if (!this->theTopicsOrdered.Contains(inputProblemName) )
+  { commentsOnFailure << "Did not find " << inputProblemName
+    << " among the list of topics/problems. ";
+    return false;
+  }
+  if (!this->databaseProblemInfo.Contains(inputProblemName))
+    this->databaseProblemInfo.SetKeyValue(inputProblemName, inputProblemInfo);
+  ProblemDataAdministrative& currentProblem=this->databaseProblemInfo.GetValueCreateIfNotPresent(inputProblemName);
+  MapLisT<std::string, std::string, MathRoutines::hashString>&
+  currentDeadlines=currentProblem.deadlinesPerSection;
+  MapLisT<std::string, std::string, MathRoutines::hashString>&
+  incomingDeadlines=inputProblemInfo.deadlinesPerSection;
+  for (int i=0; i<incomingDeadlines.size(); i++)
+  { if (this->databaseProblemAndHomeworkGroupList.size>=1000)
+    { commentsOnFailure << "Failed to account deadlines: "
+      << "max 999 sections allowed. ";
+      return false;
+    }
+    this->databaseProblemAndHomeworkGroupList.AddOnTopNoRepetition
+    (incomingDeadlines.theKeys[i]);
+  }
+  for (int i=0; i<incomingDeadlines.size(); i++)
+    currentDeadlines.SetKeyValue
+    (incomingDeadlines.theKeys[i],incomingDeadlines.theValues[i]);
+  if (inputProblemInfo.ProblemWeightUserInput!="")
+  { if (!currentProblem.ProblemWeight.AssignStringFailureAllowed(currentProblem.ProblemWeightUserInput))
+    { commentsOnFailure << "Failed to extract rational number from " << currentProblem.ProblemWeightUserInput << ". ";
+      return false;
+    }
+    currentProblem.ProblemWeightUserInput=inputProblemInfo.ProblemWeightUserInput;
+    currentProblem.ProblemWeight=inputProblemInfo.ProblemWeight;
+  }
+  return true;
+}
+
+bool CalculatorHTML::MergeProblemInfoInDatabase
+(const std::string& problemHomeName,
+ std::string& incomingProblemInfo,
+ std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::MergeProblemInfoInDatabase");
   CalculatorHTML problemHome;
   problemHome.fileName=problemHomeName;
@@ -173,66 +214,29 @@ bool DatabaseRoutines::MergeProblemInfoInDatabase
     return false;
   if (!problemHome.ParseHTML(commentsOnFailure))
     return false;
-  HashedList<std::string, MathRoutines::hashString> incomingProblems;
-  List<std::string> incomingWeights;
-  List<List<std::string> > incomingSections;
-  List<List<std::string> > incomingDeadlines;
-//  stOutput << "<hr>DEBUG: incoming string: " << inputString
-//  << ", human readable: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(inputString);
-  if (!this->ReadProblemInfo
-      (inputString, incomingProblems, incomingWeights,
-       incomingSections, incomingDeadlines, commentsOnFailure))
+  MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>
+  incomingProblems;
+  if (!this->ReadProblemInfoAppend(incomingProblemInfo, incomingProblems, commentsOnFailure))
   { commentsOnFailure << "Failed to parse your request";
     return false;
   }
-//  stOutput << "<br>DEBUG: incoming sections: " << incomingSections.ToStringCommaDelimited() << "<hr>";
-//  stOutput << "<br>DEBUG: incoming deadlines: " << incomingDeadlines.ToStringCommaDelimited() << "<hr>";
-
   std::string currentFileName;
   bool result=true;
-  for (int i=0; i<incomingProblems.size; i++)
-  { if (!problemHome.hdProblemList.Contains(incomingProblems[i]) &&
-        !problemHome.hdHomeworkGroupNames.Contains(incomingProblems[i]))
-    { commentsOnFailure << "Did not find " << incomingProblems[i]
-      << " among the list of problems and homework groups. ";
-//      << " The problem list consists of: "
-//      << problemHome.hdProblemList.ToStringCommaDelimited() << ". The homework group names are: "
-//      << problemHome.hdHomeworkGroupNames.ToStringCommaDelimited();
+  for (int i=0; i<incomingProblems.size(); i++)
+    if (!problemHome.MergeOneProblemAdminData
+        (incomingProblems.theKeys[i], incomingProblems.theValues[i], commentsOnFailure))
       result=false;
-      continue;
-    }
-    int theIndex=problemHome.databaseProblemAndHomeworkGroupList.GetIndex(incomingProblems[i]);
-    if (theIndex==-1)
-    { problemHome.databaseProblemAndHomeworkGroupList.AddOnTop(incomingProblems[i]);
-      problemHome.databaseProblemWeights.AddOnTop(incomingWeights[i]);
-      problemHome.databaseStudentSectionsPerProblem.AddOnTop(incomingSections[i]);
-      problemHome.databaseDeadlinesBySection.AddOnTop(incomingDeadlines[i]);
-      continue;
-    }
-//    stOutput << "<br>DEBUG: modifying problem info for problem: " << incomingProblems[i];
-    if (incomingWeights[i]!="")
-      problemHome.databaseProblemWeights[theIndex]=incomingWeights[i];
-    if (incomingSections[i].size!=0)
-      for (int j=0; j<incomingSections[i].size; j++)
-      { int sectionIndex=problemHome.databaseStudentSectionsPerProblem[theIndex].GetIndex(incomingSections[i][j]);
-        if (sectionIndex==-1)
-        { problemHome.databaseStudentSectionsPerProblem[theIndex].AddOnTop(incomingSections[i][j]);
-          problemHome.databaseDeadlinesBySection[theIndex].AddOnTop(incomingDeadlines[i][j]);
-          continue;
-        }
-        //stOutput << "<br>DEBUG: modifying problem info for section: " << incomingSections[i][j];
-        problemHome.databaseStudentSectionsPerProblem[theIndex][sectionIndex]=incomingSections[i][j];
-        problemHome.databaseDeadlinesBySection[theIndex][sectionIndex]=incomingDeadlines[i][j];
-      }
-  }
-  std::string stringToStore;
 
-  this->StoreProblemInfo
-  (stringToStore, problemHome.databaseProblemAndHomeworkGroupList, problemHome.databaseProblemWeights,
-   problemHome.databaseStudentSectionsPerProblem, problemHome.databaseDeadlinesBySection);
+  this->StoreDeadlineInfo
+  (theGlobalVariables.userDefault.deadlineInfoString.value,
+  problemHome.databaseProblemInfo);
+  this->StoreProblemWeightInfo
+  (theGlobalVariables.userDefault.problemInfoString.value,
+  problemHome.databaseProblemInfo);
   //stOutput << "<br>about to store back : <br>" << stringToStore << " interpreted as: <br>"
   //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(stringToStore) ;
-  if (!this->StoreProblemDatabaseInfo(problemHomeName, stringToStore, commentsOnFailure))
+  DatabaseRoutines theRoutines;
+  if (!theRoutines.StoreProblemDatabaseInfo(theGlobalVariables.userDefault, commentsOnFailure))
     return false;
   //stOutput << "<br>probs incoming: <br>" << incomingProblems.ToStringCommaDelimited()
   //<< " with weights: " << incomingWeights.ToStringCommaDelimited()
@@ -250,39 +254,27 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   { comments << "Failed to load current user's problem save-file. ";
     return false;
   }
-  if (!this->currentUseR.InterpretDatabaseProblemData(this->currentUseR.problemDataString.value, comments))
+  if (!this->currentUseR.InterpretDatabaseProblemData
+      (this->currentUseR.problemDataString.value, comments))
   { comments << "Failed to interpret user's problem save-file. ";
     return false;
   }
-  this->theProblemData=this->currentUseR.GetProblemDataAddIfNotPresent(this->fileName);
-  //if (this->courseHome=="")
-  //  return true;
-  //stOutput << "loading db, problem collection: " << this->courseHome;
-  int toDoFixDeadlines;
-/*  this->currentUser.currentTable=theRoutines.GetTableUnsafeNameUsersOfFile(this->courseHome);
-  //stOutput << "loading extra info ... " << this->courseHome;
-  if(!this->currentUser.FetchOneColumn("extraInfo", this->currentUser.extraInfoUnsafe, theRoutines, &comments))
-  { comments << "Failed to load the section/group of the current user. ";
-    //stOutput << "Failed to load the section/group of the current user. ";
-    //return false;
-  }
-  if (!theRoutines.ReadProblemDatabaseInfo
-      (this->courseHome, this->currentProblemCollectionDatabaseString, comments))
-  { comments << "Failed to load current problem collection's database string. ";
+  if (!this->ReadProblemInfoAppend
+      (this->currentUseR.deadlineInfoString.value,
+       this->databaseProblemInfo, comments))
+  { comments << "Failed to interpret the deadline string. ";
     return false;
   }
-  //stOutput << "<hr><hr>DEBUG GOT HERE:  the db string is: " << CGI::URLKeyValuePairsToNormalRecursiveHtml( this->currentProblemCollectionDatabaseString);
-  if (!theRoutines.ReadProblemInfo
-      (this->currentProblemCollectionDatabaseString, this->databaseProblemAndHomeworkGroupList,
-       this->databaseProblemWeights,
-       this->databaseStudentSectionsPerProblem, this->databaseDeadlinesBySection, comments))
-  { comments << "Failed to interpret the database problem string. ";
+  if (!this->ReadProblemInfoAppend
+      (this->currentUseR.problemInfoString.value,
+       this->databaseProblemInfo, comments))
+  { comments << "Failed to interpret the problem weight string. ";
     return false;
   }
   //stOutput << "<hr><hr>DEBUG read databaseProblemAndHomeworkGroupList: "
   //<< this->databaseProblemAndHomeworkGroupList;
-  this->currentUser.ComputePointsEarned
-  (this->databaseProblemAndHomeworkGroupList, this->databaseProblemWeights);*/
+//  this->currentUseR.ComputePointsEarned
+//  (this->databaseProblemAndHomeworkGroupList, this->databaseProblemWeights);
   theGlobalVariables.userDefault=this->currentUseR;
   return true;
 #else
@@ -924,7 +916,7 @@ std::string CalculatorHTML::PrepareUserInputBoxes()
   if (this->flagIsForReal)
     return "";
   std::stringstream out;
-  MapList<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
+  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
   std::string inputNonAnswerReader;
   for (int i=0; i<theArgs.size(); i++)
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "userInputBox", &inputNonAnswerReader))
@@ -1137,7 +1129,8 @@ std::string SyntacticElementHTML::GetTagClass()
 std::string DatabaseRoutines::ToStringClassDetails
 (bool adminsOnly, List<List<std::string> >& userTable, List<std::string>& userLabels,
  HashedList<std::string, MathRoutines::hashString>& databaseSpanList,
- List<std::string>& databaseProblemWeights
+   MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
+  databaseProblemInfo
  )
 { MacroRegisterFunctionWithName("DatabaseRoutines::ToStringClassDetails");
   std::stringstream out;
@@ -1247,7 +1240,7 @@ std::string DatabaseRoutines::ToStringClassDetails
       oneTableLineStream << "<td>No solutions history</td>";
     else if (currentUser.InterpretDatabaseProblemData
              (currentUser.selectedRowFieldsUnsafe[indexProblemData], commentsProblemData))
-    { currentUser.ComputePointsEarned(databaseSpanList, databaseProblemWeights);
+    { currentUser.ComputePointsEarned(databaseSpanList, databaseProblemInfo);
       oneTableLineStream << "<td>" << std::fixed << std::setw(1)
       << std::setprecision(1) << currentUser.pointsEarned.GetDoubleValue() << "</td>";
     } else
@@ -1339,9 +1332,10 @@ std::string CalculatorHTML::  ToStringClassDetails
   << " )\"> Add users (no email sending)</button> ";
   out << "<br><span id=\"" << idOutput << "\">\n";
   DatabaseRoutines theRoutines;
-  out << theRoutines.ToStringClassDetails
-  (adminsOnly, this->userTablE, this->labelsUserTablE,
-   this->databaseProblemAndHomeworkGroupList, this->databaseProblemWeights);
+  int todoFixThisPieceOfCode;
+//  out << theRoutines.ToStringClassDetails
+//  (adminsOnly, this->userTablE, this->labelsUserTablE,
+//   this->databaseProblemAndHomeworkGroupList, this->databaseProblemWeights);
   out << "</span>";
 #else
   out << "<b>Adding emails not available (database not present).</b> ";
@@ -1367,8 +1361,8 @@ bool CalculatorHTML::PrepareClassData(std::stringstream& commentsOnFailure)
   HashedList<std::string, MathRoutines::hashString> theSections;
   for (int i=0; i<this->userTablE.size; i++)
     theSections.AddOnTopNoRepetition(this->userTablE[i][indexExtraInfo]);
-  this->databaseStudentSectionS=theSections;
-  this->databaseStudentSectionS.QuickSortAscending();
+  this->databaseStudentSections=theSections;
+  this->databaseStudentSections.QuickSortAscending();
   return true;
 #else
   commentsOnFailure << "Error: database not running. ";
@@ -1581,13 +1575,21 @@ std::string CalculatorHTML::GetDeadline
 { MacroRegisterFunctionWithName("CalculatorHTML::GetDeadline");
   outputIsInherited=false;
   std::string result;
-  //stOutput << "<br>DEBUG: Fetching deadline for: " << problemName << "<br>this->databaseStudentSectionsPerProblem: " << this->databaseStudentSectionsPerProblem;
+  if (this->databaseProblemInfo.Contains(problemName))
+  { ProblemDataAdministrative& currentProb=
+    this->databaseProblemInfo.GetValueCreateIfNotPresent(problemName);
+    result=currentProb.deadlinesPerSection.GetValueCreateIfNotPresent(sectionNumber);
+  }
+ int todoFixThis;
+ return result;
+/*  //stOutput << "<br>DEBUG: Fetching deadline for: " << problemName << "<br>this->databaseStudentSectionsPerProblem: " << this->databaseStudentSectionsPerProblem;
   int indexInDatabase=this->databaseProblemAndHomeworkGroupList.GetIndex(problemName);
   //stOutput << "<br>DEBUG: index of  " << problemName << " in  " << this->databaseProblemAndHomeworkGroupList
   //<< ": " << indexInDatabase;
 
   if (indexInDatabase!=-1)
-  { int indexSection=  this->databaseStudentSectionsPerProblem[indexInDatabase].GetIndex(sectionNumber);
+  { int indexSection=  this->databaseStudentSectionsPerProblem[indexInDatabase].
+    GetIndex(sectionNumber);
     if (indexSection!=-1)
       result=this->databaseDeadlinesBySection[indexInDatabase][indexSection];
   }
@@ -1609,7 +1611,7 @@ std::string CalculatorHTML::GetDeadline
       outputIsInherited=true;
     }
   }
-  return result;
+  return result;*/
 }
 
 std::string CalculatorHTML::ToStringOnEDeadlineFormatted
@@ -1720,20 +1722,20 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   deadlineStream << "<table><tr><td> Deadline: </td>";
   deadlineStream << "<td><table><tr><th>Grp.</th><th>Deadline</th></tr>";
   List<std::string> deadlineIds;
-  deadlineIds.SetSize(this->databaseStudentSectionS.size);
-  for (int i=0; i<this->databaseStudentSectionS.size; i++)
+  deadlineIds.SetSize(this->databaseStudentSections.size);
+  for (int i=0; i<this->databaseStudentSections.size; i++)
   { std::string& currentDeadlineId=deadlineIds[i];
-    if (this->databaseStudentSectionS[i]=="")
+    if (this->databaseStudentSections[i]=="")
       continue;
-    currentDeadlineId = "deadline" + Crypto::CharsToBase64String(this->databaseStudentSectionS[i]+cleaneduplink);
+    currentDeadlineId = "deadline" + Crypto::CharsToBase64String(this->databaseStudentSections[i]+cleaneduplink);
     if (currentDeadlineId[currentDeadlineId.size()-1]=='=')
       currentDeadlineId.resize(currentDeadlineId.size()-1);
     if (currentDeadlineId[currentDeadlineId.size()-1]=='=')
       currentDeadlineId.resize(currentDeadlineId.size()-1);
     deadlineStream << "<tr>";
-    deadlineStream << "<td>" << this->databaseStudentSectionS[i] << "</td>";
+    deadlineStream << "<td>" << this->databaseStudentSections[i] << "</td>";
     deadlineStream << "<td> <input type=\"text\" id=\"" << currentDeadlineId << "\" value=\""
-    << this->GetDeadline(cleaneduplink, this->databaseStudentSectionS[i], false, deadlineInherited)
+    << this->GetDeadline(cleaneduplink, this->databaseStudentSections[i], false, deadlineInherited)
     << "\"> " ;
     deadlineStream << this->GetDatePickerStart(currentDeadlineId);
     deadlineStream << "</td>";
@@ -1750,13 +1752,13 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   deadlineStream << "submitStringAsMainInput('" << urledProblem
   << "='+encodeURIComponent('deadlines='+encodeURIComponent(";
   bool isFirst=true;
-  for (int i=0; i<this->databaseStudentSectionS.size; i++)
-  { if (this->databaseStudentSectionS[i]=="")
+  for (int i=0; i<this->databaseStudentSections.size; i++)
+  { if (this->databaseStudentSections[i]=="")
       continue;
     if (!isFirst)
       deadlineStream << "+";
     isFirst=false;
-    deadlineStream << "'" << CGI::StringToURLString(this->databaseStudentSectionS[i]) << "='";
+    deadlineStream << "'" << CGI::StringToURLString(this->databaseStudentSections[i]) << "='";
     deadlineStream << "+ encodeURIComponent(document.getElementById('"
     << deadlineIds[i] << "').value)+'&'";
   }
@@ -1877,24 +1879,7 @@ void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments)
     return;
   this->flagParentInvestigated=true;
   this->topicListFileName = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
-  if (!this->flagIsExamProblem)
-  { //stOutput << "NONONO! -Emily";
-    return;
-  }
-  //stOutput << "yesyesyes! -Emily";
-
-  CalculatorHTML parserOfParent;
-  parserOfParent.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"));
-  std::stringstream commentsOfparent;
-  if (!parserOfParent.LoadMe(false, commentsOfparent))
-  { comments << "Failed to load parent problem collection. Comments: " << commentsOfparent.str();
-    return;
-  }
-  if (!parserOfParent.ParseHTML(commentsOfparent))
-  { comments << "Failed to parse parent problem collection. Comments: " << commentsOfparent.str();
-    return;
-  }
-  this->problemListOfParent=parserOfParent.hdProblemList;
+  this->LoadAndParseTopicList(comments);
 }
 
 bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
@@ -1987,7 +1972,8 @@ bool CalculatorHTML::CanBeMerged(const SyntacticElementHTML& left, const Syntact
 
 bool CalculatorHTML::ParseHTMLComputeChildFiles(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::ParseHTMLComputeChildFiles");
-  bool result=true;
+  int todoFixThis;
+/*  bool result=true;
   this->hdProblemList.Clear();
   for (int i=0; i<this->theContent.size; i++)
     if (this->theContent[i].GetTagClass()=="calculatorExamProblem")
@@ -2013,7 +1999,8 @@ bool CalculatorHTML::ParseHTMLComputeChildFiles(std::stringstream& comments)
       this->hdHomeworkGroups.LastObject()->AddOnTop(this->CleanUpFileName(this->theContent[i].content));
       this->hdHomeworkGroupCorrespondingToEachProblem.AddOnTop(currentHomeworkGroup);
     }
-  return result;
+  return result;*/
+  return true;
 }
 
 bool CalculatorHTML::SetTagClassFromCloseTag(SyntacticElementHTML& output)
@@ -2797,18 +2784,18 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
       (theGlobalVariables.userCalculatorRequestType, "false", theGlobalVariables.GetWebInput("studentSection"))
       << "\">Admin view</a>" << linkBigSeparator;
     else
-    { if (this->databaseStudentSectionS.size==0)
+    { if (this->databaseStudentSections.size==0)
         out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
         << this->ToStringCalculatorArgumentsForProblem
         (theGlobalVariables.userCalculatorRequestType, "true", "")
         << "\">Student view</a>";
-      for (int i=0; i<this->databaseStudentSectionS.size; i++)
-        if (this->databaseStudentSectionS[i]!="")
+      for (int i=0; i<this->databaseStudentSections.size; i++)
+        if (this->databaseStudentSections[i]!="")
         { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
           << this->ToStringCalculatorArgumentsForProblem
-          (theGlobalVariables.userCalculatorRequestType, "true", this->databaseStudentSectionS[i])
-          << "\">Student view section " << this->databaseStudentSectionS[i] << " </a>";
-          if (i!=this->databaseStudentSectionS.size-1)
+          (theGlobalVariables.userCalculatorRequestType, "true", this->databaseStudentSections[i])
+          << "\">Student view section " << this->databaseStudentSections[i] << " </a>";
+          if (i!=this->databaseStudentSections.size-1)
             out << linkSeparator;
         }
       out << linkBigSeparator;
@@ -2983,19 +2970,17 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
     return out.str();
   }
   //stOutput << "<hr>CurrentUser.problemNames=" << this->currentUser.problemNames.ToStringCommaDelimited();
-  std::string thePoints="";
-  if (this->databaseProblemAndHomeworkGroupList.Contains(theFileName))
-    thePoints= this->databaseProblemWeights[this->databaseProblemAndHomeworkGroupList.GetIndex(theFileName)];
   #ifdef MACRO_use_MySQL
   bool noSubmissionsYet=false;
-  bool weightPrinted=false;
   if (this->currentUseR.problemNames.Contains(theFileName))
-  { ProblemData& theProbData=this->currentUseR.problemData[this->currentUseR.problemNames.GetIndex(theFileName)];
+  { ProblemData& theProbData=this->currentUseR.problemData[this->currentUseR.problemNames.GetIndex(theFileName)];   
     if (!theProbData.flagProblemWeightIsOK)
     { out << "<span style=\"color:orange\">No point weight assigned yet. </span>";
-      if (theProbData.ProblemWeightUserInput!="")
+      if (this->databaseProblemInfo.Contains(theFileName))
+        theProbData.adminData=this->databaseProblemInfo.GetValueCreateIfNotPresent(theFileName);
+      if (theProbData.adminData.ProblemWeightUserInput!="")
         out << "<span style=\"color:red\"><b>Failed to interpret weight string: "
-        << theProbData.ProblemWeightUserInput << ". </b></span>";
+        << theProbData.adminData.ProblemWeightUserInput << ". </b></span>";
       if (theProbData.theAnswers.size==1)
       { if (theProbData.numCorrectlyAnswered==1)
           out << theProbData.totalNumSubmissions << " submission(s), problem correctly answered. ";
@@ -3004,27 +2989,20 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
       } else if (theProbData.theAnswers.size>1)
         out << theProbData.totalNumSubmissions << " submission(s), " << theProbData.numCorrectlyAnswered
         << " out of "<< theProbData.theAnswers.size << " subproblems correctly answered. ";
-      weightPrinted=true;
     } else if (theProbData.totalNumSubmissions==0)
       noSubmissionsYet=true;
     else if (theProbData.numCorrectlyAnswered<theProbData.theAnswers.size)
     { out << "<span style=\"color:red\"><b> "
-      << theProbData.Points << " out of " << theProbData.ProblemWeight << " point(s). </b></span>";
-      weightPrinted=true;
+      << theProbData.Points << " out of "
+      << theProbData.adminData.ProblemWeight << " point(s). </b></span>";
     } else if (theProbData.numCorrectlyAnswered==theProbData.theAnswers.size)
     { out << "<span style=\"color:green\"><b> "
-      << theProbData.Points << " out of " << theProbData.ProblemWeight << " point(s). </b></span>";
-      weightPrinted=true;
+      << theProbData.Points << " out of "
+      << theProbData.adminData.ProblemWeight << " point(s). </b></span>";
     }
   } else
-    noSubmissionsYet=true;
-  if (thePoints!="" && noSubmissionsYet)
-  { out << "<span style=\"color:brown\"><b>No submissions: 0 out of " << thePoints
-    << " point(s). </b> </span>" ;
-    weightPrinted=true;
+  { out << "<span style=\"color:brown\"><b>No submissions.</b> </span>" ;
   }
-  if (!weightPrinted)
-    out << "<span style=\"color:orange\">No point weight assigned yet. </span>";
 
   #endif // MACRO_use_MySQL
   return out.str();
@@ -3038,22 +3016,26 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
   { out << "need to login";
     return out.str();
   }
-  std::string thePoints="";
-  if (this->databaseProblemAndHomeworkGroupList.Contains(theFileName))
-    thePoints= this->databaseProblemWeights[this->databaseProblemAndHomeworkGroupList.GetIndex(theFileName)];
   #ifdef MACRO_use_MySQL
   if (!this->currentUseR.problemNames.Contains(theFileName))
     return "<span style=\"color:brown\"><b>need to solve</b></span>";
   ProblemData& theProbData=this->currentUseR.problemData[this->currentUseR.problemNames.GetIndex(theFileName)];
+  if (this->databaseProblemInfo.Contains(theFileName))
+    theProbData.adminData=this->databaseProblemInfo.GetValueCreateIfNotPresent(theFileName);
   std::stringstream problemWeight;
-  if (!theProbData.flagProblemWeightIsOK)
-  { problemWeight << "?";
-    if (theProbData.ProblemWeightUserInput!="")
-      problemWeight << "<span style=\"color:red\">" << theProbData.ProblemWeightUserInput << "(Error)</span>";
-  }
+  bool showModifyButton=theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn();
   Rational percentSolved;
   percentSolved.AssignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.theAnswers.size);
-  if (percentSolved<1)
+  if (!theProbData.flagProblemWeightIsOK)
+  { problemWeight << "?";
+    if (theProbData.adminData.ProblemWeightUserInput!="")
+      problemWeight << "<span style=\"color:red\">"
+      << theProbData.adminData.ProblemWeightUserInput << "(Error)</span>";
+  } else
+  { problemWeight << theProbData.adminData.ProblemWeight;
+    percentSolved*=theProbData.adminData.ProblemWeight;
+  }
+  if (percentSolved<theProbData.adminData.ProblemWeight)
     out << "<span style=\"color:red\"><b>" << percentSolved << " out of " << problemWeight.str() << "</b></span>";
   else
     out << "<span style=\"color:green\"><b>" << percentSolved << " out of " << problemWeight.str() << "</b></span>";
@@ -3077,7 +3059,7 @@ std::string CalculatorHTML::ToStringProblemWeighT(const std::string& theFileName
   out << "Points: <textarea rows=\"1\" cols=\"3\" id=\"" << idPoints << "\">";
   std::string thePoints="";
   if (this->databaseProblemAndHomeworkGroupList.Contains(theFileName))
-    thePoints= this->databaseProblemWeights[this->databaseProblemAndHomeworkGroupList.GetIndex(theFileName)];
+    thePoints= this->databaseProblemInfo.GetValueCreateIfNotPresent(theFileName).ProblemWeightUserInput;
   out << thePoints;
   out << "</textarea>";
   out << "<button id=\"" << idButtonModifyPoints << "\" "
@@ -3395,9 +3377,11 @@ std::string TopicElement::GetTableStart(bool plainStyle)
   out << "<tbody>\n";
   if (!plainStyle)
     out
-    << "<tr> <th style=\"width:400px\">Sub-Topic</th>"
-    << "<th style=\"width:400px\">Resource Links</th>"
-    << "<th style=\"width:150px\">Current Score</th></tr>\n";
+    << "<tr> <th>Sub-Topic</th>"
+    << "<th>Resource Links</th>"
+    << "<th>Current Score</th>"
+    << "<th>Deadlines</th>"
+    << "</tr>\n";
   return out.str();
 }
 

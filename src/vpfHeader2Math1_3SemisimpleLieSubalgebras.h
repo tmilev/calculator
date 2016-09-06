@@ -307,8 +307,8 @@ public:
   AlgebraicClosureRationals* ownerField;
   DynkinType targetDynkinType;
   SltwoSubalgebras theSl2s;
-  MapReferences<SemisimpleLieAlgebra, DynkinType>* theSubalgebrasNonEmbedded;
-  MapReferences<SemisimpleLieAlgebra, Matrix<Rational> > theSubalgebrasNonDefaultCartanAndScale;
+  MapReferenceS<DynkinType, SemisimpleLieAlgebra>* theSubalgebrasNonEmbedded;
+  MapReferenceS<Matrix<Rational>, SemisimpleLieAlgebra> theSubalgebrasNonDefaultCartanAndScale;
   List<List<Rational> > CachedDynkinIndicesSl2subalgebrasSimpleTypes;
   HashedList<DynkinSimpleType> CachedDynkinSimpleTypesWithComputedSl2Subalgebras;
   List<OrbitFDRepIteratorWeylGroup> theOrbiTs;
@@ -332,7 +332,7 @@ public:
 
   //end current computation state variables.
 
-  MapReferences<CandidateSSSubalgebra, Vectors<Rational> > theSubalgebras; //used to search for subalgebras quickly
+  MapReferenceS<Vectors<Rational>, CandidateSSSubalgebra> theSubalgebras; //used to search for subalgebras quickly
   bool flagRealizedAllCandidates;
   bool flagAttemptToSolveSystems;
   bool flagComputePairingTable;
@@ -398,7 +398,7 @@ public:
   bool ComputeCurrentHCandidates();
   void initHookUpPointers
   (SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField,
-   MapReferences<SemisimpleLieAlgebra, DynkinType>* inputSubalgebrasNonEmbedded,
+   MapReferenceS<DynkinType, SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
    ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras)
    ;
   void reset();

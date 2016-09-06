@@ -3509,7 +3509,7 @@ bool SemisimpleSubalgebras::CheckConsistency()const
 
 void SemisimpleSubalgebras::initHookUpPointers
   (SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField,
-   MapReferences<SemisimpleLieAlgebra, DynkinType>* inputSubalgebrasNonEmbedded,
+   MapReferenceS<DynkinType, SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
    ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras)
 { (void) inputSl2sOfSubalgebras;
   this->owner=&inputOwner;

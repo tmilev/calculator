@@ -154,7 +154,6 @@ int recursionDepth=0)
   std::string GetDatabasePage();
   std::string GetNavigationPage();
   std::string GetAddUserEmails();
-  std::string GetSetProblemDatabaseInfoHtml();
   static std::string GetJavaScriptIndicatorFromHD();
   static std::string GetJavascriptSubmitLoginInfo();
   std::string GetHtmlHiddenInputAddressAsRequest();

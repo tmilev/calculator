@@ -227,12 +227,8 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
         (incomingProblems.theKeys[i], incomingProblems.theValues[i], commentsOnFailure))
       result=false;
 
-  this->StoreDeadlineInfo
-  (theGlobalVariables.userDefault.deadlineInfoString.value,
-  problemHome.databaseProblemInfo);
-  this->StoreProblemWeightInfo
-  (theGlobalVariables.userDefault.problemInfoString.value,
-  problemHome.databaseProblemInfo);
+  this->StoreDeadlineInfo(theGlobalVariables.userDefault.deadlineInfoString.value, problemHome.databaseProblemInfo);
+  this->StoreProblemWeightInfo(theGlobalVariables.userDefault.problemInfoString.value, problemHome.databaseProblemInfo);
   //stOutput << "<br>about to store back : <br>" << stringToStore << " interpreted as: <br>"
   //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(stringToStore) ;
   DatabaseRoutines theRoutines;
@@ -250,6 +246,7 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadDatabaseInfo");
 #ifdef MACRO_use_MySQL
   this->currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
+  stOutput << "<hr><hr>DEBUG reading problem info from: " << CGI::StringToHtmlString( this->currentUseR.problemDataString.value);
   if (this->currentUseR.problemDataString=="")
   { comments << "Failed to load current user's problem save-file. ";
     return false;
@@ -306,7 +303,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
   this->flagIsForReal=theGlobalVariables.UserRequestRequiresLoadingRealExamData();
 #ifdef MACRO_use_MySQL
   this->topicListFileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
-//  if (doLoadDatabase)
+  if (doLoadDatabase)
     this->LoadDatabaseInfo(comments);
 #endif // MACRO_use_MySQL
   if (!this->flagIsForReal)
@@ -1129,8 +1126,8 @@ std::string SyntacticElementHTML::GetTagClass()
 std::string DatabaseRoutines::ToStringClassDetails
 (bool adminsOnly, List<List<std::string> >& userTable, List<std::string>& userLabels,
  HashedList<std::string, MathRoutines::hashString>& databaseSpanList,
-   MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
-  databaseProblemInfo
+ MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
+ databaseProblemInfo
  )
 { MacroRegisterFunctionWithName("DatabaseRoutines::ToStringClassDetails");
   std::stringstream out;
@@ -1147,7 +1144,7 @@ std::string DatabaseRoutines::ToStringClassDetails
 
   int indexUser=-1, indexExtraInfo=-1;
   for (int i=0; i<userLabels.size; i++)
-  { if (userLabels[i]=="username")
+  { if (userLabels[i]==DatabaseStrings::userColumnLabel)
       indexUser=i;
     if (userLabels[i]==DatabaseStrings::userGroupLabel)
       indexExtraInfo=i;
@@ -1155,8 +1152,11 @@ std::string DatabaseRoutines::ToStringClassDetails
   if (indexUser==-1 || indexExtraInfo==-1)
   { out << "<span style=\"color:red\"><b>This shouldn't happen: failed to find necessary "
     << "column entries in the database. "
-    << "This is likely a software bug. </b></span>"
-    << "indexUser, indexExtraInfo: "
+    << "This is likely a software bug. Function: DatabaseRoutines::ToStringClassDetails. </b></span>"
+    << "<br>DatabaseStrings::userColumnLabel: " << DatabaseStrings::userColumnLabel
+    << "<br>DatabaseStrings::userGroupLabel: " << DatabaseStrings::userGroupLabel
+    << "<br>Available columns: <br>\n" << userLabels.ToStringCommaDelimited()
+    << "<br>indexUser, indexExtraInfo: "
     << indexUser << ", "
     << indexExtraInfo << ", "
     ;
@@ -1276,74 +1276,6 @@ std::string DatabaseRoutines::ToStringClassDetails
 }
 #endif // MACRO_use_MySQL
 
-std::string CalculatorHTML::  ToStringClassDetails
-( bool adminsOnly,
-  const SyntacticElementHTML& inputElement
-)
-{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringClassDetails");
-  std::stringstream out;
-#ifdef MACRO_use_MySQL
-  std::string idAddressTextarea= adminsOnly ? "inputAddAdmins" : "inputAddStudents";
-  std::string idExtraTextarea= adminsOnly ? "inputAddAdminsExtraInfo" : "inputAddStudentsExtraInfo";
-  if (inputElement.GetKeyValue("id")!="")
-  { idAddressTextarea+= inputElement.GetKeyValue("id");
-    idExtraTextarea+=inputElement.GetKeyValue("id");
-  } else
-  { idAddressTextarea+=this->fileName;
-    idExtraTextarea+=this->fileName;
-  }
-  std::string userRole = adminsOnly ? "admin" : "student";
-  std::string idOutput="outputAdd";
-  if (adminsOnly)
-    idOutput+="Admins";
-  else
-    idOutput+="Students";
-  idOutput+= CGI::StringToURLString(this->fileName);
-  out << "Add <b>" << userRole << "(s)</b>.<br> ";
-//  out << "<b>Warning: there's no remove button yet.</b><br>";
-  out << "<textarea width=\"500px\" ";
-  out << "id=\"" << idAddressTextarea << "\"";
-  out << "placeholder=\"email or user list, comma, space or ; separated\">";
-  out << "</textarea>";
-  out << "<textarea width=\"500px\" ";
-  out << "id=\"" << idExtraTextarea << "\"";
-  out << " placeholder=\"optional, for sorting users in groups; for example section #\">";
-  out << "</textarea>";
-  out << "<br>";
-  out
-  << "<button class=\"normalButton\" "
-//  << "onclick=\"addEmailsOrUsers("
-//  << "'"    << idAddressTextarea
-//  << "', '" << CGI::StringToURLString(this->fileName)
-//  << "', '" << idOutput
-//  << "', '" << userRole
-//  << "', '" << idExtraTextarea
-//  << "', 'addEmails'"
-//  << " )\" "
-  << "disabled> [Disabled] Add emails</button>";
-  out
-  << "<button class=\"normalButton\" onclick=\"addEmailsOrUsers("
-  << "'"    << idAddressTextarea
-  << "', '" << CGI::StringToURLString(this->fileName)
-  << "', '" << idOutput
-  << "', '" << userRole
-  << "', '" << idExtraTextarea
-  << "', 'addUsers'"
-  << " )\"> Add users (no email sending)</button> ";
-  out << "<br><span id=\"" << idOutput << "\">\n";
-  DatabaseRoutines theRoutines;
-  int todoFixThisPieceOfCode;
-//  out << theRoutines.ToStringClassDetails
-//  (adminsOnly, this->userTablE, this->labelsUserTablE,
-//   this->databaseProblemAndHomeworkGroupList, this->databaseProblemWeights);
-  out << "</span>";
-#else
-  out << "<b>Adding emails not available (database not present).</b> ";
-#endif // MACRO_use_MySQL
-
-  return out.str();
-}
-
 bool CalculatorHTML::PrepareClassData(std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareClassData");
 #ifdef MACRO_use_MySQL
@@ -1377,15 +1309,8 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
     return;
 #ifdef MACRO_use_MySQL
   std::stringstream out;
-  if (!this->flagLoadedClassDataSuccessfully)
-  { out << "<b>Failed to load class data successfully.</b>";
-    inputOutput.interpretedCommand=out.str();
-    return;
-  }
-  out << "<hr><hr>";
-  out << this->ToStringClassDetails(false, inputOutput);
-  out << "<hr><hr>";
-  out << this->ToStringClassDetails(true, inputOutput);
+  DatabaseRoutines theRoutines;
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts\"> Manage accounts</a>";
   inputOutput.interpretedCommand=out.str();
 #else
   inputOutput.interpretedCommand="<b>Managing class not available (no database).</b>";
@@ -3024,8 +2949,12 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
     theProbData.adminData=this->databaseProblemInfo.GetValueCreateIfNotPresent(theFileName);
   std::stringstream problemWeight;
   bool showModifyButton=theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn();
-  Rational percentSolved;
+  Rational percentSolved, totalPoints;
   percentSolved.AssignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.theAnswers.size);
+  theProbData.flagProblemWeightIsOK=
+  theProbData.adminData.ProblemWeight.AssignStringFailureAllowed
+  (theProbData.adminData.ProblemWeightUserInput);
+
   if (!theProbData.flagProblemWeightIsOK)
   { problemWeight << "?";
     if (theProbData.adminData.ProblemWeightUserInput!="")
@@ -3033,12 +2962,16 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
       << theProbData.adminData.ProblemWeightUserInput << "(Error)</span>";
   } else
   { problemWeight << theProbData.adminData.ProblemWeight;
-    percentSolved*=theProbData.adminData.ProblemWeight;
+    totalPoints=percentSolved*theProbData.adminData.ProblemWeight;
   }
-  if (percentSolved<theProbData.adminData.ProblemWeight)
-    out << "<span style=\"color:red\"><b>" << percentSolved << " out of " << problemWeight.str() << "</b></span>";
+  if (percentSolved<1)
+  { if (!theProbData.flagProblemWeightIsOK)
+      out << "<span style=\"color:brown\"><b>" << totalPoints << " out of " << problemWeight.str() << "</b></span>";
+    else
+      out << "<span style=\"color:red\"><b>" << totalPoints << " out of " << problemWeight.str() << "</b></span>";
+  }
   else
-    out << "<span style=\"color:green\"><b>" << percentSolved << " out of " << problemWeight.str() << "</b></span>";
+    out << "<span style=\"color:green\"><b>" << totalPoints << " out of " << problemWeight.str() << "</b></span>";
   #endif // MACRO_use_MySQL
   return out.str();
 }

@@ -1307,6 +1307,8 @@ void Rational::operator=(const AlgebraicNumber& other)
 
 bool Rational::AssignStringFailureAllowed(const std::string& input)
 { this->MakeZero();
+  if (input=="")
+    return false;
   if (input=="0")
     return true;
   int sign=1;

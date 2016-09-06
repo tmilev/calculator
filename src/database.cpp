@@ -13,7 +13,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
   DatabaseRoutines theRoutines;
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
-  userWrapper.currentTable="users";
+  userWrapper.currentTable=DatabaseStrings::usersTableName;
   if (userWrapper.Authenticate(theRoutines, comments))
   { theUseR=userWrapper;
     return true;
@@ -75,6 +75,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
 #include <time.h>
 #include <ctime>
 
+std::string DatabaseStrings::userColumnLabel="username";
 std::string DatabaseStrings::usersTableName="users";
 std::string DatabaseStrings::userGroupLabel="userInfo";
 std::string DatabaseStrings::databaseUser="ace";

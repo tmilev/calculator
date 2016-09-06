@@ -82,6 +82,7 @@ struct DatabaseStrings{
 public:
   static std::string databaseUser;
   static std::string theDatabaseName;
+  static std::string userColumnLabel;
   static std::string usersTableName;
   static std::string userGroupLabel;
   static std::string deadlinesTableName;

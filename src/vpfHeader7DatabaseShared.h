@@ -492,7 +492,7 @@ bool UserCalculator::FetchOneColumn
  DatabaseRoutines& theRoutines, std::stringstream* failureComments)
 { MacroRegisterFunctionWithName("UserCalculator::FetchOneColumn");
   return theRoutines.FetchEntry
-  ((std::string) "username", this->username, this->currentTable,
+  (DatabaseStrings::userColumnLabel, this->username, this->currentTable,
    columnNameUnsafe, outputUnsafe, failureComments);
 }
 
@@ -559,7 +559,7 @@ bool UserCalculator::FetchOneUserRow
   { this->actualActivationToken= this->GetSelectedRowEntry("activationToken");
     this->email= this->GetSelectedRowEntry("email");
     this->userRole= this->GetSelectedRowEntry("userRole");
-    this->username=this->GetSelectedRowEntry("username"); //<-Important! Database lookup may be
+    this->username=this->GetSelectedRowEntry(DatabaseStrings::userColumnLabel); //<-Important! Database lookup may be
     //case insensitive (this shouldn't be the case, so welcome to the insane design of mysql).
     //The preceding line of code guarantees we have read the username as it is stored in the DB.
     this->actualShaonedSaltedPassword=this->GetSelectedRowEntry("password");
@@ -682,7 +682,7 @@ bool UserCalculator::SetColumnEntry
 { MacroRegisterFunctionWithName("UserCalculator::SetColumnEntry");
   if (this->currentTable=="")
     crash << "Programming error: attempting to change column " << columnNameUnsafe << " without specifying a table. " << crash;
-  return theRoutines.SetEntry((std::string) "username", this->username, this->currentTable, columnNameUnsafe, theValueUnsafe, failureComments);
+  return theRoutines.SetEntry(DatabaseStrings::userColumnLabel, this->username, this->currentTable, columnNameUnsafe, theValueUnsafe, failureComments);
 }
 
 std::string MySQLdata::GetDatA()const
@@ -864,7 +864,7 @@ std::string UserCalculator::GetSelectedRowEntry(const std::string& theKey)
 bool DatabaseRoutines::FetchAllUsers
 (List<List<std::string> >& outputUserTable, List<std::string>& outputLabelsUserTable,
  std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareClassData");
+{ MacroRegisterFunctionWithName("DatabaseRoutines::FetchAllUsers");
   DatabaseRoutines theRoutines;
   if (!theRoutines.startMySQLDatabaseIfNotAlreadyStarted(&commentsOnFailure))
   { commentsOnFailure << "<b>Failed to start database</b>";
@@ -880,7 +880,7 @@ bool DatabaseRoutines::FetchAllUsers
   }
   if (tableTruncated)
   { commentsOnFailure << "<span style=\"color:red\"><b>This shouldn't happen: email list truncated. "
-    << "This is likely a software bug.</b></span>";
+    << "This is likely a software bug. Function: DatabaseRoutines::FetchAllUsers. </b></span>";
     return false;
   }
   return true;
@@ -1132,7 +1132,9 @@ bool DatabaseRoutines::AddUsersFromEmails
   std::string userRole=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("userRole"));
   std::string userGroup=CGI::URLStringToNormal(theGlobalVariables.GetWebInput(DatabaseStrings::userGroupLabel));
   std::string courseHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"));
-  std::string currentFileUsersTableName=this->GetTableUnsafeNameUsersOfFile(courseHome);
+  std::string currentFileUsersTableName= DatabaseStrings::usersTableName
+  //this->GetTableUnsafeNameUsersOfFile(courseHome)
+  ;
   List<std::string> theEmails;
   this->ExtractEmailList(emailList, theEmails, comments);
 //  stOutput << " <br>creating users: " << theEmails.ToStringCommaDelimited() << "<br>";
@@ -1170,7 +1172,7 @@ bool DatabaseRoutines::AddUsersFromEmails
   for (int i=0; i<theEmails.size; i++)
   { currentUser.username=theEmails[i];
     if (!currentUser.IamPresentInTable(*this, currentFileUsersTableName))
-      if (!this->InsertRow("username", theEmails[i], currentFileUsersTableName, comments))
+      if (!this->InsertRow(DatabaseStrings::userColumnLabel, theEmails[i], currentFileUsersTableName, comments))
         result=false;
     if (!currentUser.SetColumnEntry(DatabaseStrings::userGroupLabel, userGroup, *this, &comments))
       result=false;
@@ -1549,7 +1551,7 @@ std::string DatabaseRoutines::ToStringSuggestionsReasonsForFailure
     }
   if (userFound)
   { std::string recommendedNewName;
-    if (!theUser.FetchOneColumn("username", recommendedNewName, theRoutines, &out))
+    if (!theUser.FetchOneColumn(DatabaseStrings::userColumnLabel, recommendedNewName, theRoutines, &out))
       return out.str();
     theUser.username.value=recommendedNewName;
   }

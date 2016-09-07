@@ -1016,14 +1016,16 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
   MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
   if (!CGI::ChopCGIString(inputData, theMap, commentsOnFailure))
     return false;
-  stOutput << "<hr>DEBUG: Interpreting: <br>" << CGI::URLKeyValuePairsToNormalRecursiveHtml( inputData )<< "<hr>";
+  //stOutput << "<hr>DEBUG: Interpreting: <br>" << CGI::URLKeyValuePairsToNormalRecursiveHtml( inputData )<< "<hr>";
   this->flagRandomSeedGiven=false;
   if (theGlobalVariables.UserRequestRequiresLoadingRealExamData())
-    if (theMap.Contains("randomSeed"))
+  { if (theMap.Contains("randomSeed"))
     { this->randomSeed=atoi(theMap.GetValueCreateIfNotPresent("randomSeed").c_str());
       this->flagRandomSeedGiven=true;
-      stOutput << "<br>random seed found. <br>";
-    }
+      //stOutput << "<br>DEBUG: random seed found. <br>";
+    } //else
+      //stOutput << "<br>DEBUG: random seed  NOT NOT NOT found. <br>";
+  }
   this->theAnswers.SetSize(0);
   bool result=true;
   MapLisT<std::string, std::string, MathRoutines::hashString> currentQuestionMap;
@@ -1082,9 +1084,9 @@ bool UserCalculator::InterpretDatabaseProblemData
   this->theProblemData.Clear();
   this->theProblemData.SetExpectedSize(theMap.size());
   bool result=true;
-  stOutput << "<hr>DEBUG: Interpreting: <br>" << CGI::URLKeyValuePairsToNormalRecursiveHtml(theInfo)
-  << "<br>Map has: "
-  << theMap.size() << " entries. ";
+  //stOutput << "<hr>DEBUG: Interpreting: <br>" << CGI::URLKeyValuePairsToNormalRecursiveHtml(theInfo)
+  //<< "<br>Map has: "
+  //<< theMap.size() << " entries. ";
   ProblemData reader;
   for (int i=0; i<theMap.size(); i++)
   { if (!reader.LoadFrom(CGI::URLStringToNormal(theMap[i]), commentsOnFailure))
@@ -1105,7 +1107,7 @@ bool UserCalculator::LoadProblemStringFromDatabase
 
 bool UserCalculator::StoreProblemDataToDatabase
 (DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("UserCalculator::StoreDatabaseInfo");
+{ MacroRegisterFunctionWithName("UserCalculator::StoreProblemDataToDatabase");
   std::stringstream problemDataStream;
   for (int i=0; i<this->theProblemData.size(); i++)
     problemDataStream << CGI::StringToURLString(this->theProblemData.theKeys[i]) << "="

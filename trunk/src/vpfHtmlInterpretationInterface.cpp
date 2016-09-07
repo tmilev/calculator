@@ -338,7 +338,8 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   ;
   if (!theGlobalVariables.flagRunningApache)
     out << "<problemNavigation>" << thePage.outputHtmlNavigatioN
-    << theGlobalVariables.ToStringNavigation() << "</problemNavigation><br>";
+    << theGlobalVariables.ToStringNavigation() << "|| <small>Generated in " << theGlobalVariables.GetElapsedSeconds()
+    << " second(s).</tiny>" << "</problemNavigation><br>";
   out << thePage.outputHtmlBodyNoTag;
   out << "</body><!-- tag added automatically; user-specified body tag ignored-->\n";
   out << "</html><!-- tag added automatically; user-specified html tag ignored-->\n";

@@ -248,14 +248,17 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   //stOutput << "<hr><hr>DEBUG reading problem info from: " << CGI::StringToHtmlString(this->currentUseR.problemDataString.value);
   //stOutput << "<hr>Starting user: " << this->currentUseR.ToString();
   if (this->currentUseR.problemDataString=="")
-  { comments << "Failed to load current user's problem save-file. ";
-    return false;
-  }
+    return true;
   if (!this->currentUseR.InterpretDatabaseProblemData(this->currentUseR.problemDataString.value, comments))
-  { comments << "Failed to interpret user's problem save-file. ";
+  { comments << "Failed to interpret user's problem saved data. ";
+    //stOutput << "Failed to interpret user's problem saved data. ";
     return false;
   }
-  stOutput << "<hr>Debug: user: " << this->currentUseR.ToString() << "<hr>";
+  if (this->currentUseR.theProblemData.Contains(this->fileName))
+  { this->theProblemData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(this->fileName);
+    //stOutput << "<hr>Debug: found problem data! " << this->theProblemData.ToString() << "<hr>";
+  } //else
+    //stOutput << "<hr>Did not find problem data for filename: " << this->fileName << ". USer details: " << this->currentUseR.ToString() << "<hr>";
   if (!this->ReadProblemInfoAppend(this->currentUseR.deadlineInfoString.value, this->databaseProblemInfo, comments))
   { comments << "Failed to interpret the deadline string. ";
     return false;
@@ -271,7 +274,7 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
 //  this->currentUseR.ComputePointsEarned
 //  (this->databaseProblemAndHomeworkGroupList, this->databaseProblemWeights);
   theGlobalVariables.userDefault=this->currentUseR;
-  stOutput << "<hr>After interpretation of datastring: user: " << this->currentUseR.ToString();
+  //stOutput << "<hr>After interpretation of datastring: user: " << this->currentUseR.ToString();
   return true;
 #else
   comments << "Database not available. ";
@@ -1817,7 +1820,7 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
   }
   this->timeToParseHtml=theGlobalVariables.GetElapsedSeconds()-startTime;
   this->NumAttemptsToInterpret=0;
-  stOutput << "DEBUG: this->theProblemData.flagRandomSeedGiven: " << this->theProblemData.flagRandomSeedGiven;
+  //stOutput << "DEBUG: this->theProblemData.flagRandomSeedGiven: " << this->theProblemData.flagRandomSeedGiven;
   if (!this->theProblemData.flagRandomSeedGiven)
   { srand(time(NULL));
   }
@@ -2534,9 +2537,9 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   double startTime=theGlobalVariables.GetElapsedSeconds();
   std::stringstream outBody;
   std::stringstream outHeaD, outHeadPt1, outHeadPt2;
-  if (!this->flagIsForReal || !this->theProblemData.flagRandomSeedGiven)
-    if (this->NumAttemptsToInterpret>1)
-      this->theProblemData.randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
+  if (!this->theProblemData.flagRandomSeedGiven)
+    //if (this->NumAttemptsToInterpret>0) //<-this should always be true, if not it's better that we crash.
+    this->theProblemData.randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
   //stOutput << "DEBUG: Interpreting problem with random seed: " << this->theProblemData.randomSeed;
   this->FigureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
@@ -2746,7 +2749,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
       << this->ToStringCalculatorArgumentsForProblem("scoredQuiz", studentView)
       << "\">" << this->stringScoredQuizzes << "</a>" << linkSeparator;
     else if (theGlobalVariables.userCalculatorRequestType=="scoredQuiz")
-      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=exercise"
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=exercise&"
       << this->ToStringCalculatorArgumentsForProblem("exercise", studentView)
       << "\">" << this->stringPracticE << "</a>" << linkSeparator;
   }
@@ -2950,7 +2953,7 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
     theProbData.adminData=this->databaseProblemInfo.GetValueCreateIfNotPresent(theFileName);
   std::stringstream problemWeight;
   bool showModifyButton=theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn();
-  Rational percentSolved, totalPoints;
+  Rational percentSolved=0, totalPoints=0;
   percentSolved.AssignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.theAnswers.size);
   theProbData.flagProblemWeightIsOK=
   theProbData.adminData.ProblemWeight.AssignStringFailureAllowed
@@ -2967,7 +2970,7 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
   }
   if (percentSolved<1)
   { if (!theProbData.flagProblemWeightIsOK)
-      out << "<span style=\"color:brown\"><b>" << totalPoints << " out of " << problemWeight.str() << "</b></span>";
+      out << "<span style=\"color:brown\"><b>" << percentSolved << " out of " << problemWeight.str() << "</b></span>";
     else
       out << "<span style=\"color:red\"><b>" << totalPoints << " out of " << problemWeight.str() << "</b></span>";
   }
@@ -3152,8 +3155,9 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   { inputOutput.interpretedCommand=out.str();
     return;
   }
+  if (!this->LoadDatabaseInfo(out))
+    out << "<span style=\"color:red\">Could not load your problem history.</span> <br>";
   bool plainStyle=(inputOutput.GetKeyValue("topicListStyle")=="plain");
-  this->LoadAndParseTopicList(this->comments);
   TopicElement currentElt;
   bool tableStarted=false;
   bool sectionStarted=false;

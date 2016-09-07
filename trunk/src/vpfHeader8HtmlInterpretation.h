@@ -120,8 +120,6 @@ public:
   HashedList<std::string, MathRoutines::hashString> hdHomeworkGroupNames;
   HashedList<std::string, MathRoutines::hashString> databaseProblemAndHomeworkGroupList;
 //  List<std::string> databaseHomeworkGroupCorrespondingToEachProblem;
-  MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>
-  databaseProblemInfo;
   List<List<std::string> > userTablE;
   List<std::string> labelsUserTablE;
   List<std::string> problemListOfParent;
@@ -169,7 +167,7 @@ public:
   (const std::string& problemName, const std::string& sectionNumber,
    bool inheritFromGroup, bool& outputIsInherited);
   bool MergeOneProblemAdminData
-(const std::string& inputProblemName, ProblemDataAdministrative& inputProblemInfo,
+(const std::string& inputProblemName, ProblemData& inputProblemInfo,
  std::stringstream& commentsOnFailure)
   ;
   bool MergeProblemInfoInDatabase
@@ -179,19 +177,19 @@ public:
   ;
   bool ReadProblemInfoAppend
   (const std::string& inputInfoString,
-   MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
+   MapLisT<std::string, ProblemData, MathRoutines::hashString>&
    outputProblemInfo,
    std::stringstream& commentsOnFailure
    )
    ;
   void StoreDeadlineInfo
   (std::string& outputString,
-   MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
+   MapLisT<std::string, ProblemData, MathRoutines::hashString>&
    inputProblemInfo)
    ;
   void StoreProblemWeightInfo
   (std::string& outputString,
-   MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
+   MapLisT<std::string, ProblemData, MathRoutines::hashString>&
    inputProblemInfo)
    ;
   std::string InterpretGenerateDeadlineLink

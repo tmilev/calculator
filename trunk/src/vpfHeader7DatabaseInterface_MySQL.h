@@ -242,9 +242,7 @@ public:
   Rational pointsMax;
 
   void ComputePointsEarned
-  (const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
-      MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
-  databaseProblemInfo
+  (const HashedList<std::string, MathRoutines::hashString>& gradableProblems
    );
   ProblemData& HasProblemData(const std::string& problemName);
   ProblemData& GetProblemDataAddIfNotPresent(const std::string& problemName);

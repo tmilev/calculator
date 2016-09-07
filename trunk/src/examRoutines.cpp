@@ -38,26 +38,28 @@ CalculatorHTML::CalculatorHTML()
 
 #ifdef MACRO_use_MySQL
 bool CalculatorHTML::ReadProblemInfoAppend
-(const std::string& inputInfoString,
- MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
- outputProblemInfo,
- std::stringstream& commentsOnFailure
-)
+  (const std::string& inputInfoString,
+   MapLisT<std::string, ProblemData, MathRoutines::hashString>&
+   outputProblemInfo,
+   std::stringstream& commentsOnFailure
+   )
 { MacroRegisterFunctionWithName("DatabaseRoutines::ReadProblemInfoAppend");
   MapLisT<std::string, std::string, MathRoutines::hashString>
   CGIedProbs, currentKeyValues, sectionInfo;
   if (!CGI::ChopCGIString(inputInfoString, CGIedProbs, commentsOnFailure) )
     return false;
   outputProblemInfo.SetExpectedSize(outputProblemInfo.size()+ CGIedProbs.size());
-  ProblemDataAdministrative currentProblemValue;
+  ProblemData currentProblemValue;
   std::string currentProbName, currentProbString;
   for (int i=0; i<CGIedProbs.size(); i++)
   { currentProbName=CGI::URLStringToNormal(CGIedProbs.theKeys[i]);
     currentProbString=CGI::URLStringToNormal(CGIedProbs.theValues[i]);
+    if (outputProblemInfo.Contains(currentProbName))
+      currentProblemValue=outputProblemInfo.GetValueCreateIfNotPresent(currentProbName);
     if (!CGI::ChopCGIString(currentProbString, currentKeyValues, commentsOnFailure))
       return false;
     if (currentKeyValues.Contains("weight"))
-      currentProblemValue.ProblemWeight=
+      currentProblemValue.adminData.ProblemWeight=
       CGI::URLStringToNormal(currentKeyValues.GetValueCreateIfNotPresent("weight"));
     if (!currentKeyValues.Contains("deadlines"))
       continue;
@@ -65,7 +67,7 @@ bool CalculatorHTML::ReadProblemInfoAppend
     if (!CGI::ChopCGIString(deadlineString, sectionInfo, commentsOnFailure))
       return false;
     for (int j=0; j<sectionInfo.size(); j++)
-      currentProblemValue.deadlinesPerSection.SetKeyValue
+      currentProblemValue.adminData.deadlinesPerSection.SetKeyValue
       (CGI::URLStringToNormal(sectionInfo.theKeys[j]),
        CGI::URLStringToNormal(sectionInfo.theValues[j]));
     outputProblemInfo.SetKeyValue(currentProbName, currentProblemValue);
@@ -75,12 +77,12 @@ bool CalculatorHTML::ReadProblemInfoAppend
 
 void CalculatorHTML::StoreProblemWeightInfo
 (std::string& outputString,
- MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
+ MapLisT<std::string, ProblemData, MathRoutines::hashString>&
  inputProblemInfo)
 { MacroRegisterFunctionWithName("CalculatorHTML::StoreProblemWeightInfo");
   std::stringstream out;
   for (int i=0; i<inputProblemInfo.size(); i++)
-  { ProblemDataAdministrative& currentProblem=inputProblemInfo.theValues[i];
+  { ProblemDataAdministrative& currentProblem=inputProblemInfo.theValues[i].adminData;
     std::string currentProbName=inputProblemInfo.theKeys[i];
     std::stringstream currentProblemStream;
     if (currentProblem.ProblemWeightUserInput!="")
@@ -96,12 +98,12 @@ void CalculatorHTML::StoreProblemWeightInfo
 
 void CalculatorHTML::StoreDeadlineInfo
 (std::string& outputString,
- MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
+ MapLisT<std::string, ProblemData, MathRoutines::hashString>&
  inputProblemInfo)
 { MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemInfo");
   std::stringstream out;
   for (int i=0; i<inputProblemInfo.size(); i++)
-  { ProblemDataAdministrative& currentProblem=inputProblemInfo.theValues[i];
+  { ProblemDataAdministrative& currentProblem=inputProblemInfo.theValues[i].adminData;
     std::string currentProbName=inputProblemInfo.theKeys[i];
     std::stringstream currentProblemStream, currentDeadlineStream;
     for (int j=0; j<currentProblem.deadlinesPerSection.size(); j++)
@@ -164,7 +166,7 @@ bool DatabaseRoutines::StoreProblemDatabaseInfo
 }
 
 bool CalculatorHTML::MergeOneProblemAdminData
-(const std::string& inputProblemName, ProblemDataAdministrative& inputProblemInfo,
+(const std::string& inputProblemName, ProblemData& inputProblemInfo,
  std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("CalculatorHTML::MergeOneProblemAdminData");
   if (!this->theTopicsOrdered.Contains(inputProblemName) )
@@ -172,13 +174,14 @@ bool CalculatorHTML::MergeOneProblemAdminData
     << " among the list of topics/problems. ";
     return false;
   }
-  if (!this->databaseProblemInfo.Contains(inputProblemName))
-    this->databaseProblemInfo.SetKeyValue(inputProblemName, inputProblemInfo);
-  ProblemDataAdministrative& currentProblem=this->databaseProblemInfo.GetValueCreateIfNotPresent(inputProblemName);
+  if (!this->currentUseR.theProblemData.Contains(inputProblemName))
+    this->currentUseR.theProblemData.SetKeyValue(inputProblemName, inputProblemInfo);
+  ProblemDataAdministrative& currentProblem=
+  this->currentUseR.theProblemData.GetValueCreateIfNotPresent(inputProblemName).adminData;
   MapLisT<std::string, std::string, MathRoutines::hashString>&
   currentDeadlines=currentProblem.deadlinesPerSection;
   MapLisT<std::string, std::string, MathRoutines::hashString>&
-  incomingDeadlines=inputProblemInfo.deadlinesPerSection;
+  incomingDeadlines=inputProblemInfo.adminData.deadlinesPerSection;
   for (int i=0; i<incomingDeadlines.size(); i++)
   { if (this->databaseProblemAndHomeworkGroupList.size>=1000)
     { commentsOnFailure << "Failed to account deadlines: "
@@ -191,13 +194,13 @@ bool CalculatorHTML::MergeOneProblemAdminData
   for (int i=0; i<incomingDeadlines.size(); i++)
     currentDeadlines.SetKeyValue
     (incomingDeadlines.theKeys[i],incomingDeadlines.theValues[i]);
-  if (inputProblemInfo.ProblemWeightUserInput!="")
+  if (inputProblemInfo.adminData.ProblemWeightUserInput!="")
   { if (!currentProblem.ProblemWeight.AssignStringFailureAllowed(currentProblem.ProblemWeightUserInput))
     { commentsOnFailure << "Failed to extract rational number from " << currentProblem.ProblemWeightUserInput << ". ";
       return false;
     }
-    currentProblem.ProblemWeightUserInput=inputProblemInfo.ProblemWeightUserInput;
-    currentProblem.ProblemWeight=inputProblemInfo.ProblemWeight;
+    currentProblem.ProblemWeightUserInput=inputProblemInfo.adminData.ProblemWeightUserInput;
+    currentProblem.ProblemWeight=inputProblemInfo.adminData.ProblemWeight;
   }
   return true;
 }
@@ -213,7 +216,7 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
     return false;
   if (!problemHome.ParseHTML(commentsOnFailure))
     return false;
-  MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>
+  MapLisT<std::string, ProblemData, MathRoutines::hashString>
   incomingProblems;
   if (!this->ReadProblemInfoAppend(incomingProblemInfo, incomingProblems, commentsOnFailure))
   { commentsOnFailure << "Failed to parse your request";
@@ -226,8 +229,8 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
         (incomingProblems.theKeys[i], incomingProblems.theValues[i], commentsOnFailure))
       result=false;
 
-  this->StoreDeadlineInfo(theGlobalVariables.userDefault.deadlineInfoString.value, problemHome.databaseProblemInfo);
-  this->StoreProblemWeightInfo(theGlobalVariables.userDefault.problemInfoString.value, problemHome.databaseProblemInfo);
+  this->StoreDeadlineInfo(theGlobalVariables.userDefault.deadlineInfoString.value, problemHome.currentUseR.theProblemData);
+  this->StoreProblemWeightInfo(theGlobalVariables.userDefault.problemInfoString.value, problemHome.currentUseR.theProblemData);
   //stOutput << "<br>about to store back : <br>" << stringToStore << " interpreted as: <br>"
   //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(stringToStore) ;
   DatabaseRoutines theRoutines;
@@ -259,12 +262,12 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
     //stOutput << "<hr>Debug: found problem data! " << this->theProblemData.ToString() << "<hr>";
   } //else
     //stOutput << "<hr>Did not find problem data for filename: " << this->fileName << ". USer details: " << this->currentUseR.ToString() << "<hr>";
-  if (!this->ReadProblemInfoAppend(this->currentUseR.deadlineInfoString.value, this->databaseProblemInfo, comments))
+  if (!this->ReadProblemInfoAppend(this->currentUseR.deadlineInfoString.value, this->currentUseR.theProblemData, comments))
   { comments << "Failed to interpret the deadline string. ";
     return false;
   }
   //stOutput << "<hr>Debug: user: " << this->currentUseR.ToString();
-  if (!this->ReadProblemInfoAppend(this->currentUseR.problemInfoString.value, this->databaseProblemInfo, comments))
+  if (!this->ReadProblemInfoAppend(this->currentUseR.problemInfoString.value, this->currentUseR.theProblemData, comments))
   { comments << "Failed to interpret the problem weight string. ";
     return false;
   }
@@ -1243,7 +1246,7 @@ std::string DatabaseRoutines::ToStringClassDetails
       oneTableLineStream << "<td>No solutions history</td>";
     else if (currentUser.InterpretDatabaseProblemData
              (currentUser.selectedRowFieldsUnsafe[indexProblemData], commentsProblemData))
-    { currentUser.ComputePointsEarned(databaseSpanList, databaseProblemInfo);
+    { currentUser.ComputePointsEarned(currentUser.theProblemData.theKeys);
       oneTableLineStream << "<td>" << std::fixed << std::setw(1)
       << std::setprecision(1) << currentUser.pointsEarned.GetDoubleValue() << "</td>";
     } else
@@ -1503,9 +1506,9 @@ std::string CalculatorHTML::GetDeadline
 { MacroRegisterFunctionWithName("CalculatorHTML::GetDeadline");
   outputIsInherited=false;
   std::string result;
-  if (this->databaseProblemInfo.Contains(problemName))
+  if (this->currentUseR.theProblemData.Contains(problemName))
   { ProblemDataAdministrative& currentProb=
-    this->databaseProblemInfo.GetValueCreateIfNotPresent(problemName);
+    this->currentUseR.theProblemData.GetValueCreateIfNotPresent(problemName).adminData;
     result=currentProb.deadlinesPerSection.GetValueCreateIfNotPresent(sectionNumber);
   }
  int todoFixThis;
@@ -2905,8 +2908,6 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
   { ProblemData& theProbData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName);
     if (!theProbData.flagProblemWeightIsOK)
     { out << "<span style=\"color:orange\">No point weight assigned yet. </span>";
-      if (this->databaseProblemInfo.Contains(theFileName))
-        theProbData.adminData=this->databaseProblemInfo.GetValueCreateIfNotPresent(theFileName);
       if (theProbData.adminData.ProblemWeightUserInput!="")
         out << "<span style=\"color:red\"><b>Failed to interpret weight string: "
         << theProbData.adminData.ProblemWeightUserInput << ". </b></span>";
@@ -2948,9 +2949,9 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
   #ifdef MACRO_use_MySQL
   if (!this->currentUseR.theProblemData.Contains(theFileName))
     return "<span style=\"color:brown\"><b>need to solve</b></span>";
-  ProblemData& theProbData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName);
-  if (this->databaseProblemInfo.Contains(theFileName))
-    theProbData.adminData=this->databaseProblemInfo.GetValueCreateIfNotPresent(theFileName);
+  ProblemData theProbData;
+  if (this->currentUseR.theProblemData.Contains(theFileName))
+    theProbData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName);
   std::stringstream problemWeight;
   bool showModifyButton=theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn();
   Rational percentSolved=0, totalPoints=0;
@@ -2958,7 +2959,7 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
   theProbData.flagProblemWeightIsOK=
   theProbData.adminData.ProblemWeight.AssignStringFailureAllowed
   (theProbData.adminData.ProblemWeightUserInput);
-
+  //out << "DEBUG: " << theProbData.numCorrectlyAnswered << " out of " << theProbData.theAnswers.size;
   if (!theProbData.flagProblemWeightIsOK)
   { problemWeight << "?";
     if (theProbData.adminData.ProblemWeightUserInput!="")
@@ -2996,7 +2997,7 @@ std::string CalculatorHTML::ToStringProblemWeighT(const std::string& theFileName
   out << "Points: <textarea rows=\"1\" cols=\"3\" id=\"" << idPoints << "\">";
   std::string thePoints="";
   if (this->databaseProblemAndHomeworkGroupList.Contains(theFileName))
-    thePoints= this->databaseProblemInfo.GetValueCreateIfNotPresent(theFileName).ProblemWeightUserInput;
+    thePoints= this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName).adminData.ProblemWeightUserInput;
   out << thePoints;
   out << "</textarea>";
   out << "<button id=\"" << idButtonModifyPoints << "\" "
@@ -3157,6 +3158,8 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   }
   if (!this->LoadDatabaseInfo(out))
     out << "<span style=\"color:red\">Could not load your problem history.</span> <br>";
+
+  this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys);
   bool plainStyle=(inputOutput.GetKeyValue("topicListStyle")=="plain");
   TopicElement currentElt;
   bool tableStarted=false;

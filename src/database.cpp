@@ -911,25 +911,21 @@ bool DatabaseRoutines::SendActivationEmail(const std::string& emailList, std::st
 }
 
 void UserCalculator::ComputePointsEarned
-(const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
-   MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
-  databaseProblemInfo
+(const HashedList<std::string, MathRoutines::hashString>& gradableProblems
  )
 { MacroRegisterFunctionWithName("UserCalculator::ComputePointsEarned");
   this->pointsEarned=0;
   for (int i=0; i<this->theProblemData.size(); i++)
-  { ProblemData& currentP=this->theProblemData.theValues[i];
-    const std::string problemName=this->theProblemData.theKeys[i];
+  { const std::string problemName=this->theProblemData.theKeys[i];
+    if (!gradableProblems.Contains(problemName) )
+      continue;
+    ProblemData& currentP=this->theProblemData.theValues[i];
     currentP.Points=0;
     currentP.totalNumSubmissions=0;
     currentP.numCorrectlyAnswered=0;
-    if (gradableProblems.Contains(problemName) )
-    { currentP.adminData=
-      databaseProblemInfo.GetValueCreateIfNotPresent(problemName);
-      currentP.flagProblemWeightIsOK=
-      currentP.adminData.ProblemWeight.AssignStringFailureAllowed
-      (currentP.adminData.ProblemWeightUserInput);
-    }
+    currentP.flagProblemWeightIsOK=
+    currentP.adminData.ProblemWeight.AssignStringFailureAllowed
+    (currentP.adminData.ProblemWeightUserInput);
 //    this->problemData[i].numAnswersSought=this->problemData[i].answerIds.size;
     for (int j=0; j<currentP.theAnswers.size; j++)
     { if (currentP.theAnswers[j].numCorrectSubmissions>0)

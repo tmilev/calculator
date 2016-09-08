@@ -107,6 +107,8 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
   std::stringstream commentsOnFailure;
   CalculatorHTML theProblem;
   theProblem.fileName=inputProblemHome;
+  if (!theProblem.LoadAndParseTopicList(commentsOnFailure))
+    return "Failed to load topic list. " + commentsOnFailure.str();
   bool result=theProblem.MergeProblemInfoInDatabase
   (inputProblemHome, inputProblemInfo, commentsOnFailure);
   std::stringstream out;
@@ -1106,5 +1108,54 @@ std::string HtmlInterpretation::ToStringUserDetails
 #else
   out << "<b>Adding emails not available (database not present).</b> ";
 #endif // MACRO_use_MySQL
+  return out.str();
+}
+
+std::string GlobalVariables::ToStringNavigation()
+{ return HtmlInterpretation::ToStringNavigation();
+}
+
+std::string HtmlInterpretation::ToStringNavigation()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::ToStringNavigation");
+  std::stringstream out;
+  //out << "<table>";
+  std::string linkSeparator=" | ";
+  std::string linkBigSeparator=" || ";
+  if (theGlobalVariables.flagLoggedIn)
+  { out << "User";
+    if (theGlobalVariables.UserDefaultHasAdminRights())
+      out << " <b>(admin)</b>";
+    out << ": " << theGlobalVariables.userDefault.username.value << linkSeparator;
+    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=logout&";
+    out << theGlobalVariables.ToStringCalcArgsNoNavigation() << " \">Log out</a>" << linkSeparator;
+    if (theGlobalVariables.flagUsingSSLinCurrentConnection)
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=changePasswordPage&"
+      << theGlobalVariables.ToStringCalcArgsNoNavigation() << "\">Change password</a>" << linkSeparator;
+    else
+      out << "<b>Password change: <br>secure connection<br>only</b>" << linkSeparator;
+  }
+  out << "<a href=\"/selectCourse.html\">Select course</a>" << linkBigSeparator;
+  if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
+  { if (theGlobalVariables.userCalculatorRequestType!="accounts")
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts&" << theGlobalVariables.ToStringCalcArgsNoNavigation()
+      << "\">Accounts</a>" << linkSeparator;
+    else
+      out << "<b>Accounts</b>" << linkBigSeparator;
+    if (theGlobalVariables.userCalculatorRequestType!="status")
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=status&" << theGlobalVariables.ToStringCalcArgsNoNavigation()
+      << "\">Server</a>" << linkSeparator;
+    else
+      out << "<b>Server</b>" << linkBigSeparator;
+    if (theGlobalVariables.userCalculatorRequestType!="database")
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=database&" << theGlobalVariables.ToStringCalcArgsNoNavigation()
+      << "\">Database</a>" << linkBigSeparator;
+    else
+      out << "<b>Database</b>" << linkBigSeparator;
+    if (theGlobalVariables.userCalculatorRequestType!="compute")
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=compute&"
+      << theGlobalVariables.ToStringCalcArgsNoNavigation() << " \">Calculator</a>" << linkBigSeparator;
+    else
+      out << "<b>Calculator</b> " << linkBigSeparator;
+  }
   return out.str();
 }

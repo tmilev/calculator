@@ -3736,6 +3736,8 @@ int WebServer::main(int argc, char **argv)
   theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead=theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit-2;
   //using loggers allowed from now on.
   theWebServer.InitializeGlobalVariables();
+  theGlobalVariables.flagAceIsAvailable=
+  FileOperations::FileExistsVirtual("MathJax-2.6-latest/", false);
   if (theGlobalVariables.flagRunningBuiltInWebServer)
   { theLog
     << logger::purple << "************************" << logger::endL
@@ -3842,8 +3844,7 @@ int WebServer::mainApache()
     theGlobalVariables.flagSSLisAvailable=true;
   }
   if (theRequestMethod=="GET")
-  { theWorker.requestTypE=theWorker.requestGet;
-  }
+    theWorker.requestTypE=theWorker.requestGet;
   if (theRequestMethod=="POST")
     theWorker.requestTypE=theWorker.requestPost;
   theParser.javaScriptDisplayingIndicator=WebWorker::GetJavaScriptIndicatorFromHD();

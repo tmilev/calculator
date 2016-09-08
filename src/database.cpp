@@ -240,7 +240,14 @@ std::string ProblemData::ToStringAvailableAnswerIds()
   return out.str();
 }
 
-std::string ProblemData::ToString()
+std::string ProblemDataAdministrative::ToString()const
+{ std::stringstream out;
+  out << this->deadlinesPerSection.ToStringHtml();
+  out << "Weight: " << this->ProblemWeightUserInput << " (" << this->ProblemWeight.ToString() << ")";
+  return out.str();
+}
+
+std::string ProblemData::ToString()const
 { std::stringstream out;
   out << "Problem data. "
   << "Random seed: " << this->randomSeed;
@@ -258,6 +265,7 @@ std::string ProblemData::ToString()
     else
       out << currentA.firstCorrectAnswerClean;
   }
+  out << this->adminData.ToString();
   return out.str();
 }
 

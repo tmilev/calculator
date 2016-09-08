@@ -44,6 +44,11 @@ public:
     this->problem="";
     this->error="";
   }
+  friend std::ostream& operator << (std::ostream& output, const TopicElement& theElt)
+  { output << theElt.ToString();
+    return output;
+  }
+  std::string ToString()const;
   static std::string GetTableStart(bool plainStyle);
   static std::string GetTableFinish(bool plainStyle);
   void ComputeLinks(CalculatorHTML& owner, bool plainStyle);

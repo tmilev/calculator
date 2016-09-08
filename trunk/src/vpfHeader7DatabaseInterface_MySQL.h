@@ -172,11 +172,16 @@ public:
   std::string ProblemWeightUserInput;
   Rational ProblemWeight;
   MapLisT<std::string, std::string, MathRoutines::hashString> deadlinesPerSection;
+  std::string ToString()const;
 };
 
 struct ProblemData
 {
 public:
+  friend std::ostream& operator << (std::ostream& output, const ProblemData& theData)
+  { output << theData.ToString();
+    return output;
+  }
   bool flagRandomSeedGiven;
   unsigned int randomSeed;
   bool flagProblemWeightIsOK;
@@ -194,7 +199,7 @@ public:
   ProblemData();
   bool LoadFrom(const std::string& inputData, std::stringstream& commentsOnFailure);
   std::string Store();
-  std::string ToString();
+  std::string ToString()const;
   std::string ToStringAvailableAnswerIds();
 };
 

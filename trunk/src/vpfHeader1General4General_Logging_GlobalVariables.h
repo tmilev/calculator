@@ -79,6 +79,7 @@ public:
 
 //special flags
   bool flagRunningAce;
+  bool flagAceIsAvailable;
 //webserver flags
   bool flagLoggedIn;
   bool flagUsingSSLinCurrentConnection;

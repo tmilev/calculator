@@ -261,51 +261,6 @@ bool GlobalVariables::UserRequestMustBePromptedToLogInIfNotLoggedIn()
   ;
 }
 
-std::string GlobalVariables::ToStringNavigation()
-{ MacroRegisterFunctionWithName("GlobalVariables::ToStringNavigation");
-  std::stringstream out;
-  //out << "<table>";
-  std::string linkSeparator=" | ";
-  std::string linkBigSeparator=" || ";
-  if (theGlobalVariables.flagLoggedIn)
-  { out << "User";
-    if (theGlobalVariables.UserDefaultHasAdminRights())
-      out << " <b>(admin)</b>";
-    out << ": " << this->userDefault.username.value << linkSeparator;
-    out << "<a href=\"" << this->DisplayNameExecutable << "?request=logout&";
-    out << this->ToStringCalcArgsNoNavigation() << " \">Log out</a>" << linkSeparator;
-    if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-      out << "<a href=\"" << this->DisplayNameExecutable << "?request=changePasswordPage&"
-      << this->ToStringCalcArgsNoNavigation() << "\">Change password</a>" << linkSeparator;
-    else
-      out << "<b>Password change: <br>secure connection<br>only</b>" << linkSeparator;
-  }
-  out << "<a href=\"/selectCourse.html\">Select course</a>" << linkBigSeparator;
-  if (this->UserDefaultHasAdminRights() && !this->UserStudentViewOn())
-  { if (theGlobalVariables.userCalculatorRequestType!="accounts")
-      out << "<a href=\"" << this->DisplayNameExecutable << "?request=accounts&" << this->ToStringCalcArgsNoNavigation()
-      << "\">Accounts</a>" << linkSeparator;
-    else
-      out << "<b>Accounts</b>" << linkBigSeparator;
-    if (theGlobalVariables.userCalculatorRequestType!="status")
-      out << "<a href=\"" << this->DisplayNameExecutable << "?request=status&" << this->ToStringCalcArgsNoNavigation()
-      << "\">Server</a>" << linkSeparator;
-    else
-      out << "<b>Server</b>" << linkBigSeparator;
-    if (theGlobalVariables.userCalculatorRequestType!="database")
-      out << "<a href=\"" << this->DisplayNameExecutable << "?request=database&" << this->ToStringCalcArgsNoNavigation()
-      << "\">Database</a>" << linkBigSeparator;
-    else
-      out << "<b>Database</b>" << linkBigSeparator;
-    if (theGlobalVariables.userCalculatorRequestType!="compute")
-      out << "<a href=\"" << this->DisplayNameExecutable << "?request=compute&"
-      << this->ToStringCalcArgsNoNavigation() << " \">Calculator</a>" << linkBigSeparator;
-    else
-      out << "<b>Calculator</b> " << linkBigSeparator;
-  }
-  return out.str();
-}
-
 std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude)
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringCalcArgsNoNavigation");
   if (!this->flagLoggedIn && !this->UserGuestMode())

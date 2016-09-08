@@ -48,8 +48,8 @@ bool CalculatorHTML::ReadProblemInfoAppend
   CGIedProbs, currentKeyValues, sectionInfo;
   if (!CGI::ChopCGIString(inputInfoString, CGIedProbs, commentsOnFailure) )
     return false;
-  stOutput << "<hr>Debug: reading problem info from: " << inputInfoString << " resulted in pairs: "
-  << CGIedProbs.ToStringHtml();
+  //stOutput << "<hr>Debug: reading problem info from: " << inputInfoString << " resulted in pairs: "
+  //<< CGIedProbs.ToStringHtml();
   outputProblemInfo.SetExpectedSize(outputProblemInfo.size()+ CGIedProbs.size());
   std::string currentProbName, currentProbString;
   for (int i=0; i<CGIedProbs.size(); i++)
@@ -61,8 +61,8 @@ bool CalculatorHTML::ReadProblemInfoAppend
     outputProblemInfo.GetValueCreateIfNotPresent(currentProbName);
     if (!CGI::ChopCGIString(currentProbString, currentKeyValues, commentsOnFailure))
       return false;
-    stOutput << "<hr>Debug: reading problem info from: " << currentProbString << " resulted in pairs: "
-    << currentKeyValues.ToStringHtml();
+    //stOutput << "<hr>Debug: reading problem info from: " << currentProbString << " resulted in pairs: "
+    //<< currentKeyValues.ToStringHtml();
     if (currentKeyValues.Contains("weight"))
     { currentProblemValue.adminData.ProblemWeightUserInput=
       CGI::URLStringToNormal(currentKeyValues.GetValueCreateIfNotPresent("weight"));
@@ -86,8 +86,8 @@ void CalculatorHTML::StoreProblemWeightInfo
  inputProblemInfo)
 { MacroRegisterFunctionWithName("CalculatorHTML::StoreProblemWeightInfo");
   std::stringstream out;
-  stOutput << "<hr>DEBUG: About to store weight info given in: "
-  << inputProblemInfo.ToStringHtml();
+  //stOutput << "<hr>DEBUG: About to store weight info given in: "
+  //<< inputProblemInfo.ToStringHtml();
   for (int i=0; i<inputProblemInfo.size(); i++)
   { ProblemDataAdministrative& currentProblem=inputProblemInfo.theValues[i].adminData;
     std::string currentProbName=inputProblemInfo.theKeys[i];
@@ -153,12 +153,12 @@ bool DatabaseRoutines::ReadProblemDatabaseInfo
 bool DatabaseRoutines::StoreProblemDatabaseInfo
 (const UserCalculatorData& theUser, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
-  stOutput << "<hr>DEBUG: About to store back: "
-  << "<br>deadline:<br> "
-  << theUser.deadlineInfoString.value
-  << "<br>problem:<br> "
-  << theUser.problemInfoString.value
-  ;
+  //stOutput << "<hr>DEBUG: About to store back: "
+  //<< "<br>deadline:<br> "
+  //<< theUser.deadlineInfoString.value
+  //<< "<br>problem:<br> "
+  //<< theUser.problemInfoString.value
+  //;
   if (!this->startMySQLDatabaseIfNotAlreadyStarted(&commentsOnFailure))
     return false;
   if (!this->SetEntry
@@ -187,11 +187,11 @@ bool CalculatorHTML::MergeOneProblemAdminData
     << " among the list of topics/problems. ";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
       commentsOnFailure << this->TopicProblemFileNames.ToStringCommaDelimited();
-    stOutput << "DEBUG: NOT merging " << inputProblemName << ": topics list does not contain it. "
-    << inputProblemInfo.ToString();
+    //stOutput << "DEBUG: NOT merging " << inputProblemName << ": topics list does not contain it. "
+    //<< inputProblemInfo.ToString();
     return false;
   }
-  stOutput << "Debug: MERGING-in prob data: " << inputProblemInfo.ToString();
+  //stOutput << "Debug: MERGING-in prob data: " << inputProblemInfo.ToString();
   if (!this->currentUseR.theProblemData.Contains(inputProblemName))
     this->currentUseR.theProblemData.SetKeyValue(inputProblemName, inputProblemInfo);
   ProblemDataAdministrative& currentProblem=
@@ -227,7 +227,7 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
 (std::string& incomingProblemInfo,
  std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::MergeProblemInfoInDatabase");
-  stOutput << "DEBUG: Here I am, merging in data: " << incomingProblemInfo;
+  //stOutput << "DEBUG: Here I am, merging in data: " << incomingProblemInfo;
   MapLisT<std::string, ProblemData, MathRoutines::hashString>
   incomingProblems;
   stOutput << "<hr>DEBUG: Got to next step: " << incomingProblemInfo;
@@ -237,23 +237,23 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
   }
   std::string currentFileName;
   bool result=true;
-  stOutput << "<hr><hr>Debug: incoming problems: " << incomingProblems.ToStringHtml();
+  //stOutput << "<hr><hr>Debug: incoming problems: " << incomingProblems.ToStringHtml();
   for (int i=0; i<incomingProblems.size(); i++)
     if (!this->MergeOneProblemAdminData
         (incomingProblems.theKeys[i], incomingProblems.theValues[i], commentsOnFailure))
       result=false;
-  stOutput << "<hr><hr>Debug: after merge, resulting MERGED probs: "
-  << this->currentUseR.theProblemData.ToStringHtml() << "<hr>";
+  //stOutput << "<hr><hr>Debug: after merge, resulting MERGED probs: "
+  //<< this->currentUseR.theProblemData.ToStringHtml() << "<hr>";
   this->StoreDeadlineInfo
   (theGlobalVariables.userDefault.deadlineInfoString.value,
    this->currentUseR.theProblemData);
-  stOutput << "<hr>Debug: about to store WEIGHT info given by: " << this->currentUseR.theProblemData.ToStringHtml()
-  << "<hr>";
+  //stOutput << "<hr>Debug: about to store WEIGHT info given by: " << this->currentUseR.theProblemData.ToStringHtml()
+  //<< "<hr>";
   this->StoreProblemWeightInfo
   (theGlobalVariables.userDefault.problemInfoString.value,
    this->currentUseR.theProblemData);
-  stOutput << "<hr>Resulting string: " << theGlobalVariables.userDefault.problemInfoString.value
-  << "<hr>";
+  //stOutput << "<hr>Resulting string: " << theGlobalVariables.userDefault.problemInfoString.value
+  //<< "<hr>";
   DatabaseRoutines theRoutines;
   if (!theRoutines.StoreProblemDatabaseInfo(theGlobalVariables.userDefault, commentsOnFailure))
     return false;
@@ -323,12 +323,14 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
     //comments << "Call stack: " << crash.GetStackTraceEtcErrorMessage();
     return false;
   }
+  //stOutput << "Debug: got to here pt1";
   std::stringstream contentStream;
   contentStream << theFile.rdbuf();
   this->inputHtml=contentStream.str();
   this->flagIsForReal=theGlobalVariables.UserRequestRequiresLoadingRealExamData();
 #ifdef MACRO_use_MySQL
   this->topicListFileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
+  //stOutput << "Debug: got to here pt2";
   if (doLoadDatabase)
     this->LoadDatabaseInfo(comments);
 #endif // MACRO_use_MySQL
@@ -3120,7 +3122,7 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
     return false;
   TopicElement::GetTopicList(this->topicListContent, this->theTopics);
   this->TopicProblemFileNames.Clear();
-  for (int i=0; i<this->theTopics.size;i)
+  for (int i=0; i<this->theTopics.size; i++)
     if (this->theTopics[i].problem!="")
       this->TopicProblemFileNames.AddOnTop(this->theTopics[i].problem);
   return true;
@@ -3213,7 +3215,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     }
     if (desiredChapter!="")
       if (currentChapter!=desiredChapter)
-      { out << "<br>DEBUG: Chapter: " << currentChapter << " skipped. ";
+      { //out << "<br>DEBUG: Chapter: " << currentChapter << " skipped. ";
         continue;
       }
     if (!firstListStarted)

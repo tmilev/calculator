@@ -509,7 +509,7 @@ bool UserCalculator::FetchOneColumn
 bool UserCalculator::AuthenticateWithToken(std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::AuthenticateWithToken");
   (void) commentsOnFailure;
-//  stOutput << "DEBUG: token-authenticating user: " << this->username.value << " with entered token: " << this->enteredAuthenticationToken.value
+//  stOutput << "<br>DEBUG: token-authenticating user: " << this->username.value << " with entered token: " << this->enteredAuthenticationToken.value
 //  << " against actual token: " << this->actualAuthenticationToken.value;
   if (this->enteredAuthenticationToken=="")
     return false;
@@ -580,48 +580,45 @@ bool UserCalculator::FetchOneUserRow
     this->problemInfoRowId=this->GetSelectedRowEntry("problemInfoRowId");
   }
   std::string reader;
-  bool result=true;
+  //stOutput << "DEBUG:  GOT to hereE!!!";
   if (this->deadlineInfoRowId!="")
-  { if (theRoutines.FetchEntry
+    if (theRoutines.FetchEntry
         (DatabaseStrings::deadlinesIdColumnName,
          this->deadlineInfoRowId,
          DatabaseStrings::deadlinesTableName,
          DatabaseStrings::deadlinesInfoColumnName,
          reader,
          failureStream))
-      result=false;
-    else
       this->deadlineInfoString=CGI::URLStringToNormal(reader);
-  }
+
   if (this->problemInfoRowId!="")
-  { if (theRoutines.FetchEntry
+    if (theRoutines.FetchEntry
         (DatabaseStrings::problemWeightsIdColumnName,
          this->problemInfoRowId,
          DatabaseStrings::problemWeightsTableName,
          DatabaseStrings::problemWeightsInfoColumnName,
          reader,
          failureStream))
-      result=false;
-    else
       this->problemInfoString=CGI::URLStringToNormal(reader);
-  }
-  return result;
+  //stOutput << "DEBUG: final result:  " << result;
+  return true;
 }
 
 bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::Authenticate");
-  //stOutput << "DEBUG: Authenticating user: " << this->username.value << " with password: " << this->enteredPassword;
-  this->currentTable="users";
+  //stOutput << "<hr>DEBUG: Authenticating user: " << this->username.value << " with password: " << this->enteredPassword;
+  this->currentTable=DatabaseStrings::usersTableName;
   std::stringstream secondCommentsStream;
   if (!this->FetchOneUserRow(theRoutines, &secondCommentsStream))
   { if (!this->Iexist(theRoutines))
       if (commentsOnFailure!=0)
         *commentsOnFailure << "User " << this->username.value << " does not exist. ";
+  //stOutput << "<hr>DEBUG: user " << this->username.value << " does not exist. More details: " << secondCommentsStream.str() << "<hr>";
     return false;
   }
   if (this->AuthenticateWithToken(&secondCommentsStream))
     return true;
-  //stOutput << "DEBUG: User could not authenticate with token.";
+  //stOutput << "<br>DEBUG: User could not authenticate with token.";
   bool result= this->AuthenticateWithUserNameAndPass(theRoutines, commentsOnFailure);
   if (this->enteredPassword!="")
     this->ResetAuthenticationToken(theRoutines, commentsOnFailure);
@@ -634,6 +631,8 @@ bool UserCalculator::AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutin
   (void) theRoutines;
   (void) commentsOnFailure;
   this->ComputeShaonedSaltedPassword();
+  //stOutput << "DEBUG: computed salted shaoned pass: " << this->enteredShaonedSaltedPassword
+  //<< "; actual: " << this->actualShaonedSaltedPassword;
   return this->enteredShaonedSaltedPassword==this->actualShaonedSaltedPassword;
 }
 
@@ -650,7 +649,7 @@ std::string UserCalculator::GetPassword(DatabaseRoutines& theRoutines)
 
 bool UserCalculator::Iexist(DatabaseRoutines& theRoutines)
 { MacroRegisterFunctionWithName("UserCalculator::Iexist");
-  return this->IamPresentInTable(theRoutines, "users");
+  return this->IamPresentInTable(theRoutines, DatabaseStrings::usersTableName);
 }
 
 bool UserCalculator::DeleteMe(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure)
@@ -1573,6 +1572,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
   DatabaseRoutines theRoutines;
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
+  //stOutput << "Logging in: " << userWrapper.ToStringUnsecure();
   userWrapper.currentTable=DatabaseStrings::usersTableName;
   if (userWrapper.Authenticate(theRoutines, comments))
   { theUseR=userWrapper;
@@ -1760,17 +1760,19 @@ bool DatabaseRoutines::FetchEntry
   << " FROM " << this->theDatabaseName << "." << tableName.GetIdentifieR() << " WHERE "
   << key.GetIdentifieR() << "="
   << valueSearchKey.GetDatA() ;
-//  stOutput << " firing up query: " << queryStream.str();
+  //stOutput << "<hr>DEBUG: fetch entry: firing up query: " << queryStream.str() << "<hr>";
   DatabaseQuery theQuery(*this, queryStream.str(), failureComments);
   outputUnsafe="";
   if (!theQuery.flagQuerySucceeded)
   { if (failureComments!=0)
       *failureComments << "<b>Query failed - column may not exist (or some other error occurred). </b>";
+  //stOutput << "<hr><b>Query failed - column may not exist (or some other error occurred). </b><hr>";
     return false;
   }
   if (!theQuery.flagQueryReturnedResult)
   { if (failureComments!=0)
       *failureComments << "<b>Query did not return a result - column may not exist. </b>";
+  //stOutput << "<hr>DEBUG: Query did not return a result - column may not exist. <hr>";
     return false;
   }
   outputUnsafe= CGI::URLStringToNormal(theQuery.firstResultString);
@@ -1786,6 +1788,7 @@ bool UserCalculator::IamPresentInTable(DatabaseRoutines& theRoutines, const std:
   "SELECT username FROM " + theRoutines.theDatabaseName + "." + theTable.GetIdentifieR() +
   " where username=" + this->username.GetDatA()
   );
+  //stOutput << "DEBUG: firing: query: " << theQuery.theQueryString;
   return theQuery.flagQueryReturnedResult;
 }
 

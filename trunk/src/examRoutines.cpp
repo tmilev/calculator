@@ -2959,7 +2959,6 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
   theProbData.flagProblemWeightIsOK=
   theProbData.adminData.ProblemWeight.AssignStringFailureAllowed
   (theProbData.adminData.ProblemWeightUserInput);
-  //out << "DEBUG: " << theProbData.numCorrectlyAnswered << " out of " << theProbData.theAnswers.size;
   if (!theProbData.flagProblemWeightIsOK)
   { problemWeight << "?";
     if (theProbData.adminData.ProblemWeightUserInput!="")
@@ -2974,9 +2973,14 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
       out << "<span style=\"color:brown\"><b>" << percentSolved << " out of " << problemWeight.str() << "</b></span>";
     else
       out << "<span style=\"color:red\"><b>" << totalPoints << " out of " << problemWeight.str() << "</b></span>";
+  } else
+  { if (!theProbData.flagProblemWeightIsOK)
+      out << "<span style=\"color:green\"><b>solved</b></span>";
+    else
+      out << "<span style=\"color:green\"><b>" << totalPoints << " out of " << problemWeight.str() << "</b></span>";
   }
-  else
-    out << "<span style=\"color:green\"><b>" << totalPoints << " out of " << problemWeight.str() << "</b></span>";
+  if (showModifyButton)
+    out << " | " << this->ToStringProblemWeighT(theFileName);
   #endif // MACRO_use_MySQL
   return out.str();
 }
@@ -2994,7 +2998,7 @@ std::string CalculatorHTML::ToStringProblemWeighT(const std::string& theFileName
   std::string idNumTries= "numTries"+urledProblem;
   std::string idButtonModifyPoints = "modifyPoints" + urledProblem;
   std::string idPointsModOutput = "modifyPointsOutputSpan" + urledProblem;
-  out << "Points: <textarea rows=\"1\" cols=\"3\" id=\"" << idPoints << "\">";
+  out << "Pts: <textarea rows=\"1\" cols=\"2\" id=\"" << idPoints << "\">";
   std::string thePoints="";
   if (this->databaseProblemAndHomeworkGroupList.Contains(theFileName))
     thePoints= this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName).adminData.ProblemWeightUserInput;

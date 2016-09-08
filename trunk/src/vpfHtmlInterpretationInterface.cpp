@@ -102,15 +102,15 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
 #ifdef MACRO_use_MySQL
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "<b>Only admins may set problem weights.</b>";
-  std::string inputProblemInfo=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
-  std::string inputProblemHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"));
-  std::stringstream commentsOnFailure;
   CalculatorHTML theProblem;
-  theProblem.fileName=inputProblemHome;
+  std::string inputProblemInfo=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
+  theProblem.topicListFileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
+  std::stringstream commentsOnFailure;
   if (!theProblem.LoadAndParseTopicList(commentsOnFailure))
-    return "Failed to load topic list. " + commentsOnFailure.str();
+    return "Failed to load topic list from file name: " + theProblem.topicListFileName + ". "+ commentsOnFailure.str();
+  theProblem.currentUseR.UserCalculatorData::operator=(theGlobalVariables.userDefault);
   bool result=theProblem.MergeProblemInfoInDatabase
-  (inputProblemHome, inputProblemInfo, commentsOnFailure);
+  (inputProblemInfo, commentsOnFailure);
   std::stringstream out;
   if (result)
   { out << "<span style=\"color:green\"><b>Successfully modified problem data. </b></span>";

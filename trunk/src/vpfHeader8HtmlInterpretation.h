@@ -119,8 +119,7 @@ public:
   std::string topicListContent;
   std::string topicListFileName;
   List<TopicElement> theTopics;
-  MapLisT<std::string, TopicElement, MathRoutines::hashString> theTopicsOrdered;
-  List<std::string> hdHomeworkGroupCorrespondingToEachProblem;
+  HashedList<std::string, MathRoutines::hashString> TopicProblemFileNames;
   List<List<std::string> > hdHomeworkGroups;
   HashedList<std::string, MathRoutines::hashString> hdHomeworkGroupNames;
   HashedList<std::string, MathRoutines::hashString> databaseProblemAndHomeworkGroupList;
@@ -176,8 +175,7 @@ public:
  std::stringstream& commentsOnFailure)
   ;
   bool MergeProblemInfoInDatabase
-  (const std::string& problemHomeName,
-   std::string& incomingProblemInfo,
+  (std::string& incomingProblemInfo,
    std::stringstream& commentsOnFailure)
   ;
   bool ReadProblemInfoAppend

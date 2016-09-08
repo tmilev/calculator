@@ -182,11 +182,11 @@ bool CalculatorHTML::MergeOneProblemAdminData
 (const std::string& inputProblemName, ProblemData& inputProblemInfo,
  std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("CalculatorHTML::MergeOneProblemAdminData");
-  if (!this->theTopicsOrdered.Contains(inputProblemName))
+  if (!this->TopicProblemFileNames.Contains(inputProblemName))
   { commentsOnFailure << "Did not find " << inputProblemName
     << " among the list of topics/problems. ";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
-      commentsOnFailure << this->theTopicsOrdered.ToStringHtml();
+      commentsOnFailure << this->TopicProblemFileNames.ToStringCommaDelimited();
     stOutput << "DEBUG: NOT merging " << inputProblemName << ": topics list does not contain it. "
     << inputProblemInfo.ToString();
     return false;
@@ -224,17 +224,10 @@ bool CalculatorHTML::MergeOneProblemAdminData
 }
 
 bool CalculatorHTML::MergeProblemInfoInDatabase
-(const std::string& problemHomeName,
- std::string& incomingProblemInfo,
+(std::string& incomingProblemInfo,
  std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::MergeProblemInfoInDatabase");
-  CalculatorHTML problemHome;
-  problemHome.fileName=problemHomeName;
   stOutput << "DEBUG: Here I am, merging in data: " << incomingProblemInfo;
-  if (!problemHome.LoadMe(true, commentsOnFailure))
-    return false;
-  if (!problemHome.ParseHTML(commentsOnFailure))
-    return false;
   MapLisT<std::string, ProblemData, MathRoutines::hashString>
   incomingProblems;
   stOutput << "<hr>DEBUG: Got to next step: " << incomingProblemInfo;
@@ -246,19 +239,19 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
   bool result=true;
   stOutput << "<hr><hr>Debug: incoming problems: " << incomingProblems.ToStringHtml();
   for (int i=0; i<incomingProblems.size(); i++)
-    if (!problemHome.MergeOneProblemAdminData
+    if (!this->MergeOneProblemAdminData
         (incomingProblems.theKeys[i], incomingProblems.theValues[i], commentsOnFailure))
       result=false;
   stOutput << "<hr><hr>Debug: after merge, resulting MERGED probs: "
-  << problemHome.currentUseR.theProblemData.ToStringHtml() << "<hr>";
+  << this->currentUseR.theProblemData.ToStringHtml() << "<hr>";
   this->StoreDeadlineInfo
   (theGlobalVariables.userDefault.deadlineInfoString.value,
-   problemHome.currentUseR.theProblemData);
-  stOutput << "<hr>Debug: about to store WEIGHT info given by: " << problemHome.currentUseR.theProblemData.ToStringHtml()
+   this->currentUseR.theProblemData);
+  stOutput << "<hr>Debug: about to store WEIGHT info given by: " << this->currentUseR.theProblemData.ToStringHtml()
   << "<hr>";
   this->StoreProblemWeightInfo
   (theGlobalVariables.userDefault.problemInfoString.value,
-   problemHome.currentUseR.theProblemData);
+   this->currentUseR.theProblemData);
   stOutput << "<hr>Resulting string: " << theGlobalVariables.userDefault.problemInfoString.value
   << "<hr>";
   DatabaseRoutines theRoutines;
@@ -3123,9 +3116,13 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
   if (this->topicListContent=="")
     if (!FileOperations::LoadFileToStringVirtual(this->topicListFileName, this->topicListContent, comments))
       return false;
-  if (this->topicListContent="")
+  if (this->topicListContent=="")
     return false;
   TopicElement::GetTopicList(this->topicListContent, this->theTopics);
+  this->TopicProblemFileNames.Clear();
+  for (int i=0; i<this->theTopics.size;i)
+    if (this->theTopics[i].problem!="")
+      this->TopicProblemFileNames.AddOnTop(this->theTopics[i].problem);
   return true;
 }
 

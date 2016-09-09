@@ -943,7 +943,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   std::stringstream tableStream;
   tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th>"
   << "<th>Activation manual email</th>"
-  << "<th>Section/Group</th></tr>";
+  << "<th>Section/Group</th> <th>Pre-filled login link</th></tr>";
   UserCalculator currentUser;
   currentUser.currentTable=DatabaseStrings::usersTableName;
   int indexUser=-1;
@@ -991,6 +991,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   activatedAccountBucketsBySection.SetSize(sectionNames.size);
   nonActivatedAccountBucketsBySection.SetSize(sectionNames.size);
   int numActivatedUsers=0;
+  std::stringstream preFilledLoginLinks;
   for (int i=0; i<userTable.size; i++)
   { std::stringstream failureStream;
     currentUser.username=userTable[i][indexUser];
@@ -1053,6 +1054,11 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     else
       oneTableLineStream << "<td><span style=\"color:green\">activated</span></td><td></td><td></td>";
     oneTableLineStream << "<td>" << userTable[i][indexExtraInfo] << "</td>";
+    std::stringstream oneLink;
+    oneLink << "<a href=\"" << theGlobalVariables.hostWithPort << theGlobalVariables.DisplayNameExecutable << "?request=login&username="
+    << currentUser.username.value << "\">" << currentUser.username.value << "</a>";
+    oneTableLineStream << "<td>"  << oneLink.str()<< "</td>";
+    preFilledLoginLinks << oneLink.str() << "<br>";
     oneTableLineStream << "</tr>";
     if (isActivated)
       activatedAccountBucketsBySection[sectionNames.GetIndex(userTable[i][indexExtraInfo])].AddOnTop(oneTableLineStream.str());
@@ -1073,7 +1079,8 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     out << "\n" << numUsers << " user(s)";
     if (numActivatedUsers>0)
       out << ", <span style=\"color:red\">" << numActivatedUsers << " have not activated their accounts. </span>";
-    out << tableStream.str();
+    out << tableStream.str() << preFilledLoginLinks.str();
+
   return out.str();
 #else
   return "Compiled without database support. ";

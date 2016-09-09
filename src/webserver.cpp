@@ -845,17 +845,17 @@ std::string WebWorker::GetNavigationPage()
 { MacroRegisterFunctionWithName("WebWorker::GetNavigationPage");
   std::stringstream out;
   out << "<html><body>";
-  out << "<a href=\"" << "/accounts" << "\">Accounts</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts" << "\">Accounts</a>";
   out << "<br>";
-  out << "<a href=\"" << "/logout" << "\">Log out</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=logout" << "\">Log out</a>";
   out << "<br>";
-  out << "<a href=\"" << "/database" << "\">Database</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=database" << "\">Database</a>";
   out << "<br>";
-  out << "<a href=\"" << "/changePasswordPage" << "\">Change password</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=changePasswordPage" << "\">Change password</a>";
   out << "<br>";
-  out << "<a href=\"" << "/statusPublic" << "\">Server status</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=statusPublic" << "\">Server status</a>";
   out << "<br>";
-  out << "<a href=\"" << "/calculator" << "\">Calculator</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=compute" << "\">Calculator</a>";
   out << "</body></html>";
   return out.str();
 }

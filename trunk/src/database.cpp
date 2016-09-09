@@ -1128,28 +1128,26 @@ bool UserCalculator::StoreProblemDataToDatabase
 }
 
 bool DatabaseRoutines::AddUsersFromEmails
-  (bool doSendEmails, const std::string& emailList, bool& outputSentAllEmails,
-   std::stringstream& comments)
+(const std::string& emailList, const std::string& userPasswords, std::string& userRole, std::string& userGroup,
+ std::stringstream& comments)
 { MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000;
   theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=1000;
-  std::string userRole=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("userRole"));
-  std::string userGroup=CGI::URLStringToNormal(theGlobalVariables.GetWebInput(DatabaseStrings::userGroupLabel));
-  std::string courseHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"));
-  std::string currentFileUsersTableName= DatabaseStrings::usersTableName
-  //this->GetTableUnsafeNameUsersOfFile(courseHome)
-  ;
-  List<std::string> theEmails;
+  List<std::string> theEmails, thePasswords;
   this->ExtractEmailList(emailList, theEmails, comments);
+  this->ExtractEmailList(userPasswords, thePasswords, comments);
+  if (thePasswords.size>0)
+    if (thePasswords.size!=theEmails.size)
+    { comments << "Different number of usernames/emails and passwords: " << theEmails.size << " emails and "
+      << thePasswords.size << " passwords. "
+      << "If you want to enter usernames without password, you need to leave the password input box empty. ";
+      return false;
+    }
 //  stOutput << " <br>creating users: " << theEmails.ToStringCommaDelimited() << "<br>";
   UserCalculator currentUser;
-  bool result=true;
-  if (!this->startMySQLDatabaseIfNotAlreadyStarted(&comments))
-    return false;
-  if (!this->TableExists(currentFileUsersTableName, &comments))
-    if (!this->CreateTable(currentFileUsersTableName, "username VARCHAR(255) NOT NULL PRIMARY KEY, extraInfo LONGTEXT ", &comments, 0))
-      result=false;
   currentUser.currentTable=DatabaseStrings::usersTableName;
+  bool result=true;
+  bool doSendEmails=false;
   for (int i=0; i<theEmails.size; i++)
   { currentUser.username=theEmails[i];
     currentUser.email=theEmails[i];
@@ -1165,33 +1163,36 @@ bool DatabaseRoutines::AddUsersFromEmails
       if (!currentUser.FetchOneUserRow(*this, &comments))
         result=false;
     currentUser.SetColumnEntry("userRole", userRole, *this, &comments);
-    currentUser.ComputeActivationToken();
-    if (!currentUser.SetColumnEntry("activationToken", currentUser.actualActivationToken.value, *this, &comments))
-    { comments << "Setting activation token failed.";
-      result=false;
-      currentUser.actualActivationToken="";
+    if (thePasswords.size==0)
+    { currentUser.ComputeActivationToken();
+      if (!currentUser.SetColumnEntry("activationToken", currentUser.actualActivationToken.value, *this, &comments))
+      { comments << "Setting activation token failed.";
+        result=false;
+        currentUser.actualActivationToken="";
+      }
+    } else
+    { if (!currentUser.SetPassword(*this, &comments))
+        result=false;
+      currentUser.SetColumnEntry("activationToken", "activated", *this, &comments);
     }
   }
-  currentUser.currentTable=currentFileUsersTableName;
   for (int i=0; i<theEmails.size; i++)
   { currentUser.username=theEmails[i];
-    if (!currentUser.IamPresentInTable(*this, currentFileUsersTableName))
-      if (!this->InsertRow(DatabaseStrings::userColumnLabel, theEmails[i], currentFileUsersTableName, comments))
-        result=false;
+    //if (!currentUser.IamPresentInTable(*this, currentFileUsersTableName))
+      //if (!this->InsertRow(DatabaseStrings::userColumnLabel, theEmails[i], currentFileUsersTableName, comments))
+        //result=false;
     if (!currentUser.SetColumnEntry(DatabaseStrings::userGroupLabel, userGroup, *this, &comments))
       result=false;
   }
   if (!result)
     comments << "<br>Failed to create all users. ";
-  outputSentAllEmails=true;
   if (doSendEmails)
   { doSendEmails=false;
-    outputSentAllEmails=false;
     comments << "Sending actual emails disabled for security reasons (system not stable enough yet). ";
   }
   if (doSendEmails)
     if (! this->SendActivationEmail(theEmails, comments))
-      outputSentAllEmails=false;
+      result=false;
   return result;
 }
 

@@ -380,13 +380,10 @@ bool FetchAllUsers
  bool& outputWasTruncated, int& actualNumRowsIfTruncated,
  const MySQLdata& inputTable, std::stringstream& comments)
   ;
-  bool AddUsersFromEmailsAndCourseName
-  (const std::string& emailList, const std::string& ExamHomeFile, const std::string& userGroup,
-   std::stringstream& comments)
-   ;
   bool AddUsersFromEmails
-  (bool doSendEmails, const std::string& emailList, bool& outputSentAllEmails,
-   std::stringstream& comments)
+  (const std::string& emailList, const std::string& userPasswords, std::string& userRole, std::string& userGroup,
+ std::stringstream& comments)
+
   ;
   bool SendActivationEmail(const std::string& emailList, std::stringstream& comments);
   bool SendActivationEmail(const List<std::string>& theEmails, std::stringstream& comments);

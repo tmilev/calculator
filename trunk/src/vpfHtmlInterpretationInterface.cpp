@@ -706,14 +706,17 @@ std::string HtmlInterpretation::SubmitProblem()
 std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressWithPort)
 { MacroRegisterFunctionWithName("HtmlInterpretation::AddUserEmails");
   std::stringstream out;
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
-  { out << "<b>Only admins may add users.</b>";
+  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagUsingSSLinCurrentConnection)
+  { out << "<b>Only admins may add users, under ssl connection. </b>";
     return out.str();
   }
-  std::string inputEmails, userGroup;
-  inputEmails=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
-//  if (userGroup=="")
-//    userGroup="default";
+  std::string inputEmails=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("userList"));
+  std::string userPasswords=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("passwordList"));
+  std::string userGroup=
+  MathRoutines::StringTrimWhiteSpace(CGI::URLStringToNormal(
+  theGlobalVariables.GetWebInput(DatabaseStrings::userGroupLabel)));
+  std::string userRole=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("userRole"));
+
   if (inputEmails=="")
   { out << "<b>No emails to add</b>";
     return out.str();
@@ -722,8 +725,9 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   DatabaseRoutines theRoutines;
   std::stringstream comments;
   bool sentEmails=true;
+  stOutput << "DEBUG: here be i!";
   bool doSendEmails= theGlobalVariables.userCalculatorRequestType=="sendEmails" ?  true : false;
-  bool createdUsers=theRoutines.AddUsersFromEmails(doSendEmails, inputEmails, sentEmails, comments);
+  bool createdUsers=theRoutines.AddUsersFromEmails(inputEmails, userPasswords, userRole, userGroup, comments);
   if (createdUsers)
     out << "<span style=\"color:green\">Users successfully added. </span>";
   else
@@ -734,7 +738,6 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
     else
       out << "<span style=\"color:red\">Failed to send all activation emails. </span>";
   }
-  std::string userRole=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("userRole"));
   bool usersAreAdmins= (userRole=="admin");
   List<List<std::string> > userTable;
   List<std::string> userLabels;
@@ -1087,6 +1090,7 @@ std::string HtmlInterpretation::ToStringUserDetails
   std::string idExtraTextarea= adminsOnly ? "inputAddAdminsExtraInfo" : "inputAddStudentsExtraInfo";
   std::string userRole = adminsOnly ? "admin" : "student";
   std::string idOutput="outputAdd";
+  std::string idPasswordTextarea="inputAddDefaultPasswords";
   if (adminsOnly)
     idOutput+="Admins";
   else
@@ -1096,6 +1100,10 @@ std::string HtmlInterpretation::ToStringUserDetails
   out << "<textarea width=\"500px\" ";
   out << "id=\"" << idAddressTextarea << "\"";
   out << "placeholder=\"email or user list, comma, space or ; separated\">";
+  out << "</textarea>";
+  out << "<textarea width=\"500px\" ";
+  out << "id=\"" << idPasswordTextarea << "\"";
+  out << " placeholder=\"default passwords\">";
   out << "</textarea>";
   out << "<textarea width=\"500px\" ";
   out << "id=\"" << idExtraTextarea << "\"";
@@ -1109,6 +1117,7 @@ std::string HtmlInterpretation::ToStringUserDetails
   << "', '" << idOutput
   << "', '" << userRole
   << "', '" << idExtraTextarea
+  << "', '" << idPasswordTextarea
   << "', 'addUsers'"
   << " )\"> Add users</button> ";
   out << "<br><span id=\"" << idOutput << "\">\n";

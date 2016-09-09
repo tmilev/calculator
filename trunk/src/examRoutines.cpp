@@ -3251,20 +3251,20 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       if (currentElt.flagIsChapter)
         out << "</ol></li>\n";
     if (currentElt.flagIsChapter)
-    { out << "<li>\n" << currentElt.title << "<br>\n";
+    { out << "<li class=\"listChapter\">\n" << currentElt.title << "<br>\n";
       chapterStarted=true;
       sectionStarted=false;
       subSectionStarted=false;
       tableStarted=false;
       out << "<ol>\n";
     } else if (currentElt.flagIsSection)
-    { out << "<li>\n" << currentElt.title << "<br>\n";
+    { out << "<li class=\"listSection\">\n" << currentElt.title << "<br>\n";
       sectionStarted=true;
       subSectionStarted=false;
       tableStarted=false;
       out << "<ol>\n";
     } else if (currentElt.flagIsSubSection)
-    { out << "<li>\n";
+    { out << "<li class=\"listSubsection\">\n";
       out << currentElt.title << "\n<br>\n";
       subSectionStarted=true;
       tableStarted=false;

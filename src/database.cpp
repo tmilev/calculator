@@ -1143,7 +1143,8 @@ bool DatabaseRoutines::AddUsersFromEmails
       << "If you want to enter usernames without password, you need to leave the password input box empty. ";
       return false;
     }
-//  stOutput << " <br>creating users: " << theEmails.ToStringCommaDelimited() << "<br>";
+  //stOutput << " <br>Debug: creating users: " << theEmails.ToStringCommaDelimited() << "<br>Number of users: " << theEmails.size
+  //<< "<br>Number of passwords: " << thePasswords.size << "<hr>Passwords string: " << thePasswords;
   UserCalculator currentUser;
   currentUser.currentTable=DatabaseStrings::usersTableName;
   bool result=true;
@@ -1163,7 +1164,7 @@ bool DatabaseRoutines::AddUsersFromEmails
       if (!currentUser.FetchOneUserRow(*this, &comments))
         result=false;
     currentUser.SetColumnEntry("userRole", userRole, *this, &comments);
-    if (thePasswords.size==0)
+    if (thePasswords.size==0 || thePasswords.size!=theEmails.size)
     { currentUser.ComputeActivationToken();
       if (!currentUser.SetColumnEntry("activationToken", currentUser.actualActivationToken.value, *this, &comments))
       { comments << "Setting activation token failed.";
@@ -1171,7 +1172,10 @@ bool DatabaseRoutines::AddUsersFromEmails
         currentUser.actualActivationToken="";
       }
     } else
-    { if (!currentUser.SetPassword(*this, &comments))
+    { currentUser.enteredPassword=thePasswords[i];
+      //stOutput << "Debug: user:<br>" << currentUser.username.value << "<br>password:<br>"
+      //<< CGI::StringToURLString(thePasswords[i]) << "<br>";
+      if (!currentUser.SetPassword(*this, &comments))
         result=false;
       currentUser.SetColumnEntry("activationToken", "activated", *this, &comments);
     }
@@ -1561,7 +1565,7 @@ std::string DatabaseRoutines::ToStringSuggestionsReasonsForFailure
     theUser.username.value=recommendedNewName;
   }
   if (theUser.username.value!=inputUsernameUnsafe)
-  { out << "<br>Username is case sensitive and consists of the full email address: perhaps you meant: <br>"
+  { out << "<br>Username is CaSe SeNsItiVE and consists of the full email address: perhaps you meant: <br>"
     << theUser.username.value << "<br>";
     //out << "<hr>" << Crasher::GetStackTraceEtcErrorMessage() << "<hr>";
   }

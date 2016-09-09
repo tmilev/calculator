@@ -80,12 +80,14 @@ public:
 //special flags
   bool flagRunningAce;
   bool flagAceIsAvailable;
-//webserver flags
+//webserver flags and variables
   bool flagLoggedIn;
   bool flagUsingSSLinCurrentConnection;
-  //bool flagIgnoreSecurityToWorkaroundSafarisBugs;
   bool flagSSLisAvailable;
+  std::string hostWithPort;
+  std::string hostNoPort;
 
+//internal infrastructure flags
   bool flagAllowUseOfThreadsAndMutexes;
   bool flagNotAllocated;
 

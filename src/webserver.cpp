@@ -1317,6 +1317,7 @@ void WebWorker::ParseMessageHead()
         this->cookies.AddOnTop(this->theStrings[i]);
       }
     }
+  theGlobalVariables.hostWithPort=this->hostWithPort;
 //  std::cout << "Got thus far 14" << std::endl;
 }
 
@@ -1420,6 +1421,8 @@ void WebWorker::ExtractHostInfo()
     this->hostNoPort=this->hostWithPort.substr(0, i);
   else
     this->hostNoPort=this->hostWithPort;
+  theGlobalVariables.hostWithPort=this->hostWithPort;
+  theGlobalVariables.hostNoPort= this->hostNoPort;
 }
 
 void WebWorker::ExtractAddressParts()
@@ -3835,6 +3838,8 @@ int WebServer::mainApache()
   std::string thePort=WebServer::GetEnvironment("SERVER_PORT");
   theGlobalVariables.IPAdressCaller= WebServer::GetEnvironment("REMOTE_ADDR");
   theWorker.hostWithPort=WebServer::GetEnvironment("SERVER_NAME")+":"+thePort;
+  theGlobalVariables.hostWithPort=theWorker.hostWithPort;
+  theGlobalVariables.hostNoPort=theWorker.hostNoPort;
   std::string theURL = WebServer::GetEnvironment("REQUEST_URI");
   unsigned numBytesBeforeQuestionMark=0;
   for (numBytesBeforeQuestionMark=0; numBytesBeforeQuestionMark<theURL.size(); numBytesBeforeQuestionMark++)

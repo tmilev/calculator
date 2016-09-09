@@ -2886,9 +2886,13 @@ WebServer::WebServer()
   this->WebServerPingIntervalInSeconds=20;
   this->flagThisIsWorkerProcess=false;
   this->addressStartsNotNeedingLogin.AddOnTop("css/");
+  this->addressStartsNotNeedingLogin.AddOnTop("/css/");
   this->addressStartsNotNeedingLogin.AddOnTop("javascriptlibs/");
+  this->addressStartsNotNeedingLogin.AddOnTop("/javascriptlibs/");
   this->addressStartsNotNeedingLogin.AddOnTop("MathJax-2.6-latest/");
+  this->addressStartsNotNeedingLogin.AddOnTop("/MathJax-2.6-latest/");
   this->addressStartsNotNeedingLogin.AddOnTop("login");
+  this->addressStartsNotNeedingLogin.AddOnTop("/login");
   //NO! Adding "logout", for example: this->addressStartsNotNeedingLogin.AddOnTop("logout");
   //is FORBIDDEN! Logging someone out definitely requires authentication (imagine someone
   //asking for logouts on your account once every second: this would be fatal as proper logout resets
@@ -3709,7 +3713,7 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problemtemplates/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("pagetemplates/", "../pagetemplates/");
   folderSubstitutionsNonSensitive.SetKeyValue("topiclists/", "../topiclists/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.6-latest/", "../public_html/MathJax-2.6-latest/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.6-latest/", "../public_html/MathJax-2.6-latest/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("MathJax-2.6-latest/", "../public_html/MathJax-2.6-latest/");
 
   folderSubstitutionsSensitive.Clear();

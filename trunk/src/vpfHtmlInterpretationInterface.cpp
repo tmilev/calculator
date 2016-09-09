@@ -725,7 +725,7 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   DatabaseRoutines theRoutines;
   std::stringstream comments;
   bool sentEmails=true;
-  stOutput << "DEBUG: here be i!";
+  //stOutput << "DEBUG: here be i!";
   bool doSendEmails= theGlobalVariables.userCalculatorRequestType=="sendEmails" ?  true : false;
   bool createdUsers=theRoutines.AddUsersFromEmails(inputEmails, userPasswords, userRole, userGroup, comments);
   if (createdUsers)
@@ -1086,15 +1086,11 @@ std::string HtmlInterpretation::ToStringUserDetails
 { MacroRegisterFunctionWithName("WebWorker::ToStringUserDetails");
   std::stringstream out;
 #ifdef MACRO_use_MySQL
-  std::string idAddressTextarea= adminsOnly ? "inputAddAdmins" : "inputAddStudents";
-  std::string idExtraTextarea= adminsOnly ? "inputAddAdminsExtraInfo" : "inputAddStudentsExtraInfo";
   std::string userRole = adminsOnly ? "admin" : "student";
-  std::string idOutput="outputAdd";
-  std::string idPasswordTextarea="inputAddDefaultPasswords";
-  if (adminsOnly)
-    idOutput+="Admins";
-  else
-    idOutput+="Students";
+  std::string idAddressTextarea= "inputAddUsers"+userRole;
+  std::string idExtraTextarea= "inputAddExtraInfo"+userRole;
+  std::string idOutput="idOutput"+userRole;
+  std::string idPasswordTextarea="inputAddDefaultPasswords"+userRole;
   out << "Add <b>" << userRole << "(s)</b>.<br> ";
 //  out << "<b>Warning: there's no remove button yet.</b><br>";
   out << "<textarea width=\"500px\" ";

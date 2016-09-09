@@ -1041,7 +1041,8 @@ std::string MathRoutines::StringTrimWhiteSpace(const std::string& inputString)
 }
 
 void MathRoutines::StringTrimWhiteSpace(const std::string& inputString, std::string& output)
-{ std::stringstream out;
+{ //this function needs to be rewritten to do one substr call (no time now).
+  std::stringstream out;
   output="";
   output.reserve(inputString.size());
   unsigned i=0;
@@ -1050,6 +1051,15 @@ void MathRoutines::StringTrimWhiteSpace(const std::string& inputString, std::str
         inputString[i]!='\t' && inputString[i]!='\n')
       break;
   output=inputString.substr(i, std::string::npos);
+  if (output.size()==0)
+    return;
+  signed j=0;
+  for (j=(signed) output.size()-1; j>=0; j--)
+    if (inputString[j]!=' ' && inputString[j]!='\r' &&
+        inputString[j]!='\t' && inputString[j]!='\n')
+      break;
+  j++;
+  output=output.substr(0, j);
 }
 
 

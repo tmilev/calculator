@@ -53,7 +53,7 @@ bool CalculatorHTML::ReadProblemInfoAppend
   outputProblemInfo.SetExpectedSize(outputProblemInfo.size()+ CGIedProbs.size());
   std::string currentProbName, currentProbString;
   for (int i=0; i<CGIedProbs.size(); i++)
-  { currentProbName=CGI::URLStringToNormal(CGIedProbs.theKeys[i]);
+  { currentProbName=MathRoutines::StringTrimWhiteSpace(CGI::URLStringToNormal(CGIedProbs.theKeys[i]));
     if (currentProbName=="")
       continue;
     currentProbString=CGI::URLStringToNormal(CGIedProbs.theValues[i]);
@@ -161,13 +161,13 @@ bool DatabaseRoutines::ReadProblemDatabaseInfo
 bool DatabaseRoutines::StoreProblemDatabaseInfo
 (const UserCalculatorData& theUser, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
-  stOutput << "<hr>DEBUG: About to store back: "
-  << "<br>deadline:<br> "
-  << theUser.deadlineInfoString.value
-  << "<br>problem:<br> "
-  << theUser.problemInfoString.value
-  << "<br> problem row id: " << theUser.problemInfoRowId.value << "<hr>";
-  ;
+  //stOutput << "<hr>DEBUG: About to store back: "
+  //<< "<br>deadline:<br> "
+  //<< theUser.deadlineInfoString.value
+  //<< "<br>problem:<br> "
+  //<< theUser.problemInfoString.value
+  //<< "<br> problem row id: " << theUser.problemInfoRowId.value << "<hr>";
+  //;
   if (!this->startMySQLDatabaseIfNotAlreadyStarted(&commentsOnFailure))
     return false;
   if (!this->SetEntry
@@ -257,8 +257,8 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
   this->StoreDeadlineInfo
   (theGlobalVariables.userDefault.deadlineInfoString.value,
    this->currentUseR.theProblemData);
-  stOutput << "<hr>Debug: about to store WEIGHT with row id: "
-  << this->currentUseR.problemInfoRowId.value << "<hr>";
+  //stOutput << "<hr>Debug: about to store WEIGHT with row id: "
+  //<< this->currentUseR.problemInfoRowId.value << "<hr>";
   this->StoreProblemWeightInfo
   (theGlobalVariables.userDefault.problemInfoString.value,
    this->currentUseR.theProblemData);
@@ -281,6 +281,7 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   this->currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
   //stOutput << "<hr><hr>DEBUG reading problem info from: " << CGI::StringToHtmlString(this->currentUseR.problemDataString.value);
   //stOutput << "<hr>Starting user: " << this->currentUseR.ToString();
+  //stOutput << "<hr>DEBUG: Before loading DB: " << this->currentUseR.ToString();
   if (this->currentUseR.problemDataString=="")
     return true;
   if (!this->currentUseR.InterpretDatabaseProblemData(this->currentUseR.problemDataString.value, comments))
@@ -288,6 +289,7 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
     //stOutput << "Failed to interpret user's problem saved data. ";
     return false;
   }
+  //stOutput << "<hr>DEBUG: After interpretation of datastring: user: " << this->currentUseR.ToString();
   if (this->currentUseR.theProblemData.Contains(this->fileName))
   { this->theProblemData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(this->fileName);
     //stOutput << "<hr>Debug: found problem data! " << this->theProblemData.ToString() << "<hr>";
@@ -297,7 +299,7 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   { comments << "Failed to interpret the deadline string. ";
     return false;
   }
-  //stOutput << "<hr>Debug: user: " << this->currentUseR.ToString();
+  //stOutput << "<hr>Debug: reading problem data from: " << CGI::URLKeyValuePairsToNormalRecursiveHtml( this->currentUseR.problemInfoString.value);
   if (!this->ReadProblemInfoAppend(this->currentUseR.problemInfoString.value, this->currentUseR.theProblemData, comments))
   { comments << "Failed to interpret the problem weight string. ";
     return false;
@@ -305,10 +307,9 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   //stOutput << "<hr>Debug: user: " << this->currentUseR.ToString();
   //stOutput << "<hr><hr>DEBUG read databaseProblemAndHomeworkGroupList: "
   //<< this->databaseProblemAndHomeworkGroupList;
-//  this->currentUseR.ComputePointsEarned
-//  (this->databaseProblemAndHomeworkGroupList, this->databaseProblemWeights);
+  this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys);
   theGlobalVariables.userDefault=this->currentUseR;
-  //stOutput << "<hr>After interpretation of datastring: user: " << this->currentUseR.ToString();
+  //stOutput << "<hr>DEBUG: After interpretation of deadline and weight strings: user: " << this->currentUseR.ToString();
   return true;
 #else
   comments << "Database not available. ";

@@ -75,7 +75,7 @@ bool DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights()
     DatabaseRoutinesGlobalFunctions::CreateTable("instructors", comments);
   std::string notUsed;
   return DatabaseRoutinesGlobalFunctions::FetchEntry
-  (theGlobalVariables.userDefault.username.value, "instructors", "users", notUsed, comments);
+  (theGlobalVariables.userDefault.username.value, "instructors", DatabaseStrings::usersTableName, notUsed, comments);
 #else
   return false;
 #endif
@@ -204,7 +204,7 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
   DatabaseRoutines theRoutines;
   UserCalculator theUser;
   theUser.UserCalculatorData::operator=(theGlobalVariables.userDefault);
-  theUser.currentTable="users";
+  theUser.currentTable=DatabaseStrings::usersTableName;
 //  stOutput << "<hr>DEBUG: logout: resetting token ... ";
   theUser.ResetAuthenticationToken(theRoutines, 0);
 //  stOutput << "token reset!... <hr>";
@@ -476,8 +476,10 @@ std::string UserCalculator::ToString()
   std::stringstream out;
   out << "Calculator user: " << this->username.value;
   for (int i=0; i<this->theProblemData.size(); i++)
-    out << "<br>Problem: " << this->theProblemData.theKeys[i] << " random seed: "
-    << this->theProblemData.theValues[i].randomSeed;
+    out << "<br>Problem: " << this->theProblemData.theKeys[i] << "; random seed: "
+    << this->theProblemData.theValues[i].randomSeed << "; weight: "
+    << this->theProblemData.theValues[i].adminData.ProblemWeightUserInput << " ("
+    << this->theProblemData.theValues[i].adminData.ProblemWeight.ToString() << ")";
   return out.str();
 }
 
@@ -565,7 +567,7 @@ bool UserCalculator::FetchOneUserRow
   for (int i=0; i<theFieldQuery.allQueryResultStrings.size; i++)
     if (theFieldQuery.allQueryResultStrings[i].size>0 )
       this->selectedRowFieldNamesUnsafe[i]=CGI::URLStringToNormal(theFieldQuery.allQueryResultStrings[i][0]);
-  if (this->currentTable=="users")
+  if (this->currentTable==DatabaseStrings::usersTableName)
   { this->actualActivationToken= this->GetSelectedRowEntry("activationToken");
     this->email= this->GetSelectedRowEntry("email");
     this->userRole= this->GetSelectedRowEntry("userRole");
@@ -743,7 +745,7 @@ bool UserCalculator::ResetAuthenticationToken(DatabaseRoutines& theRoutines, std
 
 bool UserCalculator::SetPassword(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::SetPassword");
-  this->currentTable="users";
+  this->currentTable=DatabaseStrings::usersTableName;
   if (this->enteredPassword=="")
   { if (commentsOnFailure!=0)
       *commentsOnFailure << "Empty password not allowed. ";
@@ -764,7 +766,7 @@ bool DatabaseRoutines::startMySQLDatabaseIfNotAlreadyStarted(std::stringstream* 
 }
 
 std::string DatabaseRoutines::GetTableUnsafeNameUsersOfFile(const std::string& inputFileName)
-{ return "users"+ inputFileName;
+{ return DatabaseStrings::usersTableName+ inputFileName;
 }
 
 bool DatabaseRoutines::CreateTable
@@ -958,8 +960,8 @@ void UserCalculator::ComputeActivationToken()
 
 bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, std::stringstream& comments)
 { MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
-  if (!this->ColumnExists("activationToken", "users", comments))
-    if (!this->CreateColumn("activationToken", "users", comments))
+  if (!this->ColumnExists("activationToken", DatabaseStrings::usersTableName, comments))
+    if (!this->CreateColumn("activationToken", DatabaseStrings::usersTableName, comments))
     { comments << "Failed to create activationToken column. ";
       return false;
     }
@@ -969,7 +971,7 @@ bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, s
       return false;
     }*/
   UserCalculator currentUser;
-  currentUser.currentTable="users";
+  currentUser.currentTable=DatabaseStrings::usersTableName;
   ProgressReport theReport;
   bool result=true;
   TimeWrapper now;
@@ -1091,12 +1093,16 @@ bool UserCalculator::InterpretDatabaseProblemData
   //<< "<br>Map has: "
   //<< theMap.size() << " entries. ";
   ProblemData reader;
+  std::string probNameNoWhiteSpace;
   for (int i=0; i<theMap.size(); i++)
   { if (!reader.LoadFrom(CGI::URLStringToNormal(theMap[i]), commentsOnFailure))
     { result=false;
       continue;
     }
-    this->theProblemData.SetKeyValue(CGI::URLStringToNormal(theMap.theKeys[i]), reader);
+    probNameNoWhiteSpace=MathRoutines::StringTrimWhiteSpace(CGI::URLStringToNormal(theMap.theKeys[i]));
+    if (probNameNoWhiteSpace=="")
+      continue;
+    this->theProblemData.SetKeyValue(probNameNoWhiteSpace, reader);
   }
   return result;
 }
@@ -1104,7 +1110,7 @@ bool UserCalculator::InterpretDatabaseProblemData
 bool UserCalculator::LoadProblemStringFromDatabase
 (DatabaseRoutines& theRoutines, std::string& output, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::LoadProblemStringFromDatabase");
-  this->currentTable="users";
+  this->currentTable=DatabaseStrings::usersTableName;
   return this->FetchOneColumn("problemData", output, theRoutines, &commentsOnFailure);
 }
 
@@ -1116,7 +1122,7 @@ bool UserCalculator::StoreProblemDataToDatabase
     problemDataStream << CGI::StringToURLString(this->theProblemData.theKeys[i]) << "="
     << CGI::StringToURLString( this->theProblemData.theValues[i].Store()) << "&";
   //stOutput << "DEBUG: storing in database string: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(problemDataStream.str());
-  this->currentTable="users";
+  this->currentTable=DatabaseStrings::usersTableName;
   bool result= this->SetColumnEntry("problemData", problemDataStream.str(), theRoutines, &commentsOnFailure);
   return result;
 }
@@ -1143,7 +1149,7 @@ bool DatabaseRoutines::AddUsersFromEmails
   if (!this->TableExists(currentFileUsersTableName, &comments))
     if (!this->CreateTable(currentFileUsersTableName, "username VARCHAR(255) NOT NULL PRIMARY KEY, extraInfo LONGTEXT ", &comments, 0))
       result=false;
-  currentUser.currentTable="users";
+  currentUser.currentTable=DatabaseStrings::usersTableName;
   for (int i=0; i<theEmails.size; i++)
   { currentUser.username=theEmails[i];
     currentUser.email=theEmails[i];

@@ -2210,7 +2210,7 @@ int WebWorker::ProcessChangePassword()
     return 0;
   }
   if (!DatabaseRoutinesGlobalFunctions::SetEntry
-      (theUser.username.value, "users", "activationToken", "activated", commentsOnFailure))
+      (theUser.username.value, DatabaseStrings::usersTableName, "activationToken", "activated", commentsOnFailure))
     stOutput << "<span style=\"color:red\"><b>Failed to set activationToken: "
     << commentsOnFailure.str() << "</b></span>";
 

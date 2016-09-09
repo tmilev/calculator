@@ -108,11 +108,20 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
   std::stringstream commentsOnFailure;
   if (!theProblem.LoadAndParseTopicList(commentsOnFailure))
     return "Failed to load topic list from file name: " + theProblem.topicListFileName + ". "+ commentsOnFailure.str();
+  stOutput << "DEBUG: userDefault: " << theGlobalVariables.userDefault.ToStringUnsecure();
   theProblem.currentUseR.UserCalculatorData::operator=(theGlobalVariables.userDefault);
-  bool result=theProblem.MergeProblemInfoInDatabase
-  (inputProblemInfo, commentsOnFailure);
   std::stringstream out;
-  if (result)
+  if (!theProblem.ReadProblemInfoAppend
+      (theProblem.currentUseR.deadlineInfoString.value, theProblem.currentUseR.theProblemData, out))
+  { out << "Failed to interpret the deadline string. ";
+    return out.str();
+  }
+  if (!theProblem.ReadProblemInfoAppend
+      (theProblem.currentUseR.problemInfoString.value, theProblem.currentUseR.theProblemData, out))
+  { out << "Failed to interpret the problem weight string. ";
+    return out.str();
+  }
+  if (theProblem.MergeProblemInfoInDatabase(inputProblemInfo, commentsOnFailure))
   { out << "<span style=\"color:green\"><b>Successfully modified problem data. </b></span>";
     //out << "<meta http-equiv=\"refresh\" content=\"0;\">";
   } else

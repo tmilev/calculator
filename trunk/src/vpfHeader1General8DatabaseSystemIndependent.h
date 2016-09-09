@@ -85,11 +85,13 @@ public:
   static std::string userColumnLabel;
   static std::string usersTableName;
   static std::string userGroupLabel;
+
   static std::string deadlinesTableName;
   static std::string deadlinesIdColumnName;
-  static std::string deadlinesInfoColumnName;
+  static std::string infoColumnInDeadlinesTable;
+
   static std::string problemWeightsTableName;
   static std::string problemWeightsIdColumnName;
-  static std::string problemWeightsInfoColumnName;
+  static std::string infoColumnInProblemWeightsTable;
 };
 #endif

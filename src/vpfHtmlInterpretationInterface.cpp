@@ -108,7 +108,7 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
   std::stringstream commentsOnFailure;
   if (!theProblem.LoadAndParseTopicList(commentsOnFailure))
     return "Failed to load topic list from file name: " + theProblem.topicListFileName + ". "+ commentsOnFailure.str();
-  stOutput << "DEBUG: userDefault: " << theGlobalVariables.userDefault.ToStringUnsecure();
+  //stOutput << "DEBUG: userDefault: " << theGlobalVariables.userDefault.ToStringUnsecure();
   theProblem.currentUseR.UserCalculatorData::operator=(theGlobalVariables.userDefault);
   std::stringstream out;
   if (!theProblem.ReadProblemInfoAppend
@@ -324,7 +324,7 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   CalculatorHTML thePage;
   std::stringstream comments;
   thePage.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"));
-  if (!thePage.LoadMe(false, comments))
+  if (!thePage.LoadMe(true, comments))
   { out << "<html><body><b>Failed to load file: "
     << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
     << "<br>Comments:<br> " << comments.str() << "</body></html>";
@@ -942,7 +942,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   << "<th>Activation manual email</th>"
   << "<th>Section/Group</th></tr>";
   UserCalculator currentUser;
-  currentUser.currentTable="users";
+  currentUser.currentTable=DatabaseStrings::usersTableName;
   int indexUser=-1;
   int indexEmail=-1;
   int indexActivationToken=-1;

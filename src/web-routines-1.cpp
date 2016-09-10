@@ -98,8 +98,14 @@ void WebCrawler::init()
     return;
   MacroRegisterFunctionWithName("WebCrawler::init");
   buffer.initFillInObject(50000, 0);
-  this->portOrService="8155";
-  this->addressToConnectTo="127.0.0.1";
+  if (!theWebServer.flagPort8155)
+  { this->portOrService="8080";
+//    this->addressToConnectTo="localhost";
+    this->addressToConnectTo="127.0.0.1";
+  } else
+  { this->portOrService="8155";
+    this->addressToConnectTo="127.0.0.1";
+  }
 }
 
 WebCrawler::~WebCrawler()

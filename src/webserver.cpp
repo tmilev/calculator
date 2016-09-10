@@ -2507,8 +2507,13 @@ int WebWorker::ServeClient()
   bool needLogin=this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
   if (needLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection)
   { std::stringstream redirectStream, newAddressStream;
-    newAddressStream << "https://" << this->hostNoPort << ":" << this->parent->httpSSLPort
-    << this->addressGetOrPost;
+    newAddressStream << "https://" << this->hostNoPort;
+    if (!this->parent->flagPort8155)
+      newAddressStream << ":" << this->parent->httpSSLPort;
+    if (this->addressGetOrPost.size()!=0)
+      if (this->addressGetOrPost[0]!='/')
+        this->addressGetOrPost='/'+this->addressGetOrPost;
+    newAddressStream << this->addressGetOrPost;
     if (theGlobalVariables.flagRunningApache)
       redirectStream << "Content-Type: text/html\r\n";
     redirectStream << "Location: " << newAddressStream.str();
@@ -2870,7 +2875,8 @@ void WebServer::PipeProgressReportToParentProcess(const std::string& theString)
 }
 
 WebServer::WebServer()
-{ this->flagDeallocated=false;
+{ this->flagPort8155=true;
+  this->flagDeallocated=false;
   this->flagTryToKillOlderProcesses=true;
   this->activeWorker=-1;
   this->timeLastExecutableModification=-1;
@@ -3168,32 +3174,26 @@ void WebServer::Restart()
   if (this->listeningSocketHTTP!=-1)
     this->Release(this->listeningSocketHTTP);
   if (this->listeningSocketHttpSSL!=-1)
-    this->Release(this->listeningSocketHttpSSL);
-//  char arg1[7]="server";
-//  char arg2[7]="nokill";
-//  char* args[2];
-//  args[1]=arg1;
-//  args[2]=arg2;
-//  char** args=0 ;
-//  execv("./calculator server nokill", args);
-//char *exec_argv[] = { "./calculator", "server", "nokill"};
-//sleep(1);
-//execv("/proc/self/exe", exec_argv);
-  std::stringstream theCommand;
+    this->Release(this->listeningSocketHttpSSL);  std::stringstream theCommand;
   int timeInteger=(int) theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   theLog << logger::red << " restarting with time limit " << timeInteger << logger::endL;
   theCommand << "killall " << theGlobalVariables.PhysicalNameExecutableNoPath << " \r\n./";
   theCommand << theGlobalVariables.PhysicalNameExecutableNoPath;
-  theCommand << " server " << " nokill " << timeInteger;
+  if (theWebServer.flagPort8155)
+    theCommand << " server " << " nokill " << timeInteger;
+  else
+    theCommand << " server8080 " << " nokill " << timeInteger;
 //  std::cout << "\nCalling: " << theCommand.str() << "\n";
   theGlobalVariables.CallSystemNoOutput(theCommand.str()); //kill any other running copies of the calculator.
 }
 
 void WebServer::initPortsITry()
-{ this->PortsITryHttp.AddOnTop("8155");
+{ if (this->flagPort8155)
+    this->PortsITryHttp.AddOnTop("8155");
   this->PortsITryHttp.AddOnTop("8080");
   this->PortsITryHttp.AddOnTop("8081");
   this->PortsITryHttp.AddOnTop("8082");
+  this->PortsITryHttp.AddOnTop("8155");
   if (!theGlobalVariables.flagSSLisAvailable)
     return;
   this->PortsITryHttpSSL.AddOnTop("8166");
@@ -3660,8 +3660,10 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   }
   std::string& secondArgument=theGlobalVariables.programArguments[1];
 
-  if (secondArgument=="server")
-  { theGlobalVariables.flagRunningBuiltInWebServer=true;
+  if (secondArgument=="server" || secondArgument=="server8080")
+  { if (secondArgument=="server8080")
+      theWebServer.flagPort8155=false;
+    theGlobalVariables.flagRunningBuiltInWebServer=true;
     theGlobalVariables.flagRunningAce=false;
     theWebServer.flagTryToKillOlderProcesses=true;
     if (argC==2)

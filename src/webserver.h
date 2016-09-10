@@ -219,6 +219,7 @@ public:
   int timeLastExecutableModification;
   ListReferences<std::string> theProgressReports;
   bool flagDeallocated;
+  bool flagPort8155;
   WebServer();
   ~WebServer();
   static void AnalyzeMainArguments(int argC, char **argv);

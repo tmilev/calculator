@@ -2465,8 +2465,8 @@ std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
       out
       << "if (document.getElementById('authenticationToken') !=null)"
       << "  if (document.getElementById('authenticationToken').value!='')"
-      << "    ;"
-//      << "    document.getElementById('login').submit();"
+//      << "    ;"
+      << "    document.getElementById('login').submit();"
 //      << "alert('was about to submit');"
     ;
 //    << "  window.location='calculator?username='+GlobalUser+'&authenticationToken='+GlobalAuthenticationToken;";

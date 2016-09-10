@@ -1055,7 +1055,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       oneTableLineStream << "<td><span style=\"color:green\">activated</span></td><td></td><td></td>";
     oneTableLineStream << "<td>" << userTable[i][indexExtraInfo] << "</td>";
     std::stringstream oneLink;
-    oneLink << "<a href=\"" << theGlobalVariables.hostWithPort << theGlobalVariables.DisplayNameExecutable << "?request=login&username="
+    oneLink << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=login&username="
     << currentUser.username.value << "\">" << currentUser.username.value << "</a>";
     oneTableLineStream << "<td>"  << oneLink.str()<< "</td>";
     preFilledLoginLinks << oneLink.str() << "<br>";

@@ -204,7 +204,7 @@ public:
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
   std::string ToStringProblemWeighT(const std::string& theFileName);
   std::string ToStringProblemScoreFull(const std::string& theFileName);
-  std::string ToStringProblemScoreShort(const std::string& theFileName);
+  std::string ToStringProblemScoreShort(const std::string& theFileName, bool& outputAlreadySolved);
   bool ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutput);
   void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
   bool PrepareClassData(std::stringstream& commentsOnFailure);
@@ -232,11 +232,11 @@ public:
   { return this->fileName==other.fileName;
   }
   std::string ToStringDeadlinesFormatted
-  (const std::string& cleanedUpLink, const List<std::string>& sectionNumbers, bool isActualProblem,
+  (const std::string& cleanedUpLink, const List<std::string>& sectionNumbers,
   bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
   ;
   std::string ToStringOnEDeadlineFormatted
-  (const std::string& cleanedUpLink, const std::string& sectionNumber, bool isActualProblem,
+  (const std::string& cleanedUpLink, const std::string& sectionNumber,
   bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
   ;
   std::string ToStringCalculatorArgumentsForProblem

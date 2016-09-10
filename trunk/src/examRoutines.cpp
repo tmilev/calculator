@@ -1580,7 +1580,7 @@ std::string CalculatorHTML::GetDeadline
 }
 
 std::string CalculatorHTML::ToStringOnEDeadlineFormatted
-  (const std::string& cleanedUpLink,  const std::string& sectionNumber, bool isActualProblem,
+  (const std::string& cleanedUpLink,  const std::string& sectionNumber,
    bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
 { bool deadlineInherited=false;
   std::stringstream out;
@@ -1589,8 +1589,7 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   if (currentDeadline=="")
   { if (returnEmptyStringIfNoDeadline)
       return "";
-    if (isActualProblem)
-      out << "<span style=\"color:orange\">No deadline yet. </span>";
+    out << "<span style=\"color:orange\">No deadline yet. </span>";
     return out.str();
   }
 #ifdef MACRO_use_MySQL
@@ -1615,15 +1614,13 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
       << " left. ";
   } else
     hoursTillDeadlineStream << "Deadline has passed. ";
-  if (isActualProblem)
-  { out << "Deadline: ";
-    if (deadlineInherited)
-      out << "<span style=\"color:blue\">" << currentDeadline << " (topic deadline)</span>. ";
-    else
-      out << "<span style=\"color:brown\">" << currentDeadline << " (per-problem deadline)</span>. ";
-    out << hoursTillDeadlineStream.str();
-    return out.str();
-  }
+  out << "Deadline: ";
+  if (deadlineInherited)
+    out << "<span style=\"color:blue\">" << currentDeadline << " (topic deadline)</span>. ";
+  else
+    out << "<span style=\"color:brown\">" << currentDeadline << " (per-problem deadline)</span>. ";
+  out << hoursTillDeadlineStream.str();
+  return out.str();
   if (!theGlobalVariables.UserDefaultHasAdminRights() || theGlobalVariables.UserStudentViewOn())
     return out.str();
   out << "<span style=\"color:blue\">" << currentDeadline << "</span>. ";
@@ -1635,13 +1632,13 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
 }
 
 std::string CalculatorHTML::ToStringDeadlinesFormatted
-  (const std::string& cleanedUpLink,  const List<std::string>& sectionNumbers, bool isActualProblem,
+  (const std::string& cleanedUpLink, const List<std::string>& sectionNumbers,
    bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
 { if (sectionNumbers.size==0)
     return "No section number. ";
   if (sectionNumbers.size==1)
     return this->ToStringOnEDeadlineFormatted
-    (cleanedUpLink, sectionNumbers[0], isActualProblem, problemAlreadySolved, returnEmptyStringIfNoDeadline);
+    (cleanedUpLink, sectionNumbers[0], problemAlreadySolved, returnEmptyStringIfNoDeadline);
   std::stringstream out;
   out << "<table>";
   for (int i=0; i<sectionNumbers.size; i++)
@@ -1649,7 +1646,7 @@ std::string CalculatorHTML::ToStringDeadlinesFormatted
       continue;
     out << "<tr><td>Section " << sectionNumbers[i] << ":</td>";
     out << "<td>" << this->ToStringOnEDeadlineFormatted
-    (cleanedUpLink, sectionNumbers[i], isActualProblem, problemAlreadySolved, returnEmptyStringIfNoDeadline) << "</td>";
+    (cleanedUpLink, sectionNumbers[i], problemAlreadySolved, returnEmptyStringIfNoDeadline) << "</td>";
     out << "</tr>";
   }
   out << "</table>";
@@ -2973,7 +2970,7 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
 
 }
 
-std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFileName)
+std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFileName, bool& outputAlreadySolved)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemScoreShort");
   std::stringstream out;
   if (theGlobalVariables.UserGuestMode())
@@ -2984,6 +2981,7 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
   std::stringstream problemWeight;
   ProblemData theProbData;
   bool showModifyButton=theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn();
+  outputAlreadySolved=false;
   if (this->currentUseR.theProblemData.Contains(theFileName))
   { theProbData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName);
     Rational percentSolved=0, totalPoints=0;
@@ -3000,7 +2998,8 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
     { problemWeight << theProbData.adminData.ProblemWeight;
       totalPoints=percentSolved*theProbData.adminData.ProblemWeight;
     }
-    if (percentSolved<1)
+    outputAlreadySolved=(percentSolved==1);
+    if (!outputAlreadySolved)
     { if (!theProbData.flagProblemWeightIsOK)
         out << "<span style=\"color:brown\"><b>" << percentSolved << " out of " << problemWeight.str() << "</b></span>";
       else
@@ -3332,25 +3331,33 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     this->displaySlidesLink = "<a href=\"" + this->slides + "\">Slides</a>";
   if (this->slidesPrintable!="")
     this->displaySlidesPrintableLink = "<a href=\"" + this->slidesPrintable + "\">Printable slides</a>";
-  if (this->problem!="")
-  { std::string theRawSQLink=theGlobalVariables.DisplayNameExecutable +
-    "?request=scoredQuiz&fileName=" + this->problem;
-    std::string theRawExerciseLink=theGlobalVariables.DisplayNameExecutable +
-    "?request=exercise&fileName=" + this->problem;
-    this->displayAceProblemLink=
-    " | <a href=\"#\" onclick=\"window.open('" + theRawSQLink +
-    "', 'width=300', 'height=250', 'top=400'); return false;\">" + CalculatorHTML::stringScoredQuizzes + "</a>"+
-    " | <a href=\"#\" onclick=\"window.open('" + theRawExerciseLink+
-    "',  'width=300', 'height=250', 'top=400'); return false;\">" +CalculatorHTML::stringPracticE+ "</a>";
-    this->displayProblemLink= owner.ToStringLinkFromFileName(this->problem);
-    this->displayScore=owner.ToStringProblemScoreShort(this->problem);
-    this->displayModifyWeight=owner.ToStringProblemWeighT(this->problem);
-    if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserStudentViewOn())
-    { this->displayScore+="\n<br>\n" + this->displayModifyWeight;
-      this->displayDeadline+="\n<br>\n" + this->displayModifyDeadline;
-    }
-  }
 
+  if (this->problem=="")
+  { this->displayProblemLink="";
+    this->displayScore="";
+    this->displayModifyWeight="";
+    this->displayDeadline="";
+    return;
+  }
+  std::string theRawSQLink=theGlobalVariables.DisplayNameExecutable +
+  "?request=scoredQuiz&fileName=" + this->problem;
+  std::string theRawExerciseLink=theGlobalVariables.DisplayNameExecutable +
+  "?request=exercise&fileName=" + this->problem;
+  this->displayAceProblemLink=
+  " | <a href=\"#\" onclick=\"window.open('" + theRawSQLink +
+  "', 'width=300', 'height=250', 'top=400'); return false;\">" + CalculatorHTML::stringScoredQuizzes + "</a>"+
+  " | <a href=\"#\" onclick=\"window.open('" + theRawExerciseLink+
+  "',  'width=300', 'height=250', 'top=400'); return false;\">" +CalculatorHTML::stringPracticE+ "</a>";
+  this->displayProblemLink= owner.ToStringLinkFromFileName(this->problem);
+  bool problemSolved=false;
+  this->displayScore=owner.ToStringProblemScoreShort(this->problem, problemSolved);
+  this->displayModifyWeight=owner.ToStringProblemWeighT(this->problem);
+//  this->displayDeadline=owner.ToStringDeadlinesFormatted
+//  (this->problem, owner.databaseStudentSections, problemSolved, false);
+  if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserStudentViewOn())
+  { this->displayScore+="\n<br>\n" + this->displayModifyWeight;
+    this->displayDeadline+="\n<br>\n" + this->displayModifyDeadline;
+  }
 }
 
 std::string TopicElement::ToString()const

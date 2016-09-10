@@ -3745,7 +3745,7 @@ int WebServer::main(int argc, char **argv)
   theWebServer.InitializeGlobalVariables();
   theGlobalVariables.flagAceIsAvailable=
   FileOperations::FileExistsVirtual("MathJax-2.6-latest/", false);
-  if (theGlobalVariables.flagRunningBuiltInWebServer)
+  if (false && theGlobalVariables.flagRunningBuiltInWebServer)
   { theLog
     << logger::purple << "************************" << logger::endL
     << logger::red << "WARNING: theGlobalVariables.flagAllowProcessMonitoring is set to TRUE. " << logger::endL

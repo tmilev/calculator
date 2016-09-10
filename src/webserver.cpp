@@ -2872,7 +2872,6 @@ void WebServer::PipeProgressReportToParentProcess(const std::string& theString)
 WebServer::WebServer()
 { this->flagDeallocated=false;
   this->flagTryToKillOlderProcesses=true;
-  this->flagPort8155=false;
   this->activeWorker=-1;
   this->timeLastExecutableModification=-1;
   this->listeningSocketHTTP=-1;
@@ -3191,12 +3190,10 @@ void WebServer::Restart()
 }
 
 void WebServer::initPortsITry()
-{ if (this->flagPort8155)
-    this->PortsITryHttp.AddOnTop("8155");
+{ this->PortsITryHttp.AddOnTop("8155");
   this->PortsITryHttp.AddOnTop("8080");
   this->PortsITryHttp.AddOnTop("8081");
   this->PortsITryHttp.AddOnTop("8082");
-  this->PortsITryHttp.AddOnTop("8155");
   if (!theGlobalVariables.flagSSLisAvailable)
     return;
   this->PortsITryHttpSSL.AddOnTop("8166");

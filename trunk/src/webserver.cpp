@@ -2627,6 +2627,8 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType=="changePasswordPage" ||
            theGlobalVariables.userCalculatorRequestType=="activateAccount")
     return this->ProcessChangePasswordPage();
+  else if (theGlobalVariables.userCalculatorRequestType=="login")
+    return this->ProcessLoginPage();
   else if (theGlobalVariables.userCalculatorRequestType=="logout")
     return this->ProcessLogout();
   else if ((theGlobalVariables.userCalculatorRequestType=="addEmails"||

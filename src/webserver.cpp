@@ -2088,7 +2088,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   out << "<br>Password: ";
   out << "<input type=\"password\" id=\"password\" name=\"password\" placeholder=\"password\" autocomplete=\"on\">";
   out << this->GetHtmlHiddenInputs(false, false);
-  out << this->GetHtmlHiddenInputAddressAsRequest();
+  //out << this->GetHtmlHiddenInputAddressAsRequest();
   out << "<button type=\"submit\" value=\"Submit\" ";
   out << "action=\"" << theGlobalVariables.DisplayNameExecutable << "\"";
   out << ">Login</button>";
@@ -2558,7 +2558,7 @@ int WebWorker::ServeClient()
       (this->addressComputed==theGlobalVariables.DisplayNameExecutable &&
        theGlobalVariables.userCalculatorRequestType==""))
       && theGlobalVariables.flagLoggedIn)
-  { this->addressComputed="html/selectCourse.html";
+  { this->addressComputed="/html/selectCourse.html";
     theGlobalVariables.userCalculatorRequestType="selectCourse";
 //    theGlobalVariables.SetWebInpuT("topicList", "topiclists/Singapore-H2-2017.txt");
 //    theGlobalVariables.SetWebInpuT("fileName", "pagetemplates/ace-learning-Singapore-H2.html");
@@ -2577,7 +2577,7 @@ int WebWorker::ServeClient()
         redirectedAddress << theGlobalVariables.webArguments.theKeys[i] << "="
         << theGlobalVariables.webArguments.theValues[i] << "&";
     std::stringstream headerStream;
-    //headerStream << "Location: " << redirectedAddress.str();
+    headerStream << "Location: " << redirectedAddress.str();
     this->SetHeader("HTTP/1.1 303 See other", headerStream.str());
     //this->SetHeaderOKNoContentLength();
     stOutput << "<html><head>"
@@ -2587,14 +2587,14 @@ int WebWorker::ServeClient()
     << "<body>Click <a href=\"" << redirectedAddress.str() << "\">"
     << " here " << "</a> if your browser does not redirect the page automatically. ";
 
-/*    stOutput << "<hr>DEBUG: addressComputed: <br>" << CGI::StringToHtmlString( this->addressComputed)
-    << "<hr>addressToRedirectTo: <br>\n" << CGI::StringToHtmlString( redirectedAddress.str())
-    << "<hr>argumentComputed: <br>\n" << CGI::StringToHtmlString( this->argumentComputed)
-    << "<hr>addressGetOrPost: <br>" << CGI::StringToHtmlString( this->addressGetOrPost )
-    << "<hr>MessageBody: <br>\n" << CGI::StringToHtmlString( this->messageBody)
-    << " <br>MessageHead: <br>\n" << CGI::StringToHtmlString(this->messageHead);
-    stOutput << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
-    << this->ToStringMessageFullUnsafe();*/
+//    stOutput << "<hr>DEBUG: addressComputed: <br>" << CGI::StringToHtmlString( this->addressComputed)
+//    << "<hr>addressToRedirectTo: <br>\n" << CGI::StringToHtmlString( redirectedAddress.str())
+//    << "<hr>argumentComputed: <br>\n" << CGI::StringToHtmlString( this->argumentComputed)
+//    << "<hr>addressGetOrPost: <br>" << CGI::StringToHtmlString( this->addressGetOrPost )
+//    << "<hr>MessageBody: <br>\n" << CGI::StringToHtmlString( this->messageBody)
+//    << " <br>MessageHead: <br>\n" << CGI::StringToHtmlString(this->messageHead)
+//    << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
+//    << this->ToStringMessageFullUnsafe();
     stOutput << "</body></html>";
     return 0;
   }

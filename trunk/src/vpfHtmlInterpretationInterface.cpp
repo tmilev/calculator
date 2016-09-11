@@ -318,6 +318,17 @@ std::string HtmlInterpretation::GetTopicTable()
   return out.str();
 }
 
+std::string HtmlInterpretation::GetHtmlTagWithManifest()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetHtmlTagWithManifest");
+  std::stringstream out;
+  out << "<!DOCTYPE HTML>\n";
+  out << "<html";
+  if (theGlobalVariables.flagAceIsAvailable && theGlobalVariables.flagCertificatesAreOfficiallySigned && false)
+    out << " manifest=\"/cache.appcache\" type=\"text/cache-manifest\"";
+  out << ">\n<!-- tag added automatically; user-specified html tag ignored-->\n";
+  return out.str();
+}
+
 std::string HtmlInterpretation::GetPageFromTemplate()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetPageFromTemplate");
   std::stringstream out;
@@ -336,10 +347,10 @@ std::string HtmlInterpretation::GetPageFromTemplate()
     << "<br>Comments:<br> " << comments.str() << "</body></html>";
     return out.str();
   }
+  out << HtmlInterpretation::GetHtmlTagWithManifest();
   out << "<!-- File automatically generated from template: "
   << theGlobalVariables.GetWebInput("fileName")
   << ".-->\n";
-  out << "<html><!-- tag added automatically; user-specified html tag ignored-->\n";
   out << "<head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << thePage.outputHtmlHeadNoTag;
   out << HtmlSnippets::GetJavascriptStandardCookies();

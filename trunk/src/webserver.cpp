@@ -293,7 +293,7 @@ void SSL_write_Wrapper(SSL* inputSSL, const std::string& theString)
 //certificate with certificate signing request:
 //openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout privateKey.key
 //then get the CSR.csr file to a signing authority,
-//from where you get the signedFileCertificate1 andsignedFileCertificate3
+//from where you get the signedFileCertificate1 and signedFileCertificate3
 const std::string fileCertificate= "certificates/cert.pem";
 const std::string fileKey= "certificates/key.pem";
 const std::string signedFileCertificate1= "certificates/2_calculator-algebra.org.crt";
@@ -373,6 +373,7 @@ void WebServer::initSSL()
     { ERR_print_errors_fp(stderr);
       exit(4);
     }
+    theGlobalVariables.flagCertificatesAreOfficiallySigned=true;
   }
   if (!SSL_CTX_check_private_key(theSSLdata.ctx))
   { fprintf(stderr,"Private key does not match the certificate public key\n");
@@ -1820,6 +1821,9 @@ int WebWorker::ProcessFile()
   if (theGlobalVariables.UserDebugFlagOn() && fileExtension==".html")
     debugBytesStream << "<!-- DEBUG info: " << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
     << "-->";
+  if (theGlobalVariables.UserDebugFlagOn() && fileExtension==".appcache")
+  { debugBytesStream << "#" << this->GetMIMEtypeFromFileExtension(fileExtension);
+  }
   if (theGlobalVariables.flagRunningApache)
   { this->SetHeaderOKNoContentLength();
     stOutput << "<html><body>"
@@ -1831,7 +1835,7 @@ int WebWorker::ProcessFile()
   unsigned int totalLength=fileSize+debugBytesStream.str().size();
 
   std::stringstream theHeader;
-  theHeader << "HTTP/1.0 200 OK\r\n" << this->GetMIMEtypeFromFileExtension(fileExtension)
+  theHeader << "HTTP/1.1 200 OK\r\n" << this->GetMIMEtypeFromFileExtension(fileExtension)
   << "Content-length: " << totalLength;
   std::string theCookie=this->GetHeaderSetCookie();
   if (theCookie!="")
@@ -1900,6 +1904,12 @@ bool WebWorker::IamActive()
 bool WebWorker::IsFileExtensionOfBinaryFile(const std::string& fileExtension)
 { if (fileExtension==".png")
     return true;
+  if (fileExtension==".mp4")
+    return true;
+  if (fileExtension==".mpeg")
+    return true;
+  if (fileExtension==".jpg")
+    return true;
 
   return false;
 }
@@ -1944,6 +1954,8 @@ std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExten
     return "Content-Type: application/octet-stream\r\n";
   if (fileExtension==".svg")
     return "Content-Type: image/svg+xml\r\n";
+  if (fileExtension==".appcache")
+    return "Content-Type: text/cache-manifest\r\n";
   if (fileExtension==".woff")
     return "Content-Type: application/font-woff\r\n";
   return "Content-Type: application/octet-stream\r\n";
@@ -2895,6 +2907,12 @@ WebServer::WebServer()
   this->NumWorkersNormallyExited=0;
   this->WebServerPingIntervalInSeconds=20;
   this->flagThisIsWorkerProcess=false;
+  this->addressStartsNotNeedingLogin.AddOnTop("cache.appcache");
+  this->addressStartsNotNeedingLogin.AddOnTop("/cache.appcache");
+  this->addressStartsNotNeedingLogin.AddOnTop("favicon.ico");
+  this->addressStartsNotNeedingLogin.AddOnTop("/favicon.ico");
+  this->addressStartsNotNeedingLogin.AddOnTop("html-common/");
+  this->addressStartsNotNeedingLogin.AddOnTop("/html-common/");
   this->addressStartsNotNeedingLogin.AddOnTop("css/");
   this->addressStartsNotNeedingLogin.AddOnTop("/css/");
   this->addressStartsNotNeedingLogin.AddOnTop("javascriptlibs/");

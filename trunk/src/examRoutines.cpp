@@ -839,6 +839,7 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator()
   tagClass=="calculatorExamProblem" || tagClass== "calculatorExamIntermediate" ||
   tagClass=="calculatorAnswer" || tagClass=="calculatorManageClass" ||
   tagClass=="generateTopicTable" ||
+  tagClass=="calculatorJavascript" ||
   tagClass=="accountInformationLinks" ||
   tagClass=="generateTableOfContents" ||
 //  tagClass=="htmlStart" || tagClass=="htmlFinish" ||
@@ -1508,6 +1509,8 @@ void CalculatorHTML::InterpretNotByCalculator(SyntacticElementHTML& inputOutput)
     this->InterpretTableOfContents(inputOutput);
   else if (tagClass=="accountInformationLinks")
     this->InterpretAccountInformationLinks(inputOutput);
+  else if (tagClass=="calculatorJavascript")
+    this->InterpretJavascripts(inputOutput);
 }
 
 std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink)
@@ -2058,6 +2061,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     this->calculatorClasses.AddOnTop("generateTopicTable");
     this->calculatorClasses.AddOnTop("generateTableOfContents");
     this->calculatorClasses.AddOnTop("accountInformationLinks");
+    this->calculatorClasses.AddOnTop("calculatorJavascript");
     this->calculatorClasses.AddListOnTop(this->calculatorClassesAnswerFields);
   }
   this->eltsStack.SetSize(0);
@@ -3188,6 +3192,13 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
   }
   out << "</ol>";
   inputOutput.interpretedCommand=out.str();
+}
+
+void CalculatorHTML::InterpretJavascripts(SyntacticElementHTML& inputOutput)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretJavascripts");
+  std::string javascriptName=MathRoutines::StringTrimWhiteSpace(inputOutput.content);
+  if (javascriptName=="MathJax")
+    inputOutput.interpretedCommand=CGI::GetJavascriptMathjax();
 }
 
 void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)

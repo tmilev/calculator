@@ -84,6 +84,7 @@ public:
   bool flagLoggedIn;
   bool flagUsingSSLinCurrentConnection;
   bool flagSSLisAvailable;
+  bool flagCertificatesAreOfficiallySigned;
   std::string hostWithPort;
   std::string hostNoPort;
 

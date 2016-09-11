@@ -10,7 +10,7 @@ static ProjectInformationInstance ProjectInfoHeaderHtmlInterpretationInterface(_
 
 class HtmlInterpretation{
 public:
-
+  static std::string GetHtmlTagWithManifest();
   static std::string ModifyProblemReport();
   static std::string ClonePageResult();
   static std::string AddUserEmails(const std::string& hostWebAddressWithPort);

@@ -130,6 +130,10 @@ std::string HtmlSnippets::GetJavascriptStandardCookies()
       out << "  addCookie(\"courseHome\", \""
       << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"))
       << "\", 100, false);\n";
+    if (theGlobalVariables.GetWebInput("topicList")!="")
+      out << "  addCookie(\"topicList\", \""
+      << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"))
+      << "\", 100, false);\n";
   }
   out
   << "}\n";

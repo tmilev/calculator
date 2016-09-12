@@ -261,18 +261,19 @@ bool GlobalVariables::UserRequestMustBePromptedToLogInIfNotLoggedIn()
   ;
 }
 
-std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude)
+std::string GlobalVariables::ToStringCalcArgsNoNavigation( bool excludeAuthenticationToken, List<std::string>* tagsToExclude)
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringCalcArgsNoNavigation");
   if (!this->flagLoggedIn && !this->UserGuestMode())
     return "";
   std::stringstream out;
   for (int i =0; i<this->webArguments.size(); i++)
   { const std::string& currentName=this->webArguments.theKeys[i];
-    if (currentName=="request" ||
-        currentName=="authenticationInsecure" || currentName=="password" ||
+    if (currentName=="request" ||  currentName=="password" ||
         currentName=="fileName" || currentName=="courseHome" || currentName=="topicList" ||
         currentName=="currentDatabaseTable" || currentName=="mainInput" || currentName=="studentView" ||
         currentName=="studentSection")
+      continue;
+    if (excludeAuthenticationToken && currentName=="authenticaktionToken")
       continue;
     if (tagsToExclude!=0)
       if (tagsToExclude->Contains(currentName))

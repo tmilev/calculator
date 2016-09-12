@@ -360,7 +360,7 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   ;
   if (!theGlobalVariables.flagRunningApache)
     out << "<problemNavigation>" << thePage.outputHtmlNavigatioN
-    << theGlobalVariables.ToStringNavigation() << "|| <small>Generated in " << theGlobalVariables.GetElapsedSeconds()
+    << theGlobalVariables.ToStringNavigation() << "<small>Generated in " << theGlobalVariables.GetElapsedSeconds()
     << " second(s).</small>" << "</problemNavigation><br>";
   out << thePage.outputHtmlBodyNoTag;
   out << "</body><!-- tag added automatically; user-specified body tag ignored-->\n";
@@ -1153,41 +1153,63 @@ std::string HtmlInterpretation::ToStringNavigation()
   //out << "<table>";
   std::string linkSeparator=" | ";
   std::string linkBigSeparator=" || ";
+  if (theGlobalVariables.userCalculatorRequestType=="template")
+    out << "<b>Home</b>" << linkSeparator;
+  else
+  { std::string topicList=CGI::StringToURLString(theGlobalVariables.GetWebInput("topicList"));
+    std::string courseHome=CGI::StringToURLString(theGlobalVariables.GetWebInput("courseHome"));
+    if (topicList!="" && courseHome!="")
+    { std::string studentView=CGI::StringToURLString(theGlobalVariables.GetWebInput("studentView"));
+      std::string section=CGI::StringToURLString(theGlobalVariables.GetWebInput("studentSection"));
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=template"
+      << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(false)
+      << "studentView=" << studentView << "&";
+      if (section!="")
+        out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
+      out << "topicList=" << topicList << "&";
+      out << "courseHome=" << courseHome << "&";
+      out << "fileName=" << courseHome << "&\">Home</a>"
+      << linkSeparator;
+    }
+  }
+  out << "<a href=\"/selectCourse.html\">Select course</a>" << linkBigSeparator;
   if (theGlobalVariables.flagLoggedIn)
   { out << "User";
     if (theGlobalVariables.UserDefaultHasAdminRights())
       out << " <b>(admin)</b>";
     out << ": " << theGlobalVariables.userDefault.username.value << linkSeparator;
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=logout&";
-    out << theGlobalVariables.ToStringCalcArgsNoNavigation() << " \">Log out</a>" << linkSeparator;
+    out << theGlobalVariables.ToStringCalcArgsNoNavigation(false) << " \">Log out</a>" << linkSeparator;
     if (theGlobalVariables.flagUsingSSLinCurrentConnection)
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=changePasswordPage&"
-      << theGlobalVariables.ToStringCalcArgsNoNavigation() << "\">Change password</a>" << linkSeparator;
+      << theGlobalVariables.ToStringCalcArgsNoNavigation(false) << "\">Change password</a>" << linkSeparator;
     else
       out << "<b>Password change: <br>secure connection<br>only</b>" << linkSeparator;
   }
-  out << "<a href=\"/selectCourse.html\">Select course</a>" << linkBigSeparator;
   if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
   { if (theGlobalVariables.userCalculatorRequestType!="accounts")
-      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts&" << theGlobalVariables.ToStringCalcArgsNoNavigation()
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts&"
+      << theGlobalVariables.ToStringCalcArgsNoNavigation(false)
       << "\">Accounts</a>" << linkSeparator;
     else
       out << "<b>Accounts</b>" << linkBigSeparator;
     if (theGlobalVariables.userCalculatorRequestType!="status")
-      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=status&" << theGlobalVariables.ToStringCalcArgsNoNavigation()
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=status&"
+      << theGlobalVariables.ToStringCalcArgsNoNavigation(false)
       << "\">Server</a>" << linkSeparator;
     else
       out << "<b>Server</b>" << linkBigSeparator;
     if (theGlobalVariables.userCalculatorRequestType!="database")
-      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=database&" << theGlobalVariables.ToStringCalcArgsNoNavigation()
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=database&"
+      << theGlobalVariables.ToStringCalcArgsNoNavigation(false)
       << "\">Database</a>" << linkBigSeparator;
     else
       out << "<b>Database</b>" << linkBigSeparator;
-    if (theGlobalVariables.userCalculatorRequestType!="compute")
-      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=compute&"
-      << theGlobalVariables.ToStringCalcArgsNoNavigation() << " \">Calculator</a>" << linkBigSeparator;
-    else
-      out << "<b>Calculator</b> " << linkBigSeparator;
   }
+  if (theGlobalVariables.userCalculatorRequestType!="compute")
+    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=compute&"
+    << theGlobalVariables.ToStringCalcArgsNoNavigation(false) << " \">Calculator</a>" << linkBigSeparator;
+  else
+    out << "<b>Calculator</b> " << linkBigSeparator;
   return out.str();
 }

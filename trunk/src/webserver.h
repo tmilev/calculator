@@ -214,6 +214,7 @@ public:
 
   List<std::string> requestStartsNotNeedingLogin;
   List<std::string> addressStartsNotNeedingLogin;
+  List<std::string> addressStartsSentWithCacheMaxAge;
 
   int activeWorker;
   int timeLastExecutableModification;

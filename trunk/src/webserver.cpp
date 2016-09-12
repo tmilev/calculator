@@ -1817,10 +1817,23 @@ int WebWorker::ProcessFile()
     << " bytes.</b></body></html>";
     return 0;
   }
+  std::stringstream theHeader;
+  bool withCacheHeader=false;
+  theHeader << "HTTP/1.1 200 OK\r\n" << this->GetMIMEtypeFromFileExtension(fileExtension);
+  for (int i=0; i<this->parent->addressStartsSentWithCacheMaxAge.size; i++)
+    if (MathRoutines::StringBeginsWith(this->VirtualFileName, this->parent->addressStartsSentWithCacheMaxAge[i]))
+    { theHeader << "Cache-Control: max-age=12960000\r\n";
+      withCacheHeader=true;
+      break;
+    }
   std::stringstream debugBytesStream;
   if (theGlobalVariables.UserDebugFlagOn() && fileExtension==".html")
-    debugBytesStream << "<!-- DEBUG info: " << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
+  { debugBytesStream << "<!-- DEBUG info: ";
+    if (withCacheHeader)
+      debugBytesStream << "Sent with Cache-Control header.\n ";
+    debugBytesStream << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
     << "-->";
+  }
   if (theGlobalVariables.UserDebugFlagOn() && fileExtension==".appcache")
   { debugBytesStream << "#" << this->GetMIMEtypeFromFileExtension(fileExtension);
   }
@@ -1833,10 +1846,7 @@ int WebWorker::ProcessFile()
     return 0;
   }
   unsigned int totalLength=fileSize+debugBytesStream.str().size();
-
-  std::stringstream theHeader;
-  theHeader << "HTTP/1.1 200 OK\r\n" << this->GetMIMEtypeFromFileExtension(fileExtension)
-  << "Content-length: " << totalLength;
+  theHeader << "Content-length: " << totalLength;
   std::string theCookie=this->GetHeaderSetCookie();
   if (theCookie!="")
     theHeader << "\r\n" << theCookie;
@@ -2907,6 +2917,16 @@ WebServer::WebServer()
   this->NumWorkersNormallyExited=0;
   this->WebServerPingIntervalInSeconds=20;
   this->flagThisIsWorkerProcess=false;
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("/MathJax-2.6-latest/");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("MathJax-2.6-latest/");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/jquery.min.js");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common/jquery.min.js");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/mathquill.css");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common/mathquill.css");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/mathquill.min.js");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common/mathquill.min.js");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/mathquill.min-matrix.js");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common/mathquill.min-matrix.js");
   this->addressStartsNotNeedingLogin.AddOnTop("cache.appcache");
   this->addressStartsNotNeedingLogin.AddOnTop("/cache.appcache");
   this->addressStartsNotNeedingLogin.AddOnTop("favicon.ico");

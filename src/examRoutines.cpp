@@ -2794,8 +2794,9 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         out << "topicList=" << CGI::StringToURLString(this->topicListFileName) << "&";
         out << "courseHome=" << CGI::StringToURLString(this->courseHome) << "&";
         out << "fileName=" << CGI::StringToURLString(this->TopicProblemFileNames[indexInParent-1])
-        << "\"> <-Previous </a>" << linkSeparator;
-      }
+        << "\">&#8592;</a>" << linkSeparator;
+      } else
+        out << "<a disabled=\"disabled\">&#8592;</a>" << linkSeparator;
       if (indexInParent<this->TopicProblemFileNames.size-1)
       { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request="
         << theGlobalVariables.userCalculatorRequestType;
@@ -2806,18 +2807,9 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         out << "topicList=" << CGI::StringToURLString(this->topicListFileName) << "&";
         out << "courseHome=" << CGI::StringToURLString(this->courseHome) << "&";
         out << "fileName=" << CGI::StringToURLString(this->TopicProblemFileNames[indexInParent+1] )
-        << "\"> Next-> </a>" << linkSeparator;
+        << "\">&#8594;</a>" << linkSeparator;
       } else
-      { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=template";
-        out << "&" << calcArgsNoPassExamDetails
-        << "studentView=" << studentView << "&";
-        if (theGlobalVariables.GetWebInput("studentSection")!="")
-          out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
-        out << "topicList=" << CGI::StringToURLString(this->topicListFileName) << "&";
-        out << "courseHome=" << CGI::StringToURLString(this->courseHome) << "&";
-        out << "fileName=" << CGI::StringToURLString(this->courseHome)
-        << "\">Last problem, return to course page.</a>" << linkSeparator;
-      }
+        out << "<a disabled=\"disabled\">&#8594;</a>" << linkSeparator;
     }
   }
   if (this->flagIsExamProblem &&

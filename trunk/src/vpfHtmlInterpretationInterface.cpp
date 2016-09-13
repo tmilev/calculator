@@ -334,6 +334,8 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   std::stringstream out;
   CalculatorHTML thePage;
   std::stringstream comments;
+  bool includeDeadlineJavascript=
+  theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn();
   thePage.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"));
   if (!thePage.LoadMe(true, comments))
   { out << "<html><body><b>Failed to load file: "
@@ -354,9 +356,14 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   out << "<head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << thePage.outputHtmlHeadNoTag;
   out << HtmlSnippets::GetJavascriptStandardCookies();
+  if (includeDeadlineJavascript)
+    out << CGI::GetJavascriptInitilizeButtons();
   out << "</head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << "<body" //<< ">"
-  << " onload=\"loadSettings();\"><!-- tag added automatically; user-specified body tag ignored-->\n"
+  << " onload=\"loadSettings();";
+  if (includeDeadlineJavascript)
+    out << " initializeButtonsCommon(); ";
+  out <<"\"><!-- tag added automatically; user-specified body tag ignored-->\n"
   ;
   if (!theGlobalVariables.flagRunningApache)
     out << "<problemNavigation>" << thePage.outputHtmlNavigatioN

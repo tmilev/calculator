@@ -449,7 +449,7 @@ std::string HtmlInterpretation::GetEditPageHTML()
   //  out << "<form>";
   //  out << "<input type=\"submit\" value=\"Save changes\"> ";
   out << buttonStream.str();
-  out << "To include the problem in your problem home page, add the following source code. <br>"
+  out << "To include the problem in your topic list, add the following two lines. <br>"
   << "<textarea cols=\"70\", rows=\"3\">"
   << theFile.ToStringCalculatorProblemSourceFromFileName(theFile.fileName) << "</textarea>";
   out << "<br>\n";

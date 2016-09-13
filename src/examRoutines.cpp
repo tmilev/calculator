@@ -387,7 +387,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
   std::stringstream out;
   if (!this->InterpretHtml(this->comments))
   { if (theGlobalVariables.UserDefaultHasAdminRights())
-      out << this->GetEditPageButton();
+      out << this->GetEditPageButton(this->fileName);
     out << "<b>Failed to interpret file: " << this->fileName << "</b>. Comments: " << this->comments.str();
     return out.str();
   }
@@ -2603,7 +2603,10 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   }
   if (this->flagUseNavigationBar)
     if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
-      outBody << this->GetEditPageButton();
+    { outBody << this->GetEditPageButton(this->fileName);
+      if (theGlobalVariables.userCalculatorRequestType=="template")
+        outBody <<this->GetEditPageButton(this->topicListFileName);
+    }
   if (this->flagIsExamProblem)
   { bool problemAlreadySolved=false;
 #ifdef MACRO_use_MySQL
@@ -2852,23 +2855,26 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
   return out.str();
 }
 
-std::string CalculatorHTML::GetEditPageButton()
+std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName)
 { MacroRegisterFunctionWithName("CalculatorHTML::GetEditPageButton");
   std::stringstream out;
   out << "\n<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=editPage&";
-  std::string urledProblem=CGI::StringToURLString(this->fileName);
+  std::string urledProblem=CGI::StringToURLString(desiredFileName);
   std::stringstream refStreamNoRequest;
+  std::string spanCloningAttemptResultID="spanCloningAttemptResultID"+desiredFileName;
+  std::string clonePageAreaID="clonePageAreaID"+desiredFileName;
   //  out << "cleaned up link: " << cleaneduplink;
   //  out << "<br>urled link: " <<  urledProblem;
   refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation(false)
   << "fileName=" << urledProblem << "&"
   << "courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "&";
-  out << refStreamNoRequest.str() << "\">" << "Edit problem/page" << "</a>";
-  out << "<textarea class=\"currentFileNameArea\" id=\"clonePageAreaID\" cols=\""
-  << this->fileName.size()+4 << "\">" << this->fileName << "</textarea>\n"
+  out << refStreamNoRequest.str() << "\">" << "Edit" << "</a>";
+  out << "<textarea class=\"currentFileNameArea\" id=\""<< clonePageAreaID << "\" cols=\""
+  << desiredFileName.size()+4 << "\">" << desiredFileName << "</textarea>\n"
   << "<button class=\"normalButton\" onclick=\""
-  << "submitStringAsMainInput(document.getElementById('clonePageAreaID').value, 'spanCloningAttemptResultID', 'clonePage');"
-  << "\" >Clone page</button> <span id=\"spanCloningAttemptResultID\"></span><br><br>";
+  << "submitStringAsMainInput(document.getElementById('"
+  << clonePageAreaID << "').value, '" << spanCloningAttemptResultID << "', 'clonePage');"
+  << "\" >Clone page</button> <span id=\"" << spanCloningAttemptResultID <<"\"></span>";
   return out.str();
 }
 

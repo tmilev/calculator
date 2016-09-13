@@ -1696,7 +1696,7 @@ std::string CalculatorHTML::ToStringDeadlineModifyButton
     deadlineStream << "<td> <input type=\"text\" id=\"" << currentDeadlineId << "\" value=\""
     << this->GetDeadline(inputFileName, this->databaseStudentSections[i], false, deadlineInherited)
     << "\"> " ;
-    deadlineStream << this->GetDatePickerStart(currentDeadlineId);
+    //deadlineStream << this->GetDatePickerStart(currentDeadlineId);
     deadlineStream << "</td>";
     deadlineStream << "</tr>";
   }
@@ -1724,12 +1724,14 @@ std::string CalculatorHTML::ToStringDeadlineModifyButton
   deadlineStream << ")), '" << deadlineIdReport << "', 'setProblemData' );"
   << "\""
   << ">\n";
-  deadlineStream << "  Set deadline(s)</button>";
+  deadlineStream << "Set</button>";
   deadlineStream << "<span id=\"" << deadlineIdReport << "\"></span>";
   deadlineStream << "</td>";
   deadlineStream << "</tr></table>";
 //  out << deadlineStream.str();
-  out << CGI::GetHtmlSpanHidableStartsHiddeN(deadlineStream.str(), "Set deadline (show/hide). ");
+  out << "<button class=\"accordion\">deadline</button><div class=\"panel\">" << deadlineStream.str() << "</div>";
+
+//  out << CGI::GetHtmlSpanHidableStartsHiddeN(deadlineStream.str(), "deadline+ ");
   if (!isProblemGroup)
     out << "(overrides section deadline). ";
   else
@@ -3233,7 +3235,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       << "\n";
     else
     { currentElt.ComputeLinks(*this, plainStyle);
-      out << "<tr>\n";
+      out << "<tr class=\"topicList\">\n";
       out << "  <td>\n";
       out << currentElt.displayTitle;
       out << "  </td>\n";

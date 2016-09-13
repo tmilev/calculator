@@ -1674,7 +1674,7 @@ std::string CalculatorHTML::ToStringDeadlineModifyButton
     return "";
   std::stringstream out;
   std::stringstream deadlineStream;
-  deadlineStream << "<table><tr><td> Deadline: </td>";
+  deadlineStream << "<table><tr>";
   deadlineStream << "<td><table><tr><th>Grp.</th><th>Deadline</th></tr>";
   List<std::string> deadlineIds;
   deadlineIds.SetSize(this->databaseStudentSections.size);

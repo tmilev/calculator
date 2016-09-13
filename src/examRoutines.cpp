@@ -615,7 +615,7 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 //  stOutput << "Figuring out current prob list ...";
 //  std::stringstream notUsed;
 //  this->FigureOutCurrentProblemList(notUsed);
-  inputOutput.interpretedCommand= this->ToStringLinkAndDetailsFromFileName(this->CleanUpFileName(inputOutput.content));
+  inputOutput.interpretedCommand= this->ToStringProblemInfo(this->CleanUpFileName(inputOutput.content));
 }
 
 std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileName, const std::string& stringToDisplay)
@@ -645,16 +645,12 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
 
 }
 
-std::string CalculatorHTML::ToStringLinkAndDetailsFromFileName(const std::string& theFileName, const std::string& stringToDisplay)
-{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringLinkAndDetailsFromFileName");
+std::string CalculatorHTML::ToStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringLinksFromFileName");
   std::stringstream out;
-  std::string urledProblem=CGI::StringToURLString(theFileName);
   out << this->ToStringLinkFromFileName(theFileName, stringToDisplay);
-  bool isActualProblem=true;
-  if (isActualProblem)
-  { out << this->ToStringProblemScoreFull(theFileName);
-    out << this->ToStringProblemWeighT(theFileName);
-  }
+  out << this->ToStringProblemScoreFull(theFileName);
+  out << this->ToStringProblemWeighT(theFileName);
 #ifdef MACRO_use_MySQL
   bool problemAlreadySolved=false;
   if (this->currentUseR.theProblemData.Contains(theFileName))
@@ -662,7 +658,7 @@ std::string CalculatorHTML::ToStringLinkAndDetailsFromFileName(const std::string
     if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size)
       problemAlreadySolved=true;
   }
-  out << this->InterpretGenerateDeadlineLink(isActualProblem, theFileName, urledProblem, problemAlreadySolved);
+  out << this->ToStringDeadline(theFileName, problemAlreadySolved, false);
 #endif // MACRO_use_MySQL
   std::string finalStringToDisplay=stringToDisplay;
   if (finalStringToDisplay=="")
@@ -1588,8 +1584,8 @@ std::string CalculatorHTML::GetDeadline
 std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   (const std::string& cleanedUpLink,  const std::string& sectionNumber,
    bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
-{ bool deadlineInherited=false;
-  std::stringstream out;
+{ std::stringstream out;
+  bool deadlineInherited=false;
   std::string currentDeadline =
   this->GetDeadline(cleanedUpLink, sectionNumber, true, deadlineInherited);
   if (currentDeadline=="")
@@ -1637,55 +1633,46 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   return out.str();
 }
 
-std::string CalculatorHTML::ToStringDeadlinesFormatted
-  (const std::string& cleanedUpLink, const List<std::string>& sectionNumbers,
-   bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
-{ if (sectionNumbers.size==0)
-    return "No section number. ";
-  if (sectionNumbers.size==1)
-    return this->ToStringOnEDeadlineFormatted
-    (cleanedUpLink, sectionNumbers[0], problemAlreadySolved, returnEmptyStringIfNoDeadline);
+std::string CalculatorHTML::ToStringAllSectionDeadlines
+  (const std::string& cleanedUpLink)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringAllSectionDeadlines");
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return "";
   std::stringstream out;
   out << "<table>";
-  for (int i=0; i<sectionNumbers.size; i++)
-  { if (sectionNumbers[i]=="")
+  for (int i=0; i<this->hdHomeworkGroupNames.size; i++)
+  { if (this->hdHomeworkGroupNames[i]=="")
       continue;
-    out << "<tr><td>Section " << sectionNumbers[i] << ":</td>";
+    out << "<tr><td>Section " << this->hdHomeworkGroupNames[i] << ":</td>";
     out << "<td>" << this->ToStringOnEDeadlineFormatted
-    (cleanedUpLink, sectionNumbers[i], problemAlreadySolved, returnEmptyStringIfNoDeadline) << "</td>";
+    (cleanedUpLink, this->hdHomeworkGroupNames[i], false, false) << "</td>";
     out << "</tr>";
   }
   out << "</table>";
   return out.str();
 }
 
-std::string CalculatorHTML::InterpretGenerateDeadlineLink
-(bool isActualProblem,
- const std::string& cleaneduplink, const std::string& urledProblem, bool problemAlreadySolved)
-{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateDeadlineLink");
-  //  return "Submission deadline: to be announced. ";
-  if (theGlobalVariables.UserGuestMode())
+std::string CalculatorHTML::ToStringDeadline
+(const std::string& inputFileName, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringDeadlineWithModifyButton");
+#ifdef MACRO_use_MySQL
+  if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserStudentViewOn())
+  { std::string sectionNum=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("studentSection"));
+    return this->ToStringOnEDeadlineFormatted
+    (inputFileName, sectionNum, problemAlreadySolved, returnEmptyStringIfNoDeadline);
+  } else
+    return this->ToStringOnEDeadlineFormatted
+    (inputFileName, this->currentUseR.userGroup.value, problemAlreadySolved, returnEmptyStringIfNoDeadline);
+#endif // MACRO_use_MySQL
+  return "";
+}
+
+std::string CalculatorHTML::ToStringDeadlineModifyButton
+(const std::string& inputFileName, bool problemAlreadySolved, bool isProblemGroup)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringDeadlineModifyButton");
+  if (!theGlobalVariables.UserDefaultHasAdminRights() || theGlobalVariables.UserStudentViewOn())
     return "";
   std::stringstream out;
-  bool deadlineInherited=false;
-#ifdef MACRO_use_MySQL
-  if (isActualProblem)
-  { int todoDeadlines;
-    /*if (!theGlobalVariables.UserDefaultHasAdminRights())
-      out << this->ToStringOnEDeadlineFormatted
-      (cleaneduplink, this->currentUser.extraInfoUnsafe, isActualProblem, problemAlreadySolved);
-    else if (!theGlobalVariables.UserStudentViewOn())
-      out << this->ToStringDeadlinesFormatted
-      (cleaneduplink, this->databaseStudentSectionS, isActualProblem, problemAlreadySolved);
-    else
-      out << this->ToStringDeadlinesFormatted
-      (cleaneduplink,
-       CGI::URLStringToNormal(theGlobalVariables.GetWebInput("studentSection")),
-       isActualProblem, problemAlreadySolved);*/
-  }
-#endif // MACRO_use_MySQL
-  if (!theGlobalVariables.UserDefaultHasAdminRights() || theGlobalVariables.UserStudentViewOn())
-    return out.str();
   std::stringstream deadlineStream;
   deadlineStream << "<table><tr><td> Deadline: </td>";
   deadlineStream << "<td><table><tr><th>Grp.</th><th>Deadline</th></tr>";
@@ -1695,15 +1682,19 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   { std::string& currentDeadlineId=deadlineIds[i];
     if (this->databaseStudentSections[i]=="")
       continue;
-    currentDeadlineId = "deadline" + Crypto::CharsToBase64String(this->databaseStudentSections[i]+cleaneduplink);
+    currentDeadlineId = "deadline" + Crypto::CharsToBase64String(this->databaseStudentSections[i]+inputFileName);
     if (currentDeadlineId[currentDeadlineId.size()-1]=='=')
       currentDeadlineId.resize(currentDeadlineId.size()-1);
     if (currentDeadlineId[currentDeadlineId.size()-1]=='=')
       currentDeadlineId.resize(currentDeadlineId.size()-1);
-    deadlineStream << "<tr>";
+  bool deadlineInherited=false;
+  std::string sectionNumber;
+  std::string currentDeadline =
+  this->GetDeadline(inputFileName, sectionNumber, true, deadlineInherited);
+  deadlineStream << "<tr>";
     deadlineStream << "<td>" << this->databaseStudentSections[i] << "</td>";
     deadlineStream << "<td> <input type=\"text\" id=\"" << currentDeadlineId << "\" value=\""
-    << this->GetDeadline(cleaneduplink, this->databaseStudentSections[i], false, deadlineInherited)
+    << this->GetDeadline(inputFileName, this->databaseStudentSections[i], false, deadlineInherited)
     << "\"> " ;
     deadlineStream << this->GetDatePickerStart(currentDeadlineId);
     deadlineStream << "</td>";
@@ -1711,13 +1702,13 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   }
   deadlineStream << "</table></td>";
   deadlineStream << "<td>\n";
-  std::string deadlineIdReport="deadlineReport"+Crypto::CharsToBase64String(cleaneduplink);
+  std::string deadlineIdReport="deadlineReport"+Crypto::CharsToBase64String(inputFileName);
   if (deadlineIdReport[deadlineIdReport.size()-1]=='=')
     deadlineIdReport.resize(deadlineIdReport.size()-1);
   if (deadlineIdReport[deadlineIdReport.size()-1]=='=')
     deadlineIdReport.resize(deadlineIdReport.size()-1);
   deadlineStream << "<button onclick=\"";
-  deadlineStream << "submitStringAsMainInput('" << urledProblem
+  deadlineStream << "submitStringAsMainInput('" << CGI::StringToURLString(inputFileName)
   << "='+encodeURIComponent('deadlines='+encodeURIComponent(";
   bool isFirst=true;
   for (int i=0; i<this->databaseStudentSections.size; i++)
@@ -1739,7 +1730,7 @@ std::string CalculatorHTML::InterpretGenerateDeadlineLink
   deadlineStream << "</tr></table>";
 //  out << deadlineStream.str();
   out << CGI::GetHtmlSpanHidableStartsHiddeN(deadlineStream.str(), "Set deadline (show/hide). ");
-  if (isActualProblem)
+  if (!isProblemGroup)
     out << "(overrides section deadline). ";
   else
     out << "(overridden by per-problem-deadline). ";
@@ -1936,39 +1927,6 @@ bool CalculatorHTML::CanBeMerged(const SyntacticElementHTML& left, const Syntact
     return false;
   if (this->IsSplittingChar(right.content) && right.content!=" ")
     return false;
-  return true;
-}
-
-bool CalculatorHTML::ParseHTMLComputeChildFiles(std::stringstream& comments)
-{ MacroRegisterFunctionWithName("CalculatorHTML::ParseHTMLComputeChildFiles");
-  int todoFixThis;
-/*  bool result=true;
-  this->hdProblemList.Clear();
-  for (int i=0; i<this->theContent.size; i++)
-    if (this->theContent[i].GetTagClass()=="calculatorExamProblem")
-      this->hdProblemList.AddOnTop(this->CleanUpFileName(this->theContent[i].content));
-  this->hdHomeworkGroups.SetSize(0);
-  this->hdHomeworkGroups.SetExpectedSize(50);
-  this->hdHomeworkGroupCorrespondingToEachProblem.SetSize(0);
-  this->hdHomeworkGroupCorrespondingToEachProblem.SetExpectedSize(50);
-  std::string currentHomeworkGroup;
-  for (int i=0; i<this->theContent.size; i++)
-    if (this->theContent[i].GetTagClass()=="calculatorExamIntermediate")
-    { this->hdHomeworkGroups.SetSize(this->hdHomeworkGroups.size+1);
-      this->hdHomeworkGroups.LastObject()->SetSize(0);
-      currentHomeworkGroup=this->CleanUpFileName(this->theContent[i].content);
-      this->hdHomeworkGroupNames.AddOnTop(currentHomeworkGroup);
-    } else if (this->theContent[i].GetTagClass()=="calculatorExamProblem")
-    { if (this->hdHomeworkGroups.size==0)
-      { comments << "<b>Error: found a tag of type calculatorExamProblem before finding the first tag of type calculatorExamIntermediate."
-        << " Please make a tag of type calculatorExamIntermediate before making tags of type calculatorExamProblem.</b>";
-        result=false;
-        continue;
-      }
-      this->hdHomeworkGroups.LastObject()->AddOnTop(this->CleanUpFileName(this->theContent[i].content));
-      this->hdHomeworkGroupCorrespondingToEachProblem.AddOnTop(currentHomeworkGroup);
-    }
-  return result;*/
   return true;
 }
 
@@ -2302,8 +2260,6 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   }
   if (!result)
     comments << "<hr>Parsing stack.<hr>" << this->ToStringParsingStack(this->eltsStack);
-  if (!this->ParseHTMLComputeChildFiles(comments))
-    result=false;
   if (result)
     result=this->ExtractAnswerIds(comments);
   for (int i=0; i<this->theContent.size; i++)
@@ -3349,11 +3305,10 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   bool problemSolved=false;
   this->displayScore=owner.ToStringProblemScoreShort(this->problem, problemSolved);
   this->displayModifyWeight=owner.ToStringProblemWeighT(this->problem);
-//  this->displayDeadline=owner.ToStringDeadlinesFormatted
-//  (this->problem, owner.databaseStudentSections, problemSolved, false);
-  if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserStudentViewOn())
-  { this->displayScore+="\n<br>\n" + this->displayModifyWeight;
-    this->displayDeadline+="\n<br>\n" + this->displayModifyDeadline;
+  if (!this->flagIsChapter && !this->flagIsError && !this->flagIsSection)
+  { this->displayDeadline=owner.ToStringDeadline(this->problem, false, false);
+    if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
+      this->displayDeadline+="\n<br>\n" + owner.ToStringDeadlineModifyButton(this->problem, problemSolved, this->flagIsSubSection);
   }
 }
 

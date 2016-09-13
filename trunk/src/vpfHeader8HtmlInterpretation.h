@@ -138,7 +138,6 @@ public:
   bool LoadAndParseTopicList(std::stringstream& comments);
   bool LoadDatabaseInfo(std::stringstream& comments);
   std::string CleanUpFileName(const std::string& inputLink);
-  bool ParseHTMLComputeChildFiles(std::stringstream& comments);
   bool ParseHTML(std::stringstream& comments);
   bool ParseHTMLPrepareCommands(std::stringstream& comments);
   bool IsSplittingChar(const std::string& input);
@@ -194,10 +193,12 @@ public:
    MapLisT<std::string, ProblemData, MathRoutines::hashString>&
    inputProblemInfo)
    ;
-  std::string InterpretGenerateDeadlineLink
-(bool isActualProblem, const std::string& cleaneduplink, const std::string& urledProblem, bool problemAlreadySolved)
+  std::string ToStringDeadline
+(const std::string& inputFileName, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
   ;
-  std::string ToStringLinkAndDetailsFromFileName(const std::string& theFileName, const std::string& stringToDisplay="");
+  std::string ToStringDeadlineModifyButton
+  (const std::string& inputFileName, bool problemAlreadySolved, bool isProblemGroup);
+  std::string ToStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay="");
   std::string ToStringLinkFromFileName(const std::string& theFileName, const std::string& stringToDisplay="");
   std::string ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName);
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
@@ -231,9 +232,8 @@ public:
   bool operator==(const CalculatorHTML& other)const
   { return this->fileName==other.fileName;
   }
-  std::string ToStringDeadlinesFormatted
-  (const std::string& cleanedUpLink, const List<std::string>& sectionNumbers,
-  bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
+  std::string ToStringAllSectionDeadlines
+  (const std::string& cleanedUpLink)
   ;
   std::string ToStringOnEDeadlineFormatted
   (const std::string& cleanedUpLink, const std::string& sectionNumber,

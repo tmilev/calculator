@@ -1156,11 +1156,11 @@ std::string HtmlInterpretation::ToStringNavigation()
   if (theGlobalVariables.userCalculatorRequestType=="template")
     out << "<b>Home</b>" << linkSeparator;
   else
-  { std::string topicList=CGI::StringToURLString(theGlobalVariables.GetWebInput("topicList"));
-    std::string courseHome=CGI::StringToURLString(theGlobalVariables.GetWebInput("courseHome"));
+  { std::string topicList=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
+    std::string courseHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"));
     if (topicList!="" && courseHome!="")
-    { std::string studentView=CGI::StringToURLString(theGlobalVariables.GetWebInput("studentView"));
-      std::string section=CGI::StringToURLString(theGlobalVariables.GetWebInput("studentSection"));
+    { std::string studentView=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("studentView"));
+      std::string section=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("studentSection"));
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=template"
       << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(false)
       << "studentView=" << studentView << "&";

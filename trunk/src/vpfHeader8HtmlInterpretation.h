@@ -212,7 +212,7 @@ public:
   void InterpretTableOfContents(SyntacticElementHTML& inputOutput);
   void InterpretAccountInformationLinks(SyntacticElementHTML& inputOutput);
   void InterpretJavascripts(SyntacticElementHTML& inputOutput);
-  std::string GetEditPageButton();
+  std::string GetEditPageButton(const std::string& desiredFileName);
   std::string GetJavascriptSubmitMainInputIncludeCurrentFile();
   std::string GetDatePickerJavascriptInit();
   std::string GetDatePickerStart(const std::string& theId);

@@ -387,7 +387,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
   std::stringstream out;
   if (!this->InterpretHtml(this->comments))
   { if (theGlobalVariables.UserDefaultHasAdminRights())
-      out << this->GetEditPageButton(this->fileName);
+      out << this->GetEditPageButton(this->fileName) << "<br>";
     out << "<b>Failed to interpret file: " << this->fileName << "</b>. Comments: " << this->comments.str();
     return out.str();
   }
@@ -601,9 +601,11 @@ std::string Answer::ToString()
 std::string CalculatorHTML::ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringCalculatorProblemSourceFromFileName");
   std::stringstream out;
-  out << "<span class=\"calculatorExamProblem\">\n"
-  << theFileName
-  << "\n</span>";
+  out //<< "<span class=\"calculatorExamProblem\">\n"
+  << "Title: " << theFileName << "\n"
+  << "Problem: " << theFileName << "\n"
+  //<< "\n</span>"
+  ;
   return out.str();
 }
 
@@ -2606,6 +2608,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     { outBody << this->GetEditPageButton(this->fileName);
       if (theGlobalVariables.userCalculatorRequestType=="template")
         outBody <<this->GetEditPageButton(this->topicListFileName);
+      outBody << "<br>";
     }
   if (this->flagIsExamProblem)
   { bool problemAlreadySolved=false;
@@ -2821,7 +2824,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=" << theGlobalVariables.userCalculatorRequestType << "&"
     << this->ToStringCalculatorArgumentsForProblem(exerciseRequest, studentView, "", true)
-    << "\">" << this->stringProblemLink << "</a>";
+    << "\">" << this->stringProblemLink << "</a>" << linkBigSeparator;
 //  out << linkBigSeparator << theGlobalVariables.ToStringNavigation();
   return out.str();
 }

@@ -248,6 +248,11 @@ void Calculator::initPredefinedInnerFunctions()
    "LispifyFull( e^x)");
 
   this->AddOperationInnerHandler
+  ("ChildExpression", CalculatorFunctionsGeneral::innerChildExpression, "",
+   "If defined, returns the nth child of an expression.",
+   "ChildExpression( e^x,1); ChildExpression( e^x,2); ChildExpression( e^x,3)", "ChildExpression");
+
+  this->AddOperationInnerHandler
   ("ToString", CalculatorFunctionsGeneral::innerExpressionToString, "",
    "Transforms an arbitrary expression to its string representation.",
    "ToString( e^x); \n \"e^x\";\"The quick brown fox jumps over the lazy dog.\"");

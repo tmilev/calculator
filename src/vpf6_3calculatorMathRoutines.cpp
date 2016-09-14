@@ -534,6 +534,21 @@ bool CalculatorFunctionsGeneral::innerCoefficientOf(Calculator& theCommands, con
   return output.MakeSum(theCommands, survivingSummands);
 }
 
+bool CalculatorFunctionsGeneral::innerChildExpression(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerChildExpression");
+  (void) theCommands;
+  if (input.children.size!=3)
+    return false;
+  int theIndex=0;
+  if (!input[2].IsSmallInteger(&theIndex))
+    return false;
+  theIndex--;
+  if (theIndex<0 || theIndex>=input[1].size())
+    return false;
+  output=input[1][theIndex];
+  return true;
+}
+
 bool CalculatorFunctionsGeneral::innerDereferenceOperator(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDereferenceOperator");
   (void) theCommands;

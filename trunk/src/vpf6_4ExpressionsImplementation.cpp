@@ -1873,7 +1873,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     return "(non-initialized)";
   std::stringstream out;
   bool result=false;
-  bool isFinal=theFormat==0 ? false : theFormat->flagExpressionIsFinal;
+  bool isFinal=theFormat==0 ? true : theFormat->flagExpressionIsFinal;
   bool useQuotes=theFormat==0 ? false : theFormat->flagUseQuotes;
   MemorySaving<FormatExpressions> contextFormat;
   bool showContext= this->owner==0 ? false : owner->flagDisplayContext;
@@ -2334,7 +2334,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
 //  if (this->owner->flagLogSyntaxRules && recursionDepth<=1)
 //  { out << "(ContextIndex=" << this->IndexBoundVars << ")";
 //  }
-  bool isFinal=theFormat==0 ? false : theFormat->flagExpressionIsFinal;
+  bool isFinal=theFormat==0 ? true : theFormat->flagExpressionIsFinal;
   bool allowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
   bool oldAllowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
   bool useFrac =this->owner->flagUseFracInRationalLaTeX; //(theFormat==0) ? true : theFormat->flagUseFrac;
@@ -2730,7 +2730,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     if (!createTable && this->size()>2)
       out << "(";
     for (int i=1; i<this->children.size; i++)
-      if (createTable)
+    { if (createTable)
       { out << "<tr><td valign=\"top\">";
         out << "<hr> ";
         if (!this->owner->flagHideLHS)
@@ -2758,6 +2758,9 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         if (i!=this->children.size-1)
           out << ";";
       }
+      if (theFormat!=0)
+        theFormat->flagExpressionIsFinal=isFinal;
+    }
     if (!createTable && this->size()>2)
       out << ")";
   } else if (this->StartsWith(this->owner->opError(), 2))

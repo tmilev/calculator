@@ -1093,3 +1093,20 @@ bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const
   thePlot.DesiredHtmlHeightInPixels=200;
   return output.AssignValue(thePlot, theCommands);
 }
+
+bool CalculatorFunctionsGeneral::innerThaw(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerThaw");
+  if (!input.StartsWith(theCommands.opFreeze()))
+  { output=input;
+    return true;
+  }
+  if (input.size()>2)
+  { output=input;
+    return output.SetChildAtomValue(0, theCommands.opSequence());
+  }
+  if (input.size()==2)
+  { output=input[1];
+    return true;
+  }
+  return false;
+}

@@ -1886,16 +1886,10 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
       out << "(unknown~ atom~ of~ value~ " << this->theData << ")";
     result=true;
   } else if (this->IsOfType<std::string>())
-  { if (isFinal)
-    { if (!useQuotes)
-        out << this->GetValue<std::string>();
-      else
-      { out << "\"" << this->GetValue<std::string>() << "\"";
-      }
-    } else
-    { out << "\"StringNotShown\"[]";
-      //out << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    }
+  { if (!useQuotes)
+      out << CGI::StringToHtmlString( this->GetValue<std::string>());
+    else
+      out << "\"" << this->GetValue<std::string>() << "\"";
     result=true;
   } else if (this->IsOfType<Rational>())
   { if (this->HasNonEmptyContext())

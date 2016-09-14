@@ -76,6 +76,7 @@ public:
   static bool innerCompositeArithmeticOperationEvaluatedOnArgument(Calculator& theCommands, const Expression& input, Expression& output);
 
 
+  static bool innerThaw(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetFreeVariablesIncludeNamedConstants(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetFreeVariablesExcludeNamedConstants(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompareFunctionsNumerically(Calculator& theCommands, const Expression& input, Expression& output);

@@ -2228,6 +2228,12 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       eltsStack.RemoveLastObject();
       continue;
     }
+    if (secondToLast.syntacticRole=="" && last.syntacticRole==">")
+    { secondToLast.content+=">";
+      eltsStack.RemoveLastObject();
+      continue;
+    }
+
     reduced=false;
   } while (reduced || indexInElts<theElements.size);
   this->theContent.SetSize(0);

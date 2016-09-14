@@ -228,9 +228,16 @@ void Calculator::initPredefinedInnerFunctions()
    "Draws the internal tree structure of an expression. Does not unfold built-in types.",
    "DrawExpressionTree( e^x)");
   this->AddOperationInnerHandler
+  ("Thaw", CalculatorFunctionsGeneral::innerThaw, "",
+   "If the argument is frozen, removes the top freeze command and returns the argument, \
+    else returns the argument unchanged.",
+   "a=Freeze{}(1+1); Thaw a; c=Thaw(Freeze(a,b)); DrawExpressionTree c", "Thaw");
+
+  this->AddOperationInnerHandler
   ("DrawExpressionTreeFull", CalculatorFunctionsGeneral::innerDrawExpressionGraphFull, "",
    "Draws the internal tree structure of an expression. Unfolds built-in types. ",
-   "DrawExpressionTreeFull( 1); DrawExpressionTree(1+ 1);DrawExpressionTree( Freeze{}(1+1));");
+   "DrawExpressionTreeFull( 1); DrawExpressionTree(1+ 1);DrawExpressionTree( Freeze{}(1+1));",
+   "DrawExpressionTreeFull");
   this->AddOperationInnerHandler
   ("Lispify", CalculatorFunctionsGeneral::innerLispify, "",
    "Shows the internal tree structure of an expression, without completely unfolding the tree structure of expressions that represent a single mathematical\

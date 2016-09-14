@@ -1893,7 +1893,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
       { out << "\"" << this->GetValue<std::string>() << "\"";
       }
     } else
-    { out << "\"StringNotShown\"";
+    { out << "\"StringNotShown\"[]";
       //out << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     }
     result=true;
@@ -2459,7 +2459,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
             mustHaveTimes=true;
         }
       if (mustHaveTimes)
-        out << "\\cdot";
+        out << "\\cdot ";
       else
         out << " ";
       if (secondNeedsBrackets)

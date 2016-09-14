@@ -605,13 +605,14 @@ void Calculator::EvaluateCommands()
     << this->RecursionDeptH << "." << crash;
   theGlobalVariables.theDefaultFormat.GetElement().flagMakingExpressionTableWithLatex=true;
   theGlobalVariables.theDefaultFormat.GetElement().flagUseLatex=true;
-  theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal=true;
   theGlobalVariables.theDefaultFormat.GetElement().flagExpressionNewLineAllowed=true;
   theGlobalVariables.theDefaultFormat.GetElement().flagIncludeExtraHtmlDescriptionsInPlots=!this->flagPlotNoControls;
   theGlobalVariables.theDefaultFormat.GetElement().flagLatexDetailsInHtml=this->flagWriteLatexPlots;
   if(theGlobalVariables.flagRunningCommandLine)
   { theGlobalVariables.theDefaultFormat.GetElement().flagUseQuotes=false;
+    theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal=true;
     out << "Input: " << "\e[1;32m" << StartingExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\033[0m" << std::endl;
+    theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal=true;
     out << "Output: " << "\e[1;33m" << this->theProgramExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\033[0m" << std::endl;
   } else if (!this->flagDisplayFullExpressionTree)
   { std::string badCharsString=this->ToStringIsCorrectAsciiCalculatorString(this->inputString);

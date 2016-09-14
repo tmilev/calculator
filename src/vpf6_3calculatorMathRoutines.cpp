@@ -248,6 +248,15 @@ bool CalculatorFunctionsGeneral::innerUrlStringToNormalString(Calculator& theCom
   return output.AssignValue(CGI::URLStringToNormal(theString), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerStringToAtom(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerStringToAtom");
+  std::string theString;
+  if (!input.IsOfType(&theString))
+    return false;
+//  stOutput << "DEBUG: Making atom from " << theString;
+  return output.MakeAtom(theString, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerExpressionToString(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExpressionToString");
   return output.AssignValue(input.ToString(), theCommands);

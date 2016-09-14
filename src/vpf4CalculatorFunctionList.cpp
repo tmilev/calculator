@@ -252,6 +252,10 @@ void Calculator::initPredefinedInnerFunctions()
    "Transforms an arbitrary expression to its string representation.",
    "ToString( e^x); \n \"e^x\";\"The quick brown fox jumps over the lazy dog.\"");
   this->AddOperationInnerHandler
+  ("StringToAtom", CalculatorFunctionsGeneral::innerStringToAtom, "",
+   "Transforms a string to an atom. ",
+   "StringToAtom(\"The quick brown fox jumps over the lazy dog.\")");
+  this->AddOperationInnerHandler
   ("\"", CalculatorFunctionsGeneral::innerQuoteToString, "",
    "Creates a string.",
    "\"The quick brown fox jumps over the lazy dog.\"", true, false,

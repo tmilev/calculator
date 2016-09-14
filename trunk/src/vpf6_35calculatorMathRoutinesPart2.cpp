@@ -417,6 +417,11 @@ bool CalculatorFunctionsGeneral::innerNumerator(Calculator& theCommands, const E
 
 bool CalculatorFunctionsGeneral::innerDenominator(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDenominator");
+  Rational theRat, theDen;
+  if (input.IsRational(&theRat))
+  { theDen=theRat.GetDenominator();
+    return output.AssignValue(theDen, theCommands);
+  }
   if (input.StartsWith(theCommands.opDivide()))
     if (input.children.size>2)
     { output=input[2];

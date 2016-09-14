@@ -2746,7 +2746,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   if (this->flagIsExamProblem && this->flagParentInvestigated)
   { int indexInParent=this->TopicProblemFileNames.GetIndex(this->fileName);
     if (indexInParent==-1)
-    { out << "<b>Problem not in course</b>";
+    { out << "<b>Problem not in course</b>" << linkSeparator;
     } else
     { if (indexInParent>0)
       { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request="
@@ -2835,7 +2835,7 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
   << "<button class=\"normalButton\" onclick=\""
   << "submitStringAsMainInput(document.getElementById('"
   << clonePageAreaID << "').value, '" << spanCloningAttemptResultID << "', 'clonePage');"
-  << "\" >Clone page</button> <span id=\"" << spanCloningAttemptResultID <<"\"></span>";
+  << "\" >Clone</button> <span id=\"" << spanCloningAttemptResultID <<"\"></span>";
   return out.str();
 }
 

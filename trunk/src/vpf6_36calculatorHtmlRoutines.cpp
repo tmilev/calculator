@@ -64,6 +64,8 @@ bool CalculatorHtmlFunctions::innerEvaluateSymbols
     previousWasInteger=false;
     out << theCommands.controlSequences[currentElt.controlIndex];
   }
+  if (previousWasInteger)
+    out << "}";
   return output.AssignValue(out.str(), theCommands);
 }
 

@@ -122,7 +122,7 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
     return out.str();
   }
   if (theProblem.MergeProblemInfoInDatabase(inputProblemInfo, commentsOnFailure))
-  { out << "<span style=\"color:green\"><b>Successfully modified problem data. </b></span>";
+  { out << "<span style=\"color:green\"><b>Modified. </b></span>";
     //out << "<meta http-equiv=\"refresh\" content=\"0;\">";
   } else
     out << "<span style=\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";

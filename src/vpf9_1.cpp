@@ -250,8 +250,10 @@ bool GlobalVariables::UserRequestRequiresLoadingRealExamData()
 { if (this->UserGuestMode())
     return false;
   return this->flagLoggedIn &&
-  (this->userCalculatorRequestType=="scoredQuiz" || this->userCalculatorRequestType=="submitProblem" ||
-   this->userCalculatorRequestType=="submitProblemPreview");
+  (this->userCalculatorRequestType=="scoredQuiz" ||
+   this->userCalculatorRequestType=="submitProblem" ||
+   this->userCalculatorRequestType=="submitProblemPreview"
+   );
 }
 
 bool GlobalVariables::UserRequestMustBePromptedToLogInIfNotLoggedIn()

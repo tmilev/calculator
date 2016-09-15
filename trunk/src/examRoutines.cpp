@@ -1542,11 +1542,13 @@ std::string CalculatorHTML::GetDeadline
 { MacroRegisterFunctionWithName("CalculatorHTML::GetDeadline");
   outputIsInherited=false;
   std::string result;
+  #ifdef MACRO_use_MySQL
   if (this->currentUseR.theProblemData.Contains(problemName))
   { ProblemDataAdministrative& currentProb=
     this->currentUseR.theProblemData.GetValueCreateIfNotPresent(problemName).adminData;
     result=currentProb.deadlinesPerSection.GetValueCreateIfNotPresent(sectionNumber);
   }
+  #endif
  int todoFixThis;
  return result;
 /*  //stOutput << "<br>DEBUG: Fetching deadline for: " << problemName << "<br>this->databaseStudentSectionsPerProblem: " << this->databaseStudentSectionsPerProblem;
@@ -1852,19 +1854,21 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
     return false;
   }
   this->timeToParseHtml=theGlobalVariables.GetElapsedSeconds()-startTime;
-  this->NumAttemptsToInterpret=0;
   //stOutput << "DEBUG: this->theProblemData.flagRandomSeedGiven: " << this->theProblemData.flagRandomSeedGiven;
+  this->MaxInterpretationAttempts=10;
+  this->randomSeedsIfInterpretationFails.SetSize(this->MaxInterpretationAttempts);
   if (!this->theProblemData.flagRandomSeedGiven)
   { srand(time(NULL));
-  }
-  if (this->theProblemData.flagRandomSeedGiven && this->flagIsForReal)
-    this->MaxInterpretationAttempts=1;
-  this->randomSeedsIfInterpretationFails.SetSize(this->MaxInterpretationAttempts);
-  for (int i=0; i<this->randomSeedsIfInterpretationFails.size; i++)
+    this->randomSeedsIfInterpretationFails[0]=rand()%100000000;
+  } else
+    this->randomSeedsIfInterpretationFails[0]=this->theProblemData.randomSeed;
+  srand(this->randomSeedsIfInterpretationFails[0]);
+  for (int i=1; i<this->randomSeedsIfInterpretationFails.size; i++)
     this->randomSeedsIfInterpretationFails[i]=rand()%100000000;
   this->timePerAttempt.SetSize(0);
   this->timeIntermediatePerAttempt.SetSize(0);
   this->timeIntermediateComments.SetSize(0);
+  this->NumAttemptsToInterpret=0;
   while (this->NumAttemptsToInterpret<this->MaxInterpretationAttempts)
   { startTime=theGlobalVariables.GetElapsedSeconds();
     this->timeIntermediatePerAttempt.SetSize(this->timeIntermediatePerAttempt.size+1);
@@ -2619,8 +2623,10 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     << "<br>flagRandomSeedGiven: " << this->theProblemData.flagRandomSeedGiven << "\n<br>\n"
     << CGI::StringToHtmlString(this->ToStringCalculatorArgumentsForProblem("exercise", "false"));
 
+    #ifdef MACRO_use_MySQL
     outBody << "<br>Problem names: " << this->currentUseR.theProblemData.theKeys.ToStringCommaDelimited();
     outBody << "<br>Problem data string: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(this->currentUseR.problemDataString.value);
+    #endif
     outBody << "<hr>";
     outBody << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
     outBody << "<hr>";
@@ -2986,8 +2992,10 @@ std::string CalculatorHTML::ToStringProblemWeighT(const std::string& theFileName
   std::string idButtonModifyPoints = "modifyPoints" + urledProblem;
   std::string idPointsModOutput = "modifyPointsOutputSpan" + urledProblem;
   out << "Pts: <textarea rows=\"1\" cols=\"2\" id=\"" << idPoints << "\">";
+  #ifdef MACRO_use_MySQL
   out << this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName).
          adminData.ProblemWeightUserInput;
+  #endif
   out << "</textarea>";
   out << "<button id=\"" << idButtonModifyPoints << "\" "
   << "onclick=\"" << "submitStringAsMainInput('" << urledProblem
@@ -3160,8 +3168,9 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   }
   if (!this->LoadDatabaseInfo(out))
     out << "<span style=\"color:red\">Could not load your problem history.</span> <br>";
-
+  #ifdef MACRO_use_MySQL
   this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys);
+  #endif
   bool plainStyle=(inputOutput.GetKeyValue("topicListStyle")=="plain");
   TopicElement currentElt;
   bool tableStarted=false;

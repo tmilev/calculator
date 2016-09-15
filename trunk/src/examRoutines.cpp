@@ -618,7 +618,7 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   inputOutput.interpretedCommand= this->ToStringProblemInfo(this->CleanUpFileName(inputOutput.content));
 }
 
-std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileName, const std::string& stringToDisplay)
+std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileName)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringLinkFromFileName");
   std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
   std::string urledProblem=CGI::StringToURLString(theFileName);
@@ -648,7 +648,7 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
 std::string CalculatorHTML::ToStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringLinksFromFileName");
   std::stringstream out;
-  out << this->ToStringLinkFromFileName(theFileName, stringToDisplay);
+  out << this->ToStringLinkFromFileName(theFileName);
   out << this->ToStringProblemScoreFull(theFileName);
   out << this->ToStringProblemWeighT(theFileName);
 #ifdef MACRO_use_MySQL
@@ -1161,186 +1161,17 @@ std::string SyntacticElementHTML::GetTagClass()
 { return this->GetKeyValue("class");
 }
 
-#ifdef MACRO_use_MySQL
-
-std::string DatabaseRoutines::ToStringClassDetails
-(bool adminsOnly, List<List<std::string> >& userTable, List<std::string>& userLabels,
- HashedList<std::string, MathRoutines::hashString>& databaseSpanList,
- MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
- databaseProblemInfo
- )
-{ MacroRegisterFunctionWithName("DatabaseRoutines::ToStringClassDetails");
-  std::stringstream out;
-  std::string userRole = adminsOnly ? "admin" : "student";
-  int numUsers=0;
-  std::stringstream tableStream;
-  tableStream << "Database name: " << this->theDatabaseName;
-  tableStream << "<br>Database user: " << this->databaseUser << "<br>";
-  tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th>"
-  << "<th>Activation manual email</th>"
-  << "<th>Points</th><th>Section/Group</th></tr>";
-  UserCalculator currentUser;
-  currentUser.currentTable="users";
-
-  int indexUser=-1, indexExtraInfo=-1;
-  for (int i=0; i<userLabels.size; i++)
-  { if (userLabels[i]==DatabaseStrings::userColumnLabel)
-      indexUser=i;
-    if (userLabels[i]==DatabaseStrings::userGroupLabel)
-      indexExtraInfo=i;
+bool CalculatorHTML::PrepareSectionList(std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareSectionList");
+  if (this->databaseStudentSections.size>0)
+    return true;
+  for (int i=0; i<this->currentUseR.theProblemData.size(); i++)
+  { ProblemDataAdministrative& adminData=this->currentUseR.theProblemData[i].adminData;
+    for (int j=0; j<adminData.deadlinesPerSection.size(); j++)
+      this->databaseStudentSections.AddOnTopNoRepetition(adminData.deadlinesPerSection.theKeys[j]);
   }
-  if (indexUser==-1 || indexExtraInfo==-1)
-  { out << "<span style=\"color:red\"><b>This shouldn't happen: failed to find necessary "
-    << "column entries in the database. "
-    << "This is likely a software bug. Function: DatabaseRoutines::ToStringClassDetails. </b></span>"
-    << "<br>DatabaseStrings::userColumnLabel: " << DatabaseStrings::userColumnLabel
-    << "<br>DatabaseStrings::userGroupLabel: " << DatabaseStrings::userGroupLabel
-    << "<br>Available columns: <br>\n" << userLabels.ToStringCommaDelimited()
-    << "<br>indexUser, indexExtraInfo: "
-    << indexUser << ", "
-    << indexExtraInfo << ", "
-    ;
-    return out.str();
-  }
-  HashedList<std::string, MathRoutines::hashString> sectionNames;
-  List<List<std::string> > activatedAccountBucketsBySection;
-  List<List<std::string> > nonActivatedAccountBucketsBySection;
-  for (int i=0; i<userTable.size; i++)
-    sectionNames.AddOnTopNoRepetition(userTable[i][indexExtraInfo]);
-  sectionNames.QuickSortAscending();
-  activatedAccountBucketsBySection.SetSize(sectionNames.size);
-  nonActivatedAccountBucketsBySection.SetSize(sectionNames.size);
-  int numActivatedUsers=0;
-  for (int i=0; i<userTable.size; i++)
-  { std::stringstream failureStream;
-    currentUser.username=userTable[i][indexUser];
-    if (!currentUser.FetchOneUserRow(*this, &failureStream))
-    { currentUser.email=failureStream.str();
-      currentUser.actualActivationToken="error";
-      currentUser.userRole="error";
-    }
-    if (adminsOnly xor (currentUser.userRole=="admin"))
-      continue;
-    numUsers++;
-    std::stringstream oneTableLineStream;
-    oneTableLineStream << "<tr>"
-    << "<td>" << userTable[i][indexUser] << "</td>"
-    << "<td>" << currentUser.email.value << "</td>"
-    ;
-    bool isActivated=true;
-    if (currentUser.actualActivationToken!="activated" && currentUser.actualActivationToken!="error")
-    { isActivated=false;
-      numActivatedUsers++;
-      oneTableLineStream << "<td><span style=\"color:red\">not activated</span></td>";
-      if (currentUser.actualActivationToken!="")
-        oneTableLineStream << "<td>"
-        << "<a href=\""
-        << UserCalculator::GetActivationAddressFromActivationToken
-        (currentUser.actualActivationToken.value, theGlobalVariables.DisplayNameExecutable,
-         userTable[i][indexUser])
-        << "\"> (Re)activate account and change password</a>"
-        << "</td>";
-      oneTableLineStream << "<td>";
-      oneTableLineStream
-      << "<a href=\"mailto:" << currentUser.email.value
-      << "?subject=Math 140 Homework account activation&";
-
-      oneTableLineStream << "body=";
-      std::stringstream emailBody;
-      emailBody << "Dear student,\n you have not activated your homework server account yet. \n"
-      << "To activate your account and set your password please use the link: "
-      << CGI::StringToURLString("\n\n")
-      << CGI::StringToURLString(UserCalculator::GetActivationAddressFromActivationToken
-        (currentUser.actualActivationToken.value, theGlobalVariables.hopefullyPermanent_HTTPS_WebAdressOfServerExecutable,
-         userTable[i][indexUser]) )
-      << CGI::StringToURLString("\n\n")
-      << "The link does not work with apple safari; if you use safari, please contact us by email"
-      << " and we will activate your account manually. "
-      << " Once you activate your account, you can log in safely here: \n"
-      << CGI::StringToURLString("\n\n")
-      << theGlobalVariables.hopefullyPermanent_HTTPS_WebAdressOfServerExecutable
-      << CGI::StringToURLString("\n\n")
-      << "\n\nIf using the Safari browser/apple, you can use this (a little less safe link): "
-      << CGI::StringToURLString("\n\n")
-      << CGI::StringToURLString(theGlobalVariables.hopefullyPermanentWebAdressOfServerExecutable + "?request=login&ignoreSecurity=true")
-      << CGI::StringToURLString("\n\n")
-      << "Best regards, \n your Math 140 instructors."
-      ;
-      oneTableLineStream << emailBody.str() << "\">Send email manually.</a> "
-      ;
-      oneTableLineStream << "</td>";
-    } else if (currentUser.actualActivationToken=="error")
-      oneTableLineStream << "<td>error</td><td></td>";
-    else
-      oneTableLineStream << "<td><span style=\"color:green\">activated</span></td><td></td><td></td>";
-
-    int indexProblemData=currentUser.selectedRowFieldNamesUnsafe.GetIndex("problemData");
-    std::stringstream commentsProblemData;
-    if (indexProblemData==-1)
-      oneTableLineStream << "<td>No solutions history</td>";
-    else if (currentUser.InterpretDatabaseProblemData
-             (currentUser.selectedRowFieldsUnsafe[indexProblemData], commentsProblemData))
-    { currentUser.ComputePointsEarned(currentUser.theProblemData.theKeys);
-      oneTableLineStream << "<td>" << std::fixed << std::setw(1)
-      << std::setprecision(1) << currentUser.pointsEarned.GetDoubleValue() << "</td>";
-    } else
-      oneTableLineStream << "<td>Failed to load problem data. Comments: " << commentsProblemData.str() << "</td>";
-    oneTableLineStream << "<td>" << userTable[i][indexExtraInfo] << "</td>";
-    oneTableLineStream << "</tr>";
-    if (isActivated)
-      activatedAccountBucketsBySection[sectionNames.GetIndex(userTable[i][indexExtraInfo])].AddOnTop(oneTableLineStream.str());
-    else
-      nonActivatedAccountBucketsBySection[sectionNames.GetIndex(userTable[i][indexExtraInfo])].AddOnTop(oneTableLineStream.str());
-  }
-  for (int i=0; i<nonActivatedAccountBucketsBySection.size; i++)
-    nonActivatedAccountBucketsBySection[i].QuickSortAscending();
-  for (int i=0; i<activatedAccountBucketsBySection.size; i++)
-    activatedAccountBucketsBySection[i].QuickSortAscending();
-  for (int i=0; i<nonActivatedAccountBucketsBySection.size; i++)
-    for (int j=0; j<nonActivatedAccountBucketsBySection[i].size; j++)
-      tableStream << nonActivatedAccountBucketsBySection[i][j];
-  for (int i=0; i<activatedAccountBucketsBySection.size; i++)
-    for (int j=0; j<activatedAccountBucketsBySection[i].size; j++)
-      tableStream << activatedAccountBucketsBySection[i][j];
-  tableStream << "</table>";
-  out << "\n" << numUsers << " user(s)";
-  if (numActivatedUsers>0)
-    out << ", <span style=\"color:red\">" << numActivatedUsers << " have not activated their accounts";
-  out << "</span>. \n"
-
-  << "<br>";
-  out << tableStream.str();
-  //out << "<hr>DEBUG<br>"
-  //<<  userTable.ToStringCommaDelimited() << "<hr><hr>";
-  return out.str();
-}
-#endif // MACRO_use_MySQL
-
-bool CalculatorHTML::PrepareClassData(std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareClassData");
-#ifdef MACRO_use_MySQL
-  DatabaseRoutines theRoutines;
-  if (!theRoutines.PrepareClassData(this->fileName, this->userTablE, this->labelsUserTablE, commentsOnFailure))
-    return false;
-  int indexExtraInfo=-1;
-  for (int i=0; i<this->labelsUserTablE.size; i++)
-    if (this->labelsUserTablE[i]=="extraInfo")
-      indexExtraInfo=i;
-  if (indexExtraInfo==-1)
-  { commentsOnFailure << "Failed to load section data. ";
-    return false;
-  }
-  HashedList<std::string, MathRoutines::hashString> theSections;
-  for (int i=0; i<this->userTablE.size; i++)
-    theSections.AddOnTopNoRepetition(this->userTablE[i][indexExtraInfo]);
-  this->databaseStudentSections=theSections;
   this->databaseStudentSections.QuickSortAscending();
   return true;
-#else
-  commentsOnFailure << "Error: database not running. ";
-  return false;
-#endif // MACRO_use_MySQL
-
 }
 
 void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
@@ -2546,9 +2377,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   double startTime=theGlobalVariables.GetElapsedSeconds();
   std::stringstream outBody;
   std::stringstream outHeaD, outHeadPt1, outHeadPt2;
-  //if (this->NumAttemptsToInterpret>0) //<-this should always be true, if not it's better that we crash.
   this->theProblemData.randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
-  //stOutput << "DEBUG: Interpreting problem with random seed: " << this->theProblemData.randomSeed;
   this->FigureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before after loading problem list");
@@ -2585,23 +2414,6 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size)
         problemAlreadySolved=true;
     }
-#endif
-    int todoDetermineNextProblem;
-    /*
-    CalculatorHTML theProblemHome;
-    theProblemHome.fileName=this->courseHome;
-    bool isGood=true;
-    if (!theProblemHome.LoadMe(true, comments))
-      isGood=false;
-    if (isGood)
-      if (!theProblemHome.ParseHTML(comments))
-        isGood=false;
-         //     stOutput << "Time after loading collection: " << theGlobalVariables.GetElapsedSeconds()-startTime;
-    if (!isGood)
-    { out << "<b>Failed to load problem collection home: " << this->courseHome
-      << ". Comments: " << comments.str()  << "</b>";
-    }*/
-#ifdef MACRO_use_MySQL
     int todoDetermineDeadlineIfAny;
 //    out << theProblemHome.ToStringOnEDeadlineFormatted
 //    (this->fileName, this->currentUser.extraInfoUnsafe, true, problemAlreadySolved);
@@ -2618,8 +2430,10 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     if (this->flagIsExamProblem)
       outBody << "Exam problem here. ";
     outBody << "<br>Random seed: " << this->theProblemData.randomSeed
-    << "<br>ForReal: " << this->flagIsForReal << "<br>seed given: " << this->theProblemData.flagRandomSeedGiven
-    << "<br>flagRandomSeedGiven: " << this->theProblemData.flagRandomSeedGiven << "\n<br>\n"
+    << "<br>ForReal: " << this->flagIsForReal << "<br>seed given: "
+    << this->theProblemData.flagRandomSeedGiven
+    << "<br>flagRandomSeedGiven: " << this->theProblemData.flagRandomSeedGiven
+    << "\n<br>\n"
     << CGI::StringToHtmlString(this->ToStringCalculatorArgumentsForProblem("exercise", "false"));
 
     #ifdef MACRO_use_MySQL
@@ -2638,12 +2452,6 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   }
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before class management routines");
-  //stOutput << "got to here, this->theProblemData: " << this->theProblemData.ToString();
-  for (int i=0; i<this->theContent.size; i++)
-    if (this->theContent[i].GetTagClass()=="calculatorManageClass")
-    { this->flagLoadedClassDataSuccessfully= this->PrepareClassData(comments);
-      break;
-    }
   //out << "Debug data: homework groups found: " << this->hdHomeworkGroups.ToStringCommaDelimited();
   this->PrepareAnswerElements(comments);
   this->NumAnswerIdsMathquilled=0;
@@ -3167,6 +2975,8 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   }
   if (!this->LoadDatabaseInfo(out))
     out << "<span style=\"color:red\">Could not load your problem history.</span> <br>";
+  if (!this->PrepareSectionList(out))
+    out << "<span style=\"color:red\">Error preparing section list.</span> <br>";
   #ifdef MACRO_use_MySQL
   this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys);
   #endif

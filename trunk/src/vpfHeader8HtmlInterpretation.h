@@ -124,9 +124,9 @@ public:
   HashedList<std::string, MathRoutines::hashString> hdHomeworkGroupNames;
   HashedList<std::string, MathRoutines::hashString> databaseProblemAndHomeworkGroupList;
 //  List<std::string> databaseHomeworkGroupCorrespondingToEachProblem;
-  List<List<std::string> > userTablE;
-  List<std::string> labelsUserTablE;
-  List<std::string> databaseStudentSections;
+  //List<List<std::string> > userTablE;
+  //List<std::string> labelsUserTablE;
+  HashedList<std::string, MathRoutines::hashString> databaseStudentSections;
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;
   /////////////////
@@ -199,7 +199,7 @@ public:
   std::string ToStringDeadlineModifyButton
   (const std::string& inputFileName, bool problemAlreadySolved, bool isProblemGroup);
   std::string ToStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay="");
-  std::string ToStringLinkFromFileName(const std::string& theFileName, const std::string& stringToDisplay="");
+  std::string ToStringLinkFromFileName(const std::string& theFileName);
   std::string ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName);
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
   std::string ToStringProblemWeighT(const std::string& theFileName);
@@ -207,7 +207,7 @@ public:
   std::string ToStringProblemScoreShort(const std::string& theFileName, bool& outputAlreadySolved);
   bool ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutput);
   void InterpretGenerateStudentAnswerButton(SyntacticElementHTML& inputOutput);
-  bool PrepareClassData(std::stringstream& commentsOnFailure);
+  bool PrepareSectionList(std::stringstream& commentsOnFailure);
   void InterpretManageClass(SyntacticElementHTML& inputOutput);
   void InterpretTopicList(SyntacticElementHTML& inputOutput);
   void InterpretTableOfContents(SyntacticElementHTML& inputOutput);

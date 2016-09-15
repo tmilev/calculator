@@ -367,13 +367,6 @@ bool FetchAllUsers
 (List<List<std::string> >& outputUserTable, List<std::string>& outputLabelsUserTable,
   std::stringstream& commentsOnFailure)
   ;
-  std::string ToStringClassDetails
-(bool adminsOnly, List<List<std::string> >& userTable, List<std::string>& userLabels,
- HashedList<std::string, MathRoutines::hashString>& databaseSpanList,
-  MapLisT<std::string, ProblemDataAdministrative, MathRoutines::hashString>&
-  databaseProblemInfo
- )
-  ;
   bool FetchTablE
 (List<List<std::string> >& output,
  List<std::string>& outputColumnLabels,

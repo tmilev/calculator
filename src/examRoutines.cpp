@@ -2546,9 +2546,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   double startTime=theGlobalVariables.GetElapsedSeconds();
   std::stringstream outBody;
   std::stringstream outHeaD, outHeadPt1, outHeadPt2;
-  if (!this->theProblemData.flagRandomSeedGiven)
-    //if (this->NumAttemptsToInterpret>0) //<-this should always be true, if not it's better that we crash.
-    this->theProblemData.randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
+  //if (this->NumAttemptsToInterpret>0) //<-this should always be true, if not it's better that we crash.
+  this->theProblemData.randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
   //stOutput << "DEBUG: Interpreting problem with random seed: " << this->theProblemData.randomSeed;
   this->FigureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);

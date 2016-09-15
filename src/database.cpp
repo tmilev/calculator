@@ -215,6 +215,39 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
 #endif
 }
 
+std::string DatabaseStrings::userColumnLabel="username";
+std::string DatabaseStrings::usersTableName="users";
+std::string DatabaseStrings::userGroupLabel="userInfo";
+std::string DatabaseStrings::databaseUser="ace";
+std::string DatabaseStrings::theDatabaseName="aceDB";
+std::string DatabaseStrings::deadlinesTableName="deadlines";
+std::string DatabaseStrings::deadlinesIdColumnName="idInDeadlines";
+std::string DatabaseStrings::infoColumnInDeadlinesTable="deadlines";
+
+std::string DatabaseStrings::problemWeightsTableName="problemWeights";
+std::string DatabaseStrings::problemWeightsIdColumnName="idInProblemInfo";
+std::string DatabaseStrings::infoColumnInProblemWeightsTable="problemWeights";
+
+std::string MySQLdata::GetDatA()const
+{ return "'" + this->GetDataNoQuotes() + "'";
+}
+
+std::string MySQLdata::GetDataNoQuotes()const
+{ return CGI::StringToURLString(this->value);
+}
+
+std::string MySQLdata::GetIdentifierNoQuotes()const
+{ std::string result=CGI::StringToURLString(this->value);
+  if (result.size()<=30)
+    return result;
+  return result.substr(0,30)+ Crypto::computeSha1outputBase64(this->value);
+}
+
+std::string MySQLdata::GetIdentifieR()const
+{ MacroRegisterFunctionWithName("MySQLdata::GetIdentifieR");
+  return "`"+ this->GetIdentifierNoQuotes()+"`";
+}
+
 ProblemData::ProblemData()
 { this->randomSeed=0;
   this->flagRandomSeedGiven=false;
@@ -694,26 +727,6 @@ bool UserCalculator::SetColumnEntry
   if (this->currentTable=="")
     crash << "Programming error: attempting to change column " << columnNameUnsafe << " without specifying a table. " << crash;
   return theRoutines.SetEntry(DatabaseStrings::userColumnLabel, this->username, this->currentTable, columnNameUnsafe, theValueUnsafe, failureComments);
-}
-
-std::string MySQLdata::GetDatA()const
-{ return "'" + this->GetDataNoQuotes() + "'";
-}
-
-std::string MySQLdata::GetDataNoQuotes()const
-{ return CGI::StringToURLString(this->value);
-}
-
-std::string MySQLdata::GetIdentifierNoQuotes()const
-{ std::string result=CGI::StringToURLString(this->value);
-  if (result.size()<=30)
-    return result;
-  return result.substr(0,30)+ Crypto::computeSha1outputBase64(this->value);
-}
-
-std::string MySQLdata::GetIdentifieR()const
-{ MacroRegisterFunctionWithName("MySQLdata::GetIdentifieR");
-  return "`"+ this->GetIdentifierNoQuotes()+"`";
 }
 
 bool UserCalculator::ResetAuthenticationToken(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
@@ -1645,19 +1658,6 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
 #include "../../calculator/src/vpfHeader5Crypto.h"
 #include <time.h>
 #include <ctime>
-
-std::string DatabaseStrings::userColumnLabel="username";
-std::string DatabaseStrings::usersTableName="users";
-std::string DatabaseStrings::userGroupLabel="userInfo";
-std::string DatabaseStrings::databaseUser="ace";
-std::string DatabaseStrings::theDatabaseName="aceDB";
-std::string DatabaseStrings::deadlinesTableName="deadlines";
-std::string DatabaseStrings::deadlinesIdColumnName="idInDeadlines";
-std::string DatabaseStrings::infoColumnInDeadlinesTable="deadlines";
-
-std::string DatabaseStrings::problemWeightsTableName="problemWeights";
-std::string DatabaseStrings::problemWeightsIdColumnName="idInProblemInfo";
-std::string DatabaseStrings::infoColumnInProblemWeightsTable="problemWeights";
 
 DatabaseRoutines::DatabaseRoutines()
 { this->connection=0;

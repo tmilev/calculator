@@ -68,6 +68,7 @@ bool WebWorker::ReceiveAll()
 { MacroRegisterFunctionWithName("WebWorker::ReceiveAll");
   if (theGlobalVariables.flagUsingSSLinCurrentConnection)
     return this->ReceiveAllHttpSSL();
+  //theLog << logger::red << "DEBUG: Worker " << this->indexInParent+1 << " receiving all. " << logger::endL;
   return this->ReceiveAllHttp();
 }
 
@@ -608,10 +609,7 @@ bool WebWorker::ReceiveAllHttpSSL()
   { std::stringstream out;
     out << "The message-body received by me had length " << this->messageBody.size()
     << " yet I expected a message of length " << this->ContentLength << ".";
-    this->error=out.str();
-    this->displayUserInput=this->error;
-    theLog << this->error << logger::endL;
-    return false;
+    logIO << out.str() << logger::endL;
   }
   return true;
   #else
@@ -621,6 +619,7 @@ bool WebWorker::ReceiveAllHttpSSL()
 
 void WebWorker::SendAllBytesHttpSSL()
 { MacroRegisterFunctionWithName("WebWorker::SendAllBytesHttpSSL");
+#ifdef MACRO_use_open_ssl
   if (this->remainingBytesToSenD.size==0)
     return;
   this->CheckConsistency();
@@ -668,6 +667,7 @@ void WebWorker::SendAllBytesHttpSSL()
     theLog.flush();
   }
   theLog << "... done." << logger::endL;
+#endif
 }
 
 bool ProgressReportWebServer::flagServerExists=true;
@@ -1330,7 +1330,8 @@ bool WebWorker::ReceiveAllHttp()
 { MacroRegisterFunctionWithName("WebWorker::ReceiveAllHttp");
   unsigned const int bufferSize=60000;
   char buffer[bufferSize];
-//  std::cout << "Got thus far 9" << std::endl;
+  //theLog << logger::red << "DEBUG: got to here: worker" << this->indexInParent+1 << " " << logger::endL;
+
 
   if (this->connectedSocketID==-1)
     crash << "Attempting to receive on a socket with ID equal to -1. " << crash;
@@ -1366,17 +1367,21 @@ bool WebWorker::ReceiveAllHttp()
     this->displayUserInput=this->error;
     return false;
   }
+  //theLog << logger::red << "DEBUG: got to before continue, worker: " << this->indexInParent+1 << " " << logger::endL;
+
   this->remainingBytesToSenD=(std::string) "HTTP/1.0 100 Continue\r\n";
   this->SendAllBytesNoHeaders();
   this->remainingBytesToSenD.SetSize(0);
   std::string bufferString;
-  while ((signed) this->addressGetOrPost.size()<this->ContentLength)
+  //theLog << logger::red << "DEBUG: expecting: " << this->ContentLength << " bytes " << logger::endL;
+  while ((signed) this->messageBody.size()<this->ContentLength)
   { if (theGlobalVariables.GetElapsedSeconds()-numSecondsAtStart>180)
     { this->error= "Receiving bytes timed out (180 seconds).";
       logIO << this->error << logger::endL;
       this->displayUserInput=this->error;
       return false;
     }
+    //theLog << logger::red << "DEBUG: about to receive...  " << logger::endL;
     numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
     if (numBytesInBuffer==0)
     { this->error= "While trying to fetch message-body, received 0 bytes. " +
@@ -1384,6 +1389,8 @@ bool WebWorker::ReceiveAllHttp()
       this->displayUserInput=this->error;
       return false;
     }
+    //theLog << logger::red << "DEBUG: received! "  << logger::endL;
+
     if (numBytesInBuffer<0)
     { if (errno==EAGAIN || errno == EWOULDBLOCK || errno == EINTR || errno==EIO //|| errno==ENOBUFS
           || errno==ENOMEM)
@@ -1394,16 +1401,13 @@ bool WebWorker::ReceiveAllHttp()
       return false;
     }
     bufferString.assign(buffer, numBytesInBuffer);
-    this->addressGetOrPost+=bufferString;
+    this->messageBody+=bufferString;
   }
   if ((signed) this->addressGetOrPost.size()!=this->ContentLength)
   { std::stringstream out;
     out << "The message-body received by me had length " << this->addressGetOrPost.size()
     << " yet I expected a message of length " << this->ContentLength << ".";
-    this->error=out.str();
-    this->displayUserInput=this->error;
-    theLog << this->error << logger::endL;
-    return false;
+    logIO << out.str() << logger::endL;
   }
   return true;
 }
@@ -1934,10 +1938,12 @@ void WebWorker::SendAllAndWrapUp()
   { theLog << logger::red << "Signal done called on non-active worker" << logger::endL;
     return;
   }
+  //theLog << logger::red << "**************DEBUG: Worker " << this->indexInParent+1 << " finished, writing close. " << logger::endL;
   this->pipeWorkerToServerControls.WriteAfterEmptying("close");
-  theLog << logger::blue << "Worker " << this->indexInParent+1 << " finished, sending result. " << logger::endL;
+  //theLog << logger::blue << "DEBUG: Worker " << this->indexInParent+1 << " finished, sending result. " << logger::endL;
   this->SendAllBytesWithHeaders();
   this->Release();
+  //theLog << logger::blue << "DEBUG: Worker " << this->indexInParent+1 << " all bytes sent. " << logger::endL;
   theGlobalVariables.flagComputationCompletE=true;
   theGlobalVariables.flagComputationFinishedAllOutputSentClosing=true;
 }
@@ -2531,7 +2537,7 @@ int WebWorker::ServeClient()
   if (!this->ExtractArgumentsFromCookies(argumentProcessingFailureComments))
     this->flagArgumentsAreOK=false;
   bool needLogin=this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
-  if (needLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection)
+  if (needLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagSSLisAvailable)
   { std::stringstream redirectStream, newAddressStream;
     newAddressStream << "https://" << this->hostNoPort;
     if (!this->parent->flagPort8155)
@@ -2569,7 +2575,7 @@ int WebWorker::ServeClient()
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
       theGlobalVariables.userCalculatorRequestType=="navigation")
     return this->ProcessNavigation();
-  if (!theGlobalVariables.flagLoggedIn &&
+  if (!theGlobalVariables.flagLoggedIn && theGlobalVariables.flagUsingSSLinCurrentConnection &&
       this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed))
   { if(theGlobalVariables.userCalculatorRequestType!="logout" &&
        theGlobalVariables.userCalculatorRequestType!="login")
@@ -2585,6 +2591,14 @@ int WebWorker::ServeClient()
   if (argumentProcessingFailureComments.str()!="")
     theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
   this->errorCalculatorArguments=argumentProcessingFailureComments.str();
+  if ((this->addressComputed=="/" || this->addressComputed=="" ||
+      (this->addressComputed==theGlobalVariables.DisplayNameExecutable &&
+       theGlobalVariables.userCalculatorRequestType==""))
+      && !theGlobalVariables.flagSSLisAvailable)
+  { this->addressComputed=theGlobalVariables.DisplayNameExecutable;
+    theGlobalVariables.userCalculatorRequestType="compute";
+    needLogin=false;
+  }
   if ((this->addressComputed=="/" || this->addressComputed=="" ||
       (this->addressComputed==theGlobalVariables.DisplayNameExecutable &&
        theGlobalVariables.userCalculatorRequestType==""))
@@ -2768,13 +2782,21 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   }
   if (useTableTags)
     stOutput << "<tr><td>";
-  stOutput << "A progress indicator, as reported by your current computation, is displayed below. "
-  << "When done, your computation result will be displayed below. ";
+  if (theGlobalVariables.flagAllowProcessMonitoring)
+  { stOutput << "A progress indicator, as reported by your current computation, is displayed below. "
+    << "When done, your computation result will be displayed below. ";
+  } else
+    stOutput << "Monitoring computations is not allowed on this server (to avoid server load).<br> "
+    << "If you want to carry out a long computation you will need to install the calculator on your own machine.<br> "
+    << "At the moment, the only way to do that is by compiling the calculator from source.<br> "
+    << "This meant for linux experts only. Instructions follow. <br> "
+    << theGlobalVariables.ToStringSourceCodeInfo();
   if (useTableTags)
     stOutput << "</td></tr>";
   if (useTableTags)
     stOutput << "<tr><td>";
-  stOutput << this->GetJavaScriptIndicatorBuiltInServer(this->indexInParent, useTableTags);
+  if (theGlobalVariables.flagAllowProcessMonitoring)
+    stOutput << this->GetJavaScriptIndicatorBuiltInServer(this->indexInParent, useTableTags);
   if (useTableTags)
     stOutput << "</td></tr>" << "</table></body></html>";
 
@@ -2868,11 +2890,14 @@ void WebServer::ReleaseEverything()
   theGlobalVariables.IndicatorStringOutputFunction=0;
   theGlobalVariables.PauseUponUserRequest=0;
   this->activeWorker=-1;
+  //theLog << logger::red << "DEBUG: About to close: " << this->listeningSocketHTTP << logger::endL;
   if (this->listeningSocketHTTP!=-1)
     close(this->listeningSocketHTTP);
+  //theLog << logger::red << "DEBUG: Just closed: " << this->listeningSocketHTTP << logger::endL;
   this->listeningSocketHTTP=-1;
   if (this->listeningSocketHttpSSL!=-1)
     close(this->listeningSocketHttpSSL);
+  //theLog << logger::red << "DEBUG: Just closed: " << this->listeningSocketHttpSSL << logger::endL;
   this->listeningSocketHttpSSL=-1;
 }
 
@@ -2944,7 +2969,7 @@ WebServer::WebServer()
   this->addressStartsNotNeedingLogin.AddOnTop("MathJax-2.6-latest/");
   this->addressStartsNotNeedingLogin.AddOnTop("/MathJax-2.6-latest/");
   this->addressStartsNotNeedingLogin.AddOnTop("login");
-  this->addressStartsNotNeedingLogin.AddOnTop("/login");
+  this->addressStartsNotNeedingLogin.AddOnTop("/login");  
   //NO! Adding "logout", for example: this->addressStartsNotNeedingLogin.AddOnTop("logout");
   //is FORBIDDEN! Logging someone out definitely requires authentication (imagine someone
   //asking for logouts on your account once every second: this would be fatal as proper logout resets
@@ -3504,6 +3529,7 @@ void WebServer::initPrepareSignals()
 
 extern void MonitorWebServer();
 
+#include <sys/time.h>
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
   theGlobalVariables.RelativePhysicalNameCrashLog="crash_WebServerRun.html";
@@ -3648,10 +3674,15 @@ int WebServer::Run()
         this->ReleaseEverything();
         return -1;
       }
+      //theLog << logger::red << "DEBUG: got to here, pt 1" << logger::endL;
       int result= this->GetActiveWorker().ServeClient();
+      //theLog << logger::red << "DEBUG: got to here, pt 2" << logger::endL;
       this->ReleaseNonActiveWorkers();
+      //theLog << logger::red << "DEBUG: got to here, pt 3" << logger::endL;
       this->GetActiveWorker().SendAllAndWrapUp();
+      //theLog << logger::red << "DEBUG: got to here, pt 4" << logger::endL;
       this->ReleaseEverything();
+      //theLog << logger::red << "DEBUG: got to here, pt 5" << logger::endL;
       return result;
     }
     this->ReleaseWorkerSideResources();
@@ -3683,7 +3714,9 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   theGlobalVariables.flagRunningCommandLine=false;
   theGlobalVariables.flagRunningConsoleTest=false;
   theGlobalVariables.flagRunningApache=false;
+  #ifdef MACRO_use_open_ssl
   theGlobalVariables.flagSSLisAvailable=true;
+  #endif
   theGlobalVariables.flagRunningBuiltInWebServer=false;
   ////////////////////////////////////////////////////
   if (argC==0)

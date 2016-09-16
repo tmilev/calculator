@@ -510,7 +510,8 @@ std::string DatabaseRoutines::ToString()
 std::string UserCalculator::ToString()
 { MacroRegisterFunctionWithName("UserCalculator::ToString");
   std::stringstream out;
-  out << "Calculator user: " << this->username.value << "<br>Section: " << this->userGroup.value;
+  out << "Calculator user: " << this->username.value << "<br>Section: " << this->userGroup.value
+  << "<br>Sections taught: " << this->sectionInfoString.value;
   for (int i=0; i<this->theProblemData.size(); i++)
     out << "<br>Problem: " << this->theProblemData.theKeys[i] << "; random seed: "
     << this->theProblemData.theValues[i].randomSeed << "; weight: "
@@ -916,15 +917,7 @@ bool DatabaseRoutines::FetchAllUsers
 bool DatabaseRoutines::ExtractEmailList(const std::string& emailList, List<std::string>& outputList, std::stringstream& comments)
 { MacroRegisterFunctionWithName("DatabaseRoutines::ExtractEmailList");
   (void) comments;//portable way to avoid unused parameter warning
-  List<unsigned char> delimiters;
-  delimiters.AddOnTop(' ');
-  delimiters.AddOnTop('\r');
-  delimiters.AddOnTop('\n');
-  delimiters.AddOnTop('\t');
-  delimiters.AddOnTop(',');
-  delimiters.AddOnTop(';');
-  delimiters.AddOnTop(160);//<-&nbsp
-  MathRoutines::StringSplitExcludeDelimiters(emailList, delimiters, outputList);
+  MathRoutines::StringSplitDefaultDelimiters(emailList, outputList);
   return true;
 }
 

@@ -1166,13 +1166,13 @@ bool CalculatorHTML::PrepareSectionList(std::stringstream& commentsOnFailure)
   (void) commentsOnFailure;
   if (this->databaseStudentSections.size>0)
     return true;
-  stOutput << "DEBUG: PReparing sectino list from: " << this->currentUseR.ToString();
-  for (int i=0; i<this->currentUseR.theProblemData.size(); i++)
-  { ProblemDataAdministrative& adminData=this->currentUseR.theProblemData[i].adminData;
-    for (int j=0; j<adminData.deadlinesPerSection.size(); j++)
-      this->databaseStudentSections.AddOnTopNoRepetition(adminData.deadlinesPerSection.theKeys[j]);
-  }
-  this->databaseStudentSections.QuickSortAscending();
+  if (this->currentUseR.sectionInfoString=="" ||
+      (this->currentUseR.userRole!="admin" && this->currentUseR.userRole!="teacher") )
+    if (this->currentUseR.userGroup.value!="")
+    { this->databaseStudentSections.AddOnTop(this->currentUseR.userGroup.value);
+      return true;
+    }
+  MathRoutines::StringSplitDefaultDelimiters(this->currentUseR.sectionInfoString.value, this->databaseStudentSections);
   return true;
 }
 

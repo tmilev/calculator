@@ -1063,6 +1063,19 @@ void MathRoutines::StringTrimWhiteSpace(const std::string& inputString, std::str
   output=output.substr(0, j);
 }
 
+void MathRoutines::StringSplitDefaultDelimiters
+(const std::string& inputString, List<std::string>& output)
+{ MacroRegisterFunctionWithName("MathRoutines::StringSplitDefaultDelimiters");
+  List<unsigned char> delimiters;
+  delimiters.AddOnTop(' ');
+  delimiters.AddOnTop('\r');
+  delimiters.AddOnTop('\n');
+  delimiters.AddOnTop('\t');
+  delimiters.AddOnTop(',');
+  delimiters.AddOnTop(';');
+  delimiters.AddOnTop(160);//<-&nbsp
+  MathRoutines::StringSplitExcludeDelimiters(inputString, delimiters, output);
+}
 
 void MathRoutines::StringSplitExcludeDelimiters
 (const std::string& inputString, const List<unsigned char>& delimiters, List<std::string>& output)

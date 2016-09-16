@@ -47,6 +47,7 @@ class UserCalculatorData{
   public:
   double approximateHoursSinceLastTokenWasIssued;
   std::string usernamePlusPassWord;
+  MySQLdata userId;
   MySQLdata username;
   MySQLdata email;
   MySQLdata currentTable;
@@ -57,6 +58,7 @@ class UserCalculatorData{
   MySQLdata problemDataString;
   MySQLdata problemInfoRowId;
   MySQLdata problemInfoString;
+  MySQLdata sectionInfoString;
   MySQLdata deadlineInfoRowId;
   MySQLdata deadlineInfoString;
   MySQLdata userGroup;
@@ -80,6 +82,8 @@ class UserCalculatorData{
 
 struct DatabaseStrings{
 public:
+  static std::string userId;
+
   static std::string databaseUser;
   static std::string theDatabaseName;
   static std::string userColumnLabel;
@@ -93,5 +97,8 @@ public:
   static std::string problemWeightsTableName;
   static std::string problemWeightsIdColumnName;
   static std::string infoColumnInProblemWeightsTable;
+
+  static std::string sectionsList;
+
 };
 #endif

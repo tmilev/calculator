@@ -2382,6 +2382,13 @@ int WebWorker::ProcessModifyPage()
   return 0;
 }
 
+int WebWorker::ProcessAssignTeacherToSection()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessAssignTeacherToSection");
+  this->SetHeaderOKNoContentLength();
+  stOutput << HtmlInterpretation::AddTeachersSections();
+  return 0;
+}
+
 int WebWorker::ProcessAccounts()
 { MacroRegisterFunctionWithName("WebWorker::ProcessDatabase");
   this->SetHeaderOKNoContentLength();
@@ -2680,6 +2687,9 @@ int WebWorker::ServeClient()
             theGlobalVariables.userCalculatorRequestType=="addUsers") &&
             theGlobalVariables.flagLoggedIn)
     return this->ProcessAddUserEmails();
+  else if (theGlobalVariables.userCalculatorRequestType=="setTeacher"
+           && theGlobalVariables.flagLoggedIn)
+    return this->ProcessAssignTeacherToSection();
   else if ((theGlobalVariables.userCalculatorRequestType=="submitProblem" ||
             theGlobalVariables.userCalculatorRequestType=="submitExercise")
             && theGlobalVariables.flagLoggedIn)

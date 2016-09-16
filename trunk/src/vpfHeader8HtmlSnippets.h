@@ -14,6 +14,7 @@ static std::string GetJavascriptStandardCookies();
 static std::string GetJavascriptHideHtml();
 static std::string GetJavascriptSubmitEmails();
 static std::string GetJavascriptCookieFunctions();
+static std::string GetJavascriptSubmitMainInputIncludeCurrentFile();
 
 };
 

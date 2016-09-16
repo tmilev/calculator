@@ -422,7 +422,7 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << HtmlSnippets::GetJavascriptStandardCookies()
   //  << CGI::GetLaTeXProcessingJavascript()
   //  << CGI::GetCalculatorStyleSheetWithTags()
-  << theFile.GetJavascriptSubmitMainInputIncludeCurrentFile()
+  << HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "<style type=\"text/css\" media=\"screen\">\n"
   << "    #editor { \n"
   << "      height: 400px;\n"
@@ -721,6 +721,60 @@ std::string HtmlInterpretation::SubmitProblem()
   return out.str();
 }
 
+std::string HtmlInterpretation::AddTeachersSections()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::AddTeachersSections");
+  std::stringstream out;
+  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagUsingSSLinCurrentConnection)
+  { out << "<b>Only admins may assign sections to teachers.</b>";
+    return out.str();
+  }
+  std::string mainInput=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
+  MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
+  if (!CGI::ChopCGIString(mainInput, theMap, out))
+  { out << "<b>Failed to extract input from: " << mainInput << ".</b>";
+    return out.str();
+  }
+  std::string desiredUsers=
+  CGI::URLStringToNormal(theMap.GetValueCreateIfNotPresent("teachers"));
+  std::string desiredSections=
+  CGI::URLStringToNormal(theMap.GetValueCreateIfNotPresent("sections"));
+  List<std::string> theDelimiters;
+#ifdef MACRO_use_MySQL
+  List<std::string> theTeachers, theSections;
+  List<unsigned char> delimiters;
+  delimiters.AddOnTop(' ');
+  delimiters.AddOnTop('\r');
+  delimiters.AddOnTop('\n');
+  delimiters.AddOnTop('\t');
+  delimiters.AddOnTop(',');
+  delimiters.AddOnTop(';');
+  delimiters.AddOnTop(160);//<-&nbsp
+  MathRoutines::StringSplitExcludeDelimiters(desiredUsers, delimiters, theTeachers);
+//  MathRoutines::StringSplitExcludeDelimiters(desiredSections, delimiters, theSections);
+  if (theTeachers.size==0)
+  { out << "<b>Could not extract teachers from " << desiredUsers << ".</b>";
+    return out.str();
+  }
+//  if (theSections.size==0)
+//  { out << "<b>Could not extract sections from " << desiredSections << ".</b>";
+//    return out.str();
+//  }
+  DatabaseRoutines theRoutines;
+  for (int i=0; i<theTeachers.size; i++)
+    if (!theRoutines.SetEntry
+        (DatabaseStrings::userColumnLabel, theTeachers[i], DatabaseStrings::usersTableName,
+         DatabaseStrings::sectionsList, desiredSections, &out))
+      out << "<span style=\"color:red\">Failed to assign: " << theTeachers[i] << " to section: "
+      << desiredSections << "</span><br>";
+    else
+      out << "<span style=\"color:red\">Assigned " << theTeachers[i] << " to section: "
+      << desiredSections << "</span><br>";
+  return out.str();
+#else
+  return "<b>no database present.</b>";
+#endif // MACRO_use_MySQL
+}
+
 std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressWithPort)
 { MacroRegisterFunctionWithName("HtmlInterpretation::AddUserEmails");
   std::stringstream out;
@@ -924,6 +978,8 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
     theSections.AddOnTopNoRepetition(userTable[i][indexExtraInfo]);
   theSections.QuickSortAscending();
   out << "<hr><hr>";
+  out << HtmlInterpretation::ToStringAssignSection();
+  out << "<hr><hr>";
   out << HtmlInterpretation::ToStringUserDetails(true, userTable, columnLabels, hostWebAddressWithPort);
   out << "<hr><hr>";
   out << HtmlInterpretation::ToStringUserDetails(false, userTable, columnLabels, hostWebAddressWithPort);
@@ -941,6 +997,7 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
   << CGI::GetCalculatorStyleSheetWithTags()
   << HtmlSnippets::GetJavascriptStandardCookies()
   << HtmlSnippets::GetJavascriptSubmitEmails()
+  << HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
   out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation><br>";
@@ -1105,10 +1162,40 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
 #endif
 }
 
+std::string HtmlInterpretation::ToStringAssignSection()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::ToStringAssignSection");
+  std::stringstream out;
+  std::string idAddressTextarea= "inputSetTeacher";
+  std::string idExtraTextarea= "inputSections";
+  std::string idOutput="idOutputSections";
+  out << "Assign section(s) to teacher(s)<br> ";
+  out << "<textarea width=\"500px\" ";
+  out << "id=\"" << idAddressTextarea << "\"";
+  out << "placeholder=\"email or user list, comma, space or ; separated\">";
+  out << "</textarea>";
+  out << "<textarea width=\"500px\" ";
+  out << "id=\"" << idExtraTextarea << "\"";
+  out << " placeholder=\"list of sections\">";
+  out << "</textarea>";
+  out << "<br>";
+  out
+  << "<button class=\"normalButton\" onclick=\"submitStringAsMainInput("
+  << "'teachers='+ "
+  << "encodeURIComponent(document.getElementById('" << idAddressTextarea << "').value)"
+  << " + '&sections=' + "
+  << "encodeURIComponent(document.getElementById('" << idExtraTextarea << "').value),"
+  << "'" << idOutput << "',"
+  << " 'setTeacher'"
+  << " )\"> Set teacher</button> ";
+  out << "<br><span id=\"" << idOutput << "\">\n";
+  out << "</span>";
+  return out.str();
+}
+
 std::string HtmlInterpretation::ToStringUserDetails
 (bool adminsOnly, List<List<std::string> > userTable, List<std::string> columnLabels,
  const std::string& hostWebAddressWithPort)
-{ MacroRegisterFunctionWithName("WebWorker::ToStringUserDetails");
+{ MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserDetails");
   std::stringstream out;
 #ifdef MACRO_use_MySQL
   std::string userRole = adminsOnly ? "admin" : "student";
@@ -1120,7 +1207,7 @@ std::string HtmlInterpretation::ToStringUserDetails
 //  out << "<b>Warning: there's no remove button yet.</b><br>";
   out << "<textarea width=\"500px\" ";
   out << "id=\"" << idAddressTextarea << "\"";
-  out << "placeholder=\"email or user list, comma, space or ; separated\">";
+  out << "placeholder=\"user list, comma, space or ; separated\">";
   out << "</textarea>";
   out << "<textarea width=\"500px\" ";
   out << "id=\"" << idPasswordTextarea << "\"";
@@ -1128,7 +1215,7 @@ std::string HtmlInterpretation::ToStringUserDetails
   out << "</textarea>";
   out << "<textarea width=\"500px\" ";
   out << "id=\"" << idExtraTextarea << "\"";
-  out << " placeholder=\"optional, for sorting users in groups; for example section #\">";
+  out << " placeholder=\"section/class #\">";
   out << "</textarea>";
   out << "<br>";
   out

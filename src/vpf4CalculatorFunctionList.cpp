@@ -150,7 +150,7 @@ void Calculator::initPredefinedInnerFunctions()
    the web server. \
    There are two exceptions. 1) The file can be located in a folder in the project base \
    that is otherwise not visible by the webserver **provided that** the folder is white-listed\
-   via the FileOperations class within the C++ source. Example: folder ProblemCollections \
+   via the FileOperations class within the C++ source. Example: folder DefaultProblemLocation \
    is white-listed. To access this file simply start your file name with the foldername. \
    Do not start the folder name with the / character.\
    2) The file can be located in a folder in a level parallel to the project base \
@@ -159,20 +159,20 @@ void Calculator::initPredefinedInnerFunctions()
    ",
    "LoadFileIntoString(\"robots.txt\");\
     \nLoadFileIntoString(\"freecalc/contributors.tex\");\
-    \nLoadFileIntoString(\"ProblemCollections/Problems/Functions-composing-fractional-linear-1.html\")",
+    \nLoadFileIntoString(\"DefaultProblemLocation/Functions-composing-fractional-linear-1.html\")",
    true, false, "CalculatorConversions::innerLoadFileIntoString");
   this->AddOperationInnerHandler
   ("InterpretProblem", CalculatorHtmlFunctions::innerInterpretProblem, "",
    "Does as ExtractCalculatorExpressionFromHtml but in addition interprets the calculator commands. ",
    "InterpretProblem(LoadFileIntoString(\
-   \"ProblemCollections/Problems/Functions-composing-fractional-linear-1.html\"))", true, false,
+   \"DefaultProblemLocation/example.html\"))", true, false,
    "CalculatorHtmlFunctions::innerInterpretProblem", "InterpretProblem");
   this->AddOperationInnerHandler
   ("ProblemGiveUp", CalculatorHtmlFunctions::innerInterpretProblemGiveUp, "",
    "Gives the predefined answer to a problem. First argument must be a string with the problem. \
     the second argument must be the id of the answer. ",
    "ProblemGiveUp(LoadFileIntoString(\
-   \"ProblemCollections/Problems/Functions-composing-fractional-linear-1.html\"), AlgebraAnswer)", true, false,
+   \"DefaultProblemLocation/example.html\"), AlgebraAnswer)", true, false,
    "CalculatorHtmlFunctions::innerInterpretProblemGiveUp", "ProblemGiveUp");
   this->AddOperationInnerHandler
   ("makeInputBox", CalculatorHtmlFunctions::innerUserInputBox, "",
@@ -193,7 +193,7 @@ void Calculator::initPredefinedInnerFunctions()
     At the moment of writing, the planned span class names are:\
    \"calculator\", \"calculatorHidden\", \"calculatorAnswer\".",
    "ExtractCalculatorExpressionFromHtml(LoadFileIntoString(\
-   \"/ProblemCollections/Problems/Functions-composing-fractional-linear-1.html\"))", true, false,
+   \"DefaultProblemLocation/example.html\"))", true, false,
    "CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml");
    ;
   this->AddOperationInnerHandler

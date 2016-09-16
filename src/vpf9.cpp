@@ -579,7 +579,6 @@ FileOperations::FolderVirtualLinksNonSensitive()
     MutexRecursiveWrapper theMutex;
     MutexLockGuard theGuard(theMutex);
     result.SetKeyValue("output/", "output/");
-    result.SetKeyValue("ProblemCollections/", "ProblemCollections/");
     result.SetKeyValue("problemtemplates/", "../problemtemplates/");
     result.SetKeyValue("freecalc/", "../freecalc/");
     result.SetKeyValue("html/", "../public_html/");

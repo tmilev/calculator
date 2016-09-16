@@ -13,6 +13,7 @@ public:
   static std::string GetHtmlTagWithManifest();
   static std::string ModifyProblemReport();
   static std::string ClonePageResult();
+  static std::string AddTeachersSections();
   static std::string AddUserEmails(const std::string& hostWebAddressWithPort);
   static std::string SubmitProblem();
   static std::string GetProblemSolution();
@@ -27,6 +28,7 @@ public:
   static std::string GetSetProblemDatabaseInfoHtml();
   static std::string GetAccountsPage(const std::string& hostWebAddressWithPort);
   static std::string GetAccountsPageBody(const std::string& hostWebAddressWithPort);
+  static std::string ToStringAssignSection();
   static std::string ToStringUserDetails
   (bool adminsOnly, List<List<std::string> > userTable, List<std::string> columnLabels,
    const std::string& hostWebAddressWithPort);

@@ -215,6 +215,7 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
 #endif
 }
 
+std::string DatabaseStrings::userId="id";
 std::string DatabaseStrings::userColumnLabel="username";
 std::string DatabaseStrings::usersTableName="users";
 std::string DatabaseStrings::userGroupLabel="userInfo";
@@ -227,6 +228,8 @@ std::string DatabaseStrings::infoColumnInDeadlinesTable="deadlines";
 std::string DatabaseStrings::problemWeightsTableName="problemWeights";
 std::string DatabaseStrings::problemWeightsIdColumnName="idInProblemInfo";
 std::string DatabaseStrings::infoColumnInProblemWeightsTable="problemWeights";
+
+std::string DatabaseStrings::sectionsList="sectionList";
 
 std::string MySQLdata::GetDatA()const
 { return "'" + this->GetDataNoQuotes() + "'";
@@ -507,7 +510,7 @@ std::string DatabaseRoutines::ToString()
 std::string UserCalculator::ToString()
 { MacroRegisterFunctionWithName("UserCalculator::ToString");
   std::stringstream out;
-  out << "Calculator user: " << this->username.value;
+  out << "Calculator user: " << this->username.value << "<br>Section: " << this->userGroup.value;
   for (int i=0; i<this->theProblemData.size(); i++)
     out << "<br>Problem: " << this->theProblemData.theKeys[i] << "; random seed: "
     << this->theProblemData.theValues[i].randomSeed << "; weight: "
@@ -600,20 +603,22 @@ bool UserCalculator::FetchOneUserRow
   for (int i=0; i<theFieldQuery.allQueryResultStrings.size; i++)
     if (theFieldQuery.allQueryResultStrings[i].size>0 )
       this->selectedRowFieldNamesUnsafe[i]=CGI::URLStringToNormal(theFieldQuery.allQueryResultStrings[i][0]);
-  if (this->currentTable==DatabaseStrings::usersTableName)
-  { this->actualActivationToken= this->GetSelectedRowEntry("activationToken");
-    this->email= this->GetSelectedRowEntry("email");
-    this->userRole= this->GetSelectedRowEntry("userRole");
-    this->username=this->GetSelectedRowEntry(DatabaseStrings::userColumnLabel); //<-Important! Database lookup may be
-    //case insensitive (this shouldn't be the case, so welcome to the insane design of mysql).
-    //The preceding line of code guarantees we have read the username as it is stored in the DB.
-    this->actualShaonedSaltedPassword=this->GetSelectedRowEntry("password");
-    this->authenticationTokenCreationTime=this->GetSelectedRowEntry("authenticationCreationTime");
-    this->actualAuthenticationToken=this->GetSelectedRowEntry("authenticationToken");
-    this->problemDataString=this->GetSelectedRowEntry("problemData");
-    this->deadlineInfoRowId=this->GetSelectedRowEntry(DatabaseStrings::deadlinesIdColumnName);
-    this->problemInfoRowId=this->GetSelectedRowEntry(DatabaseStrings::problemWeightsIdColumnName);
-  }
+  if (this->currentTable!=DatabaseStrings::usersTableName)
+    return true;
+  this->actualActivationToken= this->GetSelectedRowEntry("activationToken");
+  this->userId=this->GetSelectedRowEntry(DatabaseStrings::userId);
+  this->email= this->GetSelectedRowEntry("email");
+  this->userRole= this->GetSelectedRowEntry("userRole");
+  this->username=this->GetSelectedRowEntry(DatabaseStrings::userColumnLabel); //<-Important! Database lookup may be
+  //case insensitive (this shouldn't be the case, so welcome to the insane design of mysql).
+  //The preceding line of code guarantees we have read the username as it is stored in the DB.
+  this->actualShaonedSaltedPassword=this->GetSelectedRowEntry("password");
+  this->authenticationTokenCreationTime=this->GetSelectedRowEntry("authenticationCreationTime");
+  this->actualAuthenticationToken=this->GetSelectedRowEntry("authenticationToken");
+  this->problemDataString=this->GetSelectedRowEntry("problemData");
+  this->deadlineInfoRowId=this->GetSelectedRowEntry(DatabaseStrings::deadlinesIdColumnName);
+  this->problemInfoRowId=this->GetSelectedRowEntry(DatabaseStrings::problemWeightsIdColumnName);
+  this->sectionInfoString=this->GetSelectedRowEntry(DatabaseStrings::sectionsList);
   std::string reader;
   //stOutput << "DEBUG:  GOT to hereE!!!";
   if (this->deadlineInfoRowId!="")
@@ -625,7 +630,6 @@ bool UserCalculator::FetchOneUserRow
          reader,
          failureStream))
       this->deadlineInfoString=CGI::URLStringToNormal(reader);
-
   if (this->problemInfoRowId!="")
     if (theRoutines.FetchEntry
         (DatabaseStrings::problemWeightsIdColumnName,
@@ -635,7 +639,6 @@ bool UserCalculator::FetchOneUserRow
          reader,
          failureStream))
       this->problemInfoString=CGI::URLStringToNormal(reader);
-  //stOutput << "DEBUG: final result:  " << result;
   return true;
 }
 
@@ -1208,7 +1211,7 @@ bool DatabaseRoutines::AddUsersFromEmails
     comments << "Sending actual emails disabled for security reasons (system not stable enough yet). ";
   }
   if (doSendEmails)
-    if (! this->SendActivationEmail(theEmails, comments))
+    if (!this->SendActivationEmail(theEmails, comments))
       result=false;
   return result;
 }
@@ -1912,6 +1915,7 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, 
   << "userInfo LONGTEXT, "
   << DatabaseStrings::problemWeightsIdColumnName << " LONGTEXT, "
   << DatabaseStrings::deadlinesIdColumnName << " LONGTEXT, "
+  << DatabaseStrings::sectionsList << " LONGTEXT, "
   << "problemData LONGTEXT "
   ;
   if (! this->CreateTable
@@ -1925,8 +1929,10 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, 
     return false;
   probWeightTableCols << DatabaseStrings::problemWeightsIdColumnName
   << " VARCHAR(50) not null, " << DatabaseStrings::infoColumnInProblemWeightsTable << " LONGTEXT";
-  return this->CreateTable
-  (DatabaseStrings::problemWeightsTableName, probWeightTableCols.str(), commentsOnFailure, 0);
+  if(!this->CreateTable
+    (DatabaseStrings::problemWeightsTableName, probWeightTableCols.str(), commentsOnFailure, 0))
+    return false;
+  return true;
 }
 
 bool DatabaseRoutines::InsertRow

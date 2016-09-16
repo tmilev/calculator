@@ -1163,8 +1163,10 @@ std::string SyntacticElementHTML::GetTagClass()
 
 bool CalculatorHTML::PrepareSectionList(std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareSectionList");
+  (void) commentsOnFailure;
   if (this->databaseStudentSections.size>0)
     return true;
+  stOutput << "DEBUG: PReparing sectino list from: " << this->currentUseR.ToString();
   for (int i=0; i<this->currentUseR.theProblemData.size(); i++)
   { ProblemDataAdministrative& adminData=this->currentUseR.theProblemData[i].adminData;
     for (int j=0; j<adminData.deadlinesPerSection.size(); j++)
@@ -2381,7 +2383,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->FigureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before after loading problem list");
-  outHeadPt2 << this->GetJavascriptSubmitMainInputIncludeCurrentFile();
+  outHeadPt2 << HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile();
 //  else
 //    out << " no date picker";
   theInterpreter.flagWriteLatexPlots=false;
@@ -2658,7 +2660,7 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
   return out.str();
 }
 
-std::string CalculatorHTML::GetJavascriptSubmitMainInputIncludeCurrentFile()
+std::string HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile()
 { std::stringstream out;
   out
   << "<script type=\"text/javascript\"> \n"
@@ -2671,9 +2673,9 @@ std::string CalculatorHTML::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "  }\n"
   << "  inputParams='request='+requestType+'&';\n"
   << "  inputParams+='" << theGlobalVariables.ToStringCalcArgsNoNavigation(false) << "';\n"
-  << "  inputParams+='&fileName=" << CGI::StringToURLString(this->fileName) << "';\n"
-  << "  inputParams+='&topicList=" << CGI::StringToURLString(this->topicListFileName) << "';\n"
-  << "  inputParams+='&courseHome=" << CGI::StringToURLString(this->courseHome) << "';\n"
+  << "  inputParams+='&fileName=" << theGlobalVariables.GetWebInput("fileName") << "';\n"
+  << "  inputParams+='&topicList=" << theGlobalVariables.GetWebInput("topicList") << "';\n"
+  << "  inputParams+='&courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "';\n"
   << "  inputParams+='&mainInput=' + encodeURIComponent(theString);\n"
   << "  var https = new XMLHttpRequest();\n"
   ////////////////////////////////////////////
@@ -2977,6 +2979,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     out << "<span style=\"color:red\">Could not load your problem history.</span> <br>";
   if (!this->PrepareSectionList(out))
     out << "<span style=\"color:red\">Error preparing section list.</span> <br>";
+  out << "DEBUG: sections: " << this->databaseStudentSections.ToStringCommaDelimited();
   #ifdef MACRO_use_MySQL
   this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys);
   #endif

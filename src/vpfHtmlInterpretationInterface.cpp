@@ -239,6 +239,8 @@ std::string HtmlInterpretation::SubmitProblemPreview()
       continue;
     const Expression& currentE=theInterpreterWithAdvice.theProgramExpression[actualIndex][1];
     theFormat.flagUseLatex=true;
+    theFormat.flagUseQuotes=false;
+    theFormat.flagExpressionIsFinal=true;
     out << currentE.ToString(&theFormat);
   }
   out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";

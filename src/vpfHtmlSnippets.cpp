@@ -89,3 +89,34 @@ std::string HtmlSnippets::GetJavascriptCookieFunctions()
   << "}\n";
   return out.str();
 }
+
+std::string HtmlSnippets::GetDatePickerStart(const std::string& theId)
+{ std::stringstream out;
+  out << "\n<script type=\"text/javascript\">\n"
+  << "$(function() {\n"
+  << "$('#" << theId << "').datepicker();\n"
+  << "});\n"
+  << "</script>\n";
+  return out.str();
+}
+
+std::string HtmlSnippets::GetDatePickerJavascriptInit()
+{ std::stringstream out;
+  if (!theGlobalVariables.flagAceIsAvailable)
+    out
+    << "<link rel=\"stylesheet\" href=\"//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css\">\n"
+    << "<script src=\"https://code.jquery.com/jquery-3.1.0.min.js\" "
+    << "integrity=\"sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=\" "
+    << "crossorigin=\"anonymous\"></script>\n"
+    << "<script src=\"https://code.jquery.com/ui/1.12.0/jquery-ui.min.js\"   "
+    << "integrity=\"sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E=\" crossorigin=\"anonymous\"></script>\n"
+    ;
+  else
+    out
+    << "<link rel=\"stylesheet\" href=\"/html-common/jquery-ui.css\">\n"
+    << "<script src=\"/html-common/jquery-3.1.0.min.js\"></script>\n"
+    << "<script src=\"/html-common/jquery-ui.min.js\"></script>\n"
+;
+
+  return out.str();
+}

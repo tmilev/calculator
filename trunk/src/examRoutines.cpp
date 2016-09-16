@@ -360,24 +360,6 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
   return true;
 }
 
-bool CalculatorHTML::FindExamItem()
-{ MacroRegisterFunctionWithName("CalculatorHTML::FindExamItem");
-  List<std::string> theExerciseFileNames, theExerciseFileNameExtensions;
-  if (!FileOperations::GetFolderFileNamesVirtual
-      ("ProblemCollections/", theExerciseFileNames, &theExerciseFileNameExtensions))
-  { this->comments << "Failed to open folder with relative file name: "
-    << "ProblemCollections/";
-    return false;
-  }
-  for (int i=0; i<theExerciseFileNames.size; i++)
-  { if (theExerciseFileNameExtensions[i]!=".html")
-      continue;
-    this->fileName="ProblemCollections/"+ theExerciseFileNames[i];
-    return true;
-  }
-  return false;
-}
-
 std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
 { MacroRegisterFunctionWithName("CalculatorHTML::GetCurrentExamItem");
   double startTime=theGlobalVariables.GetElapsedSeconds();

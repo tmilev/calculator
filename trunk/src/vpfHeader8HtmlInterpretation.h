@@ -221,7 +221,6 @@ public:
   void LoadCurrentProblemItem();
   void FigureOutCurrentProblemList(std::stringstream& comments);
   std::string LoadAndInterpretCurrentProblemItem();
-  bool FindExamItem();
   static unsigned int HashFunction(const CalculatorHTML& input)
   { return input.HashFunction();
   }

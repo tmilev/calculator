@@ -1887,7 +1887,11 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     result=true;
   } else if (this->IsOfType<std::string>())
   { if (!useQuotes)
-      out << CGI::StringToHtmlString( this->GetValue<std::string>());
+    { if (isFinal)
+        out << this->GetValue<std::string>();
+      else
+        out << CGI::StringToHtmlString( this->GetValue<std::string>());
+    }
     else
       out << "\"" << this->GetValue<std::string>() << "\"";
     result=true;

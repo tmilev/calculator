@@ -214,8 +214,6 @@ public:
   void InterpretAccountInformationLinks(SyntacticElementHTML& inputOutput);
   void InterpretJavascripts(SyntacticElementHTML& inputOutput);
   std::string GetEditPageButton(const std::string& desiredFileName);
-  std::string GetDatePickerJavascriptInit();
-  std::string GetDatePickerStart(const std::string& theId);
   std::string GetJavascriptSubmitAnswers();
   std::string GetJavascriptMathQuillBoxes();
   void LoadCurrentProblemItem();

@@ -63,8 +63,8 @@ bool CalculatorHTML::ReadProblemInfoAppend
     outputProblemInfo.GetValueCreateIfNotPresent(currentProbName);
     if (!CGI::ChopCGIString(currentProbString, currentKeyValues, commentsOnFailure))
       return false;
-    //stOutput << "<hr>Debug: reading problem info from: " << currentProbString << " resulted in pairs: "
-    //<< currentKeyValues.ToStringHtml();
+    stOutput << "<hr>Debug: reading problem info from: " << currentProbString << " resulted in pairs: "
+    << currentKeyValues.ToStringHtml();
     if (currentKeyValues.Contains("weight"))
     { currentProblemValue.adminData.ProblemWeightUserInput=
       CGI::URLStringToNormal(currentKeyValues.GetValueCreateIfNotPresent("weight"));
@@ -74,6 +74,9 @@ bool CalculatorHTML::ReadProblemInfoAppend
     std::string deadlineString=CGI::URLStringToNormal(currentKeyValues.GetValueCreateIfNotPresent("deadlines"));
     if (!CGI::ChopCGIString(deadlineString, sectionInfo, commentsOnFailure))
       return false;
+    stOutput << "<hr>Debug: deadline problem info from: " << deadlineString << " resulted in pairs: "
+    << sectionInfo.ToStringHtml();
+
     for (int j=0; j<sectionInfo.size(); j++)
       currentProblemValue.adminData.deadlinesPerSection.SetKeyValue
       (CGI::URLStringToNormal(sectionInfo.theKeys[j]),
@@ -131,7 +134,7 @@ void CalculatorHTML::StoreDeadlineInfo
     out << CGI::StringToURLString(currentProbName) << "="
     << CGI::StringToURLString(currentProblemStream.str()) << "&";
   }
-  outputString=out.str();
+  outputString= out.str();
 }
 
 bool DatabaseRoutines::ReadProblemDatabaseInfo
@@ -434,16 +437,6 @@ bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt)
   return false;
 }
 
-std::string CalculatorHTML::GetDatePickerStart(const std::string& theId)
-{ std::stringstream out;
-  out << "\n<script type=\"text/javascript\">\n"
-  << "$(function() {\n"
-  << "$('#" << theId << "').datepicker();\n"
-  << "});\n"
-  << "</script>\n";
-  return out.str();
-}
-
 std::string CalculatorHTML::GetJavascriptSubmitAnswers()
 { std::stringstream out;
   std::string requestTypeSubmit, requestTypePreview, requestGiveUp, requestSolution;
@@ -559,16 +552,6 @@ std::string CalculatorHTML::GetJavascriptSubmitAnswers()
   << "  https.send();\n"
   << "}\n"
   << "</script>";
-  return out.str();
-}
-
-std::string CalculatorHTML::GetDatePickerJavascriptInit()
-{ std::stringstream out;
-  out
-  << "<link rel=\"stylesheet\" href=\"//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css\">\n"
-  << "<script src=\"//code.jquery.com/jquery-1.10.2.js\"></script>\n"
-  << "<script src=\"//code.jquery.com/ui/1.11.4/jquery-ui.js\"></script>\n"
-  ;
   return out.str();
 }
 
@@ -1365,13 +1348,12 @@ std::string CalculatorHTML::GetDeadline
   }
   #endif
  int todoFixThis;
- return result;
-/*  //stOutput << "<br>DEBUG: Fetching deadline for: " << problemName << "<br>this->databaseStudentSectionsPerProblem: " << this->databaseStudentSectionsPerProblem;
+  //stOutput << "<br>DEBUG: Fetching deadline for: " << problemName << "<br>this->databaseStudentSectionsPerProblem: " << this->databaseStudentSectionsPerProblem;
   int indexInDatabase=this->databaseProblemAndHomeworkGroupList.GetIndex(problemName);
   //stOutput << "<br>DEBUG: index of  " << problemName << " in  " << this->databaseProblemAndHomeworkGroupList
   //<< ": " << indexInDatabase;
 
-  if (indexInDatabase!=-1)
+/*  if (indexInDatabase!=-1)
   { int indexSection=  this->databaseStudentSectionsPerProblem[indexInDatabase].
     GetIndex(sectionNumber);
     if (indexSection!=-1)
@@ -1396,6 +1378,7 @@ std::string CalculatorHTML::GetDeadline
     }
   }
   return result;*/
+ return result;
 }
 
 std::string CalculatorHTML::ToStringOnEDeadlineFormatted
@@ -1499,21 +1482,22 @@ std::string CalculatorHTML::ToStringDeadlineModifyButton
   { std::string& currentDeadlineId=deadlineIds[i];
     if (this->databaseStudentSections[i]=="")
       continue;
-    currentDeadlineId = "deadline" + Crypto::CharsToBase64String(this->databaseStudentSections[i]+inputFileName);
+    currentDeadlineId = "deadline" + Crypto::CharsToBase64String
+    (this->databaseStudentSections[i]+inputFileName);
     if (currentDeadlineId[currentDeadlineId.size()-1]=='=')
       currentDeadlineId.resize(currentDeadlineId.size()-1);
     if (currentDeadlineId[currentDeadlineId.size()-1]=='=')
       currentDeadlineId.resize(currentDeadlineId.size()-1);
-  bool deadlineInherited=false;
-  std::string sectionNumber;
-  std::string currentDeadline =
-  this->GetDeadline(inputFileName, sectionNumber, true, deadlineInherited);
-  deadlineStream << "<tr>";
+    bool deadlineInherited=false;
+    std::string sectionNumber;
+    std::string currentDeadline =
+    this->GetDeadline(inputFileName, sectionNumber, true, deadlineInherited);
+    deadlineStream << "<tr>";
     deadlineStream << "<td>" << this->databaseStudentSections[i] << "</td>";
     deadlineStream << "<td> <input type=\"text\" id=\"" << currentDeadlineId << "\" value=\""
     << this->GetDeadline(inputFileName, this->databaseStudentSections[i], false, deadlineInherited)
     << "\"> " ;
-    //deadlineStream << this->GetDatePickerStart(currentDeadlineId);
+    deadlineStream << HtmlSnippets::GetDatePickerStart(currentDeadlineId);
     deadlineStream << "</td>";
     deadlineStream << "</tr>";
   }
@@ -2361,6 +2345,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   double startTime=theGlobalVariables.GetElapsedSeconds();
   std::stringstream outBody;
   std::stringstream outHeaD, outHeadPt1, outHeadPt2;
+  this->flagIsExamHome=(theGlobalVariables.userCalculatorRequestType=="template");
   this->theProblemData.randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
   this->FigureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
@@ -2376,17 +2361,15 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
 //////////////////////////////interpretation takes place before javascript generation as the latter depends on the former.
   if (this->flagIsExamProblem)
     outHeadPt2 << this->GetJavascriptSubmitAnswers();
-  else if (this->flagIsExamHome)
-    outHeadPt2 << HtmlSnippets::GetJavascriptSubmitEmails();
   if (this->flagIsExamHome && theGlobalVariables.UserDefaultHasAdminRights() &&
       !theGlobalVariables.UserStudentViewOn())
   { outHeadPt2 << HtmlSnippets::GetJavascriptHideHtml();
-    outHeadPt2 << this->GetDatePickerJavascriptInit();
+    outHeadPt2 << HtmlSnippets::GetDatePickerJavascriptInit();
   }
   if (this->flagUseNavigationBar)
     if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
     { outBody << this->GetEditPageButton(this->fileName);
-      if (theGlobalVariables.userCalculatorRequestType=="template")
+      if (this->flagIsExamHome)
         outBody <<this->GetEditPageButton(this->topicListFileName);
       outBody << "<br>";
     }
@@ -2962,6 +2945,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   if (!this->PrepareSectionList(out))
     out << "<span style=\"color:red\">Error preparing section list.</span> <br>";
   out << "DEBUG: sections: " << this->databaseStudentSections.ToStringCommaDelimited();
+  out << "DEBUG: prob data: " << this->currentUseR.theProblemData.ToStringHtml();
   #ifdef MACRO_use_MySQL
   this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys);
   #endif

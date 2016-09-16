@@ -126,7 +126,7 @@ public:
 //  List<std::string> databaseHomeworkGroupCorrespondingToEachProblem;
   //List<List<std::string> > userTablE;
   //List<std::string> labelsUserTablE;
-  HashedList<std::string, MathRoutines::hashString> databaseStudentSections;
+  List<std::string> databaseStudentSections;
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;
   /////////////////

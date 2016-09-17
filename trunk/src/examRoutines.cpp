@@ -213,12 +213,12 @@ bool CalculatorHTML::MergeOneProblemAdminData
   MapLisT<std::string, std::string, MathRoutines::hashString>&
   incomingDeadlines=inputProblemInfo.adminData.deadlinesPerSection;
   for (int i=0; i<incomingDeadlines.size(); i++)
-  { if (this->databaseProblemAndHomeworkGroupList.size>=1000)
+  { if (this->databaseStudentSections.size>=1000)
     { commentsOnFailure << "Failed to account deadlines: "
       << "max 999 sections allowed. ";
       return false;
     }
-    this->databaseProblemAndHomeworkGroupList.AddOnTopNoRepetition
+    this->databaseStudentSections.AddOnTopNoRepetition
     (incomingDeadlines.theKeys[i]);
   }
   for (int i=0; i<incomingDeadlines.size(); i++)
@@ -1347,13 +1347,12 @@ std::string CalculatorHTML::GetDeadline
     result=currentProb.deadlinesPerSection.GetValueCreateIfNotPresent(sectionNumber);
   }
   #endif
- int todoFixThis;
   //stOutput << "<br>DEBUG: Fetching deadline for: " << problemName << "<br>this->databaseStudentSectionsPerProblem: " << this->databaseStudentSectionsPerProblem;
-  int indexInDatabase=this->databaseProblemAndHomeworkGroupList.GetIndex(problemName);
+/*  int indexInDatabase=this->databaseProblemAndHomeworkGroupList.GetIndex(problemName);
   //stOutput << "<br>DEBUG: index of  " << problemName << " in  " << this->databaseProblemAndHomeworkGroupList
   //<< ": " << indexInDatabase;
 
-/*  if (indexInDatabase!=-1)
+  if (indexInDatabase!=-1)
   { int indexSection=  this->databaseStudentSectionsPerProblem[indexInDatabase].
     GetIndex(sectionNumber);
     if (indexSection!=-1)
@@ -1376,8 +1375,7 @@ std::string CalculatorHTML::GetDeadline
     { result=this->databaseDeadlinesBySection[indexInDatabase][indexSection];
       outputIsInherited=true;
     }
-  }
-  return result;*/
+  }*/
  return result;
 }
 
@@ -1440,12 +1438,12 @@ std::string CalculatorHTML::ToStringAllSectionDeadlines
     return "";
   std::stringstream out;
   out << "<table>";
-  for (int i=0; i<this->hdHomeworkGroupNames.size; i++)
-  { if (this->hdHomeworkGroupNames[i]=="")
+  for (int i=0; i<this->databaseStudentSections.size; i++)
+  { if (this->databaseStudentSections[i]=="")
       continue;
-    out << "<tr><td>Section " << this->hdHomeworkGroupNames[i] << ":</td>";
+    out << "<tr><td>Section " << this->databaseStudentSections[i] << ":</td>";
     out << "<td>" << this->ToStringOnEDeadlineFormatted
-    (cleanedUpLink, this->hdHomeworkGroupNames[i], false, false) << "</td>";
+    (cleanedUpLink, this->databaseStudentSections[i], false, false) << "</td>";
     out << "</tr>";
   }
   out << "</table>";

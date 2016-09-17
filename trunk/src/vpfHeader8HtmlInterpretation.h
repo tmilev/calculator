@@ -120,12 +120,6 @@ public:
   std::string topicListFileName;
   List<TopicElement> theTopics;
   HashedList<std::string, MathRoutines::hashString> TopicProblemFileNames;
-  List<List<std::string> > hdHomeworkGroups;
-  HashedList<std::string, MathRoutines::hashString> hdHomeworkGroupNames;
-  HashedList<std::string, MathRoutines::hashString> databaseProblemAndHomeworkGroupList;
-//  List<std::string> databaseHomeworkGroupCorrespondingToEachProblem;
-  //List<List<std::string> > userTablE;
-  //List<std::string> labelsUserTablE;
   List<std::string> databaseStudentSections;
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;

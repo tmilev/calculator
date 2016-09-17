@@ -63,8 +63,8 @@ bool CalculatorHTML::ReadProblemInfoAppend
     outputProblemInfo.GetValueCreateIfNotPresent(currentProbName);
     if (!CGI::ChopCGIString(currentProbString, currentKeyValues, commentsOnFailure))
       return false;
-    stOutput << "<hr>Debug: reading problem info from: " << currentProbString << " resulted in pairs: "
-    << currentKeyValues.ToStringHtml();
+    //stOutput << "<hr>Debug: reading problem info from: " << currentProbString << " resulted in pairs: "
+    //<< currentKeyValues.ToStringHtml();
     if (currentKeyValues.Contains("weight"))
     { currentProblemValue.adminData.ProblemWeightUserInput=
       CGI::URLStringToNormal(currentKeyValues.GetValueCreateIfNotPresent("weight"));
@@ -74,8 +74,8 @@ bool CalculatorHTML::ReadProblemInfoAppend
     std::string deadlineString=CGI::URLStringToNormal(currentKeyValues.GetValueCreateIfNotPresent("deadlines"));
     if (!CGI::ChopCGIString(deadlineString, sectionInfo, commentsOnFailure))
       return false;
-    stOutput << "<hr>Debug: deadline problem info from: " << deadlineString << " resulted in pairs: "
-    << sectionInfo.ToStringHtml();
+    //stOutput << "<hr>Debug: deadline problem info from: " << deadlineString << " resulted in pairs: "
+    //<< sectionInfo.ToStringHtml();
 
     for (int j=0; j<sectionInfo.size(); j++)
       currentProblemValue.adminData.deadlinesPerSection.SetKeyValue
@@ -2944,8 +2944,8 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     out << "<span style=\"color:red\">Could not load your problem history.</span> <br>";
   if (!this->PrepareSectionList(out))
     out << "<span style=\"color:red\">Error preparing section list.</span> <br>";
-  out << "DEBUG: sections: " << this->databaseStudentSections.ToStringCommaDelimited();
-  out << "DEBUG: prob data: " << this->currentUseR.theProblemData.ToStringHtml();
+  //out << "DEBUG: sections: " << this->databaseStudentSections.ToStringCommaDelimited();
+  //out << "DEBUG: prob data: " << this->currentUseR.theProblemData.ToStringHtml();
   #ifdef MACRO_use_MySQL
   this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys);
   #endif

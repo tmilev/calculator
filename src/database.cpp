@@ -511,7 +511,10 @@ std::string UserCalculator::ToString()
 { MacroRegisterFunctionWithName("UserCalculator::ToString");
   std::stringstream out;
   out << "Calculator user: " << this->username.value << "<br>Section: " << this->userGroup.value
-  << "<br>Sections taught: " << this->sectionInfoString.value;
+  << "<br>Sections taught: " << this->sectionInfoString.value
+  << ""
+  ;
+
   for (int i=0; i<this->theProblemData.size(); i++)
     out << "<br>Problem: " << this->theProblemData.theKeys[i] << "; random seed: "
     << this->theProblemData.theValues[i].randomSeed << "; weight: "
@@ -630,7 +633,9 @@ bool UserCalculator::FetchOneUserRow
          DatabaseStrings::infoColumnInDeadlinesTable,
          reader,
          failureStream))
-      this->deadlineInfoString=CGI::URLStringToNormal(reader);
+      this->deadlineInfoString=reader;
+//  stOutput << "DEBUG: deadlineInfo, rawest: " << reader
+//  << " this->deadlineInfoString:  " << this->deadlineInfoString.value;
   if (this->problemInfoRowId!="")
     if (theRoutines.FetchEntry
         (DatabaseStrings::problemWeightsIdColumnName,
@@ -639,7 +644,7 @@ bool UserCalculator::FetchOneUserRow
          DatabaseStrings::infoColumnInProblemWeightsTable,
          reader,
          failureStream))
-      this->problemInfoString=CGI::URLStringToNormal(reader);
+      this->problemInfoString=reader;
   return true;
 }
 

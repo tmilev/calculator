@@ -633,7 +633,7 @@ std::string HtmlInterpretation::SubmitProblem()
      //     stOutput
         bool unused=false;
         std::string theDeadlineString=theProblemHome.GetDeadline
-        (theProblem.fileName, theProblem.currentUseR.userGroup.GetDataNoQuotes(), true, unused);
+        (theProblem.fileName, theProblem.currentUseR.userGroup.GetDataNoQuotes(), unused);
         if (theDeadlineString!="" && theDeadlineString!=" ")
         { TimeWrapper now, deadline; //<-needs a fix for different time formats.
         //<-For the time being, we hard-code it to month/day/year format (no time to program it better).

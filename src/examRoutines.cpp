@@ -194,11 +194,11 @@ bool CalculatorHTML::MergeOneProblemAdminData
 (const std::string& inputProblemName, ProblemData& inputProblemInfo,
  std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("CalculatorHTML::MergeOneProblemAdminData");
-  if (!this->TopicProblemFileNames.Contains(inputProblemName))
+  if (!this->theTopicS.Contains(inputProblemName))
   { commentsOnFailure << "Did not find " << inputProblemName
     << " among the list of topics/problems. ";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
-      commentsOnFailure << this->TopicProblemFileNames.ToStringCommaDelimited();
+      commentsOnFailure << "The topics are: " << this->theTopicS.ToStringHtml();
     //stOutput << "DEBUG: NOT merging " << inputProblemName << ": topics list does not contain it. "
     //<< inputProblemInfo.ToString();
     return false;
@@ -1336,47 +1336,29 @@ std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink)
 #include "vpfHeader5Crypto.h"
 
 std::string CalculatorHTML::GetDeadline
-(const std::string& problemName, const std::string& sectionNumber, bool inheritFromGroup, bool& outputIsInherited)
+(const std::string& problemName, const std::string& sectionNumber, bool& outputIsInherited)
 { MacroRegisterFunctionWithName("CalculatorHTML::GetDeadline");
   outputIsInherited=false;
   std::string result;
   #ifdef MACRO_use_MySQL
-  if (this->currentUseR.theProblemData.Contains(problemName))
-  { ProblemDataAdministrative& currentProb=
-    this->currentUseR.theProblemData.GetValueCreateIfNotPresent(problemName).adminData;
-    result=currentProb.deadlinesPerSection.GetValueCreateIfNotPresent(sectionNumber);
+  int topicIndex=this->theTopicS.GetIndex(problemName);
+  if (topicIndex==-1)
+    return problemName + " not found in topic list. ";
+  TopicElement& currentTopic=this->theTopicS.GetValueCreateIfNotPresent(problemName);
+  for(int i=currentTopic.parentTopics.size-1; i>=0; i--)
+  { const std::string& containerName=this->theTopicS.theKeys[currentTopic.parentTopics[i]];
+    if (this->currentUseR.theProblemData.Contains(containerName))
+    { ProblemDataAdministrative& currentProb=
+      this->currentUseR.theProblemData.GetValueCreateIfNotPresent(containerName).adminData;
+      result=currentProb.deadlinesPerSection.GetValueCreateIfNotPresent(sectionNumber);
+      if (result!="")
+      { outputIsInherited=(containerName!=problemName);
+        return result;
+      }
+    }
   }
   #endif
-  //stOutput << "<br>DEBUG: Fetching deadline for: " << problemName << "<br>this->databaseStudentSectionsPerProblem: " << this->databaseStudentSectionsPerProblem;
-/*  int indexInDatabase=this->databaseProblemAndHomeworkGroupList.GetIndex(problemName);
-  //stOutput << "<br>DEBUG: index of  " << problemName << " in  " << this->databaseProblemAndHomeworkGroupList
-  //<< ": " << indexInDatabase;
-
-  if (indexInDatabase!=-1)
-  { int indexSection=  this->databaseStudentSectionsPerProblem[indexInDatabase].
-    GetIndex(sectionNumber);
-    if (indexSection!=-1)
-      result=this->databaseDeadlinesBySection[indexInDatabase][indexSection];
-  }
-  //stOutput << "DEBUG: Index in db is: " << indexInDatabase << " result:" << result << "Inherit frm grp:"
-  //<< inheritFromGroup;
-  if (result!="" || !inheritFromGroup)
-    return result;
-  //stOutput << "DEBUG: hd prob list: " << this->hdProblemList.ToStringCommaDelimited();
-  int indexInHDproblemList=this->hdProblemList.GetIndex(problemName);
-  if (indexInHDproblemList==-1)
-    return "";
-//  stOutput << "got to hw group phase for prob: " << problemName;
-  const std::string& hwGroup=this->hdHomeworkGroupCorrespondingToEachProblem[indexInHDproblemList];
-  indexInDatabase=this->databaseProblemAndHomeworkGroupList.GetIndex(hwGroup);
-  if (indexInDatabase!=-1)
-  { int indexSection=  this->databaseStudentSectionsPerProblem[indexInDatabase].GetIndex(sectionNumber);
-    if (indexSection!=-1)
-    { result=this->databaseDeadlinesBySection[indexInDatabase][indexSection];
-      outputIsInherited=true;
-    }
-  }*/
- return result;
+  return result;
 }
 
 std::string CalculatorHTML::ToStringOnEDeadlineFormatted
@@ -1385,7 +1367,7 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
 { std::stringstream out;
   bool deadlineInherited=false;
   std::string currentDeadline =
-  this->GetDeadline(cleanedUpLink, sectionNumber, true, deadlineInherited);
+  this->GetDeadline(cleanedUpLink, sectionNumber, deadlineInherited);
   if (currentDeadline=="")
   { if (returnEmptyStringIfNoDeadline)
       return "";
@@ -1489,11 +1471,11 @@ std::string CalculatorHTML::ToStringDeadlineModifyButton
     bool deadlineInherited=false;
     std::string sectionNumber;
     std::string currentDeadline =
-    this->GetDeadline(inputFileName, sectionNumber, true, deadlineInherited);
+    this->GetDeadline(inputFileName, sectionNumber, deadlineInherited);
     deadlineStream << "<tr>";
     deadlineStream << "<td>" << this->databaseStudentSections[i] << "</td>";
     deadlineStream << "<td> <input type=\"text\" id=\"" << currentDeadlineId << "\" value=\""
-    << this->GetDeadline(inputFileName, this->databaseStudentSections[i], false, deadlineInherited)
+    << this->GetDeadline(inputFileName, this->databaseStudentSections[i], deadlineInherited)
     << "\"> " ;
     deadlineStream << HtmlSnippets::GetDatePickerStart(currentDeadlineId);
     deadlineStream << "</td>";
@@ -2528,7 +2510,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
       << "\">" << this->stringPracticE << "</a>" << linkSeparator;
   }
   if (this->flagIsExamProblem && this->flagParentInvestigated)
-  { int indexInParent=this->TopicProblemFileNames.GetIndex(this->fileName);
+  { int indexInParent=this->theTopicS.GetIndex(this->fileName);
     if (indexInParent==-1)
     { out << "<b>Problem not in course</b>" << linkSeparator;
     } else
@@ -2541,11 +2523,11 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
           out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
         out << "topicList=" << CGI::StringToURLString(this->topicListFileName) << "&";
         out << "courseHome=" << CGI::StringToURLString(this->courseHome) << "&";
-        out << "fileName=" << CGI::StringToURLString(this->TopicProblemFileNames[indexInParent-1])
+        out << "fileName=" << CGI::StringToURLString(this->problemNamesNoTopics[indexInParent-1])
         << "\">&#8592;</a>" << linkSeparator;
       } else
         out << "<a disabled=\"disabled\">&#8592;</a>" << linkSeparator;
-      if (indexInParent<this->TopicProblemFileNames.size-1)
+      if (indexInParent<this->problemNamesNoTopics.size-1)
       { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request="
         << theGlobalVariables.userCalculatorRequestType;
         out << "&" << calcArgsNoPassExamDetails
@@ -2554,7 +2536,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
           out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
         out << "topicList=" << CGI::StringToURLString(this->topicListFileName) << "&";
         out << "courseHome=" << CGI::StringToURLString(this->courseHome) << "&";
-        out << "fileName=" << CGI::StringToURLString(this->TopicProblemFileNames[indexInParent+1] )
+        out << "fileName=" << CGI::StringToURLString(this->problemNamesNoTopics[indexInParent+1] )
         << "\">&#8594;</a>" << linkSeparator;
       } else
         out << "<a disabled=\"disabled\">&#8594;</a>" << linkSeparator;
@@ -2783,7 +2765,7 @@ std::string CalculatorHTML::ToStringProblemWeighT(const std::string& theFileName
   return out.str();
 }
 
-void TopicElement::GetTopicList(const std::string& inputString, List<TopicElement>& output)
+void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output)
 { MacroRegisterFunctionWithName("TopicElement::GetTopicList");
   std::stringstream tableReader(inputString);
   std::string currentLine, currentArgument;
@@ -2795,28 +2777,36 @@ void TopicElement::GetTopicList(const std::string& inputString, List<TopicElemen
       if (currentLine[0]=='%')
         continue;
     if (MathRoutines::StringBeginsWith(currentLine, "Chapter:", &currentArgument))
-    { if (currentElt.title!="empty")
-        output.AddOnTop(currentElt);
-      currentElt.reset();
+    { if (currentElt.id!="")
+        output.SetKeyValue(currentElt.id, currentElt);
+      currentElt.reset(0);
+      currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title=MathRoutines::StringTrimWhiteSpace(currentArgument);
+      currentElt.id=currentElt.title;
       currentElt.flagIsChapter=true;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Section:", &currentArgument))
-    { if (currentElt.title!="empty")
-        output.AddOnTop(currentElt);
-      currentElt.reset();
+    { if (currentElt.id!="")
+        output.SetKeyValue(currentElt.id, currentElt);
+      currentElt.reset(1);
+      currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title=MathRoutines::StringTrimWhiteSpace(currentArgument);
+      currentElt.id=currentElt.title;
       currentElt.flagIsSection=true;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Topic:", &currentArgument))
-    { if (currentElt.title!="empty")
-        output.AddOnTop(currentElt);
-      currentElt.reset();
+    { if (currentElt.id!="")
+        output.SetKeyValue(currentElt.id, currentElt);
+      currentElt.reset(2);
+      currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title=MathRoutines::StringTrimWhiteSpace(currentArgument);
+      currentElt.id=currentElt.title;
       currentElt.flagIsSubSection=true;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Title:", &currentArgument))
-    { if (currentElt.title!="empty")
-        output.AddOnTop(currentElt);
-      currentElt.reset();
+    { if (currentElt.id!="")
+        output.SetKeyValue(currentElt.id, currentElt);
+      currentElt.reset(3);
+      currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title=MathRoutines::StringTrimWhiteSpace(currentArgument);
+      currentElt.id=currentElt.title;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Video:", &currentArgument))
       currentElt.video=MathRoutines::StringTrimWhiteSpace(currentArgument);
     else if (MathRoutines::StringBeginsWith(currentLine, "Slides:", &currentArgument))
@@ -2824,13 +2814,15 @@ void TopicElement::GetTopicList(const std::string& inputString, List<TopicElemen
     else if (MathRoutines::StringBeginsWith(currentLine, "PrintableSlides:", &currentArgument))
       currentElt.slidesPrintable=MathRoutines::StringTrimWhiteSpace(currentArgument);
     else if (MathRoutines::StringBeginsWith(currentLine, "Problem:", &currentArgument))
-      currentElt.problem=MathRoutines::StringTrimWhiteSpace(currentArgument);
-    else
+    { currentElt.problem=MathRoutines::StringTrimWhiteSpace(currentArgument);
+      currentElt.id=currentElt.problem;
+      currentElt.parentTopics.AddOnTop(output.size());
+    } else
     { currentElt.error+="Unrecognized entry: " + currentLine + ". ";
       currentElt.flagIsError=true;
     }
   }
-  output.AddOnTop(currentElt);
+  output.SetKeyValue(currentElt.id, currentElt);
 }
 
 void CalculatorHTML::InterpretAccountInformationLinks(SyntacticElementHTML& inputOutput)
@@ -2855,18 +2847,18 @@ void CalculatorHTML::InterpretAccountInformationLinks(SyntacticElementHTML& inpu
 
 bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadAndParseTopicList");
-  if (this->theTopics.size!=0)
+  if (this->theTopicS.size()!=0)
     return true;
   if (this->topicListContent=="")
     if (!FileOperations::LoadFileToStringVirtual(this->topicListFileName, this->topicListContent, comments))
       return false;
   if (this->topicListContent=="")
     return false;
-  TopicElement::GetTopicList(this->topicListContent, this->theTopics);
-  this->TopicProblemFileNames.Clear();
-  for (int i=0; i<this->theTopics.size; i++)
-    if (this->theTopics[i].problem!="")
-      this->TopicProblemFileNames.AddOnTop(this->theTopics[i].problem);
+  TopicElement::GetTopicList(this->topicListContent, this->theTopicS);
+  this->problemNamesNoTopics.Clear();
+  for (int i=0; i<this->theTopicS.size(); i++)
+    if (this->theTopicS[i].problem!="")
+      this->problemNamesNoTopics.AddOnTop(this->theTopicS[i].problem);
   return true;
 }
 
@@ -2877,15 +2869,14 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
   { inputOutput.interpretedCommand=out.str();
     return;
   }
-  TopicElement currentElt;
   bool sectionStarted=false;
   bool subSectionStarted=false;
   bool chapterStarted=false;
   out << "<!--Topic list automatically generated from topic list: " << this->topicListFileName
   << ".-->";
   out << "<ol>";
-  for (int i=0; i<theTopics.size; i++)
-  { currentElt=theTopics[i];
+  for (int i=0; i<this->theTopicS.size(); i++)
+  { TopicElement& currentElt=this->theTopicS.theValues[i];
     if (subSectionStarted)
       if (currentElt.flagIsSubSection || currentElt.flagIsSection || currentElt.flagIsChapter)
         out << "</li>";
@@ -2948,7 +2939,6 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys);
   #endif
   bool plainStyle=(inputOutput.GetKeyValue("topicListStyle")=="plain");
-  TopicElement currentElt;
   bool tableStarted=false;
   bool sectionStarted=false;
   bool subSectionStarted=false;
@@ -2961,8 +2951,8 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   bool firstListStarted=false;
   int chapterCounter=0;
   //CalculatorHTML currentProblem;
-  for (int i=0; i<this->theTopics.size; i++)
-  { currentElt=this->theTopics[i];
+  for (int i=0; i<this->theTopicS.size(); i++)
+  { TopicElement& currentElt=this->theTopicS[i];
     if (currentElt.flagIsChapter)
     { currentChapter=currentElt.title;
       chapterCounter++;

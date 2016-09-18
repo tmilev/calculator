@@ -16,6 +16,9 @@ public:
   bool flagIsSection;
   bool flagIsSubSection;
   bool flagIsError;
+  List<int> parentTopics;
+  std::string id; //<- for problems the id is the problem file name. For all other topic
+  // elements the id is the title of the element.
   std::string title;
   std::string video;
   std::string slides;
@@ -32,17 +35,19 @@ public:
   std::string displayScore;
   std::string displayModifyWeight;
   std::string displayModifyDeadline;
-  void reset()
+  void reset(int parentSize)
   { this->flagIsSection=false;
     this->flagIsSubSection=false;
     this->flagIsChapter=false;
     this->flagIsError=false;
     this->title="empty";
+    this->id="";
     this->video="";
     this->slides="";
     this->slidesPrintable="";
     this->problem="";
     this->error="";
+    this->parentTopics.SetSize(MathRoutines::Minimum(parentSize, this->parentTopics.size));
   }
   friend std::ostream& operator << (std::ostream& output, const TopicElement& theElt)
   { output << theElt.ToString();
@@ -53,9 +58,9 @@ public:
   static std::string GetTableFinish(bool plainStyle);
   void ComputeLinks(CalculatorHTML& owner, bool plainStyle);
   TopicElement()
-  { this->reset();
+  { this->reset(0);
   }
-  static void GetTopicList(const std::string& inputString, List<TopicElement>& output);
+  static void GetTopicList(const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output);
 };
 
 struct ProblemResources{
@@ -118,8 +123,8 @@ public:
   ProblemData theProblemData;
   std::string topicListContent;
   std::string topicListFileName;
-  List<TopicElement> theTopics;
-  HashedList<std::string, MathRoutines::hashString> TopicProblemFileNames;
+  HashedList<std::string, MathRoutines::hashString> problemNamesNoTopics;
+  MapLisT<std::string, TopicElement, MathRoutines::hashString> theTopicS;
   List<std::string> databaseStudentSections;
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;
@@ -160,8 +165,7 @@ public:
   std::string CleanUpCommandString(const std::string& inputCommand);
   void InterpretNotByCalculator(SyntacticElementHTML& inputOutput);
   std::string GetDeadline
-  (const std::string& problemName, const std::string& sectionNumber,
-   bool inheritFromGroup, bool& outputIsInherited);
+  (const std::string& problemName, const std::string& sectionNumber, bool& outputIsInherited);
   bool MergeOneProblemAdminData
 (const std::string& inputProblemName, ProblemData& inputProblemInfo,
  std::stringstream& commentsOnFailure)

@@ -2765,6 +2765,36 @@ std::string CalculatorHTML::ToStringProblemWeighT(const std::string& theFileName
   return out.str();
 }
 
+void TopicElement::ComputeID()
+{ if (this->problem!="")
+  { this->id=this->problem;
+    return;
+  }
+  std::stringstream out;
+  out << this->title;
+  if (this->flagIsChapter)
+    out << "[Chapter]";
+  if (this->flagIsSection)
+    out << "[Section]";
+  if (this->flagIsSubSection)
+    out << "[SubSection]";
+  this->id=out.str();
+}
+
+void TopicElement::AddTopic(TopicElement &inputElt, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output)
+{ MacroRegisterFunctionWithName("TopicElement::AddTopic");
+  inputElt.ComputeID();
+  if (inputElt.id=="")
+  { inputElt.flagIsError=true;
+    inputElt.id="error";
+  }
+  if (output.Contains(inputElt.id))
+  { inputElt.id+="[Error]";
+    inputElt.title= "[Error]: Entry " + inputElt.title + " already present. ";
+  }
+  output.SetKeyValue(inputElt.id, inputElt);
+}
+
 void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output)
 { MacroRegisterFunctionWithName("TopicElement::GetTopicList");
   std::stringstream tableReader(inputString);
@@ -2777,32 +2807,27 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
       if (currentLine[0]=='%')
         continue;
     if (MathRoutines::StringBeginsWith(currentLine, "Chapter:", &currentArgument))
-    { if (currentElt.id!="")
-        output.SetKeyValue(currentElt.id, currentElt);
+    { TopicElement::AddTopic(currentElt, output);
       currentElt.reset(0);
       currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title=MathRoutines::StringTrimWhiteSpace(currentArgument);
-      currentElt.id=currentElt.title;
       currentElt.flagIsChapter=true;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Section:", &currentArgument))
-    { if (currentElt.id!="")
-        output.SetKeyValue(currentElt.id, currentElt);
+    { TopicElement::AddTopic(currentElt, output);
       currentElt.reset(1);
       currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title=MathRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id=currentElt.title;
       currentElt.flagIsSection=true;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Topic:", &currentArgument))
-    { if (currentElt.id!="")
-        output.SetKeyValue(currentElt.id, currentElt);
+    { TopicElement::AddTopic(currentElt, output);
       currentElt.reset(2);
       currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title=MathRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id=currentElt.title;
       currentElt.flagIsSubSection=true;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Title:", &currentArgument))
-    { if (currentElt.id!="")
-        output.SetKeyValue(currentElt.id, currentElt);
+    { TopicElement::AddTopic(currentElt, output);
       currentElt.reset(3);
       currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title=MathRoutines::StringTrimWhiteSpace(currentArgument);
@@ -2816,7 +2841,6 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
     else if (MathRoutines::StringBeginsWith(currentLine, "Problem:", &currentArgument))
     { currentElt.problem=MathRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id=currentElt.problem;
-      currentElt.parentTopics.AddOnTop(output.size());
     } else
     { currentElt.error+="Unrecognized entry: " + currentLine + ". ";
       currentElt.flagIsError=true;
@@ -2967,6 +2991,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       out << "\n<style>ol{counter-reset: item " << chapterCounter-1 << "}" << "</style>\n";
       out << "<ol start=\"" << chapterCounter << "\">";
     }
+    currentElt.ComputeLinks(*this, plainStyle);
     if (!currentElt.flagIsSection && !currentElt.flagIsSubSection && !currentElt.flagIsChapter && !tableStarted)
     { out << TopicElement::GetTableStart(plainStyle);
       tableStarted=true;
@@ -2986,21 +3011,21 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       if (currentElt.flagIsChapter)
         out << "</ol></li>\n";
     if (currentElt.flagIsChapter)
-    { out << "<li class=\"listChapter\">\n" << currentElt.title << "<br>\n";
+    { out << "<li class=\"listChapter\">\n" << currentElt.displayTitle << "<br>\n";
       chapterStarted=true;
       sectionStarted=false;
       subSectionStarted=false;
       tableStarted=false;
       out << "<ol>\n";
     } else if (currentElt.flagIsSection)
-    { out << "<li class=\"listSection\">\n" << currentElt.title << "<br>\n";
+    { out << "<li class=\"listSection\">\n" << currentElt.displayTitle << "<br>\n";
       sectionStarted=true;
       subSectionStarted=false;
       tableStarted=false;
       out << "<ol>\n";
     } else if (currentElt.flagIsSubSection)
     { out << "<li class=\"listSubsection\">\n";
-      out << currentElt.title << "\n<br>\n";
+      out << currentElt.displayTitle << "\n<br>\n";
       subSectionStarted=true;
       tableStarted=false;
     } else if (currentElt.flagIsError)
@@ -3015,8 +3040,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       << "PrintableSlides: modules/substitution-rule/pdf/printable-integral-derivative-f-over-f-intro.pdf<br>\n"
       << "\n";
     else
-    { currentElt.ComputeLinks(*this, plainStyle);
-      out << "<tr class=\"topicList\">\n";
+    { out << "<tr class=\"topicList\">\n";
       out << "  <td>\n";
       out << currentElt.displayTitle;
       out << "  </td>\n";
@@ -3053,9 +3077,9 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   if (this->displayProblemLink!="")
     return;
   if (this->title=="")
-    this->displayTitle= "-";
+    this->displayTitle= (std::string)"-" + "<br>DEBUG: "+this->ToString();
   else
-    this->displayTitle=this->title;
+    this->displayTitle=this->title + "<br>DEBUG: "+this->ToString();
   if (this->video=="")
     this->displayVideoLink = "Lesson coming soon";
   else if (this->video=="-")
@@ -3100,6 +3124,13 @@ std::string TopicElement::ToString()const
   out << this->title;
   if (this->title=="")
     out << "-";
+  if (this->flagIsChapter)
+    out << "(chapter)";
+  if (this->flagIsSection)
+    out << "(section)";
+  if (this->flagIsSubSection)
+    out << "(subsection)";
+  out << "<br>Parents: " << this->parentTopics.ToStringCommaDelimited();
   return out.str();
 }
 

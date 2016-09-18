@@ -35,6 +35,7 @@ public:
   std::string displayScore;
   std::string displayModifyWeight;
   std::string displayModifyDeadline;
+  void ComputeID();
   void reset(int parentSize)
   { this->flagIsSection=false;
     this->flagIsSubSection=false;
@@ -61,6 +62,7 @@ public:
   { this->reset(0);
   }
   static void GetTopicList(const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output);
+  static void AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output);
 };
 
 struct ProblemResources{

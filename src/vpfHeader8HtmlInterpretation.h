@@ -25,6 +25,7 @@ public:
   std::string slidesPrintable;
   std::string problem;
   std::string error;
+  std::string displayTitleWithDeadline;
   std::string displayTitle;
   std::string displayVideoLink;
   std::string displaySlidesLink;

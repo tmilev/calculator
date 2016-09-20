@@ -1281,7 +1281,10 @@ std::string HtmlInterpretation::ToStringNavigation()
       << theGlobalVariables.ToStringCalcArgsNoNavigation(false) << "\">Change password</a>" << linkSeparator;
     else
       out << "<b>Password change: <br>secure connection<br>only</b>" << linkSeparator;
+    if (theGlobalVariables.userDefault.userGroup.value!="")
+      out << "Section: " << theGlobalVariables.userDefault.userGroup.value << linkSeparator;
   }
+
   if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
   { if (theGlobalVariables.userCalculatorRequestType!="accounts")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts&"

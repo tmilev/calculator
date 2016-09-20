@@ -114,7 +114,7 @@ std::string HtmlSnippets::GetDatePickerJavascriptInit()
   else
     out
     << "<link rel=\"stylesheet\" href=\"/html-common/jquery-ui.css\">\n"
-    << "<script src=\"/html-common/jquery-3.1.0.min.js\"></script>\n"
+    << "<script src=\"/html-common/jquery.min.js\"></script>\n"
     << "<script src=\"/html-common/jquery-ui.min.js\"></script>\n"
 ;
 

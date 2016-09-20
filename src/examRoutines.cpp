@@ -1389,7 +1389,8 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
 
   std::stringstream hoursTillDeadlineStream;
   bool deadlineIsNear=secondsTillDeadline<24*3600 && !problemAlreadySolved;
-  if (secondsTillDeadline>0)
+  bool deadlineHasPassed=(secondsTillDeadline<0);
+  if (deadlineHasPassed)
   { if (deadlineIsNear)
       hoursTillDeadlineStream << "<span style=\"color:red\">"
       << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false) << "</span>";
@@ -1398,16 +1399,21 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
       << " left. ";
   } else
     hoursTillDeadlineStream << "Deadline has passed. ";
-  out << "Deadline: ";
-  if (problemAlreadySolved)
-    out << "<span style=\"color:green\">" << currentDeadline << " (topic deadline)</span>. ";
-  else if (deadlineIsNear)
-    out << "<span style=\"color:red\">" << currentDeadline << " (topic deadline)</span>. ";
-  else if (deadlineInherited)
-    out << "<span style=\"color:blue\">" << currentDeadline << " (topic deadline)</span>. ";
+  if (deadlineHasPassed && !problemAlreadySolved)
+    out << "<span style=\"red\"><b>Deadline has passed. </b></span>"
+    << "<span style=\"color:blue\">" << currentDeadline << " (topic deadline)</span>. ";
   else
-    out << "<span style=\"color:brown\">" << currentDeadline << "</span>. ";
-  out << hoursTillDeadlineStream.str();
+  { out << "Deadline: ";
+    if (problemAlreadySolved)
+      out << "<span style=\"color:green\">" << currentDeadline << " (topic deadline)</span>. ";
+    else if (deadlineIsNear)
+      out << "<span style=\"color:red\">" << currentDeadline << " (topic deadline)</span>. ";
+    else if (deadlineInherited)
+      out << "<span style=\"color:blue\">" << currentDeadline << " (topic deadline)</span>. ";
+    else
+      out << "<span style=\"color:brown\">" << currentDeadline << "</span>. ";
+    out << hoursTillDeadlineStream.str();
+  }
   return out.str();
   if (!theGlobalVariables.UserDefaultHasAdminRights() || theGlobalVariables.UserStudentViewOn())
     return out.str();
@@ -2478,7 +2484,8 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   if (theGlobalVariables.UserGuestMode())
     exerciseRequest="exerciseNoLogin";
   if (theGlobalVariables.UserGuestMode())
-    out << "<b>Guest mode</b>" << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=login\">Log in</a> ";
+    out << "<b>Guest mode</b>" << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "?request=login\">Log in</a> ";
   List<std::string> randomSeedContainer;
   randomSeedContainer.AddOnTop("randomSeed");
   std::string calcArgsNoPassExamDetails=
@@ -2518,7 +2525,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
       << "\">" << this->stringPracticE << "</a>" << linkSeparator;
   }
   if (this->flagIsExamProblem && this->flagParentInvestigated)
-  { int indexInParent=this->theTopicS.GetIndex(this->fileName);
+  { int indexInParent=this->problemNamesNoTopics.GetIndex(this->fileName);
     if (indexInParent==-1)
     { out << "<b>Problem not in course</b>" << linkSeparator;
     } else

@@ -598,6 +598,7 @@ std::string HtmlInterpretation::SubmitProblem()
     isCorrect=false;
   else
     isCorrect=(mustBeOne==1);
+  out << "<table width=\"300\"><tr><td>";
 #ifdef MACRO_use_MySQL
   int correctSubmissionsRelevant=0;
   int totalSubmissionsRelevant=0;
@@ -606,6 +607,7 @@ std::string HtmlInterpretation::SubmitProblem()
   theUser.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
   bool deadLinePassed=false;
   bool hasDeadline=true;
+  double secondsTillDeadline=-1;
   if (theProblem.flagIsForReal)
   { if (!theUser.InterpretDatabaseProblemData(theUser.problemDataString.value, comments))
     { out << "<b>Failed to load user information from database. Answer not recorded. "
@@ -633,12 +635,12 @@ std::string HtmlInterpretation::SubmitProblem()
           now.AssignLocalTime();
           //  out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
           //  << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
-          double secondsTillDeadline= deadline.SubtractAnotherTimeFromMeInSeconds(now)+7*3600;
+          secondsTillDeadline= deadline.SubtractAnotherTimeFromMeInSeconds(now)+7*3600;
           deadLinePassed=(secondsTillDeadline<-18000);
         }
       }
       if (deadLinePassed)
-        out << "<span style=\"color:red\"> <b>Deadline has passed, no answer recorded.</b></span>";
+        out << "<tr><td><span style=\"color:red\"><b>Deadline passed, attempt not recorded</b></span></td></tr>";
       else
         for (int i=0; i<theProblem.studentTagsAnswered.CardinalitySelection; i++)
         { int theIndex=theProblem.studentTagsAnswered.elements[i];
@@ -658,7 +660,6 @@ std::string HtmlInterpretation::SubmitProblem()
     }
   }
 #endif // MACRO_use_MySQL
-  out << "<table width=\"300\"><tr><td>";
   if (!isCorrect)
   { out << "<span style=\"color:red\"><b>Your answer appears to be incorrect. </b></span>";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
@@ -678,7 +679,19 @@ std::string HtmlInterpretation::SubmitProblem()
     else
       out << "<tr><td>So far " << correctSubmissionsRelevant << " correct and "
       << totalSubmissionsRelevant-correctSubmissionsRelevant << " incorrect submissions.</td></tr>";
-    if (hasDeadli)
+    if (hasDeadline)
+    { if (secondsTillDeadline<0)
+        secondsTillDeadline*=-1;
+      if (deadLinePassed)
+        out << "<tr><td><span style=\"color:red\"><b>Submission "
+        << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false)
+        << " after deadline. </b></span></td></tr>";
+      else
+        out << "<tr><td><span style=\"color:green\"><b>Submission "
+        << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false)
+        << " before deadline. </b></span></td></tr>";
+    } else
+      out << "<tr><td><span style=\"color:green\"><b>No deadline yet.</b></span></td></tr>";
   } //else
     //stOutput << "<tr><td><b>Submitting problem solutions allowed only for logged-in users. </b></td></tr>";
 #endif

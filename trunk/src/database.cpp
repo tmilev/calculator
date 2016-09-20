@@ -616,6 +616,7 @@ bool UserCalculator::FetchOneUserRow
   this->username=this->GetSelectedRowEntry(DatabaseStrings::userColumnLabel); //<-Important! Database lookup may be
   //case insensitive (this shouldn't be the case, so welcome to the insane design of mysql).
   //The preceding line of code guarantees we have read the username as it is stored in the DB.
+  this->userGroup=this->GetSelectedRowEntry(DatabaseStrings::userGroupLabel);
   this->actualShaonedSaltedPassword=this->GetSelectedRowEntry("password");
   this->authenticationTokenCreationTime=this->GetSelectedRowEntry("authenticationCreationTime");
   this->actualAuthenticationToken=this->GetSelectedRowEntry("authenticationToken");

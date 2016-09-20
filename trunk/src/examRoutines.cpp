@@ -1362,8 +1362,8 @@ std::string CalculatorHTML::GetDeadline
 }
 
 std::string CalculatorHTML::ToStringOnEDeadlineFormatted
-  (const std::string& cleanedUpLink,  const std::string& sectionNumber,
-   bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
+(const std::string& cleanedUpLink,  const std::string& sectionNumber,
+ bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
 { std::stringstream out;
   bool deadlineInherited=false;
   std::string currentDeadline =
@@ -1372,6 +1372,7 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   { if (returnEmptyStringIfNoDeadline)
       return "";
     out << "<span style=\"color:orange\">No deadline yet. </span>";
+    //out << "DEBUG: section: " << sectionNumber;
     return out.str();
   }
 #ifdef MACRO_use_MySQL
@@ -1387,8 +1388,9 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   double secondsTillDeadline= deadline.SubtractAnotherTimeFromMeInSeconds(now)+7*3600;
 
   std::stringstream hoursTillDeadlineStream;
+  bool deadlineIsNear=secondsTillDeadline<24*3600 && !problemAlreadySolved;
   if (secondsTillDeadline>0)
-  { if (secondsTillDeadline<24*3600 && !problemAlreadySolved)
+  { if (deadlineIsNear)
       hoursTillDeadlineStream << "<span style=\"color:red\">"
       << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false) << "</span>";
     else
@@ -1397,10 +1399,14 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   } else
     hoursTillDeadlineStream << "Deadline has passed. ";
   out << "Deadline: ";
-  if (deadlineInherited)
+  if (problemAlreadySolved)
+    out << "<span style=\"color:green\">" << currentDeadline << " (topic deadline)</span>. ";
+  else if (deadlineIsNear)
+    out << "<span style=\"color:red\">" << currentDeadline << " (topic deadline)</span>. ";
+  else if (deadlineInherited)
     out << "<span style=\"color:blue\">" << currentDeadline << " (topic deadline)</span>. ";
   else
-    out << "<span style=\"color:brown\">" << currentDeadline << " (per-problem deadline)</span>. ";
+    out << "<span style=\"color:brown\">" << currentDeadline << "</span>. ";
   out << hoursTillDeadlineStream.str();
   return out.str();
   if (!theGlobalVariables.UserDefaultHasAdminRights() || theGlobalVariables.UserStudentViewOn())
@@ -1510,13 +1516,15 @@ std::string CalculatorHTML::ToStringDeadlineModifyButton
   deadlineStream << "</td>";
   deadlineStream << "</tr></table>";
 //  out << deadlineStream.str();
-  out << "<button class=\"accordion\">deadline</button><div class=\"panel\">" << deadlineStream.str() << "</div>";
-
-//  out << CGI::GetHtmlSpanHidableStartsHiddeN(deadlineStream.str(), "deadline+ ");
+  out << "<button class=\"accordion\">deadline</button><span class=\"panel\">";
+  out << deadlineStream.str();
   if (!isProblemGroup)
     out << "(overrides section deadline). ";
   else
     out << "(overridden by per-problem-deadline). ";
+  out << "</span>";
+
+//  out << CGI::GetHtmlSpanHidableStartsHiddeN(deadlineStream.str(), "deadline+ ");
   return out.str();
 }
 
@@ -2800,6 +2808,7 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
   std::stringstream tableReader(inputString);
   std::string currentLine, currentArgument;
   TopicElement currentElt;
+  bool found=false;
   while(std::getline(tableReader, currentLine, '\n'))
   { if (MathRoutines::StringTrimWhiteSpace(currentLine)=="")
       continue;
@@ -2807,27 +2816,35 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
       if (currentLine[0]=='%')
         continue;
     if (MathRoutines::StringBeginsWith(currentLine, "Chapter:", &currentArgument))
-    { TopicElement::AddTopic(currentElt, output);
+    { if(found)
+        TopicElement::AddTopic(currentElt, output);
+      found=true;
       currentElt.reset(0);
       currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title=MathRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.flagIsChapter=true;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Section:", &currentArgument))
-    { TopicElement::AddTopic(currentElt, output);
+    { if(found)
+        TopicElement::AddTopic(currentElt, output);
+      found=true;
       currentElt.reset(1);
       currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title=MathRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id=currentElt.title;
       currentElt.flagIsSection=true;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Topic:", &currentArgument))
-    { TopicElement::AddTopic(currentElt, output);
+    { if(found)
+        TopicElement::AddTopic(currentElt, output);
+      found=true;
       currentElt.reset(2);
       currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title=MathRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id=currentElt.title;
       currentElt.flagIsSubSection=true;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Title:", &currentArgument))
-    { TopicElement::AddTopic(currentElt, output);
+    { if(found)
+        TopicElement::AddTopic(currentElt, output);
+      found=true;
       currentElt.reset(3);
       currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title=MathRoutines::StringTrimWhiteSpace(currentArgument);
@@ -2841,12 +2858,15 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
     else if (MathRoutines::StringBeginsWith(currentLine, "Problem:", &currentArgument))
     { currentElt.problem=MathRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id=currentElt.problem;
+      found=true;
     } else
     { currentElt.error+="Unrecognized entry: " + currentLine + ". ";
       currentElt.flagIsError=true;
+      found=true;
     }
   }
-  output.SetKeyValue(currentElt.id, currentElt);
+  if(found)
+    TopicElement::AddTopic(currentElt, output);
 }
 
 void CalculatorHTML::InterpretAccountInformationLinks(SyntacticElementHTML& inputOutput)
@@ -3011,21 +3031,21 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       if (currentElt.flagIsChapter)
         out << "</ol></li>\n";
     if (currentElt.flagIsChapter)
-    { out << "<li class=\"listChapter\">\n" << currentElt.displayTitle << "<br>\n";
+    { out << "<li class=\"listChapter\">\n" << currentElt.displayTitleWithDeadline << "\n<br>\n";
       chapterStarted=true;
-      sectionStarted=false;
+      sectionStarted=false;\
       subSectionStarted=false;
       tableStarted=false;
       out << "<ol>\n";
     } else if (currentElt.flagIsSection)
-    { out << "<li class=\"listSection\">\n" << currentElt.displayTitle << "<br>\n";
+    { out << "<li class=\"listSection\">\n" << currentElt.displayTitleWithDeadline << "\n<br>\n";
       sectionStarted=true;
       subSectionStarted=false;
       tableStarted=false;
       out << "<ol>\n";
     } else if (currentElt.flagIsSubSection)
     { out << "<li class=\"listSubsection\">\n";
-      out << currentElt.displayTitle << "\n<br>\n";
+      out << currentElt.displayTitleWithDeadline << "\n<br>\n";
       subSectionStarted=true;
       tableStarted=false;
     } else if (currentElt.flagIsError)
@@ -3077,9 +3097,9 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   if (this->displayProblemLink!="")
     return;
   if (this->title=="")
-    this->displayTitle= (std::string)"-" + "<br>DEBUG: "+this->ToString();
+    this->displayTitle= (std::string)"-" ;//+ "<br>DEBUG: "+this->ToString();
   else
-    this->displayTitle=this->title + "<br>DEBUG: "+this->ToString();
+    this->displayTitle=this->title ;//+ "<br>DEBUG: "+this->ToString();
   if (this->video=="")
     this->displayVideoLink = "Lesson coming soon";
   else if (this->video=="-")
@@ -3091,32 +3111,45 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     this->displaySlidesLink = "<a href=\"" + this->slides + "\">Slides</a>";
   if (this->slidesPrintable!="")
     this->displaySlidesPrintableLink = "<a href=\"" + this->slidesPrintable + "\">Printable slides</a>";
-
+  bool problemSolved=false;
+  bool returnEmptyStringIfNoDeadline=false;
   if (this->problem=="")
   { this->displayProblemLink="";
     this->displayScore="";
     this->displayModifyWeight="";
     this->displayDeadline="";
-    return;
+    problemSolved=false;
+    returnEmptyStringIfNoDeadline=true;
+  } else
+  { std::string theRawSQLink=theGlobalVariables.DisplayNameExecutable +
+    "?request=scoredQuiz&fileName=" + this->problem;
+    std::string theRawExerciseLink=theGlobalVariables.DisplayNameExecutable +
+    "?request=exercise&fileName=" + this->problem;
+    this->displayAceProblemLink=
+    " | <a href=\"#\" onclick=\"window.open('" + theRawSQLink +
+    "', 'width=300', 'height=250', 'top=400'); return false;\">" + CalculatorHTML::stringScoredQuizzes + "</a>"+
+    " | <a href=\"#\" onclick=\"window.open('" + theRawExerciseLink+
+    "',  'width=300', 'height=250', 'top=400'); return false;\">" +CalculatorHTML::stringPracticE+ "</a>";
+    this->displayProblemLink= owner.ToStringLinkFromFileName(this->problem);
+    this->displayScore=owner.ToStringProblemScoreShort(this->problem, problemSolved);
+    this->displayModifyWeight=owner.ToStringProblemWeighT(this->problem);
   }
-  std::string theRawSQLink=theGlobalVariables.DisplayNameExecutable +
-  "?request=scoredQuiz&fileName=" + this->problem;
-  std::string theRawExerciseLink=theGlobalVariables.DisplayNameExecutable +
-  "?request=exercise&fileName=" + this->problem;
-  this->displayAceProblemLink=
-  " | <a href=\"#\" onclick=\"window.open('" + theRawSQLink +
-  "', 'width=300', 'height=250', 'top=400'); return false;\">" + CalculatorHTML::stringScoredQuizzes + "</a>"+
-  " | <a href=\"#\" onclick=\"window.open('" + theRawExerciseLink+
-  "',  'width=300', 'height=250', 'top=400'); return false;\">" +CalculatorHTML::stringPracticE+ "</a>";
-  this->displayProblemLink= owner.ToStringLinkFromFileName(this->problem);
-  bool problemSolved=false;
-  this->displayScore=owner.ToStringProblemScoreShort(this->problem, problemSolved);
-  this->displayModifyWeight=owner.ToStringProblemWeighT(this->problem);
-  if (!this->flagIsChapter && !this->flagIsError && !this->flagIsSection)
-  { this->displayDeadline=owner.ToStringDeadline(this->problem, false, false);
-    if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
-      this->displayDeadline+="\n<br>\n" + owner.ToStringDeadlineModifyButton(this->problem, problemSolved, this->flagIsSubSection);
-  }
+  this->displayDeadline=owner.ToStringDeadline(this->id, problemSolved, returnEmptyStringIfNoDeadline);
+  if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
+  { if (this->displayDeadline!="" && this->problem!="")
+      this->displayDeadline+="\n<br>\n";
+    this->displayDeadline+=owner.ToStringDeadlineModifyButton
+    (this->id, problemSolved, this->flagIsSubSection || this->flagIsSection || this->flagIsChapter);
+    std::stringstream titleAndDeadlineStream;
+    titleAndDeadlineStream
+    << "<span class=\"deadlineTitleContainer\">"
+    << "<span class=\"titleContainer\">" << this->displayTitle << "</span>"
+    << "<span class=\"deadlineForTitleContainer\">" << this->displayDeadline << "</span>"
+    << "</span>"
+    ;
+    this->displayTitleWithDeadline=titleAndDeadlineStream.str();
+  } else
+    this->displayTitleWithDeadline=this->displayTitle;
 }
 
 std::string TopicElement::ToString()const

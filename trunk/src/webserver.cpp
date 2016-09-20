@@ -2960,6 +2960,12 @@ WebServer::WebServer()
   this->addressStartsSentWithCacheMaxAge.AddOnTop("MathJax-2.6-latest/");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/jquery.min.js");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common/jquery.min.js");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/jquery-ui.css");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common/jquery-ui.css");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/jquery-ui.min.css");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common/jquery-ui.min.css");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/images");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common/images");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/mathquill.css");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common/mathquill.css");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/mathquill.min.js");

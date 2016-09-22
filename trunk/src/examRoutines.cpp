@@ -386,7 +386,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
     << theGlobalVariables.ToStringNavigation()
     << "<small>Generated in "
     << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds()-startTime)
-    << " second(s).</small>" << "</problemNavigation><br> ";
+    << " second(s).</small>" << "</problemNavigation>\n";
    }
   out << this->outputHtmlBodyNoTag;
   return out.str();
@@ -2378,7 +2378,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     }
     std::string theDeadlineString=this->ToStringDeadline(this->fileName, problemAlreadySolved, true);
     if (theDeadlineString!="")
-      theDeadlineString+="\n<br>\n";
+      theDeadlineString+="\n<hr>\n";
     outBody << theDeadlineString;
 #endif
     //outBody << "<br>";

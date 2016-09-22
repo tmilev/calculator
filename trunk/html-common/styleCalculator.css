@@ -1,11 +1,11 @@
 /*styleCalculator.css*/
 problemNavigation {
-  background-color:#eeeeee;
-  width:auto;
-  float:top;
-  overflow: auto;
-  padding:5px;
-  margin:5px;
+  background-color: #eeeeee;
+  width: 100%;
+  float: top;
+  overflow: none;
+  display: block;
+  padding: 7px;
   white-space: nowrap;
 }	      
 
@@ -67,7 +67,7 @@ button.accordion {
   color: #444;
   cursor: pointer;
   padding: 0px;
-  width: 100px;
+  /*width: 100;*/
   border: none;
   text-align: left;
   outline: none;
@@ -80,7 +80,7 @@ button.accordion.active, button.accordion:hover {
 }
 
 button.accordion:after {
-  content: '\02795';
+/*  content: '\02795';*/
   font-size: 9px;
   color: #777;
   float: right;
@@ -88,10 +88,11 @@ button.accordion:after {
 }
 
 button.accordion.active:after {
-  content: "\2796";
+/*  content: "\2796";*/
 }
 
-div.panel {
+span.panel {
+  display: inline-block;
   padding: 0 0px;
   background-color: white;
   max-height: 0;
@@ -101,7 +102,7 @@ div.panel {
   opacity: 0;
 }
 
-div.panel.show {
+span.panel.show {
   opacity: 1;
   max-height: 500px;
 }
@@ -123,10 +124,10 @@ textarea.calculatorAnswer.show {
 }
 
 textarea.currentFileNameArea {
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-  width: 100em;
+  margin-top: 5px;
+  margin-bottom: -2px;
+  height: 1.5em;
+  padding: 0px;
 }
 
 

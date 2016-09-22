@@ -874,7 +874,7 @@ std::string WebWorker::GetDatabasePage()
   << HtmlSnippets::GetJavascriptStandardCookies()
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
-  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation><br>";
+  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation>\n";
 #ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
   if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn)
@@ -1101,7 +1101,7 @@ void WebWorker::OutputBeforeComputation()
   stOutput << "\n</head>\n<body onload=\"loadSettings();\">\n";
   if (theGlobalVariables.flagLoggedIn)
     stOutput << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
-    << "</problemNavigation>" << "<section>";
+    << "</problemNavigation>\n" << "<section>";
 
   theGlobalVariables.initOutputReportAndCrashFileNames
   (theParser.inputStringRawestOfTheRaw, theParser.inputString);
@@ -1544,7 +1544,7 @@ int WebWorker::ProcessServerStatus()
   << "</head>"
   << "<body>";
   if (theGlobalVariables.flagLoggedIn)
-    stOutput << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation>";
+    stOutput << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation>\n";
   stOutput << "<section>";
   if (theGlobalVariables.UserDefaultHasAdminRights())
     stOutput << " <table><tr><td style=\"vertical-align:top\">"
@@ -2967,26 +2967,28 @@ WebServer::WebServer()
   this->flagThisIsWorkerProcess=false;
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/MathJax-2.6-latest/");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("MathJax-2.6-latest/");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/jquery.min.js");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common/jquery.min.js");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/jquery-ui.css");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common/jquery-ui.css");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/jquery-ui.min.css");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common/jquery-ui.min.css");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/images");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common/images");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/mathquill.css");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common/mathquill.css");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/mathquill.min.js");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common/mathquill.min.js");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/mathquill.min-matrix.js");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common/mathquill.min-matrix.js");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/jquery.min.js");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common-calculator/jquery.min.js");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/jquery-ui.css");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common-calculator/jquery-ui.css");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/jquery-ui.min.css");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common-calculator/jquery-ui.min.css");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/images");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common-calculator/images");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/mathquill.css");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common-calculator/mathquill.css");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/mathquill.min.js");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common-calculator/mathquill.min.js");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/mathquill.min-matrix.js");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common-calculator/mathquill.min-matrix.js");
   this->addressStartsNotNeedingLogin.AddOnTop("cache.appcache");
   this->addressStartsNotNeedingLogin.AddOnTop("/cache.appcache");
   this->addressStartsNotNeedingLogin.AddOnTop("favicon.ico");
   this->addressStartsNotNeedingLogin.AddOnTop("/favicon.ico");
   this->addressStartsNotNeedingLogin.AddOnTop("html-common/");
   this->addressStartsNotNeedingLogin.AddOnTop("/html-common/");
+  this->addressStartsNotNeedingLogin.AddOnTop("html-common-calculator/");
+  this->addressStartsNotNeedingLogin.AddOnTop("/html-common-calculator/");
   this->addressStartsNotNeedingLogin.AddOnTop("css/");
   this->addressStartsNotNeedingLogin.AddOnTop("/css/");
   this->addressStartsNotNeedingLogin.AddOnTop("javascriptlibs/");

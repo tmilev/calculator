@@ -24,16 +24,18 @@ public:
   static std::string GetExamPageInterpreter();
   static std::string GetAnswerOnGiveUp();
   static std::string GetSelectCourse();
+  static std::string GetScoresPage();
   static std::string SubmitProblemPreview();
   static std::string GetSetProblemDatabaseInfoHtml();
   static std::string GetAccountsPage(const std::string& hostWebAddressWithPort);
   static std::string GetAccountsPageBody(const std::string& hostWebAddressWithPort);
   static std::string ToStringAssignSection();
   static std::string ToStringUserDetails
-  (bool adminsOnly, List<List<std::string> > userTable, List<std::string> columnLabels,
+  (bool adminsOnly, List<List<std::string> >& userTable, List<std::string>& columnLabels,
    const std::string& hostWebAddressWithPort);
+  static std::string ToStringUserScores();
   static std::string ToStringUserDetailsTable
-  (bool adminsOnly, List<List<std::string> > userTable, List<std::string> columnLabels,
+  (bool adminsOnly, List<List<std::string> >& userTable, List<std::string>& columnLabels,
    const std::string& hostWebAddressWithPort);
   static std::string ToStringCalculatorArgumentsHumanReadable();
   static std::string ToStringNavigation();

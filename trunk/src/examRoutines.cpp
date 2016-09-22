@@ -52,13 +52,14 @@ bool CalculatorHTML::ReadProblemInfoAppend
   //<< CGIedProbs.ToStringHtml();
   outputProblemInfo.SetExpectedSize(outputProblemInfo.size()+ CGIedProbs.size());
   std::string currentProbName, currentProbString;
+  ProblemData emptyData;
   for (int i=0; i<CGIedProbs.size(); i++)
   { currentProbName=MathRoutines::StringTrimWhiteSpace(CGI::URLStringToNormal(CGIedProbs.theKeys[i]));
     if (currentProbName=="")
       continue;
     currentProbString=CGI::URLStringToNormal(CGIedProbs.theValues[i]);
-    if (outputProblemInfo.Contains(currentProbName))
-      outputProblemInfo.GetValueCreateIfNotPresent(currentProbName);
+    if (!outputProblemInfo.Contains(currentProbName))
+      outputProblemInfo.GetValueCreateIfNotPresent(currentProbName)=emptyData;
     ProblemData& currentProblemValue=
     outputProblemInfo.GetValueCreateIfNotPresent(currentProbName);
     if (!CGI::ChopCGIString(currentProbString, currentKeyValues, commentsOnFailure))
@@ -1390,7 +1391,7 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   std::stringstream hoursTillDeadlineStream;
   bool deadlineIsNear=secondsTillDeadline<24*3600 && !problemAlreadySolved;
   bool deadlineHasPassed=(secondsTillDeadline<0);
-  if (deadlineHasPassed)
+  if (!deadlineHasPassed)
   { if (deadlineIsNear)
       hoursTillDeadlineStream << "<span style=\"color:red\">"
       << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false) << "</span>";
@@ -1401,28 +1402,24 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
     hoursTillDeadlineStream << "Deadline has passed. ";
   if (deadlineHasPassed && !problemAlreadySolved)
     out << "<span style=\"red\"><b>Deadline has passed. </b></span>"
-    << "<span style=\"color:blue\">" << currentDeadline << " (topic deadline)</span>. ";
+    << "<span style=\"color:blue\">" << currentDeadline << "</span>. ";
   else
   { out << "Deadline: ";
     if (problemAlreadySolved)
-      out << "<span style=\"color:green\">" << currentDeadline << " (topic deadline)</span>. ";
+      out << "<span style=\"color:green\">" << currentDeadline << "</span>. ";
     else if (deadlineIsNear)
-      out << "<span style=\"color:red\">" << currentDeadline << " (topic deadline)</span>. ";
+      out << "<span style=\"color:red\">" << currentDeadline << "</span>. ";
     else if (deadlineInherited)
-      out << "<span style=\"color:blue\">" << currentDeadline << " (topic deadline)</span>. ";
+      out << "<span style=\"color:blue\">" << currentDeadline << "</span>. ";
     else
       out << "<span style=\"color:brown\">" << currentDeadline << "</span>. ";
     out << hoursTillDeadlineStream.str();
   }
   return out.str();
-  if (!theGlobalVariables.UserDefaultHasAdminRights() || theGlobalVariables.UserStudentViewOn())
-    return out.str();
-  out << "<span style=\"color:blue\">" << currentDeadline << "</span>. ";
-  out << hoursTillDeadlineStream.str();
 #else
   out  << "Database not running: no deadlines";
-#endif // MACRO_use_MySQL
   return out.str();
+#endif // MACRO_use_MySQL
 }
 
 std::string CalculatorHTML::ToStringAllSectionDeadlines
@@ -1460,13 +1457,15 @@ std::string CalculatorHTML::ToStringDeadline
 }
 
 std::string CalculatorHTML::ToStringDeadlineModifyButton
-(const std::string& inputFileName, bool problemAlreadySolved, bool isProblemGroup)
+(const std::string& inputFileName, std::string& buttonHtmlContent,
+ bool problemAlreadySolved, bool isProblemGroup)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringDeadlineModifyButton");
   if (!theGlobalVariables.UserDefaultHasAdminRights() || theGlobalVariables.UserStudentViewOn())
     return "";
+  (void) problemAlreadySolved;
   std::stringstream out;
   std::stringstream deadlineStream;
-  deadlineStream << "<table><tr>";
+  deadlineStream << "<table class=\"deadlineTable\"><tr>";
   deadlineStream << "<td><table><tr><th>Grp.</th><th>Deadline</th></tr>";
   List<std::string> deadlineIds;
   deadlineIds.SetSize(this->databaseStudentSections.size);
@@ -1520,14 +1519,16 @@ std::string CalculatorHTML::ToStringDeadlineModifyButton
   deadlineStream << "Set</button>";
   deadlineStream << "<span id=\"" << deadlineIdReport << "\"></span>";
   deadlineStream << "</td>";
-  deadlineStream << "</tr></table>";
-//  out << deadlineStream.str();
-  out << "<button class=\"accordion\">deadline</button><span class=\"panel\">";
-  out << deadlineStream.str();
+  deadlineStream << "</tr>";
   if (!isProblemGroup)
-    out << "(overrides section deadline). ";
+    deadlineStream << "<tr><td>(overrides section deadline).</td></tr> ";
   else
-    out << "(overridden by per-problem-deadline). ";
+    deadlineStream << "<tr><td>(overriden by per-problem-deadline).</td></tr> ";
+
+  deadlineStream << "</table>";
+//  out << deadlineStream.str();
+  out << "<button class=\"accordion\">" << buttonHtmlContent << "</button><span class=\"panel\">";
+  out << deadlineStream.str();
   out << "</span>";
 
 //  out << CGI::GetHtmlSpanHidableStartsHiddeN(deadlineStream.str(), "deadline+ ");
@@ -2375,9 +2376,10 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size)
         problemAlreadySolved=true;
     }
-    int todoDetermineDeadlineIfAny;
-//    out << theProblemHome.ToStringOnEDeadlineFormatted
-//    (this->fileName, this->currentUser.extraInfoUnsafe, true, problemAlreadySolved);
+    std::string theDeadlineString=this->ToStringDeadline(this->fileName, problemAlreadySolved, true);
+    if (theDeadlineString!="")
+      theDeadlineString+="\n<br>\n";
+    outBody << theDeadlineString;
 #endif
     //outBody << "<br>";
   }
@@ -2489,7 +2491,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   List<std::string> randomSeedContainer;
   randomSeedContainer.AddOnTop("randomSeed");
   std::string calcArgsNoPassExamDetails=
-  theGlobalVariables.ToStringCalcArgsNoNavigation(&randomSeedContainer);
+  theGlobalVariables.ToStringCalcArgsNoNavigation(true, &randomSeedContainer);
   if (theGlobalVariables.UserDefaultHasAdminRights())
   { if (theGlobalVariables.UserStudentViewOn())
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
@@ -2578,7 +2580,7 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
   out << "request=" << requestType << "&";
   List<std::string> excludedTags;
   excludedTags.AddOnTop("randomSeed");
-  out << theGlobalVariables.ToStringCalcArgsNoNavigation(&excludedTags)
+  out << theGlobalVariables.ToStringCalcArgsNoNavigation(true, &excludedTags)
   << "courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "&";
   if  (!theGlobalVariables.flagRunningApache && this->fileName!="")
     out << "fileName=" << CGI::StringToURLString(this->fileName) << "&";
@@ -2663,7 +2665,6 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
   }
   //stOutput << "<hr>CurrentUser.problemNames=" << this->currentUser.problemNames.ToStringCommaDelimited();
   #ifdef MACRO_use_MySQL
-  bool noSubmissionsYet=false;
   if (this->currentUseR.theProblemData.Contains(theFileName))
   { ProblemData& theProbData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName);
     if (!theProbData.flagProblemWeightIsOK)
@@ -2679,21 +2680,20 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
       } else if (theProbData.theAnswers.size>1)
         out << theProbData.totalNumSubmissions << " submission(s), " << theProbData.numCorrectlyAnswered
         << " out of "<< theProbData.theAnswers.size << " subproblems correctly answered. ";
-    } else if (theProbData.totalNumSubmissions==0)
-      noSubmissionsYet=true;
-    else if (theProbData.numCorrectlyAnswered<theProbData.theAnswers.size)
-    { out << "<span style=\"color:red\"><b> "
-      << theProbData.Points << " out of "
-      << theProbData.adminData.ProblemWeight << " point(s). </b></span>";
-    } else if (theProbData.numCorrectlyAnswered==theProbData.theAnswers.size)
-    { out << "<span style=\"color:green\"><b> "
-      << theProbData.Points << " out of "
-      << theProbData.adminData.ProblemWeight << " point(s). </b></span>";
+    } else if (theProbData.totalNumSubmissions!=0)
+    { if (theProbData.numCorrectlyAnswered<theProbData.theAnswers.size)
+      { out << "<span style=\"color:red\"><b> "
+        << theProbData.Points << " out of "
+        << theProbData.adminData.ProblemWeight << " point(s). </b></span>";
+      } else if (theProbData.numCorrectlyAnswered==theProbData.theAnswers.size)
+      { out << "<span style=\"color:green\"><b> "
+        << theProbData.Points << " out of "
+        << theProbData.adminData.ProblemWeight << " point(s). </b></span>";
+      }
     }
   } else
   { out << "<span style=\"color:brown\"><b>No submissions.</b> </span>" ;
   }
-
   #endif // MACRO_use_MySQL
   return out.str();
 
@@ -3143,10 +3143,10 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   }
   this->displayDeadline=owner.ToStringDeadline(this->id, problemSolved, returnEmptyStringIfNoDeadline);
   if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
-  { if (this->displayDeadline!="" && this->problem!="")
-      this->displayDeadline+="\n<br>\n";
-    this->displayDeadline+=owner.ToStringDeadlineModifyButton
-    (this->id, problemSolved, this->flagIsSubSection || this->flagIsSection || this->flagIsChapter);
+  { if (this->displayDeadline=="")
+      this->displayDeadline+="Deadline";
+    this->displayDeadline=owner.ToStringDeadlineModifyButton
+    (this->id, this->displayDeadline, problemSolved, this->flagIsSubSection || this->flagIsSection || this->flagIsChapter);
     std::stringstream titleAndDeadlineStream;
     titleAndDeadlineStream
     << "<span class=\"deadlineTitleContainer\">"

@@ -12,17 +12,21 @@ problemNavigation {
 textarea{
   resize: both;
 }
+
 .calculatorHidden{
   display:none;
 }
+
 .calculatorCommentBeforeSubmission{
   display:none;
 }
+
 .calculatorMQfieldEnclosure{
 }
 
 .problemForm{
 }
+
 .normalButton{
 }
 
@@ -30,33 +34,40 @@ textarea{
   color:red;
   width:60px;
 }
+
 .showSolutionButton{
   color:green;
   width:60px;
 }
+
 .submitButton:hover {
   background-color:#878787;
 }
+
 .previewButton {
   color:green;
   width:60px;
 }
+
 .previewButton:hover {
   background-color:#878787;
 }
+
 .showAnswerButton {
   color:green;
   width:60px;
 }
+
 .showAnswerButton:hover {
   background-color:#878787;
 }
+
 button.accordion {
   background-color: #eee;
   color: #444;
   cursor: pointer;
   padding: 0px;
-  width: 100%;
+  width: 100px;
   border: none;
   text-align: left;
   outline: none;

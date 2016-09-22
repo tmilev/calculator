@@ -68,6 +68,7 @@ class UserCalculatorData{
   std::string enteredShaonedSaltedPassword;
   std::string userRole;
   std::string authenticationTokenCreationTime;
+  //List<std::string> sectionsViewableByUser;
   List<std::string> selectedColumnsUnsafe;
   List<std::string> selectedColumnValuesUnsafe;
   List<std::string> selectedColumnsRetrievalFailureRemarks;

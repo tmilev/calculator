@@ -517,7 +517,13 @@ std::string UserCalculator::ToString()
 
   for (int i=0; i<this->theProblemData.size(); i++)
     out << "<br>Problem: " << this->theProblemData.theKeys[i] << "; random seed: "
-    << this->theProblemData.theValues[i].randomSeed << "; weight: "
+    << this->theProblemData.theValues[i].randomSeed << "; numSubmissions: "
+    << this->theProblemData.theValues[i].totalNumSubmissions
+    << "; correct: "
+    << this->theProblemData.theValues[i].Points
+    << "; points: "
+    << this->theProblemData.theValues[i].numCorrectlyAnswered
+    << "; weight: "
     << this->theProblemData.theValues[i].adminData.ProblemWeightUserInput << " ("
     << this->theProblemData.theValues[i].adminData.ProblemWeight.ToString() << ")";
   return out.str();
@@ -1037,6 +1043,9 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
   if (!CGI::ChopCGIString(inputData, theMap, commentsOnFailure))
     return false;
   //stOutput << "<hr>DEBUG: Interpreting: <br>" << CGI::URLKeyValuePairsToNormalRecursiveHtml( inputData )<< "<hr>";
+  this->Points=0;
+  this->numCorrectlyAnswered=0;
+  this->totalNumSubmissions=0;
   this->flagRandomSeedGiven=false;
   if (theGlobalVariables.UserRequestRequiresLoadingRealExamData())
   { if (theMap.Contains("randomSeed"))

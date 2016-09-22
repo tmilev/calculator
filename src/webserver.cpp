@@ -2389,8 +2389,15 @@ int WebWorker::ProcessAssignTeacherToSection()
   return 0;
 }
 
+int WebWorker::ProcessScores()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessScores");
+  this->SetHeaderOKNoContentLength();
+  stOutput << HtmlInterpretation::GetScoresPage();
+  return 0;
+}
+
 int WebWorker::ProcessAccounts()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessDatabase");
+{ MacroRegisterFunctionWithName("WebWorker::ProcessAccounts");
   this->SetHeaderOKNoContentLength();
   stOutput << HtmlInterpretation::GetAccountsPage(this->hostWithPort);
   return 0;
@@ -2694,6 +2701,8 @@ int WebWorker::ServeClient()
             theGlobalVariables.userCalculatorRequestType=="submitExercise")
             && theGlobalVariables.flagLoggedIn)
     return this->ProcessSubmitProblem();
+  else if (theGlobalVariables.userCalculatorRequestType=="scores" && theGlobalVariables.flagLoggedIn)
+    return this->ProcessScores();
   else if (theGlobalVariables.UserGuestMode() && theGlobalVariables.userCalculatorRequestType=="submitExerciseNoLogin")
     return this->ProcessSubmitProblem();
   else if ((theGlobalVariables.userCalculatorRequestType=="problemGiveUp" &&
@@ -3803,6 +3812,8 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("html/", "../public_html/"); //<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("/html-common/", "../public_html/html-common/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("html-common/", "../public_html/html-common/");//<-internal use
+  folderSubstitutionsNonSensitive.SetKeyValue("/html-common-calculator/", "./html-common/");//<-coming from webserver
+  folderSubstitutionsNonSensitive.SetKeyValue("html-common-calculator/", "./html-common/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("/font/", "../public_html/html-common/font/");
   folderSubstitutionsNonSensitive.SetKeyValue("/DefaultProblemLocation/", "../problemtemplates/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problemtemplates/");//<-internal use

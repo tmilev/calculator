@@ -198,7 +198,8 @@ public:
 (const std::string& inputFileName, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
   ;
   std::string ToStringDeadlineModifyButton
-  (const std::string& inputFileName, bool problemAlreadySolved, bool isProblemGroup);
+  (const std::string& inputFileName, std::string& buttonHtmlContent,
+   bool problemAlreadySolved, bool isProblemGroup);
   std::string ToStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay="");
   std::string ToStringLinkFromFileName(const std::string& theFileName);
   std::string ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName);

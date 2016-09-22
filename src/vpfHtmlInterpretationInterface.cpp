@@ -945,7 +945,6 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
   std::stringstream out;
   if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection)
   { out << "Browsing accounts allowed only for logged-in admins over ssl connection.";
-    out << "</body></html>";
     return out.str();
   }
   DatabaseRoutines theRoutines;
@@ -957,7 +956,6 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
   << "<br>Database user: " << theRoutines.databaseUser;
   if (!theRoutines.PrepareClassData(notUsed, userTable, columnLabels, commentsOnFailure))
   { out << "<b>Failed to load user info.</b> Comments: " << commentsOnFailure.str();
-    out << "</body></html>";
     return out.str();
   }
 //  out << "DEBUG: Usertable: " << userTable.ToStringCommaDelimited();
@@ -967,7 +965,6 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
       indexExtraInfo=i;
   if (indexExtraInfo==-1)
   { out << "Failed to load extra user info. ";
-    out << "</body></html>";
     return out.str();
   }
   HashedList<std::string, MathRoutines::hashString> theSections;
@@ -984,6 +981,24 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
 #else
   return "<b>Database not available. </b>";
 #endif // MACRO_use_MySQL
+}
+
+std::string HtmlInterpretation::GetScoresPage()
+{ MacroRegisterFunctionWithName("WebWorker::GetScoresPage");
+  std::stringstream out;
+  out << "<html>"
+  << "<head>"
+  << CGI::GetCalculatorStyleSheetWithTags()
+  << HtmlSnippets::GetJavascriptStandardCookies()
+  << "</head>"
+  << "<body onload=\"loadSettings();\">\n";
+  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation><br>";
+  out << HtmlInterpretation::ToStringUserScores();
+  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+  out << "</body></html>";
+  return out.str();
+
+
 }
 
 std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddressWithPort)
@@ -1005,7 +1020,7 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
 }
 
 std::string HtmlInterpretation::ToStringUserDetailsTable
-(bool adminsOnly, List<List<std::string> > userTable, List<std::string> columnLabels,
+(bool adminsOnly, List<List<std::string> >& userTable, List<std::string>& columnLabels,
  const std::string& hostWebAddressWithPort)
 { MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserDetailsTable");
 #ifdef MACRO_use_MySQL
@@ -1015,7 +1030,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   std::stringstream tableStream;
   tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th>"
   << "<th>Activation manual email</th>"
-  << "<th>Section/Group</th> <th>Pre-filled login link</th></tr>";
+  << "<th>Section/Group</th> <th>Pre-filled login link</th><th>Score</th></tr>";
   UserCalculator currentUser;
   currentUser.currentTable=DatabaseStrings::usersTableName;
   int indexUser=-1;
@@ -1023,6 +1038,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   int indexActivationToken=-1;
   int indexUserRole=-1;
   int indexExtraInfo=-1;
+  //int indexProblemData=-1;
   for (int i=0; i<columnLabels.size; i++)
   { if (columnLabels[i]==DatabaseStrings::userColumnLabel)
       indexUser=i;
@@ -1189,8 +1205,66 @@ std::string HtmlInterpretation::ToStringAssignSection()
   return out.str();
 }
 
+std::string HtmlInterpretation::ToStringUserScores()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserScores");
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return "only admins are allowed to view scores";
+  std::stringstream out;
+  CalculatorHTML theProblem;
+  theProblem.currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
+  theProblem.LoadFileNames();
+  if (!theProblem.LoadAndParseTopicList(out))
+    return out.str();
+  if (!theProblem.PrepareSectionList(out))
+    return out.str();
+  List<List<std::string> > userTable;
+  List<std::string> userLabels;
+  DatabaseRoutines theRoutines;
+  if (!theRoutines.FetchAllUsers(userTable, userLabels, out))
+    return out.str();
+  int usernameIndex=userLabels.GetIndex(DatabaseStrings::userColumnLabel);
+  if (usernameIndex==-1)
+    return "Could not find username column";
+  int userInfoIndex=userLabels.GetIndex(DatabaseStrings::userGroupLabel);
+  if (userInfoIndex==-1)
+    return "Could not find user group column";
+  int problemDataIndex=userLabels.GetIndex("problemData");
+  if (problemDataIndex==-1)
+    return "Could not find problem data column";
+  int problemWeightScheme=userLabels.GetIndex(DatabaseStrings::problemWeightsIdColumnName);
+  if (problemWeightScheme==-1)
+    return "Could not find problem weight scheme";
+  List<Rational> userScores;
+  CalculatorHTML currentUserRecord;
+  userScores.SetSize(userTable.size);
+  for (int i=0; i<userTable.size; i++)
+  { userScores[i]=-1;
+    currentUserRecord.currentUseR.username=userTable[i][usernameIndex];
+    //out << "<hr>Debug: reading db problem data from: "
+    //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(userTable[i][problemDataIndex]) << "<br>";
+    if (!currentUserRecord.currentUseR.InterpretDatabaseProblemData(userTable[i][problemDataIndex], out))
+      continue;
+    //out << "<br>DEBUG: after db data read: " << currentUserRecord.currentUseR.ToString();
+    currentUserRecord.ReadProblemInfoAppend
+    (theProblem.currentUseR.problemInfoString.value,
+     currentUserRecord.currentUseR.theProblemData, out);
+    //out << "<br>DEBUG: after ReadProblemInfoAppend: " << currentUserRecord.currentUseR.ToString();
+    currentUserRecord.currentUseR.ComputePointsEarned(theProblem.problemNamesNoTopics);
+    userScores[i]=currentUserRecord.currentUseR.pointsEarned;
+    //out << "<br>DEBUG: Computed scores from: " << currentUserRecord.currentUseR.ToString();
+  }
+//  out << "DBUG: prob names: " << theProblem.problemNamesNoTopics.ToStringCommaDelimited();
+  out << "<table><tr><th>User</th><td>Section</td><td>Score</td></tr>";
+  for (int i=0; i<userTable.size; i++)
+    out << "<tr><td>" << userTable[i][usernameIndex] << "</td>"
+    << "<td>" << userTable[i][userInfoIndex] << "</td>"
+    << "<td>" << userScores[i].GetDoubleValue() << "</td></tr>";
+  out << "</table>";
+  return out.str();
+}
+
 std::string HtmlInterpretation::ToStringUserDetails
-(bool adminsOnly, List<List<std::string> > userTable, List<std::string> columnLabels,
+(bool adminsOnly, List<List<std::string> >& userTable, List<std::string>& columnLabels,
  const std::string& hostWebAddressWithPort)
 { MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserDetails");
   std::stringstream out;
@@ -1270,10 +1344,10 @@ std::string HtmlInterpretation::ToStringNavigation()
       out << " <b>(admin)</b>";
     out << ": " << theGlobalVariables.userDefault.username.value << linkSeparator;
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=logout&";
-    out << theGlobalVariables.ToStringCalcArgsNoNavigation(false) << " \">Log out</a>" << linkSeparator;
+    out << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << " \">Log out</a>" << linkSeparator;
     if (theGlobalVariables.flagUsingSSLinCurrentConnection)
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=changePasswordPage&"
-      << theGlobalVariables.ToStringCalcArgsNoNavigation(false) << "\">Change password</a>" << linkSeparator;
+      << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << "\">Change password</a>" << linkSeparator;
     else
       out << "<b>Password change: <br>secure connection<br>only</b>" << linkSeparator;
     if (theGlobalVariables.userDefault.userGroup.value!="")
@@ -1283,26 +1357,32 @@ std::string HtmlInterpretation::ToStringNavigation()
   if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
   { if (theGlobalVariables.userCalculatorRequestType!="accounts")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts&"
-      << theGlobalVariables.ToStringCalcArgsNoNavigation(false)
+      << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
       << "\">Accounts</a>" << linkSeparator;
     else
-      out << "<b>Accounts</b>" << linkBigSeparator;
+      out << "<b>Accounts</b>" << linkSeparator;
+    if (theGlobalVariables.userCalculatorRequestType!="scores")
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=scores&"
+      << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
+      << "\">Scores</a>" << linkSeparator;
+    else
+      out << "<b>Scores</b>" << linkSeparator;
     if (theGlobalVariables.userCalculatorRequestType!="status")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=status&"
-      << theGlobalVariables.ToStringCalcArgsNoNavigation(false)
+      << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
       << "\">Server</a>" << linkSeparator;
     else
       out << "<b>Server</b>" << linkBigSeparator;
     if (theGlobalVariables.userCalculatorRequestType!="database")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=database&"
-      << theGlobalVariables.ToStringCalcArgsNoNavigation(false)
+      << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
       << "\">Database</a>" << linkBigSeparator;
     else
       out << "<b>Database</b>" << linkBigSeparator;
   }
   if (theGlobalVariables.userCalculatorRequestType!="compute")
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=compute&"
-    << theGlobalVariables.ToStringCalcArgsNoNavigation(false) << " \">Calculator</a>" << linkBigSeparator;
+    << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << " \">Calculator</a>" << linkBigSeparator;
   else
     out << "<b>Calculator</b> " << linkBigSeparator;
   return out.str();

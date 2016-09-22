@@ -82,6 +82,7 @@ public:
   int ProcessCalculator();
   int ProcessDatabase();
   int ProcessAccounts();
+  int ProcessScores();
   int ProcessAssignTeacherToSection();
   int ProcessExamPage();
   int ProcessTemplate();

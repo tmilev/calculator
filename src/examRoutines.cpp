@@ -3149,9 +3149,9 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     (this->id, this->displayDeadline, problemSolved, this->flagIsSubSection || this->flagIsSection || this->flagIsChapter);
     std::stringstream titleAndDeadlineStream;
     titleAndDeadlineStream
-    << "<span class=\"deadlineTitleContainer\">"
+    << "<span class=\"deadlineAndTitleContainer\">"
     << "<span class=\"titleContainer\">" << this->displayTitle << "</span>"
-    << "<span class=\"deadlineForTitleContainer\">" << this->displayDeadline << "</span>"
+    << "<span class=\"deadlineContainer\">" << this->displayDeadline << "</span>"
     << "</span>"
     ;
     this->displayTitleWithDeadline=titleAndDeadlineStream.str();

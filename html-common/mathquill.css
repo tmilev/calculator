@@ -9,8 +9,8 @@
  */
 @font-face {
   font-family: Symbola;
-  src: url(/font/Symbola.eot);
-  src: local("Symbola Regular"), local("Symbola"), url(/font/Symbola.woff2) format("woff2"), url(/font/Symbola.woff) format("woff"), url(/font/Symbola.ttf) format("truetype"), url(/font/Symbola.otf) format("opentype"), url(/font/Symbola.svg#Symbola) format("svg");
+  src: url(/html-common/font/Symbola.eot);
+  src: local("Symbola Regular"), local("Symbola"), url(/html-common/font/Symbola.woff2) format("woff2"), url(/html-common/font/Symbola.woff) format("woff"), url(/html-common/font/Symbola.ttf) format("truetype"), url(/html-common/font/Symbola.otf) format("opentype"), url(/html-common/font/Symbola.svg#Symbola) format("svg");
 }
 .mq-editable-field {
   display: -moz-inline-box;

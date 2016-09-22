@@ -768,7 +768,7 @@ std::string& CGI::GetJavascriptInitilizeButtons()
   std::string fileReader;
   out << "<script type=\"text/javascript\">";
   bool found=true;
-  if (!FileOperations::LoadFileToStringVirtual("html-common/initializebuttons.js", fileReader, commentsOnFailure))
+  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/initializebuttons.js", fileReader, commentsOnFailure))
   { theLog << logger::red  << "Javascript file initializebuttons.js not found. " << logger::endL;
     found=false;
   }
@@ -785,7 +785,7 @@ std::string& CGI::GetMathQuillStyleSheetWithTags()
   std::stringstream out, commentsOnFailure;
   std::string fileReader;
   out << "<style>";
-  if (!FileOperations::LoadFileToStringVirtual("html-common/mathquill.css", fileReader, commentsOnFailure))
+  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/mathquill.css", fileReader, commentsOnFailure))
   { theLog << logger::red  << "Style file mathquill.css is missing. " << logger::endL;
     out << "Style file mathquill.css is missing. ";
   } else
@@ -801,7 +801,7 @@ std::string& CGI::GetCalculatorStyleSheetWithTags()
   std::stringstream out, commentsOnFailure;
   std::string fileReader;
   out << "<style>";
-  if (!FileOperations::LoadFileToStringVirtual("html-common/styleCalculator.css", fileReader, commentsOnFailure))
+  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/styleCalculator.css", fileReader, commentsOnFailure))
     out << commentsOnFailure.str();
   else
     out << fileReader;
@@ -815,12 +815,12 @@ std::string& CGI::GetJavascriptMathQuillDefault()
     return CGI::JavascriptMathQuillDefault;
   std::stringstream commentsOnError;
   std::string theJS;
-  if (!FileOperations::LoadFileToStringVirtual("html-common/mathquill.min.js", theJS, commentsOnError))
+  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/mathquill.min.js", theJS, commentsOnError))
   { CGI::JavascriptMathQuillDefault=commentsOnError.str();
     return CGI::JavascriptMathQuillDefault;
   }
   std::stringstream out;
-  out << "<script src=\"/html-common/jquery.min.js\"></script>\n"
+  out << "<script src=\"/html-common-calculator/jquery.min.js\"></script>\n"
   << "<script type=\"text/javascript\">" << theJS << "</script>\n"
   << "<script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2);</script>";
   CGI::JavascriptMathQuillDefault=out.str();
@@ -832,12 +832,12 @@ std::string& CGI::GetJavascriptMathQuillMatrixSupport()
     return CGI::JavascriptMathQuillMatrixSupport;
   std::stringstream commentsOnError;
   std::string theJS;
-  if (!FileOperations::LoadFileToStringVirtual("html-common/mathquill.min-matrix.js", theJS, commentsOnError))
+  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/mathquill.min-matrix.js", theJS, commentsOnError))
   { CGI::JavascriptMathQuillMatrixSupport=commentsOnError.str();
     return CGI::JavascriptMathQuillMatrixSupport;
   }
   std::stringstream out;
-  out << "<script src=\"/html-common/jquery.min.js\"></script>\n"
+  out << "<script src=\"/html-common-calculator/jquery.min.js\"></script>\n"
   << "<script type=\"text/javascript\">" << theJS << "</script>\n"
   << "<script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2);</script>";
   CGI::JavascriptMathQuillMatrixSupport=out.str();
@@ -849,7 +849,7 @@ std::string& CGI::GetJavascriptAutocompleteWithTags()
     return CGI::JavascriptAutoCompleteWithTags;
   std::stringstream out;
   std::string theJS;
-  if (!FileOperations::LoadFileToStringVirtual("html-common/autocomplete.js", theJS, out))
+  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/autocomplete.js", theJS, out))
     CGI::JavascriptAutoCompleteWithTags=out.str();
   else
     CGI::JavascriptAutoCompleteWithTags= "<script type=\"text/javascript\">" + theJS + "</script>\n";
@@ -861,7 +861,7 @@ std::string& CGI::GetJavascriptSha1()
     return CGI::JavascriptSha1;
   std::stringstream out;
   std::string theJS;
-  if (!FileOperations::LoadFileToStringVirtual("html-common/sha1.js", theJS, out))
+  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/sha1.js", theJS, out))
     CGI::JavascriptSha1=out.str();
   else
     CGI::JavascriptSha1= "<script type=\"text/javascript\">" + theJS + "</script>\n";

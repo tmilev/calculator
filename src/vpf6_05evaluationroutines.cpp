@@ -608,6 +608,7 @@ void Calculator::EvaluateCommands()
   theGlobalVariables.theDefaultFormat.GetElement().flagExpressionNewLineAllowed=true;
   theGlobalVariables.theDefaultFormat.GetElement().flagIncludeExtraHtmlDescriptionsInPlots=!this->flagPlotNoControls;
   theGlobalVariables.theDefaultFormat.GetElement().flagLatexDetailsInHtml=this->flagWriteLatexPlots;
+  theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal=true;
   if(theGlobalVariables.flagRunningCommandLine)
   { theGlobalVariables.theDefaultFormat.GetElement().flagUseQuotes=false;
     theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal=true;

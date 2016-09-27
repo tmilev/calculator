@@ -184,7 +184,7 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   theFormat.flagUseLatex=true;
   theFormat.flagUsePmatrix=true;
   out << "\\(" << studentAnswerNoContextE.ToString(&theFormat) << "\\)";
-  if (currentA.commandIndicesCommentsBeforeSubmission.size==0)
+  if (currentA.commandIndicesVisibleCommentsBeforeSubmission.size==0)
   { out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return out.str();
   }
@@ -233,8 +233,9 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   theFormat.flagExpressionIsFinal=true;
   theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
   theFormat.flagUseQuotes=false;
-  for (int j=0; j<currentA.commandIndicesCommentsBeforeSubmission.size; j++)
-  { int actualIndex=3+currentA.commandIndicesCommentsBeforeSubmission[j];
+  for (int j=0; j<currentA.commandIndicesVisibleCommentsBeforeSubmission.size; j++)
+  { int actualIndex=3+currentA.commandIndicesVisibleCommentsBeforeSubmission[j];//<-adding 3 to actual index; the first
+    //3 indices are reserved.
     if (actualIndex>=theInterpreterWithAdvice.theProgramExpression.size() )
       continue;
     const Expression& currentE=theInterpreterWithAdvice.theProgramExpression[actualIndex][1];

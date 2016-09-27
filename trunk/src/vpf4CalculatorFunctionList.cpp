@@ -925,6 +925,12 @@ D-B;\
    "\\log{}(e); \\log 10", true, false, "CalculatorFunctionsGeneral::innerLog", "\\log")
    ;
   this->AddOperationInnerHandler
+  ("logBase", CalculatorFunctionsGeneral::innerLogBaseSimpleCases, "",
+   "If the argument is a power of the base does the computation. ",
+   "\\log_5 25; log_5 1; log_5 (1/5)", true, false, "CalculatorFunctionsGeneral::innerLogBaseSimpleCases",
+   "logBaseSimpleCases")
+   ;
+  this->AddOperationInnerHandler
   ("logBase", CalculatorFunctionsGeneral::innerLogBase, "",
    "Logarithm function (arbitrary base). Equivalent to \\log_{{a}} {{b}}= (\\log b)/(\\log a). ",
    "\\log_10 5; \\log _e 10; \\ln 10; \\log_a b", true, false, "CalculatorFunctionsGeneral::innerLogBase",
@@ -1027,9 +1033,19 @@ D-B;\
    "Checks if the number is prime by the Miller-Rabin test.",
    "A=100!+1; IsPrimeMillerRabin(A); IsPrimeMillerRabin( 4256233);IsPrimeMillerRabin(49979687);IsPrimeMillerRabin( 4256233*49979687)")
    ;
+    this->AddOperationInnerHandler
+  ("gcd", CalculatorFunctionsGeneral::innerGCD, "",
+   "Greatest common divisor of two integers.",
+   "gcd(100!+1, 101*103)", true, false, "CalculatorFunctionsGeneral::innerGCD", "gcd")
+   ;
+    this->AddOperationInnerHandler
+  ("lcm", CalculatorFunctionsGeneral::innerLCM, "",
+   "Least common multiple of two integers.",
+   "lcm(91, 1001)", true, false, "CalculatorFunctionsGeneral::innerLCM", "lcm")
+   ;
 
   this->AddOperationInnerHandler
-  ("gcdPoly", &this->innerGCD, "",
+  ("gcdPoly", Calculator::innerGCDPoly, "",
    "Greatest common divisor polynomial of two polynomials. \
    The divisor is scaled so that all coefficients are relatively prime integers, \
    and so that the leading monomial under the graded lexicographic order (x_2>x_1, etc.)\
@@ -1041,10 +1057,10 @@ D-B;\
    x_{13}^{3}x_{15}x_{18}x_{21}^{2}x_{22}-2x_{13}^{3}x_{17}^{2}x_{21}^{3}-\
    4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}-\
    2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-\
-   x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )")
+   x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )", true, false, "Calculator::innerGCDPoly", "gcdPoly" )
    ;
   this->AddOperationInnerHandler
-  ("lcmPoly", &this->innerLCM, "",
+  ("lcmPoly", Calculator::innerLCMPoly, "",
    "Least common multiple of two polynomials.\
    The output is scaled so that all coefficients are relatively prime integers, \
    and so that the leading monomial under the graded lexicographic order (x_2>x_1, etc.)\
@@ -1056,7 +1072,7 @@ D-B;\
    x_{13}^{3}x_{15}x_{18}x_{21}^{2}x_{22}-2x_{13}^{3}x_{17}^{2}x_{21}^{3}-\
    4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}-\
    2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-\
-   x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )")
+   x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )", true, false, "Calculator::innerLCMPoly", "lcmPoly" )
    ;
   this->AddOperationInnerHandler
   ("Interpolate", &this->innerInterpolatePoly, "",
@@ -3312,6 +3328,7 @@ void Calculator::initOperationsThatAreKnownFunctions()
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arcsin");
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arccos");
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\log");
+  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("logBase");
 }
 
 void Calculator::AddKnownDoubleConstant(const std::string& theConstantName, double theConstantValue)

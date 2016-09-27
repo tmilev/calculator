@@ -72,6 +72,11 @@ public:
       }
   }
   static void gcd(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output);
+  static LargeIntUnsigned gcd(const LargeIntUnsigned& a, const LargeIntUnsigned& b)
+  { LargeIntUnsigned output;
+    LargeIntUnsigned::gcd(a, b, output);
+    return output;
+  }
   static LargeIntUnsigned lcm(const LargeIntUnsigned& a, const LargeIntUnsigned& b)
   { LargeIntUnsigned output;
     LargeIntUnsigned::lcm(a, b, output);

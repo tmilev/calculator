@@ -215,8 +215,8 @@ bool Vectors<coefficient>::ConesIntersect
   return true;
 }
 
-bool Calculator::innerGCDOrLCM(Calculator& theCommands, const Expression& input, Expression& output, bool doGCD)
-{ MacroRegisterFunctionWithName("Calculator::fGCD");
+bool Calculator::innerGCDOrLCMPoly(Calculator& theCommands, const Expression& input, Expression& output, bool doGCD)
+{ MacroRegisterFunctionWithName("Calculator::innerGCDOrLCMPoly");
   Vector<Polynomial<Rational> > thePolys;
   Expression theContext(theCommands);
 //  stOutput << "<br>Time elapsed before calling innerGCDOrLCM: " << theGlobalVariables.GetElapsedSeconds() << " seconds.";

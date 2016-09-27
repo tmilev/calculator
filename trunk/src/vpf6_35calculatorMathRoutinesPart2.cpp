@@ -1110,3 +1110,107 @@ bool CalculatorFunctionsGeneral::innerThaw(Calculator& theCommands, const Expres
   }
   return false;
 }
+
+bool CalculatorFunctionsGeneral::innerLCM(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLCM");
+  if (input.size()<3)
+    return false;
+  Vector<LargeInt> theInts;
+  if (!theCommands.GetVectorLargeIntFromFunctionArguments(input, theInts))
+    return false;
+  if (theInts.size<1)//<-this shouldn't happen if GetVectorLargeIntFromFunctionArguments works as intended.
+    return false;
+  LargeIntUnsigned theResult=theInts[0].value;
+  if (theResult==0)
+    return false;
+  for (int i=1; i<theInts.size; i++)
+  { if (theInts[i].value==0)
+      return false;
+    theResult=LargeIntUnsigned::lcm(theResult, theInts[i].value);
+  }
+  return output.AssignValue(theResult, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerGCD(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGCD");
+  if (input.size()<3)
+    return false;
+  Vector<LargeInt> theInts;
+  if (!theCommands.GetVectorLargeIntFromFunctionArguments(input, theInts))
+    return false;
+  if (theInts.size<1)//<-this shouldn't happen if GetVectorLargeIntFromFunctionArguments works as intended.
+    return false;
+  LargeIntUnsigned theResult=theInts[0].value;
+  if (theResult==0)
+    return false;
+  for (int i=1; i<theInts.size; i++)
+  { if (theInts[i].value==0)
+      return false;
+    theResult=LargeIntUnsigned::gcd(theResult, theInts[i].value);
+  }
+  return output.AssignValue(theResult, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLogBaseSimpleCases");
+  //stOutput << "reducing ...." << input.ToStringSemiFull();
+  if (!input.StartsWith(theCommands.opLogBase(), 3))
+    return false;
+  Rational theBase, theArg;
+  if (!input[1].IsOfType<Rational>(&theBase) || !input[2].IsOfType<Rational>(&theArg))
+    return false;
+  if (theBase<0 || theArg<0)
+    return false;
+  if (theBase==1)
+    return false;
+  bool changed=false;
+  int theSign=1;
+  if (theBase<1)
+  { theBase.Invert();
+    theSign*=-1;
+    changed=true;
+  }
+  if (theArg==1)
+    return output.AssignValue(0, theCommands);
+  if (theArg<1)
+  { theArg.Invert();
+    theSign*=-1;
+    changed=true;
+  }
+  LargeInt baseInt, argNum;
+  if (!theBase.IsInteger(&baseInt))
+    return false;
+  argNum=theArg.GetNumerator();
+  LargeIntUnsigned argDen=theArg.GetDenominator();
+  double doubleBase= baseInt.GetDoubleValue();
+  double doubleArgNum=argNum.GetDoubleValue();
+  if (FloatingPoint::log(doubleArgNum)/FloatingPoint::log(doubleBase)>1000)
+    return false;
+  int intPart=0;
+  while (argNum% baseInt ==0)
+  { intPart++;
+    argNum/=baseInt;
+    changed=true;
+  }
+  if (!changed)
+    return false;
+  intPart*=theSign;
+  theArg=argNum;
+  theArg/=argDen;
+  Expression logPartE, newBase, newArg;
+  newBase.AssignValue(theBase, theCommands);
+  newArg.AssignValue(theArg, theCommands);
+  logPartE.MakeXOX(theCommands, theCommands.opLogBase(), newBase, newArg);
+  if (intPart==0)
+  { output=logPartE;
+    return true;
+  }
+  Expression intPartE, mOne;
+  intPartE.AssignValue(intPart, theCommands);
+  if (theSign<0)
+  { mOne.AssignValue(-1, theCommands);
+    logPartE*=mOne;
+  }
+  output=intPartE+logPartE;
+  return true;
+}

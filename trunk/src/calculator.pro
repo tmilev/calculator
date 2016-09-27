@@ -113,3 +113,6 @@ HEADERS += \
     vpfHeader8HtmlSnippets.h \
     vpfHeader1General8DatabaseSystemIndependent.h
 
+DISTFILES += \
+    ../html-common/three-d.js
+

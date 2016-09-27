@@ -599,6 +599,11 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
     refStreamNoRequest << "topicList=" << this->topicListFileName << "&";
   if (this->courseHome!="")
     refStreamNoRequest << "courseHome=" << this->courseHome << "&";
+  if (theFileName==this->topicListFileName || theFileName==this->courseHome)
+  { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "?request=template&" << refStreamNoRequest.str() << "\">" << "Home" << "</a> ";
+    return out.str();
+  }
   if (!theGlobalVariables.UserGuestMode())
   { refStreamExercise << theGlobalVariables.DisplayNameExecutable << "?request=exercise&" << refStreamNoRequest.str();
     refStreamForReal << theGlobalVariables.DisplayNameExecutable << "?request=scoredQuiz&" << refStreamNoRequest.str();
@@ -607,6 +612,8 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
   if (!theGlobalVariables.UserGuestMode())
     out << " <a href=\"" << refStreamForReal.str() << "\">" << CalculatorHTML::stringScoredQuizzes << "</a> ";
   out << " | <a href=\"" << refStreamExercise.str() << "\">" << CalculatorHTML::stringPracticE << "</a> ";
+  //out << "DEBUG: topiclist: " << this->topicListFileName << " courseHome: " << this->courseHome
+  //<< " filename: " << theFileName;
   return out.str();
 
 }
@@ -1019,7 +1026,7 @@ bool CalculatorHTML::PrepareCommentsBeforeSubmission
 (Answer& theAnswer, std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommentsBeforeSubmission");
   (void) comments;
-  std::stringstream streamCommands;
+  std::stringstream streamCommands, streamCommandsBeforeInterpretation;
   //stOutput << "<hr>DEBUG: Preparing give-up commands for: "
   //<< theAnswer.answerId << "<hr>";
   int counter=0;
@@ -1040,10 +1047,13 @@ bool CalculatorHTML::PrepareCommentsBeforeSubmission
       theAnswer.commandIndicesCommentsBeforeSubmissioN.AddOnTop(counter);
       if (currentElt.IsVisibleCommentBeforeSubmission())
         theAnswer.commandIndicesVisibleCommentsBeforeSubmission.AddOnTop(counter);
+      else
+        streamCommandsBeforeInterpretation << this->CleanUpCommandString(currentElt.content);
       counter++;
     }
   }
   theAnswer.commandsCommentsBeforeSubmissionOnly=streamCommands.str();
+  theAnswer.commandsBeforeInterpretation=streamCommandsBeforeInterpretation.str();
 //  stOutput << "<br>Final comments command: "
 //  << theAnswer.commandsNoEnclosureAnswerOnGiveUpOnly;
   return true;
@@ -2185,14 +2195,14 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
         !currentE.IsSolution())
       continue;
     if (answerIdsSeenSoFar.size==0 && currentE.GetKeyValue("name")=="")
-    { comments << "<b>Auxilary answer element: " << currentE.ToStringDebug()
+    { comments << "Auxilary answer element: " << currentE.ToStringDebug()
       << " has no name and appears before the first answer tag."
       << " Auxilary answers apply the answer tag whose id is specified in the name"
       << " tag of the auxilary answer. If the auxilary answer has no "
       << " name tag, it is assumed to apply to the (nearest) answer tag above it."
       << " To fix the issue either place the auxilary element after the answer or "
       << " specify the answer's id in the name tag of the auxilary element. "
-      << "</b>";
+      ;
       return false;
     }
     if (currentE.GetKeyValue("name")=="")
@@ -2221,7 +2231,7 @@ std::string CalculatorHTML::CleanUpCommandString(const std::string& inputCommand
 { MacroRegisterFunctionWithName("CalculatorHTML::CleanUpCommandString");
   if (inputCommand=="")
     return "";
-//  stOutput << "Cleaning up: " << inputCommand;
+  //stOutput << "<br>DEBUG: Cleaning up: " << inputCommand;
   int realStart=0;
   int realEnd=inputCommand.size()-1;
   for (; realStart< (signed) inputCommand.size(); realStart++)
@@ -2253,7 +2263,7 @@ std::string CalculatorHTML::CleanUpCommandString(const std::string& inputCommand
   { if (result[i]==' ' || result[i]=='\n')
       continue;
     if (result[i]==';')
-    { //stOutput << "to get: " << result;
+    { //stOutput << " DEBUG: to get: " << result;
       return result;
     }
     break;
@@ -2261,7 +2271,7 @@ std::string CalculatorHTML::CleanUpCommandString(const std::string& inputCommand
   if (result=="")
     return "";
   result.push_back(';');
-  //stOutput << " to get: " << result << "<br>";
+  //stOutput << "DEBUG: to get: " << result << "<br>";
   return result;
 }
 

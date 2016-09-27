@@ -124,6 +124,7 @@ struct Answer
   int numCorrectSubmissions;
   List<int> commandIndicesCommentsBeforeSubmissioN;
   List<int> commandIndicesVisibleCommentsBeforeSubmission;
+  std::string commandsBeforeInterpretation;
   std::string commandsBeforeAnswer;
   std::string commandVerificationOnly;
   std::string commandsSolutionOnly;

@@ -163,10 +163,23 @@ std::string HtmlInterpretation::SubmitProblemPreview()
     return out.str();
   }
   Answer& currentA=theProblem.theProblemData.theAnswers[indexLastAnswerId];
+  if (!theProblem.PrepareCommands(comments))
+  { out << "Something went wrong while interpreting the problem file. ";
+    if (theGlobalVariables.UserDebugFlagOn() &&
+        theGlobalVariables.UserDefaultHasAdminRights())
+      out << comments.str();
+    out << "<br>Response time: "
+    << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    return out.str();
+  }
+  std::stringstream studentInterpretationWithComments;
+  studentInterpretationWithComments << "CommandEnclosure{}{" << currentA.commandsBeforeInterpretation << "}; "
+  << studentInterpretation.str();
+
   Calculator theInterpreteR;
   theInterpreteR.flagUseLnInsteadOfLog=true;
   theInterpreteR.init();
-  theInterpreteR.Evaluate(studentInterpretation.str());
+  theInterpreteR.Evaluate(studentInterpretationWithComments.str());
   if (theInterpreteR.syntaxErrors!="")
   { out << "<span style=\"color:red\"><b>Failed to parse your answer, got:</b></span><br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false);
@@ -192,15 +205,6 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   theInterpreterWithAdvice.flagUseLnInsteadOfLog=true;
   theInterpreterWithAdvice.init();
   theInterpreterWithAdvice.flagWriteLatexPlots=false;
-  if (!theProblem.PrepareCommands(comments))
-  { out << "Something went wrong while interpreting the problem file. ";
-    if (theGlobalVariables.UserDebugFlagOn() &&
-        theGlobalVariables.UserDefaultHasAdminRights())
-      out << comments.str();
-    out << "<br>Response time: "
-    << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
-    return out.str();
-  }
   std::stringstream calculatorInputStream;
   calculatorInputStream << "CommandEnclosure{}("
   << currentA.commandsBeforeAnswer << ");";
@@ -444,10 +448,7 @@ std::string HtmlInterpretation::GetEditPageHTML()
     return out.str();
   }
   if (!theFile.ParseHTML(failureStream))
-  { out << "<b>Failed to parse file: " << theFile.fileName << ".</b> Details:<br>" << failureStream.str();
-    out << "</body></html>";
-    return out.str();
-  }
+    out << "<b>Failed to parse file: " << theFile.fileName << ".</b> Details:<br>" << failureStream.str();
   std::stringstream buttonStream, submitModPageJS;
   submitModPageJS
   //  << "submitStringAsMainInput(document.getElementById('mainInput').value, 'spanSubmitReport', 'modifyPage');"

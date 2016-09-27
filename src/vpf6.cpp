@@ -1403,6 +1403,19 @@ bool Calculator::innerMultiplyByOne(Calculator& theCommands, const Expression& i
   return true;
 }
 
+bool Calculator::GetVectorLargeIntFromFunctionArguments(const Expression& input, List<LargeInt>& output)
+{ MacroRegisterFunctionWithName("Calculator::GetVectorLargeIntFromFunctionArguments");
+  Vector<Rational> theRats;
+  if (!this->GetVectorFromFunctionArguments(input, theRats))
+    return false;
+  output.initFillInObject(theRats.size,0);
+  for (int i=0; i< theRats.size; i++)
+    if (!theRats[i].IsInteger(&output[i]))
+      return *this << "<hr>Succeeded to convert " << input.ToString() << " to the vector of rationals: "
+      << theRats.ToString() << " but failed to convert that to list of integers. ";
+  return true;
+}
+
 bool Calculator::GetVectoRInt(const Expression& input, List<int>& output)
 { MacroRegisterFunctionWithName("Calculator::GetVectoRInt");
   Vector<Rational> theRats;
@@ -1412,7 +1425,7 @@ bool Calculator::GetVectoRInt(const Expression& input, List<int>& output)
   for (int i=0; i< theRats.size; i++)
     if (!theRats[i].IsSmallInteger(&output[i]))
       return *this << "<hr>Succeeded to convert " << input.ToString() << " to the vector of rationals: "
-      << theRats.ToString() << " but failed to convert that to list of integers. ";
+      << theRats.ToString() << " but failed to convert that to list of small integers. ";
   return true;
 }
 

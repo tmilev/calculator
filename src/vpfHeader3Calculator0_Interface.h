@@ -1716,6 +1716,7 @@ public:
   bool GetVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory=-1);
   bool ConvertExpressionsToCommonContext(List<Expression>& inputOutputEs, Expression* inputOutputStartingContext=0);
   bool GetVectoRInt(const Expression& input, List<int>& output);
+  bool GetVectorLargeIntFromFunctionArguments(const Expression& input, List<LargeInt>& output);
   bool GetVectorDoubles(const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory=-1);
   template <class theType>
   bool GetVectoR
@@ -1731,12 +1732,12 @@ public:
   static bool innerFreudenthalEval(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFreudenthalFull(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerKillingForm(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerGCDOrLCM(Calculator& theCommands, const Expression& input, Expression& output, bool doGCD);
-  static bool innerLCM(Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerGCDOrLCM(theCommands, input, output, false);
+  static bool innerGCDOrLCMPoly(Calculator& theCommands, const Expression& input, Expression& output, bool doGCD);
+  static bool innerLCMPoly(Calculator& theCommands, const Expression& input, Expression& output)
+  { return theCommands.innerGCDOrLCMPoly(theCommands, input, output, false);
   }
-  static bool innerGCD(Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerGCDOrLCM(theCommands, input, output, true);
+  static bool innerGCDPoly(Calculator& theCommands, const Expression& input, Expression& output)
+  { return theCommands.innerGCDOrLCMPoly(theCommands, input, output, true);
   }
   bool GetListPolysVariableLabelsInLex(const Expression& input, Vector<Polynomial<Rational> >& output, Expression& outputContext);
   static bool innerPolynomialDivisionRemainder(Calculator& theCommands, const Expression& input, Expression& output);

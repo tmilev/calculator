@@ -58,6 +58,7 @@ public:
   static bool innerCasimirWRTlevi(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSqrt(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFactorial(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerLogBaseSimpleCases(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLogBase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLog(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAbs(Calculator& theCommands, const Expression& input, Expression& output);
@@ -138,6 +139,8 @@ public:
   static bool outerCombineFractionsCommutative(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerIsPrimeMillerRabin(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerLCM(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerGCD(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerIsNilpotent(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerInvertMatrixRFsVerbose(Calculator& theCommands, const Expression& input, Expression& output);

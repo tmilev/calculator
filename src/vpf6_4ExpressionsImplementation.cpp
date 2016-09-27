@@ -156,6 +156,12 @@ int Expression::GetTypeOperation<int>()const
 }
 
 template < >
+int Expression::GetTypeOperation<LargeIntUnsigned>()const
+{ this->CheckInitialization();
+  return this->owner->opRational();
+}
+
+template < >
 int Expression::GetTypeOperation<double>()const
 { this->CheckInitialization();
   return this->owner->opDouble();
@@ -368,6 +374,15 @@ Weight<Polynomial<Rational> >
 template < >
 int Expression::AddObjectReturnIndex(const
 int
+& inputValue)const
+{ this->CheckInitialization();
+  return this->owner->theObjectContainer.theRationals
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
+LargeIntUnsigned
 & inputValue)const
 { this->CheckInitialization();
   return this->owner->theObjectContainer.theRationals

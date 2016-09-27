@@ -3845,12 +3845,14 @@ int WebServer::main(int argc, char **argv)
   try {
   InitializeGlobalObjects();
   theWebServer.AnalyzeMainArguments(argc, argv);
-  theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead=theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit-2;
+  theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead=
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit-2;
   //using loggers allowed from now on.
   theWebServer.InitializeGlobalVariables();
   theGlobalVariables.flagAceIsAvailable=
   FileOperations::FileExistsVirtual("MathJax-2.6-latest/", false);
-  if (false && theGlobalVariables.flagRunningBuiltInWebServer)
+  if (// false &&
+      theGlobalVariables.flagRunningBuiltInWebServer)
   { theLog
     << logger::purple << "************************" << logger::endL
     << logger::red << "WARNING: theGlobalVariables.flagAllowProcessMonitoring is set to TRUE. " << logger::endL

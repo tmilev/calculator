@@ -2655,13 +2655,13 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       out << (*this)[2].ToString(theFormat);
     out << "}";
   } else if (this->IsListStartingWithAtom(this->owner->opGreaterThan()))
-    out << (*this)[1].ToString(theFormat) << ">" << (*this)[2].ToString(theFormat);
+    out << (*this)[1].ToString(theFormat) << "&gt;" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opLimit()))
     out << "\\lim_{" << (*this)[1].ToString(theFormat) << "}" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opLimitProcess()))
     out << (*this)[1].ToString(theFormat) << " \\to " << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opLessThan()))
-    out << (*this)[1].ToString(theFormat) << "<" << (*this)[2].ToString(theFormat);
+    out << (*this)[1].ToString(theFormat) << "&lt;" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opSequence()))
     switch (this->format)
     { case Expression::formatMatrixRow:
@@ -2799,7 +2799,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       out << "\\cdot";
     else
       out << "{}";
-    if(this->format== this->formatFunctionUseUnderscore)
+    if (this->format== this->formatFunctionUseUnderscore)
       out << "{";
     else if (needParenthesis)
       out << "\\left(";
@@ -2808,7 +2808,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       if (i!=this->children.size-1)
         out << ", ";
     }
-    if(this->format== this->formatFunctionUseUnderscore)
+    if (this->format== this->formatFunctionUseUnderscore)
       out << "}";
     else if (needParenthesis)
       out << "\\right)";

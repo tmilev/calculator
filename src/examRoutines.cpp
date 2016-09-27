@@ -588,7 +588,7 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringLinkFromFileName");
   std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
   std::string urledProblem=CGI::StringToURLString(theFileName);
-  refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation(false)
+  refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
   << "fileName=" << urledProblem << "&";
   if (theGlobalVariables.UserStudentViewOn())
   { refStreamNoRequest << "studentView=true&";
@@ -2609,7 +2609,7 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
   std::string clonePageAreaID="clonePageAreaID"+desiredFileName;
   //  out << "cleaned up link: " << cleaneduplink;
   //  out << "<br>urled link: " <<  urledProblem;
-  refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation(false)
+  refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
   << "fileName=" << urledProblem << "&"
   << "courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "&";
   out << refStreamNoRequest.str() << "\">" << "Edit" << "</a>";
@@ -2634,7 +2634,7 @@ std::string HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "    spanOutput.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idOutput + \"MISSING! </span>\";\n"
   << "  }\n"
   << "  inputParams='request='+requestType+'&';\n"
-  << "  inputParams+='" << theGlobalVariables.ToStringCalcArgsNoNavigation(false) << "';\n"
+  << "  inputParams+='" << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << "';\n"
   << "  inputParams+='&fileName=" << theGlobalVariables.GetWebInput("fileName") << "';\n"
   << "  inputParams+='&topicList=" << theGlobalVariables.GetWebInput("topicList") << "';\n"
   << "  inputParams+='&courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "';\n"

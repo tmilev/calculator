@@ -3731,6 +3731,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   if (argC<0)
     argC=0;
   theGlobalVariables.programArguments.SetSize(argC);
+  //std::cout << "RAND_MAX: " << RAND_MAX;
   //std::cout << "Program arguments: \n";
   for (int i=0; i<argC; i++)
   { theGlobalVariables.programArguments[i]=argv[i];

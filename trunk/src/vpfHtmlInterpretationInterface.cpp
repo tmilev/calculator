@@ -666,7 +666,8 @@ std::string HtmlInterpretation::SubmitProblem()
   { out << "<span style=\"color:red\"><b>Your answer appears to be incorrect. </b></span>";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
       out << "For debug purposes: the calculator output is: " << theInterpreter.outputString
-      << "Comments: " << theInterpreter.Comments.str();
+      << "Comments: " << theInterpreter.Comments.str() << "<hr>Calculator input was:<hr>"
+      << theInterpreter.inputString << "<hr>";
   } else
     out << "<span style=\"color:green\"><b>Correct! </b></span>";
   out << "</td></tr>";
@@ -1329,7 +1330,7 @@ std::string HtmlInterpretation::ToStringNavigation()
     { std::string studentView=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("studentView"));
       std::string section=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("studentSection"));
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=template"
-      << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(false)
+      << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
       << "studentView=" << studentView << "&";
       if (section!="")
         out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";

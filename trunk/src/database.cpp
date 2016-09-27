@@ -1720,7 +1720,7 @@ std::string DatabaseRoutines::ToStringAllTables()
   { std::stringstream linkStream;
     linkStream << theGlobalVariables.DisplayNameExecutable
     << "?request=database&currentDatabaseTable="
-    << CGI::StringToURLString(tableNames[i]) << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(false);
+    << CGI::StringToURLString(tableNames[i]) << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(true);
     out << "<tr><td><a href=\"" << linkStream.str() << "\">" << CGI::URLStringToNormal(tableNames[i])
     << "</a></td></tr>";
   }

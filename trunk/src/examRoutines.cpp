@@ -883,8 +883,16 @@ bool SyntacticElementHTML::IsCommentBeforeSubmission()
     return false;
   std::string tagClass=this->GetKeyValue("class");
   return tagClass=="calculatorCommentBeforeSubmission"
-  //||
-  //tagClass=="calculatorHiddenIncludeInCommentsBeforeSubmission"
+  ||
+  tagClass=="calculatorHiddenIncludeInCommentsBeforeSubmission"
+;
+}
+
+bool SyntacticElementHTML::IsVisibleCommentBeforeSubmission()
+{ if (this->syntacticRole!="command")
+    return false;
+  std::string tagClass=this->GetKeyValue("class");
+  return tagClass=="calculatorCommentBeforeSubmission"
 ;
 }
 
@@ -1016,7 +1024,8 @@ bool CalculatorHTML::PrepareCommentsBeforeSubmission
   //<< theAnswer.answerId << "<hr>";
   int counter=0;
 //  stOutput << "<hr>DEBUG: Call stack: " << crash.GetStackTraceEtcErrorMessage();
-  theAnswer.commandIndicesCommentsBeforeSubmission.SetSize(0);
+  theAnswer.commandIndicesCommentsBeforeSubmissioN.SetSize(0);
+  theAnswer.commandIndicesVisibleCommentsBeforeSubmission.SetSize(0);
   for (int i=0; i<this->theContent.size; i++)
   { SyntacticElementHTML& currentElt=this->theContent[i];
     if (!currentElt.IsCommentBeforeSubmission())
@@ -1028,7 +1037,9 @@ bool CalculatorHTML::PrepareCommentsBeforeSubmission
     { streamCommands << "CommandEnclosure{}{"
       << this->CleanUpCommandString(currentElt.content)
       << "};";
-      theAnswer.commandIndicesCommentsBeforeSubmission.AddOnTop(counter);
+      theAnswer.commandIndicesCommentsBeforeSubmissioN.AddOnTop(counter);
+      if (currentElt.IsVisibleCommentBeforeSubmission())
+        theAnswer.commandIndicesVisibleCommentsBeforeSubmission.AddOnTop(counter);
       counter++;
     }
   }

@@ -78,6 +78,7 @@ public:
   bool IsAnswer();
   bool IsSolution();
   bool IsAnswerElement(std::string* desiredAnswerId);
+  bool IsVisibleCommentBeforeSubmission();
   bool IsCommentBeforeSubmission();
   bool IsAnswerOnGiveUp();
   bool IsCommentAfterSubmission();
@@ -121,7 +122,8 @@ struct Answer
   bool flagSolutionFound;
   int numSubmissions;
   int numCorrectSubmissions;
-  List<int> commandIndicesCommentsBeforeSubmission;
+  List<int> commandIndicesCommentsBeforeSubmissioN;
+  List<int> commandIndicesVisibleCommentsBeforeSubmission;
   std::string commandsBeforeAnswer;
   std::string commandVerificationOnly;
   std::string commandsSolutionOnly;

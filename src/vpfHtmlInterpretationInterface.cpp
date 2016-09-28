@@ -173,8 +173,9 @@ std::string HtmlInterpretation::SubmitProblemPreview()
     return out.str();
   }
   std::stringstream studentInterpretationWithComments;
-  studentInterpretationWithComments << "CommandEnclosure{}{" << currentA.commandsBeforeInterpretation << "}; "
-  << studentInterpretation.str();
+  if (MathRoutines::StringTrimWhiteSpace( currentA.commandsBeforeInterpretation)!="")
+    studentInterpretationWithComments << "CommandEnclosure{}{" << currentA.commandsBeforeInterpretation << "}; ";
+  studentInterpretationWithComments << studentInterpretation.str();
 
   Calculator theInterpreteR;
   theInterpreteR.flagUseLnInsteadOfLog=true;

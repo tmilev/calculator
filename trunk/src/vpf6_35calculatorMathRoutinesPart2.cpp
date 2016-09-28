@@ -1197,20 +1197,21 @@ bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(Calculator& theCommands
   intPart*=theSign;
   theArg=argNum;
   theArg/=argDen;
-  Expression logPartE, newBase, newArg;
-  newBase.AssignValue(theBase, theCommands);
-  newArg.AssignValue(theArg, theCommands);
-  logPartE.MakeXOX(theCommands, theCommands.opLogBase(), newBase, newArg);
+  Expression logPartE, newBaseE, newArgE;
+  newBaseE.AssignValue(theBase, theCommands);
+  newArgE.AssignValue(theArg, theCommands);
+  logPartE.MakeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
+  if (theSign<0)
+  { Expression mOneE;
+    mOneE.AssignValue(-1, theCommands);
+    logPartE*=mOneE;
+  }
   if (intPart==0)
   { output=logPartE;
     return true;
   }
-  Expression intPartE, mOne;
+  Expression intPartE;
   intPartE.AssignValue(intPart, theCommands);
-  if (theSign<0)
-  { mOne.AssignValue(-1, theCommands);
-    logPartE*=mOne;
-  }
   output=intPartE+logPartE;
   return true;
 }

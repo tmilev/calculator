@@ -2,6 +2,8 @@ var answerIdsPureLatex;
 var answerMathQuillObjects=[];
 var answerMQspanIds;
 var preferredButtonContainers;
+//var lastFocus;
+
 function initializeButtonsCommon(){
   ///initializing accordions
   acc = document.getElementsByClassName("accordion");
@@ -11,6 +13,12 @@ function initializeButtonsCommon(){
       this.nextElementSibling.classList.toggle("show");
     }
   }
+//  for (i=0; i<answerIdsPureLatex.length; i++){ 
+//    currentButtonPanel=document.getElementById(answerMQspanIds[i]);	
+//    document.addEventListener("blur", function(){
+//      lastfocus=this;
+//    });
+//  }
 }
 function initializeButtons(){
   for (i=0; i<answerIdsPureLatex.length; i++){ 
@@ -27,6 +35,9 @@ function initializeButtons(){
 "</tr>"+
 "<tr>"+
 "<td>" + getInftyButton(i)+ "</td><td>" + getPiButton(i) + "</td>"+ 
+"</tr>"+
+"<tr>"+
+"<td>" + getUnderscoreButton(i)+ "</td><td>" + getLogBaseButton(i) + "</td>"+ 
 "</tr>"+
 "</table>"
 ;
@@ -64,15 +75,17 @@ function getSqrt_N_Button(indexMathField){
 }
 
 function sqrt_N_Click(currentMathField){ 
-  currentMathField.write("\\sqrt[]{}");
+  currentMathField.cmd("\\nthroot");
+  currentMathField.focus();
 }
 
 function getSqrtButton(indexMathField){
   return "<button style='width:25' onclick='sqrtClick(answerMathQuillObjects[" + indexMathField + "]);'>&#8730;</button>";
 }
 
-function sqrtClick(currentMathField){ 
-  currentMathField.cmd("\\sqrt");
+function sqrtClick(currentMathField){
+  currentMathField.cmd('\\sqrt');
+  currentMathField.focus();
 }
 
 function getDivideButton(indexMathField){
@@ -80,7 +93,8 @@ function getDivideButton(indexMathField){
 }
 
 function divideButtonClick(currentMathField){ 
-  currentMathField.write("\\frac{}{}");
+  currentMathField.cmd("/");
+  currentMathField.focus();
 }
 
 function getPowerButton(indexMathField){
@@ -88,7 +102,8 @@ function getPowerButton(indexMathField){
 }
 
 function powerClick(currentMathField){ 
-  currentMathField.write("{}^{}");
+  currentMathField.typedText("^");
+  currentMathField.focus();
 }
 
 function getPlusButton(indexMathField){
@@ -96,7 +111,8 @@ function getPlusButton(indexMathField){
 }
 
 function plusClick(currentMathField){ 
-  currentMathField.write("+");
+  currentMathField.cmd("+");
+  currentMathField.focus();
 }
 
 function getTimesButton(indexMathField){
@@ -104,7 +120,8 @@ function getTimesButton(indexMathField){
 }
 
 function timesClick(currentMathField){ 
-  currentMathField.write("\\cdot");
+  currentMathField.cmd("\\cdot");
+  currentMathField.focus();
 }
 
 function getInftyButton(indexMathField){
@@ -112,8 +129,29 @@ function getInftyButton(indexMathField){
 }
 
 function inftyClick(currentMathField){ 
-  currentMathField.write("\\infty");
+  currentMathField.cmd("\\infty");
+  currentMathField.focus();
 }
+
+function getUnderscoreButton(indexMathField){
+  return "<button style='width:25' onclick='underscoreClick(answerMathQuillObjects[" + indexMathField + "]);'>_</button>";
+}
+
+function underscoreClick(currentMathField){ 
+  currentMathField.cmd("_");
+  currentMathField.focus();
+}
+
+function getLogBaseButton(indexMathField){
+  return "<button style='padding:0; width:25; font-size : 9px; height:21.2;' onclick='logBaseButtonClick(answerMathQuillObjects[" + indexMathField + "]);'>log</button>";
+}
+
+function logBaseButtonClick(currentMathField){ 
+  currentMathField.cmd("log");
+  currentMathField.cmd("_");
+  currentMathField.focus();
+}
+
 
 function getPiButton(indexMathField){
   return "<button style='width:25' onclick='piClick(answerMathQuillObjects[" + indexMathField + "]);'>&#960</button>";
@@ -121,6 +159,7 @@ function getPiButton(indexMathField){
 
 function piClick(currentMathField){ 
   currentMathField.write("\\pi");
+  currentMathField.focus();
 }
 
 function getTwoByOneMatButton(indexMathField){
@@ -129,6 +168,7 @@ function getTwoByOneMatButton(indexMathField){
 
 function twoByOneMatClick(currentMathField){ 
   currentMathField.write("\\begin{pmatrix}\\\\ \\end{pmatrix}");
+  currentMathField.focus();
 }
 
 function getTwoByTwoMatButton(indexMathField){
@@ -137,6 +177,7 @@ function getTwoByTwoMatButton(indexMathField){
 
 function twoByTwoMatClick(currentMathField){ 
   currentMathField.write("\\begin{pmatrix} & \\\\ & \\end{pmatrix}");
+  currentMathField.focus();
 }
 
 function getThreeByThreeMatButton(indexMathField){
@@ -145,6 +186,7 @@ function getThreeByThreeMatButton(indexMathField){
 
 function threeByThreeMatClick(currentMathField){ 
   currentMathField.write("\\begin{pmatrix} & & \\\\ & & \\\\ & & \\end{pmatrix}");
+  currentMathField.focus();
 }
 
 function getThreeByOneMatButton(indexMathField){
@@ -153,6 +195,7 @@ function getThreeByOneMatButton(indexMathField){
 
 function threeByOneMatClick(currentMathField){ 
   currentMathField.write("\\begin{pmatrix}\\\\ \\\\ \\end{pmatrix}");
+  currentMathField.focus();
 }
 
 function getMathBFibutton(indexMathField){
@@ -160,7 +203,8 @@ function getMathBFibutton(indexMathField){
 }
 
 function mathBFiClick(currentMathField){ 
- currentMathField.write('\\mathbf{i}');
+  currentMathField.write('\\mathbf{i}');
+  currentMathField.focus();
 }
 
 function getMathBFjbutton(indexMathField){
@@ -168,7 +212,8 @@ function getMathBFjbutton(indexMathField){
 }
 
 function mathBFjClick(currentMathField){ 
- currentMathField.write('\\mathbf{j}');
+  currentMathField.write('\\mathbf{j}');
+  currentMathField.focus();
 }
 
 function getMathBFkbutton(indexMathField){
@@ -176,6 +221,7 @@ function getMathBFkbutton(indexMathField){
 }
 
 function mathBFkClick(currentMathField){ 
- currentMathField.write('\\mathbf{k}');
+  currentMathField.write('\\mathbf{k}');
+  currentMathField.focus();
 }
 

@@ -475,7 +475,7 @@ std::string CalculatorHTML::GetJavascriptSubmitAnswers()
   << "    params=\"" << this->ToStringCalculatorArgumentsForProblem(requestTypePreview, "true", "", submitRandomSeed) << "\";\n"
   << "    submitOrPreviewAnswers(idAnswer, idVerification, params,\"" << requestTypePreview
   << "\");\n"
-  << "  }, 1700);"
+  << "  }, 4000);"
   << "}\n"
   << "function previewAnswersNoTimeOut(idAnswer, idVerification){\n"
   << "  clearTimeout(timerForPreviewAnswers);\n"

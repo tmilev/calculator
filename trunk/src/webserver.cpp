@@ -1461,14 +1461,14 @@ std::string WebWorker::GetHeaderSetCookie()
   if (theGlobalVariables.userDefault.username.value!="")
   { out << "Set-Cookie: " << "username="
     << theGlobalVariables.userDefault.username.GetDataNoQuotes()
-    << "; Path=/; Expires: Sat, 01 Jan 2050 20:00:00 GMT; Secure;";
+    << "; Path=/; Expires=Sat, 01 Jan 2030 20:00:00 GMT; Secure";
     if (theGlobalVariables.userDefault.actualAuthenticationToken.value!="")
       out << "\r\n";
   }
   if (theGlobalVariables.userDefault.actualAuthenticationToken.value!="")
-    out << "Set-cookie: " << "authenticationToken="
+    out << "Set-Cookie: " << "authenticationToken="
     << theGlobalVariables.userDefault.actualAuthenticationToken.GetDataNoQuotes()
-    << "; Path=/; Expires: Sat, 01 Jan 2050 20:00:00 GMT; Secure;";
+    << "; Path=/; Expires=Sat, 01 Jan 2030 20:00:00 GMT; Secure";
   return out.str();
 }
 
@@ -3852,7 +3852,7 @@ int WebServer::main(int argc, char **argv)
   theWebServer.InitializeGlobalVariables();
   theGlobalVariables.flagAceIsAvailable=
   FileOperations::FileExistsVirtual("MathJax-2.6-latest/", false);
-  if (// false &&
+  if ( false &&
       theGlobalVariables.flagRunningBuiltInWebServer)
   { theLog
     << logger::purple << "************************" << logger::endL

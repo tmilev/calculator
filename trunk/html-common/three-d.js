@@ -79,6 +79,29 @@ function Contour(inputPoints, inputColor)
   this.color=inputColor;
 }
 
+function getPosXPosYObject(theObject, cx,cy)
+{ var divPosX=0;
+  var divPosY=0;
+  var thePointer= theObject;
+  while(thePointer)
+  { divPosX += thePointer.offsetLeft;
+    divPosY += thePointer.offsetTop;
+    thePointer = thePointer.offsetParent;
+  }
+  return [cx-divPosX+document.body.scrollLeft-shiftXCone1,
+          cy-divPosY+document.body.scrollTop-shiftYCone1];
+}
+
+function mouseWheel(theEvent)
+{ theEvent = theEvent ? theEvent : window.event;
+  theEvent.preventDefault();
+  theEvent.stopPropagation();
+  var theWheelDelta = theEvent.detail ? theEvent.detail * -1 : theEvent.wheelDelta / 40;
+  var theCanvas=calculatorCanvases[this.id];
+  theCanvas.scale+= theWheelDelta *3;
+  theCanvas.redraw();
+}
+
 function calculatorGetCanvas(inputCanvas)
 { if (calculatorCanvases[inputCanvas.id]==undefined)
   { calculatorCanvases[inputCanvas.id]=
@@ -87,18 +110,20 @@ function calculatorGetCanvas(inputCanvas)
       { thePatches: [],
         theContours: []
       },
+      canvasId: inputCanvas.id,
       screenBasisUser: [[2,1,0],[0,1,1]],
       screenNormal: [],
       drawPatch: function(base, edge1, edge2, color)
       { this.theIIIdObjects.thePatches.push(new Patch(base, edge1, edge2, color));
       },
       drawLine: function (leftPt, rightPt, inputColor)
-      { var newContour;
+      { var newContour= new Object;
         newContour.thePoints=[];
         newContour.color=inputColor;
         var numPoints=100;
         var incrementScalar=1/numPoints;
-        var incrementVector=vectorTimesScalar( vectorMinusVector(rightPt, leftPt), incrementScalar);
+        var incrementVector=vectorMinusVector(rightPt, leftPt);
+        vectorTimesScalar(incrementVector, incrementScalar);
         var currentPoint=leftPt.slice();
         for (var i=0; i<numPoints+1; i++)
         { newContour.thePoints[i]=currentPoint;
@@ -107,8 +132,8 @@ function calculatorGetCanvas(inputCanvas)
         this.theIIIdObjects.theContours.push(newContour);
       },
       computePatch: function(thePatch)
-      { thePatch.normalScreen1= vectorCrossVector(thePatch.screenNormal, thePatch.edge1);
-        thePatch.normalScreen2= vectorCrossVector(thePatch.screenNormal, thePatch.edge2);
+      { thePatch.normalScreen1= vectorCrossVector(this.screenNormal, thePatch.edge1);
+        thePatch.normalScreen2= vectorCrossVector(this.screenNormal, thePatch.edge2);
         thePatch.normal= vectorCrossVector(thePatch.edge1, thePatch.edge2);
       },
       pointIsBehindPatch: function(thePoint, thePatch)
@@ -203,6 +228,7 @@ function calculatorGetCanvas(inputCanvas)
       { var theContours=this.theIIIdObjects.theContours;
         var thePatches=this.theIIIdObjects.thePatches;
         var theSurface=this.surface;
+        theSurface.clearRect(0, 0, this.width, this.height);
         //this.drawZbuffer();
         //this.computeBuffers();
         for (var i=0; i<thePatches.length; i++)
@@ -257,7 +283,9 @@ function calculatorGetCanvas(inputCanvas)
         this.screenNormal=vectorCrossVector(e1, e2);
       },
       init: function()
-      { this.computeBasis();
+      { document.getElementById(this.canvasId).addEventListener("DOMMouseScroll", mouseWheel, true);
+        document.getElementById(this.canvasId).addEventListener("mousewheel", mouseWheel, true);
+        this.computeBasis();
         if (this.zBuffer.length==0)
           this.allocateZbuffer();
       },
@@ -272,7 +300,22 @@ function calculatorGetCanvas(inputCanvas)
       height: inputCanvas.height,
       centerX: inputCanvas.width/2,
       centerY: inputCanvas.height/2,
-      scale: 50
+      scale: 50,
+      getPosXPosY: function (cx, cy)
+      { return getPosXPosYObject(this, cx, cy);
+      },
+      canvasClick: function (x,y)
+      { var posx=getPosXPosY1(cx,cy)[0];
+        var posy=getPosXPosY1(cx,cy)[1];
+        selectedBasisIndexCone1=-1;
+        selectedBasisIndexCone1=-2;
+        var xShiftPointer1=posx;
+        var yShiftPointer1=posy;
+        for (i=0; i<2;i++)
+        { if (ptsWithinClickToleranceCone1(posx, posy, projCirc1[i][0], projCirc1[i][1]))
+            selectedBasisIndexCone1=i;
+        }
+      },
     };
   }
   return calculatorCanvases[inputCanvas.id];
@@ -280,9 +323,9 @@ function calculatorGetCanvas(inputCanvas)
 
 function calculatorCanvasMouseMoveRedraw(inputCanvas, x, y)
 { var theCanvas=calculatorGetCanvas(inputCanvas);
-  theCanvas.init();
-  if (theCanvas.theIIIdObjects.theLines.length==0)
-  { theCanvas.drawLine([-1,0,0],[1,0,0], 'black');
+  if (theCanvas.theIIIdObjects.theContours.length==0)
+  { theCanvas.init();
+    theCanvas.drawLine([-1,0,0],[1,0,0], 'black');
     theCanvas.drawLine([0,-1,0],[0,1,0], 'black');
     theCanvas.drawLine([0,0,-1],[0,0,1], 'black');
     theCanvas.drawLine([0,0,0] ,[1,2,0], 'red');
@@ -297,9 +340,8 @@ function calculatorCanvasMouseWheel(inputCanvas, event)
 {
 }
 
-function calculatorCanvasClick(inputCanvas, x,y)
-{
-}
+
+
 
 function calculatorCanvasMouseUp(inputCanvas)
 {

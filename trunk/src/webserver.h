@@ -164,6 +164,7 @@ int recursionDepth=0)
   std::string GetHtmlHiddenInputs(bool includeUserName, bool includeAuthenticationToken);
   void SetHeaderOKNoContentLength();
   void SetHeader(const std::string& httpResponse, const std::string& remainingHeader);
+  std::string GetHeaderConnection();
   std::string GetHeaderSetCookie();
   bool IsFileExtensionOfBinaryFile(const std::string& fileExtension);
   WebWorker();

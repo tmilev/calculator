@@ -1454,6 +1454,12 @@ void WebWorker::ExtractAddressParts()
   }
 }
 
+std::string WebWorker::GetHeaderConnection()
+{ std::stringstream out;
+  out << "Connection: close" << "\r\n";
+  return out.str();
+}
+
 std::string WebWorker::GetHeaderSetCookie()
 { if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection)
     return "";
@@ -1465,6 +1471,7 @@ std::string WebWorker::GetHeaderSetCookie()
     if (theGlobalVariables.userDefault.actualAuthenticationToken.value!="")
       out << "\r\n";
   }
+  out << this->GetHeaderConnection();
   if (theGlobalVariables.userDefault.actualAuthenticationToken.value!="")
     out << "Set-Cookie: " << "authenticationToken="
     << theGlobalVariables.userDefault.actualAuthenticationToken.GetDataNoQuotes()

@@ -285,6 +285,63 @@ function calculatorGetCanvas(inputCanvas)
       { return [this.scale*vectorScalarVector(vector, this.screenBasisOrthonormal[0])+this.centerX,
            (-1)*this.scale*vectorScalarVector(vector, this.screenBasisOrthonormal[1])+this.centerY];
       },
+      getPosXPosY: function (cx, cy)
+      { return getPosXPosYObject(this, cx, cy);
+      },
+      coordsScreenXYToMath: function(screenX, screenY)
+      { var xyScreen= getPosXPosYObject(this.canvasContainer, screenX,screenY);
+        return [ (xyScreen[0]-this.centerX)/this.scale, (this.centerY-xyScreen[1])/this.scale];
+      },
+      coordsMathToScreenXY: function(x, y)
+      {
+      },
+      mouseMove: function(screenX, screenY)
+      { if (this.selectedElement=="")
+          return;
+        this.mousePosition=this.coordsScreenXYToMath(screenX, screenY);
+        this.logMouseStatus();
+        if (this.selectedElement=="default")
+        { this.rotateAfterCursorDefault();
+        }
+        if (this.selectedElement=="origin")
+        { this.panAfterCursor();
+        }
+      },
+      panAfterCursor: function()
+      { var difference=vectorMinusVector(this.mousePosition, this.clickedPosition);
+        this.centerX+=difference[0]*this.scale;
+        this.centerY-=difference[1]*this.scale;
+        this.redraw();
+      },
+      pointsWithinClickTolerance: function (leftXY, rightXY)
+      { var squaredDistance= ((leftXY[0]-rightXY[0])*(leftXY[0]-rightXY[0]) +
+              (leftXY[1]-rightXY[1])*(leftXY[1]-rightXY[1]))*this.scale;
+        return squaredDistance<7;
+      },
+      canvasClick: function (screenX, screenY)
+      { this.clickedPosition=this.coordsScreenXYToMath(screenX, screenY);
+        //var selectedBasisIndexCone1=-1;
+        //var selectedBasisIndexCone1=-2;
+        //for (i=0; i<2;i++)
+        //{ //if (ptsWithinClickToleranceCone1(posx, posy, projCirc1[i][0], projCirc1[i][1]))
+          //  selectedBasisIndexCone1=i;
+        //}
+        if (this.pointsWithinClickTolerance(this.clickedPosition,[0,0]))
+          this.selectedElement="origin";
+        else
+          this.selectedElement="default";
+        this.logMouseStatus();
+      },
+      logMouseStatus: function()
+      { if (this.spanMessages==null || this.spanMessages==undefined)
+          return;
+        this.spanMessages.innerText=
+        "selected element: " + this.selectedElement +
+        "\nmouse coordinates: " + this.mousePosition +
+        "\nclicked coordinates: " + this.clickedPosition +
+        "\nextracted from event coords: " + screenX + ", " + screenY
+        ;
+      },
       zBufferColCount: 50,
       zBufferRowCount: 50,
       zBuffer: [],
@@ -293,24 +350,10 @@ function calculatorGetCanvas(inputCanvas)
       centerX: inputCanvas.width/2,
       centerY: inputCanvas.height/2,
       scale: 50,
-      getPosXPosY: function (cx, cy)
-      { return getPosXPosYObject(this, cx, cy);
-      },
-      canvasClick: function (x,y)
-      { var posx=getPosXPosYObject(this.canvasContainer, x,y)[0];
-        var posy=getPosXPosYObject(this.canvasContainer, x,y)[1];
-        //var selectedBasisIndexCone1=-1;
-        //var selectedBasisIndexCone1=-2;
-        //for (i=0; i<2;i++)
-        //{ //if (ptsWithinClickToleranceCone1(posx, posy, projCirc1[i][0], projCirc1[i][1]))
-          //  selectedBasisIndexCone1=i;
-        //}
-        if (this.spanMessages!=null)
-          this.spanMessages.innerText="clicked coordinates: "+ posx + ", "+ posy;
-        this.selectedElementWithMouse="default";
-      },
+      mousePosition: [],
+      clickedPosition: [],
       spanMessages: null,
-      selectedElementWithMouse: ""
+      selectedElement: ""
     };
   }
   return calculatorCanvases[inputCanvas.id];
@@ -327,8 +370,10 @@ function calculatorCanvasMouseMoveRedraw(inputCanvas, x, y)
     theCanvas.drawLine([0,0,0] ,[-2,0,1], 'blue');
     theCanvas.drawPatch([0,0,0], [1,1,0], [1,1,1], 'cyan');
     //console.log(theCanvas.theIIIdObjects.thePatches);
-   }
-   theCanvas.redraw();
+    theCanvas.redraw();
+  }
+  if (theCanvas!=null && theCanvas!=undefined)
+    theCanvas.mouseMove(x,y);
 }
 
 function calculatorCanvasMouseWheel(theCanvasContainer, theEvent)
@@ -340,18 +385,16 @@ function calculatorCanvasMouseWheel(theCanvasContainer, theEvent)
   if (theCanvas==undefined || theCanvas==null)
     return;
   theCanvas.scale+= theWheelDelta *3;
+  if (theCanvas.scale<=0)
+    theCanvas.scale=3;
   theCanvas.redraw();
 }
 
 function calculatorCanvasMouseUp(inputCanvas)
-{
+{ var theCanvas=calculatorGetCanvas(inputCanvas);
+  theCanvas.selectedElement="";
 }
 
 function calculatorCanvasClick(theCanvasContainer, theEvent)
 { calculatorCanvases[theCanvasContainer.id].canvasClick(theEvent.clientX, theEvent.clientY);
-}
-
-
-function calculatorCanvasMouseUp(inputCanvas)
-{
 }

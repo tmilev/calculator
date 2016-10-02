@@ -88,18 +88,8 @@ function getPosXPosYObject(theObject, cx,cy)
     divPosY += thePointer.offsetTop;
     thePointer = thePointer.offsetParent;
   }
-  return [cx-divPosX+document.body.scrollLeft-shiftXCone1,
-          cy-divPosY+document.body.scrollTop-shiftYCone1];
-}
-
-function mouseWheel(theEvent)
-{ theEvent = theEvent ? theEvent : window.event;
-  theEvent.preventDefault();
-  theEvent.stopPropagation();
-  var theWheelDelta = theEvent.detail ? theEvent.detail * -1 : theEvent.wheelDelta / 40;
-  var theCanvas=calculatorCanvases[this.id];
-  theCanvas.scale+= theWheelDelta *3;
-  theCanvas.redraw();
+  return [cx-divPosX+document.body.scrollLeft,
+          cy-divPosY+document.body.scrollTop];
 }
 
 function calculatorGetCanvas(inputCanvas)
@@ -110,6 +100,7 @@ function calculatorGetCanvas(inputCanvas)
       { thePatches: [],
         theContours: []
       },
+      canvasContainer: inputCanvas,
       canvasId: inputCanvas.id,
       screenBasisUser: [[2,1,0],[0,1,1]],
       screenNormal: [],
@@ -283,8 +274,9 @@ function calculatorGetCanvas(inputCanvas)
         this.screenNormal=vectorCrossVector(e1, e2);
       },
       init: function()
-      { document.getElementById(this.canvasId).addEventListener("DOMMouseScroll", mouseWheel, true);
-        document.getElementById(this.canvasId).addEventListener("mousewheel", mouseWheel, true);
+      { document.getElementById(this.canvasId).addEventListener("DOMMouseScroll", calculatorCanvasMouseWheel, true);
+        document.getElementById(this.canvasId).addEventListener("mousewheel", calculatorCanvasMouseWheel, true);
+        this.spanMessages=document.getElementById(this.canvasId+"Messages");
         this.computeBasis();
         if (this.zBuffer.length==0)
           this.allocateZbuffer();
@@ -305,17 +297,20 @@ function calculatorGetCanvas(inputCanvas)
       { return getPosXPosYObject(this, cx, cy);
       },
       canvasClick: function (x,y)
-      { var posx=getPosXPosY1(cx,cy)[0];
-        var posy=getPosXPosY1(cx,cy)[1];
-        selectedBasisIndexCone1=-1;
-        selectedBasisIndexCone1=-2;
-        var xShiftPointer1=posx;
-        var yShiftPointer1=posy;
-        for (i=0; i<2;i++)
-        { if (ptsWithinClickToleranceCone1(posx, posy, projCirc1[i][0], projCirc1[i][1]))
-            selectedBasisIndexCone1=i;
-        }
+      { var posx=getPosXPosYObject(this.canvasContainer, x,y)[0];
+        var posy=getPosXPosYObject(this.canvasContainer, x,y)[1];
+        //var selectedBasisIndexCone1=-1;
+        //var selectedBasisIndexCone1=-2;
+        //for (i=0; i<2;i++)
+        //{ //if (ptsWithinClickToleranceCone1(posx, posy, projCirc1[i][0], projCirc1[i][1]))
+          //  selectedBasisIndexCone1=i;
+        //}
+        if (this.spanMessages!=null)
+          this.spanMessages.innerText="clicked coordinates: "+ posx + ", "+ posy;
+        this.selectedElementWithMouse="default";
       },
+      spanMessages: null,
+      selectedElementWithMouse: ""
     };
   }
   return calculatorCanvases[inputCanvas.id];
@@ -336,11 +331,25 @@ function calculatorCanvasMouseMoveRedraw(inputCanvas, x, y)
    theCanvas.redraw();
 }
 
-function calculatorCanvasMouseWheel(inputCanvas, event)
+function calculatorCanvasMouseWheel(theCanvasContainer, theEvent)
+{ theEvent = theEvent ? theEvent : window.event;
+  theEvent.preventDefault();
+  theEvent.stopPropagation();
+  var theWheelDelta = theEvent.detail ? theEvent.detail * -1 : theEvent.wheelDelta / 40;
+  var theCanvas=calculatorCanvases[theCanvasContainer.id];
+  if (theCanvas==undefined || theCanvas==null)
+    return;
+  theCanvas.scale+= theWheelDelta *3;
+  theCanvas.redraw();
+}
+
+function calculatorCanvasMouseUp(inputCanvas)
 {
 }
 
-
+function calculatorCanvasClick(theCanvasContainer, theEvent)
+{ calculatorCanvases[theCanvasContainer.id].canvasClick(theEvent.clientX, theEvent.clientY);
+}
 
 
 function calculatorCanvasMouseUp(inputCanvas)

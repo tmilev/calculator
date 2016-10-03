@@ -8,7 +8,9 @@ function calculatorError(x)
     return;  
   firstCriticalRunTimeError=x;
   if (firstCriticalRunTimeError!="" && firstCanvas!=undefined)
-    firstCanvas.logText(firstCriticalRunTimeError+" All further error messages are suppressed.");
+  { firstCanvas.textErrors=firstCriticalRunTimeError+" All further error messages are suppressed.";
+    firstCanvas.showMessages();
+  }
 }
 
 function vectorScalarVector(s,t)
@@ -126,7 +128,9 @@ function calculatorGetCanvas(inputCanvas)
       mousePosition: [],
       clickedPosition: [],
       spanMessages: undefined,
-      spanCriticalErrors: undefined,
+      textMouseInfo: "",
+      textProjectionInfo: "",
+      textErrors: "",
       selectedElement: "",
       selectedVector: [],
       drawPatch: function(base, edge1, edge2, color)
@@ -175,6 +179,19 @@ function calculatorGetCanvas(inputCanvas)
         }
         return true;
       },
+      paintMouseInfo: function()
+      { if (this.selectedElement=="")
+          return;
+        this.surface.beginPath();
+        this.surface.setLineDash([]);
+        this.surface.lineWidth=2;
+        this.surface.strokeStyle="green";
+        var currentPt=this.coordsMathToScreen(this.selectedVector);
+        this.surface.moveTo(currentPt[0], currentPt[1]);
+        currentPt=this.coordsMathToScreen([0,0,0]);
+        this.surface.lineTo(currentPt[0], currentPt[1]);
+        this.surface.stroke();
+      },
       paintOneContour: function(theContour)
       { if (theContour.thePoints.length<2)
           return;
@@ -185,6 +202,7 @@ function calculatorGetCanvas(inputCanvas)
         theSurface.lineWidth=1;
         var currentPt=this.coordsMathToScreen(thePts[0]);
         theSurface.moveTo(currentPt[0], currentPt[1]);
+        theSurface.setLineDash([]);
         var oldIsInForeGround=this.pointIsInForeGround(theContour.thePoints[0],-1);
         var dashIsOn=false;
         for (var i=1; i<thePts.length; i++)
@@ -253,6 +271,7 @@ function calculatorGetCanvas(inputCanvas)
           this.paintOnePatch(thePatches[i]);
         for (var i=0; i<theContours.length; i++)
           this.paintOneContour(theContours[i]);
+        this.paintMouseInfo();
       },
       allocateZbuffer: function()
       { if (this.zBufferRowCount<1)
@@ -308,6 +327,10 @@ function calculatorGetCanvas(inputCanvas)
         vectorAddVectorTimesScalar(e2, e1, - vectorScalarVector(e1,e2));
         vectorNormalize(e2);
         this.screenNormal=vectorCrossVector(e1, e2);
+        this.textProjectionInfo=
+        "e1: " + this.screenBasisOrthonormal[0]+"\n"+
+        "e2: " + this.screenBasisOrthonormal[1]
+        ;
       },
       init: function()
       { document.getElementById(this.canvasId).addEventListener("DOMMouseScroll", calculatorCanvasMouseWheel, true);
@@ -318,9 +341,23 @@ function calculatorGetCanvas(inputCanvas)
         if (this.zBuffer.length==0)
           this.allocateZbuffer();
       },
+      coordsMathScreenToMath: function(theCoords)
+      { var output=this.screenBasisOrthonormal[0].slice();
+        vectorTimesScalar(output, theCoords[0]);
+        vectorAddVectorTimesScalar(output, this.screenBasisOrthonormal[1], theCoords[1]);
+        return output;
+      },
       coordsMathToMathScreen: function(vector)
       { return [vectorScalarVector(vector, this.screenBasisOrthonormal[0]),
                 vectorScalarVector(vector, this.screenBasisOrthonormal[1])];
+      },
+      projectToMathScreen: function(vector)
+      { var output=this.screenBasisOrthonormal[0].slice();
+        vectorTimesScalar(output, vectorScalarVector(vector, this.screenBasisOrthonormal[0]));
+        vectorAddVectorTimesScalar
+        (output, this.screenBasisOrthonormal[1],
+         vectorScalarVector(vector, this.screenBasisOrthonormal[1]));
+        return output;
       },
       coordsMathToScreen: function(vector)
       { return [this.scale*vectorScalarVector(vector, this.screenBasisOrthonormal[0])+this.centerX,
@@ -349,7 +386,7 @@ function calculatorGetCanvas(inputCanvas)
         if (isNaN(oldAngle) || isNaN(newAngle))
           return input;
         var angleChange=-oldAngle+newAngle;
-        vectorAddVectorTimesScalar(projection, Math.cos(angleChange)*scal1-Math.sin(angleChange)*scal2);
+        vectorAddVectorTimesScalar(projection, orthoBasis1, Math.cos(angleChange)*scal1-Math.sin(angleChange)*scal2);
         vectorAddVectorTimesScalar(projection, orthoBasis2, Math.sin(angleChange)*scal1+Math.sin(angleChange)*scal2);
         return vectorPlusVector(vComponent, projection);
       },
@@ -360,6 +397,9 @@ function calculatorGetCanvas(inputCanvas)
         var oldY=this.clickedPosition[1];
         var newX=this.mousePosition[0];
         var newY=this.mousePosition[1];
+        var oldNewDistSquared=(oldX-newX)*(oldX-newX)+(oldY-newY)*(oldY-newY);
+        if (oldNewDistSquared<0.01)
+          return;
         var screenAngleChange=-getAngleChangeMathScreen(newX, newY, oldX, oldY);
         var e1=this.screenBasisOrthonormal[0];
         var e2=this.screenBasisOrthonormal[1];
@@ -373,7 +413,7 @@ function calculatorGetCanvas(inputCanvas)
         e2= NewE2;
         var vectorScalarE1=vectorScalarVector(this.selectedVector, e1);
         var vectorScalarE2=vectorScalarVector(this.selectedVector, e2);
-        var vProjection= this.coordsMathToMathScreen(this.selectedVector);
+        var vProjection= this.projectToMathScreen(this.selectedVector);
         var vOrthogonal=this.selectedVector.slice();
         vectorAddVectorTimesScalar(vOrthogonal, vProjection, -1);
         var selectedVectorSquaredLength=vectorScalarVector(this.selectedVector, this.selectedVector);
@@ -423,33 +463,32 @@ function calculatorGetCanvas(inputCanvas)
         this.logMouseStatus();
       },
       computeSelectedVector: function()
-      { this.selectedVector=this.twoDCoordinatesToActual(this.clickedPosition);
+      { this.selectedVector=this.coordsMathScreenToMath(this.clickedPosition);
         vectorAddVectorTimesScalar(this.selectedVector, this.screenNormal, 0.01);
         var lengthSelectedVector= vectorScalarVector(this.selectedVector, this.selectedVector);
         if (lengthSelectedVector<0.5)
           vectorTimesScalar(this.selectedVector, 1/Math.sqrt(lengthSelectedVector));
       },
-      twoDCoordinatesToActual: function(theCoords)
-      { var output=this.screenBasisOrthonormal[0].slice();
-        vectorTimesScalar(output, theCoords[0]);
-        vectorAddVectorTimesScalar(output, this.screenBasisOrthonormal[1], theCoords[1]);
-        return output;
-      },
-      logText: function(theText)
-      { if (this.spanCriticalErrors==null || this.spanCriticalErrors==undefined)
-          return;
-        this.spanCriticalErrors.innerText=theText;
-      },
-      logMouseStatus: function()
+      showMessages: function()
       { if (this.spanMessages==null || this.spanMessages==undefined)
           return;
-        this.spanMessages.innerText=
+        var theHTML=
+        "<span>" +this.textMouseInfo+ "</span><hr>"+
+        "<span>" +this.textProjectionInfo+ "</span>";
+        if (this.textErrors!="")
+          theHTML+="<span>" +this.textProjectionInfo+ "</span>";
+        this.spanMessages.innerHTML=theHTML;
+        ;
+      },
+      logMouseStatus: function()
+      { this.textMouseInfo=
         "selected element: " + this.selectedElement +
         "\nmouse coordinates: " + this.mousePosition +
         "\nclicked coordinates: " + this.clickedPosition +
 //        "\nextracted from event coords: " + screenX + ", " + screenY+
         "\nselected vector: " + this.selectedVector
         ;
+        this.showMessages();
       }
     };
     if (firstCanvas==null)

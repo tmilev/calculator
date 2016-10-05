@@ -1436,7 +1436,7 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
       out << "<span style=\"color:brown\">" << currentDeadline << "</span>. ";
     out << hoursTillDeadlineStream.str();
   }
-  return out.str();
+  return "[<span style=\"color:green\"><b>Deadlines temporarily disabled. All submissions allowed.</b> </span>] "+ out.str();
 #else
   out  << "Database not running: no deadlines";
   return out.str();

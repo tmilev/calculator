@@ -642,6 +642,7 @@ std::string HtmlInterpretation::SubmitProblem()
           //  << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
           secondsTillDeadline= deadline.SubtractAnotherTimeFromMeInSeconds(now)+7*3600;
           deadLinePassed=(secondsTillDeadline<-18000);
+          bool fixTHIS;
           deadLinePassed=false;
         }
       }

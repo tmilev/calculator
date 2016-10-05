@@ -134,6 +134,7 @@ function calculatorGetCanvas(inputCanvas)
       selectedElement: "",
       selectedVector: [],
       selectedScreenBasis: [],
+      selectedPolarAngleChange: 0,
       drawPatch: function(base, edge1, edge2, color)
       { this.theIIIdObjects.thePatches.push(new Patch(base, edge1, edge2, color));
       },
@@ -185,11 +186,31 @@ function calculatorGetCanvas(inputCanvas)
           return;
         if (this.selectedVector.length==0 || this.selectedVector.length==undefined)
           return;
+        var currentPt;
+/*        this.surface.beginPath();
+        this.surface.setLineDash([]);
+        this.surface.lineWidth=3;
+        this.surface.strokeStyle="cyan";
+        var startAngle   = Math.atan2(this.mousePosition[1], this.mousePosition[0])-Math.PI/2;
+        var finishAngle  = startAngle+  Math.PI;
+        var polarRadius  = vectorLength(this.mousePosition);
+        var currentAngle = startAngle;
+        var numSegments=50;
+        var delta=(finishAngle-startAngle)/numSegments;
+        currentPt=this.coordsMathScreenToScreen([polarRadius*Math.cos(currentAngle), polarRadius* Math.sin(currentAngle)]);
+        this.surface.moveTo(currentPt[0], currentPt[1]);
+        for (var i=0; i<numSegments; i++)
+        { currentAngle+=delta;
+          currentPt=this.coordsMathScreenToScreen([polarRadius*Math.cos(currentAngle), polarRadius* Math.sin(currentAngle)]);
+          this.surface.lineTo(currentPt[0], currentPt[1]);
+        }
+        this.surface.stroke();
+*/
         this.surface.beginPath();
         this.surface.setLineDash([4,4]);
         this.surface.lineWidth=2;
         this.surface.strokeStyle="green";
-        var currentPt=this.coordsMathToSelectedScreen(this.selectedVector);
+        currentPt=this.coordsMathToSelectedScreen(this.selectedVector);
         this.surface.moveTo(currentPt[0], currentPt[1]);
         currentPt=this.coordsMathToScreen([0,0,0]);
         this.surface.lineTo(currentPt[0], currentPt[1]);
@@ -198,11 +219,13 @@ function calculatorGetCanvas(inputCanvas)
         this.surface.setLineDash([]);
         this.surface.lineWidth=2;
         this.surface.strokeStyle="green";
-        var currentPt=this.coordsMathToScreen(this.selectedVector);
+        currentPt=this.coordsMathToScreen(this.selectedVector);
         this.surface.moveTo(currentPt[0], currentPt[1]);
         currentPt=this.coordsMathToScreen([0,0,0]);
         this.surface.lineTo(currentPt[0], currentPt[1]);
         this.surface.stroke();
+
+
       },
       paintOneContour: function(theContour)
       { if (theContour.thePoints.length<2)
@@ -394,8 +417,8 @@ function calculatorGetCanvas(inputCanvas)
       { var xyScreen= getPosXPosYObject(this.canvasContainer, screenX,screenY);
         return [ (xyScreen[0]-this.centerX)/this.scale, (this.centerY-xyScreen[1])/this.scale];
       },
-      coordsMathToScreenXY: function(x, y)
-      {
+      coordsMathScreenToScreen: function(theCoords)
+      { return [this.scale*theCoords[0]+this.centerX, this.centerY-this.scale*theCoords[1]];
       },
       rotateOutOfPlane: function (input, orthoBasis1, orthoBasis2, oldCos, newCos)
       { var projection= orthoBasis1.slice();
@@ -414,44 +437,65 @@ function calculatorGetCanvas(inputCanvas)
         vectorAddVectorTimesScalar(projection, orthoBasis2, Math.sin(angleChange)*scal1+Math.sin(angleChange)*scal2);
         return vectorPlusVector(vComponent, projection);
       },
-      rotateAfterCursorDefault: function()
+      rotateAfterCursorDefaultGreatNormalCircle: function()
       { if (this.mousePosition.length==0)
           return;
         var oldX=this.clickedPosition[0];
         var oldY=this.clickedPosition[1];
         var newX=this.mousePosition[0];
         var newY=this.mousePosition[1];
-        var oldNewDistSquared=(oldX-newX)*(oldX-newX)+(oldY-newY)*(oldY-newY);
-        if (oldNewDistSquared<0.01)
-          return;
-        var screenAngleChange=-getAngleChangeMathScreen(newX, newY, oldX, oldY);
         var oldE1=this.selectedScreenBasis[0];
         var oldE2=this.selectedScreenBasis[1];
         var newE1 = oldE1.slice();
         var newE2 = oldE2.slice();
-        vectorTimesScalar(newE1, Math.cos(screenAngleChange));
-        vectorAddVectorTimesScalar(newE1, oldE2, Math.sin(screenAngleChange));
-        vectorTimesScalar(newE2, Math.cos(screenAngleChange));
-        vectorAddVectorTimesScalar(newE2, oldE1, -Math.sin(screenAngleChange));
+        //if (newX*newX+newY*newY>0.3)
+        this.selectedPolarAngleChange=-getAngleChangeMathScreen(newX, newY, oldX, oldY);
+        vectorTimesScalar(newE1, Math.cos(this.selectedPolarAngleChange));
+        vectorAddVectorTimesScalar(newE1, oldE2, Math.sin(this.selectedPolarAngleChange));
+        vectorTimesScalar(newE2, Math.cos(this.selectedPolarAngleChange));
+        vectorAddVectorTimesScalar(newE2, oldE1, -Math.sin(this.selectedPolarAngleChange));
         this.screenBasisOrthonormal[0] = newE1;
         this.screenBasisOrthonormal[1] = newE2;
-        var selectedProjectionNormalized = this.projectToSelectedMathScreen(this.selectedVector);
+        //the code below needs to be fixed.
+/*        var selectedProjectionNormalized = this.projectToSelectedMathScreen(this.selectedVector);
         var selectedOrthogonalNormalized = this.selectedVector.slice();
         vectorAddVectorTimesScalar(selectedOrthogonalNormalized, selectedProjectionNormalized, -1);
         vectorNormalize(selectedProjectionNormalized);
         vectorNormalize(selectedOrthogonalNormalized);
         var osculatingOldX=vectorScalarVector(this.selectedVector, selectedProjectionNormalized);
-        var radialVector=[oldX, oldY];
-        vectorNormalize(radialVector);
-        var osculatingNewX=vectorScalarVector([newX, newY], radialVector);
+        var osculatingOldCos=osculatingOldX/vectorLength(this.selectedVector);
+        var osculatingNewCos=vectorLength([newX, newY])/vectorLength(this.selectedVector);
 //        var osculatingOldY=vectorScalarVector(this.selectedVector, selectedOrthogonal);
-
-        oldE1=this.rotateOutOfPlane(oldE1, selectedProjectionNormalized, selectedOrthogonalNormalized, osculatingOldX, osculatingNewX);
-        oldE2=this.rotateOutOfPlane(oldE2, selectedProjectionNormalized, selectedOrthogonalNormalized, osculatingOldX, osculatingNewX);
-        this.screenBasisUser[0] = oldE1.slice();
-        this.screenBasisUser[1] = oldE2.slice();
+        newE1=this.rotateOutOfPlane(newE1, selectedProjectionNormalized, selectedOrthogonalNormalized, osculatingOldCos, osculatingNewCos);
+        newE2=this.rotateOutOfPlane(newE2, selectedProjectionNormalized, selectedOrthogonalNormalized, osculatingOldCos, osculatingNewCos);
+        this.screenBasisUser[0] = newE1.slice();
+        this.screenBasisUser[1] = newE2.slice();*/
         this.computeBasis();
         this.redraw();
+      },
+      rotateAfterCursorDefaultCartesian: function()
+      { if (this.mousePosition.length==0)
+          return;
+        var deltaX=this.mousePosition[0]-this.clickedPosition[0];
+        var deltaY=this.mousePosition[1]-this.clickedPosition[1];
+        var xyThreshhold=5;
+        if (deltaX>xyThreshhold)
+          deltaX=xyThreshhold;
+        if (deltaY>xyThreshhold)
+          deltaY=xyThreshhold;
+        if (deltaX<-xyThreshhold)
+          deltaX=-xyThreshhold;
+        if (deltaY<-xyThreshhold)
+          deltaY=-xyThreshhold;
+        var xAngle=Math.acos(deltaX/xyThreshhold);
+        var yAngle=Math.acos(deltaY/xyThreshhold);
+        this.computeBasis();
+        this.redraw();
+      },
+      rotateAfterCursorDefault: function()
+      { if (this.mousePosition.length==0)
+          return;
+        this.rotateAfterCursorDefaultGreatNormalCircle();
       },
       mouseMove: function(screenX, screenY)
       { if (this.selectedElement=="")
@@ -491,6 +535,7 @@ function calculatorGetCanvas(inputCanvas)
       { this.selectedElement="";
         this.selectedScreenBasis=[];
         this.selectedVector=[];
+        this.selectedPolarAngleChange=0;
       },
       computeSelectedVector: function()
       { this.selectedVector=this.coordsMathScreenToMath(this.clickedPosition);
@@ -507,7 +552,7 @@ function calculatorGetCanvas(inputCanvas)
         "<span>" +this.textMouseInfo+ "</span><hr>"+
         "<span>" +this.textProjectionInfo+ "</span>";
         if (this.textErrors!="")
-          theHTML+="<span>" +this.textProjectionInfo+ "</span>";
+          theHTML+="<span>" +this.textProjectionInfo+ "</sprotateAfterCursorDefaultCartesianan>";
         this.spanMessages.innerHTML=theHTML;
         ;
       },
@@ -517,7 +562,9 @@ function calculatorGetCanvas(inputCanvas)
         "<br>mouse coordinates: " + this.mousePosition +
         "<br>clicked coordinates: " + this.clickedPosition +
         "<br>selected vector: " + this.selectedVector +
-        "<br>selected basis: " + this.selectedScreenBasis
+        "<br>selected e1: " + this.selectedScreenBasis[0]+
+        "<br>selected e2: "+ this.selectedScreenBasis[1]+
+        "<br>selected polar angle change: "+ this.selectedPolarAngleChange
         ;
         this.showMessages();
       }

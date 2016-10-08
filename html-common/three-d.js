@@ -127,6 +127,9 @@ function calculatorGetCanvas(inputCanvas)
       scale: 50,
       mousePosition: [],
       clickedPosition: [],
+      unitRay: [],
+      rayComponent: [],
+      positionDelta: [],
       spanMessages: undefined,
       textMouseInfo: "",
       textProjectionInfo: "",
@@ -437,65 +440,70 @@ function calculatorGetCanvas(inputCanvas)
         vectorAddVectorTimesScalar(projection, orthoBasis2, Math.sin(angleChange)*scal1+Math.sin(angleChange)*scal2);
         return vectorPlusVector(vComponent, projection);
       },
-      rotateAfterCursorDefaultGreatNormalCircle: function()
+      rotateAfterCursorDefaultGreatNormalCircle: function(doRotateRadially)
+      //please use only with doRotateRadially=false
+      //the option creates confusing user interface, needs to be fixed/reworked
       { if (this.mousePosition.length==0)
           return;
         var oldX=this.clickedPosition[0];
         var oldY=this.clickedPosition[1];
         var newX=this.mousePosition[0];
         var newY=this.mousePosition[1];
-        var oldE1=this.selectedScreenBasis[0];
-        var oldE2=this.selectedScreenBasis[1];
-        var newE1 = oldE1.slice();
-        var newE2 = oldE2.slice();
-        //if (newX*newX+newY*newY>0.3)
-        this.selectedPolarAngleChange=-getAngleChangeMathScreen(newX, newY, oldX, oldY);
-        vectorTimesScalar(newE1, Math.cos(this.selectedPolarAngleChange));
-        vectorAddVectorTimesScalar(newE1, oldE2, Math.sin(this.selectedPolarAngleChange));
-        vectorTimesScalar(newE2, Math.cos(this.selectedPolarAngleChange));
-        vectorAddVectorTimesScalar(newE2, oldE1, -Math.sin(this.selectedPolarAngleChange));
-        this.screenBasisOrthonormal[0] = newE1;
-        this.screenBasisOrthonormal[1] = newE2;
-        //the code below needs to be fixed.
-/*        var selectedProjectionNormalized = this.projectToSelectedMathScreen(this.selectedVector);
+        this.positionDelta=[newX-oldX, newY-oldY];
+        this.unitRay= this.clickedPosition.slice();
+        vectorNormalize(this.unitRay);
+        this.rayComponent=this.unitRay.slice();
+        vectorTimesScalar(this.rayComponent, vectorScalarVector(this.mousePosition, this.unitRay));
+        if (doRotateRadially)
+        {/* this.selectedPolarAngleChange=-getAngleChangeMathScreen(newX, newY, oldX, oldY);
+          vectorTimesScalar(newE1, Math.cos(this.selectedPolarAngleChange));
+          vectorAddVectorTimesScalar(newE1, oldE2, Math.sin(this.selectedPolarAngleChange));
+          vectorTimesScalar(newE2, Math.cos(this.selectedPolarAngleChange));
+          vectorAddVectorTimesScalar(newE2, oldE1, -Math.sin(this.selectedPolarAngleChange));
+          this.screenBasisOrthonormal[0] = newE1;
+          this.screenBasisOrthonormal[1] = newE2;*/
+        }
+        var selectedProjectionNormalized = this.projectToSelectedMathScreen(this.selectedVector);
         var selectedOrthogonalNormalized = this.selectedVector.slice();
         vectorAddVectorTimesScalar(selectedOrthogonalNormalized, selectedProjectionNormalized, -1);
         vectorNormalize(selectedProjectionNormalized);
         vectorNormalize(selectedOrthogonalNormalized);
         var osculatingOldX=vectorScalarVector(this.selectedVector, selectedProjectionNormalized);
         var osculatingOldCos=osculatingOldX/vectorLength(this.selectedVector);
-        var osculatingNewCos=vectorLength([newX, newY])/vectorLength(this.selectedVector);
+        var osculatingNewX=vectorScalarVector(this.coordsMathScreenToMath(this.rayComponent), selectedProjectionNormalized );
+        var osculatingNewCos=osculatingNewX/vectorLength(this.selectedVector);
 //        var osculatingOldY=vectorScalarVector(this.selectedVector, selectedOrthogonal);
+        var oldE1=this.selectedScreenBasis[0];
+        var oldE2=this.selectedScreenBasis[1];
+        var newE1 = oldE1.slice();
+        var newE2 = oldE2.slice();
         newE1=this.rotateOutOfPlane(newE1, selectedProjectionNormalized, selectedOrthogonalNormalized, osculatingOldCos, osculatingNewCos);
         newE2=this.rotateOutOfPlane(newE2, selectedProjectionNormalized, selectedOrthogonalNormalized, osculatingOldCos, osculatingNewCos);
         this.screenBasisUser[0] = newE1.slice();
-        this.screenBasisUser[1] = newE2.slice();*/
+        this.screenBasisUser[1] = newE2.slice();
         this.computeBasis();
         this.redraw();
       },
       rotateAfterCursorDefaultCartesian: function()
       { if (this.mousePosition.length==0)
           return;
-        var deltaX=this.mousePosition[0]-this.clickedPosition[0];
-        var deltaY=this.mousePosition[1]-this.clickedPosition[1];
+        this.positionDelta=[this.mousePosition[0]-this.clickedPosition[0], this.mousePosition[1]-this.clickedPosition[1]];
         var xyThreshhold=5;
-        if (deltaX>xyThreshhold)
-          deltaX=xyThreshhold;
-        if (deltaY>xyThreshhold)
-          deltaY=xyThreshhold;
-        if (deltaX<-xyThreshhold)
-          deltaX=-xyThreshhold;
-        if (deltaY<-xyThreshhold)
-          deltaY=-xyThreshhold;
-        var xAngle=Math.acos(deltaX/xyThreshhold);
-        var yAngle=Math.acos(deltaY/xyThreshhold);
+        if (this.positionDelta[0]>xyThreshhold)
+          this.positionDelta[0]=xyThreshhold;
+        if (this.positionDelta[1]>xyThreshhold)
+          this.positionDelta[1]=xyThreshhold;
+        if (this.positionDelta[0]<-xyThreshhold)
+          this.positionDelta[0]=-xyThreshhold;
+        if (this.positionDelta[1]<-xyThreshhold)
+          this.positionDelta[1]=-xyThreshhold;
         this.computeBasis();
         this.redraw();
       },
       rotateAfterCursorDefault: function()
       { if (this.mousePosition.length==0)
           return;
-        this.rotateAfterCursorDefaultGreatNormalCircle();
+        this.rotateAfterCursorDefaultGreatNormalCircle(false);
       },
       mouseMove: function(screenX, screenY)
       { if (this.selectedElement=="")
@@ -561,6 +569,8 @@ function calculatorGetCanvas(inputCanvas)
         "selected element: " + this.selectedElement +
         "<br>mouse coordinates: " + this.mousePosition +
         "<br>clicked coordinates: " + this.clickedPosition +
+        "<br>delta of position: " + this.positionDelta +
+        "<br>ray component of mouse: " + this.rayComponent +
         "<br>selected vector: " + this.selectedVector +
         "<br>selected e1: " + this.selectedScreenBasis[0]+
         "<br>selected e2: "+ this.selectedScreenBasis[1]+

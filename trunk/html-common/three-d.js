@@ -135,6 +135,8 @@ function calculatorGetCanvas(inputCanvas)
       textProjectionInfo: "",
       textErrors: "",
       angleNormal: 0,
+      oldAngleNormal: 0,
+      newAngleNormal: 0,
       anglePolar: 0,
       selectedElement: "",
       selectedVector: [],
@@ -467,10 +469,16 @@ function calculatorGetCanvas(inputCanvas)
         vectorTimesScalar(this.rayComponent, vectorScalarVector(this.mousePosition, this.unitRay));
         var osculatingOldX=vectorLength(this.clickedPosition);
         var osculatingOldCos=osculatingOldX/vectorLength(this.selectedVector);
-        var osculatingNewX=vectorLength(this.mousePosition);
+//        var osculatingOldSin=1-osculatingOldCos*osculatingOldCos;
+        var osculatingNewX=vectorScalarVector(this.mousePosition, this.unitRay)
+        //vectorLength(this.mousePosition)
+        ;
         var osculatingNewCos=osculatingNewX/vectorLength(this.selectedVector);
+//        var osculatingNewSin=1-osculatingNewCos*osculatingNewCos;
 //        var osculatingOldY=vectorScalarVector(this.selectedVector, selectedOrthogonal);
-        this.angleNormal=-Math.acos(osculatingNewCos)+ Math.acos(osculatingOldCos);
+        this.newAngleNormal=Math.acos(osculatingNewCos);
+        this.oldAngleNormal=Math.acos(osculatingOldCos);
+        this.angleNormal=this.oldAngleNormal-this.newAngleNormal;
         if (isNaN(this.angleNormal))
           return;
         var newE1 = this.selectedScreenBasis[0].slice();
@@ -549,7 +557,7 @@ function calculatorGetCanvas(inputCanvas)
         this.selectedVector=this.selectedScreenProjectionNormalized.slice();
         vectorNormalize(this.selectedScreenProjectionNormalized);
         this.selectedScreenNormal=this.screenNormal;
-        vectorAddVectorTimesScalar(this.selectedVector, this.screenNormal, 0.01);
+//        vectorAddVectorTimesScalar(this.selectedVector, this.screenNormal, 0.1);
         var lengthSelectedVector= vectorScalarVector(this.selectedVector, this.selectedVector);
         if (lengthSelectedVector<0.5)
           vectorTimesScalar(this.selectedVector, 1/Math.sqrt(lengthSelectedVector));
@@ -575,7 +583,12 @@ function calculatorGetCanvas(inputCanvas)
         "<br>ray component of mouse: " + this.rayComponent +
         "<br>selected vector: " + this.selectedVector +
         "<br>normal angle change: "+ this.angleNormal.toFixed(3)
-        + " (" + (this.angleNormal*180/Math.PI).toFixed(1) + " degrees)"
+        + " (" + (this.angleNormal*180/Math.PI).toFixed(1) + " deg)"
+        + " = " +
+        this.oldAngleNormal.toFixed(3)+ " (" + (this.oldAngleNormal*180/Math.PI).toFixed(1) + " deg)"
+        + "-"+
+        this.newAngleNormal.toFixed(3)+ " (" + (this.newAngleNormal*180/Math.PI).toFixed(1) + " deg)"
+
         ;
         this.showMessages();
       }

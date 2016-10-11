@@ -349,6 +349,16 @@ std::string DatabaseRoutines::ToStringTableFromTableIdentifier(const std::string
   out << "Table has " << actualNumEntries << " entries. ";
   if (wasTruncated)
     out << "<b>The number of entries was truncated to " << theTable.size << ". <b>";
+  int indexToBeReplacedWithLinks=columnLabels.GetIndex("problemData");
+//  out << "DEBUG: <b>HERE AM I</b> Column labels: " << columnLabels.ToStringCommaDelimited()
+//  << ". indexToBeReplacedWithLinks: " << indexToBeReplacedWithLinks;
+  out << "<style>span.linkLike"
+  << "{\n"
+  << "color: blue;\n "
+  << "text-decoration:\n "
+  << "underline;\n "
+  << "cursor: pointer;\n"
+  << "}" << "</style>";
   out << "<table><tr>";
   for (int i=0; i<columnLabels.size; i++)
     out << "<td>" << columnLabels[i] << "</td>";
@@ -356,7 +366,30 @@ std::string DatabaseRoutines::ToStringTableFromTableIdentifier(const std::string
   for (int i=0; i<theTable.size; i++)
   { out << "<tr>";
     for (int j=0; j<theTable[i].size; j++)
-      out << "<td>" << CGI::URLKeyValuePairsToNormalRecursiveHtml(theTable[i][j]) << "</td>";
+      if (j!=indexToBeReplacedWithLinks)
+        out << "<td>" << CGI::URLKeyValuePairsToNormalRecursiveHtml(theTable[i][j]) << "</td>";
+      else if (theTable[i][j]=="")
+        out << "<td></td>";
+      else
+      { out << "<td>";
+        std::stringstream spanId;
+        std::stringstream theRequest;
+        theRequest
+        << "currentDatabaseTable=" << CGI::StringToURLString(tableIdentifier) << "&"
+        << "currentDatabaseRow=" << CGI::StringToURLString(theTable[i][0]) << "&"
+        << "currentDatabaseKeyColumn=" << CGI::StringToURLString(columnLabels[0]) << "&"
+        << "currentDatabaseDesiredColumn=" << CGI::StringToURLString(columnLabels[indexToBeReplacedWithLinks])
+        ;
+        spanId << "spanRow" << i << "Col" << j;
+        out << "<span class=\"linkLike\"  "
+        << "onclick=\"submitStringAsMainInput("
+        << "'" << theRequest.str() << "', "
+        << "'" << spanId.str() << "', "
+        << "'databaseOneEntry'"
+        << "); return true;\">More info</span> <span id=\""
+        << spanId.str() << "\"></span>";
+        out << "</td>";
+      }
     out << "</tr>";
   }
   out << "</table>";
@@ -378,9 +411,10 @@ bool DatabaseRoutines::FetchTableNames(List<std::string>& output, std::stringstr
   return true;
 }
 
-std::string DatabaseRoutines::ToStringCurrentTableHTML()
+std::string DatabaseRoutines::ToStringCurrentTableHTML ()
 { MacroRegisterFunctionWithName("DatabaseRoutines::ToStringCurrentTableHTML");
-  std::string currentTable=CGI::URLStringToNormal( theGlobalVariables.GetWebInput("currentDatabaseTable"));
+  std::string currentTable=
+  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentDatabaseTable"));
   if (currentTable.find("`")!=std::string::npos)
   { std::stringstream out;
     out << "<b>The table identifier: " << currentTable << " contains the ` character and is invalid. </b>";
@@ -394,6 +428,61 @@ std::string DatabaseRoutines::ToStringCurrentTableHTML()
     return out.str();
   }
   return this->ToStringTableFromTableIdentifier(currentTable);
+}
+
+std::string DatabaseRoutines::ToStringOneEntry()
+{ MacroRegisterFunctionWithName("DatabaseRoutines::ToStringOneEntry");
+  MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
+  std::stringstream out;
+  if (!CGI::ChopCGIString(CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput")), theMap, out))
+  { out << "Failed to extract input arguments. ";
+    return out.str();
+  }
+  out << "<hr>";
+//  out << "DEBUG: getting info from: " << theGlobalVariables.GetWebInput("mainInput")
+//  << "<br> got: <hr>" << theMap.ToStringHtml();
+  std::string currentTable=CGI::URLStringToNormal(theMap.GetValueCreateIfNotPresent
+  ("currentDatabaseTable"));
+  std::string currentRow = CGI::URLStringToNormal(theMap.GetValueCreateIfNotPresent
+  ("currentDatabaseRow"));
+  std::string currentKeyColumn = CGI::URLStringToNormal(theMap.GetValueCreateIfNotPresent
+  ("currentDatabaseKeyColumn"));
+  std::string currentDesiredColumn = CGI::URLStringToNormal(theMap.GetValueCreateIfNotPresent
+  ("currentDatabaseDesiredColumn"));
+
+  if (currentTable.find("`")!=std::string::npos ||
+      currentRow.find("`")!=std::string::npos ||
+      currentKeyColumn.find("`")!=std::string::npos ||
+      currentDesiredColumn.find("`")!=std::string::npos
+      )
+  { std::stringstream out;
+    out << "<b>At least one of the identifiers: "
+    << currentTable << ", " << currentRow << ", " << currentKeyColumn << ", " << currentDesiredColumn
+    << " contains the ` character and is invalid. </b>";
+    return out.str();
+  }
+  if (currentTable.size()>=64 || currentRow.size()>=64 ||
+      currentKeyColumn.size()>=64 || currentDesiredColumn.size()>=64)
+  { std::stringstream out;
+    out << "<b>At least one of the identifiers: "
+    << currentTable << ", " << currentRow << ", " << currentKeyColumn << ", " << currentDesiredColumn
+    << " is longer than 64 characters and is invalid. </b>";
+    return out.str();
+  }
+  std::string outputString;
+  if (!this->FetchEntry
+      (currentKeyColumn, currentRow, currentTable, currentDesiredColumn, outputString, &out))
+    out << "<hr>Failed to fetch entry. ";
+  else
+    out
+    //<< "<hr>DEBUG<hr>"
+    << CGI::URLKeyValuePairsToNormalRecursiveHtml( outputString)
+//    << "<hr>DEBUG<hr>"
+    ;
+//  out << "<hr>DEBUG: requesting: "
+//  << currentTable << ", " << currentRow << ", " << currentKeyColumn << ", " << currentDesiredColumn
+//  ;
+  return out.str();
 }
 
 bool DatabaseRoutines::FetchTablE

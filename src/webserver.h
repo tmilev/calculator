@@ -81,6 +81,7 @@ public:
   int ProcessChangePasswordPage();
   int ProcessCalculator();
   int ProcessDatabase();
+  int ProcessDatabaseOneEntry();
   int ProcessAccounts();
   int ProcessScores();
   int ProcessAssignTeacherToSection();
@@ -154,6 +155,7 @@ int recursionDepth=0)
   std::string GetEditPageHTML();
   std::string GetExamPageInterpreter();
   std::string GetDatabasePage();
+  std::string GetDatabaseOneEntry();
   std::string GetNavigationPage();
   std::string GetAddUserEmails();
   static std::string GetJavaScriptIndicatorFromHD();

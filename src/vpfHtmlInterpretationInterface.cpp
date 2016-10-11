@@ -998,6 +998,7 @@ std::string HtmlInterpretation::GetScoresPage()
   << "<head>"
   << CGI::GetCalculatorStyleSheetWithTags()
   << HtmlSnippets::GetJavascriptStandardCookies()
+  << "<link rel=\"stylesheet\" href=\"/html-common-calculator/styleScorePage.css\">"
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
   out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation>\n";
@@ -1213,6 +1214,41 @@ std::string HtmlInterpretation::ToStringAssignSection()
   return out.str();
 }
 
+void UserCalculator::ComputePointsEarned
+(const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
+ const MapLisT<std::string, TopicElement, MathRoutines::hashString>* theTopics
+ )
+{ MacroRegisterFunctionWithName("UserCalculator::ComputePointsEarned");
+  this->pointsEarned=0;
+  if (theTopics!=0)
+    for (int i=0; i<theTopics->size(); i++)
+      (*theTopics).theValues[i].pointsEarned=0;
+  for (int i=0; i<this->theProblemData.size(); i++)
+  { const std::string problemName=this->theProblemData.theKeys[i];
+    if (!gradableProblems.Contains(problemName) )
+      continue;
+    ProblemData& currentP=this->theProblemData.theValues[i];
+    currentP.Points=0;
+    currentP.totalNumSubmissions=0;
+    currentP.numCorrectlyAnswered=0;
+    currentP.flagProblemWeightIsOK=
+    currentP.adminData.ProblemWeight.AssignStringFailureAllowed
+    (currentP.adminData.ProblemWeightUserInput);
+//    this->problemData[i].numAnswersSought=this->problemData[i].answerIds.size;
+    for (int j=0; j<currentP.theAnswers.size; j++)
+    { if (currentP.theAnswers[j].numCorrectSubmissions>0)
+        currentP.numCorrectlyAnswered++;
+      currentP.totalNumSubmissions+=currentP.theAnswers[j].numSubmissions;
+    }
+    if (currentP.flagProblemWeightIsOK && currentP.theAnswers.size>0)
+    { currentP.Points=(currentP.adminData.ProblemWeight*currentP.numCorrectlyAnswered)/currentP.theAnswers.size;
+      this->pointsEarned+= currentP.Points;
+    }
+//    if (this->)
+//    TopicElement& current
+  }
+}
+
 std::string HtmlInterpretation::ToStringUserScores()
 { MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserScores");
   if (!theGlobalVariables.UserDefaultHasAdminRights())
@@ -1257,16 +1293,18 @@ std::string HtmlInterpretation::ToStringUserScores()
     (theProblem.currentUseR.problemInfoString.value,
      currentUserRecord.currentUseR.theProblemData, out);
     //out << "<br>DEBUG: after ReadProblemInfoAppend: " << currentUserRecord.currentUseR.ToString();
-    currentUserRecord.currentUseR.ComputePointsEarned(theProblem.problemNamesNoTopics);
+    currentUserRecord.currentUseR.ComputePointsEarned(theProblem.problemNamesNoTopics, &theProblem.theTopicS);
     userScores[i]=currentUserRecord.currentUseR.pointsEarned;
     //out << "<br>DEBUG: Computed scores from: " << currentUserRecord.currentUseR.ToString();
   }
 //  out << "DBUG: prob names: " << theProblem.problemNamesNoTopics.ToStringCommaDelimited();
-  out << "<table><tr><th>User</th><td>Section</td><td>Score</td></tr>";
+  out << "<table class=\"scoreTable\"><tr><th>User</th><td>Section</td><td>Score</td></tr>";
   for (int i=0; i<userTable.size; i++)
-    out << "<tr><td>" << userTable[i][usernameIndex] << "</td>"
+  { out << "<tr><td>" << userTable[i][usernameIndex] << "</td>"
     << "<td>" << userTable[i][userInfoIndex] << "</td>"
-    << "<td>" << userScores[i].GetDoubleValue() << "</td></tr>";
+    << "<td>" << userScores[i].GetDoubleValue() << "</td>";
+    out << "</tr>";
+  }
   out << "</table>";
   return out.str();
 }

@@ -1,0 +1,5 @@
+/*styleScorePage.css*/
+table.scoreTable, table.scoreTable th, table.scoreTable td {
+  border-collapse: collapse;
+  border: 1px solid black;
+}

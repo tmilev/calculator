@@ -233,6 +233,7 @@ public:
   std::string GetCommandToSendEmailWithMailX();
 };
 
+class TopicElement;
 class DatabaseRoutines;
 class UserCalculator : public UserCalculatorData
 {
@@ -250,7 +251,8 @@ public:
   Rational pointsMax;
 
   void ComputePointsEarned
-  (const HashedList<std::string, MathRoutines::hashString>& gradableProblems
+  (const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
+   const MapLisT<std::string, TopicElement, MathRoutines::hashString>* theTopics
    );
   ProblemData& HasProblemData(const std::string& problemName);
   ProblemData& GetProblemDataAddIfNotPresent(const std::string& problemName);

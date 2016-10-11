@@ -311,7 +311,7 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   //stOutput << "<hr>Debug: user: " << this->currentUseR.ToString();
   //stOutput << "<hr><hr>DEBUG read databaseProblemAndHomeworkGroupList: "
   //<< this->databaseProblemAndHomeworkGroupList;
-  this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys);
+  this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys, 0);
   theGlobalVariables.userDefault=this->currentUseR;
   //stOutput << "<hr>DEBUG: After interpretation of deadline and weight strings: user: " << this->currentUseR.ToString();
   return true;
@@ -3010,7 +3010,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   //out << "DEBUG: sections: " << this->databaseStudentSections.ToStringCommaDelimited();
   //out << "DEBUG: prob data: " << this->currentUseR.theProblemData.ToStringHtml();
   #ifdef MACRO_use_MySQL
-  this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys);
+  this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys, 0);
   #endif
   bool plainStyle=(inputOutput.GetKeyValue("topicListStyle")=="plain");
   bool tableStarted=false;

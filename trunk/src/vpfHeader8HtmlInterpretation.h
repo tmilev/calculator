@@ -36,6 +36,7 @@ public:
   std::string displayScore;
   std::string displayModifyWeight;
   std::string displayModifyDeadline;
+  Rational pointsEarned;
   void ComputeID();
   void reset(int parentSize)
   { this->flagIsSection=false;

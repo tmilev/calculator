@@ -387,6 +387,7 @@ bool FetchAllUsers
 
   std::string ToString();
   std::string ToStringAllUsersHTMLFormat();
+  std::string ToStringOneEntry();
   std::string ToStringCurrentTableHTML();
   std::string ToStringAllTables();
   std::string ToStringTablE(const MySQLdata& inputTable);

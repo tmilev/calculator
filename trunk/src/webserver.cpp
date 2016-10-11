@@ -865,6 +865,23 @@ std::string WebWorker::GetNavigationPage()
   return out.str();
 }
 
+std::string WebWorker::GetDatabaseOneEntry()
+{ MacroRegisterFunctionWithName("WebWorker::GetDatabaseOneEntry");
+  std::stringstream out;
+#ifdef MACRO_use_MySQL
+  DatabaseRoutines theRoutines;
+  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn)
+    out << "<b>Browsing database allowed only for logged-in admins.</b>";
+  else
+    out << theRoutines.ToStringOneEntry();
+#else
+out << "<b>Database not available. </b>";
+#endif // MACRO_use_MySQL
+  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+  out << "</body></html>";
+  return out.str();
+}
+
 std::string WebWorker::GetDatabasePage()
 { MacroRegisterFunctionWithName("WebWorker::GetDatabasePage");
   std::stringstream out;
@@ -872,6 +889,7 @@ std::string WebWorker::GetDatabasePage()
   << "<head>"
   << CGI::GetCalculatorStyleSheetWithTags()
   << HtmlSnippets::GetJavascriptStandardCookies()
+  << HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
   out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation>\n";
@@ -2417,6 +2435,13 @@ int WebWorker::ProcessDatabase()
   return 0;
 }
 
+int WebWorker::ProcessDatabaseOneEntry()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessDatabaseOneEntry");
+  this->SetHeaderOKNoContentLength();
+  stOutput << this->GetDatabaseOneEntry();
+  return 0;
+}
+
 int WebWorker::ProcessEditPage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessEditPage");
   this->SetHeaderOKNoContentLength();
@@ -2590,6 +2615,9 @@ int WebWorker::ServeClient()
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
       theGlobalVariables.userCalculatorRequestType=="database")
     return this->ProcessDatabase();
+  else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
+      theGlobalVariables.userCalculatorRequestType=="databaseOneEntry")
+    return this->ProcessDatabaseOneEntry();
   else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
            theGlobalVariables.userCalculatorRequestType=="accounts")
     return this->ProcessAccounts();

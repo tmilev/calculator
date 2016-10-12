@@ -19,7 +19,8 @@ public:
   bool flagContainsProblemsNotInSubsection;
   List<int> parentTopics;
   List<int> immediateChildren;
-  int totalSubSectionsUnderMe;
+  int totalSubSectionsUnderME;
+  int totalSubSectionsUnderMeIncludingEmptySubsections;
   std::string id; //<- for problems the id is the problem file name. For all other topic
   // elements the id is the title of the element.
   std::string title;
@@ -56,7 +57,8 @@ public:
     this->error="";
     this->parentTopics.SetSize(MathRoutines::Minimum(parentSize, this->parentTopics.size));
     this->immediateChildren.SetSize(0);
-    this->totalSubSectionsUnderMe=0;
+    this->totalSubSectionsUnderME=0;
+    this->totalSubSectionsUnderMeIncludingEmptySubsections=0;
     this->flagContainsProblemsNotInSubsection=false;
     this->pointsEarnedInProblemsThatAreImmediateChildren=0;
     this->totalPointsEarned=0;

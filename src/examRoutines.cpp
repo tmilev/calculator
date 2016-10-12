@@ -2821,6 +2821,14 @@ void TopicElement::ComputeID()
 
 void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output)
 { MacroRegisterFunctionWithName("TopicElement::AddTopic");
+  if (output.size()==0)
+    if (!inputElt.flagIsChapter)
+    { TopicElement chapterlessChapter;
+      chapterlessChapter.parentTopics.AddOnTop(0);
+      chapterlessChapter.flagIsChapter=true;
+      chapterlessChapter.title="Topics without chapter";
+      TopicElement::AddTopic(chapterlessChapter, output);
+    }
   inputElt.ComputeID();
   if (inputElt.id=="")
   { inputElt.flagIsError=true;
@@ -2941,21 +2949,27 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
     if (currentElt.problem!="")
       continue;
     if (currentElt.flagIsSubSection)
-    { currentElt.totalSubSectionsUnderMe=0;
+    { currentElt.totalSubSectionsUnderME=0;
+      currentElt.totalSubSectionsUnderMeIncludingEmptySubsections=0;
       currentElt.flagContainsProblemsNotInSubsection=false;
       continue;
     }
     currentElt.flagContainsProblemsNotInSubsection=false;
-    currentElt.totalSubSectionsUnderMe=0;
+    currentElt.totalSubSectionsUnderME=0;
     for (int j=0; j<currentElt.immediateChildren.size; j++)
     { TopicElement& currentChild=this->theTopicS.theValues[currentElt.immediateChildren[j]];
       if (currentChild.flagIsSubSection)
-        currentElt.totalSubSectionsUnderMe++;
-      else if (currentChild.problem!="")
+      { currentElt.totalSubSectionsUnderME++;
+        currentElt.totalSubSectionsUnderMeIncludingEmptySubsections++;
+      } else if (currentChild.problem!="")
         currentElt.flagContainsProblemsNotInSubsection=true;
       else
-        currentElt.totalSubSectionsUnderMe+=currentChild.totalSubSectionsUnderMe;
+      { currentElt.totalSubSectionsUnderME+=currentChild.totalSubSectionsUnderME;
+        currentElt.totalSubSectionsUnderMeIncludingEmptySubsections+=currentChild.totalSubSectionsUnderMeIncludingEmptySubsections;
+      }
     }
+    if (currentElt.flagContainsProblemsNotInSubsection)
+      currentElt.totalSubSectionsUnderMeIncludingEmptySubsections++;
   }
   return true;
 }

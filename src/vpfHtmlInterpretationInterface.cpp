@@ -1315,33 +1315,36 @@ std::string HtmlInterpretation::ToStringUserScores()
     //out << "<br>DEBUG: Computed scores from: " << currentUserRecord.currentUseR.ToString();
   }
 //  out << "DBUG: prob names: " << theProblem.problemNamesNoTopics.ToStringCommaDelimited();
-  out << "<table class=\"scoreTable\"><tr><th>User</th><th>Section</th><th> Total score</th>";
+  out << "<table class=\"scoreTable\"><tr><th rowspan=\"3\">User</th><th rowspan=\"3\">Section</th><th rowspan=\"3\"> Total score</th>";
   for (int i=0; i<theProblem.theTopicS.size(); i++)
   { TopicElement& currentElt=theProblem.theTopicS.theValues[i];
     if (currentElt.problem!="" || !currentElt.flagIsChapter)
       continue;
-    int numCols=currentElt.totalSubSectionsUnderMe;
-    if (currentElt.flagContainsProblemsNotInSubsection)
-      numCols++;
-    out << "<td colspan=\"" << numCols << "\">" << currentElt.title << "</td>";
+    int numCols=currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
+    out << "<td colspan=\"" << numCols << "\"";
+    if (currentElt.totalSubSectionsUnderME==0 && currentElt.flagContainsProblemsNotInSubsection)
+      out << " rowspan=\"3\"";
+    out << ">" << currentElt.title << "</td>";
   }
-  out << "</tr>";
-  out << "<tr><td></td><td></td><td></td>";
+  out << "</tr>\n";
+  out << "<tr>";
   for (int i=0; i<theProblem.theTopicS.size(); i++)
   { TopicElement& currentElt=theProblem.theTopicS.theValues[i];
     if (currentElt.problem!="" || !currentElt.flagIsSection)
       continue;
-    int numCols=currentElt.totalSubSectionsUnderMe;
-    if (currentElt.flagContainsProblemsNotInSubsection)
-      numCols++;
-    out << "<td colspan=\"" << numCols << "\">" << currentElt.title << "</td>";
+    int numCols=currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
+    out << "<td colspan=\"" << numCols << "\"";
+    if (currentElt.totalSubSectionsUnderME==0 && currentElt.flagContainsProblemsNotInSubsection)
+      out << " rowspan=\"2\"";
+    out << ">" << currentElt.title << "</td>";
   }
-  out << "</tr>";
-  out << "<tr><td></td><td></td><td></td>";
+  out << "</tr>\n";
+  out << "<tr>";
   for (int i=0; i<theProblem.theTopicS.size(); i++)
   { TopicElement& currentElt=theProblem.theTopicS.theValues[i];
     if (currentElt.problem=="" && !currentElt.flagIsSubSection)
-    { if (currentElt.flagContainsProblemsNotInSubsection || currentElt.immediateChildren.size==0)
+    { if ((currentElt.flagContainsProblemsNotInSubsection && currentElt.totalSubSectionsUnderMeIncludingEmptySubsections>1)
+          || currentElt.immediateChildren.size==0)
         out << "<td></td>";
       continue;
     }
@@ -1349,7 +1352,24 @@ std::string HtmlInterpretation::ToStringUserScores()
       continue;
     out << "<td>" << currentElt.title << "</td>";
   }
-  out << "</tr>";
+  out << "</tr>\n";
+
+  out << "<tr><td><b>Maximum possible score</b></td>"
+    << "<td>" << userTable[i][userInfoIndex] << "</td>"
+    << "<td>" << userScores[i].GetDoubleValue() << "</td>";
+    for (int j=0; j< theProblem.theTopicS.size(); j++)
+    { TopicElement& currentElt=theProblem.theTopicS.theValues[j];
+      if (currentElt.problem!="")
+        continue;
+      if (!currentElt.flagIsSubSection && !currentElt.flagContainsProblemsNotInSubsection)
+        continue;
+      if (scoresBreakdown[i].Contains(theProblem.theTopicS.theKeys[j]))
+        out << "<td>" << scoresBreakdown[i].theValues[j] << "</td>";
+      else
+        out << "<td></td>";
+    }
+    out << "</tr>";
+
 
   for (int i=0; i<userTable.size; i++)
   { out << "<tr><td>" << userTable[i][usernameIndex] << "</td>"

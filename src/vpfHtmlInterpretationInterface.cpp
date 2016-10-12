@@ -1216,13 +1216,15 @@ std::string HtmlInterpretation::ToStringAssignSection()
 
 void UserCalculator::ComputePointsEarned
 (const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
- const MapLisT<std::string, TopicElement, MathRoutines::hashString>* theTopics
+ MapLisT<std::string, TopicElement, MathRoutines::hashString>* theTopics
  )
 { MacroRegisterFunctionWithName("UserCalculator::ComputePointsEarned");
   this->pointsEarned=0;
   if (theTopics!=0)
     for (int i=0; i<theTopics->size(); i++)
-      (*theTopics).theValues[i].pointsEarned=0;
+    { (*theTopics).theValues[i].totalPointsEarned=0;
+      (*theTopics).theValues[i].pointsEarnedInProblemsThatAreImmediateChildren=0;
+    }
   for (int i=0; i<this->theProblemData.size(); i++)
   { const std::string problemName=this->theProblemData.theKeys[i];
     if (!gradableProblems.Contains(problemName) )
@@ -1244,8 +1246,15 @@ void UserCalculator::ComputePointsEarned
     { currentP.Points=(currentP.adminData.ProblemWeight*currentP.numCorrectlyAnswered)/currentP.theAnswers.size;
       this->pointsEarned+= currentP.Points;
     }
-//    if (this->)
-//    TopicElement& current
+    if (theTopics!=0)
+      if (theTopics->Contains(problemName))
+      { TopicElement& currentElt=theTopics->GetValueCreateIfNotPresent(problemName);
+        for (int j=0; j<currentElt.parentTopics.size; j++)
+          (*theTopics).theValues[currentElt.parentTopics[j]].totalPointsEarned+=currentP.Points;
+        if (currentElt.parentTopics.size>1)
+          (*theTopics).theValues[currentElt.parentTopics[currentElt.parentTopics.size-2]]
+          .pointsEarnedInProblemsThatAreImmediateChildren+=currentP.Points;
+      }
   }
 }
 
@@ -1279,8 +1288,10 @@ std::string HtmlInterpretation::ToStringUserScores()
   if (problemWeightScheme==-1)
     return "Could not find problem weight scheme";
   List<Rational> userScores;
+  List<MapLisT<std::string, Rational, MathRoutines::hashString> > scoresBreakdown;
   CalculatorHTML currentUserRecord;
   userScores.SetSize(userTable.size);
+  scoresBreakdown.SetSize(userTable.size);
   for (int i=0; i<userTable.size; i++)
   { userScores[i]=-1;
     currentUserRecord.currentUseR.username=userTable[i][usernameIndex];
@@ -1293,16 +1304,68 @@ std::string HtmlInterpretation::ToStringUserScores()
     (theProblem.currentUseR.problemInfoString.value,
      currentUserRecord.currentUseR.theProblemData, out);
     //out << "<br>DEBUG: after ReadProblemInfoAppend: " << currentUserRecord.currentUseR.ToString();
-    currentUserRecord.currentUseR.ComputePointsEarned(theProblem.problemNamesNoTopics, &theProblem.theTopicS);
+    currentUserRecord.currentUseR.ComputePointsEarned
+    (theProblem.problemNamesNoTopics, &theProblem.theTopicS);
+    scoresBreakdown[i].Clear();
+    for (int j=0; j< theProblem.theTopicS.size(); j++)
+      scoresBreakdown[i].SetKeyValue
+      (theProblem.theTopicS.theKeys[j],
+       theProblem.theTopicS[j].pointsEarnedInProblemsThatAreImmediateChildren);
     userScores[i]=currentUserRecord.currentUseR.pointsEarned;
     //out << "<br>DEBUG: Computed scores from: " << currentUserRecord.currentUseR.ToString();
   }
 //  out << "DBUG: prob names: " << theProblem.problemNamesNoTopics.ToStringCommaDelimited();
-  out << "<table class=\"scoreTable\"><tr><th>User</th><td>Section</td><td>Score</td></tr>";
+  out << "<table class=\"scoreTable\"><tr><th>User</th><th>Section</th><th> Total score</th>";
+  for (int i=0; i<theProblem.theTopicS.size(); i++)
+  { TopicElement& currentElt=theProblem.theTopicS.theValues[i];
+    if (currentElt.problem!="" || !currentElt.flagIsChapter)
+      continue;
+    int numCols=currentElt.totalSubSectionsUnderMe;
+    if (currentElt.flagContainsProblemsNotInSubsection)
+      numCols++;
+    out << "<td colspan=\"" << numCols << "\">" << currentElt.title << "</td>";
+  }
+  out << "</tr>";
+  out << "<tr><td></td><td></td><td></td>";
+  for (int i=0; i<theProblem.theTopicS.size(); i++)
+  { TopicElement& currentElt=theProblem.theTopicS.theValues[i];
+    if (currentElt.problem!="" || !currentElt.flagIsSection)
+      continue;
+    int numCols=currentElt.totalSubSectionsUnderMe;
+    if (currentElt.flagContainsProblemsNotInSubsection)
+      numCols++;
+    out << "<td colspan=\"" << numCols << "\">" << currentElt.title << "</td>";
+  }
+  out << "</tr>";
+  out << "<tr><td></td><td></td><td></td>";
+  for (int i=0; i<theProblem.theTopicS.size(); i++)
+  { TopicElement& currentElt=theProblem.theTopicS.theValues[i];
+    if (currentElt.problem=="" && !currentElt.flagIsSubSection)
+    { if (currentElt.flagContainsProblemsNotInSubsection || currentElt.immediateChildren.size==0)
+        out << "<td></td>";
+      continue;
+    }
+    if (currentElt.problem!="" || !currentElt.flagIsSubSection)
+      continue;
+    out << "<td>" << currentElt.title << "</td>";
+  }
+  out << "</tr>";
+
   for (int i=0; i<userTable.size; i++)
   { out << "<tr><td>" << userTable[i][usernameIndex] << "</td>"
     << "<td>" << userTable[i][userInfoIndex] << "</td>"
     << "<td>" << userScores[i].GetDoubleValue() << "</td>";
+    for (int j=0; j< theProblem.theTopicS.size(); j++)
+    { TopicElement& currentElt=theProblem.theTopicS.theValues[j];
+      if (currentElt.problem!="")
+        continue;
+      if (!currentElt.flagIsSubSection && !currentElt.flagContainsProblemsNotInSubsection)
+        continue;
+      if (scoresBreakdown[i].Contains(theProblem.theTopicS.theKeys[j]))
+        out << "<td>" << scoresBreakdown[i].theValues[j] << "</td>";
+      else
+        out << "<td></td>";
+    }
     out << "</tr>";
   }
   out << "</table>";

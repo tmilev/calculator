@@ -252,7 +252,7 @@ public:
 
   void ComputePointsEarned
   (const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
-   const MapLisT<std::string, TopicElement, MathRoutines::hashString>* theTopics
+   MapLisT<std::string, TopicElement, MathRoutines::hashString>* theTopics
    );
   ProblemData& HasProblemData(const std::string& problemName);
   ProblemData& GetProblemDataAddIfNotPresent(const std::string& problemName);

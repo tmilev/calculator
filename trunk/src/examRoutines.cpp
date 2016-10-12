@@ -2819,7 +2819,7 @@ void TopicElement::ComputeID()
   this->id=out.str();
 }
 
-void TopicElement::AddTopic(TopicElement &inputElt, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output)
+void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output)
 { MacroRegisterFunctionWithName("TopicElement::AddTopic");
   inputElt.ComputeID();
   if (inputElt.id=="")
@@ -2831,6 +2831,9 @@ void TopicElement::AddTopic(TopicElement &inputElt, MapLisT<std::string, TopicEl
     inputElt.title= "[Error]: Entry " + inputElt.title + " already present. ";
   }
   output.SetKeyValue(inputElt.id, inputElt);
+  if (inputElt.parentTopics.size>1)
+    output.theValues[inputElt.parentTopics[inputElt.parentTopics.size-2]]
+    .immediateChildren.AddOnTop(output.GetIndex(inputElt.id));
 }
 
 void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output)
@@ -2933,6 +2936,27 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
   for (int i=0; i<this->theTopicS.size(); i++)
     if (this->theTopicS[i].problem!="")
       this->problemNamesNoTopics.AddOnTop(this->theTopicS[i].problem);
+  for (int i=this->theTopicS.size()-1; i>=0; i--)
+  { TopicElement& currentElt=this->theTopicS.theValues[i];
+    if (currentElt.problem!="")
+      continue;
+    if (currentElt.flagIsSubSection)
+    { currentElt.totalSubSectionsUnderMe=0;
+      currentElt.flagContainsProblemsNotInSubsection=false;
+      continue;
+    }
+    currentElt.flagContainsProblemsNotInSubsection=false;
+    currentElt.totalSubSectionsUnderMe=0;
+    for (int j=0; j<currentElt.immediateChildren.size; j++)
+    { TopicElement& currentChild=this->theTopicS.theValues[currentElt.immediateChildren[j]];
+      if (currentChild.flagIsSubSection)
+        currentElt.totalSubSectionsUnderMe++;
+      else if (currentChild.problem!="")
+        currentElt.flagContainsProblemsNotInSubsection=true;
+      else
+        currentElt.totalSubSectionsUnderMe+=currentChild.totalSubSectionsUnderMe;
+    }
+  }
   return true;
 }
 

@@ -16,7 +16,10 @@ public:
   bool flagIsSection;
   bool flagIsSubSection;
   bool flagIsError;
+  bool flagContainsProblemsNotInSubsection;
   List<int> parentTopics;
+  List<int> immediateChildren;
+  int totalSubSectionsUnderMe;
   std::string id; //<- for problems the id is the problem file name. For all other topic
   // elements the id is the title of the element.
   std::string title;
@@ -36,7 +39,8 @@ public:
   std::string displayScore;
   std::string displayModifyWeight;
   std::string displayModifyDeadline;
-  Rational pointsEarned;
+  Rational totalPointsEarned;
+  Rational pointsEarnedInProblemsThatAreImmediateChildren;
   void ComputeID();
   void reset(int parentSize)
   { this->flagIsSection=false;
@@ -51,6 +55,11 @@ public:
     this->problem="";
     this->error="";
     this->parentTopics.SetSize(MathRoutines::Minimum(parentSize, this->parentTopics.size));
+    this->immediateChildren.SetSize(0);
+    this->totalSubSectionsUnderMe=0;
+    this->flagContainsProblemsNotInSubsection=false;
+    this->pointsEarnedInProblemsThatAreImmediateChildren=0;
+    this->totalPointsEarned=0;
   }
   friend std::ostream& operator << (std::ostream& output, const TopicElement& theElt)
   { output << theElt.ToString();

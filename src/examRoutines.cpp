@@ -224,9 +224,9 @@ bool CalculatorHTML::MergeOneProblemAdminData
   }
   for (int i=0; i<incomingDeadlines.size(); i++)
     currentDeadlines.SetKeyValue
-    (incomingDeadlines.theKeys[i],incomingDeadlines.theValues[i]);
-  if (inputProblemInfo.adminData.ProblemWeightUserInput!="")
-  { if (!currentProblem.ProblemWeight.AssignStringFailureAllowed(currentProblem.ProblemWeightUserInput))
+    (incomingDeadlines.theKeys[i], incomingDeadlines.theValues[i]);
+  if (MathRoutines::StringTrimWhiteSpace(inputProblemInfo.adminData.ProblemWeightUserInput)!="")
+  { if (!currentProblem.ProblemWeight.AssignStringFailureAllowed(MathRoutines::StringTrimWhiteSpace(currentProblem.ProblemWeightUserInput)))
     { commentsOnFailure << "Failed to extract rational number from "
       << currentProblem.ProblemWeightUserInput << ". ";
       return false;

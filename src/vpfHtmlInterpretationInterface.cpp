@@ -1224,6 +1224,7 @@ void UserCalculator::ComputePointsEarned
     for (int i=0; i<theTopics->size(); i++)
     { (*theTopics).theValues[i].totalPointsEarned=0;
       (*theTopics).theValues[i].pointsEarnedInProblemsThatAreImmediateChildren=0;
+      (*theTopics).theValues[i].maxPointsInAllChildren=0;
     }
   for (int i=0; i<this->theProblemData.size(); i++)
   { const std::string problemName=this->theProblemData.theKeys[i];
@@ -1250,7 +1251,9 @@ void UserCalculator::ComputePointsEarned
       if (theTopics->Contains(problemName))
       { TopicElement& currentElt=theTopics->GetValueCreateIfNotPresent(problemName);
         for (int j=0; j<currentElt.parentTopics.size; j++)
-          (*theTopics).theValues[currentElt.parentTopics[j]].totalPointsEarned+=currentP.Points;
+        { (*theTopics).theValues[currentElt.parentTopics[j]].totalPointsEarned+=currentP.Points;
+          (*theTopics).theValues[currentElt.parentTopics[j]].maxPointsInAllChildren+=currentP.adminData.ProblemWeight;
+        }
         if (currentElt.parentTopics.size>1)
           (*theTopics).theValues[currentElt.parentTopics[currentElt.parentTopics.size-2]]
           .pointsEarnedInProblemsThatAreImmediateChildren+=currentP.Points;
@@ -1301,11 +1304,9 @@ std::string HtmlInterpretation::ToStringUserScores()
       continue;
     //out << "<br>DEBUG: after db data read: " << currentUserRecord.currentUseR.ToString();
     currentUserRecord.ReadProblemInfoAppend
-    (theProblem.currentUseR.problemInfoString.value,
-     currentUserRecord.currentUseR.theProblemData, out);
+    (theProblem.currentUseR.problemInfoString.value, currentUserRecord.currentUseR.theProblemData, out);
     //out << "<br>DEBUG: after ReadProblemInfoAppend: " << currentUserRecord.currentUseR.ToString();
-    currentUserRecord.currentUseR.ComputePointsEarned
-    (theProblem.problemNamesNoTopics, &theProblem.theTopicS);
+    currentUserRecord.currentUseR.ComputePointsEarned(theProblem.problemNamesNoTopics, &theProblem.theTopicS);
     scoresBreakdown[i].Clear();
     for (int j=0; j< theProblem.theTopicS.size(); j++)
       scoresBreakdown[i].SetKeyValue
@@ -1354,21 +1355,18 @@ std::string HtmlInterpretation::ToStringUserScores()
   }
   out << "</tr>\n";
 
-  out << "<tr><td><b>Maximum possible score</b></td>"
-    << "<td>" << userTable[i][userInfoIndex] << "</td>"
-    << "<td>" << userScores[i].GetDoubleValue() << "</td>";
-    for (int j=0; j< theProblem.theTopicS.size(); j++)
-    { TopicElement& currentElt=theProblem.theTopicS.theValues[j];
-      if (currentElt.problem!="")
-        continue;
-      if (!currentElt.flagIsSubSection && !currentElt.flagContainsProblemsNotInSubsection)
-        continue;
-      if (scoresBreakdown[i].Contains(theProblem.theTopicS.theKeys[j]))
-        out << "<td>" << scoresBreakdown[i].theValues[j] << "</td>";
-      else
-        out << "<td></td>";
-    }
-    out << "</tr>";
+  out << "<tr><td><b>Maximum score</b></td>"
+  << "<td>-</td>"
+  << "<td>-</td>";
+  for (int j=0; j< theProblem.theTopicS.size(); j++)
+  { TopicElement& currentElt=theProblem.theTopicS.theValues[j];
+    if (currentElt.problem!="")
+      continue;
+    if (!currentElt.flagIsSubSection && !currentElt.flagContainsProblemsNotInSubsection)
+      continue;
+    out << "<td>" << currentElt.maxPointsInAllChildren << "</td>";
+  }
+  out << "</tr>";
 
 
   for (int i=0; i<userTable.size; i++)

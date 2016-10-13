@@ -42,6 +42,7 @@ public:
   std::string displayModifyDeadline;
   Rational totalPointsEarned;
   Rational pointsEarnedInProblemsThatAreImmediateChildren;
+  Rational maxPointsInAllChildren;
   void ComputeID();
   void reset(int parentSize)
   { this->flagIsSection=false;
@@ -62,6 +63,7 @@ public:
     this->flagContainsProblemsNotInSubsection=false;
     this->pointsEarnedInProblemsThatAreImmediateChildren=0;
     this->totalPointsEarned=0;
+    this->maxPointsInAllChildren=0;
   }
   friend std::ostream& operator << (std::ostream& output, const TopicElement& theElt)
   { output << theElt.ToString();

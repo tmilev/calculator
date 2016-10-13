@@ -226,9 +226,11 @@ bool CalculatorHTML::MergeOneProblemAdminData
     currentDeadlines.SetKeyValue
     (incomingDeadlines.theKeys[i], incomingDeadlines.theValues[i]);
   if (MathRoutines::StringTrimWhiteSpace(inputProblemInfo.adminData.ProblemWeightUserInput)!="")
-  { if (!currentProblem.ProblemWeight.AssignStringFailureAllowed(MathRoutines::StringTrimWhiteSpace(currentProblem.ProblemWeightUserInput)))
+  { if (!inputProblemInfo.adminData.ProblemWeight.AssignStringFailureAllowed
+        (MathRoutines::StringTrimWhiteSpace(inputProblemInfo.adminData.ProblemWeightUserInput)))
     { commentsOnFailure << "Failed to extract rational number from "
-      << currentProblem.ProblemWeightUserInput << ". ";
+      << inputProblemInfo.adminData.ProblemWeightUserInput << ". " << " Current weight: "
+      << currentProblem.ProblemWeightUserInput;
       return false;
     }
     currentProblem.ProblemWeightUserInput=inputProblemInfo.adminData.ProblemWeightUserInput;

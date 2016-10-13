@@ -1056,7 +1056,8 @@ void MathRoutines::StringTrimWhiteSpace(const std::string& inputString, std::str
   signed j=0;
   for (j=(signed) output.size()-1; j>=0; j--)
     if (output[j]!=' ' && output[j]!='\r' &&
-        output[j]!='\t' && output[j]!='\n')
+        output[j]!='\t' && output[j]!='\n' &&
+        output[j]!='\0')
       break;
   j++;
   output=output.substr(0, j);

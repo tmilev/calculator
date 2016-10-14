@@ -1,13 +1,15 @@
 /*styleCalculator.css*/
 problemNavigation {
   background-color: #eeeeee;
-  width: 100%;
   float: top;
   overflow: none;
   display: block;
   padding: 7px;
   white-space: nowrap;
 }	      
+problemNavigation:after{
+clear:both;
+}
 
 textarea{
   resize: both;

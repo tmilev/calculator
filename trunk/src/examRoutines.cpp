@@ -1375,6 +1375,8 @@ std::string CalculatorHTML::GetDeadline
     { ProblemDataAdministrative& currentProb=
       this->currentUseR.theProblemData.GetValueCreateIfNotPresent(containerName).adminData;
       result=currentProb.deadlinesPerSection.GetValueCreateIfNotPresent(sectionNumber);
+      stOutput << "DEBUG: deadline for containerName: " << containerName << " : " << result
+      << "<br>from problem data: " << currentProb.ToString();
       if (result!="")
       { outputIsInherited=(containerName!=problemName);
         return result;
@@ -1422,9 +1424,9 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
       hoursTillDeadlineStream << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false)
       << " left. ";
   } else
-    hoursTillDeadlineStream << "Deadline has passed. ";
+    hoursTillDeadlineStream << "[passed].";
   if (deadlineHasPassed && !problemAlreadySolved)
-    out << "<span style=\"red\"><b>Deadline has passed. </b></span>"
+    out << "<span style=\"red\"><b>[Deadline passed].</b></span>"
     << "<span style=\"color:blue\">" << currentDeadline << "</span>. ";
   else
   { out << "Deadline: ";
@@ -1438,7 +1440,7 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
       out << "<span style=\"color:brown\">" << currentDeadline << "</span>. ";
     out << hoursTillDeadlineStream.str();
   }
-  return "[<span style=\"color:green\"><b>Deadlines temporarily disabled. All submissions allowed.</b> </span>] "+ out.str();
+  return "[<span style=\"color:green\"><b>disabled</b> </span>] "+ out.str();
 #else
   out  << "Database not running: no deadlines";
   return out.str();
@@ -2522,24 +2524,34 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
       << this->ToStringCalculatorArgumentsForProblem
       (theGlobalVariables.userCalculatorRequestType, "false", theGlobalVariables.GetWebInput("studentSection"))
-      << "\">Admin view</a>" << linkBigSeparator;
+      << "\">Admin view</a>" << linkSeparator;
     else
-    { if (this->databaseStudentSections.size==0)
+      out << "<b>Admin view</b>" << linkSeparator;
+    if (this->databaseStudentSections.size==0)
+    { if (theGlobalVariables.UserStudentViewOn())
+        out << "<b>Student View</b>";
+      else
         out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
         << this->ToStringCalculatorArgumentsForProblem
         (theGlobalVariables.userCalculatorRequestType, "true", "")
         << "\">Student view</a>";
-      for (int i=0; i<this->databaseStudentSections.size; i++)
-        if (this->databaseStudentSections[i]!="")
-        { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
+    }
+    else
+      out << "Student view: ";
+    for (int i=0; i<this->databaseStudentSections.size; i++)
+      if (this->databaseStudentSections[i]!="")
+      { if (theGlobalVariables.UserStudentViewOn() &&
+            this->databaseStudentSections[i] == theGlobalVariables.GetWebInput("studentSection"))
+          out << "<b>section " << this->databaseStudentSections[i] << "</b>";
+        else
+          out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
           << this->ToStringCalculatorArgumentsForProblem
           (theGlobalVariables.userCalculatorRequestType, "true", this->databaseStudentSections[i])
-          << "\">Student view section " << this->databaseStudentSections[i] << " </a>";
-          if (i!=this->databaseStudentSections.size-1)
-            out << linkSeparator;
-        }
-      out << linkBigSeparator;
-    }
+          << "\">section " << this->databaseStudentSections[i] << " </a>";
+        if (i!=this->databaseStudentSections.size-1)
+          out << linkSeparator;
+      }
+    out << linkBigSeparator;
   }
   if (this->flagIsExamProblem)
   { if (theGlobalVariables.userCalculatorRequestType=="exercise")

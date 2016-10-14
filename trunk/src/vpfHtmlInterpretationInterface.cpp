@@ -193,7 +193,7 @@ std::string HtmlInterpretation::SubmitProblemPreview()
     return out.str();
   }
   const Expression& studentAnswerNoContextE=theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size()-1];
-  out << "<span style=\"color:magenta\"><b>Interpreting your answer as:</b></span><br>";
+  out << "<span style=\"color:magenta\"><b>Interpreting as:</b></span><br>";
   FormatExpressions theFormat;
   theFormat.flagUseLatex=true;
   theFormat.flagUsePmatrix=true;
@@ -249,7 +249,7 @@ std::string HtmlInterpretation::SubmitProblemPreview()
     theFormat.flagExpressionIsFinal=true;
     out << currentE.ToString(&theFormat);
   }
-  out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+  out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).<hr>";
   if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn() )
     out << "<hr>Logged-in as admin with debug flag on = including (lots of) details. "
     << "Executed command:<br>" << calculatorInputStream.str() << "<hr>"
@@ -601,7 +601,7 @@ std::string HtmlInterpretation::SubmitProblem()
     isCorrect=false;
   else
     isCorrect=(mustBeOne==1);
-  out << "<table width=\"300\"><tr><td>";
+  out << "<table width=\"300\">";
 #ifdef MACRO_use_MySQL
   int correctSubmissionsRelevant=0;
   int totalSubmissionsRelevant=0;
@@ -612,9 +612,10 @@ std::string HtmlInterpretation::SubmitProblem()
   bool hasDeadline=true;
   double secondsTillDeadline=-1;
   if (theProblem.flagIsForReal)
-  { if (!theUser.InterpretDatabaseProblemData(theUser.problemDataString.value, comments))
-    { out << "<b>Failed to load user information from database. Answer not recorded. "
-      << "This should not happen. " << CalculatorHTML::BugsGenericMessage << "</b>";
+  { if (!theUser.InterpretDatabaseProblemData(theUser.problemDataString.value, comments) ||
+        !theUser.InterpretDatabaseProblemData(theUser.deadlineInfoString.value, comments))
+    { out << "<tr><td><b>Failed to load user information from database. Answer not recorded. "
+      << "This should not happen. " << CalculatorHTML::BugsGenericMessage << "</b></td></tr>";
       theProblem.flagIsForReal=false;
     } else
     { if (!theProblem.LoadAndParseTopicList(out))
@@ -622,7 +623,12 @@ std::string HtmlInterpretation::SubmitProblem()
       if (hasDeadline)
       { bool unused=false;
         std::string theDeadlineString=
-        theProblem.GetDeadline(theProblem.fileName, theProblem.currentUseR.userGroup.GetDataNoQuotes(), unused);
+        theProblem.GetDeadline(theProblem.fileName, theUser.userGroup.GetDataNoQuotes(), unused);
+        out << "<tr><td>DEBUG: getting deadline for section: " << theUser.userGroup.value
+        << " the dealineinfoString is: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(theUser.deadlineInfoString.value)
+        << " <br>getDeadline output: "
+        << theProblem.GetDeadline(theProblem.fileName, theUser.userGroup.GetDataNoQuotes(), unused) << "</td></tr>";
+
         if (theDeadlineString=="" || theDeadlineString==" ")
           hasDeadline=false;
         else
@@ -630,20 +636,19 @@ std::string HtmlInterpretation::SubmitProblem()
           //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
           std::stringstream badDateStream;
           if (!deadline.AssignMonthDayYear(theDeadlineString, badDateStream))
-          { out << "<b>Problem reading deadline. </b> The deadline string was: "
+          { out << "<tr><td><b>Problem reading deadline. </b> The deadline string was: "
             << theDeadlineString << ". Comments: "
             << "<span style=\"color:red\">" << badDateStream.str() << "</span>"
-            << " This should not happen. " << CalculatorHTML::BugsGenericMessage;
+            << "</td></tr><tr><td> This should not happen. " << CalculatorHTML::BugsGenericMessage << "</td></tr>";
             return out.str();
           }
-          //  out << "deadline.date: " << deadline.theTime.tm_mday;
           now.AssignLocalTime();
           //  out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
           //  << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
           secondsTillDeadline= deadline.SubtractAnotherTimeFromMeInSeconds(now)+7*3600;
           deadLinePassed=(secondsTillDeadline<-18000);
-          bool fixTHIS;
-          deadLinePassed=false;
+//          bool fixTHIS;
+//          deadLinePassed=false;
         }
       }
       if (deadLinePassed)
@@ -661,26 +666,25 @@ std::string HtmlInterpretation::SubmitProblem()
             if (currentA.firstCorrectAnswerClean=="")
               currentA.firstCorrectAnswerClean=currentA.currentAnswerClean;
             else
-              out << "[correct answer already submitted: " << currentA.firstCorrectAnswerClean << "]";
+              out << "<tr><td>[first correct answer: " << currentA.firstCorrectAnswerClean << "]</td></tr>";
           }
         }
     }
   }
 #endif // MACRO_use_MySQL
   if (!isCorrect)
-  { out << "<span style=\"color:red\"><b>Your answer appears to be incorrect. </b></span>";
+  { out << "<tr><td><span style=\"color:red\"><b>Your answer appears to be incorrect. </b></span></td></tr>";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
-      out << "For debug purposes: the calculator output is: " << theInterpreter.outputString
+      out << "<tr><td>For debug purposes: the calculator output is: " << theInterpreter.outputString
       << "Comments: " << theInterpreter.Comments.str() << "<hr>Calculator input was:<hr>"
-      << theInterpreter.inputString << "<hr>";
+      << theInterpreter.inputString << "<hr></td></tr>";
   } else
-    out << "<span style=\"color:green\"><b>Correct! </b></span>";
-  out << "</td></tr>";
+    out << "<tr><td><span style=\"color:green\"><b>Correct! </b></span>" << "</td></tr>";
 #ifdef MACRO_use_MySQL
   if (theProblem.flagIsForReal)
   { std::stringstream comments;
-    theProblem.currentUseR.SetProblemData(theProblem.fileName, theProblem.theProblemData);
-    if (!theProblem.currentUseR.StoreProblemDataToDatabase(theRoutines, comments))
+    theUser.SetProblemData(theProblem.fileName, theProblem.theProblemData);
+    if (!theUser.StoreProblemDataToDatabase(theRoutines, comments))
       out << "<tr><td><b>This shouldn't happen and may be a bug: failed to store your answer in the database. "
       << CalculatorHTML::BugsGenericMessage << "</b><br>Comments: "
       << comments.str() << "</td></tr>";
@@ -716,7 +720,7 @@ std::string HtmlInterpretation::SubmitProblem()
     << " is considered cheating (example: answer from an online program for doing homework).</b> </span>";
   out << "</td></tr>";
   out << "</table>";
-  out << "Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+  out << "Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).<hr>";
 
 //  stOutput << "<hr>" << theInterpreter.outputString << "<hr><hr><hr><hr><hr><hr>";
 //  stOutput << this->ToStringCalculatorArgumentsHumanReadable();

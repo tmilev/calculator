@@ -615,6 +615,7 @@ std::string UserCalculator::ToString()
     << "; weight: "
     << this->theProblemData.theValues[i].adminData.ProblemWeightUserInput << " ("
     << this->theProblemData.theValues[i].adminData.ProblemWeight.ToString() << ")";
+  out << "<br>Deadline info: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(this->deadlineInfoString.value);
   return out.str();
 }
 
@@ -708,10 +709,19 @@ bool UserCalculator::FetchOneUserRow
   this->userId=this->GetSelectedRowEntry(DatabaseStrings::userId);
   this->email= this->GetSelectedRowEntry("email");
   this->userRole= this->GetSelectedRowEntry("userRole");
-  this->username=this->GetSelectedRowEntry(DatabaseStrings::userColumnLabel); //<-Important! Database lookup may be
+  this->username=this->GetSelectedRowEntry(DatabaseStrings::userColumnLabel);
+  //<-Important! Database lookup may be
   //case insensitive (this shouldn't be the case, so welcome to the insane design of mysql).
   //The preceding line of code guarantees we have read the username as it is stored in the DB.
-  this->userGroup=this->GetSelectedRowEntry(DatabaseStrings::userGroupLabel);
+  if (theGlobalVariables.UserStudentViewOn() && this->userRole=="admin" &&
+      theGlobalVariables.GetWebInput("studentSection")!="")
+  //<- warning, the user may not be
+  //fully logged-in yet so theGlobalVariables.UserDefaultHasAdminRights()
+  //does not work right.
+    this->userGroup=theGlobalVariables.GetWebInput("studentSection");
+  else
+    this->userGroup=this->GetSelectedRowEntry(DatabaseStrings::userGroupLabel);
+
   this->actualShaonedSaltedPassword=this->GetSelectedRowEntry("password");
   this->authenticationTokenCreationTime=this->GetSelectedRowEntry("authenticationCreationTime");
   this->actualAuthenticationToken=this->GetSelectedRowEntry("authenticationToken");

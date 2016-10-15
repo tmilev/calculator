@@ -772,7 +772,7 @@ std::string HtmlInterpretation::AddTeachersSections()
   for (int i=0; i<theTeachers.size; i++)
     if (!theRoutines.SetEntry
         (DatabaseStrings::userColumnLabel, theTeachers[i], DatabaseStrings::usersTableName,
-         DatabaseStrings::sectionsList, desiredSections, &out))
+         DatabaseStrings::sectionsTaughtByUser, desiredSections, &out))
       out << "<span style=\"color:red\">Failed to assign: " << theTeachers[i] << " to section: "
       << desiredSections << "</span><br>";
     else

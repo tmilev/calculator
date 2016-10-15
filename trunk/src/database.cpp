@@ -229,7 +229,7 @@ std::string DatabaseStrings::problemWeightsTableName="problemWeights";
 std::string DatabaseStrings::problemWeightsIdColumnName="idInProblemInfo";
 std::string DatabaseStrings::infoColumnInProblemWeightsTable="problemWeights";
 
-std::string DatabaseStrings::sectionsList="sectionList";
+std::string DatabaseStrings::sectionsTaughtByUser="sectionList";
 
 std::string MySQLdata::GetDatA()const
 { return "'" + this->GetDataNoQuotes() + "'";
@@ -600,7 +600,7 @@ std::string UserCalculator::ToString()
 { MacroRegisterFunctionWithName("UserCalculator::ToString");
   std::stringstream out;
   out << "Calculator user: " << this->username.value << "<br>Section: " << this->userGroup.value
-  << "<br>Sections taught: " << this->sectionInfoString.value
+  << "<br>Sections taught: " << this->sectionsTaughtByUserString.value
   << ""
   ;
 
@@ -728,7 +728,7 @@ bool UserCalculator::FetchOneUserRow
   this->problemDataString=this->GetSelectedRowEntry("problemData");
   this->deadlineInfoRowId=this->GetSelectedRowEntry(DatabaseStrings::deadlinesIdColumnName);
   this->problemInfoRowId=this->GetSelectedRowEntry(DatabaseStrings::problemWeightsIdColumnName);
-  this->sectionInfoString=this->GetSelectedRowEntry(DatabaseStrings::sectionsList);
+  this->sectionsTaughtByUserString=this->GetSelectedRowEntry(DatabaseStrings::sectionsTaughtByUser);
   std::string reader;
   //stOutput << "DEBUG:  GOT to hereE!!!";
   if (this->deadlineInfoRowId!="")
@@ -1993,7 +1993,7 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, 
   << "userInfo LONGTEXT, "
   << DatabaseStrings::problemWeightsIdColumnName << " LONGTEXT, "
   << DatabaseStrings::deadlinesIdColumnName << " LONGTEXT, "
-  << DatabaseStrings::sectionsList << " LONGTEXT, "
+  << DatabaseStrings::sectionsTaughtByUser << " LONGTEXT, "
   << "problemData LONGTEXT "
   ;
   if (! this->CreateTable

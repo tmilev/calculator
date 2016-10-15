@@ -34,6 +34,7 @@ CalculatorHTML::CalculatorHTML()
   this->flagUseNavigationBar=true;
   this->timeToParseHtml=0;
   this->flagMathQuillWithMatrices=false;
+  this->flagSectionsPrepared=false;
 }
 
 #ifdef MACRO_use_MySQL
@@ -251,7 +252,6 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
   { commentsOnFailure << "Failed to parse your request";
     return false;
   }
-  std::string currentFileName;
   bool result=true;
   //stOutput << "<hr><hr>Debug: incoming problems: " << incomingProblems.ToStringHtml();
   for (int i=0; i<incomingProblems.size(); i++)
@@ -290,6 +290,8 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   //stOutput << "<hr>DEBUG: Before loading DB: " << this->currentUseR.ToString();
   if (this->currentUseR.problemDataString=="")
     return true;
+  if (! this->PrepareSectionList(comments))
+    return false;
   if (!this->currentUseR.InterpretDatabaseProblemData(this->currentUseR.problemDataString.value, comments))
   { comments << "Failed to interpret user's problem saved data. ";
     //stOutput << "Failed to interpret user's problem saved data. ";
@@ -1153,15 +1155,18 @@ std::string SyntacticElementHTML::GetTagClass()
 bool CalculatorHTML::PrepareSectionList(std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareSectionList");
   (void) commentsOnFailure;
-  if (this->databaseStudentSections.size>0)
+  if (this->flagSectionsPrepared)
     return true;
-  if (this->currentUseR.sectionInfoString=="" ||
+  this->flagSectionsPrepared=true;
+  if (this->currentUseR.sectionsTaughtByUserString=="" ||
       (this->currentUseR.userRole!="admin" && this->currentUseR.userRole!="teacher") )
     if (this->currentUseR.userGroup.value!="")
     { this->databaseStudentSections.AddOnTop(this->currentUseR.userGroup.value);
       return true;
     }
-  MathRoutines::StringSplitDefaultDelimiters(this->currentUseR.sectionInfoString.value, this->databaseStudentSections);
+  List<std::string> sectionList;
+  MathRoutines::StringSplitDefaultDelimiters(this->currentUseR.sectionsTaughtByUserString.value, sectionList);
+  this->databaseStudentSections.AddListOnTop(sectionList);
   return true;
 }
 
@@ -2535,8 +2540,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         << this->ToStringCalculatorArgumentsForProblem
         (theGlobalVariables.userCalculatorRequestType, "true", "")
         << "\">Student view</a>";
-    }
-    else
+    } else
       out << "Student view: ";
     for (int i=0; i<this->databaseStudentSections.size; i++)
       if (this->databaseStudentSections[i]!="")

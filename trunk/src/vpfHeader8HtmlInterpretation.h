@@ -108,6 +108,7 @@ public:
   bool flagTagBodyPresent;
   bool flagUseNavigationBar;
   bool flagMathQuillWithMatrices;
+  bool flagSectionsPrepared;
   double timeToParseHtml;
   List<double> timePerAttempt;
   List<List<double> > timeIntermediatePerAttempt;

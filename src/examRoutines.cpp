@@ -49,8 +49,7 @@ bool CalculatorHTML::ReadProblemInfoAppend
   CGIedProbs, currentKeyValues, sectionInfo;
   if (!CGI::ChopCGIString(inputInfoString, CGIedProbs, commentsOnFailure) )
     return false;
-  //stOutput << "<hr>Debug: reading problem info from: " << inputInfoString << " resulted in pairs: "
-  //<< CGIedProbs.ToStringHtml();
+  //stOutput << "<hr>Debug: reading problem info from: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(inputInfoString);
   outputProblemInfo.SetExpectedSize(outputProblemInfo.size()+ CGIedProbs.size());
   std::string currentProbName, currentProbString;
   ProblemData emptyData;
@@ -76,13 +75,17 @@ bool CalculatorHTML::ReadProblemInfoAppend
     std::string deadlineString=CGI::URLStringToNormal(currentKeyValues.GetValueCreateIfNotPresent("deadlines"));
     if (!CGI::ChopCGIString(deadlineString, sectionInfo, commentsOnFailure))
       return false;
-    //stOutput << "<hr>Debug: deadline problem info from: " << deadlineString << " resulted in pairs: "
-    //<< sectionInfo.ToStringHtml();
-
+    if (currentProbName=="DefaultProblemLocation/Limits-x-tends-to-infinity-RF-equal-deg-1.html")
+      stOutput << "<hr>Debug: deadline problem info for: " << currentProbName
+      << " before accounting: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(deadlineString)
+      << " is: " << currentProblemValue.adminData.ToString();
     for (int j=0; j<sectionInfo.size(); j++)
       currentProblemValue.adminData.deadlinesPerSection.SetKeyValue
       (CGI::URLStringToNormal(sectionInfo.theKeys[j]),
        CGI::URLStringToNormal(sectionInfo.theValues[j]));
+    if (currentProbName=="DefaultProblemLocation/Limits-x-tends-to-infinity-RF-equal-deg-1.html")
+      stOutput << "<br>Debug: after accounting: "
+      << currentProblemValue.adminData.ToString() << "<br>";
   }
   return true;
 }
@@ -247,7 +250,10 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
   //stOutput << "DEBUG: Here I am, merging in data: " << incomingProblemInfo;
   MapLisT<std::string, ProblemData, MathRoutines::hashString>
   incomingProblems;
-  //stOutput << "<hr>DEBUG: Got to next step: " << incomingProblemInfo;
+//  stOutput << "<hr>DEBUG: merging problem info with stack trace: "
+//  << crash.GetStackTraceEtcErrorMessage()
+  //<< incomingProblemInfo
+//  ;
   if (!this->ReadProblemInfoAppend(incomingProblemInfo, incomingProblems, commentsOnFailure))
   { commentsOnFailure << "Failed to parse your request";
     return false;
@@ -288,6 +294,11 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   //stOutput << "<hr><hr>DEBUG reading problem info from: " << CGI::StringToHtmlString(this->currentUseR.problemDataString.value);
   //stOutput << "<hr>Starting user: " << this->currentUseR.ToString();
   //stOutput << "<hr>DEBUG: Before loading DB: " << this->currentUseR.ToString();
+  stOutput << "<hr>DEBUG: LoadDatabaseInfo, stack trace:  "
+  << crash.GetStackTraceEtcErrorMessage()
+  //<< incomingProblemInfo
+  ;
+
   if (this->currentUseR.problemDataString=="")
     return true;
   if (! this->PrepareSectionList(comments))
@@ -383,9 +394,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
   }
   //out << "DEBUG: flagMathQuillWithMatrices=" << this->flagMathQuillWithMatrices << "<br>";
   if (this->flagUseNavigationBar && !theGlobalVariables.flagRunningApache)
-  { std::string linkSeparator=" | ";
-    std::string linkBigSeparator=" || ";
-    out << "<problemNavigation>"
+  { out << "<problemNavigation>"
     << this->outputHtmlNavigatioN
     << theGlobalVariables.ToStringNavigation()
     << "<small>Generated in "

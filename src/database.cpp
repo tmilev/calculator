@@ -279,7 +279,7 @@ std::string ProblemData::ToStringAvailableAnswerIds()
 std::string ProblemDataAdministrative::ToString()const
 { std::stringstream out;
   out << this->deadlinesPerSection.ToStringHtml();
-  out << "Weight: " << this->ProblemWeightUserInput << " (" << this->ProblemWeight.ToString() << ")";
+  out << "<br>Weight: " << this->ProblemWeightUserInput << " (" << this->ProblemWeight.ToString() << ")";
   return out.str();
 }
 
@@ -1134,8 +1134,7 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
     this->AddEmptyAnswerIdOnTop(CGI::URLStringToNormal(theMap.theKeys[i]));
     Answer& currentA=*this->theAnswers.LastObject();
     std::string currentQuestion=CGI::URLStringToNormal(theMap.theValues[i]);
-    result=CGI::ChopCGIString
-    (currentQuestion, currentQuestionMap, commentsOnFailure);
+    result=CGI::ChopCGIString(currentQuestion, currentQuestionMap, commentsOnFailure);
     if (!result)
     { commentsOnFailure << "Failed to interpret as key-value pair: "
       << currentQuestion << ". ";

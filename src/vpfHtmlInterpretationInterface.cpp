@@ -612,8 +612,9 @@ std::string HtmlInterpretation::SubmitProblem()
   bool hasDeadline=true;
   double secondsTillDeadline=-1;
   if (theProblem.flagIsForReal)
-  { if (!theUser.InterpretDatabaseProblemData(theUser.problemDataString.value, comments) ||
-        !theUser.InterpretDatabaseProblemData(theUser.deadlineInfoString.value, comments))
+  { out << "<tr><td><hr><hr><hr>DEBUG:  before interpreting anything prob data is: "
+    << theUser.theProblemData.ToStringHtml() << "<hr><hr><hr></td></tr>";
+    if (!theProblem.LoadDatabaseInfo(out))
     { out << "<tr><td><b>Failed to load user information from database. Answer not recorded. "
       << "This should not happen. " << CalculatorHTML::BugsGenericMessage << "</b></td></tr>";
       theProblem.flagIsForReal=false;
@@ -625,7 +626,10 @@ std::string HtmlInterpretation::SubmitProblem()
         std::string theDeadlineString=
         theProblem.GetDeadline(theProblem.fileName, theUser.userGroup.GetDataNoQuotes(), unused);
         out << "<tr><td>DEBUG: getting deadline for section: " << theUser.userGroup.value
-        << " the dealineinfoString is: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(theUser.deadlineInfoString.value)
+        << "<br>The prob data is: "
+        << theUser.theProblemData.ToStringHtml()
+        << "<br> the dealineinfoString is: "
+        << CGI::URLKeyValuePairsToNormalRecursiveHtml(theUser.deadlineInfoString.value)
         << " <br>getDeadline output: "
         << theProblem.GetDeadline(theProblem.fileName, theUser.userGroup.GetDataNoQuotes(), unused) << "</td></tr>";
 

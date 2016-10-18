@@ -67,9 +67,9 @@ bool CalculatorHTML::ReadProblemInfoAppend
     //stOutput << "<hr>Debug: reading problem info from: " << currentProbString << " resulted in pairs: "
     //<< currentKeyValues.ToStringHtml();
     std::string deadlineString=CGI::URLStringToNormal(currentKeyValues.GetValueCreateIfNotPresent("deadlines"));
-    std::string problemString=CGI::URLStringToNormal(currentKeyValues.GetValueCreateIfNotPresent("weight"));
-    if (problemString!="")
-    { if (!CGI::ChopCGIString(problemString, sectionProblemInfo, commentsOnFailure))
+    std::string problemWeightsCollectionString=CGI::URLStringToNormal(currentKeyValues.GetValueCreateIfNotPresent("weights"));
+    if (problemWeightsCollectionString!="")
+    { if (!CGI::ChopCGIString(problemWeightsCollectionString, sectionProblemInfo, commentsOnFailure))
         return false;
       for (int j=0; j<sectionProblemInfo.size(); j++)
         currentProblemValue.adminData.problemWeightsPerSectionDB.SetKeyValue
@@ -84,6 +84,21 @@ bool CalculatorHTML::ReadProblemInfoAppend
         (CGI::URLStringToNormal(sectionDeadlineInfo.theKeys[j]),
          CGI::URLStringToNormal(sectionDeadlineInfo.theValues[j]));
     }
+    std::string problemWeightNoSectionsString=MathRoutines::StringTrimWhiteSpace
+    (currentKeyValues.GetValueCreateIfNotPresent("weight"));
+    if (problemWeightNoSectionsString!="")
+    { if (this->databaseStudentSections.size<=0)
+      { commentsOnFailure << "<span style=\"color:red\"><b>Got default weight: "
+        << problemWeightNoSectionsString << " but "
+        << "user does not appear to be teaching any sections.</b></span> ";
+        return false;
+      }
+      for (int j=0; j<this->databaseStudentSections.size; j++)
+        currentProblemValue.adminData.problemWeightsPerSectionDB.SetKeyValue
+        (CGI::URLStringToNormal(this->databaseStudentSections[j]),
+         CGI::URLStringToNormal(problemWeightNoSectionsString));
+    }
+
   }
   return true;
 }

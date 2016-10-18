@@ -111,6 +111,11 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
   //stOutput << "DEBUG: userDefault: " << theGlobalVariables.userDefault.ToStringUnsecure();
   theProblem.currentUseR.UserCalculatorData::operator=(theGlobalVariables.userDefault);
   std::stringstream out;
+  if(!theProblem.PrepareSectionList(commentsOnFailure))
+  { out << "<span style=\"color:red\"><b>Failed to prepare section list. </b></span>" << commentsOnFailure.str();
+    return out.str();
+
+  }
   if (!theProblem.ReadProblemInfoAppend
       (theProblem.currentUseR.deadlineInfoString.value, theProblem.currentUseR.theProblemData, out))
   { out << "Failed to interpret the deadline string. ";

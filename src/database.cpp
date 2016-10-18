@@ -276,10 +276,22 @@ std::string ProblemData::ToStringAvailableAnswerIds()
   return out.str();
 }
 
+bool ProblemDataAdministrative::GetWeightFromSection
+(const std::string& theSection, Rational& output, std::string *outputAsGivenByInstructor)
+{ MacroRegisterFunctionWithName("ProblemDataAdministrative::GetWeightFromSection");
+  if (!this->problemWeightsPerSectionDB.Contains(theSection))
+    return false;
+  std::string tempString;
+  if (outputAsGivenByInstructor==0)
+    outputAsGivenByInstructor=&tempString;
+  *outputAsGivenByInstructor=this->problemWeightsPerSectionDB.GetValueCreateIfNotPresent(theSection);
+  return output.AssignStringFailureAllowed(*outputAsGivenByInstructor);
+}
+
 std::string ProblemDataAdministrative::ToString()const
 { std::stringstream out;
   out << this->deadlinesPerSection.ToStringHtml();
-  out << "<br>Weight: " << this->ProblemWeightUserInput << " (" << this->ProblemWeight.ToString() << ")";
+  out << this->problemWeightsPerSectionDB.ToStringHtml();
   return out.str();
 }
 
@@ -604,17 +616,21 @@ std::string UserCalculator::ToString()
   << ""
   ;
 
+  Rational weightRat;
   for (int i=0; i<this->theProblemData.size(); i++)
-    out << "<br>Problem: " << this->theProblemData.theKeys[i] << "; random seed: "
+  { out << "<br>Problem: " << this->theProblemData.theKeys[i] << "; random seed: "
     << this->theProblemData.theValues[i].randomSeed << "; numSubmissions: "
     << this->theProblemData.theValues[i].totalNumSubmissions
     << "; correct: "
-    << this->theProblemData.theValues[i].Points
-    << "; points: "
     << this->theProblemData.theValues[i].numCorrectlyAnswered
-    << "; weight: "
-    << this->theProblemData.theValues[i].adminData.ProblemWeightUserInput << " ("
-    << this->theProblemData.theValues[i].adminData.ProblemWeight.ToString() << ")";
+    << "; points: "
+    << this->theProblemData.theValues[i].Points
+    << ";";
+    if (!this->theProblemData.theValues[i].adminData.GetWeightFromSection(this->userGroup.value, weightRat))
+      out << " (weight not available). ";
+    else
+      out << " weight: " << weightRat.ToString();
+  }
   out << "<br>Deadline info: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(this->deadlineInfoString.value);
   return out.str();
 }

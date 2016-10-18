@@ -625,13 +625,13 @@ std::string HtmlInterpretation::SubmitProblem()
       { bool unused=false;
         std::string theDeadlineString=
         theProblem.GetDeadline(theProblem.fileName, theUser.userGroup.GetDataNoQuotes(), unused);
-        out << "<tr><td>DEBUG: getting deadline for section: " << theUser.userGroup.value
-        << "<br>The prob data is: "
-        << theUser.theProblemData.ToStringHtml()
-        << "<br> the dealineinfoString is: "
-        << CGI::URLKeyValuePairsToNormalRecursiveHtml(theUser.deadlineInfoString.value)
-        << " <br>getDeadline output: "
-        << theProblem.GetDeadline(theProblem.fileName, theUser.userGroup.GetDataNoQuotes(), unused) << "</td></tr>";
+        //out << "<tr><td>DEBUG: getting deadline for section: " << theUser.userGroup.value
+        //<< "<br>The prob data is: "
+        //<< theUser.theProblemData.ToStringHtml()
+        //<< "<br> the dealineinfoString is: "
+        //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(theUser.deadlineInfoString.value)
+        //<< " <br>getDeadline output: "
+        //<< theProblem.GetDeadline(theProblem.fileName, theUser.userGroup.GetDataNoQuotes(), unused) << "</td></tr>";
 
         if (theDeadlineString=="" || theDeadlineString==" ")
           hasDeadline=false;
@@ -1242,9 +1242,9 @@ void UserCalculator::ComputePointsEarned
     currentP.Points=0;
     currentP.totalNumSubmissions=0;
     currentP.numCorrectlyAnswered=0;
+    Rational currentWeight;
     currentP.flagProblemWeightIsOK=
-    currentP.adminData.ProblemWeight.AssignStringFailureAllowed
-    (currentP.adminData.ProblemWeightUserInput);
+    currentP.adminData.GetWeightFromSection(this->userGroup.value, currentWeight);
 //    this->problemData[i].numAnswersSought=this->problemData[i].answerIds.size;
     for (int j=0; j<currentP.theAnswers.size; j++)
     { if (currentP.theAnswers[j].numCorrectSubmissions>0)
@@ -1252,7 +1252,7 @@ void UserCalculator::ComputePointsEarned
       currentP.totalNumSubmissions+=currentP.theAnswers[j].numSubmissions;
     }
     if (currentP.flagProblemWeightIsOK && currentP.theAnswers.size>0)
-    { currentP.Points=(currentP.adminData.ProblemWeight*currentP.numCorrectlyAnswered)/currentP.theAnswers.size;
+    { currentP.Points=(currentWeight*currentP.numCorrectlyAnswered)/currentP.theAnswers.size;
       this->pointsEarned+= currentP.Points;
     }
     if (theTopics!=0)
@@ -1260,7 +1260,7 @@ void UserCalculator::ComputePointsEarned
       { TopicElement& currentElt=theTopics->GetValueCreateIfNotPresent(problemName);
         for (int j=0; j<currentElt.parentTopics.size; j++)
         { (*theTopics).theValues[currentElt.parentTopics[j]].totalPointsEarned+=currentP.Points;
-          (*theTopics).theValues[currentElt.parentTopics[j]].maxPointsInAllChildren+=currentP.adminData.ProblemWeight;
+          (*theTopics).theValues[currentElt.parentTopics[j]].maxPointsInAllChildren+=currentWeight;
         }
         if (currentElt.parentTopics.size>1)
           (*theTopics).theValues[currentElt.parentTopics[currentElt.parentTopics.size-2]]

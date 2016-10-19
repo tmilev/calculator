@@ -1169,7 +1169,21 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
       //this protects from the possibility that currentA.firstCorrectAnswerURLed was not encoded properly.
     }
   }
+//  this->CheckConsistency();
   return result;
+}
+
+bool ProblemData::CheckConsistency()const
+{ MacroRegisterFunctionWithName("ProblemData::CheckConsistency");
+  for (int i=0; i<this->theAnswers.size; i++)
+  { if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].answerId)=="")
+      crash << "This is not supposed to happen: empty answer id." << crash;
+    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield)=="")
+      crash << "This is not supposed to happen: empty idMQfield. The answer id is: "
+      << this->theAnswers[i].idMQfield << this->ToString() << "<hr>All the answers are: "
+      << this->ToString() << crash;
+  }
+  return true;
 }
 
 std::string ProblemData::Store()
@@ -1204,7 +1218,9 @@ bool UserCalculator::InterpretDatabaseProblemData
   ProblemData reader;
   std::string probNameNoWhiteSpace;
   for (int i=0; i<theMap.size(); i++)
-  { if (!reader.LoadFrom(CGI::URLStringToNormal(theMap[i]), commentsOnFailure))
+  { stOutput << "<hr>Reading data: " << theMap.theKeys[i] << ", value: "
+    << CGI::URLKeyValuePairsToNormalRecursiveHtml(theMap[i]);
+    if (!reader.LoadFrom(CGI::URLStringToNormal(theMap[i]), commentsOnFailure))
     { result=false;
       continue;
     }

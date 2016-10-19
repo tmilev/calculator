@@ -2489,7 +2489,7 @@ std::string WebWorker::GetAddUserEmails()
 }
 
 std::string HtmlInterpretation::ModifyProblemReport()
-{ MacroRegisterFunctionWithName("WebWorker::ModifyProblemReport");
+{ MacroRegisterFunctionWithName("WebWorker::GetModifyProblemReport");
   bool shouldProceed=theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights();
   if (shouldProceed)
     shouldProceed= theGlobalVariables.flagUsingSSLinCurrentConnection;

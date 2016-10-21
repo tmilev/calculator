@@ -300,7 +300,7 @@ std::string ProblemData::ToString()const
   out << "Problem data. "
   << "Random seed: " << this->randomSeed;
   if (this->flagRandomSeedGiven)
-    out << " (loaded from database)";
+    out << " (given)";
   out << ". ";
   for (int i=0; i<this->theAnswers.size; i++)
   { Answer& currentA=this->theAnswers[i];
@@ -1178,9 +1178,20 @@ bool ProblemData::CheckConsistency()const
   for (int i=0; i<this->theAnswers.size; i++)
   { if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].answerId)=="")
       crash << "This is not supposed to happen: empty answer id." << crash;
-    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield)=="")
+//    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield)=="")
+//      crash << "This is not supposed to happen: empty idMQfield. The answer id is: "
+//      << this->theAnswers[i].answerId << "<br>" << this->ToString() << "<hr>All the answers are: "
+//      << this->ToString() << crash;
+  }
+  return true;
+}
+
+bool ProblemData::CheckConsistencyMQids()const
+{ MacroRegisterFunctionWithName("ProblemData::CheckConsistencyMQids");
+  for (int i=0; i<this->theAnswers.size; i++)
+  { if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield)=="")
       crash << "This is not supposed to happen: empty idMQfield. The answer id is: "
-      << this->theAnswers[i].idMQfield << this->ToString() << "<hr>All the answers are: "
+      << this->theAnswers[i].answerId << "<br>" << this->ToString() << "<hr>All the answers are: "
       << this->ToString() << crash;
   }
   return true;
@@ -1189,10 +1200,13 @@ bool ProblemData::CheckConsistency()const
 std::string ProblemData::Store()
 { MacroRegisterFunctionWithName("ProblemData::Store");
   std::stringstream out;
-  out << "randomSeed=" << this->randomSeed;
+  if (this->flagRandomSeedGiven)
+    out << "randomSeed=" << this->randomSeed;
   for (int i=0; i<this->theAnswers.size; i++)
   { Answer& currentA=this->theAnswers[i];
-    out << "&" << CGI::StringToURLString(currentA.answerId) << "=";
+    if (this->flagRandomSeedGiven || i!=0)
+      out << "&";
+    out << CGI::StringToURLString(currentA.answerId) << "=";
     std::stringstream questionsStream;
     questionsStream
     << "numCorrectSubmissions=" << currentA.numCorrectSubmissions
@@ -1218,8 +1232,8 @@ bool UserCalculator::InterpretDatabaseProblemData
   ProblemData reader;
   std::string probNameNoWhiteSpace;
   for (int i=0; i<theMap.size(); i++)
-  { stOutput << "<hr>Reading data: " << theMap.theKeys[i] << ", value: "
-    << CGI::URLKeyValuePairsToNormalRecursiveHtml(theMap[i]);
+  { //stOutput << "<hr>Reading data: " << theMap.theKeys[i] << ", value: "
+    //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(theMap[i]);
     if (!reader.LoadFrom(CGI::URLStringToNormal(theMap[i]), commentsOnFailure))
     { result=false;
       continue;
@@ -1246,7 +1260,8 @@ bool UserCalculator::StoreProblemDataToDatabase
   for (int i=0; i<this->theProblemData.size(); i++)
     problemDataStream << CGI::StringToURLString(this->theProblemData.theKeys[i]) << "="
     << CGI::StringToURLString( this->theProblemData.theValues[i].Store()) << "&";
-  //stOutput << "DEBUG: storing in database string: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(problemDataStream.str());
+  //stOutput << "DEBUG: storing in database string: "
+  //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(problemDataStream.str());
   this->currentTable=DatabaseStrings::usersTableName;
   bool result= this->SetColumnEntry("problemData", problemDataStream.str(), theRoutines, &commentsOnFailure);
   return result;

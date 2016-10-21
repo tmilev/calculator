@@ -288,24 +288,24 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
     if (!this->MergeOneProblemAdminData
         (incomingProblems.theKeys[i], incomingProblems.theValues[i], commentsOnFailure))
       result=false;
-  stOutput << "<hr><hr>Debug: after merge, resulting MERGED probs: "
-  << this->currentUseR.theProblemData.ToStringHtml() << "<hr>";
+  //stOutput << "<hr><hr>Debug: after merge, resulting MERGED probs: "
+  //<< this->currentUseR.theProblemData.ToStringHtml() << "<hr>";
   this->StoreDeadlineInfo
   (theGlobalVariables.userDefault.deadlineInfoString.value,
    this->currentUseR.theProblemData);
   //stOutput << "<hr>Debug: about to store WEIGHT with row id: "
   //<< this->currentUseR.problemInfoRowId.value << "<hr>";
-  stOutput << "<hr>About to transform to database string: "
-  << this->currentUseR.theProblemData.ToStringHtml()
-  << "<hr>";
+  //stOutput << "<hr>About to transform to database string: "
+  //<< this->currentUseR.theProblemData.ToStringHtml()
+  //<< "<hr>";
 
   this->StoreProblemWeightInfo
   (theGlobalVariables.userDefault.problemInfoString.value,
    this->currentUseR.theProblemData);
   //theGlobalVariables.userDefault=this->currentUseR;
-  stOutput << "<hr>Resulting string: "
-  << theGlobalVariables.userDefault.problemInfoString.value
-  << "<hr>";
+  //stOutput << "<hr>Resulting string: "
+  //<< theGlobalVariables.userDefault.problemInfoString.value
+  //<< "<hr>";
   DatabaseRoutines theRoutines;
   if (!theRoutines.StoreProblemDatabaseInfo(theGlobalVariables.userDefault, commentsOnFailure))
     return false;
@@ -321,37 +321,31 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadDatabaseInfo");
 #ifdef MACRO_use_MySQL
   this->currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
-  this->theProblemData.CheckConsistency();
-  stOutput << "<hr><hr>DEBug: got to loadDB info.";
-  //stOutput << "<hr>Starting user: " << this->currentUseR.ToString();
-  //stOutput << "<hr>DEBUG: Before loading DB: " << this->currentUseR.ToString();
-//  stOutput << "<hr>DEBUG: LoadDatabaseInfo, stack trace:  "
-//  << crash.GetStackTraceEtcErrorMessage()
-  //<< incomingProblemInfo
-//  ;
-
+  //this->theProblemData.CheckConsistency();
+  //stOutput << "<hr>DEBug: got to loadDB info.<hr>";
   if (this->currentUseR.problemDataString=="")
     return true;
+  //stOutput << "<hr>DEBug: continuing to load ....<hr>";
   if (! this->PrepareSectionList(comments))
     return false;
-  this->theProblemData.CheckConsistency();
-  stOutput << "<hr><hr>DEBug: got to before InterpretDatabaseProblemData.";
+  //this->theProblemData.CheckConsistency();
+//  stOutput << "<hr>DEBug: got to before InterpretDatabaseProblemData.<hr>";
   if (!this->currentUseR.InterpretDatabaseProblemData(this->currentUseR.problemDataString.value, comments))
   { comments << "Failed to interpret user's problem saved data. ";
     //stOutput << "Failed to interpret user's problem saved data. ";
     return false;
   }
   //stOutput << "<hr>DEBUG: After interpretation of datastring: user: " << this->currentUseR.ToString();
-  this->theProblemData.CheckConsistency();
-  stOutput << "<hr><hr>DEBug: got to before this->currentUseR.theProblemData.Contains.<hr><hr>";
-  stOutput << this->currentUseR.theProblemData.ToStringHtml() << "<hr><hr>";
+  //this->theProblemData.CheckConsistency();
+  //stOutput << "<hr>DEBug: got to before this->currentUseR.theProblemData.Contains.<hr>";
+  //stOutput << this->currentUseR.theProblemData.ToStringHtml() << "<hr><hr>";
   if (this->currentUseR.theProblemData.Contains(this->fileName))
   { this->theProblemData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(this->fileName);
-    stOutput << "<hr>Debug: found problem data! " << this->theProblemData.ToString() << "<hr>";
+    //stOutput << "<hr>Debug: found problem data! " << this->theProblemData.ToString() << "<hr>";
   } //else
     //stOutput << "<hr>Did not find problem data for filename: " << this->fileName << ". USer details: " << this->currentUseR.ToString() << "<hr>";
-  this->theProblemData.CheckConsistency();
-  stOutput << "<hr><hr>DEBug: got to before read prob append.";
+  //this->theProblemData.CheckConsistency();
+  //stOutput << "<hr><hr>DEBug: got to before read prob append.";
   if (!this->ReadProblemInfoAppend(this->currentUseR.deadlineInfoString.value, this->currentUseR.theProblemData, comments))
   { comments << "Failed to interpret the deadline string. ";
     return false;
@@ -364,10 +358,10 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   //stOutput << "<hr>Debug: user: " << this->currentUseR.ToString();
   //stOutput << "<hr><hr>DEBUG read databaseProblemAndHomeworkGroupList: "
   //<< this->databaseProblemAndHomeworkGroupList;
-  this->theProblemData.CheckConsistency();
-  stOutput << "<hr>DEBUG: before computing points ...";
+  //this->theProblemData.CheckConsistency();
+  //stOutput << "<hr>DEBUG: before computing points ...";
   this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys, 0);
-  stOutput << "<hr>DEBUG: after computing points ...";
+  //stOutput << "<hr>DEBUG: after computing points ...";
   this->theProblemData.CheckConsistency();
   theGlobalVariables.userDefault=this->currentUseR;
   //stOutput << "<hr>DEBUG: After interpretation of deadline and weight strings: user: " << this->currentUseR.ToString();
@@ -402,10 +396,16 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
   this->flagIsForReal=theGlobalVariables.UserRequestRequiresLoadingRealExamData();
 #ifdef MACRO_use_MySQL
   this->topicListFileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
-  stOutput << "Debug: got to here pt2";
+//  stOutput << "Debug: got to here pt2";
+//  this->theProblemData.CheckConsistency();
+//  stOutput << "Debug: got to here pt3";
   if (doLoadDatabase)
     this->LoadDatabaseInfo(comments);
 #endif // MACRO_use_MySQL
+//  stOutput << "<hr>DEBUG: Loaded successfully, checking: <hr>";
+  this->theProblemData.CheckConsistency();
+//  stOutput << "<hr>OK<hr> ";
+
   //stOutput << "DEBUG: flagIsForReal: " << this->flagIsForReal;
   if (!this->flagIsForReal)
   { std::string randString= theGlobalVariables.GetWebInput("randomSeed");
@@ -424,9 +424,9 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
 std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadAndInterpretCurrentProblemItem ");
   double startTime=theGlobalVariables.GetElapsedSeconds();
-  this->theProblemData.CheckConsistency();
+//  this->theProblemData.CheckConsistency();
   this->LoadCurrentProblemItem();
-  this->theProblemData.CheckConsistency();
+//  this->theProblemData.CheckConsistency();
   if (!this->flagLoadedSuccessfully)
     return this->comments.str();
   std::stringstream out;
@@ -472,13 +472,15 @@ void CalculatorHTML::LoadCurrentProblemItem()
     this->comments << "<b>No problem file name found. </b>";
   }
 
-  this->theProblemData.CheckConsistency();
-  stOutput << "<br>DEBUG: got to before loading<hr>";
+//  this->theProblemData.CheckConsistency();
+//  stOutput << "<hr>DEBUG: got to before loading<hr>";
   if (!this->LoadMe(needToLoadDatabase, this->comments))
     this->flagLoadedSuccessfully =false;
-  this->theProblemData.CheckConsistency();
+//  stOutput << "<hr>DEBUG: loaded<hr>";
+//  stOutput << "<hr>DEBUG: OK<hr>";
   if (!this->flagLoadedSuccessfully)
     this->comments << "<a href=\"/selectCourse.html\">Go to course list page.</a>";
+  this->theProblemData.CheckConsistency();
 }
 
 bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt)
@@ -1729,13 +1731,15 @@ void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments)
 bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretHtml");
   double startTime=theGlobalVariables.GetElapsedSeconds();
-  this->theProblemData.CheckConsistency();
+//  stOutput << "<hr>DEBUG: Checking consistency 1 passed<hr>";
   if (!this->ParseHTML(comments))
   { this->outputHtmlBodyNoTag="<b>Failed to interpret html input. </b><br>" +this->ToStringContent();
     this->timeToParseHtml=theGlobalVariables.GetElapsedSeconds()-startTime;
     return false;
   }
-  this->theProblemData.CheckConsistency();
+  //stOutput << "<hr>DEBUG: about to check 2nd time<hr>";
+  //this->theProblemData.CheckConsistency();
+  //stOutput << "<hr>DEBUG: Checking consistency 2 passed<hr>";
   this->timeToParseHtml=theGlobalVariables.GetElapsedSeconds()-startTime;
   //stOutput << "DEBUG: this->theProblemData.flagRandomSeedGiven: " << this->theProblemData.flagRandomSeedGiven;
   this->MaxInterpretationAttempts=10;
@@ -1762,6 +1766,7 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
     this->NumAttemptsToInterpret++;
     if (this->InterpretHtmlOneAttempt(theInterpreter, comments))
     { this->timePerAttempt.AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
+      this->theProblemData.CheckConsistency();
       return true;
     }
     this->timePerAttempt.AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
@@ -1775,6 +1780,7 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
       return false;
     }
   }
+  this->theProblemData.CheckConsistency();
   return true;
 }
 
@@ -2153,14 +2159,20 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       this->theContent.AddOnTop(eltsStack[i]);
     }
   }
+//  stOutput << "<hr>DEBUG: About to check consistency while parsing<hr>";
+  //this->theProblemData.CheckConsistency();
   if (!result)
     comments << "<hr>Parsing stack.<hr>" << this->ToStringParsingStack(this->eltsStack);
+  //this->theProblemData.CheckConsistency();
+  //stOutput << "<hr>DEBUG: got to extracting answer ids<hr>";
   if (result)
     result=this->ExtractAnswerIds(comments);
+  //stOutput << "<hr>DEBUG: after extracting answer ids<hr>";
   for (int i=0; i<this->theContent.size; i++)
     this->theContent[i].indexInOwner=i;
   if (result)
     result=this->CheckContent(comments);
+  this->theProblemData.CheckConsistency();
   return result;
 }
 
@@ -2245,7 +2257,11 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
   for (int i=0; i<this->theContent.size; i++)
   { SyntacticElementHTML& currentE=this->theContent[i];
     if (currentE.IsAnswer())
-    { std::string currentId=currentE.GetKeyValue("id");
+    { std::string currentId= MathRoutines::StringTrimWhiteSpace(currentE.GetKeyValue("id"));
+      if (currentId=="")
+      { comments << "The answer element: " << currentE.ToStringDebug() << " has empty id. This is not allowed. ";
+        return false;
+      }
       int theIndex=this->GetAnswerIndex(currentId);
       if (theIndex==-1)
         this->theProblemData.AddEmptyAnswerIdOnTop(currentId);
@@ -2278,6 +2294,7 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
 //    stOutput << "<hr>Debug: processed element " << currentE.ToStringDebug();
   }
 //  stOutput << "<hr>DEBUG: Elements: " << this->ToStringContent() << "<hr>";
+  this->theProblemData.CheckConsistency();
   return true;
 }
 
@@ -2478,7 +2495,6 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   //////////////////////////////
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time after execution");
-  std::string lastCommands;
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
   { outBody << "Debug information follows. ";
     if (this->flagIsExamProblem)
@@ -2507,13 +2523,16 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before class management routines");
   //out << "Debug data: homework groups found: " << this->hdHomeworkGroups.ToStringCommaDelimited();
+  //stOutput << "<hr>DEBUG: preparing answer elements... <hr>";
   this->PrepareAnswerElements(comments);
   this->NumAnswerIdsMathquilled=0;
   for (int i=0; i<this->theContent.size; i++)
     if (this->theContent[i].IsInterpretedNotByCalculator())
       this->InterpretNotByCalculator(this->theContent[i]);
-  this->theProblemData.CheckConsistency();
   this->InterpretAnswerElements(comments);
+  //stOutput << "<hr>DEBUG: All answers interpreted. <hr>";
+  this->theProblemData.CheckConsistency();
+  this->theProblemData.CheckConsistencyMQids();
   bool headFinished=!this->flagTagHeadPresent;
   std::string tagClass;
   for (int i=0; i<this->theContent.size; i++)

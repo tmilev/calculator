@@ -617,8 +617,8 @@ std::string HtmlInterpretation::SubmitProblem()
   bool hasDeadline=true;
   double secondsTillDeadline=-1;
   if (theProblem.flagIsForReal)
-  { out << "<tr><td><hr><hr><hr>DEBUG:  before interpreting anything prob data is: "
-    << theUser.theProblemData.ToStringHtml() << "<hr><hr><hr></td></tr>";
+  { //out << "<tr><td><hr><hr><hr>DEBUG: before interpreting anything prob data is: "
+    //<< theUser.theProblemData.ToStringHtml() << "<hr><hr><hr></td></tr>";
     if (!theProblem.LoadDatabaseInfo(out))
     { out << "<tr><td><b>Failed to load user information from database. Answer not recorded. "
       << "This should not happen. " << CalculatorHTML::BugsGenericMessage << "</b></td></tr>";

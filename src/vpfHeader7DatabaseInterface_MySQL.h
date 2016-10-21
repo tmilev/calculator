@@ -201,6 +201,7 @@ public:
 //  List<List<std::string> > allAnswers;
   ProblemData();
   bool CheckConsistency()const;
+  bool CheckConsistencyMQids()const;
   bool LoadFrom(const std::string& inputData, std::stringstream& commentsOnFailure);
   std::string Store();
   std::string ToString()const;

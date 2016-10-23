@@ -1260,7 +1260,8 @@ bool UserCalculator::StoreProblemDataToDatabase
   for (int i=0; i<this->theProblemData.size(); i++)
     problemDataStream << CGI::StringToURLString(this->theProblemData.theKeys[i]) << "="
     << CGI::StringToURLString( this->theProblemData.theValues[i].Store()) << "&";
-  //stOutput << "DEBUG: storing in database string: "
+//  stOutput << "DEBUG: storing in database ... stack trace: "
+//  << crash.GetStackTraceEtcErrorMessage();
   //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(problemDataStream.str());
   this->currentTable=DatabaseStrings::usersTableName;
   bool result= this->SetColumnEntry("problemData", problemDataStream.str(), theRoutines, &commentsOnFailure);

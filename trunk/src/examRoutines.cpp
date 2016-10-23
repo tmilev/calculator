@@ -1504,7 +1504,9 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
       out << "<span style=\"color:brown\">" << currentDeadline << "</span>. ";
     out << hoursTillDeadlineStream.str();
   }
-  return "[<span style=\"color:green\"><b>disabled</b> </span>] "+ out.str();
+  return
+  //"[<span style=\"color:green\"><b>disabled</b> </span>] "+
+  out.str();
 #else
   out  << "Database not running: no deadlines";
   return out.str();
@@ -2564,7 +2566,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before database storage");
 #ifdef MACRO_use_MySQL
-  if (this->flagIsForReal)
+  if (this->flagIsForReal && !this->theProblemData.flagRandomSeedGiven)
   { //stOutput << "This is for real!<br>";
     this->theProblemData.flagRandomSeedGiven=true;
     DatabaseRoutines theRoutines;

@@ -531,7 +531,6 @@ std::string HtmlInterpretation::SubmitProblem()
 //  stOutput << "<b>DEBUG remove when done: Random seed: " << theProblem.theProblemData.randomSeed << "</b>";
   if (theProblem.fileName=="")
     crash << "This shouldn't happen: empty file name: theProblem.fileName." << crash;
-  std::string problemStatement=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("problemStatement"));
   std::string studentAnswerNameReader;
   theProblem.studentTagsAnswered.init(theProblem.theProblemData.theAnswers.size);
   MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
@@ -554,9 +553,9 @@ std::string HtmlInterpretation::SubmitProblem()
         << " which is not on my list of answerable tags. </b>";
         return out.str();
       }
-      Answer& currentA=theProblem.theProblemData.theAnswers[answerIdIndex];
-      currentA.currentAnswerURLed = theArgs.theValues[i];
-      if (currentA.currentAnswerURLed=="")
+      Answer& currentProblemData=theProblem.theProblemData.theAnswers[answerIdIndex];
+      currentProblemData.currentAnswerURLed = theArgs.theValues[i];
+      if (currentProblemData.currentAnswerURLed=="")
       { out << "<b> Your answer to tag with id " << studentAnswerNameReader
         << " appears to be empty, please resubmit. </b>";
         return out.str();
@@ -567,6 +566,7 @@ std::string HtmlInterpretation::SubmitProblem()
     return out.str();
   }
   Answer& currentA=theProblem.theProblemData.theAnswers[answerIdIndex];
+
   currentA.currentAnswerClean=CGI::URLStringToNormal(currentA.currentAnswerURLed);
   currentA.currentAnswerURLed=CGI::StringToURLString(currentA.currentAnswerClean);//<-encoding back to overwrite malformed input
   //stOutput << "<hr>DEBUG: Processing answer: " << currentA.currentAnswerClean << " to answer object: " << currentA.ToString();
@@ -607,9 +607,15 @@ std::string HtmlInterpretation::SubmitProblem()
   else
     isCorrect=(mustBeOne==1);
   out << "<table width=\"300\">";
+  if (!isCorrect)
+  { out << "<tr><td><span style=\"color:red\"><b>Your answer appears to be incorrect. </b></span></td></tr>";
+    if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
+      out << "<tr><td>For debug purposes: the calculator output is: " << theInterpreter.outputString
+      << "Comments: " << theInterpreter.Comments.str() << "<hr>Calculator input was:<hr>"
+      << theInterpreter.inputString << "<hr></td></tr>";
+  } else
+    out << "<tr><td><span style=\"color:green\"><b>Correct! </b></span>" << "</td></tr>";
 #ifdef MACRO_use_MySQL
-  int correctSubmissionsRelevant=0;
-  int totalSubmissionsRelevant=0;
   DatabaseRoutines theRoutines;
   UserCalculator& theUser=theProblem.currentUseR;
   theUser.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
@@ -619,7 +625,12 @@ std::string HtmlInterpretation::SubmitProblem()
   if (theProblem.flagIsForReal)
   { //out << "<tr><td><hr><hr><hr>DEBUG: before interpreting anything prob data is: "
     //<< theUser.theProblemData.ToStringHtml() << "<hr><hr><hr></td></tr>";
-    if (!theProblem.LoadDatabaseInfo(out))
+    std::string tempCurrentAnswerClean=currentA.currentAnswerClean;
+    std::string tempCurrentAnswerCleanURLed=currentA.currentAnswerURLed;
+    bool dbLoadedWell=theProblem.LoadDatabaseInfo(out);//<- this overwrites currentAnswerClean
+    currentA.currentAnswerClean=tempCurrentAnswerClean;
+    currentA.currentAnswerURLed=tempCurrentAnswerCleanURLed;
+    if (!dbLoadedWell)
     { out << "<tr><td><b>Failed to load user information from database. Answer not recorded. "
       << "This should not happen. " << CalculatorHTML::BugsGenericMessage << "</b></td></tr>";
       theProblem.flagIsForReal=false;
@@ -656,39 +667,23 @@ std::string HtmlInterpretation::SubmitProblem()
           //  << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
           secondsTillDeadline= deadline.SubtractAnotherTimeFromMeInSeconds(now)+7*3600;
           deadLinePassed=(secondsTillDeadline<-18000);
-//          bool fixTHIS;
-//          deadLinePassed=false;
         }
       }
       if (deadLinePassed)
-        out << "<tr><td><span style=\"color:red\"><b>Deadline passed, attempt not recorded</b></span></td></tr>";
+        out << "<tr><td><span style=\"color:red\"><b>Deadline passed, attempt not recorded.</b></span></td></tr>";
       else
-        for (int i=0; i<theProblem.studentTagsAnswered.CardinalitySelection; i++)
-        { int theIndex=theProblem.studentTagsAnswered.elements[i];
-          Answer& currentA=theProblem.theProblemData.theAnswers[theIndex];
-          currentA.numSubmissions++;
-          totalSubmissionsRelevant+=currentA.numSubmissions;
-          correctSubmissionsRelevant+=currentA.numCorrectSubmissions;
-          if (isCorrect)
-          { currentA.numCorrectSubmissions++;
-            correctSubmissionsRelevant++;
-            if (currentA.firstCorrectAnswerClean=="")
-              currentA.firstCorrectAnswerClean=currentA.currentAnswerClean;
-            else
-              out << "<tr><td>[first correct answer: " << currentA.firstCorrectAnswerClean << "]</td></tr>";
-          }
+      { currentA.numSubmissions++;
+        if (isCorrect)
+        { currentA.numCorrectSubmissions++;
+          if (currentA.firstCorrectAnswerClean=="")
+            currentA.firstCorrectAnswerClean=currentA.currentAnswerClean;
+          else
+            out << "<tr><td>[first correct answer: " << currentA.firstCorrectAnswerClean << "]</td></tr>";
         }
+      }
     }
   }
 #endif // MACRO_use_MySQL
-  if (!isCorrect)
-  { out << "<tr><td><span style=\"color:red\"><b>Your answer appears to be incorrect. </b></span></td></tr>";
-    if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
-      out << "<tr><td>For debug purposes: the calculator output is: " << theInterpreter.outputString
-      << "Comments: " << theInterpreter.Comments.str() << "<hr>Calculator input was:<hr>"
-      << theInterpreter.inputString << "<hr></td></tr>";
-  } else
-    out << "<tr><td><span style=\"color:green\"><b>Correct! </b></span>" << "</td></tr>";
 #ifdef MACRO_use_MySQL
   if (theProblem.flagIsForReal)
   { std::stringstream comments;
@@ -698,8 +693,9 @@ std::string HtmlInterpretation::SubmitProblem()
       << CalculatorHTML::BugsGenericMessage << "</b><br>Comments: "
       << comments.str() << "</td></tr>";
     else
-      out << "<tr><td>So far " << correctSubmissionsRelevant << " correct and "
-      << totalSubmissionsRelevant-correctSubmissionsRelevant << " incorrect submissions.</td></tr>";
+      out << "<tr><td>So far " << currentA.numCorrectSubmissions << " correct and "
+      << currentA.numSubmissions-currentA.numCorrectSubmissions
+      << " incorrect submissions.</td></tr>";
     if (hasDeadline)
     { if (secondsTillDeadline<0)
         secondsTillDeadline*=-1;
@@ -717,8 +713,10 @@ std::string HtmlInterpretation::SubmitProblem()
     //stOutput << "<tr><td><b>Submitting problem solutions allowed only for logged-in users. </b></td></tr>";
 #endif
   out << "<tr><td>Your answer was: ";
+  out << "\\(";
+  out << currentA.currentAnswerClean;
+  out << "\\)";
   std::string errorMessage;
-  out << "\\(" << currentA.currentAnswerClean << "\\)";
   errorMessage=theInterpreter.ToStringIsCorrectAsciiCalculatorString(currentA.currentAnswerClean);
   if (errorMessage!="")
     out << "<br>" << errorMessage
@@ -1004,6 +1002,16 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
 #endif // MACRO_use_MySQL
 }
 
+std::string HtmlInterpretation::GetNavigationPanelWithGenerationTime()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetNavigationPanelWithGenerationTime");
+  std::stringstream out;
+  out.precision(3);
+  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
+  << "||Generated in " << theGlobalVariables.GetElapsedSeconds() << " second(s)"
+  << "</problemNavigation>\n";
+  return out.str();
+}
+
 std::string HtmlInterpretation::GetScoresPage()
 { MacroRegisterFunctionWithName("WebWorker::GetScoresPage");
   std::stringstream out;
@@ -1014,9 +1022,11 @@ std::string HtmlInterpretation::GetScoresPage()
   << "<link rel=\"stylesheet\" href=\"/html-common-calculator/styleScorePage.css\">"
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
-  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation>\n";
-  out << HtmlInterpretation::ToStringUserScores();
-  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+  std::string theScoresHtml=HtmlInterpretation::ToStringUserScores();
+  std::string theDebugHtml=HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+  out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
+  out << theScoresHtml;
+  out << theDebugHtml;
   out << "</body></html>";
   return out.str();
 
@@ -1250,6 +1260,8 @@ void UserCalculator::ComputePointsEarned
     Rational currentWeight;
     currentP.flagProblemWeightIsOK=
     currentP.adminData.GetWeightFromSection(this->userGroup.value, currentWeight);
+    if (!currentP.flagProblemWeightIsOK)
+      currentWeight=0;
 //    this->problemData[i].numAnswersSought=this->problemData[i].answerIds.size;
     for (int j=0; j<currentP.theAnswers.size; j++)
     { if (currentP.theAnswers[j].numCorrectSubmissions>0)
@@ -1494,7 +1506,9 @@ std::string HtmlInterpretation::ToStringNavigation()
       out << "Section: " << theGlobalVariables.userDefault.userGroup.value << linkSeparator;
   }
 
-  if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
+  if (theGlobalVariables.UserDefaultHasAdminRights()
+      //&& !theGlobalVariables.UserStudentViewOn()
+  )
   { if (theGlobalVariables.userCalculatorRequestType!="accounts")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts&"
       << theGlobalVariables.ToStringCalcArgsNoNavigation(true)

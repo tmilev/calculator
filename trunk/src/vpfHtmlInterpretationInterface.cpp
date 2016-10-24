@@ -1007,7 +1007,7 @@ std::string HtmlInterpretation::GetNavigationPanelWithGenerationTime()
   std::stringstream out;
   out.precision(3);
   out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
-  << "||Generated in " << theGlobalVariables.GetElapsedSeconds() << " second(s)"
+  << "Generated in " << theGlobalVariables.GetElapsedSeconds() << " second(s)"
   << "</problemNavigation>\n";
   return out.str();
 }
@@ -1044,8 +1044,10 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
   << HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
-  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation>\n";
-  out << HtmlInterpretation::GetAccountsPageBody(hostWebAddressWithPort);
+  std::string accountsPageBody= HtmlInterpretation::GetAccountsPageBody(hostWebAddressWithPort);
+  out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
+  out << accountsPageBody;
+//  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation>\n";
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();

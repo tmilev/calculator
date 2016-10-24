@@ -892,18 +892,21 @@ std::string WebWorker::GetDatabasePage()
   << HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
-  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation>\n";
+//  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation>\n";
+std::stringstream dbOutput;
 #ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
   if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn)
-    out << "Browsing database allowed only for logged-in admins.";
+    dbOutput << "Browsing database allowed only for logged-in admins.";
   else
-    out << "Database: " << DatabaseStrings::theDatabaseName
+    dbOutput << "Database: " << DatabaseStrings::theDatabaseName
     << "<br>Database user: " << DatabaseStrings::databaseUser
     <<  "<section>" << theRoutines.ToStringCurrentTableHTML() << "</section>";
 #else
-out << "<b>Database not available. </b>";
+dbOutput << "<b>Database not available. </b>";
 #endif // MACRO_use_MySQL
+  out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
+  out << dbOutput.str();
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
@@ -1563,23 +1566,27 @@ int WebWorker::ProcessServerStatusPublic()
 int WebWorker::ProcessServerStatus()
 { MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestServerStatus");
   this->SetHeaderOKNoContentLength();
-  stOutput << "<html>"
+  std::stringstream out;
+  out << "<html>"
   << "<head>"
   << CGI::GetCalculatorStyleSheetWithTags()
   << "</head>"
   << "<body>";
-  if (theGlobalVariables.flagLoggedIn)
-    stOutput << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation>\n";
-  stOutput << "<section>";
+  std::stringstream pageBody;
+  pageBody << "<section>";
   if (theGlobalVariables.UserDefaultHasAdminRights())
-    stOutput << " <table><tr><td style=\"vertical-align:top\">"
+    pageBody << " <table><tr><td style=\"vertical-align:top\">"
     << this->parent->ToStringStatusAll() << "</td><td>"
     << theGlobalVariables.ToStringHTMLTopCommandLinuxSystem()
     << "</td></tr></table>";
   else
-    stOutput << "<b>Viewing server status available only to logged-in admins.</b>";
-  stOutput << "</section>";
-  stOutput << "</body></html>";
+    pageBody << "<b>Viewing server status available only to logged-in admins.</b>";
+  pageBody << "</section>";
+  if (theGlobalVariables.flagLoggedIn)
+    out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
+  out << pageBody.str();
+  out << "</body></html>";
+  stOutput << out.str();
   return 0;
 }
 

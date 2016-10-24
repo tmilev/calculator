@@ -1307,16 +1307,19 @@ std::string HtmlInterpretation::ToStringUserScores()
     return out.str();
   int usernameIndex=userLabels.GetIndex(DatabaseStrings::userColumnLabel);
   if (usernameIndex==-1)
-    return "Could not find username column";
+    return "Could not find username column. ";
   int userInfoIndex=userLabels.GetIndex(DatabaseStrings::userGroupLabel);
   if (userInfoIndex==-1)
-    return "Could not find user group column";
+    return "Could not find user group column. ";
   int problemDataIndex=userLabels.GetIndex("problemData");
   if (problemDataIndex==-1)
-    return "Could not find problem data column";
+    return "Could not find problem data column. ";
+  int userGroupColIndex=userLabels.GetIndex(DatabaseStrings::userGroupLabel);
+  if (userGroupColIndex==-1)
+    return "Could not find user group column. ";
   int problemWeightScheme=userLabels.GetIndex(DatabaseStrings::problemWeightsIdColumnName);
   if (problemWeightScheme==-1)
-    return "Could not find problem weight scheme";
+    return "Could not find problem weight scheme. ";
   List<Rational> userScores;
   List<MapLisT<std::string, Rational, MathRoutines::hashString> > scoresBreakdown;
   CalculatorHTML currentUserRecord;
@@ -1325,14 +1328,15 @@ std::string HtmlInterpretation::ToStringUserScores()
   for (int i=0; i<userTable.size; i++)
   { userScores[i]=-1;
     currentUserRecord.currentUseR.username=userTable[i][usernameIndex];
-    //out << "<hr>Debug: reading db problem data from: "
-    //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(userTable[i][problemDataIndex]) << "<br>";
+    currentUserRecord.currentUseR.userGroup=userTable[i][userGroupColIndex];
+//    out << "<hr>Debug: reading db problem data from: "
+//    << CGI::URLKeyValuePairsToNormalRecursiveHtml(userTable[i][problemDataIndex]) << "<br>";
     if (!currentUserRecord.currentUseR.InterpretDatabaseProblemData(userTable[i][problemDataIndex], out))
       continue;
-    //out << "<br>DEBUG: after db data read: " << currentUserRecord.currentUseR.ToString();
+//    out << "<br>DEBUG: after db data read: " << currentUserRecord.currentUseR.ToString();
     currentUserRecord.ReadProblemInfoAppend
     (theProblem.currentUseR.problemInfoString.value, currentUserRecord.currentUseR.theProblemData, out);
-    //out << "<br>DEBUG: after ReadProblemInfoAppend: " << currentUserRecord.currentUseR.ToString();
+//    out << "<br>DEBUG: after ReadProblemInfoAppend: " << currentUserRecord.currentUseR.ToString();
     currentUserRecord.currentUseR.ComputePointsEarned(theProblem.problemNamesNoTopics, &theProblem.theTopicS);
     scoresBreakdown[i].Clear();
     for (int j=0; j< theProblem.theTopicS.size(); j++)
@@ -1394,8 +1398,6 @@ std::string HtmlInterpretation::ToStringUserScores()
     out << "<td>" << currentElt.maxPointsInAllChildren << "</td>";
   }
   out << "</tr>";
-
-
   for (int i=0; i<userTable.size; i++)
   { out << "<tr><td>" << userTable[i][usernameIndex] << "</td>"
     << "<td>" << userTable[i][userInfoIndex] << "</td>"

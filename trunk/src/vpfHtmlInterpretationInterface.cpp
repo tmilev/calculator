@@ -565,7 +565,8 @@ std::string HtmlInterpretation::SubmitProblem()
   { out << "<b>Something is wrong: I found no submitted answers.</b>";
     return out.str();
   }
-  Answer& currentA=theProblem.theProblemData.theAnswers[answerIdIndex];
+  ProblemData& currentProblemData=theProblem.theProblemData;
+  Answer& currentA=currentProblemData.theAnswers[answerIdIndex];
 
   currentA.currentAnswerClean=CGI::URLStringToNormal(currentA.currentAnswerURLed);
   currentA.currentAnswerURLed=CGI::StringToURLString(currentA.currentAnswerClean);//<-encoding back to overwrite malformed input
@@ -687,7 +688,7 @@ std::string HtmlInterpretation::SubmitProblem()
 #ifdef MACRO_use_MySQL
   if (theProblem.flagIsForReal)
   { std::stringstream comments;
-    theUser.SetProblemData(theProblem.fileName, theProblem.theProblemData);
+    theUser.SetProblemData(theProblem.fileName, currentProblemData);
     if (!theUser.StoreProblemDataToDatabase(theRoutines, comments))
       out << "<tr><td><b>This shouldn't happen and may be a bug: failed to store your answer in the database. "
       << CalculatorHTML::BugsGenericMessage << "</b><br>Comments: "

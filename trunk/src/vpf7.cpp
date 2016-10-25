@@ -747,6 +747,7 @@ std::string CGI::JavascriptMathjax;
 std::string CGI::JavascriptMathQuillMatrixSupport;
 std::string CGI::JavascriptMathQuillDefault;
 std::string CGI::JavascriptInitializeButtons;
+std::string CGI::JavascriptAceEditorScript;
 
 void CGI::LoadStrings()
 { CGI::GetJavascriptSha1();
@@ -757,9 +758,29 @@ void CGI::LoadStrings()
   CGI::GetCalculatorStyleSheetWithTags();
   CGI::GetMathQuillStyleSheetWithTags();
   CGI::GetJavascriptInitilizeButtons();
+  CGI::GetJavascriptAceEditorScript();
 }
 
 extern logger theLog;
+
+std::string& CGI::GetJavascriptAceEditorScript()
+{ if (CGI::JavascriptAceEditorScript!="")
+    return CGI::JavascriptAceEditorScript;
+  std::stringstream out, commentsOnFailure;
+  std::string fileReader;
+  bool found=true;
+  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/ace.min.js", fileReader, commentsOnFailure))
+  { theLog << logger::red  << "Javascript file ace.min.js not found. " << logger::endL;
+    found=false;
+  }
+  if (found)
+    out << "<script type=\"text/javascript\">" << fileReader << "</script>";
+  else
+    out << "<script src=\"https://cdn.jsdelivr.net/ace/1.2.3/min/ace.js\""
+    << " type=\"text/javascript\" charset=\"utf-8\"></script>\n";
+  CGI::JavascriptAceEditorScript=out.str();
+  return CGI::JavascriptAceEditorScript;
+}
 
 std::string& CGI::GetJavascriptInitilizeButtons()
 { if (CGI::JavascriptInitializeButtons!="")

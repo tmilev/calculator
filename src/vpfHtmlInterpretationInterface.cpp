@@ -677,15 +677,15 @@ std::string HtmlInterpretation::SubmitProblem()
 #ifdef MACRO_use_MySQL
   if (theProblem.flagIsForReal)
   { std::stringstream comments;
-    if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
+    /*if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
       stOutput << "<hr>DEBUG: adding prob data for file name: " << theProblem.fileName
       << "<br>"
       << currentProblemData.ToString() << "<br> into:<br> "
       << theUser.theProblemData.GetValueCreateIfNotPresent(theProblem.fileName).ToString()
-      << "<hr>";
+      << "<hr>";*/
     theUser.SetProblemData(theProblem.fileName, currentProblemData);
-    if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
-      stOutput << "<hr>result: " << theUser.theProblemData.GetValueCreateIfNotPresent(theProblem.fileName).ToString() << "<hr>";
+    //if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
+    //  stOutput << "<hr>result: " << theUser.theProblemData.GetValueCreateIfNotPresent(theProblem.fileName).ToString() << "<hr>";
     if (!theUser.StoreProblemDataToDatabase(theRoutines, comments))
       out << "<tr><td><b>This shouldn't happen and may be a bug: failed to store your answer in the database. "
       << CalculatorHTML::BugsGenericMessage << "</b><br>Comments: "

@@ -421,11 +421,11 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
   return true;
 }
 
-std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem()
+std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDatabaseMayIgnore)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadAndInterpretCurrentProblemItem ");
   double startTime=theGlobalVariables.GetElapsedSeconds();
 //  this->theProblemData.CheckConsistency();
-  this->LoadCurrentProblemItem();
+  this->LoadCurrentProblemItem(needToLoadDatabaseMayIgnore);
 //  this->theProblemData.CheckConsistency();
   if (!this->flagLoadedSuccessfully)
     return this->comments.str();
@@ -455,13 +455,12 @@ void CalculatorHTML::LoadFileNames()
   this->topicListFileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
 }
 
-void CalculatorHTML::LoadCurrentProblemItem()
+void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadCurrentProblemItem");
   this->LoadFileNames();
   this->flagLoadedSuccessfully=false;
-  bool needToLoadDatabase=true;
   if (theGlobalVariables.UserGuestMode())
-    needToLoadDatabase=false;
+    needToLoadDatabaseMayIgnore=false;
   if (theGlobalVariables.flagRunningApache)
     this->flagUseNavigationBar=(theGlobalVariables.GetWebInput("navigationBar")=="true");
   else
@@ -474,7 +473,7 @@ void CalculatorHTML::LoadCurrentProblemItem()
 
 //  this->theProblemData.CheckConsistency();
 //  stOutput << "<hr>DEBUG: got to before loading<hr>";
-  if (!this->LoadMe(needToLoadDatabase, this->comments))
+  if (!this->LoadMe(needToLoadDatabaseMayIgnore, this->comments))
     this->flagLoadedSuccessfully =false;
 //  stOutput << "<hr>DEBUG: loaded<hr>";
 //  stOutput << "<hr>DEBUG: OK<hr>";

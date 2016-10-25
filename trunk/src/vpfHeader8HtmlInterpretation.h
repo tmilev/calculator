@@ -233,9 +233,9 @@ public:
   std::string GetEditPageButton(const std::string& desiredFileName);
   std::string GetJavascriptSubmitAnswers();
   std::string GetJavascriptMathQuillBoxes();
-  void LoadCurrentProblemItem();
+  void LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore);
   void FigureOutCurrentProblemList(std::stringstream& comments);
-  std::string LoadAndInterpretCurrentProblemItem();
+  std::string LoadAndInterpretCurrentProblemItem(bool needToLoadDatabaseMayIgnore);
   static unsigned int HashFunction(const CalculatorHTML& input)
   { return input.HashFunction();
   }

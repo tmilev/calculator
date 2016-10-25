@@ -308,12 +308,12 @@ std::string ProblemData::ToString()const
     out << ", numCorrectSubmissions: " << currentA.numCorrectSubmissions;
     out << ", numSubmissions: " << currentA.numSubmissions;
     out << ", firstCorrectAnswer: ";
-    if (currentA.firstCorrectAnswerClean!="")
-      out << "none yet";
+    if (currentA.firstCorrectAnswerClean=="")
+      out << "[none yet], ";
     else
-      out << currentA.firstCorrectAnswerClean;
+      out << "[" << currentA.firstCorrectAnswerClean << "], ";
   }
-  out << this->adminData.ToString();
+  out << "Admin data: " << this->adminData.ToString();
   return out.str();
 }
 
@@ -1259,7 +1259,7 @@ bool UserCalculator::StoreProblemDataToDatabase
   std::stringstream problemDataStream;
   for (int i=0; i<this->theProblemData.size(); i++)
     problemDataStream << CGI::StringToURLString(this->theProblemData.theKeys[i]) << "="
-    << CGI::StringToURLString( this->theProblemData.theValues[i].Store()) << "&";
+    << CGI::StringToURLString(this->theProblemData.theValues[i].Store()) << "&";
 //  stOutput << "DEBUG: storing in database ... stack trace: "
 //  << crash.GetStackTraceEtcErrorMessage();
   //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(problemDataStream.str());

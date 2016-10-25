@@ -13,7 +13,7 @@ std::string HtmlInterpretation::GetProblemSolution()
   double startTime=theGlobalVariables.GetElapsedSeconds();
   CalculatorHTML theProblem;
   std::stringstream out;
-  theProblem.LoadCurrentProblemItem();
+  theProblem.LoadCurrentProblemItem(false);
   if (!theProblem.flagLoadedSuccessfully)
   { out << "Problem name is: " << theProblem.fileName
     << " <b>Could not load problem, this may be a bug. "
@@ -154,7 +154,7 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   studentInterpretation << lastAnswer;
   out << "Your answer(s): \\(" << lastAnswer << "\\)" << "\n<br>\n";
   CalculatorHTML theProblem;
-  theProblem.LoadCurrentProblemItem();
+  theProblem.LoadCurrentProblemItem(theGlobalVariables.UserRequestRequiresLoadingRealExamData());
   if (!theProblem.flagLoadedSuccessfully)
     out << "<br><b>Failed to load problem.</b> Comments: " << theProblem.comments.str();
   std::stringstream comments;
@@ -297,7 +297,7 @@ std::string HtmlInterpretation::GetExamPageInterpreter()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetExamPageInterpreter");
   CalculatorHTML theFile;
   std::stringstream out;
-  out << theFile.LoadAndInterpretCurrentProblemItem();
+  out << theFile.LoadAndInterpretCurrentProblemItem(false);
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   return out.str();
 
@@ -391,7 +391,7 @@ std::string HtmlInterpretation::GetPageFromTemplate()
 std::string HtmlInterpretation::GetExamPage()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetExamPage");
   CalculatorHTML theFile;
-  std::string problemBody= theFile.LoadAndInterpretCurrentProblemItem();
+  std::string problemBody= theFile.LoadAndInterpretCurrentProblemItem(theGlobalVariables.UserRequestRequiresLoadingRealExamData());
   std::stringstream out;
   out << "<html>"
   << "<head>"
@@ -515,7 +515,7 @@ std::string HtmlInterpretation::SubmitProblem()
   std::stringstream out;
   double startTime=theGlobalVariables.GetElapsedSeconds();
   CalculatorHTML theProblem;
-  theProblem.LoadCurrentProblemItem();
+  theProblem.LoadCurrentProblemItem(theGlobalVariables.UserRequestRequiresLoadingRealExamData());
   if (!theProblem.flagLoadedSuccessfully)
   { out << "Failed to load problem. " << theProblem.comments.str();
     return out.str();
@@ -626,61 +626,50 @@ std::string HtmlInterpretation::SubmitProblem()
   if (theProblem.flagIsForReal)
   { //out << "<tr><td><hr><hr><hr>DEBUG: before interpreting anything prob data is: "
     //<< theUser.theProblemData.ToStringHtml() << "<hr><hr><hr></td></tr>";
-    std::string tempCurrentAnswerClean=currentA.currentAnswerClean;
-    std::string tempCurrentAnswerCleanURLed=currentA.currentAnswerURLed;
-    bool dbLoadedWell=theProblem.LoadDatabaseInfo(out);//<- this overwrites currentAnswerClean
-    currentA.currentAnswerClean=tempCurrentAnswerClean;
-    currentA.currentAnswerURLed=tempCurrentAnswerCleanURLed;
-    if (!dbLoadedWell)
-    { out << "<tr><td><b>Failed to load user information from database. Answer not recorded. "
-      << "This should not happen. " << CalculatorHTML::BugsGenericMessage << "</b></td></tr>";
-      theProblem.flagIsForReal=false;
-    } else
-    { if (!theProblem.LoadAndParseTopicList(out))
-        hasDeadline=false;
-      if (hasDeadline)
-      { bool unused=false;
-        std::string theDeadlineString=
-        theProblem.GetDeadline(theProblem.fileName, theUser.userGroup.GetDataNoQuotes(), unused);
-        //out << "<tr><td>DEBUG: getting deadline for section: " << theUser.userGroup.value
-        //<< "<br>The prob data is: "
-        //<< theUser.theProblemData.ToStringHtml()
-        //<< "<br> the dealineinfoString is: "
-        //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(theUser.deadlineInfoString.value)
-        //<< " <br>getDeadline output: "
-        //<< theProblem.GetDeadline(theProblem.fileName, theUser.userGroup.GetDataNoQuotes(), unused) << "</td></tr>";
+    if (!theProblem.LoadAndParseTopicList(out))
+      hasDeadline=false;
+    if (hasDeadline)
+    { bool unused=false;
+      std::string theDeadlineString=
+      theProblem.GetDeadline(theProblem.fileName, theUser.userGroup.GetDataNoQuotes(), unused);
+      //out << "<tr><td>DEBUG: getting deadline for section: " << theUser.userGroup.value
+      //<< "<br>The prob data is: "
+      //<< theUser.theProblemData.ToStringHtml()
+      //<< "<br> the dealineinfoString is: "
+      //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(theUser.deadlineInfoString.value)
+      //<< " <br>getDeadline output: "
+      //<< theProblem.GetDeadline(theProblem.fileName, theUser.userGroup.GetDataNoQuotes(), unused) << "</td></tr>";
 
-        if (theDeadlineString=="" || theDeadlineString==" ")
-          hasDeadline=false;
-        else
-        { TimeWrapper now, deadline; //<-needs a fix for different time formats.
-          //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
-          std::stringstream badDateStream;
-          if (!deadline.AssignMonthDayYear(theDeadlineString, badDateStream))
-          { out << "<tr><td><b>Problem reading deadline. </b> The deadline string was: "
-            << theDeadlineString << ". Comments: "
-            << "<span style=\"color:red\">" << badDateStream.str() << "</span>"
-            << "</td></tr><tr><td> This should not happen. " << CalculatorHTML::BugsGenericMessage << "</td></tr>";
-            return out.str();
-          }
-          now.AssignLocalTime();
-          //  out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
-          //  << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
-          secondsTillDeadline= deadline.SubtractAnotherTimeFromMeInSeconds(now)+7*3600;
-          deadLinePassed=(secondsTillDeadline<-18000);
-        }
-      }
-      if (deadLinePassed)
-        out << "<tr><td><span style=\"color:red\"><b>Deadline passed, attempt not recorded.</b></span></td></tr>";
+      if (theDeadlineString=="" || theDeadlineString==" ")
+        hasDeadline=false;
       else
-      { currentA.numSubmissions++;
-        if (isCorrect)
-        { currentA.numCorrectSubmissions++;
-          if (currentA.firstCorrectAnswerClean=="")
-            currentA.firstCorrectAnswerClean=currentA.currentAnswerClean;
-          else
-            out << "<tr><td>[first correct answer: " << currentA.firstCorrectAnswerClean << "]</td></tr>";
+      { TimeWrapper now, deadline; //<-needs a fix for different time formats.
+        //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
+        std::stringstream badDateStream;
+        if (!deadline.AssignMonthDayYear(theDeadlineString, badDateStream))
+        { out << "<tr><td><b>Problem reading deadline. </b> The deadline string was: "
+          << theDeadlineString << ". Comments: "
+          << "<span style=\"color:red\">" << badDateStream.str() << "</span>"
+          << "</td></tr><tr><td> This should not happen. " << CalculatorHTML::BugsGenericMessage << "</td></tr>";
+          return out.str();
         }
+        now.AssignLocalTime();
+        //  out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
+        //  << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
+        secondsTillDeadline= deadline.SubtractAnotherTimeFromMeInSeconds(now)+7*3600;
+        deadLinePassed=(secondsTillDeadline<-18000);
+      }
+    }
+    if (deadLinePassed)
+      out << "<tr><td><span style=\"color:red\"><b>Deadline passed, attempt not recorded.</b></span></td></tr>";
+    else
+    { currentA.numSubmissions++;
+      if (isCorrect)
+      { currentA.numCorrectSubmissions++;
+        if (currentA.firstCorrectAnswerClean=="")
+          currentA.firstCorrectAnswerClean=currentA.currentAnswerClean;
+        else
+          out << "<tr><td>[first correct answer: " << currentA.firstCorrectAnswerClean << "]</td></tr>";
       }
     }
   }
@@ -689,7 +678,9 @@ std::string HtmlInterpretation::SubmitProblem()
   if (theProblem.flagIsForReal)
   { std::stringstream comments;
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
-      stOutput << "<hr>DEBUG: adding prob data: " << currentProblemData.ToString() << "<br> into:<br> "
+      stOutput << "<hr>DEBUG: adding prob data for file name: " << theProblem.fileName
+      << "<br>"
+      << currentProblemData.ToString() << "<br> into:<br> "
       << theUser.theProblemData.GetValueCreateIfNotPresent(theProblem.fileName).ToString()
       << "<hr>";
     theUser.SetProblemData(theProblem.fileName, currentProblemData);
@@ -856,7 +847,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp()
 { MacroRegisterFunctionWithName("CalculatorHTML::GetAnswerOnGiveUp");
   double startTime=theGlobalVariables.GetElapsedSeconds();
   CalculatorHTML theProblem;
-  theProblem.LoadCurrentProblemItem();
+  theProblem.LoadCurrentProblemItem(false);
   std::stringstream out;
   if (!theProblem.flagLoadedSuccessfully)
   { out << "Problem name is: " << theProblem.fileName

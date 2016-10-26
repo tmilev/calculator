@@ -4,12 +4,12 @@ var answerMQspanIds;
 var preferredButtonContainers;
 //var lastFocus;
 
-function processMathQuillLatex(theText){
-  for (var i=0; i<theText.length; i++)
-    if (i+5<theText.length)
-      if (theText[i]=='l' && theText[i+1]=='o' && 
-          theText[i+2]=='g' && theText[i+3]=='_' && theText[i+4]!='{')
-        theText=theText.slice(0,i+4)+'{'+theText[i+4]+'}'+theText.slice(i+5);
+function processMathQuillLatex(theText)
+{ for (var i=0; i<theText.length; i++)
+    if (i+1<theText.length)
+      if (theText[i]=='_' || theText[i]=='^' &&
+          theText[i+1]!='{')
+        theText=theText.slice(0,i+1)+'{'+theText[i+1]+'}'+theText.slice(i+2);
   return theText;
 }
 

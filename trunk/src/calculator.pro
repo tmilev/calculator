@@ -114,5 +114,6 @@ HEADERS += \
     vpfHeader1General8DatabaseSystemIndependent.h
 
 DISTFILES += \
-    ../html-common/three-d.js
+    ../html-common/three-d.js \
+    ../html-common/initializebuttons.js
 

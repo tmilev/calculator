@@ -348,6 +348,25 @@ bool Calculator::ReplaceSqrtEXByEX(int formatOptions)
   return this->DecreaseStackExceptLast(1);
 }
 
+bool Calculator::ReplaceSqrtEXXByEXX(int formatOptions)
+{ int lastSize=(*this->CurrentSyntacticStacK).size;
+  SyntacticElement& left=(*this->CurrentSyntacticStacK)[lastSize-4];
+  SyntacticElement& argument=(*this->CurrentSyntacticStacK)[lastSize-3];
+  Expression newExpr, twoE;
+  twoE.AssignValue(2, *this);
+  newExpr.reset(*this, 3);
+  newExpr.AddChildAtomOnTop(this->opSqrt());
+  newExpr.AddChildOnTop(twoE);
+  newExpr.AddChildOnTop(argument.theData);
+  newExpr.format= formatOptions;
+  left.theData=newExpr;
+  left.controlIndex=this->conExpression();
+  (*this->CurrentSyntacticStacK)[lastSize-3]=(*this->CurrentSyntacticStacK)[lastSize-2];
+  (*this->CurrentSyntacticStacK)[lastSize-2]=(*this->CurrentSyntacticStacK)[lastSize-1];
+  (*this->CurrentSyntacticStacK).SetSize(lastSize-1);
+  return true;
+}
+
 bool Calculator::ReplaceSqrtXEXByEX(int formatOptions)
 { SyntacticElement& left=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
   SyntacticElement& argument=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
@@ -391,6 +410,49 @@ bool Calculator::ReplaceOXEXEXByEX(int formatOptions)
   opElt.theData=newExpr;
   opElt.controlIndex=this->conExpression();
   return this->DecreaseStackExceptLast(4);
+}
+
+bool Calculator::ReplaceOXEXEXXByEXX(int formatOptions)
+{ SyntacticElement& opElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-7];
+  SyntacticElement& leftE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5];
+  SyntacticElement& rightE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+  Expression newExpr;
+  newExpr.reset(*this, 4);
+  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(opElt.controlIndex));
+  newExpr.format=formatOptions;
+  newExpr.AddChildOnTop(leftE.theData);
+  newExpr.AddChildOnTop(rightE.theData);
+  opElt.theData=newExpr;
+  opElt.controlIndex=this->conExpression();
+  return this->DecreaseStackExceptLastTwo(4);
+}
+
+bool Calculator::DecreaseStackExceptLast(int decrease)
+{ if (decrease<=0)
+    return true;
+  if ((*this->CurrentSyntacticStacK).size-decrease<=0)
+    crash << crash;
+//    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease-2].IndexLastCharPlusOne=
+//    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].IndexLastCharPlusOne;
+  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease-1]=
+  *this->CurrentSyntacticStacK->LastObject();
+  (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-decrease);
+  return true;
+}
+
+bool Calculator::DecreaseStackExceptLastTwo(int decrease)
+{ if (decrease<=0)
+    return true;
+  if ((*this->CurrentSyntacticStacK).size-decrease<=0)
+    crash << crash;
+  //    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease-2].IndexLastCharPlusOne=
+  //    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].IndexLastCharPlusOne;
+  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease-2]=
+  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease-1]=
+  *this->CurrentSyntacticStacK->LastObject();
+  (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-decrease);
+  return true;
 }
 
 bool Calculator::ReplaceOXEEXByEX(int formatOptions)
@@ -1552,7 +1614,11 @@ bool Calculator::ApplyOneRule()
   if (fifthToLastS=="logBase" && fourthToLastS=="_" && thirdToLastS=="Expression" &&
       secondToLastS=="Expression" && this->AllowsTimesInPreceding(lastS))
     return this->ReplaceOXEEXByEX();
-  if (fourthToLastS!="{}" && fourthToLastS!="^" && thirdToLastS=="Expression" && secondToLastS=="Expression" &&
+  if (seventhToLastS=="\\sqrt" && sixthToLastS=="[" && fifthToLastS=="Expression" &&
+      fourthToLastS=="]" && thirdToLastS=="Expression")
+    return this->ReplaceOXEXEXXByEXX();
+  if (fourthToLastS!="{}" && fourthToLastS!="^" && fourthToLastS!="\\sqrt" &&
+      thirdToLastS=="Expression" && secondToLastS=="Expression" &&
       this->AllowsTimesInPreceding(secondToLastE, lastS))
   { this->ReplaceEEXByEXusingO(this->conTimes());
     Expression impliedFunApplication;
@@ -1591,9 +1657,12 @@ bool Calculator::ApplyOneRule()
   //  stOutput << "lastS is sequence but lastE is |" << lastE.theData.ToString() << "|";
   if (thirdToLastS=="\\sqrt" && secondToLastS=="Expression")
     return this->ReplaceSqrtEXByEX();
+  if (fourthToLastS=="\\sqrt" && thirdToLastS=="Expression")
+    return this->ReplaceSqrtEXXByEXX();
   if (fourthToLastS=="\\sqrt" && thirdToLastS == "{}" && secondToLastS=="Expression")
     return this->ReplaceSqrtXEXByEX();
-  if (sixthToLastS=="\\sqrt" && fifthToLastS=="[" && fourthToLastS=="Expression" && thirdToLastS=="]" && secondToLastS=="Expression")
+  if (sixthToLastS=="\\sqrt" && fifthToLastS=="[" && fourthToLastS=="Expression" &&
+     thirdToLastS=="]" && secondToLastS=="Expression")
     return this->ReplaceOXEXEXByEX();
   if (this->knownOperationsInterpretedAsFunctionsMultiplicatively.Contains(thirdToLastS) &&
       secondToLastS=="Expression" && this->AllowsTimesInPreceding(lastS))

@@ -1003,18 +1003,8 @@ public:
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-decrease);
     return true;
   }
-  bool DecreaseStackExceptLast(int decrease)
-  { if (decrease<=0)
-      return true;
-    if ((*this->CurrentSyntacticStacK).size-decrease<=0)
-      crash << crash;
-//    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease-2].IndexLastCharPlusOne=
-//    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].IndexLastCharPlusOne;
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease-1]=
-    *this->CurrentSyntacticStacK->LastObject();
-    (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-decrease);
-    return true;
-  }
+  bool DecreaseStackExceptLast(int decrease);
+  bool DecreaseStackExceptLastTwo(int decrease);
   std::string ToStringSyntacticStackHTMLTable();
   std::string ToStringSyntacticStackHumanReadable(bool includeLispifiedExpressions);
   std::string WriteDefaultLatexFileReturnHtmlLink(const std::string& fileContent, bool useLatexDviPSpsToPNG=false);
@@ -1078,10 +1068,12 @@ public:
   bool ReplaceOXEXByEX(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEEXByEX(int formatOptions=Expression::formatDefault);
   bool ReplaceOXXEXEXEXByE(int formatOptions=Expression::formatDefault);
+  bool ReplaceSqrtEXXByEXX(int formatOptions=Expression::formatDefault);
   bool ReplaceSqrtEXByEX(int formatOptions=Expression::formatDefault);
   bool ReplaceSqrtXEXByEX(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEXEByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEXEXByEX(int formatOptions=Expression::formatDefault);
+  bool ReplaceOXEXEXXByEXX(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEXEXEXByE(int formatOptions=Expression::formatDefault);
   bool ReplaceEOEXByEX(int formatOptions=Expression::formatDefault);
   bool ReplaceXEEXByEXusingO(int inputOperation, int formatOptions=Expression::formatDefault);

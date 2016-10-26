@@ -67,6 +67,11 @@ function vectorNormalize(vector)
 { vectorTimesScalar(vector, 1/vectorLength(vector));
 }
 
+function Point(inputLocation, inputColor)
+{ this.location=inputLocation;
+  this.color=inputColor;
+}
+
 function Patch(inputBase, inputEdge1, inputEdge2, inputColor)
 { this.base=inputBase;
   this.edge1=inputEdge1;
@@ -109,7 +114,8 @@ function calculatorGetCanvas(inputCanvas)
   { calculatorCanvases[inputCanvas.id]=
     { theIIIdObjects:
       { thePatches: [],
-        theContours: []
+        theContours: [],
+        thePoints: [],
       },
       surface: inputCanvas.getContext("2d"),
       canvasContainer: inputCanvas,
@@ -147,6 +153,9 @@ function calculatorGetCanvas(inputCanvas)
       drawPatch: function(base, edge1, edge2, color)
       { this.theIIIdObjects.thePatches.push(new Patch(base, edge1, edge2, color));
       },
+      drawPoint: function (inputPoint, inputColor)
+      { this.theIIIdObjects.thePoints.push(new Point(inputPoint, inputColor));
+      },
       drawLine: function (leftPt, rightPt, inputColor)
       { var newContour= new Object;
         newContour.thePoints=[];
@@ -166,18 +175,27 @@ function calculatorGetCanvas(inputCanvas)
       { thePatch.normalScreen1= vectorCrossVector(this.screenNormal, thePatch.edge1);
         thePatch.normalScreen2= vectorCrossVector(this.screenNormal, thePatch.edge2);
         thePatch.normal= vectorCrossVector(thePatch.edge1, thePatch.edge2);
+        thePatch.internalPoint=thePatch.base.slice();
+        vectorAddVectorTimesScalar(thePatch.internalPoint, thePatch.edge1, 0.5);
+        vectorAddVectorTimesScalar(thePatch.internalPoint, thePatch.edge2, 0.5);
       },
       pointIsBehindPatch: function(thePoint, thePatch)
       { if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normalScreen1) *
-            vectorScalarVector(vectorMinusVector(thePatch.v2, thePatch.base), thePatch.normalScreen1)
+            vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.base), thePatch.normalScreen1)
             >=0)
-          if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normalScreen2) *
-              vectorScalarVector(vectorMinusVector(thePatch.v1, thePatch.base), thePatch.normalScreen2)
+          if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.vEnd), thePatch.normalScreen1) *
+              vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.vEnd), thePatch.normalScreen1)
               >=0)
-          { if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normal) *
-                vectorScalarVector(this.screenNormal, thePatch.normal)>0.000001)
-              return true;
-          }
+            if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normalScreen2) *
+                vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.base), thePatch.normalScreen2)
+                >=0)
+              if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.vEnd), thePatch.normalScreen2) *
+                  vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.vEnd), thePatch.normalScreen2)
+                  >=0)
+              { if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normal) *
+                    vectorScalarVector(this.screenNormal, thePatch.normal)<-0.00000001)
+                  return true;
+              }
         return false;
       },
       pointIsInForeGround: function(thePoint, containerPatch)
@@ -195,26 +213,9 @@ function calculatorGetCanvas(inputCanvas)
           return;
         if (this.selectedVector.length==0 || this.selectedVector.length==undefined)
           return;
+        if (true)
+          return;
         var currentPt;
-/*        this.surface.beginPath();
-        this.surface.setLineDash([]);
-        this.surface.lineWidth=3;
-        this.surface.strokeStyle="cyan";
-        var startAngle   = Math.atan2(this.mousePosition[1], this.mousePosition[0])-Math.PI/2;
-        var finishAngle  = startAngle+  Math.PI;
-        var polarRadius  = vectorLength(this.mousePosition);
-        var currentAngle = startAngle;
-        var numSegments=50;
-        var delta=(finishAngle-startAngle)/numSegments;
-        currentPt=this.coordsMathScreenToScreen([polarRadius*Math.cos(currentAngle), polarRadius* Math.sin(currentAngle)]);
-        this.surface.moveTo(currentPt[0], currentPt[1]);
-        for (var i=0; i<numSegments; i++)
-        { currentAngle+=delta;
-          currentPt=this.coordsMathScreenToScreen([polarRadius*Math.cos(currentAngle), polarRadius* Math.sin(currentAngle)]);
-          this.surface.lineTo(currentPt[0], currentPt[1]);
-        }
-        this.surface.stroke();
-*/
         this.surface.beginPath();
         this.surface.setLineDash([4,4]);
         this.surface.lineWidth=2;
@@ -233,35 +234,43 @@ function calculatorGetCanvas(inputCanvas)
         currentPt=this.coordsMathToScreen([0,0,0]);
         this.surface.lineTo(currentPt[0], currentPt[1]);
         this.surface.stroke();
-
-
       },
       paintOneContour: function(theContour)
       { if (theContour.thePoints.length<2)
           return;
         var theSurface=this.surface;
         var thePts=theContour.thePoints;
+        //console.log("line start\n");
+        var currentPt=this.coordsMathToScreen(thePts[0]);
+        var oldIsInForeGround=this.pointIsInForeGround(theContour.thePoints[0],-1);
+        var newIsInForeground;
+        var dashIsOn=false;
+        theSurface.setLineDash([]);
         theSurface.beginPath();
+//        theSurface.setLineDash([]);
         theSurface.strokeStyle=theContour.color;
         theSurface.lineWidth=1;
-        var currentPt=this.coordsMathToScreen(thePts[0]);
         theSurface.moveTo(currentPt[0], currentPt[1]);
-        theSurface.setLineDash([]);
-        var oldIsInForeGround=this.pointIsInForeGround(theContour.thePoints[0],-1);
-        var dashIsOn=false;
         for (var i=1; i<thePts.length; i++)
-        { var newIsInForeground=this.pointIsInForeGround(theContour.thePoints[i],-1);
+        { newIsInForeground=this.pointIsInForeGround(theContour.thePoints[i],-1);
           if (!newIsInForeground && !oldIsInForeGround && !dashIsOn)
           { if (i>1)
             { theSurface.stroke();
+              theSurface.setLineDash([4,4]);
               theSurface.beginPath();
+//              theSurface.setLineDash([4,4]);
               theSurface.moveTo(currentPt[0], currentPt[1]);
             }
             theSurface.setLineDash([4,4]);
+            //console.log("set dash\n");
             dashIsOn=true;
+
           } else if (dashIsOn && newIsInForeground)
           { theSurface.stroke();
+            theSurface.setLineDash([]);
             theSurface.beginPath();
+//            theSurface.setLineDash([]);
+            //console.log("removed dash\n");
             theSurface.moveTo(currentPt[0], currentPt[1]);
             dashIsOn=false;
           }
@@ -270,6 +279,7 @@ function calculatorGetCanvas(inputCanvas)
           oldIsInForeGround=newIsInForeground;
         }
         theSurface.stroke();
+        //console.log("line end\n");
       },
       paintOnePatch: function(thePatch)
       { var theSurface=this.surface;
@@ -289,6 +299,19 @@ function calculatorGetCanvas(inputCanvas)
         theSurface.fill();
 //        theSurface.stroke();
       },
+      paintOnePoint: function(thePoint)
+      { var theSurface=this.surface;
+        var isInForeGround=this.pointIsInForeGround(thePoint.location, -1);
+        theSurface.beginPath();
+        theSurface.strokeStyle=thePoint.color;
+        theSurface.fillStyle=thePoint.color;
+        var theCoords=this.coordsMathToScreen(thePoint.location);
+        theSurface.arc(theCoords[0], theCoords[1],3, 0, Math.PI*2);
+        if (isInForeGround)
+          theSurface.fill();
+        else
+          theSurface.stroke();
+      },
       accountOnePatch: function(patchIndex)
       { var thePatch=this.theIIIdObjects.thePatches(patchIndex);
         var ptOne=thePatch.base;
@@ -305,6 +328,7 @@ function calculatorGetCanvas(inputCanvas)
       redraw: function()
       { var theContours=this.theIIIdObjects.theContours;
         var thePatches=this.theIIIdObjects.thePatches;
+        var thePoints=this.theIIIdObjects.thePoints;
         var theSurface=this.surface;
         theSurface.clearRect(0, 0, this.width, this.height);
         //this.drawZbuffer();
@@ -315,6 +339,8 @@ function calculatorGetCanvas(inputCanvas)
           this.paintOnePatch(thePatches[i]);
         for (var i=0; i<theContours.length; i++)
           this.paintOneContour(theContours[i]);
+        for (var i=0; i<thePoints.length; i++)
+          this.paintOnePoint(thePoints[i]);
         this.paintMouseInfo();
       },
       allocateZbuffer: function()
@@ -606,9 +632,13 @@ function calculatorCanvasMouseMoveRedraw(inputCanvas, x, y)
     theCanvas.drawLine([-1,0,0],[1,0,0], 'black');
     theCanvas.drawLine([0,-1,0],[0,1,0], 'black');
     theCanvas.drawLine([0,0,-1],[0,0,1], 'black');
-    theCanvas.drawLine([0,0,0] ,[1,2,0], 'red');
+    theCanvas.drawLine([0,0,0] ,[1,0.5,0.5], 'red');
     theCanvas.drawLine([0,0,0] ,[-2,0,1], 'blue');
-    theCanvas.drawPatch([0,0,0], [1,1,0], [1,1,1], 'cyan');
+    theCanvas.drawPatch([1,0,0], [0,1,0], [0,0,1], 'cyan');
+    theCanvas.drawPoint([1,0,0], 'red');
+    theCanvas.drawPoint([0,1,0], 'green');
+    theCanvas.drawPoint([0,0,1], 'blue');
+
     //console.log(theCanvas.theIIIdObjects.thePatches);
     theCanvas.redraw();
   }

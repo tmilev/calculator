@@ -3,6 +3,7 @@ var answerMathQuillObjects=[];
 var answerMQspanIds;
 var preferredButtonContainers;
 //var lastFocus;
+var charsToSplit=['x','y'];
 
 function processMathQuillLatex(theText)
 { for (var i=0; i<theText.length; i++)
@@ -10,6 +11,17 @@ function processMathQuillLatex(theText)
       if (theText[i]=='_' || theText[i]=='^' &&
           theText[i+1]!='{')
         theText=theText.slice(0,i+1)+'{'+theText[i+1]+'}'+theText.slice(i+2);
+  if (charsToSplit!=undefined)
+    for (var i=0; i<theText.length-1; i++)
+    { for (var j=0; j<charsToSplit.length; j++)
+        if (theText[i]==charsToSplit[j] &&
+            theText[i+1]!=' ' && theText[i+1]!='\\'
+            && theText[i+1]!='+' && theText[i+1]!='*'
+            && theText[i+1]!='/' && theText[i+1]!='-'
+            && theText[i+1]!='='
+            )
+          theText=theText.slice(0,i+1)+" "+theText.slice(i+1);
+    }
   return theText;
 }
 

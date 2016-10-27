@@ -437,7 +437,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDa
     return out.str();
   }
   //out << "DEBUG: flagMathQuillWithMatrices=" << this->flagMathQuillWithMatrices << "<br>";
-  if (this->flagUseNavigationBar && !theGlobalVariables.flagRunningApache)
+  if (this->flagUseNavigationBar)
   { out << "<problemNavigation>"
     << this->outputHtmlNavigatioN
     << theGlobalVariables.ToStringNavigation()

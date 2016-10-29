@@ -123,9 +123,11 @@ function calculatorGetCanvas(inputCanvas)
       screenBasisUser: [[2,1,0],[0,1,1]],
       screenNormal: [],
       screenBasisOrthonormal: [],
-      zBufferColCount: 50,
-      zBufferRowCount: 50,
+      zBufferColCount: 20,
+      zBufferRowCount: 20,
       zBuffer: [],
+      zBufferIndexStrip:[],
+      boundingBoxMathScreen: [[-1, -1], [1, 1]],
       width: inputCanvas.width,
       height: inputCanvas.height,
       centerX: inputCanvas.width/2,
@@ -312,16 +314,92 @@ function calculatorGetCanvas(inputCanvas)
         else
           theSurface.stroke();
       },
+      getExtremePoint: function(indexToCompareBy, getLarger, pt1, pt2, pt3, pt4)
+      { var result=pt1[indexToCompareBy];
+        if (getLarger===1)
+        { if (result<pt2[indexToCompareBy])
+            result=pt2[indexToCompareBy];
+          if (result<pt3[indexToCompareBy])
+            result=pt3[indexToCompareBy];
+          if (result<pt4[indexToCompareBy])
+            result=pt4[indexToCompareBy];
+        } else
+        { if (result>pt2[indexToCompareBy])
+            result=pt2[indexToCompareBy];
+          if (result>pt3[indexToCompareBy])
+            result=pt3[indexToCompareBy];
+          if (result>pt4[indexToCompareBy])
+            result=pt4[indexToCompareBy];
+        }
+        return result;
+      },
+      coordsMathScreenToBufferIndices: function (input)
+      { if (input[0]<this.boundingBoxMathScreen[0][0] || input[0]> this.boundingBoxMathScreen[1][0] ||
+            input[1]<this.boundingBoxMathScreen[0][1] || input[0]> this.boundingBoxMathScreen[1][1])
+        { console.log("point with math-screen coords: " + input + " is out of the bounding box");
+          return [-1,-1];
+        }
+        var xResult=
+        Math.floor(
+          (this.zBufferColCount-1)*
+          (input[0]-this.boundingBoxMathScreen[0][0])/
+          (this.boundingBoxMathScreen[1][0]-this.boundingBoxMathScreen[0][0])
+        );
+        var yResult=
+        Math.floor(
+          (this.zBufferRowCount-1)*
+          (input[1]-this.boundingBoxMathScreen[0][1])/
+          (this.boundingBoxMathScreen[1][1]-this.boundingBoxMathScreen[0][1])
+        );
+        if (xResult>this.zBufferColCount-1)
+          xResult=this.zBufferColCount-1;
+        if (yResult>this.zBufferRowCount-1)
+          yResult=this.zBufferRowCount-1;
+        return [xResult, yResult];
+      },
       accountOnePatch: function(patchIndex)
-      { var thePatch=this.theIIIdObjects.thePatches(patchIndex);
-        var ptOne=thePatch.base;
-        var ptTwo=thePatch.base;
+      { var thePatch=this.theIIIdObjects.thePatches[patchIndex];
+        var pt1=this.coordsMathToMathScreen(thePatch.base);
+        var pt2=this.coordsMathToMathScreen(thePatch.v1);
+        var pt3=this.coordsMathToMathScreen(thePatch.v2);
+        var pt4=this.coordsMathToMathScreen(thePatch.vEnd);
+        var low=this.getExtremePoint(1, 0, pt1, pt2, pt3, pt4);
+        var high=this.getExtremePoint(1, 1, pt1, pt2, pt3, pt4);
+
+      },
+      computeBoundingBoxAccountPoint: function(input)
+      { var theV=coordsMathToMathScreen(input);
+        if (theV[0]<this.boundingBoxMathScreen[0][0])
+          this.boundingBoxMathScreen[0][0]=theV[0];
+        if (theV[1]<this.boundingBoxMathScreen[0][1])
+          this.boundingBoxMathScreen[0][1]=theV[1];
+        if (theV[0]>this.boundingBoxMathScreen[1][0])
+          this.boundingBoxMathScreen[1][0]=theV[0];
+        if (theV[1]>this.boundingBoxMathScreen[1][1])
+          this.boundingBoxMathScreen[1][1]=theV[1];
+      },
+      computeBoundingBox: function()
+      { var thePatches=this.theIIIdObjects.thePatches;
+        var theContours=this.theIIIdObjects.theContours;
+        var thePoints=this.theIIIdObjects.thePoints;
+        for (var i=0; i<thePatches.size; i++)
+        { this.computeBoundingBoxAccountPoint(thePatches[i].base);
+          this.computeBoundingBoxAccountPoint(thePatches[i].v1);
+          this.computeBoundingBoxAccountPoint(thePatches[i].v2);
+          this.computeBoundingBoxAccountPoint(thePatches[i].vEnd);
+        }
+        for (var i=0; i<theContours.size; i++)
+          for (var j=0; j<theContours.thePoints.size; j++)
+            this.computeBoundingBoxAccountPoint(theContours[i].thePoints[j]);
+        for (var i=0; i<thePoints.size; i++)
+          this.computeBoundingBoxAccountPoint(thePoints[j]);
       },
       computeBuffers: function()
       { var thePatches=this.theIIIdObjects.thePatches;
         for (var i=0; i<this.zBuffer.length; i++)
           for (var j=0; j<this.zBuffer.length; j++)
             this.zBuffer[i][j]=[];
+        this.computeBoundingBox();
         for (var i=0; i<thePatches.length; i++)
           this.accountOnePatch(i);
       },
@@ -331,8 +409,7 @@ function calculatorGetCanvas(inputCanvas)
         var thePoints=this.theIIIdObjects.thePoints;
         var theSurface=this.surface;
         theSurface.clearRect(0, 0, this.width, this.height);
-        //this.drawZbuffer();
-        //this.computeBuffers();
+        this.computeBuffers();
         for (var i=0; i<thePatches.length; i++)
           this.computePatch(thePatches[i]);
         for (var i=0; i<thePatches.length; i++)
@@ -341,6 +418,7 @@ function calculatorGetCanvas(inputCanvas)
           this.paintOneContour(theContours[i]);
         for (var i=0; i<thePoints.length; i++)
           this.paintOnePoint(thePoints[i]);
+        this.paintZbuffer();
         this.paintMouseInfo();
       },
       allocateZbuffer: function()
@@ -350,14 +428,16 @@ function calculatorGetCanvas(inputCanvas)
           this.zBufferColCount=1;
         if (this.zBuffer.length<this.zBufferRowCount)
         { this.zBuffer=new Array(this.zBufferRowCount);
+          this.zBufferIndexStrip=new Array(this.zBufferRowCount);
           for (var i=0; i< this.zBufferRowCount; i++)
           { this.zBuffer[i]= new Array(this.zBufferColCount);
             for (var j=0; j< this.zBufferColCount; j++)
               this.zBuffer[i][j]=[];
+            this.zBufferIndexStrip[i]=[0,0];
           }
         }
       },
-      drawZbuffer: function()
+      paintZbuffer: function()
       { this.allocateZbuffer();
         var theSurface=this.surface;
         theSurface.strokeStyle="gray";

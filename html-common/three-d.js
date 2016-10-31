@@ -333,42 +333,96 @@ function calculatorGetCanvas(inputCanvas)
         }
         return result;
       },
+      coordsMathScreenToBufferIndicesROWSFloat: function (input)
+      { return (this.zBufferRowCount-1)*(input-this.boundingBoxMathScreen[0][1])/(this.boundingBoxMathScreen[1][1]-this.boundingBoxMathScreen[0][1]);
+      },
+      coordsMathScreenToBufferIndicesROWS: function (input)
+      { var result= Math.floor(this.coordsMathScreenToBufferIndicesROWSFloat(input));
+        if (result>=this.zBufferRowCount)
+          result--;
+        return result;
+      },
+      coordsMathScreenToBufferIndicesCOLSFloat: function (input)
+      { return (this.zBufferColCount-1)*(input-this.boundingBoxMathScreen[0][0])/(this.boundingBoxMathScreen[1][0]-this.boundingBoxMathScreen[0][0]);
+      },
+      coordsMathScreenToBufferIndicesCOLS: function (input)
+      { var result=Math.floor(this.coordsMathScreenToBufferIndicesCOLSFloat(input));
+        if (result>=this.zBufferColCount)
+          result--;
+        return result;
+      },
       coordsMathScreenToBufferIndices: function (input)
-      { if (input[0]<this.boundingBoxMathScreen[0][0] || input[0]> this.boundingBoxMathScreen[1][0] ||
-            input[1]<this.boundingBoxMathScreen[0][1] || input[0]> this.boundingBoxMathScreen[1][1])
-        { console.log("point with math-screen coords: " + input + " is out of the bounding box");
-          return [-1,-1];
+      { var row=this.coordsMathScreenToBufferIndicesROWS(input[1]);
+        var col=this.coordsMathScreenToBufferIndicesCOLS(input[0]);
+        if (row<0 || row>=this.zBufferRowCount || col<0 || col>=this.zBufferColCount)
+          console.log("point with math-screen coords: " + input + " is out of the bounding box");
+        return [row,col];
+      },
+      accountOnePointMathCoordsInBufferStrip: function(row, thePoint, patchIndex)
+      { var bufferCoords= this.coordsMathScreenToBufferIndices(this.coordsMathToMathScreen(thePoint));
+        //If there were no rounding errors, row would be equal
+        //to bufferCoords[0]. However since there will be rounding errors,
+        //the row is passed instead as an argument.
+        if (this.zBufferIndexStrip[row][0]==-1)
+        { this.zBufferIndexStrip[row][0]=bufferCoords[1];
+          this.zBufferIndexStrip[row][1]=bufferCoords[1];
+          return;
         }
-        var xResult=
-        Math.floor(
-          (this.zBufferColCount-1)*
-          (input[0]-this.boundingBoxMathScreen[0][0])/
-          (this.boundingBoxMathScreen[1][0]-this.boundingBoxMathScreen[0][0])
-        );
-        var yResult=
-        Math.floor(
-          (this.zBufferRowCount-1)*
-          (input[1]-this.boundingBoxMathScreen[0][1])/
-          (this.boundingBoxMathScreen[1][1]-this.boundingBoxMathScreen[0][1])
-        );
-        if (xResult>this.zBufferColCount-1)
-          xResult=this.zBufferColCount-1;
-        if (yResult>this.zBufferRowCount-1)
-          yResult=this.zBufferRowCount-1;
-        return [xResult, yResult];
+        var largeCol=bufferCoords[1];
+        if (bufferCoords[1]< this.zBufferIndexStrip[row][0])
+        { largeCol=this.zBufferIndexStrip[row][0];
+          this.zBufferIndexStrip[row][0]=bufferCoords[1];
+        }
+        if (largeCol>this.zBufferIndexStrip[row][1])
+          this.zBufferIndexStrip[row][1]=largeCol;
+      },
+      accountEdgeInBufferStrip: function(base, edgeVector, patchIndex)
+      { var end=vectorPlusVector(base, edgeVector);
+        var lowFloat=this.coordsMathScreenToBufferIndicesROWSFloat(this.coordsMathToMathScreen(base)[0]);
+        var highFloat=this.coordsMathScreenToBufferIndicesROWSFloat(this.coordsMathToMathScreen(end)[0]);
+        if (lowFloat>highFloat)
+        { var temp=lowFloat;
+          lowFloat=highFloat;
+          highFloat=lowFloat;
+        }
+        this.accountOnePointMathCoordsInBufferStrip(Math.floor(lowFloat), base, patchIndex);
+        this.accountOnePointMathCoordsInBufferStrip(Math.ceil(highFloat), end, patchIndex);
+        if (lowFloat==highFloat)
+          return;
+        var currentPoint;
+        for (var i=Math.ceil(lowFloat); i<highFloat; i++)
+        { currentPoint=base.slice();
+          vectorAddVectorTimesScalar(currentPoint, edgeVector, (i-lowFloat)/(highFloat-lowFloat));
+          this.accountOnePointMathCoordsInBufferStrip(i, currentPoint, patchIndex);
+        }
       },
       accountOnePatch: function(patchIndex)
       { var thePatch=this.theIIIdObjects.thePatches[patchIndex];
-        var pt1=this.coordsMathToMathScreen(thePatch.base);
+        var pt1=this.coordsMathToMathScreen(thePatch.base, thePatch.edge2);
         var pt2=this.coordsMathToMathScreen(thePatch.v1);
         var pt3=this.coordsMathToMathScreen(thePatch.v2);
         var pt4=this.coordsMathToMathScreen(thePatch.vEnd);
-        var low=this.getExtremePoint(1, 0, pt1, pt2, pt3, pt4);
-        var high=this.getExtremePoint(1, 1, pt1, pt2, pt3, pt4);
-
+        var lowFloat=this.getExtremePoint(1, 0, pt1, pt2, pt3, pt4);
+        var highFloat=this.getExtremePoint(1, 1, pt1, pt2, pt3, pt4);
+        var low=this.coordsMathScreenToBufferIndicesROWS(lowFloat);
+        var high=this.coordsMathScreenToBufferIndicesROWS(highFloat);
+        for (var i=low; i<=high; i++)
+        { this.zBufferIndexStrip[i][0]=-1;
+          this.zBufferIndexStrip[i][1]=-1;
+        }
+        this.accountEdgeInBufferStrip(thePatch.base, thePatch.edge1, patchIndex);
+        this.accountEdgeInBufferStrip(thePatch.base, thePatch.edge2, patchIndex);
+        this.accountEdgeInBufferStrip(thePatch.v1, thePatch.edge2,   patchIndex);
+        this.accountEdgeInBufferStrip(thePatch.v2, thePatch.edge1,   patchIndex);
+        for (var i=low; i<=high; i++)
+          for (var j=this.zBufferIndexStrip[i][0]; j<=this.zBufferIndexStrip[i][1]; j++)
+          { if (i==-1 || j==-1)
+              continue;
+            this.zBuffer[i][j].push(patchIndex);
+          }
       },
       computeBoundingBoxAccountPoint: function(input)
-      { var theV=coordsMathToMathScreen(input);
+      { var theV=this.coordsMathToMathScreen(input);
         if (theV[0]<this.boundingBoxMathScreen[0][0])
           this.boundingBoxMathScreen[0][0]=theV[0];
         if (theV[1]<this.boundingBoxMathScreen[0][1])
@@ -382,17 +436,17 @@ function calculatorGetCanvas(inputCanvas)
       { var thePatches=this.theIIIdObjects.thePatches;
         var theContours=this.theIIIdObjects.theContours;
         var thePoints=this.theIIIdObjects.thePoints;
-        for (var i=0; i<thePatches.size; i++)
+        for (var i=0; i<thePatches.length; i++)
         { this.computeBoundingBoxAccountPoint(thePatches[i].base);
           this.computeBoundingBoxAccountPoint(thePatches[i].v1);
           this.computeBoundingBoxAccountPoint(thePatches[i].v2);
           this.computeBoundingBoxAccountPoint(thePatches[i].vEnd);
         }
-        for (var i=0; i<theContours.size; i++)
-          for (var j=0; j<theContours.thePoints.size; j++)
+        for (var i=0; i<theContours.length; i++)
+          for (var j=0; j<theContours[i].thePoints.length; j++)
             this.computeBoundingBoxAccountPoint(theContours[i].thePoints[j]);
-        for (var i=0; i<thePoints.size; i++)
-          this.computeBoundingBoxAccountPoint(thePoints[j]);
+        for (var i=0; i<thePoints.length; i++)
+          this.computeBoundingBoxAccountPoint(thePoints[i]);
       },
       computeBuffers: function()
       { var thePatches=this.theIIIdObjects.thePatches;
@@ -438,8 +492,7 @@ function calculatorGetCanvas(inputCanvas)
         }
       },
       paintZbuffer: function()
-      { this.allocateZbuffer();
-        var theSurface=this.surface;
+      { var theSurface=this.surface;
         theSurface.strokeStyle="gray";
         for (var i=0; i<this.zBuffer.length+1; i++)
         { theSurface.beginPath();
@@ -506,17 +559,13 @@ function calculatorGetCanvas(inputCanvas)
       projectToMathScreen: function(vector)
       { var output=this.screenBasisOrthonormal[0].slice();
         vectorTimesScalar(output, vectorScalarVector(vector, this.screenBasisOrthonormal[0]));
-        vectorAddVectorTimesScalar
-        (output, this.screenBasisOrthonormal[1],
-         vectorScalarVector(vector, this.screenBasisOrthonormal[1]));
+        vectorAddVectorTimesScalar(output, this.screenBasisOrthonormal[1], vectorScalarVector(vector, this.screenBasisOrthonormal[1]));
         return output;
       },
       projectToSelectedMathScreen: function(vector)
       { var output=this.selectedScreenBasis[0].slice();
         vectorTimesScalar(output, vectorScalarVector(vector, this.selectedScreenBasis[0]));
-        vectorAddVectorTimesScalar
-        (output, this.selectedScreenBasis[1],
-         vectorScalarVector(vector, this.selectedScreenBasis[1]));
+        vectorAddVectorTimesScalar(output, this.selectedScreenBasis[1], vectorScalarVector(vector, this.selectedScreenBasis[1]));
         return output;
       },
       coordsMathToScreen: function(vector)

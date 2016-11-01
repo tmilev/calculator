@@ -379,27 +379,22 @@ function calculatorGetCanvas(inputCanvas)
       },
       accountEdgeInBufferStrip: function(base, edgeVector, patchIndex)
       { var end=vectorPlusVector(base, edgeVector);
-        var baseCopy=base.slice();
-        var edgeCopy=edgeVector.slice();
-        var lowFloat=this.coordsMathScreenToBufferIndicesROWSFloat(this.coordsMathToMathScreen(baseCopy)[1]);
+        var lowFloat=this.coordsMathScreenToBufferIndicesROWSFloat(this.coordsMathToMathScreen(base)[1]);
         var highFloat=this.coordsMathScreenToBufferIndicesROWSFloat(this.coordsMathToMathScreen(end)[1]);
         if (lowFloat>highFloat)
-        { var temp=lowFloat;
-          lowFloat=highFloat;
-          highFloat=temp;
-          var temp2=end;
-          end=baseCopy;
-          baseCopy=temp2;
-          vectorTimesScalar(edgeCopy,-1);
+        { var minusEdge=edgeVector.slice();
+          vectorTimesScalar(minusEdge, -1);
+          this.accountEdgeInBufferStrip(end, minusEdge, patchIndex);
+          return;
         }
-        this.accountOnePointMathCoordsInBufferStrip(Math.floor(lowFloat), baseCopy, patchIndex);
+        this.accountOnePointMathCoordsInBufferStrip(Math.floor(lowFloat), base, patchIndex);
         this.accountOnePointMathCoordsInBufferStrip(Math.floor(highFloat), end, patchIndex);
         if (lowFloat==highFloat)
           return;
         var currentPoint;
         for (var i=Math.ceil(lowFloat); i<highFloat; i++)
-        { currentPoint=baseCopy.slice();
-          vectorAddVectorTimesScalar(currentPoint, edgeCopy, (i-lowFloat)/(highFloat-lowFloat));
+        { currentPoint=base.slice();
+          vectorAddVectorTimesScalar(currentPoint, edgeVector, (i-lowFloat)/(highFloat-lowFloat));
           this.accountOnePointMathCoordsInBufferStrip(i, currentPoint, patchIndex);
           this.accountOnePointMathCoordsInBufferStrip(i-1, currentPoint, patchIndex);
         }

@@ -491,21 +491,28 @@ function calculatorGetCanvas(inputCanvas)
           }
         }
       },
+      getBufferBox: function(row, col)
+      { var deltaX=(this.boundingBoxMathScreen[1][0]-this.boundingBoxMathScreen[0][0])/this.zBufferColCount;
+        var deltaY=(this.boundingBoxMathScreen[1][1]-this.boundingBoxMathScreen[0][1])/this.zBufferRowCount;
+        return [[this.boundingBoxMathScreen[0][0]+deltaX*col, this.boundingBoxMathScreen[0][1]+deltaY*row], [this.boundingBoxMathScreen[0][0]+deltaX*(col+1), this.boundingBoxMathScreen[0][1]+deltaY*(row+1)]];
+      },
       paintZbuffer: function()
       { var theSurface=this.surface;
         theSurface.strokeStyle="gray";
-        for (var i=0; i<this.zBuffer.length+1; i++)
-        { theSurface.beginPath();
-          theSurface.moveTo(0,         i*this.height/this.zBuffer.length);
-          theSurface.lineTo(this.width,i*this.height/this.zBuffer.length);
-          theSurface.stroke();
-        }
-        for (var i=0; i<this.zBuffer[0].length+1; i++)
-        { theSurface.beginPath();
-          theSurface.moveTo(i*this.width/this.zBuffer[0].length, 0);
-          theSurface.lineTo(i*this.width/this.zBuffer[0].length, this.width);
-          theSurface.stroke();
-        }
+        theSurface.setLineDash([]);
+        for (var i=0; i<this.zBuffer.length; i++)
+          for (var j=0; j< this.zBuffer[i].length; j++)
+          { var bufferBox=this.getBufferBox(i,j);
+            var bufferBoxLowLeft=this.coordsMathScreenToScreen(bufferBox[0]);
+            var bufferBoxTopRight=this.coordsMathScreenToScreen(bufferBox[1]);
+            theSurface.beginPath();
+            theSurface.moveTo(bufferBoxLowLeft[0], bufferBoxLowLeft[1]);
+            theSurface.lineTo(bufferBoxTopRight[0], bufferBoxLowLeft[1]);
+            theSurface.lineTo(bufferBoxTopRight[0], bufferBoxTopRight[1]);
+            theSurface.lineTo(bufferBoxLowLeft[0], bufferBoxTopRight[1]);
+            theSurface.lineTo(bufferBoxLowLeft[0], bufferBoxLowLeft[1]);
+            theSurface.stroke();
+          }
       },
       computeBasisFromNormal: function(inputNormal)
       { if (inputNormal[0]!=0)

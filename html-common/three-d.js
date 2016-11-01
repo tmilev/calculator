@@ -127,7 +127,9 @@ function calculatorGetCanvas(inputCanvas)
       zBufferRowCount: 20,
       zBuffer: [],
       zBufferIndexStrip:[],
-      boundingBoxMathScreen: [[-1, -1], [1, 1]],
+      bufferDeltaX: 0,
+      bufferDeltaY: 0,
+      boundingBoxMathScreen: [[-0.01, -0.01], [0.01, 0.01]],
       width: inputCanvas.width,
       height: inputCanvas.height,
       centerX: inputCanvas.width/2,
@@ -316,7 +318,7 @@ function calculatorGetCanvas(inputCanvas)
       },
       getExtremePoint: function(indexToCompareBy, getLarger, pt1, pt2, pt3, pt4)
       { var result=pt1[indexToCompareBy];
-        if (getLarger===1)
+        if (getLarger==1)
         { if (result<pt2[indexToCompareBy])
             result=pt2[indexToCompareBy];
           if (result<pt3[indexToCompareBy])
@@ -334,7 +336,7 @@ function calculatorGetCanvas(inputCanvas)
         return result;
       },
       coordsMathScreenToBufferIndicesROWSFloat: function (input)
-      { return (this.zBufferRowCount-1)*(input-this.boundingBoxMathScreen[0][1])/(this.boundingBoxMathScreen[1][1]-this.boundingBoxMathScreen[0][1]);
+      { return (this.zBufferRowCount)*(input-this.boundingBoxMathScreen[0][1])/(this.boundingBoxMathScreen[1][1]-this.boundingBoxMathScreen[0][1]);
       },
       coordsMathScreenToBufferIndicesROWS: function (input)
       { var result= Math.floor(this.coordsMathScreenToBufferIndicesROWSFloat(input));
@@ -343,7 +345,7 @@ function calculatorGetCanvas(inputCanvas)
         return result;
       },
       coordsMathScreenToBufferIndicesCOLSFloat: function (input)
-      { return (this.zBufferColCount-1)*(input-this.boundingBoxMathScreen[0][0])/(this.boundingBoxMathScreen[1][0]-this.boundingBoxMathScreen[0][0]);
+      { return (this.zBufferColCount)*(input-this.boundingBoxMathScreen[0][0])/(this.boundingBoxMathScreen[1][0]-this.boundingBoxMathScreen[0][0]);
       },
       coordsMathScreenToBufferIndicesCOLS: function (input)
       { var result=Math.floor(this.coordsMathScreenToBufferIndicesCOLSFloat(input));
@@ -359,7 +361,9 @@ function calculatorGetCanvas(inputCanvas)
         return [row,col];
       },
       accountOnePointMathCoordsInBufferStrip: function(row, thePoint, patchIndex)
-      { var bufferCoords= this.coordsMathScreenToBufferIndices(this.coordsMathToMathScreen(thePoint));
+      { if (row<0 || row>=this.zBufferIndexStrip.length)
+          return;
+        var bufferCoords= this.coordsMathScreenToBufferIndices(this.coordsMathToMathScreen(thePoint));
         //If there were no rounding errors, row would be equal
         //to bufferCoords[0]. However since there will be rounding errors,
         //the row is passed instead as an argument.
@@ -368,37 +372,41 @@ function calculatorGetCanvas(inputCanvas)
           this.zBufferIndexStrip[row][1]=bufferCoords[1];
           return;
         }
-        var largeCol=bufferCoords[1];
         if (bufferCoords[1]< this.zBufferIndexStrip[row][0])
-        { largeCol=this.zBufferIndexStrip[row][0];
           this.zBufferIndexStrip[row][0]=bufferCoords[1];
-        }
-        if (largeCol>this.zBufferIndexStrip[row][1])
-          this.zBufferIndexStrip[row][1]=largeCol;
+        if (bufferCoords[1]>this.zBufferIndexStrip[row][1])
+          this.zBufferIndexStrip[row][1]=bufferCoords[1];
       },
       accountEdgeInBufferStrip: function(base, edgeVector, patchIndex)
       { var end=vectorPlusVector(base, edgeVector);
-        var lowFloat=this.coordsMathScreenToBufferIndicesROWSFloat(this.coordsMathToMathScreen(base)[0]);
-        var highFloat=this.coordsMathScreenToBufferIndicesROWSFloat(this.coordsMathToMathScreen(end)[0]);
+        var baseCopy=base.slice();
+        var edgeCopy=edgeVector.slice();
+        var lowFloat=this.coordsMathScreenToBufferIndicesROWSFloat(this.coordsMathToMathScreen(baseCopy)[1]);
+        var highFloat=this.coordsMathScreenToBufferIndicesROWSFloat(this.coordsMathToMathScreen(end)[1]);
         if (lowFloat>highFloat)
         { var temp=lowFloat;
           lowFloat=highFloat;
-          highFloat=lowFloat;
+          highFloat=temp;
+          var temp2=end;
+          end=baseCopy;
+          baseCopy=temp2;
+          vectorTimesScalar(edgeCopy,-1);
         }
-        this.accountOnePointMathCoordsInBufferStrip(Math.floor(lowFloat), base, patchIndex);
-        this.accountOnePointMathCoordsInBufferStrip(Math.ceil(highFloat), end, patchIndex);
+        this.accountOnePointMathCoordsInBufferStrip(Math.floor(lowFloat), baseCopy, patchIndex);
+        this.accountOnePointMathCoordsInBufferStrip(Math.floor(highFloat), end, patchIndex);
         if (lowFloat==highFloat)
           return;
         var currentPoint;
         for (var i=Math.ceil(lowFloat); i<highFloat; i++)
-        { currentPoint=base.slice();
-          vectorAddVectorTimesScalar(currentPoint, edgeVector, (i-lowFloat)/(highFloat-lowFloat));
+        { currentPoint=baseCopy.slice();
+          vectorAddVectorTimesScalar(currentPoint, edgeCopy, (i-lowFloat)/(highFloat-lowFloat));
           this.accountOnePointMathCoordsInBufferStrip(i, currentPoint, patchIndex);
+          this.accountOnePointMathCoordsInBufferStrip(i-1, currentPoint, patchIndex);
         }
       },
       accountOnePatch: function(patchIndex)
       { var thePatch=this.theIIIdObjects.thePatches[patchIndex];
-        var pt1=this.coordsMathToMathScreen(thePatch.base, thePatch.edge2);
+        var pt1=this.coordsMathToMathScreen(thePatch.base);
         var pt2=this.coordsMathToMathScreen(thePatch.v1);
         var pt3=this.coordsMathToMathScreen(thePatch.v2);
         var pt4=this.coordsMathToMathScreen(thePatch.vEnd);
@@ -451,9 +459,11 @@ function calculatorGetCanvas(inputCanvas)
       computeBuffers: function()
       { var thePatches=this.theIIIdObjects.thePatches;
         for (var i=0; i<this.zBuffer.length; i++)
-          for (var j=0; j<this.zBuffer.length; j++)
+          for (var j=0; j<this.zBuffer[i].length; j++)
             this.zBuffer[i][j]=[];
         this.computeBoundingBox();
+        this.bufferDeltaX=(this.boundingBoxMathScreen[1][0]-this.boundingBoxMathScreen[0][0])/this.zBufferColCount;
+        this.bufferDeltaY=(this.boundingBoxMathScreen[1][1]-this.boundingBoxMathScreen[0][1])/this.zBufferRowCount;
         for (var i=0; i<thePatches.length; i++)
           this.accountOnePatch(i);
       },
@@ -464,6 +474,7 @@ function calculatorGetCanvas(inputCanvas)
         var theSurface=this.surface;
         theSurface.clearRect(0, 0, this.width, this.height);
         this.computeBuffers();
+        this.paintZbuffer();
         for (var i=0; i<thePatches.length; i++)
           this.computePatch(thePatches[i]);
         for (var i=0; i<thePatches.length; i++)
@@ -472,7 +483,6 @@ function calculatorGetCanvas(inputCanvas)
           this.paintOneContour(theContours[i]);
         for (var i=0; i<thePoints.length; i++)
           this.paintOnePoint(thePoints[i]);
-        this.paintZbuffer();
         this.paintMouseInfo();
       },
       allocateZbuffer: function()
@@ -487,14 +497,15 @@ function calculatorGetCanvas(inputCanvas)
           { this.zBuffer[i]= new Array(this.zBufferColCount);
             for (var j=0; j< this.zBufferColCount; j++)
               this.zBuffer[i][j]=[];
-            this.zBufferIndexStrip[i]=[0,0];
+            this.zBufferIndexStrip[i]=[-1,-1];
           }
         }
       },
       getBufferBox: function(row, col)
-      { var deltaX=(this.boundingBoxMathScreen[1][0]-this.boundingBoxMathScreen[0][0])/this.zBufferColCount;
-        var deltaY=(this.boundingBoxMathScreen[1][1]-this.boundingBoxMathScreen[0][1])/this.zBufferRowCount;
-        return [[this.boundingBoxMathScreen[0][0]+deltaX*col, this.boundingBoxMathScreen[0][1]+deltaY*row], [this.boundingBoxMathScreen[0][0]+deltaX*(col+1), this.boundingBoxMathScreen[0][1]+deltaY*(row+1)]];
+      { return [[this.boundingBoxMathScreen[0][0]+this.bufferDeltaX*col,
+                 this.boundingBoxMathScreen[0][1]+this.bufferDeltaY*row],
+                [this.boundingBoxMathScreen[0][0]+this.bufferDeltaX*(col+1),
+                 this.boundingBoxMathScreen[0][1]+this.bufferDeltaY*(row+1)]];
       },
       paintZbuffer: function()
       { var theSurface=this.surface;
@@ -506,12 +517,14 @@ function calculatorGetCanvas(inputCanvas)
             var bufferBoxLowLeft=this.coordsMathScreenToScreen(bufferBox[0]);
             var bufferBoxTopRight=this.coordsMathScreenToScreen(bufferBox[1]);
             theSurface.beginPath();
-            theSurface.moveTo(bufferBoxLowLeft[0], bufferBoxLowLeft[1]);
-            theSurface.lineTo(bufferBoxTopRight[0], bufferBoxLowLeft[1]);
+            theSurface.moveTo(bufferBoxLowLeft[0],  bufferBoxLowLeft [1]);
+            theSurface.lineTo(bufferBoxTopRight[0], bufferBoxLowLeft [1]);
             theSurface.lineTo(bufferBoxTopRight[0], bufferBoxTopRight[1]);
-            theSurface.lineTo(bufferBoxLowLeft[0], bufferBoxTopRight[1]);
-            theSurface.lineTo(bufferBoxLowLeft[0], bufferBoxLowLeft[1]);
+            theSurface.lineTo(bufferBoxLowLeft[0],  bufferBoxTopRight[1]);
+            theSurface.lineTo(bufferBoxLowLeft[0],  bufferBoxLowLeft [1]);
             theSurface.stroke();
+            if (this.zBuffer[i][j].length!=0)
+              theSurface.fill();
           }
       },
       computeBasisFromNormal: function(inputNormal)

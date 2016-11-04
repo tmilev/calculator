@@ -81,12 +81,14 @@ function Patch(inputBase, inputEdge1, inputEdge2, inputColor)
   this.v2=vectorPlusVector(this.base, this.edge2);
   this.vEnd=vectorPlusVector(this.v1, this.edge2);
   this.adjacentContours=[];
-  this.patchesBelowPatch=[];
-  this.patchesAbovePatch=[];
+  this.patchesBelowMe=[];
+  this.patchesAboveMe=[];
+  this.index=-1;
 }
 
 function Contour(inputPoints, inputColor)
 { this.thePoints=inputPoints;
+  this.thePointsMathSreen=[];
   this.color=inputColor;
   this.adjacentPatches=[];
 }
@@ -121,6 +123,9 @@ function calculatorGetCanvas(inputCanvas)
         theContours: [],
         thePoints: [],
       },
+      thePatchOrder: [],
+      numAccountedPatches: 0,
+      patchIsAccounted: [],
       surface: inputCanvas.getContext("2d"),
       canvasContainer: inputCanvas,
       canvasId: inputCanvas.id,
@@ -165,6 +170,7 @@ function calculatorGetCanvas(inputCanvas)
       { this.theIIIdObjects.thePatches.push(new Patch(base, edge1, edge2, color));
         var patchIndex=this.theIIIdObjects.thePatches.length-1;
         var thePatch= this.theIIIdObjects.thePatches[patchIndex];
+        thePatch.index=patchIndex;
         var theContours=this.theIIIdObjects.theContours;
         thePatch.adjacentContours.push(this.drawLine(thePatch.base, thePatch.v1));
         theContours[theContours.length-1].adjacentPatches.push(patchIndex);
@@ -200,6 +206,12 @@ function calculatorGetCanvas(inputCanvas)
         thePatch.internalPoint=thePatch.base.slice();
         vectorAddVectorTimesScalar(thePatch.internalPoint, thePatch.edge1, 0.5);
         vectorAddVectorTimesScalar(thePatch.internalPoint, thePatch.edge2, 0.5);
+      },
+      computeContour: function(theContour)
+      { if (theContour.thePointsMathSreen.length!=theContour.thePoints.length)
+          theContour.thePointsMathSreen = new Array(theContour.thePoints.length);
+        for (var i=0; i<theContour.thePoints.length; i++)
+          theContour.thePointsMathSreen[i]=this.coordsMathToMathScreen(theContour.thePoints[i]);
       },
       pointIsBehindPatch: function(thePoint, thePatch)
       { if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normalScreen1) *
@@ -479,13 +491,79 @@ function calculatorGetCanvas(inputCanvas)
         this.bufferDeltaY=(this.boundingBoxMathScreen[1][1]-this.boundingBoxMathScreen[0][1])/this.zBufferRowCount;
         for (var i=0; i<thePatches.length; i++)
           this.accountOnePatch(i);
-        this.computePatchPartialOrder();
+        this.computePatchOrder();
+      },
+      computePatchOrderOneContourPoint: function(thePatch, theContour, ptIndex)
+      { var thePointMathScreen=theContour.thePointsMathScreen[ptIndex];
+        var thePoint=theContour.thePoints[ptIndex];
+        var theIndices=coordsMathScreenToBufferIndices(thePointMathScreen);
+        var currentBuffer=this.zBuffer[theIndices[0], theIndices[1]];
+        var thePatches=this.theIIIdObjects.thePatches;
+        for (var i=0; i<currentBuffer.length; i++)
+        { if (thePatch.index===currentBuffer[i])
+            continue;
+          if (thePatch.patchesAboveMe.indexOf(currentBuffer[i])>=0 ||
+              thePatch.patchesBelowMe.indexOf(currentBuffer[i])>=0)
+            continue;
+          var otherPatch=thePatches[currentBuffer[i]];
+          if (this.pointIsBehindPatch(thePoint, otherPatch))
+          { otherPatch.patchesBelowMe.push();
+            this.patchesAboveMe.push(currentBuffer[i]);
+          }
+        }
+      },
+      computePatchPartialOrderOnePatch: function(thePatch)
+      { var theContours=this.theIIIdObjects.theContours;
+        for (var i=0; i<thePatch.adjacentContours.length; i++)
+          for (var j=0; j<theContours[thePatch.adjacentContours[i]].thePoints.length; j++)
+            this.computePatchOrderOneContourPoint(thePatch, theContours[thePatch.adjacentContours[i]], j);
       },
       computePatchPartialOrder: function()
       { var thePatches=this.theIIIdObjects.thePatches;
         for (var i=0; i<thePatches.length; i++)
-        { thePatches[i].patchesBelowPatch=[];
-          thePatches[i].patchesAbovePatch=[];
+        { thePatches[i].patchesBelowMe=[];
+          thePatches[i].patchesAboveMe=[];
+        }
+        for (var i=0; i<thePatches.length; i++)
+          this.computePatchPartialOrderOnePatch(thePatches[i]);
+      },
+      computePatchOrder: function()
+      { this.computePatchPartialOrder();
+        var thePatches=this.theIIIdObjects.thePatches;
+        if (this.thePatchOrder.length!=thePatches.length)
+        { this.thePatchOrder=new Array(thePatches.length);
+          this.patchIsAccounted=new Array(thePatches.length);
+        }
+        for (var i=0; i<thePatches.length; i++)
+        { this.thePatchOrder[i]=-1;
+          this.patchIsAccounted[i]=0;
+        }
+        this.numAccountedPatches=0;
+        for (var i=0; i<thePatches.length; i++)
+          if (thePatches[i].patchesBelowMe.length===0)
+          { this.thePatchOrder[this.numAccountedPatches]=i;
+            this.numAccountedPatches++;
+            this.patchIsAccounted[i]=1;
+          }
+        var currentIndex=-1;
+        while (currentIndex<this.numAccountedPatches)
+        { currentIndex++;
+          var currentPatch=thePatches[this.thePatchOrder[currentIndex]];
+          for (var i=0; i<currentPatch.patchesAboveMe.length; i++)
+          { var nextIndex=currentPatch.patchesAboveMe[i];
+            var nextPatch=thePatches[nextIndex];
+            var isGood=1;
+            for (var j=0; j<nextPatch.patchesBelowMe.length; j++)
+              if (this.patchIsAccounted[nextPatch.patchesBelowMe[j]]!==1)
+              { isGood=0;
+                break;
+              }
+            if (isGood===1)
+            { this.thePatchOrder[this.numAccountedPatches]=nextIndex;
+              this.numAccountedPatches++;
+              this.patchIsAccounted[nextIndex]=1;
+            }
+          }
         }
       },
       redraw: function()
@@ -496,10 +574,12 @@ function calculatorGetCanvas(inputCanvas)
         theSurface.clearRect(0, 0, this.width, this.height);
         for (var i=0; i<thePatches.length; i++)
           this.computePatch(thePatches[i]);
+        for (var i=0; i<theContours.length; i++)
+          this.computeContour(theContours[i]);
         this.computeBuffers();
         this.paintZbuffer();
-        for (var i=0; i<thePatches.length; i++)
-          this.paintOnePatch(thePatches[i]);
+        for (var i=0; i<this.thePatchOrder.length; i++)
+          this.paintOnePatch(thePatches[this.thePatchOrder[i]]);
         for (var i=0; i<theContours.length; i++)
           this.paintOneContour(theContours[i]);
         for (var i=0; i<thePoints.length; i++)
@@ -544,7 +624,7 @@ function calculatorGetCanvas(inputCanvas)
             theSurface.lineTo(bufferBoxLowLeft[0],  bufferBoxTopRight[1]);
             theSurface.lineTo(bufferBoxLowLeft[0],  bufferBoxLowLeft [1]);
             theSurface.stroke();
-            if (this.zBuffer[i][j].length!=0)
+            if (this.zBuffer[i][j].length!==0)
               theSurface.fill();
           }
       },
@@ -774,7 +854,11 @@ function calculatorGetCanvas(inputCanvas)
         ;
       },
       logMouseStatus: function()
-      { this.textMouseInfo=
+      { this.textMouseInfo="";
+        if (this.numAccountedPatches<this.theIIIdObjects.thePatches.length)
+          this.textMouseInfo+= "<span style='color:red'><b>Error: only " + this.numAccountedPatches +" out of " +
+          this.theIIIdObjects.thePatches.length + " patches accounted. "+ "</b></span>";
+        this.textMouseInfo+=
         "time last redraw: " + this.redrawTime +" ms " + "(~" + (1000/this.redrawTime).toFixed(1) + " f.p.s.)"+
         "<br>selected element: " + this.selectedElement +
         "<br>mouse coordinates: " + this.mousePosition +

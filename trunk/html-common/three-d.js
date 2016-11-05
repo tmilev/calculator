@@ -88,7 +88,7 @@ function Patch(inputBase, inputEdge1, inputEdge2, inputColor)
 
 function Contour(inputPoints, inputColor)
 { this.thePoints=inputPoints;
-  this.thePointsMathSreen=[];
+  this.thePointsMathScreen=[];
   this.color=inputColor;
   this.adjacentPatches=[];
 }
@@ -208,10 +208,10 @@ function calculatorGetCanvas(inputCanvas)
         vectorAddVectorTimesScalar(thePatch.internalPoint, thePatch.edge2, 0.5);
       },
       computeContour: function(theContour)
-      { if (theContour.thePointsMathSreen.length!=theContour.thePoints.length)
-          theContour.thePointsMathSreen = new Array(theContour.thePoints.length);
+      { if (theContour.thePointsMathScreen.length!=theContour.thePoints.length)
+          theContour.thePointsMathScreen = new Array(theContour.thePoints.length);
         for (var i=0; i<theContour.thePoints.length; i++)
-          theContour.thePointsMathSreen[i]=this.coordsMathToMathScreen(theContour.thePoints[i]);
+          theContour.thePointsMathScreen[i]=this.coordsMathToMathScreen(theContour.thePoints[i]);
       },
       pointIsBehindPatch: function(thePoint, thePatch)
       { if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normalScreen1) *
@@ -496,8 +496,8 @@ function calculatorGetCanvas(inputCanvas)
       computePatchOrderOneContourPoint: function(thePatch, theContour, ptIndex)
       { var thePointMathScreen=theContour.thePointsMathScreen[ptIndex];
         var thePoint=theContour.thePoints[ptIndex];
-        var theIndices=coordsMathScreenToBufferIndices(thePointMathScreen);
-        var currentBuffer=this.zBuffer[theIndices[0], theIndices[1]];
+        var theIndices=this.coordsMathScreenToBufferIndices(thePointMathScreen);
+        var currentBuffer=this.zBuffer[theIndices[0]][theIndices[1]];
         var thePatches=this.theIIIdObjects.thePatches;
         for (var i=0; i<currentBuffer.length; i++)
         { if (thePatch.index===currentBuffer[i])
@@ -508,7 +508,7 @@ function calculatorGetCanvas(inputCanvas)
           var otherPatch=thePatches[currentBuffer[i]];
           if (this.pointIsBehindPatch(thePoint, otherPatch))
           { otherPatch.patchesBelowMe.push();
-            this.patchesAboveMe.push(currentBuffer[i]);
+            thePatch.patchesAboveMe.push(currentBuffer[i]);
           }
         }
       },
@@ -545,10 +545,9 @@ function calculatorGetCanvas(inputCanvas)
             this.numAccountedPatches++;
             this.patchIsAccounted[i]=1;
           }
-        var currentIndex=-1;
+        var currentIndex=0;
         while (currentIndex<this.numAccountedPatches)
-        { currentIndex++;
-          var currentPatch=thePatches[this.thePatchOrder[currentIndex]];
+        { var currentPatch=thePatches[this.thePatchOrder[currentIndex]];
           for (var i=0; i<currentPatch.patchesAboveMe.length; i++)
           { var nextIndex=currentPatch.patchesAboveMe[i];
             var nextPatch=thePatches[nextIndex];
@@ -564,6 +563,7 @@ function calculatorGetCanvas(inputCanvas)
               this.patchIsAccounted[nextIndex]=1;
             }
           }
+          currentIndex++;
         }
       },
       redraw: function()

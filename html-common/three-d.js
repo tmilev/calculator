@@ -874,17 +874,17 @@ function calculatorGetCanvas(inputCanvas)
         //has the highest (screen) depth.
         var thePatches=this.theIIIdObjects.thePatches;
         var deepestNonAccountedIndex=-1;
-        var maxDepth=0;
+        var minDepth=0;
         for (var i=0; i<this.patchIsAccounted.length; i++)
         { if (this.patchIsAccounted[i]===1)
             continue;
           if (deepestNonAccountedIndex===-1)
           { deepestNonAccountedIndex=i;
-            maxDepth=vectorScalarVector(this.screenNormal, thePatches[i].internalPoint);
+            minDepth=vectorScalarVector(this.screenNormal, thePatches[i].internalPoint);
           }
           var currentDepth=vectorScalarVector(this.screenNormal, thePatches[i].internalPoint);
-          if (currentDepth<maxDepth)
-          { currentDepth=maxDepth;
+          if (currentDepth<minDepth)
+          { minDepth=currentDepth;
             deepestNonAccountedIndex=i;
           }
         }
